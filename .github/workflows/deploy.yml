@@ -969,14 +969,27 @@ jobs:
               echo "::notice title=${c}_minesec.json hors CI::Non versionne (marchandise). Doit etre televerse en FTP dans api/data/ ; sinon api/plateforme.php repond 503 sur ?action=${c}."
             fi
           done
-          # Repertoire LIBRE DE DROITS (1014 textes du domaine public). Meme
-          # regle : gitignore parce que le depot est PUBLIC. Les TEXTES sont
-          # libres, mais leur classement par module, leur calibrage en mots,
-          # leurs faits de langue et leurs questions sont le travail de
-          # VERITAS -- les publier ici reviendrait a en faire cadeau.
+          # Repertoire LIBRE DE DROITS (1014 textes du domaine public).
+          # ⚠️ 28/08/2026 — CE FICHIER EST DESORMAIS VERSIONNE, et son absence
+          # est une ERREUR, plus une note discrete. Il etait gitignore
+          # (`api/data/*`), donc jamais present sur le runner : la garde
+          # `[ -f ]` ci-dessous sautait a CHAQUE deploiement, la note passait
+          # inapercue, et personne ne televersait rien. Pendant ce temps la page
+          # d'accueil de l'Atelier annoncait « 2 054 textes, dont 1 014 sans
+          # abonnement » tandis que `?action=config` repondait
+          # `libre: disponible: false`. Une promesse affichee et non tenue,
+          # invisible des deux cotes.
+          # Decision de Jacques : versionner, en sachant que le depot est PUBLIC
+          # et que le fichier porte aussi l'appareil pedagogique. Le corpus
+          # MINESEC, lui, reste hors depot : ses auteurs sont vivants.
+          if [ ! -f api/data/corpus_libre.json ]; then
+            echo "::error title=Repertoire libre manquant::api/data/corpus_libre.json est suivi par git mais absent du checkout. La page annonce 1 014 textes sans abonnement : les servir est une PROMESSE. Deploiement ANNULE plutot que de la rompre en silence."
+            exit 1
+          fi
           if [ -f api/data/corpus_libre.json ]; then
             cp api/data/corpus_libre.json deploy/api/data/
-            echo "  OK api/data/corpus_libre.json (domaine public, servi a tous)"
+            N_LIB=$(grep -o '"n"[[:space:]]*:' api/data/corpus_libre.json | wc -l)
+            echo "  OK api/data/corpus_libre.json ($N_LIB textes du domaine public, servis a tous)"
           else
             echo "::notice title=corpus_libre.json hors CI::Non versionne (travail editorial). Doit etre televerse en FTP dans api/data/ ; sinon l index ne servira que le repertoire MINESEC."
           fi

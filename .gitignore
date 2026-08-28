@@ -82,6 +82,20 @@ api/data/*
 # pour la porte. Il ne contient ni secret ni contenu — rien que ce que
 # l'action publique `catalogue` sert déjà à tout visiteur.
 !api/data/livrets_catalogue.json
+# …et SAUF le répertoire LIBRE DE DROITS. Ces 1 014 textes sont dans le domaine
+# public (auteurs morts avant 1956, écrits en français, aucune traduction) et
+# l'Atelier les sert SANS abonnement : sa page d'accueil l'annonce depuis sa
+# mise en ligne. Or `corpus_libre.json` n'a jamais été déposé — il tombait sous
+# `api/data/*`, la CI ne le voyait donc pas, et l'avertissement « à téléverser
+# en FTP » passait à chaque déploiement sans que personne ne le fasse. Pendant
+# ce temps la promesse restait affichée et `?action=config` répondait
+# `libre: disponible: false` : les 1 014 textes gratuits manquaient en silence.
+# ⚠️ Le dépôt est PUBLIC et ce fichier porte AUSSI l'appareil pédagogique
+# (questions de compréhension, exploitation, faits de langue) — 425 Ko de
+# travail d'auteur. Décision prise par Jacques le 28/08/2026, en connaissance
+# de ce que l'historique Git conserve. Le répertoire MINESEC, lui, reste hors
+# du dépôt : ses auteurs sont vivants et il se vend.
+!api/data/corpus_libre.json
 api/data/_security_log.txt
 api/data/_access_log.txt
 api/data/payments/
