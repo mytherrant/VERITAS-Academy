@@ -3237,6 +3237,20 @@ class Component extends DCLogic {
       {id:'u5',name:'Mme Clarisse Mba',role:'Administrateur établissement',quota:{limit:10,used:0}},
       {id:'u6',name:'Élève démo',role:'Élève (lecture seule)',quota:{limit:0,used:0}}
     ];
+    /* ⚠️ TOUT CE QUI SUIT EST UN DÉCOR, ET DOIT SE SAVOIR TEL.
+       Ces enregistrements servent la visite guidee : ils montrent a quoi
+       ressemble l'Atelier rempli, avant toute inscription. Rien ne les
+       distinguait pourtant du travail reel, et `_adopterIdentite` les
+       RE-TAMPONNAIT au nom du compte qui venait de se connecter. Un
+       enseignant inscrit ce matin ouvrait donc son espace sur trois epreuves
+       qu'il n'avait pas ecrites, deux signees de son propre nom, « 12
+       evenements » d'activite, « 10 notifications », des propositions de
+       « Mme Aicha Bello » — et un etablissement pre-rempli dans son profil.
+       Regle du projet : base vide ⇒ rien affiche. On n'invente ni activite
+       ni statistique.
+       Le drapeau `demo` permet de jeter le decor SANS jeter le travail que
+       l'utilisateur a pu produire pendant la visite guidee : celui-la n'est
+       pas marque, il lui reste acquis. */
     const now=Date.now(),H=3600000,D=86400000;
     const seedEp=[
       {id:'e1',title:'Devoir de lecture méthodique — 3ᵉ',etab:'Lycée Bilingue de Yaoundé',classe:'3ᵉ',duree:'2 h',coeff:'2',date:'Trimestre 1',consigne:'Lis attentivement le texte puis réponds aux questions.',textIds:[9,17],status:'relecture',ownerId:'u1',editorIds:['u2'],inLibrary:false,updatedAt:now-4*H,customQ:{},comments:[{id:'c1',userId:'u4',text:'Bonne sélection. Ajoutez une question de grammaire sur les expansions du nom au texte 2.',ts:now-3*H}],activity:[{userId:'u1',text:'a créé l\u2019épreuve',ts:now-2*D},{userId:'u1',text:'a ajouté le texte n°9',ts:now-2*D+20*60000},{userId:'u2',text:'a modifié la consigne générale',ts:now-1*D},{userId:'u2',text:'a reformulé une question de compréhension (texte n°9)',ts:now-22*H},{userId:'u1',text:'a soumis en relecture',ts:now-5*H},{userId:'u4',text:'a commenté',ts:now-3*H}]},
@@ -3263,6 +3277,13 @@ class Component extends DCLogic {
       {id:'k2',gabarit:'lecture',title:'La description dans « Le village au matin »',type:'Lecture méthodique',classe:'5ᵉ',sequence:'Séquence 2',competence:'Lire et interpréter un texte descriptif',duree:'55 min',coeff:'1',objAgir:'',objContexte:'',objFonction:'',regle:'',intContexte:'',intTache:'',intProduction:'',intConsignes:'',intContraintes:'',phaseContent:{},status:'valide',ownerId:'u3',editorIds:['u2'],inLibrary:true,updatedAt:now-4*D,
         history:[{userId:'u3',text:'a créé le cours',ts:now-8*D,version:1},{userId:'u2',text:'a validé et verrouillé le cours',ts:now-4*D,version:4}]}
     ];
+    /* Le decor porte sa marque. Poser le drapeau ici plutot que dans chaque
+       litteral evite d'en oublier un — et un enregistrement de demonstration
+       oublie, c'est une ligne d'activite inventee qui survit a l'inscription. */
+    seedUsers.forEach(function(u){ u.demo = true; });
+    seedEp.forEach(function(e){ e.demo = true; });
+    seedCours.forEach(function(c){ c.demo = true; });
+
     this.annot=this._load('minesec_annot',{});
     const store=this._load('minesec_v3',null);
     this.state={
@@ -5177,12 +5198,20 @@ class Component extends DCLogic {
   _adopterIdentite(accId,nom){
     if(!accId)return;
     const st=this.state,ancien=String(st.currentUserId||'');
-    const users=(st.users||[]).slice();
+    let users=(st.users||[]).slice();
     const modele=users.find(u=>u.id===ancien)||{role:'Enseignant',quota:{limit:0,used:0}};
     const i=users.findIndex(u=>u.id===accId);
     if(i<0){
+      /* Le quota du profil de demonstration ne se transmet pas. `u1` porte
+         « 6 epreuves utilisees sur 20 » : le nouvel inscrit ouvrait donc son
+         Atelier sur « CREDITS 14 / 20 epreuves ce mois », un chiffre qu'il
+         n'avait pas consomme. Le vrai plafond descend du serveur avec le
+         droit (`corpusDroit`) ; en attendant, on ne montre pas un compteur
+         invente. */
+      const neuf=/^u\d+$/.test(String(ancien));
       users.push({id:accId,name:nom||modele.name||'Moi',
-        role:modele.role||'Enseignant',quota:modele.quota||{limit:0,used:0}});
+        role:modele.role||'Enseignant',
+        quota:neuf?{limit:0,used:0}:(modele.quota||{limit:0,used:0})});
     }else if(nom&&users[i].name!==nom){
       users[i]=Object.assign({},users[i],{name:nom});
     }
@@ -5192,6 +5221,62 @@ class Component extends DCLogic {
        ordinateur), son travail doit lui rester attribue. */
     const demo=/^u\d+$/.test(ancien);
     let eps=st.epreuves||[],cos=st.cours||[];
+
+    /* ── LE DECOR NE DEVIENT PAS LE TRAVAIL DU NOUVEL INSCRIT ─────────────
+       Le re-tamponnage ci-dessous existe pour une bonne raison : ce qu'on a
+       ecrit pendant la visite guidee doit nous rester quand on s'inscrit.
+       Mais il ne distinguait pas ce travail-la du DECOR livre avec
+       l'application. Consequence, sur chaque compte cree : trois epreuves
+       jamais ecrites — deux signees du nom du nouvel inscrit — « 12
+       evenements » d'activite, dix notifications, des propositions signees
+       d'une inspectrice qui n'existe pas, et « Lycee Bilingue de Yaounde »
+       inscrit d'office dans son profil. Un nouvel inscrit doit trouver une
+       page vierge et batir ses contenus lui-meme.
+       On jette donc ce qui porte le drapeau `demo`, et on ne re-tamponne que
+       le reste. Les propositions et messages du decor partent avec : une
+       proposition qui designe une epreuve disparue n'a plus de sujet. */
+    let props=st.proposals||{}, chat=st.chatMsgs||[], msgsC=st.msgsByConv||null, team=st.team;
+    const versReel = accId && !/^u\d+$/.test(accId);
+    if(versReel){
+      /* Reconnaissance par le drapeau ET par l'identifiant. Le drapeau
+         n'existait pas avant ce correctif : les comptes deja crees portent
+         donc le decor dans leur stockage local SANS marque, et il y
+         resterait a jamais. Les identifiants du decor sont fixes et courts
+         (`e1`…`e3`, `k1`,`k2`, `u1`…`u6`) tandis que toute creation reelle
+         s'appelle 'e'+Date.now() — treize chiffres. Aucune collision
+         possible. */
+      const estDecor = function(x, motif){
+        return !!(x && (x.demo || motif.test(String(x.id || ''))));
+      };
+      eps = eps.filter(function(e){ return !estDecor(e, /^e[1-3]$/); });
+      cos = cos.filter(function(c){ return !estDecor(c, /^k[1-2]$/); });
+      users = users.filter(function(u){
+        return u && (u.id===accId || !estDecor(u, /^u[1-9]$/));
+      });
+      const vivantes = {};
+      eps.forEach(function(e){ vivantes[e.id] = true; });
+      const p2 = {};
+      Object.keys(props).forEach(function(k){ if(vivantes[k]) p2[k] = props[k]; });
+      props = p2;
+      /* Les messages du decor n'ont pas d'identifiant — c'est deja la regle
+         qui les ecarte a l'affichage une fois connecte. Ici on les efface
+         pour de bon, pastille de non-lus comprise. */
+      chat = chat.filter(function(m){ return m && m.id; });
+      if(msgsC){
+        const m2 = {};
+        Object.keys(msgsC).forEach(function(k){
+          m2[k] = (msgsC[k]||[]).filter(function(m){ return m && m.id; });
+        });
+        msgsC = m2;
+      }
+      /* L'etablissement et le compteur d'epreuves de l'equipe de
+         demonstration s'affichaient dans le profil du nouvel inscrit. */
+      if(team && team.name === 'Lycée Bilingue de Yaoundé'){
+        team = Object.assign({}, team, {name:'', plan:'',
+          quota: Object.assign({}, team.quota||{}, {used:0})});
+      }
+    }
+
     if(demo&&ancien&&ancien!==accId){
       const re=id=>(id===ancien?accId:id);
       eps=eps.map(e=>Object.assign({},e,{
@@ -5204,7 +5289,16 @@ class Component extends DCLogic {
         editorIds:(c.editorIds||[]).map(re),
         history:(c.history||[]).map(h=>Object.assign({},h,{userId:re(h.userId)}))}));
     }
-    this.setState({users:users,currentUserId:accId,epreuves:eps,cours:cos});
+    const suite={users:users,currentUserId:accId,epreuves:eps,cours:cos};
+    if(versReel){
+      suite.proposals=props; suite.chatMsgs=chat; suite.team=team;
+      if(msgsC) suite.msgsByConv=msgsC;
+      /* Plus aucune epreuve du decor : une epreuve « active » qui vient
+         d'etre jetee laisserait le composeur sur un fantome. */
+      if(st.activeId && !eps.some(function(e){return e.id===st.activeId;})) suite.activeId=null;
+      if(st.activeCoursId && !cos.some(function(c){return c.id===st.activeCoursId;})) suite.activeCoursId=null;
+    }
+    this.setState(suite);
   }
   /* Export Word : l'enseignant veut son en-tete et son logo. On lui rend un
      .docx normal plutot qu'un HTML deguise, avec une cellule d'en-tete vide

@@ -311,6 +311,20 @@ jobs:
       - name: 🎓 L'enseignant atteint-il son Atelier ?
         run: node tests/banc_atelier_enseignant.cjs
 
+      # ── 🧹 LE NOUVEL INSCRIT TROUVE-T-IL UNE PAGE VIERGE ? L'Atelier est
+      #    livré avec un décor — six profils, trois épreuves, deux cours, des
+      #    propositions, des messages — qui sert la visite guidée. Mais
+      #    `_adopterIdentite` le RE-TAMPONNAIT au nom du compte qui venait de
+      #    se connecter : chaque nouvel inscrit ouvrait son espace sur trois
+      #    épreuves jamais écrites, « 12 événements » d'activité, dix
+      #    notifications, un établissement pré-rempli et « 14 / 20 épreuves ce
+      #    mois » hérité du profil `u1`. Règle du projet : base vide ⇒ rien
+      #    affiché, on n'invente ni activité ni statistique. Elle avait déjà
+      #    été rétablie trois fois par des filtres à l'AFFICHAGE, et un écran
+      #    passait chaque fois entre les mailles — d'où la règle à la SOURCE.
+      - name: 🧹 Le nouvel inscrit trouve-t-il une page vierge ?
+        run: node tests/banc_atelier_demo.cjs
+
       # ── 📕 LA BOUTIQUE NE VEND-ELLE QUE CE QUI EXISTE ? ────────────────────
       #    Cinq manuels inventés étaient semés dans defaultDB() avec un PRIX et
       #    un bouton d'achat : « Mathématiques 3ème » chez « MINESEC Éditions »,
