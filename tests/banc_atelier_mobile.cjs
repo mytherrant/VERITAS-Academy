@@ -205,8 +205,19 @@ console.log(`\n${G}⑦ Le contrôle de la norme ne prend la place que s'il a à 
    quand il proteste qu'il doit se voir. */
 dire(/const confEstOuvert = \(st\.confOpen === null \|\| st\.confOpen === undefined\)/.test(src),
   'son état par défaut se déduit, au lieu d’être figé');
-dire(/\?\s*\(\(confRes\.total \|\| 0\) > 0\)/.test(src),
+dire(/\?\s*\(confAControler > 0\)/.test(src),
   'ouvert seulement s’il existe au moins un écart à montrer');
+/* `resume()` compte les CONSEILS dans `total`, alors que le titre du panneau
+   n'annonce que les écarts. S'en remettre à `total` faisait dire au bouton
+   « Analyser 4 écarts » sous un titre annonçant « 2 écart(s) à la norme », et
+   ouvrait le panneau pour une simple suggestion. */
+dire(/const confAControler = \(confRes\.bloquants \|\| 0\) \+ \(confRes\.ecarts \|\| 0\);/.test(src),
+  'et ce compte exclut les simples conseils — sinon il contredirait le titre');
+/* Le fichier écrit ses accents tantôt en clair, tantôt en séquence Unicode
+   (`écart`) : le test doit accepter les deux, sinon il rougit pour une
+   question d'encodage et non de comportement. */
+dire(/Analyser '\+confAControler\+' (écart|\\u00e9cart)/.test(src),
+  'le bouton d’analyse annonce le MÊME nombre que le titre');
 dire(/:\s*!!st\.confOpen;/.test(src),
   'et le clic de l’enseignant l’emporte ensuite');
 dire(/confOpen:null,confIA:null/.test(src),
@@ -215,6 +226,27 @@ dire(!/structureCorpsStyle:st\.confOpen/.test(src),
   'la structure officielle suit le même état — pas l’ancien drapeau');
 dire(!/confToggleLabel:st\.confOpen/.test(src) && !/confToggle:\(\)=>this\.setState\(\{confOpen:!st\.confOpen\}\)/.test(src),
   'le bouton aussi, sinon son libellé mentirait sur ce qu’il fait');
+
+/* ── ⑧ La barre d'actions coulissante ──────────────────────────────────── */
+console.log(`\n${G}⑧ Les gestes du composeur sont à portée de pouce${R}`);
+/* Ils étaient dispersés : ajouter un texte au bas du corpus, appliquer le
+   barème dans la carte de conformité, exporter tout en bas de la colonne de
+   droite — laquelle passe SOUS la planche sur un écran étroit. Chacun
+   demandait de faire défiler quatre mille pixels, puis de revenir. */
+dire(/class="vrt-only-sm vrt-actions-cl"/.test(src),
+  'la barre existe et ne paraît que sur téléphone');
+dire(/\.vrt-actions-cl\{display:flex!important;gap:8px;overflow-x:auto;/.test(src),
+  'elle glisse horizontalement au lieu de couper ses boutons');
+dire(/scroll-snap-type:x proximity/.test(src),
+  'et une puce ne reste jamais à moitié visible');
+dire(/min-height:44px/.test(src),
+  'les puces atteignent la cible tactile de 44 px');
+dire(/white-space:nowrap/.test((src.match(/actClStyle:[\s\S]{0,400}/) || [''])[0]),
+  'leur libellé ne se coupe pas en deux lignes');
+const barre = (src.match(/vrt-actions-cl">([\s\S]*?)<\/div>/) || ['', ''])[1];
+['goListe', 'appliquerBareme', 'confAmbassa', 'generate', 'exportWord', 'submitReview']
+  .forEach(h => dire(new RegExp('\\{\\{ ' + h + ' \\}\\}').test(barre),
+    'elle porte l’action `' + h + '`'));
 
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko === 0 ? 0 : 1);
