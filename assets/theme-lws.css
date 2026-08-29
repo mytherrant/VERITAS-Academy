@@ -1082,6 +1082,30 @@
    ═══════════════════════════════════════════════════════════════════ */
 body, #APP, #LS, #MC{ font-family:var(--lws-font); }
 #APP .pgt, #APP h1, #APP h2, #APP h3{ font-weight:600; color:var(--lws-navy); }
+
+/* ── LA POLICE DES TITRES ECHAPPAIT AU REMAPPAGE ──────────────────────────
+   Le §1 remappe `--ds-font-text` et `--ds-font-display` vers Poppins, et
+   `body, #APP, #LS, #MC` juste au-dessus pose la police du corps. Tout ce qui
+   lit une VARIABLE suit donc la charte.
+   Mais app.css declare la police des titres EN DUR, sans passer par un jeton :
+       h1,h2,h3,.vsec-title,.ct,.mtt,.pgt,.vhero-title{font-family:'Montserrat'}
+   plus une dizaine de selecteurs particuliers (.rc-title, .pk-name,
+   .ai-card h4, .sc-body h4, .el-cat-info h4, .vnav-btn, .v-hero-tagline,
+   .hvid-cap h2). Une declaration litterale ne suit aucun remappage : ces
+   titres restaient en Montserrat pendant que la vitrine passait en Poppins.
+   La regle voisine ne rattrapait que le POIDS et la COULEUR — le defaut se
+   voyait donc a moitie corrige, ce qui le rendait plus difficile a nommer.
+
+   `:is(#APP,#VISITOR,#LS)` porte la specificite d'un identifiant (1,0,0) et
+   le second `:is()` celle d'une classe : (1,1,0) au total, largement au-dessus
+   des (0,0,1) d'app.css. `!important` reste necessaire pour les titres que le
+   rendu JS habille d'un `style=` en ligne. */
+:is(#APP, #VISITOR, #LS) :is(h1, h2, h3, h4,
+  .pgt, .ct, .mtt, .vsec-title, .vhero-title, .v-hero-tagline,
+  .rc-title, .pk-name, .vnav-btn,
+  .ai-card h4, .sc-body h4, .el-cat-info h4, .hvid-cap h2){
+  font-family:var(--lws-font)!important;
+}
 #APP .btn:hover:not(:disabled){ transform:none; }
 
 
