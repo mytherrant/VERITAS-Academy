@@ -929,8 +929,12 @@
   .vrt-only-sm{display:none!important}
   @media (min-width:821px){
     /* Sur grand écran rien ne se replie : le corps d'un volet reste ouvert,
-       quelle que soit la position du repli mobile. */
-    .vrt-repli-corps{display:block!important}
+       quelle que soit la position du repli mobile.
+       EXCEPTION `.vrt-repli-auto` : un panneau qui se referme parce qu'il est
+       DEJA RENSEIGNE doit le rester sur toutes les tailles d'ecran. Le forcer
+       ouvert ici annulerait la place qu'on vient de rendre au texte — et le
+       clic de l'enseignant pour le refermer n'aurait aucun effet visible. */
+    .vrt-repli-corps:not(.vrt-repli-auto){display:block!important}
   }
   @media (max-width:820px){
     .vrt-only-sm{display:block!important}
@@ -1789,7 +1793,7 @@
                  la planche de travail : on le replie. Il se remplit une fois,
                  on écrit l'épreuve pendant une heure. -->
             <button onClick="{{ renseignementsToggle }}" class="vrt-only-sm" style="{{ renseignementsToggleStyle }}">{{ renseignementsToggleLabel }}</button>
-            <div class="vrt-repli-corps" style="{{ renseignementsCorpsStyle }}">
+            <div class="vrt-repli-corps vrt-repli-auto" style="{{ renseignementsCorpsStyle }}">
             <div style="display:flex;flex-direction:column;gap:12px">
               <label style="{{ fieldLbl }}">Établissement<input value="{{ ep.etab }}" onChange="{{ setEtab }}" disabled="{{ cannotEdit }}" placeholder="Lycée de…" style="{{ fieldIn }}"></label>
               <div style="display:flex;gap:10px"><label style="{{ fieldLbl }};flex:1">Classe<select value="{{ ep.classe }}" onChange="{{ setClasse }}" disabled="{{ cannotEdit }}" style="{{ fieldIn }}"><option value="">— Choisir —</option><sc-for list="{{ classeOptions }}" as="c" hint-placeholder-count="8"><option value="{{ c }}">{{ c }}</option></sc-for></select></label><label style="{{ fieldLbl }};flex:1">Série<select value="{{ epSerie }}" onChange="{{ setSerie }}" disabled="{{ cannotEdit }}" style="{{ fieldIn }}"><option value="">— Toutes —</option><sc-for list="{{ serieOptions }}" as="r" hint-placeholder-count="8"><option value="{{ r }}">{{ r }}</option></sc-for></select></label></div>
@@ -3413,8 +3417,14 @@ class Component extends DCLogic {
       /* Repliés d'office sur téléphone : le garde-fou de conformité et le
          formulaire de renseignements occupaient à eux deux plus d'un écran
          AVANT la première ligne de l'épreuve. */
-      confOpen:!this._petitEcran(),confIA:null,confIABusy:false,confIAErr:'',
-      filtresOpen:false,renseignementsOpen:false,collabOpen:false,
+      /* `null` : l'etat du garde-fou se DEDUIT du nombre d'ecarts (voir
+         confEstOuvert). Il valait `!_petitEcran()`, donc toujours deplie sur
+         grand ecran, meme quand il n'avait rien a signaler. */
+      confOpen:null,confIA:null,confIABusy:false,confIAErr:'',
+      /* `null` et non `false` : l'etat par defaut du panneau des
+         renseignements se DEDUIT de son contenu (voir _repliAuto). Un
+         booleen n'y arrive que lorsque l'enseignant a clique. */
+      filtresOpen:false,renseignementsOpen:null,collabOpen:false,
       screen:'accueil',authed:store?(store.authed!==false):true,currentN:this.all[0]?this.all[0].n:1,
       qEditN:null,authMail:'',authMdp:'',authErr:'',authBusy:false,essaiJours:7,payOpen:false,paySelected:null,payDone:false,payName:'',payCard:'',payExp:'',payCvc:'',payMethod:'momo',
       payProvider:null,payBusy:false,payErr:'',payRef:'',payUrl:'',
@@ -4136,6 +4146,45 @@ class Component extends DCLogic {
 
      `compte` ajoute un nombre au libelle : replier un panneau qui contient
      quelque chose sans le dire revient a le faire disparaitre. */
+  /* ── UN PANNEAU DEJA REMPLI N'A PLUS BESOIN D'ETRE OUVERT ───────────────
+     Les renseignements — etablissement, classe, serie, duree, coefficient,
+     nature, consigne — se saisissent UNE FOIS, au debut. Ensuite ils occupent
+     le haut de la colonne pendant toute la redaction, alors qu'on n'y touche
+     plus. Sur telephone c'est un tiers d'ecran ; sur grand ecran, c'est
+     autant de moins pour le texte qu'on travaille.
+     Le panneau se replie donc de lui-meme des qu'il est renseigne, et son
+     bouton porte alors le RESUME de ce qu'il contient : on ne cache rien, on
+     resume. Un clic le rouvre, et ce clic fait autorite — on ne revient plus
+     le refermer sous les doigts de l'enseignant. */
+  _renseignementsComplets(ep){
+    if(!ep) return false;
+    const rempli = v => String(v==null?'':v).trim() !== '';
+    return rempli(ep.title) && rempli(ep.classe) && rempli(ep.duree) && rempli(ep.coeff);
+  }
+  _resumeRenseignements(ep){
+    if(!ep) return '';
+    return [ep.classe, ep.serie, ep.duree, (ep.coeff ? 'coef ' + ep.coeff : ''), ep.date]
+      .map(v => String(v==null?'':v).trim()).filter(Boolean).join(' · ');
+  }
+  /* Repli dont l'etat par defaut se DEDUIT du contenu, au lieu d'etre fixe.
+     `null` = automatique (jamais touche par l'utilisateur) ; un booleen = son
+     choix, qui l'emporte ensuite. */
+  _repliAuto(cle, ferme, ouvert, complets, resume){
+    const drapeau = cle + 'Open';
+    const brut = this.state[drapeau];
+    const auto = (brut === null || brut === undefined);
+    const est = auto ? !complets : !!brut;
+    const out = {};
+    out[cle + 'Toggle'] = () => this.setState({[drapeau]: !est});
+    out[cle + 'ToggleLabel'] = est ? ouvert
+      : (ferme + (resume ? ' · ' + resume : ''));
+    out[cle + 'ToggleStyle'] = 'width:100%;background:var(--cf4f8fc,#f4f8fc);'
+      + 'border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c14375f,#14375f);font-family:Poppins;'
+      + 'font-size:13px;font-weight:700;padding:11px;border-radius:10px;cursor:pointer;'
+      + 'text-align:left';
+    out[cle + 'CorpsStyle'] = est ? '' : 'display:none';
+    return out;
+  }
   _repli(cle,ferme,ouvert,o){
     o=o||{};
     const drapeau=cle+'Open';
@@ -4946,9 +4995,30 @@ class Component extends DCLogic {
      « envoyer un message » revenait a se parler a soi-meme, et une
      proposition de correction restait invisible de celui qu'elle concernait.
      Mesure du 26/08 : `_syncContenu` ne rendait que {epreuves, cours, annot}. */
+  /* ⚠️ LE DECOR NE DOIT PAS VOYAGER DANS L'EQUIPE.
+     `_adopterIdentite` jette le decor de demonstration a la connexion. Mais
+     l'instantane partage, lui, partait avec `st.epreuves` et `st.cours` EN
+     ENTIER. Consequence : un collegue qui ne s'est pas encore reconnecte —
+     donc pas encore purge — poussait « Devoir de lecture methodique », « Ngum
+     a Jemea » et « Composition 1er trimestre » a toute l'equipe, et la fusion
+     les REINSTALLAIT chez ceux qui venaient de les perdre. Le decor serait
+     revenu par la porte de derriere, et pour tout le monde.
+     Le filtre existait deja pour les messages (`_msgsPartageables` ecarte
+     ceux qui n'ont pas d'identifiant) ; il manquait pour les epreuves et les
+     cours. On filtre AUX DEUX BOUTS — a l'envoi et a la reception — parce que
+     les deux versions de l'Atelier vont cohabiter le temps que chacun
+     recharge sa page. */
+  _estDecor(x, motif){
+    return !!(x && (x.demo || motif.test(String(x.id || ''))));
+  }
+  _sansDecor(liste, motif){
+    const self = this;
+    return (liste || []).filter(function(x){ return !self._estDecor(x, motif); });
+  }
   _syncContenu(){
     const st=this.state;
-    return {epreuves:st.epreuves||[],cours:st.cours||[],
+    return {epreuves:this._sansDecor(st.epreuves,/^e[1-3]$/),
+            cours:this._sansDecor(st.cours,/^k[1-2]$/),
             annot:this.annot||{},
             convs:st.convs||[],
             msgs:this._msgsPartageables(),
@@ -5142,8 +5212,12 @@ class Component extends DCLogic {
         if(this._syncRev!=null&&e.revision<=this._syncRev)return;  // deja vu
         this._syncRev=e.revision;
         const c=e.contenu;
-        const ep=this._fusionner(this.state.epreuves,c.epreuves);
-        const co=this._fusionner(this.state.cours,c.cours);
+        /* Meme regle a la RECEPTION : un coequipier resté sur l'ancienne
+           version enverrait encore son decor, et la fusion le reinstallerait
+           ici. Filtrer a l'envoi seul ne suffit pas tant que tout le monde
+           n'a pas recharge sa page. */
+        const ep=this._fusionner(this.state.epreuves,this._sansDecor(c.epreuves,/^e[1-3]$/));
+        const co=this._fusionner(this.state.cours,this._sansDecor(c.cours,/^k[1-2]$/));
         /* Les annotations sont un objet indexe par numero de texte : on
            prend les deux cotes, le distant l'emporte sur une meme cle. */
         if(c.annot&&typeof c.annot==='object'&&!Array.isArray(c.annot)){
@@ -5477,13 +5551,13 @@ class Component extends DCLogic {
          (`e1`…`e3`, `k1`,`k2`, `u1`…`u6`) tandis que toute creation reelle
          s'appelle 'e'+Date.now() — treize chiffres. Aucune collision
          possible. */
-      const estDecor = function(x, motif){
-        return !!(x && (x.demo || motif.test(String(x.id || ''))));
-      };
-      eps = eps.filter(function(e){ return !estDecor(e, /^e[1-3]$/); });
-      cos = cos.filter(function(c){ return !estDecor(c, /^k[1-2]$/); });
+      /* Meme reconnaissance qu'a l'envoi vers l'equipe (_estDecor) : une
+         seule definition, sinon les deux chemins finissent par diverger. */
+      const self = this;
+      eps = this._sansDecor(eps, /^e[1-3]$/);
+      cos = this._sansDecor(cos, /^k[1-2]$/);
       users = users.filter(function(u){
-        return u && (u.id===accId || !estDecor(u, /^u[1-9]$/));
+        return u && (u.id===accId || !self._estDecor(u, /^u[1-9]$/));
       });
       const vivantes = {};
       eps.forEach(function(e){ vivantes[e.id] = true; });
@@ -7147,6 +7221,12 @@ class Component extends DCLogic {
       (f,k)=>this._qList(f,k),(n2,k,i)=>this._qPts(n2,k,i)):[];
     const confTous=confLocaux.concat((st.confIA&&st.confIA.ecarts)||[]);
     const confRes=CONFORMITE.resume(confTous);
+    /* Etat REEL du depliant : `null` = automatique (l'enseignant n'y a pas
+       touche) -> ouvert seulement s'il y a un ecart a montrer. Un booleen =
+       son choix, qui l'emporte. */
+    const confEstOuvert = (st.confOpen === null || st.confOpen === undefined)
+      ? ((confRes.total || 0) > 0)
+      : !!st.confOpen;
     const confStruct=active&&active.epreuveCode?MINESEC.epreuveParCode(active.epreuveCode):null;
     const confCible=MINESEC.totalAttendu(confStruct);
     const confTotal=this._baremeTotal();
@@ -7462,7 +7542,10 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       /* --- volets repliables du téléphone (voir _repli) --- */
       ...this._repli('filtres','Affiner la recherche','Masquer les filtres',
         {marge:true,compte:nbFiltresActifs}),
-      ...this._repli('renseignements','Renseignements de l’épreuve','Masquer les renseignements'),
+      /* Repli AUTOMATIQUE : renseigne, le panneau se referme et son bouton
+         porte le resume (« 3e · 2 h · coef 2 · Trimestre 1 »). */
+      ...this._repliAuto('renseignements','Renseignements de l’épreuve','Masquer les renseignements',
+        this._renseignementsComplets(active), this._resumeRenseignements(active)),
       /* Le libellé nomme AUSSI la validation : les boutons « Soumettre à
          relecture » et « Valider » vivent dans ce volet, et un volet replié
          dont le nom ne les annonce pas les rend introuvables. */
@@ -7478,7 +7561,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
          Son libellé, lui, nomme la structure en vigueur : replier une
          rangée sans dire ce qu'elle contient ferait disparaître la donnée
          dont dépend tout le garde-fou. */
-      structureCorpsStyle:st.confOpen?'':'display:none',
+      structureCorpsStyle:confEstOuvert?'':'display:none',
       /* Le filigrane nomme le compte qui lit. Il ne peut pas empêcher une
          capture d'écran — aucune page web ne le peut — mais il la rend
          traçable : l'image qui circule désigne celui par qui elle est
@@ -8241,12 +8324,21 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       confTitre:confRes.libelle,
       confBareme:confTotal+' / '+confCible,
       confBaremeStyle:'font-size:11.5px;font-weight:700;font-family:Poppins;padding:3px 10px;border-radius:999px;color:'+(Math.abs(confTotal-confCible)<0.001?'var(--c1f9d55,#1f9d55)':'var(--cc26a12,#c26a12)')+';background:'+(Math.abs(confTotal-confCible)<0.001?'var(--ce6f5ec,#e6f5ec)':'var(--cfdefdb,#fdefdb)'),
-      confToggle:()=>this.setState({confOpen:!st.confOpen}),
+      /* ── LE CONTROLE DE LA NORME S'OUVRE QUAND IL A QUELQUE CHOSE A DIRE
+         Il restait deplie en permanence sur grand ecran : un panneau au-dessus
+         du texte pour annoncer, la plupart du temps, que tout va bien. Or un
+         garde-fou muet n'a pas besoin de place — c'est quand il proteste qu'il
+         doit se voir.
+         Il se replie donc tant qu'aucun ecart n'est detecte, et s'ouvre SEUL
+         des qu'il en trouve un. Le clic de l'enseignant fait autorite ensuite :
+         on ne rouvre pas un panneau qu'il vient de fermer, ni l'inverse. Meme
+         mecanique que les renseignements (_repliAuto). */
+      confToggle:()=>this.setState({confOpen:!confEstOuvert}),
       /* Le dépliant gouverne AUSSI la structure officielle sur téléphone :
          son libellé doit donc dire ce qu'il cache, sinon on replie le
          réglage dont dépend tout le verdict sans que rien ne l'indique. */
-      confToggleLabel:st.confOpen?'Replier':('Voir le d\u00e9tail ('+confRes.total+')'),
-      confOpen:st.confOpen,
+      confToggleLabel:confEstOuvert?'Replier':('Voir le d\u00e9tail ('+confRes.total+')'),
+      confOpen:confEstOuvert,
       confSousTitre:confStruct?(confStruct.nom+' \u00b7 '+confStruct.duree+' \u00b7 coefficient '+confStruct.coeff+' \u00b7 '+confStruct.sujetsAuChoix+' sujet(s) au choix \u00b7 source : '+confStruct.source):'',
       confSousTitreStyle:confStruct?'font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin-top:8px;line-height:1.5':hidden,
       confEcarts:confTous.map(e=>({

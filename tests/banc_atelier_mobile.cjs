@@ -131,5 +131,90 @@ dire(!/nowrap/.test(blocEx),
 dire(!/\.vrt-exrow > span:nth-of-type\(2\)\{[^}]*min-width:0/.test(src),
   'ni `min-width:0` sur la colonne du titre, pour la même raison');
 
+/* ── ⑥ Un panneau déjà rempli rend sa place au texte ───────────────────── */
+console.log(`\n${G}⑥ Les renseignements se replient une fois saisis${R}`);
+/* Établissement, classe, série, durée, coefficient, nature, consigne se
+   saisissent UNE FOIS. Ensuite ce panneau occupait le haut de la colonne
+   pendant toute la rédaction — un tiers d'écran sur téléphone — alors que
+   personne n'y touche plus. Il se referme désormais de lui-même, en portant
+   le RÉSUMÉ de ce qu'il contient : on ne cache rien, on résume. */
+function extraireM(s, entete) {
+  const i = s.indexOf(entete);
+  if (i < 0) return null;
+  let prof = 0;
+  const j = s.indexOf('{', i);
+  if (j < 0) return null;
+  for (let k = j; k < s.length; k++) {
+    if (s[k] === '{') prof++;
+    else if (s[k] === '}') { prof--; if (prof === 0) return s.slice(i, k + 1); }
+  }
+  return null;
+}
+const mCorps = ['_renseignementsComplets(ep){', '_resumeRenseignements(ep){',
+  '_repliAuto(cle, ferme, ouvert, complets, resume){']
+  .map(e => extraireM(src, e));
+dire(mCorps.every(Boolean), 'les trois fonctions du repli automatique existent');
+
+if (mCorps.every(Boolean)) {
+  const o = new Function('return ({' + mCorps.join(',') + '});')();
+
+  const plein = { title: 'Devoir de lecture', classe: '3ᵉ', serie: 'A4',
+    duree: '2 h', coeff: '2', date: 'Trimestre 1' };
+  const vide = { title: '', classe: '', duree: '', coeff: '' };
+  dire(o._renseignementsComplets(plein) === true, 'un panneau renseigné est reconnu complet');
+  dire(o._renseignementsComplets(vide) === false, 'un panneau vide ne l’est pas');
+  dire(o._renseignementsComplets({ title: 'Devoir', classe: '3ᵉ', duree: '', coeff: '2' }) === false,
+    'un seul champ manquant suffit à le déclarer incomplet');
+  dire(o._renseignementsComplets(null) === false, 'aucune épreuve ouverte → incomplet');
+
+  const res = o._resumeRenseignements(plein);
+  dire(/3ᵉ/.test(res) && /2 h/.test(res) && /coef 2/.test(res),
+    'le résumé porte la classe, la durée et le coefficient', res);
+  dire(!/·\s*·/.test(res) && !/^·|·$/.test(res.trim()),
+    'et ne laisse pas de séparateur orphelin quand un champ manque',
+    o._resumeRenseignements({ classe: '3ᵉ', duree: '', coeff: '' }));
+
+  /* L'état par défaut se DÉDUIT du contenu ; le clic de l'enseignant
+     l'emporte ensuite — sinon le panneau se refermerait sous ses doigts. */
+  o.setState = () => {};
+  o.state = { renseignementsOpen: null };
+  dire(o._repliAuto('renseignements', 'F', 'O', true, 'r').renseignementsCorpsStyle === 'display:none',
+    'complet et jamais touché → replié');
+  dire(o._repliAuto('renseignements', 'F', 'O', false, '').renseignementsCorpsStyle === '',
+    'incomplet et jamais touché → ouvert, pour qu’on le remplisse');
+  o.state = { renseignementsOpen: true };
+  dire(o._repliAuto('renseignements', 'F', 'O', true, 'r').renseignementsCorpsStyle === '',
+    'rouvert à la main → reste ouvert malgré la complétude');
+  o.state = { renseignementsOpen: false };
+  dire(o._repliAuto('renseignements', 'F', 'O', false, '').renseignementsCorpsStyle === 'display:none',
+    'refermé à la main → reste fermé malgré l’incomplétude');
+  o.state = { renseignementsOpen: null };
+  dire(/·\s*r$/.test(o._repliAuto('renseignements', 'F', 'O', true, 'r').renseignementsToggleLabel),
+    'le bouton refermé porte le résumé');
+}
+
+dire(/class="vrt-repli-corps vrt-repli-auto"/.test(src),
+  'le panneau des renseignements porte bien la classe du repli automatique');
+dire(/\.vrt-repli-corps:not\(\.vrt-repli-auto\)\{display:block!important\}/.test(src),
+  'et la règle grand écran ne le force plus ouvert — sinon le clic serait sans effet');
+
+/* ── ⑦ Le garde-fou de conformité s'ouvre quand il proteste ────────────── */
+console.log(`\n${G}⑦ Le contrôle de la norme ne prend la place que s'il a à dire${R}`);
+/* Il restait déplié en permanence sur grand écran, pour annoncer la plupart du
+   temps que tout va bien. Un garde-fou muet n'a pas besoin de place — c'est
+   quand il proteste qu'il doit se voir. */
+dire(/const confEstOuvert = \(st\.confOpen === null \|\| st\.confOpen === undefined\)/.test(src),
+  'son état par défaut se déduit, au lieu d’être figé');
+dire(/\?\s*\(\(confRes\.total \|\| 0\) > 0\)/.test(src),
+  'ouvert seulement s’il existe au moins un écart à montrer');
+dire(/:\s*!!st\.confOpen;/.test(src),
+  'et le clic de l’enseignant l’emporte ensuite');
+dire(/confOpen:null,confIA:null/.test(src),
+  'l’état initial est bien `null` (automatique), plus `!_petitEcran()`');
+dire(!/structureCorpsStyle:st\.confOpen/.test(src),
+  'la structure officielle suit le même état — pas l’ancien drapeau');
+dire(!/confToggleLabel:st\.confOpen/.test(src) && !/confToggle:\(\)=>this\.setState\(\{confOpen:!st\.confOpen\}\)/.test(src),
+  'le bouton aussi, sinon son libellé mentirait sur ce qu’il fait');
+
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko === 0 ? 0 : 1);

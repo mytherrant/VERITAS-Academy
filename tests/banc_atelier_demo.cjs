@@ -99,8 +99,16 @@ function etatDemo() {
   };
 }
 
+/* `_adopterIdentite` s'appuie sur la MEME reconnaissance du décor que
+   l'instantané partagé avec l'équipe (`_estDecor` / `_sansDecor`). On les
+   extrait avec elle : les tester séparément laisserait passer une divergence
+   entre les deux chemins — et c'est précisément cette divergence qui a
+   permis au décor de revenir par la synchronisation. */
+const outils = ['_estDecor(x, motif){', '_sansDecor(liste, motif){']
+  .map(e => extraire(src, e));
+
 function adopter(etat, accId, nom) {
-  const obj = new Function('return ({' + corps + '});')();
+  const obj = new Function('return ({' + [corps].concat(outils.filter(Boolean)).join(',') + '});')();
   obj.state = etat;
   let recu = null;
   obj.setState = (s) => { recu = s; };
@@ -197,6 +205,39 @@ if (r2) {
     r2.epreuves[0] ? r2.epreuves[0].ownerId : 'aucune épreuve');
   dire((r2.users || []).some(u => u.id === 'va_premier'),
     'et son profil n’est pas effacé (il n’est pas du décor)');
+}
+
+/* ── ⑤ Le décor ne voyage pas dans l'équipe ────────────────────────────── */
+console.log(`\n${G}⑤ Le décor ne revient pas par la synchronisation${R}`);
+/* Jeter le décor à la connexion ne suffit pas : l'instantané partagé partait
+   avec `st.epreuves` et `st.cours` EN ENTIER. Un collègue qui ne s'était pas
+   encore reconnecté — donc pas encore purgé — poussait les trois épreuves de
+   démonstration à toute l'équipe, et la fusion les RÉINSTALLAIT chez ceux qui
+   venaient de les perdre. Le filtre existait pour les messages ; il manquait
+   pour les épreuves et les cours. */
+dire(/_sansDecor\(st\.epreuves,\/\^e\[1-3\]\$\/\)/.test(src),
+  'l’instantané envoyé à l’équipe est débarrassé des épreuves du décor');
+dire(/cours:this\._sansDecor\(st\.cours,\/\^k\[1-2\]\$\/\)/.test(src),
+  'et des cours du décor');
+dire(/this\._fusionner\(this\.state\.epreuves,this\._sansDecor\(c\.epreuves/.test(src),
+  'et ce qui ARRIVE d’un coéquipier est filtré aussi — les deux versions vont cohabiter');
+dire(/this\._fusionner\(this\.state\.cours,this\._sansDecor\(c\.cours/.test(src),
+  'idem pour les cours reçus');
+
+if (outils.every(Boolean)) {
+  const o = new Function('return ({' + outils.join(',') + '});')();
+  const lot = [
+    { id: 'e1', title: 'décor' },
+    { id: 'e2', title: 'décor' },
+    { id: 'e1756000000000', title: 'vrai travail' },
+    { id: 'e900', title: 'vrai travail aussi', demo: false },
+    { id: 'e901', title: 'marqué démo', demo: true },
+  ];
+  const reste = o._sansDecor(lot, /^e[1-3]$/);
+  dire(reste.length === 2 && reste.every(x => /vrai travail/.test(x.title)),
+    'seul le travail réel survit au filtre', reste.map(x => x.id).join(', '));
+  dire(o._sansDecor([], /^e[1-3]$/).length === 0, 'une liste vide reste vide');
+  dire(o._sansDecor(null, /^e[1-3]$/).length === 0, 'une liste absente ne fait pas tomber la synchro');
 }
 
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
