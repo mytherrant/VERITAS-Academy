@@ -1368,9 +1368,9 @@
         </div>
         <div style="margin-top:14px;display:flex;flex-direction:column;gap:9px">
           <sc-for list="{{ calEvents }}" as="v" hint-placeholder-count="3">
-            <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--c3a4658,#3a4658)"><span style="{{ v.dot }}"></span><span style="flex:1;min-width:0">{{ v.label }}</span><span style="color:var(--c9aa5b5,#9aa5b5);font-size:11.5px;flex:none">{{ v.quand }}</span></div>
+            <button onClick="{{ v.ouvrir }}" style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--c3a4658,#3a4658);background:none;border:none;padding:4px 2px;width:100%;text-align:left;cursor:pointer;font-family:inherit" style-hover="background:var(--cf7f9fc,#f7f9fc);border-radius:8px"><span style="{{ v.dot }}"></span><span style="flex:1;min-width:0">{{ v.label }}</span><span style="{{ v.quandStyle }}">{{ v.quand }}</span></button>
           </sc-for>
-          <div style="{{ calEmpty }}">Aucune date d'épreuve renseignée ce mois-ci.</div>
+          <div style="{{ calEmpty }}">Aucune échéance enregistrée. Renseignez la date de passation dans « Renseignements » pour la voir apparaître ici.</div>
         </div>
       </section>
 
@@ -1800,6 +1800,12 @@
               <div style="display:flex;gap:10px"><label style="{{ fieldLbl }};flex:1">Durée<input value="{{ ep.duree }}" onChange="{{ setDuree }}" disabled="{{ cannotEdit }}" style="{{ fieldIn }}"></label><label style="{{ fieldLbl }};flex:1">Période<input value="{{ ep.date }}" onChange="{{ setDate }}" disabled="{{ cannotEdit }}" placeholder="Trimestre 1" style="{{ fieldIn }}"></label></div>
               <div style="display:flex;gap:10px"><label style="{{ fieldLbl }};flex:1">Coefficient<input value="{{ ep.coeff }}" onChange="{{ setCoeff }}" disabled="{{ cannotEdit }}" placeholder="2" style="{{ fieldIn }}"></label></div>
               <label style="{{ fieldLbl }}">Nature de l’épreuve<select value="{{ ep.epreuveCode }}" onChange="{{ setEpreuveType }}" disabled="{{ cannotEdit }}" style="{{ fieldIn }}"><option value="">— Choisir la nature (durée et coefficient officiels) —</option><sc-for list="{{ natureOptions }}" as="n" hint-placeholder-count="10"><option value="{{ n.code }}">{{ n.label }}</option></sc-for></select></label>
+              <!-- L'ECHEANCE, distincte de la « Periode ». Le calendrier lisait
+                   `date`, dont l'exemple est « Trimestre 1 » : aucune date n'en
+                   sortait jamais, et il affichait « aucune date renseignee »
+                   quoi qu'on ecrive. Un champ de type `date` impose la forme,
+                   il n'y a plus rien a deviner. -->
+              <label style="{{ fieldLbl }}">Échéance <span style="font-weight:400;color:var(--c8b97a8,#8b97a8)">— date de passation ou de remise</span><input type="date" value="{{ ep.echeance }}" onChange="{{ setEcheance }}" disabled="{{ cannotEdit }}" style="{{ fieldIn }}"></label>
               <label style="{{ fieldLbl }}">Consigne<textarea value="{{ ep.consigne }}" onChange="{{ setConsigne }}" disabled="{{ cannotEdit }}" rows="3" style="{{ fieldIn }};resize:vertical;line-height:1.45"></textarea></label>
             </div>
             <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--ceef2f7,#eef2f7);display:flex;justify-content:space-between;font-size:12.5px;color:var(--c5a6678,#5a6678)"><span>{{ selCount }} texte(s)</span><span>{{ totalWords }} mots</span></div>
@@ -6174,6 +6180,65 @@ class Component extends DCLogic {
     let m=t.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);
     m=t.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);if(m)return new Date(+m[3],+m[2]-1,+m[1]);
     return null;}
+  /* ═══ LE CALENDRIER NE POUVAIT RIEN AFFICHER ═══════════════════════════
+     Il lisait `ep.date` — le champ « Periode » des renseignements, dont le
+     libelle d'exemple est « Trimestre 1 ». `_parseDate` n'accepte que
+     `AAAA-MM-JJ` ou `JJ/MM/AAAA` : « Trimestre 1 » ne devenait jamais une
+     date, aucun point ne se posait sur aucun jour, et « Aucune date d'epreuve
+     renseignee ce mois-ci » s'affichait quoi qu'on ecrive. Le calendrier
+     etait un decor, pas un outil.
+     Une periode et une ECHEANCE sont deux choses : « Trimestre 1 » situe
+     l'epreuve dans l'annee, la date de passation dit quand il faut qu'elle
+     soit prete. On ajoute donc `ep.echeance`, saisie dans un champ de type
+     date — le navigateur impose alors la forme, et il n'y a plus rien a
+     deviner. `ep.date` reste lue en repli pour les epreuves qui portaient
+     deja une vraie date. */
+  _echeanceDe(o){
+    if(!o) return null;
+    return this._parseDate(o.echeance) || this._parseDate(o.date);
+  }
+  /* Jours restants, en JOURS PLEINS : deux dates du meme jour donnent 0,
+     quelle que soit l'heure. Sans cette normalisation, une echeance du jour
+     s'affichait « dans -1 jour » selon l'heure de consultation. */
+  _joursAvant(d){
+    if(!d) return null;
+    const a = new Date(); a.setHours(0,0,0,0);
+    const b = new Date(d); b.setHours(0,0,0,0);
+    return Math.round((b - a) / 86400000);
+  }
+  /* Le ton d'une echeance. Les seuils ne sont pas decoratifs : ils decident
+     de ce qui remonte dans la cloche et de ce qui reste dans la liste. */
+  _urgence(j){
+    if(j === null) return null;
+    if(j < 0)  return {cle:'retard',  libelle:'en retard',      couleur:'var(--cc0392b,#c0392b)', poids:0};
+    if(j === 0) return {cle:'jour',   libelle:"aujourd'hui",    couleur:'var(--cc0392b,#c0392b)', poids:1};
+    if(j === 1) return {cle:'demain', libelle:'demain',         couleur:'var(--cf39200,#f39200)', poids:2};
+    if(j <= 7)  return {cle:'semaine',libelle:'dans '+j+' jours', couleur:'var(--cf39200,#f39200)', poids:3};
+    return {cle:'plus_tard', libelle:'dans '+j+' jours', couleur:'var(--c1a72bb,#1a72bb)', poids:4};
+  }
+  /* Toutes les echeances a venir ou depassees, epreuves ET cours confondus,
+     triees par urgence puis par date. Une seule source pour le calendrier,
+     la liste « A venir » et le compteur de la cloche : trois affichages qui
+     divergeraient s'ils comptaient chacun de leur cote. */
+  _echeances(){
+    const st = this.state;
+    const out = [];
+    const ajouter = (o, genre) => {
+      const d = this._echeanceDe(o);
+      if (!d) return;
+      const j = this._joursAvant(d);
+      const u = this._urgence(j);
+      out.push({id:o.id, titre:o.title || (genre==='cours' ? 'Cours' : 'Épreuve'),
+        genre:genre, date:d, jours:j, urgence:u,
+        fini:(o.status === 'valide')});
+    };
+    (st.epreuves||[]).forEach(e => ajouter(e, 'epreuve'));
+    (st.cours||[]).forEach(c => ajouter(c, 'cours'));
+    /* Ce qui est VALIDE n'a plus d'echeance : le signaler « en retard »
+       reprocherait a l'enseignant un travail qu'il a fini. */
+    return out.filter(x => !x.fini)
+      .sort((a,b) => (a.urgence.poids - b.urgence.poids) || (a.date - b.date));
+  }
   _setQ(f,kind,idx,text){const a=this._active();if(!a)return;const list=this._qList(f,kind);if(idx==null){list.push(text||'Nouvelle question');}else if(text==null){list.splice(idx,1);}else{list[idx]=text;}const cq={...(a.customQ||{})};cq[f.n]={...(cq[f.n]||{comp:this._qList(f,'comp'),expl:this._qList(f,'expl')})};cq[f.n][kind]=list;this._updateActive({customQ:cq},'a modifié les questions ('+(kind==='comp'?'compréhension':'production')+') — texte n°'+f.n);}
   _go(s){this.setState({screen:s,notifOpen:false});if(typeof window!=='undefined')window.scrollTo(0,0);}
   /* Icone en anneau, comme sur la vitrine VERITAS : un cercle au trait fin,
@@ -6699,9 +6764,19 @@ class Component extends DCLogic {
     const calNb=new Date(calAn,calMo+1,0).getDate();
     const calDec=(new Date(calAn,calMo,1).getDay()+6)%7;
     const auj=new Date();
+    /* Les echeances viennent de _echeances() : une seule source pour la
+       grille, la liste « A venir » et le compteur de la cloche. Trois
+       affichages qui compteraient chacun de leur cote finiraient par se
+       contredire — et c'est le genre de desaccord qu'on ne remarque qu'en
+       reunion de departement. */
+    const echeances=this._echeances();
     const evParJour={};
-    st.epreuves.forEach(e=>{const d=this._parseDate(e.date);
-      if(d&&d.getFullYear()===calAn&&d.getMonth()===calMo)(evParJour[d.getDate()]=evParJour[d.getDate()]||[]).push(e);});
+    echeances.forEach(x=>{
+      const d=x.date;
+      if(d&&d.getFullYear()===calAn&&d.getMonth()===calMo){
+        (evParJour[d.getDate()]=evParJour[d.getDate()]||[]).push(x);
+      }
+    });
     const calCases=[];
     for(let i2=0;i2<calDec;i2++)calCases.push({n:'',style:'height:32px',dot:hidden});
     for(let d=1;d<=calNb;d++){
@@ -6709,9 +6784,36 @@ class Component extends DCLogic {
       calCases.push({n:d,dot:evParJour[d]?'display:block;width:4px;height:4px;border-radius:50%;background:'+(estAuj?'var(--cffffff,#fff)':'var(--cf39200,#f39200)')+';margin:1px auto 0':hidden,
         style:'height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;border-radius:8px;font-family:Poppins;'
           +(estAuj?'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);font-weight:700':'color:var(--c3a4658,#3a4658)')});}
-    const calEvents=Object.keys(evParJour).sort((a,b)=>a-b).slice(0,4).map(d=>({
-      dot:'width:7px;height:7px;border-radius:50%;background:var(--cf39200,#f39200);flex:none',
-      label:evParJour[d][0].title||'\u00c9preuve',quand:d+' '+calRef.toLocaleDateString('fr-FR',{month:'short'})}));
+    /* La liste ne se limite plus au mois affiche : ce qui est EN RETARD ou
+       imminent doit se voir meme si l'on feuillette novembre. Une echeance
+       depassee qu'il faut aller chercher dans un autre mois n'alerte
+       personne. Chaque ligne OUVRE son epreuve ou son cours \u2014 une alerte sur
+       laquelle on ne peut pas cliquer oblige a retrouver le travail a la
+       main, et c'est ce qui fait qu'on la remet a plus tard. */
+    const calEvents=echeances.slice(0,5).map(x=>({
+      dot:'width:7px;height:7px;border-radius:50%;background:'+x.urgence.couleur+';flex:none',
+      label:x.titre,
+      quand:x.urgence.libelle,
+      quandStyle:'font-size:11.5px;font-weight:700;font-family:Poppins;color:'
+        +x.urgence.couleur+';white-space:nowrap',
+      ouvrir:()=>this.setState(
+        x.genre==='cours'?{activeCoursId:x.id,screen:'cours'}:{activeId:x.id,screen:'composeur'},
+        ()=>{this._persist();window.scrollTo(0,0);})}));
+    /* Ce que la cloche doit annoncer : depasse, aujourd'hui, demain, ou dans
+       la semaine. Au-dela, ce n'est plus une alerte, c'est un agenda. */
+    const echeancesUrgentes=echeances.filter(x=>x.urgence.poids<=3);
+    /* Elles passent DEVANT l'activite d'equipe dans la cloche : une epreuve a
+       rendre demain compte plus qu'un commentaire d'avant-hier. `unshift` en
+       ordre inverse pour que la plus urgente finisse en tete. */
+    echeancesUrgentes.slice(0,4).reverse().forEach(x=>{
+      notifications.unshift({
+        initials:(x.genre==='cours'?'C':'E'),
+        avatar:'display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;flex:none;'
+          +'font-family:Poppins;font-size:11px;font-weight:700;color:var(--cffffff,#fff);background:'+x.urgence.couleur,
+        text:(x.urgence.cle==='retard'?'est en retard — ':'est à rendre '+x.urgence.libelle+' — ')+'« '+x.titre+' »',
+        ago:x.urgence.libelle,
+        rowBg:'var(--cffffff,#fff)'});
+    });
 
     const resCards=[
       {tile:tuile('var(--ce7f1fb,#e7f1fb)'),icon:this._icon('layers','var(--c1a72bb,#1a72bb)',19),title:'Corpus MINESEC',sub:nbTextes+' textes v\u00e9rifi\u00e9s',open:()=>this._go('liste')},
@@ -7211,7 +7313,13 @@ class Component extends DCLogic {
        equipe et tout echange. On compte le fil courant, et seulement
        les messages qui portent un identifiant (donc les vrais). */
     const nbMsg=(msgsActifs||[]).filter(m=>m&&m.id&&m.userId!==me.id).length;
-    const nbNotif=acts.length;
+    /* Les ECHEANCES entrent dans la cloche, avant l'activite d'equipe. Une
+       epreuve a rendre demain compte plus qu'un commentaire d'avant-hier, et
+       elle ne se signalait NULLE PART : le calendrier ne pouvait rien
+       afficher (il lisait « Trimestre 1 » comme une date) et la cloche ne
+       comptait que l'activite. On ne retient que le depasse et les sept jours
+       qui viennent — au-dela, ce n'est plus une alerte. */
+    const nbNotif=acts.length+echeancesUrgentes.length;
     const creditPct=meLimit>0?Math.max(0,Math.min(100,Math.round((meRemaining/meLimit)*100))):100;
     /* ---- Garde-fou de conformité -------------------------------------
        Recalculé à CHAQUE rendu, sans appel réseau : c'est ce qui en fait un
@@ -7732,8 +7840,8 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       hasAnnots:annList.length>0,annotCount:annList.length,annotList:annList.map((a,i)=>({...a,rowBg:i%2?'var(--cf7f9fc,#f7f9fc)':'var(--cffffff,#fff)',commentStyle:a.comment?'display:block;font-size:13px;color:var(--c3a4658,#3a4658);line-height:1.45;margin-top:3px':hidden})),      hasEpreuves:epreuvesView.length>0,noEpreuves:epreuvesView.length===0,epreuvesView,
       epFilterAll:()=>this.setState({epFilter:'all'}),epFilterMine:()=>this.setState({epFilter:'mine'}),epFilterReview:()=>this.setState({epFilter:'review'}),epFilterLib:()=>this.setState({epFilter:'lib'}),
       epTabAll:tab('all'),epTabMine:tab('mine'),epTabReview:tab('review'),epTabLib:tab('lib'),
-      hasActive:!!active,noActive:!active,ep:{title:ep.title,etab:ep.etab,classe:ep.classe,duree:ep.duree,coeff:ep.coeff,date:ep.date,consigne:ep.consigne,epreuveCode:(active&&active.epreuveCode)||''},
-      setTitle:setField('title'),setEtab:setField('etab'),setClasse:setField('classe'),setDuree:setField('duree'),setCoeff:setField('coeff'),setDate:setField('date'),setConsigne:setField('consigne'),
+      hasActive:!!active,noActive:!active,ep:{title:ep.title,etab:ep.etab,classe:ep.classe,duree:ep.duree,coeff:ep.coeff,date:ep.date,consigne:ep.consigne,epreuveCode:(active&&active.epreuveCode)||'',echeance:(active&&active.echeance)||''},
+      setTitle:setField('title'),setEtab:setField('etab'),setClasse:setField('classe'),setDuree:setField('duree'),setCoeff:setField('coeff'),setDate:setField('date'),setConsigne:setField('consigne'),setEcheance:setField('echeance'),
       natureOptions,
       /* Choisir la nature APPELLE son gabarit : durée et coefficient
          descendent du référentiel MINESEC au lieu d'être retapés. On
