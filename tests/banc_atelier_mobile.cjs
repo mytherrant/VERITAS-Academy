@@ -90,8 +90,24 @@ dire(/text-align:left!important/.test(blocJust),
 dire(/hyphens:none/.test(blocJust), 'et la césure automatique est coupée');
 dire(/main \[style\*="text-align:justify"\]/.test(src),
   'les blocs justifiés EN LIGNE sont couverts aussi — un titre en `inherit` suivait sinon son parent');
-dire(/main \[style\*="text-align:center"\]\{text-align:center!important\}/.test(src),
+dire(/main \[style\*="text-align:center"\][^{]*\{text-align:center!important\}/.test(src),
   'ce qui est explicitement centré le reste');
+/* ⚠️ 28/08/2026 — LE SELECTEUR SANS ESPACE NE MATCHE RIEN.
+   Mesuré dans le navigateur : `[style*="text-align:center"]` renvoie 0
+   élément, `[style*="text-align: center"]` en renvoie 46. Le navigateur
+   NORMALISE l'attribut `style` : ce que le gabarit écrit « text-align:center »
+   est relu « text-align: center ». Toutes les règles à sélecteur d'attribut
+   de ce fichier étaient donc inertes depuis leur écriture — y compris la
+   dé-justification mobile que ce banc croyait vérifier, et le centrage des
+   icônes présenté comme une règle de lecture de toute l'application.
+   Une règle CSS qui ne matche rien ne produit ni erreur ni avertissement :
+   seul un contrôle explicite la rattrape. */
+dire(/\[style\*="text-align: center"\]/.test(src),
+  'et la forme NORMALISÉE par le navigateur est couverte (sans elle, zéro élément)');
+dire(/\[style\*="text-align: justify"\]/.test(src),
+  'idem pour les blocs justifiés en ligne');
+dire(/\[style\*="place-items: center"\]/.test(src),
+  'idem pour le centrage des icônes dans leur pastille');
 
 /* ── ④ᵇ Le conseil qui passe doit se voir ──────────────────────────────── */
 console.log(`\n${G}④ᵇ La bulle d'astuce se remarque et ne masque rien${R}`);
