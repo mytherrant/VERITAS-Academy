@@ -446,3 +446,38 @@ html[data-vrt-theme="sombre"] #VISITOR#VISITOR :is(.card, .vcard, .vsec, .lws-ca
 /* Le suffixe « XAF » reste secondaire, mais lisible (et non plus gris pâle). */
 #VISITOR#VISITOR .vplan-price span,
 .vplan-price span{ color: var(--n500, #3563B4) !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LE BANDEAU DES CORRIGÉS ÉTAIT ILLISIBLE — signalé le 29/08/2026
+
+   « Les corrigés des cahiers VÉRITAS sont en ligne — 6ᵉ à Terminale, en accès
+   libre, sans compte » s'affichait en bleu sombre SUR le bleu du bandeau.
+   Seul l'exposant du « 6ᵉ » restait blanc, ce qui rendait la ligne encore
+   plus étrange : un caractère lisible au milieu d'une phrase qui ne l'est pas.
+   Le bouton « Les consulter » subissait le même sort, contour compris.
+
+   Le thème pose pourtant `color:#fff` sur `.lws-promo` (theme-lws.css). La
+   règle est donc écrasée en aval, et je n'ai pas pu établir PAR QUOI : les
+   serveurs de prévisualisation étaient tombés et la navigation refusée, or ce
+   projet a pour règle de mesurer le rendu plutôt que de déduire des feuilles.
+
+   Cette règle est donc DÉFENSIVE, et assumée comme telle : le fond de ce
+   bandeau est un dégradé bleu foncé écrit en dur ; son texte doit être blanc,
+   quoi qu'en disent les autres feuilles. On vise le conteneur ET ses enfants
+   de texte — un `color` posé sur un descendant l'emporte sur l'héritage,
+   quelle que soit la spécificité du parent, et c'est précisément ce qui rend
+   une correction « sur le bloc » insuffisante ici.
+   ═══════════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR .lws-promo,
+#VISITOR#VISITOR .lws-promo :is(span, b, strong, sup, p, em) {
+  color: #fff !important;
+}
+#VISITOR#VISITOR .lws-promo-cta {
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, .78) !important;
+}
+#VISITOR#VISITOR .lws-promo-cta:hover,
+#VISITOR#VISITOR .lws-promo-cta:focus-visible {
+  background: #fff !important;
+  color: var(--lws-blue, #1E499B) !important;
+}
