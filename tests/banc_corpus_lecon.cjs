@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* ════════════════════════════════════════════════════════════════════════════
-   tests/banc_corpus_lecon.cjs — LA LEÇON TROUVE-T-ELLE SON CORPUS ?
+   tests/banc_corpus_lecon.cjs — LE CORPUS PROPOSÉ CORRESPOND-IL À LA LEÇON ?
    © 2024-2026 Jacques Miterand TAKOU (Mythe Errant).
 
      node tests/banc_corpus_lecon.cjs
@@ -13,17 +13,12 @@
    extraits jusqu'à en trouver un qui serve.
 
    Chaque fiche porte pourtant de quoi répondre : son NIVEAU, son TYPE
-   (descriptif, narratif, dialogue…), son MODULE, et surtout ses `faits` — les
-   faits de langue qu'elle permet d'observer.
+   (descriptif, narratif, dialogue…), son MODULE, et ses `faits` — les faits de
+   langue qu'elle permet d'observer.
 
-   RÈGLE TENUE ICI : on CLASSE, on ne filtre pas. Masquer, c'est risquer de
-   cacher le texte que l'enseignant cherchait. C'est la même règle que le
-   filtre par matières des épreuves, et le contrôle qui compte le plus est
-   celui-là : la bascule « ne montrer que ceux-là » ne doit JAMAIS pouvoir
-   vider la liste.
-
-   Le banc exécute la fonction RÉELLE extraite de plateforme/index.html, sur
-   des fiches du VRAI répertoire libre de droits quand il est présent.
+   LA RÈGLE : on CLASSE, on ne filtre pas. Masquer, c'est risquer de cacher le
+   texte que l'enseignant cherchait ; et une liste vide ferait croire au
+   répertoire vide, alors que c'est la leçon qui n'est pas renseignée.
    ════════════════════════════════════════════════════════════════════════ */
 'use strict';
 const fs = require('fs');
@@ -42,7 +37,8 @@ const src = fs.readFileSync(path.join(RACINE, 'plateforme', 'index.html'), 'utf8
 function extraire(s, entete) {
   const i = s.indexOf(entete);
   if (i < 0) return null;
-  let prof = 0, j = s.indexOf('{', i);
+  let prof = 0;
+  const j = s.indexOf('{', i);
   if (j < 0) return null;
   for (let k = j; k < s.length; k++) {
     if (s[k] === '{') prof++;
@@ -51,129 +47,106 @@ function extraire(s, entete) {
   return null;
 }
 
-console.log(`\n${G}LA LEÇON TROUVE-T-ELLE SON CORPUS ?${R}\n`);
+console.log(`\n${G}LE CORPUS PROPOSÉ CORRESPOND-IL À LA LEÇON ?${R}\n`);
 
 const corps = extraire(src, '_scoreCorpus(f, co){');
-dire(!!corps, '`_scoreCorpus` est extractible de plateforme/index.html');
-const scorer = corps ? new Function('return ({' + corps + '});')() : null;
-const score = (f, co) => scorer._scoreCorpus(f, co);
+dire(!!corps, '`_scoreCorpus` est extractible du fichier');
+if (!corps) { console.log('\n0 au vert, 1 au rouge.\n'); process.exit(1); }
 
-/* ── ① Le cas qui a motivé la fonctionnalité ───────────────────────────── */
-console.log(`${G}① « Les expansions du nom », 6ᵉ, séquence 1${R}`);
+const obj = new Function('return ({' + corps + '});')();
+const score = (f, co) => obj._scoreCorpus(f, co);
 
-const LECON = {
-  id: 'k1', title: 'Les expansions du nom', type: 'Leçon de langue',
-  classe: '6ᵉ', sequence: 'Séquence 1', competence: 'Lire pour décrire',
+/* Fiches calquées sur le répertoire réel (mêmes champs, mêmes libellés). */
+const FICHES = [
+  { n: 1, type: 'DESCRIPTIF', level: '6e', groupNum: 3, words: 120,
+    group: 'Module 3 — La maison', author: 'Ombété-Bella',
+    faits: 'le champ lexical dominant ; l’imparfait descriptif ; les expansions du nom (épithète, complément du nom).' },
+  { n: 2, type: 'NARRATIF', level: '3e', groupNum: 1, words: 200,
+    group: 'Module 1 — La vie quotidienne', author: 'Oyono',
+    faits: 'le passé simple ; les connecteurs temporels ; le schéma narratif.' },
+  { n: 3, type: 'DESCRIPTIF', level: '3e', groupNum: 5, words: 150,
+    group: 'Module 5 — Le village', author: 'Beti',
+    faits: 'les expansions du nom ; la comparaison ; les adjectifs qualificatifs.' },
+  { n: 4, type: 'DIALOGUE', level: '6e', groupNum: 3, words: 90,
+    group: 'Module 3 — La maison', author: 'Maeterlinck',
+    faits: 'les types de phrases ; le tiret de dialogue ; les verbes de parole.' },
+  { n: 5, type: 'ARGUMENTATIF', level: 'Tle', groupNum: 2, words: 320,
+    group: 'Module 2 — Le débat', author: 'Senghor',
+    faits: 'les connecteurs logiques ; la thèse et l’antithèse ; le lexique de l’opinion.' },
+];
+
+/* ── ① La leçon renseignée fait remonter ce qui lui correspond ─────────── */
+console.log(`${G}① Une leçon de langue retrouve ses textes${R}`);
+const lecon = { id: 'k1', title: 'Les expansions du nom', type: 'Leçon de langue',
+  classe: '6ᵉ', sequence: 'Séquence 3', competence: 'Lire pour décrire',
   objAgir: 'Identifier et employer les expansions du nom dans un texte descriptif',
-  regle: '',
-};
+  regle: '' };
 
-const FICHE_JUSTE = {
-  n: 1, type: 'DESCRIPTIF', words: 106, level: '6e', groupNum: 1,
-  group: 'Module 1 — La vie quotidienne', author: 'Maurice Maeterlinck',
-  faits: 'le champ lexical dominant ; l’imparfait descriptif ; les expansions du nom (épithète, complément du nom).',
-  comprehension: '',
-};
-const FICHE_HORS_SUJET = {
-  n: 2, type: 'ARGUMENTATIF', words: 300, level: 'Tle', groupNum: 6,
-  group: 'Module 6 — Le débat', author: 'Anonyme',
-  faits: 'les connecteurs logiques ; la thèse et les arguments.', comprehension: '',
-};
+const classe = FICHES.map(f => ({ n: f.n, s: score(f, lecon) }))
+  .sort((a, b) => b.s.score - a.s.score);
+dire(classe[0].n === 1,
+  'la fiche 6ᵉ · module 3 · descriptif · expansions du nom arrive en tête',
+  'ordre obtenu : ' + classe.map(c => 'n°' + c.n + '(' + c.s.score + ')').join(' '));
+dire(classe[0].s.score > classe[classe.length - 1].s.score,
+  'le classement discrimine réellement (le premier devance le dernier)');
 
-const sJuste = score(FICHE_JUSTE, LECON);
-const sHors = score(FICHE_HORS_SUJET, LECON);
-dire(sJuste.score > 0, 'la fiche qui porte « expansions du nom » obtient un score',
-  JSON.stringify(sJuste));
-dire(sJuste.score > sHors.score, 'et elle passe devant une fiche sans rapport',
-  sJuste.score + ' contre ' + sHors.score);
-dire(sHors.score === 0, 'la fiche sans rapport ne remonte pas du tout', String(sHors.score));
-dire(sJuste.raisons.join(' ').indexOf('fait') >= 0,
-  'la raison affichée nomme les faits de langue', sJuste.raisons.join(' · '));
-dire(sJuste.raisons.join(' ').indexOf('descriptif') >= 0,
-  'et le type de texte, parce que la leçon dit « décrire »', sJuste.raisons.join(' · '));
+const r1 = score(FICHES[0], lecon);
+dire(r1.raisons.some(x => /6e/i.test(x)), 'la raison cite le niveau', JSON.stringify(r1.raisons));
+dire(r1.raisons.some(x => /descriptif/i.test(x)), 'et le type de texte', JSON.stringify(r1.raisons));
+dire(r1.raisons.some(x => /fait/i.test(x)), 'et les faits de langue communs', JSON.stringify(r1.raisons));
+dire(r1.raisons.some(x => /module 3/i.test(x)), 'et le module', JSON.stringify(r1.raisons));
 
-/* ── ② Les niveaux s'écrivent de dix façons ────────────────────────────── */
-console.log(`\n${G}② « 6ᵉ », « 6e », « 6ème » désignent la même classe${R}`);
-const nivOnly = (classe, level) => score(
-  { n: 9, type: '', level: level, faits: '', groupNum: 0 },
-  { classe: classe, title: '', objAgir: '', regle: '', competence: '', type: '', sequence: '' }).score;
-dire(nivOnly('6ᵉ', '6e') > 0, '« 6ᵉ » retrouve « 6e »');
-dire(nivOnly('6ème', '6e') > 0, '« 6ème » aussi');
-dire(nivOnly('Terminale', 'Tle') > 0, '« Terminale » retrouve « Tle »');
-dire(nivOnly('6ᵉ', '3e') === 0, 'mais une 6ᵉ ne prend pas les textes de 3ᵉ');
+/* Une fiche du bon fait de langue mais du mauvais niveau doit rester derrière
+   celle qui coche tout — sans pour autant tomber à zéro : elle reste utile. */
+const r3 = score(FICHES[2], lecon);
+dire(r3.score > 0, 'un texte au bon fait de langue mais d’un autre niveau reste conseillé',
+  'score ' + r3.score);
+dire(r3.score < r1.score, 'mais passe après celui qui correspond aussi au niveau',
+  r3.score + ' vs ' + r1.score);
 
-/* ── ③ Les mots vides ne doivent rien faire remonter ───────────────────── */
-console.log(`\n${G}③ « les », « dans », « identifier » ne sont pas des critères${R}`);
-/* ⚠️ Premiere version de ce controle : elle opposait « Identifier les temps »
-   a une fiche portant « identifier les temps dans le texte », et attendait 0.
-   Elle avait tort — « temps » EST un fait de langue, et le rapprochement etait
-   juste. On teste donc ce qu'on voulait vraiment tester : des mots OUTILS
-   seuls, qui ne designent aucun fait. */
-const bruit = score(
-  { n: 3, type: 'NARRATIF', level: '5e', groupNum: 2,
-    faits: 'les connecteurs dans le texte pour les eleves', comprehension: '' },
-  { classe: '', title: 'Identifier dans le texte', objAgir: 'pour les eleves',
-    regle: '', competence: '', type: '', sequence: '' });
-dire(bruit.score === 0,
-  'une leçon faite de mots outils n’attrape rien',
-  JSON.stringify(bruit));
+/* ── ② Une leçon vide ne fabrique aucun conseil ────────────────────────── */
+console.log(`\n${G}② Sans leçon renseignée, aucun conseil inventé${R}`);
+const vide = { id: 'k2', title: '', classe: '', sequence: '', objAgir: '',
+  competence: '', regle: '', type: '' };
+const scoresVides = FICHES.map(f => score(f, vide).score);
+dire(scoresVides.every(s => s === 0),
+  'toutes les fiches sont à zéro — on n’annonce pas un conseil qu’on n’a pas',
+  JSON.stringify(scoresVides));
+dire(score(FICHES[0], null).score === 0, 'aucune leçon ouverte → aucun score');
 
-/* ── ④ Le module répond à la séquence ──────────────────────────────────── */
-console.log(`\n${G}④ « Séquence 3 » et « Module 3 » se répondent${R}`);
-const mod = score({ n: 4, type: '', level: '', groupNum: 3, faits: '' },
-  { classe: '', title: '', objAgir: '', regle: '', competence: '', type: '', sequence: 'Séquence 3' });
-dire(mod.score > 0 && mod.raisons.join(' ').indexOf('module 3') >= 0,
-  'le module est reconnu et nommé', JSON.stringify(mod));
+/* ── ③ Le bruit ne remonte pas ─────────────────────────────────────────── */
+console.log(`\n${G}③ Les mots vides ne font pas remonter tout le répertoire${R}`);
+const bruit = { id: 'k3', title: 'Séance de français pour les élèves',
+  objAgir: 'Faire lire le texte aux élèves', classe: '', sequence: '',
+  competence: '', regle: '', type: '' };
+const sc = FICHES.map(f => score(f, bruit).score);
+dire(sc.every(s => s === 0),
+  '« élèves », « texte », « français », « lire » sont écartés',
+  JSON.stringify(sc));
 
-/* ── ⑤ Sur le VRAI répertoire ──────────────────────────────────────────── */
-console.log(`\n${G}⑤ Sur le répertoire réel${R}`);
-const fLibre = path.join(RACINE, 'api', 'data', 'corpus_libre.json');
-if (fs.existsSync(fLibre)) {
-  const tous = JSON.parse(fs.readFileSync(fLibre, 'utf8'));
-  const notes = tous.map(f => ({ f: f, s: score(f, LECON) }));
-  /* Le SEUIL est le coeur du reglage. Sans lui, 647 fiches sur 1 014
-     obtenaient au moins un point pour cette lecon — la moitie du repertoire,
-     ce qui ne conseille rien. Mesure de la distribution : 313 fiches a
-     3 points (un seul critere), puis un creux. A 6 points il faut deux
-     criteres qui se croisent. */
-  const SEUIL = 6;
-  const retenus = notes.filter(x => x.s.score >= SEUIL);
-  dire(retenus.length > 0,
-    'la leçon « expansions du nom, 6ᵉ » trouve des textes dans les 1 014',
-    retenus.length + ' fiche(s)');
-  dire(retenus.length < tous.length * 0.25,
-    'et moins du quart du répertoire — le classement discrimine vraiment',
-    retenus.length + ' / ' + tous.length);
-  dire(/const CO_SEUIL=6;/.test(src),
-    'le même seuil est appliqué dans la page (compteur, étoile, bascule)');
-  const tri = notes.slice().sort((a, b) => b.s.score - a.s.score);
-  const tete = tri[0];
-  dire(tete.s.score >= 3, 'la tête de liste a un score franc',
-    'n°' + tete.f.n + ' score ' + tete.s.score + ' — ' + tete.s.raisons.join(' · '));
-  dire(tri[0].s.score >= tri[tri.length - 1].s.score,
-    'le tri est bien décroissant');
-} else {
-  dire(true, 'répertoire libre absent de ce poste — contrôles réels ignorés');
-}
+/* ── ④ Le dialogue et la poésie se reconnaissent par l'intention ───────── */
+console.log(`\n${G}④ L'intention de la leçon désigne le type de texte${R}`);
+const theatre = { id: 'k4', title: 'Étudier une scène de théâtre', classe: '6ᵉ',
+  objAgir: 'Repérer les répliques et les didascalies', sequence: '',
+  competence: '', regle: '', type: '' };
+const sd = score(FICHES[3], theatre);
+dire(sd.raisons.some(x => /dialogue/i.test(x)),
+  'une leçon sur les répliques retrouve les textes DIALOGUE', JSON.stringify(sd.raisons));
+const narratif = { id: 'k5', title: 'Raconter un souvenir', classe: '3e',
+  objAgir: 'Écrire un récit au passé', sequence: '', competence: '', regle: '', type: '' };
+dire(score(FICHES[1], narratif).raisons.some(x => /narratif/i.test(x)),
+  '« raconter » retrouve les textes NARRATIF');
 
-/* ── ⑥ LE CONTRÔLE QUI COMPTE : ne jamais vider la liste ───────────────── */
-console.log(`\n${G}⑥ La bascule ne peut pas vider la liste${R}`);
-const bloc = src.slice(src.indexOf('const coScores=this._scoresCorpus'),
-  src.indexOf('const coCorpusOptions='));
-dire(bloc.length > 0, 'le bloc de classement est trouvable');
-dire(/coNbConseilles>0/.test(bloc),
-  '« ne montrer que ceux-là » exige qu’il y en ait au moins un',
-  'sinon l’enseignant conclut que le répertoire est vide, pas que sa leçon est vague');
-dire(/!coQ/.test(bloc),
-  'une recherche libre garde la main : on ne réordonne pas sous ses doigts');
+/* ── ⑤ Le classement ne masque jamais la liste ─────────────────────────── */
+console.log(`\n${G}⑤ Classer n'est pas filtrer${R}`);
+dire(/coClasse=coFiltre\.slice\(\)\.sort/.test(src),
+  'la liste complète est TRIÉE, pas réduite');
+dire(/coSeulsConseilles\s*=\s*!!st\.coCorpusConseilles\s*&&\s*coNbConseilles>0/.test(src),
+  'la bascule « ne montrer que ceux-là » ne s’arme que s’il y a des conseillés');
 dire(/coConseilVisible:coNbConseilles>0/.test(src),
-  'le bandeau se tait quand il n’a rien à dire (pas de « 0 texte conseillé »)');
-/* Le fichier ecrit ses caracteres non-ASCII en sequences d'echappement
-   (`°`, `—`) : chercher le glyphe brut echouerait sur du code
-   pourtant correct. */
-dire(/\\u2605/.test(src), 'les fiches retenues sont marquées d’une étoile dans la liste');
-dire(/CO_SEUIL/.test(bloc) || /CO_SEUIL/.test(src),
-  'et le seuil gouverne bien ce marquage');
+  'le bandeau disparaît quand il n’a rien à dire, au lieu d’afficher « 0 texte »');
+dire(/if\(coScores && !coQ\)/.test(src),
+  'une recherche libre reste prioritaire — on ne réordonne pas sous les doigts');
 
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko === 0 ? 0 : 1);

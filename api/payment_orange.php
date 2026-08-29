@@ -151,8 +151,12 @@ if ($action === 'notify' && $method === 'POST') {
     $txnId       = $data['txnid']       ?? '';
 
     // Log brut pour debug
-    @file_put_contents($stateDir . '_webhook_log.txt',
-        date('c') . ' | ' . $payload . "\n", FILE_APPEND);
+    /* Journal BORNE. Ce webhook est PUBLIC et recopiait le payload recu en
+       entier, sans aucun plafond : quiconque connait l'URL pouvait faire
+       grossir un fichier du serveur autant qu'il voulait. Sur le mutualise,
+       un quota atteint met TOUT le site en 500, pages statiques comprises. */
+    vrt_log_borne($stateDir . '_webhook_log.txt',
+        date('c') . ' | ' . substr($payload, 0, 4000));
 
     if (!$ref) {
         http_response_code(400);

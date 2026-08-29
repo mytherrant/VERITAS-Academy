@@ -169,8 +169,10 @@ if ($action === 'notify' && ($method === 'POST' || $method === 'PUT')) {
     $data    = json_decode($payload, true) ?: [];
     $ref     = $_GET['ref'] ?? ($data['externalId'] ?? '');
 
-    @file_put_contents($stateDir . '_webhook_mtn_log.txt',
-        date('c') . ' | ref=' . $ref . ' | ' . $payload . "\n", FILE_APPEND);
+    /* Journal BORNE, meme raison que pour Orange Money : webhook public,
+       payload recopie en entier, aucun plafond. */
+    vrt_log_borne($stateDir . '_webhook_mtn_log.txt',
+        date('c') . ' | ref=' . $ref . ' | ' . substr($payload, 0, 4000));
 
     if (!$ref) {
         http_response_code(400);

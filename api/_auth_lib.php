@@ -1369,10 +1369,52 @@ if (!defined('VRT_AUTH_LIB')) {
         return $out;
     }
 
-    /** Journal des décisions d'argent prises côté serveur (hors webhook log). */
+    /** Journal des décisions d'argent prises côté serveur (hors webhook log).
+     *
+     * ⚠️ IL N'AVAIT AUCUNE BORNE, et c'était le seul. Mesuré le 28/08/2026 :
+     * 383,8 Ko, contre 14,1 Ko pour le deuxième journal du dossier — vingt-sept
+     * fois plus. Tous les autres se tronquent (db.php à 1 000 lignes,
+     * camerpayLog à 1 Mo, la sentinelle, le proxy IA) ; celui-ci grossissait
+     * seul, à chaque décision d'argent, sans que rien ne le rattrape.
+     *
+     * Ce que cela coûte n'est pas le disque : c'est le SITE. L'hébergement est
+     * mutualisé, et un quota atteint met tout en erreur 500 — y compris les
+     * pages statiques qui n'ont rien à voir avec les paiements. Le projet
+     * connaît déjà ce raisonnement, il est écrit tel quel dans la rotation des
+     * sauvegardes de `vrt_grant_entitlement_to_file`.
+     *
+     * Même motif que camerpayLog, avec un plafond plus bas : ces lignes sont
+     * courtes et 512 Ko en couvrent des milliers. On garde la moitié la plus
+     * récente — un journal d'argent sert à comprendre ce qui vient de se
+     * passer, l'archivage durable est l'affaire des fichiers d'état, qui, eux,
+     * portent le verdict de chaque transaction.
+     */
     function vrt_pay_log(string $ligne): void {
-        @file_put_contents(__DIR__ . '/data/_commissions_log.txt',
-            date('c') . ' ' . $ligne . "\n", FILE_APPEND | LOCK_EX);
+        vrt_log_borne(__DIR__ . '/data/_commissions_log.txt', date('c') . ' ' . $ligne);
+    }
+
+    /**
+     * Journal qui ne peut pas remplir le disque. Au-delà de $max octets, on ne
+     * garde que la moitié la plus récente.
+     *
+     * Écrit une fois ici plutôt que recopié dans chaque endpoint : le motif
+     * existait déjà dans db.php (1 000 lignes), camerpayLog (1 Mo), la
+     * sentinelle et le proxy IA — mais PAS dans les journaux de webhook
+     * d'Orange Money et de MTN MoMo, qui recopient le payload REÇU en entier.
+     * Ces deux endpoints sont publics et non authentifiés au sens HTTP :
+     * quiconque connaît l'URL peut donc faire grossir un fichier du serveur
+     * autant qu'il veut. Sur un hébergement mutualisé, un quota atteint ne
+     * casse pas seulement le paiement : il met TOUT le site en erreur 500,
+     * pages statiques comprises.
+     */
+    function vrt_log_borne(string $fichier, string $ligne, int $max = 524288): void {
+        if (@filesize($fichier) > $max) {
+            $garde = @file_get_contents($fichier, false, null, (int) ($max / 2));
+            if ($garde !== false) {
+                @file_put_contents($fichier, "... [journal tronque] ...\n" . $garde, LOCK_EX);
+            }
+        }
+        @file_put_contents($fichier, $ligne . "\n", FILE_APPEND | LOCK_EX);
     }
 
     /**
