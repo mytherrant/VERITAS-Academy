@@ -96,6 +96,38 @@ if (!fs.existsSync(vitrine)) {
 console.log('\n  Détail réel par niveau :');
 for (const [k, n] of Object.entries(reel)) console.log(`    ${k.padEnd(6)} ${n}`);
 
+/* ── L'HISTOIRE DU CENTRE NE S'INVENTE PAS ────────────────────────────────
+   Trouvé le 29/08/2026 dans la section « Notre Histoire » de l'application :
+   un sous-titre « 20 ans d'excellence » ÉCRIT EN DUR, au-dessus d'une frise
+   elle aussi en dur qui datait la fondation de 2023 — trois ans, pas vingt.
+   La frise contenait deux entrées « 2023 », un « statut d'établissement agréé
+   par le MINESEC » affirmé pour 2024 (une affirmation réglementaire qu'on
+   n'invente pas), et une « adaptation aux cours à distance pendant la période
+   COVID-19 » datée de 2024 — le COVID est de 2020.
+   Ces deux blocs viennent désormais de l'administration
+   (`publicInfo.histoireSous`, `publicInfo.jalons`) et ne s'affichent pas tant
+   qu'elle n'a rien écrit. */
+{
+  const appjs = fs.readFileSync(path.join(RACINE, 'app.js'), 'utf8');
+  console.log('\n\x1b[1mL’HISTOIRE DU CENTRE EST-ELLE ÉCRITE PAR LE CENTRE ?\x1b[0m\n');
+  t(!/20 ans d.excellence au service/.test(appjs),
+    '« 20 ans d’excellence » n’est plus écrit en dur (ni sa traduction)');
+  t(!/Fondation du centre","Ouverture avec 15/.test(appjs),
+    'la frise inventée a disparu');
+  t(!/agréé par le MINESEC/.test(appjs),
+    'plus aucun agrément MINESEC affirmé dans le code');
+  t(!/COVID-19/.test(appjs) || !/2024","Innovation/.test(appjs),
+    'plus de COVID daté de 2024');
+  t(/pi\.histoireSous/.test(appjs),
+    'le sous-titre vient de l’administration');
+  t(/pi\.jalons/.test(appjs) && /if\(!_j\.length\) return ''/.test(appjs),
+    'la frise vient de l’administration, et disparaît quand elle est vide');
+  t(/cms_histoireSous/.test(appjs) && /cms_jalons/.test(appjs),
+    'les deux champs sont éditables — retirer sans donner de quoi remplacer serait pire');
+  t(/DB\.publicInfo\.jalons=String\(_jel\.value/.test(appjs),
+    'et la saisie des jalons est bien enregistrée');
+}
+
 console.log('\n' + '─'.repeat(68));
 if (echecs) {
   console.log(`  \x1b[31m\x1b[1m${echecs} échec(s) — un chiffre annoncé n’est adossé à rien.\x1b[0m`);

@@ -5419,13 +5419,39 @@ function vShowSec(sec,btn,_boot){
     c.innerHTML=`<div class="vsec">
     <div class="acc-head">
       <h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-compass"/></svg></span> Notre Histoire</h2>
-      <div class="acc-sub">20 ans d'excellence au service des élèves camerounais</div>
+      <!-- « 20 ans d'excellence » etait ecrit en dur, au-dessus d'une frise
+           qui datait la fondation de 2023 — trois ans, pas vingt. Le
+           sous-titre vient maintenant de l'administration, et rien ne
+           s'affiche tant qu'elle n'a rien ecrit. -->
+      <div class="acc-sub">${_esc(pi.histoireSous||'')}</div>
     </div>
     <div class="vcard mb20">
       <div style="font-size:14px;line-height:2;white-space:pre-line;color:var(--ink2)">${_esc(pi.histoire||"")}</div>
     </div>
     <div class="g3">
-      ${[["2023","Fondation du centre","Ouverture avec 15 élèves et 3 enseignants dans une salle de classe louée"],["2023","Fondation","Construction de nouveaux locaux et recrutement de 8 enseignants supplémentaires"],["2024","Première année","Obtention du statut d\'établissement d\'enseignement agréé par le MINESEC"],["2024","Croissance","Introduction des outils numériques dans les pratiques pédagogiques"],["2024","Innovation","Adaptation aux cours à distance pendant la période COVID-19"],["2025","Aujourd\'hui",`${DB.students.length} élèves, ${DB.teachers.length} enseignants, taux de réussite > 85%`]].map(([an,t,d])=>`<div class="vcard" style="background:linear-gradient(135deg,#fff 0%,#E0EAFF 100%);border-radius:14px"><div style="font-family:Georgia,serif;font-size:18px;color:var(--gold);font-weight:700">${an}</div><div class="semi s mt8 mb4">${t}</div><div style="font-size:13px;color:var(--ink4)">${d}</div></div>`).join("")}
+      ${(function(){
+        /* ⚠️ FRISE HISTORIQUE : elle etait ECRITE EN DUR, et fausse.
+           Deux entrees « 2023 » dont l'une intitulee « Fondation du centre »
+           et l'autre « Fondation » ; un « statut d'etablissement agree par le
+           MINESEC » affirme pour 2024 — une affirmation reglementaire lourde
+           qu'on ne peut pas inventer ; et une « adaptation aux cours a
+           distance pendant la periode COVID-19 » datee de 2024, alors que le
+           COVID est de 2020. Le tout sous un sous-titre « 20 ans
+           d'excellence » au-dessus d'une fondation datee de 2023.
+           Regle du projet : base vide => rien affiche. On n'invente ni
+           activite ni statistique, et surtout pas un agrement.
+           Les jalons viennent desormais de DB.publicInfo.jalons, que
+           l'administration remplit. Vide, la frise ne s'affiche pas : le
+           texte libre « Notre histoire », lui, reste au-dessus. */
+        var _j = (pi.jalons||[]).filter(function(x){ return x && (x.an||x.titre||x.texte); });
+        if(!_j.length) return '';
+        return _j.map(function(x){
+          return '<div class="vcard"><div style="font-weight:800;color:var(--bl);font-size:13px">'
+            + _esc(x.an||'') + '</div><div style="font-weight:700;margin:4px 0 6px">'
+            + _esc(x.titre||'') + '</div><div style="font-size:13px;color:var(--ink2);line-height:1.6">'
+            + _esc(x.texte||'') + '</div></div>';
+        }).join('');
+      })()}
     </div>
     </div>`;
   } else if(sec==="photos"){
@@ -12008,7 +12034,10 @@ function pgCMS(){
       <button class="btn bi sm mt8" onclick="saveCMS('presentation')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>
     </div>
     <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-bookopen"/></svg></span>Histoire</div>
+      <div class="fg mb10"><span class="fl">Sous-titre affiché aux visiteurs</span><input class="fi" id="cms_histoireSous" value="${_esc(pi.histoireSous||'')}" placeholder="Laissez vide si vous n'avez rien à annoncer"></div>
       <div class="fg mb10"><span class="fl">Texte de l\'histoire</span><textarea class="fi" id="cms_histoire" rows="6">${pi.histoire||''}</textarea></div>
+      <div class="fg mb10"><span class="fl">Jalons — une ligne par étape : <code>année | titre | description</code></span><textarea class="fi" id="cms_jalons" rows="5" placeholder="2023 | Ouverture du centre | Premiers élèves accueillis">${_esc((pi.jalons||[]).map(function(x){return [x.an||'',x.titre||'',x.texte||''].join(' | ');}).join('\n'))}</textarea>
+        <div class="ib ibi mt8"><span>💡</span><span>La frise ne s\'affiche que si vous écrivez quelque chose ici. Elle contenait auparavant des étapes inventées — dont un agrément MINESEC et le COVID daté de 2024.</span></div></div>
       <div class="fg mb10"><span class="fl">Équipe pédagogique</span><input class="fi" id="cms_equipe" value="${pi.equipe||''}"></div>
       <button class="btn bi sm mt8" onclick="saveCMS('histoire')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>
     </div>
@@ -12064,7 +12093,17 @@ function saveCMS(section){
     var bpEl=document.getElementById('cms_bp');
     if(bpEl)DB.school.bp=bpEl.value.trim();
   }else if(section==='histoire'){
-    ['histoire','equipe'].forEach(k=>{const el=document.getElementById('cms_'+k);if(el)DB.publicInfo[k]=el.value;});
+    ['histoire','equipe','histoireSous'].forEach(k=>{const el=document.getElementById('cms_'+k);if(el)DB.publicInfo[k]=el.value;});
+    /* Les jalons se saisissent en texte, une etape par ligne : « annee | titre
+       | description ». On ne garde que les lignes qui portent quelque chose —
+       une ligne vide ne doit pas produire une carte vide sur la vitrine. */
+    var _jel=document.getElementById('cms_jalons');
+    if(_jel){
+      DB.publicInfo.jalons=String(_jel.value||'').split(/\r?\n/).map(function(l){
+        var p2=l.split('|').map(function(x){return x.trim();});
+        return {an:p2[0]||'',titre:p2[1]||'',texte:p2[2]||''};
+      }).filter(function(x){return x.an||x.titre||x.texte;});
+    }
   }else if(section==='resultats'){
     (DB.examResults||[]).forEach((er,ei)=>{
       var annEl=document.getElementById('cms_er_annee_'+ei);
@@ -34666,8 +34705,10 @@ window.I18N_SUBS_EN = {
     "Professor Ambassa, your AI tutor: quizzes, marking schemes, revision sheets and graded tests — 100% free.",
   // Sections visiteur courantes
   "Bienvenue au VÉRITAS Academy": "Welcome to VÉRITAS Academy",
-  "20 ans d'excellence au service des élèves camerounais":
-    "Two decades of excellence in service of Cameroonian learners",
+  /* La phrase source a été retirée le 29/08/2026 : « 20 ans d'excellence »
+     s'affichait au-dessus d'une frise qui datait la fondation de 2023. Sa
+     traduction part avec elle — une entrée orpheline finit toujours par être
+     recopiée ailleurs par quelqu'un qui la croit encore utilisée. */
   "Découvrez la vie au Centre VÉRITAS": "Discover life at Centre VÉRITAS",
   "Taux de réussite de nos élèves aux examens BEPC et BAC":
     "Our students' pass rates at the BEPC and BAC exams",
