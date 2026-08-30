@@ -1286,6 +1286,68 @@ jobs:
             echo "   Aucune version résiduelle — tous les assets partagent $VER."
           fi
 
+      # ═══════════════════════════════════════════════════════════════════════
+      # UN DÉPLOIEMENT PEUT EFFACER LE SITE. LE 30/08, IL L'A FAIT.
+      #
+      # `dangerous-clean-slate` est à false, mais l'action FTP retire quand
+      # même du serveur tout fichier qu'elle y avait déposé et qui a disparu
+      # du dossier `deploy/`. C'est voulu : une page retirée du dépôt doit
+      # quitter la production.
+      #
+      # Le piège, c'est la RÉFÉRENCE. Un `gh workflow run deploy.yml` sans
+      # `--ref` part sur la branche par défaut. Ce jour-là elle avait cinquante
+      # commits de retard : le dossier `deploy/` construit à partir d'elle ne
+      # contenait ni l'inscription (`api/compte.php`), ni le lecteur des
+      # cahiers PAYÉS (`livrets/cahier.html`), ni le plan du site. L'action a
+      # donc fait exactement son travail — elle les a effacés de la production.
+      #
+      # Aucune garde écrite dans CE fichier n'aurait pu l'empêcher : une
+      # référence périmée emporte AUSSI son workflow périmé, donc ses gardes
+      # périmées. La seule autorité qu'une référence ne peut pas périmer, c'est
+      # la production elle-même. On l'interroge donc directement : si le site
+      # sert aujourd'hui une page que ce build n'a pas, ce build l'effacerait.
+      #
+      # 404 = absent. 000 ou 5xx = on ne sait pas, on le dit sans bloquer.
+      # Tout le reste (200, 403 d'un dossier protégé, 405 d'un endpoint en
+      # POST) = servi, donc à ne pas perdre.
+      # ═══════════════════════════════════════════════════════════════════════
+      - name: 🛑 Ce déploiement effacerait-il des pages servies ?
+        run: |
+          UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          # Un témoin par famille ajoutée au fil des mois — c'est-à-dire par
+          # famille qu'une référence périmée ne connaîtrait pas.
+          TEMOINS="index.html app.html plan.html vitrine.html
+                   api/compte.php api/livret.php api/public_data.php api/db.php
+                   livrets/cahier.html livrets/gate.js
+                   plateforme/index.html
+                   corriges/index.html oeuvres/index.html ressources/index.html
+                   assets/vitrine.js app.js app.css sw.js"
+          PERDUS=""; MUETS=0; VUS=0
+          for f in $TEMOINS; do
+            C=$(curl -s -o /dev/null --max-time 20 --ssl-no-revoke                      -A "$UA" -H 'Accept: text/html' -H 'Accept-Language: fr-FR'                      -w '%{http_code}' "https://veritas-school.com/$f?_ci=$GITHUB_RUN_ID" || echo 000)
+            case "$C" in
+              404)          continue ;;                       # pas servi : rien à perdre
+              000|5*)       MUETS=$((MUETS+1)); continue ;;    # site injoignable : on ne décide pas
+            esac
+            VUS=$((VUS+1))
+            [ -f "deploy/$f" ] || PERDUS="$PERDUS $f ($C)"
+          done
+          if [ "$VUS" = "0" ]; then
+            echo "::warning title=Production injoignable::Aucun témoin n'a pu être lu ($MUETS muets). Le déploiement continue sans ce contrôle."
+            exit 0
+          fi
+          if [ -n "$PERDUS" ]; then
+            echo "::error title=Ce déploiement EFFACERAIT des pages en ligne::La production sert ces fichiers, ce build ne les a pas :$PERDUS"
+            echo ""
+            echo "  Vous déployez très probablement une référence périmée."
+            echo "  Relancez en la nommant :  gh workflow run deploy.yml --ref <votre-branche>"
+            echo "  Si ces pages doivent vraiment disparaître, retirez-les de cette liste"
+            echo "  de témoins dans le même commit que leur suppression."
+            exit 1
+          fi
+          echo "   $VUS témoin(s) servi(s) en ligne, tous présents dans ce build — rien ne sera effacé."
+          [ "$MUETS" = "0" ] || echo "   ($MUETS témoin(s) sans réponse, non comptés.)"
+
       - name: 🚀 Déployer via FTP vers veritas-school.com
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
