@@ -92,10 +92,36 @@ PROFILS = [
 
 
 def compter(dossier):
-    """Nombre de pages HTML réellement publiées dans une zone."""
+    """Nombre de pages qui seront RÉELLEMENT EN LIGNE dans une zone.
+
+    On compte ce que git suit, PAS ce qui traîne sur le poste. Les deux
+    diffèrent : le 30/08/2026, quatre corrigés en cours de rédaction (deux
+    modules de 4ᵉ, deux séquences de Terminale) étaient présents sur la machine
+    et volontairement non versionnés — donc jamais déployés. Compter le disque
+    faisait annoncer « 93 corrigés » pour 89 réellement servis, et la CI l'a
+    refusé, à juste titre.
+
+    C'est la règle du projet dans sa formulation exacte : un chiffre annoncé se
+    recompte depuis le contenu PUBLIÉ. Un brouillon sur un poste n'est pas du
+    contenu publié.
+
+    Repli sur le disque si git est indisponible (archive téléchargée, runner
+    sans historique) : mieux vaut un compte approché qu'une page vide.
+    """
     chemin = os.path.join(RACINE, dossier)
     if not os.path.isdir(chemin):
         return 0
+    try:
+        import subprocess
+        sortie = subprocess.run(
+            ['git', 'ls-files', dossier + '/'],
+            cwd=RACINE, capture_output=True, text=True, timeout=30)
+        if sortie.returncode == 0:
+            suivis = [l for l in sortie.stdout.split('\n') if l.endswith('.html')]
+            if suivis:
+                return len(suivis)
+    except Exception:
+        pass
     n = 0
     for r, _, fs in os.walk(chemin):
         n += sum(1 for f in fs if f.endswith('.html'))

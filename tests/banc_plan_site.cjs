@@ -64,10 +64,18 @@ function compter(zone) {
   })(d);
   return n;
 }
-const nCorriges = compter('corriges');
-dire(nCorriges > 0, 'les corrigés existent bien sur le disque', String(nCorriges));
-dire(new RegExp('>' + nCorriges + ' pages?<').test(plan),
-  'le plan annonce le nombre RÉEL de corrigés (' + nCorriges + ')',
+/* Ce qui sera SERVI, c'est ce que git suit — pas ce qui est sur le poste. */
+function versionnee(zone) {
+  try {
+    return require('child_process')
+      .execFileSync('git', ['ls-files', zone + '/'], { cwd: RACINE, encoding: 'utf8' })
+      .split('\n').filter(l => l.endsWith('.html')).length;
+  } catch (e) { return compter(zone); }
+}
+const versionnees = versionnee('corriges');
+dire(versionnees > 0, 'des corrigés sont bien versionnés', String(versionnees));
+dire(new RegExp('>' + versionnees + ' pages?<').test(plan),
+  'le plan annonce le nombre RÉELLEMENT DÉPLOYÉ de corrigés (' + versionnees + ')',
   (plan.match(/>\d+ pages?</g) || []).slice(0, 6).join(' '));
 
 /* ── ② Aucun lien mort ─────────────────────────────────────────────────── */
@@ -75,9 +83,32 @@ console.log(`\n${G}② Chaque lien mène quelque part${R}`);
 const liens = [...new Set((plan.match(/href="\/[^"]*"/g) || [])
   .map(h => h.slice(7, -1)))];
 dire(liens.length >= 15, 'le plan porte au moins quinze destinations', String(liens.length));
+/* `app.html` n'est PAS dans le dépôt : la CI le produit en copiant
+   VERITAS_v1.2.html au moment du déploiement. Un contrôle qui exigerait sa
+   présence ici échouerait sur le runner tout en passant sur le poste du
+   développeur — le pire des deux mondes. On vérifie donc sa SOURCE. */
+const GENERES = { 'app.html': 'VERITAS_v1.2.html' };
 const morts = liens.map(u => u.split('#')[0].replace(/^\//, ''))
-  .filter(c => c && !fs.existsSync(path.join(RACINE, c)));
+  .filter(c => {
+    if (!c) return false;
+    const cible = GENERES[c] || c;
+    return !fs.existsSync(path.join(RACINE, cible));
+  });
 dire(morts.length === 0, 'aucune ne pointe dans le vide', morts.join(', '));
+
+/* ⚠️ LE PLAN ANNONCE CE QUI SERA EN LIGNE, PAS CE QUI TRAÎNE SUR LE POSTE.
+   Le 30/08/2026, quatre corrigés de cahiers Bord en cours de rédaction (deux
+   modules de 4ᵉ, deux séquences de Terminale) étaient présents sur la machine
+   et volontairement non versionnés. Le plan, qui comptait le disque, annonçait
+   « 93 corrigés » là où 89 seulement seraient servis. La CI l'a refusé — et
+   elle avait raison : un travail en cours n'est pas du contenu publié.
+   Le générateur compte donc `git ls-files`, et ce contrôle le vérifie. */
+const surDisque = compter('corriges');
+if (versionnees !== surDisque) {
+  dire(!new RegExp('>' + surDisque + ' pages?<').test(plan),
+    'un brouillon non versionné n’est PAS annoncé au plan',
+    surDisque + ' sur le disque, ' + versionnees + ' versionnées');
+}
 
 /* ── ③ Rien d'oublié ───────────────────────────────────────────────────── */
 console.log(`\n${G}③ Aucune zone publiée n'est laissée de côté${R}`);
