@@ -26299,7 +26299,14 @@ function _monCompte(){
     +"<div class='fg full'><span class='fl'>Abonnements actifs</span><div style='margin-top:8px'>"+planHTML+"</div></div>"
     +segHTML
     +"</div>",
+    /* « Mon espace » : la SEULE porte vers _espacePerso pour un élève.
+       Les cinq appels existants ne concernent que parent, enseignant et
+       partenaire — l'élève, qui est pourtant le public principal, n'y
+       accédait par aucun chemin. On ne change pas sa page d'arrivée (il
+       continue d'atterrir sur l'accueil, ce qui est voulu) : on lui ouvre
+       une porte, là où il vient déjà voir son compte. */
     "<button class='btn bo' onclick='cm()'>Fermer</button>"
+    +"<button class='btn bo' onclick='cm();_espacePerso((SES&&SES.role)||\"eleve\")'><svg class='vico bico' aria-hidden='true'><use href='#lc-compass'/></svg>Mon espace</button>"
     +"<button class='btn bi' onclick='mRapportParent()'><svg class='vico bico' aria-hidden='true'><use href='#lc-smartphone'/></svg>Rapport au parent</button>",true);
 }
 
@@ -46287,6 +46294,91 @@ window._mesMatieresSave = async function(){
   if(typeof _espacePerso==='function') _espacePerso('enseignant');
 };
 
+/* ═══ CE QUE LE SITE PUBLIE, RANGÉ PAR PROFIL — DANS L'APPLICATION ════════
+   Mesuré sur la page d'accueil servie : le mot « corrigé » y figure 139 fois
+   et aucun lien n'y mène. Le plan public (plan.html) répare cela pour le
+   visiteur ; il restait le CONNECTÉ, qui n'a aucune raison de retourner sur
+   la page d'accueil pour retrouver les œuvres au programme ou les épreuves
+   blanches.
+   Cette table est le miroir de celle du plan (tools/build_plan.py) : les deux
+   doivent proposer la même chose, et tests/banc_espaces_profil.cjs le
+   vérifie. Un même service apparaît sous CHAQUE profil qu'il concerne —
+   l'élève qui révise et l'enseignant qui prépare cherchent les mêmes
+   corrigés, chacun chez lui.
+   `n` est le nombre de pages : il n'est pas écrit ici mais lu à l'affichage
+   quand l'information existe, pour ne jamais annoncer un compte périmé. */
+window.VERITAS_ACCES = [
+  {u:'/corriges/',           t:'Corrigés des cahiers',    i:'lc-check',
+   d:'Chaque exercice corrigé et expliqué, en accès libre.',
+   p:['eleve','enseignant','parent']},
+  {u:'/oeuvres/',            t:'Œuvres au programme',     i:'lc-book',
+   d:'Analyse, résumé, personnages, mouvement littéraire, citations.',
+   p:['eleve','enseignant']},
+  {u:'/niveaux/',            t:'Le programme par niveau', i:'lc-graduation',
+   d:'Ce qu’il faut savoir en fin d’année, de la 6ᵉ à la Terminale.',
+   p:['eleve','parent','enseignant']},
+  {u:'/evaluations/',        t:'Évaluations et épreuves blanches', i:'lc-clipboard',
+   d:'Situer son niveau et repérer ce qui manque avant l’examen.',
+   p:['eleve','parent']},
+  {u:'/cours/',              t:'Cours rédigés',           i:'lc-bookopen',
+   d:'La leçon écrite, pour reprendre ce qui n’a pas été compris.',
+   p:['eleve','enseignant']},
+  {u:'/outils/',             t:'Outils',                  i:'lc-tool',
+   d:'Calculs, conversions et aides de travail.',
+   p:['eleve','enseignant']},
+  {u:'/livrets/',            t:'Livrets interactifs',     i:'lc-edit',
+   d:'Le cahier qu’on remplit à l’écran, avec correction immédiate.',
+   p:['eleve','parent']},
+  {u:'/parcours/',           t:'Parcours de révision',    i:'lc-compass',
+   d:'Un chemin ordonné plutôt qu’une pile de documents.',
+   p:['eleve','parent']},
+  {u:'/plateforme/',         t:'Atelier de Français',     i:'lc-presentation',
+   d:'Composer épreuves et leçons conformes au programme.',
+   p:['enseignant']},
+  {u:'/manuels.html',        t:'Les manuels',             i:'lc-book',
+   d:'Les ouvrages du centre, leur sommaire et leur usage en classe.',
+   p:['enseignant','parent','partenaire']},
+  {u:'/adopter/',            t:'Adopter les cahiers',     i:'lc-building',
+   d:'Pour un établissement qui veut équiper ses classes.',
+   p:['enseignant','partenaire']},
+  {u:'/constellation.html',  t:'La Constellation VÉRITAS',i:'lc-sparkles',
+   d:'Tout ce que le centre publie, réuni sur une seule carte.',
+   p:['eleve','parent','enseignant','partenaire']},
+  {u:'/plan.html',           t:'Plan du site par profil', i:'lc-list',
+   d:'Tout VÉRITAS, rangé selon qui vous êtes.',
+   p:['eleve','parent','enseignant','partenaire']}
+];
+
+/* Rend la grille des accès d'un profil. Vide si le profil n'est pas connu :
+   une section « Tout ce qui vous concerne » suivie de rien serait pire que
+   pas de section du tout. */
+window._accesProfilHtml = function(role){
+  var lot = (window.VERITAS_ACCES||[]).filter(function(a){
+    return (a.p||[]).indexOf(role) >= 0;
+  });
+  if(!lot.length) return '';
+  var h = '<div style="margin:26px 0 8px">'
+    + '<div style="font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;'
+    +   'color:var(--r-encre,#16233F);margin-bottom:3px">Tout ce qui vous concerne</div>'
+    + '<div style="font-size:12.5px;color:var(--ink3,#64748B);margin-bottom:13px">'
+    +   'En accès libre, sans compte — vous pouvez partager ces liens.</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:11px">';
+  lot.forEach(function(a){
+    h += '<a href="'+a.u+'" target="_blank" rel="noopener" '
+      + 'style="display:flex;gap:10px;align-items:flex-start;background:#fff;'
+      +   'border:1px solid var(--r-ligne,#E4E9F2);border-radius:12px;padding:13px 14px;'
+      +   'text-decoration:none;transition:transform .15s,box-shadow .15s" '
+      + 'onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 10px 22px rgba(12,42,106,.10)\'" '
+      + 'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">'
+      + '<span style="color:var(--bl,#1E499B);flex:0 0 auto">'+ICO(a.i)+'</span>'
+      + '<span style="flex:1;min-width:0">'
+      +   '<span style="display:block;font-weight:700;font-size:13.5px;color:var(--r-encre,#16233F)">'+_esc(a.t)+'</span>'
+      +   '<span style="display:block;font-size:12px;color:var(--ink3,#64748B);line-height:1.5;margin-top:2px">'+_esc(a.d)+'</span>'
+      + '</span></a>';
+  });
+  return h + '</div></div>';
+};
+
 window._espacePerso = function(role){
   role = role || (typeof SES!=='undefined' && SES && SES.role) || 'eleve';
   var c = document.getElementById('vContent');
@@ -46317,6 +46409,15 @@ window._espacePerso = function(role){
       ['lc-upload','Publier un corrigé (70%)','if(typeof mMarketplaceSubmit===\'function\')mMarketplaceSubmit();else toast(\'Bientôt\',\'info\')'],
       ['lc-university','Classes &amp; Forum','if(typeof showClasseVirtuelle===\'function\')showClasseVirtuelle()'],
       ['lc-sliders','Mes matières','mMesMatieres()']
+    ] : role==='eleve' ? [
+      /* L'ELEVE N'AVAIT AUCUNE ACTION. La liste retombait sur `[]` pour lui,
+         alors qu'il est le public principal du site. Ces quatre-la sont ce
+         qu'il vient chercher : ce qu'il doit savoir, de quoi s'entrainer, de
+         quoi se situer, et quelqu'un a qui demander. */
+      ['lc-graduation','Le programme de ma classe','window.open(\'/niveaux/\',\'_blank\',\'noopener\')'],
+      ['lc-check','Les corrigés des cahiers','window.open(\'/corriges/\',\'_blank\',\'noopener\')'],
+      ['lc-clipboard','M’évaluer avant l’examen','window.open(\'/evaluations/\',\'_blank\',\'noopener\')'],
+      ['lc-message','Demander au tuteur IA','if(typeof mAgentAmbassa===\'function\')mAgentAmbassa()']
     ] : role==='parent' ? [
       ['lc-chart','Notes &amp; bulletin de mon enfant','_espaceParentEnfant()'],
       ['lc-wallet','Payer / Cagnotte de scolarité','vShowSec(\'cagnotte\',null)'],
@@ -46338,6 +46439,11 @@ window._espacePerso = function(role){
     });
     h += '</div>';
   }
+
+  /* Tout ce que le site publie et qui concerne CE profil. Placé après les
+     actions du rôle — qui restent prioritaires — et avant les offres : on
+     donne d'abord ce qui est déjà acquis, on propose ensuite. */
+  h += _accesProfilHtml(role);
 
   // Parent : statut de rattachement de l'enfant
   if(role==='parent'){

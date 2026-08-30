@@ -374,6 +374,19 @@ jobs:
       - name: 🔎 La recherche trouve-t-elle ce que le site publie ?
         run: node tests/banc_recherche.cjs
 
+      # ── 👤 CHAQUE PROFIL RETROUVE-T-IL SES ACCÈS ? Le plan public range le
+      #    site par profil ; il restait le CONNECTÉ, qui n'a aucune raison de
+      #    retourner sur la page d'accueil pour retrouver les œuvres au
+      #    programme. `_espacePerso` proposait quatre actions à l'enseignant,
+      #    au parent, au partenaire — et RIEN à l'élève : sa branche retombait
+      #    sur `[]`, alors qu'il est le public principal. Il n'atteignait même
+      #    pas cet espace : les cinq appels ne visaient que les trois autres.
+      #    Le banc compare AUSSI les deux surfaces (VERITAS_ACCES et
+      #    build_plan.py) : sans cela elles divergent, et un service ajouté
+      #    d'un côté manque de l'autre.
+      - name: 👤 Chaque profil retrouve-t-il ses accès ?
+        run: node tests/banc_espaces_profil.cjs
+
       # ── 📱 LA PLANCHE DE TRAVAIL TIENT-ELLE SUR UN TÉLÉPHONE ? Mesuré au
       #    navigateur sur 375 px le 28/08/2026 : 842 px défilaient AVANT la
       #    première ligne du texte — un écran entier rien que pour y arriver.
