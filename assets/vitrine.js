@@ -1143,7 +1143,18 @@
        gratuit) ; un livre papier se COMMANDE ; un livre en rupture n'offre
        ni l'un ni l'autre — on n'envoie personne vers un tunnel de paiement
        pour un article qu'on ne peut pas livrer. */
-    if (num) c.lien = 'app.html#livre?id=' + encodeURIComponent(b.id);
+    /* ⚠️ UN PRODUIT QUI PORTE SA PROPRE PORTE L'EMPORTE.
+       Les cahiers interactifs entrent depuis le 30/08 dans le même flux que
+       les manuels — une seule devanture, classée par rayon. Mais leur
+       parcours d'achat n'est pas celui d'un livre : ils ouvrent un CODE
+       D'ACCÈS émis au paiement confirmé, et cela se passe sur leur page
+       (livrets/cahier.html), pas dans la fiche « livre » de l'application.
+       Sans ce cas, la carte aurait pointé `app.html#livre?id=livret:6e` —
+       une fiche qui n'existe pas, puisque le cahier ne vit pas dans
+       `DB.books`. Un lien mort au bout d'une devanture unifiée aurait annulé
+       tout le bénéfice de l'unification. */
+    if (b.url) c.lien = b.url;
+    else if (num) c.lien = 'app.html#livre?id=' + encodeURIComponent(b.id);
     else if (!rupture) c.papier = true;
 
     /* La couverture, dans le même ordre de préséance que la maquette. */

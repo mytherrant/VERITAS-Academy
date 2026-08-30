@@ -409,6 +409,18 @@ jobs:
       - name: 🖼️ Les couvertures déposées sont-elles utilisées ?
         run: node tests/banc_couvertures.cjs
 
+      # ── 🛒 UNE SEULE DEVANTURE, UN SEUL FLUX. Le centre vendait à deux
+      #    endroits : les manuels par DB.books et la boutique de l'accueil, les
+      #    quinze cahiers interactifs par livrets_catalogue.json et une page à
+      #    part. Un client cherchant « le cahier de 4ᵉ » devait deviner lequel
+      #    des deux rayons regarder. Les deux sortent du même flux désormais.
+      #    Le banc exécute RÉELLEMENT l'endpoint : lire le source dirait qu'il
+      #    contient du code pour les livrets, pas qu'il en produit. Il vérifie
+      #    surtout que la carte suit l'URL du produit — sans quoi un cahier
+      #    pointerait `app.html#livre?id=livret:6e`, une fiche inexistante.
+      - name: 🛒 Une seule devanture, un seul flux ?
+        run: node tests/banc_boutique_unifiee.cjs
+
       # ── 📱 LA PLANCHE DE TRAVAIL TIENT-ELLE SUR UN TÉLÉPHONE ? Mesuré au
       #    navigateur sur 375 px le 28/08/2026 : 842 px défilaient AVANT la
       #    première ligne du texte — un écran entier rien que pour y arriver.

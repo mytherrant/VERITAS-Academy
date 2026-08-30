@@ -301,6 +301,73 @@ foreach ($__pd_books_src as $b) {
 }
 
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   LES LIVRETS ENTRENT DANS LA MÊME DEVANTURE
+
+   Le centre vendait ses ouvrages à deux endroits, avec deux catalogues et deux
+   parcours : les manuels par `DB.books` (case « vitrine » cochée) et la
+   boutique de l'accueil ; les cahiers interactifs par
+   `api/data/livrets_catalogue.json` et une page à part. Un client cherchant
+   « le cahier de 4ᵉ » devait savoir lequel des deux rayons regarder — et rien
+   sur la page d'accueil ne lui disait que le second existait.
+
+   On publie donc les deux dans le MÊME flux. La boutique n'a plus qu'une
+   source à lire, et le classement se fait par `rayon`.
+
+   CE QUI RESTE DISTINCT, ET DOIT L'ÊTRE : le parcours d'achat. Un manuel part
+   en commande ; un cahier interactif ouvre un CODE D'ACCÈS émis au paiement
+   confirmé (api/livret.php). D'où `kind` et `url` : la carte sait où mener,
+   sans que la boutique ait à connaître la mécanique de chacun. Le canal de
+   paiement, lui, est bien le même depuis le 30/08 — livrets/gate.js suit
+   désormais la sonde du fournisseur actif, comme l'application.
+
+   On ne publie QUE ce qui est réellement servi : `vrt_livret_catalogue()` est
+   la source qu'`api/livret.php` interroge pour ouvrir un cahier. Un ouvrage
+   absent d'ici ne peut pas être vendu ailleurs.
+   ═══════════════════════════════════════════════════════════════════════════ */
+if (!function_exists('vrt_livret_catalogue')) {
+    @require_once __DIR__ . '/_livret_lib.php';
+}
+if (function_exists('vrt_livret_catalogue')) {
+    $__pd_dirCouv = dirname(__DIR__) . '/uploads/oeuvres/';
+    foreach (vrt_livret_catalogue() as $__slug => $__o) {
+        if (!is_array($__o)) continue;
+        if (count($__pd_livres) >= 120) break;
+        $__prix = (int)($__o['prix'] ?? 0);
+        if ($__prix <= 0) continue;          // pas de prix : pas en devanture
+        /* Couverture CONSTATÉE, jamais déclarée — même règle qu'api/livret.php :
+           un chemin écrit à la main survit à la disparition du fichier, et une
+           image cassée sur la vitrine d'un produit payant est pire que pas
+           d'image du tout. */
+        $__couv = is_file($__pd_dirCouv . 'livret_' . $__slug . '.jpg')
+                ? '/uploads/oeuvres/livret_' . $__slug . '.jpg' : '';
+        $__pd_livres[] = [
+            'id'         => 'livret:' . $__slug,
+            'titre'      => vrt_pd_coupe((string)($__o['titre'] ?? $__slug), 120),
+            'auteur'     => 'Centre VÉRITAS',
+            'cls'        => vrt_pd_coupe((string)($__o['niveau'] ?? ''), 40),
+            'rayon'      => 'Cahiers interactifs',
+            'etiquette'  => '',
+            'desc'       => 'Cahier à remplir en ligne, avec correction immédiate.',
+            'prix'       => $__prix,
+            'ancienPrix' => 0,
+            'pages'      => (int)($__o['pages'] ?? 0),
+            'chaps'      => 0,
+            'ico'        => '',
+            'couleur'    => '',
+            'couv'       => $__couv,
+            'numerique'  => true,
+            'stock'      => null,            // un cahier en ligne n'a pas de pile
+            'vendu'      => 0,
+            'apercu'     => true,
+            /* Le parcours propre au produit. La boutique s'en sert pour mener
+               au bon tunnel sans rien savoir de sa mécanique. */
+            'kind'       => 'livret',
+            'url'        => '/livrets/cahier.html?o=' . rawurlencode($__slug),
+        ];
+    }
+}
+
 /** « Cécile Ngo Bassong » → « Cécile N. ». Nom vide → chaîne vide. */
 function vrt_pd_initiale($nom) {
     $nom = preg_replace('/\s+/u', ' ', trim((string)$nom));
