@@ -62,8 +62,50 @@ $backupFile = '';
 foreach ($candidates as $c) { if (is_file($c)) { $backupFile = $c; break; } }
 
 if ($backupFile === '' || !file_exists($backupFile)) {
-    http_response_code(404);
-    echo json_encode(['error' => 'Aucune donnée disponible', 'partenaires' => [], 'school' => null]);
+    /* ⚠️ SANS BASE, LES CAHIERS RESTENT PUBLIABLES.
+       Cet endpoint sortait en 404 dès que `data/veritas_db.json` manquait —
+       sur un serveur fraîchement déployé, avant la première synchronisation,
+       ou sur le runner d'intégration qui n'a évidemment pas la base de
+       production. La vitrine recevait alors `error`, retirait sa devanture, et
+       le site n'annonçait plus AUCUN produit.
+       Or les quinze cahiers interactifs ne viennent pas de la base : ils
+       viennent de `api/data/livrets_catalogue.json`, qui est versionné et
+       déployé avec le code. Il n'y a aucune raison de les taire parce qu'une
+       AUTRE source est absente.
+       On renvoie donc ce qu'on sait, et rien de plus : les cahiers, sans les
+       champs qui dépendent de la base (école, partenaires, activité). */
+    $__sec = [];
+    if (!function_exists('vrt_livret_catalogue')) @require_once __DIR__ . '/_livret_lib.php';
+    if (function_exists('vrt_livret_catalogue')) {
+        $__dc = dirname(__DIR__) . '/uploads/oeuvres/';
+        foreach (vrt_livret_catalogue() as $__s => $__x) {
+            if (!is_array($__x) || (int)($__x['prix'] ?? 0) <= 0) continue;
+            $__sec[] = [
+                'id' => 'livret:' . $__s,
+                'titre' => (string)($__x['titre'] ?? $__s),
+                'auteur' => 'Centre VÉRITAS',
+                'cls' => (string)($__x['niveau'] ?? ''),
+                'rayon' => 'Cahiers interactifs',
+                'etiquette' => '', 'desc' => 'Cahier à remplir en ligne, avec correction immédiate.',
+                'prix' => (int)$__x['prix'], 'ancienPrix' => 0,
+                'pages' => (int)($__x['pages'] ?? 0), 'chaps' => 0,
+                'ico' => '', 'couleur' => '',
+                'couv' => is_file($__dc . 'livret_' . $__s . '.jpg')
+                        ? '/uploads/oeuvres/livret_' . $__s . '.jpg' : '',
+                'numerique' => true, 'stock' => null, 'vendu' => 0, 'apercu' => true,
+                'kind' => 'livret',
+                'url' => '/livrets/cahier.html?o=' . rawurlencode($__s),
+            ];
+        }
+    }
+    /* Pas de `error` quand on a quelque chose à servir : ce champ fait retirer
+       la devanture côté vitrine, et ce serait faux ici. */
+    echo json_encode($__sec
+        ? ['boutique' => $__sec, 'partenaires' => [], 'school' => null,
+           'boutiqueChiffres' => ['titres' => count($__sec), 'prixMoyen' => 0, 'vendus' => 0]]
+        : ['error' => 'Aucune donnée disponible', 'partenaires' => [], 'school' => null],
+        JSON_UNESCAPED_UNICODE);
+    if (!$__sec) http_response_code(404);
     exit;
 }
 
