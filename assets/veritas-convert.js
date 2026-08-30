@@ -123,6 +123,25 @@
       '  font-size:13.5px;line-height:1.55;color:#0B6B74;font-weight:600}',
       '.vrtc-libre svg{width:16px;height:16px;flex:0 0 16px;margin-top:2px;fill:none;',
       '  stroke:#0B6B74;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}',
+      /* ⚠️ LE TITRE SORTAIT BLANC SUR BLANC — signalé le 30/08/2026.
+         « Et si on allait au bout du travail ? » était illisible, alors que la
+         ligne au-dessus, le corps et les deux boutons s'affichaient
+         normalement. Sa couleur est pourtant écrite juste ici, en #001136.
+
+         `-webkit-text-fill-color` est une propriété HÉRITÉE, et elle l'emporte
+         sur `color`. Il suffit qu'un ancêtre de la page porte un titre « rempli
+         par un dégradé » (`background-clip:text` + remplissage transparent)
+         pour que ce bloc hérite du remplissage TRANSPARENT sans hériter du
+         dégradé qui va avec. Le texte devient alors invisible.
+
+         Ce bug a déjà frappé ce projet, sur le prix des panneaux d'abonnement :
+         « 25 000 XAF » barré, un blanc, puis « / an scolaire ». Le correctif
+         est le même — on rétablit explicitement le remplissage. Ce bloc est
+         injecté dans des pages aux socles CSS très différents : il ne peut
+         RIEN supposer de ce qu'il hérite, et sa lisibilité ne doit dépendre
+         d'aucun effet décoratif venu d'ailleurs. */
+      '.vrtc, .vrtc *{-webkit-text-fill-color:currentColor;',
+      '  -webkit-background-clip:border-box;background-clip:border-box}',
       '.vrtc-t{margin:0 0 12px;font-size:25px;line-height:1.24;font-weight:600;color:#001136}',
       '.vrtc-d{margin:0 0 18px;font-size:15.5px;line-height:1.72;color:#4D5163}',
       '.vrtc-prix{display:none;margin:0 0 20px;padding:12px 16px;',
