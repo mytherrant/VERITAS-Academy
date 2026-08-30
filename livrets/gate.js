@@ -17,7 +17,33 @@
   'use strict';
 
   var API   = '/api/livret.php';
+  /* ⚠️ LA PASSERELLE NE S'ÉCRIT PLUS EN DUR ICI.
+     Ce fichier pointait `payment_camerpay.php` en dur, tandis que
+     l'application choisit la sienne à l'exécution (`_payProviderFile`, qui lit
+     la sonde `?action=config`). Les deux tombent aujourd'hui sur CamerPay —
+     par coïncidence, puisque c'est le fournisseur de lancement et le défaut du
+     sélecteur.
+
+     Le jour d'une bascule (`PAY_PROVIDER = 'campay'`), l'application suivrait
+     et les livrets NON : ils continueraient d'appeler une passerelle inactive,
+     et cesseraient d'encaisser sans que rien ne le dise. C'est un canal de
+     paiement à deux vérités, exactement ce qu'on vient de corriger sur les
+     catalogues.
+
+     La sonde de CamerPay répond POUR LES DEUX fournisseurs : elle donne le
+     fichier réellement actif (`file`). On la lit, et on garde CamerPay en
+     repli — si la sonde ne répond pas, mieux vaut tenter le fournisseur de
+     lancement que ne rien tenter. */
   var PAY   = '/api/payment_camerpay.php';
+  function resoudrePasserelle() {
+    return fetch(PAY + '?action=config', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (c) {
+        if (c && c.ok && c.file) PAY = '/api/' + String(c.file).replace(/^\/*(api\/)?/, '');
+        return PAY;
+      })
+      .catch(function () { return PAY; });
+  }
   // Deux tarifs : le livret ouvre les exercices d'une classe, le GUIDE ouvre les
   // corrigés complets et la console de devoirs. Le serveur garde sa propre
   // référence (vrt_livret_prix) — ces chiffres ne servent qu'à AFFICHER.
@@ -475,7 +501,11 @@
     msg('');
 
     var r = ref();
-    fetch(PAY + '?action=config', { cache: 'no-store' })
+    /* On résout d'abord la passerelle active, PUIS on l'interroge : sans cela
+       on paierait toujours chez le fournisseur écrit en dur, quel que soit
+       celui que le serveur a activé. */
+    resoudrePasserelle()
+      .then(function () { return fetch(PAY + '?action=config', { cache: 'no-store' }); })
       .then(function (x) { return x.json(); })
       .then(function (c) {
         if (!c || !c.selfService || !c.publicInitToken) {
