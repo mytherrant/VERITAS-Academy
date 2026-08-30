@@ -362,6 +362,18 @@ jobs:
       - name: 🗺️ Ce que le site publie est-il atteignable ?
         run: node tests/banc_plan_site.cjs
 
+      # ── 🔎 LA RECHERCHE TROUVE-T-ELLE CE QUE LE SITE PUBLIE ? L'index ne
+      #    connaissait que les catalogues de l'application et les corrigés :
+      #    309 entrées, dont aucune page publique hors corrigés. Chercher
+      #    « BEPC blanc » ne rendait RIEN alors que trois épreuves blanches
+      #    sont en ligne. Et il était PÉRIMÉ : 55 corrigés indexés pour 89
+      #    publiés — trente-quatre pages introuvables, sans le moindre signal.
+      #    Un index obsolète ne produit pas d'erreur, il produit du silence.
+      #    Le banc vérifie AUSSI qu'aucune page `noindex` n'y a fuité : onze
+      #    livrets sont des cahiers payants, servis après paiement.
+      - name: 🔎 La recherche trouve-t-elle ce que le site publie ?
+        run: node tests/banc_recherche.cjs
+
       # ── 📱 LA PLANCHE DE TRAVAIL TIENT-ELLE SUR UN TÉLÉPHONE ? Mesuré au
       #    navigateur sur 375 px le 28/08/2026 : 842 px défilaient AVANT la
       #    première ligne du texte — un écran entier rien que pour y arriver.

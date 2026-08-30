@@ -45408,7 +45408,12 @@ var _RECH_TYPES = {
   labo:      { l:'Laboratoire',ic:'lc-flask',     c:'#059669' },
   ressource: { l:'Ressource',  ic:'lc-doc',       c:'#B45309' },
   contenu:   { l:'E-learning', ic:'lc-graduation',c:'#1D4ED8' },
-  corrige:   { l:'Corrigé',    ic:'lc-check',     c:'#AE5353' }
+  corrige:   { l:'Corrigé',    ic:'lc-check',     c:'#AE5353' },
+  /* Les pages publiées du site : analyses d'œuvres, livrets, évaluations,
+     niveaux, cours, outils, parcours. Sans cette entrée, elles s'affichaient
+     avec « page » en guise d'étiquette et la couleur grise de repli — le
+     visiteur ne pouvait pas distinguer une épreuve blanche d'un jeu. */
+  page:      { l:'Page',       ic:'lc-doc',       c:'#1E499B' }
 };
 
 // Normalisation : « Élève » et « eleve » doivent se trouver mutuellement.
@@ -45504,6 +45509,18 @@ function _rechOuvrir(i){
   if(!e) return;
 
   if(e.t === 'corrige'){ cm(); window.open(e.k, '_blank', 'noopener'); return; }
+
+  /* ── LES PAGES PUBLIÉES DU SITE ────────────────────────────────────────
+     L'index ne connaissait que les catalogues de l'application et les
+     corrigés : les 22 analyses d'œuvres publiques, les 16 livrets, les 10
+     évaluations, les pages de niveau, les cours et les outils en étaient
+     absents. Chercher « BEPC blanc » ne rendait rien, alors que trois
+     épreuves blanches sont en ligne.
+     Ces entrées portent une URL directe (`u`) au lieu d'une clé d'ouverture :
+     sans ce cas, l'index aurait grossi de soixante-sept résultats sur
+     lesquels cliquer n'aurait RIEN fait — un catalogue qui trouve mais
+     n'ouvre pas est pire qu'un catalogue incomplet. */
+  if(e.t === 'page' && e.u){ cm(); window.open(e.u, '_blank', 'noopener'); return; }
 
   cm();
   toast('Ouverture…','info');

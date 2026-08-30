@@ -103,6 +103,70 @@ if (fs.existsSync(dossierCorriges)) {
   }
 }
 
+/* ── LES AUTRES PAGES DU SITE ────────────────────────────────────────────
+   L'index ne connaissait que les catalogues de l'application et les corrigés.
+   Tout le reste du site publié en était absent : les 22 analyses d'œuvres, les
+   16 livrets, les 10 évaluations, les 8 pages de niveau, les cours, les
+   outils, les parcours. Chercher « Ville cruelle » trouvait la fiche de
+   l'application, jamais la page publique ; chercher « BEPC blanc » ne trouvait
+   rien du tout, alors que trois épreuves blanches sont en ligne.
+
+   On indexe donc les pages RÉELLEMENT PUBLIÉES de chaque zone, avec leur
+   titre lu dans le fichier. Le type `page` porte une URL directe (`u`), là où
+   les entrées de catalogue portent une clé d'ouverture : le rendu des
+   résultats distingue les deux.
+
+   On saute les `index.html` : ils sont la porte de la zone, pas un contenu, et
+   les faire remonter noierait les vraies pages sous des doublons. */
+const ZONES_PUBLIQUES = [
+  ['oeuvres', 'Œuvres au programme'],
+  ['niveaux', 'Programme par niveau'],
+  ['evaluations', 'Évaluations'],
+  ['livrets', 'Livrets interactifs'],
+  ['cours', 'Cours rédigés'],
+  ['outils', 'Outils'],
+  ['parcours', 'Parcours'],
+  ['decouvrir', 'Découvrir VÉRITAS'],
+  ['flash', 'Flash'],
+  ['adopter', 'Adopter les cahiers'],
+];
+for (const [zone, rubrique] of ZONES_PUBLIQUES) {
+  const dossier = path.join(RACINE, zone);
+  if (!fs.existsSync(dossier)) continue;
+  (function parcourir(rep, prefixe) {
+    for (const nom of fs.readdirSync(rep)) {
+      const complet = path.join(rep, nom);
+      if (fs.statSync(complet).isDirectory()) { parcourir(complet, prefixe + nom + '/'); continue; }
+      if (!nom.endsWith('.html') || nom === 'index.html') continue;
+      const html = fs.readFileSync(complet, 'utf8');
+      /* ⚠️ UNE PAGE EN `noindex` NE VA PAS DANS LA RECHERCHE.
+         Onze livrets portent `<meta name="robots" content="noindex,
+         nofollow">` : ce sont les cahiers PAYANTS, servis après paiement. Les
+         faire remonter dans la recherche du site les annoncerait à tout
+         visiteur — et leur titre absent aurait donné des libellés d'un
+         caractère (« 3e »), ce qui a d'ailleurs mis le banc en rouge.
+         La règle est simple et se tient d'elle-même : ce qu'on demande aux
+         moteurs d'ignorer, notre propre moteur l'ignore aussi. */
+      if (/<meta[^>]+name=["']robots["'][^>]+noindex/i.test(html)) continue;
+      const m = html.match(/<title>([^<]+)<\/title>/i);
+      let titre = m ? m[1].split('|')[0].trim() : nom.replace(/\.html$/, '');
+      titre = titre.replace(/\s*[—·-]\s*(Centre\s+)?V[ÉE]RITAS.*$/i, '').trim();
+      const e = { t: 'page', k: prefixe + nom, l: titre || nom, s: rubrique };
+      e.u = '/' + prefixe + nom;
+      entrees.push(e);
+    }
+  })(dossier, zone + '/');
+}
+/* Les pages de tête, qui n'appartiennent à aucune zone. */
+for (const [f, lib, sous] of [
+  ['constellation.html', 'La Constellation VÉRITAS', 'Tout ce que publie le centre'],
+  ['manuels.html', 'Les manuels VÉRITAS', 'Ouvrages et sommaires'],
+  ['plan.html', 'Plan du site par profil', 'Élèves, parents, enseignants, partenaires'],
+]) {
+  if (!fs.existsSync(path.join(RACINE, f))) continue;
+  entrees.push({ t: 'page', k: f, l: lib, s: sous, u: '/' + f });
+}
+
 const sortie = '/* VÉRITAS — index de recherche. GÉNÉRÉ, ne pas éditer à la main.\n'
   + '   Source : tools/build_search_index.cjs · ' + entrees.length + ' entrées.\n'
   + '   Ne contient que libellé + type + clé : chercher dans tout le catalogue\n'
