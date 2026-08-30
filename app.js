@@ -13926,6 +13926,21 @@ function mAddBk(){
     <div class="fg"><span class="fl">Icône (emoji)</span><input class="fi" id="bkI" placeholder="📚" maxlength="2" value="📚"></div>
     <div class="fg"><span class="fl">Nb pages</span><input class="fi" id="bkPg" type="number" min="0"></div>
     <div class="fg full"><span class="fl">Description</span><textarea class="fi" id="bkD" rows="2" placeholder="Description du manuel..."></textarea></div>
+    <!-- LE CHAINON QUI MANQUAIT ENTRE « j'ajoute un manuel » ET « il apparait
+         sur le site ». Un manuel cree ici naissait sans la marque de
+         publication (pas d'accent grave ici : ce bloc vit dans un litteral
+         JS, et un accent grave y fermerait la chaine), donc
+         api/public_data.php ne le publiait jamais : l'application montrait un
+         catalogue, la page d'accueil en montrait un autre, et il fallait
+         savoir qu'une seconde fiche (« Modifier ») portait la case. On la
+         pose des la creation, cochee par defaut — on ajoute un manuel POUR
+         qu'il se vende. -->
+    <div class="fg full">
+      <label style="display:flex;align-items:center;gap:9px;cursor:pointer;padding:9px 11px;background:#EAF0FA;border:1px solid #BCD9F2;border-radius:9px">
+        <input type="checkbox" id="bkVit" checked style="width:18px;height:18px;accent-color:#1E499B">
+        <span style="font-size:13px;color:#14375F">Afficher ce manuel dans la boutique publique (page d’accueil)</span>
+      </label>
+    </div>
   </div>`,
   `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveBk()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Ajouter</button>`);
 }
@@ -13936,6 +13951,7 @@ function saveBk(){
   const prix=+document.getElementById('bkP')?.value;if(!prix){toast('Prix requis','warn');return;}
   var _newBkId=gid();
   DB.books.push({id:_newBkId,titre,cls:document.getElementById('bkCl')?.value||'—',auteur:document.getElementById('bkA')?.value||'—',prix,stock:+document.getElementById('bkSt')?.value||0,vendu:0,pages:+document.getElementById('bkPg')?.value||0,ico:document.getElementById('bkI')?.value||'📚',desc:document.getElementById('bkD')?.value||'',chaps:[],content:{}});
+  DB.books[DB.books.length-1].vitrine = !!(document.getElementById('bkVit')||{}).checked;
   save();cm();re();toast('✓ Manuel ajouté — ajoutez maintenant son contenu (extraits, couverture)');
   // v1.2.3 : réunit ajout + gestion → enchaîne directement sur « Gérer le contenu » du nouveau manuel.
   setTimeout(function(){ if(typeof addBookContent==='function') addBookContent(_newBkId); },350);

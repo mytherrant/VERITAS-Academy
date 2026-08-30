@@ -959,11 +959,24 @@
     fetch(base + '/public_data.php', { credentials: 'omit' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
-        if (!d || d.error) return;
+        /* ⚠️ L'ÉCHEC AUSSI DOIT RETIRER LA DEVANTURE.
+           `d.error` arrive vraiment : la sentinelle anti-robots répond
+           « Accès automatisé refusé » à certains clients. Sans ce cas,
+           `appliquerPublic` n'était pas appelée, donc `poserBoutique` non
+           plus, donc les quatre cartes de démonstration du build restaient à
+           l'écran — avec leur bouton « Commander ».
+           Le reste de la page garde bien ses valeurs de build (c'est
+           l'amélioration progressive), mais on ne PROPOSE PAS À LA VENTE un
+           produit qu'on n'a pas pu confirmer. */
+        if (!d || d.error) { masquerBoutique(); return; }
         try { sessionStorage.setItem(CLE_PUB, JSON.stringify({ t: Date.now(), d: d })); } catch (e) {}
         appliquerPublic(d);
       })
-      .catch(function () { /* hors ligne : la page garde ses valeurs de build */ });
+      .catch(function () {
+        /* Hors ligne : la page garde ses valeurs de build — sauf la boutique,
+           pour la même raison. */
+        masquerBoutique();
+      });
   }
 
   /* Un numéro saisi par l'admin s'écrit « 656 720 476 » ou « +237 6 56 72 04 76 ».
@@ -1186,9 +1199,48 @@
     return cartes.filter(function (c) { return c.categorie === cle; });
   }
 
+  /* Retire la devanture et tout ce qui la commente. On vise la SECTION
+     entière — cartes, pastilles de filtre et bandeau de chiffres — parce que
+     laisser « 9 manuels · à partir de 3 500 F » au-dessus d'une grille vide
+     serait un mensonge de plus, pas un de moins.
+     `data-vp="boutique"` est la section de la vitrine ; les cartes vivent dans
+     les gabarits `manuels`. On masque, on ne supprime pas : un rappel de
+     `poserBoutique` avec de vrais livres doit pouvoir tout ramener. */
+  function masquerBoutique() {
+    var vus = [];
+    var sec = document.querySelector('[data-vp="boutique"]');
+    if (sec) vus.push(sec);
+    var liens = document.querySelectorAll('[data-go="boutique"]');
+    for (var i = 0; i < liens.length; i++) vus.push(liens[i]);
+    for (var j = 0; j < vus.length; j++) {
+      try { vus[j].setAttribute('hidden', ''); vus[j].style.display = 'none'; } catch (e) {}
+    }
+  }
+
   function poserBoutique(livres) {
-    if (!livres || !livres.length) return;          // rien de publié : on ne touche à rien
-    if (!G.manuels || !G.filtres) return;           // gabarits absents : idem
+    /* ⚠️ UN PRODUIT N'OBÉIT PAS À LA MÊME RÈGLE QU'UN NUMÉRO DE TÉLÉPHONE.
+       Le principe de cette page est l'amélioration progressive : si l'API ne
+       répond pas, on garde les valeurs figées au build. C'est juste pour le
+       téléphone du centre — une coupure réseau ne doit pas l'effacer.
+
+       C'est FAUX pour la boutique. Aucun livre ne porte `vitrine:true` en
+       production, donc `livres` arrive vide, donc on ne touchait à rien — et
+       les quatre cartes de DÉMONSTRATION du build restaient à l'écran :
+       « Spécial BEPC », « Spécial Probatoire », « Spécial BAC », « Cahier
+       d'exercices 2ⁿᵈᵉ », avec leurs pastilles « BEST-SELLER » et « LE PLUS
+       VENDU », leurs comptes d'exercices, leurs prix de 3 500 à 5 000 F, et
+       un bouton « Commander » qui ouvre le tunnel de paiement.
+
+       Un visiteur pouvait donc commander et payer un manuel qui n'existe dans
+       AUCUN catalogue — ni catalogue_livres.json (un seul livre), ni
+       livrets_catalogue.json (quinze cahiers). Le centre aurait encaissé sans
+       rien pouvoir livrer.
+
+       Un téléphone périmé est une gêne ; un produit fantôme est une commande
+       qu'on ne peut pas honorer. Quand la liste réelle est vide, on RETIRE la
+       devanture au lieu de la laisser mentir. */
+    if (!livres || !livres.length) { masquerBoutique(); return; }
+    if (!G.manuels || !G.filtres) { masquerBoutique(); return; }
 
     var cartes = livres.map(carteDepuisLivre);
     var cats = filtresDepuisCartes(cartes);
