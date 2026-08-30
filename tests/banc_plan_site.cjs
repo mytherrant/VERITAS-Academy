@@ -117,9 +117,28 @@ console.log(`\n${G}③ Aucune zone publiée n'est laissée de côté${R}`);
    exactement ce qui est arrivé à /livrets/, /outils/ et /evaluations/. */
 const ZONES = ['corriges', 'oeuvres', 'niveaux', 'evaluations', 'livrets',
   'cours', 'outils', 'parcours', 'decouvrir', 'flash', 'adopter'];
-const oubliees = ZONES.filter(z => compter(z) > 0 && plan.indexOf('href="/' + z + '/"') < 0);
+/* Une zone figure au plan de DEUX façons possibles : par un lien vers son
+   dossier quand elle a un index (/corriges/ mène à ses sept niveaux, qui
+   mènent à leurs 89 pages), ou par ses pages listées UNE À UNE quand elle
+   n'en a pas. /evaluations/ et /cours/ sont dans le second cas : ouvrir leur
+   dossier ne rend rien, et un lien vers lui serait un cul-de-sac. */
+const oubliees = ZONES.filter(z => compter(z) > 0
+  && plan.indexOf('href="/' + z + '/"') < 0
+  && plan.indexOf('href="/' + z + '/') < 0);
 dire(oubliees.length === 0,
   'toutes les zones qui contiennent des pages sont au plan', oubliees.join(', '));
+
+/* Le contrôle qui compte vraiment pour « tout doit être atteignable » : une
+   zone SANS index doit voir chacune de ses pages listée, sinon elles restent
+   hors d'atteinte quoi que l'on clique. */
+const sansIndex = ZONES.filter(z => compter(z) > 0
+  && !fs.existsSync(path.join(RACINE, z, 'index.html')));
+sansIndex.forEach(z => {
+  const n = (plan.match(new RegExp('href="/' + z + '/[^"]+"', 'g')) || []).length;
+  dire(n >= versionnee(z),
+    z + ' : ses ' + versionnee(z) + ' pages sont listées une à une (pas d’index)',
+    n + ' lien(s)');
+});
 ['constellation.html', 'manuels.html'].forEach(f => {
   if (!fs.existsSync(path.join(RACINE, f))) return;
   dire(plan.indexOf('href="/' + f + '"') >= 0, f + ' y figure aussi');

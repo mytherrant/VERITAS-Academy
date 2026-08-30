@@ -133,6 +133,30 @@ def esc(s):
              .replace('>', '&gt;').replace('"', '&quot;'))
 
 
+def pages_suivies(dossier):
+    """Les pages HTML versionnées d'une zone, avec leur titre réel."""
+    try:
+        import subprocess
+        r = subprocess.run(['git', 'ls-files', dossier + '/'],
+                           cwd=RACINE, capture_output=True, text=True, timeout=30)
+        fichiers = [l for l in r.stdout.split('\n') if l.endswith('.html')]
+    except Exception:
+        fichiers = []
+    out = []
+    for f in fichiers:
+        if os.path.basename(f) == 'index.html':
+            continue
+        try:
+            s = io.open(os.path.join(RACINE, f), encoding='utf-8', errors='replace').read(4000)
+        except Exception:
+            continue
+        m = re.search(r'<title>([^<]{1,90})', s)
+        titre = (m.group(1).strip() if m else os.path.basename(f)[:-5])
+        titre = re.sub(r'\s*[—|·-]\s*(Centre\s+)?V[ÉE]RITAS.*$', '', titre).strip()
+        out.append({'url': '/' + f.replace(os.sep, '/'), 'titre': titre or os.path.basename(f)})
+    return sorted(out, key=lambda x: x['titre'])
+
+
 def construire():
     entrees = []
     for dossier, titre, desc, profils in ZONES:
@@ -141,8 +165,17 @@ def construire():
             # Une zone vide n'est pas annoncée : mieux vaut une rubrique
             # absente qu'un lien vers une page qui n'existe pas.
             continue
-        entrees.append({'url': '/' + dossier + '/', 'titre': titre,
-                        'desc': desc, 'profils': profils, 'n': n})
+        e = {'url': '/' + dossier + '/', 'titre': titre,
+             'desc': desc, 'profils': profils, 'n': n}
+        # ── SANS INDEX, UNE ZONE EST UN CUL-DE-SAC ─────────────────────────
+        # /corriges/ mène à ses sept niveaux, qui mènent chacun à leurs pages :
+        # les 89 corrigés sont donc atteignables en trois clics. Mais
+        # /evaluations/ et /cours/ n'ont AUCUN index — ouvrir le dossier ne
+        # donne rien, et leurs pages restent hors d'atteinte quoi qu'on
+        # clique. Pour ces zones-là, le plan liste les pages UNE À UNE.
+        if not os.path.isfile(os.path.join(RACINE, dossier, 'index.html')):
+            e['pages'] = pages_suivies(dossier)
+        entrees.append(e)
     for url, titre, desc, profils in FIXES:
         entrees.append({'url': url, 'titre': titre, 'desc': desc,
                         'profils': profils, 'n': 0})
@@ -152,6 +185,18 @@ def construire():
 def carte(e):
     compteur = ('<span class="pl-n">' + str(e['n']) + ' page'
                 + ('s' if e['n'] > 1 else '') + '</span>') if e['n'] else ''
+    # Les zones sans index déplient leurs pages : sans cela, cliquer sur la
+    # rubrique ouvrirait un dossier qui ne répond rien.
+    detail = ''
+    if e.get('pages'):
+        detail = ('<span class="pl-l">'
+                  + ''.join('<a href="' + esc(p['url']) + '">' + esc(p['titre']) + '</a>'
+                            for p in e['pages'])
+                  + '</span>')
+        return ('<div class="pl-c pl-c-o">'
+                '<span class="pl-t">' + esc(e['titre']) + compteur + '</span>'
+                '<span class="pl-d">' + esc(e['desc']) + '</span>'
+                + detail + '</div>')
     return (
         '<a class="pl-c" href="' + esc(e['url']) + '">'
         '<span class="pl-t">' + esc(e['titre']) + compteur + '</span>'
@@ -223,6 +268,12 @@ def page(entrees):
         border-radius:100px;padding:2px 9px}
   .pl-d{font-size:14px;color:var(--encre);line-height:1.55}
   .pl-go{margin-top:auto;padding-top:8px;font-size:13px;font-weight:600;color:var(--or)}
+  .pl-c-o{cursor:default}
+  .pl-c-o:hover{box-shadow:none;transform:none}
+  .pl-l{display:flex;flex-direction:column;gap:5px;margin-top:8px;padding-top:9px;
+        border-top:1px solid var(--ligne)}
+  .pl-l a{font-size:13.5px;color:var(--bleu);text-decoration:none;line-height:1.45}
+  .pl-l a:hover{text-decoration:underline}
   footer.pl-f{margin:46px 0 34px;padding-top:20px;border-top:1px solid var(--ligne);
               font-size:13.5px;color:#6B7A99}
   footer.pl-f a{color:var(--bleu)}

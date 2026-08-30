@@ -335,6 +335,20 @@
     goElearning: function () { aller('elearning'); },
     goParents: function () { aller('parents'); },
     goEnseignants: function () { aller('enseignants'); },
+    /* ── « Élèves » et « Partenaires » n'ont PAS de section de vitrine ──────
+       Les quatre cartes annoncent « chacun son espace ». Trois seulement en
+       avaient un : la vitrine ne compte que sept sections (accueil,
+       elearning, parents, enseignants, boutique, tarifs, paiement).
+       La carte « Élèves » était donc branchée sur `elearning` — un catalogue
+       d'abonnements. Un élève qui clique sur « Élèves » parce qu'on lui
+       promet « le programme de sa classe, les corrigés et un tuteur »
+       atterrissait sur une page de vente. Signalé le 30/08/2026.
+       Ces deux-là mènent au plan par profil, qui liste précisément ce qui les
+       concerne : corrigés, œuvres au programme, niveaux, évaluations,
+       livrets, cours et outils pour l'élève ; programmes, commissions et
+       revente pour le partenaire. */
+    goEleves: function () { location.href = '/plan.html#eleve'; },
+    goPartenaires: function () { location.href = '/plan.html#partenaire'; },
     goTarifs: function () { aller('tarifs'); },
     goBoutique: function () { aller('boutique'); },
     commanderVedette: function () { aller('paiement'); },
