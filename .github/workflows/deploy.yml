@@ -43,6 +43,7 @@ on:
       - 'assets/**'
       - 'legal/**'
       - 'constellation.html'
+      - 'plan.html'
       - 'eleve/**'
       - 'enseignant/**'
       - 'flash/**'
@@ -348,6 +349,18 @@ jobs:
       #    dit quand ce doit être prêt : `ep.echeance`, champ de type `date`.
       - name: 🗓️ Le calendrier peut-il afficher quelque chose ?
         run: node tests/banc_calendrier.cjs
+
+      # ── 🗺️ CE QUE LE SITE PUBLIE EST-IL ATTEIGNABLE ? Mesuré le 30/08/2026
+      #    sur la page d'accueil RÉELLEMENT SERVIE : le mot « corrigé » y
+      #    figure 139 fois, et AUCUN lien ne mène à /corriges/ — ni href, ni
+      #    window.open, ni action de navigation. Quatre-vingt-treize pages dont
+      #    le site parle sans jamais y conduire. Même silence sur /livrets/,
+      #    /evaluations/, /niveaux/, /outils/, /cours/, /parcours/, /flash/,
+      #    /adopter/, constellation.html et manuels.html : 165 pages publiées,
+      #    invisibles depuis l'accueil. Rien ne le signalait — une page
+      #    orpheline répond 200 quand on connaît son adresse.
+      - name: 🗺️ Ce que le site publie est-il atteignable ?
+        run: node tests/banc_plan_site.cjs
 
       # ── 📱 LA PLANCHE DE TRAVAIL TIENT-ELLE SUR UN TÉLÉPHONE ? Mesuré au
       #    navigateur sur 375 px le 28/08/2026 : 842 px défilaient AVANT la
@@ -766,6 +779,20 @@ jobs:
           fi
 
           if [ -f constellation.html ]; then cp constellation.html deploy/; echo "  ✓ constellation.html"; fi
+          # ── PLAN DU SITE PAR PROFIL (généré par tools/build_plan.py) ──────
+          #    Mesuré sur la page d'accueil SERVIE le 30/08/2026 : le mot
+          #    « corrigé » y figure 139 fois et AUCUN lien ne mène à
+          #    /corriges/. Idem pour les livrets, niveaux, outils, cours,
+          #    évaluations, parcours, la constellation et les manuels : 165
+          #    pages publiées, invisibles depuis l'accueil.
+          #    ÉCHEC BRUYANT et non `[ -f ] &&` : ce fichier est désormais le
+          #    seul chemin public vers ces pages. S'il manque, on ne déploie
+          #    pas un site qui parle de ses corrigés sans y conduire.
+          if [ ! -f plan.html ]; then
+            echo "::error title=Plan du site manquant::plan.html est absent. C'est le seul chemin public vers /corriges/, /livrets/, /niveaux/, /outils/, /cours/ et /evaluations/. Régénérez-le avec 'python tools/build_plan.py'. Déploiement ANNULÉ."
+            exit 1
+          fi
+          cp plan.html deploy/ && echo "  ✓ plan.html (plan par profil)"
           for d in eleve enseignant flash parcours adopter; do
             if [ -d "$d" ]; then cp -r "$d" deploy/; echo "  ✓ $d/"; fi
           done
