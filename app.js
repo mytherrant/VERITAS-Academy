@@ -1662,6 +1662,35 @@ async function _lwsBackgroundPull(){
     if(_lwsRemote&&Object.keys(_lwsRemote).length>0){
       var _lwsLocal=DB.lastModified||0;
       var _lwsServer=_lwsRemote.lastModified||0;
+
+      /* ⚠️ « L'ENREGISTREMENT NE TIENT PAS APRÈS RECHARGEMENT » — signalé le
+         30/08/2026, et c'est ici que ça se jouait.
+
+         Ce pull REMPLACE la base locale (`DB=_lwsRemote`) dès que le serveur
+         se dit plus récent. Or `save()` écrit d'abord en local puis DIFFÈRE
+         l'envoi (setTimeout). Entre les deux, une fenêtre. Et surtout : le
+         serveur touche `lastModified` de son côté à chaque écriture — une
+         inscription de visiteur (api/compte.php), une soumission de devoir
+         (api/student_data.php), un paiement confirmé. Il suffit donc qu'un
+         élève s'inscrive pour que le serveur devienne « plus récent » que le
+         poste de l'administrateur — et le rechargement suivant effaçait le
+         manuel qu'il venait d'ajouter, sans un mot.
+
+         `_fbLastSyncedMs` porte le `lastModified` du dernier envoi CONFIRMÉ.
+         Si le local a bougé depuis, il détient un travail que le serveur n'a
+         jamais reçu : on ne l'écrase pas, on le REPOUSSE. Le pull reprendra
+         au tour suivant, une fois l'envoi confirmé.
+
+         On ne perd rien dans l'autre sens : le serveur garde sa version, et
+         db.php préserve déjà les comptes nés côté serveur (voir sa fusion). */
+      var _pousseOk = window._fbLastSyncedMs || 0;
+      if(_lwsLocal > _pousseOk){
+        console.log('[LWS] Modifications locales non confirmées ('
+          + new Date(_lwsLocal).toLocaleTimeString() + ') — pull ignoré, on repousse');
+        try{ if(typeof save==='function') save(); }catch(e){}
+        return;
+      }
+
       if(_lwsServer>_lwsLocal){
         // ── FIX : préserver les suppressions locales (deletedJeux, purgedJeux, deletedDefaults, etc.) ──
         // Sinon les jeux supprimés réapparaissent après une sync cloud
@@ -2149,12 +2178,24 @@ function save(){
       var dbLight=JSON.parse(JSON.stringify(DB));
       // Sécurité : strip les mots de passe en clair (ne jamais cloud)
       // Mais GARDER les pwdHash (bcrypt one-way) pour que l'auth fonctionne sur d'autres appareils
+      /* ⚠️ CE FILTRE EFFAÇAIT LES MOTS DE PASSE QU'IL FALLAIT GARDER.
+         Il ne conservait que ce qui commence par « $ », c'est-à-dire bcrypt.
+         Or le navigateur fabrique ses empreintes en S256 (« S256$… », voir
+         hashPassword) : `'S256$…'.startsWith('$')` vaut FAUX, et l'empreinte
+         partait à la poubelle avant l'envoi.
+         Conséquence : tout compte visiteur né sur le poste de l'admin montait
+         au serveur SANS mot de passe. `vrt_verify_password` accepte pourtant
+         S256 — il est irréversible au même titre que bcrypt, c'est même le
+         format que l'Atelier vérifie depuis toujours. L'inscrit se voyait
+         refuser à l'Atelier avec le bon mot de passe : le même symptôme que
+         le bug du 28/08, par un autre chemin.
+         On garde donc les DEUX formats d'empreinte, et on ne supprime que le
+         clair — ce qui reste la raison d'être de ce filtre. */
       function _stripPlainPwd(o){
         if(!o)return;
-        if(o.pwd && !(typeof o.pwd==='string' && o.pwd.startsWith('$'))){
-          // pwd n'est pas un hash bcrypt → c'est du clair → supprimer
-          delete o.pwd;
-        }
+        if(typeof o.pwd!=='string' || !o.pwd) return;
+        var _estEmpreinte = o.pwd.charAt(0)==='$' || o.pwd.indexOf('S256$')===0;
+        if(!_estEmpreinte) delete o.pwd;   // du clair : jamais vers le serveur
       }
       if(dbLight.superAdmin)_stripPlainPwd(dbLight.superAdmin);
       (dbLight.admins||[]).forEach(_stripPlainPwd);

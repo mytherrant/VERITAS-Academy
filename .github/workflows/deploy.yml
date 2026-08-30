@@ -387,6 +387,17 @@ jobs:
       - name: 👤 Chaque profil retrouve-t-il ses accès ?
         run: node tests/banc_espaces_profil.cjs
 
+      # ── 💾 LE TRAVAIL DE L'ADMINISTRATEUR SURVIT-IL ? Deux pertes
+      #    silencieuses, signalées « l'enregistrement ne tient pas après
+      #    rechargement ». (1) Le pull remplaçait la base locale dès que le
+      #    serveur se disait plus récent — or le serveur touche lastModified à
+      #    chaque inscription de visiteur : il suffisait qu'un élève s'inscrive
+      #    pour effacer le manuel que l'admin venait d'ajouter. (2) L'envoi ne
+      #    gardait que les empreintes bcrypt : les S256 du navigateur étaient
+      #    SUPPRIMÉES, et les comptes montaient au serveur sans mot de passe.
+      - name: 💾 Le travail de l'administrateur survit-il ?
+        run: node tests/banc_synchro_admin.cjs
+
       # ── 📱 LA PLANCHE DE TRAVAIL TIENT-ELLE SUR UN TÉLÉPHONE ? Mesuré au
       #    navigateur sur 375 px le 28/08/2026 : 842 px défilaient AVANT la
       #    première ligne du texte — un écran entier rien que pour y arriver.
