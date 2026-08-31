@@ -21,6 +21,18 @@
     page: 'accueil', tab: 1, filtre: 0, moyen: 0, livr: 1, qte: 1,
     langue: 'fr', theme: 'clair', plus: false, burger: false,
     ia: false, trad: false, cit: 0, citOn: true, copie: false,
+    /* ⚠️ CE QUE LE VISITEUR ACHÈTE. Rien par défaut, et c'est volontaire.
+       Le tunnel facturait 5 000 F l'unité EN DUR — `montantTotal()` ignorait
+       purement et simplement le produit cliqué, le récapitulatif affichait
+       « Spécial BAC — Français Tˡᵉ » quoi qu'il arrive, et la ligne envoyée au
+       prestataire s'appelait « Cahier VÉRITAS ». Un cahier à 1 500 F était
+       donc encaissé 5 000 F, sous un nom que le centre n'aurait pas su
+       rattacher à une commande.
+       `article` porte désormais le produit réellement choisi ({ titre, prix,
+       … }) et TOUT le tunnel en découle. Tant qu'il vaut `null`, le montant
+       vaut zéro et `payer()` s'arrête : mieux vaut un bouton qui refuse
+       qu'un encaissement au hasard. */
+    article: null,
     // Ce que le payeur a tapé. Survit aux re-rendus du tunnel (voir champsDuMoment).
     saisie: { vpNom: '', vpTel: '', vpTel2: '', vpMail: '', vpAdr: '' }
   };
@@ -153,19 +165,41 @@
     poser('titreFormulaire', sc.titreFormulaire || '');
     poser('noteSecurite', sc.noteSecurite || '');
     poser('libellePayer', sc.libellePayer || '');
+    majArticle();
     majTotaux();
   }
 
   function majTotaux() {
-    var q = S.qte, frais = [0, 1000, 2500][S.livr];
-    var st = 5000 * q, remise = 1500 * q;
+    var q = S.qte, frais = fraisLivraison(), pu = prixUnitaire();
+    /* La « Remise catalogue » de − 1 500 F a disparu avec le reste du décor.
+       Elle se déduisait d'un sous-total de 6 500 F qui n'a jamais été le prix
+       de quoi que ce soit : afficher une remise sur un prix jamais pratiqué,
+       c'est annoncer une réduction qui n'existe pas. Le jour où le centre en
+       accordera une vraie, elle viendra du catalogue, avec son ancien prix. */
     rendre('lignesTotal', [
-      { libelle: 'Sous-total (' + q + ' article' + (q > 1 ? 's' : '') + ')', montant: f(st + remise), graisse: '400', couleur: '#4D5163' },
-      { libelle: 'Remise catalogue', montant: '− ' + f(remise), graisse: '500', couleur: '#007E11' },
+      { libelle: 'Sous-total (' + q + ' article' + (q > 1 ? 's' : '') + ')', montant: f(pu * q), graisse: '400', couleur: '#4D5163' },
       { libelle: 'Frais de livraison', montant: frais === 0 ? 'Offerts' : f(frais), graisse: '400', couleur: '#4D5163' }
     ]);
     poser('quantite', String(q));
-    poser('totalPayer', (st + frais).toLocaleString('fr-FR').replace(/ | /g, ' ') + ' F');
+    poser('totalPayer', f(montantTotal()));
+  }
+
+  /* Le récapitulatif du tunnel : ce que le visiteur relit avant de payer.
+     Il DOIT nommer le produit qu'il a cliqué — c'est la dernière occasion de
+     s'apercevoir qu'on s'est trompé d'article. */
+  function majArticle() {
+    var a = S.article;
+    poser('articleTitre', (a && a.titre) || 'Votre commande');
+    poser('articleDetail', (a && a.detail) || '');
+    poser('articleNote', (a && a.note) || '');
+    var img = document.querySelector('[data-vrt-img="article"]');
+    if (img) {
+      if (a && a.couv) { img.setAttribute('src', a.couv); img.removeAttribute('hidden'); img.style.display = 'block'; }
+      /* Pas de couverture connue : on n'en montre AUCUNE plutôt que celle
+         d'un autre livre. La vignette du cahier de 6ᵉ posée sous n'importe
+         quel titre est précisément le défaut qu'on corrige ici. */
+      else { img.setAttribute('hidden', ''); img.style.display = 'none'; }
+    }
   }
 
   /* ── Passage du jour : français / anglais ──────────────────────────────── */
@@ -351,8 +385,28 @@
     goPartenaires: function () { location.href = '/plan.html#partenaire'; },
     goTarifs: function () { aller('tarifs'); },
     goBoutique: function () { aller('boutique'); },
-    commanderVedette: function () { aller('paiement'); },
-    m__commander: function () { aller('paiement'); },
+    /* `commanderVedette` a été retiré avec le bloc « livre mis en avant » :
+       il ouvrait le tunnel pour « Spécial BAC — Français Terminale » à
+       5 000 F, un produit absent de tous les catalogues. Ne pas le rétablir
+       sans un vrai article derrière. */
+    m__commander: function (btn) {
+      /* ⚠️ ON N'OUVRE PAS LE TUNNEL SANS SAVOIR CE QU'ON VEND.
+         Ce gestionnaire se contentait de changer d'écran ; le tunnel
+         reprenait alors son article et son prix écrits en dur. Il lit
+         désormais le produit porté par la carte cliquée. */
+      var p = produitDeLaCarte(btn);
+      if (!p) {
+        /* Aucun produit rattaché : la carte vient du pré-rendu de la maquette
+           et le flux réel ne l'a pas encore remplacée. On envoie vers la
+           devanture plutôt que vers un encaissement à l'aveugle. */
+        aller('boutique');
+        return;
+      }
+      S.article = p;
+      S.qte = 1;
+      aller('paiement');
+      majPaiement();
+    },
     // Entrées de menu et cartes : la destination est portée par data-go,
     // écrit à la construction depuis la maquette.
     u__aller: destination, pm__aller: destination,
@@ -375,7 +429,7 @@
       /* La barre repeignait sa pastille active et s'arretait la : la grille
          restait identique au caractere pres, compteur compris. On re-rend donc
          AUSSI le catalogue et son compteur — c'est ce que le clic promet. */
-      if (D.manuels && D.manuels[i]) rendre('manuels', D.manuels[i]);
+      afficherManuels(i);
       var sc = D.scal && D.scal['filtre' + i];
       if (sc && sc.nbManuels !== undefined) poser('nbManuels', sc.nbManuels);
     },
@@ -620,10 +674,23 @@
       .catch(function () { return null; });   // hors ligne : repli silencieux
   }
 
-  function montantTotal() { return 5000 * S.qte + [0, 1000, 2500][S.livr]; }
+  /* Le prix unitaire vient du produit choisi, jamais d'une constante. Zéro
+     quand on ne sait pas ce qu'on vend — `payer()` s'arrête alors de lui-même. */
+  function prixUnitaire() {
+    var a = S.article;
+    var p = a && a.prix;
+    return (typeof p === 'number' && isFinite(p) && p > 0) ? p : 0;
+  }
+  function fraisLivraison() { return [0, 1000, 2500][S.livr] || 0; }
+  function montantTotal() {
+    var pu = prixUnitaire();
+    return pu ? pu * S.qte + fraisLivraison() : 0;
+  }
 
   function libelleCommande() {
-    return 'Cahier VÉRITAS × ' + S.qte + ' — livraison ' + ['retrait', 'Douala', 'régions'][S.livr];
+    var nom = (S.article && S.article.titre) || '';
+    if (!nom) return '';
+    return nom + ' × ' + S.qte + ' — livraison ' + ['retrait', 'Douala', 'régions'][S.livr];
   }
 
   /* ── Contrôle des coordonnées ───────────────────────────────────────────
@@ -698,7 +765,15 @@
   function payer() {
     if (paiementEnCours) return;                 // double-clic : une seule transaction
     var montant = montantTotal();
-    if (!(montant > 0)) return;
+    /* Un bouton « Payer » qui ne fait rien est un bug pour celui qui le
+       presse. On dit ce qui manque, et on le renvoie choisir un article —
+       plutôt que de partir sur un montant par défaut, ce que faisait
+       exactement la version précédente. */
+    if (!(montant > 0)) {
+      alert('Choisissez d’abord un ouvrage dans la boutique : le montant se calcule sur son prix.');
+      aller('boutique');
+      return;
+    }
 
     /* Coordonnées AVANT tout : rien ne sert d'ouvrir une fenêtre de paiement
        pour une commande qu'on ne pourra ni rattacher à quelqu'un ni livrer. */
@@ -751,7 +826,10 @@
             clientNom: (S.saisie.vpNom || '').trim(),
             clientTel: numeroNormalise(S.saisie.vpTel),
             clientEmail: (S.saisie.vpMail || '').trim(),
-            lignes: [{ nom: 'Cahier VÉRITAS', qte: S.qte, pu: 5000 },
+            /* La ligne portait « Cahier VÉRITAS » à 5 000 F, sans rapport
+               avec l'article choisi : le centre recevait un versement qu'il
+               ne pouvait rattacher à aucune commande précise. */
+            lignes: [{ nom: (S.article && S.article.titre) || '', qte: S.qte, pu: prixUnitaire() },
                      { nom: 'Livraison ' + ['(retrait au centre)', 'Douala', 'régions'][S.livr]
                             + (S.livr > 0 ? ' — ' + (S.saisie.vpAdr || '').trim() : ''),
                        qte: 1, pu: [0, 1000, 2500][S.livr] }]
@@ -1117,6 +1195,11 @@
     var rupture = !num && b.stock !== null && b.stock !== undefined && b.stock <= 0;
 
     var c = {
+      /* Le livre d'origine voyage avec sa carte. `litter()` ne rend que les
+         `{{ m.xxx }}` cités par le gabarit : cette clé n'atteint jamais le
+         HTML, mais elle permet de retrouver le PRIX RÉEL au moment du clic,
+         au lieu de la constante de 5 000 F que le tunnel appliquait. */
+      __src: b,
       niv: b.cls || '',
       teinte: teinte,
       fondA: paleur(teinte, .90),
@@ -1228,6 +1311,39 @@
     }
   }
 
+  /* ── Du bouton cliqué au produit réel ────────────────────────────────────
+     Le gabarit des cartes est figé au build : on ne peut pas y ajouter un
+     `data-ref` sans reconstruire toute la page. On s'appuie donc sur ce que
+     le moteur garantit déjà — `rendre()` pose UN nœud `data-vrt-item` par
+     entrée de la liste, dans l'ordre. Le rang du nœud cliqué est donc le rang
+     du livre dans le lot affiché.
+     `sourcesAffichees` est rempli par `poserBoutique` en même temps que la
+     grille : tant qu'il est vide, c'est que la grille montre encore le
+     pré-rendu de la maquette, et aucun achat ne doit partir. */
+  var sourcesAffichees = [];
+
+  function produitDeLaCarte(btn) {
+    if (!btn || !sourcesAffichees.length) return null;
+    var cartes = document.querySelectorAll('[data-vrt-item="manuels"]');
+    for (var i = 0; i < cartes.length; i++) {
+      if (cartes[i] === btn || cartes[i].contains(btn)) {
+        var b = sourcesAffichees[i];
+        if (!b || !(b.prix > 0)) return null;
+        var det = [];
+        if (b.cls) det.push(b.cls);
+        if (b.pages) det.push(b.pages + ' pages');
+        return {
+          id: b.id || '', titre: b.titre || '', prix: b.prix,
+          detail: det.join(' · '),
+          /* Une mention n'est portée que si le flux l'affirme. */
+          note: b.apercu ? 'Aperçu gratuit avant achat' : '',
+          couv: b.couv || ''
+        };
+      }
+    }
+    return null;
+  }
+
   function poserBoutique(livres) {
     /* ⚠️ UN PRODUIT N'OBÉIT PAS À LA MÊME RÈGLE QU'UN NUMÉRO DE TÉLÉPHONE.
        Le principe de cette page est l'amélioration progressive : si l'API ne
@@ -1277,8 +1393,20 @@
     var actif = Math.min(Math.max(S.filtre || 0, 0), cats.length - 1);
     S.filtre = actif;
     rendre('filtres', D.filtres[actif]);
-    rendre('manuels', D.manuels[actif]);
+    afficherManuels(actif);
     poser('nbManuels', String(D.manuels[actif].length));
+  }
+
+  /* Le SEUL endroit qui dessine la grille. Il tient `sourcesAffichees` à jour
+     dans le même geste : une grille redessinée sans ses sources laisserait
+     `produitDeLaCarte` lire le rang d'une carte dans le lot précédent — et
+     donc facturer le prix du voisin. Changer de rayon suffisait à décaler
+     tout le tableau. */
+  function afficherManuels(i) {
+    var lot = (D.manuels && D.manuels[i]) || null;
+    if (!lot) { sourcesAffichees = []; return; }
+    rendre('manuels', lot);
+    sourcesAffichees = lot.map(function (c) { return c.__src || null; });
   }
 
   /* Les chiffres du bandeau. Le build en pose déjà de VRAIS (comptés sur le

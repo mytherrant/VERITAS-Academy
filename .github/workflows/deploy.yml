@@ -421,6 +421,21 @@ jobs:
       - name: 🛒 Une seule devanture, un seul flux ?
         run: node tests/banc_boutique_unifiee.cjs
 
+      # ── 💳 LE TUNNEL FACTURE-T-IL CE QU'ON A CLIQUÉ ? Signalé par Jacques le
+      #    31/08/2026 devant un « Spécial BAC — Français Terminale » à 5 000 F,
+      #    barré 6 500 F, « le plus vendu du catalogue » : « ceci n'existe pas ».
+      #    Le bloc n'était branché sur rien. Pire, le tunnel derrière facturait
+      #    5 000 F l'unité EN DUR — `montantTotal()` ignorait le produit — et
+      #    envoyait au prestataire une ligne nommée « Cahier VÉRITAS ». Un
+      #    cahier à 1 500 F était donc encaissé 5 000 F sous un nom que le
+      #    centre n'aurait rattaché à aucune commande.
+      #    Le banc EXÉCUTE les fonctions du tunnel avec plusieurs articles :
+      #    lire le fichier dirait qu'il contient « prixUnitaire », pas qu'il
+      #    calcule juste. Éprouvé par mutation le 31/08 (prix remis en dur :
+      #    8 contrôles au rouge ; pastille remise : 2 au rouge).
+      - name: 💳 Le tunnel facture-t-il ce qu'on a cliqué ?
+        run: node tests/banc_tunnel_article.cjs
+
       # ── 📱 LA PLANCHE DE TRAVAIL TIENT-ELLE SUR UN TÉLÉPHONE ? Mesuré au
       #    navigateur sur 375 px le 28/08/2026 : 842 px défilaient AVANT la
       #    première ligne du texte — un écran entier rien que pour y arriver.
