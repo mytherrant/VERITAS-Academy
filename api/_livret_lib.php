@@ -115,6 +115,53 @@ if (!defined('VRT_LIVRET_LIB')) {
         return ['livret' => 'Livret de l\'élève', 'guide' => 'Guide de l\'enseignant'];
     }
 
+    /** ── EST-CE PUBLIÉ, ET OÙ CELA MÈNE-T-IL ? ────────────────────────────
+     * DÉCLARÉ n'est pas PUBLIÉ, et confondre les deux fait vendre du vide. Le
+     * catalogue retombe sur des classes d'origine pour ne jamais fermer un
+     * accès déjà vendu : un ouvrage peut donc y figurer sans que rien ne soit
+     * en ligne pour lui.
+     *
+     * La seule autorité, c'est le disque du serveur — deux façons d'exister :
+     * une coquille dédiée `livrets/<slug>.html`, ou les données du cahier. On
+     * constate, on ne suppose pas.
+     *
+     * ⚠️ POURQUOI CETTE FONCTION EXISTE PLUTÔT QUE DEUX COPIES. Ce calcul
+     * vivait à l'intérieur de `livret.php?action=catalogue`. Quand la boutique
+     * a été unifiée le 30/08/2026, `public_data.php` a refait le sien — en
+     * oubliant `disponible` et en devinant le lien. Résultat : la devanture
+     * publiait des ouvrages sans vérifier qu'ils étaient livrables, et envoyait
+     * tout le monde vers le lecteur générique même quand une page dédiée
+     * existait. Deux endroits qui dérivent la même chose finissent toujours
+     * par diverger ; il n'y en a plus qu'un.
+     *
+     * @return array{disponible:bool,lien:string,couverture:string}
+     */
+    function vrt_livret_etat(string $slug): array {
+        $racine  = dirname(__DIR__) . '/livrets/';
+        $dirCouv = dirname(__DIR__) . '/uploads/oeuvres/';
+        $coquille = is_file($racine . $slug . '.html');
+        /* Le dossier des données n'est pas dans le dépôt : il est déposé par
+           FTP. `lv_dir()` le nomme quand livret.php est chargé ; sinon on
+           reprend le MÊME chemin, à l'identique — se tromper de dossier ici
+           déclarerait indisponible tout le catalogue. */
+        $dirDon   = function_exists('lv_dir')
+                  ? lv_dir()
+                  : (defined('VRT_LIVRET_DONNEES')
+                     ? (string) VRT_LIVRET_DONNEES
+                     : dirname(__DIR__) . '/uploads/protected/livrets');
+        $donnees  = is_file($dirDon . '/booklet-' . $slug . '.js');
+        return [
+            'disponible' => ($coquille || $donnees),
+            // Le serveur le dit, parce que lui seul sait laquelle des deux
+            // formes existe. Une page dédiée présente mieux qu'un lecteur nu.
+            'lien' => $coquille
+                    ? ($slug . '.html')
+                    : ('cahier.html?o=' . rawurlencode($slug)),
+            'couverture' => is_file($dirCouv . 'livret_' . $slug . '.jpg')
+                    ? '/uploads/oeuvres/livret_' . $slug . '.jpg' : '',
+        ];
+    }
+
     /* ── TARIFS ───────────────────────────────────────────────────────────────
        Le livret de l'élève et le guide de l'enseignant ne valent pas la même
        chose : le premier ouvre les exercices d'une classe, le second ouvre LES

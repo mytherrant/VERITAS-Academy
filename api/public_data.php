@@ -80,6 +80,12 @@ if ($backupFile === '' || !file_exists($backupFile)) {
         $__dc = dirname(__DIR__) . '/uploads/oeuvres/';
         foreach (vrt_livret_catalogue() as $__s => $__x) {
             if (!is_array($__x) || (int)($__x['prix'] ?? 0) <= 0) continue;
+            /* Meme regle que plus bas : on ne met en devanture que ce que
+               le serveur peut livrer. Sans cette garde, le repli publiait
+               plus large que le chemin normal — exactement l'inverse de ce
+               qu'un repli doit faire. */
+            $__e = vrt_livret_etat((string)$__s);
+            if (empty($__e['disponible'])) continue;
             $__sec[] = [
                 'id' => 'livret:' . $__s,
                 'titre' => (string)($__x['titre'] ?? $__s),
@@ -94,7 +100,7 @@ if ($backupFile === '' || !file_exists($backupFile)) {
                         ? '/uploads/oeuvres/livret_' . $__s . '.jpg' : '',
                 'numerique' => true, 'stock' => null, 'vendu' => 0, 'apercu' => true,
                 'kind' => 'livret',
-                'url' => '/livrets/cahier.html?o=' . rawurlencode($__s),
+                'url' => '/livrets/' . $__e['lien'],
             ];
         }
     }
@@ -377,6 +383,14 @@ if (function_exists('vrt_livret_catalogue')) {
         if (count($__pd_livres) >= 120) break;
         $__prix = (int)($__o['prix'] ?? 0);
         if ($__prix <= 0) continue;          // pas de prix : pas en devanture
+        /* ⚠️ DÉCLARÉ N'EST PAS PUBLIÉ. Ce bloc ne regardait que le prix : il
+           mettait donc en devanture tout ouvrage tarifé, sans vérifier qu'il
+           y avait quoi que ce soit à livrer derrière. 
+           constate sur le disque — coquille dédiée ou données du cahier — et
+           donne le lien qui va avec. C'est le MÊME calcul que sert
+           api/livret.php ; il n'y en a plus deux. */
+        $__etat = vrt_livret_etat((string)$__slug);
+        if (empty($__etat['disponible'])) continue;
         /* Couverture CONSTATÉE, jamais déclarée — même règle qu'api/livret.php :
            un chemin écrit à la main survit à la disparition du fichier, et une
            image cassée sur la vitrine d'un produit payant est pire que pas
@@ -405,7 +419,10 @@ if (function_exists('vrt_livret_catalogue')) {
             /* Le parcours propre au produit. La boutique s'en sert pour mener
                au bon tunnel sans rien savoir de sa mécanique. */
             'kind'       => 'livret',
-            'url'        => '/livrets/cahier.html?o=' . rawurlencode($__slug),
+            /* Le lien vient du serveur, pas d'une supposition : une page
+               dedicace presente mieux qu'un lecteur nu, et lui seul sait
+               laquelle des deux formes existe. */
+            'url'        => '/livrets/' . $__etat['lien'],
         ];
     }
 }

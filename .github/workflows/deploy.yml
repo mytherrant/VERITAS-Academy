@@ -477,6 +477,22 @@ jobs:
       - name: 📊 Des résultats d'examen inventés ?
         run: node tests/banc_resultats_examens.cjs
 
+      # ── 📕 CHAQUE CAHIER A-T-IL SA PAGE ? Quinze cahiers se vendent, cinq
+      #    seulement avaient la leur ; les dix autres n'existaient que derrière
+      #    `cahier.html?o=<slug>` — ça marche, mais il n'y a rien à indexer. Un
+      #    parent cherchant « cahier de français 2nde Cameroun » ne pouvait pas
+      #    nous trouver.
+      #    Le banc garde trois pièges fermés : une icône absente ne dessine RIEN
+      #    (la première version du générateur employait `i-cart`, qui n'existe
+      #    pas) ; le contenu ne s'invente pas, catalogue à l'appui ; et le prix
+      #    affiché est celui que le serveur exigera.
+      #    Il vérifie AUSSI que les coquilles verrouillées gardent leur noindex :
+      #    ce sont les produits, pas leurs vitrines.
+      #    Éprouvé par mutation le 31/08 (page retirée, icône fantôme, décompte
+      #    inventé dans la méta description : 1 au rouge chacun).
+      - name: 📕 Chaque cahier a-t-il sa page ?
+        run: node tests/banc_pages_ouvrages.cjs
+
       # ── 👁️ LE TITRE DU PANNEAU EST-IL LISIBLE ? Il a été invisible DEUX FOIS,
       #    pour la raison inverse à chaque fois. En v1.19.20 le panneau était
       #    SOMBRE et le titre portait le bleu de marque : 1,22:1 — on l'a passé
