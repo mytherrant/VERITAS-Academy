@@ -463,6 +463,20 @@ jobs:
       - name: 📂 Le menu annonce-t-il tout ce qui existe ?
         run: node tests/banc_menu_rubriques.cjs
 
+      # ── 📊 DES RÉSULTATS D'EXAMEN INVENTÉS ? La page « Nos résultats aux
+      #    examens », atteignable depuis le menu colonne Parent, affichait TROIS
+      #    années scolaires complètes avec dix classes chacune, un taux, un
+      #    nombre de candidats et un nombre d'admis. Tout était inventé, et deux
+      #    de ces années précèdent la fondation du centre. Les seuls chiffres
+      #    confirmés sont BEPC 100 %, Probatoire 69 %, BAC 61 %.
+      #    Un taux de réussite est l'argument le plus fort d'un centre scolaire,
+      #    et le plus vérifiable par un parent.
+      #    Le banc EXÉCUTE la purge de migration : vider le seed ne suffit pas,
+      #    une base déjà créée ne le rejoue jamais. Éprouvé par mutation le
+      #    31/08 (purge aveugle : 1 au rouge ; année remise au seed : 3 au rouge).
+      - name: 📊 Des résultats d'examen inventés ?
+        run: node tests/banc_resultats_examens.cjs
+
       # ── 📱 LA PLANCHE DE TRAVAIL TIENT-ELLE SUR UN TÉLÉPHONE ? Mesuré au
       #    navigateur sur 375 px le 28/08/2026 : 842 px défilaient AVANT la
       #    première ligne du texte — un écran entier rien que pour y arriver.

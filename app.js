@@ -774,23 +774,19 @@ function defaultDB(){return{
     {ex:'Probatoire', taux:69,  series:[], mentions:{}},
     {ex:'BAC',        taux:61,  series:[], mentions:{}},
   ],
-  examResults:[
-    {annee:'2022–2023',niveaux:[
-      {cls:'3ème',taux:85,candidats:42,admis:36},{cls:'Tle A',taux:78,candidats:28,admis:22},{cls:'Tle C',taux:90,candidats:20,admis:18},{cls:'Tle D',taux:82,candidats:15,admis:13},
-      {cls:'CAP 2',taux:88,candidats:18,admis:16},{cls:'Tle F',taux:83,candidats:12,admis:10},{cls:'Tle G1',taux:87,candidats:14,admis:12},{cls:'Tle TI',taux:84,candidats:10,admis:8},
-      {cls:'Form 5',taux:91,candidats:22,admis:20},{cls:'Upper Sixth',taux:87,candidats:16,admis:14}
-    ]},
-    {annee:'2021–2022',niveaux:[
-      {cls:'3ème',taux:80,candidats:38,admis:31},{cls:'Tle A',taux:75,candidats:24,admis:18},{cls:'Tle C',taux:88,candidats:18,admis:16},{cls:'Tle D',taux:79,candidats:12,admis:10},
-      {cls:'CAP 2',taux:85,candidats:15,admis:13},{cls:'Tle F',taux:80,candidats:10,admis:8},{cls:'Tle G1',taux:84,candidats:12,admis:10},{cls:'Tle TI',taux:81,candidats:8,admis:6},
-      {cls:'Form 5',taux:89,candidats:19,admis:17},{cls:'Upper Sixth',taux:84,candidats:14,admis:12}
-    ]},
-    {annee:'2020–2021',niveaux:[
-      {cls:'3ème',taux:77,candidats:35,admis:27},{cls:'Tle A',taux:71,candidats:22,admis:16},{cls:'Tle C',taux:85,candidats:16,admis:14},{cls:'Tle D',taux:75,candidats:10,admis:8},
-      {cls:'CAP 2',taux:82,candidats:12,admis:10},{cls:'Tle F',taux:77,candidats:8,admis:6},{cls:'Tle G1',taux:80,candidats:10,admis:8},{cls:'Tle TI',taux:78,candidats:7,admis:5},
-      {cls:'Form 5',taux:86,candidats:16,admis:14},{cls:'Upper Sixth',taux:81,candidats:12,admis:10}
-    ]},
-  ],
+  /* ⚠️ AUCUN RÉSULTAT D'EXAMEN N'EST FOURNI PAR DÉFAUT.
+     Ce tableau contenait TROIS années scolaires complètes — 2022-2023,
+     2021-2022, 2020-2021 — avec dix classes chacune, un taux, un nombre de
+     candidats et un nombre d'admis. Tout était inventé, et tout était
+     affiché à de vrais visiteurs sous le titre « Nos résultats aux examens »,
+     depuis l'entrée « Résultats aux examens » du menu, colonne Parent.
+     Deux de ces années sont antérieures à la fondation du centre.
+     Les seuls chiffres confirmés par Jacques sont dans `statsVitrine`
+     ci-dessus : BEPC 100 %, Probatoire 69 %, BAC 61 %. Ils n'ont ni détail
+     par classe ni effectif, et on n'en fabrique pas.
+     Une base vide affiche donc les taux confirmés et rien d'autre.
+     L'administration remplit ce tableau quand elle a de vrais chiffres. */
+  examResults:[],
   students:[
     {id:'s1',mat:'VRT-001',nom:'MBALLA',pre:'Jean-Pierre',sex:'M',dob:'12/03/2010',cls:'3ème',tel:'+237 6 91 23 45 67',parent:'M. MBALLA Paul',ptel:'+237 6 91 23 45 67',frais:25000,ins:'15/09/2024',stat:'Payé'},
     {id:'s2',mat:'VRT-002',nom:'NKENG',pre:'Marie-Claire',sex:'F',dob:'05/07/2009',cls:'4ème',tel:'+237 6 72 34 56 78',parent:'Mme NKENG Esther',ptel:'+237 6 72 34 56 78',frais:25000,ins:'15/09/2024',stat:'Payé'},
@@ -1498,6 +1494,27 @@ function _migrateDB(){
   if(!DB.forumPosts)DB.forumPosts=[];
   if(!DB.photos)DB.photos=defaultDB().photos||[];
   if(!DB.examResults)DB.examResults=defaultDB().examResults||[];
+  /* ⚠️ VIDER LE SEED NE SUFFIT PAS : une base déjà créée ne le rejoue jamais.
+     Les trois années inventées (2020-2021, 2021-2022, 2022-2023) ont été
+     semées dans toutes les bases existantes et s'affichaient à de vrais
+     visiteurs sous « Nos résultats aux examens ». On les retire ici, à la
+     signature — année semée ET dix classes dont « Upper Sixth » avec les
+     effectifs d'origine. Une année que l'administration a réellement saisie
+     ne porte pas cette signature et survit donc intacte. */
+  (function _purgerResultatsSemes(){
+    try{
+      if(!Array.isArray(DB.examResults) || !DB.examResults.length) return;
+      var SEMEES = { '2020–2021':1, '2021–2022':1, '2022–2023':1 };
+      var avant = DB.examResults.length;
+      DB.examResults = DB.examResults.filter(function(er){
+        if(!er || !SEMEES[er.annee]) return true;
+        var n = (er.niveaux || []);
+        var semee = n.length === 10 && n.some(function(x){ return x && x.cls === 'Upper Sixth'; });
+        return !semee;
+      });
+      if(DB.examResults.length !== avant && typeof save === 'function') save();
+    }catch(e){}
+  })();
   if(!DB.statsVitrine)DB.statsVitrine=defaultDB().statsVitrine||[];
   // v1.2.6 FIX : l'ancien "backfill mentions" générait des effectifs Excellent/
   // Très Bien/Bien/Assez Bien par pure formule (taux*0.42, etc.) dès qu'une
@@ -5536,6 +5553,23 @@ function vShowSec(sec,btn,_boot){
       <div class="acc-sub">Taux de réussite de nos élèves aux examens BEPC, Probatoire, BAC et GCE</div>
     </div>
     ${canEdit?'<div style="text-align:center;margin:-8px 0 16px"><button class="btn bi sm" onclick="mEditExamResults()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier les statistiques</button></div>':''}
+    ${(!Array.isArray(DB.examResults)||!DB.examResults.length)?(function(){
+      /* Base sans resultats saisis — le cas NORMAL depuis qu'on a retire les
+         trois annees inventees. On n'affiche pas une page nue : les taux que
+         Jacques a confirmes existent, ils sont dans statsVitrine. Ce qu'on
+         n'affiche pas, c'est ce qu'on ne sait pas : ni classe, ni effectif. */
+      var _st=(DB.statsVitrine||[]).filter(function(s){return s&&typeof s.taux==='number';});
+      if(!_st.length) return '';
+      return '<div class="vcard exam-card mb16" style="--exam-acc:#6A8DC7">'
+        +'<div class="fl2 fic fsb mb12"><div class="exam-year-chip">\uD83D\uDCC5 Taux confirmes par le centre</div></div>'
+        +_st.map(function(s){var _fc=s.taux>=80?'#3A8F73':s.taux>=60?'#F59E0B':'#C46F6F';
+          return '<div class="exam-row">'
+            +'<div style="min-width:80px;font-weight:700;font-size:13px">'+_esc(s.ex||'')+'</div>'
+            +'<div class="exam-bar"><div class="exam-fill" style="width:'+s.taux+'%;--exam-fill-c:'+_fc+'"></div></div>'
+            +'<div style="min-width:90px;text-align:right"><span class="mono bold" style="color:'+_fc+'">'+s.taux+'%</span></div>'
+          +'</div>';}).join('')
+        +'<div style="font-size:12px;color:var(--ink4);margin-top:10px">Le detail par classe et par effectif n\'est pas publie : le centre n\'annonce que les taux qu\'il peut justifier.</div>'
+      +'</div>';})():''}
     ${DB.examResults.map((er,ei)=>{var _xa=['#6A8DC7','#6C56A6','#059669','#D97706','#0891B2','#AE5353'][ei%6];return`<div class="vcard exam-card mb16" style="--exam-acc:${_xa}">
       <div class="fl2 fic fsb mb12">
         <div class="exam-year-chip">📅 Année scolaire ${er.annee}</div>
@@ -5596,7 +5630,19 @@ function vShowSec(sec,btn,_boot){
       </div>
       <div style="text-align:center;margin-top:10px"><button class="btn bi sm" onclick="vShowSec('boutique',document.querySelector('.vnav-btn[onclick*="boutique"]'))"><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Voir toute la boutique →</button></div>
     </div>
-    <div class="ib ibg mt16"><span>✅</span><span><strong>Nos résultats parlent d'eux-mêmes !</strong> Une moyenne de <strong>${Math.round(DB.examResults.flatMap(er=>er.niveaux).reduce((a,n)=>a+n.taux,0)/Math.max(1,DB.examResults.flatMap(er=>er.niveaux).length))}%</strong> de réussite aux examens officiels. Inscrivez votre enfant dès maintenant.</span></div>
+    ${(function(){
+      /* Cette banniere annoncait « une moyenne de X% » calculee sur
+         DB.examResults — c'est-a-dire sur trois annees inventees. Le tableau
+         etant vide par defaut, la formule donnait « 0% de reussite »
+         affiche en argument de vente. On calcule desormais sur les taux
+         CONFIRMES, et on se tait quand il n'y en a pas. */
+      var _s=(DB.statsVitrine||[]).filter(function(x){return x&&typeof x.taux==='number';});
+      var _e=(DB.examResults||[]).reduce(function(a,er){return a.concat(er.niveaux||[]);},[]);
+      var _v=_e.length?_e.map(function(n){return n.taux;}):_s.map(function(x){return x.taux;});
+      if(!_v.length) return '';
+      var _m=Math.round(_v.reduce(function(a,b){return a+b;},0)/_v.length);
+      return '<div class="ib ibg mt16"><span>✅</span><span><strong>Nos resultats parlent d\'eux-memes !</strong> Une moyenne de <strong>'+_m+'%</strong> de reussite aux examens officiels. Inscrivez votre enfant des maintenant.</span></div>';
+    })()}
     </div>`;
   } else if(sec==="elearning"){
     // Le catalogue livré est chargé à la demande : on le récupère puis on
