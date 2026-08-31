@@ -112,22 +112,49 @@ jobs:
               print('::warning title=Catalogue absent::le serveur retombera sur les 5 classes historiques')
               sys.exit(0)
           d = json.loads(cat.read_text(encoding='utf-8'))
-          manquantes = []
+
+          # ⚠️ CE CONTRÔLE EXIGEAIT UNE PAGE PAR OUVRAGE, ET CE N'EST PLUS AINSI
+          #    QUE LA BOUTIQUE VEND.
+          #    Il demandait `livrets/<slug>.html` pour chacun des quinze
+          #    ouvrages. Quatre existent (6e, 5e, 4e, 3e) ; les onze autres ont
+          #    donc fait échouer le contrôle — sauf qu'il ne s'exécutait jamais,
+          #    l'étape anti-fuite échouant avant lui. Réparer celle-ci, le
+          #    31/08/2026, a révélé celui-là.
+          #    Depuis l'unification de la devanture (30/08), `public_data.php`
+          #    vend chaque cahier par `/livrets/cahier.html?o=<slug>` — le
+          #    lecteur générique, qui ouvre la porte d'accès par code. Vérifié
+          #    en production sur `?o=tle`, un slug SANS page dédiée : la page
+          #    s'affiche et demande le code. Aucun 404.
+          #    Ce qui reste vrai, c'est l'intention : un ouvrage vendu doit
+          #    mener quelque part. On vérifie donc le chemin RÉELLEMENT emprunté.
+          lecteur = pathlib.Path('livrets/cahier.html')
+          fautes, sans_vitrine = [], []
+          if not lecteur.is_file():
+              fautes.append(f'{lecteur} absente — TOUS les cahiers deviennent des liens morts')
           for slug, o in (d.get('ouvrages') or {}).items():
-              # Un ouvrage au catalogue sans sa page, c'est un lien mort dans la
-              # boutique : le visiteur clique « acheter » et tombe sur un 404.
-              page = pathlib.Path('livrets') / f'{slug}.html'
-              if not page.is_file():
-                  manquantes.append(f'{slug} → {page} absente')
+              # Le guide du professeur, lui, est bien une page à part entière :
+              # l'annoncer sans la publier reste une promesse non tenue.
               if 'guide' in (o.get('kinds') or []):
                   g = pathlib.Path('livrets') / f'guide-{slug}.html'
                   if not g.is_file():
-                      manquantes.append(f'{slug} → {g} absente')
-          if manquantes:
-              for m in manquantes:
+                      fautes.append(f'{slug} → {g} absente')
+              # Une page d'atterrissage par ouvrage n'est pas requise pour
+              # vendre, mais son absence coûte en référencement. On le dit,
+              # sans bloquer : créer onze pages est un travail éditorial, pas
+              # une correction de déploiement.
+              if not (pathlib.Path('livrets') / f'{slug}.html').is_file():
+                  sans_vitrine.append(slug)
+          if fautes:
+              for m in fautes:
                   print(f'::error title=Ouvrage sans page::{m}')
               sys.exit(1)
-          print(f"{len(d.get('ouvrages') or {})} ouvrages au catalogue, tous avec leur page.")
+          n = len(d.get('ouvrages') or {})
+          print(f'{n} ouvrages au catalogue, tous vendables par {lecteur}.')
+          if sans_vitrine:
+              print(f"::warning title=Ouvrages sans page d'atterrissage::"
+                    f"{len(sans_vitrine)} ouvrage(s) se vendent sans page dédiée "
+                    f"(donc sans entrée propre dans les moteurs de recherche) : "
+                    + ', '.join(sorted(sans_vitrine)))
           PY
 
       - name: ✅ Récapitulatif
