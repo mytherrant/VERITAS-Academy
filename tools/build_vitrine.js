@@ -396,7 +396,12 @@ const DEST_SERVICES = {
   'Orientation':             'parcours/',
   'Support WhatsApp':        'https://wa.me/237' + TEL.slice(4),
   /* Vie scolaire */
-  'Espace Parents':          '#parents',
+  /* `#parents` est la section de PRÉSENTATION de la vitrine : deux liens
+     sortants. Le panneau parent du plan en porte vingt, vers les bulletins,
+     les reçus, la cagnotte, l'évaluation du niveau de l'enfant. C'est là que
+     doit arriver quelqu'un qui clique « Espace Parents ». */
+  'Espace Parents':          'plan.html#parent',
+  'Partenaires':             'plan.html#partenaire',
   'Cagnotte de scolarité':   APP + '#cagnotte',
   'Boutique de manuels':     '#boutique',
   'Certificats vérifiables': APP + '#verifier-certificat',

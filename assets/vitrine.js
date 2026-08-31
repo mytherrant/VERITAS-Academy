@@ -381,7 +381,23 @@
        concerne : corrigés, œuvres au programme, niveaux, évaluations,
        livrets, cours et outils pour l'élève ; programmes, commissions et
        revente pour le partenaire. */
+    /* ⚠️ DEUX JEUX DE CARTES, PAS UN. La vitrine porte les quatre vignettes
+       « chacun son espace » (région `services`) ET, plus haut, trois grandes
+       cartes illustrées Élèves / Parents / Enseignants. Corriger les
+       premières le 30/08 n'a rien changé aux secondes : Jacques a signalé le
+       31/08 que « Espace Élève » menait toujours au catalogue d'abonnements.
+       Les quatre destinations vivent donc ici, et les six boutons y renvoient.
+
+       Pourquoi le plan par profil plutôt que la section de la vitrine : la
+       section `elearning` ne porte AUCUN lien sortant, `parents` en porte 2 et
+       `enseignants` 3 — ce sont des pages de présentation. Les panneaux de
+       plan.html en portent 22, 20 et 14, vers les ressources réellement
+       publiées : corrigés, œuvres au programme, épreuves, cours, outils. Un
+       élève à qui l'on promet « le programme de sa classe et les corrigés »
+       doit atterrir sur les corrigés, pas sur une grille de tarifs. */
     goEleves: function () { location.href = '/plan.html#eleve'; },
+    goParents: function () { location.href = '/plan.html#parent'; },
+    goEnseignants: function () { location.href = '/plan.html#enseignant'; },
     goPartenaires: function () { location.href = '/plan.html#partenaire'; },
     goTarifs: function () { aller('tarifs'); },
     goBoutique: function () { aller('boutique'); },

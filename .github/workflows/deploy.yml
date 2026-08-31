@@ -436,6 +436,20 @@ jobs:
       - name: 💳 Le tunnel facture-t-il ce qu'on a cliqué ?
         run: node tests/banc_tunnel_article.cjs
 
+      # ── 🧭 CHACUN ARRIVE-T-IL CHEZ LUI ? La vitrine porte DEUX jeux de cartes
+      #    par public. Les quatre vignettes « chacun son espace » ont été
+      #    repointées le 30/08 ; les trois grandes cartes illustrées Élèves /
+      #    Parents / Enseignants sont restées telles quelles, et Jacques l'a vu
+      #    le 31/08 : « ceci renvoie toujours vers e-learning ».
+      #    Ce n'est pas un détour. La section `elearning` de la vitrine ne porte
+      #    AUCUN lien sortant, `parents` 2, `enseignants` 3 — des pages de
+      #    présentation. Les panneaux de plan.html en portent 22, 20 et 14.
+      #    Le banc a aussi trouvé qu'AUCUNE porte ne menait aux partenaires.
+      #    Éprouvé par mutation le 31/08 (carte remise au routeur générique :
+      #    2 au rouge ; porte partenaires retirée : 1 au rouge).
+      - name: 🧭 Chacun arrive-t-il chez lui ?
+        run: node tests/banc_cartes_profil.cjs
+
       # ── 📱 LA PLANCHE DE TRAVAIL TIENT-ELLE SUR UN TÉLÉPHONE ? Mesuré au
       #    navigateur sur 375 px le 28/08/2026 : 842 px défilaient AVANT la
       #    première ligne du texte — un écran entier rien que pour y arriver.
