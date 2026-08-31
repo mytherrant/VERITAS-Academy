@@ -2037,24 +2037,47 @@ h2:nth-of-type(4n+4) { border-bottom-color:rgba(91,79,168,.22) }
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   PANNEAU SOMBRE : LE TITRE ÉTAIT ILLISIBLE        (v1.19.20)
+   LE TITRE BLANC D'UN PANNEAU QUI N'EST PLUS SOMBRE   (retiré le 31/08/2026)
 
-   Mesuré en production sur .vrtc-in (dégradé #142554 → #1E3A8A) :
-       h2.vrtc-t  →  color rgb(30,73,155) = #1E499B
-   Le bleu de MARQUE posé sur un fond bleu FONCÉ : contraste 1,22:1. Le titre
-   « Vous avez la correction. L'entraînement, lui, se prépare. » — l'argument
-   de vente du panneau — était pratiquement invisible.
+   HISTOIRE, parce qu'elle explique la panne. En v1.19.20, `.vrtc-in` portait
+   un dégradé SOMBRE (#142554 → #1E3A8A) et son titre avait gardé le bleu de
+   marque : contraste 1,22:1, invisible. On l'a donc passé en blanc, avec un
+   `!important` — correct à ce moment-là.
 
-   Tous ses voisins étaient déjà corrects (menthe 123,232,194 ; texte pâle
-   211,222,242 ; or 255,201,60) : ce titre était le seul à avoir gardé la
-   couleur d'un fond CLAIR. Il passe en blanc, comme un titre sur fond sombre.
+   Depuis, la refonte LWS a éclairci le panneau : `veritas-convert.js` déclare
+   maintenant `.vrtc-in{background:#FAFBFE}`. Le blanc est resté. Mesuré en
+   production le 31/08/2026 sur corriges/5e/sequence-2.html :
 
-   ⚠️ Le contraste ne se juge pas au `background-color` de l'ancêtre : ce
-   panneau n'a qu'un `background-image`. Un scan qui ne lit que la couleur
-   remonte jusqu'au <body> blanc et déclare « illisible » des textes parfaits.
+       .vrtc-t         →  rgb(255,255,255)
+       fond .vrtc-in   →  rgb(250,251,254)
+       contraste       →  1,03:1
+
+   Le titre — « Vous avez la correction. L'entraînement, lui, se prépare. »,
+   l'argument de vente du panneau — était redevenu invisible, par le correctif
+   même qui l'avait sauvé. Signalé par Jacques : « parties illisibles ».
+
+   La règle est retirée : le titre reprend le `color:#001136` que
+   `veritas-convert.js` lui donne, soit 15:1 sur ce fond. Si le panneau
+   redevient sombre un jour, c'est LÀ qu'il faudra changer la couleur, pas
+   ici — une surcharge `!important` dans une autre feuille survit toujours à
+   la raison qui l'avait justifiée.
+
+   ⚠️ MÉTHODE, pour la prochaine fois : le contraste se juge contre le fond
+   RÉELLEMENT PEINT, en remontant les ancêtres jusqu'au premier qui peint
+   quelque chose — et un bouton porte le sien. Comparer au fond du conteneur
+   déclare illisible un bouton blanc sur bleu, qui va très bien.
+
+   POURQUOI ON REMET UNE RÈGLE AU LIEU DE N'EN LAISSER AUCUNE. Sans elle, la
+   couleur du titre était décidée par `h2:nth-of-type(4n+1){color:#1E499B}`
+   quelques lignes plus haut : le panneau prenait donc le bleu de marque ou le
+   navy courant SELON SON RANG parmi les titres de la page. Deux pages
+   voisines affichaient le même panneau dans deux couleurs — exactement le
+   « décalage de style entre les pages » que Jacques signale. On fixe donc la
+   couleur, une fois, pour toutes les pages. Spécificité (0,2,0) : elle passe
+   devant le `nth-of-type` (0,1,1) sans avoir besoin d'`!important`.
    ════════════════════════════════════════════════════════════════════════ */
 .vrtc-in .vrtc-t,
-.vrtc-t{ color:#fff !important; }
+.vrtc .vrtc-t{ color:#001136; }
 
 /* ── Marges : le texte va jusqu'au bord sur petit écran ─────────────────
    La gouttière de 20-24 px coûtait un mot par ligne sur un écran de 360 px.

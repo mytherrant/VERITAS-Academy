@@ -201,11 +201,43 @@ def controles(charge: Path | None) -> list[str]:
 
     # 2. Aucun fichier de données du produit ne doit être DANS le dépôt.
     #    L'extrait gratuit, lui, est légitime — on le reconnaît à son nom.
+    #
+    #    ⚠️ UNE LISTE DE NOMS SE PÉRIME, ET ELLE MENT DANS LES DEUX SENS.
+    #    Le 31/08/2026 elle bloquait le déploiement sur `cahier.js` (le moteur
+    #    du cahier) et `sw-cahier.js` (le service worker hors ligne), deux
+    #    fichiers de CODE ajoutés après l'écriture de la liste. Inversement,
+    #    un fichier nommé `extrait-truc.js` bourré de corrigés passerait sans
+    #    un mot, uniquement grâce à son nom.
+    #    On garde donc la liste — elle dit l'intention — mais on la double
+    #    d'une mesure du CONTENU. Un moteur est du code : des lignes courtes,
+    #    pas de données encapsulées. Un ouvrage, lui, arrive en longues lignes
+    #    de texte ou en `data:` encapsulé. La mesure attrape ce que le nom
+    #    laisse passer, et le nom explique ce que la mesure ne saurait dire.
+    #    La mesure ne s'applique QU'AUX MOTEURS. Les fichiers `extrait-`,
+    #    `demo-` et `feuilletage-` sont des données par conception : ce sont
+    #    les pages offertes, et elles ont le droit d'être dans le dépôt. Leur
+    #    appliquer la mesure produisait 21 fautes pour zéro fuite.
+    MOTEURS = {"gate.js", "collab.js", "support.js", "liseur.js",
+               "cahier.js", "sw-cahier.js"}
+    #    Seuil relevé au-dessus du plus long littéral constaté dans un moteur
+    #    (support.js : 968 caractères) et très en dessous des vraies données
+    #    (feuilletage-4e-livret.js : 24 825). Entre les deux, il n'y a rien.
+    LIGNE_MAX = 2000
     for js in SORTIE.glob("*.js"):
-        if js.name in {"gate.js", "collab.js", "support.js", "liseur.js"}:
-            continue
         if js.name.startswith(("extrait-", "demo-", "feuilletage-")):
             continue
+        if js.name in MOTEURS:
+            # Un moteur qui se met à porter un ouvrage : c'est ainsi qu'une
+            # fuite entrerait sans bruit, sous un nom déjà approuvé.
+            plus_longue = max((len(l) for l in js.read_text(
+                encoding="utf-8", errors="replace").splitlines()), default=0)
+            if plus_longue > LIGNE_MAX:
+                fautes.append(
+                    f"livrets/{js.name} : moteur autorisé, mais il porte "
+                    f"maintenant une ligne de {plus_longue} caractères — "
+                    f"cela ressemble à des DONNÉES, et le dépôt est PUBLIC")
+            continue
+
         fautes.append(f"livrets/{js.name} : données d'ouvrage dans le dépôt — "
                       f"le dépôt GitHub est PUBLIC, ce fichier doit aller en FTP")
 

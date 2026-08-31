@@ -477,6 +477,20 @@ jobs:
       - name: 📊 Des résultats d'examen inventés ?
         run: node tests/banc_resultats_examens.cjs
 
+      # ── 👁️ LE TITRE DU PANNEAU EST-IL LISIBLE ? Il a été invisible DEUX FOIS,
+      #    pour la raison inverse à chaque fois. En v1.19.20 le panneau était
+      #    SOMBRE et le titre portait le bleu de marque : 1,22:1 — on l'a passé
+      #    en blanc. Puis la refonte LWS a éclairci le panneau (#FAFBFE) et le
+      #    blanc est resté : 1,03:1, mesuré en production le 31/08/2026.
+      #    Le correctif avait reproduit la panne qu'il réparait.
+      #    La couleur du titre et le fond du panneau sont un COUPLE écrit dans
+      #    deux fichiers différents ; rien ne les tenait ensemble. Le banc
+      #    calcule le contraste WCAG entre les deux valeurs déclarées.
+      #    Éprouvé par mutation dans les DEUX sens le 31/08 (blanc rétabli :
+      #    3 au rouge ; panneau redevenu sombre : 2 au rouge).
+      - name: 👁️ Le titre du panneau est-il lisible ?
+        run: node tests/banc_lisibilite_panneau.cjs
+
       # ── 📱 LA PLANCHE DE TRAVAIL TIENT-ELLE SUR UN TÉLÉPHONE ? Mesuré au
       #    navigateur sur 375 px le 28/08/2026 : 842 px défilaient AVANT la
       #    première ligne du texte — un écran entier rien que pour y arriver.
@@ -1404,7 +1418,26 @@ jobs:
           echo "   $VUS témoin(s) servi(s) en ligne, tous présents dans ce build — rien ne sera effacé."
           [ "$MUETS" = "0" ] || echo "   ($MUETS témoin(s) sans réponse, non comptés.)"
 
+      # ── 🚀 LE TRANSFERT, AVEC UNE SECONDE CHANCE ────────────────────────────
+      # Échec constaté le 31/08/2026 : « Client is closed because Timeout
+      # (control socket) », à 32 secondes. Le délai par défaut de l'action est
+      # de 30 000 ms : LWS avait simplement mis plus longtemps à répondre sur
+      # la socket de contrôle. Rien n'était cassé — le déploiement avait juste
+      # abandonné une seconde trop tôt, et laissait la production dans un état
+      # partiel jusqu'à la relance manuelle suivante.
+      #
+      # Deux mesures, dans cet ordre : on laisse au serveur le temps de
+      # répondre (120 s), puis on retente UNE fois si la coupure survient
+      # quand même. Le transfert est idempotent — l'action compare l'état du
+      # serveur avant d'envoyer — donc une seconde passe reprend là où la
+      # première s'est arrêtée au lieu de tout renvoyer.
+      #
+      # ⚠️ La première tentative porte `continue-on-error` : son échec ne doit
+      # pas arrêter le travail AVANT que la seconde ait eu lieu. C'est bien la
+      # seconde qui décide du sort du déploiement.
       - name: 🚀 Déployer via FTP vers veritas-school.com
+        id: ftp1
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server:   ftp.veritas-school.com
@@ -1413,10 +1446,33 @@ jobs:
           local-dir:  ./deploy/
           server-dir: ./
           dangerous-clean-slate: false
+          timeout: 120000
           exclude: |
             **/.git*
             **/.gitkeep
           log-level: standard
+
+      - name: 🔁 Seconde tentative de transfert (le serveur a coupé)
+        if: steps.ftp1.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server:   ftp.veritas-school.com
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          local-dir:  ./deploy/
+          server-dir: ./
+          dangerous-clean-slate: false
+          timeout: 120000
+          exclude: |
+            **/.git*
+            **/.gitkeep
+          log-level: standard
+
+      # Une coupure rattrapée reste une information : si elle devient
+      # quotidienne, c'est l'hébergeur qu'il faut regarder, pas le workflow.
+      - name: 📝 Noter que la première tentative a échoué
+        if: steps.ftp1.outcome == 'failure'
+        run: echo "::warning title=Transfert FTP repris::La première tentative a été coupée par le serveur ; la seconde a abouti. Si cela se répète, signaler la latence FTP à LWS."
 
       - name: 🔎 Vérifier le RAG (biblio_index.db présent sur le serveur)
         if: always()
