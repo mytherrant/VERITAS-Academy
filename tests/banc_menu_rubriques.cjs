@@ -143,5 +143,32 @@ console.log(`\n${G}④ Le menu n'avance pas un prix que deux listes contredisent
     planchers.map(e => e.t + ' : ' + e.d).join(', '));
 }
 
+/* ── ⑤ Rien qui double ce que la vitrine porte déjà ─────────────────────── */
+console.log(`\n${G}⑤ Le menu ne double pas la vitrine${R}`);
+{
+  /* Jacques, 31/08/2026 : « les résultats apparaissent sur la vitrine, les
+     photos, les contacts — pas besoin d'une page ou d'un lien spécial ».
+     Mesuré alors sur la page servie : « BEPC » 25 fois, « Probatoire » 23 ;
+     huit photographies réelles ; cinq liens WhatsApp et trois adresses
+     électroniques. Ces trois entrées ne faisaient que sortir le visiteur de
+     la vitrine pour le déposer dans l'ancienne interface de l'application.
+
+     La règle générale : une entrée ne se justifie que si la vitrine ne porte
+     pas déjà l'information. On vérifie donc les deux moitiés — l'ancre est
+     absente du menu, ET la vitrine porte bien de quoi s'en passer. */
+  const DOUBLONS = [
+    { ancre: 'resultats', quoi: 'les résultats aux examens', preuve: ['BEPC', 'Probatoire'] },
+    { ancre: 'photos', quoi: 'les photos du centre', preuve: ['photo-'] },
+    { ancre: 'contact', quoi: 'le contact', preuve: ['wa.me/', 'mailto:'] }
+  ];
+  for (const d of DOUBLONS) {
+    dire(bloc.indexOf('app.html#' + d.ancre + '"') < 0,
+      'aucune entrée ne renvoie à #' + d.ancre + ' — ' + d.quoi + ' sont sur la vitrine');
+    const porte = d.preuve.every(p => vitrine.indexOf(p) > 0);
+    dire(porte, 'et la vitrine porte toujours ' + d.quoi + ' (' + d.preuve.join(', ') + ')',
+      'si la vitrine cesse de les porter, l’entrée doit revenir');
+  }
+}
+
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko === 0 ? 0 : 1);

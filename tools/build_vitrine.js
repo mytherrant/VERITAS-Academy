@@ -783,6 +783,16 @@ function blocCalendrier() {
    lisibilité, pas une sécurité : le vrai contrôle est côté application
    (_gateActif) et côté serveur. Un cadenas absent ne déverrouille rien.
    ══════════════════════════════════════════════════════════════════════════ */
+  /* ⚠️ TROIS ENTRÉES RETIRÉES LE 31/08/2026 — REDONDANTES AVEC LA VITRINE.
+     Jacques : « les résultats apparaissent sur la vitrine, les photos, les
+     contacts — pas besoin d'une page ou d'un lien spécial ».
+     Mesuré sur la page servie : « BEPC » y figure 25 fois et « Probatoire »
+     23 fois ; huit photographies réelles y sont affichées ; cinq liens
+     WhatsApp et trois adresses électroniques y sont posés. Les trois entrées
+     n'ajoutaient donc rien — elles ne faisaient que sortir le visiteur de la
+     vitrine pour le déposer dans l'ancienne interface de l'application.
+     « Photos » menait en plus à une page VIDE : DB.photos compte 0 élément.
+     Ne les rétablir que si la vitrine cesse de porter ces informations. */
 const MENU = [
   { titre: 'Élève', sous: 'Apprendre et réviser', entrees: [
     { t: 'Catalogue e-learning', d: 'Matières, œuvres, séquences', i: 'lc-book',        c: '#1E499B', f: '#DBE8FE', vp: 'elearning', g: 1 },
@@ -800,7 +810,6 @@ const MENU = [
     { t: 'VÉRITAS Flash',        d: 'Scanner le QR de sa séquence',i: 'lc-qr',          c: '#5B4FA8', f: '#EAE7F7', h: 'flash/' }
   ]},
   { titre: 'Parent', sous: 'Suivre et soutenir', entrees: [
-    { t: 'Résultats aux examens',d: 'Taux de réussite',            i: 'lc-trending',    c: '#007E11', f: '#E0F5E5', h: APP + '#resultats' },
     { t: 'Orientation',          d: 'Choisir sa série',            i: 'lc-compass',     c: '#0E7C86', f: '#DDF2F4', h: APP + '#orientation' },
     { t: 'Matières et coefficients', d: 'Poids réels, orientation',i: 'lc-scale',       c: '#5B4FA8', f: '#EAE7F7', h: 'parcours/' },
     { t: 'Cagnotte de scolarité',d: 'Faire financer son année',    i: 'lc-gift',        c: '#A84200', f: '#FFF3E4', h: APP + '#cagnotte' },
@@ -846,8 +855,6 @@ const MENU = [
      éditorial qui présente réellement le centre. */
     { t: 'Présentation',         d: 'Qui nous sommes',             i: 'lc-building',    c: '#1E499B', f: '#DBE8FE', h: 'decouvrir/' },
     { t: 'Actualités',           d: 'Ce qui se passe au centre',   i: 'lc-megaphone',   c: '#A84200', f: '#FFF3E4', h: APP + '#actualites' },
-    { t: 'Photos',               d: 'La vie du centre',            i: 'lc-star',        c: '#B03A6E', f: '#FBE4EE', h: APP + '#photos' },
-    { t: 'Nous contacter',       d: 'Douala · réponse sous 2 h',   i: 'lc-message',     c: '#1E499B', f: '#DBE8FE', h: APP + '#contact' },
     { t: 'S’inscrire',           d: 'Créer un compte gratuit',     i: 'lc-user',        c: '#A84200', f: '#FFF3E4', h: APP + '#inscription' },
     /* Le filet de sécurité : 193 pages publiques, rangées par profil. Quand
        une entrée manque au menu — c'était le cas de sept services — c'est là
