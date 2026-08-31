@@ -450,6 +450,19 @@ jobs:
       - name: 🧭 Chacun arrive-t-il chez lui ?
         run: node tests/banc_cartes_profil.cjs
 
+      # ── 📂 LE MENU ANNONCE-T-IL TOUT CE QUI EXISTE ? Le 31/08/2026 le menu
+      #    « Plus » comptait 26 entrées et SEPT services publiés n'y figuraient
+      #    pas — dont l'Atelier de Français, un produit vendu aux enseignants
+      #    dont le seul chemin connu était le lien envoyé aux collègues.
+      #    Le banc vérifie aussi que la page servie porte EXACTEMENT la table de
+      #    build_vitrine.js : `vitrine.html` est un artefact construit mais c'est
+      #    lui qui est versionné, et la maquette dont il sort ne l'est pas. Une
+      #    entrée ajoutée à la table sans être reportée resterait invisible.
+      #    Éprouvé par mutation le 31/08 (Atelier retiré de la table : 1 au
+      #    rouge ; entrée pointant un dossier absent : 3 au rouge).
+      - name: 📂 Le menu annonce-t-il tout ce qui existe ?
+        run: node tests/banc_menu_rubriques.cjs
+
       # ── 📱 LA PLANCHE DE TRAVAIL TIENT-ELLE SUR UN TÉLÉPHONE ? Mesuré au
       #    navigateur sur 375 px le 28/08/2026 : 842 px défilaient AVANT la
       #    première ligne du texte — un écran entier rien que pour y arriver.

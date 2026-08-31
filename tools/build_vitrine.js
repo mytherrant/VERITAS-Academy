@@ -791,7 +791,13 @@ const MENU = [
     { t: 'Évaluations en ligne', d: 'Entraînement chronométré',    i: 'lc-clock',       c: '#A84200', f: '#FFF3E4', h: APP + '#evaluations', g: 1 },
     { t: 'Œuvres au programme',  d: 'Analyses et fiches',          i: 'lc-bookopen',    c: '#1E499B', f: '#DBE8FE', h: 'oeuvres/' },
     { t: 'Programmes par classe',d: 'De la 6ᵉ à la Terminale',     i: 'lc-graduation',  c: '#0E7C86', f: '#DDF2F4', h: 'niveaux/' },
-    { t: 'Outils gratuits',      d: 'Calculateurs de moyenne',     i: 'lc-calculator',  c: '#007E11', f: '#E0F5E5', h: 'outils/' }
+    { t: 'Outils gratuits',      d: 'Calculateurs de moyenne',     i: 'lc-calculator',  c: '#007E11', f: '#E0F5E5', h: 'outils/' },
+    /* ⚠️ TROIS SERVICES QUI EXISTAIENT SANS ÊTRE ANNONÇÉS (31/08/2026).
+       Chacun a sa page publiée, indexée, alimentée — et aucune entrée de menu.
+       Un visiteur ne pouvait les atteindre qu'en connaissant leur URL. */
+    { t: 'Espace élève',         d: 'Corrigés, quiz et méthodes',  i: 'lc-user',        c: '#1E499B', f: '#DBE8FE', h: 'eleve/' },
+    { t: 'Mon cahier en ligne',  d: 'Interactif, 6ᵉ → Terminale',  i: 'lc-bookopen',    c: '#A84200', f: '#FFF3E4', h: 'livrets/' },
+    { t: 'VÉRITAS Flash',        d: 'Scanner le QR de sa séquence',i: 'lc-qr',          c: '#5B4FA8', f: '#EAE7F7', h: 'flash/' }
   ]},
   { titre: 'Parent', sous: 'Suivre et soutenir', entrees: [
     { t: 'Résultats aux examens',d: 'Taux de réussite',            i: 'lc-trending',    c: '#007E11', f: '#E0F5E5', h: APP + '#resultats' },
@@ -805,8 +811,23 @@ const MENU = [
     { t: 'Ressources et cours',  d: 'Leçons interactives',         i: 'lc-presentation',c: '#B03A6E', f: '#FBE4EE', h: 'ressources/' },
     { t: 'Corrigés du cahier papier', d: 'La page des QR codes',   i: 'lc-qr',          c: '#1E499B', f: '#DBE8FE', h: 'manuels.html' },
     { t: 'Boutique de manuels',  d: 'Cahiers et études d’œuvres',  i: 'lc-shop',        c: '#A84200', f: '#FFF3E4', vp: 'boutique' },
-    { t: 'Abonnements',          d: 'Dès 1 000 FCFA / mois',       i: 'lc-wallet',      c: '#5B4FA8', f: '#EAE7F7', vp: 'tarifs' },
-    { t: 'Vérifier un certificat',d: 'Authentifier une distinction',i: 'lc-shield',     c: '#1E499B', f: '#DBE8FE', h: APP + '#verifier-certificat' }
+    /* ⚠️ PAS DE PRIX PLANCHER ICI TANT QUE DEUX LISTES COEXISTENT.
+       L'entrée annonçait « Dès 1 000 FCFA / mois ». Or deux tarifs
+       enseignant circulent : le plan e-learning « ENSEIGNANT — MOIS » à
+       1 000 F (base) et l'Atelier à 800 F/mois (api/plateforme.php,
+       `ens_mois`). Un plancher affiché à 1 000 F est faux si l'on vend à
+       800 F, et faux dans l'autre sens si c'est 800 F qui doit disparaître.
+       L'arbitrage est commercial, pas technique : en attendant, l'entrée
+       nomme les publics au lieu d'avancer un chiffre. */
+    { t: 'Abonnements',          d: 'Élève, enseignant, établissement', i: 'lc-wallet', c: '#5B4FA8', f: '#EAE7F7', vp: 'tarifs' },
+    { t: 'Vérifier un certificat',d: 'Authentifier une distinction',i: 'lc-shield',     c: '#1E499B', f: '#DBE8FE', h: APP + '#verifier-certificat' },
+    /* L'Atelier de Français est un PRODUIT VENDU aux enseignants — corpus
+       indexé, composition d'épreuves conformes au MINESEC, travail en
+       équipe. Il n'avait aucune entrée de menu : le seul chemin connu était
+       le lien direct envoyé aux collègues. */
+    { t: 'Atelier de Français',  d: 'Composer une épreuve MINESEC',i: 'lc-presentation',c: '#B03A6E', f: '#FBE4EE', h: 'plateforme/' },
+    { t: 'Espace enseignant',    d: 'Guide, grilles, progressions',i: 'lc-doc',         c: '#0E7C86', f: '#DDF2F4', h: 'enseignant/' },
+    { t: 'Adopter les cahiers',  d: 'Pour une classe, un établissement', i: 'lc-checkcircle', c: '#007E11', f: '#E0F5E5', h: 'adopter/' }
   ]},
   { titre: 'Partenaire', sous: 'Diffuser et représenter', entrees: [
     { t: 'Devenir partenaire',   d: '9 formules, marges revendeur',i: 'lc-users',       c: '#B03A6E', f: '#FBE4EE', h: APP + '#partenariat' },
@@ -827,7 +848,11 @@ const MENU = [
     { t: 'Actualités',           d: 'Ce qui se passe au centre',   i: 'lc-megaphone',   c: '#A84200', f: '#FFF3E4', h: APP + '#actualites' },
     { t: 'Photos',               d: 'La vie du centre',            i: 'lc-star',        c: '#B03A6E', f: '#FBE4EE', h: APP + '#photos' },
     { t: 'Nous contacter',       d: 'Douala · réponse sous 2 h',   i: 'lc-message',     c: '#1E499B', f: '#DBE8FE', h: APP + '#contact' },
-    { t: 'S’inscrire',           d: 'Créer un compte gratuit',     i: 'lc-user',        c: '#A84200', f: '#FFF3E4', h: APP + '#inscription' }
+    { t: 'S’inscrire',           d: 'Créer un compte gratuit',     i: 'lc-user',        c: '#A84200', f: '#FFF3E4', h: APP + '#inscription' },
+    /* Le filet de sécurité : 193 pages publiques, rangées par profil. Quand
+       une entrée manque au menu — c'était le cas de sept services — c'est là
+       qu'on les retrouve. Autant le dire. */
+    { t: 'Plan du site',         d: 'Tout VÉRITAS, par profil',    i: 'lc-compass',     c: '#0C2A6A', f: '#E4E9F2', h: 'plan.html' }
   ]}
 ];
 
