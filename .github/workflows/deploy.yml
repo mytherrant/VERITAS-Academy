@@ -247,6 +247,22 @@ jobs:
             exit 1
           fi
 
+      # ── 📖 LA PAGE SAIT-ELLE LIRE CE QU'ON LUI LIVRE ? ────────────────────
+      #    Le 01/09/2026, un acheteur de 6ᵉ a ouvert son cahier et n'a vu que le
+      #    sommaire — sans un chiffre, sous son propre filigrane. La porte avait
+      #    livré, le moteur savait rendre, le fichier était intact. Mais la page
+      #    cherchait `window.BOOKLET`, abandonné le 28/08 au profit de
+      #    `CAHIER_BLOCS` : elle recevait 1 181 blocs et n'en voyait aucun.
+      #    Rien n'a planté, rien n'est apparu dans la console, et les deux bancs
+      #    ci-dessus sont restés verts — l'un éprouve la porte, l'autre le
+      #    moteur ; personne ne vérifiait qu'ils parlaient la même langue.
+      #    Huit coquilles étaient dans ce cas, les plus vendues. Il a fallu la
+      #    plainte d'un client pour l'apprendre.
+      #    Éprouvé par mutation : remise dans son état de la veille, la coquille
+      #    de 6ᵉ fait rougir ce banc.
+      - name: 📖 La page sait-elle lire le format qu'on lui livre ?
+        run: node tests/banc_format_cahiers.cjs
+
       # ── 📮 LE CODE PAYÉ ARRIVE-T-IL JUSQU'À L'ACHETEUR ? ──────────────────
       #    Le 01/09/2026, deux clients ont payé sans recevoir leur code. Rien
       #    n'avait échoué du côté de l'argent : vérifié sur la production, les
@@ -1324,9 +1340,23 @@ jobs:
           # pendant un an. Rien n'aurait plante : le correctif n'aurait
           # simplement existe pour personne.
           # REGLE : tout ce que .htaccess sert en immutable doit entrer ici.
+          # ET TOUT CE QUE LE SERVICE WORKER SERT DEPUIS SON CACHE, ce qui revient
+          # au meme et durait meme plus longtemps. `livrets/sw-cahier.js` garde
+          # les COQUILLES D'OUVRAGE — /livrets/6e.html, bord-tle.html… — en
+          # « cache d'abord », sans expiration : seul un changement de sa cle
+          # (alignee sur $VER, plus bas) les jette. Or les .html n'entraient pas
+          # dans cette empreinte. Consequence mesuree le 01/09/2026 : les huit
+          # coquilles de 6e a 3e ont ete corrigees — elles lisaient un format de
+          # donnees abandonne le 28/08 et n'affichaient qu'un sommaire vide —
+          # mais AUCUN autre fichier de la liste ne changeait. L'empreinte serait
+          # restee identique, $VER aussi, la cle du worker aussi, et l'acheteur
+          # qui s'est plaint aurait rouvert exactement la meme page vide, le
+          # correctif deploye. Une correction invisible est une correction qui
+          # n'existe pas.
           EMPREINTE=$(cat deploy/app.js deploy/app.css \
                           deploy/assets/*.css deploy/assets/*.js \
                           deploy/livrets/*.css deploy/livrets/*.js \
+                          deploy/livrets/*.html \
                           deploy/chunks/*.js 2>/dev/null | sha1sum | tr -dc '0-9' | cut -c1-6)
           [ -z "$EMPREINTE" ] && EMPREINTE=0
           VER="$BASE.$EMPREINTE"

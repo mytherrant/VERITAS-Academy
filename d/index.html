@@ -58,6 +58,10 @@
   <a href="https://veritas-school.com/livrets/">Les livrets en ligne</a></footer>
 
 <script src="/livrets/gate.js?v=29598ca7"></script>
+<!-- Même règle de clé que le cahier de l'élève : sans elle, l'exercice que
+     l'enseignant a désigné ne se retrouve pas ici, et le devoir s'affiche sans
+     son énoncé. Voir `refResoudre()` dans collab.js. -->
+<script src="/livrets/cahier.js?v=1.20.16"></script>
 <script src="/livrets/collab.js?v=0c06e8ee"></script>
 <script>
 (function(){
@@ -165,6 +169,10 @@
   function rendreEleve(){
     var d = etat.devoir, moi = etat.macopie || {}, h = [];
     var corrigee = !!moi.rendue;
+    /* L'ouvrage préfixe les clés d'exercice : sans lui, aucune référence ne se
+       résout et chaque exercice du cahier s'afficherait sans son énoncé. Cette
+       page n'a pas de `?o=` — le devoir, lui, dit sa classe. */
+    C.ouvrage(d.niveau || '');
 
     if(corrigee){
       h.push('<div style="margin:6px 0 14px">'

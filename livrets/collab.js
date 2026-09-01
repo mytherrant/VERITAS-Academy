@@ -66,56 +66,106 @@
     return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
   }
 
-  /* ── Résolution d'un renvoi au livret ───────────────────────────────────────
-     Format de référence : s<séquence>.w<semaine>.i<leçon>.f<exercice>.
-     Le serveur ne stocke QUE cette référence : l'énoncé n'est jamais recopié
-     hors du livret, donc un devoir ne peut pas servir à en extraire le contenu.
-     La résolution se fait ici, dans les données que l'élève a déjà — c'est-à-dire
-     seulement s'il a payé.                                                      */
-  function refParse(ref) {
-    var m = /^s(\d+)\.w(\d+)\.i(\d+)(?:\.f(\d+))?$/.exec(String(ref || ''));
-    if (!m) return null;
-    return { s: +m[1], w: +m[2], i: +m[3], f: m[4] === undefined ? null : +m[4] };
+  /* ── Résolution d'un renvoi au cahier ───────────────────────────────────────
+     LE VOLET COLLABORATIF PARLAIT UNE LANGUE MORTE. Tout ce qui suit lisait
+     `window.BOOKLET.sequences[].weeks[].items[].flow[]` et repérait un exercice
+     par son RANG — `s0.w1.i2.f3`. Ce modèle a disparu le 28/08/2026, quand tous
+     les cahiers ont été ramenés à une liste plate de blocs (`CAHIER_BLOCS`).
+     Depuis, `refResoudre()` rendait `null` à tous les coups et `livre()`, dans
+     la console enseignant, ne trouvait jamais rien : l'enseignant qui a payé son
+     guide lisait « Le livret n'est pas encore chargé. Réessayez dans un
+     instant » — indéfiniment, pour une attente qui n'aurait jamais fini.
+     Personne ne l'a signalé ; le message avait l'air d'un contretemps.
+
+     ON NE REPÈRE PLUS UN EXERCICE PAR SON RANG. Le rang était déjà le mauvais
+     choix : ajouter un exercice en tête de leçon décalait toutes les références
+     des devoirs déjà distribués, et l'élève ouvrait un autre exercice que celui
+     qu'on lui avait donné. `cahier.js` a résolu ce problème pour les réponses —
+     une clé stable, faite du contexte et de l'empreinte de l'énoncé, éprouvée
+     par `tests/banc_cles_cahier.cjs`. On prend la sienne, telle quelle
+     (`window.VRTCahierCles`), au lieu d'en écrire une seconde : le devoir
+     désigne alors l'exercice sous le nom exact où l'élève range sa réponse.
+
+     Le serveur ne stocke QUE cette clé : l'énoncé n'est jamais recopié hors du
+     cahier, donc un devoir ne peut pas servir à en extraire le contenu. La
+     résolution se fait ici, dans les données que l'élève a déjà — c'est-à-dire
+     seulement s'il a payé.                                                     */
+
+  /** Les blocs du cahier ouvert, quel que soit l'ouvrage. */
+  function blocs() {
+    var B = window.CAHIER_BLOCS;
+    return Array.isArray(B) ? B : null;
+  }
+
+  /** Un bloc du cahier est-il un exercice (et non un titre, un corpus, une
+   *  définition) ? Les accessoires — QCM, appariement, lignes — appartiennent à
+   *  l'exercice qui les précède ; ils ne se donnent pas séparément. */
+  function estExercice(bloc) {
+    return !!bloc && bloc.y === 'exercice' && String(bloc.txt || '').trim().length > 8;
+  }
+
+  /* Le contexte (séquence · semaine · leçon) d'un exercice ne vit pas dans le
+     bloc : il vit dans les titres qui le précèdent. On balaie donc une fois, et
+     on garde ce qu'on a croisé en chemin. */
+  function inventaire() {
+    var B = blocs();
+    if (!B) return null;
+    if (inventaire._pour === B) return inventaire._out;   // même tableau = même résultat
+    var cles = (typeof window.VRTCahierCles === 'function')
+      ? window.VRTCahierCles(ouvrageCourant(), B) : null;
+    var seq = null, sem = null, lec = null, out = [];
+    B.forEach(function (b, i) {
+      if (!b || typeof b !== 'object') return;
+      if (b.y === 'sequence') { seq = b; sem = null; lec = null; return; }
+      if (b.y === 'semaine')  { sem = b; return; }
+      if (b.y === 'lecon')    { lec = b; return; }
+      if (!estExercice(b)) return;
+      out.push({
+        cle: cles ? cles[i] : String(i),
+        rang: i,
+        consigne: String(b.txt || ''),
+        num: b.no || '',
+        sequence: seq ? ((seq.no ? 'Séq. ' + seq.no + ' — ' : '') + (seq.title || '')) : '',
+        seqNo: seq ? String(seq.no || '') : '',
+        semaine: sem ? ((sem.no ? 'Sem. ' + sem.no + ' — ' : '') + (sem.title || '')) : '',
+        semNo: sem ? String(sem.no || '') : '',
+        lecon: lec ? ((lec.no ? lec.no + ' · ' : '') + (lec.title || '')) : ''
+      });
+    });
+    inventaire._pour = B; inventaire._out = out;
+    return out;
+  }
+
+  /* L'ouvrage sert de préfixe aux clés — c'est ce qui empêche une clé de 6ᵉ
+     d'ouvrir un exercice de 5ᵉ. `cahier.html?o=<slug>` le porte dans l'URL ;
+     ailleurs (console enseignant, page de devoir) on prend la classe annoncée. */
+  var _ouvrage = '';
+  function ouvrageCourant(v) {
+    if (v) _ouvrage = String(v);
+    if (!_ouvrage) {
+      try { _ouvrage = new URLSearchParams(location.search).get('o') || ''; } catch (e) { _ouvrage = ''; }
+    }
+    return _ouvrage;
   }
 
   function refResoudre(ref) {
-    var p = refParse(ref);
-    if (!p) return null;
-    var B = window.BOOKLET || window.BOOKLET_5E || window.BOOKLET_4E || window.BOOKLET_3E;
-    if (!B || !B.sequences) return null;
-    var seq = B.sequences[p.s];              if (!seq) return null;
-    var sem = (seq.weeks || [])[p.w];        if (!sem) return null;
-    var lec = (sem.items || [])[p.i];        if (!lec) return null;
-    if (p.f === null) {
-      return { titre: lec.title || '', consigne: '', lecon: lec.label || '', disc: lec.disc || '',
-               semaine: sem.title || '', sequence: seq.title || '' };
-    }
-    var bloc = (lec.flow || [])[p.f];        if (!bloc) return null;
-    // ⚠️ L'énoncé est dans `body`. `t` n'est PAS du texte : c'est un marqueur de
-    // type ('exercise' / 'section'). L'afficher écrirait « exercise » à la place
-    // de la question — vérifié sur les données réelles.
-    return {
-      titre: lec.title || '', consigne: bloc.body || bloc.consigne || '',
-      num: bloc.num || '', cat: bloc.cat || '',
-      lecon: lec.label || '', disc: lec.disc || '',
-      semaine: sem.title || '', sequence: seq.title || ''
-    };
+    var inv = inventaire();
+    if (!inv || !ref) return null;
+    for (var i = 0; i < inv.length; i++) if (inv[i].cle === ref) return inv[i];
+    return null;
   }
 
-  /** Un bloc du livret est-il un exercice (et non un titre de section
-   *  ni un corpus d'observation) ? */
-  function estExercice(bloc) {
-    return !!bloc && bloc.t === 'exercise' && String(bloc.body || '').trim().length > 8;
-  }
-
-  /** Libellé lisible d'une référence, pour l'aperçu et la console. */
+  /** Libellé lisible d'une référence, pour l'aperçu et la console.
+   *  Une référence de l'ANCIEN format (`s0.w1.i2`) ne se résout plus — le
+   *  modèle qu'elle désignait n'existe pas. On le dit, au lieu d'afficher un
+   *  repère inventé : le devoir garde de toute façon son `repere` en clair,
+   *  écrit au moment où il a été composé. */
   function refRepere(ref, classe) {
-    var p = refParse(ref);
-    if (!p) return 'Exercice du livret';
     var r = refResoudre(ref);
-    var base = (classe ? classe + ' · ' : '') + 'Séq. ' + (p.s + 1) + ' · Sem. ' + (p.w + 1);
-    if (!r) return base + ' · Exercice ' + ((p.f === null ? p.i : p.f) + 1);
-    return base + ' · ' + (r.lecon || '') + (r.disc ? ' (' + r.disc + ')' : '')
+    if (!r) return 'Exercice du livret';
+    return (classe ? classe + ' · ' : '')
+         + (r.sequence ? r.sequence + ' · ' : '')
+         + (r.lecon || '')
          + (r.num ? ' · Exercice ' + r.num : '');
   }
 
@@ -154,8 +204,9 @@
     dateFr: dateFr,
     refResoudre: refResoudre,
     refRepere: refRepere,
-    refParse: refParse,
     estExercice: estExercice,
+    inventaire: inventaire,
+    ouvrage: ouvrageCourant,
     parrainLire: parrainLire,
     monId: monId,
     lienPartage: lienPartage,

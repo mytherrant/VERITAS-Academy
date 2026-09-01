@@ -428,6 +428,63 @@ async function serveurPret() {
       'et la livraison annonce MANUEL_DATA, pas un nom qu’elle aurait choisi',
       JSON.stringify(livM.j && livM.j.installe));
 
+  /* ── ⑦ L'ÉLÈVE NE REÇOIT PAS LE GUIDE ────────────────────────────────────
+     La porte envoyait les DEUX charges à l'élève. C'était sans conséquence
+     tant que chacune posait sa propre globale (`window.BOOKLET`,
+     `window.GUIDE_6E`). Depuis la normalisation du 28/08/2026, les deux posent
+     `window.CAHIER_BLOCS` : le guide, envoyé en second, écrasait le cahier.
+     Mesuré sur la 6ᵉ — charge élève : 492 exercices, 61 QCM, 16 appariements,
+     zéro corrigé ; charge enseignant : 481 corrigés, aucun QCM. C'est la
+     seconde qui gagnait, donc l'élève payait 1 500 F pour recevoir la totalité
+     des corrigés et perdre ses questions à choix.
+     Les corrigés ont leur canal — `api/cahier.php?action=corrige`, un par un,
+     et seulement là où l'élève a déjà répondu. */
+  fs.writeFileSync(path.join(donDir, 'guide-6e.js'),
+    'window.CAHIER_BLOCS=[{"y":"corrige","txt":"Corrigé — c) exclamative."}];', 'utf8');
+  const ouvE = await api({ action: 'unlock', code: (await api({ action: 'admin_gen', classe: '6e',
+                             kind: 'livret', n: 1, jours: 365, label: 'Banc — fuite corrigés' },
+                             SECRET)).j.codes[0], classe: '6e', kind: 'livret' });
+  const livE = await api({ action: 'content', token: ouvE.j && ouvE.j.token });
+  dit(livE.status === 200 && !!(livE.j.js && livE.j.js.booklet),
+      'l’élève reçoit bien son cahier');
+  dit(!(livE.j && livE.j.js && livE.j.js.guide),
+      'et PAS le guide — sinon il écrase le cahier et livre tous les corrigés',
+      'guide reçu : ' + String(livE.j && livE.j.js && livE.j.js.guide).slice(0, 60));
+
+  const ouvP = await api({ action: 'unlock', code: (await api({ action: 'admin_gen', classe: '6e',
+                             kind: 'guide', n: 1, jours: 365, label: 'Banc — guide seul' },
+                             SECRET)).j.codes[0], classe: '6e', kind: 'guide' });
+  const livP = await api({ action: 'content', token: ouvP.j && ouvP.j.token });
+  dit(livP.status === 200 && !!(livP.j.js && livP.j.js.guide),
+      'l’enseignant reçoit bien son guide');
+  dit(!(livP.j && livP.j.js && livP.j.js.booklet),
+      'et PAS le cahier joint — il effacerait le guide qu’il vient de demander');
+
+  /* ── ⑧ LA CONSOLE DES DEVOIRS DEMANDE LE CAHIER, PAS LE GUIDE ────────────
+     L'enseignant y choisit des exercices, et chaque choix est enregistré sous
+     la CLÉ de l'exercice — celle sous laquelle l'élève range sa réponse. Or le
+     guide ne porte ni le même contexte ni le même énoncé : mesuré sur la 6ᵉ,
+     467 exercices de chaque côté et ZÉRO clé commune. Composé depuis le guide,
+     un devoir renverrait donc à des exercices introuvables chez l'élève.
+     Ce que ce contrôle interdit surtout, c'est l'inverse : qu'un jeton d'ÉLÈVE
+     puisse réclamer autre chose que son cahier. */
+  const livPB = await api({ action: 'content', token: ouvP.j && ouvP.j.token, veut: 'booklet' });
+  dit(livPB.status === 200 && !!(livPB.j.js && livPB.j.js.booklet),
+      'l’enseignant qui compose un devoir reçoit le CAHIER de l’élève',
+      'HTTP ' + livPB.status + ' ' + JSON.stringify(livPB.j).slice(0, 160));
+  dit(!(livPB.j && livPB.j.js && livPB.j.js.guide),
+      'et toujours une seule charge — le guide ne part pas avec');
+  dit(livPB.j && livPB.j.installe && livPB.j.installe.booklet === 'BOOKLET',
+      'et la livraison annonce ce qu’elle installe',
+      JSON.stringify(livPB.j && livPB.j.installe));
+
+  const livEB = await api({ action: 'content', token: ouvE.j && ouvE.j.token, veut: 'guide' });
+  dit(!(livEB.j && livEB.j.js && livEB.j.js.guide),
+      'un ÉLÈVE ne peut pas réclamer le guide — le souhait ne vaut pas un droit',
+      'guide reçu : ' + String(livEB.j && livEB.j.js && livEB.j.js.guide).slice(0, 60));
+  dit(livEB.status === 200 && !!(livEB.j.js && livEB.j.js.booklet),
+      'il reçoit son cahier, comme s’il n’avait rien demandé');
+
   // L'inventaire du dépôt : la seule façon de savoir, sans acheter les quinze
   // ouvrages un par un, lequel doit être re-déposé.
   const dep = await api({ action: 'admin_depot' }, SECRET);

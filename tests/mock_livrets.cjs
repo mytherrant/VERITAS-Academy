@@ -61,9 +61,47 @@ function claims(token) {
   try { return JSON.parse(Buffer.from(String(token).split('.')[0], 'base64url').toString('utf8')); }
   catch (e) { return null; }
 }
+/* ── CE BANC SERVAIT LA DÉMONSTRATION, PAS LE PRODUIT ────────────────────────
+   Le 01/09/2026, un acheteur de 6ᵉ a ouvert son cahier et n'a vu que le
+   sommaire. Aucun banc ne l'avait vu, et celui-ci en est la raison : il ne
+   lisait que `livrets/`, où vivent les extraits gratuits et les démos. Or
+   `demo-6e-livret.js` pose encore `window.BOOKLET` — le format d'avant le
+   28/08/2026. La coquille lisait `window.BOOKLET`, le bouchon lui en servait,
+   tout était vert ; la production, elle, livre `window.CAHIER_BLOCS` depuis la
+   normalisation, et la page ne voyait rien.
+
+   Un bouchon qui sert un format que la production ne sert plus ne mesure pas le
+   produit : il mesure la démonstration, et il valide une page morte. On lit donc
+   D'ABORD les vraies données — `uploads/protected/livrets/`, déposées par FTP,
+   hors dépôt — et on ne retombe sur `livrets/` que faute de mieux, en préférant
+   alors l'EXTRAIT (`extrait-6e.js`, format normalisé) à la démo.               */
+const CHARGE_REELLE = path.join(RACINE, 'uploads', 'protected', 'livrets');
+
 function lireDonnees(nom) {
-  const p = path.join(RACINE, 'livrets', nom);
-  return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null;
+  for (const p of [path.join(CHARGE_REELLE, nom), path.join(RACINE, 'livrets', nom)]) {
+    if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8');
+  }
+  return null;
+}
+
+/* La globale que ce fichier pose — le serveur l'annonce (`installe`) et la porte
+   s'en sert pour vérifier qu'une livraison a bien INSTALLÉ quelque chose. Le
+   bouchon doit l'annoncer aussi, sinon il exerce un contrat que la production
+   n'a pas. Même lecture qu'`identifiantDonnees()` dans gate.js. */
+function identifiantDonnees(src) {
+  const m = /^[\s﻿]*window\.([A-Za-z_$][A-Za-z0-9_$]*)\s*=/.exec(String(src || '').slice(0, 400));
+  return m ? m[1] : '';
+}
+
+/* Le cahier de l'élève, le guide de l'enseignant — au format réel s'il est là,
+   sinon l'extrait normalisé de la même classe. Jamais la démo : c'est elle qui
+   a rendu ce banc aveugle. */
+function chargeDe(classe, kind) {
+  const noms = kind === 'guide'
+    ? ['guide-' + classe + '.js']
+    : ['booklet-' + classe + '.js', 'extrait-' + classe + '.js'];
+  for (const n of noms) { const s = lireDonnees(n); if (s) return { nom: n, src: s }; }
+  return null;
 }
 
 function api(url, corps) {
@@ -94,11 +132,25 @@ function api(url, corps) {
     if (a === 'content') {
       const c = claims(corps.token);
       if (!c) return { s: 401, j: { ok: false, error: 'Session expirée.', code: 'auth' } };
-      // Le banc ne dispose que des EXTRAITS gratuits : c'est suffisant pour
-      // exercer le rendu, et cela évite d'avoir le produit complet sur le disque.
+      /* UNE SEULE CHARGE, comme la production. Ce bouchon envoyait les deux —
+         cahier ET guide — alors qu'`api/livret.php` n'en envoie qu'une depuis
+         que les deux posent la même globale : la seconde effacerait la
+         première, et le guide livré à un élève, ce sont tous les corrigés dans
+         son navigateur. Un bouchon qui envoie les deux ne peut pas voir cette
+         faute-là ; il la couvre. */
+      /* `veut:'booklet'` — la console des devoirs demande le CAHIER avec un
+         jeton d'enseignant, pour désigner les exercices sous la clé que l'élève
+         leur donne. Même règle que la production : honoré pour un enseignant,
+         jamais pour un élève (qui ne pourrait sinon réclamer le guide). */
+      const veutCahier = c.k === 'guide' && corps.veut === 'booklet';
+      const ch = chargeDe(c.c, veutCahier ? 'livret' : c.k);
+      if (!ch) return { s: 409, j: { ok: false, code: 'missing',
+        error: 'Aucune donnée pour ' + c.c + ' (' + c.k + ') — dépose-la dans uploads/protected/livrets/.' } };
+      const quoi = (c.k === 'guide' && !veutCahier) ? 'guide' : 'booklet';
       return { s: 200, j: { ok: true, classe: c.c, kind: c.k,
         wm: { id: c.id.toUpperCase(), lb: 'Banc', d: '17/08/2026', txt: 'VÉRITAS · BANC · 17/08/2026' },
-        js: { booklet: lireDonnees('demo-6e-livret.js'), guide: lireDonnees('demo-6e-guide.js') } } };
+        installe: { [quoi]: identifiantDonnees(ch.src) },
+        js: { [quoi]: ch.src } } };
     }
     if (a === 'claim') {
       const ref = String(corps.ref || '').trim().toUpperCase();

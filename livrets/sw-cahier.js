@@ -38,7 +38,15 @@
    sans cela, une correction déployée resterait invisible pour qui a déjà
    ouvert le cahier une fois — la panne la plus difficile à croire, puisque le
    fichier EST corrigé sur le serveur. */
-const CACHE = 'vrt-cahier-v1.20.15';
+/* v1.20.16 — LE CORRECTIF DU 01/09/2026 NE POUVAIT PAS ARRIVER SANS CE NOMBRE.
+   Les huit coquilles d'ouvrage (6ᵉ→3ᵉ et leurs guides) sont devenues des
+   redirections vers `cahier.html`, le seul moteur qui sache lire le format
+   normalisé. Mais `/livrets/*.html` est servi CACHE D'ABORD, et le cahier vide
+   dormait déjà dans le cache de l'acheteur : sans changer ce nom, il aurait
+   rouvert sa page cassée, correctif déployé ou non — et se serait plaint une
+   seconde fois d'un bogue effectivement corrigé. Corriger la page ET la servir
+   sont deux gestes ; le second est celui-ci. */
+const CACHE = 'vrt-cahier-v1.20.16';
 
 const COQUILLE = [
   '/livrets/cahier.html',

@@ -128,10 +128,26 @@ async function ouvrirAvecAchat(page, achat) {
     };
     dire(/id="hote"/.test(lire('cahier.html')),
       '#hote — le lecteur générique, 14 ouvrages sur 15');
-    const coquilles = ['6e', '5e', '4e', '3e'].filter(c => /id="sheet"/.test(lire(c + '.html')));
-    dire(coquilles.length === 4,
-      '#sheet — les quatre coquilles de collège (' + coquilles.length + '/4)',
-      'manquantes : ' + ['6e', '5e', '4e', '3e'].filter(c => !coquilles.includes(c)).join(', '));
+    /* ⚠️ CE CONTROLE NOMMAIT LES QUATRE COQUILLES DE COLLEGE, et il a eu raison
+       de rougir le 01/09/2026 : elles ne portent plus `#sheet`. Elles ne
+       portent plus rien du tout — elles REDIRIGENT vers `cahier.html`, parce
+       qu'elles lisaient un format de donnees abandonne le 28/08 et n'affichaient
+       qu'un sommaire vide a qui venait de payer. Le lecteur generique couvre
+       donc les quinze ouvrages, et c'est `#hote`, verifie juste au-dessus, qui
+       porte desormais la regle d'impression pour eux.
+       `#sheet` n'a pas disparu pour autant : les deux pages de demonstration le
+       portent encore, et elles s'ouvrent SANS code. Une regle qui ne matche
+       rien ne dit rien — on constate donc ou il vit reellement, au lieu de
+       nommer une liste qui a change. */
+    const portent = ['demo-6e', 'feuilletage-4e'].filter(c => /id="sheet"/.test(lire(c + '.html')));
+    dire(portent.length > 0,
+      '#sheet — les pages de demonstration (' + portent.length + '/2)',
+      'aucune page ne porte plus #sheet : la regle @media print de gate.js vise du vide');
+    const redirigent = ['6e', '5e', '4e', '3e']
+      .filter(c => /location\.replace\("cahier\.html\?o=/.test(lire(c + '.html')));
+    dire(redirigent.length === 4,
+      'et les quatre coquilles de college mènent au lecteur générique (' + redirigent.length + '/4)',
+      'ne redirigent pas : ' + ['6e', '5e', '4e', '3e'].filter(c => !redirigent.includes(c)).join(', '));
     dire(/d\.id = 'lis'/.test(lire('liseur.js')),
       '#lis — le feuilletage, posé à l’exécution par liseur.js');
   }

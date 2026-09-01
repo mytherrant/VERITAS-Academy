@@ -241,7 +241,13 @@
   }
   // Une clé par ouvrage ET par nature : le guide de l'enseignant et le livret
   // de l'élève ne doivent pas se remplacer l'un l'autre sur un poste partagé.
-  function cleCache() { return cfg.classe + '|' + cfg.kind; }
+  // `veut` en fait partie : la console des devoirs demande le CAHIER avec un
+  // jeton d'enseignant (voir `config`). Sans ce troisième terme, elle rangerait
+  // le cahier sous la clé du guide, et l'enseignant qui rouvre son guide hors
+  // ligne y trouverait le cahier de l'élève — sans un seul corrigé.
+  function cleCache() {
+    return cfg.classe + '|' + cfg.kind + (cfg.veut ? '|' + cfg.veut : '');
+  }
 
   function cacheEcrire(r) {
     return idbFaire('readwrite', function (m) {
@@ -325,7 +331,12 @@
        soit cassé — mais lequel est joint dépend de qui demande. Juger
        « booklet » indispensable dans les deux cas fermerait le guide d'un
        enseignant parce que le cahier de l'élève, lui, est abîmé. */
-    var essentiel = ((r.kind || cfg.kind) === 'guide') ? 'guide' : 'booklet';
+    /* Ce qu'on est venu chercher — et la console des devoirs, avec un jeton
+       d'enseignant, vient chercher le CAHIER. Juger le guide indispensable
+       dans son cas déclarerait la livraison manquée alors qu'elle est
+       exactement celle qui a été demandée. */
+    var essentiel = (cfg.veut === 'booklet') ? 'booklet'
+                  : (((r.kind || cfg.kind) === 'guide') ? 'guide' : 'booklet');
     ['booklet', 'guide'].forEach(function (k) {
       if (typeof js[k] !== 'string' || !js[k]) {
         // Le serveur écarte lui-même ce qu'il ne sait pas ouvrir. Absent ou
@@ -394,7 +405,7 @@
   }
 
   function charger(token) {
-    return post(API, { action: 'content', token: token }).then(function (r) {
+    return post(API, { action: 'content', token: token, veut: cfg.veut || undefined }).then(function (r) {
       var bilan = installer(r);
       /* ⚠️ NE JAMAIS METTRE DE CÔTÉ CE QUI VIENT D'ÉCHOUER. Le commentaire
          ci-dessous disait déjà la règle — « exactement ce qui vient de
@@ -420,6 +431,14 @@
       cfg.classe = (o && o.classe) || '';
       cfg.kind   = (o && o.kind) || 'livret';
       cfg.titre  = (o && o.titre) || '';
+      /* `veut:'booklet'` — la console des devoirs, seule, demande le CAHIER avec
+         un jeton d'enseignant : elle y choisit les exercices à donner, et un
+         exercice doit être désigné sous la clé que le cahier de l'ÉLÈVE lui
+         donne. Composé depuis le guide, le devoir renverrait à des exercices
+         que l'élève ne retrouverait pas (mesuré : zéro clé commune sur 467).
+         Le serveur reste seul juge : il n'honore ce souhait que pour un jeton
+         d'enseignant, et n'envoie jamais qu'une charge à la fois. */
+      cfg.veut   = (o && o.veut === 'booklet') ? 'booklet' : '';
       /* Les coquilles d'origine passaient leur titre en dur
          (`titre:'Livret 6ᵉ'`). Le moteur générique, lui, ne connaît que le
          slug de l'URL : l'écran de paiement annonçait donc « Livret 1ere » —

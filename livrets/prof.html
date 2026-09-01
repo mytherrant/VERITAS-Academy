@@ -57,6 +57,11 @@
 <footer class="bot">© <span id="y"></span> Centre VÉRITAS · Mythe Errant — Douala, Cameroun</footer>
 
 <script src="/livrets/gate.js?v=29598ca7"></script>
+<!-- Le moteur du cahier, pour sa SEULE règle de clé (`VRTCahierCles`) : c'est
+     elle qui nomme un exercice, et c'est sous ce nom-là que l'élève range sa
+     réponse. En écrire une seconde ici ferait deux vérités, et un devoir qui
+     désigne un exercice que le cahier de l'élève ne reconnaît pas. -->
+<script src="/livrets/cahier.js?v=1.20.16"></script>
 <script src="/livrets/collab.js?v=0c06e8ee"></script>
 <script>
 (function(){
@@ -103,8 +108,23 @@
 
   function demarrer(){
     // Le contenu du livret sert à composer les devoirs : on le charge une fois.
-    G.config({ classe:S.classe, kind:'guide', titre:'Guide '+S.classe });
-    G.resume().catch(function(){});
+    /* `veut:'booklet'` — cette console ne montre jamais le guide : elle sert a
+       COMPOSER des devoirs, et un exercice s'y designe sous la cle que lui
+       donne le cahier de l'eleve. Voir la note de `config()` dans gate.js. */
+    G.config({ classe:S.classe, kind:'guide', veut:'booklet', titre:'Guide '+S.classe });
+    /* L'OUVRAGE PRÉFIXE LES CLÉS DES EXERCICES, et c'est lui qui empêche une
+       clé de 6ᵉ de désigner un exercice de 5ᵉ. Cette page n'a pas de `?o=` dans
+       son URL — sans cette ligne, les clés seraient calculées sur un préfixe
+       vide et ne correspondraient à RIEN dans le cahier de l'élève. */
+    C.ouvrage(S.classe);
+    /* Le contenu arrive par le réseau ; `rendre()` ci-dessous part avant lui.
+       Sans ce rappel, l'onglet « Nouveau devoir » ouvert trop tôt annonçait un
+       cahier absent et ne se ravisait jamais — il fallait changer d'onglet et
+       revenir. On repeint quand le cahier est là, et seulement si l'enseignant
+       regarde l'écran que ça concerne. */
+    G.resume().then(function(){
+      if (S.onglet === 'nouveau') rendre();
+    }).catch(function(){});
     $('sous').textContent = 'Classe de ' + S.classe + ' · session enseignant';
     rendre();
     charger();
@@ -235,8 +255,15 @@
   }
 
   // ── Nouveau devoir ──────────────────────────────────────────────────────────
+  /* Les exercices du cahier, à plat, avec leur contexte et leur clé stable.
+     Cette fonction cherchait `window.BOOKLET || BOOKLET_5E || …` — les globales
+     d'avant la normalisation du 28/08/2026. Elle rendait donc `null` à tous les
+     coups, et la console affichait « Le livret n'est pas encore chargé.
+     Réessayez dans un instant » à un enseignant qui pouvait attendre toujours.
+     Voir la note de `refResoudre()` dans collab.js. */
   function livre(){
-    return window.BOOKLET || window.BOOKLET_5E || window.BOOKLET_4E || window.BOOKLET_3E || null;
+    var inv = C.inventaire();
+    return (inv && inv.length) ? inv : null;
   }
 
   function vueNouveau(){
@@ -253,8 +280,9 @@
       + '<div class="bloc"><h3>Exercices du livret</h3>'
       + (B ? '<div style="display:flex;gap:8px"><select id="sq"></select><select id="sm"></select></div>'
              + '<div class="exopick" id="pick" style="margin-top:10px"></div>'
-           : '<p class="meta">Le livret n\'est pas encore chargé. Réessayez dans un instant, ou composez '
-             + 'le devoir uniquement avec vos propres exercices.</p>')
+           : '<p class="meta">Votre cahier n\'est pas ouvert dans cet onglet : saisissez votre code '
+             + 'enseignant sur la page du cahier, puis revenez ici. Vous pouvez aussi composer le '
+             + 'devoir uniquement avec vos propres exercices, ci-dessous.</p>')
       + '</div>'
       + '<div class="bloc"><h3>Vos propres exercices</h3>'
       + '<div id="miens"></div>'
@@ -268,39 +296,57 @@
     $('pub').onclick = publier;
   }
 
-  function remplirSeq(B){
+  /* Les exercices arrivent à plat : le regroupement se fait ici, sur ce que les
+     titres traversés ont laissé sur chaque exercice. Deux niveaux, comme avant —
+     séquence puis leçon. La leçon plutôt que la semaine : tous les cahiers en
+     ont une, les Bords n'ont pas de semaines, et un cahier sans découpage tombe
+     proprement sur un seul groupe au lieu d'une liste vide. */
+  function remplirSeq(EX){
     var sq = $('sq'), sm = $('sm');
-    sq.innerHTML = (B.sequences||[]).map(function(s,i){
-      return '<option value="'+i+'">Séq. '+(i+1)+' — '+C.esc(s.title||'')+'</option>'; }).join('');
-    function semaines(){
-      var s = B.sequences[+sq.value] || {};
-      sm.innerHTML = (s.weeks||[]).map(function(w,i){
-        return '<option value="'+i+'">Sem. '+(i+1)+' — '+C.esc(String(w.title||'').slice(0,44))+'</option>'; }).join('');
+
+    function distinctes(liste, champ){
+      var vues = {}, out = [];
+      liste.forEach(function(e){
+        var v = e[champ] || '';
+        if(!(v in vues)){ vues[v] = 1; out.push(v); }
+      });
+      return out;
+    }
+
+    var seqs = distinctes(EX, 'sequence');
+    sq.innerHTML = seqs.map(function(s,i){
+      return '<option value="'+i+'">'+C.esc(s || 'Tout le cahier')+'</option>'; }).join('');
+
+    function lecons(){
+      var s = seqs[+sq.value] || '';
+      var dans = EX.filter(function(e){ return (e.sequence||'') === s; });
+      var ls = distinctes(dans, 'lecon');
+      sm.innerHTML = ls.map(function(l,i){
+        return '<option value="'+i+'">'+C.esc(String(l || 'Toute la séquence').slice(0,48))+'</option>'; }).join('');
       exos();
     }
+
     function exos(){
-      var si = +sq.value, wi = +sm.value;
-      var w = ((B.sequences[si]||{}).weeks||[])[wi] || {};
-      var h = [];
-      (w.items||[]).forEach(function(lec, ii){
-        (lec.flow||[]).forEach(function(bl, fi){
-          // Un exercice, c'est bl.t === 'exercise' et son enonce est dans bl.body.
-          // `t` est un MARQUEUR DE TYPE ('exercise' / 'section'), jamais du texte :
-          // s'en servir comme enonce afficherait « exercise » a l'eleve.
-          if(!C.estExercice(bl)) return;
-          var c = String(bl.body||'').trim();
-          var ref = 's'+si+'.w'+wi+'.i'+ii+'.f'+fi;
-          var rep = (lec.label||'') + (lec.disc ? ' · '+lec.disc : '')
-                  + (bl.num ? ' · Exercice '+bl.num : '');
-          h.push('<label><input type="checkbox" data-ref="'+ref+'" data-rep="'+C.esc(rep)+'">'
-            + '<span><strong>'+C.esc(rep)+'</strong> <span class="pill">'+C.esc(bl.cat||'')+'</span><br>'
-            + C.esc(c.slice(0,150))+'</span></label>');
-        });
+      var s = seqs[+sq.value] || '';
+      var dans = EX.filter(function(e){ return (e.sequence||'') === s; });
+      var ls = distinctes(dans, 'lecon');
+      var l = ls[+sm.value] || '';
+      var h = dans.filter(function(e){ return (e.lecon||'') === l; }).map(function(e){
+        /* La référence est la CLÉ STABLE de l'exercice — celle sous laquelle
+           l'élève range sa réponse dans son cahier. Elle ne bouge pas quand un
+           exercice est ajouté ailleurs, contrairement au rang qu'on écrivait
+           avant, qui décalait les devoirs déjà distribués. */
+        var rep = (e.lecon||'') + (e.num ? ' · Exercice '+e.num : '');
+        return '<label><input type="checkbox" data-ref="'+C.esc(e.cle)+'" data-rep="'+C.esc(rep)+'">'
+          + '<span><strong>'+C.esc(rep || 'Exercice')+'</strong>'
+          + (e.semaine ? ' <span class="pill">'+C.esc(e.semaine.slice(0,38))+'</span>' : '') + '<br>'
+          + C.esc(e.consigne.slice(0,150))+'</span></label>';
       });
-      $('pick').innerHTML = h.length ? h.join('') : '<p class="meta">Aucun exercice dans cette semaine.</p>';
+      $('pick').innerHTML = h.length ? h.join('') : '<p class="meta">Aucun exercice dans cette leçon.</p>';
     }
-    sq.onchange = semaines; sm.onchange = exos;
-    semaines();
+
+    sq.onchange = lecons; sm.onchange = exos;
+    lecons();
   }
 
   var nEx = 0;

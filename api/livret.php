@@ -45,7 +45,10 @@
  * USAGE (public — POST JSON uniquement)
  *   {action:"unlock",  code, classe, kind}   → {ok, token, exp, kind, label}
  *   {action:"session", token}                → {ok, exp, kind, classe}
- *   {action:"content", token}                → {ok, js:{booklet,guide}, wm}
+ *   {action:"content", token}                → {ok, js:{booklet|guide}, installe, wm}
+ *       UNE seule charge : le cahier pour l'élève, le guide pour l'enseignant.
+ *       Les deux posent `window.CAHIER_BLOCS` depuis le 28/08/2026 — envoyer
+ *       les deux, c'est en effacer une (et livrer les corrigés à l'élève).
  *
  * USAGE (admin — Bearer API_SECRET, comme db.php)
  *   {action:"admin_gen",    classe, kind, n, jours, label}  → codes EN CLAIR (une seule fois)
@@ -788,18 +791,64 @@ if ($action === 'content') {
         return $s === false ? null : $s;
     };
 
+    /* ── L'ENSEIGNANT QUI COMPOSE UN DEVOIR A BESOIN DU CAHIER, PAS DU GUIDE ──
+       La console des devoirs (`livrets/prof.html`) laisse l'enseignant choisir
+       des exercices, et chaque choix est enregistré sous la CLÉ de l'exercice —
+       celle sous laquelle l'élève range sa réponse. Or cette clé est faite du
+       contexte et de l'énoncé, et le guide ne dit ni l'un ni l'autre comme le
+       cahier : ses séquences n'ont pas de numéro et ses énoncés sont préfixés
+       « Exercice 1 — ». Mesuré sur la 6ᵉ : 467 exercices de chaque côté, et
+       ZÉRO clé commune. Un devoir composé depuis le guide désignerait donc des
+       exercices que le cahier de l'élève ne reconnaît pas — l'élève verrait
+       « ouvre cet exercice dans ton livret » à la place de chaque énoncé.
+
+       L'enseignant peut donc demander le cahier explicitement. Ce n'est pas une
+       élévation de droit : le guide coûte plus cher et donnait déjà les deux
+       avant qu'on ne les sépare. Ce qui reste interdit, et l'est ici par la
+       condition elle-même, c'est l'inverse — un jeton d'élève ne peut RIEN
+       demander d'autre que son cahier. Et l'on n'en envoie toujours qu'UNE :
+       les deux charges posent la même globale, la seconde effacerait la
+       première. */
+    $veutCahier = $kind === 'guide' && ($in['veut'] ?? '') === 'booklet';
+
     $js = [];
-    if ($kind === 'guide') {
-        // L'enseignant reçoit le guide, et le livret pour suivre l'élève.
-        $js['guide']   = $lire('guide-' . $classe . '.js');
+    if ($veutCahier) {
         $js['booklet'] = $lire('booklet-' . $classe . '.js');
+        if ($js['booklet'] === null) lv_err(409, 'Livret pas encore déposé sur le serveur.', 'missing');
+    } elseif ($kind === 'guide') {
+        // L'enseignant reçoit le guide. Lui seul : depuis l'unification des
+        // formats, les deux charges posent la MÊME globale (voir ci-dessous),
+        // et le livret joint effacerait le guide qu'il vient de demander.
+        $js['guide'] = $lire('guide-' . $classe . '.js');
         if ($js['guide'] === null) lv_err(409, 'Guide pas encore déposé sur le serveur.', 'missing');
     } else {
-        // L'élève reçoit son livret ET les corrigés (bouton « Voir la correction »),
-        // mais seulement après déverrouillage — c'était précisément la fuite :
-        // guide-data-*.js partait en <script src> avant toute vérification.
+        /* ── L'ÉLÈVE REÇOIT SON CAHIER, ET RIEN QUE SON CAHIER ────────────────
+           CETTE PORTE ENVOYAIT LE GUIDE AVEC. C'était juste avant le
+           28/08/2026 : chaque charge posait sa propre globale
+           (`window.BOOKLET`, `window.GUIDE_6E`), les coquilles lisaient les
+           deux, et le bouton « Voir la correction » y puisait sur place.
+
+           Depuis la normalisation, les deux fichiers posent le MÊME nom —
+           `window.CAHIER_BLOCS`. Le guide, envoyé en second, ÉCRASAIT donc le
+           cahier de l'élève. Mesuré sur la 6ᵉ : la charge élève porte 492
+           exercices, 61 questions à choix et 16 appariements sans un seul
+           corrigé ; la charge enseignant porte 481 corrigés et aucun exercice
+           à choix. C'est la seconde qui gagnait.
+
+           Deux conséquences, et la première est grave :
+             ① l'élève qui paie 1 500 F recevait LA TOTALITÉ DES CORRIGÉS, dans
+                le fichier que son navigateur télécharge — précisément ce que
+                tout le dispositif existe pour empêcher. `api/cahier.php` le dit
+                sans ambiguïté : « le cahier que l'élève télécharge n'en
+                contient aucun ; ils vivent dans corrige-<ouvrage>.js et ne
+                sortent qu'un par un, après une réponse enregistrée » ;
+             ② il perdait les questions à choix et les lignes de réponse : le
+                guide n'en a pas. Un QCM s'affichait sans ses propositions.
+
+           Les corrigés ont leur canal, et il est meilleur : un par un, sur
+           `api/cahier.php?action=corrige`, et seulement là où l'élève a déjà
+           répondu. On n'envoie donc plus le guide ici. */
         $js['booklet'] = $lire('booklet-' . $classe . '.js');
-        $js['guide']   = $lire('guide-' . $classe . '.js');
         if ($js['booklet'] === null) lv_err(409, 'Livret pas encore déposé sur le serveur.', 'missing');
     }
 
@@ -816,10 +865,11 @@ if ($action === 'content') {
        encaisse. On tranche donc ici, une bonne fois, au seul endroit qui tient
        le fichier entier.
 
-       LE GUIDE JOINT NE FAIT PAS TOMBER LA LIVRAISON. L'élève reçoit son cahier
-       ET les corrigés ; si ce sont les corrigés qui sont abîmés, lui retirer son
-       cahier serait aggraver la panne. On retire le fichier fautif et on livre
-       le reste : le bouton « Voir la correction » se taira, le cahier s'ouvrira.
+       UNE SEULE CHARGE PART D'ICI, celle qu'on est venu chercher — le cahier
+       pour l'élève, le guide pour l'enseignant (voir plus haut : depuis que les
+       deux posent la même globale, la seconde effaçait la première). La boucle
+       en couvre deux parce qu'elle ne présume pas de laquelle est présente ;
+       ce qui manque n'est simplement pas jugé.
 
        `installe` DIT CE QUE LE FICHIER DÉFINIT, il ne juge pas du nom. Le nom
        attendu change avec la classe (`BOOKLET` en 6ᵉ, `BOOKLET_5E` en 5ᵉ) et
@@ -837,7 +887,11 @@ if ($action === 'content') {
         }
         $installe[$quoi] = $ident;
     }
-    $essentiel = ($kind === 'guide') ? 'guide' : 'booklet';
+    /* Ce qu'on est venu chercher — pas ce que le jeton laisse espérer. Déduit du
+       seul `$kind`, l'enseignant qui demande le CAHIER pour composer un devoir
+       se voyait réclamer un guide qu'on n'avait pas chargé, et repartait avec
+       409 « abîmé » sur un fichier parfaitement sain. Attrapé au banc. */
+    $essentiel = $veutCahier ? 'booklet' : (($kind === 'guide') ? 'guide' : 'booklet');
     if ($js[$essentiel] === null && !isset($installe[$essentiel])) {
         lv_err(409, 'Le fichier de cet ouvrage est abîmé sur le serveur — il doit être '
             . 'redéposé. Ton code reste valable : réessaie dans un moment.', 'corrupt');
