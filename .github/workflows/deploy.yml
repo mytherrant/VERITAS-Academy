@@ -264,6 +264,21 @@ jobs:
       - name: 📮 Le code payé arrive-t-il jusqu'à l'acheteur ?
         run: node tests/banc_remise_code.cjs
 
+      # ── 📲 ET S'IL NE REVIENT JAMAIS SUR LA PAGE ? ────────────────────────
+      #    Les réparations ci-dessus vivent toutes dans le navigateur de
+      #    l'acheteur. Trois clients de plus ont payé les 31/08 et 01/09 sans
+      #    rien recevoir : localStorage vidé, autre téléphone, achat fait pour
+      #    l'enfant d'un voisin — et il ne reste RIEN sur l'appareil.
+      #    api/_notify_lib.php ajoute le canal qui n'en dépend pas : le serveur
+      #    envoie le code au numéro qui a payé, dès que la passerelle confirme.
+      #    Ce banc lève une VRAIE passerelle SMS (php -S) et relit ce qu'elle
+      #    reçoit — un gabarit mal substitué part en 200 avec un message vide.
+      #    Il exige surtout qu'un 200 sans accusé ne soit PAS compté livré :
+      #    « solde épuisé » répond 200 comme « message accepté », et croire le
+      #    client servi serait pire que l'incident d'origine.
+      - name: 📲 Le serveur envoie-t-il le code au numéro qui a payé ?
+        run: node tests/banc_remise_sms.cjs
+
       # ── 🔑 LA CLÉ D'UN EXERCICE survit-elle à une correction du cahier ?
       #    Si elle bouge, l'élève retrouve ses réponses sous les mauvaises
       #    questions et l'annotation du professeur désigne un autre exercice.
@@ -1036,6 +1051,7 @@ jobs:
             api/_json_boot.php \
             api/_auth_lib.php \
             api/_livret_lib.php \
+            api/_notify_lib.php \
             api/livret.php \
             api/collab.php \
             api/cahier.php \

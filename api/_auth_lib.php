@@ -74,6 +74,12 @@ if (!defined('VRT_AUTH_LIB')) {
     // n'inclut rien en retour — pas de cycle — et lit VRT_HMAC_KEY à l'appel.
     require_once __DIR__ . '/_livret_lib.php';
 
+    // Remise du code par SMS / WhatsApp. Chargé ici pour la MÊME raison que le
+    // registre : c'est le paiement confirmé qui déclenche la remise, et
+    // `vrt_grant_entitlement()` est le seul point que les quatre passerelles
+    // traversent. Cette bibliothèque n'inclut rien en retour non plus.
+    require_once __DIR__ . '/_notify_lib.php';
+
     // ── Base de données partagée (même fichier que db.php / student_data.php) ──
     function vrt_db_file(): string {
         return dirname(__DIR__) . '/data/veritas_db.json';
@@ -950,6 +956,41 @@ if (!defined('VRT_AUTH_LIB')) {
                 'cree'   => time(),
             ]);
 
+            /* ── ET ON LE LUI ENVOIE, AU LIEU DE L'ATTENDRE ───────────────────
+               Le bon de livraison ci-dessus se RETIRE : il suppose que
+               l'acheteur revienne, sur le même appareil, avec sa référence. Les
+               31/08 et 01/09/2026, cinq clients ne sont pas revenus — payer par
+               Orange Money oblige à quitter le navigateur, et Android jette
+               l'onglet resté derrière. Leur code a attendu sur le serveur
+               pendant qu'ils croyaient avoir perdu 1 500 F.
+
+               On met donc la remise en file ICI, où l'on tient encore le numéro
+               qui a payé. Simple écriture de fichier : nous sommes SOUS LE
+               VERROU de la base, et un appel réseau y bloquerait tous les
+               paiements suivants. L'envoi part après, une fois le verrou rendu
+               (vrt_grant_entitlement_to_file).
+
+               Best-effort assumé : un échec de mise en file ne doit PAS annuler
+               un droit déjà payé — il se lit dans le journal et dans
+               `admin_notify_list`. */
+            $nq = vrt_notify_enfiler([
+                'ref'    => $ref,
+                'tel'    => $tel,
+                // L'adresse n'est demandée qu'à l'achat, et elle reste
+                // facultative : beaucoup d'acheteurs paient par Orange Money
+                // sans en avoir une sous la main. La remise doit donc marcher
+                // avec l'un OU l'autre, jamais exiger les deux.
+                'mail'   => (string) ($state['clientEmail'] ?? ''),
+                'classe' => $classe,
+                'kind'   => $kind,
+                'titre'  => (string) (vrt_livret_classes()[$classe] ?? $classe),
+                'code'   => $code,
+                'lien'   => vrt_notify_lien($classe),
+                'exp'    => (int) ($em['expire'] ?? 0),
+                'n'      => $n,
+            ]);
+            if ($nq !== '') vrt_pay_log('[LIVRET_REMISE] ref=' . $ref . ' non enfilee : ' . $nq);
+
             $db['livretVentes'][] = [
                 'id' => 'lv_' . bin2hex(random_bytes(5)), 'ref' => $ref,
                 'classe' => $classe, 'kind' => $kind, 'code' => $code,
@@ -1498,7 +1539,27 @@ if (!defined('VRT_AUTH_LIB')) {
         }
         flock($fp, LOCK_UN);
         fclose($fp);
+
+        /* ── LA REMISE PART ICI, ET PAS UNE LIGNE PLUS HAUT ───────────────────
+           `vrt_grant_entitlement()` a mis le code en file ; l'envoi, lui, est un
+           appel réseau de plusieurs secondes. Le faire sous `flock` aurait tenu
+           la base entière fermée pendant qu'une passerelle SMS réfléchit — donc
+           bloqué les paiements arrivant en même temps, pour un SMS.
+
+           Budget de trois messages : celui qu'on vient d'émettre, plus deux
+           retards rattrapés au passage. Une passerelle de paiement attend notre
+           200 ; au-delà, elle conclut à l'échec et rejoue le webhook.
+
+           Ne lève jamais, ne change pas le verdict rendu à la passerelle : un
+           SMS qui ne part pas est un incident de livraison, pas un paiement
+           raté. Le journal et `admin_notify_list` le disent. */
+        $remise = ['tentes' => 0, 'envoyes' => 0, 'restants' => 0];
+        try { $remise = vrt_notify_vider(3); } catch (\Throwable $e) {
+            vrt_pay_log('[REMISE_ECHEC] ' . $e->getMessage());
+        }
+
         return ['ok' => true, 'changed' => $changed, 'msg' => $res['msg'] ?? '',
+                'remise' => $remise,
                 // Remonté jusqu'au fichier d'état par camerpayGrant() : un refus
                 // de prix doit être LISIBLE dans le tableau de bord, pas seulement
                 // dans un journal que personne n'ouvre.

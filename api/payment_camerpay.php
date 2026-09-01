@@ -512,6 +512,11 @@ if ($action === 'init' && $method === 'POST') {
         'accountId'      => $accountId,
         'clientNom'      => $clientNom,
         'clientTel'      => $payerNumber,
+        /* L'adresse était transmise à CamerPay (customer_email) et perdue pour
+           NOUS : l'état ne la gardait pas, donc l'octroi ne l'avait pas, donc la
+           remise du code ne pouvait pas s'en servir. Elle n'est validée qu'une
+           fois — ici — pour qu'aucune adresse douteuse n'entre dans l'état. */
+        'clientEmail'    => (filter_var($clientMail, FILTER_VALIDATE_EMAIL) ? $clientMail : ''),
         // Cagnotte : mot laissé par le contributeur, affiché publiquement à côté
         // de sa contribution une fois le paiement vérifié.
         'fundMessage'    => mb_substr(trim((string)($input['fundMessage'] ?? '')), 0, 140),

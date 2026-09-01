@@ -51,6 +51,10 @@
  *   {action:"admin_gen",    classe, kind, n, jours, label}  → codes EN CLAIR (une seule fois)
  *   {action:"admin_list"}                                   → inventaire (sans les codes)
  *   {action:"admin_revoke", id}                             → révoque (effet immédiat)
+ *   {action:"admin_vente",  ref}                            → le code émis pour une vente
+ *   {action:"admin_notify_list"}                            → file de remise SMS/WhatsApp
+ *   {action:"admin_notify_drain", budget}                   → relance la file
+ *   {action:"admin_notify_retry", ref, tel}                 → réarme une remise abandonnée
  *
  * DÉPÔT DES DONNÉES (par FTP, hors dépôt Git — le dépôt GitHub est PUBLIC) :
  *   uploads/protected/livrets/booklet-<classe>.js
@@ -421,6 +425,82 @@ if (strpos($action, 'admin_') === 0) {
         $j = max(1, min(365, (int) ($in['jours'] ?? 30)));
         $l = vrt_livret_expirants($j);
         lv_out(200, ['ok' => true, 'jours' => $j, 'total' => count($l), 'codes' => $l]);
+    }
+
+    /* ── RELIRE LE CODE D'UNE VENTE ───────────────────────────────────────────
+       Le 01/09/2026, pour rendre leur code à trois clients, il a fallu rejouer
+       `claim` à la main en connaissant leur numéro payeur : aucune surface
+       d'administration ne savait répondre à « quel code a été émis pour cette
+       référence ? ». Le registre ne le peut pas — il n'en garde que l'empreinte
+       HMAC, et c'est très bien ainsi. Le bon de livraison, lui, le sait.
+
+       Réservé au Bearer admin, et journalisé : relire un code vendu est une
+       opération légitime (un client au téléphone) qui doit laisser une trace.  */
+    if ($action === 'admin_vente') {
+        $ref = trim((string) ($in['ref'] ?? ''));
+        if ($ref === '') lv_err(400, 'Référence requise.', 'ref');
+        $v = vrt_livret_vente_lire($ref);
+        if ($v === null) lv_err(404, 'Aucune vente pour cette référence.', 'unknown');
+        lv_log('[ADMIN-VENTE] ref=' . substr($ref, 0, 24) . ' code=…' . substr((string) ($v['code'] ?? ''), -4));
+        $n = vrt_notify_lire($ref);
+        lv_out(200, ['ok' => true, 'ref' => $ref,
+            'code'   => (string) ($v['code'] ?? ''),
+            'codes'  => (is_array($v['codes'] ?? null) && count($v['codes']) > 1) ? array_values($v['codes']) : null,
+            'classe' => (string) ($v['classe'] ?? ''), 'kind' => (string) ($v['kind'] ?? ''),
+            'exp'    => (int) ($v['exp'] ?? 0), 'cree' => (int) ($v['cree'] ?? 0),
+            'lien'   => vrt_notify_lien((string) ($v['classe'] ?? '')),
+            // Ce que la remise automatique a fait de cette vente, s'il y en a une.
+            'remise' => $n === null ? null : ['etat' => (string) ($n['etat'] ?? ''),
+                                              'tel4' => (string) ($n['tel4'] ?? ''),
+                                              'essais' => (int) ($n['essais'] ?? 0),
+                                              'erreur' => (string) ($n['erreur'] ?? '')],
+        ]);
+    }
+
+    /* ── LA REMISE DES CODES, VUE DE L'ADMINISTRATION ─────────────────────────
+       Un canal d'envoi qui échoue en silence recrée exactement le défaut qu'il
+       devait corriger : un client qui a payé et qui attend, sans que personne
+       ne le sache. Ces trois actions rendent la file VISIBLE — ce qui est parti,
+       ce qui attend, ce qui a définitivement échoué et réclame un humain.       */
+    if ($action === 'admin_notify_list') {
+        $l = vrt_notify_liste(max(1, min(500, (int) ($in['max'] ?? 200))));
+        $par = ['attente' => 0, 'envoye' => 0, 'echec' => 0, 'sans_numero' => 0];
+        foreach ($l as $m) { $e = (string) $m['etat']; if (isset($par[$e])) $par[$e]++; }
+        lv_out(200, ['ok' => true, 'canal' => vrt_notify_canal(), 'total' => count($l),
+                     'par_etat' => $par, 'messages' => $l]);
+    }
+
+    // Relance manuelle de la file (utile sans tâche planifiée : un appel suffit).
+    if ($action === 'admin_notify_drain') {
+        $r = vrt_notify_vider(max(1, min(50, (int) ($in['budget'] ?? 10))));
+        lv_out(200, ['ok' => true, 'canal' => vrt_notify_canal()] + $r);
+    }
+
+    /* Remettre en file une remise abandonnée : le numéro était éteint, la
+       passerelle était à court de solde, ou l'administrateur vient de corriger
+       la configuration. Sans cela, un « echec » serait définitif et la seule
+       issue serait de relire le journal à la main. */
+    if ($action === 'admin_notify_retry') {
+        $ref = trim((string) ($in['ref'] ?? ''));
+        if ($ref === '') lv_err(400, 'Référence requise.', 'ref');
+        $m = vrt_notify_lire($ref);
+        if ($m === null) lv_err(404, 'Aucune remise en file pour cette référence.', 'unknown');
+        // Un numéro corrigé à la main vaut mieux qu'une remise perdue : on le
+        // renormalise, et on refuse plutôt que d'envoyer à un numéro douteux.
+        $tel = trim((string) ($in['tel'] ?? ''));
+        if ($tel !== '') {
+            $n = vrt_notify_tel($tel);
+            if ($n === '') lv_err(400, 'Numéro hors format camerounais.', 'tel');
+            $m['tel'] = $n; $m['tel4'] = substr($n, -4);
+        }
+        if ((string) ($m['tel'] ?? '') === '') lv_err(400, 'Cette remise n’a pas de numéro : fournissez-en un.', 'tel');
+        // `alerte` repart aussi : une remise réarmée qui échoue de nouveau doit
+        // pouvoir prévenir, sinon corriger la configuration puis réessayer
+        // rendrait le second échec muet.
+        $m['etat'] = 'attente'; $m['essais'] = 0; $m['prochain'] = 0; $m['erreur'] = ''; $m['alerte'] = 0;
+        if (!vrt_notify_ecrire($m)) lv_err(500, 'Écriture impossible.', 'io');
+        $r = vrt_notify_vider(3);
+        lv_out(200, ['ok' => true, 'ref' => $ref, 'canal' => vrt_notify_canal()] + $r);
     }
 
     lv_err(400, 'Action admin inconnue.', 'action');

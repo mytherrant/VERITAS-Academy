@@ -503,6 +503,20 @@
             + '<input id="vrt-n" type="number" min="1" max="500" value="' + qte + '" style="' + INP + '">'
           : '')
       + '<input id="vrt-tel" type="tel" inputmode="tel" placeholder="Ton numéro (6XX XX XX XX)" style="' + INP + '">'
+      /* L'ADRESSE, ET POURQUOI ELLE EST DEMANDÉE ICI.
+         Jusqu'au 01/09/2026, le tunnel ne collectait QUE le numéro. Le code
+         n'avait donc aucun chemin vers l'acheteur en dehors de l'onglet resté
+         ouvert — et cinq clients l'ont appris à leurs dépens. Une adresse
+         change tout : le serveur poste le code dès que le paiement est
+         confirmé, que la page soit ouverte ou fermée, sur le bon téléphone ou
+         sur un autre.
+         Facultative, et dite comme telle : beaucoup paient par Orange Money
+         sans adresse sous la main, et un champ obligatoire de plus, c'est une
+         vente qui n'aboutit pas. */
+      + '<input id="vrt-mail" type="email" inputmode="email" autocomplete="email" '
+      + 'placeholder="Ton e-mail (facultatif) — pour recevoir ton code" style="' + INP + '">'
+      + '<div style="font-size:11px;color:#98a1aa;margin:-4px 0 2px;line-height:1.45">'
+      + 'Avec une adresse, ton code t’est envoyé même si tu fermes cette page.</div>'
       + '<div id="vrt-msg" style="font-size:12.5px;color:#c0453f;min-height:17px;margin-top:2px"></div>'
       + '<button id="vrt-go" style="' + BTN + '">Payer ' + fmt(prix(cfg.kind, qte)) + ' FCFA</button>'
       + '<button id="vrt-deja" style="' + BTN2 + '">J\'ai déjà payé — retrouver mon code</button>'
@@ -536,6 +550,14 @@
     var tel = (document.getElementById('vrt-tel') || {}).value || '';
     var chiffres = tel.replace(/\D+/g, '');
     if (chiffres.length < 9) { msg('Numéro incomplet — 9 chiffres attendus (6XX XX XX XX).'); return; }
+    /* Une adresse mal tapée ne doit pas BLOQUER un paiement — mais elle ne doit
+       pas non plus partir en silence : le client croirait recevoir son code par
+       courriel et n'aurait rien. On refuse la saisie manifestement fautive, on
+       laisse passer le champ vide. */
+    var mail = ((document.getElementById('vrt-mail') || {}).value || '').trim();
+    if (mail && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) {
+      msg('Adresse e-mail incomplète — corrige-la, ou laisse le champ vide.'); return;
+    }
     var champN = document.getElementById('vrt-n');
     var n = champN ? Math.max(1, Math.min(500, parseInt(champN.value, 10) || 1)) : qte;
     var b = document.getElementById('vrt-go');
@@ -567,7 +589,10 @@
             // débloque rien.
             intent: n > 1 ? 'livret_pack' : 'livret',
             targetId: cfg.classe + ':' + cfg.kind + (n > 1 ? ':' + n : ''),
-            clientTel: chiffres
+            clientTel: chiffres,
+            // Le serveur s'en sert pour POSTER le code dès la confirmation.
+            // Sans elle, la remise n'a que le numéro — et l'onglet.
+            clientEmail: mail
           })
         });
       })

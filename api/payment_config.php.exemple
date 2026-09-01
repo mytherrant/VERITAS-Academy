@@ -309,6 +309,98 @@ if (!defined('ANTHROPIC_API_KEY')) define('ANTHROPIC_API_KEY', '');             
 if (!defined('ADMIN_TOKEN')) define('ADMIN_TOKEN',     'CHANGEZ_MOI_token_admin_long_et_aleatoire');
 
 // ============================================================
+// 📲 REMISE DU CODE PAR SMS / WHATSAPP  (api/_notify_lib.php)
+// ============================================================
+// POURQUOI. Les 31/08 et 01/09/2026, cinq clients ont payé 1 500 F sans jamais
+// voir leur code. Les paiements étaient confirmés, les codes émis et déposés :
+// c'est la REMISE qui manquait de canal. Elle ne vivait que dans le navigateur
+// de l'acheteur — un onglet ouvert, puis un `localStorage`. Or payer par Orange
+// Money oblige à quitter le navigateur pour composer #150*50#, et Android jette
+// l'onglet resté derrière.
+//
+// Le serveur envoie donc maintenant le code au numéro qui a payé, dès que la
+// passerelle confirme. TANT QUE VRT_NOTIFY_CANAL EST VIDE, RIEN N'EST ENVOYÉ :
+// les remises s'empilent dans une file visible par l'administration
+// (api/livret.php, action `admin_notify_list`). Une file visible vaut mieux
+// qu'un envoi silencieusement perdu — mais elle ne remplace pas un canal.
+//
+// Le serveur envoie donc maintenant le code au numéro (ou à l'adresse) de celui
+// qui a payé, dès que la passerelle confirme. Les canaux sont ESSAYÉS DANS
+// L'ORDRE, séparés par des virgules — le premier qui aboutit gagne :
+//   'mail'     → courriel. LE SEUL QUI NE DEMANDE DE COMPTE NULLE PART.
+//   'whatsapp' → WhatsApp Cloud API (Meta) — exige un compte Business + modèle
+//   'http'     → passerelle SMS décrite par gabarit (ci-dessous)
+//   ''         → aucun envoi : la file reste visible, rien ne part
+// Défaut si la constante n'existe pas : « mail ».
+if (!defined('VRT_NOTIFY_CANAL')) define('VRT_NOTIFY_CANAL', 'mail');
+
+// ⚠️ LA LIGNE LA PLUS IMPORTANTE DE CE BLOC.
+// Adresse qui reçoit une ALERTE quand un code payé n'a pas pu être remis (pas
+// d'adresse client, passerelle en panne…). L'alerte porte le code ET un lien
+// WhatsApp pré-rempli vers le numéro du client : un appui, et il l'a.
+// Vide = aucune alerte, et l'échec ne se lit que dans `admin_notify_list`.
+if (!defined('VRT_NOTIFY_ADMIN_MAIL')) define('VRT_NOTIFY_ADMIN_MAIL', '');   // ← À REMPLIR
+
+// Expéditeur des courriels. DOIT être une adresse DU DOMAINE : un « From » chez
+// gmail posté par nos serveurs échoue SPF et part en indésirable.
+if (!defined('VRT_NOTIFY_FROM'))    define('VRT_NOTIFY_FROM',    'no-reply@veritas-school.com');
+if (!defined('VRT_NOTIFY_REPLYTO')) define('VRT_NOTIFY_REPLYTO', 'contact@veritas-school.com');
+
+// Numéro d'aide imprimé en fin de message.
+if (!defined('VRT_NOTIFY_AIDE'))  define('VRT_NOTIFY_AIDE', '697 63 77 39');
+
+// ── A) PASSERELLE SMS GÉNÉRIQUE ─────────────────────────────
+// Aucun fournisseur n'est câblé en dur : ce qui change d'une passerelle à
+// l'autre est toujours une URL, une méthode, un corps de requête et un en-tête
+// d'authentification. Un gabarit les couvre toutes sans une ligne de code.
+//
+// Gabarits disponibles dans VRT_SMS_URL et VRT_SMS_CORPS :
+//   {tel}        numéro international sans « + »   → 237690361319
+//   {tel_plus}   avec le « + »                     → +237690361319
+//   {tel_local}  sans indicatif                    → 690361319
+//   {msg}        le message (déjà sans accents, pour tenir en 1 SMS)
+//
+// ⚠️ Reprenez l'URL et les noms de paramètres DANS LA DOCUMENTATION DE VOTRE
+//    fournisseur : ils changent d'un opérateur à l'autre et d'une version à
+//    l'autre. Les valeurs ci-dessous sont un gabarit de forme, pas une adresse
+//    vérifiée.
+if (!defined('VRT_SMS_URL'))     define('VRT_SMS_URL',     '');           // https://…/sendsms
+if (!defined('VRT_SMS_METHODE')) define('VRT_SMS_METHODE', 'POST');       // POST | GET
+if (!defined('VRT_SMS_TYPE'))    define('VRT_SMS_TYPE',    'form');       // form | json
+if (!defined('VRT_SMS_CORPS'))   define('VRT_SMS_CORPS',   '');           // gabarit du corps
+if (!defined('VRT_SMS_ENTETES')) define('VRT_SMS_ENTETES', '');           // « En-tête: valeur » séparés par |
+// Beaucoup de passerelles répondent 200 aussi bien pour « message accepté » que
+// pour « solde épuisé ». Ce fragment doit apparaître dans la réponse pour que la
+// remise soit comptée LIVRÉE. Vide = on s'en tient au code HTTP, faute de mieux
+// — et une remise jamais partie sera comptée comme livrée. À renseigner.
+if (!defined('VRT_SMS_OK'))      define('VRT_SMS_OK',      '');
+//
+// Exemple de forme, avec un corps en formulaire :
+//   define('VRT_SMS_CORPS', 'user=MONCOMPTE&password=MONMDP&senderid=VERITAS&mobiles={tel}&sms={msg}');
+// Exemple de forme, avec un corps JSON et un jeton :
+//   define('VRT_SMS_TYPE',    'json');
+//   define('VRT_SMS_CORPS',   '{"to":"{tel_plus}","from":"VERITAS","text":"{msg}"}');
+//   define('VRT_SMS_ENTETES', 'Authorization: Bearer MON_JETON');
+
+// ── B) WHATSAPP CLOUD API (Meta) ────────────────────────────
+// developers.facebook.com → WhatsApp → API Setup : identifiant du numéro
+// expéditeur + jeton permanent.
+// ⚠️ Un message envoyé à quelqu'un qui ne nous a pas écrit dans les 24 h DOIT
+//    passer par un MODÈLE approuvé par Meta. Sans VRT_WA_MODELE, l'envoi ne
+//    fonctionnera qu'en essai, sur un numéro qui vient d'écrire au compte.
+//    Le modèle attend UN paramètre de corps : le message complet, sur une ligne.
+if (!defined('VRT_WA_PHONE_ID')) define('VRT_WA_PHONE_ID', '');
+if (!defined('VRT_WA_TOKEN'))    define('VRT_WA_TOKEN',    '');
+if (!defined('VRT_WA_MODELE'))   define('VRT_WA_MODELE',   '');           // ex. « code_acces_veritas »
+if (!defined('VRT_WA_LANGUE'))   define('VRT_WA_LANGUE',   'fr');
+if (!defined('VRT_WA_VERSION'))  define('VRT_WA_VERSION',  'v21.0');
+
+// Délai maximal d'un envoi. Serré volontairement : cet appel a lieu pendant
+// qu'une passerelle de PAIEMENT attend notre 200 — au-delà, elle conclut à
+// l'échec et rejoue le webhook.
+if (!defined('VRT_NOTIFY_TIMEOUT')) define('VRT_NOTIFY_TIMEOUT', 10);
+
+// ============================================================
 // 🔧 CORS — BUG FIX #2 (juin 2026) : AUCUN header émis ici.
 // ============================================================
 // payment_config.php est une BIBLIOTHÈQUE DE CONFIG incluse par de nombreux
