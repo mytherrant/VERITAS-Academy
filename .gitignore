@@ -43,6 +43,22 @@ veritas-backend/
 # Credentials serveur — ne jamais versionner
 api/config.php
 api/payment_config.php
+# ⚠️ LES DEUX RÈGLES CI-DESSUS VISENT UN NOM EXACT, et c'est la faille.
+# Le 02/09/2026, la clé de synchronisation du poste de développement avait
+# divergé de celle du serveur (401 sur tout diagnostic). Le geste évident pour
+# la corriger — sauvegarder le fichier avant de le remplacer par celui du
+# serveur — produit `payment_config.bak.php`, `config.local.php`,
+# `payment_config.serveur.php`… Vérifié : AUCUN de ces noms n'était ignoré.
+# La réparation aurait donc poussé les secrets de production dans un dépôt
+# PUBLIC : clés Orange/MTN, jeton d'administration, clés d'IA.
+# On couvre donc toutes les variantes, et on rattrape le modèle par une
+# négation — elle fonctionne ici parce que ces règles excluent des FICHIERS,
+# jamais un dossier : aucune négation ne rescape ce qui vit sous un dossier
+# exclu. Voir la mémoire « Ancrer les règles .gitignore à la racine ».
+api/payment_config*
+api/config.*
+!api/payment_config.php.exemple
+!api/config.php.exemple
 # Identifiants MySQL + jeton d'installation de VÉRITAS Campus. Même règle que
 # ci-dessus : le fichier vit sur le serveur, jamais dans un dépôt public.
 api/campus/_config.php
@@ -107,6 +123,11 @@ _eval_insert.js
 
 # Scripts de diagnostic / session générés par Claude Code
 *.ps1
+# …mais `tools/` est le dossier des outils DURABLES du projet, pas un bac à
+# sable de session. Un script d'exploitation qu'on y range doit survivre à la
+# session qui l'a écrit — sinon il faut le réécrire au prochain incident, ce
+# qui est exactement ce qu'on cherche à éviter en l'écrivant.
+!tools/*.ps1
 apply_fixes*.py
 diag*.py
 diag*.txt
