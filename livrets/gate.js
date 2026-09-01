@@ -72,6 +72,48 @@
     });
   }
   function cle() { return 'vrt-livret-' + cfg.classe + '-' + cfg.kind; }
+
+  /* ── LA PREUVE D'ACHAT DOIT SURVIVRE À LA FERMETURE DE L'ONGLET ────────────
+     La référence était rangée en `sessionStorage`. Elle mourait donc avec
+     l'onglet — alors que le jeton d'accès, lui, est en `localStorage` deux
+     lignes plus haut. Ce n'était pas une décision, c'était une incohérence, et
+     elle a coûté des ventes le 01/09/2026.
+
+     POURQUOI C'EST EXACTEMENT LE MAUVAIS ENDROIT ICI. Le parcours Orange Money
+     oblige à QUITTER le navigateur : CamerPay affiche « composez le #150*50# »,
+     l'acheteur passe dans son clavier téléphonique, et Android gèle puis
+     souvent jette l'onglet resté derrière. Au retour, la référence n'existait
+     plus sur l'appareil — elle ne vivait plus que dans le SMS de CamerPay, que
+     personne ne pense à rapprocher d'un formulaire de retrait.
+
+     On garde donc la référence ET les 4 derniers chiffres du payeur (jamais le
+     numéro entier) : ce sont les deux seules choses qu'il faut pour réclamer
+     son code, et elles sont à l'acheteur, sur son propre appareil. */
+  var REF_CLE = 'vrt-livret-achat';
+  function achatPose(r, tel4) {
+    var v = JSON.stringify({ ref: r, t4: String(tel4 || '').slice(-4), q: Date.now() });
+    try { localStorage.setItem(REF_CLE, v); } catch (e) {}
+    try { sessionStorage.setItem('vrt-livret-ref', r); } catch (e) {}   // compat
+  }
+  function achatLu() {
+    var v = null;
+    try { v = JSON.parse(localStorage.getItem(REF_CLE) || 'null'); } catch (e) {}
+    if (v && v.ref) {
+      /* Un achat en attente se périme : au-delà de 30 jours, une reprise
+         silencieuse au chargement interrogerait le serveur pour rien, à chaque
+         visite, indéfiniment. */
+      if (Date.now() - (v.q || 0) < 30 * 24 * 3600 * 1000) return v;
+      achatEfface();
+    }
+    // Repli sur l'ancienne cle : un acheteur en cours de parcours ne doit pas
+    // perdre sa reference parce qu'on a change de rangement.
+    try { var r = sessionStorage.getItem('vrt-livret-ref'); if (r) return { ref: r, t4: '' }; } catch (e) {}
+    return null;
+  }
+  function achatEfface() {
+    try { localStorage.removeItem(REF_CLE); } catch (e) {}
+    try { sessionStorage.removeItem('vrt-livret-ref'); } catch (e) {}
+  }
   function jetonLu() { try { return localStorage.getItem(cle()) || ''; } catch (e) { return ''; } }
   function jetonPose(t) { try { localStorage.setItem(cle(), t); } catch (e) {} }
   function jetonEfface() { try { localStorage.removeItem(cle()); } catch (e) {} }
@@ -532,7 +574,7 @@
       .then(function (x) { return x.json(); })
       .then(function (j) {
         if (!j || (!j.pay_url && !j.success)) throw ErrPorte(j && j.error ? j.error : 'Initiation refusée.', 'init');
-        try { sessionStorage.setItem('vrt-livret-ref', r); } catch (e) {}
+        achatPose(r, chiffres);
         if (j.pay_url) window.open(j.pay_url, '_blank', 'noopener');
         ecranAttente(r, chiffres, j.pay_url || '');
       })
@@ -560,24 +602,47 @@
       + '<button id="vrt-close" style="' + BTN2 + '">Fermer</button>'
       + '</div>'
     );
-    document.getElementById('vrt-close').onclick = function () { clearInterval(boucle); fermerModale(); };
+    document.getElementById('vrt-close').onclick = function () { clearInterval(boucle); arreter(); fermerModale(); };
 
-    var essais = 0;
-    // Sondage borné : 5 s × 96 ≈ 8 minutes. Au-delà, le paiement n'aboutira
-    // probablement plus dans cette session — le code reste réclamable plus tard.
-    var boucle = setInterval(function () {
-      essais++;
-      if (essais > 96) { clearInterval(boucle); msg('Toujours rien. Utilise « J\'ai déjà payé » quand le paiement sera confirmé.'); return; }
+    var essais = 0, fini = false;
+    function arreter() {
+      fini = true;
+      document.removeEventListener('visibilitychange', auRetour);
+    }
+    function tenter() {
+      if (fini) return;
       VRT.reclamer(r, tel).then(function (c) {
-        clearInterval(boucle);
+        clearInterval(boucle); arreter();
         ecranCode(c);
       }).catch(function () { /* pas encore payé : on continue */ });
+    }
+    /* ⚠️ LE SONDAGE NE TOURNE PAS PENDANT QUE L'ACHETEUR PAIE.
+       Orange Money passe par « composez le #150*50# » : l'acheteur quitte le
+       navigateur pour son clavier téléphonique, et Android gèle les minuteurs
+       de l'onglet resté derrière. Les 96 essais de 5 secondes ne s'écoulaient
+       donc pas pendant le paiement — ils s'écoulaient APRÈS, si tant est que
+       l'onglet ait survécu. On interroge donc à chaque retour sur la page,
+       c'est-à-dire au moment exact où le paiement vient d'aboutir. */
+    function auRetour() { if (document.visibilityState === 'visible') tenter(); }
+    document.addEventListener('visibilitychange', auRetour);
+
+    // Sondage borné : 5 s × 96 ≈ 8 minutes de page RÉELLEMENT ouverte. Au-delà,
+    // le code reste réclamable — et la reprise au chargement le retrouvera.
+    var boucle = setInterval(function () {
+      essais++;
+      if (essais > 96) {
+        clearInterval(boucle); arreter();
+        msg('Toujours rien. Ton code reste disponible : rouvre cette page, il s’affichera tout seul.');
+        return;
+      }
+      tenter();
     }, 5000);
   }
 
   function ecranReclamation() {
-    var dernier = '';
-    try { dernier = sessionStorage.getItem('vrt-livret-ref') || ''; } catch (e) {}
+    var enAttente = achatLu() || {};
+    var dernier = enAttente.ref || '';
+    var t4 = enAttente.t4 || '';
     modale(
       '<div style="text-align:center">'
       + '<div style="font-size:38px">🔎</div>'
@@ -585,7 +650,7 @@
       + '<div style="' + SUB + '">Saisis la référence de ton paiement et les 4 derniers chiffres '
       + 'du numéro qui a payé.</div>'
       + '<input id="vrt-ref" type="text" placeholder="Référence (LV…)" value="' + esc(dernier) + '" style="' + INP + '">'
-      + '<input id="vrt-t4" type="tel" inputmode="numeric" maxlength="4" placeholder="4 derniers chiffres" style="' + INP + '">'
+      + '<input id="vrt-t4" type="tel" inputmode="numeric" maxlength="4" placeholder="4 derniers chiffres" value="' + esc(t4) + '" style="' + INP + '">'
       + '<div id="vrt-msg" style="font-size:12.5px;color:#c0453f;min-height:17px"></div>'
       + '<button id="vrt-go2" style="' + BTN + '">Retrouver mon code</button>'
       + '<button id="vrt-close" style="' + BTN2 + '">Retour</button>'
@@ -606,6 +671,9 @@
   }
 
   function ecranCode(r) {
+    // L'achat est honoré : on cesse de le suivre, sinon chaque ouverture de
+    // page rejouerait une réclamation pour un code déjà remis.
+    achatEfface();
     // Un pack établissement rend TOUT le lot : le proviseur doit pouvoir le
     // distribuer, donc le copier d'un bloc.
     var lot     = (r && r.codes && r.codes.length > 1) ? r.codes : null;
@@ -645,6 +713,97 @@
       });
     };
   }
+
+  /* ── ON N'IMPRIME PAS LE CAHIER ───────────────────────────────────────────
+     `cahier.js` interceptait Ctrl+S / Ctrl+P / Ctrl+U — mais rien n'empêchait
+     d'imprimer par le MENU du navigateur, et `livrets/cahier.css` n'avait
+     aucune règle `@media print`. Un acheteur ouvrait donc son cahier à 1 500 F
+     et sortait l'ouvrage entier en PDF, proprement mis en page : les quatre
+     coquilles de collège embarquent même la feuille d'impression de la maquette
+     papier, faite pour ça. Le raccourci clavier gardait une porte pendant que
+     la voisine restait ouverte.
+
+     ICI PLUTÔT QUE DANS CHAQUE PAGE. Quatre coquilles verrouillées, le lecteur
+     générique, le feuilletage : cinq endroits où poser la même règle, donc
+     cinq endroits pour l'oublier à la prochaine publication. `gate.js` est le
+     seul fichier que toutes chargent.
+
+     LA RÈGLE NE MORD QUE LÀ OÙ IL Y A QUELQUE CHOSE À PROTÉGER : elle vise les
+     conteneurs de contenu (`#hote`, `#sheet`, `#lis`). Sur une page de vente,
+     aucun n'existe — elle n'a aucun effet, et un parent peut imprimer la fiche
+     produit.
+
+     ⚠️ CE QUE ÇA COÛTE, ET C'EST ASSUMÉ : l'élève ne peut plus imprimer sa
+     propre copie, ses réponses étant dans le même conteneur. Arbitrage de
+     Jacques, 01/09/2026, contre l'avis inscrit jusque-là dans `cahier.js`.
+
+     ET CE QUE ÇA NE VAUT PAS : rien de tout cela ne résiste à une photo
+     d'écran. On ferme le geste facile — le menu Imprimer, deux clics — pas
+     l'intention déterminée. Le filigrane nominatif reste ce qui rend traçable
+     une capture qui circule. */
+  (function garderImpression() {
+    var poser = function () {
+      if (document.getElementById('vrt-noprint')) return;
+      var st = document.createElement('style');
+      st.id = 'vrt-noprint';
+      st.textContent =
+        '@media print{'
+        + '#hote,#sheet,#lis{display:none !important}'
+        + '#vrt-noprint-avis{display:block !important;padding:28px;text-align:center;'
+        + 'font-family:system-ui,sans-serif;font-size:15px;line-height:1.7;color:#1f2b38}'
+        + '}'
+        + '#vrt-noprint-avis{display:none}';
+      // Ajouté en dernier : les coquilles portent leur propre feuille
+      // d'impression, héritée de la maquette papier, et elle est déclarée
+      // avant celle-ci dans le document.
+      document.head.appendChild(st);
+
+      if (!document.getElementById('vrt-noprint-avis')) {
+        var d = document.createElement('div');
+        d.id = 'vrt-noprint-avis';
+        d.textContent = 'Ce cahier ne s’imprime pas : il se remplit en ligne, '
+          + 'et sa correction s’affiche exercice par exercice. '
+          + 'Ton accès vaut toute l’année scolaire, sur 3 appareils. '
+          + '— Centre VÉRITAS';
+        document.body.appendChild(d);
+      }
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', poser);
+    } else { poser(); }
+  })();
+
+  /* ── UN CODE PAYÉ ET JAMAIS RETIRÉ SE REPRÉSENTE TOUT SEUL ────────────────
+     LE 01/09/2026, DEUX CLIENTS ONT PAYÉ SANS RECEVOIR LEUR CODE. Vérifié sur
+     le serveur : les deux paiements étaient `COMPLETED` chez Orange, les deux
+     codes étaient bien émis et déposés. Rien n'avait échoué côté argent — le
+     code attendait, et personne n'est venu le chercher.
+
+     C'est que la remise n'avait qu'UN seul canal : un onglet ouvert, au
+     premier plan, pendant les huit minutes du sondage. Or payer par Orange
+     Money veut dire quitter le navigateur pour composer `#150*50#`. Le seul
+     rattrapage — « J'ai déjà payé », caché derrière le bouton « Obtenir mon
+     code d'accès » — demandait de deviner qu'il faut cliquer sur « obtenir »
+     pour « retrouver », et de ressaisir une référence que `sessionStorage`
+     venait justement d'oublier.
+
+     On tente donc UNE réclamation silencieuse à chaque ouverture de page tant
+     qu'un achat reste en attente. Elle ne coûte rien quand il n'y en a pas, et
+     quand il y en a un, l'acheteur retrouve son écran de code sans rien
+     demander à personne. Silencieuse en cas d'échec : un client dont le
+     paiement n'a pas encore abouti n'a pas à lire une erreur à chaque visite. */
+  (function repriseAchat() {
+    var a = achatLu();
+    if (!a || !a.ref || !a.t4) return;      // sans les 4 chiffres, rien à tenter
+    var lancer = function () {
+      VRT.reclamer(a.ref, a.t4)
+        .then(function (c) { if (c && (c.code || c.codes)) ecranCode(c); })
+        .catch(function () { /* pas encore confirmé : on réessaiera au prochain passage */ });
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', lancer);
+    } else { lancer(); }
+  })();
 
   /* ── LE HORS LIGNE NE DOIT PAS DÉPENDRE DE LA PAGE PAR OÙ L'ON ENTRE ───────
      « La connexion reste chère au Cameroun et pas toujours accessible » : c'est

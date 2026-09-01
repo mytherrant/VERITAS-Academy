@@ -247,6 +247,23 @@ jobs:
             exit 1
           fi
 
+      # ── 📮 LE CODE PAYÉ ARRIVE-T-IL JUSQU'À L'ACHETEUR ? ──────────────────
+      #    Le 01/09/2026, deux clients ont payé sans recevoir leur code. Rien
+      #    n'avait échoué du côté de l'argent : vérifié sur la production, les
+      #    deux paiements étaient COMPLETED chez Orange et les deux codes bien
+      #    émis — `claim` répondait 403 « bad_tel », donc « ce code existe ».
+      #    La REMISE n'avait qu'un canal : un onglet ouvert au premier plan
+      #    pendant huit minutes. Or Orange Money fait QUITTER le navigateur
+      #    pour composer #150*50#, Android gèle l'onglet resté derrière, et la
+      #    référence vivait en sessionStorage — qui meurt avec lui.
+      #    Ce banc garde les trois réparations, plus la fermeture de
+      #    l'impression (le menu Imprimer restait ouvert là où Ctrl+P était
+      #    bloqué). Il a DEUX étages : celui qui tourne ici lit les fichiers ;
+      #    celui qui pilote un navigateur s'annonce non exécuté faute de
+      #    playwright, plutôt que de se taire.
+      - name: 📮 Le code payé arrive-t-il jusqu'à l'acheteur ?
+        run: node tests/banc_remise_code.cjs
+
       # ── 🔑 LA CLÉ D'UN EXERCICE survit-elle à une correction du cahier ?
       #    Si elle bouge, l'élève retrouve ses réponses sous les mauvaises
       #    questions et l'annotation du professeur désigne un autre exercice.

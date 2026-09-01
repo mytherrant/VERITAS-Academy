@@ -32,6 +32,16 @@ const MIME = {
 // ── État en mémoire : remis à zéro à chaque démarrage ────────────────────────
 const CODE_ELEVE = 'VRT-6E-TEST-0001';
 const CODE_PROF  = 'VRT-6E-PROF-0001';
+
+/* Retrait d'un code déjà payé (`action:"claim"`). Le banc rejoue le contrat
+   EXACT d'api/livret.php, parce que c'est la distinction entre ses deux refus
+   qui porte tout le diagnostic :
+     404 « pending »  → aucun code pour cette référence ;
+     403 « bad_tel »  → le code EXISTE, les 4 chiffres ne correspondent pas.
+   Un bouchon plus indulgent que le serveur — qui rendrait le code sur la seule
+   référence — validerait une reprise automatique que la production refuserait. */
+const REF_BANC  = 'LV260901-BANCTEST';
+const TEL4_BANC = '4321';
 // Jours restants avant echeance, pour exercer le bandeau de renouvellement.
 // Reglable par la variable d'environnement JOURS (defaut 12).
 const JOURS_RESTANTS = Number(process.env.JOURS || 12);
@@ -89,6 +99,21 @@ function api(url, corps) {
       return { s: 200, j: { ok: true, classe: c.c, kind: c.k,
         wm: { id: c.id.toUpperCase(), lb: 'Banc', d: '17/08/2026', txt: 'VÉRITAS · BANC · 17/08/2026' },
         js: { booklet: lireDonnees('demo-6e-livret.js'), guide: lireDonnees('demo-6e-guide.js') } } };
+    }
+    if (a === 'claim') {
+      const ref = String(corps.ref || '').trim().toUpperCase();
+      const t4  = String(corps.tel || '').replace(/\D+/g, '').slice(-4);
+      if (ref !== REF_BANC) {
+        return { s: 404, j: { ok: false, code: 'pending',
+          error: 'Aucun code disponible pour cette référence.' } };
+      }
+      if (t4 !== TEL4_BANC) {
+        return { s: 403, j: { ok: false, code: 'bad_tel',
+          error: 'Les 4 derniers chiffres du numéro payeur ne correspondent pas.' } };
+      }
+      return { s: 200, j: { ok: true, code: CODE_ELEVE, codes: null,
+        classe: '6e', kind: 'livret',
+        expire: Math.floor(Date.now() / 1000) + 365 * 86400 } };
     }
     return { s: 400, j: { ok: false, error: 'Action inconnue (banc).', code: 'action' } };
   }
