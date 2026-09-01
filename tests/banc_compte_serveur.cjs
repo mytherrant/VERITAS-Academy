@@ -52,9 +52,14 @@ const BAC = fs.mkdtempSync(path.join(os.tmpdir(), 'vrt-banc-compte-'));
    mesure, pas une réécriture. Seul `payment_config.php` est fabriqué, pour
    donner au banc un secret de synchronisation connu (le vrai est gitignoré,
    et absent de la CI). */
+/* ⚠️ CETTE LISTE EST UNE DÉPENDANCE, PAS UN INVENTAIRE. `_auth_lib.php` fait
+   des `require_once` : en oublier un ici ne donne pas un contrôle en moins,
+   mais une erreur fatale PHP et un banc qui ne mesure plus rien. C'est arrivé
+   le 01/09/2026 avec `_notify_lib.php`, ajouté à _auth_lib et pas ici — la CI
+   s'est arrêtée sur ce banc, ce qui était le bon comportement. */
 const FICHIERS = ['compte.php', 'db.php', '_json_boot.php', 'config_sync.php',
-  '_auth_lib.php', '_livret_lib.php', '_sentinel.php', '_bot_log.php',
-  'student_data.php'];
+  '_auth_lib.php', '_livret_lib.php', '_notify_lib.php', '_sentinel.php',
+  '_bot_log.php', 'student_data.php'];
 
 function monterBac() {
   fs.mkdirSync(path.join(BAC, 'api'), { recursive: true });

@@ -267,6 +267,7 @@ def controles(charge: Path | None) -> list[str]:
         fautes.append("git indisponible : impossible de vérifier ce qui sera déployé")
     if suivis:
         for f in ["api/livret.php", "api/collab.php", "api/_livret_lib.php",
+                  "api/_notify_lib.php",
                   "livrets/gate.js", "livrets/collab.js", "d/index.html",
                   "uploads/protected/livrets/.htaccess"]:
             if f not in suivis:
