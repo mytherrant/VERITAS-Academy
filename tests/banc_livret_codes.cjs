@@ -406,6 +406,28 @@ async function serveurPret() {
       'et le cahier joint, illisible, n’est pas envoyé');
   fs.copyFileSync(path.join(donDir, 'booklet-6e.sain.js'), path.join(donDir, 'booklet-6e.js'));
 
+  /* TOUS LES CAHIERS N'INSTALLENT PAS `BOOKLET`, ET S'EN TENIR À CE NOM EST UN
+     PIÈGE. Les quatre cahiers de collège ont leur propre coquille et posent
+     `BOOKLET`, `BOOKLET_5E`… ; ceux de 2ⁿᵈᵉ, 1ʳᵉ, Tˡᵉ et EST passent par le
+     lecteur générique et posent `MANUEL_DATA`. Une garde qui n'accepterait que
+     les premiers refuserait les seconds comme « abîmés » le jour de leur
+     dépôt — quatre cahiers corrects fermés par le garde-fou censé les
+     protéger. Le contrôle porte sur la FORME, pas sur le nom : il constate
+     l'identifiant et l'annonce, il ne le choisit pas. */
+  fs.writeFileSync(path.join(donDir, 'booklet-2nde.js'),
+    'window.MANUEL_DATA = ' + JSON.stringify({ blocks: [{ t: 'title', text: 'Cahier 2nde' }] }) + ';',
+    'utf8');
+  const catM = await api({ action: 'catalogue' });
+  dit((catM.j.ouvrages || []).find(o => o.slug === '2nde').disponible === true,
+      'un cahier qui installe MANUEL_DATA (lecteur générique) est aussi livrable');
+  const ouvM = await api({ action: 'unlock', code: (await api({ action: 'admin_gen', classe: '2nde',
+                             kind: 'livret', n: 1, jours: 365, label: 'Banc — générique' },
+                             SECRET)).j.codes[0], classe: '2nde', kind: 'livret' });
+  const livM = await api({ action: 'content', token: ouvM.j && ouvM.j.token });
+  dit(livM.status === 200 && livM.j.installe && livM.j.installe.booklet === 'MANUEL_DATA',
+      'et la livraison annonce MANUEL_DATA, pas un nom qu’elle aurait choisi',
+      JSON.stringify(livM.j && livM.j.installe));
+
   // L'inventaire du dépôt : la seule façon de savoir, sans acheter les quinze
   // ouvrages un par un, lequel doit être re-déposé.
   const dep = await api({ action: 'admin_depot' }, SECRET);

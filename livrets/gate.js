@@ -280,19 +280,24 @@
   // Les fichiers de données sont du JavaScript de la forme « window.X = {…}; ».
   // On les exécute tels quels : aucune hypothèse sur leur structure, donc une
   // régénération des livrets ne casse pas la porte.
-  /* Les globales que les cahiers installent. Le nom change avec la classe —
-     `BOOKLET` en 6ᵉ, `BOOKLET_5E` en 5ᵉ, `GUIDE_3E` pour les corrigés — et
-     c'est la page qui connaît le sien. On ne les énumère donc pas : on regarde
-     ce qui est APPARU sur `window` pendant l'exécution. Une page qui changerait
-     de nom demain n'aurait rien à venir modifier ici. */
-  function globalesDonnees() {
-    var vus = {};
-    try {
-      Object.keys(window).forEach(function (k) {
-        if (/^(BOOKLET|GUIDE)($|_)/.test(k) && window[k] != null) vus[k] = true;
-      });
-    } catch (e) { /* navigateur avare sur l'énumération : on n'en fait rien */ }
-    return vus;
+  /* ── QUELLE GLOBALE CE FICHIER EST-IL CENSÉ POSER ? ────────────────────────
+     On la LIT DANS LE FICHIER, on ne la devine pas. Une première version
+     énumérait `window` à la recherche d'un nom commençant par `BOOKLET` ou
+     `GUIDE` — les noms des quatre coquilles de collège. C'était une liste
+     déguisée en règle, et elle était déjà fausse : les cahiers de 2ⁿᵈᵉ, 1ʳᵉ,
+     Tˡᵉ et EST passent par le lecteur générique et installent `MANUEL_DATA`.
+     Le jour où on les dépose, la porte les aurait refusés comme « abîmés » —
+     quatre cahiers corrects, fermés par le garde-fou censé les protéger.
+
+     Le fichier dit lui-même son nom, en toutes lettres, dans ses cent premiers
+     octets : `window.<IDENT> = …`. C'est exact, ça ne coûte rien, et ça marche
+     pour un nom qui n'existe pas encore. Le serveur l'annonce aussi
+     (`installe`) ; on préfère le sien quand il est là, et on retombe sur la
+     lecture directe pour la copie hors ligne, qui garde le fichier mais pas la
+     réponse qui l'accompagnait. */
+  function identifiantDonnees(src) {
+    var m = /^[\s﻿]*window\.([A-Za-z_$][A-Za-z0-9_$]*)\s*=/.exec(String(src || '').slice(0, 400));
+    return m ? m[1] : '';
   }
 
   /* ── UN FICHIER EXÉCUTÉ N'EST PAS UN FICHIER INSTALLÉ ──────────────────────
@@ -312,7 +317,7 @@
      sans erreur et ne rien définir (mauvais fichier déposé sous le bon nom).
      Ce qui compte est qu'une globale de données soit apparue. */
   function installer(r) {
-    var js = r.js || {}, avant = globalesDonnees(), echecs = [];
+    var js = r.js || {}, echecs = [], annonce = r.installe || {};
     /* ⚠️ « ESSENTIEL » N'EST PAS TOUJOURS LE LIVRET. Chaque livraison porte
        DEUX fichiers : l'élève reçoit son cahier plus les corrigés (bouton
        « Voir la correction »), l'enseignant reçoit son guide plus le cahier
@@ -329,13 +334,18 @@
         if (k === essentiel) echecs.push(k);
         return;
       }
-      var n = 0;
+      var ident = annonce[k] || identifiantDonnees(js[k]);
       try { (new Function(js[k]))(); }
       catch (e) { console.error('[livret] données ' + k + ' illisibles', e); echecs.push(k); return; }
-      var apres = globalesDonnees();
-      Object.keys(apres).forEach(function (g) { if (!avant[g]) n++; });
-      if (!n) { console.error('[livret] données ' + k + ' n\'installent rien'); echecs.push(k); }
-      avant = apres;
+      /* On mesure l'INSTALLATION, pas l'exécution : un fichier peut se dérouler
+         sans une erreur et ne rien poser (mauvais fichier déposé sous le bon
+         nom). Sans identifiant lisible, on ne peut rien affirmer — et on
+         n'invente pas un échec : le serveur, lui, a déjà refusé ce qu'il ne
+         savait pas ouvrir. */
+      if (ident && window[ident] == null) {
+        console.error('[livret] données ' + k + ' n\'installent pas window.' + ident);
+        echecs.push(k);
+      }
     });
     etat.wm = r.wm || null;
     filigrane(etat.wm);
