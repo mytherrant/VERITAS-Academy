@@ -220,15 +220,36 @@ console.log(`\n${G}⑦ Depuis chaque page, on peut acheter${R}`);
     'avec JavaScript, le tunnel de paiement s’ouvre sur la page',
     sansTunnel.slice(0, 4).join(', '));
 
-  /* Les cinq coquilles conservées vendent par leur propre chemin : les quatre
-     cahiers interactifs par le bouton « Je n'ai pas de code », `bord-6e` par
-     le feuilletage de liseur.js. On vérifie qu'elles en ont un, sans exiger
-     qu'il ait la forme des pages produites. */
-  const muettes = coquilles.filter(x =>
-    x.t.indexOf('livrets/gate.js') < 0 ||
-    (!/\.acheter\(/.test(x.t) && x.t.indexOf('liseur.js') < 0));
+  /* Les coquilles conservées vendent par leur propre chemin : `bord-6e` par le
+     feuilletage de liseur.js, et les quatre cahiers de collège en CONDUISANT au
+     lecteur générique, qui vend.
+
+     ⚠️ CE CONTRÔLE EXIGEAIT LE TUNNEL DANS LA PAGE, et il a bloqué le
+     déploiement du 01/09/2026 — à raison de rougir, mais pour la mauvaise
+     cause. Les quatre coquilles de 6ᵉ à 3ᵉ sont devenues des redirections vers
+     `cahier.html` : elles lisaient un format de données abandonné le 28/08 et
+     n'affichaient qu'un sommaire vide à qui venait de payer. On ne pouvait pas
+     les réparer sur place sans réécrire le moteur une seconde fois.
+     La RÈGLE, elle, n'a pas bougé : depuis chaque page, on peut acheter. Une
+     page qui mène immédiatement à une surface qui vend la respecte. Ce qu'on
+     n'accepte pas, c'est de le croire sur parole — on vérifie que la
+     destination existe et qu'elle vend vraiment, sans quoi une redirection
+     deviendrait le moyen le plus simple de faire taire ce banc. */
+  const lecteur = (() => {
+    const p = path.join(RACINE, 'livrets', 'cahier.html');
+    return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';
+  })();
+  const lecteurVend = lecteur.indexOf('livrets/gate.js') > 0 && /\.acheter\(/.test(lecteur);
+  dire(lecteurVend,
+    'le lecteur générique vend — c’est lui qui reçoit les coquilles redirigées');
+
+  const vendSurPlace = (x) => x.t.indexOf('livrets/gate.js') > 0
+    && (/\.acheter\(/.test(x.t) || x.t.indexOf('liseur.js') > 0);
+  const mene = (x) => lecteurVend
+    && x.t.indexOf('location.replace("cahier.html?o=' + x.slug) > 0;
+  const muettes = coquilles.filter(x => !vendSurPlace(x) && !mene(x));
   dire(muettes.length === 0,
-    'les ' + coquilles.length + ' coquilles conservées vendent aussi',
+    'les ' + coquilles.length + ' coquilles conservées vendent, sur place ou par le lecteur',
     muettes.map(x => x.slug).join(', '));
 
   /* Le générateur ne doit pas pouvoir écraser un lecteur. `--tout` réécrit les
