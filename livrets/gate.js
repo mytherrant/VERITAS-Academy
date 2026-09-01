@@ -646,5 +646,37 @@
     };
   }
 
+  /* ── LE HORS LIGNE NE DOIT PAS DÉPENDRE DE LA PAGE PAR OÙ L'ON ENTRE ───────
+     « La connexion reste chère au Cameroun et pas toujours accessible » : c'est
+     la phrase qui a fait écrire `sw-cahier.js`. Mais il n'était enregistré que
+     par `cahier.html` et `apercu.html`.
+
+     Or depuis l'unification de la boutique (30/08/2026), la carte d'un cahier
+     dépose l'acheteur sur la page de SON ouvrage — `/livrets/6e.html` pour un
+     cahier de 6ᵉ, `/livrets/bord-6e.html` pour un Bord. Ces pages-là
+     n'enregistraient AUCUN service worker : la coquille des quatre cahiers les
+     plus vendus (6ᵉ, 5ᵉ, 4ᵉ, 3ᵉ) ne partait donc jamais en cache. Sans réseau,
+     la page ne s'ouvrait pas — pendant que son contenu, lui, attendait
+     tranquillement dans IndexedDB. C'est mot pour mot la panne que
+     `sw-cahier.js` a été écrit pour empêcher : « garder le CONTENU sur
+     l'appareil ne sert à rien si la PAGE qui l'affiche ne se charge pas ».
+
+     On enregistre donc ici, dans le seul fichier que TOUTES les surfaces
+     chargent — les quatre coquilles, le feuilletage, le lecteur générique, les
+     pages d'ouvrage. `register()` avec la même adresse et la même portée est
+     idempotent : les deux pages qui le faisaient déjà ne le font pas deux fois.
+
+     Sans blocage et sans bruit : sur un navigateur qui n'en veut pas
+     (navigation privée, vieux WebView), tout doit s'ouvrir comme avant — le
+     hors ligne est un confort, jamais une condition. */
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    var poserSW = function () {
+      navigator.serviceWorker.register('/livrets/sw-cahier.js', { scope: '/livrets/' })
+        .catch(function () { /* pas de hors ligne, et c'est tout */ });
+    };
+    if (document.readyState === 'complete') poserSW();
+    else window.addEventListener('load', poserSW);
+  }
+
   window.VRTLivret = VRT;
 })();

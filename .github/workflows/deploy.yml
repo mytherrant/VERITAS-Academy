@@ -1345,6 +1345,26 @@ jobs:
             fi
             echo "   Service worker aligné : veritas-v$VER"
           fi
+          # Le service worker DES CAHIERS a sa propre clé de cache, et elle
+          # était maintenue À LA MAIN — 'vrt-cahier-v1.20.3' pendant que le site
+          # passait 1.20.14. C'est le même piège que celui réglé ci-dessus pour
+          # sw.js, sur la surface la plus sensible : `cahier.html`, `gate.js` et
+          # `cahier.js` sont PRÉCACHÉS par ce worker, et il les sert avec
+          # `ignoreSearch` — donc en ignorant le ?v= qu'on vient de réécrire.
+          # Une correction du moteur du cahier serait servie depuis l'ancien
+          # cache à tout élève déjà venu, sans qu'aucune erreur ne le dise, tant
+          # que personne ne pense à incrémenter ce nombre à la main.
+          # On l'aligne sur la même version : l'`activate` purge alors tout
+          # cache dont la clé n'est pas celle-ci.
+          if [ -f deploy/livrets/sw-cahier.js ]; then
+            sed -i -E "s/(const CACHE = 'vrt-cahier-v)[0-9.]+(')/\1$VER\2/" deploy/livrets/sw-cahier.js
+            SWC=$(grep -o "vrt-cahier-v[0-9.]*" deploy/livrets/sw-cahier.js | head -1 | sed 's/vrt-cahier-v//')
+            if [ "$SWC" != "$VER" ]; then
+              echo "::error title=Service worker des cahiers non aligné::CACHE vaut '$SWC' au lieu de '$VER' — un élève déjà venu garderait l'ancien moteur de cahier."
+              exit 1
+            fi
+            echo "   Service worker des cahiers aligné : vrt-cahier-v$VER"
+          fi
           echo "✅ Cache-busters alignés sur $VER dans $n fichier(s)."
           # ── Le trou de la passoire : un asset SANS ?v= du tout ────────────
           # Le remplacement ci-dessus n'attrape que les URLs qui portent déjà

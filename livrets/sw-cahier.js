@@ -38,7 +38,7 @@
    sans cela, une correction déployée resterait invisible pour qui a déjà
    ouvert le cahier une fois — la panne la plus difficile à croire, puisque le
    fichier EST corrigé sur le serveur. */
-const CACHE = 'vrt-cahier-v1.20.3';
+const CACHE = 'vrt-cahier-v1.20.15';
 
 const COQUILLE = [
   '/livrets/cahier.html',
@@ -74,7 +74,34 @@ self.addEventListener('fetch', (e) => {
 
   const estCoquille = COQUILLE.some((u) => url.pathname === u);
   const estApercu = /^\/livrets\/extrait-[a-z0-9_-]+\.js$/.test(url.pathname);
-  if (!estCoquille && !estApercu) return;
+
+  /* ⚠️ LA COQUILLE PRÉCACHÉE N'EST PAS CELLE QUE L'ACHETEUR OUVRE.
+     `COQUILLE` ne nomme que le lecteur générique (`cahier.html`). Or depuis
+     l'unification de la boutique, la carte d'un cahier mène à la page de son
+     ouvrage : `/livrets/6e.html`, `/livrets/bord-tle.html`… Ces pages
+     tombaient dans le `return` ci-dessous — jamais mises de côté, donc
+     inouvrables sans réseau, alors même que leur contenu attendait dans
+     IndexedDB.
+
+     On les garde au fil des visites, et non au moment de l'installation : la
+     liste des ouvrages change à chaque publication, et un `addAll` sur un nom
+     disparu ferait échouer l'installation ENTIÈRE. Ce qu'on met de côté est
+     donc ce que l'acheteur a réellement ouvert au moins une fois.
+
+     RIEN DE VENDU NE PASSE ICI, et c'est vérifié ailleurs : les coquilles de
+     `/livrets/` sont publiques par construction — la CI refuse le déploiement
+     si l'une d'elles embarque `window.BOOKLET*` ou dépasse 120 Ko. Le contenu
+     payant arrive en POST sur `/api/`, que ce fichier ignore deux lignes plus
+     haut. */
+  const estOuvrage = /^\/livrets\/[a-z0-9][a-z0-9-]*\.html$/.test(url.pathname);
+  const estOutil = /^\/livrets\/(liseur|support|collab)\.js$/.test(url.pathname);
+  /* Les pages d'ouvrage empruntent la feuille du site : sans elles, la page
+     s'ouvre hors ligne mais sans mise en page — pire qu'une page qui manque,
+     parce que l'acheteur croit le produit cassé. */
+  const estHabillage = /^\/assets\/veritas-(tokens|pages)\.css$/.test(url.pathname)
+                    || url.pathname === '/assets/veritas-icons.svg';
+
+  if (!estCoquille && !estApercu && !estOuvrage && !estOutil && !estHabillage) return;
 
   e.respondWith(
     caches.match(req, { ignoreSearch: true }).then((cache) => {
