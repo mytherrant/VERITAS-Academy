@@ -150,8 +150,30 @@ if (!defined('VRT_LIVRET_LIB')) {
                      ? (string) VRT_LIVRET_DONNEES
                      : dirname(__DIR__) . '/uploads/protected/livrets');
         $donnees  = is_file($dirDon . '/booklet-' . $slug . '.js');
+        /* Mode lecture (feuilletage) : le contenu n'est pas un `.js` mais un
+           dossier d'images `<slug>/p001.jpg`, servi page par page. C'est ce que
+           lit `livret.php?action=page` ; on constate donc la même chose. */
+        $pages    = is_file($dirDon . '/' . $slug . '/p001.jpg');
         return [
-            'disponible' => ($coquille || $donnees),
+            /* ⚠️ « DISPONIBLE » VEUT DIRE LIVRABLE, PAS « A UNE PAGE ».
+               Ce calcul valait `$coquille || $donnees`, et le premier terme
+               signifiait alors « une page-LECTEUR existe pour cet ouvrage » —
+               ce qui était vrai : seuls 6e, 5e, 4e, 3e et bord-6e en avaient
+               une, et c'était bien par elle qu'on lisait.
+
+               Le 31/08/2026, dix pages d'ATTERRISSAGE ont été produites pour le
+               référencement. Les quinze ouvrages ont eu une page, `$coquille`
+               est devenu vrai partout, et ce garde-fou a cessé de garder quoi
+               que ce soit — en silence, sans qu'une ligne de son code change.
+               Il annonçait pourtant lui-même ce qu'il empêchait : « le jour où
+               l'on a pu payer 1 000 F un livre dont le contenu n'était pas sur
+               le serveur ».
+
+               La seule question qui vaille est donc : le serveur peut-il
+               LIVRER ? Pour un cahier interactif, `booklet-<slug>.js` ;
+               pour un feuilletage, le dossier de pages. Une page de vente
+               n'est pas une livraison, et ne compte plus. */
+            'disponible' => ($donnees || $pages),
             // Le serveur le dit, parce que lui seul sait laquelle des deux
             // formes existe. Une page dédiée présente mieux qu'un lecteur nu.
             'lien' => $coquille

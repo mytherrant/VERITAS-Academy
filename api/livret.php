@@ -134,7 +134,18 @@ const LV_FENETRE    = 900;  // …sur 15 minutes glissantes
 
 // ── Verrouillage après échecs répétés (anti force brute) ──────────────────────
 function lv_fichier_echecs(): string {
-    $dir = __DIR__ . '/data/_rate';
+    /* ⚠️ CE COMPTEUR SUIT LE REGISTRE, SINON LE BANC SE VERROUILLE LUI-MÊME.
+       Il écrivait toujours dans le VRAI `api/data/_rate/`, quand tout le reste
+       de la porte — registre, catalogue, données — se surcharge pour les
+       essais. Or `banc_livret_codes.cjs` présente exprès de mauvais codes :
+       ses échecs s'additionnaient d'un passage à l'autre dans un dossier
+       partagé, et au troisième lancement il franchissait le seuil de 5 / 15 min
+       et rougissait sur cinq contrôles sans rapport (« révocation acceptée »…).
+       Un banc qui rougit une fois sur trois n'est plus lu : c'est ainsi qu'on
+       finit par ignorer un vrai rouge. La CI n'y voyait rien, son runner étant
+       neuf à chaque fois. Le compteur suit désormais VRT_LIVRET_DIR, comme le
+       registre qu'il protège : en production, rien ne bouge. */
+    $dir = defined('VRT_RATE_DIR') ? (string) VRT_RATE_DIR : __DIR__ . '/data/_rate';
     if (!is_dir($dir)) { @mkdir($dir, 0750, true); }
     return $dir . '/livfail_' . substr(hash('sha256', vrt_client_ip()), 0, 16) . '.txt';
 }
@@ -546,7 +557,6 @@ if ($action === 'catalogue') {
        tout sur la vitrine d'un produit payant. Le nom se déduit du slug
        (tools/couvertures.py produit `livret_<slug>.jpg`) et on vérifie que le
        fichier est là. Ajouter une couverture = déposer un fichier. */
-    $racine = dirname(__DIR__) . '/livrets/';
     $dirCouv = dirname(__DIR__) . '/uploads/oeuvres/';
     $out = [];
     foreach (vrt_livret_catalogue() as $slug => $o) {
@@ -565,8 +575,14 @@ if ($action === 'catalogue') {
            cahier y sont. C'est cette seconde condition qui compte le plus —
            elle est exactement ce qui manquait le jour où l'on a pu payer
            1 000 F un livre dont le contenu n'était pas sur le serveur. */
-        $coquille = is_file($racine . $slug . '.html');
-        $donnees  = is_file(lv_dir() . '/booklet-' . $slug . '.js');
+        /* ⚠️ UNE SEULE AUTORITÉ, ET C'EST `vrt_livret_etat()`.
+           Ce bloc refaisait le calcul à la main. Deux copies de la même
+           question finissent toujours par diverger : celle-ci a survécu à la
+           correction du 01/09/2026, où l'on a cessé de confondre « a une page »
+           et « est livrable » — la boutique aurait alors été honnête pendant
+           que ce catalogue, lui, aurait continué d'annoncer disponible tout
+           ouvrage pourvu d'une page de vente. */
+        $etat = vrt_livret_etat((string) $slug);
         $out[] = [
             'slug'  => (string) $slug,
             'titre' => (string) $o['titre'],
@@ -575,10 +591,10 @@ if ($action === 'catalogue') {
             'kinds' => array_values((array) ($o['kinds'] ?? ['livret'])),
             'prix'  => (int) ($o['prix'] ?? 0),
             'prixGuide' => (int) ($o['prixGuide'] ?? 0),
-            'disponible' => $coquille || $donnees,
+            'disponible' => (bool) $etat['disponible'],
             // Où mène la carte de la boutique. Le serveur le dit, parce que
             // lui seul sait laquelle des deux formes existe.
-            'lien' => $coquille ? ($slug . '.html') : ('cahier.html?o=' . rawurlencode((string) $slug)),
+            'lien' => (string) $etat['lien'],
             'couverture' => $couv,
         ];
     }

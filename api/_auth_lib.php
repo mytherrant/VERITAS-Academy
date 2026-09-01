@@ -305,7 +305,20 @@ if (!defined('VRT_AUTH_LIB')) {
     }
     /** Renvoie true si la limite est DÉPASSÉE (caller doit alors répondre 429). */
     function vrt_rate_exceeded(string $prefix, int $maxPerMin): bool {
-        $dir = __DIR__ . '/data/_rate/';
+        /* ⚠️ CE COMPTEUR DOIT POUVOIR S'ISOLER, SINON LE BANC SE BLOQUE LUI-MÊME.
+           Il écrivait toujours dans le VRAI `api/data/_rate/`, quand le
+           registre, le catalogue et les données des livrets se surchargent tous
+           pour les essais. Or `banc_livret_codes.cjs` consomme une quarantaine
+           de requêtes par passage, et la limite est de 40 par minute : deux
+           lancements rapprochés — ce qu'on fait précisément en éprouvant une
+           correction par mutation — et le second se voyait refuser dès la
+           première requête. Le banc annonçait alors « le serveur de test n'a
+           pas démarré », ce qui envoie chercher la panne à l'endroit exact où
+           elle n'est pas. Un banc intermittent finit par ne plus être lu.
+           La CI n'y voyait rien : son runner est neuf à chaque fois.
+           En production, la constante n'est pas définie : le chemin ne bouge
+           pas d'un pouce. */
+        $dir = (defined('VRT_RATE_DIR') ? (string) VRT_RATE_DIR : __DIR__ . '/data/_rate') . '/';
         if (!is_dir($dir)) @mkdir($dir, 0750, true);
         $f = $dir . $prefix . '_' . substr(md5(vrt_client_ip()), 0, 16) . '.txt';
         $now = time();

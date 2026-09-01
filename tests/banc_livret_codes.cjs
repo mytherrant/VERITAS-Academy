@@ -34,7 +34,31 @@ const os = require('os');
 const path = require('path');
 
 const RACINE = path.resolve(__dirname, '..');
-const PORT = parseInt(process.env.PORT_BANC || '8899', 10);
+/* ⚠️ UN PORT FIXE REND CE BANC INTERMITTENT, ET UN BANC INTERMITTENT N'EST
+   PLUS LU. Il écoutait toujours sur 8899. Deux lancements rapprochés — ce
+   qu'on fait précisément quand on éprouve une correction par mutation — et le
+   second trouvait le port encore tenu par le `php -S` du premier (TIME_WAIT
+   sous Windows). Le banc annonçait alors « le serveur de test n'a pas
+   démarré », ou cinq échecs sans rapport, une fois sur deux ou sur trois. On
+   finit par mettre ça sur le compte du hasard, et c'est ainsi qu'on ignore un
+   vrai rouge. La CI ne voyait rien : son runner est neuf à chaque fois.
+   On demande donc un port LIBRE au système, comme le fait déjà
+   `tests/static_server.cjs`. `PORT_BANC` reste prioritaire pour qui veut
+   fixer le port à la main. */
+const PORT = (() => {
+  if (process.env.PORT_BANC) return parseInt(process.env.PORT_BANC, 10);
+  /* On demande un port éphémère au noyau, on le note, on le rend. La fenêtre
+     entre la fermeture et le `php -S` est infime et sans conséquence : au pire
+     le banc dit « le serveur n'a pas démarré », comme avant, mais ce ne sera
+     plus systématique au second lancement. */
+  const { execFileSync } = require('child_process');
+  const out = execFileSync(process.execPath, ['-e',
+    "const s=require('net').createServer();s.listen(0,'127.0.0.1',()=>{" +
+    "process.stdout.write(String(s.address().port));s.close();});"],
+    { encoding: 'utf8' });
+  const p = parseInt(out.trim(), 10);
+  return Number.isInteger(p) && p > 0 ? p : 8899;
+})();
 const URL = `http://127.0.0.1:${PORT}/livret_test.php`;
 const SECRET = 'BANC_DE_TEST_SECRET_0123456789';
 
@@ -80,10 +104,33 @@ const CATALOGUE = {
 function preparer() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vrt-livret-'));
   fs.mkdirSync(path.join(dir, 'lvdata'));
+  /* ── LE DÉPÔT DES DONNÉES VENDUES, FOURNI PAR LE BANC ────────────────────
+     Depuis le 01/09/2026, « disponible » ne veut plus dire « a une page » mais
+     « le serveur peut LIVRER ». Le dossier de livraison est hors dépôt (FTP) :
+     sans fixture, ce banc mesurerait l'état du disque de la machine — l'erreur
+     que ce fichier a déjà commise sur « 2nde », et qui l'a fait rougir le jour
+     où les données ont été déposées, sans qu'aucune règle ait bougé.
+     On dépose donc exactement deux ouvrages, et on laisse les autres vides :
+       · `6e`      → cahier interactif livrable (booklet-6e.js) ;
+       · `bord-6e` → feuilletage livrable (dossier de pages) ;
+       · `2nde`    → A une page de vente dans le dépôt depuis le 31/08, mais
+                     AUCUNE donnée : c'est le témoin vivant de la régression —
+                     une page n'est pas une livraison ;
+       · `fantome` → ni l'un ni l'autre, indisponible partout et toujours. */
+  const don = path.join(dir, 'donnees');
+  fs.mkdirSync(don);
+  fs.writeFileSync(path.join(don, 'booklet-6e.js'), 'window.BOOKLET={};', 'utf8');
+  fs.mkdirSync(path.join(don, 'bord-6e'));
+  fs.writeFileSync(path.join(don, 'bord-6e', 'p001.jpg'), 'jpeg-de-banc', 'utf8');
   const cat = path.join(dir, 'catalogue.json');
   fs.writeFileSync(cat, JSON.stringify(CATALOGUE, null, 1), 'utf8');
   const shim = `<?php
 define('VRT_LIVRET_DIR', __DIR__ . '/lvdata');
+define('VRT_LIVRET_DONNEES', __DIR__ . '/donnees');
+/* Compteurs de débit isolés : sans cela, ce banc consomme sa propre limite
+   (40 requêtes/minute) dans le dossier partagé du dépôt, et le passage suivant
+   se voit refuser dès la première requête. */
+define('VRT_RATE_DIR', __DIR__ . '/lvdata/_rate');
 define('VRT_LIVRET_CATALOGUE', ${JSON.stringify(cat)});
 define('API_SECRET', ${JSON.stringify(SECRET)});
 require ${JSON.stringify(path.join(RACINE, 'api', 'livret.php'))};
@@ -159,8 +206,24 @@ async function serveurPret() {
   const pasDispo = ouvrages.filter(o => o.disponible === false).map(o => o.slug);
   dit(ouvrages.every(o => typeof o.disponible === 'boolean'),
       'chaque ouvrage dit s’il est réellement publié');
-  dit(dispo.indexOf('6e') >= 0 && dispo.indexOf('bord-6e') >= 0,
-      'les ouvrages dont la coquille existe sont « disponibles » : ' + dispo.join(', '));
+  /* ⚠️ LA RÈGLE A ENCORE CHANGÉ, LE 01/09/2026, ET CE CONTRÔLE AVEC ELLE.
+     Il affirmait « les ouvrages dont la COQUILLE existe sont disponibles ».
+     C'était juste tant qu'une coquille voulait dire une page-LECTEUR. Le
+     31/08, dix pages d'ATTERRISSAGE ont été produites pour le référencement :
+     les quinze ouvrages ont eu une page, et cette affirmation est devenue vraie
+     de tout le catalogue — donc vide de sens. Elle aurait continué de passer au
+     vert en gardant une boutique qui vend ce qu'elle ne peut pas livrer.
+     La question est désormais : le serveur a-t-il de quoi SERVIR ? */
+  dit(dispo.indexOf('6e') >= 0,
+      'un cahier dont les données sont déposées est disponible', 'dispo : ' + dispo.join(', '));
+  dit(dispo.indexOf('bord-6e') >= 0,
+      'un feuilletage dont les pages sont déposées aussi', 'dispo : ' + dispo.join(', '));
+  /* LE TÉMOIN DE LA RÉGRESSION. `livrets/2nde.html` est dans le dépôt depuis le
+     31/08 — mais rien n'est déposé pour lui ici. S'il ressort « disponible »,
+     c'est que la page a repris le pas sur la livraison. */
+  dit(pasDispo.indexOf('2nde') >= 0,
+      'un ouvrage qui n’a QU’une page de vente ne l’est pas — une page n’est pas une livraison',
+      'disponibles à tort : ' + dispo.join(', '));
 
   /* Le catalogue de ce banc déclare un ouvrage fantôme : aucune coquille,
      aucune donnée. C'est le seul cas où « non disponible » est la bonne
