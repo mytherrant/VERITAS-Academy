@@ -303,6 +303,121 @@ async function serveurPret() {
   dit(!(apres.status === 200 && apres.j && apres.j.ok),
       'le code révoqué n’ouvre plus rien', 'reçu ' + apres.status);
 
+  /* ── ⑥ UN FICHIER DÉPOSÉ MAIS ABÎMÉ ─────────────────────────────────────────
+     LE 01/09/2026, UN CLIENT A PAYÉ ET N'A RIEN VU. `booklet-6e.js` était bien
+     sur le serveur — tronqué par un dépôt FTP coupé. La boutique l'a vendu
+     (`is_file()` disait oui), la porte l'a livré, la page a peint le filigrane
+     nominatif de l'acheteur, puis `new Function(...)` a buté sur un
+     `SyntaxError` que la porte écrivait dans la console avant de continuer. Le
+     livre s'arrêtait après le sommaire, sous le nom de celui qui l'avait payé.
+
+     Deux règles, donc, et ce banc les tient toutes les deux :
+       · on ne VEND pas un ouvrage qu'on ne saura pas ouvrir ;
+       · on ne LIVRE pas un fichier qu'on ne sait pas lire — on le dit, avec un
+         motif distinct de « pas encore déposé », parce que la correction n'est
+         pas la même (déposer / RE-déposer).
+
+     On abîme donc le fichier de la 5ᵉ pour de bon : le début est valide, la fin
+     manque. C'est exactement la forme d'une troncature — et c'est ce qui rend
+     `is_file()` insuffisant. La 6ᵉ reste saine à côté, sans quoi on ne saurait
+     pas distinguer « la garde mord » de « la garde a tout fermé ». */
+  console.log('\n\x1b[1m8. ⑥ Déposé n’est pas lisible — un fichier abîmé ne se vend ni ne se livre\x1b[0m');
+  /* ⚠️ ET D'ABORD : UN VRAI CAHIER PÈSE 300 À 470 Ko, PAS 29.
+     La première version de ce contrôle validait le fichier avec une seule
+     expression régulière paresseuse (`^window\.(\w+)\s*=\s*(.+?)\s*;?\s*$`).
+     Verte sur le fichier de démonstration du dépôt (29 Ko). Passée sur les
+     cahiers réels, elle dépassait `pcre.backtrack_limit` et `preg_match`
+     renvoyait `false` — pas 0, pas une erreur : `false`, sans un mot. Les
+     QUATRE cahiers vendus devenaient « abîmés », et le garde-fou écrit pour
+     protéger la boutique l'aurait FERMÉE, silencieusement, comme la panne
+     qu'il corrige.
+     Ce banc dépose donc un fichier de la TAILLE D'UN VRAI, sans quoi il
+     mesurerait la démonstration et laisserait passer exactement ça. */
+  const gros = 'window.BOOKLET_5E = ' + JSON.stringify({
+    header: { centre: 'CENTRE VÉRITAS' },
+    sequences: Array.from({ length: 400 }, (_, i) => ({
+      num: String(i + 1), title: 'Module ' + (i + 1),
+      competence: 'Compétence longue répétée pour peser autant qu’un vrai cahier — '.repeat(12),
+      weeks: [{ num: '1', title: 'Semaine', items: [{ t: 'exercise', num: '1',
+                consigne: 'Consigne de longueur réaliste, accentuée : à è ç œ — '.repeat(10) }] }],
+    })),
+  }) + ';';
+  fs.writeFileSync(path.join(dir, 'donnees', 'booklet-5e.js'), gros, 'utf8');
+  const catG = await api({ action: 'catalogue' });
+  dit((catG.j.ouvrages || []).find(o => o.slug === '5e').disponible === true,
+      'un cahier de ' + Math.round(Buffer.byteLength(gros) / 1024) + ' Ko — taille réelle — est reconnu INTACT',
+      'un contrôle qui ne tient pas sur 400 Ko fermerait la boutique');
+
+  const donDir = path.join(dir, 'donnees');
+  fs.writeFileSync(path.join(donDir, 'booklet-5e.js'),
+    'window.BOOKLET_5E = {"header": {"centre": "CENTRE VÉRITAS"}, "sequences": [{"num": "1"',
+    'utf8');   // début valide, fin absente : une troncature, pas un fichier vide
+
+  const cat6 = await api({ action: 'catalogue' });
+  const vu = (s) => (cat6.j.ouvrages || []).find(o => o.slug === s) || {};
+  dit(vu('5e').disponible === false,
+      'un ouvrage dont le fichier est TRONQUÉ quitte la devanture',
+      'disponible=' + vu('5e').disponible);
+  dit(vu('6e').disponible === true,
+      'l’ouvrage sain reste en vente (la garde mord, elle ne ferme pas la boutique)',
+      'disponible=' + vu('6e').disponible);
+
+  // Un code valide, sur un ouvrage dont le fichier est abîmé : la porte doit
+  // refuser AVEC SON MOTIF, et surtout ne pas répondre 200 avec un cahier vide.
+  const gen5 = await api({ action: 'admin_gen', classe: '5e', kind: 'livret', n: 1,
+                           jours: 365, label: 'Banc — fichier abîmé' }, SECRET);
+  const ouv5 = await api({ action: 'unlock', code: (gen5.j.codes || [])[0],
+                           classe: '5e', kind: 'livret' });
+  dit(ouv5.status === 200 && ouv5.j.ok,
+      'le code reste valable — ce n’est pas lui qui est en cause');
+  const liv5 = await api({ action: 'content', token: ouv5.j && ouv5.j.token });
+  dit(liv5.status === 409 && liv5.j && liv5.j.code === 'corrupt',
+      'la livraison REFUSE le fichier abîmé, et dit « corrupt » (pas « missing »)',
+      'reçu ' + liv5.status + '/' + (liv5.j && liv5.j.code));
+  dit(!(liv5.j && liv5.j.js && liv5.j.js.booklet),
+      'rien d’illisible n’est envoyé au navigateur');
+
+  // L'ouvrage sain se livre toujours, et le serveur nomme ce qu'il installe :
+  // c'est ce nom que la page compare à son propre contrat.
+  const liv6 = await api({ action: 'content', token: bon.j && bon.j.token });
+  dit(liv6.status === 200 && liv6.j.ok && !!liv6.j.js.booklet,
+      'l’ouvrage sain se livre normalement', 'reçu ' + liv6.status);
+  dit(liv6.j && liv6.j.installe && liv6.j.installe.booklet === 'BOOKLET',
+      'la livraison annonce la globale qu’elle installe',
+      JSON.stringify(liv6.j && liv6.j.installe));
+
+  /* LE FICHIER JOINT NE FAIT PAS TOMBER LA LIVRAISON — et « joint » n'est pas
+     toujours le même. Chaque livraison en porte deux : l'élève reçoit son cahier
+     PLUS les corrigés, l'enseignant reçoit son guide PLUS le cahier pour suivre
+     sa classe. Juger le cahier indispensable dans les deux cas fermerait le
+     guide d'un enseignant parce que le cahier de l'élève est abîmé — alors que
+     son guide, lui, est intact. On abîme donc le cahier de 6ᵉ pendant que le
+     guide reste bon, et on exige que l'enseignant soit servi. */
+  fs.copyFileSync(path.join(donDir, 'booklet-6e.js'), path.join(donDir, 'booklet-6e.sain.js'));
+  fs.writeFileSync(path.join(donDir, 'guide-6e.js'), 'window.GUIDE_6E = {"sequences": []};', 'utf8');
+  fs.writeFileSync(path.join(donDir, 'booklet-6e.js'), 'window.BOOKLET = {"sequences": [', 'utf8');
+  const ouvG = await api({ action: 'unlock', code: (await api({ action: 'admin_gen', classe: '6e',
+                             kind: 'guide', n: 1, jours: 365, label: 'Banc — guide sain' },
+                             SECRET)).j.codes[0], classe: '6e', kind: 'guide' });
+  const livG = await api({ action: 'content', token: ouvG.j && ouvG.j.token });
+  dit(livG.status === 200 && livG.j.ok && !!livG.j.js.guide,
+      'guide intact + cahier joint abîmé → l’enseignant est SERVI', 'reçu ' + livG.status);
+  dit(!(livG.j && livG.j.js && livG.j.js.booklet),
+      'et le cahier joint, illisible, n’est pas envoyé');
+  fs.copyFileSync(path.join(donDir, 'booklet-6e.sain.js'), path.join(donDir, 'booklet-6e.js'));
+
+  // L'inventaire du dépôt : la seule façon de savoir, sans acheter les quinze
+  // ouvrages un par un, lequel doit être re-déposé.
+  const dep = await api({ action: 'admin_depot' }, SECRET);
+  dit(dep.status === 200 && dep.j.ok, 'l’inventaire du dépôt répond à l’administrateur');
+  dit(dep.j.ouvrages && dep.j.ouvrages['5e'].booklet.depose === true
+      && dep.j.ouvrages['5e'].booklet.intact === false,
+      'il nomme le fichier abîmé : déposé, mais pas intact');
+  dit(dep.j.ouvrages && dep.j.ouvrages['6e'].booklet.installe === 'BOOKLET',
+      'et l’identifiant réellement installé par le fichier sain');
+  dit((await api({ action: 'admin_depot' })).status === 401,
+      'l’inventaire du dépôt est fermé sans la clé d’administration');
+
   console.log('\n' + '─'.repeat(68));
   const total = ok + ko;
   if (ko === 0) console.log(`\x1b[32m\x1b[1m  ✓ ${ok}/${total} contrôles passés\x1b[0m`);

@@ -496,7 +496,16 @@ class Component extends DCLogic {
       ])); }
   enhanceBoxes(){ const root=document.getElementById('sheet'); if(!root)return;
     let idx=0; root.querySelectorAll('span').forEach(sp=>{ if(sp.dataset.box)return; if(sp.hasAttribute('data-dot'))return; const st=sp.getAttribute('style')||'';
-      const isBox=/width:1[3-6]px/.test(st)&&/height:1[3-6]px/.test(st)&&/border:/.test(st)&&!sp.children.length&&!sp.textContent.trim();
+      /* LES CASES A COCHER NE SE COCHAIENT PAS -- 01/09/2026, signale par un acheteur.
+         Ce test lisait l'ATTRIBUT style brut : /width:1[3-6]px/. Or le gabarit passe
+         par React, qui reserialise le style et INSERE UNE ESPACE apres le deux-points
+         ("width: 15px"). La regex ne trouvait donc ZERO case sur les 53 que porte la
+         page : aucune n'etait cablee, aucune ne repondait au clic, et rien ne s'ecrivait
+         dans la console. Mesure au banc : 0 trouvee par la regex, 53 en tolerant l'espace.
+         On interroge desormais le CSSOM (sp.style.width), qui rend la VALEUR et non sa
+         mise en forme -- immunise contre toute variation de serialisation. */
+      const bw=parseFloat(sp.style.width), bh=parseFloat(sp.style.height);
+      const isBox=bw>=13&&bw<=16&&bh>=13&&bh<=16&&!!(sp.style.border||sp.style.borderWidth)&&!sp.children.length&&!sp.textContent.trim();
       if(!isBox)return; sp.dataset.box='b'+(idx++); const key='chk-'+sp.dataset.box;
       const set=(on)=>{ sp.style.background=on?'#2b8ac6':'#fff'; sp.textContent=on?'✓':''; sp.style.color='#fff'; sp.style.display='inline-flex'; sp.style.alignItems='center'; sp.style.justifyContent='center'; sp.style.fontSize='11px'; sp.style.fontWeight='700'; };
       if(this._store[key])set(true); sp.style.cursor='pointer';

@@ -115,6 +115,95 @@ if (!defined('VRT_LIVRET_LIB')) {
         return ['livret' => 'Livret de l\'élève', 'guide' => 'Guide de l\'enseignant'];
     }
 
+    /** ── UN FICHIER PRÉSENT N'EST PAS UN FICHIER LISIBLE ──────────────────
+     * LE 01/09/2026, UN CLIENT A PAYÉ, S'EST DÉVERROUILLÉ, ET N'A RIEN VU.
+     * Le serveur avait bien `booklet-6e.js`, il l'a bien livré, la page a bien
+     * peint le filigrane nominatif — puis `new Function(...)` a buté sur un
+     * `SyntaxError` et le cahier s'est arrêté après le sommaire. Le dépôt se
+     * fait par FTP, hors dépôt Git : un transfert coupé laisse un fichier
+     * TRONQUÉ, que `is_file()` déclare parfait.
+     *
+     * D'où deux contrôles, et pas un seul, parce qu'ils n'ont pas le même prix :
+     *
+     *  · `vrt_livret_donnees_bornes()` — bon marché, pour le CATALOGUE. Il est
+     *    appelé quinze fois par affichage de la devanture : il ne lit que la
+     *    tête et la queue du fichier, jamais les mégaoctets du milieu. Une
+     *    troncature coupe la FIN — c'est très exactement ce qu'il regarde.
+     *
+     *  · `vrt_livret_donnees_identifiant()` — complet, pour la LIVRAISON. Là on
+     *    tient déjà le fichier entier en mémoire, et c'est le moment qui
+     *    compte : on décode le littéral pour de bon. Il attrape aussi ce que la
+     *    queue laisse passer (corruption au milieu, transfert en mode texte).
+     *
+     * Ces fichiers ont tous la même forme, vérifiée sur les trois que le dépôt
+     * contient : `window.<IDENT> = <littéral JSON>;`. On ne devine pas
+     * l'identifiant attendu — il change avec la classe (`BOOKLET` en 6ᵉ,
+     * `BOOKLET_5E` en 5ᵉ) et seule la page qui le lit connaît son contrat.
+     * Le serveur répond « le fichier est intact et il installe CE nom-là » ;
+     * c'est au client de dire si c'est le nom qu'il attendait.
+     */
+    function vrt_livret_donnees_identifiant(string $src): ?string {
+        // Un BOM ou des espaces en tête sont légitimes : le navigateur les
+        // accepte, nous aussi. Ce qui suit doit être exactement l'affectation.
+        $s = ltrim($src, " \t\r\n\0\x0B\u{FEFF}");
+
+        /* ⚠️ ON NE PASSE PAS UNE REGEX SUR LE FICHIER ENTIER, ET C'EST TOUT SAUF
+           un détail de style. Ce contrôle s'écrivait d'abord en une seule
+           expression — `^window\.(\w+)\s*=\s*(.+?)\s*;?\s*$` — éprouvée sur le
+           fichier de démonstration (29 Ko) : parfaite. Passée sur les VRAIS
+           cahiers (300 à 470 Ko), elle dépassait `pcre.backtrack_limit`
+           (1 000 000 par défaut) et `preg_match` renvoyait `false` — pas 0, pas
+           une erreur : `false`, silencieusement. Vingt-quatre fichiers sur
+           vingt-huit étaient déclarés abîmés, dont les quatre cahiers vendus.
+
+           Déployé ainsi, ce garde-fou aurait FERMÉ LA BOUTIQUE ENTIÈRE en
+           croyant la protéger — et il l'aurait fait sans une erreur dans les
+           journaux, exactement comme la panne qu'il vient corriger. Un contrôle
+           n'est éprouvé que contre les données réelles ; la démonstration est
+           trop petite pour révéler ce qu'elle cache.
+
+           On sépare donc : une regex ANCRÉE et bornée pour le préfixe (aucun
+           quantificateur gourmand, donc aucun retour-arrière), puis un découpage
+           par position, puis `json_decode` — qui, lui, est fait pour avaler des
+           mégaoctets. */
+        if (!preg_match('/^window\.([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*/', $s, $m)) return null;
+        $litteral = rtrim(rtrim(substr($s, strlen($m[0]))), ';');
+        $litteral = rtrim($litteral);
+        if ($litteral === '') return null;
+
+        // json_decode est le juge : il refuse un objet tronqué, un littéral
+        // amputé, un octet illégal. C'est ce que `new Function` refusera aussi.
+        $v = json_decode($litteral, true);
+        if ($v === null && strtolower($litteral) !== 'null') return null;
+        return $m[1];
+    }
+
+    /** Contrôle bon marché : les bornes du fichier, sans le lire en entier.
+     *
+     * ⚠️ PAS DE PLANCHER DE POIDS ICI. Un premier jet exigeait 64 octets, ce qui
+     * paraît prudent et ne l'est pas : `window.BOOKLET={};` est un fichier
+     * PARFAITEMENT livrable de dix-huit octets — le navigateur l'ouvre, la page
+     * affiche « 0 module ». Un cahier vide est un problème d'ÉDITION ; ce n'est
+     * pas à la porte d'en juger, et un seuil inventé ici aurait refusé de livrer
+     * ce que le serveur sait très bien servir. C'est la FORME qui tranche. */
+    function vrt_livret_donnees_bornes(string $chemin): bool {
+        if (!is_file($chemin)) return false;
+        $taille = (int) @filesize($chemin);
+        if ($taille < 12) return false;          // « window.X={} » ne tient pas en moins
+        $f = @fopen($chemin, 'rb');
+        if ($f === false) return false;
+        $tete = (string) fread($f, 256);
+        // Sur un fichier plus court que la fenêtre de queue, `fseek` négatif
+        // échouerait et `fread` relirait à côté : on borne au fichier.
+        $n = min(64, $taille);
+        $queue = (fseek($f, -$n, SEEK_END) === 0) ? (string) fread($f, $n) : '';
+        fclose($f);
+        $tete = ltrim($tete, " \t\r\n\0\x0B\u{FEFF}");
+        if (!preg_match('/^window\.[A-Za-z_$][A-Za-z0-9_$]*\s*=\s*[\[{]/', $tete)) return false;
+        // Une affectation complète se referme. Un transfert coupé, non.
+        return (bool) preg_match('/[\]}]\s*;?\s*$/', $queue);
+    }
+
     /** ── EST-CE PUBLIÉ, ET OÙ CELA MÈNE-T-IL ? ────────────────────────────
      * DÉCLARÉ n'est pas PUBLIÉ, et confondre les deux fait vendre du vide. Le
      * catalogue retombe sur des classes d'origine pour ne jamais fermer un
@@ -149,7 +238,12 @@ if (!defined('VRT_LIVRET_LIB')) {
                   : (defined('VRT_LIVRET_DONNEES')
                      ? (string) VRT_LIVRET_DONNEES
                      : dirname(__DIR__) . '/uploads/protected/livrets');
-        $donnees  = is_file($dirDon . '/booklet-' . $slug . '.js');
+        /* ⚠️ `is_file()` NE SUFFIT PAS, ET C'EST CE QUI A COÛTÉ UNE VENTE.
+           Le 01/09/2026, `booklet-6e.js` était bien là — mais tronqué. La
+           boutique l'a vendu, le serveur l'a livré, et l'acheteur a reçu un
+           cahier vide sous son propre filigrane. « Livrable » veut dire que le
+           navigateur saura l'ouvrir, pas qu'un fichier porte ce nom. */
+        $donnees  = vrt_livret_donnees_bornes($dirDon . '/booklet-' . $slug . '.js');
         /* Mode lecture (feuilletage) : le contenu n'est pas un `.js` mais un
            dossier d'images `<slug>/p001.jpg`, servi page par page. C'est ce que
            lit `livret.php?action=page` ; on constate donc la même chose. */

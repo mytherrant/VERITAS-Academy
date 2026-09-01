@@ -280,17 +280,84 @@
   // Les fichiers de données sont du JavaScript de la forme « window.X = {…}; ».
   // On les exécute tels quels : aucune hypothèse sur leur structure, donc une
   // régénération des livrets ne casse pas la porte.
+  /* Les globales que les cahiers installent. Le nom change avec la classe —
+     `BOOKLET` en 6ᵉ, `BOOKLET_5E` en 5ᵉ, `GUIDE_3E` pour les corrigés — et
+     c'est la page qui connaît le sien. On ne les énumère donc pas : on regarde
+     ce qui est APPARU sur `window` pendant l'exécution. Une page qui changerait
+     de nom demain n'aurait rien à venir modifier ici. */
+  function globalesDonnees() {
+    var vus = {};
+    try {
+      Object.keys(window).forEach(function (k) {
+        if (/^(BOOKLET|GUIDE)($|_)/.test(k) && window[k] != null) vus[k] = true;
+      });
+    } catch (e) { /* navigateur avare sur l'énumération : on n'en fait rien */ }
+    return vus;
+  }
+
+  /* ── UN FICHIER EXÉCUTÉ N'EST PAS UN FICHIER INSTALLÉ ──────────────────────
+     LE 01/09/2026, UN CLIENT A PAYÉ ET N'A RIEN VU. Le serveur avait livré son
+     cahier, la page avait peint son filigrane nominatif, la porte s'était
+     ouverte — et le livre s'arrêtait après le sommaire. `new Function(...)`
+     avait buté sur un `SyntaxError` (le fichier était tronqué sur le serveur,
+     un dépôt FTP coupé), et CETTE LIGNE-CI l'écrivait dans la console avant de
+     passer à la suite comme si de rien n'était.
+
+     Une erreur avalée coûte plus cher que la panne : l'acheteur voit un livre
+     vide sous son propre nom, ne comprend pas, et c'est lui qui doit se
+     plaindre pour qu'on l'apprenne. On dit désormais ce qui s'est passé — et on
+     le fait remonter, pour que l'appelant décide au lieu de continuer à vide.
+
+     On mesure l'INSTALLATION, pas l'exécution : un fichier peut se dérouler
+     sans erreur et ne rien définir (mauvais fichier déposé sous le bon nom).
+     Ce qui compte est qu'une globale de données soit apparue. */
   function installer(r) {
-    var js = r.js || {};
+    var js = r.js || {}, avant = globalesDonnees(), echecs = [];
+    /* ⚠️ « ESSENTIEL » N'EST PAS TOUJOURS LE LIVRET. Chaque livraison porte
+       DEUX fichiers : l'élève reçoit son cahier plus les corrigés (bouton
+       « Voir la correction »), l'enseignant reçoit son guide plus le cahier
+       pour suivre sa classe. Le fichier joint peut manquer sans que rien ne
+       soit cassé — mais lequel est joint dépend de qui demande. Juger
+       « booklet » indispensable dans les deux cas fermerait le guide d'un
+       enseignant parce que le cahier de l'élève, lui, est abîmé. */
+    var essentiel = ((r.kind || cfg.kind) === 'guide') ? 'guide' : 'booklet';
     ['booklet', 'guide'].forEach(function (k) {
-      if (typeof js[k] === 'string' && js[k]) {
-        try { (new Function(js[k]))(); }
-        catch (e) { console.error('[livret] données ' + k + ' illisibles', e); }
+      if (typeof js[k] !== 'string' || !js[k]) {
+        // Le serveur écarte lui-même ce qu'il ne sait pas ouvrir. Absent ou
+        // écarté, c'est pareil ici : ce qui compte est de savoir si c'est
+        // CELUI qu'on est venu chercher. L'appelant tranche, pas nous.
+        if (k === essentiel) echecs.push(k);
+        return;
       }
+      var n = 0;
+      try { (new Function(js[k]))(); }
+      catch (e) { console.error('[livret] données ' + k + ' illisibles', e); echecs.push(k); return; }
+      var apres = globalesDonnees();
+      Object.keys(apres).forEach(function (g) { if (!avant[g]) n++; });
+      if (!n) { console.error('[livret] données ' + k + ' n\'installent rien'); echecs.push(k); }
+      avant = apres;
     });
     etat.wm = r.wm || null;
     filigrane(etat.wm);
     bandeauEcheance();
+    return { ok: echecs.indexOf(essentiel) === -1, echecs: echecs };
+  }
+
+  /* Le bandeau des données abîmées. Il dit trois choses, et la troisième est la
+     plus importante : ce n'est pas le code de l'élève qui est en cause. Sans
+     elle, il essaie son code, échoue, et croit avoir payé pour rien. */
+  function bandeauAbime() {
+    var v = document.getElementById('vrt-abime');
+    if (v && v.parentNode) v.parentNode.removeChild(v);
+    var d = document.createElement('div');
+    d.id = 'vrt-abime';
+    d.setAttribute('data-ui', '1');
+    d.style.cssText = 'position:sticky;top:0;z-index:70;background:#c0453f;color:#fff;'
+      + 'font:600 13px/1.5 "Source Sans 3",system-ui,sans-serif;padding:10px 14px;text-align:center';
+    d.textContent = 'Ce cahier n’a pas pu être chargé : le fichier déposé sur le serveur '
+      + 'est abîmé. Ton code d’accès reste valable — ce n’est pas lui. '
+      + 'Réessaie plus tard, ou écris-nous sur WhatsApp au +' + WA + '.';
+    document.body.insertBefore(d, document.body.firstChild);
   }
 
   /* Un abonnement qui s'éteint sans prévenir est une vente perdue qu'on ne voit
@@ -318,7 +385,17 @@
 
   function charger(token) {
     return post(API, { action: 'content', token: token }).then(function (r) {
-      installer(r);
+      var bilan = installer(r);
+      /* ⚠️ NE JAMAIS METTRE DE CÔTÉ CE QUI VIENT D'ÉCHOUER. Le commentaire
+         ci-dessous disait déjà la règle — « exactement ce qui vient de
+         fonctionner, jamais une supposition » — mais rien ne la vérifiait :
+         un fichier tronqué partait en cache comme un autre, et l'élève le
+         relisait pendant une semaine hors ligne. Une panne recopiée devient
+         une panne qui survit à sa propre correction. */
+      if (!bilan.ok) {
+        bandeauAbime();
+        throw ErrPorte('Le fichier de ce cahier est abîmé sur le serveur.', 'corrupt');
+      }
       // On garde la copie APRÈS l'avoir installée : ce qu'on met de côté est
       // exactement ce qui vient de fonctionner, jamais une supposition.
       cacheEcrire(r);
@@ -371,7 +448,23 @@
              → on ne décide rien. L'ancien code effaçait le jeton dans les deux
              cas : perdre sa session parce qu'on est passé sous un tunnel, et
              devoir ressaisir un code qu'on n'a pas sur soi. */
-          if (e && e.code === 'net') {
+          /* ── TROIS ÉCHECS, PAS DEUX : le fichier abîmé est le troisième ──
+             Un fichier tronqué sur le serveur n'est ni un refus ni une panne de
+             réseau. Effacer le jeton reviendrait à punir l'acheteur d'une faute
+             qui n'est pas la sienne : il ressaisirait son code, qui marcherait,
+             et retomberait sur le même livre vide.
+             On garde donc la session — et on tente la copie hors ligne, qui est
+             forcément saine puisqu'on ne met plus en cache ce qui a échoué.
+
+             ⚠️ ET ON LIT LE BON CHAMP. Cette garde testait `e.code`, quand
+             `ErrPorte()` écrit `e.tag` — la convention de tout le reste du
+             dossier (`collab.js`, `liseur.js`). `e.code` valait donc `undefined`
+             à CHAQUE échec : la distinction si soigneusement décrite juste
+             au-dessus n'a jamais eu lieu, et le passage sous un tunnel effaçait
+             le jeton ET la copie hors ligne — précisément ce qu'elle disait
+             empêcher. Une garde écrite n'est pas une garde appelée. */
+          var motif = (e && e.tag) || '';
+          if (motif === 'net' || motif === 'corrupt') {
             return cacheLire().then(function (c) {
               if (!c || !c.js) throw e;
               var perime = Date.now() - (c.maj || 0) > BAIL_HORS_LIGNE;
@@ -385,8 +478,20 @@
               etat.exp = c.exp; etat.jours = c.jours;
               installer({ js: c.js, wm: c.wm });
               etat.ouvert = true; etat.horsLigne = true;
-              bandeauHorsLigne((c.maj || 0) + BAIL_HORS_LIGNE);
+              /* Le fichier du serveur est abîmé mais la copie de l'appareil est
+                 bonne : ce n'est pas « hors ligne », et le dire serait envoyer
+                 l'élève vérifier son réseau pour rien. */
+              if (motif === 'corrupt') bandeauAbime();
+              else bandeauHorsLigne((c.maj || 0) + BAIL_HORS_LIGNE);
               return true;
+            }).catch(function (e2) {
+              /* Rien à se mettre sous la dent, et la faute est au serveur : on
+                 n'affiche SURTOUT pas le calque « Livret verrouillé », qui
+                 demanderait son code à quelqu'un dont le code est valable. On
+                 ouvre, on explique, et le livre reste vide en attendant le
+                 nouveau dépôt — ce qui est l'exacte vérité. */
+              if (motif === 'corrupt') { etat.ouvert = true; bandeauAbime(); return true; }
+              throw e2;
             });
           }
           jetonEfface();

@@ -50,6 +50,7 @@
  * USAGE (admin — Bearer API_SECRET, comme db.php)
  *   {action:"admin_gen",    classe, kind, n, jours, label}  → codes EN CLAIR (une seule fois)
  *   {action:"admin_list"}                                   → inventaire (sans les codes)
+ *   {action:"admin_depot"}                                  → état des fichiers déposés
  *   {action:"admin_revoke", id}                             → révoque (effet immédiat)
  *   {action:"admin_vente",  ref}                            → le code émis pour une vente
  *   {action:"admin_notify_list"}                            → file de remise SMS/WhatsApp
@@ -383,6 +384,45 @@ if (strpos($action, 'admin_') === 0) {
         }
         usort($out, static function ($a, $b) { return $b['cree'] <=> $a['cree']; });
         lv_out(200, ['ok' => true, 'total' => count($out), 'codes' => $out]);
+    }
+
+    /* ── L'ÉTAT DU DÉPÔT, VU DU SERVEUR ───────────────────────────────────────
+       Les données se déposent par FTP, hors dépôt Git : rien dans la CI, rien
+       dans le journal des versions ne dit ce qui est réellement sur le disque.
+       Le 01/09/2026, il a fallu la plainte d'un client pour découvrir qu'un
+       fichier était tronqué — et la seule façon de savoir si les quatorze
+       autres allaient bien était de les acheter un par un.
+
+       Ici, une réponse : par ouvrage, ce qui est déposé, son poids, et
+       l'identifiant qu'il installe. Un `intact:false` se corrige en re-déposant
+       le fichier ; un `installe` inattendu dit qu'on a déposé le bon fichier
+       sous le mauvais nom. Réservé à l'administration : le nom des fichiers et
+       leur poids renseignent sur ce qu'on vend. */
+    if ($action === 'admin_depot') {
+        $dir = lv_dir();
+        $out = [];
+        foreach (vrt_livret_catalogue() as $slug => $o) {
+            $fiches = [];
+            foreach (['booklet', 'guide'] as $quoi) {
+                $p = $dir . '/' . $quoi . '-' . $slug . '.js';
+                if (!is_file($p)) { $fiches[$quoi] = ['depose' => false]; continue; }
+                $src = (string) @file_get_contents($p);
+                $ident = vrt_livret_donnees_identifiant($src);
+                $fiches[$quoi] = [
+                    'depose'   => true,
+                    'octets'   => strlen($src),
+                    'intact'   => $ident !== null,
+                    'installe' => $ident,
+                    'modifie'  => (int) @filemtime($p),
+                ];
+            }
+            $out[$slug] = [
+                'titre'  => (string) $o['titre'],
+                'mode'   => (string) $o['mode'],
+                'pages'  => is_file($dir . '/' . $slug . '/p001.jpg'),
+            ] + $fiches;
+        }
+        lv_out(200, ['ok' => true, 'dossier' => basename($dir), 'ouvrages' => $out]);
     }
 
     if ($action === 'admin_revoke') {
@@ -763,6 +803,46 @@ if ($action === 'content') {
         if ($js['booklet'] === null) lv_err(409, 'Livret pas encore déposé sur le serveur.', 'missing');
     }
 
+    /* ── ON NE LIVRE PAS UN FICHIER QU'ON NE SAIT PAS OUVRIR ──────────────────
+       LE 01/09/2026, UN ACHETEUR A REÇU UN CAHIER VIDE. Le fichier était sur le
+       serveur, la porte l'a livré, la page a peint son filigrane nominatif —
+       puis le navigateur a buté sur un `SyntaxError` et le livre s'est arrêté
+       après le sommaire. Le dépôt se fait par FTP : un transfert coupé laisse un
+       fichier TRONQUÉ, et `is_file()` le déclare parfait.
+
+       Deux erreurs se ressemblaient jusqu'ici et n'appellent pas la même
+       réponse : « pas encore déposé » se corrige en déposant, « déposé mais
+       abîmé » se corrige en RE-déposant — et jusqu'à ce qu'on le sache, on
+       encaisse. On tranche donc ici, une bonne fois, au seul endroit qui tient
+       le fichier entier.
+
+       LE GUIDE JOINT NE FAIT PAS TOMBER LA LIVRAISON. L'élève reçoit son cahier
+       ET les corrigés ; si ce sont les corrigés qui sont abîmés, lui retirer son
+       cahier serait aggraver la panne. On retire le fichier fautif et on livre
+       le reste : le bouton « Voir la correction » se taira, le cahier s'ouvrira.
+
+       `installe` DIT CE QUE LE FICHIER DÉFINIT, il ne juge pas du nom. Le nom
+       attendu change avec la classe (`BOOKLET` en 6ᵉ, `BOOKLET_5E` en 5ᵉ) et
+       seule la page qui le lit connaît son contrat — c'est elle qui compare. */
+    $installe = [];
+    foreach (['booklet', 'guide'] as $quoi) {
+        if (!is_string($js[$quoi] ?? null) || $js[$quoi] === '') { $js[$quoi] = null; continue; }
+        $ident = vrt_livret_donnees_identifiant($js[$quoi]);
+        if ($ident === null) {
+            lv_log('[ABIME] classe=' . $classe . ' fichier=' . $quoi
+                . ' octets=' . strlen((string) $js[$quoi])
+                . ' id=' . strtoupper((string) ($claims['id'] ?? '')));
+            $js[$quoi] = null;                 // on ne livre pas ce qu'on ne sait pas ouvrir
+            continue;
+        }
+        $installe[$quoi] = $ident;
+    }
+    $essentiel = ($kind === 'guide') ? 'guide' : 'booklet';
+    if ($js[$essentiel] === null && !isset($installe[$essentiel])) {
+        lv_err(409, 'Le fichier de cet ouvrage est abîmé sur le serveur — il doit être '
+            . 'redéposé. Ton code reste valable : réessaie dans un moment.', 'corrupt');
+    }
+
     // ── Filigrane traçable ───────────────────────────────────────────────────
     // Porté par la réponse et peint discrètement par la page : une capture qui
     // circule désigne le code, donc l'acheteur.
@@ -777,7 +857,8 @@ if ($action === 'content') {
     lv_log('[CONTENU] ip=' . vrt_client_ip() . ' id=' . $id
         . ' classe=' . $classe . ' kind=' . $kind . ' n=' . $n);
 
-    lv_out(200, ['ok' => true, 'classe' => $classe, 'kind' => $kind, 'wm' => $wm, 'js' => $js]);
+    lv_out(200, ['ok' => true, 'classe' => $classe, 'kind' => $kind, 'wm' => $wm,
+                 'js' => $js, 'installe' => $installe]);
 }
 
 /* ── RETRAIT DU CODE APRÈS PAIEMENT ──────────────────────────────────────────
