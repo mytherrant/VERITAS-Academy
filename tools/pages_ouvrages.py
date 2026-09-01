@@ -128,6 +128,12 @@ def page(slug: str, o: dict) -> str:
     couv_rel = f"/uploads/oeuvres/livret_{slug}.jpg"
     a_couv = (COUVERTURES / f"livret_{slug}.jpg").is_file()
     simple = sans_accents_titre(titre)
+    # Le titre part dans du JavaScript, pas dans du HTML : `html.escape` y
+    # écrirait « &#39; » que le visiteur lirait tel quel sur l'écran de
+    # paiement. json.dumps produit un littéral JS correct, apostrophes et
+    # exposants compris ; `</` est coupé pour qu'un titre ne puisse jamais
+    # fermer la balise <script> qui le porte.
+    titre_js = json.dumps(titre, ensure_ascii=False).replace("</", "<\\/")
 
     desc = (f"{simple} — cahier interactif du Centre VÉRITAS, à remplir en ligne. "
             f"{prix} FCFA pour l'année scolaire, code d'accès délivré après paiement "
@@ -216,7 +222,7 @@ def page(slug: str, o: dict) -> str:
       {resume}
       <a class="dl" href="cahier.html?o={slug}">
         <span>{ico('i-key')}Ouvrir mon cahier</span><span class="pill">j'ai un code</span></a>
-      <a class="dl" href="/#boutique">
+      <a class="dl" id="vrt-acheter" href="cahier.html?o={slug}" data-o="{slug}">
         <span>{ico('i-credit-card')}Obtenir mon code d'accès</span><span class="pill or">{prix} F</span></a>
     </div>
   </div>
@@ -236,6 +242,31 @@ def page(slug: str, o: dict) -> str:
      lui-même, à remplir en ligne.</p>
 
 </div>
+<!-- ⚠️ LE BOUTON D'ACHAT DOIT OUVRIR LE TUNNEL, PAS RENVOYER A LA BOUTIQUE.
+     La premiere version de ces pages pointait « Obtenir mon code d'acces » sur
+     `/#boutique`. Or c'est de la boutique qu'on ARRIVE : la carte du cahier y
+     mene ici (api/public_data.php pose `url` depuis vrt_livret_etat). Le
+     visiteur qui voulait payer repartait donc d'ou il venait, en boucle, et les
+     dix cahiers pourvus d'une page neuve perdaient le tunnel qu'ils avaient
+     avant elle — `cahier.html?o=<slug>`, qui marche.
+     Deux niveaux, dans cet ordre :
+       · sans JavaScript, le lien reste `cahier.html?o=<slug>` — le lecteur y
+         propose « Je n'ai pas de code », donc on n'envoie jamais dans le vide ;
+       · avec JavaScript, gate.js ouvre la modale de paiement SUR PLACE.
+     C'est le meme gate.js que les coquilles completes et que liseur.js : un
+     seul tunnel, un seul endroit ou se tromper. -->
+<script src="/livrets/gate.js?v=1.20.14"></script>
+<script>
+(function () {{
+  var a = document.getElementById('vrt-acheter');
+  if (!a || !window.VRTLivret) return;   // repli : le lien mene au lecteur
+  a.addEventListener('click', function (e) {{
+    e.preventDefault();
+    window.VRTLivret.config({{ classe: a.dataset.o, kind: 'livret',
+                              titre: {titre_js} }}).acheter();
+  }});
+}})();
+</script>
 </body>
 </html>
 """
@@ -262,7 +293,20 @@ def main() -> int:
     for slug, o in sorted(ouvrages.items()):
         cible = SORTIE / f"{slug}.html"
         if cible.is_file():
-            if not a.tout or cible.stat().st_size > 30_000:
+            # ⚠️ LE POIDS NE SUFFIT PAS À RECONNAÎTRE UNE COQUILLE.
+            # `--tout` ne réécrit que les pages « légères », en supposant qu'une
+            # coquille de publier.py pèse des dizaines de kilo-octets. C'est
+            # vrai des quatre coquilles interactives (~95 Ko) — et faux du
+            # lecteur en mode feuilletage : `livrets/bord-6e.html` fait
+            # 637 octets, deux balises et un appel à `VRTLiseur.ouvrir`. Il
+            # passait donc sous le seuil, et `--tout` l'aurait remplacé par une
+            # page de présentation : le seul cahier vendu en mode lecture
+            # aurait perdu son lecteur, sans qu'aucun contrôle ne le dise.
+            # On regarde ce que le fichier EST, plus seulement ce qu'il pèse.
+            deja = cible.read_text(encoding="utf-8", errors="replace")
+            coquille = ("VRTLiseur" in deja or "VRTCahier" in deja
+                        or cible.stat().st_size > 30_000)
+            if not a.tout or coquille:
                 gardees.append(slug)
                 continue
         if a.controle:

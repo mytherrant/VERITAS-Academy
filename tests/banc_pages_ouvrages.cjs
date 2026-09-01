@@ -172,5 +172,72 @@ console.log(`\n${G}⑥ La disponibilité se calcule à UN seul endroit${R}`);
     'et il ne fabrique plus le lien lui-même — le serveur le dit');
 }
 
+/* ── ⑦ ON PEUT PAYER DEPUIS LA PAGE OÙ LA BOUTIQUE NOUS DÉPOSE ──────────────
+   LE DÉFAUT QUE CE PAS ATTRAPE, ET QU'IL A ATTRAPÉ. Ces dix pages sont nées
+   avec « Obtenir mon code d'accès » pointant sur `/#boutique`. Or c'est de la
+   boutique qu'on ARRIVE : `api/public_data.php` pose l'`url` de la carte
+   depuis `vrt_livret_etat()`, et cette url, c'est cette page-ci. Le visiteur
+   qui voulait payer repartait d'où il venait — une boucle — et les dix
+   cahiers pourvus d'une page neuve PERDAIENT le tunnel qu'ils avaient avant
+   elle (`cahier.html?o=<slug>`, vérifié en production le 31/08/2026). La page
+   gagnait un référencement et le centre perdait la vente : c'est le genre de
+   régression qu'aucun contrôle de SEO ne voit.
+
+   ⚠️ CE CONTRÔLE NE REGARDE PAS LE TEXTE DU BOUTON mais OÙ IL MÈNE. Lire
+   « le bouton d'achat existe » aurait été vrai tout du long, y compris quand
+   il tournait en rond.
+
+   Le repli compte autant que le tunnel : sans JavaScript, le lien doit rester
+   `cahier.html?o=<slug>`, une surface qui vend. Un bouton nu, inerte sans JS,
+   aurait remplacé une boucle par un cul-de-sac.                             */
+console.log(`\n${G}⑦ Depuis chaque page, on peut acheter${R}`);
+{
+  /* Une page mène à la boutique, à l'accueil, ou nulle part : autant de
+     façons de ne pas vendre. On les refuse toutes. */
+  const rondsPoints = /^(\/|\/#|#|\/index\.[a-z]+|\/#boutique|https?:\/\/[^/]*veritas-school\.com\/?(#.*)?)$/i;
+
+  const bouclent = [], sansTunnel = [], sansRepli = [];
+  for (const x of produites) {
+    const m = x.t.match(/<a[^>]*id="vrt-acheter"[^>]*>/);
+    const href = m ? (m[0].match(/href="([^"]*)"/) || [])[1] || '' : null;
+    if (href === null) { sansTunnel.push(x.slug + ' : aucun bouton d’achat'); continue; }
+    if (rondsPoints.test(href.trim())) bouclent.push(x.slug + ' → ' + href);
+    // Le repli sans JavaScript doit rester une surface qui vend.
+    if (href.indexOf('cahier.html?o=' + x.slug) < 0) sansRepli.push(x.slug + ' → ' + href);
+    // Et avec JavaScript, le tunnel s'ouvre sur place : même gate.js que les
+    // coquilles complètes, donc un seul tunnel à maintenir.
+    if (x.t.indexOf('livrets/gate.js') < 0 || !/VRTLivret[\s\S]{0,400}\.acheter\(/.test(x.t)) {
+      sansTunnel.push(x.slug + ' : gate.js absent ou non branché');
+    }
+  }
+  dire(bouclent.length === 0,
+    'aucune page ne renvoie l’acheteur à la boutique d’où il vient',
+    bouclent.slice(0, 4).join(', '));
+  dire(sansRepli.length === 0,
+    'sans JavaScript, le lien mène au lecteur, qui vend',
+    sansRepli.slice(0, 4).join(', '));
+  dire(sansTunnel.length === 0,
+    'avec JavaScript, le tunnel de paiement s’ouvre sur la page',
+    sansTunnel.slice(0, 4).join(', '));
+
+  /* Les cinq coquilles conservées vendent par leur propre chemin : les quatre
+     cahiers interactifs par le bouton « Je n'ai pas de code », `bord-6e` par
+     le feuilletage de liseur.js. On vérifie qu'elles en ont un, sans exiger
+     qu'il ait la forme des pages produites. */
+  const muettes = coquilles.filter(x =>
+    x.t.indexOf('livrets/gate.js') < 0 ||
+    (!/\.acheter\(/.test(x.t) && x.t.indexOf('liseur.js') < 0));
+  dire(muettes.length === 0,
+    'les ' + coquilles.length + ' coquilles conservées vendent aussi',
+    muettes.map(x => x.slug).join(', '));
+
+  /* Le générateur ne doit pas pouvoir écraser un lecteur. `--tout` réécrit les
+     pages « légères » ; or le lecteur de `bord-6e` fait 637 octets. Le poids
+     seul l'aurait condamné. */
+  const gen = fs.readFileSync(path.join(RACINE, 'tools', 'pages_ouvrages.py'), 'utf8');
+  dire(gen.indexOf('VRTLiseur') > 0,
+    '`--tout` reconnaît un lecteur autrement que par son poids');
+}
+
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko === 0 ? 0 : 1);

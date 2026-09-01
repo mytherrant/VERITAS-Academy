@@ -48,7 +48,7 @@
       <p><b>Pour l&#x27;apprenant</b> — son travail est gardé et le suit d&#x27;un appareil à l&#x27;autre ; la correction s&#x27;ouvre dès qu&#x27;il a répondu, sans attendre le cours suivant pour savoir s&#x27;il avait juste.</p><p><b>Pour l&#x27;enseignant</b> — avec le code du Guide pédagogique, il lit les copies de sa classe, annote l&#x27;exercice qu&#x27;il vient de lire et met une note.</p>
       <a class="dl" href="cahier.html?o=1ere">
         <span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir mon cahier</span><span class="pill">j'ai un code</span></a>
-      <a class="dl" href="/#boutique">
+      <a class="dl" id="vrt-acheter" href="cahier.html?o=1ere" data-o="1ere">
         <span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-credit-card"/></svg>Obtenir mon code d'accès</span><span class="pill or">1500 F</span></a>
     </div>
   </div>
@@ -68,5 +68,30 @@
      lui-même, à remplir en ligne.</p>
 
 </div>
+<!-- ⚠️ LE BOUTON D'ACHAT DOIT OUVRIR LE TUNNEL, PAS RENVOYER A LA BOUTIQUE.
+     La premiere version de ces pages pointait « Obtenir mon code d'acces » sur
+     `/#boutique`. Or c'est de la boutique qu'on ARRIVE : la carte du cahier y
+     mene ici (api/public_data.php pose `url` depuis vrt_livret_etat). Le
+     visiteur qui voulait payer repartait donc d'ou il venait, en boucle, et les
+     dix cahiers pourvus d'une page neuve perdaient le tunnel qu'ils avaient
+     avant elle — `cahier.html?o=<slug>`, qui marche.
+     Deux niveaux, dans cet ordre :
+       · sans JavaScript, le lien reste `cahier.html?o=<slug>` — le lecteur y
+         propose « Je n'ai pas de code », donc on n'envoie jamais dans le vide ;
+       · avec JavaScript, gate.js ouvre la modale de paiement SUR PLACE.
+     C'est le meme gate.js que les coquilles completes et que liseur.js : un
+     seul tunnel, un seul endroit ou se tromper. -->
+<script src="/livrets/gate.js?v=1.20.14"></script>
+<script>
+(function () {
+  var a = document.getElementById('vrt-acheter');
+  if (!a || !window.VRTLivret) return;   // repli : le lien mene au lecteur
+  a.addEventListener('click', function (e) {
+    e.preventDefault();
+    window.VRTLivret.config({ classe: a.dataset.o, kind: 'livret',
+                              titre: "Mon Cahier de français 1ʳᵉ A" }).acheter();
+  });
+})();
+</script>
 </body>
 </html>
