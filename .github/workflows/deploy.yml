@@ -247,6 +247,27 @@ jobs:
             exit 1
           fi
 
+      # ── 🩺 « TESTER LA CONNEXION » TESTE-T-IL LA PANNE QU'IL DOIT VOIR ? ──
+      #    Le 02/09/2026, l'écran d'administration affichait « Connexion
+      #    réussie ! Le serveur répond correctement » AU-DESSUS de « Plus aucune
+      #    sauvegarde depuis 5 jours ». Les deux disaient vrai : le bouton de
+      #    test faisait un GET sur files.php — une LECTURE, sur un AUTRE
+      #    endpoint — quand la sauvegarde écrit dans db.php, en PUT. Le test ne
+      #    pouvait pas voir la panne qu'on lui demandait de chercher.
+      #    Déjà vu du 12 au 25/08 : treize jours de saisies dans un seul
+      #    navigateur, derrière une pastille verte. Ce banc exige que le test
+      #    emprunte le chemin RÉEL (db.php, PUT, via _fbFetch), qu'il ne touche
+      #    pas à la base, et qu'il ÉCHOUE quand le serveur ne peut pas écrire.
+      #    Éprouvé par mutation : sonde retirée du serveur → 6 contrôles rouges.
+      - name: 🩺 Le test de connexion voit-il une écriture impossible ?
+        run: |
+          if command -v php >/dev/null 2>&1; then
+            node tests/banc_sonde_ecriture.cjs
+          else
+            echo "::error title=PHP introuvable::Le banc de la sonde d'écriture n'a pas pu tourner. Déploiement ANNULÉ."
+            exit 1
+          fi
+
       # ── 📖 LA PAGE SAIT-ELLE LIRE CE QU'ON LUI LIVRE ? ────────────────────
       #    Le 01/09/2026, un acheteur de 6ᵉ a ouvert son cahier et n'a vu que le
       #    sommaire — sans un chiffre, sous son propre filigrane. La porte avait

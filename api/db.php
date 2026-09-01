@@ -124,6 +124,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'PUT
     if (strlen($raw) > 20*1024*1024) { http_response_code(413); echo json_encode(['ok'=>false,'error'=>'Données > 20 Mo']); exit; }
     $data = json_decode($raw, true);
     if ($data === null) { http_response_code(400); echo json_encode(['ok'=>false,'error'=>'JSON invalide']); exit; }
+
+    /* ── 🩺 SONDE D'ÉCRITURE — « Tester la connexion » doit tester CE chemin ──
+       LE 02/09/2026, L'ÉCRAN D'ADMINISTRATION SE CONTREDISAIT. Il affichait
+       « Connexion réussie ! Le serveur répond correctement » ET « Plus aucune
+       sauvegarde depuis 5 jours ». Les deux étaient vrais : le bouton de test
+       faisait un GET sur `files.php` — une LECTURE, sur un AUTRE endpoint —
+       pendant que la sauvegarde écrit ici, en PUT. Le test ne pouvait donc pas
+       voir la panne qu'on lui demandait de chercher, et il rassurait à tort.
+       Déjà vu du 12 au 25/08 : treize jours de saisies dans un seul navigateur,
+       derrière une pastille verte.
+
+       Cette sonde emprunte le chemin RÉEL, celui qui échouait : même endpoint,
+       même verbe PUT (que l'hébergeur pourrait refuser à lui seul), même
+       `requireAuth()`. Elle vérifie en plus que le dossier de données est
+       inscriptible — un disque plein ou un droit changé par un dépôt FTP ne se
+       voient d'aucune autre façon avant la prochaine sauvegarde.
+
+       Elle ne touche PAS à la base : elle écrit un fichier temporaire de un
+       octet, le relit, l'efface. Placée ici, elle passe après l'authentification
+       et la validation du JSON, mais avant tout ce qui remplace quoi que ce
+       soit — y compris le garde-fou anti-écrasement, qui refuserait ce petit
+       corps avec un 409 trompeur. */
+    if (!empty($data['__probe'])) {
+        $dir = is_dir($DATA_DIR) ? $DATA_DIR : dirname($DB_FILE);
+        if (!is_dir($dir)) { @mkdir($dir, 0750, true); }
+        $tmp   = $dir . '/.probe_' . bin2hex(random_bytes(4)) . '.tmp';
+        $ecrit = @file_put_contents($tmp, '1') === 1 && @file_get_contents($tmp) === '1';
+        @unlink($tmp);
+        http_response_code($ecrit ? 200 : 500);
+        echo json_encode([
+            'ok'           => $ecrit,
+            'probe'        => true,
+            'method'       => (string) ($_SERVER['REQUEST_METHOD'] ?? ''),
+            'writable'     => $ecrit,
+            'error'        => $ecrit ? null
+                : 'Le serveur accepte la requête mais ne peut pas ÉCRIRE dans son dossier de données.',
+            'lastModified' => is_file($DB_FILE) ? (int) filemtime($DB_FILE) : 0,
+            'bytes'        => is_file($DB_FILE) ? (int) filesize($DB_FILE) : 0,
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     // ── 🔐 Détecter et BLOQUER les payloads contenant des mots de passe en clair ──
     if (preg_match('/"pwd"\s*:\s*"(?!S256\$|S256!|S256-)[^"]{1,40}"/', $raw, $m)) {
         @file_put_contents(__DIR__.'/data/_security_log.txt',

@@ -7316,9 +7316,63 @@ function cloudTestConnection(){
     return r.json();
   })
   .then(function(data){
-    _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Connexion réussie !</strong> Le serveur répond correctement. '+
-      (Array.isArray(data)?data.length+' fichier(s) en ligne.':'')+'</span></div>');
-    toast('✅ Connexion au cloud réussie !');
+    /* ── LIRE N'EST PAS ÉCRIRE, ET C'EST L'ÉCRITURE QUI TOMBE ────────────────
+       Ce test s'arrêtait ici. Il annonçait « Connexion réussie ! Le serveur
+       répond correctement » sur la foi d'un GET vers `files.php` — alors que la
+       sauvegarde écrit ailleurs (`db.php`), avec un autre verbe (PUT), et que
+       c'est CE chemin-là qui tombe.
+       Le 02/09/2026, l'écran affichait « Connexion réussie » au-dessus de
+       « Plus aucune sauvegarde depuis 5 jours ». Les deux disaient vrai. Déjà
+       vu du 12 au 25/08 : treize jours de saisies dans un seul navigateur,
+       derrière une pastille verte. Un test qui ne peut pas voir la panne qu'on
+       lui demande de chercher est pire qu'aucun test — il rassure.
+
+       On sonde donc le vrai chemin, par `_fbFetch`, comme la sauvegarde : même
+       enveloppe, donc mêmes en-têtes, même court-circuit non-admin, même
+       coupe-circuit. Y aller en `fetch` direct testerait un chemin que
+       personne n'emprunte. Le serveur écrit un octet dans son dossier de
+       données et l'efface : la base n'est pas touchée. */
+    var nFichiers=(Array.isArray(data)?data.length+' fichier(s) en ligne.':'');
+    _si('cloudSyncStatus','<div class="ib ibt"><span>⏳</span><span>Lecture ✓ — vérification de l’écriture…</span></div>');
+    return _fbFetch(LWS_API.db,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({__probe:true})
+    }).then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(j){
+        return {http:r.status, j:j||{}};
+      });
+    }).then(function(res){
+      if(res.j&&res.j.ok&&res.j.probe){
+        var ko=res.j.bytes?Math.round(res.j.bytes/1024)+' Ko en ligne':'';
+        _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Connexion réussie — lecture ET écriture.</strong> '
+          +_esc(nFichiers)+(ko?' Base de '+_esc(ko)+'.':'')
+          +'<br><span style="font-size:12px">Vos sauvegardes peuvent partir. Lancez « Sauvegarder vers le cloud » pour envoyer ce qui attend.</span></span></div>');
+        toast('✅ Cloud joignable en lecture et en écriture');
+        return;
+      }
+      /* L'écriture a échoué alors que la lecture passait : c'est exactement le
+         cas que l'ancien test déclarait « réussi ». On le NOMME. */
+      var d='';
+      if(res.j&&res.j._offline&&res.j._reason==='circuit_open'){
+        d='Les envois sont suspendus 5 minutes après trois échecs d’affilée (mode hors-ligne). Rechargez la page (Ctrl+Shift+R) et relancez ce test.';
+      } else if(res.http===401){
+        d='La clé est acceptée en lecture mais REFUSÉE en écriture. Ressaisissez-la ci-dessus : c’est la valeur du <strong>premier</strong> <code>define(\'API_SECRET\', …)</code> de <code>api/payment_config.php</code> sur le serveur.';
+      } else if(res.http===403){
+        d='La protection anti-robots de l’hébergeur a refusé l’écriture (403) — <strong>ni votre clé ni vos données ne sont en cause</strong>. Faites <strong>Ctrl+Shift+R</strong>, puis réessayez.';
+      } else if(res.http===405){
+        d='Le serveur refuse la méthode PUT. C’est la panne du 12/08 : <code>api/db.php</code> ne l’acceptait pas, et aucune sauvegarde ne s’écrivait. Vérifiez que la dernière version d’<code>api/db.php</code> est bien déployée.';
+      } else if(res.http===500&&res.j&&res.j.writable===false){
+        d='Le serveur accepte la requête mais ne peut pas écrire dans son dossier de données : disque plein, ou droits changés sur <code>data/</code>.';
+      } else {
+        d='Réponse inattendue du serveur ('+_esc(String(res.http))+'). '+_esc(String((res.j&&res.j.error)||''));
+      }
+      _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#AE5353"><span>⛔</span><span>'
+        +'<strong>Le serveur répond, mais vos sauvegardes ne peuvent PAS partir.</strong><br>'
+        +'La lecture fonctionne ('+_esc(nFichiers||'serveur joignable')+') — c’est l’écriture qui est refusée.<br>'+d
+        +'</span></div>');
+      toast('⛔ Lecture OK, écriture refusée','err');
+    });
   })
   .catch(function(e){
     /* ── Nommer la panne, au lieu de renvoyer chercher partout ──────────────
