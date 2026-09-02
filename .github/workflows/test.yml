@@ -47,8 +47,32 @@ jobs:
                    api/payment_mtn.php api/payment_orange.php api/_pay_funds_lib.php; do
             [ -f "$f" ] && php -l "$f"
           done
+      # ────────────────────────────────────────────────────────────────────
+      # ⚠️ CES BANCS EXISTAIENT ET NE TOURNAIENT PAS.
+      # Audit du 02/09/2026 : le dossier tests/ portait une cinquantaine de
+      # bancs — dont ceux qui gardent l'émission des codes, la remise par SMS,
+      # l'ouverture des cahiers et le prix de chaque ouvrage — et le workflow
+      # n'en appelait que DEUX. Tous verts quand on les lance à la main : ils
+      # fonctionnent, ils n'étaient simplement jamais exécutés. Une régression
+      # sur la remise des codes serait passée au déploiement sans un mot.
+      #
+      # Tous vérifiés SANS le dossier uploads/protected/livrets/ (déposé par
+      # FTP, absent du dépôt et donc absent de la CI) : aucun n'en dépend.
+      # ────────────────────────────────────────────────────────────────────
       - name: 💰 Un paiement confirmé écrit-il un droit ?
         run: php tests/paiements_entitlements.php
+
+      - name: 🪪 L'acheteur est-il reconnu par son compte ?
+        run: php tests/banc_identite_acheteur.php
+
+      - name: 📕 Un livre amputé se vend-il quand même ?
+        run: php tests/banc_livre_integre.php
+
+      - name: 🔔 L'abonné est-il prévenu avant l'échéance ?
+        run: php tests/banc_relance_echeance.php
+
+      - name: 🏷️ Chaque ouvrage a-t-il un prix et une porte ?
+        run: php tests/ouvrages_en_vente.php
 
   smoke:
     name: 🌐 Boot du portail (Chromium headless)
@@ -68,6 +92,28 @@ jobs:
       # ──────────────────────────────────────────────────────────────────
       - name: 🚪 Espaces par rôle (entrées mortes, chiffres inventés)
         run: node tests/espaces_roles.cjs
+
+      # Les bancs sans navigateur, dans l'ordre du parcours d'achat : le code
+      # est-il émis, remis, et le cahier s'ouvre-t-il sur ce code ? Quelques
+      # secondes au total, avant les trois minutes de Chromium.
+      - name: 🎟️ Émission et livraison des codes
+        run: |
+          node tests/banc_livret_codes.cjs
+          node tests/banc_remise_code.cjs
+          node tests/banc_remise_sms.cjs
+
+      - name: 📓 Ouverture des cahiers et de leurs corrigés
+        run: |
+          node tests/banc_cahier.cjs
+          node tests/banc_cahiers_reels.cjs
+          node tests/banc_empreintes.cjs
+          node tests/banc_cles_cahier.cjs
+
+      - name: 🛍️ La boutique ne vend que ce qui s'ouvre
+        run: node tests/banc_boutique_unifiee.cjs
+
+      - name: 👤 Le compte remonte-t-il du serveur ?
+        run: node tests/banc_compte_serveur.cjs
       - name: 🌐 Installer Chromium
         run: npx playwright install --with-deps chromium
       - name: 🧪 Lancer les tests

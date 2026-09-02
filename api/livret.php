@@ -91,6 +91,23 @@ header('X-Frame-Options: DENY');
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204); exit; }
 
+/* ── LA FILE DE REMISE NE DOIT PLUS ATTENDRE LA VENTE SUIVANTE ────────────
+   Les codes partent au webhook ; un envoi qui échoue restait en file jusqu'au
+   paiement d'après. Un échec le vendredi soir = un client sans son code tout
+   le week-end, alors qu'il était émis dès la première seconde.
+
+   Cet hébergement n'a pas de tâche planifiée. On se sert donc du trafic de
+   cet endpoint — c'est celui que la boutique et l'acheteur de retour
+   sollicitent, soit exactement les moments où une remise en souffrance
+   compte. En `shutdown` : la réponse du visiteur est déjà partie, il
+   n'attend rien. Le battement s'auto-limite (10 min) et sort aussitôt quand
+   la file est vide, donc il ne coûte rien le reste du temps. */
+if (function_exists('vrt_notify_battement')) {
+    register_shutdown_function(function () {
+        try { vrt_notify_battement(); } catch (\Throwable $e) { /* jamais bloquant */ }
+    });
+}
+
 // ── Sorties ───────────────────────────────────────────────────────────────────
 function lv_out(int $code, array $data): void {
     while (ob_get_level() > 0) { ob_end_clean(); }
@@ -655,6 +672,9 @@ if ($action === 'unlock') {
    serveur, lui, l'accepterait. Le catalogue reste une DONNÉE, d'un bout à
    l'autre de la chaîne. */
 if ($action === 'catalogue') {
+    // Les tarifs réglés en base, lus une seule fois pour tout le catalogue.
+    $__tarifs = function_exists('vrt_tarifs_lire') ? vrt_tarifs_lire() : [];
+
     /* `disponible` — DÉCLARÉ n'est pas PUBLIÉ, et confondre les deux fait
        vendre du vide.
 
@@ -712,8 +732,17 @@ if ($action === 'catalogue') {
             'niveau' => (string) ($o['niveau'] ?? ''),
             'mode'  => (string) ($o['mode'] ?? 'interactif'),
             'kinds' => array_values((array) ($o['kinds'] ?? ['livret'])),
-            'prix'  => (int) ($o['prix'] ?? 0),
-            'prixGuide' => (int) ($o['prixGuide'] ?? 0),
+            /* LE PRIX ANNONCÉ EST CELUI QUE LE SERVEUR EXIGERA.
+               Ces deux lignes lisaient le champ BRUT de la fiche. Pour le
+               livret cela tombait juste ; pour le guide, la fiche porte 0 et
+               le catalogue public annonçait donc « 0 F » les quinze ouvrages,
+               quand l'octroi en réclame 5 000. Un prix affiché qui n'est pas
+               le prix exigé fait refuser la vente pour sous-paiement, après
+               que le client a payé — c'est-à-dire au pire moment possible.
+               On publie donc le tarif EFFECTIF, celui que `vrt_verifier_prix`
+               ira chercher au moment de l'octroi. */
+            'prix'  => vrt_livret_prix($__tarifs, 'livret', (string) $slug),
+            'prixGuide' => vrt_livret_prix($__tarifs, 'guide', (string) $slug),
             'disponible' => (bool) $etat['disponible'],
             // Où mène la carte de la boutique. Le serveur le dit, parce que
             // lui seul sait laquelle des deux formes existe.

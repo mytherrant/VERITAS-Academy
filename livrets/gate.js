@@ -44,10 +44,45 @@
       })
       .catch(function () { return PAY; });
   }
-  // Deux tarifs : le livret ouvre les exercices d'une classe, le GUIDE ouvre les
-  // corrigés complets et la console de devoirs. Le serveur garde sa propre
-  // référence (vrt_livret_prix) — ces chiffres ne servent qu'à AFFICHER.
+  /* ⚠️ CES DEUX CHIFFRES NE SERVENT PAS QU'À AFFICHER — ils partaient aussi
+     comme `montant` à `?action=init`. Le commentaire qui prétendait le
+     contraire a masqué le vrai risque : le serveur annonce ses tarifs
+     réglables en base (`DB.tarifs.livret` / `livretGuide`), et le jour où
+     l'administration passe le cahier à 2 000 F, ce fichier continue d'envoyer
+     1 500. Le contrôle de sous-paiement — celui qui protège si bien contre les
+     requêtes forgées — refuse alors CHAQUE VENTE LÉGITIME, après encaissement,
+     et le refus ne s'affiche que dans le tableau de bord.
+
+     Le catalogue publie désormais le tarif EFFECTIF (celui que l'octroi ira
+     chercher). On le lit, et on garde ces valeurs en repli : si la sonde ne
+     répond pas, mieux vaut proposer le prix habituel que bloquer la vente. */
   var PRIX  = { livret: 1500, guide: 5000 };
+  var tarifsLus = false;
+  function resoudreTarifs() {
+    if (tarifsLus) return Promise.resolve(PRIX);
+    return fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{"action":"catalogue"}',
+      cache: 'no-store'
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (!j || !j.ok || !Array.isArray(j.ouvrages)) return PRIX;
+        var slug = String(cfg.classe || '').toLowerCase();
+        for (var i = 0; i < j.ouvrages.length; i++) {
+          var o = j.ouvrages[i];
+          if (String(o.slug || '').toLowerCase() !== slug) continue;
+          // Un tarif nul n'est pas un tarif : on ne remplace que ce qui est chiffré.
+          if (parseInt(o.prix, 10) > 0)      PRIX.livret = parseInt(o.prix, 10);
+          if (parseInt(o.prixGuide, 10) > 0) PRIX.guide  = parseInt(o.prixGuide, 10);
+          break;
+        }
+        tarifsLus = true;
+        return PRIX;
+      })
+      .catch(function () { return PRIX; });
+  }
   // Remise de volume d'un pack établissement, par palier.
   var PALIERS = [[50, 20], [25, 15], [10, 10]];
   var WA    = '237697637739';             // WhatsApp du centre (support)
@@ -702,7 +737,8 @@
     /* On résout d'abord la passerelle active, PUIS on l'interroge : sans cela
        on paierait toujours chez le fournisseur écrit en dur, quel que soit
        celui que le serveur a activé. */
-    resoudrePasserelle()
+    resoudreTarifs()
+      .then(resoudrePasserelle)
       .then(function () { return fetch(PAY + '?action=config', { cache: 'no-store' }); })
       .then(function (x) { return x.json(); })
       .then(function (c) {

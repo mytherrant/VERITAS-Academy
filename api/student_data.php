@@ -213,6 +213,16 @@ if ($action === 'fetch') {
         // S3 v1.2.x (Étape 3) : token par compte → content.php sans renvoyer le mot de passe.
         'token'   => vrt_issue_token($acc, (string) $accType),
         'account' => [
+            /* L'IDENTIFIANT DU COMPTE, SANS LEQUEL RIEN NE S'ACHÈTE.
+               Tout l'octroi serveur retrouve un compte par son `id`. Cette
+               tranche ne portait que `user` : sur un appareil neuf, le client
+               n'avait donc que le login à poser dans la session, et c'est lui
+               qui partait au paiement. Le livre numérique répondait « compte
+               introuvable », l'abonnement se disait « activé » sans rien
+               ouvrir. Le client ne pouvait PAS faire mieux — la valeur ne lui
+               était jamais donnée. Elle l'est ici, après authentification, et
+               c'est son propre identifiant : rien de neuf n'est exposé. */
+            'id'    => (string) ($acc['id'] ?? ''),
             'user'  => $acc['user'],
             'type'  => $accType,
             'plans' => $acc['plans'] ?? [],

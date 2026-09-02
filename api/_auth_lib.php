@@ -441,12 +441,79 @@ if (!defined('VRT_AUTH_LIB')) {
      *  Même règle de lecture que api/secure_pdf.php — on CONSTATE les fichiers,
      *  on ne se fie pas à un drapeau du catalogue qu'un oubli laisserait à vrai.
      */
-    function vrt_livre_prepare(string $bookId): bool {
+    /**
+     * Les tarifs réglés en base, et RIEN d'autre.
+     *
+     * Le catalogue public doit annoncer le prix que le serveur va réellement
+     * exiger : sinon le tunnel d'achat envoie un montant, l'octroi en attend
+     * un autre, et chaque vente légitime est refusée pour sous-paiement — sans
+     * que l'acheteur, qui a payé, en soit informé autrement que par un silence.
+     *
+     * Charger la base entière pour trois nombres serait absurde à chaque
+     * affichage de boutique : le résultat est mis en cache pour la durée de la
+     * requête, et l'absence de base n'est pas une erreur (les valeurs par
+     * défaut du code font foi, exactement comme dans vrt_livret_prix).
+     */
+    function vrt_tarifs_lire(): array {
+        static $cache = null;
+        if ($cache !== null) return $cache;
+        $cache = [];
+        $f = vrt_db_file();
+        if (is_file($f)) {
+            $d = json_decode((string) @file_get_contents($f), true);
+            if (is_array($d) && isset($d['tarifs']) && is_array($d['tarifs'])) {
+                $cache = ['tarifs' => $d['tarifs']];
+            }
+        }
+        return $cache;
+    }
+
+    /** Le dossier des livres protégés. Surchargeable pour que les bancs
+     *  puissent fabriquer des livres tronqués sans toucher aux vrais. */
+    function vrt_livre_dossier(): string {
+        return defined('VRT_BOOKS_DIR')
+            ? rtrim((string) VRT_BOOKS_DIR, '/\\')
+            : dirname(__DIR__) . '/uploads/protected/books';
+    }
+
+    /** Combien de pages sont RÉELLEMENT sur le disque. 0 si le livre est absent. */
+    function vrt_livre_pages_reelles(string $bookId): int {
+        $id = preg_replace('/[^a-zA-Z0-9_-]/', '', $bookId);
+        if ($id === '') return 0;
+        $dir = vrt_livre_dossier() . '/' . $id;
+        if (!is_dir($dir)) return 0;
+        return count(glob($dir . '/p*.jpg') ?: []);
+    }
+
+    /**
+     * Le serveur peut-il LIVRER ce livre en entier ?
+     *
+     * ⚠️ CETTE FONCTION SE CONTENTAIT D'UNE SEULE PAGE. C'est la même erreur
+     * que `is_file()` sur les cahiers, et elle a le même prix : le 01/09/2026,
+     * un cahier tronqué à l'envoi FTP s'est vendu, livré, et affiché vide sous
+     * le filigrane de son acheteur. Les cahiers ont reçu leur garde — le
+     * catalogue lit désormais les BORNES du fichier — les livres, non.
+     *
+     * Un livre se dépose par FTP, hors dépôt Git : ni la CI, ni `git`, ni
+     * aucun banc ne voit ce dossier. Un transfert coupé à la douzième page
+     * laisse 12 fichiers qu'`is_dir()` et `count() > 0` déclarent parfaits, et
+     * le lecteur annonce alors 144 pages qu'il n'a pas.
+     *
+     * $attendu = le nombre annoncé au catalogue. Quand il est connu, on le
+     * CONFRONTE au disque. Quand il ne l'est pas, on ne peut rien comparer et
+     * on sert — refuser sur une ignorance ferait payer le client pour un trou
+     * de nos données.
+     *
+     * Plus de pages qu'annoncé ne bloque rien : une page de garde ajoutée au
+     * tirage n'est pas une avarie.
+     */
+    function vrt_livre_prepare(string $bookId, int $attendu = 0): bool {
         $id = preg_replace('/[^a-zA-Z0-9_-]/', '', $bookId);
         if ($id === '') return false;
-        $base = dirname(__DIR__) . '/uploads/protected/books';
+        $base = vrt_livre_dossier();
         $dir  = $base . '/' . $id;
-        if (is_dir($dir) && count(glob($dir . '/p*.jpg') ?: []) > 0) return true;
+        $pages = vrt_livre_pages_reelles($id);
+        if ($pages > 0) return ($attendu <= 0) || ($pages >= $attendu);
         // Repli : un PDF entier rendu à la volée, si Imagick est présent.
         if (is_file($base . '/' . $id . '.pdf') && class_exists('Imagick')) return true;
         // Livre en mode texte seul (EPUB préparé hors ligne).
@@ -733,29 +800,224 @@ if (!defined('VRT_AUTH_LIB')) {
      * Silencieux et sans effet si le livre n'a pas de version préparée
      * (`secureId` / `securePages` / `digital`) ou si l'acheteur n'a pas de compte.
      */
+    /* ══════════════════════════════════════════════════════════════════════
+       QUI VIENT DE PAYER ? — le seul endroit qui répond à cette question.
+
+       Un compte porte DEUX valeurs : son identifiant interne (`va_…`) et son
+       login. Tout l'octroi cherchait le premier, et rien ne garantissait que
+       le client l'ait : `api/student_data.php` ne renvoyait pas `id` dans sa
+       tranche de compte, si bien que le chemin « appareil neuf » n'avait que
+       le login à mettre dans la session — puis à envoyer au paiement.
+
+       Mesuré le 02/09/2026 : le livre numérique répondait « compte
+       introuvable » (bruyant, donc rattrapable) et l'abonnement répondait
+       « activé » sans rien activer (silencieux, donc invisible).
+
+       Deux règles, et l'ordre compte :
+         ① l'IDENTIFIANT d'abord. Sur une base où le login de l'un serait
+            l'identifiant de l'autre, préférer le login donnerait le droit
+            payé au compte du voisin.
+         ② le login ensuite, en repli. Ce n'est pas de la complaisance :
+            app.js est servi `immutable` pour un an, et les navigateurs déjà
+            venus continueront d'envoyer un login pendant des mois. Sans ce
+            repli, corriger le client ne répare que les acheteurs neufs.
+
+       Ce qui ne désigne AUCUN compte ne résout rien — le repli est un filet,
+       pas un passe-partout.
+       ══════════════════════════════════════════════════════════════════════ */
+    function vrt_resoudre_compte(array &$db, string $ref): ?array {
+        $ref = trim($ref);
+        if ($ref === '') return null;
+        $colls = ['visitorAccounts', 'studentAccounts'];
+        // ① par identifiant
+        foreach ($colls as $coll) {
+            if (!isset($db[$coll]) || !is_array($db[$coll])) continue;
+            foreach ($db[$coll] as $i => $a) {
+                if (is_array($a) && (string) ($a['id'] ?? '') === $ref) return ['coll' => $coll, 'idx' => $i];
+            }
+        }
+        // ② par login, en repli
+        foreach ($colls as $coll) {
+            if (!isset($db[$coll]) || !is_array($db[$coll])) continue;
+            foreach ($db[$coll] as $i => $a) {
+                if (is_array($a) && (string) ($a['user'] ?? '') === $ref) return ['coll' => $coll, 'idx' => $i];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Rattrape les droits déjà vendus sous un login au lieu d'un identifiant.
+     *
+     * Le correctif ci-dessus protège les ventes À VENIR. Celles du 31/08 au
+     * 02/09 sont déjà encaissées, et leurs lignes portent un login : leur
+     * titulaire n'a rien. Cette passe les recolle, sans jamais deviner.
+     *
+     * Ne touche PAS aux lignes sans aucun identifiant : un abonnement anonyme
+     * (achat sans compte, saisie manuelle) ne s'attribue pas au hasard — c'est
+     * exactement ce que la garde « un abonnement sans titulaire ne parle de
+     * personne » empêche, et on ne va pas la contourner ici.
+     *
+     * Idempotente : une ligne déjà recollée porte l'identifiant et n'est plus
+     * reprise au passage suivant.
+     */
+    function vrt_reparer_identites(array &$db): array {
+        $bilan = ['abonnements' => 0, 'livres' => 0, 'ventesLivret' => 0, 'commandes' => 0];
+
+        $recoller = function (string $ref) use (&$db): ?array {
+            if ($ref === '') return null;
+            $r = vrt_resoudre_compte($db, $ref);
+            if (!$r) return null;
+            $acc = $db[$r['coll']][$r['idx']];
+            $id  = (string) ($acc['id'] ?? '');
+            // Déjà bon : rien à reprendre.
+            if ($id === '' || $id === $ref) return null;
+            return ['coll' => $r['coll'], 'idx' => $r['idx'], 'id' => $id];
+        };
+
+        // ── Abonnements : recoller la ligne ET inscrire le plan sur le compte.
+        foreach (($db['elearning']['abonnements'] ?? []) as $i => $a) {
+            if (!is_array($a)) continue;
+            $ref = (string) ($a['accountId'] ?? $a['userId'] ?? '');
+            $t = $recoller($ref);
+            if (!$t) continue;
+            $db['elearning']['abonnements'][$i]['accountId'] = $t['id'];
+            $plan = (string) ($a['plan'] ?? $a['planId'] ?? '');
+            if ($plan !== '') {
+                $acc = &$db[$t['coll']][$t['idx']];
+                if (!isset($acc['plans']) || !is_array($acc['plans'])) $acc['plans'] = [];
+                if (!in_array($plan, $acc['plans'], true)) $acc['plans'][] = $plan;
+                $acc['statut'] = 'actif';
+                unset($acc);
+            }
+            $bilan['abonnements']++;
+        }
+
+        // ── Livres numériques vendus : le droit vit sur le compte, pas ailleurs.
+        //    On le retrouve par les commandes payées qui portent un login.
+        foreach (($db['visitorOrders'] ?? []) as $i => $o) {
+            if (!is_array($o) || (string) ($o['statut'] ?? '') !== 'Payé') continue;
+            $ref = (string) ($o['accountId'] ?? '');
+            $t = $recoller($ref);
+            if (!$t) continue;
+            $db['visitorOrders'][$i]['accountId'] = $t['id'];
+            $bid = (string) ($o['bid'] ?? '');
+            if ($bid !== '') {
+                $acc = &$db[$t['coll']][$t['idx']];
+                if (!isset($acc['unlockedBooks']) || !is_array($acc['unlockedBooks'])) $acc['unlockedBooks'] = [];
+                if (!in_array($bid, $acc['unlockedBooks'], true)) $acc['unlockedBooks'][] = $bid;
+                unset($acc);
+            }
+            $bilan['commandes']++;
+        }
+
+        // ── Ventes de livret : la ligne sert au rapprochement comptable.
+        foreach (($db['livretVentes'] ?? []) as $i => $v) {
+            if (!is_array($v)) continue;
+            $t = $recoller((string) ($v['accountId'] ?? ''));
+            if (!$t) continue;
+            $db['livretVentes'][$i]['accountId'] = $t['id'];
+            $bilan['ventesLivret']++;
+        }
+
+        return $bilan;
+    }
+
+    /**
+     * La passe de réparation, appliquée à la base du serveur sous verrou.
+     *
+     * Même chorégraphie que vrt_grant_entitlement_to_file() : verrou exclusif,
+     * sauvegarde horodatée AVANT écriture, écriture seulement s'il y a
+     * quelque chose à écrire. `simulation` permet de compter sans toucher —
+     * on regarde l'ampleur des dégâts avant de décider.
+     */
+    /**
+     * Passe de relance des abonnements qui arrivent à échéance.
+     *
+     * Beaucoup plus lourde que le battement de la file (elle lit et réécrit la
+     * base) : elle ne tourne donc qu'une fois par demi-journée, et sort sans
+     * rien écrire quand il n'y a personne à prévenir — ce qui est le cas la
+     * plupart du temps.
+     */
+    function vrt_abo_relances_fichier(int $joursAvant = 7): int {
+        if (!function_exists('vrt_abo_relances')) return 0;
+        $f = vrt_db_file();
+        if (!is_file($f)) return 0;
+        $fp = @fopen($f, 'c+');
+        if (!$fp) return 0;
+        // Non bloquant : cette tâche est opportuniste, elle ne doit JAMAIS
+        // faire attendre une requête de visiteur derrière un verrou.
+        if (!flock($fp, LOCK_EX | LOCK_NB)) { fclose($fp); return 0; }
+        $cur = stream_get_contents($fp);
+        $db  = json_decode((string) $cur, true);
+        if (!is_array($db)) { flock($fp, LOCK_UN); fclose($fp); return 0; }
+
+        $n = vrt_abo_relances($db, $joursAvant);
+        if ($n > 0) {
+            $enc = json_encode($db, JSON_UNESCAPED_UNICODE);
+            if ($enc !== false) { ftruncate($fp, 0); rewind($fp); fwrite($fp, $enc); fflush($fp); }
+        }
+        flock($fp, LOCK_UN);
+        fclose($fp);
+        return $n;
+    }
+
+    function vrt_reparer_identites_fichier(bool $simulation = false): array {
+        $f = vrt_db_file();
+        if (!is_file($f)) return ['ok' => false, 'msg' => 'base absente'];
+        $fp = @fopen($f, 'c+');
+        if (!$fp) return ['ok' => false, 'msg' => 'ouverture impossible'];
+        if (!flock($fp, LOCK_EX)) { fclose($fp); return ['ok' => false, 'msg' => 'verrou indisponible']; }
+        $cur = stream_get_contents($fp);
+        $db  = json_decode((string) $cur, true);
+        if (!is_array($db)) { flock($fp, LOCK_UN); fclose($fp); return ['ok' => false, 'msg' => 'base illisible']; }
+
+        $bilan = vrt_reparer_identites($db);
+        $total = array_sum($bilan);
+
+        if ($total > 0 && !$simulation) {
+            $bkDir = dirname($f) . '/_backups';
+            if (!is_dir($bkDir)) @mkdir($bkDir, 0750, true);
+            @file_put_contents($bkDir . '/veritas_db.' . date('Ymd_His') . '.repair.json', $cur);
+            $db['lastModified'] = (int) round(microtime(true) * 1000);
+            $enc = json_encode($db, JSON_UNESCAPED_UNICODE);
+            if ($enc !== false) { ftruncate($fp, 0); rewind($fp); fwrite($fp, $enc); fflush($fp); }
+        }
+        flock($fp, LOCK_UN);
+        fclose($fp);
+        return ['ok' => true, 'simulation' => $simulation, 'total' => $total, 'detail' => $bilan];
+    }
+
     function vrt_ouvrir_lecture_immediate(array &$db, string $bookId, string $accountId): string {
         if ($bookId === '' || $accountId === '') return '';
         $livre = null;
         foreach (($db['books'] ?? []) as $b) {
             if (is_array($b) && (string) ($b['id'] ?? '') === $bookId) { $livre = $b; break; }
         }
+        /* REPLI SUR LE CATALOGUE DÉPOSÉ — la même source que le contrôle de prix.
+           Un livre entre en vente par catalogue_livres.json, que la CI dépose à
+           la racine ; la base, elle, ne l'apprend qu'à la première synchro d'un
+           administrateur. Sans ce repli, le serveur en savait assez pour
+           ENCAISSER le livre (vrt_prix_catalogue a son repli depuis longtemps)
+           et pas assez pour l'OUVRIR : il renonçait ici, en silence, sur un
+           paiement parfaitement valide. Deux chemins qui décrivent le même
+           produit doivent lire la même source. */
+        if (!$livre && function_exists('vrt_catalogue_livre')) {
+            $fiche = vrt_catalogue_livre($bookId);
+            if (is_array($fiche)) $livre = $fiche;
+        }
         if (!$livre) return '';
         $lisible = !empty($livre['secureId']) || !empty($livre['securePages']) || !empty($livre['digital']);
         if (!$lisible) return '';
 
-        foreach (['visitorAccounts', 'studentAccounts'] as $coll) {
-            if (!isset($db[$coll]) || !is_array($db[$coll])) continue;
-            foreach ($db[$coll] as &$acc) {
-                if (!is_array($acc) || (string) ($acc['id'] ?? '') !== $accountId) continue;
-                if (!isset($acc['unlockedBooks']) || !is_array($acc['unlockedBooks'])) $acc['unlockedBooks'] = [];
-                if (in_array($bookId, $acc['unlockedBooks'], true)) { unset($acc); return ''; }
-                $acc['unlockedBooks'][] = $bookId;
-                unset($acc);
-                return ' — lecture numérique ouverte immédiatement';
-            }
-            unset($acc);
-        }
-        return '';
+        $r = vrt_resoudre_compte($db, $accountId);
+        if (!$r) return '';
+        $acc = &$db[$r['coll']][$r['idx']];
+        if (!isset($acc['unlockedBooks']) || !is_array($acc['unlockedBooks'])) $acc['unlockedBooks'] = [];
+        if (in_array($bookId, $acc['unlockedBooks'], true)) { unset($acc); return ''; }
+        $acc['unlockedBooks'][] = $bookId;
+        unset($acc);
+        return ' — lecture numérique ouverte immédiatement';
     }
 
     /**
@@ -830,6 +1092,32 @@ if (!defined('VRT_AUTH_LIB')) {
             $duree = $plan['duree'] ?? '';
             if ($duree === '' && isset($dureeAtelier[$targetId])) $duree = $dureeAtelier[$targetId];
             $finTs = $now + vrt_abo_duree_ms($duree);
+
+            /* ⚠️ ON RÉSOUT LE TITULAIRE AVANT D'ÉCRIRE QUOI QUE CE SOIT.
+               Ce bloc écrivait sa ligne, posait `granted`, répondait
+               « Abonnement activé »… et n'inscrivait le plan sur aucun compte
+               quand l'identifiant reçu n'en désignait aucun. L'abonné payait,
+               le tableau de bord affichait une réussite, et l'accès restait
+               fermé : le symptôme était l'absence de symptôme.
+
+               Désormais un identifiant FOURNI mais introuvable arrête l'octroi
+               net — pas de ligne, pas de drapeau, un motif lisible et une
+               transaction que la réconciliation repassera. Un identifiant
+               ABSENT reste licite (achat sans compte, saisie manuelle de
+               l'administration) : la ligne est écrite pour tracer l'argent, et
+               le message ne prétend pas avoir ouvert un accès. */
+            $titulaire = null;
+            if ($accountId !== '') {
+                $titulaire = vrt_resoudre_compte($db, $accountId);
+                if (!$titulaire) {
+                    return ['changed' => false, 'a_regler' => true,
+                            'msg' => 'compte introuvable : ' . $accountId . ' — abonnement NON activé'];
+                }
+                // La ligne portera l'identifiant canonique, même si le paiement
+                // est arrivé sous un login : plus jamais de rapprochement à la main.
+                $accountId = (string) ($db[$titulaire['coll']][$titulaire['idx']]['id'] ?? $accountId);
+            }
+
             $db['elearning']['abonnements'][] = [
                 'id' => 'abo_' . bin2hex(random_bytes(5)), 'ref' => $ref,
                 'accountId' => $accountId, 'plan' => $targetId, 'planId' => $targetId,
@@ -839,20 +1127,18 @@ if (!defined('VRT_AUTH_LIB')) {
                 'dateFinTs' => $finTs, 'dateFin' => date('d/m/Y', (int) ($finTs / 1000)),
                 'statut' => 'Activé', 'via' => 'webhook_serveur',
             ];
-            if ($accountId !== '') {
-                foreach (['visitorAccounts', 'studentAccounts'] as $coll) {
-                    if (!isset($db[$coll]) || !is_array($db[$coll])) continue;
-                    foreach ($db[$coll] as &$acc) {
-                        if (is_array($acc) && (string) ($acc['id'] ?? '') === $accountId) {
-                            if (!isset($acc['plans']) || !is_array($acc['plans'])) $acc['plans'] = [];
-                            if (!in_array($targetId, $acc['plans'], true)) $acc['plans'][] = $targetId;
-                            $acc['statut'] = 'actif';
-                        }
-                    }
-                    unset($acc);
-                }
+            if ($titulaire) {
+                $acc = &$db[$titulaire['coll']][$titulaire['idx']];
+                if (!isset($acc['plans']) || !is_array($acc['plans'])) $acc['plans'] = [];
+                if (!in_array($targetId, $acc['plans'], true)) $acc['plans'][] = $targetId;
+                $acc['statut'] = 'actif';
+                unset($acc);
+                return ['changed' => true, 'msg' => 'Abonnement ' . ($plan['nom'] ?? $targetId) . ' activé'];
             }
-            return ['changed' => true, 'msg' => 'Abonnement ' . ($plan['nom'] ?? '') . ' activé'];
+            // Sans titulaire : l'argent est tracé, l'accès reste à attribuer.
+            return ['changed' => true, 'a_regler' => true,
+                    'msg' => 'Abonnement ' . ($plan['nom'] ?? $targetId)
+                           . ' enregistré SANS titulaire — à rattacher à un compte'];
         }
 
         if ($intent === 'book') {
@@ -882,20 +1168,14 @@ if (!defined('VRT_AUTH_LIB')) {
         if ($intent === 'digitalbook') {
             if ($accountId === '') return ['changed' => false, 'msg' => 'accountId manquant'];
             $bookId = $targetId;
-            foreach (['visitorAccounts', 'studentAccounts'] as $coll) {
-                if (!isset($db[$coll]) || !is_array($db[$coll])) continue;
-                foreach ($db[$coll] as &$acc) {
-                    if (is_array($acc) && (string) ($acc['id'] ?? '') === $accountId) {
-                        if (!isset($acc['unlockedBooks']) || !is_array($acc['unlockedBooks'])) $acc['unlockedBooks'] = [];
-                        if (in_array($bookId, $acc['unlockedBooks'], true)) { unset($acc); return ['changed' => false, 'msg' => 'livre déjà débloqué']; }
-                        $acc['unlockedBooks'][] = $bookId;
-                        unset($acc);
-                        return ['changed' => true, 'msg' => 'Livre numérique débloqué'];
-                    }
-                }
-                unset($acc);
-            }
-            return ['changed' => false, 'msg' => 'compte introuvable'];
+            $r = vrt_resoudre_compte($db, $accountId);
+            if (!$r) return ['changed' => false, 'msg' => 'compte introuvable : ' . $accountId];
+            $acc = &$db[$r['coll']][$r['idx']];
+            if (!isset($acc['unlockedBooks']) || !is_array($acc['unlockedBooks'])) $acc['unlockedBooks'] = [];
+            if (in_array($bookId, $acc['unlockedBooks'], true)) { unset($acc); return ['changed' => false, 'msg' => 'livre déjà débloqué']; }
+            $acc['unlockedBooks'][] = $bookId;
+            unset($acc);
+            return ['changed' => true, 'msg' => 'Livre numérique débloqué'];
         }
 
         /* LIVRET EN LIGNE — le paiement confirmé ÉMET le code d'accès.

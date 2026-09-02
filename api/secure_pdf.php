@@ -231,12 +231,32 @@ $bookDir = $baseDir ? ($baseDir . '/' . $secureId) : null;
 $pdfFile = $baseDir ? ($baseDir . '/' . $secureId . '.pdf') : null;
 
 // Compter les pages réellement préparées si total non renseigné
-$preparedPages = 0;
-if ($bookDir && is_dir($bookDir)) {
-    $preparedPages = count(glob($bookDir . '/p*.jpg') ?: []);
-}
+// Une seule source de vérité pour ce compte : la même fonction que la garde
+// d'achat (api/payment_camerpay.php), sinon les deux dérivent en silence.
+$preparedPages = function_exists('vrt_livre_pages_reelles')
+    ? vrt_livre_pages_reelles($secureId)
+    : (($bookDir && is_dir($bookDir)) ? count(glob($bookDir . '/p*.jpg') ?: []) : 0);
 if ($totalPg <= 0) $totalPg = $preparedPages;
 $prepared = ($preparedPages > 0) || ($pdfFile && is_file($pdfFile) && class_exists('Imagick'));
+
+/* ── LE NOMBRE ANNONCÉ N'ÉTAIT JAMAIS CONFRONTÉ AU DISQUE ─────────────────
+   `$totalPg` vient du catalogue (144 pour Le Tube digestif) et ne servait
+   qu'à borner les requêtes. Un dépôt FTP coupé à la douzième page laissait
+   donc un lecteur qui annonce 144 pages, en sert 12, et n'a rien à dire sur
+   les 132 autres : l'acheteur voit une pagination complète et bute sur un mur
+   muet. C'est la panne des cahiers du 01/09, jamais portée aux livres.
+
+   On le CONSTATE ici, et on le dit au client. Le lecteur peut alors afficher
+   ce qu'il a vraiment, et l'administration voit le livre à re-déposer sans
+   avoir à l'acheter pour s'en apercevoir. */
+$attenduPg  = $totalPg;
+$incomplet  = ($preparedPages > 0 && $attenduPg > 0 && $preparedPages < $attenduPg);
+if ($incomplet) {
+    $totalPg = $preparedPages;   // on n'annonce que ce qu'on peut servir
+    @file_put_contents(__DIR__ . '/data/_security_log.txt',
+        date('c') . ' [SPDF_INCOMPLET] id=' . $id . ' disque=' . $preparedPages
+        . ' annonce=' . $attenduPg . " — livre à re-déposer\n", FILE_APPEND);
+}
 
 // ── SIGNER une fenêtre de pages (bail de lecture) ──
 if ($wantSign) {
@@ -277,6 +297,10 @@ if ($wantMeta) {
         'freePages' => $freePg,
         'hasAccess' => $hasFull,
         'prepared'  => (bool) $prepared,
+        // Le livre est-il entier sur le serveur ? `pages` ne compte que ce
+        // qui est servable ; `attendu` dit ce que le catalogue promettait.
+        'incomplet' => (bool) $incomplet,
+        'attendu'   => (int) $attenduPg,
         'titre'     => (string) ($book['titre'] ?? ''),
     ], JSON_UNESCAPED_UNICODE);
     exit;

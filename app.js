@@ -3373,6 +3373,39 @@ function _purgeLocalBinaries(silent){
 }
 function gid(){return Math.random().toString(36).slice(2,10);}
 function today(){return new Date().toLocaleDateString('fr-FR');}
+
+/* ═══════════ L'ANNÉE SCOLAIRE SE CALCULE, ELLE NE SE FIGE PAS ═══════════
+   Les replis de ces affichages étaient écrits en dur — « 2024–2025 » en tête
+   de la page Contact, sous « Inscription au Centre VÉRITAS ». En septembre
+   2026 un parent y lisait donc une année révolue depuis deux ans, sur l'écran
+   même où il s'apprête à inscrire son enfant, pendant que l'accueil public
+   annonçait correctement 2026-2027.
+
+   Un chiffre en dur ne périme pas bruyamment : il reste juste assez longtemps
+   pour qu'on oublie qu'il est là. Ce repli-ci suit l'horloge.
+
+   Bascule en AOÛT (mois 7) : au Cameroun la rentrée est en septembre, et les
+   inscriptions de l'année N+1 s'ouvrent pendant les vacances qui la précèdent.
+   `DB.school.annee`, réglable par l'administration, l'emporte toujours. */
+function _anneeScolaire(sep){
+  var d=new Date(), a=d.getFullYear();
+  if(d.getMonth()<7) a--;            // janvier→juillet : on est dans l'année ouverte en septembre dernier
+  return a+(sep||'-')+(a+1);
+}
+/** L'année de la SESSION d'examen en cours : BEPC, Probatoire et BAC se
+ *  passent en juin, c'est-à-dire dans la seconde moitié de l'année scolaire. */
+function _anneeExamen(){
+  var d=new Date(), a=d.getFullYear();
+  return (d.getMonth()<7) ? a : a+1;
+}
+/** L'année scolaire affichée : le réglage de l'établissement, sinon l'horloge. */
+function _anneeAffichee(sep){
+  try{
+    var v=(typeof DB!=='undefined'&&DB&&DB.school)?String(DB.school.annee||'').trim():'';
+    if(v) return v;
+  }catch(e){}
+  return _anneeScolaire(sep);
+}
 function starsHtml(n){var h='';for(var i=1;i<=5;i++)h+=i<=Math.round(n)?'<span class="star">'+ICO('lc-star','i vt-star on')+'</span>':'<span class="star-off">'+ICO('lc-star','i vt-star')+'</span>';return h;}
 function getBookRating(bid){var rvs=(DB.bookReviews||[]).filter(function(r){return r.bid===bid;});if(!rvs.length)return{avg:0,count:0};var avg=rvs.reduce(function(s,r){return s+r.stars;},0)/rvs.length;return{avg:avg,count:rvs.length};}
 
@@ -6414,7 +6447,7 @@ function vShowSec(sec,btn,_boot){
         <div class="vcard mb16" style="background:linear-gradient(135deg,#142554,#1a3a8a);color:#fff;border:none">
           <div style="font-family:Libre Baskerville,serif;font-size:18px;color:#FFC93C;margin-bottom:12px">Inscription au Centre VÉRITAS</div>
           <div style="font-size:13px;color:rgba(255,255,255,.7);line-height:1.8">
-            Les inscriptions pour l\'année scolaire <strong style="color:#FFC93C">${DB.school?.annee||'2024–2025'}</strong> sont ouvertes.
+            Les inscriptions pour l\'année scolaire <strong style="color:#FFC93C">${_anneeAffichee('–')}</strong> sont ouvertes.
             <div style="margin-top:12px;font-weight:600;color:rgba(255,255,255,.9)">Apportez les documents suivants :</div>
             <ul class="vlist onDark mt8">
               <li>Acte de naissance ou extrait</li>
@@ -10290,6 +10323,29 @@ function commanderAbonnement(planId){
   '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="validerAbonnement(\''+planId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Valider et payer</button>',true);
 }
 
+/* ═══════════ L'IDENTIFIANT DE COMPTE À JOINDRE À UN PAIEMENT ═══════════
+   Un seul endroit, parce qu'il était recopié à chaque point de vente et que
+   chaque copie se trompait différemment. La souscription, elle, ne le
+   transmettait QUE pour deux types de session sur trois : l'élève connecté à
+   son espace — celui qui a le plus de raisons de s'abonner — envoyait une
+   chaîne vide, produisait un abonnement sans titulaire, et le lecteur de
+   droits rejette ces lignes-là (à raison : un seul orphelin actif rendait
+   l'expiration inopérante pour tous les abonnés du même plan).
+
+   ⚠️ Ne PAS se rabattre sur SES.id pour un élève : sa session porte
+   l'identifiant de l'ÉLÈVE, pas celui du compte — ce sont deux objets
+   différents. Mieux vaut n'envoyer aucun identifiant, ce que le serveur
+   refuse bruyamment, qu'un mauvais qu'il refuserait tout aussi bruyamment
+   après avoir cherché le mauvais compte. */
+function _accId(){
+  try{
+    if(typeof SES==='undefined'||!SES) return null;
+    if(SES.accountId) return SES.accountId;
+    if(SES.type==='visiteur'||SES.type==='visiteur_inscrit') return SES.id||null;
+    return null;
+  }catch(e){ return null; }
+}
+
 function validerAbonnement(planId){
   var nom=(document.getElementById('elNom')?.value||'').trim();
   var tel=(document.getElementById('elTel')?.value||'').trim();
@@ -10303,7 +10359,7 @@ function validerAbonnement(planId){
     email:document.getElementById('elEmail')?.value||SES?.email||'',
     date:today(),statut:'En attente',
     // Lien vers le compte visiteur si connecté — nécessaire pour activation automatique
-    accountId: SES && (SES.type==='visiteur'||SES.type==='visiteur_inscrit') ? (SES.id||SES.accountId||'') : '',
+    accountId: _accId()||'',
     payRef: '' // sera renseigné lors du paiement
   };
   DB.elearning.abonnements.push(newAbo);
@@ -10343,7 +10399,7 @@ function validerAbonnement(planId){
         // ── v1.2 : metadata pour activation automatique ──
         intent: 'subscription',
         targetId: planId,
-        customerAccountId: (SES&&(SES.type==='visiteur'||SES.type==='visiteur_inscrit')?SES.id:null),
+        customerAccountId: _accId(),
         customerNom: nom,
         customerTel: tel
       });
@@ -10863,13 +10919,23 @@ async function doLogin(){
     if(_slice&&_slice.student&&_slice.student.id){
       _studentApplySlice(_slice);
       _recordLoginSuccess(u);_loginAttempts.count=0;
-      go2SES({..._slice.student,type:'eleve',sid:_slice.student.id,accountId:(_slice.account&&_slice.account.user)||u,plans:(_slice.account&&_slice.account.plans)||[]});
+      /* accountId = l'IDENTIFIANT du compte, avec repli sur le login.
+         Il portait le login tout court : l'octroi serveur cherche `acc.id`,
+         ne trouvait rien, et le livre comme l'abonnement payés sur un
+         appareil neuf n'ouvraient rien. Le serveur envoie désormais `id`
+         dans sa tranche de compte ; le repli reste pour les serveurs pas
+         encore redéployés. */
+      go2SES({..._slice.student,type:'eleve',sid:_slice.student.id,accountId:(_slice.account&&(_slice.account.id||_slice.account.user))||u,plans:(_slice.account&&_slice.account.plans)||[]});
       toast('☁️ Données chargées depuis le serveur','ok');
       return;
     } else if(_slice&&_slice.account){
       var _ac=_slice.account;
       _recordLoginSuccess(u);_loginAttempts.count=0;
-      _createSession({id:_ac.user,nom:_ac.nom||'',pre:_ac.pre||'',mat:_ac.user,cls:_ac.cls||'',type:'visiteur_inscrit',accountId:_ac.user,plans:_ac.plans||[]});
+      /* Même correction que le chemin élève ci-dessus, et elle aligne enfin ce
+         chemin sur le chemin local : là, `id` a toujours été l'identifiant du
+         compte et `mat` le login. Ici les deux valaient le login. */
+      var _acId=_ac.id||_ac.user;
+      _createSession({id:_acId,nom:_ac.nom||'',pre:_ac.pre||'',mat:_ac.user,cls:_ac.cls||'',type:'visiteur_inscrit',accountId:_acId,plans:_ac.plans||[]});
       hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);
       return;
     }
@@ -12817,7 +12883,7 @@ function printStudentHonneur(sid,tri){
     var _rf=(typeof gid==='function'?gid().substring(0,8).toUpperCase():'VRT');
     return printDoc(_certVeritasHTML({
       titleHTML:'<i>Tableau</i> d\'Honneur', plainTitle:'Tableau d Honneur',
-      kicker:'Excellence académique · '+tri2+' · '+((sc&&sc.annee)||'2025-2026'),
+      kicker:'Excellence académique · '+tri2+' · '+((sc&&sc.annee)||_anneeScolaire()),
       cta:'Le Centre VÉRITAS inscrit avec fierté',
       name:s.pre+' '+s.nom, badgeIcon:'trophy', badgeLabel:_mn, tierColor:_tc, certRef:_rf,
       descHTML:'élève de <b>'+_esc(s.cls)+'</b> (matricule '+_esc(s.mat)+'), pour ses résultats et son sérieux, avec une moyenne de <b>'+moy.toFixed(2)+' / 20</b> — '+rang+'<sup>e</sup> sur '+allMoy.length+'.',
@@ -12832,7 +12898,7 @@ function printStudentHonneur(sid,tri){
   html+='<div style="font-size:13px;color:rgba(255,255,255,.4);margin-top:4px">'+(sc?.ville||'Yaoundé')+'</div></div>';
   // Certificate body
   html+='<div style="padding:30px;text-align:center">';
-  html+='<div style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:3px;margin-bottom:12px">Année scolaire '+(sc?.annee||'2024-2025')+' — '+tri2+'</div>';
+  html+='<div style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:3px;margin-bottom:12px">Année scolaire '+(sc&&sc.annee?sc.annee:_anneeScolaire())+' — '+tri2+'</div>';
   html+='<div style="font-size:28px;font-family:Libre Baskerville,serif;font-weight:700;color:'+mentionColor+';margin:16px 0;letter-spacing:2px">'+mention+'</div>';
   html+='<div style="width:60px;height:2px;background:'+mentionColor+';margin:12px auto"></div>';
   html+='<div style="font-size:13px;color:#666;margin:16px 0">Le Conseil de Classe décerne la mention</div>';
@@ -15253,7 +15319,7 @@ function genCertScol(){
   ${docHeader('Certificat de Scolarité')}
   <div style="padding:30px 40px">
     <div style="font-family:Libre Baskerville,serif;font-size:17px;font-weight:700;color:#142554;margin-bottom:20px">CERTIFICAT DE SCOLARITÉ</div>
-    <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#a89888;margin-bottom:24px">Année académique ${DB.school?.annee||'2024–2025'}</div>
+    <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#a89888;margin-bottom:24px">Année académique ${_anneeAffichee('–')}</div>
     <div style="background:#f5f3ef;border-radius:10px;padding:20px;margin-bottom:20px;text-align:left">
       <div style="font-size:14px;line-height:2">
         <p>Nous soussignés, <strong>${DB.school?.directeur||'Le Directeur'}</strong>, Directeur du <strong>${DB.school?.nom||'Centre VÉRITAS'}</strong>, certifions que :</p>
@@ -15387,7 +15453,7 @@ function printListeClasse(){
   const selC=window._lcC||CLS[0];
   const list=DB.students.filter(s=>s.cls===selC);
   printDoc(`<div style="max-width:720px;margin:0 auto;font-family:'Inter',sans-serif">${docHeader('Liste de Classe')}
-  <div style="padding:12px 20px;background:#f5f3ef;border-bottom:1px solid #ddd8d0"><strong>Classe :</strong> ${selC} — ${list.length} élèves — Année ${DB.school?.annee||'2024–2025'}</div>
+  <div style="padding:12px 20px;background:#f5f3ef;border-bottom:1px solid #ddd8d0"><strong>Classe :</strong> ${selC} — ${list.length} élèves — Année ${_anneeAffichee('–')}</div>
   <div style="padding:12px 20px">
     <table style="width:100%;border-collapse:collapse;font-size:12px">
       <thead><tr>${['#','Matricule','Nom &amp; Prénom','Sexe','Né(e) le','Parent / Tuteur','Tél. parent','Statut'].map(h=>`<th style="padding:6px 7px;text-align:left;color:#ffffff;background:#142554;font-size:11px;font-weight:700;letter-spacing:.2px;-webkit-print-color-adjust:exact;print-color-adjust:exact">${h}</th>`).join('')}</tr></thead>
@@ -15412,7 +15478,7 @@ function genAttestTravail(){
   printDoc(`<div style="max-width:900px;margin:0 auto;font-family:'Inter',sans-serif;text-align:center;background:#fff;padding:8px;border-radius:7px;overflow:hidden;box-shadow:inset 0 0 0 2px #9a7228,inset 0 0 0 6px #142554,inset 0 0 0 8px #9a7228;-webkit-print-color-adjust:exact;print-color-adjust:exact">${docHeader("Attestation de Travail")}<div style="padding:30px 40px"><div style="font-family:Libre Baskerville,serif;font-size:20px;font-weight:700;color:#142554;margin-bottom:20px">ATTESTATION DE TRAVAIL</div>
   <div style="font-size:13px;line-height:2;text-align:left"><p>Je soussigné(e), <strong>${DB.school?.directeur||'Le Directeur'}</strong>, Directeur du <strong>${DB.school?.nom||'Centre VÉRITAS'}</strong>, atteste que :</p>
   <div style="margin:16px 0;padding:14px;background:#f5f3ef"><div style="font-size:18px;font-weight:700;color:#142554">${t.pre.toUpperCase()} ${t.nom.toUpperCase()}</div><div style="font-size:13px;color:#6b5e52;margin-top:4px">Grade: ${t.grade} · Matière: ${t.mat2}</div></div>
-  <p>est employé(e) en qualité de <strong>Professeur de ${t.mat2}</strong> au sein de notre établissement depuis la rentrée scolaire <strong>${DB.school?.annee||'2024–2025'}</strong>.</p>
+  <p>est employé(e) en qualité de <strong>Professeur de ${t.mat2}</strong> au sein de notre établissement depuis la rentrée scolaire <strong>${_anneeAffichee('–')}</strong>.</p>
   <p style="margin-top:12px">Cette attestation est délivrée pour servir et valoir ce que de droit.</p></div>
   <div style="display:flex;justify-content:space-between;margin-top:24px"><div><div style="font-size:13px;color:#6b5e52">Fait le: ${today()}</div></div><div style="text-align:right"><div style="font-weight:700">${DB.school?.directeur||'Le Directeur'}</div><div style="margin-top:18px;border-top:1px solid #ccc;width:140px;margin-left:auto;font-size:13px;color:#aaa;padding-top:4px">Signature & Cachet</div></div></div></div></div>`,`Attestation travail — ${t.pre} ${t.nom}`,'landscape');
 }
@@ -16758,7 +16824,7 @@ window._reussitesScroller = function(){
   // ruban à ce diamètre se réduisait à deux traits illisibles. La courbe
   // ascendante (#lc-trending) dit exactement ce que la section montre : des
   // taux, et leur progression.
-  var head='<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-trending"/></svg></span> Nos résultats officiels</h2><div class="acc-sub">Session 2025-2026 · BEPC · Probatoire · BAC</div></div>';
+  var head='<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-trending"/></svg></span> Nos résultats officiels</h2><div class="acc-sub">Session '+_anneeAffichee()+' · BEPC · Probatoire · BAC</div></div>';
   var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:8px"><button class="btn bo sm" onclick="mEditStatsVitrine()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier les résultats</button></div>':'';
   // v1.17 — jusqu'à 4 examens : grille STATIQUE. Le défilement emportait le
   // chiffre que le parent est précisément en train de lire, et sur grand écran
@@ -19391,7 +19457,7 @@ function _buildOrientationSection(){
 
 
 function _showBourses(){
-  _vc("<div class='vsec'><button class='back-btn' onclick='vShowSec(\"orientation\",null)'>← Orientation</button><div class='vsec-title'><span class='vsec-ico'><svg class='vico vico-21' aria-hidden='true'><use href='#lc-graduation'/></svg></span>Bourses & Concours</div><div class='vcard'><div class='ct mb10'>Calendrier 2024-2025</div><div style='display:flex;flex-direction:column;gap:8px'><div style='background:#F0F4FF;border-radius:10px;padding:10px 14px'><div style='font-weight:700;font-size:13px;color:#142554'>BEPC</div><div style='font-size:11px;color:#6B7A99'>Juin 2025 — Inscription: Janv-Mars 2025</div></div><div style='background:#F0F4FF;border-radius:10px;padding:10px 14px'><div style='font-weight:700;font-size:13px;color:#142554'>BAC (toutes series)</div><div style='font-size:11px;color:#6B7A99'>Juin 2025 — Inscription: Janv-Avril 2025</div></div><div style='background:#FEF3C7;border-radius:10px;padding:10px 14px'><div style='font-weight:700;font-size:13px;color:#D97706'>Concours ENS, ENAM, ENSP</div><div style='font-size:11px;color:#6B7A99'>Aout-Septembre — Verifiez minesup.gov.cm</div></div></div></div></div>");
+  _vc("<div class='vsec'><button class='back-btn' onclick='vShowSec(\"orientation\",null)'>← Orientation</button><div class='vsec-title'><span class='vsec-ico'><svg class='vico vico-21' aria-hidden='true'><use href='#lc-graduation'/></svg></span>Bourses & Concours</div><div class='vcard'><div class='ct mb10'>Calendrier "+_anneeAffichee()+"</div><div style='display:flex;flex-direction:column;gap:8px'><div style='background:#F0F4FF;border-radius:10px;padding:10px 14px'><div style='font-weight:700;font-size:13px;color:#142554'>BEPC</div><div style='font-size:11px;color:#6B7A99'>Juin "+_anneeExamen()+" — Inscription : janvier-mars "+_anneeExamen()+"</div></div><div style='background:#F0F4FF;border-radius:10px;padding:10px 14px'><div style='font-weight:700;font-size:13px;color:#142554'>BAC (toutes series)</div><div style='font-size:11px;color:#6B7A99'>Juin "+_anneeExamen()+" — Inscription : janvier-avril "+_anneeExamen()+"</div></div><div style='background:#FEF3C7;border-radius:10px;padding:10px 14px'><div style='font-weight:700;font-size:13px;color:#D97706'>Concours ENS, ENAM, ENSP</div><div style='font-size:11px;color:#6B7A99'>Aout-Septembre — Verifiez minesup.gov.cm</div></div></div></div></div>");
 }
 
 // ── QUIZ ENRICHIS ──────────────────────────────────────────────────
@@ -27830,7 +27896,7 @@ window._secureBuy=function(){
   openPaymentModal({
     montant:prix, label:'📘 Version numérique — '+(st.book.titre||''),
     refPrefix:'EBOOK', intent:'digitalbook', targetId:st.id,
-    customerAccountId:SES.accountId, customerNom:(SES.pre||'')+' '+(SES.nom||''), customerTel:SES.tel||''
+    customerAccountId:_accId(), customerNom:(SES.pre||'')+' '+(SES.nom||''), customerTel:SES.tel||''
   });
 };
 // Anti-copie / anti-capture (dissuasion — voir note d'honnêteté dans secure_pdf.php)
@@ -30864,7 +30930,7 @@ function mWAGroupes(){
     +'</div>'
     +'<div class="fg">'
       +'<span class="fl">Nom du groupe WA</span>'
-      +'<input class="fi" id="wgNom" placeholder="ex : Terminale D 2025-2026">'
+      +'<input class="fi" id="wgNom" placeholder="ex : Terminale D '+_anneeScolaire()+'">'
     +'</div>'
     +'<div class="fg">'
       +'<span class="fl">Lien invitation</span>'
@@ -31632,7 +31698,7 @@ function openPaymentModal(payInfo){
       // Panier : détail ligne par ligne, pour activer chaque article ET
       // rétribuer chaque auteur à partir d'un paiement unique.
       lignes: (payInfo.lignes && payInfo.lignes.length) ? payInfo.lignes : null,
-      accountId: payInfo.customerAccountId || (typeof SES!=='undefined'&&SES?SES.accountId:null),
+      accountId: payInfo.customerAccountId || _accId(),
       customerNom: payInfo.customerNom || (typeof SES!=='undefined'&&SES?(SES.pre+' '+SES.nom):''),
       customerTel: payInfo.customerTel || (typeof SES!=='undefined'&&SES?SES.tel:''),
       customerEmail: payInfo.customerEmail || ''
@@ -34708,7 +34774,7 @@ window.genCertificatAssocie = function(idx){
     titleHTML:'Certificat <i>d\'Associé</i>', plainTitle:'Certificat Associe',
     kicker:'Réseau des partenaires VÉRITAS', cta:'Il est attesté que',
     name:p.nom, badgeIcon:'bank', badgeLabel:'Associé — '+t.l, tierColor:t.c, certRef:rec.id, certToken:rec.token,
-    descHTML:'est reconnu <b>Partenaire officiel du Centre VÉRITAS</b> en qualité de <b>'+_esc(t.l)+'</b>'+(p.desc?', '+_esc(p.desc):'')+', pour l\'année académique '+_esc(sc.annee||'2025-2026')+'.'
+    descHTML:'est reconnu <b>Partenaire officiel du Centre VÉRITAS</b> en qualité de <b>'+_esc(t.l)+'</b>'+(p.desc?', '+_esc(p.desc):'')+', pour l\'année académique '+_esc(sc.annee||_anneeScolaire())+'.'
   });
   printDoc(html,'Certificat Associé — '+p.nom,'landscape');
 };
@@ -34855,6 +34921,18 @@ window.I18N_DICT = {
 // v1.2.4 : dictionnaire des SOUS-TITRES de panneaux (FR -> EN). Texte d'interface
 // uniquement — les contenus pédagogiques (œuvres, cours, épreuves) restent en français.
 // Ajouter ici les sous-titres au fur et à mesure pour étendre la couverture bilingue.
+/* Traduit une phrase en tolérant l'année qu'elle contient. Rend null si la
+   phrase n'est pas au dictionnaire — l'appelant laisse alors le français. */
+function _i18nTrad(txt){
+  if(!txt) return null;
+  var d = window.I18N_SUBS_EN || {};
+  if(d[txt]) return d[txt];
+  var an = null;
+  var cle = String(txt).replace(/\b(20\d{2}\s*[-–]\s*20\d{2})\b/, function(m){ an = m; return '{an}'; });
+  if(an === null || !d[cle]) return null;
+  return d[cle].replace('{an}', an);
+}
+
 window.I18N_SUBS_EN = {
   // Accueil
   "L'excellence scolaire de la 6ᵉ à la Terminale — préparation BEPC · Probatoire · BAC · GCE":
@@ -34896,8 +34974,14 @@ window.I18N_SUBS_EN = {
   "Cliquez pour explorer": "Click to explore",
   "Nos résultats aux examens officiels": "Our results at the official exams",
   "Nos résultats officiels": "Our official exam results",
-  "Session 2025-2026 · BEPC · Probatoire · BAC":
-    "2025-2026 session · BEPC · Probatoire · BAC",
+  /* L'ANNÉE EST UN JOKER. Cette entrée portait « 2025-2026 » des deux côtés,
+     et la recherche est une correspondance EXACTE : le jour où l'affichage a
+     cessé d'être figé pour suivre l'horloge, la clé a cessé de correspondre et
+     le bandeau est resté en français en mode anglais — sans erreur, sans
+     trace. `_i18nCle()` remplace toute année « 20XX-20XX » par « {an} » avant
+     la recherche, et la traduction la remet en place. */
+  "Session {an} · BEPC · Probatoire · BAC":
+    "{an} session · BEPC · Probatoire · BAC",
   "Nos résultats aux examens": "Our exam results",
   "Présentation du Centre": "About the Centre",
   "Notre Histoire": "Our History",
@@ -35022,14 +35106,13 @@ window._translateSubs = function(){
       if(last && last.nodeType===3){
         var raw = last.textContent;
         var trimmed = raw.replace(/\s+$/,'').replace(/^\s+/,'');
-        if(trimmed && I18N_SUBS_EN[trimmed]){
-          last.textContent = ' ' + I18N_SUBS_EN[trimmed];
-          return;
-        }
+        var t = trimmed ? _i18nTrad(trimmed) : null;
+        if(t){ last.textContent = ' ' + t; return; }
       }
       if(el.children.length===0){
         var full = (el.textContent||'').trim();
-        if(I18N_SUBS_EN[full]) el.textContent = I18N_SUBS_EN[full];
+        var tf = _i18nTrad(full);
+        if(tf) el.textContent = tf;
       }
     });
   }catch(e){}

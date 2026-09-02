@@ -385,7 +385,12 @@ if ($action === 'init' && $method === 'POST') {
         $liv = function_exists('vrt_catalogue_livre') ? vrt_catalogue_livre($targetId) : null;
         $numerique = ($intent === 'digitalbook')
                   || ($liv && !empty($liv['numeriqueSeul']));
-        if ($numerique && function_exists('vrt_livre_prepare') && !vrt_livre_prepare($targetId)) {
+        /* Le nombre de pages ANNONCÉ au catalogue est passé à la garde : sans
+           lui, elle se contentait d'une page présente et laissait vendre un
+           livre coupé à l'envoi FTP — le lecteur annonçait alors 144 pages et
+           s'arrêtait à la douzième, sans un mot. */
+        $attenduPg = (int) ($liv['securePages'] ?? $liv['pages'] ?? 0);
+        if ($numerique && function_exists('vrt_livre_prepare') && !vrt_livre_prepare($targetId, $attenduPg)) {
             vrt_pay_log('[LIVRE_NON_PREPARE] refus init id=' . $targetId . ' ref=' . $ref);
             jsonRespCy(['error' => 'Ce livre n’est pas encore disponible à la lecture en ligne. '
                                  . 'Réessayez plus tard, ou écrivez à contact@veritas-school.com.'], 409);
@@ -804,6 +809,30 @@ if ($action === 'list' && $method === 'GET') {
 // CamerPay n'expose pas d'endpoint « relevé » (OpenAPI vérifié : 5 opérations).
 // On agrège donc ce que NOUS savons, et on dit clairement d'où viennent les
 // chiffres — plutôt que de laisser croire à un relevé bancaire faisant foi.
+/* RATTRAPER LES DROITS VENDUS SOUS UN LOGIN — passe manuelle, idempotente.
+   Du 31/08 au 02/09/2026, l'octroi recevait le login au lieu de l'identifiant
+   du compte : le livre numérique répondait « compte introuvable », et
+   l'abonnement se déclarait « activé » en n'inscrivant le plan nulle part. Le
+   correctif protège les ventes à venir ; celles-là sont déjà encaissées.
+
+     GET  ?action=repair_identities&dry=1   → compte sans rien changer
+     POST ?action=repair_identities         → applique
+
+   Toujours regarder avant d'appliquer : la simulation dit l'ampleur, et la
+   passe écrit une sauvegarde horodatée avant de toucher à la base. */
+if ($action === 'repair_identities') {
+    requirePayAuth();
+    // `$body` n'est peuplé que dans le bloc `notify` : ici on lit les
+    // superglobales, sinon PHP 8 signale une variable indéfinie.
+    $simulation = ($method === 'GET') || !empty($_GET['dry']) || !empty($_POST['dry']);
+    if (!function_exists('vrt_reparer_identites_fichier')) {
+        jsonRespCy(['ok' => false, 'error' => 'passe de réparation absente — api/_auth_lib.php pas à jour'], 500);
+    }
+    $r = vrt_reparer_identites_fichier($simulation);
+    camerpayLog($logFile, date('c') . ' [REPAIR_IDENT] ' . json_encode($r) . "\n");
+    jsonRespCy($r, empty($r['ok']) ? 500 : 200);
+}
+
 if ($action === 'history' && $method === 'GET') {
     requirePayAuth();
     $start = trim($_GET['start'] ?? date('Y-m-01'));

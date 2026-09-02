@@ -151,6 +151,26 @@ if (!defined('VRT_NOTIFY_LIB')) {
         $n     = (int) ($v['n'] ?? 1);
         $aide  = defined('VRT_NOTIFY_AIDE') ? (string) VRT_NOTIFY_AIDE : '697 63 77 39';
 
+        /* ÉCHÉANCE D'ABONNEMENT — rien n'existait entre « abonné » et « expiré ».
+           La durée était calculée, écrite et respectée à la lecture, mais aucun
+           message n'était envoyé à l'approche du terme : l'abonné constatait un
+           matin que le contenu avait disparu, sans savoir pourquoi ni comment
+           revenir. Le transport, lui, était déjà construit et éprouvé — c'est
+           celui qui livre les codes de cahier. Il ne manquait que de s'en
+           servir. */
+        if ((string) ($v['type'] ?? 'code') === 'echeance') {
+            $jours = max(0, (int) ($v['jours'] ?? 0));
+            $t = 'VERITAS — votre abonnement arrive a echeance' . "\n"
+               . ($titre !== '' ? $titre . "\n" : '')
+               . ($jours > 0
+                    ? 'Il se termine dans ' . $jours . ' jour' . ($jours > 1 ? 's' : '')
+                    : 'Il se termine aujourd’hui')
+               . ($exp > 0 ? ' (le ' . date('d/m/Y', $exp) . ')' : '') . '.' . "\n"
+               . 'Renouveler : ' . ($lien !== '' ? $lien : vrt_notify_site()) . "\n"
+               . 'Aide : ' . $aide;
+            return $accents ? $t : vrt_notify_sans_accents($t);
+        }
+
         $t = 'VERITAS — votre code d’accès' . "\n"
            . ($titre !== '' ? $titre . "\n" : '')
            . 'Code : ' . $code . "\n"
@@ -243,6 +263,138 @@ if (!defined('VRT_NOTIFY_LIB')) {
         return $p[min($essais, count($p) - 1)];
     }
     function vrt_notify_max_essais(): int { return 6; }
+
+    /**
+     * BATTEMENT — vider la file sans dépendre de la vente suivante.
+     *
+     * La file ne se vidait qu'au webhook suivant (ou sur commande de
+     * l'administrateur). Un envoi qui échoue le vendredi soir attendait donc
+     * la prochaine vente : si elle tombait le lundi, le client a passé le
+     * week-end sans son code, alors qu'il était émis et prêt dès la première
+     * seconde.
+     *
+     * Pas de tâche planifiée sur cet hébergement, et une planification
+     * GitHub exigerait un secret que le dépôt n'a pas — elle échouerait en
+     * silence, ce qui est pire que rien. On se sert donc du trafic : quelques
+     * endpoints appellent ce battement, qui ne fait RIEN neuf fois sur dix.
+     *
+     * Trois précautions, parce que ceci vit sur un chemin public :
+     *   · un `filemtime` tranche avant tout le reste — coût négligeable ;
+     *   · la file vide sort immédiatement, sans rien lire ;
+     *   · la réponse est rendue au visiteur AVANT l'appel réseau quand le
+     *     serveur sait le faire (LiteSpeed et FPM le savent tous les deux),
+     *     de sorte que personne n'attend un SMS qui ne le concerne pas.
+     */
+    /**
+     * Prévenir AVANT que l'accès se referme.
+     *
+     * Rien n'existait entre « abonné » et « expiré » : pas de relance à
+     * l'approche du terme, aucun message le jour où le contenu disparaît.
+     * L'abonné le découvrait seul, et repartait souvent pour de bon.
+     *
+     * Une relance par abonnement, jamais deux : la référence de file est
+     * l'identifiant de l'abonnement, et la file est idempotente par
+     * construction. Le drapeau `relance` est posé en plus, pour que la base le
+     * dise aussi à qui la lit.
+     *
+     * Ne prévient QUE ce qui est encore actif et réellement daté : un
+     * abonnement sans terme (octroi manuel de l'administration) n'expire pas,
+     * il n'y a rien à annoncer.
+     *
+     * @return int le nombre de relances mises en file
+     */
+    function vrt_abo_relances(array &$db, int $joursAvant = 7): int {
+        if (!isset($db['elearning']['abonnements']) || !is_array($db['elearning']['abonnements'])) return 0;
+        $now   = (int) round(microtime(true) * 1000);
+        $seuil = $now + ($joursAvant * 86400000);
+        $mis   = 0;
+
+        foreach ($db['elearning']['abonnements'] as $i => $a) {
+            if (!is_array($a)) continue;
+            if (!empty($a['relance'])) continue;                       // déjà prévenu
+            $fin = (int) ($a['dateFinTs'] ?? 0);
+            if ($fin <= 0 || $fin <= $now || $fin > $seuil) continue;  // sans terme, déjà fini, ou trop tôt
+            $st = strtolower((string) ($a['statut'] ?? ''));
+            if (in_array($st, ['expiré', 'expire', 'annulé', 'annule', 'suspendu'], true)) continue;
+
+            // Le contact : celui de la ligne, complété par celui du compte.
+            $tel = (string) ($a['tel'] ?? '');
+            $mail = (string) ($a['email'] ?? $a['mail'] ?? '');
+            $accId = (string) ($a['accountId'] ?? '');
+            if ($accId !== '' && function_exists('vrt_resoudre_compte')) {
+                $r = vrt_resoudre_compte($db, $accId);
+                if ($r) {
+                    $acc = $db[$r['coll']][$r['idx']];
+                    if ($tel === '')  $tel  = (string) ($acc['tel'] ?? '');
+                    if ($mail === '') $mail = (string) ($acc['email'] ?? $acc['mail'] ?? '');
+                }
+            }
+            if ($tel === '' && $mail === '') continue;   // injoignable : rien à tenter
+
+            $jours = (int) max(0, floor(($fin - $now) / 86400000));
+            $msg = vrt_notify_enfiler([
+                'ref'   => 'RELANCE-' . (string) ($a['id'] ?? ('abo' . $i)),
+                'type'  => 'echeance',
+                'tel'   => $tel,
+                'mail'  => $mail,
+                'titre' => (string) ($a['planNom'] ?? $a['plan'] ?? 'Votre abonnement'),
+                'lien'  => vrt_notify_site() . '/app.html#abonnements',
+                'exp'   => (int) floor($fin / 1000),
+                'jours' => $jours,
+            ]);
+            // « déjà en file » compte comme fait : ne pas retenter à chaque battement.
+            if ($msg === '' || $msg === 'deja en file' || $msg === 'acheteur injoignable') {
+                $db['elearning']['abonnements'][$i]['relance'] = date('c');
+                $mis++;
+            }
+        }
+        return $mis;
+    }
+
+    function vrt_notify_battement(int $minIntervalle = 600, int $budget = 2): void {
+        $dir = vrt_notify_dir();
+
+        /* ── LA RONDE DES ÉCHÉANCES ────────────────────────────────────────
+           Bien plus lourde que le vidage de file (lecture + réécriture de la
+           base) : deux fois par jour suffisent largement pour prévenir sept
+           jours à l'avance, et elle sort sans écrire quand personne n'arrive à
+           terme — c'est-à-dire presque toujours. Verrou non bloquant : aucun
+           visiteur n'attend derrière cette tâche. */
+        $marqueAbo = dirname($dir) . '/_relance_tick.txt';
+        if (time() - (@filemtime($marqueAbo) ?: 0) >= 43200) {
+            @file_put_contents($marqueAbo, (string) time());
+            if (function_exists('vrt_abo_relances_fichier')) {
+                try {
+                    $n = vrt_abo_relances_fichier(7);
+                    if ($n > 0) vrt_notify_log('[RELANCES] ' . $n . ' abonnement(s) prévenu(s)');
+                } catch (\Throwable $e) { vrt_notify_log('[RELANCES_ERR] ' . $e->getMessage()); }
+            }
+        }
+
+        // Y a-t-il seulement quelque chose à faire ? (un seul appel disque)
+        $enAttente = glob($dir . '/*.json') ?: [];
+        if (!$enAttente) return;
+
+        $marque = dirname($dir) . '/_notify_tick.txt';
+        $dernier = @filemtime($marque) ?: 0;
+        if (time() - $dernier < $minIntervalle) return;
+        // On pose la marque AVANT d'envoyer : deux visiteurs simultanés ne
+        // doivent pas déclencher deux vidages de la même file.
+        @file_put_contents($marque, (string) time());
+
+        // Rendre la main au visiteur d'abord, s'il y a moyen.
+        if (function_exists('litespeed_finish_request'))      { @litespeed_finish_request(); }
+        elseif (function_exists('fastcgi_finish_request'))    { @fastcgi_finish_request(); }
+
+        try {
+            $r = vrt_notify_vider($budget);
+            if (($r['tentes'] ?? 0) > 0) {
+                vrt_notify_log('[BATTEMENT] ' . json_encode($r));
+            }
+        } catch (\Throwable $e) {
+            vrt_notify_log('[BATTEMENT_ERR] ' . $e->getMessage());
+        }
+    }
 
     /**
      * Vide la file. APPELÉ HORS VERROU — il y a du réseau ici.

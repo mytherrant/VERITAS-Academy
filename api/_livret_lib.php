@@ -286,9 +286,26 @@ if (!defined('VRT_LIVRET_LIB')) {
        enseignant pour avoir les corrigés du livret à moindre coût.
        Réglables en base sans redéploiement : DB.tarifs.livret / livretGuide. */
     function vrt_livret_prix(array $db, string $kind = 'livret', string $slug = ''): int {
-        // Un ouvrage peut porter son propre tarif (un cahier d'œuvre intégrale
-        // n'a pas le format d'un livret d'activités). Il l'emporte sur le tarif
-        // général — mais reste une DONNÉE du catalogue, pas un chiffre en dur.
+        /* ① LE RÉGLAGE PAR OUVRAGE, EN BASE — le seul cran vraiment réglable.
+           Les tarifs sont annoncés « réglables sans redéploiement »
+           (DB.tarifs.livret / livretGuide), mais le catalogue déposé porte
+           `prix: 1500` sur LES QUINZE ouvrages : sa valeur l'emportait toujours,
+           et le réglage général n'avait donc aucun effet sur un cahier. La
+           promesse était fausse sans que rien ne le signale.
+           Ce cran-ci passe AVANT le catalogue, et il est explicite — pas de
+           devinette sur « ce 1500 est-il le tarif général ou un prix spécial ? ».
+             DB.tarifs.livretParOuvrage = { "bord-tle": { "livret": 2500 } } */
+        if ($slug !== '') {
+            $parOuvrage = $db['tarifs']['livretParOuvrage'][$slug] ?? null;
+            if (is_array($parOuvrage)) {
+                $p = (int) ($parOuvrage[$kind] ?? 0);
+                if ($p > 0) return $p;
+            }
+        }
+        // ② Un ouvrage peut porter son propre tarif au catalogue (un cahier
+        // d'œuvre intégrale n'a pas le format d'un livret d'activités). Il
+        // l'emporte sur le tarif général — mais reste une DONNÉE du catalogue,
+        // pas un chiffre en dur.
         if ($slug !== '') {
             $c = vrt_livret_catalogue();
             if (isset($c[$slug])) {
