@@ -99,7 +99,6 @@ jobs:
       - name: 🎟️ Émission et livraison des codes
         run: |
           node tests/banc_livret_codes.cjs
-          node tests/banc_remise_code.cjs
           node tests/banc_remise_sms.cjs
 
       - name: 📓 Ouverture des cahiers et de leurs corrigés
@@ -116,6 +115,14 @@ jobs:
         run: node tests/banc_compte_serveur.cjs
       - name: 🌐 Installer Chromium
         run: npx playwright install --with-deps chromium
+
+      # ⚠️ CE BANC OUVRE UN NAVIGATEUR — il doit donc venir APRÈS l'installation
+      # de Chromium. Placé plus haut, il passait en local (le navigateur y était
+      # déjà) et échouait en CI sur « Executable doesn't exist ». Les autres
+      # bancs de la liste, eux, n'en ouvrent aucun et tournent en quelques
+      # secondes : c'est pour cela qu'ils restent avant.
+      - name: 🎟️ Remise du code et cahier non imprimable (navigateur)
+        run: node tests/banc_remise_code.cjs
       - name: 🧪 Lancer les tests
         run: npx playwright test
       - name: 📤 Rapport (artefact)
