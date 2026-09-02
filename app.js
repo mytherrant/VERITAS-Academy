@@ -971,7 +971,7 @@ function defaultDB(){return{
       {id:'plan2',public:'eleve',nom:'INTERMÉDIAIRE',cible:'6ème · 5ème · 4ème · 2nde',prix:3000,ancien:15000,duree:'Année scolaire',populaire:true,
        planTags:['plan2'],
        avantages:['✅ Épreuves séquentielles + corrigés (collèges et lycées)','✅ Cours détaillés en PDF par matière','✅ Fiches de révision format poche','✅ Astuces et méthodes d\'étude efficaces','✅ Planning de révision personnalisé','🔒 Cours vidéo (Plan Examen uniquement)','🔒 Anciens sujets d\'examen (Plan Examen uniquement)']},
-      {id:'plan3',public:'enseignant',nom:'ENSEIGNANT — ANNÉE',cible:'Professeurs & Formateurs',prix:7000,ancien:25000,duree:'Année scolaire',populaire:false,
+      {id:'plan3',public:'enseignant',nom:'E-LEARNING ENSEIGNANT — ANNÉE',cible:'Professeurs & Formateurs',prix:7000,ancien:25000,duree:'Année scolaire',populaire:false,
        planTags:['plan3'],
        avantages:['✅ Épreuves + corrections toutes classes (6ème → Tle)','✅ Cours détaillés en PDF et Vidéos','✅ Anciens sujets BEPC / Probatoire / BAC avec corrigés','✅ Programmes officiels MINESEC & progressions','✅ Projets pédagogiques et fiches de préparation','✅ Corpus complets toutes séquences','✅ Modèles de sujets à personnaliser']},
       {id:'plan4',public:'etablissement',nom:'FAMILLE / ÉCOLE',cible:'Familles · Écoles · Centres',prix:25000,ancien:100000,duree:'Année scolaire',populaire:true,
@@ -990,7 +990,7 @@ function defaultDB(){return{
       // `public` classe l'offre, `fraisCompte` porte le droit d'entrée, et
       // `surDevis` marque ce qui se chiffre au cas par cas — jamais de prix
       // inventé pour combler une case.
-      {id:'plan7',public:'enseignant',nom:'ENSEIGNANT — MOIS',cible:'Professeurs & Formateurs',prix:1000,ancien:0,duree:'1 mois',populaire:true,
+      {id:'plan7',public:'enseignant',nom:'E-LEARNING ENSEIGNANT — MOIS',cible:'Professeurs & Formateurs',prix:1000,ancien:0,duree:'1 mois',populaire:true,
        fraisCompte:500,planTags:['plan3'],
        avantages:["✅ Les leçons, par classe et par séquence","✅ Des exercices spécifiques, prêts à donner","✅ Des sujets avec leurs corrigés","✅ Programmes officiels MINESEC et progressions","✅ Sans engagement — 7 000 FCFA pour l'année complète"]},
       {id:'plan8',public:'parent',nom:'ORIENTATION SCOLAIRE',cible:'Parents',prix:5000,ancien:0,duree:'Prestation',populaire:false,
@@ -1194,6 +1194,29 @@ function _fixHtdocsUrls(){
 // ── Migration DB : à appeler après TOUT remplacement de DB (load, pull cloud, force-pull) ──
 // BUG-01/BUG-09 FIX : centralise les guards "si champ manquant → valeur par défaut"
 function _migrateDB(){
+  /* ── DEUX ABONNEMENTS ENSEIGNANTS PORTAIENT LE MÊME NOM (02/09/2026) ──────
+     « ENSEIGNANT — ANNÉE » à 7 000 F ici, et « Enseignant » à 5 000 F/an dans
+     l'Atelier de français : deux produits distincts, deux catalogues, aucun
+     n'ouvrant l'autre, et rien à l'écran pour les distinguer. Un enseignant
+     qui compare conclut qu'on lui demande 12 000 F pour ce qu'il croyait être
+     un seul abonnement — ou paie le moins cher et se plaint du reste.
+
+     Les prix ne bougent pas : c'est un malentendu de nom, pas de tarif.
+
+     ⚠️ Renommer dans `defaultDB()` ne suffit pas — une base existante ne
+     rejoue jamais son seed, et c'est justement la base de production qui
+     porte l'ancien nom. On ne renomme QUE si le nom est encore exactement
+     celui du seed : un plan que l'administration a déjà rebaptisé lui
+     appartient, on n'y touche pas. */
+  try{
+    var _renom = { plan3:['ENSEIGNANT — ANNÉE','E-LEARNING ENSEIGNANT — ANNÉE'],
+                   plan7:['ENSEIGNANT — MOIS','E-LEARNING ENSEIGNANT — MOIS'] };
+    ((DB.elearning&&DB.elearning.plans)||[]).forEach(function(p){
+      if(!p||!_renom[p.id]) return;
+      if(String(p.nom||'').trim()===_renom[p.id][0]) p.nom=_renom[p.id][1];
+    });
+  }catch(e){}
+
   // FIX URLs /htdocs/ : toutes les URLs uploadées avant 12/05/2026 sont cassées
   // Réécriture systématique au chargement (idempotent — ne fait rien si pas de /htdocs/)
   _fixHtdocsUrls();
