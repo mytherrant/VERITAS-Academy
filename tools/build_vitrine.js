@@ -382,6 +382,9 @@ for (const cible of Object.values(ANCRES)) {
 const DEST_SERVICES = {
   /* Apprendre */
   'Cours par séquence':      '#elearning',
+  /* Le cahier interactif : la boutique, pas l'application. C'est un
+     ouvrage qu'on achète à l'unité, avec son aperçu gratuit. */
+  'Mon cahier en ligne':     'livrets/',
   'Œuvres au programme':     'oeuvres/',
   'Labos virtuels':          '#elearning',
   'Jeux pédagogiques':       '#elearning',
