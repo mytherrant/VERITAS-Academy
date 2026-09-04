@@ -506,6 +506,24 @@
     return 'college';
   }
 
+  /* ── « MODULE », PAS « SÉQUENCE », DE LA 6ᵉ À LA 3ᵉ ───────────────────────
+     Le programme du 1er cycle est découpé en MODULES, et les quatre livrets
+     l'impriment ainsi — « MODULE 1 · La vie quotidienne ». Leur source, elle,
+     nomme le bloc `sequence`, et l'écran recopiait ce mot-là : l'élève lisait
+     « séquence » sur son téléphone et « module » sur la page qu'il avait sous
+     les yeux. Deux mots pour la même chose, dans le même cahier.
+     On corrige à l'AFFICHAGE et non dans les données : le mot juste arrive
+     ainsi aux cahiers déjà déposés sur le serveur, sans rien re-téléverser.
+     La 2ⁿᵈᵉ et le lycée gardent « Séquence », qui est leur mot ; les Bords
+     gardent le leur, imprimé « Séquence » dans le livre relié. */
+  var DIT_MODULE = { '6e': 1, '5e': 1, '4e': 1, '3e': 1 };
+
+  function motDeDivision(y, slug) {
+    var s = String(slug || '').toLowerCase().replace(/^apercu-/, '');
+    if (y === 'sequence' && DIT_MODULE[s]) return 'Module';
+    return ETIQUETTES[y] || 'Séquence';
+  }
+
   /* Les polices propres à chaque collection. Elles sont chargées À LA DEMANDE,
      quand on sait quel cahier s'ouvre : charger les onze familles des trois
      maquettes sur chaque page ferait payer à un élève de 6ᵉ les polices du
@@ -564,14 +582,19 @@
     return !!x && x === z;
   }
 
+  /** Retire d'un repère le mot que la pastille dit déjà. */
+  function sansMot(no, mot) {
+    no = String(no || '').trim();
+    if (mot && no.toLowerCase().indexOf(String(mot).toLowerCase()) === 0) {
+      no = no.slice(String(mot).length).replace(/^[\s·:.—-]+/, '');
+    }
+    return no;
+  }
+
   /** Le repère d'une division, sans le mot que la pastille dit déjà.
    *  « Leçon Leçon 1 » : le 1er cycle range le libellé entier dans `no`. */
   function repere(b, mot) {
-    var no = String(b.no || b.n || b.num || '').trim();
-    if (mot && no.toLowerCase().indexOf(mot.toLowerCase()) === 0) {
-      no = no.slice(mot.length).replace(/^[\s·:.—-]+/, '');
-    }
-    return no;
+    return sansMot(String((b && (b.no || b.n || b.num)) || ''), mot);
   }
 
   function Cahier(opts) {
@@ -963,8 +986,11 @@
          feuilletant. Il n'existait pas à l'écran : une pastille de 11 px. */
       if (TETES[y]) {
         famille = '';
-        var motM = ETIQUETTES[y] || 'Séquence';
-        var noM = repere(b, motM);
+        var motM = motDeDivision(y, self.ouvrage);
+        /* Le repère se nettoie des DEUX mots : la source du 1er cycle range
+           « Séquence 1 » dans `no`, et l'on affiche « Module ». Sans cela on
+           lirait « MODULE Séquence 1 ». */
+        var noM = sansMot(sansMot(repere(b, motM), 'Séquence'), 'Module');
         /* « SÉQUENCE 2 » comme titre de la séquence 2 : les cahiers du lycée
            recopient le libellé dans le titre. Affiché tel quel, on lisait deux
            fois la même chose, en gros, l'une sous l'autre. */
@@ -1071,8 +1097,25 @@
           +  '</div></div>';
         return;
       }
+      /* ── UN TEXTE, UN ENCADRÉ ─────────────────────────────────────────────
+         Les sources découpent un extrait en autant de blocs `texte` qu'il a de
+         paragraphes — trois pour la page de Lucien Leuwen. Rendus séparément,
+         cela donnait trois cadres empilés là où le livre n'en imprime qu'un :
+         le lecteur croyait à trois textes, et les filets hachaient l'extrait
+         au milieu des phrases.
+         On rassemble donc les blocs qui se suivent dans un seul encadré, un
+         paragraphe par bloc. Le premier porte la couleur du module ; les
+         autres sont consommés au passage (`saute`). */
       if (y === 'texte' || y === 'corps' || y === 'texteT') {
-        h += '<div class="ch-texte" data-seq="' + teinte + '">' + colorer(b, corps) + '</div>';
+        var corpsT = '<p>' + colorer(b, corps) + '</p>';
+        for (var j = i + 1; j < blocs.length; j++) {
+          var v = blocs[j], yv = v && (v.y || v.t);
+          if (yv !== 'texte' && yv !== 'corps' && yv !== 'texteT') break;
+          saute[j] = 1;
+          var cv = v.r ? rendreRuns(v.r, cles[j], champs) : esc(v.txt || '');
+          if (cv) corpsT += '<p>' + colorer(v, cv) + '</p>';
+        }
+        h += '<div class="ch-texte" data-seq="' + teinte + '">' + corpsT + '</div>';
         return;
       }
       if (y === 'source') { h += '<p class="ch-source">' + corps + '</p>'; return; }
