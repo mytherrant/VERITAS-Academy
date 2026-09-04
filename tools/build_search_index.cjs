@@ -89,16 +89,27 @@ if (wSeed && wSeed._VRT_ELEARNING_SEED) {
 
 // ── Corrigés en ligne (pages statiques déjà déployées) ──
 const dossierCorriges = path.join(RACINE, 'corriges');
+const titreDe = (chemin, defaut) => {
+  const m = fs.readFileSync(chemin, 'utf8').match(/<title>([^<]+)<\/title>/i);
+  return m ? m[1].split('|')[0].trim() : defaut;
+};
 if (fs.existsSync(dossierCorriges)) {
   for (const niveau of fs.readdirSync(dossierCorriges)) {
     const sousDossier = path.join(dossierCorriges, niveau);
-    if (!fs.statSync(sousDossier).isDirectory()) continue;
+    // Les pages posées À LA RACINE de corriges/ étaient sautées par le
+    // `continue` ci-dessous : le hub, les trois cahiers EST et la page
+    // « tous les corrigés » restaient introuvables par la recherche du site,
+    // alors que les 87 pages de niveau y figuraient toutes.
+    if (!fs.statSync(sousDossier).isDirectory()) {
+      if (!niveau.endsWith('.html')) continue;
+      ajouter('corrige', 'corriges/' + niveau,
+        titreDe(sousDossier, 'Corrigés — ' + niveau), 'Corrigés');
+      continue;
+    }
     for (const f of fs.readdirSync(sousDossier)) {
       if (!f.endsWith('.html')) continue;
-      const html = fs.readFileSync(path.join(sousDossier, f), 'utf8');
-      const m = html.match(/<title>([^<]+)<\/title>/i);
-      const titre = m ? m[1].split('|')[0].trim() : niveau + ' — ' + f;
-      ajouter('corrige', 'corriges/' + niveau + '/' + f, titre, 'Corrigés');
+      ajouter('corrige', 'corriges/' + niveau + '/' + f,
+        titreDe(path.join(sousDossier, f), niveau + ' — ' + f), 'Corrigés');
     }
   }
 }
