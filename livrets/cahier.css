@@ -1,119 +1,891 @@
 /* ════════════════════════════════════════════════════════════════════════════
-   livrets/cahier.css — le cahier où l'élève écrit
+   livrets/cahier.css — LE CAHIER EN COULEURS, COMME LE LIVRE
    © 2024-2026 Jacques Miterand TAKOU (Mythe Errant).
 
-   Charte LWS du site (imposée par le cahier des charges) :
-     bleu institutionnel #16284F · bleu d'action #1B63C4 · orange d'appel #F58220
-     fond #F4F7FB · bordures #E3E9F2 · texte #1B2431 / #54606F
-     Poppins pour l'interface, serif pour les textes littéraires.
-   Rayons 8–16 px, ombres discrètes, JAMAIS de dégradé.
+   ── CE QUE CETTE FEUILLE REPREND, ET À QUI ────────────────────────────────
+   Elle reprend la charte des maquettes d'impression en couleurs
+   (`Livret <classe>.dc.html`, dossier « Mise en page livret activité new ») :
+   les six teintes de module, les neuf couleurs de famille d'exercice, les huit
+   badges de discipline, Baloo 2 pour les titres, Lora pour les textes
+   d'auteur, le papier réglé des espaces d'écriture. Les valeurs sont copiées
+   au chiffre près — c'est la condition pour que l'élève qui a le cahier de
+   papier ouvert à côté du téléphone reconnaisse la même page.
 
-   Le public visé lit sur un téléphone, avec une connexion modeste : aucune
-   librairie, aucune police décorative de plus, tout en CSS.
+   La feuille d'avant appliquait la charte bleu marine du site (#16284F /
+   #1B63C4 / #F58220). Elle était cohérente avec veritas-school.com, et
+   totalement étrangère au livre qu'on vend : mêmes mots, aucun des repères par
+   lesquels on s'y retrouve. Le site garde sa charte ; le cahier reprend la
+   sienne. Ce sont deux objets.
+
+   ── CE QU'ELLE NE REPREND PAS, ET POURQUOI ────────────────────────────────
+   Rien de ce qui appartient au papier : le corps 13 px, l'interligne 1,16 et
+   les deux colonnes de la maquette A4 sont faits pour une page tenue à
+   trente centimètres, pas pour un téléphone tenu à vingt. Ici : 17 px,
+   interligne 1,72, une seule colonne de 68 signes. Même livre, autre support —
+   « confortable à la lecture » est une contrainte d'écran, pas de maquette.
+
+   ── LE PUBLIC ────────────────────────────────────────────────────────────
+   Il lit sur un téléphone, avec une connexion modeste. Aucune librairie,
+   aucune image : tout est en CSS. Quatre familles de police, chargées en
+   `swap` et non bloquantes — la page se lit avant qu'elles n'arrivent.
    ════════════════════════════════════════════════════════════════════════ */
+
 .ch-hote {
-  --ch-bleu:#16284F; --ch-action:#1B63C4; --ch-orange:#F58220;
-  --ch-fond:#F4F7FB; --ch-ligne:#E3E9F2; --ch-texte:#1B2431; --ch-second:#54606F;
-  font-family:'Poppins',system-ui,-apple-system,'Segoe UI',sans-serif;
-  color:var(--ch-texte); line-height:1.65; max-width:820px; margin:0 auto; padding:8px 0 64px;
+  /* ── Les polices, en jetons ───────────────────────────────────────────────
+     Elles changent d'une collection à l'autre (voir la section 12) : le
+     collège est en Baloo 2 arrondi, le lycée en Nunito, le Bord en Poppins et
+     Garamond. Tout le reste de la feuille passe par ces quatre noms, si bien
+     qu'une collection n'est qu'un échange de jetons — pas une seconde feuille
+     à maintenir en parallèle, qui divergerait au premier correctif. */
+  --f-titre:'Baloo 2', system-ui, sans-serif;      /* les titres            */
+  --f-texte:'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-lettre:'Lora', Georgia, 'Times New Roman', serif;  /* textes d'auteur  */
+  --f-main:'Klee One', 'Segoe Print', cursive;     /* ce que l'élève écrit  */
+
+  /* ── Les six teintes de module, dans l'ordre du livre ──────────────────── */
+  --m1:#c94f7c; --m1f:#fbedf2;      /* rose      */
+  --m2:#2f8f9d; --m2f:#e7f4f5;      /* sarcelle  */
+  --m3:#5a9e3f; --m3f:#eef6e6;      /* vert      */
+  --m4:#d98324; --m4f:#fcf1e2;      /* orange    */
+  --m5:#7b5ea7; --m5f:#f0ebf7;      /* violet    */
+  --m6:#c0453f; --m6f:#fbeae9;      /* brique    */
+
+  /* ── L'encre et le papier ─────────────────────────────────────────────── */
+  --ch-encre:#2b3038; --ch-encre2:#39434d; --ch-gris:#6a7480; --ch-pale:#9aa4ae;
+  --ch-papier:#fbf7ef; --ch-fil:#ece3d2; --ch-blanc:#fff;
+  --ch-or:#d9b44a;
+
+  font-family:var(--f-texte);
+  font-size:17px; line-height:1.72; color:var(--ch-encre);
+  /* 68 signes environ : au-delà, l'œil perd la ligne en revenant à la marge. */
+  max-width:760px; margin:0 auto; padding:8px 0 72px;
+  text-rendering:optimizeLegibility;
 }
 
-/* ── Titres de structure ─────────────────────────────────────────────────── */
-/* Titres CENTRÉS, pastille au-dessus — la mise en page des cahiers imprimés,
-   où l'ouverture d'une séquence ou d'une leçon occupe toute la largeur.
-   Le titre aligné à gauche se confondait avec le premier paragraphe : sur un
-   téléphone, on ne voyait plus où commençait une leçon. */
-.ch-titre{ font-size:17px; font-weight:600; color:var(--ch-bleu);
-  margin:34px 0 14px; padding-bottom:12px; text-align:center;
-  border-bottom:2px solid var(--ch-ligne);
-  display:flex; flex-direction:column; align-items:center; gap:8px; }
-/* La pastille : anneau coloré de la charte LWS — « la couleur qualifie, elle
-   n'inonde pas ». Elle porte la teinte de la séquence, pas le titre entier. */
-.ch-etq{ display:inline-block; font-size:11px; font-weight:600; letter-spacing:.07em;
-  text-transform:uppercase; color:#fff; background:var(--ch-bleu);
-  padding:4px 13px; border-radius:999px; }
-/* Le titre lui-meme, sous la pastille. Il porte sa propre boite pour que le
-   flex ne le colle pas a la pastille quand le texte tient sur une ligne. */
-.ch-titre-t{ display:block; max-width:44ch; }
-.ch-module .ch-etq, .ch-semaine .ch-etq, .ch-sequence .ch-etq{ background:var(--ch-action); }
-.ch-rubrique{ font-weight:600; color:var(--ch-action); margin:24px 0 10px; font-size:15px;
-  text-align:center; }
+/* La couleur du module. Elle est posée par `data-seq` sur chaque bloc, ce qui
+   la rend disponible partout sans dépendre d'un parent commun — le cahier est
+   une liste plate de blocs, il n'y a pas de conteneur « module ». */
+[data-seq="1"]{ --seq:var(--m1); --seqf:var(--m1f); }
+[data-seq="2"]{ --seq:var(--m2); --seqf:var(--m2f); }
+[data-seq="3"]{ --seq:var(--m3); --seqf:var(--m3f); }
+[data-seq="4"]{ --seq:var(--m4); --seqf:var(--m4f); }
+[data-seq="5"]{ --seq:var(--m5); --seqf:var(--m5f); }
+[data-seq="6"]{ --seq:var(--m6); --seqf:var(--m6f); }
 
-/* ── Textes d'auteur ─────────────────────────────────────────────────────── */
-/* Serif, justifié, AVEC césure : sans `hyphens`, une colonne justifiée en
-   français se lézarde de grandes coulées blanches. */
-.ch-texte{ font-family:Georgia,'Times New Roman',serif; font-size:16px;
-  background:#fff; border:1px solid var(--ch-ligne);
-  border-radius:10px; padding:16px 18px; margin:14px 0;
-  text-align:justify; hyphens:auto; -webkit-hyphens:auto; }
-.ch-source{ font-size:13px; color:var(--ch-second); font-style:italic; margin:-6px 0 18px; text-align:right; }
+/* Les neuf familles d'exercice. La couleur qualifie l'activité : on sait au
+   premier coup d'œil si l'on va observer, transformer, relier ou produire —
+   exactement ce que fait la pastille dans le livre. */
+[data-cat="observe"]  { --cat:#2b8ac6; --catf:#e8f4fb; }
+[data-cat="transform"]{ --cat:#e08a1e; --catf:#fbf0d8; }
+[data-cat="qcm"]      { --cat:#57a52c; --catf:#edf6e2; }
+[data-cat="exerce"]   { --cat:#57a52c; --catf:#edf6e2; }
+[data-cat="link"]     { --cat:#8a5cc4; --catf:#f0e9fa; }
+[data-cat="intrus"]   { --cat:#e0562f; --catf:#fbe8e0; }
+[data-cat="oral"]     { --cat:#12988a; --catf:#e2f4f1; }
+[data-cat="write"]    { --cat:#4256b8; --catf:#e9ecfa; }
+[data-cat="game"]     { --cat:#d99e0b; --catf:#fbf1cf; }
+[data-cat="mobilise"] { --cat:#5b6b7a; --catf:#eef1f4; }
+
+/* Les huit disciplines, telles qu'elles sont imprimées sous le titre. */
+[data-disc="gram"]{ --disc:#2b8ac6; } [data-disc="conj"]{ --disc:#8a5cc4; }
+[data-disc="orth"]{ --disc:#e0562f; } [data-disc="voca"]{ --disc:#57a52c; }
+[data-disc="oral"]{ --disc:#12988a; } [data-disc="ecri"]{ --disc:#4256b8; }
+[data-disc="lect"]{ --disc:#d99e0b; } [data-disc="meth"]{ --disc:#5b6b7a; }
+
+.ch-ico{ flex:none; vertical-align:-2px; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   1. LES TÊTES : MODULE, SEMAINE, LEÇON
+   Ce sont les trois repères par lesquels on se situe dans le livre, et ils
+   n'existaient pas à l'écran — une pastille de onze pixels tenait lieu des
+   trois. On les rétablit à leur taille et à leur place.
+   ════════════════════════════════════════════════════════════════════════ */
+/* Les titres sont CENTRÉS — l'ouverture d'un module, d'une semaine ou d'une
+   leçon occupe toute la largeur, comme dans le livre. Un titre aligné à gauche
+   se confondait avec le premier paragraphe : sur un téléphone, on ne voyait
+   plus où commençait une leçon. Le texte, lui, reste justifié. */
+.ch-module{
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  gap:5px; margin:46px 0 20px; padding:18px 20px 20px;
+  border:1.5px solid var(--seq,#2b8ac6); background:var(--seqf,#e8f4fb);
+  border-radius:16px;
+}
+.ch-module-no{
+  width:52px; height:52px; border-radius:14px;
+  background:var(--seq,#2b8ac6); color:#fff;
+  font-family:var(--f-titre); font-weight:800; font-size:27px;
+  display:flex; align-items:center; justify-content:center; line-height:1;
+  box-shadow:0 3px 0 rgba(0,0,0,.09);
+}
+.ch-module-mot{
+  font-family:var(--f-titre); font-weight:800; font-size:12.5px;
+  letter-spacing:.26em; text-transform:uppercase; color:var(--seq,#2b8ac6);
+  line-height:1.4; margin-top:3px;
+}
+/* Le filet sous le mot « Module » : trois pixels de la couleur, comme la
+   maquette. Il tient la composition centrée qui, sans lui, flotte. */
+.ch-module-mot::after{
+  content:''; display:block; width:52px; height:3px; border-radius:2px;
+  background:var(--seq,#2b8ac6); margin:5px auto 0;
+}
+.ch-module-t{
+  font-family:var(--f-titre); font-weight:800; font-size:22px;
+  color:#1f2b38; margin:0; line-height:1.24; text-wrap:balance; max-width:22ch;
+}
+
+.ch-semaine{
+  display:flex; align-items:center; justify-content:center; gap:12px;
+  flex-wrap:wrap; text-align:center;
+  margin:36px 0 14px; padding-bottom:9px;
+  border-bottom:3px solid var(--seq,#2b8ac6);
+}
+.ch-semaine-no{
+  flex:none; background:var(--seq,#2b8ac6); color:#fff;
+  font-family:var(--f-titre); font-weight:700; font-size:13px;
+  padding:4px 15px; border-radius:20px; white-space:nowrap;
+}
+.ch-semaine-t{
+  font-family:var(--f-titre); font-weight:700; font-size:18px;
+  color:#3a4753; line-height:1.25; text-wrap:balance;
+}
+
+.ch-lecon{ margin:32px 0 12px; text-align:center; }
+.ch-lecon-h{
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  flex-wrap:wrap; margin-bottom:6px;
+}
+/* Le badge de discipline. Il était rendu SOUS le titre, en intertitre
+   orphelin ; dans le livre il est au-dessus, et c'est lui qui annonce ce que
+   l'on va travailler. */
+.ch-disc{
+  background:var(--disc,#2b8ac6); color:#fff; font-weight:700; font-size:11px;
+  text-transform:uppercase; letter-spacing:.05em; padding:3px 10px; border-radius:5px;
+}
+.ch-lecon-no{ color:var(--ch-pale); font-weight:700; font-size:13px; }
+.ch-lecon-t{
+  font-family:var(--f-titre); font-weight:800; font-size:23px;
+  color:#1f2b38; margin:0 auto; line-height:1.24; text-wrap:balance; max-width:26ch;
+}
+
+/* La compétence visée : ce que l'élève saura faire à la fin. En serif, comme
+   dans le livre — c'est une phrase de programme, pas un titre. */
+.ch-competence{
+  margin:12px 0 18px; padding:12px 18px 14px; background:#fff; text-align:center;
+  border:1px solid #ece3d2; border-top:3px solid var(--seq,#2b8ac6);
+  border-radius:4px 4px 12px 12px;
+  box-shadow:0 1px 3px rgba(43,48,56,.05);
+}
+.ch-competence-l{
+  display:block; font-family:var(--f-titre); font-weight:700;
+  font-size:10.5px; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--seq,#2b8ac6); margin-bottom:3px;
+}
+.ch-competence p{
+  margin:0 auto; max-width:60ch; font-family:var(--f-lettre); font-size:15.5px;
+  line-height:1.6; color:#3a4753;
+}
+
+.ch-objectif{
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  margin:10px auto 12px; max-width:62ch; text-align:center;
+  font-style:italic; color:#68727c; font-size:15px;
+}
+.ch-objectif-l{
+  display:inline-flex; align-items:center; gap:5px;
+  background:#fff3d6; color:#b1810c; font-style:normal; font-weight:700;
+  font-size:10.5px; text-transform:uppercase; letter-spacing:.04em;
+  padding:3px 10px 3px 8px; border-radius:5px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   2. LA RUBRIQUE — le fil qu'on suit des yeux
+   « Je repère », « Je transforme », « QCM »… Sa couleur se retrouve sur le
+   rond du numéro de chaque exercice qui la suit : c'est ainsi qu'on voit d'un
+   coup où commence et où finit un groupe d'exercices.
+   ════════════════════════════════════════════════════════════════════════ */
+/* Centrée comme les titres : `width:fit-content` + marges automatiques, parce
+   qu'un `inline-flex` ne se centre pas tout seul et qu'un `text-align:center`
+   sur le parent étirerait la pastille sur toute la largeur. */
+.ch-rubrique{
+  display:flex; width:fit-content; max-width:100%;
+  align-items:center; justify-content:center; gap:7px;
+  margin:28px auto 10px;
+  background:var(--cat,#2b8ac6); color:#fff;
+  font-family:var(--f-titre); font-weight:700; font-size:13.5px;
+  padding:5px 16px 5px 13px; border-radius:20px; line-height:1.35;
+  text-align:center;
+}
+/* Un libellé qui n'est pas une famille (le titre d'un texte, « Adjectif ou
+   complément du nom ? ») reste un intertitre : lui coller une pastille vive au
+   hasard ferait un cahier bariolé, pas un cahier organisé. */
+.ch-inter{
+  margin:26px auto 10px; max-width:44ch; text-align:center;
+  font-family:var(--f-titre); font-weight:800; font-size:17px;
+  color:var(--seq,#1f5f88); line-height:1.3;
+}
+/* Un filet court au-dessus, centré : à gauche d'une ligne centrée, il pendait
+   dans le vide. C'est le trait qui tient le titre, pas une barre de marge. */
+.ch-inter::before{
+  content:''; display:block; width:34px; height:3px; border-radius:2px;
+  background:var(--seq,#2b8ac6); margin:0 auto 7px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   3. LES TEXTES
+   ════════════════════════════════════════════════════════════════════════ */
+/* Le corpus : la matière que l'élève va manipuler. Encadré ambre dans le
+   livre — il se confondait ici avec un texte ordinaire. */
+.ch-corpus{
+  background:#fff6e6; border:2px solid #f0c980; border-radius:14px;
+  padding:12px 16px 14px; margin:16px 0;
+}
+.ch-corpus-l{
+  display:inline-flex; align-items:center; gap:6px;
+  background:#e6942a; color:#fff;
+  font-family:var(--f-titre); font-weight:700; font-size:11.5px;
+  text-transform:uppercase; letter-spacing:.05em;
+  padding:3px 12px; border-radius:14px; margin-bottom:7px;
+}
+.ch-corpus-c{
+  font-family:var(--f-lettre); font-size:16px; line-height:1.75;
+  color:#5c4a24; text-align:justify; hyphens:auto; -webkit-hyphens:auto;
+}
+
+/* Le texte d'auteur : papier crème, serif, justifié AVEC césure — sans
+   `hyphens`, une colonne justifiée en français se lézarde de coulées
+   blanches. C'est le bloc qu'on lit le plus longtemps : c'est lui qui décide
+   si le cahier est confortable ou non. */
+.ch-texte{
+  font-family:var(--f-lettre); font-size:16.5px;
+  line-height:1.78; color:#39434d;
+  background:var(--ch-papier); border:1px solid var(--ch-fil);
+  border-radius:12px; padding:16px 20px; margin:16px 0;
+  text-align:justify; hyphens:auto; -webkit-hyphens:auto; text-wrap:pretty;
+}
+.ch-texte p{ margin:0 0 .75em; }
+.ch-texte p:last-child{ margin-bottom:0; }
+/* Une réplique de dialogue ne se justifie pas : la ligne est trop courte. */
+.ch-texte .ch-dd, .ch-texte .ch-pc{ text-align:left; }
+
+.ch-source{
+  font-family:var(--f-lettre); font-style:italic; font-size:13.5px;
+  color:var(--ch-gris); text-align:right;
+  margin:-8px 0 18px; padding-top:5px; border-top:1px dotted #d7d0c2;
+}
+
+/* Les habillages de mots que porte la source (`runs`) : notion mise en
+   évidence, nom de personnage, didascalie, entrée de lexique. Les couleurs
+   sont celles du livre, où l'on « rend visible ce que l'on apprend ». */
 .ch-p{ margin:10px 0; }
-.ch-kw{ font-weight:600; color:var(--ch-bleu); }
-.ch-pc{ font-variant:small-caps; font-weight:600; }
-.ch-dd{ font-style:italic; color:var(--ch-second); }
-.ch-lx{ border-bottom:1px dotted var(--ch-action); }
+.ch-kw{ font-weight:700; color:#c0453f; }
+.ch-pc{ font-variant:small-caps; font-weight:700; color:#8a5cc4; }
+.ch-dd{ font-style:italic; color:var(--ch-gris); }
+.ch-lx{ background:#fff2c2; border-radius:3px; padding:0 3px; font-weight:600; color:#7a5a12; }
 
-/* ── L'exercice ──────────────────────────────────────────────────────────── */
-.ch-exo{ background:#fff; border:1px solid var(--ch-ligne); border-radius:12px;
-  padding:14px 16px; margin:14px 0; }
-.ch-consigne{ font-size:15px; margin-bottom:10px; }
+/* ── LA MANIPULATION DES MOTS ─────────────────────────────────────────────
+   « Les corpus mettent en évidence, par la couleur, les notions étudiées,
+   afin de rendre visible ce que l'on apprend. » Six marques, six couleurs,
+   celles de la maquette imprimée (`markStyle`) :
+     mn  la notion de la leçon (connecteurs, négations, types de phrase)
+     mv  le mot qui porte une valeur (verbe de parole, indice de temps)
+     mp  le nom propre — qui parle, où l'on est
+     mu  le mot souligné d'une formule (Monsieur, Madame…)
+     mk  la formule consacrée, surlignée comme au fluo
+     mq  ce qui est cité entre guillemets
+   Ces marques vivent DANS le texte : elles ne doivent ni le trouer ni le
+   ralentir à la lecture — d'où le gras seul, et un fond au jaune très pâle. */
+.ch-mn{ font-weight:700; color:#c0453f; }
+.ch-mv{ font-weight:700; color:#2b8ac6; }
+.ch-mp{ font-weight:700; color:#8a5cc4; }
+.ch-mu{ font-weight:600; color:#3f7a2c;
+        text-decoration:underline; text-decoration-color:#57a52c;
+        text-decoration-thickness:2px; text-underline-offset:2px; }
+.ch-mk{ background:#fff2c2; border-radius:3px; padding:0 3px;
+        font-weight:700; color:#7a5a12; }
+.ch-mq{ font-weight:700; color:#1f5f88; }
 
-/* ── Le champ de réponse ─────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════════════════════
+   4. LES ENCADRÉS DE LA LEÇON
+   « Je retiens » est UN encadré à onglet dans le livre. À l'écran, ses deux
+   cents morceaux tombaient en autant de petites boîtes grises indépendantes :
+   on ne voyait plus où la règle commençait ni où elle finissait. Le moteur les
+   rassemble maintenant ; voici la boîte.
+   ════════════════════════════════════════════════════════════════════════ */
+.ch-carte{
+  --cc:#bfe0f2; --ccf:#f5fbfe; --ccm:#2b8ac6;
+  border:2px solid var(--cc); background:var(--ccf); border-radius:16px;
+  margin:18px 0 20px; padding-bottom:6px;
+}
+.ch-carte[data-carte="outil"]  { --cc:#b6ddd8; --ccf:#f2fbf9; --ccm:#0e6b63; }
+.ch-carte[data-carte="astuce"] { --cc:#f0d49a; --ccf:#fffaef; --ccm:#c47a1a; }
+.ch-carte[data-carte="lexique"]{ --cc:#cfe0f0; --ccf:#f6fafe; --ccm:#3f6d99; }
+.ch-carte[data-carte="bac"]    { --cc:#e8c3c1; --ccf:#fdf6f5; --ccm:#a34a44; }
+.ch-carte[data-carte="encadre"]{ --cc:#ddd6c7; --ccf:#fdfbf6; --ccm:#8a6d2e; }
+
+.ch-carte-t{
+  display:inline-flex; align-items:center; gap:7px;
+  background:var(--ccm); color:#fff;
+  font-family:var(--f-titre); font-weight:700; font-size:13.5px;
+  padding:6px 16px; border-radius:13px 13px 13px 0;
+  margin:-2px 0 0 -2px; max-width:calc(100% + 4px); line-height:1.35;
+}
+.ch-carte-c{ padding:8px 18px 10px; }
+/* La règle, à la puce carrée du livre. */
+.ch-regle{
+  position:relative; margin:9px 0; padding-left:19px; color:#39434d;
+  text-align:justify; hyphens:auto; -webkit-hyphens:auto; text-wrap:pretty;
+}
+.ch-regle::before{
+  content:''; position:absolute; left:0; top:.66em;
+  width:9px; height:9px; border-radius:2px; background:var(--ccm);
+}
+
+/* L'astuce. Dans le livre c'est une carte écrite à la main : le bloc que les
+   élèves lisent en premier. Klee One plutôt que Patrick Hand (la police du
+   papier) — elle est DÉJÀ chargée pour les champs de saisie, et une police de
+   plus, c'est une police de plus à télécharger sur une ligne à 2 G. */
+.ch-astuce{
+  position:relative; border:2px solid #c47a1a; background:#fff;
+  border-radius:14px; padding:16px 16px 12px 20px; margin:18px 0;
+}
+.ch-astuce-l{
+  position:absolute; top:0; left:18px; transform:translateY(-50%);
+  display:inline-flex; align-items:center; gap:6px;
+  background:#fff; color:#c47a1a; padding:0 8px;
+  font-family:var(--f-main); font-weight:600; font-size:16px;
+}
+.ch-astuce p{
+  margin:0; font-family:var(--f-main); font-size:16px;
+  line-height:1.66; color:#5a4a2e; text-align:justify;
+}
+
+.ch-exemple{
+  background:#eef7e6; border-radius:10px; padding:8px 14px; margin:9px 0;
+}
+.ch-exemple-l{
+  display:inline-flex; align-items:center; gap:5px;
+  font-family:var(--f-titre); font-weight:700; font-size:11px;
+  text-transform:uppercase; letter-spacing:.04em; color:#4a8a24; margin-right:6px;
+}
+.ch-exemple p{ display:inline; margin:0; color:#3a4a2e; font-style:italic; }
+
+/* Les critères de réussite : ce à quoi l'élève verra qu'il a réussi. C'est un
+   contrat, il est vert, et il se lit AVANT de se lancer. */
+.ch-criteres{
+  background:#f3faec; border:1.5px dashed #8cc060; border-radius:12px;
+  padding:11px 15px; margin:14px 0;
+}
+.ch-criteres-l{
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--f-titre); font-weight:700; font-size:11.5px;
+  text-transform:uppercase; letter-spacing:.05em; color:#4a8a24; margin-bottom:3px;
+}
+.ch-criteres p{ margin:0; color:#3f5230; font-size:15.5px; }
+
+.ch-def{
+  background:#eef4fb; border:1px solid #cfe0f0; border-radius:10px;
+  padding:9px 14px; margin:10px 0; font-size:15.5px; color:#42505c;
+}
+
+/* La consigne qui annonce le groupe d'exercices : italique, sans ligne à
+   remplir — c'est une annonce, pas une question. */
+.ch-lead{
+  font-style:italic; color:#4a5560; margin:14px 0 6px; font-size:15.5px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   5. L'EXERCICE
+   ════════════════════════════════════════════════════════════════════════ */
+.ch-exo{
+  background:#fff; border:1px solid #e8e2d6; border-radius:14px;
+  padding:14px 16px; margin:12px 0;
+  box-shadow:0 1px 3px rgba(43,48,56,.045);
+}
+.ch-exo-h{ display:flex; gap:11px; align-items:flex-start; }
+/* Le numéro. C'est par lui que le professeur désigne un exercice — « faites
+   le 4 » — et c'est le seul point commun visible entre l'écran et la page de
+   papier. Il était absent. */
+.ch-exo-no{
+  flex:none; width:27px; height:27px; border-radius:50%;
+  background:var(--cat,#5b6b7a); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--f-titre); font-weight:700; font-size:13.5px;
+  line-height:1; margin-top:2px;
+}
+.ch-consigne{
+  flex:1; min-width:0; font-size:16px;
+  text-align:justify; hyphens:auto; -webkit-hyphens:auto; text-wrap:pretty;
+}
+/* L'étiquette de nature, au lycée : « Repérage », « Analyse », « Production ».
+   Elle remplace la pastille de rubrique que le collège pose au-dessus du
+   groupe — même code de couleur, autre emplacement, parce que le cahier de
+   lycée enchaîne des exercices de natures différentes sans les regrouper. */
+.ch-exo-tag{
+  display:inline-block; margin-right:8px; padding:2px 9px; border-radius:6px;
+  background:var(--catf,#eef1f4); color:var(--cat,#5b6b7a);
+  font-family:var(--f-titre); font-weight:700; font-size:11.5px;
+  text-transform:uppercase; letter-spacing:.04em; vertical-align:1.5px;
+  white-space:nowrap;
+}
+/* Ce qui suit la consigne s'aligne sous elle, jamais sous le numéro : la
+   colonne de lecture reste droite. */
+.ch-exo > .ch-champ, .ch-exo > .ch-qcm, .ch-exo > .ch-rel,
+.ch-exo > .ch-corr, .ch-exo > .ch-annot{ margin-left:38px; }
+.ch-exo[data-cat]:focus-within{ border-color:var(--cat); }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   6. LÀ OÙ L'ÉLÈVE ÉCRIT
+   ════════════════════════════════════════════════════════════════════════ */
 /* Ligne d'écolier plutôt que boîte de formulaire : on écrit dans un cahier.
-   La hauteur s'ajuste à la frappe (géré en JS) — un élève ne doit jamais
-   avoir à faire défiler l'intérieur d'un champ pour relire sa phrase. */
-.ch-champ{ display:block; margin:6px 0 2px; }
+   La hauteur s'ajuste à la frappe (géré en JS) — un élève ne doit jamais avoir
+   à faire défiler l'intérieur d'un champ pour relire sa phrase. */
+.ch-champ{ display:block; margin:8px 0 2px; }
 .ch-saisie{
   display:block; width:100%; box-sizing:border-box; resize:none; overflow:hidden;
-  font-family:'Klee One','Segoe Print',cursive,sans-serif; font-size:15.5px; line-height:1.9;
+  font-family:var(--f-main);
+  font-size:16px; line-height:1.95;
   color:#1c3d6e; background:transparent; padding:2px 6px; margin:0;
-  border:none; border-bottom:1.5px dashed #b9c6d8; border-radius:0; outline:none;
+  border:none; border-bottom:1.5px dashed #b8c2cd; border-radius:0; outline:none;
   min-height:34px;
 }
-.ch-saisie:focus{ border-bottom-color:var(--ch-action); background:#fbfdff; }
-.ch-saisie:read-only{ color:var(--ch-second); border-bottom-style:solid; }
+.ch-saisie:focus{ border-bottom-color:var(--cat,#2b8ac6); background:#fffdf7; }
+.ch-saisie:read-only{ color:var(--ch-gris); border-bottom-style:solid; }
 .ch-champ-large .ch-saisie{ min-height:76px; }
 
-/* ── L'espace d'écriture réglé ───────────────────────────────────────────── */
-/* `{y:'lines', n:12}` : douze lignes dans le cahier imprimé, douze lignes ici.
-   L'attribut `rows` fait la hauteur — on ne la fixe donc pas en CSS, sinon un
+/* ── L'ESPACE D'ÉCRITURE RÉGLÉ ────────────────────────────────────────────
+   `{y:'lines', n:12}` : douze lignes dans le cahier imprimé, douze lignes ici.
+   Le papier est celui du livre — réglure Séyès, ses carreaux violets, sa fine
+   ligne bleue et sa marge rouge — refaite en trois dégradés répétés, sans une
+   seule image. C'est le repère le plus immédiat de tous : on voit qu'on est
+   dans un cahier avant d'avoir lu un mot.
+
+   L'interligne du texte saisi (28 px) est CELUI de la réglure : l'écriture se
+   pose sur les lignes au lieu de flotter entre elles. Changer l'un sans
+   l'autre décale tout.
+
+   La hauteur vient de l'attribut `rows` — on ne la fixe donc pas ici, sinon un
    espace de deux lignes et un de quinze auraient la même taille et l'élève
    perdrait l'indication de longueur que l'auteur lui donnait. */
-.ch-champ-lignes{ margin:10px 0 6px; }
+.ch-champ-lignes{ margin:12px 0 8px; }
 .ch-champ-lignes .ch-saisie{
-  border:1px dashed #c3d0e0; border-radius:8px; padding:8px 10px;
-  background:#fcfdfe; overflow:auto;
+  --regle:28px;
+  border:1px solid #e3ddce; border-radius:8px;
+  padding:9px 14px 11px 30px; line-height:var(--regle); overflow:auto;
+  background-color:#fffdf7;
+  background-image:
+    repeating-linear-gradient(180deg,#cbdcf0 0,#cbdcf0 1px,transparent 1px,transparent 7px),
+    repeating-linear-gradient(180deg,#b7a1dd 0,#b7a1dd 1px,transparent 1px,transparent var(--regle)),
+    repeating-linear-gradient(90deg,#e5dbf3 0,#e5dbf3 1px,transparent 1px,transparent var(--regle)),
+    linear-gradient(90deg,transparent 21px,#e0736f 21px,#e0736f 22.5px,transparent 22.5px);
+  background-position:0 9px, 0 9px, 0 0, 0 0;
+  background-repeat:repeat, repeat, repeat, no-repeat;
 }
-.ch-champ-lignes .ch-saisie:focus{ border-color:var(--ch-action); background:#fbfdff; }
+.ch-champ-lignes .ch-saisie:focus{ border-color:var(--cat,#2b8ac6); }
 
 /* ── QCM ─────────────────────────────────────────────────────────────────── */
 /* Cible tactile de 44 px : ces cahiers se remplissent au téléphone, souvent à
    une main dans un taxi. Une proposition qu'on rate au doigt fait cocher la
    voisine, et l'élève ne s'en aperçoit qu'à la correction. */
-.ch-qcm{ display:flex; flex-direction:column; gap:6px; margin:8px 0 2px; }
-.ch-opt{ display:flex; align-items:center; gap:10px; min-height:44px;
-  padding:6px 12px; border:1px solid var(--ch-ligne); border-radius:9px;
-  background:#fff; font-size:14.5px; cursor:pointer; }
-.ch-opt:hover{ border-color:var(--ch-action); }
-.ch-opt input{ width:18px; height:18px; accent-color:var(--ch-action); flex:none; margin:0; }
-.ch-opt:has(input:checked){ border-color:var(--ch-action); background:#f4f9ff; }
+.ch-qcm{ display:flex; flex-direction:column; gap:6px; margin:10px 0 2px; }
+.ch-opt{
+  display:flex; align-items:center; gap:11px; min-height:44px;
+  padding:6px 13px; border:1.5px solid #e0dacb; border-radius:10px;
+  background:#fff; font-size:15.5px; cursor:pointer;
+}
+.ch-opt:hover{ border-color:var(--cat,#57a52c); }
+.ch-opt input{ width:18px; height:18px; accent-color:var(--cat,#57a52c); flex:none; margin:0; }
+.ch-opt:has(input:checked){ border-color:var(--cat,#57a52c); background:var(--catf,#edf6e2); }
 
 /* ── Appariement ─────────────────────────────────────────────────────────── */
 /* On ne trace pas de trait au doigt : chaque entrée de gauche choisit la
    sienne dans une liste. Le trait était joli sur papier, impraticable ici. */
-.ch-rel{ display:flex; flex-direction:column; gap:8px; margin:8px 0 2px; }
-.ch-rel-l{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:14.5px; }
+.ch-rel{ display:flex; flex-direction:column; gap:9px; margin:10px 0 2px; }
+.ch-rel-l{ display:flex; align-items:center; gap:11px; flex-wrap:wrap; font-size:15.5px; }
 .ch-rel-l > span{ flex:1 1 140px; }
-.ch-rel-s{ flex:1 1 160px; min-height:44px; font:inherit; font-size:14px;
-  padding:6px 10px; border:1px solid var(--ch-ligne); border-radius:9px;
-  background:#fff; color:var(--ch-texte); }
-.ch-rel-s:focus{ outline:none; border-color:var(--ch-action); }
+.ch-rel-s{
+  flex:1 1 160px; min-height:44px; font:inherit; font-size:15px;
+  padding:6px 11px; border:1.5px solid #e0dacb; border-radius:10px;
+  background:#fff; color:var(--ch-encre);
+}
+.ch-rel-s:focus{ outline:none; border-color:var(--cat,#8a5cc4); }
 
-/* ── Dissuasion de copie ─────────────────────────────────────────────────── */
-/* La sélection est coupée sur le CONTENU, jamais dans les champs : l'élève
+/* ════════════════════════════════════════════════════════════════════════════
+   6 bis. LES JEUX : MOTS CROISÉS ET MOTS MÊLÉS
+   ═══════════════════════════════════════════
+
+   « Des jeux (mots croisés, mots mêlés) invitent l'élève à réinvestir ses
+   acquis de façon vivante » — avant-propos du livret imprimé. Il y en a 86
+   dans les quatre cahiers du 1er cycle, et AUCUN n'arrivait à l'écran : le
+   convertisseur ne lisait pas leurs données, la consigne s'affichait seule
+   au-dessus d'un espace vide. On vendait un jeu qui n'était pas là.
+
+   Ils sont maintenant rendus, et REMPLISSABLES : une case = une lettre qu'on
+   tape et qui s'enregistre ; une lettre de mots mêlés se marque au doigt.
+   Ce sont des réponses comme les autres — gardées hors ligne, poussées au
+   serveur, visibles par le professeur.
+   ════════════════════════════════════════════════════════════════════════ */
+.ch-jeu{
+  background:#fffdf7; border:2px solid var(--seq,#d99e0b); border-radius:14px;
+  padding:14px 16px 16px; margin:18px 0;
+}
+.ch-jeu-l{
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--seq,#d99e0b); color:#fff;
+  font-family:var(--f-titre); font-weight:700; font-size:11.5px;
+  text-transform:uppercase; letter-spacing:.05em;
+  padding:3px 13px; border-radius:14px; margin-bottom:10px;
+}
+/* Une grille large doit défiler DANS sa boîte, jamais pousser la page de côté
+   sur un téléphone — c'est la règle des tableaux, et elle vaut ici d'autant
+   plus qu'une grille de 13 colonnes ne tient pas dans 360 px. */
+.ch-grille-tw{ overflow-x:auto; padding-bottom:4px; }
+
+.ch-grille{ border-collapse:collapse; table-layout:fixed; margin:0 auto; }
+.ch-grille td{ padding:0; }
+.ch-case{
+  position:relative; width:34px; height:34px; min-width:34px;
+  border:1.5px solid #8a95a3; background:#fff;
+}
+.ch-case-noire{
+  width:34px; height:34px; min-width:34px;
+  background:rgba(70,86,184,.08); border:1px solid rgba(70,86,184,.14);
+}
+/* Le numéro de la définition, dans le coin — comme sur la grille imprimée. */
+.ch-case i{
+  position:absolute; top:0; left:2px; font-style:normal;
+  font-size:9px; line-height:10px; font-weight:700; color:#7a5cb0;
+}
+.ch-case-i{
+  width:100%; height:100%; box-sizing:border-box; border:none; outline:none;
+  background:transparent; text-align:center; text-transform:uppercase;
+  font-family:var(--f-main); font-size:17px; font-weight:600; color:#1c3d6e;
+  padding:4px 0 0;
+}
+.ch-case-i:focus{ background:#fff6e0; }
+
+.ch-defs{ margin-top:12px; }
+.ch-defs-t{
+  display:block; font-family:var(--f-titre); font-weight:700; font-size:11.5px;
+  text-transform:uppercase; letter-spacing:.05em; color:var(--seq,#8a5cc4);
+  margin-bottom:3px;
+}
+.ch-defs p{ margin:3px 0; font-size:15px; color:#3a4753; }
+.ch-defs b{ color:var(--seq,#8a5cc4); }
+
+/* ── Mots mêlés ─────────────────────────────────────────────────────────── */
+.ch-meles{ border-collapse:collapse; table-layout:fixed; margin:0 auto;
+  border:2px solid #b9c1c9; }
+.ch-meles td{ padding:0; }
+/* Chaque lettre est un BOUTON : sur papier on entoure au crayon, ici on
+   touche. 30 px de côté — en dessous, on marque la lettre d'à côté et l'on
+   croit que la grille est fausse. */
+.ch-lettre{
+  width:30px; height:30px; min-width:30px; padding:0; cursor:pointer;
+  border:1px solid #d9dee4; background:#fff;
+  font-family:var(--f-texte); font-size:14.5px; font-weight:600;
+  color:#3a4753; letter-spacing:.02em;
+}
+.ch-lettre:hover{ background:#fff6e0; }
+.ch-lettre[aria-pressed="true"]{
+  background:#d99e0b; border-color:#b1810c; color:#fff; font-weight:700;
+}
+.ch-lettre:disabled{ cursor:default; }
+
+.ch-mots{ margin-top:12px; }
+.ch-mots-t{
+  display:block; font-family:var(--f-titre); font-weight:700; font-size:11.5px;
+  text-transform:uppercase; letter-spacing:.05em; color:#b1810c; margin-bottom:6px;
+}
+.ch-mots-l{ display:flex; flex-wrap:wrap; gap:7px; }
+/* Un mot trouvé se barre, comme on le raye sur le cahier de papier. */
+.ch-mot{
+  background:#fbf1cf; border:1px solid #ecd68f; border-radius:13px;
+  padding:4px 13px; min-height:32px; cursor:pointer;
+  font-family:var(--f-texte); font-size:13.5px; font-weight:700;
+  letter-spacing:.06em; color:#8a6a12;
+}
+.ch-mot:hover{ border-color:#d99e0b; }
+.ch-mot[aria-pressed="true"]{
+  background:#eef7e6; border-color:#8cc060; color:#4a8a24;
+  text-decoration:line-through; text-decoration-thickness:2px;
+}
+.ch-mot:disabled{ cursor:default; }
+
+/* ── LA CARTE MENTALE ────────────────────────────────────────────────────
+   Douze cartes mentales et le schéma de Jakobson existaient dans les sources
+   sans être rattachés à un seul ouvrage vendu. Ils sont maintenant sous le
+   titre de la leçon qui enseigne la notion. Fond blanc, pleine largeur : un
+   schéma vectoriel se lit d'un coup d'œil ou pas du tout. */
+.ch-mentale{
+  margin:18px 0; padding:12px 14px 14px; text-align:center;
+  background:#fff; border:1.5px solid var(--seq,#2b8ac6); border-radius:14px;
+}
+.ch-mentale-l{
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--seq,#2b8ac6); color:#fff;
+  font-family:var(--f-titre); font-weight:700; font-size:11px;
+  text-transform:uppercase; letter-spacing:.05em;
+  padding:3px 12px; border-radius:14px; margin-bottom:10px;
+}
+.ch-mentale-b{
+  display:block; width:100%; padding:0; border:none; background:none;
+  cursor:zoom-in; line-height:0;
+}
+.ch-mentale-b img{ width:100%; height:auto; border-radius:8px; }
+.ch-mentale figcaption{
+  margin-top:9px; font-size:13.5px; font-style:italic; color:var(--ch-gris);
+}
+/* Ouverte : elle prend l'écran. `position:fixed` plutôt qu'une fenêtre
+   modale — rien à construire, rien à refermer si le JavaScript tombe. */
+.ch-mentale-grand{
+  position:fixed; inset:0; z-index:80; margin:0; border:none; border-radius:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:10px; padding:14px; background:rgba(31,43,56,.94);
+}
+.ch-mentale-grand .ch-mentale-l{ margin:0; }
+.ch-mentale-grand .ch-mentale-b{
+  cursor:zoom-out; max-width:100%; max-height:78vh;
+  overflow:auto; -webkit-overflow-scrolling:touch;
+}
+/* Largeur EXPLICITE, et non `width:auto` : ces SVG n'ont qu'un `viewBox`, donc
+   aucune taille intrinsèque, et `auto` retombait sur les 300 px par défaut du
+   navigateur — la carte « agrandie » faisait la même taille qu'avant. Les
+   attributs `width`/`height` de la balise donnent le rapport, `height:auto`
+   fait le reste. */
+.ch-mentale-grand .ch-mentale-b img{
+  width:min(92vw, 1080px); height:auto; max-width:none; max-height:78vh;
+  background:#fff; padding:10px; border-radius:8px;
+}
+.ch-mentale-grand figcaption{ color:#e7ecf2; margin:0; }
+
+/* Le sujet de production : le devoir de la séquence, pas un exercice de dix
+   secondes. Encadré rose à filet, comme dans le livre. */
+.ch-sujet{
+  background:#fdeef3; border-left:5px solid #c94f7c; border-radius:0 12px 12px 0;
+  padding:12px 16px; margin:16px 0 8px;
+}
+.ch-sujet-l{
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--f-titre); font-weight:700; font-size:11.5px;
+  text-transform:uppercase; letter-spacing:.05em; color:#b13d68; margin-bottom:3px;
+}
+.ch-sujet p{ margin:0; color:#5c3947; text-align:justify;
+  hyphens:auto; -webkit-hyphens:auto; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   7. LA CORRECTION ET LE MOT DU PROFESSEUR
+   ════════════════════════════════════════════════════════════════════════ */
+/* Le bouton est discret : il ne doit pas attirer l'œil AVANT qu'on ait
+   travaillé. Une fois ouverte, la correction prend le vert du juste — jamais
+   le rouge de la faute : l'élève vient de chercher, il n'a rien commis. */
+.ch-corr{ margin-top:12px; }
+.ch-corr-btn{
+  font:inherit; font-size:13.5px; font-weight:600; color:#4a8a24;
+  background:#fff; border:1.5px solid #cfe3bd; border-radius:10px;
+  padding:8px 14px; min-height:38px; cursor:pointer;
+}
+.ch-corr-btn:hover:not(:disabled){ border-color:#8cc060; background:#f3faec; }
+.ch-corr-btn:disabled{ color:var(--ch-gris); border-color:#e0dacb; cursor:default; }
+.ch-corr-msg{ display:inline-block; margin-left:10px; font-size:13px; color:var(--ch-gris); }
+.ch-corr-ouvert{
+  margin-top:12px; padding:12px 15px; border-radius:12px;
+  background:#eef7e6; border:1.5px solid #cfe3bd;
+}
+.ch-corr-titre{
+  display:block; font-family:var(--f-titre); font-weight:700;
+  font-size:11px; letter-spacing:.05em; text-transform:uppercase;
+  color:#4a8a24; margin-bottom:4px;
+}
+.ch-corr-ouvert p{ margin:0; color:#33471f; font-size:15.5px; white-space:pre-wrap; }
+
+/* Le corrigé livré avec le cahier (les Bords) : replié, sans être caché. */
+.ch-corrige{
+  border:1.5px solid #e0dacb; border-radius:12px; background:#fff;
+  padding:0 15px; margin:12px 0 20px;
+}
+.ch-corrige summary{
+  cursor:pointer; padding:12px 0; font-family:var(--f-titre);
+  font-weight:700; color:#4a8a24; font-size:14px; list-style:none;
+}
+.ch-corrige summary::-webkit-details-marker{ display:none; }
+.ch-corrige summary::before{ content:'▸ '; }
+.ch-corrige[open] summary::before{ content:'▾ '; }
+.ch-corrige > div{ padding-bottom:15px; font-size:15.5px; color:#39434d; }
+
+/* Un post-it dans la marge : visible sans écraser la réponse de l'élève. */
+.ch-annot{ }
+.ch-annot-pleine{
+  margin-top:12px; padding:11px 14px; border-radius:12px;
+  background:#fff7ec; border:1.5px solid #f0cf9a; font-size:15px;
+}
+.ch-annot-titre{
+  display:block; font-family:var(--f-titre); font-weight:700;
+  font-size:11px; letter-spacing:.05em; text-transform:uppercase;
+  color:#b1740c; margin-bottom:4px;
+}
+.ch-annot-pleine p{ margin:0; color:#7a4a16; }
+.ch-note{ float:right; font-family:var(--f-titre);
+  font-weight:800; color:#b1740c; font-size:16px; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   8. TABLEAUX, IMAGES, VOYANT
+   ════════════════════════════════════════════════════════════════════════ */
+/* `overflow-x` sur le conteneur : un tableau large doit défiler DANS sa boîte,
+   jamais pousser la page entière de côté sur un téléphone. */
+.ch-tw{ overflow-x:auto; margin:16px 0; }
+.ch-table{ border-collapse:collapse; width:100%; font-size:15px; background:#fff; }
+.ch-table td{ border:1px solid #ded8c9; padding:9px 11px; vertical-align:top; }
+.ch-table tr:first-child td{ background:#f7f3ea; font-weight:600; }
+
+.ch-figure{ margin:16px 0; text-align:center; }
+.ch-figure img{ max-width:100%; height:auto; border-radius:12px; }
+.ch-figure figcaption{
+  margin-top:7px; font-size:13.5px; font-style:italic; color:var(--ch-gris);
+}
+/* Le document dont le fichier n'est pas encore déposé : on montre ce qu'il
+   EST, plutôt qu'une icône d'image cassée. La consigne qui y renvoie garde
+   ainsi un sens. Filet en pointillés : c'est visiblement un emplacement. */
+.ch-figure-absente{
+  border:1.5px dashed #d9cfb8; border-radius:12px; background:#fdfbf6;
+  padding:12px 16px; text-align:left;
+}
+.ch-figure-absente figcaption{
+  margin:0; display:flex; gap:8px; align-items:baseline;
+  font-style:italic; font-size:14.5px; color:#7a6a4e;
+}
+
+/* Il dit la vérité, y compris quand la ligne est coupée. Un cahier qui ne dit
+   rien laisse croire que le travail est perdu — ou pire, qu'il est sauvé. */
+.ch-voyant{
+  position:fixed; left:50%; transform:translateX(-50%); bottom:14px; z-index:60;
+  font-family:var(--f-texte); font-size:13.5px; font-weight:600;
+  padding:8px 16px; border-radius:999px;
+  box-shadow:0 3px 12px rgba(43,48,56,.16); transition:opacity .2s;
+}
+.ch-voyant:empty{ opacity:0; }
+.ch-ok     { background:#eef7e6; color:#3f7a2c; border:1px solid #cfe3bd; }
+.ch-encours{ background:#e8f4fb; color:#1f5f88; border:1px solid #bfe0f2; }
+.ch-attente{ background:#fff7ec; color:#8a5a16; border:1px solid #f0cf9a; }
+.ch-alerte { background:#fbe8e0; color:#a3392a; border:1px solid #eec0ad; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   8 bis. LES TROIS COLLECTIONS
+   ═══════════════════════════
+
+   Les quinze ouvrages ne sont pas une série : ce sont trois collections, et
+   chacune a été maquettée pour son public. Les habiller pareil aurait effacé
+   le travail d'édition, et donné à l'élève de Terminale la couverture de son
+   petit frère de 6ᵉ. Ce qui précède est la collection COLLÈGE (elle est le
+   défaut) ; voici les deux autres.
+
+   Chaque thème ÉCHANGE DES JETONS — polices, palette, rayons — et ne touche
+   aux propriétés directes que là où la maquette impose autre chose. C'est ce
+   qui permet aux réglages téléphone (section 11) de continuer à s'appliquer :
+   un thème qui redéfinirait `font-size` gagnerait sur eux par spécificité, et
+   le cahier reviendrait à sa taille de bureau sur un écran de 360 px.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── LYCÉE — 2ⁿᵈᵉ, 1ʳᵉ, Tˡᵉ A et Tˡᵉ S&T ──────────────────────────────────
+   Nunito et Source Serif 4, huit teintes indexées sur le NUMÉRO de séquence :
+   la 0 (évaluation diagnostique) et la 7 (sujets d'examen) ont la leur dans le
+   livre, et ce sont les deux qu'un candidat cherche en premier.
+   Les valeurs sont les couleurs oklch de la maquette, converties en sRGB —
+   `oklch()` n'existe pas sur les navigateurs Android d'avant 2023, et une
+   couleur que le moteur ne sait pas lire n'est pas « approchée » : elle est
+   ignorée, et l'élément sort sans couleur du tout. */
+.ch-hote[data-fam="lycee"]{
+  --f-titre:'Nunito', system-ui, sans-serif;
+  --f-lettre:'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --ch-encre:#232830; --ch-encre2:#333a44; --ch-gris:#68707c; --ch-pale:#8a8f99;
+  --ch-papier:#f8f7f4; --ch-fil:#e0ddd6;
+}
+.ch-hote[data-fam="lycee"] [data-seq="0"]{ --seq:#00858d; --seqf:#effcfd; --seqb:#86cccf; }
+.ch-hote[data-fam="lycee"] [data-seq="1"]{ --seq:#a65c20; --seqf:#fff7f0; --seqb:#e2b293; }
+.ch-hote[data-fam="lycee"] [data-seq="2"]{ --seq:#a4517b; --seqf:#fff5fa; --seqb:#e1acc4; }
+.ch-hote[data-fam="lycee"] [data-seq="3"]{ --seq:#3275b4; --seqf:#f2faff; --seqb:#9cc2ea; }
+.ch-hote[data-fam="lycee"] [data-seq="4"]{ --seq:#33854a; --seqf:#f3fcf4; --seqb:#9ecba6; }
+.ch-hote[data-fam="lycee"] [data-seq="5"]{ --seq:#7d5fad; --seqf:#faf7ff; --seqb:#c4b4e5; }
+.ch-hote[data-fam="lycee"] [data-seq="6"]{ --seq:#ad524d; --seqf:#fff6f4; --seqb:#e8ada7; }
+.ch-hote[data-fam="lycee"] [data-seq="7"]{ --seq:#887000; --seqf:#fcf9ef; --seqb:#ccbe8a; }
+
+/* Un lycéen ne travaille pas dans un cahier à pastilles : la maquette est plus
+   sobre, les angles moins arrondis, les aplats plus discrets. */
+.ch-hote[data-fam="lycee"] .ch-module{ border-radius:10px; border-color:var(--seqb,#9cc2ea); }
+.ch-hote[data-fam="lycee"] .ch-module-no{ border-radius:9px; box-shadow:none; }
+.ch-hote[data-fam="lycee"] .ch-semaine-no,
+.ch-hote[data-fam="lycee"] .ch-rubrique{ border-radius:7px; }
+.ch-hote[data-fam="lycee"] .ch-carte{ border-radius:10px; border-width:1.5px; }
+.ch-hote[data-fam="lycee"] .ch-carte-t{ border-radius:8px 8px 8px 0; }
+.ch-hote[data-fam="lycee"] .ch-exo{ border-radius:9px; }
+.ch-hote[data-fam="lycee"] .ch-corpus{ border-radius:9px; }
+.ch-hote[data-fam="lycee"] .ch-texte{ border-radius:9px; }
+/* L'encadré « Je retiens » prend la couleur de la séquence, pas un bleu fixe :
+   c'est ainsi que la maquette relie la règle à la séquence qui l'enseigne. */
+.ch-hote[data-fam="lycee"] .ch-carte[data-carte="retiens"]{
+  --cc:var(--seqb,#9cc2ea); --ccf:var(--seqf,#f2faff); --ccm:var(--seq,#3275b4); }
+
+/* ── BORD — l'ouvrage de référence, de la 6ᵉ à la Terminale ────────────────
+   EB Garamond et Poppins, les six couleurs de module du livre relié. C'est le
+   volume qu'on garde sur l'étagère : il a la tenue d'un livre, pas d'un cahier
+   d'exercices. Donc peu d'aplats, des filets fins, des angles presque droits. */
+.ch-hote[data-fam="bord"]{
+  --f-titre:'Poppins', system-ui, sans-serif;
+  --f-texte:'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-lettre:'EB Garamond', Garamond, Georgia, serif;
+  --m1:#0E6B63; --m1f:#E8F2F1;      /* sarcelle profond */
+  --m2:#2C4E8F; --m2f:#E9EEF7;      /* bleu d'encre     */
+  --m3:#456B1E; --m3f:#EDF3E5;      /* vert olive       */
+  --m4:#9A6413; --m4f:#F7EFE0;      /* ocre             */
+  --m5:#7A3070; --m5f:#F4E9F2;      /* prune            */
+  --m6:#A33232; --m6f:#F8EAEA;      /* rouge sombre     */
+  --ch-encre:#141414; --ch-encre2:#3E4849; --ch-gris:#7A8586; --ch-pale:#9BA5A6;
+  --ch-papier:#FBF6EF; --ch-fil:#C9D0D0;
+}
+.ch-hote[data-fam="bord"] .ch-module{ border-radius:6px; }
+.ch-hote[data-fam="bord"] .ch-module-no{ border-radius:6px; box-shadow:none; }
+.ch-hote[data-fam="bord"] .ch-semaine-no{ border-radius:4px; }
+.ch-hote[data-fam="bord"] .ch-rubrique{ border-radius:4px; }
+.ch-hote[data-fam="bord"] .ch-carte{ border-radius:6px; border-width:1px; }
+.ch-hote[data-fam="bord"] .ch-carte-t{ border-radius:5px 5px 5px 0; }
+.ch-hote[data-fam="bord"] .ch-exo,
+.ch-hote[data-fam="bord"] .ch-texte,
+.ch-hote[data-fam="bord"] .ch-corpus{ border-radius:6px; }
+.ch-hote[data-fam="bord"] .ch-exo-no{ border-radius:5px; }
+/* Le Bord se lit surtout ; le texte d'auteur y est le corps du livre, pas une
+   pièce jointe. On lui retire sa boîte et on le laisse respirer, filet seul. */
+.ch-hote[data-fam="bord"] .ch-texte{
+  background:transparent; border:none; border-left:3px solid var(--seq,#0E6B63);
+  border-radius:0; padding:2px 0 2px 18px;
+}
+.ch-hote[data-fam="bord"] .ch-carte[data-carte="retiens"]{
+  --cc:var(--seq,#0E6B63); --ccf:var(--seqf,#E8F2F1); --ccm:var(--seq,#0E6B63); }
+
+/* ── LA MANIPULATION DES MOTS AU LYCÉE ────────────────────────────────────
+   Ce ne sont plus les noms propres et les verbes de parole du collège : ce
+   sont les OUTILS que le correcteur du baccalauréat cherche dans une copie
+   (métaphore, anaphore, champ lexical, passé simple…) et les ÉTAPES de la
+   démarche (Axe 1, Problématique, Thèse…), qui prennent quatre couleurs à
+   tour de rôle pour qu'un plan se lise d'un coup d'œil. */
+.ch-mt{ font-weight:700; color:#006a48; }
+.ch-me0{ font-weight:800; color:#bd413f; }
+.ch-me1{ font-weight:800; color:#006b71; }
+.ch-me2{ font-weight:800; color:#b75f0b; }
+.ch-me3{ font-weight:800; color:#714ca6; }
+/* Les numéros cerclés ①②③ du livre : ils numérotent les étapes d'une
+   méthode à l'intérieur d'une phrase. */
+.ch-mc{ font-family:var(--f-titre); font-weight:800; font-size:1.08em;
+        color:var(--seq,#3275b4); }
+/* Au lycée, ce qui est cité prend la couleur de la séquence, en italique
+   gras — c'est la citation qu'on commente. */
+.ch-hote[data-fam="lycee"] .ch-mq{ color:var(--seq,#3275b4); font-style:italic; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   9. DISSUASION DE COPIE
+   La sélection est coupée sur le CONTENU, jamais dans les champs : l'élève
    doit pouvoir relire, couper et coller ce qu'il écrit lui-même. Le pendant
    JavaScript (clic droit, Ctrl+S/P/U) vit dans cahier.js, et sa portée y est
-   expliquée : cela dissuade le partage opportuniste, rien de plus. */
+   expliquée : cela dissuade le partage opportuniste, rien de plus.
+   ════════════════════════════════════════════════════════════════════════ */
 .ch-hote{ -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
 .ch-hote textarea, .ch-hote input, .ch-hote select,
 .ch-hote [contenteditable="true"]{
@@ -121,132 +893,18 @@
 }
 .ch-hote img, .ch-hote figure{ -webkit-user-drag:none; user-drag:none; pointer-events:none; }
 
-/* ── La correction, une fois l'exercice cherché ──────────────────────────── */
-/* Le bouton est discret : il ne doit pas attirer l'œil AVANT qu'on ait
-   travaillé. Une fois ouverte, la correction prend le vert du juste — jamais
-   le rouge de la faute : l'élève vient de chercher, il n'a rien commis. */
-.ch-corr{ margin-top:10px; }
-.ch-corr-btn{ font:inherit; font-size:13px; font-weight:600; color:var(--ch-action);
-  background:transparent; border:1px solid var(--ch-ligne); border-radius:9px;
-  padding:7px 13px; min-height:36px; cursor:pointer; }
-.ch-corr-btn:hover:not(:disabled){ border-color:var(--ch-action); background:#f4f9ff; }
-.ch-corr-btn:disabled{ color:var(--ch-second); cursor:default; }
-.ch-corr-msg{ display:inline-block; margin-left:10px; font-size:12.5px; color:var(--ch-second); }
-.ch-corr-ouvert{ margin-top:10px; padding:11px 13px; border-radius:10px;
-  background:#F1F8F2; border:1px solid #CDE6D2; }
-.ch-corr-titre{ display:block; font-size:11px; font-weight:600; letter-spacing:.05em;
-  text-transform:uppercase; color:#2F6B3A; margin-bottom:4px; }
-.ch-corr-ouvert p{ margin:0; color:#254C2C; font-size:14.5px; white-space:pre-wrap; }
-
-/* ── Encadrés ────────────────────────────────────────────────────────────── */
-.ch-encadre-t{ font-weight:600; color:var(--ch-bleu); background:var(--ch-fond);
-  border:1px solid var(--ch-ligne); border-bottom:none;
-  border-radius:10px 10px 0 0; padding:9px 14px; margin:16px 0 0; font-size:14px; }
-.ch-encadre-c{ background:var(--ch-fond); border:1px solid var(--ch-ligne);
-  border-radius:0 0 10px 10px; padding:12px 14px; margin:0 0 16px; font-size:14.5px; }
-.ch-bk-astuce{ color:#9A6413; } .ch-bk-outil{ color:#0E6B63; }
-.ch-bk-lexique{ color:#7A3070; } .ch-bk-bac{ color:#8A3A3A; }
-
-/* ── Correction ──────────────────────────────────────────────────────────── */
-.ch-corrige{ border:1px solid var(--ch-ligne); border-radius:10px;
-  background:#fff; padding:0 14px; margin:10px 0 18px; }
-.ch-corrige summary{ cursor:pointer; padding:11px 0; font-weight:600;
-  color:var(--ch-action); font-size:14px; list-style:none; }
-.ch-corrige summary::-webkit-details-marker{ display:none; }
-.ch-corrige summary::before{ content:'▸ '; }
-.ch-corrige[open] summary::before{ content:'▾ '; }
-.ch-corrige > div{ padding-bottom:14px; font-size:14.5px; color:var(--ch-second); }
-
-/* ── Le mot du professeur ────────────────────────────────────────────────── */
-/* Un post-it dans la marge : visible sans écraser la réponse de l'élève. */
-.ch-annot{ }
-.ch-annot-pleine{ margin-top:10px; padding:10px 12px; border-radius:10px;
-  background:#FFF7ED; border:1px solid #FCD9AE; font-size:14px; }
-.ch-annot-titre{ display:block; font-size:11px; font-weight:600; letter-spacing:.05em;
-  text-transform:uppercase; color:var(--ch-orange); margin-bottom:4px; }
-.ch-annot-pleine p{ margin:0; color:#7A4A16; }
-.ch-note{ float:right; font-weight:700; color:var(--ch-orange); font-size:15px; }
-
-/* ── Tableaux ────────────────────────────────────────────────────────────── */
-/* `overflow-x` sur le conteneur : un tableau large doit défiler DANS sa boîte,
-   jamais pousser la page entière de côté sur un téléphone. */
-.ch-tw{ overflow-x:auto; margin:14px 0; }
-.ch-table{ border-collapse:collapse; width:100%; font-size:14px; background:#fff; }
-.ch-table td{ border:1px solid var(--ch-ligne); padding:8px 10px; vertical-align:top; }
-
-.ch-figure{ margin:14px 0; text-align:center; }
-.ch-figure img{ max-width:100%; height:auto; border-radius:10px; }
-
-/* ── Voyant d'enregistrement ─────────────────────────────────────────────── */
-/* Il dit la vérité, y compris quand la ligne est coupée. Un cahier qui ne dit
-   rien laisse croire que le travail est perdu — ou pire, qu'il est sauvé. */
-.ch-voyant{ position:fixed; left:50%; transform:translateX(-50%); bottom:14px;
-  z-index:60; font-size:13px; font-weight:500; padding:7px 15px; border-radius:999px;
-  box-shadow:0 2px 10px rgba(22,40,79,.14); transition:opacity .2s; }
-.ch-voyant:empty{ opacity:0; }
-.ch-ok{ background:#E7F5EC; color:#1A6B3C; border:1px solid #BDE3CC; }
-.ch-encours{ background:#EAF1FB; color:var(--ch-action); border:1px solid #C6DAF5; }
-.ch-attente{ background:#FFF7ED; color:#8A5A16; border:1px solid #FCD9AE; }
-.ch-alerte{ background:#FDECEC; color:#A32626; border:1px solid #F5C6C6; }
-
 /* ════════════════════════════════════════════════════════════════════════════
-   COULEUR PAR SÉQUENCE
-   Reprise exacte des cahiers imprimés — l'élève qui a le papier sous les yeux
-   retrouve la même teinte à l'écran. Elle QUALIFIE, elle n'inonde pas : elle
-   vit dans la pastille du titre et dans la rubrique, jamais en aplat de fond
-   (un aplat pastel derrière un paragraphe fatigue à la lecture longue, et
-   c'est un cahier qu'on lit une heure).
-
-   Il y avait au départ un filet vertical coloré à gauche de chaque texte.
-   Retiré le 27/08 : aligné avec les autres cartes de la page, il faisait une
-   série de barres qui découpaient la colonne au lieu de l'accompagner.
-   ════════════════════════════════════════════════════════════════════════ */
-[data-seq="1"]{ --seq:#0E6B63; }
-[data-seq="2"]{ --seq:#2C4E8F; }
-[data-seq="3"]{ --seq:#456B1E; }
-[data-seq="4"]{ --seq:#9A6413; }
-[data-seq="5"]{ --seq:#7A3070; }
-[data-seq="6"]{ --seq:#A33232; }
-
-/* Plus de filet vertical a gauche des textes (demande du 27/08) : la couleur
-   de sequence continue de vivre dans la pastille du titre et la rubrique,
-   ou elle situe sans barrer la page. */
-.ch-titre[data-seq] .ch-etq{ background:var(--seq,#16284F); }
-.ch-titre[data-seq]{ border-bottom-color:color-mix(in srgb, var(--seq,#1B63C4) 26%, #E3E9F2); }
-.ch-rubrique[data-seq]{ color:var(--seq,#1B63C4); }
-/* Le filet de la rubrique passe AU-DESSUS du texte, centré : à gauche d'une
-   ligne centrée, il pendait dans le vide. Un seul « display » — le second
-   annulerait le premier, et le filet se recollerait en ligne. */
-.ch-rubrique[data-seq]::before{
-  content:''; display:block; margin:0 auto 7px; width:22px; height:3px;
-  border-radius:2px; background:var(--seq,#1B63C4); }
-.ch-exo[data-seq]:focus-within{ border-color:var(--seq,#1B63C4); }
-.ch-exo[data-seq] .ch-saisie:focus{ border-bottom-color:var(--seq,#1B63C4); }
-
-/* ── Lecture confortable ─────────────────────────────────────────────────── */
-/* La consigne est justifiée elle aussi quand elle est longue — mais JAMAIS
-   les lignes courtes : justifier trois mots écarte les lettres jusqu'au
-   ridicule. `text-wrap:pretty` évite en plus le mot solitaire en fin de
-   paragraphe, là où le navigateur le sait faire. */
-.ch-consigne, .ch-encadre-c, .ch-corrige > div{
-  text-align:justify; hyphens:auto; -webkit-hyphens:auto; text-wrap:pretty; }
-.ch-texte{ text-wrap:pretty; }
-.ch-texte p{ margin:0 0 .7em; }
-.ch-texte p:last-child{ margin-bottom:0; }
-/* Une réplique de dialogue ne se justifie pas : la ligne est trop courte, et
-   le retrait pendant se lit mieux au fil. */
-.ch-texte .ch-dd, .ch-texte .ch-pc{ text-align:left; }
-
-/* ── Animations ──────────────────────────────────────────────────────────── */
-/* CSS pur, aucune librairie : le budget est de 150 Ko de JS pour toute la page.
+   10. ANIMATIONS
+   CSS pur, aucune librairie : le budget est de 150 Ko de JS pour toute la page.
    Seules `opacity` et `transform` sont animées — ce sont les deux propriétés
    que le navigateur traite sans refaire la mise en page, donc les seules qui
-   restent fluides sur un téléphone d'entrée de gamme. */
+   restent fluides sur un téléphone d'entrée de gamme.
+   ════════════════════════════════════════════════════════════════════════ */
 @keyframes vRise{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
 @keyframes vPop { from{ opacity:0; transform:scale(.96); }      to{ opacity:1; transform:none; } }
-@keyframes vGrow{ from{ transform:scaleX(0); }                  to{ transform:scaleX(1); } }
 
-.ch-titre, .ch-texte, .ch-exo, .ch-encadre-t, .ch-corrige{
+.ch-module, .ch-semaine, .ch-lecon, .ch-texte, .ch-corpus, .ch-exo,
+.ch-carte, .ch-astuce, .ch-criteres, .ch-corrige{
   animation:vRise .34s cubic-bezier(.22,.61,.36,1) both; }
 /* Un léger décalage de proche en proche : le cahier se pose, il n'apparaît pas
    d'un bloc. Cinq crans suffisent — au-delà, l'élève attend. */
@@ -256,24 +914,85 @@
 .ch-hote > *:nth-child(5n+5){ animation-delay:.12s; }
 
 .ch-annot-pleine, .ch-corr-ouvert{ animation:vPop .3s cubic-bezier(.22,.61,.36,1) both; }
-.ch-rubrique[data-seq]::before{ animation:vGrow .4s .1s ease-out both; transform-origin:center; }
 .ch-voyant:not(:empty){ animation:vPop .22s ease-out both; }
 
 /* Le champ de saisie ne s'anime PAS : il grandit sous la frappe, et une
    transition de hauteur ferait sautiller le curseur pendant qu'on écrit. */
 
+/* ════════════════════════════════════════════════════════════════════════════
+   11. TÉLÉPHONE
+   La maquette imprimée tient sur 210 mm en deux colonnes ; ici on a 360 px et
+   une seule. Ce qui rétrécit, c'est le décor — jamais le texte : on descend le
+   corps de 17 à 16,5 px, pas en dessous.
+   ════════════════════════════════════════════════════════════════════════ */
 @media (max-width:640px){
-  .ch-hote{ padding:4px 0 72px; }
-  .ch-texte{ padding:13px 14px; font-size:15.5px; }
-  .ch-exo{ padding:12px 13px; }
-  .ch-titre{ font-size:16px; }
+  .ch-hote{ padding:4px 0 76px; font-size:16.5px; }
+  .ch-module{ padding:12px 14px; gap:0 13px; margin-top:34px; }
+  .ch-module-no{ width:42px; height:42px; font-size:22px; border-radius:11px; }
+  .ch-module-t{ font-size:19px; }
+  .ch-lecon-t{ font-size:20px; }
+  .ch-semaine-t{ font-size:16.5px; }
+  .ch-texte{ padding:14px 15px; font-size:16px; }
+  .ch-corpus{ padding:11px 13px 12px; }
+  .ch-exo{ padding:13px 13px; }
+  .ch-exo-h{ gap:9px; }
+  .ch-exo-no{ width:24px; height:24px; font-size:12.5px; }
+  .ch-exo > .ch-champ, .ch-exo > .ch-qcm, .ch-exo > .ch-rel,
+  .ch-exo > .ch-corr, .ch-exo > .ch-annot{ margin-left:0; }
+  .ch-carte-c{ padding:8px 14px 10px; }
+  .ch-champ-lignes .ch-saisie{ padding-left:26px; }
+  /* ── LES CIBLES DU DOIGT ────────────────────────────────────────────────
+     Une case de grille se vise à l'ongle sur un écran de bureau, au pouce sur
+     un téléphone. Mesuré à 375 px : 34 px pour une case de mots croisés,
+     30 px pour une lettre de mots mêlés, 32 px pour un mot à barrer — sous le
+     minimum tenable. On les agrandit ; la grille défile déjà dans sa propre
+     boîte, l'élargir ne coûte donc rien à la page.
+     (Les propositions de QCM, elles, sont déjà à 44 px : c'est le `label`
+     entier qui se touche, pas le petit rond.) */
+  .ch-case, .ch-case-noire{ width:40px; height:40px; min-width:40px; }
+  .ch-case-i{ font-size:19px; }
+  .ch-lettre{ width:36px; height:36px; min-width:36px; font-size:15.5px; }
+  .ch-mot{ min-height:40px; padding:6px 15px; }
+  .ch-mentale{ padding:12px 10px 12px; }
+  /* ── AGRANDIR, SUR UN ÉCRAN PLUS ÉTROIT QUE LE SCHÉMA ───────────────────
+     Un schéma de 880 px « agrandi » dans un écran de 360 ne gagne rien : on
+     mesurait 321 px avant le clic, 340 après. Autant ne rien faire.
+     On l'affiche donc à SA taille et l'on fait glisser du doigt : 880 px sur
+     360, c'est un grossissement de deux fois et demie, et les branches
+     redeviennent lisibles. C'est le geste qu'on a déjà avec une carte. */
+  .ch-mentale-grand .ch-mentale-b{ max-height:82vh; }
+  .ch-mentale-grand .ch-mentale-b img{
+    width:210vw; max-height:none;      /* deux fois l'écran : on fait glisser */
+  }
+
+  /* ── LA JUSTIFICATION S'ARRÊTE AU TÉLÉPHONE ─────────────────────────────
+     Le livre imprimé justifie ses textes, et l'écran large les justifie aussi.
+     Mais une colonne de 375 px ne porte que 39 signes : mesuré ici, une ligne
+     de texte d'auteur s'étire de 8 % en moyenne, et bien davantage sur les
+     lignes courtes — « Yaoundé,   elle,   n'avait   pas   d'odeur. » On voit
+     alors des rivières de blanc traverser le paragraphe, et l'œil décroche.
+
+     La césure aurait sauvé la mise : elle est demandée (`hyphens:auto`), la
+     page est en `lang="fr"`, et Chrome ne coupe pourtant aucun mot — le
+     dictionnaire français n'est pas garanti sur un Android d'entrée de gamme.
+     On ne peut donc pas compter dessus.
+
+     En dessous de 480 px, on aligne à gauche. Le texte reste exactement le
+     même ; c'est le blanc qui passe du milieu des lignes à leur fin, où il ne
+     gêne personne. `hyphens` reste posé : là où le navigateur SAIT couper, il
+     égalise le bord droit. */
+  .ch-texte, .ch-corpus-c, .ch-regle, .ch-consigne,
+  .ch-astuce p, .ch-sujet p, .ch-criteres p, .ch-def, .ch-corrige > div{
+    text-align:left;
+  }
 }
 
 /* Le réglage système l'emporte sur tout ce qui précède : certains élèves ont
    des vertiges au mouvement, et la page doit rester entièrement lisible. */
 @media (prefers-reduced-motion:reduce){
   .ch-voyant{ transition:none; }
-  .ch-titre, .ch-texte, .ch-exo, .ch-encadre-t, .ch-corrige,
-  .ch-annot-pleine, .ch-rubrique[data-seq]::before, .ch-voyant:not(:empty){
+  .ch-module, .ch-semaine, .ch-lecon, .ch-texte, .ch-corpus, .ch-exo,
+  .ch-carte, .ch-astuce, .ch-criteres, .ch-corrige,
+  .ch-annot-pleine, .ch-corr-ouvert, .ch-voyant:not(:empty){
     animation:none !important; }
 }

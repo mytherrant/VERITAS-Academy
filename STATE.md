@@ -2037,3 +2037,355 @@ partagée) laissait les couvertures à `opacity:0` : désactivée sur cette page
 4. Une copie des données a été laissée dans `uploads/protected/livrets/` du
    dépôt de travail pour permettre la vérification locale ; c'est gitignoré
    (`uploads/protected/**`, vérifié par `git check-ignore`).
+
+## Session « Les cahiers en ligne reprennent la maquette du livre » (02-04/09/2026) — DÉPLOYÉ
+
+Demande de Jacques : « la mise en forme de mes manuels collaboratifs laisse à
+désirer. utilise les mêmes styles que les manuels en couleur à imprimer pour
+que le lecteur qui a la version physique se retrouve facilement » ; puis
+« rend bien coloré, captivant et confortable à la lecture » ; puis « couleurs
+par module, encadrés, numérotation, puces, pastilles, manipulation des mots,
+titres centrés, textes justifiés » ; puis « 2nde 1ère et tle ont leur style » ;
+puis « vérifie que les grilles de mots, QCM, cartes mentales, animations,
+simulations à compléter s'affichent vraiment et sont remplissables ».
+
+### Le point de départ : deux objets qui ne se ressemblaient pas
+Le cahier en ligne appliquait la charte bleu marine du SITE (#16284F / #1B63C4
+/ #F58220, Poppins). Le cahier de PAPIER, lui, a trois maquettes distinctes,
+une par collection. L'élève qui posait le livre à côté du téléphone ne
+retrouvait aucun de ses repères : mêmes mots, aucune couleur de module, pas de
+pastille de rubrique, pas de badge de discipline, et **pas un seul numéro
+d'exercice** — alors que c'est par lui qu'un professeur dit « faites le 4 ».
+
+### Trois collections, trois maquettes — reprises au chiffre près
+Le thème se choisit sur le slug de l'ouvrage (`familleOuvrage`), et n'est
+qu'un échange de jetons CSS : une seule feuille, pas trois à maintenir.
+- **COLLÈGE** (6ᵉ→3ᵉ) — Baloo 2, Lora, six teintes de module (rose, sarcelle,
+  vert, orange, violet, brique), pastilles à icônes SVG.
+- **LYCÉE** (2ⁿᵈᵉ, 1ʳᵉ, Tˡᵉ, Tˡᵉ S&T) — Nunito, Source Serif 4, HUIT teintes
+  indexées sur le numéro de séquence (la 0 « évaluation diagnostique » et la 7
+  « sujets d'examen » ont la leur). Couleurs oklch de la maquette **converties
+  en sRGB** : `oklch()` n'existe pas sur les Android d'avant 2023, et une
+  couleur illisible n'est pas approchée, elle est ignorée.
+- **BORD** (bord-6ᵉ→bord-Tˡᵉ) — Poppins, EB Garamond, les six couleurs de
+  module du livre relié, angles presque droits, texte d'auteur sans boîte.
+
+Les polices sont chargées **à la demande**, quand on sait quel cahier s'ouvre :
+les onze familles des trois maquettes sur chaque page, c'est plusieurs secondes
+payées pour rien sur une ligne à 2 G.
+
+### La manipulation des mots
+« Les corpus mettent en évidence, par la couleur, les notions étudiées » —
+avant-propos du livret. Le corpus arrivait en un seul gris : la leçon demandait
+de repérer quelque chose qui n'était nulle part visible.
+- **Collège** : la notion de la leçon (connecteurs, négations, types de
+  phrase…, table `REGLES_NOTION` reprise de `notionRules()`), les verbes de
+  parole, les noms propres, les citations.
+- **Lycée** : les OUTILS d'analyse (métaphore, anaphore, champ lexical, passé
+  simple… — ce que le correcteur du bac cherche dans une copie) en vert
+  profond, les ÉTAPES de la démarche (Axe 1, Problématique, Thèse) en quatre
+  couleurs à tour de rôle, les citations à la couleur de la séquence.
+
+Mesuré sur le cahier de 6ᵉ : 45 notions, 39 verbes de parole, 124 noms propres,
+99 citations colorés — sans sapin de Noël (liste de mots-outils exclus).
+
+⚠️ **Pas de `lookbehind`** dans ces expressions, alors que la maquette en
+utilise un : un moteur qui ne le connaît pas (Safari < 16.4, courant sur les
+iPhone d'occasion) lève une erreur de SYNTAXE au chargement — tout le cahier
+serait mort d'un coup, chez ces gens-là seulement.
+
+### Ce qui ne s'affichait pas du tout — 462 blocs par terre
+Cinq types de blocs traversaient la boucle du convertisseur sans qu'aucun
+`elif` ne les prenne. Un `elif` manquant ne lève pas d'erreur :
+
+| perdu | nombre | où |
+|---|---|---|
+| `question` | 123 | livret de 2ⁿᵈᵉ |
+| `source` | 91 | 2ⁿᵈᵉ, 3ᵉ, 4ᵉ |
+| **`wordsearch` (mots mêlés)** | **55** | 6ᵉ, 5ᵉ, 4ᵉ, 3ᵉ |
+| **`crossword` (mots croisés)** | **31** | 6ᵉ, 5ᵉ, 4ᵉ, 3ᵉ |
+| `subhead` | 19 | 2ⁿᵈᵉ |
+| `astuce` (dans le flux) | 8 | 3ᵉ, 4ᵉ |
+| `sujet` | 6 | 5ᵉ |
+| + leurs `lines` | 129 | |
+
+**Les 86 grilles sont le trou le plus grave** : l'élève lisait « Complète la
+grille de mots croisés à l'aide des définitions ci-dessous » sous un espace
+vide. On vendait un jeu qui n'était pas là. Elles sont maintenant rendues **et
+remplissables** : une case = un `input maxlength=1` qui s'enregistre sous sa
+propre clé, la saisie avance toute seule à la case suivante, et le retour
+arrière sur une case vide revient à la précédente ; les mots mêlés se marquent
+au doigt (cible de 30 px) et la liste des mots se raye. Éprouvé au navigateur :
+« CONTE » tapé dans la grille, trois lettres marquées, un mot barré —
+**tout retrouvé après rechargement de la page**.
+
+Aucun corrigé ne part avec : `crossword.cell` ne porte que les numéros et les
+cases noires, jamais une lettre.
+
+### Les doublons de boîtes de réponse
+Trois cas où l'on posait DEUX espaces de réponse pour une seule question :
+consigne suivie de son exercice (475 fois rien qu'en 5ᵉ) ; exercice suivi de
+son papier réglé (forme normale du lycée) ; exercice suivi de son QCM, de son
+appariement ou de sa grille.
+
+Retirés — **mais jamais quand une réponse y est déjà écrite** : la boîte était
+là depuis la mise en vente, un élève a pu s'en servir. Et si la réponse arrive
+du serveur APRÈS le premier rendu (autre appareil), `charger()` redessine une
+fois plutôt que de la laisser invisible.
+
+### Les images : 37 blocs, 0 affiché
+Deux causes, toutes deux muettes : 31 Bords nomment le fichier dans `img` et
+pas dans `src` ; les 6 du lycée portent un chemin RELATIF (`images/…`) qui
+pointe sur `/livrets/images/`, dossier non déployé. Les fichiers existent
+(≈ 3,5 Mo dans `~/Desktop/Collaboratif`), ils ne sont déposés nulle part.
+
+En attendant, on n'écrit pas de balise image — l'icône d'image cassée dans un
+cahier payé se lit comme une panne — on affiche la LÉGENDE, qui décrit le
+document. Le convertisseur garde désormais `img` : l'information n'est plus
+perdue à la conversion.
+
+### Cartes mentales, animations, simulations : il n'y en a aucune
+Inventaire des 44 000 blocs des 15 cahiers : tous les types sont rendus, sauf
+9 blocs de couverture des Bords (`coversub`, `apSub`, `apSign`). **Aucun bloc
+de carte mentale, d'animation ou de simulation dans aucune source.**
+
+⚠️ Il EXISTE pourtant des cartes mentales : `Livrets 2nde -Tle/images/2nde-mm-*.svg`
+(connecteurs logiques, discours/récit, énonciation, figures d'analogie et
+d'insistance, formation des mots) + le schéma de Jakobson, référencées par
+`livret2nde-data.js`. Mais ce fichier **n'est la source d'aucun ouvrage
+vendu** — le cahier de 2ⁿᵈᵉ se fabrique depuis `booklet-data-2nde.js`. Il y a
+là un contenu déjà produit que personne n'achète.
+
+### Les clés de réponse n'ont pas bougé
+La question qui décide : une réponse déjà écrite peut-elle se retrouver sous
+un autre exercice ? Mesuré en rendant les charges d'avant et d'après avec le
+même moteur : **12 434 clés communes, 0 déplacée.** Deux clés disparaissent en
+2ⁿᵈᵉ (la réponse cesse d'être affichée, elle reste sur le serveur).
+
+Il y en avait 14 au premier essai : une grille n'a pas de texte, elle héritait
+donc de l'empreinte de son voisin et faisait avancer son compteur de doublons.
+On lui donne de quoi s'identifier (ses mots, ses définitions) — 14 → 2.
+
+### Contrôles
+**243 verts** : `banc_cahiers_reels` 183 · `banc_cahier` 43 · `banc_cles_cahier`
+11 · `banc_format_cahiers` 6. Le banc des vrais cahiers passe **sur les charges
+déjà déployées ET sur les charges régénérées** : le frontend peut partir avant
+le dépôt FTP sans que rien ne casse.
+
+Contrôle neuf : « aucun exercice sans nulle part où répondre », **éprouvé par
+mutation deux fois** — ne plus jamais poser le champ (30 rouges), décaler d'un
+cran le bloc regardé (6 rouges : 1ʳᵉ 11, Tˡᵉ 5, 6ᵉ 3). Il a d'ailleurs mordu
+pour de bon pendant la session, quand la déduplication a englobé les QCM :
+c'est le contrôle qui a dit que cocher une case est aussi une façon de répondre.
+
+### Suite (même session) — « corrige tout » : les cartes mentales et les documents
+
+Jacques : « corrige tout. Cartes mentales, animations, simulations : il n'y en a
+aucune dans les 15 cahiers. Mais vous en avez : `Livrets 2nde -Tle/images/2nde-mm-*.svg` ».
+
+**Ce qui dormait.** Treize schémas vectoriels — douze cartes mentales
+(connecteurs logiques, discours/récit, énonciation, figures d'analogie et
+d'insistance, formation des mots, homonymes/paronymes, progression thématique,
+texte narratif, texte théâtral, tonalité lyrique, valeurs de l'indicatif) et le
+schéma de la communication de Jakobson. Référencés par `livret2nde-data.js`, qui
+n'est la source d'aucun ouvrage vendu : du contenu produit que personne ne
+pouvait voir.
+
+**Ce qui a été fait.** Une table écrite à la main (`CARTES_MENTALES`) rattache
+chaque schéma aux leçons qui ENSEIGNENT la notion, dans tous les cahiers où
+cette leçon existe : **40 rattachements dans 12 cahiers sur 15** (16 pour la
+2ⁿᵈᵉ, 4 pour la 1ʳᵉ, 4 pour le Bord de Tˡᵉ…). Vérifié un par un : chaque carte
+tombe sur la bonne leçon.
+
+Deux pièges payés en les mesurant :
+- **`\b` obligatoire** : sans frontière de mot, « énonciation » s'accrochait à
+  « La **dé**nonciation des contre-valeurs » dans le Bord de 6ᵉ.
+- **Les épreuves et les productions sont écartées** (`PAS_UNE_LECON`) :
+  « Épreuve 1 — Langue française (texte narratif) » n'est pas une leçon sur le
+  texte narratif, et « Produire un texte narratif » demande d'écrire, pas
+  d'apprendre. La carte va où l'on découvre la notion.
+
+**Les 37 photos** (Bords + lycée) sont embarquées elles aussi. Elles sont
+recompressées à 720 px / qualité 60, avec un plafond de 90 Ko par image
+(la qualité descend, puis la largeur, jusqu'à passer sous le plafond).
+
+**Pourquoi embarquer plutôt que servir.** ① Le cahier doit s'ouvrir SANS
+RÉSEAU — c'est l'argument du produit, et la charge dort déjà sept jours dans
+IndexedDB ; une image servie par une URL ne suit pas. ② Il n'y a aucun chemin
+où les poser : `livrets/` les rendrait publiques (le dépôt est public), et le
+dossier protégé demanderait un endpoint PHP de plus sur un site qui part en
+production sans pré-production. ③ Embarquées, elles suivent exactement le même
+verrou que le reste du cahier.
+
+**Le prix, dit clairement.** La charge la plus lourde passe de 630 Ko à
+**1 220 Ko** (Bord de 6ᵉ, huit photos) ; la plupart des autres de ~300 à
+~400 Ko. C'est un téléchargement unique, gardé sept jours.
+**`--sans-images` produit des charges légères** (Bord de 6ᵉ : 640 Ko) en
+gardant les légendes ET les cartes mentales — l'arbitrage appartient à Jacques.
+
+**Rendu.** Une carte mentale prend toute la largeur sur fond blanc, avec sa
+pastille « CARTE MENTALE » ; un clic l'ouvre plein écran (Échap referme) —
+à 360 px, un schéma à six branches ne se lit pas autrement.
+
+**Les clés, à nouveau.** Une carte et un document n'ont pas de `txt`, seulement
+une légende : ils héritaient donc de l'empreinte du bloc précédent, le piège
+déjà rencontré avec les grilles. `texteDuBloc` lit maintenant `cap`.
+Mesuré contre les charges RÉELLEMENT déployées : **12 434 clés communes,
+0 désignant un autre énoncé.** 88 boîtes de réponse en double disparaissent
+(un exercice qui EST une grille ou un QCM n'a plus de boîte de texte vide en
+plus) — et **31/31 se rétablissent dès qu'une réponse y est déjà écrite**,
+vérifié en simulant l'élève qui s'en était servi.
+
+**243 contrôles verts**, sur les charges déployées, sur les charges avec images
+et sur les charges `--sans-images`.
+
+### Suite — audit du confort en affichage mobile (375 px et 360 px)
+
+Mesuré au navigateur sur une page portant les 21 types de blocs, puis sur le
+vrai cahier de 5ᵉ. Quatre défauts trouvés, tous corrigés.
+
+**① La carte mentale ne s'affichait PAS DU TOUT sur téléphone.** Ces SVG
+portent un `viewBox` mais ni `width` ni `height` : dans une balise `<img>`, un
+tel fichier n'a aucune taille intrinsèque, et `height:auto` le réduit à zéro
+pixel de haut. Avec le chargement différé, cela se referme sur soi — une image
+de zéro pixel n'entre jamais dans l'écran, donc ne se charge jamais, donc reste
+à zéro. Mesuré : `complete:false`, `naturalWidth:0`, bouton de 4 px de haut.
+Aucune erreur nulle part.
+Corrigé en relevant les proportions à la publication (`dimensions_image`) et en
+les posant sur la balise : **77 images et cartes portent désormais leur
+`width`/`height`**. Le navigateur réserve la bonne boîte avant d'avoir lu le
+fichier — et la page ne sursaute plus au chargement, ce qui compte autant sur
+une ligne lente.
+
+**② La justification déchirait le texte.** Une colonne de 375 px ne porte que
+39 signes ; mesuré, une ligne de texte d'auteur s'étirait de 8 % en moyenne et
+bien davantage sur les lignes courtes (« Yaoundé,   elle,   n'avait   pas
+d'odeur. »). La césure aurait sauvé la mise — elle est demandée, la page est en
+`lang="fr"` — mais **Chrome ne coupe aucun mot** : le dictionnaire français
+n'est pas garanti sur un Android d'entrée de gamme.
+En dessous de 480 px, les textes s'alignent donc à gauche. Le texte est le
+même ; c'est le blanc qui passe du milieu des lignes à leur fin, où il ne gêne
+personne. Au-dessus, la justification du livre reste.
+
+**③ Les cibles du doigt étaient trop petites.** Mesuré à 375 px : 34 px pour
+une case de mots croisés, 30 px pour une lettre de mots mêlés, 32 px pour un
+mot à barrer. Portées à 40, 36 et 40 px — la grille défile déjà dans sa propre
+boîte, l'élargir ne coûte rien à la page. (Les propositions de QCM étaient
+déjà à 58 px : c'est le `label` entier qui se touche, pas le petit rond.)
+
+**④ « Agrandir » n'agrandissait rien.** 321 px avant le clic, 340 après : le
+même `width:auto` sans taille intrinsèque. La carte s'affiche maintenant à
+**210 % de la largeur de l'écran** et se fait glisser du doigt — mesuré à
+360 px : 776×544, soit **2,4×**, les branches redeviennent lisibles. Sur écran
+large, elle tient dans la fenêtre (1 032 px sur 1 085). Le fond noir se touche
+pour refermer, Échap aussi.
+
+**Ce qui était déjà bon** : 0 débordement horizontal à 375 comme à 360 px (les
+grilles défilent dans leur boîte, jamais la page) ; corps 16,5 px et interligne
+1,72 ; les champs de saisie à 16 px, seuil sous lequel iOS zoome la page à la
+mise au point ; écriture dans la grille de mots croisés et marquage des mots
+mêlés vérifiés au doigt sur les deux largeurs.
+
+### RESTE À FAIRE — un seul geste, et il est manuel
+
+**Téléverser par FTP `~/Desktop/veritas-ftp/uploads/protected/livrets/` (9,9 Mo).**
+La charge y a été régénérée le 04/09 : 86 grilles, 40 cartes mentales, 37
+documents, 462 blocs regagnés. Tant qu'elle n'est pas en ligne, le cahier
+PAYANT reste celui d'avant, alors que l'aperçu gratuit — déployé, lui, avec le
+dépôt — montre déjà les nouveautés. C'est le seul ordre à ne pas laisser
+traîner : l'essai promettrait plus que le produit.
+
+Rappel : `python tools/normaliser_cahiers.py --charge ~/Desktop/veritas-ftp`
+régénère tout depuis les sources (`--sans-images` pour des charges légères,
+1 220 → 640 Ko sur le Bord de 6ᵉ, les cartes mentales restant embarquées).
+
+Plus tard, si l'occasion se présente : décider du sort des 13 cartes mentales
+de `livret2nde-data.js` — elles sont désormais rattachées aux leçons des
+quinze cahiers, mais le fichier lui-même reste un ouvrage de 2ⁿᵈᵉ produit et
+jamais mis en vente.
+
+## Corrigés 6ᵉ→Tˡᵉ finalisés + page « tout en un » (03/09/2026) — NON COMMITÉ
+
+Demande : « finalise les corrections de mes documents de la 6e en Tle commencé
+par un autre agent puis mélange tout en une page SEO à mettre en ligne », puis
+« utilise le même style que LWS et sur la vitrine pour harmoniser ».
+
+### Ce que la mesure a trouvé — le « reliquat » n'en était pas un
+Recompté depuis `_bord_extract/*.json` : 7 244 items de cahier, 4 753 corrigés,
+**2 491 manquants**. Chiffre trompeur. Un classificateur (`tools/manques_vrais.py`)
+sépare les vraies questions du **bruit d'extraction** — l'extracteur de Bord
+découpe la mise en page, il prend donc pour des items des répliques de dialogue,
+des lignes de cours, des encadrés « Le saviez-vous ? », des titres d'exercice
+vides. **Éprouvé contre la vérité terrain** : 91,4 % des items réellement
+corrigés par ailleurs sont reconnus « question » par ces règles, 1,1 % seulement
+classés « corpus ». Sur le périmètre demandé, le vrai reste tombait de 540 à
+**~420 items**.
+
+### Rédigé cette session — 421 corrigés
+4ᵉ **100 %** (61 % → 100 %) : module V *Bien-être et santé* et module VI *Médias
+et communication* entiers (241 corrigés), plus l'évaluation diagnostique et le
+reliquat du module IV. 2ⁿᵈᵉ **100 %**. 6ᵉ 93 %, 5ᵉ 94 % — dans les deux cas
+**100 % des vraies questions** ; les 37 items restants sont des répliques de
+dialogue, et leur donner un « corrigé » publierait une réponse à une
+non-question. Total publié : **9 033 → 9 360 exercices**, 87 documents.
+
+### Une page unique de 9,5 Mo, et comment elle tient
+`tools/build_page_unique.py` → `corriges/tous-les-corriges.html`. Le format est
+un choix de Jacques, maintenu après réserve (une page-portail aurait mieux
+servi le SEO). Assumé techniquement : `content-visibility:auto` +
+`contain-intrinsic-size` par section — sans quoi le premier rendu d'un million
+de mots bloque le fil principal —, chaque document ET chaque corrigé repliés,
+le texte restant dans le HTML servi donc indexable. **Mesuré au navigateur** :
+9,5 Mo bruts → **2,05 Mo gzip** (~1,7 Mo Brotli, ce que sert LiteSpeed), DOM
+interactif 2,5 s, ouverture d'un document 241 ms, 0 px de débordement à 375 px.
+⚠️ 170 581 nœuds DOM : la capture d'écran du navigateur expire régulièrement,
+c'est le signe que la limite du format est atteinte.
+⚠️ **Duplication interne** : la page reprend le contenu des 87 pages fines.
+Priorité de sitemap volontairement basse (0,5), canonical sur elle-même, lien
+descendant vers chaque page détaillée. Si le référencement des pages fines
+baisse, c'est ici qu'il faut revenir.
+
+### Habillage — deuxième passage
+Première version : CSS inline maison. Refait à la demande : la page reprend
+`head()`/`foot()` de build_corriges, donc `/assets/veritas-pages.css` (déjà
+remappée LWS) et les classes du site (`header.top`, `.intro`, `section.lec`,
+`.rub`, `.ex`, `details.sol`, `.i`). **Piège rencontré** : sans la règle `.i`,
+un `<svg><use>` sans width/height prend la taille de son conteneur — les
+pictogrammes s'affichaient hauts de plusieurs centaines de pixels.
+
+### Trois blocages débloqués en chemin (aucun n'était dans la demande)
+1. **`tools/build_vitrine.js` échouait** — « 16 ancres #lien pour 15
+   destinations ». Défaut **préexistant** (source `.dc.html` non commitée) :
+   le libellé « Partenaires » avait été ajouté au pied de page sans sa
+   destination. La vitrine ne pouvait plus être régénérée du tout.
+2. **Garde-fou `chiffres_annonces.cjs` rouge** — la vitrine annonçait 8 716
+   corrigés pour 9 360 réels, et une répartition par classe fausse sur **6 des
+   7 valeurs** (4ᵉ 830→1113, 1ʳᵉ 1106→1329, Tˡᵉ 1823→1881…). Corrigé à la
+   source, vitrine régénérée. Le garde-fou aurait bloqué le déploiement.
+3. **`tools/build_search_index.cjs` sautait la racine de `corriges/`** — un
+   `continue` sur les non-dossiers : le hub, les 3 cahiers EST et la page neuve
+   étaient introuvables par la recherche du site. Corrigé : 94 → 99 entrées.
+   **Version bumpée 1.20.16 → 1.20.17** (coquille + sw.js) : `index-recherche.js`
+   est servi avec `?v=ASSET_VER` et « immutable » un an — sans bump, le nouvel
+   index n'atteint aucun visiteur de retour.
+
+### Incident, et ce qu'il coûte de vérifier
+`Write` sur `content/corriges-cahier/6e/module-2-5.md` a **écrasé** un fichier
+existant (12 corrigés des leçons 27-29). Récupéré par `git checkout HEAD --`
+— il était suivi — et le nouveau contenu reposé sous `module-2-6.md`. **Vérifier
+qu'un nom de fichier est libre avant d'écrire** ; les fichiers suivis sont
+récupérables, les non suivis ne l'auraient pas été.
+
+### Garde-fous au vert
+`chiffres_annonces` · `ci_scripts_suivis` · `banc_recherche` 18/18 ·
+`banc_plan_site` 20/20 · `banc_cahier` 43/43 · `banc_pages_ouvrages` 21/21.
+
+### RESTE — rien n'est en ligne
+1. **`git add`** : 138 fichiers non suivis, dont 49 sources de corrigés
+   (`content/corriges-cahier/**`, y compris ceux de l'agent précédent pour 1ʳᵉ
+   et Tˡᵉ), 10 pages `corriges/**` neuves, `corriges/tous-les-corriges.html` et
+   les 3 outils. **Un fichier non suivi n'est jamais déployé, et rien ne le
+   signale.** Aucun n'est gitignoré (`git check-ignore` vérifié).
+2. Commit + push + `gh workflow run deploy.yml`.
+3. Vérifier en production que `/corriges/tous-les-corriges.html` répond et que
+   la vitrine annonce bien 9 360.

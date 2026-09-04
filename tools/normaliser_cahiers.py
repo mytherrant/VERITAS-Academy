@@ -45,6 +45,8 @@ OÙ VA QUOI
 from __future__ import annotations
 
 import argparse
+import base64
+import io
 import json
 import re
 import sys
@@ -211,6 +213,255 @@ def lignes(n) -> dict | None:
     return B("lines", n=max(1, min(40, n)))
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# LES DOCUMENTS ICONOGRAPHIQUES, EMBARQUÉS DANS LA CHARGE
+# ══════════════════════════════════════════════════════════════════════════════
+# 37 blocs `image` dans les quinze cahiers, et aucun ne s'affichait : les Bords
+# nomment leur fichier dans `img` (« image4 ») et pas dans `src`, et les cahiers
+# du lycée portent un chemin RELATIF (« images/1e-image-tele.jpg ») qui, servi
+# depuis /livrets/cahier.html, pointe sur un dossier qui n'existe pas en ligne.
+#
+# POURQUOI ON LES EMBARQUE PLUTÔT QUE DE LES SERVIR
+#   ① Le cahier doit s'ouvrir SANS RÉSEAU — c'est l'argument du produit, et la
+#     charge est déjà gardée sept jours dans IndexedDB. Une image servie par une
+#     URL ne suit pas : hors ligne, la consigne « observe le document » retombe
+#     sur un carré vide.
+#   ② Il n'y a aucun chemin où les poser. Les mettre dans `livrets/` les rendrait
+#     PUBLIQUES (le dépôt est public, la CI copie le dossier entier) ; les servir
+#     depuis le dossier protégé demanderait un endpoint PHP de plus, sur un site
+#     qui part en production sans pré-production.
+#   ③ Embarquées, elles suivent exactement le même verrou que le reste du
+#     cahier : servies après validation du code, jamais avant.
+#
+# LE PRIX, ET COMMENT ON LE TIENT
+#   Les photos sont recompressées à 820 px de large et qualité 62 — au-delà,
+#   on paie des pixels qu'un téléphone n'affiche pas. Les SVG partent tels
+#   quels : ce sont quelques kilo-octets de texte, et ils restent nets au zoom,
+#   ce qui compte pour une carte mentale qu'on agrandit du doigt.
+#   L'EXTRAIT GRATUIT, lui, n'embarque rien (voir `extraire`) : il doit rester
+#   sous les 120 Ko du garde-fou de déploiement.
+LARGEUR_IMG = 720
+QUALITE_IMG = 60
+# Plafond par photo. Une image de 250 Ko embarquée en base64 en coûte 330, et
+# le Bord de 6ᵉ en porte huit : la charge doublait. On redescend en qualité,
+# puis en largeur, jusqu'à passer sous ce plafond — une photo de document se lit
+# très bien à 70 Ko, et l'élève peut l'agrandir puisqu'elle est dans la page.
+PLAFOND_IMG = 90 * 1024
+# Mis à True par `--sans-images` : produit des charges légères, sans les photos
+# (les légendes restent). Les cartes mentales, elles, sont toujours embarquées —
+# quelques kilo-octets de SVG, et c'est le cœur pédagogique.
+SANS_IMAGES = False
+
+# Où trouver les images des Bords : le nom du fichier source dit le dossier.
+DOSSIERS_BORD = {
+    "content.js": "images", "content5e.js": "images5e", "content4e.js": "images4e",
+    "content3e.js": "images3e", "content1e.js": "images1e", "contentTle.js": "imagesTle",
+}
+
+
+def _chemin_image(bloc: dict, source: Path) -> Path | None:
+    """Le fichier que désigne un bloc `image`, quel que soit le format d'origine."""
+    if txt(bloc.get("src")):
+        p = source.parent / txt(bloc["src"])
+        return p if p.is_file() else None
+    nom = txt(bloc.get("img"))
+    if not nom:
+        return None
+    dossier = DOSSIERS_BORD.get(source.name)
+    if not dossier:
+        return None
+    for ext in (".jpg", ".jpeg", ".png", ".svg"):
+        p = source.parent / dossier / (nom + ext)
+        if p.is_file():
+            return p
+    return None
+
+
+def dimensions_image(chemin: Path) -> tuple[int, int]:
+    """Les proportions du fichier — et il FAUT les transmettre.
+
+    Ces SVG portent un `viewBox` mais ni `width` ni `height`. Dans une balise
+    `<img>`, un tel fichier n'a AUCUNE taille intrinsèque : avec `height:auto`,
+    le navigateur lui donne zéro pixel de haut. Et comme l'image est chargée en
+    différé, une image de zéro pixel n'entre jamais dans l'écran, donc ne se
+    charge jamais, donc garde zéro pixel — la carte mentale n'apparaissait pas
+    du tout sur téléphone, sans une erreur nulle part.
+    En donnant `width`/`height` à la balise, le navigateur réserve la bonne
+    boîte avant même d'avoir lu le fichier : la carte s'affiche, et la page ne
+    sursaute pas au chargement (ce qui compte autant sur une ligne lente).
+    """
+    try:
+        if chemin.suffix.lower() == ".svg":
+            tete = chemin.read_text(encoding="utf-8", errors="replace")[:800]
+            m = re.search(r'viewBox\s*=\s*"[\d.\-]+\s+[\d.\-]+\s+([\d.]+)\s+([\d.]+)"',
+                          tete, re.I)
+            if m:
+                return int(float(m.group(1))), int(float(m.group(2)))
+            return 0, 0
+        from PIL import Image
+        with Image.open(chemin) as im:
+            l, h = im.size
+        if l > LARGEUR_IMG:
+            h = round(h * LARGEUR_IMG / l)
+            l = LARGEUR_IMG
+        return int(l), int(h)
+    except Exception:                                        # noqa: BLE001
+        return 0, 0
+
+
+def embarquer_image(chemin: Path) -> str:
+    """Le fichier en `data:` — vide si on ne sait pas le lire, jamais une
+    exception : une image illisible ne doit pas faire échouer la publication
+    d'un cahier de six cents pages."""
+    try:
+        if chemin.suffix.lower() == ".svg":
+            # Un SVG est du texte. On l'encode en base64 malgré tout : un `#`
+            # ou un `%` dans une URL `data:` non encodée coupe l'attribut en
+            # deux, et l'image disparaît sans que rien ne le signale.
+            brut = chemin.read_bytes()
+            return "data:image/svg+xml;base64," + base64.b64encode(brut).decode("ascii")
+        from PIL import Image           # importé ici : le contrôle n'en a pas besoin
+        im = Image.open(chemin)
+        if im.mode in ("RGBA", "P", "LA"):
+            fond = Image.new("RGB", im.size, "white")
+            im = im.convert("RGBA")
+            fond.paste(im, mask=im.split()[-1])
+            im = fond
+        else:
+            im = im.convert("RGB")
+        if im.width > LARGEUR_IMG:
+            im = im.resize((LARGEUR_IMG, round(im.height * LARGEUR_IMG / im.width)),
+                           Image.LANCZOS)
+        # On descend jusqu'à passer sous le plafond : d'abord la qualité (l'œil
+        # la remarque peu sur une photo de document), la largeur en dernier.
+        octets = b""
+        for larg, qual in ((im.width, QUALITE_IMG), (im.width, 50), (im.width, 42),
+                           (560, 48), (460, 45)):
+            copie = im if larg == im.width else im.resize(
+                (larg, round(im.height * larg / im.width)), Image.LANCZOS)
+            tampon = io.BytesIO()
+            copie.save(tampon, "JPEG", quality=qual, optimize=True, progressive=True)
+            octets = tampon.getvalue()
+            if len(octets) <= PLAFOND_IMG:
+                break
+        return "data:image/jpeg;base64," + base64.b64encode(octets).decode("ascii")
+    except Exception as e:                                   # noqa: BLE001
+        print(f"  ⚠ image illisible, ignorée : {chemin.name} ({e})")
+        return ""
+
+
+# ── LES CARTES MENTALES ─────────────────────────────────────────────────────
+# Treize schémas SVG dorment dans `Livrets 2nde -Tle/images/` : douze cartes
+# mentales et le schéma de la communication de Jakobson. Ils sont référencés
+# par `livret2nde-data.js` — un fichier qui n'est la source d'AUCUN des quinze
+# ouvrages vendus. Du contenu produit, payé, et que personne ne peut voir.
+#
+# On les rattache donc aux leçons qui ENSEIGNENT la notion, dans tous les
+# cahiers où cette leçon existe. La table est écrite à la main et vérifiable :
+# une carte mentale posée sur la mauvaise leçon serait pire que pas de carte
+# du tout.
+#
+# DEUX PRÉCAUTIONS, APPRISES EN LES MESURANT
+#   ① Les motifs sont ancrés sur des frontières de mot. Sans `\b`,
+#     « énonciation » s'accrochait à « La DÉnonciation des contre-valeurs »
+#     dans le Bord de 6ᵉ — la carte de l'énonciation sur une leçon de lecture
+#     suivie.
+#   ② On écarte les titres d'ÉPREUVE et de PRODUCTION : « Épreuve 1 — Langue
+#     française (texte narratif) » n'est pas une leçon sur le texte narratif,
+#     et « Produire un texte narratif complet » demande d'écrire, pas
+#     d'apprendre. La carte va où l'on découvre la notion.
+CARTES_MENTALES: list[tuple[str, str, str]] = [
+    # (fichier SVG, motif du titre de leçon, légende)
+    ("2nde-jakobson.svg",
+     r"\bfacteurs de la communication\b|\bsch[ée]ma de la communication\b",
+     "Le schéma de la communication selon Jakobson : six facteurs, six fonctions du langage."),
+    ("2nde-mm-valeurs-indicatif.svg",
+     r"\bvaleurs du mode indicatif\b|\bvaleurs de l'indicatif\b",
+     "Carte mentale — les valeurs du mode indicatif."),
+    ("2nde-mm-texte-narratif.svg",
+     r"\ble texte narratif\b",
+     "Carte mentale — les composantes du texte narratif."),
+    ("2nde-mm-progression-thematique.svg",
+     r"\bprogressions? th[ée]matiques?\b",
+     "Carte mentale — les trois types de progression thématique."),
+    ("2nde-mm-figures-analogie.svg",
+     r"\bfigures d'analogie\b",
+     "Carte mentale — les figures d'analogie."),
+    ("2nde-mm-texte-theatral.svg",
+     r"\btexte th[ée][âa]tral\b",
+     "Carte mentale — les caractéristiques du texte théâtral."),
+    ("2nde-mm-formation-mots.svg",
+     r"\bformation des mots\b",
+     "Carte mentale — la formation des mots : dérivation et composition."),
+    ("2nde-mm-connecteurs-logiques.svg",
+     r"\bconnecteurs logiques\b",
+     "Carte mentale — les connecteurs logiques."),
+    ("2nde-mm-figures-insistance.svg",
+     r"\bfigures d'insistance\b",
+     "Carte mentale — les figures d'insistance."),
+    ("2nde-mm-enonciation.svg",
+     r"\b[ée]nonciation\b",
+     "Carte mentale — les indices de l'énonciation."),
+    ("2nde-mm-discours-recit.svg",
+     r"\bdiscours et (?:le )?r[ée]cit\b",
+     "Carte mentale — discours et récit."),
+    ("2nde-mm-tonalite-lyrique.svg",
+     r"\btonalit[ée] lyrique\b",
+     "Carte mentale — la tonalité lyrique."),
+    ("2nde-mm-homonymes-paronymes.svg",
+     r"\bhomonymes\b.{0,20}\bparonymes\b",
+     "Carte mentale — homonymes et paronymes."),
+]
+
+# Un titre qui contient l'un de ces mots n'est pas une leçon sur la notion :
+# c'est une épreuve qui l'évalue, ou une tâche qui la réinvestit.
+PAS_UNE_LECON = re.compile(
+    r"\b[ée]preuve\b|\b[ée]valuation\b|\bproduire\b|\bproduction\b|\br[ée]diger\b"
+    r"|\bbilan\b|\bsujet\b|\bcorrig[ée]\b|\baxe\s*\d", re.I)
+
+_CACHE_CARTES: dict[str, str] = {}
+_CACHE_DIMS: dict[str, tuple[int, int]] = {}
+
+# Le fichier source en cours de conversion. Les blocs `image` désignent leur
+# fichier RELATIVEMENT à lui (« images/… » chez le lycée, un simple nom chez les
+# Bords) : sans savoir d'où l'on part, on ne peut pas les retrouver.
+SRC_COURANTE: Path | None = None
+
+
+def bloc_image(x: dict) -> dict | None:
+    """Un bloc `image` de n'importe quelle source, fichier embarqué."""
+    if SRC_COURANTE is None:
+        return None
+    p = _chemin_image(x, SRC_COURANTE)
+    cap = txt(x.get("cap") or x.get("legende"))
+    if p is None or SANS_IMAGES:
+        # On garde la légende : la consigne qui renvoie au document doit au
+        # moins dire de quoi elle parle. Le moteur l'affiche telle quelle.
+        return B("image", cap=cap) if cap else None
+    l, h = dimensions_image(p)
+    return B("image", src=embarquer_image(p), cap=cap, w=l or None, h=h or None)
+
+
+def carte_mentale_pour(titre: str) -> dict | None:
+    """La carte mentale qui éclaire cette leçon, embarquée — ou rien."""
+    t = txt(titre)
+    if not t or PAS_UNE_LECON.search(t):
+        return None
+    for fichier, motif, legende in CARTES_MENTALES:
+        if not re.search(motif, t, re.I):
+            continue
+        if fichier not in _CACHE_CARTES:
+            p = L2 / "images" / fichier
+            _CACHE_CARTES[fichier] = embarquer_image(p) if p.is_file() else ""
+            _CACHE_DIMS[fichier] = dimensions_image(p) if p.is_file() else (0, 0)
+        src = _CACHE_CARTES[fichier]
+        if not src:
+            return None
+        l, h = _CACHE_DIMS.get(fichier, (0, 0))
+        return B("carte", src=src, cap=legende, w=l or None, h=h or None)
+    return None
+
+
 # ── LA TABLE DES CORRIGÉS ───────────────────────────────────────────────────
 # « L'apprenant peut travailler de manière autonome puis voir les corrigés sans
 # avoir besoin de l'enseignant » (Jacques, 27/08/2026). C'est le premier des
@@ -232,6 +483,29 @@ CORRIGES: dict[str, str] = {}
 
 PREFIXE_EXO = re.compile(r"^Exercice\s+\d+\s*[—–-]\s*")
 
+# ── CE QUI N'EST PAS UN CORRIGÉ, MÊME SI ÇA S'APPELLE `answer` ──────────────
+# Dans les sources du 1er cycle, `answer` ne porte pas la réponse : il porte la
+# FORME de l'exercice — « lines » (des lignes à remplir), « options » (un QCM),
+# « relier », « crossword », « wordsearch ». La réponse, elle, est ailleurs ou
+# n'existe pas.
+#
+# Pris pour des corrigés, ces mots-clés partaient dans la table. Mesuré sur la
+# charge du 01/09/2026, AVANT correction :
+#     2ⁿᵈᵉ  319 corrigés annoncés — 319 valaient le mot « lines », soit 100 %
+#     6ᵉ    953 —  466 (49 %)   ·   5ᵉ  884 — 441 (50 %)
+#     4ᵉ    800 —  440 (55 %)   ·   3ᵉ 1021 — 460 (45 %)
+# soit 2 126 des 3 977 « corrigés en libre-service » vendus avec les cahiers.
+#
+# Concrètement : l'élève cherchait, répondait, cliquait « Voir la correction »
+# — et lisait « lines ». Le cahier de 2ⁿᵈᵉ ne pouvait rien répondre d'autre.
+# Rien ne plantait, aucune erreur nulle part : la fonctionnalité payée
+# répondait, et ce qu'elle répondait n'avait aucun sens.
+#
+# On refuse donc ces mots. Un exercice sans vrai corrigé n'entre plus dans la
+# table, et api/cahier.php répond alors « aucune correction type » (404) — ce
+# que le moteur sait dire. Mieux vaut l'absence annoncée qu'une réponse fausse.
+FORMES_EXERCICE = {"lines", "options", "relier", "crossword", "wordsearch", "wordbank"}
+
 
 def noter_corrige(consigne: str, corrige: str) -> None:
     """Range un corrigé sous l'empreinte de sa consigne — et sous sa variante
@@ -245,6 +519,8 @@ def noter_corrige(consigne: str, corrige: str) -> None:
     livret — devient atteignable depuis le cahier de l'élève."""
     c, r = txt(consigne), txt(corrige)
     if not c or not r:
+        return
+    if r.strip().lower() in FORMES_EXERCICE:
         return
     CORRIGES[empreinte(c)] = r
     nu = PREFIXE_EXO.sub("", c)
@@ -287,6 +563,28 @@ def depuis_booklet(d: dict, avec_corriges: bool) -> list[dict]:
                 out.append(lignes(f.get("lines") or 14))
             elif t == "exercise":
                 exercice(f, corrige_ok)
+            # ── CE QUI TOMBAIT PAR TERRE ─────────────────────────────────────
+            # Cinq types de blocs traversaient ce `for` sans qu'aucun `elif` ne
+            # les prenne : la boucle passait à la suivante, en silence. Compté
+            # sur les cinq cahiers du 1er cycle : 123 questions, 91 sources,
+            # 19 sous-titres, 8 astuces, 6 sujets — 247 blocs.
+            # Le livret de 2ⁿᵈᵉ portait à lui seul 123 questions et 66 sources :
+            # l'acheteur payait un cahier dont un bloc sur huit n'existait pas.
+            # Rien ne le disait — un `elif` manquant ne lève pas d'erreur.
+            elif t == "question":
+                out.append(B("question", no=txt(f.get("num")),
+                             txt=txt(f.get("body") or f.get("text"))))
+                if f.get("lines"):
+                    out.append(lignes(f.get("lines")))
+            elif t == "source":
+                out.append(B("source", txt=txt(f.get("text") or f.get("raw"))))
+            elif t == "subhead":
+                out.append(B("rubrique", txt=txt(f.get("text"))))
+            elif t == "astuce":
+                out.append(B("astuce", txt=txt(f.get("text"))))
+            elif t == "sujet":
+                out.append(B("sujet", txt=txt(f.get("text"))))
+                out.append(lignes(f.get("cahierH") or 14))
 
     def exercice(f: dict, corrige_ok: bool) -> None:
         """Un exercice, et — pour le guide seulement — sa réponse.
@@ -307,6 +605,48 @@ def depuis_booklet(d: dict, avec_corriges: bool) -> list[dict]:
         if isinstance(g, list) and isinstance(dr, list) and g and dr:
             out.append(B("appariement",
                          gauche=[txt(x) for x in g], droite=[txt(x) for x in dr]))
+
+        # ── LES JEUX : MOTS CROISÉS ET MOTS MÊLÉS ───────────────────────────
+        # « Des jeux (mots croisés, mots mêlés) […] invitent l'élève à
+        # réinvestir ses acquis de façon vivante » — avant-propos du livret
+        # imprimé. Il y en a 86 dans les quatre cahiers du 1er cycle : 31
+        # grilles de mots croisés et 55 de mots mêlés.
+        #
+        # Aucune ne franchissait cette fonction. La consigne passait
+        # (« Complète la grille de mots croisés à l'aide des définitions
+        # ci-dessous »), la grille et les définitions restaient dans la source.
+        # L'acheteur lisait donc une consigne qui renvoyait à des définitions
+        # absentes, sous un espace vide. C'est le genre de trou qu'aucune
+        # erreur ne signale : la page s'affiche, complète, et il manque
+        # l'exercice.
+        #
+        # RIEN DE CE QU'ON TRANSMET N'EST UNE RÉPONSE : la grille de mots
+        # croisés ne porte que les cases et leurs numéros (`cell`), jamais les
+        # lettres ; celle des mots mêlés porte les lettres, mais trouver les
+        # mots dedans EST l'exercice. On peut donc les servir à l'élève.
+        cw = f.get("crossword")
+        if isinstance(cw, dict) and cw.get("cell"):
+            cl = cw.get("clues") or {}
+            out.append(B("motscroises",
+                         cases=cw.get("cell"),
+                         horiz=[{"n": txt(d.get("num")), "d": txt(d.get("def"))}
+                                for d in (cl.get("A") or []) if isinstance(d, dict)],
+                         verti=[{"n": txt(d.get("num")), "d": txt(d.get("def"))}
+                                for d in (cl.get("D") or []) if isinstance(d, dict)]))
+        ws = f.get("wordsearch")
+        if isinstance(ws, dict) and ws.get("grid"):
+            # Une ligne de grille est une chaîne (« IODLABREMFSUC ») ou une
+            # liste de lettres selon la source : on ramène à la chaîne, qui est
+            # ce que le moteur découpe.
+            lignes_ws = []
+            for r in ws.get("grid") or []:
+                r = "".join(str(c) for c in r) if isinstance(r, list) else txt(r)
+                if r:
+                    lignes_ws.append(r)
+            out.append(B("motsmeles",
+                         grille=lignes_ws,
+                         mots=[txt(w) for w in (ws.get("words") or []) if txt(w)]))
+
         if f.get("lines"):
             out.append(lignes(f.get("lines")))
         if txt(f.get("answer")):
@@ -326,6 +666,11 @@ def depuis_booklet(d: dict, avec_corriges: bool) -> list[dict]:
             out.append(B("semaine", no=txt(w.get("num")), title=txt(w.get("title"))))
             for it in w.get("items") or []:
                 out.append(B("lecon", no=txt(it.get("label")), title=txt(it.get("title"))))
+                # La carte mentale de la notion, si elle existe : posée juste
+                # après le titre, là où l'élève ouvre la leçon.
+                carte = carte_mentale_pour(it.get("title"))
+                if carte:
+                    out.append(carte)
                 if txt(it.get("disc")):
                     out.append(B("rubrique", txt=txt(it.get("disc"))))
                 for o in it.get("objectives") or []:
@@ -411,6 +756,9 @@ def depuis_manuel(d: dict, avec_corriges: bool) -> list[dict]:
         if y == "lecon":
             # `disc` porte la leçon : titre d'un côté, domaine de l'autre.
             out.append(B("lecon", no=txt(x.get("lecon")), title=txt(x.get("titre"))))
+            carte = carte_mentale_pour(x.get("titre"))
+            if carte:
+                out.append(carte)
             if txt(x.get("dom")):
                 out.append(B("rubrique", txt=txt(x.get("dom"))))
             continue
@@ -423,7 +771,12 @@ def depuis_manuel(d: dict, avec_corriges: bool) -> list[dict]:
             out.append(B("semaine", no=txt(x.get("num") or x.get("n")), title=txt(x.get("txt"))))
             continue
         if y == "image":
-            out.append(B("image", src=txt(x.get("src") or x.get("d")), cap=txt(x.get("cap"))))
+            # `d` n'est PAS une source : c'est le numéro de séquence du bloc
+            # dans ce format. Le lire comme une image donnait `src="1"`, donc
+            # une balise <img> vers un fichier nommé « 1 ».
+            im = bloc_image(x)
+            if im:
+                out.append(im)
             continue
         out.append(B(y, txt=txt(x.get("txt"))))
     return out
@@ -454,11 +807,50 @@ def depuis_bord(blocs: list, avec_corriges: bool) -> list[dict]:
         # produit. Seul un bloc explicitement `corrige` est réservé au guide.
         if not avec_corriges and y in ("corrige", "reponse"):
             continue
+        # Les Bords nomment leur illustration dans `img` (« image4 ») et le
+        # fichier vit dans un dossier frère (`images4e/image4.jpg`). Recopié
+        # tel quel, ce nom ne désignait rien pour le navigateur : trente et une
+        # illustrations n'ont jamais été affichées.
+        if y == "image":
+            im = bloc_image(x)
+            if im:
+                out.append(im)
+            continue
         b = dict(x)
         b["y"] = TRAD_MANUEL.get(y, y)
         b.pop("t", None)
         out.append(b)
+        # Le titre d'une leçon de Bord vit dans ses `runs` : `txt()` sait les
+        # lire, et c'est lui qui décide s'il existe une carte mentale.
+        if b["y"] in ("lecon", "disc"):
+            carte = carte_mentale_pour(txt(b.get("title") or b.get("titre") or b.get("r")))
+            if carte:
+                out.append(carte)
     return out
+
+
+def alleger(blocs: list[dict]) -> list[dict]:
+    """L'APERÇU GRATUIT NE PORTE PAS LES FICHIERS EMBARQUÉS.
+
+    Une photo embarquée pèse 40 à 250 Ko à elle seule ; l'extrait, lui, tient
+    entre 3 et 13 Ko et la CI REFUSE de déployer un `livrets/*.js` de plus de
+    120 Ko — c'est le garde-fou qui empêche de publier par accident un cahier
+    entier en clair. Deux leçons tirées au bon endroit auraient suffi à le
+    faire sauter, et le déploiement se serait arrêté sans qu'on comprenne
+    pourquoi : rien dans le message n'aurait parlé d'images.
+
+    On garde la LÉGENDE : le visiteur voit qu'il y a un document, et de quoi il
+    parle. C'est même honnête — l'aperçu montre la forme, le cahier livre le
+    contenu.
+    """
+    net: list[dict] = []
+    for b in blocs:
+        if isinstance(b, dict) and b.get("y") in ("image", "carte") and b.get("src"):
+            b = {k: v for k, v in b.items() if k != "src"}
+            if not b.get("cap"):
+                continue
+        net.append(b)
+    return net
 
 
 # ── Extrait gratuit ─────────────────────────────────────────────────────────
@@ -570,6 +962,8 @@ def produire(slug: str, spec: dict, charge: Path | None, controle: bool) -> dict
         return {"slug": slug, "erreur": f"source absente : {src.name}"}
 
     CORRIGES.clear()          # une table par ouvrage, jamais mélangées
+    global SRC_COURANTE
+    SRC_COURANTE = src        # d'où partent les chemins d'image de CE cahier
     brut = lire_json_js(src)
     if isinstance(brut, list):
         eleve = depuis_bord(brut, False)
@@ -587,6 +981,7 @@ def produire(slug: str, spec: dict, charge: Path | None, controle: bool) -> dict
 
     # Le guide de l'enseignant vient d'un fichier à part quand il existe.
     if spec.get("guide") and Path(spec["guide"]).is_file():
+        SRC_COURANTE = Path(spec["guide"])
         g = lire_json_js(Path(spec["guide"]))
         if isinstance(g, dict) and est_guide(g):
             prof = depuis_guide(g)
@@ -597,7 +992,7 @@ def produire(slug: str, spec: dict, charge: Path | None, controle: bool) -> dict
         elif isinstance(g, list):
             prof = depuis_bord(g, True)
 
-    apercu = extraire(eleve)
+    apercu = alleger(extraire(eleve))
     corriges = dict(CORRIGES)
     js_eleve = "window.CAHIER_BLOCS=" + json.dumps(eleve, ensure_ascii=False, separators=(",", ":")) + ";"
     js_prof = "window.CAHIER_BLOCS=" + json.dumps(prof, ensure_ascii=False, separators=(",", ":")) + ";"
@@ -705,12 +1100,18 @@ def main() -> int:
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--charge", type=Path, help="dossier de la charge à téléverser")
     ap.add_argument("--seulement", action="append", default=[], help="un slug (répétable)")
+    ap.add_argument("--sans-images", action="store_true",
+                    help="ne pas embarquer les photos (les légendes restent) ; "
+                         "les cartes mentales, elles, sont toujours embarquées")
     ap.add_argument("--controle", action="store_true", help="ne produit rien")
     ap.add_argument("--catalogue", action="store_true",
                     help="inscrit aussi les ouvrages produits au catalogue serveur")
     ap.add_argument("--prix", type=int, default=PRIX_UNITAIRE,
                     help=f"tarif d'un ouvrage en FCFA (défaut {PRIX_UNITAIRE})")
     a = ap.parse_args()
+
+    global SANS_IMAGES
+    SANS_IMAGES = bool(a.sans_images)
 
     slugs = a.seulement or list(CAHIERS)
     inconnus = [s for s in slugs if s not in CAHIERS]

@@ -79,6 +79,33 @@ function titreDe(b) {
     || (b.r || []).map((r) => (r && r.t) || '').join(' ')).replace(/\s+/g, ' ').trim();
 }
 
+/* ── COMBIEN D'EXERCICES N'ONT NULLE PART OÙ RÉPONDRE ? ──────────────────────
+   Le moteur ne pose plus de boîte sous un exercice quand l'espace réglé arrive
+   au bloc SUIVANT — sans quoi les cahiers du lycée affichaient deux zones de
+   réponse par question, une vide et une utile. Cette économie a un prix : si
+   la condition se trompe d'un cran, l'exercice se retrouve muet, et l'élève a
+   payé pour un cahier où il ne peut pas écrire.
+
+   On compte donc, sur les cahiers RÉELS : combien d'exercices n'ont, entre eux
+   et l'exercice suivant, aucun endroit où écrire. La réponse doit être zéro.
+   (Le découpage se fait sur le HTML plutôt que sur les blocs : c'est ce que
+   l'élève reçoit, et c'est la seule chose qui compte pour lui.) */
+function exercicesSansReponse(html) {
+  /* « Un endroit où répondre », ce n'est pas seulement une ligne à écrire :
+     cocher une proposition, choisir dans une liste, taper une lettre dans une
+     grille ou marquer une case de mots mêlés en sont aussi. Ne compter que les
+     `ch-champ` faisait passer pour muets 225 exercices parfaitement
+     répondables — le banc dénonçait alors un défaut qui n'existait pas, et
+     c'est le meilleur moyen qu'il cesse d'être lu. */
+  const REPONDABLE = /class="(ch-champ|ch-qcm|ch-rel-s|ch-case-i|ch-lettre)/;
+  const parts = html.split(/(?=<div class="ch-exo")/);
+  let muets = 0;
+  for (let i = 1; i < parts.length; i++) {
+    if (!REPONDABLE.test(parts[i])) muets++;
+  }
+  return muets;
+}
+
 function compter(html) {
   const n = (re) => (html.match(re) || []).length;
   return {
@@ -131,6 +158,7 @@ for (const f of fichiers) {
     slug, c, champs, blocs: blocs.length,
     lignesAttendues: blocs.filter((b) => b && (b.y === 'lines' || b.y === 'ligne')).length,
     lignesRendues: (html.match(/class="ch-champ ch-champ-lignes"/g) || []).length,
+    exosMuets: exercicesSansReponse(html),
   });
   console.log(`  ${slug.padEnd(12)}${String(c.saisie).padStart(7)}${String(c.qcm).padStart(6)}`
     + `${String(c.relier).padStart(7)}${String(c.exos).padStart(6)}`
@@ -152,6 +180,27 @@ for (const b of bilan) {
   if (!b.lignesAttendues) continue;
   dire(b.lignesRendues === b.lignesAttendues,
     `${b.slug} : ${b.lignesRendues}/${b.lignesAttendues} espaces d'écriture réglés rendus`);
+}
+/* Aucun exercice muet : voir `exercicesSansReponse`. Éprouvé par mutation —
+   en retirant la condition « l'espace réglé arrive au bloc suivant », les
+   cahiers du lycée repassent au vert avec DEUX zones par question ; en
+   l'élargissant d'un cran (n'importe quel bloc suivant, pas seulement `lines`),
+   ce contrôle rougit sur 1ʳᵉ, 2ⁿᵈᵉ, Tˡᵉ et Tˡᵉ S&T. */
+for (const b of bilan) {
+  dire(b.exosMuets === 0,
+    `${b.slug} : ${b.exosMuets} exercice(s) sans nulle part où répondre`);
+}
+/* Aucun exercice muet. Voir `exercicesSansReponse` : c'est le contrôle qui
+   garde l'économie de la boîte en double.
+   ÉPROUVÉ PAR MUTATION, deux fois, sur les quinze cahiers réels :
+     · ne plus jamais poser le champ de l'exercice  → 30 rouges ;
+     · décaler d'un cran le bloc regardé (i+2 au lieu de i+1), c'est-à-dire
+       l'erreur qu'on ferait vraiment en touchant cette ligne → 6 rouges
+       (1ʳᵉ : 11 exercices muets, Tˡᵉ : 5, 6ᵉ : 3).
+   Un banc qui ne rougit pas quand on casse la règle ne prouve rien. */
+for (const b of bilan) {
+  dire(b.exosMuets === 0,
+    `${b.slug} : ${b.exosMuets} exercice(s) sans nulle part où répondre`);
 }
 /* Un bloc sur dix non reconnu passerait inaperçu à l'œil et viderait le cahier
    d'un dixième de sa substance. On borne. */
