@@ -201,3 +201,11 @@ uploads/protected/**
 # depuis api/data/ (dossier « Require all denied »). Le commiter rendrait tout
 # le repertoire telechargeable et viderait l'abonnement de son objet.
 plateforme/_corpus_source.js
+
+# Textes integraux des oeuvres etudiees : jamais versionnes (depot public)
+premier_cycle/_sources/
+
+# Manuscrits des cahiers d'oeuvre integrale : c'est le produit vendu.
+# Le depot est PUBLIC ; ces .docx ne doivent jamais y entrer, meme par un
+# « git add . » distrait. Ils vivent hors depot et se deposent par FTP.
+/Manuel_*_Etude_Integrale.docx

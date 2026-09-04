@@ -84,9 +84,13 @@ dire(orphelines.length === 0,
 /* ── ③ La vitrine n'affiche plus la photo générique ────────────────────── */
 console.log(`\n${G}③ L'accueil montre les vraies couvertures${R}`);
 const vitrine = fs.readFileSync(path.join(RACINE, 'vitrine.html'), 'utf8');
-[['Ngum a Jemea', 'tle_ngum_jemea'],
- ['Balafon', '1ere_balafon'],
- ['Capitoline', '2nde_tribus_capitoline'],
+/* Depuis le 03/09/2026 les quatre cartes portent la couverture du PRODUIT
+   VENDU (uploads/oeuvres/oeuvre-<slug>.jpg, la vraie couverture Editions
+   VERITAS) et non plus l'ancien visuel d'oeuvre. Le controle reste le meme :
+   une carte doit montrer SA couverture, jamais la photo de groupe. */
+[['Ngum a Jemea', 'oeuvre-ngum'],
+ ['Balafon', 'oeuvre-balafon'],
+ ['Capitoline', 'oeuvre-capitoline'],
  ['Le Tube Digestif', 'tubedigestif']].forEach(([titre, base]) => {
   const visuel = fichiers.find(v => v.replace(/\.[a-z]+$/i, '') === base);
   if (!visuel) { dire(false, titre + ' : couverture absente du dossier', base); return; }

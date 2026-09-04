@@ -78,7 +78,24 @@ def rendre_pdf(html, sortie):
 
 
 # ══ 2. PDF → images de pages ═══════════════════════════════════════════════
-def rasteriser(pdf, dossier, qualite=82):
+def rasteriser(pdf, dossier, qualite=82, largeur=LARGEUR_PAGE):
+    """PDF → une image par page.
+
+    LA DEFINITION EST UN ARBITRAGE, PAS UN DETAIL. Ces images se deposent par
+    FTP a la main, depuis Douala, et se retelechargent une par une par des
+    eleves sur donnees mobiles. Mesure faite sur un cahier d'oeuvre integrale
+    (214 pages A5, aplats de couleur et texte colore) :
+
+        1240 px q82  ->  234 Ko/page   (~50 Mo le cahier)
+        1000 px q76  ->  151 Ko/page   (~32 Mo le cahier)
+
+    1000 px pour un A5 de 148 mm fait 171 dpi : deux fois et demie la densite
+    d'un telephone qui affiche la page sur 400 px de large. On ne gagne donc
+    rien de VISIBLE au-dessus, et on paie chaque kilo-octet deux fois — une
+    fois a l'envoi, une fois a chaque lecture. `subsampling=0` (4:4:4) n'est en
+    revanche pas negociable : ces pages portent du texte de couleur sur aplat,
+    et la chroma divisee par deux le frange.
+    """
     try:
         import fitz
     except ImportError:
@@ -88,17 +105,19 @@ def rasteriser(pdf, dossier, qualite=82):
     total, octets = doc.page_count, 0
     for n in range(total):
         page = doc.load_page(n)
-        zoom = LARGEUR_PAGE / page.rect.width
+        zoom = largeur / page.rect.width
         pix = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), colorspace=fitz.csRGB, alpha=False)
         chemin = os.path.join(dossier, 'p%03d.jpg' % (n + 1))
-        pix.pil_save(chemin, format='JPEG', quality=qualite, optimize=True, progressive=True)
+        pix.pil_save(chemin, format='JPEG', quality=qualite, optimize=True,
+                     progressive=True, subsampling=0)
         octets += os.path.getsize(chemin)
-    dire('pages', '%d pages, %.1f Mo' % (total, octets / 1048576.0))
+    dire('pages', '%d pages, %.1f Mo (%d px, q%d)'
+         % (total, octets / 1048576.0, largeur, qualite))
     return total
 
 
 # ══ 3. Couverture : page 1 propre + vignette du site ═══════════════════════
-def poser_couverture(couverture, dossier, id_livre, hauteur_page):
+def poser_couverture(couverture, dossier, id_livre, hauteur_page, LARGEUR_PAGE=LARGEUR_PAGE):
     """La maquette imprimee fait courir son titre courant par-dessus la
     couverture ; l'edition en ligne merite la couverture seule. « Contain » sur
     un fond echantillonne sur l'oeuvre : aucun recadrage, aucune bande visible."""
@@ -189,6 +208,11 @@ def main():
     a.add_argument('--couleur', default='#142554')
     a.add_argument('--papier', action='store_true', help='le livre existe aussi en papier')
     a.add_argument('--refaire', action='store_true')
+    # Voir la raison du reglage dans la docstring de `rasteriser`.
+    a.add_argument('--largeur', type=int, default=LARGEUR_PAGE,
+                   help='largeur des images de page en px (defaut %d)' % LARGEUR_PAGE)
+    a.add_argument('--qualite', type=int, default=82,
+                   help='qualite JPEG des images de page (defaut 82)')
     o = a.parse_args()
 
     id_livre = re.sub(r'[^A-Za-z0-9_-]', '', o.id)
@@ -211,7 +235,7 @@ def main():
     if os.path.isdir(dossier):
         deja = len([f for f in os.listdir(dossier) if re.match(r'^p\d{3}\.jpg$', f)])
     if pdf and (o.refaire or not deja):
-        pages = rasteriser(pdf, dossier)
+        pages = rasteriser(pdf, dossier, o.qualite, o.largeur)
     elif deja:
         # Republier sans --pdf (pour corriger un prix, un resume) ne doit pas
         # perdre le nombre de pages : il se relit sur le disque.
@@ -224,12 +248,12 @@ def main():
     vignette = ''
     if o.couverture:
         from PIL import Image
-        h = LARGEUR_PAGE * 1757 // 1240
+        h = o.largeur * 1757 // 1240
         if pages:
             h = Image.open(os.path.join(dossier, 'p002.jpg')
                            if os.path.isfile(os.path.join(dossier, 'p002.jpg'))
                            else os.path.join(dossier, 'p001.jpg')).height
-        vignette = poser_couverture(o.couverture, dossier, id_livre, h)
+        vignette = poser_couverture(o.couverture, dossier, id_livre, h, o.largeur)
 
     # EPUB
     chaps, incipit, mots = [], '', 0

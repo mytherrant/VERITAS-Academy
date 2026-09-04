@@ -729,6 +729,102 @@ titre("9. Lecture du droit : l'echeance referme vraiment");
        vrt_prix_catalogue($dbVierge, 'digitalbook', 'nexistepas_' . bin2hex(random_bytes(4))) === null);
 })();
 
+
+// ════════════════════════════════════════════════════════════════════════════
+// 10. CHAQUE LIVRE A SON PRIX, ET UN PASSE N'OUVRE QU'UN SEUL LIVRE
+// ────────────────────────────────────────────────────────────────────────────
+// Règle posée le 02/09/2026, en mettant neuf cahiers en vente à TROIS tarifs
+// (2nde 1 000 F · 1ere 1 200 F · Tle 1 300 F). Deux façons de la trahir, et
+// aucune ne se voit à l'œil :
+//   · servir à tous le prix du premier livre — un cahier de Terminale partirait
+//     à 1 000 F, et la perte resterait invisible jusqu'au relevé de fin de mois ;
+//   · laisser un achat ouvrir plus d'un livre — neuf ouvrages pour un paiement.
+// La section 9 ne regarde que le PREMIER livre du catalogue : elle resterait
+// verte dans les deux cas. Celle-ci les parcourt tous.
+// ════════════════════════════════════════════════════════════════════════════
+(function () {
+    titre('10. Chaque livre son tarif ; un passe, un seul livre');
+
+    $cat = json_decode((string) @file_get_contents(dirname(__DIR__) . '/catalogue_livres.json'), true);
+    $livres = [];
+    foreach (($cat['livres'] ?? []) as $l) {
+        if (!is_array($l) || empty($l['id'])) continue;
+        $p = 0;
+        foreach (['prixDigital', 'priceDigital', 'prix'] as $k) {
+            if (isset($l[$k]) && (int) $l[$k] > 0) { $p = (int) $l[$k]; break; }
+        }
+        if ($p > 0) $livres[(string) $l['id']] = $p;
+    }
+    ok('le catalogue porte au moins deux livres tarifés', count($livres) >= 2,
+       count($livres) . ' livre(s) tarifé(s)');
+    if (count($livres) < 2) return;
+
+    // La base ignore ces livres : c'est la situation réelle entre le déploiement
+    // du catalogue et la première synchro d'un administrateur.
+    $vierge = ['books' => [], 'elearning' => ['contenus' => [], 'plans' => []]];
+
+    // ── (a) Le tarif servi est celui de CE livre, pas celui d'un autre ───────
+    $faux = [];
+    foreach ($livres as $id => $prix) {
+        if (vrt_prix_catalogue($vierge, 'digitalbook', $id) !== $prix) $faux[] = $id;
+    }
+    ok('chaque livre reçoit SON tarif', $faux === [],
+       'tarif erroné pour : ' . implode(', ', array_slice($faux, 0, 4)));
+
+    // ── (b) Payer le tarif d'un livre MOINS CHER est refusé ─────────────────
+    // On ne teste QUE le sous-paiement, et c'est un choix, pas un oubli :
+    // `vrt_verifier_prix` compare à un PLANCHER, donc un trop-perçu passe. Il
+    // doit passer — refuser 1 300 F sur un livre à 1 200 F reviendrait à ne
+    // rien livrer à un client qui a payé plus que le prix. Le risque est
+    // entièrement de l'autre côté : un cahier de Terminale emporté au tarif
+    // de Seconde. Deux cahiers au même prix ne peuvent pas se distinguer par
+    // le montant, et c'est normal aussi.
+    $laxistes = [];
+    foreach ($livres as $id => $prix) {
+        foreach ($livres as $prixAutre) {
+            if ($prixAutre >= $prix) continue;
+            $v = vrt_verifier_prix($vierge, ['intent' => 'digitalbook',
+                                             'targetId' => $id, 'montant_paye' => $prixAutre]);
+            if (!empty($v['ok'])) $laxistes[] = "$id accepté à $prixAutre F (tarif $prix)";
+        }
+    }
+    ok('le tarif d\'un livre MOINS CHER est refusé', $laxistes === [],
+       implode(' | ', array_slice($laxistes, 0, 3)));
+
+    // ── (c) UN passe n'ouvre QU'UN livre ────────────────────────────────────
+    $ids = array_keys($livres);
+    $achete = $ids[0];
+    $db = baseDeTest();
+    $r = vrt_grant_entitlement($db, paiement('digitalbook', $achete, $livres[$achete]));
+    $ouverts = [];
+    foreach (($db['visitorAccounts'] ?? []) as $a) {
+        if (($a['id'] ?? '') === 'acc_test') $ouverts = $a['unlockedBooks'] ?? [];
+    }
+    ok('l\'achat débloque le livre payé', !empty($r['changed']) && in_array($achete, $ouverts, true),
+       'unlockedBooks = ' . json_encode($ouverts));
+    ok('il n\'en débloque AUCUN autre', count($ouverts) === 1,
+       count($ouverts) . ' livres ouverts pour un seul paiement : ' . json_encode($ouverts));
+
+    // ── (d) …et chacun des autres reste fermé, nommément ────────────────────
+    $fuites = [];
+    foreach ($ids as $autre) {
+        if ($autre !== $achete && in_array($autre, $ouverts, true)) $fuites[] = $autre;
+    }
+    ok('les autres cahiers restent fermés', $fuites === [],
+       'ouverts sans paiement : ' . implode(', ', $fuites));
+
+    // ── (e) Deux achats distincts cumulent, sans se recouvrir ───────────────
+    $second = $ids[1];
+    vrt_grant_entitlement($db, paiement('digitalbook', $second, $livres[$second]));
+    $ouverts2 = [];
+    foreach (($db['visitorAccounts'] ?? []) as $a) {
+        if (($a['id'] ?? '') === 'acc_test') $ouverts2 = $a['unlockedBooks'] ?? [];
+    }
+    ok('un second achat s\'ajoute au premier', count($ouverts2) === 2
+       && in_array($achete, $ouverts2, true) && in_array($second, $ouverts2, true),
+       'unlockedBooks = ' . json_encode($ouverts2));
+})();
+
 // ════════════════════════════════════════════════════════════════════════════
 // BILAN
 // ════════════════════════════════════════════════════════════════════════════

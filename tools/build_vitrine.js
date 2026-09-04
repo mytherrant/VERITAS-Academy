@@ -514,10 +514,17 @@ const NIVEAUX = ['6eme', '5eme', '4eme', '3eme', 'seconde', 'premiere', 'termina
 // Même règle qu'au-dessus : ce que la vitrine sait afficher reste dans la
 // vitrine. Le pied de page envoyait sept liens sur quinze vers l'application
 // pour des écrans qui existent ici.
+// La 3e colonne en compte SIX depuis l'ajout de « Partenaires » dans la
+// maquette : le libellé était arrivé sans sa destination, et le garde-fou
+// ci-dessous bloquait tout le build de la vitrine (« 16 ancres pour 15
+// destinations »). « Réseau enseignants » et « Partenaires » mènent tous deux
+// à la section #partenariat de l'application — c'est elle qui porte les deux
+// publics, et l'app n'a pas d'écran distinct pour l'un d'eux.
 const FOOTER = [
   '#elearning', 'corriges/', '#elearning', APP + '#epreuves', 'oeuvres/',
   '#boutique', '#tarifs', '#elearning', '#elearning', APP + '#cagnotte',
-  'decouvrir/', '#parents', APP + '#partenariat', 'campus/', APP + '#verifier-certificat'
+  'decouvrir/', '#parents', APP + '#partenariat', APP + '#partenariat',
+  'campus/', APP + '#verifier-certificat'
 ];
 
 function brancherEnOrdre(html, ancre, cibles, quoi) {
@@ -1509,6 +1516,24 @@ corps = corps.replace(/(assets\/(?!veritas-logo)[a-z0-9-]+)\.png/g, '$1.webp');
       if (t === 'VP8L') { const b = d.readUInt32LE(21); return { w: (b & 0x3fff) + 1, h: ((b >> 14) & 0x3fff) + 1 }; }
       if (t === 'VP8X') return { w: d.readUIntLE(24, 3) + 1, h: d.readUIntLE(27, 3) + 1 };
     }
+    // JPEG — la couverture d'un livre arrive en .jpg, pas en .png. Sans ce
+    // lecteur, le build s'arrêtait sur « Images introuvables sur le disque »
+    // pour des fichiers parfaitement présents : le message accusait le disque
+    // alors que c'est l'en-tête qui n'était pas su lire. On parcourt les
+    // segments jusqu'au premier SOF, qui porte la hauteur puis la largeur.
+    if (d.length > 4 && d[0] === 0xff && d[1] === 0xd8) {
+      let i = 2;
+      while (i + 9 < d.length) {
+        if (d[i] !== 0xff) { i++; continue; }
+        const m = d[i + 1];
+        if (m === 0xd8 || m === 0x01 || (m >= 0xd0 && m <= 0xd7)) { i += 2; continue; }
+        const len = d.readUInt16BE(i + 2);
+        // SOF0-3, SOF5-7, SOF9-11, SOF13-15 : tout sauf DHT(c4), JPG(c8), DAC(cc)
+        if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc)
+          return { w: d.readUInt16BE(i + 7), h: d.readUInt16BE(i + 5) };
+        i += 2 + len;
+      }
+    }
     return null;
   };
 
@@ -1535,7 +1560,7 @@ corps = corps.replace(/(assets\/(?!veritas-logo)[a-z0-9-]+)\.png/g, '$1.webp');
     return out;
   });
   if (introuvables.length) {
-    throw new Error('Images introuvables sur le disque, dimensions impossibles à poser : '
+    throw new Error('Dimensions impossibles a poser (fichier absent, ou en-tete non lu) : '
       + [...new Set(introuvables)].join(', ') + '. Une image manquante ici serait aussi une image manquante en production.');
   }
   console.log('images      : ' + posees + ' couples width/height posés · ' + differees + ' différées');
