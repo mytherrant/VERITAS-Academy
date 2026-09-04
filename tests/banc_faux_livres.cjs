@@ -130,6 +130,66 @@ for (const l of cat.livres) {
     `et le fichier existe : ${l.coverImg}`);
 }
 
+
+/* ════════════════════════════════════════════════════════════════════════
+   9-12. LES ARTICLES DE DÉMONSTRATION — même règle, même remède
+   ────────────────────────────────────────────────────────────────────────
+   Dix-huit articles étaient semés dans `defaultDB().products` et affichés
+   sur l'accueil, prix barré et bouton « Payer » compris, alors que rien
+   n'existait derrière. Signalé le 04/09/2026 depuis la page en ligne.
+   Mêmes contrôles que pour les livres : le seed ne sème plus, la migration
+   nettoie les bases déjà créées, et elle ne touche pas à ce qu'un
+   administrateur s'est approprié.
+   ════════════════════════════════════════════════════════════════════════ */
+const DEBUT_A = '(function _retirerFauxArticles(){';
+const iA = appjs.indexOf(DEBUT_A);
+dire(iA >= 0, 'la migration _retirerFauxArticles existe dans app.js');
+if (iA >= 0) {
+  let pa = 0, fa = -1;
+  for (let k = iA + DEBUT_A.length - 1; k < appjs.length; k++) {
+    if (appjs[k] === '{') pa++;
+    else if (appjs[k] === '}') { pa--; if (pa === 0) { fa = appjs.indexOf(')();', k) + 4; break; } }
+  }
+  const SRC_A = appjs.slice(iA, fa);
+  const migrerA = (db) => { new Function('DB', 'console', SRC_A)(db, { info() {}, warn() {} }); return db; };
+
+  const SEED_A = () => ([
+    { id: 'p13', titre: 'Fiches Maths Tle', prix: 3500, actif: true, featured: true },
+    { id: 'p14', titre: 'Cahier Physique', prix: 4200, actif: true, featured: true },
+    { id: 'p16', titre: 'Kit Géométrie',   prix: 8500, actif: true, featured: true },
+    { id: 'p18', titre: 'Abonnement Annuel', prix: 49000, actif: true, featured: true },
+  ]);
+
+  console.log(`\n${G}9. Les articles inventés disparaissent d'une base existante${R}`);
+  let db = migrerA({ products: SEED_A(), visitorOrders: [] });
+  dire(db.products.length === 0, 'les quatre articles de démonstration sont retirés',
+    JSON.stringify(db.products.map(p => p.id)));
+  dire((db._produitsRetires || []).length === 4, 'et ils sont inscrits au registre des retraits',
+    JSON.stringify(db._produitsRetires));
+
+  console.log(`\n${G}10. Ce qu'un administrateur s'est approprié est GARDÉ${R}`);
+  db = migrerA({ products: [Object.assign(SEED_A()[0], { titre: 'Fiches Maths Tle — édition 2027' })], visitorOrders: [] });
+  dire(db.products.length === 1, 'un article renommé survit à la migration');
+  db = migrerA({ products: [Object.assign(SEED_A()[1], { prix: 5000 })], visitorOrders: [] });
+  dire(db.products.length === 1, 'un article re-tarifé survit');
+  db = migrerA({ products: [Object.assign(SEED_A()[2], { photo: 'uploads/kit.jpg' })], visitorOrders: [] });
+  dire(db.products.length === 1, 'un article illustré d’une vraie photo survit');
+  db = migrerA({ products: [SEED_A()[3]], visitorOrders: [{ bookTitle: 'Abonnement Annuel', prix: 49000 }] });
+  dire(db.products.length === 1, 'un article DÉJÀ COMMANDÉ survit (l’acheteur garde sa trace)');
+
+  console.log(`\n${G}11. Le registre empêche le retour par resynchronisation${R}`);
+  db = migrerA({ products: [{ id: 'p13', titre: 'Fiches Maths Tle', prix: 3500 }],
+                 _produitsRetires: ['p13'], visitorOrders: [] });
+  dire(db.products.length === 0, 'un article déjà retiré ne revient pas par une vieille base');
+
+  console.log(`\n${G}12. Le seed d'app.js ne sème plus aucun article${R}`);
+  const iP = appjs.indexOf('\n  products:[');
+  const blocP = appjs.slice(iP, appjs.indexOf('\n  ],', iP));
+  dire(!/\{id:'p\d+'/.test(blocP), 'defaultDB().products est vide');
+  dire(!/Fiches Maths Tle|Cahier Physique|Audio Français|Kit Géométrie/.test(blocP),
+    'et aucun des articles signalés n’y figure plus');
+}
+
 console.log('\n' + '─'.repeat(68));
 if (ko) { console.log(`\x1b[31m${G}  ${X} ${ko} contrôle(s) en échec sur ${ok + ko}${R}`); process.exit(1); }
 console.log(`\x1b[32m${G}  ✓ ${ok}/${ok} — rien en vitrine qui n'existe pas.${R}`);

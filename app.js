@@ -942,26 +942,21 @@ function defaultDB(){return{
   // vraie photo n'est chargée via l'admin (Gestion → Galerie photos).
   galleryImages:[
   ],
+  /* AUCUN ARTICLE DE DÉMONSTRATION. Dix-huit articles étaient semés ici —
+     « Fiches Maths Tle », « Cahier Physique », « Audio Français », « Kit
+     Géométrie »… — avec un prix, un ancien prix barré, et un bouton « Payer »
+     branché sur le vrai tunnel d'encaissement. Rien n'existait derrière : un
+     visiteur pouvait régler 4 200 F pour un cahier de physique qui n'a jamais
+     été écrit, et aucun journal de paiement ne distingue un achat honoré d'un
+     achat impossible.
+
+     C'est la même règle que pour les livres, quelques lignes plus bas : une
+     donnée de démonstration ne doit JAMAIS être vendable. Une boutique vide
+     est un état correct — elle se remplit depuis Admin > Boutique, et « aucun
+     article » se corrige en en publiant un, là où dix-huit faux articles ne se
+     corrigent pas du tout. Les bases déjà créées sont nettoyées par
+     `_retirerFauxArticles()` dans `_migrateDB`. */
   products:[
-    {id:'p1',ico:'📝',titre:'Annales BEPC 2020-2025',prix:3500,ancien:5000,desc:'5 années de sujets et corrigés complets — Toutes matières',cat:'Épreuves',photo:'',actif:true},
-    {id:'p2',ico:'🎓',titre:'Annales BAC A/C/D 2020-2025',prix:4000,ancien:6000,desc:'Séries A, C, D — Sujets corrigés + méthodologie détaillée',cat:'Épreuves',photo:'',actif:true},
-    {id:'p3',ico:'✏️',titre:'Kit Fournitures Complet',prix:7500,ancien:12000,desc:'Cahiers 200p, stylos, règle, équerre, compas, calculatrice scientifique',cat:'Fournitures',photo:'',actif:true},
-    {id:'p4',ico:'👔',titre:'Uniforme Scolaire VÉRITAS',prix:10000,ancien:15000,desc:'Tenue complète aux couleurs du centre (chemise + pantalon/jupe)',cat:'Uniforme',photo:'',actif:true},
-    {id:'p5',ico:'🎒',titre:'Sac à dos VÉRITAS',prix:5000,ancien:8000,desc:'Sac résistant avec logo brodé + compartiment laptop + rangements',cat:'Fournitures',photo:'',actif:true},
-    {id:'p6',ico:'📐',titre:'Kit Géométrie Pro',prix:2500,ancien:4000,desc:'Compas de précision, rapporteur 360°, équerre, règle 30cm',cat:'Fournitures',photo:'',actif:true},
-    {id:'p7',ico:'☀️',titre:'Cours de Vacances (1 mois)',prix:20000,ancien:30000,desc:'Révisions intensives toutes matières — Juillet ou Août — Suivi personnalisé',cat:'Services',photo:'',actif:true},
-    {id:'p8',ico:'💻',titre:'Soutien Scolaire en Ligne (3 mois)',prix:12000,ancien:18000,desc:'Cours vidéo + exercices corrigés + suivi WhatsApp personnalisé',cat:'Services',photo:'',actif:true},
-    {id:'p9',ico:'📋',titre:'Fiches de Révision BEPC/BAC',prix:2000,ancien:3500,desc:'80 fiches synthétiques format poche — Toutes matières — Résumés essentiels',cat:'Épreuves',photo:'',actif:true},
-    {id:'p10',ico:'🌍',titre:'Atlas Cameroun & Monde',prix:3000,ancien:4500,desc:'Cartes détaillées, données économiques, démographiques et historiques',cat:'Manuels',photo:'',actif:true},
-    {id:'p11',ico:'🧑‍🏫',titre:'Préparation Intensive BEPC (WhatsApp)',prix:8000,ancien:12000,desc:'Groupe WhatsApp encadré par nos enseignants — Exercices quotidiens',cat:'Services',photo:'',actif:true},
-    {id:'p12',ico:'🏆',titre:'Pack Réussite Totale',prix:35000,ancien:55000,desc:'Annales + Fiches + Cours vacances + Soutien en ligne — Tout inclus !',cat:'Pack',photo:'',actif:true},
-    // ─── Articles & Ressources mis en avant (featured) — éditables depuis Admin > Boutique ───
-    {id:'p13',ico:'📚',titre:'Fiches Maths Tle',prix:3500,ancien:5000,desc:'120 fiches de révision Mathématiques Terminale — Formules, théorèmes, méthodes essentielles',cat:'Épreuves',photo:'',actif:true,featured:true,nouveau:false,bgColor:'linear-gradient(135deg,#EDE9FE,#DDD6FE)',pictoUrl:'https://em-content.zobj.net/source/microsoft-3D-fluent/406/notebook-with-decorative-cover_1f4d4.png'},
-    {id:'p14',ico:'🖊️',titre:'Cahier Physique',prix:4200,ancien:0,desc:'300 exercices de Physique avec solutions détaillées — Tous niveaux secondaires',cat:'Épreuves',photo:'',actif:true,featured:true,nouveau:false,bgColor:'linear-gradient(135deg,#D1FAE5,#A7F3D0)',pictoUrl:'https://em-content.zobj.net/source/microsoft-3D-fluent/406/pencil_270f-fe0f.png'},
-    {id:'p15',ico:'🎧',titre:'Audio Français',prix:2900,ancien:0,desc:'18 heures d\'enregistrements audio + transcriptions complètes — Compréhension orale',cat:'Manuels',photo:'',actif:true,featured:true,nouveau:true,bgColor:'linear-gradient(135deg,#DBEAFE,#BFDBFE)',pictoUrl:'https://em-content.zobj.net/source/microsoft-3D-fluent/406/headphone_1f3a7.png'},
-    {id:'p16',ico:'📐',titre:'Kit Géométrie',prix:8500,ancien:11000,desc:'Set complet pour examens : compas, rapporteur 360°, équerres, règles, gabarits',cat:'Fournitures',photo:'',actif:true,featured:true,nouveau:false,bgColor:'linear-gradient(135deg,#FEE2E2,#FECACA)',pictoUrl:'https://em-content.zobj.net/source/microsoft-3D-fluent/406/triangular-ruler_1f4d0.png'},
-    {id:'p17',ico:'📗',titre:'Guide Orientation',prix:1900,ancien:0,desc:'200 pages : filières, débouchés, concours camerounais et internationaux',cat:'Manuels',photo:'',actif:true,featured:true,nouveau:false,bgColor:'linear-gradient(135deg,#FEF3C7,#FDE68A)',pictoUrl:'https://em-content.zobj.net/source/microsoft-3D-fluent/406/closed-book_1f4d5.png'},
-    {id:'p18',ico:'🏆',titre:'Abonnement Annuel',prix:49000,ancien:99000,desc:'Accès illimité 12 mois à toutes les ressources VÉRITAS — Plateforme + Manuels + Cours',cat:'Pack',photo:'',actif:true,featured:true,nouveau:true,bgColor:'linear-gradient(135deg,#FCE7F3,#FBCFE8)',pictoUrl:'https://em-content.zobj.net/source/microsoft-3D-fluent/406/trophy_1f3c6.png'}
   ],
   elearning:{
     plans:[
@@ -1239,6 +1234,69 @@ function _migrateDB(){
          l'acheteur perdrait la trace de ce qu'il a payé.
      Ce qui ne passe pas ces trois filtres est laissé en place et signalé en
      console : mieux vaut un faux livre de trop qu'un vrai livre effacé. */
+  /* ── LES DIX-HUIT ARTICLES DE DÉMONSTRATION (04/09/2026) ─────────────────
+     Même histoire que les faux livres, même remède. Ils étaient semés dans
+     `defaultDB().products`, affichés sur l'accueil dans « Articles &
+     Ressources » avec un prix barré et un bouton « Payer » : de quoi faire
+     régler 8 500 F un kit de géométrie qui n'existe nulle part, et abîmer la
+     confiance sans que personne au centre l'apprenne.
+
+     ON NE SUPPRIME PAS À L'AVEUGLE — trois conditions cumulatives, parce que
+     `p3` a très bien pu être réattribué à un vrai article :
+       · le titre ET le prix sont encore ceux du seed (un article renommé ou
+         re-tarifé est un article que l'administration s'est approprié) ;
+       · aucune photo n'y a été attachée (en déposer une, c'est le rendre
+         réel) ;
+       · personne ne l'a commandé — sinon l'acheteur perdrait la trace de ce
+         qu'il a réglé.
+     Ce qui ne passe pas les trois est GARDÉ et signalé en console.
+
+     Le registre `DB._produitsRetires` sert au cas qui reviendrait par la
+     bande : un appareil resté sur une vieille base qui se resynchronise. */
+  (function _retirerFauxArticles(){
+    var SEED = {
+      p1: ['Annales BEPC 2020-2025', 3500],
+      p2: ['Annales BAC A/C/D 2020-2025', 4000],
+      p3: ['Kit Fournitures Complet', 7500],
+      p4: ['Uniforme Scolaire VÉRITAS', 10000],
+      p5: ['Sac à dos VÉRITAS', 5000],
+      p6: ['Kit Géométrie Pro', 2500],
+      p7: ['Cours de Vacances (1 mois)', 20000],
+      p8: ['Soutien Scolaire en Ligne (3 mois)', 12000],
+      p9: ['Fiches de Révision BEPC/BAC', 2000],
+      p10: ['Atlas Cameroun & Monde', 3000],
+      p11: ['Préparation Intensive BEPC (WhatsApp)', 8000],
+      p12: ['Pack Réussite Totale', 35000],
+      p13: ['Fiches Maths Tle', 3500],
+      p14: ['Cahier Physique', 4200],
+      p15: ['Audio Français', 2900],
+      p16: ['Kit Géométrie', 8500],
+      p17: ['Guide Orientation', 1900],
+      p18: ['Abonnement Annuel', 49000]
+    };
+    if (!Array.isArray(DB.products)) return;
+    var retiresDeja = DB._produitsRetires || [];
+    var commandes = DB.visitorOrders || [];
+    var retires = [], gardes = [];
+    DB.products = DB.products.filter(function (p) {
+      if (!p) return false;
+      if (retiresDeja.indexOf(p.id) >= 0) { retires.push(p.id); return false; }
+      var s = SEED[p.id];
+      if (!s) return true;
+      var memeFiche  = (p.titre === s[0] && (p.prix | 0) === s[1]);
+      var sansPhoto  = !p.photo;
+      var jamaisVendu = !commandes.some(function (c) { return c && c.bookTitle === p.titre; });
+      if (memeFiche && sansPhoto && jamaisVendu) { retires.push(p.id); return false; }
+      gardes.push(p.id);
+      return true;
+    });
+    if (!retires.length && !gardes.length) return;
+    DB._produitsRetires = retiresDeja.concat(
+      retires.filter(function (id) { return retiresDeja.indexOf(id) < 0; }));
+    if (retires.length) console.info('[boutique] ' + retires.length + ' article(s) de démonstration retiré(s) : ' + retires.join(', '));
+    if (gardes.length) console.warn('[boutique] article(s) du seed CONSERVÉ(S) (renommé, re-tarifé, illustré ou commandé) : ' + gardes.join(', '));
+  })();
+
   (function _retirerFauxLivres(){
     var SEED = {
       b1: ['Mathématiques 3ème', 'MINESEC Éditions'],
@@ -11965,17 +12023,26 @@ function pgBoutique(){
   const purchasedIds=purchases.map(bp=>bp.bid);
   return`<div class="ib ibt mb16"><span>📚</span><span>Achetez vos manuels scolaires directement en ligne. Les manuels achetés seront disponibles auprès de l\'administration pour récupération physique.</span></div>
   <div class="bgrid">
-    ${DB.books.map(b=>{const owned=purchasedIds.includes(b.id);return`<div class="bc">
-      <div class="bcover" style="background:var(--blb)">${b.ico}</div>
+    ${DB.books.map(b=>{const owned=purchasedIds.includes(b.id);
+      /* UN LIVRE NUMERIQUE N'A PAS DE STOCK — et `undefined > 0` vaut faux.
+         Cette grille affichait donc « Rupture de stock », bouton grise, pour
+         TOUS les ouvrages vendus en lecture en ligne : le Tube digestif depuis
+         sa mise en vente, puis les neuf cahiers d'oeuvre integrale. Le livre
+         etait bien dans la liste ; il etait seulement invendable. La vitrine
+         visiteur, elle, distinguait deja les deux cas (`b.numeriqueSeul`). */
+      const numerique=!!(b.numeriqueSeul||b.digital);
+      const libres=(b.freePages===0?0:(b.freePages||10));
+      return`<div class="bc">
+      <div class="bcover" style="background:var(--blb)">${b.coverImg?`<img src="${_esc(b.coverImg)}" alt="${_esc(b.titre)}" style="width:100%;height:100%;object-fit:cover" onerror="this.remove()">`:b.ico}</div>
       <div style="padding:12px">
         <div class="semi s mb4">${b.titre}</div>
         <div style="font-size:13px;color:var(--ink4);margin-bottom:6px">${b.cls} · ${b.auteur}</div>
         <div style="font-size:13px;color:var(--ink4);margin-bottom:8px">${b.pages} pages</div>
         <div class="fl2 fic fsb">
           <span class="mono bold s" style="color:var(--gold)">${fmt(b.prix)}</span>
-          <span class="bg ${b.stock>0?'bgg':'bgr'}" style="font-size:12px">${b.stock>0?b.stock+' dispo':'Rupture'}</span>
+          <span class="bg ${numerique||b.stock>0?'bgg':'bgr'}" style="font-size:12px">${numerique?'En ligne':(b.stock>0?b.stock+' dispo':'Rupture')}</span>
         </div>
-        ${owned?'<div class="ib ibg mt8 mb0" style="font-size:12px"><span>✅</span><span>Déjà acheté</span></div>':(b.stock>0?`<button class="btn bi sm mt8" style="width:100%;justify-content:center" onclick="acheterManuel('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Acheter</button>`:`<button class="btn" style="width:100%;justify-content:center;background:var(--bg3);color:var(--ink4);cursor:not-allowed;padding:5px" disabled>Rupture de stock</button>`)}
+        ${owned?'<div class="ib ibg mt8 mb0" style="font-size:12px"><span>✅</span><span>Déjà acheté</span></div>':(numerique?`<button class="btn bi sm mt8" style="width:100%;justify-content:center" onclick="openSecureBook('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Lire en ligne · ${libres} pages gratuites</button>`:(b.stock>0?`<button class="btn bi sm mt8" style="width:100%;justify-content:center" onclick="acheterManuel('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Acheter</button>`:`<button class="btn" style="width:100%;justify-content:center;background:var(--bg3);color:var(--ink4);cursor:not-allowed;padding:5px" disabled>Rupture de stock</button>`))}
       </div>
     </div>`;}).join("")}
   </div>`;
