@@ -163,9 +163,8 @@ console.log(`\n${G}⑤ Un cahier sans contenu déposé ne se vend pas${R}`);
 
 /* ── ⑥ La MÊME règle pour les livres numériques ──────────────────────────────
    La devanture a deux sources : les cahiers interactifs (ci-dessus) et les
-   livres publiés depuis l'administration, `DB.books`. La première vérifiait
-   depuis toujours que le serveur peut livrer ; la seconde ne regardait que la
-   case « publié en vitrine ».
+   livres du catalogue. La première vérifiait depuis toujours que le serveur
+   peut livrer ; la seconde ne regardait que la case « publié en vitrine ».
 
    Deux branches du même flux, une seule garde — et c'est la branche non gardée
    qui porte les neuf cahiers d'œuvre intégrale, dont le contenu (~30 Mo
@@ -174,132 +173,111 @@ console.log(`\n${G}⑤ Un cahier sans contenu déposé ne se vend pas${R}`);
    à la vente, prix affiché et bouton actif, pour un livre que le lecteur ne
    sait pas ouvrir.
 
-   On l'éprouve comme au ⑤ : un livre coché, tarifé, avec sa fiche complète, et
-   RIEN sur le disque. Un livre PAPIER dans le même état doit rester en vente —
-   il s'expédie, il n'a besoin d'aucune image sur le serveur. Sans ce second
-   cas, une garde qui retirerait tout passerait pour correcte.              */
+   ⚠️ LE BANC FOURNIT SON PROPRE DÉPÔT DE LIVRES, comme il fournit déjà sa base
+   et son dossier de livrets. Première version de cette section : elle exigeait
+   que `uploads/protected/books/` porte au moins un livre du catalogue, et
+   partait de ce qu'elle y trouvait. Vert sur le poste du propriétaire, où les
+   dix livres sont présents ; ROUGE sur le runner, où ce dossier n'existe pas
+   — il est hors dépôt. Elle mesurait la machine au lieu de la règle, et a
+   bloqué le déploiement du 04/09. `VRT_BOOKS_DIR` existe précisément pour ça.
+   Le dépôt vide est aussi le seul moyen d'éprouver la garde : là où les dix
+   livres sont sur le disque, la retirer ne fait rougir personne.            */
 console.log(`\n${G}⑥ Un LIVRE numérique sans pages déposées ne se vend pas${R}`);
 {
   const baseFic = path.join(DEPOT, 'db_test.json');
-  const livre = (id, extra) => Object.assign({
-    id, titre: 'Témoin ' + id, cls: 'Seconde', prix: 1000, pages: 200,
-    securePages: 200, vitrine: true, numeriqueSeul: true,
-  }, extra || {});
-  fs.writeFileSync(baseFic, JSON.stringify({
-    books: [
-      livre('temoin-sans-pages'),                             // numérique, rien déposé
-      livre('temoin-papier', { numeriqueSeul: false }),       // papier : s'expédie
-    ],
-  }), 'utf8');
+  const DEPOTL = fs.mkdtempSync(path.join(os.tmpdir(), 'vrt-livres-'));
 
-  const interrogerAvecBase = () => {
-    const php = "define('VRT_DB_FICHIER', " + JSON.stringify(baseFic) + ");"
+  /* Une interrogation entièrement fournie : la base, le dossier des livrets et
+     le dépôt des livres. Rien de ce que ce banc affirme ne dépend plus de
+     l'état du disque autour de lui. */
+  const flux = (db, dirLivres) => {
+    fs.writeFileSync(baseFic, JSON.stringify(db), 'utf8');
+    const php = "define('VRT_BOOKS_DIR', " + JSON.stringify(dirLivres) + ");"
+      + "define('VRT_DB_FICHIER', " + JSON.stringify(baseFic) + ");"
       + "define('VRT_LIVRET_DONNEES', " + JSON.stringify(DEPOT) + ");"
       + "$_SERVER['REQUEST_METHOD']='GET';"
       + "$_SERVER['HTTP_USER_AGENT']='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36';"
       + "$_SERVER['HTTP_ACCEPT']='text/html';$_SERVER['HTTP_ACCEPT_LANGUAGE']='fr-FR';"
       + "$_SERVER['REMOTE_ADDR']='127.0.0.1';"
       + "include " + JSON.stringify(path.join(RACINE, 'api', 'public_data.php')) + ";";
-    return JSON.parse(execFileSync('php', ['-r', php],
-      { cwd: RACINE, encoding: 'utf8', maxBuffer: 40 * 1024 * 1024 }));
+    try {
+      return JSON.parse(execFileSync('php', ['-r', php],
+        { cwd: RACINE, encoding: 'utf8', maxBuffer: 40 * 1024 * 1024 })).boutique || [];
+    } catch (e) { return null; }
   };
+  const idsDe = (b) => (b || []).map(x => x.id);
 
-  let flux2 = null;
-  try { flux2 = interrogerAvecBase(); } catch (e) {
-    dire(false, 'l’endpoint répond avec une base de substitution', String(e.message).slice(0, 120));
-  }
-  const ids2 = ((flux2 && flux2.boutique) || []).map(b => b.id);
-  dire(!!flux2, 'l’endpoint répond avec une base de substitution');
-  dire(ids2.indexOf('temoin-sans-pages') < 0,
+  // ── Un livre publié depuis l'ADMINISTRATION (DB.books) ──────────────────
+  const livre = (id, extra) => Object.assign({
+    id, titre: 'Témoin ' + id, cls: 'Seconde', prix: 1000, pages: 200,
+    securePages: 200, vitrine: true, numeriqueSeul: true,
+  }, extra || {});
+  const admin = flux({ books: [
+    livre('temoin-sans-pages'),                        // numérique, rien déposé
+    livre('temoin-papier', { numeriqueSeul: false }),  // papier : s'expédie
+  ] }, DEPOTL);
+  dire(admin !== null, 'l’endpoint répond avec base et dépôt fournis');
+  dire(idsDe(admin).indexOf('temoin-sans-pages') < 0,
     'livre numérique sans pages : coché « vitrine », il ne sort PAS',
     'en vente alors que rien n’est déposé');
-  dire(ids2.indexOf('temoin-papier') >= 0,
+  dire(idsDe(admin).indexOf('temoin-papier') >= 0,
     'livre papier dans le même état : il reste en vente — il s’expédie',
     'retiré à tort : la garde mord trop large');
 
-  /* ── Les livres du catalogue entrent seuls dans la devanture ─────────────
-     Un livre publié par catalogue_livres.json était payable, lisible, tarifé —
-     et annoncé nulle part, parce que la devanture ne lisait que DB.books et
-     que la base n'apprend un titre qu'à la première synchronisation admin.
-     Dix ouvrages étaient dans ce cas le 04/09/2026. On vérifie qu'ils sortent,
-     ET que les trois règles qui rendent cette publication sûre tiennent. */
+  /* ── Un livre publié par le CATALOGUE (catalogue_livres.json) ────────────
+     Il était payable, lisible et tarifé, et annoncé nulle part : la devanture
+     ne lisait que DB.books, et la base n'apprend un titre qu'à la première
+     synchronisation admin. Dix ouvrages étaient dans ce cas le 04/09/2026.
+     Le catalogue, lui, EST versionné : ce témoin existe partout. */
   const catLivres = JSON.parse(fs.readFileSync(
     path.join(RACINE, 'catalogue_livres.json'), 'utf8')).livres || [];
-  const pret = catLivres.filter(l => {
-    const dossier = path.join(RACINE, 'uploads', 'protected', 'books', String(l.id || ''));
-    return fs.existsSync(dossier) || fs.existsSync(dossier + '.pdf');
-  });
-  dire(pret.length > 0, `le dépôt porte ${pret.length} livre(s) du catalogue à éprouver`);
-  if (pret.length) {
-    const t = pret[0];
-    dire(ids2.indexOf(t.id) >= 0,
-      `« ${String(t.titre || t.id).slice(0, 34)} » entre en devanture sans passer par la base`,
-      'absent : le catalogue n’est toujours pas lu');
-    const carte = ((flux2 && flux2.boutique) || []).find(b => b.id === t.id) || {};
-    dire(carte.prix === (t.prixDigital || t.prix),
-      'et il porte le tarif de sa fiche, pas un prix inventé',
-      'affiché ' + carte.prix + ' au lieu de ' + (t.prixDigital || t.prix));
+  const numeriques = catLivres.filter(l => l && l.id && l.numeriqueSeul !== false
+                                        && (l.prixDigital || l.prix) > 0);
+  dire(numeriques.length > 0,
+    `le catalogue porte ${numeriques.length} livre(s) numérique(s) à éprouver`);
 
-    // ① La base tranche — même quand elle a DÉCOCHÉ la case.
-    fs.writeFileSync(baseFic, JSON.stringify({
-      books: [{ id: t.id, titre: 'Retiré par l’admin', prix: t.prix, vitrine: false }],
-    }), 'utf8');
-    let horsVitrine = null;
-    try { horsVitrine = interrogerAvecBase(); } catch (e) { /* dit ci-dessous */ }
-    dire(((horsVitrine && horsVitrine.boutique) || []).every(b => b.id !== t.id),
-      'décoché dans l’administration : le catalogue ne le remet pas en devanture',
-      'republié malgré le décochage — l’opt-in ne vaudrait plus rien');
-
-    // ② Révocable — un livre retiré à la main ne ressuscite pas.
-    fs.writeFileSync(baseFic, JSON.stringify({ books: [], _livresRetires: [t.id] }), 'utf8');
-    let retire = null;
-    try { retire = interrogerAvecBase(); } catch (e) { /* dit ci-dessous */ }
-    dire(((retire && retire.boutique) || []).every(b => b.id !== t.id),
-      'retiré à la main (_livresRetires) : il ne revient pas par le catalogue',
-      'ressuscité');
-
-    /* ③ Livrable — LA règle qui rend cette publication sûre, et la seule que
-       ce poste ne pouvait pas éprouver : les dix livres du catalogue ont leur
-       contenu en local, donc la garde n'y change rien et sa suppression
-       passait inaperçue. On fournit donc un dépôt de livres VIDE
-       (VRT_BOOKS_DIR), comme on fournit déjà une base et un dossier de
-       livrets. Sans contenu, la devanture ne doit annoncer aucun livre — puis
-       en annoncer UN dès qu'on dépose son mode texte, et lui seul.
-       C'est la répétition exacte du 04/09 : les neuf cahiers d'œuvre en
-       attente de FTP, et le Tube digestif déjà déposé. */
-    const DEPOTL = fs.mkdtempSync(path.join(os.tmpdir(), 'vrt-livres-'));
-    fs.writeFileSync(baseFic, JSON.stringify({ books: [] }), 'utf8');
-    const interrogerSansContenu = (dir) => {
-      const php = "define('VRT_BOOKS_DIR', " + JSON.stringify(dir) + ");"
-        + "define('VRT_DB_FICHIER', " + JSON.stringify(baseFic) + ");"
-        + "define('VRT_LIVRET_DONNEES', " + JSON.stringify(DEPOT) + ");"
-        + "$_SERVER['REQUEST_METHOD']='GET';"
-        + "$_SERVER['HTTP_USER_AGENT']='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36';"
-        + "$_SERVER['HTTP_ACCEPT']='text/html';$_SERVER['HTTP_ACCEPT_LANGUAGE']='fr-FR';"
-        + "$_SERVER['REMOTE_ADDR']='127.0.0.1';"
-        + "include " + JSON.stringify(path.join(RACINE, 'api', 'public_data.php')) + ";";
-      return JSON.parse(execFileSync('php', ['-r', php],
-        { cwd: RACINE, encoding: 'utf8', maxBuffer: 40 * 1024 * 1024 }));
-    };
+  if (numeriques.length) {
+    const t = numeriques[0];
+    const tarif = t.prixDigital || t.prix;
     const idsCat = catLivres.map(l => String(l.id));
-    let vide = null;
-    try { vide = interrogerSansContenu(DEPOTL); } catch (e) { /* dit ci-dessous */ }
-    const sortisVide = ((vide && vide.boutique) || []).filter(b => idsCat.indexOf(b.id) >= 0);
-    dire(sortisVide.length === 0,
+    const duCatalogue = (b) => idsDe(b).filter(id => idsCat.indexOf(id) >= 0);
+
+    // ① Livrable — dépôt vide : le catalogue n'annonce rien.
+    const vide = duCatalogue(flux({ books: [] }, DEPOTL));
+    dire(vide.length === 0,
       'aucun contenu déposé : le catalogue n’annonce AUCUN livre',
-      'annoncés sans rien à livrer : ' + sortisVide.map(b => b.id).join(', '));
+      'annoncés sans rien à livrer : ' + vide.join(', '));
 
     // Mode texte seul déposé : l'ouvrage devient livrable, et lui seul.
     fs.mkdirSync(path.join(DEPOTL, t.id, 'epub'), { recursive: true });
     fs.writeFileSync(path.join(DEPOTL, t.id, 'epub', 'index.json'), '{}', 'utf8');
-    let unSeul = null;
-    try { unSeul = interrogerSansContenu(DEPOTL); } catch (e) { /* dit ci-dessous */ }
-    const sortisUn = ((unSeul && unSeul.boutique) || []).filter(b => idsCat.indexOf(b.id) >= 0);
-    dire(sortisUn.length === 1 && sortisUn[0].id === t.id,
-      'mode texte déposé pour un seul : il entre, les autres restent dehors',
-      'sortis : ' + sortisUn.map(b => b.id).join(', '));
-    try { fs.rmSync(DEPOTL, { recursive: true, force: true }); } catch (e) {}
+    const apres = flux({ books: [] }, DEPOTL);
+    const sortis = duCatalogue(apres);
+    dire(sortis.length === 1 && sortis[0] === t.id,
+      'mode texte déposé pour un seul : il entre sans passer par la base, les autres restent dehors',
+      'sortis : ' + sortis.join(', '));
+
+    const carte = (apres || []).find(b => b.id === t.id) || null;
+    dire(!!carte && carte.prix === tarif,
+      'et il porte le tarif de sa fiche, pas un prix inventé',
+      carte ? ('affiché ' + carte.prix + ' au lieu de ' + tarif) : 'carte absente');
+
+    // ② La base tranche — même quand elle a DÉCOCHÉ la case.
+    const horsVitrine = idsDe(flux({
+      books: [{ id: t.id, titre: 'Retiré par l’admin', prix: tarif, vitrine: false }],
+    }, DEPOTL));
+    dire(horsVitrine.indexOf(t.id) < 0,
+      'décoché dans l’administration : le catalogue ne le remet pas en devanture',
+      'republié malgré le décochage — l’opt-in ne vaudrait plus rien');
+
+    // ③ Révocable — un livre retiré à la main ne ressuscite pas.
+    const retire = idsDe(flux({ books: [], _livresRetires: [t.id] }, DEPOTL));
+    dire(retire.indexOf(t.id) < 0,
+      'retiré à la main (_livresRetires) : il ne revient pas par le catalogue',
+      'ressuscité');
   }
+
+  try { fs.rmSync(DEPOTL, { recursive: true, force: true }); } catch (e) {}
 }
 
 try { fs.rmSync(DEPOT, { recursive: true, force: true }); } catch (e) {}
