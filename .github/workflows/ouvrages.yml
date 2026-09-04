@@ -103,6 +103,16 @@ jobs:
           sys.exit(1 if mauvais else 0)
           PY
 
+      # ── 🗺️ Le plan de la boutique suit-il le catalogue ? ────────────────
+      # Jusqu'au 04/09/2026, AUCUNE page de /livrets/ ne figurait dans un
+      # sitemap : ni la devanture, ni les quinze pages de vente à 1 500 F.
+      # Elles étaient indexables et annoncées nulle part. Un plan qui se
+      # périme est le même défaut à retardement : un cahier publié demain
+      # resterait introuvable, sans qu'une ligne de code ne change.
+      # Le mode --controle n'écrit rien ; il échoue si le plan a dérivé.
+      - name: 🗺️ Le plan des cahiers est-il à jour ?
+        run: python tools/pages_ouvrages.py --controle
+
       - name: 🗂️ Le catalogue décrit-il bien ce qui est publié ?
         run: |
           python - <<'PY'

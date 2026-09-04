@@ -45,6 +45,16 @@ import re
 import sys
 from pathlib import Path
 
+for _f in (sys.stdout, sys.stderr):          # console Windows en cp1252
+    try:
+        # Sans cette ligne, le « ✓ » du message de SUCCÈS lève une
+        # UnicodeEncodeError sur le poste du propriétaire : le script part en
+        # traceback, code 1 — il échoue au moment précis où tout va bien.
+        # Même remède que tools/publier.py, pour la même raison.
+        _f.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 RACINE = Path(__file__).resolve().parent.parent
 CATALOGUE = RACINE / "api" / "data" / "livrets_catalogue.json"
 SORTIE = RACINE / "livrets"
@@ -272,6 +282,47 @@ def page(slug: str, o: dict) -> str:
 """
 
 
+SITEMAP = SORTIE / "sitemap-livrets.xml"
+
+# Les pages fixes de la boutique : la devanture, et le mode d'emploi qui
+# répond aux questions d'avant-achat (« combien d'appareils ? », « l'année
+# scolaire, c'est jusqu'à quand ? »). Les pages `guide-*.html` n'y sont pas :
+# elles s'adressent aux enseignants abonnés, pas aux moteurs.
+PAGES_FIXES = [("", "weekly", "0.9"), ("mode-emploi.html", "monthly", "0.4")]
+
+
+def sitemap(ouvrages: dict) -> str:
+    """Le plan de la boutique des cahiers.
+
+    ⚠️ CE PLAN MANQUAIT, ET C'EST LE PRODUIT QU'ON VEND QUI EN PÂTISSAIT.
+    Au 04/09/2026, les huit sitemaps du site ne portaient pas une seule URL
+    de `/livrets/` : ni la devanture, ni les quinze pages de vente à 1 500 F.
+    Les pages étaient pourtant indexables — canonique propre, `index,follow`.
+    Elles n'étaient simplement annoncées nulle part.
+
+    Le lien HTML aurait pu suffire, mais `livrets/index.html` ne portait en
+    dur que quatre cartes sur quinze (les onze autres arrivent par le
+    catalogue, en JavaScript) : un moteur qui n'exécute pas le script ne
+    voyait ni lien, ni plan. Deux chemins coupés, le même produit invisible.
+    On rétablit les deux — ici le plan, dans index.html les liens.
+    """
+    lignes = ['<?xml version="1.0" encoding="UTF-8"?>',
+              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for chemin, freq, prio in PAGES_FIXES:
+        lignes.append(f"<url><loc>{SITE}/livrets/{chemin}</loc>"
+                      f"<changefreq>{freq}</changefreq><priority>{prio}</priority></url>")
+    # Une page annoncée au plan doit EXISTER : un plan qui promet une URL en
+    # 404 vaut moins que pas de plan du tout. On constate le fichier plutôt
+    # que de recopier le catalogue.
+    for slug in sorted(ouvrages):
+        if not (SORTIE / f"{slug}.html").is_file():
+            continue
+        lignes.append(f"<url><loc>{SITE}/livrets/{slug}.html</loc>"
+                      f"<changefreq>monthly</changefreq><priority>0.8</priority></url>")
+    lignes.append("</urlset>")
+    return "\n".join(lignes) + "\n"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Pages d'atterrissage des cahiers.")
     ap.add_argument("--controle", action="store_true",
@@ -316,17 +367,33 @@ def main() -> int:
         cible.write_text(page(slug, o), encoding="utf-8")
         ecrites.append(slug)
 
+    attendu = sitemap(ouvrages)
+
     if a.controle:
         if manquantes:
             for s in manquantes:
                 print(f"::error title=Cahier sans page::{s} → livrets/{s}.html absente")
             print(f"\n✗ {len(manquantes)} cahier(s) sans page d'atterrissage.")
             return 1
-        print(f"✓ Les {len(ouvrages)} cahiers du catalogue ont leur page.")
+        # Le plan doit suivre le catalogue. Un cahier publié dont l'URL
+        # n'entre jamais au plan reste introuvable par un moteur : la panne
+        # est muette, et elle dure aussi longtemps que personne ne la cherche.
+        actuel = SITEMAP.read_text(encoding="utf-8") if SITEMAP.is_file() else ""
+        if actuel != attendu:
+            print("::error title=Plan des cahiers périmé::livrets/sitemap-livrets.xml "
+                  "ne correspond plus au catalogue. Régénérez-le : "
+                  "python tools/pages_ouvrages.py")
+            return 1
+        print(f"✓ Les {len(ouvrages)} cahiers du catalogue ont leur page, "
+              f"et le plan les annonce.")
         return 0
 
     for s in ecrites:
         print(f"  + livrets/{s}.html")
+    if not SITEMAP.is_file() or SITEMAP.read_text(encoding="utf-8") != attendu:
+        SITEMAP.write_text(attendu, encoding="utf-8")
+        print(f"  + livrets/sitemap-livrets.xml "
+              f"({attendu.count('<url>')} URL annoncées)")
     print(f"\n{len(ecrites)} page(s) écrite(s), {len(gardees)} conservée(s) "
           f"(coquilles existantes, jamais écrasées).")
     return 0

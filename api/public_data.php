@@ -58,6 +58,14 @@ $candidates = [
     __DIR__ . '/data/veritas_db_backup.json',       // sync.php (legacy)
     __DIR__ . '/../uploads/veritas_db_backup.json', // ancien emplacement (compat)
 ];
+/* Base de substitution pour les bancs, sur le modèle de VRT_LIVRET_DONNEES.
+   Un banc qui veut éprouver la devanture doit fournir SA base : écraser
+   data/veritas_db.json — gitignoré, et bien réel sur le poste du propriétaire —
+   pour la durée d'un test finirait un jour par ne pas être restauré. Non
+   définie (donc en production), cette constante ne change rien. */
+if (defined('VRT_DB_FICHIER') && is_file((string) VRT_DB_FICHIER)) {
+    array_unshift($candidates, (string) VRT_DB_FICHIER);
+}
 $backupFile = '';
 foreach ($candidates as $c) { if (is_file($c)) { $backupFile = $c; break; } }
 
@@ -315,6 +323,34 @@ function vrt_pd_couverture($v) {
     return vrt_pd_coupe($v, 300);
 }
 
+/* ⚠️ COCHÉ N'EST PAS LIVRABLE — la même règle que pour les livrets, en dessous.
+   Ce bloc ne regardait que la case « vitrine ». Il mettait donc en devanture,
+   avec prix et bouton d'achat, tout livre publié depuis l'administration — y
+   compris un livre dont les pages ne sont PAS sur le serveur.
+
+   Ce n'est pas théorique : publier la fiche et déposer le contenu sont deux
+   gestes séparés (la fiche part par la CI dans catalogue_livres.json, les
+   ~30 Mo d'images par FTP, à la main). Au 04/09/2026, les neuf cahiers
+   d'œuvre intégrale répondent `prepared:false` en production. Cocher leur
+   case « vitrine » les aurait affichés à la vente, et l'acheteur aurait
+   découvert au moment de payer que le livre n'existe pas — l'init de paiement
+   refuse bien (409, api/payment_camerpay.php), mais après le choix, après le
+   panier, après la promesse.
+
+   La branche des livrets, elle, appelle vrt_livret_etat() depuis le début.
+   Deux branches du MÊME flux, une seule garde : c'est cette asymétrie qu'on
+   supprime ici. Un livre PAPIER n'est pas concerné — il s'expédie, il n'a
+   besoin d'aucune image sur le serveur. Même distinction qu'à l'encaissement.
+
+   La disponibilité se constate à UN seul endroit : vrt_livre_prepare(), la
+   fonction qu'interroge déjà la garde d'achat. On la charge explicitement,
+   et si elle manquait, les livres NUMÉRIQUES ne sortent pas — se taire et
+   publier quand même remettrait le défaut en place sans qu'on le voie. */
+if (!function_exists('vrt_livre_prepare')) {
+    @require_once __DIR__ . '/_auth_lib.php';
+}
+$__pd_gardeLivre = function_exists('vrt_livre_prepare');
+
 $__pd_livres = [];
 $__pd_books_src = (isset($db['books']) && is_array($db['books'])) ? $db['books'] : [];
 foreach ($__pd_books_src as $b) {
@@ -324,6 +360,15 @@ foreach ($__pd_books_src as $b) {
     if (count($__pd_livres) >= 120) break;              // garde-fou de poids
 
     $numerique = !empty($b['numeriqueSeul']);
+    /* Le nombre de pages ANNONCÉ est passé à la garde : sans lui, un envoi FTP
+       coupé laisse des fichiers qu'is_file() déclare parfaits, et la boutique
+       vend un livre qui s'arrête à la douzième page. Même appel, mêmes
+       arguments qu'à l'encaissement — les deux ne peuvent pas diverger. */
+    if ($numerique) {
+        if (!$__pd_gardeLivre) continue;
+        $__pd_attenduPg = (int)($b['securePages'] ?? $b['pages'] ?? 0);
+        if (!vrt_livre_prepare((string)$b['id'], $__pd_attenduPg)) continue;
+    }
     $__pd_livres[] = [
         'id'         => (string)$b['id'],
         'titre'      => isset($b['titre'])  ? vrt_pd_coupe($b['titre'], 120)  : '',
@@ -346,6 +391,100 @@ foreach ($__pd_books_src as $b) {
         // Booléen seulement : l'extrait lui-même reste dans l'application.
         'apercu'     => !empty($b['extrait']) || (isset($b['previewImages']) && is_array($b['previewImages']) && count($b['previewImages']) > 0),
     ];
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LES LIVRES DU CATALOGUE ENTRENT AUSSI DANS LA DEVANTURE
+
+   Un livre numérique se publie par `catalogue_livres.json`, que la CI dépose à
+   la racine du site. Tout le reste du serveur le sait déjà : `secure_pdf.php`
+   l'ouvre depuis ce fichier, `vrt_prix_catalogue()` y lit son tarif, la garde
+   d'achat y compte ses pages. Un seul endroit l'ignorait — celui qui compose la
+   devanture. Le résultat, mesuré le 04/09/2026 : dix ouvrages payables, lisibles
+   et tarifés — « Le Tube digestif » et les neuf cahiers d'œuvre intégrale de
+   2ⁿᵈᵉ, 1ʳᵉ et Tˡᵉ — dont AUCUNE page publique n'annonçait l'existence.
+
+   La cause tient en une ligne : la boucle ci-dessus ne lit que `DB.books`, et
+   la base n'apprend un titre qu'à la première synchronisation d'un
+   administrateur. Tant qu'elle n'a pas eu lieu, le livre n'existe pour personne
+   — alors même que le site sait le vendre et le livrer. C'est le même défaut
+   que celui corrigé le 25/08 pour le prix et pour le lecteur ; il restait ici.
+
+   TROIS RÈGLES, dans cet ordre :
+     · LA BASE TRANCHE   — un livre déjà publié depuis l'administration a été vu
+       ci-dessus ; on ne le double pas, et un décochage de « vitrine » continue
+       de le retirer. Le catalogue ne sert que ce que la base ignore encore.
+     · RÉVOCABLE         — un livre retiré à la main (`_livresRetires`, ou la
+       liste des défauts supprimés) ne revient pas par ce chemin.
+     · LIVRABLE          — même garde qu'au-dessus : rien ne sort si le serveur
+       ne peut pas l'ouvrir. C'est ce qui rend cette publication sûre : les neuf
+       cahiers apparaîtront d'eux-mêmes le jour de leur dépôt FTP, pas avant.
+   ═══════════════════════════════════════════════════════════════════════════ */
+if (!function_exists('vrt_catalogue_livres')) {
+    @require_once __DIR__ . '/_auth_lib.php';
+}
+if (function_exists('vrt_catalogue_livres')) {
+    $__pd_retires = (isset($db['_livresRetires']) && is_array($db['_livresRetires']))
+                  ? $db['_livresRetires'] : [];
+    /* ⚠️ « CONNU DE LA BASE », PAS « SORTI DE LA BASE ».
+       Ce relevé se faisait d'abord sur $__pd_livres, c'est-à-dire sur les
+       livres RETENUS par la boucle précédente. Un livre présent dans la base
+       mais dont l'administration avait DÉCOCHÉ « vitrine » n'y figurait donc
+       pas — et le catalogue le republiait aussitôt. Décocher la case n'aurait
+       plus rien retiré, en silence, ce qui vide de son sens l'opt-in explicite
+       que cette boucle-ci est censée respecter.
+       On relève donc tout `DB.books`, publié ou non : dès que la base connaît
+       un titre, c'est elle qui décide de son sort. */
+    $__pd_deja = [];
+    foreach ($__pd_books_src as $__b) {
+        if (is_array($__b) && isset($__b['id'])) $__pd_deja[(string)$__b['id']] = 1;
+    }
+
+    foreach (vrt_catalogue_livres() as $__id => $__f) {
+        if (!is_array($__f)) continue;
+        if (count($__pd_livres) >= 120) break;
+        $__id = (string)$__id;
+        if (isset($__pd_deja[$__id])) continue;                       // la base a tranché
+        if (in_array($__id, $__pd_retires, true)) continue;           // retiré à la main
+        if (in_array($__id, $__pd_supprimes, true)) continue;
+        $__prix = (int)($__f['prixDigital'] ?? $__f['prix'] ?? 0);
+        if ($__prix <= 0) continue;                                   // pas de prix : pas en devanture
+
+        /* `numeriqueSeul` vaut vrai par défaut pour une fiche de catalogue —
+           c'est la règle de _catalogueFiche() côté client, on la tient ici. */
+        $__num = !isset($__f['numeriqueSeul']) || $__f['numeriqueSeul'] !== false;
+        if ($__num) {
+            if (!$__pd_gardeLivre) continue;
+            if (!vrt_livre_prepare($__id, (int)($__f['securePages'] ?? $__f['pages'] ?? 0))) continue;
+        }
+
+        $__pd_livres[] = [
+            'id'         => $__id,
+            'titre'      => vrt_pd_coupe((string)($__f['titre'] ?? ''), 120),
+            'auteur'     => vrt_pd_coupe((string)($__f['auteur'] ?? ''), 80),
+            'cls'        => vrt_pd_coupe((string)($__f['cls'] ?? ''), 40),
+            /* Un rayon écrit dans la fiche l'emporte ; sinon on range au
+               fourre-tout honnête plutôt que d'inventer une catégorie
+               éditoriale d'après un titre. Même règle que la vitrine. */
+            'rayon'      => vrt_pd_coupe((string)($__f['rayon'] ?? 'Livres numériques'), 40),
+            'etiquette'  => '',
+            'desc'       => vrt_pd_coupe((string)($__f['desc'] ?? ''), 180),
+            'prix'       => $__prix,
+            'ancienPrix' => 0,
+            'pages'      => (int)($__f['pages'] ?? 0),
+            'chaps'      => (isset($__f['chaps']) && is_array($__f['chaps'])) ? count($__f['chaps']) : 0,
+            'ico'        => vrt_pd_coupe((string)($__f['ico'] ?? ''), 8),
+            'couleur'    => vrt_pd_coupe((string)($__f['coverColor'] ?? ''), 24),
+            'couv'       => vrt_pd_couverture($__f['coverImg'] ?? ''),
+            'numerique'  => $__num,
+            'stock'      => $__num ? null : (int)($__f['stock'] ?? 0),
+            'vendu'      => 0,
+            // Un extrait au catalogue, ou des pages offertes : dans les deux
+            // cas le visiteur peut lire avant de payer, et la carte le dit.
+            'apercu'     => !empty($__f['extrait']) || (int)($__f['freePages'] ?? 0) > 0,
+        ];
+    }
 }
 
 

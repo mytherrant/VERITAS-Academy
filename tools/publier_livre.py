@@ -206,6 +206,12 @@ def main():
     a.add_argument('--genre', default=''), a.add_argument('--cls', default='Toutes classes')
     a.add_argument('--matiere', default=''), a.add_argument('--ico', default='📕')
     a.add_argument('--couleur', default='#142554')
+    # Le rayon de la devanture. Vide par defaut : api/public_data.php range
+    # alors le livre dans « Livres numeriques » plutot que de deviner une
+    # categorie editoriale d'apres le titre — ce qui rangerait des ouvrages
+    # au mauvais rayon sans que personne le voie.
+    a.add_argument('--rayon', default='',
+                   help="rayon de la boutique (ex. « Cahiers d'oeuvre integrale »)")
     a.add_argument('--papier', action='store_true', help='le livre existe aussi en papier')
     a.add_argument('--refaire', action='store_true')
     # Voir la raison du reglage dans la docstring de `rasteriser`.
@@ -262,7 +268,7 @@ def main():
 
     fiche = {
         'id': id_livre, 'titre': o.titre, 'auteur': o.auteur,
-        'cls': o.cls, 'matiere': o.matiere, 'genre': o.genre,
+        'cls': o.cls, 'matiere': o.matiere, 'genre': o.genre, 'rayon': o.rayon,
         'editeur': o.editeur, 'isbn': o.isbn, 'annee': o.annee,
         'prix': o.prix, 'prixDigital': o.prix,
         'pages': pages, 'securePages': pages, 'freePages': o.pages_libres,

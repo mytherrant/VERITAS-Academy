@@ -161,7 +161,189 @@ console.log(`\n${G}⑤ Un cahier sans contenu déposé ne se vend pas${R}`);
     'restants : ' + restants.length);
 }
 
+/* ── ⑥ La MÊME règle pour les livres numériques ──────────────────────────────
+   La devanture a deux sources : les cahiers interactifs (ci-dessus) et les
+   livres publiés depuis l'administration, `DB.books`. La première vérifiait
+   depuis toujours que le serveur peut livrer ; la seconde ne regardait que la
+   case « publié en vitrine ».
+
+   Deux branches du même flux, une seule garde — et c'est la branche non gardée
+   qui porte les neuf cahiers d'œuvre intégrale, dont le contenu (~30 Mo
+   d'images par titre) part par FTP, séparément du code. Au 04/09/2026 les neuf
+   répondaient `prepared:false` en production : cocher leur case les aurait mis
+   à la vente, prix affiché et bouton actif, pour un livre que le lecteur ne
+   sait pas ouvrir.
+
+   On l'éprouve comme au ⑤ : un livre coché, tarifé, avec sa fiche complète, et
+   RIEN sur le disque. Un livre PAPIER dans le même état doit rester en vente —
+   il s'expédie, il n'a besoin d'aucune image sur le serveur. Sans ce second
+   cas, une garde qui retirerait tout passerait pour correcte.              */
+console.log(`\n${G}⑥ Un LIVRE numérique sans pages déposées ne se vend pas${R}`);
+{
+  const baseFic = path.join(DEPOT, 'db_test.json');
+  const livre = (id, extra) => Object.assign({
+    id, titre: 'Témoin ' + id, cls: 'Seconde', prix: 1000, pages: 200,
+    securePages: 200, vitrine: true, numeriqueSeul: true,
+  }, extra || {});
+  fs.writeFileSync(baseFic, JSON.stringify({
+    books: [
+      livre('temoin-sans-pages'),                             // numérique, rien déposé
+      livre('temoin-papier', { numeriqueSeul: false }),       // papier : s'expédie
+    ],
+  }), 'utf8');
+
+  const interrogerAvecBase = () => {
+    const php = "define('VRT_DB_FICHIER', " + JSON.stringify(baseFic) + ");"
+      + "define('VRT_LIVRET_DONNEES', " + JSON.stringify(DEPOT) + ");"
+      + "$_SERVER['REQUEST_METHOD']='GET';"
+      + "$_SERVER['HTTP_USER_AGENT']='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36';"
+      + "$_SERVER['HTTP_ACCEPT']='text/html';$_SERVER['HTTP_ACCEPT_LANGUAGE']='fr-FR';"
+      + "$_SERVER['REMOTE_ADDR']='127.0.0.1';"
+      + "include " + JSON.stringify(path.join(RACINE, 'api', 'public_data.php')) + ";";
+    return JSON.parse(execFileSync('php', ['-r', php],
+      { cwd: RACINE, encoding: 'utf8', maxBuffer: 40 * 1024 * 1024 }));
+  };
+
+  let flux2 = null;
+  try { flux2 = interrogerAvecBase(); } catch (e) {
+    dire(false, 'l’endpoint répond avec une base de substitution', String(e.message).slice(0, 120));
+  }
+  const ids2 = ((flux2 && flux2.boutique) || []).map(b => b.id);
+  dire(!!flux2, 'l’endpoint répond avec une base de substitution');
+  dire(ids2.indexOf('temoin-sans-pages') < 0,
+    'livre numérique sans pages : coché « vitrine », il ne sort PAS',
+    'en vente alors que rien n’est déposé');
+  dire(ids2.indexOf('temoin-papier') >= 0,
+    'livre papier dans le même état : il reste en vente — il s’expédie',
+    'retiré à tort : la garde mord trop large');
+
+  /* ── Les livres du catalogue entrent seuls dans la devanture ─────────────
+     Un livre publié par catalogue_livres.json était payable, lisible, tarifé —
+     et annoncé nulle part, parce que la devanture ne lisait que DB.books et
+     que la base n'apprend un titre qu'à la première synchronisation admin.
+     Dix ouvrages étaient dans ce cas le 04/09/2026. On vérifie qu'ils sortent,
+     ET que les trois règles qui rendent cette publication sûre tiennent. */
+  const catLivres = JSON.parse(fs.readFileSync(
+    path.join(RACINE, 'catalogue_livres.json'), 'utf8')).livres || [];
+  const pret = catLivres.filter(l => {
+    const dossier = path.join(RACINE, 'uploads', 'protected', 'books', String(l.id || ''));
+    return fs.existsSync(dossier) || fs.existsSync(dossier + '.pdf');
+  });
+  dire(pret.length > 0, `le dépôt porte ${pret.length} livre(s) du catalogue à éprouver`);
+  if (pret.length) {
+    const t = pret[0];
+    dire(ids2.indexOf(t.id) >= 0,
+      `« ${String(t.titre || t.id).slice(0, 34)} » entre en devanture sans passer par la base`,
+      'absent : le catalogue n’est toujours pas lu');
+    const carte = ((flux2 && flux2.boutique) || []).find(b => b.id === t.id) || {};
+    dire(carte.prix === (t.prixDigital || t.prix),
+      'et il porte le tarif de sa fiche, pas un prix inventé',
+      'affiché ' + carte.prix + ' au lieu de ' + (t.prixDigital || t.prix));
+
+    // ① La base tranche — même quand elle a DÉCOCHÉ la case.
+    fs.writeFileSync(baseFic, JSON.stringify({
+      books: [{ id: t.id, titre: 'Retiré par l’admin', prix: t.prix, vitrine: false }],
+    }), 'utf8');
+    let horsVitrine = null;
+    try { horsVitrine = interrogerAvecBase(); } catch (e) { /* dit ci-dessous */ }
+    dire(((horsVitrine && horsVitrine.boutique) || []).every(b => b.id !== t.id),
+      'décoché dans l’administration : le catalogue ne le remet pas en devanture',
+      'republié malgré le décochage — l’opt-in ne vaudrait plus rien');
+
+    // ② Révocable — un livre retiré à la main ne ressuscite pas.
+    fs.writeFileSync(baseFic, JSON.stringify({ books: [], _livresRetires: [t.id] }), 'utf8');
+    let retire = null;
+    try { retire = interrogerAvecBase(); } catch (e) { /* dit ci-dessous */ }
+    dire(((retire && retire.boutique) || []).every(b => b.id !== t.id),
+      'retiré à la main (_livresRetires) : il ne revient pas par le catalogue',
+      'ressuscité');
+
+    /* ③ Livrable — LA règle qui rend cette publication sûre, et la seule que
+       ce poste ne pouvait pas éprouver : les dix livres du catalogue ont leur
+       contenu en local, donc la garde n'y change rien et sa suppression
+       passait inaperçue. On fournit donc un dépôt de livres VIDE
+       (VRT_BOOKS_DIR), comme on fournit déjà une base et un dossier de
+       livrets. Sans contenu, la devanture ne doit annoncer aucun livre — puis
+       en annoncer UN dès qu'on dépose son mode texte, et lui seul.
+       C'est la répétition exacte du 04/09 : les neuf cahiers d'œuvre en
+       attente de FTP, et le Tube digestif déjà déposé. */
+    const DEPOTL = fs.mkdtempSync(path.join(os.tmpdir(), 'vrt-livres-'));
+    fs.writeFileSync(baseFic, JSON.stringify({ books: [] }), 'utf8');
+    const interrogerSansContenu = (dir) => {
+      const php = "define('VRT_BOOKS_DIR', " + JSON.stringify(dir) + ");"
+        + "define('VRT_DB_FICHIER', " + JSON.stringify(baseFic) + ");"
+        + "define('VRT_LIVRET_DONNEES', " + JSON.stringify(DEPOT) + ");"
+        + "$_SERVER['REQUEST_METHOD']='GET';"
+        + "$_SERVER['HTTP_USER_AGENT']='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36';"
+        + "$_SERVER['HTTP_ACCEPT']='text/html';$_SERVER['HTTP_ACCEPT_LANGUAGE']='fr-FR';"
+        + "$_SERVER['REMOTE_ADDR']='127.0.0.1';"
+        + "include " + JSON.stringify(path.join(RACINE, 'api', 'public_data.php')) + ";";
+      return JSON.parse(execFileSync('php', ['-r', php],
+        { cwd: RACINE, encoding: 'utf8', maxBuffer: 40 * 1024 * 1024 }));
+    };
+    const idsCat = catLivres.map(l => String(l.id));
+    let vide = null;
+    try { vide = interrogerSansContenu(DEPOTL); } catch (e) { /* dit ci-dessous */ }
+    const sortisVide = ((vide && vide.boutique) || []).filter(b => idsCat.indexOf(b.id) >= 0);
+    dire(sortisVide.length === 0,
+      'aucun contenu déposé : le catalogue n’annonce AUCUN livre',
+      'annoncés sans rien à livrer : ' + sortisVide.map(b => b.id).join(', '));
+
+    // Mode texte seul déposé : l'ouvrage devient livrable, et lui seul.
+    fs.mkdirSync(path.join(DEPOTL, t.id, 'epub'), { recursive: true });
+    fs.writeFileSync(path.join(DEPOTL, t.id, 'epub', 'index.json'), '{}', 'utf8');
+    let unSeul = null;
+    try { unSeul = interrogerSansContenu(DEPOTL); } catch (e) { /* dit ci-dessous */ }
+    const sortisUn = ((unSeul && unSeul.boutique) || []).filter(b => idsCat.indexOf(b.id) >= 0);
+    dire(sortisUn.length === 1 && sortisUn[0].id === t.id,
+      'mode texte déposé pour un seul : il entre, les autres restent dehors',
+      'sortis : ' + sortisUn.map(b => b.id).join(', '));
+    try { fs.rmSync(DEPOTL, { recursive: true, force: true }); } catch (e) {}
+  }
+}
+
 try { fs.rmSync(DEPOT, { recursive: true, force: true }); } catch (e) {}
+
+/* ── ⑦ Les quinze cahiers sont liés SANS JavaScript ──────────────────────────
+   `livrets/index.html` ne portait en dur que quatre cartes : 6ᵉ, 5ᵉ, 4ᵉ, 3ᵉ.
+   Les onze autres — dont les quatre du LYCÉE et les sept « Bord » — n'existaient
+   que dans le script qui les fabrique depuis /api/livret.php.
+
+   Deux visiteurs ne les voyaient donc jamais : celui dont le script ne
+   s'exécute pas, et le moteur de recherche, à qui la boutique ne présentait
+   aucun lien vers onze pages de vente à 1 500 F. On exige ici que chaque
+   ouvrage du catalogue soit joignable depuis la devanture par un lien écrit,
+   et annoncé au plan du site — un cahier publié demain fait rougir ce banc
+   tant que les deux ne suivent pas.                                          */
+console.log(`\n${G}⑦ Les cahiers sont liés depuis la boutique, sans JavaScript${R}`);
+{
+  const idx = fs.readFileSync(path.join(RACINE, 'livrets', 'index.html'), 'utf8');
+  // Le <script> ne compte pas : c'est précisément ce dont on veut se passer.
+  const sansScript = idx.replace(/<script[\s\S]*?<\/script>/gi, '');
+  const slugs = Object.keys(catalogue).filter(k => (catalogue[k] || {}).prix > 0);
+  const sansLien = slugs.filter(s =>
+    !new RegExp('href="' + s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\.html"').test(sansScript));
+  dire(sansLien.length === 0,
+    `les ${slugs.length} cahiers du catalogue ont un lien en dur`,
+    'sans lien : ' + sansLien.join(', '));
+
+  const plan = path.join(RACINE, 'livrets', 'sitemap-livrets.xml');
+  dire(fs.existsSync(plan), 'la boutique a son plan de site');
+  if (fs.existsSync(plan)) {
+    const xml = fs.readFileSync(plan, 'utf8');
+    const absents = slugs.filter(s => xml.indexOf('/livrets/' + s + '.html<') < 0);
+    dire(absents.length === 0,
+      `les ${slugs.length} pages de vente sont au plan`,
+      'absentes : ' + absents.join(', '));
+    const index = fs.readFileSync(path.join(RACINE, 'sitemap-index.xml'), 'utf8');
+    dire(index.indexOf('livrets/sitemap-livrets.xml') >= 0,
+      'et ce plan est déclaré dans sitemap-index.xml — sinon personne ne le lit');
+  }
+
+  // Un lien qui mène à une page absente vaut moins que pas de lien du tout.
+  const morts = slugs.filter(s => !fs.existsSync(path.join(RACINE, 'livrets', s + '.html')));
+  dire(morts.length === 0, 'et chacune de ces pages existe', 'en 404 : ' + morts.join(', '));
+}
 
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko === 0 ? 0 : 1);

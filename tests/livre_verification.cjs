@@ -156,7 +156,19 @@ function verifie(nom, condition, detail) {
 
   // Les appels vers veritas-school.com (public_data, camerpay) echouent en CORS
   // depuis localhost : c'est le harnais, pas le code. On ne retient que le reste.
-  const propres = erreurs.filter(e => !/CORS|ERR_FAILED|veritas-school\.com/.test(e));
+  //
+  // Le 402 est exclu lui aussi, et pour une raison de fond : c'est le MUR DE
+  // PAIEMENT, le comportement attendu. Ce banc vient de le verifier deux fois
+  // ligne par ligne (« chapitre paye refuse (402) », « page 11 refusee (402) »)
+  // -- puis il comptait les memes reponses comme des defauts, parce que le
+  // navigateur journalise tout code >= 400 en « Failed to load resource ».
+  // Resultat : un banc rouge quand le paywall FONCTIONNE, et vert le jour ou il
+  // laisserait tout passer. Un rouge qu'on apprend a ignorer ne protege plus
+  // rien. Le refus reste verifie par ses assertions dediees ; ici on ne compte
+  // que ce que personne n'a demande.
+  const propres = erreurs.filter(e =>
+    !/CORS|ERR_FAILED|veritas-school\.com/.test(e) &&
+    !/status of 402|402 \(Payment Required\)/.test(e));
   verifie('aucune erreur JavaScript (hors CORS du harnais)', propres.length === 0, propres.slice(0, 3).join(' | '));
 
   await navigateur.close();

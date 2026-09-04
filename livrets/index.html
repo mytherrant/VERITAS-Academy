@@ -349,6 +349,7 @@
       <div class="duo">
         <a class="dl" href="5e.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
       </div>
+      <a class="note" href="apercu.html?o=5e" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
     </div>
     <div class="card cardlv"><h3>Classe de 4ᵉ</h3>
       <p class="note">6 séquences · vers l'explication et la justification écrite.</p>
@@ -362,6 +363,105 @@
       <div class="duo">
         <a class="dl" href="3e.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
       </div>
+      <a class="note" href="apercu.html?o=3e" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
+    </div>
+    <!-- ══════════════════════════════════════════════════════════════════
+         LES ONZE AUTRES CAHIERS, EN DUR — et c'est le point de la correction.
+
+         Cette grille ne portait que les quatre cartes ci-dessus. Les onze
+         suivantes n'existaient QUE dans le script plus bas, qui les fabrique
+         depuis /api/livret.php. Deux conséquences, mesurées le 04/09/2026 :
+
+           · un visiteur dont le script ne s'exécute pas (JS coupé, réseau qui
+             lâche entre le HTML et l'API, navigateur ancien) voyait quatre
+             cahiers de collège et rien d'autre — pas un seul du LYCÉE ;
+           · un moteur de recherche ne trouvait, depuis la boutique elle-même,
+             aucun lien vers onze pages de vente à 1 500 F. Elles étaient
+             pourtant indexables, et ne figuraient dans aucun plan de site.
+
+         Le script continue de faire son travail : il pose les couvertures, et
+         il CORRIGE ces cartes d'après le serveur (prix, lien, et surtout
+         disponibilité — voir « mettreAJour » plus bas). Le HTML donne le lien
+         et le titre, qui ne changent pas ; le serveur tranche le reste. Un
+         cahier ajouté au catalogue doit être ajouté ici : tests/banc_boutique_
+         unifiee.cjs échoue tant qu'il manque.
+         ══════════════════════════════════════════════════════════════════ -->
+    <div class="card cardlv" data-slug="2nde"><h3>Classe de 2ⁿᵈᵉ</h3>
+      <p class="note">Livret interactif : l'élève répond dans la page, la correction suit.</p>
+      <div class="duo">
+        <a class="dl" href="2nde.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
+      </div>
+      <a class="note" href="apercu.html?o=2nde" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
+    </div>
+    <div class="card cardlv" data-slug="1ere"><h3>Classe de 1ʳᵉ A</h3>
+      <p class="note">Livret interactif : l'élève répond dans la page, la correction suit.</p>
+      <div class="duo">
+        <a class="dl" href="1ere.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
+      </div>
+      <a class="note" href="apercu.html?o=1ere" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
+    </div>
+    <div class="card cardlv" data-slug="tle"><h3>Classe de Tˡᵉ A</h3>
+      <p class="note">Livret interactif : l'élève répond dans la page, la correction suit.</p>
+      <div class="duo">
+        <a class="dl" href="tle.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
+      </div>
+      <a class="note" href="apercu.html?o=tle" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
+    </div>
+    <div class="card cardlv" data-slug="est-tle"><h3>Classe de Tˡᵉ <small class="t">(S&amp;T)</small></h3>
+      <p class="note">Livret interactif de l'enseignement technique : l'élève répond dans la page, la correction suit.</p>
+      <div class="duo">
+        <a class="dl" href="est-tle.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
+      </div>
+      <a class="note" href="apercu.html?o=est-tle" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
+    </div>
+    <div class="card cardlv" data-slug="bord-6e"><h3>Le Bord — 6ᵉ</h3>
+      <p class="note">Le cahier complet, à feuilleter page par page — leçons, textes d'auteur et corrigés modèles.</p>
+      <div class="duo">
+        <a class="dl" href="bord-6e.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-book-open"/></svg>Feuilleter l'ouvrage</span><span class="pill prix">1 500 F</span></a>
+      </div>
+      <a class="note" href="apercu.html?o=bord-6e" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
+    </div>
+    <div class="card cardlv" data-slug="bord-5e"><h3>Le Bord — 5ᵉ</h3>
+      <p class="note">Le cahier complet : leçons, textes d'auteur, exercices et corrigés modèles.</p>
+      <div class="duo">
+        <a class="dl" href="bord-5e.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
+      </div>
+      <a class="note" href="apercu.html?o=bord-5e" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
+    </div>
+    <div class="card cardlv" data-slug="bord-4e"><h3>Le Bord — 4ᵉ</h3>
+      <p class="note">Le cahier complet : leçons, textes d'auteur, exercices et corrigés modèles.</p>
+      <div class="duo">
+        <a class="dl" href="bord-4e.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
+      </div>
+      <a class="note" href="apercu.html?o=bord-4e" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
+    </div>
+    <div class="card cardlv" data-slug="bord-3e"><h3>Le Bord — 3ᵉ</h3>
+      <p class="note">Le cahier complet : leçons, textes d'auteur, exercices et corrigés modèles.</p>
+      <div class="duo">
+        <a class="dl" href="bord-3e.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
+      </div>
+      <a class="note" href="apercu.html?o=bord-3e" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
+    </div>
+    <div class="card cardlv" data-slug="bord-2nde"><h3>Le Bord — 2ⁿᵈᵉ</h3>
+      <p class="note">Le cahier complet : leçons, textes d'auteur, exercices et corrigés modèles.</p>
+      <div class="duo">
+        <a class="dl" href="bord-2nde.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
+      </div>
+      <a class="note" href="apercu.html?o=bord-2nde" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
+    </div>
+    <div class="card cardlv" data-slug="bord-1ere"><h3>Le Bord — 1ʳᵉ</h3>
+      <p class="note">Le cahier complet : leçons, textes d'auteur, exercices et corrigés modèles.</p>
+      <div class="duo">
+        <a class="dl" href="bord-1ere.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
+      </div>
+      <a class="note" href="apercu.html?o=bord-1ere" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
+    </div>
+    <div class="card cardlv" data-slug="bord-tle"><h3>Le Bord — Tˡᵉ</h3>
+      <p class="note">Le cahier complet : leçons, textes d'auteur, exercices et corrigés modèles.</p>
+      <div class="duo">
+        <a class="dl" href="bord-tle.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
+      </div>
+      <a class="note" href="apercu.html?o=bord-tle" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
     </div>
   </div>
 
@@ -515,8 +615,57 @@
      les plus vendus seraient les SEULS sans visuel — précisément l'inverse de
      ce qu'on veut. Le rapprochement se fait par le lien, déjà indexé plus haut. */
   var carteDe = function (slug) {
+    var c = grille.querySelector('.card[data-slug="' + slug + '"]');
+    if (c) return c;
     var a = grille.querySelector('a[href="' + slug + '.html"]');
     return a ? a.closest('.card') : null;
+  };
+
+  /* ── UNE CARTE ÉCRITE EN DUR DOIT POUVOIR SE DÉDIRE ──────────────────────
+     Les quinze cartes sont maintenant dans le HTML, pour que le lycée existe
+     sans JavaScript et pour qu'un moteur trouve les quinze pages de vente.
+     Mais un lien écrit à la main ne sait rien de ce que le serveur peut
+     LIVRER : le contenu d'un cahier arrive par FTP, séparément du code, et
+     entre les deux la carte promettrait un ouvrage qui ne s'ouvre pas.
+
+     C'est exactement le défaut qu'on vient de corriger côté vitrine
+     (api/public_data.php ne regardait que la case « publié »). Le corriger
+     là-bas et le réintroduire ici n'aurait servi à rien.
+
+     Donc : quand le serveur répond, il TRANCHE. Un ouvrage qu'il déclare
+     indisponible perd son bouton d'achat — il garde sa carte, sa couverture,
+     son prix annoncé et son essai gratuit, parce qu'un visiteur qui cherche
+     la 1ʳᵉ doit voir qu'elle existe. Il ne peut simplement pas payer pour
+     rien. Serveur muet : on ne touche à rien, la page reste telle quelle. */
+  var mettreAJour = function (carte, o, slug) {
+    if (!carte) return;
+    poserCouverture(carte, o);
+
+    var prix = parseInt(o.prix, 10) > 0 ? parseInt(o.prix, 10) : 0;
+    var lien = carte.querySelector('a.dl');
+
+    if (o.disponible === false) {
+      if (lien) {
+        var att = document.createElement('span');
+        att.className = 'dl dl-attente';
+        att.innerHTML = '<span>' + ico('i-clock') + '</span><span class="pill prix"></span>';
+        att.querySelector('span').insertAdjacentText('beforeend', 'Bientôt en vente');
+        att.querySelector('.prix').textContent =
+          prixTexte(prix || parseInt((lien.querySelector('.prix') || {}).textContent, 10) || 1500);
+        lien.parentNode.replaceChild(att, lien);
+      }
+      return;
+    }
+
+    if (!lien) return;
+    // Le serveur sait seul si l'ouvrage a sa coquille ou passe par le moteur
+    // générique : on suit son lien quand il en donne un.
+    if (o.lien && lien.getAttribute('href') !== o.lien) lien.setAttribute('href', o.lien);
+    // Un tarif changé dans le catalogue ne doit pas rester faux sur la carte.
+    var pastille = lien.querySelector('.prix');
+    if (pastille && prix && pastille.textContent !== prixTexte(prix)) {
+      pastille.textContent = prixTexte(prix);
+    }
   };
 
   fetch('/api/livret.php', {
@@ -531,7 +680,7 @@
       j.ouvrages.forEach(function (o) {
         var slug = String(o.slug || '').toLowerCase();
         if (!slug) return;
-        if (deja[slug]) { poserCouverture(carteDe(slug), o); return; }   // déjà sur la page
+        if (deja[slug]) { mettreAJour(carteDe(slug), o, slug); return; } // déjà sur la page
         /* DÉCLARÉ ≠ PUBLIÉ — mais « pas encore en vente » ≠ « invisible ».
            Ce filtre renvoyait purement et simplement les ouvrages dont le
            contenu n'est pas encore déposé sur le serveur. Il évitait bien le
@@ -617,17 +766,22 @@
       // Le chapeau annonce « 1 500 FCFA par classe ». Dès qu'un ouvrage sort de
       // ce tarif, la phrase devient fausse : on la nuance plutôt que de la
       // laisser mentir.
-      if (ajoutes) {
-        var horsTarif = j.ouvrages.some(function (o) {
-          var p = parseInt(o.prix, 10);
-          return o.disponible !== false && p > 0 && p !== 1500
-              && !deja[String(o.slug || '').toLowerCase()];
-        });
-        var chapeau = document.querySelector('h2.sec + p.note');
-        if (horsTarif && chapeau && chapeau.textContent.indexOf('1 500') >= 0) {
-          chapeau.insertAdjacentHTML('beforeend',
-            ' <strong>Certains ouvrages ont leur propre tarif</strong> — il est indiqué sur chaque carte.');
-        }
+      /* ⚠️ Ce contrôle était gardé par `if (ajoutes)` et excluait les ouvrages
+         `deja` présents : il ne regardait donc QUE les cartes fabriquées par ce
+         script. Depuis que les quinze sont écrites dans le HTML, `ajoutes` vaut
+         zéro et aucune carte n'est « nouvelle » — la nuance ne serait plus
+         jamais posée, et le chapeau annoncerait « 1 500 FCFA par classe » alors
+         qu'un ouvrage en coûterait 2 000. La question n'a jamais été de savoir
+         qui a écrit la carte : elle est de savoir si le tarif annoncé en haut
+         de page est encore vrai. On la pose donc sur le catalogue entier. */
+      var horsTarif = j.ouvrages.some(function (o) {
+        var p = parseInt(o.prix, 10);
+        return o.disponible !== false && p > 0 && p !== 1500;
+      });
+      var chapeau = document.querySelector('h2.sec + p.note');
+      if (horsTarif && chapeau && chapeau.textContent.indexOf('1 500') >= 0) {
+        chapeau.insertAdjacentHTML('beforeend',
+          ' <strong>Certains ouvrages ont leur propre tarif</strong> — il est indiqué sur chaque carte.');
       }
     })
     .catch(function () { /* serveur muet : la page garde ses cartes */ });
