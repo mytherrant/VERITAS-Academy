@@ -2105,6 +2105,54 @@ for (const bal of ['ul', 'ol', 'li']) {
   console.log('boutons flot: ' + RETOUCHES.length + ' retouches · ' + traits + ' pictogramme(s) affiné(s)');
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   LES QUATRE PORTES PAR PUBLIC — et la garde qui les compte
+   ────────────────────────────────────────────────────────────────────────
+   `assets/vitrine.js` definit depuis longtemps goEleves / goParents /
+   goEnseignants / goPartenaires, qui menent chacun a /plan.html#<public>.
+   Mais les cartes des publics sortent du gabarit avec le gestionnaire
+   GENERIQUE `u__aller` : la porte existe dans le script, et aucun bouton ne
+   l'ouvre. La vitrine deployee jusqu'ici avait ete retouchee A LA MAIN apres
+   le build — donc reperdue a la premiere reconstruction, en silence.
+
+   Mesure du 04/09/2026 : « eleve » et « partenaire » n'avaient plus d'entree
+   depuis la page servie. On rebranche, on remet la porte partenaire au pied
+   de page, et surtout on COMPTE : un build qui perdrait de nouveau une porte
+   s'arrete ici au lieu de publier une accueil ou un public entier est sans
+   entree.
+   ══════════════════════════════════════════════════════════════════════ */
+{
+  const PORTES = { elearning: 'goEleves', parents: 'goParents', enseignants: 'goEnseignants' };
+  let rebranches = 0;
+  for (const cible of Object.keys(PORTES)) {
+    const avant = corps;
+    corps = corps.split('VRT.act(\'u__aller\',this,event)" data-go="' + cible + '"')
+                 .join('VRT.act(\'' + PORTES[cible] + '\',this,event)" data-go="' + cible + '"');
+    if (corps !== avant) rebranches++;
+  }
+
+  /* La carte « Partenaires » mene, elle, aux neuf formules DANS l'application
+     (c'est une meilleure destination qu'un plan de site, voir plus haut). Sa
+     porte de plan vit donc au pied de page, comme dans la version precedente. */
+  const ancreP = '>Boutique de manuels</a>';
+  if (corps.indexOf(ancreP) >= 0 && corps.indexOf('plan.html#partenaire') < 0) {
+    corps = corps.replace(ancreP, ancreP
+      + '<a href="plan.html#partenaire" style="font-size:14px;color:rgba(255,255,255,.72)">Partenaires</a>');
+  }
+
+  const manquantes = ['eleve', 'parent', 'enseignant', 'partenaire'].filter((pub) => {
+    if (corps.indexOf('plan.html#' + pub) >= 0) return false;
+    const nom = { eleve: 'goEleves', parent: 'goParents',
+                  enseignant: 'goEnseignants', partenaire: 'goPartenaires' }[pub];
+    return corps.indexOf("VRT.act('" + nom + "'") < 0;
+  });
+  if (manquantes.length) {
+    throw new Error('Public(s) sans porte depuis l\'accueil : ' + manquantes.join(', ')
+      + '. Un public sans entree ne casse rien de visible — il disparait, simplement.');
+  }
+  console.log('portes     : ' + rebranches + ' bouton(s) rebranche(s) + partenaire au pied de page');
+}
+
 fs.writeFileSync(path.join(__dirname, '_corps.html'), corps);
 fs.writeFileSync(path.join(__dirname, '_gabarits.json'), JSON.stringify(gabarits));
 fs.writeFileSync(path.join(__dirname, '_data.json'), JSON.stringify(D));
