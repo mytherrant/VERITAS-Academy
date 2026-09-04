@@ -2286,6 +2286,59 @@ grilles défilent dans leur boîte, jamais la page) ; corps 16,5 px et interlign
 mise au point ; écriture dans la grille de mots croisés et marquage des mots
 mêlés vérifiés au doigt sur les deux largeurs.
 
+### Suite (04/09) — déployé, et les trois portes publiques
+
+**Déployé** en trois fois : `568deeb` (la maquette du livre, les grilles, les
+cartes mentales), `69886b0` (« Module » et non « Séquence » de la 6ᵉ à la 3ᵉ ;
+un texte, un encadré), `1e5ed1d` (vitrine + manuels). Les trois runs verts, et
+le jeton de cache a bien bougé — `631286 → 378600 → 084739` : le correctif
+atteint les visiteurs de retour, ce qu'un `?v=` figé aurait empêché pendant un
+an (assets servis `immutable`).
+
+**« Module », pas « Séquence ».** Le programme du 1er cycle est découpé en
+modules et les quatre livrets l'impriment ainsi ; leur source nomme le bloc
+`sequence` et l'écran recopiait ce mot. Corrigé à l'AFFICHAGE (`DIT_MODULE`),
+donc valable pour les cahiers déjà déposés, sans re-téléverser. La 2ⁿᵈᵉ, le
+lycée et les Bords gardent leur mot.
+
+**Un texte, un encadré.** Les sources découpent un extrait en autant de blocs
+`texte` qu'il a de paragraphes — neuf pour deux pages en Tˡᵉ, rendus en neuf
+cadres empilés là où le livre n'en imprime qu'un. Les blocs qui se suivent
+tiennent maintenant dans un seul encadré : neuf blocs, trois encadrés.
+
+**Les trois portes.** La boutique `/livrets/` listait bien les quinze ouvrages
+(vérifié en production : 15 cartes, 20 boutons, 15 couvertures en 200). Les
+deux autres, non :
+- `manuels.html` menait aux corrigés **sans jamais nommer l'ouvrage** auquel ils
+  répondent — zéro lien vers le produit sur la page qui parle des manuels. Elle
+  a désormais sa section, l'aperçu gratuit en premier.
+- `vitrine.html` ne les citait que dans une entrée de menu déroulant. Une
+  cinquième carte a été posée dans l'onglet « Apprendre », **dans la maquette
+  source** et non dans le HTML rendu : ce que le gabarit reconstruit au clic
+  doit être corrigé dans le gabarit.
+Deux icônes inexistantes évitées au passage (`i-pencil`, `i-cart`) : un `<use>`
+qui ne résout rien ne lève aucune erreur, il ne dessine rien.
+
+**Les paiements.** 271 contrôles verts en local — `paiements_entitlements.php`
+94 (chaque surface payante débloque bien un droit), `banc_livret_codes` 56,
+`banc_faux_livres` 42, `banc_remise_sms` 35, `banc_tunnel_article` 25,
+`banc_remise_code` 19. En production, les quatre passerelles répondent et sont
+fail-closed : `payment_campay`, `payment_camerpay`, `payment_mtn`,
+`payment_orange` rendent un JSON d'actions autorisées ; `db.php` sans jeton
+→ 401 ; `POST api/livret.php` → 200 (c'est lui qui remplit la boutique).
+⚠️ **Aucune transaction réelle n'a été passée** : c'est un geste financier, il
+appartient à Jacques. La chaîne est vérifiée jusqu'au bord du paiement.
+
+À noter : `api/public_data.php` répond **403 à curl** (« Accès automatisé
+refusé ») — c'est la sentinelle anti-robots, pas une panne : la même URL rend
+200 depuis un vrai navigateur. La table de référence du canary (19/08, avant la
+sentinelle) est à mettre à jour sur ce point.
+
+**Le dépôt porte du travail d'autres sessions** (18 fichiers `uploads/oeuvres/`
+étaient même DÉJÀ INDEXÉS avant mon premier commit ; `tools/build_corriges.py`,
+`tools/publier_livre.py`, `tests/paiements_entitlements.php` sont modifiés sans
+être de moi). Ne jamais faire `git add -A` ici.
+
 ### RESTE À FAIRE — un seul geste, et il est manuel
 
 **Téléverser par FTP `~/Desktop/veritas-ftp/uploads/protected/livrets/` (9,9 Mo).**
