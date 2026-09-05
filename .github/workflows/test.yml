@@ -101,10 +101,27 @@ jobs:
           node tests/banc_livret_codes.cjs
           node tests/banc_remise_sms.cjs
 
+      # ⚠️ `banc_cahiers_reels.cjs` A ÉTÉ RETIRÉ D'ICI, ET SON ABSENCE EST LE
+      # CORRECTIF. Son en-tête le dit depuis toujours : « IL N'EST PAS DANS LA
+      # CI, ET C'EST VOULU » — il mesure les données VENDUES, qui ne sont pas
+      # dans le dépôt (public) mais dans la charge FTP, sur le poste du
+      # propriétaire. Sur un runner, ce dossier n'existe pas : le banc sortait
+      # donc en 2 sur « Charge introuvable :
+      # /home/runner/Desktop/veritas-ftp/… », à chaque exécution, depuis qu'on
+      # l'avait ajouté ici.
+      #
+      # Le coût n'était pas le rouge — c'est que les DEUX bancs suivants
+      # partagent ce `run:` et ne s'exécutaient donc JAMAIS. Les empreintes de
+      # cache et les clés de cahier n'ont plus été vérifiées par personne,
+      # sans qu'une ligne de leur code ne change. Un banc mal placé n'est pas
+      # seulement inutile : il éteint ses voisins.
+      #
+      # Sa place est sur le poste, AVANT le téléversement — c'est le dernier
+      # contrôle avant que quelqu'un paie :
+      #     node tests/banc_cahiers_reels.cjs [dossier-de-charge]
       - name: 📓 Ouverture des cahiers et de leurs corrigés
         run: |
           node tests/banc_cahier.cjs
-          node tests/banc_cahiers_reels.cjs
           node tests/banc_empreintes.cjs
           node tests/banc_cles_cahier.cjs
 

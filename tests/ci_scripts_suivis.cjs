@@ -51,6 +51,55 @@ const uniques = [...new Set(appels)].sort();
 
 t(uniques.length > 0, `le workflow appelle ${uniques.length} script(s) — la lecture a bien trouvé quelque chose`);
 
+/* ── Un banc marqué « hors CI » ne doit être appelé par AUCUN workflow ──────
+   Le symétrique du contrôle ci-dessus : celui-là veille à ce que la CI puisse
+   exécuter ce qu'elle appelle ; celui-ci, à ce qu'elle n'appelle pas ce
+   qu'elle ne PEUT pas exécuter.
+
+   `banc_cahiers_reels.cjs` mesure les données VENDUES, qui vivent dans la
+   charge FTP et jamais dans le dépôt (il est public). Son en-tête le disait
+   déjà en toutes lettres — ce qui n'a pas empêché de l'ajouter à test.yml, où
+   il sortait en 2 sur « Charge introuvable : /home/runner/Desktop/… » à chaque
+   exécution. Le rouge n'était pas le pire : les deux bancs qui partageaient
+   son `run:` (empreintes de cache, clés de cahier) ne s'exécutaient plus du
+   tout, sans qu'une ligne de leur code ne change.
+
+   Une phrase dans un commentaire n'arrête personne. Une marque `@hors-ci` que
+   ce banc-ci relit, si. On balaie TOUS les workflows, pas seulement deploy.yml
+   — le mauvais placement s'était fait dans test.yml.                        */
+const DOSSIER_WF = path.join(RACINE, '.github', 'workflows');
+const horsCI = [];
+for (const wf of fs.readdirSync(DOSSIER_WF).filter((f) => /\.ya?ml$/.test(f))) {
+  const src = fs.readFileSync(path.join(DOSSIER_WF, wf), 'utf8');
+  for (const ligne of src.split('\n')) {
+    /* ⚠️ UNE LIGNE DE COMMENTAIRE N'EST PAS UN APPEL. Première version de ce
+       contrôle : elle balayait le YAML brut et retrouvait le nom du banc dans
+       le commentaire qui explique POURQUOI on l'a retiré. Elle signalait donc
+       comme faute la phrase qui documente sa correction. */
+    if (/^\s*#/.test(ligne)) continue;
+    for (const m of ligne.matchAll(/\b(?:node|php)\s+((?:tests|tools)\/[A-Za-z0-9_.\/-]+\.(?:cjs|js|php|mjs))/g)) {
+      const cible = path.join(RACINE, m[1]);
+      if (!fs.existsSync(cible) || path.resolve(cible) === path.resolve(__filename)) continue;
+      /* On ne lit que les 40 premières lignes : la marque vit dans l'EN-TÊTE
+         du banc. Sans cette borne, ce fichier-ci se dénonçait lui-même — il
+         cite « @hors-ci » plus bas pour expliquer la règle. Une marque
+         déclarée et une marque citée ne sont pas la même chose. */
+      const entete = fs.readFileSync(cible, 'utf8').split('\n', 40).join('\n');
+      if (entete.includes('@hors-ci')) horsCI.push(`${m[1]}  (appelé par ${wf})`);
+    }
+  }
+}
+const hcUniq = [...new Set(horsCI)];
+t(hcUniq.length === 0,
+  hcUniq.length === 0
+    ? 'aucun banc marqué « @hors-ci » n’est appelé par un workflow'
+    : `${hcUniq.length} banc(s) hors CI appelé(s) quand même : ${hcUniq.join(' · ')}`);
+if (hcUniq.length) {
+  console.log('\n  \x1b[33mRemède :\x1b[0m  retirez cet appel du workflow.');
+  console.log('  Ce banc ne peut rien mesurer sur un runner, et il fait échouer');
+  console.log('  les bancs qui partagent son `run:`.');
+}
+
 /* La liste de ce que git suit, demandée une seule fois. */
 let suivis = new Set();
 try {

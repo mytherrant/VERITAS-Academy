@@ -23,11 +23,19 @@
      ③ L'EXTRAIT EST-IL UN EXTRAIT ?  ou bien le produit entier, comme
                              « Demo 6e » l'était avant qu'on le mesure ?
 
-   IL N'EST PAS DANS LA CI, ET C'EST VOULU
+   IL N'EST PAS DANS LA CI, ET C'EST VOULU                          @hors-ci
    Les données vendues ne sont pas dans le dépôt (le dépôt est public) : elles
    vivent dans la charge FTP. La CI ne peut donc pas les voir. Ce banc se lance
    à la main, AVANT le téléversement — c'est le dernier contrôle avant que
    quelqu'un paie.
+
+   La marque `@hors-ci` ci-dessus n'est pas décorative : `tests/ci_scripts_
+   suivis.cjs` la lit et REFUSE qu'un workflow appelle ce fichier. Elle a été
+   posée après coup, parce que la phrase seule n'a empêché personne de
+   l'ajouter à test.yml — où il a passé plusieurs jours à sortir en 2 sur
+   « Charge introuvable : /home/runner/Desktop/veritas-ftp/… », en emportant
+   avec lui les deux bancs qui partageaient son `run:`. Un banc mal placé
+   n'est pas seulement inutile : il éteint ses voisins.
    ════════════════════════════════════════════════════════════════════════ */
 'use strict';
 const fs = require('fs');
