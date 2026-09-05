@@ -175,6 +175,28 @@ if ($item === null) {
         if (is_array($c) && (string) ($c['id'] ?? '') === $id) { $item = $c; $kind = 'contenu'; break; }
     }
 }
+/* ── Repli : le catalogue déposé par la CI ────────────────────────────────
+   ⚠️ CE REPLI MANQUAIT ICI, ET NULLE PART AILLEURS.
+   `secure_pdf.php` l'a depuis le 25/08, `vrt_prix_catalogue()` aussi, et
+   `public_data.php` depuis le 05/09 : un livre publié par
+   catalogue_livres.json doit être servi même quand la BASE l'ignore encore —
+   elle n'apprend un titre qu'à la première synchronisation d'un
+   administrateur, et rien ne garantit qu'elle ait lieu.
+
+   Ce fichier-ci sert le MODE TEXTE, c'est-à-dire le HTML recomposé. Il pesait
+   peu et passait pour secondaire : les images de pages faisaient le gros du
+   travail. Depuis que le texte est le mode PAR DÉFAUT — 3 Mo de HTML contre
+   296 Mo d'images pour les neuf cahiers d'œuvre — c'est l'inverse. Un cahier
+   dont le dossier `epub/` est déposé et que la base ignore répondait ici
+   « Document introuvable » : déposé, payé, et illisible.
+
+   La base reste prioritaire (les deux boucles ci-dessus ont déjà rendu la
+   main si elle connaît l'objet) ; ce repli lit exactement la fiche qui a servi
+   à mettre le livre en vitrine. */
+if ($item === null && function_exists('vrt_catalogue_livre')) {
+    $fiche = vrt_catalogue_livre($id);
+    if ($fiche !== null) { $item = $fiche; $kind = 'book'; }
+}
 if ($item === null) sepub_err(404, 'Document introuvable');
 if (empty($item['epub'])) sepub_err(409, 'Ce document n\'a pas de version texte.');
 

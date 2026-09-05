@@ -27577,15 +27577,31 @@ window.openSecureBook=function(bookId){
   document.body.appendChild(ov);
   document.body.style.overflow='hidden';
   var _savedTh=(function(){try{return localStorage.getItem('vrt_sread_theme')||'jour';}catch(_){return 'jour';}})();
-  /* Mode de lecture : « pages » (images fidèles) ou « texte » (EPUB recomposé).
-     Le choix de l'utilisateur prime ; à défaut, TEXTE sur téléphone — la mise
-     en page A5 d'origine y oblige à zoomer, ce qui décourage la lecture — et
-     PAGES sur grand écran, où elle tient telle quelle. */
+  /* Mode de lecture : « pages » (images fidèles) ou « texte » (HTML recomposé).
+     Le choix de l'utilisateur prime toujours. À défaut, c'est le TEXTE — sur
+     grand écran comme sur téléphone.
+
+     C'était l'inverse : pages sur grand écran, texte sous 720 px seulement. Le
+     raisonnement se tenait (« la mise en page A5 tient telle quelle sur un
+     grand écran ») mais il coûtait cher, et pas seulement en confort :
+
+       · 296 Mo d'images pour les neuf cahiers d'œuvre, contre 3 Mo de HTML —
+         cent fois plus lourd, pour le MÊME contenu. Sur une connexion
+         camerounaise, une page de 135 Ko contre 1,3 Ko décide de la lecture ;
+       · une page image ne se cherche pas, ne se redimensionne pas, ne se lit
+         pas au lecteur d'écran, et ignore le thème nuit ;
+       · et surtout : elle doit être TÉLÉVERSÉE. Trente mégaoctets par titre,
+         à la main, par FTP — le geste qui bloquait la mise en vente.
+
+     Le texte reste servi sous droit (secure_epub.php, 402 sans achat), sous les
+     mêmes gardes que les images, et signé au nom de l'acheteur. Le bouton
+     « pages » demeure pour qui préfère l'édition imprimée — quand elle existe
+     sur le serveur ; sinon il s'efface (voir _secureMarkMode). */
   var _savedMode=(function(){
     if(!book.epub) return 'pages';
     var m=''; try{ m=localStorage.getItem('vrt_sread_mode')||''; }catch(_){}
     if(m==='pages'||m==='texte') return m;
-    return (window.innerWidth||1024)<720?'texte':'pages';
+    return 'texte';
   })();
   window._secureState={id:bookId,kind:kind,page:1,pages:0,freePages:10,hasAccess:false,prepared:false,base:base,tok:tok,book:book,zoom:1,theme:_savedTh,epub:!!book.epub,mode:_savedMode,chaps:null};
   if(typeof _secureTheme==='function') _secureTheme(_savedTh); else ov.setAttribute('data-theme',_savedTh);
@@ -27850,6 +27866,21 @@ window._secureMarkMode=function(){
     var on=bs[i].getAttribute('data-m')===st.mode;
     bs[i].classList.toggle('on',on);
     bs[i].setAttribute('aria-pressed',on?'true':'false');
+    /* ⚠️ UN BOUTON QUI N'OUVRE RIEN EST PIRE QU'UN BOUTON ABSENT.
+       Les images de pages sont déposées séparément du texte, et pour la
+       plupart des ouvrages elles ne le sont PAS — le HTML seul pèse cent fois
+       moins et suffit. `prepared` dit exactement cela : le serveur a-t-il des
+       pages à servir ? Quand il n'en a pas, ce bouton menait à un écran vide
+       ou à un basculement silencieux vers le texte : le lecteur cliquait, rien
+       ne changeait, et il n'apprenait pas pourquoi. On le retire plutôt.
+       Le groupe entier disparaît alors — un « choix » à une seule option n'en
+       est pas un. */
+    if(bs[i].getAttribute('data-m')==='pages'){
+      var sansPages=(st.epub && st.prepared===false);
+      bs[i].hidden=sansPages;
+      var grp=bs[i].parentNode;
+      if(grp&&grp.classList&&grp.classList.contains('sread-mode')) grp.hidden=sansPages;
+    }
   }
   var f=ov.querySelector('.sread-foot');
   if(f) f.textContent=(st.mode==='texte')
