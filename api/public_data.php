@@ -427,18 +427,31 @@ if (!function_exists('vrt_catalogue_livres')) {
 if (function_exists('vrt_catalogue_livres')) {
     $__pd_retires = (isset($db['_livresRetires']) && is_array($db['_livresRetires']))
                   ? $db['_livresRetires'] : [];
-    /* ⚠️ « CONNU DE LA BASE », PAS « SORTI DE LA BASE ».
-       Ce relevé se faisait d'abord sur $__pd_livres, c'est-à-dire sur les
-       livres RETENUS par la boucle précédente. Un livre présent dans la base
-       mais dont l'administration avait DÉCOCHÉ « vitrine » n'y figurait donc
-       pas — et le catalogue le republiait aussitôt. Décocher la case n'aurait
-       plus rien retiré, en silence, ce qui vide de son sens l'opt-in explicite
-       que cette boucle-ci est censée respecter.
-       On relève donc tout `DB.books`, publié ou non : dès que la base connaît
-       un titre, c'est elle qui décide de son sort. */
+    /* ⚠️ « LA BASE A TRANCHÉ », PAS « LA BASE CONNAÎT ».
+       Deux versions de ce relevé ont déjà échoué, chacune dans un sens :
+
+       ① sur $__pd_livres (les livres RETENUS) — un livre dont l'administration
+          avait DÉCOCHÉ « vitrine » n'y figurait pas, et le catalogue le
+          republiait aussitôt : décocher n'aurait plus rien retiré.
+       ② sur tout $__pd_books_src (les livres CONNUS) — mesuré en production le
+          05/09/2026 : « Le Tube digestif », pourtant livrable et coché nulle
+          part, restait invisible. La raison est que `_catalogueFiche()`
+          (app.js) fusionne les fiches du catalogue dans DB.books SANS poser la
+          clé `vitrine`. Dès qu'un administrateur ouvre l'application une fois,
+          la base absorbe les dix fiches — et ce relevé les excluait alors
+          définitivement. Le correctif ne tenait donc que tant que la base
+          ignorait les livres, c'est-à-dire pas longtemps.
+
+       La question n'est pas « la base connaît-elle ce titre ? » mais
+       « QUELQU'UN a-t-il décidé de son sort ? ». La clé `vitrine` répond :
+       posée (true ou false), un humain a tranché dans le panneau admin, et sa
+       décision l'emporte ; absente, la fiche n'a fait que transiter par la
+       synchronisation, et le catalogue reste seul à parler. */
     $__pd_deja = [];
     foreach ($__pd_books_src as $__b) {
-        if (is_array($__b) && isset($__b['id'])) $__pd_deja[(string)$__b['id']] = 1;
+        if (is_array($__b) && isset($__b['id']) && array_key_exists('vitrine', $__b)) {
+            $__pd_deja[(string)$__b['id']] = 1;
+        }
     }
 
     foreach (vrt_catalogue_livres() as $__id => $__f) {

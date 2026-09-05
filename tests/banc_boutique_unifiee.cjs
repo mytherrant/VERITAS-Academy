@@ -262,13 +262,26 @@ console.log(`\n${G}⑥ Un LIVRE numérique sans pages déposées ne se vend pas$
       'et il porte le tarif de sa fiche, pas un prix inventé',
       carte ? ('affiché ' + carte.prix + ' au lieu de ' + tarif) : 'carte absente');
 
-    // ② La base tranche — même quand elle a DÉCOCHÉ la case.
+    // ② La base tranche — mais seulement quand elle a VRAIMENT tranché.
     const horsVitrine = idsDe(flux({
       books: [{ id: t.id, titre: 'Retiré par l’admin', prix: tarif, vitrine: false }],
     }, DEPOTL));
     dire(horsVitrine.indexOf(t.id) < 0,
       'décoché dans l’administration : le catalogue ne le remet pas en devanture',
       'republié malgré le décochage — l’opt-in ne vaudrait plus rien');
+
+    /* ⚠️ Une fiche SANS la clé `vitrine` n'est pas une décision : c'est ce que
+       `_catalogueFiche()` (app.js) écrit dans DB.books à chaque ouverture de
+       l'application. Confondre les deux a rendu « Le Tube digestif » invisible
+       en production le 05/09/2026 — livrable, tarifé, et exclu parce que la
+       base avait absorbé sa fiche. Sans ce contrôle, le correctif de la
+       devanture ne tient que jusqu'à la première synchronisation admin. */
+    const absorbe = idsDe(flux({
+      books: [{ id: t.id, titre: String(t.titre || ''), prix: tarif }],   // aucune clé `vitrine`
+    }, DEPOTL));
+    dire(absorbe.indexOf(t.id) >= 0,
+      'fiche absorbée par la synchro, sans case cochée ni décochée : le catalogue parle encore',
+      'exclu alors que personne n’a rien décidé — le correctif ne survivrait pas à une synchro');
 
     // ③ Révocable — un livre retiré à la main ne ressuscite pas.
     const retire = idsDe(flux({ books: [], _livresRetires: [t.id] }, DEPOTL));
