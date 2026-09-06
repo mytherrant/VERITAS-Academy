@@ -404,8 +404,23 @@ def main() -> int:
             # page de présentation : le seul cahier vendu en mode lecture
             # aurait perdu son lecteur, sans qu'aucun contrôle ne le dise.
             # On regarde ce que le fichier EST, plus seulement ce qu'il pèse.
+            # ⚠️ ET UNE REDIRECTION NON PLUS N'EST PAS UNE PAGE À RÉÉCRIRE.
+            # Le 06/09/2026, `--tout` a écrasé `6e.html`, `5e.html`, `4e.html`
+            # et `3e.html`. Ces quatre-là ne portent NI `VRTLiseur` NI
+            # `VRTCahier` et pèsent moins de 30 Ko : ce sont des redirections
+            # vers `cahier.html?o=<slug>`, posées le 01/09 précisément parce que
+            # le moteur générique est le seul à savoir lire le format normalisé.
+            # Les trois signes existants les ont donc laissées passer, et quatre
+            # cahiers de collège sont devenus des pages de présentation — sans
+            # lecteur. `tests/banc_remise_code.cjs` a refusé le déploiement,
+            # c'est lui qui l'a vu ; ce garde-fou-ci, non.
+            #
+            # La question juste n'est pas « combien pèse ce fichier » mais
+            # « ce fichier MÈNE-T-IL DÉJÀ quelque part ? ». On la pose.
             deja = cible.read_text(encoding="utf-8", errors="replace")
             coquille = ("VRTLiseur" in deja or "VRTCahier" in deja
+                        or "cahier.html?o=" in deja
+                        or "http-equiv=\"refresh\"" in deja.lower()
                         or cible.stat().st_size > 30_000)
             if not a.tout or coquille:
                 gardees.append(slug)
