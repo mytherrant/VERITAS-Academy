@@ -46,7 +46,15 @@
    rouvert sa page cassée, correctif déployé ou non — et se serait plaint une
    seconde fois d'un bogue effectivement corrigé. Corriger la page ET la servir
    sont deux gestes ; le second est celui-ci. */
-const CACHE = 'vrt-cahier-v1.20.16';
+/* v1.20.19 — MÊME RAISON, NOUVEAU CONTENU.
+   Les neuf cahiers d'œuvre intégrale entrent dans ce moteur, et `cahier.js`
+   lui-même change (numérotation des lignes du corpus). Or `/livrets/*` est
+   servi CACHE D'ABORD : sans ce nombre, un acheteur qui a déjà ouvert un
+   cahier garderait l'ancien moteur ET l'ancien extrait, correctif déployé ou
+   non. Mesuré pendant la mise au point : le fichier sur le disque portait un
+   extrait corrigé, le navigateur en servait un autre, plus vieux et de taille
+   différente — et rien ne le disait. */
+const CACHE = 'vrt-cahier-v1.20.19';
 
 const COQUILLE = [
   '/livrets/cahier.html',

@@ -11,7 +11,7 @@
 <!-- Les polices du cahier imprimé — mêmes que /livrets/cahier.html : l'aperçu
      doit montrer le produit, pas une maquette voisine. -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=Klee+One&display=swap" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="/livrets/cahier.css?v=1.20.4">
+<link rel="stylesheet" href="/livrets/cahier.css?v=1.20.19">
 <style>
   body{ margin:0; background:#f7f4ee; color:#2b3038;
         font-family:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif; }
@@ -105,7 +105,7 @@
 <div id="attente" class="attente">Chargement de l'aperçu…</div>
 <div id="ch-voyant" class="ch-voyant"></div>
 
-<script src="/livrets/cahier.js?v=1.20.4"></script>
+<script src="/livrets/cahier.js?v=1.20.19"></script>
 <script>
 /* ── L'APERÇU GRATUIT ────────────────────────────────────────────────────────
    Il fait tourner EXACTEMENT le même moteur que le cahier vendu, sur un
@@ -142,7 +142,7 @@
   $('btnAchat').href = '/livrets/#' + slug;
 
   var s = document.createElement('script');
-  s.src = 'extrait-' + slug + '.js?v=1.20.4';
+  s.src = 'extrait-' + slug + '.js?v=1.20.19';
   s.onload = function () {
     var blocs = window.CAHIER_BLOCS;
     if (!blocs || !blocs.length) { echec(); return; }

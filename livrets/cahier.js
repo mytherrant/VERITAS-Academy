@@ -1090,10 +1090,41 @@
       /* Le corpus : dans le livre, un encadré ambre qui dit « voici la matière
          que tu vas manipuler ». Il se confondait avec un texte ordinaire. */
       if (y === 'corpus') {
-        h += '<div class="ch-corpus" data-seq="' + teinte + '">'
+        /* ── LES LIGNES SE NUMÉROTENT, COMME DANS UN MANUEL ─────────────────
+           Un cahier d'œuvre renvoie sans cesse au texte : « au vers 12 »,
+           « relevez, lignes 4 à 7, les mots par lesquels… ». Sans numéros, la
+           question est inutilisable — l'élève compte à la main, et se trompe.
+
+           On ne numérote QUE si le bloc le demande (`num`), pour deux raisons :
+           un extrait de trois lignes n'a rien à numéroter, et les quinze
+           cahiers du premier cycle n'ont jamais été écrits pour ça — leur
+           imposer des numéros changerait leur mise en page sans qu'on l'ait
+           voulu. Les cahiers d'œuvre, eux, le demandent à la conversion.
+
+           Le découpage suit les <br>, c'est-à-dire les retours du texte
+           d'origine : un vers reste un vers, une réplique une réplique. */
+        var interieur = colorer(b, corps);
+        if (b.num) {
+          var lignes = interieur.split(/<br\s*\/?>/i);
+          var pas = Math.max(1, parseInt(b.num, 10) || 1);
+          var num = '';
+          for (var li = 0; li < lignes.length; li++) {
+            var n = li + 1;
+            /* On n'imprime le chiffre que tous les `pas` — la convention des
+               éditions scolaires. `num:1` numérote tout (théâtre, poésie),
+               `num:5` une ligne sur cinq (prose). Les autres gardent leur
+               gouttière : sans elle, le texte se décalerait d'une ligne à
+               l'autre. */
+            var visible = (n === 1 || n % pas === 0);
+            num += '<span class="ch-ln"' + (visible ? ' data-n="' + n + '"' : '') + '>'
+                 + lignes[li] + '</span>';
+          }
+          interieur = num;
+        }
+        h += '<div class="ch-corpus' + (b.num ? ' ch-corpus-num' : '') + '" data-seq="' + teinte + '">'
           +  '<span class="ch-corpus-l">' + icone('book') + '<span>Corpus</span></span>'
           +  '<div class="ch-corpus-c">'
-          +  colorer(b, corps)
+          +  interieur
           +  '</div></div>';
         return;
       }

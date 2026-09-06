@@ -996,3 +996,37 @@
   .ch-annot-pleine, .ch-corr-ouvert, .ch-voyant:not(:empty){
     animation:none !important; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CAHIERS D'ŒUVRE INTÉGRALE — le texte se numérote, et les repères se voient
+   ──────────────────────────────────────────────────────────────────────────
+   Ces cahiers renvoient au texte à chaque question. Les numéros de ligne ne
+   sont donc pas une décoration : ce sont les coordonnées de l'exercice.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Une gouttière à gauche pour les chiffres. Elle est réservée sur TOUTES les
+   lignes, numérotées ou non — sinon le texte se décalerait d'une ligne à
+   l'autre, et l'œil perdrait la marge. */
+.ch-corpus-num .ch-corpus-c{ padding-left:2.6em; }
+.ch-ln{ display:block; position:relative; }
+.ch-ln[data-n]::before{
+  content:attr(data-n);
+  position:absolute; left:-2.6em; width:2em;
+  text-align:right;
+  font-family:var(--f-titre); font-size:11px; font-weight:700;
+  color:var(--seq,#c9a227);
+  /* Aligné sur la ligne de base du texte, pas sur le haut de la boîte. */
+  top:.28em;
+  /* Le chiffre ne se sélectionne pas : on copie un vers, pas sa numérotation
+     — et sur un cahier protégé, la sélection est de toute façon coupée. */
+  user-select:none; -webkit-user-select:none; pointer-events:none;
+}
+
+/* ── La source de l'extrait ────────────────────────────────────────────────
+   Elle se lisait comme du texte ordinaire. En petites capitales, alignée à
+   droite sous le corpus, elle redevient ce qu'elle est : une référence. */
+.ch-source{
+  text-align:right; font-size:12.5px; letter-spacing:.02em;
+  color:var(--ch-pale,#8a7f6d); font-style:italic;
+  margin:-8px 0 16px; padding-right:4px;
+}

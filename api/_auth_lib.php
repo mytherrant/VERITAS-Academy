@@ -403,22 +403,43 @@ if (!defined('VRT_AUTH_LIB')) {
      * @return array<string,array>  fiches indexées par id
      */
     function vrt_catalogue_livres(): array {
-        static $cache = null;
-        if ($cache !== null) return $cache;
+        /* Le cache est indexé PAR FICHIER, pas global. Un cache global se
+           remplit au premier appel et ne se relit jamais : une substitution
+           déclarée après coup (VRT_CATALOGUE_LIVRES, ci-dessous) restait sans
+           effet, et le banc mesurait le catalogue de production en croyant
+           mesurer le sien. En production il n'y a qu'un chemin possible : le
+           comportement et le coût sont identiques. */
+        static $cache = [];
 
-        $cache = [];
-        $f = dirname(__DIR__) . '/catalogue_livres.json';
+        $fiches = [];
+        /* Catalogue de substitution pour les bancs, sur le modèle de
+           VRT_DB_FICHIER, VRT_BOOKS_DIR et VRT_LIVRET_DONNEES. Sans ce point
+           d'entrée, un banc qui veut éprouver la règle « chaque livre reçoit
+           SON tarif » n'a que deux mauvaises options : se servir du catalogue
+           réel — et rougir le jour où son contenu change, ce qui est arrivé le
+           06/09 quand les neuf cahiers d'œuvre l'ont quitté — ou écrire dans
+           le fichier de production le temps d'un test. Non définie (donc en
+           production), cette constante ne change rien. */
+        $f = (defined('VRT_CATALOGUE_LIVRES') && is_file((string) VRT_CATALOGUE_LIVRES))
+           ? (string) VRT_CATALOGUE_LIVRES
+           : dirname(__DIR__) . '/catalogue_livres.json';
+        /* La lecture du cache vient APRÈS le calcul du chemin — c'est tout
+           l'intérêt de l'indexer par fichier — mais elle doit bien avoir lieu :
+           écrite sans être lue, elle laissait relire le JSON à chaque appel,
+           soit une lecture disque par livre affiché en devanture. */
+        if (isset($cache[$f])) return $cache[$f];
         if (is_file($f)) {
             $j = json_decode((string) @file_get_contents($f), true);
             if (is_array($j) && isset($j['livres']) && is_array($j['livres'])) {
                 foreach ($j['livres'] as $l) {
                     if (is_array($l) && isset($l['id']) && $l['id'] !== '') {
-                        $cache[(string) $l['id']] = $l;
+                        $fiches[(string) $l['id']] = $l;
                     }
                 }
             }
         }
-        return $cache;
+        $cache[$f] = $fiches;
+        return $fiches;
     }
 
     /** Une fiche du catalogue, ou null si l'identifiant est inconnu. */

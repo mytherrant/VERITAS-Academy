@@ -755,9 +755,36 @@ titre("9. Lecture du droit : l'echeance referme vraiment");
         }
         if ($p > 0) $livres[(string) $l['id']] = $p;
     }
-    ok('le catalogue porte au moins deux livres tarifés', count($livres) >= 2,
-       count($livres) . ' livre(s) tarifé(s)');
-    if (count($livres) < 2) return;
+    /* ⚠️ LE BANC FOURNIT SES PROPRES LIVRES, SINON IL MESURE LE CATALOGUE.
+       Cette section exigeait que catalogue_livres.json porte au moins DEUX
+       livres tarifés, et se servait de ce qu'elle y trouvait. C'était vrai le
+       02/09, quand les neuf cahiers d'œuvre venaient d'y entrer à trois tarifs.
+       Le 06/09 ils l'ont quitté pour le circuit des cahiers interactifs, il
+       n'en est resté qu'un — et ce banc a viré au rouge en annonçant « le
+       catalogue porte au moins deux livres tarifés », c'est-à-dire en se
+       plaignant d'un fait de gestion, pas d'un défaut.
+
+       Or la règle qu'il protège n'a rien à voir avec le contenu du catalogue :
+       « chaque livre reçoit SON tarif » doit tenir quel que soit le nombre de
+       titres en vente, aujourd'hui comme le jour où il y en aura trente. On
+       ajoute donc deux témoins à trois tarifs distincts, et les vrais livres
+       du catalogue restent éprouvés avec eux. */
+    $temoins = ['temoin-tarif-bas' => 1000, 'temoin-tarif-haut' => 1300];
+    /* Les témoins doivent être CONNUS DU SERVEUR, sinon vrt_prix_catalogue()
+       rend null, « tarif indéterminable », et accepte n'importe quel montant :
+       le banc mesurerait alors sa propre fixture au lieu de la règle. On écrit
+       donc un catalogue de substitution et on le déclare — VRT_CATALOGUE_LIVRES
+       est lu avant le fichier de production. */
+    $catTest = sys_get_temp_dir() . '/vrt_cat_' . getmypid() . '.json';
+    $liste = [];
+    foreach ($livres as $id => $prix) $liste[] = ['id' => $id, 'prix' => $prix, 'prixDigital' => $prix];
+    foreach ($temoins as $id => $prix) $liste[] = ['id' => $id, 'prix' => $prix, 'prixDigital' => $prix];
+    file_put_contents($catTest, json_encode(['version' => 1, 'livres' => $liste]));
+    if (!defined('VRT_CATALOGUE_LIVRES')) define('VRT_CATALOGUE_LIVRES', $catTest);
+    register_shutdown_function(function () use ($catTest) { @unlink($catTest); });
+    $livres += $temoins;
+    ok('deux tarifs au moins sont en jeu (témoins compris)', count(array_unique($livres)) >= 2,
+       count($livres) . ' livre(s) · ' . count(array_unique($livres)) . ' tarif(s)');
 
     // La base ignore ces livres : c'est la situation réelle entre le déploiement
     // du catalogue et la première synchro d'un administrateur.
