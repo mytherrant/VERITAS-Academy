@@ -501,6 +501,10 @@
      serveur a vendu — il n'y a donc rien à deviner ni à configurer. */
   function familleOuvrage(slug) {
     var s = String(slug || '').toLowerCase().replace(/^apercu-/, '');
+    /* Avant `bord-` et avant le test du lycée : un cahier d'œuvre s'appelle
+       `oeuvre-tartuffe`, et le second le rangerait au collège par défaut —
+       il aurait alors les polices et la palette d'un cahier de 6ᵉ. */
+    if (s.indexOf('oeuvre-') === 0) return 'oeuvre';
     if (s.indexOf('bord-') === 0) return 'bord';
     if (/^(2nde|1ere|1ère|tle|est)/.test(s)) return 'lycee';
     return 'college';
@@ -533,7 +537,13 @@
   var POLICES = {
     college: 'Baloo+2:wght@700;800&family=Lora:ital,wght@0,400;0,500;1,400',
     lycee:   'Nunito:wght@700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Caveat:wght@600;700',
-    bord:    'EB+Garamond:ital,wght@0,400;0,600;1,400&family=Poppins:wght@500;600;700'
+    bord:    'EB+Garamond:ital,wght@0,400;0,600;1,400&family=Poppins:wght@500;600;700',
+    /* Les cahiers d'œuvre intégrale ont leur propre maquette imprimée, et
+       l'écran doit la reconnaître : un élève qui a le livre en main ne doit
+       pas croire qu'il ouvre autre chose. Les trois familles sont celles du
+       document — Baloo 2 pour les titres, Patrick Hand pour ce qui est
+       manuscrit (étiquettes, annotations), Source Sans 3 pour le texte. */
+    oeuvre:  'Baloo+2:wght@600;700;800&family=Patrick+Hand&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400'
   };
 
   function assurerPolices(fam) {

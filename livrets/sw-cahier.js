@@ -54,7 +54,7 @@
    non. Mesuré pendant la mise au point : le fichier sur le disque portait un
    extrait corrigé, le navigateur en servait un autre, plus vieux et de taille
    différente — et rien ne le disait. */
-const CACHE = 'vrt-cahier-v1.20.19';
+const CACHE = 'vrt-cahier-v1.20.20';
 
 const COQUILLE = [
   '/livrets/cahier.html',

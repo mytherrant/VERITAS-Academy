@@ -1076,3 +1076,100 @@
    sans jamais empêcher l'élève de travailler — s'il revient au cahier, il est
    déjà revenu. */
 .ch-voile{ filter:blur(9px); transition:filter .12s; user-select:none; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CAHIERS D'ŒUVRE INTÉGRALE — LA MAQUETTE DU LIVRE, À L'ÉCRAN
+   ──────────────────────────────────────────────────────────────────────────
+   Ces neuf cahiers existent en imprimé, avec une maquette qui leur est propre
+   et qui ne ressemble à aucune des trois autres collections : turquoise et
+   rose, titres arrondis, étiquettes manuscrites, pastilles pleines.
+
+   L'écran doit la reconnaître. Un élève qui a le livre sous les yeux et le
+   cahier ouvert sur le téléphone ne doit pas se demander s'il s'agit du même
+   ouvrage — c'est la première chose qu'on vérifie quand on a payé.
+
+   Toutes les valeurs sont RELEVÉES sur le document, pas inventées :
+     #0F8C9E turquoise (dominante) · #C0397C rose (accent) · #F5B921 jaune
+     (pastilles) · #5E7A15 olive · #E8722A orange · fonds pâles assortis.
+   ══════════════════════════════════════════════════════════════════════════ */
+.ch-hote[data-fam="oeuvre"]{
+  --oe-turquoise:#0F8C9E; --oe-rose:#C0397C; --oe-jaune:#F5B921;
+  --oe-olive:#5E7A15;     --oe-orange:#E8722A; --oe-gris:#6B7075;
+  --oe-creme:#F4F6EE;
+  --oe-rose-pale:#FCEBF3; --oe-bleu-pale:#EAF6F8;
+  --oe-vert-pale:#EEF4D8; --oe-orange-pale:#FDE7D4;
+
+  --f-titre:'Baloo 2', system-ui, sans-serif;
+  --f-texte:'Source Sans 3', system-ui, sans-serif;
+  --f-main:'Patrick Hand', cursive;
+
+  font-family:var(--f-texte);
+  background:var(--oe-creme);
+}
+
+/* Les titres de partie : arrondis, turquoise, avec le filet jaune du livre. */
+.ch-hote[data-fam="oeuvre"] .ch-rubrique{
+  font-family:var(--f-titre); color:var(--oe-turquoise); letter-spacing:0;
+}
+.ch-hote[data-fam="oeuvre"] .ch-rubrique::after{
+  content:""; display:block; width:28mm; height:1.5pt;
+  background:var(--oe-jaune); margin:3mm 0 0;
+}
+
+/* Les sous-titres : rose, la couleur d'accent du livre. */
+.ch-hote[data-fam="oeuvre"] .ch-lecon-t{
+  font-family:var(--f-titre); color:var(--oe-rose);
+}
+.ch-hote[data-fam="oeuvre"] .ch-lecon-no{
+  font-family:var(--f-main); color:var(--oe-jaune); font-size:15px;
+}
+
+/* La pastille du numéro d'exercice — jaune pleine, comme les 84 du document. */
+.ch-hote[data-fam="oeuvre"] .ch-exo-no{
+  background:var(--oe-jaune); color:#fff;
+  font-family:var(--f-titre); font-weight:800;
+}
+.ch-hote[data-fam="oeuvre"] .ch-exo{
+  border-color:#EADFC8; border-radius:5mm;
+}
+
+/* L'extrait de l'auteur : encadré rose pâle, filet turquoise, et les numéros
+   de ligne dans le turquoise plutôt que dans l'or du thème par défaut. */
+.ch-hote[data-fam="oeuvre"] .ch-corpus{
+  background:var(--oe-rose-pale); border:0;
+  border-left:1.5mm solid var(--oe-rose); border-radius:0 5mm 5mm 0;
+}
+.ch-hote[data-fam="oeuvre"] .ch-corpus-l{
+  background:var(--oe-rose); font-family:var(--f-main);
+  font-size:13px; letter-spacing:0; text-transform:none;
+}
+.ch-hote[data-fam="oeuvre"] .ch-ln[data-n]::before{
+  color:var(--oe-turquoise); font-family:var(--f-texte);
+}
+
+/* L'encadré de méthode : bleu pâle, étiquette manuscrite. */
+.ch-hote[data-fam="oeuvre"] .ch-astuce{
+  background:var(--oe-bleu-pale); border:0;
+  border-left:1.5mm solid var(--oe-turquoise); border-radius:0 5mm 5mm 0;
+}
+.ch-hote[data-fam="oeuvre"] .ch-astuce-l{
+  background:var(--oe-turquoise); font-family:var(--f-main);
+  font-size:13px; letter-spacing:0; text-transform:none;
+}
+
+/* Les tableaux : en-tête turquoise, lignes alternées crème. */
+.ch-hote[data-fam="oeuvre"] .ch-table tr:first-child td{
+  background:var(--oe-turquoise); color:#fff; font-weight:600;
+}
+.ch-hote[data-fam="oeuvre"] .ch-table tr:nth-child(even) td{
+  background:var(--oe-creme);
+}
+.ch-hote[data-fam="oeuvre"] .ch-table td{ border-color:#DDE6E8; }
+
+/* Les lignes de réponse : le trait manuscrit du cahier de papier. */
+.ch-hote[data-fam="oeuvre"] .ch-champ{
+  border-bottom-color:var(--oe-turquoise);
+}
+.ch-hote[data-fam="oeuvre"] .ch-champ:focus{
+  background:var(--oe-bleu-pale);
+}
