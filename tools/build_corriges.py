@@ -978,6 +978,18 @@ def render_hub(levels, est):
             + ico("i-globe") + ' Espace VÉRITAS '
             "et QR code de la couverture). Choisis ta classe, puis ta séquence. Les corrigés sont masqués "
             "tant que tu ne cliques pas : <strong>cherche d'abord, compare ensuite</strong>.</div>",
+            # Entrée vers la page « tout en un ». Elle vient AVANT les grilles :
+            # un visiteur qui cherche « les corrigés VÉRITAS » sans savoir sa
+            # classe la trouve du premier coup d'œil, et le lien descendant lui
+            # évite d'ouvrir sept pages pour comprendre ce qui existe. Placée
+            # contre l'encadré précédent : le fil d'Ariane ne doit pas s'insérer
+            # entre deux encadrés, il ferme le bloc d'introduction.
+            '<div class="intro" style="border-left-color:var(--gold)">' + ico("i-lightbulb", "i lg")
+            + ' <strong>Tout sur une seule page ?</strong> Les %s corrigés, tous niveaux réunis, '
+              'sont aussi consultables d\'un seul tenant : '
+              '<a href="tous-les-corriges.html"><strong>voir tous les corrigés</strong></a>. '
+              'Page lourde — préférez votre classe ci-dessous si votre connexion est lente.</div>'
+            % num(total),
             '<p class="crumb"><a href="%s/">Accueil</a> › Corrigés des manuels</p>' % SITE,
             '<h2 class="sec">' + ico("i-book") + 'Premier cycle (6ᵉ → 3ᵉ)</h2><div class="grid">%s</div>' % c1,
             '<h2 class="sec">' + ico("i-book") + 'Second cycle — séries A (2ⁿᵈᵉ → Terminale)</h2>'
@@ -1040,11 +1052,36 @@ def main():
     for f_, _, _ in est:
         urls.append("%s/corriges/%s" % (SITE, f_))
 
+    # ── Page « tout en un » ────────────────────────────────────────────────
+    # Une seule page portant l'intégralité des corrigés, à la demande de Jacques.
+    # Générée ici pour qu'elle ne puisse pas diverger du reste : elle relit les
+    # mêmes extractions, donc elle porte forcément les mêmes chiffres.
+    # Priorité de sitemap volontairement basse (0.5) : elle duplique le contenu
+    # des 87 pages fines, et c'est à celles-ci que doit aller l'autorité.
+    try:
+        import build_page_unique
+        build_page_unique.main()
+        urls.append("%s/corriges/tous-les-corriges.html" % SITE)
+    except Exception as e:                       # noqa: BLE001
+        # Ne jamais faire échouer tout le build des corrigés pour cette page :
+        # elle est un confort, les 87 pages sont le produit.
+        #
+        # ⚠️ MAIS UN ÉCHEC AVALÉ DOIT SE VOIR. Ce `print` se perd dans les
+        # milliers de lignes d'un log de CI : la page se périmerait en silence
+        # pendant que les 87 autres se régénèrent, et personne ne le saurait
+        # avant qu'un visiteur n'y lise un chiffre faux. En annotation GitHub,
+        # l'avertissement remonte en tête du récapitulatif.
+        print("::warning title=Page unique non generee::corriges/"
+              "tous-les-corriges.html n'a pas ete regeneree (%s). Elle reste "
+              "en ligne avec son contenu precedent, qui peut avoir vieilli." % e)
+
     with open(os.path.join(OUT, "sitemap-corriges.xml"), "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
         for u in dict.fromkeys(urls):
-            prio = "0.9" if u.endswith("/corriges/") else ("0.8" if u.endswith("/") else "0.7")
+            prio = ("0.9" if u.endswith("/corriges/")
+                    else "0.5" if u.endswith("tous-les-corriges.html")
+                    else "0.8" if u.endswith("/") else "0.7")
             f.write("  <url><loc>%s</loc><lastmod>%s</lastmod>"
                     "<changefreq>monthly</changefreq><priority>%s</priority></url>\n" % (u, TODAY, prio))
         f.write("</urlset>\n")
