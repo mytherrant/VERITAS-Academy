@@ -157,6 +157,7 @@ Sitemap: https://veritas-school.com/decouvrir/sitemap-decouvrir.xml
 Sitemap: https://veritas-school.com/niveaux/sitemap-niveaux.xml
 Sitemap: https://veritas-school.com/outils/sitemap-outils.xml
 Sitemap: https://veritas-school.com/corriges/sitemap-corriges.xml
+Sitemap: https://veritas-school.com/livrets/sitemap-livrets.xml
 Sitemap: https://veritas-school.com/sitemap-index.xml
 
 # ════════════════════════════════════════════════════════════════════
