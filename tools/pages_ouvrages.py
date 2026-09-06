@@ -145,9 +145,59 @@ def page(slug: str, o: dict) -> str:
     # fermer la balise <script> qui le porte.
     titre_js = json.dumps(titre, ensure_ascii=False).replace("</", "<\\/")
 
-    desc = (f"{simple} — cahier interactif du Centre VÉRITAS, à remplir en ligne. "
-            f"{prix} FCFA pour l'année scolaire, code d'accès délivré après paiement "
-            f"par Orange Money, MTN MoMo ou carte bancaire.")
+    # ── CE QUE GOOGLE AFFICHE, ET DONC CE QUI DÉCIDE DU CLIC ─────────────────
+    # Le titre faisait 74 à 91 signes et la description 211 à 238 : Google
+    # coupe le premier vers 60, la seconde vers 155. La moitié de ce qu'on
+    # écrivait n'atteignait personne — et ce qui tombait était la fin, donc le
+    # prix et le niveau, c'est-à-dire les deux informations qui décident.
+    #
+    # Un cahier d'œuvre porte un titre à rallonge (« Tartuffe ou l'Imposteur —
+    # Cahier de l'œuvre intégrale »). On garde le nom de l'ŒUVRE, qui est ce
+    # qu'on tape dans Google, et on remplace la queue par le niveau : c'est
+    # l'autre mot de la requête réelle (« Tartuffe 2nde »).
+    # ⚠️ NE COUPER AU TIRET QUE LA OU LE TIRET SEPARE L'OEUVRE DE SA MENTION.
+    # Un cahier d'oeuvre s'appelle « Tartuffe - Cahier de l'oeuvre integrale » :
+    # couper garde « Tartuffe », qui est la requete. Un Bord s'appelle « Bord -
+    # Cahier de francais 6e » : couper garde « Bord », et les SEPT Bords se
+    # retrouvent avec le meme titre. Google appelle cela du contenu duplique, et
+    # tests/banc_pages_ouvrages.cjs l'a refuse — a raison : sept pages qui
+    # portent le meme nom se font concurrence entre elles.
+    court = (simple.split(" - ")[0].strip()
+             if (" - " in simple and slug.startswith("oeuvre-")) else simple)
+    # Le niveau du catalogue est un identifiant (`tle`, `1ere`), pas un mot :
+    # « cahier de l'œuvre tle » se lit mal et ne correspond à aucune requête.
+    # On écrit ce qu'un élève tape et ce qu'un parent reconnaît.
+    NIVEAUX = {"6e": "6e", "5e": "5e", "4e": "4e", "3e": "3e",
+               "2nde": "2nde", "1ere": "1re", "tle": "Terminale"}
+    niv_court = NIVEAUX.get(niveau.strip().lower(), sans_accents_titre(niveau) or "")
+    # Un titre d'œuvre à rallonge mangerait les 60 signes à lui seul
+    # (« Poèmes sauvages éclairés au feu de brousse »). On coupe sur un mot,
+    # jamais au milieu — un titre tronqué net se lit comme une erreur.
+    if len(court) > 34:
+        court = court[:33].rsplit(" ", 1)[0] + "…"
+    prix_lisible = format(prix, ",").replace(",", " ")
+    if slug.startswith("oeuvre-"):
+        titre_seo = f"{court} — cahier d'œuvre {niv_court}".strip()
+        desc = (f"{court} : le cahier de l'œuvre intégrale {niv_court}, à remplir en "
+                f"ligne. Lectures méthodiques, texte numéroté, devoirs rédigés. "
+                f"{prix_lisible} FCFA l'année.")
+    else:
+        titre_seo = f"{court} — cahier interactif"
+        desc = (f"{court} : le cahier à remplir en ligne, correction immédiate. "
+                f"{prix_lisible} FCFA l'année, code d'accès par Orange Money, "
+                f"MoMo ou carte.")
+    # On mesure plutôt que d'espérer : une description tronquée par le moteur
+    # vaut mieux qu'une description tronquée AU MILIEU D'UN MOT.
+    if len(desc) > 158:
+        desc = desc[:155].rsplit(" ", 1)[0] + "…"
+
+    # La signature « | VÉRITAS » coûte dix signes sur soixante. Elle aide la
+    # reconnaissance de la marque quand il reste de la place ; elle la dessert
+    # quand elle pousse le NOM DE L'ŒUVRE hors du titre affiché — or c'est lui
+    # qu'on cherche. On la pose donc seulement si elle tient.
+    titre_complet = titre_seo + " | VÉRITAS"
+    if len(titre_complet) > 60:
+        titre_complet = titre_seo
 
     resume = "".join(
         f'<p><b>{html.escape(qui)}</b> — {html.escape(quoi)}</p>'
@@ -186,10 +236,10 @@ def page(slug: str, o: dict) -> str:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{html.escape(titre)} — cahier interactif | Centre VÉRITAS</title>
+<title>{html.escape(titre_complet)}</title>
 <meta name="description" content="{html.escape(desc)}">
 <meta name="robots" content="index,follow">
-<meta property="og:title" content="{html.escape(titre)} — Centre VÉRITAS">
+<meta property="og:title" content="{html.escape(titre_seo)} — Centre VÉRITAS">
 <meta property="og:description" content="{html.escape(desc)}">
 <meta property="og:type" content="product">
 <meta property="og:url" content="{SITE}/livrets/{slug}.html">

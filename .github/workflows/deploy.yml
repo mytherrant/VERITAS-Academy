@@ -492,6 +492,14 @@ jobs:
       # bloque, mais le MENU du navigateur ne l'est pas et ne peut pas l'etre —
       # le cahier entier partait en PDF propre. Et le filigrane, en
       # position:fixed, ne marquait que la PREMIERE feuille.
+      # ── 🔎 Les fiches d'oeuvre menent-elles au cahier ? ─────────────────
+      # Vingt-et-une fiches (« Tartuffe : resume, themes ») captent ce qu'un
+      # eleve tape reellement dans Google, et ne menaient a AUCUN des neuf
+      # cahiers qui etudient ces memes oeuvres. Ce pas verifie le lien, et que
+      # les titres tiennent dans les soixante signes que Google affiche.
+      - name: 🔎 Chaque fiche d'oeuvre mene-t-elle a son cahier ?
+        run: python tools/lier_oeuvres_cahiers.py --controle
+
       - name: 🔒 Le cahier vendu porte-t-il un nom ?
         run: node tests/banc_protection_cahier.cjs
 
