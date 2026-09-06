@@ -27,7 +27,8 @@ LA MISE EN PAGE D'ORIGINE EST CONSERVÉE, PAS APLATIE
 
   Chaque forme du HTML garde donc la sienne :
       <h1>              → rubrique      (partie)
-      <h2> / <h3>       → lecon {no, title}
+      <h2>              → lecon {no, title}   (la section : « 2.1 L'auteur »)
+      <h3>              → texte en gras       (l'intertitre : « Le titre »)
       <blockquote>      → corpus (+ source si la dernière ligne est une référence)
       <div class=vtab>  → table rows    (les tableaux restent des tableaux)
       <div class=vlist> → texte à puces, l'un après l'autre
@@ -275,12 +276,31 @@ class Lecteur(HTMLParser):
         if tag == "h1":
             self.blocs.append({"y": "rubrique", "txt": txt})
             return
-        # « 7.2 Devoirs rédigés — … » → no = « 7.2 », title = le reste.
+
+        # ⚠️ UN <h3> N'EST PAS UNE LEÇON, ET LES CONFONDRE A VIDÉ LES APERÇUS.
+        # La hiérarchie de ces cahiers a trois étages : la PARTIE (<h1>, 17 par
+        # ouvrage), la SECTION numérotée (<h2>, 35 — « 2.1 L'auteur », c'est
+        # l'unité de travail), et l'INTERTITRE (<h3>, 41 — « Le titre », « Une
+        # entrée retardée »).
+        #
+        # Mapper les deux derniers sur `lecon` en produisait 76 par cahier, un
+        # tous les cinq blocs. Or `deploy.yml` limite un aperçu gratuit à DEUX
+        # blocs `lecon` — une règle écrite pour les cahiers du 1er cycle, où
+        # une leçon est une vraie leçon. Résultat mesuré le 06/09 : les neuf
+        # aperçus tenaient en sept à trente blocs. La garde faisait son travail ;
+        # c'est le mot « leçon » qui désignait la mauvaise chose.
+        #
+        # Seule la section numérotée est donc une `lecon`. L'intertitre devient
+        # un paragraphe en gras — ce qu'il est dans le livre imprimé.
         m = re.match(r"^\s*(\d+(?:\.\d+)*)[.)]?\s+(.*)$", txt)
-        if m:
-            self.blocs.append({"y": "lecon", "no": m.group(1), "title": m.group(2).strip()})
-        else:
-            self.blocs.append({"y": "lecon", "no": "", "title": txt})
+        if tag == "h2" or m:
+            if m:
+                self.blocs.append({"y": "lecon", "no": m.group(1),
+                                   "title": m.group(2).strip()})
+            else:
+                self.blocs.append({"y": "lecon", "no": "", "title": txt})
+            return
+        self.blocs.append({"y": "texte", "r": [{"t": txt, "b": True}]})
 
     def _fermer_p(self, puce=False):
         runs = self._vider()
@@ -510,13 +530,71 @@ def extrait(blocs, parties):
             out.append(b)
         return out
 
-    # « J'entre dans l'œuvre » (~1/3) et une lecture méthodique (~1/2).
-    i1 = parties[min(4, len(parties) - 1)][0]
-    i2 = parties[min(7, len(parties) - 1)][0]
-    fin1 = parties[min(5, len(parties) - 1)][0]
-    lot = (jusqu_a_n_lecons(i1, fin1, 1)
+    def partie(*mots):
+        """La partie qui porte l'un de ces mots dans son titre, et l'index où
+        elle s'arrête.
+
+        ⚠️ ON NE CHOISIT PLUS PAR RANG. La version précédente prenait
+        `parties[4]` et `parties[7]`. Mesuré en production le 06/09 : les
+        cahiers n'ont pas tous le même nombre de parties — quinze pour cinq
+        d'entre eux, dix-sept pour les quatre autres — si bien que le même rang
+        désignait « Je lis et j'analyse » ici et une page de notions là.
+        Résultat : quatre aperçus sur neuf tenaient en DIX BLOCS. Un aperçu
+        vide ne fait pas envie d'acheter, il fait douter du produit.
+
+        Le titre, lui, est stable d'un cahier à l'autre : ils suivent tous le
+        même plan (« J'entre dans l'œuvre », « Je lis et j'analyse »…). On le
+        cherche donc, et on retombe sur un rang seulement si aucun ne répond."""
+        for k, (i, titre) in enumerate(parties):
+            bas = (titre or "").lower()
+            if any(m in bas for m in mots):
+                fin = parties[k + 1][0] if k + 1 < len(parties) else len(blocs)
+                return i, fin
+        return None, None
+
+    # Deux morceaux, choisis pour ce qu'ils montrent : l'entrée dans l'œuvre
+    # (accessible, on comprend tout de suite à quoi sert le cahier) et une
+    # lecture méthodique (le cœur de ce qu'on vend).
+    i1, f1 = partie("j’entre", "j'entre", "entre dans l")
+    i2, f2 = partie("je lis", "lecture", "analyse")
+    if i1 is None:
+        i1, f1 = parties[min(4, len(parties) - 1)][0], None
+    if i2 is None or i2 == i1:
+        i2, f2 = parties[min(7, len(parties) - 1)][0], None
+    if f1 is None:
+        f1 = i1 + 200
+    if f2 is None:
+        f2 = i2 + 200
+
+    def cale_sur_un_extrait(debut, fin):
+        """Avance jusqu'à la section qui montre un TEXTE DE L'AUTEUR.
+
+        ⚠️ UN APERÇU SANS EXTRAIT NE MONTRE PAS LE PRODUIT. Deuxième mesure du
+        06/09 : les neuf aperçus faisaient bien vingt à cinquante blocs, deux
+        sections chacun — et zéro corpus. On y lisait le sommaire de la partie
+        et son introduction, jamais une ligne de Molière ni une question.
+
+        Or ce qu'on vend, c'est exactement cela : l'extrait numéroté ligne à
+        ligne et les questions qui vont avec. « Je lis et j'analyse » commence
+        par une page de méthode ; la première lecture méthodique vient après.
+        On saute donc jusqu'à la section qui porte un corpus, quand il y en a
+        une — et on reste où l'on est sinon, plutôt que de rendre une tranche
+        vide."""
+        depart, vu_lecon = None, None
+        for k in range(debut, min(fin, len(blocs))):
+            y = blocs[k].get("y")
+            if y == "lecon":
+                vu_lecon = k
+            elif y == "corpus" and vu_lecon is not None:
+                depart = vu_lecon
+                break
+        return depart if depart is not None else debut
+
+    i2 = cale_sur_un_extrait(i2, f2)
+
+    lot = (jusqu_a_n_lecons(i1, f1, 1)
            + [{"y": "texte", "txt": "…"}]
-           + jusqu_a_n_lecons(i2, i2 + 120, 1))
+           + jusqu_a_n_lecons(i2, f2, 1))
     return [blocs[0]] + lot
 
 
