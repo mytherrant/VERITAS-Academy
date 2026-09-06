@@ -1030,3 +1030,49 @@
   color:var(--ch-pale,#8a7f6d); font-style:italic;
   margin:-8px 0 16px; padding-right:4px;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   IMPRESSION — CE QUI SORT DE LA MACHINE PORTE UN NOM
+   ──────────────────────────────────────────────────────────────────────────
+   Il n'y avait aucune règle @media print. Conséquences, dans l'ordre de
+   gravité :
+
+     · Ctrl+P est bloqué hors champ de saisie, mais le MENU du navigateur
+       (Fichier ▸ Imprimer, ⌘P sur le menu système, « Enregistrer au format
+       PDF ») ne l'est pas et ne peut pas l'être. Le cahier entier partait donc
+       en PDF propre ;
+     · le filigrane est en `position:fixed` : à l'impression il ne marque que
+       la PREMIÈRE feuille. Les autres sortaient nues.
+
+   On ne prétend pas empêcher l'impression — c'est impossible, et l'élève a le
+   droit d'imprimer SA copie. On fait deux choses honnêtes : le motif se répète
+   sur chaque page (fond de `html`, qui se répète là où un élément fixe ne le
+   fait pas), et chaque feuille porte la mention nominative en pied.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media print {
+  html{
+    background-image:var(--vrt-wm,none);
+    background-repeat:repeat;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  /* L'élément fixe ferait un aplat opaque sur la première feuille par-dessus
+     le fond répété : on le retire, le fond de `html` le remplace partout. */
+  #vrt-wm{ display:none !important; }
+  #vrt-wm-pied{ position:fixed; bottom:0; left:0; right:0; }
+
+  /* Ce qui n'a aucun sens sur du papier. */
+  .ch-mentale-b, .vrt-barre, .vrt-nav, button:not(.ch-champ){ display:none !important; }
+
+  /* Un exercice ne doit pas être coupé entre deux feuilles : l'élève perdrait
+     la consigne d'un côté et ses lignes de l'autre. */
+  .ch-exo, .ch-corpus, .ch-astuce{ break-inside:avoid; page-break-inside:avoid; }
+  .ch-lecon, .ch-rub{ break-after:avoid; page-break-after:avoid; }
+
+  /* Les champs de réponse s'impriment vides et lignés : c'est un cahier. */
+  .ch-champ{ border-bottom:1px solid #b9b2a4; min-height:1.4em; }
+}
+
+/* Le voile de capture. Une seconde, pas plus : il décourage la capture réflexe
+   sans jamais empêcher l'élève de travailler — s'il revient au cahier, il est
+   déjà revenu. */
+.ch-voile{ filter:blur(9px); transition:filter .12s; user-select:none; }

@@ -487,6 +487,14 @@ jobs:
       #    contient du code pour les livrets, pas qu'il en produit. Il vérifie
       #    surtout que la carte suit l'URL du produit — sans quoi un cahier
       #    pointerait `app.html#livre?id=livret:6e`, une fiche inexistante.
+      # ── 🔒 Ce qu'on vend ne doit pas partir nu ──────────────────────────
+      # livrets/cahier.css n'avait AUCUNE regle @media print : Ctrl+P etait
+      # bloque, mais le MENU du navigateur ne l'est pas et ne peut pas l'etre —
+      # le cahier entier partait en PDF propre. Et le filigrane, en
+      # position:fixed, ne marquait que la PREMIERE feuille.
+      - name: 🔒 Le cahier vendu porte-t-il un nom ?
+        run: node tests/banc_protection_cahier.cjs
+
       - name: 🛒 Une seule devanture, un seul flux ?
         run: node tests/banc_boutique_unifiee.cjs
 

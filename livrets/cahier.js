@@ -700,6 +700,29 @@
       if (saisie(document.activeElement)) return;
       e.preventDefault();
     });
+
+    /* ── La capture d'écran ────────────────────────────────────────────────
+       On ne l'empêche pas : aucune page web ne le peut, et prétendre le
+       contraire serait se mentir. On fait deux choses qui, elles, marchent :
+
+         · le contenu se voile une seconde — assez pour qu'une capture prise à
+           l'instant de la touche ne rende qu'un cahier flou. Une seconde
+           capture, patiente, passera : c'est admis ;
+         · le presse-papier reçoit la mention de propriété, de sorte qu'un
+           collage machinal colle une phrase, pas un extrait.
+
+       Ce qui protège vraiment reste le filigrane nominatif, qui désigne
+       l'acheteur sur toute image qui circulerait. Le reste décourage, il ne
+       verrouille pas. */
+    document.addEventListener('keydown', function (e) {
+      if (String(e.key || '') !== 'PrintScreen') return;
+      hote.classList.add('ch-voile');
+      setTimeout(function () { hote.classList.remove('ch-voile'); }, 1100);
+      try {
+        navigator.clipboard && navigator.clipboard.writeText(
+          '© Centre VÉRITAS — exemplaire personnel, reproduction interdite.');
+      } catch (_) {}
+    }, true);
   };
 
   Cahier.prototype.charger = function () {

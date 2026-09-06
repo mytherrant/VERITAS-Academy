@@ -200,10 +200,26 @@
     var d = document.createElement('div');
     d.id = 'vrt-wm';
     d.setAttribute('aria-hidden', 'true');
+    var motif = 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")';
     d.style.cssText = 'position:fixed;inset:0;z-index:6;pointer-events:none;'
       + 'background-repeat:repeat;-webkit-print-color-adjust:exact;print-color-adjust:exact;'
-      + 'background-image:url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")';
+      + 'background-image:' + motif;
     document.body.appendChild(d);
+
+    /* ⚠️ `position:fixed` NE COUVRE QUE LA PREMIÈRE PAGE À L'IMPRESSION.
+       Ce filigrane est présenté comme « présent à l'écran ET à l'impression »,
+       et il l'est — sur la feuille 1. Les suivantes sortaient nues : sur un
+       cahier qui fait deux cents pages, cela veut dire un PDF propre, sans
+       nom, prêt à circuler. Or c'est le seul recours réel contre la
+       rediffusion : aucune page web n'empêche une photo, mais un exemplaire
+       signé désigne celui qui l'a fait circuler.
+
+       On expose donc le motif au CSS, qui le repose sur `html` en impression :
+       un fond d'élément racine SE RÉPÈTE sur toutes les pages, là où un
+       élément fixe ne le fait pas. */
+    try {
+      document.documentElement.style.setProperty('--vrt-wm', motif);
+    } catch (_) {}
 
     // Ligne lisible en pied de page : c'est elle qu'on relit sur une photo.
     var p = document.createElement('div');
