@@ -481,14 +481,42 @@ def js(nom, blocs):
 
 
 def extrait(blocs, parties):
-    """Deux parties ÉLOIGNÉES, jamais le début suivi."""
+    """Deux parties ÉLOIGNÉES, jamais le début suivi.
+
+    ⚠️ DEUX LEÇONS, PAS DEUX TRANCHES. La première version prenait deux
+    fenêtres de 70 blocs. Une fenêtre de cette taille traverse plusieurs
+    sous-titres : l'aperçu de Balafon en contenait TROIS, et le déploiement a
+    été refusé — deploy.yml compte les blocs `lecon` et n'en tolère que deux.
+
+    La garde a raison, et elle est commerciale avant d'être technique : un
+    aperçu qui donne trois leçons ne fait plus envie d'acheter, il commence à
+    remplacer le produit. On coupe donc sur le CONTENU (au troisième
+    sous-titre rencontré), pas sur un nombre de blocs qui ne veut rien dire.
+
+    Les deux morceaux restent éloignés : deux leçons qui se suivent forment un
+    ensemble qu'on finit, deux leçons distantes montrent ce qui manque entre
+    elles."""
     if len(parties) < 4:
         return blocs[:60]
+
+    def jusqu_a_n_lecons(debut, fin, reste):
+        """Coupe la tranche dès qu'on a vu `reste` sous-titres."""
+        out, vus = [], 0
+        for b in blocs[debut:fin]:
+            if b.get("y") == "lecon":
+                vus += 1
+                if vus > reste:
+                    break
+            out.append(b)
+        return out
+
     # « J'entre dans l'œuvre » (~1/3) et une lecture méthodique (~1/2).
     i1 = parties[min(4, len(parties) - 1)][0]
     i2 = parties[min(7, len(parties) - 1)][0]
     fin1 = parties[min(5, len(parties) - 1)][0]
-    lot = blocs[i1:fin1][:70] + [{"y": "texte", "txt": "…"}] + blocs[i2:i2 + 70]
+    lot = (jusqu_a_n_lecons(i1, fin1, 1)
+           + [{"y": "texte", "txt": "…"}]
+           + jusqu_a_n_lecons(i2, i2 + 120, 1))
     return [blocs[0]] + lot
 
 
