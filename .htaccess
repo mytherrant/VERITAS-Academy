@@ -224,7 +224,17 @@ Options -Indexes
 # 404. Le visiteur croyait être arrivé sur l'accueil et ne comprenait pas son
 # erreur d'adresse ; et chaque sonde de robot sur une URL morte coûtait un
 # demi-mégaoctet. Même correction que le 403 juste en dessous.
-ErrorDocument 404 /404.html
+# ⚠️ LA CIBLE EST UN .php, ET C'EST TOUT LE CORRECTIF DU 07/09/2026.
+# Servie en .html, la page d'erreur etait mise en cache par LiteSpeed SOUS
+# L'URL DEMANDEE. Un fichier depose une seconde apres une requete prematurée
+# restait donc introuvable, alors qu'il etait bien sur le serveur — mesure sur
+# le fichier de validation Google Search Console : l'URL nue rendait 404, la
+# meme avec « ?x=1 » rendait le fichier.
+# 404.php pose lui-meme les en-tetes anti-cache et sert le MEME contenu.
+# On ne touche pas a la directive elle-meme : ajouter un `Header ... expr=`
+# aurait pu faire refuser ce fichier EN ENTIER par LWS — et un .htaccess refuse
+# met tout le site en 500, ce qui s'est produit deux fois en aout.
+ErrorDocument 404 /404.php
 # 403 → page dédiée LÉGÈRE (≈1,5 Ko) et non indexée.
 # Avant : /index.html, soit l'application entière (~444 Ko) renvoyée à CHAQUE
 # accès refusé — donc à chaque sonde de robot sur /api/config.php, /data/…
