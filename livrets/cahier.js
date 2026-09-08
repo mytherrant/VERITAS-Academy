@@ -965,6 +965,116 @@
     }
     function sansPrefixe(s, re) { return String(s).replace(re, ''); }
 
+    /* ── L'ÉTIQUETTE DOIT DIRE CE QUE LE BLOC CONTIENT ────────────────────────
+       Les encadrés du 2ⁿᵈ cycle portaient tous « Astuce », parce que c'est le
+       seul libellé que ce moteur savait poser. À l'écran, cela donnait des
+       choses qu'on ne peut pas laisser dans un cahier de français :
+
+           💡 Astuce        ◉ Objectif. Objectif de la séance
+           💡 Astuce        Je lis. Le texte à lire
+
+       — une étiquette qui ment sur son contenu, et un libellé écrit deux fois
+       parce que la source le porte DÉJÀ en tête de son texte. Trois blocs sur
+       quatre d'une page en étaient là.
+
+       Le texte, lui, sait ce qu'il est : il s'ouvre par son nom, suivi d'un
+       point ou d'un tiret. On le lui prend, on le pose sur la pastille, et on
+       le retire du corps. Le repli reste « Astuce » — un bloc qui n'annonce
+       rien EST une astuce, c'est ainsi que la collection les nomme. */
+    /* ⚠️ UN PICTOGRAMME PEUT PRÉCÉDER LE LIBELLÉ. Les sources en posent un
+       devant certains encadrés (« ◉ Objectif. … ») ; sans lui, le motif ne
+       reconnaissait rien et la pastille retombait sur « Astuce » — sur le
+       bloc le plus visible de la page, celui qui annonce ce qu'on va faire. */
+    var PICTO = '^\\s*[\u25C9\u25CF\u25B8\u25AA\u2022\u25C6\u2713\u261E]?\\s*';
+    function _lib(motif) { return new RegExp(PICTO + motif, 'i'); }
+    var LIBELLES = [
+      [_lib('objectifs?\\s*(?:de\\s+la\\s+s[ée]ance\\s*)?\\s*[.:—–-]\\s*'), 'Objectif', 'target'],
+      [_lib('je\\s+retiens\\s*[.:—–-]\\s*'), 'Je retiens', 'brain'],
+      [_lib('m[ée]thode\\s*[.:—–-]\\s*'), 'Méthode', 'pen'],
+      [_lib('attention\\s*[.:—–-]\\s*'), 'Attention', 'bulb'],
+      [_lib('astuce\\s*[.:—–-]\\s*'), 'Astuce', 'bulb'],
+      /* Les rubriques nommées de la collection. Elles s'écrivent en tête du
+         bloc, comme dans le livre imprimé ; sans elles, « Boîte à outils »
+         s'affichait sous une pastille « Astuce », et le lecteur devait lire
+         deux fois pour savoir ce qu'il avait sous les yeux. */
+      [_lib('bo[îi]te\\s+[àa]\\s+outils\\s*[.:—–-]\\s*'), 'Boîte à outils', 'wrench'],
+      [_lib('le\\s+savais[- ]tu\\s*\\??\\s*[.:—–-]?\\s*'), 'Le savais-tu ?', 'book'],
+      [_lib('qui\\s+est\\s+qui\\s*\\??\\s*[.:—–-]?\\s*'), 'Qui est qui ?', 'book'],
+      [_lib('le\\s+coin\\s+du\\s+rire\\s*[.:—–-]\\s*'), 'Le coin du rire', 'bulb'],
+      [_lib('les\\s+mots\\s+difficiles\\s*[.:—–-]\\s*'), 'Les mots difficiles', 'book'],
+      [_lib('[àa]\\s+toi\\s+de\\s+jouer\\s*[.:—–-]\\s*'), 'À toi de jouer', 'check'],
+      [_lib('c[ôo]t[ée]\\s+examen\\s*[.:—–-]\\s*'), 'Côté examen', 'scale'],
+      [_lib('d[ée]fi\\s*[.:—–-]\\s*'), 'Défi', 'check'],
+      /* Le cas général, en dernier : « Je lis. », « J'observe. »,
+         « Je m'évalue. »… La collection nomme ses rubriques à la première
+         personne, et c'est ce « je » qui fait qu'un élève s'y reconnaît. On
+         reprend donc le libellé TEL QU'IL EST ÉCRIT plutôt que d'en tenir une
+         liste qui sera fausse au prochain cahier. */
+      [_lib("(j[e\\u2019']\\s*[a-zàâçéèêëîïôûùüÿœ\\u2019']{2,20}(?:\\s+[a-zàâçéèêëîïôûùüÿœ\\u2019']{2,14}){0,2})\\s*[.:—–]\\s*"), null, 'book']
+    ];
+    function etiquetteDuCorps(html) {
+      /* On ne regarde que le TEXTE pour reconnaître le libellé : le corps est
+         du HTML (les runs y ont posé leurs <b> et <i>), et un libellé peut
+         très bien être en gras. Le retrait, lui, se fait sur le HTML — d'où
+         la coupe par longueur visible.
+
+         ⚠️ ET ON BOUCLE. Les sources écrivent souvent le nom DEUX fois :
+         « Objectif. Objectif de la séance : … ». Retirer une seule occurrence
+         laissait « Objectif de la séance » sous une pastille « Objectif » —
+         la moitié du défaut qu'on venait corriger. */
+      var corps = String(html), label = '', ic = '';
+      for (var tour = 0; tour < 3; tour++) {
+        var nu = corps.replace(/<[^>]+>/g, ''), trouve = null;
+        for (var i = 0; i < LIBELLES.length; i++) {
+          var m = LIBELLES[i][0].exec(nu);
+          if (m) {
+            /* Un libellé nommé dans la table l'emporte ; sinon c'est le texte
+               capturé qui devient l'étiquette, avec sa majuscule d'origine. */
+            var nom = LIBELLES[i][1] || (m[1] || '').trim();
+            nom = nom.charAt(0).toUpperCase() + nom.slice(1);
+            trouve = [m[0].length, nom, LIBELLES[i][2]]; break;
+          }
+        }
+        if (!trouve) break;
+        if (!label) { label = trouve[1]; ic = trouve[2]; }
+        var pris = 0, j = 0;
+        while (j < corps.length && pris < trouve[0]) {
+          if (corps.charAt(j) === '<') { j = corps.indexOf('>', j) + 1 || corps.length; continue; }
+          j++; pris++;
+        }
+        corps = corps.slice(j);
+        /* Une balise FERMANTE laissée en tête n'a plus son ouvrante : elle ne
+           met plus rien en forme et le navigateur la jette. On la retire pour
+           que le HTML rendu reste celui qu'on croit écrire. */
+        corps = corps.replace(/^(?:\s|<\/[a-z][^>]*>)+/i, '');
+      }
+      /* ── ET LA RÉPÉTITION SANS PONCTUATION ──────────────────────────────
+         « ◉ Objectif. Objectif de la séance » : le second « Objectif » n'est
+         pas suivi d'un point mais du corps, en gras, collé. La boucle
+         ci-dessus, qui exige un séparateur, s'arrêtait donc après le premier
+         et la pastille « Objectif » restait posée sur un titre « Objectif de
+         la séance ». On retire ici ce qui répète l'étiquette qu'on vient de
+         prendre, avec son complément s'il en a un — « de la séance », « du
+         jour » — mais rien d'autre : « Je lis » suivi de « Le texte à lire »
+         garde son sous-titre, qui, lui, dit quelque chose de plus. */
+      if (label) {
+        var echo = new RegExp('^(?:\\s|<[^>]*>)*' + label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+                            + '(?:\\s+(?:de\\s+la\\s+s[ée]ance|de\\s+la\\s+le[çc]on|du\\s+jour))?'
+                            + '\\s*[.:—–-]?\\s*', 'i');
+        var nuC = corps.replace(/<[^>]+>/g, '');
+        if (echo.test(nuC)) {
+          var n2 = echo.exec(nuC)[0].length, p2 = 0, k2 = 0;
+          while (k2 < corps.length && p2 < n2) {
+            if (corps.charAt(k2) === '<') { k2 = corps.indexOf('>', k2) + 1 || corps.length; continue; }
+            k2++; p2++;
+          }
+          corps = corps.slice(k2).replace(/^(?:\s|<\/[a-z][^>]*>)+/i, '');
+        }
+      }
+      return label ? { label: label, ic: ic, corps: corps }
+                   : { label: 'Astuce', ic: 'bulb', corps: html };
+    }
+
     /* Ce qu'on met en couleur dépend de la collection, parce que ce qu'on
        apprend n'est pas le même. Au collège : qui parle (noms propres) et
        comment (verbes de parole) — on apprend à lire un récit. Au lycée : les
@@ -1081,8 +1191,12 @@
       }
 
       if (y === 'objectif') {
+        /* La pastille dit déjà « Objectif » : le corps le répétait, parce que
+           la source le porte en tête (« Objectif : l'apprenant devra… »).
+           On lisait « ◉ Objectif. Objectif de la séance ». */
         h += '<p class="ch-objectif"><span class="ch-objectif-l">' + icone('target')
-          +  '<span>Objectif</span></span>' + corps + '</p>';
+          +  '<span>Objectif</span></span>'
+          +  etiquetteDuCorps(corps).corps + '</p>';
         return;
       }
 
@@ -1421,9 +1535,10 @@
          ses anneaux de classeur sur le bord. C'est le bloc que les élèves
          lisent en premier — il mérite de se voir. */
       if (y === 'astuce') {
-        h += '<div class="ch-astuce" data-seq="' + teinte + '"><span class="ch-astuce-l">' + icone('bulb')
-          +  '<span>Astuce</span></span><p>'
-          +  sansPrefixe(corps, /^\s*astuce\s*[—:-]\s*/i) + '</p></div>';
+        var et = etiquetteDuCorps(corps);
+        h += '<div class="ch-astuce" data-seq="' + teinte + '"><span class="ch-astuce-l">' + icone(et.ic)
+          +  '<span>' + et.label + '</span></span><p>'
+          +  et.corps + '</p></div>';
         return;
       }
 
