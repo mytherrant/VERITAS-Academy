@@ -322,10 +322,47 @@ console.log(`\n${G}⑦ Les cahiers sont liés depuis la boutique, sans JavaScrip
   dire(fs.existsSync(plan), 'la boutique a son plan de site');
   if (fs.existsSync(plan)) {
     const xml = fs.readFileSync(plan, 'utf8');
-    const absents = slugs.filter(s => xml.indexOf('/livrets/' + s + '.html<') < 0);
+
+    /* ── « AU PLAN » NE S'EXIGE QUE DES PAGES QUI ACCEPTENT D'Y ÊTRE ────────
+       Ce contrôle réclamait les VINGT-QUATRE pages du catalogue au plan, sans
+       jamais demander à la page si elle voulait être indexée. Quatre ne le
+       voulaient pas : `6e.html`, `5e.html`, `4e.html` et `3e.html` ne sont
+       plus des pages de vente depuis le 01/09/2026 mais des redirections vers
+       `cahier.html?o=<slug>`, et elles portent — à juste titre — `noindex`.
+
+       La règle telle qu'écrite EXIGEAIT donc la contradiction : un plan qui
+       dit à Google « indexe ceci » à une page qui répond « ne m'indexe pas ».
+       Search Console la relève en « Soumise avec balise noindex », et c'était
+       le cas des quatre cahiers de collège — l'entrée de gamme. Mesuré en
+       production le 08/09/2026 sur les 218 URLs des neuf sitemaps : zéro lien
+       mort, et exactement ces quatre-là.
+
+       On garde donc l'intention — aucune page de vente publiée ne doit
+       manquer au plan — en la posant sur le bon ensemble. Et on ajoute la
+       réciproque, qui manquait : le plan ne doit annoncer AUCUNE page en
+       `noindex`. Sans elle, ce banc restait vert pendant que le plan se
+       contredisait ; un garde-fou qui ne vérifie qu'un sens laisse passer
+       l'autre.                                                              */
+    const indexable = (f) => {
+      const chemin = path.join(RACINE, 'livrets', f);
+      if (!fs.existsSync(chemin)) return false;
+      return !/<meta[^>]+name=["']robots["'][^>]+noindex/i
+        .test(fs.readFileSync(chemin, 'utf8'));
+    };
+
+    const publiables = slugs.filter(s => indexable(s + '.html'));
+    const absents = publiables.filter(s => xml.indexOf('/livrets/' + s + '.html<') < 0);
     dire(absents.length === 0,
-      `les ${slugs.length} pages de vente sont au plan`,
+      `les ${publiables.length} pages de vente indexables sont au plan`
+      + (publiables.length < slugs.length
+         ? ` (${slugs.length - publiables.length} redirection(s) en noindex, hors plan à dessein)` : ''),
       'absentes : ' + absents.join(', '));
+
+    const annoncees = [...xml.matchAll(/\/livrets\/([A-Za-z0-9_-]+\.html)</g)].map(m => m[1]);
+    const contradictoires = annoncees.filter(f => !indexable(f));
+    dire(contradictoires.length === 0,
+      'et le plan n’annonce aucune page qui refuse d’être indexée',
+      'annoncées en noindex : ' + contradictoires.join(', '));
     const index = fs.readFileSync(path.join(RACINE, 'sitemap-index.xml'), 'utf8');
     dire(index.indexOf('livrets/sitemap-livrets.xml') >= 0,
       'et ce plan est déclaré dans sitemap-index.xml — sinon personne ne le lit');

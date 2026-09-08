@@ -154,6 +154,41 @@ dit(($a['lien'] ?? '') === 'bord-6e.html' && ($b['lien'] ?? '') === 'bord-6e.htm
 dit(($a['mode'] ?? '') === 'interactif' && ($b['mode'] ?? '') === 'lecture',
     'et l\'état rend le mode, pour que l\'appelant n\'ait pas à le redemander');
 
+/* ═══ 5. LE TROISIÈME MODE — un cahier qui apporte son propre moteur ═══════
+   Les quatre cahiers d'œuvres du 1er cycle (08/09/2026) ne se rendent ni par
+   `cahier.html`, qui lit `window.CAHIER_BLOCS`, ni par le liseur, qui sert des
+   images de pages. Ils ont leur moteur — `support-oi.js` — et leur page :
+   `cahier-<slug>.html`. Leurs mots croisés, mots mêlés et cartes mentales
+   n'existent dans aucun autre cahier du site.
+
+   Ils se LIVRENT pourtant comme un cahier interactif : `booklet-<slug>.js`, au
+   même endroit, par la même porte. Toute la question est là — deux ouvrages
+   qui se livrent pareil et s'ouvrent ailleurs. Se tromper enverrait l'acheteur
+   sur un moteur qui ne sait pas lire son ouvrage, et lui afficherait « contenu
+   pas encore déposé » sur un cahier complet et payé.                        */
+echo "\n{$G}5. Un cahier autonome se livre comme un interactif, s'ouvre chez lui{$R}\n";
+$g = cas('autonome', 'js');
+dit(($g['disponible'] ?? null) === true,
+    'autonome + données du cahier → disponible', json_encode($g));
+$h = cas('autonome', 'images');
+dit(($h['disponible'] ?? null) === false,
+    'autonome, mais SEULES les images sont déposées → PAS en vente', json_encode($h));
+$i = cas('autonome', 'aucune');
+dit(($i['disponible'] ?? null) === false,
+    'autonome, dépôt vide → PAS en vente', json_encode($i));
+dit(($g['porte'] ?? '') === 'cahier-bord-6e.html',
+    'et il s\'ouvre par SA page, pas par le moteur générique', json_encode($g));
+dit(($g['mode'] ?? '') === 'autonome',
+    'le mode traverse tel quel — trois valeurs, pas deux', json_encode($g));
+
+/* Un mode que personne n'a prévu ne doit pas ouvrir une porte au hasard : il
+   retombe sur le cahier interactif, qui est ce que porte le catalogue pour
+   vingt ouvrages sur vingt-quatre. Une faute de frappe dans une fiche ne
+   ferme donc rien, et n'ouvre rien d'inattendu non plus. */
+$j = cas('feuilleton', 'js');
+dit(($j['mode'] ?? '') === 'interactif' && ($j['disponible'] ?? null) === true,
+    'un mode inconnu retombe sur « interactif », sans rien casser', json_encode($j));
+
 echo "\n" . str_repeat('─', 68) . "\n";
 if ($ko === 0) {
     echo "\033[32m{$G}  ✓ {$ok}/{$ok} — la forme livrée suit le mode déclaré.{$R}\n\n";

@@ -81,7 +81,20 @@ if (!defined('VRT_LIVRET_LIB')) {
             $out[$slug] = [
                 'titre'  => (string) ($o['titre'] ?? $slug),
                 'niveau' => (string) ($o['niveau'] ?? ''),
-                'mode'   => ((string) ($o['mode'] ?? 'interactif')) === 'lecture' ? 'lecture' : 'interactif',
+                /* ⚠️ CE FILTRE EST L'AUTORITÉ SUR LE MODE, ET IL EN CONNAÎT
+                   TROIS. Il n'en connaissait que deux : tout ce qui n'était
+                   pas « lecture » devenait « interactif ». Le mode « autonome »
+                   des cahiers d'œuvres du 1er cycle était donc écrasé ICI,
+                   avant même d'atteindre `vrt_livret_etat()` — qui, lui, le
+                   traitait correctement, sur une valeur qu'il ne recevait
+                   jamais. Le banc l'a vu ; la lecture du code ne l'aurait pas
+                   montré, les deux fonctions étant justes chacune de son côté.
+                   Un mode inconnu retombe toujours sur « interactif » : c'est
+                   ce que porte le catalogue pour vingt ouvrages sur
+                   vingt-quatre, et une faute de frappe dans une fiche ne doit
+                   fermer aucun ouvrage. */
+                'mode'   => in_array((string) ($o['mode'] ?? ''), ['lecture', 'autonome'], true)
+                            ? (string) $o['mode'] : 'interactif',
                 'kinds'  => $kinds ?: ['livret'],
                 'prix'   => (int) ($o['prix'] ?? 0),          // 0 = tarif général
                 'prixGuide' => (int) ($o['prixGuide'] ?? 0),
@@ -274,9 +287,20 @@ if (!defined('VRT_LIVRET_LIB')) {
            `livret.php` pour router, et c'est de lui que `pages_ouvrages.py`
            déduit la page à écrire. Mode inconnu ⇒ `interactif`, comme partout
            ailleurs (voir vrt_livret_catalogue). */
-        $cat  = vrt_livret_catalogue();
-        $mode = ((string) ($cat[$slug]['mode'] ?? 'interactif')) === 'lecture'
-              ? 'lecture' : 'interactif';
+        /* ── ET IL Y A UN TROISIÈME MODE DEPUIS LE 08/09/2026 : « autonome » ──
+           Les quatre cahiers d'œuvres du 1er cycle n'ont ni la forme de l'un
+           ni celle de l'autre. Ils arrivent avec LEUR moteur — mots croisés,
+           mots mêlés, cartes mentales, appariements, que `cahier.js` ne sait
+           pas dessiner — et leur page se suffit : `cahier-<slug>.html`.
+
+           Ils se LIVRENT pourtant comme un cahier interactif : un fichier de
+           blocs, `booklet-<slug>.js`, déposé au même endroit et servi par la
+           même porte. Ce qui change est où l'on envoie l'acheteur, et cela
+           seul. C'est précisément la distinction que le 08/09 a coûté cher :
+           la forme livrée d'un côté, la porte qui sait la lire de l'autre. */
+        $cat   = vrt_livret_catalogue();
+        $brut  = (string) ($cat[$slug]['mode'] ?? 'interactif');
+        $mode  = in_array($brut, ['lecture', 'autonome'], true) ? $brut : 'interactif';
         $livrable = ($mode === 'lecture') ? $pages : $donnees;
 
         return [
@@ -304,7 +328,14 @@ if (!defined('VRT_LIVRET_LIB')) {
             // formes existe. Une page dédiée présente mieux qu'un lecteur nu.
             'lien' => $coquille
                     ? ($slug . '.html')
-                    : ('cahier.html?o=' . rawurlencode($slug)),
+                    /* Sans page de vente, on présente par la porte — et la
+                       porte d'un cahier autonome n'est PAS le moteur
+                       générique : `cahier.html` y afficherait « contenu pas
+                       encore déposé » sur un ouvrage complet, faute de savoir
+                       lire ses blocs. */
+                    : (($mode === 'autonome')
+                       ? ('cahier-' . $slug . '.html')
+                       : ('cahier.html?o=' . rawurlencode($slug))),
             /* ── LA VITRINE ET LA PORTE NE SONT PAS LE MÊME LIEN ─────────────
                `lien` ci-dessus mène où l'on PRÉSENTE l'ouvrage : depuis les
                pages d'atterrissage du 31/08/2026, `<slug>.html` est une page
@@ -317,10 +348,17 @@ if (!defined('VRT_LIVRET_LIB')) {
                coquille du liseur pour un ouvrage qu'on feuillette — `cahier.html`
                ne sait pas afficher des images de pages, et l'acheteur d'un
                feuilletage y verrait « contenu pas encore déposé ».
-               C'est ce que `vrt_notify_lien()` envoie par SMS et par courriel. */
-            'porte' => ($mode === 'lecture' && $coquille)
-                    ? ($slug . '.html')
-                    : ('cahier.html?o=' . rawurlencode($slug)),
+               C'est ce que `vrt_notify_lien()` envoie par SMS et par courriel.
+
+               Trois modes, trois portes, et aucune n'ouvre à la place d'une
+               autre : le moteur générique pour un cahier qu'on remplit, la
+               coquille du liseur pour un ouvrage qu'on feuillette, et sa page
+               propre pour un cahier qui porte son moteur avec lui. */
+            'porte' => ($mode === 'autonome')
+                    ? ('cahier-' . $slug . '.html')
+                    : (($mode === 'lecture' && $coquille)
+                       ? ($slug . '.html')
+                       : ('cahier.html?o=' . rawurlencode($slug))),
             'couverture' => is_file($dirCouv . 'livret_' . $slug . '.jpg')
                     ? '/uploads/oeuvres/livret_' . $slug . '.jpg' : '',
         ];

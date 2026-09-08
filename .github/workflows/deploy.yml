@@ -957,7 +957,13 @@ jobs:
                 echo "::error title=Livret non verrouille::$f contient encore un code en dur. Reconstruire avec tools/prepare_livrets.py. Deploiement ANNULE."
                 exit 1
               fi
-              if grep -qE 'window[.](BOOKLET|GUIDE)[A-Z0-9_]* *=' "$f"; then
+              # ⚠️ TROIS NOMS DE GLOBALE, PAS DEUX. Les cahiers d'oeuvres du
+              #    1er cycle (08/09/2026) posent `window.OI_DOC` : ni BOOKLET
+              #    ni GUIDE. Une coquille qui embarquerait leur charge serait
+              #    passee sans un mot — le produit vendu, en clair, dans un
+              #    depot GitHub public. La garde ne vaut que ce que vaut sa
+              #    liste ; celle-ci vient de s'allonger.
+              if grep -qE 'window[.](BOOKLET|GUIDE|OI_DOC)[A-Z0-9_]* *=' "$f"; then
                 echo "::error title=Contenu dans la coquille::$f embarque les donnees du livret — le produit partirait en clair. Deploiement ANNULE."
                 exit 1
               fi
@@ -990,9 +996,27 @@ jobs:
                 echo "::error title=Corrige dans un apercu gratuit::$f contient une correction. Regenerer avec: python tools/normaliser_cahiers.py --charge <dossier>. Deploiement ANNULE."
                 exit 1
               fi
+              # ⚠️ CES DEUX MOTIFS NE PARLENT QUE DU FORMAT NORMALISE
+              #    (`{"y":"lecon"}`, `{"y":"corrige"}`). Les cahiers d'oeuvres
+              #    du 1er cycle ont le leur — des PARTIES portant un `kind`, des
+              #    CHAPITRES au lieu de lecons — et traversaient donc les deux
+              #    controles sans que rien ne soit mesure : un apercu qui
+              #    aurait embarque la partie « corriges » serait parti en clair,
+              #    sur la seule page de ces cahiers qui n'exige aucun code.
+              #    Un garde-fou muet sur un format est pire qu'absent : il
+              #    donne le vert.
+              if grep -qE '"kind":"(corriges|notes)"' "$f"; then
+                echo "::error title=Partie reservee dans un apercu gratuit::$f embarque les corriges ou la note aux enseignants. Regenerer avec: python tools/cahiers_oeuvres_1c.py --charge <dossier>. Deploiement ANNULE."
+                exit 1
+              fi
               n=$(grep -o '"y":"lecon"' "$f" | wc -l)
+              c=$(grep -o '"chapters":\[' "$f" | wc -l)
               if [ "$n" -gt 2 ]; then
                 echo "::error title=Apercu trop long::$f contient $n lecons (2 au plus). Deploiement ANNULE."
+                exit 1
+              fi
+              if [ "$c" -gt 2 ]; then
+                echo "::error title=Apercu trop long::$f contient $c oeuvres ouvertes (2 au plus). Deploiement ANNULE."
                 exit 1
               fi
             done

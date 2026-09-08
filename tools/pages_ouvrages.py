@@ -92,11 +92,37 @@ FAMILLES = {
              "corrigés déjà rédigés."),
         ],
     },
+    # Les quatre cahiers d'œuvres du collège (08/09/2026). Trois œuvres par
+    # niveau, sept temps par œuvre, et des exercices qu'aucun autre cahier du
+    # site ne porte : mots croisés, mots mêlés, cartes mentales, appariements.
+    # C'est pour eux qu'existe le mode « autonome » — ils apportent leur moteur.
+    "oeuvres1c": {
+        "etiquette": "Étude des œuvres intégrales",
+        "phrase": "Les trois œuvres au programme, étudiées en sept temps chacune : "
+                  "on ouvre le livre, on lit, on écrit, on joue, on s'évalue.",
+        "resume": [
+            ("Pour l'apprenant",
+             "il ne lit pas un résumé : il lit les œuvres, guidé passage par passage, "
+             "et révise par des jeux — mots croisés, mots mêlés, cartes mentales."),
+            ("Pour l'enseignant",
+             "avec le code enseignant, les corrigés rédigés des trois œuvres et la "
+             "conduite de chaque séquence."),
+        ],
+    },
 }
 
 
 def famille(slug: str) -> dict:
-    return FAMILLES["bord"] if slug.startswith("bord-") else FAMILLES["livret"]
+    if slug.startswith("bord-"):
+        return FAMILLES["bord"]
+    # ⚠️ « oeuvres- » ET « oeuvre- » NE SONT PAS LE MÊME PRÉFIXE, et c'est
+    # volontaire : `oeuvre-tartuffe` est le cahier d'UNE œuvre du 2ⁿᵈ cycle,
+    # `oeuvres-6e` couvre les TROIS œuvres d'un niveau du collège. Le test
+    # porte sur la chaîne entière, tiret compris, pour que l'un ne réponde
+    # jamais à la place de l'autre.
+    if slug.startswith("oeuvres-"):
+        return FAMILLES["oeuvres1c"]
+    return FAMILLES["livret"]
 
 
 _SPRITE = None
@@ -135,6 +161,15 @@ def page(slug: str, o: dict) -> str:
     titre = str(o.get("titre") or slug)
     prix = int(o.get("prix") or 0)
     niveau = str(o.get("niveau") or "")
+    # ── LA PORTE N'EST PAS LA MÊME POUR TOUS LES OUVRAGES ────────────────────
+    # `cahier.html` est le moteur GÉNÉRIQUE : il lit `window.CAHIER_BLOCS`, et
+    # sait rendre les vingt cahiers qui parlent ce format. Un cahier autonome
+    # apporte le sien (`support-oi.js`) et pose une autre globale : envoyé sur
+    # `cahier.html`, l'acheteur y lirait « contenu pas encore déposé » sur un
+    # ouvrage complet et payé. Le mode dit où l'on ouvre, ici comme dans
+    # `vrt_livret_etat()` — un seul endroit décide, des deux côtés.
+    autonome = str(o.get("mode") or "") == "autonome"
+    porte = f"cahier-{slug}.html" if autonome else f"cahier.html?o={slug}"
     couv_rel = f"/uploads/oeuvres/livret_{slug}.jpg"
     a_couv = (COUVERTURES / f"livret_{slug}.jpg").is_file()
     simple = sans_accents_titre(titre)
@@ -176,7 +211,15 @@ def page(slug: str, o: dict) -> str:
     if len(court) > 34:
         court = court[:33].rsplit(" ", 1)[0] + "…"
     prix_lisible = format(prix, ",").replace(",", " ")
-    if slug.startswith("oeuvre-"):
+    if autonome:
+        # Ce que tape un parent : « œuvres au programme 6e Cameroun ». Le titre
+        # du catalogue (« Étude des œuvres intégrales — 6ᵉ ») dit déjà les deux
+        # mots, mais avec un exposant que Google n'indexe pas comme « 6e ».
+        titre_seo = f"Œuvres intégrales {niv_court} — cahier d'étude".strip()
+        desc = (f"Les trois œuvres au programme de {niv_court} étudiées en ligne : "
+                f"lecture guidée, exercices, jeux de révision et corrigés. "
+                f"{prix_lisible} FCFA l'année.")
+    elif slug.startswith("oeuvre-"):
         titre_seo = f"{court} — cahier d'œuvre {niv_court}".strip()
         desc = (f"{court} : le cahier de l'œuvre intégrale {niv_court}, à remplir en "
                 f"ligne. Lectures méthodiques, texte numéroté, devoirs rédigés. "
@@ -198,6 +241,33 @@ def page(slug: str, o: dict) -> str:
     titre_complet = titre_seo + " | VÉRITAS"
     if len(titre_complet) > 60:
         titre_complet = titre_seo
+
+    # ── L'ENCADRÉ DU BAS PARLE DU PRODUIT QU'ON REGARDE ──────────────────
+    # « Livret ou Bord ? » est la bonne question devant un livret ou un Bord —
+    # ce sont deux ouvrages jumeaux, au même prix, et beaucoup d'élèves n'en
+    # prennent qu'un. Devant un cahier d'œuvres, elle n'a pas de sens : il n'a
+    # pas de jumeau, il vient en plus. Poser la mauvaise question au bas d'une
+    # page de vente, c'est envoyer comparer ailleurs quelqu'un qui était prêt.
+    if autonome:
+        encadre_famille = f'''<div class="card" style="margin-top:1rem">
+    <h3>{ico('i-book-open')}Ce cahier remplace-t-il les livres ?</h3>
+    <p>Non, et c'est le seul point sur lequel il ne cède pas : il faut lire les
+       trois œuvres. Il accompagne la lecture — il situe chaque passage,
+       l'explique, et vérifie qu'on a compris. L'élève y répond dans la page,
+       et révise par des jeux : mots croisés, mots mêlés, cartes mentales.</p>
+    <a class="dl" href="{porte}?extrait=1"><span>{ico('i-eye')}Lire deux chapitres
+      gratuitement</span><span class="pill gris">sans code</span></a>
+  </div>'''
+    else:
+        encadre_famille = f'''<div class="card" style="margin-top:1rem">
+    <h3>{ico('i-book')}Livret ou Bord ?</h3>
+    <p>Ce sont deux ouvrages distincts, au même prix : le <strong>Livret</strong>
+       pour travailler — l'élève y écrit — et le <strong>Bord</strong> pour
+       comprendre et réviser, avec les leçons et les corrigés modèles.
+       Beaucoup d'élèves n'en prennent qu'un.</p>
+    <a class="dl" href="/livrets/"><span>{ico('i-book-open')}Comparer et choisir</span>
+      <span class="pill gris">tous les cahiers</span></a>
+  </div>'''
 
     resume = "".join(
         f'<p><b>{html.escape(qui)}</b> — {html.escape(quoi)}</p>'
@@ -280,22 +350,14 @@ def page(slug: str, o: dict) -> str:
       <p><span class="pill or">{prix} FCFA</span> pour l'année scolaire{
         f', classe de {html.escape(niveau)}' if niveau else ''}.</p>
       {resume}
-      <a class="dl" href="cahier.html?o={slug}">
+      <a class="dl" href="{porte}">
         <span>{ico('i-key')}Ouvrir mon cahier</span><span class="pill">j'ai un code</span></a>
-      <a class="dl" id="vrt-acheter" href="cahier.html?o={slug}" data-o="{slug}">
+      <a class="dl" id="vrt-acheter" href="{porte}" data-o="{slug}">
         <span>{ico('i-credit-card')}Obtenir mon code d'accès</span><span class="pill or">{prix} F</span></a>
     </div>
   </div>
 
-  <div class="card" style="margin-top:1rem">
-    <h3>{ico('i-book')}Livret ou Bord ?</h3>
-    <p>Ce sont deux ouvrages distincts, au même prix : le <strong>Livret</strong>
-       pour travailler — l'élève y écrit — et le <strong>Bord</strong> pour
-       comprendre et réviser, avec les leçons et les corrigés modèles.
-       Beaucoup d'élèves n'en prennent qu'un.</p>
-    <a class="dl" href="/livrets/"><span>{ico('i-book-open')}Comparer et choisir</span>
-      <span class="pill gris">tous les cahiers</span></a>
-  </div>
+  {encadre_famille}
 
   <p class="note">Les corrigés des cahiers restent gratuits et sans compte sur
      <a href="/corriges/">la page des corrigés</a>. Ce cahier-ci est l'ouvrage
@@ -356,16 +418,48 @@ def sitemap(ouvrages: dict) -> str:
     voyait ni lien, ni plan. Deux chemins coupés, le même produit invisible.
     On rétablit les deux — ici le plan, dans index.html les liens.
     """
+    # ── EXISTER NE SUFFIT PAS : IL FAUT AUSSI VOULOIR ÊTRE INDEXÉ ────────────
+    # La règle « une page annoncée doit EXISTER » (plus bas) a été posée pour
+    # qu'aucune URL du plan ne réponde 404. Elle laissait passer l'autre moitié
+    # de la question : cette page ACCEPTE-T-ELLE d'être indexée ?
+    #
+    # Quatre ne l'acceptaient pas. `livrets/6e.html`, `5e.html`, `4e.html` et
+    # `3e.html` ne sont plus des pages de vente : depuis le 01/09/2026 ce sont
+    # des redirections vers `cahier.html?o=<slug>`, et elles portent — à juste
+    # titre — `noindex, nofollow`. Le plan les annonçait quand même, parce
+    # qu'il se contentait de parcourir le catalogue.
+    #
+    # Un plan qui dit « indexe ceci » à une page qui répond « ne m'indexe pas »
+    # n'est pas une contradiction abstraite : Search Console la relève en
+    # « Soumise avec balise noindex », et ce sont les QUATRE CAHIERS DE COLLÈGE
+    # — l'entrée de gamme, le plus gros du volume — qui la déclenchent. Mesuré
+    # sur les 218 URLs des neuf sitemaps le 08/09/2026 : zéro lien mort, zéro
+    # page vide, et exactement ces quatre contradictions.
+    #
+    # On lit donc la page qu'on s'apprête à annoncer, au lieu de la supposer
+    # indexable. Le contrôle couvre AUSSI les pages fixes : un garde-fou qui ne
+    # garde que la moitié d'une liste finit par laisser passer l'autre moitié.
+    def indexable(chemin: str) -> bool:
+        f = SORTIE / chemin
+        if not f.is_file():
+            return False
+        texte = f.read_text(encoding="utf-8", errors="replace")
+        return re.search(r"<meta[^>]+name=[\"']robots[\"'][^>]+noindex",
+                         texte, re.I) is None
+
     lignes = ['<?xml version="1.0" encoding="UTF-8"?>',
               '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for chemin, freq, prio in PAGES_FIXES:
+        # « livrets/ » est un dossier : c'est son index.html qui répond.
+        if not indexable(chemin if chemin.endswith(".html") else "index.html"):
+            continue
         lignes.append(f"<url><loc>{SITE}/livrets/{chemin}</loc>"
                       f"<changefreq>{freq}</changefreq><priority>{prio}</priority></url>")
     # Une page annoncée au plan doit EXISTER : un plan qui promet une URL en
     # 404 vaut moins que pas de plan du tout. On constate le fichier plutôt
     # que de recopier le catalogue.
     for slug in sorted(ouvrages):
-        if not (SORTIE / f"{slug}.html").is_file():
+        if not indexable(f"{slug}.html"):
             continue
         lignes.append(f"<url><loc>{SITE}/livrets/{slug}.html</loc>"
                       f"<changefreq>monthly</changefreq><priority>0.8</priority></url>")
