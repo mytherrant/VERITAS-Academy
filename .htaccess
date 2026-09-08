@@ -172,6 +172,19 @@ DirectoryIndex index.php index.html
     Header set X-LiteSpeed-Cache-Control "no-cache"
   </FilesMatch>
 
+  # La règle ci-dessus ne couvre que « .html ». Or « / » est servi par
+  # index.php : l'accueil n'a JAMAIS reçu ces en-têtes. Constaté le 08/09/2026
+  # — un déploiement qui change vitrine.html sans toucher index.php laissait
+  # LiteSpeed servir l'accueil de la veille : /index.php et /vitrine.html
+  # rendaient le nouveau bandeau, « / » l'ancien. Le visiteur, lui, n'ouvre
+  # que « / ».
+  <FilesMatch "^index\.php$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+    Header set X-LiteSpeed-Cache-Control "no-cache"
+  </FilesMatch>
+
   # Assets statiques : cache 1 an
   <FilesMatch "\.(css|js|woff2|jpg|jpeg|png|gif|webp|ico)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
