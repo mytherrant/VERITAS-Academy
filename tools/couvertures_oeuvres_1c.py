@@ -46,7 +46,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageFilter
 
 for _f in (sys.stdout, sys.stderr):
     try:
@@ -283,7 +283,22 @@ def main() -> int:
         print(f"       accent      : {note2}")
         if not a.controle:
             im.save(dest, "JPEG", quality=88, optimize=True, progressive=True)
-            print(f"       → {dest.relative_to(RACINE)}  {dest.stat().st_size // 1024} Ko")
+            # ── ET SA VIGNETTE, SANS QUOI LA CARTE RESTE NUE ────────────────
+            # `livrets/index.html` ne demande jamais la couverture pleine : il
+            # demande `livret_<slug>_v.jpg`, et son `img.onerror` RETIRE
+            # l'image quand elle manque. Les quatre cartes s'affichaient donc
+            # sans visuel, sans une erreur en console et sans cadre cassé —
+            # la panne était parfaitement muette, à l'endroit précis où l'on
+            # décide d'acheter. Les 28 autres couvertures ont leur vignette ;
+            # c'est `couvertures_oeuvres.py` qui les produit, aux mêmes
+            # 460 × 613 et avec le même renfort de netteté.
+            v = im.copy()
+            v.thumbnail((460, 613), Image.LANCZOS)
+            v = v.filter(ImageFilter.UnsharpMask(radius=0.7, percent=85, threshold=3))
+            vign = SORTIE / f"livret_oeuvres-{niveau}_v.jpg"
+            v.save(vign, "JPEG", quality=80, optimize=True, progressive=True, subsampling=2)
+            print(f"       → {dest.relative_to(RACINE)}  {dest.stat().st_size // 1024} Ko"
+                  f"  + vignette {vign.stat().st_size // 1024} Ko")
 
     if a.controle:
         print("\n  (contrôle : rien n'a été écrit)")

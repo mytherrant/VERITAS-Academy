@@ -217,8 +217,17 @@ def controles(charge: Path | None) -> list[str]:
     #    `demo-` et `feuilletage-` sont des données par conception : ce sont
     #    les pages offertes, et elles ont le droit d'être dans le dépôt. Leur
     #    appliquer la mesure produisait 21 fautes pour zéro fuite.
-    MOTEURS = {"gate.js", "collab.js", "support.js", "liseur.js",
-               "cahier.js", "sw-cahier.js"}
+    #    ⚠️ UN MOTEUR DE PLUS DEPUIS LE 08/09/2026, ET LA LISTE EST LA RÈGLE.
+    #    `support-oi.js` rend les quatre cahiers d'œuvres du 1er cycle — leurs
+    #    mots croisés, mots mêlés et cartes mentales, qu'aucun autre moteur du
+    #    site ne sait dessiner. C'est du CODE, comme `support.js` dont il est
+    #    la version d'atelier ; il n'embarque aucun ouvrage. Absent de cette
+    #    liste, il tombait dans le cas « données d'ouvrage » et faisait échouer
+    #    le garde-fou — un refus juste dans sa forme et faux sur le fond.
+    #    Le contrôle de longueur de ligne ci-dessous continue, lui, de vérifier
+    #    qu'il ne se met pas à porter un cahier.
+    MOTEURS = {"gate.js", "collab.js", "support.js", "support-oi.js",
+               "liseur.js", "cahier.js", "sw-cahier.js"}
     #    Seuil relevé au-dessus du plus long littéral constaté dans un moteur
     #    (support.js : 968 caractères) et très en dessous des vraies données
     #    (feuilletage-4e-livret.js : 24 825). Entre les deux, il n'y a rien.
