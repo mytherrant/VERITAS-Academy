@@ -870,6 +870,35 @@ def main() -> int:
 
     charge = Path(a.charge).expanduser() if a.charge else None
     if charge:
+        # ── EST-CE BIEN LE DÉPÔT FTP, OU UN DOSSIER QUI LUI RESSEMBLE ? ──────
+        # Le 08/09/2026, ces huit fichiers ont été produits dans
+        # `~/veritas-ftp` — un dossier abandonné depuis le 18/08 — alors que
+        # le dépôt réel est `~/Desktop/veritas-ftp`. Les deux portent le même
+        # nom, la même arborescence, et `mkdir(parents=True)` a créé sans
+        # broncher ce qui manquait. Jacques a ouvert SON dossier, n'y a rien
+        # trouvé de neuf, et a cru que rien n'avait été produit.
+        #
+        # Un dépôt FTP vivant contient déjà les cahiers vendus. S'il n'y en a
+        # aucun, ou presque, c'est probablement le mauvais dossier — on le dit
+        # avant d'écrire, en montrant ceux qu'on a trouvés ailleurs. On ne
+        # bloque pas : un tout premier dépôt est légitime.
+        dossier = charge / "uploads" / "protected" / "livrets"
+        deja = len(list(dossier.glob("booklet-*.js"))) if dossier.is_dir() else 0
+        if deja < 5:
+            autres = []
+            for c in (Path.home() / "Desktop" / "veritas-ftp",
+                      Path.home() / "veritas-ftp"):
+                d = c / "uploads" / "protected" / "livrets"
+                n = len(list(d.glob("booklet-*.js"))) if d.is_dir() else 0
+                if n > deja and c != charge:
+                    autres.append(f"{c}  ({n} cahiers déjà déposés)")
+            print(f"  ⚠️  {charge} ne contient que {deja} cahier(s) : "
+                  f"est-ce bien le dépôt FTP ?", file=sys.stderr)
+            for x in autres:
+                print(f"      Un autre dossier en contient plus : {x}", file=sys.stderr)
+            if autres:
+                print("      Si vous vous êtes trompé de dossier, relancez avec "
+                      "le bon chemin.\n", file=sys.stderr)
         (charge / "uploads" / "protected" / "livrets").mkdir(parents=True, exist_ok=True)
         (charge / "uploads" / "oeuvres" / "1c").mkdir(parents=True, exist_ok=True)
 

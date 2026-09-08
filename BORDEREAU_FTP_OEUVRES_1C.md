@@ -39,12 +39,19 @@ python tools/couvertures_oeuvres_1c.py
 
 ---
 
+> ⚠️ **Deux dossiers portent le nom `veritas-ftp` sur ce poste** : celui du
+> **Bureau** — le vrai, celui que vous ouvrez, avec vos vingt-quatre cahiers —
+> et un homonyme abandonné dans votre dossier personnel, resté au 18/08.
+> Tout ce qui suit parle du **dossier du Bureau**. Le script refuse désormais
+> d'écrire en silence dans un dossier qui ne contient pas déjà vos cahiers :
+> il avertit, et nomme celui qui les a.
+
 ## Geste 1 — les huit fichiers de charge
 
 Ce sont les cahiers eux-mêmes. Ils ne sont dans aucun dépôt : **le dépôt GitHub
 est public**, et c'est le produit vendu.
 
-Déposez le contenu de `~/veritas-ftp/uploads/protected/livrets/` dans, sur le
+Déposez le contenu de **`Bureau\veritas-ftp\uploads\protected\livrets\`** dans, sur le
 serveur :
 
 ```
@@ -80,7 +87,7 @@ actuels — celui qui contient déjà `booklet-6e.js`, `guide-bord-3e.js`, etc.
 
 ## Geste 2 — les soixante-sept illustrations
 
-Déposez le contenu de `~/veritas-ftp/uploads/oeuvres/1c/` dans, sur le serveur :
+Déposez le dossier **`Bureau\veritas-ftp\uploads\oeuvres\1c\`** dans, sur le serveur :
 
 ```
 uploads/oeuvres/1c/
