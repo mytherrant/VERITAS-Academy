@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Étude des œuvres intégrales — 6ᵉ — Centre VÉRITAS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://veritas-school.com/livrets/oeuvres-6e.html">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/livrets/gate.js?v=1.20.21"></script>
+<script src="/livrets/support-oi.js?v=1.20.21"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&amp;family=Patrick+Hand&amp;family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #FFFFFF; }
+  body { font-family: "Source Sans 3", system-ui, sans-serif; color: #2B2118; -webkit-text-size-adjust: 100%; }
+  a { color: #7A4E05; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; }
+  a:hover { color: #2B2118; }
+  input, textarea, select, button { font-family: inherit; }
+  textarea { resize: vertical; }
+  ::selection { background: #F5B921; color: #2B2118; }
+  @keyframes vUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes vPop { 0% { transform: scale(0.94); } 60% { transform: scale(1.04); } 100% { transform: scale(1); } }
+  @keyframes vShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; background: #FFFFFF;">
+
+<sc-if value="{{ showGate }}" hint-placeholder-val="{{ true }}">
+  <div style="min-height: 100vh; display: grid; place-items: center; padding: 22px 16px 48px; background:
+      radial-gradient(circle at 88% 4%, rgba(245,185,33,0.14), transparent 44%),
+      radial-gradient(circle at 6% 22%, rgba(43,33,24,0.05), transparent 40%),
+      radial-gradient(circle at 92% 88%, rgba(245,185,33,0.10), transparent 42%),
+      #FFFFFF;">
+    <div style="width: 100%; max-width: 470px;">
+
+      <div style="display: flex; align-items: center; justify-content: center; gap: 11px; margin-bottom: 20px;">
+        <div style="width: 46px; height: 46px; border-radius: 14px; background: #F5B921; color: #2B2118; display: grid; place-items: center; font-family: 'Baloo 2', cursive; font-weight: 800; font-size: 24px; box-shadow: 0 4px 12px rgba(43,33,24,0.35);">V</div>
+        <div style="text-align: left;">
+          <div style="font-family: 'Baloo 2', cursive; font-weight: 800; font-size: 17px; letter-spacing: 0.02em; color: #2B2118;">Centre Véritas</div>
+          <div style="font-family: 'Patrick Hand', cursive; font-size: 15px; color: #6E5C45;">cahiers vivants · Cameroun</div>
+        </div>
+      </div>
+
+      <div style="background: #FFFFFF; border-radius: 26px; box-shadow: 0 18px 44px rgba(43,33,24,0.13), 0 2px 6px rgba(43,33,24,0.06); overflow: hidden;">
+
+        <div style="padding: 26px 22px 22px; text-align: center; background: #FFFFFF; border-bottom: 3px solid #E8E8E4;">
+          <div style="display: inline-block; background: #6B4304; color: #FFFFFF; font-size: 11.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 6px 13px; border-radius: 999px;">Classe de 6<sup>e</sup></div>
+          <h1 style="margin: 13px 0 7px; font-family: 'Baloo 2', cursive; font-size: 31px; line-height: 1.1; font-weight: 800; color: #2B2118; text-wrap: pretty;">Étude des œuvres intégrales</h1>
+          <p style="margin: 0; font-family: 'Patrick Hand', cursive; font-size: 18px; line-height: 1.45; color: #5C4E3C;">Les Chants de la Forêt · Les Bimanes · Les Contes de Korotoumou</p>
+        </div>
+
+        <div style="padding: 24px 22px;">
+          <label style="display: block; text-align: center; font-size: 11.5px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: #7A4E05; margin-bottom: 8px;">Ton code d'accès</label>
+          <input type="text" value="{{ code }}" onInput="{{ onCode }}" placeholder="V6-XXXX-XXXX-XXXX" autocapitalize="characters" spellcheck="false" style="width: 100%; padding: 16px 14px; font-family: 'Baloo 2', cursive; font-size: 20px; font-weight: 700; letter-spacing: 0.10em; text-align: center; color: #2B2118; background: #FFFFFF; border: 2.5px solid #E3E3DF; border-radius: 15px; outline: none;" style-focus="border-color: #F5B921; box-shadow: 0 0 0 4px rgba(43,33,24,0.28);" />
+
+          <label style="display: block; text-align: center; font-size: 11.5px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: #7A4E05; margin: 20px 0 8px;">Ton nom et ta classe</label>
+          <input type="text" value="{{ name }}" onInput="{{ onName }}" placeholder="Ex. Ngo Bakang Estelle" style="width: 100%; padding: 13px 14px; font-size: 16.5px; font-weight: 600; text-align: center; color: #2B2118; background: #FFFFFF; border: 2.5px solid #E3E3DF; border-radius: 15px; outline: none; margin-bottom: 10px;" style-focus="border-color: #F5B921; box-shadow: 0 0 0 4px rgba(43,33,24,0.28);" />
+          <input type="text" value="{{ classe }}" onInput="{{ onClasse }}" placeholder="Ex. 6e M2 — Collège Véritas" style="width: 100%; padding: 13px 14px; font-size: 16.5px; font-weight: 600; text-align: center; color: #2B2118; background: #FFFFFF; border: 2.5px solid #E3E3DF; border-radius: 15px; outline: none;" style-focus="border-color: #F5B921; box-shadow: 0 0 0 4px rgba(43,33,24,0.28);" />
+
+          <sc-if value="{{ gateErr }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; align-items: center; gap: 9px; margin-top: 15px; padding: 12px 14px; background: #FEF2F2; border: 2px solid #EF4444; border-radius: 14px; font-size: 14.5px; font-weight: 600; color: #B91C1C; text-align: left; animation: vShake 0.32s ease;">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#EF4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex: 0 0 auto;"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+              <span>{{ gateErr }}</span>
+            </div>
+          </sc-if>
+
+          <button onClick="{{ onUnlock }}" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 20px; padding: 17px; font-family: 'Baloo 2', cursive; font-size: 18.5px; font-weight: 700; color: #2B2118; background: linear-gradient(135deg, #F5B921, #E0A50F); border: none; border-radius: 17px; box-shadow: 0 8px 20px rgba(43,33,24,0.36); cursor: pointer;" style-hover="transform: translateY(-2px); box-shadow: 0 12px 26px rgba(43,33,24,0.24);" style-active="transform: translateY(1px);">
+            <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#2B2118" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6a2 2 0 0 1 2-2h6l2 2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"></path><path d="M9 12h6"></path></svg>
+            <span>Ouvrir mon cahier</span>
+          </button>
+
+          <p style="margin: 17px 0 0; font-size: 13.5px; line-height: 1.6; text-align: center; color: #5C4E3C;">Le contenu de ce cahier n'est pas dans cette page : il est envoyé par le serveur, une fois le code vérifié. Un code fonctionne sur <b>3 appareils</b> et reste valable jusqu'à la fin de l'année scolaire.</p>
+
+          <div style="margin-top: 20px; padding-top: 18px; border-top: 2px dashed #E3E3DF; display: flex; flex-wrap: wrap; gap: 9px;">
+            <button onClick="{{ onDemo }}" style="flex: 1 1 150px; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 12px; font-size: 13.5px; font-weight: 700; color: #2B2118; background: #F5B921; border: none; border-radius: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(43,33,24,0.32);" style-hover="transform: translateY(-1px);">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path></svg>
+              <span>Lire un extrait gratuit</span>
+            </button>
+            <button onClick="{{ onDemoT }}" style="flex: 1 1 150px; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 12px; font-size: 13.5px; font-weight: 700; color: #2B2118; background: #C08A0C; border: none; border-radius: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(43,33,24,0.28);" style-hover="transform: translateY(-1px);">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h20v12H2z"></path><path d="M2 11h20"></path><path d="M6 15h4"></path></svg>
+              <span>Obtenir mon code — 1 000 F</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p style="margin: 20px 6px 0; font-size: 13px; line-height: 1.6; text-align: center; color: #6E5C45;">Pas encore de code ? L'ouvrage de 6<sup>e</sup> coûte <b style="color: #7A4E05;">1 000 FCFA</b> et s'achète par CamerPay sur le portail Véritas — le code arrive aussitôt par WhatsApp, SMS et e-mail.</p>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ showBook }}" hint-placeholder-val="{{ false }}">
+  <div style="position: relative; min-height: 100vh; background: #FFFFFF;">
+
+    <div style="position: fixed; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; opacity: 0.05; display: grid; place-items: center;">
+      <div style="transform: rotate(-30deg); font-family: 'Baloo 2', cursive; font-size: 25px; font-weight: 700; line-height: 2.7; letter-spacing: 0.14em; color: #7A4E05; white-space: pre; text-align: center;">{{ markText }}</div>
+    </div>
+
+    <header style="position: sticky; top: 0; z-index: 30; background: #FFFFFF; border-bottom: 4px solid {{ accent }}; box-shadow: 0 3px 14px rgba(43,33,24,0.07);">
+      <div style="max-width: 680px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px;">
+        <button onClick="{{ toggleDrawer }}" aria-label="Sommaire" style="flex: 0 0 auto; width: 43px; height: 43px; border-radius: 13px; background: {{ accent }}; border: none; cursor: pointer; display: grid; place-items: center; box-shadow: 0 3px 9px rgba(43,33,24,0.16);" style-hover="transform: translateY(-1px);">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#2B2118" stroke-width="2.4" stroke-linecap="round"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>
+        </button>
+        <div style="flex: 1 1 auto; min-width: 0; text-align: center;">
+          <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: {{ ink }}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ pageKicker }}</div>
+          <div style="font-family: 'Baloo 2', cursive; font-size: 15.5px; font-weight: 700; color: #2B2118; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ pageTitle }}</div>
+        </div>
+        <button onClick="{{ toggleTimer }}" aria-label="Minuteur" style="flex: 0 0 auto; height: 43px; padding: 0 11px; display: flex; align-items: center; gap: 6px; border-radius: 13px; background: #F4F4F2; border: none; font-size: 13px; font-weight: 700; color: #7A4E05; cursor: pointer; white-space: nowrap;" style-hover="background: #F4F4F2;">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#F5B921" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0z"></path><path d="M12 7v5l3 2"></path></svg>
+          <span>{{ timerLabel }}</span>
+        </button>
+        <div style="flex: 0 0 auto; width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; background: conic-gradient({{ accent }} {{ progDeg }}, #E8E8E4 0);">
+          <div style="width: 34px; height: 34px; border-radius: 999px; background: #FFFFFF; display: grid; place-items: center; font-size: 11px; font-weight: 800; color: {{ ink }};">{{ progPct }}</div>
+        </div>
+      </div>
+    </header>
+
+    <sc-if value="{{ tOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position: sticky; top: 68px; z-index: 29; max-width: 680px; margin: 0 auto; padding: 0 20px;">
+        <div style="margin-top: 11px; padding: 16px; text-align: center; background: #FFFFFF; border: 3px solid #F5B921; border-radius: 20px; box-shadow: 0 10px 26px rgba(43,33,24,0.28);">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #7A4E05;">Épreuve blanche</div>
+          <div style="font-family: 'Baloo 2', cursive; font-size: 42px; font-weight: 800; line-height: 1.1; color: #2B2118; font-variant-numeric: tabular-nums;">{{ timerBig }}</div>
+          <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin-top: 10px;">
+            <sc-for list="{{ timerPresets }}" as="tp" hint-placeholder-count="3">
+              <button onClick="{{ tp.go }}" style="padding: 10px 14px; font-size: 13.5px; font-weight: 700; color: #7A4E05; background: #F4F4F2; border: none; border-radius: 12px; cursor: pointer;" style-hover="background: #F4F4F2;">{{ tp.label }}</button>
+            </sc-for>
+            <button onClick="{{ timerToggle }}" style="padding: 10px 15px; font-size: 13.5px; font-weight: 700; color: #2B2118; background: #C08A0C; border: none; border-radius: 12px; cursor: pointer;">{{ timerBtn }}</button>
+            <button onClick="{{ timerReset }}" style="padding: 10px 14px; font-size: 13.5px; font-weight: 700; color: #5C4E3C; background: #F4F4F2; border: none; border-radius: 12px; cursor: pointer;">Effacer</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ drawer }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeDrawer }}" style="position: fixed; inset: 0; z-index: 45; background: rgba(43,33,24,0.42);"></div>
+      <nav style="position: fixed; top: 0; left: 0; bottom: 0; z-index: 46; width: 88%; max-width: 348px; background: #FFFFFF; overflow-y: auto; box-shadow: 6px 0 30px rgba(43,33,24,0.22); animation: vUp 0.22s ease;">
+        <div style="position: sticky; top: 0; padding: 17px 16px; background: linear-gradient(135deg, #F5B921, #E0A50F); color: #2B2118; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+          <div>
+            <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.85;">Sommaire</div>
+            <div style="font-family: 'Baloo 2', cursive; font-size: 18px; font-weight: 700;">6<sup>e</sup> · trois œuvres</div>
+          </div>
+          <button onClick="{{ closeDrawer }}" aria-label="Fermer" style="width: 37px; height: 37px; border-radius: 12px; background: rgba(255,255,255,0.22); border: none; cursor: pointer; display: grid; place-items: center;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+          </button>
+        </div>
+        <div style="padding: 12px;">
+          <sc-for list="{{ toc }}" as="t" hint-placeholder-count="8">
+            <div>
+              <sc-if value="{{ t.isHead }}" hint-placeholder-val="{{ false }}">
+                <div style="margin: 17px 4px 9px; text-align: center;">
+                  <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: {{ ink }};">{{ t.kicker }}</div>
+                  <div style="font-family: 'Baloo 2', cursive; font-size: 17px; font-weight: 700; line-height: 1.2; color: #2B2118;">{{ t.title }}</div>
+                  <div style="width: 46px; height: 3px; margin: 7px auto 0; border-radius: 99px; background: {{ t.accent }};"></div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ t.isItem }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ t.go }}" style="width: 100%; text-align: left; display: flex; align-items: center; gap: 10px; padding: 11px 12px; margin-bottom: 6px; background: {{ t.bg }}; border: 2px solid {{ t.bd }}; border-radius: 14px; cursor: pointer;" style-hover="transform: translateX(3px);">
+                  <span style="flex: 0 0 auto; width: 27px; height: 27px; border-radius: 9px; background: {{ t.accent }}; color: #FFFFFF; display: grid; place-items: center; font-size: 12.5px; font-weight: 800;">{{ t.num }}</span>
+                  <span style="flex: 1 1 auto; font-size: 14.5px; font-weight: 600; line-height: 1.28; color: #2B2118;">{{ t.title }}</span>
+                  <sc-if value="{{ t.locked }}" hint-placeholder-val="{{ false }}">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#8A7A66" stroke-width="2.3" stroke-linecap="round" style="flex: 0 0 auto;"><path d="M4 11h16v10H4z"></path><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+                  </sc-if>
+                </button>
+              </sc-if>
+            </div>
+          </sc-for>
+          <button onClick="{{ onLock }}" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin: 18px 0 10px; padding: 13px; font-size: 14px; font-weight: 700; color: #FFFFFF; background: #8A7A66; border: none; border-radius: 14px; cursor: pointer;">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round"><path d="M4 11h16v10H4z"></path><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+            <span>Verrouiller le cahier</span>
+          </button>
+        </div>
+      </nav>
+    </sc-if>
+
+    <main style="position: relative; z-index: 10; max-width: 680px; margin: 0 auto; padding: 18px 20px 120px;">
+
+      <sc-if value="{{ isTeacher }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-bottom: 20px; padding: 18px; text-align: center; background: #FAFAF9; border: 2px solid #D9D8D2; border-radius: 22px;">
+          <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #7A4E05;">Espace enseignant</div>
+          <h2 style="margin: 7px 0 12px; font-family: 'Baloo 2', cursive; font-size: 22px; font-weight: 700; line-height: 1.15; color: #2B2118;">Salon de classe · {{ classe }}</h2>
+          <div style="display: grid; gap: 9px; grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));">
+            <sc-for list="{{ teacherStats }}" as="s" hint-placeholder-count="3">
+              <div style="padding: 12px; background: #FFFFFF; border-radius: 15px; box-shadow: 0 3px 10px rgba(43,33,24,0.12);">
+                <div style="font-family: 'Baloo 2', cursive; font-size: 27px; font-weight: 800; line-height: 1; color: #7A4E05;">{{ s.v }}</div>
+                <div style="margin-top: 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #6E5C45;">{{ s.k }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <p style="margin: 13px auto 0; max-width: 52ch; font-size: 14px; line-height: 1.6; color: #54452C;">Vos élèves vous envoient le fichier de leurs réponses depuis le bouton « Récupérer mes réponses », en bas de leur cahier.</p>
+        </div>
+      </sc-if>
+
+      <div style="margin-bottom: 22px; text-align: center; background: #FFFFFF; border-radius: 24px; box-shadow: 0 12px 32px rgba(43,33,24,0.10); overflow: hidden;">
+        <sc-if value="{{ hasCover }}" hint-placeholder-val="{{ false }}">
+          <div style="background: #FFFFFF; border-bottom: 4px solid {{ accent }};">
+            <img src="{{ coverSrc }}" alt="{{ coverAlt }}" style="display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: contain; background: #FAFAF9;" />
+          </div>
+        </sc-if>
+        <div style="padding: 20px 18px 22px;">
+          <div style="display: inline-block; background: {{ accent }}; color: #2B2118; font-size: 10.5px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; padding: 6px 12px; border-radius: 999px;">{{ pageKicker }}</div>
+          <h1 style="margin: 12px auto 0; max-width: 24ch; font-family: 'Baloo 2', cursive; font-size: 28px; font-weight: 800; line-height: 1.12; color: #2B2118; text-wrap: pretty;">{{ pageTitle }}</h1>
+          <sc-if value="{{ pageSub }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 9px auto 0; max-width: 40ch; font-family: 'Patrick Hand', cursive; font-size: 18px; line-height: 1.45; color: #5C4E3C;">{{ pageSub }}</p>
+          </sc-if>
+          <div style="width: 54px; height: 4px; margin: 14px auto 0; border-radius: 99px; background: {{ accent }};"></div>
+        </div>
+      </div>
+
+      <sc-for list="{{ view }}" as="b" hint-placeholder-count="6">
+        <div style="animation: vUp 0.3s ease both;">
+
+          <sc-if value="{{ b.isH3 }}" hint-placeholder-val="{{ false }}">
+            <div style="margin: 34px 0 14px; text-align: center;">
+              <sc-if value="{{ b.img }}" hint-placeholder-val="{{ false }}">
+                <figure style="margin: 0 auto 16px; max-width: 620px;">
+                  <div style="background: #FFFFFF; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 28px rgba(43,33,24,0.13);">
+                    <img src="{{ b.imgSrc }}" loading="lazy" decoding="async" alt="{{ b.imgAlt }}" style="display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: contain; background: #FAFAF9;" />
+                  </div>
+                  <figcaption style="margin-top: 9px; font-family: 'Patrick Hand', cursive; font-size: 16px; line-height: 1.4; color: #6E5C45;">{{ b.imgCap }}</figcaption>
+                </figure>
+              </sc-if>
+              <h3 style="margin: 0 auto; max-width: 28ch; font-family: 'Baloo 2', cursive; font-size: 22px; font-weight: 700; line-height: 1.18; color: #2B2118; text-wrap: pretty;">{{ b.text }}</h3>
+              <div style="width: 44px; height: 4px; margin: 10px auto 0; border-radius: 99px; background: {{ accent }};"></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ b.isP }}" hint-placeholder-val="{{ true }}">
+            <p style="margin: 0 0 12px; font-size: 18px; line-height: 1.72; color: #3A2E22; text-align: left; text-wrap: pretty;">{{ b.html }}</p>
+          </sc-if>
+
+          <sc-if value="{{ b.isDia }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; gap: 12px; margin: 0 0 11px; padding: 11px 14px 11px 13px; background: #FFFFFF; border-left: 5px solid {{ b.accent }}; border-radius: 5px 15px 15px 5px;">
+              <span style="flex: 0 0 auto; font-family: 'Baloo 2', cursive; font-size: 20px; font-weight: 800; line-height: 1.2; color: {{ b.accent }};">—</span>
+              <p style="flex: 1 1 auto; margin: 0; font-size: 17px; line-height: 1.62; font-style: italic; color: #3A2E22; text-align: left;">{{ b.html }}</p>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ b.isLi }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; gap: 11px; margin: 0 0 10px;">
+              <span style="flex: 0 0 auto; margin-top: 8px; width: 9px; height: 9px; border-radius: 99px; background: {{ b.dot }};"></span>
+              <span style="flex: 1 1 auto; font-size: 17px; line-height: 1.65; color: #3A2E22;">{{ b.html }}</span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ b.isQuote }}" hint-placeholder-val="{{ false }}">
+            <blockquote style="margin: 24px 0; padding: 22px 24px 18px; background: #FFFFFF; border-radius: 22px; box-shadow: 0 5px 18px rgba(43,33,24,0.10);">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="#D9D8D2" style="margin-bottom: 4px;"><path d="M7 7h4v6a4 4 0 0 1-4 4V7zm8 0h4v6a4 4 0 0 1-4 4V7z"></path></svg>
+              <sc-for list="{{ b.lines }}" as="l" hint-placeholder-count="2">
+                <p style="margin: 0 0 10px; padding-left: {{ l.pad }}; border-left: {{ l.rule }}; font-size: 17.5px; line-height: 1.74; color: #3A2E22; text-align: left;">{{ l.html }}</p>
+              </sc-for>
+              <div style="margin-top: 8px; text-align: right; font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #7A4E05;">Extrait de l'œuvre</div>
+            </blockquote>
+          </sc-if>
+
+          <sc-if value="{{ b.isPanel }}" hint-placeholder-val="{{ false }}">
+            <section style="margin: 28px 0 24px; padding: 22px 24px 20px; background: {{ b.bg }}; border: {{ b.frame }}; border-radius: 22px; box-shadow: {{ b.sh }};">
+              <div style="margin-bottom: 13px;">
+                <div style="width: 46px; height: 46px; margin: 0 auto 10px; border-radius: 15px; background: {{ b.iconBg }}; border: {{ b.iconRing }}; display: grid; place-items: center;">
+                  <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="{{ b.iconFg }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <sc-for list="{{ b.icon }}" as="s" hint-placeholder-count="2">
+                      <path d="{{ s.d }}"></path>
+                    </sc-for>
+                  </svg>
+                </div>
+                <div style="text-align: center;">
+                  <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: {{ b.bd }};">{{ b.label }}</div>
+                  <div style="margin: 3px auto 0; max-width: 30ch; font-family: 'Baloo 2', cursive; font-size: 19.5px; font-weight: 700; line-height: 1.24; color: #2B2118; text-wrap: pretty;">{{ b.title }}</div>
+                </div>
+              </div>
+              <sc-for list="{{ b.lines }}" as="l" hint-placeholder-count="2">
+                <p style="margin: 0 0 9px; font-size: 16.5px; line-height: 1.68; color: #3A2E22; text-align: left;">{{ l.html }}</p>
+              </sc-for>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ b.isQ }}" hint-placeholder-val="{{ false }}">
+            <div style="margin: 16px 0; padding: 17px; background: #FFFFFF; border-radius: 18px; box-shadow: 0 6px 18px rgba(43,33,24,0.09);">
+              <div style="display: flex; align-items: flex-start; gap: 11px; margin-bottom: 12px;">
+                <span style="flex: 0 0 auto; width: 29px; height: 29px; border-radius: 10px; background: {{ b.hue }}; color: #FFFFFF; display: grid; place-items: center; font-size: 13.5px; font-weight: 800;">{{ b.num }}</span>
+                <span style="flex: 1 1 auto; font-size: 17px; font-weight: 600; line-height: 1.56; color: #2B2118; text-align: left; text-wrap: pretty;">{{ b.html }}</span>
+              </div>
+              <textarea value="{{ b.val }}" onInput="{{ b.onInput }}" rows="{{ b.rows }}" placeholder="Ta réponse…" style="width: 100%; padding: 12px 13px; font-family: 'Patrick Hand', cursive; font-size: 18px; line-height: 29px; color: #1F3A8A; background: repeating-linear-gradient(#FFFFFF 0 27px, #DEDEDA 27px 29px); border: 2px solid #E3E3DF; border-radius: 13px; outline: none;" style-focus="border-color: {{ accent }};"></textarea>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ b.isFill }}" hint-placeholder-val="{{ false }}">
+            <div style="margin: 14px 0;">
+              <div style="font-size: 15.5px; font-weight: 600; line-height: 1.5; margin-bottom: 8px; color: #2B2118; text-align: left;">{{ b.html }}</div>
+              <textarea value="{{ b.val }}" onInput="{{ b.onInput }}" rows="{{ b.rows }}" placeholder="…" style="width: 100%; padding: 11px 13px; font-family: 'Patrick Hand', cursive; font-size: 18px; line-height: 29px; color: #1F3A8A; background: repeating-linear-gradient(#FFFFFF 0 27px, #DEDEDA 27px 29px); border: 2px solid #E3E3DF; border-radius: 13px; outline: none;" style-focus="border-color: {{ accent }};"></textarea>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ b.isLines }}" hint-placeholder-val="{{ false }}">
+            <textarea value="{{ b.val }}" onInput="{{ b.onInput }}" rows="{{ b.rows }}" placeholder="Écris ici…" style="display: block; width: 100%; margin: 10px 0 16px; padding: 11px 13px; font-family: 'Patrick Hand', cursive; font-size: 18px; line-height: 29px; color: #1F3A8A; background: repeating-linear-gradient(#FFFFFF 0 27px, #DEDEDA 27px 29px); border: 2px solid #E3E3DF; border-radius: 13px; outline: none;" style-focus="border-color: {{ accent }};"></textarea>
+          </sc-if>
+
+          <sc-if value="{{ b.isTable }}" hint-placeholder-val="{{ false }}">
+            <div style="margin: 20px 0; background: #FFFFFF; border-radius: 18px; overflow: hidden; box-shadow: 0 8px 22px rgba(43,33,24,0.10);">
+              <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; min-width: 360px;">
+                  <sc-for list="{{ b.trs }}" as="r" hint-placeholder-count="3">
+                    <tr style="background: {{ r.bg }};">
+                      <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="3">
+                        <td style="padding: 11px 12px; border-bottom: 1.5px solid #E8E8E4; font-size: 14.5px; line-height: 1.5; font-weight: {{ c.fw }}; color: {{ c.fg }}; vertical-align: top;"><span>{{ c.html }}</span></td>
+                      </sc-for>
+                    </tr>
+                  </sc-for>
+                </table>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ b.isGrid }}" hint-placeholder-val="{{ false }}">
+            <div style="margin: 20px auto; max-width: 640px; padding: 17px; background: #FFFFFF; border-radius: 18px; box-shadow: 0 8px 22px rgba(43,33,24,0.10);">
+              <div style="text-align: center; font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: {{ ink }}; margin-bottom: 12px;">Grille à remplir</div>
+              <sc-for list="{{ b.gr }}" as="r" hint-placeholder-count="3">
+                <div style="display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1.5px dashed #E3E3DF;">
+                  <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="2">
+                    <div>
+                      <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #6E5C45; margin-bottom: 4px;">{{ c.label }}</div>
+                      <sc-if value="{{ c.ed }}" hint-placeholder-val="{{ false }}">
+                        <input type="text" value="{{ c.val }}" onInput="{{ c.onInput }}" placeholder="…" style="width: 100%; padding: 10px 12px; font-family: 'Patrick Hand', cursive; font-size: 17.5px; color: #1F3A8A; background: #FFFFFF; border: 2px solid #E3E3DF; border-radius: 12px; outline: none;" style-focus="border-color: {{ accent }};" />
+                      </sc-if>
+                      <sc-if value="{{ c.ro }}" hint-placeholder-val="{{ false }}">
+                        <div style="font-size: 15.5px; line-height: 1.5; font-weight: 600; color: #3A2E22;">{{ c.html }}</div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ b.isQcm }}" hint-placeholder-val="{{ false }}">
+            <section style="margin: 28px 0; padding: 24px 22px; text-align: center; background: #FAFAF9; border-radius: 24px; box-shadow: 0 6px 20px rgba(43,33,24,0.16);">
+              <div style="width: 46px; height: 46px; margin: 0 auto 10px; border-radius: 15px; background: #F5B921; display: grid; place-items: center;">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9.1 9a3 3 0 1 1 4.5 2.6c-.9.6-1.6 1.2-1.6 2.4"></path><path d="M12 18h.01"></path><path d="M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0z"></path></svg>
+              </div>
+              <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #7A4E05;">Jeu · une seule bonne réponse</div>
+              <h3 style="margin: 6px auto 16px; max-width: 26ch; font-family: 'Baloo 2', cursive; font-size: 21px; font-weight: 700; line-height: 1.18; color: #2B2118;">{{ b.title }}</h3>
+              <sc-for list="{{ b.items }}" as="q" hint-placeholder-count="3">
+                <div style="margin-bottom: 14px; padding: 15px; background: #FFFFFF; border-radius: 17px; box-shadow: 0 4px 14px rgba(43,33,24,0.07);">
+                  <div style="display: flex; align-items: center; justify-content: center; gap: 9px; margin-bottom: 12px;">
+                    <span style="flex: 0 0 auto; width: 27px; height: 27px; border-radius: 9px; background: #F5B921; color: #2B2118; display: grid; place-items: center; font-size: 12.5px; font-weight: 800;">{{ q.n }}</span>
+                    <span style="flex: 0 1 auto; font-size: 16.5px; font-weight: 600; line-height: 1.4; text-align: center; text-wrap: pretty;">{{ q.q }}</span>
+                  </div>
+                  <div style="display: grid; gap: 8px;">
+                    <sc-for list="{{ q.opts }}" as="o" hint-placeholder-count="4">
+                      <button onClick="{{ o.pick }}" style="display: flex; align-items: center; gap: 11px; width: 100%; text-align: left; padding: 12px 13px; min-height: 48px; background: {{ o.bg }}; border: 2px solid {{ o.bd }}; border-radius: 14px; cursor: pointer;" style-hover="transform: translateX(3px);">
+                        <span style="flex: 0 0 auto; width: 27px; height: 27px; border-radius: 999px; background: {{ o.lbg }}; color: {{ o.lfg }}; display: grid; place-items: center; font-size: 12.5px; font-weight: 800; text-transform: uppercase;">{{ o.l }}</span>
+                        <span style="flex: 1 1 auto; font-size: 15.5px; font-weight: 600; line-height: 1.38; color: #2B2118;">{{ o.t }}</span>
+                        <sc-if value="{{ o.good }}" hint-placeholder-val="{{ false }}">
+                          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex: 0 0 auto;"><path d="M20 6 9 17l-5-5"></path></svg>
+                        </sc-if>
+                        <sc-if value="{{ o.bad }}" hint-placeholder-val="{{ false }}">
+                          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#DC2626" stroke-width="3" stroke-linecap="round" style="flex: 0 0 auto;"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                        </sc-if>
+                      </button>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <button onClick="{{ b.check }}" style="padding: 14px 20px; font-family: 'Baloo 2', cursive; font-size: 16px; font-weight: 700; color: #2B2118; background: #F5B921; border: none; border-radius: 15px; box-shadow: 0 6px 16px rgba(43,33,24,0.34); cursor: pointer;" style-hover="transform: translateY(-2px);">Vérifier</button>
+                <div style="font-family: 'Baloo 2', cursive; font-size: 20px; font-weight: 800; color: #7A4E05;">{{ b.score }}</div>
+              </div>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ b.isVf }}" hint-placeholder-val="{{ false }}">
+            <section style="margin: 28px 0; padding: 24px 22px; text-align: center; background: #FFFFFF; border-radius: 24px; box-shadow: 0 4px 16px rgba(43,33,24,0.10); outline: 2px solid #E3E3DF; outline-offset: -2px;">
+              <div style="width: 46px; height: 46px; margin: 0 auto 10px; border-radius: 15px; background: #FFFFFF; border: 2px solid #D9D8D2; display: grid; place-items: center;">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#6B4304" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+              </div>
+              <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #7A4E05;">Jeu · c'est la justification qui compte</div>
+              <h3 style="margin: 6px auto 7px; max-width: 26ch; font-family: 'Baloo 2', cursive; font-size: 21px; font-weight: 700; line-height: 1.18; color: #2B2118;">{{ b.title }}</h3>
+              <p style="margin: 0 auto 16px; max-width: 50ch; font-family: 'Patrick Hand', cursive; font-size: 17px; line-height: 1.45; color: #7A4E05;">{{ b.intro }}</p>
+              <sc-for list="{{ b.items }}" as="q" hint-placeholder-count="3">
+                <div style="margin-bottom: 13px; padding: 15px; background: #FFFFFF; border-radius: 17px; box-shadow: 0 4px 14px rgba(43,33,24,0.07);">
+                  <div style="font-size: 16px; font-weight: 600; line-height: 1.42; margin-bottom: 12px; text-wrap: pretty;">{{ q.n }}. {{ q.s }}</div>
+                  <div style="display: flex; gap: 9px; margin-bottom: 10px;">
+                    <button onClick="{{ q.pickV }}" style="flex: 1 1 0; padding: 12px; min-height: 48px; font-family: 'Baloo 2', cursive; font-size: 15.5px; font-weight: 700; color: {{ q.vfg }}; background: {{ q.vbg }}; border: 2px solid {{ q.vbd }}; border-radius: 13px; cursor: pointer;">VRAI</button>
+                    <button onClick="{{ q.pickF }}" style="flex: 1 1 0; padding: 12px; min-height: 48px; font-family: 'Baloo 2', cursive; font-size: 15.5px; font-weight: 700; color: {{ q.ffg }}; background: {{ q.fbg }}; border: 2px solid {{ q.fbd }}; border-radius: 13px; cursor: pointer;">FAUX</button>
+                  </div>
+                  <input type="text" value="{{ q.why }}" onInput="{{ q.onWhy }}" placeholder="Parce que…" style="width: 100%; padding: 11px 13px; font-family: 'Patrick Hand', cursive; font-size: 17.5px; color: #1F3A8A; background: #FFFFFF; border: 2px solid #E3E3DF; border-radius: 12px; outline: none;" style-focus="border-color: #F5B921;" />
+                  <sc-if value="{{ q.shown }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top: 10px; padding: 11px 13px; text-align: left; background: {{ q.rbg }}; border-radius: 12px; font-size: 14.5px; line-height: 1.55; color: #3A2E22;"><b style="color: {{ q.rbd }};">{{ q.ans }}</b> — {{ q.expl }}</div>
+                  </sc-if>
+                </div>
+              </sc-for>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <button onClick="{{ b.check }}" style="padding: 14px 20px; font-family: 'Baloo 2', cursive; font-size: 16px; font-weight: 700; color: #2B2118; background: #C08A0C; border: none; border-radius: 15px; box-shadow: 0 6px 16px rgba(43,33,24,0.30); cursor: pointer;" style-hover="transform: translateY(-2px);">Vérifier</button>
+                <div style="font-family: 'Baloo 2', cursive; font-size: 20px; font-weight: 800; color: #7A4E05;">{{ b.score }}</div>
+              </div>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ b.isOrder }}" hint-placeholder-val="{{ false }}">
+            <section style="margin: 28px 0; padding: 24px 22px; text-align: center; background: #F4F4F2; border-radius: 24px; box-shadow: 0 6px 20px rgba(43,33,24,0.14);">
+              <div style="width: 46px; height: 46px; margin: 0 auto 10px; border-radius: 15px; background: #F0EFEC; display: grid; place-items: center;">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#A9700A" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10"></path><path d="M4 12h7"></path><path d="M4 18h13"></path><path d="m18 9 3 3-3 3"></path></svg>
+              </div>
+              <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #7A4E05;">Jeu · remets dans l'ordre</div>
+              <h3 style="margin: 6px auto 7px; max-width: 26ch; font-family: 'Baloo 2', cursive; font-size: 21px; font-weight: 700; line-height: 1.18; color: #2B2118;">{{ b.title }}</h3>
+              <p style="margin: 0 auto 16px; max-width: 50ch; font-family: 'Patrick Hand', cursive; font-size: 17px; line-height: 1.45; color: #7A4E05;">{{ b.intro }}</p>
+              <sc-for list="{{ b.items }}" as="q" hint-placeholder-count="4">
+                <div style="display: flex; align-items: center; gap: 11px; margin-bottom: 9px; padding: 12px 13px; text-align: left; background: {{ q.bg }}; border: 2px solid {{ q.bd }}; border-radius: 15px;">
+                  <span style="flex: 0 0 auto; width: 30px; height: 30px; border-radius: 10px; background: #F5B921; color: #2B2118; display: grid; place-items: center; font-family: 'Baloo 2', cursive; font-size: 14px; font-weight: 800;">{{ q.pos }}</span>
+                  <span style="flex: 1 1 auto; font-size: 15.5px; font-weight: 600; line-height: 1.4; color: #2B2118;">{{ q.t }}</span>
+                  <div style="flex: 0 0 auto; display: flex; flex-direction: column; gap: 4px;">
+                    <button onClick="{{ q.up }}" aria-label="Monter" style="width: 36px; height: 27px; border-radius: 9px; background: #FFFFFF; border: 2px solid #E3E3DF; cursor: pointer; display: grid; place-items: center;">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#6B4304" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"></path></svg>
+                    </button>
+                    <button onClick="{{ q.down }}" aria-label="Descendre" style="width: 36px; height: 27px; border-radius: 9px; background: #FFFFFF; border: 2px solid #E3E3DF; cursor: pointer; display: grid; place-items: center;">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#6B4304" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+                    </button>
+                  </div>
+                </div>
+              </sc-for>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <button onClick="{{ b.check }}" style="padding: 14px 20px; font-family: 'Baloo 2', cursive; font-size: 16px; font-weight: 700; color: #2B2118; background: #F5B921; border: none; border-radius: 15px; box-shadow: 0 6px 16px rgba(43,33,24,0.34); cursor: pointer;" style-hover="transform: translateY(-2px);">Vérifier l'ordre</button>
+                <div style="font-family: 'Baloo 2', cursive; font-size: 20px; font-weight: 800; color: #7A4E05;">{{ b.score }}</div>
+              </div>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ b.isMatch }}" hint-placeholder-val="{{ false }}">
+            <section style="margin: 28px 0; padding: 24px 22px; text-align: center; background: #FAFAF9; border-radius: 24px; box-shadow: 0 4px 16px rgba(43,33,24,0.10); outline: 2px dashed #D9D8D2; outline-offset: -3px;">
+              <div style="width: 46px; height: 46px; margin: 0 auto 10px; border-radius: 15px; background: #FFFFFF; border: 2px dashed #D9D8D2; display: grid; place-items: center;">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#6B4304" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"></path><path d="M15 7h2a5 5 0 0 1 0 10h-2"></path><path d="M8 12h8"></path></svg>
+              </div>
+              <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #7A4E05;">Jeu · relie les colonnes</div>
+              <h3 style="margin: 6px auto 7px; max-width: 26ch; font-family: 'Baloo 2', cursive; font-size: 21px; font-weight: 700; line-height: 1.18; color: #2B2118;">{{ b.title }}</h3>
+              <p style="margin: 0 auto 16px; max-width: 50ch; font-family: 'Patrick Hand', cursive; font-size: 17px; line-height: 1.45; color: #7A4E05;">Touche la bonne réponse sous chaque nom : elle s'affiche en entier.</p>
+              <sc-for list="{{ b.items }}" as="q" hint-placeholder-count="4">
+                <div style="margin-bottom: 11px; padding: 15px; text-align: left; background: #FFFFFF; border: 2px solid {{ q.bd }}; border-radius: 17px; box-shadow: 0 4px 14px rgba(43,33,24,0.07);">
+                  <div style="display: flex; align-items: center; gap: 9px; margin-bottom: 10px;">
+                    <span style="flex: 0 0 auto; width: 27px; height: 27px; border-radius: 9px; background: #6B4304; color: #FFFFFF; display: grid; place-items: center; font-size: 12.5px; font-weight: 800;">{{ q.n }}</span>
+                    <span style="flex: 1 1 auto; font-family: 'Baloo 2', cursive; font-size: 17.5px; font-weight: 700; color: #2B2118;">{{ q.t }}</span>
+                    <sc-if value="{{ q.good }}" hint-placeholder-val="{{ false }}">
+                      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex: 0 0 auto;"><path d="M20 6 9 17l-5-5"></path></svg>
+                    </sc-if>
+                    <sc-if value="{{ q.bad }}" hint-placeholder-val="{{ false }}">
+                      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#DC2626" stroke-width="3" stroke-linecap="round" style="flex: 0 0 auto;"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                    </sc-if>
+                  </div>
+                  <div style="display: grid; gap: 7px;">
+                    <sc-for list="{{ q.choices }}" as="c" hint-placeholder-count="4">
+                      <button onClick="{{ c.pick }}" style="display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 11px 12px; min-height: 46px; background: {{ c.bg }}; border: 2px solid {{ c.bd }}; border-radius: 13px; cursor: pointer;" style-hover="transform: translateX(3px);">
+                        <span style="flex: 0 0 auto; width: 25px; height: 25px; border-radius: 999px; background: {{ c.lbg }}; color: {{ c.lfg }}; display: grid; place-items: center; font-size: 12px; font-weight: 800;">{{ c.l }}</span>
+                        <span style="flex: 1 1 auto; font-size: 15px; font-weight: 500; line-height: 1.38; color: #3A2E22;">{{ c.t }}</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                  <sc-if value="{{ q.shown }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top: 10px; padding: 10px 12px; background: {{ q.rbg }}; border-radius: 12px; font-size: 14px; line-height: 1.5; color: #3A2E22;">Bonne réponse : <b>{{ q.ansL }}</b> — {{ q.ansT }}</div>
+                  </sc-if>
+                </div>
+              </sc-for>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <button onClick="{{ b.check }}" style="padding: 14px 20px; font-family: 'Baloo 2', cursive; font-size: 16px; font-weight: 700; color: #2B2118; background: #C08A0C; border: none; border-radius: 15px; box-shadow: 0 6px 16px rgba(43,33,24,0.30); cursor: pointer;" style-hover="transform: translateY(-2px);">Vérifier</button>
+                <div style="font-family: 'Baloo 2', cursive; font-size: 20px; font-weight: 800; color: #7A4E05;">{{ b.score }}</div>
+              </div>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ b.isRiddle }}" hint-placeholder-val="{{ false }}">
+            <section style="margin: 28px 0; padding: 24px 22px; text-align: center; background: #FAFAF9; border-radius: 24px; box-shadow: 0 6px 18px rgba(43,33,24,0.12);">
+              <div style="width: 46px; height: 46px; margin: 0 auto 10px; border-radius: 15px; background: #F5B921; display: grid; place-items: center;">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16v.01"></path><path d="M9 9a3 3 0 1 1 4.6 2.5c-1 .7-1.6 1.3-1.6 2.5"></path></svg>
+              </div>
+              <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #7A4E05;">Jeu · devinettes</div>
+              <h3 style="margin: 6px auto 7px; max-width: 26ch; font-family: 'Baloo 2', cursive; font-size: 21px; font-weight: 700; line-height: 1.18; color: #2B2118;">{{ b.title }}</h3>
+              <p style="margin: 0 auto 16px; max-width: 50ch; font-family: 'Patrick Hand', cursive; font-size: 17px; line-height: 1.45; color: #7A4E05;">{{ b.intro }}</p>
+              <sc-for list="{{ b.items }}" as="q" hint-placeholder-count="3">
+                <div style="margin-bottom: 12px; padding: 16px; background: #FFFFFF; border: 2px solid {{ q.bd }}; border-radius: 17px; box-shadow: 0 4px 14px rgba(43,33,24,0.07);">
+                  <p style="margin: 0 auto 12px; max-width: 48ch; font-size: 17px; font-style: italic; line-height: 1.55; color: #3A2E22;">« {{ q.clue }} »</p>
+                  <div style="display: flex; gap: 9px; align-items: center;">
+                    <input type="text" value="{{ q.val }}" onInput="{{ q.onInput }}" placeholder="Je suis…" style="flex: 1 1 auto; min-width: 0; padding: 12px 13px; font-family: 'Patrick Hand', cursive; font-size: 18px; color: #1F3A8A; background: #FFFFFF; border: 2px solid #E3E3DF; border-radius: 13px; outline: none;" style-focus="border-color: #7A4E05;" />
+                    <sc-if value="{{ q.good }}" hint-placeholder-val="{{ false }}">
+                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex: 0 0 auto;"><path d="M20 6 9 17l-5-5"></path></svg>
+                    </sc-if>
+                    <sc-if value="{{ q.bad }}" hint-placeholder-val="{{ false }}">
+                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#DC2626" stroke-width="3" stroke-linecap="round" style="flex: 0 0 auto;"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                    </sc-if>
+                  </div>
+                  <sc-if value="{{ q.shown }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top: 10px; font-size: 14.5px; font-weight: 700; color: #7A4E05;">Réponse : {{ q.ans }}</div>
+                  </sc-if>
+                </div>
+              </sc-for>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <button onClick="{{ b.check }}" style="padding: 14px 20px; font-family: 'Baloo 2', cursive; font-size: 16px; font-weight: 700; color: #2B2118; background: #F5B921; border: none; border-radius: 15px; box-shadow: 0 6px 16px rgba(43,33,24,0.34); cursor: pointer;" style-hover="transform: translateY(-2px);">Vérifier</button>
+                <div style="font-family: 'Baloo 2', cursive; font-size: 20px; font-weight: 800; color: #7A4E05;">{{ b.score }}</div>
+              </div>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ b.isWs }}" hint-placeholder-val="{{ false }}">
+            <section style="margin: 28px 0; padding: 24px 22px; text-align: center; background: #FFFFFF; border-radius: 24px; box-shadow: 0 4px 16px rgba(43,33,24,0.10); outline: 2px solid #E3E3DF; outline-offset: -2px;">
+              <div style="width: 46px; height: 46px; margin: 0 auto 10px; border-radius: 15px; background: #F0EFEC; display: grid; place-items: center;">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#A9700A" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"></path><path d="M4 10h16"></path><path d="M10 4v16"></path></svg>
+              </div>
+              <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #7A4E05;">Jeu · mots mêlés</div>
+              <h3 style="margin: 6px auto 7px; max-width: 26ch; font-family: 'Baloo 2', cursive; font-size: 21px; font-weight: 700; line-height: 1.18; color: #2B2118;">{{ b.title }}</h3>
+              <p style="margin: 0 auto 16px; max-width: 50ch; font-family: 'Patrick Hand', cursive; font-size: 17px; line-height: 1.45; color: #7A4E05;">Touche la <b>première</b> lettre puis la <b>dernière</b> lettre du mot. {{ b.hint }}</p>
+              <div style="overflow-x: auto; padding-bottom: 8px; margin-bottom: 14px;">
+                <div style="display: inline-block; padding: 10px; background: #FFFFFF; border-radius: 16px; box-shadow: 0 4px 14px rgba(43,33,24,0.08);">
+                  <sc-for list="{{ b.grid }}" as="r" hint-placeholder-count="10">
+                    <div style="display: flex;">
+                      <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="10">
+                        <button onClick="{{ c.tap }}" style="width: 31px; height: 31px; margin: 1.5px; border-radius: 8px; background: {{ c.bg }}; color: {{ c.fg }}; border: none; font-family: 'Baloo 2', cursive; font-size: 14.5px; font-weight: 700; cursor: pointer; padding: 0;">{{ c.ch }}</button>
+                      </sc-for>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin-bottom: 14px;">
+                <sc-for list="{{ b.words }}" as="w" hint-placeholder-count="8">
+                  <span style="padding: 7px 12px; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; background: {{ w.bg }}; color: {{ w.fg }}; border-radius: 999px; text-decoration: {{ w.deco }};">{{ w.t }}</span>
+                </sc-for>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <button onClick="{{ b.reveal }}" style="padding: 13px 18px; font-size: 14.5px; font-weight: 700; color: #7A4E05; background: #FFFFFF; border: 2px solid #D9D8D2; border-radius: 14px; cursor: pointer;">Montrer la solution</button>
+                <div style="font-family: 'Baloo 2', cursive; font-size: 20px; font-weight: 800; color: #7A4E05;">{{ b.score }}</div>
+              </div>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ b.isCw }}" hint-placeholder-val="{{ false }}">
+            <section style="margin: 28px 0; padding: 24px 22px; text-align: center; background: #F4F4F2; border-radius: 24px; box-shadow: 0 6px 20px rgba(43,33,24,0.14);">
+              <div style="width: 46px; height: 46px; margin: 0 auto 10px; border-radius: 15px; background: #FFFFFF; border: 2px solid #D9D8D2; display: grid; place-items: center;">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#6B4304" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h7v7H4z"></path><path d="M13 13h7v7h-7z"></path><path d="M11 8h9"></path><path d="M4 16h9"></path></svg>
+              </div>
+              <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #6B4304;">Jeu · mots croisés</div>
+              <h3 style="margin: 6px auto 14px; max-width: 26ch; font-family: 'Baloo 2', cursive; font-size: 21px; font-weight: 700; line-height: 1.18; color: #2B2118;">{{ b.title }}</h3>
+              <div style="overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px;">
+                <div style="display: inline-block; padding: 10px; background: #FFFFFF; border-radius: 16px; box-shadow: 0 4px 14px rgba(43,33,24,0.08);">
+                  <sc-for list="{{ b.grid }}" as="r" hint-placeholder-count="10">
+                    <div style="display: flex;">
+                      <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="14">
+                        <div style="position: relative; width: 31px; height: 31px; margin: 1.5px;">
+                          <sc-if value="{{ c.black }}" hint-placeholder-val="{{ true }}">
+                            <div style="width: 100%; height: 100%; border-radius: 6px; background: #E8E8E4;"></div>
+                          </sc-if>
+                          <sc-if value="{{ c.open }}" hint-placeholder-val="{{ false }}">
+                            <input type="text" maxlength="1" value="{{ c.val }}" onInput="{{ c.onInput }}" style="width: 100%; height: 100%; padding: 0; text-align: center; text-transform: uppercase; font-family: 'Baloo 2', cursive; font-size: 15px; font-weight: 700; color: #2B2118; background: {{ c.bg }}; border: 2px solid {{ c.bd }}; border-radius: 6px; outline: none;" style-focus="border-color: #F5B921;" />
+                            <sc-if value="{{ c.num }}" hint-placeholder-val="{{ false }}">
+                              <span style="position: absolute; top: -2px; left: 2px; font-size: 8.5px; font-weight: 800; color: #6B4304; pointer-events: none;">{{ c.num }}</span>
+                            </sc-if>
+                          </sc-if>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); margin-bottom: 14px;">
+                <div style="padding: 14px; text-align: left; background: #FFFFFF; border-radius: 15px; box-shadow: 0 4px 14px rgba(43,33,24,0.07);">
+                  <div style="text-align: center; font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #6B4304; margin-bottom: 9px;">Horizontalement</div>
+                  <sc-for list="{{ b.across }}" as="c" hint-placeholder-count="4">
+                    <div style="display: flex; gap: 8px; margin-bottom: 7px; font-size: 14px; line-height: 1.45;"><b style="color: #7A4E05;">{{ c.n }}.</b><span>{{ c.c }}</span></div>
+                  </sc-for>
+                </div>
+                <div style="padding: 14px; text-align: left; background: #FFFFFF; border-radius: 15px; box-shadow: 0 4px 14px rgba(43,33,24,0.07);">
+                  <div style="text-align: center; font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #6B4304; margin-bottom: 9px;">Verticalement</div>
+                  <sc-for list="{{ b.down }}" as="c" hint-placeholder-count="4">
+                    <div style="display: flex; gap: 8px; margin-bottom: 7px; font-size: 14px; line-height: 1.45;"><b style="color: #7A4E05;">{{ c.n }}.</b><span>{{ c.c }}</span></div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                <button onClick="{{ b.check }}" style="padding: 14px 20px; font-family: 'Baloo 2', cursive; font-size: 16px; font-weight: 700; color: #2B2118; background: #C08A0C; border: none; border-radius: 15px; box-shadow: 0 6px 16px rgba(43,33,24,0.30); cursor: pointer;" style-hover="transform: translateY(-2px);">Vérifier</button>
+                <button onClick="{{ b.reveal }}" style="padding: 13px 17px; font-size: 14.5px; font-weight: 700; color: #6B4304; background: #FFFFFF; border: 2px solid #D9D8D2; border-radius: 14px; cursor: pointer;">Solution</button>
+                <div style="font-family: 'Baloo 2', cursive; font-size: 18px; font-weight: 800; color: #6B4304;">{{ b.score }}</div>
+              </div>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ b.isFlash }}" hint-placeholder-val="{{ false }}">
+            <section style="margin: 28px 0; padding: 24px 22px; text-align: center; background: #FAFAF9; border-radius: 24px; box-shadow: 0 4px 16px rgba(43,33,24,0.10);">
+              <div style="width: 46px; height: 46px; margin: 0 auto 10px; border-radius: 15px; background: #F0EFEC; display: grid; place-items: center;">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#A9700A" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h7v15H4z"></path><path d="M13 5h7v15h-7z"></path><path d="M7 9h1"></path><path d="M16 9h1"></path></svg>
+              </div>
+              <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #7A4E05;">Cartes éclair · vocabulaire</div>
+              <h3 style="margin: 6px auto 14px; max-width: 26ch; font-family: 'Baloo 2', cursive; font-size: 21px; font-weight: 700; line-height: 1.18; color: #2B2118;">{{ b.title }}</h3>
+              <button onClick="{{ b.flip }}" style="display: block; width: 100%; max-width: 480px; margin: 0 auto; min-height: 170px; padding: 24px; text-align: center; background: #FFFFFF; border: none; border-radius: 22px; box-shadow: 0 10px 26px rgba(43,33,24,0.12); cursor: pointer; animation: vPop 0.22s ease;">
+                <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #7A4E05; margin-bottom: 12px;">{{ b.face }}</div>
+                <div style="margin: 0 auto; max-width: 40ch; font-family: 'Baloo 2', cursive; font-size: 21px; font-weight: 700; line-height: 1.4; color: #2B2118;">{{ b.card }}</div>
+                <div style="margin-top: 16px; font-family: 'Patrick Hand', cursive; font-size: 16px; color: #6E5C45;">Touche la carte pour la retourner</div>
+              </button>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; flex-wrap: wrap;">
+                <button onClick="{{ b.prev }}" style="display: flex; align-items: center; gap: 7px; padding: 12px 16px; font-size: 14.5px; font-weight: 700; color: #7A4E05; background: #FFFFFF; border: 2px solid #D9D8D2; border-radius: 14px; cursor: pointer;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#6B4304" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+                  <span>Avant</span>
+                </button>
+                <button onClick="{{ b.next }}" style="display: flex; align-items: center; gap: 7px; padding: 12px 16px; font-size: 14.5px; font-weight: 700; color: #2B2118; background: #F5B921; border: none; border-radius: 14px; cursor: pointer; box-shadow: 0 5px 14px rgba(43,33,24,0.3);">
+                  <span>Suivante</span>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+                </button>
+                <div style="font-family: 'Baloo 2', cursive; font-size: 17px; font-weight: 800; color: #7A4E05;">{{ b.count }}</div>
+              </div>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ b.isMind }}" hint-placeholder-val="{{ false }}">
+            <section style="margin: 28px 0; padding: 24px 22px; text-align: center; background: #FFFFFF; border-radius: 24px; box-shadow: 0 10px 28px rgba(43,33,24,0.10);">
+              <div style="width: 46px; height: 46px; margin: 0 auto 10px; border-radius: 15px; background: {{ accent }}; display: grid; place-items: center;">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"></path><path d="M5 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"></path><path d="M19 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"></path><path d="M12 9v3"></path><path d="M12 12 5 17"></path><path d="m12 12 7 5"></path></svg>
+              </div>
+              <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: {{ ink }};">Carte mentale</div>
+              <h3 style="margin: 6px auto 16px; max-width: 26ch; font-family: 'Baloo 2', cursive; font-size: 21px; font-weight: 700; line-height: 1.18; color: #2B2118;">{{ b.title }}</h3>
+              <sc-if value="{{ b.mapImg }}" hint-placeholder-val="{{ false }}">
+                <figure style="margin: 0 auto 18px; max-width: 600px;">
+                  <div style="background: #FFFFFF; border-radius: 18px; overflow: hidden; box-shadow: 0 8px 22px rgba(43,33,24,0.12);">
+                    <img src="{{ b.mapSrc }}" loading="lazy" decoding="async" alt="{{ b.title }}" style="display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: contain; background: #FAFAF9;" />
+                  </div>
+                  <figcaption style="margin-top: 9px; font-family: 'Patrick Hand', cursive; font-size: 16px; color: #6E5C45;">{{ b.mapCap }}</figcaption>
+                </figure>
+              </sc-if>
+              <div style="display: grid; gap: 11px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+                <sc-for list="{{ b.branches }}" as="br" hint-placeholder-count="4">
+                  <div style="padding: 15px; background: {{ br.bg }}; border-radius: 17px;">
+                    <div style="font-family: 'Baloo 2', cursive; font-size: 15.5px; font-weight: 700; margin-bottom: 8px; color: {{ br.fg }};">{{ br.title }}</div>
+                    <div style="font-size: 14.5px; line-height: 1.58; color: #3A2E22;">{{ br.html }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top: 13px; padding: 16px; background: #FAFAF9; border: 2px dashed #F5B921; border-radius: 17px;">
+                <div style="font-family: 'Baloo 2', cursive; font-size: 15.5px; font-weight: 700; margin-bottom: 9px; color: #7A4E05;">Ma branche à moi</div>
+                <input type="text" value="{{ b.mTitle }}" onInput="{{ b.onTitle }}" placeholder="Titre de ma branche…" style="width: 100%; padding: 11px 13px; margin-bottom: 8px; font-family: 'Baloo 2', cursive; font-size: 15.5px; font-weight: 700; text-align: center; color: #2B2118; background: #FFFFFF; border: 2px solid #E3E3DF; border-radius: 12px; outline: none;" style-focus="border-color: #F5B921;" />
+                <textarea value="{{ b.mBody }}" onInput="{{ b.onBody }}" rows="3" placeholder="Ce que j'y mets…" style="width: 100%; padding: 11px 13px; font-family: 'Patrick Hand', cursive; font-size: 17.5px; line-height: 1.6; color: #1F3A8A; background: #FFFFFF; border: 2px solid #E3E3DF; border-radius: 12px; outline: none;" style-focus="border-color: #F5B921;"></textarea>
+              </div>
+            </section>
+          </sc-if>
+
+        </div>
+      </sc-for>
+
+      <div style="margin-top: 36px; padding: 20px 18px; text-align: center; background: #FFFFFF; border-radius: 22px; box-shadow: 0 10px 28px rgba(43,33,24,0.10);">
+        <div style="width: 46px; height: 46px; margin: 0 auto 11px; border-radius: 15px; background: #F5B921; display: grid; place-items: center;">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"></path><path d="M12 3v12"></path><path d="m8 7 4-4 4 4"></path></svg>
+        </div>
+        <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #7A4E05;">Partager mon travail</div>
+        <p style="margin: 8px auto 14px; max-width: 50ch; font-size: 15px; line-height: 1.6; color: #3A2E22;">{{ shareMsg }}</p>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 9px;">
+          <button onClick="{{ onExport }}" style="padding: 13px 18px; font-family: 'Baloo 2', cursive; font-size: 15.5px; font-weight: 700; color: #7A4E05; background: #F4F4F2; border: none; border-radius: 14px; cursor: pointer;" style-hover="background: #F4F4F2;">Récupérer mes réponses</button>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 24px;">
+        <button onClick="{{ goPrev }}" style="flex: 1 1 0; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 12px; font-family: 'Baloo 2', cursive; font-size: 15.5px; font-weight: 700; color: #5C4E3C; background: #FFFFFF; border: none; border-radius: 17px; box-shadow: 0 6px 18px rgba(43,33,24,0.09); cursor: pointer;" style-hover="transform: translateY(-2px);">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#7C6A54" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+          <span>{{ prevLabel }}</span>
+        </button>
+        <button onClick="{{ goNext }}" style="flex: 1 1 0; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 12px; font-family: 'Baloo 2', cursive; font-size: 15.5px; font-weight: 700; color: #2B2118; background: {{ accent }}; border: none; border-radius: 17px; box-shadow: 0 8px 20px rgba(43,33,24,0.16); cursor: pointer;" style-hover="transform: translateY(-2px);">
+          <span>{{ nextLabel }}</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2B2118" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+        </button>
+      </div>
+
+      <p style="margin: 28px auto 0; max-width: 56ch; font-size: 12px; line-height: 1.65; text-align: center; color: #6E5C45;">Centre Véritas · Cahier numérique de 6<sup>e</sup> · exemplaire nominatif de {{ name }} · code {{ codeShort }} · valable jusqu'au {{ expLabel }}. Reproduction et diffusion interdites.</p>
+    </main>
+  </div>
+</sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:420,&quot;height&quot;:880}}">
+/* ── LA PORTE EST CELLE DU SITE, PLUS CELLE DE LA PAGE ────────────────────
+   Ce qui était ici — un alphabet, un grain de sel, une somme de contrôle et
+   une fabrique de codes, une trentaine de lignes en tout — jugeait les
+   codes DANS le navigateur. Un code n'y était pas « acheté », il était
+   « bien formé » : somme de contrôle juste, échéance non dépassée, bon
+   préfixe de niveau. Tout cela se calcule sans rien acheter, et deux boutons
+   de la porte le faisaient en un clic.
+
+   La vérification est maintenant au serveur (`api/livret.php?action=unlock`),
+   qui seul tient le registre : à qui le code a été émis, s'il est révoqué,
+   sur combien d'appareils il tourne. Et le contenu ne part qu'après — il
+   n'est plus téléchargeable en statique.
+
+   `gate.js` fait tout cela pour les vingt-quatre autres ouvrages du site ;
+   il n'y a pas de raison d'en écrire une seconde version ici. */
+const LS = 'oi6.';
+const SLUG = 'oeuvres-6e';
+function norm(s) { return (s || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
+
+function expLabel() {
+  /* L'échéance n'est plus dans le code : elle est au registre, et le serveur
+     la donne en JOURS restants. On dit donc une date quand on la connaît, et
+     on se tait quand on ne la connaît pas — « valable jusqu'au undefined NaN »
+     en bas de chaque page valait moins que rien. */
+  var j = window.VRTLivret && window.VRTLivret.joursRestants();
+  if (j === null || j === undefined || j < 0) return 'la fin de l\u2019année scolaire';
+  var d = new Date(Date.now() + j * 86400000);
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+function norm(s) { return (s || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
+
+const CIRC = r => 'M' + (12 + r) + ' 12a' + r + ' ' + r + ' 0 1 1-' + (r * 2) + ' 0 ' + r + ' ' + r + ' 0 1 1 ' + (r * 2) + ' 0';
+const ICONS = {
+  objectif: [CIRC(9), CIRC(5), CIRC(1.6)],
+  astuce: ['M9 18h6', 'M10 22h4', 'M12 2a7 7 0 0 0-4 12.7V18h8v-3.3A7 7 0 0 0 12 2z'],
+  attention: ['M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z', 'M12 9v4', 'M12 17h.01'],
+  monde: [CIRC(10), 'M2 12h20', 'M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z'],
+  nature: ['M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10z', 'M2 21c0-3 1.9-5.7 4.5-7C9 12.8 10 12 11 10'],
+  qui: ['M18 21a8 8 0 0 0-12 0', 'M15 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0z', CIRC(10)],
+  ou: ['M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z', 'M15 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0z'],
+  rire: [CIRC(10), 'M8 14s1.5 2 4 2 4-2 4-2', 'M9 9h.01', 'M15 9h.01'],
+  mots: ['M15 2a5 5 0 0 0-4.3 7.6L2 18.3V22h3.7l8.7-8.7A5 5 0 1 0 15 2z', 'M16.5 7.5h.01'],
+  jouer: ['M4 4h16v16H4z', 'M8.5 8.5h.01', 'M15.5 15.5h.01', 'M12 12h.01'],
+  outils: ['M14.7 6.3a4 4 0 0 0 5 5l-9.4 9.4a2.8 2.8 0 0 1-4-4l9.4-9.4z', 'M14.7 6.3 18 3l3 3-3.3 3.3'],
+  jelis: ['M2 4h7a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z', 'M22 4h-7a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z'],
+  retiens: ['m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z'],
+  examen: ['M9 3h6v3H9z', 'M5 6h14v15H5z', 'm9 13 2 2 4-4'],
+  defi: ['M7 4h10v5a5 5 0 0 1-10 0z', 'M7 6H4a3 3 0 0 0 3 3', 'M17 6h3a3 3 0 0 1-3 3', 'M12 14v4', 'M8 21h8']
+};
+const INK = '#6B4304';
+const PANELS = {
+  objectif: ['#FAFAF9', INK, 'Objectif', 'solid'],
+  astuce: ['#FFFFFF', INK, 'Astuce', 'ring'],
+  attention: ['#FAFAF9', INK, 'Attention', 'wash'],
+  monde: ['#FFF7DE', INK, 'Le savais-tu ?', 'flag'],
+  nature: ['#FFF7DE', INK, 'Le savais-tu ?', 'flag'],
+  qui: ['#FAFAF9', INK, 'Qui est qui ?', 'solid'],
+  ou: ['#FFFFFF', INK, 'C\u2019est où ?', 'plain'],
+  rire: ['#FAFAF9', INK, 'Le coin du rire', 'wash'],
+  mots: ['#FFFFFF', INK, 'Les mots difficiles', 'ring'],
+  jouer: ['#FAFAF9', INK, 'À toi de jouer', 'solid'],
+  outils: ['#FAFAF9', INK, 'Boîte à outils', 'wash'],
+  jelis: ['#FFFFFF', INK, 'Je lis', 'plain'],
+  retiens: ['#F4F4F2', INK, 'Je retiens', 'solid'],
+  examen: ['#FAFAF9', INK, 'Côté examen', 'ring'],
+  defi: ['#F4F4F2', INK, 'Défi', 'solid']
+};
+const PSTYLE = {
+  solid: { iconBg: '#F5B921', iconFg: '#4A2E02', ring: 'none', shadow: '0 6px 20px rgba(43,33,24,0.16)' },
+  ring: { iconBg: '#FFFFFF', iconFg: '#6B4304', ring: '2px solid #D9D8D2', shadow: '0 4px 16px rgba(43,33,24,0.10)' },
+  wash: { iconBg: '#F0EFEC', iconFg: '#6B4304', ring: 'none', shadow: '0 6px 18px rgba(43,33,24,0.12)' },
+  plain: { iconBg: 'transparent', iconFg: '#6B4304', ring: '2px dashed #D9D8D2', shadow: '0 3px 12px rgba(43,33,24,0.08)' },
+  flag: { iconBg: '#F5B921', iconFg: '#2B2118', ring: '3px solid #F5B921', shadow: '0 8px 24px rgba(245,185,33,0.30)' }
+};
+const DOTS = ['#8A5A04', '#0A6270', '#B02F6E', '#046046', '#A34309', '#6D34D6'];
+const BR = [['#FAFAF9', '#6B4304'], ['#FFFFFF', '#7A4E05'], ['#F4F4F2', '#6B4304'], ['#FAFAF9', '#7A4E05'], ['#FFFFFF', '#6B4304'], ['#F0EFEC', '#4A2E02']];
+const DIRS = { '\u2192': [0, 1], '\u2190': [0, -1], '\u2193': [1, 0], '\u2191': [-1, 0], '\u2198': [1, 1], '\u2199': [1, -1], '\u2196': [-1, -1], '\u2197': [-1, 1] };
+
+const C1 = '#0A6270', C2 = '#B02F6E', C3 = '#6D34D6', C4 = '#046046', C5 = '#A34309', C6 = '#1D4ED8';
+const CHAR_COL = {
+  'Kulu': C1,
+  'Zee': C2,
+  'Gnitorni': C3,
+  'Dany': C4,
+  'Ngolo': C5,
+  'Etoundi': C6,
+  'Ahanda': C1,
+  'Malan': C2,
+  'Zameyo': C3,
+  'Mebenga': C4,
+  'Serge': C5,
+  'Kongodjan': C6,
+  'Towa': C1,
+  'Garba': C2,
+  'Ambombo': C3,
+  'Zog': C4,
+  'Mbah': C5,
+  'Tchakarias': C6,
+  'Ana': C1,
+  'Olong': C2,
+  'Dzungo’o': C3,
+  'Moussa': C4,
+  'Fari': C5,
+  'Ndoe': C6,
+  'Mvomo': C1,
+  'Ngondzanga': C2,
+  'Emgbeme': C3,
+  'Minanhanlan': C4,
+  'Soumaoro': C5,
+  'Kouncoun': C6,
+  'Tortue': C1,
+  'Léopard': C2,
+  'Hyène': C3,
+  'Chien': C4,
+  'Singe': C5,
+  'Lion': C6,
+  'Coq': C1,
+  'Oiseau': C2,
+  'Bigorneau': C3,
+  'Lièvre': C4,
+  'Éléphant': C5,
+  'Caméléon': C6,
+  'Python': C1,
+  'Panthère': C2,
+  'Chimpanzé': C3
+};
+const CHAR_RE = new RegExp('(^|[^\\wÀ-ÿ])(' + Object.keys(CHAR_COL).sort((a, b) => b.length - a.length).map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')(?![\\wÀ-ÿ])', 'g');
+
+const CHAP_IMG = {
+  'w1c1': ['w1-depart-course', 'Kulu la tortue et Zee la panthère, les deux héros du recueil'],
+  'w1c2': ['w1-frise-auteur', 'La vie de Lucien Anya Noa, de 1948 aux Chants de la Forêt'],
+  'w1c3': ['w1-qui-est-qui', 'Chien, Kulu, le Chimpanzé, la jeune fille et Zee le juge'],
+  'w1c4': ['w1-kulu-zee-race', 'La course de Kulu et de Zee à travers la forêt'],
+  'w1c5': ['w1-chant-bigorneau', 'La mare du bigorneau : un lieu à décrire'],
+  'w1c6': ['w1-tortue-savane', 'L\u2019arrivée de la course : à toi de jouer'],
+  'w2c1': ['w2-carte-mentale', 'Les sept nouvelles des Bimanes'],
+  'w2c2': ['w2-ecole-village', 'L\u2019école du village, décor des Bimanes'],
+  'w2c3': ['w2-classe-lecon', 'Une leçon dans une classe camerounaise'],
+  'w2c4': ['w2-homme-bertoua', 'Un homme de Bertoua dans les années 1970'],
+  'w2c5': ['w2-freres-soeurs', 'Frères et sœurs au soleil couchant'],
+  'w2c6': ['w2-dot-ceremonie', 'La cérémonie de la dot'],
+  'w3c1': ['w3-couverture', 'Korotoumou, le vieux conteur, le lièvre et l\u2019hyène'],
+  'w3c2': ['w3-veillee-baobab', 'La veillée sous le baobab'],
+  'w3c3': ['w3-carte-mentale', 'Les quatorze contes et leurs trois familles'],
+  'w3c4': ['w3-grand-mere-conte', 'Korotoumou raconte aux enfants du village'],
+  'w3c5': ['w3-riviere-couchant', 'La rivière où chante la voix'],
+  'w3c6': ['w3-hyene-lievre', 'Le lièvre et l\u2019hyène près du feu'],
+  'front': ['front-affiche', 'Trois œuvres à découvrir cette année'],
+  'passerelles': ['w1-deux-amis', 'Les animaux des trois œuvres réunis'],
+  'notes': ['w2-themes-bimanes', 'Les thèmes des sept nouvelles'],
+  'corriges': ['w1-mindmap-foret', 'Qui chante dans la forêt : les voix des contes']
+};
+const H3_IMG = [
+  ['Lecture suivie n° 1 — La course truquée', 'w1-course-truquee', 'La course truquée : Kulu, ses frères et Zee le juge'],
+  ['Lecture suivie n° 2 — Une poutre d\u2019eau', 'w1-mariage-kulu', 'Le mariage de Kulu : les épreuves du chef Zameyo'],
+  ['Lecture suivie n° 4 — Deux amis', 'w1-deux-amis', 'Le chien et le chimpanzé, deux amis et deux secrets'],
+  ['Lecture suivie n° 5 — Le procès des mâchoires', 'w1-proces-cabris', 'Le procès des cabris devant Zee le juge'],
+  ['Lecture suivie n° 6 — La voix au fond de la source', 'w1-chant-bigorneau', 'Le chant du bigorneau à la mare de la forêt'],
+  ['Lucien Anya Noa, l\u2019homme qui a écouté', 'w1-frise-auteur', 'Séminaire, ordination, Sorbonne, Collège NCA, Chants de la Forêt'],
+  ['Ce qu\u2019il y a dedans : dix-huit histoires', 'w1-carte-mentale', 'Les dix-huit contes et ce que chacun enseigne'],
+  ['Séverin Cécile Abega', 'w2-ecole-village', 'Le Cameroun des villages qu\u2019Abega met en scène'],
+  ['Ce qu\u2019il y a dedans : sept nouvelles', 'w2-carte-mentale', 'Les sept nouvelles des Bimanes'],
+  ['Lecture suivie n° 1 — Le vieux qui savait', 'w2-homme-bertoua', 'Le vieux du Fardeau, à Bertoua'],
+  ['Lecture suivie n° 2 — Le bachelier et sa cravate', 'w2-freres-soeurs', 'Le bachelier revenu au village'],
+  ['Lecture suivie n° 3 — Le sourire le plus cher', 'w2-maroua-chambre', 'La petite vendeuse de beignets'],
+  ['Lecture suivie n° 4 — La leçon du savon', 'w2-boutique-tanga', 'La boutique où l\u2019on achète le savon'],
+  ['Lecture suivie n° 5 — L\u2019odeur de la terre mouillée', 'w2-file-cacao', 'L\u2019étranger de passage et la file du cacao'],
+  ['Lecture suivie n° 6 — La gifle de la vérité', 'w2-classe-lecon', 'Mots d\u2019enfants : la classe et la leçon'],
+  ['Amadou Koné', 'w3-couverture', 'Les Contes de Korotoumou et leurs personnages'],
+  ['La veillée qui n\u2019a plus lieu', 'w3-veillee-baobab', 'La veillée d\u2019autrefois sous le baobab'],
+  ['Ce qu\u2019il y a dedans : quatorze contes', 'w3-carte-mentale', 'Quatorze contes, trois familles'],
+  ['Lecture suivie n° 1 — « Et si nous disions des contes', 'w3-grand-mere-conte', 'Korotoumou ouvre la veillée'],
+  ['Lecture suivie n° 2 — L\u2019hyène qui ne sait pas attendre', 'w3-hyene-lievre', 'L\u2019hyène et le lièvre au jeu des congco\u2019ngan'],
+  ['Lecture suivie n° 3 — La chaîne des grands frères', 'w3-miel-foret', 'Le miel de la forêt et la chaîne des frères'],
+  ['Lecture suivie n° 6 — La voix qui chante dans la rivière', 'w3-riviere-couchant', 'La proscrite et la voix de la rivière']
+];
+const MAP_IMG = { 'Les Chants de la Forêt': ['w1-carte-mentale', 'Les dix-huit contes beti'], 'Les Bimanes': ['w2-carte-mentale', 'Les sept nouvelles'], 'Les Contes de Korotoumou': ['w3-carte-mentale', 'Quatorze contes, trois familles'] };
+
+class Component extends DCLogic {
+  state = {
+    booted: false, doc: null, loadErr: '',
+    sess: null, code: '', name: '', classe: '', gateErr: '',
+    pi: 0, drawer: false, tOpen: false, tLeft: 0, tRun: false,
+    ans: {}, ui: {}, shareMsg: 'Ton cahier est enregistré sur cet appareil. Récupère tes réponses en un fichier, puis envoie-le à ton enseignant par WhatsApp.'
+  };
+
+  componentDidMount() {
+    /* ── TROIS FAÇONS D'ARRIVER SUR CETTE PAGE ──────────────────────────────
+       ① avec une session encore ouverte (on a déjà déverrouillé, ici, hier) :
+          `resume()` la reprend sans redemander le code, et retombe sur la copie
+          hors ligne si le réseau manque — au Cameroun, ce cas est la règle et
+          non l'exception ;
+       ② avec un lien d'aperçu (`?extrait=1`) : on charge les deux chapitres
+          publics, et la porte reste fermée sur le reste ;
+       ③ sans rien : la porte demande un code, et propose de l'acheter. */
+    try {
+      const m = JSON.parse(localStorage.getItem(LS + 'moi') || '{}');
+      if (m.name) this.setState({ name: m.name, classe: m.classe || '' });
+    } catch (e) { /* pas de nom retenu */ }
+    try { this.setState({ ans: JSON.parse(localStorage.getItem(LS + 'ans') || '{}') }); } catch (e) { /* vide */ }
+
+    if (window.VRTLivret) {
+      window.VRTLivret.config({ classe: SLUG, kind: 'livret' });
+      window.VRTLivret.resume()
+        .then(() => {
+          const m = (() => { try { return JSON.parse(localStorage.getItem(LS + 'moi') || '{}'); } catch (e) { return {}; } })();
+          this.setState({ sess: { code: '', name: m.name || 'Élève', classe: m.classe || SLUG, role: window.VRTLivret.etat().kind === 'guide' ? 'teacher' : 'student' } });
+          this.load();
+        })
+        .catch(() => { if (/[?&]extrait=1/.test(location.search)) this.chargerExtrait(); });
+    } else if (/[?&]extrait=1/.test(location.search)) {
+      this.chargerExtrait();
+    }
+
+    this._tick = setInterval(() => {
+      if (this.state.tRun && this.state.tLeft > 0) this.setState(s => ({ tLeft: s.tLeft - 1, tRun: s.tLeft - 1 > 0 }));
+    }, 1000);
+    this._block = e => { if (!e.target.closest || !e.target.closest('input, textarea')) e.preventDefault(); };
+    document.addEventListener('copy', this._block);
+    document.addEventListener('cut', this._block);
+    document.addEventListener('contextmenu', this._block);
+    this.setState({ booted: true });
+  }
+
+  /* L'aperçu gratuit : deux chapitres, pris aux deux bouts du cahier, sans un
+     seul corrigé. Il est PUBLIC — c'est le seul contenu de cet ouvrage qui le
+     soit — et il se charge sans code, comme une vitrine s'ouvre sans clé. */
+  chargerExtrait() {
+    if (this._ex) return;
+    this._ex = true;
+    const s = document.createElement('script');
+    s.src = '/livrets/extrait-' + SLUG + '.js?v=1.20.21';
+    s.onload = () => {
+      const d = window.OI_DOC;
+      if (d && d.parts) {
+        this.setState({ doc: d, extrait: true,
+                        sess: { code: '', name: 'Aperçu gratuit', classe: '', role: 'student' } });
+      }
+    };
+    s.onerror = () => this.setState({ gateErr: 'L\u2019aperçu n\u2019a pas pu être chargé. Vérifie ta connexion.' });
+    document.head.appendChild(s);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this._tick);
+    document.removeEventListener('copy', this._block);
+    document.removeEventListener('cut', this._block);
+    document.removeEventListener('contextmenu', this._block);
+  }
+
+  /* ── LE CONTENU ARRIVE DU SERVEUR, PAS D'UN FICHIER À CÔTÉ ──────────────
+     `load()` téléchargeait `content/<niveau>.enc` et le déchiffrait avec une
+     graine écrite trois lignes plus haut. N'importe qui pouvait faire les deux.
+
+     Désormais : `gate.js` obtient le jeton, demande la charge à
+     `api/livret.php?action=content`, l'exécute — et le fichier pose
+     `window.OI_DOC`. On le lit ici. Si la globale n'est pas là, ce n'est pas
+     à nous de le dire : `gate.js` a déjà affiché pourquoi (code refusé,
+     fichier abîmé, réseau coupé), et inventer un second message par-dessus
+     ferait douter d'un diagnostic juste. */
+  load() {
+    if (this.state.doc) return;
+    const d = window.OI_DOC;
+    if (d && d.parts) this.setState({ doc: d, extrait: !!d._extrait });
+  }
+
+
+  save(ans) { this.setState({ ans }); try { localStorage.setItem(LS + 'ans', JSON.stringify(ans)); } catch (e) { /* quota */ } }
+  set(key, val) { const a = Object.assign({}, this.state.ans); a[key] = val; this.save(a); }
+  get(key, dflt) { const v = this.state.ans[key]; return v === undefined ? dflt : v; }
+  uiSet(key, val) { const u = Object.assign({}, this.state.ui); u[key] = val; this.setState({ ui: u }); }
+
+  /* ── LE SERVEUR TRANCHE, LA PAGE AFFICHE ────────────────────────────────
+     Ce que la page peut encore juger seule : qu'un nom a été saisi (il ira sur
+     le filigrane) et que le champ n'est pas vide. Le reste — le code est-il
+     réel, payé, vivant, dans son quota d'appareils — n'appartient qu'au
+     serveur, et il répond en français. */
+  unlock(rawCode) {
+    const code = (rawCode || '').trim();
+    if (!code) { this.setState({ gateErr: 'Saisis le code reçu après ton paiement.' }); return; }
+    if (!this.state.name.trim()) { this.setState({ gateErr: 'Écris ton nom : il figurera sur chaque page de ton cahier.' }); return; }
+    if (!window.VRTLivret) { this.setState({ gateErr: 'La page n\u2019a pas fini de charger. Attends un instant, puis réessaie.' }); return; }
+    this.setState({ gateErr: '', gateBusy: true });
+    window.VRTLivret.unlock(code)
+      .then(() => {
+        const sess = { code: code, name: this.state.name.trim(), classe: this.state.classe.trim() || SLUG,
+                       role: window.VRTLivret.etat().kind === 'guide' ? 'teacher' : 'student' };
+        try { localStorage.setItem(LS + 'moi', JSON.stringify({ name: sess.name, classe: sess.classe })); } catch (e) { /* quota */ }
+        this.setState({ sess, gateErr: '', gateBusy: false, pi: 0 });
+        this.load();
+      })
+      .catch(e => this.setState({ gateBusy: false, gateErr: (e && e.message) || 'Code refusé. Vérifie que tu l\u2019as recopié exactement.' }));
+  }
+
+
+  pages() {
+    const d = this.state.doc; if (!d) return [];
+    const out = [];
+    for (const p of d.parts) {
+      if (p.chapters) {
+        p.chapters.forEach((c, i) => out.push({
+          kicker: 'Œuvre ' + p.n + ' · ' + p.author, title: c.title, sub: i === 0 ? p.title + ' — ' + p.genre : '',
+          accent: p.accent, blocks: c.blocks, id: c.id,
+          partId: p.id, workTitle: p.title, workN: p.n, chapN: i + 1
+        }));
+      } else {
+        out.push({
+          kicker: p.kind === 'front' ? 'Ouverture' : p.kind === 'corriges' ? 'Réservé enseignant' : 'Pour finir',
+          title: p.title, sub: '', accent: '#F5B921', blocks: p.blocks, id: p.id,
+          partId: p.id, workTitle: '', workN: 0, chapN: 0
+        });
+      }
+    }
+    return out;
+  }
+
+  flashcards(workTitle) {
+    const d = this.state.doc; if (!d) return [];
+    const p = d.parts.find(x => x.title === workTitle); if (!p || !p.chapters) return [];
+    const cards = [];
+    for (const c of p.chapters) for (const b of c.blocks) {
+      if (b.k === 'panel' && b.type === 'mots') for (const line of b.body) {
+        const m = line.match(/^<b>(.+?)<\/b>\s*:\s*(.+)$/);
+        if (m) cards.push({ front: m[1].replace(/<[^>]+>/g, ''), back: m[2].replace(/<[^>]+>/g, '') });
+      }
+    }
+    return cards;
+  }
+
+  h3Image(text) {
+    for (const [pfx, file, cap] of H3_IMG) if (text.indexOf(pfx) === 0) return [file, cap];
+    return null;
+  }
+
+  decorate(blocks, page) {
+    const out = [];
+    const K = p => page.partId + '.' + p;
+    blocks.forEach((b, bi) => {
+      const id = K(bi);
+      if (b.k === 'h2') return;
+      if (b.k === 'h3') {
+        const text = b.x.replace(/<[^>]+>/g, '');
+        const im = this.h3Image(text);
+        out.push({ isH3: true, text, img: !!im, imgSrc: im ? '/uploads/oeuvres/1c/' + im[0] + '.webp' : '', imgAlt: text, imgCap: im ? im[1] : '' });
+        return;
+      }
+      if (b.k === 'p') {
+        const plain = b.x.replace(/<[^>]+>/g, '').trim();
+        if (/^[—–-]\s/.test(plain)) out.push({ isDia: true, html: this.rich(b.x.replace(/^\s*[—–-]\s*/, '')), accent: page.accent });
+        else out.push({ isP: true, html: this.rich(b.x) });
+        if (b.lines) out.push(this.lineBox(id + '.l', b.lines));
+        return;
+      }
+      if (b.k === 'li') { const n = out.filter(x => x.isLi).length; out.push({ isLi: true, html: this.rich(b.x), dot: DOTS[n % DOTS.length] }); return; }
+      if (b.k === 'quote') {
+        const runs = [];
+        for (const t of b.body) {
+          const src = String(t), re = /\u00ab([^\u00bb]{2,})\u00bb/g;
+          let last = 0, m;
+          while ((m = re.exec(src))) {
+            runs.push({ talk: false, s: src.slice(last, m.index) });
+            runs.push({ talk: true, s: '\u00ab\u202f' + m[1].trim() + '\u202f\u00bb' });
+            last = m.index + m[0].length;
+          }
+          runs.push({ talk: false, s: src.slice(last) });
+        }
+        const kept = [];
+        const bare = s => String(s).replace(/<[^>]+>/g, '');
+        for (const r of runs) {
+          if (r.talk) { kept.push(r); continue; }
+          let s = r.s;
+          const head = s.match(/^\s*([.,;:!?\u2026]+)/);
+          if (head && kept.length) { kept[kept.length - 1].s += head[1]; s = s.slice(head[0].length); }
+          s = s.replace(/^[\s.,;:!?\u2026]+/, '').replace(/\s+$/, '');
+          if (!/[A-Za-zÀ-ÿ0-9]/.test(this.plain(s))) continue;
+          kept.push({ talk: false, s });
+        }
+        out.push({
+          isQuote: true,
+          lines: kept.map(r => ({ html: this.rich(r.s), talk: r.talk, pad: r.talk ? '18px' : '0px', rule: r.talk ? '3px solid #F5B921' : 'none' }))
+        });
+        return;
+      }
+      if (b.k === 'panel') { out.push(this.panel(b)); return; }
+      if (b.k === 'q') {
+        const qn = out.filter(x => x.isQ).length; out.push({ isQ: true, num: qn + 1, hue: DOTS[qn % DOTS.length], html: this.rich(b.x), val: this.get(id, ''), rows: Math.max(2, b.lines || 2), onInput: e => this.set(id, e.target.value) });
+        return;
+      }
+      if (b.k === 'fill') { out.push({ isFill: true, html: this.rich(b.x.replace(/[.·…]{6,}/g, ' ')), val: this.get(id, ''), rows: Math.max(1, b.lines || 1), onInput: e => this.set(id, e.target.value) }); return; }
+      if (b.k === 'lines') { out.push(this.lineBox(id, b.n)); return; }
+      if (b.k === 'table') {
+        out.push({ isTable: true, trs: b.rows.map((r, ri) => ({ bg: ri === 0 ? page.accent : (ri % 2 ? '#FFFFFF' : '#FFFFFF'), cells: r.map(c => ({ html: this.rich(c), fw: ri === 0 ? '700' : '500', fg: ri === 0 ? '#2B2118' : '#3A2E22' })) })) });
+        return;
+      }
+      if (b.k === 'gridfill') {
+        const head = b.rows[0].map(c => c.replace(/<[^>]+>/g, '').trim());
+        out.push({
+          isGrid: true, gr: b.rows.slice(1).map((r, ri) => ({
+            cells: r.map((c, ci) => {
+              const txt = c.replace(/<[^>]+>/g, '').trim();
+              const ed = txt === '' || /^[.·…_\s☐]+$/.test(txt);
+              const cid = id + '.' + ri + '.' + ci;
+              return ed
+                ? { label: head[ci] || '', ed: true, ro: false, val: this.get(cid, ''), onInput: e => this.set(cid, e.target.value), html: ' ' }
+                : { label: head[ci] || '', ed: false, ro: true, html: this.rich(c), val: '', onInput: () => { } };
+            })
+          }))
+        });
+        return;
+      }
+      if (b.k === 'qcm') {
+        const shown = this.state.ui[id + '.s'];
+        let good = 0;
+        const items = b.items.map(q => {
+          const pick = this.get(id + '.' + q.n, '');
+          if (pick === q.ans) good++;
+          return {
+            n: q.n, q: q.q, opts: q.opts.map(o => {
+              const sel = pick === o.l, right = shown && o.l === q.ans, wrong = shown && sel && o.l !== q.ans;
+              return {
+                l: o.l, t: o.t, good: !!right, bad: !!wrong,
+                bg: right ? '#EEF7F2' : wrong ? '#FBEFEE' : sel ? '#F4F4F2' : '#FFFFFF',
+                bd: right ? '#10B981' : wrong ? '#B91C1C' : sel ? '#F5B921' : '#E3E3DF',
+                lbg: sel ? '#F5B921' : '#E8E8E4', lfg: sel ? '#2B2118' : '#6E5C45',
+                pick: () => this.set(id + '.' + q.n, o.l)
+              };
+            })
+          };
+        });
+        out.push({ isQcm: true, title: b.title.replace(/^[^A-Za-zÀ-ÿ]+/, ''), items, score: shown ? good + ' / ' + b.items.length : '', check: () => this.uiSet(id + '.s', true) });
+        return;
+      }
+      if (b.k === 'vf') {
+        const shown = this.state.ui[id + '.s'];
+        let good = 0;
+        const items = b.items.map(q => {
+          const pick = this.get(id + '.' + q.n, ''), ok = pick === q.ans;
+          if (ok) good++;
+          const on = v => pick === v;
+          return {
+            n: q.n, s: q.s, ans: q.ans, expl: q.why, shown: !!shown,
+            vbg: on('VRAI') ? (shown ? (ok ? '#EEF7F2' : '#FBEFEE') : '#10B981') : '#FFFFFF',
+            vfg: on('VRAI') ? (shown ? (ok ? '#046046' : '#B91C1C') : '#FFFFFF') : '#7C6A54',
+            vbd: on('VRAI') ? (shown ? (ok ? '#10B981' : '#B91C1C') : '#10B981') : '#E3E3DF',
+            fbg: on('FAUX') ? (shown ? (ok ? '#EEF7F2' : '#FBEFEE') : '#10B981') : '#FFFFFF',
+            ffg: on('FAUX') ? (shown ? (ok ? '#046046' : '#B91C1C') : '#FFFFFF') : '#7C6A54',
+            fbd: on('FAUX') ? (shown ? (ok ? '#10B981' : '#B91C1C') : '#10B981') : '#E3E3DF',
+            rbg: ok ? '#EEF7F2' : '#F4F4F2', rbd: ok ? '#046046' : '#6B4304',
+            why: this.get(id + '.' + q.n + '.w', ''),
+            pickV: () => this.set(id + '.' + q.n, 'VRAI'),
+            pickF: () => this.set(id + '.' + q.n, 'FAUX'),
+            onWhy: e => this.set(id + '.' + q.n + '.w', e.target.value)
+          };
+        });
+        out.push({ isVf: true, title: b.title.replace(/^[^A-Za-zÀ-ÿ]+/, ''), intro: b.intro, items, score: shown ? good + ' / ' + b.items.length : '', check: () => this.uiSet(id + '.s', true) });
+        return;
+      }
+      if (b.k === 'order') {
+        const shown = this.state.ui[id + '.s'];
+        const order = this.get(id + '.o', b.items.map((_, i) => i));
+        let good = 0;
+        const items = order.map((oi, pos) => {
+          const q = b.items[oi], ok = q.ans === pos + 1;
+          if (ok) good++;
+          const move = d => {
+            const n = order.slice(), j = pos + d;
+            if (j < 0 || j >= n.length) return;
+            const t = n[pos]; n[pos] = n[j]; n[j] = t;
+            this.set(id + '.o', n);
+          };
+          return {
+            pos: pos + 1, t: q.t,
+            bg: shown ? (ok ? '#EEF7F2' : '#FBEFEE') : '#FFFFFF',
+            bd: shown ? (ok ? '#10B981' : '#B91C1C') : '#E3E3DF',
+            up: () => move(-1), down: () => move(1)
+          };
+        });
+        out.push({ isOrder: true, title: b.title.replace(/^[^A-Za-zÀ-ÿ]+/, ''), intro: b.intro, items, score: shown ? good + ' / ' + b.items.length : '', check: () => this.uiSet(id + '.s', true) });
+        return;
+      }
+      if (b.k === 'match') {
+        const shown = this.state.ui[id + '.s'];
+        let good = 0;
+        const items = b.A.map(a => {
+          const pick = this.get(id + '.' + a.n, ''), ok = pick === a.ans;
+          if (ok) good++;
+          const ansB = b.B.find(x => x.l === a.ans);
+          return {
+            n: a.n, t: a.t, shown: !!shown, good: !!(shown && ok), bad: !!(shown && !ok),
+            bd: shown ? (ok ? '#10B981' : '#B91C1C') : '#E3E3DF',
+            rbg: ok ? '#EEF7F2' : '#F4F4F2', ansL: a.ans, ansT: ansB ? ansB.t : '',
+            choices: b.B.map(x => {
+              const sel = pick === x.l;
+              return {
+                l: x.l, t: x.t,
+                bg: sel ? '#F4F4F2' : '#FFFFFF', bd: sel ? '#F5B921' : '#E3E3DF',
+                lbg: sel ? '#F5B921' : '#E8E8E4', lfg: sel ? '#2B2118' : '#6E5C45',
+                pick: () => this.set(id + '.' + a.n, x.l)
+              };
+            })
+          };
+        });
+        out.push({ isMatch: true, title: b.title.replace(/^[^A-Za-zÀ-ÿ]+/, ''), items, score: shown ? good + ' / ' + b.A.length : '', check: () => this.uiSet(id + '.s', true) });
+        if (b.after) for (const p of b.after) out.push(this.panel(p));
+        return;
+      }
+      if (b.k === 'riddle') {
+        const shown = this.state.ui[id + '.s'];
+        let good = 0;
+        const items = b.items.map(q => {
+          const val = this.get(id + '.' + q.n, '');
+          const key = norm(q.ans), mine = norm(val);
+          const ok = mine.length > 1 && (key.includes(mine) || mine.includes(key.split(' ')[0]) || key.split(' ').some(w => w.length > 3 && mine.includes(w)));
+          if (ok) good++;
+          return {
+            n: q.n, clue: q.clue, ans: q.ans, val, shown: !!shown,
+            good: !!(shown && ok), bad: !!(shown && !ok),
+            bd: shown ? (ok ? '#10B981' : '#B91C1C') : '#E3E3DF',
+            onInput: e => this.set(id + '.' + q.n, e.target.value)
+          };
+        });
+        out.push({ isRiddle: true, title: b.title.replace(/^[^A-Za-zÀ-ÿ]+/, ''), intro: b.intro, items, score: shown ? good + ' / ' + b.items.length : '', check: () => this.uiSet(id + '.s', true) });
+        return;
+      }
+      if (b.k === 'wordsearch') {
+        const found = this.get(id + '.f', []);
+        const rev = this.state.ui[id + '.r'], tap = this.state.ui[id + '.t'];
+        const paths = {};
+        for (const s of b.sols) {
+          const d = DIRS[s.dir] || [0, 1], cells = [];
+          for (let i = 0; i < s.w.length; i++) cells.push(((s.row - 1) + d[0] * i) + ':' + ((s.col - 1) + d[1] * i));
+          paths[s.w] = cells;
+        }
+        const lit = {};
+        for (const w of found) (paths[w] || []).forEach(c => { lit[c] = 1; });
+        if (rev) for (const w of Object.keys(paths)) paths[w].forEach(c => { lit[c] = lit[c] || 2; });
+        const grid = b.grid.map((row, r) => ({
+          cells: row.map((ch, c) => {
+            const key = r + ':' + c, on = lit[key], isTap = tap === key;
+            return {
+              ch, bg: on === 1 ? '#10B981' : on === 2 ? '#F5B921' : isTap ? '#0A6270' : '#FFFFFF',
+              fg: on || isTap ? '#FFFFFF' : '#3A2E22',
+              tap: () => {
+                if (!tap) { this.uiSet(id + '.t', key); return; }
+                let hit = '';
+                for (const w of Object.keys(paths)) {
+                  const p = paths[w], a = p[0], z = p[p.length - 1];
+                  if ((a === tap && z === key) || (z === tap && a === key)) hit = w;
+                }
+                const u = Object.assign({}, this.state.ui); u[id + '.t'] = '';
+                this.setState({ ui: u });
+                if (hit && !found.includes(hit)) this.set(id + '.f', found.concat([hit]));
+              }
+            };
+          })
+        }));
+        out.push({
+          isWs: true, title: b.title.replace(/^[^A-Za-zÀ-ÿ]+/, ''), hint: b.words.length + ' mots à trouver.', grid,
+          words: b.words.map(w => ({
+            t: w, bg: found.includes(w) ? '#10B981' : rev ? '#F5B921' : '#FFFFFF',
+            fg: found.includes(w) ? '#FFFFFF' : rev ? '#FFFFFF' : '#0D7A8A', deco: found.includes(w) ? 'line-through' : 'none'
+          })),
+          score: found.length + ' / ' + b.words.length, reveal: () => this.uiSet(id + '.r', true)
+        });
+        return;
+      }
+      if (b.k === 'crossword') {
+        const shown = this.state.ui[id + '.s'], rev = this.state.ui[id + '.r'];
+        let good = 0, total = 0;
+        const grid = b.sol.map((row, r) => ({
+          cells: row.map((sol, c) => {
+            if (!sol || sol === '■') return { black: true, open: false, val: '', num: '', bg: '', bd: '', onInput: () => { } };
+            total++;
+            const cid = id + '.' + r + '.' + c;
+            const val = rev ? sol : this.get(cid, ''), ok = norm(val) === norm(sol);
+            if (ok) good++;
+            const numRow = b.num[r] || [];
+            const numTxt = /^\d+$/.test((numRow[c] || '').trim()) ? numRow[c].trim() : '';
+            return {
+              black: false, open: true, val, num: numTxt,
+              bg: rev ? '#FAFAF9' : shown ? (ok ? '#EEF7F2' : '#FBEFEE') : '#FFFFFF',
+              bd: rev ? '#F5B921' : shown ? (ok ? '#10B981' : '#B91C1C') : '#E3E3DF',
+              onInput: e => this.set(cid, (e.target.value || '').toUpperCase().slice(-1))
+            };
+          })
+        }));
+        out.push({
+          isCw: true, title: b.title.replace(/^[^A-Za-zÀ-ÿ]+/, ''), grid, across: b.across, down: b.down,
+          score: shown || rev ? good + ' / ' + total : '',
+          check: () => this.uiSet(id + '.s', true), reveal: () => this.uiSet(id + '.r', true)
+        });
+        return;
+      }
+      if (b.k === 'mindmap') {
+        const branches = [];
+        b.rows.slice(1).forEach(r => {
+          [r[0], r[2]].forEach(cell => {
+            if (!cell) return;
+            const m = cell.match(/^<b>(.+?)<\/b>([\s\S]*)$/);
+            if (m) { const c = BR[branches.length % BR.length]; branches.push({ title: m[1].replace(/<[^>]+>/g, ''), html: this.rich(m[2].replace(/^<br>/, '')), bg: c[0], fg: c[1] }); }
+          });
+        });
+        const mi = MAP_IMG[page.workTitle];
+        out.push({
+          isMind: true, title: b.title.replace(/^[^A-Za-zÀ-ÿ]+/, ''), branches,
+          mapImg: !!mi, mapSrc: mi ? '/uploads/oeuvres/1c/' + mi[0] + '.webp' : '', mapCap: mi ? mi[1] : '',
+          mTitle: this.get(id + '.mt', ''), mBody: this.get(id + '.mb', ''),
+          onTitle: e => this.set(id + '.mt', e.target.value),
+          onBody: e => this.set(id + '.mb', e.target.value)
+        });
+        if (page.workTitle) {
+          const cards = this.flashcards(page.workTitle);
+          if (cards.length) {
+            const fi = this.get(id + '.fi', 0) % cards.length;
+            const flipped = this.state.ui[id + '.fl'];
+            out.push({
+              isFlash: true, title: 'Les mots de ' + page.workTitle,
+              face: flipped ? 'Définition' : 'Le mot',
+              card: flipped ? cards[fi].back : cards[fi].front,
+              count: (fi + 1) + ' / ' + cards.length,
+              flip: () => this.uiSet(id + '.fl', !flipped),
+              next: () => { this.uiSet(id + '.fl', false); this.set(id + '.fi', (fi + 1) % cards.length); },
+              prev: () => { this.uiSet(id + '.fl', false); this.set(id + '.fi', (fi - 1 + cards.length) % cards.length); }
+            });
+          }
+        }
+        return;
+      }
+    });
+    return out;
+  }
+
+  panel(b) {
+    const P = PANELS[b.type] || PANELS.mots;
+    const S = PSTYLE[P[3]] || PSTYLE.solid;
+    return {
+      isPanel: true, bg: P[0], bd: P[1], label: P[2],
+      frame: P[3] === 'flag' ? '3px solid #F5B921' : 'none',
+      iconBg: S.iconBg, iconFg: S.iconFg, iconRing: S.ring, sh: S.shadow,
+      icon: (ICONS[b.type] || ICONS.mots).map(d => ({ d })),
+      title: b.title, lines: b.body.map(t => ({ html: this.rich(t) }))
+    };
+  }
+
+  names(text, key0) {
+    const out = []; let key = key0.k, last = 0, m;
+    CHAR_RE.lastIndex = 0;
+    while ((m = CHAR_RE.exec(text))) {
+      if (m.index + m[1].length > last) out.push(text.slice(last, m.index + m[1].length));
+      out.push(React.createElement('b', { key: 'n' + key++, style: { color: CHAR_COL[m[2]], fontWeight: 700 } }, m[2]));
+      last = m.index + m[0].length;
+    }
+    key0.k = key;
+    if (last < text.length) out.push(text.slice(last));
+    return out.length ? out : [text];
+  }
+
+  speech(text, ctr) {
+    if (text.indexOf('\u00ab') < 0) return this.names(text, ctr);
+    const out = []; const re = /\u00ab([^\u00bb]{2,})\u00bb/g; let last = 0, m;
+    while ((m = re.exec(text))) {
+      if (m.index > last) for (const k of this.names(text.slice(last, m.index), ctr)) out.push(k);
+      out.push(React.createElement('span', {
+        key: 's' + ctr.k++,
+        style: { display: 'inline', padding: '1px 6px', margin: '0 1px', borderRadius: '8px', background: '#F4F4F2', color: '#4A3A18', fontStyle: 'normal', fontWeight: 500, boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }
+      }, ['\u00ab\u202f', ...this.names(m[1].trim(), ctr), '\u202f\u00bb']));
+      last = m.index + m[0].length;
+    }
+    if (last < text.length) for (const k of this.names(text.slice(last), ctr)) out.push(k);
+    return out;
+  }
+
+  plain(html) {
+    return String(html || '')
+      .replace(/[\u{1F300}-\u{1FAFF}\u{1F000}-\u{1F2FF}\u2600-\u27BF\uFE0F\u2B00-\u2BFF]/gu, '')
+      .replace(/<[^>]+>/g, '').trim();
+  }
+
+  rich(html) {
+    const src = String(html || '')
+      .replace(/[\u{1F300}-\u{1FAFF}\u{1F000}-\u{1F2FF}\u2600-\u27BF\uFE0F\u2B00-\u2BFF]/gu, '')
+      .replace(/^\s*\/\s*/, '').replace(/\s{2,}/g, ' ');
+    const nodes = []; const ctr = { k: 0 }; let last = 0, open = null, inner = '', m;
+    const re = /<(b|i|sup)>|<\/(b|i|sup)>|<br\s*\/?>/g;
+    const push = (t, tag) => {
+      if (!t) return;
+      const kids = tag === 'sup' ? [t] : this.speech(t, ctr);
+      if (tag) nodes.push(React.createElement(tag, { key: 't' + ctr.k++ }, kids));
+      else for (const kid of kids) nodes.push(kid);
+    };
+    while ((m = re.exec(src))) {
+      const seg = src.slice(last, m.index);
+      if (open) inner += seg; else push(seg, null);
+      last = m.index + m[0].length;
+      if (/^<br/.test(m[0])) nodes.push(React.createElement('br', { key: 'b' + ctr.k++ }));
+      else if (m[1]) { open = m[1] === 'b' ? 'strong' : m[1] === 'i' ? 'em' : 'sup'; inner = ''; }
+      else if (m[2]) { push(inner, open); open = null; inner = ''; }
+    }
+    if (open) push(inner, open); else push(src.slice(last), null);
+    return React.createElement(React.Fragment, null, nodes);
+  }
+
+  lineBox(id, n) {
+    return { isLines: true, val: this.get(id, ''), rows: Math.max(2, Math.min(8, n || 2)), onInput: e => this.set(id, e.target.value) };
+  }
+
+  renderVals() {
+    const S = this.state, sess = S.sess;
+    const pgs = this.pages(), nPages = pgs.length;
+    const pi = Math.min(S.pi, Math.max(0, nPages - 1));
+    const page = pgs[pi] || { kicker: '', title: 'Chargement…', sub: '', accent: '#F5B921', blocks: [], id: 'x', partId: 'x', workTitle: '' };
+    const isTeacher = !!sess && sess.role === 'teacher';
+    const cover = CHAP_IMG[page.id] || null;
+
+    const toc = [];
+    if (S.doc) {
+      let lastPart = '';
+      pgs.forEach((p, i) => {
+        if (p.partId !== lastPart) {
+          lastPart = p.partId;
+          toc.push({ isHead: true, isItem: false, kicker: p.workN ? 'Œuvre ' + p.workN : 'Section', title: p.workTitle || p.title, accent: p.accent, num: '', locked: false, go: () => { } });
+        }
+        if (p.chapN || !p.workN) {
+          toc.push({
+            isHead: false, isItem: true, title: p.title, accent: p.accent, num: p.chapN || '•',
+            locked: p.partId === 'corriges', bg: i === pi ? '#FAFAF9' : '#FFFFFF',
+            bd: i === pi ? p.accent : '#E8E8E4', kicker: '',
+            go: () => { this.setState({ pi: i, drawer: false }); window.scrollTo(0, 0); }
+          });
+        }
+      });
+    }
+
+    const answered = Object.keys(S.ans).filter(k => { const v = S.ans[k]; return typeof v === 'string' ? v.trim().length > 0 : Array.isArray(v) ? v.length > 0 : v !== undefined; }).length;
+    const pct = Math.min(100, Math.round(answered / 4.6));
+    const mm = Math.floor(S.tLeft / 60), ss = S.tLeft % 60, pad = n => (n < 10 ? '0' : '') + n;
+
+    return {
+      showGate: !sess, showBook: !!sess,
+      code: S.code, name: sess ? sess.name : S.name, classe: sess ? sess.classe : S.classe, gateErr: S.gateErr,
+      onCode: e => this.setState({ code: e.target.value, gateErr: '' }),
+      onName: e => this.setState({ name: e.target.value, gateErr: '' }),
+      onClasse: e => this.setState({ classe: e.target.value }),
+      onUnlock: () => this.unlock(S.code),
+      onDemo: () => { this.chargerExtrait(); },
+      onDemoT: () => { if (window.VRTLivret) window.VRTLivret.config({ classe: SLUG, kind: 'livret' }).acheter(); else location.href = '/livrets/' + SLUG + '.html'; },
+      onLock: () => { try { localStorage.removeItem(LS + 'sess'); } catch (e) { /* rien */ } this.setState({ sess: null, code: '', drawer: false }); },
+
+      markText: sess ? (sess.name + ' · ' + sess.code + '   ').repeat(3) : '',
+      accent: page.accent, ink: '#6B4304', pageKicker: page.kicker, pageTitle: page.title, pageSub: page.sub,
+      hasCover: !!cover, coverSrc: cover ? '/uploads/oeuvres/1c/' + cover[0] + '.webp' : '', coverAlt: cover ? cover[1] : '',
+      view: S.doc ? this.decorate(page.blocks, page) : [],
+      toc, drawer: S.drawer, toggleDrawer: () => this.setState({ drawer: !S.drawer }), closeDrawer: () => this.setState({ drawer: false }),
+      progPct: pct + '%', progDeg: (pct * 3.6) + 'deg',
+
+      tOpen: S.tOpen, toggleTimer: () => this.setState({ tOpen: !S.tOpen }),
+      timerLabel: S.tLeft > 0 ? pad(mm) + ':' + pad(ss) : 'Minuteur',
+      timerBig: pad(mm) + ':' + pad(ss),
+      timerBtn: S.tRun ? 'Pause' : 'Démarrer',
+      timerToggle: () => this.setState({ tRun: !S.tRun }),
+      timerReset: () => this.setState({ tLeft: 0, tRun: false }),
+      timerPresets: [{ label: '45 min', go: () => this.setState({ tLeft: 2700, tRun: true }) }, { label: '1 h', go: () => this.setState({ tLeft: 3600, tRun: true }) }, { label: '2 h', go: () => this.setState({ tLeft: 7200, tRun: true }) }],
+
+      isTeacher, classCode: sess ? 'C6-' + sess.code.slice(3, 7) : '',
+      teacherStats: [{ v: nPages, k: 'pages du cahier' }, { v: answered, k: 'réponses saisies' }, { v: '3', k: 'œuvres suivies' }],
+
+      goPrev: () => { this.setState({ pi: Math.max(0, pi - 1) }); window.scrollTo(0, 0); },
+      goNext: () => { this.setState({ pi: Math.min(nPages - 1, pi + 1) }); window.scrollTo(0, 0); },
+      prevLabel: pi > 0 ? 'Précédent' : 'Début',
+      nextLabel: pi < nPages - 1 ? 'Suivant' : 'Fin',
+
+      shareMsg: S.shareMsg,
+      onExport: () => {
+        try {
+          const data = JSON.stringify({ eleve: sess.name, classe: sess.classe, code: sess.code, reponses: S.ans }, null, 2);
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+          a.download = 'reponses-' + norm(sess.name).replace(/ /g, '-') + '.json';
+          a.click();
+          this.setState({ shareMsg: 'Fichier de réponses téléchargé. Tu peux l\u2019envoyer par WhatsApp à ton enseignant.' });
+        } catch (e) { this.setState({ shareMsg: 'Export impossible sur cet appareil.' }); }
+      },
+      codeShort: (window.VRTLivret && window.VRTLivret.etat().ouvert) ? 'vérifié' : '—',
+      expLabel: expLabel()
+    };
+  }
+}
+
+</script>
+</body>
+</html>

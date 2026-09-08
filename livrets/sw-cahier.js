@@ -54,7 +54,20 @@
    non. Mesuré pendant la mise au point : le fichier sur le disque portait un
    extrait corrigé, le navigateur en servait un autre, plus vieux et de taille
    différente — et rien ne le disait. */
-const CACHE = 'vrt-cahier-v1.20.20';
+/* v1.20.21 — `support-oi.js` et les quatre coquilles `cahier-oeuvres-*.html`
+   entrent dans `/livrets/` (08/09/2026). Elles ne sont PAS pré-chargées : 67 Ko
+   de moteur plus 110 Ko par cahier, pour un ouvrage que tout le monde n'achète
+   pas. Elles seront gardées après la première visite, comme le reste du
+   dossier, servi cache d'abord.
+
+   ⚠️ CE NUMÉRO N'EST PAS CE QUI FAIT ARRIVER UN CORRECTIF. Les trois notes
+   ci-dessus laissent croire qu'il faut penser à le lever à chaque changement
+   de `/livrets/` — ce n'était vrai qu'avant : depuis, `deploy.yml` réécrit
+   cette ligne avec la version du site à chaque déploiement (« Service worker
+   des cahiers aligné »). L'oublier ici ne fige donc rien chez personne, et le
+   lever à la main ne suffirait pas si la CI ne passait pas. On le tient à jour
+   pour que le dépôt dise la même chose que la production, pas pour purger. */
+const CACHE = 'vrt-cahier-v1.20.21';
 
 const COQUILLE = [
   '/livrets/cahier.html',
