@@ -100,15 +100,34 @@ const extraits = fs.readdirSync(path.join(RACINE, 'livrets'))
   .filter((f) => /^extrait-.*\.js$/.test(f));
 dit(extraits.length > 0, `${extraits.length} extraits gratuits trouvés`);
 
+/* ⚠️ « LE FORMAT VIVANT » N'EST PAS LE MÊME POUR TOUS LES CAHIERS.
+   Ce contrôle exigeait `CAHIER_BLOCS` de TOUS les extraits — juste tant qu'un
+   seul moteur rendait tous les ouvrages. Depuis le 08/09/2026, les quatre
+   cahiers d'œuvres du 1er cycle apportent le leur (`support-oi.js`) et posent
+   `OI_DOC` : leurs mots croisés, mots mêlés et cartes mentales n'existent dans
+   aucun autre cahier du site, et `cahier.js` ne saurait pas les dessiner.
+
+   La question juste n'est donc pas « quel nom ? » mais « CE nom est-il celui
+   que la page qui lira ce fichier attend ? ». Le catalogue tranche, par
+   `mode` — la même source que `vrt_livret_etat()` et `pages_ouvrages.py`.
+   Un extrait qui poserait `CAHIER_BLOCS` pour un cahier autonome serait
+   chargé sans erreur et n'afficherait rien : la panne la plus muette qui
+   soit, sur la seule page de ces cahiers qui n'exige aucun code. */
+const catalogue = JSON.parse(lire(path.join(RACINE, 'api', 'data',
+  'livrets_catalogue.json')) || '{}').ouvrages || {};
+const AUTONOME = 'OI_DOC';
+
 const malFormes = [];
 for (const f of extraits) {
+  const slug = f.replace(/^extrait-/, '').replace(/\.js$/, '');
+  const attendu = ((catalogue[slug] || {}).mode === 'autonome') ? AUTONOME : VIVANT;
   const tete = lire(path.join(RACINE, 'livrets', f)).slice(0, 400);
   const m = /^[\s﻿]*window\.([A-Za-z_$][A-Za-z0-9_$]*)\s*=/.exec(tete);
   const nom = m ? m[1] : '(aucune)';
-  if (nom !== VIVANT) malFormes.push(f + ' pose ' + nom);
+  if (nom !== attendu) malFormes.push(`${f} pose ${nom}, sa page lit ${attendu}`);
 }
 dit(malFormes.length === 0,
-    `tous posent window.${VIVANT}`,
+    'chacun pose la globale que sa page lit',
     malFormes.join(' | '));
 
 // ── ③ Les pages autonomes sont d'accord avec leurs propres données ───────────

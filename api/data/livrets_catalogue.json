@@ -283,6 +283,58 @@
       "mode": "interactif",
       "pages": 0,
       "pagesLibres": 0
+    },
+    "oeuvres-6e": {
+      "titre": "Étude des œuvres intégrales — 6ᵉ",
+      "niveau": "6e",
+      "mode": "autonome",
+      "kinds": [
+        "livret",
+        "guide"
+      ],
+      "prix": 1000,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0
+    },
+    "oeuvres-5e": {
+      "titre": "Étude des œuvres intégrales — 5ᵉ",
+      "niveau": "5e",
+      "mode": "autonome",
+      "kinds": [
+        "livret",
+        "guide"
+      ],
+      "prix": 1000,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0
+    },
+    "oeuvres-4e": {
+      "titre": "Étude des œuvres intégrales — 4ᵉ",
+      "niveau": "4e",
+      "mode": "autonome",
+      "kinds": [
+        "livret",
+        "guide"
+      ],
+      "prix": 1000,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0
+    },
+    "oeuvres-3e": {
+      "titre": "Étude des œuvres intégrales — 3ᵉ",
+      "niveau": "3e",
+      "mode": "autonome",
+      "kinds": [
+        "livret",
+        "guide"
+      ],
+      "prix": 1000,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0
     }
   }
 }

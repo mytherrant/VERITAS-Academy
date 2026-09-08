@@ -54,7 +54,7 @@ console.log(`${G}① Aucun cahier du catalogue n'est sans page${R}`);
 
 /* ── ② à ④ Chaque page, une par une ─────────────────────────────────────── */
 const pages = slugs
-  .map(s => ({ slug: s, p: path.join(RACINE, 'livrets', s + '.html') }))
+  .map(s => ({ slug: s, o: catalogue[s] || {}, p: path.join(RACINE, 'livrets', s + '.html') }))
   .filter(x => fs.existsSync(x.p))
   .map(x => Object.assign(x, { t: fs.readFileSync(x.p, 'utf8') }));
 
@@ -202,8 +202,21 @@ console.log(`\n${G}⑦ Depuis chaque page, on peut acheter${R}`);
     const href = m ? (m[0].match(/href="([^"]*)"/) || [])[1] || '' : null;
     if (href === null) { sansTunnel.push(x.slug + ' : aucun bouton d’achat'); continue; }
     if (rondsPoints.test(href.trim())) bouclent.push(x.slug + ' → ' + href);
-    // Le repli sans JavaScript doit rester une surface qui vend.
-    if (href.indexOf('cahier.html?o=' + x.slug) < 0) sansRepli.push(x.slug + ' → ' + href);
+    /* Le repli sans JavaScript doit rester une surface qui vend.
+
+       ⚠️ ET « LE LECTEUR » N'EST PAS LE MÊME POUR TOUS LES OUVRAGES. Ce
+       contrôle exigeait `cahier.html?o=<slug>` — le moteur générique, qui lit
+       `window.CAHIER_BLOCS`. Les quatre cahiers d'œuvres du 1er cycle
+       (08/09/2026) apportent le leur : mots croisés, mots mêlés, cartes
+       mentales et appariements n'existent dans aucun autre cahier du site, et
+       `cahier.html` afficherait « contenu pas encore déposé » sur un ouvrage
+       complet. Leur porte est `cahier-<slug>.html`, et c'est le catalogue qui
+       le dit, par `mode: autonome` — la même source que `vrt_livret_etat()` et
+       que `pages_ouvrages.py`. On la lui demande au lieu de présumer. */
+    const porte = (x.o && x.o.mode === 'autonome')
+      ? 'cahier-' + x.slug + '.html'
+      : 'cahier.html?o=' + x.slug;
+    if (href.indexOf(porte) < 0) sansRepli.push(x.slug + ' → ' + href);
     // Et avec JavaScript, le tunnel s'ouvre sur place : même gate.js que les
     // coquilles complètes, donc un seul tunnel à maintenir.
     if (x.t.indexOf('livrets/gate.js') < 0 || !/VRTLivret[\s\S]{0,400}\.acheter\(/.test(x.t)) {
