@@ -489,6 +489,20 @@ jobs:
       - name: 🖼️ Les couvertures déposées sont-elles utilisées ?
         run: node tests/banc_couvertures.cjs
 
+      # ── 🏷️ ET LA CARTE MONTRE-T-ELLE CETTE COUVERTURE, UNE SEULE FOIS ?
+      #    Le banc ci-dessus vérifie que la couverture existe et sert. Il ne
+      #    regarde pas la VIGNETTE — or c'est elle, et elle seule, que la
+      #    grille demande (`livret_<slug>_v.jpg`) ; absente, `img.onerror`
+      #    retire l'image sans un mot. Les neuf cahiers d'oeuvre du 2nd cycle
+      #    s'affichaient nus depuis leur mise en vente du 06/09.
+      #    Il vérifie aussi que le relevé des cartes porte sur les TROIS
+      #    grilles de la page : cantonné à la première, il en ajoutait un
+      #    second exemplaire — 41 cartes pour 28 destinations, mesuré en
+      #    production le 08/09. Éprouvé par mutation (vignette retirée : 1 au
+      #    rouge).
+      - name: 🏷️ Chaque carte montre son ouvrage, et une seule fois ?
+        run: node tests/banc_vignettes_boutique.cjs
+
       # ── 🛒 UNE SEULE DEVANTURE, UN SEUL FLUX. Le centre vendait à deux
       #    endroits : les manuels par DB.books et la boutique de l'accueil, les
       #    quinze cahiers interactifs par livrets_catalogue.json et une page à

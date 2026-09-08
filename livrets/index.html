@@ -684,10 +684,29 @@
 
   // Ce qui est DÉJÀ montré, déduit des liens en place : aucune liste à tenir
   // à jour en double, donc rien à oublier.
+  /* ⚠️ LA PAGE A TROIS GRILLES, ET CE RELEVÉ N'EN LISAIT QU'UNE.
+     `grille` est `document.querySelector('.grid')` — la PREMIÈRE. Les cartes
+     des deux autres (les neuf cahiers d'œuvre du 2ⁿᵈ cycle, les quatre du
+     collège) n'entraient donc jamais dans `deja`, et le script les prenait
+     pour des ouvrages absents de la page : il en ajoutait une SECONDE carte
+     dans la première grille.
+
+     Mesuré en production le 08/09/2026 : 41 cartes pour 28 destinations —
+     TREIZE ouvrages affichés deux fois, et aucun des deux exemplaires avec sa
+     couverture, puisque `carteDe()` ne retrouvait pas davantage l'original.
+     Un visiteur voyait « Tartuffe » à deux endroits, sans visuel ni l'un ni
+     l'autre, à l'endroit précis où l'on choisit ce qu'on achète.
+
+     On relève donc sur TOUTE la page. Ce qui suit — poser la couverture,
+     corriger le prix, le libellé et le lien — s'applique dès lors aux
+     vingt-cinq cartes écrites à la main, pas aux sept de la première grille. */
+  var toutesGrilles = document.querySelectorAll('.grid');
   var deja = {};
-  grille.querySelectorAll('a[href$=".html"]').forEach(function (a) {
-    var f = (a.getAttribute('href') || '').replace(/^.*\//, '').replace(/\.html$/, '');
-    if (f) deja[f.toLowerCase()] = 1;
+  toutesGrilles.forEach(function (g) {
+    g.querySelectorAll('a[href$=".html"]').forEach(function (a) {
+      var f = (a.getAttribute('href') || '').replace(/^.*\//, '').replace(/\.html$/, '');
+      if (f) deja[f.toLowerCase()] = 1;
+    });
   });
 
   var ico = function (n) {
@@ -738,9 +757,14 @@
      les plus vendus seraient les SEULS sans visuel — précisément l'inverse de
      ce qu'on veut. Le rapprochement se fait par le lien, déjà indexé plus haut. */
   var carteDe = function (slug) {
-    var c = grille.querySelector('.card[data-slug="' + slug + '"]');
+    /* Même correction que pour `deja` : on cherche dans les trois grilles.
+       Cantonnée à la première, cette fonction rendait `null` pour les treize
+       ouvrages des autres — et `poserCouverture(null, o)` sort sans rien
+       faire, sans erreur et sans trace. La couverture manquait, le prix ne
+       se corrigeait plus, et rien ne le disait. */
+    var c = document.querySelector('.grid .card[data-slug="' + slug + '"]');
     if (c) return c;
-    var a = grille.querySelector('a[href="' + slug + '.html"]');
+    var a = document.querySelector('.grid a[href="' + slug + '.html"]');
     return a ? a.closest('.card') : null;
   };
 
