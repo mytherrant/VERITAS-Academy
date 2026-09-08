@@ -57,12 +57,29 @@
 <footer class="bot">© <span id="y"></span> Centre VÉRITAS · Mythe Errant — Douala, Cameroun ·
   <a href="https://veritas-school.com/livrets/">Les livrets en ligne</a></footer>
 
-<script src="/livrets/gate.js?v=29598ca7"></script>
+<!-- ⚠️ LE JETON DE CACHE EST NUMÉRIQUE, SINON LA CI LE MUTILE.
+     L'étape « Aligner les cache-busters » de deploy.yml ne reconnaît qu'un
+     jeton fait de chiffres et de points. Ces deux lignes en portaient un
+     hexadécimal — 29598ca7 pour gate.js, 0c06e8ee pour collab.js — et le
+     remplacement n'en mangeait que la tête : la production servait
+     « 1.20.19.424924ca7 » et « 1.20.19.424924c06e8ee », la queue de l'ancienne
+     empreinte collée derrière la version du site. Mesuré sur
+     veritas-school.com le 08/09/2026, ici et dans livrets/prof.html.
+     Tant que le jeton commence par un chiffre, rien ne plante. Qu'il commence
+     par une lettre — c6d93301, comme dans plateforme/index.html — et le motif
+     ne mord plus du tout : l'URL ne change plus d'un déploiement à l'autre,
+     alors que .htaccess sert ces fichiers « immutable, un an ». Le correctif
+     serait sur le serveur sans exister pour personne, et sans un mot : le
+     contrôle « asset sans cache-buster » n'attrape que les URLs qui n'ont
+     AUCUN jeton, pas celles dont le jeton est figé.
+     On écrit donc la version du site, comme partout ailleurs ; la CI la
+     réaligne ensuite sur l'empreinte du contenu réellement téléversé. -->
+<script src="/livrets/gate.js?v=1.20.20"></script>
 <!-- Même règle de clé que le cahier de l'élève : sans elle, l'exercice que
      l'enseignant a désigné ne se retrouve pas ici, et le devoir s'affiche sans
      son énoncé. Voir `refResoudre()` dans collab.js. -->
 <script src="/livrets/cahier.js?v=1.20.16"></script>
-<script src="/livrets/collab.js?v=0c06e8ee"></script>
+<script src="/livrets/collab.js?v=1.20.20"></script>
 <script>
 (function(){
   'use strict';

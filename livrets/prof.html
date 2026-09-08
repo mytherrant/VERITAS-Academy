@@ -56,13 +56,17 @@
 </div>
 <footer class="bot">© <span id="y"></span> Centre VÉRITAS · Mythe Errant — Douala, Cameroun</footer>
 
-<script src="/livrets/gate.js?v=29598ca7"></script>
+<!-- ⚠️ Jeton NUMÉRIQUE, jamais hexadécimal : l'alignement des
+     cache-busters de la CI ne reconnaît que chiffres et points, et mutile le
+     reste — gate.js était servi « 1.20.19.424924ca7 » en production le
+     08/09/2026. L'explication complète est en tête des scripts de d/index.html. -->
+<script src="/livrets/gate.js?v=1.20.20"></script>
 <!-- Le moteur du cahier, pour sa SEULE règle de clé (`VRTCahierCles`) : c'est
      elle qui nomme un exercice, et c'est sous ce nom-là que l'élève range sa
      réponse. En écrire une seconde ici ferait deux vérités, et un devoir qui
      désigne un exercice que le cahier de l'élève ne reconnaît pas. -->
 <script src="/livrets/cahier.js?v=1.20.20"></script>
-<script src="/livrets/collab.js?v=0c06e8ee"></script>
+<script src="/livrets/collab.js?v=1.20.20"></script>
 <script>
 (function(){
   'use strict';
