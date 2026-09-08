@@ -223,7 +223,7 @@ if (!defined('VRT_LIVRET_LIB')) {
      * existait. Deux endroits qui dérivent la même chose finissent toujours
      * par diverger ; il n'y en a plus qu'un.
      *
-     * @return array{disponible:bool,lien:string,couverture:string}
+     * @return array{disponible:bool,lien:string,porte:string,mode:string,couverture:string}
      */
     function vrt_livret_etat(string $slug): array {
         $racine  = dirname(__DIR__) . '/livrets/';
@@ -248,7 +248,39 @@ if (!defined('VRT_LIVRET_LIB')) {
            dossier d'images `<slug>/p001.jpg`, servi page par page. C'est ce que
            lit `livret.php?action=page` ; on constate donc la même chose. */
         $pages    = is_file($dirDon . '/' . $slug . '/p001.jpg');
+        /* ── LE MODE DÉCLARÉ DIT LAQUELLE DES DEUX FORMES FAIT FOI ───────────
+           `disponible` valait `$donnees || $pages` : n'importe laquelle des
+           deux formes suffisait. C'est un OU sur deux produits DIFFÉRENTS, et
+           un ouvrage peut très bien porter la forme que sa porte ne sait pas
+           lire.
+
+           C'est arrivé, et ça s'est vu jusque chez le client. « bord-6e » était
+           déclaré `mode: lecture` au catalogue ; sa page, `livrets/bord-6e.html`,
+           appelait donc le liseur, qui réclame `bord-6e/p001.jpg`. Or la passe
+           de normalisation avait entre-temps produit et déposé son
+           `booklet-bord-6e.js` — la forme INTERACTIVE. Ce OU a vu le `.js`, a
+           répondu « disponible », la boutique a mis la carte en vente, et le
+           liseur a reçu 409 sur la première page de l'aperçu GRATUIT : écran
+           noir avant même le mur de paiement. Un client l'a signalé le
+           08/09/2026 — « je n'arrive pas à acheter le bord de 6e, ça ne charge
+           pas ». Payable, et illisible.
+
+           La question n'est donc pas « une forme est-elle là ? » mais « LA
+           forme qu'annonce la fiche est-elle là ? ». Un cahier interactif se
+           livre par ses données, un feuilletage par ses images ; ce qui manque
+           ferme l'ouvrage, quelle que soit l'autre forme présente.
+
+           Le catalogue reste la seule autorité sur le mode : c'est lui que lit
+           `livret.php` pour router, et c'est de lui que `pages_ouvrages.py`
+           déduit la page à écrire. Mode inconnu ⇒ `interactif`, comme partout
+           ailleurs (voir vrt_livret_catalogue). */
+        $cat  = vrt_livret_catalogue();
+        $mode = ((string) ($cat[$slug]['mode'] ?? 'interactif')) === 'lecture'
+              ? 'lecture' : 'interactif';
+        $livrable = ($mode === 'lecture') ? $pages : $donnees;
+
         return [
+            'mode' => $mode,
             /* ⚠️ « DISPONIBLE » VEUT DIRE LIVRABLE, PAS « A UNE PAGE ».
                Ce calcul valait `$coquille || $donnees`, et le premier terme
                signifiait alors « une page-LECTEUR existe pour cet ouvrage » —
@@ -267,10 +299,26 @@ if (!defined('VRT_LIVRET_LIB')) {
                LIVRER ? Pour un cahier interactif, `booklet-<slug>.js` ;
                pour un feuilletage, le dossier de pages. Une page de vente
                n'est pas une livraison, et ne compte plus. */
-            'disponible' => ($donnees || $pages),
+            'disponible' => $livrable,
             // Le serveur le dit, parce que lui seul sait laquelle des deux
             // formes existe. Une page dédiée présente mieux qu'un lecteur nu.
             'lien' => $coquille
+                    ? ($slug . '.html')
+                    : ('cahier.html?o=' . rawurlencode($slug)),
+            /* ── LA VITRINE ET LA PORTE NE SONT PAS LE MÊME LIEN ─────────────
+               `lien` ci-dessus mène où l'on PRÉSENTE l'ouvrage : depuis les
+               pages d'atterrissage du 31/08/2026, `<slug>.html` est une page
+               de vente pour la plus grande part du catalogue. C'est ce qu'il
+               faut à la boutique — et surtout pas à quelqu'un qui vient de
+               payer : on lui redemanderait 1 500 F.
+
+               `porte` mène où l'on OUVRE. Elle dépend du mode, et d'elle
+               seule : le moteur générique pour un cahier qu'on remplit, la
+               coquille du liseur pour un ouvrage qu'on feuillette — `cahier.html`
+               ne sait pas afficher des images de pages, et l'acheteur d'un
+               feuilletage y verrait « contenu pas encore déposé ».
+               C'est ce que `vrt_notify_lien()` envoie par SMS et par courriel. */
+            'porte' => ($mode === 'lecture' && $coquille)
                     ? ($slug . '.html')
                     : ('cahier.html?o=' . rawurlencode($slug)),
             'couverture' => is_file($dirCouv . 'livret_' . $slug . '.jpg')

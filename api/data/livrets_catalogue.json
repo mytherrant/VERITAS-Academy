@@ -104,14 +104,14 @@
     "bord-6e": {
       "titre": "Bord — Cahier de français 6ᵉ",
       "niveau": "6e",
-      "mode": "lecture",
+      "mode": "interactif",
       "kinds": [
         "livret"
       ],
       "prix": 1500,
       "prixGuide": 0,
-      "pages": 135,
-      "pagesLibres": 8
+      "pages": 0,
+      "pagesLibres": 0
     },
     "bord-5e": {
       "titre": "Bord — Cahier de français 5ᵉ",

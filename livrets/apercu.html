@@ -126,20 +126,71 @@
   var params = new URLSearchParams(location.search);
   var slug = (params.get('o') || '6e').toLowerCase().replace(/[^a-z0-9_-]/g, '');
 
-  // Les onglets de classe. Un aperçu d'une seule classe fait partir les six
-  // autres : le visiteur ne cherche pas « un cahier », il cherche LE sien.
-  var nav = $('choix');
-  CLASSES.forEach(function (c) {
-    var a = document.createElement('a');
-    a.href = 'apercu.html?o=' + encodeURIComponent(c[0]);
-    a.textContent = c[1];
-    if (c[0] === slug) a.setAttribute('aria-current', 'page');
-    nav.appendChild(a);
-  });
+  // Les sept classes sont les LIVRETS d'activités. Les Bords et les cahiers
+  // d'œuvre ont leur propre aperçu et ne se rangent pas dans cette rangée.
+  var estLivret = CLASSES.some(function (c) { return c[0] === slug; });
 
+  /* ── LES ONGLETS NE S'AFFICHENT QUE POUR LA COLLECTION QU'ILS DÉCRIVENT ────
+     Ils étaient posés pour tout le monde. Sur l'aperçu du Bord de 6ᵉ ou du
+     cahier de Tartuffe — dix-sept ouvrages sur vingt-quatre — aucun n'était
+     marqué courant, et cliquer « 5ᵉ » emmenait le visiteur sur le LIVRET de 5ᵉ,
+     un autre produit, sans qu'il ait rien demandé. Une rangée qui ne contient
+     pas la page où l'on est ne sert pas à s'orienter : elle fait sortir. */
+  var nav = $('choix');
+  if (estLivret) {
+    CLASSES.forEach(function (c) {
+      var a = document.createElement('a');
+      a.href = 'apercu.html?o=' + encodeURIComponent(c[0]);
+      a.textContent = c[1];
+      if (c[0] === slug) a.setAttribute('aria-current', 'page');
+      nav.appendChild(a);
+    });
+  } else {
+    nav.hidden = true;
+  }
+
+  /* ── LE TITRE, ET OÙ MÈNENT LES DEUX BOUTONS D'ACHAT ──────────────────────
+     ① Le titre se composait de la table `CLASSES` seule, avec le slug pour
+        repli. Les dix-sept ouvrages qui n'y sont pas s'annonçaient donc par
+        leur identifiant technique : « Aperçu gratuit — cahier de bord-6e »,
+        « … de oeuvre-tartuffe ». C'est la première ligne que lit quelqu'un à
+        qui l'on demandera 1 500 F trois écrans plus loin.
+     ② Les deux boutons — celui de la barre et celui du bas, qu'on atteint
+        après avoir lu les deux leçons — pointaient sur `/livrets/#<slug>` et
+        sur `/livrets/`. Aucune ancre `id="<slug>"` n'existe dans la boutique :
+        le premier ne bougeait donc pas d'un pixel du haut de page, et le
+        second n'a jamais porté le slug. Le visiteur le plus décidé du parcours
+        retombait sur une grille de vingt-et-une cartes, à chercher la sienne.
+        Les vingt-quatre pages de vente existent (banc_boutique_unifiee les
+        compte) et chacune ouvre le tunnel de paiement sur place : c'est là
+        qu'il faut mener.
+     Le titre exact vient du serveur — `action=ouvrage` est publique et ne livre
+     aucun contenu, c'est la même source que `gate.js` interroge pour ne pas
+     annoncer un slug sur l'écran de paiement. Le repli reste la table locale :
+     un titre approximatif vaut mieux qu'une page qui attend le réseau. */
   var nom = (CLASSES.filter(function (c) { return c[0] === slug; })[0] || [slug, slug])[1];
   $('titre').textContent = 'Aperçu gratuit — cahier de ' + nom;
-  $('btnAchat').href = '/livrets/#' + slug;
+
+  var venteHref = slug + '.html';
+  $('btnAchat').href = venteHref;
+  var btnFin = document.querySelector('.fin a');
+  if (btnFin) btnFin.href = venteHref;
+
+  if (!estLivret) {
+    fetch('/api/livret.php', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'ouvrage', o: slug })
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        var t = j && j.ouvrage && j.ouvrage.titre;
+        if (t) {
+          $('titre').textContent = 'Aperçu gratuit — ' + t;
+          document.title = 'Aperçu gratuit — ' + t + ' · Centre VÉRITAS';
+        }
+      })
+      .catch(function () { /* le repli est déjà en place */ });
+  }
 
   var s = document.createElement('script');
   s.src = 'extrait-' + slug + '.js?v=1.20.20';

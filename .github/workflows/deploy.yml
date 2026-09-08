@@ -701,6 +701,22 @@ jobs:
             exit 1
           fi
 
+      # ── 📖 LA FORME LIVRÉE SUIT-ELLE LE MODE DÉCLARÉ ?
+      #    Le banc ci-dessus vérifie qu'un ouvrage a un prix et une porte. Il ne
+      #    regarde pas si la porte sait lire ce qui est déposé derrière elle.
+      #    « bord-6e » était déclaré feuilleté et livré interactif : vendu
+      #    1 500 F, écran noir dès la première page de l'aperçu gratuit, et
+      #    aucun contrôle pour le dire. Celui-ci fournit son propre catalogue et
+      #    son propre dépôt — il éprouve la RÈGLE, pas l'état de la machine.
+      - name: 📖 La forme livrée suit-elle le mode déclaré ?
+        run: |
+          if command -v php >/dev/null 2>&1; then
+            php tests/banc_mode_ouvrage.php
+          else
+            echo "::error title=PHP introuvable::Le banc des modes n'a pas pu tourner. Déploiement ANNULÉ."
+            exit 1
+          fi
+
       # ── 🛡️ Le bouclier anti-robots garde MAINTENANT toutes les surfaces
       #    publiques, y compris les payantes. Une régression y est invisible
       #    dans les deux sens : soit les portes s'ouvrent, soit les élèves

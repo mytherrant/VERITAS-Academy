@@ -415,9 +415,9 @@
       <a class="note" href="apercu.html?o=est-tle" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
     </div>
     <div class="card cardlv" data-slug="bord-6e"><h3>Le Bord — 6ᵉ</h3>
-      <p class="note">Le cahier complet, à feuilleter page par page — leçons, textes d'auteur et corrigés modèles.</p>
+      <p class="note">Le cahier complet : leçons, textes d'auteur, exercices et corrigés modèles.</p>
       <div class="duo">
-        <a class="dl" href="bord-6e.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-book-open"/></svg>Feuilleter l'ouvrage</span><span class="pill prix">1 500 F</span></a>
+        <a class="dl" href="bord-6e.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
       </div>
       <a class="note" href="apercu.html?o=bord-6e" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
     </div>
@@ -749,6 +749,20 @@
     var pastille = lien.querySelector('.prix');
     if (pastille && prix && pastille.textContent !== prixTexte(prix)) {
       pastille.textContent = prixTexte(prix);
+    }
+    /* ── ET LE LIBELLÉ SUIT LE MODE, comme le href et le prix ────────────────
+       Les cartes ajoutées par ce même script disent déjà « Feuilleter
+       l'ouvrage » ou « Ouvrir le livret » selon `o.mode`. Les vingt-et-une
+       cartes écrites en dur, elles, portent le libellé du jour où on les a
+       tapées — et un ouvrage change de mode le jour où l'on refait son
+       contenu. « bord-6e » a promis « Feuilleter l'ouvrage » longtemps après
+       être devenu un cahier qu'on remplit. Ce n'est pas qu'un mot : c'est ce
+       que le visiteur croit acheter. */
+    var etiq = lien.querySelector('span');
+    var voulu = (o.mode === 'lecture') ? 'Feuilleter l’ouvrage' : 'Ouvrir le livret';
+    if (etiq && etiq.textContent.trim() !== voulu) {
+      etiq.innerHTML = ico(o.mode === 'lecture' ? 'i-book-open' : 'i-key');
+      etiq.insertAdjacentText('beforeend', voulu);
     }
   };
 

@@ -334,7 +334,20 @@ async function pret() {
        la passerelle SMS réfléchit — donc bloquerait les paiements arrivant en
        même temps, pour un SMS. Cela ne se mesure pas à l'exécution : cela se
        lit dans l'ordre des lignes. */
-    const src = fs.readFileSync(path.join(RACINE, 'api', '_auth_lib.php'), 'utf8');
+    /* ⚠️ ON NORMALISE LES FINS DE LIGNE AVANT DE CHERCHER.
+       Ce contrôle lit un repère de PLUSIEURS lignes. `api/_auth_lib.php` est
+       enregistré en CRLF sur le poste de développement : le motif, écrit avec
+       des sauts de ligne simples, n'y figurait donc jamais. `indexOf` rendait
+       -1 et le contrôle était ROUGE en permanence — depuis assez longtemps
+       pour qu'on ait cessé de le lire.
+       Un rouge qui ne bouge jamais ne vaut pas mieux qu'un vert qui ne rougit
+       jamais : dans les deux cas le banc a cessé de mesurer. Celui-ci aurait
+       laissé passer sans un mot le déplacement de vrt_notify_vider() SOUS le
+       verrou — c'est-à-dire très exactement la panne qu'il existe pour
+       empêcher : tous les paiements bloqués le temps qu'une passerelle SMS
+       réfléchisse. */
+    const src = fs.readFileSync(path.join(RACINE, 'api', '_auth_lib.php'), 'utf8')
+                  .split('\r\n').join('\n');
     const iFerme = src.indexOf('fclose($fp);\n\n        /* ── LA REMISE PART ICI');
     const iVider = src.indexOf('vrt_notify_vider(');
     verifier('vrt_notify_vider() est appelée après fclose($fp)',

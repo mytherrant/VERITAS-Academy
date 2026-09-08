@@ -809,6 +809,47 @@ if ($action === 'content') {
     $classe = (string) $claims['c'];
     $kind   = (string) $claims['k'];
 
+    /* ── UN OUVRAGE QU'ON FEUILLETTE N'A PAS DE CHARGE À TÉLÉCHARGER ──────────
+       Cette porte ne connaissait qu'une façon de livrer : lire
+       `booklet-<classe>.js` et l'envoyer. C'est la bonne pour un cahier qu'on
+       remplit, et c'est la SEULE que le mode « lecture » ne peut pas emprunter :
+       son contenu n'est pas un fichier de blocs, c'est un dossier d'images que
+       `?o=<slug>&p=<n>&token=<jeton>` sert une par une, filigranées.
+
+       La conséquence n'était pas une gêne, c'était un mur. `gate.js` fait
+       passer `unlock()` ET `resume()` par `charger()`, donc par ici : tout
+       ouvrage réellement en mode lecture repartait en 409 « pas encore
+       déposé », code d'accès valide en main. Le liseur ne pouvait déverrouiller
+       personne — ni après paiement (« Ouverture impossible »), ni au
+       rechargement de la page. Le seul ouvrage vendu dans ce mode masquait le
+       défaut en tombant plus tôt, sur ses images absentes.
+
+       Le jeton est vérifié, la session est vivante, le plafond est décompté :
+       tout ce qui protège l'ouvrage a déjà joué au-dessus. Il ne reste qu'à
+       dire OUI, et à donner le filigrane — c'est lui que la page peint, et
+       c'est `?p=` qui livrera les pages, sous ce même jeton.
+
+       `mode` est dans la réponse pour que le client sache qu'il n'y a rien à
+       installer : sans lui, `gate.js` chercherait une charge absente et
+       afficherait « le fichier de ce cahier est abîmé » sur un ouvrage sain. */
+    $modeOuvrage = ((string) (vrt_livret_catalogue()[$classe]['mode'] ?? 'interactif')) === 'lecture'
+                 ? 'lecture' : 'interactif';
+    if ($modeOuvrage === 'lecture') {
+        $id = strtoupper((string) ($claims['id'] ?? ''));
+        lv_log('[CONTENU] ip=' . vrt_client_ip() . ' id=' . $id
+            . ' classe=' . $classe . ' kind=' . $kind . ' mode=lecture n=' . $n);
+        lv_out(200, [
+            'ok' => true, 'classe' => $classe, 'kind' => $kind, 'mode' => 'lecture',
+            'wm' => [
+                'id'  => $id,
+                'lb'  => (string) ($claims['lb'] ?? ''),
+                'd'   => date('d/m/Y'),
+                'txt' => 'VÉRITAS · ' . $id . ' · ' . date('d/m/Y'),
+            ],
+            'js' => ['booklet' => null, 'guide' => null], 'installe' => [],
+        ]);
+    }
+
     $base = realpath(lv_dir());
     if ($base === false) lv_err(409, 'Livret pas encore déposé sur le serveur.', 'missing');
 
@@ -940,7 +981,8 @@ if ($action === 'content') {
     lv_log('[CONTENU] ip=' . vrt_client_ip() . ' id=' . $id
         . ' classe=' . $classe . ' kind=' . $kind . ' n=' . $n);
 
-    lv_out(200, ['ok' => true, 'classe' => $classe, 'kind' => $kind, 'wm' => $wm,
+    lv_out(200, ['ok' => true, 'classe' => $classe, 'kind' => $kind,
+                 'mode' => 'interactif', 'wm' => $wm,
                  'js' => $js, 'installe' => $installe]);
 }
 

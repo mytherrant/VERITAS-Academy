@@ -375,6 +375,23 @@
      Ce qui compte est qu'une globale de données soit apparue. */
   function installer(r) {
     var js = r.js || {}, echecs = [], annonce = r.installe || {};
+    /* ── UN OUVRAGE QU'ON FEUILLETTE N'INSTALLE RIEN, ET C'EST NORMAL ────────
+       Tout ce qui suit juge une CHARGE : un fichier de blocs qui doit se
+       dérouler et poser sa globale. Un ouvrage en mode lecture n'en a pas — son
+       contenu est une suite d'images que le serveur sert page par page, sous ce
+       même jeton. La boucle concluait donc « rien n'est installé », donc
+       « abîmé », et `charger()` jetait `corrupt` : bandeau rouge « le fichier
+       de ce cahier est abîmé sur le serveur » sur un ouvrage parfaitement sain,
+       et le lecteur ne s'ouvrait pas.
+       Le serveur annonce le mode ; on le croit sur parole, puisque c'est lui
+       qui décide de ce qu'il envoie. Le filigrane, lui, se pose comme partout :
+       c'est le même, et il sert autant sur une page feuilletée. */
+    if (r.mode === 'lecture') {
+      etat.wm = r.wm || null;
+      filigrane(etat.wm);
+      bandeauEcheance();
+      return { ok: true, echecs: [] };
+    }
     /* ⚠️ « ESSENTIEL » N'EST PAS TOUJOURS LE LIVRET. Chaque livraison porte
        DEUX fichiers : l'élève reçoit son cahier plus les corrigés (bouton
        « Voir la correction »), l'enseignant reçoit son guide plus le cahier
@@ -470,7 +487,11 @@
       }
       // On garde la copie APRÈS l'avoir installée : ce qu'on met de côté est
       // exactement ce qui vient de fonctionner, jamais une supposition.
-      cacheEcrire(r);
+      // Sauf un feuilletage : il n'a pas de charge, et sa copie ne contiendrait
+      // qu'un filigrane. Rangée quand même, elle ferait croire à `resume()`
+      // qu'un ouvrage est lisible hors ligne alors que chacune de ses pages
+      // vient du réseau — porte ouverte sur un livre vide, sans un mot.
+      if (r.mode !== 'lecture') cacheEcrire(r);
       etat.horsLigne = false;
       return r;
     });

@@ -112,19 +112,31 @@ ouvrages:
       page: "Livret 2nde En ligne.dc.html"
       donnees: "booklet-data-2nde.js"
 
-  # ── Bords (cahiers complets) — mode LECTURE ────────────────────────────────
-  # Le Bord n'est pas un livret à remplir : c'est le cahier complet, leçons et
-  # corrigés modèles compris. Il se feuillette, page par page, filigrané.
+  # ── Bords (cahiers complets) ───────────────────────────────────────────────
+  # Le Bord n'est pas le livret d'activités : c'est le cahier complet, leçons et
+  # corrigés modèles compris. Les huit sont passés au format NORMALISÉ — on y
+  # répond dans la page, comme dans un livret — et c'est
+  # `tools/normaliser_cahiers.py` qui les produit et les inscrit au catalogue.
+  #
+  # ⚠️ CE MANIFESTE N'EST PLUS LA SOURCE DU CATALOGUE DES BORDS ET DES ŒUVRES.
+  # `api/data/livrets_catalogue.json` compte vingt-quatre ouvrages ; il n'en
+  # déclare que dix-neuf, et pas dans le même état. Une exécution de
+  # `tools/publier.py` réécrirait donc le catalogue depuis ici, avec les modes
+  # d'ici. C'est précisément ce qui a coûté « bord-6e » : déclaré `lecture`
+  # pendant que la normalisation déposait ses données interactives, il a été
+  # mis en vente 1 500 F avec une page qui réclamait des images inexistantes —
+  # 409 dès la première page de l'aperçu gratuit, écran noir. Signalé par un
+  # client le 08/09/2026.
+  #
+  # `mode` est donc aligné ci-dessous sur ce que le serveur sert RÉELLEMENT.
+  # Avant d'ajouter un ouvrage ici, vérifier lequel des deux outils le produit.
   bord-6e:
     titre: "Bord — Cahier de français 6ᵉ"
     niveau: 6e
-    mode: lecture
+    mode: interactif
     actif: true
     kinds: [livret]
     prix: 1500
-    pages_libres: 8
-    # 135 pages rendues a 120 dpi depuis la maquette PDF :
-    #   python tools/rendu_pages.py "<...>/6e_Bord_cahier_de_francais_MAQUETTE.pdf"     #     --slug bord-6e --charge ~/veritas-ftp
     source: { racine: docx1, document: "6e_Bord_cahier_de_francais_MAQUETTE.pdf" }
 
   bord-5e:

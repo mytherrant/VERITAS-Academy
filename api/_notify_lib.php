@@ -129,13 +129,34 @@ if (!defined('VRT_NOTIFY_LIB')) {
     }
 
     /* ── LE LIEN QU'ON ENVOIE ─────────────────────────────────────────────────
-       Toujours `cahier.html?o=<slug>`, jamais `<slug>.html`. Les deux existent,
-       mais depuis les dix pages d'atterrissage du 31/08/2026, `<slug>.html` est
-       une page de VENTE pour une partie du catalogue — y envoyer quelqu'un qui
-       vient de payer lui redemanderait de payer. `cahier.html` est la porte,
-       pour tous les ouvrages, et c'est elle que le banc de remise pilote. */
+       Jamais `<slug>.html` par défaut : depuis les dix pages d'atterrissage du
+       31/08/2026, c'est une page de VENTE pour la plus grande part du
+       catalogue — y envoyer quelqu'un qui vient de payer lui redemanderait de
+       payer.
+
+       Mais « toujours `cahier.html?o=<slug>` » était l'excès inverse, et il
+       coûtait autant. `cahier.html` est le moteur du cahier qu'on REMPLIT : il
+       lit `window.CAHIER_BLOCS`. Un ouvrage feuilleté n'en a pas — son contenu
+       est une suite d'images servies page par page — et l'acheteur d'un
+       feuilletage tombait donc sur « le contenu de ce cahier n'est pas encore
+       déposé sur le serveur », juste après avoir payé. Le SMS le menait à une
+       impasse, et le message accusait un dépôt manquant qui ne manquait pas.
+
+       `vrt_livret_etat()` sait déjà laquelle des deux portes existe pour cet
+       ouvrage — c'est son travail, et il n'y a pas de raison d'en tenir un
+       second registre ici. On la lui demande, et on retombe sur `cahier.html`
+       si la bibliothèque n'est pas chargée : c'est la porte des vingt-trois
+       ouvrages sur vingt-quatre. */
     function vrt_notify_lien(string $slug): string {
-        return vrt_notify_site() . '/livrets/cahier.html?o=' . rawurlencode($slug);
+        $porte = 'cahier.html?o=' . rawurlencode($slug);
+        if (!function_exists('vrt_livret_etat')) {
+            @require_once __DIR__ . '/_livret_lib.php';
+        }
+        if (function_exists('vrt_livret_etat')) {
+            $e = vrt_livret_etat($slug);
+            if (!empty($e['porte'])) $porte = (string) $e['porte'];
+        }
+        return vrt_notify_site() . '/livrets/' . $porte;
     }
 
     /**

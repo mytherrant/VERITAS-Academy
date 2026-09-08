@@ -1057,11 +1057,31 @@ def ecrire_catalogue(faits: list[dict], prix: int) -> pathlib_Path:
     Les cinq classes historiques restent servies par le repli de
     `_livret_lib.php` : aucun code déjà vendu ne se referme.
     """
-    # Ce que le catalogue dit DÉJÀ. On ne le jette pas : « bord-6e » y est en
-    # mode lecture, avec ses 135 pages rendues et ses 8 pages d'aperçu — un
-    # produit vendu, dont la coquille appelle le liseur et non le moteur du
-    # cahier. Le réécrire en « interactif, 0 page » lui aurait retiré son
-    # aperçu gratuit et fait mentir sa fiche, sans que rien ne le signale.
+    # Ce que le catalogue dit DÉJÀ. On ne le jette pas : un ouvrage qui n'est
+    # PAS de cette passe y garde sa fiche entière (boucle `setdefault` plus
+    # bas), parce que des codes ont pu être vendus dessus.
+    #
+    # ⚠️ MAIS LE MODE D'UN OUVRAGE QU'ON VIENT DE PRODUIRE N'EST PAS À REPRENDRE.
+    # Cette fonction conservait le `mode: "lecture"` de l'ancien catalogue, pour
+    # que « bord-6e » — alors le seul ouvrage feuilleté — ne perde ni son liseur
+    # ni ses 8 pages d'aperçu. La garde protégeait une fiche que la passe venait
+    # justement de contredire : bord-6e figure dans CAHIERS, la passe a produit
+    # son `booklet-bord-6e.js` interactif et l'a déposé — et le catalogue a
+    # continué d'annoncer « lecture, 135 pages ».
+    #
+    # Les trois surfaces se sont alors désaccordées EN SILENCE :
+    #   · `vrt_livret_etat()` a vu le `.js` et déclaré l'ouvrage DISPONIBLE ;
+    #   · la boutique a donc affiché la carte, au prix, avec son bouton ;
+    #   · et `livrets/bord-6e.html`, resté sur le liseur, a demandé
+    #     `p001.jpg` — absent — donc 409 et un écran noir.
+    # Signalé par un client le 08/09/2026 : « je n'arrive pas à acheter le bord
+    # de 6e, ça ne charge pas ». Le produit était payable et illisible.
+    #
+    # Le mode suit donc CE QU'ON VIENT DE PRODUIRE. Si la passe a fabriqué un
+    # cahier interactif pour cet ouvrage, il EST interactif — l'ancien
+    # catalogue n'a pas voix au chapitre sur ce point précis. Un ouvrage
+    # réellement feuilleté n'est pas dans `faits` : il traverse par le
+    # `setdefault`, intact.
     ancien = {}
     if CATALOGUE.is_file():
         try:
@@ -1072,19 +1092,22 @@ def ecrire_catalogue(faits: list[dict], prix: int) -> pathlib_Path:
 
     cat = {"version": 1, "ouvrages": {}}
     for r in faits:
-        a = ancien.get(r["slug"]) or {}
-        lecture = str(a.get("mode") or "") == "lecture"
         cat["ouvrages"][r["slug"]] = {
             "titre": r["titre"],
             "niveau": r["niveau"],
-            # Les nouveaux passent par le moteur du cahier ; ceux qui se
-            # feuillettent déjà gardent leur liseur.
-            "mode": "lecture" if lecture else "interactif",
+            # Ce que cette passe produit est un cahier qu'on remplit. Le dire
+            # autrement enverrait l'acheteur sur le liseur, qui réclamerait des
+            # images de pages que personne n'a rendues.
+            "mode": "interactif",
             "kinds": ["livret", "guide"] if r["guide"] else ["livret"],
             "prix": prix,
             "prixGuide": 0,             # 0 = tarif général enseignant du serveur
-            "pages": int(a.get("pages") or 0),
-            "pagesLibres": int(a.get("pagesLibres") or 0),
+            # Ces deux-là ne décrivent QUE le feuilletage (nombre d'images
+            # rendues, et jusqu'où va l'aperçu). Les reprendre de l'ancienne
+            # fiche faisait annoncer « 135 pages, 8 offertes » sur un cahier
+            # interactif qui n'a ni l'un ni l'autre.
+            "pages": 0,
+            "pagesLibres": 0,
         }
     # Un ouvrage déjà au catalogue mais absent de cette passe reste inscrit :
     # des codes ont pu être vendus dessus, et le retirer les fermerait.

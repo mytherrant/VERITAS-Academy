@@ -366,6 +366,33 @@ if ($action === 'init' && $method === 'POST') {
         if (!isset(vrt_livret_kinds()[$lvKind]) || !vrt_livret_ouvrage_accepte($lvSlug, $lvKind)) {
             jsonRespCy(['error' => 'Cet ouvrage ne se vend pas dans cette version.'], 400);
         }
+        /* ── ET IL FAUT POUVOIR LE LIVRER, PAS SEULEMENT LE CATALOGUER ────────
+           Les deux contrôles ci-dessus lisent le CATALOGUE : cet ouvrage
+           existe-t-il, se vend-il dans cette nature ? Aucun ne regarde le
+           disque. Un livret déclaré, tarifé et accepté mais dont les données ne
+           sont pas déposées passait donc au débit — et le client découvrait
+           après paiement « le contenu de ce cahier n'est pas encore déposé sur
+           le serveur ».
+
+           La règle existe pourtant juste en dessous, pour un livre numérique
+           (`vrt_livre_prepare`), et elle y a été posée après un incident : « Le
+           Tube digestif » vendu 1 000 F avec `prepared:false` le 26/08/2026. La
+           branche des livrets ne l'avait jamais reçue. Deux chemins vers la
+           même caisse, une seule garde : c'est l'autre qui vend le vide.
+
+           On interroge l'autorité déjà en place, `vrt_livret_etat()` — celle
+           que lisent la boutique et le catalogue. Elle sait que la livrabilité
+           dépend du mode : les données du cahier pour un interactif, les images
+           de pages pour un feuilletage. La vitrine et la caisse répondent ainsi
+           la même chose, ce qui est le seul moyen qu'elles ne divergent plus. */
+        if (function_exists('vrt_livret_etat')) {
+            $lvEtat = vrt_livret_etat($lvSlug);
+            if (empty($lvEtat['disponible'])) {
+                vrt_pay_log('[LIVRET_NON_LIVRABLE] refus init o=' . $lvSlug . ' ref=' . $ref);
+                jsonRespCy(['error' => 'Ce cahier n’est pas encore disponible en ligne. '
+                                     . 'Réessayez plus tard, ou écrivez à contact@veritas-school.com.'], 409);
+            }
+        }
     }
 
     /* ── MÊME RÈGLE POUR UN LIVRE NUMÉRIQUE ──────────────────────────────────
