@@ -26,6 +26,16 @@
  * serveur (déploiement partiel), le visiteur retombe sur l'application
  * plutôt que sur une page de maintenance. Le site reste debout.
  */
+/* ── POURQUOI CE FICHIER DOIT CHANGER A CHAQUE REFONTE DE LA VITRINE ──────
+ * LiteSpeed garde une entree de cache pour « / » et ne la lache que si
+ * index.php change. Le 08/09/2026, un deploiement a mis vitrine.html a jour
+ * sans toucher ce fichier : /index.php et /vitrine.html rendaient le nouveau
+ * bandeau, « / » rendait celui de la veille — et « / » est la seule adresse
+ * qu'ouvre un visiteur. Le .htaccess porte desormais un bloc no-cache pour
+ * index.php, mais il n'invalide pas une entree deja posee : seule une
+ * modification de CE fichier le fait. Empreinte de la vitrine servie, mise a
+ * jour a chaque refonte pour forcer cette invalidation : 2026-09-08b
+ */
 $vitrine = __DIR__ . '/vitrine.html';
 $appFile = file_exists($vitrine) ? $vitrine : __DIR__ . '/app.html';
 
