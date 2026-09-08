@@ -324,6 +324,11 @@ const ANCRES = {
   '#corriges': 'corriges/',
   '#bareme': 'corriges/',
   '#offert': 'corriges/',
+  /* L'Atelier de Français est vendu aux enseignants 800 F/mois. Il figurait
+     dans le menu « Plus » — donc à deux clics et sous un dépliant — alors que
+     c'est un produit qui encaisse. Le bandeau d'annonce le montre désormais
+     dès l'ouverture, à côté de la boutique. */
+  '#atelier': 'plateforme/',
   '#whatsapp': 'https://wa.me/237' + TEL.slice(4),
   '#appel': 'tel:' + TEL,
   /* Ces trois-là n'avaient AUCUNE destination : le pied de page annonçait
