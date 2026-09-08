@@ -610,6 +610,15 @@ PORTE_JS = """/* ── LA PORTE EST CELLE DU SITE, PLUS CELLE DE LA PAGE ──
    il n'y a pas de raison d'en écrire une seconde version ici. */
 const LS = '@LS@';
 const SLUG = '@SLUG@';
+/* ── LA MÊME PAGE OUVRE LES DEUX OUVRAGES ────────────────────────────────
+   Un cahier se vend en deux natures : le livret de l'élève et le guide de
+   l'enseignant, qui porte les corrigés rédigés. Ce sont deux produits, deux
+   codes, deux prix — mais un seul rendu, puisque c'est le même document.
+   `livrets/guide-<slug>.html` redirige ici avec `?prof=1`, comme les huit
+   coquilles historiques le font vers `cahier.html?o=<slug>&prof=1`. Sans ce
+   paramètre, un enseignant qui saisit son code recevrait « ce code n'ouvre
+   pas le livret de l'élève » : le serveur vérifie la nature demandée. */
+const KIND = /[?&]prof=1/.test(location.search) ? 'guide' : 'livret';
 function norm(s) { return (s || '').toString().toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
 
 """
@@ -670,7 +679,7 @@ MOUNT_JS = """  componentDidMount() {
     try { this.setState({ ans: JSON.parse(localStorage.getItem(LS + 'ans') || '{}') }); } catch (e) { /* vide */ }
 
     if (window.VRTLivret) {
-      window.VRTLivret.config({ classe: SLUG, kind: 'livret' });
+      window.VRTLivret.config({ classe: SLUG, kind: KIND });
       window.VRTLivret.resume()
         .then(() => {
           const m = (() => { try { return JSON.parse(localStorage.getItem(LS + 'moi') || '{}'); } catch (e) { return {}; } })();
@@ -728,7 +737,7 @@ EXP_JS = """      codeShort: (window.VRTLivret && window.VRTLivret.etat().ouvert
 
 DEMO_JS = """      onDemo: () => { this.chargerExtrait(); },"""
 
-DEMOT_JS = """      onDemoT: () => { if (window.VRTLivret) window.VRTLivret.config({ classe: SLUG, kind: 'livret' }).acheter(); else location.href = '/livrets/' + SLUG + '.html'; },"""
+DEMOT_JS = """      onDemoT: () => { if (window.VRTLivret) window.VRTLivret.config({ classe: SLUG, kind: KIND }).acheter(); else location.href = '/livrets/' + SLUG + '.html'; },"""
 
 
 # ── Écriture ─────────────────────────────────────────────────────────────────
@@ -921,6 +930,36 @@ def main() -> int:
         if not a.controle:
             PUBLIC.mkdir(parents=True, exist_ok=True)
             (PUBLIC / f"cahier-{slug}.html").write_text(coquille, encoding="utf-8")
+            # ── LA PORTE DE L'ENSEIGNANT ────────────────────────────────────
+            # Un cahier se vend en DEUX natures : le livret de l'élève et le
+            # guide, qui porte les corrigés rédigés. Le catalogue le déclare
+            # (`kinds: ["livret","guide"]`) et le garde-fou des ouvrages exige
+            # alors une page `guide-<slug>.html` — sans quoi l'enseignant qui
+            # achète son code n'a nulle part où le saisir. Les huit coquilles
+            # historiques résolvent cela par une redirection d'une ligne vers
+            # `cahier.html?o=<slug>&prof=1` ; on fait le même geste, vers la
+            # page qui sait rendre CE cahier.
+            (PUBLIC / f"guide-{slug}.html").write_text(f"""<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Guide de l’enseignant — {cfg["titre"]} — Centre VÉRITAS</title>
+<link rel="canonical" href="https://veritas-school.com/livrets/cahier-{slug}.html?prof=1">
+<meta http-equiv="refresh" content="0; url=cahier-{slug}.html?prof=1">
+<!-- Cette page ne contient rien : le guide et le cahier sont le MÊME document,
+     et c'est le serveur qui décide lequel il envoie, d'après la nature du code.
+     La redirection porte `prof=1` pour que la porte demande le guide ; sans
+     lui, l'enseignant recevrait « ce code n'ouvre pas le livret de l'élève ».
+     Produit par tools/cahiers_oeuvres_1c.py — ne pas retoucher à la main. -->
+</head>
+<body>
+<p>Redirection vers le guide…
+   <a href="cahier-{slug}.html?prof=1">Ouvrir le guide de l’enseignant</a></p>
+</body>
+</html>
+""", encoding="utf-8")
             (PUBLIC / f"extrait-{slug}.js").write_text(js_globale(ex), encoding="utf-8")
             if charge:
                 d = charge / "uploads" / "protected" / "livrets"

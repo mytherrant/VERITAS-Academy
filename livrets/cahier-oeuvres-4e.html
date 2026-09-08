@@ -693,6 +693,15 @@
    il n'y a pas de raison d'en écrire une seconde version ici. */
 const LS = 'oi4.';
 const SLUG = 'oeuvres-4e';
+/* ── LA MÊME PAGE OUVRE LES DEUX OUVRAGES ────────────────────────────────
+   Un cahier se vend en deux natures : le livret de l'élève et le guide de
+   l'enseignant, qui porte les corrigés rédigés. Ce sont deux produits, deux
+   codes, deux prix — mais un seul rendu, puisque c'est le même document.
+   `livrets/guide-<slug>.html` redirige ici avec `?prof=1`, comme les huit
+   coquilles historiques le font vers `cahier.html?o=<slug>&prof=1`. Sans ce
+   paramètre, un enseignant qui saisit son code recevrait « ce code n'ouvre
+   pas le livret de l'élève » : le serveur vérifie la nature demandée. */
+const KIND = /[?&]prof=1/.test(location.search) ? 'guide' : 'livret';
 function norm(s) { return (s || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
 
 function expLabel() {
@@ -920,7 +929,7 @@ class Component extends DCLogic {
     try { this.setState({ ans: JSON.parse(localStorage.getItem(LS + 'ans') || '{}') }); } catch (e) { /* vide */ }
 
     if (window.VRTLivret) {
-      window.VRTLivret.config({ classe: SLUG, kind: 'livret' });
+      window.VRTLivret.config({ classe: SLUG, kind: KIND });
       window.VRTLivret.resume()
         .then(() => {
           const m = (() => { try { return JSON.parse(localStorage.getItem(LS + 'moi') || '{}'); } catch (e) { return {}; } })();
@@ -1463,7 +1472,7 @@ class Component extends DCLogic {
       onClasse: e => this.setState({ classe: e.target.value }),
       onUnlock: () => this.unlock(S.code),
       onDemo: () => { this.chargerExtrait(); },
-      onDemoT: () => { if (window.VRTLivret) window.VRTLivret.config({ classe: SLUG, kind: 'livret' }).acheter(); else location.href = '/livrets/' + SLUG + '.html'; },
+      onDemoT: () => { if (window.VRTLivret) window.VRTLivret.config({ classe: SLUG, kind: KIND }).acheter(); else location.href = '/livrets/' + SLUG + '.html'; },
       onLock: () => { try { localStorage.removeItem(LS + 'sess'); } catch (e) { /* rien */ } this.setState({ sess: null, code: '', drawer: false }); },
 
       markText: sess ? (sess.name + ' · ' + sess.code + '   ').repeat(3) : '',
