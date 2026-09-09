@@ -2069,6 +2069,101 @@ if ($action === 'offres') {
     jsonResponse(['ok' => false, 'error' => 'Méthode non permise'], 405);
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   7. PALIERS — les plafonds, réglables sans redéploiement
+
+   ILS ÉTAIENT ANNONCÉS RÉGLABLES ET NE L'ÉTAIENT PAS.
+   `plat_paliers()` laisse depuis toujours la base primer sur le code — c'est
+   voulu : un plafond doit pouvoir changer sans attendre un déploiement. Mais
+   RIEN n'écrivait `DB.plateforme.paliers` : ni cet endpoint, ni l'admin. Le
+   seul moyen était d'éditer à la main un JSON de plusieurs centaines de
+   kilo-octets sur le serveur.
+
+   Le coût, mesuré en production le 09/09/2026 : un réglage déposé fin août y
+   dormait, et il ÉCRASAIT les nouveaux plafonds d'essai qu'on venait de
+   resserrer. Le code disait 12 textes et 2 exports ; le serveur en servait 20
+   et 3, sans que rien ne le signale. Un défaut qu'on ne peut pas remplacer est
+   un défaut qui gagne toujours.
+
+   ⚠️ ÉCRITURE FUSIONNANTE, jamais un remplacement. On n'écrit que les paliers
+   et les clés effectivement transmis : envoyer `{"essai":{"exports":2}}` ne
+   doit pas effacer les quatre autres plafonds de l'essai, ni les cinq autres
+   paliers. Sans cela, régler un chiffre en ouvrirait quatre.
+   ───────────────────────────────────────────────────────────────────────── */
+
+if ($action === 'paliers') {
+    $db = vrt_load_db();
+    if (!is_array($db)) jsonResponse(['ok' => false, 'error' => 'Base indisponible'], 503);
+
+    if ($method === 'GET') {
+        // Ce qui est RÉELLEMENT appliqué, défauts et surcharges fusionnés.
+        jsonResponse(['ok' => true, 'paliers' => plat_paliers($db)]);
+    }
+
+    if ($method === 'POST' || $method === 'PUT') {
+        requireAuth();
+        $in = plat_input(8192);
+        $vx = is_array($in['paliers'] ?? null) ? $in['paliers'] : $in;
+
+        /* Liste blanche des deux côtés : un palier inconnu ne se crée pas (il
+           ne serait lu par personne), et une clé inconnue non plus. */
+        $palOk = array_keys(plat_paliers([]));
+        $cleOk = ['textes', 'citations', 'exports', 'ia', 'epreuves'];
+
+        $vus = [];
+        $res = plat_muter(function (array $db2) use ($vx, $palOk, $cleOk, &$vus) {
+            if (!isset($db2['plateforme']) || !is_array($db2['plateforme'])) $db2['plateforme'] = [];
+            $sur = $db2['plateforme']['paliers'] ?? [];
+            if (!is_array($sur)) $sur = [];
+
+            foreach ($vx as $pal => $vals) {
+                if (!in_array($pal, $palOk, true) || !is_array($vals)) continue;
+                if (!isset($sur[$pal]) || !is_array($sur[$pal])) $sur[$pal] = [];
+                foreach ($vals as $k => $v) {
+                    if (!in_array($k, $cleOk, true) || !is_numeric($v)) continue;
+                    /* -1 = sans limite ; en deçà, c'est une faute de frappe qui
+                       ouvrirait tout. Plafond haut pour ne pas brider une
+                       offre future. */
+                    $n = (int) $v;
+                    if ($n < -1) $n = -1;
+                    if ($n > 100000) $n = 100000;
+                    $sur[$pal][$k] = $n;
+                    $vus[] = $pal . '.' . $k;
+                }
+            }
+            $db2['plateforme']['paliers'] = $sur;
+            return [$db2, $sur];
+        }, false);
+
+        if ($res === null) {
+            jsonResponse(['ok' => false, 'error' => 'Écriture impossible — réessayez'], 503);
+        }
+        /* On rend ce qui est appliqué, pas ce qu'on a reçu : c'est la seule
+           réponse qui permette de vérifier sans redemander. */
+        jsonResponse(['ok' => true, 'ecrits' => $vus,
+                      'paliers' => plat_paliers(vrt_load_db() ?: [])]);
+    }
+
+    /* ⚠️ Effacer la surcharge et revenir aux défauts du code. C'est la sortie
+       de secours du piège ci-dessus : sans elle, un réglage déposé une fois
+       ne peut plus JAMAIS être rendu au code, et chaque nouvelle valeur par
+       défaut serait muette pour toujours. */
+    if ($method === 'DELETE') {
+        requireAuth();
+        $res = plat_muter(function (array $db2) {
+            if (isset($db2['plateforme']['paliers'])) unset($db2['plateforme']['paliers']);
+            return [$db2, true];
+        }, false);
+        if ($res === null) {
+            jsonResponse(['ok' => false, 'error' => 'Écriture impossible — réessayez'], 503);
+        }
+        jsonResponse(['ok' => true, 'rendus_au_code' => true,
+                      'paliers' => plat_paliers(vrt_load_db() ?: [])]);
+    }
+
+    jsonResponse(['ok' => false, 'error' => 'Méthode non permise'], 405);
+}
+
 /* ───────────────────────────────────────────────────────────────────────── */
 
 jsonResponse(['ok' => false, 'error' => 'Action inconnue'], 404);

@@ -376,6 +376,59 @@ const lireRegistre = () => {
     dire(codeInvite.j.ok === false,
       'un invité n’a pas de code : il n’a pas encore d’abonnement à reprendre');
 
+    // ── ⑩bis Les plafonds sont vraiment reglables ────────────────────────
+    console.log(`
+${G}⑩bis Un plafond annonce reglable doit pouvoir etre remplace${R}`);
+    /* `plat_paliers()` laisse la base primer sur le code — et RIEN ne savait
+       ecrire cette base. Mesure en production le 09/09/2026 : un reglage
+       depose fin aout y dormait et ecrasait en silence les plafonds d'essai
+       qu'on venait de resserrer. Un defaut qu'on ne peut pas remplacer est un
+       defaut qui gagne toujours. */
+    const adm = { Authorization: 'Bearer ' + SECRET, 'Content-Type': 'application/json' };
+    const ecrire = (corps) => appel('?action=paliers',
+      { method: 'POST', headers: adm, body: JSON.stringify(corps) });
+
+    const sansCle2 = await appel('?action=paliers', { method: 'POST',
+      headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    dire(sansCle2.http === 401 || sansCle2.http === 403,
+      'l’écriture est réservée à la clé d’administration', 'HTTP ' + sansCle2.http);
+
+    const w1 = await ecrire({ paliers: { essai: { exports: 1 } } });
+    dire(w1.http === 200 && w1.j.ok === true && w1.j.paliers.essai.exports === 1,
+      'un plafond se règle sans redéploiement', JSON.stringify(w1.j).slice(0, 110));
+    /* ⚠️ CE CONTROLE SE MESURE SUR DEUX ECRITURES, pas sur une.
+       La premiere version regardait le resultat de `plat_paliers()` apres un
+       seul appel — or il FUSIONNE avec les defauts du code : que la base
+       porte les cinq plafonds ou un seul, la sortie est identique. Le
+       controle etait donc aveugle, et une ecriture qui remplace au lieu de
+       fusionner le laissait vert (mesure par mutation, 09/09/2026).
+       En reglant un SECOND chiffre, on voit si le premier a survecu. */
+    const w1b = await ecrire({ paliers: { essai: { ia: 3 } } });
+    dire(w1b.j.paliers.essai.exports === 1 && w1b.j.paliers.essai.ia === 3,
+      '⚠️ régler un SECOND chiffre n’efface pas le premier — sinon en régler un en rouvrirait quatre',
+      JSON.stringify(w1b.j.paliers.essai));
+    dire(w1b.j.paliers.demo && w1b.j.paliers.demo.textes === 5,
+      'les autres paliers sont intacts', JSON.stringify(w1b.j.paliers.demo));
+
+    /* Idem : `plat_paliers()` ne rend que les paliers qu'il connait, donc un
+       palier inconnu ECRIT EN BASE resterait invisible dans sa sortie. On
+       regarde la base elle-meme. */
+    const w2 = await ecrire({ paliers: { inconnu: { exports: 99 }, essai: { bidon: 99 } } });
+    const enBase = (lireBase().plateforme || {}).paliers || {};
+    dire(w2.http === 200 && !enBase.inconnu && !(enBase.essai || {}).bidon,
+      'un palier ou une clé inconnus n’entrent même pas dans la base',
+      JSON.stringify(Object.keys(enBase)) + ' / ' + JSON.stringify(enBase.essai));
+
+    const w3 = await ecrire({ paliers: { essai: { exports: -50 } } });
+    dire(w3.j.paliers.essai.exports === -1,
+      'une valeur négative est ramenée à -1 (sans limite), jamais à un plafond absurde',
+      String(w3.j.paliers.essai.exports));
+
+    const w4 = await appel('?action=paliers', { method: 'DELETE', headers: adm });
+    dire(w4.http === 200 && w4.j.ok === true && w4.j.paliers.essai.exports === 2,
+      'la sortie de secours rend les plafonds au code — sans elle, un réglage déposé une fois y resterait pour toujours',
+      JSON.stringify(w4.j.paliers && w4.j.paliers.essai));
+
     // ── ⑩ Aucun mot de passe n'ouvre le compte promu ─────────────────────
     console.log(`\n${G}⑩ Aucun mot de passe n’ouvre un compte né sans mot de passe${R}`);
     for (const essai of ['', ' ', 'motdepasse', cree.user]) {
