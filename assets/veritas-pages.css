@@ -2306,16 +2306,47 @@ article ul:not([class]) > li:nth-child(even) {
    Tout est désactivé si le visiteur a demandé moins d'animations.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* ── 1. Alternance : un liseré de couleur par carte ────────────────── */
+/* ── LE TITRE D'UNE ŒUVRE SE COMPOSE, IL NE SE FOND PAS ─────────────────
+   Les cartes des cahiers d'œuvre annoncent les trois livres au programme —
+   « Trois prétendants… un mari · Cœur du Sahel · L'attachement au sol
+   natal » — et ces titres étaient dans le même gris que la phrase qui les
+   suit, séparés par de simples points médians. On ne voyait pas où un titre
+   commençait ni où il finissait, alors que c'est LA raison pour laquelle un
+   parent lit cette carte : reconnaître les livres de son enfant.
+
+   L'italique est la règle française pour un titre d'œuvre ; la couleur et la
+   demi-graisse font le reste du travail à la taille où ces cartes se lisent
+   sur un téléphone. On ne met pas de gras plein : trois titres en gras dans
+   une phrase de deux lignes crient plus qu'ils n'informent.
+
+   `font-style:italic` sur un texte déjà italique s'annulerait — d'où le
+   `font-style` explicite plutôt qu'un `<i>` imbriqué. */
+.wrap .note .oeu, .wrap p .oeu{
+  font-style:italic;
+  font-weight:600;
+  color:var(--r-profond,#0C2A6A);
+  font-synthesis-style:none;
+}
+
+/* ── 1. LE LISERÉ DE COULEUR EST RETIRÉ (09/09/2026) ────────────────────
+   Il datait du 20/08, quand une carte n'était qu'un rectangle bleu sans
+   icône : trois pixels de couleur en haut, tournant sur quatre teintes,
+   servaient alors à distinguer une carte de sa voisine.
+
+   Ce n'est plus le cas. Depuis, chaque carte porte SA COUVERTURE — une
+   image de livre, haute, colorée, différente d'une carte à l'autre. Le
+   liseré ne distingue donc plus rien : il ajoute une quatrième couleur
+   arbitraire au-dessus d'une couverture qui a déjà la sienne, et coupe la
+   carte d'un trait qui n'appartient ni au livre ni à la charte. Signalé
+   par Jacques sur la grille des cahiers, capture à l'appui.
+
+   On garde la bordure fine et le relief au survol : eux disent encore
+   quelque chose — où finit la carte, et qu'elle répond au doigt. */
 .wrap .grid > .card{
   position:relative;
-  border-top:3px solid var(--navy);
   transition:transform .34s cubic-bezier(.34,1.4,.64,1),
              box-shadow .34s ease, border-color .3s ease;
 }
-.wrap .grid > .card:nth-child(4n+2){border-top-color:var(--green,#007E11)}
-.wrap .grid > .card:nth-child(4n+3){border-top-color:var(--ambr-f,#C24E00)}
-.wrap .grid > .card:nth-child(4n+4){border-top-color:var(--violet,#5B4FA8)}
 
 /* ── 2. Relief au survol : la carte se soulève et s'éclaire ────────── */
 .wrap .grid > .card:hover,

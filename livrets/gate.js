@@ -736,14 +736,49 @@
     document.getElementById('vrt-close').onclick = fermerModale;
     document.getElementById('vrt-deja').onclick = ecranReclamation;
     document.getElementById('vrt-go').onclick = lancerPaiement;
-    var champN = document.getElementById('vrt-n');
-    if (champN) champN.oninput = function () {
-      var n = Math.max(1, Math.min(500, parseInt(this.value, 10) || 1));
+
+    /* ── LE PRIX AFFICHÉ ET LE PRIX ENCAISSÉ ÉTAIENT DEUX CHIFFRES ─────────
+       `resoudreTarifs()` n'était appelée qu'au CLIC sur « Payer ». Le montant
+       envoyé à `?action=init` était donc juste — il est calculé après elle —
+       mais la modale, elle, s'était ouverte avec le repli écrit en tête de
+       fichier : 1 500 F.
+
+       Tant que tous les cahiers valaient 1 500 F, personne ne pouvait le
+       voir. Les quatre cahiers d'œuvres du collège en valent 1 000 : leur
+       écran de paiement annonçait « 1 500 FCFA » et « Payer 1 500 FCFA »
+       pour un débit de 1 000. Ni l'un ni l'autre chiffre n'était faux tout
+       seul — c'est leur écart qui l'était, sur le seul écran où quelqu'un
+       sort de l'argent.
+
+       On lance donc la sonde à l'OUVERTURE, et on redessine dès qu'elle
+       répond. La modale ne l'attend pas : elle s'ouvre tout de suite avec le
+       repli, puis se corrige — mieux vaut un prix qui s'ajuste en un clin
+       d'œil qu'un tunnel qui met une seconde à s'ouvrir sur une connexion
+       camerounaise. */
+    var majPrix = function () {
+      var n = qte;
+      var champ = document.getElementById('vrt-n');
+      if (champ) n = Math.max(1, Math.min(500, parseInt(champ.value, 10) || 1));
       var t = prix(cfg.kind, n);
-      document.getElementById('vrt-go').textContent = 'Payer ' + fmt(t) + ' FCFA';
+      var b = document.getElementById('vrt-go');
+      /* Le bouton peut être en cours de paiement (« Ouverture du paiement… ») :
+         on ne réécrit que s'il porte encore son libellé de prix, sinon on
+         effacerait l'état sous les yeux de l'acheteur. */
+      if (b && /^Payer /.test(b.textContent)) b.textContent = 'Payer ' + fmt(t) + ' FCFA';
       var e = document.querySelector('#vrt-achat .vrt-prix');
       if (e) e.textContent = fmt(t) + ' FCFA';
-      msg(n > 1 ? n + ' codes — ' + fmt(Math.round(t / n)) + ' F l’unité' : '', true);
+      return { n: n, t: t };
+    };
+
+    resoudreTarifs().then(function () {
+      // La modale a pu être fermée entre-temps : on ne ressuscite rien.
+      if (document.getElementById('vrt-achat')) majPrix();
+    });
+
+    var champN = document.getElementById('vrt-n');
+    if (champN) champN.oninput = function () {
+      var r = majPrix();
+      msg(r.n > 1 ? r.n + ' codes — ' + fmt(Math.round(r.t / r.n)) + ' F l’unité' : '', true);
     };
   }
 
