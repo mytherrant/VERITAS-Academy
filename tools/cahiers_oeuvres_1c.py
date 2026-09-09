@@ -139,6 +139,11 @@ INEDITES = {
                          "Qui chante dans la forêt : les voix des dix-huit contes"),
     "w2-themes-bimanes": ("les_bimanes_themes_vrais.webp",
                           "Les Bimanes : les thèmes des sept nouvelles"),
+    # Une scène sans marqueur — un village au bord de l'eau, sous un ciel de
+    # saison sèche. Elle sert en 4ᵉ (Cœur du Sahel), en 3ᵉ et en 5ᵉ, là où
+    # trois chapitres se partageaient la même illustration.
+    "oi-sahel-riviere": ("original_6.webp",
+                         "Un village au bord de l’eau"),
 }
 
 NIVEAUX = {
@@ -315,6 +320,50 @@ def extrait(doc: dict) -> dict:
     out["parts"] = parts
     out["_extrait"] = True
     return out
+
+
+def remplacer_chap_img(html: str, changements: dict) -> str:
+    """Réaffecte des images de chapitre, en relisant la table plutôt qu'en la
+    cherchant au texte.
+
+    Les quatre coquilles n'écrivent pas `CHAP_IMG` de la même façon : la 6ᵉ en
+    JavaScript sur une ligne (apostrophes simples), les trois autres en JSON
+    indenté (guillemets doubles). Un remplacement de texte marcherait sur
+    l'une et échouerait en silence sur les autres — ou pire, réussirait à
+    moitié. On lit donc la table, on la modifie, on la réécrit.
+
+    Une clé absente est une ERREUR, pas un cas à ignorer : elle signifie que le
+    chapitre visé n'existe plus, et qu'on vient de croire réaffecter une image
+    qui restera où elle était.
+    """
+    i = html.find("const CHAP_IMG")
+    if i < 0:
+        raise Ancre("CHAP_IMG est introuvable")
+    j = html.find("};", i)
+    if j < 0:
+        raise Ancre("la fin de CHAP_IMG est introuvable")
+    corps = html[html.find("{", i):j + 1]
+    # Du JS au JSON : les apostrophes de la 6ᵉ, et rien d'autre — les légendes
+    # ne portent pas de guillemets doubles (vérifié : elles en seraient
+    # échappées par le producteur).
+    essai = corps
+    try:
+        table = json.loads(essai)
+    except Exception:
+        essai = re.sub(r"'([^']*)'", lambda m: json.dumps(m.group(1), ensure_ascii=False), corps)
+        try:
+            table = json.loads(essai)
+        except Exception as e:
+            raise Ancre(f"CHAP_IMG illisible : {e}")
+
+    for cle, (fichier, legende) in changements.items():
+        if cle not in table:
+            raise Ancre(f"le chapitre « {cle} » est absent de CHAP_IMG")
+        table[cle] = [fichier, legende]
+
+    return (html[:html.find("{", i)]
+            + json.dumps(table, ensure_ascii=False, indent=1)
+            + html[j + 1:])
 
 
 # ── Fabrication de la coquille ───────────────────────────────────────────────
@@ -647,6 +696,60 @@ def patcher(html: str, niveau: str, cfg: dict) -> str:
         if "w3-carte-mentale" in html:
             raise Ancre("« w3-carte-mentale » subsiste après le retrait de ses trois emplois")
 
+    # ⑯ SEPT IMAGES POUR VINGT-CINQ CHAPITRES.
+    #    Le cahier de 4ᵉ servait « la cour du village » en tête de SIX
+    #    chapitres, celui de 3ᵉ « le palais » en tête de cinq. Une image revue
+    #    trois pages plus loin donne l'impression que le cahier n'avance pas —
+    #    et sur un cahier qu'on tient un an, cela compte.
+    #
+    #    Le lot d'origine contient de quoi combler : des scènes de village, de
+    #    chefferie, d'internat, dont le sujet convient à plusieurs œuvres.
+    #    ⚠️ MAIS PAS N'IMPORTE LAQUELLE. Trois d'entre elles portent un
+    #    marqueur écrit qui les attache à UNE œuvre et à une seule :
+    #      · « CHEFFERIE KEKEM · CONSEIL DES NOTABLES » → N'koum-wam (5ᵉ) ;
+    #      · un tableau de classe « Leçon du jour : Les Bimanes » → 6ᵉ ;
+    #      · un panneau « TANGA TOWN 3 KM » → Ville cruelle (3ᵉ).
+    #    Les employer ailleurs mettrait un décor faux sous un texte juste, et
+    #    un élève de 4ᵉ lirait « Kekem » sous une scène de Cœur du Sahel. On
+    #    ne retient donc que les scènes sans marqueur.
+    #
+    #    Une même image peut servir dans deux cahiers différents : personne
+    #    n'achète deux niveaux à la fois, et une école de village est une école
+    #    de village. Le préfixe du nom de fichier (`a5-`, `a3-`) dit d'où elle
+    #    vient, pas à qui elle appartient.
+    if niveau == "4e":
+        html = remplacer_chap_img(html, {
+            # Trois prétendants… un mari — le prétendant devant la famille,
+            # puis la fête du village : deux scènes que la pièce met en scène.
+            "w1c3": ["a5-w2-doyen", "Le prétendant devant la famille réunie"],
+            "w1c5": ["a5-w3-ceremonie", "La fête au village, tambours et danses"],
+            # Cœur du Sahel — Faydé placée en ville, et le Sahel au bord de l'eau.
+            "w2c4": ["a5-w3-dortoir", "Loin de chez soi, le soir venu"],
+            "w2c6": ["oi-sahel-riviere", "Le Sahel, au bord de l’eau"],
+            # L'attachement au sol natal — celui qui revient instruit au village.
+            "w3c5": ["a5-w3-ecole", "Revenir au village, instruit"],
+            "w3c6": ["a3-w3-homme", "Frère et sœur, au couchant"],
+        })
+        n += 1
+    if niveau == "3e":
+        html = remplacer_chap_img(html, {
+            # La marmite de Koka-Mbala — le conseil des anciens, et la fête.
+            "w2c3": ["a5-w2-doyen", "Devant le conseil des anciens"],
+            "w2c5": ["a5-w3-ceremonie", "La fête, tambours et masques"],
+            # Petites gouttes de chant — l'école, et le fleuve.
+            "w3c5": ["a5-w3-ecole", "L’école du village"],
+            "w3c6": ["oi-sahel-riviere", "Au bord de l’eau, à l’heure du conte"],
+        })
+        n += 1
+    if niveau == "5e":
+        # La 5ᵉ est moins pauvre (treize images) mais répète tout de même :
+        # deux scènes de plus, prises hors de son propre lot.
+        html = remplacer_chap_img(html, {
+            "w1c6": ["a3-w3-homme", "Ce que l’arbre a vu passer"],
+            "w2c6": ["oi-sahel-riviere", "Au bord de l’eau, avant la palabre"],
+        })
+        n += 1
+
     # ⑩ LE CONFORT DE LECTURE — MESURÉ, PAS DEVINÉ.
     #    La colonne de texte faisait 1 180 px. Sur l'écran d'un ordinateur, une
     #    ligne portait donc jusqu'à 140 signes ; mesuré à 900 px de large, elle
@@ -711,7 +814,11 @@ def patcher(html: str, niveau: str, cfg: dict) -> str:
 
     # Trois remplacements de plus pour la 6ᵉ, qui est le seul des quatre
     # cahiers à servir deux fois la même illustration.
-    attendus = 38 if niveau == "6e" else 32
+    # La 6ᵉ a ses trois remplacements d'images propres (patch ⑫) plus le
+    # retrait de la carte fausse (⑬) ; les trois autres reçoivent une passe de
+    # réaffectation (⑯) que la 6ᵉ n'a pas besoin — elle a déjà vingt et une
+    # images distinctes pour vingt-deux chapitres.
+    attendus = 38 if niveau == "6e" else 33
     if n != attendus:
         raise Ancre(f"{n} remplacements au lieu de {attendus}")
     # Une dernière vérification, sur le produit fini : aucune trace du verrou
