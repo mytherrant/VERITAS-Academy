@@ -194,7 +194,7 @@
               </div>
             </sc-for>
           </div>
-          <p style="margin: 13px auto 0; max-width: 52ch; font-size: 14px; line-height: 1.6; color: #54452C;">Vos élèves vous envoient le fichier de leurs réponses depuis le bouton « Récupérer mes réponses », en bas de leur cahier.</p>
+          <p style="margin: 13px auto 0; max-width: 52ch; font-size: 14px; line-height: 1.6; color: #54452C;">Les réponses de vos élèves remontent au fur et à mesure qu'ils écrivent. Ouvrez-les avec votre code enseignant.</p>
         </div>
       </sc-if>
 
@@ -693,6 +693,173 @@
    il n'y a pas de raison d'en écrire une seconde version ici. */
 const LS = 'oi4.';
 const SLUG = 'oeuvres-4e';
+
+/* ── LA CLÉ D'UNE RÉPONSE, ET POURQUOI ELLE COMPTE ────────────────────────
+   Le cahier rangeait chaque réponse sous « <œuvre>.<indice du bloc> » :
+   `page.partId + '.' + bi`. Deux défauts dans une seule ligne.
+
+   ① `partId` est l'ŒUVRE, pas le chapitre — et `bi` repart de zéro à chaque
+      chapitre. Les sept chapitres d'une même œuvre se partageaient donc les
+      mêmes clés. Mesuré sur les quatre cahiers : 463 champs de réponse dont
+      la clé désigne aussi un AUTRE champ. L'élève répond à la question 3 du
+      chapitre 1 ; il ouvre le chapitre 4, sa réponse y est déjà, sous une
+      autre question — et s'il la corrige, la première est perdue.
+   ② Même sans collision, un indice est positionnel : ajouter un exercice au
+      milieu d'un chapitre décale tout ce qui suit, et l'élève retrouve ses
+      réponses sous les mauvaises questions à la rentrée suivante.
+
+   La clé porte donc OÙ l'on est (le chapitre) et CE QUE l'exercice DIT (une
+   empreinte de son énoncé). Ajouter, retirer ou déplacer un exercice ne
+   touche à rien d'autre. C'est la règle de `livrets/cahier.js`, et le même
+   FNV-1a en base 36 : les deux moteurs rangent leurs réponses de la même
+   façon, ce qui compte le jour où `api/cahier.php` les lit tous les deux.
+
+   Corollaire assumé : réécrire l'énoncé d'un exercice détache la réponse qui
+   y était. C'est le bon comportement — la question n'est plus la même. */
+function empK(texte) {
+  var t = String(texte || '').replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ').trim().toLowerCase().slice(0, 400);
+  var h = 0x811c9dc5;
+  for (var i = 0; i < t.length; i++) {
+    h ^= t.charCodeAt(i);
+    h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0;
+  }
+  return h.toString(36);
+}
+/* Le texte qui identifie un bloc. Un bloc sans texte — une grille, une carte —
+   n'en a pas : il prend alors son type et son rang, faute de mieux. Sans ce
+   repli, tous les blocs muets d'un chapitre partageraient l'empreinte de la
+   chaîne vide, et l'on aurait remplacé une collision par une autre. */
+function texteBloc(b, i) {
+  if (!b) return 'b' + i;
+  var t = b.x || b.title || '';
+  if (!t && b.body) t = (b.body || []).join(' ');
+  if (!t && b.rows) t = JSON.stringify(b.rows).slice(0, 200);
+  if (!t && b.words) t = (b.words || []).join(' ');
+  if (!t && b.items) t = JSON.stringify(b.items).slice(0, 200);
+  return t ? String(t) : (b.k || 'x') + '#' + i;
+}
+/* Les clés d'un chapitre, calculées d'un coup. Deux blocs peuvent porter le
+   MÊME texte dans un même chapitre (deux consignes identiques, deux lignes de
+   grille) : le second reçoit alors un rang. On ne le donne qu'aux doublons,
+   pour que la clé du cas courant reste inchangée quand un doublon apparaît
+   plus loin. */
+/* ── LE TRAVAIL DE L'ÉLÈVE MONTE AU SERVEUR ───────────────────────────────
+   Jusqu'ici, tout vivait dans le `localStorage` de l'appareil. Changer de
+   téléphone, vider son cache ou ouvrir le cahier sur l'ordinateur de la
+   maison, et une année de réponses disparaissait. Le bouton « Envoyer au
+   salon de classe » promettait pourtant que « votre enseignant verra vos
+   réponses » — il n'envoyait rien du tout.
+
+   `api/cahier.php` fait déjà ce travail pour les vingt-quatre autres cahiers,
+   et son contrat nous va tel quel : l'élève est identifié par SON JETON de
+   livret — celui que `gate.js` détient — et l'enseignant lit les copies de
+   son ouvrage avec un jeton de guide. Rien à ajouter côté serveur.
+
+   TROIS RÈGLES, ET CHACUNE A COÛTÉ QUELQUE CHOSE À QUELQU'UN :
+
+   ① ON ÉCRIT D'ABORD SUR L'APPAREIL, ON ENVOIE ENSUITE. L'élève travaille
+      depuis un téléphone, au Cameroun ; la ligne coupe. Une réponse n'est
+      jamais perdue parce qu'une requête a échoué — elle attend dans la file
+      et repart au prochain envoi.
+
+   ② ON N'ENVOIE QUE CE QUI A CHANGÉ. Pousser les deux cents réponses d'un
+      cahier à chaque frappe rendrait le cahier inutilisable sur une connexion
+      lente, et ferait payer des données pour rien.
+
+   ③ UNE RÉPONSE QUI N'EST PAS UNE CHAÎNE DOIT ÊTRE SÉRIALISÉE. `ch_texte()`
+      côté serveur commence par `if (!is_scalar($v)) return '';` — un tableau
+      y devient la chaîne vide. Or l'ordre d'un exercice « remets dans l'ordre »
+      et la liste des mots trouvés d'une grille SONT des tableaux : envoyés
+      tels quels, ils seraient enregistrés vides, et l'élève retrouverait ses
+      grilles effacées en changeant d'appareil. On les encode en JSON, et on
+      les relit au retour. */
+var SYNC = { file: {}, t: null, jeton: null, actif: false };
+
+function syncJeton() {
+  try { return (window.VRTLivret && window.VRTLivret.jeton()) || null; }
+  catch (e) { return null; }
+}
+function syncEncode(v) { return typeof v === 'string' ? v : JSON.stringify(v); }
+function syncDecode(v) {
+  if (typeof v !== 'string') return v;
+  var t = v.trim();
+  if (t.charAt(0) !== '[' && t.charAt(0) !== '{') return v;
+  try { return JSON.parse(t); } catch (e) { return v; }
+}
+
+/* Le paquet part au plus tôt 2,5 s après la dernière frappe : on n'écrit pas
+   une requête par lettre, et l'élève qui répond d'un trait n'en déclenche
+   qu'une. */
+function syncPousser() {
+  if (SYNC.t) { clearTimeout(SYNC.t); SYNC.t = null; }
+  SYNC.t = setTimeout(function () {
+    SYNC.t = null;
+    var jeton = SYNC.jeton || syncJeton();
+    var cles = Object.keys(SYNC.file);
+    if (!jeton || !cles.length) return;
+    var lot = {};
+    for (var i = 0; i < cles.length; i++) lot[cles[i]] = SYNC.file[cles[i]];
+    fetch('/api/cahier.php', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'enregistrer', token: jeton, reponses: lot })
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (!j || !j.ok) throw new Error('refus');
+        /* On ne vide QUE ce qui vient de partir : une réponse écrite pendant
+           que la requête était en vol reste dans la file. */
+        for (var k in lot) if (SYNC.file[k] === lot[k]) delete SYNC.file[k];
+      })
+      .catch(function () {
+        /* Réseau coupé, serveur muet : on garde tout et on réessaiera au
+           prochain changement. Rien n'est perdu, rien n'est annoncé — le
+           travail est déjà sur l'appareil. */
+        SYNC.t = setTimeout(syncPousser, 20000);
+      });
+  }, 2500);
+}
+
+function syncNoter(cle, valeur) {
+  if (!SYNC.actif) return;
+  SYNC.file[SLUG + '/' + cle] = syncEncode(valeur);
+  syncPousser();
+}
+
+/* À l'ouverture : ce que le serveur a déjà l'emporte sur un appareil vierge,
+   et l'appareil l'emporte sur le serveur quand il a du travail en attente.
+   On ne « fusionne » pas au caractère près : la dernière écriture gagne, clé
+   par clé, comme le fait api/cahier.php lui-même. */
+function syncCharger(alors) {
+  var jeton = syncJeton();
+  if (!jeton) { alors(null); return; }
+  SYNC.jeton = jeton; SYNC.actif = true;
+  fetch('/api/cahier.php', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'charger', token: jeton })
+  })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      if (!j || !j.ok || !j.reponses) { alors(null); return; }
+      var out = {}, pre = SLUG + '/';
+      for (var k in j.reponses) {
+        if (k.indexOf(pre) !== 0) continue;
+        out[k.slice(pre.length)] = syncDecode(j.reponses[k]);
+      }
+      alors(out);
+    })
+    .catch(function () { alors(null); });
+}
+
+function clesDuChapitre(page, blocs) {
+  var vus = {}, out = [];
+  for (var i = 0; i < blocs.length; i++) {
+    var e = empK(texteBloc(blocs[i], i));
+    vus[e] = (vus[e] || 0) + 1;
+    out.push(page.id + '.' + e + (vus[e] > 1 ? '_' + vus[e] : ''));
+  }
+  return out;
+}
 /* ── LA MÊME PAGE OUVRE LES DEUX OUVRAGES ────────────────────────────────
    Un cahier se vend en deux natures : le livret de l'élève et le guide de
    l'enseignant, qui porte les corrigés rédigés. Ce sont deux produits, deux
@@ -910,7 +1077,7 @@ class Component extends DCLogic {
     booted: false, doc: null, loadErr: '',
     sess: null, code: '', name: '', classe: '', gateErr: '',
     pi: 0, drawer: false, tOpen: false, tLeft: 0, tRun: false,
-    ans: {}, ui: {}, shareMsg: 'Ton cahier est enregistré sur cet appareil. Récupère tes réponses en un fichier, puis envoie-le à ton enseignant par WhatsApp.'
+    ans: {}, ui: {}, shareMsg: 'Ton cahier est enregistré sur cet appareil ET sur le serveur : tu le retrouves sur un autre téléphone, et ton enseignant peut lire tes réponses.'
   };
 
   componentDidMount() {
@@ -935,6 +1102,10 @@ class Component extends DCLogic {
           const m = (() => { try { return JSON.parse(localStorage.getItem(LS + 'moi') || '{}'); } catch (e) { return {}; } })();
           this.setState({ sess: { code: '', name: m.name || 'Élève', classe: m.classe || SLUG, role: window.VRTLivret.etat().kind === 'guide' ? 'teacher' : 'student' } });
           this.load();
+          syncCharger(distantes => {
+            if (!distantes) return;
+            this.save(Object.assign({}, distantes, this.state.ans));
+          });
         })
         .catch(() => { if (/[?&]extrait=1/.test(location.search)) this.chargerExtrait(); });
     } else if (/[?&]extrait=1/.test(location.search)) {
@@ -995,7 +1166,7 @@ class Component extends DCLogic {
 
 
   save(ans) { this.setState({ ans }); try { localStorage.setItem(LS + 'ans', JSON.stringify(ans)); } catch (e) { /* quota */ } }
-  set(key, val) { const a = Object.assign({}, this.state.ans); a[key] = val; this.save(a); }
+  set(key, val) { const a = Object.assign({}, this.state.ans); a[key] = val; this.save(a); syncNoter(key, val); }
   get(key, dflt) { const v = this.state.ans[key]; return v === undefined ? dflt : v; }
   uiSet(key, val) { const u = Object.assign({}, this.state.ui); u[key] = val; this.setState({ ui: u }); }
 
@@ -1017,6 +1188,11 @@ class Component extends DCLogic {
         try { localStorage.setItem(LS + 'moi', JSON.stringify({ name: sess.name, classe: sess.classe })); } catch (e) { /* quota */ }
         this.setState({ sess, gateErr: '', gateBusy: false, pi: 0 });
         this.load();
+        syncCharger(distantes => {
+          if (!distantes) return;
+          const a = Object.assign({}, distantes, this.state.ans);
+          this.save(a);
+        });
       })
       .catch(e => this.setState({ gateBusy: false, gateErr: (e && e.message) || 'Code refusé. Vérifie que tu l\u2019as recopié exactement.' }));
   }
@@ -1063,7 +1239,8 @@ class Component extends DCLogic {
 
   decorate(blocks, page) {
     const out = [];
-    const K = p => page.partId + '.' + p;
+    const _cles = clesDuChapitre(page, blocks);
+    const K = p => _cles[p] || (page.id + '.b' + p);
     blocks.forEach((b, bi) => {
       const id = K(bi);
       if (b.k === 'h2') return;

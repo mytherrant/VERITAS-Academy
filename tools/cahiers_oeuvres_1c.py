@@ -516,6 +516,137 @@ def patcher(html: str, niveau: str, cfg: dict) -> str:
             html = html.replace(avant, apres)
             n += 1
 
+    # ⑭ LA CLÉ D'UNE RÉPONSE NE PEUT PAS ÊTRE UN INDICE.
+    #    `const K = p => page.partId + '.' + p` — l'œuvre, et le rang du bloc
+    #    dans le chapitre. Les sept chapitres d'une œuvre partageaient donc
+    #    leurs clés : 463 champs de réponse, sur les quatre cahiers, dont la
+    #    clé désigne aussi un autre champ. C'est de la perte de travail chez
+    #    l'élève, en silence.
+    #    Voir `clesDuChapitre()` ci-dessus pour la règle et son pourquoi.
+    ancienK = "    const K = p => page.partId + '.' + p;"
+    if ancienK not in html:
+        raise Ancre("la fabrique de clés K() est introuvable")
+    html = html.replace(
+        ancienK,
+        "    const _cles = clesDuChapitre(page, blocks);\n"
+        "    const K = p => _cles[p] || (page.id + '.b' + p);")
+    n += 1
+
+    # ⑮ LE SALON DE CLASSE, BRANCHÉ POUR DE BON.
+    #    Le bouton « Envoyer au salon » a été retiré au patch ⑧ parce qu'il
+    #    ne faisait rien : le message « votre enseignant verra vos réponses »
+    #    s'affichait, et aucune requête ne partait. C'était le bon geste — on
+    #    ne laisse pas une promesse fausse à l'écran — mais ce n'était qu'une
+    #    moitié : le travail de l'élève restait prisonnier d'un appareil.
+    #
+    #    Maintenant que chaque réponse a une clé stable (patch ⑭), on peut
+    #    l'écrire en base sans risque. `api/cahier.php` la reçoit, la range
+    #    sous le code de l'élève, et l'enseignant muni du code guide lit les
+    #    copies de SON ouvrage. Rien de neuf côté serveur : c'est le circuit
+    #    des vingt-quatre autres cahiers.
+    #
+    #    Sans la clé stable, ce branchement aurait écrit 463 collisions dans
+    #    la base — et une réponse écrasée en base ne se récupère pas, alors
+    #    qu'un `localStorage` abîmé ne concerne qu'un appareil. L'ordre des
+    #    deux patchs n'est pas un hasard.
+    ancienSet = "  set(key, val) { const a = Object.assign({}, this.state.ans); a[key] = val; this.save(a); }"
+    if ancienSet not in html:
+        raise Ancre("set() est introuvable")
+    html = html.replace(ancienSet,
+        "  set(key, val) { const a = Object.assign({}, this.state.ans); a[key] = val; "
+        "this.save(a); syncNoter(key, val); }")
+    n += 1
+
+    #    Et au déverrouillage, on redescend ce que le serveur garde : c'est ce
+    #    qui fait qu'un élève retrouve son cahier sur le téléphone de son
+    #    grand frère. Les réponses du serveur ne remplacent pas celles de
+    #    l'appareil — elles les complètent, clé par clé, sinon un cahier
+    #    ouvert hors ligne puis reconnecté perdrait sa dernière séance.
+    ancienCharge = ("          this.load();\n        })\n        .catch(() => { "
+                    "if (/[?&]extrait=1/.test(location.search)) this.chargerExtrait(); });")
+    if ancienCharge not in html:
+        raise Ancre("la reprise de session est introuvable")
+    html = html.replace(ancienCharge,
+        "          this.load();\n"
+        "          syncCharger(distantes => {\n"
+        "            if (!distantes) return;\n"
+        "            this.save(Object.assign({}, distantes, this.state.ans));\n"
+        "          });\n"
+        "        })\n"
+        "        .catch(() => { if (/[?&]extrait=1/.test(location.search)) "
+        "this.chargerExtrait(); });")
+    n += 1
+
+    #    Même chose après la saisie d'un code : `unlock()` obtient le jeton,
+    #    donc le serveur peut enfin être interrogé.
+    ancienUnlock = "        this.setState({ sess, gateErr: '', gateBusy: false, pi: 0 });\n        this.load();"
+    if ancienUnlock not in html:
+        raise Ancre("la fin de unlock() est introuvable")
+    html = html.replace(ancienUnlock,
+        "        this.setState({ sess, gateErr: '', gateBusy: false, pi: 0 });\n"
+        "        this.load();\n"
+        "        syncCharger(distantes => {\n"
+        "          if (!distantes) return;\n"
+        "          const a = Object.assign({}, distantes, this.state.ans);\n"
+        "          this.save(a);\n"
+        "        });")
+    n += 1
+
+    #    Et le panneau du bas redit la vérité : les réponses partent vraiment.
+    for avant, apres in (
+        ("shareMsg: 'Ton cahier est enregistré sur cet appareil. Récupère tes réponses "
+         "en un fichier, puis envoie-le à ton enseignant par WhatsApp.'",
+         "shareMsg: 'Ton cahier est enregistré sur cet appareil ET sur le serveur : tu "
+         "le retrouves sur un autre téléphone, et ton enseignant peut lire tes réponses.'"),
+        ("Vos élèves vous envoient le fichier de leurs réponses depuis le bouton "
+         "« Récupérer mes réponses », en bas de leur cahier.",
+         "Les réponses de vos élèves remontent au fur et à mesure qu'ils écrivent. "
+         "Ouvrez-les avec votre code enseignant."),
+    ):
+        if avant not in html:
+            raise Ancre(f"le texte du salon est introuvable : {avant[:46]}…")
+        html = html.replace(avant, apres)
+        n += 1
+
+    # ⑬ UNE ILLUSTRATION QUI CONTREDIT SA PROPRE LÉGENDE.
+    #    La carte mentale des « Contes de Korotoumou » affiche « 20 TEXTES »
+    #    quatre fois — dans son titre, son sous-titre, sur le livre dessiné et
+    #    sous lui. L'œuvre en compte QUATORZE : le document le dit trois fois
+    #    (« Le recueil compte quatorze contes en trois parties »), et les
+    #    légendes de cette image elles-mêmes disent « Quatorze contes, trois
+    #    familles ». L'image et sa légende se contredisent dans le même bloc,
+    #    à l'écran, dans un cahier qu'on vend 1 000 F.
+    #
+    #    On ne peut pas la corriger ici : le nombre est peint dans les pixels,
+    #    en quatre endroits et deux corps de police, et le lot d'originaux n'en
+    #    contient qu'une variante — la même, avec la même faute.
+    #
+    #    Une illustration absente coûte moins qu'une illustration fausse : un
+    #    élève qui lit « 20 » sur l'image et « quatorze » dans la consigne ne
+    #    sait plus lequel croire, et c'est tout le cahier qui perd son autorité.
+    #    On la retire donc de ses trois emplois. Le chapitre « Qui est qui dans
+    #    les contes » reprend la couverture de l'œuvre, qui montre justement
+    #    ses personnages ; les deux autres emplois restent sans image, le texte
+    #    suffit. À refaire côté image, avec le bon nombre.
+    if niveau == "6e":
+        for avant, apres in (
+            ("'w3c3': ['w3-carte-mentale', 'Les quatorze contes et leurs trois familles'],",
+             "'w3c3': ['w3-couverture', 'Les personnages des quatorze contes'],"),
+            # ⚠️ L'apostrophe est ÉCHAPPÉE dans la source (`’`, six
+            #    caractères), pas écrite en toutes lettres : le motif doit
+            #    porter la même forme, sinon l'ancre reste introuvable.
+            ("  ['Ce qu\\u2019il y a dedans : quatorze contes', 'w3-carte-mentale', "
+             "'Quatorze contes, trois familles'],\n", ""),
+            ("'Les Contes de Korotoumou': ['w3-carte-mentale', 'Quatorze contes, trois familles'] };",
+             "};"),
+        ):
+            if avant not in html:
+                raise Ancre(f"l'emploi « {avant[:34]}… » est introuvable")
+            html = html.replace(avant, apres)
+            n += 1
+        if "w3-carte-mentale" in html:
+            raise Ancre("« w3-carte-mentale » subsiste après le retrait de ses trois emplois")
+
     # ⑩ LE CONFORT DE LECTURE — MESURÉ, PAS DEVINÉ.
     #    La colonne de texte faisait 1 180 px. Sur l'écran d'un ordinateur, une
     #    ligne portait donc jusqu'à 140 signes ; mesuré à 900 px de large, elle
@@ -580,7 +711,7 @@ def patcher(html: str, niveau: str, cfg: dict) -> str:
 
     # Trois remplacements de plus pour la 6ᵉ, qui est le seul des quatre
     # cahiers à servir deux fois la même illustration.
-    attendus = 29 if niveau == "6e" else 26
+    attendus = 38 if niveau == "6e" else 32
     if n != attendus:
         raise Ancre(f"{n} remplacements au lieu de {attendus}")
     # Une dernière vérification, sur le produit fini : aucune trace du verrou
@@ -610,6 +741,173 @@ PORTE_JS = """/* ── LA PORTE EST CELLE DU SITE, PLUS CELLE DE LA PAGE ──
    il n'y a pas de raison d'en écrire une seconde version ici. */
 const LS = '@LS@';
 const SLUG = '@SLUG@';
+
+/* ── LA CLÉ D'UNE RÉPONSE, ET POURQUOI ELLE COMPTE ────────────────────────
+   Le cahier rangeait chaque réponse sous « <œuvre>.<indice du bloc> » :
+   `page.partId + '.' + bi`. Deux défauts dans une seule ligne.
+
+   ① `partId` est l'ŒUVRE, pas le chapitre — et `bi` repart de zéro à chaque
+      chapitre. Les sept chapitres d'une même œuvre se partageaient donc les
+      mêmes clés. Mesuré sur les quatre cahiers : 463 champs de réponse dont
+      la clé désigne aussi un AUTRE champ. L'élève répond à la question 3 du
+      chapitre 1 ; il ouvre le chapitre 4, sa réponse y est déjà, sous une
+      autre question — et s'il la corrige, la première est perdue.
+   ② Même sans collision, un indice est positionnel : ajouter un exercice au
+      milieu d'un chapitre décale tout ce qui suit, et l'élève retrouve ses
+      réponses sous les mauvaises questions à la rentrée suivante.
+
+   La clé porte donc OÙ l'on est (le chapitre) et CE QUE l'exercice DIT (une
+   empreinte de son énoncé). Ajouter, retirer ou déplacer un exercice ne
+   touche à rien d'autre. C'est la règle de `livrets/cahier.js`, et le même
+   FNV-1a en base 36 : les deux moteurs rangent leurs réponses de la même
+   façon, ce qui compte le jour où `api/cahier.php` les lit tous les deux.
+
+   Corollaire assumé : réécrire l'énoncé d'un exercice détache la réponse qui
+   y était. C'est le bon comportement — la question n'est plus la même. */
+function empK(texte) {
+  var t = String(texte || '').replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ').trim().toLowerCase().slice(0, 400);
+  var h = 0x811c9dc5;
+  for (var i = 0; i < t.length; i++) {
+    h ^= t.charCodeAt(i);
+    h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0;
+  }
+  return h.toString(36);
+}
+/* Le texte qui identifie un bloc. Un bloc sans texte — une grille, une carte —
+   n'en a pas : il prend alors son type et son rang, faute de mieux. Sans ce
+   repli, tous les blocs muets d'un chapitre partageraient l'empreinte de la
+   chaîne vide, et l'on aurait remplacé une collision par une autre. */
+function texteBloc(b, i) {
+  if (!b) return 'b' + i;
+  var t = b.x || b.title || '';
+  if (!t && b.body) t = (b.body || []).join(' ');
+  if (!t && b.rows) t = JSON.stringify(b.rows).slice(0, 200);
+  if (!t && b.words) t = (b.words || []).join(' ');
+  if (!t && b.items) t = JSON.stringify(b.items).slice(0, 200);
+  return t ? String(t) : (b.k || 'x') + '#' + i;
+}
+/* Les clés d'un chapitre, calculées d'un coup. Deux blocs peuvent porter le
+   MÊME texte dans un même chapitre (deux consignes identiques, deux lignes de
+   grille) : le second reçoit alors un rang. On ne le donne qu'aux doublons,
+   pour que la clé du cas courant reste inchangée quand un doublon apparaît
+   plus loin. */
+/* ── LE TRAVAIL DE L'ÉLÈVE MONTE AU SERVEUR ───────────────────────────────
+   Jusqu'ici, tout vivait dans le `localStorage` de l'appareil. Changer de
+   téléphone, vider son cache ou ouvrir le cahier sur l'ordinateur de la
+   maison, et une année de réponses disparaissait. Le bouton « Envoyer au
+   salon de classe » promettait pourtant que « votre enseignant verra vos
+   réponses » — il n'envoyait rien du tout.
+
+   `api/cahier.php` fait déjà ce travail pour les vingt-quatre autres cahiers,
+   et son contrat nous va tel quel : l'élève est identifié par SON JETON de
+   livret — celui que `gate.js` détient — et l'enseignant lit les copies de
+   son ouvrage avec un jeton de guide. Rien à ajouter côté serveur.
+
+   TROIS RÈGLES, ET CHACUNE A COÛTÉ QUELQUE CHOSE À QUELQU'UN :
+
+   ① ON ÉCRIT D'ABORD SUR L'APPAREIL, ON ENVOIE ENSUITE. L'élève travaille
+      depuis un téléphone, au Cameroun ; la ligne coupe. Une réponse n'est
+      jamais perdue parce qu'une requête a échoué — elle attend dans la file
+      et repart au prochain envoi.
+
+   ② ON N'ENVOIE QUE CE QUI A CHANGÉ. Pousser les deux cents réponses d'un
+      cahier à chaque frappe rendrait le cahier inutilisable sur une connexion
+      lente, et ferait payer des données pour rien.
+
+   ③ UNE RÉPONSE QUI N'EST PAS UNE CHAÎNE DOIT ÊTRE SÉRIALISÉE. `ch_texte()`
+      côté serveur commence par `if (!is_scalar($v)) return '';` — un tableau
+      y devient la chaîne vide. Or l'ordre d'un exercice « remets dans l'ordre »
+      et la liste des mots trouvés d'une grille SONT des tableaux : envoyés
+      tels quels, ils seraient enregistrés vides, et l'élève retrouverait ses
+      grilles effacées en changeant d'appareil. On les encode en JSON, et on
+      les relit au retour. */
+var SYNC = { file: {}, t: null, jeton: null, actif: false };
+
+function syncJeton() {
+  try { return (window.VRTLivret && window.VRTLivret.jeton()) || null; }
+  catch (e) { return null; }
+}
+function syncEncode(v) { return typeof v === 'string' ? v : JSON.stringify(v); }
+function syncDecode(v) {
+  if (typeof v !== 'string') return v;
+  var t = v.trim();
+  if (t.charAt(0) !== '[' && t.charAt(0) !== '{') return v;
+  try { return JSON.parse(t); } catch (e) { return v; }
+}
+
+/* Le paquet part au plus tôt 2,5 s après la dernière frappe : on n'écrit pas
+   une requête par lettre, et l'élève qui répond d'un trait n'en déclenche
+   qu'une. */
+function syncPousser() {
+  if (SYNC.t) { clearTimeout(SYNC.t); SYNC.t = null; }
+  SYNC.t = setTimeout(function () {
+    SYNC.t = null;
+    var jeton = SYNC.jeton || syncJeton();
+    var cles = Object.keys(SYNC.file);
+    if (!jeton || !cles.length) return;
+    var lot = {};
+    for (var i = 0; i < cles.length; i++) lot[cles[i]] = SYNC.file[cles[i]];
+    fetch('/api/cahier.php', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'enregistrer', token: jeton, reponses: lot })
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (!j || !j.ok) throw new Error('refus');
+        /* On ne vide QUE ce qui vient de partir : une réponse écrite pendant
+           que la requête était en vol reste dans la file. */
+        for (var k in lot) if (SYNC.file[k] === lot[k]) delete SYNC.file[k];
+      })
+      .catch(function () {
+        /* Réseau coupé, serveur muet : on garde tout et on réessaiera au
+           prochain changement. Rien n'est perdu, rien n'est annoncé — le
+           travail est déjà sur l'appareil. */
+        SYNC.t = setTimeout(syncPousser, 20000);
+      });
+  }, 2500);
+}
+
+function syncNoter(cle, valeur) {
+  if (!SYNC.actif) return;
+  SYNC.file[SLUG + '/' + cle] = syncEncode(valeur);
+  syncPousser();
+}
+
+/* À l'ouverture : ce que le serveur a déjà l'emporte sur un appareil vierge,
+   et l'appareil l'emporte sur le serveur quand il a du travail en attente.
+   On ne « fusionne » pas au caractère près : la dernière écriture gagne, clé
+   par clé, comme le fait api/cahier.php lui-même. */
+function syncCharger(alors) {
+  var jeton = syncJeton();
+  if (!jeton) { alors(null); return; }
+  SYNC.jeton = jeton; SYNC.actif = true;
+  fetch('/api/cahier.php', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'charger', token: jeton })
+  })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      if (!j || !j.ok || !j.reponses) { alors(null); return; }
+      var out = {}, pre = SLUG + '/';
+      for (var k in j.reponses) {
+        if (k.indexOf(pre) !== 0) continue;
+        out[k.slice(pre.length)] = syncDecode(j.reponses[k]);
+      }
+      alors(out);
+    })
+    .catch(function () { alors(null); });
+}
+
+function clesDuChapitre(page, blocs) {
+  var vus = {}, out = [];
+  for (var i = 0; i < blocs.length; i++) {
+    var e = empK(texteBloc(blocs[i], i));
+    vus[e] = (vus[e] || 0) + 1;
+    out.push(page.id + '.' + e + (vus[e] > 1 ? '_' + vus[e] : ''));
+  }
+  return out;
+}
 /* ── LA MÊME PAGE OUVRE LES DEUX OUVRAGES ────────────────────────────────
    Un cahier se vend en deux natures : le livret de l'élève et le guide de
    l'enseignant, qui porte les corrigés rédigés. Ce sont deux produits, deux

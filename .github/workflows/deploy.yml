@@ -521,6 +521,17 @@ jobs:
       - name: 🏷️ Chaque carte montre son ouvrage, et une seule fois ?
         run: node tests/banc_vignettes_boutique.cjs
 
+      # ── 🔑 DEUX RÉPONSES NE PARTAGENT PAS UNE CLÉ
+      #    Les cahiers d'oeuvres du 1er cycle rangeaient chaque réponse sous
+      #    « <oeuvre>.<indice du bloc> » : les sept chapitres d'une meme oeuvre
+      #    partageaient donc leurs cles — 463 champs, sur les quatre cahiers,
+      #    dont la cle designait aussi un AUTRE champ. L'eleve repondait au
+      #    chapitre 1 et retrouvait sa reponse au chapitre 4, ou la perdait.
+      #    Le banc rejoue l'ANCIENNE regle en plus de la nouvelle : s'il ne
+      #    retrouve plus les 463 collisions, c'est qu'il a cesse de mesurer.
+      - name: 🔑 Chaque réponse a-t-elle sa propre clé ?
+        run: node tests/banc_cles_oeuvres_1c.cjs
+
       # ── 🛒 UNE SEULE DEVANTURE, UN SEUL FLUX. Le centre vendait à deux
       #    endroits : les manuels par DB.books et la boutique de l'accueil, les
       #    quinze cahiers interactifs par livrets_catalogue.json et une page à
