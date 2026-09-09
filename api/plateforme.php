@@ -96,14 +96,35 @@ function plat_bearer(): string
 }
 
 /**
- * Compte authentifié, ou refus 401. On recharge le compte depuis la base à
- * chaque appel (c'est ce que fait vrt_verify_token) : un droit retiré prend
- * effet tout de suite, sans attendre l'expiration du jeton.
+ * Porteur du jeton, ou refus 401. Deux sortes de porteurs, et c'est voulu :
+ *
+ *   • un COMPTE — jeton vrt_issue_token, rechargé depuis la base à chaque
+ *     appel (un droit retiré prend effet tout de suite, sans attendre
+ *     l'expiration du jeton) ;
+ *   • un INVITÉ — jeton d'appareil, sans compte ni mot de passe, rendu par
+ *     ?action=invite. C'est ce qui a remplacé le mur d'inscription.
+ *
+ * Les deux sortent d'ici sous la même forme (`acc` + `type`), pour que le
+ * reste du fichier n'ait pas à savoir lequel il sert. `type` vaut « invite »
+ * dans le second cas, et `cle` porte alors l'empreinte de l'appareil — c'est
+ * elle qui range l'essai et les compteurs.
  */
 function plat_compte(array $db): array
 {
     $tok = plat_bearer();
     if ($tok === '') jsonResponse(['ok' => false, 'error' => 'Authentification requise'], 401);
+
+    /* L'invité d'abord : son jeton porte un préfixe qui ne peut pas être
+       confondu, et vrt_verify_token le rejetterait de toute façon. */
+    $inv = plat_inv_verifier($tok);
+    if ($inv !== null) {
+        return [
+            'acc'  => plat_inv_compte($inv['id'], $inv['cle']),
+            'type' => 'invite',
+            'cle'  => $inv['cle'],
+        ];
+    }
+
     $v = vrt_verify_token($tok, $db);
     if (!$v || empty($v['acc'])) jsonResponse(['ok' => false, 'error' => 'Session expirée'], 401);
     return $v;
@@ -185,6 +206,308 @@ function plat_essai_ouvrir(string $accId, int $herite = 0): int
     return $debut;
 }
 
+/* ═════════════════════════════════════════════════════════════════════════
+   ENTRÉE SANS MOT DE PASSE — le registre des invités
+
+   POURQUOI
+     L'Atelier réclamait un compte VÉRITAS avant de montrer quoi que ce soit :
+     aller s'inscrire sur un autre domaine, choisir un identifiant, un mot de
+     passe, revenir ici. Beaucoup d'enseignants s'arrêtaient là — un outil
+     qu'on n'a pas encore vu ne mérite pas qu'on remplisse un formulaire pour
+     lui. Le mur ne protégeait d'ailleurs rien : le répertoire sous droits est
+     gardé par le PALIER, pas par la porte d'entrée.
+
+   CE QUI LE REMPLACE
+     Le navigateur tire une empreinte d'appareil au hasard et la présente ; le
+     serveur lui rend un jeton d'invité signé. Aucun mot de passe, aucune
+     adresse, aucun formulaire : l'invité travaille tout de suite.
+
+   POURQUOI HORS DE LA BASE
+     `data/veritas_db.json` est poussée EN ENTIER par le navigateur de
+     l'administration (db.php en PUT). Y verser un compte par visiteur la
+     ferait enfler sans fin, et chaque synchronisation admin écraserait les
+     invités nés entre-temps. Le registre est donc un fichier à part, que
+     personne d'autre ne lit — même raisonnement que `_plat_essais.json`.
+
+   CE QU'UN INVITÉ NE PEUT PAS FAIRE
+     Ni équipe, ni bibliothèque partagée, ni abonnement : ce sont des choses
+     qui se rattachent à une personne. Au moment de payer, et seulement là,
+     `?action=promouvoir` lui fabrique un vrai compte — toujours sans mot de
+     passe — et lui remet un CODE DE REPRISE. C'est ce code, jamais un mot de
+     passe, qui rouvre son abonnement sur un autre appareil.
+
+   L'ESSAI NE SE RELANCE PAS EN VIDANT SON NAVIGATEUR
+     Deux verrous, parce qu'un seul se contourne :
+       1. l'empreinte d'appareil — même appareil, même essai, même compteur ;
+       2. un plafond de NOUVEAUX essais par adresse IP et par jour : assez
+          large pour une salle des professeurs derrière un seul routeur, assez
+          étroit pour que recréer un essai à la chaîne ne mène nulle part.
+     Et surtout : l'essai ne s'ouvre plus à l'ENTRÉE — il s'ouvre au premier
+     geste payant (voir plat_essai_stamp). Parcourir le répertoire trois jours
+     durant ne consomme plus rien.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/** Durée de vie d'un jeton d'invité. Longue à dessein : le redemander
+    reviendrait à remettre une porte là où on vient d'en enlever une. */
+if (!defined('VRT_INV_TTL')) define('VRT_INV_TTL', 180 * 86400);
+
+function plat_inv_fichier(): string
+{
+    global $DATA_DIR;
+    return $DATA_DIR . '/_plat_invites.json';
+}
+
+function plat_inv_lire(): array
+{
+    $j = json_decode((string) @file_get_contents(plat_inv_fichier()), true);
+    if (!is_array($j)) $j = [];
+    if (!isset($j['appareils']) || !is_array($j['appareils'])) $j['appareils'] = [];
+    if (!isset($j['ip'])       || !is_array($j['ip']))        $j['ip']        = [];
+    return $j;
+}
+
+/**
+ * Lecture-modification-écriture du registre sous verrou. Le mutateur reçoit le
+ * registre et renvoie `[$registre, $resultat]`, ou `null` pour ne rien écrire.
+ *
+ * Best-effort assumé : si le verrou ne vient pas, on rend null sans écrire.
+ * Mieux vaut un compteur qui rate un incrément qu'un enseignant bloqué devant
+ * un écran par un fichier occupé.
+ */
+function plat_inv_muter(callable $mutateur)
+{
+    $f  = plat_inv_fichier();
+    $fp = @fopen($f, 'c+');
+    if (!$fp) return null;
+
+    $obtenu = false;
+    for ($i = 0; $i < 12; $i++) {
+        if (flock($fp, LOCK_EX | LOCK_NB)) { $obtenu = true; break; }
+        usleep(80000);
+    }
+    if (!$obtenu) { fclose($fp); return null; }
+
+    $reg = json_decode((string) stream_get_contents($fp), true);
+    if (!is_array($reg)) $reg = [];
+    if (!isset($reg['appareils']) || !is_array($reg['appareils'])) $reg['appareils'] = [];
+    if (!isset($reg['ip'])       || !is_array($reg['ip']))        $reg['ip']        = [];
+
+    $sortie = $mutateur($reg);
+    if (!is_array($sortie)) { flock($fp, LOCK_UN); fclose($fp); return null; }
+
+    $neuf = is_array($sortie[0] ?? null) ? $sortie[0] : $reg;
+    $res  = $sortie[1] ?? null;
+
+    /* PURGE — un registre qui n'oublie rien finit par coûter une relecture de
+       plusieurs mégaoctets à chaque ouverture de page. On jette les appareils
+       muets depuis cinq mois (leur jeton expire à six) et les compteurs d'IP
+       des jours passés. */
+    $limite = time() - 150 * 86400;
+    foreach ($neuf['appareils'] as $k => $vv) {
+        if ((int) ($vv['vu'] ?? 0) < $limite) unset($neuf['appareils'][$k]);
+    }
+    $jour = date('Y-m-d');
+    foreach ($neuf['ip'] as $k => $vv) {
+        if ((string) ($vv['j'] ?? '') !== $jour) unset($neuf['ip'][$k]);
+    }
+
+    $enc = json_encode($neuf, JSON_UNESCAPED_UNICODE);
+    if ($enc !== false) { ftruncate($fp, 0); rewind($fp); fwrite($fp, $enc); fflush($fp); }
+    flock($fp, LOCK_UN);
+    fclose($fp);
+    return $res;
+}
+
+/** Empreinte rangée : on ne stocke jamais la valeur que le navigateur détient. */
+function plat_inv_cle(string $brut): string
+{
+    return substr(hash('sha256', 'appareil$' . $brut), 0, 32);
+}
+
+/** Jeton d'invité. Format distinct du jeton de compte (préfixe « inv. ») pour
+    qu'aucun des deux ne puisse être pris pour l'autre par accident. */
+function plat_inv_jeton(string $id, string $cle): string
+{
+    $body = vrt_b64url_encode(json_encode(
+        ['id' => $id, 'd' => $cle, 'exp' => time() + VRT_INV_TTL],
+        JSON_UNESCAPED_UNICODE));
+    return 'inv.' . $body . '.' . vrt_b64url_encode(
+        hash_hmac('sha256', 'invite|' . $body, VRT_HMAC_KEY, true));
+}
+
+/** Vérifie un jeton d'invité. Renvoie ['id','cle'] ou null. */
+function plat_inv_verifier(string $tok): ?array
+{
+    if (strpos($tok, 'inv.') !== 0) return null;
+    $parts = explode('.', substr($tok, 4));
+    if (count($parts) !== 2) return null;
+    $body = $parts[0];
+    $sig  = $parts[1];
+    $attendu = vrt_b64url_encode(hash_hmac('sha256', 'invite|' . $body, VRT_HMAC_KEY, true));
+    if (!hash_equals($attendu, $sig)) return null;
+    $p = json_decode(vrt_b64url_decode($body), true);
+    if (!is_array($p)) return null;
+    if ((int) ($p['exp'] ?? 0) < time()) return null;
+    $id  = (string) ($p['id'] ?? '');
+    $cle = (string) ($p['d'] ?? '');
+    if ($id === '' || $cle === '') return null;
+    return ['id' => $id, 'cle' => $cle];
+}
+
+/** Adresse IP rangée : un registre d'invités n'a pas à conserver des adresses
+    en clair, et un compteur n'a besoin que d'un discriminant stable. */
+function plat_inv_ip(): string
+{
+    return substr(hash('sha256', 'ip$' . vrt_client_ip()), 0, 24);
+}
+
+/**
+ * Ouvre (ou retrouve) l'invité d'un appareil.
+ *
+ * Renvoie ['id','cle','neuf'] ou ['erreur' => 'plafond_ip'] quand le plafond
+ * quotidien d'ouvertures pour cette adresse est atteint.
+ */
+function plat_inv_ouvrir(string $cleBrute, int $plafondIp): array
+{
+    $cle = plat_inv_cle($cleBrute);
+    $ip  = plat_inv_ip();
+    $res = plat_inv_muter(function (array $reg) use ($cle, $ip, $plafondIp) {
+        $maintenant = time();
+        if (isset($reg['appareils'][$cle]) && is_array($reg['appareils'][$cle])) {
+            $a = $reg['appareils'][$cle];
+            /* On n'écrit `vu` qu'une fois par jour : sans cela chaque
+               ouverture de page réécrirait tout le registre sous verrou. */
+            if ($maintenant - (int) ($a['vu'] ?? 0) > 86400) {
+                $reg['appareils'][$cle]['vu'] = $maintenant;
+            }
+            return [$reg, ['id' => (string) ($a['id'] ?? ''), 'cle' => $cle, 'neuf' => false]];
+        }
+
+        $jour = date('Y-m-d');
+        $c    = $reg['ip'][$ip] ?? null;
+        $n    = (is_array($c) && (string) ($c['j'] ?? '') === $jour) ? (int) $c['n'] : 0;
+        if ($plafondIp > 0 && $n >= $plafondIp) {
+            return [$reg, ['erreur' => 'plafond_ip']];
+        }
+        $reg['ip'][$ip] = ['j' => $jour, 'n' => $n + 1];
+
+        $id = 'inv_' . dechex($maintenant) . '_' . bin2hex(random_bytes(4));
+        $reg['appareils'][$cle] = [
+            'id'    => $id,
+            'ne'    => $maintenant,
+            'vu'    => $maintenant,
+            'essai' => 0,          // 0 = l'essai n'est pas encore entamé
+            'q'     => [],
+        ];
+        return [$reg, ['id' => $id, 'cle' => $cle, 'neuf' => true]];
+    });
+    if (!is_array($res)) {
+        /* Registre inaccessible : on rend quand même un invité, non persisté.
+           Il travaillera ; refuser l'accès sur un incident d'écriture
+           coûterait bien plus cher que de laisser un essai se rouvrir. */
+        return ['id' => 'inv_' . dechex(time()) . '_' . bin2hex(random_bytes(4)),
+                'cle' => $cle, 'neuf' => true, 'volatile' => true];
+    }
+    return $res;
+}
+
+/**
+ * Pseudo-compte d'un invité, de la forme que lisent plat_droit() et la suite.
+ * `plans` est TOUJOURS vide : un invité n'a pas d'abonnement — s'il en achète
+ * un, il cesse d'être invité (voir ?action=promouvoir).
+ */
+function plat_inv_compte(string $id, string $cle): array
+{
+    $reg = plat_inv_lire();
+    $a   = $reg['appareils'][$cle] ?? [];
+    return [
+        'id'             => $id,
+        'user'           => '',
+        'nom'            => '',
+        'plans'          => [],
+        'platInvite'     => true,
+        'platEssaiDebut' => (int) ($a['essai'] ?? 0),
+    ];
+}
+
+/** Code de reprise : douze caractères sans ambiguïté typographique (ni O/0,
+    ni I/1), présentés en trois groupes. C'est un secret porteur — il se lit
+    au téléphone et se recopie sans se tromper. */
+function plat_code_reprise(): string
+{
+    $alpha = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';   // 32 signes, sans I O 0 1
+    $out   = '';
+    for ($i = 0; $i < 12; $i++) {
+        $out .= $alpha[random_int(0, 31)];
+        if ($i === 3 || $i === 7) $out .= '-';
+    }
+    return $out;
+}
+
+/** Le code ne se range jamais en clair : la base est lue par d'autres outils,
+    et un code de reprise ouvre un abonnement payé. */
+function plat_code_hash(string $code): string
+{
+    $norm = strtoupper((string) preg_replace('/[^A-Za-z0-9]/', '', $code));
+    return hash_hmac('sha256', 'reprise|' . $norm, VRT_HMAC_KEY);
+}
+
+/**
+ * Pose la date d'ouverture de l'essai — au bon endroit selon le porteur.
+ *
+ * ⚠️ Elle ne se pose PLUS à l'entrée. L'essai démarrait à la première
+ * connexion ; maintenant que l'entrée est libre, il aurait démarré au premier
+ * coup d'œil, et sept jours plus tard l'enseignant qui prenait son temps
+ * n'aurait plus rien eu à essayer. Il démarre au premier geste qui consomme
+ * vraiment : ouvrir un texte sous droits, exporter, appeler Ambassa.
+ */
+function plat_essai_stamp(array $v): void
+{
+    if (($v['type'] ?? '') === 'invite') {
+        $cle = (string) ($v['cle'] ?? '');
+        if ($cle === '') return;
+        plat_inv_muter(function (array $reg) use ($cle) {
+            if (!isset($reg['appareils'][$cle])) return null;
+            if ((int) ($reg['appareils'][$cle]['essai'] ?? 0) > 0) return null;
+            $reg['appareils'][$cle]['essai'] = time();
+            return [$reg, true];
+        });
+        return;
+    }
+    $acc = $v['acc'] ?? [];
+    plat_essai_ouvrir((string) ($acc['id'] ?? ''), (int) ($acc['platEssaiDebut'] ?? 0));
+}
+
+/**
+ * Compteur mensuel d'un invité. Mêmes plafonds que pour un compte
+ * (`plat_paliers` reste la seule table) ; seul le rangement diffère, pour que
+ * la base ne porte pas une ligne par visiteur.
+ */
+function plat_inv_quota(string $cle, string $genre, int $plafond, string $mois): array
+{
+    $res = plat_inv_muter(function (array $reg) use ($cle, $genre, $plafond, $mois) {
+        if (!isset($reg['appareils'][$cle]) || !is_array($reg['appareils'][$cle])) return null;
+        $q = $reg['appareils'][$cle]['q'] ?? [];
+        if (!is_array($q)) $q = [];
+        $c = $q[$genre] ?? null;
+        if (!is_array($c) || (string) ($c['mois'] ?? '') !== $mois) $c = ['mois' => $mois, 'utilise' => 0];
+        if ($plafond >= 0 && (int) $c['utilise'] >= $plafond) {
+            // Rien n'est écrit : un refus ne consomme pas.
+            return [$reg, ['accorde' => false, 'utilise' => (int) $c['utilise'], 'plafond' => $plafond]];
+        }
+        $c['utilise'] = (int) $c['utilise'] + 1;
+        $q[$genre] = $c;
+        $reg['appareils'][$cle]['q'] = $q;
+        return [$reg, ['accorde' => true, 'utilise' => (int) $c['utilise'], 'plafond' => $plafond]];
+    });
+    if (!is_array($res)) {
+        /* Registre inaccessible : on accorde. Refuser sur un incident
+           d'écriture punirait l'enseignant d'une panne de disque. */
+        return ['accorde' => true, 'utilise' => 0, 'plafond' => $plafond];
+    }
+    return $res;
+}
+
 /**
  * Tarif public de chaque plan de l'Atelier.
  *
@@ -218,6 +541,11 @@ function plat_offres(array $db): array
         'cadeauBienvenue'  => max(0, (int) ($o['cadeauBienvenue']  ?? 0)),
         'bonusReabo'       => max(0, (int) ($o['bonusReabo']       ?? 0)),
         'quotaEssai'       => max(0, (int) ($o['quotaEssai']       ?? 10)),
+        /* Nouveaux essais ouverts par adresse IP et par jour. Une salle des
+           professeurs derrière un seul routeur en consomme quelques-uns dans
+           l'après-midi ; en farmer trente pour ne jamais payer bute ici.
+           0 = sans plafond (à ne poser qu'en connaissance de cause). */
+        'essaisParIp'      => max(0, (int) ($o['essaisParIp']      ?? 8)),
         'message'          => (string) ($o['message'] ?? ''),
     ];
 }
@@ -276,7 +604,18 @@ function plat_paliers(array $db): array
            qui donnent de quoi travailler tout de suite ; l'échantillon
            protégé, lui, montre ce qu'on achète.
            Réglable en base : DB.plateforme.paliers.essai.textes. */
-        'essai' => ['textes' => 20,  'citations' => 8,   'exports' => 3,   'ia' => 10,  'epreuves' => 12],
+        /* RESSERRÉ le 09/09/2026, en même temps que l'entrée s'ouvrait.
+           Tant qu'il fallait créer un compte pour entrer, l'essai était le
+           prix d'un formulaire : on pouvait être large. L'entrée est
+           désormais libre — l'essai n'est plus mérité par personne, et c'est
+           lui, seul, qui sépare le visiteur de l'abonné. Il montre la
+           qualité ; il n'équipe pas un trimestre.
+           En contrepartie il ne s'ouvre plus à l'entrée mais au premier geste
+           payant (plat_essai_stamp) : celui qui prend son temps ne le brûle
+           plus à parcourir le répertoire.
+           Toutes ces valeurs se règlent en base (DB.plateforme.paliers.essai)
+           sans redéploiement. */
+        'essai' => ['textes' => 12,  'citations' => 5,   'exports' => 2,   'ia' => 5,   'epreuves' => 5],
 
         /* `epreuves` valait -1 (illimite) sur les trois paliers payants, alors
            que les cartes annoncent « 30 / 120 / 400 epreuves par mois ». Un
@@ -528,7 +867,15 @@ if ($action === 'config') {
         'tarifs'     => plat_tarifs($db),
         'paliers'    => is_array($db) ? plat_paliers($db) : plat_paliers([]),
         'places'     => is_array($db) ? plat_places_palier($db) : plat_places_palier([]),
-        'offres'     => $offres,
+        /* L'ENTRÉE EST LIBRE — le client le lit ici plutôt que de le supposer.
+           Un vieux navigateur en cache qui n'aurait pas la nouvelle page
+           continue d'afficher le formulaire ; ce drapeau permet de le
+           reconnaître au lieu de deviner. */
+        'entree'     => ['libre' => true, 'version' => 2],
+        /* `essaisParIp` est retiré : c'est un garde-fou, et un garde-fou dont
+           on publie le chiffre se contourne à coup sûr. L'administration le
+           règle par ?action=offres, où elle est authentifiée. */
+        'offres'     => array_diff_key($offres, ['essaisParIp' => 1]),
         'baseLisible' => is_array($db),
     ]);
 }
@@ -575,6 +922,312 @@ if ($action === 'session' && $method === 'POST') {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
+   2bis. ENTRÉE LIBRE — un jeton contre une empreinte d'appareil
+
+   Aucun mot de passe, aucune adresse, aucun formulaire. Le navigateur tire une
+   empreinte au hasard, la garde, et la présente : il retrouve son invité, donc
+   son essai et ses compteurs. Vider son navigateur en fabrique un autre — c'est
+   le plafond par adresse IP, plus bas, qui empêche d'en fabriquer à la chaîne.
+
+   ⚠️ PLAFOND ATTEINT = HTTP 200 AVEC ok:false, PAS 429.
+   LWS bannit l'adresse à six mauvaises requêtes par minute, et cette sanction
+   ferme le site ENTIER. Un visiteur qui bute sur le plafond ne doit pas, en
+   rafraîchissant trois fois, faire tomber veritas-school.com pour son quartier.
+   ───────────────────────────────────────────────────────────────────────── */
+
+if ($action === 'invite' && $method === 'POST') {
+    $in  = plat_input(1024);
+    $cle = trim((string) ($in['appareil'] ?? ''));
+    /* L'empreinte vient du navigateur et ne prouve rien : elle ne sert qu'à se
+       reconnaître. On impose sa forme pour qu'elle ne serve pas à autre chose
+       (une clé trop longue ferait un registre trop lourd, une clé choisie
+       ferait deviner celle d'autrui). */
+    if (!preg_match('/^[A-Za-z0-9_-]{16,64}$/', $cle)) {
+        jsonResponse(['ok' => false, 'error' => 'Empreinte d’appareil invalide'], 400);
+    }
+
+    $db     = vrt_load_db();
+    $offres = is_array($db) ? plat_offres($db) : plat_offres([]);
+    $res    = plat_inv_ouvrir($cle, (int) $offres['essaisParIp']);
+
+    if (!empty($res['erreur'])) {
+        jsonResponse([
+            'ok'      => false,
+            'code'    => 'plafond_ip',
+            'error'   => 'Trop d’accès ouverts depuis cette connexion aujourd’hui. '
+                       . 'Réessayez demain, ou entrez votre code de reprise si vous êtes déjà abonné.',
+        ]);
+    }
+
+    $acc   = plat_inv_compte((string) $res['id'], (string) $res['cle']);
+    $droit = is_array($db) ? plat_droit($acc, $db, $offres) : ['ok' => true, 'motif' => 'essai_ouverture'];
+
+    jsonResponse([
+        'ok'     => true,
+        'token'  => plat_inv_jeton((string) $res['id'], (string) $res['cle']),
+        'compte' => ['id' => (string) $res['id'], 'nom' => '', 'type' => 'invite'],
+        'neuf'   => !empty($res['neuf']),
+        'droit'  => $droit,
+    ]);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   2ter. CODE DE REPRISE — retrouver son abonnement sans mot de passe
+
+   Un abonné change de téléphone, réinstalle son navigateur, travaille au
+   collège puis chez lui. Sans mot de passe, il lui faut autre chose que sa
+   mémoire : le code remis au moment du paiement. C'est un secret porteur, pas
+   un identifiant — celui qui l'a, a l'abonnement. D'où le débit très serré et
+   le rangement sous empreinte.
+
+   ⚠️ CODE INCONNU = HTTP 200 AVEC ok:false (même raison que ci-dessus : se
+   tromper de code est l'erreur la plus banale qui soit, et six fautes de
+   frappe ne doivent pas fermer le site).
+   ───────────────────────────────────────────────────────────────────────── */
+
+if ($action === 'reprise' && $method === 'POST') {
+    /* Un code fait 60 bits : le deviner demande des milliards d'essais. Le
+       débit sert surtout à ce que personne n'essaie de le vérifier. */
+    if (vrt_rate_exceeded('plat_reprise', 8)) {
+        jsonResponse(['ok' => false, 'error' => 'Trop de tentatives — patientez une minute.']);
+    }
+    $in   = plat_input(1024);
+    $code = trim((string) ($in['code'] ?? ''));
+    if ($code === '' || strlen($code) > 40) {
+        jsonResponse(['ok' => false, 'error' => 'Entrez le code de reprise reçu lors de votre abonnement.']);
+    }
+
+    $db = vrt_load_db();
+    if (!is_array($db)) jsonResponse(['ok' => false, 'error' => 'Base indisponible'], 503);
+
+    $empreinte = plat_code_hash($code);
+    $trouve    = null;
+    foreach (['visitorAccounts', 'studentAccounts'] as $coll) {
+        foreach (($db[$coll] ?? []) as $a) {
+            if (!is_array($a)) continue;
+            $h = (string) ($a['platCode'] ?? '');
+            /* hash_equals des deux côtés : comparer un secret avec == laisse
+               fuir sa longueur de préfixe par le temps de réponse. */
+            if ($h !== '' && hash_equals($h, $empreinte)) {
+                $trouve = ['acc' => $a, 'type' => ($coll === 'studentAccounts' ? 'eleve' : 'visiteur')];
+                break 2;
+            }
+        }
+    }
+    if ($trouve === null) {
+        jsonResponse(['ok' => false, 'error' => 'Ce code ne correspond à aucun abonnement. '
+            . 'Vérifiez-le, ou écrivez au centre.']);
+    }
+
+    $acc    = $trouve['acc'];
+    $offres = plat_offres($db);
+    jsonResponse([
+        'ok'     => true,
+        'token'  => vrt_issue_token($acc, (string) $trouve['type']),
+        'compte' => [
+            'id'   => (string) ($acc['id'] ?? ''),
+            'nom'  => (string) ($acc['nom'] ?? $acc['user'] ?? ''),
+            'type' => (string) $trouve['type'],
+        ],
+        'droit'  => plat_droit($acc, $db, $offres),
+    ]);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   2quater. PROMOTION — l'invité devient titulaire, au moment de payer
+
+   POURQUOI ICI ET PAS À L'ENTRÉE
+     Un abonnement se rattache à quelqu'un : `vrt_grant_entitlement()` écrit
+     le plan dans `acc.plans`, et sans compte il n'écrit nulle part — le client
+     aurait payé pour rien. Mais demander qui l'on est AVANT d'avoir montré
+     l'outil, c'est le mur qu'on vient d'enlever. On le demande donc au seul
+     moment où c'est utile et où l'enseignant le donne sans y penser : il tape
+     déjà son nom et son numéro Mobile Money pour payer.
+
+   TOUJOURS SANS MOT DE PASSE
+     Le compte créé porte `pwd` vide. `vrt_verify_password()` refuse
+     explicitement une empreinte vide : personne ne peut donc s'y connecter par
+     mot de passe, ni son titulaire ni un autre. Ce qui le rouvre ailleurs,
+     c'est le CODE DE REPRISE rendu ci-dessous — à noter, il n'est plus jamais
+     réaffiché en clair.
+
+   CE QUI SUIT L'INVITÉ
+     Son essai et ses compteurs du mois. Sans ce report, s'abonner remettrait
+     les compteurs à zéro : payer le lendemain d'un essai épuisé donnerait le
+     mois en cours en double, et abandonner en cours de route rouvrirait un
+     essai neuf. Le droit acheté s'ajoute ; il n'efface pas ce qui a été
+     consommé.
+   ───────────────────────────────────────────────────────────────────────── */
+
+if ($action === 'promouvoir' && $method === 'POST') {
+    if (vrt_rate_exceeded('plat_promo', 10)) {
+        jsonResponse(['ok' => false, 'error' => 'Trop de demandes — patientez une minute.'], 200);
+    }
+    $db = vrt_load_db();
+    if (!is_array($db)) jsonResponse(['ok' => false, 'error' => 'Base indisponible'], 503);
+
+    $v = plat_compte($db);
+
+    /* Déjà titulaire d'un compte : rien à créer. On lui rend son identité et,
+       s'il n'en a pas encore, un code de reprise — c'est le même geste. */
+    if (($v['type'] ?? '') !== 'invite') {
+        $acc = $v['acc'];
+        jsonResponse([
+            'ok'     => true,
+            'deja'   => true,
+            'compte' => ['id' => (string) ($acc['id'] ?? ''),
+                         'nom' => (string) ($acc['nom'] ?? $acc['user'] ?? '')],
+        ]);
+    }
+
+    $in  = plat_input(2048);
+    $nom = plat_texte_court($in['nom'] ?? '', 80);
+    $tel = plat_texte_court($in['tel'] ?? '', 30);
+
+    $invId  = (string) ($v['acc']['id'] ?? '');
+    $invCle = (string) ($v['cle'] ?? '');
+
+    /* Ce que l'invité a déjà consommé, relu AVANT l'écriture : c'est ce qui
+       va suivre son compte. */
+    $regInv   = plat_inv_lire();
+    $ancien   = $regInv['appareils'][$invCle] ?? [];
+    $essaiInv = (int) ($ancien['essai'] ?? 0);
+    $qInv     = is_array($ancien['q'] ?? null) ? $ancien['q'] : [];
+
+    $code   = plat_code_reprise();
+    $accId  = 'va_' . round(microtime(true) * 1000) . '_' . bin2hex(random_bytes(3));
+    /* L'identifiant technique n'est jamais montré ni saisi : il n'existe que
+       parce que `vrt_find_account()` cherche par `user`. Le rendre lisible
+       inviterait à le prendre pour un identifiant de connexion — il n'y en a
+       plus. */
+    $user   = 'atl-' . bin2hex(random_bytes(6));
+
+    $acc = [
+        'id'    => $accId,
+        'user'  => $user,
+        'pwd'   => '',                     // ← jamais de mot de passe, par construction
+        'nom'   => $nom,
+        'pre'   => '',
+        'tel'   => $tel,
+        'email' => '',
+        'role'  => 'enseignant',
+        'isTeacher' => true,
+        'plans' => [],                     // ← le plan viendra de vrt_grant_entitlement
+        'statut' => 'actif',
+        'inscriptionPayee' => true,
+        'dateInscription'  => date('d/m/Y'),
+        'platAtelier' => true,             // né dans l'Atelier, sans mot de passe
+        'platCode'    => plat_code_hash($code),
+        'platCodeLe'  => time(),
+        /* Horodatage de naissance CÔTÉ SERVEUR : c'est lui que db.php compare
+           au `lastModified` d'une synchronisation administrateur pour ne pas
+           effacer un compte né entre-temps. Sans ces deux champs, le premier
+           enregistrement de l'administration supprimerait l'abonné. */
+        'srvAt'      => (int) round(microtime(true) * 1000),
+        'srvCreated' => true,
+    ];
+
+    $res = plat_muter(function (array $db2) use ($acc, $qInv, $accId) {
+        if (!isset($db2['visitorAccounts']) || !is_array($db2['visitorAccounts'])) {
+            $db2['visitorAccounts'] = [];
+        }
+        foreach ($db2['visitorAccounts'] as $a) {
+            if (is_array($a) && (string) ($a['user'] ?? '') === (string) $acc['user']) {
+                return null;               // collision : 1 chance sur 2^48, mais on ne l'écrase pas
+            }
+        }
+        $db2['visitorAccounts'][] = $acc;
+
+        /* Report des compteurs du mois en cours. */
+        if (!isset($db2['plateforme']) || !is_array($db2['plateforme'])) $db2['plateforme'] = [];
+        if (!isset($db2['plateforme']['quotas']) || !is_array($db2['plateforme']['quotas'])) {
+            $db2['plateforme']['quotas'] = [];
+        }
+        $mois = date('Y-m');
+        foreach (['epreuve', 'ia', 'export'] as $genre) {
+            $c = $qInv[$genre] ?? null;
+            if (!is_array($c) || (string) ($c['mois'] ?? '') !== $mois) continue;
+            $db2['plateforme']['quotas'][$accId . '|' . $genre] =
+                ['mois' => $mois, 'utilise' => (int) ($c['utilise'] ?? 0)];
+        }
+        return [$db2, true];
+    }, false);
+
+    if ($res === null) {
+        jsonResponse(['ok' => false,
+            'error' => 'Le compte n’a pas pu être créé. Réessayez dans un instant.'], 503);
+    }
+
+    /* Report de l'essai : le compte hérite de la date d'ouverture de l'invité.
+       Sans cela, s'abonner après un essai épuisé rouvrirait un essai neuf. */
+    if ($essaiInv > 0) plat_essai_ouvrir($accId, $essaiInv);
+
+    /* L'appareil ne redevient pas invité : il porte désormais un compte. On
+       efface son entrée pour qu'un jeton d'invité resté en cache ne rouvre pas
+       un essai parallèle sur la même machine. */
+    if ($invCle !== '') {
+        plat_inv_muter(function (array $reg) use ($invCle) {
+            if (!isset($reg['appareils'][$invCle])) return null;
+            unset($reg['appareils'][$invCle]);
+            return [$reg, true];
+        });
+    }
+
+    @file_put_contents(__DIR__ . '/data/_access_log.txt',
+        date('c') . ' PLAT_PROMO acc=' . $accId . ' de=' . $invId
+        . ' ip=' . vrt_client_ip() . "\n", FILE_APPEND);
+
+    jsonResponse([
+        'ok'     => true,
+        'token'  => vrt_issue_token($acc, 'visiteur'),
+        'compte' => ['id' => $accId, 'nom' => $nom, 'type' => 'visiteur'],
+        /* LE SEUL MOMENT OÙ LE CODE EXISTE EN CLAIR. Il n'est pas rangé : la
+           base n'en garde qu'une empreinte. Perdu, il se remplace (?action=code
+           en repose un nouveau) ; il ne se retrouve pas. */
+        'code'   => $code,
+    ], 201);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   2quinquies. CODE DE REPRISE D'UN COMPTE EXISTANT
+
+   Deux usages : l'abonné qui veut revoir sa clé (elle n'est pas conservée en
+   clair : on en pose une NEUVE, et l'ancienne cesse de valoir), et l'abonné de
+   longue date, arrivé par mot de passe, qui n'en a jamais eu.
+   ───────────────────────────────────────────────────────────────────────── */
+
+if ($action === 'code' && $method === 'POST') {
+    if (vrt_rate_exceeded('plat_code', 6)) {
+        jsonResponse(['ok' => false, 'error' => 'Trop de demandes — patientez une minute.']);
+    }
+    $db = vrt_load_db();
+    if (!is_array($db)) jsonResponse(['ok' => false, 'error' => 'Base indisponible'], 503);
+
+    $v = plat_compte($db);
+    if (($v['type'] ?? '') === 'invite') {
+        jsonResponse(['ok' => false,
+            'error' => 'Un code de reprise accompagne un abonnement. Abonnez-vous d’abord.']);
+    }
+
+    $accId = (string) ($v['acc']['id'] ?? '');
+    $code  = plat_code_reprise();
+    $emp   = plat_code_hash($code);
+
+    $res = plat_muter(function (array $db2) use ($accId, $emp) {
+        $cible = vrt_resoudre_compte($db2, $accId);
+        if ($cible === null) return null;
+        $db2[$cible['coll']][$cible['idx']]['platCode']   = $emp;
+        $db2[$cible['coll']][$cible['idx']]['platCodeLe'] = time();
+        return [$db2, true];
+    }, false);
+
+    if ($res === null) {
+        jsonResponse(['ok' => false, 'error' => 'Le code n’a pas pu être posé. Réessayez.'], 503);
+    }
+    jsonResponse(['ok' => true, 'code' => $code]);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
    3. CORPUS — sous condition de droit
    ───────────────────────────────────────────────────────────────────────── */
 
@@ -588,13 +1241,14 @@ if (($action === 'corpus' || $action === 'citations') && $method === 'GET') {
     $palier = plat_palier_de($droit);
     $caps   = plat_paliers($db)[$palier] ?? plat_paliers($db)['demo'];
 
-    /* Premier accès : on horodate l'ouverture de l'essai, côté serveur.
-       Dans le registre DÉDIÉ — un fichier de quelques centaines d'octets —
-       et non plus par une réécriture de toute la base sous verrou exclusif
-       sur le chemin de lecture du répertoire. Voir plat_essai_ouvrir(). */
-    if (($droit['motif'] ?? '') === 'essai_ouverture') {
-        plat_essai_ouvrir((string) ($acc['id'] ?? ''), (int) ($acc['platEssaiDebut'] ?? 0));
-    }
+    /* ⚠️ L'ESSAI NE S'OUVRE PLUS ICI. Il s'ouvrait au premier appel du
+       répertoire, index compris : depuis que l'entrée est libre, cela
+       revenait à le déclencher au premier coup d'œil. Quelqu'un qui découvre
+       l'outil un vendredi et revient le travailler la semaine suivante
+       aurait trouvé son essai déjà consommé, sans avoir rien ouvert.
+       Il s'ouvre maintenant au premier geste qui consomme vraiment : un
+       texte sous droits (plus bas), un export ou un appel à Ambassa
+       (?action=quota). Voir plat_essai_stamp(). */
 
     $estCitation = ($action === 'citations');
     $fichier = $estCitation ? $GLOBALS['CITATIONS_FILE'] : $GLOBALS['CORPUS_FILE'];
@@ -648,6 +1302,23 @@ if (($action === 'corpus' || $action === 'citations') && $method === 'GET') {
                             ? 'Cette citation fait partie du répertoire complet. Abonnez-vous pour lire les 137 citations et leurs sources vérifiées.'
                             : 'Ce texte fait partie du répertoire complet. Abonnez-vous pour ouvrir les 1040 textes, leurs questions et leurs faits de langue.'),
                 ], 402);
+            }
+            /* C'EST ICI que l'essai peut commencer — mais SEULEMENT si c'est
+               l'essai, et lui seul, qui vient d'ouvrir ce texte.
+               Les tout premiers textes sont offerts à TOUT LE MONDE, essai
+               terminé compris (palier « demo ») : les compter reviendrait à
+               tendre un piège à qui vient simplement regarder, et à faire
+               mentir la promesse « parcourir ne consomme rien ». Mesuré au
+               banc le 09/09/2026 — c'est le contrôle ③ de
+               tests/banc_entree_libre.cjs qui a levé ce défaut.
+               Ce qui déclenche, c'est donc : un texte que l'essai a rendu
+               lisible et que « demo » ne donnait pas ; un export, un appel à
+               Ambassa ou une épreuve (?action=quota). */
+            if (($droit['motif'] ?? '') === 'essai_ouverture') {
+                $capDemo = (int) ((plat_paliers($db)['demo'] ?? [])[$estCitation ? 'citations' : 'textes'] ?? 0);
+                $offertsDemo = $capDemo < 0 ? null : plat_offerts($items, $capDemo);
+                $sansEssai = ($offertsDemo === null) || in_array($num, $offertsDemo, true);
+                if (!$sansEssai) plat_essai_stamp($v);
             }
             jsonResponse(['ok' => true, ($estCitation ? 'citation' : 'texte') => $t,
                           'droit' => $droit, 'palier' => $palier]);
@@ -1044,6 +1715,18 @@ if ($action === 'groupe') {
     if ($accId === '') jsonResponse(['ok' => false, 'error' => 'Compte sans identifiant'], 403);
     $op = strtolower((string) ($_GET['op'] ?? 'lister'));
 
+    /* UN INVITÉ N'A PAS D'ÉQUIPE. Une équipe rassemble des personnes et son
+       nombre de places dépend d'un abonnement : les deux supposent un
+       titulaire. `lister` reste ouvert — il rend une liste vide, ce qui évite
+       au navigateur un cas particulier — mais rien ne se crée ni ne se rejoint
+       sous une identité d'appareil. Sans cette garde, une équipe naîtrait au
+       nom d'un invité, et disparaîtrait avec son navigateur. */
+    if (($v['type'] ?? '') === 'invite' && $op !== 'lister') {
+        jsonResponse(['ok' => false, 'code' => 'invite',
+            'error' => 'Les espaces de travail partagés demandent un abonnement. '
+                     . 'Abonnez-vous pour créer votre équipe et y inviter vos collègues.']);
+    }
+
     /* LISTER — la seule vérité sur « à quelles équipes j'appartiens ».
        Le navigateur ne s'en souvient plus : il demande. */
     if ($op === 'lister') {
@@ -1295,7 +1978,30 @@ if ($action === 'quota' && $method === 'POST') {
         jsonResponse(['ok' => false, 'error' => 'Plafond inconnu pour ce genre'], 400);
     }
 
+    /* PREMIER GESTE PAYANT = OUVERTURE DE L'ESSAI.
+       Exporter, appeler Ambassa ou ouvrir une épreuve, c'est consommer le
+       produit ; c'est donc là que le décompte commence — pas à l'entrée,
+       qui est libre depuis le 09/09/2026. On stampe AVANT de décompter :
+       un essai qui s'ouvrirait après le refus de quota serait un essai
+       ouvert pour rien. */
+    if (($droit['motif'] ?? '') === 'essai_ouverture') {
+        plat_essai_stamp($v);
+    }
+
     $mois = date('Y-m');
+
+    /* L'INVITÉ NE COMPTE PAS DANS LA BASE. Une ligne de quota par visiteur
+       ferait enfler `veritas_db.json`, que le navigateur de l'administration
+       repousse en entier à chaque synchronisation. Le plafond appliqué est le
+       MÊME (plat_paliers reste la seule table) ; seul le tiroir diffère. */
+    if (($v['type'] ?? '') === 'invite') {
+        $r = plat_inv_quota((string) ($v['cle'] ?? ''), $genre, $plafond, $mois);
+        if (!$r['accorde']) {
+            jsonResponse(['ok' => false, 'error' => 'Quota épuisé'] + $r, 402);
+        }
+        jsonResponse(['ok' => true] + $r);
+    }
+
     $res  = plat_muter(function (array $db2) use ($accId, $genre, $mois, $plafond) {
         if (!isset($db2['plateforme']) || !is_array($db2['plateforme'])) $db2['plateforme'] = [];
         if (!isset($db2['plateforme']['quotas']) || !is_array($db2['plateforme']['quotas'])) {
@@ -1331,7 +2037,9 @@ if ($action === 'offres') {
     if (!is_array($db)) jsonResponse(['ok' => false, 'error' => 'Base indisponible'], 503);
 
     if ($method === 'GET') {
-        jsonResponse(['ok' => true, 'offres' => plat_offres($db)]);
+        // Lecture publique : le plafond anti-farming n'en fait pas partie.
+        jsonResponse(['ok' => true,
+            'offres' => array_diff_key(plat_offres($db), ['essaisParIp' => 1])]);
     }
 
     if ($method === 'POST' || $method === 'PUT') {
@@ -1347,6 +2055,10 @@ if ($action === 'offres') {
                 'cadeauBienvenue' => max(0, min(365, (int) ($in['cadeauBienvenue'] ?? $ancien['cadeauBienvenue'] ?? 0))),
                 'bonusReabo'      => max(0, min(365, (int) ($in['bonusReabo']      ?? $ancien['bonusReabo']      ?? 0))),
                 'quotaEssai'      => max(0, min(9999, (int) ($in['quotaEssai']     ?? $ancien['quotaEssai']      ?? 10))),
+                /* Nouveaux essais par adresse IP et par jour. 0 = sans
+                   plafond : à ne poser que si l'on accepte qu'un seul
+                   navigateur en rouvre un à volonté. */
+                'essaisParIp'     => max(0, min(500,  (int) ($in['essaisParIp']    ?? $ancien['essaisParIp']     ?? 8))),
                 'message'         => mb_substr((string) ($in['message'] ?? $ancien['message'] ?? ''), 0, 400),
             ];
             return [$db2, $db2['plateforme']['offres']];

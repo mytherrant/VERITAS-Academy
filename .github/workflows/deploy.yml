@@ -377,6 +377,24 @@ jobs:
       - name: 🪪 Le compte créé sur le site atteint-il le serveur ?
         run: node tests/banc_compte_serveur.cjs
 
+      # ── 🚪 ON ENTRE SANS MOT DE PASSE, ET L'ESSAI NE SE RELANCE PAS.
+      #    Le 09/09/2026, l'Atelier a cessé de demander un compte à l'entrée :
+      #    trop d'enseignants s'arrêtaient devant le formulaire d'inscription
+      #    et repartaient. Retirer un mur déplace la charge sur l'abonnement et
+      #    sur l'essai — et les trois promesses qui remplacent ce mur sont
+      #    tenues par du code qui ne lève RIEN quand il se trompe : un essai
+      #    qui repart à zéro ne produit aucune erreur, il produit un abonnement
+      #    qu'on ne vend jamais.
+      #    Ce banc monte un vrai `php -S` et mesure : l'entrée s'ouvre sans
+      #    aucune saisie ; parcourir le répertoire ne consomme pas l'essai ;
+      #    revenir, vider son navigateur (plafond par adresse) ou s'abonner
+      #    (report à la promotion) ne le relancent pas ; un compte né dans
+      #    l'Atelier n'a AUCUN mot de passe et ne s'ouvre qu'au code de
+      #    reprise ; et ce code n'est jamais rangé en clair.
+      #    Éprouvé par 6 mutations, chacune rougissant le contrôle visé.
+      - name: 🚪 L'entrée est-elle libre, et l'essai borné ?
+        run: node tests/banc_entree_libre.cjs
+
       # ── 🎓 L'ENSEIGNANT ATTEINT-IL SON ATELIER, ET NE VOIT-IL QUE SES
       #    MATIÈRES ? Deux frictions signalées le 28/08/2026. D'abord un
       #    produit vendu à l'inscription puis introuvable : il fallait quitter

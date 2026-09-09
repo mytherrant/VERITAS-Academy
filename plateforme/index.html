@@ -1237,7 +1237,7 @@
           <div style="{{ corpusTraceStyle }}">{{ corpusTrace }}</div>
           <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
             <button onClick="{{ corpusReessayer }}" style="background:var(--c1a72bb,#1a72bb);border:none;color:var(--cffffff,#fff);padding:10px 20px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer">Réessayer</button>
-            <button onClick="{{ corpusDeconnecter }}" style="background:transparent;border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);padding:10px 20px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer">Revenir à la connexion</button>
+            <button onClick="{{ corpusDeconnecter }}" style="background:transparent;border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);padding:10px 20px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer">Rouvrir un accès</button>
           </div>
         </div>
       </div>
@@ -2069,7 +2069,7 @@
         <span style="flex:none">{{ invSceau }}</span>
         <div style="flex:1 1 240px;min-width:200px">
           <h2 style="font-family:Poppins;font-size:15.5px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 3px">Inviter un collègue</h2>
-          <p style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin:0;line-height:1.55">Il rejoint votre équipe avec son compte VÉRITAS, puis partage vos épreuves, vos cours et votre bibliothèque.</p>
+          <p style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin:0;line-height:1.55">Il ouvre l’Atelier sans rien créer, colle ce code, et partage aussitôt vos épreuves, vos cours et votre bibliothèque. Sa place est comprise dans votre abonnement.</p>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:15px">
@@ -2237,14 +2237,30 @@
     <sc-if value="{{ profIsSecu }}" hint-placeholder-val="{{ false }}">
       <section style="{{ cardStyle }};margin-bottom:16px">
         <h2 class="vrt-titre-file" style="{{ cardTitle }}">Sécurité</h2>
-        <div style="{{ profSecuBanner }}">L'authentification réelle vit sur le serveur VÉRITAS. Tant que le raccordement n'est pas fait, ces comptes restent locaux à ce navigateur et aucun mot de passe n'est enregistré.</div>
+        <!-- Ce bandeau annonçait un raccordement « pas encore fait ». Il
+             l'est depuis août 2026, et depuis le 09/09 il n'y a même plus
+             de mot de passe du tout : ce qu'il faut dire ici, c'est ce qui
+             tient lieu de clé — l'appareil pour un invité, le code de
+             reprise pour un abonné. -->
+        <div style="{{ profSecuBanner }}">{{ profSecuTexte }}</div>
+
+        <!-- ═══ REMPLACER SON CODE DE REPRISE ═══
+             Le serveur n'en garde qu'une empreinte : un code perdu ne se
+             retrouve pas, il se REMPLACE — et l'ancien cesse alors de
+             valoir, ce qui ferme aussi la porte à qui l'aurait recopié. -->
+        <div style="{{ codeReprBoxStyle }}">
+          <div style="font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.6;margin-bottom:10px">Votre code de reprise rouvre votre abonnement sur un autre téléphone ou un autre ordinateur. Perdu, il ne se retrouve pas — on en pose un neuf, et l’ancien cesse aussitôt de valoir.</div>
+          <div style="{{ codeNeufStyle }}">{{ codeNeuf }}</div>
+          <div style="{{ codeReprErrStyle }}">{{ codeReprErr }}</div>
+          <button onClick="{{ demanderCode }}" style="{{ demanderCodeBtn }}">{{ demanderCodeLabel }}</button>
+        </div>
         <div style="display:flex;flex-direction:column;gap:13px;margin-top:16px">
           <label style="{{ fieldLbl }}">Identifiant de connexion<input value="{{ profMail }}" onChange="{{ setProfMail }}" style="{{ fieldIn }}"></label>
           <label style="{{ fieldLbl }}">Groupe rattaché<input value="{{ profGroupe }}" disabled="{{ true }}" style="{{ fieldIn }};opacity:.7"></label>
         </div>
         <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
           <button onClick="{{ introRevoir }}" style="{{ profRevoirBtn }}">Revoir la présentation</button>
-          <button onClick="{{ goLogin }}" style="{{ profLogoutBtn }}">Se déconnecter</button>
+          <button onClick="{{ goLogin }}" style="{{ profLogoutBtn }}">{{ logoutLabel }}</button>
         </div>
       </section>
 
@@ -2927,16 +2943,21 @@
           <div class="vrt-demo-barre"><i></i><i></i><i></i><span>ATELIER DE FRANÇAIS</span></div>
           <div class="vrt-demo-scenes">
 
-            <!-- 1 · se connecter -->
+            <!-- 1 · entrer — PLUS AUCUNE SAISIE.
+                 Cette scene montrait un formulaire identifiant + mot de
+                 passe : elle annoncait donc l'obstacle qu'on vient
+                 justement de retirer. Montrer un champ de mot de passe a
+                 quelqu'un qui n'en aura jamais besoin, c'est le faire
+                 renoncer avant d'avoir commence. -->
             <div class="vrt-scene">
-              <h4><b>1</b>Se connecter</h4>
-              <p>Votre compte VÉRITAS ouvre les 2 054 textes du répertoire, dont 1 014 sans abonnement.</p>
-              <div class="vrt-boite" style="max-width:290px">
-                <div style="font-size:9.5px;font-weight:700;color:var(--c8b97a8,#8b97a8);font-family:Poppins,sans-serif;letter-spacing:.06em;margin-bottom:5px">IDENTIFIANT</div>
-                <div style="height:7px;border-radius:4px;background:var(--ceef2f7,#eef2f7);margin-bottom:11px"><div class="vrt-saisie"></div></div>
-                <div style="font-size:9.5px;font-weight:700;color:var(--c8b97a8,#8b97a8);font-family:Poppins,sans-serif;letter-spacing:.06em;margin-bottom:5px">MOT DE PASSE</div>
-                <div style="height:7px;border-radius:4px;background:var(--ceef2f7,#eef2f7);margin-bottom:13px;width:60%"></div>
-                <span class="vrt-bleu vrt-appui">Se connecter</span>
+              <h4><b>1</b>Entrer</h4>
+              <p>Aucun compte, aucun mot de passe : les 2 054 textes du répertoire s’ouvrent tout de suite, dont 1 014 sans aucun abonnement.</p>
+              <div class="vrt-boite" style="max-width:290px;text-align:center">
+                <div style="font-size:9.5px;font-weight:700;color:var(--c8b97a8,#8b97a8);font-family:Poppins,sans-serif;letter-spacing:.06em;margin-bottom:9px">RIEN À REMPLIR</div>
+                <div style="display:flex;gap:6px;justify-content:center;margin-bottom:12px">
+                  <div class="vrt-l" style="width:34%"></div><div class="vrt-l" style="width:24%"></div><div class="vrt-l" style="width:18%"></div>
+                </div>
+                <span class="vrt-bleu vrt-appui">Ouvrir l’Atelier</span>
               </div>
             </div>
 
@@ -3028,50 +3049,52 @@
           </div>
         </div>
         <div class="vrt-demo-puces"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-        <p style="text-align:center;margin:11px 0 0;font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.6">Le répertoire de textes n’est servi qu’à un compte VÉRITAS connecté ci-dessous.</p>
+        <p style="text-align:center;margin:11px 0 0;font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.6">Aucune inscription : l’Atelier s’ouvre au clic. Le formulaire ci-dessous ne sert qu’à retrouver un abonnement déjà payé.</p>
       </div>
 
-      <div style="max-width:420px;margin:0 auto;text-align:left;background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:16px;padding:26px 24px;box-shadow:0 4px 18px rgba(20,55,95,.06)">
-        <h2 style="font-family:Poppins;font-size:19px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 4px;text-align:center">Connexion</h2>
-        <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 20px;text-align:center">Avec votre compte VÉRITAS — le même que sur veritas-school.com.</p>
+      <div style="max-width:440px;margin:0 auto;text-align:left;background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:16px;padding:26px 24px;box-shadow:0 4px 18px rgba(20,55,95,.06)">
+
+        <!-- ══════════════ 1. ENTRER — le geste par défaut ══════════════
+             Cet écran ne s'affiche plus au démarrage : l'Atelier ouvre
+             directement. On n'y arrive que par deux chemins étroits — le
+             serveur injoignable, ou le plafond quotidien d'ouvertures
+             atteint pour cette connexion. Le bouton qui réessaie doit donc
+             être le premier de la page, et de loin le plus gros. -->
+        <h2 style="font-family:Poppins;font-size:19px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 4px;text-align:center">Ouvrir l’Atelier</h2>
+        <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 16px;text-align:center">Sans compte, sans mot de passe.</p>
+        <div style="{{ accesMsgStyle }}">{{ accesMsg }}</div>
+        <button onClick="{{ entrerLibre }}" style="{{ entrerBtn }}">{{ entrerLabel }}</button>
+
+        <!-- ══════════════ 2. REPRENDRE UN ABONNEMENT ══════════════
+             Un champ, pas deux, et rien à créer. C'est ce qui remplace le
+             mot de passe pour l'abonné qui change d'appareil. -->
+        <div style="margin:22px 0 0;padding-top:18px;border-top:1px solid var(--ce6ecf3,#e6ecf3)">
+          <h3 style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 4px">Déjà abonné ?</h3>
+          <p style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin:0 0 11px;line-height:1.6">Entrez le code de reprise reçu au moment de votre abonnement — il rouvre votre compte sur cet appareil.</p>
+          <label style="{{ authLbl }}">Code de reprise<input type="text" autoCapitalize="characters" spellCheck="false" value="{{ repCode }}" onChange="{{ setRepCode }}" onKeyDown="{{ repKey }}" placeholder="XXXX-XXXX-XXXX" style="{{ authIn }}"></label>
+          <div style="{{ repErrStyle }}">{{ repErr }}</div>
+          <button onClick="{{ repSubmit }}" style="{{ repBtn }}">{{ repLabel }}</button>
+          <p style="margin:9px 0 0;font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.6">Code perdu ? Écrivez au centre par WhatsApp — il se remplace, il ne se retrouve pas.</p>
+        </div>
+
+        <!-- ══════════════ 3. L'ANCIEN CHEMIN, REPLIÉ ══════════════
+             Les enseignants inscrits avant le 09/09/2026 ont un identifiant
+             et un mot de passe VÉRITAS : leur abonnement y est rattaché, et
+             le leur retirer serait leur fermer la porte. Le formulaire reste
+             donc entier — mais replié, parce qu'il ne concerne plus personne
+             de nouveau, et qu'un champ de mot de passe visible suffit à
+             faire croire qu'il en faut un. -->
+        <div style="margin:20px 0 0;padding-top:16px;border-top:1px solid var(--ce6ecf3,#e6ecf3)">
+          <button onClick="{{ toggleCx }}" style="{{ toggleCxStyle }}">{{ toggleCxLabel }}</button>
+        </div>
+        <div style="{{ cxBoxStyle }}">
         <div style="display:flex;flex-direction:column;gap:12px">
           <label style="{{ authLbl }}">Identifiant<input type="text" autoComplete="username" autoCapitalize="none" spellCheck="false" value="{{ authMail }}" onChange="{{ setAuthMail }}" onKeyDown="{{ authKey }}" placeholder="votre identifiant VÉRITAS" style="{{ authIn }}"></label>
           <label style="{{ authLbl }}">Mot de passe<input type="password" autoComplete="current-password" value="{{ authMdp }}" onChange="{{ setAuthMdp }}" onKeyDown="{{ authKey }}" placeholder="••••••••" style="{{ authIn }}"></label>
         </div>
         <div style="{{ authErrStyle }}">{{ authErr }}</div>
         <button onClick="{{ authSubmit }}" style="{{ authBtn }}">{{ authLabel }}</button>
-        <p style="margin:14px 0 0;font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.6;text-align:center">Votre essai de {{ essaiJours }} jours s’ouvre à la première connexion.</p>
-
-        <!-- ============ CRÉER UN COMPTE ============
-             Il n'y en avait AUCUNE trace : l'écran demandait un compte VÉRITAS
-             sans jamais dire où l'obtenir. Quelqu'un qui arrive ici sans compte
-             n'a donc rien à faire, et repart.
-             On n'ouvre pas un formulaire ici — `api/plateforme.php` n'a aucune
-             action d'inscription, et l'ancien « Créer mon compte » ne créait
-             rien : il posait un profil local sans mot de passe, que l'écran de
-             connexion réclamait ensuite. On envoie donc là où le compte se crée
-             VRAIMENT.
-
-             ⚠️ `app.html`, PAS la racine. Le routeur `#inscription-*` vit dans
-             app.js, et la racine du domaine sert la VITRINE : le lien y menait
-             donc à l'accueil, sans formulaire — un cul-de-sac poli. Vérifié au
-             navigateur : `app.html#inscription-enseignant` ouvre bien les neuf
-             champs de « Créer mon compte enseignant ». C'est aussi la forme
-             qu'emploie la vitrine elle-même (vitrine.html:2872). -->
-        <div style="margin:16px 0 0;padding-top:15px;border-top:1px solid var(--ce6ecf3,#e6ecf3);text-align:center">
-          <p style="margin:0 0 9px;font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.6">Vous n’avez pas encore de compte VÉRITAS ?</p>
-          <!-- Ce que l'inscription donne, dit ICI : de l'autre côté, le
-               formulaire du site ne parle pas de l'Atelier. -->
-          <p style="margin:0 0 12px;font-size:13.5px;color:var(--c6a7889,#6a7889);line-height:1.65">L’inscription est <strong style="color:var(--c188047,#188047);font-weight:700">gratuite</strong>. Votre semaine d’essai s’ouvre à la première connexion, et <strong style="color:var(--c14375f,#14375f);font-weight:700">1 014 textes</strong> vous restent ouverts ensuite, sans abonnement.</p>
-          <a href="https://veritas-school.com/app.html?de=atelier#inscription-enseignant" target="_blank" rel="noopener"
-             style="display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:10px;border:1.5px solid var(--c1a72bb,#1a72bb);color:var(--c1a72bb,#1a72bb);background:var(--cffffff,#fff);font-family:Poppins;font-weight:700;font-size:13.5px;text-decoration:none"
-             style-hover="background:var(--cf4f8fc,#f4f8fc)">Créer un compte enseignant</a>
-          <!-- LE RETOUR. L'onglet de l'Atelier reste ouvert derrière — c'est
-               l'intérêt de target="_blank" — mais personne ne le sait. Ce
-               bouton le dit et ramène le curseur dans le champ identifiant :
-               sans lui, l'enseignant revient et cherche où se connecter. -->
-          <button onClick="{{ retourInscription }}" style="{{ retourInscriptionStyle }}">J’ai créé mon compte — me connecter</button>
-          <p style="margin:9px 0 0;font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.6">L’inscription se fait sur veritas-school.com, puis vous revenez ici avec le même identifiant.</p>
+        <p style="margin:12px 0 0;font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.6;text-align:center">Ce chemin ne concerne que les comptes créés avant septembre 2026. Les nouveaux n’ont ni identifiant ni mot de passe.</p>
         </div>
       </div>
 
@@ -3267,6 +3290,22 @@
           <div style="width:62px;height:62px;border-radius:50%;background:var(--ce6f5ec,#e6f5ec);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;animation:popIn .4s ease both">{{ payCheckIcon }}</div>
           <h2 style="font-family:Poppins;font-size:20px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 6px">Paiement confirmé</h2>
           <p style="font-size:13.5px;color:var(--c5a6678,#5a6678);margin:0 0 22px;line-height:1.55">Le plan <strong style="color:var(--c14375f,#14375f)">{{ payPlanName }}</strong> est activé. Votre quota mensuel est mis à jour.</p>
+
+          <!-- ════════ LE CODE DE REPRISE ════════
+               Il n'y a plus de mot de passe : ce code est la SEULE chose
+               qui rouvre un abonnement ailleurs. Le serveur n'en garde
+               qu'une empreinte — il ne saura jamais le redire. C'est donc
+               le seul instant de toute la vie de l'abonnement ou il
+               s'affiche, et l'ecran doit le dire sans ambiguite.
+               Le bloc est masque (`codeBoxStyle` = display:none) pour un
+               abonne qui renouvelle : son code, lui, n'a pas change. -->
+          <div style="{{ codeBoxStyle }}">
+            <div style="font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--cc26a12,#c26a12);font-weight:700;font-family:Poppins;margin-bottom:8px">Votre code de reprise</div>
+            <div style="font-family:Poppins;font-size:23px;font-weight:700;letter-spacing:.09em;color:var(--c14375f,#14375f);margin-bottom:10px;word-break:break-all">{{ codeReprise }}</div>
+            <p style="font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.6;margin:0 0 12px;text-align:left">Notez-le maintenant. Il n’y a pas de mot de passe sur l’Atelier : c’est <strong style="color:var(--c14375f,#14375f)">ce code, et lui seul</strong>, qui rouvre votre abonnement sur un autre téléphone ou un autre ordinateur. Il ne sera plus jamais affiché.</p>
+            <button onClick="{{ copierCode }}" style="background:var(--cffffff,#fff);border:1.5px solid var(--cc26a12,#c26a12);color:var(--cc26a12,#c26a12);padding:9px 18px;font-size:12.5px;cursor:pointer;border-radius:9px;font-weight:700;font-family:Poppins">{{ copierCodeLabel }}</button>
+          </div>
+
           <button onClick="{{ closePay }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:12px 26px;font-size:13.5px;cursor:pointer;border-radius:999px;font-weight:700;font-family:Poppins" style-hover="background:var(--c135a96,#135a96)">Continuer</button>
         </div>
       </sc-if>
@@ -3307,7 +3346,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '21/08 · 7';
+const ATELIER_BUILD = '09/09 · 8';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -3460,7 +3499,15 @@ class Component extends DCLogic {
          booleen n'y arrive que lorsque l'enseignant a clique. */
       filtresOpen:false,renseignementsOpen:null,collabOpen:false,
       screen:'accueil',authed:store?(store.authed!==false):true,currentN:this.all[0]?this.all[0].n:1,
-      qEditN:null,authMail:'',authMdp:'',authErr:'',authBusy:false,essaiJours:7,payOpen:false,paySelected:null,payDone:false,payName:'',payCard:'',payExp:'',payCvc:'',payMethod:'momo',
+      qEditN:null,authMail:'',authMdp:'',authErr:'',authBusy:false,essaiJours:7,
+      /* ENTREE LIBRE (09/09/2026). `estInvite` dit que ce navigateur
+         travaille sous une identite d'appareil, sans compte ni mot de
+         passe. `codeReprise` n'est rempli qu'une seule fois, au retour
+         de la promotion : le serveur ne le garde qu'en empreinte et ne
+         saura jamais le redire. */
+      estInvite:false,codeReprise:'',accesMsg:'',cxOuverte:false,codeCopie:false,
+      codeNeuf:'',codeReprErr:'',codeReprBusy:false,
+      repCode:'',repErr:'',repBusy:false,payOpen:false,paySelected:null,payDone:false,payName:'',payCard:'',payExp:'',payCvc:'',payMethod:'momo',
       payProvider:null,payBusy:false,payErr:'',payRef:'',payUrl:'',
       annotSel:null,annotVersion:0,annotTool:'surligner',annotColor:'var(--cfff3a3,#fff3a3)',annotComment:'',
       chatOpen:false,chatDraft:'',epTab:'edition',
@@ -3576,7 +3623,15 @@ class Component extends DCLogic {
     },'astuces');
     /* Jeton deja pose (l utilisateur revient) : la synchro peut demarrer
        tout de suite. Sinon elle attend la connexion. */
-    sur(()=>{if(this._jeton())this._installerSync();},'synchro du groupe');
+    /* La synchro d'equipe ne concerne QUE les comptes. Un invite n'a pas
+       d'equipe -- le serveur la lui refuse -- et l'interroger a vide ferait
+       des requetes pour rien : LWS bannit l'adresse a six mauvaises
+       requetes par minute, et cette sanction ferme le site entier. */
+    sur(()=>{if(this._jeton()&&!this._estInvite())this._installerSync();},'synchro du groupe');
+    /* Un jeton d'invite deja pose (l'enseignant revient) : l'ecran doit le
+       savoir des le premier rendu, sinon il proposerait « se deconnecter »
+       a quelqu'un qui n'est connecte a rien. */
+    sur(()=>{if(this._estInvite()&&!this.state.estInvite)this.setState({estInvite:true});},'identité d’appareil');
     sur(()=>this._installerClavierIntro(),'clavier de la présentation');
     /* CHIEN DE GARDE DU DEMARRAGE, independant du chargement lui-meme.
        Douze secondes apres le montage, si rien n'a abouti ET qu'aucun
@@ -3607,6 +3662,22 @@ class Component extends DCLogic {
     if(!this.state.ready){
       const boot=()=>{/* Formatage des dialogues et construction des filtres : voir _installerBase(). */const n=this._installerBase();this._tr('installés '+n);this.setState({ready:n>0,currentN:this.all[0]?this.all[0].n:this.state.currentN});};
       if(window.MINESEC_CORPUS){this._tr('corpus déjà en mémoire');boot();return;}
+      /* ═══ ENTREE LIBRE ═══
+         Sans jeton, on n'affiche plus un formulaire : on demande un acces
+         d'invite et on charge. C'est tout ce qui separe desormais
+         l'enseignant qui arrive du repertoire ouvert devant lui.
+         L'ecran d'acces ne reste que pour deux cas : serveur injoignable,
+         ou plafond quotidien d'ouvertures atteint pour cette connexion. */
+      if(!this._jeton()){
+        this._tr('accès libre');
+        this.setState({corpusEtat:'Ouverture de votre accès…'});
+        this._ouvrirInvite(ok=>{
+          if(!ok){this._tr('accès libre refusé');
+            this._allerConnexion({accesMsg:this._inviteErr||''});return;}
+          this._chargerCorpus(boot);
+        });
+        return;
+      }
       /* Le corpus vient du SERVEUR, sous condition de droit. Le fichier en
          clair n'existe qu'en developpement : s'il repond, on l'utilise ; sinon
          on affiche le mur d'abonnement plutot qu'un ecran vide. */
@@ -3865,6 +3936,22 @@ class Component extends DCLogic {
              d'attente avec un seul bouton « Reessayer » enfermait le visiteur
              dans une boucle qui ne pouvait que re-echouer. */
           if(e._http===401){
+            /* ═══ LE 401 N'EST PLUS UN MUR ═══
+               Il ne veut plus dire « il faut un compte » mais « ce
+               navigateur n'a pas de jeton, ou le sien a expire ». On en
+               demande un d'invite -- sans aucune saisie -- et on relance.
+               Une seule tentative : `_inviteTente` interdit la boucle,
+               qui martelerait le serveur au lieu de dire ce qui ne va pas. */
+            if(!this._inviteTente){
+              this._inviteTente=true;
+              this._tr('→ accès libre');
+              this._poserJeton('');
+              this._ouvrirInvite(ok=>{
+                if(ok){this._rechargerCorpus();return;}
+                this._allerConnexion({accesMsg:this._inviteErr||''});
+              });
+              return;
+            }
             this._tr('→ connexion');
             /* MESURE du 21/08 (banc `atelier-banc`, mode `auth`) : ce chemin
                marche, le formulaire s'affiche. Une hypothese l'accusait — un
@@ -3877,7 +3964,7 @@ class Component extends DCLogic {
             return;
           }
           const RAISON={
-            401:'Connectez-vous pour ouvrir le répertoire.',
+            401:'Votre accès a expiré. Rouvrez l’Atelier — il n’y a rien à saisir.',
             503:'Le répertoire n’est pas encore installé sur ce serveur. Signalez-le au centre — ni votre connexion ni votre abonnement ne sont en cause.'
           };
           this.setState({corpusErr:RAISON[e._http]
@@ -4782,6 +4869,18 @@ class Component extends DCLogic {
       const t=this.state;
       if(t.ready||t.corpusErr||t.screen==='login'||this._enVol)return;
       if(!this._jeton()){
+        /* Plus de jeton : on en redemande un plutot que de renvoyer a un
+           formulaire. Une seule fois -- au-dela, c'est que le serveur ne
+           veut pas, et il faut le dire. */
+        if(!this._inviteTente){
+          this._inviteTente=true;
+          this._tr('réparation → accès libre');
+          this._ouvrirInvite(ok=>{
+            if(ok){this._rechargerCorpus();return;}
+            this._allerConnexion({accesMsg:this._inviteErr||''});
+          });
+          return;
+        }
         this._tr('réparation → connexion');
         this._allerConnexion();
         return;
@@ -5329,7 +5428,27 @@ class Component extends DCLogic {
      a l'autre. Le nombre de places, lui, depend de son abonnement. */
   _creerEquipe(nom){
     if(!this._jeton()){
-      this.setState({invMsg:'Connectez-vous pour créer un espace de travail.',invMsgTon:'ko'});
+      this.setState({invMsg:'Ouvrez d’abord l’Atelier.',invMsgTon:'ko'});
+      return;
+    }
+    /* Une equipe est un objet durable, rattache a quelqu'un : la creer
+       fait de l'invite un titulaire (sans paiement), et lui vaut un code
+       de reprise — c'est aussi ce qui fera suivre son travail d'un
+       appareil a l'autre. */
+    if(this._estInvite()&&!this.state.compteId){
+      const moi=String((this._me()||{}).name||'').trim();
+      if(!moi||moi==='Moi'){
+        this.setState({invMsg:'Renseignez d’abord votre nom dans Profil.',invMsgTon:'ko'});
+        return;
+      }
+      this.setState({eqBusy:true,invMsg:'Ouverture de votre espace…',invMsgTon:''});
+      this._promouvoir(ok=>{
+        this.setState({eqBusy:false},()=>{
+          if(!ok){this.setState({invMsg:this._promoErr
+            ||'Votre espace n’a pas pu être ouvert. Réessayez.',invMsgTon:'ko'});return;}
+          this._creerEquipe(nom);
+        });
+      },{nom:moi,tel:''});
       return;
     }
     if(this.state.eqBusy)return;
@@ -5374,7 +5493,7 @@ class Component extends DCLogic {
       +' » sur l’Atelier de Francais de VERITAS.\n\n'
       +'Code d’equipe : '+code+'\n'
       +this._lienInvitation(code)+'\n\n'
-      +'Connectez-vous avec votre compte VERITAS, le code s’applique tout seul.';
+      +'Ouvrez le lien, mettez votre nom dans Profil, puis collez le code : aucun compte a creer.';
   }
   /* Rejoindre par code. LE SERVEUR SEUL PEUT REPONDRE.
      Cette fonction cherchait le code dans `this.state.groupes` -- la liste
@@ -5386,8 +5505,35 @@ class Component extends DCLogic {
     const c=String(code||'').trim().toUpperCase();
     if(!c){this.setState({invMsg:'Saisissez le code reçu.',invMsgTon:'ko'});return false;}
     if(!this._jeton()){
-      this.setState({invMsg:'Connectez-vous avec votre compte VÉRITAS, puis saisissez le code.',
+      this.setState({invMsg:'Ouvrez d’abord l’Atelier, puis saisissez le code.',
         invMsgTon:'ko',invSaisie:c});
+      return false;
+    }
+    /* ⚠️ CE CHEMIN FAIT TENIR LE PLAN COLLEGE.
+       Une equipe rassemble des PERSONNES : elle ne peut pas retenir une
+       identite d'appareil, qui disparait avec le navigateur. L'invite
+       devient donc titulaire ici — sans payer un franc, c'est le
+       proprietaire de l'equipe qui a paye les places. Sans cette
+       promotion, « Jusqu'a 15 enseignants » ne voudrait plus rien dire :
+       le serveur refuserait chaque collegue invite.
+       Le nom compte : il s'affiche chez tous les membres, et quinze
+       personnes appelees « Moi » ne forment pas une equipe. */
+    if(this._estInvite()&&!this.state.compteId){
+      const nom=String((this._me()||{}).name||'').trim();
+      if(!nom||nom==='Moi'){
+        this.setState({invMsg:'Renseignez d’abord votre nom dans Profil : '
+          +'vos collègues doivent savoir qui rejoint l’équipe.',
+          invMsgTon:'ko',invSaisie:c});
+        return false;
+      }
+      this.setState({eqBusy:true,invMsg:'Ouverture de votre espace…',invMsgTon:''});
+      this._promouvoir(ok=>{
+        this.setState({eqBusy:false},()=>{
+          if(!ok){this.setState({invMsg:this._promoErr
+            ||'Votre espace n’a pas pu être ouvert. Réessayez.',invMsgTon:'ko'});return;}
+          this._rejoindreEquipe(c);
+        });
+      },{nom:nom,tel:''});
       return false;
     }
     if(this.state.eqBusy)return false;
@@ -5488,7 +5634,7 @@ class Component extends DCLogic {
       this._codeEnAttente=code;
       if(!this._jeton()){
         this.setState({invSaisie:code,
-          invMsg:'Connectez-vous avec votre compte VÉRITAS : l’invitation s’appliquera aussitôt.',
+          invMsg:'Renseignez votre nom dans Profil : l’invitation s’appliquera aussitôt.',
           invMsgTon:''});
         return;
       }
@@ -5535,6 +5681,31 @@ class Component extends DCLogic {
   /* IDENTITE. Apres connexion, on est son COMPTE VERITAS, plus le profil de
      demonstration `u1`. Deux enseignants etaient tous deux `u1` : le travail
      de l'un redescendait chez l'autre signe de son propre nom. */
+  /* ═══ IDENTITE D'UN INVITE ═══
+     Il ne se nomme pas — on ne lui demande rien — mais il lui faut un
+     profil a lui. Sans cela il herite de `u1`, le profil de
+     demonstration, et ses epreuves partent signees d'un personnage
+     d'exemple : c'est exactement le defaut corrige en aout pour les
+     comptes, et l'ouverture de l'entree le ferait revenir pour tout le
+     monde.
+     Le DECOR, lui, reste en place : c'est ce qui montre a quoi ressemble
+     un Atelier rempli a quelqu'un qui vient de le decouvrir, et il porte
+     son drapeau `demo` — ni la synchro ni l'equipe ne le voient. Il sera
+     jete le jour ou l'invite devient titulaire (_adopterIdentite), et son
+     travail a lui suivra.
+     Renvoie un fragment d'etat plutot que d'appeler setState : l'appelant
+     le fusionne dans le sien, ce qui evite deux rendus successifs dont le
+     premier montrerait une identite a moitie posee. */
+  _identiteInvite(id){
+    if(!id)return {};
+    const st=this.state;
+    if(st.currentUserId===id)return {};
+    const users=(st.users||[]).slice();
+    if(!users.some(u=>u&&u.id===id)){
+      users.push({id:id,name:'Moi',role:'Enseignant',quota:{limit:0,used:0}});
+    }
+    return {users:users,currentUserId:id};
+  }
   _adopterIdentite(accId,nom){
     if(!accId)return;
     const st=this.state,ancien=String(st.currentUserId||'');
@@ -5556,10 +5727,17 @@ class Component extends DCLogic {
       users[i]=Object.assign({},users[i],{name:nom});
     }
     /* Re-tamponnage du travail deja fait sur ce poste -- UNIQUEMENT si
-       l'identite quittee etait un profil de demonstration (u1…u6). Si
-       c'etait un autre compte reel (deux enseignants sur le meme
-       ordinateur), son travail doit lui rester attribue. */
-    const demo=/^u\d+$/.test(ancien);
+       l'identite quittee etait PROVISOIRE : un profil de demonstration
+       (u1…u6) ou une identite d'INVITE (inv_…). Si c'etait un autre
+       compte reel (deux enseignants sur le meme ordinateur), son travail
+       doit lui rester attribue.
+       ⚠️ L'identite d'invite compte ici depuis le 09/09/2026, et c'est
+       essentiel : tout ce qu'un enseignant compose pendant son essai est
+       signe `inv_…`. Sans cette reconnaissance, le jour ou il paie, son
+       travail reste dans le stockage mais attribue a personne — donc
+       absent de « mes epreuves » au moment precis ou il vient de payer
+       pour le retrouver. */
+    const demo=/^u\d+$/.test(ancien)||/^inv_/.test(ancien);
     let eps=st.epreuves||[],cos=st.cours||[];
 
     /* ── LE DECOR NE DEVIENT PAS LE TRAVAIL DU NOUVEL INSCRIT ─────────────
@@ -5591,7 +5769,14 @@ class Component extends DCLogic {
       eps = this._sansDecor(eps, /^e[1-3]$/);
       cos = this._sansDecor(cos, /^k[1-2]$/);
       users = users.filter(function(u){
-        return u && (u.id===accId || !self._estDecor(u, /^u[1-9]$/));
+        if(!u) return false;
+        if(u.id===accId) return true;
+        /* Le profil d'invite qu'on vient de quitter : son travail a ete
+           re-tamponne au compte juste au-dessus, il ne reste de lui
+           qu'une ligne vide. La garder afficherait « Moi » deux fois
+           dans la liste des membres de l'equipe. */
+        if(/^inv_/.test(String(u.id||''))) return false;
+        return !self._estDecor(u, /^u[1-9]$/);
       });
       const vivantes = {};
       eps.forEach(function(e){ vivantes[e.id] = true; });
@@ -5720,6 +5905,130 @@ class Component extends DCLogic {
   }
   _poserJeton(t){window.__VRT_TOKEN=t||'';try{if(t)localStorage.setItem('minesec_token',t);
     else localStorage.removeItem('minesec_token');}catch(e){}}
+  /* ═══════════ ENTREE LIBRE — l'empreinte d'appareil ═══════════
+     L'Atelier reclamait un compte VERITAS avant de rien montrer : aller
+     s'inscrire sur un autre domaine, choisir un identifiant, un mot de passe,
+     revenir. Beaucoup d'enseignants s'arretaient la. Le mur ne protegeait
+     d'ailleurs rien -- le repertoire sous droits est garde par le PALIER,
+     cote serveur, pas par la porte d'entree.
+
+     A la place : une empreinte tiree au hasard, gardee dans ce navigateur,
+     et echangee contre un jeton d'invite. Elle ne prouve rien et ne dit rien
+     de personne ; elle sert seulement a se reconnaitre d'une visite a
+     l'autre, donc a retrouver son essai et ses compteurs. */
+  _appareil(){
+    try{
+      const c=localStorage.getItem('minesec_appareil');
+      if(c&&/^[A-Za-z0-9_-]{16,64}$/.test(c))return c;
+      const n=this._alea(32);
+      localStorage.setItem('minesec_appareil',n);
+      return n;
+    }catch(e){
+      /* Navigation privee, ou stockage refuse. On tire une empreinte pour la
+         duree de l'onglet plutot que de refuser l'entree : l'essai repartira
+         au prochain lancement, et c'est le plafond par adresse -- cote
+         serveur -- qui borne l'abus, pas ce navigateur-ci. */
+      if(!this._appareilVolatil)this._appareilVolatil=this._alea(32);
+      return this._appareilVolatil;
+    }
+  }
+  _alea(n){
+    const A='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    try{
+      const b=new Uint8Array(n);crypto.getRandomValues(b);
+      return Array.from(b,x=>A[x%62]).join('');
+    }catch(e){
+      let s='';for(let i=0;i<n;i++)s+=A[Math.floor(Math.random()*62)];return s;
+    }
+  }
+  /* Le jeton d'invite porte un prefixe que le jeton de compte n'a jamais :
+     c'est la seule facon fiable de savoir sous quelle identite on travaille,
+     sans redemander au serveur. */
+  _estInvite(){return String(this._jeton()||'').slice(0,4)==='inv.';}
+  /* Ouvre (ou retrouve) l'acces libre. Aucun formulaire, aucune saisie.
+     `cb(true)` quand un jeton est en place, `cb(false)` sinon -- et dans ce
+     cas `this._inviteErr` porte la raison a montrer (serveur injoignable, ou
+     plafond quotidien d'ouvertures atteint pour cette connexion). */
+  _ouvrirInvite(cb){
+    /* ⚠️ DEUX CHEMINS DEMANDENT L'ACCES EN MEME TEMPS, et c'est normal :
+       `componentDidMount` l'ouvre au demarrage, et `_reparerAttente` --
+       arme par le premier rendu -- constate au meme instant qu'il n'y a
+       pas encore de jeton. La premiere version repondait `false` au
+       second : il concluait a un echec et affichait l'ecran d'acces
+       PENDANT que le premier reussissait. Mesure au navigateur le
+       09/09/2026 -- sur une connexion lente, c'est le cas ordinaire, et
+       l'enseignant voyait donc un formulaire alors qu'il venait d'entrer.
+       Les rappels font desormais la QUEUE : un seul appel reseau, et tout
+       le monde apprend le meme resultat. */
+    if(this._inviteEnVol){
+      (this._inviteFile=this._inviteFile||[]).push(cb);
+      return;
+    }
+    this._inviteEnVol=true;this._inviteErr='';this._inviteFile=[];
+    fetch(this._apiUrl('plateforme.php')+'?action=invite',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({appareil:this._appareil()})})
+      .then(r=>r.json().catch(()=>({})))
+      .then(j=>{
+        this._inviteEnVol=false;
+        if(!j||!j.ok||!j.token){
+          this._inviteErr=(j&&j.error)||'';
+          this._inviteFini(cb,false);return;
+        }
+        this._poserJeton(j.token);
+        const invId=(j.compte&&j.compte.id)||'';
+        this.setState(Object.assign(
+          {authed:true,estInvite:true,compteId:'',authErr:'',
+           accesMsg:'',corpusDroit:j.droit||null},
+          this._identiteInvite(invId)),()=>{this._persist();this._inviteFini(cb,true);});
+      })
+      .catch(()=>{this._inviteEnVol=false;
+        this._inviteErr='Serveur injoignable. Vérifiez votre connexion.';
+        this._inviteFini(cb,false);});
+  }
+  /* Un seul resultat, distribue a tous ceux qui attendaient. Les rappels
+     sont isoles : celui qui jette ne doit pas priver les suivants de la
+     reponse -- l'un d'eux est peut-etre le seul a savoir afficher l'ecran. */
+  _inviteFini(cb,ok){
+    const file=(this._inviteFile||[]).slice();
+    this._inviteFile=[];
+    try{cb&&cb(ok);}catch(e){}
+    file.forEach(f=>{try{f&&f(ok);}catch(e){}});
+  }
+  /* ═══════════ REPRISE D'ABONNEMENT ═══════════
+     Sans mot de passe, l'abonne qui change d'appareil a besoin d'autre chose
+     que sa memoire : le code remis au moment du paiement. Un champ, pas deux,
+     et rien a creer. */
+  _reprendreAbo(){
+    const st=this.state;
+    if(st.repBusy)return;
+    const code=String(st.repCode||'').trim();
+    if(code.length<8){this.setState({repErr:'Entrez le code de reprise reçu lors de votre abonnement.'});return;}
+    this.setState({repBusy:true,repErr:''});
+    fetch(this._apiUrl('plateforme.php')+'?action=reprise',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({code:code})})
+      .then(r=>r.json().catch(()=>({})))
+      .then(j=>{
+        if(!j||!j.ok||!j.token){
+          this.setState({repBusy:false,
+            repErr:(j&&j.error)||'Ce code n’a pas pu être vérifié. Réessayez.'});
+          return;
+        }
+        this._poserJeton(j.token);
+        const nom=(j.compte&&j.compte.nom)||'';
+        const accId=(j.compte&&j.compte.id)||'';
+        this._adopterIdentite(accId,nom);
+        this.setState({repBusy:false,repErr:'',repCode:'',authed:true,
+          estInvite:false,compteId:accId,demo:false,
+          corpusDroit:j.droit||null,screen:'accueil'},()=>{
+          this._persist();this._rechargerCorpus();this._installerSync();
+          try{window.scrollTo(0,0);}catch(e){}
+        });
+      })
+      .catch(()=>this.setState({repBusy:false,
+        repErr:'Serveur injoignable. Vérifiez votre connexion.'}));
+  }
   /* Quatre caracteres tires au sort, ajoutes a la reference de paiement.
      `Date.now().toString(36)` seul est DEVINABLE : l'horloge avance de facon
      previsible, et `payment_camerpay.php?action=status` n'est pas authentifie
@@ -5940,6 +6249,54 @@ class Component extends DCLogic {
      enregistre bien l'abonnement mais ne le rattache a AUCUN compte
      (`_auth_lib.php:745`), donc `acc.plans` reste vide et `plat_droit` continue
      de repondre \u00ab essai_termine \u00bb. Le client aurait paye pour rien. */
+  /* ═══ DEVENIR TITULAIRE — AU MOMENT DE PAYER ═══
+     Un abonnement se rattache a quelqu'un : `vrt_grant_entitlement` ecrit
+     le plan dans `acc.plans`, et sans compte il n'ecrit NULLE PART -- le
+     client aurait paye pour rien. C'est exactement le piege de
+     l'`accountId` manquant, deja paye cher en aout.
+     Mais demander qui l'on est AVANT d'avoir montre l'outil, c'est le mur
+     qu'on vient d'enlever. On le demande donc au seul moment ou
+     l'enseignant le donne sans y penser : il tape deja son nom et son
+     numero Mobile Money pour payer.
+     Toujours SANS mot de passe. Ce qui rouvrira son abonnement sur un
+     autre appareil, c'est le CODE DE REPRISE que le serveur rend ici --
+     et qu'il ne redira jamais, n'en gardant qu'une empreinte. */
+  /* `qui` permet d'appeler ce chemin ailleurs qu'au paiement — rejoindre
+     ou creer une equipe demande aussi un titulaire, mais pas un sou. */
+  _promouvoir(cb,qui){
+    const st=this.state;
+    const q=qui||{};
+    this._promoErr='';
+    fetch(this._apiUrl('plateforme.php')+'?action=promouvoir',{
+      method:'POST',headers:this._entetesJeton(true),
+      body:JSON.stringify({nom:String(q.nom!=null?q.nom:(st.payName||'')).trim(),
+        tel:String(q.tel!=null?q.tel:(st.payCard||'')).replace(/\s+/g,'')})})
+      .then(r=>r.json().catch(()=>({})))
+      .then(j=>{
+        if(!j||!j.ok){
+          this._promoErr=(j&&j.error)
+            ||'Votre accès n’a pas pu être enregistré. Aucun montant n’a été prélevé.';
+          cb&&cb(false);return;
+        }
+        if(j.token)this._poserJeton(j.token);
+        const accId=(j.compte&&j.compte.id)||'';
+        const nom=(j.compte&&j.compte.nom)||'';
+        if(accId)this._adopterIdentite(accId,nom||(this._me()||{}).name||'');
+        this.setState({compteId:accId,estInvite:false,demo:false,
+          /* Le code n'arrive qu'ICI, une seule fois. On le met de cote tout
+             de suite : l'ecran de confirmation le montrera, et c'est la
+             seule occasion qu'aura l'enseignant de le noter. */
+          codeReprise:j.code||st.codeReprise||''},()=>{
+          this._persist();
+          /* Titulaire : la synchro d'equipe a desormais un sens. */
+          try{this._installerSync();}catch(e){}
+          cb&&cb(!!accId);
+        });
+      })
+      .catch(()=>{
+        this._promoErr='Serveur injoignable. Aucun montant n’a été prélevé.';
+        cb&&cb(false);});
+  }
   _payerCamerpay(_reprise){
     if(this.state.payBusy&&!_reprise)return;
     const plan=this.plans.find(p=>p.id===this.state.paySelected);
@@ -5947,6 +6304,33 @@ class Component extends DCLogic {
     const tel=String(this.state.payCard||'').replace(/\s+/g,'');
     if(!/^(\+?237)?6\d{8}$/.test(tel)){
       this.setState({payErr:'Num\u00e9ro Mobile Money invalide. Format attendu : 6XX XXX XXX.'});return;}
+    /* ⚠️ LA FENETRE NAIT DU CLIC, avant tout aller-retour reseau : c'est la
+       seule facon qu'elle ne soit pas bloquee par le navigateur. Elle est
+       retenue d'un passage a l'autre, car DEUX etapes peuvent desormais
+       s'intercaler avant l'initiation -- la promotion en compte et la
+       rotation du jeton public. Sans cela la seconde tentative ouvrait une
+       fenetre hors du geste de l'utilisateur, donc rien du tout, et l'ecran
+       restait sur « L'encaissement n'a pas pu etre initie ». */
+    const fenetre=this._payFenetre||window.open('','_blank');
+    this._payFenetre=fenetre;
+    const lacher=()=>{this._payFenetre=null;};
+
+    /* ═══ L'INVITE DEVIENT TITULAIRE ICI, ET NULLE PART AVANT ═══ */
+    if(this._estInvite()&&!this.state.compteId){
+      this.setState({payBusy:true,payErr:''});
+      this._promouvoir(ok=>{
+        if(!ok){
+          if(fenetre){try{fenetre.close();}catch(e){}}
+          lacher();
+          this.setState({payBusy:false,payErr:this._promoErr
+            ||'Votre accès n’a pas pu être enregistré. Aucun montant n’a été prélevé.'});
+          return;
+        }
+        this.setState({payBusy:false},()=>this._payerCamerpay(_reprise));
+      });
+      return;
+    }
+
     /* Pas de jeton en main : on sonde d'abord, puis on rejoue. Sans cela le
        tout premier paiement d'une session echouerait par 401 alors que la
        passerelle est parfaitement configuree. */
@@ -5956,7 +6340,6 @@ class Component extends DCLogic {
         ()=>this._payerCamerpay(true));});
       return;
     }
-    const fenetre=window.open('','_blank');
     const ref='PLAT'+Date.now().toString(36).toUpperCase()
       +this._alea4();   // voir _alea4 : une reference doit resister a l'enumeration
     this.setState({payBusy:true,payErr:'',payRef:ref});
@@ -5976,6 +6359,7 @@ class Component extends DCLogic {
            on resonde et on rejoue UNE fois. `_reprise` interdit la boucle. */
         if(statut===401&&!_reprise){
           if(fenetre){try{fenetre.close();}catch(e){}}
+          lacher();
           this._payTok='';
           this._sondeCamerpay().then(()=>{this.setState({payBusy:false},
             ()=>this._payerCamerpay(true));});
@@ -5986,6 +6370,7 @@ class Component extends DCLogic {
         const url=corps&&(corps.pay_url||corps.payUrl||corps.url);
         if((statut===200||statut===201)&&url){
           if(fenetre)fenetre.location=url;else window.location.href=url;
+          lacher();
           /* La reference part sur le disque AVANT le sondage : si l'onglet
              se ferme dans la seconde qui suit, le prochain demarrage la
              reprendra. */
@@ -5993,11 +6378,11 @@ class Component extends DCLogic {
           this.setState({payUrl:url,payBusy:false});
           this._sonderPaiement(ref,0);
         }else{
-          if(fenetre)fenetre.close();
+          if(fenetre)fenetre.close();lacher();
           this.setState({payBusy:false,payErr:(corps&&(corps.message||corps.error))
             ||'L\u2019encaissement n\u2019a pas pu \u00eatre initi\u00e9.'});
         }})
-      .catch(()=>{if(fenetre)fenetre.close();
+      .catch(()=>{if(fenetre)fenetre.close();lacher();
         this.setState({payBusy:false,payErr:'Serveur d\u2019encaissement injoignable. Aucun montant n\u2019a \u00e9t\u00e9 pr\u00e9lev\u00e9.'});});
   }
   /* Filet : le webhook confirme normalement tout seul, mais s'il se perd le
@@ -7643,6 +8028,95 @@ class Component extends DCLogic {
          +'border:1px solid var(--cf3c9c9,#f3c9c9);color:var(--ca33a3a,#a33a3a);font-size:12px;line-height:1.5'
         :hidden,
       essaiJours:st.essaiJours,
+
+      /* ══════════ ECRAN D'ACCES ══════════
+         Il n'est plus la porte d'entree : l'Atelier s'ouvre tout seul. On
+         n'arrive ici que si l'ouverture a echoue (serveur injoignable, ou
+         plafond quotidien atteint), ou si l'on vient chercher un
+         abonnement deja paye. */
+      accesMsg:st.accesMsg||'',
+      accesMsgStyle:st.accesMsg
+        ?'margin:0 0 14px;padding:10px 13px;border-radius:10px;background:var(--cfdefdb,#fdefdb);'
+         +'border:1px solid var(--cf0d9b0,#f0d9b0);color:var(--cc26a12,#c26a12);font-size:12.5px;line-height:1.55'
+        :hidden,
+      entrerLabel:st.authBusy?'Ouverture…':'Ouvrir l’Atelier',
+      entrerBtn:'width:100%;background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);'
+        +'border:none;padding:13px;font-size:14.5px;font-weight:700;font-family:Poppins;'
+        +'border-radius:11px;cursor:pointer',
+      entrerLibre:()=>{
+        /* On repart de zero : un jeton perime en place ferait rejouer le
+           meme 401 sans jamais redemander d'acces. */
+        this._inviteTente=false;
+        this._poserJeton('');
+        this.setState({authBusy:true,accesMsg:''});
+        this._ouvrirInvite(ok=>{
+          if(!ok){
+            this.setState({authBusy:false,
+              accesMsg:this._inviteErr||'L’accès n’a pas pu être ouvert. Réessayez dans un instant.'});
+            return;
+          }
+          this.setState({authBusy:false,screen:'accueil'},()=>{
+            this._rechargerCorpus();
+            try{window.scrollTo(0,0);}catch(e){}
+          });
+        });
+      },
+
+      /* ── reprise d'abonnement : un champ, et c'est tout ── */
+      repCode:st.repCode,
+      setRepCode:e=>this.setState({repCode:val(e).toUpperCase(),repErr:''}),
+      repKey:e=>{if(e.key==='Enter'){e.preventDefault();this._reprendreAbo();}},
+      repSubmit:()=>this._reprendreAbo(),
+      repLabel:st.repBusy?'Vérification…':'Retrouver mon abonnement',
+      repBtn:'width:100%;margin-top:12px;background:var(--cffffff,#fff);'
+        +'border:1.5px solid '+(st.repBusy?'var(--cd5e0ec,#d5e0ec)':'var(--c1a72bb,#1a72bb)')+';'
+        +'color:'+(st.repBusy?'var(--c8b97a8,#8b97a8)':'var(--c1a72bb,#1a72bb)')+';'
+        +'padding:11px;font-size:13.5px;font-weight:700;font-family:Poppins;'
+        +'border-radius:10px;cursor:'+(st.repBusy?'default':'pointer'),
+      repErr:st.repErr,
+      repErrStyle:st.repErr
+        ?'margin-top:10px;padding:9px 12px;border-radius:9px;background:var(--cfdeaea,#fdeaea);'
+         +'border:1px solid var(--cf3c9c9,#f3c9c9);color:var(--ca33a3a,#a33a3a);font-size:12px;line-height:1.5'
+        :hidden,
+
+      /* ── l'ancien chemin, replie ── */
+      toggleCx:()=>this.setState({cxOuverte:!st.cxOuverte}),
+      toggleCxLabel:st.cxOuverte
+        ?'Masquer la connexion par mot de passe'
+        :'J’ai un compte VÉRITAS avec mot de passe',
+      toggleCxStyle:'width:100%;background:none;border:none;color:var(--c8b97a8,#8b97a8);'
+        +'font-size:12.5px;font-family:Open Sans;cursor:pointer;text-decoration:underline;padding:0',
+      cxBoxStyle:st.cxOuverte?'margin-top:14px':hidden,
+
+      /* ══════════ CODE DE REPRISE ══════════
+         Il n'existe en clair qu'a l'instant ou le serveur le rend. Le bloc
+         reste masque pour un abonne qui renouvelle : son code n'a pas
+         change, et lui en montrer un vide serait pire que rien. */
+      codeReprise:st.codeReprise||'',
+      codeBoxStyle:st.codeReprise
+        ?'margin:0 0 20px;padding:16px 18px;border-radius:13px;text-align:center;'
+         +'background:var(--cfdefdb,#fdefdb);border:1.5px solid var(--cf0d9b0,#f0d9b0)'
+        :hidden,
+      copierCodeLabel:st.codeCopie?'✓ Copié':'Copier le code',
+      copierCode:()=>{
+        const c=this.state.codeReprise||'';
+        if(!c)return;
+        const fini=()=>{this.setState({codeCopie:true});
+          setTimeout(()=>this.setState({codeCopie:false}),2500);};
+        try{
+          if(navigator.clipboard&&navigator.clipboard.writeText){
+            navigator.clipboard.writeText(c).then(fini,()=>{});return;
+          }
+        }catch(e){}
+        /* Repli pour les navigateurs sans presse-papier moderne : sur un
+           telephone d'entree de gamme, c'est le seul chemin qui marche. */
+        try{
+          const z=document.createElement('textarea');
+          z.value=c;z.style.position='fixed';z.style.opacity='0';
+          document.body.appendChild(z);z.select();
+          document.execCommand('copy');document.body.removeChild(z);fini();
+        }catch(e){}
+      },
       loginIcLogo:this._icon('book','var(--sb-logo-fg)',24),
 plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,screen:'login'},()=>this._persist());},
       payOpen:st.payOpen,payFormShown:!st.payDone,payDoneShown:st.payDone,payPlanName:payPlan.name,payPlanPrice:payPlan.price+(payPlan.period.includes('gratuit')?'':' FCFA'),
@@ -8298,6 +8772,54 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       profThemeBtn:'display:flex;align-items:center;gap:8px;border:1px solid var(--cd5e0ec,#d5e0ec);background:var(--cffffff,#fff);color:var(--c5a6678,#5a6678);font-size:12.5px;font-weight:700;font-family:Poppins;padding:8px 14px;border-radius:9px;cursor:pointer;flex:none',
       profThemeLabel:st.theme==='sombre'?'Mode sombre':'Mode clair',
       profSecuBanner:'border-radius:10px;padding:12px 14px;background:var(--cfdefdb,#fdefdb);color:var(--cc26a12,#c26a12);font-size:12.5px;font-weight:600;line-height:1.55',
+      /* Ce qui tient lieu de cle, dit sans detour. Deux situations, deux
+         phrases : l'invite est reconnu par son APPAREIL, le titulaire par
+         son CODE. Aucun des deux n'a de mot de passe. */
+      profSecuTexte:st.estInvite
+        ?'Vous travaillez sans compte : cet appareil vous reconnaît tout seul, et rien n’est demandé. '
+         +'Videz les données du navigateur et cet accès repart à zéro — abonnez-vous pour que votre travail vous suive partout.'
+        :(st.compteId
+          ?'Il n’y a pas de mot de passe sur l’Atelier. Ce qui rouvre votre abonnement ailleurs, c’est votre code de reprise.'
+          :'Vous êtes connecté avec un compte VÉRITAS et son mot de passe. Les comptes créés depuis septembre 2026 n’en ont plus : ils s’ouvrent au code de reprise.'),
+      logoutLabel:st.estInvite?'Fermer cet accès':'Se déconnecter',
+
+      /* ── remplacer son code de reprise ── */
+      codeReprBoxStyle:(st.compteId&&!st.estInvite)
+        ?'margin-top:16px;padding-top:15px;border-top:1px solid var(--ce6ecf3,#e6ecf3)'
+        :hidden,
+      codeNeuf:st.codeNeuf||'',
+      codeNeufStyle:st.codeNeuf
+        ?'font-family:Poppins;font-size:20px;font-weight:700;letter-spacing:.09em;'
+         +'color:var(--c14375f,#14375f);background:var(--cfdefdb,#fdefdb);'
+         +'border:1.5px solid var(--cf0d9b0,#f0d9b0);border-radius:11px;'
+         +'padding:13px;text-align:center;margin-bottom:10px;word-break:break-all'
+        :hidden,
+      codeReprErr:st.codeReprErr||'',
+      codeReprErrStyle:st.codeReprErr
+        ?'margin-bottom:10px;padding:9px 12px;border-radius:9px;background:var(--cfdeaea,#fdeaea);'
+         +'border:1px solid var(--cf3c9c9,#f3c9c9);color:var(--ca33a3a,#a33a3a);font-size:12px;line-height:1.5'
+        :hidden,
+      demanderCodeLabel:st.codeReprBusy?'…':(st.codeNeuf?'En poser encore un autre':'Poser un nouveau code de reprise'),
+      demanderCodeBtn:'background:var(--cffffff,#fff);border:1.5px solid var(--c1a72bb,#1a72bb);'
+        +'color:var(--c1a72bb,#1a72bb);padding:10px 18px;font-size:12.5px;cursor:'
+        +(st.codeReprBusy?'default':'pointer')+';border-radius:9px;font-weight:700;font-family:Poppins',
+      demanderCode:()=>{
+        if(this.state.codeReprBusy)return;
+        this.setState({codeReprBusy:true,codeReprErr:''});
+        fetch(this._apiUrl('plateforme.php')+'?action=code',
+          {method:'POST',headers:this._entetesJeton(true),body:'{}'})
+          .then(r=>r.json().catch(()=>({})))
+          .then(j=>{
+            if(!j||!j.ok||!j.code){
+              this.setState({codeReprBusy:false,
+                codeReprErr:(j&&j.error)||'Le code n’a pas pu être posé. Réessayez.'});
+              return;
+            }
+            this.setState({codeReprBusy:false,codeNeuf:j.code,codeReprErr:''});
+          })
+          .catch(()=>this.setState({codeReprBusy:false,
+            codeReprErr:'Serveur injoignable. Réessayez.'}));
+      },
       profGroupe:(monGroupe?monGroupe.nom+' \u00b7 '+(monGroupe.type==='ouvert'?'ouvert':'ferm\u00e9'):'Aucun groupe'),
       profRevoirBtn:'background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);padding:10px 18px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer',
       profLogoutBtn:'background:var(--cffffff,#fff);border:1px solid var(--cecc4bf,#ecc4bf);color:var(--cc0392b,#c0392b);padding:10px 18px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer',
