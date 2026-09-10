@@ -792,6 +792,27 @@ if (!defined('VRT_AUTH_LIB')) {
         $paye     = (int) ($state['montant_paye'] ?? $state['montant'] ?? 0);
         $attendu  = vrt_prix_catalogue($db, $intent, $targetId);
 
+        /* ⚠️ UN ABONNEMENT SANS TARIF CONNU NE SE VEND PAS — mesuré le
+           09/09/2026 par tests/banc_tunnel_abonnement.cjs.
+           `targetId` vient du NAVIGATEUR. Pour tous les autres genres il
+           désigne un objet du catalogue, et le repli permissif ci-dessous
+           existe pour ne pas bloquer une vente légitime dont la ligne
+           manquerait. Mais pour un ABONNEMENT, la cible est libre et le droit
+           accordé est durable : `vrt_effective_plantags()` place le
+           `targetId` LUI-MÊME dans les étiquettes effectives du compte. Payer
+           100 FCFA pour `subscription/premium` écrivait donc
+           `acc.plans = ['premium']`, et tout contenu réclamant l'étiquette
+           « premium » s'ouvrait — sans qu'aucun plan de ce nom ait jamais
+           existé ni été facturé.
+           Aucun contenu n'exigeait une telle étiquette au moment de la mesure ;
+           il suffisait d'en créer un, ce qui est un geste d'administration
+           ordinaire. On refuse donc, plutôt que d'attendre.
+           Les plans réels ont tous un prix : `plan1…plan15` par le catalogue,
+           et les quatre de l'Atelier par le miroir de vrt_prix_catalogue(). */
+        if ($attendu === null && $intent === 'subscription') {
+            return ['ok' => false, 'attendu' => null, 'paye' => $paye, 'plancher' => 0,
+                    'motif' => 'abonnement inconnu au catalogue'];
+        }
         if ($attendu === null) return ['ok' => true, 'attendu' => null, 'paye' => $paye, 'plancher' => 0, 'motif' => 'tarif indéterminable'];
         if ($attendu <= 0)     return ['ok' => true, 'attendu' => $attendu, 'paye' => $paye, 'plancher' => 0, 'motif' => 'gratuit'];
 

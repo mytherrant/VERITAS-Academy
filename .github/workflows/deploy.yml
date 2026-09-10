@@ -395,6 +395,24 @@ jobs:
       - name: 🚪 L'entrée est-elle libre, et l'essai borné ?
         run: node tests/banc_entree_libre.cjs
 
+      # ── 💳 LE CORPUS S'OUVRE-T-IL VRAIMENT AU PAIEMENT ?
+      #    `paiements_entitlements.php` s'arrête à « le plan est écrit sur le
+      #    compte ». Entre là et « le texte descend dans le navigateur » il
+      #    reste plat_plans_atelier → plat_droit → plat_palier_de →
+      #    plat_paliers : quatre fonctions où un nom peut diverger sans que
+      #    rien ne le signale. Le paiement réussit, le droit s'écrit, et le
+      #    client reçoit toujours 402 — « il a payé, rien ne s'ouvre », et
+      #    aucun journal ne le distingue d'un impayé.
+      #    Ce banc mesure le tunnel entier sur le CORPS du texte :
+      #    invité → 402 → promotion → 402 → paiement → 200 + texte intégral,
+      #    pour les quatre plans, plus la reprise sur un autre appareil.
+      #    Il a trouvé le 09/09/2026 qu'un abonnement absent du catalogue
+      #    s'achetait à n'importe quel prix (tarif indéterminable = accepté),
+      #    et que son identifiant devenait une étiquette de droit.
+      #    Éprouvé par 5 mutations, chacune rougissant le maillon visé.
+      - name: 💳 Le corpus s'ouvre-t-il vraiment au paiement ?
+        run: node tests/banc_tunnel_abonnement.cjs
+
       # ── 🎓 L'ENSEIGNANT ATTEINT-IL SON ATELIER, ET NE VOIT-IL QUE SES
       #    MATIÈRES ? Deux frictions signalées le 28/08/2026. D'abord un
       #    produit vendu à l'inscription puis introuvable : il fallait quitter
