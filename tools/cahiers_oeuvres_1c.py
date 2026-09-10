@@ -750,6 +750,57 @@ def patcher(html: str, niveau: str, cfg: dict) -> str:
         })
         n += 1
 
+    # ⑰ LE PANNEAU DE L'ENSEIGNANT MONTRAIT L'ENSEIGNANT.
+    #    « Espace enseignant · Salon de classe », et dessous trois compteurs :
+    #    le nombre de pages du cahier, le nombre de réponses saisies — LES
+    #    SIENNES — et « 3 œuvres suivies », écrit en dur. Rien de tout cela ne
+    #    parlait de ses élèves. C'est la même famille de défaut que le bouton
+    #    « Envoyer au salon » qui n'envoyait rien : une interface qui a l'air
+    #    de fonctionner parce qu'elle affiche quelque chose.
+    #
+    #    `action=copies` donne les vrais chiffres, pour son ouvrage et lui
+    #    seul. Tant qu'ils ne sont pas arrivés, on affiche des tirets plutôt
+    #    qu'un zéro : « 0 élève » est une information, « — » est une attente,
+    #    et les confondre ferait croire à un salon vide au premier chargement.
+    ancienStats = ("      teacherStats: [{ v: nPages, k: 'pages du cahier' }, "
+                   "{ v: answered, k: 'réponses saisies' }, "
+                   "{ v: '3', k: 'œuvres suivies' }],")
+    if ancienStats not in html:
+        raise Ancre("les compteurs de l'enseignant sont introuvables")
+    html = html.replace(ancienStats,
+        "      teacherStats: (() => {\n"
+        "        const c = S.copies;\n"
+        "        if (!c) return [{ v: '—', k: 'élèves du salon' },\n"
+        "                        { v: '—', k: 'exercices remplis' },\n"
+        "                        { v: '—', k: 'dernier travail' }];\n"
+        "        const ex = c.reduce((n, x) => n + (x.exercices || 0), 0);\n"
+        "        const maj = c.reduce((m, x) => Math.max(m, x.maj || 0), 0);\n"
+        "        return [{ v: String(c.length), k: c.length > 1 ? 'élèves du salon' : 'élève du salon' },\n"
+        "                { v: String(ex), k: 'exercices remplis' },\n"
+        "                { v: classeQuand(maj), k: 'dernier travail' }];\n"
+        "      })(),")
+    n += 1
+
+    #    Et on va les chercher — une seule fois, à l'ouverture du cahier, et
+    #    seulement pour un jeton d'enseignant : `action=copies` refuse un jeton
+    #    d'élève, ce qui est exactement ce qu'on veut.
+    ancreCharge = "        syncCharger(distantes => {"
+    if ancreCharge not in html:
+        raise Ancre("le point d'accroche de la synchro est introuvable")
+    html = html.replace(ancreCharge,
+        "        classeCharger(copies => { if (copies) this.setState({ copies }); });\n"
+        + ancreCharge, 1)
+    n += 1
+
+    #    `copies` doit exister dans l'état initial, sinon `S.copies` est
+    #    `undefined` au premier rendu et le panneau lit une propriété d'un
+    #    objet qui n'a pas encore été posé.
+    ancienEtat = "    ans: {}, ui: {}, shareMsg:"
+    if ancienEtat not in html:
+        raise Ancre("l'état initial est introuvable")
+    html = html.replace(ancienEtat, "    ans: {}, ui: {}, copies: null, shareMsg:", 1)
+    n += 1
+
     # ⑩ LE CONFORT DE LECTURE — MESURÉ, PAS DEVINÉ.
     #    La colonne de texte faisait 1 180 px. Sur l'écran d'un ordinateur, une
     #    ligne portait donc jusqu'à 140 signes ; mesuré à 900 px de large, elle
@@ -818,7 +869,7 @@ def patcher(html: str, niveau: str, cfg: dict) -> str:
     # retrait de la carte fausse (⑬) ; les trois autres reçoivent une passe de
     # réaffectation (⑯) que la 6ᵉ n'a pas besoin — elle a déjà vingt et une
     # images distinctes pour vingt-deux chapitres.
-    attendus = 38 if niveau == "6e" else 33
+    attendus = 41 if niveau == "6e" else 36
     if n != attendus:
         raise Ancre(f"{n} remplacements au lieu de {attendus}")
     # Une dernière vérification, sur le produit fini : aucune trace du verrou
@@ -1004,6 +1055,50 @@ function syncCharger(alors) {
       alors(out);
     })
     .catch(function () { alors(null); });
+}
+
+/* ── CE QUE L'ENSEIGNANT DOIT VOIR : SA CLASSE ────────────────────────────
+   Le panneau « Espace enseignant · Salon de classe » affichait trois
+   compteurs : le nombre de pages du cahier, le nombre de réponses saisies —
+   les SIENNES — et le chiffre 3, écrit en dur, pour « œuvres suivies ». Un
+   enseignant y lisait donc ses propres statistiques présentées comme celles
+   de ses élèves, sous un titre qui promettait leur travail.
+
+   `api/cahier.php?action=copies` les donne pour de bon : un enseignant muni
+   d'un jeton de guide y trouve, pour SON ouvrage et lui seul, la liste de ses
+   élèves, le nombre d'exercices que chacun a remplis, ce qu'il a déjà annoté,
+   et la date du dernier travail. On ne montre rien d'autre : un compteur
+   inventé sur un écran de suivi vaut moins que pas de compteur du tout. */
+var CLASSE = { copies: null, lue: false };
+
+function classeCharger(alors) {
+  if (CLASSE.lue) { alors(CLASSE.copies); return; }
+  var jeton = syncJeton();
+  if (!jeton) { alors(null); return; }
+  fetch('/api/cahier.php', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'copies', token: jeton })
+  })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      /* Un jeton d'ÉLÈVE reçoit ici un refus, et c'est normal : le panneau
+         n'est affiché qu'aux enseignants. On ne réessaie pas. */
+      CLASSE.lue = true;
+      CLASSE.copies = (j && j.ok && j.copies) ? j.copies : null;
+      alors(CLASSE.copies);
+    })
+    .catch(function () { CLASSE.lue = true; alors(null); });
+}
+
+/* Le jour d'un horodatage, en clair. « il y a 3 jours » se lit plus vite
+   qu'une date, quand la question est « qui travaille encore ? ». */
+function classeQuand(t) {
+  if (!t) return 'jamais';
+  var j = Math.floor((Date.now() / 1000 - t) / 86400);
+  if (j <= 0) return 'aujourd’hui';
+  if (j === 1) return 'hier';
+  if (j < 30) return 'il y a ' + j + ' jours';
+  return new Date(t * 1000).toLocaleDateString('fr-FR');
 }
 
 function clesDuChapitre(page, blocs) {

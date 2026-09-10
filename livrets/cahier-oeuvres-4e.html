@@ -851,6 +851,50 @@ function syncCharger(alors) {
     .catch(function () { alors(null); });
 }
 
+/* ── CE QUE L'ENSEIGNANT DOIT VOIR : SA CLASSE ────────────────────────────
+   Le panneau « Espace enseignant · Salon de classe » affichait trois
+   compteurs : le nombre de pages du cahier, le nombre de réponses saisies —
+   les SIENNES — et le chiffre 3, écrit en dur, pour « œuvres suivies ». Un
+   enseignant y lisait donc ses propres statistiques présentées comme celles
+   de ses élèves, sous un titre qui promettait leur travail.
+
+   `api/cahier.php?action=copies` les donne pour de bon : un enseignant muni
+   d'un jeton de guide y trouve, pour SON ouvrage et lui seul, la liste de ses
+   élèves, le nombre d'exercices que chacun a remplis, ce qu'il a déjà annoté,
+   et la date du dernier travail. On ne montre rien d'autre : un compteur
+   inventé sur un écran de suivi vaut moins que pas de compteur du tout. */
+var CLASSE = { copies: null, lue: false };
+
+function classeCharger(alors) {
+  if (CLASSE.lue) { alors(CLASSE.copies); return; }
+  var jeton = syncJeton();
+  if (!jeton) { alors(null); return; }
+  fetch('/api/cahier.php', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'copies', token: jeton })
+  })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      /* Un jeton d'ÉLÈVE reçoit ici un refus, et c'est normal : le panneau
+         n'est affiché qu'aux enseignants. On ne réessaie pas. */
+      CLASSE.lue = true;
+      CLASSE.copies = (j && j.ok && j.copies) ? j.copies : null;
+      alors(CLASSE.copies);
+    })
+    .catch(function () { CLASSE.lue = true; alors(null); });
+}
+
+/* Le jour d'un horodatage, en clair. « il y a 3 jours » se lit plus vite
+   qu'une date, quand la question est « qui travaille encore ? ». */
+function classeQuand(t) {
+  if (!t) return 'jamais';
+  var j = Math.floor((Date.now() / 1000 - t) / 86400);
+  if (j <= 0) return 'aujourd’hui';
+  if (j === 1) return 'hier';
+  if (j < 30) return 'il y a ' + j + ' jours';
+  return new Date(t * 1000).toLocaleDateString('fr-FR');
+}
+
 function clesDuChapitre(page, blocs) {
   var vus = {}, out = [];
   for (var i = 0; i < blocs.length; i++) {
@@ -1077,7 +1121,7 @@ class Component extends DCLogic {
     booted: false, doc: null, loadErr: '',
     sess: null, code: '', name: '', classe: '', gateErr: '',
     pi: 0, drawer: false, tOpen: false, tLeft: 0, tRun: false,
-    ans: {}, ui: {}, shareMsg: 'Ton cahier est enregistré sur cet appareil ET sur le serveur : tu le retrouves sur un autre téléphone, et ton enseignant peut lire tes réponses.'
+    ans: {}, ui: {}, copies: null, shareMsg: 'Ton cahier est enregistré sur cet appareil ET sur le serveur : tu le retrouves sur un autre téléphone, et ton enseignant peut lire tes réponses.'
   };
 
   componentDidMount() {
@@ -1102,7 +1146,8 @@ class Component extends DCLogic {
           const m = (() => { try { return JSON.parse(localStorage.getItem(LS + 'moi') || '{}'); } catch (e) { return {}; } })();
           this.setState({ sess: { code: '', name: m.name || 'Élève', classe: m.classe || SLUG, role: window.VRTLivret.etat().kind === 'guide' ? 'teacher' : 'student' } });
           this.load();
-          syncCharger(distantes => {
+          classeCharger(copies => { if (copies) this.setState({ copies }); });
+        syncCharger(distantes => {
             if (!distantes) return;
             this.save(Object.assign({}, distantes, this.state.ans));
           });
@@ -1668,7 +1713,17 @@ class Component extends DCLogic {
       timerPresets: [{ label: '45 min', go: () => this.setState({ tLeft: 2700, tRun: true }) }, { label: '1 h', go: () => this.setState({ tLeft: 3600, tRun: true }) }, { label: '2 h', go: () => this.setState({ tLeft: 7200, tRun: true }) }],
 
       isTeacher, classCode: sess ? 'C4-' + sess.code.slice(3, 7) : '',
-      teacherStats: [{ v: nPages, k: 'pages du cahier' }, { v: answered, k: 'réponses saisies' }, { v: '3', k: 'œuvres suivies' }],
+      teacherStats: (() => {
+        const c = S.copies;
+        if (!c) return [{ v: '—', k: 'élèves du salon' },
+                        { v: '—', k: 'exercices remplis' },
+                        { v: '—', k: 'dernier travail' }];
+        const ex = c.reduce((n, x) => n + (x.exercices || 0), 0);
+        const maj = c.reduce((m, x) => Math.max(m, x.maj || 0), 0);
+        return [{ v: String(c.length), k: c.length > 1 ? 'élèves du salon' : 'élève du salon' },
+                { v: String(ex), k: 'exercices remplis' },
+                { v: classeQuand(maj), k: 'dernier travail' }];
+      })(),
 
       goPrev: () => { this.setState({ pi: Math.max(0, pi - 1) }); window.scrollTo(0, 0); },
       goNext: () => { this.setState({ pi: Math.min(nPages - 1, pi + 1) }); window.scrollTo(0, 0); },
