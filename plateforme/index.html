@@ -3346,7 +3346,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '09/09 · 8';
+const ATELIER_BUILD = '10/09 · 9';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -5681,31 +5681,6 @@ class Component extends DCLogic {
   /* IDENTITE. Apres connexion, on est son COMPTE VERITAS, plus le profil de
      demonstration `u1`. Deux enseignants etaient tous deux `u1` : le travail
      de l'un redescendait chez l'autre signe de son propre nom. */
-  /* ═══ IDENTITE D'UN INVITE ═══
-     Il ne se nomme pas — on ne lui demande rien — mais il lui faut un
-     profil a lui. Sans cela il herite de `u1`, le profil de
-     demonstration, et ses epreuves partent signees d'un personnage
-     d'exemple : c'est exactement le defaut corrige en aout pour les
-     comptes, et l'ouverture de l'entree le ferait revenir pour tout le
-     monde.
-     Le DECOR, lui, reste en place : c'est ce qui montre a quoi ressemble
-     un Atelier rempli a quelqu'un qui vient de le decouvrir, et il porte
-     son drapeau `demo` — ni la synchro ni l'equipe ne le voient. Il sera
-     jete le jour ou l'invite devient titulaire (_adopterIdentite), et son
-     travail a lui suivra.
-     Renvoie un fragment d'etat plutot que d'appeler setState : l'appelant
-     le fusionne dans le sien, ce qui evite deux rendus successifs dont le
-     premier montrerait une identite a moitie posee. */
-  _identiteInvite(id){
-    if(!id)return {};
-    const st=this.state;
-    if(st.currentUserId===id)return {};
-    const users=(st.users||[]).slice();
-    if(!users.some(u=>u&&u.id===id)){
-      users.push({id:id,name:'Moi',role:'Enseignant',quota:{limit:0,used:0}});
-    }
-    return {users:users,currentUserId:id};
-  }
   _adopterIdentite(accId,nom){
     if(!accId)return;
     const st=this.state,ancien=String(st.currentUserId||'');
@@ -5977,10 +5952,28 @@ class Component extends DCLogic {
         }
         this._poserJeton(j.token);
         const invId=(j.compte&&j.compte.id)||'';
-        this.setState(Object.assign(
-          {authed:true,estInvite:true,compteId:'',authErr:'',
-           accesMsg:'',corpusDroit:j.droit||null},
-          this._identiteInvite(invId)),()=>{this._persist();this._inviteFini(cb,true);});
+        /* ⚠️ L'INVITE PASSE PAR LE MEME CHEMIN QU'UN COMPTE, decor jete
+           compris. La premiere version le lui laissait, en se disant qu'un
+           Atelier rempli montre mieux qu'un ecran vide. C'etait faux, et
+           cela s'est vu du premier coup d'oeil : ce ne sont pas des
+           exemples, ce sont des NOTIFICATIONS — « 15 » dans la barre,
+           « Aicha Bello propose une modification », « attend une relecture,
+           il y a 19 j ». Presentee ainsi, l'activite d'un personnage
+           invente passe pour la sienne, et l'enseignant cherche a repondre
+           a des collegues qui n'existent pas.
+           La regle etait deja ecrite pour les inscrits — « un nouvel
+           inscrit doit trouver une page vierge et batir ses contenus
+           lui-meme ». L'entree devenue libre, l'invite EST l'utilisateur
+           ordinaire, et la meme regle vaut pour lui.
+           `_adopterIdentite` jette le decor (drapeau `demo`, e1-e3, k1-k2,
+           u1-u9, propositions et messages d'exemple) ET re-tamponne a son
+           nom le travail deja fait sur ce poste. Les notifications, elles,
+           se DEDUISENT des epreuves et des propositions : rien de plus a
+           effacer, elles disparaissent avec ce qui les fabriquait. */
+        if(invId)this._adopterIdentite(invId,'Moi');
+        this.setState({authed:true,estInvite:true,compteId:'',authErr:'',
+          accesMsg:'',corpusDroit:j.droit||null},
+          ()=>{this._persist();this._inviteFini(cb,true);});
       })
       .catch(()=>{this._inviteEnVol=false;
         this._inviteErr='Serveur injoignable. Vérifiez votre connexion.';
@@ -6908,7 +6901,23 @@ class Component extends DCLogic {
     const inActive=n=>active?active.textIds.includes(n):false;
     const val=e=>e&&e.target?e.target.value:'';
     const hidden='display:none';
-    const meRemaining=Math.max(0,me.quota.limit-me.quota.used),meLimit=me.quota.limit;
+    /* ⚠️ LE PLAFOND VIENT DU SERVEUR, et il n'etait lu nulle part.
+       `me.quota.limit` vaut 0 sur un profil neuf — c'est voulu : on ne
+       montre pas un compteur invente tant qu'on ne sait rien. Mais le
+       serveur, lui, SAIT : `?action=corpus` rend `plafonds`, la table du
+       palier en cours, et `_chargerCorpus` la range dans `corpusPlafonds`
+       … ou personne n'allait la chercher. Mesure du 10/09/2026 :
+       « CREDITS 0 / 0 epreuves ce mois » s'affichait pour TOUT LE MONDE,
+       invite comme abonne — un chiffre generique la ou l'enseignant
+       attend le sien. Une donnee recue et jamais affichee est une donnee
+       perdue.
+       Le serveur prime quand il a parle ; la valeur locale sert de repli
+       tant qu'il n'a pas repondu. -1 signifierait « sans limite » : on le
+       laisse alors au repli plutot que d'ecrire « -1 » a l'ecran. */
+    const plafondSrv=(st.corpusPlafonds&&st.corpusPlafonds.epreuves!=null)
+      ?(st.corpusPlafonds.epreuves|0):null;
+    const meLimit=(plafondSrv!=null&&plafondSrv>=0)?plafondSrv:me.quota.limit;
+    const meRemaining=Math.max(0,meLimit-me.quota.used);
     const tq=st.team.quota,teamRemaining=Math.max(0,tq.limit-tq.used),teamLimit=tq.limit;
     const avStack=ids=>{const arr=ids.map(id=>st.users.find(u=>u.id===id)).filter(Boolean);return React.createElement(React.Fragment,null,arr.slice(0,4).map((u,i)=>React.createElement('span',{key:u.id,title:u.name,style:{display:'inline-grid',placeItems:'center',width:'24px',height:'24px',borderRadius:'50%',background:this._color(u),color:'var(--cffffff,#fff)',fontSize:'9.5px',fontWeight:700,fontFamily:'Poppins',border:'2px solid var(--cffffff,#fff)',marginLeft:i?'-7px':'0'}},this._initials(u.name))));};
 
@@ -7134,9 +7143,23 @@ class Component extends DCLogic {
     const mesEp=st.epreuves.filter(e=>e.ownerId===me.id||(e.editorIds||[]).indexOf(me.id)>=0);
     const nbTerminer=mesEp.filter(e=>e.status==='brouillon').length;
     const nbRelire=st.epreuves.filter(e=>e.status==='relecture').length;
+    /* ⚠️ UNE PROPOSITION ORPHELINE NE S'AFFICHE PAS.
+       `proposals`, `chatMsgs` et `msgsByConv` ne sont PAS persistes
+       (voir _persist) : le decor de demonstration les repose donc a CHAQUE
+       demarrage, apres que _adopterIdentite a jete les epreuves et les
+       profils qui vont avec. Resultat mesure le 10/09/2026 : un invite
+       tout neuf trouvait « 1 evenement — ? propose une modification sur
+       Texte 2 · Question II.2 » — une notification sans auteur, sur une
+       epreuve qui n'existe pas, dans un Atelier ou il n'a rien fait.
+       Nettoyer l'etat ne suffirait pas, puisqu'il est repose au chargement
+       suivant : la garde doit etre ICI, au rendu. On exige les deux bouts
+       — l'epreuve visee ET l'auteur — car chacun peut manquer seul. */
     const propsPlats=[];
     Object.keys(st.proposals||{}).forEach(k=>{(st.proposals[k]||[]).forEach(p=>{
-      if(p.status==='pending')propsPlats.push({...p,epId:k});});});
+      if(p.status!=='pending')return;
+      if(!(st.epreuves||[]).some(e=>e&&e.id===k))return;
+      if(!(st.users||[]).some(u=>u&&u.id===p.userId))return;
+      propsPlats.push({...p,epId:k});});});
 
     /* Quatre reperes du jour. Chacun prend une teinte de la rotation : c'est
        l'alternance de lws.fr, et elle sert a les distinguer d'un coup d'oeil
