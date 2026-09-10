@@ -413,6 +413,22 @@ jobs:
       - name: 💳 Le corpus s'ouvre-t-il vraiment au paiement ?
         run: node tests/banc_tunnel_abonnement.cjs
 
+      # ── 🧹 LE DÉCOR NE PASSE PAS POUR L'ACTIVITÉ DE L'ENSEIGNANT.
+      #    L'Atelier est livré avec six profils, trois épreuves et deux cours
+      #    d'exemple. Ils ne s'affichent pas comme des exemples mais comme des
+      #    NOTIFICATIONS — « 15 » dans la barre, « Aïcha Bello propose une
+      #    modification », dans une file « À TRAITER ». L'enseignant cherche
+      #    alors à répondre à des collègues qui n'existent pas.
+      #    `_adopterIdentite` les jetait déjà, mais il n'est appelé QU'UNE
+      #    fois : quiconque avait déjà ouvert l'Atelier gardait le décor pour
+      #    toujours. `_jeterDecor` tourne maintenant à chaque montage — et le
+      #    banc mesure l'APPEL, pas seulement la fonction : sans lui, tout
+      #    resterait vert pendant que plus personne ne serait nettoyé.
+      #    Le contrôle qui compte le plus : le travail RÉEL survit au ménage.
+      #    Éprouvé par 7 mutations, chacune rougissant le contrôle visé.
+      - name: 🧹 Le décor de démonstration est-il bien jeté ?
+        run: node tests/banc_decor_jete.cjs
+
       # ── 🎓 L'ENSEIGNANT ATTEINT-IL SON ATELIER, ET NE VOIT-IL QUE SES
       #    MATIÈRES ? Deux frictions signalées le 28/08/2026. D'abord un
       #    produit vendu à l'inscription puis introuvable : il fallait quitter

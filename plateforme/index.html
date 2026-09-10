@@ -36,6 +36,58 @@
 <script src="./docx.js?v=2122627c"></script>
 </head>
 <body>
+<!-- ═══════════════════════════════════════════════════════════════════════
+     BANDEAU DE RETOUR — L'ATELIER ÉTAIT UN CUL-DE-SAC
+     ───────────────────────────────────────────────────────────────────────
+     Mesuré au navigateur le 10/09/2026 : la page ne portait que CINQ liens,
+     tous dans le pied de page, et aucun ne menait à la boutique, aux
+     abonnements ni à « mon compte ». Un enseignant entré dans l'Atelier ne
+     pouvait plus rejoindre le reste du site sans faire défiler toute la page
+     pour trouver « Centre VÉRITAS » — ou sans réécrire l'adresse à la main.
+     Combiné à une charte propre (Open Sans / #1a72bb, là où le site est en
+     Poppins / #142554-#FFC93C) et à un stockage local séparé (minesec_*
+     contre vrt10), l'Atelier se comportait comme un autre site.
+
+     Ce bandeau ne touche pas au moteur de l'Atelier : il est posé avant la
+     racine de rendu, hors de tout ce que celle-ci remplace. Il porte la
+     palette du site — bleu nuit et or — pour que le passage d'un module à
+     l'autre cesse de ressembler à un changement de produit.
+
+     (Aucun nom de balise en clair dans ce commentaire : la racine de rendu
+     est repérée par son nom d'élément, et une seconde occurrence — même
+     commentée — la faisait dédoubler, bandeau et commentaire compris.
+     Constaté au navigateur, corrigé le 10/09/2026.)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<style>
+  .vrt-pont{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:18px;
+    flex-wrap:wrap;padding:9px 20px;background:#142554;color:#fff;
+    font:600 13px/1.4 'Poppins','Open Sans',system-ui,sans-serif;
+    box-shadow:0 1px 0 rgba(255,255,255,.08),0 2px 10px rgba(20,37,84,.18)}
+  .vrt-pont a{color:#fff;text-decoration:none;opacity:.86;padding:3px 2px;border-bottom:2px solid transparent}
+  .vrt-pont a:hover,.vrt-pont a:focus-visible{opacity:1;color:#fff;border-bottom-color:#FFC93C;outline:none}
+  .vrt-pont-marque{display:flex;align-items:center;gap:9px;margin-right:auto;font-weight:700;letter-spacing:.2px}
+  .vrt-pont-marque img{width:24px;height:24px;border-radius:5px;display:block}
+  .vrt-pont-marque .vrt-pont-ici{color:#FFC93C;font-weight:600;opacity:.95}
+  .vrt-pont-liens{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  @media (max-width:560px){
+    .vrt-pont{gap:10px;padding:8px 12px;font-size:12px}
+    .vrt-pont-liens{gap:12px}
+    .vrt-pont-marque .vrt-pont-ici{display:none}
+  }
+  @media print{.vrt-pont{display:none!important}}
+</style>
+<nav class="vrt-pont" data-noprint="1" aria-label="Navigation Centre VÉRITAS">
+  <span class="vrt-pont-marque">
+    <img src="../assets/veritas-logo.png" alt="" aria-hidden="true">
+    <a href="/">Centre VÉRITAS</a>
+    <span class="vrt-pont-ici">· Atelier de Français</span>
+  </span>
+  <span class="vrt-pont-liens">
+    <a href="/#boutique">Boutique</a>
+    <a href="/#tarifs">Abonnements</a>
+    <a href="/app.html#connexion">Mon compte</a>
+  </span>
+</nav>
 <x-dc>
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3346,7 +3398,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '10/09 · 9';
+const ATELIER_BUILD = '10/09 · 10';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -3611,6 +3663,19 @@ class Component extends DCLogic {
         this._adopterIdentite(st.compteId,(this._me()||{}).name||'');
         this._persistLocal();
       }},'reprise d’identite');
+    /* ⚠️ LE DECOR SE REJETTE A CHAQUE DEMARRAGE.
+       `_adopterIdentite` le jette deja — mais il n'est appele qu'UNE
+       fois : a la connexion, ou a la toute premiere ouverture d'un acces
+       libre. Quiconque avait deja ouvert l'Atelier le gardait donc pour
+       TOUJOURS ; et `proposals` / `chatMsgs` / `msgsByConv`, qui ne
+       passent pas par `_persist()`, le reposaient a chaque chargement
+       meme chez les autres.
+       Mesure du 10/09/2026, sur un poste ordinaire : « Notifications 15 »,
+       « jacques a ajoute M. Paul Etoa comme co-editeur », « Devoir de
+       lecture methodique — 3e, en relecture » — des notifications datees
+       et signees, qui passent pour l'activite de l'enseignant.
+       Un nettoyage qui ne tourne qu'a la creation ne nettoie personne. */
+    sur(()=>this._jeterDecor(),'décor de démonstration');
     sur(()=>this._lireInvitation(),'lien d’invitation');
     sur(()=>this._lireIdentifiantPropose(),'identifiant transmis par le site');
     /* Une première astuce après quelques secondes — le temps que l'écran se
@@ -5147,6 +5212,75 @@ class Component extends DCLogic {
   _sansDecor(liste, motif){
     const self = this;
     return (liste || []).filter(function(x){ return !self._estDecor(x, motif); });
+  }
+  /* ═══ JETER LE DECOR ═══
+     Appelee a CHAQUE montage. Elle ne fait rien tant qu'on porte encore
+     un profil de demonstration (u1…u6) : c'est le tout premier lancement,
+     avant meme l'ouverture de l'acces, et la visite guidee a le droit de
+     montrer un Atelier rempli. Des qu'une identite REELLE est en place
+     — `inv_…` pour un invite, `va_…` pour un titulaire — les six profils
+     d'exemple, leurs trois epreuves et leurs deux cours n'ont plus rien a
+     faire la.
+     Elle ne declenche aucun rendu quand il n'y a rien a jeter : sur un
+     Atelier deja propre, c'est un simple comptage. */
+  _jeterDecor(){
+    const st=this.state, self=this;
+    const id=String(st.currentUserId||'');
+    if(!id||/^u\d+$/.test(id))return;
+
+    const eps=this._sansDecor(st.epreuves,/^e[1-3]$/);
+    const cos=this._sansDecor(st.cours,/^k[1-2]$/);
+    const users=(st.users||[]).filter(function(u){
+      return u && (u.id===id || !self._estDecor(u,/^u[1-9]$/));
+    });
+    /* Les propositions se rangent PAR EPREUVE : celles qui designent une
+       epreuve disparue n'ont plus de sujet. Les messages d'exemple, eux,
+       n'ont pas d'identifiant — c'est deja la regle qui les ecarte du
+       partage d'equipe. */
+    const vivantes={};
+    eps.forEach(function(e){ vivantes[e.id]=true; });
+    const props={};
+    Object.keys(st.proposals||{}).forEach(function(k){
+      if(vivantes[k])props[k]=st.proposals[k];});
+    const chat=(st.chatMsgs||[]).filter(function(m){return m&&m.id;});
+    let msgs=null;
+    if(st.msgsByConv){
+      msgs={};
+      Object.keys(st.msgsByConv).forEach(function(k){
+        msgs[k]=(st.msgsByConv[k]||[]).filter(function(m){return m&&m.id;});});
+    }
+    /* L'etablissement de l'equipe de demonstration s'affichait dans le
+       profil, et son compteur d'epreuves avec. */
+    let team=st.team;
+    const equipeDemo=!!(team&&team.name==='Lycée Bilingue de Yaoundé');
+    if(equipeDemo){
+      team=Object.assign({},team,{name:'',plan:'',
+        quota:Object.assign({},team.quota||{},{used:0})});
+    }
+
+    /* Rien a jeter : on ne provoque pas un rendu pour rien. Compter les
+       messages demande de descendre d'un cran, les conversations etant
+       rangees par cle. */
+    let msgsAvant=0, msgsApres=0;
+    if(msgs){
+      Object.keys(st.msgsByConv).forEach(function(k){
+        msgsAvant+=(st.msgsByConv[k]||[]).length; msgsApres+=(msgs[k]||[]).length;});
+    }
+    if(eps.length===(st.epreuves||[]).length
+      && cos.length===(st.cours||[]).length
+      && users.length===(st.users||[]).length
+      && Object.keys(props).length===Object.keys(st.proposals||{}).length
+      && chat.length===(st.chatMsgs||[]).length
+      && msgsAvant===msgsApres && !equipeDemo) return;
+
+    const suite={epreuves:eps,cours:cos,users:users,proposals:props,
+                 chatMsgs:chat,team:team};
+    if(msgs)suite.msgsByConv=msgs;
+    /* Une epreuve « active » qu'on vient de jeter laisserait le composeur
+       sur un fantome. */
+    if(st.activeId&&!eps.some(function(e){return e.id===st.activeId;}))suite.activeId=null;
+    if(st.activeCoursId&&!cos.some(function(c){return c.id===st.activeCoursId;}))suite.activeCoursId=null;
+    this.setState(suite,()=>this._persist());
   }
   _syncContenu(){
     const st=this.state;
