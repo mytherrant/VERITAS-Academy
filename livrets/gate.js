@@ -629,6 +629,12 @@
       return post(API, { action: 'claim', ref: ref, tel: tel });
     },
 
+    /** Recevoir une copie du code par e-mail (apres coup, depuis l'ecran de
+     *  code). Meme garde que `reclamer` cote serveur : reference + numero. */
+    copie: function (ref, tel, mail) {
+      return post(API, { action: 'copie', ref: ref, tel: tel, mail: mail });
+    },
+
     prix: prix,
     joursRestants: function () { return etat.jours; },
 
@@ -678,13 +684,35 @@
   }
   function fermerModale() { if (M && M.parentNode) { M.parentNode.removeChild(M); M = null; } }
 
-  var BTN = 'width:100%;border:none;background:#c0453f;color:#fff;font-family:"Baloo 2",sans-serif;'
+  /* ⚠️ LES GUILLEMETS DE LA POLICE FERMAIENT L'ATTRIBUT. Cette constante est
+     posée dans `style="' + BTN + '"` : le `"` de `"Baloo 2"` y terminait
+     l'attribut, et TOUT ce qui suit — graisse, taille, remplissage, rayon,
+     curseur — était jeté par l'analyseur. Mesuré au navigateur le
+     12/09/2026 : le bouton rendait 17 px de haut, en Arial 13 px, sans
+     remplissage. Les trois boutons concernés sont ceux du tunnel d'achat —
+     « Payer N FCFA », « Retrouver mon code », « Ouvrir mon livret ». Le plus
+     visible des défauts, et invisible à la lecture : la feuille est correcte,
+     c'est sa POSE qui ne l'était pas.
+     Apostrophes échappées : `'Baloo 2'` est valide dans un attribut délimité
+     par des guillemets doubles, et ne le referme pas. */
+  var BTN = 'width:100%;border:none;background:#c0453f;color:#fff;font-family:\'Baloo 2\',sans-serif;'
     + 'font-weight:800;font-size:16px;padding:12px;border-radius:10px;cursor:pointer;margin-top:10px';
   var BTN2 = 'width:100%;border:1px solid #cfd6dd;background:#fff;color:#5c666f;font-weight:700;'
     + 'font-size:13px;padding:9px;border-radius:10px;cursor:pointer;margin-top:8px';
   var INP = 'width:100%;box-sizing:border-box;margin:10px 0 4px;padding:11px 14px;border:2px solid #cfd6dd;'
     + 'border-radius:10px;font-size:16px;text-align:center;letter-spacing:.06em';
-  var TTL = 'font-family:"Baloo 2",sans-serif;font-weight:800;font-size:21px;color:#1f2b38;margin:8px 0 4px';
+  /* Le vert de WhatsApp, et pas celui de la maquette : ce bouton doit se
+     reconnaitre AVANT d'etre lu. C'est le seul endroit du tunnel ou l'on
+     emprunte la couleur d'un tiers, et c'est justifie — l'acheteur cherche
+     l'icone qu'il connait, pas un bouton de plus. */
+  var BTNWA = 'width:100%;border:none;background:#25D366;color:#fff;font-weight:800;'
+    + 'font-size:14px;padding:11px;border-radius:10px;cursor:pointer;margin-top:8px;'
+    + 'display:flex;align-items:center;justify-content:center;gap:8px';
+  /* Même défaut que BTN, et trouvé par le banc et non à l'œil : ce titre est
+     posé dans `style="' + TTL + '"`, le guillemet de la police y refermait
+     l'attribut, et « Ton code d'accès » sortait en Arial 13 px au lieu de
+     Baloo 2 en 21 gras. */
+  var TTL = 'font-family:\'Baloo 2\',sans-serif;font-weight:800;font-size:21px;color:#1f2b38;margin:8px 0 4px';
   var SUB = 'font-size:14px;color:#5c666f;line-height:1.55';
 
   var qte = 1;   // >1 = pack établissement
@@ -726,6 +754,26 @@
       + '<div id="vrt-msg" style="font-size:12.5px;color:#c0453f;min-height:17px;margin-top:2px"></div>'
       + '<button id="vrt-go" style="' + BTN + '">Payer ' + fmt(prix(cfg.kind, qte)) + ' FCFA</button>'
       + '<button id="vrt-deja" style="' + BTN2 + '">J\'ai déjà payé — retrouver mon code</button>'
+      /* ══ ESSAYER AVANT D'ACHETER ═══════════════════════════════════════════
+         `livrets/apercu.html` existe depuis longtemps — deux leçons entières,
+         gratuites, avec leurs corrections. `livrets/index.html` y mène 23 fois.
+         Mais depuis l'unification de la boutique (30/08), la carte d'un cahier
+         dépose l'acheteur sur la page de SON ouvrage — /livrets/6e.html — et
+         ces pages-là n'y mènent PAS une seule fois : vérifié, 0 occurrence dans
+         6e.html, 4e.html, 2nde.html. Le seul chemin réel vers l'achat était
+         donc le seul d'où l'essai gratuit avait disparu.
+
+         On le remet ICI plutôt que dans chaque coquille : gate.js est le seul
+         fichier que toutes chargent, et c'est la leçon déjà tirée pour la règle
+         d'impression — cinq endroits où poser la même chose, c'est cinq endroits
+         pour l'oublier à la prochaine publication.
+
+         SOUS le bouton de paiement, pas au-dessus : celui qui est décidé ne doit
+         pas être détourné. C'est l'hésitant qu'on rattrape, et l'aperçu ramène
+         vers l'achat par ses propres boutons (« Obtenir mon code — 1 500 FCFA »). */
+      + '<a id="vrt-essai" href="/livrets/apercu.html" style="' + BTN2
+        + ';display:block;text-align:center;text-decoration:none;box-sizing:border-box">'
+        + 'Lire deux leçons gratuitement, sans payer</a>'
       + '<button id="vrt-close" style="' + BTN2 + '">Annuler</button>'
       + '<div style="font-size:11px;color:#98a1aa;margin-top:12px;line-height:1.5">'
       + 'Le code d\'accès est envoyé dès que le paiement est confirmé. '
@@ -880,7 +928,7 @@
       if (fini) return;
       VRT.reclamer(r, tel).then(function (c) {
         clearInterval(boucle); arreter();
-        ecranCode(c);
+        ecranCode(c, { ref: r, tel: tel });
       }).catch(function () { /* pas encore payé : on continue */ });
     }
     /* ⚠️ LE SONDAGE NE TOURNE PAS PENDANT QUE L'ACHETEUR PAIE.
@@ -929,7 +977,7 @@
       var t = (document.getElementById('vrt-t4') || {}).value || '';
       if (!r.trim()) { msg('Référence requise.'); return; }
       var b = this; b.disabled = true; b.textContent = 'Recherche…';
-      VRT.reclamer(r.trim(), t).then(function (c) { ecranCode(c); })
+      VRT.reclamer(r.trim(), t).then(function (c) { ecranCode(c, { ref: r.trim(), tel: t }); })
         .catch(function (e) {
           b.disabled = false; b.textContent = 'Retrouver mon code';
           msg(e.message || 'Introuvable.');
@@ -937,7 +985,51 @@
     };
   }
 
-  function ecranCode(r) {
+  /* ══ « JE M'ENVOIE LE CODE » ═══════════════════════════════════════════════
+     La reference d'achat vit dans le localStorage de l'appareil qui a paye.
+     Telephone perdu, cache vide, achat depuis un cybercafe : l'acheteur n'a
+     plus AUCUN chemin vers son code. Les canaux de remise automatique
+     existent (api/_notify_lib.php sait faire mail, WhatsApp Cloud API et SMS)
+     mais aucun n'est active, et celui qui l'est par defaut — le courriel —
+     demande une adresse que l'acheteur ne laisse presque jamais : on paie ici
+     avec un telephone.
+
+     Ce bouton ne demande NI compte, NI API, NI abonnement, NI un franc. Il
+     ouvre WhatsApp avec le message deja ecrit ; l'acheteur choisit son propre
+     fil (« Message a moi-meme ») et l'envoie. Le code atterrit dans une
+     conversation qu'il retrouvera dans six mois, sur n'importe quel appareil
+     ou il se reconnecte — ce qu'aucun localStorage ne sait faire.
+
+     Ce n'est PAS un remplacant de la remise automatique : elle part du serveur
+     sans rien demander, lui exige un geste. C'est le filet qu'on peut poser
+     aujourd'hui, en attendant qu'un canal soit configure. */
+  function messageWhatsApp(codes, classe) {
+    var url = location.origin + location.pathname;
+    var quoi = classe ? ('Cahier ' + String(classe).toUpperCase()) : 'Mon cahier VÉRITAS';
+    return 'VÉRITAS — mon code d’accès\n'
+         + quoi + '\n\n'
+         + codes + '\n\n'
+         + 'Ouvrir : ' + url + '\n'
+         + 'À garder : ce code ouvre ton cahier toute l’année.';
+  }
+  /* wa.me SANS numero = WhatsApp demande a QUI envoyer, et c'est exactement ce
+     qu'on veut : l'acheteur se choisit lui-meme. Un numero code en dur
+     enverrait le code au centre, ce qui n'aide personne.
+     Plafond de longueur : au-dela, certains navigateurs Android tronquent
+     l'URL en silence — et un code tronque est pire qu'un bouton absent. */
+  function lienWhatsApp(texte) {
+    var u = 'https://wa.me/?text=' + encodeURIComponent(texte);
+    return u.length > 1800 ? '' : u;
+  }
+
+  /* `ctx` porte la reference et le numero du payeur — les deux seuls elements
+     qui autorisent l'envoi d'une copie. Ils sont connus des trois appelants
+     (sondage apres paiement, saisie manuelle, reprise au chargement) mais
+     `ecranCode` les ignorait : on les lui passe plutot que de les relire dans
+     le localStorage, qu'`achatEfface()` vient justement de vider deux lignes
+     plus bas. Absent, le champ e-mail ne s'affiche pas — on ne propose pas un
+     geste qu'on ne saurait pas verifier. */
+  function ecranCode(r, ctx) {
     // L'achat est honoré : on cesse de le suivre, sinon chaque ouverture de
     // page rejouerait une réclamation pour un code déjà remis.
     achatEfface();
@@ -946,6 +1038,11 @@
     var lot     = (r && r.codes && r.codes.length > 1) ? r.codes : null;
     var code    = (r && r.code) || r;
     var aCopier = lot ? lot.join('\n') : code;
+    /* Un pack etablissement peut porter des centaines de codes : le message
+       depasserait la longueur d'URL tenable et partirait tronque. Le bouton
+       disparait alors, et « Copier » reste — un proviseur distribue depuis un
+       ordinateur, pas depuis WhatsApp. */
+    var lienWA = lienWhatsApp(messageWhatsApp(aCopier, r && r.classe));
     modale(
       '<div style="text-align:center">'
       + '<div style="font-size:38px">🎉</div>'
@@ -961,7 +1058,22 @@
       + esc(aCopier) + '</div>'
       + '<button id="vrt-copy" style="' + BTN2 + '">'
       + (lot ? 'Copier les ' + lot.length + ' codes' : 'Copier le code') + '</button>'
+      + (lienWA
+          ? '<button id="vrt-wa" style="' + BTNWA + '">'
+            + '<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.22 8.22 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.79.97-.14.16-.29.18-.54.06-.25-.13-1.05-.39-1.99-1.23-.74-.66-1.24-1.47-1.38-1.72-.15-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.13-.15.17-.25.25-.41.08-.17.04-.31-.02-.44-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.23.25-.86.84-.86 2.05s.88 2.38 1 2.54c.12.17 1.73 2.64 4.19 3.7.59.25 1.04.4 1.4.52.59.19 1.12.16 1.55.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.11-.22-.17-.47-.29Z"/></svg>'
+            + "M'envoyer le code sur WhatsApp</button>"
+          : '')
       + '<button id="vrt-open" style="' + BTN + '">Ouvrir mon livret</button>'
+      + (ctx && ctx.ref
+          ? '<div style="margin-top:14px;padding-top:13px;border-top:1px solid #eef1f4">'
+            + '<div style="font-size:12.5px;color:#5c666f;margin-bottom:7px">'
+            + 'Recevoir une copie par e-mail — pour le retrouver si tu changes de téléphone.'
+            + '</div>'
+            + '<input id="vrt-mail" type="email" inputmode="email" autocomplete="email" '
+            + 'placeholder="ton@email.com" style="' + INP + '">'
+            + '<button id="vrt-mail-go" style="' + BTN2 + '">M’envoyer une copie</button>'
+            + '</div>'
+          : '')
       + '<div id="vrt-msg" style="font-size:12.5px;min-height:17px;margin-top:6px"></div>'
       + '</div>'
     );
@@ -969,6 +1081,39 @@
       try { navigator.clipboard.writeText(aCopier); msg(lot ? 'Les ' + lot.length + ' codes sont copiés.' : 'Code copié.', true); }
       catch (e) { msg('Copie impossible — note-les à la main.'); }
     };
+    if (lienWA) {
+      document.getElementById('vrt-wa').onclick = function () {
+        /* `noopener` : la page qui s'ouvre ne doit pas pouvoir manipuler
+           celle-ci, qui porte le code a l'ecran. */
+        window.open(lienWA, '_blank', 'noopener');
+        msg("WhatsApp s’ouvre — choisis ton propre nom pour te l’envoyer.", true);
+      };
+    }
+    /* L'envoi d'une copie : le serveur re-verifie la reference ET le numero
+       (meme garde que `claim`). Le bouton se verrouille pendant l'appel —
+       deux appuis rapides feraient deux remises pour le meme code. */
+    var champMail = document.getElementById('vrt-mail-go');
+    if (champMail) {
+      champMail.onclick = function () {
+        var m = (document.getElementById('vrt-mail') || {}).value || '';
+        if (!m.trim()) { msg('Écris ton adresse e-mail.'); return; }
+        var b = this; b.disabled = true; b.textContent = 'Envoi…';
+        VRT.copie(ctx.ref, ctx.tel || '', m.trim())
+          .then(function (d) {
+            b.textContent = 'Copie demandée';
+            /* On ne PROMET pas la reception : la remise part en file et peut
+               echouer chez l'operateur. Dire « envoye » puis ne rien livrer
+               est exactement ce qu'on essaie d'arreter. */
+            msg(d && d.etat === 'deja_envoye'
+                ? 'Cette adresse a déjà reçu le code.'
+                : 'C’est noté — la copie part à cette adresse.', true);
+          })
+          .catch(function (e) {
+            b.disabled = false; b.textContent = 'M’envoyer une copie';
+            msg((e && e.message) || 'Envoi impossible.');
+          });
+      };
+    }
     document.getElementById('vrt-open').onclick = function () {
       var b = this; b.disabled = true; b.textContent = 'Ouverture…';
       VRT.unlock(lot ? lot[0] : code).then(function () {
@@ -1064,7 +1209,7 @@
     if (!a || !a.ref || !a.t4) return;      // sans les 4 chiffres, rien à tenter
     var lancer = function () {
       VRT.reclamer(a.ref, a.t4)
-        .then(function (c) { if (c && (c.code || c.codes)) ecranCode(c); })
+        .then(function (c) { if (c && (c.code || c.codes)) ecranCode(c, { ref: a.ref, tel: a.t4 }); })
         .catch(function () { /* pas encore confirmé : on réessaiera au prochain passage */ });
     };
     if (document.readyState === 'loading') {

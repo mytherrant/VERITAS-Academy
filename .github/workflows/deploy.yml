@@ -242,6 +242,23 @@ jobs:
             exit 1
           fi
 
+      # ── 🧾 UN PAIEMENT QUI N'OUVRE RIEN DOIT SE VOIR. camerpayGrant() posait
+      #    `granted` sur la seule lisibilité de la base : un octroi qui n'avait
+      #    RIEN ouvert (« accountId manquant », « compte introuvable ») sortait
+      #    définitivement de la réconciliation. Argent encaissé, accès fermé,
+      #    aucune alerte. Le banc garde la distinction entre un octroi réel, un
+      #    webhook rejoué et un octroi bloqué — et le cas de l'achat sans compte,
+      #    seul endroit où l'octroi réussit tout en demandant une décision.
+      #    Éprouvé par 4 mutations le 12/09/2026, chacune probante.
+      - name: 🧾 Un paiement qui n'ouvre rien se voit-il ?
+        run: |
+          if command -v php >/dev/null 2>&1; then
+            php tests/banc_octroi_bloque.php
+          else
+            echo "::error title=PHP introuvable::Le garde-fou de l'octroi n'a pas pu tourner. Déploiement ANNULÉ."
+            exit 1
+          fi
+
       # ── 🎟️ LA PORTE DES CAHIERS — deux règles commerciales, pas du code.
       #    ① un code n'ouvre QUE son manuel   ② et QUE sa version (élève/prof).
       #    Le 25/08/2026, le serveur émettait un code « guide » pour un ouvrage
@@ -590,6 +607,20 @@ jobs:
 
       - name: 🔒 Le cahier vendu porte-t-il un nom ?
         run: node tests/banc_protection_cahier.cjs
+
+      # ── 📲 L'ACHETEUR REPART-IL AVEC SON CODE ? La référence d'achat vit dans
+      #    le localStorage de l'appareil qui a payé : téléphone perdu ou cache
+      #    vidé, et le client n'a plus aucun chemin vers son code. Le bouton
+      #    « M'envoyer le code sur WhatsApp » le rend portable sans compte, sans
+      #    API et sans frais. Ce banc garde aussi une règle plus large, trouvée
+      #    en chemin : une constante posée dans `style="…"` ne doit porter aucun
+      #    guillemet double. `BTN` et `TTL` en portaient un — le guillemet de
+      #    `"Baloo 2"` refermait l'attribut, et SEPT éléments du tunnel d'achat
+      #    rendaient en Arial 13 px sans remplissage, dont le bouton « Payer ».
+      #    Éprouvé par 4 mutations le 12/09 (voir l'en-tête du banc).
+      #    L'étage navigateur se saute proprement si Playwright manque.
+      - name: 📲 L'acheteur repart-il avec son code ?
+        run: node tests/banc_remise_whatsapp.cjs
 
       - name: 🛒 Une seule devanture, un seul flux ?
         run: node tests/banc_boutique_unifiee.cjs

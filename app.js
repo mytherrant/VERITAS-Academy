@@ -6776,6 +6776,46 @@ async function hashPassword(pwd,salt){
   return _hashSync(pwd,salt);
 }
 function isHashed(p){return p&&(p.indexOf('S256$')===0||p.indexOf('H$')===0);}
+
+/* ── UN MOT DE PASSE NE SE TIRE PAS À Math.random() ─────────────────────────
+   Les deux générateurs de mots de passe provisoires (compte auteur, remise à
+   zéro d'un compte) tiraient `Math.random()`. Ce n'est pas un générateur
+   cryptographique : V8 l'implémente en xorshift128+, dont l'état interne se
+   reconstitue à partir de quelques sorties observées. Qui obtient un seul mot
+   de passe provisoire — le sien, par exemple — peut en dériver ceux tirés
+   juste avant et juste après.
+
+   `crypto.getRandomValues` est disponible partout où tourne déjà
+   `crypto.subtle` (dont dépend hashPassword). Repli sur l'ancien tirage
+   uniquement si l'API manque : mieux vaut un mot de passe faible qu'un bouton
+   « créer un compte » qui ne répond plus.
+
+   Alphabet sans I, l, 0, O, 1 : ces identifiants se dictent au téléphone et se
+   recopient à la main. 14 signes sur 57 valeurs ≈ 81 bits, contre 36 avant. */
+function _motDePasseProvisoire(n){
+  n = n || 14;
+  var A = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+  try{
+    if(typeof crypto!=='undefined' && crypto.getRandomValues){
+      var t = new Uint32Array(n), out = '';
+      crypto.getRandomValues(t);
+      /* Rejet du haut de plage : un simple modulo favoriserait les premières
+         lettres de l'alphabet. Le biais serait minime ici, mais il n'y a
+         aucune raison de le laisser dans un tirage de mot de passe. */
+      var limite = Math.floor(4294967296 / A.length) * A.length;
+      for(var i=0;i<n;i++){
+        var v = t[i];
+        while(v >= limite){ var r = new Uint32Array(1); crypto.getRandomValues(r); v = r[0]; }
+        out += A.charAt(v % A.length);
+      }
+      return 'VRT-' + out;
+    }
+  }catch(e){}
+  console.warn('[security] crypto.getRandomValues indisponible — tirage faible');
+  return 'VRT'+Math.random().toString(36).slice(2,7)+'@'+Math.floor(100+Math.random()*900);
+}
+window._motDePasseProvisoire = _motDePasseProvisoire;
+
 async function verifyPassword(plain,hashed,salt,recordRef){
   if(isHashed(hashed)){
     try{
@@ -8900,17 +8940,28 @@ function pgAuthorsMgmt(){
   return h;
 }
 
-function createAuthorAccount(){
+async function createAuthorAccount(){
   var nom=(document.getElementById('auNom')?.value||'').trim();
   var user=(document.getElementById('auUser')?.value||'').trim();
   if(!nom||!user){toast('Nom et identifiant requis','warn');return;}
   if((DB.authors||[]).find(function(a){return a.user===user;})){toast('Identifiant déjà utilisé','warn');return;}
   if(!DB.authors)DB.authors=[];
-  // v1.2.2 : mot de passe ALÉATOIRE par auteur (plus de défaut codé en dur).
-  // Stocké tel quel puis haché au prochain chargement (_migratePasswords).
-  var _tmpPwd='VRT'+Math.random().toString(36).slice(2,7)+'@'+Math.floor(100+Math.random()*900);
+  /* ⚠️ LE MOT DE PASSE ÉTAIT ÉCRIT EN CLAIR, ET RIEN NE LE HACHAIT JAMAIS.
+     Le commentaire d'origine annonçait « haché au prochain chargement
+     (_migratePasswords) » et la modale affiche encore « stocké sous forme
+     hachée ». Or _migratePasswords() ne parcourt que superAdmin, admins,
+     studentAccounts, tpwd et visitorAccounts — vérifié ligne à ligne le
+     12/09/2026 : le mot `authors` n'y figure pas une seule fois. Le mot de
+     passe restait donc en clair à vie dans DB.authors[].pwd, donc dans le
+     localStorage de l'administration ET dans data/veritas_db.json une fois la
+     base synchronisée. Une garde écrite n'est pas une garde appelée.
+     On hache ICI, au moment de l'écriture, comme le fait déjà _saResetPwdDo(). */
+  var _tmpPwd=_motDePasseProvisoire();
+  var _pwdStocke=_tmpPwd;
+  try{ _pwdStocke = await hashPassword(_tmpPwd, user); }
+  catch(e){ toast('Chiffrement du mot de passe impossible — compte non créé','err'); return; }
   DB.authors.push({
-    id:gid(),user:user,pwd:_tmpPwd,nom:nom,
+    id:gid(),user:user,pwd:_pwdStocke,nom:nom,
     email:document.getElementById('auEmail')?.value||'',
     tel:document.getElementById('auTel')?.value||'',
     bio:document.getElementById('auBio')?.value||'',
@@ -12561,9 +12612,19 @@ async function _saResetPwdDo(){
   else if(scope==='visitor')rec=(DB.visitorAccounts||[]).find(function(a){return a.id===id;});
   if(!rec){ if(typeof toast==='function')toast('Compte introuvable','err'); return; }
   var salt=rec.user||'VERITAS';
-  var tmp='VRT'+Math.random().toString(36).slice(2,7)+'@'+Math.floor(100+Math.random()*900);
-  try{ rec.pwd = (typeof hashPassword==='function') ? await hashPassword(tmp, salt) : tmp; }
-  catch(e){ rec.pwd=tmp; }
+  var tmp=_motDePasseProvisoire();   // tirage cryptographique — voir _motDePasseProvisoire
+  /* ⚠️ LE REPLI ÉCRIVAIT LE MOT DE PASSE EN CLAIR. Si hashPassword() échouait,
+     ce `catch` posait `rec.pwd = tmp` — en clair, dans la base synchronisée —
+     pendant que la modale affichait « Stocké sous forme hachée ». Un repli qui
+     dit le contraire de ce qu'il fait est pire que pas de repli : on renonce
+     à la remise à zéro plutôt que de dégrader le stockage en silence. */
+  try{
+    if(typeof hashPassword!=='function') throw new Error('hashPassword indisponible');
+    rec.pwd = await hashPassword(tmp, salt);
+  }catch(e){
+    if(typeof toast==='function')toast('Chiffrement impossible — mot de passe inchangé','err');
+    return;
+  }
   save(); cm();
   M('✓ Mot de passe réinitialisé','À transmettre à l\'utilisateur',
     '<div class="fg"><span class="fl">Identifiant</span><input class="fi" value="'+_esc(rec.user||'')+'" readonly onclick="this.select()"></div>'
@@ -28011,7 +28072,19 @@ window._secureUnlock=function(){
 };
 window._secureBuy=function(){
   var st=window._secureState; if(!st) return;
-  if(typeof SES==='undefined'||!SES){ toast('Connectez-vous pour acheter','warn'); if(typeof showRegisterForm==='function'){ closeSecureBook(); showRegisterForm(); } return; }
+  /* L'INSCRIPTION EST MAINTENUE, ET C'EST UN CHOIX — arbitré le 12/09/2026.
+     On avait retiré ce mur pour supprimer la friction. Mais tout l'accès
+     numérique vit sur `acc.unlockedBooks` : un acheteur sans compte peut lire
+     son livre dans la foulée du paiement, et n'a plus AUCUN chemin pour y
+     revenir huit jours plus tard. Une reprise par numéro de téléphone aurait
+     comblé le trou en en ouvrant un autre : un numéro se devine, et donnerait
+     accès aux livres d'autrui. Le compte est donc ce qui rend le livre
+     re-consultable — pas une formalité. */
+  if(typeof SES==='undefined'||!SES){
+    toast('Créez votre compte : c’est lui qui garde vos livres','warn');
+    if(typeof showRegisterForm==='function'){ closeSecureBook(); showRegisterForm(); }
+    return;
+  }
   var prix=(st.book.prixDigital||st.book.priceDigital||st.book.prix||0);
   if(typeof openPaymentModal!=='function'){ toast('Paiement indisponible','warn'); return; }
   openPaymentModal({
@@ -31628,16 +31701,61 @@ function _payAdminView(endpoint, action, title){
   fetch(url, { headers:{ 'Authorization':'Bearer ' + cc.secret } })
     .then(function(r){ return r.text(); })
     .then(function(txt){
-      var pretty = txt;
-      try { pretty = JSON.stringify(JSON.parse(txt), null, 2); } catch(e){}
+      var pretty = txt, data = null;
+      try { data = JSON.parse(txt); pretty = JSON.stringify(data, null, 2); } catch(e){}
       M(title || 'Paiements', endpoint,
-        '<pre style="max-height:60vh;overflow:auto;background:#0b1220;color:#cfe3ff;padding:12px;border-radius:8px;font-size:11px;line-height:1.5;white-space:pre-wrap;word-break:break-word">'
+        _payAlerteSansAcces(data)
+        + '<pre style="max-height:60vh;overflow:auto;background:#0b1220;color:#cfe3ff;padding:12px;border-radius:8px;font-size:11px;line-height:1.5;white-space:pre-wrap;word-break:break-word">'
         + _esc(pretty) + '</pre>',
         '<button class="btn bo" onclick="cm()">Fermer</button>');
     })
     .catch(function(e){ toast('Erreur : ' + (e && e.message || e),'err'); });
 }
 window._payAdminView = _payAdminView;
+
+/* ── « PAYÉ » NE VEUT PAS DIRE « SERVI » ────────────────────────────────────
+   Cette vue déversait le JSON brut du serveur. Tout y était — `grant_msg`,
+   `a_regler`, `underpaid` — mais noyé dans plusieurs centaines de lignes que
+   personne ne relit ligne à ligne. Or c'est exactement là que se cache le seul
+   incident qui coûte un client : l'argent est encaissé et rien ne s'est ouvert.
+   On remonte donc ces transactions-là EN TÊTE, en clair. Le JSON reste dessous
+   pour le détail.
+
+   Rendu vide s'il n'y a rien à signaler : un bandeau permanent finit par ne
+   plus être lu, et c'est précisément ce qu'on essaie d'éviter. */
+function _payAlerteSansAcces(data){
+  try{
+    if(!data || !data.payments || !data.payments.length) return '';
+    var muets = data.payments.filter(function(p){
+      if(!p || p.status !== 'paid') return false;
+      /* Trois signatures, parce qu'un serveur d'une version antérieure au
+         correctif du 12/09/2026 ne pose ni `bloque` ni `a_regler` : on retient
+         aussi la transaction payée que rien n'a marquée accordée. */
+      return p.a_regler || p.underpaid || (p.granted !== true);
+    });
+    if(!muets.length) return '';
+    var h = '<div style="background:#FFF4E5;border:1px solid #F0A202;border-left-width:4px;'
+          + 'border-radius:8px;padding:12px 14px;margin-bottom:12px">'
+          + '<div style="font-weight:700;color:#8A4B00;margin-bottom:6px">⚠️ '
+          + muets.length + ' paiement' + (muets.length>1?'s':'') + ' encaissé'
+          + (muets.length>1?'s':'') + ' sans accès ouvert</div>'
+          + '<div style="font-size:12px;color:#6B4A16;line-height:1.6">Ces transactions demandent une décision : '
+          + 'rattacher le compte, puis relancer l’octroi.</div>'
+          + '<div style="margin-top:8px;display:grid;gap:6px">';
+    muets.slice(0,12).forEach(function(p){
+      h += '<div style="background:#fff;border-radius:6px;padding:7px 9px;font-size:12px">'
+        +  '<b>' + _esc(String(p.ref||'?')) + '</b> · ' + _esc(String(p.montant_paye||p.montant||0)) + ' FCFA'
+        +  ' · ' + _esc(String(p.intent||'?'))
+        +  (p.clientTel ? ' · ' + _esc(String(p.clientTel)) : '')
+        +  '<div style="color:#8A4B00;margin-top:2px">' + _esc(String(p.grant_msg || 'octroi non confirmé')) + '</div>'
+        +  '</div>';
+    });
+    if(muets.length>12) h += '<div style="font-size:11px;color:#6B4A16">… et ' + (muets.length-12) + ' autre(s), détail dans le JSON ci-dessous.</div>';
+    return h + '</div></div>';
+  }catch(e){ return ''; }
+}
+window._payAlerteSansAcces = _payAlerteSansAcces;
+
 
 // Ouvrir le modal de paiement — point d'entrée principal
 // payInfo: {montant: 5000, label: 'Pack Premium', ref?: 'VT250407-XXXX', onConfirm?: fn}

@@ -6074,6 +6074,52 @@ class Component extends DCLogic {
       return;
     }
     this._inviteEnVol=true;this._inviteErr='';this._inviteFile=[];
+
+    /* ══ LE PONT AVEC LE SITE PRINCIPAL ════════════════════════════════════
+       Mesure du 12/09/2026 : un enseignant connecte sur veritas-school.com,
+       abonnement « ens » ACTIF, ouvrait /plateforme/ dans le meme navigateur
+       et repartait avec un jeton `inv.` -- invite d'appareil, en essai. Il
+       avait paye, il etait connecte, et l'Atelier le traitait en inconnu.
+       C'est cela, la « double interface » : deux modules de meme origine dont
+       aucun ne lit la session de l'autre (0 occurrence de VERITAS_SES ici,
+       0 de minesec_token dans app.js).
+
+       On tente donc d'abord la session du site. Ce qu'on presente n'est PAS
+       une affirmation du navigateur : c'est le jeton que le serveur a emis a
+       la connexion (`_vrtCT`, pose par student_data.php), signe HMAC, date et
+       revocable. plateforme.php le verifie avec vrt_verify_token ; forge, il
+       ne vaut rien.
+
+       Trois garde-fous, parce qu'une entree libre ne doit JAMAIS se refermer :
+         · une seule tentative par session (`_pontTente`) ;
+         · tout echec -- jeton absent, perime, revoque, serveur muet --
+           retombe sur l'entree invite, sans message ni attente ;
+         · le drapeau `_inviteEnVol` est rendu avant le repli, sinon le
+           rappel recursif se verrait refuser et la file resterait pleine. */
+    const _pont = (function(){ try{ return sessionStorage.getItem('_vrtCT')||''; }catch(e){ return ''; } })();
+    if(_pont && !this._pontTente){
+      this._pontTente=true;
+      fetch(this._apiUrl('plateforme.php')+'?action=session',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({jeton:_pont})})
+        .then(r=>r.json().catch(()=>({})))
+        .then(j=>{
+          this._inviteEnVol=false;
+          if(!j||!j.ok||!j.token){ this._ouvrirInvite(cb); return; }   // repli invite
+          this._poserJeton(j.token);
+          const accId=(j.compte&&j.compte.id)||'';
+          const nom=(j.compte&&j.compte.nom)||'Moi';
+          if(accId)this._adopterIdentite(accId,nom);
+          this.setState({authed:true,estInvite:false,compteId:accId,authErr:'',
+            accesMsg:'',demo:false,corpusDroit:j.droit||null},
+            ()=>{this._persist();
+                 try{ this._rechargerCorpus&&this._rechargerCorpus(); }catch(e){}
+                 this._inviteFini(cb,true);});
+        })
+        .catch(()=>{ this._inviteEnVol=false; this._ouvrirInvite(cb); });
+      return;
+    }
+
     fetch(this._apiUrl('plateforme.php')+'?action=invite',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({appareil:this._appareil()})})

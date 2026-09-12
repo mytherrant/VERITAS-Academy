@@ -148,6 +148,100 @@ if (!defined('VRT_AUTH_LIB')) {
         return password_hash($plain, PASSWORD_BCRYPT, ['cost' => 12]);
     }
 
+    /**
+     * ── LA MIGRATION QUE `needUpgrade` ANNONÇAIT SANS JAMAIS L'EXÉCUTER ───────
+     *
+     * `vrt_verify_password()` pose `$needUpgrade = true` chaque fois qu'un compte
+     * s'authentifie avec une empreinte S256 — c'est-à-dire un simple SHA-256 en
+     * UN tour, salé par l'identifiant (public) et poivré par la constante '2026'
+     * (publique, elle est dans le source). Six appelants déclaraient la variable
+     * et la passaient par référence ; AUCUN ne la lisait. Le drapeau montait, et
+     * retombait avec la requête.
+     *
+     * Conséquence : `vrt_hash_bcrypt()` n'était appelée qu'à la création d'un
+     * compte par api/compte.php. Tous les autres comptes — ceux nés dans un
+     * navigateur (doRegister hors ligne, _mgrCreate depuis l'administration) et
+     * tous les comptes antérieurs — restaient en S256 à vie. Un SHA-256 en un
+     * tour se force au rythme de plusieurs milliards d'essais par seconde sur une
+     * carte graphique ordinaire : avec le minimum de 6 caractères qu'impose
+     * l'inscription, une base qui fuite est une base dont les mots de passe sont
+     * lisibles le soir même.
+     *
+     * On fait donc ce que le code annonçait : à la première connexion réussie,
+     * l'empreinte est remplacée par un bcrypt cost 12.
+     *
+     * Trois précautions, parce qu'écrire la base au moment d'un login n'est pas
+     * anodin sur un mutualisé :
+     *   · l'écriture n'a lieu QU'UNE FOIS par compte — au second passage le `pwd`
+     *     est déjà bcrypt, `vrt_verify_password` ne lève plus le drapeau, et on
+     *     ressort avant même d'ouvrir le fichier ;
+     *   · elle est fail-soft : verrou indisponible, base illisible, disque plein
+     *     → on abandonne en silence. L'authentification, elle, a déjà réussi :
+     *     rater la migration ne doit jamais coûter sa connexion à l'utilisateur ;
+     *   · on ne réécrit QUE le champ `pwd` du compte concerné, sous `flock`, et on
+     *     relit la base à l'intérieur du verrou — jamais la copie que l'appelant
+     *     tient en mémoire, qui peut dater de plusieurs secondes.
+     *
+     * ⚠️ Limite connue, qui n'est pas réparable ici : la synchronisation
+     * administrateur pousse la base ENTIÈRE depuis un navigateur (db.php en PUT,
+     * « dernière écriture gagne »). Un administrateur dont l'onglet était ouvert
+     * avant la migration repoussera son ancienne copie et ramènera le S256. La
+     * migration se refera à la connexion suivante — elle n'est donc pas perdue,
+     * seulement différée. C'est la même limite que celle documentée pour
+     * `srvCreated` dans db.php.
+     *
+     * @return bool true si l'empreinte a effectivement été remplacée.
+     */
+    function vrt_upgrade_password_bcrypt(string $login, string $plain): bool {
+        if ($login === '' || $plain === '') return false;
+        $f = vrt_db_file();
+        if (!is_file($f)) return false;
+
+        $fp = @fopen($f, 'c+');
+        if (!$fp) return false;
+        if (!@flock($fp, LOCK_EX)) { @fclose($fp); return false; }
+
+        try {
+            $db = json_decode((string) stream_get_contents($fp), true);
+            if (!is_array($db)) return false;
+
+            $lc = strtolower(trim($login));
+            // Mêmes tiroirs que vrt_find_account(), dans le même ordre : si les
+            // deux portaient le même identifiant, c'est l'élève qui ouvre la
+            // session, donc c'est son empreinte qu'il faut migrer.
+            foreach (['studentAccounts', 'visitorAccounts'] as $tiroir) {
+                if (!isset($db[$tiroir]) || !is_array($db[$tiroir])) continue;
+                foreach ($db[$tiroir] as $i => $a) {
+                    if (!is_array($a) || !isset($a['user'])) continue;
+                    if (strtolower((string) $a['user']) !== $lc) continue;
+
+                    $stocke = (string) ($a['pwd'] ?? '');
+                    // Idempotence : déjà migré (ou jamais en S256) → rien à faire.
+                    if (strpos($stocke, 'S256$') !== 0) return false;
+                    // On ne migre que sur une preuve : le clair fourni doit bien
+                    // correspondre à l'empreinte en place. Sans ce contrôle, un
+                    // appelant distrait pourrait remplacer le mot de passe d'un
+                    // compte par celui qu'il vient de taper.
+                    if (!hash_equals($stocke, vrt_hash_s256($plain, (string) $a['user']))) return false;
+
+                    $db[$tiroir][$i]['pwd'] = vrt_hash_bcrypt($plain);
+                    $db['lastModified'] = (int) round(microtime(true) * 1000);
+                    $enc = json_encode($db, JSON_UNESCAPED_UNICODE);
+                    if ($enc === false) return false;
+                    ftruncate($fp, 0); rewind($fp); fwrite($fp, $enc); fflush($fp);
+                    @file_put_contents(__DIR__ . '/data/_security_log.txt',
+                        date('c') . ' [PWD_UPGRADE_BCRYPT] tiroir=' . $tiroir
+                        . ' user=' . substr((string) $a['user'], 0, 40) . "\n", FILE_APPEND);
+                    return true;
+                }
+            }
+            return false;
+        } finally {
+            @flock($fp, LOCK_UN);
+            @fclose($fp);
+        }
+    }
+
     // ── Tokens par compte (stateless, signés HMAC) ────────────────────────────
     function vrt_b64url_encode(string $s): string {
         return rtrim(strtr(base64_encode($s), '+/', '-_'), '=');
@@ -1208,6 +1302,16 @@ if (!defined('VRT_AUTH_LIB')) {
         // v1.7 : LIVRE NUMÉRIQUE — débloque la lecture sécurisée sur le compte
         // (acc.unlockedBooks). Idempotent par ref. Lu par api/secure_pdf.php.
         if ($intent === 'digitalbook') {
+            /* PAS DE TITULAIRE FABRIQUÉ ICI — arbitré le 12/09/2026.
+               Une version de ce bloc créait un compte à partir du numéro payeur
+               pour qu'on puisse acheter sans s'inscrire. Écarté : le compte
+               ainsi né ne porte aucun mot de passe et n'a aucun chemin de
+               reprise, donc l'acheteur lit son livre une fois et le perd. Un
+               accès qu'on ne peut pas rouvrir n'est pas un accès.
+               Un achat sans compte est donc REFUSÉ, mais jamais en silence :
+               `bloque` le signale au tableau de bord et la réconciliation le
+               reprend — ce qui rattrape seul le cas d'un compte créé juste
+               après le paiement. */
             if ($accountId === '') return ['changed' => false, 'msg' => 'accountId manquant'];
             $bookId = $targetId;
             $r = vrt_resoudre_compte($db, $accountId);
@@ -1880,11 +1984,42 @@ if (!defined('VRT_AUTH_LIB')) {
             vrt_pay_log('[REMISE_ECHEC] ' . $e->getMessage());
         }
 
-        return ['ok' => true, 'changed' => $changed, 'msg' => $res['msg'] ?? '',
+        /* ── « ok » NE VEUT PAS DIRE « L'ACCÈS EST OUVERT » ───────────────────
+           Ce `ok` ne dit qu'une chose : la base était lisible et le verrou
+           obtenu. Il valait `true` y compris quand l'octroi n'avait RIEN
+           ouvert — « accountId manquant », « compte introuvable ». Or
+           camerpayGrant() posait `granted` sur ce seul `ok`, et sa première
+           ligne est `if (!empty($state['granted'])) return;` : la transaction
+           sortait du circuit de réconciliation pour toujours. Argent encaissé,
+           accès fermé, et plus personne pour repasser derrière.
+
+           On distingue donc trois issues, et le fichier d'état les porte :
+             · `changed`  — quelque chose a été écrit, l'accès est ouvert ;
+             · `deja`     — c'était déjà fait (webhook rejoué) : succès, on ne
+                            rejoue pas, une passerelle rejoue jusqu'au 200 ;
+             · `bloque`   — rien n'a été ouvert et ce n'est pas un rejeu. Seul
+                            un humain peut trancher.
+
+           ⚠️ CONVENTION : tout retour idempotent de vrt_grant_entitlement()
+           DOIT contenir le mot « déjà ». C'est ce mot qui le distingue d'un
+           échec. Un nouveau cas idempotent rédigé autrement serait classé
+           « bloqué » — bruyant, jamais silencieux : on préfère une alerte de
+           trop à un accès payé qui se perd sans bruit. */
+        $msgRes = (string) ($res['msg'] ?? '');
+        $deja   = (function_exists('mb_stripos') ? mb_stripos($msgRes, 'déjà') : stripos($msgRes, 'déjà')) !== false;
+        $bloque = empty($res['changed']) && !$deja;
+
+        return ['ok' => true, 'changed' => $changed, 'msg' => $msgRes,
                 'remise' => $remise,
                 // Remonté jusqu'au fichier d'état par camerpayGrant() : un refus
                 // de prix doit être LISIBLE dans le tableau de bord, pas seulement
                 // dans un journal que personne n'ouvre.
-                'underpaid' => !empty($res['underpaid'])];
+                'underpaid' => !empty($res['underpaid']),
+                'deja'      => $deja,
+                'bloque'    => $bloque,
+                /* `a_regler` remontait jusqu'ici puis disparaissait : seul
+                   `underpaid` était relayé. Un « compte introuvable » demandait
+                   donc une décision humaine que personne ne voyait jamais. */
+                'a_regler'  => !empty($res['a_regler']) || $bloque];
     }
 }

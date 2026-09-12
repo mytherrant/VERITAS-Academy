@@ -750,11 +750,21 @@ html{scroll-behavior:smooth}
   box-shadow:0 6px 16px rgba(242,101,0,.28);
 }
 .vbq-cta:hover{ transform:translateY(-2px);box-shadow:0 10px 22px rgba(242,101,0,.4); }
+/* Le bouton porte la TEINTE DE SA CARTE. Il tenait un dégradé bleu figé :
+   l'intitulé de rayon alternait au-dessus (`--vbq-teinte`) pendant que neuf
+   boutons restaient rigoureusement identiques — l'élément le plus important
+   de la carte était le seul à ne rien distinguer. Le voile clair→sombre
+   remplace le second arrêt codé en dur : il fonctionne pour les cinq teintes
+   sans qu'aucune ait besoin de sa propre règle.
+   Ombre NEUTRE et non teintée : `color-mix()` ferait tomber l'ombre sur les
+   navigateurs Android anciens encore courants au Cameroun. */
 .vbq-lire{
-  background:linear-gradient(135deg,#1E499B,#0C2A6A);color:#fff;
-  box-shadow:0 6px 16px rgba(30,73,155,.28);text-decoration:none;
+  background-color:var(--vbq-teinte,#1E499B);
+  background-image:linear-gradient(135deg,rgba(255,255,255,.13),rgba(0,0,0,.26));
+  color:#fff;
+  box-shadow:0 6px 16px rgba(0,17,54,.26);text-decoration:none;
 }
-.vbq-lire:hover{ transform:translateY(-2px);box-shadow:0 10px 22px rgba(30,73,155,.4);color:#fff;text-decoration:none; }
+.vbq-lire:hover{ transform:translateY(-2px);box-shadow:0 10px 22px rgba(0,17,54,.34);color:#fff;text-decoration:none; }
 
 /* ── Écrans étroits ────────────────────────────────────────────────────────
    Libryo garde DEUX colonnes sur téléphone plutôt que de passer à une : une

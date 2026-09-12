@@ -11,6 +11,58 @@
  *  Les données des régions dynamiques sont injectées dans window.VRT_DATA,
  *  extraites de la maquette à la construction (aucune ressaisie à la main).
  * ==========================================================================*/
+/* ── LE PARRAINAGE MOURAIT SUR LE PAILLASSON ──────────────────────────────
+   L'application remet à ses ambassadeurs un lien de la forme
+   « https://veritas-school.com/?ref=VRTXXXX » — trois endroits d'app.js le
+   fabriquent ainsi (fiche imprimable, partage, kit ambassadeur), et c'est
+   cette adresse-là qui part sur les QR imprimés.
+
+   Depuis qu'« / » sert la vitrine, cette adresse n'atteint plus app.js :
+   `_captureReferralCode()` y est défini, la vitrine ne le charge pas. Le code
+   arrivait donc, s'affichait dans la barre d'adresse — et personne ne le
+   ramassait. Le filleul cliquait ensuite « Créer un compte », partait sur
+   « app.html#inscription » SANS la requête, et `_processReferralOnSignup()`
+   ne trouvait rien : aucune ligne de parrainage, aucune commission, aucun
+   bonus, ni pour le parrain ni pour le filleul. Mesuré de bout en bout, avec
+   contre-épreuve : le même code via /app.html?ref= était bien capté.
+
+   On ramasse donc le code ici, dans la MÊME clé de session que celle qu'app.js
+   relit (`_vrtRef`) et avec le MÊME motif de validation — même origine, même
+   onglet, la clé survit à la navigation vers /app.html.
+
+   Ceinture ET bretelles : on recolle aussi le code sur les liens qui mènent à
+   l'application. La clé de session ne suit pas un lien ouvert dans un nouvel
+   onglet, et elle n'existe pas du tout en navigation privée stricte.
+   ────────────────────────────────────────────────────────────────────────── */
+(function () {
+  'use strict';
+  var MOTIF = /^VRT[A-Z0-9]+$/i;          // miroir exact d'app.js
+  var code = '';
+  try {
+    code = new URL(location.href).searchParams.get('ref') || '';
+  } catch (e) { code = ''; }
+  if (!code || !MOTIF.test(code)) return;
+  code = code.toUpperCase();
+
+  try { sessionStorage.setItem('_vrtRef', code); } catch (e) { /* stockage refusé : les liens prennent le relais */ }
+
+  /* Les liens de la vitrine vers l'application sont posés par le HTML
+     pré-rendu ET par le moteur d'écrans. On agit donc au clic, au moment où
+     l'adresse est certaine, plutôt qu'une fois au chargement sur une liste
+     qui n'est pas encore complète. */
+  document.addEventListener('click', function (ev) {
+    var a = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
+    if (!a) return;
+    var href = a.getAttribute('href') || '';
+    if (href.indexOf('app.html') < 0) return;      // seule l'application sait quoi en faire
+    if (/[?&]ref=/i.test(href)) return;            // déjà porté
+    var d = href.indexOf('#');
+    var base = d < 0 ? href : href.slice(0, d);
+    var ancre = d < 0 ? '' : href.slice(d);
+    a.setAttribute('href', base + (base.indexOf('?') < 0 ? '?' : '&') + 'ref=' + encodeURIComponent(code) + ancre);
+  }, true);
+})();
+
 (function () {
   'use strict';
 
@@ -213,6 +265,9 @@
     poser('passage2', sc.passage2 || '');
     poser('decryptage', sc.decryptage || '');
     rendre('partages', D.partages[S.langue]);
+    /* `rendre` repose les href figés au build : sans ce rappel, changer de
+       langue effacerait le lien qu'on vient d'attacher. */
+    majPartages();
   }
 
   /* ── Thème sombre ──────────────────────────────────────────────────────── */
@@ -493,14 +548,11 @@
       /* Le titre et l'auteur étaient écrits en dur : depuis que l'extrait tourne
          (voir chargerPassageDuJour), copier renvoyait à une œuvre qui n'était
          plus celle affichée. On copie ce que le visiteur a sous les yeux. */
-      var txt;
-      if (PDJ) {
-        txt = '« ' + PDJ.texte + ' »\n— ' + PDJ.titre + (PDJ.auteur ? ', ' + PDJ.auteur : '')
-            + '\nPassage du jour · VÉRITAS';
-      } else {
-        var sc = D.scal[S.langue] || {};
-        txt = '« ' + sc.passage1 + ' ' + sc.passage2 + ' »\n— Le Tube Digestif, Alobwed’Epie\nPassage du jour · VÉRITAS';
-      }
+      /* Le titre et l'auteur étaient composés ici, puis RECOMPOSÉS ailleurs
+         pour les boutons de partage : deux textes pour un même passage, qui
+         ont fini par diverger. Un seul constructeur désormais — et c'est lui
+         qui attache le lien du site. */
+      var txt = passageAPartager();
       var fini = function () {
         poser('texteBoutonCopie', 'Copié !');
         setTimeout(function () { poser('texteBoutonCopie', 'Copier le passage'); }, 2400);
@@ -1203,11 +1255,42 @@
     return 'rgb(' + m(r) + ',' + m(g) + ',' + m(b) + ')';
   }
 
+  /* ══ TEINTES ALTERNÉES ═══════════════════════════════════════════════════
+     La MAQUETTE alterne : orange brûlé, bleu, sarcelle, violet, framboise —
+     une carte se distingue de sa voisine et l'œil accroche le rayon avant le
+     titre. Les DONNÉES RÉELLES écrasaient tout : `b.couleur` n'est renseigné
+     sur AUCUN livre du catalogue (vérifié : 6/6 à vide), et le repli tenait
+     en une seule constante. Neuf cartes alternées au build devenaient donc
+     neuf cartes identiques en production — exactement le « tic de cartes
+     clonées » que la charte bannit.
+
+     Le repli tourne désormais sur la palette de la maquette. Une couleur
+     posée par l'administration reste souveraine : on ne recolore que ce que
+     personne n'a choisi. */
+  var TEINTES_RAYON = ['#A84200', '#1E499B', '#0E7C86', '#5B4FA8', '#B03A6E'];
+
+  /* Applique la teinte de rang `r` à une carte, avec ses deux fonds dérivés.
+     `couvTeinte` suit : une couverture dessinée garderait sinon l'ancienne
+     couleur pendant que l'intitulé de rayon en prend une autre. */
+  function teindreCarte(c, r) {
+    var t = TEINTES_RAYON[((r % TEINTES_RAYON.length) + TEINTES_RAYON.length) % TEINTES_RAYON.length];
+    c.teinte = t;
+    c.fondA  = paleur(t, .90);
+    c.fondB  = paleur(t, .96);
+    if (c.couvTeinte) c.couvTeinte = t;
+    return c;
+  }
+
   /* Une fiche de livre du panneau admin → une carte de la grille.
      Les noms de champs sont ceux du gabarit `manuels` (voir la maquette). */
-  function carteDepuisLivre(b) {
+  function carteDepuisLivre(b, rang) {
     var num = !!b.numerique;
-    var teinte = b.couleur || (num ? '#142554' : '#1E499B');
+    /* `rang` vient du .map() de poserBoutique. Il donne une alternance dès le
+       premier rendu ; afficherManuels() la recalcule ensuite sur le lot
+       réellement affiché, pour que deux voisines à l'écran diffèrent même
+       après un filtrage par rayon. */
+    var autoTeinte = !b.couleur;
+    var teinte = b.couleur || TEINTES_RAYON[(rang || 0) % TEINTES_RAYON.length];
     var rupture = !num && b.stock !== null && b.stock !== undefined && b.stock <= 0;
 
     var c = {
@@ -1216,6 +1299,9 @@
          HTML, mais elle permet de retrouver le PRIX RÉEL au moment du clic,
          au lieu de la constante de 5 000 F que le tunnel appliquait. */
       __src: b,
+      /* Vrai tant que l'administration n'a pas choisi de couleur : seules ces
+         cartes-là sont recolorées par l'alternance. */
+      __autoTeinte: autoTeinte,
       niv: b.cls || '',
       teinte: teinte,
       fondA: paleur(teinte, .90),
@@ -1421,6 +1507,17 @@
   function afficherManuels(i) {
     var lot = (D.manuels && D.manuels[i]) || null;
     if (!lot) { sourcesAffichees = []; return; }
+
+    /* L'alternance se rejoue sur le lot RÉELLEMENT AFFICHÉ, pas sur le
+       catalogue entier. Un filtre par rayon prélève un sous-ensemble : teinté
+       au rang global, « Littérature » pouvait sortir quatre cartes de la même
+       couleur d'affilée — l'alternance existait dans les données et ne se
+       voyait pas à l'écran. Les lots partagent leurs objets de carte, d'où la
+       teinture juste avant `rendre` plutôt qu'une fois pour toutes. */
+    for (var r = 0; r < lot.length; r++) {
+      if (lot[r] && lot[r].__autoTeinte) teindreCarte(lot[r], r);
+    }
+
     rendre('manuels', lot);
     sourcesAffichees = lot.map(function (c) { return c.__src || null; });
   }
@@ -1741,7 +1838,47 @@
     return re.test(url) ? url.replace(re, '$1' + encodeURIComponent(valeur)) : url;
   }
 
+  /* ── CE QUI CIRCULE DOIT RAMENER ────────────────────────────────────────
+     Le passage partagé ne portait que « Passage du jour · VÉRITAS ». Or son
+     usage réel, c'est le groupe WhatsApp de parents ou d'élèves : il y
+     voyageait sans aucune adresse. Le meilleur contenu gratuit de la vitrine
+     circulait donc en ne ramenant personne, et celui qui le recevait n'avait
+     aucun moyen de remonter à la source — ni de lire la suite.
+
+     Un seul constructeur, pour que la copie et les quatre boutons de partage
+     ne puissent pas diverger : c'est exactement ainsi que le titre et l'auteur
+     s'étaient désynchronisés quand l'extrait s'est mis à tourner.
+
+     Facebook reste à part, et c'est voulu : il ne transporte qu'une URL (`u=`)
+     dont il compose lui-même l'aperçu — y glisser le texte le casserait. Il
+     porte donc déjà le lien, par construction. */
+  function lienSite() {
+    try {
+      var o = String(location.origin || '');
+      if (o.indexOf('http') === 0) return o + '/';
+    } catch (e) {}
+    return 'https://veritas-school.com/';   // ouvert en file://, ou origine illisible
+  }
+
+  function passageAPartager() {
+    var corps, signature;
+    if (PDJ) {
+      corps = PDJ.texte || '';
+      signature = (PDJ.titre || '') + (PDJ.auteur ? ', ' + PDJ.auteur : '');
+    } else {
+      /* Repli de maquette : le passage figé au build, tant que le serveur n'a
+         pas répondu. Il se partage comme l'autre — sinon le lien manquerait
+         précisément aux visiteurs des connexions les plus lentes. */
+      var sc = (D.scal && D.scal[S.langue]) || {};
+      corps = ((sc.passage1 || '') + ' ' + (sc.passage2 || '')).trim();
+      signature = 'Le Tube Digestif, Alobwed’Epie';
+    }
+    return '« ' + corps + ' »\n— ' + signature
+         + '\nPassage du jour · VÉRITAS\n' + lienSite();
+  }
+
   function majPartages(citation) {
+    if (citation === undefined) citation = passageAPartager();
     var liens = document.querySelectorAll('[data-vrt-item="partages"]');
     for (var i = 0; i < liens.length; i++) {
       var h = liens[i].getAttribute('href') || '';
@@ -1839,7 +1976,7 @@
     if (zl) zl.hidden = true;
 
     PDJ = { texte: txt, titre: titre, auteur: auteur };
-    majPartages('« ' + txt + ' » — ' + titre + (auteur ? ', ' + auteur : ''));
+    majPartages();          // compose depuis PDJ, lien du site compris
     chargerDecryptage(PDJ);
   }
 
@@ -2142,6 +2279,13 @@
 
   /* ── Démarrage ─────────────────────────────────────────────────────────── */
   function demarrer() {
+    /* Le lien du site est attaché AU PREMIER RENDU, pas quand l'extrait du
+       jour arrive. Les href de partage sont figés au build, sans adresse : si
+       l'on attendait la réponse du serveur, tout visiteur qui partage avant
+       elle — ou dont le serveur ne répond pas — ferait circuler un passage
+       anonyme. chargerPassageDuJour() rappellera cette fonction avec le texte
+       réel ; d'ici là, le repli de maquette porte déjà le lien. */
+    majPartages();
     mesurer();
     window.addEventListener('resize', mesurer);
     window.addEventListener('scroll', parallaxe, { passive: true });

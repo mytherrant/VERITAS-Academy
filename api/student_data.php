@@ -146,6 +146,9 @@ if ($acc === null && $login !== '') {
     if ($acc !== null && !vrt_verify_password($pass, (string)($acc['pwd'] ?? ''), (string)$acc['user'], $pwNeedUpgrade)) {
         $acc = null; // mot de passe incorrect
     }
+    /* Empreinte S256 (SHA-256 un tour, sel public) → bcrypt, une seule fois.
+       Le drapeau existait depuis le début et n'était lu nulle part. */
+    if ($acc !== null && $pwNeedUpgrade) { @vrt_upgrade_password_bcrypt((string)$acc['user'], $pass); }
 }
 
 if ($acc === null) {

@@ -527,12 +527,30 @@ if (!defined('VRT_NOTIFY_LIB')) {
        un canal unique reviendrait à décider d'avance lequel des deux clients on
        ne servira pas.
 
-       Défaut « mail » : c'est le seul canal qui ne demande aucun compte chez un
-       tiers — un hébergement mutualisé sait envoyer un courriel. Laisser le
-       défaut à vide aurait fait taire la remise chez qui ne lit pas cette ligne,
-       et c'est le silence qu'on répare ici. */
+       Défaut « whatsapp,mail », et l'ordre compte.
+
+       Il valait « mail » seul. C'était défendable — le courriel ne demande de
+       compte nulle part — mais cela rendait les identifiants WhatsApp INOPÉRANTS
+       tant qu'on n'avait pas aussi trouvé CETTE ligne : on collait son jeton
+       Meta dans payment_config.php, on ne voyait aucun changement, et rien ne
+       disait pourquoi. Un réglage qui en exige un second, non documenté à
+       l'endroit où l'on travaille, est un réglage qui ne sera pas fait.
+
+       Le coller suffit désormais. Le canal WhatsApp SORT PROPREMENT quand il
+       n'est pas configuré (« VRT_WA_PHONE_ID / VRT_WA_TOKEN non configures »)
+       et la boucle passe au suivant : tant qu'il n'y a pas de jeton, ce défaut
+       se comporte exactement comme l'ancien. Il ne coûte donc rien aujourd'hui
+       et fonctionne tout seul demain.
+
+       WhatsApp AVANT le courriel, et pas l'inverse : on paie ici avec un
+       téléphone, l'adresse est facultative à l'achat et rarement laissée. Le
+       canal qui a le plus de chances d'aboutir passe en premier — le premier
+       qui aboutit gagne, les suivants ne sont pas tentés.
+
+       `http` (SMS) reste hors du défaut : il se facture au message et exige un
+       fournisseur choisi sur le prix. On ne met pas une dépense par défaut. */
     function vrt_notify_canaux(): array {
-        $c = defined('VRT_NOTIFY_CANAL') ? strtolower(trim((string) VRT_NOTIFY_CANAL)) : 'mail';
+        $c = defined('VRT_NOTIFY_CANAL') ? strtolower(trim((string) VRT_NOTIFY_CANAL)) : 'whatsapp,mail';
         if ($c === '') return [];
         $out = [];
         foreach (explode(',', $c) as $x) {

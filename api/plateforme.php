@@ -891,20 +891,58 @@ if ($action === 'session' && $method === 'POST') {
     $in    = plat_input(4096);
     $login = trim((string) ($in['login'] ?? ''));
     $mdp   = (string) ($in['motDePasse'] ?? $in['password'] ?? '');
-    if ($login === '' || $mdp === '') {
+
+    /* ══ REPRENDRE LA SESSION DU SITE PRINCIPAL ═══════════════════════════════
+       Mesuré le 12/09/2026 : un enseignant connecté sur veritas-school.com, son
+       abonnement « ens » ACTIF, ouvrait /plateforme/ dans le même navigateur et
+       recevait un jeton `inv.` — invité d'appareil, en essai. Il avait payé, il
+       était connecté, et l'Atelier ne le reconnaissait pas : les deux modules
+       ne se lisent pas (0 occurrence de VERITAS_SES côté Atelier, 0 de
+       minesec_token côté application). D'où l'impression de deux sites.
+
+       Le pont n'accorde AUCUNE confiance au navigateur. Ce qu'il accepte est le
+       jeton que le SERVEUR a émis à la connexion (vrt_issue_token, le même
+       ici et dans student_data.php) : signé HMAC, daté, et révocable par
+       `tokenVer`. Un client qui fabrique une session dans son sessionStorage
+       n'obtient rien — la signature ne tient pas.
+
+       Les identifiants restent acceptés : l'Atelier s'ouvre aussi seul, depuis
+       un autre appareil, sans passer par le site. */
+    $jeton = trim((string) ($in['jeton'] ?? $in['token'] ?? ''));
+    if ($jeton === '') {
+        $entete = (string) ($_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '');
+        if (stripos($entete, 'Bearer ') === 0) $jeton = trim(substr($entete, 7));
+    }
+
+    if ($jeton === '' && ($login === '' || $mdp === '')) {
         jsonResponse(['ok' => false, 'error' => 'Identifiant et mot de passe requis'], 400);
     }
     $db = vrt_load_db();
     if (!is_array($db)) jsonResponse(['ok' => false, 'error' => 'Base indisponible'], 503);
 
-    $trouve = vrt_find_account($db, $login);
-    // Message identique dans les deux cas : ne pas révéler quels comptes existent.
-    if (!$trouve) jsonResponse(['ok' => false, 'error' => 'Identifiants invalides'], 401);
+    if ($jeton !== '') {
+        $v = vrt_verify_token($jeton, $db);
+        /* Un jeton périmé ou révoqué n'est PAS une erreur d'identifiants : le
+           client doit savoir qu'il peut retomber sur l'entrée libre plutôt que
+           d'afficher « identifiants invalides » à quelqu'un qui n'a rien tapé. */
+        if (!$v) jsonResponse(['ok' => false, 'error' => 'Session expirée', 'code' => 'jeton'], 401);
+        $trouve = ['acc' => $v['acc'], 'type' => $v['type']];
+        $acc    = $v['acc'];
+    } else {
+        $trouve = vrt_find_account($db, $login);
+        // Message identique dans les deux cas : ne pas révéler quels comptes existent.
+        if (!$trouve) jsonResponse(['ok' => false, 'error' => 'Identifiants invalides'], 401);
 
-    $acc      = $trouve['acc'];
-    $besoinMaj = false;
-    $ok = vrt_verify_password($mdp, (string) ($acc['pwd'] ?? ''), (string) ($acc['user'] ?? ''), $besoinMaj);
-    if (!$ok) jsonResponse(['ok' => false, 'error' => 'Identifiants invalides'], 401);
+        $acc      = $trouve['acc'];
+        $besoinMaj = false;
+        $ok = vrt_verify_password($mdp, (string) ($acc['pwd'] ?? ''), (string) ($acc['user'] ?? ''), $besoinMaj);
+        if (!$ok) jsonResponse(['ok' => false, 'error' => 'Identifiants invalides'], 401);
+
+        /* Le drapeau était levé et personne ne le lisait : le compte restait en
+           SHA-256 un tour pour toujours. On le migre ici, une seule fois, et sans
+           jamais faire dépendre la connexion du succès de cette écriture. */
+        if ($besoinMaj) { @vrt_upgrade_password_bcrypt((string) ($acc['user'] ?? ''), $mdp); }
+    }
 
     $offres = plat_offres($db);
     $droit  = plat_droit($acc, $db, $offres);

@@ -1040,4 +1040,103 @@ if ($action === 'claim') {
     ]);
 }
 
+/* ══ « RECEVOIR UNE COPIE PAR E-MAIL » ═══════════════════════════════════════
+   L'adresse est FACULTATIVE à l'achat, et on paie ici avec un téléphone : elle
+   n'est presque jamais laissée. La remise automatique se rabat alors sur
+   « mail: pas d'adresse », réessaie six fois et ABANDONNE — mesuré dans
+   api/data/_notify_log.txt. L'acheteur, lui, a bien vu son code à l'écran ;
+   c'est le filet qui manque, et il manque au moment précis où il servirait :
+   quand le téléphone est perdu ou le cache vidé.
+
+   On lui laisse donc l'ajouter APRÈS avoir été servi, depuis l'écran de code —
+   là où il est détendu et où l'adresse a un sens pour lui, plutôt qu'avant de
+   payer où elle n'est qu'un champ de plus.
+
+   MÊME GARDE QUE `claim`, et ce n'est pas une précaution de forme : sans elle,
+   quiconque devine une référence ferait envoyer le code d'autrui à sa propre
+   adresse. La référence seule ne suffit pas — il faut le numéro qui a payé.
+
+   IDEMPOTENT ET SANS EFFET DE BORD : si la remise est déjà partie, on ne la
+   rejoue pas (l'acheteur a déjà son courriel) ; si elle a été purgée, on la
+   remet en file depuis la vente, qui fait foi. */
+if ($action === 'copie') {
+    if (lv_echecs_recents() >= LV_MAX_ECHECS) {
+        lv_log('[COPIE-BLOQUE] ip=' . vrt_client_ip());
+        lv_err(429, 'Trop de tentatives. Réessayez dans un quart d\'heure.', 'locked');
+    }
+    $ref  = trim((string) ($in['ref'] ?? ''));
+    $tel  = trim((string) ($in['tel'] ?? ''));
+    $mail = trim((string) ($in['mail'] ?? ''));
+    if ($ref === '')  lv_err(400, 'Référence requise.', 'empty');
+    if ($mail === '' || !filter_var($mail, FILTER_VALIDATE_EMAIL)) {
+        lv_err(400, 'Cette adresse e-mail n’est pas valide.', 'mail');
+    }
+
+    $v = vrt_livret_vente_lire($ref);
+    // Même message que `claim` pour « inconnue » et « pas encore payée » :
+    // sinon l'énumération dirait lesquelles ont été réglées.
+    if ($v === null || (string) ($v['code'] ?? '') === '') {
+        lv_note_echec();
+        usleep(300000);
+        lv_err(404, 'Aucun code disponible pour cette référence.', 'pending');
+    }
+
+    $attendu = (string) ($v['tel4'] ?? '');
+    if ($attendu !== '') {
+        $fourni = vrt_livret_tel4_hash($tel);
+        if ($fourni === '' || !hash_equals($attendu, $fourni)) {
+            lv_note_echec();
+            lv_log('[COPIE-REFUS] ip=' . vrt_client_ip() . ' motif=tel');
+            usleep(400000);
+            lv_err(403, 'Les 4 derniers chiffres du numéro payeur ne correspondent pas.', 'bad_tel');
+        }
+    } else {
+        /* Vente sans numéro (paiement par carte) : la référence fait foi, comme
+           pour `claim`, et l'accès est journalisé. */
+        lv_log('[COPIE-SANS-TEL] ip=' . vrt_client_ip() . ' ref=' . substr($ref, 0, 24));
+    }
+    lv_efface_echecs();
+
+    $m = vrt_notify_lire($ref);
+    if ($m !== null && (string) ($m['etat'] ?? '') === 'envoye' && (string) ($m['mail'] ?? '') === $mail) {
+        // Déjà partie à cette adresse : on ne renvoie pas, et on ne ment pas non plus.
+        lv_out(200, ['ok' => true, 'ref' => $ref, 'etat' => 'deja_envoye']);
+    }
+
+    if ($m === null) {
+        /* Purgée (90 jours) ou jamais mise en file : on la reconstruit depuis la
+           VENTE, seule source qui fasse foi — jamais depuis ce que le client
+           envoie. Le code vient de $v, pas de la requête. */
+        $r = vrt_notify_enfiler([
+            'ref'    => $ref,
+            'tel'    => (string) ($v['tel'] ?? ''),
+            'mail'   => $mail,
+            'code'   => (string) $v['code'],
+            'classe' => (string) ($v['classe'] ?? ''),
+            'kind'   => (string) ($v['kind'] ?? 'livret'),
+            'titre'  => (string) ($v['titre'] ?? ''),
+            'exp'    => (int) ($v['exp'] ?? 0),
+            'n'      => (is_array($v['codes'] ?? null) ? count($v['codes']) : 1),
+        ]);
+        if ($r !== '' && $r !== 'deja en file') lv_err(500, 'Mise en file impossible.', 'io');
+        $m = vrt_notify_lire($ref);
+        if ($m === null) lv_err(500, 'Mise en file impossible.', 'io');
+    }
+
+    /* L'adresse s'AJOUTE : on ne touche ni au numéro, ni au texte, ni au code.
+       `alerte` repart avec le reste — une remise réarmée qui échoue de nouveau
+       doit pouvoir prévenir l'exploitant. */
+    $m['mail']  = $mail;
+    $m['etat']  = 'attente';
+    $m['essais'] = 0; $m['prochain'] = 0; $m['erreur'] = ''; $m['alerte'] = 0;
+    if (!vrt_notify_ecrire($m)) lv_err(500, 'Écriture impossible.', 'io');
+    lv_log('[COPIE] ip=' . vrt_client_ip() . ' ref=' . substr($ref, 0, 24) . ' mail=oui');
+
+    /* Budget de trois : celle-ci, plus deux retards rattrapés au passage. Le
+       client attend une réponse, pas une file entière. */
+    $bilan = vrt_notify_vider(3);
+    lv_out(200, ['ok' => true, 'ref' => $ref, 'etat' => 'en_route',
+                 'canal' => vrt_notify_canal()] + $bilan);
+}
+
 lv_err(400, 'Action inconnue.', 'action');

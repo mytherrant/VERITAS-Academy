@@ -1760,7 +1760,45 @@ function camerpayGrant(&$state, $logFile, $ref) {
 
     try {
         $g = vrt_grant_entitlement_to_file($state);
-        if (!empty($g['ok'])) { $state['granted'] = true; $state['granted_at'] = date('c'); }
+
+        /* ⚠️ `granted` SE POSE SUR L'OCTROI, PAS SUR LA LECTURE DE LA BASE.
+           Il se posait sur `$g['ok']`, qui ne dit que « la base était lisible ».
+           Un octroi qui n'ouvrait rien — « accountId manquant », « compte
+           introuvable : va_… » — était donc marqué accordé, et la première
+           ligne de cette fonction (`if (!empty($state['granted'])) return;`)
+           le sortait définitivement de la réconciliation. Le client avait payé,
+           son accès restait fermé, et plus rien ne repassait derrière.
+           Mesuré le 12/09/2026 sur les trois cas : chacun ressortait
+           `granted:true, changed:false`.
+
+           Désormais : un octroi BLOQUÉ ne pose pas le drapeau — la
+           réconciliation (?action=list) le reprend au passage suivant, ce qui
+           rattrape tout seul le cas fréquent d'un compte créé juste après le
+           paiement. */
+        /* ⚠️ UN OCTROI QUI RÉUSSIT PEUT QUAND MÊME DEMANDER UNE DÉCISION.
+           Ce relais manquait, et le banc l'a trouvé par mutation le
+           12/09/2026 : un abonnement réglé SANS identifiant de compte — achat
+           anonyme, saisie manuelle de l'administration — rend `changed:true`
+           ET `a_regler:true`. La ligne est écrite, l'argent est tracé, mais
+           personne n'en est titulaire : l'accès reste à attribuer à la main.
+           Ne relayer le drapeau que dans la branche « bloqué » perdait ce
+           cas-là — le seul où l'octroi réussit sans ouvrir d'accès. */
+        if (!empty($g['a_regler'])) $state['a_regler'] = true;
+
+        if (empty($g['bloque'])) {
+            $state['granted'] = true; $state['granted_at'] = date('c');
+        } else {
+            $state['a_regler'] = true;             // demande une décision humaine
+            $n = (int) ($state['grant_essais'] ?? 0) + 1;
+            $state['grant_essais'] = $n;
+            /* Au-delà de cinq passages on cesse de rejouer : chaque tentative
+               réécrit une sauvegarde complète de la base, et une transaction
+               irrécupérable ferait tourner cette meule à chaque ouverture du
+               tableau de bord. On pose le drapeau pour arrêter la boucle, mais
+               `a_regler` et `grant_msg` RESTENT : elle sort du circuit
+               automatique, pas de la vue de l'administration. */
+            if ($n >= 5) { $state['granted'] = true; $state['granted_at'] = date('c'); }
+        }
         // Le VERDICT de l'octroi vit désormais dans le fichier d'état : « accès
         // ouvert », « compte introuvable », « sous-paiement refusé »… Sans lui,
         // ?action=list affichait « payé » pour une transaction qui n'avait
