@@ -211,8 +211,15 @@ if (!chromium) {
 } else {
   (async () => {
     const BASE = process.env.VRT_BASE || 'http://localhost:8000';
-    const nav = await chromium.launch();
+    /* Le LANCEMENT aussi est protégé. Il était hors du `try` : un runner qui
+       aurait le paquet mais pas les navigateurs installés (npm ci sans
+       `playwright install`) jetait ici, l'échec remontait, et le déploiement
+       tombait pour une dépendance d'outillage — pas pour un défaut du produit.
+       Un banc ne doit jamais bloquer une livraison parce qu'IL ne peut pas
+       tourner : il le dit, et il rend la main. */
+    let nav = null;
     try {
+      nav = await chromium.launch();
       const ctx = await nav.newContext({ viewport: { width: 430, height: 900 } });
       const p = await ctx.newPage();
       await p.goto(BASE + '/livrets/6e.html', { waitUntil: 'domcontentloaded', timeout: 45000 });
@@ -248,7 +255,7 @@ if (!chromium) {
       console.log('\n\x1b[31m  Étage navigateur interrompu : ' + String(e.message).slice(0, 90) + '\x1b[0m');
       console.log('  \x1b[33m(serveur local requis : php -S localhost:8000 -t .)\x1b[0m');
     }
-    await nav.close();
+    if (nav) await nav.close();
     bilan();
   })();
 }

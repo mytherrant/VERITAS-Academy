@@ -82,17 +82,30 @@ function poserDrapeaux(array $cl, array &$state): void {
     }
 }
 
-$src = $RACINE . '/data/veritas_db.json';
-if (!is_file($src)) { fwrite(STDERR, "base absente : $src\n"); exit(2); }
-$db = json_decode((string) file_get_contents($src), true);
-if (!is_array($db)) { fwrite(STDERR, "base illisible\n"); exit(2); }
+/* ⚠️ LA BASE EST FABRIQUÉE ICI, ET NON LUE SUR LE DISQUE.
+   La première version chargeait `data/veritas_db.json`. Elle passait en local,
+   et le déploiement du 12/09/2026 s'est arrêté dessus : ce fichier est
+   GITIGNORÉ, donc absent du dépôt, donc absent du runner. « base absente »,
+   sortie 2, et l'envoi FTP annulé. Un banc qui dépend d'une donnée que la CI
+   n'a pas ne garde rien — il bloque.
 
-/* Un compte RÉEL pour le témoin : sans lui, le « cas qui marche » marcherait
-   pour la mauvaise raison, et le banc serait vert sans rien prouver. */
+   Tout ce dont l'octroi a besoin tient dans ces quelques lignes, et les avoir
+   sous les yeux vaut mieux qu'une base de production dont le contenu change
+   sans prévenir : le témoin ne peut plus réussir « pour la mauvaise raison ».
+   Les tarifs, eux, viennent du miroir de vrt_prix_catalogue() et du catalogue
+   de fichiers, tous deux versionnés. */
 $temoin = 'va_banc_' . bin2hex(random_bytes(3));
-$db['visitorAccounts'][] = ['id' => $temoin, 'user' => 'banc_octroi_' . bin2hex(random_bytes(2)),
-                            'pwd' => '', 'nom' => 'Banc', 'plans' => [], 'statut' => 'actif'];
-$rangTemoin = count($db['visitorAccounts']) - 1;
+$db = [
+    'visitorAccounts' => [
+        ['id' => $temoin, 'user' => 'banc_octroi_' . bin2hex(random_bytes(2)),
+         'pwd' => '', 'nom' => 'Banc', 'plans' => [], 'statut' => 'actif'],
+    ],
+    'studentAccounts' => [],
+    'elearning'       => ['plans' => [], 'abonnements' => [], 'contenus' => []],
+    'visitorOrders'   => [],
+    'livretVentes'    => [],
+];
+$rangTemoin = 0;
 
 titre("① UN OCTROI QUI N'OUVRE RIEN NE SE DIT PAS « ACCORDÉ »");
 /* L'INSCRIPTION EST MAINTENUE — arbitrage du 12/09/2026. Un achat de livre
