@@ -28,7 +28,29 @@
   /* ── Accents par audience — inchangés, déjà communs aux deux feuilles ── */
   --r-parents:   #0E7C86;
   --r-ensgt:     #B03A6E;
+  /* ── SIGNAL, et non SURFACE ────────────────────────────────────────────
+     `--r-action` est une couleur d'ENCRE : alertes, pictogrammes, mots mis
+     en garde. Elle reste l'orange brûlé, qui se lit sur blanc (5,9:1).
+     Ne PAS la poser en fond de bouton — voir --r-cta juste dessous. */
   --r-action:    #C24E00;
+
+  /* ── LA COULEUR D'ACTION, celle des boutons ───────────────────────────
+     La doctrine du thème LWS tient en une phrase : UNE couleur d'action,
+     l'or, réservée au geste d'achat ou d'inscription, jamais décorative —
+     et l'encre navy obligatoire dessus.
+
+     Les 90 pages de la refonte ne la suivaient pas : leur `.cta` était un
+     aplat orange `#C24E00` en pilule de 100 px, texte blanc. Mesuré le
+     13/09/2026 : contraste 4,79:1, soit tout juste AA, contre 12,1:1 pour
+     navy-sur-or. Deux boutons d'action pour une seule marque, et le moins
+     lisible des deux sur la moitié du site.
+
+     RÈGLE : toute surface qui prend --r-cta en fond DOIT prendre
+     --r-cta-txt en encre. */
+  --r-cta:       #FFC93C;
+  --r-cta-haut:  #F0B71E;   /* survol */
+  --r-cta-txt:   #001136;
+  --r-cta-om:    0 5px 15px rgba(242,165,32,.45);
   --r-acquis:    #007E11;
   --r-premium:   #5B4FA8;
 

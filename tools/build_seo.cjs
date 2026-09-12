@@ -106,8 +106,8 @@ header{background:#0C2A6A;color:#fff;padding:24px;border-radius:18px;margin-bott
 h1{font-size:23px;font-weight:600;margin:0 0 6px;color:#fff}
 .tags span{display:inline-block;background:#EDF2FB;color:#1E499B;border-radius:100px;padding:4px 13px;font-size:12px;font-weight:600;margin:3px 4px 0 0}
 .excerpt{background:#fff;border:0;border-radius:14px;padding:18px;white-space:pre-wrap;font-size:15px;box-shadow:0 6px 16px rgba(0,17,54,.06)}
-.cta{display:block;text-align:center;background:#C24E00;color:#fff;font-weight:600;text-decoration:none;padding:16px;border-radius:100px;margin:22px 0;font-size:15px;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:background .18s,box-shadow .18s}
-.cta:hover{background:#A84300;box-shadow:0 12px 26px rgba(0,17,54,.09)}
+.cta{display:block;text-align:center;background:#FFC93C;color:#001136;font-weight:600;text-decoration:none;padding:16px;border-radius:10px;margin:22px 0;font-size:15px;box-shadow:0 5px 15px rgba(242,165,32,.45);transition:background .18s,box-shadow .18s}
+.cta:hover{background:#F0B71E;color:#001136;box-shadow:0 12px 26px rgba(0,17,54,.09)}
 footer{font-size:13px;color:#4D5163;text-align:center;border:0;background:#ECEFF7;border-radius:18px;padding:18px;margin-top:26px}</style>
 </head><body>
 <header><h1>${esc(titre)}</h1><div style="opacity:.85;font-size:14px">${esc(matiere)} · ${esc(classe)} · ${esc(seq)} — Sujet corrigé conforme MINESEC</div></header>
@@ -146,8 +146,8 @@ header h1{color:#fff;font-size:23px;font-weight:600;margin:0 0 6px}
 ul{list-style:none;padding:0}li{margin:9px 0}
 li a{display:block;background:#fff;border-radius:14px;padding:14px 16px;text-decoration:none;color:#0C2A6A;font-weight:500;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:box-shadow .18s,transform .18s}
 li a:hover{box-shadow:0 12px 26px rgba(0,17,54,.09);transform:translateY(-2px)}
-.cta{display:block;text-align:center;background:#C24E00;color:#fff;font-weight:600;text-decoration:none;padding:16px;border-radius:100px;margin:22px 0;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:background .18s}
-.cta:hover{background:#A84300}</style></head><body>
+.cta{display:block;text-align:center;background:#FFC93C;color:#001136;font-weight:600;text-decoration:none;padding:16px;border-radius:10px;margin:22px 0;box-shadow:0 5px 15px rgba(242,165,32,.45);transition:background .18s}
+.cta:hover{background:#F0B71E;color:#001136}</style></head><body>
 <header><h1>Épreuves corrigées gratuites</h1><div style="opacity:.85;font-size:14px">Sujets MINESEC (Cameroun), en accès libre</div></header>
 <p>Les corrigés sont gratuits : c'est le cahier qui se vend, pas la correction.</p>
 <ul>${list}</ul>

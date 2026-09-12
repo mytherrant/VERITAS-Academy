@@ -215,8 +215,14 @@ footer {
 }
 
 /* ── Appel à l'action ──────────────────────────────────────────────────────
-   Orange : sur ce site il signale l'action, et lui seule. Le bleu du bandeau
-   servait aussi de bouton, ce qui rendait le clic invisible. */
+   L'OR, et l'encre navy dessus. C'était un aplat orange en pilule, texte blanc :
+   une SECONDE couleur d'action pour une seule marque, alors que la vitrine et les
+   133 pages de `veritas-pages.css` suivent déjà l'or. Mesuré le 13/09/2026 sur
+   oeuvres/1ere-balafon.html : blanc sur #C24E00 = 4,79:1, tout juste AA ; navy sur
+   or = 12,1:1. Le rayon suit : 10 px comme partout, au lieu d'une pilule de 100 px
+   qu'on ne retrouve sur aucune autre surface.
+   REPLIS EN DUR dans les `var()` : 27 pages `seo/` chargent CETTE feuille SANS
+   veritas-tokens.css, et un jeton indéfini y laisserait un bouton transparent. */
 .cta {
   display: flex;
   flex-direction: column;
@@ -224,17 +230,18 @@ footer {
   justify-content: center;
   text-align: center;
   gap: 3px;
-  background: var(--r-action);
-  color: #fff;
+  background: var(--r-cta, #FFC93C);
+  color: var(--r-cta-txt, #001136);
   text-decoration: none;
   font-weight: 600;
   padding: 16px 22px;
-  border-radius: var(--r-pilule);
+  border-radius: var(--r-10, 10px);
   margin-top: 18px;
-  box-shadow: var(--r-om1);
+  box-shadow: var(--r-cta-om, 0 5px 15px rgba(242,165,32,.45));
   transition: background var(--r-t), box-shadow var(--r-t), transform var(--r-t);
 }
-.cta:hover { background: #A84300; color: #fff; box-shadow: var(--r-om2); transform: translateY(-1px); }
+.cta:hover { background: var(--r-cta-haut, #F0B71E); color: var(--r-cta-txt, #001136);
+             box-shadow: var(--r-om2); transform: translateY(-1px); }
 .cta small { display: block; font-weight: 400; opacity: .92; font-size: 12.5px; }
 
 .rel { font-size: 15px; color: var(--r-encre2); }
