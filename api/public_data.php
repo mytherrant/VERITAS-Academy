@@ -389,7 +389,18 @@ foreach ($__pd_books_src as $b) {
         'stock'      => $numerique ? null : (isset($b['stock']) ? (int)$b['stock'] : 0),
         'vendu'      => isset($b['vendu']) ? max(0, (int)$b['vendu']) : 0,
         // Booléen seulement : l'extrait lui-même reste dans l'application.
-        'apercu'     => !empty($b['extrait']) || (isset($b['previewImages']) && is_array($b['previewImages']) && count($b['previewImages']) > 0),
+        /* PAGES OFFERTES = APERÇU. Ce test ne regardait que `extrait` et
+           `previewImages` : un livre vendu avec dix pages gratuites était donc
+           publié « sans aperçu », et sa carte n'en disait rien. Les deux noms
+           de champ coexistent selon la source (`pagesGratuites` en base,
+           `freePages` au catalogue) — on accepte les deux plutôt que d'en
+           imposer un et de perdre l'autre en silence. */
+        'apercu'     => !empty($b['extrait'])
+                        || (isset($b['previewImages']) && is_array($b['previewImages']) && count($b['previewImages']) > 0)
+                        || (int) ($b['pagesGratuites'] ?? $b['freePages'] ?? 0) > 0,
+        /* Le NOMBRE, pour que la carte puisse écrire « 10 pages offertes »
+           plutôt qu'un vague « aperçu disponible ». Un chiffre convainc. */
+        'pagesOffertes' => max(0, (int) ($b['pagesGratuites'] ?? $b['freePages'] ?? 0)),
     ];
 }
 
@@ -496,6 +507,7 @@ if (function_exists('vrt_catalogue_livres')) {
             // Un extrait au catalogue, ou des pages offertes : dans les deux
             // cas le visiteur peut lire avant de payer, et la carte le dit.
             'apercu'     => !empty($__f['extrait']) || (int)($__f['freePages'] ?? 0) > 0,
+            'pagesOffertes' => max(0, (int) ($__f['freePages'] ?? $__f['pagesGratuites'] ?? 0)),
         ];
     }
 }

@@ -1317,8 +1317,25 @@
       type: b.desc || (b.auteur ? 'de ' + b.auteur : ''),
       prix: f(b.prix || 0),
       exos: b.pages ? (b.pages + ' pages' + (b.chaps ? ' · ' + b.chaps + ' chapitres' : '')) : '',
-      mention: num ? 'lecture en ligne, sans téléchargement'
-                   : (b.apercu ? 'aperçu gratuit avant achat' : ''),
+      /* ⚠️ LA CARTE TAISAIT L'ESSAI GRATUIT SUR LES LIVRES NUMÉRIQUES.
+         Elle écrivait « lecture en ligne, sans téléchargement » dès que le
+         livre était numérique, et ne parlait d'aperçu que pour le PAPIER. Or
+         c'est le numérique qui en offre un : « Le Tube digestif » publie
+         dix pages gratuites, sa fiche porte bien « Feuilleter un extrait
+         gratuit » — et la devanture n'en disait pas un mot. Le visiteur
+         devait ouvrir la fiche pour découvrir qu'il pouvait lire avant de
+         payer, c'est-à-dire au moment précis où il avait déjà décidé.
+
+         L'essai passe donc en premier, avec son CHIFFRE quand on l'a : « 10
+         pages offertes » convainc là où « aperçu disponible » n'engage à
+         rien. Le confort de lecture recule en second — il rassure, il ne
+         vend pas. */
+      mention: (function () {
+        var n = Math.max(0, parseInt(b.pagesOffertes || 0, 10) || 0);
+        if (n > 0) return n + ' pages offertes avant d’acheter';
+        if (b.apercu) return 'extrait gratuit avant d’acheter';
+        return num ? 'lecture en ligne, sans téléchargement' : '';
+      })(),
       format: num ? 'ebook' : 'papier',
       formatNom: num ? 'E-book' : 'Papier',
       formatCls: num ? 'vbq-fmt-ebook' : 'vbq-fmt-papier'

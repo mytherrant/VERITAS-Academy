@@ -36,13 +36,13 @@
    qui ne l'était pas — et visible du premier coup d'œil à l'écran.
 
    ─── DEUX ÉTAGES, ET LE SECOND PEUT MANQUER ────────────────────────────────
-   ① à ⑦ lisent les fichiers : ils tournent partout, CI comprise. ⑧ et ⑨
+   ① à ⑧ lisent les fichiers : ils tournent partout, CI comprise. ⑨ et ⑩
    pilotent un vrai navigateur et mesurent le style CALCULÉ — la seule preuve
    qu'un attribut n'a pas été tronqué. Sans Playwright, le banc s'arrête après
-   ⑦ en le disant, et ne fait pas échouer la CI pour une absence d'outil.
+   ⑧ en le disant, et ne fait pas échouer la CI pour une absence d'outil.
 
    ─── ÉPROUVÉ PAR MUTATION (12/09/2026) ──────────────────────────────────────
-   · guillemets doubles rétablis dans BTN      → 4 au rouge (② + les 3 de ⑨,
+   · guillemets doubles rétablis dans BTN      → 4 au rouge (② + les 3 de ⑩,
                                                  mesurés à 17 px et en Arial)
    · plafond de longueur porté à 99999         → 1 au rouge (④)
    · numéro codé en dur dans le lien wa.me     → 2 au rouge (③)
@@ -191,7 +191,13 @@ titre('⑦ On peut essayer avant de payer');
    SON ouvrage, et ces pages-là n'y menaient pas une seule fois. Le seul chemin
    réel vers l'achat était donc le seul d'où l'essai avait disparu. */
 ok('le tunnel propose de lire gratuitement', /id="vrt-essai"/.test(GATE));
-ok('il mène à la page d’aperçu', /href="\/livrets\/apercu\.html"/.test(GATE));
+ok('il mène à la page d’aperçu', GATE.indexOf('/livrets/apercu.html') >= 0);
+/* `apercu.html` lit `?o=<slug>` et retombe sur « 6e » quand il manque. Un lien
+   nu enverrait donc TOUT LE MONDE sur l'aperçu de sixième — un enseignant de
+   Terminale compris, qui en conclurait que le cahier n'est pas le sien. */
+ok('et il porte le slug de l’ouvrage, pas la 6ᵉ pour tout le monde',
+   GATE.indexOf('/livrets/apercu.html?o=') >= 0
+   && /apercu\.html\?o='[\s\S]{0,40}encodeURIComponent\(cfg\.classe/.test(GATE));
 ok('la page d’aperçu existe',
    fs.existsSync(path.join(RACINE, 'livrets', 'apercu.html')));
 /* Elle doit RAMENER vers l'achat : un essai qui ne convertit pas est une fuite. */
@@ -201,12 +207,47 @@ ok('l’aperçu ramène vers l’achat', /Obtenir\s+(le cahier|mon code)/.test(A
 ok('le lien est placé APRÈS le bouton « Payer »',
    GATE.indexOf('id="vrt-essai"') > GATE.indexOf('id="vrt-go"'));
 
+/* ══ LA DEVANTURE ANNONCE-T-ELLE L'ESSAI ? ════════════════════════════════
+   Mesuré en production le 12/09/2026 : les 29 cartes de la boutique disaient
+   « lecture en ligne, sans téléchargement » — PAS UNE ne mentionnait l'essai,
+   alors que « Le Tube digestif » offre dix pages et que chaque cahier a sa
+   page d'aperçu. La mention ne parlait d'aperçu que pour le PAPIER, or c'est
+   le numérique qui en offre un. Le visiteur devait ouvrir la fiche pour
+   découvrir qu'il pouvait lire avant de payer — c'est-à-dire au moment où il
+   avait déjà décidé.
+   On EXÉCUTE la fonction plutôt que de relire son code : une mention écrite
+   n'est pas une mention rendue. */
+const VITRINE = fs.readFileSync(path.join(RACINE, 'assets', 'vitrine.js'), 'utf8');
+const debCarte = VITRINE.indexOf('  function paleur(hex, force) {');
+const finCarte = VITRINE.indexOf('  function filtresDepuisCartes(');
+if (debCarte < 0 || finCarte < 0) { console.error('bornes de carteDepuisLivre introuvables'); process.exit(2); }
+const carteDepuisLivre = new Function(
+  "var f=function(n){return String(n)+' F';};"
+  + VITRINE.slice(debCarte, finCarte)
+  + '\nreturn carteDepuisLivre;')();
+
+titre('⑧ La devanture annonce l’essai, au lieu de le taire');
+const mention = (b) => carteDepuisLivre(b, 0).mention;
+ok('un livre numérique à 10 pages offertes le DIT',
+   /10 pages offertes/.test(mention({ id:'x', numerique:true, prix:1000, apercu:true, pagesOffertes:10 })));
+ok('le chiffre prime sur le confort de lecture',
+   !/sans téléchargement/.test(mention({ id:'x', numerique:true, prix:1000, apercu:true, pagesOffertes:10 })));
+ok('un extrait sans pagination le dit aussi',
+   /extrait gratuit/.test(mention({ id:'y', numerique:true, prix:1000, apercu:true, pagesOffertes:0 })));
+ok('un manuel papier avec extrait le dit',
+   /extrait gratuit/.test(mention({ id:'z', numerique:false, prix:5000, apercu:true, stock:9 })));
+/* Et surtout : on n'invente pas un essai là où il n'y en a pas. */
+ok('sans aperçu, aucune promesse d’essai',
+   !/offert|gratuit|extrait/.test(mention({ id:'w', numerique:true, prix:2000, apercu:false, pagesOffertes:0 })));
+ok('le serveur publie bien le nombre de pages offertes',
+   fs.readFileSync(path.join(RACINE, 'api', 'public_data.php'), 'utf8').indexOf("'pagesOffertes'") >= 0);
+
 /* ══ ÉTAGE NAVIGATEUR ═════════════════════════════════════════════════════ */
 let chromium = null;
 try { ({ chromium } = require('playwright')); } catch (e) { /* absent */ }
 
 if (!chromium) {
-  console.log('\n\x1b[33m  Playwright absent — les contrôles ⑧ et ⑨ sont sautés.\x1b[0m');
+  console.log('\n\x1b[33m  Playwright absent — les contrôles ⑨ et ⑩ sont sautés.\x1b[0m');
   bilan();
 } else {
   (async () => {
@@ -225,14 +266,14 @@ if (!chromium) {
       await p.goto(BASE + '/livrets/6e.html', { waitUntil: 'domcontentloaded', timeout: 45000 });
       await p.waitForTimeout(4000);
 
-      titre('⑧ L’écran d’achat, mesuré dans le navigateur');
+      titre('⑨ L’écran d’achat, mesuré dans le navigateur');
       const ouvert = await p.evaluate(() => {
         try { window.VRTLivret.acheter({}); return true; } catch (e) { return String(e); }
       });
       ok('le tunnel d’achat s’ouvre', ouvert === true);
       await p.waitForTimeout(1500);
 
-      titre('⑨ Un bouton d’action n’est pas un filet de texte');
+      titre('⑩ Un bouton d’action n’est pas un filet de texte');
       const m = await p.evaluate(() => {
         const lire = (id) => {
           const e = document.getElementById(id);

@@ -771,7 +771,13 @@
          SOUS le bouton de paiement, pas au-dessus : celui qui est décidé ne doit
          pas être détourné. C'est l'hésitant qu'on rattrape, et l'aperçu ramène
          vers l'achat par ses propres boutons (« Obtenir mon code — 1 500 FCFA »). */
-      + '<a id="vrt-essai" href="/livrets/apercu.html" style="' + BTN2
+      /* ⚠️ L'APERÇU EST PROPRE À L'OUVRAGE : apercu.html lit `?o=<slug>` et
+         retombe sur « 6e » quand le paramètre manque. Un lien nu y envoyait
+         donc TOUT LE MONDE sur l'aperçu de sixième — un enseignant de
+         Terminale compris, qui en aurait conclu que le cahier n'est pas le
+         sien. On passe `cfg.classe`, le slug que le tunnel connaît déjà. */
+      + '<a id="vrt-essai" href="/livrets/apercu.html?o='
+        + encodeURIComponent(cfg.classe || '6e') + '" style="' + BTN2
         + ';display:block;text-align:center;text-decoration:none;box-sizing:border-box">'
         + 'Lire deux leçons gratuitement, sans payer</a>'
       + '<button id="vrt-close" style="' + BTN2 + '">Annuler</button>'
