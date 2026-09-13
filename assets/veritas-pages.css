@@ -2383,17 +2383,34 @@ article ul:not([class]) > li:nth-child(even) {
 @supports (animation-timeline: view()){
   @media (prefers-reduced-motion: no-preference){
     @keyframes vrt-monter{
-      from{opacity:0;transform:translateY(16px)}
-      to  {opacity:1;transform:none}
+      from{opacity:0;translate:0 16px}
+      to  {opacity:1;translate:none}
     }
     .wrap .grid > .card,.cta a{
       animation:vrt-monter .5s var(--e-out,ease-out) both;
       animation-timeline:view();
       animation-range:entry 0% cover 22%;
     }
-    /* Au survol, la carte reprend la main : sans cette remise à zéro, la
-       translation de l'animation et celle du survol se contrarient. */
-    .wrap .grid > .card:hover,.cta a:hover{animation-timeline:none}
+    /* ⚠️ LES CARTES DISPARAISSAIENT AU SURVOL — signalé par Jacques le
+       13/09/2026 sur /corriges/, capture à l'appui.
+
+       Cette ligne coupait la ligne de temps au survol :
+         .card:hover,.cta a:hover{animation-timeline:none}
+       L'intention était de « rendre la main » au soulèvement du survol,
+       dont la translation contrariait celle de l'animation. Mais retirer
+       la ligne de temps ne LIBÈRE pas une animation : sans temps résolu,
+       et avec `fill-mode: both`, elle reste figée sur sa PREMIÈRE image —
+       opacity:0 et 16 px plus bas. Mesuré en production : quatre cartes
+       sur quatre à opacity:0 après un simple passage de la souris.
+
+       Le conflit se règle à la source, pas au survol : l'animation anime
+       désormais la propriété `translate`, le survol la propriété
+       `transform`. Ce sont deux propriétés distinctes, elles se composent
+       au lieu de s'écraser, et il n'y a plus rien à couper.
+
+       `translate` est sûr ici : ce bloc est tout entier sous
+       @supports (animation-timeline: view()), réservé à des navigateurs
+       qui le reconnaissent tous. */
   }
 }
 

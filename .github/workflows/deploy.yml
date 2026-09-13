@@ -635,6 +635,17 @@ jobs:
       - name: 🎨 Une seule couleur d'action sur tout le site ?
         run: node tests/banc_charte_action.cjs
 
+      # ── 🃏 UNE CARTE SURVOLÉE DISPARAÎT-ELLE ? Signalé le 13/09/2026 sur
+      #    /corriges/ : les cartes s'effaçaient au passage de la souris.
+      #    veritas-pages.css coupait la ligne de temps de l'animation
+      #    d'apparition au survol (`animation-timeline:none`) — ce qui ne libère
+      #    pas l'animation mais la FIGE sur sa première image, opacity:0. La
+      #    feuille sert 133 pages. L'animation porte désormais `translate`, le
+      #    survol `transform` : deux propriétés qui se composent. L'étage
+      #    navigateur se saute proprement sans Playwright ni serveur.
+      - name: 🃏 Une carte survolée reste-t-elle visible ?
+        run: node tests/banc_cartes_survol.cjs
+
       - name: 🛒 Une seule devanture, un seul flux ?
         run: node tests/banc_boutique_unifiee.cjs
 
