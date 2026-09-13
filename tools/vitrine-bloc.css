@@ -651,10 +651,10 @@ html{scroll-behavior:smooth}
   transition:transform .18s,box-shadow .18s;
 }
 .vbq-cta{
-  background:linear-gradient(135deg,#FF7A18,#A84200);color:#fff;
-  box-shadow:0 6px 16px rgba(242,101,0,.28);
+  background:#FFC93C;color:#001136;
+  box-shadow:0 6px 16px rgba(242,165,32,.28);
 }
-.vbq-cta:hover{ transform:translateY(-2px);box-shadow:0 10px 22px rgba(242,101,0,.4); }
+.vbq-cta:hover{ transform:translateY(-2px);box-shadow:0 10px 22px rgba(242,165,32,.4); }
 /* Le bouton porte la TEINTE DE SA CARTE. Il tenait un dégradé bleu figé :
    l'intitulé de rayon alternait au-dessus (`--vbq-teinte`) pendant que neuf
    boutons restaient rigoureusement identiques — l'élément le plus important

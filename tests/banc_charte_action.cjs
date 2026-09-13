@@ -172,6 +172,36 @@ ok('la barre latérale suit (élément actif, lien, jauge)',
 ok('le corps est en Poppins, comme le reste du site',
    /body\{[^}]*font-family:'Poppins'/.test(ATELIER));
 
+/* ══ ⑥ LA VITRINE : SON BOUTON PRINCIPAL ÉTAIT ORANGE, ET ILLISIBLE ═══════════
+   Mesuré le 13/09/2026, en inventoriant TOUS les boutons pleins de l'accueil :
+   le bouton d'action principal n'était pas l'or de la charte, mais un DÉGRADÉ
+   orange #FF7A18 → #A84200 à texte blanc, sur 11 boutons — « Commencer
+   maintenant », « Connexion », « Lancer un quiz »… Contraste sous le texte :
+   3,88:1 ; à l'extrémité claire : 2,61:1. Le bouton le plus important du site
+   ne passait pas le seuil AA. L'or n'habillait que le lien « Boutique ».
+
+   Choix de Jacques : l'or partout (fidèle à son « change le rouge orange en
+   or » du 12/08). Deux pièges, et ce contrôle les garde tous les deux :
+     · les SURVOLS de ces boutons (.vh10:hover, .vh13:hover) réécrivaient
+       `color:#fff` — sur or, du blanc à 1,66:1 pendant le survol ;
+     · la source `tools/vitrine-bloc.css` doit suivre, sinon la prochaine
+       reconstruction de vitrine.html ramène l'orange. */
+titre('⑥ La vitrine : le bouton principal est l’or, au repos comme au survol');
+const VITRINE_HTML = lire('vitrine.html');
+const BLOC_VITRINE = lire('tools/vitrine-bloc.css');
+const DEGRADE_ORANGE = /linear-gradient\(135deg,\s*#FF7A18/i;
+ok('vitrine.html ne pose plus aucun dégradé orange d’action', !DEGRADE_ORANGE.test(VITRINE_HTML));
+ok('la source vitrine-bloc.css non plus', !DEGRADE_ORANGE.test(BLOC_VITRINE));
+ok('aucun halo orange ne subsiste sous un bouton devenu doré',
+   !/rgba\(242,\s*101,\s*0,/.test(VITRINE_HTML) && !/rgba\(242,\s*101,\s*0,/.test(BLOC_VITRINE));
+/* Toute surface dorée doit porter l'encre navy — dans le style ET dans ses survols. */
+const surfacesOr = (VITRINE_HTML.match(/background:#FFC93C;color:#[0-9A-Fa-f]{3,6}/gi) || []);
+ok('les surfaces dorées portent l’encre navy (' + surfacesOr.length + ')',
+   surfacesOr.length >= 7 && surfacesOr.every((x) => /color:#001136/i.test(x)));
+ok('les survols .vh10 et .vh13 n’écrivent plus de blanc sur l’or',
+   !/\.vh10:hover\{[^}]*color:#fff/i.test(VITRINE_HTML)
+   && !/\.vh13:hover\{[^}]*color:#fff/i.test(VITRINE_HTML));
+
 console.log('\n' + '─'.repeat(68));
 if (rouge === 0) {
   console.log('\x1b[32m\x1b[1m  ✓ ' + vert + '/' + vert + ' — une seule couleur d’action.\x1b[0m');
