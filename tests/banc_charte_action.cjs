@@ -33,9 +33,12 @@
    laisserait un bouton transparent, pas un bouton orange.
 
    ─── ÉPROUVÉ PAR MUTATION (13/09/2026) ──────────────────────────────────────
-   · orange rétabli dans veritas-refonte.css   → ② et ④ au rouge
-   · orange rétabli dans build_seo.cjs          → ③ au rouge
-   · replis retirés des var()                   → ② au rouge
+   · orange rétabli dans veritas-refonte.css   → ② au rouge (2 contrôles)
+   · orange rétabli dans build_seo.cjs          → ③ au rouge (2 contrôles)
+   · replis retirés des var()                   → ② au rouge (1 contrôle)
+   · orange rétabli dans l'Atelier (clair)      → ⑤ au rouge
+   · bleu MOYEN dans l'Atelier (sombre)         → ⑤ au rouge, mesuré à 3,42:1 —
+     la preuve que ce contrôle CALCULE le contraste au lieu de relire un nom
    ════════════════════════════════════════════════════════════════════════════ */
 'use strict';
 const fs = require('fs');
@@ -120,6 +123,54 @@ ok('les ' + seoPages.length + ' pages générées portent l’or'
    + (fautives.length ? ' — fautive(s) : ' + fautives.slice(0, 4).join(', ') : ''),
    fautives.length === 0);
 }
+
+/* ══ ⑤ L'ATELIER A QUITTÉ SA CHARTE PROPRE ══════════════════════════════════
+   Le 10/09/2026 une session l'avait diagnostiqué noir sur blanc dans
+   plateforme/index.html : « charte propre (Open Sans / #1a72bb) + stockage
+   séparé → l'Atelier se comportait comme un autre site ». Elle avait posé un
+   bandeau-pont aux couleurs du site, mais laissé la charte en place.
+
+   Les 927 couleurs de l'Atelier passent par `var(--cXXXXXX,#XXXXXX)` : c'est
+   la seule voie fiable (le moteur re-sérialise les styles en rgb(), un sélecteur
+   sur la valeur ne mord jamais). On remappe donc les DÉFINITIONS.
+
+   L'orange d'action n'y devient PAS l'or : il ne sert que des gestes d'OUTIL
+   (« Nouvelle épreuve », « Imprimer / PDF »), et l'or est réservé à l'achat. Il
+   devient le bleu profond — ce qui évite aussi le piège du blanc-sur-or, la
+   variable d'encre `--cffffff` étant partagée par toutes les surfaces blanches.
+
+   Thème SOMBRE : l'encre du bouton y devient foncée (`--cffffff:#161f2b`). Un
+   bleu moyen dessous tomberait à 3,4:1 ; d'où un bleu CLAIR (7,3:1). */
+titre('⑤ L’Atelier porte la charte du site, en clair comme en sombre');
+const ATELIER = lire('plateforme/index.html');
+const bloc = (sel) => {
+  const i = ATELIER.indexOf(sel);
+  return i < 0 ? '' : ATELIER.slice(i, ATELIER.indexOf('}', i));
+};
+const clair  = bloc('  :root{\n    --c0e2a4f');
+const sombre = bloc('  html[data-theme="sombre"]{\n    --c0e2a4f');
+ok('les deux blocs de thème ont été trouvés', clair.length > 200 && sombre.length > 200);
+ok('clair : le bleu primaire est celui du site (#1e499b)', /--c1a72bb:#1e499b;/i.test(clair));
+ok('clair : l’action d’outil n’est plus orange', /--cf39200:#0c2a6a;/i.test(clair)
+   && !/--cf39200:#f39200/i.test(clair));
+ok('sombre : l’action n’est plus orange', !/--cf39200:#f0a02a/i.test(sombre));
+/* Le calcul, pas l'intuition : l'encre sombre du bouton contre sa surface. */
+const hex = (h) => h.replace('#', '').match(/../g).map((x) => parseInt(x, 16));
+const L = (h) => hex(h).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92
+  : Math.pow((v + 0.055) / 1.055, 2.4); }).reduce((a, v, i) => a + v * [0.2126, 0.7152, 0.0722][i], 0);
+const ratio = (a, b) => (Math.max(L(a), L(b)) + 0.05) / (Math.min(L(a), L(b)) + 0.05);
+const surfSombre = (sombre.match(/--cf39200:(#[0-9a-f]{6})/i) || [])[1];
+const encreSombre = (sombre.match(/--cffffff:(#[0-9a-f]{6})/i) || [])[1];
+ok('sombre : le bouton reste lisible sous son encre foncée (≥ 4,5:1)'
+   + (surfSombre && encreSombre ? ' — ' + ratio(surfSombre, encreSombre).toFixed(2) + ':1' : ''),
+   !!surfSombre && !!encreSombre && ratio(surfSombre, encreSombre) >= 4.5);
+ok('aucun halo orange ne subsiste sous un bouton devenu bleu',
+   ATELIER.indexOf('rgba(243,146,0,') < 0);
+ok('la barre latérale suit (élément actif, lien, jauge)',
+   /--sb-active-fg:#1e499b;/i.test(ATELIER) && /--sb-link:#1e499b;/i.test(ATELIER)
+   && /--sb-bar:#1e499b;/i.test(ATELIER));
+ok('le corps est en Poppins, comme le reste du site',
+   /body\{[^}]*font-family:'Poppins'/.test(ATELIER));
 
 console.log('\n' + '─'.repeat(68));
 if (rouge === 0) {
