@@ -671,6 +671,92 @@ function vrt_pd_activite(array $db): array {
     return array_slice($ventes, 0, 8);
 }
 
+/**
+ * Les plans que la vitrine et l'application PROPOSENT.
+ *
+ * 1. Les formules Starter / Pro / Élite / Famille (vrt_plans_formules) sont
+ *    servies même si la base ne les connaît pas encore : elles sont annoncées
+ *    sur l'accueil, le serveur sait les tarifer et les octroyer. Une ligne de
+ *    la base au même identifiant l'emporte (tarif réglé par l'administration).
+ * 2. Les anciens plans ÉLÈVE qu'elles remplacent (3 000 / 5 000 F l'année)
+ *    quittent la vente : les laisser à côté d'un Starter à 1 000 F par mois
+ *    rendrait la nouvelle grille illisible. Ils restent valables pour leurs
+ *    abonnés. L'administration peut en remettre un en vente (`enVente: true`).
+ */
+function vrt_pd_plans_en_vente(array $db): array {
+    $base = (isset($db['elearning']['plans']) && is_array($db['elearning']['plans'])) ? $db['elearning']['plans'] : [];
+    $retires = function_exists('vrt_plans_retires_de_la_vente') ? vrt_plans_retires_de_la_vente() : [];
+    $formules = function_exists('vrt_plans_formules') ? vrt_plans_formules() : [];
+    $out = []; $vus = [];
+    foreach ($base as $p) {
+        if (!is_array($p) || !isset($p['id'])) continue;
+        $id = (string) $p['id'];
+        // Vue AVANT tout filtre : une formule retirée de la vente par
+        // l'administration ne doit pas revenir par le repli du code ci-dessous.
+        $vus[$id] = true;
+        if (in_array($id, $retires, true) && empty($p['enVente'])) continue;
+        if (isset($p['enVente']) && $p['enVente'] === false) continue;
+        if (isset($formules[$id]) && isset($p['actif']) && $p['actif'] === false) continue;
+        if (isset($formules[$id])) $p = array_merge($formules[$id], $p);
+        $out[] = $p; $vus[$id] = true;
+    }
+    foreach ($formules as $id => $f) {
+        if (!isset($vus[$id])) $out[] = $f;
+    }
+    return $out;
+}
+
+/**
+ * Les TARIFS que le serveur exigera, publiés pour qu'on les affiche.
+ *
+ * Réglés par l'administration (« Prix & calculs »), ils vivent dans la base —
+ * que le navigateur d'un visiteur ne reçoit jamais. Sans cette tranche, un
+ * micro-achat passé de 200 à 300 F s'affichait encore 200 F chez le visiteur
+ * pendant que l'octroi en exigeait 300 : paiement accepté, accès refusé pour
+ * sous-paiement. Un prix affiché doit être le prix exigé.
+ *
+ * Liste blanche stricte : des nombres bornés et des libellés courts, rien
+ * d'autre ne sort.
+ */
+function vrt_pd_tarifs_publics(array $db): array {
+    $t = (isset($db['tarifs']) && is_array($db['tarifs'])) ? $db['tarifs'] : [];
+    $ent = function ($v, int $min, int $max) { $n = (int) $v; return ($n >= $min && $n <= $max) ? $n : null; };
+    $out = ['microPrix' => [], 'tarifs' => []];
+
+    foreach (['epreuve', 'chapitre', 'fiche', 'labo', 'ia'] as $k) {
+        $m = $db['microPrix'][$k] ?? null;
+        if (!is_array($m)) continue;
+        $montant = $ent($m['montant'] ?? 0, 1, 1000000);
+        if ($montant === null) continue;
+        $ligne = ['montant' => $montant];
+        if (isset($m['label']) && is_string($m['label'])) $ligne['label'] = mb_substr($m['label'], 0, 80);
+        if ($k === 'ia') { $j = $ent($m['jetons'] ?? 0, 1, 10000); if ($j !== null) $ligne['jetons'] = $j; }
+        $out['microPrix'][$k] = $ligne;
+    }
+
+    foreach (['inscription' => [0, 100000], 'livret' => [1, 1000000], 'livretGuide' => [1, 1000000]] as $k => $b) {
+        if (isset($t[$k])) { $v = $ent($t[$k], $b[0], $b[1]); if ($v !== null) $out['tarifs'][$k] = $v; }
+    }
+    if (isset($t['inscriptionRoles']) && is_array($t['inscriptionRoles'])) {
+        foreach (['eleve', 'parent', 'enseignant', 'partenaire', 'auteur', 'mecene'] as $r) {
+            if (isset($t['inscriptionRoles'][$r])) {
+                $v = $ent($t['inscriptionRoles'][$r], 0, 100000);
+                if ($v !== null) $out['tarifs']['inscriptionRoles'][$r] = $v;
+            }
+        }
+    }
+    if (function_exists('vrt_livret_paliers_pack')) $out['tarifs']['livretPack'] = vrt_livret_paliers_pack($db);
+    if (isset($t['fraisOperateurPct']) && is_numeric($t['fraisOperateurPct'])) {
+        $f = (float) $t['fraisOperateurPct'];
+        if ($f >= 0 && $f <= 10) $out['tarifs']['fraisOperateurPct'] = $f;
+    }
+    if (isset($t['formules']['moisOfferts'])) {
+        $v = $ent($t['formules']['moisOfferts'], 0, 6);
+        if ($v !== null) $out['tarifs']['formules'] = ['moisOfferts' => $v];
+    }
+    return $out;
+}
+
 /** Les chiffres du bandeau de la boutique. Comptés, jamais écrits à la main :
  *  la maquette annonçait « 134 titres au catalogue » et « 4 000 F prix moyen »
  *  pour neuf titres à 3 277 F de moyenne. Un chiffre faux sur une page de
@@ -699,7 +785,8 @@ $public = [
     'partenaires' => $db['partenaires'] ?? [],
     'tickerItems' => $db['tickerItems'] ?? [],
     'calendrier'  => $db['calendrier']  ?? [],
-    'elearning_plans' => isset($db['elearning']['plans']) ? $db['elearning']['plans'] : [],
+    'elearning_plans' => vrt_pd_plans_en_vente($db),
+    'tarifs_publics'  => vrt_pd_tarifs_publics($db),
     'elearning_categories' => (isset($db['elearning']['categories']) && is_array($db['elearning']['categories']))
         ? $db['elearning']['categories'] : [],
     'elearning_contenus' => $__pd_contenus,

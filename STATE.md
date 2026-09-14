@@ -1,3 +1,86 @@
+## Code ami, formules d'abonnement, « Prix & calculs automatiques » (14/09/2026) — NON DÉPLOYÉ
+
+Demande : « le site tarde à décoller ». Rendre l'offre attrayante, auditer
+parrainage et codes promo, commission automatique au paiement ; puis « tous les
+prix et calculs automatiques configurables par l'admin ».
+
+**Ce que l'audit a trouvé (code de 86be0b1)** :
+
+1. *Remise sans code.* `vrt_verifier_prix` acceptait tout montant supérieur ou
+   égal à « prix − meilleure remise promo active » (plafond 50 %), que le payeur
+   ait saisi un code ou non. Un code promo actif à 15 % valait −15 % pour
+   quiconque modifiait le montant.
+2. *Le parrainage ne pouvait pas marcher chez un vrai visiteur.*
+   `_processReferralOnSignup` cherchait le parrain dans `DB.visitorAccounts`,
+   c'est-à-dire la copie locale de la base, qu'un visiteur ne reçoit jamais
+   (public_data). Le « crédit de 500 F » affiché n'était ni versé ni utilisable.
+3. *Commission écrite à la COMMANDE, pas au paiement.* `applyPartnerCode`
+   remplissait `DB.commissions` dès `validerAbonnement` / `confirmVisitorOrder`,
+   avant tout encaissement, dans une base « dernière écriture gagne ».
+4. *Codes en collision.* `_genReferralCode` = « VRT » + les 6 premiers
+   caractères de l'identifiant complétés de X : deux comptes au même préfixe
+   partageaient un code.
+5. *Trois barèmes contradictoires* : `PARRAINAGE_BONUS` (500 F),
+   `DB.parrainRate {forfait:500}`, commission par niveau de partenaire.
+
+**Ce qui est construit** :
+
+- **Code ami côté serveur** (`api/_parrainage_lib.php`, `api/parrainage.php`).
+  Règle par défaut : −10 % pour le filleul, 10 % de ce qu'il paie pour le
+  parrain, sans limite de durée (lien créé au premier paiement), versement
+  Mobile Money automatique dès 2 000 F cumulés. Registre séparé
+  `api/data/parrainage/` (flock, .bak, jamais écrasé s'il est illisible) parce
+  que db.php écrase. Code = VRT + 6 caractères d'un sha256, identique dans le
+  navigateur et le serveur (banc de parité).
+- **La commission naît au paiement confirmé**, dans
+  `vrt_grant_entitlement_to_file`, idempotente par référence. Remboursement →
+  reprise au prorata. Versement par `/api/payouts/batch` de CamerPay, suivi par
+  le webhook (références `PAR-…`). Sur une réponse 0/5xx, l'état est
+  « incertain » et la réservation reste posée : pas de second versement tant
+  qu'il n'est pas tranché.
+- **La remise est vérifiée par le serveur** : l'init CamerPay évalue le code
+  transmis ; sans code valide, un montant réduit est refusé AVANT le débit (409
+  `PRIX_INCOHERENT`). `VRT_REMISE_SANS_CODE` (payment_config.php) rétablirait
+  l'ancien plancher si nécessaire.
+- **Formules** : Starter 1 000, Pro 2 000, Élite 3 000, Famille 10 000 F/mois
+  (4 enfants) ; annuel = 10 mois payés, ancien prix barré. plan1/2/4/5/6
+  retirés de la vente (un renouvellement reste encaissable). Grille `.vfo` dans
+  l'app (le visuel « catastrophique » signalé : médaillon sur le titre, doubles
+  puces), vitrine pilotée par `poserFormules`.
+- **« 💰 Finances → Prix & calculs automatiques »** (`pgPrixCalculs`) :
+  formules, mois offerts, enfants Famille, Code ami (remise, commission, seuil,
+  auto), inscription par rôle, cahiers (prix, guide, par ouvrage, paliers de
+  pack), micro-achats et IA, parts auteur/ressource/cours, frais opérateur. Le
+  serveur relit ces valeurs (`tarifs_publics`, `vrt_livret_paliers_pack`) :
+  ce qui est affiché est ce qui est encaissé.
+
+**Bancs** : `tests/parrainage.php` 88/88, `tests/banc_code_ami_parite.cjs` 8/8
+(mutations rouges), `paiements_entitlements.php` 95/95 (dont « −10 % sans code :
+refusé »). Suite CI locale : 54 OK ; 3 rouges déjà rouges à HEAD (empreintes,
+tunnel_article, cahiers_reels : environnement) ; `ci_scripts_suivis` rouge tant
+que les nouveaux fichiers ne sont pas `git add`. Playwright : 1er passage rouge
+sur `page.goto` (démarrage à froid), deux passages suivants verts.
+
+**Pièges retenus** :
+- Reconstruire `vitrine.html` depuis sa source a annulé le bouton or de 86be0b1,
+  fait par une autre session DANS vitrine.html seulement. Reporté dans la source.
+- `_auth_lib.php` requiert maintenant `_parrainage_lib.php` : il fallait
+  l'ajouter aux listes de fichiers de 4 bancs (compte_serveur,
+  tunnel_abonnement, entree_libre, sonde_ecriture) et à `tools/publier.py`.
+  Oublié au départ : trois bancs rouges, cause = bac à sable, pas le code.
+
+**Avant de déployer** : `git add api/_parrainage_lib.php api/parrainage.php
+tests/parrainage.php tests/banc_code_ami_parite.cjs` — sans le premier, TOUTE
+l'API tombe (require fatal ; la garde CI l'arrête). Versement auto : le jeton
+LIVE a déjà `payout:write` (décision du 10/08). Ce versement-ci part du SERVEUR
+au paiement confirmé, sans session admin ouverte (contrairement à
+`_payMaybeAutoPayout`) ; garde-fou `CAMERPAY_PAYOUT_MAX` (200 000 par défaut).
+Si le versement échoue, le solde revient et se règle depuis la page Code ami.
+
+**Limites connues** : pas encore de Code ami dans gate.js (cahiers), la
+boutique de la vitrine ni l'Atelier ; parts d'auteur toujours calculées dans le
+navigateur ; quelques mentions de prix de la vitrine restent statiques.
+
 ## Audit final avant production (19/08/2026) — v1.19.47
 
 Troisième passage, en revérifiant tout par la mesure plutôt qu'en relisant les

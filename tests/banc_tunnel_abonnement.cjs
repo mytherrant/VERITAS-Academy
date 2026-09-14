@@ -56,7 +56,7 @@ const BAC = fs.mkdtempSync(path.join(os.tmpdir(), 'vrt-banc-tunnel-'));
 /* ⚠️ DÉPENDANCE, PAS INVENTAIRE : `_auth_lib.php` fait des require_once. En
    oublier un ne donne pas un contrôle en moins, mais une erreur fatale PHP. */
 const FICHIERS = ['plateforme.php', '_json_boot.php', 'config_sync.php',
-  '_auth_lib.php', '_livret_lib.php', '_notify_lib.php', '_sentinel.php',
+  '_auth_lib.php', '_livret_lib.php', '_notify_lib.php', '_parrainage_lib.php', '_sentinel.php',
   '_bot_log.php'];
 
 /* Les quatre plans, avec le tarif que le serveur exige réellement. Un plan

@@ -74,6 +74,12 @@ jobs:
       - name: 🏷️ Chaque ouvrage a-t-il un prix et une porte ?
         run: php tests/ouvrages_en_vente.php
 
+      - name: 🎁 Le Code ami et les formules paient-ils juste ?
+        run: php tests/parrainage.php
+
+      - name: 🔗 Le navigateur affiche-t-il ce que le serveur encaisse ?
+        run: node tests/banc_code_ami_parite.cjs
+
   smoke:
     name: 🌐 Boot du portail (Chromium headless)
     runs-on: ubuntu-latest

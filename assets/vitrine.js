@@ -1144,6 +1144,77 @@
     return n;
   }
 
+  /* ── LES FORMULES ET LEURS PRIX, TELS QUE LE SERVEUR LES EXIGERA ──────────
+     Les prix de Starter / Pro / Élite / Famille se règlent dans le tableau de
+     bord (« Prix & calculs », 14/09/2026). Le panneau pré-rendu garde les
+     valeurs du jour de la construction ; on les remplace par celles que
+     `api/public_data.php` publie — c'est-à-dire celles que l'octroi exigera.
+     Un prix affiché qui n'est pas le prix exigé fait refuser la vente APRÈS
+     que le client a payé.
+     Amélioration progressive : serveur muet ou sans formules → le pré-rendu
+     reste. Une formule retirée de la vente disparaît du panneau. */
+  function poserFormules(plans) {
+    if (!plans || !plans.length) return;
+    var g = {};
+    for (var i = 0; i < plans.length; i++) {
+      var p = plans[i];
+      if (!p || !p.formule || !p.groupe || p.actif === false || !(p.prix > 0)) continue;
+      g[p.groupe] = g[p.groupe] || {};
+      if (!g[p.groupe][p.variante || 'mois']) g[p.groupe][p.variante || 'mois'] = p;
+    }
+    var groupes = Object.keys(g);
+    if (!groupes.length) return;
+    // « 1 000 » : espace insécable ordinaire (l'espace fine disparaît en gras).
+    var fmtP = function (n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); };
+    var eco = function (m, a) {
+      if (!m || !a || !(a.ancien > a.prix) || !(m.prix > 0)) return '';
+      var e = a.ancien - a.prix, q = e / m.prix, r = Math.round(q);
+      if (r >= 1 && Math.abs(q - r) < 0.01) return r + ' mois offert' + (r > 1 ? 's' : '');
+      return '−' + Math.round(e * 100 / a.ancien) + ' %';
+    };
+    var poser = function (racine, champ, texte) {
+      var els = racine.querySelectorAll('[data-vrt-f="' + champ + '"]');
+      for (var k = 0; k < els.length; k++) {
+        // « 12 000 F » : on garde le suffixe écrit dans la maquette.
+        var suffixe = /\sF$/.test(els[k].textContent) ? ' F' : '';
+        els[k].textContent = texte + suffixe;
+      }
+    };
+    var ecoGlobal = '';
+    var cartes = document.querySelectorAll('[data-vrt-formule]');
+    for (var c = 0; c < cartes.length; c++) {
+      var carte = cartes[c], fo = g[carte.getAttribute('data-vrt-formule')];
+      if (!fo || !fo.mois) { carte.style.display = 'none'; continue; }
+      carte.style.display = '';
+      poser(carte, 'mois', fmtP(fo.mois.prix));
+      var an = fo.an, boite = carte.querySelector('[data-vrt-an]'), lienAn = carte.querySelector('[data-vrt-cta="an"]');
+      if (an) {
+        var e = eco(fo.mois, an);
+        poser(carte, 'an', fmtP(an.prix));
+        var ancien = carte.querySelectorAll('[data-vrt-f="ancien"], [data-vrt-f="eco"]');
+        for (var k = 0; k < ancien.length; k++) ancien[k].style.display = e ? '' : 'none';
+        if (e) { poser(carte, 'ancien', fmtP(an.ancien)); poser(carte, 'eco', e); if (!ecoGlobal) ecoGlobal = e; }
+        if (boite) boite.style.display = '';
+        if (lienAn) lienAn.style.display = '';
+      } else {
+        if (boite) boite.style.display = 'none';
+        if (lienAn) lienAn.style.display = 'none';
+      }
+    }
+    var glob = document.querySelectorAll('[data-vrt-eco-global]');
+    for (var x = 0; x < glob.length; x++) {
+      if (ecoGlobal) glob[x].textContent = ecoGlobal; else glob[x].style.display = 'none';
+    }
+    // Le prix d'une formule repris dans les textes (« dès 1 000 F par mois »).
+    var parId = {};
+    for (var y = 0; y < plans.length; y++) if (plans[y] && plans[y].id) parId[plans[y].id] = plans[y];
+    var mentions = document.querySelectorAll('[data-vrt-prix]');
+    for (var z = 0; z < mentions.length; z++) {
+      var pl = parId[mentions[z].getAttribute('data-vrt-prix')];
+      if (pl && pl.prix > 0 && pl.actif !== false) mentions[z].textContent = fmtP(pl.prix);
+    }
+  }
+
   function appliquerPublic(d) {
     var pi = d.publicInfo || {};
     var ec = d.school || {};
@@ -1208,6 +1279,7 @@
       if (v != null && String(v) !== '') fentes[m].textContent = String(v);
     }
 
+    poserFormules(d.elearning_plans || []);
     poserBandeau(d.tickerItems || []);
     poserClassement(d.jeu || null);
     poserBoutique(d.boutique || []);

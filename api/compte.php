@@ -61,8 +61,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('X-Content-Type-Options: nosniff');
 header('Vary: Origin');
 
-$DB_FILE  = dirname(__DIR__) . '/data/veritas_db.json';
-$DATA_DIR = dirname(__DIR__) . '/data';
+/* La MÊME base que vrt_load_db() lit juste en dessous. Ce chemin était écrit en
+   dur : un banc qui substituait la base (VRT_DB_FICHIER) contrôlait l'unicité
+   sur la sienne et écrivait le compte dans la vraie. En production, identique. */
+$DB_FILE  = vrt_db_file();
+$DATA_DIR = dirname($DB_FILE);
 
 function cpt_out(array $payload, int $code = 200): void {
     http_response_code($code);
@@ -299,6 +302,37 @@ if ($role === 'auteur' || $role === 'enseignant') {
     $acc['childMat'] = strtoupper(cpt_txt($in['childMat'] ?? '', 30));
 }
 
+/* ── CODE AMI — le parrainage naît ICI, sur le serveur ────────────────────
+   Il naissait dans le navigateur du filleul, qui cherchait son parrain dans
+   SA copie de la base : vide sur un téléphone neuf. Aucun lien n'arrivait
+   jamais jusqu'au serveur, donc aucune commission ne pouvait être due.
+   Le code est résolu ici contre la base réelle. On refuse l'auto-parrainage
+   par le numéro de téléphone (le nouveau compte n'a pas encore d'identifiant
+   à comparer). Un code invalide n'empêche jamais l'inscription. */
+$acc['codeParrain'] = vrt_parr_code_pour_id($acc['id']);
+$parrainNouveau = null;
+$codeParrainSaisi = substr(trim((string) ($in['codeParrain'] ?? '')), 0, 32);
+if ($codeParrainSaisi !== '' && function_exists('vrt_parr_resoudre')) {
+    try {
+        $regParr = vrt_parr_lire();
+        $cfgParr = vrt_parr_cfg($db, $regParr);
+        $resParr = !empty($cfgParr['actif']) ? vrt_parr_resoudre($db, $regParr, $codeParrainSaisi) : null;
+        if ($resParr && !empty($resParr['benef']) && $resParr['type'] !== 'promo') {
+            $persParr = vrt_parr_personne($db, $resParr['benef']);
+            $t1 = $persParr ? vrt_parr_tel9((string) $persParr['tel']) : '';
+            $t2 = vrt_parr_tel9((string) $acc['tel']);
+            if ($persParr && !empty($persParr['actif']) && !($t1 !== '' && $t1 === $t2)) {
+                $acc['parrainBenef'] = $resParr['benef'];
+                $acc['parrainCode']  = $resParr['code'];
+                $acc['parrainLe']    = date('Y-m-d');
+                $parrainNouveau = ['benef' => $resParr['benef'], 'code' => $resParr['code'], 'nom' => $resParr['nom']];
+            }
+        }
+    } catch (\Throwable $e) {
+        @file_put_contents(__DIR__ . '/data/_access_log.txt', date('c') . ' CODE_AMI_INSCRIPTION_ERR ' . $e->getMessage() . "\n", FILE_APPEND);
+    }
+}
+
 /* ── Écriture : read-modify-write sous verrou exclusif ────────────────────
    Même motif que student_data.php. Le contrôle d'unicité est REJOUÉ sous le
    verrou : entre la lecture d'en haut et l'écriture ici, une autre requête a
@@ -347,4 +381,24 @@ fclose($fp);
 @file_put_contents(__DIR__ . '/data/_access_log.txt',
     date('c') . ' COMPTE_NEW user=' . $user . ' role=' . $role . ' ip=' . vrt_client_ip() . "\n", FILE_APPEND);
 
-cpt_out(['ok' => true, 'existe' => false, 'id' => $acc['id'], 'srvAt' => $acc['srvAt']], 201);
+/* Le lien entre au registre du Code ami APRÈS l'écriture de la base (ordre des
+   verrous : la base, puis le registre). Le registre fait foi : une
+   synchronisation administrateur peut réécrire la base, pas lui. */
+if ($parrainNouveau !== null) {
+    try {
+        $idNouveau = (string) $acc['id'];
+        vrt_parr_tx(function (array &$reg) use ($idNouveau, $parrainNouveau) {
+            if (!isset($reg['liens']['acc:' . $idNouveau])) {
+                $reg['liens']['acc:' . $idNouveau] = ['b' => $parrainNouveau['benef'], 'c' => $parrainNouveau['code'],
+                                                     't' => time(), 'via' => 'inscription'];
+            }
+        });
+    } catch (\Throwable $e) {
+        @file_put_contents(__DIR__ . '/data/_access_log.txt', date('c') . ' CODE_AMI_LIEN_ERR ' . $e->getMessage() . "\n", FILE_APPEND);
+    }
+}
+try { vrt_parr_indexer((string) $acc['codeParrain'], 'acc:' . (string) $acc['id']); } catch (\Throwable $e) {}
+
+cpt_out(['ok' => true, 'existe' => false, 'id' => $acc['id'], 'srvAt' => $acc['srvAt'],
+         'codeParrain' => $acc['codeParrain'],
+         'parrain' => $parrainNouveau ? ['code' => $parrainNouveau['code'], 'nom' => $parrainNouveau['nom']] : null], 201);

@@ -78,6 +78,16 @@
           if (parseInt(o.prixGuide, 10) > 0) PRIX.guide  = parseInt(o.prixGuide, 10);
           break;
         }
+        /* Paliers de remise d'un pack : réglables par l'administration depuis
+           le 14/09/2026, donc lus au serveur. Même garde que les tarifs : on ne
+           remplace la table de repli que par une table complète et plausible. */
+        if (Array.isArray(j.paliers) && j.paliers.length) {
+          var pal = j.paliers.filter(function (p) {
+            return Array.isArray(p) && parseInt(p[0], 10) >= 2 && parseInt(p[1], 10) >= 0 && parseInt(p[1], 10) <= 50;
+          }).map(function (p) { return [parseInt(p[0], 10), parseInt(p[1], 10)]; })
+            .sort(function (a, b) { return b[0] - a[0]; });
+          if (pal.length) PALIERS = pal;
+        }
         tarifsLus = true;
         return PRIX;
       })
@@ -733,7 +743,7 @@
       // doit pas avoir à nous écrire. La remise s'affiche dès 10 codes.
       + (cfg.kind === 'livret'
           ? '<label style="display:block;font-size:12.5px;color:#5c666f;margin:12px 0 2px">'
-            + 'Nombre de codes (remise dès 10 : établissement)</label>'
+            + 'Nombre de codes (remise dès ' + PALIERS[PALIERS.length - 1][0] + ' : établissement)</label>'
             + '<input id="vrt-n" type="number" min="1" max="500" value="' + qte + '" style="' + INP + '">'
           : '')
       + '<input id="vrt-tel" type="tel" inputmode="tel" placeholder="Ton numéro (6XX XX XX XX)" style="' + INP + '">'

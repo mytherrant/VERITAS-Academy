@@ -698,7 +698,8 @@ function server_user_tier(string $userId): string {
             $end = isset($abo['dateFinTs']) ? (int) $abo['dateFinTs'] : 0;
             if ($end && $end < $now) continue;
             $p = strtolower((string) ($abo['plan'] ?? $abo['planId'] ?? ''));
-            if (strpos($p, 'elite') !== false || $p === 'plan4') $t = 'elite';
+            // « famille » : chaque enfant couvert est au niveau Élite (formule du 13/09/2026).
+            if (strpos($p, 'elite') !== false || strpos($p, 'famille') !== false || $p === 'plan4') $t = 'elite';
             elseif ($p === 'plan2' || strpos($p, 'starter') !== false) $t = 'starter';
             else $t = 'pro';
             if ($rank[$t] > $best) { $best = $rank[$t]; $bestT = $t; }

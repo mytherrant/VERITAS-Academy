@@ -431,6 +431,59 @@ if ($action === 'init' && $method === 'POST') {
         jsonRespCy(['error' => 'Numéro invalide — format attendu 6XXXXXXXX ou 2376XXXXXXXX'], 400);
     }
 
+    /* ── CODE AMI + CONTRÔLE DU PRIX, AVANT LE DÉBIT ─────────────────────────
+       Le code saisi quittait jamais le navigateur : le serveur ne savait ni
+       quelle remise honorer, ni qui rémunérer. Il est désormais évalué ICI,
+       avec le tarif de référence de la base — et le résultat (remise, parrain,
+       taux) est écrit dans le fichier d'état par le serveur lui-même. Rien de
+       ce que le client envoie ne fixe un montant.
+
+       Et le prix se contrôle maintenant AVANT de faire payer. Il ne l'était
+       qu'à l'octroi, c'est-à-dire après le débit : un montant faux (code
+       expiré entre l'affichage et le clic, onglet resté ouvert sur un ancien
+       tarif) faisait payer le client pour un refus. Mieux vaut un « actualisez
+       la page » qu'un argent pris pour rien. L'octroi garde son propre
+       contrôle : les deux protègent des choses différentes. */
+    $codeSaisi = substr(trim((string) ($input['code'] ?? '')), 0, 32);
+    $parrainageEtat = null;
+    $dbInit = function_exists('vrt_load_db') ? vrt_load_db() : null;
+    if (is_array($dbInit)) {
+        $prixRef = vrt_prix_catalogue($dbInit, $intent, $targetId);
+        /* Seul un tunnel qui AFFICHE la remise l'annonce, en envoyant la clé
+           `code` (même vide). Les autres (cahiers, boutique de la vitrine,
+           Atelier) montrent le plein tarif : leur appliquer le parrain à vie
+           rémunérerait le parrain sans que le filleul voie sa remise. */
+        if (function_exists('vrt_parr_evaluer') && array_key_exists('code', $input)) {
+            try {
+                $ev = vrt_parr_evaluer($dbInit, vrt_parr_lire(), [
+                    'code' => $codeSaisi, 'accountId' => $accountId, 'tel' => $payerNumber,
+                    'intent' => $intent, 'targetId' => $targetId,
+                    'prix' => ($prixRef !== null && $prixRef > 0) ? $prixRef : $montant,
+                ]);
+                $parrainageEtat = vrt_parr_pour_etat($ev);
+            } catch (\Throwable $e) {
+                // Registre indisponible : le paiement passe au plein tarif plutôt que de bloquer une vente.
+                vrt_pay_log('[CODE_AMI_INIT_ERR] ref=' . $ref . ' ' . $e->getMessage());
+            }
+        }
+        $pvInit = vrt_verifier_prix($dbInit, ['intent' => $intent, 'targetId' => $targetId,
+                                              'montant' => $montant, 'parrainage' => $parrainageEtat]);
+        $modePrix = defined('VRT_PRICE_ENFORCE') ? strtolower((string) VRT_PRICE_ENFORCE) : 'strict';
+        if (!$pvInit['ok'] && $modePrix !== 'log') {
+            vrt_pay_log('[PRIX_REFUSE_INIT] ref=' . $ref . ' intent=' . $intent . ' cible=' . $targetId
+                . ' montant=' . $montant . ' attendu=' . $pvInit['attendu'] . ' plancher=' . $pvInit['plancher']);
+            jsonRespCy([
+                'error'    => ($pvInit['attendu'] === null)
+                    ? 'Cette formule n’est plus proposée. Actualisez la page pour voir les offres en cours.'
+                    : 'Le montant ne correspond plus au tarif (' . number_format((int) $pvInit['plancher'], 0, ',', ' ')
+                      . ' FCFA attendus). Actualisez la page puis réessayez : vous n’avez pas été débité.',
+                'code'     => 'PRIX_INCOHERENT',
+                'attendu'  => $pvInit['attendu'],
+                'plancher' => $pvInit['plancher'],
+            ], 409);
+        }
+    }
+
     // Méthode : soit imposée par le client, soit déduite du préfixe quand il est
     // sans ambiguïté, soit omise → le payeur choisit sur la page CamerPay.
     if ($methode !== '' && !in_array($methode, ['orange_money', 'mtn_momo', 'stripe', 'paypal'], true)) {
@@ -560,6 +613,11 @@ if ($action === 'init' && $method === 'POST') {
         'provider'       => 'camerpay_cm',
         'frais_estimes'  => (int)round($montant * camerpayFeeRate()),
         'commissions'    => (isset($input['commissions']) && is_array($input['commissions'])) ? $input['commissions'] : [],
+        // Calculé par le serveur ci-dessus — jamais recopié de la requête.
+        'parrainage'     => $parrainageEtat,
+        // Formule Famille : les identifiants des enfants à couvrir (4 au plus,
+        // bornés — c'est une entrée client, l'octroi les résout lui-même).
+        'beneficiaires'  => camerpaySanitizeBeneficiaires($input['beneficiaires'] ?? null),
         // Panier : le détail article par article. Sans lui, un paiement « cart »
         // confirmé par webhook ne pouvait débloquer AUCUN des articles côté
         // serveur — seul le navigateur du payeur savait ce qu'il avait acheté.
@@ -937,11 +995,38 @@ if ($action === 'refund' && $method === 'POST') {
     file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     camerpayLog($logFile, date('c') . " [REFUND] ref=$ref montant=" . ($mnt ?: 'total') . "\n");
 
+    // La commission du Code ami suit l'argent : remboursée, elle est reprise.
+    if (function_exists('vrt_parr_annuler')) {
+        try {
+            $ann = vrt_parr_annuler($ref, $mnt, 'remboursement');
+            if (!empty($ann['annule'])) camerpayLog($logFile, date('c') . " [CODE_AMI_REPRISE] ref=$ref commission=" . (int) $ann['annule'] . "\n");
+        } catch (\Throwable $e) {
+            camerpayLog($logFile, date('c') . " [CODE_AMI_REPRISE_ERR] ref=$ref " . $e->getMessage() . "\n");
+        }
+    }
+
     // ⚠️ Le remboursement N'ANNULE PAS l'accès déjà ouvert : révoquer un
     // entitlement au milieu d'un trimestre est une décision pédagogique, pas
     // technique. L'admin retire l'accès à la main s'il le veut.
     jsonRespCy(['success' => true, 'ref' => $ref,
                 'message' => 'Remboursement demandé. Orange/MTN ne sont pas réversibles par API : vérifiez auprès du support CamerPay. L\'accès de l\'élève reste ouvert — retirez-le manuellement si nécessaire.']);
+}
+
+// ════════════════════════════════════════════════════════════
+// 6bis. CODE AMI — versements dus, lancés par l'administration
+// ════════════════════════════════════════════════════════════
+// Le versement part tout seul au crédit qui franchit le seuil. Ce bouton
+// rattrape le reste : un numéro corrigé après coup, un lot refusé puis
+// réparé, un budget épuisé. `benef` vide = tous les soldes dus.
+if ($action === 'parrainage_verser' && $method === 'POST') {
+    requirePayAuth();
+    camerpayRequireConfig();
+    $in = json_decode(file_get_contents('php://input'), true) ?: [];
+    $benef = preg_replace('/[^A-Za-z0-9:_.@-]/', '', (string) ($in['benef'] ?? ''));
+    $bilan = camerpayParrainageVerser($logFile, $benef !== '' ? 1 : 20, $benef);
+    jsonRespCy(['success' => true] + $bilan + ['message' =>
+        $bilan['soumis'] . ' versement(s) soumis à CamerPay (validation < 4 h ouvrées), '
+        . $bilan['bloques'] . ' bloqué(s), ' . $bilan['echecs'] . ' en échec.']);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1177,6 +1262,7 @@ if ($action === 'payouts' && $method === 'GET') {
                                                                       $p['reason'] = $ligne['failure_reason'] ?? ''; }
         $p['provider_status'] = strtoupper((string)($d['status'] ?? ''));
         file_put_contents($stateDir . _safePayoutCamerpay($p['ref']) . '.json', json_encode($p, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        camerpayParrainageSuivi((string) ($p['ref'] ?? ''), (string) ($p['status'] ?? ''), (string) ($p['reason'] ?? ''));
         $payouts[$i] = $p;
     }
     jsonRespCy(['count' => count($payouts), 'payouts' => $payouts]);
@@ -1517,6 +1603,109 @@ function camerpaySanitizeLignes($brut) {
     return $out;
 }
 
+// Enfants couverts par une formule Famille : des identifiants de compte, rien
+// d'autre. Quatre au plus, 32 caractères, alphabet des identifiants du site.
+function camerpaySanitizeBeneficiaires($brut) {
+    if (!is_array($brut)) return [];
+    $out = [];
+    foreach ($brut as $b) {
+        $b = trim((string) $b);
+        if ($b === '' || !preg_match('/^[A-Za-z0-9._@-]{2,64}$/', $b)) continue;
+        if (!in_array($b, $out, true)) $out[] = mb_substr($b, 0, 64);
+        if (count($out) >= 4) break;
+    }
+    return $out;
+}
+
+/* ── VERSEMENTS DU CODE AMI ────────────────────────────────────────────────
+   Le solde d'un parrain part dès qu'il atteint le seuil (2 000 F par défaut).
+   Appelé juste après un octroi qui a crédité une commission, donc HORS du
+   verrou de la base : un appel au fournisseur prend des secondes, et tenir la
+   base fermée pendant ce temps bloquerait les paiements qui arrivent.
+
+   Budget de deux versements par appel : une passerelle attend notre 200, et
+   un lot refusé ne doit pas en retenir d'autres. Ce qui dépasse le budget part
+   au crédit suivant, ou par le bouton de l'administration.
+
+   `$seul` : forcer UN bénéficiaire depuis l'administration (le réglage
+   « versement automatique » ne bloque pas un geste humain). */
+function camerpayParrainageVerser($logFile, $budget = 2, $seul = '') {
+    $bilan = ['soumis' => 0, 'bloques' => 0, 'echecs' => 0, 'details' => []];
+    if (!function_exists('vrt_parr_a_verser') || !camerpayConfigured()) return $bilan;
+    $db = vrt_load_db();
+    if (!is_array($db)) return $bilan;
+    $reg = vrt_parr_lire();
+    $cfg = vrt_parr_cfg($db, $reg);
+    if ($seul === '' && empty($cfg['versementAuto'])) return $bilan;
+
+    $candidats = ($seul !== '') ? [$seul] : vrt_parr_a_verser($db, $reg);
+    $plafond   = defined('CAMERPAY_PAYOUT_MAX') ? (int) CAMERPAY_PAYOUT_MAX : 200000;
+    $stateDir  = __DIR__ . '/data/payments/';
+
+    foreach ($candidats as $benef) {
+        if ($bilan['soumis'] >= $budget) break;
+        $dest = vrt_parr_destination($db, $reg, $benef);
+        if (empty($dest['ok'])) {
+            vrt_parr_bloquer($benef, (string) $dest['motif']);
+            $bilan['bloques']++; $bilan['details'][] = ['benef' => $benef, 'motif' => $dest['motif']];
+            continue;
+        }
+        $v = vrt_parr_reserver($benef, $dest, (int) $cfg['seuilVersement'], $plafond);
+        if (!$v) continue;
+
+        list($http, $resp) = camerpayApi('POST', '/api/payouts/batch', [
+            'reference'     => $v['ref'],
+            'description'   => 'Commission Code ami VÉRITAS',
+            'callback_url'  => camerpayCallbackUrl(),
+            'beneficiaries' => [[
+                'phone' => '+' . $v['tel'], 'amount' => (int) $v['m'],
+                'name' => mb_substr((string) $v['nom'], 0, 120), 'method' => $v['meth'], 'external_id' => $v['ref'],
+            ]],
+        ]);
+        $data = json_decode((string) $resp, true) ?: [];
+
+        if ($http >= 200 && $http < 300 && !empty($data['batch_uuid'])) {
+            vrt_parr_versement_etat($v['ref'], 'soumis', '', (string) $data['batch_uuid']);
+            // Même fichier d'état qu'un versement manuel : ?action=payouts et le
+            // webhook des lots le suivent sans code supplémentaire.
+            @file_put_contents($stateDir . _safePayoutCamerpay($v['ref']) . '.json', json_encode([
+                'ref' => $v['ref'], 'camerpay_batch' => $data['batch_uuid'], 'montant' => (int) $v['m'],
+                'to' => $v['tel'], 'titulaire' => $v['nom'], 'methode' => $v['meth'], 'partenaireId' => $benef,
+                'note' => 'Commission Code ami', 'status' => 'pending',
+                'provider_status' => strtoupper((string) ($data['status'] ?? 'PENDING_APPROVAL')),
+                'estimated_fees' => intval($data['estimated_fees'] ?? 0),
+                'created_at' => date('c'), 'provider' => 'camerpay_payout_cm', 'origine' => 'code_ami',
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            camerpayIndex($stateDir, $data['batch_uuid'], $v['ref'], 'withdraw');
+            camerpayLog($logFile, date('c') . ' [CODE_AMI_VERSEMENT] ref=' . $v['ref'] . ' benef=' . $benef . ' montant=' . $v['m'] . "\n");
+            $bilan['soumis']++; $bilan['details'][] = ['benef' => $benef, 'ref' => $v['ref'], 'montant' => (int) $v['m']];
+        } elseif ((int) $http === 0 || (int) $http >= 500) {
+            // Réponse perdue : le lot est PEUT-ÊTRE parti. On garde la réservation.
+            vrt_parr_versement_etat($v['ref'], 'incertain', 'Réponse du fournisseur perdue (HTTP ' . (int) $http . ') — vérifier sur camerpay.biz avant de relancer');
+            camerpayLog($logFile, date('c') . ' [CODE_AMI_VERSEMENT_INCERTAIN] ref=' . $v['ref'] . ' http=' . (int) $http . "\n");
+            $bilan['echecs']++; $bilan['details'][] = ['benef' => $benef, 'ref' => $v['ref'], 'motif' => 'incertain'];
+        } else {
+            $motif = camerpayErrorMessage($data, $http);
+            vrt_parr_versement_etat($v['ref'], 'echec', $motif);
+            camerpayLog($logFile, date('c') . ' [CODE_AMI_VERSEMENT_REFUSE] ref=' . $v['ref'] . ' http=' . (int) $http . ' ' . $motif . "\n");
+            $bilan['echecs']++; $bilan['details'][] = ['benef' => $benef, 'ref' => $v['ref'], 'motif' => $motif];
+        }
+    }
+    return $bilan;
+}
+
+// Un lot de commission a changé d'état chez CamerPay : le registre suit.
+// `sent` → versé ; `failed` → le montant revient au solde du parrain.
+function camerpayParrainageSuivi($ref, $status, $reason) {
+    if (strpos((string) $ref, 'PAR-') !== 0 || !function_exists('vrt_parr_versement_etat')) return;
+    try {
+        if ($status === 'sent')       vrt_parr_versement_etat($ref, 'verse');
+        elseif ($status === 'failed') vrt_parr_versement_etat($ref, 'echec', (string) $reason);
+    } catch (\Throwable $e) {
+        error_log('[CODE_AMI_SUIVI] ' . $ref . ' ' . $e->getMessage());
+    }
+}
+
 function camerpayIndex($stateDir, $key, $ourRef, $kind) {
     if (!$key) return;
     $f = $stateDir . '_camerpayidx_' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string)$key) . '.json';
@@ -1810,6 +1999,22 @@ function camerpayGrant(&$state, $logFile, $ref) {
             $state['a_regler']   = true;   // demande une décision humaine
         }
         camerpayLog($logFile, date('c') . ' [GRANT] ref=' . $ref . ' ' . json_encode($g) . "\n");
+
+        // Code ami : commission créditée par l'octroi. Si le solde du parrain
+        // vient d'atteindre le seuil, on verse — après le verrou de la base.
+        if (!empty($g['parrainage']['commission'])) {
+            $state['commission_code_ami'] = (int) $g['parrainage']['commission'];
+        }
+        if (!empty($g['parrainage']['aVerser'])) {
+            try {
+                $vb = camerpayParrainageVerser($logFile, 2);
+                if ($vb['soumis'] || $vb['echecs'] || $vb['bloques']) {
+                    camerpayLog($logFile, date('c') . ' [CODE_AMI_AUTO] ref=' . $ref . ' ' . json_encode($vb) . "\n");
+                }
+            } catch (\Throwable $e) {
+                camerpayLog($logFile, date('c') . ' [CODE_AMI_AUTO_ERR] ref=' . $ref . ' ' . $e->getMessage() . "\n");
+            }
+        }
     } catch (\Throwable $e) {
         camerpayLog($logFile, date('c') . ' [GRANT_ERR] ref=' . $ref . ' ' . $e->getMessage() . "\n");
     }
@@ -1834,6 +2039,7 @@ function camerpayHandlePayoutWebhook($stateDir, $logFile, array $body) {
         elseif (in_array($status, ['failed', 'cancelled'], true)) { $out['status'] = 'failed'; $out['failed_at'] = date('c');
                                                                     $out['reason'] = (string)($body['failure_reason'] ?? 'Refusé par l\'opérateur'); }
         file_put_contents($unit, json_encode($out, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        camerpayParrainageSuivi((string) ($out['ref'] ?? ''), (string) ($out['status'] ?? ''), (string) ($out['reason'] ?? ''));
         return;
     }
 

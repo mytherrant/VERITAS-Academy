@@ -407,11 +407,38 @@ if (!defined('VRT_LIVRET_LIB')) {
         return $p > 0 ? $p : 1500;
     }
 
+    /**
+     * Paliers de remise d'un pack établissement : [[seuil, %], …] du plus haut
+     * au plus bas. Réglables dans « Prix & calculs » (DB.tarifs.livretPack,
+     * sous la forme {"10":10,"25":15,"50":20} — celle de VERITAS_TARIFS côté
+     * navigateur). Bornés : seuil de 2 à 500 codes, remise de 0 à 50 %.
+     * Publiés par `livret.php?action=catalogue` : le tunnel affiche la remise
+     * que ce calcul exigera, jamais une table recopiée à la main.
+     */
+    function vrt_livret_paliers_pack(?array $db = null): array {
+        $defaut = [[50, 20], [25, 15], [10, 10]];
+        $brut = $db['tarifs']['livretPack'] ?? null;
+        if (!is_array($brut) || !$brut) return $defaut;
+        $out = [];
+        foreach ($brut as $seuil => $pct) {
+            // Deux formes acceptées : {"10":10} ou [[10,10]].
+            if (is_array($pct)) { $seuil = $pct[0] ?? null; $pct = $pct[1] ?? null; }
+            $s = (int) $seuil; $p = (int) $pct;
+            if ($s < 2 || $s > 500 || $p < 0 || $p > 50) continue;
+            $out[$s] = $p;
+        }
+        if (!$out) return $defaut;
+        krsort($out);
+        $l = [];
+        foreach ($out as $s => $p) $l[] = [(int) $s, (int) $p];
+        return $l;
+    }
+
     /** Remise de volume d'un pack établissement, en pourcentage. */
-    function vrt_livret_remise_pack(int $n): int {
-        if ($n >= 50) return 20;
-        if ($n >= 25) return 15;
-        if ($n >= 10) return 10;
+    function vrt_livret_remise_pack(int $n, ?array $db = null): int {
+        foreach (vrt_livret_paliers_pack($db) as $pal) {
+            if ($n >= $pal[0]) return $pal[1];
+        }
         return 0;
     }
 
@@ -421,7 +448,7 @@ if (!defined('VRT_LIVRET_LIB')) {
         $n = max(1, min(500, $n));
         $unite = vrt_livret_prix($db, $kind, $slug);
         $brut  = $unite * $n;
-        return (int) round($brut * (100 - vrt_livret_remise_pack($n)) / 100);
+        return (int) round($brut * (100 - vrt_livret_remise_pack($n, $db)) / 100);
     }
 
     function vrt_livret_log(string $line): void {

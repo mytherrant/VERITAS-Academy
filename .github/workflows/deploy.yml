@@ -242,6 +242,24 @@ jobs:
             exit 1
           fi
 
+      # ── 🎁 LE CODE AMI PAIE JUSTE, UNE FOIS, ET À TEMPS (13-14/09/2026).
+      #    api/_auth_lib.php charge api/_parrainage_lib.php à CHAQUE requête :
+      #    un défaut ici ne casse pas que le parrainage, il met tous les
+      #    endpoints en erreur. Le banc éprouve la remise, le crédit au paiement
+      #    confirmé (idempotent), la reprise au remboursement, la réservation des
+      #    versements, les formules Starter/Pro/Élite/Famille et les prix réglés
+      #    dans « Prix & calculs ». Le second garde la parité navigateur ⇄ serveur
+      #    (prix des formules, code d'un compte, opérateur d'un numéro).
+      - name: 🎁 Le Code ami et les formules paient-ils juste ?
+        run: |
+          if command -v php >/dev/null 2>&1; then
+            php tests/parrainage.php
+            node tests/banc_code_ami_parite.cjs
+          else
+            echo "::error title=PHP introuvable::Le garde-fou du Code ami n'a pas pu tourner. Déploiement ANNULÉ."
+            exit 1
+          fi
+
       # ── 🧾 UN PAIEMENT QUI N'OUVRE RIEN DOIT SE VOIR. camerpayGrant() posait
       #    `granted` sur la seule lisibilité de la base : un octroi qui n'avait
       #    RIEN ouvert (« accountId manquant », « compte introuvable ») sortait
@@ -1318,6 +1336,8 @@ jobs:
             api/_auth_lib.php \
             api/_livret_lib.php \
             api/_notify_lib.php \
+            api/_parrainage_lib.php \
+            api/parrainage.php \
             api/livret.php \
             api/collab.php \
             api/cahier.php \

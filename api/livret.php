@@ -751,7 +751,11 @@ if ($action === 'catalogue') {
         ];
     }
     lv_out(200, ['ok' => true, 'total' => count($out), 'ouvrages' => $out,
-                 'kinds' => vrt_livret_kinds()]);
+                 'kinds' => vrt_livret_kinds(),
+                 // Les paliers de remise d'un pack, tels que vrt_livret_prix_pack
+                 // les appliquera : réglables par l'administration, donc lus ici
+                 // plutôt que recopiés dans livrets/gate.js.
+                 'paliers' => vrt_livret_paliers_pack($__tarifs)]);
 }
 
 /* Fiche d'un ouvrage en mode lecture : de quoi que le liseur sache quoi

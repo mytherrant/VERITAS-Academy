@@ -80,8 +80,17 @@ if (!defined('VRT_AUTH_LIB')) {
     // traversent. Cette bibliothèque n'inclut rien en retour non plus.
     require_once __DIR__ . '/_notify_lib.php';
 
+    // Code ami : remise, commission et versement. Chargé ici pour la même raison
+    // que les deux précédentes — la commission naît au paiement confirmé, dans
+    // vrt_grant_entitlement_to_file(). N'inclut rien en retour.
+    require_once __DIR__ . '/_parrainage_lib.php';
+
     // ── Base de données partagée (même fichier que db.php / student_data.php) ──
     function vrt_db_file(): string {
+        /* Base de substitution pour les bancs (même point d'entrée que
+           public_data.php) : l'octroi « sur fichier » et le Code ami s'éprouvent
+           sans jamais écrire dans la base de travail. Non définie en production. */
+        if (defined('VRT_DB_FICHIER') && (string) VRT_DB_FICHIER !== '') return (string) VRT_DB_FICHIER;
         return dirname(__DIR__) . '/data/veritas_db.json';
     }
     function vrt_load_db(): ?array {
@@ -347,14 +356,26 @@ if (!defined('VRT_AUTH_LIB')) {
         $plans = vrt_account_active_plans($acc, $db);
         if (!is_array($plans)) $plans = [];
         $defs = $db['elearning']['plans'] ?? [];
+        $formules = vrt_plans_formules();
         $eff = [];
         foreach ($plans as $pid) {
             if (!in_array($pid, $eff, true)) $eff[] = $pid;
+            $connu = false;
             foreach ($defs as $pd) {
-                if (($pd['id'] ?? null) === $pid && !empty($pd['planTags']) && is_array($pd['planTags'])) {
+                if (($pd['id'] ?? null) !== $pid) continue;
+                $connu = true;
+                if (!empty($pd['planTags']) && is_array($pd['planTags'])) {
                     foreach ($pd['planTags'] as $t) {
                         if (!in_array($t, $eff, true)) $eff[] = $t;
                     }
+                }
+            }
+            /* Une formule payée mais pas encore connue de la base ouvrait son
+               seul identifiant — aucun contenu ne le porte : l'abonné payait et
+               trouvait tout fermé. On lit alors les étiquettes du repli. */
+            if (!$connu && isset($formules[$pid])) {
+                foreach ($formules[$pid]['planTags'] as $t) {
+                    if (!in_array($t, $eff, true)) $eff[] = $t;
                 }
             }
         }
@@ -636,6 +657,87 @@ if (!defined('VRT_AUTH_LIB')) {
         return false;
     }
 
+    /* ══════════════════════════════════════════════════════════════════════
+       FORMULES ÉLÈVE & FAMILLE — grille arrêtée par Jacques le 13/09/2026.
+
+       Au mois : Starter 1 000 · Pro 2 000 · Élite 3 000 · Famille 10 000 F.
+       À l'année : douze mois pour le prix de dix (deux mois offerts). Le prix
+       « ancien », barré sur les cartes, est celui de douze mois payés un à un.
+
+       Pourquoi ce catalogue vit dans le CODE et pas seulement dans la base :
+       l'accueil annonçait Starter / Pro / Élite depuis la refonte d'août, et
+       aucune de ces formules n'existait au catalogue. Leurs boutons tournaient
+       en rond sur la page des tarifs ; et si un paiement était parti, le
+       serveur aurait répondu « abonnement inconnu au catalogue ». Or la base
+       n'apprend un plan qu'à la synchronisation d'un administrateur — cassée
+       plusieurs fois cette année. Une offre en vitrine doit être vendable dès
+       le déploiement.
+
+       La base reste PRIORITAIRE : un tarif réglé par l'administration dans
+       DB.elearning.plans (même identifiant) l'emporte partout — prix, durée,
+       étiquettes. Ces valeurs ne sont qu'un repli.
+
+       `planTags` : les étiquettes que portent les contenus existants
+       (plan1 examen, plan2 intermédiaire, plan4 tout inclus, plan5 technique,
+       plan6 GCE). Les formules se distinguent par le VOLUME (tuteur IA, labos,
+       classes virtuelles), pas en retirant des cours à qui paie.
+       ══════════════════════════════════════════════════════════════════════ */
+    function vrt_plans_formules(): array {
+        $eleve   = ['plan1', 'plan2', 'plan5', 'plan6'];
+        $complet = ['plan1', 'plan2', 'plan4', 'plan5', 'plan6'];
+        $f = [
+            'starter' => ['nom' => 'STARTER', 'public' => 'eleve', 'mois' => 1000, 'cible' => 'Élève · 6ᵉ → Tˡᵉ', 'tags' => $eleve,
+                          'avantages' => ['Tous les cours de sa classe, par séquence', 'Œuvres au programme', 'Épreuves et annales corrigées', '5 questions par jour au Professeur Ambassa', 'Suivi des résultats']],
+            'pro'     => ['nom' => 'PRO', 'public' => 'eleve', 'mois' => 2000, 'cible' => 'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', 'tags' => $eleve, 'populaire' => true,
+                          'avantages' => ['Tout Starter', '30 questions par jour au tuteur', 'Labos virtuels PCT & SVT', 'Bulletins blancs notés', 'Fiches de révision imprimables']],
+            'elite'   => ['nom' => 'ÉLITE', 'public' => 'eleve', 'mois' => 3000, 'cible' => 'Accompagnement complet', 'tags' => $complet,
+                          'avantages' => ['Tout Pro', 'Tuteur IA sans limite', 'Classes virtuelles en direct', 'Concours blancs corrigés', 'Entretien d’orientation']],
+            'famille' => ['nom' => 'FAMILLE', 'public' => 'parent', 'mois' => 10000, 'cible' => 'Jusqu’à 4 enfants', 'tags' => $complet, 'enfantsMax' => 4,
+                          'avantages' => ['Jusqu’à 4 enfants sur un seul paiement', 'Chaque enfant au niveau Élite', 'Suivi parent : notes, absences, progression', 'Tuteur IA sans limite pour chacun']],
+        ];
+        $out = [];
+        foreach ($f as $g => $d) {
+            foreach (['m' => 'mensuel', 'a' => 'annuel'] as $v => $duree) {
+                $id = 'abo_' . $g . '_' . $v;
+                $annuel = ($v === 'a');
+                $out[$id] = [
+                    'id'        => $id,
+                    'groupe'    => $g,
+                    'variante'  => $annuel ? 'an' : 'mois',
+                    'nom'       => $d['nom'] . ($annuel ? ' — ANNÉE' : ''),
+                    'public'    => $d['public'],
+                    'cible'     => $d['cible'],
+                    'prix'      => $annuel ? $d['mois'] * 10 : $d['mois'],
+                    'ancien'    => $annuel ? $d['mois'] * 12 : 0,
+                    'duree'     => $duree,
+                    'planTags'  => $d['tags'],
+                    'avantages' => $d['avantages'],
+                    'populaire' => !empty($d['populaire']),
+                    'enfantsMax'=> (int) ($d['enfantsMax'] ?? 0),
+                    'formule'   => true,
+                ];
+            }
+        }
+        return $out;
+    }
+
+    /** La définition d'une formule : la ligne de la base si elle existe, sinon le repli du code. */
+    function vrt_plan_formule(array $db, string $id): ?array {
+        foreach (($db['elearning']['plans'] ?? []) as $p) {
+            if (is_array($p) && (string) ($p['id'] ?? '') === $id) {
+                $def = vrt_plans_formules()[$id] ?? [];
+                return array_merge($def, $p);   // la base gagne champ par champ
+            }
+        }
+        $f = vrt_plans_formules();
+        return $f[$id] ?? null;
+    }
+
+    /** Les anciens plans ÉLÈVE que ces formules remplacent à la vente (ils restent valables pour leurs abonnés). */
+    function vrt_plans_retires_de_la_vente(): array {
+        return ['plan1', 'plan2', 'plan4', 'plan5', 'plan6'];
+    }
+
     function vrt_prix_catalogue(array $db, string $intent, string $targetId): ?int {
         // Micro-achats à l'unité et crédits IA : le tarif vit dans DB.microPrix,
         // avec le repli sur les valeurs par défaut du client (MICRO_PRIX_DEFAULT).
@@ -784,6 +886,13 @@ if (!defined('VRT_AUTH_LIB')) {
 
         foreach ($liste as $o) {
             if (!is_array($o) || (string) ($o['id'] ?? '') !== $targetId) continue;
+            /* Une FORMULE retirée de la vente dans « Prix & calculs » ne se vend
+               plus, même par une requête forgée — et surtout pas au tarif du
+               repli codé plus bas, qui l'aurait remise en vente en silence. */
+            if ($intent === 'subscription' && !empty($o['formule'])
+                && ((isset($o['actif']) && $o['actif'] === false) || (isset($o['enVente']) && $o['enVente'] === false))) {
+                return null;
+            }
             // Le manuel NUMÉRIQUE a son propre tarif (souvent moitié du papier) :
             // le confronter au prix papier refuserait un achat parfaitement payé.
             if ($intent === 'digitalbook') {
@@ -840,6 +949,10 @@ if (!defined('VRT_AUTH_LIB')) {
         if ($intent === 'subscription') {
             $atelier = ['ens' => 5000, 'etab' => 30000, 'pro' => 70000];
             if (isset($atelier[$targetId])) return $atelier[$targetId];
+            // Formules Starter / Pro / Élite / Famille : absentes de la base tant
+            // qu'un administrateur ne les y a pas synchronisées (voir vrt_plans_formules).
+            $formules = vrt_plans_formules();
+            if (isset($formules[$targetId])) return (int) $formules[$targetId]['prix'];
         }
 
         return null;   // objet absent du catalogue : on ne devine pas
@@ -910,7 +1023,25 @@ if (!defined('VRT_AUTH_LIB')) {
         if ($attendu === null) return ['ok' => true, 'attendu' => null, 'paye' => $paye, 'plancher' => 0, 'motif' => 'tarif indéterminable'];
         if ($attendu <= 0)     return ['ok' => true, 'attendu' => $attendu, 'paye' => $paye, 'plancher' => 0, 'motif' => 'gratuit'];
 
-        $plancher = vrt_prix_plancher($db, $attendu);
+        /* ⚠️ PLUS DE REMISE DEVINÉE (13/09/2026).
+           Tant que le navigateur appliquait les codes promo sans dire lequel, le
+           serveur tolérait « la meilleure remise active en base ». Mesuré sur un
+           banc HTTP : avec une campagne à −15 % en service, un Pro à 2 000 F
+           s'initiait à 1 700 F SANS qu'aucun code ait été saisi — la campagne
+           valait pour quiconque savait forger une requête. Le code voyage
+           désormais jusqu'au serveur (ci-dessous) : la remise n'est tolérée que
+           s'il a été validé. VRT_REMISE_SANS_CODE (payment_config.php) rétablit
+           l'ancienne tolérance le temps d'une urgence, sans redéploiement. */
+        $plancher = (defined('VRT_REMISE_SANS_CODE') && VRT_REMISE_SANS_CODE)
+            ? vrt_prix_plancher($db, $attendu) : $attendu;
+        /* CODE AMI / CODE PROMO VALIDÉ À L'INITIATION. `parrainage` n'est jamais
+           recopié de la requête : `?action=init` le calcule lui-même (voir
+           vrt_parr_evaluer) et l'écrit dans le fichier d'état. On en déduit la
+           remise TOLÉRÉE — jamais plus que ce que la règle accorde. */
+        if (isset($state['parrainage']) && is_array($state['parrainage']) && function_exists('vrt_parr_remise')) {
+            $pc = max(0, $attendu - vrt_parr_remise($attendu, $state['parrainage']));
+            if ($pc < $plancher) $plancher = $pc;
+        }
         if ($paye >= $plancher) {
             return ['ok' => true, 'attendu' => $attendu, 'paye' => $paye, 'plancher' => $plancher,
                     'motif' => ($paye < $attendu) ? 'remise admise' : ''];
@@ -1207,6 +1338,9 @@ if (!defined('VRT_AUTH_LIB')) {
             foreach (($db['elearning']['plans'] ?? []) as $p) {
                 if (is_array($p) && (string) ($p['id'] ?? '') === $targetId) { $plan = $p; break; }
             }
+            // Formule pas encore synchronisée dans la base : sa durée et son nom
+            // viennent du repli, sinon « mensuel » retomberait sur 365 jours.
+            if ($plan === null) $plan = vrt_plans_formules()[$targetId] ?? null;
             $now = (int) round(microtime(true) * 1000);
             /* DURÉE — MIROIR OBLIGATOIRE POUR L'ATELIER.
                La boucle ci-dessus cherche le plan dans `elearning.plans`. Les
@@ -1254,6 +1388,23 @@ if (!defined('VRT_AUTH_LIB')) {
                 $accountId = (string) ($db[$titulaire['coll']][$titulaire['idx']]['id'] ?? $accountId);
             }
 
+            /* RÉABONNEMENT ANTICIPÉ — les formules au mois se renouvellent à la
+               main (le Mobile Money ne prélève pas tout seul). Un abonné qui
+               repaie cinq jours avant l'échéance perdait ces cinq jours : la
+               nouvelle période partait d'aujourd'hui. Elle part désormais de la
+               fin de la période en cours, pour le même plan et le même compte. */
+            $duree_ms = $finTs - $now;
+            if ($accountId !== '') {
+                foreach ($db['elearning']['abonnements'] as $a) {
+                    if (!is_array($a) || (string) ($a['accountId'] ?? '') !== $accountId) continue;
+                    if ((string) ($a['plan'] ?? $a['planId'] ?? '') !== $targetId) continue;
+                    $st = strtolower((string) ($a['statut'] ?? ''));
+                    if (in_array($st, ['expiré', 'expire', 'annulé', 'annule', 'en attente', 'suspendu'], true)) continue;
+                    $fin = (int) ($a['dateFinTs'] ?? 0);
+                    if ($fin > $now && $fin + $duree_ms > $finTs) $finTs = $fin + $duree_ms;
+                }
+            }
+
             $db['elearning']['abonnements'][] = [
                 'id' => 'abo_' . bin2hex(random_bytes(5)), 'ref' => $ref,
                 'accountId' => $accountId, 'plan' => $targetId, 'planId' => $targetId,
@@ -1269,7 +1420,52 @@ if (!defined('VRT_AUTH_LIB')) {
                 if (!in_array($targetId, $acc['plans'], true)) $acc['plans'][] = $targetId;
                 $acc['statut'] = 'actif';
                 unset($acc);
-                return ['changed' => true, 'msg' => 'Abonnement ' . ($plan['nom'] ?? $targetId) . ' activé'];
+
+                /* FORMULE FAMILLE — un paiement, plusieurs enfants. Chaque enfant
+                   reçoit SA ligne d'abonnement, avec la même échéance : la
+                   lecture des droits (vrt_account_active_plans) ne connaît que
+                   des abonnements par compte, et c'est très bien ainsi — pas de
+                   seconde règle d'accès à maintenir. Les identifiants viennent
+                   du payeur ; un enfant introuvable n'annule pas les autres, il
+                   est signalé pour que le centre le rattache. */
+                $max = (int) ($plan['enfantsMax'] ?? 0);
+                $benefs = (isset($state['beneficiaires']) && is_array($state['beneficiaires'])) ? $state['beneficiaires'] : [];
+                $rattaches = []; $introuvables = [];
+                if ($max > 0 && $benefs) {
+                    $vus = [$accountId => true];
+                    foreach (array_slice($benefs, 0, $max) as $i => $login) {
+                        $login = trim((string) $login);
+                        if ($login === '') continue;
+                        $e = vrt_resoudre_compte($db, $login);
+                        if (!$e) { $introuvables[] = mb_substr($login, 0, 32); continue; }
+                        $eAcc = &$db[$e['coll']][$e['idx']];
+                        $eId  = (string) ($eAcc['id'] ?? '');
+                        if ($eId === '' || isset($vus[$eId])) { unset($eAcc); continue; }
+                        $vus[$eId] = true;
+                        if (!isset($eAcc['plans']) || !is_array($eAcc['plans'])) $eAcc['plans'] = [];
+                        if (!in_array($targetId, $eAcc['plans'], true)) $eAcc['plans'][] = $targetId;
+                        $eAcc['statut'] = 'actif';
+                        $eNom = trim((string) ($eAcc['pre'] ?? '') . ' ' . (string) ($eAcc['nom'] ?? ''));
+                        unset($eAcc);
+                        $db['elearning']['abonnements'][] = [
+                            'id' => 'abo_' . bin2hex(random_bytes(5)), 'ref' => $ref . '#' . ($i + 1),
+                            'accountId' => $eId, 'plan' => $targetId, 'planId' => $targetId,
+                            'planNom' => ($plan['nom'] ?? $label), 'payeParCompte' => $accountId,
+                            'nom' => $eNom, 'tel' => $tel, 'montant' => 0,
+                            'date' => date('d/m/Y'), 'dateDebut' => date('c'), 'dateActivation' => date('d/m/Y'),
+                            'dateFinTs' => $finTs, 'dateFin' => date('d/m/Y', (int) ($finTs / 1000)),
+                            'statut' => 'Activé', 'via' => 'webhook_serveur',
+                        ];
+                        $rattaches[] = $eId;
+                    }
+                }
+                $msg = 'Abonnement ' . ($plan['nom'] ?? $targetId) . ' activé';
+                if ($rattaches)    $msg .= ' — ' . count($rattaches) . ' enfant(s) rattaché(s)';
+                if ($introuvables) {
+                    return ['changed' => true, 'a_regler' => true,
+                            'msg' => $msg . ' ; identifiant(s) introuvable(s) à rattacher : ' . implode(', ', $introuvables)];
+                }
+                return ['changed' => true, 'msg' => $msg];
             }
             // Sans titulaire : l'argent est tracé, l'accès reste à attribuer.
             return ['changed' => true, 'a_regler' => true,
@@ -1944,7 +2140,21 @@ if (!defined('VRT_AUTH_LIB')) {
         //    ici, à partir du palier du partenaire tel qu'il est enregistré dans
         //    la base : la valeur du client n'est plus qu'un plafond.
         $commChanged = false;
-        $commissionsOk = vrt_commissions_verifiees($db, $state);
+        /* CODE AMI : la commission est calculée et CRÉDITÉE ici, par le serveur,
+           à la seconde où l'octroi réussit — que le payeur ait gardé son onglet
+           ouvert ou non. Idempotente par référence (registre dédié). Quand un
+           code a été validé à l'initiation, la liste `commissions` du navigateur
+           est ignorée : deux chemins pour la même vente paieraient deux fois. */
+        $parr = ['benef' => '', 'commission' => 0, 'aVerser' => false];
+        if (!empty($res['changed']) && !empty($state['parrainage']) && function_exists('vrt_parr_crediter')) {
+            try {
+                $parr = vrt_parr_crediter($db, $state);
+                if (!empty($parr['dbModifiee'])) $commChanged = true;
+            } catch (\Throwable $e) {
+                vrt_pay_log('[PARRAINAGE_ERR] ref=' . ($state['ref'] ?? '') . ' ' . $e->getMessage());
+            }
+        }
+        $commissionsOk = empty($state['parrainage']) ? vrt_commissions_verifiees($db, $state) : [];
         if ($commissionsOk) {
             if (!isset($db['commissions']) || !is_array($db['commissions'])) $db['commissions'] = [];
             $seen = [];
@@ -2011,6 +2221,9 @@ if (!defined('VRT_AUTH_LIB')) {
 
         return ['ok' => true, 'changed' => $changed, 'msg' => $msgRes,
                 'remise' => $remise,
+                // Le versement éventuel part APRÈS le verrou de la base, depuis
+                // la passerelle qui sait parler au fournisseur (camerpayGrant).
+                'parrainage' => $parr,
                 // Remonté jusqu'au fichier d'état par camerpayGrant() : un refus
                 // de prix doit être LISIBLE dans le tableau de bord, pas seulement
                 // dans un journal que personne n'ouvre.

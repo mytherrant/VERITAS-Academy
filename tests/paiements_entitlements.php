@@ -378,14 +378,28 @@ foreach ([['ens_mois', 800], ['ens', 5000], ['etab', 30000], ['pro', 70000]] as 
 // ════════════════════════════════════════════════════════════════════════════
 titre('4. Les remises légitimes passent encore');
 
+/* Depuis le Code ami (13/09/2026), la remise n'est tolérée que si le code a été
+   TRANSMIS et validé par ?action=init — c'est l'état `parrainage` qu'il écrit.
+   L'ancienne tolérance « meilleure remise active en base » laissait payer moins
+   à quiconque, code saisi ou non. */
+$codeValide = function (array $db, string $code, int $prix) {
+    return vrt_parr_pour_etat(vrt_parr_evaluer($db, vrt_parr_vide(),
+        ['code' => $code, 'accountId' => 'acc_test', 'intent' => 'subscription', 'targetId' => 'pl1', 'prix' => $prix]));
+};
 $db = baseDeTest();
 $db['promoCodes'] = [['code' => 'ELEVE10', 'reduction' => 10, 'type' => 'percent', 'actif' => true]];
-$res = vrt_grant_entitlement($db, paiement('subscription', 'pl1', 22500));   // -10 %
-ok('subscription    → -10 % (code actif en base) accepté', !empty($res['changed']), $res['msg'] ?? '');
+$res = vrt_grant_entitlement($db, paiement('subscription', 'pl1', 22500, ['parrainage' => $codeValide($db, 'ELEVE10', 25000)]));   // -10 %
+ok('subscription    → -10 % avec le code ELEVE10 transmis : accepté', !empty($res['changed']), $res['msg'] ?? '');
 
 $db = baseDeTest();
 $db['promoCodes'] = [['code' => 'ELEVE10', 'reduction' => 10, 'type' => 'percent', 'actif' => true]];
-$res = vrt_grant_entitlement($db, paiement('subscription', 'pl1', 5000));    // -80 %
+$res = vrt_grant_entitlement($db, paiement('subscription', 'pl1', 22500));   // -10 %, aucun code
+ok('subscription    → -10 % SANS code transmis : refusé (la remise ne se devine plus)',
+   empty($res['changed']) && !empty($res['underpaid']), 'une campagne active valait pour qui ne l’avait pas saisie');
+
+$db = baseDeTest();
+$db['promoCodes'] = [['code' => 'ELEVE10', 'reduction' => 10, 'type' => 'percent', 'actif' => true]];
+$res = vrt_grant_entitlement($db, paiement('subscription', 'pl1', 5000, ['parrainage' => $codeValide($db, 'ELEVE10', 25000)]));    // -80 %
 ok('subscription    → -80 % refusé malgré un code à -10 %',
    empty($res['changed']), 'la tolérance de remise sert de porte dérobée');
 

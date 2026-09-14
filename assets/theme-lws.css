@@ -4295,3 +4295,156 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
 /* Le bloc « Où retirer votre exemplaire » : aplats, donc rien à rallumer côté
    fond ; seules les graisses tombent sous le balayage du §18.c. */
 #VISITOR#VISITOR :is(.bkret-t, .bkret-l b, .bkret-note a){ font-weight:700 !important; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   GRILLE DES FORMULES — Starter · Pro · Élite · Famille  (14/09/2026)
+   ──────────────────────────────────────────────────────────────────────────
+   Rendue par _formulesGrille() (app.js) sur l'accueil, la page Tarifs et la
+   section E-learning. Classes NEUVES (`vfo-*`) : les cartes `.acc-plan`
+   portaient trois couches de style, dont un médaillon de prix qui couvrait le
+   nom du plan sur la page Tarifs (mesuré le 13/09/2026 ; « visuel
+   catastrophique » selon Jacques).
+
+   Triple identifiant partout, et !important sur ce que les balayages du §18
+   éteignent (graisse, ombre, fond) : sinon ce bloc hériterait du plafond de
+   graisse à 400 et perdrait ses reliefs.
+
+   Action = OR à encre navy (12,06:1), comme la vitrine depuis le 13/09/2026.
+   ══════════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR#VISITOR .vfo{ max-width:1180px; margin:16px auto 26px; font-family:Poppins,'Plus Jakarta Sans',sans-serif; }
+
+#VISITOR#VISITOR#VISITOR .vfo-ami{
+  display:flex !important; align-items:center; gap:12px; flex-wrap:wrap;
+  background:#FFF6DB !important; border:1px solid #F2D27A !important; border-radius:14px !important;
+  padding:12px 16px !important; margin:0 auto 22px !important; max-width:940px;
+}
+#VISITOR#VISITOR#VISITOR .vfo-ami-ic{ font-size:22px; line-height:1; }
+#VISITOR#VISITOR#VISITOR .vfo-ami-tx{ flex:1 1 260px; font-size:14px !important; line-height:1.55 !important; color:#001136 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-ami-tx b{ font-weight:600 !important; color:#001136 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-ami-btn{
+  appearance:none; cursor:pointer; border:1.5px solid #001136 !important; background:#fff !important;
+  color:#001136 !important; border-radius:10px !important; padding:9px 14px !important;
+  font:600 13.5px Poppins,sans-serif !important; font-weight:600 !important; min-height:40px;
+}
+#VISITOR#VISITOR#VISITOR .vfo-ami-btn:hover{ background:#001136 !important; color:#fff !important; }
+
+#VISITOR#VISITOR#VISITOR .vfo-grille{
+  display:grid !important; grid-template-columns:repeat(4, minmax(0, 1fr)) !important;
+  gap:18px !important; align-items:stretch !important; padding-top:12px;
+}
+@media (max-width:1180px){ #VISITOR#VISITOR#VISITOR .vfo-grille{ grid-template-columns:repeat(2, minmax(0, 1fr)) !important; } }
+@media (max-width:620px){  #VISITOR#VISITOR#VISITOR .vfo-grille{ grid-template-columns:1fr !important; gap:22px !important; } }
+
+#VISITOR#VISITOR#VISITOR .vfo-carte{
+  position:relative; display:flex !important; flex-direction:column !important; text-align:left !important;
+  background:#fff !important; border:1px solid #E4E7EF !important; border-radius:16px !important;
+  padding:24px 20px 20px !important; margin:0 !important;
+  box-shadow:0 1px 2px rgba(16,24,40,.04), 0 12px 30px -18px rgba(16,24,40,.22) !important;
+  transform:none !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-pop{
+  border:2px solid #1E499B !important;
+  box-shadow:0 18px 40px -20px rgba(30,73,155,.5) !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-ruban{
+  position:absolute; top:-13px; left:18px;
+  background:#1E499B !important; color:#fff !important; border-radius:99px !important;
+  padding:5px 11px !important; font:600 11px/1 Poppins,sans-serif !important; font-weight:600 !important;
+  letter-spacing:.6px; text-transform:uppercase;
+}
+#VISITOR#VISITOR#VISITOR .vfo-pour{
+  font-size:12px !important; font-weight:600 !important; letter-spacing:.5px !important;
+  text-transform:uppercase !important; color:#1E499B !important; line-height:1.4 !important;
+  background:none !important; padding:0 !important; margin:0 !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-nom{
+  font-size:25px !important; font-weight:700 !important; line-height:1.15 !important;
+  color:#001136 !important; margin:4px 0 12px !important; background:none !important; padding:0 !important;
+  text-transform:none !important; letter-spacing:0 !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-prix{ display:flex !important; align-items:baseline; gap:6px; margin:0 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-montant{
+  font-size:40px !important; font-weight:700 !important; line-height:1 !important;
+  color:#001136 !important; letter-spacing:-.5px; font-variant-numeric:tabular-nums;
+}
+#VISITOR#VISITOR#VISITOR .vfo-devise{ font-size:14px !important; font-weight:600 !important; color:#4D5163 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-unite{ font-size:13px !important; color:#6E7385 !important; margin-top:5px !important; }
+
+#VISITOR#VISITOR#VISITOR .vfo-an{
+  margin:14px 0 2px !important; padding:10px 12px !important; border-radius:10px !important;
+  background:#F2F7FF !important; border:1px dashed #BFD3F5 !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-an-l{ font-size:12.5px !important; color:#4D5163 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-an-p{ display:flex !important; align-items:baseline; flex-wrap:wrap; gap:4px 8px; margin-top:2px; }
+#VISITOR#VISITOR#VISITOR .vfo-an-p s{ font-size:14px !important; color:#8B93A6 !important; text-decoration:line-through !important; }
+#VISITOR#VISITOR#VISITOR .vfo-an-p b{ font-size:19px !important; font-weight:700 !important; color:#001136 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-an-p em{
+  font-style:normal !important; font-size:11.5px !important; font-weight:600 !important;
+  color:#006B10 !important; background:#DFF3E3 !important; border-radius:99px !important; padding:2px 9px !important;
+}
+
+#VISITOR#VISITOR#VISITOR .vfo-av{
+  list-style:none !important; margin:16px 0 18px !important; padding:0 !important;
+  display:flex !important; flex-direction:column !important; gap:9px !important; flex:1 1 auto;
+}
+/* La règle générale « une pastille colorée devant chaque puce » ne s'applique
+   pas ici : chaque avantage porte déjà sa coche. */
+#VISITOR#VISITOR#VISITOR .vfo-av > li{
+  display:flex !important; align-items:flex-start !important; gap:9px !important;
+  padding:0 !important; margin:0 !important; background:none !important; border:0 !important;
+  font-size:14px !important; line-height:1.5 !important; color:#2E3752 !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-av > li::before{ content:none !important; display:none !important; }
+#VISITOR#VISITOR#VISITOR .vfo-av > li > svg{
+  flex:0 0 auto !important; width:16px !important; height:16px !important; margin-top:3px !important;
+  stroke:#007E11 !important; stroke-width:2.6 !important; fill:none !important;
+  background:none !important; padding:0 !important; border-radius:0 !important;
+}
+
+#VISITOR#VISITOR#VISITOR .vfo-actions{ display:flex !important; flex-direction:column !important; gap:8px !important; margin-top:auto !important; }
+#VISITOR#VISITOR#VISITOR .vfo-cta{
+  appearance:none; cursor:pointer; width:100%;
+  background:#FFC93C !important; color:#001136 !important; border:0 !important; border-radius:10px !important;
+  padding:13px 16px !important; min-height:48px;
+  font:600 15px/1.2 Poppins,sans-serif !important; font-weight:600 !important;
+  box-shadow:0 8px 18px -10px rgba(242,165,32,.75) !important;
+  transition:background-color .15s, transform .12s;
+}
+#VISITOR#VISITOR#VISITOR .vfo-cta:hover{ background:#FFB81F !important; color:#001136 !important; transform:translateY(-1px); }
+#VISITOR#VISITOR#VISITOR .vfo-cta2{
+  appearance:none; cursor:pointer; width:100%;
+  background:#fff !important; color:#1E499B !important; border:1.5px solid #1E499B !important; border-radius:10px !important;
+  padding:10px 14px !important; min-height:44px;
+  font:600 14px/1.2 Poppins,sans-serif !important; font-weight:600 !important; box-shadow:none !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-cta2:hover{ background:#EEF3FC !important; }
+#VISITOR#VISITOR#VISITOR :is(.vfo-cta, .vfo-cta2, .vfo-ami-btn):focus-visible{ outline:3px solid #1E499B !important; outline-offset:2px; }
+
+#VISITOR#VISITOR#VISITOR .vfo-note{
+  display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; text-align:center;
+  font-size:13px !important; color:#6E7385 !important; margin:16px auto 0 !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-note svg{ stroke:#6E7385 !important; }
+
+/* ── Les autres offres : des lignes, pas des vitrines ── */
+#VISITOR#VISITOR#VISITOR .vfo-autres{ max-width:940px; margin:8px auto 24px; display:flex; flex-direction:column; gap:10px; }
+#VISITOR#VISITOR#VISITOR .vfo-ligne{
+  display:grid !important; grid-template-columns:1fr auto 170px; align-items:center; gap:14px;
+  background:#fff !important; border:1px solid #E4E7EF !important; border-radius:12px !important; padding:12px 16px !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-ligne-tx{ display:flex; flex-direction:column; min-width:0; }
+#VISITOR#VISITOR#VISITOR .vfo-ligne-pub{ font-size:11.5px !important; font-weight:600 !important; text-transform:uppercase; letter-spacing:.5px; color:#1E499B !important; }
+#VISITOR#VISITOR#VISITOR .vfo-ligne-nom{ font-size:15px !important; font-weight:600 !important; color:#001136 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-ligne-prix{ font-size:16px !important; font-weight:700 !important; color:#001136 !important; white-space:nowrap; }
+#VISITOR#VISITOR#VISITOR .vfo-ligne-prix small{ font-size:12px !important; font-weight:400 !important; color:#6E7385 !important; }
+@media (max-width:620px){
+  #VISITOR#VISITOR#VISITOR .vfo-ligne{ grid-template-columns:1fr auto; }
+  #VISITOR#VISITOR#VISITOR .vfo-ligne .vfo-cta2{ grid-column:1 / -1; }
+}
+
+/* ── Même travers, ailleurs : « • ✓ » devant chaque avantage ──────────────
+   La pastille générale (règle « Puces et numérotations colorées ») se posait
+   aussi devant les puces qui portent DÉJÀ un pictogramme : cartes d'offre de
+   l'accueil, listes cochées. Une puce à icône n'en veut pas une seconde.
+   :has() absent (vieux navigateur) = rendu d'avant, rien de pire. */
+#VISITOR#VISITOR#VISITOR ul > li:has(> svg)::before{ content:none !important; display:none !important; }

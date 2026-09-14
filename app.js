@@ -1188,6 +1188,34 @@ function _fixHtdocsUrls(){
 
 // ── Migration DB : à appeler après TOUT remplacement de DB (load, pull cloud, force-pull) ──
 // BUG-01/BUG-09 FIX : centralise les guards "si champ manquant → valeur par défaut"
+/* Les formules du 13/09/2026, MIROIR de vrt_plans_formules() (api/_auth_lib.php).
+   Déclaration de fonction — donc disponible dès le premier _migrateDB, avant que
+   le reste du fichier ait été exécuté. tests/banc_formules_parite.cjs compare
+   les deux tables : un prix changé d'un seul côté y rougit. */
+function _formulesDefaut(){
+  var eleve = ['plan1','plan2','plan5','plan6'], complet = ['plan1','plan2','plan4','plan5','plan6'];
+  var F = [
+    {g:'starter', nom:'STARTER', pub:'eleve',  mois:1000,  cible:'Élève · 6ᵉ → Tˡᵉ', tags:eleve,
+     av:['Tous les cours de sa classe, par séquence','Œuvres au programme','Épreuves et annales corrigées','5 questions par jour au Professeur Ambassa','Suivi des résultats']},
+    {g:'pro',     nom:'PRO',     pub:'eleve',  mois:2000,  cible:'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', tags:eleve, pop:true,
+     av:['Tout Starter','30 questions par jour au tuteur','Labos virtuels PCT & SVT','Bulletins blancs notés','Fiches de révision imprimables']},
+    {g:'elite',   nom:'ÉLITE',   pub:'eleve',  mois:3000,  cible:'Accompagnement complet', tags:complet,
+     av:['Tout Pro','Tuteur IA sans limite','Classes virtuelles en direct','Concours blancs corrigés','Entretien d’orientation']},
+    {g:'famille', nom:'FAMILLE', pub:'parent', mois:10000, cible:'Jusqu’à 4 enfants', tags:complet, enfants:4,
+     av:['Jusqu’à 4 enfants sur un seul paiement','Chaque enfant au niveau Élite','Suivi parent : notes, absences, progression','Tuteur IA sans limite pour chacun']}
+  ];
+  var out = [];
+  F.forEach(function(d){
+    [['m','mensuel'],['a','annuel']].forEach(function(v){
+      var an = v[0] === 'a';
+      out.push({ id:'abo_'+d.g+'_'+v[0], groupe:d.g, variante: an?'an':'mois', nom: d.nom + (an?' — ANNÉE':''),
+        public:d.pub, cible:d.cible, prix: an ? d.mois*10 : d.mois, ancien: an ? d.mois*12 : 0, duree:v[1],
+        planTags:d.tags.slice(), avantages:d.av.slice(), populaire:!!d.pop, enfantsMax:d.enfants||0, formule:true });
+    });
+  });
+  return out;
+}
+
 function _migrateDB(){
   /* ── DEUX ABONNEMENTS ENSEIGNANTS PORTAIENT LE MÊME NOM (02/09/2026) ──────
      « ENSEIGNANT — ANNÉE » à 7 000 F ici, et « Enseignant » à 5 000 F/an dans
@@ -1369,6 +1397,16 @@ function _migrateDB(){
         var _rp=_refPlans[_i];
         if(_rp && _rp.id && _nouveaux[_rp.id] && !_aDejaPlan(_rp.id)) _pl.push(_rp);
       }
+    }
+
+    /* 4. Formules Starter / Pro / Élite / Famille (13/09/2026) — ajoutées UNE
+       fois. Le serveur les connaît déjà (vrt_plans_formules) et les sert aux
+       visiteurs ; les inscrire ici les rend visibles et modifiables dans
+       l'administration — un prix changé ici, synchronisé, l'emporte sur le
+       serveur. Le drapeau empêche une formule supprimée de ressusciter. */
+    if(!DB._formulesV2){
+      _formulesDefaut().forEach(function(f){ if(!_aDejaPlan(f.id)) _pl.push(f); });
+      DB._formulesV2 = 1;
     }
   }catch(e){ console.warn('[migration grille tarifaire]', e); }
   /* PRODUIT DE TEST À 100 FCFA — pour éprouver l'encaissement en conditions
@@ -3578,7 +3616,9 @@ function visitorOrderProduct(title,price){
    vpPromo, des champs qui n'existent plus dans le DOM. */
 
 function visitorOrderBook(bid){
-  var autoPromo=(typeof SES!=='undefined'&&SES&&SES.type==='eleve')?'ELEVE10':'';
+  // Le code retenu (lien d'un ami) — et plus « ELEVE10 » annoncé « appliqué »
+  // sans que le serveur l'ait jamais vu.
+  var autoPromo=String((typeof _codeAmiRetenu==='function'?_codeAmiRetenu():'')||'').replace(/[^A-Za-z0-9_\-]/g,'');
 
   const b=DB.books.find(x=>x.id===bid);if(!b)return;
   if(b.stock<=0){toast('Ce manuel est en rupture de stock','warn');return;}
@@ -3609,8 +3649,8 @@ function visitorOrderBook(bid){
       <div class="fg"><span class="fl">Email (optionnel)</span><input class="fi" id="voEmail" type="email" value="${_esc(_voPre.email)}" placeholder="email@exemple.com"></div>
     </div>
     <div class="fg"><span class="fl">📍 Adresse de livraison *</span><input class="fi" id="voAdresse" placeholder="Quartier + ville (ex : Akwa, Douala)"></div>
-    <div class="fg"><span class="fl">Code promo</span><input class="fi" id="voPromo" value="${autoPromo}" placeholder="ELEVE10" style="text-transform:uppercase"></div>
-    ${autoPromo?'<div style="font-size:13px;color:var(--gr);margin:-8px 0 8px">✅ Code ELEVE10 appliqué (-10%)</div>':''}
+    <div class="fg"><span class="fl">Code ami ou code promo</span><input class="fi" id="voPromo" value="${autoPromo}" placeholder="VRT…" style="text-transform:uppercase"></div>
+    <div style="font-size:12px;color:var(--ink4);margin:-8px 0 8px">Le code est vérifié à l’étape du paiement : le montant réduit s’affiche avant de payer.</div>
     <div class="fg"><span class="fl">Message (optionnel)</span><textarea class="fi" id="voMsg" rows="2" placeholder="Précisions, quantité..."></textarea></div>
   </div>
   <div class="mf"><button class="btn bo" onclick="this.closest('.mov').remove()">Annuler</button><button class="btn bi" onclick="confirmVisitorOrder('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Confirmer la commande</button></div></div>`;
@@ -3626,24 +3666,19 @@ function confirmVisitorOrder(bid){
   if(!adresse){toast('Adresse de livraison requise','warn');return;}
   if(!DB.visitorOrders)DB.visitorOrders=[];
   const promoCode=(document.getElementById('voPromo')?.value||'').trim().toUpperCase();
-  let finalPrix=b.prix;let promoUsed='';
-  if(promoCode){const promo=(DB.promoCodes||[]).find(p=>p.code===promoCode&&p.actif);
-    if(promo){if(promo.type==='percent')finalPrix=Math.round(b.prix*(100-promo.reduction)/100);else finalPrix=Math.max(0,b.prix-promo.reduction);promoUsed=promoCode;promo.usage=(promo.usage||0)+1;}}
+  /* La remise ne se calcule plus ICI : chez un visiteur, DB.promoCodes est la
+     table par défaut du code, pas celle de l'administration — un vrai code
+     répondait « invalide », un code par défaut remisait un prix que le serveur
+     refusait ensuite. Le code part avec le paiement ; le tunnel affiche le
+     montant réduit rendu par le serveur. */
+  let finalPrix=b.prix;let promoUsed=promoCode;
+  if(promoCode && typeof _codeAmiRetenir==='function') _codeAmiRetenir(promoCode);
   DB.visitorOrders.push({id:gid(),bid,bookTitle:b.titre,nom,tel,adresse,
     email:document.getElementById('voEmail')?.value||'',
     cls:document.getElementById('voCls')?.value||'',
     msg:document.getElementById('voMsg')?.value||'',
     promo:promoUsed,prixOriginal:b.prix,
     date:today(),statut:'En attente',prix:finalPrix});
-  // ── PROGRAMME PARTENARIAT v1 : tracking commission si code parrainage utilisé ──
-  if(promoCode && typeof applyPartnerCode==='function'){
-    try {
-      applyPartnerCode(promoCode, {
-        refType:'book', refId:bid, refLabel:b.titre,
-        saleAmount: finalPrix, qty:1
-      });
-    } catch(e){ /* fail silent — la vente reste enregistrée même si commission KO */ }
-  }
   save();
   const mov=document.querySelector('.mov');if(mov)mov.remove();
   // v1.0 : ouvrir le modal de paiement unifié
@@ -3659,7 +3694,8 @@ function confirmVisitorOrder(bid){
         customerNom: nom,
         customerTel: tel,
         customerAdresse: adresse,
-        customerEmail: document.getElementById('voEmail')?.value||''
+        customerEmail: document.getElementById('voEmail')?.value||'',
+        code: promoCode
       });
     } else {
       toast('✓ Commande enregistrée ! Nous vous contacterons au '+tel);
@@ -4782,6 +4818,33 @@ function _fetchPublicData(){
       if(!isAdmin||(!(DB.elearning&&DB.elearning.plans)||DB.elearning.plans.length===0)){
         if(!DB.elearning)DB.elearning={plans:[],categories:[],contenus:[],abonnements:[],commandes:[]};
         DB.elearning.plans=data.elearning_plans;changed=true;
+      }
+    }
+
+    /* ── Tarifs réglés par l'administration (« Prix & calculs », 14/09/2026) ──
+       Micro-achats, crédits IA, frais d'inscription, cahiers, remises de pack,
+       frais affichés. Le navigateur d'un visiteur ne reçoit jamais la base : sans
+       cette tranche, il affichait les valeurs du code pendant que le serveur
+       exigeait celles de l'administration — paiement accepté, accès refusé pour
+       sous-paiement. Jamais appliqué chez un admin : sa base fait foi. */
+    if(!isAdmin && data.tarifs_publics && typeof data.tarifs_publics==='object'){
+      var _tp=data.tarifs_publics;
+      if(_tp.microPrix && typeof _tp.microPrix==='object'){
+        DB.microPrix=DB.microPrix||{};
+        Object.keys(_tp.microPrix).forEach(function(k){
+          var src=_tp.microPrix[k], dst=DB.microPrix[k]||{};
+          if(src && src.montant>0){
+            dst.montant=src.montant; if(src.label) dst.label=src.label; if(src.jetons>0) dst.jetons=src.jetons;
+            // Un réglage de montant seul ne doit pas effacer le libellé du bouton d'achat.
+            var _def=(k==='ia') ? window.MICRO_PRIX_IA_DEFAULT : (window.MICRO_PRIX_DEFAULT||{})[k];
+            if(!dst.label && _def) dst.label=_def.label;
+            if(k==='ia' && !(dst.jetons>0) && _def) dst.jetons=_def.jetons;
+            DB.microPrix[k]=dst; changed=true;
+          }
+        });
+      }
+      if(_tp.tarifs && typeof _tp.tarifs==='object'){
+        DB.tarifs=Object.assign(DB.tarifs||{}, _tp.tarifs); changed=true;
       }
     }
 
@@ -6067,10 +6130,13 @@ function vShowSec(sec,btn,_boot){
     h+='<div id="elPlans" style="margin-bottom:28px">';
     h+='<div style="text-align:center;margin-bottom:24px">';
     h+='<div style="font-family:Montserrat,sans-serif;font-size:26px;font-weight:800;color:#142554">Choisissez votre <span style="color:#3C8DFF">abonnement</span></div>';
-    h+='<div style="font-family:Georgia,serif;font-size:15px;color:var(--ink3);font-style:italic;margin-top:8px;max-width:500px;margin-left:auto;margin-right:auto">Accès illimité aux épreuves, cours et corpus selon votre niveau — prix imbattables !</div>';
+    h+='<div style="font-family:Georgia,serif;font-size:15px;color:var(--ink3);font-style:italic;margin-top:8px;max-width:560px;margin-left:auto;margin-right:auto">'+_esc((typeof _formulesAccroche==='function'&&_formulesAccroche())||'Sans engagement.')+'</div>';
     h+='</div>';
+    // Les formules (Starter / Pro / Élite / Famille) : la grille partagée,
+    // Code ami compris — même rendu que l'accueil et la page Tarifs.
+    h+=(typeof _formulesGrille==='function') ? _formulesGrille() : '';
 
-    // ── PLANS PREMIUM v2 — pictos 3D HD + animations + conic border populaire ──
+    // ── Les AUTRES offres (enseignants, prestations parents, établissements) ──
     var _picBaseP='https://em-content.zobj.net/source/microsoft-3D-fluent/406/';
     var planPictos={
       plan1:_picBaseP+'graduation-cap_1f393.png',           // Examen
@@ -6079,32 +6145,43 @@ function vShowSec(sec,btn,_boot){
       plan4:_picBaseP+'family_1f46a.png'                    // Famille
     };
     var planCssMap={plan1:'p1',plan2:'p2',plan3:'p3',plan4:'p4'};
-
-    h+='<div class="vplan-grid v-reveal">';
-    // v1.4.2 : les plans qui correspondent au PROFIL apprenant remontent en tête
-    var _plansSorted=(el.plans||[]).slice().sort(function(a,b){
+    // Les formules ont leur grille ; les anciens forfaits élève qu'elles
+    // remplacent ne se proposent plus (api/public_data.php ne les sert plus).
+    var _retiresVente={plan1:1,plan2:1,plan4:1,plan5:1,plan6:1};
+    var _plansSorted=(el.plans||[]).filter(function(p){
+      return p && !p.formule && p.actif!==false && p.enVente!==false && (!_retiresVente[p.id] || p.enVente===true);
+    }).sort(function(a,b){
       return ((typeof _planProfileScore==='function')?(_planProfileScore(b)-_planProfileScore(a)):0);
     });
+    if(_plansSorted.length){
+      h+='<div style="text-align:center;margin:30px 0 16px"><div style="font-family:Montserrat,sans-serif;font-size:20px;font-weight:800;color:#142554">Enseignants, parents et établissements</div></div>';
+    }
+    h+='<div class="vplan-grid v-reveal">';
     _plansSorted.forEach(function(plan,idx){
-      var pct=plan.ancien?Math.round((1-plan.prix/plan.ancien)*100):0;
+      var pct=(plan.ancien&&plan.prix>0)?Math.round((1-plan.prix/plan.ancien)*100):0;
       var isPopular=plan.populaire||(idx===1);
       var isReco=(typeof _planProfileScore==='function')&&_planProfileScore(plan)>0;
       var cssClass=planCssMap[plan.id]||'p1';
       var picto=plan.pictoUrl||planPictos[plan.id]||_picBaseP+'memo_1f4dd.png';
       var nbRessources=(el.contenus||[]).filter(function(c){return c.plans&&c.plans.indexOf(plan.id)>-1;}).length;
+      // Une prestation chiffrée au cas par cas ne s'affiche pas « 0 XAF ».
+      var _surDevis=!!plan.surDevis||!(plan.prix>0);
+      var _u=_planUnite(plan);
 
       h+='<div class="vplan-card '+cssClass+(isPopular?' is-popular':'')+'">';
       h+='  <div class="vplan-top"></div>';
       h+=  (isReco?'<div class="vplan-badge-pop" style="background:linear-gradient(135deg,#059669,#3A8F73)">🎯 Recommandé pour vous</div>':(isPopular?'<div class="vplan-badge-pop">Populaire</div>':''));
       h+='  <div class="vplan-body">';
       h+='    <div class="vplan-ico"><img src="'+_esc(picto)+'" alt="" loading="lazy" data-ef="🎓"></div>';
-      h+=    (pct?'<div class="vplan-promo">'+ICO("lc-flame")+'-'+pct+'% ÉCONOMIE</div>':'');
+      h+=    (pct&&!_surDevis?'<div class="vplan-promo">'+ICO("lc-flame")+'-'+pct+'% ÉCONOMIE</div>':'');
       h+='    <div class="vplan-name">'+_esc(plan.nom)+'</div>';
       h+='    <div class="vplan-cible">'+_esc(plan.cible)+'</div>';
       h+='    <div class="vplan-divider"></div>';
-      h+=    (plan.ancien?'<div class="vplan-old-price">'+fmtN(plan.ancien)+' XAF</div>':'');
-      h+='    <div class="vplan-price">'+fmtN(plan.prix)+'<span style="font-size:14px;font-weight:600;color:#94A3B8;margin-left:4px">XAF</span></div>';
-      h+='    <div class="vplan-price-unit">/ an scolaire</div>';
+      h+=    (plan.ancien&&!_surDevis?'<div class="vplan-old-price">'+fmtN(plan.ancien)+' XAF</div>':'');
+      h+=    (_surDevis
+               ? '<div class="vplan-price" style="font-size:26px">Sur devis</div>'
+               : '<div class="vplan-price">'+fmtN(plan.prix)+'<span style="font-size:14px;font-weight:600;color:#94A3B8;margin-left:4px">XAF</span></div>');
+      h+='    <div class="vplan-price-unit">'+_esc(_surDevis?'selon vos besoins':(_u||''))+'</div>';
       h+=    (nbRessources>0?'<div class="vplan-resources">📚 '+nbRessources+' ressources incluses</div>':'');
       h+='    <div class="vplan-feats">';
       // Un plan créé sans avantages faisait tomber TOUTE la section e-learning
@@ -6114,12 +6191,17 @@ function vShowSec(sec,btn,_boot){
         h+='      <div class="vplan-feat">'+_esc(av).replace(/^[✅✓☑️\s]+/,'')+'</div>';
       });
       h+='    </div>';
-      h+='    <button class="vplan-cta" onclick="commanderAbonnement(\''+plan.id+'\')">S\'abonner maintenant</button>';
-      h+='    <div class="vplan-footer">Valable toute l\'année scolaire</div>';
+      if(_surDevis){
+        h+='    <button class="vplan-cta" onclick="(typeof mDevisAccompagnement===\'function\'?mDevisAccompagnement():window.open(\'https://wa.me/237697637739?text=\'+encodeURIComponent(\'Bonjour VÉRITAS, je souhaite un devis : '+_esc(String(plan.nom||'').replace(/[\'"\\]/g,''))+'\'),\'_blank\'))">Demander un devis</button>';
+      } else {
+        h+='    <button class="vplan-cta" onclick="_ouvrirAbonnementAncre(\''+plan.id+'\')">S\'abonner maintenant</button>';
+      }
+      h+='    <div class="vplan-footer">'+(_surDevis?'Devis gratuit, sans engagement':(_u==='par mois'?'Sans engagement — renouvelable chaque mois':(_u==='par an'?'Valable 12 mois':'Valable toute l\'année scolaire')))+'</div>';
       h+='  </div>';
       h+='</div>';
     });
     h+='</div></div>';
+
 
     // ──── CUSTOM ORDER CTA ──── (v1.3.1 épure : carte claire — un seul panneau
     // sombre par page suffit ; le bouton or reste le point d'accroche)
@@ -6935,6 +7017,15 @@ function _createSession(data){
   SESSION_EXPIRY = _reprise ? data._exp : (Date.now()+SESSION_DURATION);
   SES=data;SES._token=SESSION_TOKEN;SES._exp=SESSION_EXPIRY;
   try{ sessionStorage.setItem('VERITAS_SES',JSON.stringify(SES)); }catch(e){}
+  // Formule choisie AVANT d'avoir un compte (#abonnement?plan=…) : la
+  // souscription reprend dès que la session existe (_ouvrirAbonnementAncre).
+  try{
+    var _aboAttente = sessionStorage.getItem('_vrtAboAttente');
+    if(_aboAttente && data && data.type !== 'admin' && data.type !== 'superadmin'){
+      sessionStorage.removeItem('_vrtAboAttente');
+      setTimeout(function(){ if(typeof _ouvrirAbonnementAncre === 'function') _ouvrirAbonnementAncre(_aboAttente); }, 900);
+    }
+  }catch(e){}
 }
 
 /* Relit la session du sessionStorage et la VALIDE. Retourne null si absente,
@@ -10426,21 +10517,85 @@ function filterElContents(){
   });
 }
 
+/* L'unité d'un prix, lue dans la DURÉE du plan. Les cartes écrivaient
+   « / an scolaire » en dur : une formule à 1 000 F par mois s'y serait lue
+   1 000 F l'année. */
+function _planUnite(plan){
+  var d = String((plan && plan.duree) || '').toLowerCase();
+  if(d.indexOf('mois') >= 0 || d.indexOf('mensuel') >= 0) return 'par mois';
+  if(d.indexOf('annuel') >= 0 || d === 'an' || d.indexOf('année') >= 0 || d.indexOf('annee') >= 0) return (d.indexOf('scolaire') >= 0 ? 'l’année scolaire' : 'par an');
+  return d ? d : '';
+}
+window._planUnite = _planUnite;
+// La variante sœur d'une formule (au mois ⇄ à l'année), ou null.
+function _planVariante(plan){
+  if(!plan || !plan.groupe) return null;
+  var autre = plan.variante === 'an' ? 'mois' : 'an';
+  return ((DB.elearning && DB.elearning.plans) || []).find(function(p){ return p && p.groupe === plan.groupe && p.variante === autre; }) || null;
+}
+
+/* Ouvre la souscription d'une formule arrivée par lien (#abonnement?plan=…).
+   Un abonnement s'ouvre SUR UN COMPTE : sans session, on propose d'abord de le
+   créer, et la souscription reprend d'elle-même à la connexion (_createSession).
+   Sans cela l'octroi serveur l'écrirait « sans titulaire », à rattacher à la main. */
+function _ouvrirAbonnementAncre(pid){
+  var essais = 0;
+  (function tenter(){
+    var plans = (DB.elearning && DB.elearning.plans) || [];
+    var plan = plans.find(function(p){ return p && p.id === pid; });
+    // Les plans d'un visiteur arrivent de public_data.php, parfois après ce lien.
+    if(!plan && essais++ < 24){ setTimeout(tenter, 250); return; }
+    if(!plan){
+      toast('Cette formule n’est plus proposée — voici les offres en cours', 'warn');
+      try{ var ep = document.getElementById('elPlans'); if(ep) ep.scrollIntoView({behavior:'smooth'}); }catch(e){}
+      return;
+    }
+    var ses = (typeof SES !== 'undefined' && SES) ? SES : null;
+    if(!ses){
+      try{ sessionStorage.setItem('_vrtAboAttente', pid); }catch(e){}
+      var codeR = (typeof _codeAmiRetenu === 'function') ? _codeAmiRetenu() : '';
+      M('🎓 ' + _esc(plan.nom) + ' — ' + fmt(plan.prix) + ' ' + _esc(_planUnite(plan)), 'Une minute pour créer votre compte',
+        '<div style="font-size:14px;line-height:1.7;color:var(--ink2)">L’abonnement s’ouvre <b>sur votre compte</b> : c’est lui qui garde vos accès sur tous vos appareils. '
+        + 'Créez-le gratuitement (nom, classe, WhatsApp, mot de passe) — le paiement s’ouvre juste après, par MTN MoMo ou Orange Money.</div>'
+        + (codeR ? '<div class="ib ibt mt12" style="background:rgba(5,150,105,.08)"><span>🎁</span><span>Code ami <b>' + _esc(codeR) + '</b> retenu : il sera appliqué à votre paiement.</span></div>' : ''),
+        '<button class="btn bo" onclick="cm();(typeof _ouvrirConnexionAncre===\'function\'?_ouvrirConnexionAncre():0)">J’ai déjà un compte</button>'
+        + '<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm():0)">Créer mon compte</button>', true);
+      return;
+    }
+    commanderAbonnement(pid);
+  })();
+}
+window._ouvrirAbonnementAncre = _ouvrirAbonnementAncre;
+
 function commanderAbonnement(planId){
   try{ if(typeof _track==='function') _track('sub_click'); }catch(e){}
   var el=DB.elearning||{plans:[]};
   var plan=el.plans.find(function(p){return p.id===planId;});
   if(!plan) return;
-  M('📋 Abonnement E-Learning: '+plan.nom,'Souscription',
+  var _ses=(typeof SES!=='undefined'&&SES)?SES:null;
+  var _sNom=_ses?((_ses.pre||'')+' '+(_ses.nom||'')).trim():'';
+  var _sTel=_ses?(_ses.tel||''):'';
+  var _var=_planVariante(plan);
+  var _eco=(plan.ancien&&plan.ancien>plan.prix)?(plan.ancien-plan.prix):0;
+  var _enfants=(plan.enfantsMax|0);
+  var _code=String((typeof _codeAmiRetenu==='function'?_codeAmiRetenu():'')||'').replace(/[^A-Za-z0-9_\-]/g,'');
+  M('📋 Abonnement : '+plan.nom,'Souscription',
   '<div style="text-align:center;margin-bottom:16px">'+
-  '<div style="font-family:Montserrat,sans-serif;font-size:20px;font-weight:700;color:#142554;margin-bottom:4px">'+plan.nom+'</div>'+
-  '<div style="font-size:13px;color:var(--ink3)">'+plan.cible+'</div>'+
-  '<div style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#3C8DFF;margin:8px 0">'+fmt(plan.prix)+' <span style="font-size:13px;color:var(--ink4)">/ '+plan.duree+'</span></div>'+
+  '<div style="font-family:Montserrat,sans-serif;font-size:20px;font-weight:700;color:#142554;margin-bottom:4px">'+_esc(plan.nom)+'</div>'+
+  '<div style="font-size:13px;color:var(--ink3)">'+_esc(plan.cible||'')+'</div>'+
+  '<div style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#1E499B;margin:8px 0">'
+    +(_eco?'<span style="font-size:15px;color:var(--ink4);text-decoration:line-through;margin-right:8px">'+fmt(plan.ancien)+'</span>':'')
+    +fmt(plan.prix)+' <span style="font-size:13px;color:var(--ink4)">'+_esc(_planUnite(plan))+'</span></div>'+
+  (_eco?'<div style="font-size:12px;font-weight:700;color:#059669">'+_esc(_formuleEcoTxt(_planVariante(plan)||{prix:0},plan)||'Remise annuelle')+' : '+fmt(_eco)+' d’économie</div>':'')+
+  (_var?'<button class="btn bo sm" style="margin-top:8px" onclick="cm();commanderAbonnement(\''+_esc(_var.id)+'\')">'
+    +(_var.variante==='an'?'Payer l’année à la place : '+fmt(_var.prix)+(_formuleEcoTxt(plan,_var)?' ('+_formuleEcoTxt(plan,_var)+')':''):'Payer au mois à la place : '+fmt(_var.prix)+' par mois')+'</button>':'')+
   '</div>'+
-  '<div class="ib ibt mb13"><span>💡</span><span>Après paiement, vous recevrez vos accès par WhatsApp sous 24h.</span></div>'+
+  // L'accès s'ouvre SEUL à la confirmation de l'opérateur (CamerPay) : promettre
+  // « vos accès par WhatsApp sous 24 h » décourageait au moment de payer.
+  '<div class="ib ibt mb13"><span>⚡</span><span>Paiement MTN MoMo ou Orange Money : l’accès s’ouvre automatiquement dès la confirmation. Reçu numéroté immédiat.</span></div>'+
   '<div class="fg2">'+
-  '<div class="fg"><span class="fl">Votre nom complet *</span><input class="fi" id="elNom" placeholder="Ex: MBALLA Jean-Pierre"></div>'+
-  '<div class="fg"><span class="fl">Numéro WhatsApp *</span><input class="fi" id="elTel" placeholder="Ex: 697 637 739"></div>'+
+  '<div class="fg"><span class="fl">Votre nom complet *</span><input class="fi" id="elNom" value="'+_esc(_sNom)+'" placeholder="Ex: MBALLA Jean-Pierre"></div>'+
+  '<div class="fg"><span class="fl">Numéro WhatsApp *</span><input class="fi" id="elTel" value="'+_esc(_sTel)+'" placeholder="Ex: 697 637 739"></div>'+
   '<div class="fg"><span class="fl">Classe / Niveau</span><select class="fi" id="elClasse">'+(function(){
     var grps=(DB.whatsappGroupes||[]).filter(function(g){return g.actif&&g.niveau&&g.niveau!=='tous';});
     var opts=grps.length?grps.map(function(g){return g.niveau;}):CLS.slice();
@@ -10449,9 +10604,13 @@ function commanderAbonnement(planId){
       .map(function(cl){return '<option'+(cl===(SES&&SES.cls)?' selected':'')+'>'+_esc(cl)+'</option>';}).join('');
   })()+'</select></div>'+
   '<div class="fg"><span class="fl">Email (optionnel)</span><input class="fi" id="elEmail" placeholder="votre@email.com"></div>'+
-  '<div class="fg full"><span class="fl">🤝 Code parrainage (facultatif)</span><input class="fi" id="elPromo" placeholder="Ex. JACQUES10 — code d\'un partenaire VÉRITAS" style="text-transform:uppercase"></div>'+
+  '<div class="fg full"><span class="fl">🎁 Code ami ou code promo (facultatif)</span><input class="fi" id="elPromo" value="'+_esc(_code)+'" placeholder="Ex. VRT7K2M9Q — le code d’un ami vous fait payer moins" style="text-transform:uppercase"></div>'+
+  (_enfants?'<div class="fg full"><span class="fl">👨‍👩‍👧 Les enfants couverts (identifiants de leurs comptes, jusqu’à '+_enfants+')</span>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">'
+    +Array.from({length:_enfants}).map(function(_,i){ return '<input class="fi" id="elEnfant'+i+'" placeholder="Enfant '+(i+1)+' — identifiant">'; }).join('')
+    +'</div><div style="font-size:11px;color:var(--ink4);margin-top:4px">Chaque enfant doit avoir son compte (gratuit). Un identifiant inconnu est signalé au centre, qui le rattache à la main.</div></div>':'')+
   '</div>'+
-  '<div class="ib ibt mb13"><span>💳</span><span>Après validation, vous serez redirigé(e) vers notre formulaire de paiement sécurisé.</span></div>',
+  '<div class="ib ibt mb13"><span>💳</span><span>Le code est vérifié à l’étape suivante : le montant réduit s’affiche avant que vous ne payiez.</span></div>',
   '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="validerAbonnement(\''+planId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Valider et payer</button>',true);
 }
 
@@ -10495,17 +10654,18 @@ function validerAbonnement(planId){
     payRef: '' // sera renseigné lors du paiement
   };
   DB.elearning.abonnements.push(newAbo);
-  // ── PROGRAMME PARTENARIAT v1 : tracking commission si code parrainage utilisé ──
+  /* CODE AMI : le code part AVEC le paiement et le serveur le vérifie. On ne
+     calcule plus de commission ici (applyPartnerCode) : dans le navigateur d'un
+     visiteur elle n'atteignait jamais personne, et à côté du crédit serveur elle
+     aurait payé deux fois. */
   var elPromoCode = (document.getElementById('elPromo')?.value||'').trim().toUpperCase();
-  if(elPromoCode && typeof applyPartnerCode==='function'){
-    try {
-      applyPartnerCode(elPromoCode, {
-        refType:'elearning', refId:planId,
-        refLabel: plan ? plan.nom : ('Abonnement '+planId),
-        saleAmount: plan ? (plan.prix||0) : 0, qty:1
-      });
-      newAbo.partnerCode = elPromoCode; // trace dans l'abonnement
-    } catch(e){ /* fail silent */ }
+  if(elPromoCode){ newAbo.partnerCode = elPromoCode; if(typeof _codeAmiRetenir==='function') _codeAmiRetenir(elPromoCode); }
+  var _enfantsSaisis = [];
+  for(var _ei=0; _ei<8; _ei++){
+    var _ee=document.getElementById('elEnfant'+_ei);
+    if(!_ee) break;
+    var _ev=(_ee.value||'').trim();
+    if(_ev && _enfantsSaisis.indexOf(_ev)<0) _enfantsSaisis.push(_ev);
   }
   // Notification admin
   autoNotify(
@@ -10533,7 +10693,9 @@ function validerAbonnement(planId){
         targetId: planId,
         customerAccountId: _accId(),
         customerNom: nom,
-        customerTel: tel
+        customerTel: tel,
+        code: elPromoCode,
+        beneficiaires: _enfantsSaisis
       });
     } else {
       toast('✓ Demande d\'abonnement envoyée ! L\'administration sera contactée.');
@@ -11357,6 +11519,7 @@ const ANAV=[
     {k:"visitororders",i:"📦",l:"Commandes visiteurs"}
   ]},
   {s:"💰 Finances",i:[
+    {k:"prix_calculs",i:"🏷️",l:"Prix & calculs automatiques"},
     {k:"payments",i:"💳",l:"Paiements élèves"},
     {k:"paiements_admin",i:"💰",l:"Tentatives de paiement"},
     {k:"partenaires_splits",i:"🤝",l:"Partage revenus partenaires"},
@@ -11368,7 +11531,7 @@ const ANAV=[
     {k:"announce",i:"◆",l:"Annonces"},
     {k:"send",i:"◎",l:"Centre WhatsApp"},
     {k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"},
-    {k:"parrainage_admin",i:"🎁",l:"Programme parrainage"},
+    {k:"parrainage_admin",i:"🎁",l:"Code ami (parrainage)"},
     {k:"partenaires_admin",i:"🤝",l:"Programme Partenariat"},
     {k:"demandes",i:"✉",l:"Demandes & devis"},
     {k:"forum_admin",i:"💬",l:"Modération Forum"},
@@ -11488,6 +11651,7 @@ const PT={
   books2:"Bibliothèque scolaire",
   elearningmgmt:"E-Learning & Contenus premium",
   paywall:"Essais gratuits & mur d'abonnement",
+  prix_calculs:"Prix & calculs automatiques",
   plateforme:"Atelier de Français — abonnements & quotas",
   authorsmgmt:"Auteurs & Partage de droits",
   visitororders:"Commandes visiteurs",
@@ -11585,7 +11749,7 @@ function render(p){
     devoirs_teacher:pgDevoirsTeacher,perf_teacher:pgPerfTeacher,
     // Admin
     absences_admin:pgAbsencesAdmin,devoirs_admin:pgDevoirsAdmin,orientation_admin:pgOrientationAdmin,resPedago:pgResPedagoAdmin,paiements_admin:pgPaiementsAdmin,
-    stats_business:pgStatsBusiness,parrainage_admin:pgParrainageAdmin,paywall:pgPaywall,
+    stats_business:pgStatsBusiness,parrainage_admin:pgParrainageAdmin,paywall:pgPaywall,prix_calculs:pgPrixCalculs,
     forum_admin:pgForumAdmin,marketplace_admin:pgMarketplaceAdmin,centres_admin:pgCentresAdmin,
     calendrier_admin:pgCalendrierAdmin,
     partenaires_splits:pgPartenairesSplits,
@@ -12531,9 +12695,9 @@ function pgSAControl(){
   h+='</div>';
   // ── Bundle 4 : Finances & intégrité ──
   h+='<div class="card mb16"><div class="pgt" style="font-size:18px">💰 Finances & intégrité</div>'
-    +'<div class="ib ibi mb12"><span>📊</span><span>Part auteur : <strong>'+(DB.authorShare||60)+'%</strong> · Parrainage : <strong>'+(DB.parrainRate.forfait||0)+' FCFA</strong> + <strong>'+(DB.parrainRate.pct||0)+'%</strong></span></div>'
+    +'<div class="ib ibi mb12"><span>📊</span><span>Part auteur : <strong>'+(DB.authorShare||60)+'%</strong> · Code ami : <strong>'+_esc((typeof _codeAmiRegleTxt==='function')?_codeAmiRegleTxt():'')+'</strong></span></div>'
     +'<div class="fl2 fw g8">'
-    +'<button class="btn bi" onclick="_saRatesModal()"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Taux globaux (auteur / parrain / promos)</button>'
+    +'<button class="btn bi" onclick="_saRatesModal()"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Prix & calculs automatiques</button>'
     +'<button class="btn bo" onclick="if(typeof mPayAttempts===\'function\')mPayAttempts()"><svg class="vico bico" aria-hidden="true"><use href="#lc-card"/></svg>Override des paiements</button>'
     +'<button class="btn bo" onclick="goTo(\'livret_codes\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-lock"/></svg>Codes d\'accès des cahiers (espèces)</button>'
     +'<button class="btn bo" onclick="_saIntegrity()"><svg class="vico bico" aria-hidden="true"><use href="#lc-flask"/></svg>Vérifier l\'intégrité des données</button>'
@@ -12639,22 +12803,18 @@ function _saUnlock(k){
 }
 function _saRatesModal(){
   if(!DB.parrainRate)DB.parrainRate={forfait:500,pct:0};
-  M('⚖️ Taux globaux','Appliqués aux ventes et au parrainage',
+  /* Le forfait et le pourcentage de parrainage réglés ici ne commandaient plus
+     rien depuis le Code ami (13/09/2026) : la commission est calculée et versée
+     par le serveur. Tous les prix et calculs se règlent dans UN écran. */
+  M('⚖️ Taux globaux','Appliqués aux ventes',
     '<div class="fg"><span class="fl">Part auteur (%)</span><input class="fi" id="_saAuthor" type="number" min="0" max="100" value="'+(DB.authorShare||60)+'"></div>'
-    +'<div class="fg"><span class="fl">Parrainage — forfait par filleul (FCFA)</span><input class="fi" id="_saParF" type="number" min="0" value="'+(DB.parrainRate.forfait||0)+'"></div>'
-    +'<div class="fg"><span class="fl">Parrainage — % des paiements du filleul</span><input class="fi" id="_saParP" type="number" min="0" max="100" value="'+(DB.parrainRate.pct||0)+'"></div>'
-    +'<p style="font-size:13px;color:var(--ds-text-3,#7A88A6)">Les codes promo (%) se gèrent dans la page « Programme parrainage / Boutique ».</p>',
+    +'<p style="font-size:13px;color:var(--ds-text-3,#7A88A6)">Formules, Code ami, frais d’inscription, cahiers, achats à l’unité : <a href="javascript:void(0)" onclick="cm();goTo(\'prix_calculs\')">Prix & calculs automatiques →</a></p>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
     +'<button class="btn bi" onclick="_saRatesSave()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>');
 }
 function _saRatesSave(){
   var a=parseInt((_ge('_saAuthor')&&_ge('_saAuthor').value)||'',10);
-  var pf=parseInt((_ge('_saParF')&&_ge('_saParF').value)||'',10);
-  var pp=parseInt((_ge('_saParP')&&_ge('_saParP').value)||'',10);
   if(!isNaN(a)&&a>=0&&a<=100)DB.authorShare=a;
-  if(!DB.parrainRate)DB.parrainRate={forfait:500,pct:0};
-  if(!isNaN(pf)&&pf>=0)DB.parrainRate.forfait=pf;
-  if(!isNaN(pp)&&pp>=0&&pp<=100)DB.parrainRate.pct=pp;
   save(); cm(); if(typeof toast==='function')toast('✓ Taux enregistrés','ok'); if(pg==='sacontrol')re();
 }
 function _saIntegrity(){
@@ -17408,7 +17568,7 @@ window._aiTier = function(){
     if(!match) return;
     var p = (x.plan||x.planId||'').toLowerCase();
     var t;
-    if(p.indexOf('elite')>=0 || p==='plan4') t='elite';        // FAMILLE / Élite
+    if(p.indexOf('elite')>=0 || p.indexOf('famille')>=0 || p==='plan4') t='elite';        // FAMILLE / Élite (formules du 13/09/2026 comprises)
     else if(p==='plan2' || p.indexOf('starter')>=0) t='starter'; // INTERMÉDIAIRE
     else t='pro';                                                // EXAMEN(plan1)/ENSEIGNANT(plan3)/TECHNIQUE(plan5)/GCE(plan6)/inconnu payant
     if(_rank[t] > _bestR){ _bestR = _rank[t]; _best = t; }
@@ -17676,7 +17836,7 @@ window._showQuotaExceeded = function(action, tier, used, limit){
       // recevait un droit `micro_epreuve:ambassa` — une épreuve fantôme, aucun
       // crédit IA. Le bon intent est `ia` (droit unlockedIA).
       +((typeof _creditsIABtn==='function')?('<div style="margin-top:8px">'+_creditsIABtn()+'</div>'):'')
-      +'<button class="btn bo" style="margin-top:8px;width:100%" onclick="cm();mParrainage()"><svg class="vico bico" aria-hidden="true"><use href="#lc-gift"/></svg>Ou parrainer un ami (+500 FCFA crédit)</button>'
+      +'<button class="btn bo" style="margin-top:8px;width:100%" onclick="cm();mParrainage()"><svg class="vico bico" aria-hidden="true"><use href="#lc-gift"/></svg>Ou parrainer un ami (−10 % pour lui, 10 % pour vous)</button>'
       +'</div>';
   } else {
     // Plans payants : message simple + upgrade vers plan supérieur
@@ -26278,7 +26438,7 @@ function _buildRegisterHTML(role){
     +"<div class='fg'><label class='fl' for='rTel'>WhatsApp *</label><input class='fi' id='rTel' autocomplete='tel' inputmode='tel' required placeholder='+237 6 00 00 00 00'></div>"
     +"<div class='fg'><label class='fl' for='rEmail'>Email"+(isPro?' *':'')+"</label><input class='fi' type='email' id='rEmail' autocomplete='email' placeholder='jean@email.cm'></div>"
     +roleField
-    +"<div class='fg'><label class='fl' for='rRef'>🎁 Code parrainage (optionnel)</label><input class='fi' id='rRef' placeholder='VRT...' value='"+(sessionStorage.getItem('_vrtRef')||'')+"' style='text-transform:uppercase;letter-spacing:1px'></div>"
+    +"<div class='fg'><label class='fl' for='rRef'>🎁 Code ami (facultatif) — −10 % sur vos abonnements et achats</label><input class='fi' id='rRef' placeholder='VRT…' value='"+String((typeof _codeAmiRetenu==='function'?_codeAmiRetenu():'')||'').replace(/[^A-Za-z0-9_\-]/g,'')+"' style='text-transform:uppercase;letter-spacing:1px'></div>"
     +parcours
     +"<div class='fg full'><label class='fl' for='rUser'>Identifiant (sans espaces) *</label>"
     +"<input class='fi' id='rUser' autocomplete='username' required aria-describedby='uAvail' placeholder='jean.mballa' oninput='_chkUser(this.value)'>"
@@ -26421,12 +26581,28 @@ async function _compteServeurEnregistrer(acc, pwdClair){
         nom:acc.nom||'', pre:acc.pre||'', tel:acc.tel||'', email:acc.email||'',
         cls:acc.cls||'', serie:acc.serie||'', profil:acc.profil||{},
         role:acc.role||'eleve', discipline:acc.discipline||'',
-        orgNom:acc.orgNom||'', orgType:acc.orgType||'', childMat:acc.childMat||''
+        orgNom:acc.orgNom||'', orgType:acc.orgType||'', childMat:acc.childMat||'',
+        // Code ami : le parrainage naît ICI, sur le serveur (api/compte.php).
+        // Champ du formulaire d'abord, sinon le code reçu par lien.
+        codeParrain: (function(){
+          var f = document.getElementById('rRef') || document.getElementById('maRef');
+          var v = f && f.value ? f.value.trim() : '';
+          return v || ((typeof _codeAmiRetenu === 'function') ? _codeAmiRetenu() : '');
+        })()
       })
     });
     var j={}; try{ j=await r.json(); }catch(e){}
     if(r.status===409) return {conflit:true,msg:(j&&j.error)||"Cet identifiant est déjà pris"};
-    if(r.ok&&j&&j.ok) return {ok:true,id:j.id||"",existe:!!j.existe};
+    if(r.ok&&j&&j.ok){
+      if(j.codeParrain) acc.codeParrain = j.codeParrain;
+      if(j.parrain && j.parrain.code){
+        acc.parrainCode = j.parrain.code;
+        var _rg = window._CODE_AMI_REGLE || {};
+        try{ toast('🎁 Parrainage enregistré : −' + (_rg.remisePct != null ? _rg.remisePct : 10) + ' % sur vos abonnements et achats'
+                   + (j.parrain.nom ? ', grâce à ' + j.parrain.nom : ''), 'ok'); }catch(e){}
+      }
+      return {ok:true,id:j.id||"",existe:!!j.existe};
+    }
     /* 400/500 : le serveur a répondu et refuse. Ce n'est pas une panne de
        réseau — le dire tel quel plutôt que de créer un compte local que
        l'Atelier ne reconnaîtra jamais. */
@@ -32392,6 +32568,13 @@ function _payInitCampay(ref, montant, label, intent, targetId, accountId, nom, _
   var _body = {ref:ref,montant:montant,label:label,intent:intent,targetId:targetId,
       accountId:accountId,clientNom:nom,clientTel:tel,commissions:_payPendingCommissions(intent,targetId)};
   if(_extra.lignes) _body.lignes = _extra.lignes;
+  // Code ami / code promo : le serveur le RE-VÉRIFIE et recalcule la remise ;
+  // sans lui, un montant remisé serait refusé avant le débit (409).
+  var _codeSaisi = _extra.code || ((document.getElementById('promoInput')||{}).value || '').trim();
+  // Toujours présent, même vide : c'est ce qui dit au serveur que CE tunnel
+  // affiche la remise (un parrain à vie s'applique alors sans rien saisir).
+  _body.code = String(_codeSaisi || '').toUpperCase().slice(0, 32);
+  if(_extra.beneficiaires && _extra.beneficiaires.length) _body.beneficiaires = _extra.beneficiaires;
   fetch(endpoint, {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+_tok},
@@ -32799,6 +32982,23 @@ window._payFinalizePaid = function(att, source){
   //    pending → validated (elles comptent alors pour le palier et le versement)
   try { _payConfirmPromoCommissions(att); }
   catch(e){ console.warn('_payConfirmPromoCommissions:', e); }
+
+  // 3bis. CODE AMI — un paiement validé À LA MAIN (espèces, dépôt sur le numéro
+  //   du centre) n'a traversé aucun webhook : le serveur ne l'a donc pas
+  //   commissionné. On le lui signale ; il vérifie le code et le parrain, et ne
+  //   crédite jamais deux fois une même référence (sans effet sur un paiement
+  //   déjà confirmé par CamerPay).
+  try {
+    if(typeof iA==='function' && iA() && DB.cloudConfig && DB.cloudConfig.secret && typeof _codeAmiApi==='function' && att.ref){
+      _codeAmiApi('crediter', { admin:true, body:{
+        ref: att.ref, montant: att.montantFinal || att.montant || 0, accountId: att.accountId || att.customerAccountId || '',
+        intent: att.intent || '', targetId: att.targetId || '', code: att.code || att.promo || '',
+        tel: att.clientTel || att.customerTel || '', label: att.label || ''
+      }}).then(function(j){
+        if(j && j.commission > 0 && typeof toast==='function') toast('🎁 Commission Code ami créditée : ' + fmt(j.commission));
+      });
+    }
+  } catch(e){ console.warn('[code ami] crédit manuel', e); }
 
   // 4. Reçu : émis AUTOMATIQUEMENT, quel que soit le chemin de confirmation.
   //    Au Cameroun un paiement sans reçu numéroté ne vaut rien devant un parent
@@ -33364,6 +33564,8 @@ window._getSplitConfig = function(){
 // 500 F fixes » : le SPLIT_CONFIG.parrain_abo/boutique n'est PAS ce qui est versé
 // tant que DB.parrainRate.pct est un nombre (0 par défaut).
 window._parrainBaremeTxt = function(){
+  // Depuis le 13/09/2026 : la règle du Code ami (serveur), et plus DB.parrainRate.
+  if(typeof _codeAmiRegleTxt === 'function') return _codeAmiRegleTxt();
   var pr = DB.parrainRate || { forfait:500, pct:0 };
   var f = (typeof pr.forfait === 'number') ? pr.forfait : 0;
   var p = (typeof pr.pct === 'number') ? pr.pct : 0;
@@ -33420,45 +33622,11 @@ window._computeSplits = function(payAttempt){
   var cfg = _getSplitConfig();
   var splits = [];
 
-  // 1. Parrainage : si le payeur a été parrainé, créditer le parrain
-  try {
-    var userId = payAttempt.accountId || payAttempt.userId;
-    if(userId){
-      var parr = (DB.parrainages || []).find(function(p){ return p.filleulId === userId && p.confirmed; });
-      if(parr && parr.parrainId && parr.parrainId !== userId){
-        // v1.2.2 : barème admin DB.parrainRate {forfait, pct} (forfait + %),
-        // repli sur SPLIT_CONFIG si non défini. → un seul barème, éditable par le superadmin.
-        var pr = DB.parrainRate || {};
-        var pPct = (typeof pr.pct === 'number') ? pr.pct
-                 : ((payAttempt.intent === 'subscription') ? cfg.parrain_abo : cfg.parrain_boutique);
-        var pForfait = (typeof pr.forfait === 'number') ? pr.forfait : 0;
-        var amount = pForfait + Math.round((payAttempt.montant * pPct) / 100);
-        if(amount > 0){
-          /* Étalement sur la durée réellement couverte : un annuel se
-             commissionne mois par mois, pas d'avance. La part totale ne change
-             pas — c'est son EXIGIBILITÉ qui suit l'encaissement. */
-          var _duree = (typeof _dureeCommission==='function') ? _dureeCommission(payAttempt) : 1;
-          var _ech   = (_duree > 1 && typeof _echelonnerCommission==='function')
-                     ? _echelonnerCommission(amount, _duree, Date.now()) : null;
-          splits.push({
-            id: gid(),
-            paymentRef: payAttempt.ref,
-            echeancier: _ech,
-            dureeMois: _duree,
-            type: 'parrainage',
-            partenaireId: parr.parrainId,
-            description: 'Parrainage de '+(payAttempt.customerNom || 'filleul'),
-            montantBase: payAttempt.montant,
-            forfait: pForfait,
-            pct: pPct,
-            montant: amount,
-            etat: 'pending',
-            createdAt: Date.now()
-          });
-        }
-      }
-    }
-  } catch(e){ console.warn('split parrain:', e); }
+  /* 1. PARRAINAGE — retiré d'ici le 13/09/2026. La commission du Code ami est
+     créditée par le SERVEUR à la confirmation du paiement (api/_parrainage_lib.php,
+     registre dédié) et versée par lui. La calculer aussi dans ce navigateur
+     paierait deux fois le même parrain — et elle ne quittait de toute façon
+     jamais un navigateur de visiteur. Les parts d'AUTEUR restent ci-dessous. */
 
   // 2. Bénéficiaire de l'objet vendu — piloté par VERITAS_MONETISATION.
   //    Couvre d'un coup : manuel papier, manuel numérique, contenu e-learning,
@@ -33770,8 +33938,6 @@ window.pgPartenairesSplits = function(){
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">'
     +(function(){var cfg=_getSplitConfig();
       return [
-        {k:'parrain_abo',l:'Parrain — abonnement',v:cfg.parrain_abo},
-        {k:'parrain_boutique',l:'Parrain — boutique',v:cfg.parrain_boutique},
         {k:'auteur_livre',l:'Auteur — livre',v:cfg.auteur_livre},
         {k:'auteur_ressource',l:'Auteur — ressource',v:cfg.auteur_ressource},
         {k:'enseignant_cours',l:'Enseignant — cours',v:cfg.enseignant_cours}
@@ -33808,11 +33974,13 @@ window.pgPartenairesSplits = function(){
 // Sauvegarder la config %
 window._saveSplitConfig = function(){
   var cfg = {};
-  ['parrain_abo','parrain_boutique','auteur_livre','auteur_ressource','enseignant_cours'].forEach(function(k){
+  ['auteur_livre','auteur_ressource','enseignant_cours'].forEach(function(k){
     var v = parseInt((_ge('sc_'+k)||{}).value);
     if(!isNaN(v) && v>=0 && v<=100) cfg[k] = v;
   });
-  DB._splitConfig = cfg;
+  // Fusion : un réglage absent de cet écran (fait dans « Prix & calculs ») survit.
+  DB._splitConfig = Object.assign({}, DB._splitConfig || {}, cfg);
+  if(typeof cfg.auteur_livre === 'number') DB.authorShare = cfg.auteur_livre;
   save();
   toast('✓ Configuration enregistrée','ok');
 };
@@ -34666,143 +34834,271 @@ function _statCard(emoji, val, lbl, color){
 }
 
 // ════════════════════════════════════════════════════════════════════
-// ── v1.2 P2 — MODULE PROGRAMME DE PARRAINAGE ───────────────────────
+// ── CODE AMI (13/09/2026) — le navigateur AFFICHE, le serveur DÉCIDE ──
 // ════════════════════════════════════════════════════════════════════
-// Logique : chaque visiteur inscrit reçoit un code unique. S'il partage
-// ce code et qu'un nouveau s'inscrit avec, les 2 reçoivent +500 FCFA de
-// crédit à utiliser sur la boutique ou e-learning.
-window.PARRAINAGE_BONUS = 500; // FCFA crédit par parrainage réussi
+/* La règle, arrêtée par Jacques le 13/09/2026 : chaque inscrit a un code
+   personnel. Son filleul paie 10 % de moins sur tous ses paiements, sans
+   limite de durée ; le parrain touche 10 % de ce que le filleul paie
+   réellement, crédité à la confirmation du paiement, versé sur son Mobile
+   Money dès 2 000 F cumulés.
 
-window._genReferralCode = function(uid){
-  if(!uid) return 'VRTGUEST';
-  // Code court basé sur l'UID utilisateur
-  var c = (uid+'').replace(/[^A-Z0-9]/gi,'').toUpperCase().slice(0,6);
-  while(c.length<6) c+='X';
-  return 'VRT'+c;
+   Ce module remplace un programme qui ne tenait aucune de ses promesses
+   (mesuré le 13/09/2026) :
+   · le lien parrain → filleul n'était écrit que dans le navigateur du
+     filleul, après une recherche du parrain dans SA base locale — vide sur un
+     téléphone neuf : aucun parrainage n'arrivait jusqu'au serveur ;
+   · le code « VRT + 6 premiers caractères de l'identifiant » était le même
+     pour tous les comptes créés par le serveur la même quinzaine ;
+   · les « 500 F de crédit » étaient écrits dans DB.userCredits, que rien ne
+     lisait ;
+   · les taux affichés se contredisaient d'un écran à l'autre (500 F fixes,
+     5/8/10/12 %, 10/12/15/18 %).
+   Tout se calcule désormais dans api/_parrainage_lib.php. Ici on n'écrit
+   jamais un taux ni un montant : on les LIT (api/parrainage.php). La valeur
+   ci-dessous n'est qu'un repli d'affichage, remplacé dès que le serveur répond. */
+window._CODE_AMI_REGLE = { actif:true, remisePct:10, commissionPct:10, seuilVersement:2000, versementAuto:true };
+
+// Un code reçu par lien vaut 60 jours sur l'appareil : le temps de se décider,
+// de revenir, de payer depuis un autre onglet.
+window._codeAmiRetenir = function(code){
+  var c = String(code||'').toUpperCase().replace(/[^A-Z0-9_\-]/g,'').slice(0,32);
+  if(c.length < 3) return '';
+  try{ sessionStorage.setItem('_vrtRef', c); }catch(e){}
+  try{ localStorage.setItem('vrt_code_ami', JSON.stringify({c:c, t:Date.now()})); }catch(e){}
+  return c;
+};
+window._codeAmiRetenu = function(){
+  try{ var s = sessionStorage.getItem('_vrtRef'); if(s) return s; }catch(e){}
+  try{
+    var o = JSON.parse(localStorage.getItem('vrt_code_ami') || 'null');
+    if(o && o.c && (Date.now() - (o.t||0)) < 60*86400000) return String(o.c);
+  }catch(e){}
+  return '';
+};
+// Le jeton de COMPTE émis à la connexion (student_data.php) : c'est lui qui
+// dit au serveur QUI demande, jamais un identifiant passé en paramètre.
+window._codeAmiJeton = function(){
+  try{ return window._vrtContentToken || sessionStorage.getItem('_vrtCT') || ''; }catch(e){ return ''; }
+};
+window._codeAmiApi = function(action, opts){
+  opts = opts || {};
+  var h = { 'Accept':'application/json' };
+  var tok = opts.admin ? ((typeof DB!=='undefined' && DB.cloudConfig && DB.cloudConfig.secret) || '') : _codeAmiJeton();
+  if(tok) h['Authorization'] = 'Bearer ' + tok;
+  var init = { method: opts.body ? 'POST' : 'GET', headers: h };
+  if(opts.body){ h['Content-Type'] = 'application/json'; init.body = JSON.stringify(opts.body); }
+  var q = '';
+  if(opts.query){
+    Object.keys(opts.query).forEach(function(k){
+      var v = opts.query[k];
+      q += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(v == null ? '' : v);
+    });
+  }
+  return fetch(_VRT_API + '/parrainage.php?action=' + encodeURIComponent(action) + q, init)
+    .then(function(r){
+      return r.json().catch(function(){ return { ok:false, error:'Réponse illisible du serveur (' + r.status + ')' }; })
+        .then(function(j){ j = j || {}; j._http = r.status; return j; });
+    })
+    .catch(function(){ return { ok:false, error:'Serveur injoignable — vérifiez la connexion.', _http:0 }; });
+};
+window._codeAmiConfig = function(){
+  if(window._codeAmiConfigP) return window._codeAmiConfigP;
+  window._codeAmiConfigP = _codeAmiApi('config').then(function(j){
+    if(j && j.ok) window._CODE_AMI_REGLE = j;
+    return window._CODE_AMI_REGLE;
+  });
+  return window._codeAmiConfigP;
+};
+window._codeAmiRegleTxt = function(){
+  var r = window._CODE_AMI_REGLE || {};
+  return '−' + (r.remisePct != null ? r.remisePct : 10) + ' % pour votre filleul, '
+       + (r.commissionPct != null ? r.commissionPct : 10) + ' % de ses paiements pour vous';
+};
+/* Le code d'un identifiant, calculé comme le serveur (api/_parrainage_lib.php,
+   vrt_parr_code_pour_id) : sert à l'enseignant du centre, qui n'a pas de jeton
+   de compte, et au premier affichage avant la réponse du serveur. */
+window._codeAmiCalculer = function(id){
+  if(!id || !(window.crypto && crypto.subtle && window.TextEncoder)) return Promise.resolve('');
+  return crypto.subtle.digest('SHA-256', new TextEncoder().encode('veritas|code-ami|' + id)).then(function(buf){
+    var b = new Uint8Array(buf), a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', s = 'VRT';
+    for(var i = 0; i < 6; i++) s += a.charAt(b[i] % 32);
+    return s;
+  }).catch(function(){ return ''; });
+};
+window._codeAmiPartage = function(code, lien){
+  var r = window._CODE_AMI_REGLE || {};
+  return 'Je te fais économiser ' + (r.remisePct != null ? r.remisePct : 10) + ' % sur VÉRITAS (cours, corrigés et tuteur IA du programme camerounais). '
+    + 'Avec mon code ' + code + ', tous tes paiements sont moins chers. Inscris-toi ici : ' + lien;
+};
+
+/* ── Le tunnel de paiement : vérifier un code et repeindre le montant ──────
+   Le montant BARRÉ, le nouveau total, le libellé du bouton « Payer » et la
+   somme envoyée à ?action=init viennent de la MÊME réponse du serveur. Un
+   repli calculé ici afficherait un prix que le serveur refuserait ensuite. */
+window._codeAmiAppliquer = function(ref, silencieux){
+  window._VRT_PAYX = window._VRT_PAYX || {};
+  var X = window._VRT_PAYX[ref] = window._VRT_PAYX[ref] || {};
+  var inp = document.getElementById('promoInput');
+  var code = String(inp && inp.value ? inp.value : '').trim().toUpperCase();
+  var fb = document.getElementById('promoFeedback');
+  var base = X.montant || 0;
+  var fmtF = function(n){ return new Intl.NumberFormat('fr-FR').format(n) + ' FCFA'; };
+  var peindre = function(montant){
+    var tot = document.getElementById('payStepTotal');
+    if(tot){
+      tot.innerHTML = (montant < base)
+        ? '<span style="font-size:18px;opacity:.7;text-decoration:line-through;margin-right:8px">' + fmtF(base) + '</span>' + fmtF(montant)
+        : fmtF(base);
+    }
+    var btn = document.getElementById('payCampayBtn_' + ref);
+    if(btn) btn.textContent = '⚡ Payer maintenant — ' + fmtF(montant);
+  };
+  if(fb && code && !silencieux) fb.innerHTML = '<span style="font-size:12px;color:var(--ink4)">Vérification du code…</span>';
+  return _codeAmiApi('verifier', { query:{ code:code, intent:X.intent||'', targetId:X.targetId||'', montant:base } })
+    .then(function(j){
+      if(j && j.ok && j.montant > 0 && j.montant < base){
+        X.montantFinal = j.montant; X.code = j.code; X.remise = j.remise;
+        if(code) _codeAmiRetenir(code);
+        peindre(j.montant);
+        var qui = j.source === 'lien'
+          ? 'Remise de parrainage' + (j.parrain ? ' (code de ' + _esc(j.parrain) + ')' : '')
+          : 'Code ' + _esc(j.code) + (j.parrain ? ' — offert par ' + _esc(j.parrain) : '');
+        if(fb) fb.innerHTML = '<span style="color:var(--gr);font-size:12px;font-weight:600">✅ ' + qui + ' : −'
+          + new Intl.NumberFormat('fr-FR').format(j.remise) + ' FCFA → vous payez <strong>' + fmtF(j.montant) + '</strong></span>'
+          + (j.message ? '<div style="font-size:11px;color:var(--ink4);margin-top:3px">' + _esc(j.message) + '</div>' : '');
+        return j;
+      }
+      X.montantFinal = 0; X.code = ''; X.remise = 0;
+      peindre(base);
+      if(fb) fb.innerHTML = (code && !silencieux)
+        ? '<span style="color:var(--re);font-size:12px;font-weight:600">❌ ' + _esc((j && (j.message || j.error)) || 'Ce code ne s’applique pas à cet achat.') + '</span>'
+        : '';
+      if(code && !silencieux && typeof toast === 'function') toast((j && (j.message || j.error)) || 'Code non valable', 'warn');
+      return j;
+    });
+};
+
+/* ── « Mon code ami » : ce que le parrain voit ─────────────────────────────── */
+window._codeAmiRendre = function(hote, d){
+  var el = typeof hote === 'string' ? document.getElementById(hote) : hote;
+  if(!el) return;
+  var r = d.regle || window._CODE_AMI_REGLE || {};
+  var fmtF = function(n){ return (typeof fmt === 'function') ? fmt(n || 0) : ((n || 0) + ' FCFA'); };
+  var lien = d.lien || ('https://veritas-school.com/?ref=' + encodeURIComponent(d.code || ''));
+  var msg = encodeURIComponent(_codeAmiPartage(d.code || '', lien));
+  var h = '';
+  if(d.monParrain && d.monParrain.code){
+    h += '<div class="ib ibt mb12" style="background:rgba(5,150,105,.08)"><span>🎁</span><span>Vous payez <b>'
+      + (r.remisePct != null ? r.remisePct : 10) + ' % de moins</b> sur vos abonnements et achats grâce au code de <b>'
+      + _esc(d.monParrain.nom || d.monParrain.code) + '</b>. C’est automatique, sans rien saisir.</span></div>';
+  }
+  h += '<div style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;padding:20px;border-radius:14px;text-align:center;margin-bottom:14px">'
+    + '<div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:.8">Votre code ami</div>'
+    + '<div style="font-family:monospace;font-size:32px;font-weight:900;letter-spacing:3px;color:#FFC93C;margin:6px 0">' + _esc(d.code || '…') + '</div>'
+    + '<div style="font-size:13px;opacity:.9">' + _esc(_codeAmiRegleTxt()) + ' — sans limite de durée</div>'
+    + '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px">'
+      + '<a class="btn" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=' + msg + '">📲 Partager sur WhatsApp</a>'
+      + '<button class="btn" style="background:#FFC93C;color:#001136;border:none" onclick="navigator.clipboard&&navigator.clipboard.writeText(\'' + _esc(d.code || '') + '\').then(function(){toast(\'Code copié\')})">Copier le code</button>'
+      + '<button class="btn" style="background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.35)" onclick="navigator.clipboard&&navigator.clipboard.writeText(\'' + _esc(lien) + '\').then(function(){toast(\'Lien copié\')})">Copier le lien</button>'
+    + '</div></div>';
+  if(d.ok){
+    h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px">'
+      + _statCard('👥', d.filleuls || 0, 'Filleuls', '#1E499B')
+      + _statCard('💰', fmtF(d.gagne), 'Gagné', '#059669')
+      + _statCard('⏳', fmtF(d.solde), 'À verser', '#B8860B')
+      + _statCard('✅', fmtF(d.verse), 'Déjà versé', '#5B4FA8')
+      + '</div>';
+    h += '<div class="card" style="margin-bottom:12px"><div class="semi mb8">📱 Où recevoir vos commissions</div>'
+      + '<div class="s mb8">Versement automatique dès <b>' + fmtF(r.seuilVersement || 2000) + '</b> cumulés, sur votre Mobile Money '
+      + (d.numero ? '(<b>' + _esc(d.operateur) + ' ' + _esc(d.numero) + '</b>)' : '') + '. CamerPay valide chaque versement en quelques heures ouvrées.</div>'
+      + (d.enCours ? '<div class="ib ibt mb8"><span>⏳</span><span>' + fmtF(d.enCours) + ' en cours de versement.</span></div>' : '')
+      + (d.blocage ? '<div class="ib ibr mb8"><span>⚠️</span><span>' + _esc(d.blocage) + '</span></div>' : '')
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap"><input class="fi" id="codeAmiTel" type="tel" placeholder="Numéro MTN ou Orange (6XX XX XX XX)" style="flex:1;min-width:200px">'
+      + '<button class="btn bi" onclick="_codeAmiNumero()">Enregistrer ce numéro</button></div></div>';
+    var ops = d.operations || [];
+    h += '<div class="card"><div class="semi mb8">🧾 Dernières commissions</div>'
+      + (ops.length
+          ? ops.slice(0, 12).map(function(o){
+              return '<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--bg3,#EEF1F7);font-size:13px">'
+                + '<span>' + _esc(o.date) + ' · ' + _esc(o.quoi || 'Paiement d’un filleul') + ' <span style="color:var(--ink4)">(' + fmtF(o.paye) + ')</span></span>'
+                + '<b style="color:' + (o.annule ? '#AE5353' : '#059669') + '">' + (o.annule ? 'remboursé' : '+' + fmtF(o.commission)) + '</b></div>';
+            }).join('')
+          : '<div class="s mut">Aucune commission pour l’instant. Partagez votre code : chaque paiement de vos filleuls vous rapporte ' + (r.commissionPct != null ? r.commissionPct : 10) + ' %.</div>')
+      + '</div>';
+  } else if(d.error){
+    h += '<div class="ib ibr"><span>⚠️</span><span>' + _esc(d.error) + '</span></div>';
+  }
+  el.innerHTML = h;
+};
+
+window._codeAmiNumero = function(){
+  var inp = document.getElementById('codeAmiTel');
+  var tel = inp ? inp.value : '';
+  if(!tel){ toast('Saisissez votre numéro Mobile Money', 'warn'); return; }
+  _codeAmiApi('numero', { body:{ tel:tel } }).then(function(j){
+    if(j && j.ok){ toast('✓ Numéro enregistré (' + (j.methode === 'mtn_momo' ? 'MTN MoMo' : 'Orange Money') + ')'); _codeAmiCharger(); }
+    else toast((j && j.error) || 'Numéro refusé', 'warn');
+  });
+};
+
+// Charge « Mon code ami » dans l'hôte courant (#codeAmiHote).
+window._codeAmiCharger = function(){
+  var hote = document.getElementById('codeAmiHote');
+  if(!hote) return;
+  _codeAmiConfig().then(function(){
+    if(_codeAmiJeton()){
+      return _codeAmiApi('moi').then(function(j){
+        if(j && j.ok){ window._codeAmiMoi = j; _codeAmiRendre(hote, j); return; }
+        return _codeAmiRepliLocal(hote, (j && j.error) || '');
+      });
+    }
+    return _codeAmiRepliLocal(hote, '');
+  });
+};
+/* Sans jeton de compte (enseignant du centre, session ancienne) : on calcule
+   le code comme le serveur, et on dit franchement où voir les gains. */
+window._codeAmiRepliLocal = function(hote, erreur){
+  var ses = (typeof SES !== 'undefined' && SES) ? SES : null;
+  var id = ses ? (ses.accountId || ses.id || '') : '';
+  return _codeAmiCalculer(id).then(function(code){
+    _codeAmiRendre(hote, { ok:false, code:code || '—',
+      error: erreur || 'Vos gains s’affichent ici quand vous êtes connecté avec votre compte VÉRITAS. Reconnectez-vous pour les voir.' });
+  });
 };
 
 window.mParrainage = function(){
-  try {
-    var ses = (typeof SES!=='undefined' && SES) ? SES : null;
-    // Les enseignants ont leur propre tableau de bord (filleuls + commissions)
-    if(ses && ses.type==='enseignant' && typeof goTo==='function'){ goTo('parrainage_teacher'); return; }
-    if(!ses || (ses.type!=='visiteur_inscrit' && ses.type!=='eleve')){
-      M('🎁 Programme de parrainage','Invitez vos amis & gagnez du crédit',
-        '<div style="padding:8px">'
-        +'<div style="background:linear-gradient(135deg,#FFC93C,#F59E0B);padding:18px;border-radius:14px;text-align:center;color:#142554;margin-bottom:14px">'
-          +'<div style="font-size:32px;font-weight:900">+ '+fmt(PARRAINAGE_BONUS)+'</div>'
-          +'<div style="font-size:12px;margin-top:4px;opacity:.85">de crédit par filleul qui s\'inscrit</div>'
-        +'</div>'
-        +'<div style="background:#F3F4F6;padding:14px;border-radius:12px;margin-bottom:12px">'
-        +'<div style="font-weight:700;margin-bottom:8px;color:#142554">🚀 Comment ça marche ?</div>'
-        +'<ol style="margin:0;padding-left:20px;font-size:13px;color:#374151;line-height:1.7">'
-          +'<li>Inscrivez-vous gratuitement (une minute)</li>'
-          +'<li>Récupérez votre code de parrainage unique</li>'
-          +'<li>Partagez-le à vos amis (WhatsApp, Facebook)</li>'
-          +'<li>Vous recevez <b>'+fmt(PARRAINAGE_BONUS)+'</b> de crédit chacun à leur inscription</li>'
-          +'<li>Utilisez le crédit sur la boutique et les abonnements</li>'
-        +'</ol></div>'
-        +'<p style="text-align:center;font-size:13px;color:#6B7280">Inscription en une minute, 100% gratuit.</p>'
-        +'</div>',
-        '<button class="btn bo" onclick="cm()">Fermer</button>'
-        +'<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm():typeof showLogin===\'function\'?showLogin(\'eleve\'):null);"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>', true);
-      return;
-    }
-    var code = _genReferralCode(ses.id);
-    var filleuls = (DB.parrainages||[]).filter(function(p){return p.parrainId===ses.id;});
-    var credit = filleuls.reduce(function(s,f){return s + (f.confirmed?PARRAINAGE_BONUS:0);},0);
-    var shareUrl = (location.origin||'https://veritas-academy.com')+'/?ref='+code;
-    var shareMsg = encodeURIComponent('🎓 Rejoins-moi sur VÉRITAS Academy avec mon code '+code+' et reçois '+fmt(PARRAINAGE_BONUS)+' de crédit ! '+shareUrl);
-
-    var body = '<div style="background:linear-gradient(135deg,#FFC93C,#F59E0B);padding:20px;border-radius:14px;text-align:center;color:#142554;margin-bottom:14px">'
-      +'<div style="font-size:11px;opacity:.8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Votre code parrainage</div>'
-      +'<div style="font-size:32px;font-weight:900;letter-spacing:3px;font-family:monospace">'+code+'</div>'
-      +'<button class="btn" style="margin-top:10px;background:rgba(20,37,84,.9);color:#FFC93C;border:none;padding:6px 14px;border-radius:8px;font-size:12px" onclick="navigator.clipboard.writeText(\''+code+'\').then(function(){toast(\'Code copié !\');});"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier</button>'
-      +'</div>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">'
-      +'<div style="background:#fff;border:2px solid #3A8F73;border-radius:12px;padding:14px;text-align:center">'
-        +'<div style="font-size:28px">'+filleuls.length+'</div>'
-        +'<div style="font-size:11px;color:#6B7280">Filleul'+(filleuls.length>1?'s':'')+'</div></div>'
-      +'<div style="background:#fff;border:2px solid #FFC93C;border-radius:12px;padding:14px;text-align:center">'
-        +'<div style="font-size:20px;color:#3A8F73;font-weight:800">'+fmt(credit)+'</div>'
-        +'<div style="font-size:11px;color:#6B7280">Crédit gagné</div></div>'
-      +'</div>'
-      +'<div style="background:#F3F4F6;padding:14px;border-radius:12px;margin-bottom:12px">'
-      +'<div style="font-weight:700;margin-bottom:8px">🚀 Comment ça marche ?</div>'
-      +'<ol style="margin:0;padding-left:20px;font-size:13px;color:#374151;line-height:1.7">'
-      +'<li>Partagez votre code à un ami</li>'
-      +'<li>Il s\'inscrit en saisissant le code</li>'
-      +'<li>Vous recevez <b>'+fmt(PARRAINAGE_BONUS)+'</b> de crédit chacun</li>'
-      +'<li>Crédit utilisable sur la boutique et les abonnements e-learning</li></ol></div>'
-      +'<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">'
-      +'<a class="btn" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text='+shareMsg+'"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>WhatsApp</a>'
-      +'<a class="btn" style="background:#1877F2;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(shareUrl)+'"><svg class="vico bico" aria-hidden="true"><use href="#lc-book"/></svg>Facebook</a>'
-      +'<button class="btn bo" onclick="navigator.clipboard.writeText(\''+shareUrl+'\').then(function(){toast(\'Lien copié !\');});"><svg class="vico bico" aria-hidden="true"><use href="#lc-globe"/></svg>Lien</button>'
-      +'</div>';
-
-    M('🎁 Programme de parrainage','Invitez vos amis, gagnez du crédit',body,
-      '<button class="btn bi" onclick="cm()">Fermer</button>', true);
-  } catch(e){
-    console.error('mParrainage error:',e);
-    toast('Erreur parrainage : '+e.message,'err');
+  var ses = (typeof SES !== 'undefined' && SES) ? SES : null;
+  _codeAmiConfig();
+  if(!ses){
+    var r = window._CODE_AMI_REGLE || {};
+    M('🎁 Code ami VÉRITAS', 'Faites économiser vos amis, gagnez de l’argent',
+      '<div style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;padding:20px;border-radius:14px;text-align:center;margin-bottom:14px">'
+      + '<div style="font-size:30px;font-weight:900;color:#FFC93C">−' + (r.remisePct != null ? r.remisePct : 10) + ' % · +' + (r.commissionPct != null ? r.commissionPct : 10) + ' %</div>'
+      + '<div style="font-size:13px;margin-top:6px;opacity:.9">Votre ami paie moins cher, vous touchez une part de chacun de ses paiements</div></div>'
+      + '<ol style="margin:0 0 12px;padding-left:20px;font-size:14px;line-height:1.8;color:var(--ink2)">'
+      + '<li>Créez votre compte gratuit : votre code personnel est créé aussitôt.</li>'
+      + '<li>Partagez-le sur WhatsApp à vos camarades, élèves ou parents.</li>'
+      + '<li>Ils paient <b>' + (r.remisePct != null ? r.remisePct : 10) + ' % de moins</b> sur leurs abonnements et achats — sans limite de durée.</li>'
+      + '<li>Vous touchez <b>' + (r.commissionPct != null ? r.commissionPct : 10) + ' %</b> de ce qu’ils paient, versés sur votre Mobile Money dès <b>' + ((typeof fmt === 'function') ? fmt(r.seuilVersement || 2000) : '2 000 FCFA') + '</b>.</li>'
+      + '</ol>',
+      '<button class="btn bo" onclick="cm()">Plus tard</button>'
+      + '<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm():0)">Créer mon compte</button>', true);
+    return;
   }
+  M('🎁 Mon code ami', 'Partagez-le : votre ami paie moins, vous gagnez', '<div id="codeAmiHote"><div class="s mut" style="padding:20px;text-align:center">Chargement de votre code…</div></div>',
+    '<button class="btn bo" onclick="cm()">Fermer</button>', true);
+  _codeAmiCharger();
 };
 
-// ── Espace enseignant : mes filleuls + leur progression + mes commissions ──
+// ── Espace enseignant : le même écran, en page ─────────────────────────────
 window.pgParrainageEns = function(){
-  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
-  if(!ses || (ses.type!=='enseignant' && !iA())) return na();
-  var code = _genReferralCode(ses.id);
-  var filleuls = (DB.parrainages||[]).filter(function(p){ return p.parrainId===ses.id; });
-  var ps = (DB.partenairesSplit||{})[ses.id] || { solde:0, totalVerse:0 };
-  var abos = (DB.elearning && DB.elearning.abonnements) || [];
-  var parrTxt = (typeof _parrainBaremeTxt==='function') ? _parrainBaremeTxt() : '500 FCFA';
-  function resolveUser(uid){
-    return (DB.visitorAccounts||[]).find(function(v){return v.id===uid;})
-        || (DB.students||[]).find(function(s){return s.id===uid;}) || null;
-  }
-  function isAbonne(uid){
-    return abos.some(function(a){ return (a.userId===uid||a.accountId===uid||a.eleveId===uid||a.uid===uid) && a.statut!=='annule' && a.statut!=='expire' && a.statut!=='Expiré' && a.statut!=='En attente'; });
-  }
-  function xpOf(uid){ var st=(DB.userStreaks||{})[uid]; return st?(st.xp||0):0; }
-  var nbAb = filleuls.filter(function(p){ return isAbonne(p.filleulId); }).length;
-  var rows = filleuls.length ? filleuls.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); }).map(function(p){
-    var u = resolveUser(p.filleulId);
-    var nom = u ? ((u.pre||u.prenom||'')+' '+(u.nom||'')).trim() : '';
-    if(!nom) nom = (u && (u.identifiant||u.login)) || 'Filleul';
-    var ab = isAbonne(p.filleulId);
-    var xp = xpOf(p.filleulId);
-    return '<tr><td>'+_esc(nom)+'</td>'
-      +'<td>'+(p.date?new Date(p.date).toLocaleDateString('fr-FR'):'—')+'</td>'
-      +'<td style="text-align:center">'+(ab?'<span style="color:#3A8F73;font-weight:700">✓ Abonné</span>':'<span style="color:#9CA3AF">Gratuit</span>')+'</td>'
-      +'<td style="text-align:right;font-weight:700;color:#142554">'+xp+' XP</td></tr>';
-  }).join('') : '<tr><td colspan="4" style="text-align:center;color:#9CA3AF;padding:20px">Aucun filleul pour l\'instant. Partagez votre code !</td></tr>';
-  var shareUrl = (location.origin||'https://veritas-school.com')+'/?ref='+code;
-  var shareMsg = encodeURIComponent('🎓 Rejoins ma classe sur VÉRITAS avec mon code '+code+' et accède aux révisions MINESEC : '+shareUrl);
-  return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-gift"/></svg></span>Mes filleuls & commissions</div>'
-    +'<div class="card mt12" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554">'
-      +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:800;opacity:.85">Votre code parrainage</div>'
-      +'<div style="font-size:30px;font-weight:900;letter-spacing:3px;font-family:monospace;margin:4px 0">'+code+'</div>'
-      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'
-        +'<button class="btn" style="background:rgba(20,37,84,.92);color:#FFC93C;border:none" onclick="navigator.clipboard.writeText(\''+code+'\').then(function(){toast(\'Code copié !\');});"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier le code</button>'
-        +'<a class="btn" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text='+shareMsg+'"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Partager (WhatsApp)</a>'
-        +'<button class="btn" style="background:rgba(20,37,84,.92);color:#fff;border:none" onclick="navigator.clipboard.writeText(\''+shareUrl+'\').then(function(){toast(\'Lien copié !\');});"><svg class="vico bico" aria-hidden="true"><use href="#lc-globe"/></svg>Copier le lien</button>'
-        +'<button class="btn" style="background:#142554;color:#FFC93C;border:none" onclick="genAmbassadorKit(\''+code+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Mon kit ambassadeur (A4)</button>'
-        +'<button class="btn" style="background:#C9A227;color:#142554;border:none;font-weight:700" onclick="genCertificatAmbassadeur()"><svg class="vico bico" aria-hidden="true"><use href="#lc-award"/></svg>Mon certificat d\'ambassadeur</button>'
-      +'</div>'
-    +'</div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">'
-    +_statCard('👥', filleuls.length, 'Filleuls inscrits', '#3C8DFF')
-    +_statCard('🎓', nbAb, 'Filleuls abonnés', '#3A8F73')
-    +_statCard('💰', fmt(ps.solde||0), 'Commission à recevoir', '#FFC93C')
-    +_statCard('✅', fmt(ps.totalVerse||0), 'Déjà versé', '#6C56A6')
-    +'</div>'
-    +'<div class="ib ibi mt12 mb0"><span>💡</span><span>Vous touchez <b>'+parrTxt+'</b> sur chaque paiement d\'un filleul inscrit avec votre code. Versement par MoMo/Orange après validation (espace admin → Partage revenus).</span></div></div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>Suivi de mes filleuls</div>'
-    +'<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse">'
-    +'<thead><tr><th>Filleul</th><th>Inscrit le</th><th style="text-align:center">Statut</th><th style="text-align:right">Progression</th></tr></thead>'
-    +'<tbody>'+rows+'</tbody></table></div></div>';
+  var ses = (typeof SES !== 'undefined' && SES) ? SES : null;
+  if(!ses || (ses.type !== 'enseignant' && !iA())) return na();
+  setTimeout(_codeAmiCharger, 0);
+  return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-gift"/></svg></span>Mon code ami & commissions</div>'
+    + '<div class="card mt12"><div id="codeAmiHote"><div class="s mut" style="padding:20px;text-align:center">Chargement…</div></div>'
+    + '<div style="margin-top:12px"><button class="btn" style="background:#142554;color:#FFC93C;border:none" onclick="genAmbassadorKit((window._codeAmiMoi&&window._codeAmiMoi.code)||\'\')">🖨️ Mon kit ambassadeur (A4)</button> '
+    + '<button class="btn" style="background:#C9A227;color:#142554;border:none;font-weight:700" onclick="genCertificatAmbassadeur()">🏅 Mon certificat d’ambassadeur</button></div></div>';
 };
 
 // ══ v1.9 (#3) — TEST DE POSITIONNEMENT (diagnostic forces/faiblesses) ════════
@@ -34988,7 +35284,11 @@ window.genCertificatAmbassadeur = function(uid){
   var ses = (typeof SES!=='undefined'&&SES) ? SES : null;
   uid = uid || (ses ? ses.id : null);
   if(!uid){ toast('Session requise','warn'); return; }
-  var filleuls = (DB.parrainages||[]).filter(function(p){ return p.parrainId===uid; }).length;
+  // Les filleuls sont comptés par le SERVEUR (registre du Code ami) : DB.parrainages
+  // ne vivait que dans le navigateur de chaque filleul et restait vide ici.
+  var filleuls = (window._codeAmiMoi && typeof window._codeAmiMoi.filleuls === 'number')
+    ? window._codeAmiMoi.filleuls
+    : (DB.parrainages||[]).filter(function(p){ return p.parrainId===uid; }).length;
   var tier = filleuls>=100 ? {c:'#3FA9C6',l:'Diamant'} : filleuls>=50 ? {c:'#C9A227',l:'Or'} : filleuls>=20 ? {c:'#8C99A8',l:'Argent'} : {c:'#B87333',l:'Bronze'};
   var nom = ses ? ((ses.pre||'')+' '+(ses.nom||'')).trim() : '';
   if(!nom){ var u=(DB.visitorAccounts||[]).find(function(v){return v.id===uid;})||(DB.students||[]).find(function(s){return s.id===uid;}); nom=u?((u.pre||u.prenom||'')+' '+(u.nom||'')).trim():'Ambassadeur VÉRITAS'; }
@@ -35021,91 +35321,61 @@ window.genCertificatAssocie = function(idx){
 window.genAmbassadorKit = function(code){
   var ses=(typeof SES!=='undefined'&&SES)?SES:null;
   var nom=ses?((ses.pre||'')+' '+(ses.nom||'')).trim():'';
-  var parrTxt=(typeof _parrainBaremeTxt==='function')?_parrainBaremeTxt():'500 FCFA';
-  var shareUrl=(location.origin||'https://veritas-school.com')+'/?ref='+code;
+  code = String(code || (window._codeAmiMoi && window._codeAmiMoi.code) || '').toUpperCase();
+  if(!code){ if(typeof toast==='function') toast('Code en cours de chargement — réessayez dans un instant','warn'); if(typeof _codeAmiCharger==='function') _codeAmiCharger(); return; }
+  var r = window._CODE_AMI_REGLE || {};
+  var remise = (r.remisePct != null ? r.remisePct : 10), comm = (r.commissionPct != null ? r.commissionPct : 10);
+  var seuil = (typeof fmt==='function') ? fmt(r.seuilVersement || 2000) : '2 000 FCFA';
+  var shareUrl='https://veritas-school.com/?ref='+encodeURIComponent(code);
   var qr='https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&data='+encodeURIComponent(shareUrl);
-  var L=(typeof _prtL==='function')?_prtL():null;
-  var paliers=L?Object.keys(L).map(function(k){var lv=L[k];return '<tr><td style="padding:6px 10px;font-weight:700">'+lv.badge+' '+lv.label+'</td><td style="padding:6px 10px;text-align:center">'+lv.min+'+ ventes</td><td style="padding:6px 10px;text-align:right;font-weight:800;color:#142554">'+Math.round(lv.commission*100)+'%</td></tr>';}).join(''):'';
+  /* Le barème est celui du SERVEUR (api/parrainage.php?action=config), et il
+     tient en une phrase. L'ancien kit imprimait une grille de paliers
+     5/8/10/12 % PLUS « 500 FCFA par paiement » : trois promesses, aucune
+     tenue — un papier distribué en classe ne se rectifie pas. */
   var html='<div style="max-width:760px;margin:0 auto;font-family:Inter,Arial,sans-serif;color:#142554">'
-    +(typeof docHeader==='function'?docHeader('Kit Ambassadeur VÉRITAS'):'<h1>VÉRITAS</h1>')
+    +(typeof docHeader==='function'?docHeader('Code ami VÉRITAS'):'<h1>VÉRITAS</h1>')
     +'<div style="padding:24px 34px">'
     +'<div style="text-align:center;margin-bottom:18px"><div style="font-family:Libre Baskerville,Georgia,serif;font-size:22px;font-weight:700">Ambassadeur VÉRITAS</div>'
     +(nom?'<div style="font-size:15px;color:#475882;margin-top:4px">'+_esc(nom)+'</div>':'')+'</div>'
     +'<div style="display:flex;gap:26px;align-items:center;flex-wrap:wrap;justify-content:center;margin-bottom:22px">'
     +'<div style="text-align:center"><img src="'+qr+'" alt="QR" style="width:180px;height:180px;border:1px solid #ddd;border-radius:10px"><div style="font-size:11px;color:#6b5e52;margin-top:6px">Scannez pour vous inscrire</div></div>'
     +'<div style="text-align:center">'
-      +'<div style="font-size:12px;text-transform:uppercase;letter-spacing:2px;color:#9a7b1c;font-weight:800">Code de parrainage</div>'
+      +'<div style="font-size:12px;text-transform:uppercase;letter-spacing:2px;color:#9a7b1c;font-weight:800">Code ami</div>'
       +'<div style="font-family:Fira Code,monospace;font-size:38px;font-weight:900;letter-spacing:3px;background:#142554;color:#FFC93C;padding:10px 22px;border-radius:12px;margin:8px 0">'+_esc(code)+'</div>'
       +'<div style="font-size:12px;color:#475882">'+_esc(shareUrl)+'</div>'
     +'</div></div>'
-    +'<div style="background:#f5f3ef;border-radius:10px;padding:14px 18px;margin-bottom:18px">'
-      +'<div style="font-weight:800;margin-bottom:8px">💰 Votre commission par palier</div>'
-      +'<table style="width:100%;border-collapse:collapse;font-size:13px"><tbody>'+paliers+'</tbody></table>'
-      +'<div style="font-size:12px;color:#6b5e52;margin-top:8px">+ '+parrTxt+' sur chaque paiement d\'un filleul inscrit avec votre code. Versement MoMo/Orange après validation.</div>'
+    +'<div style="background:#f5f3ef;border-radius:10px;padding:16px 18px;margin-bottom:18px;text-align:center">'
+      +'<div style="font-size:26px;font-weight:900;color:#142554">−'+remise+' % pour vous · '+comm+' % pour votre parrain</div>'
+      +'<div style="font-size:13px;color:#6b5e52;margin-top:6px">Sur vos abonnements et achats dans l’application VÉRITAS, sans limite de durée. Le parrain reçoit sa part sur son Mobile Money dès '+_esc(seuil)+' cumulés.</div>'
     +'</div>'
     +'<div style="font-weight:800;margin-bottom:6px">🚀 Comment ça marche</div>'
     +'<ol style="margin:0 0 14px 0;padding-left:20px;font-size:13px;line-height:1.9">'
-      +'<li>Distribuez cette fiche (ou le code) à vos élèves et parents.</li>'
-      +'<li>Ils s\'inscrivent gratuitement en scannant le QR ou en saisissant votre code.</li>'
-      +'<li>Vous touchez une commission sur leurs achats et abonnements.</li>'
-      +'<li>Suivez vos filleuls et vos gains dans votre espace enseignant.</li>'
+      +'<li>Scannez le QR ou saisissez le code '+_esc(code)+' à l’inscription.</li>'
+      +'<li>Choisissez votre formule : '+_esc(((typeof _formulesAccroche==='function'&&_formulesAccroche())||'').replace(/^Dès/,'dès'))+'</li>'
+      +'<li>La remise s’applique toute seule à chaque paiement MTN MoMo ou Orange Money.</li>'
     +'</ol>'
-    +'<div style="text-align:center;font-size:11px;color:#aaa;border-top:1px solid #eee;padding-top:10px">VÉRITAS Academy · veritas-school.com · Émis le '+(typeof today==='function'?today():new Date().toLocaleDateString('fr-FR'))+'</div>'
+    +'<div style="text-align:center;font-size:11px;color:#aaa;border-top:1px solid #eee;padding-top:10px">VÉRITAS · veritas-school.com · Émis le '+(typeof today==='function'?today():new Date().toLocaleDateString('fr-FR'))+'</div>'
     +'</div></div>';
   if(typeof printDoc==='function') printDoc(html,'Kit Ambassadeur — '+(nom||code));
   else { var w=window.open('','_blank'); if(w){w.document.write(html);w.document.close();w.print();} }
 };
 
-// Capture ref code depuis URL ?ref=VRT...
+// Le code arrive par un lien « ?ref=CODE » (QR imprimé, partage WhatsApp).
+// Tout code plausible est retenu — le serveur, seul, dira s'il vaut quelque chose.
 window._captureReferralCode = function(){
   try {
-    var u = new URL(location.href);
-    var ref = u.searchParams.get('ref');
-    if(ref && /^VRT[A-Z0-9]+$/i.test(ref)){
-      sessionStorage.setItem('_vrtRef', ref.toUpperCase());
-    }
+    var ref = new URL(location.href).searchParams.get('ref');
+    if(ref && /^[A-Z0-9_\-]{3,32}$/i.test(ref)) _codeAmiRetenir(ref);
   } catch(e){}
 };
 try { _captureReferralCode(); } catch(e){}
 
-// Hook inscription : à appeler depuis le flux d'inscription après création du compte
-window._processReferralOnSignup = function(newUserId){
-  try {
-    // Priorité au champ formulaire (rRef ou maRef), sinon sessionStorage
-    var field = (document.getElementById('rRef') || document.getElementById('maRef'));
-    var ref = (field && field.value && field.value.trim()) || sessionStorage.getItem('_vrtRef');
-    if(ref) ref = ref.toUpperCase().trim();
-    if(!ref || !newUserId) return false;
-    // Trouver le parrain — visiteurs inscrits, PUIS enseignants, PUIS élèves
-    var parrainType = 'visiteur';
-    var parrain = (DB.visitorAccounts||[]).find(function(v){
-      return _genReferralCode(v.id)===ref;
-    });
-    if(!parrain){
-      parrain = (DB.teachers||[]).find(function(t){ return _genReferralCode(t.id)===ref; });
-      if(parrain) parrainType = 'enseignant';
-    }
-    if(!parrain){
-      parrain = (DB.students||[]).find(function(s){ return _genReferralCode(s.id)===ref; });
-      if(parrain) parrainType = 'eleve';
-    }
-    if(!parrain || parrain.id===newUserId) return false;
-    DB.parrainages = DB.parrainages || [];
-    DB.parrainages.push({
-      id: gid(), parrainId: parrain.id, filleulId: newUserId, parrainType: parrainType,
-      code: ref, confirmed: true, bonus: PARRAINAGE_BONUS,
-      date: new Date().toISOString()
-    });
-    // Créditer les 2
-    DB.userCredits = DB.userCredits || {};
-    DB.userCredits[parrain.id] = (DB.userCredits[parrain.id]||0) + PARRAINAGE_BONUS;
-    DB.userCredits[newUserId] = (DB.userCredits[newUserId]||0) + PARRAINAGE_BONUS;
-    save();
-    sessionStorage.removeItem('_vrtRef');
-    toast('🎉 +'+fmt(PARRAINAGE_BONUS)+' crédit (parrainage)','ok');
-    return true;
-  } catch(e){ console.warn(e); return false; }
-};
+/* Le parrainage naît désormais sur le SERVEUR, à l'inscription
+   (api/compte.php reçoit `codeParrain`, voir _compteServeurEnregistrer).
+   Cette fonction écrivait un lien local que personne d'autre ne voyait et
+   créditait 500 F que rien ne permettait de dépenser : elle ne fait plus rien,
+   et reste définie pour les deux appelants qui la testent par `typeof`. */
+window._processReferralOnSignup = function(newUserId){ return false; };
 
 // ════════════════════════════════════════════════════════════════════
 // ── v1.2 P2 — MODULE i18n BILINGUE FR/EN ───────────────────────────
@@ -35574,47 +35844,118 @@ window.pgStatsBusiness = function(){
 
 window.pgParrainageAdmin = function(){
   if(!iA()) return na();
-  try {
-    var pars = DB.parrainages||[];
-    var totalBonus = pars.filter(function(p){return p.confirmed;}).length * (PARRAINAGE_BONUS||500);
-    var byParrain = {};
-    pars.forEach(function(p){
-      byParrain[p.parrainId] = (byParrain[p.parrainId]||0) + 1;
-    });
-    var topParrains = Object.entries(byParrain).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
-    var visitors = DB.visitorAccounts||[];
-
-    var topHTML = topParrains.map(function(t,i){
-      var v = visitors.find(function(x){return x.id===t[0];});
-      var nom = v ? (v.pre||'')+' '+(v.nom||'') : 'Anonyme';
-      return '<tr><td>'+(i+1)+'</td><td>'+_esc(nom)+'</td><td><code style="background:#F3F4F6;padding:2px 6px;border-radius:4px">'+_genReferralCode(t[0])+'</code></td><td><b style="color:#3A8F73">'+t[1]+'</b></td><td>'+fmt(t[1]*(PARRAINAGE_BONUS||500))+'</td></tr>';
-    }).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;color:#9CA3AF">Aucun parrainage actif</td></tr>';
-
-    return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-gift"/></svg></span>Programme de parrainage</div>'
-      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
-      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">'
-      +_statCard('🎁', pars.length, 'Parrainages totaux', '#C37199')
-      +_statCard('✅', pars.filter(function(p){return p.confirmed;}).length, 'Confirmés', '#3A8F73')
-      +_statCard('💰', fmt(totalBonus), 'Crédits distribués', '#FFC93C')
-      +_statCard('👥', Object.keys(byParrain).length, 'Parrains actifs', '#6C56A6')
-      +'</div></div>'
-      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-award"/></svg></span>Top 10 parrains</div>'
-      +'<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse">'
-      +'<thead><tr><th>#</th><th>Nom</th><th>Code</th><th>Filleuls</th><th>Bonus généré</th></tr></thead>'
-      +'<tbody>'+topHTML+'</tbody></table></div></div>'
-      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-sliders"/></svg></span>Configuration</div>'
-      +'<div class="fg"><span class="fl">Bonus par parrainage (FCFA)</span>'
-      +'<input class="fi" id="parr_bonus" type="number" value="'+(PARRAINAGE_BONUS||500)+'" min="0" step="100"></div>'
-      +'<button class="btn bi mt10" onclick="window.PARRAINAGE_BONUS=parseInt(_ge(\'parr_bonus\')?.value)||500;DB._parrainageBonus=window.PARRAINAGE_BONUS;save();toast(\'✓ Bonus mis à jour\');"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>'
-      +'</div>';
-  } catch(e){
-    console.error('pgParrainageAdmin:',e);
-    return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-gift"/></svg></span>Parrainage</div><div class="card">Erreur : '+_esc(e.message)+'</div>';
-  }
+  setTimeout(_codeAmiAdminCharger, 0);
+  return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-gift"/></svg></span>Code ami — parrainages, commissions, versements</div>'
+    + '<div id="codeAmiAdmin" class="mt12"><div class="card"><div class="s mut">Lecture du registre sur le serveur…</div></div></div>';
 };
 
-// Restaurer bonus parrainage depuis DB si défini
-try { if(DB && DB._parrainageBonus) window.PARRAINAGE_BONUS = DB._parrainageBonus; } catch(e){}
+/* Le tableau de bord lit le REGISTRE du serveur (api/data/parrainage/), pas la
+   base locale : les commissions y sont écrites par les webhooks de paiement,
+   pendant que l'administrateur n'a pas la page ouverte. */
+window._codeAmiAdminCharger = function(){
+  var hote = document.getElementById('codeAmiAdmin');
+  if(!hote) return;
+  if(!(DB.cloudConfig && DB.cloudConfig.secret)){
+    hote.innerHTML = '<div class="ib ibr"><span>⚠️</span><span>Clé serveur absente sur cet appareil : Paramètres → Cloud. Sans elle, le registre des commissions ne peut pas être lu.</span></div>';
+    return;
+  }
+  _codeAmiApi('admin', { admin:true }).then(function(d){
+    if(!d || !d.ok){ hote.innerHTML = '<div class="ib ibr"><span>⚠️</span><span>' + _esc((d && d.error) || 'Registre illisible') + '</span></div>'; return; }
+    var r = d.regle || {}, t = d.totaux || {};
+    var F = function(n){ return fmt(n || 0); };
+    var dateCourte = function(ts){ return ts ? new Date(ts * 1000).toLocaleDateString('fr-FR') : '—'; };
+    var h = '<div class="card"><div class="ct">Règle en vigueur</div>'
+      + '<div class="fg2">'
+      + '<div class="fg"><span class="fl">Remise du filleul (%)</span><input class="fi" id="caRemise" type="number" min="0" max="50" value="' + (r.remisePct || 0) + '"></div>'
+      + '<div class="fg"><span class="fl">Commission du parrain (%)</span><input class="fi" id="caComm" type="number" min="0" max="50" value="' + (r.commissionPct || 0) + '"></div>'
+      + '<div class="fg"><span class="fl">Versement dès (FCFA)</span><input class="fi" id="caSeuil" type="number" min="500" step="500" value="' + (r.seuilVersement || 2000) + '"></div>'
+      + '</div>'
+      + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caActif"' + (r.actif ? ' checked' : '') + '> Programme actif (les codes s’appliquent)</label>'
+      + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caAuto"' + (r.versementAuto ? ' checked' : '') + '> Versement automatique dès le seuil (CamerPay)</label>'
+      + '<div class="s mut mb8">Bornes serveur : 50 % maximum chacun, 60 % cumulés ; seuil de 500 F minimum. La remise ne s’applique ni aux frais d’inscription, ni à la scolarité, ni aux paniers.</div>'
+      + '<button class="btn bi" onclick="_codeAmiAdminReglages()">Enregistrer la règle</button></div>';
+    h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0">'
+      + _statCard('👥', t.filleuls || 0, 'Filleuls rattachés', '#1E499B')
+      + _statCard('🧾', t.ventes || 0, 'Ventes avec code', '#0E7C86')
+      + _statCard('💰', F(t.gagne), 'Commissions acquises', '#059669')
+      + _statCard('⏳', F(t.du), 'Dues (à verser)', '#B8860B')
+      + _statCard('🚚', F(t.enCours), 'En cours de versement', '#5B4FA8')
+      + _statCard('✅', F(t.verse), 'Versées', '#142554')
+      + '</div>';
+    var ps = d.parrains || [];
+    h += '<div class="card"><div class="ct" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span>Parrains</span>'
+      + '<button class="btn bo sm" onclick="_codeAmiAdminVerser(\'\')">Verser tous les soldes dus</button></div>'
+      + (ps.length ? '<div class="tw"><table><thead><tr><th>Parrain</th><th>Code</th><th>Filleuls</th><th>Ventes</th><th>Gagné</th><th>Versé</th><th>À verser</th><th>En cours</th><th></th></tr></thead><tbody>'
+        + ps.map(function(p){
+            return '<tr><td>' + _esc(p.nom) + (p.blocage ? '<div style="color:#AE5353;font-size:11px">' + _esc(p.blocage) + '</div>' : '') + '</td>'
+              + '<td style="font-family:monospace">' + _esc(p.code) + '</td><td>' + p.filleuls + '</td><td>' + p.ventes + '</td>'
+              + '<td>' + F(p.gagne) + '</td><td>' + F(p.verse) + '</td><td><b>' + F(p.solde) + '</b></td><td>' + F(p.enCours) + '</td>'
+              + '<td>' + (p.solde > 0 && !p.enCours ? '<button class="btn xs bi" onclick="_codeAmiAdminVerser(\'' + _esc(p.benef) + '\')">Verser</button>' : '') + '</td></tr>';
+          }).join('') + '</tbody></table></div>'
+        : '<div class="s mut">Aucune commission encore. Elles apparaissent ici dès le premier paiement d’un filleul.</div>')
+      + '</div>';
+    var vs = d.versements || [];
+    if(vs.length){
+      var libEtat = { prepare:'préparé', soumis:'soumis à CamerPay', verse:'versé', echec:'refusé', incertain:'INCERTAIN — à vérifier' };
+      h += '<div class="card mt12"><div class="ct">Versements</div><div class="tw"><table><thead><tr><th>Date</th><th>Bénéficiaire</th><th>Montant</th><th>Numéro</th><th>État</th><th></th></tr></thead><tbody>'
+        + vs.slice(0, 50).map(function(v){
+            var incertain = v.etat === 'incertain';
+            return '<tr><td>' + dateCourte(v.t) + '</td><td>' + _esc(v.nom) + '</td><td>' + F(v.montant) + '</td><td>' + _esc(v.numero) + '</td>'
+              + '<td>' + _esc(libEtat[v.etat] || v.etat) + (v.raison ? '<div style="font-size:11px;color:var(--ink4)">' + _esc(v.raison) + '</div>' : '') + '</td>'
+              + '<td>' + (incertain
+                  ? '<button class="btn xs bi" onclick="_codeAmiAdminRegler(\'' + _esc(v.ref) + '\',\'verse\')">Parti</button> <button class="btn xs bo" onclick="_codeAmiAdminRegler(\'' + _esc(v.ref) + '\',\'echec\')">Jamais parti</button>'
+                  : '') + '</td></tr>';
+          }).join('') + '</tbody></table></div>'
+        + '<div class="s mut mt8">« Incertain » : la réponse de CamerPay s’est perdue. Vérifiez sur camerpay.biz avant de trancher — relancer sans vérifier risquerait un double versement.</div></div>';
+    }
+    var ops = d.operations || [];
+    if(ops.length){
+      h += '<div class="card mt12"><div class="ct">Dernières ventes avec code</div><div class="tw"><table><thead><tr><th>Date</th><th>Réf.</th><th>Code</th><th>Payé</th><th>Commission</th><th>Note</th></tr></thead><tbody>'
+        + ops.slice(0, 50).map(function(o){
+            return '<tr><td>' + dateCourte(o.t) + '</td><td style="font-family:monospace;font-size:11px">' + _esc(o.ref) + '</td><td>' + _esc(o.code || '—') + '</td>'
+              + '<td>' + F(o.paye) + '</td><td>' + (o.commission ? F(o.commission) : '—') + '</td>'
+              + '<td style="font-size:11px">' + _esc(o.refus ? 'refusée : ' + o.refus : (o.annule ? 'reprise (remboursement) : ' + F(o.annule) : '')) + '</td></tr>';
+          }).join('') + '</tbody></table></div></div>';
+    }
+    hote.innerHTML = h;
+  });
+};
+
+window._codeAmiAdminReglages = function(){
+  var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+  var c = function(id){ var e = document.getElementById(id); return !!(e && e.checked); };
+  _codeAmiApi('reglages', { admin:true, body:{
+    remisePct: parseInt(v('caRemise'), 10), commissionPct: parseInt(v('caComm'), 10),
+    seuilVersement: parseInt(v('caSeuil'), 10), actif: c('caActif'), versementAuto: c('caAuto')
+  }}).then(function(j){
+    if(j && j.ok){
+      window._CODE_AMI_REGLE = Object.assign({}, window._CODE_AMI_REGLE, j.regle || {});
+      window._codeAmiConfigP = null;
+      toast('✓ Règle enregistrée sur le serveur : ' + _codeAmiRegleTxt());
+      _codeAmiAdminCharger();
+    } else toast((j && j.error) || 'Enregistrement refusé', 'err');
+  });
+};
+
+window._codeAmiAdminVerser = function(benef){
+  var base = (typeof _payApiBase === 'function') ? _payApiBase() : (_VRT_API);
+  if(!confirm(benef ? 'Verser maintenant le solde de ce parrain sur son Mobile Money ?' : 'Verser tous les soldes dus (au-dessus du seuil) ?')) return;
+  fetch(base + '/' + ((typeof _payProviderFile === 'function') ? _payProviderFile() : 'payment_camerpay.php') + '?action=parrainage_verser', {
+    method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + ((DB.cloudConfig && DB.cloudConfig.secret) || '') },
+    body: JSON.stringify({ benef: benef || '' })
+  }).then(function(r){ return r.json(); }).then(function(j){
+    toast(j && j.message ? j.message : ((j && j.error) || 'Réponse inattendue'), (j && j.success) ? 'ok' : 'warn');
+    _codeAmiAdminCharger();
+  }).catch(function(){ toast('Serveur de paiement injoignable', 'err'); });
+};
+
+window._codeAmiAdminRegler = function(ref, etat){
+  if(!confirm(etat === 'verse' ? 'Confirmer que ce versement est bien PARTI (vérifié sur camerpay.biz) ?' : 'Confirmer que ce versement n’est JAMAIS parti ? Le montant revient au solde du parrain.')) return;
+  _codeAmiApi('versement_regler', { admin:true, body:{ ref:ref, etat:etat } }).then(function(j){
+    toast(j && j.ok ? '✓ Versement réglé' : ((j && j.error) || 'Refusé'), j && j.ok ? 'ok' : 'warn');
+    _codeAmiAdminCharger();
+  });
+};
 
 // ════════════════════════════════════════════════════════════════════
 // ── v1.2 P3 — #13 IA ADAPTATIVE — Spaced Repetition SM-2 ───────────
@@ -40599,43 +40940,26 @@ var _promoDiscount = 0;
    — il borne désormais tout sous-paiement à la meilleure remise active en base.
    Appliquer ici une remise que le serveur ignore ferait payer le client pour
    rien : paiement accepté, accès refusé. */
+/* ⚠️ 13/09/2026 — LA REMISE N'EST PLUS CALCULÉE ICI.
+   Cette fonction lisait DB.promoCodes dans le NAVIGATEUR. Or un visiteur ne
+   reçoit jamais la base : chez lui la table était celle du code par défaut, et
+   tout code réellement créé par l'administration répondait « invalide ». Et le
+   code saisi ne partait pas au serveur — qui ne savait donc ni quelle remise
+   honorer, ni qui rémunérer. Elle délègue désormais à _codeAmiAppliquer, qui
+   interroge api/parrainage.php : la remise, le parrain et le montant affichés
+   sont ceux que ?action=init acceptera. `_promoApplied` reste renseigné pour
+   l'étape ③ (message WhatsApp des paiements manuels). */
 function appliquerPromo(originalMontant, ref){
-  var code = (document.getElementById('promoInput')?.value||'').trim().toUpperCase();
-  var fb = document.getElementById('promoFeedback');
-  var _pose = function(m){
-    if(!ref) return;
-    window._VRT_PAYX = window._VRT_PAYX || {};
-    window._VRT_PAYX[ref] = window._VRT_PAYX[ref] || {};
-    window._VRT_PAYX[ref].montantFinal = m;
-  };
-  if(!code){ if(fb) fb.innerHTML=''; _promoApplied=null; _promoDiscount=0; _pose(0); return; }
-
-  var promo = ((typeof DB!=='undefined' && DB.promoCodes) || []).find(function(p){
-    return p && p.actif && String(p.code||'').toUpperCase() === code;
+  if(!ref || typeof _codeAmiAppliquer !== 'function') return;
+  window._VRT_PAYX = window._VRT_PAYX || {};
+  var X = window._VRT_PAYX[ref] = window._VRT_PAYX[ref] || {};
+  if(!X.montant) X.montant = originalMontant;
+  return _codeAmiAppliquer(ref, false).then(function(j){
+    _promoApplied = (j && j.ok && X.code) ? X.code : null;
+    _promoDiscount = (X.remise && X.montant) ? Math.round(X.remise * 100 / X.montant) : 0;
+    if(j && j.ok && X.remise && typeof toast === 'function') toast('✅ Remise appliquée — ' + new Intl.NumberFormat('fr-FR').format(X.remise) + ' FCFA de moins');
+    return j;
   });
-  if(!promo){
-    if(fb) fb.innerHTML='<span style="color:var(--re);font-size:12px;font-weight:600">❌ Code invalide ou expiré</span>';
-    _promoApplied=null; _promoDiscount=0; _pose(0);
-    toast('❌ Code invalide ou expiré','warn');
-    return;
-  }
-
-  var val = parseFloat(promo.reduction)||0;
-  var reduction = (promo.type === 'fixed') ? Math.round(val)
-                                           : Math.round(originalMontant * val / 100);
-  if(reduction >= originalMontant) reduction = originalMontant - 1;   // jamais 0 FCFA à encaisser
-  if(reduction < 0) reduction = 0;
-  var newTotal = originalMontant - reduction;
-
-  _promoApplied = code;
-  _promoDiscount = Math.round(reduction * 100 / (originalMontant||1));
-  _pose(newTotal);
-
-  if(fb) fb.innerHTML='<span style="color:var(--gr);font-size:12px;font-weight:600">✅ '+_esc(promo.desc||code)+' — -'+new Intl.NumberFormat('fr-FR').format(reduction)+' FCFA → Nouveau total : <strong>'+new Intl.NumberFormat('fr-FR').format(newTotal)+' FCFA</strong></span>';
-  toast('✅ Code appliqué — '+new Intl.NumberFormat('fr-FR').format(reduction)+' FCFA de réduction !');
-
-  var totalEl = document.getElementById('payStepTotal');
-  if(totalEl) totalEl.textContent = new Intl.NumberFormat('fr-FR').format(newTotal) + ' FCFA';
 }
 window.appliquerPromo = appliquerPromo;
 
@@ -40660,7 +40984,11 @@ openPaymentModal = function(payInfo){
   // _payInitCampay le rattache au corps de la requête.
   try{
     window._VRT_PAYX = window._VRT_PAYX || {};
-    window._VRT_PAYX[ref] = { lignes: (payInfo.lignes && payInfo.lignes.length) ? payInfo.lignes : null };
+    window._VRT_PAYX[ref] = { lignes: (payInfo.lignes && payInfo.lignes.length) ? payInfo.lignes : null,
+      // Ce que le Code ami doit savoir pour interroger le serveur : QUOI est
+      // acheté (le tarif de référence vient de là) et pour QUI (formule Famille).
+      intent: payInfo.intent || 'generic', targetId: payInfo.targetId || '', montant: montant,
+      beneficiaires: (payInfo.beneficiaires && payInfo.beneficiaires.length) ? payInfo.beneficiaires : null };
   }catch(e){}
 
   _promoApplied = null;
@@ -40713,7 +41041,9 @@ openPaymentModal = function(payInfo){
     // On annonce donc les frais opérateur AVANT le paiement, et on dit qu'ils
     // sont absorbés : le client paie le montant affiché, pas un franc de plus.
     +'<div style="margin-top:10px;padding:7px 11px;background:rgba(255,255,255,.08);border-radius:8px;font-size:11.5px;line-height:1.5">'
-      +'Frais opérateur estimés (2 %) : <strong>'+new Intl.NumberFormat('fr-FR').format(Math.round(montant*0.02))+' FCFA</strong>'
+      // Taux réglable dans « Prix & calculs » (DB.tarifs.fraisOperateurPct) : il
+      // suit le forfait réellement souscrit chez le prestataire.
+      +'Frais opérateur estimés ('+String((DB.tarifs&&DB.tarifs.fraisOperateurPct!=null)?DB.tarifs.fraisOperateurPct:2).replace('.',',')+' %) : <strong>'+new Intl.NumberFormat('fr-FR').format(Math.round(montant*((DB.tarifs&&DB.tarifs.fraisOperateurPct!=null)?DB.tarifs.fraisOperateurPct:2)/100))+' FCFA</strong>'
       +' — <span style="opacity:.85">pris en charge par le centre. Vous êtes débité de <strong style="color:#FFC93C">'+montantFmt+'</strong>.</span>'
     +'</div>'
     +'</div>'
@@ -40723,7 +41053,10 @@ openPaymentModal = function(payInfo){
     +'<div class="fg"><span class="fl">Numéro WhatsApp *</span><input class="fi" id="payTel" type="tel" value="'+_esc(_cTel)+'" placeholder="+237 6XX XX XX XX"></div>'
     +'<div class="fg"><span class="fl">Email (pour PDF)</span><input class="fi" id="payEmail" type="email" value="'+_esc(_cMail)+'" placeholder="votre@email.com"></div>'
     +'</div>'
-    +'<div style="margin-top:12px"><span class="fl">Code promo</span><div style="display:flex;gap:8px"><input class="fi" id="promoInput" placeholder="Ex: ELEVE10" style="flex:1;text-transform:uppercase"><button class="btn bi sm" onclick="appliquerPromo('+montant+',\''+ref+'\')" style="white-space:nowrap">Appliquer</button></div><div id="promoFeedback" style="margin-top:6px"></div></div>'
+    // Pré-rempli avec le code reçu par lien (ou transmis par l'écran d'avant) :
+    // le filleul n'a rien à retenir. Un parrain rattaché à vie s'applique même
+    // champ vide — le serveur le sait (voir _codeAmiAppliquer à l'ouverture).
+    +'<div style="margin-top:12px"><span class="fl">Code ami ou code promo</span><div style="display:flex;gap:8px"><input class="fi" id="promoInput" placeholder="Ex : VRT7K2M9Q" value="'+_esc(String(payInfo.code||((typeof _codeAmiRetenu==='function')?_codeAmiRetenu():'')||'').toUpperCase())+'" style="flex:1;text-transform:uppercase"><button class="btn bi sm" onclick="appliquerPromo('+montant+',\''+ref+'\')" style="white-space:nowrap">Appliquer</button></div><div id="promoFeedback" style="margin-top:6px"></div></div>'
     +'<div style="margin-top:16px;text-align:right"><button class="btn bi" onclick="_payGoStep(2)">Suivant →</button></div>'
     +'</div>';
 
@@ -40743,7 +41076,8 @@ openPaymentModal = function(payInfo){
       +'</div>'
       +'<div style="font-size:11px;color:var(--ink4);line-height:1.5;margin-bottom:8px">'+_payTileTexte()+'</div>'
       +'<input class="fi" id="campayPhoneInput_'+ref+'" placeholder="'+_payTilePlaceholder()+'" value="'+String(payInfo.customerTel||'').replace(/[^0-9+]/g,'')+'" style="font-size:12px;padding:8px 10px;width:100%;margin-bottom:8px">'
-      +'<button class="btn" style="width:100%;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;border:none;border-radius:8px;padding:12px;font-weight:800;font-size:13px;cursor:pointer" onclick="_payInitCampay(\''+ref+'\','+montant+',\''+String(label).replace(/[\\\\\x27"]/g,'')+'\',\''+(payInfo.intent||'generic')+'\',\''+(payInfo.targetId||'')+'\',\''+(payInfo.customerAccountId||'')+'\',\''+String(payInfo.customerNom||'').replace(/[\\\\\x27"]/g,'')+'\')">⚡ Payer maintenant — '+montantFmt+'</button>'
+      // id : _codeAmiAppliquer repeint le montant du bouton après une remise.
+      +'<button class="btn" id="payCampayBtn_'+ref+'" style="width:100%;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;border:none;border-radius:8px;padding:12px;font-weight:800;font-size:13px;cursor:pointer" onclick="_payInitCampay(\''+ref+'\','+montant+',\''+String(label).replace(/[\\\\\x27"]/g,'')+'\',\''+(payInfo.intent||'generic')+'\',\''+(payInfo.targetId||'')+'\',\''+(payInfo.customerAccountId||'')+'\',\''+String(payInfo.customerNom||'').replace(/[\\\\\x27"]/g,'')+'\')">⚡ Payer maintenant — '+montantFmt+'</button>'
     +'</div>')
     : '';
 
@@ -40824,6 +41158,15 @@ openPaymentModal = function(payInfo){
   // setTimeout laisse M() poser le DOM — _payGoStep lit les champs, qui
   // n'existent pas encore à cet instant.
   if(_coordConnues) setTimeout(function(){ try{ _payGoStep(2); }catch(e){} }, 0);
+
+  /* Code ami : on interroge le serveur dès l'ouverture, avec le code retenu (ou
+     sans code, pour un filleul rattaché à vie). La modale ne l'attend pas — un
+     tunnel qui met une seconde à s'ouvrir coûte plus qu'un total qui se
+     corrige sous les yeux. Même doctrine que le tarif des cahiers
+     (livrets/gate.js) : la sonde part à l'OUVERTURE, pas au clic sur Payer. */
+  if(typeof _codeAmiAppliquer === 'function'){
+    setTimeout(function(){ try{ _codeAmiAppliquer(ref, true); }catch(e){} }, 0);
+  }
 };
 window.openPaymentModal = openPaymentModal;
 
@@ -40838,7 +41181,15 @@ function _payGoStep(step){
     if(!nom||!tel){toast('Nom et WhatsApp requis','warn');return;}
     // Save client info to latest payAttempt
     var latest = (DB.payAttempts||[])[(DB.payAttempts||[]).length-1];
-    if(latest){latest.clientNom=nom;latest.clientTel=tel;latest.clientEmail=(document.getElementById('payEmail')?.value||'').trim();if(_promoApplied){latest.promo=_promoApplied;latest.discount=_promoDiscount;latest.montantFinal=Math.round(latest.montant*(100-_promoDiscount)/100);}save();}
+    if(latest){latest.clientNom=nom;latest.clientTel=tel;latest.clientEmail=(document.getElementById('payEmail')?.value||'').trim();
+      /* La remise vient du serveur (_VRT_PAYX[ref]), jamais d'un pourcentage
+         recalculé ici. Un code tapé sans cliquer « Appliquer » est vérifié au
+         passage : sinon le filleul payait plein tarif avec un code valable. */
+      var _X=(window._VRT_PAYX||{})[latest.ref]||{};
+      var _saisi=(document.getElementById('promoInput')?.value||'').trim().toUpperCase();
+      if(_saisi && _saisi!==_X.code && typeof _codeAmiAppliquer==='function'){ _codeAmiAppliquer(latest.ref, false); }
+      if(_X.code){ latest.promo=_X.code; latest.code=_X.code; latest.montantFinal=_X.montantFinal||latest.montant; }
+      save();}
   }
 
   if(step===3){
@@ -40992,17 +41343,18 @@ function _mAddPromo(){
      partenaire (il découle de son PALIER, il ne se saisit pas). */
   var parts = (typeof DB!=='undefined' && DB.partners) ? DB.partners.filter(function(p){return p && p.status==='active';}) : [];
   var L = (typeof _prtL==='function') ? _prtL() : {};
+  var _rgA = window._CODE_AMI_REGLE || {};
+  var _commA = (_rgA.commissionPct != null ? _rgA.commissionPct : 10);
   var optsP = '<option value="">— Aucun (simple réduction, personne n\'est rémunéré) —</option>'
     + parts.map(function(p){
-        var lv = L[p.level||'bronze'] || L.bronze || {commission:0.05,label:'Bronze'};
         return '<option value="'+_esc(p.id)+'">'+_esc(p.nom||p.name||p.code||p.id)
-             + ' — '+(lv.label||p.level||'Bronze')+' · '+Math.round((lv.commission||0)*100)+' % de commission</option>';
+             + ' — '+_commA+' % de commission (Code ami)</option>';
       }).join('');
 
   M('🏷️ Nouveau code promo','',
     '<div class="fg2">'
     +'<div class="fg"><span class="fl">Code *</span><input class="fi" id="npCode" placeholder="MONCODE" style="text-transform:uppercase"></div>'
-    +'<div class="fg"><span class="fl">Réduction (%) *</span><input class="fi" id="npPct" type="number" min="1" max="100" placeholder="10"></div>'
+    +'<div class="fg"><span class="fl">Réduction (%) *</span><input class="fi" id="npPct" type="number" min="1" max="50" value="10" placeholder="10"><div style="font-size:11px;color:var(--ink4)">50 % au plus : le serveur ramène tout code au-delà.</div></div>'
     +'<div class="fg"><span class="fl">Label</span><input class="fi" id="npLabel" placeholder="Description courte"></div>'
     +'<div class="fg"><span class="fl">Utilisations max *</span><input class="fi" id="npMax" type="number" min="1" placeholder="100"></div>'
     +'</div>'
@@ -41010,7 +41362,7 @@ function _mAddPromo(){
       +'<select class="fi" id="npOwner">'+optsP+'</select></div>'
     +'<div class="ib ibt" style="margin-top:10px"><span>💡</span><span>'
       +(parts.length
-        ? 'La <strong>réduction</strong> est ce que le client économise. La <strong>commission</strong> est ce que touche le parrain : elle découle de son palier (Bronze 5 % · Argent 8 % · Or 10 % · Diamant 12 %) et ne se saisit pas ici. Elle est recalculée par le serveur à chaque vente.'
+        ? 'La <strong>réduction</strong> est ce que le client économise. La <strong>commission</strong> est ce que touche le propriétaire du code : '+_commA+' % du montant réellement payé, créditée par le serveur à la confirmation du paiement et versée sur son Mobile Money (règle « Code ami », réglable dans Parrainage). Un code sans propriétaire ne rémunère personne.'
         : 'Aucun partenaire actif pour l\'instant : ce code réduira le prix sans rémunérer personne. Créez d\'abord un partenaire dans <strong>Partenaires</strong> pour en faire un code de parrainage.')
     +'</span></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveNewPromo()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Créer</button>');
@@ -45196,6 +45548,7 @@ function _cagCreer(eleveId){
     if(!sec) return '';
     if(FONCTIONS[sec]) return sec;
     if(sec === 'livre') return 'livre';   // lien partagé d'un manuel : #livre?id=…
+    if(sec === 'abonnement') return 'abonnement';   // bouton « Choisir » d'une formule : #abonnement?plan=…
     // Programmes de partenariat : « partenariat-parent », « partenariat-sponsor »…
     if(sec.indexOf('partenariat-') === 0) return sec;
     if(sec.indexOf('pour-') === 0) return sec;          // hubs par public (v1.14)
@@ -45229,6 +45582,27 @@ function _cagCreer(eleveId){
         window._vCurrentSec = 'livre:' + id;
         _bookOpenFromHash(id);
       }
+      return;
+    }
+
+    /* Formule choisie sur la page des tarifs : #abonnement?plan=abo_pro_m[&ref=CODE].
+       Ces boutons tournaient en rond sur #tarifs depuis la refonte d'août — le
+       bouton le plus proche de l'argent du site ne menait nulle part. On rend
+       d'abord le catalogue SOUS la modale (jamais de page blanche derrière). */
+    if(sec === 'abonnement'){
+      var qa = (window.location.hash || '').split('?')[1] || '';
+      var pid = '', codeLien = '';
+      qa.split('&').forEach(function(kv){
+        var p = kv.split('=');
+        var k = decodeURIComponent(p[0] || ''), v = decodeURIComponent(p[1] || '');
+        if(k === 'plan') pid = v;
+        if(k === 'ref' || k === 'code') codeLien = v;
+      });
+      if(codeLien && typeof _codeAmiRetenir === 'function') _codeAmiRetenir(codeLien);
+      if(window._vCurrentSec === 'abonnement:' + pid) return;
+      window._vCurrentSec = 'abonnement:' + pid;
+      try{ window.vShowSec('elearning', null); }catch(e){}
+      if(pid && typeof _ouvrirAbonnementAncre === 'function') setTimeout(function(){ _ouvrirAbonnementAncre(pid); }, 300);
       return;
     }
 
@@ -47207,6 +47581,18 @@ function _avQte(s){
 }
 
 function _accOffre(){
+  /* Les formules d'abord : triée par prix, l'ancienne sélection mêlait le
+     Starter élève au forfait Enseignant (tous deux à 1 000 F) et aux
+     prestations parents. La grille partagée ne montre que les formules. */
+  var grille = (typeof _formulesGrille === 'function') ? _formulesGrille({ avMax:3 }) : '';
+  if(grille){
+    return '<div class="acc-head"><h2 class="acc-pill gold"><span class="ic">'
+      +'<svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-sparkles"/></svg></span>'
+      +' Ce que débloque l\'abonnement</h2>'
+      +'<div class="acc-sub">Les corrigés et les jeux restent gratuits. L\'abonnement ouvre les cours de la classe, les épreuves corrigées et le tuteur. '+_esc((typeof _formulesAccroche==='function'&&_formulesAccroche())||'')+'</div></div>'
+      + grille
+      +'<div class="acc-plans-note"><button class="acc-lien-sec" onclick="vShowSec(\'tarifs\',null)">Comparer toutes les offres →</button></div>';
+  }
   var plans = ((typeof DB!=='undefined' && DB.elearning && DB.elearning.plans) || [])
     .filter(function(p){ return p && p.actif !== false && Number(p.prix) > 0; });
   if(!plans.length) return '';
@@ -47244,6 +47630,147 @@ function _accOffre(){
 }
 window._accOffre = _accOffre;
 
+/* ═══════════ GRILLE DES FORMULES (14/09/2026) ═══════════
+   UNE seule façon de présenter Starter / Pro / Élite / Famille, partagée par
+   l'accueil (_accOffre), la page Tarifs et la section E-learning.
+
+   Pourquoi un composant neuf plutôt que les cartes `.acc-plan` : elles
+   portaient TROIS couches de style (app.css, puis deux passes de
+   theme-lws.css à trois identifiants et !important). La dernière dessine un
+   « médaillon » de prix à cheval sur un bandeau, calibré pour le balisage de
+   l'accueil (étiquette + nom + prix). La page Tarifs n'a pas d'étiquette :
+   mesuré le 13/09/2026, le médaillon de 132 px remontait de 66 px sur un
+   bandeau de 90 px et couvrait le nom du plan. Et une règle générale de
+   theme-lws.css posait une pastille colorée devant CHAQUE puce, coche
+   comprise : « • ✓ » sur chaque avantage. Des classes neuves (`vfo-*`) ne
+   héritent d'aucune de ces couches.
+
+   Chaque carte dit le prix au mois ET l'offre à l'année avec son ancien prix
+   barré (demande de Jacques, 13/09/2026) — pas de bascule à manipuler pour
+   découvrir la remise. */
+function _formulesPlans(){
+  var plans = (typeof DB!=='undefined' && DB.elearning && DB.elearning.plans) || [];
+  var g = {};
+  var poser = function(p){
+    if(!p || !p.formule || !p.groupe || p.actif === false || !(Number(p.prix) > 0)) return;
+    g[p.groupe] = g[p.groupe] || {};
+    if(!g[p.groupe][p.variante || 'mois']) g[p.groupe][p.variante || 'mois'] = p;
+  };
+  plans.forEach(poser);
+  // Base d'avant la mise à jour (ou visiteur dont la sonde publique n'a pas
+  // encore répondu) : le catalogue du code, miroir exact du serveur.
+  if(!Object.keys(g).length && typeof _formulesDefaut === 'function') _formulesDefaut().forEach(poser);
+  return ['starter','pro','elite','famille']
+    .filter(function(k){ return g[k] && g[k].mois; })
+    .map(function(k){ return { groupe:k, mois:g[k].mois, an:g[k].an || null }; });
+}
+
+/* « N mois offerts » se DÉDUIT des prix, qui sont réglables : écrit en dur, il
+   mentirait dès que l'administration change la remise annuelle. Quand l'écart
+   ne tombe pas sur un nombre entier de mois, on dit le pourcentage. */
+function _formuleEcoTxt(m, a){
+  if(!m || !a || !(a.ancien > a.prix) || !(m.prix > 0)) return '';
+  var eco = a.ancien - a.prix, n = eco / m.prix, r = Math.round(n);
+  if(r >= 1 && Math.abs(n - r) < 0.01) return r + ' mois offert' + (r > 1 ? 's' : '');
+  return '−' + Math.round(eco * 100 / a.ancien) + ' %';
+}
+window._formuleEcoTxt = _formuleEcoTxt;
+
+// L'accroche des pages de prix, calculée sur la grille en vigueur.
+function _formulesAccroche(){
+  var gs = _formulesPlans();
+  if(!gs.length) return '';
+  var min = 0, eco = '';
+  for(var i = 0; i < gs.length; i++){
+    if(!min || gs[i].mois.prix < min) min = gs[i].mois.prix;
+    if(!eco) eco = _formuleEcoTxt(gs[i].mois, gs[i].an);
+  }
+  return 'Dès ' + fmt(min) + ' par mois, sans engagement' + (eco ? ' — ' + eco + ' si vous payez l’année en une fois' : '') + '.';
+}
+window._formulesAccroche = _formulesAccroche;
+
+function _formulesGrille(opts){
+  opts = opts || {};
+  var gs = _formulesPlans();
+  if(!gs.length) return '';
+  var rg = window._CODE_AMI_REGLE || {};
+  var remise = (rg.remisePct != null ? rg.remisePct : 10), comm = (rg.commissionPct != null ? rg.commissionPct : 10);
+  var POUR = { starter:'Élève', pro:'Année d’examen', elite:'Accompagnement', famille:'Toute la famille' };
+  var nomCourt = function(p){
+    var n = String(p.nom || '').replace(/\s*[—–-]\s*ANN[ÉE]E\s*$/i, '').trim();
+    return n ? n.charAt(0) + n.slice(1).toLowerCase() : 'Formule';
+  };
+  var avMax = opts.avMax || 5;
+  var h = '<div class="vfo">';
+  if(opts.codeAmi !== false){
+    h += '<div class="vfo-ami">'
+      +   '<span class="vfo-ami-ic" aria-hidden="true">🎁</span>'
+      +   '<span class="vfo-ami-tx"><b>Code ami</b> — le code d’un ami vous fait payer <b>' + remise + ' % de moins</b> sur vos abonnements et achats, sans limite de durée. '
+      +   'Partagez le vôtre : <b>' + comm + ' %</b> de ce que paient vos amis vous revient, sur votre Mobile Money.</span>'
+      +   '<button type="button" class="vfo-ami-btn" onclick="mParrainage()">Mon code ami</button>'
+      + '</div>';
+  }
+  h += '<div class="vfo-grille">';
+  gs.forEach(function(f){
+    var m = f.mois, a = f.an, pop = !!m.populaire;
+    var av = (m.avantages || []).map(function(s){ return String(s).replace(/^[✅✔️•\-\s]+/, '').trim(); })
+                                .filter(function(s){ return s && s.indexOf('🔒') !== 0; }).slice(0, avMax);
+    var eco = (a && a.ancien > a.prix) ? a.ancien - a.prix : 0;
+    var ecoTxt = _formuleEcoTxt(m, a);
+    h += '<article class="vfo-carte' + (pop ? ' vfo-pop' : '') + '">'
+      +   (pop ? '<span class="vfo-ruban">Le plus choisi</span>' : '')
+      +   '<div class="vfo-pour">' + _esc(m.cible || POUR[f.groupe] || '') + '</div>'
+      +   '<div class="vfo-nom">' + _esc(nomCourt(m)) + '</div>'
+      // Espace insécable ordinaire pour le grand chiffre : l'espace fine du
+      // format français disparaît à 40 px en gras, « 1 000 » s'y lit « 1000 ».
+      +   '<div class="vfo-prix"><span class="vfo-montant">' + fmtN(m.prix).replace(/ /g, ' ') + '</span><span class="vfo-devise">FCFA</span></div>'
+      +   '<div class="vfo-unite">par mois · sans engagement</div>'
+      +   (a ? '<div class="vfo-an">'
+             +   '<div class="vfo-an-l">Ou toute l’année en une fois :</div>'
+             +   '<div class="vfo-an-p">' + (eco ? '<s>' + fmtN(a.ancien) + ' F</s>' : '') + '<b>' + fmtN(a.prix) + ' F</b>'
+             +   (eco ? '<em>' + ecoTxt + '</em>' : '') + '</div>'
+             + '</div>' : '')
+      +   '<ul class="vfo-av">' + av.map(function(s){ return '<li>' + _ico('check', 15) + '<span>' + _esc(s) + '</span></li>'; }).join('') + '</ul>'
+      +   '<div class="vfo-actions">'
+      +     '<button type="button" class="vfo-cta" onclick="_ouvrirAbonnementAncre(\'' + _esc(m.id) + '\')">Choisir ' + _esc(nomCourt(m)) + '</button>'
+      +     (a ? '<button type="button" class="vfo-cta2" onclick="_ouvrirAbonnementAncre(\'' + _esc(a.id) + '\')">Payer l’année — ' + fmtN(a.prix) + ' F</button>' : '')
+      +   '</div>'
+      + '</article>';
+  });
+  h += '</div>'
+    + '<div class="vfo-note">' + _ico('shield', 14) + ' MTN Mobile Money ou Orange Money · accès ouvert dès la confirmation · reçu numéroté · aucune reconduction automatique</div>'
+    + '</div>';
+  return h;
+}
+window._formulesGrille = _formulesGrille;
+
+/* Les autres offres (enseignants, prestations parents, établissements) :
+   des lignes sobres, sous les formules. `surDevis` ou prix nul → « Sur devis »
+   et une demande, jamais « 0 XAF » ni un bouton de paiement. */
+function _autresOffres(){
+  var plans = ((typeof DB!=='undefined' && DB.elearning && DB.elearning.plans) || [])
+    .filter(function(p){ return p && !p.formule && p.actif !== false && p.enVente !== false; });
+  // Les anciens forfaits élève remplacés par les formules ne se proposent plus
+  // (le serveur ne les sert plus aux visiteurs — api/public_data.php).
+  var retires = { plan1:1, plan2:1, plan4:1, plan5:1, plan6:1 };
+  plans = plans.filter(function(p){ return !retires[p.id] || p.enVente === true; });
+  if(!plans.length) return '';
+  var PUB = { enseignant:'Enseignants', parent:'Parents', etablissement:'Établissements', eleve:'Élèves' };
+  return '<div class="vfo-autres">' + plans.map(function(p){
+    var devis = !!p.surDevis || !(Number(p.prix) > 0);
+    var nom = String(p.nom || '').replace(/[\'"\\]/g, '');
+    return '<div class="vfo-ligne">'
+      + '<div class="vfo-ligne-tx"><span class="vfo-ligne-pub">' + _esc(PUB[p.public] || p.cible || '') + '</span>'
+      +   '<span class="vfo-ligne-nom">' + _esc(p.nom || '') + '</span></div>'
+      + '<div class="vfo-ligne-prix">' + (devis ? 'Sur devis' : fmt(Number(p.prix)) + ' <small>' + _esc(_planUnite(p)) + '</small>') + '</div>'
+      + (devis
+          ? '<button type="button" class="vfo-cta2" onclick="(typeof mDevisAccompagnement===\'function\'?mDevisAccompagnement():window.open(\'https://wa.me/237697637739?text=\'+encodeURIComponent(\'Bonjour VÉRITAS, je souhaite un devis : ' + _esc(nom) + '\'),\'_blank\'))">Demander un devis</button>'
+          : '<button type="button" class="vfo-cta2" onclick="_ouvrirAbonnementAncre(\'' + _esc(p.id) + '\')">Choisir</button>')
+      + '</div>';
+  }).join('') + '</div>';
+}
+window._autresOffres = _autresOffres;
+
 /* ════════ PAGE TARIFS (v1.17) ════════
    Ce qui reste gratuit, ce que l'abonnement ajoute, et tous les plans réels. */
 function pgTarifs(){
@@ -47256,21 +47783,10 @@ function pgTarifs(){
                  'Outils de calcul (moyenne, note à viser)','Calendrier scolaire et orientation']
     .map(function(s){ return '<li>'+_ico('check',14)+'<span>'+_esc(s)+'</span></li>'; }).join('');
 
-  var cartes = plans.map(function(p){
-    var av = p.avantages || p.features || [];
-    if(!Array.isArray(av)) av = String(av).split('\n');
-    av = av.map(function(s){ return String(s).trim(); }).filter(Boolean);
-    return '<div class="acc-plan">'
-      +'<div class="acc-plan-nom">'+_esc(p.nom||'Abonnement')+'</div>'
-      +'<div class="acc-plan-prix">'+fmt(Number(p.prix))+'<small> / '+_esc(p.duree||'an')+'</small></div>'
-      +'<ul class="acc-plan-av">'+av.map(function(s){
-          var bloque = s.indexOf('🔒') === 0;
-          var txt = s.replace(/^[✅✔️🔒•\-\s]+/,'').trim();
-          return '<li'+(bloque?' class="off"':'')+'>'+_ico(bloque?'lock':'check',14)+'<span>'+_esc(txt)+'</span></li>';
-        }).join('')+'</ul>'
-      +'<button class="btn bi" style="width:100%;margin-top:10px" onclick="vShowSec(\'elearning\',null)">Souscrire →</button>'
-    +'</div>';
-  }).join('');
+  // Les formules en grille, les autres offres en lignes (voir _formulesGrille).
+  var cartes = (typeof _formulesGrille === 'function') ? _formulesGrille() : '';
+  var autres = (typeof _autresOffres === 'function') ? _autresOffres() : '';
+  void plans;
 
   // ── Ce que l'abonnement change, par public. On parle du RÉSULTAT pour la
   //    personne, pas de la liste des fichiers qu'elle télécharge.
@@ -47297,7 +47813,8 @@ function pgTarifs(){
     ['Et si ça ne me sert pas ?','L\'essentiel est déjà gratuit et sans compte : corrigés, Professeur Ambassa, jeux, labos, outils. Servez-vous d\'abord. On ne s\'abonne que si le gratuit a déjà rendu service.'],
     ['Je n\'ai pas de carte bancaire.','Aucune n\'est demandée. MTN Mobile Money et Orange Money suffisent, depuis un téléphone camerounais.'],
     ['Je suis à l\'étranger, je paie pour un enfant au pays.','C\'est prévu : la cagnotte de scolarité permet de payer depuis l\'étranger, et le plan Famille couvre plusieurs enfants.'],
-    ['Suis-je engagé pour longtemps ?','Non. L\'abonnement couvre l\'année scolaire et s\'arrête de lui-même. Rien ne se reconduit dans votre dos.']
+    ['Suis-je engagé pour longtemps ?','Non. Au mois, vous payez un mois à la fois ; à l\'année, vous payez dix mois pour douze. Rien ne se reconduit dans votre dos : l\'accès s\'arrête à l\'échéance, et vous êtes prévenu avant.'],
+    ['Un ami m\'a donné un code.','Saisissez-le au moment de payer (ou à l\'inscription) : vous payez 10 % de moins sur vos abonnements et achats dans l\'application, sans limite de durée. Et vous recevez à votre tour votre propre code à partager.']
   ].map(function(f){
     return '<details class="vfaq"><summary>'+_esc(f[0])+'</summary><p>'+_esc(f[1])+'</p></details>';
   }).join('');
@@ -47322,9 +47839,13 @@ function pgTarifs(){
         ? '<div class="acc-head" style="margin-top:26px"><h2 class="acc-pill"><span class="ic">'
             +'<svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-sparkles"/></svg></span>'
             +' Aller plus loin</h2>'
-            +'<div class="acc-sub">Choisissez la formule qui correspond à votre situation. Rien d\'autre à payer.</div></div>'
-          +'<div class="acc-plans">'+cartes+'</div>'
-          +'<div class="acc-plans-note">'+_ico('shield',14)+' Paiement MTN Mobile Money ou Orange Money · Sans engagement · Aucune reconduction automatique</div>'
+            +'<div class="acc-sub">'+_esc((typeof _formulesAccroche==='function'&&_formulesAccroche())||'')+' Rien d\'autre à payer.</div></div>'
+          + cartes
+          +(autres
+              ? '<div class="acc-head" style="margin-top:22px"><h2 class="acc-pill"><span class="ic">'
+                  +'<svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-users"/></svg></span>'
+                  +' Enseignants, parents, établissements</h2></div>' + autres
+              : '')
         : '<div class="vcard" style="max-width:680px;margin:0 auto"><div class="vprose">'
           +'Les abonnements sont en cours de mise à jour. Écrivez-nous sur WhatsApp pour connaître les formules disponibles.'
           +'</div></div>')
@@ -47559,7 +48080,7 @@ var _ACC_COMMUNAUTE = [
   {ic:'lc-award',     t:'Mes badges',           d:'30+ succès à débloquer en pratiquant.',                              libre:1, a:"mAchievements()"},
   {ic:'lc-users',     t:'Étude en groupe',      d:'Une room en temps réel avec un code à 6 chiffres.',                  libre:1, a:"mStudyRoom()"},
   {ic:'lc-university',t:'Classes & Forum',      d:'Échanger avec ses enseignants et ses pairs.',                       libre:1, a:"showClasseVirtuelle()"},
-  {ic:'lc-gift',      t:'Parrainage',           d:'+500 FCFA de crédit pour chaque filleul inscrit.',                   libre:1, a:"mParrainage()"},
+  {ic:'lc-gift',      t:'Parrainage',           d:'−10 % pour vos amis, 10 % de leurs paiements pour vous.',            libre:1, a:"mParrainage()"},
   {ic:'lc-trending',  t:'Classement Junior',    d:'Le top 100 des ambassadeurs élèves.',                                libre:1, a:"vShowSec('leaderboard-junior',null)"},
   {ic:'lc-wallet',    t:'Cagnotte de scolarité',d:'Faire participer la famille au paiement, même depuis l\'étranger.', a:"vShowSec('cagnotte',null)"},
   {ic:'lc-handshake', t:'Partenariat VÉRITAS',  d:'9 programmes, du Bronze au Diamant.',                                a:"vShowSec('partenariat',null)"}
@@ -51821,3 +52342,351 @@ window.pgPlateforme    = pgPlateforme;
 window._platEnregistrer = _platEnregistrer;
 window._platDefauts     = _platDefauts;
 window._platSonder      = _platSonder;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PRIX & CALCULS AUTOMATIQUES — un seul écran d'administration  (14/09/2026)
+   ──────────────────────────────────────────────────────────────────────────
+   Demande de Jacques : « rends tous les prix et calculs automatiques
+   configurables par l'admin dans le Dashboard ».
+
+   Règle tenue par chaque section : un réglage ne s'affiche ici que s'il
+   commande RÉELLEMENT ce que le serveur exige ou verse. Chaque champ écrit la
+   clé que lit le serveur — vérifiée une par une le 14/09/2026 :
+     · formules          → DB.elearning.plans (abo_*)     vrt_prix_catalogue
+     · mois offerts       → prix de l'année + prix barré  (calcul écrit ici)
+     · Code ami           → registre serveur               api/parrainage.php
+     · inscription        → DB.tarifs.inscription(Roles)   vrt_prix_catalogue
+     · cahiers en ligne   → DB.tarifs.livret / livretGuide / livretParOuvrage
+     · packs établissement→ DB.tarifs.livretPack           vrt_livret_paliers_pack
+     · micro-achats, IA   → DB.microPrix                   vrt_prix_catalogue
+     · frais affichés     → DB.tarifs.fraisOperateurPct    (affichage du tunnel)
+     · part auteur        → DB.authorShare, DB._splitConfig (_computeSplits)
+   Les prix partent au serveur par la synchronisation de CET appareil (save) ;
+   le Code ami part directement au registre du serveur.
+   ══════════════════════════════════════════════════════════════════════════ */
+function pgPrixCalculs(){
+  if(!iA()) return na();
+  var T = DB.tarifs || {};
+  var nomsG = { starter:'Starter', pro:'Pro', elite:'Élite', famille:'Famille' };
+  var moisOff = (T.formules && T.formules.moisOfferts != null) ? T.formules.moisOfferts : 2;
+  var defs = (typeof _formulesDefaut === 'function') ? _formulesDefaut() : [];
+  var ligne = function(id){
+    var p = ((DB.elearning && DB.elearning.plans) || []).find(function(x){ return x && x.id === id; });
+    return p || defs.find(function(x){ return x.id === id; }) || null;
+  };
+  var synchro = !!(DB.cloudConfig && DB.cloudConfig.url && DB.cloudConfig.secret);
+  var F = function(n){ return fmt(n || 0); };
+  var num = function(id, v, min, max, step, extra){
+    return '<input class="fi" id="' + id + '" type="number" inputmode="numeric" min="' + min + '" max="' + max + '" step="' + (step || 1) + '" value="' + _esc(String(v == null ? '' : v)) + '" oninput="_pcApercu()"' + (extra || '') + '>';
+  };
+  var carte = function(titre, ico, corps, pied){
+    return '<div class="card mt12"><div class="ct"><span class="ct-ico">' + _ico(ico, 17) + '</span>' + titre + '</div>' + corps
+      + (pied ? '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">' + pied + '</div>' : '') + '</div>';
+  };
+
+  var h = '<div class="pgt"><span class="pgt-ico">' + _ico('wallet', 19) + '</span>Prix & calculs automatiques</div>'
+    + '<div class="ib ibi mt8"><span>💡</span><span>Chaque chiffre de cette page est celui que le serveur <b>exige au paiement</b> ou <b>verse</b> — rien n’est décoratif. '
+    + 'Les montants s’appliquent aux visiteurs dès la synchronisation de cet appareil ; le Code ami s’applique immédiatement.</span></div>'
+    + (synchro ? '' : '<div class="ib ibr mt8"><span>⚠️</span><span><b>Cet appareil n’est pas relié au serveur</b> (Paramètres → Cloud) : vos réglages resteront sur cet appareil et le serveur continuera d’exiger les anciens prix.</span></div>');
+
+  // ── 1. Formules d'abonnement ────────────────────────────────────────────
+  var lignesF = ['starter','pro','elite','famille'].map(function(g){
+    var m = ligne('abo_' + g + '_m') || {}, a = ligne('abo_' + g + '_a') || {};
+    var enVente = m.actif !== false && m.enVente !== false;
+    return '<tr>'
+      + '<td><b>' + nomsG[g] + '</b><div class="xs2 mut">' + _esc(m.cible || '') + '</div></td>'
+      + '<td style="min-width:120px">' + num('pc_f_' + g, m.prix || '', 100, 1000000, 100) + '</td>'
+      + '<td><span id="pc_fa_' + g + '" class="semi"></span><div class="xs2 mut" id="pc_fb_' + g + '"></div></td>'
+      + '<td style="text-align:center"><input type="radio" name="pc_pop" value="' + g + '"' + (m.populaire ? ' checked' : '') + '></td>'
+      + '<td style="text-align:center"><input type="checkbox" id="pc_fv_' + g + '"' + (enVente ? ' checked' : '') + '></td>'
+      + '</tr>';
+  }).join('');
+  var famM = ligne('abo_famille_m') || {};
+  h += carte('Formules d’abonnement (élèves et familles)', 'sparkles',
+      '<div class="tw"><table><thead><tr><th>Formule</th><th>Prix par mois (FCFA)</th><th>À l’année (calculé)</th><th>Mise en avant</th><th>En vente</th></tr></thead><tbody>' + lignesF + '</tbody></table></div>'
+      + '<div class="fg2 mt12">'
+      +   '<div class="fg"><span class="fl">Mois offerts si l’on paie l’année en une fois</span>' + num('pc_moisoff', moisOff, 0, 6) + '<div class="xs2 mut">Prix de l’année = prix du mois × (12 − mois offerts). Le prix barré affiché = 12 mois.</div></div>'
+      +   '<div class="fg"><span class="fl">Formule Famille : enfants couverts au plus</span>' + num('pc_enfants', famM.enfantsMax || 4, 1, 8) + '</div>'
+      + '</div>',
+    '<button class="btn bi" onclick="_pcFormulesSave()">' + _ico('check', 15) + ' Enregistrer les formules</button>'
+    + '<span class="xs2 mut">Les textes (avantages, public) se modifient dans E-Learning → plans.</span>');
+
+  // ── 2. Code ami ─────────────────────────────────────────────────────────
+  var rg = window._CODE_AMI_REGLE || {};
+  h += carte('Code ami — remise du filleul et commission du parrain', 'gift',
+      '<div class="fg2">'
+      + '<div class="fg"><span class="fl">Remise du filleul (%)</span>' + num('caRemise', rg.remisePct != null ? rg.remisePct : 10, 0, 50) + '</div>'
+      + '<div class="fg"><span class="fl">Commission du parrain (% du montant payé)</span>' + num('caComm', rg.commissionPct != null ? rg.commissionPct : 10, 0, 50) + '</div>'
+      + '<div class="fg"><span class="fl">Versement automatique dès (FCFA)</span>' + num('caSeuil', rg.seuilVersement || 2000, 500, 200000, 500) + '</div>'
+      + '</div>'
+      + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caActif"' + (rg.actif !== false ? ' checked' : '') + '> Programme actif (les codes s’appliquent)</label>'
+      + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caAuto"' + (rg.versementAuto !== false ? ' checked' : '') + '> Verser automatiquement dès le seuil (CamerPay)</label>'
+      + '<div class="ib ibt mt8" id="pc_ca_ex"></div>'
+      + '<div class="xs2 mut mt6">Bornes du serveur : 50 % au plus chacun, 60 % cumulés ; seuil de 500 F au moins. Ne s’applique ni aux frais d’inscription, ni à la scolarité, ni aux paniers.</div>',
+    '<button class="btn bi" onclick="_codeAmiAdminReglages()">' + _ico('check', 15) + ' Enregistrer sur le serveur</button>'
+    + '<button class="btn bo" onclick="goTo(\'parrainage_admin\')">Voir parrains, commissions et versements →</button>');
+
+  // ── 3. Frais d'inscription ──────────────────────────────────────────────
+  var roles = T.inscriptionRoles || (window.VERITAS_TARIFS && VERITAS_TARIFS.inscription) || {};
+  h += carte('Frais d’inscription (quand l’inscription payante est activée)', 'users',
+      '<div class="fg2">'
+      + '<div class="fg"><span class="fl">Élève (FCFA)</span>' + num('pc_i_eleve', roles.eleve != null ? roles.eleve : 100, 0, 100000, 50) + '</div>'
+      + '<div class="fg"><span class="fl">Parent (FCFA)</span>' + num('pc_i_parent', roles.parent != null ? roles.parent : 100, 0, 100000, 50) + '</div>'
+      + '<div class="fg"><span class="fl">Enseignant (FCFA)</span>' + num('pc_i_enseignant', roles.enseignant != null ? roles.enseignant : 500, 0, 100000, 50) + '</div>'
+      + '<div class="fg"><span class="fl">Partenaire (FCFA)</span>' + num('pc_i_partenaire', roles.partenaire != null ? roles.partenaire : 500, 0, 100000, 50) + '</div>'
+      + '<div class="fg"><span class="fl">Autres rôles (FCFA)</span>' + num('pc_i_base', T.inscription || 100, 0, 100000, 50) + '</div>'
+      + '</div><div class="xs2 mut">Le rôle est lu sur le compte, par le serveur : on ne choisit pas son tarif en se déclarant « parent ». Interrupteur : Essais & abonnements.</div>',
+    '<button class="btn bi" onclick="_pcInscriptionSave()">' + _ico('check', 15) + ' Enregistrer les frais</button>');
+
+  // ── 4. Cahiers en ligne ─────────────────────────────────────────────────
+  var pal = T.livretPack || (window.VERITAS_TARIFS && VERITAS_TARIFS.livretPack) || {10:10, 25:15, 50:20};
+  // Deux formes circulent : {"10":10} (réglage) et [[10,10]] (tranche publique du serveur).
+  var palRows = (Array.isArray(pal) ? pal.map(function(p){ return [parseInt(p && p[0], 10), parseInt(p && p[1], 10)]; })
+                                    : Object.keys(pal).map(function(k){ return [parseInt(k, 10), parseInt(pal[k], 10)]; }))
+    .filter(function(p){ return p[0] > 0 && p[1] >= 0; }).sort(function(a, b){ return a[0] - b[0]; });
+  while(palRows.length < 4) palRows.push(['', '']);
+  h += carte('Cahiers en ligne et packs établissement', 'book',
+      '<div class="fg2">'
+      + '<div class="fg"><span class="fl">Livret élève — tarif général (FCFA)</span>' + num('pc_l_livret', T.livret || 1500, 100, 1000000, 100) + '</div>'
+      + '<div class="fg"><span class="fl">Guide enseignant — tarif général (FCFA)</span>' + num('pc_l_guide', T.livretGuide || 5000, 100, 1000000, 100) + '</div>'
+      + '</div>'
+      + '<div class="xs2 mut">Un cahier dont la fiche porte son propre prix garde ce prix : réglez-le ouvrage par ouvrage ci-dessous.</div>'
+      + '<div id="pc_ouvrages" class="mt8"><div class="xs2 mut">Chargement des ouvrages…</div></div>'
+      + '<div class="fl mt12">Remise de volume d’un pack établissement</div>'
+      + '<div class="tw"><table><thead><tr><th>À partir de (codes)</th><th>Remise (%)</th><th>Exemple : pack au tarif général</th></tr></thead><tbody>'
+      + palRows.map(function(p, i){
+          return '<tr><td>' + num('pc_p_s' + i, p[0], 2, 500) + '</td><td>' + num('pc_p_r' + i, p[1], 0, 50) + '</td><td id="pc_p_ex' + i + '" class="xs2"></td></tr>';
+        }).join('')
+      + '</tbody></table></div><div class="xs2 mut">Laissez une ligne vide pour la retirer. 50 % de remise au plus.</div>',
+    '<button class="btn bi" onclick="_pcCahiersSave()">' + _ico('check', 15) + ' Enregistrer les cahiers</button>');
+
+  // ── 5. Micro-achats et crédits IA ───────────────────────────────────────
+  var mp = function(k){ return (typeof _microPrix === 'function' ? _microPrix(k) : null) || {}; };
+  var ia = (typeof _prixCreditsIA === 'function') ? _prixCreditsIA() : {montant:500, jetons:20};
+  h += carte('Achats à l’unité et crédits IA', 'lightbulb',
+      '<div class="fg2">'
+      + '<div class="fg"><span class="fl">Une épreuve corrigée (FCFA)</span>' + num('pc_m_epreuve', mp('epreuve').montant || 200, 50, 100000, 50) + '</div>'
+      + '<div class="fg"><span class="fl">Un chapitre complet (FCFA)</span>' + num('pc_m_chapitre', mp('chapitre').montant || 500, 50, 100000, 50) + '</div>'
+      + '<div class="fg"><span class="fl">Une fiche de révision (FCFA)</span>' + num('pc_m_fiche', mp('fiche').montant || 300, 50, 100000, 50) + '</div>'
+      + '<div class="fg"><span class="fl">Une expérience de labo (FCFA)</span>' + num('pc_m_labo', mp('labo').montant || 300, 50, 100000, 50) + '</div>'
+      + '<div class="fg"><span class="fl">Pack de crédits IA (FCFA)</span>' + num('pc_m_ia', ia.montant || 500, 50, 100000, 50) + '</div>'
+      + '<div class="fg"><span class="fl">Questions dans ce pack</span>' + num('pc_m_iaj', ia.jetons || 20, 1, 1000) + '</div>'
+      + '</div><div class="ib ibt mt8" id="pc_ia_ex"></div>',
+    '<button class="btn bi" onclick="_pcMicroSave()">' + _ico('check', 15) + ' Enregistrer les achats à l’unité</button>');
+
+  // ── 6. Partage des revenus et affichage ─────────────────────────────────
+  var sc = (typeof _getSplitConfig === 'function') ? _getSplitConfig() : {};
+  h += carte('Partage des revenus et frais affichés', 'coins',
+      '<div class="fg2">'
+      + '<div class="fg"><span class="fl">Part de l’auteur sur ses livres (%)</span>' + num('pc_s_livre', (typeof DB.authorShare === 'number') ? DB.authorShare : (sc.auteur_livre || 60), 0, 100) + '</div>'
+      + '<div class="fg"><span class="fl">Part de l’auteur sur ses ressources (%)</span>' + num('pc_s_res', sc.auteur_ressource != null ? sc.auteur_ressource : 60, 0, 100) + '</div>'
+      + '<div class="fg"><span class="fl">Part de l’enseignant sur ses cours (%)</span>' + num('pc_s_cours', sc.enseignant_cours != null ? sc.enseignant_cours : 70, 0, 100) + '</div>'
+      + '<div class="fg"><span class="fl">Frais opérateur annoncés au payeur (%)</span>' + num('pc_frais', (T.fraisOperateurPct != null) ? T.fraisOperateurPct : 2, 0, 10, 0.1) + '</div>'
+      + '</div><div class="xs2 mut">Les parts d’auteur se calculent quand un paiement est validé dans ce tableau de bord. Les frais opérateur sont une estimation affichée (le prestataire les prélève, le centre les absorbe).</div>',
+    '<button class="btn bi" onclick="_pcPartageSave()">' + _ico('check', 15) + ' Enregistrer</button>');
+
+  // ── 7. Ce qui a déjà son écran ──────────────────────────────────────────
+  h += carte('Réglages voisins', 'settings',
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      + '<button class="btn bo" onclick="goTo(\'paywall\')">🔓 Essais gratuits et quotas du tuteur IA</button>'
+      + '<button class="btn bo" onclick="goTo(\'plateforme\')">🧩 Tarifs de l’Atelier de Français</button>'
+      + '<button class="btn bo" onclick="goTo(\'elearningmgmt\')">🎓 Plans et contenus à l’unité</button>'
+      + '<button class="btn bo" onclick="goTo(\'books2\')">📚 Prix des livres</button>'
+      + '<button class="btn bo" onclick="goTo(\'paiements_admin\')">🏷️ Codes promo</button>'
+      + '</div>');
+
+  setTimeout(function(){ _pcApercu(); _pcOuvragesCharger(); _pcCodeAmiCharger(); }, 0);
+  return h;
+}
+
+function _pcVal(id, def){
+  var e = document.getElementById(id);
+  if(!e || e.value === '') return def;
+  var v = Number(e.value);
+  return isFinite(v) ? v : def;
+}
+
+// Les calculs, sous les yeux de l'administrateur, pendant qu'il tape.
+function _pcApercu(){
+  var mo = Math.max(0, Math.min(6, Math.round(_pcVal('pc_moisoff', 2))));
+  ['starter','pro','elite','famille'].forEach(function(g){
+    var p = Math.round(_pcVal('pc_f_' + g, 0));
+    var a = document.getElementById('pc_fa_' + g), b = document.getElementById('pc_fb_' + g);
+    if(!a || !b) return;
+    a.textContent = p > 0 ? fmt(p * (12 - mo)) : '—';
+    b.textContent = (p > 0 && mo > 0) ? ('au lieu de ' + fmt(p * 12) + ' · ' + mo + ' mois offert' + (mo > 1 ? 's' : '')) : '';
+  });
+  var pro = Math.round(_pcVal('pc_f_pro', 2000)) || 2000;
+  var r = Math.max(0, Math.min(50, _pcVal('caRemise', 10))), c = Math.max(0, Math.min(50, _pcVal('caComm', 10)));
+  var paye = pro - Math.round(pro * r / 100), gain = Math.round(paye * c / 100);
+  var ex = document.getElementById('pc_ca_ex');
+  if(ex) ex.innerHTML = '<span>🧮</span><span>Sur un <b>Pro à ' + fmt(pro) + '</b> : le filleul paie <b>' + fmt(paye) + '</b>, le parrain reçoit <b>' + fmt(gain) + '</b>. '
+    + 'Il faut <b>' + Math.max(1, Math.ceil(_pcVal('caSeuil', 2000) / Math.max(1, gain))) + ' paiement(s)</b> de filleuls pour déclencher un versement.</span>';
+  var livret = Math.round(_pcVal('pc_l_livret', 1500)) || 1500;
+  for(var i = 0; i < 4; i++){
+    var s = Math.round(_pcVal('pc_p_s' + i, 0)), pc = Math.round(_pcVal('pc_p_r' + i, 0)), cel = document.getElementById('pc_p_ex' + i);
+    if(cel) cel.textContent = (s >= 2 && pc >= 0) ? (s + ' codes : ' + fmt(Math.round(livret * s * (100 - pc) / 100)) + ' au lieu de ' + fmt(livret * s)) : '';
+  }
+  var iaM = Math.round(_pcVal('pc_m_ia', 500)), iaJ = Math.round(_pcVal('pc_m_iaj', 20)), exIa = document.getElementById('pc_ia_ex');
+  if(exIa) exIa.innerHTML = '<span>🧮</span><span>Soit <b>' + fmt(Math.round(iaM / Math.max(1, iaJ))) + '</b> la question au tuteur IA.</span>';
+}
+
+function _pcFormulesSave(){
+  var mo = Math.round(_pcVal('pc_moisoff', 2));
+  if(!(mo >= 0 && mo <= 6)){ toast('Mois offerts : entre 0 et 6', 'warn'); return; }
+  var enfants = Math.round(_pcVal('pc_enfants', 4));
+  if(!(enfants >= 1 && enfants <= 8)){ toast('Formule Famille : de 1 à 8 enfants', 'warn'); return; }
+  var popEl = document.querySelector('input[name="pc_pop"]:checked');
+  var pop = popEl ? popEl.value : '';
+  if(!DB.elearning) DB.elearning = {plans:[],categories:[],contenus:[],abonnements:[],commandes:[]};
+  if(!Array.isArray(DB.elearning.plans)) DB.elearning.plans = [];
+  var defs = _formulesDefaut(), erreurs = [];
+  var groupes = ['starter','pro','elite','famille'];
+  groupes.forEach(function(g){
+    var p = Math.round(_pcVal('pc_f_' + g, 0));
+    if(!(p >= 100 && p <= 1000000)) erreurs.push(g);
+  });
+  if(erreurs.length){ toast('Prix par mois invalide (100 à 1 000 000 F) : ' + erreurs.join(', '), 'warn'); return; }
+  groupes.forEach(function(g){
+    var p = Math.round(_pcVal('pc_f_' + g, 0));
+    var vend = !!(document.getElementById('pc_fv_' + g) || {}).checked;
+    ['m','a'].forEach(function(v){
+      var id = 'abo_' + g + '_' + v;
+      var l = DB.elearning.plans.find(function(x){ return x && x.id === id; });
+      if(!l){
+        var d = defs.find(function(x){ return x.id === id; });
+        l = JSON.parse(JSON.stringify(d));
+        DB.elearning.plans.push(l);
+      }
+      l.formule = true; l.groupe = g; l.variante = (v === 'a') ? 'an' : 'mois';
+      l.duree = (v === 'a') ? 'annuel' : 'mensuel';
+      l.prix = (v === 'a') ? p * (12 - mo) : p;
+      l.ancien = (v === 'a' && mo > 0) ? p * 12 : 0;
+      l.populaire = (v === 'm' && g === pop);
+      l.actif = vend; l.enVente = vend;
+      if(g === 'famille') l.enfantsMax = enfants;
+    });
+  });
+  DB.tarifs = DB.tarifs || {};
+  DB.tarifs.formules = { moisOfferts: mo };
+  DB._formulesV2 = 1;   // la migration ne rajoute plus une formule qu'on vient de régler
+  save();
+  toast('✓ Formules enregistrées — prix de l’année recalculés' + ((DB.cloudConfig && DB.cloudConfig.secret) ? '' : ' (non synchronisé : appareil sans clé serveur)'));
+  re();
+}
+
+function _pcInscriptionSave(){
+  var r = {};
+  var ok = true;
+  ['eleve','parent','enseignant','partenaire'].forEach(function(k){
+    var v = Math.round(_pcVal('pc_i_' + k, -1));
+    if(!(v >= 0 && v <= 100000)) ok = false; else r[k] = v;
+  });
+  var base = Math.round(_pcVal('pc_i_base', -1));
+  if(!ok || !(base >= 0 && base <= 100000)){ toast('Frais d’inscription : de 0 à 100 000 F', 'warn'); return; }
+  DB.tarifs = DB.tarifs || {};
+  DB.tarifs.inscriptionRoles = r;
+  DB.tarifs.inscription = base;
+  save(); toast('✓ Frais d’inscription enregistrés'); re();
+}
+
+function _pcCahiersSave(){
+  var liv = Math.round(_pcVal('pc_l_livret', 0)), gui = Math.round(_pcVal('pc_l_guide', 0));
+  if(!(liv >= 100) || !(gui >= 100)){ toast('Tarifs des cahiers : 100 F au moins', 'warn'); return; }
+  var pal = {}, n = 0;
+  for(var i = 0; i < 4; i++){
+    var s = document.getElementById('pc_p_s' + i), r = document.getElementById('pc_p_r' + i);
+    if(!s || !r || s.value === '' || r.value === '') continue;
+    var sv = Math.round(Number(s.value)), rv = Math.round(Number(r.value));
+    if(!(sv >= 2 && sv <= 500 && rv >= 0 && rv <= 50)){ toast('Palier de pack invalide : 2 à 500 codes, 0 à 50 %', 'warn'); return; }
+    pal[String(sv)] = rv; n++;
+  }
+  DB.tarifs = DB.tarifs || {};
+  DB.tarifs.livret = liv;
+  DB.tarifs.livretGuide = gui;
+  if(n) DB.tarifs.livretPack = pal; else delete DB.tarifs.livretPack;
+  // Prix par ouvrage : seuls ceux que l'administrateur a CHANGÉS deviennent des
+  // réglages ; les autres gardent leur source (fiche du catalogue).
+  var par = DB.tarifs.livretParOuvrage = DB.tarifs.livretParOuvrage || {};
+  document.querySelectorAll('[data-pc-ouvrage]').forEach(function(inp){
+    var slug = inp.getAttribute('data-pc-ouvrage'), kind = inp.getAttribute('data-pc-kind');
+    var v = Math.round(Number(inp.value)), avant = Math.round(Number(inp.getAttribute('data-pc-avant')));
+    if(!(v >= 100) || v === avant) return;
+    par[slug] = par[slug] || {};
+    par[slug][kind] = v;
+  });
+  save(); toast('✓ Cahiers et packs enregistrés'); re();
+}
+
+function _pcMicroSave(){
+  var champs = { epreuve:'pc_m_epreuve', chapitre:'pc_m_chapitre', fiche:'pc_m_fiche', labo:'pc_m_labo', ia:'pc_m_ia' };
+  var vals = {}, ok = true;
+  Object.keys(champs).forEach(function(k){
+    var v = Math.round(_pcVal(champs[k], 0));
+    if(!(v >= 50 && v <= 100000)) ok = false; else vals[k] = v;
+  });
+  var jetons = Math.round(_pcVal('pc_m_iaj', 0));
+  if(!ok || !(jetons >= 1 && jetons <= 1000)){ toast('Achats à l’unité : de 50 à 100 000 F ; 1 à 1 000 questions', 'warn'); return; }
+  DB.microPrix = DB.microPrix || {};
+  Object.keys(vals).forEach(function(k){
+    var def = (k === 'ia') ? (window.MICRO_PRIX_IA_DEFAULT || {}) : ((window.MICRO_PRIX_DEFAULT || {})[k] || {});
+    var cur = DB.microPrix[k] || {};
+    DB.microPrix[k] = Object.assign({}, def, cur, { montant: vals[k] });
+  });
+  DB.microPrix.ia.jetons = jetons;
+  // Le libellé du pack suit le nombre de questions : « 20 questions » pour 30 serait faux.
+  DB.microPrix.ia.label = jetons + ' questions à l\'IA VÉRITAS';
+  save(); toast('✓ Achats à l’unité enregistrés'); re();
+}
+
+function _pcPartageSave(){
+  var livre = Math.round(_pcVal('pc_s_livre', -1)), res = Math.round(_pcVal('pc_s_res', -1)), cours = Math.round(_pcVal('pc_s_cours', -1));
+  var frais = _pcVal('pc_frais', -1);
+  if(![livre, res, cours].every(function(v){ return v >= 0 && v <= 100; }) || !(frais >= 0 && frais <= 10)){
+    toast('Parts : de 0 à 100 % ; frais : de 0 à 10 %', 'warn'); return;
+  }
+  DB.authorShare = livre;
+  DB._splitConfig = Object.assign({}, DB._splitConfig || {}, { auteur_livre: livre, auteur_ressource: res, enseignant_cours: cours });
+  DB.tarifs = DB.tarifs || {};
+  DB.tarifs.fraisOperateurPct = Math.round(frais * 10) / 10;
+  save(); toast('✓ Partage et frais enregistrés'); re();
+}
+
+// Prix par ouvrage : lus au catalogue du serveur, qui renvoie le tarif EFFECTIF.
+function _pcOuvragesCharger(){
+  var hote = document.getElementById('pc_ouvrages');
+  if(!hote) return;
+  fetch(_VRT_API + '/livret.php', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{"action":"catalogue"}', cache:'no-store' })
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if(!j || !j.ok || !Array.isArray(j.ouvrages) || !j.ouvrages.length){ hote.innerHTML = '<div class="xs2 mut">Catalogue des cahiers indisponible pour le moment.</div>'; return; }
+      hote.innerHTML = '<details><summary class="semi" style="cursor:pointer">Prix ouvrage par ouvrage (' + j.ouvrages.length + ')</summary>'
+        + '<div class="tw mt8"><table><thead><tr><th>Ouvrage</th><th>Livret élève (FCFA)</th><th>Guide enseignant (FCFA)</th></tr></thead><tbody>'
+        + j.ouvrages.map(function(o){
+            var kinds = Array.isArray(o.kinds) ? o.kinds : ['livret'];
+            var cel = function(kind, v){
+              return (kinds.indexOf(kind) >= 0)
+                ? '<input class="fi" type="number" min="100" step="100" value="' + (parseInt(v, 10) || '') + '" data-pc-ouvrage="' + _esc(o.slug) + '" data-pc-kind="' + kind + '" data-pc-avant="' + (parseInt(v, 10) || 0) + '">'
+                : '<span class="xs2 mut">non vendu</span>';
+            };
+            return '<tr><td>' + _esc(o.titre || o.slug) + (o.disponible ? '' : ' <span class="xs2 mut">(non publié)</span>') + '</td><td>' + cel('livret', o.prix) + '</td><td>' + cel('guide', o.prixGuide) + '</td></tr>';
+          }).join('')
+        + '</tbody></table></div></details>';
+    })
+    .catch(function(){ hote.innerHTML = '<div class="xs2 mut">Catalogue des cahiers injoignable.</div>'; });
+}
+
+// La règle du Code ami, lue au serveur (elle n'est pas dans la base).
+function _pcCodeAmiCharger(){
+  if(typeof _codeAmiApi !== 'function') return;
+  window._codeAmiConfigP = null;
+  _codeAmiApi('config').then(function(j){
+    if(!j || !j.ok) return;
+    window._CODE_AMI_REGLE = j;
+    var set = function(id, v){ var e = document.getElementById(id); if(e && v != null) e.value = v; };
+    set('caRemise', j.remisePct); set('caComm', j.commissionPct); set('caSeuil', j.seuilVersement);
+    var a = document.getElementById('caActif'); if(a) a.checked = j.actif !== false;
+    var b = document.getElementById('caAuto'); if(b) b.checked = j.versementAuto !== false;
+    _pcApercu();
+  });
+}
