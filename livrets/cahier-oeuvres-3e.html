@@ -711,8 +711,14 @@ const SLUG = 'oeuvres-3e';
    La clé porte donc OÙ l'on est (le chapitre) et CE QUE l'exercice DIT (une
    empreinte de son énoncé). Ajouter, retirer ou déplacer un exercice ne
    touche à rien d'autre. C'est la règle de `livrets/cahier.js`, et le même
-   FNV-1a en base 36 : les deux moteurs rangent leurs réponses de la même
-   façon, ce qui compte le jour où `api/cahier.php` les lit tous les deux.
+   FNV-1a en base 36 — mais PAS la même empreinte : `empK` retire les balises
+   HTML avant de normaliser, `cahier.js` et `tools/normaliser_cahiers.py` non.
+   Mesuré sur la charge : 2 950 blocs sur 7 756 reçoivent ici une empreinte
+   que l'autre moteur ne calculerait pas. Sans effet aujourd'hui — chaque
+   moteur sert ses propres cahiers et reste cohérent avec lui-même — mais
+   n'ALIGNEZ PAS l'un sur l'autre pour « unifier » : les élèves ont déjà
+   répondu, et changer l'un des deux détache ses réponses de leurs questions,
+   sans rien afficher. `tests/banc_empreintes.cjs` garde cet écart en l'état.
 
    Corollaire assumé : réécrire l'énoncé d'un exercice détache la réponse qui
    y était. C'est le bon comportement — la question n'est plus la même. */

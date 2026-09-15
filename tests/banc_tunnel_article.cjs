@@ -41,7 +41,14 @@ const dire = (b, m, d) => {
 
 console.log(`\n${G}LE TUNNEL FACTURE CE QU'ON A CLIQUÉ${R}\n`);
 
-const src = fs.readFileSync(path.join(RACINE, 'assets', 'vitrine.js'), 'utf8');
+/* Les fins de ligne sont normalisées AVANT toute recherche. Le dépôt est en
+   LF, mais `core.autocrlf=true` rend le fichier en CRLF sur le poste Windows
+   où ce code s'écrit : la marque d'ouverture `\n  function` survivait (un
+   `\r\n` contient un `\n`), la marque de fermeture `\n  }\n` non. Les cinq
+   extractions rendaient null, le banc était rouge ici et vert sur le runner
+   Linux — c'est-à-dire muet exactement là où l'on modifie le tunnel. */
+const src = fs.readFileSync(path.join(RACINE, 'assets', 'vitrine.js'), 'utf8')
+  .replace(/\r\n/g, '\n');
 
 /* ── Extraction : une fonction déclarée à deux espaces d'indentation ────── */
 function extraire(nom) {
@@ -50,7 +57,7 @@ function extraire(nom) {
   if (i < 0) return null;
   const j = src.indexOf('\n  }\n', i);
   if (j < 0) return null;
-  return src.slice(i + 1, j + '\n  }'.length + i - i + j) && src.slice(i + 1, j + 4);
+  return src.slice(i + 1, j + 4);
 }
 
 const NOMS = ['prixUnitaire', 'fraisLivraison', 'montantTotal', 'libelleCommande', 'produitDeLaCarte'];
