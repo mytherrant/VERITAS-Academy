@@ -91,6 +91,13 @@
     window.VRTLivret.config({ classe: a.dataset.o, kind: 'livret',
                               titre: "Bord — Cahier de français 3ᵉ" }).acheter();
   });
+
+  /* « COMMANDER » DEPUIS LA BOUTIQUE. La carte de la devanture mène ici avec
+     `?achat=1` : le visiteur a déjà dit qu'il voulait acheter, on lui ouvre le
+     tunnel sans lui faire chercher le bouton. Sans cela il arrivait sur une
+     page de présentation et devait deviner par où passer — c'est ce qui a
+     fait écrire « je n'arrive pas à me l'acheter » le 14/09/2026. */
+  if (/[?&]achat=1(&|$)/.test(location.search)) a.click();
 })();
 </script>
 </body>

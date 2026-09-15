@@ -100,6 +100,32 @@ const urlsMortes = livrets
 dire(urlsMortes.length === 0, 'et cette page existe', urlsMortes.join(', '));
 dire(livrets.every(x => x.prix > 0), 'aucun n’est publié sans prix');
 
+/* ⚠️ UNE PAGE QUI EXISTE N'EST PAS UNE PAGE QUI VEND.
+   Depuis le 15/09/2026, la carte porte un bouton « Commander » qui mène à
+   `<page>?achat=1`, et c'est ce paramètre qui ouvre le tunnel de paiement au
+   lieu de l'écran « Saisis ton code ». Le contrôle ci-dessus se contentait de
+   constater que le fichier est là — il l'était déjà quand le bouton ne menait
+   à rien.
+   Le premier passage du correctif n'avait touché que les neuf cahiers
+   d'œuvre : c'est tout ce que montre le catalogue sur un poste de
+   développement, où les données des autres ouvrages ne sont pas déposées. La
+   production en vend vingt-neuf. Les cahiers 2ⁿᵈᵉ→Tˡᵉ, les sept Bords et les
+   quatre études d'œuvres du collège — QUINZE produits — avaient donc un bouton
+   d'achat qui retombait sur une page de présentation. Le poste ne pouvait pas
+   le montrer ; ce banc, lui, lit le flux et le voit.
+   Éprouvé par mutation le 15/09 (`achat=1` retiré de bord-3e.html : 1 rouge,
+   la page nommée). */
+{
+  const sansTunnel = livrets
+    .map(x => (x.url || '').split('?')[0].replace(/^\//, ''))
+    .filter((c, i, a) => a.indexOf(c) === i)
+    .filter(c => c && fs.existsSync(path.join(RACINE, c)))
+    .filter(c => !fs.readFileSync(path.join(RACINE, c), 'utf8').includes('achat=1'));
+  dire(sansTunnel.length === 0,
+    'et « Commander » y ouvre le paiement, pas un champ de code',
+    sansTunnel.join(', '));
+}
+
 /* ── ③ La carte suit cette porte ───────────────────────────────────────── */
 console.log(`\n${G}③ La vitrine respecte la porte du produit${R}`);
 const vit = fs.readFileSync(path.join(RACINE, 'assets', 'vitrine.js'), 'utf8');
