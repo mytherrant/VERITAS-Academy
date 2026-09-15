@@ -260,6 +260,20 @@ jobs:
             exit 1
           fi
 
+      # ── 🎁 ET IL VAUT AUSSI SUR LES CAHIERS (15/09/2026). Le serveur honore
+      #    le Code ami sur `intent: 'livret'` depuis le 14/09, mais seulement
+      #    pour les tunnels qui ENVOIENT la clé `code` — garde délibérée, pour
+      #    qu'un parrain ne touche jamais sur un rabais que le filleul n'a pas
+      #    vu. livrets/gate.js ne l'envoyait pas : la promesse affichée à
+      #    l'inscription (« −10 % sur vos abonnements et achats ») ne valait sur
+      #    aucun des quinze cahiers, et rien ne l'aurait dit — le paiement
+      #    aboutissait, au plein tarif.
+      #    Le banc lit le CORPS réellement envoyé à `?action=init` et garde un
+      #    seul invariant : prix affiché = libellé du bouton = montant débité.
+      #    Éprouvé par 3 mutations le 15/09/2026, chacune probante.
+      - name: 🎁 Le Code ami vaut-il aussi sur les cahiers ?
+        run: node tests/banc_code_ami_cahiers.cjs
+
       # ── 🧾 UN PAIEMENT QUI N'OUVRE RIEN DOIT SE VOIR. camerpayGrant() posait
       #    `granted` sur la seule lisibilité de la base : un octroi qui n'avait
       #    RIEN ouvert (« accountId manquant », « compte introuvable ») sortait

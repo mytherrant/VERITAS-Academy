@@ -103,12 +103,39 @@ dire(livrets.every(x => x.prix > 0), 'aucun n’est publié sans prix');
 /* ── ③ La carte suit cette porte ───────────────────────────────────────── */
 console.log(`\n${G}③ La vitrine respecte la porte du produit${R}`);
 const vit = fs.readFileSync(path.join(RACINE, 'assets', 'vitrine.js'), 'utf8');
-dire(/if \(b\.url\) c\.lien = b\.url;/.test(vit),
-  'la carte utilise l’URL fournie quand il y en a une');
-const iUrl = vit.indexOf('if (b.url) c.lien = b.url;');
+/* ⚠️ ON ÉPROUVE LA RÈGLE, PAS LA MISE EN FORME.
+   Ces deux contrôles cherchaient la LIGNE EXACTE `if (b.url) c.lien = b.url;`.
+   Le 15/09/2026, la branche est devenue un bloc — pour poser AUSSI le chemin
+   d'achat — et ils sont passés au rouge sans qu'aucune règle ait bougé. Un banc
+   qui rougit sur un retour à la ligne finit par se faire contourner au lieu
+   d'être lu. On vérifie donc l'ORDRE des deux branches, seule chose qui
+   compte : l'URL fournie doit être examinée AVANT le cas « fiche de livre »,
+   sinon un cahier pointerait une fiche qui n'existe pas. */
+const iUrl = vit.search(/if \(b\.url\)\s*\{?\s*\n?\s*c\.lien = b\.url;/);
 const iNum = vit.indexOf("c.lien = 'app.html#livre?id='");
+dire(iUrl > 0, 'la carte utilise l’URL fournie quand il y en a une');
 dire(iUrl > 0 && iNum > iUrl,
   'et elle passe AVANT le cas « fiche de livre » — sinon un cahier pointerait une fiche inexistante');
+
+/* ── ③ bis. IL FAUT UN CHEMIN VERS LE PAIEMENT, ET IL N'Y EN AVAIT AUCUN ──
+   Jusqu'au 15/09/2026, « Commander » ne s'affichait que sur `c.papier`, une
+   branche que seul un livre NON numérique atteignait. Tout le catalogue étant
+   numérique, les vingt-neuf cartes de la devanture n'offraient que « Lire en
+   ligne » — qui mène à un écran réclamant le code d'accès qu'on obtient APRÈS
+   avoir payé. Deux usagers l'ont écrit le 14/09 : « aucun paiement n'est
+   accepté », « je n'arrive pas à me l'acheter ».
+   Le gabarit et le moteur doivent donc s'accorder sur `m.acheter` : l'un le
+   pose, l'autre l'affiche. Les deux moitiés, sinon la moitié qui manque est
+   exactement celle qui manquait. Éprouvé par mutation le 15/09 : `c.acheter`
+   renommé dans vitrine.js → 1 au rouge ; `{{ m.acheter }}` retiré du gabarit
+   livré → 1 au rouge, l'autre. */
+dire(/c\.acheter\s*=/.test(vit),
+  'le moteur pose un chemin d’achat sur la carte');
+{
+  const gab = fs.readFileSync(path.join(RACINE, 'vitrine.html'), 'utf8');
+  dire(gab.indexOf('{{ m.acheter }}') >= 0,
+    'et le gabarit livré porte le bouton qui l’utilise — sinon il n’est jamais rendu');
+}
 
 /* ── ④ Les couvertures suivent ─────────────────────────────────────────── */
 console.log(`\n${G}④ Les cahiers arrivent avec leur couverture${R}`);

@@ -202,6 +202,53 @@ ok('les survols .vh10 et .vh13 n’écrivent plus de blanc sur l’or',
    !/\.vh10:hover\{[^}]*color:#fff/i.test(VITRINE_HTML)
    && !/\.vh13:hover\{[^}]*color:#fff/i.test(VITRINE_HTML));
 
+/* ══════════════════════════════════════════════════════════════════════════
+   LES ÉCRANS DE VENTE NE DESSINENT PAS AVEC DES ÉMOJIS
+   ──────────────────────────────────────────────────────────────────────────
+   Le tunnel d'achat des cahiers ouvrait chacun de ses écrans sur un émoji de
+   38 px — 📘 pour le paiement, ⏳ pour l'attente, 🔎 pour « retrouver mon
+   code », 🎉 pour le code obtenu, 🎁 pour le code ami. La devanture, elle,
+   n'emploie que des icônes vectorielles. Deux dessins pour une même marque, et
+   sur l'écran qui demande de l'argent c'est le moins maîtrisé des deux qui
+   s'affichait : un émoji est rendu par le système du lecteur, jamais par nous,
+   et un WebView Android ancien qui n'en possède pas la police affiche le
+   rectangle vide « tofu » en tête de l'écran de paiement.
+   On ne regarde QUE les chaînes affichées : les émojis cités dans les
+   commentaires du code — dont ceux du présent bloc — ne gênent personne.
+   Éprouvé par mutation le 15/09/2026 : un émoji remis à la place de l'icône
+   « loupe » dans une chaîne de gate.js → 2 au rouge, la ligne fautive nommée
+   ET le décompte d'icônes, qui retombe sous cinq.
+   ══════════════════════════════════════════════════════════════════════════ */
+titre('Les écrans de vente sont dessinés, pas émojifiés');
+{
+  const EMO = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/u;
+  /* ⚠️ ON RETIRE LES COMMENTAIRES POUR DE BON, on ne les DEVINE pas.
+     Première version : « une ligne sans guillemet est un commentaire ». En
+     français, un commentaire sur deux porte une apostrophe — « s'ouvraient »,
+     « l'élève » — et passait donc pour du code. Quatre commentaires ⚠️ de
+     gate.js ressortaient en faux défauts, sur un fichier pourtant conforme.
+     Un banc qui accuse à tort finit par être désactivé. On blanchit donc les
+     blocs /* … *​/ et les fins de ligne //, puis on regarde ce qui reste. */
+  const sansCommentaires = (src) => src
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))   // les \n restent : les numéros de ligne aussi
+    .replace(/(^|[^:'"`\\])\/\/[^\n]*/g, (m, p) => p);
+  for (const rel of ['livrets/gate.js', 'livrets/liseur.js', 'livrets/cahier.html']) {
+    const p = path.join(RACINE, rel);
+    if (!fs.existsSync(p)) continue;
+    const fautifs = sansCommentaires(fs.readFileSync(p, 'utf8')).split(/\r?\n/)
+      .map((l, i) => ({ n: i + 1, l }))
+      .filter(({ l }) => EMO.test(l));
+    ok(rel + ' n’affiche aucun émoji'
+       + (fautifs.length ? ' — ligne ' + fautifs.map((f) => f.n).join(', ') : ''),
+       fautifs.length === 0);
+  }
+  // L'autre moitié : les icônes doivent bien être là, sinon « aucun émoji »
+  // serait vrai d'un écran devenu vide.
+  const gate = fs.readFileSync(path.join(RACINE, 'livrets', 'gate.js'), 'utf8');
+  ok('et le tunnel porte son jeu d’icônes vectorielles',
+     /var TRACES = \{/.test(gate) && (gate.match(/ico\('/g) || []).length >= 5);
+}
+
 console.log('\n' + '─'.repeat(68));
 if (rouge === 0) {
   console.log('\x1b[32m\x1b[1m  ✓ ' + vert + '/' + vert + ' — une seule couleur d’action.\x1b[0m');

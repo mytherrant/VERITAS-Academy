@@ -1427,9 +1427,38 @@
        une fiche qui n'existe pas, puisque le cahier ne vit pas dans
        `DB.books`. Un lien mort au bout d'une devanture unifiée aurait annulé
        tout le bénéfice de l'unification. */
-    if (b.url) c.lien = b.url;
-    else if (num) c.lien = 'app.html#livre?id=' + encodeURIComponent(b.id);
-    else if (!rupture) c.papier = true;
+    /* ⚠️ CES TROIS BRANCHES S'EXCLUAIENT, ET AUCUNE NE VENDAIT.
+       « Commander » ne s'affichait que sur `c.papier`, c'est-à-dire sur un
+       livre NON numérique et non lié. Or les vingt-neuf produits du catalogue
+       sont numériques : la devanture entière n'offrait que « Lire en ligne »,
+       et le seul chemin vers le paiement passait par un écran qui réclame un
+       code d'accès — celui qu'on obtient APRÈS avoir payé. D'où les messages du
+       14/09 : « aucun paiement n'est accepté », « on me demande le code ».
+
+       LE BOUTON D'ACHAT DOIT MENER AU TUNNEL QUI SAIT LIVRER, et ils ne se
+       valent pas :
+         · cahiers et livrets → leur propre page, `?achat=1` (intent `livret`,
+           le serveur émet un code d'accès au paiement confirmé) ;
+         · livre papier → le panier de la vitrine (intent `cart`), qui est fait
+           pour une livraison physique ;
+         · livre numérique → sa fiche dans l'application, où l'aperçu gratuit
+           précède l'achat (intent `digitalbook`).
+       Brancher un cahier sur le panier de la vitrine aurait encaissé 1 500 F
+       avec des frais de livraison et n'aurait ouvert AUCUN accès : `cart`
+       n'active que les sous-lignes portant leur propre intent, et la vitrine
+       n'en envoie aucune. */
+    if (b.url) {
+      c.lien = b.url;
+      c.acheter = b.url + (b.url.indexOf('?') >= 0 ? '&' : '?') + 'achat=1';
+    } else if (num) {
+      c.lien = 'app.html#livre?id=' + encodeURIComponent(b.id);
+      /* La fiche porte l'aperçu gratuit ET le bouton d'achat : « Commander »
+         y mène directement plutôt que d'ouvrir un tunnel qui ne saurait pas
+         déverrouiller le livre. */
+      c.acheter = c.lien;
+    } else if (!rupture) {
+      c.papier = true;
+    }
 
     /* La couverture, dans le même ordre de préséance que la maquette. */
     if (b.couv) {

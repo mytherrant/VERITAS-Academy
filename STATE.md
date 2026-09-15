@@ -1,4 +1,93 @@
-## Code ami, formules d'abonnement, « Prix & calculs automatiques » (14/09/2026) — NON DÉPLOYÉ
+## Le Code ami ne valait sur aucun cahier (15/09/2026) — DÉPLOYÉ
+
+Reprise du travail du 14/09, interrompu en pleine vérification de production
+(plafond hebdomadaire atteint à 20 h 49, session `61928060`).
+
+**Ce que la reprise a d'abord établi — le déploiement du 14/09 ÉTAIT allé au
+bout.** Commit `3d0c6f9`, poussé sur `master` et `atelier-francais`, run
+`34894416798` **success**, FTP réussi (`uploading api/_parrainage_lib.php`,
+`api/parrainage.php`, puis `replacing` app.js, _auth_lib, payment_camerpay,
+public_data, compte, livrets/gate.js, sw.js…). Les deux runs de `test.yml` sont
+verts. `STATE.md` et la mémoire disaient encore « NON DÉPLOYÉ » : corrigé, une
+session suivante en aurait tiré de faux diagnostics.
+
+Vérification de production terminée (script `verif_prod.sh` de la session
+précédente, rejoué en entier) :
+
+| Sonde | Résultat |
+|---|---|
+| `api/parrainage.php?action=config` | 200 — `actif:true, remisePct:10, commissionPct:10, seuilVersement:2000, versementAuto:true` |
+| `app.html` → `app.js?v=1.20.19.671630` | 200, 2 761 676 o — `pgPrixCalculs`, `_formulesGrille`, `_codeAmiAppliquer` présents |
+| Vitrine `/` | 200 — 4 `data-vrt-formule`, `abo_starter_m` ×6 |
+| `assets/theme-lws.css` | 200 — 52 règles `.vfo` |
+| `api/public_data.php` | 403 en curl (**sentinelle anti-robots**, pas une panne) ; 200 dans un navigateur, les 10 formules et `tarifs_publics` publiés |
+| `api/_parrainage_lib.php` en direct | 200 mais **0 octet** — PHP exécute, n'expose rien ; identique à tous les `_*_lib.php`, pas une régression |
+
+**LE TROU QUI RESTAIT, ET IL ÉTAIT COMMERCIAL.** Le serveur honore le Code ami
+sur `intent: 'livret'` depuis le 14/09 — mais `api/payment_camerpay.php` ne
+l'évalue **que si la requête d'initiation porte la clé `code`**. Ce n'est pas un
+oubli : c'est la garde qui empêche de rémunérer un parrain sur un rabais que le
+filleul n'a pas vu. Or `livrets/gate.js` ne l'envoyait jamais.
+
+Conséquence mesurée : le formulaire d'inscription promet « Code ami (facultatif)
+— −10 % sur vos abonnements **et achats** », et cette promesse ne valait sur
+**aucun des quinze cahiers** — la surface la plus achetée du site. Rien ne
+l'aurait dit : le paiement aboutissait, au plein tarif.
+
+**Ce qui est construit** (`livrets/gate.js`) : champ « Code ami » dans le tunnel
+d'achat, vérifié par `parrainage.php?action=verifier`, prix barré + nouveau
+total + libellé du bouton repeints depuis **la réponse du serveur**. Le code
+porté par le visiteur (`?ref=`, `sessionStorage._vrtRef`, `localStorage
+.vrt_code_ami` — les clés d'app.js) s'applique seul, après la sonde des tarifs.
+
+**Trois décisions qui tiennent tout le module :**
+
+1. *On ne calcule JAMAIS la remise dans le navigateur.* Le montant envoyé au
+   débit est celui que le serveur a rendu. Un prix deviné serait promis à
+   l'écran puis refusé au débit (409 `PRIX_INCOHERENT`).
+2. *La clé `code` n'est ajoutée au corps que si une remise est AFFICHÉE.*
+   Sa seule présence — `array_key_exists`, même vide — déclenche l'évaluation
+   côté serveur : l'envoyer vide ferait appliquer un lien que cette page ne
+   connaît pas, donc un montant plus bas que celui qu'on vient d'afficher.
+3. *Ce qui rendrait la remise fausse la retire.* Quantité portée à 2 (le pack
+   a déjà ses paliers, et `livret_pack` est banni côté serveur) ou tarif de
+   référence qui bouge sous elle → remise retirée, champ masqué, et le débit
+   s'arrête plutôt que de partir sur un chiffre que l'acheteur n'a pas vu.
+
+**Banc** : `tests/banc_code_ami_cahiers.cjs`, branché dans `deploy.yml` ET
+`test.yml`. Étage ① lit les fichiers (tourne partout) ; étage ② pilote Chromium
+et **lit le corps réellement envoyé à `?action=init`** — la seule preuve qui
+compte. Un seul invariant, sous quatre angles : *prix affiché = libellé du
+bouton = montant débité*. 23/23.
+
+La remise du bouchon vaut **137 F, pas 150** : une remise ronde de 10 % serait
+reproductible par un calcul local, et le banc ne saurait plus distinguer
+« le client affiche ce que le serveur a dit » de « le client a deviné la même
+chose ».
+
+**Éprouvé par 3 mutations, chacune probante** (`gate.js`) :
+
+| Mutation | Rouges |
+|---|---|
+| `corps.code = codeAmi.code \|\| ''` (clé inconditionnelle) | 4 |
+| `aPayer = Math.round(aPayer * 0.9)` (prix deviné) | 1 — `1350 ≠ 1363` |
+| garde-fou `plein !== codeAmi.base` retiré | 1 |
+
+**Piège repris au vol** : `ci_scripts_suivis` a refusé le banc neuf tant qu'il
+n'était pas `git add` — exactement le garde-fou « fichier non suivi = jamais
+déployé ». Aucun bump de version à la main : l'empreinte de `deploy/livrets/*.js`
+entre dans `$VER`, donc une correction de `gate.js` invalide seule les caches
+« immutable 1 an ».
+
+**Suite locale** : 55/55 verts. (Un passage a montré `banc_boutique_unifiee`
+rouge ; rejoué 6 fois, seul et dans l'ordre exact de la suite, il est vert —
+contention de Chromium pendant le balayage, pas le code.)
+
+**Limites connues, inchangées** : le Code ami n'est toujours pas dans la
+boutique de la vitrine ni dans l'Atelier ; parts d'auteur encore calculées dans
+le navigateur ; quelques mentions de prix de la vitrine restent statiques.
+
+## Code ami, formules d'abonnement, « Prix & calculs automatiques » (14/09/2026) — DÉPLOYÉ
 
 Demande : « le site tarde à décoller ». Rendre l'offre attrayante, auditer
 parrainage et codes promo, commission automatique au paiement ; puis « tous les

@@ -151,9 +151,23 @@
     el('lis-code').style.display = S.ouvert ? 'none' : '';
   }
 
+  /* Icône plutôt qu'émoji, pour la même raison que dans le tunnel d'achat
+     (livrets/gate.js) : un émoji est dessiné par le système du lecteur, pas
+     par nous, et les WebView anciens n'en ont aucun — ils affichent alors un
+     rectangle vide en haut du mur d'aperçu, juste avant le prix. Même grille
+     24×24 et même graisse que le sprite de la devanture.
+     Posé en ligne ici : `ico()` vit dans la fermeture de gate.js, et exporter
+     une fonction d'affichage pour un seul appel coûterait plus cher que ces
+     deux tracés. */
+  var ICO_LIVRE_FERME =
+    '<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#c0453f" '
+    + 'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" '
+    + 'focusable="false"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>'
+    + '<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
+
   function mur(n) {
     el('lis-vue').innerHTML = '<div id="lis-mur">'
-      + '<div style="font-size:38px">📕</div>'
+      + '<div style="margin-bottom:2px">' + ICO_LIVRE_FERME + '</div>'
       + '<div style="font-family:\'Baloo 2\',sans-serif;font-weight:800;font-size:21px;color:#1f2b38;'
       + 'margin:8px 0 4px">Fin de l\'aperçu</div>'
       + '<div style="font-size:14px;color:#5c666f;line-height:1.55">Les ' + S.libres + ' premières pages '
@@ -205,10 +219,17 @@
         maj();
       }).catch(function () { /* la fiche est un confort, pas une condition */ });
 
-      // Un code déjà posé sur cet appareil rouvre l'ouvrage sans rien demander.
+      /* Un code déjà posé sur cet appareil rouvre l'ouvrage sans rien demander.
+         `?achat=1` — le visiteur arrive de « Commander » en boutique — ouvre le
+         tunnel de paiement, mais SEULEMENT après l'échec de la reprise : celui
+         qui a déjà payé ne doit pas voir un écran de paiement s'ouvrir sur son
+         ouvrage. Même règle que livrets/cahier.html. */
+      var veutAcheter = /[?&]achat=1(&|$)/.test(location.search);
       window.VRTLivret.resume().then(function () {
         S.ouvert = true; maj();
-      }).catch(function () {});
+      }).catch(function () {
+        if (veutAcheter) window.VRTLivret.acheter({});
+      });
     }
   };
 })();

@@ -139,9 +139,15 @@ require ${JSON.stringify(path.join(RACINE, 'api', 'livret.php'))};
   return dir;
 }
 
-async function api(body, secret) {
+/* `ua` : l'empreinte de poste se calcule sur l'agent du navigateur. Deux
+   agents distincts = deux appareils aux yeux du quota. C'est le seul levier
+   dont ce banc dispose pour jouer plusieurs appareils : `php -S` répond
+   toujours depuis 127.0.0.1, et c'est justement ce qu'on veut — l'adresse IP
+   ne doit PLUS entrer dans l'empreinte. */
+async function api(body, secret, ua) {
   const h = { 'Content-Type': 'application/json' };
   if (secret) h['Authorization'] = 'Bearer ' + secret;
+  if (ua) h['User-Agent'] = ua;
   const r = await fetch(URL, { method: 'POST', headers: h, body: JSON.stringify(body) });
   let j = null; try { j = await r.json(); } catch (e) {}
   return { status: r.status, j };
@@ -496,6 +502,156 @@ async function serveurPret() {
       'et l’identifiant réellement installé par le fichier sain');
   dit((await api({ action: 'admin_depot' })).status === 401,
       'l’inventaire du dépôt est fermé sans la clé d’administration');
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     LE QUOTA D'APPAREILS — non couvert jusqu'au 15/09/2026, et c'est là que le
+     défaut a vécu.
+     Un collègue s'est vu refuser le Bord 2ⁿᵈᵉ par « ce code est déjà utilisé
+     sur 3 appareils », sur un code honnête et un seul téléphone. L'empreinte
+     valait hash(IP + agent) : chaque bascule Wi-Fi ↔ données mobiles prenait
+     une place, et une place prise ne se rendait jamais. Aucun contrôle ne
+     regardait de ce côté — le banc comptait les codes, pas les places.
+     ⓪ n'interroge PAS le serveur HTTP : `php -S` répond toujours depuis
+     127.0.0.1 et `vrt_real_ip()` refuse à juste titre de croire un en-tête
+     `X-Forwarded-For` sans proxy déclaré — le banc ne PEUT donc pas jouer deux
+     adresses par la porte HTTP. Il éprouve la recette d'empreinte là où elle
+     s'écrit, en appelant la fonction directement.
+     Éprouvé par mutation le 15/09 : en remettant l'IP dans
+     `vrt_livret_empreinte`, ⓪ rougit ; en retirant la purge des places
+     dormantes, ⑤ rougit ; en retirant la migration, ④ rougit.
+     ══════════════════════════════════════════════════════════════════════════ */
+  console.log('\n\x1b[1m9. Le quota compte des APPAREILS, pas des connexions\x1b[0m');
+  /* Les compteurs de débit (40 requêtes/minute) sont partagés par tout le
+     banc. Après huit sections, ils sont épuisés : sans cette remise à zéro,
+     cette section-ci mesure le RATE-LIMIT et rougit en bloc sur des 429,
+     quoi que fasse le quota d'appareils. */
+  try { fs.rmSync(path.join(dir, 'lvdata', '_rate'), { recursive: true, force: true }); } catch (e) {}
+
+  // ⓪ LA CAUSE RACINE : l'adresse IP ne doit plus entrer dans l'empreinte.
+  {
+    const sonde = path.join(dir, 'sonde_empreinte.php');
+    fs.writeFileSync(sonde, `<?php
+define('VRT_HMAC_KEY', ${JSON.stringify('k'.repeat(32))});
+require ${JSON.stringify(path.join(RACINE, 'api', '_livret_lib.php'))};
+$ua = 'Mozilla/5.0 (Linux; Android 13; Infinix X669C) Chrome/120';
+$emp = function (string $ip) use ($ua) {
+    $_SERVER['REMOTE_ADDR'] = $ip; $_SERVER['HTTP_USER_AGENT'] = $ua;
+    return vrt_livret_empreinte();
+};
+$wifi = $emp('41.202.207.10');          // Wi-Fi de l'école
+$data = $emp('154.72.166.44');          // données mobiles MTN
+$_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120';
+$_SERVER['REMOTE_ADDR'] = '41.202.207.10';
+$pc = vrt_livret_empreinte();           // ordinateur familial, même réseau
+echo json_encode(['memeTel' => $wifi === $data, 'autrePoste' => $wifi !== $pc]);
+`, 'utf8');
+    const r = spawnSync('php', [sonde], { encoding: 'utf8' });
+    let s = null; try { s = JSON.parse((r.stdout || '').trim()); } catch (e) {}
+    dit(!!s && s.memeTel === true,
+        'le même téléphone garde UNE empreinte du Wi-Fi aux données mobiles',
+        (r.stdout || r.stderr || '').trim().slice(0, 120));
+    dit(!!s && s.autrePoste === true,
+        'deux postes réellement différents restent distinguables');
+  }
+
+  const REGISTRE = path.join(dir, 'lvdata', 'livret_codes.json');
+  const lireReg  = () => JSON.parse(fs.readFileSync(REGISTRE, 'utf8'));
+  const ecrireReg = (r) => fs.writeFileSync(REGISTRE, JSON.stringify(r), 'utf8');
+  // La clé du registre est un HMAC du code : on retrouve l'entrée par sa seule
+  // nouveauté plutôt qu'en recalculant la signature.
+  const entreeDe = (reg, avant) => Object.keys(reg.codes).filter(k => !avant.has(k))[0];
+
+  const TEL = 'Mozilla/5.0 (Linux; Android 13; Infinix X669C) Chrome/120';
+  const PC  = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120';
+  const TAB = 'Mozilla/5.0 (Linux; Android 11; SM-T220) Chrome/120';
+  const QUATRE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) Safari/605';
+
+  const avantQ = new Set(Object.keys(lireReg().codes));
+  const genQ = await api({ action: 'admin_gen', classe: '6e', kind: 'livret', n: 1,
+                           label: 'quota' }, SECRET);
+  const codeQ = (genQ.j && genQ.j.codes || [])[0];
+  const cleQ = entreeDe(lireReg(), avantQ);
+  dit(!!codeQ && !!cleQ, 'un code de test est émis pour le quota');
+
+  // ① Le même appareil qui revient ne consomme pas une place de plus.
+  await api({ action: 'unlock', code: codeQ, classe: '6e', kind: 'livret' }, null, TEL);
+  await api({ action: 'unlock', code: codeQ, classe: '6e', kind: 'livret' }, null, TEL);
+  await api({ action: 'unlock', code: codeQ, classe: '6e', kind: 'livret' }, null, TEL);
+  dit(Object.keys(lireReg().codes[cleQ].dev || {}).length === 1,
+      'trois ouvertures depuis le MÊME téléphone = une seule place',
+      'places : ' + Object.keys(lireReg().codes[cleQ].dev || {}).length);
+
+  // ② Trois appareils réellement distincts tiennent, le quatrième est refusé.
+  await api({ action: 'unlock', code: codeQ, classe: '6e', kind: 'livret' }, null, PC);
+  const troisieme = await api({ action: 'unlock', code: codeQ, classe: '6e', kind: 'livret' }, null, TAB);
+  dit(troisieme.status === 200, 'trois appareils distincts ouvrent le cahier');
+  const quatrieme = await api({ action: 'unlock', code: codeQ, classe: '6e', kind: 'livret' }, null, QUATRE);
+  dit(quatrieme.status === 403 && quatrieme.j && quatrieme.j.code === 'device_quota',
+      'le quatrième est refusé — le plafond tient toujours',
+      'statut ' + quatrieme.status);
+
+  // ③ Le refus ne laisse plus l'acheteur sans issue : il dit quoi faire.
+  dit(/remettons à zéro|Ferme le cahier/.test((quatrieme.j && quatrieme.j.error) || ''),
+      'le refus propose une sortie au lieu d’accuser de partage',
+      (quatrieme.j && quatrieme.j.error || '').slice(0, 70));
+
+  // ④ MIGRATION. Un code bloqué sous l'ancienne recette d'empreinte doit se
+  //    rouvrir tout seul : sinon les acheteurs déjà coincés le restent à vie.
+  {
+    const reg = lireReg();
+    /* ⚠️ LES PLACES DOIVENT ÊTRE RÉCENTES, sinon ce contrôle ne prouve rien.
+       Première version : elles étaient datées de 2025 — la purge des dormantes
+       (⑤) les rendait à elle seule, et ce contrôle restait VERT même en
+       désactivant la migration. Constaté par mutation le 15/09.
+       Datées de maintenant, seule la migration peut les rendre — et c'est bien
+       le cas du collègue : un code saturé il y a quelques jours. */
+    const now = Math.floor(Date.now() / 1000);
+    reg.codes[cleQ].dev = { 'aaaaaaaaaaaaaaaa': now,
+                            'bbbbbbbbbbbbbbbb': now - 3600,
+                            'cccccccccccccccc': now - 7200 };
+    delete reg.codes[cleQ].fpv;          // état d'un registre d'avant le 15/09
+    ecrireReg(reg);
+    const rouvre = await api({ action: 'unlock', code: codeQ, classe: '6e', kind: 'livret' }, null, QUATRE);
+    dit(rouvre.status === 200,
+        'un code saturé par l’ANCIENNE empreinte se débloque de lui-même',
+        'statut ' + rouvre.status + ' ' + ((rouvre.j && rouvre.j.error) || ''));
+    dit(lireReg().codes[cleQ].fpv === 2,
+        'et le registre note la version d’empreinte, pour ne migrer qu’une fois');
+  }
+
+  // ⑤ DORMANCE. Une place inutilisée depuis plus de 30 jours est rendue.
+  {
+    const reg = lireReg();
+    const vieux = Math.floor(Date.now() / 1000) - 40 * 86400;
+    reg.codes[cleQ].dev = { 'dddddddddddddddd': vieux,
+                            'eeeeeeeeeeeeeeee': vieux,
+                            'ffffffffffffffff': Math.floor(Date.now() / 1000) };
+    reg.codes[cleQ].fpv = 2;
+    ecrireReg(reg);
+    const neuf = await api({ action: 'unlock', code: codeQ, classe: '6e', kind: 'livret' }, null, TEL);
+    dit(neuf.status === 200,
+        'deux places dormantes depuis 40 jours sont rendues',
+        'statut ' + neuf.status + ' ' + ((neuf.j && neuf.j.error) || ''));
+    const restantes = Object.keys(lireReg().codes[cleQ].dev || {});
+    dit(restantes.indexOf('dddddddddddddddd') < 0 && restantes.indexOf('ffffffffffffffff') >= 0,
+        'la place récente est gardée, les dormantes sont retirées',
+        'restantes : ' + restantes.length);
+  }
+
+  // ⑥ L'horodatage doit suivre le DERNIER usage, sinon « dormante » ne veut
+  //    rien dire : il était écrit une fois et jamais relu.
+  {
+    const reg = lireReg();
+    const cles = Object.keys(reg.codes[cleQ].dev || {});
+    const cible = cles[cles.length - 1];
+    reg.codes[cleQ].dev[cible] = Math.floor(Date.now() / 1000) - 10 * 86400;
+    const avant = reg.codes[cleQ].dev[cible];
+    ecrireReg(reg);
+    await api({ action: 'unlock', code: codeQ, classe: '6e', kind: 'livret' }, null, TEL);
+    const apresVu = (lireReg().codes[cleQ].dev || {});
+    const rafraichi = Object.keys(apresVu).some(k => apresVu[k] > avant);
+    dit(rafraichi, 'une ouverture rafraîchit l’horodatage de la place');
+  }
 
   console.log('\n' + '─'.repeat(68));
   const total = ok + ko;

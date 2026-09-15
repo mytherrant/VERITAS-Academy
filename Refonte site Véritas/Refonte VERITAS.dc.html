@@ -1210,6 +1210,12 @@
                   <sc-if value="{{ m.lien }}">
                     <a href="{{ m.lien }}" class="vbq-lire" aria-label="Lire {{ m.titre }} en ligne"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"></use></svg>Lire en ligne</a>
                   </sc-if>
+                  <!-- Le bouton qui VEND (15/09/2026). `m.acheter` porte le
+                       tunnel qui sait livrer ce produit-là ; le choix se fait
+                       dans carteDepuisLivre (assets/vitrine.js), commenté. -->
+                  <sc-if value="{{ m.acheter }}">
+                    <a href="{{ m.acheter }}" class="vbq-cta" aria-label="Commander {{ m.titre }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-basket"></use></svg>Commander</a>
+                  </sc-if>
                 </div>
               </div>
             </article>

@@ -6,6 +6,13 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Mon Cahier de français 6ᵉ — Centre VÉRITAS</title>
 <link rel="canonical" href="https://veritas-school.com/livrets/cahier.html?o=6e">
+<script>
+/* AVANT le filet `meta refresh` ci-dessous, qui ne sait pas propager le
+   paramètre. Un visiteur venu de « Commander » en boutique doit arriver sur le
+   tunnel de paiement, pas sur l'écran de code — celui-ci suppose un achat
+   qu'il n'a pas encore pu faire. */
+if (/[?&]achat=1(&|$)/.test(location.search)) location.replace("cahier.html?o=6e&achat=1");
+</script>
 <meta http-equiv="refresh" content="0; url=cahier.html?o=6e">
 <!--
   ══════════════════════════════════════════════════════════════════════════
@@ -68,7 +75,11 @@
 /* La redirection immédiate passe par `replace()` : le bouton « précédent » ne
    doit pas ramener sur cette page, sinon on y rebondit sans fin. Le
    `meta refresh` ci-dessus reste le filet sans JavaScript. */
-location.replace("cahier.html?o=6e");
+/* On PROPAGE `achat=1`. Cette redirection le perdait : un visiteur venu de
+   « Commander » en boutique arrivait sur l'écran « Saisis ton code », c'est-à-
+   dire sur la preuve d'un achat qu'il n'avait pas encore pu faire. */
+var _achat = /[?&]achat=1(&|$)/.test(location.search) ? "&achat=1" : "";
+location.replace("cahier.html?o=6e" + _achat);
 </script>
 </body>
 </html>

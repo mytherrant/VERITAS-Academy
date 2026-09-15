@@ -110,6 +110,99 @@
   }
   function fmt(v) { return Number(v).toLocaleString('fr-FR'); }
 
+  /* ══ CODE AMI ═══════════════════════════════════════════════════════════════
+     Depuis le 14/09/2026 le serveur sait honorer un code ami sur `intent:
+     'livret'` — mais il ne l'applique QU'AUX TUNNELS QUI ENVOIENT la clé
+     `code`. Ce n'est pas un oubli : rémunérer le parrain sur un achat où le
+     filleul n'a pas vu sa remise, c'est prélever une commission sur un rabais
+     que personne n'a reçu. Les cahiers ne l'envoyaient pas. Le champ promis à
+     l'inscription — « Code ami (facultatif) — −10 % sur vos abonnements et
+     achats » — ne valait donc sur AUCUN des quinze cahiers, alors que c'est la
+     surface la plus achetée du site.
+
+     RÈGLE DE SÛRETÉ, ET ELLE EST TOUT LE MODULE : le prix affiché, le libellé
+     du bouton et la somme envoyée à `?action=init` sortent tous de la MÊME
+     réponse du serveur (`?action=verifier`). On ne calcule JAMAIS la remise
+     ici. Un prix deviné serait promis à l'écran puis refusé au débit
+     (409 PRIX_INCOHERENT) — l'écart entre les deux chiffres est précisément ce
+     qui s'est déjà payé sur ce tunnel avec les cahiers d'œuvres à 1 000 F.
+
+     Et tout ce qui peut déplacer le tarif — la quantité, la sonde des tarifs
+     qui répond après coup — RETIRE la remise tant qu'elle n'a pas été
+     revérifiée auprès du serveur.
+
+     ⚠️ Le pack (`livret_pack`, n > 1) n'est pas éligible côté serveur : il a
+     déjà ses paliers de volume. Le champ disparaît donc dès le 2ᵉ code. */
+  var PARR = '/api/parrainage.php';
+  var codeAmi = { code: '', remise: 0, montant: 0, pct: 0, parrain: '', base: 0 };
+
+  function codeAmiPose() { return !!(codeAmi.code && codeAmi.remise > 0 && codeAmi.montant > 0); }
+  function codeAmiOublier() { codeAmi = { code: '', remise: 0, montant: 0, pct: 0, parrain: '', base: 0 }; }
+
+  /* Le code que le visiteur porte déjà. MÊMES SOURCES, ET DANS LE MÊME ORDRE,
+     que `_codeAmiRetenu()` d'app.js : un visiteur arrivé par le lien d'un ami
+     retrouve sa remise sur le cahier sans avoir à retaper quoi que ce soit —
+     et la retrouve identique des deux côtés du site. */
+  function codeAmiRetenu() {
+    try {
+      var u = new RegExp('[?&](?:ref|code|parrain)=([A-Za-z0-9_-]{3,32})').exec(location.search);
+      if (u) return u[1].toUpperCase();
+    } catch (e) {}
+    try { var s = sessionStorage.getItem('_vrtRef'); if (s) return String(s).toUpperCase(); } catch (e) {}
+    try {
+      var o = JSON.parse(localStorage.getItem('vrt_code_ami') || 'null');
+      if (o && o.c && (Date.now() - (o.t || 0)) < 60 * 86400000) return String(o.c).toUpperCase();
+    } catch (e) {}
+    return '';
+  }
+
+  /* Un code accepté se garde — la même durée et sous la même clé qu'app.js,
+     pour qu'un achat de cahier profite ensuite à l'abonnement, et l'inverse. */
+  function codeAmiGarder(code) {
+    if (!code) return;
+    try { localStorage.setItem('vrt_code_ami', JSON.stringify({ c: code, t: Date.now() })); } catch (e) {}
+  }
+
+  /* Demande au serveur ce qu'il honorerait, et RIEN DE PLUS. La réponse fait
+     autorité : `montant` est ce qui sera envoyé au débit. */
+  function codeAmiVerifier(code, n, tel) {
+    var brut = String(code || '').toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
+    if (!brut) return Promise.resolve({ ok: false, message: '' });
+    if (n > 1) return Promise.resolve({ ok: false, message: 'Un code ami ne se cumule pas avec la remise de volume d’un pack.' });
+    return fetch(PARR + '?action=verifier', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+      body: JSON.stringify({
+        code: brut,
+        intent: 'livret',
+        targetId: cfg.classe + ':' + cfg.kind,
+        montant: prix(cfg.kind, 1),
+        tel: String(tel || '').replace(/\D+/g, '')
+      })
+    })
+      .then(function (r) { return r.json().catch(function () { return null; }); })
+      .then(function (j) {
+        if (!j) return { ok: false, message: 'Réponse illisible du serveur — réessaie dans un instant.' };
+        if (!j.ok) return { ok: false, message: j.message || j.error || 'Code inconnu, épuisé ou expiré.' };
+        var remise = parseInt(j.remise, 10) || 0;
+        var montant = parseInt(j.montant, 10) || 0;
+        // Un « ok » sans remise chiffrée ne change rien au prix : on n'affiche
+        // pas une réduction de 0 F, et surtout on ne modifie pas le montant.
+        if (remise <= 0 || montant <= 0) return { ok: false, message: j.message || 'Ce code ne s’applique pas à cet achat.' };
+        return {
+          ok: true, code: String(j.code || brut), remise: remise, montant: montant,
+          pct: parseInt(j.remisePct, 10) || 0, parrain: String(j.parrain || ''),
+          message: j.message || ''
+        };
+      })
+      .catch(function () {
+        // Registre injoignable : la vente continue AU PLEIN TARIF plutôt que de
+        // s'arrêter. Un code non appliqué se rattrape ; une vente perdue, non.
+        return { ok: false, message: 'Vérification impossible pour le moment — tu peux payer au tarif normal.' };
+      });
+  }
+
   // ── Utilitaires ──────────────────────────────────────────────────────────
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -725,13 +818,46 @@
   var TTL = 'font-family:\'Baloo 2\',sans-serif;font-weight:800;font-size:21px;color:#1f2b38;margin:8px 0 4px';
   var SUB = 'font-size:14px;color:#5c666f;line-height:1.55';
 
+  /* ── ICÔNES PLUTÔT QU'ÉMOJIS ──────────────────────────────────────────────
+     Les écrans de ce tunnel s'ouvraient sur un émoji de 38 px — 📘 ⏳ 🔎 🎉 🎁.
+     Un émoji n'est pas dessiné par nous : chaque système en donne sa version
+     (Android, iOS, Windows), certains anciens WebView n'en ont aucune et
+     affichent le rectangle vide « tofu ». C'est l'écran de PAIEMENT : il doit
+     porter la même charte que la devanture, qui utilise déjà un jeu d'icônes
+     vectorielles (`#lc-*` du sprite de vitrine.html).
+     Le sprite, lui, ne peut pas servir ici : `gate.js` s'exécute sur les pages
+     de livrets, qui ne l'embarquent pas. On pose donc le tracé en ligne —
+     même grille 24×24 et même graisse que le sprite, pour que les deux
+     surfaces restent indiscernables. */
+  var TRACES = {
+    livre:   '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+    horloge: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    loupe:   '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/>',
+    succes:  '<path d="M21.8 10A10 10 0 1 1 17 3.3"/><path d="m9 11 3 3L22 4"/>',
+    cadeau:  '<path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 21V7"/>'
+           + '<path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>'
+           + '<path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>'
+  };
+
+  /** Icône vectorielle. `px` remplace la taille de l'émoji, `couleur` porte le
+   *  sens de l'écran (bleu = information, ambre = en cours, vert = obtenu).
+   *  `aria-hidden` : le titre juste en dessous dit déjà de quoi il s'agit —
+   *  une icône annoncée deux fois est une gêne pour qui écoute la page. */
+  function ico(nom, px, couleur) {
+    var d = TRACES[nom];
+    if (!d) return '';
+    return '<svg width="' + px + '" height="' + px + '" viewBox="0 0 24 24" fill="none" '
+      + 'stroke="' + couleur + '" stroke-width="1.7" stroke-linecap="round" '
+      + 'stroke-linejoin="round" aria-hidden="true" focusable="false">' + d + '</svg>';
+  }
+
   var qte = 1;   // >1 = pack établissement
   function ouvrirAchat(opts) {
     qte = Math.max(1, Math.min(500, (opts && opts.n) || 1));
     var nom = cfg.titre || ('Livret ' + cfg.classe);
     modale(
       '<div style="text-align:center">'
-      + '<div style="font-size:38px">📘</div>'
+      + '<div style="margin-bottom:2px">' + ico('livre', 38, '#1E499B') + '</div>'
       + '<div style="' + TTL + '">' + esc(nom) + '</div>'
       + '<div style="' + SUB + '">Accès en ligne pour <strong>toute l\'année scolaire</strong> : '
       + 'tu réponds directement dans le livret, tes réponses sont enregistrées, '
@@ -761,6 +887,23 @@
       + 'placeholder="Ton e-mail (facultatif) — pour recevoir ton code" style="' + INP + '">'
       + '<div style="font-size:11px;color:#98a1aa;margin:-4px 0 2px;line-height:1.45">'
       + 'Avec une adresse, ton code t’est envoyé même si tu fermes cette page.</div>'
+      /* CODE AMI — le même champ que l'application, sur la surface la plus
+         achetée du site. Masqué pour un pack : le serveur refuse d'y cumuler
+         un code avec les paliers de volume, et proposer un champ qui ne peut
+         pas aboutir vaut moins que pas de champ du tout. */
+      + '<div id="vrt-ca-bloc" style="margin-top:10px;text-align:left'
+        + (qte > 1 ? ';display:none' : '') + '">'
+      + '<label for="vrt-ca" style="display:block;font-size:12.5px;color:#5c666f;margin-bottom:2px">'
+      + '<span style="display:inline-block;vertical-align:-3px;margin-right:5px">'
+      + ico('cadeau', 15, '#A84200') + '</span>Code ami (facultatif) — une remise si un ami t’en a donné un</label>'
+      + '<div style="display:flex;gap:8px;align-items:stretch">'
+      + '<input id="vrt-ca" type="text" autocomplete="off" spellcheck="false" placeholder="VRT…" '
+      + 'style="' + INP + ';margin:0;flex:1;text-transform:uppercase">'
+      + '<button id="vrt-ca-go" type="button" style="border:1px solid #cfd6dd;background:#fff;color:#5c666f;'
+      + 'font-weight:700;font-size:13px;padding:0 14px;border-radius:10px;cursor:pointer;white-space:nowrap">Appliquer</button>'
+      + '</div>'
+      + '<div id="vrt-ca-msg" style="font-size:12px;min-height:16px;margin-top:4px;line-height:1.45"></div>'
+      + '</div>'
       + '<div id="vrt-msg" style="font-size:12.5px;color:#c0453f;min-height:17px;margin-top:2px"></div>'
       + '<button id="vrt-go" style="' + BTN + '">Payer ' + fmt(prix(cfg.kind, qte)) + ' FCFA</button>'
       + '<button id="vrt-deja" style="' + BTN2 + '">J\'ai déjà payé — retrouver mon code</button>'
@@ -823,15 +966,43 @@
       var n = qte;
       var champ = document.getElementById('vrt-n');
       if (champ) n = Math.max(1, Math.min(500, parseInt(champ.value, 10) || 1));
-      var t = prix(cfg.kind, n);
+      var plein = prix(cfg.kind, n);
+
+      /* ── LA REMISE NE SURVIT PAS À CE QUI LA RENDRAIT FAUSSE ─────────────
+         Deux choses peuvent bouger sous elle : la quantité (le pack n'est pas
+         éligible) et le tarif de référence, que `resoudreTarifs()` corrige
+         APRÈS l'ouverture de la modale. Dans les deux cas la somme validée par
+         le serveur ne correspond plus à rien : on la retire, plutôt que
+         d'envoyer au débit un montant qui serait refusé après coup. Le code
+         reste écrit dans le champ — il suffit de le réappliquer. */
+      var bloc = document.getElementById('vrt-ca-bloc');
+      if (bloc) bloc.style.display = (n > 1) ? 'none' : '';
+      if (codeAmiPose() && (n > 1 || plein !== codeAmi.base)) {
+        var perdue = (n > 1)
+          ? 'Un code ami ne s’applique pas à un pack : la remise de volume la remplace.'
+          : 'Le tarif vient d’être actualisé — réapplique ton code.';
+        codeAmiOublier();
+        caMsg(perdue, false);
+      }
+
+      var t = codeAmiPose() ? codeAmi.montant : plein;
       var b = document.getElementById('vrt-go');
       /* Le bouton peut être en cours de paiement (« Ouverture du paiement… ») :
          on ne réécrit que s'il porte encore son libellé de prix, sinon on
          effacerait l'état sous les yeux de l'acheteur. */
       if (b && /^Payer /.test(b.textContent)) b.textContent = 'Payer ' + fmt(t) + ' FCFA';
       var e = document.querySelector('#vrt-achat .vrt-prix');
-      if (e) e.textContent = fmt(t) + ' FCFA';
-      return { n: n, t: t };
+      if (e) {
+        // Le plein tarif reste LISIBLE à côté du nouveau : une remise qu'on ne
+        // peut pas comparer n'est pas perçue comme une remise.
+        if (codeAmiPose()) {
+          e.innerHTML = '<span style="font-size:19px;color:#98a1aa;text-decoration:line-through;margin-right:10px">'
+            + fmt(plein) + '</span>' + fmt(t) + ' FCFA';
+        } else {
+          e.textContent = fmt(t) + ' FCFA';
+        }
+      }
+      return { n: n, t: t, plein: plein };
     };
 
     resoudreTarifs().then(function () {
@@ -844,10 +1015,67 @@
       var r = majPrix();
       msg(r.n > 1 ? r.n + ' codes — ' + fmt(Math.round(r.t / r.n)) + ' F l’unité' : '', true);
     };
+
+    /* ── CODE AMI : appliquer, et ne rien promettre sans le serveur ────────── */
+    var champCA = document.getElementById('vrt-ca');
+    var boutonCA = document.getElementById('vrt-ca-go');
+
+    var appliquerCA = function () {
+      if (!champCA || !boutonCA) return;
+      var n = 1;
+      var cn = document.getElementById('vrt-n');
+      if (cn) n = Math.max(1, Math.min(500, parseInt(cn.value, 10) || 1));
+      var saisi = String(champCA.value || '').toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
+      champCA.value = saisi;
+      if (!saisi) { codeAmiOublier(); majPrix(); caMsg('', true); return; }
+      boutonCA.disabled = true;
+      var libelle = boutonCA.textContent;
+      boutonCA.textContent = '…';
+      caMsg('Vérification…', true);
+      var tel = (document.getElementById('vrt-tel') || {}).value || '';
+      codeAmiVerifier(saisi, n, tel).then(function (r) {
+        // La modale a pu être fermée pendant l'aller-retour : on ne ressuscite rien.
+        if (!document.getElementById('vrt-achat')) return;
+        boutonCA.disabled = false; boutonCA.textContent = libelle;
+        if (!r.ok) { codeAmiOublier(); majPrix(); caMsg(r.message || 'Code refusé.', false); return; }
+        codeAmi = {
+          code: r.code, remise: r.remise, montant: r.montant, pct: r.pct,
+          parrain: r.parrain, base: prix(cfg.kind, 1)
+        };
+        codeAmiGarder(r.code);
+        majPrix();
+        caMsg('✓ Code ' + r.code + ' appliqué' + (r.parrain ? ' (merci ' + r.parrain + ')' : '')
+          + ' — tu économises ' + fmt(r.remise) + ' FCFA.', true);
+      });
+    };
+
+    if (boutonCA) boutonCA.onclick = appliquerCA;
+    if (champCA) champCA.onkeydown = function (ev) {
+      if (ev && (ev.key === 'Enter' || ev.keyCode === 13)) { ev.preventDefault(); appliquerCA(); }
+    };
+
+    /* Le code que le visiteur porte déjà s'applique SEUL — mais seulement après
+       que la sonde des tarifs a répondu : appliqué sur le repli de 1 500 F puis
+       corrigé à 1 000, il serait retiré aussitôt sous les yeux de l'acheteur. */
+    resoudreTarifs().then(function () {
+      if (!document.getElementById('vrt-achat') || !champCA) return;
+      var porte = codeAmiRetenu();
+      if (!porte || champCA.value) return;
+      champCA.value = porte;
+      appliquerCA();
+    });
   }
 
   function msg(t, ok) {
     var e = document.getElementById('vrt-msg');
+    if (e) { e.textContent = t || ''; e.style.color = ok ? '#3f7a2c' : '#c0453f'; }
+  }
+
+  /* Le retour du code ami a sa PROPRE ligne : posé dans `vrt-msg`, il serait
+     effacé par le premier « Numéro incomplet » venu, et l'acheteur croirait sa
+     remise perdue au moment où il corrige son numéro. */
+  function caMsg(t, ok) {
+    var e = document.getElementById('vrt-ca-msg');
     if (e) { e.textContent = t || ''; e.style.color = ok ? '#3f7a2c' : '#c0453f'; }
   }
 
@@ -869,6 +1097,29 @@
     b.disabled = true; b.textContent = 'Ouverture du paiement…';
     msg('');
 
+    /* ⚠️ LA FENÊTRE DOIT S'OUVRIR PENDANT LE CLIC, PAS DANS LE `.then()`.
+       Jusqu'ici, `window.open(pay_url)` était appelé à la FIN d'une chaîne de
+       quatre allers-retours réseau (tarifs, passerelle, ?action=config,
+       ?action=init). À cet instant le geste de l'utilisateur est consommé
+       depuis longtemps : Chrome Android et Safari iOS bloquent l'ouverture,
+       sans un mot. L'écran d'attente affirmait pourtant « termine le paiement
+       dans l'onglet qui vient de s'ouvrir » — un onglet qui n'existait pas.
+       Le visiteur en concluait que le site n'accepte aucun paiement, et c'est
+       exactement ce que deux usagers ont écrit.
+       Ce défaut ne touchait QUE cette porte : le tunnel de la vitrine
+       (assets/vitrine.js) et les deux tunnels de l'application (app.js)
+       ouvrent déjà la fenêtre dans le geste, avec le même repli. Les quinze
+       cahiers à 1 500 F — la plus grosse part du catalogue — passaient tous
+       par ici.
+       On ouvre donc un onglet VIDE tant qu'on tient encore le geste, et on lui
+       donne son adresse quand le serveur l'a rendue. Si le navigateur l'a
+       refusé malgré tout (webview Android), on bascule l'onglet courant :
+       `achatPose` a déjà noté la référence, et `repriseAchat()` rouvre l'écran
+       de suivi au retour du payeur. */
+    var fen = null;
+    try { fen = window.open('', '_blank'); } catch (e) { fen = null; }
+    function fermerFenetre() { if (fen) { try { fen.close(); } catch (e) {} fen = null; } }
+
     var r = ref();
     /* On résout d'abord la passerelle active, PUIS on l'interroge : sans cela
        on paierait toujours chez le fournisseur écrit en dur, quel que soit
@@ -883,48 +1134,113 @@
             + 'Écris-nous sur WhatsApp pour obtenir ton code.', 'off');
         }
         if (c.sandbox) msg('Mode TEST : aucun argent réel ne circule.', true);
+
+        /* ── LE MONTANT ENVOYÉ EST CELUI QUI EST AFFICHÉ, OU RIEN ───────────
+           `resoudreTarifs()` vient de répondre : le tarif de référence est
+           peut-être retombé ailleurs que là où le code a été validé. Plutôt
+           que de débiter un chiffre que l'acheteur n'a pas vu — dans un sens
+           ou dans l'autre —, on s'arrête et on le lui dit. C'est la seule
+           issue honnête : le serveur, lui, refuserait le sous-paiement APRÈS
+           l'encaissement, et le refus ne s'afficherait que dans le tableau de
+           bord. */
+        var aPayer = prix(cfg.kind, n);
+        if (n <= 1 && codeAmiPose()) {
+          if (codeAmi.base !== aPayer) {
+            codeAmiOublier(); majPrix();
+            throw ErrPorte('Le tarif vient d’être actualisé : réapplique ton code ami, puis réessaie. '
+              + 'Tu n’as pas été débité.', 'prix');
+          }
+          aPayer = codeAmi.montant;
+        }
+
+        var corps = {
+          montant: aPayer,
+          ref: r,
+          label: (cfg.titre || ('Livret ' + cfg.classe)) + ' — accès en ligne',
+          // L'intent et la cible disent au serveur QUEL code émettre. Le tarif,
+          // lui, est vérifié en base (vrt_prix_catalogue) : envoyer 1 F ici ne
+          // débloque rien.
+          intent: n > 1 ? 'livret_pack' : 'livret',
+          targetId: cfg.classe + ':' + cfg.kind + (n > 1 ? ':' + n : ''),
+          clientTel: chiffres,
+          // Le serveur s'en sert pour POSTER le code dès la confirmation.
+          // Sans elle, la remise n'a que le numéro — et l'onglet.
+          clientEmail: mail
+        };
+        /* ⚠️ LA PRÉSENCE DE LA CLÉ `code` EST L'OPT-IN DU TUNNEL, PAS SA VALEUR.
+           api/payment_camerpay.php n'évalue le parrainage que si la clé existe
+           — `array_key_exists`, même vide. C'est ainsi qu'un parrain n'est
+           jamais rémunéré sur un achat où le filleul n'a pas vu sa remise.
+           On ne l'ajoute donc QUE lorsqu'une remise est affichée à l'écran, et
+           avec exactement le code qui l'a produite. L'envoyer vide reviendrait
+           à demander au serveur d'appliquer un lien que cette page ne connaît
+           pas : il rendrait un montant plus bas que celui qu'on vient
+           d'afficher, et le parrain toucherait sur un rabais jamais consenti. */
+        if (n <= 1 && codeAmiPose()) corps.code = codeAmi.code;
+
         return fetch(PAY + '?action=init', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + c.publicInitToken },
-          body: JSON.stringify({
-            montant: prix(cfg.kind, n),
-            ref: r,
-            label: (cfg.titre || ('Livret ' + cfg.classe)) + ' — accès en ligne',
-            // L'intent et la cible disent au serveur QUEL code émettre. Le tarif,
-            // lui, est vérifié en base (vrt_prix_catalogue) : envoyer 1 F ici ne
-            // débloque rien.
-            intent: n > 1 ? 'livret_pack' : 'livret',
-            targetId: cfg.classe + ':' + cfg.kind + (n > 1 ? ':' + n : ''),
-            clientTel: chiffres,
-            // Le serveur s'en sert pour POSTER le code dès la confirmation.
-            // Sans elle, la remise n'a que le numéro — et l'onglet.
-            clientEmail: mail
-          })
+          body: JSON.stringify(corps)
         });
       })
       .then(function (x) { return x.json(); })
       .then(function (j) {
         if (!j || (!j.pay_url && !j.success)) throw ErrPorte(j && j.error ? j.error : 'Initiation refusée.', 'init');
         achatPose(r, chiffres);
-        if (j.pay_url) window.open(j.pay_url, '_blank', 'noopener');
-        ecranAttente(r, chiffres, j.pay_url || '');
+        var ouverte = false;
+        if (j.pay_url) {
+          if (fen) {
+            try { fen.location.replace(j.pay_url); ouverte = (fen.closed === false); }
+            catch (e) { ouverte = false; }
+          }
+          if (!ouverte) {
+            /* Pas d'onglet : on n'abandonne pas le payeur sur une page qui lui
+               parle d'un onglet absent. On l'emmène sur la page de paiement
+               dans cet onglet-ci ; il y revient par `merchant_return_url`. */
+            fermerFenetre();
+            ecranAttente(r, chiffres, j.pay_url, false);
+            location.href = j.pay_url;
+            return;
+          }
+        }
+        ecranAttente(r, chiffres, j.pay_url || '', ouverte);
       })
       .catch(function (e) {
-        b.disabled = false; b.textContent = 'Payer ' + fmt(prix(cfg.kind, n)) + ' FCFA';
+        // Un onglet vide laissé ouvert derrière une erreur, c'est une page
+        // blanche que le visiteur devra fermer lui-même.
+        fermerFenetre();
+        /* Le libellé rendu au bouton est celui de la remise EN COURS, pas le
+           plein tarif : après un échec réseau, réafficher 1 500 F sous un
+           écran qui annonce 1 350 F ferait croire la remise perdue. */
+        b.disabled = false;
+        b.textContent = 'Payer ' + fmt((n <= 1 && codeAmiPose()) ? codeAmi.montant : prix(cfg.kind, n)) + ' FCFA';
         msg(e.message || 'Paiement impossible pour le moment.');
       });
   }
 
-  function ecranAttente(r, tel, url) {
+  /* `ouverte` : un onglet de paiement a-t-il RÉELLEMENT été ouvert ? L'écran
+     l'affirmait sans le savoir. Quand le navigateur avait refusé la fenêtre,
+     il envoyait donc le payeur chercher un onglet qui n'existait pas, et le
+     lien de secours passait pour un détail. */
+  function ecranAttente(r, tel, url, ouverte) {
     modale(
       '<div style="text-align:center">'
-      + '<div style="font-size:38px">⏳</div>'
+      + '<div style="margin-bottom:2px">' + ico('horloge', 38, '#B45309') + '</div>'
       + '<div style="' + TTL + '">Paiement en cours</div>'
-      + '<div style="' + SUB + '">Termine le paiement dans l\'onglet qui vient de s\'ouvrir. '
+      + '<div style="' + SUB + '">'
+      + (ouverte
+          ? 'Termine le paiement dans l\'onglet qui vient de s\'ouvrir. '
+          : 'Ouvre la page de paiement ci-dessous pour terminer. ')
       + 'Cette page se débloque toute seule dès que c\'est confirmé.</div>'
       + (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener" '
-        + 'style="display:block;margin-top:10px;color:#2b8ac6;font-weight:700;font-size:13px">'
-        + 'Rouvrir la page de paiement</a>' : '')
+        + 'style="display:block;margin-top:10px;' + (ouverte
+            ? 'color:#2b8ac6;font-weight:700;font-size:13px'
+            /* Fenêtre refusée : ce lien n'est plus un secours, c'est LE
+               chemin. Il prend donc l'allure d'un bouton. */
+            : 'background:#c0453f;color:#fff;font-weight:800;font-size:14.5px;'
+              + 'padding:12px 14px;border-radius:10px;text-decoration:none') + '">'
+        + (ouverte ? 'Rouvrir la page de paiement' : 'Ouvrir la page de paiement') + '</a>' : '')
       + '<div style="margin:14px 0 4px;font-size:12px;color:#98a1aa">Référence</div>'
       + '<div style="font-family:ui-monospace,monospace;font-weight:700;font-size:15px;color:#1f2b38;'
       + 'background:#f4f6f8;border-radius:8px;padding:8px">' + esc(r) + '</div>'
@@ -976,7 +1292,7 @@
     var t4 = enAttente.t4 || '';
     modale(
       '<div style="text-align:center">'
-      + '<div style="font-size:38px">🔎</div>'
+      + '<div style="margin-bottom:2px">' + ico('loupe', 38, '#1E499B') + '</div>'
       + '<div style="' + TTL + '">Retrouver mon code</div>'
       + '<div style="' + SUB + '">Saisis la référence de ton paiement et les 4 derniers chiffres '
       + 'du numéro qui a payé.</div>'
@@ -1061,7 +1377,7 @@
     var lienWA = lienWhatsApp(messageWhatsApp(aCopier, r && r.classe));
     modale(
       '<div style="text-align:center">'
-      + '<div style="font-size:38px">🎉</div>'
+      + '<div style="margin-bottom:2px">' + ico('succes', 38, '#1E7A46') + '</div>'
       + '<div style="' + TTL + '">' + (lot ? 'Vos ' + lot.length + ' codes' : 'Ton code d\'accès') + '</div>'
       + '<div style="' + SUB + '">' + (lot
           ? 'Un code par élève. Chacun ouvre le livret toute l\'année, sur 3 appareils au plus.'

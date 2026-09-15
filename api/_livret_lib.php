@@ -647,12 +647,41 @@ if (!defined('VRT_LIVRET_LIB')) {
     // les mêmes jetons. Deux implémentations auraient divergé — et une divergence
     // sur une vérification de signature, c'est une porte qui s'entrouvre.
 
-    /** IP + agent hachés avec la clé HMAC : rien d'identifiant n'est stocké, mais
-     *  un jeton ne vaut que depuis le poste qui l'a obtenu. */
+    /* ⚠️ L'ADRESSE IP N'EST PAS UN APPAREIL — ELLE A ÉTÉ RETIRÉE LE 15/09/2026.
+       L'empreinte valait hash(IP + agent). Au Cameroun, l'adresse IP change à
+       chaque bascule entre le Wi-Fi de l'école et les données mobiles, et MTN
+       comme Orange en réattribuent d'eux-mêmes. Un seul téléphone produisait
+       donc une empreinte NEUVE plusieurs fois par semaine, avec deux effets,
+       tous deux muets :
+
+         • le jeton de session portait l'empreinte et était revérifié à chaque
+           requête : changer de réseau EN COURS DE LECTURE fermait le cahier ;
+         • chaque nouvelle empreinte prenait une place du quota, et une place
+           prise ne se libérait jamais. En quelques jours, « ce code est déjà
+           utilisé sur 3 appareils » — sur un code parfaitement honnête, à un
+           acheteur qui n'avait qu'un téléphone.
+
+       Le message accusait donc de partage des clients qui n'avaient rien fait,
+       et il n'existait aucun déblocage automatique. C'est ce qu'un collègue a
+       signalé le 14/09 pour le Bord 2ⁿᵈᵉ.
+
+       Reste l'agent du navigateur : stable sur un même téléphone, il distingue
+       toujours le téléphone de l'ordinateur familial. Le partage large, lui,
+       est arrêté par ce qui l'arrêtait déjà vraiment — la session unique
+       (LIVRET_SESSION_UNIQUE) et le filigrane nominatif.
+
+       LA VERSION COMPTE. Changer la recette rend inconnues les empreintes déjà
+       inscrites au registre : sans le numéro ci-dessous, un code arrivé à 3/3
+       sous l'ancienne recette resterait bloqué pour toujours, ses trois places
+       occupées par des empreintes que plus personne ne peut présenter.
+       `livret.php` purge les places dès que la version a bougé. */
+    if (!defined('LIVRET_FP_VERSION')) define('LIVRET_FP_VERSION', 2);
+
+    /** Agent haché avec la clé HMAC : rien d'identifiant n'est stocké, mais un
+     *  jeton ne vaut que depuis le poste qui l'a obtenu. */
     function vrt_livret_empreinte(): string {
-        $ip = function_exists('vrt_client_ip') ? vrt_client_ip() : (string) ($_SERVER['REMOTE_ADDR'] ?? '');
         $ua = substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 120);
-        return substr(hash_hmac('sha256', $ip . '|' . $ua, VRT_HMAC_KEY), 0, 16);
+        return substr(hash_hmac('sha256', 'v' . LIVRET_FP_VERSION . '|' . $ua, VRT_HMAC_KEY), 0, 16);
     }
 
     function vrt_livret_jeton_emettre(array $entry, string $cle, string $sid, int $ttl): array {

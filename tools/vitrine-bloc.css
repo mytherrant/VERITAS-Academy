@@ -634,18 +634,49 @@ html{scroll-behavior:smooth}
   margin-top:9px;display:inline-flex;align-items:center;gap:6px;
   font:500 12px Poppins,sans-serif;color:#4D5163;
 }
+/* ⚠️ DEUX ACTIONS TIENNENT ICI DEPUIS LE 15/09/2026, PLUS UNE SEULE.
+   La rangée n'a longtemps porté qu'un bouton — « Commander » pour le papier,
+   OU « Lire en ligne » pour le numérique — et se contentait donc d'un flex
+   sans retour à la ligne, avec des boutons en `flex:0 0 auto;white-space:
+   nowrap`. En ajoutant le bouton d'achat à côté du bouton de lecture, mesuré
+   au navigateur : « Commander » sortait de 117 px hors d'une carte de 263 px,
+   sur TOUTES les cartes de la grille. Rien ne le signalait — un débordement
+   flex ne casse pas la page, il dépasse.
+   Avec `wrap`, le bouton d'achat prend sa propre ligne quand les deux ne
+   tiennent pas côte à côte, et s'y étire : la carte reste dans ses bornes et
+   le geste qui rapporte devient le plus large de la carte. Une carte à une
+   seule action ne bouge pas d'un pixel. */
 .vbq-prix-row{
   margin-top:auto;padding-top:16px;
-  display:flex;align-items:flex-end;justify-content:space-between;gap:10px;
+  display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px;
 }
 /* Libryo étiquette son prix (« Prix » en 10 px au-dessus du montant). Sur un
    catalogue mixte papier/numérique, l'étiquette évite de lire 1 000 F comme
    un prix de livraison ou un acompte. */
+/* Le bloc du prix prend sa propre ligne et se centre. Il était calé à gauche,
+   en vis-à-vis d'un bouton — disposition d'une rangée à DEUX éléments. Depuis
+   que la carte porte deux actions, celles-ci passent en dessous (cf. le `wrap`
+   ci-dessus) et laissaient le prix seul, décentré, sur une ligne entière. */
+.vbq-prix-row > span{ flex:1 1 100%;text-align:center; }
 .vbq-prix-lbl{ display:block;font:400 10.5px Poppins,sans-serif;color:#8A8FA3;margin-bottom:1px; }
-.vbq-prix{ display:block;font:600 21px/1.1 Poppins,sans-serif;color:#001136;white-space:nowrap; }
+/* ⚠️ LE PRIX EST EN COULEUR, ET CE N'EST PAS L'OR.
+   Il était navy #001136 — la couleur du texte courant : sur une carte, le
+   chiffre qui décide de l'achat se lisait comme le reste.
+   L'or #FFC93C est exclu et pas seulement par la charte, qui le réserve au
+   geste d'achat : mesuré, il donne 1,54:1 sur blanc — illisible.
+   L'orange de signal #C24E00 donne 4,79:1, soit très exactement le chiffre
+   qu'on reproche à l'ancien bouton d'action remplacé le 13/09.
+   #A84200 tient 6,10:1, et c'est déjà l'orange des étiquettes et des pastilles
+   de cette page : le prix attire l'œil sans introduire une septième teinte, et
+   laisse l'or au bouton juste en dessous. */
+.vbq-prix{ display:block;font:600 21px/1.1 Poppins,sans-serif;color:#A84200;white-space:nowrap; }
 .vbq-mention{ display:block;margin-top:3px;font:400 11.5px Poppins,sans-serif;color:#6E7385; }
+/* `flex:1 1 auto` et non `0 0 auto` : une action renvoyée à la ligne suivante
+   par le `wrap` ci-dessus doit l'occuper, pas y flotter à gauche en laissant
+   un vide. Sur une carte à une seule action, le comportement est identique —
+   elle reste calée à droite du prix par `justify-content:space-between`. */
 .vbq-cta,.vbq-lire{
-  display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:1 1 auto;
   padding:10px 15px;border-radius:10px;border:0;
   font:600 13.5px Poppins,sans-serif;cursor:pointer;white-space:nowrap;
   transition:transform .18s,box-shadow .18s;
@@ -691,7 +722,16 @@ html{scroll-behavior:smooth}
      rembourrage — le centrage se décale d'autant, sans toucher au reste. */
   .vbq-couv-cahier{ padding:52px 12px 16px; }
   .vbq-couv-roman { padding:52px 14px 16px; }
-  .vbq-prix-row{ flex-direction:column;align-items:stretch;gap:9px;padding-top:12px; }
+  /* ⚠️ `flex-wrap` ET `flex-direction:column` NE VONT PAS ENSEMBLE ICI.
+     La rangée passe en colonne sous 620 px. Le `flex:1 1 100%` posé plus haut
+     sur le bloc du prix y désigne alors 100 % de la HAUTEUR, pas de la
+     largeur : le prix remplissait la colonne à lui seul et le `wrap` renvoyait
+     les deux boutons dans une SECONDE colonne, à 187 px hors de la carte.
+     Mesuré au navigateur à 589 px de large — invisible au-dessus de 620, où la
+     rangée reste en ligne. On rend donc au prix sa base automatique, et on
+     retire le `wrap`, sans objet quand tout est déjà empilé. */
+  .vbq-prix-row{ flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:9px;padding-top:12px; }
+  .vbq-prix-row > span{ flex:0 0 auto; }
   .vbq-cta,.vbq-lire{ justify-content:center;width:100%; }
   .vbq-niv,.vbq-badges{ top:9px; }
   .vbq-niv{ left:9px; }

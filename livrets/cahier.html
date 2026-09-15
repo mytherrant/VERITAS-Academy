@@ -144,8 +144,25 @@
 
   VRTLivret.onOuvert = ouvrirCahier;
 
+  /* ── « COMMANDER » DOIT OUVRIR LE PAIEMENT, PAS UN CHAMP DE CODE ──────────
+     Depuis la boutique, un visiteur qui n'a rien acheté arrivait ici sur
+     « Saisis ton code » — un écran qui suppose l'achat déjà fait. Deux usagers
+     l'ont écrit le 14/09 : « on propose la lecture en ligne, et plus loin on me
+     demande le code ». Le bouton d'achat existait bien, mais plus bas, après
+     l'écran qui les avait déjà arrêtés.
+     `?achat=1` dit que le visiteur vient de cliquer « Commander » : on lui
+     ouvre le tunnel tout de suite.
+     ET SEULEMENT S'IL N'A PAS DÉJÀ ACCÈS : la reprise passe d'abord. Ouvrir le
+     paiement devant quelqu'un qui a payé hier, c'est lui demander de payer
+     deux fois. */
+  var veutAcheter = params.get('achat') === '1' && kind !== 'guide';
+
   // Reprise silencieuse d'une session encore valide (rechargement, retour).
-  VRTLivret.resume().then(ouvrirCahier).catch(function () { montrer('porte'); $('code').focus(); });
+  VRTLivret.resume().then(ouvrirCahier).catch(function () {
+    montrer('porte');
+    if (veutAcheter) { VRTLivret.acheter({}); return; }   // le focus irait sous la modale
+    $('code').focus();
+  });
 
   $('btnOuvrir').addEventListener('click', function () {
     var v = ($('code').value || '').trim();

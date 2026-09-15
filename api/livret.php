@@ -146,6 +146,12 @@ if (!defined('LIVRET_TTL_ENSEIGNANT'))     define('LIVRET_TTL_ENSEIGNANT', 8 * 3
 // téléphone + l'ordinateur familial ; au-delà de 3, c'est un code qui circule.
 if (!defined('LIVRET_MAX_APPAREILS'))      define('LIVRET_MAX_APPAREILS', 3);
 if (!defined('LIVRET_MAX_APPAREILS_PROF')) define('LIVRET_MAX_APPAREILS_PROF', 2);
+// Une place qui n'a pas servi depuis ce délai est rendue. Sans elle, le quota
+// ne comptait pas les appareils EN USAGE mais tous ceux ayant jamais ouvert le
+// cahier : un téléphone changé, un ordinateur d'école utilisé une fois en
+// septembre, et l'acheteur se retrouvait à l'étroit sur son propre code — sans
+// aucun moyen de se débloquer lui-même.
+if (!defined('LIVRET_DEV_INACTIF'))        define('LIVRET_DEV_INACTIF', 30 * 86400);
 // Session unique : un nouveau déverrouillage invalide le précédent. Trois
 // appareils AUTORISÉS, mais pas trois lectures SIMULTANÉES — c'est ce qui
 // distingue « ma famille » de « toute la classe ».
@@ -622,13 +628,40 @@ if ($action === 'unlock') {
     $fp   = lv_empreinte();
     $devs = (array) ($entry['dev'] ?? []);
     $max  = ($kind === 'guide') ? LIVRET_MAX_APPAREILS_PROF : LIVRET_MAX_APPAREILS;
+
+    /* MIGRATION D'EMPREINTE. Les places inscrites sous l'ancienne recette
+       (IP + agent, cf. vrt_livret_empreinte) désignent des adresses IP qui
+       n'existent plus. Les garder reviendrait à laisser définitivement bloqués
+       les codes déjà arrivés au plafond — exactement ceux dont les acheteurs
+       se plaignent. On les rend, une fois, au premier déverrouillage. */
+    $fpv = (int) ($entry['fpv'] ?? 1);
+    if ($fpv !== LIVRET_FP_VERSION) {
+        if ($devs) {
+            lv_log('[MIGRATION] id=' . substr($cle, 0, 12) . ' places rendues=' . count($devs)
+                . ' fpv=' . $fpv . '->' . LIVRET_FP_VERSION);
+        }
+        $devs = [];
+    }
+
+    /* PLACES DORMANTES. L'horodatage était écrit à la première ouverture et
+       plus jamais relu : il ne servait à rien. Il date maintenant le DERNIER
+       usage, et une place inutilisée depuis LIVRET_DEV_INACTIF est rendue. */
+    $seuil = time() - LIVRET_DEV_INACTIF;
+    foreach ($devs as $k => $vu) {
+        if ($k !== $fp && (int) $vu < $seuil) unset($devs[$k]);
+    }
+
     if (!isset($devs[$fp]) && count($devs) >= $max) {
         lv_log('[REFUS] ip=' . vrt_client_ip() . ' id=' . substr($cle, 0, 12)
             . ' motif=quota appareils=' . count($devs));
-        lv_err(403, 'Ce code est déjà utilisé sur ' . $max . ' appareils. '
-            . 'Contactez le Centre VÉRITAS pour le réinitialiser.', 'device_quota');
+        lv_err(403, 'Ce code est déjà ouvert sur ' . $max . ' appareils. '
+            . 'Ferme le cahier sur un appareil que tu n\'utilises plus, ou écris-nous '
+            . 'et nous le remettons à zéro tout de suite.', 'device_quota');
     }
-    if (!isset($devs[$fp])) { $devs[$fp] = time(); }
+    /* À CHAQUE ouverture, pas seulement à la première : c'est ce qui distingue
+       un appareil encore utilisé d'un appareil oublié. */
+    $devs[$fp] = time();
+    $reg['codes'][$cle]['fpv'] = LIVRET_FP_VERSION;
 
     // Nouvelle session : elle évince la précédente (LIVRET_SESSION_UNIQUE).
     $sid = bin2hex(random_bytes(8));
