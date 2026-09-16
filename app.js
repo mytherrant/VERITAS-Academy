@@ -45573,14 +45573,22 @@ function _cagCreer(eleveId){
        devait pouvoir s'ouvrir après le premier. */
     if(sec === 'livre'){
       var qs = (window.location.hash || '').split('?')[1] || '';
-      var id = '';
+      var id = '', achat = false;
       qs.split('&').forEach(function(kv){
         var p = kv.split('=');
-        if(decodeURIComponent(p[0] || '') === 'id') id = decodeURIComponent(p[1] || '');
+        var cle = decodeURIComponent(p[0] || '');
+        if(cle === 'id') id = decodeURIComponent(p[1] || '');
+        /* `achat=1` — le visiteur arrive de « Commander » en boutique. Les
+           quinze cahiers ouvrent leur paiement d'un seul clic depuis le
+           15/09/2026 ; le livre numérique, lui, demandait encore de trouver
+           « Payer maintenant » sur la fiche. Un parcours d'achat différent
+           pour un seul produit du catalogue, c'est un produit qu'on vend
+           moins bien que les autres sans savoir pourquoi. */
+        if(cle === 'achat') achat = (decodeURIComponent(p[1] || '') === '1');
       });
       if(id && typeof _bookOpenFromHash === 'function'){
         window._vCurrentSec = 'livre:' + id;
-        _bookOpenFromHash(id);
+        _bookOpenFromHash(id, achat);
       }
       return;
     }
@@ -50287,8 +50295,23 @@ window._bookBuyPanel = function(b, rt, rvs){
   h += '<div class="bkbuy-net">' + fmt(b.prix) + '</div>';
   h += '</div>';
 
-  /* — L'action principale — */
-  if(stock === null || stock > 0){
+  /* — L'action principale —
+     ⚠️ ELLE NE REGARDAIT QUE LE STOCK, ET PROPOSAIT UNE LIVRAISON POUR UN
+     LIVRE QUI N'EXISTE PAS SUR PAPIER.
+     `visitorOrderBook` est le tunnel de commande PAPIER : il exige une adresse
+     de livraison et annonce « Manuel papier : il nous faut une adresse ». Or un
+     ouvrage `numeriqueSeul` n'a pas de pile à expédier — `stock` y vaut null,
+     donc la condition d'origine était vraie et le bouton s'affichait quand
+     même. Dix lignes plus haut, ce même panneau écrit pourtant « Édition
+     numérique — lecture en ligne » : il SAIT, et n'en tenait pas compte ici.
+     Conséquence : l'acheteur du Tube digestif remplissait un quartier et une
+     ville, et le centre recevait une commande qu'il ne pouvait pas honorer.
+     Le numérique a son propre tunnel (`intent: 'digitalbook'`, qui ouvre
+     `unlockedBooks`) ; c'est vers lui qu'on envoie. */
+  if(b.numeriqueSeul){
+    h += '<button class="bkbuy-cta" onclick="_bookBuyDigital(\'' + b.id + '\')">'
+       +   ICO('i-credit-card') + 'Acheter la version numérique — ' + fmt(b.prixDigital || b.prix) + '</button>';
+  } else if(stock === null || stock > 0){
     h += '<button class="bkbuy-cta" onclick="visitorOrderBook(\'' + b.id + '\')">'
        +   ICO('i-credit-card') + 'Payer maintenant — ' + fmt(b.prix) + '</button>';
   }
@@ -50818,7 +50841,34 @@ function _bookCopyLink(id){
    puis la fiche du manuel. Si l'identifiant n'existe plus (manuel
    retiré du catalogue), on laisse la boutique ouverte plutôt qu'un
    écran vide, et on le dit. */
-function _bookOpenFromHash(id){
+/* ── Acheter un livre NUMÉRIQUE, sans passer par la commande papier ────────
+   Le tunnel numérique (`_secureBuy`, intent `digitalbook`) lit `_secureState`,
+   que seul `openSecureBook` pose. On ouvre donc le lecteur — il porte déjà
+   l'aperçu gratuit, et le visiteur reste dessus s'il referme le paiement —
+   puis on déclenche l'achat dès que l'état est prêt.
+   Attente BORNÉE : si le lecteur ne s'ouvre pas (document introuvable, réseau),
+   on s'arrête au bout d'une seconde et demie et on laisse le lecteur dire
+   lui-même ce qui ne va pas, plutôt que de tourner en silence.
+   Le mur d'inscription de `_secureBuy` est volontaire (arbitré le 12/09/2026 :
+   c'est le compte qui rend le livre re-consultable) — on ne le contourne pas. */
+function _bookBuyDigital(id){
+  if (!id) return false;
+  try { if (typeof openSecureBook === 'function') openSecureBook(id); } catch(e){ return false; }
+  var essais = 0;
+  var t = setInterval(function(){
+    essais++;
+    if (window._secureState && typeof window._secureBuy === 'function'){
+      clearInterval(t);
+      try { window._secureBuy(); } catch(e){}
+    } else if (essais > 15){
+      clearInterval(t);
+    }
+  }, 100);
+  return true;
+}
+window._bookBuyDigital = _bookBuyDigital;
+
+function _bookOpenFromHash(id, ouvrirLAchat){
   if (!id) return false;
   var b = (typeof DB !== 'undefined' && DB.books)
         ? DB.books.find(function(x){ return x.id === id; }) : null;
@@ -50849,6 +50899,27 @@ function _bookOpenFromHash(id){
        PAR-DESSUS le manuel qu'on vient d'ouvrir. On remet le repère juste. */
     window._vCurrentSec = 'livre:' + id;
     try{ window.scrollTo({ top: 0, behavior: 'smooth' }); }catch(e){}
+
+    /* « COMMANDER » OUVRE LE PAIEMENT, ICI AUSSI.
+       La fiche est peinte : on peut ouvrir le tunnel par-dessus. On appelle la
+       MÊME fonction que le bouton « Payer maintenant » de la fiche plutôt que
+       de cliquer le bouton — un clic simulé dépend de son libellé et de sa
+       place dans le DOM, qui changent ; l'appel, non.
+       Le second délai laisse la fiche finir de se peindre : `viewBookDetail`
+       réécrit #vContent, et une modale ouverte dans le même souffle se ferait
+       balayer par ce rendu. La fiche reste derrière — refermer le paiement
+       laisse donc le visiteur sur le livre, avec son aperçu gratuit, et non
+       sur un écran vide. */
+    if (ouvrirLAchat) {
+      /* Le bon tunnel, pas le premier : un ouvrage `numeriqueSeul` n'a pas de
+         livraison à renseigner, et `visitorOrderBook` en réclamerait une. */
+      setTimeout(function(){
+        try {
+          if (b.numeriqueSeul && typeof _bookBuyDigital === 'function') _bookBuyDigital(id);
+          else if (typeof visitorOrderBook === 'function') visitorOrderBook(id);
+        } catch(e){}
+      }, 340);
+    }
   }, 260);
   return true;
 }

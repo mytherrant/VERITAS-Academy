@@ -163,6 +163,30 @@ dire(/c\.acheter\s*=/.test(vit),
     'et le gabarit livré porte le bouton qui l’utilise — sinon il n’est jamais rendu');
 }
 
+/* ══ ③ ter. UN LIVRE NUMÉRIQUE NE SE FAIT PAS LIVRER ═══════════════════════
+   Le panneau d'achat de la fiche (`_bookBuyHtml`, app.js) posait son bouton
+   principal sur la seule condition `stock === null || stock > 0`. Un ouvrage
+   `numeriqueSeul` n'a pas de pile à écouler — son `stock` vaut null — donc la
+   condition était vraie et « Payer maintenant » ouvrait `visitorOrderBook`,
+   le tunnel PAPIER : « Manuel papier : il nous faut une adresse de livraison »,
+   avec un champ « Adresse de livraison * » obligatoire.
+   Constaté le 16/09/2026 sur Le Tube digestif, seul livre numérique du
+   catalogue : l'acheteur saisissait un quartier et une ville pour un livre qui
+   n'existe qu'en ligne, et le centre recevait une commande impossible à
+   honorer. Dix lignes plus haut, le même panneau écrit pourtant « Édition
+   numérique — lecture en ligne » : l'information était là, jamais relue.
+   Éprouvé par mutation le 16/09 : condition `b.numeriqueSeul` retirée du
+   panneau → 1 au rouge. */
+{
+  const appJs = fs.readFileSync(path.join(RACINE, 'app.js'), 'utf8');
+  const i = appJs.indexOf("h += '<button class=\"bkbuy-cta\"");
+  const avant = i > 0 ? appJs.slice(Math.max(0, i - 400), i) : '';
+  dire(i > 0 && /if\(b\.numeriqueSeul\)\{/.test(avant),
+    'la fiche d’un livre numérique n’ouvre pas le tunnel de livraison papier');
+  dire(/function _bookBuyDigital\(/.test(appJs),
+    'et elle a un chemin d’achat numérique à elle');
+}
+
 /* ── ④ Les couvertures suivent ─────────────────────────────────────────── */
 console.log(`\n${G}④ Les cahiers arrivent avec leur couverture${R}`);
 const sansCouv = livrets.filter(x => !x.couv);

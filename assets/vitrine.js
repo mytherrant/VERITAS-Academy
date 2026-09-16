@@ -1452,10 +1452,13 @@
       c.acheter = b.url + (b.url.indexOf('?') >= 0 ? '&' : '?') + 'achat=1';
     } else if (num) {
       c.lien = 'app.html#livre?id=' + encodeURIComponent(b.id);
-      /* La fiche porte l'aperçu gratuit ET le bouton d'achat : « Commander »
-         y mène directement plutôt que d'ouvrir un tunnel qui ne saurait pas
-         déverrouiller le livre. */
-      c.acheter = c.lien;
+      /* La fiche porte l'aperçu gratuit ET le bouton d'achat. « Commander »
+         y mène donc aussi — mais avec `achat=1`, qui ouvre le paiement dès
+         l'arrivée (cf. le routeur d'ancres d'app.js). Sans ce paramètre, le
+         seul livre numérique du catalogue demandait un clic de plus que les
+         vingt-huit cahiers : « Commander » puis, sur la fiche, « Payer
+         maintenant ». Un parcours à part pour un seul produit. */
+      c.acheter = c.lien + '&achat=1';
     } else if (!rupture) {
       c.papier = true;
     }
