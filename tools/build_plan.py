@@ -59,15 +59,21 @@ SA MISE EN FORME — REFAITE LE 16/09/2026, SUR LA CARTE DE LA VITRINE
       • Les rubriques sans index dépliaient TOUTES leurs pages dans la carte :
         dix lignes à côté d'une carte de trois, et des rangées en escalier.
 
-    Ce qu'on a appris en chemin, et pourquoi la page COPIE la vitrine :
-      • Une première reprise empruntait le sprite `/assets/veritas-icons.svg`.
-        Mesuré dans le navigateur : ses symboles s'y dessinaient `fill:black,
-        stroke:none` — des pâtés, pas des icônes. Ce jeu porte ses attributs
-        de trait sur le `<symbol>` ; la vitrine, elle, les pose sur le `<svg>`
-        porteur (`fill="none" stroke="currentColor"`), ce qui ne dépend
-        d'aucune héritabilité. On reprend donc SES icônes, `lc-*`, extraites
-        de vitrine.html à chaque build : si la vitrine change une icône, le
-        plan suit ; si une icône disparaît, le build s'arrête.
+    Pourquoi la page COPIE la vitrine :
+      • Une première reprise empruntait le sprite `/assets/veritas-icons.svg`,
+        celui des pages de corrigés. Il se dessinait correctement, mais ce
+        n'étaient pas les icônes de la vitrine, ni son médaillon : Jacques a
+        demandé « les vraies icônes, centrées exactement comme dans la
+        vitrine ». On reprend donc SES icônes, `lc-*`, extraites de
+        vitrine.html à chaque build : si la vitrine change une icône, le plan
+        suit ; si une icône disparaît, le build s'arrête.
+      • ⚠️ Correction du 17/09. Une version antérieure de ce commentaire, et le
+        message du commit 05c14b3, affirmaient que ce sprite se dessinait
+        « fill:black, stroke:none — des pâtés ». C'ÉTAIT FAUX. La mesure lisait
+        le style calculé du <svg> EXTÉRIEUR, qui vaut toujours fill:black par
+        défaut et ne dit rien de ce que dessine le symbole cloné par <use>.
+        Vérifié ensuite à l'œil, icône agrandie à 180 px : trait vert, net,
+        identique à celui de la vitrine. Pour juger une icône, la regarder.
       • La carte est celle de la vitrine, cote pour cote : fond blanc, bordure
         neutre `E4E9F2`, rayon 14 px, ombre douce ; médaillon rond de 42 px
         centré (`margin:0 auto 13px`), icône de 20 px au trait de 2 ; titre,
@@ -172,9 +178,9 @@ _UTILISEES = []
 def ico(nom, taille=20, trait=2, cls=None):
     """Une icône de la vitrine, balisée EXACTEMENT comme la vitrine la balise.
 
-    Les attributs de dessin sont sur le <svg> porteur — c'est ce qui les rend
-    visibles quel que soit le symbole. Référence locale `#lc-…` : le symbole
-    est recopié dans la page par sprite().
+    Les attributs de dessin sont sur le <svg> porteur, comme dans la vitrine :
+    les symboles `lc-*` n'en portent aucun. Référence locale `#lc-…` : le
+    symbole est recopié dans la page par sprite().
     """
     if nom not in _UTILISEES:
         _UTILISEES.append(nom)
