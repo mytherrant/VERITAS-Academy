@@ -4149,17 +4149,68 @@ function showBookTab(btn,tabId){
   }
 }
 
+/* ⚠️ 17/09/2026 — « APPLIQUER » SUR LA FICHE : LE MÊME DÉFAUT QUE LE 13/09,
+   SUR LE CHEMIN QUE CETTE CORRECTION-LÀ N'AVAIT PAS VU.
+   Le 13/09, `appliquerPromo` (fenêtre de paiement) a cessé de chercher le code
+   dans DB.promoCodes du NAVIGATEUR : un visiteur n'y a que la table du code par
+   défaut, si bien que tout code créé par l'administration répondait
+   « invalide ». Cette fonction-ci faisait encore exactement cela, avec deux
+   conséquences mesurées en production sur Le Tube digestif :
+     · ELEVE10 ne passait que parce qu'il figure dans la table par défaut ;
+     · surtout, le code n'allait NULLE PART. La fiche affichait « Nouveau prix :
+       900 FCFA », le bouton juste au-dessus restait à 1 000 FCFA, et la fenêtre
+       de paiement s'ouvrait champ code VIDE : `_codeAmiRetenu()` renvoyait ''.
+   On pose désormais la même question au serveur que la fenêtre de paiement
+   (`?action=verifier`), avec le même intent que l'achat qui suivra, et on
+   RETIENT le code validé comme elle le fait (`_codeAmiRetenir`). La fenêtre de
+   paiement (payInfo.code || _codeAmiRetenu, puis _codeAmiAppliquer à
+   l'ouverture) et la commande papier (visitorOrderBook, autoPromo) le
+   reprennent alors d'elles-mêmes : le montant lu sur la fiche est celui qui
+   sera débité. */
 function applyPromo(bid){
   const b=DB.books.find(x=>x.id===bid);if(!b)return;
   const code=(document.getElementById('promoInput_'+bid)?.value||'').trim().toUpperCase();
   const result=document.getElementById('promoResult_'+bid);
   if(!code){if(result)result.innerHTML='';return;}
-  const promo=(DB.promoCodes||[]).find(p=>p.code===code&&p.actif);
-  if(!promo){if(result)result.innerHTML='<div style="font-size:13px;color:var(--re);margin-top:4px">❌ Code promo invalide</div>';return;}
-  let newPrice=b.prix;let savings=0;
-  if(promo.type==='percent'){savings=Math.round(b.prix*promo.reduction/100);newPrice=b.prix-savings;}
-  else{savings=promo.reduction;newPrice=Math.max(0,b.prix-promo.reduction);}
-  if(result)result.innerHTML='<div style="font-size:13px;color:var(--gr);margin-top:4px;padding:6px;background:var(--grb);border-radius:var(--r)">✅ <strong>'+promo.desc+'</strong> — Vous économisez <strong>'+fmt(savings)+'</strong><br><span class="mono bold" style="font-size:14px;color:var(--gold)">Nouveau prix: '+fmt(newPrice)+'</span></div>';
+  if(typeof _codeAmiApi!=='function'){
+    if(result)result.innerHTML='<div style="font-size:13px;color:var(--ink4);margin-top:4px">Le code sera vérifié à l’étape du paiement.</div>';
+    return;
+  }
+  // Le prix et l'intent de l'achat qui SUIVRA — sinon le serveur répondrait
+  // pour un autre produit. Mêmes règles que _secureBuy et confirmVisitorOrder.
+  const numerique=!!b.numeriqueSeul;
+  const base=numerique?(b.prixDigital||b.priceDigital||b.prix||0):(b.prix||0);
+  const intent=numerique?'digitalbook':'book';
+  if(result)result.innerHTML='<div style="font-size:13px;color:var(--ink4);margin-top:4px">Vérification du code…</div>';
+  _codeAmiApi('verifier',{query:{code:code,intent:intent,targetId:bid,montant:base}}).then(function(j){
+    // La fiche a pu être quittée pendant l'aller-retour : on ne peint rien
+    // dans un DOM qui n'est plus le sien.
+    const zone=document.getElementById('promoResult_'+bid);
+    if(j&&j.ok&&j.montant>0&&j.montant<base){
+      if(typeof _codeAmiRetenir==='function')_codeAmiRetenir(code);
+      applyPromo._valide=applyPromo._valide||{};
+      applyPromo._valide[bid]={code:String(j.code||code).toUpperCase(),montant:j.montant};
+      if(zone)zone.innerHTML='<div style="font-size:13px;color:var(--gr);margin-top:4px;padding:6px;background:var(--grb);border-radius:var(--r)">✅ Code <strong>'+_esc(j.code||code)+'</strong> — vous économisez <strong>'+fmt(j.remise||(base-j.montant))+'</strong><br><span class="mono bold" style="font-size:14px">Vous paierez : '+fmt(j.montant)+'</span><div style="font-size:11px;color:var(--ink4);margin-top:3px">Le code est gardé : il sera déjà saisi au moment de payer.</div></div>';
+      // Le bouton d'achat affichait encore l'ancien prix, juste au-dessus du
+      // « vous paierez » : on l'aligne sur la réponse du serveur.
+      document.querySelectorAll('.bkbuy-cta').forEach(function(btn){
+        const oc=btn.getAttribute('onclick')||'';
+        if(oc.indexOf("'"+bid+"'")<0)return;
+        const libelle=oc.indexOf('_bookBuyDigital')>=0?'Acheter la version numérique — ':'Payer maintenant — ';
+        btn.innerHTML=(typeof ICO==='function'?ICO('i-credit-card'):'')+libelle+fmt(j.montant);
+      });
+      return;
+    }
+    /* Un second code, refusé, après un premier validé : on ne DÉ-RETIENT rien
+       (un code ami reçu par lien serait perdu avec), et la fenêtre de paiement
+       appliquera toujours le code gardé. Le bouton, repeint au prix remisé,
+       dit donc vrai — c'est le message qui doit le dire aussi, sans quoi
+       « Code inconnu » voisine un prix réduit et l'écran se contredit. */
+    const garde=(applyPromo._valide||{})[bid];
+    const encore=garde&&typeof _codeAmiRetenu==='function'&&String(_codeAmiRetenu()).toUpperCase()===garde.code;
+    if(zone)zone.innerHTML='<div style="font-size:13px;color:var(--re);margin-top:4px">❌ '+_esc((j&&(j.message||j.error))||'Ce code ne s’applique pas à cet achat.')+'</div>'
+      +(encore?'<div style="font-size:12px;color:var(--gr);margin-top:3px">Le code <strong>'+_esc(garde.code)+'</strong> reste appliqué : vous paierez '+fmt(garde.montant)+'.</div>':'');
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -6396,7 +6447,7 @@ function vShowSec(sec,btn,_boot){
     <div class="vcard mb20">
       <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-shop"/></svg></span>Comment Acheter ?</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;text-align:center">
-        ${[['1️⃣','Choisissez','Parcourez les manuels et consultez les extraits gratuits'],['2️⃣','Code Promo','Appliquez votre code (ELEVE10, FIDELE5...)'],['3️⃣','WhatsApp','Commandez au 656 720 476'],['4️⃣','Payez','OM: 650 435 106 / MoMo: 656 720 476'],['5️⃣','Récupérez','Au centre ou livraison à domicile']].map(([n,t,d])=>'<div style="padding:12px"><div style="font-size:24px;margin-bottom:4px">'+n+'</div><div class="semi" style="font-size:12px">'+t+'</div><div style="font-size:13px;color:var(--ink4);margin-top:4px;line-height:1.5">'+d+'</div></div>').join("")}
+        ${[['1️⃣','Choisissez','Parcourez les manuels et consultez les extraits gratuits'],['2️⃣','Code Promo','Appliquez votre code promo ou votre code ami'],['3️⃣','WhatsApp','Commandez au 656 720 476'],['4️⃣','Payez','OM: 650 435 106 / MoMo: 656 720 476'],['5️⃣','Récupérez','Au centre ou livraison à domicile']].map(([n,t,d])=>'<div style="padding:12px"><div style="font-size:24px;margin-bottom:4px">'+n+'</div><div class="semi" style="font-size:12px">'+t+'</div><div style="font-size:13px;color:var(--ink4);margin-top:4px;line-height:1.5">'+d+'</div></div>').join("")}
       </div>
     </div>
 
@@ -8896,6 +8947,52 @@ function saveNewPromo(){
   save();cm();re();toast('✓ Code promo '+code+' créé');
 }
 
+/* ══ RECETTES PAR LIVRE — une part d'auteur repose sur l'argent REÇU ═════════
+   Les parts d'auteur (espace auteur, gestion des auteurs) et le bilan financier
+   comptaient les ventes de livres comme `vendu × prix`. Quatre défauts d'argent :
+     · le PRIX DU JOUR réécrivait le passé — un manuel vendu dix fois à 1 000 F
+       puis passé à 2 000 F affichait 20 000 F, et la part de l'auteur doublait ;
+     · les remises (Code ami, codes promo, prix de pack) n'étaient pas vues ;
+     · `vendu` ne compte qu'avec un stock suivi, et jamais le numérique ;
+     · et ce compteur, écrit par le serveur dans la base, est effacé par la
+       synchronisation suivante (db.php remplace la base entière).
+   Le serveur tient désormais un REGISTRE DES RECETTES (api/_recettes_lib.php),
+   rempli au paiement confirmé avec le montant réellement encaissé, et que db.php
+   ne touche pas. On le lit par api/stats.php?recettes=1.
+   Un livre sans vente enregistrée garde l'ancienne estimation : c'est tout ce
+   qui existe pour le passé. À sa première vente suivie, le serveur FIGE cette
+   estimation (`anterieur`) — un changement de prix ne la réécrit plus. */
+window._VRT_RECETTES = window._VRT_RECETTES || null;
+function _recettesLivres(){
+  if(window._VRT_RECETTES_P) return window._VRT_RECETTES_P;
+  var tok=(typeof DB!=='undefined'&&DB.cloudConfig&&DB.cloudConfig.secret)||'';
+  // Sans le secret d'administration, pas de registre : l'ancienne estimation
+  // reste affichée, et elle est marquée comme telle.
+  if(!tok){ window._VRT_RECETTES_P=Promise.resolve(null); return window._VRT_RECETTES_P; }
+  var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
+  window._VRT_RECETTES_P=fetch(base+'/stats.php?recettes=1',{headers:{'Authorization':'Bearer '+tok},cache:'no-store'})
+    .then(function(r){ return r.json().catch(function(){ return null; }); })
+    .then(function(d){
+      if(d&&d.ok&&d.livres&&typeof d.livres==='object'){
+        window._VRT_RECETTES=d.livres;
+        /* Un seul re-rendu : la promesse est gardée, les pages qui rappellent
+           _recettesLivres() pendant ce rendu reçoivent la même, sans refaire
+           de requête — pas de boucle. */
+        try{ if(typeof re==='function') re(); }catch(e){}
+      }
+      return window._VRT_RECETTES;
+    })
+    .catch(function(){ return null; });
+  return window._VRT_RECETTES_P;
+}
+function _bookRecette(b){
+  if(!b) return 0;
+  var R=window._VRT_RECETTES, l=R&&R[b.id];
+  if(l) return (+l.recette||0)+(+l.anterieur||0);
+  return (+b.vendu||0)*(+b.prix||0);          // estimation d'avant le registre
+}
+window._recettesLivres=_recettesLivres; window._bookRecette=_bookRecette;
+
 function pgMyBooks(){
   var t=isEnseignant()?T(SES.tid):null;
   var author=(DB.authors||[]).find(function(a){return a.user===SES?.user;});
@@ -8904,7 +9001,8 @@ function pgMyBooks(){
     '<button class="btn bi" onclick="mSubmitBook()"><svg class="vico bico" aria-hidden="true"><use href="#lc-book"/></svg>Soumettre un manuel</button>';
   }
   var myBooks=DB.books.filter(function(b){return(author.books||[]).indexOf(b.id)>-1;});
-  var totalVentes=myBooks.reduce(function(s,b){return s+b.vendu*b.prix;},0);
+  _recettesLivres();   // les recettes RÉELLES du registre serveur ; re() quand elles arrivent
+  var totalVentes=myBooks.reduce(function(s,b){return s+_bookRecette(b);},0);
   var maPartNum=Math.round(totalVentes*(author.share||DB.authorShare||60)/100);
   var h='<div class="sg">';
   h+='<div class="sc scg"><div class="sci">📚</div><div class="scl">Mes manuels</div><div class="scv vg">'+myBooks.length+'</div></div>';
@@ -8914,7 +9012,7 @@ function pgMyBooks(){
   h+='<div class="card"><div class="fl2 fic fsb mb12"><div class="ct mb0">Mes Publications</div><button class="btn bi sm" onclick="mSubmitBook()">＋ Soumettre un manuel</button></div>';
   h+='<div class="tw"><table><thead><tr><th>Manuel</th><th>Classe</th><th>Prix</th><th>Vendus</th><th>Revenus</th><th>Ma part</th><th>Avis</th></tr></thead><tbody>';
   myBooks.forEach(function(b){
-    var rt=getBookRating(b.id);var rev=b.vendu*b.prix;var part=Math.round(rev*(author.share||DB.authorShare||60)/100);
+    var rt=getBookRating(b.id);var rev=_bookRecette(b);var part=Math.round(rev*(author.share||DB.authorShare||60)/100);
     h+='<tr><td class="semi">'+b.ico+' '+b.titre+'</td><td>'+b.cls+'</td><td class="mono">'+fmt(b.prix)+'</td><td class="mono">'+b.vendu+'</td><td class="mono">'+fmt(rev)+'</td><td class="mono bold" style="color:var(--gr)">'+fmt(part)+'</td><td>'+starsHtml(rt.avg)+' ('+rt.count+')</td></tr>';
   });
   h+='</tbody></table></div></div>';
@@ -8955,6 +9053,7 @@ function saveSubmittedBook(){
 
 function pgAuthorsMgmt(){
   if(!iA())return na();
+  _recettesLivres();   // les recettes RÉELLES du registre serveur ; re() quand elles arrivent
   var authors=DB.authors||[];
   var shareRate=DB.authorShare||60;
   var totalBooks=authors.reduce(function(s,a){return s+(a.books||[]).length;},0);
@@ -8962,7 +9061,7 @@ function pgAuthorsMgmt(){
   authors.forEach(function(a){
     (a.books||[]).forEach(function(bid){
       var b=DB.books.find(function(x){return x.id===bid;});
-      if(b){var rev=b.vendu*b.prix;totalVentes+=rev;totalAuteurGains+=Math.round(rev*(a.share||shareRate)/100);}
+      if(b){var rev=_bookRecette(b);totalVentes+=rev;totalAuteurGains+=Math.round(rev*(a.share||shareRate)/100);}
     });
   });
   var h='<div class="sg">';
@@ -8987,7 +9086,7 @@ function pgAuthorsMgmt(){
   h+='<div class="tw"><table><thead><tr><th>Auteur</th><th>Livres</th><th>Ventes</th><th>Part</th><th>Status</th></tr></thead><tbody>';
   authors.forEach(function(a){
     var bookCount=(a.books||[]).length;var ventes=0;
-    (a.books||[]).forEach(function(bid){var b=DB.books.find(function(x){return x.id===bid;});if(b)ventes+=b.vendu*b.prix;});
+    (a.books||[]).forEach(function(bid){var b=DB.books.find(function(x){return x.id===bid;});if(b)ventes+=_bookRecette(b);});
     var part=Math.round(ventes*(a.share||shareRate)/100);
     h+='<tr><td class="semi">'+a.nom+'</td><td class="mono">'+bookCount+'</td><td class="mono">'+fmt(ventes)+'</td><td class="mono bold" style="color:var(--gr)">'+fmt(part)+'</td><td><span class="bg '+(a.status==='approved'?'bgg':'bgo')+'">'+a.status+'</span></td></tr>';
   });
@@ -15552,7 +15651,8 @@ function exportClassStats(){
 function pgFinance(){
   if(!iA())return na();
   const tF=DB.payments.filter(p=>p.stat==='Payé').reduce((s,p)=>s+p.mnt,0);
-  const tB=DB.books.reduce((s,b)=>s+b.vendu*b.prix,0);
+  _recettesLivres();
+  const tB=DB.books.reduce((s,b)=>s+_bookRecette(b),0);
   const tS=DB.teachers.reduce((s,t)=>s+t.sal,0);
   const tD=(DB.depenses||[]).reduce((s,d)=>s+d.mnt,0); // BUG FIX #7
   const bNet=tF+tB-tS-tD;
@@ -15581,7 +15681,8 @@ function pgFinance(){
 }
 function printBilan(){
   const tF=DB.payments.filter(p=>p.stat==='Payé').reduce((s,p)=>s+p.mnt,0);
-  const tB=DB.books.reduce((s,b)=>s+b.vendu*b.prix,0);
+  _recettesLivres();
+  const tB=DB.books.reduce((s,b)=>s+_bookRecette(b),0);
   const tS=DB.teachers.reduce((s,t)=>s+t.sal,0);
   const tD=(DB.depenses||[]).reduce((s,d)=>s+d.mnt,0); // BUG FIX #7
   const bNet=tF+tB-tS-tD;
@@ -40917,12 +41018,14 @@ setTimeout(renderCartBadge, 500);
 // ── v1.1 — MODULE 4 : CODES PROMO ───────────────────────��───────
 // ══════════════════════════════════════════��═══════════════════════
 
-window.VERITAS_PROMOS = window.VERITAS_PROMOS || {
-  'ELEVE10':  {pct:10, label:'10% élève', usage:0, max:100},
-  'FIDELE5':  {pct:5,  label:'5% fidèle', usage:0, max:999},
-  'VERITAS20':{pct:20, label:'20% spécial', usage:0, max:50},
-  'RENTR2026':{pct:15, label:'Rentrée 2026', usage:0, max:200}
-};
+/* `window.VERITAS_PROMOS` A ÉTÉ RETIRÉE LE 17/09/2026. Plus aucun code ne la
+   lisait depuis le 13/09 (voir plus bas : DB.promoCodes, puis le serveur).
+   Elle restait pourtant en tête de module, avec quatre codes présentés comme
+   valables — ELEVE10, FIDELE5, VERITAS20, RENTR2026 — dont TROIS refusés par
+   le serveur en production (« Code inconnu, épuisé ou expiré »). Une table
+   morte qui ressemble à la source de vérité finit par être recopiée : FIDELE5
+   était déjà annoncé aux visiteurs dans la boutique. La seule liste qui fait
+   foi est celle de l'administration, que le serveur consulte. */
 
 var _promoApplied = null;
 var _promoDiscount = 0;

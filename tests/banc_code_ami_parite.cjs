@@ -93,6 +93,32 @@ function php(code) {
     ok('mêmes opérateurs sur les 100 préfixes 600-699', ecarts.length === 0, ecarts.slice(0, 5).join(' | '));
   }
 
+  /* ④ UN CODE PROMO N'EST JAMAIS ÉVALUÉ PAR LE NAVIGATEUR.
+     Le 13/09/2026, la fenêtre de paiement a cessé de lire DB.promoCodes dans le
+     navigateur — un visiteur n'y a que la table du code par défaut. Le bouton
+     « Appliquer » de la FICHE LIVRE (`applyPromo`) le faisait encore le 17/09,
+     et gardait le code pour lui : mesuré en production, la fiche affichait
+     « Nouveau prix : 900 FCFA » pendant que la fenêtre de paiement s'ouvrait à
+     1 000 FCFA, champ code vide. Et une table en dur, `window.VERITAS_PROMOS`,
+     que plus rien ne lisait, présentait comme valables trois codes que le
+     serveur refuse — dont FIDELE5, déjà recopié dans le texte de la boutique.
+     Éprouvé par mutation le 17/09/2026, chacune appliquée puis annulée par
+     remplacement exact (jamais par copie de fichier) :
+       · lecture locale de DB.promoCodes remise dans applyPromo → 1 au rouge ;
+       · `_codeAmiRetenir` retiré                               → 1 au rouge ;
+       · `window.VERITAS_PROMOS = …` redéclarée                 → 1 au rouge. */
+  titre('④ Un code promo : le serveur le juge, et le paiement le reçoit');
+  const srcP = extraire('function applyPromo(bid){');
+  ok('la fiche livre a une fonction « Appliquer » identifiable', !!srcP);
+  if (srcP) {
+    ok('elle ne cherche plus le code dans la base du navigateur', !/DB\.promoCodes/.test(srcP));
+    ok('elle pose la question au serveur, comme la fenêtre de paiement', /_codeAmiApi\(\s*'verifier'/.test(srcP));
+    ok('elle garde le code validé pour que le paiement le reprenne', /_codeAmiRetenir\(/.test(srcP));
+  }
+  ok('la table en dur VERITAS_PROMOS n’est plus déclarée', !/window\.VERITAS_PROMOS\s*=/.test(APP));
+  ok('le texte de la boutique ne nomme aucun code précis',
+     !/Appliquez votre code \([A-Z0-9]{4,}/.test(APP));
+
   console.log('\n────────────────────────────────────────────────────────────────────');
   if (rouge === 0) { console.log('\x1b[32m\x1b[1m  ✓ ' + vert + '/' + vert + ' — le navigateur affiche ce que le serveur encaisse.\x1b[0m\n'); process.exit(0); }
   console.log('\x1b[31m\x1b[1m  ✗ ' + rouge + ' écart(s) sur ' + (vert + rouge) + '.\x1b[0m\n'); process.exit(1);
