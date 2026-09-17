@@ -1321,9 +1321,20 @@ deplacerSectionApres("Trois portes d'entrée", 'Un répétiteur coûte',
     .replace('<button type="button"', '<a')
     .replace(/ onclick="[^"]*"/, '')
     .replace(' data-go="enseignants"', ' href="' + APP + '#partenariat"')
-    .replace('>Enseignants</button>', ';text-decoration:none>Partenaires</a>')
-    .replace('white-space:nowrap;transition:color .18s,border-color .18s;text-decoration:none',
-             'white-space:nowrap;text-decoration:none;transition:color .18s,border-color .18s');
+    .replace('>Enseignants</button>', '>Partenaires</a>')
+    /* `text-decoration:none` s'insère DANS le style, ancré sur son guillemet
+       fermant. La version précédente l'accrochait à `>Enseignants</button>`,
+       or cette marque est précédée de `class="vh4"`, pas de la fin du style :
+       on obtenait `class="vh4";text-decoration:none>`, une déclaration CSS
+       hors de tout attribut. Le rattrapage qui suivait visait une chaîne
+       jamais produite — il ne faisait donc rien. Résultat : « Partenaires »
+       était le seul onglet souligné de la barre, ses voisins étant des
+       <button>, que le navigateur ne souligne pas. */
+    .replace('white-space:nowrap;transition:color .18s,border-color .18s"',
+             'white-space:nowrap;text-decoration:none;transition:color .18s,border-color .18s"');
+  if (lien.indexOf('text-decoration:none;transition') < 0) {
+    throw new Error('Barre : « Partenaires » n\'a pas reçu text-decoration:none dans son style.');
+  }
   corps = corps.replace(btnEns[0], btnEns[0] + lien);
   console.log('barre       : + onglet « Partenaires »');
 }
@@ -2139,6 +2150,60 @@ for (const bal of ['ul', 'ol', 'li']) {
     if (corps !== avant) rebranches++;
   }
 
+  /* ── LA BARRE DE NAVIGATION, TROISIÈME ENDROIT ─────────────────────────
+     La réécriture ci-dessus ne voit que les boutons sortis du gabarit avec
+     le gestionnaire GÉNÉRIQUE `u__aller`. L'onglet « Élèves » de la barre,
+     lui, sort de la maquette avec `{{ goElearning }}` déjà résolu : il
+     échappait au balayage et menait au catalogue d'abonnements.
+
+     C'est la TROISIÈME fois que ce défaut est signalé — les vignettes le
+     30/08, les grandes cartes le 31/08, la barre le 16/09 — parce que
+     chaque correction a visé un jeu de boutons, jamais la question « quels
+     sont TOUS les endroits d'où part un élève ? ». La garde plus bas ne
+     l'attrapait pas non plus : elle vérifiait que `goEleves` figure QUELQUE
+     PART dans la page, ce qu'une seule carte suffisait à satisfaire. */
+  const ongletEleve = /<button type="button" onclick="VRT\.act\('goElearning',this,event\)"([^>]*)>Élèves<\/button>/;
+  if (ongletEleve.test(corps)) {
+    corps = corps.replace(ongletEleve,
+      '<button type="button" onclick="VRT.act(\'goEleves\',this,event)"$1>Élèves</button>');
+    rebranches++;
+  }
+
+  /* ── LE MENU DU TÉLÉPHONE, QUATRIÈME ENDROIT ───────────────────────────
+     Sous 1 000 px, la barre disparaît au profit du menu burger. Ses trois
+     entrées de public sortent du gabarit avec `mm__aller`, qui lit
+     `data-go` — et le balayage du 16/09 a mesuré :
+       « Élèves »      data-go="elearning"  → le catalogue d'abonnements ;
+       « Parents »     AUCUN data-go        → le bouton ne fait RIEN ;
+       « Enseignants » AUCUN data-go        → le bouton ne fait RIEN.
+     `destination()` ne lève aucune erreur quand il ne trouve pas de cible :
+     il se tait. Sur téléphone, deux publics sur trois n'avaient donc pas
+     d'entrée depuis le menu, et le troisième entrait par la mauvaise porte.
+     On les rebranche sur les MÊMES portes que la barre du bureau. */
+  const MENU_MOBILE = { 'Élèves': 'goEleves', 'Parents': 'goParents', 'Enseignants': 'goEnseignants' };
+  corps = corps.replace(
+    /<button type="button" onclick="VRT\.act\('mm__aller',this,event\)"([^>]*)>([\s\S]*?)<\/button>/g,
+    (bouton, attrs, dedans) => {
+      /* `[^>]*` dans les balises : elles portent leur `style` au moment du
+         build. Écrit `<span>Élèves<small>`, ce motif ne trouvait rien — et
+         c'est la garde plus bas qui l'a dit, pas la page. */
+      const m = /<span[^>]*>(Élèves|Parents|Enseignants)<small[^>]*>/.exec(dedans);
+      if (!m) return bouton;
+      rebranches++;
+      return '<button type="button" onclick="VRT.act(\'' + MENU_MOBILE[m[1]] + '\',this,event)"'
+        + attrs.replace(/ data-go="[^"]*"/, '') + '>' + dedans + '</button>';
+    });
+
+  /* ── LE PIED DE PAGE ───────────────────────────────────────────────────
+     « Espace Parents » y menait à `#parents`, la section de PRÉSENTATION de
+     la vitrine — deux liens sortants, là où plan.html#parent en porte vingt.
+     C'est exactement la raison pour laquelle les portes ont quitté les
+     sections le 31/08 (voir assets/vitrine.js). « Espace élève » et
+     « Espace enseignant », eux, mènent à /eleve/ et /enseignant/ : de vraies
+     pages d'espace, qui n'existent pas pour les parents. On les laisse. */
+  corps = corps.replace(/<a href="#parents"([^>]*)>Espace Parents<\/a>/g,
+    (lien, attrs) => { rebranches++; return '<a href="plan.html#parent"' + attrs + '>Espace Parents</a>'; });
+
   /* La carte « Partenaires » mene, elle, aux neuf formules DANS l'application
      (c'est une meilleure destination qu'un plan de site, voir plus haut). Sa
      porte de plan vit donc au pied de page, comme dans la version precedente. */
@@ -2157,6 +2222,50 @@ for (const bal of ['ul', 'ol', 'li']) {
   if (manquantes.length) {
     throw new Error('Public(s) sans porte depuis l\'accueil : ' + manquantes.join(', ')
       + '. Un public sans entree ne casse rien de visible — il disparait, simplement.');
+  }
+
+  /* La garde ci-dessus compte les portes ; celle-ci verifie que chacune est
+     derriere la BONNE etiquette. C'est le controle qui manquait : un bouton
+     qui DIT « Eleves » doit OUVRIR l'espace eleve, et rien d'autre. Sans lui,
+     une seule carte correcte suffisait a rendre la page conforme pendant que
+     l'onglet de la barre envoyait au catalogue d'abonnements. */
+  /* On lit le TEXTE VISIBLE de chaque bouton, pas un motif de balisage. La
+     première version de cette garde cherchait `>Élèves<` : elle voyait
+     l'onglet de la barre et pas l'entrée du menu mobile, balisée
+     `<span>Élèves<small>…</small></span>`. Un contrôle qui dépend de la
+     forme du HTML rate exactement le bouton qu'on n'a pas pensé à écrire. */
+  const PORTE_DU_LIBELLE = [
+    [/^Espace Élèves?\b/u, 'goEleves'],   [/^Élèves?(\s|$)/u, 'goEleves'],
+    [/^Espace Parents?\b/u, 'goParents'], [/^Parents?(\s|$)/u, 'goParents'],
+    [/^Enseignants?(\s|$)/u, 'goEnseignants'],
+  ];
+  const GENERIQUES = ['u__aller', 'pm__aller', 'pl__aller', 'mm__aller'];
+  const trompeuses = [];
+  const muets = [];
+  for (const b of corps.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)) {
+    const act = (b[1].match(/VRT\.act\('([A-Za-z_]+)',this,event\)/) || [])[1];
+    if (!act) continue;
+    const vu = b[2].replace(/<svg[\s\S]*?<\/svg>/g, '').replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ').trim();
+    for (const [re, attendu] of PORTE_DU_LIBELLE) {
+      if (re.test(vu)) {
+        if (act !== attendu) trompeuses.push('« ' + vu.slice(0, 40) + ' » → ' + act + '() au lieu de ' + attendu + '()');
+        break;
+      }
+    }
+    /* Un gestionnaire générique lit `data-go` ; sans lui, `destination()` se
+       tait — le bouton ne fait rien, et rien ne le signale. */
+    if (GENERIQUES.includes(act) && !/ data-go="[^"]+"/.test(b[1])) {
+      muets.push('« ' + vu.slice(0, 40) + ' » (' + act + ', sans data-go)');
+    }
+  }
+  if (trompeuses.length) {
+    throw new Error('Etiquette et destination divergent : ' + trompeuses.join(' ; ')
+      + '. Le visiteur ne voit pas le nom de la fonction, il voit le mot — et il clique dessus.');
+  }
+  if (muets.length) {
+    throw new Error('Bouton(s) sans destination : ' + muets.join(' ; ')
+      + '. Un clic qui ne fait rien ne produit aucune erreur — seulement un visiteur qui part.');
   }
   console.log('portes     : ' + rebranches + ' bouton(s) rebranche(s) + partenaire au pied de page');
 }

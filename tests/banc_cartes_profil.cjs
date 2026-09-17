@@ -47,7 +47,18 @@ console.log(`${G}① Les cartes de public ne mènent plus à une page de vente${
 
 /* Les boutons qui NOMMENT un public. On les repère par leur libellé, pas par
    leur position : la maquette peut être reconstruite, le libellé reste. */
-const LIBELLES = ['Espace Élève', 'Espace Parents', 'Rejoindre le réseau', 'Espace Partenaires'];
+/* Chaque libellé porte le public qu'il PROMET. La liste d'origine ne visait
+   que les cartes (« Espace Élève »…) : l'onglet « Élèves » de la barre et
+   l'entrée « Élèves » du menu du téléphone lui échappaient. Le 16/09, Jacques
+   a signalé pour la TROISIÈME fois qu'« Élèves » ouvrait l'e-learning — par la
+   barre, cette fois — et le balayage a trouvé pire sur téléphone : « Parents »
+   et « Enseignants » n'y menaient nulle part. Ce banc était vert pendant ce
+   temps, parce qu'il ne regardait pas ces boutons-là. */
+const LIBELLES = [
+  ['Espace Élève', 'eleve'], ['Espace Parents', 'parent'],
+  ['Rejoindre le réseau', 'enseignant'], ['Espace Partenaires', 'partenaire'],
+  ['Élèves', 'eleve'], ['Parents', 'parent'], ['Enseignants', 'enseignant'],
+];
 const boutons = [];
 /* 900 caractères et non 80 : le libellé du bouton précède une icône SVG
    entière. Trop court, la capture n'atteint jamais `</button>` et le banc
@@ -56,25 +67,45 @@ const reBouton = /<button[^>]*onclick="VRT\.act\('([a-zA-Z_]+)'[^>]*>([\s\S]{0,9
 let m;
 while ((m = reBouton.exec(vitrine))) {
   const texte = m[2].replace(/<[^>]*>/g, '').trim();
-  for (const l of LIBELLES) if (texte.indexOf(l) === 0) boutons.push({ act: m[1], libelle: l });
+  for (const [l, pub] of LIBELLES) {
+    if (texte.indexOf(l) === 0) { boutons.push({ act: m[1], libelle: l, public: pub }); break; }
+  }
 }
-dire(boutons.length >= 3, 'les cartes de public sont repérables dans la page servie',
+dire(boutons.length >= 6, 'les boutons de public sont repérables — barre, menu du téléphone, cartes',
   boutons.length + ' bouton(s) trouvé(s)');
+for (const pub of ['eleve', 'parent', 'enseignant']) {
+  const n = boutons.filter(b => b.public === pub).length;
+  dire(n >= 3, 'le public « ' + pub + ' » est nommé par ses trois entrées (barre, téléphone, carte)',
+    n + ' trouvée(s)');
+}
 
-const generiques = boutons.filter(b => b.act === 'u__aller');
+/* Tous les routeurs génériques, pas seulement `u__aller` : l'entrée du menu
+   du téléphone passait par `mm__aller`, qui lit `data-go` et se tait quand il
+   n'en trouve pas. */
+const GENERIQUES = ['u__aller', 'mm__aller', 'pl__aller', 'pm__aller'];
+const generiques = boutons.filter(b => GENERIQUES.includes(b.act));
 dire(generiques.length === 0,
-  'aucune ne passe par le routeur générique, qui les renvoyait dans la vitrine',
-  generiques.map(b => b.libelle).join(', '));
+  'aucun ne passe par un routeur générique, qui les renvoyait dans la vitrine — ou nulle part',
+  generiques.map(b => b.libelle + ' (' + b.act + ')').join(', '));
 
 /* ── ② Chaque destination est un panneau de profil ──────────────────────── */
 console.log(`\n${G}② Chaque bouton vise un panneau de profil${R}`);
 const cibles = {};
+const dejaVus = new Set();
 for (const b of boutons) {
+  const cle = b.libelle + '|' + b.act;
+  if (dejaVus.has(cle)) continue;
+  dejaVus.add(cle);
   const re = new RegExp(b.act + ":\\s*function\\s*\\([^)]*\\)\\s*\\{[^}]*'(/plan\\.html#[a-z]+)'");
   const t = js.match(re);
-  dire(!!t, '« ' + b.libelle + ' » → ' + (t ? t[1] : 'aucune destination lisible'),
-    t ? '' : 'le gestionnaire ' + b.act + ' ne pointe pas plan.html');
-  if (t) cibles[b.libelle] = t[1].split('#')[1];
+  const ancre = t ? t[1].split('#')[1] : null;
+  /* Le BON panneau, pas un panneau quelconque : « Espace Parents » vers
+     #eleve mène bien à plan.html, et trompe quand même le parent. */
+  dire(ancre === b.public,
+    '« ' + b.libelle + ' » (' + b.act + ') → ' + (t ? t[1] : 'aucune destination lisible'),
+    !t ? 'le gestionnaire ' + b.act + ' ne pointe pas plan.html'
+       : 'attendu #' + b.public + ', obtenu #' + ancre);
+  if (t) cibles[b.libelle] = ancre;
 }
 
 /* ── ③ Le panneau existe, et il mène quelque part ───────────────────────── */

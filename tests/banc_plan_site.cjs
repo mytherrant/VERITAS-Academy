@@ -88,7 +88,13 @@ dire(liens.length >= 15, 'le plan porte au moins quinze destinations', String(li
    présence ici échouerait sur le runner tout en passant sur le poste du
    développeur — le pire des deux mondes. On vérifie donc sa SOURCE. */
 const GENERES = { 'app.html': 'VERITAS_v1.2.html' };
-const morts = liens.map(u => u.split('#')[0].replace(/^\//, ''))
+/* On retire le fragment ET la chaîne de requête. Le `?v=` est la convention de
+   tout le site : les feuilles et scripts sont servis « immutable » un an sous
+   cette version. Sans ce `split('?')`, adopter la feuille partagée sur cette
+   page — ce qu'on a fait le 16/09 pour lui rendre la charte du site — faisait
+   rougir le banc sur `assets/veritas-pages.css?v=1.20.19`, un fichier
+   pourtant bien présent. Le banc reprochait le cache-buster, pas un lien mort. */
+const morts = liens.map(u => u.split('#')[0].split('?')[0].replace(/^\//, ''))
   .filter(c => {
     if (!c) return false;
     const cible = GENERES[c] || c;

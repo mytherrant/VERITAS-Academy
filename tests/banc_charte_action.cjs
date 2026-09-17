@@ -249,6 +249,70 @@ titre('Les écrans de vente sont dessinés, pas émojifiés');
      /var TRACES = \{/.test(gate) && (gate.match(/ico\('/g) || []).length >= 5);
 }
 
+/* ══ ⑦ LE PLAN DU SITE, QUE CE BANC NE REGARDAIT PAS ══════════════════════════
+   `plan.html` est la page où mènent « Élèves », « Parents », « Enseignants ».
+   Jusqu'au 16/09/2026 elle s'écrivait une charte à elle : une soixantaine de
+   lignes de CSS, aucune icône, et une couleur d'action ORANGE, `#C2410C` —
+   qui n'est d'ailleurs pas l'orange que ce banc bannissait (`ORANGE` ci-dessus
+   vise `#C24E00` et `#A84300`). Deux angles morts empilés : la page n'était
+   pas lue, et sa teinte n'aurait pas été reconnue.
+   Jacques : « mise en page fade : aucune icône, pas de couleurs, tableaux
+   disparates », puis « les vraies icônes dans les ronds, centrées comme dans
+   la vitrine », puis « enlève les traits colorés de bordures ».
+   Le générateur `tools/build_plan.py` porte ses propres gardes, mais la CI ne
+   le lance pas : `plan.html` est versionné tel quel. C'est donc ICI, sur le
+   fichier servi, que la règle doit tenir.
+   ─── ÉPROUVÉ PAR MUTATION (16/09/2026), plan.html seul permuté ─────────────
+   · version actuelle                          → 5 verts
+   · version d'avant (git show 7afd6ff)        → 5 rouges sur 5
+   · liseré rétabli `border-top:… var(--trait)` → bordure au rouge, seule
+   · liseré écrit en dur `#007E11`              → bordure au rouge, seule
+   · `color:#C2410C` rétabli sur « Ouvrir »     → orange + couleur étrangère
+   · un <symbol> retiré                         → icônes au rouge, symbole nommé
+   Le premier passage de cette épreuve a d'abord trouvé un défaut DANS le
+   banc : le cas « rien n'est cassé » sortait rouge (voir `orphelins`). */
+titre('⑦ Le plan du site porte la charte de la vitrine');
+{
+  const PLAN = lire('plan.html');
+  const VITRINE = lire('vitrine.html');
+  const style = (PLAN.match(/<style>([\s\S]*?)<\/style>/g) || []).join('\n');
+  ok('le plan charge la feuille partagée des autres pages',
+     /href="\/assets\/veritas-pages\.css\?v=/.test(PLAN));
+  ok('aucun orange d’action n’y survit — ni #C2410C, ni ceux de la refonte',
+     !/#C2410C/i.test(PLAN) && !ORANGE.test(style));
+  const etrangeres = [...new Set(style.match(/#[0-9A-Fa-f]{6}\b/g) || [])]
+    .filter((c) => !VITRINE.toUpperCase().includes(c.toUpperCase()));
+  ok('chaque couleur de son style existe dans la vitrine'
+     + (etrangeres.length ? ' — étrangère(s) : ' + etrangeres.join(', ') : ''),
+     etrangeres.length === 0 && /#[0-9A-Fa-f]{6}/.test(style));
+  const cartes = (PLAN.match(/class="pl-c"/g) || []).length;
+  const ronds = (PLAN.match(/class="pl-ico"/g) || []).length;
+  /* Une capture, pas `slice(n, -1)` : le premier jet comptait mal le préfixe
+     `<use href="#`, gardait un guillemet dans l'identifiant, et déclarait
+     TOUS les symboles absents — y compris sur la page saine. L'épreuve par
+     mutation l'a vu : le cas « rien n'est cassé » sortait rouge. */
+  const orphelins = [...new Set([...PLAN.matchAll(/<use href="#(lc-[a-z0-9-]+)"/g)]
+    .map((m) => m[1]))].filter((id) => !PLAN.includes('<symbol id="' + id + '"'));
+  ok('chaque carte a son rond, et chaque icône son dessin (' + cartes + ' cartes)'
+     + (orphelins.length ? ' — symbole(s) absent(s) : ' + orphelins.join(', ') : ''),
+     cartes >= 15 && ronds === cartes && orphelins.length === 0);
+  /* Toute bordure est la bordure NEUTRE de la carte de la vitrine, `#E4E9F2`.
+     On ne cherche pas « une variable de famille » : un liseré coloré peut
+     s'écrire `var(--t)`, `var(--trait)` ou `#007E11` — la version
+     intermédiaire du 16/09 l'écrivait `var(--t)`, et un contrôle qui aurait
+     visé `--trait` l'aurait laissé passer. On exige donc la seule valeur
+     permise, ce qui attrape toutes les autres. `border-radius` n'est pas une
+     bordure : le motif ne le lit pas. */
+  const bordures = [...style.matchAll(/border(?:-(?:top|right|bottom|left))?(?:-color)?\s*:\s*([^;}]+)/g)]
+    .map((m) => m[1].trim())
+    .filter((v) => /var\(|#[0-9A-Fa-f]{3,8}\b/.test(v) && !/^(0|none)$/.test(v))
+    .filter((v) => /var\(/.test(v) || (v.match(/#[0-9A-Fa-f]{3,8}\b/g) || [])
+      .some((c) => c.toUpperCase() !== '#E4E9F2'));
+  ok('aucune bordure colorée : toutes sont le trait neutre de la vitrine'
+     + (bordures.length ? ' — ' + bordures.slice(0, 3).join(' | ') : ''),
+     bordures.length === 0);
+}
+
 console.log('\n' + '─'.repeat(68));
 if (rouge === 0) {
   console.log('\x1b[32m\x1b[1m  ✓ ' + vert + '/' + vert + ' — une seule couleur d’action.\x1b[0m');
