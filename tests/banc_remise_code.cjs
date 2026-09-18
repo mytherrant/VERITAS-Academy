@@ -246,6 +246,38 @@ async function ouvrirAvecAchat(page, achat) {
         'display=' + impr.avis);
     }
 
+    /* ══ ⑨ UN PAIEMENT REFUSÉ DOIT SE DIRE ═══════════════════════════════════
+       Le suivi de cette porte ne demandait QUE le code (`claim`). Tant qu'il
+       n'en venait pas, le `.catch` avalait tout : huit minutes de sondage, puis
+       « Ton code reste disponible : rouvre cette page, il s'affichera tout
+       seul. » Quand l'opérateur avait REFUSÉ — solde insuffisant, PIN erroné —
+       cette phrase était fausse, et elle envoyait l'acheteur recommencer. Une
+       seule vente manquée produisait ainsi plusieurs transactions échouées,
+       sans que personne ne lui dise que c'était son solde. `?action=status`
+       porte pourtant le motif ; app.js et assets/vitrine.js l'affichent depuis
+       longtemps, cette porte-ci ne le lisait pas.
+       Le bouchon refuse toute référence contenant « ECHEC ».
+       Éprouvé par mutation le 18/09/2026, appliquée puis annulée par
+       remplacement exact : le `fetch(PAY + '?action=status')` retiré de
+       `repriseAchat` → les 4 contrôles au rouge, l'acheteur retombant sur
+       « Saisis le code reçu avec ton cahier » et l'achat restant en mémoire. */
+    console.log(`\n${G}⑨ Un paiement refusé le dit, au lieu de promettre un code${R}`);
+    {
+      const r = await ouvrirAvecAchat(page, { ref: 'LV260918-ECHEC01', t4: '4321', q: Date.now() });
+      const t = r.texte.replace(/\s+/g, ' ');
+      dire(/Paiement non abouti/i.test(t),
+        'l’acheteur qui revient apprend que le paiement n’a pas abouti',
+        'écran obtenu : ' + t.slice(0, 100));
+      dire(/Solde insuffisant/i.test(t),
+        'et il lit le motif donné par l’opérateur, pas un message générique',
+        t.slice(0, 100));
+      dire(/Aucun montant n[’']a été prélevé/i.test(t),
+        'on le rassure sur le point qui inquiète : rien n’a été prélevé');
+      dire(r.reste === null,
+        'et l’achat refusé cesse d’être suivi — l’écran ne revient pas à chaque visite',
+        'reste en mémoire : ' + r.reste);
+    }
+
     console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
     sortie = ko === 0 ? 0 : 1;
   } catch (e) {

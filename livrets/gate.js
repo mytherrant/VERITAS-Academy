@@ -1256,12 +1256,37 @@
       fini = true;
       document.removeEventListener('visibilitychange', auRetour);
     }
+    /* ⚠️ CE SUIVI NE REGARDAIT QUE LE CODE, JAMAIS LE PAIEMENT.
+       Il n'appelait que `claim` : tant qu'aucun code n'était émis, le `.catch`
+       avalait tout et le sondage tournait huit minutes, pour finir sur « Ton
+       code reste disponible : rouvre cette page, il s'affichera tout seul. »
+       Quand le paiement a ÉCHOUÉ — solde insuffisant, code PIN erroné, refus
+       de l'opérateur — cette phrase est fausse : aucun code ne viendra jamais.
+       L'acheteur attend, revient, ne trouve rien, et recommence : une seule
+       vente manquée produit ainsi plusieurs transactions échouées, et personne
+       ne lui dit que c'était son solde.
+       Le serveur, lui, le sait : `?action=status` renvoie `failed` avec le
+       motif du fournisseur (`reason`). app.js et assets/vitrine.js l'affichent
+       depuis longtemps ; ce tunnel-ci — les quinze cahiers, la surface la plus
+       achetée du site — ne le lisait pas.
+       L'action est publique et bornée à une re-vérification toutes les 4 s côté
+       serveur ; notre sondage est à 5 s, il ne la martèle donc pas. */
     function tenter() {
       if (fini) return;
       VRT.reclamer(r, tel).then(function (c) {
         clearInterval(boucle); arreter();
         ecranCode(c, { ref: r, tel: tel });
-      }).catch(function () { /* pas encore payé : on continue */ });
+      }).catch(function () {
+        // Pas (encore) de code : le paiement est-il en cours, ou refusé ?
+        fetch(PAY + '?action=status&ref=' + encodeURIComponent(r), { cache: 'no-store' })
+          .then(function (x) { return x.json(); })
+          .then(function (s) {
+            if (fini || !s || s.status !== 'failed') return;   // en cours : on continue
+            clearInterval(boucle); arreter();
+            ecranEchec(r, tel, s.reason || '');
+          })
+          .catch(function () { /* réseau : le sondage continue */ });
+      });
     }
     /* ⚠️ LE SONDAGE NE TOURNE PAS PENDANT QUE L'ACHETEUR PAIE.
        Orange Money passe par « composez le #150*50# » : l'acheteur quitte le
@@ -1284,6 +1309,36 @@
       }
       tenter();
     }, 5000);
+  }
+
+  /* Le paiement a été REFUSÉ : on le dit, avec le motif du fournisseur quand il
+     en donne un, et on rassure sur le point qui inquiète le plus — rien n'a été
+     prélevé. Puis deux issues, pas une : réessayer, ou passer par WhatsApp. Sans
+     cet écran, l'acheteur restait devant « Paiement en cours » jusqu'à ce que le
+     sondage renonce, et repartait avec la promesse d'un code qui n'existait pas. */
+  function ecranEchec(r, tel, motif) {
+    modale(
+      '<div style="text-align:center">'
+      + '<div style="margin-bottom:2px">' + ico('horloge', 38, '#c0453f') + '</div>'
+      + '<div style="' + TTL + '">Paiement non abouti</div>'
+      + '<div style="' + SUB + '">'
+      + (motif ? 'L’opérateur indique : <strong>' + esc(motif) + '</strong>. ' : 'Le paiement n’a pas été confirmé par l’opérateur. ')
+      + '<strong>Aucun montant n’a été prélevé.</strong></div>'
+      + '<div style="margin:14px 0 4px;font-size:12px;color:#98a1aa">Référence</div>'
+      + '<div style="font-family:ui-monospace,monospace;font-weight:700;font-size:15px;color:#1f2b38;'
+      + 'background:#f4f6f8;border-radius:8px;padding:8px">' + esc(r) + '</div>'
+      + '<button id="vrt-retry" style="' + BTN + '">Réessayer le paiement</button>'
+      + '<a href="https://wa.me/' + WA + '?text=' + encodeURIComponent(
+          'Bonjour, mon paiement VÉRITAS n\'a pas abouti (réf. ' + r + ').')
+      + '" target="_blank" rel="noopener" style="' + BTN2 + ';display:block;text-decoration:none">'
+      + 'Écrire sur WhatsApp</a>'
+      + '<button id="vrt-fermer-echec" style="' + BTN2 + '">Fermer</button>'
+      + '</div>'
+    );
+    var re = document.getElementById('vrt-retry');
+    if (re) re.onclick = function () { fermerModale(); ouvrirAchat({}); };
+    var fe = document.getElementById('vrt-fermer-echec');
+    if (fe) fe.onclick = function () { fermerModale(); };
   }
 
   function ecranReclamation() {
@@ -1542,7 +1597,23 @@
     var lancer = function () {
       VRT.reclamer(a.ref, a.t4)
         .then(function (c) { if (c && (c.code || c.codes)) ecranCode(c, { ref: a.ref, tel: a.t4 }); })
-        .catch(function () { /* pas encore confirmé : on réessaiera au prochain passage */ });
+        .catch(function () {
+          /* « Rouvre cette page, il s'affichera tout seul » : c'est ce qu'on a
+             dit à l'acheteur, et c'est ici qu'il revient. Un paiement REFUSÉ y
+             restait muet — il repartait une fois de plus sans savoir pourquoi,
+             et recommençait. On consulte donc le statut, et on l'oublie une
+             fois dit : sans cela l'écran d'échec reviendrait à chaque visite,
+             trente jours durant. Un paiement encore en cours, lui, ne touche à
+             rien : la reprise le retrouvera au prochain passage. */
+          fetch(PAY + '?action=status&ref=' + encodeURIComponent(a.ref), { cache: 'no-store' })
+            .then(function (x) { return x.json(); })
+            .then(function (s) {
+              if (!s || s.status !== 'failed') return;
+              achatEfface();
+              ecranEchec(a.ref, a.t4, s.reason || '');
+            })
+            .catch(function () { /* réseau : on réessaiera au prochain passage */ });
+        });
     };
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', lancer);

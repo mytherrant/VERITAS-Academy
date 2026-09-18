@@ -263,6 +263,26 @@ function ficheOuvrage(slug) {
 http.createServer((req, res) => {
   const u = new URL(req.url, 'http://x');
 
+  /* GET payment_camerpay.php?action=status&ref=… — le STATUT d'un paiement.
+     Ajouté le 18/09/2026 : la porte (livrets/gate.js) ne le consultait pas.
+     Elle ne demandait que le code, et tant qu'aucun code n'arrivait, elle
+     tournait huit minutes avant de promettre « ton code s'affichera tout
+     seul » — y compris quand l'opérateur avait REFUSÉ le paiement.
+     Le bouchon répond d'après la référence, pour que le banc puisse jouer les
+     deux issues sans jamais toucher à un vrai paiement : une référence
+     contenant « ECHEC » est refusée avec son motif, toute autre reste en
+     cours. */
+  if (u.pathname.startsWith('/api/payment_camerpay.php')
+      && u.searchParams.get('action') === 'status') {
+    const ref = String(u.searchParams.get('ref') || '');
+    const echoue = /ECHEC/i.test(ref);
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    res.end(JSON.stringify(echoue
+      ? { ref, status: 'failed', reason: 'Solde insuffisant', failure_code: 'INSUFFICIENT_FUNDS' }
+      : { ref, status: 'pending', reason: null }));
+    return;
+  }
+
   // GET ?o=<slug>&p=<n> : une page-image. Le banc rejoue la REGLE (aperçu
   // gratuit puis code exige), pas la signature du jeton.
   if (u.pathname.startsWith('/api/livret.php') && u.searchParams.has('o') && u.searchParams.has('p')) {
