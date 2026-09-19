@@ -2134,8 +2134,8 @@ class Component extends DCLogic {
   _servicesData(){
     return {
       1: [
-        { ico: '#lc-bookopen', titre: 'Cours par s\u00e9quence', desc: 'Six s\u00e9quences par niveau : le\u00e7ons de langue, groupements de textes, m\u00e9thodes r\u00e9dig\u00e9es comme au tableau.', prix: 'Inclus d\u00e8s 1 000 F', fond: '#DBE8FE', teinte: '#1E499B' },
-        { ico: '#lc-book', titre: '\u0152uvres au programme', desc: '\u00c9tude int\u00e9grale : r\u00e9sum\u00e9 par chapitre, personnages, axes de lecture, sujets de dissertation.', prix: 'Inclus d\u00e8s 1 000 F', fond: '#EEE9F8', teinte: '#5B4FA8' },
+        { ico: '#lc-bookopen', titre: 'Cours par s\u00e9quence', desc: 'Six s\u00e9quences par niveau : le\u00e7ons de langue, groupements de textes, m\u00e9thodes r\u00e9dig\u00e9es comme au tableau.', prix: 'Inclus d\u00e8s {PRIX:abo_starter_m|1 000} F', fond: '#DBE8FE', teinte: '#1E499B' },
+        { ico: '#lc-book', titre: '\u0152uvres au programme', desc: '\u00c9tude int\u00e9grale : r\u00e9sum\u00e9 par chapitre, personnages, axes de lecture, sujets de dissertation.', prix: 'Inclus d\u00e8s {PRIX:abo_starter_m|1 000} F', fond: '#EEE9F8', teinte: '#5B4FA8' },
         { ico: '#lc-atom', titre: 'Labos virtuels', desc: 'Exp\u00e9riences de PCT et SVT simul\u00e9es, pour les \u00e9tablissements sans laboratoire \u00e9quip\u00e9.', prix: 'Plan Pro', fond: '#E3F1EE', teinte: '#0E7C86' },
         { ico: '#lc-doc', titre: 'Mon cahier en ligne', desc: 'Le cahier de papier, rempli à l’écran : on écrit dedans, le travail se garde, et la correction s’ouvre dès qu’on a cherché.', prix: '1 500 F', fond: '#FDECEF', teinte: '#B03A6E' },
         { ico: '#lc-game', titre: 'Jeux p\u00e9dagogiques', desc: 'R\u00e9visions actives : quiz chronom\u00e9tr\u00e9s, associations, cartes m\u00e9moire par mati\u00e8re.', prix: 'Gratuit', fond: '#E0F5E5', teinte: '#007E11' }
@@ -2480,7 +2480,7 @@ class Component extends DCLogic {
         { nom: 'Parents', desc: 'Notes, absences, scolarit\u00e9', ico: '#lc-users', fond: '#E3F1EE', teinte: '#0E7C86', aller: () => { location.href = '/plan.html#parent'; } },
         { nom: 'Enseignants', desc: 'Publier et encadrer', ico: '#lc-presentation', fond: '#FBE9F1', teinte: '#B03A6E', aller: () => { location.href = '/plan.html#enseignant'; } },
         { nom: 'Catalogue E-Learning', desc: 'Mati\u00e8res et \u0153uvres', ico: '#lc-book', fond: '#DBE8FE', teinte: '#1E499B', aller: () => this._go('elearning') },
-        { nom: 'Abonnements', desc: 'D\u00e8s 1 000 FCFA / mois', ico: '#lc-wallet', fond: '#EEE9F8', teinte: '#5B4FA8', aller: () => this._go('tarifs') },
+        { nom: 'Abonnements', desc: 'D\u00e8s {PRIX:abo_starter_m|1 000} FCFA / mois', ico: '#lc-wallet', fond: '#EEE9F8', teinte: '#5B4FA8', aller: () => this._go('tarifs') },
         { nom: 'Boutique de manuels', desc: 'Cahiers et \u00e9tudes d\u2019\u0153uvres', ico: '#lc-basket', fond: '#FFF3E4', teinte: '#A84200', aller: () => this._go('boutique') },
         { nom: 'Accueil', desc: 'Revenir \u00e0 la page d\u2019accueil', ico: '#lc-home', fond: '#F4F5F8', teinte: '#4D5163', aller: () => this._go('accueil') }
       ],
@@ -2489,7 +2489,7 @@ class Component extends DCLogic {
       plusLiens: [
         { nom: 'Catalogue E-Learning', desc: 'Mati\u00e8res, \u0153uvres, s\u00e9quences', ico: '#lc-book', fond: '#DBE8FE', teinte: '#1E499B', aller: () => this._go('elearning') },
         { nom: 'Corrig\u00e9s des cahiers', desc: '9 675 exercices, acc\u00e8s libre', ico: '#lc-checkcircle', fond: '#E0F5E5', teinte: '#007E11', aller: () => this._go('elearning') },
-        { nom: 'Abonnements', desc: 'D\u00e8s 1 000 FCFA / mois', ico: '#lc-wallet', fond: '#EEE9F8', teinte: '#5B4FA8', aller: () => this._go('tarifs') },
+        { nom: 'Abonnements', desc: 'D\u00e8s {PRIX:abo_starter_m|1 000} FCFA / mois', ico: '#lc-wallet', fond: '#EEE9F8', teinte: '#5B4FA8', aller: () => this._go('tarifs') },
         { nom: 'Boutique de manuels', desc: 'Cahiers et \u00e9tudes d\u2019\u0153uvres', ico: '#lc-shop', fond: '#FFF3E4', teinte: '#A84200', aller: () => this._go('boutique') }
       ],
       /* Ces trois cartes menaient aux sections de la vitrine, qui sont des
@@ -2552,7 +2552,7 @@ class Component extends DCLogic {
            d\u00e9mentie par l\u2019\u00e9cran suivant co\u00fbte plus qu\u2019une minute annonc\u00e9e. */
         { n: '1', titre: 'Cr\u00e9ez le compte', desc: 'Nom, classe, num\u00e9ro WhatsApp et un mot de passe. Une minute, aucune carte demand\u00e9e.' },
         { n: '2', titre: 'Prenez la ressource offerte', desc: 'Un cours entier, une \u00e9preuve corrig\u00e9e ou une \u00e9tude d\u2019\u0153uvre \u2014 l\u2019\u00e9l\u00e8ve choisit.' },
-        { n: '3', titre: 'Abonnez-vous seulement si c\u2019est convaincant', desc: 'MTN MoMo ou Orange Money. 1 000 F par mois, r\u00e9siliable en un message, sans frais.' }
+        { n: '3', titre: 'Abonnez-vous seulement si c\u2019est convaincant', desc: 'MTN MoMo ou Orange Money. {PRIX:abo_starter_m|1 000} F par mois, r\u00e9siliable en un message, sans frais.' }
       ],
       avis: [
         { qui: 'Parent d\u2019\u00e9l\u00e8ve de 3\u1d49', ou: 'Douala' },

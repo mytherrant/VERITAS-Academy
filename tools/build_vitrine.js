@@ -76,7 +76,26 @@ function hoverClass(decls) {
   hoverRules.push('.' + cls + ':hover{' + decls + '}');
   return cls;
 }
-const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+/* ⚠️ `esc` ne sert QU'À DU TEXTE (vérifié : ses huit emplois sont tous entre
+   balises, jamais dans un attribut) — d'où la liberté d'y rendre une balise.
+
+   UN PRIX ÉCRIT DANS UNE DONNÉE. « Abonnements — Dès 1 000 FCFA / mois »
+   (navigation), « Inclus dès 1 000 F » (cartes) : ces prix vivent dans les
+   DONNÉES de la maquette, et le moteur de gabarit échappe les valeurs — on ne
+   peut pas y poser un `data-vrt-prix` à la main, il sortirait en toutes
+   lettres. Le jour où l'administration passe la formule Starter à 1 200 F, ces
+   mentions annonçaient toujours 1 000.
+   La donnée porte donc un jeton `{PRIX:<id de formule>|<repli>}` :
+     · ICI, au pré-rendu, il devient une mention LIÉE, avec le repli pour texte
+       — la page reste juste pour un moteur de recherche et sans JavaScript, et
+       assets/vitrine.js repeint ce texte dès que les tarifs réels arrivent ;
+     · dans VRT_DATA, le jeton reste BRUT : `litter()` le remplace par le tarif
+       réel à chaque re-rendu de région (changement d'onglet, de filtre…).
+   Le jeton ne contient ni `<`, ni `>`, ni `&`, ni `"` : l'échappement le laisse
+   intact, et la substitution se fait donc après lui sans risque. */
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  .replace(/\{PRIX:([a-z0-9_]+)\|([^}]*)\}/gi,
+           (m, id, repli) => '<span data-vrt-prix="' + id + '">' + repli + '</span>');
 
 function resolve(expr, scope) {
   expr = expr.trim();

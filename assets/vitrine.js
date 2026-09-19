@@ -113,7 +113,29 @@
       var v = item;
       for (var i = 1; i < parts.length; i++) { if (v == null) return ''; v = v[parts[i]]; }
       if (v === undefined || v === null) return '';
-      return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      return String(prixJetons(v)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    });
+  }
+
+  /* ── UN PRIX ÉCRIT DANS UNE DONNÉE ──────────────────────────────────────
+     « Abonnements — Dès 1 000 FCFA / mois » (navigation), « Inclus dès
+     1 000 F » (cartes) : ces prix vivent dans des DONNÉES, pas dans le
+     balisage. On ne peut donc pas y poser un `data-vrt-prix` — le moteur de
+     gabarit échappe les valeurs, et la balise sortirait en toutes lettres.
+     Le jour où l'administration passe la formule Starter à 1 200 F, ces
+     mentions continuaient d'annoncer 1 000.
+     La donnée porte donc un JETON — `{PRIX:abo_starter_m|1 000}` — remplacé
+     ici par le tarif réel, et par la valeur de repli quand il n'est pas encore
+     connu (premier affichage, serveur muet, lecture sans JavaScript : le
+     pré-rendu du build y substitue déjà le repli). */
+  function prixDe(id) {
+    var pl = PRIX_MENTIONS && PRIX_MENTIONS[id];
+    return (pl && pl.prix > 0 && pl.actif !== false) ? fmtPrix(pl.prix) : null;
+  }
+  function prixJetons(v) {
+    if (typeof v !== 'string' || v.indexOf('{PRIX:') < 0) return v;
+    return v.replace(/\{PRIX:([a-z0-9_]+)\|([^}]*)\}/gi, function (m, id, repli) {
+      return prixDe(id) || repli;
     });
   }
 
@@ -130,12 +152,15 @@
     var html = '';
     for (var j = 0; j < liste.length; j++) html += litter(g.tpl, liste[j], g.alias);
     tampon.innerHTML = html;
+    /* Les tarifs réels AVANT l'insertion : posés après, le visiteur verrait
+       le prix de la maquette le temps d'une image. */
+    appliquerMentionsPrix(tampon);
     while (tampon.firstChild) parent.insertBefore(tampon.firstChild, apres);
   }
 
   function poser(nom, valeur) {
     var el = document.querySelector('[data-vrt-val="' + nom + '"]');
-    if (el) el.textContent = valeur;
+    if (el) el.textContent = prixJetons(valeur);
   }
 
   /* ── Formatage FCFA, identique à la maquette ───────────────────────────── */
@@ -1155,6 +1180,18 @@
      reste. Une formule retirée de la vente disparaît du panneau. */
   function poserFormules(plans) {
     if (!plans || !plans.length) return;
+    /* ⚠️ LES MENTIONS DE PRIX D'ABORD, ET SANS CONDITION.
+       Elles étaient posées en fin de fonction, APRÈS deux sorties anticipées :
+       un plan publié sans `formule`/`groupe` — ou une grille qu'on ne peut pas
+       reconstituer — et « Dès 1 000 F / mois » restait le prix de la maquette
+       partout sur la page, alors que le serveur venait d'annoncer l'autre.
+       Une mention ne dépend que de l'identifiant du plan : elle n'a pas besoin
+       de la grille, et ne doit pas tomber avec elle. */
+    var parId = {};
+    for (var m = 0; m < plans.length; m++) if (plans[m] && plans[m].id) parId[plans[m].id] = plans[m];
+    PRIX_MENTIONS = parId;
+    appliquerMentionsPrix();
+
     var g = {};
     for (var i = 0; i < plans.length; i++) {
       var p = plans[i];
@@ -1205,13 +1242,25 @@
     for (var x = 0; x < glob.length; x++) {
       if (ecoGlobal) glob[x].textContent = ecoGlobal; else glob[x].style.display = 'none';
     }
-    // Le prix d'une formule repris dans les textes (« dès 1 000 F par mois »).
-    var parId = {};
-    for (var y = 0; y < plans.length; y++) if (plans[y] && plans[y].id) parId[plans[y].id] = plans[y];
-    var mentions = document.querySelectorAll('[data-vrt-prix]');
+  }
+
+  /* ── LES MENTIONS DE PRIX SE RÉAPPLIQUENT ────────────────────────────────
+     Elles étaient posées UNE fois, à l'arrivée des tarifs. Or `rendre()`
+     détruit et recrée les nœuds d'une région à chaque changement d'onglet, de
+     moyen de paiement ou de filtre : la mention repeinte y redevenait le prix
+     figé de la maquette, sans que rien ne le signale. On garde donc les tarifs
+     connus et on les repose après chaque rendu. */
+  var PRIX_MENTIONS = null;
+  /* Au MODULE, pas dans poserFormules : `fmtP` y est une variable locale, et
+     l'appeler d'ici lèverait une ReferenceError que `node --check` ne voit pas.
+     Même rendu que la maquette : 1 200 → « 1 200 », sans suffixe. */
+  function fmtPrix(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+  function appliquerMentionsPrix(racine) {
+    if (!PRIX_MENTIONS) return;
+    var mentions = (racine || document).querySelectorAll('[data-vrt-prix]');
     for (var z = 0; z < mentions.length; z++) {
-      var pl = parId[mentions[z].getAttribute('data-vrt-prix')];
-      if (pl && pl.prix > 0 && pl.actif !== false) mentions[z].textContent = fmtP(pl.prix);
+      var pl = PRIX_MENTIONS[mentions[z].getAttribute('data-vrt-prix')];
+      if (pl && pl.prix > 0 && pl.actif !== false) mentions[z].textContent = fmtPrix(pl.prix);
     }
   }
 
