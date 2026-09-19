@@ -86,7 +86,14 @@
        qu'un encaissement au hasard. */
     article: null,
     // Ce que le payeur a tapé. Survit aux re-rendus du tunnel (voir champsDuMoment).
-    saisie: { vpNom: '', vpTel: '', vpTel2: '', vpMail: '', vpAdr: '' }
+    saisie: { vpNom: '', vpTel: '', vpTel2: '', vpMail: '', vpAdr: '', vpCodeAmi: '' },
+    /* CODE AMI. `remise` et `code` viennent du SERVEUR — jamais d'un calcul
+       fait ici. `base` retient le sous-total sur lequel la remise a été
+       accordée : changer d'article ou de quantité la rend caduque, et elle
+       tombe plutôt que d'annoncer un rabais que le serveur ne connaît plus.
+       La remise porte sur les ARTICLES, jamais sur la livraison : le transport
+       est une avance de frais du centre, pas une marge à partager. */
+    codeAmi: { code: '', remise: 0, base: 0, ok: false, msg: '', parrain: '' }
   };
 
   /* ── Micro-moteur de gabarit ───────────────────────────────────────────
@@ -222,11 +229,18 @@
      rendu, et un écouteur DÉLÉGUÉ (posé une seule fois sur le document)
      enregistre les frappes — un écouteur par champ ne survivrait pas au
      remplacement des nœuds. */
+  /* Le champ « Code ami » est ajouté ICI plutôt que dans VRT_DATA : il est le
+     même pour les quatre moyens de paiement, et le recopier quatre fois dans un
+     bloc de données de 470 Ko, c'est quatre endroits pour l'oublier. */
+  var CHAMP_CODE_AMI = { champ: 'vpCodeAmi', label: 'Code ami (facultatif)',
+    exemple: 'VRT…', ico: '#lc-gift', colonne: 'span 2', auto: 'off', type: 'text' };
+
   function champsDuMoment() {
     var liste = (D.champsPaiement[S.moyen] || []).slice();
     // L'adresse n'a de sens que si l'on livre. On ne demande pas où livrer
     // à quelqu'un qui vient retirer au centre.
     if (S.livr > 0 && D.champLivraison) liste = liste.concat(D.champLivraison);
+    liste = liste.concat([CHAMP_CODE_AMI]);
     return liste.map(function (c) {
       var o = {}; for (var k in c) if (Object.prototype.hasOwnProperty.call(c, k)) o[k] = c[k];
       o.valeur = S.saisie[c.champ] || '';
@@ -253,10 +267,27 @@
        de quoi que ce soit : afficher une remise sur un prix jamais pratiqué,
        c'est annoncer une réduction qui n'existe pas. Le jour où le centre en
        accordera une vraie, elle viendra du catalogue, avec son ancien prix. */
-    rendre('lignesTotal', [
+    var lignes = [
       { libelle: 'Sous-total (' + q + ' article' + (q > 1 ? 's' : '') + ')', montant: f(pu * q), graisse: '400', couleur: '#4D5163' },
       { libelle: 'Frais de livraison', montant: frais === 0 ? 'Offerts' : f(frais), graisse: '400', couleur: '#4D5163' }
-    ]);
+    ];
+    /* La remise ne s'affiche que quand elle existe VRAIMENT, et elle vient du
+       serveur — c'est exactement la règle posée plus haut à propos de l'ancienne
+       « Remise catalogue » de décor : une réduction annoncée doit être une
+       réduction accordée. */
+    var ra = remiseAmi();
+    if (ra > 0) {
+      lignes.push({ libelle: 'Code ami ' + S.codeAmi.code, montant: '− ' + f(ra),
+                    graisse: '600', couleur: '#007E11' });
+    } else if (S.codeAmi.ok) {
+      /* La remise avait été accordée pour un autre sous-total — l'acheteur a
+         changé d'article ou de quantité depuis. On le DIT : une remise qui
+         disparaît en silence de la colonne des totaux passe pour une erreur. */
+      direCodeAmi('Le panier a changé — le code se revérifie.', false);
+      S.codeAmi = { code: '', remise: 0, base: 0, ok: false, msg: '', parrain: '' };
+      if (String(S.saisie.vpCodeAmi || '').trim()) setTimeout(verifierCodeAmi, 0);
+    }
+    rendre('lignesTotal', lignes);
     poser('quantite', String(q));
     poser('totalPayer', f(montantTotal()));
   }
@@ -500,8 +531,12 @@
       }
       S.article = p;
       S.qte = 1;
+      /* Arrivé par le lien d'un ami, le visiteur retrouve son code déjà posé,
+         et vérifié : la remise s'affiche avant qu'il n'ait rien tapé. */
+      if (!String(S.saisie.vpCodeAmi || '').trim()) S.saisie.vpCodeAmi = codeAmiRetenu();
       aller('paiement');
       majPaiement();
+      if (String(S.saisie.vpCodeAmi || '').trim()) verifierCodeAmi();
     },
     // Entrées de menu et cartes : la destination est portée par data-go,
     // écrit à la construction depuis la maquette.
@@ -775,9 +810,103 @@
     return (typeof p === 'number' && isFinite(p) && p > 0) ? p : 0;
   }
   function fraisLivraison() { return [0, 1000, 2500][S.livr] || 0; }
+  function sousTotalArticles() { return prixUnitaire() * S.qte; }
+  /* La remise n'est valable que pour le sous-total sur lequel le serveur l'a
+     accordée. Ajouter un exemplaire, changer d'article, et elle ne vaut plus :
+     mieux vaut la retirer que débiter un chiffre que l'acheteur n'a pas vu. */
+  function remiseAmi() {
+    var c = S.codeAmi;
+    if (!c.ok || c.remise <= 0) return 0;
+    if (c.base !== sousTotalArticles()) return 0;
+    return Math.min(c.remise, sousTotalArticles());
+  }
   function montantTotal() {
     var pu = prixUnitaire();
-    return pu ? pu * S.qte + fraisLivraison() : 0;
+    return pu ? sousTotalArticles() + fraisLivraison() - remiseAmi() : 0;
+  }
+
+  /* ── CODE AMI ────────────────────────────────────────────────────────────
+     Le serveur honore le Code ami, mais api/payment_camerpay.php ne l'évalue
+     QUE si la requête d'initiation porte la clé `code` — garde délibérée, pour
+     qu'un parrain ne soit jamais rémunéré sur un rabais que le filleul n'a pas
+     vu. La boutique ne l'envoyait pas : la remise promise ailleurs sur le site
+     ne valait sur aucune commande de manuel.
+
+     RÈGLE, la même que dans livrets/gate.js et dans l'Atelier : le montant
+     affiché et celui envoyé au débit sortent de la MÊME réponse du serveur. Ce
+     qu'on reprend ici, c'est la REMISE en francs — jamais un pourcentage
+     réappliqué sur place.
+
+     Un message qui ne vole PAS le curseur : la vérification part pendant que
+     l'acheteur tape encore, et `signalerChamp` donnerait le focus au champ à
+     chaque frappe. */
+  function direCodeAmi(msg, ok) {
+    var el = document.getElementById('vpCodeAmi');
+    if (!el) return;
+    var boite = el.closest ? (el.closest('label') || el.parentNode) : el.parentNode;
+    var vieux = boite.querySelector('.vp-err');
+    if (vieux) vieux.parentNode.removeChild(vieux);
+    if (!msg) { el.style.borderColor = ''; return; }
+    var p = document.createElement('span');
+    p.className = 'vp-err';
+    p.style.cssText = 'font:400 12.5px Poppins,sans-serif;margin-top:2px;color:' + (ok ? '#007E11' : '#B3261E');
+    p.textContent = msg;
+    boite.appendChild(p);
+    el.style.borderColor = ok ? '#007E11' : '#B3261E';
+  }
+
+  var codeAmiJeton = 0;
+  function verifierCodeAmi() {
+    var brut = String(S.saisie.vpCodeAmi || '').toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
+    var base = sousTotalArticles();
+    S.codeAmi = { code: '', remise: 0, base: 0, ok: false, msg: '', parrain: '' };
+    if (!brut) { direCodeAmi('', true); majTotaux(); return; }
+    if (base <= 0) { direCodeAmi('Choisissez d’abord un article.', false); majTotaux(); return; }
+    var mien = ++codeAmiJeton;       // seule la DERNIÈRE frappe fait foi
+    direCodeAmi('Vérification…', true);
+    fetch(apiBase() + '/parrainage.php?action=verifier', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+      body: JSON.stringify({ code: brut, intent: 'cart', targetId: '',
+        montant: base, tel: numeroNormalise(S.saisie.vpTel) })
+    })
+      .then(function (r) { return r.json().catch(function () { return null; }); })
+      .then(function (j) {
+        if (mien !== codeAmiJeton) return;                 // une frappe plus récente a suivi
+        if (!j) { direCodeAmi('Réponse illisible du serveur — réessayez.', false); majTotaux(); return; }
+        var remise = parseInt(j.remise, 10) || 0;
+        if (!j.ok || remise <= 0) {
+          direCodeAmi(String(j.message || j.error || 'Code inconnu, épuisé ou expiré.'), false);
+          majTotaux(); return;
+        }
+        S.codeAmi = { code: String(j.code || brut), remise: remise, base: base, ok: true,
+                      msg: '', parrain: String(j.parrain || '') };
+        try { localStorage.setItem('vrt_code_ami', JSON.stringify({ c: S.codeAmi.code, t: Date.now() })); } catch (e) {}
+        direCodeAmi('✓ Code appliqué' + (S.codeAmi.parrain ? ' (merci ' + S.codeAmi.parrain + ')' : '')
+          + ' — vous économisez ' + f(remise) + '.', true);
+        majTotaux();
+      })
+      .catch(function () {
+        /* Registre injoignable : la commande continue au plein tarif plutôt que
+           de s'arrêter. Un code non appliqué se rattrape ; une vente perdue non. */
+        if (mien !== codeAmiJeton) return;
+        direCodeAmi('Vérification impossible — vous pouvez commander au tarif normal.', false);
+        majTotaux();
+      });
+  }
+
+  /* Le code déjà porté par le visiteur, aux MÊMES clés qu'app.js, gate.js et
+     l'Atelier : arrivé par le lien d'un ami, il le retrouve sans rien retaper. */
+  function codeAmiRetenu() {
+    try {
+      var u = new RegExp('[?&](?:ref|code|parrain)=([A-Za-z0-9_-]{3,32})').exec(location.search);
+      if (u) return u[1].toUpperCase();
+    } catch (e) {}
+    try { var s = sessionStorage.getItem('_vrtRef'); if (s) return String(s).toUpperCase(); } catch (e) {}
+    try {
+      var o = JSON.parse(localStorage.getItem('vrt_code_ami') || 'null');
+      if (o && o.c && (Date.now() - (o.t || 0)) < 60 * 86400000) return String(o.c).toUpperCase();
+    } catch (e) {}
+    return '';
   }
 
   function libelleCommande() {
@@ -904,10 +1033,13 @@
       var fichier = cfg.file || 'payment_camerpay.php';
 
       var envoyer = function (tok, second) {
-        return fetch(apiBase() + '/' + fichier + '?action=init', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
-          body: JSON.stringify({
+        /* ⚠️ LA PRÉSENCE DE LA CLÉ `code` EST L'OPT-IN, PAS SA VALEUR.
+           api/payment_camerpay.php n'évalue le parrainage que si elle existe
+           (array_key_exists, même vide). On ne l'ajoute donc QUE lorsqu'une
+           remise est affichée dans la colonne des totaux, et avec exactement le
+           code qui l'a produite — sinon le parrain toucherait sur un rabais que
+           l'acheteur n'a jamais vu. */
+        var corps = {
             ref: ref,
             montant: montant,
             label: libelleCommande(),
@@ -926,7 +1058,18 @@
                      { nom: 'Livraison ' + ['(retrait au centre)', 'Douala', 'régions'][S.livr]
                             + (S.livr > 0 ? ' — ' + (S.saisie.vpAdr || '').trim() : ''),
                        qte: 1, pu: [0, 1000, 2500][S.livr] }]
-          })
+        };
+        if (remiseAmi() > 0) {
+          corps.code = S.codeAmi.code;
+          /* L'assiette de la commission : les ARTICLES, remise déduite — pas la
+             livraison, qui est une avance de frais. Le serveur la borne au
+             montant payé : elle ne peut que réduire la commission. */
+          corps.assiette = sousTotalArticles() - remiseAmi();
+        }
+        return fetch(apiBase() + '/' + fichier + '?action=init', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+          body: JSON.stringify(corps)
         })
         /* On conserve le code HTTP : un 401 ne se traite pas comme les
            autres erreurs, et .then(r => r.json()) le jetterait. */
@@ -2504,6 +2647,7 @@
     /* Frappes du tunnel : un SEUL écouteur, délégué au document. Les champs
        sont détruits et recréés à chaque changement de moyen ou de livraison ;
        un écouteur posé sur l'élément ne leur survivrait pas. */
+    var minuteurCodeAmi = null;
     document.addEventListener('input', function (e) {
       var id = e.target && e.target.id;
       if (id && Object.prototype.hasOwnProperty.call(S.saisie, id)) {
@@ -2511,6 +2655,13 @@
         var boite = e.target.closest ? e.target.closest('label') : null;
         var err = boite && boite.querySelector('.vp-err');
         if (err) { err.parentNode.removeChild(err); e.target.style.borderColor = ''; e.target.removeAttribute('aria-invalid'); }
+        /* Le code se vérifie au SERVEUR, donc pas à chaque frappe : on attend
+           que la saisie se pose. Sans ce délai, taper « VRT7K2M9Q » lancerait
+           neuf requêtes, et LWS ferme le site à six mauvaises par minute. */
+        if (id === 'vpCodeAmi') {
+          if (minuteurCodeAmi) clearTimeout(minuteurCodeAmi);
+          minuteurCodeAmi = setTimeout(verifierCodeAmi, 550);
+        }
       }
     });
 

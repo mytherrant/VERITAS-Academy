@@ -3312,7 +3312,7 @@
   <div data-noprint="1" onClick="{{ closePay }}" style="position:fixed;inset:0;background:rgba(14,46,77,.5);z-index:70;display:flex;align-items:flex-start;justify-content:center;padding:56px 20px;overflow:auto;animation:fadeIn .2s ease both">
     <div onClick="{{ stop }}" style="background:var(--cffffff,#fff);border-radius:16px;box-shadow:0 24px 70px rgba(14,46,77,.4);width:100%;max-width:460px;overflow:hidden;animation:popIn .28s ease both">
       <sc-if value="{{ payFormShown }}" hint-placeholder-val="{{ true }}">
-        <div style="padding:22px 26px;border-bottom:1px solid var(--ceef2f7,#eef2f7)"><h2 style="font-family:Poppins;font-size:18px;font-weight:700;color:var(--c14375f,#14375f);margin:0">Paiement — plan {{ payPlanName }}</h2><p style="font-size:12.5px;color:var(--c8b97a8,#8b97a8);margin:5px 0 0">{{ payPlanPrice }} · renouvellement mensuel</p></div>
+        <div style="padding:22px 26px;border-bottom:1px solid var(--ceef2f7,#eef2f7)"><h2 style="font-family:Poppins;font-size:18px;font-weight:700;color:var(--c14375f,#14375f);margin:0">Paiement — plan {{ payPlanName }}</h2><p style="font-size:12.5px;color:var(--c8b97a8,#8b97a8);margin:5px 0 0"><sc-if value="{{ payRemiseShown }}" hint-placeholder-val="{{ false }}"><span style="text-decoration:line-through;margin-right:7px">{{ payPrixAvant }}</span></sc-if>{{ payPlanPrice }} · renouvellement mensuel</p></div>
         <div style="padding:22px 26px">
           <div style="{{ payBannerStyle }}">{{ payBanner }}</div>
           <div style="display:flex;gap:8px;margin:14px 0 18px">
@@ -3329,6 +3329,14 @@
               <label style="{{ fieldLbl }}">Numéro de carte<input value="{{ payCard }}" onChange="{{ setPayCard }}" placeholder="0000 0000 0000 0000" style="{{ fieldIn }}"></label>
               <div style="display:flex;gap:10px"><label style="{{ fieldLbl }};flex:1">Expiration<input value="{{ payExp }}" onChange="{{ setPayExp }}" placeholder="MM/AA" style="{{ fieldIn }}"></label><label style="{{ fieldLbl }};flex:1">CVC<input value="{{ payCvc }}" onChange="{{ setPayCvc }}" placeholder="123" style="{{ fieldIn }}"></label></div>
             </sc-if>
+            <div>
+              <div style="{{ fieldLbl }};margin-bottom:5px">Code ami (facultatif) — une remise si un collègue vous en a donné un</div>
+              <div style="display:flex;gap:8px;align-items:stretch">
+                <input value="{{ payCode }}" onChange="{{ setPayCode }}" placeholder="VRT…" style="{{ fieldIn }};flex:1;text-transform:uppercase">
+                <button onClick="{{ applyPayCode }}" style="background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);padding:0 16px;font-size:13px;cursor:pointer;border-radius:9px;font-weight:600;white-space:nowrap">Appliquer</button>
+              </div>
+              <div style="{{ payCodeMsgStyle }}">{{ payCodeMsg }}</div>
+            </div>
           </div>
         </div>
         <div style="{{ payErrStyle }}">{{ payErr }}</div>
@@ -3561,6 +3569,12 @@ class Component extends DCLogic {
       codeNeuf:'',codeReprErr:'',codeReprBusy:false,
       repCode:'',repErr:'',repBusy:false,payOpen:false,paySelected:null,payDone:false,payName:'',payCard:'',payExp:'',payCvc:'',payMethod:'momo',
       payProvider:null,payBusy:false,payErr:'',payRef:'',payUrl:'',
+      /* CODE AMI. `payMontant` est la somme rendue par le SERVEUR : c'est elle
+         qui s'affiche, qui habille le bouton et qui part au debit. `payBase`
+         retient le tarif sur lequel la remise a ete accordee — si le plan
+         change, la remise ne vaut plus et tombe. Voir _verifierCodeAmi. */
+      payCode:'',payCodeMsg:'',payCodeOk:false,payCodeBusy:false,
+      payRemise:0,payMontant:0,payBase:0,
       annotSel:null,annotVersion:0,annotTool:'surligner',annotColor:'var(--cfff3a3,#fff3a3)',annotComment:'',
       chatOpen:false,chatDraft:'',epTab:'edition',
       /* Formulaire de proposition. Il n'existait AUCUN moyen d'en creer
@@ -6004,6 +6018,76 @@ class Component extends DCLogic {
   }
   /* ---- CamerPay ------------------------------------------------------- */
   _apiUrl(f){return (window.__VRT_API||'/api/')+f;}
+  /* ═══════════ CODE AMI ═══════════════════════════════════════════════════
+     Le serveur honore le Code ami sur `intent:'subscription'` — les quatre
+     plans de l'Atelier ont un tarif de reference dans vrt_prix_catalogue. Mais
+     api/payment_camerpay.php ne l'evalue QUE si la requete d'initiation porte
+     la cle `code` : garde deliberee, pour qu'un parrain ne touche jamais sur un
+     rabais que le filleul n'a pas vu. L'Atelier ne l'envoyait pas — la remise
+     promise ailleurs sur le site ne valait donc sur aucun de ses abonnements.
+
+     REGLE, la meme que dans livrets/gate.js : le prix affiche, le libelle du
+     bouton et la somme envoyee au debit sortent TOUS de la reponse du serveur.
+     On ne calcule jamais la remise ici ; un prix devine serait promis a l'ecran
+     puis refuse au debit (409 PRIX_INCOHERENT). */
+  _planTarif(plan){return parseInt(String((plan&&plan.price)||'').replace(/\D/g,''),10)||0;}
+  _codeAmiOublier(maj){
+    const z={payCode:this.state.payCode,payCodeMsg:'',payCodeOk:false,
+             payRemise:0,payMontant:0,payBase:0};
+    if(maj)this.setState(z);else Object.assign(this.state,z);
+  }
+  _verifierCodeAmi(){
+    const st=this.state;
+    const plan=this.plans.find(p=>p.id===st.paySelected)||this.plans[1];
+    const brut=String(st.payCode||'').toUpperCase().replace(/[^A-Z0-9_-]/g,'').slice(0,32);
+    const base=this._planTarif(plan);
+    if(!brut){this.setState({payCode:'',payCodeMsg:'',payCodeOk:false,
+      payRemise:0,payMontant:0,payBase:0});return;}
+    if(base<=0){this.setState({payCode:brut,payCodeOk:false,
+      payCodeMsg:'Ce plan est gratuit : il n’y a rien a remiser.'});return;}
+    this.setState({payCode:brut,payCodeBusy:true,payCodeMsg:'Vérification…',payCodeOk:false});
+    fetch(this._apiUrl('parrainage.php')+'?action=verifier',{
+      method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
+      body:JSON.stringify({code:brut,intent:'subscription',targetId:plan.id,
+        montant:base,tel:String(st.payCard||'').replace(/\D/g,'')})})
+      .then(r=>r.json().catch(()=>null))
+      .then(j=>{
+        if(!this.state.payOpen)return;                 // fenetre refermee entre-temps
+        if(!j){this._codeAmiOublier();this.setState({payCodeBusy:false,
+          payCodeMsg:'Réponse illisible du serveur — réessayez.'});return;}
+        const remise=parseInt(j.remise,10)||0, montant=parseInt(j.montant,10)||0;
+        if(!j.ok||remise<=0||montant<=0){
+          this._codeAmiOublier();
+          this.setState({payCodeBusy:false,payCodeOk:false,
+            payCodeMsg:String(j.message||j.error||'Code inconnu, épuisé ou expiré.')});
+          return;
+        }
+        try{localStorage.setItem('vrt_code_ami',JSON.stringify({c:String(j.code||brut),t:Date.now()}));}catch(e){}
+        this.setState({payCodeBusy:false,payCodeOk:true,payCode:String(j.code||brut),
+          payRemise:remise,payMontant:montant,payBase:base,
+          payCodeMsg:'✓ Code appliqué'+(j.parrain?' (merci '+j.parrain+')':'')
+            +' — vous économisez '+remise.toLocaleString('fr-FR')+' FCFA.'});
+      })
+      .catch(()=>{
+        /* Registre injoignable : la vente continue au plein tarif plutot que
+           de s'arreter. Un code non applique se rattrape ; une vente perdue non. */
+        if(!this.state.payOpen)return;
+        this._codeAmiOublier();
+        this.setState({payCodeBusy:false,payCodeOk:false,
+          payCodeMsg:'Vérification impossible — vous pouvez payer au tarif normal.'});
+      });
+  }
+  /* Le code deja porte par le visiteur, aux MEMES cles qu'app.js et gate.js :
+     un enseignant venu par le lien d'un collegue retrouve sa remise ici sans
+     rien retaper. */
+  _codeAmiRetenu(){
+    try{const u=new RegExp('[?&](?:ref|code|parrain)=([A-Za-z0-9_-]{3,32})').exec(location.search);
+      if(u)return u[1].toUpperCase();}catch(e){}
+    try{const s=sessionStorage.getItem('_vrtRef');if(s)return String(s).toUpperCase();}catch(e){}
+    try{const o=JSON.parse(localStorage.getItem('vrt_code_ami')||'null');
+      if(o&&o.c&&(Date.now()-(o.t||0))<60*86400000)return String(o.c).toUpperCase();}catch(e){}
+    return '';
+  }
   /* Le jeton vit dans le stockage local : sans cela il disparait au premier
      rechargement et l'enseignant se retrouve devant un corpus vide alors
      qu'il vient de se connecter. */
@@ -6231,7 +6315,9 @@ class Component extends DCLogic {
       || ('Ce texte fait partie du répertoire complet. Abonnez-vous pour ouvrir '
          +(n>0?('les '+n.toLocaleString('fr-FR')+' textes'):'tout le répertoire')
          +', leurs questions et leurs faits de langue.'),'attention');
-    this.setState({payOpen:true,paySelected:'ens',payDone:false});
+    this.setState({payOpen:true,paySelected:'ens',payDone:false,
+      payCode:this._codeAmiRetenu(),payCodeMsg:'',payCodeOk:false,
+      payRemise:0,payMontant:0,payBase:0},()=>{if(this.state.payCode)this._verifierCodeAmi();});
   }
   _alea4(){
     const A='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -6518,13 +6604,28 @@ class Component extends DCLogic {
     this.setState({payBusy:true,payErr:'',payRef:ref});
     const entetes={'Content-Type':'application/json'};
     if(this._payTok)entetes.Authorization='Bearer '+this._payTok;
+    /* \u2500\u2500 LE MONTANT ENVOYE EST CELUI QUI EST AFFICHE, OU RIEN \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+       La remise n'a ete accordee que pour un tarif donne. Si le plan a change
+       depuis, elle ne vaut plus : on part au plein tarif plutot que de debiter
+       un chiffre que le payeur n'a pas vu. */
+    const _base=this._planTarif(plan);
+    const _stp=this.state;
+    const _remiseVaut=!!(_stp.payCodeOk&&_stp.payMontant>0&&_stp.payBase===_base&&_base>0);
+    const _corps={intent:'subscription',targetId:plan.id,ref:ref,
+      montant:_remiseVaut?_stp.payMontant:_base,
+      clientTel:tel,clientNom:String(this.state.payName||'').trim(),
+      accountId:this.state.compteId||'',
+      label:'Abonnement '+plan.name+' \u2014 Corpus & \u00c9preuves'};
+    /* \u26a0\ufe0f LA PRESENCE DE LA CLE `code` EST L'OPT-IN, PAS SA VALEUR.
+       api/payment_camerpay.php n'evalue le parrainage que si elle existe
+       (array_key_exists, meme vide). L'envoyer vide reviendrait a demander au
+       serveur d'appliquer un lien que cette fenetre ne connait pas : il rendrait
+       un montant plus bas que celui qu'on vient d'afficher, et le parrain
+       toucherait sur un rabais jamais consenti. */
+    if(_remiseVaut)_corps.code=_stp.payCode;
     fetch(this._apiUrl('payment_camerpay.php')+'?action=init',{
       method:'POST',headers:entetes,
-      body:JSON.stringify({intent:'subscription',targetId:plan.id,ref:ref,
-        montant:parseInt(String(plan.price).replace(/\D/g,''),10)||0,
-        clientTel:tel,clientNom:String(this.state.payName||'').trim(),
-        accountId:this.state.compteId||'',
-        label:'Abonnement '+plan.name+' \u2014 Corpus & \u00c9preuves'})})
+      body:JSON.stringify(_corps)})
       .then(r=>r.json().then(j=>({statut:r.status,corps:j})))
       .then(({statut,corps})=>{
         /* 401 = le jeton public a tourne cote serveur pendant que nous gardions
@@ -8075,8 +8176,14 @@ class Component extends DCLogic {
     const planBg={essai:'var(--cffffff,#fff)',ens:'var(--cffffff,#fff)',etab:'var(--cf5faff,#f5faff)',pro:'var(--cfbf8ff,#fbf8ff)'};
     const planBorder={essai:'var(--ce2eaf3,#e2eaf3)',ens:'var(--ce2eaf3,#e2eaf3)',etab:'var(--cbcd9f2,#bcd9f2)',pro:'var(--cd9c9f0,#d9c9f0)'};
     const curPlanName=st.team.plan;
-    const plansView=this.plans.map(p=>{const isCur=p.name===curPlanName;return{name:p.name,price:p.price,period:p.period,seats:p.seats,bg:planBg[p.id]||'var(--cffffff,#fff)',border:isCur?'var(--c1f9d55,#1f9d55)':(planBorder[p.id]||'var(--ce2eaf3,#e2eaf3)'),titleColor:p.id==='pro'?'var(--c7b52c7,#7b52c7)':'var(--c14375f,#14375f)',currentChip:isCur?'font-size:10px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,features:p.features.map(f=>({label:f,icon:this._icon('check','var(--c1f9d55,#1f9d55)',13),check:'display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--ce6f5ec,#e6f5ec);flex:none;margin-top:1px'})),cta:isCur?'Plan actuel':'Choisir ce plan',btn:isCur?'background:var(--ceef2f7,#eef2f7);color:var(--c8b97a8,#8b97a8);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:default;font-family:Poppins':'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;font-family:Poppins',btnHover:isCur?'':'background:var(--c135a96,#135a96)',choose:()=>{if(!isCur)this.setState({payOpen:true,paySelected:p.id,payDone:false});}};});
+    const plansView=this.plans.map(p=>{const isCur=p.name===curPlanName;return{name:p.name,price:p.price,period:p.period,seats:p.seats,bg:planBg[p.id]||'var(--cffffff,#fff)',border:isCur?'var(--c1f9d55,#1f9d55)':(planBorder[p.id]||'var(--ce2eaf3,#e2eaf3)'),titleColor:p.id==='pro'?'var(--c7b52c7,#7b52c7)':'var(--c14375f,#14375f)',currentChip:isCur?'font-size:10px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,features:p.features.map(f=>({label:f,icon:this._icon('check','var(--c1f9d55,#1f9d55)',13),check:'display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--ce6f5ec,#e6f5ec);flex:none;margin-top:1px'})),cta:isCur?'Plan actuel':'Choisir ce plan',btn:isCur?'background:var(--ceef2f7,#eef2f7);color:var(--c8b97a8,#8b97a8);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:default;font-family:Poppins':'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;font-family:Poppins',btnHover:isCur?'':'background:var(--c135a96,#135a96)',choose:()=>{if(!isCur)this.setState({payOpen:true,paySelected:p.id,payDone:false,payCode:this._codeAmiRetenu(),payCodeMsg:'',payCodeOk:false,payRemise:0,payMontant:0,payBase:0},()=>{if(this.state.payCode)this._verifierCodeAmi();});}};});
     const payPlan=this.plans.find(p=>p.id===st.paySelected)||this.plans[1];
+    /* CODE AMI — la remise ne vaut que pour le plan sur lequel le serveur l'a
+       accordee. Changer de plan dans la meme fenetre la rend caduque : sans ce
+       garde-fou, l'ecran annoncerait 3 500 F pour un plan a 30 000. */
+    const _tarifPlan=this._planTarif(payPlan);
+    const _remiseVaut=!!(st.payCodeOk&&st.payMontant>0&&st.payBase===_tarifPlan&&_tarifPlan>0);
+    const _fFCFA=n=>Number(n).toLocaleString('fr-FR')+' FCFA';
     const payTab=on=>on?'flex:1;background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:9px;font-size:12.5px;font-weight:700;border-radius:8px;cursor:pointer;font-family:Poppins':'flex:1;background:var(--cf2f6fb,#f2f6fb);color:var(--c5a6678,#5a6678);border:none;padding:9px;font-size:12.5px;font-weight:600;border-radius:8px;cursor:pointer;font-family:Poppins';
 
     return {
@@ -8322,13 +8429,25 @@ class Component extends DCLogic {
       },
       loginIcLogo:this._icon('book','var(--sb-logo-fg)',24),
 plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,screen:'login'},()=>this._persist());},
-      payOpen:st.payOpen,payFormShown:!st.payDone,payDoneShown:st.payDone,payPlanName:payPlan.name,payPlanPrice:payPlan.price+(payPlan.period.includes('gratuit')?'':' FCFA'),
+      payOpen:st.payOpen,payFormShown:!st.payDone,payDoneShown:st.payDone,payPlanName:payPlan.name,
+      payPlanPrice:_remiseVaut?_fFCFA(st.payMontant):payPlan.price+(payPlan.period.includes('gratuit')?'':' FCFA'),
+      payRemiseShown:_remiseVaut,payPrixAvant:_fFCFA(_tarifPlan),
+      payCode:st.payCode,
+      setPayCode:e=>this.setState({payCode:String(val(e)||'').toUpperCase().replace(/[^A-Z0-9_-]/g,'').slice(0,32),
+        payCodeOk:false,payCodeMsg:'',payRemise:0,payMontant:0,payBase:0}),
+      applyPayCode:()=>this._verifierCodeAmi(),
+      payCodeMsg:st.payCodeMsg,
+      payCodeMsgStyle:'font-size:12px;line-height:1.45;min-height:16px;margin-top:5px;color:'
+        +(st.payCodeOk?'var(--c1f9d55,#1f9d55)':'var(--cc0453f,#c0453f)'),
       payIsMomo:st.payMethod!=='card',payIsCard:st.payMethod==='card',payMomoTab:payTab(st.payMethod!=='card'),payCardTab:payTab(st.payMethod==='card'),
       payMethodMomo:()=>this.setState({payMethod:'momo'}),payMethodCard:()=>this.setState({payMethod:'card'}),
       payName:st.payName,payCard:st.payCard,payExp:st.payExp,payCvc:st.payCvc,
       setPayName:e=>this.setState({payName:val(e)}),setPayCard:e=>this.setState({payCard:val(e)}),setPayExp:e=>this.setState({payExp:val(e)}),setPayCvc:e=>this.setState({payCvc:val(e)}),
       payCheckIcon:this._icon('check','var(--c1f9d55,#1f9d55)',30),
-      closePay:()=>this.setState({payOpen:false,payDone:false}),
+      /* On referme AVEC la remise : la garder ferait rouvrir la fenetre sur un
+         prix remise que plus rien n'a valide cote serveur. */
+      closePay:()=>this.setState({payOpen:false,payDone:false,payCode:'',payCodeMsg:'',
+        payCodeOk:false,payRemise:0,payMontant:0,payBase:0}),
       confirmPay:()=>this._payerCamerpay(),
       epreuveSeries:this.epreuveSeries.map(s=>({code:s.code,cycle:s.cycle,name:s.name,structure:s.structure,duree:s.duree,coeff:s.coeff,create:()=>{const me=this._me();const id='e'+Date.now();const ep={id,groupeId:grpActif.id,title:s.name,etab:'',classe:(s.classes&&s.classes[0])||'',duree:s.duree,coeff:s.coeff==='—'?'':s.coeff,date:'',epreuveCode:s.code,consigne:'Lis attentivement le(s) texte(s) puis réponds aux questions.',textIds:[],status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),comments:[],activity:[{userId:me.id,text:'a créé une épreuve à partir du gabarit '+s.code,ts:Date.now()}]};this.setState(st2=>({epreuves:[ep,...st2.epreuves],activeId:id,screen:'composeur'}),()=>{this._persist();window.scrollTo(0,0);});}})),
       setCoTitle:e=>{if(cActive&&!cLocked)this._updateCours({title:val(e)});},

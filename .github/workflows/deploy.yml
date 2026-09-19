@@ -276,6 +276,32 @@ jobs:
       - name: 🎁 Le Code ami vaut-il aussi sur les cahiers ?
         run: node tests/banc_code_ami_cahiers.cjs
 
+      # ── 🎁 ET DANS L'ATELIER (16/09/2026). Meme garde, meme oubli : ses quatre
+      #    abonnements (800 F au mois, 5 000, 30 000 et 70 000 F a l'annee) n'envoyaient
+      #    pas la cle `code`, donc aucune remise ne pouvait s'y appliquer. Le banc
+      #    EXECUTE le bloc applicatif de plateforme/index.html (harnais vm, comme
+      #    sonde_tarifs_atelier) et lit le CORPS envoye a ?action=init.
+      #    Eprouve par 3 mutations le 16/09/2026 : 4, 4 et 2 au rouge.
+      - name: 🎁 Le Code ami vaut-il aussi dans l'Atelier ?
+        run: node tests/banc_code_ami_atelier.cjs
+
+      # ── 🎁 ET DANS LA BOUTIQUE (16/09/2026). Les manuels papier de la vitrine
+      #    (`intent:'cart'`) : le navigateur n'envoyait pas `code`, et le serveur
+      #    excluait tout panier. Le serveur distingue desormais le panier PHYSIQUE
+      #    (admis) du NUMERIQUE d'app.js (exclu : sa derniere ligne ne s'ouvrirait
+      #    plus) — garde par tests/parrainage.php, section 9. Ce banc-ci lit le CORPS
+      #    envoye au debit : remise du serveur, sur les articles et pas la livraison.
+      #    Eprouve par 3 mutations le 16/09/2026 : 3, 7 et 2 au rouge.
+      - name: 🎁 Le Code ami vaut-il aussi dans la boutique ?
+        run: node tests/banc_code_ami_boutique.cjs
+
+      # ── 🏷️ LES PRIX DE LA VITRINE SUIVENT L'ADMINISTRATION (17/09/2026).
+      #    « Dès 1 000 F / mois » vivait dans des DONNÉES de la maquette : un jeton
+      #    {PRIX:formule|repli} les lie désormais au tarif publié. Le banc vérifie le
+      #    pré-rendu (build_vitrine.js) ET le re-rendu (litter / appliquerMentionsPrix).
+      - name: 🏷️ La vitrine annonce-t-elle le prix que l'admin a réglé ?
+        run: node tests/banc_prix_vitrine.cjs
+
       # ── 🧾 UN PAIEMENT QUI N'OUVRE RIEN DOIT SE VOIR. camerpayGrant() posait
       #    `granted` sur la seule lisibilité de la base : un octroi qui n'avait
       #    RIEN ouvert (« accountId manquant », « compte introuvable ») sortait

@@ -77,11 +77,26 @@ jobs:
       - name: 🎁 Le Code ami et les formules paient-ils juste ?
         run: php tests/parrainage.php
 
+      - name: ✍️ La part d'un auteur repose-t-elle sur l'argent reçu ?
+        run: php tests/banc_recettes_livres.php
+
+      - name: ✍️ Les écrans lisent-ils l'argent reçu ?
+        run: node tests/banc_recettes_parts_auteur.cjs
+
       - name: 🔗 Le navigateur affiche-t-il ce que le serveur encaisse ?
         run: node tests/banc_code_ami_parite.cjs
 
       - name: 🎁 Le Code ami vaut-il aussi sur les cahiers ?
         run: node tests/banc_code_ami_cahiers.cjs
+
+      - name: 🎁 Le Code ami vaut-il aussi dans l'Atelier ?
+        run: node tests/banc_code_ami_atelier.cjs
+
+      - name: 🎁 Le Code ami vaut-il aussi dans la boutique ?
+        run: node tests/banc_code_ami_boutique.cjs
+
+      - name: 🏷️ La vitrine annonce-t-elle le prix que l'admin a réglé ?
+        run: node tests/banc_prix_vitrine.cjs
 
   smoke:
     name: 🌐 Boot du portail (Chromium headless)

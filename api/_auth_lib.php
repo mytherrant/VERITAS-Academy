@@ -2155,7 +2155,20 @@ if (!defined('VRT_AUTH_LIB')) {
            code a été validé à l'initiation, la liste `commissions` du navigateur
            est ignorée : deux chemins pour la même vente paieraient deux fois. */
         $parr = ['benef' => '', 'commission' => 0, 'aVerser' => false];
-        if (!empty($res['changed']) && !empty($state['parrainage']) && function_exists('vrt_parr_crediter')) {
+        /* ⚠️ UN PANIER PHYSIQUE N'OUVRE RIEN, ET C'EST SON SUCCÈS.
+           Le crédit n'était accordé que « si l'octroi a réellement ouvert quelque
+           chose » — garde juste pour le numérique, où un octroi vide signale un
+           échec. Mais une commande de manuels papier n'ouvre aucun accès : elle
+           rend TOUJOURS `changed:false`. Le filleul aurait eu sa remise, et le
+           parrain n'aurait jamais touché sa commission. `panierPhysique` est écrit
+           par le SERVEUR à l'initiation (vrt_parr_panier_physique) ; on n'arrive
+           ici que pour un paiement confirmé (camerpayGrant exige status « paid »),
+           et vrt_parr_crediter() est idempotente par référence : une
+           réconciliation qui rejoue ne crédite pas deux fois. */
+        $panierPhysiquePaye = ($state['intent'] ?? '') === 'cart'
+            && !empty($state['parrainage']['panierPhysique']);
+        if ((!empty($res['changed']) || $panierPhysiquePaye)
+            && !empty($state['parrainage']) && function_exists('vrt_parr_crediter')) {
             try {
                 $parr = vrt_parr_crediter($db, $state);
                 if (!empty($parr['dbModifiee'])) $commChanged = true;

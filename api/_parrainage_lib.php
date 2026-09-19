@@ -85,13 +85,42 @@ if (!defined('VRT_PARR_LIB')) {
     /**
      * Paiements concernés. Exclus : les frais d'inscription (100 F — le code se
      * donne à l'inscription, pas sur elle), la scolarité du centre, les dons
-     * d'une cagnotte, les paiements libres, les packs d'établissement (déjà
-     * remisés au volume) et les paniers (chaque ligne y est contrôlée contre
-     * l'encaissé : une remise globale refermerait la dernière ligne).
+     * d'une cagnotte, les paiements libres et les packs d'établissement (déjà
+     * remisés au volume).
+     *
+     * ⚠️ LE PANIER A DEUX NATURES, ET UNE SEULE PEUT ÊTRE REMISÉE (16/09/2026).
+     *   · NUMÉRIQUE (app.js : « Payer tout », les collections) — chaque ligne
+     *     porte son propre intent, est accordée séparément et contrôlée contre
+     *     l'encaissé. Une remise globale sous-paierait la DERNIÈRE ligne, qui
+     *     ne s'ouvrirait pas : l'acheteur perdrait un article payé. Exclu.
+     *   · PHYSIQUE (la boutique de la vitrine : manuels papier et livraison) —
+     *     aucune ligne numérique, rien n'est ouvert ligne par ligne. La remise
+     *     n'y referme rien. Admis.
+     * Jusqu'au 16/09 le panier entier était exclu, si bien que la remise promise
+     * partout sur le site (« −10 % sur vos abonnements et achats ») ne valait
+     * sur aucune commande de manuel. C'est le SERVEUR qui tranche la nature du
+     * panier, à partir des lignes réellement reçues : voir vrt_parr_panier_physique().
      */
-    function vrt_parr_intent_eligible(string $intent): bool {
+    function vrt_parr_intent_eligible(string $intent, bool $panierPhysique = false): bool {
+        if ($intent === 'cart') return $panierPhysique;
         return $intent !== '' && !in_array($intent,
-            ['inscription', 'echeance', 'cagnotte', 'generic', 'livret_pack', 'cart'], true);
+            ['inscription', 'echeance', 'cagnotte', 'generic', 'livret_pack'], true);
+    }
+
+    /**
+     * Un panier est PHYSIQUE s'il ne porte AUCUNE ligne numérique. Même critère
+     * que camerpaySanitizeLignes() : une ligne est numérique si elle a un intent
+     * valide autre que `cart`. Les lignes de la boutique ({nom, qte, pu}) n'en
+     * ont pas — elles ne servent qu'à habiller la page du prestataire.
+     */
+    function vrt_parr_panier_physique($lignes): bool {
+        if (!is_array($lignes)) return true;
+        foreach ($lignes as $l) {
+            if (!is_array($l)) continue;
+            $i = strtolower(trim((string) ($l['intent'] ?? '')));
+            if ($i !== '' && $i !== 'cart' && preg_match('/^[a-z_]{1,30}$/', $i)) return false;
+        }
+        return true;
     }
 
     // ════════════════════════════════════════════════════════════════════
@@ -438,7 +467,7 @@ if (!defined('VRT_PARR_LIB')) {
                 'remisePct' => 0, 'remiseFixe' => 0, 'commissionPct' => 0,
                 'remise' => 0, 'prix' => $prix, 'montant' => $prix, 'parrain' => ''];
         if (empty($cfg['actif'])) { $out['motif'] = 'Les codes sont momentanément suspendus.'; return $out; }
-        if (!vrt_parr_intent_eligible((string) ($ctx['intent'] ?? ''))) {
+        if (!vrt_parr_intent_eligible((string) ($ctx['intent'] ?? ''), !empty($ctx['panierPhysique']))) {
             $out['motif'] = 'Les codes ne s’appliquent pas à ce type de paiement.'; return $out;
         }
 
@@ -561,7 +590,16 @@ if (!defined('VRT_PARR_LIB')) {
             elseif ($telB !== '' && $telB === $payeurTel)      $refus = 'auto-parrainage (même numéro)';
             if ($refus === '') {
                 $pct = max(0, min(50, (int) ($p['commissionPct'] ?? 0)));
-                $commission = min((int) round($paye * $pct / 100), (int) floor($paye / 2));
+                /* L'ASSIETTE. Sur un panier physique, ce qui est payé comprend la
+                   LIVRAISON — une avance de frais que le centre reverse au
+                   transporteur, pas une vente. Commissionner dessus, c'est payer
+                   le parrain sur un colis. `assiette` (les articles, remise
+                   déduite) est posée à l'initiation ; elle est bornée ici au
+                   montant payé, si bien qu'un navigateur qui la gonflerait ne
+                   dépasserait jamais le cas par défaut — il ne peut que la
+                   RÉDUIRE, et seulement au détriment de son propre parrain. */
+                $assiette = isset($p['assiette']) ? max(0, min($paye, (int) $p['assiette'])) : $paye;
+                $commission = min((int) round($assiette * $pct / 100), (int) floor($assiette / 2));
             }
         }
 

@@ -18,7 +18,11 @@
  *   4. l'évaluation d'un code : remise, parrain à vie, auto-parrainage ;
  *   5. le crédit au paiement confirmé : une fois, jamais sur un sous-paiement, repris au remboursement ;
  *   6. les versements : réservation, succès, refus, réponse perdue, plafond ;
- *   7. la parité de la table des opérateurs avec la passerelle.
+ *   7. la parité de la table des opérateurs avec la passerelle ;
+ *   8. les prix réglés dans « Prix & calculs », appliqués par le serveur ;
+ *   9. le panier PHYSIQUE de la boutique : remisé, crédité alors qu'il n'ouvre
+ *      rien, commissionné sur les articles et non sur la livraison — le panier
+ *      NUMÉRIQUE restant exclu (sa dernière ligne ne s'ouvrirait plus).
  */
 declare(strict_types=1);
 
@@ -294,6 +298,7 @@ for ($i = 1; $i <= 13; $i++) {
 ok('le versement est demandé au crédit qui franchit 2 000 F — pas avant (12ᵉ vente à 180 F)', $aVerser === 12, 'demandé au passage ' . var_export($aVerser, true) . ' solde=' . (reg()['comptes']['acc:va_parrain']['solde'] ?? '?'));
 
 // ═════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════════════
 titre('6. Les versements');
 $db = lireBase(); $r = reg();
 $dest = vrt_parr_destination($db, $r, 'acc:va_parrain');
@@ -415,6 +420,75 @@ if (preg_match('/function vrt_pd_tarifs_publics\(array \$db\): array \{.*?\R\}\R
 } else {
     ok('vrt_pd_tarifs_publics lisible dans public_data.php', false, 'regex décrochée');
 }
+
+// ═════════════════════════════════════════════════════════════════════════
+titre('9. Le panier PHYSIQUE de la boutique (16/09/2026)');
+/* Jusqu'au 16/09, `cart` était exclu en bloc : la remise promise partout sur le
+   site ne valait sur aucune commande de manuel papier. L'exclusion reste juste
+   pour le panier NUMÉRIQUE (chaque ligne y est accordée et contrôlée contre
+   l'encaissé : une remise globale sous-paierait la dernière). On sépare donc
+   les deux natures, et c'est le serveur qui tranche sur les lignes reçues. */
+registreVide();
+ecrireBase(base());
+$db = lireBase();
+
+$lignesBoutique = [['nom' => 'Cahier 6e', 'qte' => 2, 'pu' => 1500],
+                   ['nom' => 'Livraison Douala', 'qte' => 1, 'pu' => 1000]];
+$lignesNumeriques = [['intent' => 'book', 'targetId' => 'bk1', 'montant' => 2000, 'label' => 'Livre'],
+                     ['intent' => 'book', 'targetId' => 'bk2', 'montant' => 1500, 'label' => 'Livre 2']];
+ok('les lignes de la boutique ({nom, qte, pu}) forment un panier physique',
+   vrt_parr_panier_physique($lignesBoutique) === true);
+ok('les lignes d’app.js (un intent par ligne) forment un panier NUMÉRIQUE',
+   vrt_parr_panier_physique($lignesNumeriques) === false);
+ok('une seule ligne numérique suffit à rendre le panier numérique',
+   vrt_parr_panier_physique(array_merge($lignesBoutique, [$lignesNumeriques[0]])) === false);
+ok('un panier sans lignes est physique (rien à ouvrir ligne par ligne)',
+   vrt_parr_panier_physique(null) === true && vrt_parr_panier_physique([]) === true);
+
+$ev = vrt_parr_evaluer($db, reg(), ['code' => $codeAwa, 'accountId' => 'va_filleul', 'intent' => 'cart',
+                                    'targetId' => '', 'prix' => 3000, 'panierPhysique' => true]);
+ok('panier PHYSIQUE : le code s’applique (−300 F sur 3 000 F d’articles)',
+   !empty($ev['ok']) && (int) $ev['remise'] === 300, json_encode($ev));
+$ev = vrt_parr_evaluer($db, reg(), ['code' => $codeAwa, 'accountId' => 'va_filleul', 'intent' => 'cart',
+                                    'targetId' => '', 'prix' => 3000, 'panierPhysique' => false]);
+ok('panier NUMÉRIQUE : le code reste refusé — la dernière ligne ne s’ouvrirait pas', empty($ev['ok']));
+
+/* Le crédit. Articles 2 × 1 500 = 3 000, remise 300, livraison 1 000 :
+   payé 3 700, assiette 2 700. La commission vaut 10 % de 2 700 = 270 — pas
+   370, qui rémunérerait le parrain sur le colis. */
+$pPhys = vrt_parr_pour_etat(vrt_parr_evaluer($db, reg(), ['code' => $codeAwa, 'accountId' => 'va_filleul',
+          'intent' => 'cart', 'targetId' => '', 'prix' => 3000, 'panierPhysique' => true]));
+$pPhys['panierPhysique'] = true;
+$pPhys['assiette'] = 2700;
+$etatPanier = function (string $ref, array $parr, int $paye = 3700) {
+    return ['intent' => 'cart', 'targetId' => '', 'montant' => $paye, 'montant_paye' => $paye,
+            'ref' => $ref, 'accountId' => 'va_filleul', 'clientTel' => '', 'label' => 'Cahiers',
+            'lignes' => [], 'parrainage' => $parr];
+};
+$g = vrt_grant_entitlement_to_file($etatPanier('P-1', $pPhys));
+ok('l’octroi d’un panier physique n’ouvre rien — c’est normal',
+   empty($g['changed']) || !empty($g['ok']), json_encode($g));
+$solde = (int) (reg()['comptes']['acc:va_parrain']['solde'] ?? 0);
+ok('… et le parrain est QUAND MÊME crédité : 270 F', $solde === 270, "solde = $solde");
+ok('la commission porte sur les articles (2 700), pas sur la livraison (370 aurait été faux)',
+   $solde !== 370, "solde = $solde");
+vrt_grant_entitlement_to_file($etatPanier('P-1', $pPhys));
+ok('réconciliation qui rejoue le panier : aucun double crédit',
+   (int) (reg()['comptes']['acc:va_parrain']['solde'] ?? 0) === 270);
+
+// Un navigateur qui gonflerait l'assiette ne dépasse jamais le cas par défaut.
+$pGonfle = $pPhys; $pGonfle['assiette'] = 999999;
+vrt_grant_entitlement_to_file($etatPanier('P-GONFLE', $pGonfle));
+$opG = reg()['ops']['r:P-GONFLE'] ?? [];
+ok('assiette gonflée (999 999) : bornée au montant payé — 370 F au plus',
+   (int) ($opG['c'] ?? -1) === 370, json_encode($opG));
+
+// Un panier NUMÉRIQUE porteur d'un parrainage mais qui n'ouvre rien : pas de
+// crédit par le chemin physique — l'octroi vide y signale un échec.
+$pNum = $pPhys; unset($pNum['panierPhysique'], $pNum['assiette']);
+vrt_grant_entitlement_to_file($etatPanier('P-NUM', $pNum));
+ok('panier numérique qui n’ouvre rien : aucune commission (l’octroi vide y est un échec)',
+   !isset(reg()['ops']['r:P-NUM']));
 
 echo "\n────────────────────────────────────────────────────────────────────\n";
 if ($T['ko'] === 0) {

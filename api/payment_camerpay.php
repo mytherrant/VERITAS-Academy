@@ -455,12 +455,25 @@ if ($action === 'init' && $method === 'POST') {
            rémunérerait le parrain sans que le filleul voie sa remise. */
         if (function_exists('vrt_parr_evaluer') && array_key_exists('code', $input)) {
             try {
+                /* La nature du panier se juge sur les lignes REÇUES, jamais sur
+                   une déclaration du navigateur : voir vrt_parr_intent_eligible(). */
+                $panierPhysique = ($intent === 'cart') && function_exists('vrt_parr_panier_physique')
+                    && vrt_parr_panier_physique($input['lignes'] ?? null);
                 $ev = vrt_parr_evaluer($dbInit, vrt_parr_lire(), [
                     'code' => $codeSaisi, 'accountId' => $accountId, 'tel' => $payerNumber,
                     'intent' => $intent, 'targetId' => $targetId,
                     'prix' => ($prixRef !== null && $prixRef > 0) ? $prixRef : $montant,
+                    'panierPhysique' => $panierPhysique,
                 ]);
                 $parrainageEtat = vrt_parr_pour_etat($ev);
+                /* L'assiette de la commission d'un panier physique : les ARTICLES,
+                   remise déduite — pas la livraison. Bornée au montant payé, elle
+                   ne peut que réduire la commission par rapport au cas par défaut.
+                   Voir vrt_parr_crediter(). */
+                if ($parrainageEtat && $panierPhysique && isset($input['assiette'])) {
+                    $parrainageEtat['assiette'] = max(0, min($montant, (int) $input['assiette']));
+                }
+                if ($parrainageEtat && $panierPhysique) $parrainageEtat['panierPhysique'] = true;
             } catch (\Throwable $e) {
                 // Registre indisponible : le paiement passe au plein tarif plutôt que de bloquer une vente.
                 vrt_pay_log('[CODE_AMI_INIT_ERR] ref=' . $ref . ' ' . $e->getMessage());

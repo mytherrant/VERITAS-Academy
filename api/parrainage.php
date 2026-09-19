@@ -105,9 +105,14 @@ if ($action === 'verifier') {
     $prix = ($prixRef !== null && $prixRef > 0) ? $prixRef : $montant;
 
     try { $reg = vrt_parr_lire(); } catch (\Throwable $e) { $reg = vrt_parr_vide(); }
+    /* Un DEVIS, pas une décision : c'est ?action=init qui tranche, sur les lignes
+       réellement reçues. Un navigateur qui se dirait « physique » ici puis
+       enverrait des lignes numériques au débit se verrait refuser le code là-bas. */
+    $panierPhysique = ($intent === 'cart') && vrt_parr_panier_physique($in['lignes'] ?? null);
     $ev = vrt_parr_evaluer($db, $reg, [
         'code' => $code, 'accountId' => $acc ? (string) ($acc['id'] ?? '') : '',
         'tel' => (string) ($in['tel'] ?? ''), 'intent' => $intent, 'targetId' => $targetId, 'prix' => $prix,
+        'panierPhysique' => $panierPhysique,
     ]);
     if (!empty($ev['ok']) && !empty($ev['benef']) && $ev['type'] !== 'promo') vrt_parr_indexer((string) $ev['code'], (string) $ev['benef']);
     parr_out([
