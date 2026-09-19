@@ -145,6 +145,57 @@ sansIndex.forEach(z => {
     z + ' : ses ' + versionnee(z) + ' pages sont listées une à une (pas d’index)',
     n + ' lien(s)');
 });
+
+/* ── Et la contrepartie, qui manquait ────────────────────────────────────
+   Le 17/09/2026, /evaluations/, /cours/ et /legal/ ont reçu une page d'index
+   (elles répondaient 403 : `Options -Indexes` ferme tout dossier qui n'en a
+   pas, et la Search Console le signalait comme « Bloquée en raison d'une
+   interdiction d'accès »). Le contrôle ci-dessus a alors CESSÉ de s'appliquer
+   — il ne vise que les zones sans index — et plus rien ne garantissait que
+   ces treize pages restent atteignables : le plan ne renvoie plus qu'au
+   dossier. La garantie déménage donc ici : quand une zone a un index, c'est
+   lui qui doit lister chacune de ses pages. */
+const avecIndex = ZONES.filter(z => compter(z) > 0
+  && fs.existsSync(path.join(RACINE, z, 'index.html')));
+avecIndex.forEach(z => {
+  const idx = fs.readFileSync(path.join(RACINE, z, 'index.html'), 'utf8');
+  /* Une page `noindex` est tenue hors des moteurs EXPRÈS (guides d'œuvres,
+     espace enseignant des livrets) : exiger qu'un index public y mène
+     défairait ce choix. Elle n'a donc pas à y figurer. */
+  const pages = fs.readdirSync(path.join(RACINE, z))
+    .filter(f => f.endsWith('.html') && f !== 'index.html' && !/^[_.]/.test(f))
+    .filter(f => !/<meta\s+name=["']robots["'][^>]*noindex/i
+      .test(fs.readFileSync(path.join(RACINE, z, f), 'utf8')));
+  if (!pages.length) return;
+  const absentes = pages.filter(f => idx.indexOf(f) < 0);
+  dire(absentes.length === 0,
+    z + ' : son index mène à ses ' + pages.length + ' pages',
+    absentes.slice(0, 5).join(', ') + (absentes.length > 5 ? '…' : ''));
+});
+
+/* ── Aucun dossier public ne peut répondre 403 par absence d'index ───────
+   La cause racine, généralisée : tout dossier SERVI qui contient des pages
+   doit avoir un index, sinon son adresse est refusée. Mesuré en production le
+   17/09 avec l'agent de Googlebot : /evaluations/ 403, /cours/ 403,
+   /legal/ 403 — pendant que leurs pages, elles, répondaient 200. Et ces refus
+   coûtent plus qu'un motif dans un rapport : LWS ferme le site entier à une
+   IP au-delà de six réponses refusées par minute, en 509/512 — le « 5xx »
+   du rapport suivant. */
+{
+  const SERVIS = ['corriges', 'oeuvres', 'niveaux', 'evaluations', 'livrets', 'cours',
+    'outils', 'parcours', 'decouvrir', 'flash', 'adopter', 'legal', 'ressources',
+    'eleve', 'enseignant', 'campus', 'plateforme'];
+  const nus = SERVIS.filter((z) => {
+    const d = path.join(RACINE, z);
+    if (!fs.existsSync(d)) return false;
+    const aDesPages = fs.readdirSync(d).some((f) => f.endsWith('.html') && f !== 'index.html');
+    return aDesPages && !fs.existsSync(path.join(d, 'index.html'))
+                     && !fs.existsSync(path.join(d, 'index.php'));
+  });
+  dire(nus.length === 0,
+    'aucun dossier public sans index (il répondrait 403)',
+    nus.map((z) => '/' + z + '/').join(', ') + ' — lancer python tools/build_hubs.py');
+}
 ['constellation.html', 'manuels.html'].forEach(f => {
   if (!fs.existsSync(path.join(RACINE, f))) return;
   dire(plan.indexOf('href="/' + f + '"') >= 0, f + ' y figure aussi');

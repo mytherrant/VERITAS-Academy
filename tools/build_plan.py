@@ -323,56 +323,11 @@ def carte(e):
             + tete + '<span class="pl-go">Ouvrir' + ico('lc-arrow-right', 15, 2.2) + '</span></a>')
 
 
-def page(entrees, vitrine):
-    total = sum(e['n'] for e in entrees)
-    blocs = []
-    for cle, nom, sous, icone in PROFILS:
-        lot = [e for e in entrees if cle in e['profils']]
-        if not lot:
-            continue
-        blocs.append(
-            '<section class="pl-s" id="' + cle + '">'
-            '<h2 class="sec">' + ico(icone, 24, 2, 'i') + esc(nom) + '</h2>'
-            '<p class="pl-sub">' + esc(sous)
-            + ' &nbsp;·&nbsp; ' + str(len(lot)) + ' rubriques</p>'
-            '<div class="pl-g">' + ''.join(carte(e) for e in lot) + '</div>'
-            '</section>')
-
-    nav = ''.join('<a href="#' + c + '">' + ico(i, 15, 2) + esc(n) + '</a>'
-                  for c, n, _, i in PROFILS
-                  if any(c in e['profils'] for e in entrees))
-
-    # Les règles de famille : une par paire de la vitrine.
-    familles = '\n'.join(
-        '  .pl-c[data-f="%s"]{--fond:%s;--trait:%s}' % (k, f, t)
-        for k, (f, t) in FAMILLES.items())
-
-    # Le sprite se calcule APRÈS le rendu : il ne recopie que les icônes
-    # réellement posées dans la page.
-    lutins = sprite(vitrine)
-
-    return """<!doctype html>
-<html lang="fr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Plan du site — tout VÉRITAS, classé par profil</title>
-<meta name="description" content="Corrigés, œuvres au programme, cours, évaluations, livrets et outils du Centre VÉRITAS, rangés selon que vous êtes élève, parent, enseignant ou partenaire.">
-<meta name="robots" content="index,follow">
-<link rel="canonical" href="__SITE__/plan.html">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Centre VÉRITAS">
-<meta property="og:title" content="Plan du site — tout VÉRITAS, classé par profil">
-<meta property="og:description" content="Tout ce que publie le Centre VÉRITAS, rangé par profil : élève, parent, enseignant, partenaire.">
-<meta property="og:url" content="__SITE__/plan.html">
-<meta property="og:image" content="__SITE__/uploads/logo-veritas.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"></noscript>
-<link rel="stylesheet" href="/assets/veritas-pages.css?v=__VER__">
-<style>
-  /* LA CARTE DE LA VITRINE, reproduite cote pour cote. Toute couleur écrite
+# ── La carte de la vitrine, en une seule copie ─────────────────────────────
+#    `tools/build_hubs.py` (pages d'index de /evaluations/, /cours/, /legal/)
+#    l'importe : deux copies dériveraient, et c'est précisément la dérive qui
+#    avait donné à cette page une charte à elle.
+CSS_CARTES = """  /* LA CARTE DE LA VITRINE, reproduite cote pour cote. Toute couleur écrite
      ici doit exister dans vitrine.html : main() le vérifie et s'arrête sinon.
      L'enveloppe (en-tête, fil d'Ariane, titres de section, pied) vient de
      veritas-pages.css, comme sur les 133 autres pages. */
@@ -426,7 +381,62 @@ __FAMILLES__
           color:#001136;text-decoration:none}
   .pl-l a svg{color:var(--trait);flex:none;margin-top:2px}
   .pl-l a:hover span{text-decoration:underline}
-  @media (max-width:620px){ .pl-g{grid-template-columns:1fr} }
+  @media (max-width:620px){ .pl-g{grid-template-columns:1fr} }"""
+
+
+def regles_familles():
+    """Une règle par paire de médaillon de la vitrine."""
+    return '\n'.join('  .pl-c[data-f="%s"]{--fond:%s;--trait:%s}' % (k, f, t)
+                     for k, (f, t) in FAMILLES.items())
+
+
+def page(entrees, vitrine):
+    total = sum(e['n'] for e in entrees)
+    blocs = []
+    for cle, nom, sous, icone in PROFILS:
+        lot = [e for e in entrees if cle in e['profils']]
+        if not lot:
+            continue
+        blocs.append(
+            '<section class="pl-s" id="' + cle + '">'
+            '<h2 class="sec">' + ico(icone, 24, 2, 'i') + esc(nom) + '</h2>'
+            '<p class="pl-sub">' + esc(sous)
+            + ' &nbsp;·&nbsp; ' + str(len(lot)) + ' rubriques</p>'
+            '<div class="pl-g">' + ''.join(carte(e) for e in lot) + '</div>'
+            '</section>')
+
+    nav = ''.join('<a href="#' + c + '">' + ico(i, 15, 2) + esc(n) + '</a>'
+                  for c, n, _, i in PROFILS
+                  if any(c in e['profils'] for e in entrees))
+
+    familles = regles_familles()
+
+    # Le sprite se calcule APRÈS le rendu : il ne recopie que les icônes
+    # réellement posées dans la page.
+    lutins = sprite(vitrine)
+
+    return """<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plan du site — tout VÉRITAS, classé par profil</title>
+<meta name="description" content="Corrigés, œuvres au programme, cours, évaluations, livrets et outils du Centre VÉRITAS, rangés selon que vous êtes élève, parent, enseignant ou partenaire.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="__SITE__/plan.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Centre VÉRITAS">
+<meta property="og:title" content="Plan du site — tout VÉRITAS, classé par profil">
+<meta property="og:description" content="Tout ce que publie le Centre VÉRITAS, rangé par profil : élève, parent, enseignant, partenaire.">
+<meta property="og:url" content="__SITE__/plan.html">
+<meta property="og:image" content="__SITE__/uploads/logo-veritas.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"></noscript>
+<link rel="stylesheet" href="/assets/veritas-pages.css?v=__VER__">
+<style>
+__CSS__
 </style>
 </head>
 <body>
@@ -451,7 +461,8 @@ __SPRITE__
 </div>
 </body>
 </html>
-""".replace('__FAMILLES__', familles) \
+""".replace('__CSS__', CSS_CARTES) \
+   .replace('__FAMILLES__', familles) \
    .replace('__SPRITE__', lutins) \
    .replace('__TOTAL__', str(total)) \
    .replace('__NAV__', nav) \
