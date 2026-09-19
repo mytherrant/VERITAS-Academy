@@ -103,5 +103,22 @@ if (isset($_GET['summary'])) {
     exit;
 }
 
+/* ── GET ?recettes=1 : recettes RÉELLES par livre (ADMIN — Bearer API_SECRET) ──
+   Les parts d'auteur et le bilan financier calculaient les ventes de livres
+   comme `vendu × prix` dans le navigateur : le prix du jour réécrivait le passé,
+   les remises étaient ignorées, le numérique et les livres sans stock ne
+   comptaient pas. Le registre api/data/recettes/ enregistre au paiement
+   confirmé ce qui a vraiment été encaissé — voir _recettes_lib.php. */
+if (isset($_GET['recettes'])) {
+    $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    $tok = trim(str_ireplace('bearer', '', $auth));
+    if ($tok === '' || !hash_equals(API_SECRET, $tok)) {
+        http_response_code(401); echo '{"ok":false,"error":"auth"}'; exit;
+    }
+    require_once __DIR__ . '/_recettes_lib.php';
+    echo json_encode(['ok' => true, 'livres' => (object) vrt_rec_par_livre()], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 http_response_code(405);
 echo '{"ok":false}';

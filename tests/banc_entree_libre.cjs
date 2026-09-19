@@ -51,7 +51,7 @@ const BAC = fs.mkdtempSync(path.join(os.tmpdir(), 'vrt-banc-entree-'));
    oublier un ne donne pas un contrôle en moins mais une erreur fatale PHP, et
    un banc qui ne mesure plus rien. */
 const FICHIERS = ['plateforme.php', '_json_boot.php', 'config_sync.php',
-  '_auth_lib.php', '_livret_lib.php', '_notify_lib.php', '_parrainage_lib.php', '_sentinel.php',
+  '_auth_lib.php', '_livret_lib.php', '_notify_lib.php', '_parrainage_lib.php', '_recettes_lib.php', '_sentinel.php',
   '_bot_log.php'];
 
 /* Le plafond d'essais par adresse IP, posé bas exprès : le banc tourne depuis

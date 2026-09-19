@@ -85,6 +85,10 @@ if (!defined('VRT_AUTH_LIB')) {
     // vrt_grant_entitlement_to_file(). N'inclut rien en retour.
     require_once __DIR__ . '/_parrainage_lib.php';
 
+    // Recettes par livre : un registre A PART, que db.php n'ecrase pas.
+    // Les parts d'auteur en dependent. Voir _recettes_lib.php.
+    require_once __DIR__ . '/_recettes_lib.php';
+
     // ── Base de données partagée (même fichier que db.php / student_data.php) ──
     function vrt_db_file(): string {
         /* Base de substitution pour les bancs (même point d'entrée que
@@ -1479,6 +1483,7 @@ if (!defined('VRT_AUTH_LIB')) {
                 if (is_array($o) && (string) ($o['ref'] ?? '') === $ref) {
                     if (($o['statut'] ?? '') === 'Payé') { unset($o); return ['changed' => false, 'msg' => 'commande déjà payée']; }
                     $o['statut'] = 'Payé'; $o['datePaiement'] = date('c'); unset($o);
+                    vrt_rec_vente($db, $state, $targetId);   // AVANT vendu++ : fige le passe d'avant
                     vrt_dec_stock($db, $targetId);
                     $lect = vrt_ouvrir_lecture_immediate($db, $targetId, $accountId);
                     return ['changed' => true, 'msg' => 'Commande livre confirmée' . $lect];
@@ -1490,6 +1495,7 @@ if (!defined('VRT_AUTH_LIB')) {
                 'bookTitle' => preg_replace('/^[^—]*—\s*/u', '', $label), 'nom' => $nom ?: '?', 'tel' => $tel ?: '?',
                 'date' => date('d/m/Y'), 'statut' => 'Payé', 'prix' => $montant, 'datePaiement' => date('c'), 'via' => 'webhook_serveur',
             ];
+            vrt_rec_vente($db, $state, $targetId);   // AVANT vendu++ : fige le passe d'avant
             vrt_dec_stock($db, $targetId);
             $lect = vrt_ouvrir_lecture_immediate($db, $targetId, $accountId);
             return ['changed' => true, 'msg' => 'Commande livre créée et confirmée' . $lect];
@@ -1517,6 +1523,9 @@ if (!defined('VRT_AUTH_LIB')) {
             if (in_array($bookId, $acc['unlockedBooks'], true)) { unset($acc); return ['changed' => false, 'msg' => 'livre déjà débloqué']; }
             $acc['unlockedBooks'][] = $bookId;
             unset($acc);
+            /* Un livre numerique n'incrementait aucun compteur : son auteur
+               voyait zero vente, quel que soit le nombre de lecteurs payants. */
+            vrt_rec_vente($db, $state, $bookId);
             return ['changed' => true, 'msg' => 'Livre numérique débloqué'];
         }
 

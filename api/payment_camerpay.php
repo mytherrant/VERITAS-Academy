@@ -1005,6 +1005,17 @@ if ($action === 'refund' && $method === 'POST') {
         }
     }
 
+    // La recette d'un livre suit l'argent aussi : remboursee, elle ne compte
+    // plus dans la part de son auteur. Un panier est repris ligne par ligne.
+    if (function_exists('vrt_rec_annuler')) {
+        try {
+            $rep = vrt_rec_annuler($ref, (int) $mnt);
+            if ($rep > 0) camerpayLog($logFile, date('c') . " [RECETTE_REPRISE] ref=$ref recette=" . $rep . "\n");
+        } catch (\Throwable $e) {
+            camerpayLog($logFile, date('c') . " [RECETTE_REPRISE_ERR] ref=$ref " . $e->getMessage() . "\n");
+        }
+    }
+
     // ⚠️ Le remboursement N'ANNULE PAS l'accès déjà ouvert : révoquer un
     // entitlement au milieu d'un trimestre est une décision pédagogique, pas
     // technique. L'admin retire l'accès à la main s'il le veut.

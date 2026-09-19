@@ -58,7 +58,7 @@ const BAC = fs.mkdtempSync(path.join(os.tmpdir(), 'vrt-banc-compte-'));
    le 01/09/2026 avec `_notify_lib.php`, ajouté à _auth_lib et pas ici — la CI
    s'est arrêtée sur ce banc, ce qui était le bon comportement. */
 const FICHIERS = ['compte.php', 'db.php', '_json_boot.php', 'config_sync.php',
-  '_auth_lib.php', '_livret_lib.php', '_notify_lib.php', '_parrainage_lib.php', '_sentinel.php',
+  '_auth_lib.php', '_livret_lib.php', '_notify_lib.php', '_parrainage_lib.php', '_recettes_lib.php', '_sentinel.php',
   '_bot_log.php', 'student_data.php'];
 
 function monterBac() {

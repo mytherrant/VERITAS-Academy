@@ -54,7 +54,7 @@ const dit = (bon, quoi, det) => {
    oublier un ici ne retire pas un contrôle — il donne une erreur fatale PHP et
    un banc qui ne mesure plus rien. Même liste que banc_compte_serveur.cjs. */
 const FICHIERS = ['db.php', '_json_boot.php', 'config_sync.php', '_auth_lib.php',
-  '_livret_lib.php', '_notify_lib.php', '_parrainage_lib.php', '_sentinel.php', '_bot_log.php'];
+  '_livret_lib.php', '_notify_lib.php', '_parrainage_lib.php', '_recettes_lib.php', '_sentinel.php', '_bot_log.php'];
 
 function monterBac(avecDossierData) {
   const bac = fs.mkdtempSync(path.join(os.tmpdir(), 'vrt-sonde-'));

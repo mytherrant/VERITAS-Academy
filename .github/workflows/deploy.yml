@@ -254,6 +254,8 @@ jobs:
         run: |
           if command -v php >/dev/null 2>&1; then
             php tests/parrainage.php
+            php tests/banc_recettes_livres.php
+            node tests/banc_recettes_parts_auteur.cjs
             node tests/banc_code_ami_parite.cjs
           else
             echo "::error title=PHP introuvable::Le garde-fou du Code ami n'a pas pu tourner. Déploiement ANNULÉ."
@@ -1351,6 +1353,7 @@ jobs:
             api/_livret_lib.php \
             api/_notify_lib.php \
             api/_parrainage_lib.php \
+            api/_recettes_lib.php \
             api/parrainage.php \
             api/livret.php \
             api/collab.php \
