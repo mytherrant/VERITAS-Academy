@@ -624,12 +624,25 @@
          est publique et ne livre aucun contenu. Si l'appel échoue, on garde le
          repli — un titre approximatif vaut mieux qu'une porte qui ne s'ouvre
          pas parce que le réseau a toussé. */
-      if (!cfg.titre && cfg.classe) {
+      /* ⚠️ ON INTERROGE MÊME QUAND LE TITRE EST CONNU. L'appel ne servait qu'à
+         retrouver un titre manquant ; il rapporte aussi `aCorriges`, et c'est
+         lui qui décide de ce que l'écran de paiement PROMET. Les pages de
+         vente passent leur titre en dur : la question n'était donc jamais
+         posée là où l'on encaisse, et la fenêtre annonçait « chaque exercice a
+         sa correction » pour des ouvrages qui n'en portent aucun — les livrets
+         du 2ⁿᵈ cycle, les neuf cahiers d'œuvre et les éditions « Mon cahier de
+         français ». Promettre au moment du paiement ce que le produit ne
+         livre pas, c'est le remboursement qu'on prépare. */
+      if (cfg.classe) {
         post(API, { action: 'ouvrage', o: cfg.classe })
           .then(function (r) {
-            if (r && r.ouvrage && r.ouvrage.titre) cfg.titre = r.ouvrage.titre;
+            if (!r || !r.ouvrage) return;
+            if (!cfg.titre && r.ouvrage.titre) cfg.titre = r.ouvrage.titre;
+            cfg.aCorriges = !!r.ouvrage.aCorriges;
+            var el = document.getElementById('vrt-accroche');
+            if (el) el.innerHTML = accroche();   // la fenêtre est déjà ouverte
           })
-          .catch(function () { /* repli : « Livret <classe> » */ });
+          .catch(function () { /* repli : titre approché, et rien de promis */ });
       }
       return VRT;
     },
@@ -818,6 +831,15 @@
   var TTL = 'font-family:\'Baloo 2\',sans-serif;font-weight:800;font-size:21px;color:#1f2b38;margin:8px 0 4px';
   var SUB = 'font-size:14px;color:#5c666f;line-height:1.55';
 
+  /* Ce que l'écran de paiement PROMET. Écrite une fois, relue deux : à
+     l'ouverture de la fenêtre, et dès que le serveur a dit si cet ouvrage
+     porte des corrigés. Tant qu'il ne l'a pas dit, on n'en promet aucun. */
+  function accroche() {
+    return 'Accès en ligne pour <strong>toute l\'année scolaire</strong> : '
+      + 'tu réponds directement dans le livret et tes réponses sont enregistrées'
+      + (cfg.aCorriges ? ', et la correction s\'ouvre dès que tu as répondu.' : '.');
+  }
+
   /* ── ICÔNES PLUTÔT QU'ÉMOJIS ──────────────────────────────────────────────
      Les écrans de ce tunnel s'ouvraient sur un émoji de 38 px — 📘 ⏳ 🔎 🎉 🎁.
      Un émoji n'est pas dessiné par nous : chaque système en donne sa version
@@ -859,9 +881,13 @@
       '<div style="text-align:center">'
       + '<div style="margin-bottom:2px">' + ico('livre', 38, '#1E499B') + '</div>'
       + '<div style="' + TTL + '">' + esc(nom) + '</div>'
-      + '<div style="' + SUB + '">Accès en ligne pour <strong>toute l\'année scolaire</strong> : '
-      + 'tu réponds directement dans le livret, tes réponses sont enregistrées, '
-      + 'et chaque exercice a sa correction.</div>'
+      /* La correction n'est annoncée que si le serveur a dit que cet ouvrage
+         en porte — et jamais par défaut : sans réponse, on promet moins.
+         L'identifiant sert à RATTRAPER la phrase : `?achat=1` ouvre la fenêtre
+         à l'instant du chargement, souvent avant que la réponse n'arrive, et
+         les cahiers du collège, qui ont bel et bien leurs corrigés, y
+         perdaient la mention pour toujours. */
+      + '<div id="vrt-accroche" style="' + SUB + '">' + accroche() + '</div>'
       + '<div style="font-family:\'Baloo 2\',sans-serif;font-weight:800;font-size:30px;color:#c0453f;margin:14px 0 2px" class="vrt-prix">'
       + fmt(prix(cfg.kind, qte)) + ' FCFA</div>'
       + '<div style="font-size:12px;color:#98a1aa">Orange Money · MTN MoMo · carte bancaire</div>'
