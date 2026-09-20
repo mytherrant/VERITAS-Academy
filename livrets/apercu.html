@@ -171,26 +171,47 @@
   var nom = (CLASSES.filter(function (c) { return c[0] === slug; })[0] || [slug, slug])[1];
   $('titre').textContent = 'Aperçu gratuit — cahier de ' + nom;
 
+  /* ── NE PROMETTRE LA CORRECTION QU'À CEUX QUI L'ONT ──────────────────────
+     La page annonçait à TOUT ouvrage que « la correction s'ouvre dès que vous
+     avez répondu ». C'est vrai des quatre cahiers du collège et de la 2ⁿᵈᵉ ;
+     c'est faux des livrets du 2ⁿᵈ cycle, des neuf cahiers d'œuvre et des
+     éditions « Mon cahier de français » — leur source ne porte aucune
+     correction, et le cahier lui-même n'affiche pas le bouton. L'écran de
+     vente promettait donc ce que le produit ne livre pas.
+     Le serveur sait lequel en a (`aCorriges`) : on le lui demande, et on
+     n'écrit la promesse que s'il dit oui. Sans réponse du serveur, on retire
+     la promesse plutôt que de la maintenir : mieux vaut annoncer moins que
+     faire acheter sur une phrase fausse. */
+  function sansCorrection() {
+    var e3 = document.querySelectorAll('.etape')[2];
+    if (e3) e3.innerHTML = '<b>3 · Toute l’année</b><span>Les leçons, les textes et '
+      + 'les exercices de l’année entière : dans le cahier complet.</span>';
+    if ($('finP')) $('finP').textContent = 'Vous venez d’en faire deux leçons. '
+      + 'L’année en compte des dizaines, dans le cahier complet.';
+  }
+
   var venteHref = slug + '.html';
   $('btnAchat').href = venteHref;
   var btnFin = document.querySelector('.fin a');
   if (btnFin) btnFin.href = venteHref;
 
-  if (!estLivret) {
-    fetch('/api/livret.php', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'ouvrage', o: slug })
+  /* On interroge le serveur pour TOUS les ouvrages, y compris ceux dont la
+     table locale connaît le nom : le titre, elle l'a — la présence des
+     corrigés, non, et c'est elle qui décide de ce qu'on promet. */
+  fetch('/api/livret.php', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'ouvrage', o: slug })
+  })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      var o = j && j.ouvrage;
+      if (o && o.titre && !estLivret) {
+        $('titre').textContent = 'Aperçu gratuit — ' + o.titre;
+        document.title = 'Aperçu gratuit — ' + o.titre + ' · Centre VÉRITAS';
+      }
+      if (!o || !o.aCorriges) sansCorrection();
     })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) {
-        var t = j && j.ouvrage && j.ouvrage.titre;
-        if (t) {
-          $('titre').textContent = 'Aperçu gratuit — ' + t;
-          document.title = 'Aperçu gratuit — ' + t + ' · Centre VÉRITAS';
-        }
-      })
-      .catch(function () { /* le repli est déjà en place */ });
-  }
+    .catch(function () { sansCorrection(); });
 
   var s = document.createElement('script');
   s.src = 'extrait-' + slug + '.js?v=1.20.20';

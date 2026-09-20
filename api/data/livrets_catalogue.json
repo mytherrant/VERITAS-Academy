@@ -335,6 +335,42 @@
       "prixGuide": 0,
       "pages": 0,
       "pagesLibres": 0
+    },
+    "bord-2nde-ed1": {
+      "titre": "Mon cahier de français 2ⁿᵈᵉ — 1ʳᵉ édition",
+      "niveau": "2nde",
+      "mode": "interactif",
+      "kinds": [
+        "livret"
+      ],
+      "prix": 1500,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0
+    },
+    "bord-1ere-ed1": {
+      "titre": "Mon cahier de français 1ʳᵉ — 1ʳᵉ édition",
+      "niveau": "1ere",
+      "mode": "interactif",
+      "kinds": [
+        "livret"
+      ],
+      "prix": 1500,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0
+    },
+    "bord-tle-ed1": {
+      "titre": "Mon cahier de français Tˡᵉ — 1ʳᵉ édition",
+      "niveau": "tle",
+      "mode": "interactif",
+      "kinds": [
+        "livret"
+      ],
+      "prix": 1500,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0
     }
   }
 }

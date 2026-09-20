@@ -112,7 +112,32 @@ FAMILLES = {
 }
 
 
+# « Mon cahier de français », 1ʳᵉ édition (2nde, 1ʳᵉ, Tˡᵉ — 19/09/2026). Une
+# AUTRE édition que les Bords en ligne, vendue à côté d'eux. Ce qui est dit ici
+# est ce que dit sa couverture, vérifié sur le contenu produit : synthèses de
+# cours (« L'essentiel »), 650 à 913 questions par cahier, les œuvres au
+# programme, la méthodologie, des épreuves par séquence et type examen. Rien
+# sur des corrigés : ces éditions n'en livrent pas.
+FAMILLES["edition"] = {
+    "etiquette": "Mon cahier de français — 1ʳᵉ édition",
+    "phrase": "Les synthèses de tous les cours de langue, des centaines d'exercices "
+              "sur des textes d'auteur, l'étude des œuvres au programme, la "
+              "méthodologie pas à pas et des sujets type examen.",
+    "resume": [
+        ("Pour l'apprenant",
+         "il répond dans la page, question après question, et retrouve son travail "
+         "d'un appareil à l'autre."),
+        ("Pour l'enseignant",
+         "la progression de l'année et les épreuves par séquence, prêtes à donner "
+         "en classe."),
+    ],
+}
+
+
 def famille(slug: str) -> dict:
+    # Avant « bord- » : `bord-2nde-ed1` commence comme un Bord mais n'en est pas un.
+    if slug.endswith("-ed1"):
+        return FAMILLES["edition"]
     if slug.startswith("bord-"):
         return FAMILLES["bord"]
     # ⚠️ « oeuvres- » ET « oeuvre- » NE SONT PAS LE MÊME PRÉFIXE, et c'est
@@ -219,6 +244,14 @@ def page(slug: str, o: dict) -> str:
         desc = (f"Les trois œuvres au programme de {niv_court} étudiées en ligne : "
                 f"lecture guidée, exercices, jeux de révision et corrigés. "
                 f"{prix_lisible} FCFA l'année.")
+    elif slug.endswith("-ed1"):
+        # Pas de « correction immédiate » : ces éditions n'ont pas de corrigés.
+        # Et pas le titre du catalogue, dont la coupe à 34 signes donnait
+        # « Mon cahier de français 1re - 1re… ».
+        titre_seo = f"Cahier de français {niv_court}, 1re édition — en ligne"
+        desc = (f"Mon cahier de français {niv_court}, 1re édition : cours, exercices "
+                f"sur textes d'auteur, œuvres au programme, sujets type examen. "
+                f"{prix_lisible} FCFA l'année.")
     elif slug.startswith("oeuvre-"):
         titre_seo = f"{court} — cahier d'œuvre {niv_court}".strip()
         desc = (f"{court} : le cahier de l'œuvre intégrale {niv_court}, à remplir en "
@@ -257,6 +290,16 @@ def page(slug: str, o: dict) -> str:
        et révise par des jeux : mots croisés, mots mêlés, cartes mentales.</p>
     <a class="dl" href="{porte}?extrait=1"><span>{ico('i-eye')}Lire deux chapitres
       gratuitement</span><span class="pill gris">sans code</span></a>
+  </div>'''
+    elif slug.endswith("-ed1"):
+        encadre_famille = f'''<div class="card" style="margin-top:1rem">
+    <h3>{ico('i-book')}Une autre édition que le Bord</h3>
+    <p>Ce cahier et le <strong>Bord</strong> de la même classe sont deux éditions
+       différentes, vendues séparément. Celle-ci suit le plan du cahier imprimé
+       « Collection VÉRITAS » : langue, littérature, méthodologie, puis les
+       épreuves.</p>
+    <a class="dl" href="/livrets/"><span>{ico('i-book-open')}Voir tous les cahiers</span>
+      <span class="pill gris">comparer</span></a>
   </div>'''
     else:
         encadre_famille = f'''<div class="card" style="margin-top:1rem">
@@ -387,6 +430,13 @@ def page(slug: str, o: dict) -> str:
     window.VRTLivret.config({{ classe: a.dataset.o, kind: 'livret',
                               titre: {titre_js} }}).acheter();
   }});
+
+  /* « COMMANDER » DEPUIS LA BOUTIQUE. La carte de la devanture mène ici avec
+     `?achat=1` : le visiteur a déjà dit qu'il voulait acheter, on lui ouvre le
+     tunnel sans lui faire chercher le bouton. Sans cela il arrivait sur une
+     page de présentation et devait deviner par où passer — c'est ce qui a
+     fait écrire « je n'arrive pas à me l'acheter » le 14/09/2026. */
+  if (/[?&]achat=1(&|$)/.test(location.search)) a.click();
 }})();
 </script>
 </body>

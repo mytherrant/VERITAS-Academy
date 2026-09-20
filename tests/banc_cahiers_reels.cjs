@@ -152,12 +152,43 @@ if (!fs.existsSync(PROTEGE)) {
 const fichiers = fs.readdirSync(PROTEGE).filter((f) => /^booklet-.+\.js$/.test(f)).sort();
 if (!fichiers.length) { console.log(`${X} aucun booklet-*.js dans la charge`); process.exit(2); }
 
+/* ── DEUX MOTEURS, DONC DEUX FORMES DE CHARGE ───────────────────────────────
+   `livrets/cahier.js` lit un TABLEAU de blocs. Les quatre cahiers d'œuvres du
+   collège apportent leur propre moteur (`livrets/support-oi.js`) et déposent
+   un OBJET `{level,title,parts}` sous le même nom de fichier. Passé à
+   `Cahier`, il faisait tomber le banc entier sur « (blocs || []).forEach is
+   not a function » — et avec lui les contrôles des vingt-sept autres cahiers,
+   y compris la fuite de corrigé.
+   On trie donc les charges AVANT de rendre. Les autonomes gardent les
+   contrôles qui les concernent (corrigé du bon côté, catalogue) ; ce qui n'est
+   NI l'une NI l'autre forme fait rougir, jamais sauter en silence : une
+   troisième forme apparue sans qu'on le sache, c'est un cahier vendu que
+   personne ne vérifie plus. */
+const estAutonome = (b) => b && !Array.isArray(b) && typeof b === 'object'
+  && (Array.isArray(b.parts) || Array.isArray(b.chapitres));
+const formesInconnues = [];
+const interactifs = fichiers.filter((f) => {
+  const b = blocsDe(path.join(PROTEGE, f));
+  if (Array.isArray(b)) return true;
+  if (!estAutonome(b)) formesInconnues.push(f);
+  return false;
+});
+const autonomes = fichiers.filter((f) => !interactifs.includes(f)
+  && !formesInconnues.includes(f));
+
 console.log(`${G}1. ① Chaque cahier est-il vraiment un cahier ?${R}`);
+if (autonomes.length) {
+  console.log(`  (${autonomes.length} cahier(s) autonome(s) — moteur support-oi.js, `
+    + `rendus hors de ce banc : ${autonomes.map((f) => f.replace(/^booklet-|\.js$/g, '')).join(', ')})`);
+}
+for (const f of formesInconnues) {
+  dire(false, `${f} : forme de charge inconnue — ni blocs, ni cahier autonome`);
+}
 console.log(`  ${'ouvrage'.padEnd(12)}${'écrire'.padStart(7)}${'QCM'.padStart(6)}${'relier'.padStart(7)}`
           + `${'exos'.padStart(6)}${'textes'.padStart(8)}${'inconnus'.padStart(10)}`);
 
 const bilan = [];
-for (const f of fichiers) {
+for (const f of interactifs) {
   const slug = f.replace(/^booklet-|\.js$/g, '');
   const blocs = blocsDe(path.join(PROTEGE, f));
   const { html, champs } = rendre(blocs, slug);
@@ -173,8 +204,15 @@ for (const f of fichiers) {
     + `${String(c.textes).padStart(8)}${String(c.orphelins).padStart(10)}`);
 }
 console.log('');
+/* Le plancher dépend de ce qu'on vend. Un cahier d'ANNÉE couvre six séquences :
+   moins de cent endroits où écrire, et il manque des pages. Un cahier d'ŒUVRE
+   couvre UN livre : `oeuvre-capitoline` en compte 95, et c'est son format, pas
+   un défaut. Un seuil unique de 100 faisait rougir le banc sur un produit
+   conforme — donc bloquait le déploiement de tous les autres. */
+const plancher = (slug) => (/^oeuvre-/.test(slug) ? 60 : 100);
 for (const b of bilan) {
-  dire(b.c.saisie >= 100, `${b.slug} : ${b.c.saisie} endroits où l'élève écrit`);
+  dire(b.c.saisie >= plancher(b.slug),
+    `${b.slug} : ${b.c.saisie} endroits où l'élève écrit (≥ ${plancher(b.slug)})`);
 }
 /* ── Le contrôle qui mord vraiment ────────────────────────────────────────
    Le seuil ci-dessus est un garde-fou grossier : éprouvé par mutation, il
@@ -255,7 +293,15 @@ for (const f of fichiers) {
   const pv = fs.statSync(path.join(PROTEGE, f)).size;
   const pe = fs.statSync(ext).size;
   const part = pe / pv;
-  dire(part < 0.06,
+  /* La règle est « l'aperçu ne remplace pas le produit », et elle se mesure en
+     part du cahier — mais la part dépend de la taille du cahier. Deux leçons
+     d'un Bord de 1 500 pages font 3 % ; les deux mêmes parties d'un cahier
+     d'œuvre, dix fois plus court, en font 8 % sans rien donner de plus. On
+     garde donc les 6 % pour les cahiers d'année et on autorise 10 % aux
+     cahiers d'œuvre, où la borne qui protège vraiment est ailleurs : deux
+     leçons au plus (contrôle ci-dessous) et le plafond de déploiement. */
+  const max = /^oeuvre-/.test(slug) ? 0.10 : 0.06;
+  dire(part < max,
     `${slug} : extrait = ${(part * 100).toFixed(1)} % du cahier (${Math.round(pe / 1024)} Ko)`);
 
   /* LA règle, telle que Jacques l'a posée : « 2 leçons maximum et non
@@ -264,6 +310,11 @@ for (const f of fichiers) {
      leçons, et on va chercher dans le cahier complet si elles s'y touchent. */
   const bExt = blocsDe(ext);
   const bTout = blocsDe(path.join(PROTEGE, f));
+  // Le compte des leçons ne vaut que pour la forme en blocs : un cahier
+  // autonome découpe en `parts`, et son aperçu est vérifié par son propre
+  // banc. Poids et absence de corrigé, eux, viennent d'être mesurés ci-dessus
+  // pour tout le monde.
+  if (!Array.isArray(bExt) || !Array.isArray(bTout)) continue;
   const estLecon = (b) => b && (b.y === 'lecon' || b.y === 'epreuve');
   const titres = bExt.filter(estLecon).map((b) => titreDe(b));
   dire(titres.length > 0 && titres.length <= 2,
@@ -314,9 +365,27 @@ if (!guides.length) console.log('  (aucun guide dans cette charge)');
 for (const f of guides) {
   const slug = f.replace(/^guide-|\.js$/g, '');
   const js = fs.readFileSync(path.join(PROTEGE, f), 'utf8');
+  const blocs = blocsDe(path.join(PROTEGE, f));
+  /* ── DEUX PRODUITS, DEUX FAÇONS DE PORTER LE CORRIGÉ ──────────────────────
+     Le guide d'un cahier en blocs range ses corrections dans des blocs
+     `corrige`. Celui d'un cahier autonome (les quatre études d'œuvres du
+     collège) n'en a aucun : ce qu'il ajoute à la charge de l'élève, c'est la
+     partie « Côté enseignant » (`kind:"notes"`), et c'est précisément ce qui
+     ne doit PAS se trouver chez l'élève.
+     Mesurer le premier critère sur le second donnait « 0 corrigés dans le
+     guide » sur quatre guides parfaitement conformes — un rouge qui bloque le
+     déploiement de tout le monde pour un contrôle qui regardait à côté. */
+  if (!Array.isArray(blocs)) {
+    const eleve = path.join(PROTEGE, `booklet-${slug}.js`);
+    const jsE = fs.existsSync(eleve) ? fs.readFileSync(eleve, 'utf8') : '';
+    const nG = (js.match(/"kind":"notes"/g) || []).length;
+    const nE = (jsE.match(/"kind":"notes"/g) || []).length;
+    dire(nG >= 1, `${slug} : le guide porte la partie « Côté enseignant » (${nG})`);
+    dire(nE === 0, `${slug} : et l'élève ne l'a PAS (${nE})`);
+    continue;
+  }
   const n = (js.match(/"y":"corrige"/g) || []).length;
   dire(n >= 50, `${slug} : ${n} corrigés dans le guide`);
-  const blocs = blocsDe(path.join(PROTEGE, f));
   const { html } = rendre(blocs, slug);
   dire((html.match(/class="ch-corrige"/g) || []).length >= 50,
     `${slug} : le moteur les rend bien comme corrigés`);

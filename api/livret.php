@@ -804,6 +804,15 @@ if ($action === 'ouvrage') {
         'mode' => (string) $o['mode'], 'kinds' => (array) $o['kinds'],
         'pages' => (int) $o['pages'], 'pagesLibres' => (int) $o['pagesLibres'],
         'prix' => (int) $o['prix'],
+        /* CET OUVRAGE A-T-IL DES CORRIGÉS ? Un booléen, jamais leur contenu.
+           L'aperçu gratuit promettait à TOUS les cahiers que « la correction
+           s'ouvre dès que vous avez répondu » : c'est vrai du collège, et faux
+           des livrets du 2ⁿᵈ cycle, des cahiers d'œuvre et des éditions
+           « Mon cahier de français », dont la source ne porte aucune
+           correction. Promettre à l'écran de vente ce que le produit ne livre
+           pas, c'est une vente qu'on fera une fois. La page lit donc ce champ
+           au lieu de supposer. */
+        'aCorriges' => is_file(lv_dir() . '/corrige-' . $slug . '.js'),
     ]]);
 }
 
