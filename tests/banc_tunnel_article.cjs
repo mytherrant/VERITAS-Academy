@@ -69,7 +69,11 @@ if (manquantes.length) { console.log(`\n${ok} au vert, ${ko} au rouge.\n`); proc
 
 /* ── Bac à sable : un S mutable et un DOM minimal ───────────────────────── */
 function monter(etat, cartesDOM, sources) {
-  const S = Object.assign({ qte: 1, livr: 0, filtre: 0, article: null }, etat);
+  /* `codeAmi` fait partie de l'etat REEL depuis le 16/09 : montantTotal() en
+     deduit la remise du serveur. L'oublier ici ne donnait pas un controle en
+     moins mais un TypeError qui arretait le deploiement. */
+  const S = Object.assign({ qte: 1, livr: 0, filtre: 0, article: null,
+    codeAmi: { code: '', remise: 0, base: 0, ok: false, msg: '', parrain: '' } }, etat);
   const document = {
     querySelectorAll(sel) {
       return sel === '[data-vrt-item="manuels"]' ? (cartesDOM || []) : [];
