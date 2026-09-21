@@ -3277,3 +3277,56 @@
     setTimeout(function () { marquer(); versParent({ type: 'vrt-cms-pret' }); }, 700);
   })();
 })();
+
+/* ══ BANDEAU ROUGE « MODE DE PAIEMENT » (21/09/2026) ═══════════════════════
+   CamerPay ne répond plus : on encaisse par code marchand MTN MoMo / Orange
+   Money, au nom de VERITAS EDUCATION, et l'accès s'ouvre dès que le paiement
+   est vu. Ce bandeau l'annonce EN HAUT DE PAGE pour rassurer avant l'achat.
+
+   Il ne porte AUCUN numéro écrit ici : il les lit dans la sonde du serveur
+   (api/payment_camerpay.php?action=config, bloc `manuel`). Deux conséquences
+   voulues : les numéros n'existent qu'à un endroit servi aux pages publiques,
+   et le bandeau DISPARAÎT tout seul le jour où la passerelle est rallumée
+   (`horsService` redevient faux) — personne n'aura à penser à le retirer.
+   Le même bloc vit dans assets/vitrine.js et livrets/gate.js. */
+(function bandeauPaiement() {
+  if (typeof document === 'undefined' || !window.fetch) return;
+  var ID = 'vrt-bandeau-paiement';
+  function esc(t) {
+    return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function poser(m) {
+    if (document.getElementById(ID) || !document.body) return;
+    var d = document.createElement('div');
+    d.id = ID;
+    d.setAttribute('role', 'note');
+    d.style.cssText = 'background:#B91C1C;color:#fff;font:600 13.5px/1.5 system-ui,-apple-system,sans-serif;'
+      + 'padding:9px 16px;text-align:center;position:relative;z-index:50';
+    var lignes = [];
+    if (m.momo && m.momo.codeMarchand) lignes.push('MTN MoMo : code marchand <strong>' + esc(m.momo.codeMarchand) + '</strong>');
+    if (m.orange && m.orange.codeMarchand) lignes.push('Orange Money : code marchand <strong>' + esc(m.orange.codeMarchand) + '</strong>');
+    d.innerHTML = '<span aria-hidden="true" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#fff;margin-right:6px;vertical-align:1px"></span><strong>Paiement :</strong> ' + lignes.join(' · ')
+      + ' — au nom de <strong>' + esc(m.titulaire || 'VERITAS EDUCATION') + '</strong>.'
+      + '<br><span style="font-weight:500">Votre accès ou votre code est activé dès que nous avons vu votre paiement, '
+      + 'au plus tard sous 24 h. Gardez votre référence.</span>';
+    document.body.insertBefore(d, document.body.firstChild);
+  }
+  function lancer() {
+    // Cache de session : une requête par onglet, pas une par page vue.
+    var c = null;
+    try { c = JSON.parse(sessionStorage.getItem('vrtBandeauPay') || 'null'); } catch (e) {}
+    if (c && Date.now() - (c.t || 0) < 10 * 60 * 1000) { if (c.m) poser(c.m); return; }
+    fetch('/api/payment_camerpay.php?action=config', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        var m = (j && j.horsService && j.manuel) ? j.manuel : null;
+        try { sessionStorage.setItem('vrtBandeauPay', JSON.stringify({ t: Date.now(), m: m })); } catch (e) {}
+        if (m) poser(m);
+      })
+      .catch(function () { /* hors ligne : pas de bandeau, rien de cassé */ });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', lancer);
+  else lancer();
+})();

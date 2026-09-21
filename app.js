@@ -6447,7 +6447,7 @@ function vShowSec(sec,btn,_boot){
     <div class="vcard mb20">
       <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-shop"/></svg></span>Comment Acheter ?</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;text-align:center">
-        ${[['1️⃣','Choisissez','Parcourez les manuels et consultez les extraits gratuits'],['2️⃣','Code Promo','Appliquez votre code promo ou votre code ami'],['3️⃣','WhatsApp','Commandez au 656 720 476'],['4️⃣','Payez','OM: 650 435 106 / MoMo: 656 720 476'],['5️⃣','Récupérez','Au centre ou livraison à domicile']].map(([n,t,d])=>'<div style="padding:12px"><div style="font-size:24px;margin-bottom:4px">'+n+'</div><div class="semi" style="font-size:12px">'+t+'</div><div style="font-size:13px;color:var(--ink4);margin-top:4px;line-height:1.5">'+d+'</div></div>').join("")}
+        ${[['1️⃣','Choisissez','Parcourez les manuels et consultez les extraits gratuits'],['2️⃣','Code Promo','Appliquez votre code promo ou votre code ami'],['3️⃣','WhatsApp','Commandez au 656 720 476'],['4️⃣','Payez','Orange Money : '+_payNum('orange')+' · MTN MoMo : '+_payNum('momo')],['5️⃣','Récupérez','Au centre ou livraison à domicile']].map(([n,t,d])=>'<div style="padding:12px"><div style="font-size:24px;margin-bottom:4px">'+n+'</div><div class="semi" style="font-size:12px">'+t+'</div><div style="font-size:13px;color:var(--ink4);margin-top:4px;line-height:1.5">'+d+'</div></div>').join("")}
       </div>
     </div>
 
@@ -6509,8 +6509,8 @@ function vShowSec(sec,btn,_boot){
       <div style="color:#FFC93C;font-family:Libre Baskerville,serif;font-size:16px;margin-bottom:12px">${ICO('i-credit-card')}Moyens de Paiement</div>
       <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:14px">
         ${[
-        ['<div style="width:40px;height:40px;border-radius:50%;background:#ff6600;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;letter-spacing:-1px">OM</div>','Orange Money','697 637 739','#ff6600'],
-        ['<div style="width:40px;height:40px;border-radius:50%;background:#ffcc00;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#003;letter-spacing:-0.5px">MoMo</div>','MTN MoMo','650 435 106','#ffcc00'],
+        ['<div style="width:40px;height:40px;border-radius:50%;background:#ff6600;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;letter-spacing:-1px">OM</div>','Orange Money',_payNum('orange'),'#ff6600'],
+        ['<div style="width:40px;height:40px;border-radius:50%;background:#ffcc00;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#003;letter-spacing:-0.5px">MoMo</div>','MTN MoMo',_payNum('momo'),'#ffcc00'],
         ['<div style="width:40px;height:40px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.615-1.456A11.93 11.93 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.813c-2.188 0-4.22-.59-5.978-1.618l-.428-.254-3.182 1.004 1.023-3.094-.278-.442A9.77 9.77 0 012.188 12c0-5.414 4.398-9.813 9.812-9.813S21.813 6.586 21.813 12s-4.399 9.813-9.813 9.813z"/></svg></div>','WhatsApp','697 637 739','#25d366'],
         ['<div style="width:40px;height:40px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;color:#fff">'+ICO('i-coins')+'</div>','Espèces','Au centre','var(--gold)']
       ].map(([icon,n,v,col])=>'<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:var(--r2);padding:14px 16px;min-width:140px;text-align:center"><div style="display:flex;justify-content:center">'+icon+'</div><div style="color:#fff;font-size:13px;font-weight:700;margin-top:8px">'+n+'</div><div style="font-family:Fira Code;color:#FFC93C;font-size:14px;font-weight:700;margin-top:4px;letter-spacing:1px">'+v+'</div></div>').join("")}
@@ -31810,25 +31810,31 @@ window.VERITAS_PAYMENTS = (function(){
   var defaults = {
     momo: {
       label:'MTN Mobile Money',
-      numero:'+237 650 435 106',
-      /* Le payeur voyait un NOM PROPRE et recevait une facture au nom d'une
-         SARL, sans rien qui relie les deux : c'est le doute qui naît à la
-         seconde exacte du paiement. Tant que le compte marchand au nom de la
-         société n'est pas ouvert, on écrit au moins le lien en toutes lettres. */
-      nomCompte:'TAKOU Jacques Miterand (gérant, VERITAS EDUCATION SARL)',
+      numero:'+237 678 790 590',
+      /* 21/09/2026 — les codes marchands sont au nom de la société : le nom
+         que le payeur lit ici est celui que son téléphone lui affichera au
+         moment de valider. Un écart entre les deux, c'est le doute qui naît à
+         la seconde exacte du paiement. */
+      nomCompte:'VERITAS EDUCATION',
       code:'*126#',
+      /* 20/09/2026 — le CODE MARCHAND n'est pas le code USSD : le premier
+         désigne le compte qui encaisse, le second n'est que la porte du menu.
+         Les écrire dans le même champ faisait composer « 02681266 » à un
+         client qui cherchait une touche. Deux champs, deux lignes. */
+      codeMarchand:'02681266',
       couleur:'#FFCB05',
       ico:'📱'
     },
     orange: {
       label:'Orange Money',
-      numero:'+237 697 637 739',
-      /* Le payeur voyait un NOM PROPRE et recevait une facture au nom d'une
-         SARL, sans rien qui relie les deux : c'est le doute qui naît à la
-         seconde exacte du paiement. Tant que le compte marchand au nom de la
-         société n'est pas ouvert, on écrit au moins le lien en toutes lettres. */
-      nomCompte:'TAKOU Jacques Miterand (gérant, VERITAS EDUCATION SARL)',
-      code:'#150*1#',
+      numero:'+237 655 084 230',
+      /* 21/09/2026 — les codes marchands sont au nom de la société : le nom
+         que le payeur lit ici est celui que son téléphone lui affichera au
+         moment de valider. Un écart entre les deux, c'est le doute qui naît à
+         la seconde exacte du paiement. */
+      nomCompte:'VERITAS EDUCATION',
+      code:'#150#',
+      codeMarchand:'999471',
       couleur:'#FF6600',
       ico:'🟠'
     },
@@ -31881,6 +31887,56 @@ window.VERITAS_PAYMENTS = (function(){
   return defaults;
 })();
 
+// ── 20/09/2026 : LES COORDONNÉES N'ONT PLUS QU'UN SEUL LECTEUR ───────────
+// La vitrine (« Comment acheter », « Moyens de paiement ») affichait des
+// numéros écrits en dur, qui avaient dérivé : la boutique annonçait
+// « OM : 650 435 106 » — un numéro MTN. Un client qui suivait cette ligne
+// envoyait son argent sur le mauvais réseau. Ces écrans lisent désormais
+// VERITAS_PAYMENTS comme la fenêtre de paiement.
+// Forme nationale (sans « +237 »), qui est celle que l'on compose au pays.
+function _payNum(op){
+  try{
+    var m = (window.VERITAS_PAYMENTS||{})[op];
+    return (m && m.numero) ? String(m.numero).replace(/^\+?237\s*/,'') : '';
+  }catch(e){ return ''; }
+}
+window._payNum = _payNum;
+
+// Les deux tuiles de paiement manuel (fenêtre longue et assistant 3 étapes)
+// écrivaient leurs coordonnées chacune de leur côté : ajouter le code marchand
+// à l'une seulement l'aurait laissé invisible dans l'autre, qui est justement
+// celle que le client voit. Un seul rendu, deux densités.
+function _payCoordHtml(m, compact){
+  m = m || {};
+  var cm  = m.codeMarchand ? _esc(String(m.codeMarchand)) : '';
+  var nom = _esc(String(m.nomCompte||''));
+  var ussd= _esc(String(m.code||''));
+  if(compact){
+    return 'Nom: '+nom
+      + (cm ? ' · <strong>Code marchand: '+cm+'</strong>' : '')
+      + (ussd ? ' · USSD: '+ussd+(cm?' → Paiement marchand':'') : '');
+  }
+  return 'Nom : <strong>'+nom+'</strong>'
+    + (cm ? '<br>Code marchand : <strong style="font-family:monospace;font-size:13px">'+cm+'</strong>' : '')
+    + (ussd ? '<br>Code USSD : <strong>'+ussd+'</strong>'+(cm?' → <em>Paiement marchand</em> → '+cm : '') : '');
+}
+window._payCoordHtml = _payCoordHtml;
+
+/* ── BANDEAU ROUGE « MODE DE PAIEMENT » (21/09/2026) ───────────────────────
+   Demandé pour RASSURER : il dit, avant que le client ne paie, comment il
+   paie, à qui, et quand son accès s'ouvre. Rouge parce qu'il doit se voir
+   avant les tuiles. La promesse de délai est celle que le site tenait déjà
+   (« sous 24 h ») — on n'en invente pas une plus courte. */
+function _payBandeauManuel(ref){
+  return '<div style="border:2px solid #DC2626;background:#FEF2F2;color:#7F1D1D;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:12.5px;line-height:1.6">'
+    + '<div style="font-weight:800;color:#DC2626;font-size:13.5px;margin-bottom:4px">🔴 Paiement par code marchand MTN MoMo ou Orange Money</div>'
+    + 'Les comptes sont au nom de <strong>VERITAS EDUCATION</strong>. Payez le montant exact, puis passez à l\'étape suivante et confirmez avec votre référence'
+    + (ref ? ' <strong style="font-family:monospace">'+_esc(ref)+'</strong>' : '') + '.<br>'
+    + '<strong>Votre accès (ou votre code) est activé dès que nous avons vu votre paiement</strong> — au plus tard sous 24 h. Vous êtes prévenu par notification et sur WhatsApp.'
+    + '</div>';
+}
+window._payBandeauManuel = _payBandeauManuel;
+
 // v1.2.2 : une méthode optionnelle n'est affichée que si réellement configurée
 // (évite un lien Stripe de test cassé ou un IBAN « À configurer » visibles par le client).
 function _payOK(v){ return !!v && !/replace_me|test_replace|À configurer|REMPLACER|Votre[A-Z]|exemple|example|XXXX/i.test(String(v)); }
@@ -31904,16 +31960,24 @@ window.mPayCoordonnees = function(){
   M('🏦 Coordonnées d\'encaissement', 'Les numéros et noms affichés aux clients',
     '<div style="padding:4px">'
     +'<div class="ib ibt mb14"><span>⚠️</span><span>Ces coordonnées doivent être celles du <strong>Centre VÉRITAS</strong> (entité), pas d\'un compte personnel. Elles s\'affichent au client dans la fenêtre de paiement et servent au paiement manuel.</span></div>'
+    /* Piège coûteux : ce qu'on tape ici est enregistré dans DB.payConfig, qui
+       ne quitte jamais ce poste — public_data.php ne le publie pas et un
+       visiteur ne télécharge pas la base. Un admin pouvait donc corriger son
+       numéro, le voir changer devant lui, et laisser TOUS les clients payer
+       sur l'ancien. On le dit, au lieu de le laisser découvrir. */
+    +'<div class="ib ibt mb14"><span>📌</span><span><strong>Cet écran ne change que VOTRE poste.</strong> Les numéros vus par les clients sont ceux livrés avec l\'application. Pour les changer pour tout le monde, il faut une mise à jour du site — prévenez le développeur.</span></div>'
 
     +'<div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-smartphone"/></svg></span>MTN Mobile Money</div>'
     + f('pc_momo_num', 'Numéro MoMo', P.momo&&P.momo.numero, 'Format : +237 6XX XX XX XX')
     + f('pc_momo_nom', 'Nom du compte', P.momo&&P.momo.nomCompte, 'Doit correspondre au titulaire déclaré')
-    + f('pc_momo_code','Code USSD / code marchand', P.momo&&P.momo.code, 'Ex. *126# ou *126*4*CODE#')
+    + f('pc_momo_code','Code USSD (entrée du menu)', P.momo&&P.momo.code, 'Ex. *126#')
+    + f('pc_momo_marchand','Code marchand MoMoPay', P.momo&&P.momo.codeMarchand, 'Le code que le client saisit après « Paiement marchand ». Laisser vide pour ne pas l\'afficher.')
 
     +'<div class="ct mt14"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-smartphone"/></svg></span>Orange Money</div>'
     + f('pc_om_num', 'Numéro Orange Money', P.orange&&P.orange.numero)
     + f('pc_om_nom', 'Nom du compte', P.orange&&P.orange.nomCompte)
-    + f('pc_om_code','Code USSD', P.orange&&P.orange.code, 'Ex. #150*1#')
+    + f('pc_om_code','Code USSD (entrée du menu)', P.orange&&P.orange.code, 'Ex. #150#')
+    + f('pc_om_marchand','Code marchand Orange Money', P.orange&&P.orange.codeMarchand, 'Le code que le client saisit après « Paiement marchand ». Laisser vide pour ne pas l\'afficher.')
 
     +'<div class="ct mt14"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-message"/></svg></span>Contact</div>'
     + f('pc_wa',    'WhatsApp du centre', P.whatsapp, 'Reçoit les confirmations de paiement manuel')
@@ -31936,8 +32000,8 @@ window.mPayCoordonnees = function(){
 window._savePayCoordonnees = function(){
   var v = function(id){ var e=_ge(id); return e ? e.value.trim() : ''; };
   DB.payConfig = DB.payConfig || {};
-  DB.payConfig.momo   = Object.assign({}, DB.payConfig.momo,   {numero:v('pc_momo_num'), nomCompte:v('pc_momo_nom'), code:v('pc_momo_code')});
-  DB.payConfig.orange = Object.assign({}, DB.payConfig.orange, {numero:v('pc_om_num'),   nomCompte:v('pc_om_nom'),   code:v('pc_om_code')});
+  DB.payConfig.momo   = Object.assign({}, DB.payConfig.momo,   {numero:v('pc_momo_num'), nomCompte:v('pc_momo_nom'), code:v('pc_momo_code'), codeMarchand:v('pc_momo_marchand')});
+  DB.payConfig.orange = Object.assign({}, DB.payConfig.orange, {numero:v('pc_om_num'),   nomCompte:v('pc_om_nom'),   code:v('pc_om_code'),   codeMarchand:v('pc_om_marchand')});
   DB.payConfig.bank   = Object.assign({}, DB.payConfig.bank,   {titulaire:v('pc_bk_tit'), banque:v('pc_bk_ban'), iban:v('pc_bk_iban'), swift:v('pc_bk_swi')});
   DB.payConfig.paypal = Object.assign({}, DB.payConfig.paypal, {url:v('pc_pp')});
   DB.payConfig.stripe = Object.assign({}, DB.payConfig.stripe, {url:v('pc_str')});
@@ -32099,6 +32163,7 @@ function openPaymentModal(payInfo){
             + '<span><strong>Important :</strong> Après votre paiement, <strong>cliquez sur le bouton WhatsApp en bas</strong> pour nous envoyer votre confirmation avec la référence '+ref+'. Votre accès sera activé sous 24h.</span>'
           + '</div>')
 
+    + (_payCampayReady() ? '' : _payBandeauManuel(ref))
     + '<div class="bold s mb10" style="color:var(--ink2)">💰 Choisissez votre moyen de paiement :</div>'
 
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:16px">'
@@ -32127,7 +32192,7 @@ function openPaymentModal(payInfo){
           + (_payDirectMtnReady()?'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>':'')
         + '</div>'
         + '<div style="font-family:monospace;font-size:15px;font-weight:800;color:'+P.momo.couleur+';margin-bottom:4px;cursor:pointer" onclick="_payCopy(\''+P.momo.numero.replace(/[^0-9+]/g,'')+'\',\'Numéro MoMo\')">'+P.momo.numero+'</div>'
-        + '<div style="font-size:11px;color:var(--ink4);line-height:1.5">Nom : <strong>'+P.momo.nomCompte+'</strong><br>Code USSD : <strong>'+P.momo.code+'</strong></div>'
+        + '<div style="font-size:11px;color:var(--ink4);line-height:1.5">'+_payCoordHtml(P.momo)+'</div>'
         + (_payDirectMtnReady()
             ? '<div style="margin-top:10px;border-top:1px solid var(--bg3);padding-top:10px">'
               +'<input class="fi" id="mtnPhoneInput_'+ref+'" placeholder="Votre n° MTN (ex: 6XX XX XX XX)" value="'+(payInfo.customerTel||'').replace(/[^0-9+]/g,'')+'" style="font-size:12px;padding:6px 10px;width:100%;margin-bottom:6px">'
@@ -32145,7 +32210,7 @@ function openPaymentModal(payInfo){
           + (_payDirectOrangeReady()?'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>':'')
         + '</div>'
         + '<div style="font-family:monospace;font-size:15px;font-weight:800;color:'+P.orange.couleur+';margin-bottom:4px;cursor:pointer" onclick="_payCopy(\''+P.orange.numero.replace(/[^0-9+]/g,'')+'\',\'Numéro Orange Money\')">'+P.orange.numero+'</div>'
-        + '<div style="font-size:11px;color:var(--ink4);line-height:1.5">Nom : <strong>'+P.orange.nomCompte+'</strong><br>Code USSD : <strong>'+P.orange.code+'</strong></div>'
+        + '<div style="font-size:11px;color:var(--ink4);line-height:1.5">'+_payCoordHtml(P.orange)+'</div>'
         + (_payDirectOrangeReady()
             ? '<button class="btn" style="margin-top:8px;width:100%;background:linear-gradient(135deg,'+P.orange.couleur+',#ff8c00);color:#fff;border:none;border-radius:8px;padding:10px;font-weight:800;font-size:13px;cursor:pointer" onclick="_payInitOrange(\''+ref+'\','+montant+',\''+_esc(label).replace(/\x27/g,"")+'\',\''+(payInfo.intent||"generic")+'\',\''+(payInfo.targetId||"")+'\',\''+(payInfo.customerAccountId||"")+'\',\''+(payInfo.customerNom||"").replace(/\x27/g,"")+'\',\''+(payInfo.customerTel||"")+'\')">⚡ Payer maintenant (auto)</button>'
             : '<div style="font-size:10px;color:var(--ink4);margin-top:6px;font-style:italic">👆 Cliquez pour copier le numéro</div>'
@@ -32540,7 +32605,22 @@ function _payCampayProbe(){
 }
 
 // Le paiement automatique est-il réellement proposable à un client final ?
+// ── 20/09/2026 : PASSERELLE AUTOMATIQUE COUPÉE ───────────────────────────
+// CamerPay ne répond plus — ni au téléphone, ni aux courriels — et ses
+// paiements n'aboutissent plus. La sonde serveur, elle, répond toujours
+// « canCollect: true » : elle ne mesure que la présence des clés, jamais
+// l'état réel du fournisseur. Sans ce drapeau, chaque visiteur continue donc
+// de voir « ⚡ Payer maintenant », clique, et tombe dans un mur : la vente est
+// perdue et la confiance avec.
+// Tant que ceci vaut true, seuls les moyens MANUELS sont proposés (MoMo /
+// Orange sur les comptes marchands VÉRITAS), validés dans
+// 🛠️ Gestion avancée → 💰 Paiements.
+// POUR RALLUMER : repasser à false et redéployer. Rien d'autre à toucher.
+var VRT_PASSERELLE_AUTO_HS = true;
+window.VRT_PASSERELLE_AUTO_HS = VRT_PASSERELLE_AUTO_HS;
+
 function _payCampayReady(){
+  if(window.VRT_PASSERELLE_AUTO_HS) return false;
   var c = window._VRT_CAMPAY;
   if(c && typeof c.canCollect === 'boolean') return c.canCollect;  // le serveur tranche
   // Sonde pas encore revenue : on retombe sur le réglage admin (comportement d'avant).
@@ -33016,13 +33096,37 @@ function mPayAttempts(){
           ? '<div style="font-size:10px;color:var(--ink4);margin-top:2px">👤 '+_esc(a.customerNom||'')+(a.customerTel?' · '+_esc(a.customerTel):'')+'</div>'
           : '';
         var actInfo = a.activationResult ? '<div style="font-size:10px;color:var(--gr);margin-top:2px">✓ '+_esc(a.activationResult)+'</div>' : '';
+        /* ── CE QUE LE SERVEUR A FAIT, ET NON CE QUE CE POSTE A FAIT ────────
+           « ✓ Validé » ne parle que du navigateur : l'accès local est ouvert,
+           le reçu est émis. Le code de livret, lui, naît sur le serveur — et
+           quand cet octroi-là échoue (compte pas encore créé, montant jugé
+           insuffisant, serveur injoignable), rien ne le disait. On lisait
+           « validé », on passait au suivant, et le client attendait. */
+        var _sg = a.serverGrant;
+        var srvInfo = '';
+        var btnOctroi = '';
+        if(a.status === 'paid' && !_sg && String(a.providerAuto||'manuel').toLowerCase() === 'manuel'){
+          srvInfo = '<div style="font-size:10px;color:var(--gold2);margin-top:2px">☁️ Octroi serveur non effectué — aucun code émis</div>';
+          btnOctroi = ' <button class="btn xs" style="background:#B45309;color:#fff" onclick="_payRetryOctroi(\''+a.ref+'\')" title="Ouvrir l\'accès côté serveur et émettre le code">☁️ Octroyer</button>';
+        } else if(_sg && (_sg.error || _sg.bloque)){
+          srvInfo = '<div style="font-size:10px;color:var(--re);margin-top:2px">☁️ Serveur : '+_esc(String(_sg.error||_sg.msg||'octroi bloqué'))+'</div>';
+          btnOctroi = ' <button class="btn xs" style="background:#B45309;color:#fff" onclick="_payRetryOctroi(\''+a.ref+'\')" title="Rejouer l\'octroi serveur">☁️ Réessayer</button>';
+        } else if(_sg){
+          /* « tenté » n'est pas « reçu » : tant qu'aucun canal d'envoi n'est
+             configuré, le code existe mais n'a été remis à personne. */
+          var _rm = _sg.remise || {};
+          srvInfo = '<div style="font-size:10px;color:var(--gr);margin-top:2px">☁️ Accès ouvert côté serveur'
+            + (((_rm.envoyes|0) > 0) ? ' · pass envoyé'
+                                     : ' · <span style="color:var(--gold2);font-weight:700">pass à remettre à la main</span>')
+            + '</div>';
+        }
         return '<tr>'
           +'<td style="font-family:monospace;font-size:11px;vertical-align:top">'+_esc(a.ref)+'<br>'+_intentBadge(a)+'</td>'
-          +'<td style="font-size:12px;max-width:220px;vertical-align:top">'+_esc(a.label)+clientInfo+actInfo+'</td>'
+          +'<td style="font-size:12px;max-width:220px;vertical-align:top">'+_esc(a.label)+clientInfo+actInfo+srvInfo+'</td>'
           +'<td style="font-size:12px;white-space:nowrap;vertical-align:top"><strong>'+new Intl.NumberFormat('fr-FR').format(a.montant)+'</strong> FCFA</td>'
           +'<td style="font-size:11px;color:var(--ink4);white-space:nowrap;vertical-align:top">'+dt+'</td>'
           +'<td style="vertical-align:top"><span style="padding:3px 8px;border-radius:10px;font-size:10px;font-weight:800;background:'+statColor+';color:#fff">'+_esc(a.status||'pending').toUpperCase()+'</span></td>'
-          +'<td style="white-space:nowrap;vertical-align:top">'+btnPaye+btnAbo
+          +'<td style="white-space:nowrap;vertical-align:top">'+btnPaye+btnAbo+btnOctroi
             // Réédition du reçu : un parent le perd, le redemande six mois plus
             // tard. Le numéro ne change pas (idempotence par référence), donc
             // rééditer ne crée jamais un second reçu pour le même paiement.
@@ -33047,12 +33151,102 @@ function mPayAttempts(){
 
   M('💳 Paiements & Activations Auto', 'Validation = activation automatique',
     topBar
+    /* Les commandes déclarées depuis les pages publiques (cahiers, fenêtre de
+       paiement d'un visiteur) vivent sur le SERVEUR, pas dans DB.payAttempts
+       de ce poste : sans ce bloc, l'administration ne les voyait nulle part. */
+    +'<div id="pmSrvListe" class="mb12"><div style="font-size:12px;color:var(--ink4)">☁️ Chargement des commandes déclarées…</div></div>'
     +'<div class="ib ibg mb12" style="background:#F0FDF4;border:1px solid #A7F3D0"><span>✨</span><span><strong>v1.2 — Automatisation totale</strong> : cliquez sur <b>"✓ Valider &amp; activer"</b>. Le système exécute automatiquement la bonne action selon le type (📚 livre → commande payée, 🎓 abonnement → accès e-learning activé, 📲 groupe WA → adhésion validée, 🎥 classe virtuelle → élève inscrit). Le client reçoit une notification avec ses accès.</span></div>'
     +'<div class="tw" style="max-height:420px;overflow:auto"><table>'
     +'<thead><tr><th>Réf / Type</th><th>Description / Client</th><th>Montant</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>'
     +'<tbody>'+rows+'</tbody></table></div>',
     '<button class="btn bo" onclick="cm()">Fermer</button>');
+  try { _pmChargerCommandes(); } catch(e){ console.warn('[commandes]', e); }
 }
+
+/* ══ COMMANDES DÉCLARÉES — la file de validation (21/09/2026) ══════════════
+   Un client paie sur le code marchand et déclare sa commande. Ici,
+   l'administration la voit avec le montant et le numéro qui doivent
+   apparaître sur son téléphone MoMo / Orange, et la valide d'un clic :
+   le serveur ouvre l'accès et émet le code (payment_manuel.php « grant »).
+   Sur la page du cahier, le code s'affiche alors TOUT SEUL chez l'acheteur. */
+function _pmChargerCommandes(){
+  var box = document.getElementById('pmSrvListe');
+  if(!box) return;
+  var cc = DB.cloudConfig || {};
+  if(!cc.url || !cc.secret){
+    box.innerHTML = '<div class="ib ibt"><span>🔒</span><span>Clé de synchronisation absente sur ce poste : les commandes déclarées par les clients ne peuvent pas s\'afficher.</span></div>';
+    return;
+  }
+  fetch(cc.url.replace(/\/+$/,'')+'/payment_manuel.php?action=list', { headers:{ 'Authorization':'Bearer '+cc.secret } })
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      box = document.getElementById('pmSrvListe');   // la fenêtre a pu être re-rendue
+      if(!box) return;
+      if(!j || !j.ok){ box.innerHTML = '<div class="ib ibt"><span>⚠️</span><span>Commandes indisponibles : '+_esc((j&&j.error)||'erreur serveur')+'</span></div>'; return; }
+      window._PM_ITEMS = j.items || [];
+      var att = (j.items||[]).filter(function(x){ return x.status==='declare' && !x.granted; });
+      var rec = (j.items||[]).filter(function(x){ return x.granted; }).slice(0, 8);
+      var h = '<div style="border:2px solid #DC2626;border-radius:12px;padding:12px;background:#FEF2F2">'
+        + '<div style="font-weight:800;color:#DC2626;margin-bottom:6px">☁️ Commandes à valider ('+att.length+')</div>'
+        + '<div style="font-size:11.5px;color:#7F1D1D;margin-bottom:8px">Validez <strong>seulement</strong> quand vous voyez l\'argent sur votre téléphone : même montant, même numéro payeur. La validation ouvre l\'accès et émet le code.</div>';
+      if(!att.length) h += '<div style="font-size:12px;color:var(--ink4)">Aucune commande en attente.</div>';
+      att.forEach(function(x){
+        h += '<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;border-top:1px solid #FECACA;padding:8px 0">'
+          + '<div style="font-size:12px;line-height:1.5"><strong style="font-size:14px">'+fmtN(x.montant||0)+' F</strong> · '+_esc(x.label||x.intent)
+          + '<br>📱 <strong>'+_esc(x.clientTel||'?')+'</strong>'+(x.clientNom?' · '+_esc(x.clientNom):'')
+          + ' · <span style="font-family:monospace">'+_esc(x.ref)+'</span>'
+          + (x.declaredAt?' · '+new Date(x.declaredAt).toLocaleString('fr-FR'):'')
+          + (x.msg?'<br><span style="color:var(--re)">'+_esc(x.msg)+'</span>':'')+'</div>'
+          + '<button class="btn xs" style="background:#059669;color:#fff;font-weight:800;border:none" onclick="_pmValider(\''+_esc(x.ref)+'\')">✓ Paiement reçu — valider</button>'
+          + '</div>';
+      });
+      if(rec.length){
+        h += '<details style="margin-top:6px"><summary style="cursor:pointer;font-size:12px;color:var(--ink3)">Dernières validations ('+rec.length+')</summary>';
+        rec.forEach(function(x){
+          h += '<div style="font-size:11.5px;padding:4px 0;border-top:1px solid #FECACA">✓ '+fmtN(x.montant||0)+' F · '+_esc(x.label||x.intent)+' · '+_esc(x.clientTel||'')
+            + ((x.intent==='livret'||x.intent==='livret_pack') ? ' <button class="btn xs" style="margin-left:6px" onclick="_pmRemettre(\''+_esc(x.ref)+'\')">🎟️ Code</button>' : '')
+            + '</div>';
+        });
+        h += '</details>';
+      }
+      box.innerHTML = h + '</div>';
+    })
+    .catch(function(){ var b=document.getElementById('pmSrvListe'); if(b) b.innerHTML='<div class="ib ibt"><span>⚠️</span><span>Serveur injoignable : commandes non chargées.</span></div>'; });
+}
+window._pmChargerCommandes = _pmChargerCommandes;
+
+function _pmTrouve(ref){ return (window._PM_ITEMS||[]).find(function(x){ return x.ref===ref; }) || null; }
+
+window._pmRemettre = function(ref){
+  var x = _pmTrouve(ref); if(!x) return;
+  _payRemettreCodeLivret({ ref:x.ref, intent:x.intent, customerTel:x.clientTel, customerNom:x.clientNom, label:x.label });
+};
+
+window._pmValider = function(ref){
+  var x = _pmTrouve(ref); if(!x){ toast('Commande introuvable','warn'); return; }
+  /* La seule garantie de ce parcours, c'est ce regard-là : aucune API ne
+     confirme l'argent. On le demande en toutes lettres, avec les deux chiffres
+     à comparer, plutôt que « Êtes-vous sûr ? ». */
+  if(!confirm('Avez-vous VU '+fmtN(x.montant||0)+' FCFA arriver du '+(x.clientTel||'?')+' sur MoMo / Orange Money ?\n\nRéf. '+x.ref+'\n\nValider ouvre l\'accès et émet le code.')) return;
+  var cc = DB.cloudConfig || {};
+  toast('⏳ Validation…','info');
+  fetch(cc.url.replace(/\/+$/,'')+'/payment_manuel.php?action=grant', {
+    method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+cc.secret },
+    body: JSON.stringify({ ref: x.ref, validePar: (typeof SES!=='undefined'&&SES)?((SES.pre||'')+' '+(SES.nom||'')).trim():'' })
+  })
+  .then(function(r){ return r.json().catch(function(){ return {error:'Réponse illisible (HTTP '+r.status+')'}; }); })
+  .then(function(j){
+    if(j.error){ toast('⚠️ '+j.error,'err'); }
+    else if(j.bloque){ toast('⚠️ Accès non ouvert : '+(j.msg||'à reprendre'),'warn'); }
+    else {
+      toast('✅ Validé — '+(j.msg||'accès ouvert'),'ok');
+      if(x.intent==='livret' || x.intent==='livret_pack') _pmRemettre(x.ref);
+    }
+    _pmChargerCommandes();
+  })
+  .catch(function(){ toast('⚠️ Serveur injoignable — rien n\'a été validé','err'); });
+};
+
 // Helpers appelés depuis les onclick inline de mPayAttempts
 // ── v1.2 : auto-exécution de l'action liée à l'intent ──
 // ═══════════════════════════════════════════════════════════════════
@@ -33330,9 +33524,153 @@ function _payMarkPaid(ref){
   // ── ÉVÉNEMENT pour VERITAS_AUTO ──
   if(window.VA) VA.fire('payAttempt.validated', {attempt: a});
 
+  // ── L'OCTROI SERVEUR : c'est LUI qui émet le code et envoie le pass ──
+  // Tout ce qui précède s'est passé dans CE navigateur. Le serveur, lui,
+  // n'a rien vu — et c'est lui qui tient le registre des codes de livret.
+  try { _payOctroiServeur(a); } catch(e){ console.warn('[octroi serveur]', e); }
+
   mPayAttempts();
   toast('✓ Paiement validé'+(result.msg?' — '+result.msg:''));
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   OCTROI SERVEUR D'UN PAIEMENT ENCAISSÉ HORS LIGNE   (20/09/2026)
+   ─────────────────────────────────────────────────────────────────────
+   « Valider & activer » ne travaillait que dans le navigateur de
+   l'administrateur : accès écrit dans la base locale, reçu émis, splits
+   calculés. Côté serveur, rien.
+
+   Or c'est le SERVEUR qui émet le code de livret et qui envoie le pass :
+   vrt_grant_entitlement_to_file() ouvre l'accès, inscrit la vente dans le
+   registre des codes, met la remise en file et la vide. Cette fonction
+   n'avait que quatre appelants — les quatre passerelles. Tant que l'une
+   d'elles encaissait, le trou restait invisible. Le jour où le fournisseur
+   se tait, le paiement manuel devient le SEUL chemin — et c'était celui
+   qui ne délivrait rien : le client payait sur le compte marchand et
+   attendait un code qui ne pouvait pas naître.
+
+   api/payment_manuel.php appelle exactement la même fonction, avec la même
+   forme d'état, et est idempotent par référence : re-cliquer, rouvrir la
+   fenêtre ou rejouer une synchro ne réémet aucun code.
+   ═════════════════════════════════════════════════════════════════════ */
+window._payOctroiServeur = function(a, silencieux){
+  if(!a || !a.ref) return Promise.resolve(null);
+
+  /* Une passerelle qui a confirmé a DÉJÀ accordé côté serveur. Repasser
+     derrière elle ne ferait rien de mal (l'octroi est idempotent), mais
+     ajouterait un aller-retour réseau à chaque validation de contrôle. */
+  var src = String(a.providerAuto||'').toLowerCase();
+  if(src && src !== 'manuel') return Promise.resolve(null);
+
+  var cc = DB.cloudConfig || {};
+  if(!cc.url || !cc.secret){
+    /* Le dire, et le dire en clair. Sans clé de synchronisation l'accès
+       n'existe que sur ce poste : l'acheteur ne recevra rien et personne
+       ne s'en apercevra avant sa réclamation. */
+    if(!silencieux) toast('⚠️ Activé sur ce poste seulement — sans clé de synchronisation, aucun code n\'est émis et le pass ne part pas','warn');
+    return Promise.resolve(null);
+  }
+
+  var base = cc.url.replace(/\/+$/,'');
+  return fetch(base+'/payment_manuel.php?action=grant', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+cc.secret },
+    body: JSON.stringify({
+      ref:         a.ref,
+      intent:      a.intent || 'generic',
+      targetId:    a.targetId || '',
+      accountId:   a.accountId || a.customerAccountId || '',
+      // Le montant RÉELLEMENT encaissé : le serveur s'en sert pour vérifier
+      // que la somme couvre l'objet. Envoyer le prix catalogue ferait passer
+      // un paiement partiel pour un paiement complet.
+      montant:     a.montantFinal || a.montant || 0,
+      clientNom:   a.customerNom   || a.clientNom   || '',
+      clientTel:   a.customerTel   || a.clientTel   || '',
+      clientEmail: a.customerEmail || a.clientEmail || '',
+      label:       a.label || '',
+      lignes:      (a.lignes && a.lignes.length) ? a.lignes : null,
+      moyen:       a.moyen || '',
+      validePar:   (typeof SES!=='undefined' && SES) ? ((SES.pre||'')+' '+(SES.nom||'')).trim() : ''
+    })
+  })
+  .then(function(r){
+    return r.json().catch(function(){ return { error:'Réponse illisible du serveur (HTTP '+r.status+')' }; });
+  })
+  .then(function(j){
+    j = j || {};
+    try { a.serverGrant = j; if(typeof save==='function') save(); } catch(e){}
+
+    if(j.error){
+      toast('⚠️ Octroi serveur refusé : '+j.error+' — le code n\'a PAS été émis','err');
+      return j;
+    }
+    if(j.bloque){
+      /* Le cas le plus fréquent : le compte de l'acheteur n'existe pas encore.
+         Rien n'est perdu — « Réessayer l'octroi » rejoue depuis l'état
+         enregistré dès que le compte est créé. */
+      toast('⚠️ Accès non ouvert côté serveur : '+(j.msg||'raison inconnue')+' — à reprendre','warn');
+      return j;
+    }
+    if(j.deja) return j;
+
+    // La remise a-t-elle vraiment pu partir ? « tenté » n'est pas « reçu ».
+    var rm = j.remise || {};
+    if((rm.envoyes|0) === 0 && ((rm.restants|0) > 0 || (rm.tentes|0) > 0)){
+      toast('📌 Code émis, mais AUCUN message n\'a pu partir — remettez-le vous-même','warn');
+    }
+
+    // Un livret : le code existe maintenant côté serveur. On va le chercher
+    // pour que l'administration puisse le remettre à la main dans la seconde,
+    // sans attendre qu'un canal d'envoi soit configuré.
+    var it = String(a.intent||'');
+    if(it === 'livret' || it === 'livret_pack'){
+      try { _payRemettreCodeLivret(a); } catch(e){ console.warn('[remise code]', e); }
+    }
+    return j;
+  })
+  .catch(function(e){
+    toast('⚠️ Serveur injoignable — l\'accès est activé ici, mais le code n\'est pas émis','err');
+    console.warn('[_payOctroiServeur]', e);
+    return null;
+  });
+};
+
+/* Va chercher le code émis pour cette référence et l'affiche avec un envoi
+   WhatsApp pré-rempli VERS L'ACHETEUR. Les canaux automatiques (WhatsApp
+   Cloud API, e-mail) ne sont pas configurés en production : sans cet écran,
+   le code naît côté serveur et personne ne le lit. */
+window._payRemettreCodeLivret = function(a){
+  if(typeof _lvcApi !== 'function') return;
+  _lvcApi('admin_vente', { ref: a.ref }).then(function(v){
+    if(!v || !v.code) return;
+    var codes = (v.codes && v.codes.length > 1) ? v.codes : [v.code];
+    var tel   = String(a.customerTel || a.clientTel || '').replace(/[^0-9+]/g,'').replace(/^\+/,'');
+    if(tel && tel.length === 9) tel = '237' + tel;
+
+    var msg = 'Bonjour ' + (a.customerNom || '') + ',\n\n'
+      + 'Votre paiement (réf. ' + a.ref + ') est confirmé. Merci !\n\n'
+      + (codes.length > 1 ? 'Vos codes d\'accès :\n' : 'Votre code d\'accès : ')
+      + codes.join('\n') + '\n\n'
+      + (v.lien ? ('Ouvrez : ' + v.lien + '\n\n') : '')
+      + 'Centre VÉRITAS';
+
+    var wa = 'https://wa.me/' + (tel || '') + '?text=' + encodeURIComponent(msg);
+
+    M('🎟️ Code émis — à remettre à l\'acheteur',
+      (a.label || '') + ' · réf. ' + _esc(a.ref),
+      '<div style="padding:4px">'
+      + '<div class="ib ibt mb12"><span>📌</span><span>L\'envoi automatique n\'est pas configuré : <strong>c\'est vous qui remettez ce code</strong>. Il reste consultable dans 🎟️ Codes d\'accès.</span></div>'
+      + codes.map(function(c){
+          return '<div style="font-family:monospace;font-size:20px;font-weight:800;letter-spacing:2px;text-align:center;'
+            + 'background:var(--bg2);border:2px dashed var(--gold);border-radius:10px;padding:12px;margin-bottom:8px;'
+            + 'user-select:all;-webkit-user-select:all">'+_esc(c)+'</div>';
+        }).join('')
+      + (tel ? '' : '<div class="ib ibt mt12"><span>⚠️</span><span>Aucun numéro n\'a été laissé par l\'acheteur : WhatsApp s\'ouvrira sans destinataire, choisissez-le vous-même.</span></div>')
+      + '</div>',
+      '<button class="btn bo" onclick="cm()">Fermer</button>'
+      + '<a class="btn" href="'+wa+'" target="_blank" rel="noopener" style="background:#25d366;color:#fff;text-decoration:none">📲 Envoyer sur WhatsApp</a>');
+  }).catch(function(e){ console.warn('[admin_vente]', e); });
+};
 
 // ════════════════════════════════════════════════════════════════════
 // v2.8 — 💰 SYSTÈME PARTAGE REVENUS PARTENAIRES (splits + versements)
@@ -33945,6 +34283,10 @@ window._payGuessOperator = _payGuessOperator;
 // qui sait quel fournisseur est réellement branché, et on ne retombe sur les
 // cases d'administration que si la sonde n'a pas (encore) répondu.
 function _payPayoutReady(){
+  // Même fournisseur que l'encaissement : s'il est muet, il ne verse pas non
+  // plus. Sans cette ligne, l'admin choisit « ⚡ Automatique » et croit avoir
+  // payé ses partenaires. Le versement manuel reste disponible.
+  if(window.VRT_PASSERELLE_AUTO_HS) return false;
   var cfg = DB.payApiConfig || {};
   var c   = window._VRT_CAMPAY;
   if(c && c.provider === 'camerpay') return !!c.configured;
@@ -34793,6 +35135,18 @@ function _payAutoActivate(a){
     return {msg:'Erreur activation : '+e.message, userMsg:''};
   }
 }
+/* Rejoue l'octroi serveur d'un paiement déjà validé. Volontairement le MÊME
+   appel que la validation initiale : api/payment_manuel.php est idempotent par
+   référence, donc un rejeu n'émet pas un second code et ne recrédite personne.
+   Un deuxième chemin d'octroi, lui, aurait fini par diverger du premier. */
+window._payRetryOctroi = function(ref){
+  var a = (DB.payAttempts||[]).find(function(x){ return x.ref === ref; });
+  if(!a){ toast('Tentative introuvable','warn'); return; }
+  toast('⏳ Octroi serveur…','info');
+  var p = _payOctroiServeur(a);
+  if(p && p.then) p.then(function(){ try{ mPayAttempts(); }catch(e){} });
+};
+
 function _payDelete(ref){
   if(!confirm('Supprimer cette tentative ?'))return;
   DB.payAttempts=(DB.payAttempts||[]).filter(function(x){return x.ref!==ref;});
@@ -41191,20 +41545,20 @@ openPaymentModal = function(payInfo){
     // de payer découragerait inutilement le client.
     + (_campayTile
         ? '<div class="ib ibt mb12" style="background:rgba(5,150,105,.08);"><span>⚡</span><span>'+_payTileBandeau()+'</span></div>'
-        : '<div class="ib ibt mb12" style="background:rgba(220,38,38,.08);"><span>⚠️</span><span><strong>Important :</strong> après votre paiement, passez à l\'étape 3 pour nous envoyer votre confirmation avec la référence <strong>'+ref+'</strong>. Votre accès sera activé sous 24 h.</span></div>')
+        : _payBandeauManuel(ref))
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:16px">'
     + _campayTile
     // MoMo
     +'<div style="background:#fff;border:2px solid '+P.momo.couleur+';border-radius:12px;padding:12px;cursor:pointer" onclick="_payCopy(\''+P.momo.numero.replace(/[^0-9+]/g,'')+'\',\'Numéro MoMo\')">'
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="font-size:24px">'+P.momo.ico+'</div><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;color:#142554">'+P.momo.label+'</div></div>'
     +'<div style="font-family:monospace;font-size:14px;font-weight:800;color:'+P.momo.couleur+'">'+P.momo.numero+'</div>'
-    +'<div style="font-size:10px;color:var(--ink4);margin-top:4px">Nom: '+P.momo.nomCompte+' · USSD: '+P.momo.code+'</div>'
+    +'<div style="font-size:10px;color:var(--ink4);margin-top:4px">'+_payCoordHtml(P.momo,true)+'</div>'
     +'<div style="font-size:9px;color:var(--ink4);margin-top:4px;font-style:italic">👆 Cliquez pour copier</div></div>'
     // Orange
     +'<div style="background:#fff;border:2px solid '+P.orange.couleur+';border-radius:12px;padding:12px;cursor:pointer" onclick="_payCopy(\''+P.orange.numero.replace(/[^0-9+]/g,'')+'\',\'Numéro Orange Money\')">'
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="font-size:24px">'+P.orange.ico+'</div><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;color:#142554">'+P.orange.label+'</div></div>'
     +'<div style="font-family:monospace;font-size:14px;font-weight:800;color:'+P.orange.couleur+'">'+P.orange.numero+'</div>'
-    +'<div style="font-size:10px;color:var(--ink4);margin-top:4px">Nom: '+P.orange.nomCompte+' · USSD: '+P.orange.code+'</div>'
+    +'<div style="font-size:10px;color:var(--ink4);margin-top:4px">'+_payCoordHtml(P.orange,true)+'</div>'
     +'<div style="font-size:9px;color:var(--ink4);margin-top:4px;font-style:italic">👆 Cliquez pour copier</div></div>'
     // PayPal
     +'<a href="'+P.paypal.url+'" target="_blank" rel="noopener" style="text-decoration:none;background:#fff;border:2px solid '+P.paypal.couleur+';border-radius:12px;padding:12px;display:block">'
@@ -41234,7 +41588,8 @@ openPaymentModal = function(payInfo){
     +'<div style="font-family:monospace;font-size:18px;font-weight:800;color:var(--gold)">'+ref+'</div>'
     +'<div style="font-size:12px;color:var(--ink4);margin-top:8px">Montant : <strong>'+montantFmt+'</strong></div>'
     +'</div>'
-    +'<div style="font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:16px">Notre équipe activera votre accès sous <strong>24h</strong> après vérification.<br>Conservez cette référence.</div>'
+    +'<div style="font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:8px">Votre accès est activé <strong>dès que nous avons vu votre paiement</strong> (au plus tard sous 24 h).<br>Conservez cette référence.</div>'
+    +'<div id="payDeclEtat" style="font-size:12px;color:var(--ink4);margin-bottom:12px">Enregistrement de votre commande…</div>'
     +'<button class="btn bo sm" onclick="_payCopy(\''+ref+'\',\'Référence\')" style="margin-bottom:12px"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier la référence</button>'
     +'</div>'
     +'<div id="payStep3WA"></div>'
@@ -41298,6 +41653,11 @@ function _payGoStep(step){
   if(step===3){
     // Build WhatsApp confirmation
     var latest2=(DB.payAttempts||[])[(DB.payAttempts||[]).length-1]||{};
+    /* La confirmation n'existait QUE sur WhatsApp et dans la base de CE
+       navigateur — celui du client, que l'administration ne voit jamais. La
+       commande entre maintenant dans la file du serveur, où l'administration
+       la valide d'un clic (mPayAttempts → « Commandes déclarées »). */
+    try { _payDeclarerServeur(latest2); } catch(e){ console.warn('[déclaration]', e); }
     var cNom=latest2.clientNom||'';
     var cTel=latest2.clientTel||'';
     var mFinal=latest2.montantFinal||latest2.montant||0;
@@ -41318,6 +41678,41 @@ function _payGoStep(step){
   if(i3){i3.style.background=step>=3?'var(--gold)':'var(--bg3)';i3.style.color=step>=3?'var(--ink)':'var(--ink4)';}
 }
 window._payGoStep = _payGoStep;
+
+/* Déclare la commande au serveur (api/payment_manuel.php?action=declarer).
+   N'ACCORDE RIEN : elle entre dans la file que l'administration valide après
+   avoir vu l'argent. Une seule fois par référence. */
+function _payDeclarerServeur(att){
+  var etat = document.getElementById('payDeclEtat');
+  var dire = function(t, ok){ if(etat){ etat.textContent = t; etat.style.color = ok ? 'var(--gr)' : 'var(--re)'; } };
+  if(!att || !att.ref) return;
+  if(att.declareServeur){ dire('✓ Commande enregistrée — référence '+att.ref, true); return; }
+  var X = (window._VRT_PAYX||{})[att.ref] || {};
+  var tel = String(att.clientTel||att.customerTel||'').replace(/\D+/g,'');
+  if(tel.length === 12 && tel.indexOf('237') === 0) tel = tel.slice(3);
+  if(!/^6\d{8}$/.test(tel)){ dire('⚠️ Numéro WhatsApp invalide (9 chiffres) : revenez à l\'étape 1, sinon confirmez sur WhatsApp.', false); return; }
+  var corps = {
+    ref: att.ref, intent: X.intent || att.intent || 'generic', targetId: X.targetId || att.targetId || '',
+    montant: att.montantFinal || att.montant || 0,
+    clientNom: att.clientNom || att.customerNom || '', clientTel: tel, clientEmail: att.clientEmail || '',
+    label: att.label || '', lignes: X.lignes || att.lignes || null,
+    accountId: (typeof _accId==='function') ? _accId() : ''
+  };
+  // Le code ami n'est envoyé que s'il a été APPLIQUÉ (remise affichée) : le
+  // serveur le revérifie, et c'est lui qui autorise le montant réduit.
+  if(att.code) corps.code = att.code;
+  var base = (typeof _payApiBase==='function') ? _payApiBase() : '/api';
+  fetch(base + '/payment_manuel.php?action=declarer', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(corps)
+  })
+  .then(function(r){ return r.json().catch(function(){ return {error:'Réponse illisible (HTTP '+r.status+')'}; }); })
+  .then(function(j){
+    if(j && j.ok){ att.declareServeur = true; try{ save(); }catch(e){} dire('✓ Commande enregistrée — nous la validons dès réception de votre paiement.', true); }
+    else dire('⚠️ '+((j&&j.error)||'Enregistrement impossible')+' — confirmez sur WhatsApp ci-dessous.', false);
+  })
+  .catch(function(){ dire('⚠️ Connexion impossible — confirmez sur WhatsApp ci-dessous.', false); });
+}
+window._payDeclarerServeur = _payDeclarerServeur;
 
 // ══════════════════════════════════════════════════���═══════════════
 // ── v1.1 — MODULE 5 : TABLEAU DE BORD PAIEMENTS (admin) ─────────

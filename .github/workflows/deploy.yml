@@ -1379,6 +1379,7 @@ jobs:
             api/payment_mtn.php \
             api/payment_campay.php \
             api/payment_camerpay.php \
+            api/payment_manuel.php \
             api/_pay_funds_lib.php \
             api/ia_proxy.php \
             api/rag.php \

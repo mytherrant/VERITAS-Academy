@@ -811,6 +811,18 @@
      c'est sa POSE qui ne l'était pas.
      Apostrophes échappées : `'Baloo 2'` est valide dans un attribut délimité
      par des guillemets doubles, et ne le referme pas. */
+  /* ══ BANDEAU « MODE DE PAIEMENT » (21/09/2026) ══════════════════════════
+     Rouge, parce qu'il doit se voir avant le bouton. Il dit trois choses, dans
+     l'ordre où l'acheteur se les demande : comment je paie, à qui, et quand
+     j'aurai mon code. Sans guillemet double dans les styles : ils refermeraient
+     l'attribut (défaut déjà payé sur BTN et TTL). */
+  var BANDEAU_PAIEMENT = '<div style="margin:12px 0 4px;padding:10px 12px;border:2px solid #c0453f;'
+    + 'background:#fdecea;border-radius:10px;text-align:left;font-size:12.5px;line-height:1.5;color:#7a1f1a">'
+    + '<strong style="color:#c0453f">Paiement par code marchand MTN MoMo ou Orange Money</strong>, '
+    + 'au nom de <strong>VERITAS EDUCATION</strong>. '
+    + 'Après ton paiement, <strong>ton code d\u2019accès s\u2019affiche ici tout seul</strong> dès que nous l\u2019avons vérifié '
+    + '\u2014 tu peux même fermer la page : il t\u2019attendra à ton retour.</div>';
+
   var BTN = 'width:100%;border:none;background:#c0453f;color:#fff;font-family:\'Baloo 2\',sans-serif;'
     + 'font-weight:800;font-size:16px;padding:12px;border-radius:10px;cursor:pointer;margin-top:10px';
   var BTN2 = 'width:100%;border:1px solid #cfd6dd;background:#fff;color:#5c666f;font-weight:700;'
@@ -890,7 +902,11 @@
       + '<div id="vrt-accroche" style="' + SUB + '">' + accroche() + '</div>'
       + '<div style="font-family:\'Baloo 2\',sans-serif;font-weight:800;font-size:30px;color:#c0453f;margin:14px 0 2px" class="vrt-prix">'
       + fmt(prix(cfg.kind, qte)) + ' FCFA</div>'
-      + '<div style="font-size:12px;color:#98a1aa">Orange Money · MTN MoMo · carte bancaire</div>'
+      /* 21/09/2026 — « carte bancaire » n'est plus vrai : CamerPay est muet et
+         l'on encaisse par code marchand. Annoncer AVANT le clic comment on va
+         payer, et ce qui se passe après, c'est ce qui rassure — l'acheteur
+         ne découvre pas un mode de paiement inattendu au milieu du tunnel. */
+      + BANDEAU_PAIEMENT
       // Pack établissement : un proviseur qui équipe une classe entière ne
       // doit pas avoir à nous écrire. La remise s'affiche dès 10 codes.
       + (cfg.kind === 'livret'
@@ -1155,7 +1171,9 @@
       .then(function () { return fetch(PAY + '?action=config', { cache: 'no-store' }); })
       .then(function (x) { return x.json(); })
       .then(function (c) {
-        if (!c || !c.selfService || !c.publicInitToken) {
+        // Mode manuel (passerelle hors service) : ce n'est PAS « indisponible »,
+        // c'est un autre chemin — on laisse passer pour calculer le montant.
+        if (!c || (!c.horsService && (!c.selfService || !c.publicInitToken))) {
           throw ErrPorte('Le paiement en ligne est momentanément indisponible. '
             + 'Écris-nous sur WhatsApp pour obtenir ton code.', 'off');
         }
@@ -1204,6 +1222,17 @@
            d'afficher, et le parrain toucherait sur un rabais jamais consenti. */
         if (n <= 1 && codeAmiPose()) corps.code = codeAmi.code;
 
+        /* ── PASSERELLE HORS SERVICE : PAIEMENT PAR CODE MARCHAND ──────────
+           Le montant et le corps sont ceux qu'on aurait envoyés à CamerPay —
+           remise du code ami comprise. On s'arrête ici : le reste se passe
+           dans payerManuel(), qui enregistre la commande côté serveur AVANT
+           de montrer où payer. */
+        if (c.horsService) {
+          var stop = new Error('');
+          stop.manuel = { corps: corps, info: c.manuel || null };
+          throw stop;
+        }
+
         return fetch(PAY + '?action=init', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + c.publicInitToken },
@@ -1241,8 +1270,112 @@
            écran qui annonce 1 350 F ferait croire la remise perdue. */
         b.disabled = false;
         b.textContent = 'Payer ' + fmt((n <= 1 && codeAmiPose()) ? codeAmi.montant : prix(cfg.kind, n)) + ' FCFA';
+        if (e && e.manuel) { payerManuel(r, chiffres, e.manuel.corps, e.manuel.info, b); return; }
         msg(e.message || 'Paiement impossible pour le moment.');
       });
+  }
+
+  /* ══ PAIEMENT PAR CODE MARCHAND (21/09/2026) ══════════════════════════════
+     CamerPay ne répond plus. L'acheteur paie depuis son téléphone sur le code
+     marchand de VERITAS EDUCATION, et aucune API ne nous le confirme : c'est
+     l'administration qui voit l'argent arriver et valide.
+
+     Ce qui rend ce parcours supportable, c'est que l'acheteur n'a RIEN à
+     faire après avoir payé. La commande est enregistrée côté serveur AVANT
+     qu'on lui montre où payer (montant vérifié, code ami compris) ; la
+     référence et ses 4 derniers chiffres sont gardés sur son appareil ; et
+     dès que l'administration valide, `claim` rend le code — sur cet écran s'il
+     est encore ouvert, sinon au prochain passage (repriseAchat, 30 jours).
+     Le bouton WhatsApp ne sert qu'à accélérer, jamais à conditionner. */
+  function payerManuel(r, tel, corps, info, bouton) {
+    if (bouton) { bouton.disabled = true; bouton.textContent = 'Préparation…'; }
+    var d = {};
+    for (var k in corps) if (Object.prototype.hasOwnProperty.call(corps, k)) d[k] = corps[k];
+    d.clientTel = tel;
+    fetch('/api/payment_manuel.php?action=declarer', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d)
+    })
+      .then(function (x) { return x.json().then(function (j) { return { s: x.status, j: j }; }); })
+      .then(function (rep) {
+        if (bouton) { bouton.disabled = false; bouton.textContent = 'Payer ' + fmt(corps.montant) + ' FCFA'; }
+        if (!rep.j || !rep.j.ok) { msg((rep.j && rep.j.error) || 'Commande impossible pour le moment. Écris-nous sur WhatsApp.'); return; }
+        achatPose(r, tel);
+        ecranManuel(r, tel, rep.j.montant || corps.montant, corps.label || '', info);
+      })
+      .catch(function () {
+        if (bouton) { bouton.disabled = false; bouton.textContent = 'Payer ' + fmt(corps.montant) + ' FCFA'; }
+        msg('Connexion impossible. Vérifie ton réseau et réessaie.');
+      });
+  }
+
+  function ecranManuel(r, tel, montant, label, info) {
+    info = info || {};
+    var titulaire = info.titulaire || 'VERITAS EDUCATION';
+    function tuile(o, couleur, nom) {
+      if (!o || !o.numero) return '';
+      return '<div style="border:2px solid ' + couleur + ';border-radius:12px;padding:10px 12px;margin-top:8px;text-align:left">'
+        + '<div style="font-weight:800;color:#1f2b38;font-size:14px">' + esc(nom) + '</div>'
+        + '<div style="font-size:12.5px;color:#5c666f;margin-top:2px">Code marchand</div>'
+        + '<div style="font-family:ui-monospace,monospace;font-weight:800;font-size:22px;letter-spacing:.08em;color:#1f2b38;'
+        + 'user-select:all;-webkit-user-select:all">' + esc(o.codeMarchand || '') + '</div>'
+        + '<div style="font-size:12px;color:#5c666f;line-height:1.5;margin-top:2px">'
+        + 'Compose <strong>' + esc(o.ussd || '') + '</strong> \u2192 Paiement marchand \u2192 <strong>' + esc(o.codeMarchand || '')
+        + '</strong> \u2192 <strong>' + fmt(montant) + ' F</strong>'
+        + '<br>Numéro : ' + esc(o.numero) + ' \u00b7 ' + esc(titulaire) + '</div></div>';
+    }
+    var texteWA = 'Bonjour VÉRITAS, je viens de payer ' + fmt(montant) + ' FCFA par code marchand.\n'
+      + 'Référence : ' + r + '\n' + (label ? 'Achat : ' + label + '\n' : '')
+      + 'Mon numéro : ' + tel;
+    modale(
+      '<div style="text-align:center">'
+      + '<div style="' + TTL + '">Paie ' + fmt(montant) + ' FCFA</div>'
+      + '<div style="margin:8px 0 2px;padding:9px 11px;border:2px solid #c0453f;background:#fdecea;border-radius:10px;'
+      + 'font-size:12.5px;line-height:1.5;color:#7a1f1a;text-align:left">'
+      + '<strong style="color:#c0453f">Paiement par code marchand</strong> au nom de <strong>' + esc(titulaire) + '</strong>. '
+      + 'Ta commande est enregistrée : <strong>ton code s\u2019affichera ici tout seul</strong> dès que nous aurons vu ton paiement.</div>'
+      + tuile(info.momo, '#FFCB05', 'MTN Mobile Money')
+      + tuile(info.orange, '#FF6600', 'Orange Money')
+      + '<div style="margin:14px 0 4px;font-size:12px;color:#98a1aa">Ta référence</div>'
+      + '<div style="font-family:ui-monospace,monospace;font-weight:700;font-size:15px;color:#1f2b38;'
+      + 'background:#f4f6f8;border-radius:8px;padding:8px">' + esc(r) + '</div>'
+      + '<div style="font-size:11.5px;color:#98a1aa;margin-top:6px">Tu peux fermer cette page : ton code t\u2019attendra à ton retour, sur ce téléphone.</div>'
+      + '<div id="vrt-msg" style="font-size:12.5px;color:#5c666f;min-height:17px;margin-top:10px">En attente de la vérification de ton paiement…</div>'
+      + '<a href="https://wa.me/' + WA + '?text=' + encodeURIComponent(texteWA) + '" target="_blank" rel="noopener" '
+      + 'style="' + BTNWA + ';text-decoration:none;box-sizing:border-box">J\u2019ai payé \u2014 prévenir VÉRITAS sur WhatsApp</a>'
+      + '<button id="vrt-close" style="' + BTN2 + '">Fermer</button>'
+      + '</div>'
+    );
+
+    var fini = false, essais = 0, boucle = null;
+    function arreter() {
+      fini = true;
+      if (boucle) clearInterval(boucle);
+      document.removeEventListener('visibilitychange', auRetour);
+    }
+    document.getElementById('vrt-close').onclick = function () { arreter(); fermerModale(); };
+    function tenter() {
+      if (fini) return;
+      VRT.reclamer(r, tel).then(function (c) {
+        if (fini || !c || !(c.code || c.codes)) return;
+        arreter();
+        ecranCode(c, { ref: r, tel: tel });
+      }).catch(function () { /* pas encore validé : on patiente */ });
+    }
+    // Au retour sur la page — c'est-à-dire juste après le passage par le
+    // clavier du téléphone pour composer le code USSD.
+    function auRetour() { if (document.visibilityState === 'visible') tenter(); }
+    document.addEventListener('visibilitychange', auRetour);
+    // 15 s × 160 ≈ 40 minutes de page ouverte ; au-delà, la reprise au
+    // chargement prend le relais pendant 30 jours.
+    boucle = setInterval(function () {
+      essais++;
+      if (essais > 160) {
+        arreter();
+        msg('Ton paiement n\u2019est pas encore vérifié. Rouvre cette page plus tard : ton code s\u2019affichera tout seul.');
+        return;
+      }
+      tenter();
+    }, 15000);
   }
 
   /* `ouverte` : un onglet de paiement a-t-il RÉELLEMENT été ouvert ? L'écran
@@ -1679,4 +1812,57 @@
   }
 
   window.VRTLivret = VRT;
+})();
+
+/* ══ BANDEAU ROUGE « MODE DE PAIEMENT » (21/09/2026) ═══════════════════════
+   CamerPay ne répond plus : on encaisse par code marchand MTN MoMo / Orange
+   Money, au nom de VERITAS EDUCATION, et l'accès s'ouvre dès que le paiement
+   est vu. Ce bandeau l'annonce EN HAUT DE PAGE pour rassurer avant l'achat.
+
+   Il ne porte AUCUN numéro écrit ici : il les lit dans la sonde du serveur
+   (api/payment_camerpay.php?action=config, bloc `manuel`). Deux conséquences
+   voulues : les numéros n'existent qu'à un endroit servi aux pages publiques,
+   et le bandeau DISPARAÎT tout seul le jour où la passerelle est rallumée
+   (`horsService` redevient faux) — personne n'aura à penser à le retirer.
+   Le même bloc vit dans assets/vitrine.js et livrets/gate.js. */
+(function bandeauPaiement() {
+  if (typeof document === 'undefined' || !window.fetch) return;
+  var ID = 'vrt-bandeau-paiement';
+  function esc(t) {
+    return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function poser(m) {
+    if (document.getElementById(ID) || !document.body) return;
+    var d = document.createElement('div');
+    d.id = ID;
+    d.setAttribute('role', 'note');
+    d.style.cssText = 'background:#B91C1C;color:#fff;font:600 13.5px/1.5 system-ui,-apple-system,sans-serif;'
+      + 'padding:9px 16px;text-align:center;position:relative;z-index:50';
+    var lignes = [];
+    if (m.momo && m.momo.codeMarchand) lignes.push('MTN MoMo : code marchand <strong>' + esc(m.momo.codeMarchand) + '</strong>');
+    if (m.orange && m.orange.codeMarchand) lignes.push('Orange Money : code marchand <strong>' + esc(m.orange.codeMarchand) + '</strong>');
+    d.innerHTML = '<span aria-hidden="true" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#fff;margin-right:6px;vertical-align:1px"></span><strong>Paiement :</strong> ' + lignes.join(' · ')
+      + ' — au nom de <strong>' + esc(m.titulaire || 'VERITAS EDUCATION') + '</strong>.'
+      + '<br><span style="font-weight:500">Votre accès ou votre code est activé dès que nous avons vu votre paiement, '
+      + 'au plus tard sous 24 h. Gardez votre référence.</span>';
+    document.body.insertBefore(d, document.body.firstChild);
+  }
+  function lancer() {
+    // Cache de session : une requête par onglet, pas une par page vue.
+    var c = null;
+    try { c = JSON.parse(sessionStorage.getItem('vrtBandeauPay') || 'null'); } catch (e) {}
+    if (c && Date.now() - (c.t || 0) < 10 * 60 * 1000) { if (c.m) poser(c.m); return; }
+    fetch('/api/payment_camerpay.php?action=config', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        var m = (j && j.horsService && j.manuel) ? j.manuel : null;
+        try { sessionStorage.setItem('vrtBandeauPay', JSON.stringify({ t: Date.now(), m: m })); } catch (e) {}
+        if (m) poser(m);
+      })
+      .catch(function () { /* hors ligne : pas de bandeau, rien de cassé */ });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', lancer);
+  else lancer();
 })();

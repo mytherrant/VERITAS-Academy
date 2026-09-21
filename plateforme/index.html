@@ -6482,6 +6482,9 @@ class Component extends DCLogic {
         this._payTok=String(j.publicInitToken||'');
         this.setState({payProvider:{
           ok:!!(j.canCollect||j.configured),mode:j.mode||'',provider:j.provider||'camerpay',
+          /* 21/09/2026 : CamerPay hors service, encaissement par code marchand.
+             Ce n'est pas une panne a taire, c'est un mode a ANNONCER (en rouge). */
+          hors:!!j.horsService,
           /* Le serveur nomme ce champ `reason`, pas `message` : on lisait une
              cle qui n'existe pas, donc le diagnostic qu'il prend soin de
              formuler (KYC en attente, mode test, jeton absent) n'atteignait
@@ -9153,11 +9156,13 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       /* --- paiement CamerPay --- */
       payBanner:PP===null?'V\u00e9rification du service d\u2019encaissement\u2026'
         :(PP.ok?('Paiement s\u00e9curis\u00e9 par CamerPay'+(PP.mode?(' \u2014 mode '+PP.mode):'')+'. Vous serez redirig\u00e9 vers sa page pour choisir Orange Money, MTN MoMo ou la carte.')
-              :('Encaissement indisponible \u2014 '+(PP.message||'le service n\u2019est pas configur\u00e9 sur ce serveur.'))),
+              :(PP.hors?('\ud83d\udd34 '+PP.message)
+                :('Encaissement indisponible \u2014 '+(PP.message||'le service n\u2019est pas configur\u00e9 sur ce serveur.')))),
       payBannerStyle:'border-radius:10px;padding:11px 13px;font-size:12.5px;line-height:1.55;font-weight:600;'
         +(PP===null?'background:var(--cf2f6fb,#f2f6fb);color:var(--c5a6678,#5a6678)'
          :(PP.ok?'background:var(--ce6f5ec,#e6f5ec);color:var(--c188047,#188047)'
-               :'background:var(--cfdefdb,#fdefdb);color:var(--cc26a12,#c26a12)')),
+               :(PP.hors?'background:#fef2f2;color:#991b1b;border:2px solid #dc2626'
+                 :'background:var(--cfdefdb,#fdefdb);color:var(--cc26a12,#c26a12)'))),
       payErr:st.payErr,
       payErrStyle:st.payErr?'margin:0 26px;padding:11px 13px;border-radius:10px;background:var(--cfdecea,#fdecea);color:var(--cc0392b,#c0392b);font-size:12.5px;font-weight:600;line-height:1.5':hidden,
       /* --- administration --- */

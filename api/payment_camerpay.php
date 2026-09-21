@@ -94,6 +94,44 @@ header('X-Content-Type-Options: nosniff');
 $action = $_GET['action'] ?? 'init';
 $method = $_SERVER['REQUEST_METHOD'];
 
+// ════════════════════════════════════════════════════════════
+// 🔴 21/09/2026 — CAMERPAY HORS SERVICE : ENCAISSEMENT PAR CODE MARCHAND
+// ════════════════════════════════════════════════════════════
+// CamerPay ne répond plus (ni téléphone, ni courriel) et ses paiements
+// échouent. La sonde ?action=config, elle, annonçait toujours
+// « canCollect: true » : elle ne mesure que la présence des CLÉS, jamais
+// l'état du fournisseur. Les QUATRE tunnels qui la lisent — pages des cahiers
+// (livrets/gate.js), vitrine, Atelier, application — envoyaient donc chaque
+// acheteur vers une page de paiement morte.
+//
+// Le coupe-circuit vit ICI, dans le fichier déployé, et pas dans
+// payment_config.php : celui-ci n'existe que sur le serveur, la CI ne le
+// dépose jamais, et un correctif qui dépend d'une retouche FTP à la main est un
+// correctif qui n'a pas eu lieu. Il reste surchargeable depuis payment_config.php :
+//   define('CAMERPAY_HORS_SERVICE', false);   // le jour où CamerPay revient
+//
+// Ce qui reste ouvert : status / notify / list / hooklog — une transaction
+// lancée AVANT la panne doit encore pouvoir être confirmée et accordée.
+if (!defined('CAMERPAY_HORS_SERVICE')) define('CAMERPAY_HORS_SERVICE', true);
+
+/* Les coordonnées du paiement manuel, servies par la sonde. UNE source pour
+   les trois tunnels qui ne chargent pas app.js (cahiers, vitrine, Atelier) :
+   écrire les numéros dans chacun, c'est la garantie qu'un jour l'un d'eux
+   affichera l'ancien. (app.js garde les siens dans VERITAS_PAYMENTS ; les
+   deux listes sont contrôlées par le banc de déploiement.) */
+function camerpayManuelInfo() {
+    return [
+        'titulaire' => 'VERITAS EDUCATION',
+        'momo'   => ['label' => 'MTN Mobile Money', 'numero' => '678 790 590',
+                     'codeMarchand' => '02681266', 'ussd' => '*126#'],
+        'orange' => ['label' => 'Orange Money', 'numero' => '655 084 230',
+                     'codeMarchand' => '999471', 'ussd' => '#150#'],
+        'whatsapp' => '237697637739',
+        // Où l'acheteur déclare son paiement (public, n'accorde rien).
+        'declarer' => '/api/payment_manuel.php?action=declarer',
+    ];
+}
+
 // Même dossier d'état que CamPay : les deux fournisseurs coexistent, chaque
 // fichier porte son champ `provider` et les préfixes de nom ne se croisent pas.
 $stateDir = __DIR__ . '/data/payments/';
@@ -258,6 +296,34 @@ function camerpayInitRateLimit($stateDir) {
 // actif ni si les clés sont posées. On renvoie AUSSI l'état de CamPay pour que
 // le client puisse retomber dessus sans une deuxième requête — c'est ce qui
 // rend la bascule CamerPay ⇄ CamPay invisible côté app.
+if ($action === 'config' && ($method === 'GET' || $method === 'POST') && CAMERPAY_HORS_SERVICE) {
+    /* Tout ce qu'un tunnel teste pour décider d'ENVOYER le payeur chez le
+       fournisseur est éteint, ensemble : canCollect (vitrine, app), selfService
+       + publicInitToken (cahiers), configured (Atelier : « canCollect OU
+       configured »). En oublier un seul laissait une porte ouverte sur le mur. */
+    jsonRespCy([
+        'ok'              => true,
+        'provider'        => '',
+        'file'            => 'payment_camerpay.php',
+        'publicInitToken' => '',
+        'webhookSecret'   => false,
+        'flow'            => 'manuel',
+        'configured'      => false,
+        'mode'            => 'manuel',
+        'selfService'     => false,
+        'canCollect'      => false,
+        'sandbox'         => false,
+        'horsService'     => true,
+        'manuel'          => camerpayManuelInfo(),
+        'operators'       => ['MTN', 'ORANGE'],
+        'campayConfigured'=> false,
+        // Lu tel quel par l'Atelier (plateforme/index.html), qui n'a pas d'autre
+        // écran de paiement manuel : il doit donc contenir TOUTE la marche à suivre.
+        'reason'          => 'Paiement par code marchand au nom de VERITAS EDUCATION : MTN MoMo 02681266 (*126#) '
+                           . 'ou Orange Money 999471 (#150#). Envoyez ensuite votre référence et votre numéro sur WhatsApp '
+                           . 'au 697 63 77 39 : votre accès est activé dès que nous avons vu votre paiement, au plus tard sous 24 h.',
+    ]);
+}
 if ($action === 'config' && ($method === 'GET' || $method === 'POST')) {
     $cyOk  = camerpayConfigured();
     $cpOk  = camerpayCampayConfigured();
@@ -324,6 +390,15 @@ if ($action === 'config' && ($method === 'GET' || $method === 'POST')) {
 // ════════════════════════════════════════════════════════════
 // 1. INIT — création d'une transaction (POST /api/payment/initiate)
 // ════════════════════════════════════════════════════════════
+if ($action === 'init' && $method === 'POST' && CAMERPAY_HORS_SERVICE) {
+    // Un tunnel ancien, mis en cache chez un visiteur, peut encore appeler
+    // init : on refuse AVANT de créer le moindre fichier d'état, et on lui
+    // donne de quoi payer autrement plutôt qu'un simple « indisponible ».
+    jsonRespCy(['error' => 'Le paiement en ligne automatique est suspendu. Payez par code marchand '
+                         . 'MTN MoMo 02681266 ou Orange Money 999471 (VERITAS EDUCATION), '
+                         . 'puis envoyez votre référence sur WhatsApp : votre accès est activé dès vérification.',
+                'horsService' => true, 'manuel' => camerpayManuelInfo()], 503);
+}
 if ($action === 'init' && $method === 'POST') {
     $authMode = camerpayInitGuard($stateDir);   // 'admin' (illimité) OU 'public' (bridé)
     camerpayRequireConfig();
