@@ -583,6 +583,16 @@ jobs:
       - name: 🔎 La recherche trouve-t-elle ce que le site publie ?
         run: node tests/banc_recherche.cjs
 
+      # ── Un correctif du lecteur atteint-il l'acheteur DÉJÀ venu ? ─────────
+      #    Le 21/09/2026 : le service worker des cahiers re-copiait à chaque
+      #    version l'ancien gate.js depuis le cache HTTP (« immutable 1 an »,
+      #    même sans ?v=), et gardait deux copies dont la plus vieille gagnait.
+      #    Tout correctif du moteur ou de l'écran de paiement restait donc
+      #    invisible pour qui avait déjà ouvert un cahier — jusqu'à un an.
+      #    Aucun banc ne regardait livrets/sw-cahier.js.
+      - name: 🔄 Le service worker des cahiers livre-t-il la version déployée ?
+        run: node tests/banc_sw_cahier.cjs
+
       # ── 👤 CHAQUE PROFIL RETROUVE-T-IL SES ACCÈS ? Le plan public range le
       #    site par profil ; il restait le CONNECTÉ, qui n'a aucune raison de
       #    retourner sur la page d'accueil pour retrouver les œuvres au

@@ -77,12 +77,59 @@ const COQUILLE = [
   '/livrets/cahier.css',
 ];
 
+/* ══════════════════════════════════════════════════════════════════════════
+   UN ACHETEUR DÉJÀ VENU GARDAIT L'ANCIEN MOTEUR JUSQU'À UN AN (21/09/2026)
+   ════════════════════════════════════════════════════════════════════════
+
+   Constaté en production : le cache NEUF (`vrt-cahier-v1.20.19.560750`)
+   contenait l'ANCIEN `gate.js`. L'écran de paiement corrigé la veille restait
+   l'ancien pour qui avait déjà ouvert un cahier. Deux causes, mesurées une à
+   une dans le navigateur, et chacune suffisait :
+
+   ① LA PRÉ-COPIE LISAIT LE CACHE HTTP. `c.add('/livrets/gate.js')` passe par
+      le cache du navigateur, et `.htaccess` sert `gate.js`, `cahier.js` et
+      `cahier.css` « immutable, max-age=31536000 » — MÊME SANS `?v=`. Le
+      premier service worker avait mis l'adresse nue en cache HTTP pour un an ;
+      chaque version suivante re-copiait donc la même vieille réponse, et le
+      renouvellement du nom de cache par la CI ne changeait rien au contenu.
+      → on pré-copie avec `cache: 'reload'`, qui va au serveur.
+
+   ② DEUX COPIES, ET LA PLUS VIEILLE GAGNE. La pré-copie range l'adresse nue ;
+      le rafraîchissement rangeait l'adresse versionnée (`gate.js?v=…`). Deux
+      entrées pour un même fichier, et `match(…, { ignoreSearch: true })` rend
+      la PREMIÈRE insérée — mesuré : il rend l'ancienne même quand on lui
+      demande la version exacte. Le rafraîchissement écrivait donc une copie
+      neuve que personne ne lisait jamais.
+      → une seule clé par fichier : le chemin, sans requête. Le
+        rafraîchissement ÉCRASE au lieu d'ajouter.
+
+   Et une amélioration qui en découle : une page qui demande une version
+   (`?v=`) DIFFÉRENTE de celle qu'on a en cache sait qu'un déploiement a eu
+   lieu. Elle passe alors par le réseau d'abord — l'acheteur reçoit le
+   correctif dès la première ouverture, pas à la seconde — et retombe sur la
+   copie en cache seulement s'il est hors ligne. Le hors ligne est préservé.
+   ══════════════════════════════════════════════════════════════════════ */
+function cleDe(url) {
+  const u = new URL(url, self.location.origin);
+  return u.origin + u.pathname;          // le fichier, jamais sa requête
+}
+
+/* La réponse mise de côté garde l'adresse EXACTE qui l'a produite : c'est ce
+   qui permet de savoir, plus tard, si elle est de la version demandée. */
+function marquer(rep, source) {
+  const h = new Headers(rep.headers);
+  h.set('X-Vrt-Source', source);
+  return rep.blob().then((b) => new Response(b, { status: rep.status, statusText: rep.statusText, headers: h }));
+}
+
 self.addEventListener('install', (e) => {
   /* `addAll` échoue en bloc si UN seul fichier manque, et l'installation
      entière est perdue — donc plus de hors ligne du tout, pour un fichier
      renommé. On met de côté un par un, et on continue. */
   e.waitUntil(caches.open(CACHE).then((c) => Promise.all(
-    COQUILLE.map((u) => c.add(u).catch(() => null))
+    COQUILLE.map((u) => fetch(new Request(u, { cache: 'reload' }))
+      .then((rep) => (rep && rep.ok ? marquer(rep, cleDe(u)).then((m) => c.put(cleDe(u), m)) : null))
+      .catch(() => null))
   )).then(() => self.skipWaiting()));
 });
 
@@ -132,22 +179,34 @@ self.addEventListener('fetch', (e) => {
 
   if (!estCoquille && !estApercu && !estOuvrage && !estOutil && !estHabillage) return;
 
-  e.respondWith(
-    caches.match(req, { ignoreSearch: true }).then((cache) => {
-      /* Le rafraîchissement passe par le réseau SANS bloquer la réponse : la
-         page s'affiche depuis le cache, la version neuve arrive pour la
-         prochaine ouverture. `ignoreSearch` parce que la CI réécrit les `?v=`
-         à chaque déploiement — sans lui, chaque déploiement rendrait le cache
-         inutile et le hors ligne cesserait de fonctionner en silence. */
-      const frais = fetch(req).then((rep) => {
-        if (rep && rep.ok) {
-          const copie = rep.clone();
-          caches.open(CACHE).then((c) => c.put(req, copie)).catch(() => {});
-        }
-        return rep;
-      }).catch(() => null);
+  const cle = cleDe(req.url);
+  e.respondWith(caches.open(CACHE).then((c) => c.match(cle).then((cache) => {
+    /* Le réseau, dont la réponse ÉCRASE la copie de ce fichier (une clé par
+       fichier : voir l'en-tête ①②). Pas de `ignoreSearch` : la clé n'a plus
+       de requête, il n'y a plus rien à ignorer. */
+    const frais = () => fetch(req).then((rep) => {
+      if (rep && rep.ok) {
+        const copie = rep.clone();
+        const range = marquer(copie, req.url).then((m) => c.put(cle, m)).catch(() => {});
+        /* `waitUntil` lève une erreur si l'événement est déjà clos : la copie
+           se fait quand même, on ne garantit simplement plus qu'elle aboutisse
+           avant la mise en veille du service worker. */
+        try { e.waitUntil(range); } catch (_) { /* événement clos */ }
+      }
+      return rep;
+    }).catch(() => null);
 
-      return cache || frais.then((r) => r || Response.error());
-    })
-  );
+    /* Une version demandée (`?v=`) qui n'est pas celle qu'on garde = un
+       déploiement a eu lieu depuis. Réseau d'abord, copie en secours. */
+    const demandeVersion = new URL(req.url).searchParams.has('v');
+    const perimee = cache && demandeVersion
+      && cache.headers.get('X-Vrt-Source') !== req.url;
+    if (!cache || perimee) {
+      return frais().then((r) => r || cache || Response.error());
+    }
+    /* Sinon, cache d'abord — la page s'ouvre sans réseau — et rafraîchi en
+       arrière-plan pour la prochaine ouverture. */
+    e.waitUntil(frais());
+    return cache;
+  })));
 });
