@@ -393,22 +393,25 @@
       </div>
       <a class="note" href="apercu.html?o=2nde" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
     </div>
+    <!-- 1ʳᵉ A, Tˡᵉ A, Tˡᵉ S&T : leurs sources ne portent AUCUN corrigé. « la
+         correction suit » y était une promesse que le cahier ne tient pas —
+         seuls 6ᵉ→3ᵉ et 2ⁿᵈᵉ en ont (corrige-<slug>.js). Corrigé le 22/09/2026. -->
     <div class="card cardlv" data-slug="1ere"><h3>Classe de 1ʳᵉ A</h3>
-      <p class="note">Livret interactif : l'élève répond dans la page, la correction suit.</p>
+      <p class="note">Livret interactif : l'élève répond dans la page, son travail est gardé.</p>
       <div class="duo">
         <a class="dl" href="1ere.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
       </div>
       <a class="note" href="apercu.html?o=1ere" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
     </div>
     <div class="card cardlv" data-slug="tle"><h3>Classe de Tˡᵉ A</h3>
-      <p class="note">Livret interactif : l'élève répond dans la page, la correction suit.</p>
+      <p class="note">Livret interactif : l'élève répond dans la page, son travail est gardé.</p>
       <div class="duo">
         <a class="dl" href="tle.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
       </div>
       <a class="note" href="apercu.html?o=tle" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
     </div>
     <div class="card cardlv" data-slug="est-tle"><h3>Classe de Tˡᵉ <small class="t">(S&amp;T)</small></h3>
-      <p class="note">Livret interactif de l'enseignement technique : l'élève répond dans la page, la correction suit.</p>
+      <p class="note">Livret interactif de l'enseignement technique : l'élève répond dans la page, son travail est gardé.</p>
       <div class="duo">
         <a class="dl" href="est-tle.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
       </div>
@@ -893,7 +896,9 @@
         + 'animation:lvnP 2.2s ease-out infinite}'
         + '@keyframes lvnP{0%{box-shadow:0 0 0 0 rgba(0,126,17,.45)}70%{box-shadow:0 0 0 9px rgba(0,126,17,0)}100%{box-shadow:0 0 0 0 rgba(0,126,17,0)}}'
         + '@media (prefers-reduced-motion:reduce){#lv-neufs .lvn-p{animation:none}}'
-        + '#lv-neufs .lvn-s{margin:0 0 12px;color:#5c666f;font-size:14px}'
+        // Centré comme le titre `h2.sec` qu'il suit : aligné à gauche sous un
+        // titre centré, il se lisait comme une ligne égarée.
+        + '#lv-neufs .lvn-s{margin:0 0 12px;color:#5c666f;font-size:14px;text-align:center}'
         + '#lv-neufs .lvn-l{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 8px}'
         + '#lv-neufs .lvn-c{flex:0 0 250px;scroll-snap-align:start;display:flex;gap:12px;align-items:center;'
         + 'background:#fff;border:1px solid #EEE6CF;border-radius:13px;padding:10px;text-decoration:none;color:inherit;'
@@ -1013,7 +1018,9 @@
         p.className = 'note';
         p.textContent = lecture
           ? 'Le cahier complet, à feuilleter page par page — leçons et corrigés modèles.'
-          : 'Livret interactif : l’élève répond dans la page, la correction suit.';
+          // Pas de « la correction suit » par défaut : la plupart des cahiers
+          // n'en ont pas, et cette carte ne sait pas lequel elle présente.
+          : 'Livret interactif : l’élève répond dans la page, son travail est gardé.';
         d.appendChild(p);
 
         var duo = document.createElement('div');
