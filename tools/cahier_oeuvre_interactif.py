@@ -639,6 +639,7 @@ def main():
             if sortie:
                 (sortie / ("booklet-%s.js" % cle)).write_text(contenu, encoding="utf-8")
             (EXTRAITS / ("extrait-%s.js" % cle)).write_text(ext, encoding="utf-8")
+            date = (cat["ouvrages"].get(cle) or {}).get("ajoute")
             cat["ouvrages"][cle] = {
                 "titre": titre + " — Cahier de l’œuvre intégrale",
                 "niveau": niveau, "prix": prix,
@@ -647,6 +648,9 @@ def main():
                 "kinds": ["livret"], "mode": "interactif",
                 "pages": 0, "pagesLibres": 0,
             }
+            # La date de mise en vente se garde (badge « Nouveau »).
+            if date:
+                cat["ouvrages"][cle]["ajoute"] = date
         total += 1
 
     if not a.controle and total:

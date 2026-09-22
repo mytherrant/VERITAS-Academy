@@ -781,6 +781,8 @@ if ($action === 'catalogue') {
             // lui seul sait laquelle des deux formes existe.
             'lien' => (string) $etat['lien'],
             'couverture' => $couv,
+            // Date de mise en vente : la boutique en tire ses « Nouveautés ».
+            'ajoute' => (string) ($o['ajoute'] ?? ''),
         ];
     }
     lv_out(200, ['ok' => true, 'total' => count($out), 'ouvrages' => $out,

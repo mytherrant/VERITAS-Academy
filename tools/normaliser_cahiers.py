@@ -1109,6 +1109,11 @@ def ecrire_catalogue(faits: list[dict], prix: int) -> pathlib_Path:
             "pages": 0,
             "pagesLibres": 0,
         }
+        # La date de mise en vente se GARDE : c'est elle qui décide du badge
+        # « Nouveau » en boutique (tools/dates_catalogue.py). La réécrire à
+        # chaque passe ferait passer un cahier de fin août pour une nouveauté.
+        if (ancien.get(r["slug"]) or {}).get("ajoute"):
+            cat["ouvrages"][r["slug"]]["ajoute"] = ancien[r["slug"]]["ajoute"]
     # Un ouvrage déjà au catalogue mais absent de cette passe reste inscrit :
     # des codes ont pu être vendus dessus, et le retirer les fermerait.
     for slug, a in ancien.items():

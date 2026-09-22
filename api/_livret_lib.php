@@ -100,6 +100,12 @@ if (!defined('VRT_LIVRET_LIB')) {
                 'prixGuide' => (int) ($o['prixGuide'] ?? 0),
                 'pages'  => (int) ($o['pages'] ?? 0),          // mode lecture
                 'pagesLibres' => (int) ($o['pagesLibres'] ?? 0),
+                /* Date de mise en vente (AAAA-MM-JJ), lue dans l'historique
+                   par tools/dates_catalogue.py. Elle décide des « Nouveautés »
+                   de la boutique ; une valeur mal formée vaut « inconnue »,
+                   jamais « nouveau ». */
+                'ajoute' => preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($o['ajoute'] ?? ''))
+                            ? (string) $o['ajoute'] : '',
             ];
         }
         // Les cinq d'origine restent servis même si le catalogue les oublie :
@@ -215,6 +221,23 @@ if (!defined('VRT_LIVRET_LIB')) {
         if (!preg_match('/^window\.[A-Za-z_$][A-Za-z0-9_$]*\s*=\s*[\[{]/', $tete)) return false;
         // Une affectation complète se referme. Un transfert coupé, non.
         return (bool) preg_match('/[\]}]\s*;?\s*$/', $queue);
+    }
+
+    /** Cet ouvrage porte-t-il des corrigés ? Constaté sur le disque (la table
+     *  `corrige-<slug>.js` du dossier protégé), comme `disponible`.
+     *
+     *  Sert à ne PROMETTRE la correction que là où elle existe : la vitrine
+     *  décrivait les trente et un cahiers « avec correction immédiate », quand
+     *  cinq seulement en ont une. Même règle que `aCorriges` de
+     *  `livret.php?action=ouvrage` — une seule source pour la même question. */
+    function vrt_livret_a_corriges(string $slug): bool {
+        $dir = function_exists('lv_dir')
+             ? lv_dir()
+             : (defined('VRT_LIVRET_DONNEES')
+                ? (string) VRT_LIVRET_DONNEES
+                : dirname(__DIR__) . '/uploads/protected/livrets');
+        $slug = (string) preg_replace('/[^a-z0-9_-]/', '', strtolower($slug));
+        return $slug !== '' && is_file($dir . '/corrige-' . $slug . '.js');
     }
 
     /** ── EST-CE PUBLIÉ, ET OÙ CELA MÈNE-T-IL ? ────────────────────────────

@@ -1349,7 +1349,10 @@ def catalogue_ecrire(fiches: dict[str, dict]) -> None:
             pass
     cat.setdefault("ouvrages", {})
     for slug, fiche in fiches.items():
-        cat["ouvrages"][slug] = fiche
+        # La date de mise en vente se garde (badge « Nouveau », voir
+        # tools/dates_catalogue.py) : republier n'est pas remettre en vente.
+        date = (cat["ouvrages"].get(slug) or {}).get("ajoute")
+        cat["ouvrages"][slug] = dict(fiche, **({"ajoute": date} if date else {}))
     CATALOGUE.write_text(
         json.dumps(cat, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 

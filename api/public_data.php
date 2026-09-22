@@ -100,7 +100,12 @@ if ($backupFile === '' || !file_exists($backupFile)) {
                 'auteur' => 'Centre VÉRITAS',
                 'cls' => (string)($__x['niveau'] ?? ''),
                 'rayon' => 'Cahiers interactifs',
-                'etiquette' => '', 'desc' => 'Cahier à remplir en ligne, avec correction immédiate.',
+                'etiquette' => '',
+                // La correction n'est promise qu'où elle existe (voir plus bas).
+                'desc' => vrt_livret_a_corriges((string)$__s)
+                          ? 'Cahier à remplir en ligne, avec correction immédiate.'
+                          : 'Cahier à remplir en ligne, réponses enregistrées.',
+                'ajoute' => (string)($__x['ajoute'] ?? ''),
                 'prix' => (int)$__x['prix'], 'ancienPrix' => 0,
                 'pages' => (int)($__x['pages'] ?? 0), 'chaps' => 0,
                 'ico' => '', 'couleur' => '',
@@ -568,7 +573,19 @@ if (function_exists('vrt_livret_catalogue')) {
             'cls'        => vrt_pd_coupe((string)($__o['niveau'] ?? ''), 40),
             'rayon'      => 'Cahiers interactifs',
             'etiquette'  => '',
-            'desc'       => 'Cahier à remplir en ligne, avec correction immédiate.',
+            /* ⚠️ « AVEC CORRECTION IMMÉDIATE » ÉTAIT ÉCRIT SUR LES TRENTE ET UN.
+               Cinq cahiers seulement portent des corrigés (6ᵉ→3ᵉ et 2ⁿᵈᵉ) ;
+               les livrets du 2ⁿᵈ cycle, les neuf cahiers d'œuvre et les
+               éditions « Mon cahier de français » n'en ont aucun. Le même
+               défaut avait été retiré de l'aperçu gratuit et de l'écran de
+               paiement le 20/09 — il restait ici, sur la carte même. */
+            'desc'       => vrt_livret_a_corriges((string)$__slug)
+                            ? 'Cahier à remplir en ligne, avec correction immédiate.'
+                            : 'Cahier à remplir en ligne, réponses enregistrées.',
+            /* Date de mise en vente : c'est elle qui fait les « Nouveautés ».
+               Vraie par construction (tools/dates_catalogue.py la lit dans
+               l'historique) — la vitrine n'invente aucune nouveauté. */
+            'ajoute'     => (string)($__o['ajoute'] ?? ''),
             'prix'       => $__prix,
             'ancienPrix' => 0,
             'pages'      => (int)($__o['pages'] ?? 0),

@@ -12,7 +12,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-08-26"
     },
     "5e": {
       "titre": "Mon Cahier de français 5ᵉ",
@@ -25,7 +26,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-08-26"
     },
     "4e": {
       "titre": "Mon Cahier de français 4ᵉ",
@@ -38,7 +40,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-08-26"
     },
     "3e": {
       "titre": "Mon Cahier de français 3ᵉ (BEPC)",
@@ -51,7 +54,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-08-26"
     },
     "2nde": {
       "titre": "Mon Cahier de français 2ⁿᵈᵉ",
@@ -63,7 +67,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-08-27"
     },
     "1ere": {
       "titre": "Mon Cahier de français 1ʳᵉ A",
@@ -75,7 +80,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-08-27"
     },
     "tle": {
       "titre": "Mon Cahier de français Tˡᵉ A",
@@ -87,7 +93,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-08-27"
     },
     "est-tle": {
       "titre": "Cahier de français Tˡᵉ S&T",
@@ -99,7 +106,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-08-27"
     },
     "bord-6e": {
       "titre": "Bord — Cahier de français 6ᵉ",
@@ -111,7 +119,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-08-26"
     },
     "bord-5e": {
       "titre": "Bord — Cahier de français 5ᵉ",
@@ -123,7 +132,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-08-27"
     },
     "bord-4e": {
       "titre": "Bord — Cahier de français 4ᵉ",
@@ -135,7 +145,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-08-27"
     },
     "bord-3e": {
       "titre": "Bord — Cahier de français 3ᵉ",
@@ -147,7 +158,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-08-27"
     },
     "bord-2nde": {
       "titre": "Bord — Cahier de français 2ⁿᵈᵉ",
@@ -159,7 +171,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-08-27"
     },
     "bord-1ere": {
       "titre": "Bord — Cahier de français 1ʳᵉ",
@@ -171,7 +184,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-08-27"
     },
     "bord-tle": {
       "titre": "Bord — Cahier de français Tˡᵉ",
@@ -183,7 +197,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-08-27"
     },
     "oeuvre-balafon": {
       "titre": "Balafon — Cahier de l’œuvre intégrale",
@@ -194,7 +209,8 @@
       ],
       "mode": "interactif",
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-06"
     },
     "oeuvre-capitoline": {
       "titre": "Les Tribus de Capitoline — Cahier de l’œuvre intégrale",
@@ -205,7 +221,8 @@
       ],
       "mode": "interactif",
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-06"
     },
     "oeuvre-lionperle": {
       "titre": "Le Lion et la Perle — Cahier de l’œuvre intégrale",
@@ -216,7 +233,8 @@
       ],
       "mode": "interactif",
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-06"
     },
     "oeuvre-ngum": {
       "titre": "Ngum a Jemea — Cahier de l’œuvre intégrale",
@@ -227,7 +245,8 @@
       ],
       "mode": "interactif",
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-06"
     },
     "oeuvre-poemes": {
       "titre": "Poèmes sauvages éclairés au feu de brousse — Cahier de l’œuvre intégrale",
@@ -238,7 +257,8 @@
       ],
       "mode": "interactif",
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-06"
     },
     "oeuvre-stances": {
       "titre": "Stances et Poèmes — Cahier de l’œuvre intégrale",
@@ -249,7 +269,8 @@
       ],
       "mode": "interactif",
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-06"
     },
     "oeuvre-tartuffe": {
       "titre": "Tartuffe ou l’Imposteur — Cahier de l’œuvre intégrale",
@@ -260,7 +281,8 @@
       ],
       "mode": "interactif",
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-06"
     },
     "oeuvre-tenebres": {
       "titre": "Au cœur des ténèbres — Cahier de l’œuvre intégrale",
@@ -271,7 +293,8 @@
       ],
       "mode": "interactif",
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-06"
     },
     "oeuvre-vieuxnegre": {
       "titre": "Le Vieux Nègre et la Médaille — Cahier de l’œuvre intégrale",
@@ -282,7 +305,8 @@
       ],
       "mode": "interactif",
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-06"
     },
     "oeuvres-6e": {
       "titre": "Étude des œuvres intégrales — 6ᵉ",
@@ -295,7 +319,8 @@
       "prix": 1000,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-08"
     },
     "oeuvres-5e": {
       "titre": "Étude des œuvres intégrales — 5ᵉ",
@@ -308,7 +333,8 @@
       "prix": 1000,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-08"
     },
     "oeuvres-4e": {
       "titre": "Étude des œuvres intégrales — 4ᵉ",
@@ -321,7 +347,8 @@
       "prix": 1000,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-08"
     },
     "oeuvres-3e": {
       "titre": "Étude des œuvres intégrales — 3ᵉ",
@@ -334,7 +361,8 @@
       "prix": 1000,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-08"
     },
     "bord-2nde-ed1": {
       "titre": "Mon cahier de français 2ⁿᵈᵉ — 1ʳᵉ édition",
@@ -346,7 +374,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-20"
     },
     "bord-1ere-ed1": {
       "titre": "Mon cahier de français 1ʳᵉ — 1ʳᵉ édition",
@@ -358,7 +387,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-20"
     },
     "bord-tle-ed1": {
       "titre": "Mon cahier de français Tˡᵉ — 1ʳᵉ édition",
@@ -370,7 +400,8 @@
       "prix": 1500,
       "prixGuide": 0,
       "pages": 0,
-      "pagesLibres": 0
+      "pagesLibres": 0,
+      "ajoute": "2026-09-20"
     }
   }
 }

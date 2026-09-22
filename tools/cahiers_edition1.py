@@ -840,12 +840,16 @@ def main() -> int:
             (sortie / f"booklet-{slug}.js").write_text(contenu, encoding="utf-8")
         (EXTRAITS / f"extrait-{slug}.js").write_text(apercu, encoding="utf-8")
         couverture(a.source / spec["couv"], slug)
+        date = (cat["ouvrages"].get(slug) or {}).get("ajoute")
         cat["ouvrages"][slug] = {
             "titre": spec["titre"], "niveau": spec["niveau"], "mode": "interactif",
             # Pas de guide pour ces éditions : un code « guide » n'ouvrirait rien.
             "kinds": ["livret"], "prix": PRIX, "prixGuide": 0,
             "pages": 0, "pagesLibres": 0,
         }
+        # La date de mise en vente se garde (badge « Nouveau »).
+        if date:
+            cat["ouvrages"][slug]["ajoute"] = date
         faits += 1
 
     if faits:

@@ -1545,6 +1545,42 @@
     return c;
   }
 
+  /* ══ NOUVEAUTÉS — D'APRÈS LA DATE DE MISE EN VENTE, ET ELLE SEULE ══════════
+     Le badge « Nouveau » et le bandeau « Nouveautés » ne s'écrivent PAS à la
+     main : une nouveauté posée à la main se périme sans que personne y pense,
+     et la vitrine finit par annoncer « nouveau » un cahier de six mois. Ils
+     viennent du champ `ajoute` (AAAA-MM-JJ) que le serveur tire du catalogue,
+     lui-même lu dans l'historique du dépôt (tools/dates_catalogue.py) : le jour
+     où l'ouvrage est réellement entré en vente.
+     Passé le délai, le badge et le bandeau disparaissent seuls. Aucune date,
+     ou une date illisible : jamais « nouveau ». On ne fabrique rien.
+
+     ⚠️ QUATORZE JOURS, PAS TRENTE. Toute la boutique est entrée en vente
+     entre le 26/08 et le 20/09/2026 : à trente jours, les trente et un
+     ouvrages portaient « Nouveau » le 22/09 — et quand tout est nouveau, rien
+     ne l'est. Deux semaines isolent ce qui vient VRAIMENT d'arriver. */
+  var NOUVEAU_JOURS = 14;
+  var NOUVEAUTES_MAX = 8;          // le bandeau en montre huit au plus
+
+  function dateDe(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+    // Date LOCALE : `new Date('2026-09-20')` serait minuit UTC, donc la veille
+    // au soir à l'ouest de Greenwich, et « ajouté le 19 » pour certains.
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+  }
+
+  function joursDepuis(iso) {
+    var d = dateDe(iso);
+    if (!d) return Infinity;
+    var auj = new Date(); auj.setHours(0, 0, 0, 0);
+    return Math.round((auj - d) / 864e5);
+  }
+
+  function estNouveau(b) {
+    var j = joursDepuis(b && b.ajoute);
+    return j >= 0 && j <= NOUVEAU_JOURS;
+  }
+
   /* Une fiche de livre du panneau admin → une carte de la grille.
      Les noms de champs sont ceux du gabarit `manuels` (voir la maquette). */
   function carteDepuisLivre(b, rang) {
@@ -1575,8 +1611,12 @@
          honnête « Catalogue ». Inventer « Spécial examen » d'après un titre
          rangerait des livres au mauvais rayon sans que personne le voie. */
       categorie: b.rayon || (b.genre === 'roman' ? 'Littérature' : 'Catalogue'),
-      etiquette: rupture ? 'Rupture' : (b.etiquette || ''),
-      etiquetteFond: rupture ? '#8C2F39' : '#A84200',
+      /* Priorité : la rupture (on ne vend pas ce qu'on ne livre pas), puis
+         l'étiquette choisie par l'administration, puis « Nouveau » si la date
+         de mise en vente le dit. */
+      etiquette: rupture ? 'Rupture' : (b.etiquette || (estNouveau(b) ? 'Nouveau' : '')),
+      etiquetteFond: rupture ? '#8C2F39'
+                   : (!b.etiquette && estNouveau(b) ? '#007E11' : '#A84200'),
       titre: b.titre || '',
       type: b.desc || (b.auteur ? 'de ' + b.auteur : ''),
       prix: f(b.prix || 0),
@@ -1784,6 +1824,17 @@
     if (!livres || !livres.length) { masquerBoutique(); return; }
     if (!G.manuels || !G.filtres) { masquerBoutique(); return; }
 
+    /* À LA UNE : les nouveautés passent en tête, la plus récente d'abord ; le
+       reste garde l'ordre du catalogue. Tri STABLE fait à la main — tous les
+       navigateurs encore en circulation au Cameroun ne garantissent pas
+       celui de `Array.prototype.sort`. */
+    var neufs = [], autres = [];
+    for (var k = 0; k < livres.length; k++) (estNouveau(livres[k]) ? neufs : autres).push(livres[k]);
+    neufs.sort(function (a, b) { return String(b.ajoute).localeCompare(String(a.ajoute)); });
+    livres = neufs.concat(autres);
+    // Le bandeau est un plus : s'il échoue, la boutique doit s'afficher quand même.
+    try { poserNouveautes(neufs); } catch (e) {}
+
     var cartes = livres.map(carteDepuisLivre);
     var cats = filtresDepuisCartes(cartes);
 
@@ -1810,6 +1861,99 @@
     rendre('filtres', D.filtres[actif]);
     afficherManuels(actif);
     poser('nbManuels', String(D.manuels[actif].length));
+  }
+
+  /* ══ LE BANDEAU « NOUVEAUTÉS » ═══════════════════════════════════════════
+     Au-dessus des rayons : ce qui est entré en vente ces trente derniers
+     jours, le plus récent d'abord, avec sa date. C'est ce qui dit, au premier
+     coup d'œil, que la boutique VIT — à condition que ce soit vrai : aucun
+     titre récent, aucun bandeau. Un « Nouveautés » vide ou recyclé se
+     retournerait contre le vendeur.
+     Construit en DOM, jamais en innerHTML : les titres viennent du catalogue,
+     et un titre avec un chevron n'a pas à devenir du balisage. */
+  function poserNouveautes(neufs) {
+    var ancien = document.getElementById('vbq-neufs');
+    if (ancien && ancien.parentNode) ancien.parentNode.removeChild(ancien);
+    if (!neufs || !neufs.length) return;
+    var total = neufs.length;
+    neufs = neufs.slice(0, NOUVEAUTES_MAX);
+    var grille = document.querySelector('[data-vp="boutique"] .vbq-grid');
+    var hote = grille && grille.parentNode;
+    if (!hote) return;
+
+    if (!document.getElementById('vbq-neufs-css')) {
+      var st = document.createElement('style');
+      st.id = 'vbq-neufs-css';
+      st.textContent =
+        '#vbq-neufs{margin:0 0 30px;padding:20px 20px 16px;border-radius:18px;'
+        + 'background:linear-gradient(135deg,#FFF3E4 0%,#FFFFFF 70%);border:1.5px solid #F4D9BD}'
+        + '#vbq-neufs .vn-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 14px}'
+        + '#vbq-neufs .vn-t{font:700 20px Poppins,sans-serif;color:#001136;margin:0;display:flex;align-items:center;gap:9px}'
+        + '#vbq-neufs .vn-p{display:inline-block;width:9px;height:9px;border-radius:50%;background:#007E11;'
+        + 'box-shadow:0 0 0 0 rgba(0,126,17,.45);animation:vnP 2.2s ease-out infinite}'
+        + '@keyframes vnP{0%{box-shadow:0 0 0 0 rgba(0,126,17,.45)}70%{box-shadow:0 0 0 9px rgba(0,126,17,0)}100%{box-shadow:0 0 0 0 rgba(0,126,17,0)}}'
+        + '@media (prefers-reduced-motion:reduce){#vbq-neufs .vn-p{animation:none}}'
+        + '#vbq-neufs .vn-s{font:400 13.5px Poppins,sans-serif;color:#6E7385}'
+        + '#vbq-neufs .vn-l{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;'
+        + 'padding:2px 2px 8px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}'
+        + '#vbq-neufs .vn-c{flex:0 0 250px;scroll-snap-align:start;display:flex;gap:12px;align-items:center;'
+        + 'background:#fff;border:1px solid #EEE3D6;border-radius:14px;padding:10px;text-decoration:none;color:inherit;'
+        + 'transition:transform .18s,box-shadow .18s}'
+        + '#vbq-neufs .vn-c:hover,#vbq-neufs .vn-c:focus-visible{transform:translateY(-2px);box-shadow:0 8px 22px rgba(168,66,0,.13)}'
+        + '#vbq-neufs .vn-i{flex:0 0 58px;height:78px;border-radius:7px;background:#F3E7D8 center/cover no-repeat;'
+        + 'box-shadow:0 2px 6px rgba(0,17,54,.12)}'
+        + '#vbq-neufs .vn-x{min-width:0;display:flex;flex-direction:column;gap:3px}'
+        + '#vbq-neufs .vn-b{align-self:flex-start;font:700 10.5px Poppins,sans-serif;letter-spacing:.5px;text-transform:uppercase;'
+        + 'color:#fff;background:#007E11;border-radius:100px;padding:2px 8px}'
+        + '#vbq-neufs .vn-n{font:600 14px/1.3 Poppins,sans-serif;color:#001136;display:-webkit-box;-webkit-line-clamp:2;'
+        + '-webkit-box-orient:vertical;overflow:hidden}'
+        + '#vbq-neufs .vn-d{font:400 12px Poppins,sans-serif;color:#6E7385}'
+        + '#vbq-neufs .vn-m{font:700 13.5px Poppins,sans-serif;color:#A84200}'
+        + '@media (max-width:620px){#vbq-neufs{padding:16px 14px 12px}#vbq-neufs .vn-c{flex-basis:78%}}';
+      document.head.appendChild(st);
+    }
+
+    var bloc = document.createElement('section');
+    bloc.id = 'vbq-neufs';
+    bloc.setAttribute('aria-labelledby', 'vbq-neufs-t');
+    var h = document.createElement('div'); h.className = 'vn-h';
+    var t = document.createElement('h2'); t.className = 'vn-t'; t.id = 'vbq-neufs-t';
+    var p = document.createElement('span'); p.className = 'vn-p'; p.setAttribute('aria-hidden', 'true');
+    t.appendChild(p); t.appendChild(document.createTextNode('Nouveautés'));
+    var s = document.createElement('span'); s.className = 'vn-s';
+    s.textContent = total + (total > 1 ? ' titres entrés' : ' titre entré')
+      + ' en boutique ces ' + NOUVEAU_JOURS + ' derniers jours';
+    h.appendChild(t); h.appendChild(s); bloc.appendChild(h);
+
+    var liste = document.createElement('div'); liste.className = 'vn-l';
+    for (var i = 0; i < neufs.length; i++) {
+      var b = neufs[i], c = carteDepuisLivre(b, i);
+      var a = document.createElement('a');
+      a.className = 'vn-c';
+      a.href = c.lien || c.acheter || '#boutique';
+      var img = document.createElement('span'); img.className = 'vn-i';
+      // La VIGNETTE (460 px) plutôt que la couverture pleine : le bandeau en
+      // affiche une dizaine, et la page se charge souvent en 3G.
+      var couv = String(b.couv || '');
+      if (couv) img.style.backgroundImage = 'url("' + couv.replace(/(\/livret_[a-z0-9-]+)\.jpg$/, '$1_v.jpg').replace(/"/g, '') + '")';
+      var x = document.createElement('span'); x.className = 'vn-x';
+      var bd = document.createElement('span'); bd.className = 'vn-b';
+      var j = joursDepuis(b.ajoute);
+      bd.textContent = j === 0 ? 'Aujourd’hui' : (j === 1 ? 'Hier' : 'Nouveau');
+      var n = document.createElement('span'); n.className = 'vn-n'; n.textContent = b.titre || '';
+      var d = document.createElement('span'); d.className = 'vn-d';
+      var dd = dateDe(b.ajoute);
+      d.textContent = 'En boutique depuis le ' + (dd ? dd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '');
+      var pr = document.createElement('span'); pr.className = 'vn-m'; pr.textContent = b.prix > 0 ? f(b.prix) : '';
+      x.appendChild(bd); x.appendChild(n); x.appendChild(d); if (b.prix > 0) x.appendChild(pr);
+      a.appendChild(img); a.appendChild(x);
+      liste.appendChild(a);
+    }
+    bloc.appendChild(liste);
+
+    // Avant la barre des rayons : c'est la première chose qu'on voit.
+    var barre = hote.firstElementChild;
+    hote.insertBefore(bloc, barre && barre !== grille ? barre : grille);
   }
 
   /* Le SEUL endroit qui dessine la grille. Il tient `sourcesAffichees` à jour
