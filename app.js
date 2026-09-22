@@ -33184,7 +33184,9 @@ function _pmChargerCommandes(){
       if(!box) return;
       if(!j || !j.ok){ box.innerHTML = '<div class="ib ibt"><span>⚠️</span><span>Commandes indisponibles : '+_esc((j&&j.error)||'erreur serveur')+'</span></div>'; return; }
       window._PM_ITEMS = j.items || [];
-      var att = (j.items||[]).filter(function(x){ return x.status==='declare' && !x.granted; });
+      // Tout ce qui n'est pas ACCORDÉ reste à traiter — y compris une commande
+      // dont la première validation a été bloquée (son motif s'affiche en rouge).
+      var att = (j.items||[]).filter(function(x){ return !x.granted; });
       var rec = (j.items||[]).filter(function(x){ return x.granted; }).slice(0, 8);
       var h = '<div style="border:2px solid #DC2626;border-radius:12px;padding:12px;background:#FEF2F2">'
         + '<div style="font-weight:800;color:#DC2626;margin-bottom:6px">☁️ Commandes à valider ('+att.length+')</div>'
@@ -45767,6 +45769,48 @@ function _cagVerifierTitulaire(){
     });
 }
 
+/* Contribution à une cagnotte par code marchand. La déclaration n'inscrit
+   RIEN : la contribution n'apparaît sur la cagnotte qu'après validation par
+   l'administration, qui voit l'argent arriver (payment_manuel.php « grant »
+   → cagRecordContribution, idempotent par référence). */
+function _cagPayerManuel(f, m, nom, tel, mot, info){
+  var chiffres = String(tel||'').replace(/\D+/g,'');
+  if(chiffres.length === 12 && chiffres.indexOf('237') === 0) chiffres = chiffres.slice(3);
+  if(!/^6\d{8}$/.test(chiffres)){
+    toast('Entrez votre numéro MTN ou Orange (9 chiffres) : c\'est lui qui nous permet de reconnaître votre paiement','warn');
+    var t = document.getElementById('cagTel'); if(t) t.focus(); return;
+  }
+  var ref = 'CAG' + (f.token||'').substring(0,6).toUpperCase() + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
+  var base = (typeof _payApiBase==='function') ? _payApiBase() : '/api';
+  toast('⏳ Enregistrement de votre contribution…','info');
+  fetch(base + '/payment_manuel.php?action=declarer', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ ref:ref, montant:m, intent:'cagnotte', targetId:f.token,
+      label:'Cagnotte '+(f.prenom||''), clientNom:nom, clientTel:chiffres, fundMessage:mot })
+  })
+  .then(function(r){ return r.json().catch(function(){ return {error:'Réponse illisible (HTTP '+r.status+')'}; }); })
+  .then(function(j){
+    if(!j || !j.ok){ toast('❌ '+((j&&j.error)||'Contribution impossible pour le moment'),'err'); return; }
+    var mm = info.momo || {}, oo = info.orange || {};
+    var wa = String((window.VERITAS_PAYMENTS||{}).whatsapp||'').replace(/[^0-9]/g,'');
+    var texte = 'Bonjour VÉRITAS, je viens de verser '+fmtN(m)+' FCFA à la cagnotte de '+(f.prenom||'')+'.\nRéférence : '+ref+'\nMon numéro : '+chiffres;
+    M('💚 Payez votre contribution', 'Référence : '+_esc(ref),
+      '<div style="padding:6px">'
+      + '<div style="border:2px solid #DC2626;background:#FEF2F2;color:#7F1D1D;border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:1.6;margin-bottom:12px">'
+      +   '<strong style="color:#DC2626">Paiement par code marchand</strong> au nom de <strong>'+_esc(info.titulaire||'VERITAS EDUCATION')+'</strong>. '
+      +   'Votre contribution apparaîtra sur la cagnotte <strong>dès que nous aurons vu votre paiement</strong>, au plus tard sous 24 h.'
+      + '</div>'
+      + '<div style="font-family:Montserrat,sans-serif;font-size:24px;font-weight:800;text-align:center;color:var(--ink);margin-bottom:10px">'+fmt(m)+'</div>'
+      + (mm.codeMarchand ? '<div style="border:2px solid #FFCB05;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:12.5px"><strong>MTN MoMo</strong> — code marchand <strong style="font-family:monospace;font-size:16px">'+_esc(mm.codeMarchand)+'</strong><br>'+_esc(mm.ussd||'')+' → Paiement marchand → '+_esc(mm.codeMarchand)+' → '+fmtN(m)+' F</div>' : '')
+      + (oo.codeMarchand ? '<div style="border:2px solid #FF6600;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:12.5px"><strong>Orange Money</strong> — code marchand <strong style="font-family:monospace;font-size:16px">'+_esc(oo.codeMarchand)+'</strong><br>'+_esc(oo.ussd||'')+' → Paiement marchand → '+_esc(oo.codeMarchand)+' → '+fmtN(m)+' F</div>' : '')
+      + (wa ? '<a href="https://wa.me/'+wa+'?text='+encodeURIComponent(texte)+'" target="_blank" rel="noopener" class="btn" style="display:block;text-align:center;background:#25d366;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;text-decoration:none;margin-top:6px">J\'ai payé — prévenir VÉRITAS sur WhatsApp</a>' : '')
+      + '</div>',
+      '<button class="btn bo" onclick="cm()">Fermer</button>');
+  })
+  .catch(function(){ toast('❌ Connexion impossible — réessayez','err'); });
+}
+window._cagPayerManuel = _cagPayerManuel;
+
 function _cagPayer(){
   var f = window._CAG.fund;
   if(!f){ toast('Cagnotte non chargée','warn'); return; }
@@ -45778,6 +45822,19 @@ function _cagPayer(){
 
   if(m < 500){ toast('Montant minimum : 500 FCFA','warn'); return; }
   if(!nom){ toast('Indiquez votre nom — il apparaîtra sur la cagnotte','warn'); var n=document.getElementById('cagNom'); if(n)n.focus(); return; }
+  /* 21/09/2026 — passerelle hors service : la contribution est DÉCLARÉE et
+     réglée par code marchand. Sans cette branche, le donateur lisait « le
+     paiement en ligne n'est pas encore actif » et repartait : la cagnotte
+     d'un élève cessait de recevoir quoi que ce soit, sans que personne le voie. */
+  var _sondeC = window._VRT_CAMPAY;
+  // La sonde part en différé au démarrage (jusqu'à 4 s) : un donateur rapide
+  // cliquerait avant elle et tomberait sur l'ancien parcours. On l'attend.
+  if(!_sondeC && !window._cagSondeAttendue && typeof _payCampayProbe==='function'){
+    window._cagSondeAttendue = true;
+    _payCampayProbe().then(function(){ _cagPayer(); }, function(){ _cagPayer(); });
+    return;
+  }
+  if(_sondeC && _sondeC.horsService){ _cagPayerManuel(f, m, nom, tel, mot, _sondeC.manuel || {}); return; }
   var _redir = (typeof _payFlowIsRedirect==='function') && _payFlowIsRedirect();
   // Page de paiement hébergée : le donateur peut régler par carte ou PayPal
   // (utile pour la diaspora, qui n'a pas toujours un numéro camerounais).

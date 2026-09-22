@@ -692,6 +692,16 @@ jobs:
       - name: 📲 L'acheteur repart-il avec son code ?
         run: node tests/banc_remise_whatsapp.cjs
 
+      # ── 🏦 UNE SEULE VÉRITÉ SUR LES COMPTES MARCHANDS (21/09/2026) ──────
+      #    Les codes marchands VERITAS EDUCATION vivent à deux endroits :
+      #    VERITAS_PAYMENTS (app.js) et camerpayManuelInfo() (servie par la
+      #    sonde aux cahiers, à la vitrine et à l'Atelier). Changer l'un sans
+      #    l'autre enverrait la moitié des clients sur l'ancien compte, sans
+      #    une erreur nulle part. Le banc refuse aussi toute copie en dur dans
+      #    les pages publiques. Éprouvé par 4 mutations le 22/09.
+      - name: 🏦 Les deux sources des codes marchands concordent-elles ?
+        run: node tests/banc_codes_marchands.cjs
+
       # ── 🎨 UNE SEULE COULEUR D'ACTION ? La doctrine LWS tient en une phrase :
       #    l'or #FFC93C pour le geste d'achat, encre navy dessus, jamais
       #    décoratif. La vitrine et les 133 pages de veritas-pages.css la

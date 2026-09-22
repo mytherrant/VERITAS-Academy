@@ -44,6 +44,7 @@
 
 require_once __DIR__ . '/config_sync.php';   // CORS allowlist + API_SECRET + requireAuth()
 require_once __DIR__ . '/_auth_lib.php';     // vrt_grant_entitlement_to_file()
+require_once __DIR__ . '/_pay_funds_lib.php'; // cagLoad(), cagRecordContribution() — cagnottes
 
 header('X-Content-Type-Options: nosniff');
 
@@ -138,6 +139,8 @@ function pmEtat(array $in, array $prev) {
         // Le moyen réellement employé, pour le rapprochement comptable :
         // « momo », « orange », « especes », « virement »…
         'moyen'       => (string) ($in['moyen'] ?? ''),
+        // Cagnotte : le petit mot du donateur, affiché avec sa contribution.
+        'fundMessage' => substr(trim((string) ($in['fundMessage'] ?? '')), 0, 200),
         'status'      => 'paid',
         'provider'    => 'manuel',
         'mode'        => 'manuel',
@@ -161,7 +164,25 @@ function pmEtat(array $in, array $prev) {
    définitivement la transaction de toute reprise — argent encaissé, accès
    fermé, et plus personne derrière. */
 function pmOctroyer(array $state, $path) {
-    $g = vrt_grant_entitlement_to_file($state);
+    /* CAGNOTTE : ce n'est pas un droit qu'on ouvre, c'est une contribution
+       qu'on inscrit — même aiguillage que camerpayGrant(). La traduire dans
+       les trois issues de l'octroi (changed / deja / bloque) garde le reste
+       du circuit identique : drapeau `granted`, liste, bouton Réessayer. */
+    if (($state['intent'] ?? '') === 'cagnotte') {
+        try { $r = cagRecordContribution($state); }
+        catch (\Throwable $e) { $r = ['ok' => false, 'reason' => $e->getMessage()]; }
+        $g = [
+            'ok'      => true,
+            'changed' => !empty($r['ok']) && empty($r['already']),
+            'deja'    => !empty($r['already']),
+            'bloque'  => empty($r['ok']),
+            'msg'     => !empty($r['ok'])
+                ? (!empty($r['already']) ? 'Contribution déjà inscrite' : 'Contribution inscrite sur la cagnotte')
+                : ('Cagnotte : ' . ($r['reason'] ?? 'échec')),
+        ];
+    } else {
+        $g = vrt_grant_entitlement_to_file($state);
+    }
 
     $state['grant']    = $g;
     $state['grant_at'] = date('c');
@@ -270,6 +291,14 @@ if ($action === 'declarer' && $method === 'POST') {
 
     $cible = substr((string) ($in['targetId'] ?? ''), 0, 80);
 
+    // Une contribution à une cagnotte inexistante ou close serait encaissée
+    // puis impossible à inscrire : on refuse AVANT que le donateur ne paie.
+    if ($intent === 'cagnotte') {
+        $fund = cagLoad($cible);
+        if (!$fund) pmOut(['error' => 'Cette cagnotte est introuvable.'], 404);
+        if (($fund['statut'] ?? 'ouverte') !== 'ouverte') pmOut(['error' => 'Cette cagnotte est close : elle ne reçoit plus de contributions.'], 409);
+    }
+
     /* ── CODE AMI + PRIX, VÉRIFIÉS AVANT QUE L'ACHETEUR NE PAIE ─────────────
        Même évaluation, mot pour mot, que l'initiation de payment_camerpay.php.
        Sans elle, le filleul qui voit « 1 350 F » paierait 1 350 F — et
@@ -325,6 +354,7 @@ if ($action === 'declarer' && $method === 'POST') {
         'label'       => substr(trim((string) ($in['label'] ?? '')), 0, 140),
         'lignes'      => (isset($in['lignes']) && is_array($in['lignes'])) ? array_slice($in['lignes'], 0, 30) : null,
         'moyen'       => in_array(($in['moyen'] ?? ''), ['momo', 'orange'], true) ? $in['moyen'] : '',
+        'fundMessage' => (string) ($in['fundMessage'] ?? ''),
     ], []);
     // Une déclaration n'est PAS un paiement : l'état le dit en clair, pour
     // qu'aucune relecture ne la prenne pour un encaissement confirmé.
@@ -360,28 +390,35 @@ if ($action === 'grant' && $method === 'POST') {
     $path = pmPath($refFic);
     $prev = pmLire($path);
 
-    /* Une commande DÉCLARÉE par l'acheteur se valide avec sa seule référence :
-       l'administration n'a rien à ressaisir, donc rien à mal ressaisir. Ce que
-       le corps de la requête précise (validation depuis l'application, qui
-       connaît déjà la tentative) l'emporte champ par champ. */
-    if ($prev && ($prev['status'] ?? '') === 'declare') {
-        foreach (['intent', 'targetId', 'accountId', 'montant', 'clientNom', 'clientTel',
-                  'clientEmail', 'label', 'lignes', 'moyen'] as $k) {
-            if (!isset($in[$k]) || $in[$k] === '' || $in[$k] === null) $in[$k] = $prev[$k] ?? null;
-        }
-    }
-    if (trim((string) ($in['intent'] ?? '')) === '') pmOut(['error' => 'intent requis'], 400);
-    if ((int) ($in['montant'] ?? 0) <= 0)  pmOut(['error' => 'montant requis'], 400);
-
-    /* IDEMPOTENT. L'administrateur re-clique, la fenêtre se rouvre, la synchro
-       rejoue : rien de tout cela ne doit émettre un second code ni recréditer
-       un parrain. Le fichier d'état tranche avant tout travail. */
+    /* IDEMPOTENT — ET EN PREMIER. L'administrateur re-clique, la fenêtre se
+       rouvre, la synchro rejoue : rien de tout cela ne doit émettre un second
+       code ni recréditer un parrain. Ce contrôle passait APRÈS la vérification
+       des champs ; une commande déjà validée, re-cliquée avec sa seule
+       référence, répondait donc « intent requis » au lieu de « déjà validé »
+       (trouvé par le banc le 22/09). Le fichier d'état tranche avant tout. */
     if (!empty($prev['granted'])) {
         pmOut(['ok' => true, 'deja' => true, 'changed' => false,
                'msg'      => 'Déjà accordé le ' . ($prev['granted_at'] ?? '?'),
                'a_regler' => !empty($prev['a_regler']),
                'remise'   => ($prev['grant']['remise'] ?? null)]);
     }
+
+    /* Une commande DÉCLARÉE par l'acheteur se valide avec sa seule référence :
+       l'administration n'a rien à ressaisir, donc rien à mal ressaisir. Ce que
+       le corps de la requête précise (validation depuis l'application, qui
+       connaît déjà la tentative) l'emporte champ par champ.
+       Vrai pour TOUTE commande pas encore accordée, pas seulement au statut
+       « declare » : un premier essai BLOQUÉ (compte introuvable…) fait passer
+       l'état à « paid » sans rien ouvrir, et un second essai par la seule
+       référence doit encore retrouver l'intent, la cible et le montant. */
+    if ($prev) {
+        foreach (['intent', 'targetId', 'accountId', 'montant', 'clientNom', 'clientTel',
+                  'clientEmail', 'label', 'lignes', 'moyen', 'fundMessage'] as $k) {
+            if (!isset($in[$k]) || $in[$k] === '' || $in[$k] === null) $in[$k] = $prev[$k] ?? null;
+        }
+    }
+    if (trim((string) ($in['intent'] ?? '')) === '') pmOut(['error' => 'intent requis'], 400);
+    if ((int) ($in['montant'] ?? 0) <= 0)  pmOut(['error' => 'montant requis'], 400);
 
     list($state, $g) = pmOctroyer(pmEtat(array_merge($in, ['ref' => $refBrut]), $prev), $path);
 
@@ -452,7 +489,10 @@ if ($action === 'list' && ($method === 'GET' || $method === 'POST')) {
         $s = pmLire($f);
         if (!$s) continue;
         if (!empty($s['a_regler']) && empty($s['granted'])) $bloques++;
-        if (($s['status'] ?? '') === 'declare' && empty($s['granted'])) $enAttente++;
+        // « En attente » = tout ce qui n'est pas ACCORDÉ : une commande dont le
+        // premier essai a été bloqué reste à traiter, elle ne doit pas sortir
+        // de la file parce que son statut est passé à « paid ».
+        if (empty($s['granted'])) $enAttente++;
         $out[] = [
             'ref'        => (string) ($s['ref'] ?? ''),
             'intent'     => (string) ($s['intent'] ?? ''),

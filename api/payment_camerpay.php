@@ -834,7 +834,30 @@ if ($action === 'status' && $method === 'GET') {
     if (!$ref) jsonRespCy(['error' => 'ref requise'], 400);
 
     $stateFile = $stateDir . _safeRefCamerpay($ref) . '.json';
-    if (!file_exists($stateFile)) jsonRespCy(['status' => 'unknown', 'ref' => $ref]);
+    if (!file_exists($stateFile)) {
+        /* ── COMMANDE PAYÉE PAR CODE MARCHAND (21/09/2026) ─────────────────
+           Tous les tunnels suivent un paiement en interrogeant CETTE action :
+           l'Atelier (_sonderPaiement, _reconcilierPaiements), les cahiers
+           (ecranAttente, repriseAchat), l'application. Plutôt que d'apprendre
+           à chacun un second point de suivi, on répond ici pour les commandes
+           déclarées dans api/payment_manuel.php : « paid » une fois validées
+           par l'administration, « pending » tant qu'elles attendent.
+           Rien d'autre ne sort — cette action n'est pas authentifiée. */
+        if (preg_match('/^[A-Za-z0-9._-]{4,64}$/', $ref) && strpos($ref, '..') === false) {
+            $fm = __DIR__ . '/data/payments_manuel/manuel_' . $ref . '.json';
+            if (is_file($fm)) {
+                $m = json_decode((string) @file_get_contents($fm), true) ?: [];
+                jsonRespCy([
+                    'ref'     => $ref,
+                    'status'  => !empty($m['granted']) ? 'paid' : 'pending',
+                    'paid_at' => !empty($m['granted']) ? ($m['granted_at'] ?? null) : null,
+                    'manuel'  => true,
+                    'intent'  => $m['intent'] ?? 'generic',
+                ]);
+            }
+        }
+        jsonRespCy(['status' => 'unknown', 'ref' => $ref]);
+    }
 
     $state = json_decode(file_get_contents($stateFile), true) ?: [];
     $age   = time() - strtotime($state['created_at'] ?? 'now');

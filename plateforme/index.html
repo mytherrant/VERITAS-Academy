@@ -4432,9 +4432,9 @@ class Component extends DCLogic {
      le suivi des qu'il revenait : il avait paye, rien ne s'ouvrait. La file
      est donc ecrite sur le disque et rejouee a chaque demarrage. */
   _attentes(){try{return this._load('minesec_pay_attente',[])||[];}catch(e){return [];}}
-  _ajouterAttente(ref,planId){
+  _ajouterAttente(ref,planId,manuel){
     const l=this._attentes().filter(x=>x.ref!==ref);
-    l.push({ref:ref,planId:planId,ts:Date.now()});
+    l.push({ref:ref,planId:planId,ts:Date.now(),manuel:!!manuel});
     this._save('minesec_pay_attente',l);
   }
   _retirerAttente(ref){
@@ -4447,8 +4447,13 @@ class Component extends DCLogic {
     const l=this._attentes();
     if(!l.length)return;
     const limite=24*3600*1000;
+    /* Paiement par code marchand : c'est un HUMAIN qui valide, pas une
+       passerelle. On promet « au plus tard sous 24 h » ; abandonner la
+       reference a 24 h pile ferait perdre l'activation de celui qu'on aurait
+       valide a 24 h 10. Sept jours, puis le serveur reste la reference. */
+    const limiteManuel=7*24*3600*1000;
     l.forEach(a=>{
-      if(Date.now()-(a.ts||0)>limite){this._retirerAttente(a.ref);return;}
+      if(Date.now()-(a.ts||0)>(a.manuel?limiteManuel:limite)){this._retirerAttente(a.ref);return;}
       fetch(this._apiUrl('payment_camerpay.php')+'?action=status&ref='+encodeURIComponent(a.ref))
         .then(r=>r.ok?r.json():Promise.reject(new Error('http')))
         .then(j=>{
@@ -6485,6 +6490,9 @@ class Component extends DCLogic {
           /* 21/09/2026 : CamerPay hors service, encaissement par code marchand.
              Ce n'est pas une panne a taire, c'est un mode a ANNONCER (en rouge). */
           hors:!!j.horsService,
+          // Les codes marchands viennent du serveur (une seule source), jamais
+          // d'une copie ecrite ici qui finirait par dater.
+          manuel:j.manuel||null,
           /* Le serveur nomme ce champ `reason`, pas `message` : on lisait une
              cle qui n'existe pas, donc le diagnostic qu'il prend soin de
              formuler (KYC en attente, mode test, jeton absent) n'atteignait
@@ -6626,6 +6634,20 @@ class Component extends DCLogic {
        un montant plus bas que celui qu'on vient d'afficher, et le parrain
        toucherait sur un rabais jamais consenti. */
     if(_remiseVaut)_corps.code=_stp.payCode;
+    /* ── PASSERELLE HORS SERVICE (21/09/2026) : CODE MARCHAND ──────────────
+       Meme corps, meme remise, mais pas de page de paiement a ouvrir : la
+       commande est DECLAREE, l'enseignant paie depuis son telephone, et
+       l'abonnement s'ouvre tout seul quand l'administration a vu l'argent
+       (le suivi passe par ?action=status, qui connait les commandes
+       manuelles). La fenetre ouverte pendant le clic ne sert plus : on la
+       referme avant qu'elle ne reste blanche derriere l'Atelier. */
+    const _PPh=this.state.payProvider;
+    if(_PPh&&_PPh.hors){
+      if(fenetre){try{fenetre.close();}catch(e){}}
+      lacher();
+      this._payerManuel(ref,plan,_corps);
+      return;
+    }
     fetch(this._apiUrl('payment_camerpay.php')+'?action=init',{
       method:'POST',headers:entetes,
       body:JSON.stringify(_corps)})
@@ -6661,6 +6683,50 @@ class Component extends DCLogic {
         }})
       .catch(()=>{if(fenetre)fenetre.close();lacher();
         this.setState({payBusy:false,payErr:'Serveur d\u2019encaissement injoignable. Aucun montant n\u2019a \u00e9t\u00e9 pr\u00e9lev\u00e9.'});});
+  }
+  /* Commande par code marchand : enregistree cote serveur (montant et code
+     ami verifies AVANT que l'enseignant ne paie), puis suivie jusqu'a la
+     validation. Rien ne s'ouvre tant que l'administration n'a pas vu
+     l'argent : `declarer` n'accorde rien. */
+  _payerManuel(ref,plan,corps){
+    const deja=this.state.payManuel;
+    if(deja&&deja.planId===plan.id){this.setState({payBusy:false});return;}
+    fetch(this._apiUrl('payment_manuel.php')+'?action=declarer',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(corps)})
+      .then(r=>r.json().then(j=>({statut:r.status,corps:j})))
+      .then(({corps:j})=>{
+        if(!j||!j.ok){
+          this.setState({payBusy:false,payErr:(j&&j.error)||'La commande n’a pas pu être enregistrée. Écrivez-nous sur WhatsApp.'});
+          return;}
+        this._ajouterAttente(ref,plan.id,true);
+        this.setState({payBusy:false,payErr:'',
+          payManuel:{ref:ref,planId:plan.id,montant:j.montant||corps.montant}});
+        this._sonderManuel(ref,0);
+      })
+      .catch(()=>this.setState({payBusy:false,
+        payErr:'Serveur injoignable : la commande n’a pas été enregistrée. Aucun montant ne vous est demandé pour l’instant.'}));
+  }
+  /* Une validation humaine prend des minutes, parfois des heures : 15 s x 240
+     couvrent une heure d'onglet ouvert ; au-dela, _reconcilierPaiements
+     reprend a chaque demarrage pendant sept jours. */
+  _sonderManuel(ref,essai){
+    if(essai>240||!this.state.payManuel||this.state.payManuel.ref!==ref)return;
+    setTimeout(()=>{
+      fetch(this._apiUrl('payment_camerpay.php')+'?action=status&ref='+encodeURIComponent(ref))
+        .then(r=>r.ok?r.json():Promise.reject(new Error('http')))
+        .then(j=>{
+          if(String(j.status||'').toLowerCase()==='paid'){
+            // Le plan vient de la commande, pas de `paySelected` : l'enseignant
+            // a pu fermer la fenetre de paiement pendant l'attente.
+            const planId=(this.state.payManuel||{}).planId;
+            this._retirerAttente(ref);
+            this.setState({payManuel:null});
+            this._activerPlanPaye(planId);
+            if(typeof this._toastPaiement==='function')this._toastPaiement();
+            return;}
+          this._sonderManuel(ref,essai+1);})
+        .catch(()=>this._sonderManuel(ref,essai+1));
+    },15000);
   }
   /* Filet : le webhook confirme normalement tout seul, mais s'il se perd le
      sondage rattrape. On s'arrete au bout de 5 minutes plutot que de tourner
@@ -9154,7 +9220,16 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
          seule chose utile qu'elles portaient, vit désormais dans la carte
          d'invitation de l'écran Équipe. */
       /* --- paiement CamerPay --- */
-      payBanner:PP===null?'V\u00e9rification du service d\u2019encaissement\u2026'
+      /* Commande deja enregistree (code marchand) : on dit exactement quoi
+         payer, et qu'il n'y a plus rien d'autre a faire que d'attendre ici. */
+      payBanner:(st.payManuel&&PP&&PP.hors&&PP.manuel)
+        ?('\ud83d\udd34 Commande enregistr\u00e9e \u2014 r\u00e9f\u00e9rence '+st.payManuel.ref+'. Payez '
+          +String(st.payManuel.montant||'').replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+' FCFA par code marchand au nom de '
+          +(PP.manuel.titulaire||'VERITAS EDUCATION')+' : '
+          +'MTN MoMo '+((PP.manuel.momo||{}).codeMarchand||'')+' ('+((PP.manuel.momo||{}).ussd||'')+' \u2192 Paiement marchand) ou Orange Money '
+          +((PP.manuel.orange||{}).codeMarchand||'')+' ('+((PP.manuel.orange||{}).ussd||'')+' \u2192 Paiement marchand). '
+          +'Votre abonnement s\u2019ouvrira ici tout seul d\u00e8s que nous aurons vu votre paiement \u2014 au plus tard sous 24 h. Vous pouvez fermer cette fen\u00eatre.')
+        :PP===null?'V\u00e9rification du service d\u2019encaissement\u2026'
         :(PP.ok?('Paiement s\u00e9curis\u00e9 par CamerPay'+(PP.mode?(' \u2014 mode '+PP.mode):'')+'. Vous serez redirig\u00e9 vers sa page pour choisir Orange Money, MTN MoMo ou la carte.')
               :(PP.hors?('\ud83d\udd34 '+PP.message)
                 :('Encaissement indisponible \u2014 '+(PP.message||'le service n\u2019est pas configur\u00e9 sur ce serveur.')))),
