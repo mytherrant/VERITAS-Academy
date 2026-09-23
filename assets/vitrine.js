@@ -175,6 +175,14 @@
 
   /* ── Navigation entre les sept écrans ──────────────────────────────────── */
   function aller(page) {
+    /* Ce script tourne aussi sur des pages qui reprennent la barre de la
+       vitrine (plan.html, constellation.html…) mais n'ont aucun écran
+       [data-vp] : rien à y basculer, c'est une redirection vers l'accueil
+       qu'il faut, pas un défilement interne. */
+    if (!document.querySelector('[data-vp]')) {
+      location.href = page === 'accueil' ? '/' : '/#' + page;
+      return;
+    }
     S.page = page; S.plus = false; S.burger = false;
     var secs = document.querySelectorAll('[data-vp]');
     for (var i = 0; i < secs.length; i++) {
@@ -594,7 +602,7 @@
     ambassaOutil: function (el) { ambassaOutil(el); },
     nouvelleCitation: function () {
       S.cit = (S.cit + 1) % (D.citations || [{}]).length; S.citOn = true;
-      var c = D.citations[S.cit] || {};
+      var c = (D.citations && D.citations[S.cit]) || {};
       poser('citationTexte', c.t || ''); poser('citationAuteur', '— ' + (c.a || ''));
       panneau('vrtCit', true);
     },
@@ -2854,7 +2862,7 @@
     if (S.citOn && (D.citations || []).length) {
       setTimeout(function () {
         if (!S.citOn) return;                       // fermée entre-temps
-        var c = D.citations[S.cit] || {};
+        var c = (D.citations && D.citations[S.cit]) || {};
         poser('citationTexte', c.t || ''); poser('citationAuteur', '— ' + (c.a || ''));
         panneau('vrtCit', true);
         setTimeout(function () {
@@ -2870,7 +2878,7 @@
     setInterval(function () {
       if (!S.citOn) return;
       S.cit = (S.cit + 1) % (D.citations || [{}]).length;
-      var c = D.citations[S.cit] || {};
+      var c = (D.citations && D.citations[S.cit]) || {};
       poser('citationTexte', c.t || ''); poser('citationAuteur', '— ' + (c.a || ''));
     }, 45000);
 

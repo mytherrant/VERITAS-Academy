@@ -302,8 +302,13 @@ titre('⑦ Le plan du site porte la charte de la vitrine');
      intermédiaire du 16/09 l'écrivait `var(--t)`, et un contrôle qui aurait
      visé `--trait` l'aurait laissé passer. On exige donc la seule valeur
      permise, ce qui attrape toutes les autres. `border-radius` n'est pas une
-     bordure : le motif ne le lit pas. */
-  const bordures = [...style.matchAll(/border(?:-(?:top|right|bottom|left))?(?:-color)?\s*:\s*([^;}]+)/g)]
+     bordure : le motif ne le lit pas.
+     Le bloc « vitrine:habillage » (nav, méga-menu, pied recopiés de la
+     vitrine) est hors de ce contrôle : ses séparateurs gris sont ceux de la
+     vitrine elle-même. Il reste soumis au contrôle des couleurs ci-dessus. */
+  const styleCartes = (PLAN.match(/<style>([\s\S]*?)<\/style>/g) || [])
+    .filter((b) => !b.includes('/* vitrine:habillage')).join('\n');
+  const bordures = [...styleCartes.matchAll(/border(?:-(?:top|right|bottom|left))?(?:-color)?\s*:\s*([^;}]+)/g)]
     .map((m) => m[1].trim())
     .filter((v) => /var\(|#[0-9A-Fa-f]{3,8}\b/.test(v) && !/^(0|none)$/.test(v))
     .filter((v) => /var\(/.test(v) || (v.match(/#[0-9A-Fa-f]{3,8}\b/g) || [])

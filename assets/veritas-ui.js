@@ -258,6 +258,10 @@
   var WA_NUM = '237697637739';
   function fabWhatsApp() {
     if (document.querySelector('.vrt-wa-fab')) return;
+    /* Page habillée comme la vitrine : ses bulles (Ambassa, thème, langue)
+       occupent déjà ce coin, et la vitrine ne porte pas de bulle WhatsApp.
+       Le contact passe alors par le lien « Contact » de son pied. */
+    if (document.getElementById('vrtNav')) return;
     var titre = (document.title || '').split('—')[0].trim().substring(0, 70);
     var msg = 'Bonjour VÉRITAS. Je consulte « ' + titre + ' » et j\'ai une question.';
     var a = document.createElement('a');
