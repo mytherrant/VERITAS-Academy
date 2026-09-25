@@ -240,6 +240,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'PUT
         }
     }
 
+    /* ── 🛟 PRÉSERVER LES MESSAGES DU FORUM ÉCRITS CÔTÉ SERVEUR ──────────────
+       Les élèves écrivent dans le forum des classes par api/student_data.php
+       (messages et réponses marqués `srv`). La copie de l'administrateur ne
+       les contient que s'il a rafraîchi depuis : sans cette règle, sa
+       synchro suivante les effaçait tous.
+       Même principe que les comptes ci-dessus, mais sans critère de date : le
+       `lastModified` poussé est l'heure de l'ENVOI, pas celle du chargement,
+       et effacerait donc tout message antérieur. On garde ce que la copie ne
+       contient pas, sauf ce que l'administrateur a explicitement supprimé
+       (identifiants listés dans `forumDeleted`, écrit par le client admin). */
+    if (is_file($DB_FILE) && isset($data['forumPosts']) && is_array($data['forumPosts'])) {
+        $srvDb2 = json_decode((string) @file_get_contents($DB_FILE), true);
+        $srvPosts = (is_array($srvDb2) && isset($srvDb2['forumPosts']) && is_array($srvDb2['forumPosts'])) ? $srvDb2['forumPosts'] : [];
+        if ($srvPosts) {
+            $supprimes = array_flip(array_map('strval', array_merge(
+                (array) ($data['forumDeleted'] ?? []), (array) ($srvDb2['forumDeleted'] ?? []))));
+            $idx = [];
+            foreach ($data['forumPosts'] as $i => $p) { if (is_array($p) && isset($p['id'])) $idx[(string) $p['id']] = $i; }
+            $gardes = 0;
+            foreach ($srvPosts as $sp) {
+                if (!is_array($sp) || !isset($sp['id'])) continue;
+                $sid = (string) $sp['id'];
+                if (isset($supprimes[$sid])) continue;
+                if (!isset($idx[$sid])) {
+                    if (!empty($sp['srv'])) { $data['forumPosts'][] = $sp; $gardes++; }
+                    continue;
+                }
+                // Message connu des deux côtés : rattraper les réponses d'élèves
+                // absentes de la copie, et réunir les « j'aime ».
+                $i = $idx[$sid];
+                $reps = (isset($data['forumPosts'][$i]['replies']) && is_array($data['forumPosts'][$i]['replies'])) ? $data['forumPosts'][$i]['replies'] : [];
+                $connues = [];
+                foreach ($reps as $r) { if (is_array($r) && isset($r['id'])) $connues[(string) $r['id']] = true; }
+                foreach ((array) ($sp['replies'] ?? []) as $r) {
+                    if (!is_array($r) || !isset($r['id']) || empty($r['srv'])) continue;
+                    $rid = (string) $r['id'];
+                    if (isset($connues[$rid]) || isset($supprimes[$rid])) continue;
+                    $reps[] = $r; $gardes++;
+                }
+                $data['forumPosts'][$i]['replies'] = $reps;
+                $data['forumPosts'][$i]['likes'] = array_values(array_unique(array_merge(
+                    (array) ($data['forumPosts'][$i]['likes'] ?? []), (array) ($sp['likes'] ?? []))));
+            }
+            // Les tombes restent bornées : 2 000 identifiants suffisent largement.
+            $data['forumDeleted'] = array_slice(array_values(array_unique(array_keys($supprimes))), -2000);
+            $reEnc2 = json_encode($data, JSON_UNESCAPED_UNICODE);
+            if ($reEnc2 !== false) {
+                $raw = $reEnc2;
+                if ($gardes) {
+                    @file_put_contents(__DIR__ . '/data/_access_log.txt',
+                        date('c') . ' MERGE_KEEP ' . $gardes . ' message(s) forum serveur preserve(s) ip=' . $ip . "\n", FILE_APPEND);
+                }
+            }
+        }
+    }
+
     // ── 💾 v1.2.3 Sauvegarde horodatée AVANT écrasement (rétention 30) ───────
     // La synchro est en « dernière écriture gagne » (le verrou optimiste côté
     // client est inopérant). Cette copie convertit une perte SILENCIEUSE en perte
