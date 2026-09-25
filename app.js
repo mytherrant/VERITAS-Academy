@@ -1108,16 +1108,14 @@ function defaultDB(){return{
     {id:'d2',cat:'Fournitures',desc:'Achat matériel didactique',mnt:35000,dt:'05/10/2024'},
   ],
   loginLog:[],
-  bookReviews:[
-    {id:'rv1',bid:'b1',nom:'Mme MBALLA Pauline',role:'Parent - 3ème',stars:5,text:'Mon fils a eu 16/20 en maths grâce à ce manuel. Les exercices corrigés sont très bien faits !',date:'2024-10-15',verified:true},
-    {id:'rv2',bid:'b1',nom:'Jean-Pierre FOUDA',role:'Élève - 3ème',stars:5,text:'Le meilleur manuel de maths. Les explications sont claires, les exemples concrets. Je recommande à 100% !',date:'2024-10-01',verified:true},
-    {id:'rv3',bid:'b2',nom:'Esther DJOMOU',role:'Élève - Tle A',stars:4,text:'Très bon manuel de français. Les analyses de textes africains sont passionnantes.',date:'2024-09-28',verified:true},
-    {id:'rv4',bid:'b3',nom:'Samuel CHEDJOU',role:'Élève - 2nde',stars:5,text:'Les TP guidés de physique-chimie m\'aident énormément. Merci VÉRITAS !',date:'2024-10-12',verified:true},
-    {id:'rv5',bid:'b4',nom:'Mme ATEBA Cécile',role:'Enseignante SVT',stars:5,text:'En tant qu\'enseignante, je recommande ce manuel. Contenu conforme au programme MINESEC.',date:'2024-09-20',verified:true},
-    {id:'rv6',bid:'b5',nom:'M. NKENG Robert',role:'Parent - 3ème',stars:4,text:'Livraison rapide. Les cartes et documents sont en couleur. Très bonne qualité.',date:'2024-10-05',verified:true},
-    {id:'rv7',bid:'b1',nom:'Fabrice ETEKI',role:'Élève - 3ème',stars:4,text:'Les QCM de fin de chapitre m\'aident à préparer le BEPC. Bon rapport qualité-prix avec le code ELEVE10.',date:'2024-10-18',verified:true},
-    {id:'rv8',bid:'b2',nom:'Marie-Claire BELLA',role:'Élève - Tle A',stars:5,text:'La méthodologie de dissertation est excellente. J\'ai gagné 3 points grâce à ce livre !',date:'2024-10-10',verified:true},
-  ],
+  /* Plus d'avis de démonstration. Il y en avait huit, nominatifs, datés de
+     2024, marqués « Achat vérifié » et rattachés à des manuels (b1…b5) qui
+     n'existent plus : chaque visiteur les recevait avec defaultDB() et la
+     boutique les présentait comme « 6 avis vérifiés · 4,7/5 ». Un avis
+     inventé présenté comme vérifié, c'est de la publicité trompeuse — la
+     même règle que le classement de jeu et les chiffres de la vitrine
+     (api/public_data.php) : du réel, ou rien. Purge : _retirerFauxAvis(). */
+  bookReviews:[],
   authors:[
     {id:'au1',user:'minesec_ed',pwd:'S256$3a93516ced34b148af7ec14b4cb29d76ae414666b7152461ccbb205d03e74b61',nom:'MINESEC Éditions',email:'',tel:'',bio:'Éditeur officiel du Ministère de l\'Enseignement Secondaire du Cameroun.',share:60,status:'approved',books:['b1','b3'],gains:0},
     {id:'au2',user:'editions_cle',pwd:'S256$df9772e6d67ead67802e5c97f41b3c7cbb870e3384c3526ee595dceeb64a8942',nom:'Éditions Clé',email:'',tel:'',bio:'Maison d\'édition camerounaise spécialisée en littérature et sciences humaines.',share:60,status:'approved',books:['b2'],gains:0},
@@ -1214,6 +1212,33 @@ function _formulesDefaut(){
     });
   });
   return out;
+}
+
+/* Les huit avis de démonstration, reconnus à l'identifiant ET au nom : un vrai
+   avis qui porterait par hasard l'identifiant « rv3 » n'est pas touché. */
+function _retirerFauxAvis(){
+  var faux={rv1:'Mme MBALLA Pauline',rv2:'Jean-Pierre FOUDA',rv3:'Esther DJOMOU',rv4:'Samuel CHEDJOU',
+            rv5:'Mme ATEBA Cécile',rv6:'M. NKENG Robert',rv7:'Fabrice ETEKI',rv8:'Marie-Claire BELLA'};
+  var avant=(DB.bookReviews||[]).length;
+  DB.bookReviews=(DB.bookReviews||[]).filter(function(r){ return !(r&&faux[r.id]&&faux[r.id]===r.nom); });
+  return avant-DB.bookReviews.length;
+}
+// Avis affichables : ceux d'un manuel qui existe encore, texte non vide.
+function _avisReels(){
+  var ids={};(DB.books||[]).forEach(function(b){ if(b&&b.id) ids[b.id]=1; });
+  return (DB.bookReviews||[]).filter(function(r){ return r&&ids[r.bid]&&+r.stars>0&&String(r.text||'').trim(); });
+}
+function _avisCarte(r, titreLivre){
+  var nom=String(r.nom||'Lecteur');
+  return '<div class="review-card"><div class="review-hd"><div class="review-av">'+_esc(nom.charAt(0).toUpperCase())+'</div><div><div class="review-nm">'+_esc(nom)+'</div><div class="review-rl">'+_esc(r.role||'')+(titreLivre?' · '+_esc(titreLivre):'')+'</div></div></div>'
+    +'<div>'+starsHtml(+r.stars||0)+'</div><div class="review-txt">&laquo; '+_esc(r.text||'')+' &raquo;</div>'
+    +'<div class="fl2 fic fsb"><span class="review-dt">'+_esc(r.date||'')+'</span>'+(r.verified?'<span class="review-vf">'+ICO('i-check')+'Achat vérifié</span>':'')+'</div></div>';
+}
+// « N avis » — « vérifiés » seulement s'ils le sont TOUS (verified est posé
+// par l'administration, pas par l'auteur de l'avis).
+function _avisCompte(l){
+  var n=l.length, v=l.filter(function(r){return r.verified;}).length;
+  return n+' avis'+(v===n&&n?' vérifié'+(n>1?'s':''):(v?' dont '+v+' vérifié'+(v>1?'s':''):''));
 }
 
 function _migrateDB(){
@@ -1504,6 +1529,7 @@ function _migrateDB(){
   if(!DB.submissions)DB.submissions=[];
   if(!DB.bookPurchases)DB.bookPurchases=[];
   if(!DB.bookReviews)DB.bookReviews=[];
+  try{ _retirerFauxAvis(); }catch(e){}
   if(!DB.books)DB.books=defaultDB().books;
   if(!DB.payAttempts)DB.payAttempts=[];
   if(!DB.loginLog)DB.loginLog=[];
@@ -3918,15 +3944,12 @@ function viewBookDetail(bid){
   // Reviews tab
   h+='<div id="revs_'+bid+'" style="display:none">';
   if(rt.count>0){
-    h+='<div class="avg-box"><div class="avg-num">'+rt.avg.toFixed(1)+'</div><div><div class="avg-stars">'+starsHtml(rt.avg)+'</div><div class="avg-cnt">'+rt.count+' avis vérifiés</div></div></div>';
+    h+='<div class="avg-box"><div class="avg-num">'+rt.avg.toFixed(1)+'</div><div><div class="avg-stars">'+starsHtml(rt.avg)+'</div><div class="avg-cnt">'+_avisCompte(rvs)+'</div></div></div>';
   }
   if(rvs.length){
-    rvs.forEach(function(r){
-      h+='<div class="review-card"><div class="review-hd"><div class="review-av">'+r.nom[0]+'</div><div><div class="review-nm">'+r.nom+'</div><div class="review-rl">'+r.role+'</div></div></div>';
-      h+='<div>'+starsHtml(r.stars)+'</div>';
-      h+='<div class="review-txt">&laquo; '+r.text+' &raquo;</div>';
-      h+='<div class="fl2 fic fsb"><span class="review-dt">'+r.date+'</span>'+(r.verified?'<span class="review-vf">'+ICO('i-check')+'Achat vérifié</span>':'')+'</div></div>';
-    });
+    // Échappés : un visiteur écrit ces avis (submitReview) — nom et texte
+    // étaient injectés tels quels dans la page.
+    rvs.forEach(function(r){ h+=_avisCarte(r,''); });
   }else h+='<div class="empty"><div class="empty-ico">⭐</div>Aucun avis pour le moment</div>';
   // Add review form
   h+='<div style="margin-top:14px;padding:14px;border:1px solid var(--bg3);border-radius:var(--r2);background:var(--bg)">';
@@ -4865,6 +4888,8 @@ function _fetchPublicData(){
     }
 
     // ── Plans e-learning ────────────────────────────────────────────────────
+    // Codes promo affichables (liste blanche du serveur) — voir _promosAffiches().
+    if(Array.isArray(data.promosPublics)){ window._vrtPromosPublics=data.promosPublics; }
     if(data.elearning_plans&&data.elearning_plans.length>0){
       if(!isAdmin||(!(DB.elearning&&DB.elearning.plans)||DB.elearning.plans.length===0)){
         if(!DB.elearning)DB.elearning={plans:[],categories:[],contenus:[],abonnements:[],commandes:[]};
@@ -6293,7 +6318,13 @@ function vShowSec(sec,btn,_boot){
     c.innerHTML=h;  // (perf) rendu unique — supprime un double innerHTML qui peignait la section 2×
 
   } else if(sec==="boutique"){
-    const promos=(DB.promoCodes||[]).filter(p=>p.actif);
+    /* Les codes AFFICHÉS au visiteur. Ce bandeau lisait DB.promoCodes du
+       NAVIGATEUR : chez un visiteur, la table de démonstration de defaultDB()
+       (ELEVE10, RENTRÉE2024, LOT3LIVRES) — jamais les codes réellement créés
+       par l'administration, et des codes que le serveur, lui, peut refuser.
+       Désormais : la liste publiée par api/public_data.php (codes actifs
+       cochés « afficher en boutique »), ou la table locale pour l'admin. */
+    const promos=(typeof _promosAffiches==='function')?_promosAffiches():[];
     // v1.4.3 : accroche VENDEUSE — social proof dynamique + best-seller mis en avant
     const _bks=DB.books||[];
     const _totVendu=_bks.reduce((s,b)=>s+(b.vendu||0),0);
@@ -6321,7 +6352,7 @@ function vShowSec(sec,btn,_boot){
     ${promos.length?`<div style="background:linear-gradient(135deg,#5E1B23,#8C2F39);border:1px solid rgba(255,201,60,.28);border-radius:16px;padding:14px 20px;margin-bottom:20px;color:#fff;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
       <span class="i-disc" style="width:34px;height:34px;background:rgba(255,201,60,.16);color:#FFC93C">${ICO('lc-ticket')}</span>
       <span style="font-weight:800;font-family:Montserrat,sans-serif;font-size:13px">Codes promo actifs :</span>
-      ${promos.map(p=>'<span style="padding:4px 12px;border-radius:20px;background:rgba(255,255,255,.15);border:1px dashed rgba(255,255,255,.5);color:#fff;font-size:13px;font-weight:700;font-family:Fira Code">'+p.code+' → <span style="color:#FFE0A0">'+(p.type==='percent'?'-'+p.reduction+'%':'-'+fmt(p.reduction))+'</span></span>').join('')}
+      ${promos.map(p=>'<span style="padding:4px 12px;border-radius:20px;background:rgba(255,255,255,.15);border:1px dashed rgba(255,255,255,.5);color:#fff;font-size:13px;font-weight:700;font-family:Fira Code">'+_esc(p.code)+' → <span style="color:#FFE0A0">'+(p.type==='percent'?'-'+p.reduction+'%':'-'+fmt(p.reduction))+'</span></span>').join('')}
     </div>`:''}
 
     <!-- MANUELS GRID -->
@@ -6421,8 +6452,9 @@ function vShowSec(sec,btn,_boot){
     </div>
     </details>
 
-    <!-- ═════ AUTRES PRODUITS PREMIUM v2 ═════ -->
-    <div class="vcard mb20">
+    <!-- ═════ AUTRES PRODUITS PREMIUM v2 ═════ (masqué s'il n'y a rien à vendre :
+         l'encadré s'affichait vide, titre compris) -->
+    <div class="vcard mb20"${(DB.products||[]).some(function(p){return p&&p.actif&&!p.featured;})?'':' hidden'}>
       <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-gift"/></svg></span>Autres Produits & Services</div>
       <div class="vprod-grid">
         ${(DB.products||[]).filter(function(p){return p.actif&&!p.featured;}).map(function(p){
@@ -6469,7 +6501,7 @@ function vShowSec(sec,btn,_boot){
     <div class="vcard mb20">
       <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-shop"/></svg></span>Comment Acheter ?</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;text-align:center">
-        ${[['1️⃣','Choisissez','Parcourez les manuels et consultez les extraits gratuits'],['2️⃣','Code Promo','Appliquez votre code promo ou votre code ami'],['3️⃣','WhatsApp','Commandez au 656 720 476'],['4️⃣','Payez','Orange Money : '+_payNum('orange')+' · MTN MoMo : '+_payNum('momo')],['5️⃣','Récupérez','Au centre ou livraison à domicile']].map(([n,t,d])=>'<div style="padding:12px"><div style="font-size:24px;margin-bottom:4px">'+n+'</div><div class="semi" style="font-size:12px">'+t+'</div><div style="font-size:13px;color:var(--ink4);margin-top:4px;line-height:1.5">'+d+'</div></div>').join("")}
+        ${[['1️⃣','Choisissez','Parcourez les manuels et consultez les extraits gratuits'],['2️⃣','Code Promo','Appliquez votre code promo ou votre code ami'],['3️⃣','WhatsApp','Commandez au '+_waBoutique().aff],['4️⃣','Payez','Orange Money : '+_payNum('orange')+' · MTN MoMo : '+_payNum('momo')],['5️⃣','Récupérez','Au centre ou livraison à domicile']].map(([n,t,d])=>'<div style="padding:12px"><div style="font-size:24px;margin-bottom:4px">'+n+'</div><div class="semi" style="font-size:12px">'+t+'</div><div style="font-size:13px;color:var(--ink4);margin-top:4px;line-height:1.5">'+d+'</div></div>').join("")}
       </div>
     </div>
 
@@ -6477,15 +6509,13 @@ function vShowSec(sec,btn,_boot){
     <div class="vcard mb20">
       <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-star"/></svg></span>Avis de nos Clients</div>
       ${(function(){
-        var allRvs=(DB.bookReviews||[]).slice(0,6);
-        if(!allRvs.length)return'<div class="empty xs2">Aucun avis pour le moment</div>';
-        var avgAll=allRvs.reduce(function(s,r){return s+r.stars;},0)/allRvs.length;
-        var h2='<div class="avg-box"><div class="avg-num">'+avgAll.toFixed(1)+'</div><div><div class="avg-stars">'+starsHtml(avgAll)+'</div><div class="avg-cnt">'+allRvs.length+' avis vérifiés</div></div></div>';
-        allRvs.forEach(function(r){
-          var bk=DB.books.find(function(x){return x.id===r.bid;});
-          h2+='<div class="review-card"><div class="review-hd"><div class="review-av">'+r.nom[0]+'</div><div><div class="review-nm">'+r.nom+'</div><div class="review-rl">'+r.role+(bk?' · '+bk.titre:'')+'</div></div></div>';
-          h2+='<div>'+starsHtml(r.stars)+'</div><div class="review-txt">&laquo; '+r.text+' &raquo;</div>';
-          h2+='<div class="fl2 fic fsb"><span class="review-dt">'+r.date+'</span>'+(r.verified?'<span class="review-vf">'+ICO('i-check')+'Achat vérifié</span>':'')+'</div></div>';
+        var tous=_avisReels();
+        if(!tous.length)return'<div class="empty xs2">Pas encore d’avis. Vous avez lu l’un de nos manuels ? Donnez le vôtre depuis sa fiche.</div>';
+        var avgAll=tous.reduce(function(s,r){return s+(+r.stars||0);},0)/tous.length;
+        var h2='<div class="avg-box"><div class="avg-num">'+avgAll.toFixed(1)+'</div><div><div class="avg-stars">'+starsHtml(avgAll)+'</div><div class="avg-cnt">'+_avisCompte(tous)+'</div></div></div>';
+        tous.slice().sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''));}).slice(0,6).forEach(function(r){
+          var bk=(DB.books||[]).find(function(x){return x.id===r.bid;});
+          h2+=_avisCarte(r, bk?bk.titre:'');
         });
         return h2;
       })()}
@@ -6521,7 +6551,7 @@ function vShowSec(sec,btn,_boot){
         <div style="font-size:14px;color:rgba(255,255,255,.7);max-width:500px;margin:0 auto 20px;line-height:1.7">Inscrivez votre enfant dans un centre d\'excellence. Enseignement de qualité, suivi personnalisé et outils modernes.</div>
         <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
           <button class="btn" style="background:#FFC93C;color:#142554;font-family:Montserrat,sans-serif;font-weight:700;font-size:15px;padding:14px 28px;border-radius:12px" onclick="showLogin('eleve')"><svg class="vico bico" aria-hidden="true"><use href="#lc-graduation"/></svg>S\'inscrire maintenant</button>
-          <a class="btn" href="https://wa.me/237697637739" target="_blank" style="background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.3);font-family:Montserrat,sans-serif;font-size:14px;padding:12px 24px;border-radius:12px;text-decoration:none"><svg class="vico bico" aria-hidden="true"><use href="#lc-message"/></svg>Nous contacter</a>
+          <a class="btn" href="https://wa.me/${_waBoutique().num}" target="_blank" rel="noopener" style="background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.3);font-family:Montserrat,sans-serif;font-size:14px;padding:12px 24px;border-radius:12px;text-decoration:none"><svg class="vico bico" aria-hidden="true"><use href="#lc-message"/></svg>Nous contacter</a>
         </div>
       </div>
     </div>
@@ -6537,7 +6567,7 @@ function vShowSec(sec,btn,_boot){
         ['<div style="width:40px;height:40px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;color:#fff">'+ICO('i-coins')+'</div>','Espèces','Au centre','var(--gold)']
       ].map(([icon,n,v,col])=>'<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:var(--r2);padding:14px 16px;min-width:140px;text-align:center"><div style="display:flex;justify-content:center">'+icon+'</div><div style="color:#fff;font-size:13px;font-weight:700;margin-top:8px">'+n+'</div><div style="font-family:Fira Code;color:#FFC93C;font-size:14px;font-weight:700;margin-top:4px;letter-spacing:1px">'+v+'</div></div>').join("")}
       </div>
-      <a href="https://wa.me/237697637739?text=${encodeURIComponent('Bonjour VÉRITAS ! Je souhaite commander.')}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#FFC93C;color:#142554;padding:10px 24px;border-radius:var(--r);font-size:13px;font-weight:700;text-decoration:none;transition:all .2s">${ICO('i-phone')}Commander maintenant</a>
+      <a href="https://wa.me/${_waBoutique().num}?text=${encodeURIComponent('Bonjour VÉRITAS ! Je souhaite commander.')}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:#FFC93C;color:#142554;padding:10px 24px;border-radius:var(--r);font-size:13px;font-weight:700;text-decoration:none;transition:all .2s">${ICO('i-phone')}Commander maintenant</a>
     </div>
     </div>`;
   
@@ -6590,7 +6620,7 @@ function vShowSec(sec,btn,_boot){
     });
     h+='</div>';
     // Avis rapides
-    var rvs=DB.bookReviews||[];
+    var rvs=(typeof _avisReels==='function')?_avisReels():[];
     if(rvs.length){
       h+='<div class="vcard mb16">';
       h+='<div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-star"/></svg></span>Témoignages de nos élèves</div>';
@@ -6598,14 +6628,14 @@ function vShowSec(sec,btn,_boot){
         var st='';for(var i=1;i<=5;i++)st+=i<=Math.round(r.stars)?ICO('lc-star','i vt-star on'):ICO('lc-star','i vt-star');
         h+='<div style="padding:10px 0;border-bottom:1px solid var(--bg2)">'+
            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'+
-           '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#142554,#6C56A6);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;flex-shrink:0">'+r.nom[0]+'</div>'+
-           '<div style="font-size:12px;font-weight:700">'+r.nom+'</div>'+
-           '<div style="font-size:11px;color:var(--ink4)">· '+r.role+'</div>'+
+           '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#142554,#6C56A6);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;flex-shrink:0">'+_esc(String(r.nom||'?').charAt(0))+'</div>'+
+           '<div style="font-size:12px;font-weight:700">'+_esc(r.nom||'')+'</div>'+
+           '<div style="font-size:11px;color:var(--ink4)">· '+_esc(r.role||'')+'</div>'+
            '<div style="margin-left:auto;font-size:12px">'+st+'</div></div>'+
-           '<div style="font-size:12px;color:var(--ink3);font-style:italic">« '+r.text.substring(0,110)+' »</div></div>';
+           '<div style="font-size:12px;color:var(--ink3);font-style:italic">« '+_esc(String(r.text||'').substring(0,110))+' »</div></div>';
       });
-      h+='<div style="text-align:center;margin-top:10px">'+
-         '<button class="btn bpu sm" onclick="vShowSec(\'avis\',null)"><svg class="vico bico" aria-hidden="true"><use href="#lc-star"/></svg>Tous les avis par niveau →</button></div>';
+      // (Le bouton « Tous les avis par niveau → » ouvrait une section « avis »
+      // qui n'existe pas : retiré.)
       h+='</div>';
     }
     // Formulaire
@@ -8955,7 +8985,8 @@ function mAddPromo(){
   '<div class="fg"><span class="fl">Code *</span><input class="fi" id="npCode" placeholder="EX: NOEL2024" style="text-transform:uppercase"></div>'+
   '<div class="fg"><span class="fl">Type</span><select class="fi" id="npType"><option value="percent">Pourcentage (%)</option><option value="fixed">Montant fixe (FCFA)</option></select></div>'+
   '<div class="fg"><span class="fl">Valeur réduction *</span><input class="fi" id="npVal" type="number" min="1" placeholder="10"></div>'+
-  '<div class="fg"><span class="fl">Description</span><input class="fi" id="npDesc" placeholder="Promo Noël"></div></div>',
+  '<div class="fg"><span class="fl">Description</span><input class="fi" id="npDesc" placeholder="Promo Noël"></div></div>'+
+  '<label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:13px"><input type="checkbox" id="npAffiche"> Afficher ce code aux visiteurs de la boutique</label>',
   '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveNewPromo()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Créer</button>');
 }
 function saveNewPromo(){
@@ -8965,8 +8996,9 @@ function saveNewPromo(){
   if(!DB.promoCodes)DB.promoCodes=[];
   DB.promoCodes.push({id:gid(),code:code,reduction:val,
     type:document.getElementById('npType')?.value||'percent',
-    desc:document.getElementById('npDesc')?.value||'',actif:true,usage:0});
+    desc:document.getElementById('npDesc')?.value||'',actif:true,usage:0,affiche:!!document.getElementById('npAffiche')?.checked});
   save();cm();re();toast('✓ Code promo '+code+' créé');
+  if(typeof _triggerAutoSync==='function')_triggerAutoSync();
 }
 
 /* ══ RECETTES PAR LIVRE — une part d'auteur repose sur l'argent REÇU ═════════
@@ -13132,19 +13164,40 @@ function deleteAdmin(aid){
   DB.admins=DB.admins.filter(function(a){return a.id!==aid;});
   save();re();toast("Admin supprimé");
 }
+// Codes promo que la boutique affiche : publiés par le serveur pour un
+// visiteur, lus dans la table locale pour l'administration.
+function _promosAffiches(){
+  var ok=function(p){
+    if(!p||!p.actif||p.affiche!==true)return false;
+    if(p.expireLe&&new Date(p.expireLe+'T23:59:59')<new Date())return false;
+    if(+p.max>0&&(+p.usage||0)>=+p.max)return false;
+    return true;
+  };
+  if(typeof iA==='function'&&iA())return (DB.promoCodes||[]).filter(ok);
+  return (window._vrtPromosPublics||[]).filter(function(p){return p&&p.code;});
+}
+function togglePromoAffiche(codeOrId){
+  var p=(DB.promoCodes||[]).find(function(x){return x.code===codeOrId||x.id===codeOrId;});
+  if(!p)return;
+  p.affiche=!p.affiche;save();
+  toast(p.affiche?'✓ Affiché dans la boutique':'Retiré de la boutique (le code reste valable)');
+  if(typeof _triggerAutoSync==='function')_triggerAutoSync();
+  mManagePromos();
+}
 function mManagePromos(){
   if(!DB.promoCodes)DB.promoCodes=[];
   var rows=DB.promoCodes.map(function(p){
-    return '<tr><td class="mono s" style="color:var(--gold)">'+p.code+'</td><td class="xs2">'+p.desc+'</td><td class="mono xs2">'+(p.type==="percent"?p.reduction+"%":fmt(p.reduction))+'</td><td><span class="bg '+(p.actif?"bgg":"bgr")+'">'+(p.actif?"Actif":"Inactif")+'</span></td><td class="mono xs2">'+(p.usage||0)+'</td><td><button class="btn bo xs" onclick="togglePromo(&apos;'+p.code+'&apos;)">'+(p.actif?"⏸":"▶")+'</button></td></tr>';
+    return '<tr><td class="mono s" style="color:var(--gold)">'+p.code+'</td><td class="xs2">'+p.desc+'</td><td class="mono xs2">'+(p.type==="percent"?p.reduction+"%":fmt(p.reduction))+'</td><td><span class="bg '+(p.actif?"bgg":"bgr")+'">'+(p.actif?"Actif":"Inactif")+'</span></td><td><button class="btn '+(p.affiche?'bi':'bo')+' xs" title="Afficher ce code aux visiteurs de la boutique" onclick="togglePromoAffiche(\''+_esc(p.id||p.code)+'\')">'+(p.affiche?'Affiché':'Masqué')+'</button></td><td class="mono xs2">'+(p.usage||0)+'</td><td><button class="btn bo xs" onclick="togglePromo(&apos;'+p.code+'&apos;)">'+(p.actif?"⏸":"▶")+'</button></td></tr>';
   }).join("");
   M("🎟️ Gestion des codes promo","Valables sur la boutique et les commandes",
-  '<div class="tw"><table><thead><tr><th>Code</th><th>Description</th><th>Réduction</th><th>Statut</th><th>Utilisations</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+  '<div class="tw"><table><thead><tr><th>Code</th><th>Description</th><th>Réduction</th><th>Statut</th><th>Boutique</th><th>Utilisations</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
   '<div style="margin-top:14px;padding-top:14px;border-top:var(--br)"><div class="bold s mb8">Ajouter un code promo</div><div class="fg2">'+
   '<div class="fg"><span class="fl">Code *</span><input class="fi" id="npCode" placeholder="EX: PROMO20" style="text-transform:uppercase"></div>'+
   '<div class="fg"><span class="fl">Type</span><select class="fi" id="npType"><option value="percent">Pourcentage (%)</option><option value="fixed">Montant fixe (FCFA)</option></select></div>'+
   '<div class="fg"><span class="fl">Valeur *</span><input class="fi" id="npVal" type="number" placeholder="10"></div>'+
   '<div class="fg"><span class="fl">Description</span><input class="fi" id="npDesc" placeholder="Réduction spéciale"></div>'+
-  '</div><button class="btn bi sm mt8" onclick="addPromoCode()">＋ Ajouter</button></div>',
+  '</div><label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:13px"><input type="checkbox" id="npAffiche"> Afficher ce code aux visiteurs de la boutique (sinon il reste valable, mais n’est connu que de ceux à qui vous le donnez)</label>'+
+  '<button class="btn bi sm mt8" onclick="addPromoCode()">＋ Ajouter</button></div>',
   '<button class="btn bo" onclick="cm()">Fermer</button>',true);
 }
 function addPromoCode(){
@@ -13152,9 +13205,11 @@ function addPromoCode(){
   var val=parseInt(document.getElementById("npVal")?.value)||0;
   if(!code||!val){toast("Code et valeur requis","warn");return;}
   if(!DB.promoCodes)DB.promoCodes=[];
-  DB.promoCodes.push({code:code,reduction:val,type:document.getElementById("npType")?.value||"percent",
-    desc:document.getElementById("npDesc")?.value||"Promo "+code,actif:true,usage:0});
-  save();toast("✓ Code "+code+" créé");mManagePromos();
+  DB.promoCodes.push({id:gid(),code:code,reduction:val,type:document.getElementById("npType")?.value||"percent",
+    desc:document.getElementById("npDesc")?.value||"Promo "+code,actif:true,usage:0,affiche:!!document.getElementById("npAffiche")?.checked});
+  save();toast("✓ Code "+code+" créé");
+  if(typeof _triggerAutoSync==='function')_triggerAutoSync();
+  mManagePromos();
 }
 function togglePromo(codeOrId){
   var p=(DB.promoCodes||[]).find(function(x){return x.code===codeOrId||x.id===codeOrId;});
@@ -14682,7 +14737,10 @@ function saveEditBk(id){const b=DB.books.find(x=>x.id===id);if(!b)return;b.titre
     var _n=(DB.books||[]).filter(function(x){return x.vitrine;}).length;
     toast('✓ Publié — la boutique publique affiche maintenant '+_n+' manuel'+(_n>1?'s':'')+' (uniquement les manuels cochés)');
   } else toast('✓ Manuel modifié');}
-function delBook(id){if(!confirm('Supprimer ce manuel ?'))return;DB.books=DB.books.filter(b=>b.id!==id);save();re();}
+// Le produit de test à 100 F est ré-inséré par _migrateDB tant que
+// _testProduitRetire n'est pas posé : sans ce drapeau, le supprimer depuis
+// l'admin ne tenait que jusqu'au rechargement suivant.
+function delBook(id){if(!confirm('Supprimer ce manuel ?'))return;DB.books=DB.books.filter(b=>b.id!==id);if(id==='btest100')DB._testProduitRetire=true;save();re();}
 
 // ── MANUELS : LECTURE PROTÉGÉE (lecteur sécurisé api/secure_pdf.php) ────────
 // Le lecteur existe depuis v1.7 et viewBookDetail sait déjà afficher « Lire en
@@ -32023,6 +32081,17 @@ window.VERITAS_PAYMENTS = (function(){
 // envoyait son argent sur le mauvais réseau. Ces écrans lisent désormais
 // VERITAS_PAYMENTS comme la fenêtre de paiement.
 // Forme nationale (sans « +237 »), qui est celle que l'on compose au pays.
+/* Le numéro WhatsApp des commandes, d'UNE source : la configuration des
+   paiements. La boutique en affichait trois — « Commandez au 656 720 476 »
+   (téléphone de l'école, écrit en dur) juste au-dessus d'une tuile et d'un
+   bouton « Commander » qui, eux, menaient au 697 637 739. */
+function _waBoutique(){
+  var brut=String((window.VERITAS_PAYMENTS&&VERITAS_PAYMENTS.whatsapp)||'+237 697 637 739');
+  var num=brut.replace(/\D/g,'');
+  if(num.length===9)num='237'+num;
+  var loc=num.replace(/^237/,'');
+  return { num:num, aff:loc.replace(/^(\d{3})(\d{3})(\d{3})$/,'$1 $2 $3') };
+}
 function _payNum(op){
   try{
     var m = (window.VERITAS_PAYMENTS||{})[op];
@@ -45425,7 +45494,7 @@ window._vtParentStats = function(){
     }
   }catch(e){}
   try{
-    var rv = (DB.bookReviews||[]).filter(function(r){ return r && +r.stars>0; });
+    var rv = (typeof _avisReels==='function') ? _avisReels() : [];
     if(rv.length >= 3){
       var avg = rv.reduce(function(a,r){ return a + (+r.stars||0); }, 0) / rv.length;
       tiles.push([ICO('i-sparkle'), avg.toFixed(1)+'/5', rv.length+' avis d\'élèves et de parents']);

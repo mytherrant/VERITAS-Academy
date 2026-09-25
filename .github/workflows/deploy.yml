@@ -795,6 +795,12 @@ jobs:
       - name: 📊 Des résultats d'examen inventés ?
         run: node tests/banc_resultats_examens.cjs
 
+      # ── ⭐ DES AVIS CLIENTS RÉELS, OU AUCUN. defaultDB() semait huit avis
+      #    nominatifs « Achat vérifié » : la boutique affichait « 6 avis
+      #    vérifiés · 4,7/5 » à tous les visiteurs. Voir le banc.
+      - name: ⭐ Des avis clients inventés ?
+        run: node tests/banc_avis_reels.cjs
+
       # ── 📕 CHAQUE CAHIER A-T-IL SA PAGE ? Quinze cahiers se vendent, cinq
       #    seulement avaient la leur ; les dix autres n'existaient que derrière
       #    `cahier.html?o=<slug>` — ça marche, mais il n'y a rien à indexer. Un

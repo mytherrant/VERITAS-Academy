@@ -795,6 +795,39 @@ function vrt_pd_chiffres(array $db, array $boutique): array {
 }
 
 
+/**
+ * Les codes promo que la BOUTIQUE peut annoncer.
+ *
+ * Le bandeau « Codes promo actifs » lisait la table du navigateur : chez un
+ * visiteur, les codes de démonstration de defaultDB() — jamais ceux de
+ * l'administration, et parfois des codes que le serveur refuse ensuite.
+ * On ne publie que ce que l'administration a coché « afficher en boutique »
+ * (`affiche`), actif, non expiré, non épuisé. Liste blanche des champs : un
+ * code de partenaire, ses commissions et ses compteurs restent privés.
+ */
+function vrt_pd_promos_publics(array $db): array {
+    $out = [];
+    foreach ((array) ($db['promoCodes'] ?? []) as $p) {
+        if (!is_array($p) || empty($p['actif']) || ($p['affiche'] ?? false) !== true) continue;
+        $code = trim((string) ($p['code'] ?? ''));
+        if ($code === '') continue;
+        $fin = (string) ($p['expireLe'] ?? '');
+        if ($fin !== '' && ($t = strtotime($fin . ' 23:59:59')) !== false && $t < time()) continue;
+        $max = (int) ($p['max'] ?? 0);
+        if ($max > 0 && (int) ($p['usage'] ?? 0) >= $max) continue;
+        $type = ((string) ($p['type'] ?? 'percent') === 'fixed') ? 'fixed' : 'percent';
+        $out[] = [
+            'code'      => mb_substr($code, 0, 40),
+            'type'      => $type,
+            'reduction' => $type === 'fixed' ? max(0, (int) round((float) ($p['reduction'] ?? 0)))
+                                             : max(0, min(50, (int) round((float) ($p['reduction'] ?? 0)))),
+            'desc'      => mb_substr((string) ($p['desc'] ?? ''), 0, 120),
+        ];
+        if (count($out) >= 6) break;
+    }
+    return $out;
+}
+
 // Extraire uniquement les données publiques (pas de notes, élèves, paiements, etc.)
 $public = [
     'school'      => $db['school']      ?? null,
@@ -804,6 +837,7 @@ $public = [
     'calendrier'  => $db['calendrier']  ?? [],
     'elearning_plans' => vrt_pd_plans_en_vente($db),
     'tarifs_publics'  => vrt_pd_tarifs_publics($db),
+    'promosPublics'   => vrt_pd_promos_publics($db),
     'elearning_categories' => (isset($db['elearning']['categories']) && is_array($db['elearning']['categories']))
         ? $db['elearning']['categories'] : [],
     'elearning_contenus' => $__pd_contenus,
