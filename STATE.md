@@ -1,3 +1,69 @@
+## Reskin finalisé : l'habillage de la vitrine sur les 202 pages statiques (25/09/2026) — NON DÉPLOYÉ
+
+Demande de Jacques : « finalise le reskin », puis « les mêmes icônes dans le
+rond centré, l'alternance de couleurs, les effets exactement comme sur la
+vitrine ». Le pilote (`498ed99`, plan.html + constellation.html) est étendu à
+toutes les pages qui portent `veritas-pages.css` ou `veritas-refonte.css`
+(corrigés, livrets, niveaux, œuvres, ressources, outils, cours, légal,
+découvrir, espaces élève / enseignant…).
+
+**Un seul outil, une seule source** : `python tools/habiller_pages.py`.
+Il lit les blocs du pilote dans `tools/build_plan.py` (NAV / PROMO / FOOTER /
+WIDGETS / CSS_CHROME) et les symboles dans `vitrine.html` — rien n'est recopié
+à la main. Passe **idempotente** (balises `<!--vrt-habillage:…-->`), à relancer
+après tout générateur de pages. `--controle` échoue si une page n'est pas à
+jour : branché dans `deploy.yml` (🧥), éprouvé par mutation.
+
+Ce que la passe pose : barre + bandeau en tête, pied + bulles (thème,
+traducteur, Ambassa) + `vitrine.js` en fin, `assets/veritas-habillage.css`
+(généré), `VRT_DATA` minimal (citations + thème sombre, sinon deux bulles
+étaient muettes), `veritas-medaillons.js` s'il manquait. La simple barre de
+marque « Centre VÉRITAS » est retirée ; un en-tête qui porte le `<h1>` est
+GARDÉ (garde : le nombre de `<h1>` ne doit pas bouger). Les URL des blocs sont
+rendues absolues (elles étaient relatives à la racine), les `#lc-*` pointent
+sur `assets/veritas-icons.svg`, où les symboles de la vitrine sont recopiés.
+
+**Cartes « comme la vitrine »** (`veritas-medaillons.js` réécrit + CSS) :
+médaillon ROND 42 px centré, fond pâle + icône **Lucide** de la vitrine, six
+teintes en rotation (bleu, sarcelle, vert, violet, rose, brique), carte
+blanche filet #E4E9F2 rayon 14, survol −4 px + ombre, sans trait coloré.
+Icône déduite du titre, sinon de l'ADRESSE du lien (tuiles d'œuvres), sinon
+pictogramme neutre si les voisines de la grille en ont un.
+
+**Pièges trouvés (tous mesurés dans Chromium, avant/après)** :
+- `veritas-pages.css` impose l'ANCIEN médaillon (rond blanc cerclé) et
+  `font-weight:400` sur tout span/div/a en `!important` → exemption
+  `:not(.vrt-hab *)` et médaillon en `!important` plus spécifique.
+- **`#y` dans l'ancien pied** : le script principal de `d/index.html` et
+  `livrets/prof.html` commence par `getElementById('y').textContent=` —
+  retirer le pied arrêtait TOUTE la page. Un `<span hidden>` par identifiant
+  de l'ancien pied est laissé à sa place.
+- Le pied à 4 colonnes débordait à 390 px (520 px de large), **pilote
+  compris** : la couche responsive de la vitrine n'avait pas été recopiée.
+  Ajoutée à CSS_CHROME, bornée à l'habillage ; plan.html régénéré,
+  constellation.html reportée à la main.
+- `querySelector('h3, h2, h4, strong')` attrapait un `<strong>` du texte : le
+  médaillon tombait en plein paragraphe sur /niveaux/. Titre = enfant direct.
+- La délégation « Découvrir » de `vitrine.js` aurait détourné les liens des
+  pages : désormais inactive hors de la vitrine (`[data-vp]` absent).
+- `banc_pages_ouvrages.cjs` classait les pages par POIDS (< 30 Ko) : +67 Ko
+  d'habillage les faisait passer pour des coquilles. Mesure faite sans les
+  blocs d'habillage.
+- Tableaux larges (confidentialité, répétitions) : débordaient AVANT ; ils
+  défilent maintenant seuls sous 700 px.
+
+**Vérifié** : 202 pages chargées avant/après dans Chromium à 390 px — aucune
+nouvelle erreur JS, 0 débordement, barre présente partout ; burger, menu,
+thème sombre, Ambassa, logo → `/` sur une page en sous-dossier ; bancs verts
+(hors `banc_cahiers_reels`, qui exige des données absentes du dépôt).
+
+**Non couvert, volontairement** : `campus/` (produit SaaS à part),
+`plateforme/` (Atelier), les coquilles de cahiers sans feuille partagée,
+`evaluations/*` imprimables, et les 27 pages `seo/` générées en CI
+(`build_seo.cjs`, style en ligne) — à habiller dans leur générateur si voulu.
+Poppins n'a pas pu être vérifiée en local (Google Fonts bloqué dans le bac à
+sable) : à regarder en production.
+
 ## Le Code ami ne valait sur aucun cahier (15/09/2026) — DÉPLOYÉ
 
 Reprise du travail du 14/09, interrompu en pleine vérification de production
