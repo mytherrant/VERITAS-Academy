@@ -62,9 +62,35 @@ DEJA_HABILLEES = {'vitrine.html', 'index.html', 'plan.html', 'constellation.html
 # Familles concernées : on reconnaît une page statique du site à sa feuille.
 FEUILLES = ('veritas-pages.css', 'veritas-refonte.css')
 
+# Pages publiques SANS feuille partagée, habillées elles aussi (« habille
+# tout sauf les cahiers », Jacques, 25/09/2026). Les cahiers — coquilles
+# verrouillées, aperçus, feuilletages, guides de livrets — n'y sont PAS :
+# leur écran appartient au cahier.
+EN_PLUS = [re.compile(x) for x in (
+    r'^(403|404|reset|admin-validation)\.html$',
+    r'^evaluations/[^/]+\.html$',
+    r'^campus/[^/]+\.html$',
+    r'^plateforme/index\.html$',
+    r'^livrets/mode-emploi\.html$',
+    r'^seo/.+\.html$',
+)]
+
+# OUTILS DE TRAVAIL : l'écran appartient à la planche. Barre de la vitrine
+# COMPACTE (58 px au lieu de 76) et NON collante — elle s'en va au premier
+# défilement et rend toute la hauteur au travail ; ni bandeau d'annonce, ni
+# bulles flottantes posées sur la planche (l'Atelier a déjà son thème et son
+# Ambassa dans sa barre d'outils) ; le pied de la page n'est pas retiré.
+OUTILS = [re.compile(x) for x in (
+    r'^plateforme/index\.html$',
+    r'^campus/(app|dashboard|documents|notes|onboarding)\.html$',
+    r'^livrets/prof\.html$',
+    r'^d/index\.html$',
+    r'^admin-validation\.html$',
+)]
+
 # Dossiers jamais touchés (maquette, sources, tests, outils internes).
 EXCLUS = ('Refonte site', 'chunks/', 'tests/', 'Manuel_EST/', 'graphify',
-          'promo/', 'node_modules/', '.claude/', 'campus/', 'deploy/')
+          'promo/', 'node_modules/', '.claude/', 'deploy/')
 
 
 def charger_build_plan():
@@ -139,6 +165,49 @@ NAV = marquer(absolu(BP.NAV_VITRINE), 'nav')
 PROMO = marquer(absolu(BP.PROMO_VITRINE), 'div')
 PIED = marquer(absolu(BP.FOOTER_VITRINE), 'footer')
 BULLES = marquer(absolu(BP.WIDGETS_VITRINE), 'div')
+NAV_OUTIL = NAV.replace('class="vrt-hab"', 'class="vrt-hab vrt-outil"', 1)
+assert NAV_OUTIL != NAV
+
+# L'Atelier portait son propre bandeau de retour (« vrt-pont », collant,
+# 44 px — 76 sur deux lignes au téléphone). La barre de la vitrine le
+# remplace : deux barres empilées, c'est la planche qui rétrécit.
+PONT_ATELIER = re.compile(r'<nav class="vrt-pont"[\s\S]*?</nav>\n?')
+# 403, 404, reset.html : le <body> est une boîte FLEXIBLE qui centre un
+# encadré. La barre et le pied y devenaient des voisins en ligne — la page
+# faisait 622 px de large sur un écran de 390. On empile en colonne :
+# barre en haut, encadré centré dans l'espace qui reste, pied en bas.
+CSS_CORPS_FLEX = ('<style>'
+                  'body{flex-direction:column!important;flex-wrap:nowrap!important;'
+                  'align-items:center!important;padding:0 16px!important}'
+                  'body>.vrt-hab{align-self:stretch;width:auto;max-width:none;flex:none;'
+                  'margin-left:-16px;margin-right:-16px}'
+                  'body>:not(.vrt-hab):not(script):not(style):not(svg){margin-top:auto;'
+                  'margin-bottom:auto}'
+                  'body>footer.vrt-hab{margin-top:48px}'
+                  'body>div.vrt-hab:not([style*="position:fixed"]){margin-bottom:32px}'
+                  '</style>')
+
+# Pages seo/ (tools/build_seo.cjs) : le <body> lui-même est la colonne de
+# lecture (max-width:760px, padding:24px). La barre et le pied y restaient
+# encadrés, en retrait des bords. Ils sortent de la colonne jusqu'aux bords
+# de l'écran ; le texte, lui, garde sa largeur de lecture.
+CSS_CORPS_ETROIT = ('<style>'
+                    'body{padding-top:0!important}'
+                    'body>.vrt-hab:not([style*="position:fixed"]){'
+                    'margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw)}'
+                    'body>div.vrt-hab:not([style*="position:fixed"]){margin-bottom:24px}'
+                    'body>footer.vrt-hab{margin-bottom:-24px}'
+                    '</style>')
+
+CSS_ATELIER = ('<style>'
+               # Son petit pied (CGV, Support…) double celui de la vitrine.
+               'footer[data-noprint="1"]:not(.vrt-hab){display:none!important}'
+               # Le moteur fixe son hôte à la hauteur de l'écran, et la planche
+               # déborde dessous : le pied posé après s'affichait PAR-DESSUS
+               # le travail (mesuré : hôte 800 px, planche 1 708 px). L'hôte
+               # prend désormais la hauteur de son contenu.
+               '.sc-host,div:has(>.sc-host){height:auto!important;min-height:100vh}'
+               '</style>')
 
 
 def donnees_vitrine(vitrine):
@@ -178,6 +247,33 @@ nav.vrt-hab a:hover{text-decoration:none}
 .vrt-hab h2,.vrt-hab h3{color:inherit}
 nav.vrt-hab a,div.vrt-hab a,footer.vrt-hab a{text-decoration:none}
 
+/* Les pages hors des deux familles ont leurs propres règles GÉNÉRIQUES :
+   reset.html pose `button{padding:14px 24px}` sur tout bouton — la bulle de
+   46 px du thème n'avait plus de place, et son icône tombait à 0 px de large.
+   Un bouton de l'habillage qui n'écrit pas son padding n'en a aucun, et une
+   icône ne se laisse jamais comprimer. */
+.vrt-hab button:not([style*="padding"]){padding:0}
+.vrt-hab svg{flex-shrink:0}
+/* Police de la vitrine sur tout l'habillage : sans elle, les liens du pied
+   prenaient la police de la page (Times sur les épreuves imprimables). */
+.vrt-hab{font-family:Poppins,system-ui,sans-serif}
+
+/* Une épreuve, une fiche ou une évaluation qu'on imprime : le papier ne
+   porte ni la barre, ni le pied, ni les bulles. */
+@media print{.vrt-hab{display:none!important}}
+
+/* ── OUTIL DE TRAVAIL (Atelier, Campus, console enseignant) ───────────────
+   L'écran appartient à la planche. La barre de la vitrine y est compacte
+   (58 px au lieu de 76) et NON collante : elle s'en va au premier
+   défilement, et la barre d'outils de l'application reprend le haut de
+   l'écran. Mesuré sur l'Atelier : l'ancien bandeau collant retenait 44 px
+   en permanence sur ordinateur, 76 px sur téléphone (deux lignes). */
+nav.vrt-outil{position:relative!important;height:58px!important;
+  box-shadow:0 1px 0 #E6EAF2!important;z-index:60}
+nav.vrt-outil img{width:36px!important;height:36px!important}
+nav.vrt-outil a[href*="#connexion"]{padding:8px 18px!important}
+nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!important}
+
 /* Un tableau large (tarifs, cookies, calendrier) faisait glisser TOUTE la
    page sous le pouce — mesuré à 405 et 451 px sur un écran de 390, déjà avant
    l'habillage. Il défile désormais seul, dans sa largeur. */
@@ -200,46 +296,46 @@ nav.vrt-hab a,div.vrt-hab a,footer.vrt-hab a{text-decoration:none}
    (`.grid > .tile:nth-child(even)`) — la vitrine alterne la couleur des
    MÉDAILLONS, pas celle des cartes. Une carte dont le fond est écrit en ligne
    (tuile d'appel sombre) garde le sien. */
-:root body .card:not([style*="background"]),:root body .tile:not([style*="background"]){
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .card:not([style*="background"]),:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .tile:not([style*="background"]){
   background:#fff!important}
-:root body .card,:root body .tile{
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .card,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .tile{
   border:1px solid #E4E9F2;border-radius:14px;
   box-shadow:0 4px 14px rgba(0,17,54,.05);
   transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
-:root body .card::before,:root body .card::after,
-:root body .tile::before,:root body .tile::after{display:none}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .card::before,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .card::after,
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .tile::before,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .tile::after{display:none}
 /* Le soulèvement va aux cartes qu'on CLIQUE (lien, ou carte courte à
    médaillon). Une carte qui porte une liste de téléchargements ou un
    formulaire est un panneau de travail : elle ne bouge pas sous la souris. */
-:root body a.card:hover,:root body a.tile:hover,
-:root body :is(.card,.tile):has(.ico):not(:has(ul,ol,table,details,.dl,form,input)):hover{
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) a.card:hover,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) a.tile:hover,
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):has(.ico):not(:has(ul,ol,table,details,.dl,form,input)):hover{
   transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09);
   border-color:#E4E9F2;text-decoration:none}
-:root body :is(.card,.tile):has(.ico){text-align:center}
-:root body :is(.card,.tile):has(.ico) :is(ul,ol,table,details,pre,.dl){text-align:left}
-:root body :is(.card,.tile) > :is(h3,h2,h4,strong){color:#001136}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):has(.ico){text-align:center}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):has(.ico) :is(ul,ol,table,details,pre,.dl){text-align:left}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) > :is(h3,h2,h4,strong){color:#001136}
 
 /* `!important` imposé : veritas-pages.css fixe l'ANCIEN médaillon (rond blanc
    cerclé de couleur) en !important. À importance égale, c'est la spécificité
    qui tranche — celle-ci l'emporte. */
-:root body :is(.card,.tile) .ico{
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico{
   display:flex!important;align-items:center;justify-content:center;
   width:42px!important;height:42px!important;border-radius:50%!important;border:0!important;
   margin:0 auto 13px!important;
   background:var(--vm-fond,#DBE8FE)!important;color:var(--vm-trait,#1E499B)!important;
   box-shadow:none!important;transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
-:root body :is(.card,.tile) .ico svg{width:20px!important;height:20px!important;vertical-align:0;color:inherit!important}
-:root body :is(a.card,a.tile,.card:has(.ico):not(:has(ul,ol,table,details,.dl,form,input)),.tile:has(.ico):not(:has(ul,ol,table,details,.dl,form,input))):hover .ico{transform:scale(1.08) rotate(-4deg)}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico svg{width:20px!important;height:20px!important;vertical-align:0;color:inherit!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(a.card,a.tile,.card:has(.ico):not(:has(ul,ol,table,details,.dl,form,input)),.tile:has(.ico):not(:has(ul,ol,table,details,.dl,form,input))):hover .ico{transform:scale(1.08) rotate(-4deg)}
 .ico[data-vm="bleu"]    {--vm-fond:#DBE8FE;--vm-trait:#1E499B}
 .ico[data-vm="sarcelle"]{--vm-fond:#E3F1EE;--vm-trait:#0E7C86}
 .ico[data-vm="vert"]    {--vm-fond:#E7F7EC;--vm-trait:#007E11}
 .ico[data-vm="violet"]  {--vm-fond:#EEE9F8;--vm-trait:#5B4FA8}
 .ico[data-vm="rose"]    {--vm-fond:#FBE9F1;--vm-trait:#B03A6E}
 .ico[data-vm="brique"]  {--vm-fond:#FFF3E4;--vm-trait:#A84200}
-:root body :is(.card,.tile) .ico.sur-sombre{--vm-fond:rgba(255,255,255,.14);--vm-trait:#fff}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico.sur-sombre{--vm-fond:rgba(255,255,255,.14);--vm-trait:#fff}
 @media (prefers-reduced-motion:reduce){
-  :root body .card,:root body .tile,:root body :is(.card,.tile) .ico{transition:none}
-  :root body :is(.card,.tile):hover,:root body :is(.card,.tile):hover .ico{transform:none}
+  :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .card,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .tile,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico{transition:none}
+  :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):hover,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):hover .ico{transform:none}
 }
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -249,15 +345,15 @@ nav.vrt-hab a,div.vrt-hab a,footer.vrt-hab a{text-decoration:none}
    sombre de la vitrine, qui ne connaît que les styles EN LIGNE : elle
    assombrit la barre et le pied, pas le corps des pages. Sans ces règles le
    bouton rendait une page à moitié sombre. */
-html[data-vrt-theme="sombre"] body{background:#0B1530;color:#DCE3F2}
-html[data-vrt-theme="sombre"] body :is(main,.wrap,section,article){background-color:transparent}
-html[data-vrt-theme="sombre"] body :is(h1,h2,h3,h4,strong,b){color:#F2F5FC}
-html[data-vrt-theme="sombre"] body :is(p,li,td,th,dd,small,.note){color:#C4CDE0}
-html[data-vrt-theme="sombre"] body :is(.card,.tile):not([style*="background"]){background:#14224A!important}
-html[data-vrt-theme="sombre"] body :is(.card,.tile){border-color:#24345F;box-shadow:0 4px 14px rgba(0,0,0,.25)}
-html[data-vrt-theme="sombre"] body :is(.card,.tile) :is(a.dl,.dl){background:transparent;border-color:#24345F}
-html[data-vrt-theme="sombre"] body :is(.card,.tile) > :is(h3,h2,h4,strong){color:#F2F5FC}
-html[data-vrt-theme="sombre"] body a:not(.vrt-hab a){color:#9CC0FF}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)){background:#0B1530;color:#DCE3F2}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(main,.wrap,section,article){background-color:transparent}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(h1,h2,h3,h4,strong,b){color:#F2F5FC}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(p,li,td,th,dd,small,.note){color:#C4CDE0}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):not([style*="background"]){background:#14224A!important}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile){border-color:#24345F;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) :is(a.dl,.dl){background:transparent;border-color:#24345F}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) > :is(h3,h2,h4,strong){color:#F2F5FC}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) a:not(.vrt-hab a){color:#9CC0FF}
 """
 
 
@@ -299,14 +395,29 @@ def entete_de_marque(h):
         and re.search(r'<a\b', h)
 
 
-def habiller(s, donnees):
+def habiller(s, donnees, rel=''):
     s = retirer_blocs(s)
     v = version(s)
+    outil = any(r.search(rel) for r in OUTILS)
+    atelier = rel == 'plateforme/index.html'
 
     # <head>
     tete = ('<link rel="stylesheet" href="/assets/veritas-habillage.css?v=%s">\n'
             '<script>window.VRT_DATA=window.VRT_DATA||%s;</script>') % (v, donnees)
+    # La barre est dessinée en Poppins : une page qui ne la charge pas
+    # (évaluations, Campus, Atelier…) la recevrait en police système.
+    if not re.search(r'fonts\.googleapis\.com/css2\?family=[^"]*Poppins', s):
+        tete = ('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?'
+                'family=Poppins:wght@400;500;600&display=swap">\n') + tete
+    if atelier:
+        tete += '\n' + CSS_ATELIER
+    if re.search(r'body\s*\{[^}]*display\s*:\s*flex', s):
+        tete += '\n' + CSS_CORPS_FLEX
+    elif re.search(r'body\s*\{[^}]*max-width\s*:', s):
+        tete += '\n' + CSS_CORPS_ETROIT
     s = s.replace('</head>', bloc('tete', tete) + '\n</head>', 1)
+    if atelier:
+        s = PONT_ATELIER.sub('', s, count=1)
 
     # Barre de marque seule → retirée (la barre de la vitrine la remplace).
     m = re.search(r'<header\b[^>]*>[\s\S]*?</header>', s)
@@ -319,10 +430,12 @@ def habiller(s, donnees):
     ms = re.match(r'\s*<svg\b[^>]*>[\s\S]*?</svg>', s[pos:])
     if ms and 'position:absolute' in ms.group(0)[:300]:
         pos += ms.end()
-    s = s[:pos] + bloc('barre', NAV + '\n' + PROMO) + '\n' + s[pos:]
+    barre = NAV_OUTIL if outil else NAV + '\n' + PROMO
+    s = s[:pos] + bloc('barre', barre) + '\n' + s[pos:]
 
-    # Ancien pied → retiré (le dernier <footer> hors de nos blocs).
-    pieds = list(re.finditer(r'<footer\b[^>]*>[\s\S]*?</footer>', s))
+    # Ancien pied → retiré (le dernier <footer> hors de nos blocs). Pas dans un
+    # outil de travail : son pied fait partie de l'application.
+    pieds = [] if outil else list(re.finditer(r'<footer\b[^>]*>[\s\S]*?</footer>', s))
     pieds = [p for p in pieds if 'vrt-hab' not in p.group(0)[:200]]
     if pieds:
         p = pieds[-1]
@@ -338,10 +451,10 @@ def habiller(s, donnees):
 
     # Fin du corps : pied, bulles, scripts.
     scripts = ''
-    if 'veritas-medaillons.js' not in s:
+    if 'veritas-medaillons.js' not in s and not outil and any(f in s for f in FEUILLES):
         scripts += '<script src="/assets/veritas-medaillons.js?v=%s" defer></script>\n' % v
     scripts += '<script src="/assets/vitrine.js?v=%s" defer></script>' % v
-    fin = PIED + '\n' + BULLES + '\n' + scripts
+    fin = PIED + '\n' + ('' if outil else BULLES + '\n') + scripts
     i = s.rfind('</body>')
     s = s[:i] + bloc('pied', fin) + '\n' + s[i:]
     return s
@@ -360,12 +473,15 @@ def pages(base):
             continue
         chemin = os.path.join(base, rel)
         s = open(chemin, encoding='utf-8').read()
-        if not any(f in s for f in FEUILLES) or '</body>' not in s:
+        r = rel.replace(os.sep, '/')
+        if '</body>' not in s:
+            continue
+        if not (any(f in s for f in FEUILLES) or any(x.search(r) for x in EN_PLUS)):
             continue
         # Une page qui porte sa PROPRE barre de la vitrine (générateur) n'est pas retouchée.
         if 'id="vrtNav"' in retirer_blocs(s):
             continue
-        yield rel, chemin, s
+        yield r, chemin, s
 
 
 def main():
@@ -384,7 +500,7 @@ def main():
 
     n = 0
     for rel, chemin, s in pages(base):
-        neuf = habiller(s, donnees)
+        neuf = habiller(s, donnees, rel)
         n += 1
         # Garde : le corps de la page est intact, hormis ce qu'on remplace.
         if neuf.count('<h1') != s.count('<h1'):

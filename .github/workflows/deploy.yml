@@ -1640,6 +1640,15 @@ jobs:
             fi
           fi
 
+      # ── 🧥 Habillage des pages produites PENDANT le déploiement ─────────
+      #    Les 27 pages seo/ sont générées ci-dessus par build_seo.cjs et ne
+      #    sont pas dans le dépôt : le contrôle 🧥 ne les voit pas. La passe
+      #    rejouée sur deploy/ les habille ; sur les pages commitées elle ne
+      #    change rien (idempotente). Avant les cache-busters, qui alignent
+      #    ensuite le ?v= de veritas-habillage.css comme les autres.
+      - name: 🧥 Habiller les pages générées au déploiement
+        run: python tools/habiller_pages.py deploy
+
       - name: 🔗 Aligner les cache-busters de tous les assets
         run: |
           # Les ?v= de /assets/*.css|js étaient maintenus À LA MAIN, page par page,

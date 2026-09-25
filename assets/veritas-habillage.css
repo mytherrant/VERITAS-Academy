@@ -196,6 +196,33 @@ nav.vrt-hab a:hover{text-decoration:none}
 .vrt-hab h2,.vrt-hab h3{color:inherit}
 nav.vrt-hab a,div.vrt-hab a,footer.vrt-hab a{text-decoration:none}
 
+/* Les pages hors des deux familles ont leurs propres règles GÉNÉRIQUES :
+   reset.html pose `button{padding:14px 24px}` sur tout bouton — la bulle de
+   46 px du thème n'avait plus de place, et son icône tombait à 0 px de large.
+   Un bouton de l'habillage qui n'écrit pas son padding n'en a aucun, et une
+   icône ne se laisse jamais comprimer. */
+.vrt-hab button:not([style*="padding"]){padding:0}
+.vrt-hab svg{flex-shrink:0}
+/* Police de la vitrine sur tout l'habillage : sans elle, les liens du pied
+   prenaient la police de la page (Times sur les épreuves imprimables). */
+.vrt-hab{font-family:Poppins,system-ui,sans-serif}
+
+/* Une épreuve, une fiche ou une évaluation qu'on imprime : le papier ne
+   porte ni la barre, ni le pied, ni les bulles. */
+@media print{.vrt-hab{display:none!important}}
+
+/* ── OUTIL DE TRAVAIL (Atelier, Campus, console enseignant) ───────────────
+   L'écran appartient à la planche. La barre de la vitrine y est compacte
+   (58 px au lieu de 76) et NON collante : elle s'en va au premier
+   défilement, et la barre d'outils de l'application reprend le haut de
+   l'écran. Mesuré sur l'Atelier : l'ancien bandeau collant retenait 44 px
+   en permanence sur ordinateur, 76 px sur téléphone (deux lignes). */
+nav.vrt-outil{position:relative!important;height:58px!important;
+  box-shadow:0 1px 0 #E6EAF2!important;z-index:60}
+nav.vrt-outil img{width:36px!important;height:36px!important}
+nav.vrt-outil a[href*="#connexion"]{padding:8px 18px!important}
+nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!important}
+
 /* Un tableau large (tarifs, cookies, calendrier) faisait glisser TOUTE la
    page sous le pouce — mesuré à 405 et 451 px sur un écran de 390, déjà avant
    l'habillage. Il défile désormais seul, dans sa largeur. */
@@ -218,46 +245,46 @@ nav.vrt-hab a,div.vrt-hab a,footer.vrt-hab a{text-decoration:none}
    (`.grid > .tile:nth-child(even)`) — la vitrine alterne la couleur des
    MÉDAILLONS, pas celle des cartes. Une carte dont le fond est écrit en ligne
    (tuile d'appel sombre) garde le sien. */
-:root body .card:not([style*="background"]),:root body .tile:not([style*="background"]){
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .card:not([style*="background"]),:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .tile:not([style*="background"]){
   background:#fff!important}
-:root body .card,:root body .tile{
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .card,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .tile{
   border:1px solid #E4E9F2;border-radius:14px;
   box-shadow:0 4px 14px rgba(0,17,54,.05);
   transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
-:root body .card::before,:root body .card::after,
-:root body .tile::before,:root body .tile::after{display:none}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .card::before,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .card::after,
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .tile::before,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .tile::after{display:none}
 /* Le soulèvement va aux cartes qu'on CLIQUE (lien, ou carte courte à
    médaillon). Une carte qui porte une liste de téléchargements ou un
    formulaire est un panneau de travail : elle ne bouge pas sous la souris. */
-:root body a.card:hover,:root body a.tile:hover,
-:root body :is(.card,.tile):has(.ico):not(:has(ul,ol,table,details,.dl,form,input)):hover{
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) a.card:hover,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) a.tile:hover,
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):has(.ico):not(:has(ul,ol,table,details,.dl,form,input)):hover{
   transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09);
   border-color:#E4E9F2;text-decoration:none}
-:root body :is(.card,.tile):has(.ico){text-align:center}
-:root body :is(.card,.tile):has(.ico) :is(ul,ol,table,details,pre,.dl){text-align:left}
-:root body :is(.card,.tile) > :is(h3,h2,h4,strong){color:#001136}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):has(.ico){text-align:center}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):has(.ico) :is(ul,ol,table,details,pre,.dl){text-align:left}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) > :is(h3,h2,h4,strong){color:#001136}
 
 /* `!important` imposé : veritas-pages.css fixe l'ANCIEN médaillon (rond blanc
    cerclé de couleur) en !important. À importance égale, c'est la spécificité
    qui tranche — celle-ci l'emporte. */
-:root body :is(.card,.tile) .ico{
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico{
   display:flex!important;align-items:center;justify-content:center;
   width:42px!important;height:42px!important;border-radius:50%!important;border:0!important;
   margin:0 auto 13px!important;
   background:var(--vm-fond,#DBE8FE)!important;color:var(--vm-trait,#1E499B)!important;
   box-shadow:none!important;transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
-:root body :is(.card,.tile) .ico svg{width:20px!important;height:20px!important;vertical-align:0;color:inherit!important}
-:root body :is(a.card,a.tile,.card:has(.ico):not(:has(ul,ol,table,details,.dl,form,input)),.tile:has(.ico):not(:has(ul,ol,table,details,.dl,form,input))):hover .ico{transform:scale(1.08) rotate(-4deg)}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico svg{width:20px!important;height:20px!important;vertical-align:0;color:inherit!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(a.card,a.tile,.card:has(.ico):not(:has(ul,ol,table,details,.dl,form,input)),.tile:has(.ico):not(:has(ul,ol,table,details,.dl,form,input))):hover .ico{transform:scale(1.08) rotate(-4deg)}
 .ico[data-vm="bleu"]    {--vm-fond:#DBE8FE;--vm-trait:#1E499B}
 .ico[data-vm="sarcelle"]{--vm-fond:#E3F1EE;--vm-trait:#0E7C86}
 .ico[data-vm="vert"]    {--vm-fond:#E7F7EC;--vm-trait:#007E11}
 .ico[data-vm="violet"]  {--vm-fond:#EEE9F8;--vm-trait:#5B4FA8}
 .ico[data-vm="rose"]    {--vm-fond:#FBE9F1;--vm-trait:#B03A6E}
 .ico[data-vm="brique"]  {--vm-fond:#FFF3E4;--vm-trait:#A84200}
-:root body :is(.card,.tile) .ico.sur-sombre{--vm-fond:rgba(255,255,255,.14);--vm-trait:#fff}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico.sur-sombre{--vm-fond:rgba(255,255,255,.14);--vm-trait:#fff}
 @media (prefers-reduced-motion:reduce){
-  :root body .card,:root body .tile,:root body :is(.card,.tile) .ico{transition:none}
-  :root body :is(.card,.tile):hover,:root body :is(.card,.tile):hover .ico{transform:none}
+  :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .card,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .tile,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico{transition:none}
+  :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):hover,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):hover .ico{transform:none}
 }
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -267,12 +294,12 @@ nav.vrt-hab a,div.vrt-hab a,footer.vrt-hab a{text-decoration:none}
    sombre de la vitrine, qui ne connaît que les styles EN LIGNE : elle
    assombrit la barre et le pied, pas le corps des pages. Sans ces règles le
    bouton rendait une page à moitié sombre. */
-html[data-vrt-theme="sombre"] body{background:#0B1530;color:#DCE3F2}
-html[data-vrt-theme="sombre"] body :is(main,.wrap,section,article){background-color:transparent}
-html[data-vrt-theme="sombre"] body :is(h1,h2,h3,h4,strong,b){color:#F2F5FC}
-html[data-vrt-theme="sombre"] body :is(p,li,td,th,dd,small,.note){color:#C4CDE0}
-html[data-vrt-theme="sombre"] body :is(.card,.tile):not([style*="background"]){background:#14224A!important}
-html[data-vrt-theme="sombre"] body :is(.card,.tile){border-color:#24345F;box-shadow:0 4px 14px rgba(0,0,0,.25)}
-html[data-vrt-theme="sombre"] body :is(.card,.tile) :is(a.dl,.dl){background:transparent;border-color:#24345F}
-html[data-vrt-theme="sombre"] body :is(.card,.tile) > :is(h3,h2,h4,strong){color:#F2F5FC}
-html[data-vrt-theme="sombre"] body a:not(.vrt-hab a){color:#9CC0FF}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)){background:#0B1530;color:#DCE3F2}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(main,.wrap,section,article){background-color:transparent}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(h1,h2,h3,h4,strong,b){color:#F2F5FC}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(p,li,td,th,dd,small,.note){color:#C4CDE0}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):not([style*="background"]){background:#14224A!important}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile){border-color:#24345F;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) :is(a.dl,.dl){background:transparent;border-color:#24345F}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) > :is(h3,h2,h4,strong){color:#F2F5FC}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) a:not(.vrt-hab a){color:#9CC0FF}

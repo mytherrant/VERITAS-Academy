@@ -1,4 +1,4 @@
-## Reskin finalisé : l'habillage de la vitrine sur les 202 pages statiques (25/09/2026) — NON DÉPLOYÉ
+## Reskin finalisé : l'habillage de la vitrine sur 225 pages + l'Atelier (25/09/2026) — NON DÉPLOYÉ
 
 Demande de Jacques : « finalise le reskin », puis « les mêmes icônes dans le
 rond centré, l'alternance de couleurs, les effets exactement comme sur la
@@ -57,12 +57,61 @@ nouvelle erreur JS, 0 débordement, barre présente partout ; burger, menu,
 thème sombre, Ambassa, logo → `/` sur une page en sous-dossier ; bancs verts
 (hors `banc_cahiers_reels`, qui exige des données absentes du dépôt).
 
-**Non couvert, volontairement** : `campus/` (produit SaaS à part),
-`plateforme/` (Atelier), les coquilles de cahiers sans feuille partagée,
-`evaluations/*` imprimables, et les 27 pages `seo/` générées en CI
-(`build_seo.cjs`, style en ligne) — à habiller dans leur générateur si voulu.
-Poppins n'a pas pu être vérifiée en local (Google Fonts bloqué dans le bac à
-sable) : à regarder en production.
+**Suite (même jour) — « habille tout sauf les cahiers », et l'Atelier
+doit laisser la place à la planche.** 225 pages habillées. Ajoutées :
+403, 404, `reset.html`, `admin-validation.html`, `evaluations/*`,
+`campus/*`, `plateforme/` (Atelier), `livrets/mode-emploi.html`, et les 27
+pages `seo/` (générées en CI : la passe est rejouée sur `deploy/`, étape
+🧥 de `deploy.yml`). **Jamais les cahiers** : coquilles verrouillées
+(`livrets/6e.html`…), aperçu, démo, feuilletage, guides — vérifié, aucune
+n'avait été touchée par la première passe non plus.
+
+**Profil « outil de travail »** (Atelier, écrans Campus, `livrets/prof.html`,
+`d/index.html`, `admin-validation.html`) : barre de la vitrine compacte
+(58 px) et NON collante, sans bandeau ni bulles ; le pied de l'application
+n'est pas retiré ; pas de couche « cartes ». Sur l'Atelier, la barre
+remplace le bandeau `vrt-pont` (collant : 44 px retenus en permanence sur
+ordinateur, 76 px sur téléphone). Mesuré sur le composeur : planche à 175 px
+du haut sur téléphone (193 avant), et **0 px** retenu après défilement (44 /
+76 avant).
+
+**Pièges de cette suite** :
+- Le moteur de l'Atelier fixe son hôte `.sc-host` à la hauteur de l'écran
+  (800 px) et la planche déborde dessous (1 708 px) : le pied posé après
+  s'affichait PAR-DESSUS le travail. Hôte en `height:auto` sur l'Atelier ;
+  9 écrans vérifiés (accueil, épreuves, composeur, cours, collab, liste,
+  activité, fiche, aperçu), aucun chevauchement.
+- `reset.html` / 403 / 404 : `<body>` flexible qui centre un encadré → barre
+  et pied côte à côte (622 px de large sur 390). Empilés en colonne.
+- `reset.html` porte une `.card` sombre translucide : la couche « cartes »
+  la blanchissait (texte blanc sur blanc). Cartes, médaillons et thème
+  sombre du corps sont désormais réservés aux deux familles de contenu
+  (`:root:has(link[href*="veritas-pages.css"],…)`).
+- `button{padding:14px 24px}` générique (reset.html) écrasait les bulles de
+  46 px : icône à 0 px. Bouton de l'habillage sans padding écrit → 0,
+  icônes non compressibles, Poppins imposée sur tout l'habillage.
+- Pages `seo/` : le `<body>` EST la colonne (max-width 760) → barre et pied
+  étendus jusqu'aux bords.
+- Impression : `.vrt-hab` masqué (épreuves imprimables vérifiées).
+
+**Pour voir la planche en local** : l'Atelier charge React/Babel depuis
+unpkg (bloqué dans le bac à sable) et l'entrée passe par l'API PHP. Servir
+les trois fichiers depuis `npm i react@18.3.1 react-dom@18.3.1
+@babel/standalone` via `page.route`, puis basculer l'écran par la fibre
+React : `stateNode.logic.setState({screen:'composeur', ready:true})`.
+⚠️ `tests/banc_atelier.cjs` n'est PAS un test : c'est un serveur de
+simulation de l'API (il ne rend jamais la main — ne pas le lancer dans une
+boucle de bancs).
+
+**Débordements mobiles existants, non causés par l'habillage** (identiques
+avant/après) : feuilles A4 de `evaluations/BEPC_blanc_*` et
+`campus/documents.html` (794-822 px), écrans Collab (405) et Aperçu (611)
+de l'Atelier.
+
+**Toujours hors habillage, volontairement** : `app.html` (l'application
+connectée, qui a sa propre navigation), `VERITAS_Promo_Video.html` (outil de
+tournage), `BUSINESS_PLAN_VERITAS.html` et `promo/affiches/` (non déployés),
+le fichier de vérification Google. Poppins non vérifiable en local.
 
 ## Le Code ami ne valait sur aucun cahier (15/09/2026) — DÉPLOYÉ
 
