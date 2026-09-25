@@ -65,8 +65,13 @@ const pages = slugs
    soit indexable reviendrait à demander qu'on expose la marchandise.
    Les pages produites par `tools/pages_ouvrages.py`, elles, n'existent QUE
    pour être trouvées. On les distingue à ce qu'elles portent des données
-   structurées et pèsent quelques kilo-octets. */
-const produites = pages.filter(x => x.t.indexOf('application/ld+json') > 0 && x.t.length < 30000);
+   structurées et pèsent quelques kilo-octets.
+   Le poids se mesure SANS l'habillage de la vitrine (barre, bandeau, pied,
+   bulles : ~67 Ko posés par tools/habiller_pages.py sur les pages de
+   présentation, jamais sur les coquilles) — sinon toutes les pages de
+   présentation passaient pour des coquilles. */
+const propre = t => t.replace(/<!--vrt-habillage:([a-z]+)-->[\s\S]*?<!--\/vrt-habillage:\1-->/g, '');
+const produites = pages.filter(x => x.t.indexOf('application/ld+json') > 0 && propre(x.t).length < 30000);
 const coquilles = pages.filter(x => produites.indexOf(x) < 0);
 
 console.log(`\n${G}② Les pages de présentation sont indexables${R}`);

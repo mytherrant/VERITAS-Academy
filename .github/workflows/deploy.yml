@@ -715,6 +715,16 @@ jobs:
       - name: 🎨 Une seule couleur d'action sur tout le site ?
         run: node tests/banc_charte_action.cjs
 
+      # ── 🧥 CHAQUE PAGE PORTE-T-ELLE L'HABILLAGE DE LA VITRINE ? ──────────
+      #    Barre, bandeau, bulles et pied de vitrine.html sont posés sur les
+      #    ~200 pages statiques par tools/habiller_pages.py, APRÈS leurs
+      #    générateurs (build_corriges.py, pages_ouvrages.py…). Une page
+      #    régénérée sans relancer la passe repartirait avec l'ancien en-tête
+      #    — ou une barre qui ne suit plus la vitrine. Le contrôle échoue
+      #    alors, et nomme la commande à lancer.
+      - name: 🧥 Chaque page porte-t-elle l'habillage de la vitrine ?
+        run: python tools/habiller_pages.py --controle
+
       # ── 🃏 UNE CARTE SURVOLÉE DISPARAÎT-ELLE ? Signalé le 13/09/2026 sur
       #    /corriges/ : les cartes s'effaçaient au passage de la souris.
       #    veritas-pages.css coupait la ligne de temps de l'animation
@@ -1629,6 +1639,15 @@ jobs:
               rm -f deploy/app.min.js
             fi
           fi
+
+      # ── 🧥 Habillage des pages produites PENDANT le déploiement ─────────
+      #    Les 27 pages seo/ sont générées ci-dessus par build_seo.cjs et ne
+      #    sont pas dans le dépôt : le contrôle 🧥 ne les voit pas. La passe
+      #    rejouée sur deploy/ les habille ; sur les pages commitées elle ne
+      #    change rien (idempotente). Avant les cache-busters, qui alignent
+      #    ensuite le ?v= de veritas-habillage.css comme les autres.
+      - name: 🧥 Habiller les pages générées au déploiement
+        run: python tools/habiller_pages.py deploy
 
       - name: 🔗 Aligner les cache-busters de tous les assets
         run: |

@@ -3086,6 +3086,10 @@
   }
 
   document.addEventListener('click', function (ev) {
+    /* Hors de la vitrine (pages statiques habillées par
+       tools/habiller_pages.py), un lien « Découvrir » est écrit par la page
+       elle-même, vers sa vraie destination : on ne le détourne pas. */
+    if (!document.querySelector('[data-vp]')) return;
     var a = ev.target && ev.target.closest ? ev.target.closest('a') : null;
     if (!a || !/^\s*D[ée]couvrir/i.test(a.textContent || '')) return;
     var carte = carteDe(a);

@@ -1,3 +1,136 @@
+## Reskin finalisé : l'habillage de la vitrine sur 225 pages + l'Atelier (25/09/2026) — NON DÉPLOYÉ
+
+Demande de Jacques : « finalise le reskin », puis « les mêmes icônes dans le
+rond centré, l'alternance de couleurs, les effets exactement comme sur la
+vitrine ». Le pilote (`498ed99`, plan.html + constellation.html) est étendu à
+toutes les pages qui portent `veritas-pages.css` ou `veritas-refonte.css`
+(corrigés, livrets, niveaux, œuvres, ressources, outils, cours, légal,
+découvrir, espaces élève / enseignant…).
+
+**Un seul outil, une seule source** : `python tools/habiller_pages.py`.
+Il lit les blocs du pilote dans `tools/build_plan.py` (NAV / PROMO / FOOTER /
+WIDGETS / CSS_CHROME) et les symboles dans `vitrine.html` — rien n'est recopié
+à la main. Passe **idempotente** (balises `<!--vrt-habillage:…-->`), à relancer
+après tout générateur de pages. `--controle` échoue si une page n'est pas à
+jour : branché dans `deploy.yml` (🧥), éprouvé par mutation.
+
+Ce que la passe pose : barre + bandeau en tête, pied + bulles (thème,
+traducteur, Ambassa) + `vitrine.js` en fin, `assets/veritas-habillage.css`
+(généré), `VRT_DATA` minimal (citations + thème sombre, sinon deux bulles
+étaient muettes), `veritas-medaillons.js` s'il manquait. La simple barre de
+marque « Centre VÉRITAS » est retirée ; un en-tête qui porte le `<h1>` est
+GARDÉ (garde : le nombre de `<h1>` ne doit pas bouger). Les URL des blocs sont
+rendues absolues (elles étaient relatives à la racine), les `#lc-*` pointent
+sur `assets/veritas-icons.svg`, où les symboles de la vitrine sont recopiés.
+
+**Cartes « comme la vitrine »** (`veritas-medaillons.js` réécrit + CSS) :
+médaillon ROND 42 px centré, fond pâle + icône **Lucide** de la vitrine, six
+teintes en rotation (bleu, sarcelle, vert, violet, rose, brique), carte
+blanche filet #E4E9F2 rayon 14, survol −4 px + ombre, sans trait coloré.
+Icône déduite du titre, sinon de l'ADRESSE du lien (tuiles d'œuvres), sinon
+pictogramme neutre si les voisines de la grille en ont un.
+
+**Pièges trouvés (tous mesurés dans Chromium, avant/après)** :
+- `veritas-pages.css` impose l'ANCIEN médaillon (rond blanc cerclé) et
+  `font-weight:400` sur tout span/div/a en `!important` → exemption
+  `:not(.vrt-hab *)` et médaillon en `!important` plus spécifique.
+- **`#y` dans l'ancien pied** : le script principal de `d/index.html` et
+  `livrets/prof.html` commence par `getElementById('y').textContent=` —
+  retirer le pied arrêtait TOUTE la page. Un `<span hidden>` par identifiant
+  de l'ancien pied est laissé à sa place.
+- Le pied à 4 colonnes débordait à 390 px (520 px de large), **pilote
+  compris** : la couche responsive de la vitrine n'avait pas été recopiée.
+  Ajoutée à CSS_CHROME, bornée à l'habillage ; plan.html régénéré,
+  constellation.html reportée à la main.
+- `querySelector('h3, h2, h4, strong')` attrapait un `<strong>` du texte : le
+  médaillon tombait en plein paragraphe sur /niveaux/. Titre = enfant direct.
+- La délégation « Découvrir » de `vitrine.js` aurait détourné les liens des
+  pages : désormais inactive hors de la vitrine (`[data-vp]` absent).
+- `banc_pages_ouvrages.cjs` classait les pages par POIDS (< 30 Ko) : +67 Ko
+  d'habillage les faisait passer pour des coquilles. Mesure faite sans les
+  blocs d'habillage.
+- Tableaux larges (confidentialité, répétitions) : débordaient AVANT ; ils
+  défilent maintenant seuls sous 700 px.
+
+**Vérifié** : 202 pages chargées avant/après dans Chromium à 390 px — aucune
+nouvelle erreur JS, 0 débordement, barre présente partout ; burger, menu,
+thème sombre, Ambassa, logo → `/` sur une page en sous-dossier ; bancs verts
+(hors `banc_cahiers_reels`, qui exige des données absentes du dépôt).
+
+**Suite (même jour) — « habille tout sauf les cahiers », et l'Atelier
+doit laisser la place à la planche.** 225 pages habillées. Ajoutées :
+403, 404, `reset.html`, `admin-validation.html`, `evaluations/*`,
+`campus/*`, `plateforme/` (Atelier), `livrets/mode-emploi.html`, et les 27
+pages `seo/` (générées en CI : la passe est rejouée sur `deploy/`, étape
+🧥 de `deploy.yml`). **Jamais les cahiers** : coquilles verrouillées
+(`livrets/6e.html`…), aperçu, démo, feuilletage, guides — vérifié, aucune
+n'avait été touchée par la première passe non plus.
+
+**Profil « outil de travail »** (Atelier, écrans Campus, `livrets/prof.html`,
+`d/index.html`, `admin-validation.html`) : barre de la vitrine compacte
+(58 px) et NON collante, sans bandeau ni bulles ; le pied de l'application
+n'est pas retiré ; pas de couche « cartes ». Sur l'Atelier, la barre
+remplace le bandeau `vrt-pont` (collant : 44 px retenus en permanence sur
+ordinateur, 76 px sur téléphone). Mesuré sur le composeur : planche à 175 px
+du haut sur téléphone (193 avant), et **0 px** retenu après défilement (44 /
+76 avant).
+
+**Atelier au téléphone : la planche d'abord** (`plateforme/index.html`,
+bloc « LA PLANCHE D'ABORD » de la feuille ≤ 820 px). Mesuré au composeur,
+390 × 800, en pleine saisie : barre d'outils collante 117 px + volet
+« Renseignements » collant 160 px + onglets 60 px → ~490 px pour écrire.
+Après : ~740 px. Les volets latéraux (collants pour rester À CÔTÉ du texte
+sur ordinateur) redeviennent des blocs ordinaires une fois empilés
+au-dessus ; la barre d'outils se replie à la descente et revient à la
+moindre remontée (petit script autonome en fin de page, jamais au-delà de
+820 px, jamais pendant une saisie dans la barre). ⚠️ React réécrit les
+styles en ligne AVEC espaces (`top: 86px`) : un sélecteur d'attribut sur
+l'écriture du gabarit (`top:86px`) ne mord jamais. Banc
+`banc_atelier_mobile` ⑧ (8 contrôles, éprouvé par 2 mutations). Le bandeau
+d'astuces (une toutes les 3 min) est une fonction voulue : laissé tel quel.
+
+**Pièges de cette suite** :
+- Le moteur de l'Atelier fixe son hôte `.sc-host` à la hauteur de l'écran
+  (800 px) et la planche déborde dessous (1 708 px) : le pied posé après
+  s'affichait PAR-DESSUS le travail. Hôte en `height:auto` sur l'Atelier ;
+  9 écrans vérifiés (accueil, épreuves, composeur, cours, collab, liste,
+  activité, fiche, aperçu), aucun chevauchement.
+- `reset.html` / 403 / 404 : `<body>` flexible qui centre un encadré → barre
+  et pied côte à côte (622 px de large sur 390). Empilés en colonne.
+- `reset.html` porte une `.card` sombre translucide : la couche « cartes »
+  la blanchissait (texte blanc sur blanc). Cartes, médaillons et thème
+  sombre du corps sont désormais réservés aux deux familles de contenu
+  (`:root:has(link[href*="veritas-pages.css"],…)`).
+- `button{padding:14px 24px}` générique (reset.html) écrasait les bulles de
+  46 px : icône à 0 px. Bouton de l'habillage sans padding écrit → 0,
+  icônes non compressibles, Poppins imposée sur tout l'habillage.
+- Pages `seo/` : le `<body>` EST la colonne (max-width 760) → barre et pied
+  étendus jusqu'aux bords.
+- Impression : `.vrt-hab` masqué (épreuves imprimables vérifiées).
+
+**Pour voir la planche en local** : l'Atelier charge React/Babel depuis
+unpkg (bloqué dans le bac à sable) et l'entrée passe par l'API PHP. Servir
+les trois fichiers depuis `npm i react@18.3.1 react-dom@18.3.1
+@babel/standalone` via `page.route`, puis basculer l'écran par la fibre
+React : `stateNode.logic.setState({screen:'composeur', ready:true})`.
+⚠️ `tests/banc_atelier.cjs` n'est PAS un test : c'est un serveur de
+simulation de l'API (il ne rend jamais la main — ne pas le lancer dans une
+boucle de bancs).
+
+**Débordements mobiles existants — CORRIGÉS (25/09, suite)** : épreuves
+`evaluations/BEPC_blanc_*` (feuille A4 en `210mm` fixe → largeur suivie à
+l'ÉCRAN sous 820 px, en-tête en colonne ; l'impression reste A4),
+`campus/documents.html` (rangée des 7 types de document défilante, blocs
+de signature à la ligne à l'écran), Atelier Collaboration (`.vrt-col3` en
+`minmax(0,1fr)` : une piste `1fr` ne descend pas sous son contenu) et Aperçu
+(barre « Exporter / Imprimer » qui passe à la ligne). Vérifié : 224 pages +
+9 écrans de l'Atelier à 390 px, 0 débordement.
+
+**Toujours hors habillage, volontairement** : `app.html` (l'application
+connectée, qui a sa propre navigation), `VERITAS_Promo_Video.html` (outil de
+tournage), `BUSINESS_PLAN_VERITAS.html` et `promo/affiches/` (non déployés),
+le fichier de vérification Google. Poppins non vérifiable en local.
+
 ## Le Code ami ne valait sur aucun cahier (15/09/2026) — DÉPLOYÉ
 
 Reprise du travail du 14/09, interrompu en pleine vérification de production

@@ -1755,7 +1755,12 @@ input:focus-visible, select:focus-visible, [tabindex]:focus-visible{
    400 par défaut, 500 pour l'appui, 600 pour les titres. Rien au-dessus :
    c'est ce plafond, plus que la palette, qui distingue une page tenue
    d'une page criarde. */
-body, body p, body li, body td, body span, body div, body small, body a{
+/* `:not(.vrt-hab *)` : la barre, le pied et les bulles recopiés de la
+   vitrine (tools/habiller_pages.py) portent leurs graisses en ligne —
+   500 et 600, comme sur l'accueil. Les ramener à 400 rendait le menu et le
+   pied plus pâles que ceux de la vitrine. */
+body, body p:not(.vrt-hab *), body li:not(.vrt-hab *), body td, body span:not(.vrt-hab *),
+body div:not(.vrt-hab *), body small:not(.vrt-hab *), body a:not(.vrt-hab *){
   font-weight:400 !important;
 }
 h1, h2, h3, h4, h5, h6, b, strong, summary, th, legend, dt,

@@ -823,7 +823,22 @@ CSS_CHROME = r"""  @keyframes vpulse{0%,100%{box-shadow:0 0 0 0 rgba(91,224,122,
 .vh59:hover{transform:translateY(-2px)}
 .vh60:hover{transform:translateY(-3px) rotate(-8deg);box-shadow:0 12px 26px rgba(0,17,54,.09);color:#A84200}
 .vh61:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(14,124,134,.28)}
-.vh62:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 18px 40px rgba(91,79,168,.55)}"""
+.vh62:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 18px 40px rgba(91,79,168,.55)}
+/* Couche responsive de la vitrine, bornée à l'habillage (barre, pied, blocs
+   .vrt-hab). Sur vitrine.html elle vise tout [style*="grid-template-columns"] ;
+   recopiée telle quelle, elle écraserait les grilles EN LIGNE des pages. Sans
+   elle, le pied à quatre colonnes faisait 520 px de large sur un écran de 390
+   (plan.html et constellation.html compris). */
+@media (max-width:999.98px){
+  :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="grid-template-columns"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{padding-left:20px!important;padding-right:20px!important}
+}
+@media (max-width:700px){
+  :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="grid-template-columns"]{grid-template-columns:minmax(0,1fr)!important}
+  :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{padding-left:16px!important;padding-right:16px!important}
+}
+@media (min-width:1440px){ :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{max-width:1330px!important} }
+@media (min-width:1760px){ :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{max-width:1440px!important} }"""
 
 
 CSS_CARTES = """  /* LA CARTE DE LA VITRINE, reproduite cote pour cote. Toute couleur écrite

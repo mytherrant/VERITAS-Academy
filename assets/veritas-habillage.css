@@ -1,0 +1,305 @@
+/* VÉRITAS — habillage de la vitrine pour les pages statiques.
+   FICHIER GÉNÉRÉ par tools/habiller_pages.py : ne pas éditer à la main.
+   Barre, bandeau, bulles et pied : CSS_CHROME de tools/build_plan.py,
+   recopié de vitrine.html. Cartes et médaillons : voir plus bas. */
+  @keyframes vpulse{0%,100%{box-shadow:0 0 0 0 rgba(91,224,122,.5)}70%{box-shadow:0 0 0 9px rgba(91,224,122,0)}}
+  @keyframes vpop{0%{transform:scale(.82);opacity:0}60%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+
+/* Barre large / compacte : bascule à 1000 px, en CSS pur. */
+.vrt-compact{display:none!important}
+@media (max-width:999.98px){
+  .vrt-large{display:none!important}
+  .vrt-compact{display:flex!important}
+}
+[hidden]{display:none!important}
+
+/* ── Le menu « Plus » s'ouvre au survol ────────────────────────────────────
+   Trois choses à savoir avant de toucher à cette règle.
+
+   1. Le mot-clé important est OBLIGATOIRE ici. La ligne [hidden] juste
+      au-dessus ferme le panneau avec la même arme : sans important en face,
+      la règle de survol perd l'arbitrage, en silence.
+
+   2. On s'accroche au PARENT via :has(), faute de conteneur. Le panneau est
+      positionné en absolu, mais l'élément #vrtPlusWrap que vitrine.js
+      interroge dans son gestionnaire de clic extérieur n'existe pas dans la
+      page — :has(> #vrtPlus) désigne donc le vrai parent, quel qu'il soit.
+      Là où :has() n'est pas connu (Chrome antérieur à 105, encore présent
+      sur une partie du parc Android d'ici), la règle est simplement ignorée
+      et le clic continue de fonctionner : l'ouverture au survol est un
+      confort, jamais la seule porte d'entrée.
+
+   3. Réservé aux pointeurs FINS. Sur un écran tactile, un menu qui s'ouvre au
+      survol piège l'utilisateur : la première frappe ouvre au lieu de
+      naviguer, et rien n'indique qu'il faut frapper deux fois. La demande
+      était « au pointeur de la souris » — la media query dit exactement
+      cela. */
+@media (hover:hover) and (pointer:fine){
+  *:has(> #vrtPlus):hover > #vrtPlus[hidden]{display:flex!important}
+  /* Pont de survol : sans lui, les quelques pixels entre le bouton et le
+     panneau referment le menu en cours de trajet. */
+  *:has(> #vrtPlus){position:relative}
+  *:has(> #vrtPlus)::after{content:'';position:absolute;left:0;right:0;top:100%;height:10px}
+}
+
+/* ── Menu « Plus » : toutes les rubriques ──────────────────────────────────
+   Le panneau d'origine tenait quatre entrées dans 236 px. Il en porte
+   maintenant vingt-sept, groupées : il faut des colonnes, sinon la liste
+   dépasse l'écran et on perd ce qu'on venait de gagner.
+
+   Largeurs choisies pour que le panneau NE SOIT JAMAIS coupé. Il est ancré
+   sur le bouton « Plus », qui se trouve autour du tiers gauche de la barre :
+   trois colonnes de 218 px (≈ 690 px) tiennent à partir de 1200 px de
+   fenêtre, deux colonnes en dessous. Sous 1000 px le panneau n'est plus
+   affiché du tout — c'est le menu mobile qui prend le relais, et il reçoit
+   les mêmes entrées. */
+/* MÉGA-MENU PLEINE LARGEUR (v1.19.31). Barre fixée SOUS l'en-tête, fond
+   pleine largeur (technique du padding-inline : le bloc s'étend d'un bord à
+   l'autre, le CONTENU reste centré à 1160 px). Trois colonnes ÉGALES qui
+   s'étalent sur toute la largeur — plus de panneau étroit ancré à gauche, plus
+   de descriptions tronquées.
+
+   Ancrage : #vrtNav porte un backdrop-filter, qui fait de lui le BLOC CONTENANT
+   des descendants position:fixed. « top:100% » = exactement le bas du nav, et
+   s'ajuste tout seul quand le nav se compacte au défilement — aucun JS requis.
+   Repli @supports pour les rares navigateurs sans backdrop-filter (le bloc
+   contenant redevient alors le viewport, où le nav commence à 0 → 76 px). */
+.vmn{position:fixed;left:0;right:0;top:100%;
+  background:#fff;border-top:1px solid #EEF1F7;border-bottom:1px solid #E1E6F0;
+  box-shadow:0 26px 52px rgba(12,28,74,.16);z-index:59;
+  padding:24px max(24px,calc((100vw - 1160px)/2)) 30px;
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px 30px;
+  max-height:min(80vh,540px);overflow-y:auto;overscroll-behavior:contain;
+  animation:vmnDown .26s cubic-bezier(.22,1,.36,1)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){ .vmn{top:76px} }
+/* Cinq colonnes de rôle tiennent au-delà de 1240 px. En dessous on passe à
+   trois puis à deux : une colonne de rôle écrasée sous ~200 px coupe les
+   libellés (« Matières et coefficients »), et un menu illisible ne range
+   rien. Le classement par rôle survit à chaque palier — seul le nombre de
+   colonnes change, jamais l'ordre des groupes. */
+@media (max-width:1239.98px){ .vmn{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:1023.98px){ .vmn{grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 30px;padding-left:24px;padding-right:24px} }
+@keyframes vmnDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+.vmn-col{display:flex;flex-direction:column;gap:1px;min-width:0}
+.vmn-t{margin:8px 0 6px;padding:0 12px 6px;font:700 11px Poppins,sans-serif;
+  letter-spacing:1px;text-transform:uppercase;color:#5B4FA8;border-bottom:1px solid #F0F2F8}
+/* Le sous-titre dit à qui la colonne s'adresse, en minuscules et sans
+   interlettrage : il se lit comme une phrase, pas comme une deuxième
+   étiquette qui concurrencerait le nom du rôle. */
+.vmn-t small{display:block;margin-top:3px;font:400 11px Poppins,sans-serif;
+  letter-spacing:0;text-transform:none;color:#8A8FA3}
+/* Bandeau d'annonces piloté par l'admin (« Portail visiteur → Bandeau
+   défilant »). Inséré par vitrine.js seulement s'il y a un message : pas de
+   barre vide. Navy plein plutôt qu'un jaune d'alerte — c'est une information
+   du centre, pas un avertissement, et l'accueil est déjà clair. */
+/* Podium du panneau « Apprendre en jouant ». Rempli par vitrine.js depuis les
+   scores réels ; le conteneur reste masqué tant qu'il n'y en a aucun. */
+.vpod-list{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.vpod-l{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:12px;
+  background:#F7F9FD;font:500 14px Poppins,sans-serif;color:#12203F}
+.vpod-l:first-child{background:#FFF8E6}
+.vpod-r{flex:0 0 auto;width:25px;height:25px;border-radius:50%;color:#fff;
+  display:inline-flex;align-items:center;justify-content:center;font:700 12.5px Poppins,sans-serif}
+.vpod-n{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vpod-p{flex:0 0 auto;font:700 13.5px Poppins,sans-serif;color:#A84200}
+
+.vann{display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:9px 20px;background:linear-gradient(90deg,#0C2A6A,#1E499B);color:#fff;
+  font:500 13.5px/1.45 Poppins,sans-serif;text-align:center;position:relative;z-index:58}
+.vann-p{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:7px;background:rgba(255,255,255,.16);color:#FFC93C}
+.vann-x{animation:vannIn .5s cubic-bezier(.22,1,.36,1);min-width:0}
+@keyframes vannIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){ .vann-x{animation:none} }
+@media (max-width:600px){ .vann{font-size:12.5px;padding:8px 14px} }
+
+/* Texte réservé aux lecteurs d'écran : présent dans l'arbre d'accessibilité,
+   invisible à l'œil. On masque par clip-path et non par display:none, qui le
+   retirerait aussi de l'annonce vocale. */
+.vsr{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;
+  overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.vmn-l{flex:0 0 auto;margin-left:auto;display:inline-flex;align-items:center;
+  justify-content:center;width:19px;height:19px;border-radius:6px;
+  background:#F1F0FA;color:#5B4FA8}
+.vmn-i:hover .vmn-l{background:#E4E1F6}
+.vmn-i{display:flex;align-items:center;gap:11px;padding:9px 12px;border:0;border-radius:11px;
+  background:none;cursor:pointer;text-align:left;text-decoration:none;width:100%;
+  font:500 14px Poppins,sans-serif;color:#12203F;
+  transition:background .16s ease,color .16s ease,transform .16s ease}
+.vmn-i:hover,.vmn-i:focus-visible{background:#F3F6FC;color:#1E499B;outline:none;transform:translateX(3px)}
+.vmn-i:focus-visible{box-shadow:0 0 0 2px #1E499B inset}
+.vmn-i:hover .vmn-p{transform:scale(1.1) rotate(-3deg)}
+.vmn-p{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;flex:0 0 auto;transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
+.vmn-x{display:flex;flex-direction:column;line-height:1.35;min-width:0}
+.vmn-x small{font:400 12px Poppins,sans-serif;color:#6E7385;margin-top:1px}
+@media (prefers-reduced-motion:reduce){ .vmn{animation:none} .vmn-i,.vmn-p{transition:none} .vmn-i:hover{transform:none} .vmn-i:hover .vmn-p{transform:none} }
+
+/* Version mobile : dans le tiroir, donc en flux, une seule colonne, sans
+   ombre ni cadre — le tiroir en porte déjà. */
+.vmn-mob{position:static;display:block;border:0;box-shadow:none;padding:4px 0 0;
+  max-height:none;overflow:visible;animation:none;background:none;
+  border-top:1px solid #E4E7EF;margin-top:8px}
+.vmn-mob .vmn-col{margin-bottom:2px}
+
+.vh1:hover{color:#fff;text-decoration:underline}
+.vh2:hover{color:#1E499B;border-bottom-color:#1E499B}
+.vh3:hover{color:#0E7C86;border-bottom-color:#0E7C86}
+.vh4:hover{color:#B03A6E;border-bottom-color:#B03A6E}
+.vh5:hover{color:#5B4FA8;border-bottom-color:#5B4FA8}
+.vh7:hover{background:#F4F7FD}
+.vh8:hover{color:#fff;text-decoration:none}
+.vh9:hover{background:#F0F4FB;border-color:#DBE8FE;color:#1E499B;text-decoration:none}
+.vh10:hover{color:#001136;text-decoration:none;transform:translateY(-2px);box-shadow:0 10px 22px rgba(242,165,32,.42)}
+.vh11:hover{background:#fff;color:#1E499B;text-decoration:none}
+.vh12:hover{background:#FFD96B;box-shadow:0 4px 12px rgba(255,201,60,.4);text-decoration:none}
+.vh50:hover{color:#fff}
+.vh56:hover{background:rgba(255,255,255,.3)}
+.vh57:hover{background:#5B4FA8;color:#fff;transform:translateY(-2px)}
+.vh58:hover{background:#5B4FA8;color:#fff}
+.vh59:hover{transform:translateY(-2px)}
+.vh60:hover{transform:translateY(-3px) rotate(-8deg);box-shadow:0 12px 26px rgba(0,17,54,.09);color:#A84200}
+.vh61:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(14,124,134,.28)}
+.vh62:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 18px 40px rgba(91,79,168,.55)}
+/* Couche responsive de la vitrine, bornée à l'habillage (barre, pied, blocs
+   .vrt-hab). Sur vitrine.html elle vise tout [style*="grid-template-columns"] ;
+   recopiée telle quelle, elle écraserait les grilles EN LIGNE des pages. Sans
+   elle, le pied à quatre colonnes faisait 520 px de large sur un écran de 390
+   (plan.html et constellation.html compris). */
+@media (max-width:999.98px){
+  :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="grid-template-columns"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{padding-left:20px!important;padding-right:20px!important}
+}
+@media (max-width:700px){
+  :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="grid-template-columns"]{grid-template-columns:minmax(0,1fr)!important}
+  :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{padding-left:16px!important;padding-right:16px!important}
+}
+@media (min-width:1440px){ :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{max-width:1330px!important} }
+@media (min-width:1760px){ :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{max-width:1440px!important} }
+
+/* ════════════════════════════════════════════════════════════════════════
+   EXEMPTIONS — l'habillage garde ses graisses et sa mise en page
+   ════════════════════════════════════════════════════════════════════════
+   veritas-pages.css pose `font-weight:400 !important` sur tous les span, div
+   et a : la barre et le pied recopiés de la vitrine perdaient leurs 500/600
+   (règle exemptée des blocs .vrt-hab dans veritas-pages.css). veritas-refonte.css
+   habille TOUT <footer> (centré, 13 px, fond, rayon) : on rend au pied de la
+   vitrine sa propre mise en page. */
+footer.vrt-hab{padding:0;text-align:left;font-size:16px;border:0;border-radius:0;
+  box-shadow:none;animation:none}
+footer.vrt-hab a{text-decoration:none}
+footer.vrt-hab a:hover{text-decoration:none}
+footer.vrt-hab p{color:inherit}
+nav.vrt-hab{animation:none;border-radius:0;padding:0}
+nav.vrt-hab a:hover{text-decoration:none}
+.vrt-hab svg{vertical-align:initial}
+.vrt-hab h2,.vrt-hab h3{color:inherit}
+nav.vrt-hab a,div.vrt-hab a,footer.vrt-hab a{text-decoration:none}
+
+/* Les pages hors des deux familles ont leurs propres règles GÉNÉRIQUES :
+   reset.html pose `button{padding:14px 24px}` sur tout bouton — la bulle de
+   46 px du thème n'avait plus de place, et son icône tombait à 0 px de large.
+   Un bouton de l'habillage qui n'écrit pas son padding n'en a aucun, et une
+   icône ne se laisse jamais comprimer. */
+.vrt-hab button:not([style*="padding"]){padding:0}
+.vrt-hab svg{flex-shrink:0}
+/* Police de la vitrine sur tout l'habillage : sans elle, les liens du pied
+   prenaient la police de la page (Times sur les épreuves imprimables). */
+.vrt-hab{font-family:Poppins,system-ui,sans-serif}
+
+/* Une épreuve, une fiche ou une évaluation qu'on imprime : le papier ne
+   porte ni la barre, ni le pied, ni les bulles. */
+@media print{.vrt-hab{display:none!important}}
+
+/* ── OUTIL DE TRAVAIL (Atelier, Campus, console enseignant) ───────────────
+   L'écran appartient à la planche. La barre de la vitrine y est compacte
+   (58 px au lieu de 76) et NON collante : elle s'en va au premier
+   défilement, et la barre d'outils de l'application reprend le haut de
+   l'écran. Mesuré sur l'Atelier : l'ancien bandeau collant retenait 44 px
+   en permanence sur ordinateur, 76 px sur téléphone (deux lignes). */
+nav.vrt-outil{position:relative!important;height:58px!important;
+  box-shadow:0 1px 0 #E6EAF2!important;z-index:60}
+nav.vrt-outil img{width:36px!important;height:36px!important}
+nav.vrt-outil a[href*="#connexion"]{padding:8px 18px!important}
+nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!important}
+
+/* Un tableau large (tarifs, cookies, calendrier) faisait glisser TOUTE la
+   page sous le pouce — mesuré à 405 et 451 px sur un écran de 390, déjà avant
+   l'habillage. Il défile désormais seul, dans sa largeur. */
+@media (max-width:700px){
+  body table:not(.vrt-hab table){display:block;max-width:100%;overflow-x:auto}
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   CARTES — la carte de la vitrine, cote pour cote
+   ════════════════════════════════════════════════════════════════════════
+   Relevé sur vitrine.html (« Quelqu'un suit votre enfant ») : fond blanc,
+   filet #E4E9F2, rayon 14, ombre 0 4px 14px, médaillon ROND de 42 px centré
+   au-dessus du titre (fond pâle, icône Lucide de la teinte), six teintes en
+   rotation. Survol : la carte se soulève de 4 px, l'ombre s'élargit — sans
+   trait coloré (ni barre latérale, ni bordure teintée).
+   Les deux familles de pages sont couvertes : .card + <h3> (veritas-pages)
+   et .tile + <strong> (veritas-refonte). Le médaillon est posé par
+   assets/veritas-medaillons.js, qui écrit la teinte dans data-vm. */
+/* Fond blanc en !important : veritas-refonte.css teinte une tuile sur deux
+   (`.grid > .tile:nth-child(even)`) — la vitrine alterne la couleur des
+   MÉDAILLONS, pas celle des cartes. Une carte dont le fond est écrit en ligne
+   (tuile d'appel sombre) garde le sien. */
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .card:not([style*="background"]),:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .tile:not([style*="background"]){
+  background:#fff!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .card,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .tile{
+  border:1px solid #E4E9F2;border-radius:14px;
+  box-shadow:0 4px 14px rgba(0,17,54,.05);
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .card::before,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .card::after,
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .tile::before,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .tile::after{display:none}
+/* Le soulèvement va aux cartes qu'on CLIQUE (lien, ou carte courte à
+   médaillon). Une carte qui porte une liste de téléchargements ou un
+   formulaire est un panneau de travail : elle ne bouge pas sous la souris. */
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) a.card:hover,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) a.tile:hover,
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):has(.ico):not(:has(ul,ol,table,details,.dl,form,input)):hover{
+  transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09);
+  border-color:#E4E9F2;text-decoration:none}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):has(.ico){text-align:center}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):has(.ico) :is(ul,ol,table,details,pre,.dl){text-align:left}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) > :is(h3,h2,h4,strong){color:#001136}
+
+/* `!important` imposé : veritas-pages.css fixe l'ANCIEN médaillon (rond blanc
+   cerclé de couleur) en !important. À importance égale, c'est la spécificité
+   qui tranche — celle-ci l'emporte. */
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico{
+  display:flex!important;align-items:center;justify-content:center;
+  width:42px!important;height:42px!important;border-radius:50%!important;border:0!important;
+  margin:0 auto 13px!important;
+  background:var(--vm-fond,#DBE8FE)!important;color:var(--vm-trait,#1E499B)!important;
+  box-shadow:none!important;transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico svg{width:20px!important;height:20px!important;vertical-align:0;color:inherit!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(a.card,a.tile,.card:has(.ico):not(:has(ul,ol,table,details,.dl,form,input)),.tile:has(.ico):not(:has(ul,ol,table,details,.dl,form,input))):hover .ico{transform:scale(1.08) rotate(-4deg)}
+.ico[data-vm="bleu"]    {--vm-fond:#DBE8FE;--vm-trait:#1E499B}
+.ico[data-vm="sarcelle"]{--vm-fond:#E3F1EE;--vm-trait:#0E7C86}
+.ico[data-vm="vert"]    {--vm-fond:#E7F7EC;--vm-trait:#007E11}
+.ico[data-vm="violet"]  {--vm-fond:#EEE9F8;--vm-trait:#5B4FA8}
+.ico[data-vm="rose"]    {--vm-fond:#FBE9F1;--vm-trait:#B03A6E}
+.ico[data-vm="brique"]  {--vm-fond:#FFF3E4;--vm-trait:#A84200}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico.sur-sombre{--vm-fond:rgba(255,255,255,.14);--vm-trait:#fff}
+@media (prefers-reduced-motion:reduce){
+  :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .card,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .tile,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico{transition:none}
+  :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):hover,:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):hover .ico{transform:none}
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   THÈME SOMBRE — le bouton lune de la colonne flottante
+   ════════════════════════════════════════════════════════════════════════
+   vitrine.js pose data-vrt-theme="sombre" sur <html> et injecte la feuille
+   sombre de la vitrine, qui ne connaît que les styles EN LIGNE : elle
+   assombrit la barre et le pied, pas le corps des pages. Sans ces règles le
+   bouton rendait une page à moitié sombre. */
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)){background:#0B1530;color:#DCE3F2}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(main,.wrap,section,article){background-color:transparent}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(h1,h2,h3,h4,strong,b){color:#F2F5FC}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(p,li,td,th,dd,small,.note){color:#C4CDE0}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile):not([style*="background"]){background:#14224A!important}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile){border-color:#24345F;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) :is(a.dl,.dl){background:transparent;border-color:#24345F}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) > :is(h3,h2,h4,strong){color:#F2F5FC}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) a:not(.vrt-hab a){color:#9CC0FF}
