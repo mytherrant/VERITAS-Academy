@@ -89,6 +89,24 @@ l'écriture du gabarit (`top:86px`) ne mord jamais. Banc
 `banc_atelier_mobile` ⑧ (8 contrôles, éprouvé par 2 mutations). Le bandeau
 d'astuces (une toutes les 3 min) est une fonction voulue : laissé tel quel.
 
+**Déploiement 568 BLOQUÉ (rien n'est parti, FTP sauté)** par
+« 🔎 Chaque fiche d'oeuvre mene-t-elle a son cahier ? » :
+`tools/lier_oeuvres_cahiers.py` ancrait son encart « avant le DERNIER
+<footer> » — désormais celui de la vitrine, DANS le bloc d'habillage. Il
+déclarait « lien absent » neuf fiches qui le portaient. Corrigé : encart
+existant mis à jour sur place, sinon posé avant `<!--vrt-habillage:pied-->`.
+⚠️ **Leçon : avant de pousser vers master, rejouer TOUTES les étapes `run:`
+de deploy.yml, pas seulement `tests/banc_*.cjs`** — et avec `bash -e`
+(GitHub Actions), PAS `-o pipefail` : un `grep | wc -l` sans résultat y
+ferait échouer « Préparer les fichiers » à tort. Deux étapes ne se
+reproduisent pas ici : « 🧩 dépendances » (xargs bute sur le chemin
+accentué « Refonte site Véritas » en local ; verte en CI) et « 🛑 pages
+effacées » (interroge la production, bloquée dans le bac à sable).
+Aussi : l'Atelier était exclu de l'alignement des cache-busters (le sed
+mange ses empreintes hexadécimales) — ses liens `/assets/…` d'habillage
+restaient en `?v=1.20.19`. Réécriture ancrée sur `/assets/` ajoutée à
+deploy.yml ; les six jetons de modules restent intacts (revérifiés).
+
 **Pièges de cette suite** :
 - Le moteur de l'Atelier fixe son hôte `.sc-host` à la hauteur de l'écran
   (800 px) et la planche déborde dessous (1 708 px) : le pied posé après
