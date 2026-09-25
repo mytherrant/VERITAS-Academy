@@ -4448,3 +4448,183 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
    l'accueil, listes cochées. Une puce à icône n'en veut pas une seconde.
    :has() absent (vieux navigateur) = rendu d'avant, rien de pire. */
 #VISITOR#VISITOR#VISITOR ul > li:has(> svg)::before{ content:none !important; display:none !important; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FORMULES EN PALIERS — modèle « fiche kit » SmartSana  (25/09/2026)
+   ──────────────────────────────────────────────────────────────────────────
+   Rendu par _formulesGrille / _formulesOnglets / _formulesComparatif /
+   _formulesTrouver / _formulesHero (app.js). Bandeau coloré par palier (N1 →
+   N4, du bleu à l'or), quatre chiffres clés, deux prix côte à côte, bande de
+   garanties, « Tout X, plus : ».
+   ══════════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR#VISITOR .vfo-pal{ padding:0 !important; overflow:visible; }
+#VISITOR#VISITOR#VISITOR .vfo-pal .vfo-ruban{ top:-13px; left:auto; right:16px; z-index:2; background:#FFC93C !important; color:#001136 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-band{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+  padding:18px 18px 16px !important; border-radius:15px 15px 0 0;
+  /* La couleur UNIE sous le dégradé n'est pas décorative : theme-lws.js
+     (corrigerCouleur) juge le contraste sur background-color seul. Sans
+     elle, il voit du « blanc », et repeint en bleu le texte blanc du bandeau. */
+  background-color:var(--vfo-c2) !important;
+  background-image:linear-gradient(135deg, var(--vfo-c1), var(--vfo-c2)) !important; color:var(--vfo-tx) !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-g-starter{ --vfo-c1:#3C6FD1; --vfo-c2:#1E499B; --vfo-tx:#fff; --vfo-soft:#EEF3FC; --vfo-ac:#1E499B; }
+#VISITOR#VISITOR#VISITOR .vfo-g-pro    { --vfo-c1:#1E3A7B; --vfo-c2:#142554; --vfo-tx:#fff; --vfo-soft:#EDF0F7; --vfo-ac:#142554; }
+#VISITOR#VISITOR#VISITOR .vfo-g-elite  { --vfo-c1:#FFD464; --vfo-c2:#F2A520; --vfo-tx:#001136; --vfo-soft:#FFF6DB; --vfo-ac:#9A5B00; }
+#VISITOR#VISITOR#VISITOR .vfo-g-famille{ --vfo-c1:#E86A1C; --vfo-c2:#C2410C; --vfo-tx:#fff; --vfo-soft:#FFF0E6; --vfo-ac:#B23C0A; }
+#VISITOR#VISITOR#VISITOR .vfo-band-l{ min-width:0; }
+#VISITOR#VISITOR#VISITOR .vfo-rang{
+  display:inline-block; font:700 11px/1 Poppins,sans-serif !important; letter-spacing:.8px;
+  padding:4px 7px; border-radius:6px; background:rgba(255,255,255,.22); color:inherit;
+}
+#VISITOR#VISITOR#VISITOR .vfo-band .vfo-nom{ color:inherit !important; font-size:27px !important; margin:6px 0 2px !important; }
+#VISITOR#VISITOR#VISITOR .vfo-metr{ font-size:13px !important; opacity:.92; color:inherit !important; }
+#VISITOR#VISITOR#VISITOR .vfo-band-r{
+  font-size:12.5px !important; font-style:italic; text-align:right; line-height:1.35; opacity:.92;
+  max-width:46%; color:inherit !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-corps{ display:flex; flex-direction:column; flex:1 1 auto; padding:14px 16px 18px; }
+#VISITOR#VISITOR#VISITOR .vfo-acc{
+  margin:0 0 12px !important; padding:11px 13px !important; border-radius:12px; background:#F4F5F8 !important;
+  font-size:14px !important; line-height:1.5 !important; color:#2E3752 !important; text-align:left !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-acc b{ color:var(--vfo-ac) !important; font-weight:700 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-specs{
+  display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:0; margin:0 0 12px !important;
+  background:var(--vfo-soft) !important; border-radius:12px; overflow:hidden;
+}
+#VISITOR#VISITOR#VISITOR .vfo-specs > div{ padding:8px 10px; text-align:center; border:0 solid rgba(0,17,54,.08); }
+#VISITOR#VISITOR#VISITOR .vfo-specs > div:nth-child(odd){ border-right-width:1px; }
+#VISITOR#VISITOR#VISITOR .vfo-specs > div:nth-child(-n+2){ border-bottom-width:1px; }
+#VISITOR#VISITOR#VISITOR .vfo-specs dt{ font-size:10.5px !important; font-weight:600 !important; letter-spacing:.6px; text-transform:uppercase; color:#4D5163 !important; margin:0 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-specs dd{ font-size:14.5px !important; font-weight:700 !important; color:#001136 !important; margin:2px 0 0 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-2prix{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:0 0 10px; }
+#VISITOR#VISITOR#VISITOR .vfo-px{
+  appearance:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px;
+  padding:10px 6px !important; border-radius:12px !important; font-family:Poppins,sans-serif !important;
+  transition:transform .12s, box-shadow .15s;
+}
+#VISITOR#VISITOR#VISITOR .vfo-px:hover{ transform:translateY(-1px); box-shadow:0 8px 18px -12px rgba(0,17,54,.45) !important; }
+#VISITOR#VISITOR#VISITOR .vfo-px:focus-visible{ outline:3px solid #1E499B !important; outline-offset:2px; }
+#VISITOR#VISITOR#VISITOR .vfo-px-m{ background:#FFF4E5 !important; border:2px solid #E86A1C !important; }
+#VISITOR#VISITOR#VISITOR .vfo-px-a{ background:#EAF2FF !important; border:2px solid #1E5FD1 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-px-l{ font-size:10.5px !important; font-weight:700 !important; letter-spacing:.7px; text-transform:uppercase; }
+#VISITOR#VISITOR#VISITOR .vfo-px-m .vfo-px-l, #VISITOR#VISITOR#VISITOR .vfo-px-m .vfo-px-v{ color:#B23C0A !important; }
+#VISITOR#VISITOR#VISITOR .vfo-px-a .vfo-px-l, #VISITOR#VISITOR#VISITOR .vfo-px-a .vfo-px-v{ color:#123F95 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-px-v{ white-space:nowrap; font-size:clamp(19px, 1.75vw, 25px) !important; font-weight:800 !important; line-height:1.1 !important; font-variant-numeric:tabular-nums; }
+#VISITOR#VISITOR#VISITOR .vfo-px-u{ font-size:11px !important; color:#4D5163 !important; text-align:center; line-height:1.35; }
+#VISITOR#VISITOR#VISITOR .vfo-px-u s{ color:#8B93A6 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-px-u em{ font-style:normal !important; font-weight:700 !important; color:#006B10 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-gar{
+  display:flex; align-items:center; gap:7px; padding:8px 10px !important; border-radius:10px;
+  background:#EFF8F0 !important; border:1px solid #CDEBD2 !important;
+  font-size:12px !important; font-weight:600 !important; color:#0B5A1E !important; line-height:1.35;
+}
+#VISITOR#VISITOR#VISITOR .vfo-gar svg{ flex:0 0 auto; width:14px; height:14px; stroke:#0B5A1E !important; fill:none !important; }
+#VISITOR#VISITOR#VISITOR .vfo-herite{
+  display:flex; align-items:center; gap:8px; margin:12px 0 0 !important; padding:8px 11px !important;
+  border-left:3px solid #007E11; border-radius:0 10px 10px 0; background:#F1F8F2 !important;
+  font-size:13.5px !important; font-weight:700 !important; color:#0B5A1E !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-herite svg{ width:15px; height:15px; stroke:#007E11 !important; stroke-width:2.6 !important; fill:none !important; flex:0 0 auto; }
+#VISITOR#VISITOR#VISITOR .vfo-pal .vfo-av{ margin:12px 0 16px !important; }
+#VISITOR#VISITOR#VISITOR .vfo-wa{
+  appearance:none; cursor:pointer; background:none !important; border:0 !important; padding:6px !important;
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  font:600 13px Poppins,sans-serif !important; color:#0B7A3E !important; text-decoration:underline; text-underline-offset:3px;
+}
+#VISITOR#VISITOR#VISITOR .vfo-wa svg{ width:14px; height:14px; stroke:#0B7A3E !important; fill:none !important; }
+
+/* ── En-tête de la page Tarifs ── */
+#VISITOR#VISITOR#VISITOR .vfo-hero{
+  max-width:1180px; margin:10px auto 18px; padding:26px 18px 20px; border-radius:18px; text-align:center;
+  background-color:#142554 !important; /* voir .vfo-band : requis par corrigerCouleur */
+  background-image:linear-gradient(160deg, #142554, #0B1733) !important; color:#fff !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-hero-t{ font:800 clamp(24px,4.4vw,36px)/1.15 Poppins,sans-serif !important; color:#fff !important; }
+#VISITOR#VISITOR#VISITOR .vfo-hero-t em{ font-style:italic; color:#FFC93C !important; }
+#VISITOR#VISITOR#VISITOR .vfo-hero-s{ margin-top:8px; font-size:15px !important; color:rgba(255,255,255,.88) !important; }
+#VISITOR#VISITOR#VISITOR .vfo-hero-s b{ color:#FFC93C !important; font-weight:700 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-hero-pour{ display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:8px; margin:16px auto 0; }
+#VISITOR#VISITOR#VISITOR .vfo-hero-pour > span{ width:100%; font-size:12px !important; font-weight:700 !important; letter-spacing:1.4px; text-transform:uppercase; color:#FFC93C !important; }
+#VISITOR#VISITOR#VISITOR .vfo-hero-k{ display:flex; justify-content:center; gap:clamp(18px,6vw,56px); margin-top:18px; }
+#VISITOR#VISITOR#VISITOR .vfo-hero-k b{ display:block; font:800 26px/1 Poppins,sans-serif !important; color:#fff !important; }
+#VISITOR#VISITOR#VISITOR .vfo-hero-k span{ font-size:12.5px !important; color:rgba(255,255,255,.75) !important; }
+#VISITOR#VISITOR#VISITOR .vfo-chip{
+  appearance:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+  padding:8px 14px !important; min-height:40px; border-radius:99px !important;
+  background:#fff !important; color:#142554 !important; border:1.5px solid #D5DBE8 !important;
+  font:600 14px Poppins,sans-serif !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-chip svg{ width:14px; height:14px; stroke:currentColor !important; fill:none !important; }
+#VISITOR#VISITOR#VISITOR .vfo-chip.on{ background:#142554 !important; color:#fff !important; border-color:#142554 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-chip:focus-visible{ outline:3px solid #FFC93C !important; outline-offset:2px; }
+
+/* ── Onglets ── */
+#VISITOR#VISITOR#VISITOR .vfo-onglets{ max-width:1180px; margin:0 auto; }
+#VISITOR#VISITOR#VISITOR .vfo-tabs{
+  display:flex; gap:6px; overflow-x:auto; border-bottom:3px solid #142554; padding:0 2px; scrollbar-width:none;
+}
+#VISITOR#VISITOR#VISITOR .vfo-tab{
+  appearance:none; cursor:pointer; flex:0 0 auto; white-space:nowrap;
+  padding:11px 16px !important; border:0 !important; border-radius:12px 12px 0 0 !important;
+  background:#EEF0F4 !important; color:#4D5163 !important; font:600 14.5px Poppins,sans-serif !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-tab.on{ background:#142554 !important; color:#fff !important; }
+#VISITOR#VISITOR#VISITOR .vfo-tab:focus-visible{ outline:3px solid #FFC93C !important; outline-offset:-3px; }
+
+/* ── Comparatif ── */
+#VISITOR#VISITOR#VISITOR .vfo-cmp-wrap{ overflow-x:auto; margin:18px auto 8px; border:1px solid #E4E7EF; border-radius:14px; background:#fff; }
+#VISITOR#VISITOR#VISITOR .vfo-cmp{ width:100%; min-width:560px; border-collapse:collapse; font-family:Poppins,sans-serif; }
+#VISITOR#VISITOR#VISITOR .vfo-cmp th, #VISITOR#VISITOR#VISITOR .vfo-cmp td{
+  padding:11px 10px !important; text-align:center; border-bottom:1px solid #EEF0F4; font-size:13.5px !important; color:#2E3752 !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-cmp tbody th{ text-align:left; font-weight:600 !important; color:#4D5163 !important; white-space:nowrap; }
+#VISITOR#VISITOR#VISITOR .vfo-cmp thead th{
+  background-color:var(--vfo-c2, #fff) !important;
+  background-image:linear-gradient(135deg, var(--vfo-c1, #fff), var(--vfo-c2, #fff)) !important; color:var(--vfo-tx, #001136) !important;
+  font-size:16px !important; font-weight:700 !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-cmp thead th .vfo-rang{ display:block; width:max-content; margin:0 auto 4px; }
+#VISITOR#VISITOR#VISITOR .vfo-cmp-px td b{ font-size:15.5px !important; color:#001136 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-cmp-eco{ font-size:11.5px !important; font-weight:600; color:#006B10 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-cmp .vfo-cta2{ min-height:38px; padding:7px 10px !important; }
+
+/* ── Trouver ma formule ── */
+#VISITOR#VISITOR#VISITOR .vfo-trouver{ max-width:760px; margin:18px auto 8px; display:flex; flex-direction:column; gap:14px; }
+#VISITOR#VISITOR#VISITOR .vfo-q{ background:#fff; border:1px solid #E4E7EF; border-radius:14px; padding:14px 16px; }
+#VISITOR#VISITOR#VISITOR .vfo-q-t{ font:600 15px Poppins,sans-serif !important; color:#001136 !important; margin-bottom:10px; }
+#VISITOR#VISITOR#VISITOR .vfo-q-o{ display:flex; flex-wrap:wrap; gap:8px; }
+#VISITOR#VISITOR#VISITOR .vfo-reco{ border-radius:14px; padding:16px; background:#FFF6DB; border:1px solid #F2D27A; }
+#VISITOR#VISITOR#VISITOR .vfo-reco-vide{ font-size:14px; color:#4D5163; }
+#VISITOR#VISITOR#VISITOR .vfo-reco-l{ font-size:11.5px !important; font-weight:700 !important; letter-spacing:1px; text-transform:uppercase; color:#9A5B00 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-reco-n{ font:800 24px/1.2 Poppins,sans-serif !important; color:#001136 !important; margin:6px 0 2px; }
+#VISITOR#VISITOR#VISITOR .vfo-reco-n .vfo-rang{ background:#142554; color:#fff; vertical-align:middle; }
+#VISITOR#VISITOR#VISITOR .vfo-reco-p{ font-size:15px !important; color:#2E3752 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-reco-w{ margin-top:6px; font-size:13.5px !important; color:#4D5163 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-reco-a{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+/* Quatre colonnes (> 1180 px) : la carte fait ~280 px, deux prix de six
+   chiffres côte à côte n'y tiennent qu'à 20 px. En deux colonnes et sur
+   téléphone, la place revient : 25 px. */
+@media (max-width:1180px){ #VISITOR#VISITOR#VISITOR .vfo-px-v{ font-size:25px !important; } }
+@media (max-width:480px){ #VISITOR#VISITOR#VISITOR .vfo-reco-a{ grid-template-columns:1fr; } }
+
+/* ── Garanties « noir sur blanc » ── */
+#VISITOR#VISITOR#VISITOR .vfo-garanties{
+  max-width:940px; margin:18px auto 8px; border:2px solid #CDEBD2; border-radius:16px; background:#F6FBF6; padding:14px 16px;
+}
+#VISITOR#VISITOR#VISITOR .vfo-garanties summary{ cursor:pointer; list-style:none; display:flex; flex-direction:column; gap:8px; }
+#VISITOR#VISITOR#VISITOR .vfo-garanties summary::-webkit-details-marker{ display:none; }
+#VISITOR#VISITOR#VISITOR .vfo-gt-tag{
+  align-self:flex-start; display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:99px;
+  border:1.5px solid #CDEBD2; background:#fff; font:700 11.5px Poppins,sans-serif !important; letter-spacing:1px; text-transform:uppercase; color:#0B5A1E !important;
+}
+#VISITOR#VISITOR#VISITOR .vfo-gt-tag svg{ width:13px; height:13px; stroke:#0B5A1E !important; fill:none !important; }
+#VISITOR#VISITOR#VISITOR .vfo-gt-t{ font:700 18px/1.3 Poppins,sans-serif !important; color:#0B3D17 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-gt-t::after{ content:' ▾'; color:#0B5A1E; }
+#VISITOR#VISITOR#VISITOR .vfo-garanties[open] .vfo-gt-t::after{ content:' ▴'; }
+#VISITOR#VISITOR#VISITOR .vfo-gt-t em{ font-style:normal; color:#C2410C !important; }
+#VISITOR#VISITOR#VISITOR .vfo-garanties ul{ list-style:none !important; margin:12px 0 0 !important; padding:0 !important; display:flex; flex-direction:column; gap:9px; }
+#VISITOR#VISITOR#VISITOR .vfo-garanties li{ display:flex; gap:9px; font-size:14px !important; line-height:1.5; color:#2E3752 !important; }
+#VISITOR#VISITOR#VISITOR .vfo-garanties li::before{ content:none !important; display:none !important; }
+#VISITOR#VISITOR#VISITOR .vfo-garanties li svg{ flex:0 0 auto; width:16px; height:16px; margin-top:3px; stroke:#007E11 !important; stroke-width:2.6 !important; fill:none !important; }
