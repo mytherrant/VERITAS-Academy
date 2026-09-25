@@ -248,5 +248,28 @@ const barre = (src.match(/vrt-actions-cl">([\s\S]*?)<\/div>/) || ['', ''])[1];
   .forEach(h => dire(new RegExp('\\{\\{ ' + h + ' \\}\\}').test(barre),
     'elle porte l’action `' + h + '`'));
 
+/* ── ⑧ La planche d'abord : rien ne reste collé au-dessus du texte ─────── */
+console.log(`\n${G}⑧ En pleine saisie, la planche garde l'écran${R}`);
+/* Mesuré le 25/09/2026 au composeur, 390 × 800 : barre d'outils 117 px +
+   volet « Renseignements » collant 160 px + onglets 60 px — ~490 px sur 800
+   pour écrire. Après : ~740 px. */
+const bloc820 = (src.match(/LA PLANCHE D'ABORD[\s\S]*?\n  \}/) || [''])[0];
+dire(bloc820.length > 0, 'le bloc « LA PLANCHE D’ABORD » existe, dans la feuille mobile');
+dire(/\[style\*="top: 86px"\]/.test(bloc820) && /\[style\*="top:86px"\]/.test(bloc820),
+  'les volets collants sont visés dans les DEUX écritures (React réécrit « top: 86px »)');
+dire(/position:static!important/.test(bloc820),
+  'empilés au-dessus du texte, ils ne le suivent plus');
+dire(/header\[data-noprint="1"\]\.vrt-replie\{transform:translateY\(-100%\)\}/.test(bloc820),
+  'la barre d’outils sait se replier');
+const scriptRepli = (src.match(/Barre d'outils repliable[\s\S]*?<\/script>/) || [''])[0];
+dire(/classList\.add\('vrt-replie'\)/.test(scriptRepli) && /classList\.remove\('vrt-replie'\)/.test(scriptRepli),
+  'un script la replie à la descente et la rend à la remontée');
+dire(/innerWidth > 820/.test(scriptRepli),
+  'jamais sur grand écran');
+dire(/h\.contains\(document\.activeElement\)/.test(scriptRepli),
+  'jamais pendant une saisie dans la barre (recherche)');
+dire(!/<x-dc/.test(scriptRepli),
+  'le script ne nomme pas la racine de rendu (une seconde occurrence la dédouble)');
+
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko === 0 ? 0 : 1);

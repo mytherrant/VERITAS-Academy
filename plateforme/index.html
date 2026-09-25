@@ -1111,7 +1111,25 @@
     .vrt-col2 aside:has(> .vrt-repli-corps[style*="none"]){padding:11px!important}
     .vrt-col2 > div:first-child{gap:10px!important}
 
+    /* ── LA PLANCHE D'ABORD (25/09/2026) ─────────────────────────────────
+       Mesuré au composeur sur 390 × 800, en pleine saisie du texte : barre
+       d'outils collante 117 px + volet « Renseignements » collant 160 px +
+       barre d'onglets 60 px. Restaient ~490 px sur 800 pour écrire.
+       1. Les volets latéraux sont collants pour rester À CÔTÉ du texte sur
+          ordinateur. Empilés AU-DESSUS du texte, ils le suivaient et le
+          recouvraient : ils redeviennent des blocs ordinaires.
+       2. La barre d'outils se replie quand on descend et revient dès qu'on
+          remonte (script en fin de page, classe `vrt-replie`). Elle ne se
+          replie jamais pendant une saisie DANS la barre (recherche). */
+    /* React RÉÉCRIT le style en ligne avec des espaces (« top: 86px ») :
+       le sélecteur couvre les deux écritures, sinon il ne mord jamais. */
+    .vrt-col2 :is([style*="top:86px"],[style*="top: 86px"])[style*="sticky"]{position:static!important}
+    header[data-noprint="1"]{transition:transform .22s ease}
+    header[data-noprint="1"].vrt-replie{transform:translateY(-100%)}
+    body:has(header.vrt-replie) :is([style*="top:66px"],[style*="top: 66px"])[style*="sticky"]{top:0!important}
+
   }
+  @media (prefers-reduced-motion:reduce){ header[data-noprint="1"]{transition:none} }
 
   /* ── LISIBILITÉ SUR TÉLÉPHONE : RELÈVEMENT DES POLICES ──────────────────
      Les tailles sont écrites EN LIGNE dans le gabarit ; ces règles sont le
@@ -9549,6 +9567,22 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
     };
   }
 }
+</script>
+<script>
+/* Barre d'outils repliable au téléphone (voir « LA PLANCHE D'ABORD »).
+   Script autonome, hors du moteur : il ne pose qu'une classe sur la barre,
+   que le gabarit n'écrit pas — un nouveau rendu ne l'efface donc pas. */
+(function () {
+  var y0 = 0, SEUIL = 120, PAS = 6;
+  addEventListener('scroll', function () {
+    var h = document.querySelector('header[data-noprint="1"]');
+    if (!h) return;
+    var y = window.scrollY || 0;
+    if (innerWidth > 820 || y < SEUIL || y < y0 - PAS) h.classList.remove('vrt-replie');
+    else if (y > y0 + PAS && !h.contains(document.activeElement)) h.classList.add('vrt-replie');
+    y0 = y;
+  }, { passive: true });
+})();
 </script>
 <!--vrt-habillage:pied-->
 <footer style="background:#001136;color:rgba(255,255,255,.72);margin-top:64px" class="vrt-hab">

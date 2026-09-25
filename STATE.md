@@ -75,6 +75,20 @@ ordinateur, 76 px sur téléphone). Mesuré sur le composeur : planche à 175 px
 du haut sur téléphone (193 avant), et **0 px** retenu après défilement (44 /
 76 avant).
 
+**Atelier au téléphone : la planche d'abord** (`plateforme/index.html`,
+bloc « LA PLANCHE D'ABORD » de la feuille ≤ 820 px). Mesuré au composeur,
+390 × 800, en pleine saisie : barre d'outils collante 117 px + volet
+« Renseignements » collant 160 px + onglets 60 px → ~490 px pour écrire.
+Après : ~740 px. Les volets latéraux (collants pour rester À CÔTÉ du texte
+sur ordinateur) redeviennent des blocs ordinaires une fois empilés
+au-dessus ; la barre d'outils se replie à la descente et revient à la
+moindre remontée (petit script autonome en fin de page, jamais au-delà de
+820 px, jamais pendant une saisie dans la barre). ⚠️ React réécrit les
+styles en ligne AVEC espaces (`top: 86px`) : un sélecteur d'attribut sur
+l'écriture du gabarit (`top:86px`) ne mord jamais. Banc
+`banc_atelier_mobile` ⑧ (8 contrôles, éprouvé par 2 mutations). Le bandeau
+d'astuces (une toutes les 3 min) est une fonction voulue : laissé tel quel.
+
 **Pièges de cette suite** :
 - Le moteur de l'Atelier fixe son hôte `.sc-host` à la hauteur de l'écran
   (800 px) et la planche déborde dessous (1 708 px) : le pied posé après
