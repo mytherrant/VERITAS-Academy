@@ -50,7 +50,15 @@ require_once __DIR__ . '/_sentinel.php';
 $ip = vrt_real_ip();
 $ip = preg_replace('/[^0-9a-fA-F:.,]/', '', (string)$ip);
 $ipHash = substr(md5($ip), 0, 16);
-$rateFile = $rateDir . 'stud_' . $ipHash . '.txt';
+/* Lecture du forum par jeton : compteur À PART, plus large. Le plafond de 40
+   vise le bourrage d'identifiants ; il ne concerne pas une lecture authentifiée
+   par jeton signé. Or tout un centre sort souvent par UNE adresse IP (même
+   Wi-Fi) : trente élèves sur le forum de leur classe, qui se rafraîchit
+   seul, auraient épuisé les 40 et bloqué aussi les connexions. */
+$peek = json_decode((string) file_get_contents('php://input'), true);
+$lectureForum = is_array($peek) && (($peek['action'] ?? '') === 'forum_fetch') && !empty($peek['token']);
+$rateMax  = $lectureForum ? 400 : 40;
+$rateFile = $rateDir . ($lectureForum ? 'stufr_' : 'stud_') . $ipHash . '.txt';
 $now = time();
 $hits = [];
 if (is_file($rateFile)) {
@@ -58,7 +66,7 @@ if (is_file($rateFile)) {
         return $t !== '' && ($now - (int)$t) < 60;
     });
 }
-if (count($hits) >= 40) {
+if (count($hits) >= $rateMax) {
     http_response_code(429);
     echo json_encode(['ok' => false, 'error' => 'Trop de requêtes — réessayez dans 1 minute']);
     @file_put_contents(__DIR__ . '/data/_security_log.txt',
@@ -341,6 +349,199 @@ if ($action === 'submit' || $action === 'progress') {
     flock($fp, LOCK_UN);
     fclose($fp);
 
+    @file_put_contents(__DIR__ . '/data/_access_log.txt',
+        date('c') . ' STUDENT_' . strtoupper($action) . ' eid=' . $eid . ' ip=' . $ip . "\n", FILE_APPEND);
+    echo json_encode($result, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+// ── FORUM DES CLASSES VIRTUELLES ─────────────────────────────────────────────
+/* Jusqu'ici un message d'élève ne quittait jamais son navigateur : le forum
+   n'écrivait que dans localStorage, et seule la synchro ADMIN (db.php)
+   atteignait le serveur. L'élève « postait », personne ne le lisait jamais.
+   Ces actions font du serveur la source des messages, avec les mêmes règles
+   que les soumissions : auteur fixé d'après l'identité authentifiée,
+   propriétaire jamais pris dans l'entrée, écriture sous verrou.
+   db.php conserve ces messages (`srv`) face à un envoi admin qui ne les
+   contient pas, sauf s'ils figurent dans `forumDeleted` (suppression voulue). */
+if (in_array($action, ['forum_fetch', 'forum_post', 'forum_like', 'forum_delete'], true)) {
+    $accId   = (string) ($acc['id'] ?? $eid);
+    $role    = strtolower((string) ($acc['role'] ?? ''));
+    $isProf  = ($role === 'enseignant') || !empty($acc['isTeacher']);
+    // Classe de l'élève : sa fiche d'abord, le compte ensuite.
+    // Le NOM aussi : un compte élève ne porte souvent que son identifiant de
+    // connexion — c'est la fiche qui porte « Awa Ngono ».
+    $clsNom = (string) ($acc['cls'] ?? '');
+    $fiche = null;
+    foreach (($db['students'] ?? []) as $s) {
+        if (is_array($s) && (string) ($s['id'] ?? '') === $eid) { $fiche = $s; $clsNom = (string) ($s['cls'] ?? $clsNom); break; }
+    }
+    // Même clé que _cvDefaultClassrooms() côté client : 'cls_' + nom sans
+    // caractère hors [a-z0-9] (les accents tombent des deux côtés : « 6ème » → 6me).
+    $cleCls = function (string $nom): string { return strtolower((string) preg_replace('/[^a-z0-9]/i', '', $nom)); };
+
+    $classes = (isset($db['classrooms']) && is_array($db['classrooms'])) ? $db['classrooms'] : [];
+    $accede = function (array $cv) use ($eid, $accId, $clsNom, $isProf, $cleCls, $acc): bool {
+        if ($isProf) return true;
+        if (in_array($eid, (array) ($cv['membres'] ?? []), true) || in_array($accId, (array) ($cv['membres'] ?? []), true)) return true;
+        foreach ((array) ($cv['students'] ?? []) as $st) {
+            if (is_array($st) && (string) ($st['accountId'] ?? '') === $accId) return true;
+        }
+        if ($clsNom !== '' && (string) ($cv['nom'] ?? '') === $clsNom) return true;
+        if (!empty($cv['seg']) && (string) ($acc['seg'] ?? '') === (string) $cv['seg']) return true;
+        return false;
+    };
+    $mesClasses = [];
+    foreach ($classes as $cv) {
+        if (is_array($cv) && isset($cv['id']) && $accede($cv)) $mesClasses[(string) $cv['id']] = $cv;
+    }
+    // Base où l'administration n'a pas encore publié les classes : la classe
+    // par défaut de l'élève (celle que le client affiche) reste utilisable.
+    if ($clsNom !== '' && !$classes) {
+        $k = $cleCls($clsNom);
+        $mesClasses['cls_' . $k] = ['id' => 'cls_' . $k, 'nom' => $clsNom, 'channels' => [
+            ['id' => 'ch_gen_' . $k], ['id' => 'ch_ann_' . $k, 'teacherOnly' => true],
+            ['id' => 'ch_fr_' . $k], ['id' => 'ch_math_' . $k], ['id' => 'ch_sc_' . $k],
+        ]];
+    }
+
+    if ($action === 'forum_fetch') {
+        $posts = [];
+        foreach ((array) ($db['forumPosts'] ?? []) as $p) {
+            if (is_array($p) && isset($mesClasses[(string) ($p['classroomId'] ?? '')])) $posts[] = $p;
+        }
+        // Les plus récents d'abord, bornés : un forum actif ne doit pas faire
+        // télécharger des mois d'historique à chaque rafraîchissement.
+        usort($posts, function ($a, $b) { return strcmp((string) ($b['dateISO'] ?? ''), (string) ($a['dateISO'] ?? '')); });
+        echo json_encode([
+            'ok' => true,
+            'classrooms' => array_keys($mesClasses),
+            'posts' => array_slice($posts, 0, 400),
+            'uid' => $eid,
+            'server_time' => time(),
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $payload = $in['payload'] ?? [];
+    if (!is_array($payload)) { http_response_code(400); echo json_encode(['ok' => false, 'error' => 'payload invalide']); exit; }
+
+    $fp = fopen($DB_FILE, 'c+');
+    if (!$fp || !flock($fp, LOCK_EX)) {
+        if ($fp) fclose($fp);
+        http_response_code(503); echo json_encode(['ok' => false, 'error' => 'Base occupée — réessayez']); exit;
+    }
+    $cur = stream_get_contents($fp);
+    $cdb = json_decode((string) $cur, true);
+    if (!is_array($cdb)) { flock($fp, LOCK_UN); fclose($fp); http_response_code(503); echo json_encode(['ok' => false, 'error' => 'Base illisible']); exit; }
+    if (!isset($cdb['forumPosts']) || !is_array($cdb['forumPosts'])) $cdb['forumPosts'] = [];
+    $refus = function (int $code, string $msg) use ($fp) {
+        flock($fp, LOCK_UN); fclose($fp); http_response_code($code);
+        echo json_encode(['ok' => false, 'error' => $msg], JSON_UNESCAPED_UNICODE); exit;
+    };
+    $nowIso = gmdate('Y-m-d\TH:i:s\Z');
+    $nowMs  = (int) round(microtime(true) * 1000);
+    $nomAuteur = trim((string) ($acc['pre'] ?? ($fiche['pre'] ?? '')) . ' ' . (string) ($acc['nom'] ?? ($fiche['nom'] ?? '')));
+    if ($nomAuteur === '') $nomAuteur = (string) ($acc['user'] ?? 'Élève');
+    $nomAuteur = mb_substr($nomAuteur, 0, 80);
+    $typeAuteur = $isProf ? 'enseignant' : ($accType === 'eleve' ? 'eleve' : 'visiteur');
+    $result = ['ok' => true];
+
+    if ($action === 'forum_post') {
+        $clsId = (string) ($payload['classroomId'] ?? '');
+        $chId  = (string) ($payload['channelId'] ?? '');
+        $texte = trim(mb_substr((string) ($payload['contenu'] ?? ''), 0, 4000));
+        $replyTo = (string) ($payload['replyTo'] ?? '');
+        if ($texte === '') $refus(400, 'Message vide');
+        if (!isset($mesClasses[$clsId])) $refus(403, 'Ce forum est réservé aux membres de la classe');
+        $canal = null;
+        foreach ((array) ($mesClasses[$clsId]['channels'] ?? []) as $c) {
+            if (is_array($c) && (string) ($c['id'] ?? '') === $chId) { $canal = $c; break; }
+        }
+        if ($canal === null) $refus(404, 'Canal introuvable');
+        if (!empty($canal['teacherOnly']) && !$isProf) $refus(403, 'Canal réservé aux enseignants');
+
+        if ($replyTo !== '') {
+            $trouve = false;
+            foreach ($cdb['forumPosts'] as $i => $p) {
+                if (!is_array($p) || (string) ($p['id'] ?? '') !== $replyTo) continue;
+                if ((string) ($p['classroomId'] ?? '') !== $clsId) $refus(403, 'Message d\'une autre classe');
+                $r = ['id' => 'r' . bin2hex(random_bytes(5)), 'auteurId' => $eid, 'auteurNom' => $nomAuteur,
+                      'auteurType' => $typeAuteur, 'contenu' => $texte, 'date' => date('d/m/Y'),
+                      'dateISO' => $nowIso, 'likes' => [], 'srv' => true, 'srvAt' => $nowMs];
+                if (!isset($cdb['forumPosts'][$i]['replies']) || !is_array($cdb['forumPosts'][$i]['replies'])) $cdb['forumPosts'][$i]['replies'] = [];
+                $cdb['forumPosts'][$i]['replies'][] = $r;
+                $result['post'] = $cdb['forumPosts'][$i];
+                $trouve = true; break;
+            }
+            if (!$trouve) $refus(404, 'Message d\'origine introuvable (supprimé ?)');
+        } else {
+            $types = $isProf ? ['discussion', 'question', 'ressource', 'devoir', 'annonce'] : ['discussion', 'question', 'ressource'];
+            $type = (string) ($payload['type'] ?? 'discussion');
+            if (!in_array($type, $types, true)) $type = 'discussion';
+            $p = ['id' => 'fp' . bin2hex(random_bytes(6)), 'classroomId' => $clsId, 'channelId' => $chId,
+                  'auteurId' => $eid, 'auteurNom' => $nomAuteur, 'auteurType' => $typeAuteur, 'type' => $type,
+                  'titre' => $isProf ? mb_substr(trim((string) ($payload['titre'] ?? '')), 0, 150) : '',
+                  'contenu' => $texte, 'date' => date('d/m/Y'), 'dateISO' => $nowIso,
+                  'likes' => [], 'pinned' => false, 'replies' => [], 'srv' => true, 'srvAt' => $nowMs];
+            $cdb['forumPosts'][] = $p;
+            $result['post'] = $p;
+        }
+    } elseif ($action === 'forum_like') {
+        $pid = (string) ($payload['postId'] ?? ''); $rid = (string) ($payload['replyId'] ?? '');
+        $trouve = false;
+        foreach ($cdb['forumPosts'] as $i => $p) {
+            if (!is_array($p) || (string) ($p['id'] ?? '') !== $pid) continue;
+            if (!isset($mesClasses[(string) ($p['classroomId'] ?? '')])) $refus(403, 'Message d\'une autre classe');
+            $bascule = function (array $l) use ($eid): array {
+                $k = array_search($eid, $l, true);
+                if ($k === false) { $l[] = $eid; } else { array_splice($l, $k, 1); }
+                return array_values($l);
+            };
+            if ($rid === '') {
+                $cdb['forumPosts'][$i]['likes'] = $bascule((array) ($p['likes'] ?? []));
+            } else {
+                foreach ((array) ($p['replies'] ?? []) as $j => $r) {
+                    if (is_array($r) && (string) ($r['id'] ?? '') === $rid) {
+                        $cdb['forumPosts'][$i]['replies'][$j]['likes'] = $bascule((array) ($r['likes'] ?? []));
+                    }
+                }
+            }
+            $result['post'] = $cdb['forumPosts'][$i];
+            $trouve = true; break;
+        }
+        if (!$trouve) $refus(404, 'Message introuvable');
+    } else { // forum_delete — seulement ce qu'on a soi-même écrit
+        $pid = (string) ($payload['postId'] ?? ''); $rid = (string) ($payload['replyId'] ?? '');
+        $trouve = false;
+        foreach ($cdb['forumPosts'] as $i => $p) {
+            if (!is_array($p) || (string) ($p['id'] ?? '') !== $pid) continue;
+            if ($rid === '') {
+                if ((string) ($p['auteurId'] ?? '') !== $eid) $refus(403, 'Vous ne pouvez supprimer que vos propres messages');
+                array_splice($cdb['forumPosts'], $i, 1);
+                $result['deleted'] = $pid;
+            } else {
+                $reps = (array) ($p['replies'] ?? []);
+                foreach ($reps as $j => $r) {
+                    if (is_array($r) && (string) ($r['id'] ?? '') === $rid) {
+                        if ((string) ($r['auteurId'] ?? '') !== $eid) $refus(403, 'Vous ne pouvez supprimer que vos propres réponses');
+                        array_splice($reps, $j, 1);
+                        break;
+                    }
+                }
+                $cdb['forumPosts'][$i]['replies'] = array_values($reps);
+                $result['post'] = $cdb['forumPosts'][$i];
+            }
+            $trouve = true; break;
+        }
+        if (!$trouve) $refus(404, 'Message introuvable');
+    }
+
+    $cdb['lastModified'] = $nowMs;
+    $enc = json_encode($cdb, JSON_UNESCAPED_UNICODE);
+    if ($enc === false) $refus(500, 'Encodage échoué');
+    ftruncate($fp, 0); rewind($fp); fwrite($fp, $enc); fflush($fp);
+    flock($fp, LOCK_UN); fclose($fp);
     @file_put_contents(__DIR__ . '/data/_access_log.txt',
         date('c') . ' STUDENT_' . strtoupper($action) . ' eid=' . $eid . ' ip=' . $ip . "\n", FILE_APPEND);
     echo json_encode($result, JSON_UNESCAPED_UNICODE);

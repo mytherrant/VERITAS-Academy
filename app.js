@@ -5900,6 +5900,11 @@ function vShowSec(sec,btn,_boot){
     ];
     var catAccents=['#93C5FD','#DDD6FE','#FCA5A5','#A7F3D0','#FDE68A','#A5F3FC'];
 
+    // Ce que le visiteur peut réellement ouvrir : les contenus par défaut que
+    // l'administration a supprimés (deletedDefaults) ne comptent nulle part.
+    var _delDefH=DB.deletedDefaults||[];
+    var _visibles=(el.contenus||[]).filter(function(x){return x&&_delDefH.indexOf(x.id)<0;});
+    var _nbGratuits=_visibles.filter(function(x){return (typeof _pwEstGratuit==='function')?_pwEstGratuit(x):!!x.gratuit;}).length;
     if(!selCat){
       // ── HERO BANNER ──
       h+='<div class="v-hero-gradient" style="border-radius:20px;padding:28px;margin-bottom:22px;color:#fff;position:relative;overflow:hidden">';
@@ -5909,9 +5914,9 @@ function vShowSec(sec,btn,_boot){
       h+='<div style="font-family:Montserrat,sans-serif;font-size:24px;font-weight:900;line-height:1.2;margin-bottom:8px">Apprenez à votre rythme</div>';
       h+='<div style="font-family:Libre Baskerville,Georgia,serif;font-size:13px;color:rgba(255,255,255,.78);line-height:1.7;font-style:italic;max-width:500px">Épreuves officielles, cours vidéos, fiches de révision — tout ce qu\'il faut pour réussir le BEPC et le BAC.</div>';
       h+='<div style="display:flex;gap:20px;margin-top:16px;flex-wrap:wrap">';
-      h+='<div style="text-align:center"><div style="font-family:Libre Baskerville,Georgia,serif;font-size:28px;font-weight:700;color:#FFC93C;line-height:1">'+el.contenus.length+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Ressources</div></div>';
-      h+='<div style="text-align:center"><div style="font-family:Libre Baskerville,Georgia,serif;font-size:28px;font-weight:700;color:#A5F3FC;line-height:1">'+el.categories.length+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Catégories</div></div>';
-      h+='<div style="text-align:center"><div style="font-family:Libre Baskerville,Georgia,serif;font-size:28px;font-weight:700;color:#FDE68A;line-height:1">'+(el.plans||[]).length+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Packs</div></div>';
+      h+='<div style="text-align:center"><div style="font-family:Libre Baskerville,Georgia,serif;font-size:28px;font-weight:700;color:#FFC93C;line-height:1">'+_visibles.length+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Ressources</div></div>';
+      h+='<div style="text-align:center"><div style="font-family:Libre Baskerville,Georgia,serif;font-size:28px;font-weight:700;color:#A5F3FC;line-height:1">'+(el.categories||[]).filter(function(c){return _visibles.some(function(x){return x.cat===c.id;});}).length+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Catégories</div></div>';
+      h+='<div style="text-align:center"><div style="font-family:Libre Baskerville,Georgia,serif;font-size:28px;font-weight:700;color:#FDE68A;line-height:1">'+_nbGratuits+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Gratuites</div></div>';
       h+='</div>';
       // v1.4.2 : bouton PROFIL — l'apprenant déclare section/enseignement/classe
       h+='<div style="margin-top:14px"><button onclick="mLearnerProfile()" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,201,60,.45);border-radius:24px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif">🎯 '+(_lpEl&&_lpEl.cls?('Mon parcours : '+_esc(_lpEl.cls)+(_lpEl.sys==='en'?' · Anglophone':'')+(_lpEl.ens==='tech'?' · Technique':'')):'Personnaliser mon parcours')+'</button></div>';
@@ -5937,8 +5942,8 @@ function vShowSec(sec,btn,_boot){
       },50);
       // Pré-calcul des compteurs par catégorie (1 seule passe sur tous les contenus)
       var _catCounts={},_catFree={};
-      (el.contenus||[]).forEach(function(x){
-        if(x.cat){_catCounts[x.cat]=(_catCounts[x.cat]||0)+1;if(x.gratuit)_catFree[x.cat]=(_catFree[x.cat]||0)+1;}
+      _visibles.forEach(function(x){
+        if(x.cat){_catCounts[x.cat]=(_catCounts[x.cat]||0)+1;if((typeof _pwEstGratuit==='function')?_pwEstGratuit(x):x.gratuit)_catFree[x.cat]=(_catFree[x.cat]||0)+1;}
       });
       // v2.2 : Mapping catégorie → couleur Lucide + icône SVG (style analyse littéraire)
       var _catLcMap={
@@ -5958,12 +5963,22 @@ function vShowSec(sec,btn,_boot){
       // (icône + nom blancs), corps blanc épuré, CTA pilule bleu vif. Entrée en
       // CASCADE au scroll (classe lx-catcard, délais nth-child en CSS).
       h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px" class="v-reveal lx-catgrid">';
-      el.categories.forEach(function(cat,i){
+      // Les catégories VIDES menaient à « Aucune ressource » : 7 tuiles sur 18
+      // étaient des impasses. Elles passent en fin de grille, marquées
+      // « Bientôt », et ne s'ouvrent plus pour le visiteur (l'admin, lui,
+      // doit pouvoir y entrer pour les remplir).
+      var _catsTriees=(el.categories||[]).map(function(c,i){return {c:c,i:i};})
+        .sort(function(a,b){return ((_catCounts[b.c.id]?1:0)-(_catCounts[a.c.id]?1:0))||(a.i-b.i);});
+      _catsTriees.forEach(function(o){
+        var cat=o.c, i=o.i;
         var theme=_catLcMap[cat.id]||{ic:'book',col:'#6A8DC7',bg:'rgba(59,130,246,0.12)'};
         var cnt=_catCounts[cat.id]||0;
         var free=_catFree[cat.id]||0;
-        var isPopular=(i===0)||cat.populaire;
-        h+='<div class="lx-catcard" onclick="window._elCat=\''+cat.id+'\';vShowSec(\'elearning\',null)">';
+        var isPopular=cnt&&((i===0)||cat.populaire);
+        var ouvrable=cnt||iA();
+        h+='<div class="lx-catcard'+(cnt?'':' lx-catcard-vide')+'"'+(ouvrable
+            ?' role="button" tabindex="0" onkeydown="if(event.key===\'Enter\')this.click()" onclick="window._elCat=\''+_esc(cat.id)+'\';vShowSec(\'elearning\',null)"'
+            :' aria-disabled="true" title="Bientôt disponible" style="opacity:.62;cursor:default"')+'>';
         // Bandeau navy
         h+='<div class="lx-catcard-head">';
         h+='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-'+theme.ic+'"/></svg>';
@@ -5973,7 +5988,9 @@ function vShowSec(sec,btn,_boot){
         // Corps blanc sobre
         h+='<div class="lx-catcard-body">';
         h+='<div class="lx-catcard-desc">'+_esc((cat.desc||'').slice(0,64))+'</div>';
-        h+='<div class="lx-catcard-foot"><span class="lx-catcard-count">'+cnt+' ressource'+(cnt>1?'s':'')+'</span><span class="lx-catcard-cta">Explorer →</span></div>';
+        h+='<div class="lx-catcard-foot">'+(cnt
+            ?'<span class="lx-catcard-count">'+cnt+' ressource'+(cnt>1?'s':'')+'</span><span class="lx-catcard-cta">Explorer →</span>'
+            :'<span class="lx-catcard-count">Bientôt disponible</span>'+(iA()?'<span class="lx-catcard-cta">Remplir →</span>':''))+'</div>';
         h+='</div>';
         h+='</div>';
       });
@@ -5989,9 +6006,9 @@ function vShowSec(sec,btn,_boot){
       h+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">';
       h+='<button class="back-btn" onclick="window._elCat=\'\';vShowSec(\'elearning\',null)">← Catégories</button>';
       h+='<div style="background:'+catGrad+';border-radius:12px;padding:8px 16px;display:flex;align-items:center;gap:8px;color:#fff">';
-      h+='<span style="font-size:22px">'+selCatObj.ico+'</span>';
-      h+='<div><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px">'+selCatObj.nom+'</div>';
-      h+='<div style="font-size:11px;opacity:.75">'+selCatObj.desc+'</div></div></div></div>';
+      h+='<span style="font-size:22px">'+_esc(selCatObj.ico||'')+'</span>';
+      h+='<div><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px">'+_esc(selCatObj.nom)+'</div>';
+      h+='<div style="font-size:11px;opacity:.85">'+_esc(selCatObj.desc||'')+'</div></div></div></div>';
 
       // Class filter
       h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center">';
@@ -5999,11 +6016,11 @@ function vShowSec(sec,btn,_boot){
       if(!window._elClsOpts||window._elClsOptsKey!==selCat){
         window._elClsOptsKey=selCat;
         var _clsFilt=['Toutes'].concat((el.contenus||[]).filter(function(x){return x.cat===selCat&&x.classe;}).reduce(function(a,x){if(a.indexOf(x.classe)<0)a.push(x.classe);return a;},[]));
-        window._elClsOpts=_clsFilt.map(function(cl){return '<option>'+cl+'</option>';}).join('');
+        window._elClsOpts=_clsFilt.map(function(cl){return '<option>'+_esc(cl)+'</option>';}).join('');
       }
-      var _clsOpts=window._elClsOpts.replace('>'+selCls+'<','selected>'+selCls+'<');
+      var _clsOpts=window._elClsOpts.replace('>'+_esc(selCls)+'<',' selected>'+_esc(selCls)+'<');
       h+='<select class="fi" style="min-width:110px;font-size:12px;border-radius:10px" onchange="window._elCls=this.value;vShowSec(\'elearning\',null)">'+_clsOpts+'</select>';
-      h+='<input class="fi" style="flex:1;min-width:140px;font-size:12px;border-radius:10px" placeholder="🔍 Rechercher..." id="elSearch" oninput="filterElContents()">';
+      h+='<input class="fi" style="flex:1;min-width:140px;font-size:12px;border-radius:10px" placeholder="🔍 Titre, matière, classe…" aria-label="Rechercher une ressource" id="elSearch" oninput="filterElContents()">';
       // v1.4.3 : VRAI FILTRE PROFIL — interrupteur visible. ON par défaut quand un
       // parcours est déclaré : seules les ressources de SA section s'affichent.
       var _lpGrpEl=(typeof _profileGroup==='function')?_profileGroup():'';
@@ -6037,8 +6054,11 @@ function vShowSec(sec,btn,_boot){
       if(!filtered.length){
         h+='<div style="text-align:center;padding:50px 20px;background:#F8FAFF;border-radius:18px;border:2px dashed #C7D2FE">';
         h+='<div style="font-size:52px;margin-bottom:12px">📭</div>';
-        h+='<div style="font-family:Montserrat,sans-serif;font-size:16px;color:#4A5568">Aucune ressource dans cette catégorie</div>';
-        h+='<div style="font-size:12px;color:#8895AA;margin-top:6px">Ajoutez des contenus depuis le panneau Admin → E-Learning</div></div>';
+        h+='<div style="font-family:Montserrat,sans-serif;font-size:16px;color:#4A5568">Aucune ressource '+(selCls!=='Toutes'||_pfOn?'pour ce filtre':'dans cette catégorie pour l’instant')+'</div>';
+        // La consigne d'administration ne s'adresse qu'à l'administration.
+        h+='<div style="font-size:12.5px;color:#6B7A99;margin-top:6px">'+(iA()
+          ?'Ajoutez des contenus depuis le panneau Admin → E-Learning'
+          :((selCls!=='Toutes'||_pfOn)?'Élargissez le filtre (classe « Toutes », parcours OFF) ou ':'')+'<a href="#" onclick="window._elCat=\'\';vShowSec(\'elearning\',null);return false">revenez aux catégories</a>.')+'</div></div>';
       } else {
         var free2=0;
         // v1.16 — nombre d'aperçus payants offerts avant le mur : réglable dans
@@ -6062,7 +6082,9 @@ function vShowSec(sec,btn,_boot){
           var dlKey='dl_'+item.id+'_'+_dlDate;
           var dlUsed=parseInt(localStorage.getItem(dlKey)||'0');
           
-          h+='<div class="rc elItem" data-titre="'+item.titre.toLowerCase()+'" style="border-color:'+(isLocked?'#E8EEFF':catColor+'44')+';position:relative">';
+          // Recherche sur le titre, la matière et la classe (échappés : un
+          // guillemet dans un titre cassait l'attribut).
+          h+='<div class="rc elItem" data-titre="'+_esc([item.titre,item.matiere,item.classe,item.seq].filter(Boolean).join(' ').toLowerCase())+'" style="border-color:'+(isLocked?'#E8EEFF':catColor+'44')+';position:relative">';
           if(isFree) h+='<div class="vt-rib-wrap"><span class="vt-rib">Gratuit</span></div>';
           h+='<div class="rc-accent" style="background:'+catColor+'"></div>';
           h+='<div class="rc-body">';
@@ -6075,17 +6097,17 @@ function vShowSec(sec,btn,_boot){
               h+='<span class="rc-tag" style="background:'+catColor+'18;color:'+catColor+'">'+( pLabels[pk]||pk)+'</span>';
             });
           }
-          if(item.classe) h+='<span class="rc-tag" style="background:#F0F4FF;color:#6B7A99">'+item.classe+'</span>';
+          if(item.classe) h+='<span class="rc-tag" style="background:#F0F4FF;color:#4D5163">'+_esc(item.classe)+'</span>';
           h+='</div>';
           
-          h+='<div class="rc-title">'+item.titre+'</div>';
+          h+='<div class="rc-title">'+_esc(item.titre)+'</div>';
           h+='<div class="rc-meta">';
-          if(item.matiere) h+='<span>'+item.matiere+'</span>';
-          if(item.seq) h+='<span>'+item.seq+'</span>';
+          if(item.matiere) h+='<span>'+_esc(item.matiere)+'</span>';
+          if(item.seq) h+='<span>'+_esc(item.seq)+'</span>';
           h+='</div>';
           
-          if(item.apercu) h+='<div class="rc-preview" style="background:'+catColor+'08;border-color:'+catColor+'">'+item.apercu.substring(0,110)+'…</div>';
-          else if(item.desc) h+='<div class="rc-preview" style="background:'+catColor+'08;border-color:'+catColor+'">'+item.desc.substring(0,110)+'</div>';
+          if(item.apercu) h+='<div class="rc-preview" style="background:'+catColor+'08;border-color:'+catColor+'">'+_esc(String(item.apercu).substring(0,110))+'…</div>';
+          else if(item.desc) h+='<div class="rc-preview" style="background:'+catColor+'08;border-color:'+catColor+'">'+_esc(String(item.desc).substring(0,110))+'</div>';
           
           // Footer with price and action
           h+='<div class="rc-footer">';
@@ -6093,7 +6115,7 @@ function vShowSec(sec,btn,_boot){
             h+='<span style="font-family:Libre Baskerville,Georgia,serif;font-size:13px;font-weight:700;color:#059669">Gratuit</span>';
             h+='<div style="display:flex;align-items:center;gap:6px">';
             if(item.externalUrl){
-              h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 14px;border-radius:12px;font-weight:700" onclick="window.open(\''+item.externalUrl+'\',\'_blank\')">&#9654;&#65039; Passer l\'épreuve</button>';
+              h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 14px;border-radius:12px;font-weight:700" data-url="'+_esc(item.externalUrl)+'" onclick="if(/^https?:\/\//i.test(this.dataset.url))window.open(this.dataset.url,\'_blank\',\'noopener\')">&#9654;&#65039; Passer l\'épreuve</button>';
             } else {
               var isHtmlItem=(item.fileType==='html')||(item.fichier&&item.fichier.toLowerCase().endsWith('.html'));
               if(dlUsed>0&&!isHtmlItem) h+='<span class="dl-counter">📊 '+dlUsed+'/3</span>';
@@ -6106,7 +6128,7 @@ function vShowSec(sec,btn,_boot){
             }
             h+='</div>';
           } else if(isLocked){
-            h+='<span class="rc-price" style="color:#FFC93C">'+fmtN(item.prix)+' FCFA</span>';
+            h+='<span class="rc-price" style="color:#142554">'+(Number(item.prix)>0?fmtN(item.prix)+' FCFA':'Abonnés')+'</span>';
             h+='<div style="display:flex;align-items:center;gap:6px">';
             if(item.apercu||item.desc) h+='<button class="btn" style="background:'+catColor+'18;color:'+catColor+';font-size:10px;padding:5px 10px;border-radius:10px;border:1px solid '+catColor+'33" onclick="event.stopPropagation();previewElContent(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Aperçu</button>';
             h+='<button class="btn" style="background:#E8EEFF;color:#4B5BDB;font-size:11px;padding:6px 12px;border-radius:12px" onclick="document.getElementById(\'elPlans\')?.scrollIntoView({behavior:\'smooth\'})"><svg class="vico bico" aria-hidden="true"><use href="#lc-lock"/></svg>Abonnement</button>';
@@ -6115,7 +6137,7 @@ function vShowSec(sec,btn,_boot){
             if(hasPlanAccess&&!iA()){
               h+='<span style="background:#D1FAE5;color:#059669;font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;display:inline-block">✓ Inclus dans votre abonnement</span>';
             } else {
-              h+='<span class="rc-price" style="color:'+catColor+'">'+fmtN(item.prix)+' FCFA</span>';
+              h+='<span class="rc-price" style="color:'+catColor+'">'+(Number(item.prix)>0?fmtN(item.prix)+' FCFA':'')+'</span>';
             }
             h+='<div style="display:flex;align-items:center;gap:6px">';
             if(item.apercu||item.desc) h+='<button class="btn" style="background:'+catColor+'18;color:'+catColor+';font-size:10px;padding:5px 10px;border-radius:10px;border:1px solid '+catColor+'33" onclick="event.stopPropagation();previewElContent(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Aperçu</button>';
@@ -10610,10 +10632,16 @@ function _dlFile(btn){
 }
 
 function filterElContents(){
-  var q=(document.getElementById('elSearch')?.value||'').toLowerCase();
+  var q=(document.getElementById('elSearch')?.value||'').toLowerCase().trim();
+  var n=0;
   document.querySelectorAll('.elItem').forEach(function(el){
-    if(el)el.style.display=el.getAttribute('data-titre').includes(q)?'':'none';
+    var ok=(el.getAttribute('data-titre')||'').includes(q);
+    el.style.display=ok?'':'none'; if(ok)n++;
   });
+  var cat=document.getElementById('elCatalog'), msg=document.getElementById('elSearchVide');
+  if(cat&&!n&&!msg){ msg=document.createElement('div'); msg.id='elSearchVide'; msg.setAttribute('role','status');
+    msg.style.cssText='grid-column:1/-1;text-align:center;padding:24px;color:#4D5163;font-size:14px'; cat.appendChild(msg); }
+  if(msg){ msg.textContent=n?'':'Aucune ressource ne correspond à « '+q+' ».'; msg.style.display=n?'none':''; }
 }
 
 /* L'unité d'un prix, lue dans la DURÉE du plan. Les cartes écrivaient
@@ -23641,128 +23669,164 @@ function _cvDefaultClassrooms(){
 function showClasseVirtuelle(cid,chid){
   if(!DB.classrooms||!DB.classrooms.length){DB.classrooms=_cvDefaultClassrooms();save();}
   if(!DB.forumPosts)DB.forumPosts=[];
-  if(cid&&chid){_CV.classroomId=cid;_CV.channelId=chid;_cvRenderChannel();return;}
-  if(_CV.classroomId&&_CV.channelId){_cvRenderChannel();return;}
-  _cvRenderHome();
+  if(cid&&chid){_CV.classroomId=cid;_CV.channelId=chid;_cvRenderChannel();}
+  else if(_CV.classroomId&&_CV.channelId){_cvRenderChannel();}
+  else _cvRenderHome();
+  // Élève/visiteur : les messages de sa classe vivent sur le SERVEUR (voir
+  // _cvApi) — on les récupère à l'arrivée, sans bloquer l'affichage.
+  if(_cvServeur()) _cvSync(true);
 }
 
+/* ── Échanges avec le serveur (api/student_data.php, actions forum_*) ──────
+   Avant : un message d'élève n'allait que dans SON localStorage — la synchro
+   ne part que des postes admin (_triggerAutoSync). Personne d'autre ne le
+   lisait jamais. Le serveur fixe l'auteur d'après le jeton : on n'envoie ni
+   nom ni identifiant. */
+function _cvUid(){ return SES?(SES.id||SES.eid||''):''; }
+function _cvToken(){ try{ return window._vrtContentToken||sessionStorage.getItem('_vrtCT')||''; }catch(e){ return ''; } }
+function _cvServeur(){ return !!(SES&&!iA()&&_cvToken()&&typeof _studentSyncUrl==='function'&&_studentSyncUrl()); }
+function _cvApi(action,payload){
+  return fetch(_studentSyncUrl(),{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:action,token:_cvToken(),payload:payload||{}})})
+    .then(function(r){ return r.json().catch(function(){ return {ok:false,error:'Réponse illisible ('+r.status+')'}; }); })
+    .then(function(j){ if(!j||!j.ok) throw new Error((j&&j.error)||'Serveur indisponible'); return j; });
+}
+function _cvMergePost(p){
+  if(!p||!p.id)return;
+  DB.forumPosts=DB.forumPosts||[];
+  var i=DB.forumPosts.findIndex(function(x){return x.id===p.id;});
+  if(i>=0)DB.forumPosts[i]=p; else DB.forumPosts.push(p);
+}
+// Les messages des classes renvoyées par le serveur REMPLACENT la copie locale
+// de ces classes ; le forum public (même tableau, sans classroomId) n'est pas touché.
+function _cvSync(silencieux){
+  if(!_cvServeur())return Promise.resolve(false);
+  return _cvApi('forum_fetch',{}).then(function(j){
+    var mes={};(j.classrooms||[]).forEach(function(id){mes[id]=1;});
+    var avant=_cvSignature();
+    DB.forumPosts=(DB.forumPosts||[]).filter(function(p){return !(p&&p.classroomId&&mes[p.classroomId]);}).concat(j.posts||[]);
+    window._cvMesClasses=j.classrooms||[];
+    var change=avant!==_cvSignature();
+    if(change){save();_cvRafraichirVue();}
+    if(!silencieux)toast(change?'✓ Nouveaux messages':'✓ À jour','ok');
+    return change;
+  }).catch(function(e){ if(!silencieux)toast('Forum : '+e.message,'warn'); return false; });
+}
+function _cvSignature(){
+  return (DB.forumPosts||[]).filter(function(p){return p&&p.classroomId;}).map(function(p){
+    return p.id+':'+(p.replies||[]).length+':'+(p.likes||[]).length+':'+(p.pinned?1:0);
+  }).sort().join('|');
+}
+// Ne redessine QUE le fil : la saisie en cours et le défilement survivent.
+function _cvRafraichirVue(){
+  var feed=document.getElementById('cvFeed');
+  if(!feed){ if(!_CV.classroomId&&document.getElementById('cvHome'))_cvRenderHome(); return; }
+  var cls=(DB.classrooms||[]).find(function(c){return c.id===_CV.classroomId;});
+  var ch=cls&&(cls.channels||[]).find(function(c){return c.id===_CV.channelId;});
+  if(!cls||!ch)return;
+  var enBas=feed.scrollHeight-feed.scrollTop-feed.clientHeight<60;
+  var haut=feed.scrollTop;
+  feed.innerHTML=_cvFeedHtml(cls,ch);
+  if(enBas)feed.scrollTop=feed.scrollHeight; else feed.scrollTop=haut;
+  var n=document.getElementById('cvChCount');
+  if(n)n.textContent=_cvPostsCanal(ch.id).length+' message(s)';
+}
+function _cvPostsCanal(chId){ return (DB.forumPosts||[]).filter(function(p){return p.channelId===chId;}); }
+// Noms enregistrés DÉJÀ échappés par les anciennes versions (« l&#39;élève ») :
+// on les ramène au texte brut avant de les échapper une seule fois.
+function _cvTxt(s){
+  return String(s==null?'':s).replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+}
+function _cvNom(s){ return _esc(_cvTxt(s)); }
+
 function _cvRenderHome(){
+  _cvStopTimer();
   var cls=DB.classrooms||[];
-  var accessible=cls;
-  if(SES&&SES.type==='eleve'){
-    var mine=cls.filter(function(c){return (c.membres||[]).indexOf(SES.id||SES.eid)>-1||c.nom===SES.cls;});
+  var accessible=cls, horsClasse=false;
+  if(SES&&!iA()&&SES.type!=='enseignant'){
+    var uid=_cvUid(), srv=window._cvMesClasses||[];
+    var mine=cls.filter(function(c){return (c.membres||[]).indexOf(uid)>-1||c.nom===SES.cls||srv.indexOf(c.id)>-1;});
+    horsClasse=!mine.length;
     accessible=mine.length?mine:cls;
   }
-  var totalPosts=(DB.forumPosts||[]).length;
+  var posts=(DB.forumPosts||[]).filter(function(p){return p&&p.classroomId;});
   var today2=new Date().toISOString().slice(0,10);
-  var todayPosts=(DB.forumPosts||[]).filter(function(p){return (p.dateISO||'').startsWith(today2);}).length;
-  var h="<div class='vsec' style='max-width:980px;margin:0 auto'>";
+  var todayPosts=posts.filter(function(p){return (p.dateISO||'').startsWith(today2);}).length;
+  var h="<div class='vsec' id='cvHome' style='max-width:980px;margin:0 auto'>";
   h+="<div style='display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px'>";
-  h+="<div><div class='vsec-title vsec-title-hero' style='margin-bottom:4px'>🏫 Classes &amp; Forum</div><div style='font-size:13px;color:var(--ink4)'>Échangez avec vos enseignants, camarades et la communauté VÉRITAS</div></div>";
-  h+="<button class='btn bo sm' onclick='showForum()' style='background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(245,158,11,.05));color:#F59E0B;border:1.5px solid rgba(245,158,11,.3);font-weight:700'><span style='margin-right:6px'>💬</span> Accéder au Forum public</button>";
+  h+="<div><div class='vsec-title vsec-title-hero' style='margin-bottom:4px'>🏫 Classes &amp; Forum</div><div style='font-size:13px;color:var(--ink4)'>Échangez avec vos enseignants et vos camarades de classe</div></div>";
+  h+="<div style='display:flex;gap:8px;flex-wrap:wrap'>";
+  h+="<button class='btn bo sm' onclick='showForum()'>💬 Forum public</button>";
   if(iA()){h+="<button class='btn bi sm' onclick='_cvAdminPanel()'><svg class='vico bico' aria-hidden='true'><use href='#lc-sliders'/></svg>Gérer les classes</button>";}
-  h+="</div>";
-  // Stats
+  h+="</div></div>";
+  if(!SES){
+    h+="<div class='ib ibi mb14'><span>🔐</span><span>Les forums de classe sont réservés aux élèves et enseignants inscrits. <button class='btn bi xs' onclick=\"showLogin('eleve')\">Se connecter</button></span></div>";
+  } else if(horsClasse){
+    h+="<div class='ib ibi mb14'><span>ℹ️</span><span>Votre compte n'est rattaché à aucune classe pour l'instant : vous pouvez lire les classes ouvertes, mais pas y écrire. Renseignez votre classe dans votre profil ou demandez au centre de vous inscrire.</span></div>";
+  }
+  // Stats — des nombres qui concernent CES classes, pas tout le site
   h+="<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:24px'>";
-  [{n:accessible.length,l:'Classes actives',i:'🏫',c:'#3C8DFF'},{n:totalPosts,l:'Messages',i:'💬',c:'#6C56A6'},{n:todayPosts,l:"Aujourd'hui",i:'🔔',c:'#059669'},{n:(DB.students||[]).length,l:'Élèves',i:'👤',c:'#F59E0B'}].forEach(function(s){
-    h+="<div style='background:linear-gradient(135deg,"+s.c+"18,"+s.c+"06);border:1px solid "+s.c+"25;border-radius:14px;padding:14px;text-align:center'><div style='font-size:22px;margin-bottom:4px'>"+s.i+"</div><div style='font-size:20px;font-weight:900;color:"+s.c+";font-family:Montserrat,sans-serif'>"+s.n+"</div><div style='font-size:11px;color:var(--ink4)'>"+s.l+"</div></div>";
+  var ids={};accessible.forEach(function(c){ids[c.id]=1;});
+  var mesPosts=posts.filter(function(p){return ids[p.classroomId];});
+  [{n:accessible.length,l:accessible.length>1?'Classes':'Classe',i:'🏫'},{n:mesPosts.length,l:'Messages',i:'💬'},{n:mesPosts.filter(function(p){return (p.dateISO||'').startsWith(today2);}).length,l:"Aujourd'hui",i:'🔔'}].forEach(function(s){
+    h+="<div style='background:#fff;border:1px solid #E4E7EF;border-radius:14px;padding:14px;text-align:center'><div style='font-size:20px;margin-bottom:4px'>"+s.i+"</div><div style='font-size:20px;font-weight:800;color:#142554'>"+s.n+"</div><div style='font-size:11px;color:var(--ink4)'>"+s.l+"</div></div>";
   });
+  void todayPosts;
   h+="</div>";
-  // Grille classes
+  // Grille classes. Bandeau navy UNI : la charte (theme-lws) aplatit les
+  // dégradés et neutralise les teintes hors palette — 3 cartes sur 5
+  // perdaient leur bandeau et affichaient un texte blanc sur blanc. La
+  // couleur de la classe reste en liseré.
   h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:28px'>";
   accessible.forEach(function(c){
-    var posts=(DB.forumPosts||[]).filter(function(p){return p.classroomId===c.id;});
-    var last=posts.slice().sort(function(a,b){return (b.dateISO||'').localeCompare(a.dateISO||'');});
-    var lastP=last[0]||null;
+    var cp=posts.filter(function(p){return p.classroomId===c.id;});
+    var lastP=cp.slice().sort(function(a,b){return (b.dateISO||'').localeCompare(a.dateISO||'');})[0]||null;
     var firstCh=(c.channels||[{id:''}])[0];
-    h+="<div onclick=\"_CV.classroomId='"+c.id+"';_CV.channelId='"+firstCh.id+"';_cvRenderChannel()\" style='background:var(--sur);border:2px solid var(--bg3);border-radius:18px;overflow:hidden;cursor:pointer;transition:all .25s;box-shadow:0 2px 8px rgba(0,0,0,.04)' onmouseover=\"this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 28px rgba(0,0,0,.1)';this.style.borderColor='"+c.couleur+"'\" onmouseout=\"this.style.transform='';this.style.boxShadow='0 2px 8px rgba(0,0,0,.04)';this.style.borderColor='var(--bg3)'\">";
-    h+="<div style='background:linear-gradient(135deg,"+c.couleur+","+c.couleur+"bb);padding:20px;position:relative'>";
-    h+="<div style='font-size:38px;margin-bottom:8px'>"+c.ico+"</div>";
+    h+="<div role='button' tabindex='0' onclick=\"showClasseVirtuelle('"+_esc(c.id)+"','"+_esc(firstCh.id)+"')\" onkeydown=\"if(event.key==='Enter')this.click()\" style='background:#fff;border:1px solid #E4E7EF;border-radius:16px;overflow:hidden;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.04)'>";
+    h+="<div style='background-color:#142554;border-bottom:4px solid "+_esc(c.couleur||'#FFC93C')+";padding:16px 18px;color:#fff'>";
+    h+="<div style='font-size:28px;margin-bottom:6px'>"+_esc(c.ico||'📚')+"</div>";
     h+="<div style='font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:#fff'>"+_esc(c.nom)+"</div>";
-    h+="<div style='font-size:11px;color:rgba(255,255,255,.7);margin-top:3px'>"+(c.channels||[]).length+" canaux · "+(c.membres||[]).length+" élèves</div>";
+    h+="<div style='font-size:11.5px;color:rgba(255,255,255,.8);margin-top:3px'>"+(c.channels||[]).length+" canaux · "+cp.length+" message"+(cp.length>1?'s':'')+"</div>";
     h+="</div><div style='padding:12px 14px'>";
-    h+="<div style='font-size:11px;color:var(--ink4);margin-bottom:8px'>"+(lastP?("💬 "+_esc((lastP.auteurNom||'').split(' ')[0])+" · "+_cvRelTime(lastP.dateISO)):"Aucun message pour l'instant")+"</div>";
+    h+="<div style='font-size:12px;color:var(--ink3);margin-bottom:8px'>"+(lastP?("💬 "+_cvNom((_cvTxt(lastP.auteurNom)||'').split(' ')[0])+" · "+_cvRelTime(lastP.dateISO)):"Aucun message pour l'instant")+"</div>";
     h+="<div style='display:flex;gap:5px;flex-wrap:wrap'>";
-    (c.channels||[]).slice(0,4).forEach(function(ch){h+="<span style='font-size:10px;background:"+c.couleur+"15;color:"+c.couleur+";border:1px solid "+c.couleur+"25;border-radius:8px;padding:2px 7px;font-weight:600'>"+ch.ico+" "+_esc(ch.nom)+"</span>";});
+    (c.channels||[]).slice(0,4).forEach(function(ch){h+="<span style='font-size:11px;background:#EEF3FC;color:#1E499B;border-radius:8px;padding:2px 7px;font-weight:600'>"+_esc(ch.ico)+" "+_esc(ch.nom)+"</span>";});
     h+="</div></div></div>";
   });
   h+="</div>";
-  // Activité récente
-  var recent=(DB.forumPosts||[]).slice().sort(function(a,b){return (b.dateISO||'').localeCompare(a.dateISO||'');}).slice(0,6);
+  // Activité récente — seulement dans les classes affichées
+  var recent=mesPosts.slice().sort(function(a,b){return (b.dateISO||'').localeCompare(a.dateISO||'');}).slice(0,6);
   if(recent.length){
     h+="<div class='vcard'><div class='ct mb10'><span class='ct-ico'><svg class='vico' aria-hidden='true'><use href='#lc-zap'/></svg></span>Activité récente</div>";
     recent.forEach(function(p){
       var cls2=(DB.classrooms||[]).find(function(c){return c.id===p.classroomId;});
       var ch2=cls2&&(cls2.channels||[]).find(function(c){return c.id===p.channelId;});
       if(!cls2)return;
-      h+="<div onclick=\"showClasseVirtuelle('"+p.classroomId+"','"+p.channelId+"')\" style='display:flex;align-items:flex-start;gap:10px;padding:9px;border-radius:10px;cursor:pointer;transition:.15s;margin-bottom:4px' onmouseover=\"this.style.background='var(--bg)'\" onmouseout=\"this.style.background=''\">"+
-        "<div style='width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,"+cls2.couleur+","+cls2.couleur+"99);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0'>"+_cvInitials(p.auteurNom)+"</div>"+
+      h+="<div role='button' tabindex='0' onclick=\"showClasseVirtuelle('"+_esc(p.classroomId)+"','"+_esc(p.channelId)+"')\" style='display:flex;align-items:flex-start;gap:10px;padding:9px;border-radius:10px;cursor:pointer;margin-bottom:4px'>"+
+        "<div style='width:34px;height:34px;border-radius:50%;background-color:#1E499B;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0'>"+_esc(_cvInitials(_cvTxt(p.auteurNom)))+"</div>"+
         "<div style='flex:1;min-width:0'>"+
-        "<div style='font-size:12px;font-weight:700;color:var(--bl)'>"+_esc(p.auteurNom)+"<span style='font-weight:400;color:var(--ink4);margin-left:6px;font-size:11px'>"+_cvRelTime(p.dateISO)+"</span></div>"+
-        "<div style='font-size:11px;color:var(--ink4)'>"+cls2.ico+" "+_esc(cls2.nom)+(ch2?(" · "+ch2.ico+" "+_esc(ch2.nom)):"")+"</div>"+
-        "<div style='font-size:12px;color:var(--ink2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+_esc((p.contenu||p.titre||'').slice(0,80))+"</div>"+
+        "<div style='font-size:12.5px;font-weight:700;color:var(--bl)'>"+_cvNom(p.auteurNom)+"<span style='font-weight:400;color:var(--ink4);margin-left:6px;font-size:11px'>"+_cvRelTime(p.dateISO)+"</span></div>"+
+        "<div style='font-size:11.5px;color:var(--ink4)'>"+_esc(cls2.nom)+(ch2?(" · "+_esc(ch2.nom)):"")+"</div>"+
+        "<div style='font-size:12.5px;color:var(--ink2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+_esc((p.contenu||p.titre||'').slice(0,80))+"</div>"+
         "</div></div>";
     });
     h+="</div>";
   }
   if(!accessible.length){
-    h+="<div style='text-align:center;padding:60px 20px;color:var(--ink4)'><div style='font-size:56px;margin-bottom:14px'>🏫</div><div style='font-size:15px;font-weight:700;color:var(--bl);margin-bottom:6px'>Aucune classe disponible</div>"+(iA()?"<button class='btn bi sm mt8' onclick='_cvAdminPanel()'><svg class='vico bico' aria-hidden='true'><use href='#lc-sliders'/></svg>Créer une classe</button>":"<div style='font-size:13px'>Contactez l'administration</div>")+"</div>";
+    h+="<div style='text-align:center;padding:60px 20px;color:var(--ink4)'><div style='font-size:56px;margin-bottom:14px'>🏫</div><div style='font-size:15px;font-weight:700;color:var(--bl);margin-bottom:6px'>Aucune classe disponible</div>"+(iA()?"<button class='btn bi sm mt8' onclick='_cvAdminPanel()'>Créer une classe</button>":"<div style='font-size:13px'>Contactez l'administration</div>")+"</div>";
   }
   h+="</div>";
   _vc(h);
 }
 
-function _cvRenderChannel(){
-  var cls=(DB.classrooms||[]).find(function(c){return c.id===_CV.classroomId;});
-  if(!cls){_cvRenderHome();return;}
-  var ch=(cls.channels||[]).find(function(c){return c.id===_CV.channelId;})||(cls.channels||[])[0];
-  if(!ch){_cvRenderHome();return;}
-  _CV.channelId=ch.id;
-  var posts=(DB.forumPosts||[]).filter(function(p){return p.channelId===ch.id;});
+function _cvStopTimer(){ if(_CV.refreshTimer){clearInterval(_CV.refreshTimer);_CV.refreshTimer=null;} }
+function _cvQuitterCanal(){ _CV.classroomId=null;_CV.channelId=null;_CV.replyTo=null;_cvRenderHome(); }
+
+function _cvFeedHtml(cls,ch){
+  var posts=_cvPostsCanal(ch.id);
   var pinned=posts.filter(function(p){return p.pinned;});
   var normal=posts.filter(function(p){return !p.pinned;}).sort(function(a,b){return (a.dateISO||'').localeCompare(b.dateISO||'');});
-  var isMob=window.innerWidth<660;
-  var canPost=!(ch.teacherOnly&&SES&&SES.type==='eleve');
-
-  var h="<div style='display:flex;min-height:82vh;background:var(--bg);border-radius:var(--r3);overflow:hidden;border:var(--br)'>";
-
-  // ─ Sidebar (desktop seulement) ────────────────────────────────
-  if(!isMob){
-    h+="<div style='width:210px;flex-shrink:0;background:linear-gradient(180deg,#0D1B3E 0%,#142554 100%);overflow-y:auto;display:flex;flex-direction:column'>";
-    h+="<div style='padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.1)'>";
-    h+="<button onclick='_CV.classroomId=null;_CV.channelId=null;_cvRenderHome()' style='background:none;border:none;color:rgba(255,255,255,.45);font-size:11px;cursor:pointer;margin-bottom:10px;padding:0;display:flex;align-items:center;gap:4px;transition:.2s' onmouseover=\"this.style.color='#fff'\" onmouseout=\"this.style.color='rgba(255,255,255,.45)'\">← Toutes les classes</button>";
-    h+="<div style='display:flex;align-items:center;gap:8px'><span style='font-size:22px'>"+cls.ico+"</span><span style='font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;color:#fff;line-height:1.2'>"+_esc(cls.nom)+"</span></div>";
-    h+="</div>";
-    h+="<div style='padding:6px 4px;flex:1'>";
-    h+="<div style='padding:6px 10px;font-size:9px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin-top:6px'>CANAUX</div>";
-    (cls.channels||[]).forEach(function(c){
-      var cnt=(DB.forumPosts||[]).filter(function(p){return p.channelId===c.id;}).length;
-      var active=c.id===ch.id;
-      h+="<div onclick=\"showClasseVirtuelle('"+cls.id+"','"+c.id+"')\" style='display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin:1px 4px;border-radius:8px;cursor:pointer;background:"+(active?"rgba(255,255,255,.16)":"none")+";transition:.15s' onmouseover=\"if(this.style.background!='rgba(255,255,255,.16)')this.style.background='rgba(255,255,255,.07)'\" onmouseout=\"if(this.style.background!='rgba(255,255,255,.16)')this.style.background='none'\">"+
-        "<span style='font-size:12px;color:"+(active?"#fff":"rgba(255,255,255,.6)")+";font-weight:"+(active?"700":"400")+"'>"+c.ico+" "+_esc(c.nom)+(c.teacherOnly?" 🔒":"")+"</span>"+
-        (cnt?"<span style='font-size:10px;background:rgba(255,255,255,.14);color:rgba(255,255,255,.7);border-radius:10px;padding:1px 6px;min-width:18px;text-align:center'>"+cnt+"</span>":"")+"</div>";
-    });
-    if(iA()){h+="<div onclick=\"_cvAddChannel('"+cls.id+"')\" style='display:flex;align-items:center;gap:5px;padding:8px 10px;margin:8px 4px 4px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,.3);font-size:11px;border:1px dashed rgba(255,255,255,.15);transition:.15s' onmouseover=\"this.style.color='rgba(255,255,255,.7)';this.style.borderColor='rgba(255,255,255,.35)'\" onmouseout=\"this.style.color='rgba(255,255,255,.3)';this.style.borderColor='rgba(255,255,255,.15)'\">+ Nouveau canal</div>";}
-    h+="</div></div>";
-  }
-
-  // ─ Zone principale ─────────────────────────────────────────────
-  h+="<div style='flex:1;display:flex;flex-direction:column;min-width:0;background:var(--sur)'>";
-
-  // Header canal
-  h+="<div style='padding:11px 16px;background:var(--sur);border-bottom:var(--br);display:flex;align-items:center;justify-content:space-between;gap:8px'>";
-  h+="<div style='display:flex;align-items:center;gap:10px'>";
-  if(isMob){h+="<button onclick='_cvRenderHome()' style='background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink2);line-height:1;padding:2px 6px'>←</button>";}
-  h+="<div style='font-size:20px'>"+ch.ico+"</div>";
-  h+="<div><div style='font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;color:var(--bl)'>"+_esc(ch.nom)+(ch.teacherOnly?" 🔒":"")+"</div>";
-  h+="<div style='font-size:11px;color:var(--ink4)'>"+cls.ico+" "+_esc(cls.nom)+" · "+(pinned.length+normal.length)+" message(s)</div></div></div>";
-  h+="<div style='display:flex;gap:6px'>";
-  if(isMob){h+="<button class='btn bo xs' onclick=\"_cvShowChannelMenu('"+cls.id+"')\">☰</button>";}
-  if(iA()){h+="<button class='btn bo xs' onclick=\"_cvModeratePanel('"+cls.id+"')\"><svg class='vico bico' aria-hidden='true'><use href='#lc-sliders'/></svg>️</button>";}
-  h+="<button class='btn bi xs' onclick='_cvPullFresh()' title='Actualiser'>↻</button></div></div>";
-
-  // Feed messages
-  h+="<div id='cvFeed' style='flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:200px;background:var(--bg)'>";
+  var h='';
   if(!pinned.length&&!normal.length){
     h+="<div style='text-align:center;padding:60px 20px;color:var(--ink4)'><div style='font-size:52px;margin-bottom:14px'>💬</div><div style='font-size:15px;font-weight:700;color:var(--bl);margin-bottom:6px'>Démarrez la conversation !</div><div style='font-size:13px'>Soyez le premier à poster dans ce canal.</div></div>";
   } else {
@@ -23773,102 +23837,126 @@ function _cvRenderChannel(){
     }
     normal.forEach(function(p){h+=_cvPostCard(p,cls,ch);});
   }
-  h+="<div id='cvBottom'></div></div>";
+  return h+"<div id='cvBottom'></div>";
+}
 
-  // Composer
+function _cvRenderChannel(){
+  var cls=(DB.classrooms||[]).find(function(c){return c.id===_CV.classroomId;});
+  if(!cls){_cvRenderHome();return;}
+  var ch=(cls.channels||[]).find(function(c){return c.id===_CV.channelId;})||(cls.channels||[])[0];
+  if(!ch){_cvRenderHome();return;}
+  _CV.channelId=ch.id;
+  var nPosts=_cvPostsCanal(ch.id).length;
+  var isMob=window.innerWidth<660;
+  var estProf=iA()||(SES&&SES.type==='enseignant');
+  var canPost=!!SES&&!(ch.teacherOnly&&!estProf);
+
+  var h="<div style='display:flex;min-height:78vh;background:var(--bg);border-radius:var(--r3);overflow:hidden;border:var(--br)'>";
+  if(!isMob){
+    h+="<div style='width:210px;flex-shrink:0;background-color:#142554;overflow-y:auto;display:flex;flex-direction:column'>";
+    h+="<div style='padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.1)'>";
+    h+="<button onclick='_cvQuitterCanal()' style='background:none;border:none;color:rgba(255,255,255,.75);font-size:12px;cursor:pointer;margin-bottom:10px;padding:0'>← Toutes les classes</button>";
+    h+="<div style='display:flex;align-items:center;gap:8px'><span style='font-size:22px'>"+_esc(cls.ico||'📚')+"</span><span style='font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;color:#fff;line-height:1.2'>"+_esc(cls.nom)+"</span></div>";
+    h+="</div><div style='padding:6px 4px;flex:1'>";
+    h+="<div style='padding:6px 10px;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:2px;text-transform:uppercase;margin-top:6px'>Canaux</div>";
+    (cls.channels||[]).forEach(function(c){
+      var cnt=_cvPostsCanal(c.id).length, active=c.id===ch.id;
+      h+="<div role='button' tabindex='0' onclick=\"showClasseVirtuelle('"+_esc(cls.id)+"','"+_esc(c.id)+"')\" style='display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin:1px 4px;border-radius:8px;cursor:pointer;background:"+(active?"rgba(255,255,255,.16)":"none")+"'>"+
+        "<span style='font-size:12.5px;color:"+(active?"#fff":"rgba(255,255,255,.78)")+";font-weight:"+(active?"700":"400")+"'>"+_esc(c.ico)+" "+_esc(c.nom)+(c.teacherOnly?" 🔒":"")+"</span>"+
+        (cnt?"<span style='font-size:10px;background:rgba(255,255,255,.16);color:#fff;border-radius:10px;padding:1px 6px;min-width:18px;text-align:center'>"+cnt+"</span>":"")+"</div>";
+    });
+    if(iA()){h+="<div role='button' tabindex='0' onclick=\"_cvAddChannel('"+_esc(cls.id)+"')\" style='padding:8px 10px;margin:8px 4px 4px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,.75);font-size:11.5px;border:1px dashed rgba(255,255,255,.3)'>+ Nouveau canal</div>";}
+    h+="</div></div>";
+  }
+  h+="<div style='flex:1;display:flex;flex-direction:column;min-width:0;background:var(--sur)'>";
+  h+="<div style='padding:10px 14px;background:var(--sur);border-bottom:var(--br);display:flex;align-items:center;justify-content:space-between;gap:8px'>";
+  h+="<div style='display:flex;align-items:center;gap:10px;min-width:0'>";
+  if(isMob){h+="<button onclick='_cvQuitterCanal()' aria-label='Toutes les classes' style='background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink2);line-height:1;padding:2px 6px'>←</button>";}
+  h+="<div style='font-size:20px'>"+_esc(ch.ico)+"</div>";
+  h+="<div style='min-width:0'><div style='font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;color:var(--bl);white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"+_esc(ch.nom)+(ch.teacherOnly?" 🔒":"")+"</div>";
+  h+="<div style='font-size:11.5px;color:var(--ink4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"+_esc(cls.nom)+" · <span id='cvChCount'>"+nPosts+" message(s)</span></div></div></div>";
+  h+="<div style='display:flex;gap:6px;flex-shrink:0'>";
+  if(isMob){h+="<button class='btn bo xs' aria-label='Canaux' onclick=\"_cvShowChannelMenu('"+_esc(cls.id)+"')\">☰</button>";}
+  if(iA()){h+="<button class='btn bo xs' aria-label='Modération' onclick=\"_cvModeratePanel('"+_esc(cls.id)+"')\"><svg class='vico bico' aria-hidden='true'><use href='#lc-sliders'/></svg></button>";}
+  h+="<button class='btn bo xs' onclick='_cvPullFresh()' title='Actualiser' aria-label='Actualiser'>↻</button></div></div>";
+
+  h+="<div id='cvFeed' style='flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:200px;max-height:64vh;background:var(--bg)'>"+_cvFeedHtml(cls,ch)+"</div>";
+
   if(!SES){
-    h+="<div style='padding:12px 16px;background:var(--sur);border-top:var(--br);text-align:center'><div style='font-size:12px;color:var(--ink4);margin-bottom:8px'>Connectez-vous pour participer</div><button class='btn bi sm' onclick=\"showLogin('eleve')\"><svg class='vico bico' aria-hidden='true'><use href='#lc-lock'/></svg>Se connecter</button></div>";
+    h+="<div style='padding:12px 16px;background:var(--sur);border-top:var(--br);text-align:center'><div style='font-size:12.5px;color:var(--ink4);margin-bottom:8px'>Connectez-vous pour participer</div><button class='btn bi sm' onclick=\"showLogin('eleve')\"><svg class='vico bico' aria-hidden='true'><use href='#lc-lock'/></svg>Se connecter</button></div>";
   } else if(!canPost){
-    h+="<div style='padding:10px 16px;background:var(--sur);border-top:var(--br);text-align:center;font-size:12px;color:var(--ink4)'>📢 Canal réservé aux enseignants</div>";
+    h+="<div style='padding:10px 16px;background:var(--sur);border-top:var(--br);text-align:center;font-size:12.5px;color:var(--ink4)'>📢 Canal réservé aux enseignants</div>";
   } else {
     h+="<div style='padding:10px 14px;background:var(--sur);border-top:var(--br)'>";
-    h+="<div id='cvReplyBanner' style='display:none;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:6px 10px;margin-bottom:8px;font-size:12px;color:var(--bl);display:flex;align-items:center;justify-content:space-between'><span id='cvReplyInfo'></span><button onclick='_cvCancelReply()' style='background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink4);line-height:1'>×</button></div>";
-    h+="<div style='display:flex;align-items:flex-end;gap:8px'>";
-    h+="<div style='width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,"+cls.couleur+","+cls.couleur+"99);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0'>"+_cvInitials(SES.pre?SES.pre+' '+SES.nom:SES.nom||'?')+"</div>";
-    h+="<div style='flex:1'>";
-    h+="<div style='display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap'>";
-    var types=[{v:'discussion',l:'💬'},{v:'question',l:'❓'},{v:'ressource',l:'📎'}];
-    if(iA()||SES.type==='enseignant'){types.push({v:'devoir',l:'📝'});types.push({v:'annonce',l:'📢'});}
-    h+="<select id='cvPostType' style='font-size:11px;padding:4px 8px;border-radius:8px;border:1px solid var(--bg3);background:var(--sur);color:var(--ink2);cursor:pointer'>";
-    types.forEach(function(t){h+="<option value='"+t.v+"'>"+t.l+" "+t.v.charAt(0).toUpperCase()+t.v.slice(1)+"</option>";});
+    // Un seul `display` : la version précédente en portait deux (none PUIS
+    // flex) — le second gagnait, le bandeau de réponse restait toujours affiché.
+    h+="<div id='cvReplyBanner' style='display:none;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:6px 10px;margin-bottom:8px;font-size:12.5px;color:var(--bl);align-items:center;justify-content:space-between'><span id='cvReplyInfo'></span><button onclick='_cvCancelReply()' aria-label='Annuler la réponse' style='background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink4);line-height:1'>×</button></div>";
+    h+="<div style='display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap'>";
+    var types=[{v:'discussion',l:'💬 Discussion'},{v:'question',l:'❓ Question'},{v:'ressource',l:'📎 Ressource'}];
+    if(estProf){types.push({v:'devoir',l:'📝 Devoir'});types.push({v:'annonce',l:'📢 Annonce'});}
+    h+="<select id='cvPostType' aria-label='Type de message' style='font-size:12px;padding:5px 8px;border-radius:8px;border:1px solid var(--bg3);background:var(--sur);color:var(--ink2);cursor:pointer'>";
+    types.forEach(function(t){h+="<option value='"+t.v+"'>"+t.l+"</option>";});
     h+="</select>";
-    if(iA()||SES.type==='enseignant'){
-      h+="<input id='cvPostTitre' placeholder='Titre (optionnel)' style='flex:1;font-size:11px;padding:4px 8px;border-radius:8px;border:1px solid var(--bg3);background:var(--sur);min-width:120px'>";
-    }
+    if(estProf){h+="<input id='cvPostTitre' maxlength='150' placeholder='Titre (optionnel)' style='flex:1;font-size:12px;padding:5px 8px;border-radius:8px;border:1px solid var(--bg3);background:var(--sur);min-width:120px'>";}
     h+="</div>";
     h+="<div style='display:flex;gap:8px;align-items:flex-end'>";
-    h+="<textarea id='cvMsgInput' placeholder='Écrire un message…' rows='2' style='flex:1;resize:none;padding:10px;border-radius:12px;border:1px solid var(--bg3);background:var(--bg);font-size:13px;font-family:inherit;outline:none;transition:.2s;line-height:1.5' onfocus=\"this.style.borderColor='var(--bl)'\" onblur=\"this.style.borderColor='var(--bg3)'\"></textarea>";
-    h+="<button onclick=\"_cvSubmitPost('"+cls.id+"','"+ch.id+"')\" class='btn bi' style='padding:10px 16px;border-radius:12px;flex-shrink:0;font-size:13px'>➤</button>";
-    h+="</div></div></div></div>";
+    h+="<textarea id='cvMsgInput' maxlength='4000' placeholder='Écrire un message…  (Ctrl + Entrée pour envoyer)' rows='2' onkeydown=\"if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();_cvSubmitPost('"+_esc(cls.id)+"','"+_esc(ch.id)+"');}\" style='flex:1;resize:vertical;padding:10px;border-radius:12px;border:1px solid var(--bg3);background:var(--bg);font-size:14px;font-family:inherit;line-height:1.5'></textarea>";
+    h+="<button id='cvSendBtn' onclick=\"_cvSubmitPost('"+_esc(cls.id)+"','"+_esc(ch.id)+"')\" class='btn bi' aria-label='Envoyer' style='padding:10px 16px;border-radius:12px;flex-shrink:0;font-size:14px'>➤</button>";
+    h+="</div></div>";
   }
   h+="</div></div>";
   _vc(h);
-  setTimeout(function(){var b=document.getElementById('cvBottom');if(b)b.scrollIntoView();},80);
-  if(_CV.refreshTimer)clearInterval(_CV.refreshTimer);
-  _CV.refreshTimer=setInterval(function(){_cvSilentRefresh();},30000);
+  setTimeout(function(){var f=document.getElementById('cvFeed');if(f)f.scrollTop=f.scrollHeight;},80);
+  _cvStopTimer();
+  // 45 s : un centre entier partage souvent une adresse IP (voir student_data.php).
+  _CV.refreshTimer=setInterval(_cvSilentRefresh,45000);
 }
 
 function _cvPostCard(p,cls,ch){
-  var me=SES;
-  var uid=me&&(me.id||me.eid||'');
+  var uid=_cvUid();
   var isMe=uid&&(p.auteurId===uid);
   var isTeacher=p.auteurType==='enseignant'||p.auteurType==='admin';
   var iLiked=uid&&(p.likes||[]).indexOf(uid)>-1;
-  var typeColors={discussion:'#3C8DFF',question:'#F59E0B',ressource:'#059669',devoir:'#6C56A6',annonce:'#AE5353'};
   var typeIcos={discussion:'💬',question:'❓',ressource:'📎',devoir:'📝',annonce:'📢'};
-  var tc=typeColors[p.type||'discussion']||'#6B7A99';
   var ti=typeIcos[p.type||'discussion']||'💬';
-  var border=p.pinned?'':isMe?''+cls.couleur:'';
-
-  var html="<div id='cvp_"+p.id+"' style='background:var(--sur);border-radius:14px;padding:14px;border:1px solid var(--bg3);"+border+";transition:.2s'>";
-
-  // En-tête auteur
+  var pid=_esc(p.id);
+  var html="<div id='cvp_"+pid+"' style='background:var(--sur);border-radius:14px;padding:14px;border:1px solid var(--bg3);"+(isMe?"border-left:3px solid #1E499B;":"")+"'>";
   html+="<div style='display:flex;align-items:flex-start;gap:10px;margin-bottom:10px'>";
-  html+="<div style='width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,"+tc+","+tc+"bb);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0'>"+_cvInitials(p.auteurNom)+"</div>";
+  html+="<div style='width:38px;height:38px;border-radius:50%;background-color:"+(isTeacher?"#9A5B00":"#1E499B")+";display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0'>"+_esc(_cvInitials(_cvTxt(p.auteurNom)))+"</div>";
   html+="<div style='flex:1;min-width:0'>";
   html+="<div style='display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:2px'>";
-  html+="<span style='font-weight:700;font-size:13px;color:var(--bl)'>"+_esc(p.auteurNom)+"</span>";
-  html+="<span style='font-size:10px;background:"+tc+"16;color:"+tc+";border:1px solid "+tc+"28;border-radius:8px;padding:1px 7px;font-weight:700'>"+ti+" "+_esc(p.type||'discussion')+"</span>";
-  if(isTeacher)html+="<span style='font-size:10px;background:#FFF7ED;color:#B45309;border:1px solid #FED7AA;border-radius:8px;padding:1px 7px;font-weight:700'>👑 "+(p.auteurType==='admin'?'Admin':'Enseignant')+"</span>";
-  if(p.pinned)html+="<span style='font-size:10px;background:#FFF7ED;color:#B45309;border:1px solid #FED7AA;border-radius:8px;padding:1px 7px;font-weight:700'>📌</span>";
-  html+="</div>";
-  html+="<div style='font-size:11px;color:var(--ink4)'>"+_cvRelTime(p.dateISO)+"</div>";
-  html+="</div>";
-  // Boutons admin/owner
-  html+="<div style='display:flex;gap:2px;flex-shrink:0;opacity:.55'>";
-  if(iA()){html+="<button onclick=\"_cvTogglePin('"+p.id+"')\" style='background:none;border:none;cursor:pointer;font-size:14px;line-height:1;padding:3px' title='"+(p.pinned?"Désépingler":"Épingler")+"'>"+(p.pinned?"📌":"📍")+"</button>";}
-  if(iA()||isMe){html+="<button onclick=\"_cvDeletePost('"+p.id+"')\" style='background:none;border:none;cursor:pointer;font-size:14px;line-height:1;padding:3px' title='Supprimer'>🗑️</button>";}
+  html+="<span style='font-weight:700;font-size:13.5px;color:var(--bl)'>"+_cvNom(p.auteurNom)+"</span>";
+  html+="<span style='font-size:11px;background:#EEF3FC;color:#1E499B;border-radius:8px;padding:1px 7px;font-weight:600'>"+ti+" "+_esc(p.type||'discussion')+"</span>";
+  if(isTeacher)html+="<span style='font-size:11px;background:#FFF7ED;color:#9A5B00;border:1px solid #FED7AA;border-radius:8px;padding:1px 7px;font-weight:700'>"+(p.auteurType==='admin'?'Admin':'Enseignant')+"</span>";
+  if(p.pinned)html+="<span style='font-size:11px'>📌</span>";
+  html+="</div><div style='font-size:11.5px;color:var(--ink4)'>"+_cvRelTime(p.dateISO)+"</div></div>";
+  html+="<div style='display:flex;gap:2px;flex-shrink:0'>";
+  if(iA()){html+="<button onclick=\"_cvTogglePin('"+pid+"')\" style='background:none;border:none;cursor:pointer;font-size:14px;line-height:1;padding:4px' title='"+(p.pinned?"Désépingler":"Épingler")+"' aria-label='"+(p.pinned?"Désépingler":"Épingler")+"'>"+(p.pinned?"📌":"📍")+"</button>";}
+  if(iA()||isMe){html+="<button onclick=\"_cvDeletePost('"+pid+"')\" style='background:none;border:none;cursor:pointer;font-size:14px;line-height:1;padding:4px' title='Supprimer' aria-label='Supprimer'>🗑️</button>";}
   html+="</div></div>";
-
-  // Titre
-  if(p.titre){html+="<div style='font-family:Libre Baskerville,serif;font-size:14px;font-weight:700;color:var(--bl);margin-bottom:6px'>"+_esc(p.titre)+"</div>";}
-  // Contenu
-  html+="<div style='font-size:13px;color:var(--ink2);line-height:1.75;white-space:pre-wrap;word-break:break-word'>"+_esc(p.contenu||'')+"</div>";
-  // Pièce jointe
-  if(p.fichierUrl){html+="<div style='margin-top:8px'><a href='"+_esc(p.fichierUrl)+"' target='_blank' style='display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--bl);background:var(--blb);border:1px solid var(--bld);border-radius:8px;padding:5px 10px;text-decoration:none'>📎 "+_esc(p.fichierNom||'Ressource')+"</a></div>";}
-
-  // Barre d'actions
-  html+="<div style='display:flex;align-items:center;gap:14px;margin-top:10px;padding-top:10px;border-top:1px solid var(--bg3);flex-wrap:wrap'>";
-  html+="<button onclick=\"_cvLike('"+p.id+"')\" style='background:none;border:none;cursor:pointer;font-size:12px;color:"+(iLiked?"#C46F6F":"var(--ink4)")+";font-weight:"+(iLiked?"700":"400")+";display:flex;align-items:center;gap:4px;transition:.2s;padding:0'>"+(iLiked?"❤️":"🤍")+" "+(p.likes||[]).length+"</button>";
-  if(me){html+="<button onclick=\"_cvStartReply('"+p.id+"','"+_esc(p.auteurNom)+"')\" style='background:none;border:none;cursor:pointer;font-size:12px;color:var(--ink4);display:flex;align-items:center;gap:4px;padding:0;transition:.2s' onmouseover=\"this.style.color='var(--bl)'\" onmouseout=\"this.style.color='var(--ink4)'\">💬 Répondre ("+(p.replies||[]).length+")</button>";}
+  if(p.titre){html+="<div style='font-size:14.5px;font-weight:700;color:var(--bl);margin-bottom:6px'>"+_esc(p.titre)+"</div>";}
+  html+="<div style='font-size:14px;color:var(--ink2);line-height:1.7;white-space:pre-wrap;word-break:break-word'>"+_esc(p.contenu||'')+"</div>";
+  if(p.fichierUrl&&/^(https?:|\/)/i.test(String(p.fichierUrl))){html+="<div style='margin-top:8px'><a href='"+_esc(p.fichierUrl)+"' target='_blank' rel='noopener' style='display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--bl);background:var(--blb);border:1px solid var(--bld);border-radius:8px;padding:5px 10px;text-decoration:none'>📎 "+_esc(p.fichierNom||'Ressource')+"</a></div>";}
+  html+="<div style='display:flex;align-items:center;gap:16px;margin-top:10px;padding-top:10px;border-top:1px solid var(--bg3);flex-wrap:wrap'>";
+  html+="<button onclick=\"_cvLike('"+pid+"')\" aria-pressed='"+(iLiked?'true':'false')+"' style='background:none;border:none;cursor:pointer;font-size:12.5px;color:"+(iLiked?"#B42318":"var(--ink4)")+";font-weight:"+(iLiked?"700":"400")+";padding:4px 0'>"+(iLiked?"❤️":"🤍")+" "+(p.likes||[]).length+"</button>";
+  if(SES){html+="<button onclick=\"_cvStartReply('"+pid+"')\" style='background:none;border:none;cursor:pointer;font-size:12.5px;color:var(--ink3);padding:4px 0'>💬 Répondre ("+(p.replies||[]).length+")</button>";}
   html+="</div>";
-
-  // Réponses (thread)
-  if((p.replies||[]).length){
+  var reps=(p.replies||[]).slice().sort(function(a,b){return (a.dateISO||'').localeCompare(b.dateISO||'');});
+  if(reps.length){
     html+="<div style='margin-top:12px;margin-left:18px;border-left:2px solid var(--bg3);padding-left:12px;display:flex;flex-direction:column;gap:8px'>";
-    (p.replies||[]).sort(function(a,b){return (a.dateISO||'').localeCompare(b.dateISO||'');}).forEach(function(r){
+    reps.forEach(function(r){
       var rLiked=uid&&(r.likes||[]).indexOf(uid)>-1;
-      var rMe=uid&&r.auteurId===uid;
+      var rMe=uid&&r.auteurId===uid, rid=_esc(r.id);
       html+="<div style='background:var(--bg);border-radius:10px;padding:10px'>";
       html+="<div style='display:flex;align-items:center;gap:7px;margin-bottom:6px'>";
-      html+="<div style='width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#6B7A99,#9CA3AF);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff'>"+_cvInitials(r.auteurNom||'?')+"</div>";
-      html+="<span style='font-size:12px;font-weight:700;color:var(--bl)'>"+_esc(r.auteurNom||'')+"</span>";
-      if(r.auteurType==='enseignant'||r.auteurType==='admin')html+="<span style='font-size:9px;background:#FFF7ED;color:#B45309;border-radius:6px;padding:1px 5px'>👑</span>";
-      html+="<span style='font-size:10px;color:var(--ink4)'>"+_cvRelTime(r.dateISO)+"</span>";
-      if(iA()||rMe){html+="<button onclick=\"_cvDeleteReply('"+p.id+"','"+r.id+"')\" style='background:none;border:none;cursor:pointer;font-size:12px;color:var(--ink4);margin-left:auto;opacity:.5'>🗑️</button>";}
+      html+="<div style='width:26px;height:26px;border-radius:50%;background-color:#6B7A99;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff'>"+_esc(_cvInitials(_cvTxt(r.auteurNom||'?')))+"</div>";
+      html+="<span style='font-size:12.5px;font-weight:700;color:var(--bl)'>"+_cvNom(r.auteurNom||'')+"</span>";
+      if(r.auteurType==='enseignant'||r.auteurType==='admin')html+="<span style='font-size:10px;background:#FFF7ED;color:#9A5B00;border-radius:6px;padding:1px 5px'>Enseignant</span>";
+      html+="<span style='font-size:11px;color:var(--ink4)'>"+_cvRelTime(r.dateISO)+"</span>";
+      if(iA()||rMe){html+="<button onclick=\"_cvDeleteReply('"+pid+"','"+rid+"')\" aria-label='Supprimer la réponse' style='background:none;border:none;cursor:pointer;font-size:12px;color:var(--ink4);margin-left:auto'>🗑️</button>";}
       html+="</div>";
-      html+="<div style='font-size:12px;color:var(--ink2);line-height:1.65;white-space:pre-wrap;word-break:break-word'>"+_esc(r.contenu||'')+"</div>";
-      html+="<button onclick=\"_cvLikeReply('"+p.id+"','"+r.id+"')\" style='background:none;border:none;cursor:pointer;font-size:11px;color:"+(rLiked?"#C46F6F":"var(--ink4)")+";margin-top:6px;padding:0'>"+(rLiked?"❤️":"🤍")+" "+(r.likes||[]).length+"</button>";
+      html+="<div style='font-size:13.5px;color:var(--ink2);line-height:1.65;white-space:pre-wrap;word-break:break-word'>"+_esc(r.contenu||'')+"</div>";
+      html+="<button onclick=\"_cvLikeReply('"+pid+"','"+rid+"')\" aria-pressed='"+(rLiked?'true':'false')+"' style='background:none;border:none;cursor:pointer;font-size:11.5px;color:"+(rLiked?"#B42318":"var(--ink4)")+";margin-top:6px;padding:2px 0'>"+(rLiked?"❤️":"🤍")+" "+(r.likes||[]).length+"</button>";
       html+="</div>";
     });
     html+="</div>";
@@ -23887,9 +23975,9 @@ function _cvRelTime(iso){
   if(!iso)return '';
   var diff=Date.now()-new Date(iso).getTime();
   if(diff<60000)return "À l'instant";
-  if(diff<3600000)return Math.floor(diff/60000)+'min';
-  if(diff<86400000)return Math.floor(diff/3600000)+'h';
-  if(diff<604800000)return Math.floor(diff/86400000)+'j';
+  if(diff<3600000)return 'il y a '+Math.floor(diff/60000)+' min';
+  if(diff<86400000)return 'il y a '+Math.floor(diff/3600000)+' h';
+  if(diff<604800000)return 'il y a '+Math.floor(diff/86400000)+' j';
   return new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
 }
 
@@ -23902,76 +23990,110 @@ function _cvSubmitPost(clsId,chId){
   var msg=(input.value||'').trim();
   if(!msg){toast('Message vide','warn');return;}
   if(!SES){toast('Connectez-vous d\'abord','warn');return;}
-  var auteurNom=SES.pre?(_esc(SES.pre)+' '+_esc(SES.nom||'')).trim():(_esc(SES.nom||SES.nomComplet||'Utilisateur'));
-  var reply={id:gid(),classroomId:clsId,channelId:chId,auteurId:SES.id||SES.eid||'',auteurNom:auteurNom.trim(),auteurType:SES.type||'visiteur',type:(typeEl?typeEl.value:'discussion'),titre:(titreEl?titreEl.value.trim():''),contenu:msg,date:today(),dateISO:new Date().toISOString(),likes:[],pinned:false,replies:[]};
+  var btn=document.getElementById('cvSendBtn');
+  var fini=function(txt){ input.value='';_CV.replyTo=null;_cvCancelReply();save();_cvRafraichirVue();var f=document.getElementById('cvFeed');if(f)f.scrollTop=f.scrollHeight;toast(txt,'ok'); };
+  if(_cvServeur()){
+    if(btn)btn.disabled=true;
+    _cvApi('forum_post',{classroomId:clsId,channelId:chId,type:typeEl?typeEl.value:'discussion',titre:titreEl?titreEl.value.trim():'',contenu:msg,replyTo:_CV.replyTo||''})
+      .then(function(j){ _cvMergePost(j.post); fini(_CV.replyTo?'✓ Réponse envoyée':'✓ Message envoyé'); })
+      .catch(function(e){ toast(e.message,'warn'); })
+      .then(function(){ if(btn)btn.disabled=false; });
+    return;
+  }
+  // Admin (synchro complète) — ou compte sans jeton serveur : écriture locale.
+  // Le nom est stocké BRUT et échappé à l'affichage (il l'était deux fois).
+  var auteurNom=((SES.pre?SES.pre+' ':'')+(SES.nom||SES.nomComplet||'Utilisateur')).trim();
+  var auteurType=iA()?'admin':(SES.type||'visiteur');
   if(_CV.replyTo){
     var parent=(DB.forumPosts||[]).find(function(p){return p.id===_CV.replyTo;});
     if(parent){
       if(!parent.replies)parent.replies=[];
-      parent.replies.push({id:gid(),auteurId:reply.auteurId,auteurNom:reply.auteurNom,auteurType:reply.auteurType,contenu:msg,date:today(),dateISO:new Date().toISOString(),likes:[]});
-      _CV.replyTo=null;save();
-      if(typeof _triggerAutoSync==='function')setTimeout(_triggerAutoSync,400);
-      input.value='';_cvRenderChannel();toast('✓ Réponse envoyée');return;
+      parent.replies.push({id:gid(),auteurId:_cvUid(),auteurNom:auteurNom,auteurType:auteurType,contenu:msg,date:today(),dateISO:new Date().toISOString(),likes:[]});
     }
+  } else {
+    DB.forumPosts=DB.forumPosts||[];
+    DB.forumPosts.push({id:gid(),classroomId:clsId,channelId:chId,auteurId:_cvUid(),auteurNom:auteurNom,auteurType:auteurType,type:(typeEl?typeEl.value:'discussion'),titre:(titreEl?titreEl.value.trim():''),contenu:msg,date:today(),dateISO:new Date().toISOString(),likes:[],pinned:false,replies:[]});
   }
-  if(!DB.forumPosts)DB.forumPosts=[];
-  DB.forumPosts.push(reply);save();
   if(typeof _triggerAutoSync==='function')setTimeout(_triggerAutoSync,400);
-  input.value='';_cvRenderChannel();toast('✓ Message envoyé');
+  fini(iA()?'✓ Message envoyé':'✓ Enregistré sur cet appareil — reconnectez-vous pour le partager avec la classe');
 }
-function _cvLike(pid){
-  if(!SES){toast('Connectez-vous pour liker','warn');return;}
-  var p=(DB.forumPosts||[]).find(function(x){return x.id===pid;});
-  if(!p)return;if(!p.likes)p.likes=[];
-  var uid=SES.id||SES.eid||'';
-  var idx=p.likes.indexOf(uid);
-  if(idx>-1)p.likes.splice(idx,1);else p.likes.push(uid);
-  save();_cvRenderChannel();
-}
-function _cvLikeReply(pid,rid){
-  if(!SES){toast('Connectez-vous pour liker','warn');return;}
+function _cvToggleLike(pid,rid){
+  if(!SES){toast('Connectez-vous pour aimer un message','warn');return;}
+  if(_cvServeur()){
+    _cvApi('forum_like',{postId:pid,replyId:rid||''}).then(function(j){_cvMergePost(j.post);save();_cvRafraichirVue();}).catch(function(e){toast(e.message,'warn');});
+    return;
+  }
   var p=(DB.forumPosts||[]).find(function(x){return x.id===pid;});if(!p)return;
-  var r=(p.replies||[]).find(function(x){return x.id===rid;});if(!r)return;
-  if(!r.likes)r.likes=[];
-  var uid=SES.id||SES.eid||'';
-  var idx=r.likes.indexOf(uid);
-  if(idx>-1)r.likes.splice(idx,1);else r.likes.push(uid);
-  save();_cvRenderChannel();
+  var cible=p;
+  if(rid){cible=(p.replies||[]).find(function(x){return x.id===rid;});if(!cible)return;}
+  if(!cible.likes)cible.likes=[];
+  var uid=_cvUid(), idx=cible.likes.indexOf(uid);
+  if(idx>-1)cible.likes.splice(idx,1);else cible.likes.push(uid);
+  save();_cvRafraichirVue();
+  if(iA()&&typeof _triggerAutoSync==='function')_triggerAutoSync();
 }
-function _cvStartReply(pid,nom){
+function _cvLike(pid){ _cvToggleLike(pid,''); }
+function _cvLikeReply(pid,rid){ _cvToggleLike(pid,rid); }
+function _cvStartReply(pid){
+  var p=(DB.forumPosts||[]).find(function(x){return x.id===pid;});if(!p)return;
+  var nom=_cvTxt(p.auteurNom||'');
   _CV.replyTo=pid;
   var b=document.getElementById('cvReplyBanner'),i=document.getElementById('cvReplyInfo');
-  if(b){b.style.display='flex';}if(i)i.textContent='↩ Répondre à '+nom;
+  if(b)b.style.display='flex';
+  if(i)i.textContent='↩ Répondre à '+nom;
   var inp=document.getElementById('cvMsgInput');
   if(inp){inp.focus();inp.placeholder='Répondre à '+nom+'…';}
 }
 function _cvCancelReply(){
   _CV.replyTo=null;
   var b=document.getElementById('cvReplyBanner');if(b)b.style.display='none';
-  var inp=document.getElementById('cvMsgInput');if(inp){inp.value='';inp.placeholder='Écrire un message…';}
+  var inp=document.getElementById('cvMsgInput');if(inp)inp.placeholder='Écrire un message…  (Ctrl + Entrée pour envoyer)';
 }
 function _cvTogglePin(pid){
   if(!iA())return;
   var p=(DB.forumPosts||[]).find(function(x){return x.id===pid;});if(!p)return;
-  p.pinned=!p.pinned;save();_cvRenderChannel();toast(p.pinned?'📌 Épinglé':'Désépinglé');
+  p.pinned=!p.pinned;save();_cvRafraichirVue();toast(p.pinned?'📌 Épinglé':'Désépinglé');
+  if(typeof _triggerAutoSync==='function')_triggerAutoSync();
+}
+// Une suppression par l'administration doit PRIMER sur la préservation des
+// messages serveur (api/db.php) : on laisse une « tombe » avec l'identifiant.
+function _cvTombe(ids){
+  DB.forumDeleted=DB.forumDeleted||[];
+  (ids||[]).forEach(function(id){ if(id&&DB.forumDeleted.indexOf(id)<0)DB.forumDeleted.push(id); });
+  if(DB.forumDeleted.length>2000)DB.forumDeleted=DB.forumDeleted.slice(-2000);
+}
+function _cvSupprimerPostsLocal(filtre){
+  var morts=(DB.forumPosts||[]).filter(filtre);
+  _cvTombe(morts.map(function(p){return p.id;}));
+  DB.forumPosts=(DB.forumPosts||[]).filter(function(p){return !filtre(p);});
+  save();
+  if(typeof _triggerAutoSync==='function')_triggerAutoSync();
+  return morts.length;
 }
 function _cvDeletePost(pid){
   if(!confirm('Supprimer ce message ?'))return;
-  DB.forumPosts=(DB.forumPosts||[]).filter(function(p){return p.id!==pid;});
-  save();_cvRenderChannel();toast('✓ Message supprimé');
+  if(_cvServeur()){
+    _cvApi('forum_delete',{postId:pid}).then(function(){DB.forumPosts=(DB.forumPosts||[]).filter(function(p){return p.id!==pid;});save();_cvRafraichirVue();toast('✓ Message supprimé');}).catch(function(e){toast(e.message,'warn');});
+    return;
+  }
+  _cvSupprimerPostsLocal(function(p){return p.id===pid;});
+  _cvRafraichirVue();toast('✓ Message supprimé');
 }
 function _cvDeleteReply(pid,rid){
   if(!confirm('Supprimer cette réponse ?'))return;
+  if(_cvServeur()){
+    _cvApi('forum_delete',{postId:pid,replyId:rid}).then(function(j){_cvMergePost(j.post);save();_cvRafraichirVue();toast('✓ Réponse supprimée');}).catch(function(e){toast(e.message,'warn');});
+    return;
+  }
   var p=(DB.forumPosts||[]).find(function(x){return x.id===pid;});if(!p)return;
   p.replies=(p.replies||[]).filter(function(r){return r.id!==rid;});
-  save();_cvRenderChannel();toast('✓ Réponse supprimée');
+  _cvTombe([rid]);save();_cvRafraichirVue();toast('✓ Réponse supprimée');
+  if(typeof _triggerAutoSync==='function')_triggerAutoSync();
 }
 function _cvPullFresh(){
-  var feed=document.getElementById('cvFeed');
-  if(feed){var ind=document.createElement('div');ind.id='cvRefInd';ind.style.cssText='text-align:center;padding:6px;font-size:11px;color:var(--ink4)';ind.textContent='⟳ Actualisation…';feed.appendChild(ind);}
+  if(_cvServeur()){ _cvSync(false); return; }
+  if(!iA()){ toast(SES?'Reconnectez-vous pour recevoir les messages de la classe':'Connectez-vous pour participer','info'); return; }
   _fbFetch(LWS_API.db+'?t='+Date.now()).then(function(r){return r.json();}).then(function(remote){
-    // FIX : Firebase renvoie null si DB vide. Ne pas crasher.
-    var i=document.getElementById('cvRefInd');if(i)i.remove();
     if(!remote){toast('Aucune donnée distante','info');return;}
     if(remote.forumPosts){
       var remIds={};(remote.forumPosts||[]).forEach(function(p){remIds[p.id]=true;});
@@ -23979,21 +24101,23 @@ function _cvPullFresh(){
       DB.forumPosts=(remote.forumPosts||[]).concat(localOnly);
     }
     if(remote.classrooms&&remote.classrooms.length){DB.classrooms=remote.classrooms;}
-    save();_cvRenderChannel();toast('✓ Actualisé');
-  }).catch(function(){var i=document.getElementById('cvRefInd');if(i)i.remove();toast('Données locales (hors ligne)','warn');});
+    save();_cvRafraichirVue();toast('✓ Actualisé');
+  }).catch(function(){toast('Données locales (hors ligne)','warn');});
 }
 function _cvSilentRefresh(){
-  // Refresh sans toast ni indicateur visuel
-  if(!_CV.classroomId)return;
+  // Page quittée : on arrête. Avant, le minuteur survivait à la navigation et
+  // réaffichait le canal par-dessus la page où l'on était allé.
+  if(!document.getElementById('cvFeed')){ _cvStopTimer(); return; }
+  if(document.hidden)return;
+  if(_cvServeur()){ _cvSync(true); return; }
+  if(!iA())return;
   _fbFetch(LWS_API.db+'?t='+Date.now()).then(function(r){return r.json();}).then(function(remote){
-    if(!remote)return;
-    var changed=false;
-    if(remote.forumPosts&&remote.forumPosts.length>(DB.forumPosts||[]).length){
-      var remIds={};(remote.forumPosts||[]).forEach(function(p){remIds[p.id]=true;});
-      var lo=(DB.forumPosts||[]).filter(function(p){return !remIds[p.id];});
-      DB.forumPosts=(remote.forumPosts||[]).concat(lo);changed=true;
-    }
-    if(changed){save();_cvRenderChannel();}
+    if(!remote||!remote.forumPosts)return;
+    var avant=_cvSignature();
+    var remIds={};(remote.forumPosts||[]).forEach(function(p){remIds[p.id]=true;});
+    var lo=(DB.forumPosts||[]).filter(function(p){return !remIds[p.id];});
+    DB.forumPosts=(remote.forumPosts||[]).concat(lo);
+    if(avant!==_cvSignature()){save();_cvRafraichirVue();}
   }).catch(function(){});
 }
 function _cvShowChannelMenu(clsId){
@@ -24021,7 +24145,7 @@ function _cvAdminPanel(){
     h+="<button class='btn bo xs' onclick=\"cm();_cvSyncMembers('"+c.id+"')\" title='Synchroniser élèves'>👥</button>";
     h+="<button class='btn bo xs' onclick=\"cm();_cvAddChannel('"+c.id+"')\">+ Canal</button>";
     h+="<button class='btn bo xs' onclick=\"cm();_cvEditClassroom('"+c.id+"')\"><svg class='vico bico' aria-hidden='true'><use href='#lc-pencil'/></svg>️</button>";
-    h+="<button onclick=\"if(confirm('Supprimer cette classe ?')){DB.classrooms=(DB.classrooms||[]).filter(function(x){return x.id!='"+c.id+"';});DB.forumPosts=(DB.forumPosts||[]).filter(function(p){return p.classroomId!='"+c.id+"';});save();_cvAdminPanel();toast('✓ Classe supprimée');}\" style='background:var(--reb);color:var(--re);border:1px solid var(--red);border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer'>🗑️</button>";
+    h+="<button onclick=\"if(confirm('Supprimer cette classe ?')){DB.classrooms=(DB.classrooms||[]).filter(function(x){return x.id!='"+c.id+"';});_cvSupprimerPostsLocal(function(p){return p.classroomId=='"+c.id+"';});_cvAdminPanel();toast('✓ Classe supprimée');}\" style='background:var(--reb);color:var(--re);border:1px solid var(--red);border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer'>🗑️</button>";
     h+="</div></div>";
     h+="<div style='display:flex;gap:4px;flex-wrap:wrap'>";
     (c.channels||[]).forEach(function(ch){h+="<span style='font-size:10px;background:"+c.couleur+"15;color:"+c.couleur+";border:1px solid "+c.couleur+"25;border-radius:8px;padding:2px 7px'>"+ch.ico+" "+_esc(ch.nom)+"</span>";});
@@ -24117,19 +24241,19 @@ function _cvModeratePanel(clsId){
     posts.forEach(function(p){
       var ch2=(cls.channels||[]).find(function(c){return c.id===p.channelId;});
       h+="<div style='display:flex;align-items:flex-start;gap:8px;padding:8px;border-bottom:1px solid var(--bg3)'>";
-      h+="<div style='flex:1;min-width:0'><div style='font-size:12px;font-weight:700;color:var(--bl)'>"+_esc(p.auteurNom)+"<span style='font-weight:400;color:var(--ink4);margin-left:6px'>"+_cvRelTime(p.dateISO)+"</span></div>";
+      h+="<div style='flex:1;min-width:0'><div style='font-size:12px;font-weight:700;color:var(--bl)'>"+_cvNom(p.auteurNom)+"<span style='font-weight:400;color:var(--ink4);margin-left:6px'>"+_cvRelTime(p.dateISO)+"</span></div>";
       h+="<div style='font-size:11px;color:var(--ink4)'>"+(ch2?ch2.ico+" "+_esc(ch2.nom):"")+" · "+(p.type||'')+"</div>";
       h+="<div style='font-size:12px;color:var(--ink2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+_esc((p.contenu||'').slice(0,80))+"</div></div>";
       h+="<div style='display:flex;gap:3px;flex-shrink:0'>";
       h+="<button onclick=\"_cvTogglePin('"+p.id+"');_cvModeratePanel('"+clsId+"')\" style='background:none;border:none;cursor:pointer;font-size:13px;opacity:.6'>"+(p.pinned?"📌":"📍")+"</button>";
-      h+="<button onclick=\"DB.forumPosts=(DB.forumPosts||[]).filter(function(x){return x.id!='"+p.id+"';});save();_cvModeratePanel('"+clsId+"');toast('✓ Supprimé')\" style='background:none;border:none;cursor:pointer;font-size:13px;color:var(--re)'>🗑️</button>";
+      h+="<button onclick=\"_cvSupprimerPostsLocal(function(x){return x.id=='"+p.id+"';});_cvModeratePanel('"+clsId+"');toast('✓ Supprimé')\" style='background:none;border:none;cursor:pointer;font-size:13px;color:var(--re)'>🗑️</button>";
       h+="</div></div>";
     });
   }
   h+="</div>";
   M('⚙️ Modération — '+cls.ico+' '+cls.nom,'',h,
     "<button class='btn bo' onclick='cm()'>Fermer</button>"+
-    "<button class='btn bg2 sm' onclick=\"if(confirm('Vider tous les messages ?')){DB.forumPosts=(DB.forumPosts||[]).filter(function(p){return p.classroomId!='"+clsId+"';});save();cm();toast('✓ Vidé');}\" ><svg class='vico bico' aria-hidden='true'><use href='#lc-trash'/></svg>Vider</button>",true);
+    "<button class='btn bg2 sm' onclick=\"if(confirm('Vider tous les messages ?')){_cvSupprimerPostsLocal(function(p){return p.classroomId=='"+clsId+"';});cm();toast('✓ Vidé');_cvRafraichirVue();}\" ><svg class='vico bico' aria-hidden='true'><use href='#lc-trash'/></svg>Vider</button>",true);
 }
 
 // ═══════════════════════════════════════════════════════════════════
