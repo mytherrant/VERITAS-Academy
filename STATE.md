@@ -1,4 +1,15 @@
-## Reskin finalisé : l'habillage de la vitrine sur 225 pages + l'Atelier (25/09/2026) — NON DÉPLOYÉ
+## Reskin finalisé : l'habillage de la vitrine sur 225 pages + l'Atelier (25/09/2026) — DÉPLOYÉ
+
+**En production depuis le run 569** (workflow_dispatch sur master `d47d63d`,
+25/09 15:37–15:44 UTC, toutes étapes vertes, FTP « Sync complete »). Le run
+568 (fusion de #54) avait été bloqué AVANT l'envoi — voir plus bas. ⚠️ La
+fusion de #55 n'a PAS déclenché de déploiement : elle ne touchait que des
+chemins hors du filtre `paths:` de deploy.yml (workflow, tools/, STATE.md).
+Relancer à la main dans ce cas (`workflow_dispatch`). Envoyés, entre autres :
+`assets/veritas-habillage.css` (nouveau), `veritas-icons.svg`, `vitrine.js`,
+les pages habillées, `plateforme/index.html`, `seo/*` habillées au vol.
+**Non relu en production** : `veritas-school.com` est bloqué par la politique
+réseau du bac à sable de cette session (Poppins, rendu réel à vérifier).
 
 Demande de Jacques : « finalise le reskin », puis « les mêmes icônes dans le
 rond centré, l'alternance de couleurs, les effets exactement comme sur la
