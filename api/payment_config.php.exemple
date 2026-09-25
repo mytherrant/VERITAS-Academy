@@ -334,6 +334,23 @@ if (!defined('ADMIN_TOKEN')) define('ADMIN_TOKEN',     'CHANGEZ_MOI_token_admin_
 // Défaut si la constante n'existe pas : « mail ».
 if (!defined('VRT_NOTIFY_CANAL')) define('VRT_NOTIFY_CANAL', 'mail');
 
+// ════════════════════════════════════════════════════════════
+// 🤖 VALIDATION AUTOMATIQUE PAR LE SMS DE RÉCEPTION (26/09/2026)
+// ════════════════════════════════════════════════════════════
+// Le téléphone qui porte les codes marchands relaie ses SMS à
+// api/payment_sms.php?action=recu ; un livret ou un manuel dont le paiement
+// est PROUVÉ (chaîne des soldes) est servi sans validation humaine.
+// Mode d'emploi complet : GUIDE_RAPPROCHEMENT_SMS.md.
+// Vide = éteint (tout reste en validation manuelle). 24 caractères minimum :
+//   openssl rand -hex 24
+if (!defined('SMS_WEBHOOK_SECRET'))  define('SMS_WEBHOOK_SECRET', '');
+// Au-delà de ce montant (FCFA), la commande reste en validation humaine.
+if (!defined('SMS_AUTO_MAX'))        define('SMS_AUTO_MAX', 25000);
+// Types d'achat servis automatiquement (livrets et manuels).
+if (!defined('SMS_AUTO_INTENTS'))    define('SMS_AUTO_INTENTS', 'livret,livret_pack,digitalbook,book');
+// Expéditeurs acceptés (nom affiché par le téléphone pour les SMS opérateur).
+if (!defined('SMS_EXPEDITEURS'))     define('SMS_EXPEDITEURS', 'MobileMoney,MoMo,MTN,OrangeMoney,Orange Money,Orange');
+
 // ⚠️ LA LIGNE LA PLUS IMPORTANTE DE CE BLOC.
 // Adresse qui reçoit une ALERTE quand un code payé n'a pas pu être remis (pas
 // d'adresse client, passerelle en panne…). L'alerte porte le code ET un lien

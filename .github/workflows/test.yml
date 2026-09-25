@@ -62,6 +62,9 @@ jobs:
       - name: 💰 Un paiement confirmé écrit-il un droit ?
         run: php tests/paiements_entitlements.php
 
+      - name: 🤖 Un SMS de réception sert-il le pass, et un faux SMS jamais ?
+        run: php tests/banc_rapprochement_sms.php
+
       - name: 🪪 L'acheteur est-il reconnu par son compte ?
         run: php tests/banc_identite_acheteur.php
 

@@ -242,6 +242,12 @@ jobs:
             exit 1
           fi
 
+      # ── 🤖 RAPPROCHEMENT SMS (25/09/2026). Un SMS de réception conforme sert
+      #    le livret/manuel sans humain ; un faux SMS (solde incohérent, txid
+      #    rejoué, expéditeur inconnu) ne sert JAMAIS rien.
+      - name: 🤖 Un SMS de réception sert-il le pass, et un faux SMS jamais ?
+        run: php tests/banc_rapprochement_sms.php
+
       # ── 🎁 LE CODE AMI PAIE JUSTE, UNE FOIS, ET À TEMPS (13-14/09/2026).
       #    api/_auth_lib.php charge api/_parrainage_lib.php à CHAQUE requête :
       #    un défaut ici ne casse pas que le parrainage, il met tous les

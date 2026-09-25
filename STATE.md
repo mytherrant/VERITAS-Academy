@@ -1,3 +1,45 @@
+## Paiements : audit + pass livrets/manuels servis automatiquement par rapprochement SMS (25/09/2026)
+
+Demande de Jacques : « Audite le mode de paiement de VERITAS et automatise les
+pass pour les manuels et livrets ».
+
+**Audit (chaîne existante).** L'acheteur déclare (`payment_manuel.php?action=declarer`),
+puis paie sur le code marchand (MoMo 02681266 / OM 999471). Un admin fait ensuite
+`grant` → `pmOctroyer` → le code est émis, et l'acheteur le réclame via `livret.php`
+(`claim`). Le goulot est **la validation humaine** : les codes marchands ne
+disposent d'aucune API de notification. Seule la preuve SMS reçue par le
+téléphone marchand existe.
+
+**Automatisation.** `api/payment_sms.php?action=recu` reçoit les SMS relayés
+par le téléphone marchand (clé `SMS_WEBHOOK_SECRET`). `api/_rapprochement_lib.php`
+ne sert une commande que si toutes ces conditions sont réunies :
+- expéditeur admis ;
+- **chaîne des soldes cohérente** (un faux SMS la rompt, puis ré-ancrage humain
+  obligatoire) ;
+- txid inédit ;
+- une seule commande correspondante (txid ou numéro payeur, même montant et même
+  opérateur, 72 h) ;
+- montant ≤ `SMS_AUTO_MAX` ;
+- intent livret, livret_pack, digitalbook ou book.
+
+Cas couverts : paiement fait avant la déclaration (SMS gardé en attente) ; paiement
+depuis un autre numéro (action publique `preuve` : txid + 4 derniers chiffres).
+
+**ÉTEINT tant que la clé n'est pas posée** (503). La mise en place est décrite dans
+`GUIDE_RAPPROCHEMENT_SMS.md` : relais Android, clé dans `payment_config.php` par
+FTP, ancrage des soldes dans Admin → Paiements.
+
+Fichiers :
+- `_manuel_lib.php` : helpers extraits de `payment_manuel.php`, plus `vrt_pm_dir()`
+  qu'on peut surcharger en test ;
+- `gate.js` : le code s'affiche directement si l'accord est automatique ;
+- `app.js` : 🤖 sur les validations automatiques, bloc d'état et bouton « Ancrer » ;
+- `payment_camerpay` : `status` passe par `vrt_pm_dir()`.
+
+Banc : `tests/banc_rapprochement_sms.php`, 39/39. Les mutations M1–M6 sont toutes
+détectées. Il est branché dans `deploy.yml` et `test.yml`. E2E HTTP local vérifié
+de bout en bout : déclaration → SMS → accord → `status` paid → `claim` du code.
+
 ## Reskin finalisé : l'habillage de la vitrine sur 225 pages + l'Atelier (25/09/2026) — DÉPLOYÉ
 
 **En production depuis le run 569** (workflow_dispatch sur master `d47d63d`,
