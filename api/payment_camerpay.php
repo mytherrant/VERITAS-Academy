@@ -844,7 +844,9 @@ if ($action === 'status' && $method === 'GET') {
            par l'administration, « pending » tant qu'elles attendent.
            Rien d'autre ne sort — cette action n'est pas authentifiée. */
         if (preg_match('/^[A-Za-z0-9._-]{4,64}$/', $ref) && strpos($ref, '..') === false) {
-            $fm = __DIR__ . '/data/payments_manuel/manuel_' . $ref . '.json';
+            // Même dossier que l'octroi (et que le rapprochement SMS) : une seule source.
+            require_once __DIR__ . '/_manuel_lib.php';
+            $fm = vrt_pm_dir() . 'manuel_' . $ref . '.json';
             if (is_file($fm)) {
                 $m = json_decode((string) @file_get_contents($fm), true) ?: [];
                 jsonRespCy([

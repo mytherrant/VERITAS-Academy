@@ -33403,17 +33403,79 @@ function _pmChargerCommandes(){
       if(rec.length){
         h += '<details style="margin-top:6px"><summary style="cursor:pointer;font-size:12px;color:var(--ink3)">Dernières validations ('+rec.length+')</summary>';
         rec.forEach(function(x){
-          h += '<div style="font-size:11.5px;padding:4px 0;border-top:1px solid #FECACA">✓ '+fmtN(x.montant||0)+' F · '+_esc(x.label||x.intent)+' · '+_esc(x.clientTel||'')
+          h += '<div style="font-size:11.5px;padding:4px 0;border-top:1px solid #FECACA">'+(String(x.validePar||'').indexOf('auto:')===0?'🤖 ':'✓ ')+fmtN(x.montant||0)+' F · '+_esc(x.label||x.intent)+' · '+_esc(x.clientTel||'')
             + ((x.intent==='livret'||x.intent==='livret_pack') ? ' <button class="btn xs" style="margin-left:6px" onclick="_pmRemettre(\''+_esc(x.ref)+'\')">🎟️ Code</button>' : '')
             + '</div>';
         });
         h += '</details>';
       }
-      box.innerHTML = h + '</div>';
+      box.innerHTML = h + '<div id="pmSmsEtat" style="margin-top:10px"></div></div>';
+      try { _pmChargerSms(); } catch(e){ console.warn('[sms]', e); }
     })
     .catch(function(){ var b=document.getElementById('pmSrvListe'); if(b) b.innerHTML='<div class="ib ibt"><span>⚠️</span><span>Serveur injoignable : commandes non chargées.</span></div>'; });
 }
 window._pmChargerCommandes = _pmChargerCommandes;
+
+/* ══ RAPPROCHEMENT SMS — la validation sans humain (26/09/2026) ════════════
+   Le téléphone marchand relaie ses SMS de réception à api/payment_sms.php ;
+   un livret ou un manuel dont le paiement est PROUVÉ est servi tout seul
+   (🤖 dans la liste). La preuve repose sur la chaîne des soldes : chaque SMS
+   doit prolonger exactement le solde précédent. Au moindre écart, la chaîne
+   est rompue et tout revient à la validation ci-dessus, jusqu'à ce que
+   l'administration ré-ancre le solde qu'elle LIT sur le téléphone. */
+function _pmChargerSms(){
+  var box = document.getElementById('pmSmsEtat'); if(!box) return;
+  var cc = DB.cloudConfig || {}; if(!cc.url || !cc.secret) return;
+  fetch(cc.url.replace(/\/+$/,'')+'/payment_sms.php?action=etat', { headers:{ 'Authorization':'Bearer '+cc.secret } })
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      box = document.getElementById('pmSmsEtat'); if(!box || !j || !j.ok) return;
+      if(!j.actif){
+        box.innerHTML = '<div style="font-size:11.5px;color:var(--ink3);border-top:1px dashed #FECACA;padding-top:8px">🤖 Validation automatique <strong>éteinte</strong> : posez SMS_WEBHOOK_SECRET dans payment_config.php et installez le relais sur le téléphone marchand (GUIDE_RAPPROCHEMENT_SMS.md).</div>';
+        return;
+      }
+      var nom = { mtn:'MTN MoMo', orange:'Orange Money' };
+      var h = '<div style="border-top:1px dashed #FECACA;padding-top:8px"><div style="font-weight:800;font-size:12.5px;margin-bottom:4px">🤖 Validation automatique par SMS <span style="font-weight:400;color:var(--ink3)">— livrets et manuels jusqu\'à '+fmtN(j.plafond||0)+' F</span></div>';
+      ['mtn','orange'].forEach(function(op){
+        var c = (j.chaines||{})[op] || {};
+        var etat = (c.solde===null || c.solde===undefined) ? '<span style="color:#B45309">jamais ancrée</span>'
+                 : c.rompue ? '<span style="color:var(--re)">⛔ suspendue — '+_esc(c.motif||'')+'</span>'
+                 : '<span style="color:#059669">✓ active · solde '+fmtN(c.solde)+' F</span>';
+        h += '<div style="display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:12px;padding:4px 0">'
+          + '<span><strong>'+nom[op]+'</strong> : '+etat+'</span>'
+          + '<button class="btn xs" onclick="_pmAncrer(\''+op+'\')">Ancrer le solde</button></div>';
+      });
+      var sms = (j.sms||[]).slice(0, 8);
+      if(sms.length){
+        var lib = { rapproche:'✓ servi', en_attente:'en attente de commande', non_verifie:'⚠️ non vérifié', ignore:'ignoré', mouvement:'mouvement', octroi_bloque:'⚠️ octroi bloqué' };
+        h += '<details style="margin-top:4px"><summary style="cursor:pointer;font-size:12px;color:var(--ink3)">Derniers SMS reçus ('+sms.length+')</summary>';
+        sms.forEach(function(x){
+          h += '<div style="font-size:11.5px;padding:3px 0;border-top:1px solid #FECACA">'+_esc((nom[x.operateur]||x.operateur||'?'))+' · '+fmtN(x.montant||0)+' F '+_esc(x.tel||'')
+            + ' · <strong>'+_esc(lib[x.statut]||x.statut)+'</strong>'+(x.ref?' · '+_esc(x.ref):'')+(x.motif?'<br><span style="color:var(--ink3)">'+_esc(x.motif)+'</span>':'')+'</div>';
+        });
+        h += '</details>';
+      }
+      box.innerHTML = h + '</div>';
+    })
+    .catch(function(){});
+}
+window._pmChargerSms = _pmChargerSms;
+
+window._pmAncrer = function(op){
+  var nom = op==='mtn' ? 'MTN MoMo' : 'Orange Money';
+  var v = prompt('Solde ACTUEL du compte marchand '+nom+', tel que vous le LISEZ sur le téléphone (en FCFA) :');
+  if(v===null) return;
+  var solde = parseInt(String(v).replace(/\D+/g,''), 10);
+  if(!(solde>=0)){ toast('Solde invalide','warn'); return; }
+  var cc = DB.cloudConfig || {};
+  fetch(cc.url.replace(/\/+$/,'')+'/payment_sms.php?action=ancrer', {
+    method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+cc.secret },
+    body: JSON.stringify({ operateur: op, solde: solde, par: (typeof SES!=='undefined'&&SES)?((SES.pre||'')+' '+(SES.nom||'')).trim():'' })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(j){ toast(j&&j.ok ? '✅ '+nom+' ancré à '+fmtN(solde)+' F' : '⚠️ '+((j&&j.error)||(j&&j.msg)||'refusé'), j&&j.ok?'ok':'err'); _pmChargerSms(); })
+  .catch(function(){ toast('⚠️ Serveur injoignable','err'); });
+};
 
 function _pmTrouve(ref){ return (window._PM_ITEMS||[]).find(function(x){ return x.ref===ref; }) || null; }
 

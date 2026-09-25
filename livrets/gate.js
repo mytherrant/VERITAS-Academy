@@ -1300,7 +1300,13 @@
         if (bouton) { bouton.disabled = false; bouton.textContent = 'Payer ' + fmt(corps.montant) + ' FCFA'; }
         if (!rep.j || !rep.j.ok) { msg((rep.j && rep.j.error) || 'Commande impossible pour le moment. Écris-nous sur WhatsApp.'); return; }
         achatPose(r, tel);
-        ecranManuel(r, tel, rep.j.montant || corps.montant, corps.label || '', info);
+        // Le serveur dit si le rapprochement par SMS est actif : l'écran
+        // promet alors « dans la minute », sinon « dès que nous l'aurons vu ».
+        var inf = {};
+        for (var q in (info || {})) if (Object.prototype.hasOwnProperty.call(info, q)) inf[q] = info[q];
+        inf.auto = !!rep.j.rapprochementActif;
+        if (rep.j.auto) { VRT.reclamer(r, tel).then(function (c) { if (c && (c.code || c.codes)) ecranCode(c, { ref: r, tel: tel }); }); return; }
+        ecranManuel(r, tel, rep.j.montant || corps.montant, corps.label || '', inf);
       })
       .catch(function () {
         if (bouton) { bouton.disabled = false; bouton.textContent = 'Payer ' + fmt(corps.montant) + ' FCFA'; }
@@ -1332,13 +1338,25 @@
       + '<div style="margin:8px 0 2px;padding:9px 11px;border:2px solid #c0453f;background:#fdecea;border-radius:10px;'
       + 'font-size:12.5px;line-height:1.5;color:#7a1f1a;text-align:left">'
       + '<strong style="color:#c0453f">Paiement par code marchand</strong> au nom de <strong>' + esc(titulaire) + '</strong>. '
-      + 'Ta commande est enregistrée : <strong>ton code s\u2019affichera ici tout seul</strong> dès que nous aurons vu ton paiement.</div>'
+      + 'Ta commande est enregistrée : <strong>ton code s\u2019affichera ici tout seul</strong> '
+      + (info.auto ? 'en général dans la minute qui suit ton paiement.' : 'dès que nous aurons vu ton paiement.') + '</div>'
       + tuile(info.momo, '#FFCB05', 'MTN Mobile Money')
       + tuile(info.orange, '#FF6600', 'Orange Money')
       + '<div style="margin:14px 0 4px;font-size:12px;color:#98a1aa">Ta référence</div>'
       + '<div style="font-family:ui-monospace,monospace;font-weight:700;font-size:15px;color:#1f2b38;'
       + 'background:#f4f6f8;border-radius:8px;padding:8px">' + esc(r) + '</div>'
       + '<div style="font-size:11.5px;color:#98a1aa;margin-top:6px">Tu peux fermer cette page : ton code t\u2019attendra à ton retour, sur ce téléphone.</div>'
+      /* Payé depuis un AUTRE numéro (celui d'un parent) : le numéro déclaré ne
+         permet plus de retrouver le paiement, l'ID de transaction du SMS si.
+         Replié : la plupart des acheteurs paient de leur propre téléphone. */
+      + '<details style="margin-top:12px;text-align:left;font-size:12.5px;color:#5c666f">'
+      + '<summary style="cursor:pointer;color:#1f2b38;font-weight:600">Payé depuis un autre numéro\u00a0?</summary>'
+      + '<div style="margin-top:8px;line-height:1.5">Colle l\u2019<strong>ID de transaction</strong> du SMS de confirmation de ton opérateur.</div>'
+      + '<div style="display:flex;gap:8px;margin-top:8px">'
+      + '<input id="vrt-txid" inputmode="text" autocomplete="off" placeholder="Ex. 8123456789" '
+      + 'style="flex:1;min-width:0;padding:10px;border:1px solid #cfd6dd;border-radius:9px;font:inherit;font-size:16px">'
+      + '<button id="vrt-txid-ok" style="padding:10px 14px;border:0;border-radius:9px;background:#1f2b38;color:#fff;font-weight:700">Envoyer</button>'
+      + '</div></details>'
       + '<div id="vrt-msg" style="font-size:12.5px;color:#5c666f;min-height:17px;margin-top:10px">En attente de la vérification de ton paiement…</div>'
       + '<a href="https://wa.me/' + WA + '?text=' + encodeURIComponent(texteWA) + '" target="_blank" rel="noopener" '
       + 'style="' + BTNWA + ';text-decoration:none;box-sizing:border-box">J\u2019ai payé \u2014 prévenir VÉRITAS sur WhatsApp</a>'
@@ -1353,6 +1371,24 @@
       document.removeEventListener('visibilitychange', auRetour);
     }
     document.getElementById('vrt-close').onclick = function () { arreter(); fermerModale(); };
+    var btTx = document.getElementById('vrt-txid-ok');
+    if (btTx) btTx.onclick = function () {
+      var champ = document.getElementById('vrt-txid');
+      var tx = String((champ && champ.value) || '').replace(/[^A-Za-z0-9.\-]/g, '');
+      if (tx.length < 6) { msg('Cet ID de transaction paraît incomplet.'); return; }
+      btTx.disabled = true;
+      fetch('/api/payment_manuel.php?action=preuve', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ref: r, txid: tx, tel4: String(tel).slice(-4) })
+      })
+        .then(function (x) { return x.json(); })
+        .then(function (j) {
+          btTx.disabled = false;
+          if (j && j.ok) { msg(j.auto ? 'Paiement retrouvé : ton code arrive…' : 'Merci, ton paiement sera rapproché dès sa réception.'); tenter(); }
+          else msg((j && j.error) || 'Envoi impossible pour le moment.');
+        })
+        .catch(function () { btTx.disabled = false; msg('Connexion impossible. Réessaie.'); });
+    };
     function tenter() {
       if (fini) return;
       VRT.reclamer(r, tel).then(function (c) {
