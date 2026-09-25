@@ -8,8 +8,19 @@ chemins hors du filtre `paths:` de deploy.yml (workflow, tools/, STATE.md).
 Relancer à la main dans ce cas (`workflow_dispatch`). Envoyés, entre autres :
 `assets/veritas-habillage.css` (nouveau), `veritas-icons.svg`, `vitrine.js`,
 les pages habillées, `plateforme/index.html`, `seo/*` habillées au vol.
-**Non relu en production** : `veritas-school.com` est bloqué par la politique
-réseau du bac à sable de cette session (Poppins, rendu réel à vérifier).
+**Relu en production par la CI** (run 570, puis à chaque déploiement :
+étape « 🔭 La production sert-elle l'habillage déployé ? ») : 6 pages de
+familles différentes servies avec barre, pied, feuille à la bonne version,
+Poppins demandée ; Atelier en barre compacte sans l'ancien bandeau ;
+feuille et sprite d'icônes servis. Seul le RENDU visuel (Poppins affichée)
+reste à juger à l'œil.
+
+**RAG : l'index EST en production (run 571, `"ok":true`).** L'alerte
+« biblio_index.db n'est PAS sur le serveur », répétée à chaque déploiement,
+était un FAUX POSITIF : la sentinelle (`api/_sentinel.php`) refusait le curl
+nu du contrôle (« Accès automatisé refusé »), lu comme « absent ». Le contrôle
+envoie désormais des en-têtes de navigateur et dit « indéterminé » s'il est
+bloqué. ⚠️ Ne pas re-téléverser l'index sur la foi d'une ancienne alerte.
 
 Demande de Jacques : « finalise le reskin », puis « les mêmes icônes dans le
 rond centré, l'alternance de couleurs, les effets exactement comme sur la

@@ -1936,14 +1936,93 @@ jobs:
         if: steps.ftp1.outcome == 'failure'
         run: echo "::warning title=Transfert FTP repris::La première tentative a été coupée par le serveur ; la seconde a abouti. Si cela se répète, signaler la latence FTP à LWS."
 
+      # ── 🔭 LA PRODUCTION SERT-ELLE CE QU'ON VIENT D'ENVOYER ? ─────────────
+      #    Un envoi FTP « Sync complete » ne prouve pas que le visiteur reçoit
+      #    la bonne page : un cache serveur, un fichier refusé par l'hébergeur,
+      #    une version de feuille qui ne suit pas… Le 25/09/2026, le reskin a
+      #    été déployé sans que personne ne relise le site servi (le bac à
+      #    sable de la session n'y avait pas accès). Cette sonde relit la
+      #    production depuis le runner, APRÈS l'envoi, sur des pages de chaque
+      #    famille : habillage présent, feuille à la version déployée, icônes
+      #    de la vitrine, Poppins demandée, Atelier sans l'ancien bandeau.
+      #    Quelques secondes d'attente entre deux essais : LiteSpeed peut
+      #    servir l'ancienne copie un court instant.
+      - name: 🔭 La production sert-elle l'habillage déployé ?
+        if: success()
+        run: |
+          SITE=https://veritas-school.com
+          UA='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36'
+          VER=$(grep -oE 'veritas-habillage\.css\?v=[0-9.]+' deploy/corriges/3e/index.html | head -1 | sed 's/.*v=//')
+          echo "Version attendue de veritas-habillage.css : ${VER:-?}"
+          ko=0
+          lire() {  # $1 = chemin ; écrit la page dans /tmp/p.html, rend le code HTTP
+            for essai in 1 2 3; do
+              code=$(curl -s -A "$UA" -H 'Cache-Control: no-cache' --max-time 25 -o /tmp/p.html -w '%{http_code}' "$SITE$1?_=$(date +%s)" || echo 000)
+              [ "$code" = "200" ] && grep -q 'vrt-habillage:barre' /tmp/p.html && break
+              sleep 10
+            done
+            echo "$code"
+          }
+          for chemin in /corriges/3e/ /oeuvres/1ere-balafon.html /niveaux/francais-3eme.html /legal/cgv.html /seo/ep_dic5.html /plateforme/; do
+            code=$(lire "$chemin")
+            if [ "$code" != "200" ]; then
+              echo "::error title=Page non servie::$chemin répond $code"; ko=$((ko+1)); continue
+            fi
+            manque=""
+            grep -q 'vrt-habillage:barre' /tmp/p.html || manque="$manque barre"
+            grep -q 'vrt-habillage:pied' /tmp/p.html || manque="$manque pied"
+            grep -q "veritas-habillage.css?v=$VER" /tmp/p.html || manque="$manque feuille-v$VER"
+            grep -q 'fonts.googleapis.com/css2?family=[^"]*Poppins' /tmp/p.html || manque="$manque Poppins"
+            if [ "$chemin" = "/plateforme/" ]; then
+              grep -q 'class="vrt-pont"' /tmp/p.html && manque="$manque (ancien-bandeau-encore-là)"
+              grep -q 'vrt-outil' /tmp/p.html || manque="$manque barre-compacte"
+            fi
+            if [ -n "$manque" ]; then
+              echo "::error title=Habillage absent en production::$chemin — manque :$manque"; ko=$((ko+1))
+            else
+              echo "  ✓ $chemin"
+            fi
+          done
+          code=$(curl -s -A "$UA" --max-time 25 -o /tmp/c.css -w '%{http_code}' "$SITE/assets/veritas-habillage.css?v=$VER" || echo 000)
+          taille=$(wc -c < /tmp/c.css 2>/dev/null || echo 0)
+          if [ "$code" = "200" ] && [ "$taille" -gt 10000 ] && grep -q 'vrt-outil' /tmp/c.css; then
+            echo "  ✓ veritas-habillage.css ($taille octets)"
+          else
+            echo "::error title=Feuille d'habillage non servie::assets/veritas-habillage.css répond $code ($taille octets)"; ko=$((ko+1))
+          fi
+          code=$(curl -s -A "$UA" --max-time 25 -o /tmp/i.svg -w '%{http_code}' "$SITE/assets/veritas-icons.svg?v=$VER" || echo 000)
+          if [ "$code" = "200" ] && grep -q 'id="lc-moon"' /tmp/i.svg; then
+            echo "  ✓ veritas-icons.svg porte les icônes de la vitrine"
+          else
+            echo "::error title=Icônes de la vitrine absentes::assets/veritas-icons.svg répond $code sans lc-moon"; ko=$((ko+1))
+          fi
+          if [ "$ko" -gt 0 ]; then
+            echo "::error::$ko contrôle(s) de production en échec — le site EST déployé, mais ne sert pas ce qui a été envoyé."
+            exit 1
+          fi
+          echo "✅ La production sert l'habillage déployé (version $VER)."
+
       - name: 🔎 Vérifier le RAG (biblio_index.db présent sur le serveur)
         if: always()
         run: |
           echo "Vérification de l'index RAG sur https://veritas-school.com ..."
-          RESP=$(curl -s --max-time 25 "https://veritas-school.com/api/rag.php?q=cameroun+minesec+francais&limit=1" || echo "")
+          # En-têtes de NAVIGATEUR : un curl nu est refusé par la sentinelle
+          # (api/_sentinel.php : signature « curl », ni Accept-Language ni
+          # Sec-Fetch) avec « Accès automatisé refusé ». Jusqu'au 25/09/2026 ce
+          # refus était lu comme « index absent » : l'alerte ci-dessous tombait
+          # à CHAQUE déploiement, que l'index soit là ou non.
+          RESP=$(curl -s --compressed --max-time 25 \
+            -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36' \
+            -H 'Accept: application/json,text/html;q=0.9,*/*;q=0.8' \
+            -H 'Accept-Language: fr-FR,fr;q=0.9' \
+            -H 'Accept-Encoding: gzip, deflate, br' \
+            -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-origin' \
+            "https://veritas-school.com/api/rag.php?q=cameroun+minesec+francais&limit=1" || echo "")
           echo "Réponse rag.php : ${RESP:0:300}"
           if echo "$RESP" | grep -qE '"ok"[[:space:]]*:[[:space:]]*true'; then
             echo "✅ RAG actif : biblio_index.db répond sur le serveur."
+          elif [ -z "$RESP" ] || echo "$RESP" | grep -q 'Accès automatisé refusé\|Acc\\u00e8s automatis'; then
+            echo "::warning title=RAG indéterminé::rag.php n'a pas pu être interrogé (sentinelle ou réseau) — on ne sait PAS si biblio_index.db est présent. Vérifier à la main dans le navigateur : /api/rag.php?q=cameroun&limit=1"
           else
             echo "::warning title=RAG inactif (corpus absent)::biblio_index.db n'est PAS sur le serveur — l'IA répond SANS le corpus MINESEC. Il est gitignoré (22 Mo) donc jamais déployé par la CI : uploadez-le manuellement en FTP vers …/api/data/biblio_index.db. Régénérez-le au besoin avec 'python index_corpus.py'."
           fi
