@@ -18119,6 +18119,10 @@ function _pkForm(p){
     '<div class="fg full"><span class="fl">Avantages (un par ligne) *</span>'+
     '<textarea class="fi" id="pkAv" rows="5" placeholder="Accès toutes les épreuves\nCours vidéos\nIA Correction illimitée">'+
     (p?(p.avantages||[]).join('\n'):'')+'</textarea></div>'+
+    // Présentation en paliers (_formulesGrille) : vide = texte par défaut du palier.
+    '<div class="fg full"><span class="fl">Accroche — partie mise en avant</span><input class="fi" id="pkAccF" value="'+_esc(p&&p.accrocheFort||'')+'" placeholder="Préparer l’examen sans deviner"></div>'+
+    '<div class="fg full"><span class="fl">Accroche — suite</span><input class="fi" id="pkAccS" value="'+_esc(p&&p.accrocheSuite||'')+'" placeholder=" — labos virtuels, bulletins blancs notés…"></div>'+
+    '<div class="fg"><span class="fl">Chiffre clé sous le nom</span><input class="fi" id="pkMetr" value="'+_esc(p&&p.metrique||'')+'" placeholder="30 questions / jour au tuteur"></div>'+
     '<div class="fg"><label class="fl2" style="cursor:pointer;gap:8px"><input type="checkbox" id="pkPop"'+(p&&p.populaire?' checked':'')+'>  ⭐ Populaire (meilleure vente)</label></div>'+
     '</div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'+
@@ -18134,7 +18138,8 @@ function _savePk(){
   var pid=window._editPkId;
   if(pid){
     var p=DB.elearning.plans.find(function(x){return x.id===pid;});
-    if(p){p.nom=nom;p.cible=document.getElementById('pkCible')?.value||'';p.prix=prix;p.ancien=parseInt(document.getElementById('pkAncien')?.value)||0;p.avantages=av;p.populaire=document.getElementById('pkPop')?.checked||false;}
+    if(p){p.nom=nom;p.cible=document.getElementById('pkCible')?.value||'';p.prix=prix;p.ancien=parseInt(document.getElementById('pkAncien')?.value)||0;p.avantages=av;p.populaire=document.getElementById('pkPop')?.checked||false;
+      p.accrocheFort=(document.getElementById('pkAccF')?.value||'').trim();p.accrocheSuite=document.getElementById('pkAccS')?.value||'';p.metrique=(document.getElementById('pkMetr')?.value||'').trim();}
     toast('✅ Pack mis à jour');
   } else {
     var id=(document.getElementById('pkId')?.value||'').replace(/[^a-z0-9_]/gi,'_');
@@ -48252,18 +48257,77 @@ function _formulesAccroche(){
 }
 window._formulesAccroche = _formulesAccroche;
 
+/* ═══════════ LES FORMULES EN PALIERS (25/09/2026) ═══════════
+   Présentation reprise de la fiche « kits » de SmartSana, que Jacques a donnée
+   en modèle : chaque palier est NUMÉROTÉ (N1 → N4), dit pour QUI il est fait,
+   résume en une phrase ce qu'il permet, aligne quatre chiffres clés, pose les
+   deux prix CÔTE À CÔTE (au mois / à l'année), affiche ses garanties, et
+   annonce ce qu'il ajoute au palier d'en dessous (« Tout Starter, plus : »).
+
+   Les chiffres clés sont ceux que le code APPLIQUE, pas un argumentaire :
+     · tuteur IA   → quotas de _IA_QUOTAS (starter 5, pro 30, élite -1) et
+                     de api/ia_proxy.php ;
+     · labos       → réservés à Pro et au-dessus (avantages de _formulesDefaut) ;
+     · direct      → classes virtuelles : Élite et Famille ;
+     · profils     → Famille : enfantsMax (réglable dans « Prix & calculs »).
+   L'accroche et le chiffre sous le nom se règlent par formule dans l'admin
+   (Packs d'abonnement : champs `accrocheFort`, `accrocheSuite`, `metrique`) ;
+   à défaut, le texte ci-dessous. */
+var _PALIERS = {
+  starter:{ rang:'N1', pour:'Un élève, toute l’année', metrique:'5 questions / jour au tuteur',
+    fort:'Toute sa classe, en ligne', suite:' — cours par séquence, œuvres au programme et épreuves corrigées, pour réviser à son rythme.',
+    specs:[['Tuteur IA','5 / jour'],['Cours','Sa classe'],['Labos','—'],['Direct','—']],
+    cmp:{ 'Enfants':'1', 'Suivi':'Résultats' } },
+  pro:{ rang:'N2', pour:'Année d’examen', metrique:'30 questions / jour au tuteur',
+    fort:'Préparer l’examen sans deviner', suite:' — labos virtuels, bulletins blancs notés et fiches imprimables pour le BEPC, le Probatoire et le BAC.',
+    specs:[['Tuteur IA','30 / jour'],['Cours','Sa classe'],['Labos','PCT & SVT'],['Direct','—']],
+    cmp:{ 'Enfants':'1', 'Suivi':'Résultats + bulletins blancs' } },
+  elite:{ rang:'N3', pour:'Accompagnement complet', metrique:'Tuteur IA sans limite',
+    fort:'Un enseignant en direct, un tuteur sans limite', suite:' — classes virtuelles, concours blancs corrigés et entretien d’orientation.',
+    specs:[['Tuteur IA','Illimité'],['Cours','Tout inclus'],['Labos','PCT & SVT'],['Direct','Classes virtuelles']],
+    cmp:{ 'Enfants':'1', 'Suivi':'+ entretien d’orientation' } },
+  famille:{ rang:'N4', pour:'Toute la famille', metrique:'Jusqu’à {n} enfants',
+    fort:'Tous vos enfants au niveau Élite', suite:' — un seul paiement, et un suivi parent des notes, absences et progrès de chacun.',
+    specs:[['Enfants','{n}'],['Niveau','Élite'],['Tuteur IA','Illimité'],['Suivi parent','Inclus']],
+    // Le comparatif aligne les MÊMES lignes pour les quatre paliers.
+    cmp:{ 'Cours':'Tout inclus', 'Labos':'PCT & SVT', 'Direct':'Classes virtuelles', 'Enfants':'{n}', 'Suivi':'Parent : notes, absences' } }
+};
+var _PALIERS_ORDRE = ['starter','pro','elite','famille'];
+// Les engagements que le tunnel de paiement tient réellement (voir la FAQ de
+// pgTarifs et commanderAbonnement) — pas une promesse de plus.
+var _PALIERS_GARANTIES = ['Sans reconduction','Accès dès confirmation','Reçu numéroté'];
+
+function _palierNomCourt(p){
+  var n = String((p && p.nom) || '').replace(/\s*[—–-]\s*ANN[ÉE]E\s*$/i, '').trim();
+  return n ? n.charAt(0) + n.slice(1).toLowerCase() : 'Formule';
+}
+// Les textes d'un palier : réglage admin s'il existe, sinon le défaut ci-dessus.
+function _palierFiche(g, m){
+  var d = _PALIERS[g] || { rang:'', pour:'', metrique:'', fort:'', suite:'', specs:[] };
+  var n = String((m && m.enfantsMax) || 4);
+  var rep = function(s){ return String(s || '').replace(/\{n\}/g, n); };
+  var aFort = m && m.accrocheFort != null && String(m.accrocheFort).trim() !== '';
+  return {
+    rang: d.rang,
+    pour: (m && m.cible) || d.pour,
+    metrique: rep((m && m.metrique) || d.metrique),
+    fort: aFort ? String(m.accrocheFort) : d.fort,
+    suite: aFort ? String(m.accrocheSuite || '') : d.suite,
+    specs: (d.specs || []).map(function(s){ return [s[0], rep(s[1])]; }),
+    cmp: (function(){ var o = {}; (d.specs || []).forEach(function(s){ o[s[0]] = rep(s[1]); });
+      Object.keys(d.cmp || {}).forEach(function(k){ o[k] = rep(d.cmp[k]); }); return o; })()
+  };
+}
+
 function _formulesGrille(opts){
   opts = opts || {};
   var gs = _formulesPlans();
   if(!gs.length) return '';
   var rg = window._CODE_AMI_REGLE || {};
   var remise = (rg.remisePct != null ? rg.remisePct : 10), comm = (rg.commissionPct != null ? rg.commissionPct : 10);
-  var POUR = { starter:'Élève', pro:'Année d’examen', elite:'Accompagnement', famille:'Toute la famille' };
-  var nomCourt = function(p){
-    var n = String(p.nom || '').replace(/\s*[—–-]\s*ANN[ÉE]E\s*$/i, '').trim();
-    return n ? n.charAt(0) + n.slice(1).toLowerCase() : 'Formule';
-  };
   var avMax = opts.avMax || 5;
+  var noms = {};
+  gs.forEach(function(f){ noms[f.groupe] = _palierNomCourt(f.mois); });
   var h = '<div class="vfo">';
   if(opts.codeAmi !== false){
     h += '<div class="vfo-ami">'
@@ -48275,28 +48339,53 @@ function _formulesGrille(opts){
   }
   h += '<div class="vfo-grille">';
   gs.forEach(function(f){
-    var m = f.mois, a = f.an, pop = !!m.populaire;
+    var m = f.mois, a = f.an, pop = !!m.populaire, g = f.groupe;
+    var fi = _palierFiche(g, m), nom = noms[g];
     var av = (m.avantages || []).map(function(s){ return String(s).replace(/^[✅✔️•\-\s]+/, '').trim(); })
-                                .filter(function(s){ return s && s.indexOf('🔒') !== 0; }).slice(0, avMax);
+                                .filter(function(s){ return s && s.indexOf('🔒') !== 0; });
+    // « Tout Pro » en tête des avantages → le bandeau « Tout Pro, plus : »,
+    // comme « Supporte toutes les charges du Kit Muna, plus : ».
+    var herite = '';
+    if(av.length && /^Tout\s+\S/i.test(av[0]) && av[0].length < 30){ herite = av.shift(); }
+    av = av.slice(0, avMax);
     var eco = (a && a.ancien > a.prix) ? a.ancien - a.prix : 0;
     var ecoTxt = _formuleEcoTxt(m, a);
-    h += '<article class="vfo-carte' + (pop ? ' vfo-pop' : '') + '">'
+    h += '<article class="vfo-carte vfo-pal vfo-g-' + _esc(g) + (pop ? ' vfo-pop' : '') + '" id="vfo-' + _esc(g) + '">'
       +   (pop ? '<span class="vfo-ruban">Le plus choisi</span>' : '')
-      +   '<div class="vfo-pour">' + _esc(m.cible || POUR[f.groupe] || '') + '</div>'
-      +   '<div class="vfo-nom">' + _esc(nomCourt(m)) + '</div>'
-      // Espace insécable ordinaire pour le grand chiffre : l'espace fine du
-      // format français disparaît à 40 px en gras, « 1 000 » s'y lit « 1000 ».
-      +   '<div class="vfo-prix"><span class="vfo-montant">' + fmtN(m.prix).replace(/ /g, ' ') + '</span><span class="vfo-devise">FCFA</span></div>'
-      +   '<div class="vfo-unite">par mois · sans engagement</div>'
-      +   (a ? '<div class="vfo-an">'
-             +   '<div class="vfo-an-l">Ou toute l’année en une fois :</div>'
-             +   '<div class="vfo-an-p">' + (eco ? '<s>' + fmtN(a.ancien) + ' F</s>' : '') + '<b>' + fmtN(a.prix) + ' F</b>'
-             +   (eco ? '<em>' + ecoTxt + '</em>' : '') + '</div>'
-             + '</div>' : '')
-      +   '<ul class="vfo-av">' + av.map(function(s){ return '<li>' + _ico('check', 15) + '<span>' + _esc(s) + '</span></li>'; }).join('') + '</ul>'
-      +   '<div class="vfo-actions">'
-      +     '<button type="button" class="vfo-cta" onclick="_ouvrirAbonnementAncre(\'' + _esc(m.id) + '\')">Choisir ' + _esc(nomCourt(m)) + '</button>'
-      +     (a ? '<button type="button" class="vfo-cta2" onclick="_ouvrirAbonnementAncre(\'' + _esc(a.id) + '\')">Payer l’année — ' + fmtN(a.prix) + ' F</button>' : '')
+      +   '<header class="vfo-band">'
+      +     '<div class="vfo-band-l">'
+      +       (fi.rang ? '<span class="vfo-rang">' + _esc(fi.rang) + '</span>' : '')
+      +       '<div class="vfo-nom">' + _esc(nom) + '</div>'
+      +       (fi.metrique ? '<div class="vfo-metr">' + _esc(fi.metrique) + '</div>' : '')
+      +     '</div>'
+      +     '<div class="vfo-band-r">' + _esc(fi.pour) + '</div>'
+      +   '</header>'
+      +   '<div class="vfo-corps">'
+      +     (fi.fort || fi.suite ? '<p class="vfo-acc"><b>' + _esc(fi.fort) + '</b>' + _esc(fi.suite) + '</p>' : '')
+      +     (fi.specs.length ? '<dl class="vfo-specs">' + fi.specs.map(function(s){
+              return '<div><dt>' + _esc(s[0]) + '</dt><dd>' + _esc(s[1]) + '</dd></div>'; }).join('') + '</dl>' : '')
+      +     '<div class="vfo-2prix">'
+      +       '<button type="button" class="vfo-px vfo-px-m" onclick="_ouvrirAbonnementAncre(\'' + _esc(m.id) + '\')" aria-label="' + _esc(nom) + ' au mois, ' + _esc(fmt(m.prix)) + '">'
+      +         '<span class="vfo-px-l">Au mois</span>'
+      // Espace insécable ordinaire : l'espace fine disparaît en gros et gras.
+      +         '<span class="vfo-px-v">' + fmtN(m.prix).replace(/\s/g, ' ') + '</span>'
+      +         '<span class="vfo-px-u">FCFA · sans engagement</span>'
+      +       '</button>'
+      +       (a ? '<button type="button" class="vfo-px vfo-px-a" onclick="_ouvrirAbonnementAncre(\'' + _esc(a.id) + '\')" aria-label="' + _esc(nom) + ' à l’année, ' + _esc(fmt(a.prix)) + '">'
+      +         '<span class="vfo-px-l">À l’année</span>'
+      +         '<span class="vfo-px-v">' + fmtN(a.prix).replace(/\s/g, ' ') + '</span>'
+      +         '<span class="vfo-px-u">' + (eco ? '<s>' + fmtN(a.ancien) + '</s> ' : '') + 'FCFA'
+      +           (ecoTxt ? ' · <em>' + _esc(ecoTxt) + '</em>' : '') + '</span>'
+      +       '</button>' : '')
+      +     '</div>'
+      +     '<div class="vfo-gar">' + _ico('shield', 14) + '<span>' + _PALIERS_GARANTIES.map(_esc).join(' · ') + '</span></div>'
+      +     (herite ? '<div class="vfo-herite">' + _ico('check', 15) + '<span>' + _esc(herite) + ', plus :</span></div>' : '')
+      +     '<ul class="vfo-av">' + av.map(function(s){ return '<li>' + _ico('check', 15) + '<span>' + _esc(s) + '</span></li>'; }).join('') + '</ul>'
+      +     '<div class="vfo-actions">'
+      +       '<button type="button" class="vfo-cta" onclick="_ouvrirAbonnementAncre(\'' + _esc(m.id) + '\')">Choisir ' + _esc(nom) + ' — ' + fmtN(m.prix) + ' F / mois</button>'
+      +       (a ? '<button type="button" class="vfo-cta2" onclick="_ouvrirAbonnementAncre(\'' + _esc(a.id) + '\')">Payer l’année — ' + fmtN(a.prix) + ' F</button>' : '')
+      +       '<button type="button" class="vfo-wa" onclick="_palierWhatsApp(\'' + _esc(g) + '\')">' + _ico('message', 14) + ' Une question sur ' + _esc(nom) + ' ?</button>'
+      +     '</div>'
       +   '</div>'
       + '</article>';
   });
@@ -48306,6 +48395,163 @@ function _formulesGrille(opts){
   return h;
 }
 window._formulesGrille = _formulesGrille;
+
+// « Je suis intéressé » : le message part pré-rempli, le centre sait de quoi on parle.
+function _palierWhatsApp(g){
+  var f = _formulesPlans().find(function(x){ return x.groupe === g; });
+  var nom = f ? _palierNomCourt(f.mois) : g;
+  var txt = 'Bonjour VÉRITAS, je m’intéresse à la formule ' + nom
+    + (f ? ' (' + fmtN(f.mois.prix) + ' F/mois' + (f.an ? ' ou ' + fmtN(f.an.prix) + ' F l’année' : '') + ')' : '')
+    + '. J’ai une question : ';
+  var num = String((window.VERITAS_PAYMENTS && VERITAS_PAYMENTS.whatsapp) || '+237 697 637 739').replace(/\D/g, '');
+  try{ window.open('https://wa.me/' + num + '?text=' + encodeURIComponent(txt), '_blank', 'noopener'); }catch(e){}
+}
+window._palierWhatsApp = _palierWhatsApp;
+
+/* ── Comparatif : les paliers en colonnes, les chiffres clés en lignes ── */
+function _formulesComparatif(){
+  var gs = _formulesPlans();
+  if(!gs.length) return '';
+  var fiches = gs.map(function(f){ return _palierFiche(f.groupe, f.mois); });
+  var lignes = ['Tuteur IA','Cours','Labos','Direct','Enfants','Suivi'];
+  var val = function(fi, l){ return fi.cmp[l] || '—'; };
+  var h = '<div class="vfo-cmp-wrap"><table class="vfo-cmp"><thead><tr><th scope="col"></th>'
+    + gs.map(function(f, i){ return '<th scope="col" class="vfo-g-' + _esc(f.groupe) + '"><span class="vfo-rang">' + _esc(fiches[i].rang) + '</span>' + _esc(_palierNomCourt(f.mois)) + '</th>'; }).join('')
+    + '</tr></thead><tbody>'
+    + '<tr><th scope="row">Pour qui</th>' + fiches.map(function(fi){ return '<td>' + _esc(fi.pour) + '</td>'; }).join('') + '</tr>'
+    + lignes.map(function(l){
+        return '<tr><th scope="row">' + _esc(l) + '</th>' + fiches.map(function(fi){ return '<td>' + _esc(val(fi, l)) + '</td>'; }).join('') + '</tr>';
+      }).join('')
+    + '<tr class="vfo-cmp-px"><th scope="row">Au mois</th>' + gs.map(function(f){ return '<td><b>' + fmtN(f.mois.prix) + ' F</b></td>'; }).join('') + '</tr>'
+    + '<tr class="vfo-cmp-px"><th scope="row">À l’année</th>' + gs.map(function(f){
+        return '<td>' + (f.an ? '<b>' + fmtN(f.an.prix) + ' F</b>' + (_formuleEcoTxt(f.mois, f.an) ? '<div class="vfo-cmp-eco">' + _esc(_formuleEcoTxt(f.mois, f.an)) + '</div>' : '') : '—') + '</td>';
+      }).join('') + '</tr>'
+    + '<tr><th scope="row"></th>' + gs.map(function(f){
+        return '<td><button type="button" class="vfo-cta2" onclick="_ouvrirAbonnementAncre(\'' + _esc(f.mois.id) + '\')">Choisir</button></td>';
+      }).join('') + '</tr>'
+    + '</tbody></table></div>';
+  return h;
+}
+window._formulesComparatif = _formulesComparatif;
+
+/* ── Trouver ma formule : trois questions, une recommandation CHIFFRÉE ──
+   Pour plusieurs enfants on compare honnêtement « n × la formule » au prix
+   Famille et l'on recommande le moins cher — pas systématiquement le plus gros. */
+var _pfRep = { qui:'', exam:'', direct:'' };
+function _formulesTrouver(){
+  var q = function(cle, titre, opts){
+    return '<div class="vfo-q"><div class="vfo-q-t">' + titre + '</div><div class="vfo-q-o">'
+      + opts.map(function(o){
+          var on = _pfRep[cle] === o[0];
+          return '<button type="button" class="vfo-chip' + (on ? ' on' : '') + '" aria-pressed="' + on + '" onclick="_pfChoix(\'' + cle + '\',\'' + o[0] + '\')">' + _esc(o[1]) + '</button>';
+        }).join('')
+      + '</div></div>';
+  };
+  return '<div class="vfo-trouver">'
+    + q('qui', '1. Pour combien d’enfants ?', [['1','Un seul'],['2','Deux'],['3','Trois'],['4','Quatre ou plus']])
+    + q('exam', '2. Une année d’examen (3ᵉ, 1ʳᵉ, Tˡᵉ) ?', [['oui','Oui'],['non','Non']])
+    + q('direct', '3. Souhaitez-vous des cours en direct et un tuteur sans limite ?', [['oui','Oui'],['non','Pas nécessaire']])
+    + '<div id="vfoReco" class="vfo-reco">' + _pfReco() + '</div>'
+    + '</div>';
+}
+window._formulesTrouver = _formulesTrouver;
+function _pfChoix(cle, v){
+  _pfRep[cle] = v;
+  var box = document.querySelector('.vfo-trouver');
+  if(box) box.outerHTML = _formulesTrouver();
+}
+window._pfChoix = _pfChoix;
+function _pfReco(){
+  if(!_pfRep.qui || !_pfRep.exam || !_pfRep.direct) return '<span class="vfo-reco-vide">Répondez aux trois questions : la formule adaptée s’affiche ici, avec son prix.</span>';
+  var gs = _formulesPlans(), par = {};
+  gs.forEach(function(f){ par[f.groupe] = f; });
+  var g = _pfRep.direct === 'oui' ? 'elite' : (_pfRep.exam === 'oui' ? 'pro' : 'starter');
+  if(!par[g]) g = ['elite','pro','starter'].find(function(k){ return par[k]; }) || '';
+  if(!g) return '';
+  var n = parseInt(_pfRep.qui, 10) || 1, f = par[g], nom = _palierNomCourt(f.mois);
+  var total = f.mois.prix * n, fam = par.famille, pourquoi = '';
+  var choix = f, qte = n;
+  if(n > 1 && fam){
+    var max = fam.mois.enfantsMax || 4;
+    if(n <= max && fam.mois.prix <= total){ choix = fam; qte = 1;
+      pourquoi = n + ' × ' + nom + ' = ' + fmtN(total) + ' F / mois ; la formule Famille couvre les ' + n + ' enfants au niveau Élite pour ' + fmtN(fam.mois.prix) + ' F.';
+    } else {
+      pourquoi = n + ' × ' + nom + ' (' + fmtN(total) + ' F / mois) revient moins cher que la formule Famille (' + fmtN(fam.mois.prix) + ' F).';
+    }
+  }
+  var cNom = _palierNomCourt(choix.mois), fi = _palierFiche(choix.groupe, choix.mois);
+  return '<div class="vfo-reco-ok">'
+    + '<div class="vfo-reco-l">Notre recommandation</div>'
+    + '<div class="vfo-reco-n"><span class="vfo-rang">' + _esc(fi.rang) + '</span> ' + _esc(cNom) + (qte > 1 ? ' × ' + qte : '') + '</div>'
+    + '<div class="vfo-reco-p"><b>' + fmtN(choix.mois.prix * qte) + ' F / mois</b>'
+    +   (choix.an ? ' — ou ' + fmtN(choix.an.prix * qte) + ' F pour l’année' : '') + '</div>'
+    + (pourquoi ? '<div class="vfo-reco-w">' + _esc(pourquoi) + '</div>' : '')
+    + '<div class="vfo-reco-a">'
+    +   '<button type="button" class="vfo-cta" onclick="_ouvrirAbonnementAncre(\'' + _esc(choix.mois.id) + '\')">Choisir ' + _esc(cNom) + '</button>'
+    +   '<button type="button" class="vfo-cta2" onclick="_formulesOnglet(\'details\',\'' + _esc(choix.groupe) + '\')">Voir le détail</button>'
+    + '</div></div>';
+}
+
+/* ── Les garanties, « écrites noir sur blanc » ── */
+function _formulesGaranties(){
+  var li = [
+    ['Aucune reconduction automatique', 'L’accès s’arrête à l’échéance ; vous êtes prévenu avant. Rien n’est prélevé dans votre dos.'],
+    ['Accès ouvert dès la confirmation', 'Le paiement Mobile Money confirmé ouvre la formule sur votre compte, sur tous vos appareils.'],
+    ['Reçu numéroté', 'Chaque paiement produit un reçu que vous pouvez présenter au centre.'],
+    ['Le gratuit reste gratuit', 'Corrigés, Professeur Ambassa, jeux, labos d’essai et outils de calcul restent ouverts sans abonnement.'],
+    ['Aucune carte bancaire', 'MTN Mobile Money ou Orange Money suffisent — y compris pour payer depuis l’étranger.']
+  ];
+  return '<details class="vfo-garanties"><summary><span class="vfo-gt-tag">' + _ico('shield', 13) + ' Tranquillité d’esprit</span>'
+    + '<span class="vfo-gt-t">Toutes nos <em>garanties</em>, écrites noir sur blanc</span></summary><ul>'
+    + li.map(function(x){ return '<li>' + _ico('check', 15) + '<span><b>' + _esc(x[0]) + '</b> — ' + _esc(x[1]) + '</span></li>'; }).join('')
+    + '</ul></details>';
+}
+window._formulesGaranties = _formulesGaranties;
+
+/* ── Onglets de la page Tarifs : Détails · Trouver ma formule · Comparatif ── */
+var _pfOnglet = 'details';
+function _formulesOnglets(){
+  var t = [['details','Détails des formules'],['trouver','Trouver ma formule'],['comparer','Comparatif']];
+  var corps = _pfOnglet === 'trouver' ? _formulesTrouver()
+            : _pfOnglet === 'comparer' ? _formulesComparatif()
+            : _formulesGrille();
+  return '<div class="vfo-onglets" id="vfoOnglets"><div class="vfo-tabs" role="tablist">'
+    + t.map(function(x){
+        var on = _pfOnglet === x[0];
+        return '<button type="button" role="tab" class="vfo-tab' + (on ? ' on' : '') + '" aria-selected="' + on + '" onclick="_formulesOnglet(\'' + x[0] + '\')">' + _esc(x[1]) + '</button>';
+      }).join('')
+    + '</div><div class="vfo-tab-corps">' + corps + '</div></div>';
+}
+window._formulesOnglets = _formulesOnglets;
+function _formulesOnglet(id, ancre){
+  _pfOnglet = id;
+  var el = document.getElementById('vfoOnglets');
+  if(el) el.outerHTML = _formulesOnglets();
+  if(ancre){ setTimeout(function(){ var c = document.getElementById('vfo-' + ancre); if(c) c.scrollIntoView({ behavior:'smooth', block:'start' }); }, 30); }
+}
+window._formulesOnglet = _formulesOnglet;
+
+/* ── L'en-tête de la page Tarifs : « à partir de », les publics, les repères ── */
+function _formulesHero(){
+  var gs = _formulesPlans();
+  if(!gs.length) return '';
+  var min = Math.min.apply(null, gs.map(function(f){ return f.mois.prix; }));
+  var publics = [['graduation','Élèves','vfo-starter'],['users','Parents','vfo-famille'],['presentation','Enseignants','vfoAutres'],['wallet','Établissements','vfoAutres']];
+  return '<div class="vfo-hero">'
+    + '<div class="vfo-hero-t">Réviser avec VÉRITAS, <em>à votre rythme</em></div>'
+    + '<div class="vfo-hero-s">' + gs.length + ' paliers, du cours de la classe à l’accompagnement complet · à partir de <b>' + fmtN(min) + ' FCFA</b> par mois</div>'
+    + '<div class="vfo-hero-pour"><span>Pour les</span>'
+    + publics.map(function(p){
+        return '<button type="button" class="vfo-chip" onclick="(function(){_formulesOnglet(\'details\');setTimeout(function(){var e=document.getElementById(\'' + p[2] + '\');if(e)e.scrollIntoView({behavior:\'smooth\',block:\'start\'});},40);})()">' + _ico(p[0], 14) + ' ' + _esc(p[1]) + '</button>';
+      }).join('')
+    + '</div>'
+    + '<div class="vfo-hero-k">'
+    +   '<div><b>' + gs.length + '</b><span>paliers</span></div>'
+    +   '<div><b>0</b><span>engagement</span></div>'
+    +   '<div><b>100 %</b><span>Mobile Money</span></div>'
+    + '</div></div>';
+}
+window._formulesHero = _formulesHero;
 
 /* Les autres offres (enseignants, prestations parents, établissements) :
    des lignes sobres, sous les formules. `surDevis` ou prix nul → « Sur devis »
@@ -48347,7 +48593,10 @@ function pgTarifs(){
     .map(function(s){ return '<li>'+_ico('check',14)+'<span>'+_esc(s)+'</span></li>'; }).join('');
 
   // Les formules en grille, les autres offres en lignes (voir _formulesGrille).
-  var cartes = (typeof _formulesGrille === 'function') ? _formulesGrille() : '';
+  // Présentation en paliers (modèle SmartSana) : onglets Détails / Trouver /
+  // Comparatif, puis les garanties.
+  var cartes = (typeof _formulesOnglets === 'function' && _formulesPlans().length)
+    ? _formulesOnglets() + _formulesGaranties() : '';
   var autres = (typeof _autresOffres === 'function') ? _autresOffres() : '';
   void plans;
 
@@ -48387,6 +48636,7 @@ function pgTarifs(){
       +'<svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-wallet"/></svg></span>'
       +' Abonnements</h1>'
       +'<div class="acc-sub">L\'essentiel restera toujours gratuit. L\'abonnement ouvre ce qui demande du travail d\'enseignant : les épreuves corrigées, les cours, les progressions.</div></div>'
+    +((typeof _formulesHero==='function') ? _formulesHero() : '')
 
     // ── Ce que vous y gagnez ──────────────────────────────────────────────
     +'<div class="vgains v-reveal">'+gains+'</div>'
@@ -48405,7 +48655,7 @@ function pgTarifs(){
             +'<div class="acc-sub">'+_esc((typeof _formulesAccroche==='function'&&_formulesAccroche())||'')+' Rien d\'autre à payer.</div></div>'
           + cartes
           +(autres
-              ? '<div class="acc-head" style="margin-top:22px"><h2 class="acc-pill"><span class="ic">'
+              ? '<div class="acc-head" id="vfoAutres" style="margin-top:22px"><h2 class="acc-pill"><span class="ic">'
                   +'<svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-users"/></svg></span>'
                   +' Enseignants, parents, établissements</h2></div>' + autres
               : '')
