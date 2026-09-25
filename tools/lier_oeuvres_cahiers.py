@@ -180,15 +180,30 @@ def main():
         # lien pourtant présent, et l'aurait fait rougir la CI sans fin.
         # On consomme donc les blancs des deux côtés, quel que soit le style de
         # fin de ligne, et on repose un séparateur unique.
-        html_sans = re.sub(
-            r'(?:\r?\n)*<section class="%s".*?</section>(?:\r?\n)*' % MARQUE,
-            "\n", html, flags=re.S)
+        motif = re.compile(
+            r'(?:\r?\n)*<section class="%s".*?</section>(?:\r?\n)*' % MARQUE, re.S)
 
-        i = html_sans.rfind("<footer")
-        if i < 0:
-            manquants.append(fichier + " (pas de <footer> où s'ancrer)")
-            continue
-        sortie = html_sans[:i] + neuf + html_sans[i:]
+        # ── OÙ POSER LE BLOC ─────────────────────────────────────────────────
+        # Il allait « avant le dernier <footer> ». Depuis le reskin (25/09/2026),
+        # l'ancien pied des fiches est remplacé par celui de la vitrine, posé
+        # par tools/habiller_pages.py DANS le bloc <!--vrt-habillage:pied-->.
+        # Viser le dernier <footer> revenait à vouloir le bloc à l'intérieur de
+        # l'habillage — que la passe suivante efface — et `--controle` déclarait
+        # « lien absent » neuf fiches qui le portaient pourtant (déploiement
+        # 568 bloqué). Donc :
+        #   · un bloc déjà présent est mis à jour SUR PLACE ;
+        #   · sinon, il se pose avant le pied de la vitrine, ou à défaut avant
+        #     le dernier <footer>.
+        if motif.search(html):
+            sortie = motif.sub(lambda m: "\n" + neuf + "\n", html, count=1)
+        else:
+            i = html.find("<!--vrt-habillage:pied-->")
+            if i < 0:
+                i = html.rfind("<footer")
+            if i < 0:
+                manquants.append(fichier + " (pas de pied où s'ancrer)")
+                continue
+            sortie = html[:i] + neuf + "\n" + html[i:]
 
         if sortie == html:
             inchangees.append(fichier)

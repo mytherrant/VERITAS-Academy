@@ -1732,6 +1732,16 @@ jobs:
               n=$((n+1))
             fi
           done < <(find deploy -type f \( -name '*.html' -o -name '*.php' \) -not -path 'deploy/plateforme/*')
+          # L'Atelier porte AUSSI l'habillage de la vitrine (barre, pied :
+          # /assets/veritas-habillage.css, /assets/vitrine.js). Ces liens-là
+          # suivent la version du site — sinon un visiteur qui a déjà chargé
+          # vitrine.js?v=1.20.19 ailleurs garderait l'ancien fichier un an.
+          # Motif ANCRÉ sur « /assets/ » : les six modules de l'Atelier sont
+          # appelés sans ce préfixe, leurs empreintes ne sont jamais touchées
+          # (et le contrôle juste en dessous le revérifie).
+          if [ -f deploy/plateforme/index.html ]; then
+            sed -i -E "s#(/assets/[A-Za-z0-9_.-]+\.(css|js))\?v=[0-9.]+#\1?v=$VER#g" deploy/plateforme/index.html
+          fi
 
           # Verification APRES coup : l'etape « Preparer les fichiers » a deja
           # controle ces jetons, mais elle passe AVANT ce sed — elle a donc
