@@ -2006,10 +2006,23 @@ jobs:
         if: always()
         run: |
           echo "Vérification de l'index RAG sur https://veritas-school.com ..."
-          RESP=$(curl -s --max-time 25 "https://veritas-school.com/api/rag.php?q=cameroun+minesec+francais&limit=1" || echo "")
+          # En-têtes de NAVIGATEUR : un curl nu est refusé par la sentinelle
+          # (api/_sentinel.php : signature « curl », ni Accept-Language ni
+          # Sec-Fetch) avec « Accès automatisé refusé ». Jusqu'au 25/09/2026 ce
+          # refus était lu comme « index absent » : l'alerte ci-dessous tombait
+          # à CHAQUE déploiement, que l'index soit là ou non.
+          RESP=$(curl -s --compressed --max-time 25 \
+            -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36' \
+            -H 'Accept: application/json,text/html;q=0.9,*/*;q=0.8' \
+            -H 'Accept-Language: fr-FR,fr;q=0.9' \
+            -H 'Accept-Encoding: gzip, deflate, br' \
+            -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-origin' \
+            "https://veritas-school.com/api/rag.php?q=cameroun+minesec+francais&limit=1" || echo "")
           echo "Réponse rag.php : ${RESP:0:300}"
           if echo "$RESP" | grep -qE '"ok"[[:space:]]*:[[:space:]]*true'; then
             echo "✅ RAG actif : biblio_index.db répond sur le serveur."
+          elif [ -z "$RESP" ] || echo "$RESP" | grep -q 'Accès automatisé refusé\|Acc\\u00e8s automatis'; then
+            echo "::warning title=RAG indéterminé::rag.php n'a pas pu être interrogé (sentinelle ou réseau) — on ne sait PAS si biblio_index.db est présent. Vérifier à la main dans le navigateur : /api/rag.php?q=cameroun&limit=1"
           else
             echo "::warning title=RAG inactif (corpus absent)::biblio_index.db n'est PAS sur le serveur — l'IA répond SANS le corpus MINESEC. Il est gitignoré (22 Mo) donc jamais déployé par la CI : uploadez-le manuellement en FTP vers …/api/data/biblio_index.db. Régénérez-le au besoin avec 'python index_corpus.py'."
           fi
