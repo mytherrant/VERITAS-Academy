@@ -970,7 +970,11 @@
   /* Colonnes fixes : sur un telephone, une colonne de filtres de 244 px plus
      la liste font deborder la page. On les empile. */
   @media (max-width:900px){
-    .vrt-col3{grid-template-columns:1fr!important}
+    /* `minmax(0,1fr)` et non `1fr` : une piste `1fr` refuse de descendre sous
+       la largeur minimale de son contenu — l'écran Collaboration faisait
+       405 px sur un téléphone de 390 (25/09/2026). */
+    .vrt-col3{grid-template-columns:minmax(0,1fr)!important}
+    .vrt-col3 > *{min-width:0}
   }
   @media (max-width:820px){
     .vrt-col2{grid-template-columns:1fr!important}
@@ -1127,6 +1131,11 @@
     header[data-noprint="1"]{transition:transform .22s ease}
     header[data-noprint="1"].vrt-replie{transform:translateY(-100%)}
     body:has(header.vrt-replie) :is([style*="top:66px"],[style*="top: 66px"])[style*="sticky"]{top:0!important}
+    /* Barre d'actions de l'Aperçu (Exporter en Word, Imprimer) : une seule
+       ligne avec 28 px de marge — la page faisait 611 px de large. */
+    main > div[data-noprint="1"]:is([style*="top:66px"],[style*="top: 66px"]){
+      flex-wrap:wrap!important;padding:12px 16px!important;gap:10px!important}
+    main > div[data-noprint="1"]:is([style*="top:66px"],[style*="top: 66px"]) > button{margin-left:0!important}
 
   }
   @media (prefers-reduced-motion:reduce){ header[data-noprint="1"]{transition:none} }

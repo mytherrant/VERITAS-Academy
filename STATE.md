@@ -117,10 +117,14 @@ React : `stateNode.logic.setState({screen:'composeur', ready:true})`.
 simulation de l'API (il ne rend jamais la main — ne pas le lancer dans une
 boucle de bancs).
 
-**Débordements mobiles existants, non causés par l'habillage** (identiques
-avant/après) : feuilles A4 de `evaluations/BEPC_blanc_*` et
-`campus/documents.html` (794-822 px), écrans Collab (405) et Aperçu (611)
-de l'Atelier.
+**Débordements mobiles existants — CORRIGÉS (25/09, suite)** : épreuves
+`evaluations/BEPC_blanc_*` (feuille A4 en `210mm` fixe → largeur suivie à
+l'ÉCRAN sous 820 px, en-tête en colonne ; l'impression reste A4),
+`campus/documents.html` (rangée des 7 types de document défilante, blocs
+de signature à la ligne à l'écran), Atelier Collaboration (`.vrt-col3` en
+`minmax(0,1fr)` : une piste `1fr` ne descend pas sous son contenu) et Aperçu
+(barre « Exporter / Imprimer » qui passe à la ligne). Vérifié : 224 pages +
+9 écrans de l'Atelier à 390 px, 0 débordement.
 
 **Toujours hors habillage, volontairement** : `app.html` (l'application
 connectée, qui a sa propre navigation), `VERITAS_Promo_Video.html` (outil de

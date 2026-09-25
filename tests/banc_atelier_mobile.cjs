@@ -268,6 +268,10 @@ dire(/innerWidth > 820/.test(scriptRepli),
   'jamais sur grand écran');
 dire(/h\.contains\(document\.activeElement\)/.test(scriptRepli),
   'jamais pendant une saisie dans la barre (recherche)');
+dire(/\.vrt-col3\{grid-template-columns:minmax\(0,1fr\)!important\}/.test(src),
+  'Collaboration : la colonne unique descend sous la largeur de son contenu (minmax(0,1fr), pas 1fr)');
+dire(/main > div\[data-noprint="1"\][^{]*\{\s*flex-wrap:wrap!important/.test(bloc820),
+  'Aperçu : la barre « Exporter / Imprimer » passe à la ligne');
 dire(!/<x-dc/.test(scriptRepli),
   'le script ne nomme pas la racine de rendu (une seconde occurrence la dédouble)');
 
