@@ -2118,7 +2118,7 @@ jobs:
           juge() {  # $1 libellé, $2 code obtenu, $3 codes attendus (regex)
             if echo "$2" | grep -qE "^($3)$"; then echo "  ✓ $1 → $2 : $(head -c 160 /tmp/r.json)"
             elif sentinelle; then echo "::warning title=Sonde SMS bloquée::$1 — refusée par la sentinelle, indéterminé"; bloque=$((bloque+1))
-            else echo "::error title=Rapprochement SMS en production::$1 répond $2 (attendu $3) : $(head -c 200 /tmp/r.json)"; ko=$((ko+1)); fi
+            else echo "::error title=Rapprochement SMS en production::$1 répond $2 (attendu $3) : $(head -c 500 /tmp/r.json)"; ko=$((ko+1)); fi
           }
           c=$(appel POST '/api/payment_sms.php?action=recu' '{"from":"SONDE","text":"sonde"}')
           juge "relais sans clé" "$c" '503|401'
