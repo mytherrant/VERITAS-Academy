@@ -40,7 +40,7 @@ try {
 }
 
 /* 2. Les modules chargés à côté */
-['support.js', 'minesec.js', 'conformite.js', 'exercices.js', 'texte.js', 'docx.js']
+['support.js', 'minesec.js', 'conformite.js', 'exercices.js', 'generateur.js', 'texte.js', 'docx.js']
   .forEach(n => {
     const f = path.join(RACINE, 'plateforme', n);
     if (!fs.existsSync(f)) { console.log('  [ KO ] ' + n + ' : absent'); soucis++; return; }

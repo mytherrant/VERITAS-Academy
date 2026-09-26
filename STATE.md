@@ -1,3 +1,30 @@
+## Atelier de Français : Ambassa compose l'épreuve entière, l'équipe relit (26/09/2026, mode hybride)
+
+Demande de Jacques : « Ma plateforme collaborative atelier de français ne passe pas parce que ce n'est pas automatique ; les usagers veulent que l'IA génère entièrement l'épreuve, ils relisent et corrigent simplement. Câble et automatise tout via l'IA Ambassa. Entraîne-la aux exigences et critères MINESEC. » Puis : « Configure en hybride (manuel collaboratif et IA). »
+
+**Ce qui existait.** Ambassa ne faisait que RELIRE (analyse de conformité, QCM, résumé). Pour composer, il fallait choisir le texte, écrire chaque question, répartir les points et rédiger le corrigé à la main.
+
+**Le panneau « Composer avec Ambassa »** (composeur, au-dessus du garde-fou) :
+- **Tout composer avec Ambassa** : Ambassa choisit le texte dans le corpus, sauf si l'équipe en a déjà choisi un. Elle rédige les questions, le barème, le corrigé question par question et les sujets (situation-problème, dissertation, commentaire, texte fautif), puis fixe le titre, la durée et le coefficient officiels.
+- **Compléter sans toucher à nos questions** : les énoncés de l'équipe restent mot pour mot. Ambassa ajoute seulement les points, le corrigé et les sujets manquants.
+- Champ **Thème / domaine de vie** (facultatif), **＋ Sujet à la main**, **Afficher le corrigé**, **Corrigé joint à l'export Word** (page séparée « réservé à l'enseignant »), **Tout marquer comme relu**.
+- Un rapport de contrôle s'affiche : barème, formulations proscrites, niveaux de questionnement, sujets rédigés, et ce qu'Ambassa demande de vérifier.
+
+**Hybride et collaboratif.** Tout atterrit dans les champs existants (`customQ`, `pts`), plus `corrige`, `sujets`, `grilleIA`, `iaNote` et `texteSource`, tous synchronisés avec l'équipe. Chaque proposition porte une marque **« à relire »** (`iaRelire`, `sujets[].aRelire`). Modifier la question ou son corrigé retire la marque, de même qu'un clic dessus. Le garde-fou (`conformite.js`) compte les marques restantes comme un **écart**. L'historique indique qui a fait composer l'épreuve.
+
+**L'« entraînement » d'Ambassa** (`plateforme/generateur.js`) :
+1. **Le plan est calculé, pas demandé à l'IA** : pour les 23 structures de `minesec.js`, on calcule les blocs notés, les rubriques, les productions, les sujets au choix et la présentation. Le total retombe toujours sur le total officiel.
+2. **La formation MINESEC** part en `sysPrompt` (non plafonné par le proxy) : descriptif de l'épreuve, grille, verbes de consigne par niveau, équilibre des points, formulations proscrites, formules du corrigé harmonisé, et **deux jeux de questions RÉELLES du corpus officiel pour la même classe**, à imiter.
+3. **Le contrôle est local** : barème recalé bloc par bloc au demi-point, nombre de mots du résumé calculé et inscrit, « Pourquoi / Comment… » détectés puis **réécrits par un second appel** (un seul). Ce qui résiste est signalé, jamais maquillé.
+- Le texte support est **choisi dans le corpus, jamais inventé** : niveau, longueur officielle, type, thème, textes déjà travaillés par l'équipe écartés, textes fermés exclus. Le texte fautif d'une correction orthographique est fabriqué à partir d'un texte authentique, dont l'original est joint au corrigé.
+- Le prompt reste sous **7 600 octets** (le proxy refuse au-delà de 8 000 octets `strlen`). Un texte coupé est signalé à Ambassa.
+
+**Corrections annexes** : supprimer une question décale désormais ses points (bug existant), son corrigé et sa marque. `_baremeTotal`, l'avancement et le garde-fou comptent les sujets imposés ; un sujet au choix vaut 20 à lui seul. Le texte du commentaire composé n'est plus jugé à l'aune des 550 à 650 mots de la contraction.
+
+**Bancs** : `tests/banc_composition_ambassa.cjs` (38 contrôles, 4 mutations détectées), branché dans `deploy.yml` et `test.yml`. Vérifié au navigateur, sur un serveur simulé avec le corpus libre (1 280 px et 390 px) : 0 débordement, 0 erreur JS. Les autres bancs de l'Atelier restent verts (mobile 68/68, collaboratif 28/28…).
+
+⚠️ **Nouveau module** `plateforme/generateur.js` : ajouté aux listes de `deploy.yml` (modules obligatoires + jetons `?v=`), à `tools/versionner_atelier.cjs` et à `tests/verif_syntaxe_atelier.cjs`. Chaque appel consomme le quota IA habituel (`_consommerIA`, puis le plafond du serveur `ia_proxy.php`), plus un appel en cas de réécriture.
+
 ## ⚠️ Incident 25-26/09/2026 : payment_manuel.php en 500 après le déploiement du rapprochement SMS
 
 Lors du run 575 (fusion de #63), `_manuel_lib.php`, `_rapprochement_lib.php` et `payment_sms.php` n'étaient **pas** dans la liste explicite des fichiers `api/` déployés (étape 📋 de `deploy.yml`). Ils étaient bien suivis par git, donc le garde « 🧩 » n'a rien vu. Conséquence : `payment_manuel.php` a renvoyé 500 en production, ce qui cassait la déclaration des commandes manuelles.

@@ -55,6 +55,34 @@
     return { severite: severite, titre: titre, detail: detail || '', quoiFaire: quoiFaire || '', ancre: ancre || '' };
   }
 
+  /* Total noté : les questions, plus les sujets imposés. Quand tous les
+     sujets sont au choix et qu'aucune question ne compte, c'est un sujet qui
+     fait la note. */
+  function totalAvecSujets(ptsQuestions, sujets) {
+    var t = ptsQuestions || 0, imposes = 0, maxChoix = 0;
+    (sujets || []).forEach(function (s) {
+      var p = parseFloat(s && s.pts) || 0;
+      if (s.auChoix) maxChoix = Math.max(maxChoix, p); else imposes += p;
+    });
+    t += imposes;
+    if (!t && maxChoix) t = maxChoix;
+    return Math.round(t * 100) / 100;
+  }
+
+  /* Marques « à relire » posées par Ambassa : sur les questions
+     (ep.iaRelire[n][kind][i]) et sur les sujets (s.aRelire). */
+  function compterNonRelus(ep) {
+    var n = 0;
+    var r = (ep && ep.iaRelire) || {};
+    Object.keys(r).forEach(function (k) {
+      ['comp', 'expl'].forEach(function (kind) {
+        (r[k] && r[k][kind] || []).forEach(function (v) { if (v) n++; });
+      });
+    });
+    ((ep && ep.sujets) || []).forEach(function (s) { if (s && s.aRelire) n++; });
+    return n;
+  }
+
   /* Une règle issue d'une structure incertaine ne peut pas bloquer. */
   function pondere(structure, severite) {
     if (!structure) return severite;
@@ -110,11 +138,40 @@
         'renseignements'));
     }
 
-    /* --- 2. Aucun texte support --- */
-    if (!textes.length) {
+    /* --- 1 bis. Propositions d'Ambassa non relues ---
+       Le mode hybride laisse Ambassa rédiger, mais un sujet ne part pas en
+       classe sans qu'un enseignant l'ait lu. Chaque question ou sujet produit
+       par l'IA porte une marque « à relire » que seule une relecture retire. */
+    var nonRelus = compterNonRelus(ep);
+    if (nonRelus) {
+      out.push(ecart('ecart',
+        nonRelus + ' proposition' + (nonRelus > 1 ? 's' : '') + ' d’Ambassa à relire',
+        'Questions, corrigés ou sujets rédigés par l’IA et pas encore relus par l’équipe.',
+        'Relisez chaque élément marqué « à relire » : modifiez-le ou validez-le.',
+        'ambassa'));
+    }
+
+    /* Sujets rédigés (situation-problème, dissertation, texte fautif…). */
+    var sujets = (ep.sujets || []).filter(function (s) { return s && (String(s.texte || '').trim() || s.genre === 'presentation'); });
+    var sujetsRediges = sujets.filter(function (s) { return s.genre !== 'presentation'; });
+
+    /* --- 2. Aucun texte support ---
+       Une expression écrite, un texte fautif ou une dissertation portent sur
+       un SUJET rédigé et non sur un texte du corpus : ils ne sont pas en
+       faute. */
+    if (!textes.length && !sujetsRediges.length) {
       out.push(ecart('bloquant', 'Aucun texte support',
         'Une épreuve de français s’appuie sur au moins un texte.',
         'Ajoutez un texte depuis le corpus.', 'textes'));
+      return out;
+    }
+    if (!textes.length) {
+      var totS = totalAvecSujets(0, sujets);
+      var attenduS = M.totalAttendu(struct);
+      if (Math.abs(totS - attenduS) > 0.001) {
+        out.push(ecart('bloquant', 'Le barème totalise ' + totS + ' points au lieu de ' + attenduS,
+          'Un sujet remis à un candidat doit tomber juste.', 'Ajustez les points des sujets.', 'bareme'));
+      }
       return out;
     }
 
@@ -147,6 +204,16 @@
     if (struct && struct.texteSupport) {
       var ts = struct.texteSupport;
       textes.forEach(function (f, i) {
+        /* Le texte du commentaire composé (sujet au choix) n'est pas le texte
+           de la contraction : il se mesure en lignes (20 à 30), pas à
+           l'aune des 550-650 mots du texte argumentatif. */
+        var cq = ep.customQ && ep.customQ[f.n];
+        if (cq && cq.role === 'commentaire') {
+          var nc = f.words || compterMots(f.text);
+          if (nc > 400) out.push(ecart('conseil', 'Texte ' + (i + 1) + ' (commentaire) : ' + nc + ' mots',
+            'Le commentaire composé porte sur 20 à 30 lignes ou une vingtaine de vers.', 'Coupez l’extrait, en marquant les suppressions par […].', 'texte-' + f.n));
+          return;
+        }
         var n = f.words || compterMots(f.text);
         if (n < ts.min || n > ts.max) {
           out.push(ecart(pondere(struct, n < ts.min * 0.6 || n > ts.max * 1.6 ? 'bloquant' : 'ecart'),
@@ -160,7 +227,8 @@
     }
 
     /* --- 4. Nombre de sujets au choix --- */
-    if (struct && struct.sujetsAuChoix > 1) {
+    var sujetsChoix = sujetsRediges.filter(function (s) { return s.auChoix; }).length;
+    if (struct && struct.sujetsAuChoix > 1 && sujetsChoix + 1 < struct.sujetsAuChoix) {
       out.push(ecart('conseil',
         struct.sujetsAuChoix + ' sujets au choix attendus',
         struct.nom + ' propose ' + struct.sujetsAuChoix + ' sujets au choix au candidat. Le composeur produit pour l’instant un sujet unique.',
@@ -180,6 +248,10 @@
         });
       });
     });
+
+    /* Les sujets imposés (présentation, expression écrite…) comptent dans le
+       total ; un sujet AU CHOIX vaut 20 à lui seul et n'y entre pas. */
+    total = totalAvecSujets(total, sujets);
 
     if (nbQ === 0) {
       out.push(ecart('bloquant', 'Aucune question',
@@ -609,6 +681,8 @@
 
   root.CONFORMITE = {
     verifierEpreuve: verifierEpreuve,
+    totalAvecSujets: totalAvecSujets,
+    compterNonRelus: compterNonRelus,
     verifierCours: verifierCours,
     resume: resume,
     promptAmbassa: promptAmbassa,

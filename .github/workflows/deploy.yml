@@ -985,6 +985,17 @@ jobs:
       - name: 🔗 Atelier — chaque bouton du gabarit trouve-t-il sa fonction ?
         run: node tests/verif_liaisons_atelier.cjs
 
+      # ── ✨ AMBASSA COMPOSE, L'ÉQUIPE RELIT (26/09/2026). Les enseignants
+      #    voulaient que l'IA rédige l'épreuve entière. Le plan (barème,
+      #    parties, sujets au choix) est calculé depuis minesec.js pour les
+      #    23 structures ; la réponse de l'IA est recalée au point près ; la
+      #    question en « Pourquoi » est réécrite ; chaque proposition reste
+      #    « à relire » jusqu'à ce qu'un enseignant l'ait vue. Parcours réel
+      #    exécuté (harnais vm) avec un Ambassa simulé. Éprouvé par 4
+      #    mutations le 26/09/2026 : 1, 1, 2 et 1 au rouge.
+      - name: ✨ Atelier — Ambassa compose-t-elle une épreuve conforme ?
+        run: node tests/banc_composition_ambassa.cjs
+
       # La métadonnée et le contenu descendent séparément. Quand le second
       # transfert échoue, l'export Word annonce 387 mots au-dessus d'un texte
       # de 33 — et l'épreuve part en photocopie.
@@ -1522,7 +1533,7 @@ jobs:
           # minesec.js, c'est un ecran blanc, et le job serait vert.
           # Quatre incidents passes ont cette meme cause (fichier ecrit,
           # jamais « git add » — la CI ne le voit pas au checkout).
-          for m in index.html support.js minesec.js conformite.js exercices.js texte.js docx.js; do
+          for m in index.html support.js minesec.js conformite.js exercices.js generateur.js texte.js docx.js; do
             if [ ! -f "deploy/plateforme/$m" ]; then
               echo "::error title=Module manquant::plateforme/$m absent du checkout (oubli de git add ?) — deploiement interrompu."
               exit 1
@@ -1537,7 +1548,7 @@ jobs:
           # refuse un deploiement pour cet ecart-la, alors que les six modules
           # etaient rigoureusement identiques. git stocke du LF et le serveur
           # sert du LF : c'est le LF qui fait foi, ici comme dans le versionneur.
-          for m in support minesec conformite exercices texte docx; do
+          for m in support minesec conformite exercices generateur texte docx; do
             reel=$(tr -d '\r' < "deploy/plateforme/$m.js" | sha1sum | cut -c1-8)
             html=$(grep -oE "$m\.js\?v=[0-9a-f]+" deploy/plateforme/index.html | head -1 | sed 's/.*v=//')
             if [ "$reel" != "$html" ]; then
@@ -1783,7 +1794,7 @@ jobs:
           # valide un fichier qu'une etape ulterieure a ensuite reecrit, et la
           # production est partie fausse avec un job vert. On revalide ici, sur
           # les octets qui vont reellement etre televerses.
-          for m in support minesec conformite exercices texte docx; do
+          for m in support minesec conformite exercices generateur texte docx; do
             reel=$(tr -d '\r' < "deploy/plateforme/$m.js" | sha1sum | cut -c1-8)
             html=$(grep -oE "$m\.js\?v=[0-9a-f]+" deploy/plateforme/index.html | head -1 | sed 's/.*v=//')
             if [ "$reel" != "$html" ]; then
