@@ -879,13 +879,17 @@
     var prompt = ajusterPrompt(ctx);
     return appeler(prompt, sys, opts).then(function (o) {
       var res = validerEpreuve(o, ctx, opts);
-      if (!res.aReparer.length || !opts.reparer || !opts.reparer()) return res;
-      if (opts.etape) opts.etape('Ambassa réécrit ' + res.aReparer.length + ' question(s) non conforme(s)…');
-      /* Le proxy refuse deux appels du même compte à moins de 2 s. */
-      return new Promise(function (ok) { setTimeout(ok, opts.pause == null ? 2300 : opts.pause); })
-        .then(function () { return appeler(promptReparation(res.aReparer), sys, Object.assign({}, opts, { max: 1500 })); })
-        .then(function (o2) { return appliquerReparation(res, o2, opts); })
-        .catch(function () { return res; });
+      if (!res.aReparer.length || !opts.reparer) return res;
+      /* `reparer` peut répondre tout de suite (booléen) ou plus tard
+         (promesse) : l'Atelier demande l'accord au SERVEUR de quota. */
+      return Promise.resolve(opts.reparer()).then(function (accord) {
+        if (!accord) return res;
+        if (opts.etape) opts.etape('Ambassa réécrit ' + res.aReparer.length + ' question(s) non conforme(s)…');
+        /* Le proxy refuse deux appels du même compte à moins de 2 s. */
+        return new Promise(function (ok) { setTimeout(ok, opts.pause == null ? 2300 : opts.pause); })
+          .then(function () { return appeler(promptReparation(res.aReparer), sys, Object.assign({}, opts, { max: 1500 })); })
+          .then(function (o2) { return appliquerReparation(res, o2, opts); });
+      }).catch(function () { return res; });
     });
   }
 

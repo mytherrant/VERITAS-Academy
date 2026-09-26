@@ -254,6 +254,12 @@ const attendre = ms => new Promise(r => setTimeout(r, ms));
   dire(!!iaCall && iaCall.corps.token === 'JETON-BANC' && /FORMULATIONS PROSCRITES/.test(iaCall.corps.sysPrompt || ''),
     'l’appel porte le jeton du compte et la formation MINESEC en consigne système');
   dire(appelsIA === 2, 'la question en « Pourquoi » a déclenché UNE réécriture', appelsIA);
+  /* Le quota mensuel de la formule se décompte au SERVEUR, avant chaque appel
+     (composition PUIS réécriture) — pas dans le navigateur. */
+  const ordre = a.__journal.filter(x => /ia_proxy|action=quota/.test(x.url))
+    .map(x => /ia_proxy/.test(x.url) ? 'IA' : 'Q:' + ((x.corps || {}).genre || '?'));
+  dire(JSON.stringify(ordre) === JSON.stringify(['Q:ia', 'IA', 'Q:ia', 'IA']),
+    'chaque appel à Ambassa est précédé du décompte serveur du quota « ia »', JSON.stringify(ordre));
   const qs = a._qList(a.all.find(x => x.n === 12), 'comp');
   dire(qs.length === 3 && !/pourquoi/i.test(qs.join(' ')), 'les questions d’Ambassa sont dans l’épreuve, sans « Pourquoi »', JSON.stringify(qs));
   dire(Math.abs(a._baremeTotal() - 20) < 0.001, 'barème : 20 / 20', a._baremeTotal());
@@ -307,6 +313,29 @@ const attendre = ms => new Promise(r => setTimeout(r, ms));
     'expression écrite : une situation-problème /20, sans texte support', JSON.stringify(eb.sujets));
   const gb = vmConf(b).verifierEpreuve(eb, [], () => [], () => null);
   dire(!gb.some(x => x.severite === 'bloquant'), 'le garde-fou accepte une épreuve portée par un sujet rédigé', gb.map(x => x.titre).join(' | '));
+
+  /* Quota épuisé : le serveur répond 402, Ambassa n'est PAS appelée et le
+     panneau dit pourquoi. */
+  const q = atelier((url) => /action=quota/.test(url)
+    ? { status: 402, corps: { ok: false, utilise: 30, plafond: 30 } }
+    : /ia_proxy/.test(url) ? { corps: { text: JSON.stringify(REPONSE_BEPC) } } : { corps: { ok: true } });
+  await new Promise(r => q._ensureDraft(() => r()));
+  q._updateActive({ classe: '3e', epreuveCode: 'BEPC_ETUDE', etab: 'CES' });
+  q._composerAvecAmbassa('tout');
+  for (let i = 0; i < 40 && q.state.genBusy; i++) await attendre(50);
+  dire(!q.__journal.some(x => /ia_proxy/.test(x.url)) && /appels à Ambassa épuisé \(30 ce mois\)/.test(q.state.genErr || '') && !q.state.genBusy,
+    'quota mensuel épuisé : aucun appel à Ambassa, le panneau le dit', q.state.genErr);
+
+  /* ia_proxy : un abonné de l'Atelier PROUVÉ par son jeton n'est plus
+     plafonné à 5 appels/jour ; sans jeton, rien ne change. */
+  const px = fs.readFileSync(P('api/ia_proxy.php'), 'utf8');
+  dire(/vrt_account_active_plans\(\$verif\['acc'\], \$dbAtelier\)/.test(px)
+    && /\['ens_mois', 'ens', 'etab', 'pro'\]/.test(px)
+    && /if \(\$abonneAtelier && in_array\(\$userTier/.test(px)
+    && px.indexOf('$abonneAtelier && in_array') > px.indexOf('$userId = $utilisateurVerifie;'),
+    'ia_proxy.php : l’abonné de l’Atelier vérifié passe au palier enseignant, jamais sans jeton');
+  const plansAtelier = (fs.readFileSync(P('api/plateforme.php'), 'utf8').match(/function plat_plans_atelier[\s\S]*?return (\[[^\]]*\])/) || [])[1];
+  dire(plansAtelier === "['ens_mois', 'ens', 'etab', 'pro']", 'la liste des formules du proxy est celle de plat_plans_atelier()', plansAtelier);
 
   /* Sans classe : on n'appelle pas l'IA, on dit quoi faire. */
   const c = atelier(() => ({ corps: { ok: true } }));

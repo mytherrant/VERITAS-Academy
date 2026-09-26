@@ -29,7 +29,13 @@ Demande de Jacques : « Ma plateforme collaborative atelier de français ne pass
 - Les structures incertaines (ENIET 1 et 2, Probatoire industriel) transmettent leur réserve officielle à Ambassa, qui la reprend dans ses remarques.
 - Banc : 41 contrôles, deux nouvelles mutations détectées (délai de garde, réglages du proxy).
 
-⚠️ **Limite existante, non modifiée (décision commerciale)** : `ia_proxy.php` ne connaît pas les abonnements de l'Atelier. Un abonné connecté est compté au palier `free`, soit **5 appels IA par jour** ; un visiteur invité, au palier `anon` (2 par jour et par IP). Une composition coûte 1 appel (2 avec réécriture). Pour relever ce plafond, ajouter les abonnés de l'Atelier à `server_user_tier`, ou ajuster `IA_TIER_DAILY_JSON`.
+**DÉPLOYÉ** le 26/09/2026 (run 583, fusion de #71) : FTP confirmé pour `generateur.js`, `index.html`, `conformite.js`, `docx.js` et `ia_proxy.php`. Les sondes de production sont vertes.
+
+**Finalisation — le quota IA vendu est enfin celui qui s'applique (26/09/2026, suite)** :
+- Avant ce correctif, `ia_proxy.php` ne connaissait pas les abonnements de l'Atelier : un abonné tombait au palier `free` (5 appels par jour). Une formule vendue avec 120 ou 400 appels à Ambassa par mois (`plat_paliers`) ne pouvait donc pas être consommée. Désormais, un compte **prouvé par son jeton** et titulaire d'une formule Atelier active (`ens_mois`, `ens`, `etab` ou `pro`, même liste que `plat_plans_atelier()`) passe au palier `teach` (120 par jour). Sans jeton, rien ne change.
+- La composition (et sa réécriture) décompte désormais le quota **mensuel** de la formule côté serveur (`plateforme.php?action=quota`, genre `ia`, sous verrou, fermé en cas de panne) avant chaque appel. Le compteur local `_consommerIA` n'est plus utilisé pour la composition. Les autres usages d'Ambassa dans l'Atelier (QCM, relecture, assistant) restent sur le compteur local, borné par le plafond journalier du proxy.
+- `_consommerQuota(genre, suite, refus)` accepte un rappel `refus`, pour afficher le message dans le panneau, et un message propre au genre `ia`.
+- Banc : 45 contrôles (ordre quota → IA, refus 402 sans appel, palier du proxy), mutation M7 détectée.
 
 ⚠️ **Nouveau module** `plateforme/generateur.js` : ajouté aux listes de `deploy.yml` (modules obligatoires + jetons `?v=`), à `tools/versionner_atelier.cjs` et à `tests/verif_syntaxe_atelier.cjs`. Chaque appel consomme le quota IA habituel (`_consommerIA`, puis le plafond du serveur `ia_proxy.php`), plus un appel en cas de réécriture.
 
