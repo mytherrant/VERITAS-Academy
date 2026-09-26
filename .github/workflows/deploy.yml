@@ -2112,6 +2112,8 @@ jobs:
       #    était vert, car rien ne lisait cette réponse. Une panne ici efface la
       #    boutique, les formules et le calendrier de l'accueil : on l'exige.
       - name: 🛒 L'API publique répond-elle (catalogue de la boutique) ?
+        # Même si une sonde précédente a échoué : c'est ce qui dit si la boutique s'affiche.
+        if: ${{ !cancelled() }}
         run: |
           UA='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36'
           code=$(curl -s --compressed --max-time 30 -A "$UA" \

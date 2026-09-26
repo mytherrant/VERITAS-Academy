@@ -14,7 +14,20 @@
 // FAIL-CLOSED : si API_SECRET n'est pas défini côté serveur, on génère une valeur
 // aléatoire inconnue (toutes les requêtes seront refusées) plutôt que d'accepter un
 // secret connu. → Toujours définir API_SECRET dans payment_config.php.
-@include_once __DIR__ . '/payment_config.php';
+/* Ce fichier est édité à la main sur le serveur. Le 26/09/2026, une accolade
+   en trop (ligne 66, « Unmatched '}' ») y a fait tomber TOUT ce qui le charge —
+   le catalogue public compris : la vitrine a masqué la boutique. Une erreur de
+   syntaxe est désormais rattrapée et journalisée : on continue SANS les secrets
+   (fail-closed juste en dessous), au lieu de rendre un 500 muet partout. */
+if (!defined('VRT_CONFIG_CHARGEE')) {
+    define('VRT_CONFIG_CHARGEE', 1);
+    try {
+        @include_once __DIR__ . '/payment_config.php';
+    } catch (\ParseError $e) {
+        if (!defined('VRT_CONFIG_CASSEE')) define('VRT_CONFIG_CASSEE', 'ligne ' . $e->getLine() . ' : ' . $e->getMessage());
+        @error_log('[VERITAS] payment_config.php illisible — ' . VRT_CONFIG_CASSEE);
+    }
+}
 if (!defined('API_SECRET')) {
     define('API_SECRET', bin2hex(random_bytes(32)));
 }
