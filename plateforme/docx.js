@@ -223,12 +223,36 @@
         });
     });
 
+    /* Sujets rédigés : situation-problème, dissertation, texte fautif… */
+    (ep.sujets || []).forEach(function (s) {
+      if (s.genre === 'presentation') {
+        corps.push(p('Présentation de la copie' + (s.pts ? ' : ' + s.pts + ' pts' : ''),
+          { italique: true, taille: 20, couleur: '5A6678', espaceAvant: 160, espaceApres: 60 }));
+        return;
+      }
+      corps.push(p((s.auChoix ? 'SUJET AU CHOIX — ' : '') + String(s.titre || 'Sujet').toUpperCase() + (s.pts ? '  ·  ' + s.pts + ' pts' : ''),
+        { gras: true, taille: 20, couleur: '1A72BB', espaceAvant: 200, espaceApres: 80, bordureBas: true }));
+      corps.push(p(s.texte || '', { taille: 22, align: 'both', espaceApres: 120 }));
+    });
+
     if (ep.totalBareme != null) {
       corps.push(p('Total : ' + ep.totalBareme + ' / ' + (ep.total || 20) + ' points',
         { gras: true, taille: 20, align: 'right', couleur: '14375F', espaceAvant: 200, espaceApres: 0 }));
     }
     corps.push(p(ep.pied || 'Épreuve composée avec Corpus & Épreuves — Centre VÉRITAS',
       { taille: 15, align: 'center', couleur: '9AA5B5', espaceAvant: 320, espaceApres: 0 }));
+
+    /* Corrigé et barème, sur une page à part : on la détache avant de
+       photocopier la feuille du candidat. */
+    if (ep.corrige && ep.corrige.length) {
+      corps.push('<w:p><w:r><w:br w:type="page"/></w:r></w:p>');
+      corps.push(p('CORRIGÉ ET BARÈME — RÉSERVÉ À L’ENSEIGNANT', { gras: true, taille: 26, align: 'center', couleur: '14375F', espaceApres: 60 }));
+      corps.push(p((ep.titre || 'Épreuve de français') + (ep.classe ? '  ·  ' + ep.classe : ''), { taille: 20, align: 'center', couleur: '5A6678', espaceApres: 200 }));
+      ep.corrige.forEach(function (b) {
+        corps.push(p(b.titre || '', { gras: true, taille: 21, couleur: '1F9D55', espaceAvant: 160, espaceApres: 80, bordureBas: true }));
+        (b.lignes || []).forEach(function (l) { corps.push(p(l, { taille: 20, align: 'both', espaceApres: 70 })); });
+      });
+    }
 
     return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +

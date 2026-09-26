@@ -31,7 +31,7 @@ const crypto = require('crypto');
 
 const RACINE = path.resolve(__dirname, '..');
 const HTML = path.join(RACINE, 'plateforme/index.html');
-const MODULES = ['support', 'minesec', 'conformite', 'exercices', 'texte', 'docx'];
+const MODULES = ['support', 'minesec', 'conformite', 'exercices', 'generateur', 'texte', 'docx'];
 const VERIFIE = process.argv.includes('--verifie');
 
 const empreinte = f => crypto.createHash('sha1')

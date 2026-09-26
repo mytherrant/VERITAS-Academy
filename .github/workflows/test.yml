@@ -95,6 +95,9 @@ jobs:
       - name: 🎁 Le Code ami vaut-il aussi dans l'Atelier ?
         run: node tests/banc_code_ami_atelier.cjs
 
+      - name: ✨ Atelier — Ambassa compose-t-elle une épreuve conforme ?
+        run: node tests/banc_composition_ambassa.cjs
+
       - name: 🎁 Le Code ami vaut-il aussi dans la boutique ?
         run: node tests/banc_code_ami_boutique.cjs
 

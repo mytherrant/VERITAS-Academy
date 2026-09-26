@@ -30,10 +30,11 @@
 <meta name="twitter:card" content="summary_large_image">
 <script src="./support.js?v=2e38395c"></script>
 <script src="./minesec.js?v=570ac91b"></script>
-<script src="./conformite.js?v=69a07e4f"></script>
+<script src="./conformite.js?v=be09f1cb"></script>
 <script src="./exercices.js?v=c6d93301"></script>
+<script src="./generateur.js?v=8b1ce151"></script>
 <script src="./texte.js?v=43fa1e84"></script>
-<script src="./docx.js?v=2122627c"></script>
+<script src="./docx.js?v=8979cf66"></script>
 <!--vrt-habillage:tete-->
 <link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.20">
 <script>window.VRT_DATA=window.VRT_DATA||{"citations":[{"t":"Le génie, c’est un pour cent d’inspiration et quatre-vingt-dix-neuf pour cent de transpiration.","a":"Thomas Edison"},{"t":"Ce n’est pas parce que les choses sont difficiles que nous n’osons pas ; c’est parce que nous n’osons pas qu’elles sont difficiles.","a":"Sénèque"},{"t":"L’éducation est l’arme la plus puissante pour changer le monde.","a":"Nelson Mandela"},{"t":"Un peu chaque jour vaut mieux que beaucoup un seul jour.","a":"Proverbe"},{"t":"La chance sourit à l’esprit préparé.","a":"Louis Pasteur"},{"t":"Tomber sept fois, se relever huit.","a":"Proverbe japonais"}],"themeSombre":"\n      body{background:#0A1428!important}\n      [style*=\"background:#fff\"],[style*=\"background:#FAFBFE\"],[style*=\"background:#FCFDFE\"],[style*=\"background:#F7F9FD\"]{background:#132241!important}\n      [style*=\"background:#F4F5F8\"],[style*=\"background:#F4F6FB\"],[style*=\"background:#EFF2F7\"],[style*=\"background:#F5F9FF\"]{background:#0F1B33!important}\n      [style*=\"background:rgba(255,255,255,.96)\"]{background:rgba(13,25,48,.96)!important}\n      [style*=\"radial-gradient(1100px\"],[style*=\"radial-gradient(900px\"]{background:#0C1730!important}\n      [style*=\"linear-gradient(180deg,#FBF8F1\"]{background:#0C1730!important}\n      [style*=\"color:#001136\"]{color:#EEF3FC!important}\n      [style*=\"color:#0C2A6A\"]{color:#DCE6F8!important}\n      [style*=\"color:#4D5163\"],[style*=\"color:#6B5A42\"]{color:#B6C2D8!important}\n      [style*=\"color:#6E7385\"],[style*=\"color:#9BA6BE\"]{color:#8D9AB4!important}\n      [style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"]{border-color:#24334F!important}\n      [style*=\"\"],[style*=\"\"]{border-bottom-color:#24334F!important}\n      [style*=\"\"]{border-top-color:#24334F!important}\n      [style*=\"border-left:4px solid\"]{border-left-color:#FFC93C!important}\n      input,input::placeholder{color:#C7D2E6!important}\n    "};</script>
@@ -1042,6 +1043,8 @@
        Sans cela la règle s'appliquait à moitié — mesuré : la zone passait de
        184 à 165 px, elle rétrécissait au lieu de prendre la ligne. */
     .vrt-qrow > textarea{order:4;flex:1 1 100%!important;min-height:58px}
+    .vrt-qrow > .vrt-qcorr{order:5;flex-direction:column;gap:4px!important;padding-left:0!important}
+    .vrt-qrow > .vrt-qcorr > textarea{width:100%;box-sizing:border-box}
   }
   /* ---------- TÉLÉPHONE : dégager la planche de travail ----------
      Mesuré sur un gabarit de 390 px AVANT correction : les quatre cartes de
@@ -1807,6 +1810,48 @@
       <sc-if value="{{ emptySelection }}" hint-placeholder-val="{{ true }}">
       <div style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin-bottom:18px">Modifiez le titre et les <strong style="color:var(--c1a72bb,#1a72bb);font-weight:700">Renseignements</strong> ci-dessous, puis ajoutez des textes depuis l'onglet <button onClick="{{ goListe }}" style="background:none;border:none;color:var(--c1a72bb,#1a72bb);font-weight:700;cursor:pointer;padding:0;font-size:12.5px;font-family:inherit" style-hover="text-decoration:underline">Corpus {{ icSuite }}</button></div>
       </sc-if>
+      <!-- ============ COMPOSER AVEC AMBASSA — MODE HYBRIDE ============
+           Ambassa rédige l'épreuve entière (texte choisi dans le corpus,
+           questions, barème, corrigé, sujets) ; l'équipe relit et corrige
+           dans les mêmes champs que d'habitude. Chaque proposition porte la
+           marque « à relire » jusqu'à ce qu'un enseignant l'ait vue. -->
+      <section data-noprint="1" class="vrt-exsec" style="{{ genWrap }}">
+        <div class="vrt-exrow" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="vrt-hide-xs" style="flex:none">{{ genSceau }}</span>
+          <span style="flex:1 1 190px;min-width:170px">
+            <span style="display:block;font-family:Poppins;font-size:13.5px;font-weight:700;color:var(--c14375f,#14375f)">Composer avec Ambassa</span>
+            <span class="vrt-hide-xs" style="display:block;font-size:12px;color:var(--c8b97a8,#8b97a8);line-height:1.5">{{ genSous }}</span>
+          </span>
+          <span style="{{ genRelireChip }}">{{ genRelireLabel }}</span>
+          <button onClick="{{ genToggle }}" style="{{ exToggleStyle }}">{{ genToggleLabel }}</button>
+        </div>
+        <sc-if value="{{ genOuvert }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px">
+            <span style="{{ genCibleStyle }}">{{ genCible }}</span>
+            <input value="{{ genTheme }}" onChange="{{ setGenTheme }}" disabled="{{ cannotEdit }}" placeholder="Thème ou domaine de vie (facultatif) — ex. la santé, l’environnement, le travail" style="flex:1 1 240px;min-width:0;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 11px;font-size:12.5px;color:var(--c33404f,#33404f);background:var(--cffffff,#fff)">
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+            <button onClick="{{ genTout }}" title="Ambassa choisit le texte (sauf s’il y en a déjà), rédige questions, barème, corrigé et sujets. Consomme un appel IA." style="{{ genToutStyle }}">{{ genToutIcone }}<span>{{ genToutLabel }}</span></button>
+            <button onClick="{{ genCompleter }}" title="Vos questions restent intactes : Ambassa ajoute seulement le barème, le corrigé et les sujets manquants." style="{{ genBtnSec }}">Compléter sans toucher à nos questions</button>
+            <button onClick="{{ ajouterSujet }}" title="Ajouter à la main une situation-problème, une dissertation…" style="{{ genBtnSecEdit }}">＋ Sujet à la main</button>
+            <button onClick="{{ genToggleCorrige }}" style="{{ genBtnSec }}">{{ genCorrigeLabel }}</button>
+            <button onClick="{{ genToggleWord }}" title="Ajoute au fichier Word une dernière page « Corrigé et barème — réservé à l’enseignant »" style="{{ genBtnSec }}">{{ genWordLabel }}</button>
+            <button onClick="{{ genToutRelu }}" style="{{ genToutReluStyle }}">Tout marquer comme relu</button>
+          </div>
+          <div style="{{ genEtapeStyle }}">{{ genEtape }}</div>
+          <div style="{{ genErrStyle }}">{{ genErr }}</div>
+          <sc-if value="{{ genARapport }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:12px;background:var(--cf7f9fc,#f7f9fc);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:12px;color:var(--c5a6678,#5a6678)"><strong style="color:var(--c14375f,#14375f)">Texte support :</strong> {{ genRapportTexte }}</div>
+              <sc-for list="{{ genControles }}" as="c" hint-placeholder-count="4">
+                <div style="{{ c.style }}">{{ c.sceau }} {{ c.libelle }}</div>
+              </sc-for>
+              <div style="{{ genRemarquesStyle }}"><strong>À vérifier selon Ambassa :</strong> {{ genRemarques }}</div>
+              <div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);line-height:1.5">Relisez chaque élément marqué « à relire ». La marque disparaît dès que vous modifiez la question ou son corrigé, ou quand vous cliquez dessus. Tout reste modifiable par l’équipe, et l’historique garde chaque version.</div>
+            </div>
+          </sc-if>
+        </sc-if>
+      </section>
       <!-- ============ GARDE-FOU DE CONFORMITÉ MINESEC ============ -->
       <section data-noprint="1" style="{{ confWrap }}">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -2050,10 +2095,12 @@
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px"><span style="width:7px;height:7px;border-radius:50%;background:var(--c1a72bb,#1a72bb)"></span><span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c1a72bb,#1a72bb);font-family:Poppins">I. Compréhension</span><span style="{{ f.qEditedComp }}">modifié</span></div>
                     <div style="display:flex;flex-direction:column;gap:6px">
                       <sc-for list="{{ f.compItems }}" as="q" hint-placeholder-count="3">
-                        <div class="vrt-qrow" style="display:flex;gap:8px;align-items:flex-start;background:{{ q.rowBg }};border-radius:8px;padding:5px 8px">
+                        <div class="vrt-qrow" style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;background:{{ q.rowBg }};border-radius:8px;padding:5px 8px">
                           <span style="{{ q.numStyle }}" title="{{ q.niveauNom }}">{{ q.num }}</span>
                           <textarea value="{{ q.text }}" onChange="{{ q.set }}" disabled="{{ f.locked }}" rows="1" style="flex:1;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:7px;padding:6px 9px;font-size:13px;color:var(--c33404f,#33404f);line-height:1.45;resize:vertical;background:var(--cffffff,#fff);font-family:'Open Sans'"></textarea>
                           <input value="{{ q.pts }}" onChange="{{ q.setPts }}" disabled="{{ f.locked }}" type="number" step="0.5" min="0" placeholder="pts" title="Points attribués à cette question" style="width:54px;flex:none;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:7px;padding:6px 4px;font-size:12.5px;text-align:center;color:var(--c14375f,#14375f);font-weight:700;font-family:Poppins;background:var(--cffffff,#fff)"><button onClick="{{ q.remove }}" style="{{ f.qBtn }}" title="Supprimer" style-hover="border-color:var(--cc0392b,#c0392b);color:var(--cc0392b,#c0392b);background:var(--cfdecea,#fdecea)">{{ icClose }}</button>
+                          <button onClick="{{ q.relu }}" title="Proposée par Ambassa — cliquez quand vous l’avez relue" style="{{ q.relireStyle }}">à relire</button>
+                          <div class="vrt-qcorr" style="{{ q.corrStyle }}"><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--c1f9d55,#1f9d55);font-family:Poppins;flex:none;margin-top:7px">Corrigé</span><textarea value="{{ q.corrige }}" onChange="{{ q.setCorrige }}" disabled="{{ f.locked }}" rows="2" placeholder="Réponse attendue (réservée à l’enseignant)" style="flex:1;border:1px dashed var(--cb6e2c6,#b6e2c6);border-radius:7px;padding:6px 9px;font-size:12.5px;color:var(--c33404f,#33404f);line-height:1.45;resize:vertical;background:var(--cf3fbf5,#f3fbf5);font-family:'Open Sans'"></textarea></div>
                         </div>
                       </sc-for>
                     </div>
@@ -2061,10 +2108,12 @@
                     <div style="display:flex;align-items:center;gap:8px;margin:14px 0 9px"><span style="width:7px;height:7px;border-radius:50%;background:var(--cc26a12,#c26a12)"></span><span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--cc26a12,#c26a12);font-family:Poppins">II. Langue &amp; production</span><span style="{{ f.qEditedExpl }}">modifié</span></div>
                     <div style="display:flex;flex-direction:column;gap:6px">
                       <sc-for list="{{ f.explItems }}" as="q" hint-placeholder-count="3">
-                        <div class="vrt-qrow" style="display:flex;gap:8px;align-items:flex-start;background:{{ q.rowBg }};border-radius:8px;padding:5px 8px">
+                        <div class="vrt-qrow" style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;background:{{ q.rowBg }};border-radius:8px;padding:5px 8px">
                           <span style="{{ q.numStyle }}" title="{{ q.niveauNom }}">{{ q.num }}</span>
                           <textarea value="{{ q.text }}" onChange="{{ q.set }}" disabled="{{ f.locked }}" rows="1" style="flex:1;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:7px;padding:6px 9px;font-size:13px;color:var(--c33404f,#33404f);line-height:1.45;resize:vertical;background:var(--cffffff,#fff);font-family:'Open Sans'"></textarea>
                           <input value="{{ q.pts }}" onChange="{{ q.setPts }}" disabled="{{ f.locked }}" type="number" step="0.5" min="0" placeholder="pts" title="Points attribués à cette question" style="width:54px;flex:none;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:7px;padding:6px 4px;font-size:12.5px;text-align:center;color:var(--c14375f,#14375f);font-weight:700;font-family:Poppins;background:var(--cffffff,#fff)"><button onClick="{{ q.remove }}" style="{{ f.qBtn }}" title="Supprimer" style-hover="border-color:var(--cc0392b,#c0392b);color:var(--cc0392b,#c0392b);background:var(--cfdecea,#fdecea)">{{ icClose }}</button>
+                          <button onClick="{{ q.relu }}" title="Proposée par Ambassa — cliquez quand vous l’avez relue" style="{{ q.relireStyle }}">à relire</button>
+                          <div class="vrt-qcorr" style="{{ q.corrStyle }}"><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--c1f9d55,#1f9d55);font-family:Poppins;flex:none;margin-top:7px">Corrigé</span><textarea value="{{ q.corrige }}" onChange="{{ q.setCorrige }}" disabled="{{ f.locked }}" rows="2" placeholder="Réponse attendue (réservée à l’enseignant)" style="flex:1;border:1px dashed var(--cb6e2c6,#b6e2c6);border-radius:7px;padding:6px 9px;font-size:12.5px;color:var(--c33404f,#33404f);line-height:1.45;resize:vertical;background:var(--cf3fbf5,#f3fbf5);font-family:'Open Sans'"></textarea></div>
                         </div>
                       </sc-for>
                     </div>
@@ -2073,6 +2122,27 @@
                 </article>
               </sc-for>
             </div>
+            <!-- ===== SUJETS RÉDIGÉS (situation-problème, dissertation, texte fautif…) ===== -->
+            <sc-if value="{{ hasSujets }}" hint-placeholder-val="{{ false }}">
+            <section style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:13px;padding:16px 18px;margin-bottom:22px;box-shadow:0 2px 10px rgba(20,55,95,.05)">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap"><span style="width:7px;height:7px;border-radius:50%;background:var(--c1f9d55,#1f9d55)"></span><span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c1f9d55,#1f9d55);font-family:Poppins">Sujets rédigés</span><span style="font-size:11.5px;color:var(--c8b97a8,#8b97a8)">{{ sujetsSous }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <sc-for list="{{ sujetsItems }}" as="sj" hint-placeholder-count="2">
+                  <div style="{{ sj.carte }}">
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+                      <input value="{{ sj.titre }}" onChange="{{ sj.setTitre }}" disabled="{{ sj.locked }}" style="flex:1 1 200px;min-width:0;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:7px;padding:6px 9px;font-size:13px;font-weight:700;color:var(--c14375f,#14375f);font-family:Poppins;background:var(--cffffff,#fff)">
+                      <button onClick="{{ sj.basculerChoix }}" title="Un sujet au choix vaut 20 à lui seul et n’entre pas dans le total" style="{{ sj.choixStyle }}">{{ sj.choixLabel }}</button>
+                      <input value="{{ sj.pts }}" onChange="{{ sj.setPts }}" disabled="{{ sj.locked }}" type="number" step="0.5" min="0" placeholder="pts" style="width:58px;flex:none;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:7px;padding:6px 4px;font-size:12.5px;text-align:center;color:var(--c14375f,#14375f);font-weight:700;font-family:Poppins;background:var(--cffffff,#fff)">
+                      <button onClick="{{ sj.relu }}" title="Proposé par Ambassa — cliquez quand vous l’avez relu" style="{{ sj.relireStyle }}">à relire</button>
+                      <button onClick="{{ sj.remove }}" title="Retirer ce sujet" style="{{ sj.removeStyle }}">{{ icClose }}</button>
+                    </div>
+                    <textarea value="{{ sj.texte }}" onChange="{{ sj.setTexte }}" disabled="{{ sj.locked }}" rows="5" placeholder="Énoncé du sujet tel qu’il sera imprimé" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:9px 11px;font-size:13.5px;color:var(--c22303f,#22303f);line-height:1.6;resize:vertical;background:var(--cffffff,#fff);font-family:'Open Sans'"></textarea>
+                    <div style="{{ sj.corrStyle }}"><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--c1f9d55,#1f9d55);font-family:Poppins;flex:none;margin-top:7px">Corrigé</span><textarea value="{{ sj.corrige }}" onChange="{{ sj.setCorrige }}" disabled="{{ sj.locked }}" rows="4" placeholder="Attentes, plan possible, barème détaillé (réservé à l’enseignant)" style="flex:1;border:1px dashed var(--cb6e2c6,#b6e2c6);border-radius:7px;padding:6px 9px;font-size:12.5px;color:var(--c33404f,#33404f);line-height:1.45;resize:vertical;background:var(--cf3fbf5,#f3fbf5);font-family:'Open Sans'"></textarea></div>
+                  </div>
+                </sc-for>
+              </div>
+            </section>
+            </sc-if>
             <div style="background:linear-gradient(135deg,var(--c1a72bb,#1a72bb),var(--c134f88,#134f88));color:var(--cffffff,#fff);padding:22px 26px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;border-radius:14px;box-shadow:0 8px 24px rgba(20,55,95,.22);margin-bottom:22px">
               <div style="flex:1;min-width:200px"><div style="font-family:'Poppins';font-size:17px;font-weight:700;margin-bottom:5px">Générer l'épreuve</div><div style="font-size:12px;color:var(--cd6e6f5,#d6e6f5);line-height:1.55">Quota — vous : <span style="{{ meInlineStyle }}">{{ meRemaining }}/{{ meLimit }}</span> · équipe : <span style="{{ teamInlineStyle }}">{{ teamRemaining }}/{{ teamLimit }}</span> ce mois.</div></div>
               <sc-if value="{{ canGenerate }}" hint-placeholder-val="{{ true }}"><button onClick="{{ generate }}" style="background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:14px 26px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;border-radius:999px;font-family:'Poppins';box-shadow:0 4px 14px rgba(12,42,106,.35)" style-hover="background:var(--ce07f00,#e07f00)">Générer &amp; aperçu {{ icSuite }}</button></sc-if>
@@ -2575,7 +2645,13 @@
             <div style="display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--cd5e0ec,#d5e0ec);padding-bottom:6px;margin-bottom:12px"><h2 style="font-family:'Poppins';font-size:16px;font-weight:700;margin:0;color:var(--c14375f,#14375f)">Texte {{ f.pos }}</h2><span style="font-size:11px;color:var(--c7a8598,#7a8598);text-transform:uppercase;letter-spacing:.05em">{{ f.type }} · {{ f.words }} mots</span></div>
             <p style="font-size:14.5px;line-height:1.75;color:var(--c22303f,#22303f);margin:0;white-space:pre-wrap;text-wrap:pretty">{{ f.text }}</p>
             <p style="font-size:13px;font-style:italic;text-align:right;color:var(--c5a6678,#5a6678);margin:10px 0 16px">— {{ f.reference }}</p>
-            <div style="font-size:13px;color:var(--c22303f,#22303f)"><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">I. Compréhension</p><ol style="margin:0 0 12px;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.compQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">II. Langue et production</p><ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.explQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol></div>
+            <div style="{{ f.qBlocStyle }}"><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">I. Compréhension</p><ol style="margin:0 0 12px;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.compQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">II. Langue et production</p><ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.explQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol></div>
+          </section>
+        </sc-for>
+        <sc-for list="{{ printSujets }}" as="sj" hint-placeholder-count="1">
+          <section style="break-inside:avoid">
+            <div style="display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--cd5e0ec,#d5e0ec);padding-bottom:6px;margin-bottom:10px"><h2 style="font-family:'Poppins';font-size:16px;font-weight:700;margin:0;color:var(--c14375f,#14375f)">{{ sj.titre }}</h2><span style="margin-left:auto;font-size:12.5px;font-weight:700;color:var(--c14375f,#14375f);white-space:nowrap">{{ sj.pts }}</span></div>
+            <p style="font-size:14px;line-height:1.7;color:var(--c22303f,#22303f);margin:0;white-space:pre-wrap;text-wrap:pretty">{{ sj.texte }}</p>
           </section>
         </sc-for>
       </div>
@@ -3688,6 +3764,7 @@ class Component extends DCLogic {
          `accountId` — abonnement encaisse, rattache a personne. */
       compteId:(store&&store.compteId)||'',
       exOuvert:false,exType:'',exBusy:false,exErr:'',exResultat:null,
+      genOuvert:true,genBusy:false,genEtape:'',genErr:'',genRapport:null,genTheme:'',genCorrigeVisible:false,genCorrigeWord:true,
       coConfIA:null,coConfIABusy:false,coConfIAErr:'',
       coObjProp:null,coObjBusy:false,coObjErr:'',
       assistOuvert:false,assistSaisie:'',assistBusy:false,assistErr:'',
@@ -4821,6 +4898,215 @@ class Component extends DCLogic {
     const a=this._active();if(!a)return;
     const annexes=(a.annexes||[]).slice();annexes.splice(i,1);
     this._updateActive({annexes},'a retir\u00e9 un exercice compl\u00e9mentaire');
+  }
+  /* ═══ COMPOSITION HYBRIDE : AMBASSA REDIGE, L'EQUIPE RELIT ═══════════════
+     Les enseignants ne composaient pas : il fallait choisir le texte, ecrire
+     chaque question, repartir les points, rediger le corrige -- une soiree
+     par sujet. Ils demandaient qu'Ambassa fasse TOUT, et qu'il ne leur reste
+     qu'a relire et corriger.
+     Le composeur collaboratif n'est pas remplace : ce qu'Ambassa produit
+     tombe dans les MEMES champs que ce qu'un collegue saisit (customQ, pts),
+     plus un corrige par question et des sujets rediges. Chaque element porte
+     une marque « a relire » que seule une relecture humaine retire -- le
+     garde-fou de conformite la compte comme un ecart, et l'historique dit
+     qui a fait composer quoi.
+     Deux gestes :
+       « Tout composer »  Ambassa choisit le texte (sauf s'il y en a deja),
+                          redige questions, bareme, corrige et sujets.
+       « Completer »      les questions de l'equipe restent intactes ; Ambassa
+                          ajoute les points, le corrige et les sujets manquants.
+     Le PLAN (bareme, parties, sujets au choix) est calcule par
+     VRT_GENERATEUR depuis minesec.js, jamais laisse a l'IA. */
+  _structureDe(a){
+    let s=a&&a.epreuveCode?MINESEC.epreuveParCode(a.epreuveCode):null;
+    if(!s&&a&&a.classe){
+      const l=MINESEC.epreuvesParClasse(a.classe)||[];
+      s=l.find(e=>a.serie&&(e.series||[]).indexOf(a.serie)>=0)
+        ||l.find(e=>/tude de texte|Langue/.test(e.nom))||l[0]||null;
+    }
+    return s;
+  }
+  _aDuContenu(a){
+    if(!a)return false;
+    return !!(Object.keys(a.customQ||{}).length||Object.keys(a.pts||{}).length
+      ||(a.sujets||[]).some(x=>x&&x.texte)||Object.keys(a.corrige||{}).length);
+  }
+  _texteComplet(nn){
+    return new Promise(ok=>{
+      const f=this.all.find(x=>x.n===nn);
+      if(f&&!f._partiel&&f.text){ok(true);return;}
+      this._completerTexte(nn,r=>ok(!!r));
+    });
+  }
+  _composerAvecAmbassa(mode){
+    const st=this.state;
+    if(st.genBusy)return;
+    const perm=this._perm(this._me().role);
+    if(!perm.edit){this.setState({genOuvert:true,genErr:'Votre rôle ne permet pas de modifier cette épreuve.'});return;}
+    const a=this._active();
+    if(!a){this._ensureDraft(()=>this._composerAvecAmbassa(mode));return;}
+    if(a.status==='valide'&&!perm.validate){this.setState({genOuvert:true,genErr:'Cette épreuve est validée : repassez-la en brouillon pour la faire recomposer.'});return;}
+    const struct=this._structureDe(a);
+    if(!a.classe||!struct){
+      this.setState({genOuvert:true,genErr:'Choisissez d’abord la classe et la nature de l’épreuve dans les Renseignements : '
+        +'c’est elle qui fixe la structure et le barème qu’Ambassa doit suivre.'});
+      return;
+    }
+    const G=VRT_GENERATEUR;
+    const plan=G.planEpreuve(struct);
+    const textesChoisis=(a.textIds||[]).slice();
+    if(mode==='completer'&&plan.support==='texte'&&!textesChoisis.length)mode='tout';
+    if(mode==='tout'&&this._aDuContenu(a)&&typeof window!=='undefined'&&window.confirm
+      &&!window.confirm('Ambassa va réécrire les questions, le barème, le corrigé et les sujets de cette épreuve. '
+        +'Les textes déjà choisis sont conservés, et l’historique garde la version actuelle.\n\nContinuer ?'))return;
+    if(!this._consommerIA()){this.setState({genOuvert:true,genErr:this._messageQuotaIA()});return;}
+    const etape=t=>this.setState({genEtape:t});
+    this.setState({genBusy:true,genErr:'',genRapport:null,genOuvert:true,genEtape:'Choix du texte support dans le corpus…'});
+
+    /* 1. Les textes. Ceux que l'equipe a choisis font foi ; sinon on prend
+       le mieux classe du corpus pour la classe, la longueur et le type. */
+    const dejaVus=[];(st.epreuves||[]).forEach(e=>{if(e.id!==a.id)(e.textIds||[]).forEach(n=>dejaVus.push(n));});
+    const genre=(plan.productions[0]||{}).genre||(plan.sujets[0]||{}).genre||'';
+    const choisir=(bornes,g,exclure)=>{
+      const l=G.classerTextes(this.all,{classe:a.classe,theme:st.genTheme||'',bornes:bornes,genre:g,exclure:dejaVus.concat(exclure||[])});
+      return l.length?l[0].f.n:null;
+    };
+    const roles=[];   // [{n, role}]
+    if(plan.support==='texte'){
+      if(textesChoisis.length)textesChoisis.forEach(n=>roles.push({n:n,role:'support'}));
+      else{const n=choisir(plan.texteSupport,genre);if(n!=null)roles.push({n:n,role:'support'});}
+    }else if(plan.support==='fautif'||plan.support==='dictee'){
+      const n=(a.texteSource!=null&&mode==='completer')?a.texteSource:(textesChoisis[0]!=null?textesChoisis[0]:choisir(plan.texteSupport,plan.support));
+      if(n!=null)roles.push({n:n,role:plan.support});
+    }
+    if(plan.sujets.some(x=>x.genre==='commentaire')){
+      const deja=(a.textIds||[]).find(n=>a.customQ&&a.customQ[n]&&a.customQ[n].role==='commentaire');
+      const n2=deja!=null?deja:choisir({min:150,max:320},'commentaire',roles.map(r=>r.n));
+      if(n2!=null)roles.push({n:n2,role:'commentaire'});
+    }
+    if(plan.support!=='aucun'&&!roles.some(r=>r.role!=='commentaire')){
+      this.setState({genBusy:false,genEtape:'',genErr:'Aucun texte du corpus ouvert à votre abonnement ne convient à cette classe. Ajoutez un texte à la main, puis relancez.'});
+      return;
+    }
+    etape('Téléchargement du texte intégral…');
+    Promise.all(roles.map(r=>this._texteComplet(r.n))).then(oks=>{
+      if(oks.some(x=>!x)){
+        this.setState({genBusy:false,genEtape:'',genErr:'Le texte support n’a pas pu être téléchargé en entier. Réessayez dans un instant.'});
+        return;
+      }
+      const textes=roles.map(r=>Object.assign({},this.all.find(x=>x.n===r.n),{role:r.role}));
+      const principal=textes.find(t=>t.role!=='commentaire');
+      let fixes=null;
+      if(mode==='completer'){
+        fixes={};
+        textes.filter(t=>t.role==='support').forEach(t=>{fixes[t.n]={comp:this._qListOf(a,t,'comp'),expl:this._qListOf(a,t,'expl')};});
+      }
+      const ctx={plan:plan,struct:struct,classe:a.classe,serie:a.serie||'',theme:st.genTheme||'',textes:textes,fixes:fixes,
+        exemples:G.exemplesOfficiels(this.all,a.classe,principal?principal.n:null,2)};
+      etape('Ambassa rédige l’épreuve et son corrigé — une trentaine de secondes…');
+      return G.composer(ctx,{token:this._jeton(),url:this._apiUrl('ia_proxy.php'),etape:etape,
+        reparer:()=>this._consommerIA()})
+        .then(res=>this._appliquerComposition(a.id,res,ctx,struct,mode));
+    }).catch(e=>this.setState({genBusy:false,genEtape:'',genErr:(e&&e.message==='quota')
+      ?this._messageQuotaIA()
+      :(e&&/reponse_/.test(e.message||''))?'Ambassa a renvoyé une réponse incomplète : votre épreuve n’a pas été modifiée. Vous pouvez relancer (un nouvel appel IA sera décompté).'
+      :(e&&e.message==='delai')?'Ambassa n’a pas répondu à temps (plus de deux minutes). Votre épreuve n’a pas été modifiée : relancez dans un instant.'
+      :'Ambassa est injoignable pour le moment. Votre épreuve n’a pas été modifiée.'}));
+  }
+  _appliquerComposition(id,res,ctx,struct,mode){
+    const a=(this.state.epreuves||[]).find(e=>e.id===id);
+    if(!a){this.setState({genBusy:false,genEtape:''});return;}
+    const plan=ctx.plan;
+    const customQ={...(a.customQ||{})},pts={...(a.pts||{})},corrige={...(a.corrige||{})},iaRelire={...(a.iaRelire||{})};
+    Object.keys(res.questions).forEach(n=>{
+      const q=res.questions[n];
+      customQ[n]={comp:q.comp.map(x=>x.q),expl:q.expl.map(x=>x.q)};
+      pts[n]={comp:q.comp.map(x=>x.pts),expl:q.expl.map(x=>x.pts)};
+      corrige[n]={comp:q.comp.map(x=>x.corrige||''),expl:q.expl.map(x=>x.corrige||'')};
+      iaRelire[n]={comp:q.comp.map(()=>true),expl:q.expl.map(()=>true)};
+    });
+    /* Le texte du commentaire compose n'appelle pas de questions : il est le
+       support du sujet de type 2. */
+    const com=ctx.textes.find(t=>t.role==='commentaire');
+    if(com){customQ[com.n]={comp:[],expl:[],role:'commentaire'};pts[com.n]={comp:[],expl:[]};}
+    /* Sujets. En mode « completer », ce que l'equipe a deja redige reste. */
+    const anciens=a.sujets||[];
+    const source=ctx.textes.find(t=>t.role==='fautif'||t.role==='dictee');
+    const sujets=res.sujets.map((s,i)=>{
+      const ancien=anciens[i];
+      let corr=s.corrige||'';
+      if(source&&(s.genre==='fautif'||s.genre==='dictee')){
+        corr=(s.genre==='dictee'?'TEXTE DE LA DICTÉE':'TEXTE ORIGINAL')+' — '+(source.reference||source.author||'')+'\n'
+          +String(source.text||'')+'\n\n'+corr;
+      }
+      if(mode==='completer'&&ancien&&ancien.texte)
+        return {...ancien,pts:ancien.pts!=null?ancien.pts:s.pts,corrige:ancien.corrige||corr,
+          aRelire:!!(ancien.aRelire||(!ancien.corrige&&corr))};
+      return {id:'s'+i+'_'+Date.now().toString(36),genre:s.genre,titre:s.titre,texte:s.texte,pts:s.pts,
+        auChoix:s.auChoix,corrige:corr,aRelire:s.genre!=='presentation'};
+    });
+    let textIds;
+    if(plan.support==='texte')textIds=ctx.textes.filter(t=>t.role==='support').map(t=>t.n);
+    else textIds=[];
+    if(com)textIds=textIds.concat([com.n]);
+    const defautTitre=!a.title||a.title==='Nouvelle épreuve';
+    const defautConsigne=!a.consigne||/^Lis attentivement le\(s\) texte\(s\)/.test(a.consigne);
+    const patch={textIds,customQ,pts,corrige,iaRelire,sujets,
+      epreuveCode:a.epreuveCode||struct.code,
+      duree:a.duree&&a.duree!=='2 h'?a.duree:(struct.duree||a.duree),
+      coeff:a.coeff||(struct.coeff&&struct.coeff!=='—'?struct.coeff:''),
+      texteSource:source?source.n:null,
+      grilleIA:res.grille||[],
+      iaNote:{mode:mode,ts:Date.now(),remarques:res.remarques||'',controles:res.controles||[]}};
+    if((defautTitre||mode==='tout')&&res.titre)patch.title=res.titre;
+    if((defautConsigne||mode==='tout')&&res.consigne)patch.consigne=res.consigne;
+    this.setState({activeId:id},()=>{
+      this._updateActive(patch,mode==='tout'
+        ?'a fait composer l’épreuve par Ambassa — à relire'
+        :'a fait compléter l’épreuve par Ambassa (barème, corrigé, sujets) — à relire');
+      const ref=ctx.textes.filter(t=>t.role!=='commentaire').map(t=>'n°'+t.n+(t.reference?' — '+t.reference:'')).join(' · ');
+      this.setState({genBusy:false,genEtape:'',genCorrigeVisible:true,
+        genRapport:{controles:res.controles||[],remarques:res.remarques||'',texte:ref}});
+    });
+  }
+  /* Une relecture retire la marque. Modifier la question ou son corrige
+     vaut relecture : l'enseignant l'a eue sous les yeux. */
+  _marquerRelu(n,kind,i){
+    const a=this._active();if(!a)return;
+    const r={...(a.iaRelire||{})};const t={...(r[n]||{})};const l=(t[kind]||[]).slice();
+    if(!l[i])return;
+    l[i]=false;t[kind]=l;r[n]=t;
+    this._updateActive({iaRelire:r});
+  }
+  _toutRelu(){
+    const a=this._active();if(!a)return;
+    if(!this._perm(this._me().role).edit)return;
+    const n=CONFORMITE.compterNonRelus(a);if(!n)return;
+    this._updateActive({iaRelire:{},sujets:(a.sujets||[]).map(s=>({...s,aRelire:false}))},
+      'a relu et accepté '+n+' proposition'+(n>1?'s':'')+' d’Ambassa');
+  }
+  _setCorrige(n,kind,i,v){
+    const a=this._active();if(!a)return;
+    const c={...(a.corrige||{})};const t={...(c[n]||{})};const l=(t[kind]||[]).slice();l[i]=v;t[kind]=l;c[n]=t;
+    const r={...(a.iaRelire||{})};const tr={...(r[n]||{})};const lr=(tr[kind]||[]).slice();lr[i]=false;tr[kind]=lr;r[n]=tr;
+    this._updateActive({corrige:c,iaRelire:r});
+  }
+  _setSujet(i,champ,v){
+    const a=this._active();if(!a)return;
+    const l=(a.sujets||[]).slice();if(!l[i])return;
+    const x={...l[i],aRelire:false};
+    x[champ]=(champ==='pts')?(v===''?null:parseFloat(v)):(champ==='auChoix'?!!v:v);
+    l[i]=x;this._updateActive({sujets:l});
+  }
+  _ajouterSujet(){
+    const a=this._active();if(!a)return;
+    const l=(a.sujets||[]).concat([{id:'s'+Date.now().toString(36),genre:'expression',titre:'Sujet',texte:'',pts:null,auChoix:false,corrige:'',aRelire:false}]);
+    this._updateActive({sujets:l},'a ajouté un sujet');
+  }
+  _retirerSujet(i){
+    const a=this._active();if(!a)return;
+    const l=(a.sujets||[]).slice();l.splice(i,1);
+    this._updateActive({sujets:l},'a retiré un sujet');
   }
   /* ---- Panier de corpus -----------------------------------------------
      Un enseignant qui prepare une epreuve parcourt la base longtemps avant de
@@ -6097,6 +6383,28 @@ class Component extends DCLogic {
     this._consommerQuota('export',()=>this._fabriquerWord(a));
   }
   /* Fabrication proprement dite, appelee UNIQUEMENT apres accord du serveur. */
+  /* Corrige et bareme, pour la page « reservee a l'enseignant » de l'export.
+     La norme le demande (« toujours associer le corrige et le texte original
+     a l'epreuve proposee ») ; on ne l'imprime jamais sur la feuille du
+     candidat. */
+  _corrigePourExport(a){
+    const blocs=[];
+    (a.textIds||[]).forEach((n,ti)=>{const f=this.all.find(x=>x.n===n);if(!f)return;
+      [['comp','I. Compréhension'],['expl','II. Langue et production']].forEach(([k,t])=>{
+        const qs=this._qListOf(a,f,k);if(!qs.length)return;
+        const c=(a.corrige&&a.corrige[n]&&a.corrige[n][k])||[];
+        const pp=(a.pts&&a.pts[n]&&a.pts[n][k])||[];
+        blocs.push({titre:'Texte '+(ti+1)+' — '+t,lignes:qs.map((q,i)=>(i+1)+'. '+q
+          +(pp[i]!=null&&pp[i]!==''?' ('+pp[i]+' pt'+((parseFloat(pp[i])||0)>1?'s':'')+')':'')
+          +'\n   → '+(c[i]||'à compléter'))});});});
+    (a.sujets||[]).forEach(s=>{if(!s||!s.corrige)return;
+      blocs.push({titre:s.titre+(s.pts?' ('+s.pts+' pts)':''),lignes:[s.corrige]});});
+    if((a.grilleIA||[]).length)blocs.push({titre:'Grille de correction',
+      lignes:a.grilleIA.map(g=>'• '+g.critere+(g.points!=null?' — '+g.points+' pts':'')+(g.indicateurs?' : '+g.indicateurs:''))});
+    const stru=a.epreuveCode?MINESEC.epreuveParCode(a.epreuveCode):null;
+    if(stru&&stru.formulesCorrige&&stru.formulesCorrige.length)blocs.push({titre:'À rappeler aux correcteurs',lignes:stru.formulesCorrige});
+    return blocs.length?blocs:null;
+  }
   _fabriquerWord(a){
     const stru=a.epreuveCode?MINESEC.epreuveParCode(a.epreuveCode):null;
     const textes=(a.textIds||[]).map(nn=>this.all.find(x=>x.n===nn)).filter(Boolean).map(f=>({
@@ -6113,6 +6421,8 @@ class Component extends DCLogic {
       classe:a.classe||'',duree:a.duree||'',coeff:a.coeff||'',
       total:MINESEC.totalAttendu(stru),totalBareme:this._baremeTotal(),
       consigne:a.consigne||'',
+      sujets:(a.sujets||[]).filter(s=>s&&(s.texte||s.genre==='presentation')),
+      corrige:this.state.genCorrigeWord===false?null:this._corrigePourExport(a),
       pied:'Épreuve composée avec Atelier de Français — Centre VÉRITAS'
     },textes);
   }
@@ -6995,7 +7305,7 @@ class Component extends DCLogic {
     (a.textIds||[]).forEach(n=>{const f=this.all.find(x=>x.n===n);if(!f)return;
       ['comp','expl'].forEach(k=>{this._qList(f,k).forEach((q,i)=>{
         const p=this._qPts(n,k,i);if(p!==null)t+=(parseFloat(p)||0);});});});
-    return Math.round(t*100)/100;}
+    return CONFORMITE.totalAvecSujets(Math.round(t*100)/100,a.sujets||[]);}
   /* Applique le barème de la structure officielle : on répartit les points
      de chaque partie sur ses questions, au dixième près, et le reliquat va
      à la dernière — sinon le total tombe à 19,9. */
@@ -7023,8 +7333,10 @@ class Component extends DCLogic {
       ['comp','expl'].forEach(k=>{this._qListOf(e,f,k).forEach((q,i2)=>{nbQ++;
         const t=(e.pts&&e.pts[nn]&&e.pts[nn][k])?e.pts[nn][k][i2]:null;
         if(t!==null&&t!==undefined&&t!=='')total+=(parseFloat(t)||0);});});});
+    total=CONFORMITE.totalAvecSujets(total,e.sujets||[]);
+    const nbS=(e.sujets||[]).filter(x=>x&&x.texte).length;
     const jalons=[!!(e.title&&e.title.trim()),!!(e.etab&&e.classe),
-      (e.textIds||[]).length>0,nbQ>0,nbQ>0&&Math.abs(total-cible)<0.001];
+      (e.textIds||[]).length>0||nbS>0,nbQ+nbS>0,nbQ+nbS>0&&Math.abs(total-cible)<0.001];
     return Math.round(jalons.filter(Boolean).length/jalons.length*100);}
   /* Date d'épreuve saisie à la main : on accepte JJ/MM/AAAA et AAAA-MM-JJ. */
   _parseDate(v){const t=String(v||'').trim();if(!t)return null;
@@ -7090,7 +7402,17 @@ class Component extends DCLogic {
     return out.filter(x => !x.fini)
       .sort((a,b) => (a.urgence.poids - b.urgence.poids) || (a.date - b.date));
   }
-  _setQ(f,kind,idx,text){const a=this._active();if(!a)return;const list=this._qList(f,kind);if(idx==null){list.push(text||'Nouvelle question');}else if(text==null){list.splice(idx,1);}else{list[idx]=text;}const cq={...(a.customQ||{})};cq[f.n]={...(cq[f.n]||{comp:this._qList(f,'comp'),expl:this._qList(f,'expl')})};cq[f.n][kind]=list;this._updateActive({customQ:cq},'a modifié les questions ('+(kind==='comp'?'compréhension':'production')+') — texte n°'+f.n);}
+  /* Les points, le corrige et les marques « a relire » vivent dans des
+     tableaux paralleles aux questions : supprimer la 2e question sans les
+     decaler donnait sa note et son corrige a la 3e. */
+  _setQ(f,kind,idx,text){const a=this._active();if(!a)return;const list=this._qList(f,kind);if(idx==null){list.push(text||'Nouvelle question');}else if(text==null){list.splice(idx,1);}else{list[idx]=text;}const cq={...(a.customQ||{})};cq[f.n]={...(cq[f.n]||{comp:this._qList(f,'comp'),expl:this._qList(f,'expl')})};cq[f.n][kind]=list;
+    const patch={customQ:cq};
+    const aligner=(src,vider)=>{if(!src||!src[f.n]||!src[f.n][kind])return src;const o={...src};const t={...o[f.n]};const l=t[kind].slice();
+      if(text==null)l.splice(idx,1);else if(vider)l[idx]=false;t[kind]=l;o[f.n]=t;return o;};
+    if(idx!=null&&text==null){patch.pts=aligner(a.pts);patch.corrige=aligner(a.corrige);patch.iaRelire=aligner(a.iaRelire);}
+    else if(idx!=null){patch.iaRelire=aligner(a.iaRelire,true);}
+    Object.keys(patch).forEach(k=>{if(patch[k]===undefined)delete patch[k];});
+    this._updateActive(patch,'a modifié les questions ('+(kind==='comp'?'compréhension':'production')+') — texte n°'+f.n);}
   _go(s){this.setState({screen:s,notifOpen:false});if(typeof window!=='undefined')window.scrollTo(0,0);}
   /* Icone en anneau, comme sur la vitrine VERITAS : un cercle au trait fin,
      le glyphe centre dedans, aucun aplat de couleur. Le fond reste celui de
@@ -7153,6 +7475,7 @@ class Component extends DCLogic {
     arrowUp:[React.createElement('path',{key:1,d:'M12 19V5M5 12l7-7 7 7'})],
     arrowDown:[React.createElement('path',{key:1,d:'M12 5v14M19 12l-7 7-7-7'})],
     star:[React.createElement('path',{key:1,d:'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'})],
+    sparkle:[React.createElement('path',{key:1,d:'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z'}),React.createElement('path',{key:2,d:'M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z'})],
     swap:[React.createElement('path',{key:1,d:'M7 16H3l4 4M3 16h14M17 8h4l-4-4M21 8H7'})],
     chevronLeft:[React.createElement('path',{key:1,d:'M15 18l-6-6 6-6'})],
     sun:[React.createElement('circle',{key:1,cx:12,cy:12,r:4}),React.createElement('path',{key:2,d:'M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4'})],
@@ -7497,7 +7820,15 @@ class Component extends DCLogic {
       return 'display:grid;place-items:center;width:22px;height:22px;flex:none;margin-top:4px;'
         +'border-radius:50%;font-family:Poppins;font-size:11px;font-weight:700;color:'+c
         +';background:'+(nv?c+'1f':'var(--ceef2f7,#eef2f7)')+';border:1px solid '+(nv?c+'55':'var(--ce6ecf3,#e6ecf3)');};
-    const mkItems=(f,kind,color)=>this._qList(f,kind).map((t,qi)=>({num:qi+1,text:t,rowBg:qi%2?'var(--cf7f9fc,#f7f9fc)':'var(--cffffff,#fff)',numStyle:numStyleDe(t),niveauNom:(nivDe(t)?nivDe(t).nom:'Niveau non reconnu — commencez par un verbe de consigne'),pts:(this._qPts(f.n,kind,qi)===null?'':this._qPts(f.n,kind,qi)),setPts:e=>this._setPts(f.n,kind,qi,val(e)),set:e=>this._setQ(f,kind,qi,val(e)),remove:()=>{if(!qLocked)this._setQ(f,kind,qi,null);}}));
+    const relireDe=(n,kind,qi)=>!!(active&&active.iaRelire&&active.iaRelire[n]&&(active.iaRelire[n][kind]||[])[qi]);
+    const corrDe=(n,kind,qi)=>{const c=active&&active.corrige&&active.corrige[n];return (c&&(c[kind]||[])[qi])||'';};
+    const relireStyle='font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-family:Poppins;color:var(--c7b52c7,#7b52c7);background:var(--cefe8fa,#efe8fa);border:1px solid var(--cd9c9f2,#d9c9f2);border-radius:999px;padding:4px 9px;cursor:pointer;flex:none;margin-top:3px;white-space:nowrap';
+    const mkItems=(f,kind,color)=>this._qList(f,kind).map((t,qi)=>({num:qi+1,
+      relireStyle:relireDe(f.n,kind,qi)?relireStyle:hidden,
+      relu:()=>{if(!qLocked)this._marquerRelu(f.n,kind,qi);},
+      corrige:corrDe(f.n,kind,qi),
+      corrStyle:(st.genCorrigeVisible||corrDe(f.n,kind,qi)&&relireDe(f.n,kind,qi))?'flex:0 0 100%;box-sizing:border-box;display:flex;gap:8px;align-items:flex-start;margin:2px 0 3px;padding-left:32px;min-width:0':hidden,
+      setCorrige:e=>this._setCorrige(f.n,kind,qi,val(e)),text:t,rowBg:qi%2?'var(--cf7f9fc,#f7f9fc)':'var(--cffffff,#fff)',numStyle:numStyleDe(t),niveauNom:(nivDe(t)?nivDe(t).nom:'Niveau non reconnu — commencez par un verbe de consigne'),pts:(this._qPts(f.n,kind,qi)===null?'':this._qPts(f.n,kind,qi)),setPts:e=>this._setPts(f.n,kind,qi,val(e)),set:e=>this._setQ(f,kind,qi,val(e)),remove:()=>{if(!qLocked)this._setQ(f,kind,qi,null);}}));
     const hasCustomQ=(f,kind)=>{const a=active;return !!(a&&a.customQ&&a.customQ[f.n]&&a.customQ[f.n][kind]);};
     /* Le texte est rendu paragraphe par paragraphe : une replique de dialogue
        recoit un retrait pendant, si bien que le tiret sort dans la marge et
@@ -7571,7 +7902,8 @@ class Component extends DCLogic {
     const accountSwitch=(st.compteId?[]:st.users).map(u=>({name:u.name,initials:this._initials(u.name),avatar:this._av(u,36),role:u.role,current:u.id===me.id,currentChip:u.id===me.id?'font-size:11px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:3px 10px;border-radius:999px':hidden,rowStyle:'display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid '+(u.id===me.id?'var(--cbcd9f2,#bcd9f2)':'var(--ceef2f7,#eef2f7)')+';border-radius:11px;background:'+(u.id===me.id?'var(--cf5faff,#f5faff)':'var(--cffffff,#fff)')+';cursor:pointer;text-align:left',select:()=>this.setState({currentUserId:u.id,screen:'accueil'},()=>{this._persist();window.scrollTo(0,0);})}));
 
     const mkPrintQ=(f,kind)=>this._qList(f,kind).map((t,qi)=>{const p=this._qPts(f.n,kind,qi);return{text:t,pts:(p===null?'':'('+p+' pt'+((parseFloat(p)||0)>1?'s':'')+')'),ptsStyle:(p===null?'display:none':'font-weight:700;color:var(--c14375f,#14375f);white-space:nowrap;margin-left:6px')};});
-    const printFiches=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean).map((f,i)=>({pos:i+1,type:f.type,words:f.words,text:f.text||'',reference:f.reference||'',compList:this._qList(f,'comp'),explList:this._qList(f,'expl'),compQ:mkPrintQ(f,'comp'),explQ:mkPrintQ(f,'expl')}));
+    const printFiches=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean).map((f,i)=>({pos:i+1,
+      qBlocStyle:(this._qList(f,'comp').length||this._qList(f,'expl').length)?'font-size:13px;color:var(--c22303f,#22303f)':'display:none',type:f.type,words:f.words,text:f.text||'',reference:f.reference||'',compList:this._qList(f,'comp'),explList:this._qList(f,'expl'),compQ:mkPrintQ(f,'comp'),explQ:mkPrintQ(f,'expl')}));
     const epView={etab:ep.etab||'Établissement scolaire',title:ep.title||'Épreuve de français',classe:ep.classe||'—',duree:ep.duree||'—',coeff:ep.coeff||'—',date:ep.date||'',consigne:ep.consigne||''};
 
     /* ---- Accueil ------------------------------------------------------
@@ -8949,6 +9281,64 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
         ?'width:40px;height:40px;border-radius:10px;border:1px solid var(--ce6ecf3,#e6ecf3);background:var(--cffffff,#fff);display:grid;place-items:center;cursor:pointer;flex:none'
         :hidden,
       /* --- exercices complementaires --- */
+      /* --- composer avec Ambassa (mode hybride) --- */
+      genWrap:'background:linear-gradient(180deg,var(--cf5faff,#f5faff),var(--cffffff,#fff));border:1px solid var(--cbcd9f2,#bcd9f2);border-radius:12px;padding:14px 16px;margin-bottom:18px'+(perm.edit&&perm.ia?'':';display:none'),
+      genSceau:this._icoRond('sparkle','var(--c1a72bb,#1a72bb)',36),
+      genSous:'Ambassa rédige l’épreuve entière selon le descriptif MINESEC — texte choisi dans le corpus, questions, barème, corrigé et sujets. Vous relisez et corrigez.',
+      genOuvert:st.genOuvert,
+      genToggle:()=>this.setState({genOuvert:!st.genOuvert,genErr:''}),
+      genToggleLabel:st.genOuvert?'Replier':'Ouvrir',
+      genCible:(()=>{const s2=this._structureDe(active);if(!active||!active.classe)return'Classe à choisir dans les Renseignements';
+        return s2?(active.classe+' · '+s2.nom+' · '+MINESEC.totalAttendu(s2)+' pts'):'Nature de l’épreuve à choisir';})(),
+      genCibleStyle:'font-size:11.5px;font-weight:700;font-family:Poppins;color:var(--c14375f,#14375f);background:var(--ce7f1fb,#e7f1fb);border-radius:999px;padding:5px 11px;flex:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap',
+      genTheme:st.genTheme||'',
+      setGenTheme:e=>this.setState({genTheme:val(e).slice(0,120)}),
+      genTout:()=>this._composerAvecAmbassa('tout'),
+      genCompleter:()=>this._composerAvecAmbassa('completer'),
+      genToutIcone:this._icon('sparkle',st.genBusy?'var(--c8b97a8,#8b97a8)':'var(--cffffff,#fff)',15),
+      genToutLabel:st.genBusy?'Ambassa compose…':'Tout composer avec Ambassa',
+      genToutStyle:'display:inline-flex;align-items:center;gap:7px;border:none;padding:9px 16px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:'+(st.genBusy?'default':'pointer')
+        +';color:var(--cffffff,#fff);background:'+(st.genBusy?'var(--cc9d3df,#c9d3df)':'var(--cf39200,#f39200)')+';box-shadow:0 3px 10px rgba(12,42,106,.18)',
+      genBtnSec:'background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c14375f,#14375f);padding:8px 13px;font-size:12px;font-weight:600;font-family:Poppins;border-radius:999px;cursor:pointer',
+      genBtnSecEdit:perm.edit?'background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);color:var(--c5a6678,#5a6678);padding:8px 13px;font-size:12px;font-weight:600;font-family:Poppins;border-radius:999px;cursor:pointer':hidden,
+      ajouterSujet:()=>{if(perm.edit)this._ensureDraft(()=>this._ajouterSujet());},
+      genToggleCorrige:()=>this.setState({genCorrigeVisible:!st.genCorrigeVisible}),
+      genCorrigeLabel:st.genCorrigeVisible?'Masquer le corrigé':'Afficher le corrigé',
+      genToggleWord:()=>this.setState({genCorrigeWord:st.genCorrigeWord===false}),
+      genWordLabel:(st.genCorrigeWord===false?'☐':'☑')+' Corrigé joint à l’export Word',
+      genToutRelu:()=>this._toutRelu(),
+      genToutReluStyle:(active&&CONFORMITE.compterNonRelus(active)&&perm.edit)?'background:var(--c7b52c7,#7b52c7);border:none;color:var(--cffffff,#fff);padding:8px 13px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer':hidden,
+      genRelireLabel:(()=>{const n=active?CONFORMITE.compterNonRelus(active):0;return n+' à relire';})(),
+      genRelireChip:(active&&CONFORMITE.compterNonRelus(active))?'font-size:11.5px;font-weight:700;font-family:Poppins;padding:3px 10px;border-radius:999px;flex:none;color:var(--c7b52c7,#7b52c7);background:var(--cefe8fa,#efe8fa)':hidden,
+      genEtape:st.genEtape||'',
+      genEtapeStyle:st.genBusy?'margin-top:11px;font-size:12.5px;color:var(--c1a72bb,#1a72bb);font-weight:600':hidden,
+      genErr:st.genErr||'',
+      genErrStyle:st.genErr?'margin-top:11px;padding:10px 13px;border-radius:10px;background:var(--cfffaf2,#fffaf2);border:1px solid var(--cf5e3c8,#f5e3c8);color:var(--c8a5a14,#8a5a14);font-size:12.5px;line-height:1.5':hidden,
+      genARapport:!!st.genRapport,
+      genRapportTexte:(st.genRapport&&st.genRapport.texte)||'aucun (sujet rédigé)',
+      genControles:((st.genRapport&&st.genRapport.controles)||[]).map(c=>({libelle:c.libelle,
+        sceau:c.ok?'✓':'⚠',
+        style:'font-size:12.5px;line-height:1.5;font-weight:600;color:'+(c.ok?'var(--c1f9d55,#1f9d55)':'var(--cc26a12,#c26a12)')})),
+      genRemarques:(st.genRapport&&st.genRapport.remarques)||'',
+      genRemarquesStyle:(st.genRapport&&st.genRapport.remarques)?'font-size:12px;color:var(--c5a6678,#5a6678);line-height:1.55':hidden,
+      /* --- sujets rediges --- */
+      hasSujets:!!(active&&(active.sujets||[]).length),
+      sujetsSous:(()=>{const l=(active&&active.sujets)||[];const c=l.filter(x=>x.auChoix).length;
+        return c?(c+' sujet'+(c>1?'s':'')+' au choix : chacun vaut 20 à lui seul'):'comptés dans le barème';})(),
+      sujetsItems:((active&&active.sujets)||[]).map((x,i)=>({
+        titre:x.titre||'',texte:x.texte||'',pts:(x.pts==null?'':x.pts),corrige:x.corrige||'',locked:qLocked,
+        carte:'border:1px solid '+(x.aRelire?'var(--cd9c9f2,#d9c9f2)':'var(--ceef2f7,#eef2f7)')+';border-radius:10px;padding:11px 12px;background:'+(x.aRelire?'var(--cfaf7fe,#faf7fe)':'var(--cfbfcfe,#fbfcfe)'),
+        setTitre:e=>this._setSujet(i,'titre',val(e)),setTexte:e=>this._setSujet(i,'texte',val(e)),
+        setPts:e=>this._setSujet(i,'pts',val(e)),setCorrige:e=>this._setSujet(i,'corrige',val(e)),
+        basculerChoix:()=>{if(!qLocked)this._setSujet(i,'auChoix',!x.auChoix);},
+        choixLabel:x.auChoix?'au choix':'imposé',
+        choixStyle:'font-size:10.5px;font-weight:700;font-family:Poppins;border-radius:999px;padding:4px 10px;cursor:pointer;flex:none;border:1px solid '
+          +(x.auChoix?'var(--cf0d9b0,#f0d9b0);color:var(--cc26a12,#c26a12);background:var(--cfdefdb,#fdefdb)':'var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);background:var(--cffffff,#fff)'),
+        relu:()=>{if(!qLocked)this._setSujet(i,'aRelire',false);},
+        relireStyle:x.aRelire?relireStyle:hidden,
+        remove:()=>{if(!qLocked)this._retirerSujet(i);},
+        removeStyle:qLocked?hidden:qBtnStyle,
+        corrStyle:(st.genCorrigeVisible||(x.corrige&&x.aRelire))?'display:flex;gap:8px;align-items:flex-start;margin-top:8px':hidden})),
       exWrap:'background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:14px 16px;margin-bottom:18px',
       exSceau:this._icoRond('puzzle','var(--c7b52c7,#7b52c7)',36),
       exSous:'QCM, vrai/faux, r\u00e9sum\u00e9 et analyse par Ambassa \u00b7 grille, anagrammes et texte \u00e0 trous calcul\u00e9s sur place',
@@ -9572,7 +9962,12 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       exportWordStyle:perm.imprimer
         ?'margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--cffffff,#fff);border:1px solid var(--cbcd9f2,#bcd9f2);color:var(--c1a72bb,#1a72bb);padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;border-radius:999px;font-family:Poppins'
         :hidden,
-      epView,printFiches,doPrint:()=>window.print()
+      epView,printFiches,doPrint:()=>window.print(),
+      /* Sujets rediges, sur la feuille du candidat : jamais leur corrige. */
+      printSujets:((active&&active.sujets)||[]).filter(x=>x&&(x.texte||x.genre==='presentation')).map(x=>({
+        titre:(x.auChoix?'Sujet au choix \u2014 ':'')+(x.titre||'Sujet'),
+        pts:(x.pts!=null&&x.pts!=='')?('/ '+x.pts+' pt'+((parseFloat(x.pts)||0)>1?'s':'')):'',
+        texte:x.genre==='presentation'?'':(x.texte||'')})),
     };
   }
 }
