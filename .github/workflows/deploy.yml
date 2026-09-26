@@ -2037,40 +2037,6 @@ jobs:
           fi
           echo "✅ La production sert l'habillage déployé (version $VER)."
 
-      # ── 🛒 L'API PUBLIQUE RÉPOND-ELLE ? ────────────────────────────────────
-      #    Le 26/09/2026, public_data.php répondait HTTP 500 avec ZÉRO octet
-      #    (mb_substr sans garde, mbstring absent de l'hébergement) : la vitrine,
-      #    privée de catalogue, masquait toute la boutique — et le déploiement
-      #    était vert, car rien ne lisait cette réponse. Une panne ici efface la
-      #    boutique, les formules et le calendrier de l'accueil : on l'exige.
-      - name: 🛒 L'API publique répond-elle (catalogue de la boutique) ?
-        run: |
-          UA='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36'
-          code=$(curl -s --compressed --max-time 30 -A "$UA" \
-            -H 'Accept: application/json,text/html;q=0.9,*/*;q=0.8' -H 'Accept-Language: fr-FR,fr;q=0.9' \
-            -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-origin' \
-            -o /tmp/pd.json -w '%{http_code}' "https://veritas-school.com/api/public_data.php?t=$(date +%s)" || echo 000)
-          echo "public_data.php → HTTP $code, $(wc -c < /tmp/pd.json 2>/dev/null || echo 0) octets"
-          if [ "$code" = "403" ]; then
-            echo "::warning title=API publique non vérifiée::la sentinelle a refusé la sonde (403) — vérifier à la main /api/public_data.php"
-            exit 0
-          fi
-          python3 - <<'PY'
-          import json, sys
-          try:
-              d = json.load(open('/tmp/pd.json', encoding='utf-8'))
-          except Exception as e:
-              print("::error title=API publique en panne::public_data.php ne renvoie pas de JSON (%s). La vitrine masque alors la boutique." % e)
-              sys.exit(1)
-          if not isinstance(d, dict) or 'boutique' not in d:
-              print("::error title=API publique incomplète::pas de clé « boutique » dans la réponse.")
-              sys.exit(1)
-          n = len(d.get('boutique') or [])
-          print("✅ API publique : %d ouvrage(s) en boutique, %d formule(s)." % (n, len(d.get('elearning_plans') or [])))
-          if n == 0:
-              print("::warning title=Boutique vide::l'API répond, mais aucun ouvrage n'est publiable — la vitrine masquera la boutique.")
-          PY
-
       - name: 🔎 Vérifier le RAG (biblio_index.db présent sur le serveur)
         if: always()
         run: |
@@ -2138,6 +2104,44 @@ jobs:
           else echo "::error title=gate.js::livrets/gate.js répond $c sans le formulaire de preuve"; ko=$((ko+1)); fi
           echo "Sonde SMS : $ko erreur(s), $bloque indéterminée(s)."
           [ "$ko" -eq 0 ]
+
+      # ── 🛒 L'API PUBLIQUE RÉPOND-ELLE ? ────────────────────────────────────
+      #    Le 26/09/2026, public_data.php répondait HTTP 500 avec ZÉRO octet
+      #    (mb_substr sans garde, mbstring absent de l'hébergement) : la vitrine,
+      #    privée de catalogue, masquait toute la boutique — et le déploiement
+      #    était vert, car rien ne lisait cette réponse. Une panne ici efface la
+      #    boutique, les formules et le calendrier de l'accueil : on l'exige.
+      - name: 🛒 L'API publique répond-elle (catalogue de la boutique) ?
+        run: |
+          UA='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36'
+          code=$(curl -s --compressed --max-time 30 -A "$UA" \
+            -H 'Accept: application/json,text/html;q=0.9,*/*;q=0.8' -H 'Accept-Language: fr-FR,fr;q=0.9' \
+            -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-origin' \
+            -o /tmp/pd.json -w '%{http_code}' "https://veritas-school.com/api/public_data.php?t=$(date +%s)" || echo 000)
+          echo "public_data.php → HTTP $code, $(wc -c < /tmp/pd.json 2>/dev/null || echo 0) octets"
+          if [ "$code" = "403" ]; then
+            echo "::warning title=API publique non vérifiée::la sentinelle a refusé la sonde (403) — vérifier à la main /api/public_data.php"
+            exit 0
+          fi
+          python3 - <<'PY'
+          import json, sys
+          try:
+              d = json.load(open('/tmp/pd.json', encoding='utf-8'))
+          except Exception as e:
+              print("::error title=API publique en panne::public_data.php ne renvoie pas de JSON (%s). La vitrine masque alors la boutique." % e)
+              sys.exit(1)
+          if isinstance(d, dict) and d.get('fatal'):
+              f = d['fatal']
+              print("::error title=API publique : erreur fatale::%s ligne %s — %s" % (f.get('fichier'), f.get('ligne'), f.get('message')))
+              sys.exit(1)
+          if not isinstance(d, dict) or 'boutique' not in d:
+              print("::error title=API publique incomplète::pas de clé « boutique » dans la réponse.")
+              sys.exit(1)
+          n = len(d.get('boutique') or [])
+          print("✅ API publique : %d ouvrage(s) en boutique, %d formule(s)." % (n, len(d.get('elearning_plans') or [])))
+          if n == 0:
+              print("::warning title=Boutique vide::l'API répond, mais aucun ouvrage n'est publiable — la vitrine masquera la boutique.")
+          PY
 
       - name: 🔁 Rappel — version du Service Worker
         if: always()
