@@ -32,7 +32,7 @@
 <script src="./minesec.js?v=570ac91b"></script>
 <script src="./conformite.js?v=be09f1cb"></script>
 <script src="./exercices.js?v=c6d93301"></script>
-<script src="./generateur.js?v=8b1ce151"></script>
+<script src="./generateur.js?v=b7869fd7"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=8979cf66"></script>
 <!--vrt-habillage:tete-->
@@ -4727,9 +4727,12 @@ class Component extends DCLogic {
      un geste a la portee de tout le monde. Le compromis coute peu : le corpus
      lui-meme descend du serveur, donc composer hors ligne n'etait de toute
      facon pas possible. On le DIT clairement plutot que d'echouer en silence. */
-  _consommerQuota(genre,suite){
+  _consommerQuota(genre,suite,refus){
+    /* `refus` (facultatif) recoit le message au lieu de l'avis flottant :
+       le panneau d'Ambassa l'affiche la ou l'enseignant regarde. */
+    const dire=(m)=>{if(refus)refus(m);else this._avis(m,'ko');};
     const t=this._jeton();
-    if(!t){this._avis('Reconnectez-vous pour continuer.','ko');return;}
+    if(!t){dire('Reconnectez-vous pour continuer.');return;}
     /* DELAI DE GARDE. Un serveur qui ne repond RIEN (proxy qui avale la
        requete, LiteSpeed qui tient la connexion ouverte) laisse la promesse en
        suspens pour toujours : le `.catch` ne part jamais et l'enseignant reste
@@ -4755,17 +4758,19 @@ class Component extends DCLogic {
         }
         if(http===402){
           const p=(j&&j.plafond>=0)?(' ('+j.plafond+' ce mois)'):'';
-          this._avis(genre==='export'
+          dire(genre==='export'
             ?('Quota d’exports épuisé'+p+'. Souscrivez un plan supérieur pour en obtenir davantage.')
-            :('Quota d’épreuves épuisé'+p+'. Souscrivez un plan supérieur pour en obtenir davantage.'),'ko');
+            :genre==='ia'
+            ?('Quota d’appels à Ambassa épuisé'+p+'. Souscrivez un plan supérieur pour en obtenir davantage.')
+            :('Quota d’épreuves épuisé'+p+'. Souscrivez un plan supérieur pour en obtenir davantage.'));
           return;
         }
-        this._avis((j&&j.error)||('Le serveur a refusé la demande (erreur '+http+').'),'ko');
+        dire((j&&j.error)||('Le serveur a refusé la demande (erreur '+http+').'));
       })
       .catch(e=>{desarmer();
-        this._avis((e&&e.name==='AbortError')
+        dire((e&&e.name==='AbortError')
           ?'Le serveur n’a pas répondu à temps : votre quota n’a pas pu être vérifié. Réessayez dans un instant.'
-          :'Serveur injoignable : impossible de vérifier votre quota. Reconnectez-vous au réseau et réessayez.','ko');});
+          :'Serveur injoignable : impossible de vérifier votre quota. Reconnectez-vous au réseau et réessayez.');});
   }
   /* Reflet local du compteur serveur, pour que l'ecran affiche un chiffre juste
      sans jamais s'en servir comme d'une autorisation. */
@@ -4959,9 +4964,21 @@ class Component extends DCLogic {
     if(mode==='tout'&&this._aDuContenu(a)&&typeof window!=='undefined'&&window.confirm
       &&!window.confirm('Ambassa va réécrire les questions, le barème, le corrigé et les sujets de cette épreuve. '
         +'Les textes déjà choisis sont conservés, et l’historique garde la version actuelle.\n\nContinuer ?'))return;
-    if(!this._consommerIA()){this.setState({genOuvert:true,genErr:this._messageQuotaIA()});return;}
+    /* LE QUOTA SE DEMANDE AU SERVEUR. La formule de l'Atelier vend un nombre
+       d'appels a Ambassa par mois (plat_paliers : 30, 120 ou 400) ; le
+       compteur local `_consommerIA` se contournait en vidant le stockage du
+       navigateur et laissait le quota paye sans effet. On decompte donc ici,
+       sous verrou, avant tout appel -- ferme en cas de panne, comme les
+       exports. */
+    this.setState({genBusy:true,genErr:'',genRapport:null,genOuvert:true,genEtape:'Vérification de votre quota Ambassa…'});
+    this._consommerQuota('ia',()=>this._lancerComposition(mode,a,struct,plan,textesChoisis),
+      m=>this.setState({genBusy:false,genEtape:'',genErr:m}));
+  }
+  _lancerComposition(mode,a,struct,plan,textesChoisis){
+    const st=this.state;
+    const G=VRT_GENERATEUR;
     const etape=t=>this.setState({genEtape:t});
-    this.setState({genBusy:true,genErr:'',genRapport:null,genOuvert:true,genEtape:'Choix du texte support dans le corpus…'});
+    etape('Choix du texte support dans le corpus…');
 
     /* 1. Les textes. Ceux que l'equipe a choisis font foi ; sinon on prend
        le mieux classe du corpus pour la classe, la longueur et le type. */
@@ -5005,7 +5022,7 @@ class Component extends DCLogic {
         exemples:G.exemplesOfficiels(this.all,a.classe,principal?principal.n:null,2)};
       etape('Ambassa rédige l’épreuve et son corrigé — une trentaine de secondes…');
       return G.composer(ctx,{token:this._jeton(),url:this._apiUrl('ia_proxy.php'),etape:etape,
-        reparer:()=>this._consommerIA()})
+        reparer:()=>new Promise(ok=>this._consommerQuota('ia',()=>ok(true),()=>ok(false)))})
         .then(res=>this._appliquerComposition(a.id,res,ctx,struct,mode));
     }).catch(e=>this.setState({genBusy:false,genEtape:'',genErr:(e&&e.message==='quota')
       ?this._messageQuotaIA()

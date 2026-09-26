@@ -270,6 +270,7 @@ if ($IA_GLOBAL_DAILY_MAX > 0 && $gCount >= $IA_GLOBAL_DAILY_MAX) {
 // avant, mais on ÉCRÊTE les paliers à privilège. Les abonnés légitimes gardent
 // un quota confortable ; l'usurpation ne rapporte plus rien.
 $utilisateurVerifie = '';
+$abonneAtelier = false;
 $jetonIA = (string) ($body['token'] ?? '');
 if ($jetonIA !== '') {
     @include_once __DIR__ . '/_auth_lib.php';
@@ -278,6 +279,23 @@ if ($jetonIA !== '') {
             $verif = vrt_verify_token($jetonIA);
             if ($verif !== null) {
                 $utilisateurVerifie = (string) ($verif['acc']['user'] ?? $verif['acc']['id'] ?? '');
+                /* ABONNÉ DE L'ATELIER DE FRANÇAIS. server_user_tier() ne lit
+                   que les abonnements e-learning : un abonné de l'Atelier
+                   tombait au palier « free » (5 appels/jour), si bien qu'une
+                   formule vendue avec 120 ou 400 appels à Ambassa par mois ne
+                   pouvait jamais être consommée. Le compte étant PROUVÉ par
+                   son jeton, on lui donne le palier enseignant ; la vraie
+                   borne reste le quota MENSUEL de sa formule, décompté par
+                   plateforme.php?action=quota avant chaque composition.
+                   Liste identique à plat_plans_atelier() (api/plateforme.php). */
+                if (function_exists('vrt_account_active_plans') && function_exists('vrt_load_db')) {
+                    $dbAtelier = vrt_load_db();
+                    if (is_array($dbAtelier) && array_intersect(
+                            vrt_account_active_plans($verif['acc'], $dbAtelier),
+                            ['ens_mois', 'ens', 'etab', 'pro'])) {
+                        $abonneAtelier = true;
+                    }
+                }
             }
         } catch (Throwable $e) { /* jeton illisible → on retombe sur l'écrêtage */ }
     }
@@ -297,6 +315,9 @@ if ($utilisateurVerifie === '') {
 } else {
     // Le compteur suit l'identité PROUVÉE (un jeton = un compte).
     $userId = $utilisateurVerifie;
+    if ($abonneAtelier && in_array($userTier, ['anon', 'free', 'starter', 'pro', 'elite'], true)) {
+        $userTier = 'teach';
+    }
 }
 $tierDaily = ['anon' => 2, 'free' => 5, 'starter' => 15, 'pro' => 50, 'teach' => 120, 'elite' => 100, 'admin' => -1];
 if (defined('IA_TIER_DAILY_JSON')) { $cfg = json_decode(IA_TIER_DAILY_JSON, true); if (is_array($cfg)) $tierDaily = array_merge($tierDaily, $cfg); }
