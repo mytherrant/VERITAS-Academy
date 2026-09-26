@@ -353,11 +353,29 @@ $model      = $modelElite; // 🚀 top modèle pour TOUS (visiteurs inclus)
 // Chaque maillon ne s'active que si sa clé est configurée dans payment_config.php.
 $ok = false; $text = ''; $error = null; $source = 'none';
 
+// ── Réglages de génération propres à certaines demandes ──────────────────
+// La composition d'une épreuve complète (Atelier de Français, action
+// `epreuve_minesec`) renvoie un JSON long : questions, barème, corrigé,
+// sujets. Deux pièges avec Gemini 2.5 : (1) sa « réflexion » est décomptée
+// du MÊME plafond de sortie — elle pouvait en consommer l'essentiel et
+// laisser un JSON tronqué ; (2) sans contrainte de format, il l'entoure de
+// prose. On borne donc la réflexion, on impose le JSON et on baisse la
+// température (un sujet d'examen n'a pas besoin de fantaisie). Aucune autre
+// action n'est touchée.
+$geminiReglages = [];
+if ((string) ($body['action'] ?? '') === 'epreuve_minesec') {
+    $geminiReglages = [
+        'temperature'      => 0.3,
+        'responseMimeType' => 'application/json',
+        'thinkingConfig'   => ['thinkingBudget' => 2048],
+    ];
+}
+
 foreach ($geminiKeys as $gIdx => $gk) {
-    [$ok, $text, $error] = call_gemini($gk, $sysPrompt, $ragContext, $prompt, $model);
+    [$ok, $text, $error] = call_gemini($gk, $sysPrompt, $ragContext, $prompt, $model, $geminiReglages);
     if ($ok) { $source = 'gemini_pro' . ($gIdx ? ('_k' . ($gIdx + 1)) : ''); break; }
     if ($model !== $modelFree) { // repli Flash sur la même clé
-        [$okF, $textF, $errF] = call_gemini($gk, $sysPrompt, $ragContext, $prompt, $modelFree);
+        [$okF, $textF, $errF] = call_gemini($gk, $sysPrompt, $ragContext, $prompt, $modelFree, $geminiReglages);
         if ($okF) { $ok = true; $text = $textF; $error = null; $source = 'gemini_flash' . ($gIdx ? ('_k' . ($gIdx + 1)) : ''); break; }
     }
 }
@@ -436,7 +454,7 @@ exit;
 // v1.3.2 : call_claude_sonnet SUPPRIMÉE (code mort — clé jamais configurée,
 // modèle obsolète). La chaîne active : Gemini → DeepSeek → Groq → Mistral.
 
-function call_gemini(string $apiKey, string $sys, string $rag, string $prompt, string $model = ''): array {
+function call_gemini(string $apiKey, string $sys, string $rag, string $prompt, string $model = '', array $reglages = []): array {
     // Google Gemini — quota gratuit généreux, bon support du français.
     // Clé gratuite : https://aistudio.google.com/apikey
     $fullSys = trim($sys);
@@ -456,7 +474,7 @@ function call_gemini(string $apiKey, string $sys, string $rag, string $prompt, s
     $payload = json_encode([
         'systemInstruction' => ['parts' => [['text' => $fullSys !== '' ? $fullSys : 'Tu es un assistant pédagogique.']]],
         'contents'          => [['role' => 'user', 'parts' => [['text' => $prompt]]]],
-        'generationConfig'  => ['temperature' => 0.7, 'maxOutputTokens' => $maxTok]
+        'generationConfig'  => array_merge(['temperature' => 0.7, 'maxOutputTokens' => $maxTok], $reglages)
     ], JSON_UNESCAPED_UNICODE);
 
     // v1.2.1 : retry sur 503 "high demand" / 429 / 5xx (le tier gratuit Gemini sature par moments)

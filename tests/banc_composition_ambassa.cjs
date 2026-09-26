@@ -106,6 +106,10 @@ const sys = GEN.formationMinesec(MINESEC.epreuveParCode('BEPC_ETUDE'), null, '3e
 dire(/Relève les personnages|Identifie le narrateur/.test(sys) && /pourquoi/.test(sys) && /200 à 250 mots/.test(sys),
   'la formation d’Ambassa porte le descriptif, les formulations proscrites et des questions RÉELLES de la classe');
 
+const sysE = GEN.formationMinesec(MINESEC.epreuveParCode('ENIET1'), null, 'ENIET 1ère année', []);
+dire(/RÉSERVE OFFICIELLE/.test(sysE) && /14 points/.test(sysE),
+  'une structure incertaine (ENIET 1 : 14 points) est transmise avec sa réserve officielle');
+
 /* ───────────────────────── ② LE CONTRÔLE ───────────────────────── */
 console.log(`\n${G}② Le contrôle de ce qu'Ambassa renvoie${R}`);
 
@@ -207,6 +211,24 @@ const REPONSE_BEPC = { titre: 'BEPC blanc — Le marché', consigne: 'Lis attent
 const attendre = ms => new Promise(r => setTimeout(r, ms));
 
 (async () => {
+  /* Délai de garde : un serveur muet ne doit pas laisser le bouton tourner
+     pour toujours. On simule un fetch qui n'aboutit jamais, sauf abandon. */
+  const fetchMuet = (u, o) => new Promise((ok, ko) => {
+    if (o && o.signal) o.signal.addEventListener('abort', () => { const e = new Error('abort'); e.name = 'AbortError'; ko(e); });
+  });
+  const errDelai = await Promise.race([
+    GEN.composer(ctxBE, { fetch: fetchMuet, delai: 60 }).then(() => '', e => e.message),
+    new Promise(r => setTimeout(() => r('toujours en attente après 2 s'), 2000))]);
+  dire(errDelai === 'delai', 'un serveur muet est abandonné après le délai de garde (erreur « delai »)', errDelai);
+
+  /* Le proxy : JSON imposé et réflexion bornée, pour CETTE action seule. */
+  const proxy = fs.readFileSync(P('api/ia_proxy.php'), 'utf8');
+  const bloc = (proxy.match(/if \(\(string\) \(\$body\['action'\] \?\? ''\) === 'epreuve_minesec'\) \{[\s\S]*?\}\n/) || [''])[0];
+  dire(/responseMimeType' => 'application\/json'/.test(bloc) && /thinkingBudget/.test(bloc)
+    && /array_merge\(\['temperature' => 0\.7, 'maxOutputTokens' => \$maxTok\], \$reglages\)/.test(proxy)
+    && (proxy.match(/call_gemini\([^)]*\$geminiReglages\)/g) || []).length === 2,
+    'ia_proxy.php : JSON imposé et réflexion bornée pour epreuve_minesec, les autres actions inchangées');
+
   let appelsIA = 0;
   const a = atelier((url, corps) => {
     if (/ia_proxy/.test(url)) {

@@ -23,6 +23,14 @@ Demande de Jacques : « Ma plateforme collaborative atelier de français ne pass
 
 **Bancs** : `tests/banc_composition_ambassa.cjs` (38 contrôles, 4 mutations détectées), branché dans `deploy.yml` et `test.yml`. Vérifié au navigateur, sur un serveur simulé avec le corpus libre (1 280 px et 390 px) : 0 débordement, 0 erreur JS. Les autres bancs de l'Atelier restent verts (mobile 68/68, collaboratif 28/28…).
 
+**Audit final avant déploiement (26/09/2026)** : les 62 scripts de test des workflows et les gardes inline de `deploy.yml` (syntaxe PHP + JS, dépendances déployables, modules et jetons `?v=` de l'Atelier) passent en local. L'audit a donné lieu à trois correctifs :
+- `api/ia_proxy.php`, pour l'action `epreuve_minesec` **seulement** : `responseMimeType: application/json`, `thinkingBudget: 2048` et température 0,3. La réflexion de Gemini 2.5 est décomptée du même plafond de sortie (8 192) et pouvait tronquer le JSON d'une épreuve complète. Les autres actions sont inchangées (paramètre optionnel `$reglages` de `call_gemini`, fusionné dans `generationConfig`).
+- Délai de garde de 150 s côté navigateur (`AbortController`), avec un message clair. Le message « réponse incomplète » ne prétend plus que la relance est gratuite.
+- Les structures incertaines (ENIET 1 et 2, Probatoire industriel) transmettent leur réserve officielle à Ambassa, qui la reprend dans ses remarques.
+- Banc : 41 contrôles, deux nouvelles mutations détectées (délai de garde, réglages du proxy).
+
+⚠️ **Limite existante, non modifiée (décision commerciale)** : `ia_proxy.php` ne connaît pas les abonnements de l'Atelier. Un abonné connecté est compté au palier `free`, soit **5 appels IA par jour** ; un visiteur invité, au palier `anon` (2 par jour et par IP). Une composition coûte 1 appel (2 avec réécriture). Pour relever ce plafond, ajouter les abonnés de l'Atelier à `server_user_tier`, ou ajuster `IA_TIER_DAILY_JSON`.
+
 ⚠️ **Nouveau module** `plateforme/generateur.js` : ajouté aux listes de `deploy.yml` (modules obligatoires + jetons `?v=`), à `tools/versionner_atelier.cjs` et à `tests/verif_syntaxe_atelier.cjs`. Chaque appel consomme le quota IA habituel (`_consommerIA`, puis le plafond du serveur `ia_proxy.php`), plus un appel en cas de réécriture.
 
 ## ⚠️ Incident 25-26/09/2026 : payment_manuel.php en 500 après le déploiement du rapprochement SMS

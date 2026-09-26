@@ -386,6 +386,9 @@
       });
       (struct.interdits || []).forEach(function (x) { l.push('- INTERDIT : ' + x); });
       if (struct.note) l.push('- À savoir : ' + struct.note);
+      /* Une structure incertaine se DIT : l'enseignant doit la confirmer sur
+         la circulaire, et Ambassa doit le rappeler dans ses remarques. */
+      if (struct.avertissement) l.push('- RÉSERVE OFFICIELLE (à reprendre dans "remarques") : ' + struct.avertissement);
       (struct.consignesRedaction || []).forEach(function (x) { l.push('- ' + x); });
     }
     var g = struct && struct.grille && ref ? ref.grille(struct.grille) : null;
@@ -842,14 +845,27 @@
     var corps = { action: 'epreuve_minesec', prompt: prompt, sysPrompt: sys || '',
                   max_tokens: opts.max || 6000, temperature: 0.3 };
     if (opts.token) corps.token = opts.token;
+    /* DÉLAI DE GARDE. Le proxy essaie jusqu'à deux modèles de 60 s chacun,
+       puis les replis : au-delà de 150 s, plus rien n'arrivera. Sans ce
+       garde, un serveur muet laissait le bouton sur « Ambassa compose… »
+       pour toujours, sans un mot. */
+    var coupe = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var minuterie = coupe ? setTimeout(function () { try { coupe.abort(); } catch (e) {} }, opts.delai || 150000) : null;
+    var desarmer = function () { if (minuterie) clearTimeout(minuterie); };
     return (opts.fetch || fetch)(opts.url || '/api/ia_proxy.php', {
-      method: 'POST', headers: entetes, body: JSON.stringify(corps)
+      method: 'POST', headers: entetes, body: JSON.stringify(corps),
+      signal: coupe ? coupe.signal : undefined
     }).then(function (r) {
+      desarmer();
       if (r.status === 402 || r.status === 429) throw new Error('quota');
       if (!r.ok) throw new Error('http_' + r.status);
       return r.json();
     }).then(function (j) {
       return extraireJSON(j.text || j.reponse || j.response || j.content || '');
+    }, function (e) {
+      desarmer();
+      if (e && e.name === 'AbortError') throw new Error('delai');
+      throw e;
     });
   }
 

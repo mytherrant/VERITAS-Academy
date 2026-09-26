@@ -32,7 +32,7 @@
 <script src="./minesec.js?v=570ac91b"></script>
 <script src="./conformite.js?v=be09f1cb"></script>
 <script src="./exercices.js?v=c6d93301"></script>
-<script src="./generateur.js?v=04dcc368"></script>
+<script src="./generateur.js?v=8b1ce151"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=8979cf66"></script>
 <!--vrt-habillage:tete-->
@@ -5009,7 +5009,8 @@ class Component extends DCLogic {
         .then(res=>this._appliquerComposition(a.id,res,ctx,struct,mode));
     }).catch(e=>this.setState({genBusy:false,genEtape:'',genErr:(e&&e.message==='quota')
       ?this._messageQuotaIA()
-      :(e&&/reponse_/.test(e.message||''))?'Ambassa a renvoyé une réponse incomplète. Relancez : le quota n’est décompté que d’un appel.'
+      :(e&&/reponse_/.test(e.message||''))?'Ambassa a renvoyé une réponse incomplète : votre épreuve n’a pas été modifiée. Vous pouvez relancer (un nouvel appel IA sera décompté).'
+      :(e&&e.message==='delai')?'Ambassa n’a pas répondu à temps (plus de deux minutes). Votre épreuve n’a pas été modifiée : relancez dans un instant.'
       :'Ambassa est injoignable pour le moment. Votre épreuve n’a pas été modifiée.'}));
   }
   _appliquerComposition(id,res,ctx,struct,mode){
