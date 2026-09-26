@@ -1,5 +1,19 @@
 <?php
 require_once __DIR__ . '/_json_boot.php'; // display_errors=0 + purge des parasites avant le JSON (voir _json_boot.php)
+
+// Une erreur fatale ne laissait qu'un 500 muet de zéro octet — et la vitrine,
+// privée de catalogue, masquait la boutique (26/09/2026). On la rend lisible,
+// comme payment_sms.php : type, fichier (nom seul), ligne, message sans chemin
+// absolu. La sonde « 🛒 L'API publique répond-elle ? » du déploiement la lit.
+register_shutdown_function(function () {
+    $e = error_get_last();
+    if (!$e || !in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) return;
+    if (!headers_sent()) { http_response_code(500); header('Content-Type: application/json; charset=utf-8'); }
+    $msg = str_replace([__DIR__ . '/', dirname(__DIR__) . '/'], '', (string) $e['message']);
+    echo json_encode(['error' => 'Erreur fatale', 'fatal' => [
+        'type' => $e['type'], 'fichier' => basename((string) $e['file']), 'ligne' => $e['line'],
+        'message' => substr($msg, 0, 300)]], JSON_UNESCAPED_UNICODE);
+});
 // ============================================================
 // VÉRITAS — Données publiques (sans authentification)
 // © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
