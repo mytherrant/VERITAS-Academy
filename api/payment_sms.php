@@ -24,6 +24,19 @@
 
 @ini_set('display_errors', '0');
 
+// Une erreur fatale au chargement (bibliothèque absente, redéclaration…) ne
+// laisse qu'un 500 muet : on la rend lisible — type, fichier (nom seul), ligne,
+// message sans chemin absolu. La sonde de production du déploiement la lit.
+register_shutdown_function(function () {
+    $e = error_get_last();
+    if (!$e || !in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) return;
+    if (!headers_sent()) { http_response_code(500); header('Content-Type: application/json; charset=utf-8'); }
+    $msg = str_replace([__DIR__ . '/', dirname(__DIR__) . '/'], '', (string) $e['message']);
+    echo json_encode(['error' => 'Erreur fatale', 'fatal' => [
+        'type' => $e['type'], 'fichier' => basename((string) $e['file']), 'ligne' => $e['line'],
+        'message' => substr($msg, 0, 300)]], JSON_UNESCAPED_UNICODE);
+});
+
 require_once __DIR__ . '/config_sync.php';          // payment_config.php + requireAuth()
 require_once __DIR__ . '/_rapprochement_lib.php';
 
