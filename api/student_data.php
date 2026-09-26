@@ -365,6 +365,10 @@ if ($action === 'submit' || $action === 'progress') {
    db.php conserve ces messages (`srv`) face à un envoi admin qui ne les
    contient pas, sauf s'ils figurent dans `forumDeleted` (suppression voulue). */
 if (in_array($action, ['forum_fetch', 'forum_post', 'forum_like', 'forum_delete'], true)) {
+    // mbstring n'est pas garanti sur l'hébergement (voir vrt_pd_coupe, public_data.php).
+    $coupe = function (string $t, int $n): string {
+        return function_exists('mb_substr') ? mb_substr($t, 0, $n) : substr($t, 0, $n);
+    };
     $accId   = (string) ($acc['id'] ?? $eid);
     $role    = strtolower((string) ($acc['role'] ?? ''));
     $isProf  = ($role === 'enseignant') || !empty($acc['isTeacher']);
@@ -443,14 +447,14 @@ if (in_array($action, ['forum_fetch', 'forum_post', 'forum_like', 'forum_delete'
     $nowMs  = (int) round(microtime(true) * 1000);
     $nomAuteur = trim((string) ($acc['pre'] ?? ($fiche['pre'] ?? '')) . ' ' . (string) ($acc['nom'] ?? ($fiche['nom'] ?? '')));
     if ($nomAuteur === '') $nomAuteur = (string) ($acc['user'] ?? 'Élève');
-    $nomAuteur = mb_substr($nomAuteur, 0, 80);
+    $nomAuteur = $coupe($nomAuteur, 80);
     $typeAuteur = $isProf ? 'enseignant' : ($accType === 'eleve' ? 'eleve' : 'visiteur');
     $result = ['ok' => true];
 
     if ($action === 'forum_post') {
         $clsId = (string) ($payload['classroomId'] ?? '');
         $chId  = (string) ($payload['channelId'] ?? '');
-        $texte = trim(mb_substr((string) ($payload['contenu'] ?? ''), 0, 4000));
+        $texte = trim($coupe((string) ($payload['contenu'] ?? ''), 4000));
         $replyTo = (string) ($payload['replyTo'] ?? '');
         if ($texte === '') $refus(400, 'Message vide');
         if (!isset($mesClasses[$clsId])) $refus(403, 'Ce forum est réservé aux membres de la classe');
@@ -481,7 +485,7 @@ if (in_array($action, ['forum_fetch', 'forum_post', 'forum_like', 'forum_delete'
             if (!in_array($type, $types, true)) $type = 'discussion';
             $p = ['id' => 'fp' . bin2hex(random_bytes(6)), 'classroomId' => $clsId, 'channelId' => $chId,
                   'auteurId' => $eid, 'auteurNom' => $nomAuteur, 'auteurType' => $typeAuteur, 'type' => $type,
-                  'titre' => $isProf ? mb_substr(trim((string) ($payload['titre'] ?? '')), 0, 150) : '',
+                  'titre' => $isProf ? $coupe(trim((string) ($payload['titre'] ?? '')), 150) : '',
                   'contenu' => $texte, 'date' => date('d/m/Y'), 'dateISO' => $nowIso,
                   'likes' => [], 'pinned' => false, 'replies' => [], 'srv' => true, 'srvAt' => $nowMs];
             $cdb['forumPosts'][] = $p;

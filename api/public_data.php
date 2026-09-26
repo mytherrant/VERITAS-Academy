@@ -653,7 +653,8 @@ function vrt_pd_activite(array $db): array {
                n'est pas une vente, c'est une intention — et c'est le statut par
                défaut de toute commande créée. Les publier reviendrait à
                annoncer une vente à chaque clic sur « Payer ». */
-            $st = mb_strtolower((string)($o['statut'] ?? $o['status'] ?? ''), 'UTF-8');
+            $st = (string)($o['statut'] ?? $o['status'] ?? '');
+            $st = function_exists('mb_strtolower') ? mb_strtolower($st, 'UTF-8') : strtolower($st);
             $ok = ($st !== '') && (strpos($st, 'pay') !== false || strpos($st, 'confirm') !== false
                  || strpos($st, 'valid') !== false || strpos($st, 'livr') !== false);
             if ($ok && strpos($st, 'attente') !== false) $ok = false;   // « en attente de paiement »
@@ -746,7 +747,7 @@ function vrt_pd_tarifs_publics(array $db): array {
         $montant = $ent($m['montant'] ?? 0, 1, 1000000);
         if ($montant === null) continue;
         $ligne = ['montant' => $montant];
-        if (isset($m['label']) && is_string($m['label'])) $ligne['label'] = mb_substr($m['label'], 0, 80);
+        if (isset($m['label']) && is_string($m['label'])) $ligne['label'] = function_exists('mb_substr') ? mb_substr($m['label'], 0, 80) : substr($m['label'], 0, 80);
         if ($k === 'ia') { $j = $ent($m['jetons'] ?? 0, 1, 10000); if ($j !== null) $ligne['jetons'] = $j; }
         $out['microPrix'][$k] = $ligne;
     }
@@ -817,11 +818,11 @@ function vrt_pd_promos_publics(array $db): array {
         if ($max > 0 && (int) ($p['usage'] ?? 0) >= $max) continue;
         $type = ((string) ($p['type'] ?? 'percent') === 'fixed') ? 'fixed' : 'percent';
         $out[] = [
-            'code'      => mb_substr($code, 0, 40),
+            'code'      => vrt_pd_coupe($code, 40),
             'type'      => $type,
             'reduction' => $type === 'fixed' ? max(0, (int) round((float) ($p['reduction'] ?? 0)))
                                              : max(0, min(50, (int) round((float) ($p['reduction'] ?? 0)))),
-            'desc'      => mb_substr((string) ($p['desc'] ?? ''), 0, 120),
+            'desc'      => vrt_pd_coupe((string) ($p['desc'] ?? ''), 120),
         ];
         if (count($out) >= 6) break;
     }
@@ -837,7 +838,14 @@ $public = [
     'calendrier'  => $db['calendrier']  ?? [],
     'elearning_plans' => vrt_pd_plans_en_vente($db),
     'tarifs_publics'  => vrt_pd_tarifs_publics($db),
-    'promosPublics'   => vrt_pd_promos_publics($db),
+    /* Isolé : le 26/09/2026, une fonction appelée ici sans garde (mb_substr,
+       mbstring n'étant pas garanti sur l'hébergement) a fait tomber TOUTE la
+       réponse — HTTP 500, zéro octet — et la vitrine, privée de catalogue, a
+       masqué la boutique. Un bandeau de codes promo ne vaut pas ce risque :
+       s'il échoue, il sort vide et le reste de la réponse part. */
+    'promosPublics'   => (function () use ($db) {
+        try { return vrt_pd_promos_publics($db); } catch (\Throwable $e) { return []; }
+    })(),
     'elearning_categories' => (isset($db['elearning']['categories']) && is_array($db['elearning']['categories']))
         ? $db['elearning']['categories'] : [],
     'elearning_contenus' => $__pd_contenus,
