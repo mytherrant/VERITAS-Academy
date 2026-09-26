@@ -1,0 +1,38 @@
+# TEMPORAIRE — diagnostic de la boutique vide en production (26/09/2026).
+# Ne déploie rien : interroge le site en lecture seule. À supprimer après usage.
+name: 🔎 Diagnostic boutique (temporaire)
+on:
+  push:
+    branches: ['claude/dreamy-ritchie-7j5pja']
+    paths: ['.github/workflows/diag-boutique.yml']
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ce que la production renvoie
+        run: |
+          UA='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36'
+          H=(-A "$UA" -H 'Accept: application/json,text/html;q=0.9,*/*;q=0.8' -H 'Accept-Language: fr-FR,fr;q=0.9' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-origin' --compressed --max-time 30)
+          S=https://veritas-school.com
+          code=$(curl -s "${H[@]}" -o pd.json -w '%{http_code}' "$S/api/public_data.php?t=$(date +%s)")
+          echo "public_data.php → HTTP $code, $(wc -c < pd.json) octets"
+          python3 - <<'PY'
+          import json
+          raw=open('pd.json',encoding='utf-8',errors='replace').read()
+          try:
+              d=json.loads(raw)
+          except Exception as e:
+              print('JSON ILLISIBLE:', e); print(raw[:800]); raise SystemExit
+          print('clés :', ', '.join(d.keys()))
+          b=d.get('boutique') or []
+          print('boutique :', len(b), 'entrée(s)')
+          for x in b[:40]:
+              print('  -', x.get('id'), '|', x.get('titre'), '| prix', x.get('prix'), '| kind', x.get('kind'), '| numerique', x.get('numerique'))
+          print('boutiqueChiffres :', d.get('boutiqueChiffres'))
+          print('error :', d.get('error'))
+          PY
+          for f in catalogue_livres.json livrets_catalogue.json; do
+            code=$(curl -s "${H[@]}" -o f.json -w '%{http_code}' "$S/$f?t=$(date +%s)")
+            echo "$f → HTTP $code, $(wc -c < f.json) octets"
+            python3 -c "import json;d=json.load(open('f.json'));print('   entrées :', len(d) if isinstance(d,(list,dict)) else '?', '| ids :', list(d.keys())[:20] if isinstance(d,dict) else [x.get('id') for x in d[:20]])" 2>&1 | head -3
+          done
