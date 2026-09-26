@@ -1412,6 +1412,9 @@ jobs:
             api/payment_campay.php \
             api/payment_camerpay.php \
             api/payment_manuel.php \
+            api/_manuel_lib.php \
+            api/_rapprochement_lib.php \
+            api/payment_sms.php \
             api/_pay_funds_lib.php \
             api/ia_proxy.php \
             api/rag.php \
@@ -1454,6 +1457,26 @@ jobs:
             fi
             cp "$f" deploy/api/ && echo "  ✓ $f"
           done
+
+          # ── Chaque require d'un endpoint déployé part-il AVEC lui ? ──────
+          #    26/09/2026 : _manuel_lib.php et _rapprochement_lib.php, suivis
+          #    par git mais absents de la liste ci-dessus, ne sont pas partis :
+          #    payment_manuel.php a répondu 500 en production jusqu'à la sonde
+          #    SMS. Le garde « 🧩 dépendances » ne vérifie que le suivi git ;
+          #    celui-ci vérifie ce qui PART. Seuls les secrets, posés à la main
+          #    par FTP, sont exemptés.
+          manque=0
+          for f in deploy/api/*.php; do
+            for dep in $(grep -oE "(require|include)(_once)?[[:space:](]*__DIR__[[:space:]]*\.[[:space:]]*'/[A-Za-z0-9_]+\.php'" "$f" | sed -E "s/.*'\/(.*)'/\1/" | sort -u); do
+              case "$dep" in config.php|payment_config.php) continue ;; esac
+              if [ ! -f "deploy/api/$dep" ]; then
+                echo "::error title=Dépendance non déployée::$(basename "$f") charge $dep, qui n'est pas dans la liste des fichiers déployés — l'endpoint répondrait 500 en production."
+                manque=$((manque+1))
+              fi
+            done
+          done
+          [ "$manque" -eq 0 ] || { echo "Déploiement ANNULÉ : $manque dépendance(s) PHP absente(s) du paquet."; exit 1; }
+          echo "  ✓ toutes les dépendances PHP des endpoints déployés partent avec eux"
 
           # ── Backend VÉRITAS Campus (api/campus/) ────────────────
           # TOUT le dossier part : index.php est le front controller, mais il

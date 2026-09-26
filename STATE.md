@@ -1,3 +1,9 @@
+## ⚠️ Incident 25-26/09/2026 : payment_manuel.php en 500 après le déploiement du rapprochement SMS
+
+Lors du run 575 (fusion de #63), `_manuel_lib.php`, `_rapprochement_lib.php` et `payment_sms.php` n'étaient **pas** dans la liste explicite des fichiers `api/` déployés (étape 📋 de `deploy.yml`). Ils étaient bien suivis par git, donc le garde « 🧩 » n'a rien vu. Conséquence : `payment_manuel.php` a renvoyé 500 en production, ce qui cassait la déclaration des commandes manuelles.
+
+La sonde de production ajoutée par #64 l'a détecté au run 576. Le correctif fait deux choses : il ajoute les 3 fichiers à la liste, et il ajoute une garde qui annule le déploiement si un `require __DIR__.'/x.php'` d'un endpoint déployé ne part pas avec lui. La garde a été éprouvée par mutation. **Tout nouveau fichier `api/` doit être ajouté à cette liste.**
+
 ## Paiements : audit + pass livrets/manuels servis automatiquement par rapprochement SMS (25/09/2026)
 
 Demande de Jacques : « Audite le mode de paiement de VERITAS et automatise les
