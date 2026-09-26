@@ -2116,10 +2116,18 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           UA='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36'
-          code=$(curl -s --compressed --max-time 30 -A "$UA" \
-            -H 'Accept: application/json,text/html;q=0.9,*/*;q=0.8' -H 'Accept-Language: fr-FR,fr;q=0.9' \
-            -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-origin' \
-            -o /tmp/pd.json -w '%{http_code}' "https://veritas-school.com/api/public_data.php?t=$(date +%s)" || echo 000)
+          # Jusqu'à 4 lectures sur ~1 min : le cache de code PHP de l'hébergeur
+          # sert parfois l'ANCIENNE version quelques secondes après l'envoi
+          # (26/09/2026 : 500 lu 8 s après l'envoi, 200 et 32 ouvrages 6 min plus tard).
+          for essai in 1 2 3 4; do
+            code=$(curl -s --compressed --max-time 30 -A "$UA" \
+              -H 'Accept: application/json,text/html;q=0.9,*/*;q=0.8' -H 'Accept-Language: fr-FR,fr;q=0.9' \
+              -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-origin' \
+              -o /tmp/pd.json -w '%{http_code}' "https://veritas-school.com/api/public_data.php?t=$(date +%s%N)" || echo 000)
+            [ "$code" = "200" ] && break
+            echo "  essai $essai : HTTP $code — nouvel essai dans 20 s"
+            [ "$essai" -lt 4 ] && sleep 20
+          done
           echo "public_data.php → HTTP $code, $(wc -c < /tmp/pd.json 2>/dev/null || echo 0) octets"
           if [ "$code" = "403" ]; then
             echo "::warning title=API publique non vérifiée::la sentinelle a refusé la sonde (403) — vérifier à la main /api/public_data.php"
