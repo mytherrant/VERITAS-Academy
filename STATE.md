@@ -1,3 +1,62 @@
+## Formules en paliers, forum des classes, e-learning, boutique — et la boutique vide du 26/09 (25→27/09/2026)
+
+**Formules en paliers** (#60, modèle de la fiche « kits » SmartSana) :
+- Starter / Pro / Élite / Famille deviennent des paliers N1 → N4. Chaque carte montre :
+  - un bandeau ;
+  - quatre chiffres clés, tirés des quotas réellement appliqués ;
+  - les prix au mois et à l'année, côte à côte ;
+  - des garanties ;
+  - « Tout X, plus : » pour ce qu'ajoute le palier.
+- Page Tarifs :
+  - onglets Détails / Trouver ma formule / Comparatif ;
+  - l'outil de choix compare n × formule au prix Famille et recommande le moins cher.
+- L'accroche et le chiffre clé se règlent dans l'admin (Packs d'abonnement). Aucun prix n'a changé.
+
+**Forum des classes virtuelles** (#61) :
+- Un message d'élève ne quittait jamais son navigateur. `api/student_data.php` reçoit désormais `forum_fetch`, `forum_post`, `forum_like` et `forum_delete` :
+  - authentification par jeton ;
+  - auteur fixé par le serveur ;
+  - accès limité à la classe de l'élève ;
+  - canal « Annonces » réservé aux enseignants.
+- `api/db.php` conserve les messages `srv` face à un envoi admin. Une suppression voulue par l'admin passe par des tombes (`forumDeleted`), pas par la date.
+- Interface corrigée :
+  - le rafraîchissement ne redessine que le fil, la saisie en cours est conservée ;
+  - le minuteur s'arrête hors du forum ;
+  - le bandeau « Répondre à… » ne reste plus affiché en permanence ;
+  - les noms ne sont plus échappés deux fois.
+- **E-learning** :
+  - « Packs » (qui comptait aussi les offres retirées) est remplacé par le nombre de ressources gratuites ;
+  - catégories vides en « Bientôt disponible » ;
+  - contenus échappés ;
+  - recherche sur titre, matière et classe.
+
+**Boutique** (#62) :
+- Retrait des 8 avis inventés semés par `defaultDB()`, qui s'affichaient comme « 6 avis vérifiés · 4,7/5 ». Purge par `_retirerFauxAvis`, et banc `tests/banc_avis_reels.cjs`.
+- Faille XSS stockée corrigée dans l'affichage des avis.
+- Codes promo publiés par le serveur (`promosPublics`) : seulement ceux cochés « afficher en boutique ».
+- Un seul numéro WhatsApp pour commander (`_waBoutique`).
+- La suppression du produit de test tient désormais (`_testProduitRetire`).
+
+**Boutique vide en production (26/09)** :
+- Symptôme : `public_data.php` répondait 500 avec zéro octet, et la vitrine masquait la boutique.
+- Fausse piste : `mb_substr` sans garde. Corrigé quand même (#66) ; forum compris.
+- Vraie cause, mesurée par le gestionnaire d'erreur fatale (#68, sur le modèle de payment_sms #67) : **`api/payment_config.php` ligne 66, « Unmatched '}' »**. Ce fichier est édité à la main sur le serveur et **corrigé par Jacques** depuis.
+- #69 : `_auth_lib.php` et `config_sync.php` rattrapent désormais une `ParseError` de ce fichier. Le site continue sans secrets (fail-closed) au lieu de tomber, et le catalogue reste servi.
+- Nouvelle sonde de déploiement « 🛒 L'API publique répond-elle ? » :
+  - elle échoue si la réponse n'est pas du JSON ou contient une erreur fatale ;
+  - elle prévient si la boutique est vide ;
+  - elle tourne même si une sonde précédente a échoué (`!cancelled()`) ;
+  - elle réessaie pendant environ une minute (#70), car le cache PHP de l'hébergeur sert l'ancienne version quelques secondes après l'envoi.
+- Contrôle final en production (27/09) :
+  - `public_data.php` : 200, 32 ouvrages, 10 formules ;
+  - `payment_manuel.php` : 404 attendu ;
+  - `payment_sms.php` : 503 « non configuré » ;
+  - forum avec un faux jeton : 401.
+
+**À savoir** :
+- `mbstring` n'est pas garanti sur l'hébergement : toujours `vrt_pd_coupe` ou `function_exists('mb_substr')`.
+- Les avis écrits par les visiteurs restent dans leur navigateur. Pour qu'ils soient partagés, il faudrait un passage serveur avec modération.
+
 ## Atelier de Français : Ambassa compose l'épreuve entière, l'équipe relit (26/09/2026, mode hybride)
 
 Demande de Jacques : « Ma plateforme collaborative atelier de français ne passe pas parce que ce n'est pas automatique ; les usagers veulent que l'IA génère entièrement l'épreuve, ils relisent et corrigent simplement. Câble et automatise tout via l'IA Ambassa. Entraîne-la aux exigences et critères MINESEC. » Puis : « Configure en hybride (manuel collaboratif et IA). »
