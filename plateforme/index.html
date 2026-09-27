@@ -3878,6 +3878,8 @@ class Component extends DCLogic {
         nom+' : '+((e&&e.message)||e));
       try{console.error('[Atelier] '+nom,e);}catch(_){}}};
     sur(()=>this._appliquerTheme(this.state.theme),'thème');
+    sur(()=>{const u2=this._roleSoloRepare(this.state.users,this.state.currentUserId);
+      if(u2!==this.state.users)this.setState({users:u2},()=>this._persist());},'rôle');
     sur(()=>this._sondeCamerpay(),'sonde encaissement');
     sur(()=>this._sondeOffres(),'sonde offres');
     sur(()=>this._reconcilierPaiements(),'paiements en attente');
@@ -6317,6 +6319,19 @@ class Component extends DCLogic {
   /* IDENTITE. Apres connexion, on est son COMPTE VERITAS, plus le profil de
      demonstration `u1`. Deux enseignants etaient tous deux `u1` : le travail
      de l'un redescendait chez l'autre signe de son propre nom. */
+  /* Un compte SEUL dans son equipe (les profils de demonstration u1…u6 et
+     les invites ne comptent pas) ne peut pas rester dans un role qui lui
+     interdit d'editer : personne d'autre ne pourrait le lui rendre. On le
+     remet « Enseignant ». Renvoie le MEME tableau si rien ne change. */
+  _roleSoloRepare(users,meId){
+    const L=users||[];const me=L.find(u=>u&&u.id===meId);
+    if(!me||/^u\d+$/.test(String(me.id)))return L;
+    const autres=L.filter(u=>u&&u.id!==me.id&&!/^u\d+$/.test(String(u.id))&&!/^inv/.test(String(u.id)));
+    if(autres.length)return L;
+    const r=(this.ROLES||[]).find(x=>x.nom===me.role);
+    if(r&&r.droits&&r.droits.editer)return L;
+    return L.map(u=>u.id===me.id?{...u,role:'Enseignant'}:u);
+  }
   _adopterIdentite(accId,nom){
     if(!accId)return;
     const st=this.state,ancien=String(st.currentUserId||'');
@@ -6331,8 +6346,14 @@ class Component extends DCLogic {
          droit (`corpusDroit`) ; en attendant, on ne montre pas un compteur
          invente. */
       const neuf=/^u\d+$/.test(String(ancien));
+      /* ⚠️ Le ROLE ne s'herite pas non plus. Il reprenait celui du profil
+         affiche au moment de la connexion : qui avait visite la demo sous
+         « M. Paul Etoa (Relecteur) » devenait Relecteur pour de bon --
+         champs verrouilles, generation masquee, et aucun moyen d'en sortir
+         puisqu'un relecteur ne gere pas l'equipe (signale le 27/09/2026 :
+         « les champs d'en-tete ne se renseignent pas, pas de generation »). */
       users.push({id:accId,name:nom||modele.name||'Moi',
-        role:modele.role||'Enseignant',
+        role:'Enseignant',
         quota:neuf?{limit:0,used:0}:(modele.quota||{limit:0,used:0})});
     }else if(nom&&users[i].name!==nom){
       users[i]=Object.assign({},users[i],{name:nom});
@@ -6425,6 +6446,7 @@ class Component extends DCLogic {
         editorIds:(c.editorIds||[]).map(re),
         history:(c.history||[]).map(h=>Object.assign({},h,{userId:re(h.userId)}))}));
     }
+    users=this._roleSoloRepare(users,accId);
     const suite={users:users,currentUserId:accId,epreuves:eps,cours:cos};
     if(versReel){
       suite.proposals=props; suite.chatMsgs=chat; suite.team=team;
@@ -9535,15 +9557,23 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
          c'est la que s'affichent l'avancement, le rapport et les erreurs. */
       genAller:()=>this.setState({genOuvert:true},()=>{const el=document.getElementById('vrt-composer');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}),
       genDepuisRens:()=>{
+        /* Role sans droit d'edition : on ne masque plus le bouton en silence,
+           on dit pourquoi et on offre l'issue. Seul dans son equipe, on
+           reprend le role Enseignant ; sinon, c'est au chef d'equipe. */
+        if(!perm.edit){
+          const u2=this._roleSoloRepare(st.users,me.id);
+          if(u2!==st.users)this.setState({users:u2,genErr:''},()=>this._persist());
+          else this._go('equipe');
+          return;}
         if(!(active&&active.classe)){this.setState({genOuvert:true,genErr:'Choisissez d\u2019abord la classe : Ambassa en d\u00e9duit la structure officielle de l\u2019\u00e9preuve.'});}
         else this._composerAvecAmbassa('tout');
         setTimeout(()=>{const el=document.getElementById('vrt-composer');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},60);},
-      genRensWrap:(perm.edit&&perm.ia)?'margin-top:16px;padding:14px;border-radius:12px;background:var(--cf5faff,#f5faff);border:1px solid var(--cd6e8f8,#d6e8f8)':hidden,
+      genRensWrap:perm.ia?'margin-top:16px;padding:14px;border-radius:12px;background:var(--cf5faff,#f5faff);border:1px solid var(--cd6e8f8,#d6e8f8)':hidden,
       genRensBtn:'width:100%;display:flex;align-items:center;justify-content:center;gap:8px;border:none;padding:12px 16px;font-size:13.5px;font-weight:700;font-family:Poppins;border-radius:10px;color:var(--cffffff,#fff);cursor:'+(st.genBusy?'default':'pointer')+';background:'+(st.genBusy?'var(--c8b97a8,#8b97a8)':'linear-gradient(135deg,var(--c14375f,#14375f),var(--c1a72bb,#1a72bb))'),
-      genRensLabel:st.genBusy?'Ambassa compose\u2026':(active&&this._aDuContenu(active)?'Recomposer l\u2019\u00e9preuve avec Ambassa':'G\u00e9n\u00e9rer l\u2019\u00e9preuve avec Ambassa'),
-      genRensAide:st.genErr?st.genErr:!(active&&active.classe)?'Choisissez d\u2019abord la classe : la nature et le bar\u00e8me officiels en d\u00e9coulent.'
+      genRensLabel:!perm.edit?(/^u\d+$/.test(String(me.id))?'Profil de d\u00e9monstration en lecture seule':(this._roleSoloRepare(st.users,me.id)!==st.users?'Reprendre le r\u00f4le Enseignant pour g\u00e9n\u00e9rer':'Demander le droit d\u2019\u00e9dition')):st.genBusy?'Ambassa compose\u2026':(active&&this._aDuContenu(active)?'Recomposer l\u2019\u00e9preuve avec Ambassa':'G\u00e9n\u00e9rer l\u2019\u00e9preuve avec Ambassa'),
+      genRensAide:!perm.edit?('Votre r\u00f4le \u00ab '+perm.roleNom+' \u00bb ne permet ni de modifier ni de g\u00e9n\u00e9rer cette \u00e9preuve : les champs sont verrouill\u00e9s.'):st.genErr?st.genErr:!(active&&active.classe)?'Choisissez d\u2019abord la classe : la nature et le bar\u00e8me officiels en d\u00e9coulent.'
         :'Ambassa choisit le texte, r\u00e9dige les questions, le bar\u00e8me, le corrig\u00e9 et les sujets. Vous relisez ensuite.',
-      actClGenStyle:(perm.edit&&perm.ia)?'flex:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;border:none;color:var(--cffffff,#fff);background:linear-gradient(135deg,var(--c14375f,#14375f),var(--c1a72bb,#1a72bb));font-family:Poppins;font-size:12.5px;font-weight:700;padding:11px 14px;border-radius:10px;cursor:pointer;min-height:44px':hidden,
+      actClGenStyle:perm.ia?'flex:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;border:none;color:var(--cffffff,#fff);background:linear-gradient(135deg,var(--c14375f,#14375f),var(--c1a72bb,#1a72bb));font-family:Poppins;font-size:12.5px;font-weight:700;padding:11px 14px;border-radius:10px;cursor:pointer;min-height:44px':hidden,
       actClAnalyseStyle:(confActif&&perm.ia)?'flex:none;white-space:nowrap;background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c14375f,#14375f);font-family:Poppins;font-size:12.5px;font-weight:700;padding:11px 14px;border-radius:10px;cursor:pointer;min-height:44px':hidden,
       genCompleter:()=>this._composerAvecAmbassa('completer'),
       genToutIcone:this._icon('sparkle',st.genBusy?'var(--c8b97a8,#8b97a8)':'var(--cffffff,#fff)',15),
