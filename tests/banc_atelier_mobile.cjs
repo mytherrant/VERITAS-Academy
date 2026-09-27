@@ -339,5 +339,16 @@ if (corpsRep) {
 dire(/genRensWrap:perm\.ia\?/.test(src) && /ne permet ni de modifier ni de g/.test(src),
   'un rôle sans édition voit POURQUOI les champs sont verrouillés, au lieu d’un bouton disparu');
 
+/* ── ⑮ L'aperçu n'est plus bloqué par un compteur local (27/09/2026) ────
+   Compte neuf : plafond local 0 tant que le serveur n'a pas parlé, quota
+   d'équipe de démonstration — « Aperçu » ne faisait rien, sans un mot. */
+console.log(`\n${G}⑮ Le serveur fait foi pour le quota d'aperçu${R}`);
+dire(/const canGen=active&&active\.textIds\.length>0&&perm\.edit&&!quotaSrvAtteint;/.test(src),
+  'l’aperçu ne dépend plus des compteurs locaux (plafond 0, quota d’équipe de démo)');
+dire(/const quotaSrvAtteint=plafondSrv!=null&&plafondSrv>=0&&meRemaining<=0;/.test(src),
+  'il ne se bloque que si le SERVEUR a annoncé le plafond atteint');
+dire(/generate:\(\)=>\{\s*if\(!canGen\)\{\s*this\._avis\(/.test(src),
+  'un aperçu impossible le dit, au lieu de ne rien faire');
+
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko === 0 ? 0 : 1);

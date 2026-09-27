@@ -8813,9 +8813,17 @@ class Component extends DCLogic {
     const cycleOptions=(this.meta||[]).map(c=>({value:c.cycle,label:this.cShort[c.cycle]||c.cycle}));
     const groupOptions=(st.filters.cycle?((this.meta||[]).find(c=>c.cycle===st.filters.cycle)||{groups:[]}).groups:(this.meta||[]).flatMap(c=>c.groups)).map(g=>g.name);
 
-    const canGen=active&&active.textIds.length>0&&meRemaining>0&&teamRemaining>0&&perm.edit;
-    const genBlocked=active&&active.textIds.length>0&&perm.edit&&(meRemaining<=0||teamRemaining<=0);
-    const quotaMsg=meRemaining<=0?'Votre quota mensuel est atteint':'Quota d\u2019équipe atteint';
+    /* ⚠️ LE SERVEUR FAIT FOI. L'apercu se bloquait sur des compteurs LOCAUX :
+       `me.quota.limit` vaut 0 pour un compte neuf tant que le serveur n'a pas
+       donne son plafond, et `team.quota` est un chiffre de demonstration.
+       Le bouton « Apercu » ne faisait alors RIEN, sans un mot (mesure le
+       27/09/2026). `_consommerQuota('epreuve')` verifie deja le quota mensuel
+       au serveur, sous verrou, avant chaque apercu : on ne bloque plus ici
+       que si le SERVEUR a deja annonce le plafond atteint. */
+    const quotaSrvAtteint=plafondSrv!=null&&plafondSrv>=0&&meRemaining<=0;
+    const canGen=active&&active.textIds.length>0&&perm.edit&&!quotaSrvAtteint;
+    const genBlocked=active&&active.textIds.length>0&&perm.edit&&quotaSrvAtteint;
+    const quotaMsg='Votre quota mensuel est atteint';
 
     const navBase='background:none;border:none;font-family:Poppins;font-size:14px;font-weight:500;padding:8px 13px;border-radius:8px;cursor:pointer;color:var(--c3a4658,#3a4658);display:flex;align-items:center';
     const navAct=navBase+';color:var(--c1a72bb,#1a72bb);background:var(--ceef5fc,#eef5fc);font-weight:600';
@@ -9470,7 +9478,12 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
          qui vivait ici (`used+1` dans le state, puis localStorage) ne
          protegeait rien. On n'affiche l'apercu que si le serveur a
          effectivement decremente. */
-      generate:()=>{if(!canGen)return;
+      generate:()=>{
+        if(!canGen){
+          this._avis(!active||!active.textIds.length?'Ajoutez d\u2019abord au moins un texte, ou g\u00e9n\u00e9rez l\u2019\u00e9preuve avec Ambassa.'
+            :!perm.edit?'Votre r\u00f4le ne permet pas de produire l\u2019aper\u00e7u de cette \u00e9preuve.'
+            :quotaMsg+' : passez \u00e0 une formule sup\u00e9rieure pour continuer.','ko');
+          return;}
         this._consommerQuota('epreuve',()=>this.setState({screen:'apercu'},
           ()=>{this._persist();window.scrollTo(0,0);}));},
       membersView,roleOptions:this.roles,manageChip:perm.manageTeam?hidden:'margin-left:auto;font-size:11.5px;color:var(--c9aa5b5,#9aa5b5)',

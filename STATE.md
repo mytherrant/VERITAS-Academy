@@ -156,6 +156,28 @@ Demande de Jacques : « Ma plateforme collaborative atelier de français ne pass
 - **Vérifié de bout en bout au navigateur** (390 px), avec quota et IA simulés : saisie de l'en-tête (établissement, classe), puis « Générer », puis un appel de quota et un appel à l'IA. L'épreuve est composée (titre, texte n°14, 4 questions, barème recalé 20/20, rapport). Aucune erreur JS.
 - CI locale : Node 57/58 (`banc_cahiers_reels` demande une charge locale), PHP 11/11 ; balayage des 14 écrans sans erreur. Bancs : mobile 88, démo 33.
 
+**Vérification fonctionnelle complète (27/09/2026)** : parcours de bout en bout au navigateur (390 px), avec quota et IA simulés. **15/15 gestes réussis** :
+- accueil ;
+- calendrier : volet du jour, échéance calée ;
+- garde-fou : absent sur une épreuve vide, présent une fois l'épreuve composée ;
+- en-tête enregistré ;
+- génération (texte, questions, barème 20) ;
+- ajout manuel d'un texte ;
+- texte replié ;
+- barème type ;
+- export Word (.docx téléchargé) ;
+- aperçu ;
+- soumission en relecture ;
+- création d'un cours ;
+- persistance après rechargement.
+
+**Bug trouvé et corrigé** : le bouton « Aperçu » ne faisait **rien, sans message**, pour un compte neuf. Il se bloquait sur `me.quota.limit` (0 tant que le serveur n'a pas donné son plafond) et sur `team.quota` (chiffre de démonstration). Correction :
+- le serveur fait foi (`_consommerQuota('epreuve')` vérifie déjà le quota mensuel sous verrou) ;
+- la page ne bloque plus que si le serveur a annoncé le plafond atteint (`quotaSrvAtteint`) ;
+- tout refus s'explique par un message.
+
+Banc mobile : 91 contrôles.
+
 ⚠️ **Nouveau module** `plateforme/generateur.js` : ajouté aux listes de `deploy.yml` (modules obligatoires + jetons `?v=`), à `tools/versionner_atelier.cjs` et à `tests/verif_syntaxe_atelier.cjs`. Chaque composition décompte le quota mensuel de la formule côté serveur (`plateforme.php?action=quota`, genre `ia`), puis le plafond journalier de `ia_proxy.php` ; une réécriture compte pour un appel de plus. (`_consommerIA` a été retiré le 27/09.)
 
 ## ⚠️ Incident 25-26/09/2026 : payment_manuel.php en 500 après le déploiement du rapprochement SMS
