@@ -118,6 +118,26 @@ Demande de Jacques : « Ma plateforme collaborative atelier de français ne pass
 - composer 2 ou 3 épreuves réelles en production avec le vrai Gemini, puis les relire (les bancs utilisent des réponses simulées) ;
 - ajouter des annales officielles MINESEC au corpus pour enrichir les exemples.
 
+**Accueil, calendrier, composeur : retours de Jacques sur téléphone (27/09/2026)** — **DÉPLOYÉ** (runs 588 à 591, #79 à #82) :
+- **Icônes** : une seule forme dans tout l'Atelier. `_icoRond` dessine un anneau au trait de sa teinte sur le fond pâle assorti ; `_fondDe` nomme ce fond pour chaque teinte. Le paramètre `fond` permet un fond blanc sur les cartes déjà teintées (Ressources). La pastille sans anneau, essayée d'abord, a été refusée : Jacques a demandé le retour des ronds.
+- **Couleurs** : la rotation `_teinte` affichait bleu, vert, bleu, bleu, car l'habillage remappe l'orange `--ce07f00` en bleu. Elle passe à bleu, vert, orange (`--cc26a12`), violet, sarcelle, nuit. Cartes de tête : dégradé pâle, chiffre et lien assortis, **sans bandeau supérieur**. Ressources : une teinte par carte et un bouton « Explorer » plein. **Filets au-dessus des titres de section retirés** (`.vrt-titre-file::before{content:none}`).
+- **Calendrier** : les jours étaient des cases inertes. Ce sont maintenant des boutons qui ouvrent un volet « Échéance du … » avec trois actions :
+  - « Déjà prévu ce jour », avec « Retirer » ;
+  - « Caler une échéance ce jour », limité aux épreuves et cours modifiables (propriétaire ou éditeur, non validés) ;
+  - « + Nouvelle épreuve pour ce jour », via `_nouvelleEpreuveLe` et non `_ensureDraft`, qui re-daterait l'épreuve ouverte.
+  La date va dans le même champ `echeance` que « Renseignements » (via `_calerEcheance`), est historisée et synchronisée. `banc_calendrier` : 47 contrôles.
+- **Garde-fou MINESEC** : masqué tant que l'épreuve n'a ni texte ni contenu (`confActif`). Sur une épreuve vide, il listait des reproches génériques.
+- **Menus déroulants** (sur 390 px, le composeur passe de 8 210 à 6 159 px) :
+  - garde-fou replié par défaut sur téléphone ;
+  - « Composer avec Ambassa » replié d'office une fois l'épreuve composée (`genOuvert:null` → `genEstOuvert`) ;
+  - chaque texte du composeur a un bouton « Replier le texte » (`txtReplies`).
+- **Bugs corrigés** :
+  - la préférence « Garde-fou toujours déplié » du Profil n'était lue nulle part ; elle commande désormais l'ouverture ;
+  - l'aperçu gardait ses marges d'A4 sur téléphone, et le texte tenait dans une colonne de 190 px ;
+  - `api/_notify_lib.php` : les jours restants avant l'échéance d'un abonnement étaient arrondis à l'entier inférieur (« dans 2 jours » pour 3), d'où l'échec intermittent de `banc_relance_echeance.php` en CI ; arrondi supérieur désormais, comme `_livret_lib`.
+- **Balayage** des 14 écrans (390 et 1 280 px) sur un serveur simulé : routes `action=invite|session|corpus` simulées, corpus libre de 1 014 textes. Aucune erreur JS ; les seuls débordements sont des barres d'onglets défilantes. La bulle d'astuces (`_montrerAstuce`) s'efface seule après quelques secondes, au plus une fois par minute : ce n'est pas un bug.
+- `banc_atelier_mobile` : 75 contrôles. Toujours non testé d'ici : connexion réelle, paiements, synchronisation d'équipe, appels réels à Ambassa (la base de production est inaccessible depuis l'environnement de test).
+
 ⚠️ **Nouveau module** `plateforme/generateur.js` : ajouté aux listes de `deploy.yml` (modules obligatoires + jetons `?v=`), à `tools/versionner_atelier.cjs` et à `tests/verif_syntaxe_atelier.cjs`. Chaque composition décompte le quota mensuel de la formule côté serveur (`plateforme.php?action=quota`, genre `ia`), puis le plafond journalier de `ia_proxy.php` ; une réécriture compte pour un appel de plus. (`_consommerIA` a été retiré le 27/09.)
 
 ## ⚠️ Incident 25-26/09/2026 : payment_manuel.php en 500 après le déploiement du rapprochement SMS
