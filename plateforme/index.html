@@ -3644,7 +3644,7 @@ class Component extends DCLogic {
        jamais le navigateur. */
     this.plans=[
       {id:'essai',name:'Essai',price:'0',period:'gratuit',quota:10,seats:'1 utilisateur',
-       features:['1 semaine d’essai','10 épreuves / mois','Corpus MINESEC complet','Aperçu & impression PDF']},
+       features:['1 semaine d’essai','5 épreuves / mois','12 textes MINESEC au choix + tout le domaine public','Aperçu & impression PDF']},
       /* Payer au mois lève le seul obstacle qui compte : sortir 5 000 F
          d'un coup. Même service, même quota mensuel — et l'annuel reste
          moins cher sur l'année, ce que la carte dit sans détour. */
@@ -6854,6 +6854,33 @@ class Component extends DCLogic {
             return jours+' jour'+(jours>1?'s':'')+' d’essai';
           return f;
         });
+        /* CE QUE LA FORMULE OUVRE VRAIMENT. « Corpus MINESEC complet »
+           s'affichait sur l'essai, qui n'ouvre que N textes sous droits
+           (plat_paliers.essai.textes) ; et le quota d'appels a Ambassa --
+           decompte au serveur depuis le 27/09/2026 -- n'etait annonce nulle
+           part. On enonce les plafonds appliques, et eux seuls. */
+        if(q){
+          const plat=f=>f.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+          let fs=p.features.map(f=>{
+            if(q.textes!=null&&q.textes>=0&&/^(corpus minesec complet|\d+ textes minesec)/.test(plat(f)))
+              return q.textes+' textes MINESEC au choix + tout le domaine public';
+            if(q.textes!=null&&q.textes<0&&/^\d+ textes minesec/.test(plat(f)))
+              return 'Corpus MINESEC complet';
+            return f;
+          })
+            /* On ne remplace une ligne que si le serveur en donne le chiffre :
+               sans lui, l'argumentaire reste mot pour mot. */
+            .filter(f=>!(q.ia!=null&&/ambassa/.test(plat(f)))&&!(q.exports!=null&&/export/.test(plat(f))));
+          const lignes=[];
+          if(q.ia!=null)lignes.push(q.ia<0?'Ambassa sans limite'
+            :q.ia+' appel'+(q.ia>1?'s':'')+' à Ambassa / mois');
+          if(q.exports!=null&&q.exports>=0&&q.epreuves!=null&&(q.epreuves<0||q.exports<q.epreuves))
+            lignes.push(q.exports+' export'+(q.exports>1?'s':'')+' Word / mois');
+          /* Juste apres la ligne des epreuves : les quotas se lisent ensemble. */
+          const iq=fs.findIndex(f=>/epreuves?\s*\/\s*mois/.test(plat(f)));
+          fs.splice(iq>=0?iq+1:0,0,...lignes);
+          p.features=fs;
+        }
       }
     }
   }
