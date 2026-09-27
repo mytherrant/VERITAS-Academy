@@ -61,7 +61,8 @@
   function totalAvecSujets(ptsQuestions, sujets) {
     var t = ptsQuestions || 0, imposes = 0, maxChoix = 0;
     (sujets || []).forEach(function (s) {
-      var p = parseFloat(s && s.pts) || 0;
+      if (!s) return;
+      var p = parseFloat(s.pts) || 0;
       if (s.auChoix) maxChoix = Math.max(maxChoix, p); else imposes += p;
     });
     t += imposes;

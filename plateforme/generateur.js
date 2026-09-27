@@ -839,9 +839,12 @@
       var texte = propre(typeof v === 'string' ? v : v.texte, 5000);
       res.sujets.push({ genre: s.genre, titre: s.titre, texte: texte, pts: s.points, auChoix: !!s.auChoix, corrige: propre(v.corrige, 3000) });
     });
-    /* La dictée n'a rien à rédiger : son « sujet » est le texte lui-même. */
+    /* La dictée n'a rien à rédiger : son « sujet » est le texte lui-même.
+       On IMPOSE la mention, même si Ambassa a écrit quelque chose : ce champ
+       s'imprime sur la feuille du candidat, et une IA qui y recopierait le
+       texte de la dictée (ou ses difficultés) donnerait la réponse. */
     res.sujets.forEach(function (s) {
-      if (s.genre === 'dictee' && !s.texte) s.texte = 'Dictée lue par l’examinateur (le texte figure au corrigé, réservé à l’enseignant).';
+      if (s.genre === 'dictee') s.texte = 'Dictée lue par l’examinateur (le texte figure au corrigé, réservé à l’enseignant).';
     });
 
     /* --- grille --- */

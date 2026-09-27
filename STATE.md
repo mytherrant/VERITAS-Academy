@@ -1,3 +1,31 @@
+## Audit de l'Atelier de Français : bugs, sécurité, visuel, marketing (27/09/2026)
+
+Demande de Jacques : « Audite le travail de l'agent sur l'Atelier, corrige tous les bugs, vérifie le reskin, la sécurité, le visuel, le marketing. » Revue du diff #71 → #87 (composition par Ambassa, quota IA, calendrier, icônes, rôles) et parcours réel au navigateur (1 280 et 390 px, serveur simulé, Ambassa simulée).
+
+**Bugs corrigés** :
+- **Épreuve sans texte support invisible** (expression écrite, dictée, texte fautif) : le bloc des sujets et le bouton d'aperçu étaient conditionnés aux seuls textes du corpus. Ambassa composait l'épreuve, puis rien ne s'affichait (« aucun texte ») et « Aperçu » refusait. `hasSelection` compte les sujets ; `canGen` accepte un sujet rédigé (`aMatiere`).
+- **Quota IA consommé pour rien** : le décompte se faisait avant le choix et le téléchargement du texte. Un corpus sans texte convenable ou une coupure réseau coûtaient un appel. Le quota se demande désormais juste avant l'appel à Ambassa.
+- **Dictée** : si Ambassa écrivait quelque chose dans l'énoncé, la feuille du candidat pouvait porter le texte de la dictée. La mention « Dictée lue par l'examinateur… » est désormais imposée.
+- **« 0 / 0 » et « Crédits disponibles 0 »** pour un compte neuf, avant que le serveur ait donné son plafond : un tiret s'affiche à la place. Le quota « équipe 120/120 » (chiffre de démonstration, que le serveur n'applique pas) est retiré du bloc « Générer l'épreuve ».
+- **Calendrier** : « Nouvelle épreuve pour ce jour » contournait le droit « créer » (relecteur, élève). Bouton masqué et action refusée sans ce droit.
+- Petits correctifs : points d'un sujet non numériques (NaN), titre de sujet vide dans le corrigé exporté (« undefined »), sujet `null` dans `totalAvecSujets`, astuce « « comment » — Même constat. » incompréhensible hors contexte (`minesec.js`).
+
+**Sécurité** :
+- **`ia_proxy.php`, palier de l'abonné borné par le quota vendu.** Depuis #72, un abonné de l'Atelier (dès 800 F/mois, 30 appels) passait au palier `teach` (120/jour) pour TOUT appel direct au proxy, sans passer par `plateforme.php?action=quota` : jusqu'à 3 600 appels/mois. Le palier n'est plus accordé qu'à hauteur des appels déjà décomptés ce mois (`quotas[<compte>|ia].utilise`), avec un compteur propre dans `data/_rate/iaatelier_*`. Au-delà, le compte garde son palier ordinaire.
+- **`ia_proxy.php`, `sysPrompt` et `ragContext` plafonnés à 20 Ko** (seul `prompt` l'était, à 8 Ko) : un visiteur anonyme pouvait faire facturer des centaines de Ko par appel. La formation MINESEC la plus longue pèse 6,5 Ko.
+- Paiement : seule une adresse `https://` (ou localhost pour les bancs) ouvre la fenêtre de paiement.
+- Rendu : aucune injection HTML dans l'Atelier (React échappe tout ; aucun `innerHTML` sur une donnée).
+
+**Marketing** : la page d'entrée, la démonstration animée (scène 3) et les balises `description` / `og:description` ne parlaient pas de la génération complète par Ambassa, qui est pourtant la demande des usagers. Elles l'annoncent désormais. Les cartes des formules l'annoncent aussi (« Épreuve complète générée par l'IA… », sans le mot « Ambassa », que `_appliquerTarifs` remplace par le quota réel). La carte annuelle n'affichait plus « Corpus MINESEC complet » et paraissait moins fournie que la mensuelle, alors qu'elle coûte deux fois moins cher : alignée, avec « Soit environ 420 F / mois ». Le repli local de l'essai annonçait 5 épreuves, mais son quota interne valait 10 : aligné sur 5 (`plat_paliers`).
+
+**Reskin / visuel** : 14 écrans parcourus, 0 débordement, 0 erreur JS, à 390 et 1 280 px. Icônes en ronds, teintes alternées, filets retirés : conformes. Export Word vérifié (corrigé sur une page séparée).
+
+**Restent à faire (hors code)** :
+- Le corpus du domaine public contient des scories d'OCR (« p Avant que… », « euvent ») et des maximes classées en textes d'étude. Ambassa peut les choisir : un nettoyage de `corpus_libre.json` serait utile.
+- L'écran Équipe affiche encore un « quota d'équipe » de démonstration, que le serveur n'applique pas.
+
+Bancs : `banc_composition_ambassa` 72 (dont « aucun texte → rien décompté », mutation détectée sur l'ancien code), `banc_atelier_mobile` 94, `banc_calendrier` 49. CI locale : tous les scripts des workflows sont verts (sauf `banc_cahiers_reels`, qui demande une charge locale). Jetons `?v=` réalignés (`minesec`, `conformite`, `generateur`).
+
 ## Formules en paliers, forum des classes, e-learning, boutique — et la boutique vide du 26/09 (25→27/09/2026)
 
 **Formules en paliers** (#60, modèle de la fiche « kits » SmartSana) :

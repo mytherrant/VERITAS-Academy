@@ -190,6 +190,16 @@ if (cal && neuve) {
   m._calerEcheance('epreuve', 'x', '');
   dire(m.state.epreuves.find(e => e.id === 'x').echeance === '' && !m._echeances().some(e => e.id === 'x'),
     '« Retirer » efface la date et l’échéance disparaît');
+  /* Audit du 27/09/2026 : le calendrier ne contourne pas le droit « créer ». */
+  let avis = '';
+  m._avis = (t) => { avis = t; };
+  m._perm = () => ({ creer: false });
+  const avantNb = m.state.epreuves.length;
+  m._nouvelleEpreuveLe('2026-12-04');
+  dire(m.state.epreuves.length === avantNb && /ne permet pas de cr/.test(avis),
+    'un rôle sans droit de création ne crée rien depuis le calendrier, et on le lui dit', avis);
+  dire(/calNouvelleStyle:perm\.creer\?/.test(src), 'le bouton « Nouvelle épreuve pour ce jour » n’apparaît qu’avec le droit de créer');
+  m._perm = () => ({ creer: true });
   m.state.activeId = 'y';
   m._nouvelleEpreuveLe('2026-12-04');
   const n = m.state.epreuves[0];
