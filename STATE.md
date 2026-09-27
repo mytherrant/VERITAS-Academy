@@ -105,6 +105,10 @@ Lors du run 575 (fusion de #63), `_manuel_lib.php`, `_rapprochement_lib.php` et 
 
 La sonde de production ajoutée par #64 l'a détecté au run 576. Le correctif fait deux choses : il ajoute les 3 fichiers à la liste, et il ajoute une garde qui annule le déploiement si un `require __DIR__.'/x.php'` d'un endpoint déployé ne part pas avec lui. La garde a été éprouvée par mutation. **Tout nouveau fichier `api/` doit être ajouté à cette liste.**
 
+**Ce n'était que la première cause.** Une fois les fichiers envoyés (run 577), le 500 a persisté. Le gestionnaire d'erreur fatale de `payment_sms.php` (#67) a donné la vraie cause au run 580 : **`api/payment_config.php` ligne 66, « Unmatched '}' »**. Ce fichier est édité à la main sur le serveur, et cette erreur faisait tomber tout ce qui le charge : paiements, boutique, synchronisation. Jacques l'a corrigé par FTP. Au run 582 (26/09, 06:53 UTC), tout est vert en production : boutique à 32 ouvrages, `preuve` répond 404 « Commande introuvable », `etat` répond 401, le relais répond 503 (rapprochement ÉTEINT, clé non posée).
+
+La CI ne peut pas réécrire `payment_config.php` (fichier de secrets). Un workflow de réparation automatique a été écrit puis refusé par les garde-fous : la correction reste manuelle.
+
 ## Paiements : audit + pass livrets/manuels servis automatiquement par rapprochement SMS (25/09/2026)
 
 Demande de Jacques : « Audite le mode de paiement de VERITAS et automatise les

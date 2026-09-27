@@ -59,6 +59,13 @@ define('SMS_WEBHOOK_SECRET', 'la-clé-générée');
 // define('SMS_AUTO_INTENTS', 'livret,livret_pack,digitalbook,book');
 ```
 
+⚠️ **Vérifier juste après l'enregistrement.** Ouvrir
+`https://veritas-school.com/api/public_data.php` dans le navigateur : la page doit
+afficher du texte qui commence par `{`. Une page d'erreur signifie que le fichier est
+cassé, souvent par une accolade ou un guillemet en trop. Dans ce cas, **tout** le
+site tombe : paiements, boutique et synchronisation. Il faut annuler la modification
+tout de suite. (Incident réel du 26/09/2026 : une accolade en trop à la ligne 66.)
+
 ### 2. Installer le relais sur le téléphone marchand
 
 Installer une application Android de transfert de SMS vers une URL, par exemple
