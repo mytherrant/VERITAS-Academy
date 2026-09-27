@@ -352,7 +352,11 @@ if (!defined('VRT_NOTIFY_LIB')) {
             }
             if ($tel === '' && $mail === '') continue;   // injoignable : rien à tenter
 
-            $jours = (int) max(0, floor(($fin - $now) / 86400000));
+            /* Arrondi SUPÉRIEUR, comme _livret_lib : un terme à 3 jours moins
+               quelques millisecondes (le temps d'exécuter la ronde) s'annonçait
+               « dans 2 jours ». `$fin > $now` est garanti plus haut : le
+               minimum est donc 1. */
+            $jours = (int) max(1, ceil(($fin - $now) / 86400000));
             $msg = vrt_notify_enfiler([
                 'ref'   => 'RELANCE-' . (string) ($a['id'] ?? ('abo' . $i)),
                 'type'  => 'echeance',

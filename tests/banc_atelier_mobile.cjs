@@ -205,7 +205,7 @@ console.log(`\n${G}⑦ Le contrôle de la norme ne prend la place que s'il a à 
    quand il proteste qu'il doit se voir. */
 dire(/const confEstOuvert = \(st\.confOpen === null \|\| st\.confOpen === undefined\)/.test(src),
   'son état par défaut se déduit, au lieu d’être figé');
-dire(/\?\s*\(confAControler > 0\)/.test(src),
+dire(/\?\s*\(confAControler > 0( &&|\))/.test(src),
   'ouvert seulement s’il existe au moins un écart à montrer');
 /* `resume()` compte les CONSEILS dans `total`, alors que le titre du panneau
    n'annonce que les écarts. S'en remettre à `total` faisait dire au bouton
@@ -274,6 +274,25 @@ dire(/main > div\[data-noprint="1"\][^{]*\{\s*flex-wrap:wrap!important/.test(blo
   'Aperçu : la barre « Exporter / Imprimer » passe à la ligne');
 dire(!/<x-dc/.test(scriptRepli),
   'le script ne nomme pas la racine de rendu (une seconde occurrence la dédouble)');
+
+/* ── ⑫ Menus déroulants et garde-fou (27/09/2026) ─────────────────────
+   Mesuré sur 390 px, épreuve de deux textes : 8 210 px de composeur, dont
+   ~1 500 de liste d'écarts AVANT le premier texte. Après : 6 159 px. */
+console.log(`\n${G}⑫ Le composeur se replie pour laisser place au travail${R}`);
+dire(/confWrap:confActif\?/.test(src),
+  'le garde-fou n’apparaît qu’une fois l’épreuve composée (pas de reproches sur une épreuve vide)');
+dire(/const confActif=!!active&&\(\(\(active\.textIds\|\|\[\]\)\.length>0\)\|\|this\._aDuContenu\(active\)\)/.test(src),
+  '« composée » = un texte ou du contenu (questions, barème, sujets, corrigé)');
+dire(/confAControler > 0 && \(confPref===true \|\| \(confPref!==false && !surTel\)\)/.test(src),
+  'garde-fou replié par défaut sur téléphone, et la préférence du Profil est enfin lue');
+dire(/const genEstOuvert=\(st\.genOuvert===null\|\|st\.genOuvert===undefined\)/.test(src) && /genOuvert:null,genBusy:false/.test(src),
+  '« Composer avec Ambassa » se replie d’office une fois l’épreuve composée');
+dire(/onClick="\{\{ f\.texteToggle \}\}"/.test(src) && /txtReplies/.test(src),
+  'chaque texte du composeur a son menu déroulant');
+dire(/\[data-print-sheet\]\{padding:24px 16px 30px!important/.test(src),
+  'l’aperçu ne garde pas ses marges d’A4 sur téléphone');
+dire(/\.vrt-titre-file::before\{content:none;display:none\}/.test(src),
+  'plus de filet au-dessus des titres de section');
 
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko === 0 ? 0 : 1);
