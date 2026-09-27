@@ -3334,10 +3334,10 @@
     <p style="font-size:14px;color:var(--c5a6678,#5a6678);margin:0 0 26px;max-width:70ch;text-align:justify">Le quota d'épreuves générées est limité par mois selon le plan, afin d'éviter les abus. Le compteur se réinitialise chaque début de mois et s'applique à l'équipe comme à chaque membre.</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px">
       <sc-for list="{{ plansView }}" as="p" hint-placeholder-count="4">
-        <article style="background:{{ p.bg }};border:2px solid {{ p.border }};border-radius:16px;padding:24px 22px;display:flex;flex-direction:column;box-shadow:0 3px 12px rgba(20,55,95,.06);animation:popIn .34s ease both">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="font-family:Poppins;font-size:16px;font-weight:700;color:{{ p.titleColor }}">{{ p.name }}</span><span style="{{ p.currentChip }}">Actuel</span></div>
-          <div style="display:flex;align-items:baseline;gap:5px;margin-bottom:4px"><span style="font-family:Poppins;font-size:28px;font-weight:700;color:var(--c14375f,#14375f)">{{ p.price }}</span><span style="font-size:12.5px;color:var(--c8b97a8,#8b97a8);font-weight:600">{{ p.period }}</span></div>
-          <div style="font-size:12px;color:var(--c7a8598,#7a8598);margin-bottom:16px">{{ p.seats }}</div>
+        <article style="{{ p.carte }}">
+          <div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;text-align:center"><span style="font-family:Poppins;font-size:16px;font-weight:700;color:{{ p.titleColor }}">{{ p.name }}</span><span style="{{ p.currentChip }}">Actuel</span></div>
+          <div style="display:flex;align-items:baseline;justify-content:center;flex-wrap:wrap;gap:5px;margin-bottom:4px"><span style="font-family:Poppins;font-size:28px;font-weight:700;color:var(--c14375f,#14375f)">{{ p.price }}</span><span style="font-size:12.5px;color:var(--c8b97a8,#8b97a8);font-weight:600">{{ p.period }}</span></div>
+          <div style="font-size:12px;color:var(--c7a8598,#7a8598);margin-bottom:16px;text-align:center">{{ p.seats }}</div>
           <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
             <sc-for list="{{ p.features }}" as="ft" hint-placeholder-count="3">
               <div style="display:flex;gap:9px;align-items:flex-start"><span style="{{ ft.check }}">{{ ft.icon }}</span><span style="font-size:13px;color:var(--c3a4658,#3a4658);line-height:1.4">{{ ft.label }}</span></div>
@@ -3644,7 +3644,7 @@ class Component extends DCLogic {
        jamais le navigateur. */
     this.plans=[
       {id:'essai',name:'Essai',price:'0',period:'gratuit',quota:10,seats:'1 utilisateur',
-       features:['1 semaine d’essai','10 épreuves / mois','Corpus MINESEC complet','Aperçu & impression PDF']},
+       features:['1 semaine d’essai','5 épreuves / mois','12 textes MINESEC au choix + tout le domaine public','Aperçu & impression PDF']},
       /* Payer au mois lève le seul obstacle qui compte : sortir 5 000 F
          d'un coup. Même service, même quota mensuel — et l'annuel reste
          moins cher sur l'année, ce que la carte dit sans détour. */
@@ -6854,6 +6854,33 @@ class Component extends DCLogic {
             return jours+' jour'+(jours>1?'s':'')+' d’essai';
           return f;
         });
+        /* CE QUE LA FORMULE OUVRE VRAIMENT. « Corpus MINESEC complet »
+           s'affichait sur l'essai, qui n'ouvre que N textes sous droits
+           (plat_paliers.essai.textes) ; et le quota d'appels a Ambassa --
+           decompte au serveur depuis le 27/09/2026 -- n'etait annonce nulle
+           part. On enonce les plafonds appliques, et eux seuls. */
+        if(q){
+          const plat=f=>f.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+          let fs=p.features.map(f=>{
+            if(q.textes!=null&&q.textes>=0&&/^(corpus minesec complet|\d+ textes minesec)/.test(plat(f)))
+              return q.textes+' textes MINESEC au choix + tout le domaine public';
+            if(q.textes!=null&&q.textes<0&&/^\d+ textes minesec/.test(plat(f)))
+              return 'Corpus MINESEC complet';
+            return f;
+          })
+            /* On ne remplace une ligne que si le serveur en donne le chiffre :
+               sans lui, l'argumentaire reste mot pour mot. */
+            .filter(f=>!(q.ia!=null&&/ambassa/.test(plat(f)))&&!(q.exports!=null&&/export/.test(plat(f))));
+          const lignes=[];
+          if(q.ia!=null)lignes.push(q.ia<0?'Ambassa sans limite'
+            :q.ia+' appel'+(q.ia>1?'s':'')+' à Ambassa / mois');
+          if(q.exports!=null&&q.exports>=0&&q.epreuves!=null&&(q.epreuves<0||q.exports<q.epreuves))
+            lignes.push(q.exports+' export'+(q.exports>1?'s':'')+' Word / mois');
+          /* Juste apres la ligne des epreuves : les quotas se lisent ensemble. */
+          const iq=fs.findIndex(f=>/epreuves?\s*\/\s*mois/.test(plat(f)));
+          fs.splice(iq>=0?iq+1:0,0,...lignes);
+          p.features=fs;
+        }
       }
     }
   }
@@ -8727,10 +8754,19 @@ class Component extends DCLogic {
     }:{phases:[],collaborators:[],history:[]};
 
     const roleDotC=r=>'width:10px;height:10px;border-radius:50%;flex:none;background:'+(this.roleColors[r]||'var(--c1a72bb,#1a72bb)');
-    const planBg={essai:'var(--cffffff,#fff)',ens:'var(--cffffff,#fff)',etab:'var(--cf5faff,#f5faff)',pro:'var(--cfbf8ff,#fbf8ff)'};
-    const planBorder={essai:'var(--ce2eaf3,#e2eaf3)',ens:'var(--ce2eaf3,#e2eaf3)',etab:'var(--cbcd9f2,#bcd9f2)',pro:'var(--cd9c9f0,#d9c9f0)'};
     const curPlanName=st.team.plan;
-    const plansView=this.plans.map(p=>{const isCur=p.name===curPlanName;return{name:p.name,price:p.price,period:p.period,seats:p.seats,bg:planBg[p.id]||'var(--cffffff,#fff)',border:isCur?'var(--c1f9d55,#1f9d55)':(planBorder[p.id]||'var(--ce2eaf3,#e2eaf3)'),titleColor:p.id==='pro'?'var(--c7b52c7,#7b52c7)':'var(--c14375f,#14375f)',currentChip:isCur?'font-size:10px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,features:p.features.map(f=>({label:f,icon:this._icon('check','var(--c1f9d55,#1f9d55)',13),check:'display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--ce6f5ec,#e6f5ec);flex:none;margin-top:1px'})),cta:isCur?'Plan actuel':'Choisir ce plan',btn:isCur?'background:var(--ceef2f7,#eef2f7);color:var(--c8b97a8,#8b97a8);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:default;font-family:Poppins':'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;font-family:Poppins',btnHover:isCur?'':'background:var(--c135a96,#135a96)',choose:()=>{if(!isCur)this.setState({payOpen:true,paySelected:p.id,payDone:false,payCode:this._codeAmiRetenu(),payCodeMsg:'',payCodeOk:false,payRemise:0,payMontant:0,payBase:0},()=>{if(this.state.payCode)this._verifierCodeAmi();});}};});
+    /* Chaque formule a SA couleur, en alternance : l'oeil distingue les cartes
+       d'un coup, surtout au telephone ou elles s'empilent. La couleur habille
+       le bandeau, le titre, le fond et les puces ; le bouton garde la couleur
+       d'action unique du site. */
+    const THEMES_PLAN=[
+      {a:'var(--c1a72bb,#1a72bb)',t:'var(--ce7f1fb,#e7f1fb)'},
+      {a:'var(--cc26a12,#c26a12)',t:'var(--cfdefdb,#fdefdb)'},
+      {a:'var(--c1f9d55,#1f9d55)',t:'var(--ce6f5ec,#e6f5ec)'},
+      {a:'var(--c7b52c7,#7b52c7)',t:'var(--cefe8fa,#efe8fa)'}];
+    const plansView=this.plans.map((p,ip)=>{const isCur=p.name===curPlanName;const th=THEMES_PLAN[ip%THEMES_PLAN.length];return{name:p.name,price:p.price,period:p.period,seats:p.seats,
+      carte:'background:linear-gradient(180deg,'+th.t+' 0,var(--cffffff,#fff) 170px);border:2px solid '+(isCur?th.a:'var(--ce2eaf3,#e2eaf3)')+';border-top:5px solid '+th.a+';border-radius:16px;padding:24px 22px;display:flex;flex-direction:column;box-shadow:0 3px 12px rgba(20,55,95,.06);animation:popIn .34s ease both',
+      titleColor:th.a,currentChip:isCur?'font-size:10px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,features:p.features.map(f=>({label:f,icon:this._icon('check','var(--cffffff,#fff)',12),check:'display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:'+th.a+';flex:none;margin-top:1px'})),cta:isCur?'Plan actuel':'Choisir ce plan',btn:isCur?'background:var(--ceef2f7,#eef2f7);color:var(--c8b97a8,#8b97a8);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:default;font-family:Poppins':'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;font-family:Poppins',btnHover:isCur?'':'background:var(--c135a96,#135a96)',choose:()=>{if(!isCur)this.setState({payOpen:true,paySelected:p.id,payDone:false,payCode:this._codeAmiRetenu(),payCodeMsg:'',payCodeOk:false,payRemise:0,payMontant:0,payBase:0},()=>{if(this.state.payCode)this._verifierCodeAmi();});}};});
     const payPlan=this.plans.find(p=>p.id===st.paySelected)||this.plans[1];
     /* CODE AMI — la remise ne vaut que pour le plan sur lequel le serveur l'a
        accordee. Changer de plan dans la meme fenetre la rend caduque : sans ce

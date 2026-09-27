@@ -431,6 +431,23 @@ const attendre = ms => new Promise(r => setTimeout(r, ms));
   dire(/2 texte\(s\) conforme\(s\) sont réservés à une formule supérieure/.test(libAb),
     'le rapport dit que des textes conformes sont réservés à une formule supérieure', libAb);
 
+  /* LES CARTES ANNONCENT CE QUE LE SERVEUR APPLIQUE (27/09/2026) : l'essai
+     affichait « Corpus MINESEC complet » alors que le serveur n'ouvre que N
+     textes sous droits ; le quota d'appels à Ambassa n'était annoncé nulle part. */
+  const tf = atelier(() => ({ corps: { ok: true } }));
+  const cfg = { paliers: { essai: { textes: 12, exports: 2, ia: 5, epreuves: 12 },
+    ens_mois: { textes: -1, exports: 30, ia: 30, epreuves: 30 } } };
+  tf._appliquerTarifs(cfg, 7); tf._appliquerTarifs(cfg, 7);
+  const fe = (tf.plans.find(p => p.id === 'essai') || {}).features || [];
+  const fm = (tf.plans.find(p => p.id === 'ens_mois') || {}).features || [];
+  dire(!fe.some(f => /Corpus MINESEC complet/.test(f)) && fe.includes('12 textes MINESEC au choix + tout le domaine public')
+    && fe.includes('5 appels à Ambassa / mois') && fe.includes('2 exports Word / mois')
+    && fe.filter(f => /Ambassa/.test(f)).length === 1,
+    'carte Essai : 12 textes, 5 appels à Ambassa, 2 exports — plus de « corpus complet » (et aucun doublon)', JSON.stringify(fe));
+  dire(fm.includes('Corpus MINESEC complet') && fm.includes('30 appels à Ambassa / mois')
+    && !fm.some(f => /export/.test(f)),
+    'carte Enseignant : corpus complet, 30 appels à Ambassa ; les exports égaux aux épreuves ne sont pas répétés', JSON.stringify(fm));
+
   /* Sans classe : on n'appelle pas l'IA, on dit quoi faire. */
   const c = atelier(() => ({ corps: { ok: true } }));
   await new Promise(r => c._ensureDraft(() => r()));
