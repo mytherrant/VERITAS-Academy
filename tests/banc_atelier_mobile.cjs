@@ -310,5 +310,34 @@ dire(/if\(!\(active&&active\.classe\)\)\{this\.setState\(\{genOuvert:true,genErr
 dire(/<section id="vrt-composer"/.test(src) && /#vrt-composer\{scroll-margin-top:136px\}/.test(src),
   'le panneau de composition est amené sous les yeux, titre compris');
 
+/* ── ⑭ Personne ne se retrouve enfermé en lecture seule (27/09/2026) ────
+   « Les champs d'en-tête ne se renseignent pas, pas de génération » : le
+   compte réel héritait du rôle du profil de démonstration affiché
+   (Relecteur), qui n'édite pas et ne gère pas l'équipe — impasse. */
+console.log(`\n${G}⑭ Un compte seul ne reste pas bloqué dans un rôle sans édition${R}`);
+dire(/users\.push\(\{id:accId,name:nom\|\|modele\.name\|\|'Moi',\s*role:'Enseignant',/.test(src),
+  'un nouveau compte n’hérite plus du rôle du profil de démonstration');
+dire(/users=this\._roleSoloRepare\(users,accId\);/.test(src)
+  && /const u2=this\._roleSoloRepare\(this\.state\.users,this\.state\.currentUserId\);/.test(src),
+  'le rôle est réparé à l’adoption du compte ET au démarrage (appareils déjà touchés)');
+const corpsRep = (() => { const i = src.indexOf('_roleSoloRepare(users,meId){'); if (i < 0) return null;
+  let d = 0; const j = src.indexOf('{', i); for (let k = j; k < src.length; k++) { if (src[k] === '{') d++; else if (src[k] === '}') { d--; if (!d) return src.slice(i, k + 1); } } return null; })();
+dire(!!corpsRep, '_roleSoloRepare est extractible');
+if (corpsRep) {
+  const o = new Function('return ({' + corpsRep + '});')();
+  o.ROLES = [{ nom: 'Enseignant', droits: { editer: true } }, { nom: 'Relecteur / validateur', droits: { editer: false } }];
+  const demo = [{ id: 'u1', role: 'Enseignant' }, { id: 'u4', role: 'Relecteur / validateur' }];
+  const seul = demo.concat([{ id: 'inv_x', role: 'Relecteur / validateur' }]);
+  dire(o._roleSoloRepare(seul, 'inv_x').find(u => u.id === 'inv_x').role === 'Enseignant',
+    'seul (les profils de démo ne comptent pas) : remis Enseignant');
+  const equipe = seul.concat([{ id: 'acc_chef', role: 'Enseignant' }]);
+  dire(o._roleSoloRepare(equipe, 'inv_x') === equipe, 'dans une vraie équipe, le rôle choisi par le chef est respecté');
+  dire(o._roleSoloRepare(demo, 'u4') === demo, 'le profil de démonstration Relecteur reste une démonstration');
+  const ok2 = demo.concat([{ id: 'acc_1', role: 'Enseignant' }]);
+  dire(o._roleSoloRepare(ok2, 'acc_1') === ok2, 'rien ne change quand le rôle permet déjà d’éditer');
+}
+dire(/genRensWrap:perm\.ia\?/.test(src) && /ne permet ni de modifier ni de g/.test(src),
+  'un rôle sans édition voit POURQUOI les champs sont verrouillés, au lieu d’un bouton disparu');
+
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko === 0 ? 0 : 1);

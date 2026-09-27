@@ -104,7 +104,9 @@ function etatDemo() {
    extrait avec elle : les tester séparément laisserait passer une divergence
    entre les deux chemins — et c'est précisément cette divergence qui a
    permis au décor de revenir par la synchronisation. */
-const outils = ['_estDecor(x, motif){', '_sansDecor(liste, motif){']
+/* `_roleSoloRepare` (27/09/2026) : le compte adopté, seul dans son équipe,
+   ne peut pas rester dans un rôle sans droit d'édition. */
+const outils = ['_estDecor(x, motif){', '_sansDecor(liste, motif){', '_roleSoloRepare(users,meId){']
   .map(e => extraire(src, e));
 
 function adopter(etat, accId, nom) {
