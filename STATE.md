@@ -20,11 +20,13 @@ Demande de Jacques : « Audite le travail de l'agent sur l'Atelier, corrige tous
 
 **Reskin / visuel** : 14 écrans parcourus, 0 débordement, 0 erreur JS, à 390 et 1 280 px. Icônes en ronds, teintes alternées, filets retirés : conformes. Export Word vérifié (corrigé sur une page séparée).
 
-**Restent à faire (hors code)** :
-- Le corpus du domaine public contient des scories d'OCR (« p Avant que… », « euvent ») et des maximes classées en textes d'étude. Ambassa peut les choisir : un nettoyage de `corpus_libre.json` serait utile.
-- L'écran Équipe affiche encore un « quota d'équipe » de démonstration, que le serveur n'applique pas.
+**Finalisation (même jour)** :
+- **Scories d'OCR** : 6 textes du domaine public (maximes de La Rochefoucauld) gardent des lettrines détachées (« qu'ils euvent faire. p Avant… »). `VRT_GENERATEUR.scoriesOCR` mesure la part de consonnes minuscules isolées : ces 6 textes dépassent 0,8 %, le suivant plafonne à 0,3 %. Ambassa ne les choisit plus ; l'équipe peut toujours les ajouter à la main. Les données de `corpus_libre.json` ne sont pas modifiées.
+- **Écran Équipe** : le « quota d'équipe » n'apparaît plus que dans la démonstration, puisque le serveur compte par compte. Le quota individuel affiche un tiret tant que le serveur n'a pas donné son plafond, et « Quota 0/0 » ne s'affiche plus dans la liste des membres.
 
-Bancs : `banc_composition_ambassa` 72 (dont « aucun texte → rien décompté », mutation détectée sur l'ancien code), `banc_atelier_mobile` 94, `banc_calendrier` 49. CI locale : tous les scripts des workflows sont verts (sauf `banc_cahiers_reels`, qui demande une charge locale). Jetons `?v=` réalignés (`minesec`, `conformite`, `generateur`).
+**Reste à faire (production)** : composer 2 ou 3 épreuves réelles avec un compte abonné, pour vérifier que les appels passent au palier `teach` (borné par les appels décomptés du mois).
+
+Bancs : `banc_composition_ambassa` 73 (dont « aucun texte → rien décompté », mutation détectée sur l'ancien code), `banc_atelier_mobile` 95, `banc_calendrier` 49. CI locale : tous les scripts des workflows sont verts (sauf `banc_cahiers_reels`, qui demande une charge locale). Jetons `?v=` réalignés (`minesec`, `conformite`, `generateur`).
 
 ## Formules en paliers, forum des classes, e-learning, boutique — et la boutique vide du 26/09 (25→27/09/2026)
 

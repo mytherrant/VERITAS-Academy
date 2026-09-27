@@ -297,6 +297,20 @@
      une classe ; mais il passe derrière tout ce qui est dans la norme.
      opts : classe, theme, exclure (numéros déjà travaillés), genre, bornes
      {min,max}, alea. */
+  /* SCORIES D'OCR. Quelques textes du domaine public gardent des lettrines
+     détachées de leur mot (« qu'ils euvent faire. p Avant que… ») : une
+     consonne minuscule isolée, qui n'existe pas en français. Mesuré le
+     27/09/2026 sur les 1 014 textes libres : 6 textes dépassent 0,8 %
+     (tous des maximes), le suivant est à 0,3 % (un « t » cité). Ambassa ne
+     les choisit plus d'elle-même ; l'équipe peut toujours les ajouter. */
+  function scoriesOCR(texte) {
+    var w = String(texte || '').split(/\s+/).filter(Boolean);
+    if (w.length < 40) return 0;
+    var n = 0;
+    w.forEach(function (x) { if (/^[b-df-hj-np-tv-xz]$/.test(x)) n++; });
+    return n / w.length;
+  }
+
   function classerTextes(all, opts) {
     opts = opts || {};
     var cibles = niveauxCibles(opts.classe || '');
@@ -323,6 +337,7 @@
       }
       if (!f) return;
       if (!f.text && !f._partiel) return;
+      if (scoriesOCR(f.text) > 0.008) return;
       var score = 0, raisons = [];
       var jn = jetonsNiveau(f.level);
       var commun = cibles.filter(function (c) { return jn.indexOf(c) >= 0 && c !== 'tech'; });
@@ -1079,6 +1094,7 @@
   }
 
   root.VRT_GENERATEUR = {
+    scoriesOCR: scoriesOCR,
     classer: classer, segmentsConsigne: segmentsConsigne, planEpreuve: planEpreuve, blocsDuPlan: blocsDuPlan, totalNote: totalNote,
     jetonsNiveau: jetonsNiveau, niveauxCibles: niveauxCibles, classerTextes: classerTextes,
     exemplesOfficiels: exemplesOfficiels, formationMinesec: formationMinesec,

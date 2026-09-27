@@ -376,6 +376,13 @@ const attendre = ms => new Promise(r => setTimeout(r, ms));
     && /\$utilisesAt < \$accordesAt/.test(px) && /file_put_contents\(\$fichierAtelier/.test(px),
     'ia_proxy.php : le palier de l’abonné ne dépasse jamais les appels déjà décomptés par plateforme.php ce mois');
 
+  /* Scories d'OCR (lettrines détachées) : Ambassa ne choisit pas ces textes. */
+  const propre = 'Le marché de la ville est bruyant le matin et les marchandes appellent les passants avec de grands gestes. ' .repeat(5);
+  const abime = propre.replace(/ et /g, ' et p ').replace(/ les /g, ' q les ');
+  dire(GEN.scoriesOCR(abime) > 0.008 && GEN.scoriesOCR(propre) === 0
+    && GEN.classerTextes([{ n: 1, level: '3e', text: abime }, { n: 2, level: '3e', text: propre }], { classe: '3e' }).every(x => x.f.n !== 1),
+    'un texte à lettrines détachées (« euvent faire. p Avant… ») n’est jamais choisi par Ambassa');
+
   /* Aucun texte convenable : rien n'est décompté (le quota se demande après
      le choix et le téléchargement du texte). */
   const sansTexte = atelier((url) => /ia_proxy/.test(url) ? { corps: { text: JSON.stringify(REPONSE_BEPC) } } : { corps: { ok: true } });

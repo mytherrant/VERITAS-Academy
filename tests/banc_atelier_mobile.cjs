@@ -362,6 +362,8 @@ dire(/hasSelection:!!active&&\(active\.textIds\.length>0\|\|\(active\.sujets\|\|
   'les sujets rédigés s’affichent dans le composeur même sans texte support');
 dire(!/équipe : <span style="\{\{ teamInlineStyle \}\}">/.test(src) && /const meQuotaInconnu=/.test(src),
   'pas de quota d’équipe de démonstration ni de « 0 / 0 » avant que le serveur ait parlé');
+dire(/<div style="\{\{ quotaEquipeCarte \}\}">/.test(src) && /quotaEquipeCarte:\/\^u\\d\+\$\/\.test\(String\(me\.id\)\)\?/.test(src),
+  'écran Équipe : le quota d’équipe (non appliqué par le serveur) n’apparaît que dans la démonstration');
 
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko === 0 ? 0 : 1);
