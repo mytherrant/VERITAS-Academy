@@ -472,16 +472,8 @@
      désormais sur la même palette de six que les anneaux d'icônes, si
      bien que deux titres voisins ne portent jamais la même couleur — le
      repère devient distinctif au lieu d'être décoratif. */
-  main section:nth-of-type(6n+1) .vrt-titre-file::before{background:var(--c1a72bb,#1a72bb)}
-  main section:nth-of-type(6n+2) .vrt-titre-file::before{background:var(--c1f9d55,#1f9d55)}
-  main section:nth-of-type(6n+3) .vrt-titre-file::before{background:var(--cc26a12,#c26a12)}
-  main section:nth-of-type(6n+4) .vrt-titre-file::before{background:var(--c7b52c7,#7b52c7)}
-  main section:nth-of-type(6n+5) .vrt-titre-file::before{background:var(--c0e8a9c,#0e8a9c)}
-  main section:nth-of-type(6n+6) .vrt-titre-file::before{background:var(--c14375f,#14375f)}
   /* Le filet s'allonge quand on survole sa section : un mouvement de
      34 px, assez pour se remarquer, trop court pour distraire. */
-  .vrt-titre-file::before{transition:width .24s cubic-bezier(.22,.61,.36,1)}
-  main section:hover .vrt-titre-file::before{width:52px}
 
   /* La bordure d'une carte survolée prend la teinte de son rang, au lieu
      du même bleu pour toutes. C'est la règle des vignettes d'accueil,
@@ -545,10 +537,10 @@
   .vrt-bande-fonce{background:linear-gradient(135deg,var(--c14375f,#14375f),var(--c1a72bb,#1a72bb));color:#fff;border:none}
   .vrt-bande-fonce h2,.vrt-bande-fonce h3{color:#fff}
 
-  /* Un titre de section porte un filet colore court : c'est le repere que
-     l'oeil suit quand la page est longue. */
-  .vrt-titre-file::before{content:'';display:block;width:34px;height:3px;border-radius:2px;
-    background:var(--c1a72bb,#1a72bb);margin-bottom:9px}
+  /* Le filet colore au-dessus des titres de section est RETIRE (27/09/2026,
+     demande de Jacques) : la couleur vit desormais dans les icones et les
+     cartes. La classe reste, sans pseudo-element. */
+  .vrt-titre-file::before{content:none;display:none}
 
   /* Squelette de chargement plutot qu'un vide blanc. */
   .vrt-charge{background:linear-gradient(90deg,var(--ceef2f7,#eef2f7) 25%,var(--cf7f9fc,#f7f9fc) 37%,var(--ceef2f7,#eef2f7) 63%);
@@ -894,10 +886,6 @@
   main article:hover, .vrt-carte:hover{border-color:var(--cbcd9f2,#bcd9f2)}
 
   /* Le filet colore des titres de section suit la meme rotation. */
-  main > section:nth-of-type(4n+1) .vrt-titre-file::before{background:var(--c14375f,#14375f)}
-  main > section:nth-of-type(4n+2) .vrt-titre-file::before{background:var(--c1f9d55,#1f9d55)}
-  main > section:nth-of-type(4n+3) .vrt-titre-file::before{background:var(--cc26a12,#c26a12)}
-  main > section:nth-of-type(4n+4) .vrt-titre-file::before{background:var(--c1a72bb,#1a72bb)}
 
   /* En mode sombre l'alternance s'inverse : le fond « clair » devient une
      nuance a peine plus haute, sinon la bande eblouit. */
@@ -1225,6 +1213,14 @@
 
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}
     .vrt-carte:hover,main article:hover{transform:none}}
+  /* APERÇU SUR TÉLÉPHONE. La feuille gardait ses marges d'A4 (60 px de
+     chaque côté) : sur 390 px, le texte de l'épreuve tenait dans une colonne
+     de 190 px, trois mots par ligne (mesuré le 27/09/2026). L'impression,
+     elle, n'est pas concernée : @media print reprend la main. */
+  @media screen and (max-width:640px){
+    [data-print-sheet]{padding:24px 16px 30px!important;margin:12px 8px!important}
+    [data-print-sheet] ol{padding-left:18px!important}
+  }
   @media print{
     [data-noprint]{display:none!important}
     body{background:var(--cffffff,#fff)}
@@ -2104,7 +2100,11 @@
                     </div>
                     <div style="{{ f.ctrlWrap }}"><button onClick="{{ f.up }}" style="{{ iconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb);color:var(--c1a72bb,#1a72bb)">{{ icHaut }}</button><button onClick="{{ f.down }}" style="{{ iconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb);color:var(--c1a72bb,#1a72bb)">{{ icBas }}</button><button onClick="{{ f.remove }}" style="{{ iconBtn }};color:var(--cc0392b,#c0392b)" style-hover="border-color:var(--cc0392b,#c0392b);background:var(--cfdecea,#fdecea)">{{ icClose }}</button></div>
                   </div>
-                  <div style="margin-top:13px;padding-top:13px;border-top:1px dashed var(--ce2eaf3,#e2eaf3)">
+                  <!-- MENU DÉROULANT DU TEXTE. Un texte de 400 mots occupe deux
+                       écrans de téléphone : une fois lu, on le replie pour
+                       travailler les questions sans défiler (27/09/2026). -->
+                  <button type="button" onClick="{{ f.texteToggle }}" style="margin-top:11px;width:100%;background:var(--cf4f8fc,#f4f8fc);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c14375f,#14375f);font-family:Poppins;font-size:12.5px;font-weight:700;padding:9px 11px;border-radius:9px;cursor:pointer;text-align:left">{{ f.texteToggleLabel }}</button>
+                  <div style="{{ f.texteBloc }}">
                     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
                       <span style="font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);font-family:Poppins">Texte — traiter :</span>
                       <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:8px;padding:3px">
@@ -3793,7 +3793,7 @@ class Component extends DCLogic {
          `accountId` — abonnement encaisse, rattache a personne. */
       compteId:(store&&store.compteId)||'',
       exOuvert:false,exType:'',exBusy:false,exErr:'',exResultat:null,
-      genOuvert:true,genBusy:false,genEtape:'',genErr:'',genRapport:null,genTheme:'',genCorrigeVisible:false,genCorrigeWord:true,
+      genOuvert:null,genBusy:false,genEtape:'',genErr:'',genRapport:null,genTheme:'',genCorrigeVisible:false,genCorrigeWord:true,
       coConfIA:null,coConfIABusy:false,coConfIAErr:'',
       coObjProp:null,coObjBusy:false,coObjErr:'',
       assistOuvert:false,assistSaisie:'',assistBusy:false,assistErr:'',
@@ -8005,7 +8005,11 @@ class Component extends DCLogic {
       }).filter(x=>x.tokens.some(t=>t.click));};
     const mkTokens=(f)=>mkParas(f).reduce((a,x)=>a.concat(x.tokens),[]);
     const selectedFiches=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean).map((f,i)=>{const ann=this._wordAnnots(f.n);const annCount=Object.keys(ann).length;const ko=f._partiel||f._syncKo;const koFerme=(f._libre===false||f._syncKo==='abonnement');
+      const replie=!!(st.txtReplies||{})[f.n];
       return{pos:i+1,type:f.type,words:f.words,level:f.level,ancre:'vrt-txt-'+f.n,
+        texteBloc:'margin-top:13px;padding-top:13px;border-top:1px dashed var(--ce2eaf3,#e2eaf3)'+(replie?';display:none':''),
+        texteToggleLabel:replie?'Afficher le texte ('+(f.words||0)+' mots)':'Replier le texte',
+        texteToggle:()=>this.setState(s2=>({txtReplies:{...(s2.txtReplies||{}),[f.n]:!replie}})),
       /* Le nombre de mots ci-contre vient du repertoire ; il ne vaut que si
          le texte integral a suivi. Quand ce n'est pas le cas, on le dit ICI,
          a cote du chiffre -- pas dans un journal que personne n'ouvre. */
@@ -8293,7 +8297,9 @@ class Component extends DCLogic {
       {k:'confAuto',label:'Garde-fou toujours d\u00e9pli\u00e9',aide:'Ouvrir le panneau de conformit\u00e9 d\u00e8s l\u2019ouverture d\u2019une \u00e9preuve.'}
     ];
     const mesPrefs=(me.prefs)||{};
-    const profPrefs=PREFS.map((p,i2)=>{const on=mesPrefs[p.k]!==false;
+    /* confAuto n'est « oui » que si on l'a coche : sans choix, le garde-fou
+       suit l'ecran (ouvert sur poste, replie sur telephone). */
+    const profPrefs=PREFS.map((p,i2)=>{const on=p.k==='confAuto'?mesPrefs[p.k]===true:mesPrefs[p.k]!==false;
       return{label:p.label,aide:p.aide,
         rowStyle:'display:flex;align-items:center;gap:13px;padding:13px 12px;border-radius:10px;background:'+(i2%2?'var(--cfbfcfe,#fbfcfe)':'transparent'),
         switchStyle:'width:44px;height:25px;border-radius:99px;border:none;cursor:pointer;flex:none;position:relative;padding:0;background:'+(on?'var(--c1f9d55,#1f9d55)':'var(--ccdd9e6,#cdd9e6)'),
@@ -8730,6 +8736,10 @@ class Component extends DCLogic {
        Recalculé à CHAQUE rendu, sans appel réseau : c'est ce qui en fait un
        garde-fou plutôt qu'un bouton qu'on oublie de cliquer. */
     const confTextes=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean);
+    const confActif=!!active&&(((active.textIds||[]).length>0)||this._aDuContenu(active));
+    const genEstOuvert=(st.genOuvert===null||st.genOuvert===undefined)
+      ?!(active&&this._aDuContenu(active))||!!st.genBusy||!!st.genErr||!!st.genRapport
+      :!!st.genOuvert;
     const confLocaux=active?CONFORMITE.verifierEpreuve(active,confTextes,
       (f,k)=>this._qList(f,k),(n2,k,i)=>this._qPts(n2,k,i)):[];
     const confTous=confLocaux.concat((st.confIA&&st.confIA.ecarts)||[]);
@@ -8743,8 +8753,16 @@ class Component extends DCLogic {
        « Analyser 4 ecarts » sous un titre annoncant « 2 ecart(s) a la norme »,
        et ouvrait le panneau pour une simple suggestion. */
     const confAControler = (confRes.bloquants || 0) + (confRes.ecarts || 0);
+    /* Ouverture automatique : la preference « Garde-fou toujours deplie »
+       (Profil) etait affichee mais lue nulle part. Cochee -> ouvert des qu'il
+       y a un ecart ; decochee -> replie ; sans choix -> ouvert sur un poste
+       de travail, REPLIE sur telephone, ou la liste des ecarts poussait les
+       textes a 1 500 px plus bas (mesure le 27/09/2026). L'en-tete garde le
+       compte des ecarts : rien n'est cache, c'est un menu deroulant. */
+    const confPref=((me&&me.prefs)||{}).confAuto;
+    const surTel=typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(max-width:820px)').matches;
     const confEstOuvert = (st.confOpen === null || st.confOpen === undefined)
-      ? (confAControler > 0)
+      ? (confAControler > 0 && (confPref===true || (confPref!==false && !surTel)))
       : !!st.confOpen;
     const confStruct=active&&active.epreuveCode?MINESEC.epreuveParCode(active.epreuveCode):null;
     const confCible=MINESEC.totalAttendu(confStruct);
@@ -9486,9 +9504,11 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       genWrap:'background:linear-gradient(180deg,var(--cf5faff,#f5faff),var(--cffffff,#fff));border:1px solid var(--cbcd9f2,#bcd9f2);border-radius:12px;padding:14px 16px;margin-bottom:18px'+(perm.edit&&perm.ia?'':';display:none'),
       genSceau:this._icoRond('sparkle','var(--c1a72bb,#1a72bb)',36),
       genSous:'Ambassa rédige l’épreuve entière selon le descriptif MINESEC — texte choisi dans le corpus, questions, barème, corrigé et sujets. Vous relisez et corrigez.',
-      genOuvert:st.genOuvert,
-      genToggle:()=>this.setState({genOuvert:!st.genOuvert,genErr:''}),
-      genToggleLabel:st.genOuvert?'Replier':'Ouvrir',
+      /* Replie d'office une fois l'epreuve composee : il a servi, la place
+         revient aux textes et aux questions. Un clic le rouvre. */
+      genOuvert:genEstOuvert,
+      genToggle:()=>this.setState({genOuvert:!genEstOuvert,genErr:''}),
+      genToggleLabel:genEstOuvert?'Replier':'Ouvrir',
       genCible:(()=>{const s2=this._structureDe(active);if(!active||!active.classe)return'Classe à choisir dans les Renseignements';
         return s2?(active.classe+' · '+s2.nom+' · '+MINESEC.totalAttendu(s2)+' pts'):'Nature de l’épreuve à choisir';})(),
       genCibleStyle:'font-size:11.5px;font-weight:700;font-family:Poppins;color:var(--c14375f,#14375f);background:var(--ce7f1fb,#e7f1fb);border-radius:999px;padding:5px 11px;flex:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap',
@@ -10079,7 +10099,12 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       goActivite:()=>this.setState({screen:'activite',notifOpen:false,chatOpen:false},()=>window.scrollTo(0,0)),
       isCollab:ready&&st.screen==='collab',
       isActivite:ready&&st.screen==='activite',
-      confWrap:'background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:14px 16px;margin-bottom:18px;box-shadow:0 2px 10px rgba(20,55,95,.05)',
+      /* Le garde-fou n'apparait qu'une fois l'epreuve COMPOSEE (un texte, des
+         questions, un bareme ou un sujet). Sur une epreuve vide, il listait
+         « Aucune structure rattachee », « Etablissement non renseigne »… :
+         des reproches generiques, sans rapport avec un contenu qui n'existe
+         pas encore (signale le 27/09/2026). */
+      confWrap:confActif?'background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:14px 16px;margin-bottom:18px;box-shadow:0 2px 10px rgba(20,55,95,.05)':hidden,
       confDot:'width:9px;height:9px;border-radius:50%;flex:none;background:'+confRes.couleur,
       confTitre:confRes.libelle,
       confBareme:confTotal+' / '+confCible,
