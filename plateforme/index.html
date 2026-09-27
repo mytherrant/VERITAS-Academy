@@ -1522,13 +1522,42 @@
           <sc-for list="{{ calJours }}" as="j" hint-placeholder-count="7"><div style="text-align:center;font-size:10.5px;font-weight:700;color:var(--c9aa5b5,#9aa5b5);font-family:Poppins;padding:4px 0">{{ j }}</div></sc-for>
         </div>
         <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">
-          <sc-for list="{{ calCases }}" as="c" hint-placeholder-count="35"><div style="{{ c.style }}">{{ c.n }}<span style="{{ c.dot }}"></span></div></sc-for>
+          <sc-for list="{{ calCases }}" as="c" hint-placeholder-count="35"><button type="button" onClick="{{ c.choisir }}" aria-label="{{ c.aria }}" style="{{ c.style }}">{{ c.n }}<span style="{{ c.dot }}"></span></button></sc-for>
         </div>
+        <!-- CALER UNE ÉCHÉANCE. Le calendrier se lisait sans se toucher : pour
+             dater une épreuve, il fallait l'ouvrir et trouver le champ dans
+             « Renseignements ». Un jour touché ouvre ce volet : ce qui y est
+             déjà prévu, ce qu'on peut y caler, et une épreuve neuve datée. -->
+        <sc-if value="{{ calJourOuvert }}" hint-placeholder-val="{{ false }}">
+        <div class="vrt-cal-volet" style="margin-top:12px;border:1px solid var(--cd6e8f8,#d6e8f8);background:var(--cf5faff,#f5faff);border-radius:12px;padding:12px 13px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px">
+            <span style="font-family:Poppins;font-size:13px;font-weight:700;color:var(--c14375f,#14375f);flex:1;min-width:0">{{ calJourLibelle }}</span>
+            <button type="button" onClick="{{ calFermer }}" aria-label="Fermer" style="width:26px;height:26px;border-radius:7px;border:1px solid var(--ce6ecf3,#e6ecf3);background:var(--cffffff,#fff);color:var(--c5a6678,#5a6678);cursor:pointer;font-size:14px;line-height:1;display:grid;place-items:center">×</button>
+          </div>
+          <div style="{{ calPrevusTitre }}">Déjà prévu ce jour</div>
+          <sc-for list="{{ calPrevus }}" as="x" hint-placeholder-count="1">
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12.5px;color:var(--c22303f,#22303f)">
+              <span style="{{ x.dot }}"></span><span style="flex:1;min-width:0">{{ x.label }}</span>
+              <button type="button" onClick="{{ x.retirer }}" style="{{ x.retirerStyle }}">Retirer</button>
+            </div>
+          </sc-for>
+          <div style="{{ calCandTitre }}">Caler une échéance ce jour</div>
+          <sc-for list="{{ calCandidats }}" as="x" hint-placeholder-count="3">
+            <button type="button" onClick="{{ x.caler }}" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:9px;padding:8px 10px;margin-bottom:6px;cursor:pointer;font-family:inherit" style-hover="border-color:var(--c1a72bb,#1a72bb)">
+              <span style="{{ x.chip }}">{{ x.genre }}</span>
+              <span style="flex:1;min-width:0;font-size:12.5px;color:var(--c22303f,#22303f);font-weight:600">{{ x.label }}</span>
+              <span style="font-size:11px;color:var(--c8b97a8,#8b97a8);white-space:nowrap">{{ x.actuel }}</span>
+            </button>
+          </sc-for>
+          <div style="{{ calCandVide }}">Aucune épreuve ni aucun cours modifiable à dater.</div>
+          <button type="button" onClick="{{ calNouvelle }}" style="margin-top:6px;width:100%;background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;cursor:pointer" style-hover="filter:brightness(1.1)">+ Nouvelle épreuve pour ce jour</button>
+        </div>
+        </sc-if>
         <div style="margin-top:14px;display:flex;flex-direction:column;gap:9px">
           <sc-for list="{{ calEvents }}" as="v" hint-placeholder-count="3">
             <button onClick="{{ v.ouvrir }}" style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--c3a4658,#3a4658);background:none;border:none;padding:4px 2px;width:100%;text-align:left;cursor:pointer;font-family:inherit" style-hover="background:var(--cf7f9fc,#f7f9fc);border-radius:8px"><span style="{{ v.dot }}"></span><span style="flex:1;min-width:0">{{ v.label }}</span><span style="{{ v.quandStyle }}">{{ v.quand }}</span></button>
           </sc-for>
-          <div style="{{ calEmpty }}">Aucune échéance enregistrée. Renseignez la date de passation dans « Renseignements » pour la voir apparaître ici.</div>
+          <div style="{{ calEmpty }}">Aucune échéance enregistrée. Touchez un jour du calendrier pour y caler une épreuve ou un cours.</div>
         </div>
       </section>
 
@@ -3716,7 +3745,7 @@ class Component extends DCLogic {
     this.annot=this._load('minesec_annot',{});
     const store=this._load('minesec_v3',null);
     this.state={
-      sbOpen:true,calOffset:0,
+      sbOpen:true,calOffset:0,calJour:'',
       theme:(function(){try{return localStorage.getItem('minesec_theme')||'clair';}catch(e){return 'clair';}})(),
       /* Repliés d'office sur téléphone : le garde-fou de conformité et le
          formulaire de renseignements occupaient à eux deux plus d'un écran
@@ -7468,6 +7497,31 @@ class Component extends DCLogic {
      triees par urgence puis par date. Une seule source pour le calendrier,
      la liste « A venir » et le compteur de la cloche : trois affichages qui
      divergeraient s'ils comptaient chacun de leur cote. */
+  /* Date une epreuve ou un cours depuis le calendrier ('' retire la date).
+     Meme champ que « Renseignements » (`echeance`, AAAA-MM-JJ) : une seule
+     verite, quel que soit l'endroit ou on l'a saisie. */
+  _calerEcheance(genre,id,iso){
+    const cle=genre==='cours'?'cours':'epreuves';
+    const d=this._parseDate(iso);
+    const txt=d?'a fix\u00e9 l\u2019\u00e9ch\u00e9ance au '+d.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'a retir\u00e9 l\u2019\u00e9ch\u00e9ance';
+    this.setState(st=>({[cle]:(st[cle]||[]).map(o=>{
+      if(!o||o.id!==id)return o;
+      const n={...o,echeance:iso||'',updatedAt:Date.now()};
+      const ev={userId:st.currentUserId,text:txt,ts:Date.now()};
+      if(genre==='cours'){const v=(o.history&&o.history.length?o.history[o.history.length-1].version:1);n.history=[...(o.history||[]),{...ev,version:v}];}
+      else n.activity=[...(o.activity||[]),ev];
+      return n;})}),()=>this._persist());
+  }
+  /* Epreuve NEUVE datee du jour choisi. Pas _ensureDraft : il reprend
+     l'epreuve active, et dater un nouveau sujet ne doit pas re-dater celui
+     qu'on avait ouvert. */
+  _nouvelleEpreuveLe(iso){
+    const me=this._me();const id='e'+Date.now();
+    const ep={id,groupeId:this._groupeActif(),title:'Nouvelle \u00e9preuve',etab:'',classe:'',duree:'2 h',coeff:'',date:'',echeance:iso||'',
+      consigne:'Lis attentivement le(s) texte(s) puis r\u00e9ponds aux questions.',textIds:[],status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,
+      updatedAt:Date.now(),comments:[],activity:[{userId:me.id,text:'a cr\u00e9\u00e9 l\u2019\u00e9preuve',ts:Date.now()}]};
+    this.setState(st=>({epreuves:[ep,...st.epreuves],activeId:id,calJour:'',screen:'composeur'}),()=>{this._persist();window.scrollTo(0,0);});
+  }
   _echeances(){
     const st = this.state;
     const out = [];
@@ -8093,12 +8147,40 @@ class Component extends DCLogic {
       }
     });
     const calCases=[];
-    for(let i2=0;i2<calDec;i2++)calCases.push({n:'',style:'height:32px',dot:hidden});
+    const iso2=(a,m,j)=>a+'-'+String(m+1).padStart(2,'0')+'-'+String(j).padStart(2,'0');
+    const calJour=st.calJour||'';
+    for(let i2=0;i2<calDec;i2++)calCases.push({n:'',style:'height:32px;visibility:hidden;border:none;background:none',dot:hidden,choisir:()=>{},aria:''});
     for(let d=1;d<=calNb;d++){
       const estAuj=(d===auj.getDate()&&calMo===auj.getMonth()&&calAn===auj.getFullYear());
-      calCases.push({n:d,dot:evParJour[d]?'display:block;width:4px;height:4px;border-radius:50%;background:'+(estAuj?'var(--cffffff,#fff)':'var(--cf39200,#f39200)')+';margin:1px auto 0':hidden,
-        style:'height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;border-radius:8px;font-family:Poppins;'
-          +(estAuj?'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);font-weight:700':'color:var(--c3a4658,#3a4658)')});}
+      const iso=iso2(calAn,calMo,d);const estChoisi=iso===calJour;
+      calCases.push({n:d,aria:'Choisir le '+d,
+        choisir:()=>this.setState({calJour:estChoisi?'':iso}),
+        dot:evParJour[d]?'display:block;width:4px;height:4px;border-radius:50%;background:'+(estAuj?'var(--cffffff,#fff)':'var(--cf39200,#f39200)')+';margin:1px auto 0':hidden,
+        style:'height:32px;width:100%;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;border-radius:8px;font-family:Poppins;cursor:pointer;'
+          +(estAuj?'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);font-weight:700;border:2px solid '+(estChoisi?'var(--cc26a12,#c26a12)':'transparent')
+            :estChoisi?'background:var(--cfdefdb,#fdefdb);color:var(--cc26a12,#c26a12);font-weight:700;border:2px solid var(--cc26a12,#c26a12)'
+            :'background:transparent;color:var(--c3a4658,#3a4658);border:2px solid transparent')});}
+    /* Volet du jour choisi. On ne propose que ce que l'on peut MODIFIER :
+       dater l'epreuve d'un collegue depuis son propre accueil serait une
+       ecriture sans droit. */
+    const jourD=this._parseDate(calJour);
+    const peutDater=o=>o.ownerId===me.id||(o.editorIds||[]).indexOf(me.id)>=0;
+    const fmtCourt=d=>d?d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):'';
+    const lesDeux=[...(st.epreuves||[]).map(o=>({o,g:'epreuve'})),...(st.cours||[]).map(o=>({o,g:'cours'}))]
+      .filter(x=>x.o&&x.o.status!=='valide');
+    const chipG=g=>'font-size:10px;font-weight:700;font-family:Poppins;padding:2px 8px;border-radius:999px;flex:none;'
+      +(g==='cours'?'color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec)':'color:var(--c1a72bb,#1a72bb);background:var(--ce7f1fb,#e7f1fb)');
+    const titreDe=x=>x.o.title||(x.g==='cours'?'Cours sans titre':'\u00c9preuve sans titre');
+    const calPrevus=jourD?lesDeux.filter(x=>{const d=this._echeanceDe(x.o);return d&&d.getTime()===jourD.getTime();}).map(x=>({
+      label:titreDe(x),dot:'width:7px;height:7px;border-radius:50%;flex:none;background:var(--cf39200,#f39200)',
+      retirer:()=>this._calerEcheance(x.g,x.o.id,''),
+      retirerStyle:peutDater(x.o)?'background:none;border:1px solid var(--ce6ecf3,#e6ecf3);color:var(--cc0392b,#c0392b);font-size:11px;font-weight:700;font-family:Poppins;padding:3px 9px;border-radius:7px;cursor:pointer':hidden})):[];
+    const calCandidats=jourD?lesDeux.filter(x=>peutDater(x.o)).filter(x=>{const d=this._echeanceDe(x.o);return !(d&&d.getTime()===jourD.getTime());})
+      .sort((a,b)=>(b.o.updatedAt||0)-(a.o.updatedAt||0)).slice(0,8).map(x=>{const d=this._echeanceDe(x.o);return{
+      genre:x.g==='cours'?'Cours':'\u00c9preuve',chip:chipG(x.g),label:titreDe(x),
+      actuel:d?'pr\u00e9vu le '+fmtCourt(d):'sans date',
+      caler:()=>this._calerEcheance(x.g,x.o.id,calJour)};}):[];
+    const titreBloc='font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);font-family:Poppins;margin:4px 0 6px';
     /* La liste ne se limite plus au mois affiche : ce qui est EN RETARD ou
        imminent doit se voir meme si l'on feuillette novembre. Une echeance
        depassee qu'il faut aller chercher dans un autre mois n'alerte
@@ -9951,6 +10033,14 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       calPrev:()=>this.setState({calOffset:(st.calOffset||0)-1}),
       calNext:()=>this.setState({calOffset:(st.calOffset||0)+1}),
       calToday:()=>this.setState({calOffset:0}),
+      calJourOuvert:!!jourD,
+      calJourLibelle:jourD?'\u00c9ch\u00e9ance du '+jourD.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'',
+      calFermer:()=>this.setState({calJour:''}),
+      calPrevus,calCandidats,
+      calPrevusTitre:calPrevus.length?titreBloc:hidden,
+      calCandTitre:calCandidats.length?titreBloc:hidden,
+      calCandVide:(calCandidats.length||calPrevus.length)?hidden:'font-size:12px;color:var(--c8b97a8,#8b97a8);margin:4px 0 2px',
+      calNouvelle:()=>this._nouvelleEpreuveLe(calJour),
       /* --- theme --- */
       themeIcon:this._icon(st.theme==='sombre'?'sun':'moon','var(--c5a6678,#5a6678)',18),
       themeTitre:st.theme==='sombre'?'Passer en mode clair':'Passer en mode sombre',
