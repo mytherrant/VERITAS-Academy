@@ -92,6 +92,7 @@ dire(pE.support === 'aucun' && pE.sujets[0].points === 20, 'Expression écrite :
 const cl = GEN.classerTextes(CORPUS, { classe: '3e', bornes: { min: 200, max: 250 }, alea: () => 0 });
 dire(cl[0].f.n === 12, 'BEPC étude de texte : le texte retenu est de 3e et dans la norme 200-250 mots', cl.map(x => x.f.n + ':' + Math.round(x.score)).join(' '));
 dire(!cl.some(x => x.f.n === 17), 'un texte fermé par l’abonnement n’est jamais proposé');
+dire(cl.fermesConformes === 1, 'les textes fermés qui auraient convenu sont comptés (n°17 : 3e, 230 mots)', cl.fermesConformes);
 
 let pire = 0;
 MINESEC.epreuves.forEach(s => {
@@ -132,9 +133,42 @@ const v = GEN.validerEpreuve(brut, ctxBE);
 const tot = (v.questions[12].comp.concat(v.questions[12].expl)).reduce((a, x) => a + x.pts, 0);
 dire(Math.abs(tot - 20) < 0.001 && v.questions[12].comp.reduce((a, x) => a + x.pts, 0) === 10,
   'BEPC : compréhension /10 et langue /10 imposées par le plan, quoi qu’ait écrit l’IA', tot);
-dire(v.aReparer.length === 1 && v.aReparer[0].motif === 'pourquoi', 'la question en « Pourquoi » part en réécriture');
-const v2 = GEN.appliquerReparation(v, { questions: ['Explique ce qui rend le marché bruyant.'] });
-dire(!v2.aReparer.length && /Explique/.test(v2.questions[12].comp[1].q), 'la réécriture est appliquée et recontrôlée');
+dire(v.aReparer.some(r => r.motif === 'pourquoi'), 'la question en « Pourquoi » part en réécriture');
+dire(v.aReparer.some(r => (r.defauts || []).some(d => d.code === 'citation')),
+  'une citation absente du texte (« le marché ») est détectée comme hallucination');
+const pr = GEN.promptReparation(v.aReparer, CORPUS[1].text);
+dire(/TEXTE SUPPORT/.test(pr) && /À corriger : .*n’existe pas dans le texte/.test(pr),
+  'la réécriture reçoit la consigne précise ET le texte pour recopier la citation');
+/* Une réécriture n'est acceptée que si elle passe TOUT le contrôle. */
+const v2 = GEN.appliquerReparation(v, { questions: ['Explique ce qui rend le marché bruyant.', 'Remplace « marché » par un pronom.'] },
+  undefined, { 12: CORPUS[1].text });
+dire(!v2.aReparer.length && /Explique/.test(v2.questions[12].comp[1].q) && /« marché »/.test(v2.questions[12].expl[0].q),
+  'la réécriture est appliquée puis recontrôlée entièrement', JSON.stringify(v2.aReparer));
+const v3 = GEN.appliquerReparation(GEN.validerEpreuve(brut, ctxBE), { questions: ['Pourquoi est-ce bruyant ?', 'Remplace « le grand marché » par un pronom.'] },
+  undefined, { 12: CORPUS[1].text });
+dire(v3.aReparer.length === 2, 'une réécriture encore fautive (nouveau « Pourquoi », nouvelle citation inventée) est refusée', v3.aReparer.length);
+
+/* Les autres défauts du contrôle qualité. */
+const D = (q, ctx2) => GEN.diagnostiquer(q, Object.assign({ texte: CORPUS[1].text }, ctx2 || {})).map(d => d.code);
+dire(D('Donne la définition du complément du nom.').includes('theorique'), 'question théorique détectée (« donne la définition »)');
+dire(D('Le narrateur et le marché.').includes('consigne'), 'question sans verbe de consigne détectée');
+dire(D('Rédige un texte dans lequel tu décris ton marché.', { production: 'expression' }).includes('longueur')
+  && !D('Rédige un texte de quinze lignes dans lequel tu décris ton marché.', { production: 'expression' }).includes('longueur'),
+  'production sans longueur détectée ; avec « quinze lignes », acceptée');
+dire(!D('Relève dans le texte trois occurrences du mot « marché ».').length, 'une bonne question ne déclenche aucun défaut');
+const vd = GEN.validerEpreuve({ questions: [
+  { texte: 1, liste: 'comp', bloc: 'comp', q: 'Relève les mots qui désignent le marché dans le texte.', pts: 5, corrige: 'marché. Barème : 1 pt par mot.' },
+  { texte: 1, liste: 'comp', bloc: 'comp', q: 'Relève les mots qui désignent le marché dans ce texte.', pts: 5, corrige: 'marché' },
+  { texte: 1, liste: 'expl', bloc: 'expl', q: 'Remplace « marché » par un pronom.', pts: 10 }] }, ctxBE);
+dire(vd.aReparer.some(r => (r.defauts || []).some(d => d.code === 'doublon')), 'deux questions quasi identiques : la seconde part en réécriture');
+dire(vd.controles.some(c => !c.ok && /sans corrigé/.test(c.libelle)), 'une question sans corrigé est signalée');
+const vb = GEN.validerEpreuve({ questions: [
+  { texte: 1, liste: 'comp', bloc: 'comp', q: 'Relève les lieux du texte.', pts: 10, corrige: 'le marché, la place' },
+  { texte: 1, liste: 'expl', bloc: 'expl', q: 'Remplace « marché » par un pronom.', pts: 10, corrige: 'il. Barème : 10 pts pour la bonne substitution.' }] }, ctxBE);
+dire(vb.controles.some(c => !c.ok && /sans barème ventilé/.test(c.libelle)), 'un corrigé sans barème ventilé est signalé');
+const sysV = GEN.formationMinesec(MINESEC.epreuveParCode('BEPC_ETUDE'), null, '3e', []);
+dire(/MOT POUR MOT/.test(sysV) && /Barème : …/.test(sysV) && /LONGUEUR attendue/.test(sysV),
+  'la formation exige citations exactes, barème ventilé et longueur des productions');
 
 const fixes = { 12: { comp: ['Question de l’équipe A', 'Question de l’équipe B'], expl: ['Question C'] } };
 const vf = GEN.validerEpreuve({ questions: [
@@ -376,6 +410,26 @@ const attendre = ms => new Promise(r => setTimeout(r, ms));
   const src = fs.readFileSync(P('plateforme/index.html'), 'utf8');
   dire(!/this\._consommerIA\(/.test(src) && (src.match(/this\._avecQuotaIA\(\(\)=>\{/g) || []).length === 6,
     'plus aucun appel à Ambassa ne passe par le compteur local du navigateur');
+
+  /* Le rapport passe l'épreuve composée au garde-fou complet. */
+  dire(vals && (vals.genControles || []).some(c => /Garde-fou MINESEC \(hors relecture\) : aucun bloquant/.test(c.libelle)),
+    'le rapport inclut l’audit du garde-fou MINESEC (aucun bloquant)', vals && JSON.stringify((vals.genControles || []).map(c => c.libelle)));
+
+  /* LES TEXTES SUIVENT L'ABONNEMENT : le texte conforme (n°12) est fermé
+     pour ce compte. Ambassa compose sur un texte ouvert et le rapport dit
+     ce que la formule laisse de côté — sans jamais utiliser le texte fermé. */
+  const ab = atelier(url => /ia_proxy/.test(url) ? { corps: { text: JSON.stringify(REPONSE_BEPC) } } : { corps: { ok: true } });
+  ab.all = ab.all.map(f => f.n === 12 ? Object.assign({}, f, { _libre: false }) : f);
+  await new Promise(r => ab._ensureDraft(() => r()));
+  ab._updateActive({ classe: '3e', epreuveCode: 'BEPC_ETUDE', etab: 'CES' });
+  ab._composerAvecAmbassa('tout');
+  for (let i = 0; i < 60 && ab.state.genBusy; i++) await attendre(100);
+  const eab = ab._active();
+  const libAb = ((ab.state.genRapport || {}).controles || []).map(c => c.libelle).join(' | ');
+  dire(eab.textIds.length === 1 && eab.textIds[0] !== 12 && eab.textIds[0] !== 17,
+    'abonnement : aucun texte fermé n’est utilisé (ni n°12, ni n°17)', JSON.stringify(eab.textIds));
+  dire(/2 texte\(s\) conforme\(s\) sont réservés à une formule supérieure/.test(libAb),
+    'le rapport dit que des textes conformes sont réservés à une formule supérieure', libAb);
 
   /* Sans classe : on n'appelle pas l'IA, on dit quoi faire. */
   const c = atelier(() => ({ corps: { ok: true } }));

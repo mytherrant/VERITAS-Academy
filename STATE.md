@@ -97,6 +97,21 @@ Demande de Jacques : « Ma plateforme collaborative atelier de français ne pass
 - `_consommerQuota(genre, suite, refus)` accepte un rappel `refus`, pour afficher le message dans le panneau, et un message propre au genre `ia`.
 - Banc : 45 contrôles (ordre quota → IA, refus 402 sans appel, palier du proxy), mutation M7 détectée.
 
+**Renfort MINESEC d'Ambassa + audit final (27/09/2026)** :
+- **RAG écarté, et pourquoi.** `rag.php` (biblio_index.db, 57 000 passages) renvoie des extraits de 32 mots, romans compris, et indexe le menu des pages. Les modèles maison (`evaluations/BEPC_blanc_*`) contiennent en outre « Pourquoi… ? » et « À quel temps… », des formes que le référentiel proscrit. Les donner en exemple aurait tiré Ambassa vers ces écarts. On n'en garde que le bon usage : le **barème ventilé dans le corrigé**.
+- **Formation** : citations recopiées mot pour mot ; une question = une tâche ; ni doublon ni question théorique ; longueur imposée pour toute production ; ligne « Barème : … » ventilée dans le corrigé dès qu'une question vaut plus d'1 point.
+- **Contrôle qualité** (`diagnostiquer`), avec réécriture ciblée :
+  - **citation absente du texte** (hallucination) ;
+  - **question théorique** (« donne la définition », « énonce la règle ») ;
+  - **question sans consigne reconnue** : référentiel + impératifs + interrogatifs, soit 1,6 % de faux positifs sur les 6 084 questions du corpus libre, contre 16,8 % avec le référentiel seul ;
+  - **doublon** (80 % de mots pleins communs) ;
+  - **production sans longueur**.
+- La réécriture reçoit la consigne précise de chaque défaut, **et le texte support** quand une citation est en cause. Elle n'est acceptée que si elle passe **tout** le contrôle.
+- **Signalés sans réécriture** : corrigé manquant ; barème non ventilé ; citation du corrigé introuvable ; équilibre des niveaux hors des repères officiels.
+- **Garde-fou dans le rapport** : l'épreuve composée passe aussitôt `CONFORMITE.verifierEpreuve` (hors marques de relecture), et le rapport affiche bloquants et écarts.
+- **Les textes suivent l'abonnement** : Ambassa ne compose que sur les textes ouverts par la formule du compte (`_libre`, décidé par le serveur). `classerTextes` compte les textes fermés qui auraient été conformes. Si le texte retenu est hors de la longueur officielle alors que N textes conformes sont fermés, le rapport indique : « N texte(s) conforme(s) sont réservés à une formule supérieure ».
+- Banc : 68 contrôles, mutations M10 (citations) et M11 (abonnement) détectées. CI locale : 62/62 et gardes inline vertes. Rendu vérifié au navigateur (aucun débordement, aucune erreur).
+
 ⚠️ **Nouveau module** `plateforme/generateur.js` : ajouté aux listes de `deploy.yml` (modules obligatoires + jetons `?v=`), à `tools/versionner_atelier.cjs` et à `tests/verif_syntaxe_atelier.cjs`. Chaque appel consomme le quota IA habituel (`_consommerIA`, puis le plafond du serveur `ia_proxy.php`), plus un appel en cas de réécriture.
 
 ## ⚠️ Incident 25-26/09/2026 : payment_manuel.php en 500 après le déploiement du rapprochement SMS

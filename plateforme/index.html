@@ -32,7 +32,7 @@
 <script src="./minesec.js?v=570ac91b"></script>
 <script src="./conformite.js?v=be09f1cb"></script>
 <script src="./exercices.js?v=c6d93301"></script>
-<script src="./generateur.js?v=b7869fd7"></script>
+<script src="./generateur.js?v=a0954e70"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=8979cf66"></script>
 <!--vrt-habillage:tete-->
@@ -4997,16 +4997,21 @@ class Component extends DCLogic {
        le mieux classe du corpus pour la classe, la longueur et le type. */
     const dejaVus=[];(st.epreuves||[]).forEach(e=>{if(e.id!==a.id)(e.textIds||[]).forEach(n=>dejaVus.push(n));});
     const genre=(plan.productions[0]||{}).genre||(plan.sujets[0]||{}).genre||'';
-    const choisir=(bornes,g,exclure)=>{
+    /* `abonnement` garde ce que la formule a laisse de cote pour le texte
+       principal : le rapport le dira, sans jamais utiliser un texte ferme. */
+    let abonnement=null;
+    const choisir=(bornes,g,exclure,principal)=>{
       const l=G.classerTextes(this.all,{classe:a.classe,theme:st.genTheme||'',bornes:bornes,genre:g,exclure:dejaVus.concat(exclure||[])});
+      if(principal)abonnement={fermes:l.fermesConformes||0,bornes:bornes||null,
+        dansNorme:!!(l.length&&bornes&&l[0].mots>=bornes.min&&l[0].mots<=bornes.max)};
       return l.length?l[0].f.n:null;
     };
     const roles=[];   // [{n, role}]
     if(plan.support==='texte'){
       if(textesChoisis.length)textesChoisis.forEach(n=>roles.push({n:n,role:'support'}));
-      else{const n=choisir(plan.texteSupport,genre);if(n!=null)roles.push({n:n,role:'support'});}
+      else{const n=choisir(plan.texteSupport,genre,null,true);if(n!=null)roles.push({n:n,role:'support'});}
     }else if(plan.support==='fautif'||plan.support==='dictee'){
-      const n=(a.texteSource!=null&&mode==='completer')?a.texteSource:(textesChoisis[0]!=null?textesChoisis[0]:choisir(plan.texteSupport,plan.support));
+      const n=(a.texteSource!=null&&mode==='completer')?a.texteSource:(textesChoisis[0]!=null?textesChoisis[0]:choisir(plan.texteSupport,plan.support,null,true));
       if(n!=null)roles.push({n:n,role:plan.support});
     }
     if(plan.sujets.some(x=>x.genre==='commentaire')){
@@ -5031,7 +5036,7 @@ class Component extends DCLogic {
         fixes={};
         textes.filter(t=>t.role==='support').forEach(t=>{fixes[t.n]={comp:this._qListOf(a,t,'comp'),expl:this._qListOf(a,t,'expl')};});
       }
-      const ctx={plan:plan,struct:struct,classe:a.classe,serie:a.serie||'',theme:st.genTheme||'',textes:textes,fixes:fixes,
+      const ctx={plan:plan,struct:struct,classe:a.classe,serie:a.serie||'',theme:st.genTheme||'',textes:textes,fixes:fixes,abonnement:abonnement,
         exemples:G.exemplesOfficiels(this.all,a.classe,principal?principal.n:null,2)};
       etape('Ambassa rédige l’épreuve et son corrigé — une trentaine de secondes…');
       return G.composer(ctx,{token:this._jeton(),url:this._apiUrl('ia_proxy.php'),etape:etape,
@@ -5094,9 +5099,31 @@ class Component extends DCLogic {
       this._updateActive(patch,mode==='tout'
         ?'a fait composer l’épreuve par Ambassa — à relire'
         :'a fait compléter l’épreuve par Ambassa (barème, corrigé, sujets) — à relire');
-      const ref=ctx.textes.filter(t=>t.role!=='commentaire').map(t=>'n°'+t.n+(t.reference?' — '+t.reference:'')).join(' · ');
+      const ref=ctx.textes.filter(t=>t.role!=='commentaire').map(t=>'n\u00b0'+t.n+(t.reference?' \u2014 '+t.reference:'')).join(' \u00b7 ');
+      const controles=(res.controles||[]).slice();
+      /* L'epreuve composee passe aussitot le garde-fou complet : ce que
+         l'enseignant verra dans la carte de conformite, on le lui dit ici. */
+      try{
+        const ep=this._active();
+        const tx=(ep.textIds||[]).map(n=>this.all.find(x=>x.n===n)).filter(Boolean);
+        const g=CONFORMITE.verifierEpreuve(ep,tx,(f,k)=>this._qListOf(ep,f,k),(n,k,i)=>this._qPts(n,k,i))
+          .filter(e=>!/a relire|à relire/.test(e.titre));
+        const bl=g.filter(e=>e.severite==='bloquant'),ec=g.filter(e=>e.severite==='ecart');
+        controles.push({ok:!bl.length&&!ec.length,libelle:'Garde-fou MINESEC (hors relecture) : '
+          +(bl.length?bl.length+' bloquant(s) ('+bl[0].titre+')':'aucun bloquant')
+          +(ec.length?', '+ec.length+' \u00e9cart(s)':', aucun \u00e9cart')});
+      }catch(e){}
+      /* Les textes suivent l'abonnement : on ne compose que sur des textes
+         ouverts, et on dit ce que la formule laisse de cote. */
+      const ab=ctx.abonnement;
+      if(ab&&ab.bornes&&!ab.dansNorme&&ab.fermes>0){
+        controles.push({ok:false,libelle:'Texte hors de la longueur officielle ('+ab.bornes.min+'-'+ab.bornes.max
+          +' mots) : '+ab.fermes+' texte(s) conforme(s) sont r\u00e9serv\u00e9s \u00e0 une formule sup\u00e9rieure.'});
+      }else if(ab&&ab.bornes&&!ab.dansNorme){
+        controles.push({ok:false,libelle:'Aucun texte du corpus ne tombe dans la longueur officielle ('+ab.bornes.min+'-'+ab.bornes.max+' mots) : coupez l\u2019extrait en marquant [\u2026].'});
+      }
       this.setState({genBusy:false,genEtape:'',genCorrigeVisible:true,
-        genRapport:{controles:res.controles||[],remarques:res.remarques||'',texte:ref}});
+        genRapport:{controles:controles,remarques:res.remarques||'',texte:ref}});
     });
   }
   /* Une relecture retire la marque. Modifier la question ou son corrige
