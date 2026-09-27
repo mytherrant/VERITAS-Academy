@@ -138,6 +138,24 @@ Demande de Jacques : « Ma plateforme collaborative atelier de français ne pass
 - **Balayage** des 14 écrans (390 et 1 280 px) sur un serveur simulé : routes `action=invite|session|corpus` simulées, corpus libre de 1 014 textes. Aucune erreur JS ; les seuls débordements sont des barres d'onglets défilantes. La bulle d'astuces (`_montrerAstuce`) s'efface seule après quelques secondes, au plus une fois par minute : ce n'est pas un bug.
 - `banc_atelier_mobile` : 75 contrôles. Toujours non testé d'ici : connexion réelle, paiements, synchronisation d'équipe, appels réels à Ambassa (la base de production est inaccessible depuis l'environnement de test).
 
+**Génération introuvable, champs verrouillés : la vraie cause (27/09/2026)** — **DÉPLOYÉ** (runs 592-593, #84, #85) :
+- **Cause racine** : `_adopterIdentite` donnait au compte réel ou d'essai le **rôle du profil de démonstration** affiché. Visiter la démo sous « M. Paul Etoa (Relecteur) » rendait Relecteur pour de bon, et ce rôle était persisté sur l'appareil. Conséquences :
+  - champs verrouillés (`editer:false`) ;
+  - génération masquée ;
+  - aucune issue, puisqu'un relecteur ne gère pas l'équipe.
+  Indice sur les captures : l'avatar vert, couleur du rôle Relecteur.
+- **Correction** :
+  - un nouveau compte est « Enseignant » ;
+  - `_roleSoloRepare`, appliqué à l'adoption **et** au démarrage : un compte seul dans son équipe (démo et invités exclus) ne reste pas dans un rôle sans édition ;
+  - un rôle sans édition voit pourquoi les champs sont verrouillés, avec une issue.
+- **Accès à la génération** :
+  - « ✨ Générer » en tête de la barre d'actions (téléphone) ;
+  - « Générer l'épreuve avec Ambassa » à la fin des Renseignements ;
+  - l'ancien bouton « Ambassa », qui lançait l'**analyse**, devient « Analyse IA » et n'apparaît qu'une fois l'épreuve composée ;
+  - `#vrt-composer{scroll-margin-top}`.
+- **Vérifié de bout en bout au navigateur** (390 px), avec quota et IA simulés : saisie de l'en-tête (établissement, classe), puis « Générer », puis un appel de quota et un appel à l'IA. L'épreuve est composée (titre, texte n°14, 4 questions, barème recalé 20/20, rapport). Aucune erreur JS.
+- CI locale : Node 57/58 (`banc_cahiers_reels` demande une charge locale), PHP 11/11 ; balayage des 14 écrans sans erreur. Bancs : mobile 88, démo 33.
+
 ⚠️ **Nouveau module** `plateforme/generateur.js` : ajouté aux listes de `deploy.yml` (modules obligatoires + jetons `?v=`), à `tools/versionner_atelier.cjs` et à `tests/verif_syntaxe_atelier.cjs`. Chaque composition décompte le quota mensuel de la formule côté serveur (`plateforme.php?action=quota`, genre `ia`), puis le plafond journalier de `ia_proxy.php` ; une réécriture compte pour un appel de plus. (`_consommerIA` a été retiré le 27/09.)
 
 ## ⚠️ Incident 25-26/09/2026 : payment_manuel.php en 500 après le déploiement du rapprochement SMS
