@@ -337,6 +337,46 @@ const attendre = ms => new Promise(r => setTimeout(r, ms));
   const plansAtelier = (fs.readFileSync(P('api/plateforme.php'), 'utf8').match(/function plat_plans_atelier[\s\S]*?return (\[[^\]]*\])/) || [])[1];
   dire(plansAtelier === "['ens_mois', 'ens', 'etab', 'pro']", 'la liste des formules du proxy est celle de plat_plans_atelier()', plansAtelier);
 
+  /* ── Les SIX autres usages d'Ambassa dans l'Atelier passent eux aussi par
+     le quota serveur (27/09/2026). Pour chacun : le décompte « ia » précède
+     l'appel ; un refus 402 n'appelle jamais Ambassa et s'affiche. */
+  const USAGES = [
+    ['QCM', x => x._genererExercice('qcm'), 'exErr'],
+    ['résumé', x => x._genererResume('resume'), 'exErr'],
+    ['relecture de l’épreuve', x => x._analyserConformite(), 'confIAErr'],
+    ['assistant', x => x._demanderAmbassa('Quelle est la durée du BEPC ?'), 'assistErr'],
+    ['objectif de leçon', x => x._proposerObjectif(), 'coObjErr'],
+    ['audit de leçon', x => x._analyserConformiteCours(), 'coConfIAErr']
+  ];
+  async function preparer(repondre) {
+    const x = atelier(repondre);
+    await new Promise(r => x._ensureDraft(() => r()));
+    x._updateActive({ classe: '3e', epreuveCode: 'BEPC_ETUDE', etab: 'CES', textIds: [12] });
+    x.setState({ cours: [{ id: 'c1', title: 'Les expansions du nom', classe: '6e', gabarit: 'langue', corpusN: 12 }], activeCoursId: 'c1' });
+    return x;
+  }
+  for (const [nom, agir, champ] of USAGES) {
+    const ok1 = await preparer(url => /ia_proxy/.test(url) ? { corps: { text: '{}' } } : { corps: { ok: true, utilise: 1, plafond: 30 } });
+    agir(ok1);
+    await attendre(60);
+    const ordre = ok1.__journal.filter(x => /ia_proxy|action=quota/.test(x.url)).map(x => /ia_proxy/.test(x.url) ? 'IA' : 'Q:' + ((x.corps || {}).genre || '?'));
+    const refuse = await preparer(url => /action=quota/.test(url) ? { status: 402, corps: { ok: false, plafond: 30 } } : { corps: { text: '{}' } });
+    agir(refuse);
+    await attendre(60);
+    dire(ordre[0] === 'Q:ia' && ordre[1] === 'IA'
+      && !refuse.__journal.some(x => /ia_proxy/.test(x.url)) && /Ambassa épuisé/.test(refuse.state[champ] || ''),
+      nom + ' : quota « ia » décompté au serveur avant l’appel ; refusé → aucun appel, message affiché',
+      JSON.stringify(ordre) + ' / ' + refuse.state[champ]);
+  }
+  /* Double clic pendant que le serveur répond : un seul décompte. */
+  const dc = await preparer(url => /action=quota/.test(url) ? null : { corps: { text: '{}' } });
+  dc._genererExercice('qcm'); dc._genererExercice('qcm'); dc._analyserConformite();
+  await attendre(30);
+  dire(dc.__journal.filter(x => /action=quota/.test(x.url)).length === 1, 'un double clic pendant la vérification ne décompte qu’une fois');
+  const src = fs.readFileSync(P('plateforme/index.html'), 'utf8');
+  dire(!/this\._consommerIA\(/.test(src) && (src.match(/this\._avecQuotaIA\(\(\)=>\{/g) || []).length === 6,
+    'plus aucun appel à Ambassa ne passe par le compteur local du navigateur');
+
   /* Sans classe : on n'appelle pas l'IA, on dit quoi faire. */
   const c = atelier(() => ({ corps: { ok: true } }));
   await new Promise(r => c._ensureDraft(() => r()));
