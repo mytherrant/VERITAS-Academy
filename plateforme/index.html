@@ -474,7 +474,7 @@
      repère devient distinctif au lieu d'être décoratif. */
   main section:nth-of-type(6n+1) .vrt-titre-file::before{background:var(--c1a72bb,#1a72bb)}
   main section:nth-of-type(6n+2) .vrt-titre-file::before{background:var(--c1f9d55,#1f9d55)}
-  main section:nth-of-type(6n+3) .vrt-titre-file::before{background:var(--ce07f00,#e07f00)}
+  main section:nth-of-type(6n+3) .vrt-titre-file::before{background:var(--cc26a12,#c26a12)}
   main section:nth-of-type(6n+4) .vrt-titre-file::before{background:var(--c7b52c7,#7b52c7)}
   main section:nth-of-type(6n+5) .vrt-titre-file::before{background:var(--c0e8a9c,#0e8a9c)}
   main section:nth-of-type(6n+6) .vrt-titre-file::before{background:var(--c14375f,#14375f)}
@@ -488,7 +488,7 @@
      étendue aux grilles de la planche de travail. */
   .vrt-stats > article:nth-child(6n+1):hover{border-color:var(--c1a72bb,#1a72bb)}
   .vrt-stats > article:nth-child(6n+2):hover{border-color:var(--c1f9d55,#1f9d55)}
-  .vrt-stats > article:nth-child(6n+3):hover{border-color:var(--ce07f00,#e07f00)}
+  .vrt-stats > article:nth-child(6n+3):hover{border-color:var(--cc26a12,#c26a12)}
   .vrt-stats > article:nth-child(6n+4):hover{border-color:var(--c7b52c7,#7b52c7)}
 
   /* Un volet qui s'ouvre déroule son contenu au lieu d'apparaître d'un
@@ -896,7 +896,7 @@
   /* Le filet colore des titres de section suit la meme rotation. */
   main > section:nth-of-type(4n+1) .vrt-titre-file::before{background:var(--c14375f,#14375f)}
   main > section:nth-of-type(4n+2) .vrt-titre-file::before{background:var(--c1f9d55,#1f9d55)}
-  main > section:nth-of-type(4n+3) .vrt-titre-file::before{background:var(--ce07f00,#e07f00)}
+  main > section:nth-of-type(4n+3) .vrt-titre-file::before{background:var(--cc26a12,#c26a12)}
   main > section:nth-of-type(4n+4) .vrt-titre-file::before{background:var(--c1a72bb,#1a72bb)}
 
   /* En mode sombre l'alternance s'inverse : le fond « clair » devient une
@@ -1536,11 +1536,11 @@
         <h2 class="vrt-titre-file" style="{{ cardTitle }}">Ressources</h2>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:12px">
           <sc-for list="{{ resCards }}" as="r" hint-placeholder-count="4">
-            <div style="background:var(--cfbfcfe,#fbfcfe);border:1px solid var(--ceef2f7,#eef2f7);border-radius:12px;padding:14px 13px;display:flex;flex-direction:column;gap:8px">
+            <div style="{{ r.carte }}">
               <span style="{{ r.tile }}">{{ r.icon }}</span>
               <span style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--c22303f,#22303f);line-height:1.3">{{ r.title }}</span>
               <span style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);line-height:1.4">{{ r.sub }}</span>
-              <button onClick="{{ r.open }}" style="margin-top:auto;background:var(--ce7f1fb,#e7f1fb);border:none;color:var(--c1a72bb,#1a72bb);font-size:11.5px;font-weight:700;font-family:Poppins;padding:6px 12px;border-radius:8px;cursor:pointer;align-self:flex-start" style-hover="background:var(--cd6e8f8,#d6e8f8)">Explorer</button>
+              <button onClick="{{ r.open }}" style="{{ r.bouton }}" style-hover="filter:brightness(1.1)">Explorer</button>
             </div>
           </sc-for>
         </div>
@@ -7499,14 +7499,25 @@ class Component extends DCLogic {
     Object.keys(patch).forEach(k=>{if(patch[k]===undefined)delete patch[k];});
     this._updateActive(patch,'a modifié les questions ('+(kind==='comp'?'compréhension':'production')+') — texte n°'+f.n);}
   _go(s){this.setState({screen:s,notifOpen:false});if(typeof window!=='undefined')window.scrollTo(0,0);}
-  /* Icone en anneau, comme sur la vitrine VERITAS : un cercle au trait fin,
-     le glyphe centre dedans, aucun aplat de couleur. Le fond reste celui de
-     la carte, ce qui allege beaucoup une grille de vingt vignettes. */
+  /* Icone en PASTILLE : un disque au fond pale de sa teinte, le glyphe dans
+     la teinte franche. Une seule forme pour toute l'application (27/09/2026) :
+     l'accueil melait des anneaux au trait fin et des carres teintes, et
+     l'anneau bleu nuit se lisait a peine sur une carte bleu pale. */
   _icoRond(name,color,taille){
     const d=taille||44;const c=color||'var(--c1a72bb,#1a72bb)';
     return React.createElement('span',{style:{width:d+'px',height:d+'px',flex:'none',
-      borderRadius:'50%',border:'1.6px solid '+c,display:'grid',placeItems:'center',
-      background:'transparent'}},this._icon(name,c,Math.round(d*0.46)));
+      borderRadius:'50%',display:'grid',placeItems:'center',
+      background:this._fondDe(c),boxShadow:'inset 0 0 0 1px rgba(20,55,95,.05)'}},
+      this._icon(name,c,Math.round(d*0.46)));
+  }
+  /* Le fond pale qui va avec une teinte franche. Nomme, pas calcule : les
+     variables s'inversent en mode sombre, une opacite ne suivrait pas. */
+  _fondDe(c){
+    const F={'--c1a72bb':'var(--ce7f1fb,#e7f1fb)','--c1f9d55':'var(--ce6f5ec,#e6f5ec)',
+      '--cc26a12':'var(--cfdefdb,#fdefdb)','--c7b52c7':'var(--cefe8fa,#efe8fa)',
+      '--c0e8a9c':'var(--ceaf1f8,#eaf1f8)','--c14375f':'var(--ceaf1f8,#eaf1f8)'};
+    const m=/--c[0-9a-f]{6}/.exec(c||'');
+    return (m&&F[m[0]])||'var(--cf2f6fb,#f2f6fb)';
   }
   /* Rotation de teintes : deux vignettes voisines ne portent jamais la meme
      couleur, ce qui aide l'oeil a les separer dans une longue grille. */
@@ -7519,8 +7530,11 @@ class Component extends DCLogic {
     return F[((i%F.length)+F.length)%F.length];
   }
   _teinte(i){
-    const P=['var(--c14375f,#14375f)','var(--c1f9d55,#1f9d55)','var(--ce07f00,#e07f00)',
-             'var(--c1a72bb,#1a72bb)','var(--c7b52c7,#7b52c7)','var(--c0e8a9c,#0e8a9c)'];
+    /* Bleu, vert, orange, violet, sarcelle, nuit. L'ancien orange
+       (--ce07f00) est remappe en bleu par l'habillage : la rotation
+       affichait bleu, vert, BLEU, bleu... On prend l'orange de --cc26a12. */
+    const P=['var(--c1a72bb,#1a72bb)','var(--c1f9d55,#1f9d55)','var(--cc26a12,#c26a12)',
+             'var(--c7b52c7,#7b52c7)','var(--c0e8a9c,#0e8a9c)','var(--c14375f,#14375f)'];
     return P[((i%P.length)+P.length)%P.length];
   }
   _icon(name,color,size){const s=size||20;const c=color||'var(--c1a72bb,#1a72bb)';const p={width:s,height:s,viewBox:'0 0 24 24',fill:'none',stroke:c,strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round'};const P=(d)=>React.createElement('path',{d});const paths={
@@ -8040,8 +8054,11 @@ class Component extends DCLogic {
       icon:this._icoRond(x.ic,this._teinte(i2),46),
       tile:'display:flex;justify-content:center;margin-bottom:12px',
       value:x.v,label:x.l,cta:x.cta,open:x.go,
-      carte:'text-align:center;background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);'
-        +'border-radius:14px;padding:20px 18px;box-shadow:0 2px 10px rgba(20,55,95,.045);'
+      /* Chaque repere porte sa teinte : bandeau en tete, fond qui s'eclaircit
+         vers le blanc, pastille, chiffre et lien assortis. */
+      carte:'text-align:center;background:linear-gradient(180deg,'+this._fondDe(this._teinte(i2))+' 0%,var(--cffffff,#fff) 72%);'
+        +'border:1px solid var(--ce6ecf3,#e6ecf3);border-top:4px solid '+this._teinte(i2)+';'
+        +'border-radius:14px;padding:18px 18px 20px;box-shadow:0 2px 10px rgba(20,55,95,.045);'
         +'display:flex;flex-direction:column;align-items:center',
       valeurStyle:'display:block;font-family:Poppins;font-size:28px;font-weight:700;line-height:1;color:'+this._teinte(i2),
       lienStyle:'margin-top:14px;padding-top:12px;width:100%;border-top:1px solid var(--ceef2f7,#eef2f7);'
@@ -8113,11 +8130,19 @@ class Component extends DCLogic {
         rowBg:'var(--cffffff,#fff)'});
     });
 
+    /* Chaque ressource a sa teinte : fond pale, pastille, bouton plein. Le
+       fond commun bleu pale effacait la pastille bleue du Corpus. */
+    const res=(i2,ic,title,sub,open)=>{const c=this._teinte(i2);return{
+      carte:'background:'+this._fondDe(c)+';border:1px solid transparent;border-radius:12px;padding:14px 13px;display:flex;flex-direction:column;gap:8px',
+      tile:'display:flex',icon:React.createElement('span',{style:{width:'42px',height:'42px',borderRadius:'50%',display:'grid',placeItems:'center',flex:'none',
+        background:'var(--cffffff,#fff)',boxShadow:'0 2px 6px rgba(20,55,95,.08)'}},this._icon(ic,c,19)),
+      title,sub,open,
+      bouton:'margin-top:auto;background:'+c+';border:none;color:var(--cffffff,#fff);font-size:11.5px;font-weight:700;font-family:Poppins;padding:7px 14px;border-radius:8px;cursor:pointer;align-self:flex-start'};};
     const resCards=[
-      {tile:tuile('var(--ce7f1fb,#e7f1fb)'),icon:this._icon('layers','var(--c1a72bb,#1a72bb)',19),title:'Corpus MINESEC',sub:nbTextes+' textes v\u00e9rifi\u00e9s',open:()=>this._go('liste')},
-      {tile:tuile('var(--cefe8fa,#efe8fa)'),icon:this._icon('file','var(--c7b52c7,#7b52c7)',19),title:'Structures d\u2019\u00e9preuves',sub:MINESEC.epreuves.length+' structures officielles',open:()=>this._go('cours')},
-      {tile:tuile('var(--ce6f5ec,#e6f5ec)'),icon:this._icon('book','var(--c1f9d55,#1f9d55)',19),title:'Gabarits de cours',sub:MINESEC.gabarits.length+' mod\u00e8les, 2 cycles',open:()=>this._go('cours')},
-      {tile:tuile('var(--cfdefdb,#fdefdb)'),icon:this._icon('inbox','var(--cc26a12,#c26a12)',19),title:'Biblioth\u00e8que',sub:nbBiblio+' \u00e9preuve(s) partag\u00e9e(s)',open:()=>this.setState({screen:'epreuves',epFilter:'lib'},()=>window.scrollTo(0,0))}
+      res(0,'layers','Corpus MINESEC',nbTextes+' textes v\u00e9rifi\u00e9s',()=>this._go('liste')),
+      res(3,'file','Structures d\u2019\u00e9preuves',MINESEC.epreuves.length+' structures officielles',()=>this._go('cours')),
+      res(1,'book','Gabarits de cours',MINESEC.gabarits.length+' mod\u00e8les, 2 cycles',()=>this._go('cours')),
+      res(2,'inbox','Biblioth\u00e8que',nbBiblio+' \u00e9preuve(s) partag\u00e9e(s)',()=>this.setState({screen:'epreuves',epFilter:'lib'},()=>window.scrollTo(0,0)))
     ];
 
     const homeProps=propsPlats.slice(0,3).map(p=>{
@@ -9877,7 +9902,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
          tile:'display:flex;flex:none',
          style:'display:flex;align-items:center;gap:11px;width:100%;border:none;background:none;padding:12px 14px;cursor:pointer;text-align:left;border-top:1px solid var(--ceef2f7,#eef2f7)',
          go:()=>this.setState({createOpen:false,screen:'cours',coursTab:'gabarits'},()=>window.scrollTo(0,0))}]:[]).concat(perm.importer?[
-        {label:'Importer un corpus',sub:'Fichier .json / .csv ou coller',icon:this._icoRond('upload','var(--ce07f00,#e07f00)',34),
+        {label:'Importer un corpus',sub:'Fichier .json / .csv ou coller',icon:this._icoRond('upload','var(--cc26a12,#c26a12)',34),
          tile:'display:flex;flex:none',
          style:'display:flex;align-items:center;gap:11px;width:100%;border:none;background:none;padding:12px 14px;cursor:pointer;text-align:left;border-top:1px solid var(--ceef2f7,#eef2f7)',
          go:()=>this.setState({createOpen:false,importOpen:true,screen:'liste'},()=>window.scrollTo(0,0))}]:[]),
