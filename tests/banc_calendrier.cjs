@@ -148,5 +148,59 @@ dire(/setEcheance:setField\('echeance'\)/.test(src),
 dire(/ouvrir:\(\)=>this\.setState\(/.test(src),
   'chaque ligne ouvre son épreuve : une alerte sans clic se remet à plus tard');
 
+/* ── ⑦ Le calendrier se touche ─────────────────────────────────────────
+   27/09/2026 : « Le calendrier n'est pas fonctionnel, impossible de caler
+   les dates d'échéance ». Les jours étaient des <div> inertes ; dater une
+   épreuve obligeait à l'ouvrir et à trouver le champ dans « Renseignements ». */
+console.log(`\n${G}⑦ Toucher un jour permet d'y caler une échéance${R}`);
+dire(/<button type="button" onClick="\{\{ c\.choisir \}\}"/.test(src),
+  'chaque jour est un bouton, pas une case inerte');
+dire(/choisir:\(\)=>this\.setState\(\{calJour:estChoisi\?'':iso\}\)/.test(src),
+  'le toucher ouvre (ou referme) le volet du jour');
+dire(/calOffset:0,calJour:''/.test(src), 'le jour choisi fait partie de l’état initial');
+dire(/<sc-if value="\{\{ calJourOuvert \}\}"/.test(src), 'le volet du jour existe dans la page');
+dire(/const peutDater=o=>o\.ownerId===me\.id\|\|\(o\.editorIds\|\|\[\]\)\.indexOf\(me\.id\)>=0/.test(src),
+  'on ne propose de dater que ce qu’on a le droit de modifier');
+dire(/onClick="\{\{ calNouvelle \}\}"/.test(src), 'une épreuve neuve peut naître datée du jour choisi');
+
+const cal = extraire(src, '_calerEcheance(genre,id,iso){');
+const neuve = extraire(src, '_nouvelleEpreuveLe(iso){');
+dire(!!cal && !!neuve, 'les deux actions sont extractibles');
+if (cal && neuve) {
+  const m = new Function('return ({' + [...corps, cal, neuve].join(',') + '});')();
+  let persiste = 0;
+  m._persist = () => { persiste++; };
+  m._me = () => ({ id: 'moi' });
+  m._groupeActif = () => 'g1';
+  m.state = { currentUserId: 'moi', screen: 'accueil', calJour: '2026-12-04',
+    epreuves: [{ id: 'x', title: 'BEPC blanc', activity: [] }, { id: 'y', title: 'Autre', echeance: '2026-11-02' }],
+    cours: [{ id: 'k', title: 'Leçon', history: [{ version: 3 }] }] };
+  m.setState = function (f, cb) { Object.assign(this.state, typeof f === 'function' ? f(this.state) : f); cb && cb(); };
+  if (typeof window === 'undefined') global.window = { scrollTo() {} };
+
+  m._calerEcheance('epreuve', 'x', '2026-12-04');
+  const x = m.state.epreuves.find(e => e.id === 'x');
+  dire(x.echeance === '2026-12-04', 'l’épreuve prend la date, au format du champ `date`', x.echeance);
+  dire(m._echeances().some(e => e.id === 'x'), 'et elle apparaît aussitôt dans les échéances');
+  dire(/fixé l’échéance/.test((x.activity.slice(-1)[0] || {}).text || ''), 'l’historique dit qui l’a datée');
+  dire(m.state.epreuves.find(e => e.id === 'y').echeance === '2026-11-02', 'les autres épreuves ne bougent pas');
+  m._calerEcheance('cours', 'k', '2026-12-04');
+  const k = m.state.cours[0];
+  dire(k.echeance === '2026-12-04' && k.history.slice(-1)[0].version === 3, 'un cours se date aussi, sans changer de version');
+  m._calerEcheance('epreuve', 'x', '');
+  dire(m.state.epreuves.find(e => e.id === 'x').echeance === '' && !m._echeances().some(e => e.id === 'x'),
+    '« Retirer » efface la date et l’échéance disparaît');
+  m.state.activeId = 'y';
+  m._nouvelleEpreuveLe('2026-12-04');
+  const n = m.state.epreuves[0];
+  dire(n.id !== 'y' && n.echeance === '2026-12-04' && n.ownerId === 'moi' && n.status === 'brouillon',
+    'la nouvelle épreuve est un brouillon à moi, datée du jour choisi');
+  dire(m.state.activeId === n.id && m.state.screen === 'composeur' && m.state.calJour === '',
+    'elle s’ouvre dans le composeur, le volet se referme');
+  dire(m.state.epreuves.find(e => e.id === 'y').echeance === '2026-11-02',
+    'l’épreuve qui était ouverte n’est pas re-datée (pas de _ensureDraft)');
+  dire(persiste === 4, 'chaque geste est enregistré', String(persiste));
+}
+
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko === 0 ? 0 : 1);
