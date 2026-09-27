@@ -3952,7 +3952,7 @@ class Component extends DCLogic {
   _analyserConformiteCours(){
     if(this.state.coConfIABusy)return;
     const c=this._activeCours();if(!c)return;
-    if(!this._consommerIA()){this.setState({coConfIAErr:this._messageQuotaIA(),coConfOpen:true});return;}
+    this._avecQuotaIA(()=>{
     /* Le corpus de la lecon est celui que l'enseignant a rattache ; on le
        relit ici plutot que de dupliquer la logique de renderVals. */
     const corpus=(c.corpusN!=null)?this.all.find(x=>x.n===c.corpusN):null;
@@ -3964,6 +3964,7 @@ class Component extends DCLogic {
       .catch(e=>this.setState({coConfIABusy:false,coConfIAErr:
         (e&&e.message==='quota')?'Quota d\u2019analyse IA \u00e9puis\u00e9 pour aujourd\u2019hui.'
         :'Ambassa est injoignable. Les contr\u00f4les automatiques restent valables.'}));
+    },m=>this.setState({coConfIAErr:m,coConfOpen:true}));
   }
   /* Blocage du clic droit et de la copie sur les seuls textes du corpus.
      On previent au lieu de rester muet : un blocage silencieux passe pour un
@@ -4683,7 +4684,7 @@ class Component extends DCLogic {
   _demanderAmbassa(question){
     const q=String(question||this.state.assistSaisie||'').trim();
     if(!q||this.state.assistBusy)return;
-    if(!this._consommerIA()){this.setState({assistErr:this._messageQuotaIA()});return;}
+    this._avecQuotaIA(()=>{
     const msgs=[...(this.state.assistMsgs||[]),{role:'moi',texte:q,ts:Date.now()}];
     this._save('minesec_assistant',msgs);
     this.setState({assistMsgs:msgs,assistSaisie:'',assistBusy:true,assistErr:''});
@@ -4697,6 +4698,7 @@ class Component extends DCLogic {
       })
       .catch(e=>this.setState({assistBusy:false,assistErr:(e&&e.message==='quota')
         ?this._messageQuotaIA():'Ambassa est injoignable pour le moment.'}));
+    },m=>this.setState({assistErr:m}));
   }
   _viderAssistant(){this._save('minesec_assistant',[]);this.setState({assistMsgs:[],assistErr:''});}
   /* ---- Quota d'IA par usager -------------------------------------------
@@ -4787,14 +4789,22 @@ class Component extends DCLogic {
       users:st.users.map(u=>u.id===me.id?{...u,quota:{...u.quota,used:utilise}}:u),
       team:{...st.team,quota:{...st.team.quota,used:utilise}}}),()=>this._persist());
   }
-  _consommerIA(){
-    const q=this._quotaIA();
-    if(q.limite>=0&&q.reste<=0)return false;
-    const me=this._me();
-    this.setState(st=>({users:st.users.map(u=>u.id===me.id
-      ?{...u,quotaIA:{limit:q.limite,used:(((u.quotaIA||{}).used)||0)+1}}:u)}),
-      ()=>this._persist());
-    return true;
+  /* ─── TOUT APPEL A AMBASSA DECOMPTE LE QUOTA DU SERVEUR ──────────────
+     La formule de l'Atelier vend un nombre d'appels a Ambassa par mois
+     (plat_paliers : 30, 120, 400). Le QCM, la relecture, l'assistant, le
+     resume, l'objectif et l'audit de lecon ne comptaient que dans le
+     navigateur (l'ancien `_consommerIA`, retire le 27/09/2026) : vider le
+     stockage local remettait le compteur a zero. Ils passent desormais par
+     plateforme.php?action=quota (genre `ia`), sous verrou, ferme en cas de
+     panne -- comme la composition et les exports.
+     Le drapeau `_iaQuotaEnVol` empeche un double clic de consommer deux fois
+     pendant que le serveur repond. */
+  _avecQuotaIA(suite,refus){
+    if(this._iaQuotaEnVol)return;
+    this._iaQuotaEnVol=true;
+    this._consommerQuota('ia',
+      ()=>{this._iaQuotaEnVol=false;suite();},
+      m=>{this._iaQuotaEnVol=false;refus(m);});
   }
   _messageQuotaIA(){
     return 'Votre quota d\u2019analyses IA est \u00e9puis\u00e9 ('
@@ -4807,7 +4817,7 @@ class Component extends DCLogic {
     if(this.state.exBusy)return;
     const textes=this._textesActifs();
     if(!textes.length){this.setState({exErr:'Ajoutez d\u2019abord un texte \u00e0 l\u2019\u00e9preuve.',exOuvert:true});return;}
-    if(!this._consommerIA()){this.setState({exErr:this._messageQuotaIA(),exOuvert:true});return;}
+    this._avecQuotaIA(()=>{
     const t=textes[0];
     this.setState({exType:mode==='analyse'?'analyse':'resume',exOuvert:true,exBusy:true,exErr:'',exResultat:null});
     VRT_EXERCICES.genererResume(t.text||'',{mode:mode,token:this._jeton()})
@@ -4818,11 +4828,12 @@ class Component extends DCLogic {
       })
       .catch(e=>this.setState({exBusy:false,exErr:(e&&e.message==='quota')
         ?this._messageQuotaIA():'Ambassa est injoignable pour le moment.'}));
+    },m=>this.setState({exErr:m,exOuvert:true}));
   }
   _proposerObjectif(){
     if(this.state.coObjBusy)return;
     const c=this._activeCours();if(!c)return;
-    if(!this._consommerIA()){this.setState({coObjErr:this._messageQuotaIA()});return;}
+    this._avecQuotaIA(()=>{
     const g=MINESEC.gabaritParId(c.gabarit);
     const corpus=(c.corpusN!=null)?this.all.find(x=>x.n===c.corpusN):null;
     const interdits=(MINESEC.questionnement&&MINESEC.questionnement.objectif.interdits)||[];
@@ -4834,6 +4845,7 @@ class Component extends DCLogic {
       })
       .catch(e=>this.setState({coObjBusy:false,coObjErr:(e&&e.message==='quota')
         ?this._messageQuotaIA():'Ambassa est injoignable pour le moment.'}));
+    },m=>this.setState({coObjErr:m}));
   }
   _appliquerObjectif(){
     const o=this.state.coObjProp;if(!o)return;
@@ -4875,7 +4887,7 @@ class Component extends DCLogic {
 
     /* --- QCM et vrai/faux : Ambassa. Les trois exercices calcules ci-dessus
        ne consomment rien : le quota ne se decompte qu'ici. --- */
-    if(!this._consommerIA()){this.setState({exErr:this._messageQuotaIA()});return;}
+    this._avecQuotaIA(()=>{
     this.setState({exType:type,exOuvert:true,exBusy:true,exErr:'',exResultat:null});
     const opts={token:this._jeton(),classe:(a&&a.classe)||'',combien:type==='qcm'?6:8};
     const p=(type==='qcm')
@@ -4889,6 +4901,7 @@ class Component extends DCLogic {
       exErr:(e&&e.message==='quota')
         ?'Quota d\u2019IA \u00e9puis\u00e9 pour aujourd\u2019hui. Les exercices calcul\u00e9s (grille, anagrammes, texte \u00e0 trous) restent disponibles.'
         :'Ambassa est injoignable. Les exercices calcul\u00e9s restent disponibles.'}));
+    },m=>this.setState({exErr:m}));
   }
   /* L'annexe est rangee SUR l'epreuve : elle suit la relecture, la validation
      et l'impression comme le reste. */
@@ -7300,7 +7313,7 @@ class Component extends DCLogic {
   _analyserConformite(){
     if(this.state.confIABusy)return;
     const a=this._active();if(!a)return;
-    if(!this._consommerIA()){this.setState({confIAErr:this._messageQuotaIA(),confOpen:true});return;}
+    this._avecQuotaIA(()=>{
     const textes=(a.textIds||[]).map(n=>this.all.find(x=>x.n===n)).filter(Boolean)
       .map(f=>Object.assign({},f,{__comp:this._qList(f,'comp'),__expl:this._qList(f,'expl')}));
     const locaux=CONFORMITE.verifierEpreuve(a,textes,(f,k)=>this._qList(f,k),(n,k,i)=>this._qPts(n,k,i));
@@ -7310,6 +7323,7 @@ class Component extends DCLogic {
       .catch(e=>this.setState({confIABusy:false,confIAErr:
         e&&e.message==='quota'?'Quota d\u2019analyse IA épuisé pour aujourd\u2019hui.'
         :'Ambassa est injoignable pour le moment. Les contr\u00f4les automatiques restent valables.'}));
+    },m=>this.setState({confIAErr:m,confOpen:true}));
   }
   _qPts(n,kind,idx){const a=this._active();if(!a||!a.pts)return null;
     const t=a.pts[n];if(!t||!t[kind])return null;const v=t[kind][idx];
