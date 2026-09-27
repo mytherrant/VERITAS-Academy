@@ -112,7 +112,13 @@ Demande de Jacques : « Ma plateforme collaborative atelier de français ne pass
 - **Les textes suivent l'abonnement** : Ambassa ne compose que sur les textes ouverts par la formule du compte (`_libre`, décidé par le serveur). `classerTextes` compte les textes fermés qui auraient été conformes. Si le texte retenu est hors de la longueur officielle alors que N textes conformes sont fermés, le rapport indique : « N texte(s) conforme(s) sont réservés à une formule supérieure ».
 - Banc : 68 contrôles, mutations M10 (citations) et M11 (abonnement) détectées. CI locale : 62/62 et gardes inline vertes. Rendu vérifié au navigateur (aucun débordement, aucune erreur).
 
-⚠️ **Nouveau module** `plateforme/generateur.js` : ajouté aux listes de `deploy.yml` (modules obligatoires + jetons `?v=`), à `tools/versionner_atelier.cjs` et à `tests/verif_syntaxe_atelier.cjs`. Chaque appel consomme le quota IA habituel (`_consommerIA`, puis le plafond du serveur `ia_proxy.php`), plus un appel en cas de réécriture.
+**Cartes des formules de l'Atelier (27/09/2026)** (#76, #77) : couleurs alternées, titres centrés, puces colorées (`THEMES_PLAN`). `_appliquerTarifs` réécrit les lignes textes / Ambassa / exports d'après `plat_paliers` (essai : 12 textes, 5 appels, 2 exports, 5 épreuves), mais seulement quand le serveur donne le chiffre : sans lui, l'argumentaire reste mot pour mot. **DÉPLOYÉ** (runs 586-587, sondes vertes).
+
+**Audit de conformité final (27/09/2026, `master` 26c8058)** : CI locale 62/62 ; gardes inline de `deploy.yml` vertes (syntaxe PHP et JS, dépendances, modules, jetons `?v=` à jour, ressources en version 1.20.20) ; banc mobile 68/68 ; banc de composition vert. Aucun écart. **Restent à faire hors dépôt** :
+- composer 2 ou 3 épreuves réelles en production avec le vrai Gemini, puis les relire (les bancs utilisent des réponses simulées) ;
+- ajouter des annales officielles MINESEC au corpus pour enrichir les exemples.
+
+⚠️ **Nouveau module** `plateforme/generateur.js` : ajouté aux listes de `deploy.yml` (modules obligatoires + jetons `?v=`), à `tools/versionner_atelier.cjs` et à `tests/verif_syntaxe_atelier.cjs`. Chaque composition décompte le quota mensuel de la formule côté serveur (`plateforme.php?action=quota`, genre `ia`), puis le plafond journalier de `ia_proxy.php` ; une réécriture compte pour un appel de plus. (`_consommerIA` a été retiré le 27/09.)
 
 ## ⚠️ Incident 25-26/09/2026 : payment_manuel.php en 500 après le déploiement du rapprochement SMS
 
