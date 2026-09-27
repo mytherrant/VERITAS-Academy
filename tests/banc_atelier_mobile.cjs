@@ -294,5 +294,21 @@ dire(/\[data-print-sheet\]\{padding:24px 16px 30px!important/.test(src),
 dire(/\.vrt-titre-file::before\{content:none;display:none\}/.test(src),
   'plus de filet au-dessus des titres de section');
 
+/* ── ⑬ Générer est sous le doigt (27/09/2026) ──────────────────────────
+   « Pas d'onglet ou d'espace pour générer avec l'IA » : le bouton
+   « Ambassa » de la barre lançait l'ANALYSE, et la génération vivait tout
+   en haut, loin des Renseignements où l'on choisit la classe. */
+console.log(`\n${G}⑬ La génération par Ambassa se trouve là où l'on travaille${R}`);
+dire(/onClick="\{\{ genAller \}\}" style="\{\{ actClGenStyle \}\}"/.test(src),
+  'la barre d’actions commence par « Générer »');
+dire(/onClick="\{\{ confAmbassa \}\}" style="\{\{ actClAnalyseStyle \}\}">Analyse IA</.test(src),
+  'l’analyse de conformité porte son vrai nom, et seulement une fois l’épreuve composée');
+dire(/onClick="\{\{ genDepuisRens \}\}"/.test(src),
+  'un bouton « Générer l’épreuve avec Ambassa » clôt les Renseignements');
+dire(/if\(!\(active&&active\.classe\)\)\{this\.setState\(\{genOuvert:true,genErr:/.test(src),
+  'sans classe, il dit quoi choisir au lieu d’échouer en silence');
+dire(/<section id="vrt-composer"/.test(src) && /#vrt-composer\{scroll-margin-top:136px\}/.test(src),
+  'le panneau de composition est amené sous les yeux, titre compris');
+
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko === 0 ? 0 : 1);

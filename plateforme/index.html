@@ -1217,6 +1217,9 @@
      chaque côté) : sur 390 px, le texte de l'épreuve tenait dans une colonne
      de 190 px, trois mots par ligne (mesuré le 27/09/2026). L'impression,
      elle, n'est pas concernée : @media print reprend la main. */
+  /* Le panneau de composition est une cible de defilement : sans marge,
+     l'en-tete collant du telephone en cachait le titre. */
+  #vrt-composer{scroll-margin-top:136px}
   @media screen and (max-width:640px){
     [data-print-sheet]{padding:24px 16px 30px!important;margin:12px 8px!important}
     [data-print-sheet] ol{padding-left:18px!important}
@@ -1840,7 +1843,7 @@
            questions, barème, corrigé, sujets) ; l'équipe relit et corrige
            dans les mêmes champs que d'habitude. Chaque proposition porte la
            marque « à relire » jusqu'à ce qu'un enseignant l'ait vue. -->
-      <section data-noprint="1" class="vrt-exsec" style="{{ genWrap }}">
+      <section id="vrt-composer" data-noprint="1" class="vrt-exsec" style="{{ genWrap }}">
         <div class="vrt-exrow" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <span class="vrt-hide-xs" style="flex:none">{{ genSceau }}</span>
           <span style="flex:1 1 190px;min-width:170px">
@@ -2015,9 +2018,14 @@
            d'être coupé. La barre ne paraît que sur téléphone — sur grand
            écran, la colonne de droite reste visible en permanence. -->
       <div class="vrt-only-sm vrt-actions-cl">
+        <!-- « Ambassa » lancait l'ANALYSE de conformite, pas la generation :
+             sur une epreuve vide il ne produisait rien, et l'on cherchait en
+             vain ou generer (signale le 27/09/2026). La generation passe en
+             tete ; l'analyse garde son geste, sous son vrai nom. -->
+        <button onClick="{{ genAller }}" style="{{ actClGenStyle }}">{{ genToutIcone }}<span>Générer</span></button>
         <button onClick="{{ goListe }}" style="{{ actClStyle }}">＋ Texte</button>
         <button onClick="{{ appliquerBareme }}" style="{{ actClStyle }}">Barème</button>
-        <button onClick="{{ confAmbassa }}" style="{{ actClStyle }}">Ambassa</button>
+        <button onClick="{{ confAmbassa }}" style="{{ actClAnalyseStyle }}">Analyse IA</button>
         <button onClick="{{ generate }}" style="{{ actClStyle }}">Aperçu</button>
         <button onClick="{{ exportWord }}" style="{{ actClStyle }}">Word</button>
         <button onClick="{{ submitReview }}" style="{{ actClStyle }}">Relecture</button>
@@ -2052,6 +2060,14 @@
                    il n'y a plus rien a deviner. -->
               <label style="{{ fieldLbl }}">Échéance <span style="font-weight:400;color:var(--c8b97a8,#8b97a8)">— date de passation ou de remise</span><input type="date" value="{{ ep.echeance }}" onChange="{{ setEcheance }}" disabled="{{ cannotEdit }}" style="{{ fieldIn }}"></label>
               <label style="{{ fieldLbl }}">Consigne<textarea value="{{ ep.consigne }}" onChange="{{ setConsigne }}" disabled="{{ cannotEdit }}" rows="3" style="{{ fieldIn }};resize:vertical;line-height:1.45"></textarea></label>
+            </div>
+            <!-- GÉNÉRER D'ICI. La classe et la nature se choisissent dans ces
+                 Renseignements, mais le bouton de generation vivait tout en
+                 haut, dans « Composer avec Ambassa » : une fois la classe
+                 choisie, rien sous le doigt ne permettait de lancer l'IA. -->
+            <div style="{{ genRensWrap }}">
+              <button onClick="{{ genDepuisRens }}" style="{{ genRensBtn }}">{{ genToutIcone }}<span>{{ genRensLabel }}</span></button>
+              <div style="font-size:11.5px;color:var(--c7a8598,#7a8598);line-height:1.5;margin-top:7px;text-align:center">{{ genRensAide }}</div>
             </div>
             <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--ceef2f7,#eef2f7);display:flex;justify-content:space-between;font-size:12.5px;color:var(--c5a6678,#5a6678)"><span>{{ selCount }} texte(s)</span><span>{{ totalWords }} mots</span></div>
             </div>
@@ -9515,6 +9531,20 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       genTheme:st.genTheme||'',
       setGenTheme:e=>this.setState({genTheme:val(e).slice(0,120)}),
       genTout:()=>this._composerAvecAmbassa('tout'),
+      /* Ouvre le panneau « Composer avec Ambassa » et l'amene sous les yeux :
+         c'est la que s'affichent l'avancement, le rapport et les erreurs. */
+      genAller:()=>this.setState({genOuvert:true},()=>{const el=document.getElementById('vrt-composer');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}),
+      genDepuisRens:()=>{
+        if(!(active&&active.classe)){this.setState({genOuvert:true,genErr:'Choisissez d\u2019abord la classe : Ambassa en d\u00e9duit la structure officielle de l\u2019\u00e9preuve.'});}
+        else this._composerAvecAmbassa('tout');
+        setTimeout(()=>{const el=document.getElementById('vrt-composer');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},60);},
+      genRensWrap:(perm.edit&&perm.ia)?'margin-top:16px;padding:14px;border-radius:12px;background:var(--cf5faff,#f5faff);border:1px solid var(--cd6e8f8,#d6e8f8)':hidden,
+      genRensBtn:'width:100%;display:flex;align-items:center;justify-content:center;gap:8px;border:none;padding:12px 16px;font-size:13.5px;font-weight:700;font-family:Poppins;border-radius:10px;color:var(--cffffff,#fff);cursor:'+(st.genBusy?'default':'pointer')+';background:'+(st.genBusy?'var(--c8b97a8,#8b97a8)':'linear-gradient(135deg,var(--c14375f,#14375f),var(--c1a72bb,#1a72bb))'),
+      genRensLabel:st.genBusy?'Ambassa compose\u2026':(active&&this._aDuContenu(active)?'Recomposer l\u2019\u00e9preuve avec Ambassa':'G\u00e9n\u00e9rer l\u2019\u00e9preuve avec Ambassa'),
+      genRensAide:st.genErr?st.genErr:!(active&&active.classe)?'Choisissez d\u2019abord la classe : la nature et le bar\u00e8me officiels en d\u00e9coulent.'
+        :'Ambassa choisit le texte, r\u00e9dige les questions, le bar\u00e8me, le corrig\u00e9 et les sujets. Vous relisez ensuite.',
+      actClGenStyle:(perm.edit&&perm.ia)?'flex:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;border:none;color:var(--cffffff,#fff);background:linear-gradient(135deg,var(--c14375f,#14375f),var(--c1a72bb,#1a72bb));font-family:Poppins;font-size:12.5px;font-weight:700;padding:11px 14px;border-radius:10px;cursor:pointer;min-height:44px':hidden,
+      actClAnalyseStyle:(confActif&&perm.ia)?'flex:none;white-space:nowrap;background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c14375f,#14375f);font-family:Poppins;font-size:12.5px;font-weight:700;padding:11px 14px;border-radius:10px;cursor:pointer;min-height:44px':hidden,
       genCompleter:()=>this._composerAvecAmbassa('completer'),
       genToutIcone:this._icon('sparkle',st.genBusy?'var(--c8b97a8,#8b97a8)':'var(--cffffff,#fff)',15),
       genToutLabel:st.genBusy?'Ambassa compose…':'Tout composer avec Ambassa',
