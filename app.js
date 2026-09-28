@@ -16107,7 +16107,7 @@ function pgGuide(){
   h+='<div class="fl2 g6 fw">';
   sections.forEach(function(s){
     var active=(s.k===section);
-    h+='<button onclick="window._guideSec=\''+s.k+'\';re()" style="background:'+(active?s.col:'#fff')+';color:'+(active?'#fff':s.col)+';border:1.5px solid '+s.col+';padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;transition:.18s;display:flex;align-items:center;gap:6px"><span style="font-size:14px">'+s.ico+'</span>'+s.l+'</button>';
+    h+='<button onclick="window._guideSec=\''+s.k+'\';re()" style="background:'+(active?_encreSurBlanc(s.col):'#fff')+';color:'+(active?'#fff':_encreSurBlanc(s.col))+';border:1.5px solid '+s.col+';padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;transition:.18s;display:flex;align-items:center;gap:6px"><span style="font-size:14px">'+s.ico+'</span>'+s.l+'</button>';
   });
   h+='</div></div>';
 
@@ -34618,7 +34618,7 @@ window.pgPartenairesSplits = function(){
   return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-coins"/></svg></span>Partage Revenus Partenaires</div>'
     +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">'
-      +'<div class="card-v2" style="text-align:center;--vcol:#F59E0B"><div class="h-display" style="color:#F59E0B">'+fmt(totalDu)+'</div><div class="text-muted">À verser</div></div>'
+      +'<div class="card-v2" style="text-align:center;--vcol:#F59E0B"><div class="h-display" style="color:#B45309">'+fmt(totalDu)+'</div><div class="text-muted">À verser</div></div>'
       +'<div class="card-v2" style="text-align:center;--vcol:#3A8F73"><div class="h-display" style="color:#3A8F73">'+fmt(totalVerse)+'</div><div class="text-muted">Déjà versé</div></div>'
       +'<div class="card-v2" style="text-align:center;--vcol:#3C8DFF"><div class="h-display" style="color:#3C8DFF">'+partenaires.length+'</div><div class="text-muted">Partenaires</div></div>'
       +'<div class="card-v2" style="text-align:center;--vcol:#6C56A6"><div class="h-display" style="color:#6C56A6">'+((DB.splits||[]).filter(function(s){return s.etat==='pending';}).length)+'</div><div class="text-muted">Splits en attente</div></div>'
@@ -35131,7 +35131,7 @@ window.mDetailPartenaire = function(partenaireId){
 
   var body = '<div style="padding:8px">'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">'
-      +'<div class="card-v2" style="text-align:center;--vcol:#F59E0B"><div style="font-size:22px;font-weight:900;color:#F59E0B">'+fmt(p.solde||0)+'</div><div class="text-muted" style="font-size:11px">À verser</div></div>'
+      +'<div class="card-v2" style="text-align:center;--vcol:#F59E0B"><div style="font-size:22px;font-weight:900;color:#B45309">'+fmt(p.solde||0)+'</div><div class="text-muted" style="font-size:11px">À verser</div></div>'
       +'<div class="card-v2" style="text-align:center;--vcol:#3A8F73"><div style="font-size:22px;font-weight:900;color:#3A8F73">'+fmt(p.totalVerse||0)+'</div><div class="text-muted" style="font-size:11px">Déjà versé</div></div>'
     +'</div>'
     +'<h3 class="h-3">📜 Splits ('+splits.length+')</h3>'
@@ -35542,10 +35542,31 @@ window.mBusinessStats = function(){
   }
 };
 
+/* Encre lisible sur fond blanc (28/09/2026). Les cartes de chiffres et les
+   titres colores recoivent la couleur d'accent de leur rubrique — or #FFC93C,
+   ambre #F59E0B. Ecrits tels quels sur du blanc, ces chiffres tombaient a un
+   contraste de 1,5:1 et 2,2:1 (WCAG demande 4,5:1) : « 12 eleves », « 0 FCFA »
+   a verser, etc., quasiment invisibles dans Stats business, Centres,
+   Marketplace, Partenaires, le Guide et Prof. Ambassa. On garde la teinte
+   mais on l'assombrit juste assez pour atteindre 4,5:1. Une couleur deja
+   lisible, ou non hexadecimale, est rendue telle quelle. */
+function _encreSurBlanc(col){
+  var m=/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(col||'').trim());
+  if(!m) return col;
+  var h=m[1]; if(h.length===3) h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  var n=parseInt(h,16), r=n>>16&255, g=n>>8&255, b=n&255;
+  function lin(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);}
+  function ratio(k){return 1.05/(.2126*lin(r*k)+.7152*lin(g*k)+.0722*lin(b*k)+.05);}
+  if(ratio(1)>=4.5) return col;
+  var k=1; while(k>.05 && ratio(k)<4.5) k-=.02;
+  function hx(v){v=Math.round(v*k);return (v<16?'0':'')+v.toString(16);}
+  return '#'+hx(r)+hx(g)+hx(b);
+}
+
 function _statCard(emoji, val, lbl, color){
   return '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px;text-align:center;--vcol:'+color+'">'
     +'<div style="font-size:24px;margin-bottom:6px">'+emoji+'</div>'
-    +'<div style="font-size:20px;font-weight:800;color:'+color+';margin-bottom:2px">'+val+'</div>'
+    +'<div style="font-size:20px;font-weight:800;color:'+_encreSurBlanc(color)+';margin-bottom:2px">'+val+'</div>'
     +'<div style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.5px">'+lbl+'</div>'
     +'</div>';
 }
@@ -40260,7 +40281,7 @@ window.mAgentAmbassa = function(taskId){
       +'<div style="width:42px;height:42px;border-radius:50%;background:'+t.col+'18;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
       +'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="'+t.col+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-'+t.ic+'"/></svg>'
       +'</div>'
-      +'<div style="flex:1"><div style="font-weight:800;font-size:14px;color:'+t.col+'">'+t.t+'</div><div style="font-size:11px;color:#6B7280;margin-top:3px;line-height:1.4">'+t.d+'</div></div>'
+      +'<div style="flex:1"><div style="font-weight:800;font-size:14px;color:'+_encreSurBlanc(t.col)+'">'+t.t+'</div><div style="font-size:11px;color:#6B7280;margin-top:3px;line-height:1.4">'+t.d+'</div></div>'
       +'<div style="color:'+t.col+';font-size:18px;align-self:center">→</div>'
       +'</div>';
   }).join('');
@@ -41067,7 +41088,7 @@ window.pgAmbassa = function(){
         +'<div style="width:36px;height:36px;border-radius:50%;background:'+t.col+'18;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
         +'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+t.col+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-'+t.ic+'"/></svg>'
         +'</div>'
-        +'<div style="font-weight:800;color:'+t.col+';font-size:13px">'+t.t+'</div>'
+        +'<div style="font-weight:800;color:'+_encreSurBlanc(t.col)+';font-size:13px">'+t.t+'</div>'
         +'</div>'
         +'<div style="font-size:12px;color:#6B7280;line-height:1.4">'+t.d+'</div>'
         +'</div>';
@@ -43106,7 +43127,7 @@ function _prtKpiCard(emoji, label, value, color){
   return '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:14px;text-align:center">'
     + '<div style="font-size:24px">'+emoji+'</div>'
     + '<div style="font-size:11px;color:var(--ink3);margin:4px 0">'+label+'</div>'
-    + '<div style="font-size:18px;font-weight:800;color:'+color+'">'+value+'</div>'
+    + '<div style="font-size:18px;font-weight:800;color:'+_encreSurBlanc(color)+'">'+value+'</div>'
     + '</div>';
 }
 
