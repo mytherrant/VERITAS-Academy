@@ -1296,7 +1296,7 @@
       <div style="position:relative;flex:none">
         <button onClick="{{ toggleCreate }}" style="{{ topCreateStyle }}" style-hover="background:var(--c135a96,#135a96)">{{ topIcPlus }}<span class="vrt-hide-sm">Créer</span></button>
         <sc-if value="{{ createOpen }}" hint-placeholder-val="{{ false }}">
-          <div style="position:absolute;right:0;top:48px;width:262px;background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;box-shadow:0 14px 36px rgba(20,55,95,.18);overflow:hidden;z-index:40">
+          <div class="vrt-creer-menu" style="{{ createMenuPos }};background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;box-shadow:0 14px 36px rgba(20,55,95,.18);overflow:hidden;z-index:40">
             <sc-for list="{{ createMenu }}" as="c" hint-placeholder-count="3">
               <button onClick="{{ c.go }}" style="{{ c.style }}" style-hover="background:var(--cf5faff,#f5faff)">
                 <span style="{{ c.tile }}">{{ c.icon }}</span>
@@ -10098,20 +10098,33 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       newCoursDirect:()=>this.setState({coursTab:'gabarits',cycleFiltre:''},()=>window.scrollTo(0,0)),
       btnPrimaire:perm.edit?'display:flex;align-items:center;gap:7px;margin-left:auto;background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;border-radius:10px;font-family:Poppins':hidden,
       /* --- menu Creer --- */
-      toggleCreate:()=>this.setState({createOpen:!st.createOpen}),
+      /* MENU « CREER » (signale le 28/09/2026 sur telephone) : il s'alignait
+         sur le bord DROIT du bouton « + ». Sur telephone ce bouton est a
+         GAUCHE de la barre : le menu sortait de l'ecran et ses libelles
+         etaient coupes. On calcule sa place a l'ouverture pour qu'il reste
+         toujours a 12 px des bords, ou que soit le bouton. */
+      toggleCreate:e=>{
+        let pos=null;
+        try{const hote=e&&e.currentTarget&&e.currentTarget.parentElement;
+          if(hote&&!st.createOpen){const r=hote.getBoundingClientRect();const vw=document.documentElement.clientWidth||window.innerWidth;
+            const w=Math.min(262,vw-24);const gauche=Math.min(Math.max(12,r.right-w),vw-12-w);
+            pos={left:Math.round(gauche-r.left),w:Math.round(w)};}}catch(_){}
+        this.setState({createOpen:!st.createOpen,createPos:pos});},
+      createMenuPos:st.createPos?('position:absolute;left:'+st.createPos.left+'px;right:auto;top:48px;width:'+st.createPos.w+'px')
+        :'position:absolute;right:0;top:48px;width:262px',
       createOpen:st.createOpen,
       createMenu:[].concat(perm.creer?[
         {label:'Nouvelle \u00e9preuve',sub:'Composer un sujet depuis le corpus',icon:this._icoRond('file','var(--c14375f,#14375f)',34),
          tile:'display:flex;flex:none',
-         style:'display:flex;align-items:center;gap:11px;width:100%;border:none;background:none;padding:12px 14px;cursor:pointer;text-align:left',
+         style:'display:flex;align-items:center;justify-content:flex-start;gap:11px;width:100%;border:none;background:none;padding:12px 14px;cursor:pointer;text-align:left',
          go:()=>{this.setState({createOpen:false});this._ensureDraft(id=>this.setState({activeId:id,screen:'composeur'},()=>window.scrollTo(0,0)));}},
         {label:'Nouveau cours',sub:'Partir d\u2019un gabarit MINESEC',icon:this._icoRond('book','var(--c1f9d55,#1f9d55)',34),
          tile:'display:flex;flex:none',
-         style:'display:flex;align-items:center;gap:11px;width:100%;border:none;background:none;padding:12px 14px;cursor:pointer;text-align:left;border-top:1px solid var(--ceef2f7,#eef2f7)',
+         style:'display:flex;align-items:center;justify-content:flex-start;gap:11px;width:100%;border:none;background:none;padding:12px 14px;cursor:pointer;text-align:left;border-top:1px solid var(--ceef2f7,#eef2f7)',
          go:()=>this.setState({createOpen:false,screen:'cours',coursTab:'gabarits'},()=>window.scrollTo(0,0))}]:[]).concat(perm.importer?[
         {label:'Importer un corpus',sub:'Fichier .json / .csv ou coller',icon:this._icoRond('upload','var(--cc26a12,#c26a12)',34),
          tile:'display:flex;flex:none',
-         style:'display:flex;align-items:center;gap:11px;width:100%;border:none;background:none;padding:12px 14px;cursor:pointer;text-align:left;border-top:1px solid var(--ceef2f7,#eef2f7)',
+         style:'display:flex;align-items:center;justify-content:flex-start;gap:11px;width:100%;border:none;background:none;padding:12px 14px;cursor:pointer;text-align:left;border-top:1px solid var(--ceef2f7,#eef2f7)',
          go:()=>this.setState({createOpen:false,importOpen:true,screen:'liste'},()=>window.scrollTo(0,0))}]:[]),
       /* --- activite --- */
       actGroupes,
