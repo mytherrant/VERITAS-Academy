@@ -1,3 +1,7 @@
+## Atelier : le menu du bouton « + » sortait de l'écran sur téléphone (28/09/2026)
+
+Signalé par Jacques (capture d'écran) : le menu « Créer » s'ouvrait à moitié hors de l'écran, libellés coupés. Il était aligné sur le bord DROIT du bouton « + » ; sur téléphone ce bouton est à GAUCHE de la barre, donc le menu débordait par la gauche. Sa position est désormais calculée à l'ouverture (`toggleCreate` → `createPos`) pour qu'il reste à 12 px des bords, où que soit le bouton. Vérifié au navigateur de 360 à 1 280 px. Les icônes des lignes « Nouveau cours » et « Importer un corpus » étaient aussi décalées (centrage hérité) : alignées à gauche. `banc_atelier_mobile` : 96 contrôles.
+
 ## Audit de l'Atelier de Français : bugs, sécurité, visuel, marketing (27/09/2026)
 
 Demande de Jacques : « Audite le travail de l'agent sur l'Atelier, corrige tous les bugs, vérifie le reskin, la sécurité, le visuel, le marketing. » Revue du diff #71 → #87 (composition par Ambassa, quota IA, calendrier, icônes, rôles) et parcours réel au navigateur (1 280 et 390 px, serveur simulé, Ambassa simulée).

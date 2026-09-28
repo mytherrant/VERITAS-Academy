@@ -365,5 +365,13 @@ dire(!/équipe : <span style="\{\{ teamInlineStyle \}\}">/.test(src) && /const m
 dire(/<div style="\{\{ quotaEquipeCarte \}\}">/.test(src) && /quotaEquipeCarte:\/\^u\\d\+\$\/\.test\(String\(me\.id\)\)\?/.test(src),
   'écran Équipe : le quota d’équipe (non appliqué par le serveur) n’apparaît que dans la démonstration');
 
+/* ── ⑰ Le menu « Créer » reste dans l'écran (signalé le 28/09/2026) ──
+   Aligné sur le bord droit du bouton « + », qui est à GAUCHE de la barre
+   sur téléphone, il sortait de l'écran : libellés coupés. */
+console.log(`\n${G}⑰ Le menu du bouton « + » reste lisible sur téléphone${R}`);
+dire(/<div class="vrt-creer-menu" style="\{\{ createMenuPos \}\};/.test(src)
+  && /const gauche=Math\.min\(Math\.max\(12,r\.right-w\),vw-12-w\);/.test(src),
+  'le menu « Créer » est placé à l’ouverture pour rester à 12 px des bords de l’écran');
+
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko === 0 ? 0 : 1);
