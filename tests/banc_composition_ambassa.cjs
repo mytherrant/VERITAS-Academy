@@ -368,6 +368,32 @@ const attendre = ms => new Promise(r => setTimeout(r, ms));
     && /if \(\$abonneAtelier && in_array\(\$userTier/.test(px)
     && px.indexOf('$abonneAtelier && in_array') > px.indexOf('$userId = $utilisateurVerifie;'),
     'ia_proxy.php : l’abonné de l’Atelier vérifié passe au palier enseignant, jamais sans jeton');
+  /* Audit du 27/09/2026 : le palier enseignant du proxy est BORNÉ par les
+     appels déjà accordés ce mois par plateforme.php (quotas[<compte>|ia]) ;
+     sinon un abonné appelait le proxy en direct, 120 fois par jour, hors
+     de sa formule. */
+  dire(/\$qAt\s*=\s*\$dbAtelier\['plateforme'\]\['quotas'\]\[\$accAt \. '\|ia'\]/.test(px)
+    && /\$utilisesAt < \$accordesAt/.test(px) && /file_put_contents\(\$fichierAtelier/.test(px),
+    'ia_proxy.php : le palier de l’abonné ne dépasse jamais les appels déjà décomptés par plateforme.php ce mois');
+
+  /* Scories d'OCR (lettrines détachées) : Ambassa ne choisit pas ces textes. */
+  const propre = 'Le marché de la ville est bruyant le matin et les marchandes appellent les passants avec de grands gestes. ' .repeat(5);
+  const abime = propre.replace(/ et /g, ' et p ').replace(/ les /g, ' q les ');
+  dire(GEN.scoriesOCR(abime) > 0.008 && GEN.scoriesOCR(propre) === 0
+    && GEN.classerTextes([{ n: 1, level: '3e', text: abime }, { n: 2, level: '3e', text: propre }], { classe: '3e' }).every(x => x.f.n !== 1),
+    'un texte à lettrines détachées (« euvent faire. p Avant… ») n’est jamais choisi par Ambassa');
+
+  /* Aucun texte convenable : rien n'est décompté (le quota se demande après
+     le choix et le téléchargement du texte). */
+  const sansTexte = atelier((url) => /ia_proxy/.test(url) ? { corps: { text: JSON.stringify(REPONSE_BEPC) } } : { corps: { ok: true } });
+  sansTexte.all = [];
+  await new Promise(r => sansTexte._ensureDraft(() => r()));
+  sansTexte._updateActive({ classe: '3e', epreuveCode: 'BEPC_ETUDE', etab: 'CES' });
+  sansTexte._composerAvecAmbassa('tout');
+  for (let i = 0; i < 40 && sansTexte.state.genBusy; i++) await attendre(50);
+  dire(!sansTexte.__journal.some(x => /action=quota|ia_proxy/.test(x.url)) && /Aucun texte/.test(sansTexte.state.genErr || ''),
+    'aucun texte convenable : ni quota décompté ni appel à Ambassa, le panneau le dit', sansTexte.state.genErr);
+
   const plansAtelier = (fs.readFileSync(P('api/plateforme.php'), 'utf8').match(/function plat_plans_atelier[\s\S]*?return (\[[^\]]*\])/) || [])[1];
   dire(plansAtelier === "['ens_mois', 'ens', 'etab', 'pro']", 'la liste des formules du proxy est celle de plat_plans_atelier()', plansAtelier);
 

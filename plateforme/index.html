@@ -12,7 +12,7 @@
      destination, pas le raccourci. -->
 <link rel="canonical" href="https://veritas-school.com/plateforme/">
 <meta name="robots" content="index,follow">
-<meta name="description" content="Composez des épreuves de français conformes au programme MINESEC : corpus de textes indexés par classe et par module, exercices calibrés, relecture de conformité et export Word.">
+<meta name="description" content="Composez des épreuves de français conformes au programme MINESEC : l’IA Ambassa rédige l’épreuve complète (texte, questions, barème, corrigé), vous relisez. Corpus indexé par classe et par module, contrôle de conformité, export Word.">
 <!-- Le favicon vit à la racine du site (assets/ est copié tel quel par la CI) ;
      le chemin RELATIF fonctionne donc aussi bien en production, sur le banc
      local, que depuis un sous-dossier. Une URL absolue casserait les deux
@@ -22,17 +22,17 @@
 <meta property="og:locale" content="fr_FR">
 <meta property="og:site_name" content="Centre VÉRITAS">
 <meta property="og:title" content="Atelier de Français — Centre VÉRITAS">
-<meta property="og:description" content="Composez des épreuves de français conformes au programme MINESEC : corpus indexé, exercices calibrés, contrôle de conformité et export Word.">
+<meta property="og:description" content="L’IA Ambassa compose l’épreuve de français complète selon le descriptif MINESEC — questions, barème, corrigé — et vous la relisez. Corpus indexé, contrôle de conformité, export Word.">
 <meta property="og:url" content="https://veritas-school.com/plateforme/">
 <!-- og:image EXIGE une URL absolue (les réseaux sociaux ne résolvent pas le
      relatif). Ce fichier est bien déposé à la racine par la CI — vérifié. -->
 <meta property="og:image" content="https://veritas-school.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <script src="./support.js?v=2e38395c"></script>
-<script src="./minesec.js?v=570ac91b"></script>
-<script src="./conformite.js?v=be09f1cb"></script>
+<script src="./minesec.js?v=d9d8069b"></script>
+<script src="./conformite.js?v=70d66d2a"></script>
 <script src="./exercices.js?v=c6d93301"></script>
-<script src="./generateur.js?v=a0954e70"></script>
+<script src="./generateur.js?v=7c16d0c8"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=8979cf66"></script>
 <!--vrt-habillage:tete-->
@@ -1549,7 +1549,7 @@
             </button>
           </sc-for>
           <div style="{{ calCandVide }}">Aucune épreuve ni aucun cours modifiable à dater.</div>
-          <button type="button" onClick="{{ calNouvelle }}" style="margin-top:6px;width:100%;background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;cursor:pointer" style-hover="filter:brightness(1.1)">+ Nouvelle épreuve pour ce jour</button>
+          <button type="button" onClick="{{ calNouvelle }}" style="{{ calNouvelleStyle }}" style-hover="filter:brightness(1.1)">+ Nouvelle épreuve pour ce jour</button>
         </div>
         </sc-if>
         <div style="margin-top:14px;display:flex;flex-direction:column;gap:9px">
@@ -2189,7 +2189,7 @@
             </section>
             </sc-if>
             <div style="background:linear-gradient(135deg,var(--c1a72bb,#1a72bb),var(--c134f88,#134f88));color:var(--cffffff,#fff);padding:22px 26px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;border-radius:14px;box-shadow:0 8px 24px rgba(20,55,95,.22);margin-bottom:22px">
-              <div style="flex:1;min-width:200px"><div style="font-family:'Poppins';font-size:17px;font-weight:700;margin-bottom:5px">Générer l'épreuve</div><div style="font-size:12px;color:var(--cd6e6f5,#d6e6f5);line-height:1.55">Quota — vous : <span style="{{ meInlineStyle }}">{{ meRemaining }}/{{ meLimit }}</span> · équipe : <span style="{{ teamInlineStyle }}">{{ teamRemaining }}/{{ teamLimit }}</span> ce mois.</div></div>
+              <div style="flex:1;min-width:200px"><div style="font-family:'Poppins';font-size:17px;font-weight:700;margin-bottom:5px">Générer l'épreuve</div><div style="font-size:12px;color:var(--cd6e6f5,#d6e6f5);line-height:1.55">Quota — vous : <span style="{{ meInlineStyle }}">{{ meRemaining }}/{{ meLimit }}</span> ce mois, vérifié par le serveur à chaque aperçu.</div></div>
               <sc-if value="{{ canGenerate }}" hint-placeholder-val="{{ true }}"><button onClick="{{ generate }}" style="background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:14px 26px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;border-radius:999px;font-family:'Poppins';box-shadow:0 4px 14px rgba(12,42,106,.35)" style-hover="background:var(--ce07f00,#e07f00)">Générer &amp; aperçu {{ icSuite }}</button></sc-if>
               <sc-if value="{{ genBlocked }}" hint-placeholder-val="{{ false }}"><div style="text-align:right"><div style="font-size:12.5px;color:var(--cffd08a,#ffd08a);font-weight:700;margin-bottom:7px;font-family:'Poppins'">{{ quotaMsg }}</div><button onClick="{{ goAbo }}" style="background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:11px 20px;font-size:13px;font-weight:700;cursor:pointer;border-radius:999px;font-family:'Poppins'" style-hover="background:var(--ce07f00,#e07f00)">Gérer les quotas</button></div></sc-if>
             </div>
@@ -2357,8 +2357,8 @@
     </section>
     </sc-if>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:26px">
-      <div style="background:linear-gradient(135deg,var(--c1a72bb,#1a72bb),var(--c134f88,#134f88));color:var(--cffffff,#fff);border-radius:14px;padding:22px 24px;box-shadow:0 6px 18px rgba(20,55,95,.18)">
+    <div style="{{ quotaGrille }}">
+      <div style="{{ quotaEquipeCarte }}">
         <div style="font-size:12px;color:var(--ccfe1f2,#cfe1f2);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Quota équipe · ce mois</div>
         <div style="font-family:'Poppins';font-size:30px;font-weight:700">{{ teamRemaining }} <span style="font-size:16px;color:var(--ccfe1f2,#cfe1f2);font-weight:600">/ {{ teamLimit }} restantes</span></div>
         <div style="height:8px;background:rgba(255,255,255,.22);border-radius:999px;margin-top:14px;overflow:hidden"><div style="{{ teamBar }}"></div></div>
@@ -2368,7 +2368,7 @@
         <div style="font-size:12px;color:var(--c8b97a8,#8b97a8);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Votre quota individuel</div>
         <div style="font-family:'Poppins';font-size:30px;font-weight:700;color:var(--c14375f,#14375f)">{{ meRemaining }} <span style="font-size:16px;color:var(--c9aa5b5,#9aa5b5);font-weight:600">/ {{ meLimit }} restantes</span></div>
         <div style="height:8px;background:var(--ceef2f7,#eef2f7);border-radius:999px;margin-top:14px;overflow:hidden"><div style="{{ meBar }}"></div></div>
-        <div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin-top:8px">Le quota individuel se décompte aussi du quota d'équipe.</div>
+        <div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin-top:8px">{{ quotaNote }}</div>
       </div>
     </div>
     <div style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:14px;box-shadow:0 2px 10px rgba(20,55,95,.05);overflow:hidden">
@@ -3194,7 +3194,7 @@
       <div style="width:56px;height:56px;border-radius:15px;background:var(--sb-logo-bg);display:grid;place-items:center;margin:0 auto 18px">{{ loginIcLogo }}</div>
       <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);font-weight:700;margin-bottom:12px">Atelier de Français · Français MINESEC</div>
       <h1 style="font-family:'Poppins';font-size:31px;font-weight:700;line-height:1.2;margin:0 auto 14px;max-width:20ch;color:var(--c14375f,#14375f);letter-spacing:-.02em">Un espace collaboratif pour vos cours et vos épreuves</h1>
-      <p style="font-size:14.5px;line-height:1.7;color:var(--c5a6678,#5a6678);max-width:62ch;margin:0 auto 34px">Composez vos épreuves et vos leçons à partir de 2 054 textes vérifiés — dont 1 014 ouverts sans abonnement — avec un garde-fou qui contrôle la conformité MINESEC pendant que vous écrivez.</p>
+      <p style="font-size:14.5px;line-height:1.7;color:var(--c5a6678,#5a6678);max-width:62ch;margin:0 auto 34px">Ambassa, l’IA de VÉRITAS, compose l’épreuve entière selon le descriptif MINESEC — texte choisi dans le corpus, questions, barème et corrigé — en une trentaine de secondes : vous relisez et corrigez. Vos épreuves et vos leçons puisent dans 2 054 textes vérifiés — dont 1 014 ouverts sans abonnement — et un garde-fou contrôle la conformité pendant que vous écrivez.</p>
 
       <!-- ═══════════ DÉMONSTRATION ANIMÉE ═══════════
            Elle remplace la « Visite guidée » par profils d'exemple, qui
@@ -3252,7 +3252,7 @@
             <!-- 3 · monter une épreuve -->
             <div class="vrt-scene">
               <h4><b>3</b>Monter une épreuve</h4>
-              <p>Le garde-fou vérifie longueurs, barème et structure officielle pendant que vous écrivez.</p>
+              <p>Ambassa rédige questions, barème et corrigé ; le garde-fou vérifie longueurs, barème et structure officielle. Vous relisez.</p>
               <div class="vrt-boite" style="margin-bottom:9px">
                 <div style="display:flex;justify-content:space-between;align-items:center">
                   <span style="font-size:10.5px;font-weight:700;color:var(--c14375f,#14375f);font-family:Poppins,sans-serif">Texte support · 312 mots</span>
@@ -3688,19 +3688,19 @@ class Component extends DCLogic {
        api/payment_config.php : c'est le serveur qui fait foi au paiement,
        jamais le navigateur. */
     this.plans=[
-      {id:'essai',name:'Essai',price:'0',period:'gratuit',quota:10,seats:'1 utilisateur',
-       features:['1 semaine d’essai','5 épreuves / mois','12 textes MINESEC au choix + tout le domaine public','Aperçu & impression PDF']},
+      {id:'essai',name:'Essai',price:'0',period:'gratuit',quota:5,seats:'1 utilisateur',
+       features:['1 semaine d’essai','5 épreuves / mois','Épreuve complète générée par l’IA, à relire','12 textes MINESEC au choix + tout le domaine public','Aperçu & impression PDF']},
       /* Payer au mois lève le seul obstacle qui compte : sortir 5 000 F
          d'un coup. Même service, même quota mensuel — et l'annuel reste
          moins cher sur l'année, ce que la carte dit sans détour. */
       {id:'ens_mois',name:'Atelier — Enseignant, au mois',price:'800',period:'FCFA / mois',quota:30,seats:'1 utilisateur',
-       features:['30 épreuves / mois','Corpus MINESEC complet','Import de corpus externe','Relecture par Ambassa','Sans engagement — arrêtez quand vous voulez']},
+       features:['30 épreuves / mois','Épreuve complète générée par l’IA : questions, barème, corrigé','Corpus MINESEC complet','Import de corpus externe','Relecture par Ambassa','Sans engagement — arrêtez quand vous voulez']},
       {id:'ens',name:'Atelier — Enseignant',price:'5 000',period:'FCFA / an',quota:30,seats:'1 utilisateur',
-       features:['30 épreuves / mois','Import de corpus externe','Historique des versions','Relecture par Ambassa']},
+       features:['30 épreuves / mois','Épreuve complète générée par l’IA : questions, barème, corrigé','Corpus MINESEC complet','Import de corpus externe','Historique des versions','Relecture par Ambassa','Soit environ 420 F / mois, moitié prix du mensuel']},
       {id:'etab',name:'Collège',price:'30 000',period:'FCFA / an',quota:120,seats:"Jusqu'à 15 enseignants",
-       features:['120 épreuves / mois','Circuit de validation','Bibliothèque partagée','Accès par fonction','Groupe d’établissement privé']},
+       features:['120 épreuves / mois','Épreuve complète générée par l’IA, relue par l’équipe','Circuit de validation','Bibliothèque partagée','Accès par fonction','Groupe d’établissement privé']},
       {id:'pro',name:'Bassin',price:'70 000',period:'FCFA / an',quota:400,seats:'Utilisateurs illimités',
-       features:['400 épreuves / mois','Rôles & accès avancés','Verrouillage & audit','Groupes multiples','Support prioritaire']}
+       features:['400 épreuves / mois','Épreuve complète générée par l’IA, relue par l’équipe','Rôles & accès avancés','Verrouillage & audit','Groupes multiples','Support prioritaire']}
     ];
 
     const seedUsers=[
@@ -5030,9 +5030,11 @@ class Component extends DCLogic {
        navigateur et laissait le quota paye sans effet. On decompte donc ici,
        sous verrou, avant tout appel -- ferme en cas de panne, comme les
        exports. */
-    this.setState({genBusy:true,genErr:'',genRapport:null,genOuvert:true,genEtape:'Vérification de votre quota Ambassa…'});
-    this._consommerQuota('ia',()=>this._lancerComposition(mode,a,struct,plan,textesChoisis),
-      m=>this.setState({genBusy:false,genEtape:'',genErr:m}));
+    /* Le quota se demande APRES le choix et le telechargement du texte
+       (audit du 27/09/2026) : un corpus sans texte convenable ou un reseau
+       qui coupe pendant le telechargement decomptaient un appel pour rien. */
+    this.setState({genBusy:true,genErr:'',genRapport:null,genOuvert:true,genEtape:''});
+    this._lancerComposition(mode,a,struct,plan,textesChoisis);
   }
   _lancerComposition(mode,a,struct,plan,textesChoisis){
     const st=this.state;
@@ -5085,11 +5087,16 @@ class Component extends DCLogic {
       }
       const ctx={plan:plan,struct:struct,classe:a.classe,serie:a.serie||'',theme:st.genTheme||'',textes:textes,fixes:fixes,abonnement:abonnement,
         exemples:G.exemplesOfficiels(this.all,a.classe,principal?principal.n:null,2)};
+      etape('Vérification de votre quota Ambassa…');
+      return new Promise((ok,ko)=>this._consommerQuota('ia',()=>ok(true),m=>ko({quotaRefus:m})))
+        .then(()=>{
       etape('Ambassa rédige l’épreuve et son corrigé — une trentaine de secondes…');
       return G.composer(ctx,{token:this._jeton(),url:this._apiUrl('ia_proxy.php'),etape:etape,
         reparer:()=>new Promise(ok=>this._consommerQuota('ia',()=>ok(true),()=>ok(false)))})
         .then(res=>this._appliquerComposition(a.id,res,ctx,struct,mode));
-    }).catch(e=>this.setState({genBusy:false,genEtape:'',genErr:(e&&e.message==='quota')
+        });
+    }).catch(e=>this.setState({genBusy:false,genEtape:'',genErr:(e&&e.quotaRefus)?e.quotaRefus
+      :(e&&e.message==='quota')
       ?this._messageQuotaIA()
       :(e&&/reponse_/.test(e.message||''))?'Ambassa a renvoyé une réponse incomplète : votre épreuve n’a pas été modifiée. Vous pouvez relancer (un nouvel appel IA sera décompté).'
       :(e&&e.message==='delai')?'Ambassa n’a pas répondu à temps (plus de deux minutes). Votre épreuve n’a pas été modifiée : relancez dans un instant.'
@@ -5199,7 +5206,7 @@ class Component extends DCLogic {
     const a=this._active();if(!a)return;
     const l=(a.sujets||[]).slice();if(!l[i])return;
     const x={...l[i],aRelire:false};
-    x[champ]=(champ==='pts')?(v===''?null:parseFloat(v)):(champ==='auChoix'?!!v:v);
+    x[champ]=(champ==='pts')?(v===''||!isFinite(parseFloat(v))?null:Math.max(0,parseFloat(v))):(champ==='auChoix'?!!v:v);
     l[i]=x;this._updateActive({sujets:l});
   }
   _ajouterSujet(){
@@ -6522,7 +6529,7 @@ class Component extends DCLogic {
           +(pp[i]!=null&&pp[i]!==''?' ('+pp[i]+' pt'+((parseFloat(pp[i])||0)>1?'s':'')+')':'')
           +'\n   → '+(c[i]||'à compléter'))});});});
     (a.sujets||[]).forEach(s=>{if(!s||!s.corrige)return;
-      blocs.push({titre:s.titre+(s.pts?' ('+s.pts+' pts)':''),lignes:[s.corrige]});});
+      blocs.push({titre:(s.titre||'Sujet')+(s.pts?' ('+s.pts+' pts)':''),lignes:[s.corrige]});});
     if((a.grilleIA||[]).length)blocs.push({titre:'Grille de correction',
       lignes:a.grilleIA.map(g=>'• '+g.critere+(g.points!=null?' — '+g.points+' pts':'')+(g.indicateurs?' : '+g.indicateurs:''))});
     const stru=a.epreuveCode?MINESEC.epreuveParCode(a.epreuveCode):null;
@@ -7223,7 +7230,9 @@ class Component extends DCLogic {
         /* 201 = nouvelle transaction, 200 = transaction deja ouverte : les deux
            sont des succes, refuser le 200 casserait l'idempotence. */
         const url=corps&&(corps.pay_url||corps.payUrl||corps.url);
-        if((statut===200||statut===201)&&url){
+        /* Seule une adresse https:// part dans la fenetre de paiement : une
+           reponse alteree ne doit pas pouvoir y glisser un javascript:. */
+        if((statut===200||statut===201)&&url&&/^(https:\/\/|http:\/\/(localhost|127\.0\.0\.1)[:\/])/i.test(String(url))){
           if(fenetre)fenetre.location=url;else window.location.href=url;
           lacher();
           /* La reference part sur le disque AVANT le sondage : si l'onglet
@@ -7554,7 +7563,11 @@ class Component extends DCLogic {
      l'epreuve active, et dater un nouveau sujet ne doit pas re-dater celui
      qu'on avait ouvert. */
   _nouvelleEpreuveLe(iso){
-    const me=this._me();const id='e'+Date.now();
+    const me=this._me();
+    /* Meme droit que « Creer » : un relecteur ou un eleve ne cree pas
+       d'epreuve en passant par le calendrier (audit du 27/09/2026). */
+    if(!this._perm(me.role).creer){this._avis('Votre r\u00f4le ne permet pas de cr\u00e9er une \u00e9preuve.','ko');return;}
+    const id='e'+Date.now();
     const ep={id,groupeId:this._groupeActif(),title:'Nouvelle \u00e9preuve',etab:'',classe:'',duree:'2 h',coeff:'',date:'',echeance:iso||'',
       consigne:'Lis attentivement le(s) texte(s) puis r\u00e9ponds aux questions.',textIds:[],status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,
       updatedAt:Date.now(),comments:[],activity:[{userId:me.id,text:'a cr\u00e9\u00e9 l\u2019\u00e9preuve',ts:Date.now()}]};
@@ -7878,6 +7891,7 @@ class Component extends DCLogic {
       ?(st.corpusPlafonds.epreuves|0):null;
     const meLimit=(plafondSrv!=null&&plafondSrv>=0)?plafondSrv:me.quota.limit;
     const meRemaining=Math.max(0,meLimit-me.quota.used);
+    const meQuotaInconnu=plafondSrv==null&&!(me.quota&&me.quota.limit);
     const tq=st.team.quota,teamRemaining=Math.max(0,tq.limit-tq.used),teamLimit=tq.limit;
     const avStack=ids=>{const arr=ids.map(id=>st.users.find(u=>u.id===id)).filter(Boolean);return React.createElement(React.Fragment,null,arr.slice(0,4).map((u,i)=>React.createElement('span',{key:u.id,title:u.name,style:{display:'inline-grid',placeItems:'center',width:'24px',height:'24px',borderRadius:'50%',background:this._color(u),color:'var(--cffffff,#fff)',fontSize:'9.5px',fontWeight:700,fontFamily:'Poppins',border:'2px solid var(--cffffff,#fff)',marginLeft:i?'-7px':'0'}},this._initials(u.name))));};
 
@@ -8083,7 +8097,7 @@ class Component extends DCLogic {
     const idsMembres=sansEquipe?[me.id]:(grpActif.membres||[me.id]);
     const membresReels=idsMembres.map(id=>st.users.find(u=>u.id===id)
       ||{id:id,name:'Membre',role:'Enseignant',quota:{limit:0,used:0}});
-    const membersView=membresReels.map(u=>{const cnt=st.epreuves.filter(e=>e.ownerId===u.id).length;return{name:u.name,initials:this._initials(u.name),avatarLg:this._av(u,40),youTag:u.id===me.id?'(vous)':'',role:u.role,roleShort:(u.role||'').split(' / ')[0],epLine:cnt+' épreuve(s) créée(s)',quotaLine:(u.quota.limit-u.quota.used)+'/'+u.quota.limit,roleDisabled:!perm.manageTeam,roleSelStyle:perm.manageTeam?'padding:7px 9px;border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:8px;font-size:12.5px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)':'padding:7px 9px;border:1px solid var(--ceef2f7,#eef2f7);border-radius:8px;font-size:12.5px;color:var(--c8b97a8,#8b97a8);background:var(--cf7f9fc,#f7f9fc);pointer-events:none',setRole:e=>{const nr=val(e);this.setState(s=>({users:s.users.map(x=>x.id===u.id?{...x,role:nr}:x)}),()=>this._persist());},
+    const membersView=membresReels.map(u=>{const cnt=st.epreuves.filter(e=>e.ownerId===u.id).length;return{name:u.name,initials:this._initials(u.name),avatarLg:this._av(u,40),youTag:u.id===me.id?'(vous)':'',role:u.role,roleShort:(u.role||'').split(' / ')[0],epLine:cnt+' épreuve(s) créée(s)',quotaLine:u.id===me.id?(meQuotaInconnu?'\u2014':meRemaining+'/'+meLimit):/^u\d+$/.test(String(u.id))?(u.quota.limit-u.quota.used)+'/'+u.quota.limit:'\u2014',roleDisabled:!perm.manageTeam,roleSelStyle:perm.manageTeam?'padding:7px 9px;border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:8px;font-size:12.5px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)':'padding:7px 9px;border:1px solid var(--ceef2f7,#eef2f7);border-radius:8px;font-size:12.5px;color:var(--c8b97a8,#8b97a8);background:var(--cf7f9fc,#f7f9fc);pointer-events:none',setRole:e=>{const nr=val(e);this.setState(s=>({users:s.users.map(x=>x.id===u.id?{...x,role:nr}:x)}),()=>this._persist());},
       /* Retirer un membre : reserve a qui dirige l'equipe, et jamais sur
          soi-meme depuis cette liste (on quitte par le bouton dedie). */
       retirerStyle:(jeDirige&&u.id!==me.id)
@@ -8144,7 +8158,7 @@ class Component extends DCLogic {
        go:()=>this.setState({screen:'epreuves',epFilter:'review'},()=>window.scrollTo(0,0))},
       {ic:'bell',v:acts.length,l:'Nouvelles activit\u00e9s',cta:'Voir',
        go:()=>this.setState({screen:'activite'},()=>window.scrollTo(0,0))},
-      {ic:'database',v:meRemaining,l:'Cr\u00e9dits disponibles',cta:'D\u00e9tails',
+      {ic:'database',v:meQuotaInconnu?'\u2014':meRemaining,l:'Cr\u00e9dits disponibles',cta:'D\u00e9tails',
        go:()=>this._go('abo')}
     ];
     const statCards=statBrut.map((x,i2)=>({
@@ -8347,7 +8361,7 @@ class Component extends DCLogic {
     const planCourant=this.plans.find(p=>p.name===st.team.plan)||this.plans[0];
     const profAbo=[
       {label:'Plan',valeur:st.team.plan||'\u2014',sous:planCourant?(planCourant.price==='0'?'Gratuit':(planCourant.price+' '+planCourant.period)):''},
-      {label:'Quota individuel',valeur:meRemaining+' / '+meLimit,sous:'\u00e9preuves restantes ce mois'},
+      {label:'Quota individuel',valeur:meQuotaInconnu?'\u2014':(meRemaining+' / '+meLimit),sous:'\u00e9preuves restantes ce mois'},
       {label:'Quota d\u2019\u00e9quipe',valeur:teamRemaining+' / '+teamLimit,sous:'partag\u00e9 entre '+st.users.length+' membres'}
     ];
 
@@ -8821,8 +8835,12 @@ class Component extends DCLogic {
        au serveur, sous verrou, avant chaque apercu : on ne bloque plus ici
        que si le SERVEUR a deja annonce le plafond atteint. */
     const quotaSrvAtteint=plafondSrv!=null&&plafondSrv>=0&&meRemaining<=0;
-    const canGen=active&&active.textIds.length>0&&perm.edit&&!quotaSrvAtteint;
-    const genBlocked=active&&active.textIds.length>0&&perm.edit&&quotaSrvAtteint;
+    /* Une dictee, une correction orthographique ou une expression ecrite
+       n'ont pas de texte du corpus : leur contenu est un SUJET redige.
+       Exiger un texte bloquait leur apercu (audit du 27/09/2026). */
+    const aMatiere=!!active&&((active.textIds||[]).length>0||(active.sujets||[]).some(x=>x&&String(x.texte||'').trim()));
+    const canGen=aMatiere&&perm.edit&&!quotaSrvAtteint;
+    const genBlocked=aMatiere&&perm.edit&&quotaSrvAtteint;
     const quotaMsg='Votre quota mensuel est atteint';
 
     const navBase='background:none;border:none;font-family:Poppins;font-size:14px;font-weight:500;padding:8px 13px;border-radius:8px;cursor:pointer;color:var(--c3a4658,#3a4658);display:flex;align-items:center';
@@ -8959,7 +8977,16 @@ class Component extends DCLogic {
          l'en-tete annoncait « 6 membres » juste au-dessus d'une liste qui
          n'en montrait qu'un. On compte les membres reels de l'equipe. */
       team:{...st.team,name:grpActif.nom},memberCount:membresReels.length,
-      meRemaining,meLimit,teamRemaining,teamLimit,teamUsed:tq.used,teamReset:new Date(tq.resetsOn).toLocaleDateString('fr-FR',{day:'numeric',month:'long'}),
+      /* Plafond encore INCONNU (compte neuf, serveur pas encore entendu) :
+         « 0 / 0 » se lisait « vous n'avez plus rien » alors que rien n'est
+         consomme. On affiche un tiret jusqu'a ce que le serveur ait parle. */
+      /* Le serveur ne compte que PAR COMPTE (plateforme.php, quotas[<compte>|genre]) :
+         le « quota d'equipe » n'existe que dans le decor de demonstration.
+         Un compte reel ne voit plus un chiffre que rien n'applique. */
+      quotaGrille:'display:grid;grid-template-columns:'+(/^u\d+$/.test(String(me.id))?'1fr 1fr':'1fr')+';gap:16px;margin-bottom:26px',
+      quotaEquipeCarte:/^u\d+$/.test(String(me.id))?'background:linear-gradient(135deg,var(--c1a72bb,#1a72bb),var(--c134f88,#134f88));color:var(--cffffff,#fff);border-radius:14px;padding:22px 24px;box-shadow:0 6px 18px rgba(20,55,95,.18)':hidden,
+      quotaNote:/^u\d+$/.test(String(me.id))?'Le quota individuel se d\u00e9compte aussi du quota d\u2019\u00e9quipe.':'D\u00e9compt\u00e9 par le serveur pour votre compte, remis \u00e0 z\u00e9ro chaque mois.',
+      meRemaining:meQuotaInconnu?'\u2014':meRemaining,meLimit:meQuotaInconnu?'\u2014':meLimit,teamRemaining,teamLimit,teamUsed:tq.used,teamReset:new Date(tq.resetsOn).toLocaleDateString('fr-FR',{day:'numeric',month:'long'}),
       quotaNumStyle:'font-weight:700;color:'+(meRemaining<=3?'var(--cf39200,#f39200)':'var(--c14375f,#14375f)'),
       meBar:'height:100%;width:'+Math.min(100,Math.round(me.quota.used/Math.max(1,me.quota.limit)*100))+'%;background:'+(meRemaining<=3?'var(--cf39200,#f39200)':'var(--c1a72bb,#1a72bb)'),
       teamBar:'height:100%;width:'+Math.min(100,Math.round(tq.used/Math.max(1,tq.limit)*100))+'%;background:var(--cffd08a,#ffd08a)',
@@ -9455,7 +9482,12 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
         this._updateActive(maj,'a rattaché l’épreuve à une structure officielle');
       },
       fieldLbl,iconBtn,selCount:active?active.textIds.length:0,totalWords,
-      hasSelection:active&&active.textIds.length>0,emptySelection:active&&active.textIds.length===0,selectedFiches,
+      /* Les sujets rediges (expression ecrite, dictee, texte fautif, ou un
+         sujet ajoute a la main) vivent DANS ce bloc : le conditionner aux
+         seuls textes du corpus les rendait invisibles, donc ni relisibles
+         ni modifiables, sur toute epreuve sans texte support. */
+      hasSelection:!!active&&(active.textIds.length>0||(active.sujets||[]).length>0),
+      emptySelection:!!active&&active.textIds.length===0&&!(active.sujets||[]).length,selectedFiches,
       activeStatusChip:this._statusChip(ep.status),activeStatusLabel:this._statusMeta(ep.status).label,
       readOnlyChip:perm.readOnly?'font-size:11px;font-weight:700;color:var(--c8b97a8,#8b97a8);background:var(--ceef2f7,#eef2f7);padding:3px 10px;border-radius:999px':hidden,
       savedNote:active?'Enregistré · '+this._ago(active.updatedAt):'',
@@ -9480,7 +9512,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
          effectivement decremente. */
       generate:()=>{
         if(!canGen){
-          this._avis(!active||!active.textIds.length?'Ajoutez d\u2019abord au moins un texte, ou g\u00e9n\u00e9rez l\u2019\u00e9preuve avec Ambassa.'
+          this._avis(!aMatiere?'Ajoutez d\u2019abord au moins un texte, ou g\u00e9n\u00e9rez l\u2019\u00e9preuve avec Ambassa.'
             :!perm.edit?'Votre r\u00f4le ne permet pas de produire l\u2019aper\u00e7u de cette \u00e9preuve.'
             :quotaMsg+' : passez \u00e0 une formule sup\u00e9rieure pour continuer.','ko');
           return;}
@@ -10134,6 +10166,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       calCandTitre:calCandidats.length?titreBloc:hidden,
       calCandVide:(calCandidats.length||calPrevus.length)?hidden:'font-size:12px;color:var(--c8b97a8,#8b97a8);margin:4px 0 2px',
       calNouvelle:()=>this._nouvelleEpreuveLe(calJour),
+      calNouvelleStyle:perm.creer?'margin-top:6px;width:100%;background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;cursor:pointer':hidden,
       /* --- theme --- */
       themeIcon:this._icon(st.theme==='sombre'?'sun':'moon','var(--c5a6678,#5a6678)',18),
       themeTitre:st.theme==='sombre'?'Passer en mode clair':'Passer en mode sombre',

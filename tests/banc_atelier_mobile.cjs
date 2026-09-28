@@ -343,12 +343,27 @@ dire(/genRensWrap:perm\.ia\?/.test(src) && /ne permet ni de modifier ni de g/.te
    Compte neuf : plafond local 0 tant que le serveur n'a pas parlé, quota
    d'équipe de démonstration — « Aperçu » ne faisait rien, sans un mot. */
 console.log(`\n${G}⑮ Le serveur fait foi pour le quota d'aperçu${R}`);
-dire(/const canGen=active&&active\.textIds\.length>0&&perm\.edit&&!quotaSrvAtteint;/.test(src),
+dire(/const canGen=aMatiere&&perm\.edit&&!quotaSrvAtteint;/.test(src),
   'l’aperçu ne dépend plus des compteurs locaux (plafond 0, quota d’équipe de démo)');
 dire(/const quotaSrvAtteint=plafondSrv!=null&&plafondSrv>=0&&meRemaining<=0;/.test(src),
   'il ne se bloque que si le SERVEUR a annoncé le plafond atteint');
 dire(/generate:\(\)=>\{\s*if\(!canGen\)\{\s*this\._avis\(/.test(src),
   'un aperçu impossible le dit, au lieu de ne rien faire');
+
+/* ── ⑯ Épreuve sans texte support (audit du 27/09/2026) ──────────────
+   Expression écrite, dictée, texte fautif : le contenu est un SUJET rédigé.
+   Le bloc des sujets et le bouton d'aperçu étaient conditionnés aux seuls
+   textes du corpus : l'épreuve composée restait invisible et l'aperçu
+   refusé. */
+console.log(`\n${G}⑯ Une épreuve portée par un sujet rédigé se voit et s'aperçoit${R}`);
+dire(/const aMatiere=!!active&&\(\(active\.textIds\|\|\[\]\)\.length>0\|\|\(active\.sujets\|\|\[\]\)\.some\(/.test(src),
+  'l’aperçu accepte une épreuve sans texte du corpus mais avec un sujet rédigé');
+dire(/hasSelection:!!active&&\(active\.textIds\.length>0\|\|\(active\.sujets\|\|\[\]\)\.length>0\)/.test(src),
+  'les sujets rédigés s’affichent dans le composeur même sans texte support');
+dire(!/équipe : <span style="\{\{ teamInlineStyle \}\}">/.test(src) && /const meQuotaInconnu=/.test(src),
+  'pas de quota d’équipe de démonstration ni de « 0 / 0 » avant que le serveur ait parlé');
+dire(/<div style="\{\{ quotaEquipeCarte \}\}">/.test(src) && /quotaEquipeCarte:\/\^u\\d\+\$\/\.test\(String\(me\.id\)\)\?/.test(src),
+  'écran Équipe : le quota d’équipe (non appliqué par le serveur) n’apparaît que dans la démonstration');
 
 console.log(`\n${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko === 0 ? 0 : 1);

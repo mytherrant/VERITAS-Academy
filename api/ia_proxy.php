@@ -63,6 +63,18 @@ $body = json_decode(file_get_contents('php://input'), true) ?: [];
 $prompt    = trim($body['prompt'] ?? '');
 $sysPrompt = $body['sysPrompt'] ?? '';
 $ragContext = $body['ragContext'] ?? '';
+/* PLAFOND DES CONSIGNES (audit du 27/09/2026). Seul `prompt` était borné
+   (8 000 octets) : `sysPrompt` et `ragContext` passaient sans limite, si
+   bien qu'un visiteur anonyme pouvait faire facturer des centaines de Ko de
+   jetons par appel. La formation MINESEC la plus longue de l'Atelier pèse
+   environ 6,5 Ko : 20 Ko laissent une large marge sans ouvrir la porte. */
+$vrtCoupe = function ($s, int $max): string {
+    $s = is_string($s) ? $s : '';
+    if (strlen($s) <= $max) return $s;
+    return function_exists('mb_strcut') ? mb_strcut($s, 0, $max, 'UTF-8') : substr($s, 0, $max);
+};
+$sysPrompt  = $vrtCoupe($sysPrompt, 20000);
+$ragContext = $vrtCoupe($ragContext, 20000);
 $userId    = $body['userId'] ?? '';
 $userPlan  = strtolower($body['plan'] ?? 'anon');
 
@@ -271,6 +283,7 @@ if ($IA_GLOBAL_DAILY_MAX > 0 && $gCount >= $IA_GLOBAL_DAILY_MAX) {
 // un quota confortable ; l'usurpation ne rapporte plus rien.
 $utilisateurVerifie = '';
 $abonneAtelier = false;
+$fichierAtelier = ''; $compteAtelier = 0;
 $jetonIA = (string) ($body['token'] ?? '');
 if ($jetonIA !== '') {
     @include_once __DIR__ . '/_auth_lib.php';
@@ -293,7 +306,28 @@ if ($jetonIA !== '') {
                     if (is_array($dbAtelier) && array_intersect(
                             vrt_account_active_plans($verif['acc'], $dbAtelier),
                             ['ens_mois', 'ens', 'etab', 'pro'])) {
-                        $abonneAtelier = true;
+                        /* ⚠️ LE PALIER SUIT LE QUOTA DÉJÀ DÉCOMPTÉ (audit du
+                           27/09/2026). Sans cette borne, un abonné à 800 F
+                           pouvait appeler ce proxy DIRECTEMENT, 120 fois par
+                           jour, sans jamais passer par plateforme.php?action=
+                           quota : le quota mensuel vendu (30) ne bornait que
+                           l'interface. On n'accorde donc le palier enseignant
+                           qu'à hauteur des appels que plateforme.php a déjà
+                           accordés CE MOIS-CI (quotas[<compte>|ia].utilise) :
+                           chaque appel légitime de l'Atelier en a décompté un
+                           juste avant. Au-delà, le compte garde son palier
+                           ordinaire. Compteur propre, dans data/_rate/. */
+                        $accAt = (string) ($verif['acc']['id'] ?? '');
+                        $qAt   = $dbAtelier['plateforme']['quotas'][$accAt . '|ia'] ?? null;
+                        $accordesAt = (is_array($qAt) && (string) ($qAt['mois'] ?? '') === date('Y-m'))
+                            ? (int) ($qAt['utilise'] ?? 0) : 0;
+                        $fAt = $rateDir . 'iaatelier_' . substr(md5($accAt), 0, 16) . '_' . date('Ym') . '.txt';
+                        $utilisesAt = is_file($fAt) ? (int) @file_get_contents($fAt) : 0;
+                        if ($accAt !== '' && $utilisesAt < $accordesAt) {
+                            $abonneAtelier = true;
+                            $fichierAtelier = $fAt;
+                            $compteAtelier  = $utilisesAt;
+                        }
                     }
                 }
             }
@@ -317,6 +351,8 @@ if ($utilisateurVerifie === '') {
     $userId = $utilisateurVerifie;
     if ($abonneAtelier && in_array($userTier, ['anon', 'free', 'starter', 'pro', 'elite'], true)) {
         $userTier = 'teach';
+        if (!is_dir($rateDir)) @mkdir($rateDir, 0755, true);
+        @file_put_contents($fichierAtelier, ($compteAtelier + 1) . '', LOCK_EX);
     }
 }
 $tierDaily = ['anon' => 2, 'free' => 5, 'starter' => 15, 'pro' => 50, 'teach' => 120, 'elite' => 100, 'admin' => -1];

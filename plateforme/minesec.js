@@ -998,7 +998,7 @@
     /* Ce qu'on ne demande pas — mesuré, pas supposé. */
     aEviter: [
       { motif: 'pourquoi', pourquoi: 'Absent des 3 372 questions du corpus officiel : la norme fait relever puis justifier, elle ne fait pas deviner une intention.' },
-      { motif: 'comment', pourquoi: 'Même constat. Préférer une consigne de repérage suivie d’une justification.' },
+      { motif: 'comment', pourquoi: 'Absent lui aussi des questions du corpus officiel. Préférer une consigne de repérage suivie d’une justification.' },
       { motif: 'que remarques-tu', pourquoi: 'Question vague : l’élève ne sait pas ce qu’on attend de lui.' },
       { motif: 'qu’en penses-tu', pourquoi: 'Sans critère, la réponse n’est pas évaluable.' }
     ],
