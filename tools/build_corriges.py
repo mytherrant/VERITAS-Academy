@@ -943,6 +943,49 @@ def maj_manuels_html(levels):
     return True
 
 
+ORDRE_2026 = ["6e-cahier", "5e-cahier", "4e-cahier", "3e-cahier", "2nde-a", "2nde-cd",
+              "1ere-a", "1ere-cd", "tle-a", "tle-cd"]
+
+
+def cahiers_2026():
+    """Les corrigés des NOUVEAUX cahiers de l'élève (édition 2026-2027, tools/build_corriges_2c.py)
+    déjà générés dans corriges/<slug>/ : [(niv, nombre d'exercices, pages)].
+
+    05/10/2026 — Jacques garde EN LIGNE les corrigés des anciens cahiers « Bord » (ceux qui les ont
+    achetés en ont besoin) ; les nouveaux cahiers ont leur propre rubrique. Le nombre d'exercices
+    est relu dans le <title> que build_corriges_2c écrit d'après le contenu : rien n'est saisi à
+    la main (tests/chiffres_annonces.cjs ne recompte que les sept niveaux des Bord, et le total de
+    la vitrine reste le leur)."""
+    try:
+        import build_corriges_2c as b2
+    except Exception as e:                       # noqa: BLE001
+        print("::warning title=Cahiers 2026-2027 non raccordes::%s" % e)
+        return []
+    par_slug = {n["slug"]: n for n in b2.NIVEAUX_2C}
+    out = []
+    for slug in ORDRE_2026:
+        niv = par_slug.get(slug)
+        idx = os.path.join(OUT, slug, "index.html")
+        if niv is None or not os.path.exists(idx):
+            continue
+        # Un niveau n'est annoncé (rubrique + plan du site) que COMPLET : l'audit de
+        # tools/audit_corriges_2c.py ne doit signaler aucun item « manque ». Un niveau
+        # en cours de rédaction reste hors du hub, même si ses pages existent déjà.
+        audit = os.path.join(ROOT, "_bord_extract", "audit_2c_%s.txt" % slug)
+        if not os.path.exists(audit):
+            continue
+        cv = re.search(r"COUVERTURE[^{]*(\{[^}]*\})", open(audit, encoding="utf-8").read())
+        if not cv or re.search(r"'manque':\s*[1-9]", cv.group(1)):
+            print("  · %-10s en cours de rédaction : hors du hub" % slug)
+            continue
+        m = re.search(r"—\s*([\d\s  ]+)\s*exercices", open(idx, encoding="utf-8").read())
+        n = int(re.sub(r"\D", "", m.group(1))) if m else 0
+        pages = sorted(f for f in os.listdir(os.path.join(OUT, slug))
+                       if f.endswith(".html") and f != "index.html")
+        out.append((niv, n, pages))
+    return out
+
+
 def render_hub(levels, est):
     total = sum(sum(p.n_items for p in pages) + sum(p.n_items for p in cah)
                 for _, pages, cah in levels)
@@ -966,6 +1009,17 @@ def render_hub(levels, est):
         return "".join(out)
     c1 = group([x for x in levels if x[0]["cycle"] == "1er"])
     c2 = group([x for x in levels if x[0]["cycle"] == "2nd"])
+    neufs = cahiers_2026()
+    c26 = "".join('<div class="card"><h3>%s%s</h3><p class="note">%s exercices corrigés · %d page%s</p>'
+                  '<a class="dl" href="%s/"><span>Voir les corrigés</span><span class="pill">%s exos</span></a>'
+                  '</div>' % (esc(niv["long"]), (' <small class="note">(%s)</small>' % niv["examen"])
+                              if niv.get("examen") else "", num(n), len(pages), "s" if len(pages) > 1 else "",
+                              niv["slug"], num(n))
+                  for niv, n, pages in neufs)
+    sec26 = ('<h2 class="sec">' + ico("i-book-open") + 'Cahiers de l\'élève — édition 2026-2027 (6ᵉ → Terminale)</h2>'
+             '<p class="note">Les corrigés des nouveaux cahiers d\'activités. Tu as un ancien cahier ? '
+             'Ses corrigés restent en ligne, plus bas, à ta classe.</p>'
+             '<div class="grid">%s</div>' % c26) if neufs else ""
     ce = "".join('<div class="card"><h3>%s</h3><p class="note">%s</p>'
                  '<a class="dl" href="%s"><span>Voir les corrigés</span><span class="pill">EN LIGNE</span></a></div>'
                  % (esc(t), esc(s), f) for f, t, s in est)
@@ -991,8 +1045,11 @@ def render_hub(levels, est):
               'Page lourde — préférez votre classe ci-dessous si votre connexion est lente.</div>'
             % num(total),
             '<p class="crumb"><a href="%s/">Accueil</a> › Corrigés des manuels</p>' % SITE,
-            '<h2 class="sec">' + ico("i-book") + 'Premier cycle (6ᵉ → 3ᵉ)</h2><div class="grid">%s</div>' % c1,
-            '<h2 class="sec">' + ico("i-book") + 'Second cycle — séries A (2ⁿᵈᵉ → Terminale)</h2>'
+            sec26,
+            '<h2 class="sec">' + ico("i-book") + 'Premier cycle (6ᵉ → 3ᵉ)%s</h2><div class="grid">%s</div>'
+            % (" — cahiers « Bord » et livrets" if neufs else "", c1),
+            '<h2 class="sec">' + ico("i-book") + 'Second cycle — séries A (2ⁿᵈᵉ → Terminale)%s</h2>'
+            % (" — cahiers « Bord » et livrets" if neufs else "") +
             '<div class="grid">%s</div>' % c2,
             '<h2 class="sec">' + ico("i-flask") + 'Séries scientifiques &amp; techniques (Cahiers EST)</h2>'
             '<p class="note">Corrigés des évaluations et des tâches d\'intégration : langue (méthode R.A.I.), '
@@ -1051,6 +1108,10 @@ def main():
     urls.insert(0, SITE + "/corriges/")
     for f_, _, _ in est:
         urls.append("%s/corriges/%s" % (SITE, f_))
+    # 05/10/2026 : les corrigés des nouveaux cahiers (édition 2026-2027) dans le plan du site
+    for niv, _n, pages in cahiers_2026():
+        urls.append("%s/corriges/%s/" % (SITE, niv["slug"]))
+        urls.extend("%s/corriges/%s/%s" % (SITE, niv["slug"], p) for p in pages)
 
     # ── Page « tout en un » ────────────────────────────────────────────────
     # Une seule page portant l'intégralité des corrigés, à la demande de Jacques.

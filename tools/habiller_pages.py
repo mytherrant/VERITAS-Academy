@@ -220,7 +220,10 @@ def donnees_vitrine(vitrine):
     src = vitrine[i:j]
     js = ("var window={};" + src + ";process.stdout.write(JSON.stringify("
           "{citations:window.VRT_DATA.citations,themeSombre:window.VRT_DATA.themeSombre}))")
-    out = subprocess.check_output(['node', '-e', js])
+    # Le programme passe par l'entrée standard, pas par `node -e` : sous Windows,
+    # une ligne de commande plafonne à 32 767 caractères (WinError 206), et les
+    # données de la vitrine les dépassent. Même résultat sur le runner Linux.
+    out = subprocess.check_output(['node'], input=js.encode('utf-8'))
     d = json.loads(out.decode('utf-8'))
     # `</` ne doit jamais apparaître dans un <script> en ligne.
     return json.dumps(d, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/')
