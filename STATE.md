@@ -3051,3 +3051,25 @@ récupérables, les non suivis ne l'auraient pas été.
 2. Commit + push + `gh workflow run deploy.yml`.
 3. Vérifier en production que `/corriges/tous-les-corriges.html` répond et que
    la vitrine annonce bien 9 360.
+
+## Corrigés des cahiers de l'élève 2026-2027 : les 5 niveaux complets (08/10/2026)
+Suite du commit 355ea4a (3e et Tle A en ligne le 05/10). Tle C-D et 1re A étaient
+terminées (sessions du 05 au 08/10) ; restait la **1re C-D** : 46 items de la
+séquence 6, 1 citation hors cahier, 3 « axe ».
+- `content/corriges-cahier/1ere-cd/module-6.md` (neuf) : emprunts (Max Lobe,
+  Beigbeder, Mukasonga), introduction/conclusion de la discussion, paragraphe et
+  conclusion sur le sujet « méprise » (préface critique du __Lion et la perle__),
+  bilan de l'œuvre, épreuves (Beyala ; numérique et éducation).
+- module-5 : « axe » → « centre d'intérêt » (norme OBC) ; un sujet d'exemple inventé
+  passait pour une citation du cahier (guillemets « » → “ ”).
+- Piège rencontré : le cahier imprime « Il se ainsi le problème de » (verbe omis) ;
+  l'audit des citations refuse donc la forme corrigée entre « ». Citer le cahier
+  tel quel, ou reformuler entre “ ”.
+- **Audit strict au vert** sur 3e, Tle A, Tle C-D, 1re A, 1re C-D : 0 manque,
+  0 fuite, 0 citation hors cahier, 0 norme. Page à onglets
+  `corriges/livret-a-completer.html` : 5 classes, 4 340 corrigés. Total vitrine
+  inchangé (9 709 : il ne compte que les Bord).
+- Index de recherche 440 → 481 entrées → **version 1.20.21 → 1.20.22** (coquille +
+  sw.js), puis build_corriges, build_plan, build_vitrine, habiller_pages.
+- Laissés HORS du commit (autre chantier) : `api/payment_monetbil.php`,
+  `api/payment_config.php.exemple`, sondes `tests/_*`, brouillons `tools/_*` et `_*.txt`.

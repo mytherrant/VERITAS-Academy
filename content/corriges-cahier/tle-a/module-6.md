@@ -134,3 +134,7 @@
 # ── L19 · Remédiation
 #SOL:: tle-a-m6-l19-n3 :: Réponse personnelle. Exemple (l'analyse) : “L'analyse réduit le texte au tiers, à la troisième personne, en nommant l'auteur et sa démarche, sans jamais juger sa thèse.” Exemple : “Selon l'auteur, la corruption s'est banalisée dans les services publics.”
 #NOSOL:: tle-a-m6-l19-n1 :: bilan personnel de l'élève
+
+# ── L5 et L8 · « Rappelle la méthode » (la réponse héritée de la leçon 4 portait sur la structure argumentative)
+#SOL:: tle-a-m6-l5-n1 :: (1) Supprimer ce qui ne porte pas d'idée (exemples, répétitions, détails) ; (2) remplacer une énumération par un terme général et une phrase par un groupe de mots ; (3) conserver les connecteurs qui marquent le raisonnement.
+#SOL:: tle-a-m6-l8-n1 :: (1) Rédiger avec ses propres mots, sans recopier le texte ; (2) suivre l'ordre de l'original et garder son système d'énonciation ; (3) enchaîner les idées par des connecteurs.

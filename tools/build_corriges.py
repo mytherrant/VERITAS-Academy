@@ -1011,14 +1011,21 @@ def render_hub(levels, est):
     c2 = group([x for x in levels if x[0]["cycle"] == "2nd"])
     neufs = cahiers_2026()
     c26 = "".join('<div class="card"><h3>%s%s</h3><p class="note">%s exercices corrigés · %d page%s</p>'
-                  '<a class="dl" href="%s/"><span>Voir les corrigés</span><span class="pill">%s exos</span></a>'
+                  '<a class="dl" href="%s"><span>Voir les corrigés</span><span class="pill">%s exos</span></a>'
                   '</div>' % (esc(niv["long"]), (' <small class="note">(%s)</small>' % niv["examen"])
                               if niv.get("examen") else "", num(n), len(pages), "s" if len(pages) > 1 else "",
-                              niv["slug"], num(n))
+                              "livret-a-completer.html#" + niv["slug"], num(n))
                   for niv, n, pages in neufs)
-    sec26 = ('<h2 class="sec">' + ico("i-book-open") + 'Cahiers de l\'élève — édition 2026-2027 (6ᵉ → Terminale)</h2>'
-             '<p class="note">Les corrigés des nouveaux cahiers d\'activités. Tu as un ancien cahier ? '
-             'Ses corrigés restent en ligne, plus bas, à ta classe.</p>'
+    # 06/10/2026 — Jacques : « mets toutes ces séries de corrigés sur la même page avec les onglets
+    # par classe et tu mets livret à compléter, progression nationale » : les cartes ouvrent l'onglet
+    # de la classe dans corriges/livret-a-completer.html (tools/build_page_livret.py).
+    sec26 = ('<h2 class="sec">' + ico("i-book-open") + 'Livret à compléter — progression nationale '
+             '(6ᵉ → Terminale)</h2>'
+             '<div class="intro" style="border-left-color:var(--gold)">' + ico("i-lightbulb", "i lg")
+             + ' <strong>Toutes les classes sur une seule page :</strong> '
+               '<a href="livret-a-completer.html"><strong>ouvrir les corrigés du livret à compléter</strong></a>, '
+               'une classe par onglet. Tu as un ancien cahier ? Ses corrigés restent en ligne, plus bas, '
+               'à ta classe.</div>'
              '<div class="grid">%s</div>' % c26) if neufs else ""
     ce = "".join('<div class="card"><h3>%s</h3><p class="note">%s</p>'
                  '<a class="dl" href="%s"><span>Voir les corrigés</span><span class="pill">EN LIGNE</span></a></div>'
@@ -1108,6 +1115,13 @@ def main():
     urls.insert(0, SITE + "/corriges/")
     for f_, _, _ in est:
         urls.append("%s/corriges/%s" % (SITE, f_))
+    # 06/10/2026 : la page à onglets du livret à compléter (une classe par onglet)
+    try:
+        import build_page_livret
+        if build_page_livret.main():
+            urls.append("%s/corriges/%s" % (SITE, build_page_livret.NOM))
+    except Exception as e:                       # noqa: BLE001
+        print("::warning title=Page du livret a completer non generee::%s" % e)
     # 05/10/2026 : les corrigés des nouveaux cahiers (édition 2026-2027) dans le plan du site
     for niv, _n, pages in cahiers_2026():
         urls.append("%s/corriges/%s/" % (SITE, niv["slug"]))
