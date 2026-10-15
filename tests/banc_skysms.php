@@ -203,6 +203,15 @@ try {
     verifier('attente SkySMS de 2 jours : signalée « à régler »', !empty($st['a_regler']));
     verifier('…mais toujours en attente (on ne sait pas si elle est payée)', ($st['status'] ?? '') === 'pending');
 
+    // Payé mais octroi bloqué : la liste doit le rejouer (il ne repassait jamais).
+    [$c, , $j] = init('BANC-G1', 1000);
+    $st = etat('BANC-G1'); $st['status'] = 'paid'; $st['paid_at'] = date('c'); unset($st['granted']); ecrireEtat('BANC-G1', $st);
+    [$c, , $js] = req('GET', "$API?action=status&ref=BANC-G1");
+    verifier('status dit « payé » ET « pas encore octroyé »', ($js['status'] ?? '') === 'paid' && array_key_exists('granted', (array) $js) && $js['granted'] === false, json_encode($js));
+    req('GET', "$API?action=list", null, ["Authorization: Bearer $ADM"]);
+    $st = etat('BANC-G1');
+    verifier('list rejoue l\'octroi d\'un payé non octroyé', !empty($st['granted']) || (int) ($st['grant_essais'] ?? 0) >= 1 || !empty($st['grant_msg']), json_encode(array_intersect_key($st, array_flip(['granted', 'grant_essais', 'grant_msg']))));
+
     echo "\n\033[1m⑦ pas de numéro client dans le journal\033[0m\n";
     rappel(['id_client' => $idc, 'id_operation' => $op, 'statut' => '1', 'telephone' => '690000001']);
     $log = (string) @file_get_contents($etatDir . '_webhook_camerpay_log.txt');

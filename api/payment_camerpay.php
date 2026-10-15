@@ -715,7 +715,30 @@ if ($action === 'init' && $method === 'POST') {
             // paiement l'y ramène une fois le paiement confirmé.
             'retour'       => skysmsRetour(),
         ];
-        file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        /* CRÉATION EXCLUSIVE : deux `init` simultanés (double clic) passaient
+           tous deux le test d'existence et le second écrasait l'état du premier
+           avec un autre jeton — la page ouverte par le premier répondait alors
+           « introuvable ». Le second reçoit désormais l'état du premier. Une
+           écriture ratée (disque plein) n'annonce plus un succès. */
+        $fpInit = @fopen($stateFile, 'x');
+        if ($fpInit === false) {
+            $deja = is_file($stateFile) ? skysmsLireEtat($stateFile) : [];
+            if (($deja['pay_url'] ?? '') !== '') {
+                jsonRespCy(['success' => true, 'ref' => $ref, 'already' => true, 'transaction_uuid' => '',
+                            'pay_url' => $deja['pay_url'], 'status' => $deja['status'] ?? 'pending',
+                            'sandbox' => false, 'provider' => 'skysms',
+                            'message' => 'Transaction déjà initialisée pour cette référence.']);
+            }
+            camerpayLog($logFile, date('c') . " [SKYSMS_INIT_ECRITURE_KO] ref=$ref\n");
+            jsonRespCy(['error' => 'Le paiement n’a pas pu être préparé. Réessayez dans un instant : vous n’avez pas été débité.'], 500);
+        }
+        $okInit = @fwrite($fpInit, (string) json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        @fclose($fpInit);
+        if (!$okInit) {
+            @unlink($stateFile);
+            camerpayLog($logFile, date('c') . " [SKYSMS_INIT_ECRITURE_KO] ref=$ref\n");
+            jsonRespCy(['error' => 'Le paiement n’a pas pu être préparé. Réessayez dans un instant : vous n’avez pas été débité.'], 500);
+        }
         camerpayLog($logFile, date('c') . " [SKYSMS_INIT] ref=$ref montant=$montant intent=$intent\n");
         jsonRespCy([
             'success'          => true,
@@ -984,7 +1007,9 @@ if ($action === 'skysms_collect' && $method === 'POST') {
 
     $verrou = skysmsVerrouiller($stateFile);
     $state = skysmsLireEtat($stateFile);
-    $refuser = function ($corps, $code) use ($verrou) { skysmsDeverrouiller($verrou); jsonRespCy($corps, $code); };
+    // Par RÉFÉRENCE : la collecte reprend un second verrou plus bas, c'est
+    // celui-là que $refuser doit rendre.
+    $refuser = function ($corps, $code) use (&$verrou) { skysmsDeverrouiller($verrou); jsonRespCy($corps, $code); };
     if (($state['provider'] ?? '') !== 'skysms') $refuser(['error' => 'Référence non gérée par ce moyen de paiement.'], 400);
     if (!empty($state['jeton']) && !hash_equals((string) $state['jeton'], (string) ($in['t'] ?? ''))) {
         $refuser(['error' => 'Lien de paiement invalide. Relancez l’achat depuis VÉRITAS.'], 403);
@@ -1015,6 +1040,16 @@ if ($action === 'skysms_collect' && $method === 'POST') {
     $idc = vrt_skysms_id_client();
     $verrou = skysmsVerrouiller($stateFile);
     $state = skysmsLireEtat($stateFile) ?: $state;
+    /* REVÉRIFIER sous ce second verrou : le premier a été rendu pour le débit
+       par IP. Entre les deux, un rappel a pu passer « payé », ou un second clic
+       a pu pousser sa demande — sans ce contrôle, une seconde demande partait
+       sur le téléphone d'un client déjà débité. */
+    $stat2 = (string) ($state['status'] ?? '');
+    if ($stat2 === 'paid') $refuser(['ok' => true, 'status' => 'paid'], 200);
+    if ($stat2 !== 'pending' && $stat2 !== 'failed') $refuser(['error' => 'Cette demande est close (' . $stat2 . ').'], 409);
+    $depuis2 = time() - strtotime((string) ($state['last_push_at'] ?? '@0'));
+    if ($depuis2 < 30) $refuser(['error' => 'Une demande vient d’être envoyée : validez-la sur votre téléphone, ou réessayez dans ' . (30 - $depuis2) . ' s.'], 429);
+    if ((int) ($state['push_count'] ?? 0) >= 6) $refuser(['error' => 'Trop de demandes pour ce paiement. Relancez l’achat depuis VÉRITAS.'], 429);
     $state['push_count']   = (int) ($state['push_count'] ?? 0) + 1;
     $state['last_push_at'] = date('c');
     $state['clientTel']    = '237' . $tel;
@@ -1107,7 +1142,10 @@ if ($action === 'skysms_notify') {
        « échec » ou une « attente » sans id_operation reste lu (au pire, le
        payeur relance sa demande) — c'est aussi la forme minimale qu'emploie
        tests/banc_skysms_rappel.cjs. */
-    if ($rp['verdict'] === 'paid' && $opAttendu !== '' && !hash_equals($opAttendu, $rp['id_operation'])) {
+    // Comparaison sur la forme normalisée (espaces, casse) : un UUID renvoyé en
+    // majuscules par le rappel n'est pas une autre opération.
+    $opNorm = function ($s) { return strtolower(trim((string) $s)); };
+    if ($rp['verdict'] === 'paid' && $opAttendu !== '' && !hash_equals($opNorm($opAttendu), $opNorm($rp['id_operation']))) {
         $state['a_regler'] = true;
         $state['reason']   = 'Rappel refusé : son id_operation ne correspond pas à la demande envoyée. À vérifier sur le relevé SkySMS.';
         camerpayLog($logFile, date('c') . " [SKYSMS_OP_DIFFERENT] ref=$ref idc={$rp['id_client']} recu=" . mb_substr($rp['id_operation'], 0, 60) . " (accuse 1, rien ouvert)\n");
@@ -1430,6 +1468,10 @@ if ($action === 'status' && $method === 'GET') {
         // insuffisant », « PIN incorrect »… C'est ce qu'on montre au payeur.
         'reason'          => $state['failure_reason'] ?? ($state['reason'] ?? null),
         'failure_code'    => $state['failure_code'] ?? null,
+        // « Payé » ne veut pas dire « accès ouvert » : un octroi bloqué (compte
+        // introuvable…) laisse granted faux. Le tunnel doit pouvoir le dire.
+        'granted'         => !empty($state['granted']),
+        'a_regler'        => !empty($state['a_regler']),
     ]);
 }
 
@@ -1456,6 +1498,26 @@ if ($action === 'list' && $method === 'GET') {
     $expires = 0;
 
     foreach ($payments as $i => $p) {
+        /* PAYÉ MAIS PAS OCTROYÉ : camerpayGrant laisse `granted` faux quand
+           l'octroi est bloqué (compte pas encore synchronisé…) en comptant sur
+           cette passe pour réessayer — mais elle ne regardait que les
+           « pending ». Une ligne « paid » bloquée ne repassait donc jamais.
+           camerpayGrant borne lui-même les essais (5) puis pose `granted`. */
+        if (($p['status'] ?? '') === 'paid' && empty($p['granted'])) {
+            // Chaque octroi copie la base entière : 5 rejeux par ouverture au plus.
+            if (($rejoues = ($rejoues ?? 0) + 1) > 5) continue;
+            $fG = $stateDir . _safeRefCamerpay($p['ref'] ?? '') . '.json';
+            $vG = skysmsVerrouiller($fG);
+            $p = skysmsLireEtat($fG) ?: $p;
+            if (($p['status'] ?? '') === 'paid' && empty($p['granted'])) {
+                camerpayGrant($p, $logFile, $p['ref'] ?? '');
+                skysmsEcrireEtat($fG, $p);
+                camerpayLog($logFile, date('c') . ' [OCTROI_REJOUE] ref=' . ($p['ref'] ?? '') . ' granted=' . (empty($p['granted']) ? 0 : 1) . "\n");
+            }
+            skysmsDeverrouiller($vG);
+            $payments[$i] = $p;
+            continue;
+        }
         if (($p['status'] ?? '') !== 'pending') continue;
         $age = time() - strtotime($p['created_at'] ?? 'now');
         if ($age < 60) continue;                      // trop frais : le payeur est encore dessus
