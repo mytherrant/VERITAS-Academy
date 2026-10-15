@@ -1085,8 +1085,14 @@ if ($action === 'skysms_dlr') {
     $idsms = $pick(['idsmsclient', 'id_sms_client', 'idSmsClient', 'id_client']);
     $m = skysmsMessageParSms($ssid, $idsms);
     if (!$m) {
-        camerpayLog($logFile, date('c') . " [SKYSMS_DLR_INCONNU] ssid=$ssid idsms=$idsms\n");
-        http_response_code(404); echo 'sms inconnu'; exit;
+        /* « Retourne 1 pour que je sache que tu as reçu » (SKYSOFT, 15/10/2026).
+           Clé valide = la notification est bien de chez eux et bien arrivée : on
+           l'accuse, même si le SMS n'est pas une remise de code (SMS d'essai,
+           test de leur côté). Répondre autre chose les ferait renvoyer sans fin
+           un accusé qu'aucun renvoi ne rendra rattachable. Trace gardée. */
+        camerpayLog($logFile, date('c') . " [SKYSMS_DLR_INCONNU] ssid=$ssid idsms=$idsms (accuse 1)\n");
+        header('Content-Type: text/plain; charset=utf-8');
+        http_response_code(200); echo '1'; exit;
     }
     $m['dlr'] = ['statut' => vrt_skysms_dlr_statut($pick(['statut', 'status', 'delivered', 'dlr_status'])),
                  'date' => mb_substr($pick(['datereception', 'dlrtime', 'date', 'delivered_at']), 0, 40),
