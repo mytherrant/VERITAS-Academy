@@ -225,7 +225,9 @@ if ($action === 'notify' && ($method === 'POST' || $method === 'PUT')) {
         if ($authStatus === 'SUCCESSFUL') {
             $state['status']  = 'paid';
             $state['paid_at'] = date('c');
-        } elseif (in_array($authStatus, ['FAILED', 'REJECTED', 'TIMEOUT', 'EXPIRED'])) {
+        } elseif (in_array($authStatus, ['FAILED', 'REJECTED', 'TIMEOUT', 'EXPIRED'])
+                  && ($state['status'] ?? 'pending') !== 'paid') {
+            // Un « échec » rejoué ne défait JAMAIS un « payé » (audit 15/10/2026).
             $state['status']    = 'failed';
             $state['failed_at'] = date('c');
             $state['reason']    = $state['reason'] ?? 'Refusé par le payeur ou expiration';

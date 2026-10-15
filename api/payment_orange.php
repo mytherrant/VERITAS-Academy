@@ -203,7 +203,9 @@ if ($action === 'notify' && $method === 'POST') {
     if (in_array($newStatus, ['SUCCESS', 'SUCCESSFULL', 'COMPLETED', 'PAID'])) {
         $state['status']    = 'paid';
         $state['paid_at']   = date('c');
-    } elseif (in_array($newStatus, ['FAILED', 'EXPIRED', 'CANCELLED', 'CANCELED'])) {
+    } elseif (in_array($newStatus, ['FAILED', 'EXPIRED', 'CANCELLED', 'CANCELED'])
+              && ($state['status'] ?? 'pending') !== 'paid') {
+        // Un « échec » rejoué ou en retard ne défait JAMAIS un « payé » (audit 15/10/2026).
         $state['status']    = 'failed';
         $state['failed_at'] = date('c');
     }
