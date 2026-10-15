@@ -84,9 +84,19 @@ if (!function_exists('vrt_skysms_base')) {
         return (strlen($n) === 9 && $n[0] === '6') ? $n : '';
     }
 
-    /** Identifiant client NUMÉRIQUE (l'exemple SkySMS : 10000001), unique par demande. */
+    /** Identifiant client NUMÉRIQUE (l'exemple SkySMS : 10000001), unique par demande.
+        IMPRÉVISIBLE (audit 15/10/2026, n°2) : c'est lui qui relie le rappel à la
+        commande. « date + 3 chiffres » se devinait à la seconde près. 10 chiffres
+        commençant par 1 : tient dans un entier 32 bits signé, et ne ressemble
+        jamais à un numéro de téléphone (6XXXXXXXX) dans les journaux masqués. */
     function vrt_skysms_id_client(): string {
-        return date('ymdHis') . str_pad((string) random_int(0, 999), 3, '0', STR_PAD_LEFT);
+        return (string) random_int(1000000000, 1999999999);
+    }
+
+    /** 690000001 → « 6•• •• •0 01 » : assez pour que le payeur reconnaisse son numéro. */
+    function vrt_skysms_tel_masque(string $tel): string {
+        $l = vrt_skysms_tel_local($tel);
+        return $l === '' ? '' : $l[0] . '•• •• •' . $l[6] . ' ' . substr($l, 7, 2);
     }
 
     /**
@@ -310,7 +320,12 @@ if (!function_exists('vrt_skysms_base')) {
         $ref     = (string) ($state['ref'] ?? '');
         $montant = number_format((int) ($state['montant'] ?? 0), 0, ',', ' ');
         $tel     = vrt_skysms_tel_local((string) ($state['clientTel'] ?? ''));
-        $cfg = json_encode(['ref' => $ref, 'api' => $api, 'tel' => $tel, 'retour' => (string) ($state['retour'] ?? ''),
+        /* Le numéro n'apparaît plus en clair (audit n°4) : la page n'en reçoit
+           que la forme masquée ; le serveur utilise le numéro enregistré quand
+           le champ reste vide. `t` = jeton de la pay_url, exigé par la collecte. */
+        $masque  = vrt_skysms_tel_masque($tel);
+        $cfg = json_encode(['ref' => $ref, 'api' => $api, 'masque' => $masque, 't' => (string) ($state['jeton'] ?? ''),
+                            'retour' => (string) ($state['retour'] ?? ''),
                             'auto' => ($tel !== '' && empty($state['push_count']))],
                            JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
         return '<!doctype html><html lang="fr"><head><meta charset="utf-8">'
@@ -330,7 +345,8 @@ if (!function_exists('vrt_skysms_base')) {
 . '<h1>' . $e($state['label'] ?? 'Paiement VÉRITAS') . '</h1>'
 . '<div class="montant">' . $montant . ' FCFA</div><div class="doux">Référence ' . $e($ref) . ' · MTN Mobile Money ou Orange Money</div>'
 . '<form id="f"><label for="tel">Votre numéro Mobile Money</label>'
-. '<input id="tel" name="tel" inputmode="numeric" autocomplete="tel" placeholder="6XX XX XX XX" maxlength="16" value="' . $e($tel) . '">'
+. '<input id="tel" name="tel" inputmode="numeric" autocomplete="tel" placeholder="' . $e($masque !== '' ? $masque : '6XX XX XX XX') . '" maxlength="16" value="">'
+. ($masque !== '' ? '<div class="doux">Numéro enregistré : ' . $e($masque) . ' — laissez vide pour l’utiliser, ou entrez un autre numéro.</div>' : '')
 . '<div class="doux" id="op"></div>'
 . '<button id="go" type="submit">Recevoir la demande de paiement</button></form>'
 . '<div id="etat" role="status" aria-live="polite"></div>'
@@ -349,10 +365,13 @@ if (!function_exists('vrt_skysms_base')) {
 . '}).catch(function(){});}'
 . 'function retourner(){try{if(window.opener&&!window.opener.closed){window.opener.focus();window.close();}}catch(x){}'
 . 'if(C.retour){location.href=C.retour;}else{e.innerHTML+=" <a href=\\"/\\">Revenir sur VÉRITAS</a>";}}'
-. 'function suivre(){if(!suivi)suivi=setInterval(sonder,5000);sonder();}'
-. 'function pousser(auto){var v=loc(t.value);if(!oper(v)){dire("ko","Entrez un numéro MTN ou Orange à 9 chiffres (6XX XX XX XX).");return;}'
-. 'b.disabled=true;dire("info","Demande envoyée au "+v+". Regardez votre téléphone et validez avec votre code secret…");suivre();'
-. 'fetch(C.api+"?action=skysms_collect",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ref:C.ref,tel:v,auto:!!auto})})'
+/* Attente bornée (audit n°7) : sans verdict au bout de 3 min, on dit quoi faire
+   au lieu de laisser le payeur devant un écran qui tourne. */
+. 'var garde=null;function borner(){if(garde)return;garde=setTimeout(function(){if(!fini)dire("info","Pas encore de confirmation ? Si vous avez validé sur votre téléphone, votre accès s’ouvrira dès que l’opérateur confirme. Sinon, envoyez la référence "+C.ref+" sur WhatsApp au 697 63 77 39.");},180000);}'
+. 'function suivre(){if(!suivi)suivi=setInterval(sonder,5000);sonder();borner();}'
+. 'function pousser(auto){var v=loc(t.value);if(!(v===""&&C.masque)&&!oper(v)){dire("ko","Entrez un numéro MTN ou Orange à 9 chiffres (6XX XX XX XX).");return;}'
+. 'b.disabled=true;dire("info","Demande envoyée au "+(v||C.masque)+". Regardez votre téléphone et validez avec votre code secret…");suivre();'
+. 'fetch(C.api+"?action=skysms_collect",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ref:C.ref,tel:v,t:C.t,auto:!!auto})})'
 . '.then(function(r){return r.json().then(function(j){return{s:r.status,j:j};});}).then(function(x){if(fini)return;'
 . 'if(x.j&&x.j.status==="paid"){sonder();return;}'
 . 'if(x.s>=400){b.disabled=false;dire("ko",(x.j&&x.j.error)||"La demande n’a pas pu être envoyée. Réessayez.");}'
