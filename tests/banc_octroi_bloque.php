@@ -51,6 +51,8 @@
 declare(strict_types=1);
 
 $RACINE = dirname(__DIR__);
+// La remise (SMS du code d'accès d'un livre) écrit sa file : hors du dépôt.
+define('VRT_NOTIFY_DIR', sys_get_temp_dir() . '/vrt_banc_octroi_' . bin2hex(random_bytes(3)));
 require_once $RACINE . '/api/_auth_lib.php';
 
 $vert = 0; $rouge = 0;
@@ -108,14 +110,14 @@ $db = [
 $rangTemoin = 0;
 
 titre("① UN OCTROI QUI N'OUVRE RIEN NE SE DIT PAS « ACCORDÉ »");
-/* L'INSCRIPTION EST MAINTENUE — arbitrage du 12/09/2026. Un achat de livre
-   numérique SANS compte est refusé, quel que soit le numéro fourni : le
-   téléphone ne rattrape rien, parce qu'un compte fabriqué à partir de lui
-   n'aurait aucun chemin de reprise et que l'acheteur perdrait son livre dès
-   le lendemain. Ce qui compte ici n'est pas le refus — c'est qu'il soit
-   SIGNALÉ et rejoué, au lieu d'être classé « accordé ». */
+/* 15/10/2026 — l'arbitrage du 12/09 (inscription obligatoire) est levé par
+   Jacques : un livre numérique s'achète SANS compte, et le serveur crée le
+   compte du numéro payeur avec un code d'accès envoyé par SMS (voir ⑥).
+   Ce qui reste BLOQUÉ, c'est l'achat sans compte ET sans numéro camerounais
+   exploitable : il n'y a alors personne à qui rattacher le livre. Ce qui
+   compte ici n'est pas le refus — c'est qu'il soit SIGNALÉ et rejoué. */
 $bloquants = [
-    'digitalbook sans accountId'      => ['intent'=>'digitalbook','targetId'=>'cahier6e','accountId'=>'','montant'=>1500],
+    'digitalbook sans compte ni numéro' => ['intent'=>'digitalbook','targetId'=>'cahier6e','accountId'=>'','montant'=>1500,'clientTel'=>'12345'],
     'subscription compte introuvable' => ['intent'=>'subscription','targetId'=>'ens','accountId'=>'va_nexiste_pas','montant'=>5000],
     'digitalbook compte introuvable'  => ['intent'=>'digitalbook','targetId'=>'cahier6e','accountId'=>'va_nexiste_pas','montant'=>1500],
 ];
@@ -154,7 +156,7 @@ titre('④ LA BOUCLE DE RÉCONCILIATION EST BORNÉE');
 /* Sans borne, chaque ouverture du tableau de bord relancerait l'octroi — et
    chaque tentative réécrit une sauvegarde complète de la base. */
 $etat3 = ['intent'=>'digitalbook','targetId'=>'cahier6e','accountId'=>'','montant'=>1500,
-          'ref'=>'BANC-BORNE','clientNom'=>'B','clientTel'=>'690000000','status'=>'paid'];
+          'ref'=>'BANC-BORNE','clientNom'=>'B','clientTel'=>'12345','status'=>'paid'];
 for ($i = 1; $i <= 5; $i++) { $c = classer(vrt_grant_entitlement($db, $etat3)); poserDrapeaux($c, $etat3); }
 ok('après 5 passages, on cesse de rejouer',    !empty($etat3['granted']));
 ok("… mais l'alerte « à régler » demeure",     !empty($etat3['a_regler']));
@@ -182,5 +184,24 @@ ok('mais il est signalé « à régler »',              !empty($etat5['a_regler
 ok('et il ne sera pas rejoué inutilement',          !empty($etat5['granted']));
 
 echo "\n" . str_repeat('─', 68) . "\n";
+titre('⑥ UN LIVRE NUMÉRIQUE SANS COMPTE, AVEC UN NUMÉRO : ACCORDÉ (15/10/2026)');
+/* Le compte naît du numéro payeur : identifiant = ce numéro, mot de passe =
+   code d'accès (bcrypt), envoyé par SMS. Pas d'alerte : rien n'est à régler. */
+$tel6  = '69' . str_pad((string) random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
+$etat6 = ['intent'=>'digitalbook','targetId'=>'cahier6e','accountId'=>'','montant'=>1500,
+          'ref'=>'BANC-LIVRE-' . bin2hex(random_bytes(3)),'clientNom'=>'B','clientTel'=>$tel6,'status'=>'paid'];
+$cl6 = classer(vrt_grant_entitlement($db, $etat6));
+poserDrapeaux($cl6, $etat6);
+$acc6 = null; foreach ($db['visitorAccounts'] as $a) { if (($a['user'] ?? '') === $tel6) $acc6 = $a; }
+ok('accordé',                                    !empty($etat6['granted']));
+ok('aucune alerte « à régler »',                 empty($etat6['a_regler']));
+ok('compte créé, identifiant = numéro payeur',   $acc6 !== null);
+ok('le livre est sur ce compte',                 in_array('cahier6e', $acc6['unlockedBooks'] ?? [], true));
+ok('mot de passe chiffré (bcrypt), jamais vide', strpos((string) ($acc6['pwd'] ?? ''), '$2y$') === 0);
+$etat6b = $etat6; unset($etat6b['granted'], $etat6b['a_regler']); $etat6b['targetId'] = 'cahier5e';
+$etat6b['ref'] .= '-B'; vrt_grant_entitlement($db, $etat6b);
+$n6 = 0; foreach ($db['visitorAccounts'] as $a) { if (($a['user'] ?? '') === $tel6) $n6++; }
+ok('second achat du même numéro : même compte',  $n6 === 1);
+
 if ($rouge === 0) { echo "\033[32m\033[1m  ✓ $vert/$vert — un paiement qui n'ouvre rien se voit.\033[0m\n"; exit(0); }
 echo "\033[31m\033[1m  ✗ $rouge au rouge sur " . ($vert + $rouge) . ".\033[0m\n"; exit(1);
