@@ -1048,6 +1048,7 @@ if ($action === 'skysms_notify') {
     $state['raw_rappel']  = $trace;
     $state['notified_at'] = date('c');
     if ($rp['id_operation'] !== '' && empty($state['id_operation'])) $state['id_operation'] = $rp['id_operation'];
+    if ($rp['id_operateur'] !== '') $state['id_operateur'] = mb_substr($rp['id_operateur'], 0, 80);
 
     // Le rappel n'est pas signé : on recoupe le numéro qui a payé.
     $telAttendu = vrt_skysms_tel_local((string) ($state['clientTel'] ?? ''));

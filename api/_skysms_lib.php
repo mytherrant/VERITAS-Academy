@@ -158,6 +158,19 @@ if (!function_exists('vrt_skysms_base')) {
         foreach (['success', 'fail', 'pending'] as $b) {
             if (isset($d[$b]) && !is_array($d[$b])) $d[$b] = filter_var($d[$b], FILTER_VALIDATE_BOOLEAN);
         }
+        /* Table OFFICIELLE du rappel, fournie par SKYSOFT le 15/10/2026 :
+             statut  1 = Successful · 0 = Fail · -1 = Pending
+           Elle passe avant toute autre lecture : « -1 » ressemble à un code
+           d'erreur (les SMS en ont de -1 à -13) et l'heuristique ci-dessous
+           l'aurait pris pour un échec. ⚠️ Ne vaut QUE pour le rappel : la
+           réponse de la collecte rend aussi « 1 », mais pour « demande
+           enregistrée » — elle n'est jamais passée ici. */
+        if (isset($d['statut']) && is_scalar($d['statut'])) {
+            $s = trim((string) $d['statut']);
+            if ($s === '1')  return 'paid';
+            if ($s === '0')  return 'failed';
+            if ($s === '-1') return 'pending';
+        }
         if (!empty($d['success'])) return 'paid';
         if (!empty($d['fail']))    return 'failed';
         foreach (['statut', 'status', 'statutText', 'statutProvider', 'reponse', 'state'] as $k) {
@@ -190,7 +203,10 @@ if (!function_exists('vrt_skysms_base')) {
         $m = preg_replace('/[^0-9.]/', '', $m);
         return [
             'id_client'    => $pick(['id_client', 'idclient', 'idClient', 'idTransactionClient', 'id_transaction_client', 'order_id', 'external_reference', 'reference']),
-            'id_operation' => $pick(['id_operation', 'idOperation', 'numeroOperation', 'id', 'txnid', 'payment_ref', 'numeroPaymentOperateur']),
+            'id_operation' => $pick(['id_operation', 'idOperation', 'numeroOperation', 'id', 'txnid', 'payment_ref']),
+            // ID de la transaction chez Orange / MTN : la preuve à citer au
+            // service client de l'opérateur en cas de litige.
+            'id_operateur' => $pick(['id_operateur', 'idOperateur', 'numeroPaymentOperateur']),
             'verdict'      => vrt_skysms_verdict($b),
             'montant'      => ($m !== '' && is_numeric($m)) ? (int) round((float) $m) : null,
             'tel'          => vrt_skysms_tel_local($pick(['telephone', 'phone', 'tel', 'numero'])),
