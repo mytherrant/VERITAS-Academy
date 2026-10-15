@@ -16593,6 +16593,9 @@ function pgSettings(){
         <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView(_payProviderFile(),'list','⚡ Encaissements '+_payProviderName())"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Encaissements (liste + net)</button>
         <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView(_payProviderFile(),'balance','💰 Solde '+_payProviderName())"><svg class="vico bico" aria-hidden="true"><use href="#lc-coins"/></svg>Solde du compte</button>
         <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView(_payProviderFile(),'payouts','📤 Versements partenaires '+_payProviderName())"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Versements partenaires</button>
+        <button class="btn bo sm" style="border-color:#2563eb;color:#2563eb" onclick="_payAdminView('payment_camerpay.php','skysms_diag','📲 SkySMS — configuration')"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>SkySMS : configuration</button>
+        <button class="btn bo sm" style="border-color:#2563eb;color:#2563eb" onclick="_skysmsConfirmer()"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>SkySMS : valider un paiement</button>
+        <button class="btn bo sm" style="border-color:#2563eb;color:#2563eb" onclick="_skysmsTestSms()"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>SkySMS : SMS d'essai</button>
         <button class="btn bo sm" onclick="_payAdminView('payment_orange.php','list','🟠 Paiements Orange')"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Paiements Orange (liste)</button>
         <button class="btn bo sm" onclick="_payAdminView('payment_mtn.php','list','📱 Paiements MTN')"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Paiements MTN (liste)</button>
         <button class="btn bo sm" onclick="(function(){var u=DB.cloudConfig?.url;if(!u){toast('URL serveur non configurée','warn');return;}fetch(u.replace(/\\/+$/,'')+'/payment_orange.php?action=status&ref=TEST').then(function(r){return r.text();}).then(function(t){toast('🟠 Orange : '+t.substring(0,80));}).catch(function(e){toast('Erreur : '+e.message,'err');})})()"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Tester Orange</button>
@@ -28536,7 +28539,8 @@ window._secureUnlock=function(){
 };
 window._secureBuy=function(){
   var st=window._secureState; if(!st) return;
-  /* L'INSCRIPTION EST MAINTENUE, ET C'EST UN CHOIX — arbitré le 12/09/2026.
+  /* [HISTORIQUE — remplacé le 15/10/2026, voir juste en dessous]
+     L'INSCRIPTION ÉTAIT MAINTENUE — arbitré le 12/09/2026.
      On avait retiré ce mur pour supprimer la friction. Mais tout l'accès
      numérique vit sur `acc.unlockedBooks` : un acheteur sans compte peut lire
      son livre dans la foulée du paiement, et n'a plus AUCUN chemin pour y
@@ -28544,17 +28548,35 @@ window._secureBuy=function(){
      comblé le trou en en ouvrant un autre : un numéro se devine, et donnerait
      accès aux livres d'autrui. Le compte est donc ce qui rend le livre
      re-consultable — pas une formalité. */
-  if(typeof SES==='undefined'||!SES){
-    toast('Créez votre compte : c’est lui qui garde vos livres','warn');
-    if(typeof showRegisterForm==='function'){ closeSecureBook(); showRegisterForm(); }
-    return;
-  }
+  /* 15/10/2026 — PLUS DE COMPTE EXIGÉ (décision de Jacques). Le mur ci-dessus
+     est levé : sans session, on paie directement. Le serveur crée le compte au
+     paiement confirmé, identifiant = numéro payeur, et envoie par SMS un CODE
+     D'ACCÈS qui rouvre le livre sur tout appareil (vrt_compte_par_tel). Ce
+     code répond à l'objection du 12/09 : le livre reste re-consultable. */
+  var _ses=(typeof SES!=='undefined'&&SES)?SES:null;
   var prix=(st.book.prixDigital||st.book.priceDigital||st.book.prix||0);
   if(typeof openPaymentModal!=='function'){ toast('Paiement indisponible','warn'); return; }
+  if(!_ses){
+    try{ closeSecureBook(); }catch(e){}
+    /* Le lien du SMS ramène l'acheteur ICI, souvent sans session : sans ce
+       choix, « Débloquer » lui ferait payer une seconde fois le livre qu'il a
+       déjà. « Commander » (boutique) pose _vrtAchatDirect et va droit au
+       paiement : là, il n'y a encore rien à retrouver. */
+    var _direct = !!window._vrtAchatDirect; window._vrtAchatDirect = false;
+    if(!_direct && !window._vrtChoixLivreFait){
+      M('📘 '+_esc(st.book.titre||'Livre numérique'),'Lecture complète — '+new Intl.NumberFormat('fr-FR').format(prix)+' FCFA',
+        '<div style="font-size:14px;line-height:1.6;color:var(--ink2)">Vous avez déjà acheté ce livre ? Connectez-vous avec <strong>votre numéro</strong> et le <strong>code d’accès reçu par SMS</strong>.</div>',
+        '<button class="btn bo" onclick="cm();showLogin(\'eleve\')">J’ai déjà acheté ce livre</button>'
+        +'<button class="btn bi" onclick="cm();window._vrtChoixLivreFait=true;_secureBuy()">Acheter — '+new Intl.NumberFormat('fr-FR').format(prix)+' FCFA</button>');
+      return;
+    }
+    window._vrtChoixLivreFait = false;
+    toast('Après le paiement, votre code d’accès au livre vous est envoyé par SMS','info');
+  }
   openPaymentModal({
     montant:prix, label:'📘 Version numérique — '+(st.book.titre||''),
     refPrefix:'EBOOK', intent:'digitalbook', targetId:st.id,
-    customerAccountId:_accId(), customerNom:(SES.pre||'')+' '+(SES.nom||''), customerTel:SES.tel||''
+    customerAccountId:_ses?_accId():'', customerNom:_ses?((_ses.pre||'')+' '+(_ses.nom||'')):'', customerTel:_ses?(_ses.tel||''):''
   });
 };
 // Anti-copie / anti-capture (dissuasion — voir note d'honnêteté dans secure_pdf.php)
@@ -32252,6 +32274,36 @@ function _payAdminView(endpoint, action, title){
 }
 window._payAdminView = _payAdminView;
 
+// SkySMS n'a pas de route de statut : si le rappel n'arrive pas, l'admin
+// constate le paiement sur son tableau de bord SkySMS puis le valide ici
+// (même octroi que le rappel : accès, commissions, remise du code).
+function _skysmsPost(action, corps){
+  var cc = DB.cloudConfig || {};
+  if(!cc.url || !cc.secret){ toast('Synchro serveur non configurée (URL + secret)','warn'); return Promise.reject(new Error('config')); }
+  return fetch(cc.url.replace(/\/+$/,'') + '/payment_camerpay.php?action=' + action, {
+    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + cc.secret},
+    body: JSON.stringify(corps)
+  }).then(function(r){ return r.json(); });
+}
+function _skysmsConfirmer(){
+  var ref = (prompt('Référence du paiement SkySMS à valider (ex : VT261015-AB12) :') || '').trim();
+  if(!ref) return;
+  if(!confirm('Avez-vous vérifié sur le tableau de bord SkySMS que le paiement ' + ref + ' est bien encaissé ?')) return;
+  _skysmsPost('skysms_confirmer', {ref: ref}).then(function(j){
+    if(j && j.ok) toast('✓ ' + ref + ' : ' + (j.granted ? 'accès ouvert' : ('à régler — ' + (j.grant_msg || j.status))), j.granted ? 'ok' : 'warn');
+    else toast('❌ ' + ((j && j.error) || 'Refusé'), 'err');
+  }).catch(function(e){ if(e && e.message !== 'config') toast('Erreur : ' + e.message, 'err'); });
+}
+function _skysmsTestSms(){
+  var tel = (prompt('Numéro qui recevra le SMS d\'essai (6XXXXXXXX) :') || '').replace(/\D/g,'');
+  if(!tel) return;
+  _skysmsPost('skysms_test_sms', {tel: tel}).then(function(j){
+    toast((j && j.ok ? '✓ ' : '❌ ') + ((j && j.msg) || 'Réponse illisible'), j && j.ok ? 'ok' : 'err');
+  }).catch(function(e){ if(e && e.message !== 'config') toast('Erreur : ' + e.message, 'err'); });
+}
+window._skysmsConfirmer = _skysmsConfirmer;
+window._skysmsTestSms = _skysmsTestSms;
+
 /* ── « PAYÉ » NE VEUT PAS DIRE « SERVI » ────────────────────────────────────
    Cette vue déversait le JSON brut du serveur. Tout y était — `grant_msg`,
    `a_regler`, `underpaid` — mais noyé dans plusieurs centaines de lignes que
@@ -32719,6 +32771,15 @@ function _payFlowIsRedirect(){
 }
 window._payFlowIsRedirect = _payFlowIsRedirect;
 
+// SkySMS (15/10/2026) : la pay_url est NOTRE page, qui pousse la demande sur le
+// téléphone (MTN / Orange, code secret). Ni carte, ni PayPal : les textes de
+// la redirection CamerPay mentiraient, on reprend ceux de l'USSD.
+function _payIsSkysms(){
+  var c = window._VRT_CAMPAY;
+  return !!(c && c.provider === 'skysms');
+}
+window._payIsSkysms = _payIsSkysms;
+
 // ── Formulations du bouton de paiement automatique ────────────────────────
 // Les deux parcours ne promettent PAS la même chose : en USSD on annonce un
 // prompt sur le téléphone, en redirection une page où l'on choisit son moyen
@@ -32726,22 +32787,22 @@ window._payFlowIsRedirect = _payFlowIsRedirect;
 // condition dans les deux écrans de paiement — et qu'un seul des deux soit
 // corrigé le jour où le texte change.
 function _payTileTitre(){
-  return _payFlowIsRedirect()
+  return (_payFlowIsRedirect() && !_payIsSkysms())
     ? 'Paiement automatique — MoMo, Orange, carte ou PayPal'
     : 'Paiement automatique — MTN MoMo ou Orange Money';
 }
 function _payTileTexte(){
-  return _payFlowIsRedirect()
+  return (_payFlowIsRedirect() && !_payIsSkysms())
     ? 'Vous êtes redirigé vers la page de paiement sécurisée, où vous choisissez votre moyen. <strong>Votre accès s\'active tout seul</strong> dès le paiement confirmé.'
     : 'Entrez votre numéro : l\'opérateur est détecté automatiquement. Vous validez avec votre code secret et <strong>votre accès s\'active tout seul</strong>.';
 }
 function _payTilePlaceholder(){
-  return _payFlowIsRedirect()
+  return (_payFlowIsRedirect() && !_payIsSkysms())
     ? 'Votre n° de téléphone (facultatif)'
     : 'Votre n° MTN ou Orange (ex : 6XX XX XX XX)';
 }
 function _payTileBandeau(){
-  return _payFlowIsRedirect()
+  return (_payFlowIsRedirect() && !_payIsSkysms())
     ? '<strong>Paiement automatique disponible :</strong> réglez par MoMo, Orange Money, carte bancaire ou PayPal, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24 h).'
     : '<strong>Paiement automatique disponible :</strong> payez avec votre numéro MTN ou Orange, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24 h).';
 }
@@ -32818,8 +32879,10 @@ var VRT_PASSERELLE_AUTO_HS = true;
 window.VRT_PASSERELLE_AUTO_HS = VRT_PASSERELLE_AUTO_HS;
 
 function _payCampayReady(){
-  if(window.VRT_PASSERELLE_AUTO_HS) return false;
   var c = window._VRT_CAMPAY;
+  // Le coupe-circuit visait CamerPay (contrat rompu le 15/10/2026). SkySMS,
+  // lui, n'est annoncé par la sonde que s'il est complet : on le laisse passer.
+  if(window.VRT_PASSERELLE_AUTO_HS && !(c && c.provider === 'skysms')) return false;
   if(c && typeof c.canCollect === 'boolean') return c.canCollect;  // le serveur tranche
   // Sonde pas encore revenue : on retombe sur le réglage admin (comportement d'avant).
   return !!(DB.payApiConfig && DB.payApiConfig.campayEnabled);
@@ -33032,7 +33095,11 @@ function _payInitCampay(ref, montant, label, intent, targetId, accountId, nom, _
         +'<div style="font-size:14px;color:var(--ink2);margin-bottom:12px"><strong>'
           +(ouverte ? 'La page de paiement s\'est ouverte dans un nouvel onglet.' : 'Ouvrez la page de paiement pour continuer.')
         +'</strong></div>'
-        +'<div style="font-size:13px;color:var(--ink3);margin-bottom:14px;background:var(--blb);padding:12px;border-radius:8px;border:1px solid var(--bld)">Choisissez-y <strong>Orange Money, MTN MoMo, carte bancaire ou PayPal</strong> pour régler <strong>'+new Intl.NumberFormat("fr-FR").format(montant)+' FCFA</strong>, puis revenez sur cette page.</div>'
+        +'<div style="font-size:13px;color:var(--ink3);margin-bottom:14px;background:var(--blb);padding:12px;border-radius:8px;border:1px solid var(--bld)">'
+          +(_payIsSkysms()
+            ? 'Entrez-y votre numéro <strong>MTN MoMo ou Orange Money</strong> : une demande de <strong>'+new Intl.NumberFormat("fr-FR").format(montant)+' FCFA</strong> arrive sur votre téléphone, validez-la avec votre <strong>code secret</strong>.'
+            : 'Choisissez-y <strong>Orange Money, MTN MoMo, carte bancaire ou PayPal</strong> pour régler <strong>'+new Intl.NumberFormat("fr-FR").format(montant)+' FCFA</strong>, puis revenez sur cette page.')
+        +'</div>'
         +'<a href="'+_esc(url)+'"'+lienAttrs+' class="btn" style="display:block;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;border:none;border-radius:8px;padding:12px;font-weight:800;font-size:13px;text-decoration:none">'
           +(ouverte ? '🔁 Rouvrir la page de paiement' : '💳 Ouvrir la page de paiement')+'</a>'
         +'<div style="font-size:12px;color:var(--ink4);margin-top:12px">'
@@ -33075,6 +33142,7 @@ function _payProviderName(){
   var c = window._VRT_CAMPAY;
   if(c && c.provider === 'campay') return 'CamPay';
   if(c && c.provider === 'camerpay') return 'CamerPay';
+  if(c && c.provider === 'skysms')   return 'SkySMS';
   return (_payProviderFile() === 'payment_campay.php') ? 'CamPay' : 'CamerPay';
 }
 window._payProviderName = _payProviderName;
@@ -34551,6 +34619,9 @@ function _payPayoutReady(){
   if(window.VRT_PASSERELLE_AUTO_HS) return false;
   var cfg = DB.payApiConfig || {};
   var c   = window._VRT_CAMPAY;
+  // SkySMS encaisse mais n'a pas d'API de versement documentée : les bonus
+  // partenaires restent manuels.
+  if(c && c.provider === 'skysms') return false;
   if(c && c.provider === 'camerpay') return !!c.configured;
   if(c && c.provider === 'campay')   return !!cfg.campayEnabled;
   return !!(cfg.camerpayEnabled || cfg.campayEnabled);
@@ -35248,7 +35319,11 @@ function _payAutoActivate(a){
             if(accB.unlockedBooks.indexOf(a.targetId)<0) accB.unlockedBooks.push(a.targetId);
           }
         }
-        return {msg:'Livre numérique débloqué', userMsg:'Votre livre est débloqué — lisez-le en ligne sans limite.'};
+        // Acheté sans compte : le serveur a créé le compte (identifiant = numéro)
+        // et envoie le code d'accès par SMS — c'est lui qu'il faut annoncer.
+        return {msg:'Livre numérique débloqué', userMsg: a.accountId
+          ? 'Votre livre est débloqué — lisez-le en ligne sans limite.'
+          : 'Votre livre est débloqué. Votre code d’accès arrive par SMS : connectez-vous avec votre numéro et ce code pour le lire sur n’importe quel appareil.'};
       }
 
       // ── 3. Souscription à un plan e-learning ──
@@ -51940,6 +52015,7 @@ function _bookBuyDigital(id){
     essais++;
     if (window._secureState && typeof window._secureBuy === 'function'){
       clearInterval(t);
+      window._vrtAchatDirect = true;   // « Commander » : droit au paiement, sans le choix « déjà acheté »
       try { window._secureBuy(); } catch(e){}
     } else if (essais > 15){
       clearInterval(t);
@@ -51967,6 +52043,21 @@ function _bookOpenFromHash(id, ouvrirLAchat){
      Le drapeau `_boot` est l'échappatoire prévue par le garde-fou : ici on
      RESTE volontairement dans l'application, on va afficher la fiche. */
   try{ if (typeof vShowSec === 'function') vShowSec('boutique', null, true); }catch(e){}
+  /* ⚠️ LE LIVRE NUMÉRIQUE N'EST PAS ENCORE LÀ AU PREMIER CHARGEMENT.
+     Il n'existe pas dans la base : il arrive de catalogue_livres.json, chargé
+     en différé (_catalogueLivresCharger, jusqu'à 4 s après le démarrage). Le
+     routeur, lui, passe tout de suite. Mesuré en production le 15/10/2026 sur
+     un navigateur vierge : « Commander » sur « Le Tube digestif » laissait le
+     visiteur sur la liste, avec « Ce manuel n'est plus au catalogue » — aucune
+     fiche, aucun paiement. Un visiteur qui revenait, lui, avait le livre en
+     localStorage : le défaut ne touchait que les NOUVEAUX acheteurs.
+     On charge donc le catalogue et on réessaie UNE fois avant de conclure. */
+  if (!b && _bookOpenFromHash._attendu !== id && typeof window._catalogueLivresCharger === 'function'){
+    _bookOpenFromHash._attendu = id;   // une seule relance : pas de boucle si le livre n'existe vraiment pas
+    var _relance = function(){ _bookOpenFromHash(id, ouvrirLAchat); _bookOpenFromHash._attendu = null; };
+    window._catalogueLivresCharger().then(_relance, _relance);
+    return true;
+  }
   if (!b){
     if (typeof toast === 'function') toast('Ce manuel n\'est plus au catalogue', 'warn');
     return false;

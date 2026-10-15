@@ -811,18 +811,6 @@
      c'est sa POSE qui ne l'était pas.
      Apostrophes échappées : `'Baloo 2'` est valide dans un attribut délimité
      par des guillemets doubles, et ne le referme pas. */
-  /* ══ BANDEAU « MODE DE PAIEMENT » (21/09/2026) ══════════════════════════
-     Rouge, parce qu'il doit se voir avant le bouton. Il dit trois choses, dans
-     l'ordre où l'acheteur se les demande : comment je paie, à qui, et quand
-     j'aurai mon code. Sans guillemet double dans les styles : ils refermeraient
-     l'attribut (défaut déjà payé sur BTN et TTL). */
-  var BANDEAU_PAIEMENT = '<div style="margin:12px 0 4px;padding:10px 12px;border:2px solid #c0453f;'
-    + 'background:#fdecea;border-radius:10px;text-align:left;font-size:12.5px;line-height:1.5;color:#7a1f1a">'
-    + '<strong style="color:#c0453f">Paiement par code marchand MTN MoMo ou Orange Money</strong>, '
-    + 'au nom de <strong>VERITAS EDUCATION</strong>. '
-    + 'Après ton paiement, <strong>ton code d\u2019accès s\u2019affiche ici tout seul</strong> dès que nous l\u2019avons vérifié '
-    + '\u2014 tu peux même fermer la page : il t\u2019attendra à ton retour.</div>';
-
   var BTN = 'width:100%;border:none;background:#c0453f;color:#fff;font-family:\'Baloo 2\',sans-serif;'
     + 'font-weight:800;font-size:16px;padding:12px;border-radius:10px;cursor:pointer;margin-top:10px';
   var BTN2 = 'width:100%;border:1px solid #cfd6dd;background:#fff;color:#5c666f;font-weight:700;'
@@ -902,11 +890,9 @@
       + '<div id="vrt-accroche" style="' + SUB + '">' + accroche() + '</div>'
       + '<div style="font-family:\'Baloo 2\',sans-serif;font-weight:800;font-size:30px;color:#c0453f;margin:14px 0 2px" class="vrt-prix">'
       + fmt(prix(cfg.kind, qte)) + ' FCFA</div>'
-      /* 21/09/2026 — « carte bancaire » n'est plus vrai : CamerPay est muet et
-         l'on encaisse par code marchand. Annoncer AVANT le clic comment on va
-         payer, et ce qui se passe après, c'est ce qui rassure — l'acheteur
-         ne découvre pas un mode de paiement inattendu au milieu du tunnel. */
-      + BANDEAU_PAIEMENT
+      /* 15/10/2026 — le bandeau rouge « Paiement par code marchand… » est
+         retiré à la demande de Jacques : l'écran suivant donne déjà les codes
+         marchands et la marche à suivre, au moment où l'on en a besoin. */
       // Pack établissement : un proviseur qui équipe une classe entière ne
       // doit pas avoir à nous écrire. La remise s'affiche dès 10 codes.
       + (cfg.kind === 'livret'
