@@ -16593,6 +16593,7 @@ function pgSettings(){
         <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView(_payProviderFile(),'list','⚡ Encaissements '+_payProviderName())"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Encaissements (liste + net)</button>
         <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView(_payProviderFile(),'balance','💰 Solde '+_payProviderName())"><svg class="vico bico" aria-hidden="true"><use href="#lc-coins"/></svg>Solde du compte</button>
         <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView(_payProviderFile(),'payouts','📤 Versements partenaires '+_payProviderName())"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Versements partenaires</button>
+        <button class="btn bi sm" onclick="_skysmsSuivi()"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Suivi paiements, codes et SMS</button>
         <button class="btn bo sm" style="border-color:#2563eb;color:#2563eb" onclick="_payAdminView('payment_camerpay.php','skysms_diag','📲 SkySMS — configuration')"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>SkySMS : configuration</button>
         <button class="btn bo sm" style="border-color:#2563eb;color:#2563eb" onclick="_skysmsConfirmer()"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>SkySMS : valider un paiement</button>
         <button class="btn bo sm" style="border-color:#2563eb;color:#2563eb" onclick="_skysmsTestSms()"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>SkySMS : SMS d'essai</button>
@@ -32285,8 +32286,8 @@ function _skysmsPost(action, corps){
     body: JSON.stringify(corps)
   }).then(function(r){ return r.json(); });
 }
-function _skysmsConfirmer(){
-  var ref = (prompt('Référence du paiement SkySMS à valider (ex : VT261015-AB12) :') || '').trim();
+function _skysmsConfirmer(refDonnee){
+  var ref = String(refDonnee || prompt('Référence du paiement SkySMS à valider (ex : VT261015-AB12) :') || '').trim();
   if(!ref) return;
   if(!confirm('Avez-vous vérifié sur le tableau de bord SkySMS que le paiement ' + ref + ' est bien encaissé ?')) return;
   _skysmsPost('skysms_confirmer', {ref: ref}).then(function(j){
@@ -32303,6 +32304,95 @@ function _skysmsTestSms(){
 }
 window._skysmsConfirmer = _skysmsConfirmer;
 window._skysmsTestSms = _skysmsTestSms;
+
+/* ── SUIVI : chaque paiement, son code, son SMS (15/10/2026) ──────────────────
+   Demandé par SKYSOFT et par Jacques : voir, sans ouvrir de journal, si un
+   paiement a été CONFIRMÉ par l'opérateur, si le CODE a été remis (affiché à
+   l'acheteur, utilisé sur un appareil) et si le SMS est PARTI puis ARRIVÉ.
+   Source : payment_camerpay.php?action=skysms_suivi (admin). */
+function _skysmsSuivi(jours){
+  var cc = DB.cloudConfig || {};
+  if(!cc.url || !cc.secret){ toast('Synchro serveur non configurée (URL + secret)','warn'); return; }
+  jours = jours || 14;
+  toast('⏳ Chargement du suivi…','info');
+  fetch(cc.url.replace(/\/+$/,'') + '/payment_camerpay.php?action=skysms_suivi&jours=' + jours, { headers:{ 'Authorization':'Bearer ' + cc.secret } })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d || !d.ok){ toast('❌ ' + ((d && d.error) || 'Suivi indisponible'), 'err'); return; }
+      var T = d.totaux || {}, F = function(n){ return new Intl.NumberFormat('fr-FR').format(n||0); };
+      var dt = function(v){
+        if(!v) return '—';
+        var x = (typeof v === 'number') ? new Date(v*1000) : new Date(v);
+        return isNaN(x) ? _esc(String(v)) : x.toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      };
+      var pastille = function(txt, coul){ return '<span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:'+coul+'1f;color:'+coul+'">'+txt+'</span>'; };
+      var VERT='#15803d', ORANGE='#b45309', ROUGE='#b91c1c', GRIS='#64748b';
+      var tuile = function(lbl, val, sous, coul){ return '<div style="flex:1 1 140px;border:1px solid var(--bld,#e2e8f0);border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:var(--ink3,#64748b)">'+lbl+'</div><div style="font-size:20px;font-weight:800;color:'+(coul||'inherit')+'">'+val+'</div><div style="font-size:11px;color:var(--ink4,#94a3b8)">'+(sous||'')+'</div></div>'; };
+      var html = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">'
+        + tuile('Paiements confirmés', F(T.payes), F(T.encaisse)+' FCFA encaissés', VERT)
+        + tuile('En attente', F(T.attente), (T.a_regler? T.a_regler+' à régler':'rappel opérateur attendu'), T.attente?ORANGE:GRIS)
+        + tuile('Codes remis', F(T.codes_affiches)+' / '+F(T.codes), F(T.codes_utilises)+' utilisés sur un appareil', VERT)
+        + tuile('SMS', F(T.sms_delivres)+' délivrés', F(T.sms_envoyes)+' envoyés · '+F(T.sms_en_echec)+' en échec · '+F(T.sms_en_attente)+' en file', T.sms_en_echec?ROUGE:VERT)
+        + '</div>';
+      var lignes = d.lignes || [];
+      if(!lignes.length){ html += '<div style="padding:18px;text-align:center;color:var(--ink3)">Aucun paiement ni remise sur les '+d.jours+' derniers jours.</div>'; }
+      else {
+        html += '<div style="overflow:auto;max-height:55vh"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="text-align:left;position:sticky;top:0;background:var(--bg,#fff)">'
+          + '<th style="padding:6px">Date</th><th style="padding:6px">Achat</th><th style="padding:6px">Paiement</th><th style="padding:6px">Code</th><th style="padding:6px">SMS</th><th style="padding:6px"></th></tr></thead><tbody>';
+        lignes.forEach(function(l){
+          var pay = l.statut==='paid' ? pastille('Payé',VERT) + '<div style="color:var(--ink4);font-size:11px">'+dt(l.paye_at)+(l.confirme_par? ' · '+_esc(l.confirme_par):'')+(l.id_operateur? '<br>'+_esc(l.id_operateur):'')+'</div>'
+                  : l.statut==='pending' ? pastille('En attente',ORANGE) + (l.erreur_demande? '<div style="color:'+ROUGE+';font-size:11px">'+_esc(l.erreur_demande)+'</div>':'')
+                  : pastille(_esc(l.statut||'?'),ROUGE) + (l.motif? '<div style="font-size:11px;color:var(--ink4)">'+_esc(l.motif)+'</div>':'');
+          if(l.a_regler) pay += '<div>'+pastille('À régler',ROUGE)+'</div>';
+          var c = l.code, code = '—';
+          if(c){ code = '<b>'+_esc(c.fin)+'</b> '+(c.affiche_at? pastille('Affiché',VERT) : pastille('Pas encore affiché',ORANGE))
+                 + '<div style="font-size:11px;color:var(--ink4)">'+(c.affiche_at? dt(c.affiche_at)+' · ':'')+(c.appareils!=null? c.appareils+' appareil(s)':'')+'</div>'; }
+          else if(l.accorde && l.octroi){ code = '<span style="font-size:11px;color:var(--ink3)">'+_esc(l.octroi)+'</span>'; }
+          var s = l.sms, sms = '—';
+          if(s){
+            if(s.etat==='envoye'){
+              var dl = s.dlr && s.dlr.statut;
+              sms = (dl==='delivre'? pastille('Délivré',VERT) : dl==='non_delivre'? pastille('Non délivré',ROUGE) : pastille('Envoyé',GRIS))
+                  + '<div style="font-size:11px;color:var(--ink4)">'+_esc(s.canal)+' · '+dt(s.envoye_at)+(s.dlr&&s.dlr.date? ' → '+_esc(s.dlr.date):'')+'</div>';
+            } else if(s.etat==='attente'){ sms = pastille('En file ('+s.essais+' essai'+(s.essais>1?'s':'')+')',ORANGE) + '<div style="font-size:11px;color:var(--ink4)">'+_esc(s.erreur)+'</div>'; }
+            else { sms = pastille(s.etat==='echec'?'Échec':_esc(s.etat),ROUGE) + '<div style="font-size:11px;color:var(--ink4)">'+_esc(s.erreur)+'</div>'; }
+          }
+          var refJs = String(l.ref).replace(/[^A-Za-z0-9._-]/g,'');
+          var actions = '';
+          if(l.statut==='pending' && l.source==='skysms') actions += '<button class="btn bo sm" onclick="cm();_skysmsConfirmer(\''+refJs+'\')">Valider</button> ';
+          if(s && s.etat!=='envoye') actions += '<button class="btn bo sm" onclick="_skysmsRelancerSms(\''+refJs+'\')">Renvoyer SMS</button>';
+          html += '<tr style="border-top:1px solid var(--bld,#e2e8f0);vertical-align:top">'
+            + '<td style="padding:6px;white-space:nowrap">'+dt(l.cree)+'</td>'
+            + '<td style="padding:6px"><b>'+_esc(l.label||l.intent||'')+'</b><div style="font-size:11px;color:var(--ink4)">'+_esc(l.ref)+' · '+_esc(l.tel||'')+(l.montant? ' · '+F(l.montant)+' F':'')+(l.source==='code_marchand'?' · code marchand':'')+'</div></td>'
+            + '<td style="padding:6px">'+pay+'</td><td style="padding:6px">'+code+'</td><td style="padding:6px">'+sms+'</td><td style="padding:6px;white-space:nowrap">'+actions+'</td></tr>';
+        });
+        html += '</tbody></table></div>';
+      }
+      M('📊 Suivi des paiements, codes et SMS', d.jours+' derniers jours · canaux de remise : '+_esc((d.canaux||[]).join(', ')||'aucun'), html,
+        '<button class="btn bo" onclick="cm()">Fermer</button>'
+        + '<button class="btn bo" onclick="_skysmsVerifierSms()">Vérifier la remise des SMS</button>'
+        + '<button class="btn bo" onclick="cm();_skysmsSuivi('+(jours===14?60:14)+')">'+(jours===14?'Voir 60 jours':'Voir 14 jours')+'</button>'
+        + '<button class="btn bi" onclick="cm();_skysmsSuivi('+jours+')">Actualiser</button>', true);
+    })
+    .catch(function(e){ toast('Erreur : ' + (e && e.message || e), 'err'); });
+}
+function _skysmsVerifierSms(){
+  _skysmsPost('skysms_sms_verifier', {}).then(function(j){
+    toast(j && j.ok ? ('✓ '+j.consultes+' SMS consultés chez SkySMS, '+j.mis_a_jour+' mis à jour') : ('❌ '+((j&&j.error)||'Refusé')), j && j.ok ? 'ok' : 'err');
+    if(j && j.ok){ cm(); _skysmsSuivi(); }
+  }).catch(function(e){ if(e && e.message !== 'config') toast('Erreur : ' + e.message, 'err'); });
+}
+function _skysmsRelancerSms(ref){
+  if(!confirm('Renvoyer le SMS de la référence ' + ref + ' ?')) return;
+  _skysmsPost('skysms_sms_relancer', {ref: ref}).then(function(j){
+    if(j && j.ok) toast(j.etat==='envoye' ? '✓ SMS envoyé' : ('SMS toujours en file : ' + (j.erreur||'')), j.etat==='envoye' ? 'ok' : 'warn');
+    else toast('❌ ' + ((j && j.error) || 'Refusé'), 'err');
+    cm(); _skysmsSuivi();
+  }).catch(function(e){ if(e && e.message !== 'config') toast('Erreur : ' + e.message, 'err'); });
+}
+window._skysmsSuivi = _skysmsSuivi;
+window._skysmsVerifierSms = _skysmsVerifierSms;
+window._skysmsRelancerSms = _skysmsRelancerSms;
 
 /* ── « PAYÉ » NE VEUT PAS DIRE « SERVI » ────────────────────────────────────
    Cette vue déversait le JSON brut du serveur. Tout y était — `grant_msg`,
@@ -33425,7 +33515,8 @@ function mPayAttempts(){
     +'<div class="tw" style="max-height:420px;overflow:auto"><table>'
     +'<thead><tr><th>Réf / Type</th><th>Description / Client</th><th>Montant</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>'
     +'<tbody>'+rows+'</tbody></table></div>',
-    '<button class="btn bo" onclick="cm()">Fermer</button>');
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    +'<button class="btn bi" onclick="cm();_skysmsSuivi()">📊 Suivi paiements, codes et SMS</button>');
   try { _pmChargerCommandes(); } catch(e){ console.warn('[commandes]', e); }
 }
 

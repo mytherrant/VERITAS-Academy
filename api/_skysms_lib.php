@@ -252,11 +252,40 @@ if (!function_exists('vrt_skysms_base')) {
         $d = json_decode($rep, true);
         if (!is_array($d)) return ['ok' => false, 'canal' => 'skysms', 'msg' => 'HTTP ' . $http . ' réponse illisible'];
         $st = trim((string) ($d['statut'] ?? ''));
-        if ($st === '1') return ['ok' => true, 'canal' => 'skysms', 'msg' => 'SMS envoyé (' . (string) ($d['ssid_sms'] ?? '') . ')', 'solde' => $d['solde'] ?? null];
+        if ($st === '1') return ['ok' => true, 'canal' => 'skysms', 'msg' => 'SMS envoyé (' . (string) ($d['ssid_sms'] ?? '') . ')',
+                                 'solde' => $d['solde'] ?? null,
+                                 // Identifiants du SMS chez SkySMS et chez nous : c'est par eux
+                                 // qu'arrive l'accusé de réception (rappel ou consultation).
+                                 'ssid' => (string) ($d['ssid_sms'] ?? ''), 'idsms' => (string) ($p['idsmsclient'] ?? '')];
         // La description de SkySMS recopie login ET mot de passe en clair
         // (« Compte Inexistant (Login : … / Pwd : …) ») : on la caviarde.
         $desc = preg_replace('/\(Login.*?\)/u', '(identifiants masqués)', (string) ($d['description'] ?? ''));
         return ['ok' => false, 'canal' => 'skysms', 'msg' => 'statut ' . $st . ' : ' . mb_substr($desc, 0, 160)];
+    }
+
+    /**
+     * Accusé de réception d'un SMS envoyé (doc SKYSOFT V2023, § 3) :
+     * statut 1 = DELIVRE, 0 = NON_DELIVRE ; datereception dd/MM/yyyy HH:mm:ss.
+     * @return array{ok:bool,statut:string,date:string,motif:string}
+     */
+    function vrt_skysms_dlr_consulter(string $ssid): array {
+        if ($ssid === '' || !vrt_skysms_sms_actif()) return ['ok' => false, 'statut' => 'inconnu', 'date' => '', 'motif' => 'non consultable'];
+        [$http, $rep, $err] = vrt_skysms_get('/accusereceptionsms/v1/output=json', [
+            'user' => vrt_skysms_const('SKYSMS_USER'), 'password' => vrt_skysms_const('SKYSMS_PASSWORD'),
+            'ssid_sms' => $ssid], 15);
+        $d = json_decode($rep, true);
+        if (!is_array($d)) return ['ok' => false, 'statut' => 'inconnu', 'date' => '', 'motif' => $err !== '' ? $err : 'HTTP ' . $http];
+        return ['ok' => true, 'statut' => vrt_skysms_dlr_statut((string) ($d['statut'] ?? '')),
+                'date' => mb_substr((string) ($d['datereception'] ?? ''), 0, 40),
+                'motif' => mb_substr(preg_replace('/\(Login.*?\)/u', '', (string) ($d['description'] ?? '')), 0, 160)];
+    }
+
+    /** 1 → delivre, 0 → non_delivre, le reste → inconnu (accusé pas encore revenu). */
+    function vrt_skysms_dlr_statut(string $s): string {
+        $s = strtolower(trim($s));
+        if (in_array($s, ['1', 'delivre', 'délivré', 'delivered', 'true'], true)) return 'delivre';
+        if (in_array($s, ['0', 'non_delivre', 'undelivered', 'failed', 'false'], true)) return 'non_delivre';
+        return 'inconnu';
     }
 
     /** Solde SMS (nombre de SMS restants). */

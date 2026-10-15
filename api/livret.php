@@ -1075,6 +1075,13 @@ if ($action === 'claim') {
     }
 
     lv_efface_echecs();
+    /* Trace de REMISE : la première fois que l'acheteur voit son code à l'écran,
+       et combien de fois il est revenu le chercher. C'est ce que lit le suivi
+       admin (payment_camerpay.php?action=skysms_suivi) pour dire « code reçu ». */
+    $v['retraits'] = (int) ($v['retraits'] ?? 0) + 1;
+    if (empty($v['retire_at'])) $v['retire_at'] = time();
+    $v['dernier_retrait'] = time();
+    vrt_livret_vente_ecrire($ref, $v);
     lv_log('[CLAIM] ip=' . vrt_client_ip() . ' ref=' . substr($ref, 0, 24)
         . ' classe=' . (string) ($v['classe'] ?? '') . ' code=…' . substr((string) $v['code'], -4));
     $lot = (is_array($v['codes'] ?? null) && count($v['codes']) > 1) ? array_values($v['codes']) : null;

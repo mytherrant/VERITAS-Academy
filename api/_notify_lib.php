@@ -479,6 +479,11 @@ if (!defined('VRT_NOTIFY_LIB')) {
             $m['dernier'] = $now;
             if ($r['ok']) {
                 $m['etat'] = 'envoye'; $m['erreur'] = ''; $m['canal'] = $r['canal'];
+                $m['envoye_at'] = $now;
+                // SkySMS : identifiants du SMS, pour rattacher l'accusé de réception.
+                if (!empty($r['ssid']))  $m['ssid']  = (string) $r['ssid'];
+                if (!empty($r['idsms'])) $m['idsms'] = (string) $r['idsms'];
+                unset($m['dlr']);
                 $envoyes++; $restants--;
                 vrt_notify_log('[ENVOYE] ref=' . (string) ($m['ref'] ?? '') . ' tel=…'
                     . (string) ($m['tel4'] ?? '') . ' canal=' . $r['canal'] . ' essai=' . $m['essais']);

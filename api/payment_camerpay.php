@@ -1012,38 +1012,8 @@ if ($action === 'skysms_collect' && $method === 'POST') {
 }
 
 if ($action === 'skysms_notify') {
-    $raw  = (string) file_get_contents('php://input');
-    $body = $_POST;
-    if (!$body && $raw !== '') { $j = json_decode($raw, true); if (is_array($j)) $body = $j; else parse_str($raw, $body); }
-    if (!is_array($body)) $body = [];
-    $q = $_GET; unset($q['action'], $q['cle']);
-    $body = $body + $q;
-    // Trace BORNÉE, clé retirée : c'est ce journal qui nous apprendra le
-    // format exact du rappel, que SkySMS ne documente pas.
-    camerpayLog($logFile, date('c') . ' [SKYSMS_RAPPEL] ' . substr(json_encode($body, JSON_UNESCAPED_UNICODE), 0, 1500) . "\n");
-
-    $cle = vrt_skysms_cle_rappel();
-    if ($cle === '') { http_response_code(503); echo 'SKYSMS_CALLBACK_CLE absente cote serveur'; exit; }
-    $recue = (string) ($_GET['cle'] ?? ($_SERVER['HTTP_X_VRT_CLE'] ?? ''));
-    /* SKYSOFT COLLE SES PARAMÈTRES AVEC UN SECOND « ? ». Mesuré le 15/10/2026 :
-       leurs appels de test vides passaient la clé, leurs vrais rappels (statut,
-       id_operateur, id_client) étaient refusés « cle invalide ». Notre URL
-       contient déjà « ?action=…&cle=… » : un « ?statut=1… » ajouté derrière
-       fait lire à PHP cle = « <clé>?statut=1 ». On coupe au premier « ? » et on
-       récupère ce qui suit comme paramètres. La clé doit toujours être EXACTE. */
-    if (strpos($recue, '?') !== false) {
-        [$recue, $suite] = explode('?', $recue, 2);
-        $extra = []; parse_str($suite, $extra);
-        foreach ($extra as $k => $v) { if (is_scalar($v) && !isset($body[$k])) $body[$k] = $v; }
-    }
-    $recue = trim($recue);
-    if ($recue === '' || !hash_equals($cle, $recue)) {
-        // Forme de la clé reçue, JAMAIS sa valeur : longueur, bon début, caractères en trop.
-        camerpayLog($logFile, date('c') . ' [SKYSMS_RAPPEL_REFUSE] cle invalide (recue ' . strlen($recue)
-            . ' car., attendue ' . strlen($cle) . ', debut ' . (strncmp($recue, $cle, 8) === 0 ? 'bon' : 'different')
-            . ', methode ' . $method . ")\n");
-        http_response_code(401); echo 'cle invalide'; exit;
-    }
+    $body = skysmsCorpsRappel($logFile, 'SKYSMS_RAPPEL');
+    skysmsCleValide($body, $logFile, $method, 'SKYSMS_RAPPEL_REFUSE');
 
     $rp  = vrt_skysms_lire_rappel($body);
     $ref = vrt_skysms_resoudre($stateDir, [$rp['id_client'], $rp['id_operation']]);
@@ -1096,6 +1066,140 @@ if ($action === 'skysms_confirmer' && $method === 'POST') {
                 'grant_msg' => $state['grant_msg'] ?? '', 'a_regler' => !empty($state['a_regler'])]);
 }
 
+/* ── ACCUSÉ DE RÉCEPTION DES SMS (rappel SKYSOFT) ────────────────────────────
+   URL à déclarer chez SKYSOFT comme « callback SMS » (même clé que le rappel
+   des paiements) : …/payment_camerpay.php?action=skysms_dlr&cle=<clé>.
+   Format attendu (doc V2023 § 3) : ssid_sms, idsmsclient, statut (1 délivré,
+   0 non délivré), datereception — lu largement, comme le rappel de paiement. */
+if ($action === 'skysms_dlr') {
+    $body = skysmsCorpsRappel($logFile, 'SKYSMS_DLR');
+    skysmsCleValide($body, $logFile, $method, 'SKYSMS_DLR_REFUSE');
+    $pick = function (array $cles) use ($body) {
+        foreach ($cles as $k) { if (isset($body[$k]) && is_scalar($body[$k]) && trim((string) $body[$k]) !== '') return trim((string) $body[$k]); }
+        return '';
+    };
+    $ssid = $pick(['ssid_sms', 'ssid', 'id_sms', 'idsms', 'id']);
+    $idsms = $pick(['idsmsclient', 'id_sms_client', 'idSmsClient', 'id_client']);
+    $m = skysmsMessageParSms($ssid, $idsms);
+    if (!$m) {
+        camerpayLog($logFile, date('c') . " [SKYSMS_DLR_INCONNU] ssid=$ssid idsms=$idsms\n");
+        http_response_code(404); echo 'sms inconnu'; exit;
+    }
+    $m['dlr'] = ['statut' => vrt_skysms_dlr_statut($pick(['statut', 'status', 'delivered', 'dlr_status'])),
+                 'date' => mb_substr($pick(['datereception', 'dlrtime', 'date', 'delivered_at']), 0, 40),
+                 'motif' => mb_substr($pick(['description', 'dlrerror', 'message']), 0, 160),
+                 'recu_at' => time(), 'source' => 'rappel'];
+    vrt_notify_ecrire($m);
+    camerpayLog($logFile, date('c') . ' [SKYSMS_DLR] ref=' . ($m['ref'] ?? '') . ' statut=' . $m['dlr']['statut'] . "\n");
+    http_response_code(200); echo 'OK'; exit;
+}
+
+/* ── SUIVI (admin) : paiements, codes remis, SMS envoyés et délivrés ────────── */
+if ($action === 'skysms_suivi' && $method === 'GET') {
+    requirePayAuth();
+    $jours  = max(1, min(90, (int) ($_GET['jours'] ?? 14)));
+    $depuis = time() - $jours * 86400;
+    $reg    = function_exists('vrt_livret_registre_charger') ? vrt_livret_registre_charger() : [];
+    $vus    = [];
+    $lignes = [];
+    $tot = ['payes' => 0, 'encaisse' => 0, 'attente' => 0, 'echecs' => 0, 'a_regler' => 0,
+            'codes' => 0, 'codes_affiches' => 0, 'codes_utilises' => 0,
+            'sms_envoyes' => 0, 'sms_delivres' => 0, 'sms_non_delivres' => 0, 'sms_en_echec' => 0, 'sms_en_attente' => 0];
+
+    $ligneRemise = function (string $ref) use ($reg, &$tot) {
+        $out = ['code' => null, 'sms' => null];
+        $v = function_exists('vrt_livret_vente_lire') ? vrt_livret_vente_lire($ref) : null;
+        if ($v && !empty($v['code'])) {
+            $e = $reg['codes'][vrt_livret_cle((string) $v['code'])] ?? null;
+            $out['code'] = ['fin' => '…' . substr((string) $v['code'], -4), 'classe' => (string) ($v['classe'] ?? ''),
+                            'affiche_at' => $v['retire_at'] ?? null, 'affichages' => (int) ($v['retraits'] ?? 0),
+                            'appareils' => is_array($e) ? count((array) ($e['dev'] ?? [])) : null,
+                            'utilisations' => is_array($e) ? (int) ($e['use'] ?? 0) : null];
+            $tot['codes']++;
+            if (!empty($v['retire_at'])) $tot['codes_affiches']++;
+            if (is_array($e) && (count((array) ($e['dev'] ?? [])) > 0 || (int) ($e['use'] ?? 0) > 0)) $tot['codes_utilises']++;
+        }
+        $m = function_exists('vrt_notify_lire') ? vrt_notify_lire($ref) : null;
+        if ($m) {
+            $etat = (string) ($m['etat'] ?? '');
+            $out['sms'] = ['etat' => $etat, 'canal' => (string) ($m['canal'] ?? ''), 'essais' => (int) ($m['essais'] ?? 0),
+                           'envoye_at' => $m['envoye_at'] ?? null, 'erreur' => mb_substr((string) ($m['erreur'] ?? ''), 0, 140),
+                           'dlr' => $m['dlr'] ?? null, 'type' => (string) ($m['kind'] ?? '')];
+            if ($etat === 'envoye') {
+                $tot['sms_envoyes']++;
+                $d = (string) ($m['dlr']['statut'] ?? '');
+                if ($d === 'delivre') $tot['sms_delivres']++;
+                elseif ($d === 'non_delivre') $tot['sms_non_delivres']++;
+            } elseif ($etat === 'echec') $tot['sms_en_echec']++;
+            elseif ($etat === 'attente') $tot['sms_en_attente']++;
+        }
+        return $out;
+    };
+
+    foreach (camerpayCollectStates($stateDir, 'skysms') as $p) {
+        if (strtotime((string) ($p['created_at'] ?? '')) < $depuis) continue;
+        $ref = (string) ($p['ref'] ?? ''); $vus[$ref] = true;
+        $st = (string) ($p['status'] ?? '');
+        if ($st === 'paid') { $tot['payes']++; $tot['encaisse'] += (int) ($p['montant_paye'] ?? $p['montant'] ?? 0); }
+        elseif ($st === 'pending') $tot['attente']++;
+        else $tot['echecs']++;
+        if (!empty($p['a_regler'])) $tot['a_regler']++;
+        $lignes[] = ['ref' => $ref, 'source' => 'skysms', 'cree' => $p['created_at'] ?? null, 'label' => (string) ($p['label'] ?? ''),
+                     'intent' => (string) ($p['intent'] ?? ''), 'montant' => (int) ($p['montant'] ?? 0), 'tel' => (string) ($p['clientTel'] ?? ''),
+                     'operateur' => (string) ($p['operator'] ?? ''), 'statut' => $st, 'paye_at' => $p['paid_at'] ?? null,
+                     'confirme_par' => (string) ($p['paid_source'] ?? ''), 'id_operateur' => (string) ($p['id_operateur'] ?? ''),
+                     'demandes' => (int) ($p['push_count'] ?? 0), 'erreur_demande' => (string) ($p['push_error'] ?? ''),
+                     'accorde' => !empty($p['granted']), 'a_regler' => !empty($p['a_regler']),
+                     'octroi' => mb_substr((string) ($p['grant_msg'] ?? ''), 0, 140), 'motif' => (string) ($p['failure_reason'] ?? ($p['reason'] ?? ''))]
+                   + $ligneRemise($ref);
+    }
+    // Les remises nées d'un paiement par CODE MARCHAND validé (hors SkySMS) :
+    // le SMS du code part pareil, il doit se voir pareil.
+    foreach ((function_exists('vrt_notify_liste') ? vrt_notify_liste(500) : []) as $n) {
+        $ref = (string) ($n['ref'] ?? '');
+        if ($ref === '' || isset($vus[$ref]) || (int) ($n['cree'] ?? 0) < $depuis) continue;
+        $lignes[] = ['ref' => $ref, 'source' => 'code_marchand', 'cree' => date('c', (int) $n['cree']), 'label' => (string) ($n['classe'] ?? ''),
+                     'intent' => (string) ($n['kind'] ?? ''), 'montant' => null, 'tel' => '…' . (string) ($n['tel4'] ?? ''),
+                     'statut' => 'paid', 'accorde' => true] + $ligneRemise($ref);
+    }
+    usort($lignes, function ($a, $b) { return strcmp((string) ($b['cree'] ?? ''), (string) ($a['cree'] ?? '')); });
+    jsonRespCy(['ok' => true, 'jours' => $jours, 'totaux' => $tot, 'lignes' => $lignes,
+                'canaux' => function_exists('vrt_notify_canaux') ? vrt_notify_canaux() : []]);
+}
+
+/* ── Consulter chez SKYSOFT l'accusé des SMS sans réponse (admin) ─────────── */
+if ($action === 'skysms_sms_verifier' && $method === 'POST') {
+    requirePayAuth();
+    $faits = 0; $maj = 0; $limite = time() - 7 * 86400;
+    foreach ((glob(vrt_notify_dir() . '/*.json') ?: []) as $f) {
+        if ($faits >= 25) break;
+        $m = json_decode((string) @file_get_contents($f), true);
+        if (!is_array($m) || ($m['etat'] ?? '') !== 'envoye' || ($m['canal'] ?? '') !== 'skysms' || empty($m['ssid'])) continue;
+        if ((int) ($m['envoye_at'] ?? 0) < $limite) continue;
+        if (in_array((string) ($m['dlr']['statut'] ?? ''), ['delivre', 'non_delivre'], true)) continue;
+        $faits++;
+        $r = vrt_skysms_dlr_consulter((string) $m['ssid']);
+        if (!$r['ok']) continue;
+        $m['dlr'] = ['statut' => $r['statut'], 'date' => $r['date'], 'motif' => $r['motif'], 'recu_at' => time(), 'source' => 'consultation'];
+        vrt_notify_ecrire($m); $maj++;
+    }
+    jsonRespCy(['ok' => true, 'consultes' => $faits, 'mis_a_jour' => $maj]);
+}
+
+/* ── Renvoyer le SMS d'une remise (admin) ─────────────────────────────────── */
+if ($action === 'skysms_sms_relancer' && $method === 'POST') {
+    requirePayAuth();
+    $in = json_decode((string) file_get_contents('php://input'), true) ?: [];
+    $ref = trim((string) ($in['ref'] ?? ''));
+    $m = ($ref !== '' && function_exists('vrt_notify_lire')) ? vrt_notify_lire($ref) : null;
+    if (!$m) jsonRespCy(['error' => 'Aucune remise pour cette référence.'], 404);
+    $m['etat'] = 'attente'; $m['essais'] = 0; $m['prochain'] = 0; unset($m['dlr']);
+    vrt_notify_ecrire($m);
+    $r = vrt_notify_vider(5);
+    $apres = vrt_notify_lire($ref) ?: [];
+    jsonRespCy(['ok' => true, 'etat' => $apres['etat'] ?? '', 'erreur' => mb_substr((string) ($apres['erreur'] ?? ''), 0, 160), 'file' => $r]);
+}
+
 if ($action === 'skysms_diag' && $method === 'GET') {
     requirePayAuth();
     $cle = vrt_skysms_cle_rappel();
@@ -1106,7 +1210,11 @@ if ($action === 'skysms_diag' && $method === 'GET') {
         'pret'           => camerpaySkysmsPret(),
         // L'adresse à déclarer chez SkySMS (champ « URL de callback » du compte).
         'urlRappel'      => $cle !== '' ? camerpayPublicBase() . '/api/payment_camerpay.php?action=skysms_notify&cle=' . rawurlencode($cle) : '',
+        'urlRappelSms'   => $cle !== '' ? camerpayPublicBase() . '/api/payment_camerpay.php?action=skysms_dlr&cle=' . rawurlencode($cle) : '',
         'smsActif'       => vrt_skysms_sms_actif(),
+        // Longueur seulement : départage « mauvais fichier » de « mauvais mot de passe ».
+        'identifiantsLongueur' => ['user' => strlen(vrt_skysms_const('SKYSMS_USER')), 'password' => strlen(vrt_skysms_const('SKYSMS_PASSWORD')),
+                                   'sender' => vrt_skysms_const('SKYSMS_SENDER')],
         'soldeSms'       => vrt_skysms_sms_actif() ? vrt_skysms_solde() : null,
     ]);
 }
@@ -1923,6 +2031,56 @@ function camerpayCampayConfigured() {
    le paiement par code marchand, qui, lui, fonctionne. */
 function camerpaySkysmsPret() {
     return vrt_skysms_collecte_active() && vrt_skysms_jeton_public() !== '' && vrt_skysms_cle_rappel() !== '';
+}
+
+/* Corps d'un rappel SKYSOFT (GET, POST formulaire ou JSON), journalisé borné. */
+function skysmsCorpsRappel($logFile, $tag) {
+    $raw  = (string) file_get_contents('php://input');
+    $body = $_POST;
+    if (!$body && $raw !== '') { $j = json_decode($raw, true); if (is_array($j)) $body = $j; else parse_str($raw, $body); }
+    if (!is_array($body)) $body = [];
+    $q = $_GET; unset($q['action'], $q['cle']);
+    $body = $body + $q;
+    // Trace BORNÉE, clé retirée.
+    camerpayLog($logFile, date('c') . ' [' . $tag . '] ' . substr(json_encode($body, JSON_UNESCAPED_UNICODE), 0, 1500) . "\n");
+    return $body;
+}
+
+/* Clé du rappel — SORT (401/503) si elle est absente ou fausse.
+   SKYSOFT COLLE SES PARAMÈTRES AVEC UN SECOND « ? ». Mesuré le 15/10/2026 :
+   leurs appels de test vides passaient la clé, leurs vrais rappels étaient
+   refusés. Notre URL contient déjà « ?action=…&cle=… » : un « ?statut=1… »
+   ajouté derrière fait lire cle = « <clé>?statut=1 ». On coupe au premier
+   « ? » et on relit la suite comme paramètres. La clé doit rester EXACTE. */
+function skysmsCleValide(array &$body, $logFile, $method, $tagRefus) {
+    $cle = vrt_skysms_cle_rappel();
+    if ($cle === '') { http_response_code(503); echo 'SKYSMS_CALLBACK_CLE absente cote serveur'; exit; }
+    $recue = (string) ($_GET['cle'] ?? ($_SERVER['HTTP_X_VRT_CLE'] ?? ''));
+    if (strpos($recue, '?') !== false) {
+        [$recue, $suite] = explode('?', $recue, 2);
+        $extra = []; parse_str($suite, $extra);
+        foreach ($extra as $k => $v) { if (is_scalar($v) && !isset($body[$k])) $body[$k] = $v; }
+    }
+    $recue = trim($recue);
+    if ($recue === '' || !hash_equals($cle, $recue)) {
+        // Forme de la clé reçue, JAMAIS sa valeur.
+        camerpayLog($logFile, date('c') . ' [' . $tagRefus . '] cle invalide (recue ' . strlen($recue)
+            . ' car., attendue ' . strlen($cle) . ', debut ' . (strncmp($recue, $cle, 8) === 0 ? 'bon' : 'different')
+            . ', methode ' . $method . ")\n");
+        http_response_code(401); echo 'cle invalide'; exit;
+    }
+}
+
+/* Le message de remise auquel se rapporte un accusé SMS (par ssid SkySMS ou
+   par notre idsmsclient). La file est petite (≤ quelques centaines). */
+function skysmsMessageParSms($ssid, $idsms) {
+    if ($ssid === '' && $idsms === '') return null;
+    foreach ((glob(vrt_notify_dir() . '/*.json') ?: []) as $f) {
+        $m = json_decode((string) @file_get_contents($f), true);
+        if (!is_array($m)) continue;
+        if (($ssid !== '' && ($m['ssid'] ?? '') === $ssid) || ($idsms !== '' && ($m['idsms'] ?? '') === $idsms)) return $m;
+    }
+    return null;
 }
 
 /* Applique un verdict SkySMS (rappel, réponse de collecte, ou administration)
