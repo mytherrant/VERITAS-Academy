@@ -594,6 +594,16 @@ if ($action === 'unlock') {
     if (!isset(vrt_livret_classes()[$classe])) lv_err(400, 'Classe inconnue.', 'classe');
     if (!isset(vrt_livret_kinds()[$kind]))     lv_err(400, 'Nature inconnue.', 'kind');
 
+    /* CODE COURT (15/10/2026). Un code vaut « VRT-<CLASSE>-ABCD-EFGH » : seuls
+       les 8 derniers caractères sont secrets, le début répète le cahier que la
+       page connaît déjà. « Code long, fastidieux à recopier » (Jacques) : on
+       accepte donc les 8 seuls, et on reconstitue le code avec la classe de la
+       page. Même secret, même garde (5 échecs par IP, quota d'appareils). */
+    $court = vrt_livret_normaliser($code);
+    if (strlen($court) === 8) {
+        $code = 'VRT-' . strtoupper($classe) . '-' . substr($court, 0, 4) . '-' . substr($court, 4, 4);
+    }
+
     $cle   = vrt_livret_cle($code);
     $entry = $reg['codes'][$cle] ?? null;
 

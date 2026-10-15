@@ -213,10 +213,12 @@ if (!defined('VRT_NOTIFY_LIB')) {
            appareil. Un pack établissement garde le lien nu : ses codes sont à
            distribuer, pas à ouvrir. */
         $ouvrir = ($n > 1 || $code === '' || $lien === '') ? $lien : $lien . '#code=' . rawurlencode($code);
+        // Seuls les 8 derniers caractères sont à saisir (livret.php accepte le code court).
+        $court = preg_match('/-([A-Z0-9]{4})-([A-Z0-9]{4})$/', $code, $mm) ? $mm[1] . '-' . $mm[2] : $code;
         $t = 'VERITAS — votre code d’accès' . "\n"
            . ($titre !== '' ? $titre . "\n" : '')
            . 'Ouvrir votre cahier : ' . $ouvrir . "\n"
-           . 'Code : ' . $code
+           . 'Code : ' . $court
            . ($exp > 0 ? ' (valable jusqu’au ' . date('d/m/Y', $exp) . ', 3 appareils)' : '') . "\n"
            . ($n > 1 ? 'Pack de ' . $n . ' codes : les autres sont sur la page.' . "\n" : '')
            . 'Aide : ' . $aide;

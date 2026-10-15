@@ -191,7 +191,7 @@
 
   function saisirCode() {
     var m = el('lis-msg');
-    var code = window.prompt('Saisis ton code d\'accès (VRT-…)');
+    var code = window.prompt('Saisis ton code d\'accès (8 caractères, ex. ABCD-EFGH)');
     if (!code) return;
     window.VRTLivret.unlock(code).then(function () {
       S.ouvert = true;

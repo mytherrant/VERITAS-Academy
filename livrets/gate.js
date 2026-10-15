@@ -1705,6 +1705,9 @@
      Le code reste à l'écran — c'est lui qui rouvre le cahier sur un autre
      appareil — mais l'acheteur n'a aucun geste à faire. */
   function ouvertureDirecte(code, depuisLien) {
+    // À l'écran, les 8 caractères à saisir sur un autre appareil — pas le préfixe.
+    var mc = /-([A-Z0-9]{4})-([A-Z0-9]{4})$/i.exec(String(code));
+    var court = mc ? (mc[1] + '-' + mc[2]).toUpperCase() : String(code);
     modale(
       '<div style="text-align:center">'
       + '<div style="margin-bottom:2px">' + ico('succes', 38, '#1E7A46') + '</div>'
@@ -1712,7 +1715,7 @@
       + '<div style="' + SUB + '">Ton code d’accès (il t’est aussi envoyé par SMS) :</div>'
       + '<div style="font-family:ui-monospace,monospace;font-weight:800;font-size:20px;color:#1f2b38;'
       + 'background:#f2f8ea;border:2px dashed #57a52c;border-radius:12px;padding:10px;margin:12px 0;'
-      + 'letter-spacing:.06em;user-select:all">' + esc(code) + '</div>'
+      + 'letter-spacing:.06em;user-select:all">' + esc(court) + '</div>'
       + '<div id="vrt-msg" style="font-size:12.5px;color:#5c666f;min-height:17px">Ouverture…</div>'
       + '<button id="vrt-open" style="' + BTN + ';display:none">Ouvrir mon cahier</button>'
       + '</div>'
