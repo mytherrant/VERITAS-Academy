@@ -709,6 +709,8 @@ if (!defined('VRT_NOTIFY_LIB')) {
         $lien = (string) ($m['lien'] ?? vrt_notify_lien((string) ($m['classe'] ?? '')));
         $code = '';
         if (preg_match('/Code\s*:\s*([A-Z0-9\-]+)/u', (string) ($m['texte'] ?? ''), $mm)) $code = $mm[1];
+        // Le bouton ouvre le cahier DIRECTEMENT (lien « #code= » du message), comme le SMS.
+        if (preg_match('/Ouvrir votre cahier\s*:\s*(\S+)/u', (string) ($m['texte'] ?? ''), $ml)) $lien = $ml[1];
         $aide = defined('VRT_NOTIFY_AIDE') ? (string) VRT_NOTIFY_AIDE : '697 63 77 39';
 
         return '<div style="font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:520px;margin:0 auto;'
@@ -722,8 +724,9 @@ if (!defined('VRT_NOTIFY_LIB')) {
              . '<p style="font-size:15px"><a href="' . $e($lien) . '" '
              . 'style="display:inline-block;background:#142554;color:#fff;text-decoration:none;'
              . 'border-radius:9px;padding:12px 20px;font-weight:700">Ouvrir mon cahier</a></p>'
-             . '<p style="font-size:13.5px;color:#5b6672">Ouvrez cette page, saisissez le code, et le cahier '
-             . 's’ouvre. Il fonctionne sur 3 appareils (téléphone, tablette, ordinateur).</p>'
+             . '<p style="font-size:13.5px;color:#5b6672">Le bouton ouvre votre cahier directement. Sur un autre '
+             . 'appareil, saisissez simplement ce code sur la page du cahier. Il fonctionne sur 3 appareils '
+             . '(téléphone, tablette, ordinateur).</p>'
              . '<p style="font-size:13.5px;color:#5b6672">Une difficulté ? Écrivez-nous au '
              . $e($aide) . '. Merci de votre confiance.</p>'
              . '<p style="font-size:12px;color:#98a1aa;border-top:1px solid #e6eaee;padding-top:10px">'

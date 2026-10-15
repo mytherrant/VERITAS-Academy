@@ -295,8 +295,14 @@ async function pret() {
     verifier('l’adresse laissée à l’achat suit jusqu’à la remise',
       E.j.message && E.j.message.mail === 'eleve@example.com',
       'adresse en file : ' + (E.j.message && E.j.message.mail));
-    verifier('le courriel porte le code',
-      (E.j.html || '').indexOf(E.j.code) > 0);
+    /* 15/10/2026 — on ne fait plus recopier que les 8 caractères secrets
+       (« ABCD-EFGH ») : c'est eux que le courriel affiche, et son bouton ouvre
+       le cahier directement avec le code complet dans le fragment « #code= ». */
+    const court = String(E.j.code || '').replace(/^.*-([A-Z0-9]{4})-([A-Z0-9]{4})$/, '$1-$2');
+    verifier('le courriel porte le code à saisir (8 caractères)',
+      court.length === 9 && (E.j.html || '').indexOf('>' + court + '<') > 0);
+    verifier('et son bouton ouvre le cahier sans rien saisir',
+      (E.j.html || '').indexOf('#code=' + encodeURIComponent(E.j.code || '')) > 0);
     verifier('et le lien vers la porte du cahier',
       (E.j.html || '').indexOf('/livrets/cahier.html?o=6e') > 0);
 

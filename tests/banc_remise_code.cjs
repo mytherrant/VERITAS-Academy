@@ -82,12 +82,15 @@ async function ouvrirAvecAchat(page, achat) {
   // sans dépendre d'un délai fixe qui rendrait le banc intermittent.
   try {
     await page.waitForFunction(
-      () => /VRT-[A-Z0-9-]{6,}/.test(document.body.innerText),
+      () => /VRT-[A-Z0-9-]{6,}|TEST-0001/.test(document.body.innerText)
+            || Object.keys(localStorage).some((k) => /^vrt-livret-6e-/.test(k)),
       { timeout: 6000 });
   } catch (e) { /* rien ne s'est affiché : c'est un résultat, pas une panne */ }
   return page.evaluate(() => ({
     texte: document.body.innerText,
     reste: localStorage.getItem('vrt-livret-achat'),
+    // 15/10/2026 : un code unique OUVRE le cahier (jeton posé), sans écran de code.
+    jeton: Object.keys(localStorage).some((k) => /^vrt-livret-6e-/.test(k) && localStorage.getItem(k)),
   }));
 }
 
@@ -181,8 +184,8 @@ async function ouvrirAvecAchat(page, achat) {
     console.log(`${G}⑤ Un code payé et jamais retiré se représente tout seul${R}`);
     {
       const r = await ouvrirAvecAchat(page, { ref: REF, t4: TEL4, q: Date.now() });
-      dire(r.texte.includes(CODE_ATTENDU),
-        'l’acheteur rouvre la page : son code s’affiche sans rien demander',
+      dire(r.jeton || r.texte.includes(CODE_ATTENDU.slice(-9)),
+        'l’acheteur rouvre la page : son cahier s’ouvre sans rien demander',
         'écran obtenu : ' + r.texte.replace(/\s+/g, ' ').slice(0, 90));
       dire(r.reste === null,
         'et l’achat cesse d’être suivi — pas de réclamation rejouée à chaque visite',
