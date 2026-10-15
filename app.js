@@ -11678,6 +11678,7 @@ const ANAV=[
     {k:"visitororders",i:"📦",l:"Commandes visiteurs"}
   ]},
   {s:"💰 Finances",i:[
+    {k:"suivi_skysms",i:"📲",l:"Suivi SkySMS (paiements, codes, SMS)"},
     {k:"prix_calculs",i:"🏷️",l:"Prix & calculs automatiques"},
     {k:"payments",i:"💳",l:"Paiements élèves"},
     {k:"paiements_admin",i:"💰",l:"Tentatives de paiement"},
@@ -11811,6 +11812,7 @@ const PT={
   elearningmgmt:"E-Learning & Contenus premium",
   paywall:"Essais gratuits & mur d'abonnement",
   prix_calculs:"Prix & calculs automatiques",
+  suivi_skysms:"Suivi SkySMS — paiements, codes et SMS",
   plateforme:"Atelier de Français — abonnements & quotas",
   authorsmgmt:"Auteurs & Partage de droits",
   visitororders:"Commandes visiteurs",
@@ -11908,7 +11910,7 @@ function render(p){
     devoirs_teacher:pgDevoirsTeacher,perf_teacher:pgPerfTeacher,
     // Admin
     absences_admin:pgAbsencesAdmin,devoirs_admin:pgDevoirsAdmin,orientation_admin:pgOrientationAdmin,resPedago:pgResPedagoAdmin,paiements_admin:pgPaiementsAdmin,
-    stats_business:pgStatsBusiness,parrainage_admin:pgParrainageAdmin,paywall:pgPaywall,prix_calculs:pgPrixCalculs,
+    stats_business:pgStatsBusiness,parrainage_admin:pgParrainageAdmin,paywall:pgPaywall,prix_calculs:pgPrixCalculs,suivi_skysms:pgSuiviSkysms,
     forum_admin:pgForumAdmin,marketplace_admin:pgMarketplaceAdmin,centres_admin:pgCentresAdmin,
     calendrier_admin:pgCalendrierAdmin,
     partenaires_splits:pgPartenairesSplits,
@@ -16479,7 +16481,7 @@ function pgSettings(){
       <button class="btn bi sm" onclick="DB.tauxHoraire=parseInt(document.getElementById('sc_taux')?.value)||2000;save();toast('✓ Taux horaire mis à jour: '+fmt(DB.tauxHoraire)+'/h')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer taux</button>
     </div>
     <div class="card mt16">
-      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-zap"/></svg></span>Paiements API automatiques (CamerPay / CamPay / Orange Money / MTN MoMo)</div>
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-zap"/></svg></span>Paiements automatiques — SkySMS (MTN MoMo / Orange Money)</div>
       <div class="ib ibg mb14"><span>🎉</span><span><strong>Paiement 100% automatique.</strong> Le client paie → l'opérateur notifie le serveur → l'accès s'active <strong>et le partenaire est crédité</strong>, sans intervention admin.</span></div>
       <div class="ib ibi mb14"><span>🏦</span><span><strong>Une seule chose à mettre à jour</strong> quand le compte au nom du Centre VÉRITAS sera ouvert : les numéros affichés aux clients. <button class="btn bi sm" style="margin-left:8px" onclick="mPayCoordonnees()"><svg class="vico bico" aria-hidden="true"><use href="#lc-building"/></svg>Coordonnées d'encaissement</button></span></div>
       <div class="ib ibt mb14"><span>⚠️</span><span><strong>Une seule voie active par opérateur.</strong> N'activez pas CamPay <em>et</em> l'API directe du même opérateur : deux demandes de paiement partiraient pour une même référence. CamPay = MTN + Orange en un seul contrat (2% de frais, versements partenaires inclus). API directe = zéro intermédiaire, mais un contrat marchand par opérateur.</span></div>
@@ -32312,7 +32314,12 @@ window._skysmsTestSms = _skysmsTestSms;
    Source : payment_camerpay.php?action=skysms_suivi (admin). */
 function _skysmsSuivi(jours){
   var cc = DB.cloudConfig || {};
-  if(!cc.url || !cc.secret){ toast('Synchro serveur non configurée (URL + secret)','warn'); return; }
+  // Page « Suivi SkySMS » (menu Finances) : on remplit la page au lieu d'ouvrir une fenêtre.
+  var zone = document.getElementById('suiviSkysmsZone');
+  if(!cc.url || !cc.secret){
+    if(zone) zone.innerHTML = '<div class="ib ibw"><span>⚠️</span><span>La synchronisation serveur n\'est pas configurée sur ce poste (Paramètres → VÉRITAS Cloud : URL + secret). Le suivi lit les données du serveur.</span></div>';
+    toast('Synchro serveur non configurée (URL + secret)','warn'); return;
+  }
   jours = jours || 14;
   toast('⏳ Chargement du suivi…','info');
   fetch(cc.url.replace(/\/+$/,'') + '/payment_camerpay.php?action=skysms_suivi&jours=' + jours, { headers:{ 'Authorization':'Bearer ' + cc.secret } })
@@ -32368,14 +32375,42 @@ function _skysmsSuivi(jours){
         });
         html += '</tbody></table></div>';
       }
+      zone = document.getElementById('suiviSkysmsZone');
+      if(zone){
+        zone.innerHTML = '<div style="font-size:12px;color:var(--ink3);margin-bottom:10px">'+d.jours+' derniers jours · canaux de remise : '+_esc((d.canaux||[]).join(', ')||'aucun')+'</div>'
+          + html
+          + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">'
+          + '<button class="btn bi" onclick="_skysmsSuivi('+jours+')">Actualiser</button>'
+          + '<button class="btn bo" onclick="_skysmsVerifierSms()">Vérifier la remise des SMS</button>'
+          + '<button class="btn bo" onclick="_skysmsSuivi('+(jours===14?60:14)+')">'+(jours===14?'Voir 60 jours':'Voir 14 jours')+'</button>'
+          + '<button class="btn bo" onclick="_skysmsTestSms()">SMS d\'essai</button>'
+          + '<button class="btn bo" onclick="_payAdminView(\'payment_camerpay.php\',\'skysms_diag\',\'📲 SkySMS — configuration\')">Configuration SkySMS</button>'
+          + '</div>';
+        return;
+      }
       M('📊 Suivi des paiements, codes et SMS', d.jours+' derniers jours · canaux de remise : '+_esc((d.canaux||[]).join(', ')||'aucun'), html,
         '<button class="btn bo" onclick="cm()">Fermer</button>'
         + '<button class="btn bo" onclick="_skysmsVerifierSms()">Vérifier la remise des SMS</button>'
         + '<button class="btn bo" onclick="cm();_skysmsSuivi('+(jours===14?60:14)+')">'+(jours===14?'Voir 60 jours':'Voir 14 jours')+'</button>'
         + '<button class="btn bi" onclick="cm();_skysmsSuivi('+jours+')">Actualiser</button>', true);
     })
-    .catch(function(e){ toast('Erreur : ' + (e && e.message || e), 'err'); });
+    .catch(function(e){
+      var z = document.getElementById('suiviSkysmsZone');
+      if(z) z.innerHTML = '<div class="ib ibw"><span>⚠️</span><span>Le serveur n\'a pas répondu ('+_esc(e && e.message || e)+'). Réessayez dans une minute.</span></div>';
+      toast('Erreur : ' + (e && e.message || e), 'err');
+    });
 }
+/* Page du menu Finances → « Suivi SkySMS ». Le suivi existait, mais caché au
+   fond de Paramètres, sous quatre sections de mise en service : Jacques ne le
+   trouvait pas (15/10/2026). */
+function pgSuiviSkysms(){
+  if(!iA()) return na();
+  setTimeout(function(){ _skysmsSuivi(14); }, 60);
+  return '<div class="pgt">📲 Suivi SkySMS — paiements, codes et SMS</div>'
+    + '<div class="ib ibi mb12"><span>ℹ️</span><span>Chaque achat payé par SkySMS ou par code marchand : le <strong>paiement</strong> (confirmé par l\'opérateur ?), le <strong>code</strong> (affiché au client, utilisé sur un appareil ?) et le <strong>SMS</strong> (envoyé, délivré ?).</span></div>'
+    + '<div class="card" id="suiviSkysmsZone"><div style="color:var(--ink3)">⏳ Chargement…</div></div>';
+}
+window.pgSuiviSkysms = pgSuiviSkysms;
 function _skysmsVerifierSms(){
   _skysmsPost('skysms_sms_verifier', {}).then(function(j){
     toast(j && j.ok ? ('✓ '+j.consultes+' SMS consultés chez SkySMS, '+j.mis_a_jour+' mis à jour') : ('❌ '+((j&&j.error)||'Refusé')), j && j.ok ? 'ok' : 'err');
