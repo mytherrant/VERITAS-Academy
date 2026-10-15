@@ -1103,7 +1103,11 @@ if ($action === 'skysms_notify') {
     if ($opAttendu === '' && $rp['id_client'] === '' && $rp['id_operation'] !== '' && in_array($rp['id_operation'], $ops, true)) {
         $opAttendu = $rp['id_operation'];          // résolu par l'id_operation lui-même
     }
-    if ($opAttendu !== '' && !hash_equals($opAttendu, $rp['id_operation'])) {
+    /* Seul un « payé » ouvre un accès : c'est lui qu'on exige authentique. Un
+       « échec » ou une « attente » sans id_operation reste lu (au pire, le
+       payeur relance sa demande) — c'est aussi la forme minimale qu'emploie
+       tests/banc_skysms_rappel.cjs. */
+    if ($rp['verdict'] === 'paid' && $opAttendu !== '' && !hash_equals($opAttendu, $rp['id_operation'])) {
         $state['a_regler'] = true;
         $state['reason']   = 'Rappel refusé : son id_operation ne correspond pas à la demande envoyée. À vérifier sur le relevé SkySMS.';
         camerpayLog($logFile, date('c') . " [SKYSMS_OP_DIFFERENT] ref=$ref idc={$rp['id_client']} recu=" . mb_substr($rp['id_operation'], 0, 60) . " (accuse 1, rien ouvert)\n");

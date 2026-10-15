@@ -126,16 +126,19 @@ try {
     $st = etat('BANC-A1');
     $op = (string) ($st['id_operation'] ?? '');
     verifier('id_operation de la collecte mémorisé', $op !== '');
-    [$c] = rappel(['id_client' => $idc, 'id_operation' => 'OP-FORGE', 'id_operateur' => 'X', 'statut' => '1']);
+    // SKYSOFT exige « 1 » dès que la clé est bonne (sinon il renvoie sans fin) :
+    // le refus se lit dans l'ÉTAT, pas dans le code HTTP.
+    [$c, $r] = rappel(['id_client' => $idc, 'id_operation' => 'OP-FORGE', 'id_operateur' => 'X', 'statut' => '1']);
     $st = etat('BANC-A1');
-    verifier('rappel « payé » avec un id_operation forgé : refusé', $c >= 400 && ($st['status'] ?? '') !== 'paid', "http $c statut " . ($st['status'] ?? ''));
+    verifier('rappel « payé » avec un id_operation forgé : acquitté « 1 » mais RIEN ouvert', $c === 200 && trim($r) === '1'
+        && ($st['status'] ?? '') !== 'paid' && empty($st['granted']) && !empty($st['a_regler']), "http $c « $r » statut " . ($st['status'] ?? ''));
     [$c] = rappel(['id_client' => $idc, 'id_operation' => $op, 'id_operateur' => 'MP123', 'statut' => '1']);
     $st = etat('BANC-A1');
     verifier('rappel authentique : payé', $c === 200 && ($st['status'] ?? '') === 'paid', "http $c statut " . ($st['status'] ?? ''));
     [$c] = rappel(['id_client' => $idc, 'id_operation' => $op, 'statut' => '1']);
     verifier('rappel rejoué : accepté sans changement', $c === 200 && (etat('BANC-A1')['paid_at'] ?? '') === ($st['paid_at'] ?? 'x'));
-    [$c] = rappel(['statut' => '1', 'id_client' => '1234567890']);
-    verifier('rappel pour un id_client inconnu : 404', $c === 404, "http $c");
+    [$c, $r] = rappel(['statut' => '1', 'id_client' => '1234567890']);
+    verifier('rappel pour un id_client inconnu : acquitté « 1 », sans effet', $c === 200 && trim($r) === '1', "http $c « $r »");
     [$c] = req('GET', "$API?action=skysms_notify&cle=mauvaise&statut=1&id_client=$idc");
     verifier('clé fausse : 401', $c === 401, "http $c");
 
