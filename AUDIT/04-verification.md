@@ -1,7 +1,7 @@
 # 04 — Vérification (15/10/2026, soir)
 
 ## Ce qui est déployé
-Commits poussés sur `master` (avance rapide depuis `a8ba357`), déployés par FTP :
+Commits poussés sur `master` (avance rapide depuis `a8ba357`, puis `e246ddb..bf1a9cd`), déployés par FTP. 2ᵉ vague (audit approfondi) : `d8f4e2f` Campus, `a3fa6b8` SkySMS, `99b61a4` Orange/MTN, `22da842` upload, `07efcf7` CI, `bf1a9cd` tunnel + assets **1.20.28** (vérifié en prod : `app.js?v=1.20.28.040403`, nouveaux messages présents, 0 erreur console). 1ʳᵉ vague :
 
 | Commit | Contenu |
 |---|---|

@@ -1,6 +1,38 @@
 # 00 — Rapport d'audit VÉRITAS (15/10/2026)
 
-> **Statut (15/10, soir)** : n°1 à 8 **corrigés, testés et déployés** (commit `e246ddb`, prod en 1.20.27). Preuves : [04-verification](04-verification.md). N°9 à 17 restent ouverts.
+> **Statut (15/10, nuit)** : n°1 à 8 **corrigés, testés et déployés**, puis l'audit approfondi ci-dessous (A1 à A10) aussi. Commit `bf1a9cd`, prod en **1.20.28**. Preuves : [04-verification](04-verification.md). N°9 à 17 et O1 à O12 restent ouverts.
+
+## Audit approfondi (2ᵉ passe, 15/10 au soir) — CORRIGÉ et déployé
+Deux relectures indépendantes : `php-reviewer` (tout `api/` et `api/campus/`) et `silent-failure-hunter` (parcours critiques et `deploy.yml`). **Chaque constat a été revérifié dans le code avant correction.** Un constat s'est révélé faux : `status` réécrirait l'état SkySMS sans verrou. Il ne le réécrit plus depuis `5d09b62`.
+
+| # | Gravité | Problème | Correctif (commit) |
+|---|---|---|---|
+| A1 | **CRITIQUE** | Campus : sans jeton posé (le défaut), le webhook MoMo/Orange confirmait **n'importe quel** paiement. Scolarité soldée, reçu officiel, SMS au parent. | Fermé sans jeton (503), jeton faux → 401 (`d8f4e2f`) |
+| A2 | HAUTE | Campus : un élève ou un parent pouvait initier un paiement pour **n'importe quel** élève | `student_id` forcé à son propre élève (`d8f4e2f`) |
+| A3 | HAUTE | Campus : une erreur SQL au webhook était répondue 200 « doublon » : l'événement était perdu | Seul le code 23000 est un doublon ; sinon 500 (`d8f4e2f`) |
+| A4 | HAUTE | SkySMS : une **seconde demande** pouvait partir vers un client déjà débité (contrôles non refaits sous le second verrou) | Revérification sous verrou (`a3fa6b8`) |
+| A5 | HAUTE | Un paiement « payé » dont l'octroi était bloqué n'était **jamais rejoué**, et le client lisait « accès activé » | Rejeu dans `list` ; `status` renvoie `granted` ; message « paiement reçu, activation en cours » (`a3fa6b8`, `bf1a9cd`) |
+| A6 | MOY.-HAUTE | `init` : un double clic écrasait l'état (jeton périmé, donc page « introuvable ») ; une écriture ratée renvoyait un faux succès | Création exclusive, 500 si l'écriture échoue (`a3fa6b8`) |
+| A7 | MOYENNE | Orange / MTN : un « échec » rejoué défaisait un « payé » | Garde (`99b61a4`) |
+| A8 | HAUTE | Upload admin : `x.phtml` / `x.phar` gardaient leur extension | L'extension suit le type réel (`22da842`) |
+| A9 | MOYENNE | Le banc SkySMS ne bloquait pas le déploiement | Ajouté à `deploy.yml` (`07efcf7`) |
+| A10 | MOYENNE | Après 12 min, le tunnel invitait à « réessayer » : risque de payer deux fois | Message : WhatsApp + référence avant de repayer (`bf1a9cd`) |
+
+## Restent OUVERTS (non corrigés, avec la raison)
+| # | Gravité | Problème | Pourquoi pas maintenant |
+|---|---|---|---|
+| O1 | HAUTE | Un seul secret de synchro sert à tout : base, uploads, clé HMAC des jetons de compte. Il est accepté en `?_secret=` (donc dans les journaux). | Retirer le repli GET peut casser un client ancien ; séparer la clé HMAC invaliderait les sessions en cours. **Décision à prendre par vous.** |
+| O2 | HAUTE | Campus : `payments/initiate` n'appelle **aucun** fournisseur (« En prod : appeler l'API »). Le paiement en ligne Campus n'existe pas encore. | C'est une fonctionnalité à construire, pas un correctif. A1 empêche toute fausse confirmation en attendant. |
+| O3 | MOYENNE | Un rappel SkySMS refusé (référence inconnue, `id_operation` ou numéro différent) n'est signalé que dans le journal et par `a_regler` : **aucune alerte** | Demande un canal d'alerte (courriel ou WhatsApp exploitant) à choisir |
+| O4 | MOYENNE | Format réel de l'`id_operation` dans le rappel : jamais vu sur un vrai paiement | **Essai réel à 100 F**, puis lire `[SKYSMS_OP_DIFFERENT]` dans le journal |
+| O5 | MOYENNE | `forceFullSync` affiche « ✅ sauvegardé » même si le PUT ou la sauvegarde LWS a échoué | Outil admin ; à corriger dans une passe `app.js` dédiée |
+| O6 | MOYENNE | L'alerte « code payé non remis » est marquée envoyée même si `mail()` échoue | Dépend de O3 (second canal) |
+| O7 | MOYENNE | `news_proxy.php` : TLS non vérifié ; liens RSS non filtrés | Faible enjeu, à traiter avec la prochaine passe |
+| O8 | MOYENNE | `cahier.php` : deux appareils d'un même élève peuvent écraser la sauvegarde l'un de l'autre | Verrou par élève à ajouter, avec un banc |
+| O9 | MOYENNE | `_payRef` : `Math.random`, 4 caractères | Le serveur refuse désormais la collision (409) : impact réduit |
+| O10 | MOYENNE | Upload admin : le HTML reste accepté et servi depuis le domaine | Retirer `text/html` peut casser un usage admin existant : **à confirmer** |
+| O11 | BASSE | `content.php` (préfixe sans séparateur), `demandes.php` (en-tête de courriel), CORS sous-domaines Campus, fichiers `.lock` jamais nettoyés | Faible enjeu |
+| O12 | BASSE | Comptes anciens en `S256` | Migration progressive en cours |
 
 Détail : [01-cartographie](01-cartographie.md) · [02-skysoft](02-skysoft.md) · [03-global](03-global.md)
 
