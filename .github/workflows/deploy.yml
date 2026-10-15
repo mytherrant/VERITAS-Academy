@@ -242,6 +242,12 @@ jobs:
             exit 1
           fi
 
+      # SkySMS encaisse de l'argent réel : un rappel forgé, une référence
+      # recopiée ou une page devinée ne doit rien ouvrir. Ce banc ne vivait que
+      # dans test.yml, qui ne conditionne PAS ce déploiement (audit 15/10/2026).
+      - name: 📲 SkySMS — le flux de paiement tient-il encore ?
+        run: php tests/banc_skysms.php
+
       # ── 🤖 RAPPROCHEMENT SMS (25/09/2026). Un SMS de réception conforme sert
       #    le livret/manuel sans humain ; un faux SMS (solde incohérent, txid
       #    rejoué, expéditeur inconnu) ne sert JAMAIS rien.
