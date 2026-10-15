@@ -192,6 +192,21 @@ if (!defined('VRT_NOTIFY_LIB')) {
             return $accents ? $t : vrt_notify_sans_accents($t);
         }
 
+        // LIVRE NUMÉRIQUE : pas de code, l'accès est sur le compte de l'acheteur.
+        if ((string) ($v['type'] ?? 'code') === 'livre') {
+            $login = (string) ($v['login'] ?? '');
+            $t = 'VERITAS — paiement recu, votre livre est debloque' . "\n"
+               . ($titre !== '' ? $titre . "\n" : '')
+               . 'Lire : ' . ($lien !== '' ? $lien : vrt_notify_site()) . "\n"
+               // Compte créé au paiement : l'identifiant ET le code. Compte déjà
+               // existant : son propre mot de passe, qu'on ne connaît pas.
+               . ($code !== ''
+                    ? 'Connexion : identifiant ' . $login . ', code d’accès ' . $code . "\n"
+                    : 'Connectez-vous avec votre compte VERITAS.' . "\n")
+               . 'Aide : ' . $aide;
+            return $accents ? $t : vrt_notify_sans_accents($t);
+        }
+
         $t = 'VERITAS — votre code d’accès' . "\n"
            . ($titre !== '' ? $titre . "\n" : '')
            . 'Code : ' . $code . "\n"
@@ -559,9 +574,40 @@ if (!defined('VRT_NOTIFY_LIB')) {
         $out = [];
         foreach (explode(',', $c) as $x) {
             $x = trim($x);
-            if (in_array($x, ['mail', 'whatsapp', 'http'], true) && !in_array($x, $out, true)) $out[] = $x;
+            if (in_array($x, ['mail', 'whatsapp', 'http', 'skysms'], true) && !in_array($x, $out, true)) $out[] = $x;
         }
+        /* SKYSMS (15/10/2026) — poser ses identifiants SUFFIT, et il passe en
+           TÊTE. Même doctrine que WhatsApp plus haut : un réglage qui en exige
+           un second ne sera pas fait. Le SMS se paie au message, mais poser
+           SKYSMS_USER est précisément la décision de payer ; et c'est le seul
+           canal qui atteint TOUS les acheteurs — le numéro est obligatoire à
+           la déclaration d'un paiement par code marchand, l'adresse ne l'est
+           pas. Écrit explicitement dans VRT_NOTIFY_CANAL, son rang est respecté. */
+        if (!in_array('skysms', $out, true) && vrt_notify_skysms_pret()) array_unshift($out, 'skysms');
         return $out;
+    }
+
+    /** Identifiants SkySMS posés (sans charger la bibliothèque). */
+    function vrt_notify_skysms_pret(): bool {
+        foreach (['SKYSMS_USER', 'SKYSMS_PASSWORD'] as $k) {
+            if (!defined($k)) return false;
+            $v = trim((string) constant($k));
+            if ($v === '' || strpos($v, 'À_REMPLIR') !== false) return false;
+        }
+        return true;
+    }
+
+    /* Chargée à l'appel, et seulement si elle est là : ce fichier n'inclut rien
+       au chargement (voir l'en-tête), et les bancs recopient l'API par listes. */
+    function vrt_notify_skysms(string $tel, string $msg, string $ref): array {
+        $f = __DIR__ . '/_skysms_lib.php';
+        if (!function_exists('vrt_skysms_sms')) {
+            if (!is_file($f)) return ['ok' => false, 'canal' => 'skysms', 'msg' => '_skysms_lib.php absent du serveur'];
+            require_once $f;
+        }
+        // idsmsclient : SkySMS refuse un doublon (-13). Un nouvel essai de la
+        // même remise doit donc porter un identifiant neuf.
+        return vrt_skysms_sms($tel, $msg, 'VRT' . substr(hash('sha256', $ref), 0, 10) . time());
     }
     /** Compat : le premier canal, pour l'affichage. */
     function vrt_notify_canal(): string { $c = vrt_notify_canaux(); return $c[0] ?? ''; }
@@ -586,6 +632,10 @@ if (!defined('VRT_NOTIFY_LIB')) {
                 } elseif ($canal === 'whatsapp') {
                     if ($tel === '') { $motifs[] = 'whatsapp: pas de numéro'; continue; }
                     $r = vrt_notify_whatsapp($tel, (string) ($m['texte'] ?? ''));
+                } elseif ($canal === 'skysms') {
+                    if ($tel === '') { $motifs[] = 'skysms: pas de numéro'; continue; }
+                    // Texte SANS accents : 160 caractères par segment au lieu de 70.
+                    $r = vrt_notify_skysms($tel, (string) ($m['sms'] ?? ''), (string) ($m['ref'] ?? ''));
                 } else {
                     if ($tel === '') { $motifs[] = 'sms: pas de numéro'; continue; }
                     $r = vrt_notify_http($tel, (string) ($m['sms'] ?? ''));

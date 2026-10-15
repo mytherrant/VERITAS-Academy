@@ -1435,6 +1435,7 @@ jobs:
             api/_auth_lib.php \
             api/_livret_lib.php \
             api/_notify_lib.php \
+            api/_skysms_lib.php \
             api/_parrainage_lib.php \
             api/_recettes_lib.php \
             api/parrainage.php \

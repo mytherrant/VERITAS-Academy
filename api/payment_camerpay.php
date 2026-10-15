@@ -73,6 +73,7 @@ require_once __DIR__ . '/_json_boot.php'; // display_errors=0 + purge des parasi
 require_once __DIR__ . '/payment_config.php';
 require_once __DIR__ . '/_auth_lib.php';
 require_once __DIR__ . '/_pay_funds_lib.php';
+require_once __DIR__ . '/_skysms_lib.php';      // SkySMS : collecte MoMo/Orange + SMS (15/10/2026)
 
 // ── CORS (allowlist stricte, identique aux autres endpoints de paiement) ──
 $__cy_allowed = [
@@ -189,7 +190,11 @@ function camerpayInitGuard($stateDir, $compteDansLeDebit = true) {
     $token = camerpayBearer();
     if ($token !== '' && defined('PAY_API_SECRET') && hash_equals(PAY_API_SECRET, $token)) return 'admin';
     $pub = defined('CAMERPAY_PUBLIC_INIT') ? (string) CAMERPAY_PUBLIC_INIT : '';
-    if ($pub === '' || $token === '' || !hash_equals($pub, $token)) {
+    // SkySMS peut porter son propre jeton public (SKYSMS_PUBLIC_INIT) : c'est
+    // celui que la sonde distribue quand SkySMS encaisse.
+    $pubSky = camerpaySkysmsPret() ? vrt_skysms_jeton_public() : '';
+    $okSky  = ($pubSky !== '' && $token !== '' && hash_equals($pubSky, $token));
+    if (!$okSky && ($pub === '' || $token === '' || !hash_equals($pub, $token))) {
         http_response_code(401);
         echo json_encode(['error' => 'Authentification requise pour initier un paiement']);
         exit;
@@ -296,6 +301,36 @@ function camerpayInitRateLimit($stateDir) {
 // actif ni si les clés sont posées. On renvoie AUSSI l'état de CamPay pour que
 // le client puisse retomber dessus sans une deuxième requête — c'est ce qui
 // rend la bascule CamerPay ⇄ CamPay invisible côté app.
+/* ── SKYSMS (15/10/2026) : ENCAISSEMENT AUTOMATIQUE MTN MoMo + ORANGE MONEY ──
+   Quand SkySMS est prêt (identifiant de collecte + jeton public + clé du
+   rappel), il remplace le paiement par code marchand SANS toucher aux quatre
+   tunnels : la sonde annonce un fournisseur qui encaisse, `init` renvoie une
+   `pay_url` — notre propre page (?action=payer) qui pousse la demande sur le
+   téléphone et suit le statut. Les tunnels ouvrent cette page comme ils
+   ouvraient celle de CamerPay. */
+if ($action === 'config' && ($method === 'GET' || $method === 'POST') && camerpaySkysmsPret()) {
+    jsonRespCy([
+        'ok'              => true,
+        'provider'        => 'skysms',
+        'file'            => 'payment_camerpay.php',
+        'publicInitToken' => vrt_skysms_jeton_public(),
+        'webhookSecret'   => true,
+        // 'redirect' : l'application ouvre la pay_url (notre page ?action=payer)
+        // pendant le clic, comme les trois autres tunnels. Ses textes lisent
+        // `provider === 'skysms'` pour annoncer le code secret, pas la carte.
+        'flow'            => 'redirect',
+        'configured'      => true,
+        'mode'            => 'live',
+        'selfService'     => true,
+        'canCollect'      => true,
+        'sandbox'         => false,
+        'horsService'     => false,
+        'manuel'          => camerpayManuelInfo(),
+        'operators'       => ['MTN', 'ORANGE'],
+        'campayConfigured'=> false,
+        'reason'          => '',
+    ]);
+}
 if ($action === 'config' && ($method === 'GET' || $method === 'POST') && CAMERPAY_HORS_SERVICE) {
     /* Tout ce qu'un tunnel teste pour décider d'ENVOYER le payeur chez le
        fournisseur est éteint, ensemble : canCollect (vitrine, app), selfService
@@ -390,7 +425,7 @@ if ($action === 'config' && ($method === 'GET' || $method === 'POST')) {
 // ════════════════════════════════════════════════════════════
 // 1. INIT — création d'une transaction (POST /api/payment/initiate)
 // ════════════════════════════════════════════════════════════
-if ($action === 'init' && $method === 'POST' && CAMERPAY_HORS_SERVICE) {
+if ($action === 'init' && $method === 'POST' && CAMERPAY_HORS_SERVICE && !camerpaySkysmsPret()) {
     // Un tunnel ancien, mis en cache chez un visiteur, peut encore appeler
     // init : on refuse AVANT de créer le moindre fichier d'état, et on lui
     // donne de quoi payer autrement plutôt qu'un simple « indisponible ».
@@ -401,7 +436,8 @@ if ($action === 'init' && $method === 'POST' && CAMERPAY_HORS_SERVICE) {
 }
 if ($action === 'init' && $method === 'POST') {
     $authMode = camerpayInitGuard($stateDir);   // 'admin' (illimité) OU 'public' (bridé)
-    camerpayRequireConfig();
+    $viaSkysms = camerpaySkysmsPret();
+    if (!$viaSkysms) camerpayRequireConfig();
 
     $input     = json_decode(file_get_contents('php://input'), true) ?: [];
     $montant   = intval($input['montant']   ?? 0);
@@ -578,6 +614,9 @@ if ($action === 'init' && $method === 'POST') {
         jsonRespCy(['error' => 'Méthode inconnue (orange_money, mtn_momo, stripe, paypal)'], 400);
     }
     if ($methode === '' && $payerNumber !== '') $methode = camerpayGuessMethod($payerNumber);
+    if ($viaSkysms && ($methode === 'stripe' || $methode === 'paypal')) {
+        jsonRespCy(['error' => 'Seuls MTN Mobile Money et Orange Money sont acceptés pour le moment.'], 400);
+    }
 
     // Bornes CamerPay par méthode (doc « Limites montant ») — on refuse ICI avec
     // un message en français plutôt que de laisser remonter un 422 opaque.
@@ -609,6 +648,52 @@ if ($action === 'init' && $method === 'POST') {
             'status'           => $existing['status'] ?? 'pending',
             'sandbox'          => (bool)($existing['sandbox'] ?? false),
             'message'          => 'Transaction déjà initialisée pour cette référence.'
+        ]);
+    }
+
+    /* ── SKYSMS : on ne débite RIEN ici ───────────────────────────────────
+       La demande sur le téléphone part de la page ?action=payer, une fois le
+       numéro confirmé par le payeur : la collecte SkySMS garde la connexion
+       ouverte jusqu'à ce qu'il valide (mesuré : 60 s et plus), ce qu'aucun
+       tunnel n'attend d'un `init`. L'état créé ici est le même que celui de
+       CamerPay — même octroi, même suivi, même réconciliation. */
+    if ($viaSkysms) {
+        $state = [
+            'ref'          => $ref,
+            'pay_url'      => camerpayPublicBase() . '/api/payment_camerpay.php?action=payer&ref=' . rawurlencode($ref),
+            'montant'      => $montant,
+            'label'        => $label,
+            'intent'       => $intent,
+            'targetId'     => $targetId,
+            'accountId'    => $accountId,
+            'clientNom'    => $clientNom,
+            'clientTel'    => $payerNumber,
+            'clientEmail'  => (filter_var($clientMail, FILTER_VALIDATE_EMAIL) ? $clientMail : ''),
+            'fundMessage'  => mb_substr(trim((string)($input['fundMessage'] ?? '')), 0, 140),
+            'operator'     => camerpayOperatorLabel($methode),
+            'payment_method' => $methode,
+            'status'       => 'pending',
+            'sandbox'      => false,
+            'created_at'   => date('c'),
+            'provider'     => 'skysms',
+            'frais_estimes'=> (int) round($montant * vrt_skysms_taux_frais()),
+            'commissions'  => (isset($input['commissions']) && is_array($input['commissions'])) ? $input['commissions'] : [],
+            'parrainage'   => $parrainageEtat,
+            'beneficiaires'=> camerpaySanitizeBeneficiaires($input['beneficiaires'] ?? null),
+            'lignes'       => camerpaySanitizeLignes($input['lignes'] ?? null),
+            'push_count'   => 0,
+        ];
+        file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        camerpayLog($logFile, date('c') . " [SKYSMS_INIT] ref=$ref montant=$montant intent=$intent\n");
+        jsonRespCy([
+            'success'          => true,
+            'ref'              => $ref,
+            'transaction_uuid' => '',
+            'pay_url'          => $state['pay_url'],
+            'sandbox'          => false,
+            'operator'         => $state['operator'],
+            'provider'         => 'skysms',
+            'message'          => 'Ouvrez la page de paiement : la demande arrive sur votre téléphone, validez-la avec votre code secret.',
         ]);
     }
 
@@ -827,6 +912,201 @@ if ($action === 'notify') {
 }
 
 // ════════════════════════════════════════════════════════════
+// 2 bis. SKYSMS — page de paiement, demande sur le téléphone, rappel
+// ════════════════════════════════════════════════════════════
+// GET  ?action=payer&ref=            → page HTML (la pay_url des tunnels)
+// POST ?action=skysms_collect        → { ref, tel, auto } pousse la demande (public, borné)
+// GET|POST ?action=skysms_notify&cle= → rappel SkySMS (URL à déclarer chez SkySMS)
+// POST ?action=skysms_confirmer      → { ref } validation manuelle (admin)
+// GET  ?action=skysms_diag           → état de la configuration + solde SMS (admin)
+// POST ?action=skysms_test_sms       → { tel } SMS d'essai (admin)
+if ($action === 'payer' && $method === 'GET') {
+    $ref = trim((string) ($_GET['ref'] ?? ''));
+    $f   = $stateDir . _safeRefCamerpay($ref) . '.json';
+    $st  = ($ref !== '' && is_file($f)) ? (json_decode((string) file_get_contents($f), true) ?: []) : [];
+    header('Content-Type: text/html; charset=utf-8');
+    header('Cache-Control: no-store');
+    header('X-Frame-Options: DENY');
+    header('Referrer-Policy: no-referrer');
+    if (($st['provider'] ?? '') !== 'skysms') {
+        http_response_code(404);
+        echo '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+           . '<title>Paiement introuvable</title><p style="font:16px system-ui;max-width:440px;margin:40px auto;padding:0 16px">'
+           . 'Cette demande de paiement est introuvable ou a expiré. Revenez sur <a href="/">VÉRITAS</a> et relancez l’achat.</p>';
+        exit;
+    }
+    // Chemin RELATIF : la page est servie par ce fichier, donc même origine.
+    echo vrt_skysms_page($st, 'payment_camerpay.php');
+    exit;
+}
+
+if ($action === 'skysms_collect' && $method === 'POST') {
+    if (!vrt_skysms_collecte_active()) jsonRespCy(['error' => 'Le paiement Mobile Money automatique est indisponible.'], 503);
+    $in  = json_decode((string) file_get_contents('php://input'), true) ?: [];
+    $ref = trim((string) ($in['ref'] ?? ''));
+    $stateFile = $stateDir . _safeRefCamerpay($ref) . '.json';
+    if ($ref === '' || !is_file($stateFile)) jsonRespCy(['error' => 'Demande de paiement introuvable.'], 404);
+    $state = json_decode((string) file_get_contents($stateFile), true) ?: [];
+    if (($state['provider'] ?? '') !== 'skysms') jsonRespCy(['error' => 'Référence non gérée par ce moyen de paiement.'], 400);
+    $stat = (string) ($state['status'] ?? '');
+    if ($stat === 'paid') jsonRespCy(['ok' => true, 'status' => 'paid']);
+    if ($stat !== 'pending' && $stat !== 'failed') jsonRespCy(['error' => 'Cette demande est close (' . $stat . ').'], 409);
+
+    $tel = vrt_skysms_tel_local((string) ($in['tel'] ?? ''));
+    if ($tel === '' || camerpayGuessMethod($tel) === '') {
+        jsonRespCy(['error' => 'Entrez un numéro MTN ou Orange à 9 chiffres (6XX XX XX XX).'], 400);
+    }
+    // La page déclenche seule la première demande quand le numéro est connu :
+    // un rechargement de la page ne doit pas en pousser une seconde.
+    if (!empty($in['auto']) && !empty($state['push_count'])) jsonRespCy(['ok' => true, 'deja' => true, 'status' => $stat]);
+
+    // Bornes : cette action est publique et sonne un téléphone. Par référence
+    // (6 demandes, 30 s d'écart) ET par IP (débit partagé avec init).
+    $n = (int) ($state['push_count'] ?? 0);
+    if ($n >= 6) jsonRespCy(['error' => 'Trop de demandes pour ce paiement. Relancez l’achat depuis VÉRITAS.'], 429);
+    $depuis = time() - strtotime((string) ($state['last_push_at'] ?? '@0'));
+    if ($depuis < 30) jsonRespCy(['error' => 'Une demande vient d’être envoyée : validez-la sur votre téléphone, ou réessayez dans ' . (30 - $depuis) . ' s.'], 429);
+    camerpayInitRateLimit($stateDir);
+
+    $idc = vrt_skysms_id_client();
+    $state['push_count']   = $n + 1;
+    $state['last_push_at'] = date('c');
+    $state['clientTel']    = '237' . $tel;
+    $state['operator']     = camerpayOperatorLabel(camerpayGuessMethod($tel));
+    $state['payment_method'] = camerpayGuessMethod($tel);
+    $state['id_clients']   = array_slice(array_merge((array) ($state['id_clients'] ?? []), [$idc]), -6);
+    if ($stat === 'failed') { $state['status'] = 'pending'; unset($state['failed_at'], $state['failure_reason']); }
+    // Écrit AVANT l'appel : SkySMS peut rappeler pendant qu'il nous fait attendre.
+    vrt_skysms_indexer($stateDir, $idc, $ref);
+    file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+    @ignore_user_abort(true);   // le payeur peut fermer la page : on garde la réponse
+    $r = vrt_skysms_collecter($tel, (int) $state['montant'], $idc);
+
+    // Relire : un rappel a pu passer « payé » pendant l'attente.
+    $state = json_decode((string) file_get_contents($stateFile), true) ?: $state;
+    $d = $r['data'];
+    camerpayLog($logFile, date('c') . " [SKYSMS_COLLECT] ref=$ref idc=$idc http={$r['http']} attente=" . ($r['attente'] ? 1 : 0)
+        . ' rep=' . substr(json_encode($d, JSON_UNESCAPED_UNICODE), 0, 400) . "\n");
+    $idop = trim((string) ($d['id_operation'] ?? ''));
+    if ($idop !== '') {
+        vrt_skysms_indexer($stateDir, $idop, $ref);
+        $state['id_operation'] = $idop;
+    }
+    $state['push_reponse'] = ['http' => $r['http'], 'statut' => (string) ($d['statut'] ?? ''),
+                              'description' => mb_substr((string) ($d['description'] ?? $r['msg']), 0, 200), 'at' => date('c')];
+    if (!$r['ok']) {
+        $state['push_error'] = mb_substr($r['msg'], 0, 200);
+        file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        jsonRespCy(['error' => 'La demande n’a pas pu être envoyée : ' . $r['msg']], 502);
+    }
+    // La réponse de la collecte n'ouvre l'accès QUE si l'on a constaté sur un
+    // vrai paiement qu'elle est définitive (voir _skysms_lib.php).
+    if (defined('SKYSMS_COLLECT_REPONSE_FINALE') && SKYSMS_COLLECT_REPONSE_FINALE && !$r['attente']) {
+        $v = vrt_skysms_verdict($d);
+        if ($v !== 'pending') {
+            $m = isset($d['amount']) && is_numeric($d['amount']) ? (int) $d['amount'] : null;
+            skysmsAppliquer($state, $v, $m, 'collecte', (string) ($d['description'] ?? ''), $logFile, $ref);
+        }
+    }
+    file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    jsonRespCy(['ok' => true, 'status' => $state['status'] ?? 'pending', 'attente' => $r['attente'],
+                'message' => 'Validez la demande sur votre téléphone avec votre code secret.']);
+}
+
+if ($action === 'skysms_notify') {
+    $raw  = (string) file_get_contents('php://input');
+    $body = $_POST;
+    if (!$body && $raw !== '') { $j = json_decode($raw, true); if (is_array($j)) $body = $j; else parse_str($raw, $body); }
+    if (!is_array($body)) $body = [];
+    $q = $_GET; unset($q['action'], $q['cle']);
+    $body = $body + $q;
+    // Trace BORNÉE, clé retirée : c'est ce journal qui nous apprendra le
+    // format exact du rappel, que SkySMS ne documente pas.
+    camerpayLog($logFile, date('c') . ' [SKYSMS_RAPPEL] ' . substr(json_encode($body, JSON_UNESCAPED_UNICODE), 0, 1500) . "\n");
+
+    $cle = vrt_skysms_cle_rappel();
+    if ($cle === '') { http_response_code(503); echo 'SKYSMS_CALLBACK_CLE absente cote serveur'; exit; }
+    $recue = (string) ($_GET['cle'] ?? ($_SERVER['HTTP_X_VRT_CLE'] ?? ''));
+    if ($recue === '' || !hash_equals($cle, $recue)) {
+        camerpayLog($logFile, date('c') . " [SKYSMS_RAPPEL_REFUSE] cle invalide\n");
+        http_response_code(401); echo 'cle invalide'; exit;
+    }
+
+    $rp  = vrt_skysms_lire_rappel($body);
+    $ref = vrt_skysms_resoudre($stateDir, [$rp['id_client'], $rp['id_operation']]);
+    $stateFile = $stateDir . _safeRefCamerpay($ref) . '.json';
+    if ($ref === '' || !is_file($stateFile)) {
+        camerpayLog($logFile, date('c') . " [SKYSMS_REF_INCONNUE] idc={$rp['id_client']} idop={$rp['id_operation']}\n");
+        http_response_code(404); echo 'ref inconnue'; exit;
+    }
+    $state = json_decode((string) file_get_contents($stateFile), true) ?: [];
+    if (($state['provider'] ?? '') !== 'skysms') { http_response_code(409); echo 'provider'; exit; }
+
+    $trace = [];
+    foreach ($body as $k => $v) {
+        if (count($trace) >= 25) break;
+        if (is_scalar($v)) $trace[mb_substr((string) $k, 0, 40)] = mb_substr((string) $v, 0, 200);
+    }
+    $state['raw_rappel']  = $trace;
+    $state['notified_at'] = date('c');
+    if ($rp['id_operation'] !== '' && empty($state['id_operation'])) $state['id_operation'] = $rp['id_operation'];
+
+    // Le rappel n'est pas signé : on recoupe le numéro qui a payé.
+    $telAttendu = vrt_skysms_tel_local((string) ($state['clientTel'] ?? ''));
+    if ($rp['verdict'] === 'paid' && $rp['tel'] !== '' && $telAttendu !== '' && $rp['tel'] !== $telAttendu) {
+        $state['a_regler'] = true;
+        $state['reason']   = 'Rappel « payé » pour le ' . $rp['tel'] . ', attendu ' . $telAttendu . ' : à vérifier.';
+        camerpayLog($logFile, date('c') . " [SKYSMS_TEL_DIFFERENT] ref=$ref recu={$rp['tel']} attendu=$telAttendu\n");
+        file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        http_response_code(409); echo 'telephone different'; exit;
+    }
+    if ($rp['verdict'] !== 'pending') {
+        skysmsAppliquer($state, $rp['verdict'], $rp['montant'], 'rappel', $rp['motif'], $logFile, $ref);
+    }
+    file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    http_response_code(200); echo 'OK'; exit;
+}
+
+if ($action === 'skysms_confirmer' && $method === 'POST') {
+    requirePayAuth();
+    $in  = json_decode((string) file_get_contents('php://input'), true) ?: [];
+    $ref = trim((string) ($in['ref'] ?? ''));
+    $stateFile = $stateDir . _safeRefCamerpay($ref) . '.json';
+    if ($ref === '' || !is_file($stateFile)) jsonRespCy(['error' => 'ref inconnue'], 404);
+    $state = json_decode((string) file_get_contents($stateFile), true) ?: [];
+    if (($state['provider'] ?? '') !== 'skysms') jsonRespCy(['error' => 'pas un paiement SkySMS'], 400);
+    $m = (isset($in['montant']) && is_numeric($in['montant'])) ? (int) $in['montant'] : null;
+    skysmsAppliquer($state, 'paid', $m, 'admin', 'Validé par l’administration après contrôle SkySMS', $logFile, $ref);
+    file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    jsonRespCy(['ok' => true, 'ref' => $ref, 'status' => $state['status'] ?? '', 'granted' => !empty($state['granted']),
+                'grant_msg' => $state['grant_msg'] ?? '', 'a_regler' => !empty($state['a_regler'])]);
+}
+
+if ($action === 'skysms_diag' && $method === 'GET') {
+    requirePayAuth();
+    $cle = vrt_skysms_cle_rappel();
+    jsonRespCy([
+        'collecteActive' => vrt_skysms_collecte_active(),
+        'jetonPublic'    => vrt_skysms_jeton_public() !== '',
+        'cleRappel'      => $cle !== '',
+        'pret'           => camerpaySkysmsPret(),
+        'reponseFinale'  => defined('SKYSMS_COLLECT_REPONSE_FINALE') && SKYSMS_COLLECT_REPONSE_FINALE,
+        // L'adresse à déclarer chez SkySMS (champ « URL de callback » du compte).
+        'urlRappel'      => $cle !== '' ? camerpayPublicBase() . '/api/payment_camerpay.php?action=skysms_notify&cle=' . rawurlencode($cle) : '',
+        'smsActif'       => vrt_skysms_sms_actif(),
+        'soldeSms'       => vrt_skysms_sms_actif() ? vrt_skysms_solde() : null,
+    ]);
+}
+
+if ($action === 'skysms_test_sms' && $method === 'POST') {
+    requirePayAuth();
+    $in = json_decode((string) file_get_contents('php://input'), true) ?: [];
+    $r  = vrt_skysms_sms((string) ($in['tel'] ?? ''), (string) ($in['message'] ?? 'Test SMS VERITAS : la passerelle SkySMS fonctionne.'), 'VRTTEST' . time());
+    jsonRespCy($r, !empty($r['ok']) ? 200 : 502);
+}
+
+// ════════════════════════════════════════════════════════════
 // 3. STATUS — polling frontend
 // ════════════════════════════════════════════════════════════
 if ($action === 'status' && $method === 'GET') {
@@ -912,7 +1192,11 @@ if ($action === 'status' && $method === 'GET') {
 // été payée pendant que notre serveur était injoignable.
 if ($action === 'list' && $method === 'GET') {
     requirePayAuth();
-    $payments = camerpayCollectStates($stateDir, 'camerpay_cm');
+    // SkySMS écrit dans le même dossier, avec le même schéma : une seule liste.
+    // Ses lignes « pending » ne se re-vérifient pas (aucune route de statut
+    // chez SkySMS) — camerpayVerifyTransaction rend null faute d'UUID.
+    $payments = array_merge(camerpayCollectStates($stateDir, 'skysms'), camerpayCollectStates($stateDir, 'camerpay_cm'));
+    usort($payments, function ($a, $b) { return strcmp($b['created_at'] ?? '', $a['created_at'] ?? ''); });
     $reconciles = 0;
 
     /* ⏳ DÉLAI AU-DELÀ DUQUEL UNE TRANSACTION EN ATTENTE EST CLOSE.
@@ -996,7 +1280,7 @@ if ($action === 'list' && $method === 'GET') {
             'net_encaisse' => $net,
             'montant_test' => $test,           // sandbox, hors comptabilité
         ],
-        'note'     => 'Les frais sont ESTIMÉS au taux de votre plan CamerPay (' . (camerpayFeeRate() * 100) . ' %). Le montant exact figure sur votre relevé camerpay.biz/client.',
+        'note'     => 'Frais ESTIMÉS (SkySMS : taux SKYSMS_FEE_RATE ; anciennes lignes CamerPay : ' . (camerpayFeeRate() * 100) . ' %). Le montant exact figure sur le relevé du fournisseur.',
         'payments' => $payments
     ]);
 }
@@ -1598,7 +1882,16 @@ function jsonRespCy($data, $code = 200) {
     exit;
 }
 
+/* 🔴 15/10/2026 — CONTRAT CAMERPAY ROMPU. Ce n'est PAS un réglage : aucune
+   constante de payment_config.php ne doit pouvoir rallumer un fournisseur avec
+   lequel VÉRITAS n'a plus de contrat. camerpayConfigured() répond toujours non
+   (sonde, init, vérification, versements des parrains) et camerpayApi() refuse
+   tout appel sortant. Ce fichier reste le point d'entrée des quatre tunnels
+   (il porte l'octroi, le suivi, les cagnottes) — c'est SkySMS qui encaisse. */
+function camerpayResilie() { return true; }
+
 function camerpayConfigured() {
+    if (camerpayResilie()) return false;
     return defined('CAMERPAY_TOKEN') && CAMERPAY_TOKEN !== ''
         && strpos(CAMERPAY_TOKEN, 'À_REMPLIR') === false;
 }
@@ -1609,6 +1902,48 @@ function camerpayCampayConfigured() {
     $cred = defined('CAMPAY_USERNAME') && CAMPAY_USERNAME !== ''
             && strpos(CAMPAY_USERNAME, 'À_REMPLIR') === false;
     return $perm || $cred;
+}
+
+/* SkySMS encaisse-t-il ? Il faut ses TROIS pièces : l'identifiant de collecte
+   (sinon rien ne part), le jeton public (sinon aucun visiteur ne peut lancer
+   un paiement) et la clé du rappel (sinon aucun paiement ne se confirme seul —
+   on encaisserait sans jamais ouvrir l'accès). Une pièce manque : on reste sur
+   le paiement par code marchand, qui, lui, fonctionne. */
+function camerpaySkysmsPret() {
+    return vrt_skysms_collecte_active() && vrt_skysms_jeton_public() !== '' && vrt_skysms_cle_rappel() !== '';
+}
+
+/* Applique un verdict SkySMS (rappel, réponse de collecte, ou administration)
+   puis octroie. Idempotent : `camerpayGrant` ne rejoue pas un octroi posé. */
+function skysmsAppliquer(&$state, $verdict, $montant, $source, $motif, $logFile, $ref) {
+    $st = (string) ($state['status'] ?? 'pending');
+    if ($verdict === 'paid' && ($st === 'pending' || $st === 'failed')) {
+        $attendu = (int) ($state['montant'] ?? 0);
+        $state['montant_verifie'] = ($montant !== null);
+        if ($montant !== null && $montant < $attendu) {
+            $state['status'] = 'underpaid';
+            $state['a_regler'] = true;
+            $state['reason'] = 'Montant encaissé (' . $montant . ') inférieur au montant attendu (' . $attendu . ')';
+            camerpayLog($logFile, date('c') . " [SKYSMS_SOUS_PAIEMENT] ref=$ref paye=$montant attendu=$attendu\n");
+            return;
+        }
+        $state['status']          = 'paid';
+        $state['paid_at']         = date('c');
+        $state['paid_source']     = $source;
+        $state['provider_status'] = 'SUCCESS';
+        $state['montant_paye']    = $montant ?: $attendu;
+        $state['frais']           = (int) round($state['montant_paye'] * vrt_skysms_taux_frais());
+        $state['net_encaisse']    = max(0, $state['montant_paye'] - $state['frais']);
+        unset($state['failed_at'], $state['failure_reason']);
+        camerpayLog($logFile, date('c') . " [SKYSMS_PAYE] ref=$ref source=$source montant={$state['montant_paye']}\n");
+    } elseif ($verdict === 'failed' && $st === 'pending') {
+        $state['status']          = 'failed';
+        $state['failed_at']       = date('c');
+        $state['provider_status'] = 'FAILED';
+        $state['failure_reason']  = $motif !== '' ? $motif : 'Paiement non abouti';
+        camerpayLog($logFile, date('c') . " [SKYSMS_ECHEC] ref=$ref source=$source motif=" . mb_substr($motif, 0, 120) . "\n");
+    }
+    camerpayGrant($state, $logFile, $ref);
 }
 
 // Quel fournisseur sert les paiements ? PAY_PROVIDER tranche si elle est
@@ -1870,6 +2205,7 @@ function camerpayCheckSignature($uuid, $invoiceId, $status, $amountStr, $signatu
 }
 
 function camerpayApi($method, $path, $body = null) {
+    if (camerpayResilie()) return [0, json_encode(['error' => 'CAMERPAY_RESILIE', 'message' => 'Contrat CamerPay rompu : aucun appel.'])];
     $ch = curl_init(camerpayBase() . $path);
     $headers = ['Accept: application/json'];
     if (defined('CAMERPAY_TOKEN') && CAMERPAY_TOKEN !== '') $headers[] = 'Authorization: Bearer ' . CAMERPAY_TOKEN;

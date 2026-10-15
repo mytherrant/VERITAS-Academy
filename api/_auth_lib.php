@@ -1109,6 +1109,52 @@ if (!defined('VRT_AUTH_LIB')) {
        Ce qui ne désigne AUCUN compte ne résout rien — le repli est un filet,
        pas un passe-partout.
        ══════════════════════════════════════════════════════════════════════ */
+    /**
+     * ACHAT DE LIVRE SANS COMPTE (15/10/2026, décision de Jacques : « pas besoin
+     * de compte pour un achat de livre »).
+     *
+     * Le 12/09 on avait écarté le compte fabriqué au paiement parce qu'il ne
+     * portait AUCUN mot de passe : l'acheteur lisait une fois et perdait son
+     * livre. Ici le compte en porte un — un CODE D'ACCÈS tiré au hasard,
+     * envoyé par SMS au numéro qui a payé. Identifiant = ce numéro. C'est ce
+     * code qui rouvre le livre sur n'importe quel appareil.
+     *
+     * Un compte qui porte déjà ce numéro (comme identifiant ou comme téléphone)
+     * reçoit le livre, et son mot de passe n'est JAMAIS changé : un paiement
+     * déclaré pour le numéro d'autrui ne doit pas pouvoir lui prendre son compte.
+     *
+     * @return array{coll:string,idx:int,code:string,login:string}|null
+     */
+    function vrt_compte_par_tel(array &$db, string $tel, string $nom): ?array {
+        $n = preg_replace('/[^0-9]/', '', $tel);
+        if (strlen($n) === 12 && strpos($n, '237') === 0) $n = substr($n, 3);
+        if (strlen($n) !== 9 || $n[0] !== '6') return null;
+        foreach (['visitorAccounts', 'studentAccounts'] as $coll) {
+            if (!isset($db[$coll]) || !is_array($db[$coll])) continue;
+            foreach ($db[$coll] as $i => $a) {
+                if (!is_array($a)) continue;
+                $u = preg_replace('/[^0-9]/', '', (string) ($a['user'] ?? ''));
+                $t = preg_replace('/[^0-9]/', '', (string) ($a['tel'] ?? ''));
+                if ($u === $n || substr($t, -9) === $n) {
+                    return ['coll' => $coll, 'idx' => $i, 'code' => '', 'login' => (string) ($a['user'] ?? $n)];
+                }
+            }
+        }
+        $alpha = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';   // ni 0/O ni 1/I/L : se dicte au téléphone
+        $code = '';
+        for ($k = 0; $k < 6; $k++) $code .= $alpha[random_int(0, strlen($alpha) - 1)];
+        $parts = preg_split('/\s+/', trim($nom), 2);
+        if (!isset($db['visitorAccounts']) || !is_array($db['visitorAccounts'])) $db['visitorAccounts'] = [];
+        $db['visitorAccounts'][] = [
+            'id' => 'va_' . bin2hex(random_bytes(5)), 'user' => $n,
+            'pwd' => vrt_hash_bcrypt($code),
+            'pre' => (string) ($parts[0] ?? ''), 'nom' => (string) ($parts[1] ?? ''),
+            'tel' => '+237' . $n, 'statut' => 'actif', 'plans' => [], 'unlockedBooks' => [],
+            'dateInscription' => date('d/m/Y'), 'creeVia' => 'achat_livre', 'srvSync' => true,
+        ];
+        return ['coll' => 'visitorAccounts', 'idx' => count($db['visitorAccounts']) - 1, 'code' => $code, 'login' => $n];
+    }
+
     function vrt_resoudre_compte(array &$db, string $ref): ?array {
         $ref = trim($ref);
         if ($ref === '') return null;
@@ -1517,20 +1563,20 @@ if (!defined('VRT_AUTH_LIB')) {
         // v1.7 : LIVRE NUMÉRIQUE — débloque la lecture sécurisée sur le compte
         // (acc.unlockedBooks). Idempotent par ref. Lu par api/secure_pdf.php.
         if ($intent === 'digitalbook') {
-            /* PAS DE TITULAIRE FABRIQUÉ ICI — arbitré le 12/09/2026.
-               Une version de ce bloc créait un compte à partir du numéro payeur
-               pour qu'on puisse acheter sans s'inscrire. Écarté : le compte
-               ainsi né ne porte aucun mot de passe et n'a aucun chemin de
-               reprise, donc l'acheteur lit son livre une fois et le perd. Un
-               accès qu'on ne peut pas rouvrir n'est pas un accès.
-               Un achat sans compte est donc REFUSÉ, mais jamais en silence :
-               `bloque` le signale au tableau de bord et la réconciliation le
-               reprend — ce qui rattrape seul le cas d'un compte créé juste
-               après le paiement. */
-            if ($accountId === '') return ['changed' => false, 'msg' => 'accountId manquant'];
+            /* SANS COMPTE (15/10/2026) : le compte se crée au paiement, à partir
+            du numéro qui a payé, avec un CODE D'ACCÈS envoyé par SMS — voir
+            vrt_compte_par_tel(). L'arbitrage du 12/09 (refus de l'achat sans
+            compte) tenait à l'absence de mot de passe ; ce code en est un. */
             $bookId = $targetId;
-            $r = vrt_resoudre_compte($db, $accountId);
-            if (!$r) return ['changed' => false, 'msg' => 'compte introuvable : ' . $accountId];
+            $codeAcces = ''; $loginAcces = '';
+            if ($accountId !== '') {
+                $r = vrt_resoudre_compte($db, $accountId);
+                if (!$r) return ['changed' => false, 'msg' => 'compte introuvable : ' . $accountId];
+            } else {
+                $r = vrt_compte_par_tel($db, $tel, $nom);
+                if (!$r) return ['changed' => false, 'msg' => 'ni compte ni numéro camerounais valide pour rattacher le livre'];
+                $codeAcces = $r['code']; $loginAcces = $r['login'];
+            }
             $acc = &$db[$r['coll']][$r['idx']];
             if (!isset($acc['unlockedBooks']) || !is_array($acc['unlockedBooks'])) $acc['unlockedBooks'] = [];
             if (in_array($bookId, $acc['unlockedBooks'], true)) { unset($acc); return ['changed' => false, 'msg' => 'livre déjà débloqué']; }
@@ -1539,6 +1585,22 @@ if (!defined('VRT_AUTH_LIB')) {
             /* Un livre numerique n'incrementait aucun compteur : son auteur
                voyait zero vente, quel que soit le nombre de lecteurs payants. */
             vrt_rec_vente($db, $state, $bookId);
+            /* Un livre numérique n'a pas de code : l'accès vit sur le compte.
+               On prévient quand même l'acheteur, par la même file que les codes
+               de cahier (SMS SkySMS en tête) — payer par code marchand l'a fait
+               quitter le navigateur, il ne sait pas encore que c'est ouvert.
+               Simple écriture locale : nous sommes sous le verrou. */
+            if (function_exists('vrt_notify_enfiler')) {
+                $livre = function_exists('vrt_catalogue_livre') ? vrt_catalogue_livre($bookId) : null;
+                $titreLivre = (string) ($livre['titre'] ?? $livre['title'] ?? preg_replace('/^[^—]*—\s*/u', '', $label));
+                $nq = vrt_notify_enfiler([
+                    'ref' => $ref, 'tel' => $tel, 'mail' => (string) ($state['clientEmail'] ?? ''),
+                    'type' => 'livre', 'kind' => 'livre', 'titre' => $titreLivre,
+                    'lien' => vrt_notify_site() . '/app.html#livre?id=' . rawurlencode($bookId),
+                    'login' => $loginAcces, 'code' => $codeAcces,
+                ]);
+                if ($nq !== '') vrt_pay_log('[LIVRE_REMISE] ref=' . $ref . ' non enfilee : ' . $nq);
+            }
             return ['changed' => true, 'msg' => 'Livre numérique débloqué'];
         }
 
