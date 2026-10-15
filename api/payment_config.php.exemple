@@ -379,53 +379,6 @@ if (!defined('SKYSMS_PUBLIC_INIT'))  define('SKYSMS_PUBLIC_INIT', '');
 if (!defined('SKYSMS_CALLBACK_CLE')) define('SKYSMS_CALLBACK_CLE', '');
 if (!defined('SKYSMS_FEE_RATE'))     define('SKYSMS_FEE_RATE', 0.0);
 
-// ============================================================
-// 📲 SKYSMS (SKYSOFT, skysms.cm) — SMS des codes d'accès   (api/_skysms_lib.php)
-// ============================================================
-// Poser SKYSMS_USER + SKYSMS_PASSWORD SUFFIT : le canal « skysms » passe alors
-// EN TÊTE de VRT_NOTIFY_CANAL, sans autre réglage. Il envoie :
-//   • le code d'un cahier en ligne dès que le paiement est validé (par vous,
-//     ou tout seul par le rapprochement SMS du téléphone marchand) ;
-//   • « votre livre est débloqué » pour un livre numérique (accès sur le compte).
-// Vérifier : Admin → Paramètres → Paiements → « SkySMS : SMS d'essai ».
-// ⚠️ Le 15/10/2026, le compte SMS fourni répondait « Compte Inexistant »
-//    (statut -2) : faire activer le compte par SKYSOFT avant d'attendre un SMS.
-// ⚠️ L'expéditeur (11 caractères max) doit être autorisé chez SKYSOFT, sinon
-//    statut -12. « SKYSOFT » est celui de leur exemple.
-if (!defined('SKYSMS_USER'))     define('SKYSMS_USER',     'À_REMPLIR');
-if (!defined('SKYSMS_PASSWORD')) define('SKYSMS_PASSWORD', 'À_REMPLIR');
-if (!defined('SKYSMS_SENDER'))   define('SKYSMS_SENDER',   'VERITAS');
-
-// ── Collecte Mobile Money SkySMS : L'ENCAISSEMENT AUTOMATIQUE (15/10/2026) ──
-// CamerPay est résilié (aucun appel possible, quoi qu'on écrive ici). SkySMS
-// pousse la demande de paiement sur le téléphone du payeur (MTN ou Orange) ;
-// SON RAPPEL au serveur confirme le paiement, et l'octroi fait le reste :
-// accès, code de cahier par SMS, commissions (code ami, partenaires, parts
-// d'auteur), reçu. Les codes marchands restent le repli manuel.
-//
-// IL FAUT LES TROIS PIÈCES, sinon la sonde reste sur les codes marchands :
-//   1. SKYSMS_UID           — l'uid de collecte fourni par SKYSOFT
-//   2. SKYSMS_PUBLIC_INIT   — jeton public (pub_ + 32 hex) ; vide = CAMERPAY_PUBLIC_INIT
-//   3. SKYSMS_CALLBACK_CLE  — 24 caractères minimum : bin2hex(random_bytes(16))
-// 👉 Puis faire déclarer CHEZ SKYSOFT l'URL de rappel du compte (urlCallBack) :
-//      https://veritas-school.com/api/payment_camerpay.php?action=skysms_notify&cle=<SKYSMS_CALLBACK_CLE>
-//    (Admin → Paramètres → Paiements → « SkySMS : configuration » l'affiche toute prête.)
-// Sans rappel, un paiement encaissé reste « en attente » : le valider à la main
-// par « SkySMS : valider un paiement » après contrôle sur le tableau de bord SkySMS.
-//
-// SKYSMS_COLLECT_REPONSE_FINALE : la réponse IMMÉDIATE de la collecte n'est pas
-// documentée. Ne la passer à true qu'après avoir constaté, sur un vrai paiement,
-// qu'elle ne répond « succès » qu'une fois l'argent reçu — sinon un accès
-// s'ouvrirait sans paiement. Le journal [SKYSMS_COLLECT] montre ce qu'elle renvoie.
-// SKYSMS_FEE_RATE : commission SkySMS (ex. 0.02 pour 2 %), déduite du NET
-// affiché dans « Encaissements ». Les commissions partenaires se calculent sur
-// le montant payé, comme avec les autres fournisseurs.
-if (!defined('SKYSMS_UID'))          define('SKYSMS_UID', 'À_REMPLIR');
-if (!defined('SKYSMS_PUBLIC_INIT'))  define('SKYSMS_PUBLIC_INIT', '');
-if (!defined('SKYSMS_CALLBACK_CLE')) define('SKYSMS_CALLBACK_CLE', '');
-if (!defined('SKYSMS_COLLECT_REPONSE_FINALE')) define('SKYSMS_COLLECT_REPONSE_FINALE', false);
-if (!defined('SKYSMS_FEE_RATE'))     define('SKYSMS_FEE_RATE', 0.0);
-
 // ════════════════════════════════════════════════════════════
 // 🤖 VALIDATION AUTOMATIQUE PAR LE SMS DE RÉCEPTION (26/09/2026)
 // ════════════════════════════════════════════════════════════
