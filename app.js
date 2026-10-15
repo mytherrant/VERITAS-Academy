@@ -32791,7 +32791,9 @@ function _payStartPollingMtn(ref){
     if(checks > 24){ // arrêt après 2 min (MTN expire ~60s)
       _payStopPolling();
       var sel=document.getElementById('payMtnStatus');
-      if(sel){sel.innerHTML='⏰ Délai dépassé. Réessayez si le paiement n\'a pas abouti.';sel.style.color='var(--or)';}
+      /* Ne PAS inviter à « réessayer » : une confirmation peut arriver après ce
+         délai, et le client qui relance paierait deux fois (audit 15/10/2026). */
+      if(sel){sel.innerHTML='⏰ Pas encore de confirmation. Si vous avez validé sur votre téléphone, votre accès s\'ouvrira dès que l\'opérateur confirme. Sinon, écrivez-nous sur WhatsApp au 697 63 77 39 avec la référence '+String(ref).replace(/[^\w\-]/g,'')+' avant de payer à nouveau.';sel.style.color='var(--or)';}
       return;
     }
     fetch(url).then(function(r){return r.json();}).then(function(data){
@@ -33275,6 +33277,15 @@ function _payProviderName(){
 window._payProviderName = _payProviderName;
 
 // Polling du fournisseur actif (même contrat de réponse que MTN/Orange)
+/* « Payé » n'est pas « accès ouvert » : un octroi bloqué côté serveur (compte
+   introuvable…) renvoie granted:false (audit 15/10/2026). Un serveur plus
+   ancien n'envoie pas le champ : on garde alors l'ancien message. */
+function _payMsgPaye(data, ref){
+  if(data && data.granted===false){
+    return '✅ Paiement reçu. Activation en cours : si votre accès n\'apparaît pas d\'ici quelques minutes, écrivez-nous sur WhatsApp au 697 63 77 39 avec la référence '+String(ref).replace(/[^\w\-]/g,'')+'.';
+  }
+  return '✅ Paiement confirmé — accès activé.';
+}
 function _payStartPollingCampay(ref){
   _payStopPolling();
   var url = _payApiBase()+'/'+_payProviderFile()+'?action=status&ref='+encodeURIComponent(ref);
@@ -33290,7 +33301,9 @@ function _payStartPollingCampay(ref){
     if(checks > maxChecks){
       _payStopPolling();
       var sel=document.getElementById('payCampayStatus');
-      if(sel){sel.innerHTML='⏰ Délai dépassé. Réessayez si le paiement n\'a pas abouti.';sel.style.color='var(--or)';}
+      /* Ne PAS inviter à « réessayer » : une confirmation peut arriver après ce
+         délai, et le client qui relance paierait deux fois (audit 15/10/2026). */
+      if(sel){sel.innerHTML='⏰ Pas encore de confirmation. Si vous avez validé sur votre téléphone, votre accès s\'ouvrira dès que l\'opérateur confirme. Sinon, écrivez-nous sur WhatsApp au 697 63 77 39 avec la référence '+String(ref).replace(/[^\w\-]/g,'')+' avant de payer à nouveau.';sel.style.color='var(--or)';}
       return;
     }
     fetch(url).then(function(r){return r.json();}).then(function(data){
@@ -33321,13 +33334,13 @@ function _payStartPollingCampay(ref){
           // du payeur pendant qu'il regarde l'écran, pas dans un menu qu'il
           // faudra retrouver. Et on ne referme plus la modale toute seule tant
           // qu'il ne l'a pas vue.
-          statusEl.innerHTML = '✅ Paiement confirmé — accès activé.'
+          statusEl.innerHTML = _payMsgPaye(data, ref)
             + '<div style="margin-top:10px"><button class="btn bi" style="width:100%" onclick="_recuOuvrir(\''+String(ref).replace(/[^\w\-]/g,'')+'\')">🧾 Télécharger mon reçu</button></div>';
           statusEl.style.color = 'var(--gr)';
-          if(typeof toast==='function') toast('✅ Paiement confirmé et accès activé !','ok');
+          if(typeof toast==='function') toast(data.granted===false ? '✅ Paiement reçu — activation en cours' : '✅ Paiement confirmé et accès activé !','ok');
           return;
         }
-        setTimeout(function(){cm();toast('✅ Paiement confirmé et accès activé !','ok');},2500);
+        setTimeout(function(){cm();toast(data.granted===false ? '✅ Paiement reçu — activation en cours' : '✅ Paiement confirmé et accès activé !','ok');},2500);
       } else if(data.status==='underpaid'){
         // Montant encaissé < montant attendu : le serveur refuse d'ouvrir l'accès.
         statusEl.innerHTML = '⚠️ Montant incomplet. Contactez le centre avec la réf '+ref+'.';

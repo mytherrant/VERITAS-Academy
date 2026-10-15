@@ -1,4 +1,6 @@
-# 00 — Rapport d'audit VÉRITAS (15/10/2026) — en attente de votre validation
+# 00 — Rapport d'audit VÉRITAS (15/10/2026)
+
+> **Statut (15/10, soir)** : n°1 à 8 **corrigés, testés et déployés** (commit `e246ddb`, prod en 1.20.27). Preuves : [04-verification](04-verification.md). N°9 à 17 restent ouverts.
 
 Détail : [01-cartographie](01-cartographie.md) · [02-skysoft](02-skysoft.md) · [03-global](03-global.md)
 
