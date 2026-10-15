@@ -1000,15 +1000,12 @@ if ($action === 'skysms_collect' && $method === 'POST') {
         file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         jsonRespCy(['error' => 'La demande n’a pas pu être envoyée : ' . $r['msg']], 502);
     }
-    // La réponse de la collecte n'ouvre l'accès QUE si l'on a constaté sur un
-    // vrai paiement qu'elle est définitive (voir _skysms_lib.php).
-    if (defined('SKYSMS_COLLECT_REPONSE_FINALE') && SKYSMS_COLLECT_REPONSE_FINALE && !$r['attente']) {
-        $v = vrt_skysms_verdict($d);
-        if ($v !== 'pending') {
-            $m = isset($d['amount']) && is_numeric($d['amount']) ? (int) $d['amount'] : null;
-            skysmsAppliquer($state, $v, $m, 'collecte', (string) ($d['description'] ?? ''), $logFile, $ref);
-        }
-    }
+    /* La réponse de la collecte n'ouvre JAMAIS l'accès. Mesuré le 15/10/2026 :
+       elle revient en ~20 s avec `statut:"1"` et « Demande de collecte
+       enregistrée… Veuillez valider le paiement en saisissant votre code Pin »
+       — AVANT que le payeur ait validé. Lue comme un verdict, elle aurait
+       ouvert l'accès sans paiement. Seuls le rappel et l'administration
+       confirment. */
     file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     jsonRespCy(['ok' => true, 'status' => $state['status'] ?? 'pending', 'attente' => $r['attente'],
                 'message' => 'Validez la demande sur votre téléphone avec votre code secret.']);
@@ -1091,7 +1088,6 @@ if ($action === 'skysms_diag' && $method === 'GET') {
         'jetonPublic'    => vrt_skysms_jeton_public() !== '',
         'cleRappel'      => $cle !== '',
         'pret'           => camerpaySkysmsPret(),
-        'reponseFinale'  => defined('SKYSMS_COLLECT_REPONSE_FINALE') && SKYSMS_COLLECT_REPONSE_FINALE,
         // L'adresse à déclarer chez SkySMS (champ « URL de callback » du compte).
         'urlRappel'      => $cle !== '' ? camerpayPublicBase() . '/api/payment_camerpay.php?action=skysms_notify&cle=' . rawurlencode($cle) : '',
         'smsActif'       => vrt_skysms_sms_actif(),

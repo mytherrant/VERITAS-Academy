@@ -20,12 +20,17 @@
 //     `methodeCallBack` : SkySMS rappelle l'URL déclarée chez eux, au format
 //     non documenté. On l'authentifie donc par un SECRET DANS L'URL
 //     (SKYSMS_CALLBACK_CLE) et on recoupe montant + numéro.
-//   • La réponse de la collecte est un ACCUSÉ, pas une preuve de paiement :
-//     son `statut` n'est pas documenté. Tant que SKYSMS_COLLECT_REPONSE_FINALE
-//     vaut false (défaut), elle n'ouvre JAMAIS un accès — seul le rappel (ou
-//     la validation de l'administration) le fait. Mesuré le 15/10/2026 : la
-//     collecte de 100 F n'a rien répondu en 61 s (connexion coupée côté
-//     SkySMS) — elle attend vraisemblablement la validation du payeur.
+//   • La réponse de la collecte est un ACCUSÉ, pas une preuve de paiement, et
+//     elle n'ouvre JAMAIS un accès — seul le rappel (ou la validation de
+//     l'administration) le fait. Mesuré le 15/10/2026, demande de 100 F reçue
+//     sur le téléphone : réponse en ~20 s, AVANT la saisie du code Pin —
+//       { "statut":"1", "amount":100, "telephone":"697637739",
+//         "description":"Demande de collecte enregistrée avec succes.\nVeuillez
+//          valider le paiement en saisissant votre code Pin.",
+//         "id_operation":"<uuid>" }
+//     « 1 » = demande enregistrée. id_client alphanumérique accepté. (Un
+//     premier essai, le même jour, avait été coupé à 61 s sans réponse : on
+//     garde donc la coupure pour « demande partie, rappel attendu ».)
 //
 // Les identifiants ne vivent QUE dans api/payment_config.php (gitignoré) : le
 // dépôt est public, et SkySMS les fait voyager en paramètres d'URL — on ne
