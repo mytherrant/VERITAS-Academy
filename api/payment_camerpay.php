@@ -1025,8 +1025,23 @@ if ($action === 'skysms_notify') {
     $cle = vrt_skysms_cle_rappel();
     if ($cle === '') { http_response_code(503); echo 'SKYSMS_CALLBACK_CLE absente cote serveur'; exit; }
     $recue = (string) ($_GET['cle'] ?? ($_SERVER['HTTP_X_VRT_CLE'] ?? ''));
+    /* SKYSOFT COLLE SES PARAMÈTRES AVEC UN SECOND « ? ». Mesuré le 15/10/2026 :
+       leurs appels de test vides passaient la clé, leurs vrais rappels (statut,
+       id_operateur, id_client) étaient refusés « cle invalide ». Notre URL
+       contient déjà « ?action=…&cle=… » : un « ?statut=1… » ajouté derrière
+       fait lire à PHP cle = « <clé>?statut=1 ». On coupe au premier « ? » et on
+       récupère ce qui suit comme paramètres. La clé doit toujours être EXACTE. */
+    if (strpos($recue, '?') !== false) {
+        [$recue, $suite] = explode('?', $recue, 2);
+        $extra = []; parse_str($suite, $extra);
+        foreach ($extra as $k => $v) { if (is_scalar($v) && !isset($body[$k])) $body[$k] = $v; }
+    }
+    $recue = trim($recue);
     if ($recue === '' || !hash_equals($cle, $recue)) {
-        camerpayLog($logFile, date('c') . " [SKYSMS_RAPPEL_REFUSE] cle invalide\n");
+        // Forme de la clé reçue, JAMAIS sa valeur : longueur, bon début, caractères en trop.
+        camerpayLog($logFile, date('c') . ' [SKYSMS_RAPPEL_REFUSE] cle invalide (recue ' . strlen($recue)
+            . ' car., attendue ' . strlen($cle) . ', debut ' . (strncmp($recue, $cle, 8) === 0 ? 'bon' : 'different')
+            . ', methode ' . $method . ")\n");
         http_response_code(401); echo 'cle invalide'; exit;
     }
 
