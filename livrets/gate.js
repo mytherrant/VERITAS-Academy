@@ -1606,6 +1606,13 @@
     var lot     = (r && r.codes && r.codes.length > 1) ? r.codes : null;
     var code    = (r && r.code) || r;
     var aCopier = lot ? lot.join('\n') : code;
+    /* ── 15/10/2026 : UN SEUL CODE → LE CAHIER S'OUVRE TOUT SEUL ─────────────
+       « Copier le code, l'envoyer par WhatsApp, et tous les autres étapes
+       fatiguent l'usager » (Jacques). Le code part déjà par SMS, avec un lien
+       qui ouvre le cahier ; ici on ne demande plus rien : on déverrouille.
+       L'écran complet (copier, WhatsApp, e-mail) ne reste que pour un PACK
+       établissement, qu'un proviseur doit distribuer. */
+    if (!lot) { ouvertureDirecte(code); return; }
     /* Un pack etablissement peut porter des centaines de codes : le message
        depasserait la longueur d'URL tenable et partirait tronque. Le bouton
        disparait alors, et « Copier » reste — un proviseur distribue depuis un
@@ -1693,6 +1700,57 @@
       });
     };
   }
+
+  /* Déverrouillage immédiat d'un code reçu (paiement confirmé, ou lien du SMS).
+     Le code reste à l'écran — c'est lui qui rouvre le cahier sur un autre
+     appareil — mais l'acheteur n'a aucun geste à faire. */
+  function ouvertureDirecte(code, depuisLien) {
+    modale(
+      '<div style="text-align:center">'
+      + '<div style="margin-bottom:2px">' + ico('succes', 38, '#1E7A46') + '</div>'
+      + '<div style="' + TTL + '">' + (depuisLien ? 'Ton cahier s’ouvre' : 'C’est payé, ton cahier s’ouvre') + '</div>'
+      + '<div style="' + SUB + '">Ton code d’accès (il t’est aussi envoyé par SMS) :</div>'
+      + '<div style="font-family:ui-monospace,monospace;font-weight:800;font-size:20px;color:#1f2b38;'
+      + 'background:#f2f8ea;border:2px dashed #57a52c;border-radius:12px;padding:10px;margin:12px 0;'
+      + 'letter-spacing:.06em;user-select:all">' + esc(code) + '</div>'
+      + '<div id="vrt-msg" style="font-size:12.5px;color:#5c666f;min-height:17px">Ouverture…</div>'
+      + '<button id="vrt-open" style="' + BTN + ';display:none">Ouvrir mon cahier</button>'
+      + '</div>'
+    );
+    var b = document.getElementById('vrt-open');
+    var ouvrir = function () {
+      if (b) { b.style.display = 'none'; }
+      msg('Ouverture…', true);
+      VRT.unlock(code).then(function () {
+        fermerModale();
+        if (typeof VRT.onOuvert === 'function') VRT.onOuvert();
+      }).catch(function (e) {
+        // Réseau coupé ou code refusé : on laisse la main, sans rien perdre.
+        if (b) { b.style.display = 'block'; b.disabled = false; }
+        msg((e && e.message) || 'Ouverture impossible pour l’instant. Réessaie.');
+      });
+    };
+    if (b) b.onclick = ouvrir;
+    ouvrir();
+  }
+
+  /* ── LE LIEN DU SMS OUVRE LE CAHIER ──────────────────────────────────────
+     Le SMS de remise porte « …#code=XXXX » : un appui et le cahier s'ouvre,
+     sur n'importe quel téléphone, sans rien saisir. Le code voyage dans le
+     FRAGMENT (#), qui ne part jamais au serveur ni dans un Referer ; on
+     l'efface de la barre d'adresse aussitôt lu. « ?code= » est accepté aussi. */
+  (function codeDuLien() {
+    var m = /(?:^|[#&?])code=([A-Za-z0-9-]{4,40})/.exec((location.hash || '') + '&' + (location.search || ''));
+    if (!m) return;
+    var code = decodeURIComponent(m[1]);
+    try {
+      var propre = location.pathname + location.search.replace(/([?&])code=[^&]*&?/, '$1').replace(/[?&]$/, '');
+      history.replaceState(null, '', propre);
+    } catch (e) { /* vieux navigateur : l'adresse garde le code, sans gravité */ }
+    var lancer = function () { setTimeout(function () { ouvertureDirecte(code, true); }, 300); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', lancer);
+    else lancer();
+  })();
 
   /* ── ON N'IMPRIME PAS LE CAHIER ───────────────────────────────────────────
      `cahier.js` interceptait Ctrl+S / Ctrl+P / Ctrl+U — mais rien n'empêchait

@@ -682,6 +682,9 @@ if ($action === 'init' && $method === 'POST') {
             'beneficiaires'=> camerpaySanitizeBeneficiaires($input['beneficiaires'] ?? null),
             'lignes'       => camerpaySanitizeLignes($input['lignes'] ?? null),
             'push_count'   => 0,
+            // Page d'où l'acheteur est parti (même site seulement) : la page de
+            // paiement l'y ramène une fois le paiement confirmé.
+            'retour'       => skysmsRetour(),
         ];
         file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         camerpayLog($logFile, date('c') . " [SKYSMS_INIT] ref=$ref montant=$montant intent=$intent\n");
@@ -1091,7 +1094,10 @@ if ($action === 'skysms_dlr') {
                  'recu_at' => time(), 'source' => 'rappel'];
     vrt_notify_ecrire($m);
     camerpayLog($logFile, date('c') . ' [SKYSMS_DLR] ref=' . ($m['ref'] ?? '') . ' statut=' . $m['dlr']['statut'] . "\n");
-    http_response_code(200); echo 'OK'; exit;
+    // Accusé attendu par SKYSOFT (15/10/2026) : le corps « 1 » = notification reçue.
+    // Toute autre réponse (clé refusée, SMS inconnu) leur fait renvoyer.
+    header('Content-Type: text/plain; charset=utf-8');
+    http_response_code(200); echo '1'; exit;
 }
 
 /* ── SUIVI (admin) : paiements, codes remis, SMS envoyés et délivrés ────────── */
@@ -2031,6 +2037,19 @@ function camerpayCampayConfigured() {
    le paiement par code marchand, qui, lui, fonctionne. */
 function camerpaySkysmsPret() {
     return vrt_skysms_collecte_active() && vrt_skysms_jeton_public() !== '' && vrt_skysms_cle_rappel() !== '';
+}
+
+/* Page d'origine de l'achat, d'après le Referer — acceptée seulement si elle
+   est sur NOTRE domaine : la page de paiement y redirige, on n'en fait pas une
+   redirection ouverte vers n'importe où. */
+function skysmsRetour() {
+    $r = (string) ($_SERVER['HTTP_REFERER'] ?? '');
+    $p = $r !== '' ? parse_url($r) : false;
+    $nous = (string) parse_url(camerpayPublicBase(), PHP_URL_HOST);
+    if (!$p || empty($p['host']) || !in_array(strtolower((string) ($p['scheme'] ?? '')), ['https', 'http'], true)) return '';
+    $h = function ($x) { return preg_replace('/^www\./', '', strtolower((string) $x)); };
+    if ($h($p['host']) !== $h($nous)) return '';
+    return mb_substr(preg_replace('/#.*$/', '', $r), 0, 300);
 }
 
 /* Corps d'un rappel SKYSOFT (GET, POST formulaire ou JSON), journalisé borné. */

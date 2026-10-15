@@ -207,14 +207,19 @@ if (!defined('VRT_NOTIFY_LIB')) {
             return $accents ? $t : vrt_notify_sans_accents($t);
         }
 
+        /* 15/10/2026 — UN APPUI, ET LE CAHIER S'OUVRE. Le lien porte le code
+           dans son fragment (« #code= ») : livrets/gate.js le lit et déverrouille
+           sans rien demander. Le code reste écrit en clair pour un autre
+           appareil. Un pack établissement garde le lien nu : ses codes sont à
+           distribuer, pas à ouvrir. */
+        $ouvrir = ($n > 1 || $code === '' || $lien === '') ? $lien : $lien . '#code=' . rawurlencode($code);
         $t = 'VERITAS — votre code d’accès' . "\n"
            . ($titre !== '' ? $titre . "\n" : '')
-           . 'Code : ' . $code . "\n"
+           . 'Ouvrir votre cahier : ' . $ouvrir . "\n"
+           . 'Code : ' . $code
+           . ($exp > 0 ? ' (valable jusqu’au ' . date('d/m/Y', $exp) . ', 3 appareils)' : '') . "\n"
            . ($n > 1 ? 'Pack de ' . $n . ' codes : les autres sont sur la page.' . "\n" : '')
-           . 'Ouvrir : ' . $lien . "\n"
-           . 'Saisissez le code sur cette page.'
-           . ($exp > 0 ? ' Valable jusqu’au ' . date('d/m/Y', $exp) . ', 3 appareils.' : '')
-           . "\n" . 'Aide : ' . $aide;
+           . 'Aide : ' . $aide;
         return $accents ? $t : vrt_notify_sans_accents($t);
     }
 

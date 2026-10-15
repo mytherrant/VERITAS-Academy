@@ -310,7 +310,7 @@ if (!function_exists('vrt_skysms_base')) {
         $ref     = (string) ($state['ref'] ?? '');
         $montant = number_format((int) ($state['montant'] ?? 0), 0, ',', ' ');
         $tel     = vrt_skysms_tel_local((string) ($state['clientTel'] ?? ''));
-        $cfg = json_encode(['ref' => $ref, 'api' => $api, 'tel' => $tel,
+        $cfg = json_encode(['ref' => $ref, 'api' => $api, 'tel' => $tel, 'retour' => (string) ($state['retour'] ?? ''),
                             'auto' => ($tel !== '' && empty($state['push_count']))],
                            JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
         return '<!doctype html><html lang="fr"><head><meta charset="utf-8">'
@@ -343,10 +343,12 @@ if (!function_exists('vrt_skysms_base')) {
 . 'function majOp(){var x=oper(loc(t.value));o.textContent=x?("Opérateur : "+x):"";}t.addEventListener("input",majOp);majOp();'
 . 'function dire(c,m){e.className=c;e.textContent=m;}'
 . 'function sonder(){if(fini)return;fetch(C.api+"?action=status&ref="+encodeURIComponent(C.ref),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){'
-. 'if(j.status==="paid"){fini=true;clearInterval(suivi);b.disabled=true;dire("ok","Paiement confirmé. Votre accès est activé : vous pouvez fermer cette page et revenir sur VÉRITAS.");}'
+. 'if(j.status==="paid"){fini=true;clearInterval(suivi);b.disabled=true;dire("ok","Paiement confirmé. Votre accès s’ouvre…");setTimeout(retourner,1500);}'
 . 'else if(j.status==="failed"){clearInterval(suivi);suivi=null;b.disabled=false;dire("ko","Paiement non abouti"+(j.reason?" : "+j.reason:"")+". Vous pouvez réessayer.");}'
 . 'else if(j.status==="underpaid"){fini=true;clearInterval(suivi);dire("ko","Montant reçu incomplet. Contactez VÉRITAS sur WhatsApp au 697 63 77 39 avec la référence "+C.ref+".");}'
 . '}).catch(function(){});}'
+. 'function retourner(){try{if(window.opener&&!window.opener.closed){window.opener.focus();window.close();}}catch(x){}'
+. 'if(C.retour){location.href=C.retour;}else{e.innerHTML+=" <a href=\\"/\\">Revenir sur VÉRITAS</a>";}}'
 . 'function suivre(){if(!suivi)suivi=setInterval(sonder,5000);sonder();}'
 . 'function pousser(auto){var v=loc(t.value);if(!oper(v)){dire("ko","Entrez un numéro MTN ou Orange à 9 chiffres (6XX XX XX XX).");return;}'
 . 'b.disabled=true;dire("info","Demande envoyée au "+v+". Regardez votre téléphone et validez avec votre code secret…");suivre();'
