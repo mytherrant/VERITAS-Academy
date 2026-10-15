@@ -12436,7 +12436,9 @@ function acheterManuel(bid){
 function confirmerAchat(bid){
   const s=SES;const b=DB.books.find(x=>x.id===bid);if(!b)return;
   b.vendu++;b.stock--;
-  const ref='BOOK-'+Math.floor(Math.random()*90000+10000);
+  // Référence datée et aléatoire (audit 15/10/2026, n°3) : « BOOK- + 5 chiffres »
+  // n'avait que 90 000 valeurs à vie et finissait par désigner l'achat d'un autre.
+  const ref=_payRef('BOOK');
   DB.bookPurchases.push({id:gid(),eid:s.id,bid,date:today(),mnt:b.prix,statut:'En attente de paiement',ref});
   save();cm();re();
   // v1.0 : ouvrir directement le modal de paiement au lieu d'un simple toast
