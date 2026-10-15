@@ -410,6 +410,12 @@ jobs:
       - name: 📲 Le serveur envoie-t-il le code au numéro qui a payé ?
         run: node tests/banc_remise_sms.cjs
 
+      # ── 💳 LE RAPPEL SKYSMS ouvre-t-il l'accès payé… et seulement lui ? ──
+      #    Clé du rappel, table 1/0/-1, second « ? » de SKYSOFT, sous-paiement,
+      #    autre numéro, rejeu, accusé « 1 » exigé par SKYSOFT, accusé SMS.
+      - name: 💳 Le rappel SkySMS ouvre-t-il l'accès payé, et seulement lui ?
+        run: node tests/banc_skysms_rappel.cjs
+
       # ── 🔑 LA CLÉ D'UN EXERCICE survit-elle à une correction du cahier ?
       #    Si elle bouge, l'élève retrouve ses réponses sous les mauvaises
       #    questions et l'annotation du professeur désigne un autre exercice.

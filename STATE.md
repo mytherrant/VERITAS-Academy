@@ -1,3 +1,31 @@
+## Audit SkySMS (SKYSOFT) : rappels de paiement et de SMS (15/10/2026, suite)
+
+Vérification en ligne : le déploiement de 4255317 (v1.20.25, 11:14 UTC) est vert. Sondes de production : API publique 200 (32 ouvrages, 10 formules), SW `veritas-v1.20.25`, sonde SMS 0 erreur. Le conteneur de la session n'atteint pas veritas-school.com (politique réseau) ; la vérification passe par les sondes du déploiement.
+
+**Corrigé** (`api/payment_camerpay.php`) :
+- **Rappel de paiement accusé « 1 »**. SKYSOFT exige le corps « 1 » pour savoir qu'une notification est reçue. Le rappel SMS le faisait déjà (af14f2d), mais le rappel de PAIEMENT répondait encore « OK », ou bien 404 (« ref inconnue ») ou 409 (autre numéro). SKYSOFT pouvait donc le croire perdu et le renvoyer sans fin. Désormais, dès que la clé est bonne, la réponse est « 1 » : payé, en attente, échec, référence inconnue, autre numéro (consigné « à régler »). Seules une clé absente ou fausse sont refusées (401/503). Un seul assistant, `skysmsAccuser()`, sert les deux rappels.
+- **Le suivi de statut ne réécrit plus un paiement SkySMS.** La page de paiement interroge `?action=status` toutes les 5 s. Pour un paiement sans `camerpay_uuid`, il n'y a rien à vérifier, mais l'état était quand même relu puis réécrit. Si le rappel « payé » arrivait entre les deux, il pouvait être effacé. Il n'y a plus d'écriture dans ce cas.
+
+**Nouveau banc** `tests/banc_skysms_rappel.cjs` (33 contrôles, dans `test.yml` et `deploy.yml`). Il lève un vrai serveur PHP sur une copie de `api/` et un faux SkySMS, puis vérifie :
+- la clé ;
+- que la réponse de collecte « 1 » n'ouvre rien ;
+- la table -1/0/1 ;
+- le second « ? » ;
+- le sous-paiement et l'autre numéro ;
+- le rejeu (une seule vente) ;
+- qu'un échec tardif ne défait pas un paiement ;
+- l'accusé « 1 » ;
+- l'accusé SMS ;
+- le suivi admin.
+
+Sur l'ancien code, il donne 7 rouges.
+
+**Reste à faire (production)** :
+- un paiement réel de 100 F de bout en bout ;
+- dans le journal `_webhook_camerpay_log.txt`, vérifier les lignes `[SKYSMS_RAPPEL]` et `[SKYSMS_PAYE]`, et l'absence de `[SKYSMS_RAPPEL_REFUSE]` ;
+- confirmer avec SKYSOFT que le « 1 » vaut aussi pour le rappel de paiement ;
+- poser `SMS_WEBHOOK_SECRET` si le rapprochement SMS doit être allumé (la sonde le dit éteint).
+
 ## Audit de l'Atelier de Français : bugs, sécurité, visuel, marketing (27/09/2026)
 
 Demande de Jacques : « Audite le travail de l'agent sur l'Atelier, corrige tous les bugs, vérifie le reskin, la sécurité, le visuel, le marketing. » Revue du diff #71 → #87 (composition par Ambassa, quota IA, calendrier, icônes, rôles) et parcours réel au navigateur (1 280 et 390 px, serveur simulé, Ambassa simulée).

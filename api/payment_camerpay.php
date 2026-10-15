@@ -1022,11 +1022,14 @@ if ($action === 'skysms_notify') {
     $ref = vrt_skysms_resoudre($stateDir, [$rp['id_client'], $rp['id_operation']]);
     $stateFile = $stateDir . _safeRefCamerpay($ref) . '.json';
     if ($ref === '' || !is_file($stateFile)) {
-        camerpayLog($logFile, date('c') . " [SKYSMS_REF_INCONNUE] idc={$rp['id_client']} idop={$rp['id_operation']}\n");
-        http_response_code(404); echo 'ref inconnue'; exit;
+        camerpayLog($logFile, date('c') . " [SKYSMS_REF_INCONNUE] idc={$rp['id_client']} idop={$rp['id_operation']} (accuse 1)\n");
+        skysmsAccuser();
     }
     $state = json_decode((string) file_get_contents($stateFile), true) ?: [];
-    if (($state['provider'] ?? '') !== 'skysms') { http_response_code(409); echo 'provider'; exit; }
+    if (($state['provider'] ?? '') !== 'skysms') {
+        camerpayLog($logFile, date('c') . " [SKYSMS_PROVIDER_AUTRE] ref=$ref (accuse 1)\n");
+        skysmsAccuser();
+    }
 
     $trace = [];
     foreach ($body as $k => $v) {
@@ -1045,13 +1048,13 @@ if ($action === 'skysms_notify') {
         $state['reason']   = 'Rappel « payé » pour le ' . $rp['tel'] . ', attendu ' . $telAttendu . ' : à vérifier.';
         camerpayLog($logFile, date('c') . " [SKYSMS_TEL_DIFFERENT] ref=$ref recu={$rp['tel']} attendu=$telAttendu\n");
         file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        http_response_code(409); echo 'telephone different'; exit;
+        skysmsAccuser();   // reçu et consigné « à régler » : un renvoi n'y changerait rien
     }
     if ($rp['verdict'] !== 'pending') {
         skysmsAppliquer($state, $rp['verdict'], $rp['montant'], 'rappel', $rp['motif'], $logFile, $ref);
     }
     file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    http_response_code(200); echo 'OK'; exit;
+    skysmsAccuser();
 }
 
 if ($action === 'skysms_confirmer' && $method === 'POST') {
@@ -1091,8 +1094,7 @@ if ($action === 'skysms_dlr') {
            test de leur côté). Répondre autre chose les ferait renvoyer sans fin
            un accusé qu'aucun renvoi ne rendra rattachable. Trace gardée. */
         camerpayLog($logFile, date('c') . " [SKYSMS_DLR_INCONNU] ssid=$ssid idsms=$idsms (accuse 1)\n");
-        header('Content-Type: text/plain; charset=utf-8');
-        http_response_code(200); echo '1'; exit;
+        skysmsAccuser();
     }
     $m['dlr'] = ['statut' => vrt_skysms_dlr_statut($pick(['statut', 'status', 'delivered', 'dlr_status'])),
                  'date' => mb_substr($pick(['datereception', 'dlrtime', 'date', 'delivered_at']), 0, 40),
@@ -1101,9 +1103,8 @@ if ($action === 'skysms_dlr') {
     vrt_notify_ecrire($m);
     camerpayLog($logFile, date('c') . ' [SKYSMS_DLR] ref=' . ($m['ref'] ?? '') . ' statut=' . $m['dlr']['statut'] . "\n");
     // Accusé attendu par SKYSOFT (15/10/2026) : le corps « 1 » = notification reçue.
-    // Toute autre réponse (clé refusée, SMS inconnu) leur fait renvoyer.
-    header('Content-Type: text/plain; charset=utf-8');
-    http_response_code(200); echo '1'; exit;
+    // Toute autre réponse (clé refusée) leur fait renvoyer.
+    skysmsAccuser();
 }
 
 /* ── SUIVI (admin) : paiements, codes remis, SMS envoyés et délivrés ────────── */
@@ -1283,7 +1284,11 @@ if ($action === 'status' && $method === 'GET') {
     //    référence, pas par IP — les adresses tournent, la référence non.
     //    4 secondes laissent le polling légitime (5 s) inchangé.
     $depuisControle = time() - strtotime($state['last_check_at'] ?? '@0');
-    if (($state['status'] ?? '') === 'pending' && $age > 5 && $depuisControle >= 4) {
+    /* Paiement SkySMS : rien à vérifier chez un fournisseur (pas de
+       `camerpay_uuid`), seul le rappel tranche. Ne PAS réécrire l'état : la
+       page de paiement interroge toutes les 5 s, et cette écriture pouvait
+       effacer un « payé » posé par le rappel entre la lecture et l'écriture. */
+    if (($state['status'] ?? '') === 'pending' && $age > 5 && $depuisControle >= 4 && !empty($state['camerpay_uuid'])) {
         $state['last_check_at'] = date('c');
         $verified = camerpayVerifyTransaction($state);
         if ($verified !== null) {
@@ -2056,6 +2061,17 @@ function skysmsRetour() {
     $h = function ($x) { return preg_replace('/^www\./', '', strtolower((string) $x)); };
     if ($h($p['host']) !== $h($nous)) return '';
     return mb_substr(preg_replace('/#.*$/', '', $r), 0, 300);
+}
+
+/* Accusé attendu par SKYSOFT pour SES DEUX rappels (paiement et SMS) : le
+   corps « 1 » = « notification reçue » (15/10/2026). Toute autre réponse les
+   fait renvoyer. On l'envoie dès que la clé est bonne et que la notification
+   est consignée — y compris quand elle ne se rattache à rien ou demande un
+   contrôle humain (« à régler ») : un renvoi n'y changerait rien. Seule une
+   clé absente ou fausse (401/503) reste refusée. */
+function skysmsAccuser() {
+    header('Content-Type: text/plain; charset=utf-8');
+    http_response_code(200); echo '1'; exit;
 }
 
 /* Corps d'un rappel SKYSOFT (GET, POST formulaire ou JSON), journalisé borné. */
