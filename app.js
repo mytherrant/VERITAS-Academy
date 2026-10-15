@@ -6643,18 +6643,18 @@ function vShowSec(sec,btn,_boot){
     h+='<div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-mail"/></svg></span>Soumettre une demande de conseil</div>';
     h+='<div style="font-size:13px;color:var(--ink4);margin-bottom:16px">Notre équipe vous contactera dans les plus brefs délais.</div>';
     h+='<div class="fg2">';
-    h+='<div class="fg"><span class="fl">Nom & Prénom *</span><input class="fi" id="orNom" placeholder="Ex: MBALLA Jean-Pierre"></div>';
-    h+='<div class="fg"><span class="fl">Téléphone *</span><input class="fi" id="orTel" placeholder="Ex: 697 637 739"></div>';
-    h+='<div class="fg"><span class="fl">Niveau scolaire</span><select class="fi" id="orNiveau"><option value="">-- Choisir --</option>';
+    h+='<div class="fg"><label class="fl" for="orNom">Nom & Prénom *</label><input class="fi" id="orNom" autocomplete="name" placeholder="Ex: MBALLA Jean-Pierre"></div>';
+    h+='<div class="fg"><label class="fl" for="orTel">Téléphone *</label><input class="fi" id="orTel" autocomplete="tel" inputmode="tel" placeholder="Ex: 697 637 739"></div>';
+    h+='<div class="fg"><label class="fl" for="orNiveau">Niveau scolaire</label><select class="fi" id="orNiveau"><option value="">-- Choisir --</option>';
     niv.forEach(function(n){h+='<option>'+n+'</option>';});
     h+='</select></div>';
-    h+='<div class="fg"><span class="fl">Type de service *</span><select class="fi" id="orType"><option value="">-- Choisir --</option>'+
+    h+='<div class="fg"><label class="fl" for="orType">Type de service *</label><select class="fi" id="orType"><option value="">-- Choisir --</option>'+
        '<option>🏫 Répétitions au centre</option><option>🏠 Répétitions à domicile</option>'+
        '<option>💻 Classes virtuelles (à distance)</option><option>📚 Stage de rattrapage</option>'+
        '<option>🎯 Orientation scolaire</option><option>📅 Emploi du temps</option>'+
        '<option>📝 Astuces examens</option><option>🧠 Psychologie scolaire</option>'+
        '<option>🏥 Bien-être scolaire</option><option>👨‍👩‍👧 Conseil aux parents</option></select></div>';
-    h+='<div class="fg" style="grid-column:1/-1"><span class="fl">Message</span><textarea class="fi" id="orMsg" rows="3" placeholder="Décrivez brièvement votre situation..."></textarea></div>';
+    h+='<div class="fg" style="grid-column:1/-1"><label class="fl" for="orMsg">Message</label><textarea class="fi" id="orMsg" rows="3" placeholder="Décrivez brièvement votre situation..."></textarea></div>';
     h+='<div class="fg"><label class="fl" for="orQuartier">Quartier / domicile</label><input class="fi" id="orQuartier" autocomplete="address-level2" placeholder="Ex: Ndogpassi, Bonabéri, Makepe..."></div>';
     h+='<div class="fg"><label class="fl" for="orMatieres">Matière(s) concernée(s)</label><input class="fi" id="orMatieres" placeholder="Ex: Maths et Français"></div>';
     h+='<div class="fg" style="grid-column:1/-1"><label class="fl" for="orDispo">Jours et heures qui vous arrangent</label><input class="fi" id="orDispo" placeholder="Ex: Lundi matin, Mercredi après-midi..."></div>';
@@ -11159,7 +11159,7 @@ function swLR(t){
     const labels={eleve:"Espace Élève",enseignant:"Espace Enseignant",admin:"Administration",superadmin:"Super Administration"};
     const placeholders={eleve:"Matricule",enseignant:"Identifiant",admin:"Identifiant",superadmin:"Identifiant"};
     if(ls)ls.textContent=labels[t]||"Connexion";
-    if(lfa)lfa.innerHTML=`<div class="lf"><label>Identifiant</label><input id="lu" placeholder="${placeholders[t]||'Identifiant'}" autocomplete="username"></div><div class="lf"><label>Mot de passe</label><div class="pw"><input id="lp" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"><button class="pwe" onclick="tp('lp',this)">👁</button></div></div>`;
+    if(lfa)lfa.innerHTML=`<div class="lf"><label for="lu">Identifiant</label><input id="lu" placeholder="${placeholders[t]||'Identifiant'}" autocomplete="username"></div><div class="lf"><label for="lp">Mot de passe</label><div class="pw"><input id="lp" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"><button type="button" class="pwe" aria-label="Afficher le mot de passe" onclick="tp('lp',this)">👁</button></div></div>`;
     lb.textContent="Connexion →";lb.onclick=doLogin;
   }
   /* Texte d'aide propre au rôle, écrit HORS de lFormArea pour survivre aux

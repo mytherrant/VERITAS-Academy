@@ -1,3 +1,19 @@
+## Audit final du site, hors SkySMS (15/10/2026, v1.20.26)
+
+Rapport complet : `AUDIT_FINAL_v1.20.26.md`. Bilan : 69/70 bancs au vert, 68/68 vues navigateur sans erreur, aucun lien interne cassé.
+
+**Corrigé** :
+- React est servi par le site (`assets/vendor/`) et non plus par unpkg.com ; l'Atelier restait blanc sans ce CDN ;
+- balises SEO de `livrets/mode-emploi.html` ;
+- libellés rattachés aux champs de connexion et d'orientation ;
+- version 1.20.26.
+
+**À décider** :
+- corrigés 3ᵉ en double (`3e/` et `3e-cahier/`) ;
+- `tous-les-corriges.html` pèse 10,8 Mo ;
+- couvertures d'œuvres de 0,9 Mo, en double ;
+- périmètre du guide enseignant dans `api/cahier.php`.
+
 ## Audit SkySMS (SKYSOFT) : rappels de paiement et de SMS (15/10/2026, suite)
 
 Vérification en ligne : le déploiement de 4255317 (v1.20.25, 11:14 UTC) est vert. Sondes de production : API publique 200 (32 ouvrages, 10 formules), SW `veritas-v1.20.25`, sonde SMS 0 erreur. Le conteneur de la session n'atteint pas veritas-school.com (politique réseau) ; la vérification passe par les sondes du déploiement.

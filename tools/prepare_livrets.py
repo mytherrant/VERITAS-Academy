@@ -87,7 +87,43 @@ class Echec(Exception):
     """Une source a changé de forme : on refuse de produire une page non protégée."""
 
 
+# React 18.3.1 auto-hébergé (assets/vendor/) — empreintes SRI identiques à unpkg.
+REACT_LOCAL = {
+    "https://unpkg.com/react@18.3.1/umd/react.production.min.js": "/assets/vendor/react-18.3.1.production.min.js",
+    "https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js": "/assets/vendor/react-dom-18.3.1.production.min.js",
+}
+
+# Tête des pages libres : l'export de la maquette ne porte ni <title>, ni
+# description, ni langue — la page était au plan du site sans rien de tout ça.
+TETES_LIBRES = {
+    "mode-emploi.html": (
+        "Mode d'emploi du cahier de français en ligne | VÉRITAS",
+        "Ton livret de français en ligne en quatre gestes : débloque-le avec ton code, "
+        "réponds directement en ligne, vérifie avec la correction, imprime ou garde en PDF."),
+}
+
+
+def tete_seo(html: str, nom_out: str) -> str:
+    if nom_out not in TETES_LIBRES:
+        return html
+    titre, desc = TETES_LIBRES[nom_out]
+    e = lambda x: x.replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;")
+    url = f"https://veritas-school.com/livrets/{nom_out}"
+    html = re.sub(r"<html(?![^>]*\blang=)", '<html lang="fr"', html, count=1)
+    if "<title>" not in html:
+        tete = (f"\n<title>{e(titre)}</title>"
+                f'\n<meta name="description" content="{e(desc)}">'
+                f'\n<link rel="canonical" href="{url}">'
+                f'\n<meta property="og:title" content="{e(titre)}">'
+                f'\n<meta property="og:description" content="{e(desc)}">'
+                f'\n<meta property="og:url" content="{url}">'
+                '\n<meta property="og:image" content="https://veritas-school.com/og-image.jpg">')
+        html = re.sub(r'(<meta charset="utf-8">)', lambda m: m.group(1) + tete, html, count=1)
+    return html
+
+
 # ── Découpe par accolades ────────────────────────────────────────────────────
+
 def corps_methode(src: str, nom: str) -> tuple[int, int, str]:
     """Retourne (début, fin, texte) de `nom(){ … }`, accolades équilibrées."""
     m = re.search(r"\b" + re.escape(nom) + r"\s*\(\s*\)\s*\{", src)
@@ -380,11 +416,12 @@ def main() -> int:
             (SORTIE / nom_out).write_text(out, encoding="utf-8")
             faits.append(f"livrets/{nom_out}")
 
-    # Pages libres sans données : copie telle quelle.
+    # Pages libres sans données : copie, plus la tête que l'export n'a pas
+    # (titre, description, langue, canonical) — elles sont au plan du site.
     for nom_src, nom_out in LIBRES.items():
         p = src_dir / nom_src
         if p.is_file():
-            shutil.copyfile(p, SORTIE / nom_out)
+            (SORTIE / nom_out).write_text(tete_seo(p.read_text(encoding="utf-8"), nom_out), encoding="utf-8")
             faits.append(f"livrets/{nom_out}  (libre)")
 
     # Pages d'appel (démo, feuilletage) : on leur fabrique un VRAI extrait.
@@ -408,7 +445,12 @@ def main() -> int:
             faits.append(f"livrets/{f}")
     sup = src_dir / "support.js"
     if sup.is_file():
-        shutil.copyfile(sup, SORTIE / "support.js")
+        # React servi par le site, plus par unpkg.com : un CDN lent ou bloqué
+        # (réseaux mobiles) laissait la page blanche. Mêmes fichiers, même SRI.
+        txt = sup.read_text(encoding="utf-8")
+        for cdn, local in REACT_LOCAL.items():
+            txt = txt.replace(cdn, local)
+        (SORTIE / "support.js").write_text(txt, encoding="utf-8")
         faits.append("livrets/support.js")
     else:
         erreurs.append("support.js absent de la source (les pages ne s'afficheront pas)")
