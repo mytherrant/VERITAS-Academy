@@ -88,6 +88,16 @@ if ($route === 'payments/initiate' && $method === 'POST') {
     $montant = (int) cmp_param('montant', 0);
     $moyen = cmp_param('moyen', 'momo') === 'orange' ? 'orange' : 'momo';
     $sid = (int) cmp_param('student_id', 0);
+    /* Un élève ou un parent ne paie QUE pour l'élève rattaché à son compte
+       (audit 15/10/2026) : `student_id` venait du corps de la requête, donc
+       n'importe quel élève de l'établissement. Requête en ligne :
+       cmp_portal_student() vit dans _routes_portal.php, inclus APRÈS ce fichier. */
+    if (!cmp_can($ctx, 'finance.manage')) {
+        $q = cmp_pdo()->prepare('SELECT student_id FROM cmp_users WHERE id = ? AND tenant_id = ?');
+        $q->execute([$ctx['user_id'], $tid]);
+        $sid = (int) ($q->fetchColumn() ?: 0);
+        if (!$sid) { cmp_fail('Aucun élève associé à ce compte.', 404); }
+    }
     if ($montant <= 0) { cmp_fail('Montant invalide.', 422); }
     $ref = cmp_pay_ref($tid);
     cmp_pdo()->prepare(
@@ -131,7 +141,11 @@ if (($route === 'webhooks/momo' || $route === 'webhooks/orange') && $method === 
         $pdo->prepare('INSERT INTO cmp_payment_webhooks (provider, event_id, reference, payload) VALUES (?,?,?,?)')
             ->execute([$provider, $eventId, $ref, json_encode($body, JSON_UNESCAPED_UNICODE)]);
     } catch (Throwable $e) {
-        cmp_ok(['duplicate' => true]);   // déjà reçu → on confirme sans retraiter
+        // SEUL un doublon (contrainte d'unicité, SQLSTATE 23000) est un « déjà
+        // reçu ». Une table absente ou une base injoignable était répondue 200 :
+        // le fournisseur croyait l'événement traité, il était perdu.
+        if ((string) $e->getCode() === '23000') { cmp_ok(['duplicate' => true]); }
+        cmp_fail('Webhook non enregistré, réessayez.', 500);
     }
     // Retrouve le paiement (référence globalement unique).
     $p = $pdo->prepare('SELECT id, tenant_id, montant, student_id, statut FROM cmp_payments WHERE reference = ? LIMIT 1');
@@ -139,9 +153,18 @@ if (($route === 'webhooks/momo' || $route === 'webhooks/orange') && $method === 
     $pay = $p->fetch();
     if (!$pay) { $pdo->prepare('UPDATE cmp_payment_webhooks SET processed = 1 WHERE provider = ? AND event_id = ?')->execute([$provider, $eventId]); cmp_ok(['unknown_reference' => true]); }
     $tid = (int) $pay['tenant_id'];
-    // Vérification du jeton de notification du tenant (fail-closed si configuré).
+    /* Jeton de notification du tenant — FAIL-CLOSED (audit 15/10/2026, CRITIQUE).
+       La garde ne jouait que « si configuré » : sans jeton posé (le défaut),
+       n'importe qui confirmait un paiement en postant {reference, status:success}
+       — scolarité soldée, reçu officiel enregistré, SMS « confirmé » au parent.
+       Sans jeton, le webhook refuse tout. Accepté aussi en en-tête
+       (X-Notif-Token) pour qu'il ne voyage pas forcément dans le corps. */
     $secret = function_exists('cmp_tenant_secret') ? cmp_tenant_secret($tid, $provider . '_notif_token') : '';
-    if ($secret !== '' && !hash_equals($secret, $token)) {
+    if ($token === '') $token = (string) ($_SERVER['HTTP_X_NOTIF_TOKEN'] ?? '');
+    if ($secret === '') {
+        cmp_fail('Paiement en ligne non configuré pour cet établissement.', 503);
+    }
+    if (!hash_equals($secret, $token)) {
         cmp_fail('Jeton de notification invalide.', 401);
     }
     $success = in_array($status, ['success', 'successful', 'completed', 'paid'], true);
