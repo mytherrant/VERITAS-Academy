@@ -62,6 +62,9 @@ jobs:
       - name: 💰 Un paiement confirmé écrit-il un droit ?
         run: php tests/paiements_entitlements.php
 
+      - name: 📲 SkySMS — un rappel forgé, une réf recopiée, une page devinée n'ouvrent rien ?
+        run: php tests/banc_skysms.php
+
       - name: 🤖 Un SMS de réception sert-il le pass, et un faux SMS jamais ?
         run: php tests/banc_rapprochement_sms.php
 
