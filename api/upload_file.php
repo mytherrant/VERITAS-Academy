@@ -98,6 +98,18 @@ $refId  = preg_replace('/[^a-z0-9_-]/', '', $_POST['ref_id'] ?? 'x');
 $origRaw = basename($file['name']);
 $origSafe = preg_replace('/[^a-z0-9._-]/i', '_', $origRaw);
 $origSafe = strtolower(substr($origSafe, 0, 80));
+/* L'EXTENSION SUIT LE TYPE RÉEL, pas le nom envoyé (audit 15/10/2026). Un
+   contenu accepté par finfo mais nommé `x.phtml` ou `x.phar` gardait cette
+   extension, que le .htaccess (« \.php$ » seulement) ne bloquait pas. */
+$extParMime = [
+    'application/pdf' => 'pdf', 'image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp',
+    'video/mp4' => 'mp4', 'video/webm' => 'webm', 'video/ogg' => 'ogv', 'audio/mpeg' => 'mp3', 'audio/mp4' => 'm4a', 'audio/wav' => 'wav',
+    'application/msword' => 'doc', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+    'application/vnd.ms-powerpoint' => 'ppt', 'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'pptx',
+    'text/html' => 'html',
+];
+$origSafe = preg_replace('/\.[a-z0-9]+$/', '', $origSafe);
+$origSafe = str_replace('.', '_', $origSafe) . '.' . ($extParMime[$mime] ?? 'bin');
 
 $filename = ($type ?: 'file') . '_' . ($refId ?: 'x') . '_' . date('Ymd_His') . '_' . $origSafe;
 $dest     = $mediaDir . $filename;
