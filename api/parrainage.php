@@ -172,7 +172,8 @@ if ($action === 'reglages' && $method === 'POST') {
     $propre = [];
     if (array_key_exists('actif', $in))         $propre['actif'] = (bool) $in['actif'];
     if (array_key_exists('versementAuto', $in)) $propre['versementAuto'] = (bool) $in['versementAuto'];
-    foreach (['remisePct', 'commissionPct', 'seuilVersement'] as $k) {
+    foreach (['remisePct', 'commissionPct', 'seuilVersement', 'commissionPartenairePct',
+              'cogerantsPct', 'partenaireJours', 'partenaireSeuil'] as $k) {
         if (isset($in[$k]) && is_numeric($in[$k])) $propre[$k] = (int) $in[$k];
     }
     vrt_parr_tx(function (array &$reg) use ($propre) {

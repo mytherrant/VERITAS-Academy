@@ -696,6 +696,20 @@ function plat_droit(array $acc, array $db, array $offres): array
         }
     }
 
+    // 1bis. Enseignant-partenaire (grille du 16/10/2026) : l'Atelier au palier
+    //       « ens » tant que son accès court. La date de fin vit dans le
+    //       registre du Code ami, que la synchronisation de la base ne touche pas.
+    $accIdP = (string) ($acc['id'] ?? '');
+    if ($accIdP !== '' && function_exists('vrt_parr_partenaire_de')) {
+        try {
+            $eP = vrt_parr_partenaire_de(vrt_parr_lire(), 'acc:' . $accIdP);
+            if (vrt_parr_partenaire_ouvert($eP)) {
+                return ['ok' => true, 'motif' => 'abonnement', 'plan' => 'ens', 'partenaire' => true,
+                        'fin' => date('Y-m-d', (int) $eP['fin']), 'resteJours' => null];
+            }
+        } catch (\Throwable $e) { /* registre illisible : on retombe sur l'essai, sans rien ouvrir */ }
+    }
+
     // 2. Période d'essai. Le point de départ est horodaté CÔTÉ SERVEUR :
     //    compter depuis le navigateur laisserait relancer l'essai en vidant
     //    son stockage local. On lit le registre dédié, et à défaut la valeur
@@ -1052,6 +1066,45 @@ if ($action === 'reprise' && $method === 'POST') {
             }
         }
     }
+    /* ENSEIGNANT-PARTENAIRE dont le compte a disparu de la base (une
+       synchronisation administrateur plus ancienne l'a écrasé) : le registre
+       du Code ami a gardé son identité et l'empreinte de son code — on
+       recrée le compte à l'identique, sous le même identifiant, pour que ses
+       filleuls, ses commissions et son accès le retrouvent. */
+    if ($trouve === null && function_exists('vrt_parr_partenaire_par_reprise')) {
+        $pr = vrt_parr_partenaire_par_reprise(vrt_parr_lire(), $empreinte);
+        if ($pr !== null) {
+            $accIdR = (string) substr($pr['benef'], 4);
+            $accR = [
+                'id' => $accIdR, 'user' => 'atl-' . bin2hex(random_bytes(6)), 'pwd' => '',
+                'nom' => (string) ($pr['e']['nom'] ?? ''), 'pre' => '', 'tel' => (string) ($pr['e']['tel'] ?? ''),
+                'email' => '', 'role' => 'enseignant', 'isTeacher' => true, 'plans' => [], 'statut' => 'actif',
+                'inscriptionPayee' => true, 'dateInscription' => date('d/m/Y'),
+                'platAtelier' => true, 'platCode' => $empreinte, 'platCodeLe' => time(),
+                'codeParrain' => (string) ($pr['e']['code'] ?? ''), 'partenaireEnseignant' => true,
+                'srvAt' => (int) round(microtime(true) * 1000), 'srvCreated' => true,
+            ];
+            $resR = plat_muter(function (array $db2) use ($accR, $empreinte) {
+                $c = vrt_resoudre_compte($db2, (string) $accR['id']);
+                if ($c !== null) {
+                    // Le compte existe, mais une synchro a remis une ancienne empreinte : on repose la bonne.
+                    $db2[$c['coll']][$c['idx']]['platCode'] = $empreinte;
+                    $db2[$c['coll']][$c['idx']]['platCodeLe'] = time();
+                    return [$db2, $db2[$c['coll']][$c['idx']]];
+                }
+                if (!isset($db2['visitorAccounts']) || !is_array($db2['visitorAccounts'])) $db2['visitorAccounts'] = [];
+                $db2['visitorAccounts'][] = $accR;
+                return [$db2, $accR];
+            }, false);
+            if (is_array($resR)) {
+                $trouve = ['acc' => $resR, 'type' => 'visiteur'];
+                $db = vrt_load_db() ?: $db;
+                @file_put_contents(__DIR__ . '/data/_access_log.txt',
+                    date('c') . ' PLAT_PARTENAIRE_RECREE acc=' . $accIdR . "\n", FILE_APPEND);
+            }
+        }
+    }
+
     if ($trouve === null) {
         jsonResponse(['ok' => false, 'error' => 'Ce code ne correspond à aucun abonnement. '
             . 'Vérifiez-le, ou écrivez au centre.']);
@@ -2200,6 +2253,136 @@ if ($action === 'paliers') {
     }
 
     jsonResponse(['ok' => false, 'error' => 'Méthode non permise'], 405);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   ENSEIGNANTS-PARTENAIRES (grille du 16/10/2026) — réservé à l'administration
+
+   Un enseignant-partenaire reçoit, en un geste de l'administrateur :
+     · un COMPTE de l'Atelier (titulaire, sans mot de passe), retrouvé par son
+       numéro s'il en a déjà un ;
+     · un CODE DE REPRISE (rendu en clair ici, une seule fois) qui rouvre ce
+       compte sur son téléphone ou son ordinateur ;
+     · un CODE PUBLIC à partager : −10 % pour l'apprenant, 20 % pour lui ;
+     · l'Atelier au palier Enseignant pendant 60 jours (2 mois), reconduit de 60 jours
+       à chaque groupe de 5 nouveaux filleuls payants (ou à la main).
+
+   GET                         → la liste
+   POST {op:'creer', nom, tel, code}
+   POST {op:'reconduire', accId, jours} · {op:'suspendre'|'reactiver', accId}
+   POST {op:'code_reprise', accId}   → un code de reprise NEUF (l'ancien cesse)
+   ───────────────────────────────────────────────────────────────────────── */
+
+if ($action === 'partenaires') {
+    requireAuth();
+    $db = vrt_load_db();
+    if (!is_array($db)) jsonResponse(['ok' => false, 'error' => 'Base indisponible'], 503);
+
+    if ($method === 'GET') {
+        jsonResponse(['ok' => true, 'regle' => vrt_parr_cfg($db),
+                      'partenaires' => vrt_parr_partenaires_admin($db, vrt_parr_lire())]);
+    }
+    if ($method !== 'POST') jsonResponse(['ok' => false, 'error' => 'Méthode non permise'], 405);
+
+    $in = plat_input(4096);
+    $op = (string) ($in['op'] ?? '');
+
+    if ($op === 'creer') {
+        $nom  = plat_texte_court($in['nom'] ?? '', 80);
+        $tel9 = vrt_parr_tel9((string) ($in['tel'] ?? ''));
+        $code = vrt_parr_normaliser((string) ($in['code'] ?? ''));
+        if ($nom === '') jsonResponse(['ok' => false, 'error' => 'Nom requis']);
+        if (!preg_match('/^6\d{8}$/', $tel9)) jsonResponse(['ok' => false, 'error' => 'Numéro camerounais à 9 chiffres requis (6XXXXXXXX)']);
+        if (!vrt_parr_code_partenaire_valide($code)) {
+            jsonResponse(['ok' => false, 'error' => 'Code : 4 à 20 lettres, chiffres ou tirets (ex. PROF-ESSOME)']);
+        }
+        $reg = vrt_parr_lire();
+
+        // Déjà partenaire sous ce numéro ? On met à jour, on ne double pas.
+        $accId = '';
+        foreach (($reg['partenaires'] ?? []) as $b => $e) {
+            if (is_array($e) && vrt_parr_tel9((string) ($e['tel'] ?? '')) === $tel9) { $accId = (string) substr((string) $b, 4); break; }
+        }
+        // Sinon, un compte UNIQUE déjà porteur de ce numéro (abonné de l'Atelier, visiteur…).
+        if ($accId === '') {
+            $memes = [];
+            foreach (($db['visitorAccounts'] ?? []) as $a) {
+                if (is_array($a) && !empty($a['id']) && vrt_parr_tel9((string) ($a['tel'] ?? '')) === $tel9) $memes[] = (string) $a['id'];
+            }
+            if (count($memes) === 1) $accId = $memes[0];
+        }
+        if ($accId !== '' && !vrt_parr_code_libre($db, $reg, $code, 'acc:' . $accId)) {
+            jsonResponse(['ok' => false, 'error' => 'Le code ' . $code . ' désigne déjà quelqu’un d’autre']);
+        }
+        if ($accId === '' && vrt_parr_resoudre($db, $reg, $code) !== null) {
+            jsonResponse(['ok' => false, 'error' => 'Le code ' . $code . ' désigne déjà quelqu’un d’autre']);
+        }
+
+        $reprise = plat_code_reprise();
+        $emp     = plat_code_hash($reprise);
+        $cree    = false;
+        if ($accId === '') {
+            $accId = 'va_' . round(microtime(true) * 1000) . '_' . bin2hex(random_bytes(3));
+            $cree  = true;
+        }
+        $acc = [
+            'id' => $accId, 'user' => 'atl-' . bin2hex(random_bytes(6)), 'pwd' => '',
+            'nom' => $nom, 'pre' => '', 'tel' => $tel9, 'email' => '',
+            'role' => 'enseignant', 'isTeacher' => true, 'plans' => [], 'statut' => 'actif',
+            'inscriptionPayee' => true, 'dateInscription' => date('d/m/Y'),
+            'platAtelier' => true, 'platCode' => $emp, 'platCodeLe' => time(),
+            'codeParrain' => $code, 'partenaireEnseignant' => true,
+            'srvAt' => (int) round(microtime(true) * 1000), 'srvCreated' => true,
+        ];
+        $res = plat_muter(function (array $db2) use ($acc, $cree, $emp, $code) {
+            if (!isset($db2['visitorAccounts']) || !is_array($db2['visitorAccounts'])) $db2['visitorAccounts'] = [];
+            if ($cree) { $db2['visitorAccounts'][] = $acc; return [$db2, true]; }
+            $cible = vrt_resoudre_compte($db2, (string) $acc['id']);
+            if ($cible === null) return null;
+            $a = &$db2[$cible['coll']][$cible['idx']];
+            $a['platCode'] = $emp; $a['platCodeLe'] = time();
+            $a['codeParrain'] = $code; $a['partenaireEnseignant'] = true;
+            if (empty($a['statut']) || $a['statut'] === 'suspendu') $a['statut'] = 'actif';
+            unset($a);
+            return [$db2, true];
+        }, false);
+        if ($res === null) jsonResponse(['ok' => false, 'error' => 'Écriture impossible — réessayez'], 503);
+
+        $e = vrt_parr_partenaire_inscrire('acc:' . $accId, $code, $nom, $tel9, vrt_parr_cfg($db), $emp);
+        @file_put_contents(__DIR__ . '/data/_access_log.txt',
+            date('c') . ' PLAT_PARTENAIRE acc=' . $accId . ' code=' . $code . ($cree ? ' cree' : ' rattache') . "\n", FILE_APPEND);
+        jsonResponse(['ok' => true, 'accId' => $accId, 'cree' => $cree, 'neuf' => !empty($e['neuf']),
+                      'code' => $code, 'reprise' => $reprise, 'fin' => date('Y-m-d', (int) $e['fin'])], 201);
+    }
+
+    $accId = plat_texte_court($in['accId'] ?? '', 64);
+    if ($accId === '') jsonResponse(['ok' => false, 'error' => 'accId requis']);
+
+    if ($op === 'reconduire' || $op === 'suspendre' || $op === 'reactiver') {
+        $jours = (int) ($in['jours'] ?? vrt_parr_cfg($db)['partenaireJours']);
+        $e = vrt_parr_partenaire_agir('acc:' . $accId, $op, $jours);
+        if ($e === null) jsonResponse(['ok' => false, 'error' => 'Partenaire inconnu']);
+        vrt_pay_log('[PARTENAIRE_' . strtoupper($op) . '] acc=' . $accId . ($op === 'reconduire' ? ' jours=' . $jours : ''));
+        jsonResponse(['ok' => true, 'fin' => date('Y-m-d', (int) ($e['fin'] ?? 0)), 'actif' => !empty($e['actif'])]);
+    }
+
+    if ($op === 'code_reprise') {
+        if (!vrt_parr_partenaire_de(vrt_parr_lire(), 'acc:' . $accId)) jsonResponse(['ok' => false, 'error' => 'Partenaire inconnu']);
+        $reprise = plat_code_reprise();
+        $emp = plat_code_hash($reprise);
+        $res = plat_muter(function (array $db2) use ($accId, $emp) {
+            $cible = vrt_resoudre_compte($db2, $accId);
+            if ($cible === null) return null;
+            $db2[$cible['coll']][$cible['idx']]['platCode']   = $emp;
+            $db2[$cible['coll']][$cible['idx']]['platCodeLe'] = time();
+            return [$db2, true];
+        }, false);
+        if ($res === null) jsonResponse(['ok' => false, 'error' => 'Compte introuvable'], 404);
+        vrt_parr_partenaire_reprise('acc:' . $accId, $emp);
+        jsonResponse(['ok' => true, 'reprise' => $reprise]);
+    }
+
+    jsonResponse(['ok' => false, 'error' => 'Opération inconnue'], 400);
 }
 
 /* ───────────────────────────────────────────────────────────────────────── */

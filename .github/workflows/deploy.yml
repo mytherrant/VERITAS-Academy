@@ -493,6 +493,13 @@ jobs:
       - name: 🚪 L'entrée est-elle libre, et l'essai borné ?
         run: node tests/banc_entree_libre.cjs
 
+      # ── 🧑‍🏫 ENSEIGNANTS-PARTENAIRES (grille du 16/10/2026)
+      #    Un geste admin = compte Atelier + code de reprise + code public +
+      #    60 jours d'accès. Le banc parle au vrai endpoint (php -S) et vérifie
+      #    qu'un compte effacé par une synchro se recrée au code de reprise.
+      - name: 🧑‍🏫 Les enseignants-partenaires reçoivent-ils leur accès ?
+        run: node tests/banc_partenaires_enseignants.cjs
+
       # ── 💳 LE CORPUS S'OUVRE-T-IL VRAIMENT AU PAIEMENT ?
       #    `paiements_entitlements.php` s'arrête à « le plan est écrit sur le
       #    compte ». Entre là et « le texte descend dans le navigateur » il

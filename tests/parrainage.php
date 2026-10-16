@@ -222,7 +222,8 @@ foreach (['inscription', 'cart', 'echeance', 'cagnotte'] as $it) {
 $ev = vrt_parr_evaluer($db, reg(), ['code' => 'RENTREE15', 'accountId' => 'va_filleul', 'intent' => 'subscription', 'targetId' => 'abo_pro_m', 'prix' => 2000]);
 ok('campagne RENTRÉE15 sans bénéficiaire : −15 %, personne n’est commissionné', $ev['ok'] && $ev['remise'] === 300 && $ev['benef'] === null && $ev['commissionPct'] === 0, json_encode($ev));
 $ev = vrt_parr_evaluer($db, reg(), ['code' => 'LIBRAIRIE', 'accountId' => 'va_filleul', 'intent' => 'book', 'targetId' => 'bk', 'prix' => 5000]);
-ok('code promo rattaché à un partenaire : remise ET commission au partenaire', $ev['ok'] && $ev['benef'] === 'prt:prt_lib' && $ev['commissionPct'] === 10);
+// Grille du 16/10/2026 : un partenaire touche 20 % (10 % avant).
+ok('code promo rattaché à un partenaire : remise ET commission (20 %) au partenaire', $ev['ok'] && $ev['benef'] === 'prt:prt_lib' && $ev['commissionPct'] === 20, json_encode($ev));
 
 // Parrain à vie
 vrt_parr_tx(function (array &$r) { $r['liens']['acc:va_filleul'] = ['b' => 'acc:va_parrain', 'c' => vrt_parr_code_pour_id('va_parrain'), 't' => time()]; });
@@ -489,6 +490,77 @@ $pNum = $pPhys; unset($pNum['panierPhysique'], $pNum['assiette']);
 vrt_grant_entitlement_to_file($etatPanier('P-NUM', $pNum));
 ok('panier numérique qui n’ouvre rien : aucune commission (l’octroi vide y est un échec)',
    !isset(reg()['ops']['r:P-NUM']));
+
+// ═════════════════════════════════════════════════════════════════════════
+titre('10. Enseignants-partenaires et répartition (grille du 16/10/2026)');
+registreVide();
+$dbP = base();
+$dbP['visitorAccounts'][] = ['id' => 'va_prof', 'user' => 'prof', 'pre' => '', 'nom' => 'IPR Test', 'tel' => '699000001', 'statut' => 'actif', 'plans' => []];
+for ($i = 1; $i <= 6; $i++) {
+    $dbP['visitorAccounts'][] = ['id' => "va_f$i", 'user' => "f$i", 'pre' => 'F', 'nom' => "N$i", 'tel' => '6990000' . (10 + $i), 'statut' => 'actif', 'plans' => []];
+}
+ecrireBase($dbP);
+$db = lireBase();
+$c = vrt_parr_cfg($db);
+ok('défauts : partenaire 20 %, co-gérants 30 %, accès 60 jours, reconduit par 5 filleuls',
+   $c['commissionPartenairePct'] === 20 && $c['cogerantsPct'] === 30 && $c['partenaireJours'] === 60 && $c['partenaireSeuil'] === 5, json_encode($c));
+$r1 = vrt_parr_repartition(10800, 2160, $c);
+ok('PDF, cas 2 : 10 800 F avec code → 2 160 / 3 240 / 5 400', $r1['partenaire'] === 2160 && $r1['cogerants'] === 3240 && $r1['pool'] === 5400, json_encode($r1));
+$r0 = vrt_parr_repartition(12000, 0, $c);
+ok('PDF, cas 1 : 12 000 F sans code → 3 600 / 8 400', $r0['cogerants'] === 3600 && $r0['pool'] === 8400, json_encode($r0));
+
+$t0 = time();
+$e = vrt_parr_partenaire_inscrire('acc:va_prof', 'PROF-TEST', 'IPR Test', '699000001', $c, 'empreinte-test');
+ok('inscription : accès ouvert pour 60 jours', abs((int) $e['fin'] - ($t0 + 60 * 86400)) < 5 && vrt_parr_partenaire_ouvert($e));
+$ev = vrt_parr_evaluer($db, reg(), ['code' => 'prof-test', 'accountId' => 'va_f1', 'intent' => 'subscription', 'targetId' => 'abo_pro_m', 'prix' => 2000]);
+ok('son code : −10 % à l’apprenant, 20 % pour l’enseignant', $ev['ok'] && $ev['remise'] === 200 && $ev['commissionPct'] === 20 && $ev['benef'] === 'acc:va_prof', json_encode($ev));
+$evA = vrt_parr_evaluer($db, reg(), ['code' => vrt_parr_code_pour_id('va_parrain'), 'accountId' => 'va_f6', 'intent' => 'subscription', 'targetId' => 'abo_pro_m', 'prix' => 2000]);
+ok('le Code ami d’un compte ordinaire reste à 10 %', $evA['ok'] && $evA['commissionPct'] === 10, json_encode($evA));
+$evE = vrt_parr_evaluer($db, reg(), ['code' => vrt_parr_code_pour_id('ens_1'), 'accountId' => 'va_f6', 'intent' => 'subscription', 'targetId' => 'abo_pro_m', 'prix' => 2000]);
+ok('un enseignant du centre touche aussi 20 %', $evE['ok'] && $evE['commissionPct'] === 20, json_encode($evE));
+
+$etatP = function (string $ref, string $payeur, ?array $parr, int $m) {
+    return ['intent' => 'subscription', 'targetId' => 'abo_pro_m', 'montant' => $m, 'montant_paye' => $m,
+            'ref' => $ref, 'accountId' => $payeur, 'clientTel' => '', 'label' => 'Pro', 'parrainage' => $parr];
+};
+$pP = function (string $payeur) { return vrt_parr_pour_etat(vrt_parr_evaluer(lireBase(), reg(), ['code' => 'PROF-TEST', 'accountId' => $payeur, 'intent' => 'subscription', 'targetId' => 'abo_pro_m', 'prix' => 2000])); };
+vrt_grant_entitlement_to_file($etatP('T-1', 'va_f1', $pP('va_f1'), 1800));
+$r = reg();
+ok('1 800 F payés : 360 F (20 %) crédités à l’enseignant', (int) ($r['comptes']['acc:va_prof']['solde'] ?? 0) === 360, json_encode($r['comptes'] ?? []));
+$rp = $r['repartition']['r:T-1'] ?? [];
+ok('répartition notée : 360 partenaire / 540 co-gérants / 900 pool', ($rp['part'] ?? -1) === 360 && ($rp['cog'] ?? -1) === 540 && ($rp['pool'] ?? -1) === 900, json_encode($rp));
+vrt_grant_entitlement_to_file($etatP('T-SANS', 'va_f6', null, 2000));
+$rp = reg()['repartition']['r:T-SANS'] ?? [];
+ok('abonnement SANS code : 600 co-gérants / 1 400 pool, rien au partenaire', ($rp['part'] ?? -1) === 0 && ($rp['cog'] ?? -1) === 600 && ($rp['pool'] ?? -1) === 1400, json_encode($rp));
+vrt_grant_entitlement_to_file($etatP('T-SANS', 'va_f6', null, 2000));
+ok('rejeu : la répartition n’est pas comptée deux fois', count(reg()['repartition']) === 2);
+
+$finAvant = (int) reg()['partenaires']['acc:va_prof']['fin'];
+vrt_grant_entitlement_to_file($etatP('T-1b', 'va_f1', $pP('va_f1'), 1800));
+ok('le même filleul qui rachète ne compte qu’une fois', count(reg()['partenaires']['acc:va_prof']['vus']) === 1);
+foreach (['va_f2', 'va_f3', 'va_f4'] as $k => $f) vrt_grant_entitlement_to_file($etatP('T-' . ($k + 2), $f, $pP($f), 1800));
+ok('4 filleuls : pas encore de reconduction', (int) reg()['partenaires']['acc:va_prof']['fin'] === $finAvant);
+vrt_grant_entitlement_to_file($etatP('T-5', 'va_f5', $pP('va_f5'), 1800));
+$eP = reg()['partenaires']['acc:va_prof'];
+ok('5ᵉ filleul payant : accès reconduit de 60 jours, compteur remis à zéro',
+   (int) $eP['fin'] === $finAvant + 60 * 86400 && count($eP['cycle']) === 0 && count($eP['vus']) === 5, json_encode($eP));
+
+vrt_parr_partenaire_agir('acc:va_prof', 'reconduire', 60);
+ok('reconduction manuelle : +60 jours', (int) reg()['partenaires']['acc:va_prof']['fin'] === $finAvant + 120 * 86400);
+vrt_parr_partenaire_agir('acc:va_prof', 'suspendre');
+ok('suspendu : plus d’accès, et son code retombe au taux ordinaire (10 %)',
+   !vrt_parr_partenaire_ouvert(reg()['partenaires']['acc:va_prof']) && vrt_parr_taux($c, reg(), 'acc:va_prof') === 10);
+vrt_parr_partenaire_agir('acc:va_prof', 'reactiver');
+
+$dbSans = lireBase();
+$dbSans['visitorAccounts'] = array_values(array_filter($dbSans['visitorAccounts'], function ($a) { return $a['id'] !== 'va_prof'; }));
+$ev = vrt_parr_evaluer($dbSans, reg(), ['code' => 'PROF-TEST', 'accountId' => 'va_f6', 'intent' => 'subscription', 'targetId' => 'abo_pro_m', 'prix' => 2000]);
+ok('compte effacé par une synchro : le code vaut toujours (identité gardée au registre)', $ev['ok'] && $ev['benef'] === 'acc:va_prof' && $ev['commissionPct'] === 20, json_encode($ev));
+$pr = vrt_parr_partenaire_par_reprise(reg(), 'empreinte-test');
+ok('le code de reprise retrouve le partenaire au registre', $pr !== null && $pr['benef'] === 'acc:va_prof');
+ok('un code déjà pris par quelqu’un d’autre est refusé', !vrt_parr_code_libre(lireBase(), reg(), 'AKWA', 'acc:va_prof') && vrt_parr_code_libre(lireBase(), reg(), 'PROF-TEST', 'acc:va_prof'));
+$tot = vrt_parr_repartition_totaux(reg());
+ok('totaux de répartition : 7 abonnements dont 6 avec code', $tot['tout']['n'] === 7 && $tot['tout']['avecCode'] === 6, json_encode($tot));
 
 echo "\n────────────────────────────────────────────────────────────────────\n";
 if ($T['ko'] === 0) {

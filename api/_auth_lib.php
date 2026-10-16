@@ -2283,6 +2283,21 @@ if (!defined('VRT_AUTH_LIB')) {
             }
         }
 
+        /* RÉPARTITION (grille du 16/10/2026) : chaque abonnement payé, avec ou
+           sans code, est inscrit au registre — partenaire / co-gérants 30 % /
+           pool des enseignants. Idempotent par référence ; une erreur ici ne
+           doit jamais faire échouer l'octroi déjà accordé. */
+        if (!empty($res['changed']) && ($state['intent'] ?? '') === 'subscription'
+            && function_exists('vrt_parr_repartition_noter')) {
+            try {
+                $partRep = (int) ($parr['commission'] ?? 0);
+                foreach ($commissionsOk as $c) $partRep += (int) ($c['commissionAmount'] ?? 0);
+                vrt_parr_repartition_noter($db, $state, $partRep, (string) ($parr['benef'] ?? ''));
+            } catch (\Throwable $e) {
+                vrt_pay_log('[REPARTITION_ERR] ref=' . ($state['ref'] ?? '') . ' ' . $e->getMessage());
+            }
+        }
+
         $changed = (!empty($res['changed']) || $commChanged);
         if ($changed) {
             $db['lastModified'] = (int) round(microtime(true) * 1000);

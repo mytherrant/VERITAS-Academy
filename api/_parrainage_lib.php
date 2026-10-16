@@ -50,9 +50,25 @@ if (!defined('VRT_PARR_LIB')) {
     // ════════════════════════════════════════════════════════════════════
     // 1. RÉGLAGES
     // ════════════════════════════════════════════════════════════════════
+    /*
+     * GRILLE DU 16/10/2026 (« Plan d'action — Tarification et répartition des
+     * revenus VÉRITAS », VÉRITAS Éducation SARL) :
+     *   · remise du code : 10 % pour l'apprenant (inchangée) ;
+     *   · ENSEIGNANT-PARTENAIRE détenteur du code : 20 % du montant payé ;
+     *   · co-gérants : 30 % du montant payé, avec ou sans code ;
+     *   · pool des enseignants qui suivent les apprenants : le reste
+     *     (70 % sans code, 50 % avec code).
+     * Le Code ami d'un compte ordinaire (parent, élève) reste à 10 % : la note
+     * ne vise que les enseignants-partenaires.
+     * Les enseignants-partenaires reçoivent l'Atelier pendant 60 jours (2 mois),
+     * reconduits de 60 jours à chaque groupe de 5 nouveaux filleuls PAYANTS
+     * apportés par leur code — ou à la main par l'administration.
+     */
     function vrt_parr_defauts(): array {
         return ['actif' => true, 'remisePct' => 10, 'commissionPct' => 10,
-                'seuilVersement' => 2000, 'versementAuto' => true];
+                'seuilVersement' => 2000, 'versementAuto' => true,
+                'commissionPartenairePct' => 20, 'cogerantsPct' => 30,
+                'partenaireJours' => 60, 'partenaireSeuil' => 5];
     }
 
     /**
@@ -71,13 +87,21 @@ if (!defined('VRT_PARR_LIB')) {
         foreach ($sources as $c) {
             if (array_key_exists('actif', $c))        $d['actif'] = (bool) $c['actif'];
             if (array_key_exists('versementAuto', $c)) $d['versementAuto'] = (bool) $c['versementAuto'];
-            foreach (['remisePct', 'commissionPct', 'seuilVersement'] as $k) {
+            foreach (['remisePct', 'commissionPct', 'seuilVersement', 'commissionPartenairePct',
+                      'cogerantsPct', 'partenaireJours', 'partenaireSeuil'] as $k) {
                 if (isset($c[$k]) && is_numeric($c[$k])) $d[$k] = (int) $c[$k];
             }
         }
         $d['remisePct']      = max(0, min(50, $d['remisePct']));
         $d['commissionPct']  = max(0, min(50, $d['commissionPct']));
         if ($d['remisePct'] + $d['commissionPct'] > 60) $d['commissionPct'] = 60 - $d['remisePct'];
+        $d['commissionPartenairePct'] = max(0, min(50, $d['commissionPartenairePct']));
+        if ($d['remisePct'] + $d['commissionPartenairePct'] > 60) $d['commissionPartenairePct'] = 60 - $d['remisePct'];
+        /* Co-gérants + partenaire ne peuvent pas dépasser l'encaissé : le pool
+           des enseignants ne descend jamais sous zéro. */
+        $d['cogerantsPct']    = max(0, min(100 - $d['commissionPartenairePct'], $d['cogerantsPct']));
+        $d['partenaireJours'] = max(7, min(366, $d['partenaireJours']));
+        $d['partenaireSeuil'] = max(1, min(100, $d['partenaireSeuil']));
         $d['seuilVersement'] = max(500, min(200000, $d['seuilVersement']));
         return $d;
     }
@@ -210,7 +234,8 @@ if (!defined('VRT_PARR_LIB')) {
      * peut l'être. Le préfixe garde les clés telles qu'on les a écrites.
      */
     function vrt_parr_vide(): array {
-        return ['v' => 1, 'reglages' => [], 'index' => [], 'liens' => [], 'comptes' => [], 'ops' => [], 'versements' => []];
+        return ['v' => 1, 'reglages' => [], 'index' => [], 'liens' => [], 'comptes' => [], 'ops' => [], 'versements' => [],
+                'partenaires' => [], 'repartition' => []];
     }
 
     function vrt_parr_lire(): array {
@@ -274,6 +299,16 @@ if (!defined('VRT_PARR_LIB')) {
                             'actif' => (string) ($a['statut'] ?? '') !== 'suspendu'];
                 }
             }
+            /* Un enseignant-partenaire dont la copie dans la base a disparu
+               (synchronisation administrateur plus ancienne) reste connu du
+               registre : son code continue de valoir, ses commissions de
+               courir. */
+            try { $e = vrt_parr_partenaire_de(vrt_parr_lire(), $benef); } catch (\Throwable $x) { $e = null; }
+            if ($e) {
+                return ['type' => 'acc', 'id' => $id, 'pre' => '', 'nom' => (string) ($e['nom'] ?? ''),
+                        'tel' => (string) ($e['tel'] ?? ''), 'login' => '', 'code' => (string) ($e['code'] ?? ''),
+                        'actif' => !empty($e['actif'])];
+            }
             return null;
         }
         if ($type === 'ens') {
@@ -328,6 +363,118 @@ if (!defined('VRT_PARR_LIB')) {
         } catch (\Throwable $e) { /* un index manquant ralentit, il ne casse rien */ }
     }
 
+    // ════════════════════════════════════════════════════════════════════
+    // 4bis. ENSEIGNANTS-PARTENAIRES (grille du 16/10/2026)
+    // ════════════════════════════════════════════════════════════════════
+    /*
+     * Un enseignant-partenaire est un COMPTE (souvent né dans l'Atelier) inscrit
+     * au registre sous $reg['partenaires']['acc:<id>'] :
+     *   { code, nom, tel, debut, fin, actif, vus:[clés], cycle:[clés], hist:[…] }
+     * Le registre, pas la base : la date de fin d'accès et le compte des
+     * filleuls sont écrits par le serveur au paiement confirmé — une
+     * synchronisation administrateur (db.php, « dernière écriture gagne »)
+     * les effacerait.
+     */
+    function vrt_parr_partenaire_de(array $reg, string $benef): ?array {
+        $e = $reg['partenaires'][$benef] ?? null;
+        return is_array($e) ? $e : null;
+    }
+
+    /** Son accès à l'Atelier court-il encore ? (actif ET fin dans le futur) */
+    function vrt_parr_partenaire_ouvert(?array $e, ?int $t = null): bool {
+        if (!$e || empty($e['actif'])) return false;
+        return (int) ($e['fin'] ?? 0) > ($t ?? time());
+    }
+
+    /**
+     * Taux de commission du bénéficiaire d'un code. 20 % pour un
+     * enseignant-partenaire (registre), un partenaire (prt:) ou un enseignant
+     * du centre (ens:) ; le taux du Code ami pour tout autre compte. Un
+     * partenaire SUSPENDU retombe au taux ordinaire : son code continue de
+     * faire profiter ses filleuls, il ne lui ouvre plus la grille enseignant.
+     */
+    function vrt_parr_taux(array $cfg, array $reg, ?string $benef): int {
+        if (!$benef) return 0;
+        $type = substr($benef, 0, (int) strpos($benef, ':'));
+        if ($type === 'prt' || $type === 'ens') return (int) $cfg['commissionPartenairePct'];
+        $e = vrt_parr_partenaire_de($reg, $benef);
+        if ($e && !empty($e['actif'])) return (int) $cfg['commissionPartenairePct'];
+        return (int) $cfg['commissionPct'];
+    }
+
+    /** Prolonge l'accès : à partir de la fin prévue, ou d'aujourd'hui si elle est passée. */
+    function vrt_parr_partenaire_prolonger(array &$e, int $jours, string $via, ?int $t = null): void {
+        $t = $t ?? time();
+        $base = max((int) ($e['fin'] ?? 0), $t);
+        $e['fin'] = $base + max(1, $jours) * 86400;
+        if (!isset($e['hist']) || !is_array($e['hist'])) $e['hist'] = [];
+        $e['hist'][] = ['t' => $t, 'via' => $via, 'jours' => $jours, 'fin' => $e['fin']];
+        if (count($e['hist']) > 60) $e['hist'] = array_slice($e['hist'], -60);
+    }
+
+    /**
+     * Un filleul payant de plus. Compté UNE fois à vie (`vus`) : les mêmes
+     * cinq personnes qui rachètent chaque mois ne reconduisent pas l'accès
+     * indéfiniment. Chaque groupe de `partenaireSeuil` NOUVEAUX filleuls
+     * reconduit de `partenaireJours`. Renvoie vrai si l'accès a été reconduit.
+     *
+     * Payants, pas simplement inscrits : compter les inscriptions rémunérerait
+     * des comptes créés en masse et jamais réglés (même règle que
+     * vrt_taux_par_volume).
+     */
+    function vrt_parr_partenaire_noter(array &$e, string $cle, array $cfg, ?int $t = null): bool {
+        if ($cle === '') return false;
+        foreach (['vus', 'cycle'] as $k) { if (!isset($e[$k]) || !is_array($e[$k])) $e[$k] = []; }
+        if (in_array($cle, $e['vus'], true)) return false;
+        $e['vus'][] = $cle;
+        $e['cycle'][] = $cle;
+        if (count($e['cycle']) < (int) $cfg['partenaireSeuil']) return false;
+        $e['cycle'] = [];
+        vrt_parr_partenaire_prolonger($e, (int) $cfg['partenaireJours'], 'filleuls', $t);
+        return true;
+    }
+
+    /**
+     * Répartition d'un encaissement (grille du 16/10/2026) :
+     *   avec code : partenaire (sa commission réelle) · co-gérants 30 % · pool = le reste
+     *   sans code : co-gérants 30 % · pool 70 %.
+     * La part du partenaire est celle RÉELLEMENT créditée (0 si refusée) : le
+     * pool récupère ce qui n'a pas été versé, rien ne se perd.
+     */
+    function vrt_parr_repartition(int $paye, int $partenaire, array $cfg): array {
+        $paye = max(0, $paye);
+        $partenaire = max(0, min($paye, $partenaire));
+        $cog = (int) round($paye * (int) $cfg['cogerantsPct'] / 100);
+        $cog = min($cog, $paye - $partenaire);
+        return ['paye' => $paye, 'partenaire' => $partenaire, 'cogerants' => $cog,
+                'pool' => $paye - $partenaire - $cog];
+    }
+
+    /**
+     * Inscrit la répartition d'un ABONNEMENT payé (avec ou sans code), une
+     * fois par référence. Appelée par vrt_grant_entitlement_to_file() sous le
+     * verrou de la base (ordre base → registre respecté).
+     */
+    function vrt_parr_repartition_noter(array $db, array $state, int $partenaire, string $benef = ''): void {
+        $ref = (string) ($state['ref'] ?? '');
+        if ($ref === '' || (string) ($state['intent'] ?? '') !== 'subscription') return;
+        $paye = (int) ($state['montant_paye'] ?? $state['montant'] ?? 0);
+        if ($paye <= 0) return;
+        $cfg = vrt_parr_cfg($db);
+        $rep = vrt_parr_repartition($paye, $partenaire, $cfg);
+        $code = (string) ($state['parrainage']['code'] ?? '');
+        vrt_parr_tx(function (array &$reg) use ($ref, $rep, $code, $benef, $state) {
+            if (!isset($reg['repartition']) || !is_array($reg['repartition'])) $reg['repartition'] = [];
+            $cle = 'r:' . $ref;
+            if (isset($reg['repartition'][$cle])) return;
+            $reg['repartition'][$cle] = [
+                't' => time(), 'm' => $rep['paye'], 'part' => $rep['partenaire'], 'cog' => $rep['cogerants'],
+                'pool' => $rep['pool'], 'code' => $code, 'b' => $benef,
+                'cible' => mb_substr((string) ($state['targetId'] ?? ''), 0, 40),
+            ];
+        });
+    }
+
     /**
      * Résout un code saisi. Ordre : codes promo de l'administration, index du
      * registre, codes de partenaires, codes de comptes (porté puis calculé),
@@ -365,19 +512,29 @@ if (!defined('VRT_PARR_LIB')) {
                 if (!$pers) $r['benef'] = null;   // propriétaire disparu : la remise reste, personne n'est payé
                 else $r['nom'] = vrt_parr_nom_court($pers['pre'], $pers['nom']);
             }
-            if ($r['benef'] === null) $r['commissionPct'] = 0;
+            $r['commissionPct'] = ($r['benef'] === null) ? 0 : vrt_parr_taux($cfg, $reg, $r['benef']);
             return $r;
         }
 
-        $trouve = function (string $benef) use ($db, $base) {
+        $trouve = function (string $benef) use ($db, $base, $cfg, $reg) {
             $pers = vrt_parr_personne($db, $benef);
             if (!$pers) return null;
             $r = $base;
             $r['type']  = ['acc' => 'compte', 'prt' => 'partenaire', 'ens' => 'enseignant'][$pers['type']] ?? 'compte';
+            if ($pers['type'] === 'acc' && vrt_parr_partenaire_de($reg, $benef)) $r['type'] = 'enseignant';
             $r['benef'] = $benef;
             $r['nom']   = vrt_parr_nom_court($pers['pre'], $pers['nom']);
+            $r['commissionPct'] = vrt_parr_taux($cfg, $reg, $benef);
             return $r;
         };
+
+        // a bis. Enseignants-partenaires du registre (leur code y fait foi,
+        //        même si une synchronisation a effacé la copie dans la base).
+        foreach (($reg['partenaires'] ?? []) as $b => $e) {
+            if (is_array($e) && vrt_parr_normaliser((string) ($e['code'] ?? '')) === $code) {
+                return $trouve((string) $b);
+            }
+        }
 
         // b. Index du registre (codes déjà vus) — vérifié, jamais cru sur parole.
         if (isset($reg['index'][$code]) && is_string($reg['index'][$code])) {
@@ -495,7 +652,7 @@ if (!defined('VRT_PARR_LIB')) {
         if ($lien) {
             $pers = vrt_parr_personne($db, $lien['b']);
             $choix = ['code' => $lien['c'], 'type' => 'lien', 'benef' => $lien['b'],
-                      'remisePct' => $cfg['remisePct'], 'remiseFixe' => 0, 'commissionPct' => $cfg['commissionPct'],
+                      'remisePct' => $cfg['remisePct'], 'remiseFixe' => 0, 'commissionPct' => vrt_parr_taux($cfg, $reg, $lien['b']),
                       'nom' => $pers ? vrt_parr_nom_court($pers['pre'], $pers['nom']) : ''];
             if (!$pers || empty($pers['actif']) || $estSoi($lien['b'], $pers)) {
                 $choix['benef'] = null; $choix['commissionPct'] = 0;   // la remise du filleul survit à son parrain
@@ -604,9 +761,9 @@ if (!defined('VRT_PARR_LIB')) {
         }
 
         $maintenant = time();
-        $r = vrt_parr_tx(function (array &$reg) use ($ref, $benef, $commission, $paye, $p, $state, $payeurId, $cfg, $refus, $maintenant) {
+        $r = vrt_parr_tx(function (array &$reg) use ($ref, $benef, $commission, $paye, $p, $state, $payeurId, $payeurTel, $cfg, $refus, $maintenant) {
             $cle = 'r:' . $ref;
-            if (isset($reg['ops'][$cle])) return ['deja' => true, 'lienNeuf' => false, 'aVerser' => false];
+            if (isset($reg['ops'][$cle])) return ['deja' => true, 'lienNeuf' => false, 'aVerser' => false, 'reconduit' => false];
             $reg['ops'][$cle] = [
                 'b' => $benef, 'p' => $payeurId, 'm' => $paye, 'pct' => (int) ($p['commissionPct'] ?? 0),
                 'c' => $commission, 'code' => (string) ($p['code'] ?? ''), 'src' => (string) ($p['source'] ?? ''),
@@ -634,16 +791,29 @@ if (!defined('VRT_PARR_LIB')) {
                 }
                 $aVerser = !empty($cfg['versementAuto']) && (int) $c2['solde'] >= (int) $cfg['seuilVersement']
                            && (int) ($c2['enCours'] ?? 0) === 0;
-                return ['deja' => false, 'lienNeuf' => $lienNeuf, 'aVerser' => $aVerser];
+                /* Enseignant-partenaire : un filleul payant de plus, et peut-être
+                   la reconduction de son accès à l'Atelier. Même transaction que
+                   le crédit : un rejeu (deja) ne compte pas deux fois. */
+                $reconduit = false;
+                if (isset($reg['partenaires'][$benef]) && is_array($reg['partenaires'][$benef])
+                    && !empty($reg['partenaires'][$benef]['actif'])) {
+                    $cleF = $payeurId !== '' ? 'acc:' . $payeurId : ($payeurTel !== '' ? 'tel:' . $payeurTel : 'ref:' . $ref);
+                    $reconduit = vrt_parr_partenaire_noter($reg['partenaires'][$benef], $cleF, $cfg, $maintenant);
+                }
+                return ['deja' => false, 'lienNeuf' => $lienNeuf, 'aVerser' => $aVerser, 'reconduit' => $reconduit];
             }
-            return ['deja' => false, 'lienNeuf' => false, 'aVerser' => false];
+            return ['deja' => false, 'lienNeuf' => false, 'aVerser' => false, 'reconduit' => false];
         });
 
         $out['deja']       = !empty($r['deja']);
         $out['benef']      = $benef;
         $out['commission'] = $out['deja'] ? 0 : $commission;
         $out['aVerser']    = !empty($r['aVerser']);
+        $out['reconduit']  = !empty($r['reconduit']);
         if ($out['deja']) return $out;
+        if ($out['reconduit'] && function_exists('vrt_pay_log')) {
+            vrt_pay_log('[PARTENAIRE_RECONDUIT] benef=' . $benef . ' ref=' . $ref . ' (filleuls)');
+        }
 
         if (function_exists('vrt_pay_log')) {
             vrt_pay_log('[CODE_AMI] ref=' . $ref . ' code=' . ($p['code'] ?? '') . ' benef=' . $benef
@@ -709,6 +879,16 @@ if (!defined('VRT_PARR_LIB')) {
     function vrt_parr_annuler(string $ref, int $rembourse, string $motif = 'remboursement'): array {
         return vrt_parr_tx(function (array &$reg) use ($ref, $rembourse, $motif) {
             $cle = 'r:' . $ref;
+            // La répartition suit le remboursement : on retire au prorata de chaque part.
+            $rp = $reg['repartition'][$cle] ?? null;
+            if (is_array($rp) && empty($rp['annule'])) {
+                $m = max(1, (int) ($rp['m'] ?? 1));
+                $f = $rembourse > 0 ? min(1, $rembourse / $m) : 1;
+                foreach (['m', 'part', 'cog', 'pool'] as $k) {
+                    $reg['repartition'][$cle][$k] = (int) ($rp[$k] ?? 0) - (int) round((int) ($rp[$k] ?? 0) * $f);
+                }
+                $reg['repartition'][$cle]['annule'] = (int) round($m * $f);
+            }
             $op = $reg['ops'][$cle] ?? null;
             if (!is_array($op) || !empty($op['annule']) || empty($op['b']) || (int) ($op['c'] ?? 0) <= 0) {
                 return ['annule' => 0];
@@ -892,6 +1072,134 @@ if (!defined('VRT_PARR_LIB')) {
         ];
     }
 
+    // ════════════════════════════════════════════════════════════════════
+    // 9. ENSEIGNANTS-PARTENAIRES — administration
+    // ════════════════════════════════════════════════════════════════════
+    /** Un code public d'enseignant : 4 à 20 signes, lettres, chiffres, tirets. */
+    function vrt_parr_code_partenaire_valide(string $code): bool {
+        return (bool) preg_match('/^[A-Z0-9][A-Z0-9-]{3,19}$/', $code);
+    }
+
+    /**
+     * Le code est-il libre pour ce bénéficiaire ? Un code qui désigne déjà
+     * QUELQU'UN D'AUTRE (promo, partenaire, compte, enseignant) est refusé :
+     * deux personnes derrière un code, c'est une commission versée au hasard.
+     */
+    function vrt_parr_code_libre(array $db, array $reg, string $code, string $benef): bool {
+        $r = vrt_parr_resoudre($db, $reg, $code);
+        if ($r === null) {
+            // Un code promo épuisé ou expiré ne se résout plus, mais il existe.
+            foreach (($db['promoCodes'] ?? []) as $pc) {
+                if (is_array($pc) && vrt_parr_normaliser((string) ($pc['code'] ?? '')) === $code) return false;
+            }
+            return true;
+        }
+        return ($r['benef'] ?? null) === $benef;
+    }
+
+    /**
+     * Inscrit (ou met à jour) un enseignant-partenaire. À la création, l'accès
+     * court `partenaireJours` à partir d'aujourd'hui ; une mise à jour ne
+     * touche ni la date de fin ni les filleuls comptés.
+     */
+    function vrt_parr_partenaire_inscrire(string $benef, string $code, string $nom, string $tel, array $cfg, string $repriseHash = ''): array {
+        $t = time();
+        return vrt_parr_tx(function (array &$reg) use ($benef, $code, $nom, $tel, $cfg, $t, $repriseHash) {
+            if (!isset($reg['partenaires']) || !is_array($reg['partenaires'])) $reg['partenaires'] = [];
+            $neuf = !isset($reg['partenaires'][$benef]);
+            $e = $neuf ? ['debut' => $t, 'fin' => $t + (int) $cfg['partenaireJours'] * 86400, 'vus' => [], 'cycle' => [],
+                          'hist' => [['t' => $t, 'via' => 'creation', 'jours' => (int) $cfg['partenaireJours']]]]
+                       : $reg['partenaires'][$benef];
+            // L'ancien code d'un partenaire renommé ne doit plus le désigner.
+            if (!$neuf && !empty($e['code']) && ($reg['index'][$e['code']] ?? '') === $benef && $e['code'] !== $code) {
+                unset($reg['index'][$e['code']]);
+            }
+            $e['code'] = $code; $e['nom'] = $nom; $e['tel'] = $tel; $e['actif'] = true; $e['maj'] = $t;
+            if ($repriseHash !== '') $e['rh'] = $repriseHash;   // empreinte seulement, jamais le code en clair
+            $reg['partenaires'][$benef] = $e;
+            $reg['index'][$code] = $benef;
+            return ['neuf' => $neuf] + $e;
+        });
+    }
+
+    /** Nouvelle empreinte de code de reprise (l'ancien code cesse de valoir). */
+    function vrt_parr_partenaire_reprise(string $benef, string $repriseHash): bool {
+        return (bool) vrt_parr_tx(function (array &$reg) use ($benef, $repriseHash) {
+            if (!isset($reg['partenaires'][$benef]) || !is_array($reg['partenaires'][$benef])) return false;
+            $reg['partenaires'][$benef]['rh'] = $repriseHash;
+            return true;
+        });
+    }
+
+    /** Le partenaire dont le code de reprise a cette empreinte : ['benef', 'e'] ou null. */
+    function vrt_parr_partenaire_par_reprise(array $reg, string $repriseHash): ?array {
+        if ($repriseHash === '') return null;
+        foreach (($reg['partenaires'] ?? []) as $b => $e) {
+            if (is_array($e) && !empty($e['rh']) && hash_equals((string) $e['rh'], $repriseHash)) return ['benef' => (string) $b, 'e' => $e];
+        }
+        return null;
+    }
+
+    /** reconduire (n jours) · suspendre · reactiver. Renvoie l'entrée, ou null si inconnue. */
+    function vrt_parr_partenaire_agir(string $benef, string $op, int $jours = 0): ?array {
+        return vrt_parr_tx(function (array &$reg) use ($benef, $op, $jours) {
+            if (!isset($reg['partenaires'][$benef]) || !is_array($reg['partenaires'][$benef])) return null;
+            $e = $reg['partenaires'][$benef];
+            if (!isset($e['hist']) || !is_array($e['hist'])) $e['hist'] = [];
+            if ($op === 'reconduire')     vrt_parr_partenaire_prolonger($e, max(1, min(366, $jours)), 'manuel');
+            elseif ($op === 'suspendre')  { $e['actif'] = false; $e['hist'][] = ['t' => time(), 'via' => 'suspendu']; }
+            elseif ($op === 'reactiver')  { $e['actif'] = true;  $e['hist'][] = ['t' => time(), 'via' => 'reactive']; }
+            else return null;
+            $reg['partenaires'][$benef] = $e;
+            return $e;
+        });
+    }
+
+    /** Liste pour l'écran d'administration. */
+    function vrt_parr_partenaires_admin(array $db, array $reg): array {
+        $cfg = vrt_parr_cfg($db, $reg);
+        $t = time();
+        $out = [];
+        foreach (($reg['partenaires'] ?? []) as $b => $e) {
+            if (!is_array($e)) continue;
+            $b = (string) $b;
+            $c = $reg['comptes'][$b] ?? [];
+            $fin = (int) ($e['fin'] ?? 0);
+            $out[] = [
+                'benef' => $b, 'accId' => (string) substr($b, 4), 'code' => (string) ($e['code'] ?? ''),
+                'nom' => (string) ($e['nom'] ?? ''), 'tel' => (string) ($e['tel'] ?? ''),
+                'actif' => !empty($e['actif']), 'ouvert' => vrt_parr_partenaire_ouvert($e, $t),
+                'debut' => (int) ($e['debut'] ?? 0), 'fin' => $fin,
+                'resteJours' => $fin > $t ? (int) ceil(($fin - $t) / 86400) : 0,
+                'filleuls' => count((array) ($e['vus'] ?? [])), 'cycle' => count((array) ($e['cycle'] ?? [])),
+                'seuil' => (int) $cfg['partenaireSeuil'],
+                'reconductions' => count(array_filter((array) ($e['hist'] ?? []), function ($h) {
+                    return is_array($h) && in_array($h['via'] ?? '', ['filleuls', 'manuel'], true); })),
+                'gagne' => (int) ($c['gagne'] ?? 0), 'solde' => (int) ($c['solde'] ?? 0), 'verse' => (int) ($c['verse'] ?? 0),
+            ];
+        }
+        usort($out, function ($a, $b) { return strcmp($a['nom'], $b['nom']); });
+        return $out;
+    }
+
+    /** Totaux de répartition (grille du 16/10/2026) : tout, et le mois en cours. */
+    function vrt_parr_repartition_totaux(array $reg): array {
+        $z = ['n' => 0, 'avecCode' => 0, 'encaisse' => 0, 'partenaires' => 0, 'cogerants' => 0, 'pool' => 0];
+        $tout = $z; $mois = $z; $m0 = date('Y-m');
+        foreach (($reg['repartition'] ?? []) as $r) {
+            if (!is_array($r)) continue;
+            $ajouter = function (array &$acc) use ($r) {
+                $acc['n']++;
+                if ((string) ($r['code'] ?? '') !== '') $acc['avecCode']++;
+                $acc['encaisse'] += (int) ($r['m'] ?? 0);    $acc['partenaires'] += (int) ($r['part'] ?? 0);
+                $acc['cogerants'] += (int) ($r['cog'] ?? 0); $acc['pool'] += (int) ($r['pool'] ?? 0);
+            };
+            $ajouter($tout);
+            if (date('Y-m', (int) ($r['t'] ?? 0)) === $m0) $ajouter($mois);
+        }
+        return ['tout' => $tout, 'mois' => $mois];
+    }
+
     /** Le tableau de bord de l'administration. */
     function vrt_parr_resume_admin(array $db, array $reg): array {
         $cfg = vrt_parr_cfg($db, $reg);
@@ -932,6 +1240,8 @@ if (!defined('VRT_PARR_LIB')) {
         }
         usort($vers, function ($a, $b) { return $b['t'] - $a['t']; });
         return ['ok' => true, 'regle' => $cfg, 'totaux' => $t, 'parrains' => array_slice($lignes, 0, 200),
-                'operations' => array_slice($ops, 0, 100), 'versements' => array_slice($vers, 0, 100)];
+                'operations' => array_slice($ops, 0, 100), 'versements' => array_slice($vers, 0, 100),
+                'partenaires' => vrt_parr_partenaires_admin($db, $reg),
+                'repartition' => vrt_parr_repartition_totaux($reg)];
     }
 }
