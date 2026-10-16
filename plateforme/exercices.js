@@ -264,7 +264,7 @@
     if (opts.token) entetes['Authorization'] = 'Bearer ' + opts.token;
     return fetch(url, {
       method: 'POST', headers: entetes,
-      body: JSON.stringify({ action: opts.action || 'exercices_minesec', prompt: prompt,
+      body: JSON.stringify({ action: opts.action || 'exercices_minesec', prompt: prompt, sysPrompt: opts.sysPrompt || '',
                              max_tokens: opts.max || 1600, temperature: 0.35 })
     }).then(function (r) {
       if (r.status === 402) throw new Error('quota');
@@ -365,7 +365,9 @@
     l.push('Évite aussi les verbes non observables : connaître, comprendre, savoir, apprécier.');
     l.push('');
     l.push('LEÇON');
-    l.push('Type : ' + ((gabarit && gabarit.nom) || 'non précisé'));
+    /* La norme complète du type de leçon (déroulé, corpus, règle, interdits) :
+       l'objectif doit pouvoir être ATTEINT par ce déroulé-là. */
+    l.push('Type : ' + ((gabarit && gabarit.nom) || 'non précisé') + ' — sa norme complète (déroulé, corpus, règle, interdits) est dans la consigne système : l’objectif doit pouvoir être ATTEINT par ce déroulé-là.');
     if (gabarit && gabarit.phases) l.push('Phases : ' + gabarit.phases.map(function (p) { return p.nom; }).join(' → '));
     l.push('Titre : ' + ((cours && cours.title) || '(sans titre)'));
     l.push('Classe : ' + ((cours && cours.classe) || '?'));
@@ -410,7 +412,12 @@
   }
 
   function genererObjectif(cours, gabarit, corpus, interdits, opts) {
-    return appeler(promptObjectif(cours, gabarit, corpus, interdits), opts)
+    var M0 = (typeof root !== 'undefined' && root.MINESEC) || (typeof MINESEC !== 'undefined' ? MINESEC : null);
+    var norme = (gabarit && M0 && M0.normeDuGabarit) ? M0.normeDuGabarit(gabarit, cours && cours.classe) : [];
+    var o2 = {};
+    for (var k in (opts || {})) o2[k] = opts[k];
+    if (norme.length) o2.sysPrompt = 'NORME DU TYPE DE LEÇON (référentiel MINESEC de l’Atelier — elle fait foi) :\n' + norme.join('\n');
+    return appeler(promptObjectif(cours, gabarit, corpus, interdits), o2)
       .then(function (o) { return validerObjectif(o, interdits); });
   }
 

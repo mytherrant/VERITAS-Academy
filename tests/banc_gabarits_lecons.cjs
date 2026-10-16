@@ -47,10 +47,9 @@ dire(!sans.length, 'chaque gabarit cite sa source et son niveau de confiance', s
 
 console.log(`\n${G}② Ce qu'on enseigne est ce qui est noté${R}`);
 const apc = M.grille('apc4');
-const hintCom = g('commentaire').phases.map(p => p.hint).join(' ');
-const nombres = (hintCom.match(/\/(\d+)/g) || []).map(x => +x.slice(1));
-dire(g('commentaire').grille === 'apc4' && JSON.stringify(nombres) === JSON.stringify(apc.criteres.map(c => c.points)),
-  'commentaire : le barème enseigné est la grille officielle 6/6/6/2 (plus de « /3 /12 /3 /2 »)', JSON.stringify(nombres));
+const hintCom = g('commentaire').phases.map(p => p.hint).join(' ') + ' ' + (g('commentaire').regleCle || '');
+dire(g('commentaire').grille === 'apc4' && /compréhension et pertinence 6, organisation et cohérence 6, expression 6, originalité et présentation 2/.test(hintCom) && !/\/12/.test(hintCom),
+  'commentaire : le barème enseigné est la grille officielle 6/6/6/2 (plus de « /3 /12 /3 /2 »)');
 ['resume', 'analyse'].forEach(id => {
   const x = g(id);
   dire(JSON.stringify(x.typesTexte) === '["ARGUMENTATIF","EXPLICATIF"]' && x.texteSupport.min === 550 && x.texteSupport.max === 650
@@ -77,7 +76,7 @@ dire(aLongueur(ecarts('lecture2', '1ère A', 700)), 'lecture méthodique du 2nd 
 dire(aLongueur(ecarts('lecture', '4e', 700)), 'lecture méthodique du 1er cycle : toujours contrôlée');
 const ty = t => ecarts('resume', 'Tle A', 600, { type: t }).some(e => /^Texte \S+ pour contraction/.test(e.titre));
 dire(!ty('ARGUMENTATIF') && !ty('EXPLICATIF') && ty('NARRATIF') && ty('POÉTIQUE'), 'type : argumentatif et explicatif admis, narratif et poétique signalés');
-dire(ecarts('resume', 'Tle A', 600).some(e => e.titre === 'Règle de l’exercice' && /ordre de l’auteur/.test(e.detail)), 'la règle de l’exercice est affichée (champ jusqu’ici lu par personne)');
+dire(ecarts('resume', 'Tle A', 600).some(e => e.titre === 'Règle de l’exercice' && /ordre des idées/.test(e.detail)), 'la règle de l’exercice est affichée (champ jusqu’ici lu par personne)');
 dire(!ecarts('resume', 'Tle A', 600).some(e => e.titre === 'Règle de l’exercice' && e.severite !== 'conseil'), 'la règle est un conseil, pas une alerte');
 
 console.log(`\n${G}④ Durées et déroulés : les documents de Jacques font foi${R}`);
@@ -116,5 +115,44 @@ const vieux = C.verifierCours({ title: 'L', classe: '5e', gabarit: 'suivie', obj
 dire(!vieux.some(e => /phase\(s\) non renseignée/.test(e.titre) && /Bilan/.test(e.quoiFaire || '')), 'le garde-fou lit aussi par la correspondance : le Bilan d’une ancienne leçon n’est pas « vide »',
   JSON.stringify(vieux.filter(e => /phase/.test(e.titre)).map(e => e.quoiFaire)));
 
-console.log(`\n  ${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
-process.exit(ko ? 1 : 0);
+console.log(`\n${G}⑥ Gabarits du 2nd cycle selon le guide (Jacques, 16/10/2026)${R}`);
+dire(g('langue2').phases.map(p => p.nom).join(' → ') === 'Observation / découverte → Analyse → Vérification / confrontation → Formulation de la règle → Consolidation',
+  'leçon de langue (2nd cycle) : les 5 étapes du guide');
+dire(/quinzaine de lignes/.test(g('langue2').exigencesCorpus.join(' ')), 'leçon de langue : corpus d’une quinzaine de lignes');
+dire(g('lecture2').phases.map(p => p.nom).join(' → ') === 'Lectures du texte → Observation et formulation des hypothèses → Choix des outils d’analyse → Analyse du texte → Validation des hypothèses → Bilan',
+  'lecture méthodique (2nd cycle) : les 6 étapes du guide');
+dire(/LITTÉRAIRE/.test(g('lecture2').texteSupport.note) && /œuvre au programme/.test(g('lecture2').texteSupport.note), 'lecture méthodique : texte littéraire de 20 à 30 lignes, œuvre au programme ou groupement');
+dire(g('commentaire').phases.map(p => p.nom).join(' → ') === 'Découverte de l’épreuve → Analyse détaillée du texte → Regroupement des données par affinités → Plan détaillé',
+  'commentaire : les 4 étapes du guide');
+dire(/ŒUVRE INTÉGRALE AU PROGRAMME/.test(g('commentaire').exigencesCorpus.join(' ')), 'commentaire : extrait d’une œuvre au programme');
+dire(/SOIT sur un problème abordé dans le texte, SOIT sur un passage précis/.test(g('discussion').regleCle) && /\/10 en 2nde/.test(g('discussion').regleCle), 'discussion : un problème du texte ou un passage ; /10 en 2nde, /9 ensuite');
+dire(/\/8 en 2nde/.test(g('resume').regleCle) && /pronominalisation, nominalisation/i.test(g('resume').phases.map(p => p.hint).join(' ')), 'résumé : /8 en 2nde, techniques de contraction du guide');
+dire(!!g('gt') && total(g('gt')) === 360 && /4 à 6 textes/.test(g('gt').exigencesCorpus.join(' ')), 'groupement de textes : 4 à 6 textes, 6 heures');
+dire(/dialectique, analytique ou mixte/.test(g('dissertation').phases[0].hint), 'dissertation : analyse du sujet selon le type (dialectique, analytique, mixte)');
+const lg = M.phasesDuCours({ gabarit: 'langue2', phasesRev: '2026-10-16', phaseContent: { 0: 'obs', 1: 'rep', 2: 'ana', 3: 'int', 4: 'conso' } });
+dire(lg[1] === 'rep\n\nana\n\nint' && lg[4] === 'conso' && lg[2] === undefined, 'leçon de langue déjà écrite : repérage + analyse + interprétation regroupés sous « Analyse », réemploi → consolidation', JSON.stringify(lg));
+dire(M.phasesDuCours({ gabarit: 'langue2', phasesRev: M.PHASES_REV, phaseContent: { 2: 'verif' } })[2] === 'verif', 'une leçon de langue au nouveau déroulé n’est jamais déplacée');
+const e2 = M.epreuveParCode('A_LITT');
+dire(/ŒUVRE INTÉGRALE AU PROGRAMME/.test(M.partiesPour(e2, 'Tle A')[1].consigne) && /PLAN DÉTAILLÉ/.test(M.partiesPour(e2, '2nde A')[1].consigne), 'structure : commentaire sur une œuvre au programme ; plan détaillé seul en 2nde');
+dire(M.grille('contraction8102').total === 20 && JSON.stringify(M.grille('contraction8102').criteres.map(c => c.points)) === '[8,10,2]', 'grille de 2nde 8 / 10 / 2 au référentiel');
+
+console.log(`\n${G}⑦ Ce qu'Ambassa reçoit pour une leçon : la norme COMPLÈTE${R}`);
+(async () => {
+  const nCom = M.normeDuGabarit('commentaire', 'Tle A').join('\n');
+  dire(/Déroulé officiel :/.test(nCom) && /Regroupement des données par affinités \(1 h\) — Formuler deux ou trois centres d’intérêt/.test(nCom)
+    && /Corpus : Extrait d’une ŒUVRE INTÉGRALE AU PROGRAMME/.test(nCom) && /Œuvres au programme de la classe : « Ngum a Jemea »/.test(nCom) && !/\.\./.test(nCom),
+    'la norme porte le déroulé avec ce que chaque phase contient, le corpus exigé et les œuvres de la classe');
+  dire(!/Œuvres au programme/.test(M.normeDuGabarit('langue', '5e').join(' ')), 'pas d’œuvres du 2nd cycle dans une leçon de langue du 1er cycle');
+  const envoyes = [];
+  const fetch0 = globalThis.fetch;
+  globalThis.fetch = (u, o) => { envoyes.push(JSON.parse(o.body)); return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ text: '{}' }) }); };
+  const lourd = { title: 'L', classe: 'Tle A', gabarit: 'lecture', objAgir: 'x', phasesRev: M.PHASES_REV,
+    phaseContent: Object.fromEntries(M.gabaritParId('lecture').phases.map((p, i) => [i, 'é'.repeat(1500)])) };
+  try { await C.analyserAvecAmbassa('cours', lourd, [{ text: 'é'.repeat(5000) }], []); } catch (e) {}
+  globalThis.fetch = fetch0;
+  const env = envoyes[0] || {};
+  dire(Buffer.byteLength(env.prompt || '') <= 8000, 'une leçon très remplie tient sous les 8 000 octets du proxy (avant : 9 971, refusée)', Buffer.byteLength(env.prompt || ''));
+  dire(/NORME DU TYPE DE LEÇON/.test(env.sysPrompt || '') && /Déroulé officiel/.test(env.sysPrompt || ''), 'l’audit envoie la norme en consigne système');
+  console.log(`\n  ${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
+  process.exit(ko ? 1 : 0);
+})();

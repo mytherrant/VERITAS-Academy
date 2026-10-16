@@ -29,10 +29,10 @@
 <meta property="og:image" content="https://veritas-school.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <script src="./support.js?v=b7335820"></script>
-<script src="./minesec.js?v=c6660ff8"></script>
-<script src="./conformite.js?v=c6acd615"></script>
-<script src="./exercices.js?v=c6d93301"></script>
-<script src="./generateur.js?v=4f4fb478"></script>
+<script src="./minesec.js?v=5109f163"></script>
+<script src="./conformite.js?v=7948efec"></script>
+<script src="./exercices.js?v=0018edb0"></script>
+<script src="./generateur.js?v=85c8cdef"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=090324b1"></script>
 <!--vrt-habillage:tete-->
@@ -5139,9 +5139,21 @@ class Component extends DCLogic {
       const n=(a.texteSource!=null&&mode==='completer')?a.texteSource:(textesChoisis[0]!=null?textesChoisis[0]:choisir(plan.texteSupport,plan.support,null,true));
       if(n!=null)roles.push({n:n,role:plan.support});
     }
+    /* LE COMMENTAIRE COMPOSÉ PORTE SUR UN EXTRAIT D'UNE ŒUVRE AU PROGRAMME de
+       la classe (Jacques, 16/10/2026). On cherche d'abord un tel extrait dans
+       le corpus ouvert ; sinon l'enseignant est prévenu AVANT l'appel. */
+    let comHors=false;
     if(plan.sujets.some(x=>x.genre==='commentaire')){
       const deja=(a.textIds||[]).find(n=>a.customQ&&a.customQ[n]&&a.customQ[n].role==='commentaire');
-      const n2=deja!=null?deja:choisir({min:150,max:320},'commentaire',roles.map(r=>r.n));
+      let n2=deja;
+      if(n2==null){
+        const pris=roles.map(r=>r.n);
+        const deLOeuvre=this.all.filter(f=>f._libre!==false&&pris.indexOf(f.n)<0&&f.words>=150&&f.words<=400
+          &&G.texteDeLOeuvre(f,MINESEC,a.classe))
+          .sort((x,y)=>Math.abs((x.words||0)-225)-Math.abs((y.words||0)-225));
+        if(deLOeuvre.length)n2=deLOeuvre[0].n;
+        else{n2=choisir({min:150,max:320},'commentaire',pris);comHors=true;}
+      }
       if(n2!=null)roles.push({n:n2,role:'commentaire'});
     }
     if(plan.support!=='aucun'&&!roles.some(r=>r.role!=='commentaire')){
@@ -5163,6 +5175,16 @@ class Component extends DCLogic {
       this.setState({genBusy:false,genEtape:'',genErr:'Composition annulée : aucun appel décompté. Importez un texte argumentatif ou explicatif de '
         +ab0.bornes.min+' à '+ab0.bornes.max+' mots (onglet Corpus, « Importer un corpus »), ajoutez-le à l’épreuve, puis relancez.'});
       return;
+    }
+    if(comHors&&typeof window!=='undefined'&&window.confirm){
+      const oe=(MINESEC.oeuvresDe?MINESEC.oeuvresDe(a.classe):[]).map(o=>'« '+o.titre+' » ('+o.auteur+')').join(', ');
+      if(!window.confirm('Commentaire composé : le corpus n\u2019a aucun extrait des œuvres au programme de la classe'+(oe?' — '+oe:'')+'.\n\n'
+        +'OK : composer quand même sur le texte littéraire le plus proche (le sujet sera signalé hors programme).\n'
+        +'Annuler : importer d\u2019abord un extrait de 20 à 30 lignes de l\u2019une de ces œuvres (onglet Corpus, « Importer un corpus »), puis relancer.')){
+        this.setState({genBusy:false,genEtape:'',genErr:'Composition annulée : aucun appel décompté. Importez un extrait de 20 à 30 lignes d\u2019une œuvre au programme'
+          +(oe?' ('+oe+')':'')+', ajoutez-le à l\u2019épreuve, puis relancez.'});
+        return;
+      }
     }
     etape('Téléchargement du texte intégral…');
     Promise.all(roles.map(r=>this._texteComplet(r.n))).then(oks=>{

@@ -570,7 +570,8 @@
      demande exactement ce qu'elle seule peut juger.
      ------------------------------------------------------------------ */
 
-  function promptAmbassa(kind, objet, textes, ecartsLocaux) {
+  function promptAmbassa(kind, objet, textes, ecartsLocaux, lim) {
+    lim = lim || {};
     var struct = objet && objet.epreuveCode ? M.epreuveParCode(objet.epreuveCode) : null;
     var g = objet && objet.gabarit ? M.gabaritParId(objet.gabarit) : null;
 
@@ -597,7 +598,7 @@
       (textes || []).forEach(function (f, i) {
         l.push('');
         l.push('--- Texte ' + (i + 1) + ' (' + (f.words || 0) + ' mots) — ' + (f.reference || f.author || 'sans référence'));
-        l.push((f.text || '').slice(0, 2200));
+        l.push((f.text || '').slice(0, lim.texte || 2200));
         if (f.__comp && f.__comp.length) l.push('Questions de compréhension : ' + f.__comp.map(function (q, k) { return (k + 1) + ') ' + q; }).join(' '));
         if (f.__expl && f.__expl.length) l.push('Questions de langue / production : ' + f.__expl.map(function (q, k) { return (k + 1) + ') ' + q; }).join(' '));
       });
@@ -609,8 +610,14 @@
       l.push('4. La progression des questions est-elle ordonnée (repérage avant interprétation) ?');
       l.push('5. Manque-t-il une partie exigée par la norme ci-dessus ?');
     } else {
-      l.push('NORME APPLICABLE : ' + (g ? (g.nom + ' — démarche ' + (g.demarche || 'du programme') + ', phases : '
-        + g.phases.map(function (p) { return p.nom; }).join(' → ')) : 'aucun gabarit déclaré.'));
+      /* La norme COMPLÈTE du type de leçon : déroulé avec ce que chaque phase
+         doit contenir, corpus exigé, règle, interdits (16/10/2026). */
+      if (g && M.normeDuGabarit) {
+        l.push('NORME APPLICABLE : ' + g.nom + ' — le déroulé officiel, le corpus exigé, la règle de l’exercice et les interdits sont dans la consigne système : juge la leçon CONTRE eux, phase par phase.');
+      } else {
+        l.push('NORME APPLICABLE : ' + (g ? (g.nom + ' — démarche ' + (g.demarche || 'du programme') + ', phases : '
+          + g.phases.map(function (p) { return p.nom; }).join(' → ')) : 'aucun gabarit déclaré.'));
+      }
       l.push('');
       l.push('LEÇON SOUMISE');
       l.push('Titre : ' + (objet.title || '(sans titre)') + ' · Classe : ' + (objet.classe || '?'));
@@ -618,7 +625,7 @@
       if (objet.regle) l.push('Règle visée : ' + objet.regle);
       var pc = (M.phasesDuCours ? M.phasesDuCours(objet) : objet.phaseContent) || {};
       if (g) g.phases.forEach(function (p, i) {
-        l.push('• ' + p.nom + ' : ' + (String(pc[i] || pc[p.nom] || '(vide)').slice(0, 700)));
+        l.push('• ' + p.nom + ' : ' + (String(pc[i] || pc[p.nom] || '(vide)').slice(0, lim.phase || 700)));
       });
       l.push('');
       l.push('CE QUE TU DOIS JUGER, et rien d’autre :');
@@ -638,10 +645,32 @@
 
   /* Appelle Ambassa via le proxy serveur. La clé d'API ne quitte jamais le
      serveur : le navigateur ne voit que ce endpoint. */
+  /* Consigne système de l'audit d'une LEÇON : la norme complète du type de
+     leçon (MINESEC.normeDuGabarit). Hors du prompt, qui est borné à 8 000
+     caractères et porte déjà le texte et le contenu des phases (16/10/2026). */
+  function systemeAmbassa(kind, objet) {
+    if (kind !== 'cours' || !objet || !objet.gabarit || !M.normeDuGabarit) return '';
+    var n = M.normeDuGabarit(objet.gabarit, objet.classe);
+    return n.length ? 'NORME DU TYPE DE LEÇON (référentiel MINESEC de l’Atelier — elle fait foi) :\n' + n.join('\n') : '';
+  }
+
   function analyserAvecAmbassa(kind, objet, textes, ecartsLocaux, opts) {
     opts = opts || {};
     var url = opts.url || '/api/ia_proxy.php';
-    var prompt = promptAmbassa(kind, objet, textes, ecartsLocaux);
+    /* Le proxy refuse un prompt de plus de 8 000 OCTETS (strlen PHP : un
+       « é » en vaut deux). Mesuré le 16/10/2026 : une leçon aux phases bien
+       remplies et un texte complet atteignaient 9 971 octets — refus
+       « Prompt invalide », et l'audit ne partait jamais. On resserre les
+       extraits jusqu'à tenir. */
+    var octets = function (x) { return typeof TextEncoder !== 'undefined' ? new TextEncoder().encode(x).length : unescape(encodeURIComponent(x)).length; };
+    var lim = { texte: 2200, phase: 700 };
+    var prompt = promptAmbassa(kind, objet, textes, ecartsLocaux, lim);
+    for (var garde = 0; octets(prompt) > 7800 && garde < 12; garde++) {
+      lim.texte = Math.max(300, lim.texte - 300);
+      lim.phase = Math.max(160, lim.phase - 90);
+      prompt = promptAmbassa(kind, objet, textes, ecartsLocaux, lim);
+    }
+    var sys = systemeAmbassa(kind, objet);
     var headers = { 'Content-Type': 'application/json' };
     if (opts.token) headers['Authorization'] = 'Bearer ' + opts.token;
 
@@ -651,6 +680,7 @@
       body: JSON.stringify({
         action: 'conformite_minesec',
         prompt: prompt,
+        sysPrompt: sys,
         max_tokens: 1200,
         temperature: 0.2
       })
@@ -706,6 +736,7 @@
     resume: resume,
     promptAmbassa: promptAmbassa,
     analyserAvecAmbassa: analyserAvecAmbassa,
+    systemeAmbassa: systemeAmbassa,
     parseVerdict: parseVerdict,
     compterMots: compterMots
   };

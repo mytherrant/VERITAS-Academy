@@ -116,8 +116,12 @@ dire(/Résumez-le au quart/.test(r.questions[1].expl[0].q) && !r.aReparer.some(x
   '« Résume-le » à la 2e phrase est vouvoyé sur place (« Résumez-le »), sans appel d’IA', r.questions[1].expl[0].q);
 dire(GEN.tutoie('Ce texte compte 600 mots. Résume-le au quart.'), 'le détecteur, lui, voit toujours « Résume-le » à la 2e phrase');
 
-o = conforme(); o.questions[1].q = 'Vous discuterez ce point de vue sur la jeunesse dans un développement argumenté.';
-dire(valider(o).aReparer.some(x => x.defauts.some(d => d.code === 'discussion')), 'une discussion qui ne cite pas le texte part en réécriture');
+/* Guide du 2nd cycle : la discussion porte « soit sur un problème abordé
+   dans le texte, soit sur un passage précis » — citer n'est pas exigé. */
+o = conforme(); o.questions[1].q = 'Vous exprimerez un avis argumenté sur la place des écrans dans la vie des familles, en vous appuyant sur votre expérience et sur vos lectures.';
+dire(!valider(o).aReparer.length, 'une discussion sur un PROBLÈME du texte, sans citation, est acceptée (guide du 2nd cycle)');
+o = conforme(); o.questions[1].q = '« La jeunesse africaine doit inventer son avenir à tout prix. » Vous exprimerez un avis argumenté.';
+dire(valider(o).aReparer.some(x => x.defauts.some(d => d.code === 'citation')), 'mais un passage cité doit l’être mot pour mot');
 
 o = conforme(); o.sujets[0].texte = COMMENTAIRE + ' Vous ferez de ce texte un commentaire composé. Vous montrerez comment le fleuve devient témoin.';
 r = valider(o);
@@ -146,7 +150,8 @@ const reel = {
 };
 /* Le texte réel comptait 381 mots : résumé au quart = 95. */
 const T381 = mots.slice(0, 381).join(' ');
-const ctx381 = Object.assign({}, ctx, { textes: [Object.assign({}, ctx.textes[0], { words: 381, text: T381 }), ctx.textes[1]] });
+const ctx381 = Object.assign({}, ctx, { textes: [Object.assign({}, ctx.textes[0], { words: 381, text: T381 }),
+  Object.assign({}, ctx.textes[1], { title: 'Le Vieux Nègre et la Médaille', reference: 'Ferdinand Oyono, Le Vieux Nègre et la Médaille' })] });
 const rr = GEN.validerEpreuve(reel, ctx381);
 const exp = rr.questions[1].expl;
 dire(exp.length === 2 && exp[0].pts === 9 && exp[1].pts === 9, 'la « Présentation » parasite est retirée du bloc du résumé : 9 + 9 points', JSON.stringify(exp.map(x => x.pts)));
@@ -218,6 +223,42 @@ const rL1 = GEN.validerEpreuve({ questions: [{ texte: 1, liste: 'comp', bloc: 'c
 dire(rL1.questions[1].comp[0].q === 'Relève deux personnages du texte.', 'au 1er cycle, la 2e personne reste (« Relève »)');
 dire(GEN.vouvoyer('Résumé au quart : 150 mots.') === 'Résumé au quart : 150 mots.' && GEN.vouvoyer('Analyse au tiers.') === 'Analyse au tiers.'
   && GEN.vouvoyer('Analyse le rôle du narrateur.') === 'Analysez le rôle du narrateur.', '« Résumé » et « Analyse » noms restent des noms ; verbes, ils s’accordent');
+
+console.log(`\n${G}⑥ Guide du 2nd cycle (Jacques, 16/10/2026)${R}`);
+/* Commentaire : un extrait d'une œuvre AU PROGRAMME de la classe. */
+const avecCom = f => GEN.validerEpreuve(conforme(), Object.assign({}, ctx, { textes: [ctx.textes[0], Object.assign({}, ctx.textes[1], f)] }));
+dire(avec(avecCom({ title: 'Poème', reference: 'Poème, 1960' }), /Commentaire composé : le texte n’est pas tiré d’une œuvre au programme de la classe \(« Ngum a Jemea »/).length === 1,
+  'commentaire sur un texte hors programme : signalé, avec les œuvres de la classe');
+dire(avecCom({ title: 'Le Vieux Nègre et la Médaille', reference: 'F. Oyono' }).controles.some(c => c.ok && /extrait de « Le Vieux Nègre et la Médaille »/.test(c.libelle)),
+  'extrait d’une œuvre de Terminale : reconnu');
+dire(avec(GEN.validerEpreuve(conforme(), Object.assign({}, ctx, { classe: '1ère A', textes: [ctx.textes[0], Object.assign({}, ctx.textes[1], { title: 'Le Vieux Nègre et la Médaille' })] })), /n’est pas tiré d’une œuvre au programme/).length === 1,
+  'la même œuvre en 1ère : refusée (elle est au programme de Terminale)');
+/* 2nde : contraction 8 + 10 + 2 (grilles du guide), barèmes officiels reposés. */
+const pl2 = GEN.planEpreuve(struct, { classe: '2nde A' });
+dire(JSON.stringify(pl2.productions.map(x => x.points)) === '[8,10]' && pl2.sujets.find(x => x.genre === 'presentation').points === 2, '2nde : résumé /8, discussion /10, présentation /2');
+dire(JSON.stringify(GEN.planEpreuve(struct, { classe: 'Tle A' }).productions.map(x => x.points)) === '[9,9]', '1ère-Tle : 9 + 9 + 2 inchangé');
+const ctx2 = { plan: pl2, struct, classe: '2nde A', textes: [Object.assign({}, ctx.textes[0], { words: 450, text: mots.slice(0, 450).join(' ') }), Object.assign({}, ctx.textes[1], { title: 'Les Tribus de Capitoline' })] };
+const o2 = conforme(); o2.questions[0].pts = 8; o2.questions[1].pts = 10;
+o2.questions[0].corrige = o2.questions[0].corrige.replace(resume150, Array.from({ length: 112 }, (_, i) => 'mot' + (i % 9)).join(' ')).replace('(150 mots)', '(112 mots)');
+const r2 = GEN.validerEpreuve(o2, ctx2);
+dire(/compréhension 3 pts \(fidélité au texte 1,5/.test(r2.questions[1].expl[0].corrige) && /compréhension du sujet 4 pts/.test(r2.questions[1].expl[1].corrige),
+  '2nde : le barème du guide (8 et 10) remplace le barème du BAC (9)');
+const s2 = GEN.formationMinesec(struct, pl2, '2nde A', []);
+dire(/CONTRACTION DE TEXTE \(résumé ou analyse \/8\)/.test(s2) && /DISCUSSION \(\/10\)/.test(s2) && /EXTRAIT D’UNE ŒUVRE INTÉGRALE AU PROGRAMME/.test(s2), 'la formation d’Ambassa en 2nde dit /8, /10 et « extrait d’une œuvre au programme »');
+dire(/SOIT sur un problème abordé dans le texte, SOIT sur un passage précis/.test(s2) && !/elle cite MOT POUR MOT entre « » la phrase visée/.test(s2), 'la discussion : un problème du texte OU un passage précis (plus d’obligation de citer)');
+/* Langue : repérage → analyse → interprétation, dans chaque rubrique. */
+const stA = MINESEC.epreuveParCode('A_LANGUE'), plA = GEN.planEpreuve(stA, { classe: 'Tle A' }), blA = GEN.blocsDuPlan(plA);
+const sA = GEN.formationMinesec(stA, plA, 'Tle A', []);
+dire(/TROIS sous-questions dans cet ordre : a\. REPÉRER ou IDENTIFIER/.test(sA) && /b\. L’ANALYSER/.test(sA) && /c\. L’INTERPRÉTER/.test(sA), 'la formation exige repérage, analyse, interprétation');
+dire(/TROIS items, dans cet ordre/.test(GEN.ajusterPrompt({ plan: plA, struct: stA, classe: 'Tle A', textes: [{ n: 1, role: 'support', words: 300, text: TEXTE }] })), 'chaque rubrique demande trois items a/b/c');
+const qA = (bloc, q) => ({ texte: 1, liste: 'expl', bloc, pts: 1.5, q, corrige: 'x' });
+const ctxA = { plan: plA, struct: stA, classe: 'Tle A', textes: [{ n: 1, role: 'support', words: 300, text: TEXTE }] };
+const complet = GEN.validerEpreuve({ questions: blA.flatMap(b => [qA(b.cle, 'Relevez la phrase interrogative.'), qA(b.cle, 'Précisez sa nature.'), qA(b.cle, 'Interprétez l’effet produit.')]) }, ctxA);
+dire(complet.controles.some(c => c.ok && /repérage, analyse et interprétation dans chaque rubrique/.test(c.libelle)), 'quatre rubriques complètes : contrôle au vert');
+const bancal = GEN.validerEpreuve({ questions: blA.flatMap(b => [qA(b.cle, 'Relevez la phrase interrogative.'), qA(b.cle, 'Relevez un adverbe.')]) }, ctxA);
+dire(avec(bancal, /Langue : chaque rubrique doit aller du repérage à l’analyse puis à l’interprétation — à reprendre : Communication \(sans analyse, interprétation\)/).length === 1, 'une rubrique de pur repérage est signalée, avec ce qui manque');
+dire(GEN.operationLangue('Repérez deux figures.') === 'reperage' && GEN.operationLangue('Précisez la nature du mot.') === 'analyse' && GEN.operationLangue('Dégagez l’effet de sens.') === 'interpretation',
+  'les trois opérations se reconnaissent (« Repérez », « Précisez la nature », « Dégagez l’effet »)');
 
 console.log(`\n  ${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko ? 1 : 0);

@@ -511,6 +511,34 @@ const attendre = ms => new Promise(r => setTimeout(r, ms));
     }
   }
 
+  /* LE COMMENTAIRE PORTE SUR UN EXTRAIT D'UNE ŒUVRE AU PROGRAMME (Jacques,
+     16/10/2026). Le texte de la contraction est conforme (n°13, 600 mots) :
+     seul le commentaire peut déclencher l'avertissement. */
+  for (const cas of ['sans-extrait-refus', 'avec-extrait']) {
+    let iaC = 0, questions = [];
+    const t = atelier((url, corps) => {
+      if (/ia_proxy/.test(url)) { iaC++; return { corps: { text: JSON.stringify({ titre: 'x', questions: [], sujets: [] }) } }; }
+      return { status: 200, corps: { ok: true } };
+    });
+    if (cas === 'avec-extrait') t.all = t.all.concat([{ n: 77, level: '1ere - Tle', type: 'NARRATIF', words: 230, text: phrase(230, 'médaille'),
+      title: 'Le Vieux Nègre et la Médaille', reference: 'Ferdinand Oyono, Le Vieux Nègre et la Médaille', author: 'Ferdinand Oyono', _libre: true, _partiel: false }]);
+    t.__win.confirm = m => { questions.push(m); return false; };
+    await new Promise(r => t._ensureDraft(() => r()));
+    t._updateActive({ classe: 'Tle A', epreuveCode: 'A_LITT', etab: 'Lycée' });
+    t._composerAvecAmbassa('tout');
+    for (let i = 0; i < 60 && t.state.genBusy; i++) await attendre(100);
+    if (cas === 'sans-extrait-refus') {
+      dire(questions.some(q => /Commentaire composé : le corpus n’a aucun extrait des œuvres au programme de la classe — « Ngum a Jemea »/.test(q)) && iaC === 0
+        && /Composition annulée : aucun appel décompté\. Importez un extrait de 20 à 30 lignes d’une œuvre au programme/.test(t.state.genErr || ''),
+        'commentaire sans extrait d’une œuvre au programme : prévenu AVANT, « Annuler » ne coûte rien', JSON.stringify({ q: questions.map(x => x.slice(0, 60)), iaC, err: t.state.genErr }));
+    } else {
+      const e = t._active();
+      const com = (e.textIds || []).find(n => e.customQ && e.customQ[n] && e.customQ[n].role === 'commentaire');
+      dire(!questions.length && iaC === 1 && com === 77, 'un extrait de l’œuvre au programme existe : il est CHOISI pour le commentaire, sans avertissement',
+        JSON.stringify({ q: questions.length, iaC, com, ids: e.textIds }));
+    }
+  }
+
   console.log(`\n  ${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
   process.exit(ko ? 1 : 0);
 })().catch(e => { console.log('  ' + X + ' exception : ' + (e && e.stack || e)); process.exit(1); });

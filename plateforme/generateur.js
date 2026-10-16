@@ -133,7 +133,9 @@
     };
     if (!struct) return plan;
     var grille = (struct.grille && ref && ref.grille(struct.grille)) || null;
-    var parties = struct.parties || [];
+    /* Parties DE LA CLASSE : la 2nde note la contraction 8 + 10 + 2 (guide du
+       2nd cycle), la 1ère et la Terminale 9 + 9 + 2 (Draft EST). */
+    var parties = (ref && ref.partiesPour ? ref.partiesPour(struct, opts && opts.classe) : struct.parties) || [];
     var auChoix = (struct.sujetsAuChoix || 1) > 1;
 
     /* Répartit une liste de segments notés dans le plan (bloc portant sur le texte). */
@@ -445,6 +447,8 @@
      fausse — on ne signale pas à l'enseignant ce qu'on sait réparer. */
   var BAREMES = {
     resume: 'Barème : compréhension et pertinence 3 pts (texte réduit 1, fidélité au texte 1, proportions respectées 1) + cohérence et technique 3 pts (ordre des idées et système d’énonciation 1, enchaînement et connecteurs 1, idées convergentes 1) + expression 3 pts (vocabulaire personnel 1, orthographe et grammaire 1, syntaxe 1)',
+    resume2nde: 'Barème : compréhension 3 pts (fidélité au texte 1,5, reformulation exacte des idées 1,5) + technique du résumé 3 pts (chronologie des idées et système d’énonciation 1, cohérence et cohésion 1, limites du nombre de mots 1) + expression 2 pts (accords et vocabulaire 1, syntaxe, temps et modes 1)',
+    discussion2nde: 'Barème : compréhension du sujet 4 pts (thèse reformulée, développée et illustrée 2, antithèse développée 2) + organisation et cohérence 3 pts (enchaînement logique 1,5, cohésion 1,5) + expression 3 pts (accords et vocabulaire 1,5, syntaxe, temps et modes 1,5)',
     discussion: 'Barème : compréhension et pertinence 3 pts (type de production 1, reformulation et problématique 1, arguments et exemples pertinents 1) + organisation et cohérence 3 pts (introduction-développement-conclusion 1, enchaînement et connecteurs 1, cohésion 1) + expression 3 pts (vocabulaire 1, orthographe 1, syntaxe 1)',
     commentaire2nde: 'Barème : compréhension et pertinence 6 pts (centres d’intérêt dégagés 2, plan détaillé pertinent lié aux faits de langue 4) + organisation et cohérence 6 pts (progression des idées 3, congruence centre d’intérêt – idées – moyens d’expression 3) + expression 6 pts (vocabulaire et orthographe 3, syntaxe, temps et modes 3) + originalité et présentation 2 pts',
     commentaire: 'Barème : compréhension et pertinence 6 pts (idées directrices pertinentes 2, arguments adéquats 2, illustrations justes 2) + organisation et cohérence 6 pts (congruence 2, articulation par connecteurs 2, progression vers le thème structurateur 2) + expression 6 pts (vocabulaire 2, orthographe et grammaire 2, syntaxe, temps et modes 2) + originalité et présentation 2 pts',
@@ -469,7 +473,12 @@
       }
       var tsp = (plan && plan.texteSupport) || struct.texteSupport;
       if (tsp) l.push('- Texte support : ' + tsp.min + ' à ' + tsp.max + ' mots' + (tsp.nature ? ', ' + tsp.nature : '') + '.');
-      if (struct.grille === 'langue4rub5') l.push('- ÉPREUVE DE LANGUE (guide pédagogique du 2nd cycle) : aucune question théorique ; des exercices de repérage, d’analyse et d’interprétation sur les contenus enseignés, chaque question rangée dans sa rubrique' + (en2nde(ref, classe) ? ' (en 2nde : les rubriques significatives du texte).' : ' ; en 1ère et en Terminale, les QUATRE rubriques sont obligatoires.'));
+      if (struct.grille === 'langue4rub5' || struct.grille === 'resumeLangue1082') {
+        l.push('- ÉPREUVE DE LANGUE (Draft EST ; ' + 'guide pédagogique du 2nd cycle' + ') : « Les questions posées renvoient au repérage, à l’analyse et à l’interprétation. » Dans chaque rubrique, TROIS sous-questions dans cet ordre : a. REPÉRER ou IDENTIFIER le fait de langue dans le texte (« Relevez… », « Identifiez… ») ; b. L’ANALYSER — nature, fonction, construction, valeur (« Précisez la nature… », « Analysez la construction… ») ; c. L’INTERPRÉTER — l’effet de sens qu’il produit dans CE texte (« Interprétez… », « Dégagez l’effet… »).');
+        l.push('  Aucune question théorique (ni définition, ni règle à réciter). Les questions portent OBLIGATOIREMENT sur les contenus enseignés et sur des aspects importants du texte ; les phrases visées se citent entre « » mot pour mot.'
+          + (en2nde(ref, classe) ? ' En 2nde : 5 à 6 questions au total, sur les rubriques significatives du texte.' : ' En 1ère et en Terminale : les QUATRE rubriques sont obligatoires.'));
+        l.push('  Corrigé de chaque sous-question : la réponse attendue, précise, avec la citation exacte ; pour c., l’effet de sens rédigé en une ou deux phrases.');
+      }
       (struct.parties || []).forEach(function (p) {
         l.push('- Partie « ' + p.titre + ' »' + (p.points ? ' /' + p.points : '') + (p.consigne ? ' : ' + p.consigne : ''));
       });
@@ -536,19 +545,21 @@
       l.push('SUJETS DE RÉFLEXION — guide pédagogique du second cycle et Draft EST :');
       if (plan && plan.productions.some(function (p) { return p.genre === 'resume'; })) {
         var tsc = plan.texteSupport;
-        l.push('- CONTRACTION DE TEXTE (résumé ou analyse /9) : texte ARGUMENTATIF OU EXPLICATIF d’actualité, sans grande difficulté de compréhension (jeunesse, immigration, chômage, sports et loisirs, TIC…)' + (tsc ? ', de ' + tsc.min + ' à ' + tsc.max + ' mots' : '') + '. Le libellé dit la NATURE du travail, le NOMBRE EXACT de mots du texte et la réduction : « Ce texte compte N mots. Résumez-le au quart de sa longueur, soit environ X mots, ou analysez-le au tiers, soit environ Y mots. Une marge de 10 % en plus ou en moins est admise. Vous indiquerez à la fin de votre travail le nombre de mots employés. »');
-        l.push('  Corrigé : (1) thème, thèse, système d’énonciation et structure argumentative du texte ; (2) les idées essentielles, numérotées dans l’ordre de l’auteur ; (3) un RÉSUMÉ MODÈLE rédigé au quart, avec son nombre de mots entre parenthèses ; (4) « ' + BAREMES.resume + ' ».');
+        var ptsR = seconde ? 8 : 9;
+        l.push('- CONTRACTION DE TEXTE (résumé ou analyse /' + ptsR + ') : texte ARGUMENTATIF OU EXPLICATIF d’actualité, sans grande difficulté de compréhension (jeunesse, immigration, chômage, sports et loisirs, TIC…)' + (tsc ? ', de ' + tsc.min + ' à ' + tsc.max + ' mots' : '') + '. Le libellé dit la NATURE du travail, le NOMBRE EXACT de mots du texte et la réduction : « Ce texte compte N mots. Résumez-le au quart de sa longueur, soit environ X mots, ou analysez-le au tiers, soit environ Y mots. Une marge de 10 % en plus ou en moins est admise. Vous indiquerez à la fin de votre travail le nombre de mots employés. »');
+        l.push('  Résumé : ordre des idées ET système d’énonciation de l’auteur conservés. Analyse : système énonciatif CHANGÉ (distanciation), ordre libre, liens logiques mis en évidence. Techniques : pronominalisation, nominalisation, phrase complexe réduite (relative → adjectif, complétive → groupe nominal, circonstancielle → groupe prépositionnel).');
+        l.push('  Corrigé : (1) thème, thèse, système d’énonciation et structure argumentative du texte ; (2) les idées essentielles, numérotées dans l’ordre de l’auteur ; (3) un RÉSUMÉ MODÈLE rédigé au quart, avec son nombre de mots entre parenthèses ; (4) « ' + (seconde ? BAREMES.resume2nde : BAREMES.resume) + ' ».');
       }
       if (plan && plan.productions.some(function (p) { return p.genre === 'discussion'; })) {
-        l.push('- DISCUSSION (/9) : une question formulée À PARTIR DU TEXTE, qui pose un problème dont le texte éclaire au moins un aspect ; elle cite MOT POUR MOT entre « » la phrase visée, puis : « Vous discuterez ce point de vue dans un développement argumenté, en vous appuyant sur votre expérience et sur vos lectures. » Ce n’est pas une reprise du texte. AUCUNE limite de mots.');
-        l.push('  Corrigé : reformulation du sujet et problématique, plan détaillé (thèse puis antithèse, arguments et exemples précis), introduction RÉDIGÉE ; « ' + BAREMES.discussion + ' ».');
+        l.push('- DISCUSSION (/' + (seconde ? 10 : 9) + ') — mini-dissertation qui prend appui sur le texte : le libellé formule, À PARTIR DU TEXTE, une question qui pose un problème dont le texte éclaire au moins un aspect. Elle porte SOIT sur un problème abordé dans le texte, SOIT sur un passage précis — alors cité MOT POUR MOT entre « ». Puis : « Vous exprimerez un avis argumenté, en vous appuyant sur votre expérience et sur vos lectures. » Ce n’est pas une reprise du texte. AUCUNE limite de mots.');
+        l.push('  Corrigé : reformulation du sujet et problématique, plan détaillé (thèse puis antithèse, arguments et exemples précis), introduction RÉDIGÉE ; « ' + (seconde ? BAREMES.discussion2nde : BAREMES.discussion) + ' ».');
       }
       if (plan && plan.sujets.some(function (s) { return s.genre === 'commentaire'; })) {
         if (seconde) {
-          l.push('- COMMENTAIRE COMPOSÉ EN 2NDE (/20) : TEXTE 2, littéraire, de 200 à 250 mots (20 à 30 lignes ou vers ayant une unité de sens). En 2nde on s’arrête au PLAN DÉTAILLÉ. La consigne ne recopie pas le texte : « 1. Exprimez le thème du texte. 2. Dégagez deux ou trois centres d’intérêt et présentez-les en plan détaillé : idées directrices, idées secondaires, moyens d’expression. »');
+          l.push('- COMMENTAIRE COMPOSÉ EN 2NDE (/20) : TEXTE 2, EXTRAIT D’UNE ŒUVRE INTÉGRALE AU PROGRAMME de la classe, de 200 à 250 mots (20 à 30 lignes ou vers ayant une unité de sens). Le sujet le situe dans l’œuvre (titre, auteur), sans rien inventer de l’intrigue. En 2nde on s’arrête au PLAN DÉTAILLÉ. La consigne ne recopie pas le texte : « 1. Exprimez le thème du texte. 2. Dégagez deux ou trois centres d’intérêt et présentez-les en plan détaillé : idées directrices, idées secondaires, moyens d’expression. »');
           l.push('  Corrigé : le thème ; pour chaque centre d’intérêt, ses idées directrices, ses idées secondaires et leurs moyens d’expression (procédé nommé + citation EXACTE) ; « ' + BAREMES.commentaire2nde + ' ».');
         } else {
-          l.push('- COMMENTAIRE COMPOSÉ (/20) : TEXTE 2, littéraire, de 200 à 250 mots (20 à 30 lignes ou une vingtaine de vers). La consigne ne recopie PAS le texte (il est imprimé à part) et reste non contraignante : « Vous ferez de ce texte un commentaire composé. Vous pourrez, par exemple, montrer comment … et analyser … » — deux ou trois centres d’intérêt complémentaires.');
+          l.push('- COMMENTAIRE COMPOSÉ (/20) : TEXTE 2, EXTRAIT D’UNE ŒUVRE INTÉGRALE AU PROGRAMME de la classe, de 200 à 250 mots (20 à 30 lignes ou une vingtaine de vers). Exercice écrit, entièrement rédigé, « composé » : il regroupe en deux ou trois centres d’intérêt au lieu de suivre le texte, sans séparer le fond de la forme. La consigne ne recopie PAS le texte (il est imprimé à part) et reste non contraignante : « Vous ferez de ce texte un commentaire composé. Vous pourrez, par exemple, montrer comment … et analyser … » — deux ou trois centres d’intérêt complémentaires.');
           l.push('  Corrigé : situation du texte, thème et problématique, introduction RÉDIGÉE, plan détaillé en deux ou trois centres d’intérêt où chaque idée s’appuie sur un procédé nommé et une citation EXACTE, conclusion ; « ' + BAREMES.commentaire + ' ».');
         }
       }
@@ -603,8 +614,8 @@
         + ' mots. Une marge de 10 % en plus ou en moins est tolérée. Vous indiquerez à la fin le nombre de mots employés. » ;'
         + ' corrigé : idées essentielles numérotées, RÉSUMÉ MODÈLE d’environ ' + quart + ' mots (nombre de mots entre parenthèses), ligne « Barème : … » sur 9';
     }
-    if (genre === 'discussion') return 'sujet de discussion, au vouvoiement : une phrase du texte citée MOT POUR MOT entre « », puis « Vous discuterez ce point de vue dans un développement argumenté et illustré d’exemples précis tirés de vos lectures, de la vie sociale et de votre expérience. » — sans limite de mots ;'
-      + ' corrigé : problématique, plan détaillé, introduction rédigée, ligne « Barème : … » sur 9';
+    if (genre === 'discussion') return 'sujet de discussion, au vouvoiement, FORMULÉ À PARTIR DU TEXTE : une question sur un problème qu’il aborde, ou sur un passage précis (alors cité MOT POUR MOT entre « »), puis « Vous exprimerez un avis argumenté, en vous appuyant sur votre expérience et sur vos lectures. » — sans limite de mots, et pas une reprise du texte ;'
+      + ' corrigé : problématique, plan détaillé, introduction rédigée, ligne « Barème : … »';
     if (genre === 'synthese') return 'résumé partiel ou esprit de synthèse sur une partie précise du texte, avec un nombre de mots imposé';
     if (genre === 'essai') return 'sujet d’essai de culture générale lié au thème du texte : le candidat donne son opinion sur un problème précis';
     return 'situation-problème d’expression écrite liée au thème du texte : contexte (situation de vie), tâche, type de texte attendu, longueur, puis trois consignes numérotées 1-2-3';
@@ -650,9 +661,14 @@
         if (b.production) {
           l.push('- bloc "' + b.cle + '" (' + b.titre + ', ' + b.points + ' pts, liste ' + b.kind + ') : UNE seule consigne — ' + consignesProduction(b.production, mots) + '.');
         } else {
-          var nbq = b.points <= 2 ? 1 : b.points <= 5 ? 2 : b.points <= 8 ? 3 : 4;
-          l.push('- bloc "' + b.cle + '" (' + b.titre + ', ' + b.points + ' pts, liste ' + b.kind + ') : ' + nbq + ' à ' + (nbq + 1) + ' questions'
-            + (b.kind === 'comp' ? ', du repérage vers l’interprétation.' : ', manipulations de langue sur des phrases citées du texte ; pour une rubrique de langue, une question « a. » de repérage/analyse puis une question « b. » d’interprétation.'));
+          var rubLangue = b.kind === 'expl' && plan.expl.rubriques.length > 1;
+          if (rubLangue) {
+            l.push('- bloc "' + b.cle + '" (' + b.titre + ', ' + b.points + ' pts) : TROIS items, dans cet ordre — 1) repérage ou identification, 2) analyse, 3) interprétation de l’effet de sens —, chacun sur la MÊME phrase ou le même fait du texte. Dans "q", la consigne seule : ni titre de rubrique, ni numéro, ni lettre, ni « (N pts) » — l’Atelier les pose.');
+          } else {
+            var nbq = b.points <= 2 ? 1 : b.points <= 5 ? 2 : b.points <= 8 ? 3 : 4;
+            l.push('- bloc "' + b.cle + '" (' + b.titre + ', ' + b.points + ' pts, liste ' + b.kind + ') : ' + nbq + ' à ' + (nbq + 1) + ' questions'
+              + (b.kind === 'comp' ? ', du repérage vers l’interprétation.' : ', manipulations de langue sur des phrases citées du texte.'));
+          }
         }
       });
     }
@@ -839,9 +855,11 @@
     if (contexte.production && contexte.production !== 'resume' && contexte.production !== 'discussion' && !LONGUEUR.test(norm(q))) {
       d.push({ code: 'longueur', motif: 'longueur attendue non précisée', consigne: 'précise la longueur attendue (nombre de lignes ou de mots) et le type de texte' });
     }
-    if (contexte.production === 'discussion' && contexte.texte && !citations(q).length) {
-      d.push({ code: 'discussion', motif: 'discussion sans phrase du texte citée', consigne: 'cite entre « » la phrase du texte qui pose le problème, recopiée mot pour mot, puis « Vous discuterez ce point de vue… »' });
-    }
+    /* La discussion porte « soit sur un problème abordé dans le texte, soit
+       sur un passage précis » (guide du 2nd cycle) : citer n'est PAS
+       obligatoire. L'exiger (règle du 16/10 matin) était plus strict que le
+       texte officiel — corrigé le soir même. Une citation, si elle est faite,
+       reste vérifiée mot pour mot (code « citation »). */
     if (contexte.vous && tutoie(q)) {
       d.push({ code: 'tutoiement', motif: 'tutoiement au second cycle', consigne: 'réécris la consigne au vouvoiement (« Relevez », « Vous montrerez »), comme aux examens du second cycle' });
     }
@@ -1460,8 +1478,10 @@
           var rc = recalerCitations(it.corrige, texte); it.corrige = rc.s; nbCit += rc.nb;
           var b = cleValides[it.bloc];
           if (!b || !b.production || !it.corrige) return;
-          var off = BAREMES[b.production];
-          if (off && it.pts === 9 && sommeBareme(it.corrige) !== 9) { it.corrige = poserBareme(it.corrige, off); nbBar++; }
+          var off = it.pts === 8 && b.production === 'resume' ? BAREMES.resume2nde
+            : it.pts === 10 && b.production === 'discussion' ? BAREMES.discussion2nde
+            : it.pts === 9 ? BAREMES[b.production] : null;
+          if (off && sommeBareme(it.corrige) !== it.pts) { it.corrige = poserBareme(it.corrige, off); nbBar++; }
           if (b.production === 'resume') {
             var rm = resumeModele(it.corrige);
             if (rm && Math.abs(rm.compte - rm.annonce) > Math.max(2, rm.annonce * 0.03)) {
@@ -1498,7 +1518,59 @@
     if (notes.length) res.controles.push({ ok: true, libelle: 'Réparé automatiquement : ' + notes.join(' ; ') + '.' });
   }
 
+  /* Les trois opérations d'une question de langue (Draft EST : « repérage,
+     analyse, interprétation »). Le classement général des verbes laissait
+     « Repérez », « Analysez », « Dégagez l'effet » sans niveau et rangeait
+     « Précisez la nature » au repérage : la langue a le sien. */
+  function operationLangue(q) {
+    var t = norm(String(q || '').replace(/«[^»]*»/g, ' ')).replace(/^.*?—\s*/, '').replace(/^[a-d][.)]\s*/, '');
+    if (/^(interpretez|interprete|degagez|degage)\b|\b(effet|effets|valeur expressive|role)\b|^(que|qu) (traduit|revele|exprime|suggere)|^montrez (le role|l effet|ce que)|^a quoi sert/.test(t)) return 'interpretation';
+    if (/^(analysez|analyse|precisez|donnez|expliquez|justifiez|transformez|reecrivez|remplacez|transposez|decomposez|indiquez|caracterisez|classez)\b|\b(nature|fonction|construction|valeur|mode|temps|type de phrase|forme)\b/.test(t)) return 'analyse';
+    if (/^(relevez|releve|identifiez|identifie|reperez|repere|citez|soulignez|retrouvez|encadrez|nommez)\b/.test(t)) return 'reperage';
+    return '';
+  }
+  function exigencesLangue(res, ctx, cleValides) {
+    var plan = ctx.plan, struct = ctx.struct;
+    if (!struct || !/langue4rub|resumeLangue/.test(struct.grille || '') || !secondCycle(struct, ctx.classe)) return;
+    var manque = [];
+    Object.keys(cleValides).forEach(function (cle) {
+      var b = cleValides[cle];
+      if (b.production || b.kind !== 'expl' || plan.expl.rubriques.length < 2) return;
+      var vus = {};
+      Object.keys(res.questions || {}).forEach(function (n) {
+        (res.questions[n].expl || []).forEach(function (it) { if (it.bloc === cle) vus[operationLangue(it.q)] = 1; });
+      });
+      if (!Object.keys(vus).length) return;   // bloc vide : déjà signalé
+      var m = ['reperage', 'analyse', 'interpretation'].filter(function (o) { return !vus[o]; });
+      if (m.length) manque.push(b.titre.replace(/^[IVX]+\.\s*/, '') + ' (sans ' + m.map(function (o) { return o === 'reperage' ? 'repérage' : o === 'interpretation' ? 'interprétation' : o; }).join(', ') + ')');
+    });
+    res.controles.push({ ok: !manque.length, libelle: manque.length
+      ? 'Langue : chaque rubrique doit aller du repérage à l’analyse puis à l’interprétation — à reprendre : ' + manque.join(' ; ') + '.'
+      : 'Langue : repérage, analyse et interprétation dans chaque rubrique' });
+  }
+
+  /* Le texte du commentaire composé : un extrait d'une œuvre AU PROGRAMME
+     de la classe (règle de Jacques, 16/10/2026). Reconnu à son titre ou à
+     sa référence. */
+  function texteDeLOeuvre(f, ref, classe) {
+    var l = ref && ref.oeuvresDe ? ref.oeuvresDe(classe) : [];
+    var h = plat([f && f.title, f && f.reference, f && f.author].join(' '));
+    return l.filter(function (o) {
+      var mots = plat(o.titre).trim().split(' ').filter(function (w) { return w.length > 3; });
+      return mots.length && mots.every(function (w) { return h.indexOf(' ' + w + ' ') >= 0; });
+    })[0] || null;
+  }
+
   function exigencesReflexion(res, ctx, cleValides, opts) {
+    exigencesLangue(res, ctx, cleValides);
+    var comT = (ctx.textes || []).filter(function (t) { return t.role === 'commentaire'; })[0];
+    if (comT && ctx.plan.sujets.some(function (s) { return s.genre === 'commentaire'; })) {
+      var oe = texteDeLOeuvre(comT, M(opts), ctx.classe);
+      var liste = (M(opts).oeuvresDe ? M(opts).oeuvresDe(ctx.classe) : []).map(function (o) { return '« ' + o.titre + ' »'; }).join(', ');
+      res.controles.push({ ok: !!oe, libelle: oe
+        ? 'Commentaire composé : extrait de « ' + oe.titre + ' », œuvre au programme'
+        : 'Commentaire composé : le texte n’est pas tiré d’une œuvre au programme de la classe (' + (liste || 'liste à renseigner') + ') — importez un extrait de 20 à 30 lignes de l’une d’elles.' });
+    }
     var plan = ctx.plan, ref = M(opts);
     var vous = secondCycle(ctx.struct, ctx.classe);
     var sp = (ctx.textes || []).filter(function (t) { return t.role === 'support'; })[0];
@@ -1691,7 +1763,7 @@
   }
 
   root.VRT_GENERATEUR = {
-    scoriesOCR: scoriesOCR, nettoyerEnonce: nettoyerEnonce, vouvoyer: vouvoyer, tutoie: tutoie,
+    scoriesOCR: scoriesOCR, operationLangue: operationLangue, texteDeLOeuvre: texteDeLOeuvre, nettoyerEnonce: nettoyerEnonce, vouvoyer: vouvoyer, tutoie: tutoie,
     classer: classer, segmentsConsigne: segmentsConsigne, planEpreuve: planEpreuve, blocsDuPlan: blocsDuPlan, totalNote: totalNote,
     jetonsNiveau: jetonsNiveau, niveauxCibles: niveauxCibles, classerTextes: classerTextes,
     exemplesOfficiels: exemplesOfficiels, formationMinesec: formationMinesec,

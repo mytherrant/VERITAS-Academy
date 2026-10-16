@@ -57,7 +57,7 @@
       ],
       source: 'Épreuve de Langue française Probatoire/BAC (ESG) ; sujets réels 2021',
       confiance: 'officiel',
-      note: '2 questions par rubrique, chacune scindée en a. (repérage/analyse, 1,5-2 pts) et b. (interprétation, 0,5-1 pt). Les questions portent sur le repérage, l’analyse et l’interprétation.'
+      note: 'Dans chaque rubrique, la question se décompose en a. repérage ou identification, b. analyse, c. interprétation (« Les questions posées renvoient au repérage, à l’analyse et à l’interprétation », Draft EST). Jamais de question théorique.'
     },
     langue4rub2: {
       id: 'langue4rub2', nom: 'Langue — 4 rubriques × 2 points', total: 8,
@@ -158,6 +158,17 @@
       source: 'Programme officiel MINESEC 1er cycle — évaluation sommative',
       confiance: 'officiel',
       note: 'Épreuve de 2 h, coefficient 2.'
+    },
+    contraction8102: {
+      id: 'contraction8102', nom: 'Contraction de texte et discussion — 2nde', total: 20,
+      criteres: [
+        { nom: 'Résumé (au ¼) ou analyse (au 1/3)', points: 8 },
+        { nom: 'Discussion', points: 10 },
+        { nom: 'Présentation (perfectionnement)', points: 2 }
+      ],
+      source: 'guide pédagogique du 2nd cycle (« Changements 2nde », IGE) — grilles d’évaluation de la contraction et de la discussion',
+      confiance: 'officiel',
+      note: 'Résumé /8 : compréhension 3 (fidélité au texte 1,5 ; reformulation exacte des idées 1,5), technique 3 (chronologie des idées et système d’énonciation 1 ; cohérence et cohésion 1 ; limites du nombre de mots 1), expression 2 (accords et vocabulaire 1 ; syntaxe, temps et modes 1). Discussion /10 : compréhension 4 (thèse reformulée, développée, illustrée 2 ; antithèse 2), organisation 3 (enchaînement 1,5 ; cohésion 1,5), expression 3 (accords et vocabulaire 1,5 ; syntaxe, temps et modes 1,5).'
     },
     resumeDetail: {
       id: 'resumeDetail', nom: 'Résumé — grille de détail', total: 9,
@@ -282,20 +293,25 @@
       classes: ['2nde', '1ère', 'Terminale'], series: ['A', 'ABI'],
       nom: 'Littérature ou culture générale — A, ABI',
       duree: '4 h', coeff: '3', sujetsAuChoix: 3, grille: 'contraction992',
+      partiesParClasse: { '2nde': [
+        { titre: 'Sujet de type 1 — Contraction de texte et discussion', points: 20, consigne: 'Résumé au ¼ ou analyse au 1/3 /8 · Discussion d’un problème tiré du texte /10 · Présentation /2.' },
+        { titre: 'Sujet de type 2 — Commentaire composé', points: 20, consigne: 'Extrait de 20 à 30 lignes (200 à 250 mots) d’une ŒUVRE INTÉGRALE AU PROGRAMME de 2nde. En 2nde, on s’arrête au PLAN DÉTAILLÉ : 1. exprimer le thème ; 2. donner les centres d’intérêt avec leurs éléments constitutifs.' },
+        { titre: 'Sujet de type 3 — Dissertation', points: 20, consigne: 'Dissertation littéraire ou de culture générale, sur une problématique invitant à une réflexion personnelle.' }
+      ] },
       texteSupport: { min: 550, max: 650, unite: 'mots', nature: 'texte argumentatif ou explicatif en français contemporain' },
       texteSupportParClasse: { '2nde': { min: 400, max: 500, unite: 'mots', nature: 'texte argumentatif ou explicatif d’actualité, sans grande difficulté de compréhension (guide pédagogique 2nd cycle : 400 à 500 mots en 2nde)' } },
       parties: [
         { titre: 'Sujet de type 1 — Contraction de texte et discussion', points: 20, consigne: 'Résumé au ¼ ou analyse au 1/3 /9 · Discussion d’un problème tiré du texte /9 · Présentation /2.' },
-        { titre: 'Sujet de type 2 — Commentaire composé', points: 20, consigne: 'Texte de 20 à 30 lignes ou une vingtaine de vers, avec une consigne non contraignante.' },
+        { titre: 'Sujet de type 2 — Commentaire composé', points: 20, consigne: 'Extrait de 20 à 30 lignes (200 à 250 mots) ou d’une vingtaine de vers d’une ŒUVRE INTÉGRALE AU PROGRAMME de la classe, avec une consigne non contraignante.' },
         { titre: 'Sujet de type 3 — Dissertation', points: 20, consigne: 'Dissertation littéraire ou de culture générale, sur une problématique invitant à une réflexion personnelle.' }
       ],
       formulesCorrige: [
         'On restera ouvert à toute autre interprétation pertinente du texte par le candidat.',
         'NB. Le candidat qui aura présenté d’autres arguments que ceux évoqués ici ne devra pas être pénalisé.'
       ],
-      source: 'Draft EST — descriptif des sujets ESG ; corrigés harmonisés OBC',
+      source: 'Draft EST — descriptif des sujets ESG ; corrigés harmonisés OBC ; guide pédagogique du 2nd cycle (« Changements 2nde », IGE) pour la 2nde (contraction /8 + discussion /10)',
       confiance: 'officiel',
-      note: 'Le COMMENTAIRE COMPOSÉ n’existe qu’en séries A et ABI.',
+      note: 'Le COMMENTAIRE COMPOSÉ n’existe qu’en séries A et ABI, et porte sur un extrait d’une œuvre intégrale au programme de la classe (règle de Jacques, 16/10/2026).',
       avertissement: 'Durée et coefficient issus des sujets et de l’usage ; le descriptif officiel ne les précise pas pour l’ESG. À confirmer sur la circulaire.'
     },
     {
@@ -303,6 +319,12 @@
       classes: ['2nde', '1ère', 'Terminale'], series: ['A', 'ABI'],
       nom: 'Langue française — A, ABI',
       duree: '2 h', coeff: '1', sujetsAuChoix: 1, grille: 'langue4rub5',
+      consignesRedaction: [
+        'CHAQUE QUESTION articule les trois opérations du descriptif, dans cet ordre et en sous-questions distinctes : a. REPÉRER ou IDENTIFIER le fait de langue dans le texte (relevez, identifiez, repérez) ; b. ANALYSER sa forme ou son fonctionnement (précisez la nature, la fonction, la valeur, la construction) ; c. INTERPRÉTER l’effet de sens qu’il produit dans CE texte (interprétez, dégagez l’effet, montrez le rôle).',
+        'Aucune question théorique : ni définition, ni règle à réciter ; on fait observer et manipuler la langue sur des phrases du texte, citées entre « » mot pour mot.',
+        'Les questions portent OBLIGATOIREMENT sur les contenus enseignés et mettent en évidence des aspects importants du texte ; elles évaluent des compétences d’expression et de communication.',
+        '1ère et Terminale : les QUATRE rubriques (Communication, Morphosyntaxe, Sémantique / Lexicologie, Stylistique / Rhétorique des textes), 5 points chacune. 2nde : 5 à 6 questions, réparties sur les rubriques significatives du texte.'
+      ],
       texteSupport: { min: 250, max: 400, unite: 'mots', nature: 'texte littéraire ou non littéraire' },
       texteSupportParClasse: { '2nde': { min: 200, max: 250, unite: 'mots', nature: 'texte littéraire ou non (guide pédagogique 2nd cycle : 200 à 250 mots en 2nde littéraire)' } },
       parties: [
@@ -323,6 +345,10 @@
       classes: ['2nde', '1ère', 'Terminale'], series: ['C', 'D', 'E', 'TI'],
       nom: 'Littérature ou culture générale — C, D, E, TI',
       duree: '3 h', coeff: '2', sujetsAuChoix: 2, grille: 'contraction992',
+      partiesParClasse: { '2nde': [
+        { titre: 'Sujet de type 1 — Contraction de texte et discussion', points: 20, consigne: 'Résumé au ¼ ou analyse au 1/3 /8 · Discussion d’un problème tiré du texte /10 · Présentation /2.' },
+        { titre: 'Sujet de type 2 — Dissertation', points: 20, consigne: 'Dissertation littéraire ou de culture générale.' }
+      ] },
       texteSupport: { min: 550, max: 650, unite: 'mots', nature: 'texte argumentatif ou explicatif en français contemporain' },
       texteSupportParClasse: { '2nde': { min: 400, max: 500, unite: 'mots', nature: 'texte argumentatif ou explicatif d’actualité, sans grande difficulté de compréhension (guide pédagogique 2nd cycle : 400 à 500 mots en 2nde)' } },
       parties: [
@@ -342,6 +368,12 @@
       classes: ['2nde', '1ère', 'Terminale'], series: ['C', 'D', 'E', 'TI'],
       nom: 'Langue française — C, D, E, TI',
       duree: '2 h', coeff: '1', sujetsAuChoix: 1, grille: 'langue4rub5',
+      consignesRedaction: [
+        'CHAQUE QUESTION articule les trois opérations du descriptif, dans cet ordre et en sous-questions distinctes : a. REPÉRER ou IDENTIFIER le fait de langue dans le texte (relevez, identifiez, repérez) ; b. ANALYSER sa forme ou son fonctionnement (précisez la nature, la fonction, la valeur, la construction) ; c. INTERPRÉTER l’effet de sens qu’il produit dans CE texte (interprétez, dégagez l’effet, montrez le rôle).',
+        'Aucune question théorique : ni définition, ni règle à réciter ; on fait observer et manipuler la langue sur des phrases du texte, citées entre « » mot pour mot.',
+        'Les questions portent OBLIGATOIREMENT sur les contenus enseignés et mettent en évidence des aspects importants du texte ; elles évaluent des compétences d’expression et de communication.',
+        '1ère et Terminale : les QUATRE rubriques (Communication, Morphosyntaxe, Sémantique / Lexicologie, Stylistique / Rhétorique des textes), 5 points chacune. 2nde : 5 à 6 questions, réparties sur les rubriques significatives du texte.'
+      ],
       texteSupport: { min: 250, max: 400, unite: 'mots', nature: 'texte littéraire ou non littéraire' },
       texteSupportParClasse: { '2nde': { min: 150, max: 200, unite: 'mots', nature: 'texte littéraire ou non (guide pédagogique 2nd cycle : 150 à 200 mots en 2nde scientifique)' } },
       parties: [
@@ -652,19 +684,35 @@
     },
     {
       id: 'lecture2', nom: 'Lecture méthodique (2nd cycle)', famille: 'cours', cycle: '2nd', icon: 'search', tint: '#efe8fa',
-      tag: 'axes de lecture',
-      desc: 'Axes de lecture, procédés d’écriture, effets de sens.',
+      tag: '6 étapes',
+      desc: 'Lectures, hypothèses, outils d’analyse, analyse, validation des hypothèses, bilan.',
       phases: [
-        { nom: 'Situation de l’extrait', hint: 'Où l’extrait se place dans l’œuvre et ce qui précède.', duree: '5 min' },
-        { nom: 'Lecture et première impression', hint: 'Lecture, relevé des impressions dominantes.', duree: '10 min' },
-        { nom: 'Hypothèses et axes de lecture', hint: 'Deux ou trois axes, déduits des hypothèses.', duree: '5 min' },
-        { nom: 'Analyse des procédés d’écriture', hint: 'Tableau : outils | relevé | analyse | interprétation. Types et genres de textes.', duree: '20 min' },
-        { nom: 'Confrontation des hypothèses', hint: 'Ce que l’analyse confirme, nuance ou écarte.', duree: '10 min' },
-        { nom: 'Synthèse et ouverture', hint: 'Interprétation d’ensemble, rapport à l’œuvre entière.', duree: '10 min' }
+        { nom: 'Lectures du texte', hint: 'Situer l’extrait dans l’œuvre ; lecture expressive par le professeur, lecture silencieuse par les élèves.', duree: '5 min' },
+        { nom: 'Observation et formulation des hypothèses', hint: 'Par des questions simples : paratexte, mise en page, ponctuation, typographie ; premières impressions → hypothèses de lecture.', duree: '10 min' },
+        { nom: 'Choix des outils d’analyse', hint: 'Les outils se choisissent selon le genre et le type du texte et selon les hypothèses : ils ne sont pas donnés d’avance.', duree: '5 min' },
+        { nom: 'Analyse du texte', hint: 'Analyse à l’aide des outils retenus : repérage des indices, analyse, interprétation (tableau à 4 entrées).', duree: '20 min' },
+        { nom: 'Validation des hypothèses', hint: 'Ce que l’analyse confirme, nuance ou écarte des hypothèses de départ.', duree: '10 min' },
+        { nom: 'Bilan', hint: 'Sens du texte construit avec la classe ; rapport à l’œuvre entière ou au groupement.', duree: '10 min' }
       ],
-      texteSupport: { min: 250, max: 400, unite: 'mots', note: 'La poésie peut être plus courte.' },
+      texteSupport: { min: 200, max: 350, unite: 'mots', note: '20 à 30 lignes, texte LITTÉRAIRE tiré d’une œuvre au programme ou d’un groupement de textes.' },
+      exigencesCorpus: ['Texte LITTÉRAIRE de 20 à 30 lignes.', 'Tiré d’une œuvre intégrale au programme de la classe, ou d’un groupement de textes.'],
       objectifsInterdits: ['construire le sens'],
-      source: 'Draft EST — éléments liés à l’étude des textes ; progression 2nde',
+      interdits: ['L’objectif évite les formules passe-partout (« construire le sens du texte ») et l’anticipation du sens : il part des traits formels de l’écriture et de la thématique de CE texte.'],
+      source: 'guide pédagogique du 2nd cycle (« Changements 2nde », IGE) — l’apprentissage de la lecture méthodique ; Draft EST, progressions (1 h)',
+      confiance: 'officiel'
+    },
+    {
+      id: 'gt', nom: 'Groupement de textes', famille: 'cours', cycle: '2nd', icon: 'book', tint: '#e6f5ec',
+      tag: '4 à 6 textes',
+      desc: 'Une collection de 4 à 6 textes de 20 à 30 lignes autour d’un problème, d’un thème, d’un genre ou d’un auteur.',
+      phases: [
+        { nom: 'Présentation du groupement', hint: 'L’axe d’étude (un titre formulé avec précision), l’objectif, les textes ordonnés, les motifs de confrontation. Peut se coupler à l’étude du 1er texte.', duree: '1 h' },
+        { nom: 'Étude des textes', hint: 'Une heure par texte, sous le prisme des motifs de confrontation ; méthode choisie selon le texte (lecture méthodique, commentaire, épreuve de langue, résumé pour un texte d’idées).', duree: '4 h' },
+        { nom: 'Confrontation et bilan', hint: 'Deux tableaux : les motifs de confrontation par texte ; convergences, divergences et bilan. La séance vaut évaluation du groupement.', duree: '1 h' }
+      ],
+      texteSupport: { min: 200, max: 350, unite: 'mots', note: 'Chaque texte : 20 à 30 lignes.' },
+      exigencesCorpus: ['4 à 6 textes de 20 à 30 lignes, de préférence du même genre ou de la même époque.', 'Séries littéraires : deux groupements, à la fin de l’étude des deux premières œuvres ; séries scientifiques : un seul, après la 1ère œuvre.'],
+      source: 'guide pédagogique du 2nd cycle (« Changements 2nde », IGE) — le groupement de textes (durée : 6 heures environ)',
       confiance: 'officiel'
     },
     {
@@ -700,19 +748,18 @@
       tag: 'au ¼',
       desc: 'Réduire un texte au quart en conservant l’ordre et l’énonciation de l’auteur.',
       phases: [
-        { nom: 'Présentation de l’exercice', hint: 'Ce qu’on attend, ce qui est sanctionné, la marge tolérée.', duree: '5 min' },
-        { nom: 'Repérage du thème, de la thèse et des arguments', hint: 'Travail préparatoire.', duree: '10 min' },
-        { nom: 'Repérage des parties essentielles', hint: 'Articulations logiques, connecteurs, hiérarchie des idées.', duree: '10 min' },
-        { nom: 'Techniques du résumé', hint: 'Nominalisation, généralisation, suppression de l’exemple et de la redondance.', duree: '15 min' },
-        { nom: 'Production et vérification', hint: 'Compter les mots et INDIQUER le nombre exact.', duree: '20 min' }
+        { nom: 'Travail préparatoire', hint: 'Repérer le thème, la thèse, le système énonciatif ; dégager la structure argumentative (thèse, connecteurs, arguments) ; traiter les exemples et les citations pour n’en garder que l’essentiel.', duree: '20 min' },
+        { nom: 'Reformulation des idées', hint: 'Reformuler les idées retenues, dans l’ordre et l’énonciation de l’auteur (résumé) ou en les distanciant (analyse).', duree: '15 min' },
+        { nom: 'Techniques de contraction', hint: 'Pronominalisation, nominalisation, phrase complexe → phrase simple (relative → adjectif ; complétive → groupe nominal ; circonstancielle → groupe prépositionnel).', duree: '15 min' },
+        { nom: 'Rédaction et vérification', hint: 'Rester dans l’intervalle (marge de 10 %) et INDIQUER le nombre exact de mots employés.', duree: '10 min' }
       ],
       texteSupport: { min: 550, max: 650, unite: 'mots', nature: 'texte argumentatif ou explicatif en français contemporain' },
       texteSupportParClasse: { '2nde': { min: 400, max: 500, unite: 'mots', nature: 'texte argumentatif ou explicatif d’actualité (guide pédagogique 2nd cycle)' } },
       typesTexte: ['ARGUMENTATIF', 'EXPLICATIF'],
       exigencesCorpus: ['Texte ARGUMENTATIF ou EXPLICATIF, contemporain, d’actualité (jeunesse, chômage, TIC, sports…).', '400 à 500 mots en 2nde ; 550 à 650 mots en 1ère et en Terminale.', 'Texte d’auteur reproduit mot pour mot : on coupe en marquant […], on ne rallonge jamais.'],
-      regleCle: 'Le résumé conserve l’ordre de l’auteur et son système d’énonciation. Réduction au ¼, marge de 10 % ; le candidat indique le nombre de mots employés. Barème /9 : compréhension et pertinence 3, cohérence et technique 3, expression 3.',
+      regleCle: 'Le résumé réduit au ¼ en respectant le système d’énonciation, l’ordre des idées et les limites fixées (marge de 10 %) ; le candidat indique le nombre exact de mots. Barème : /8 en 2nde (compréhension 3, technique 3, expression 2) ; /9 en 1ère et Terminale (3 + 3 + 3).',
       grille: 'resumeDetail',
-      source: 'Draft EST — progression 2nde, séquence I ; descriptif des épreuves',
+      source: 'guide pédagogique du 2nd cycle (« Changements 2nde », IGE) — la contraction de texte ; Draft EST — progression 2nde, séquence I ; descriptif des épreuves',
       confiance: 'officiel'
     },
     {
@@ -720,18 +767,18 @@
       tag: 'au 1/3',
       desc: 'Réduire au tiers avec distanciation : le candidat parle de ce que dit l’auteur.',
       phases: [
-        { nom: 'Ce qui distingue l’analyse du résumé', hint: 'Réorganisation possible ; distanciation OBLIGATOIRE.', duree: '10 min' },
-        { nom: 'Les marques de la distanciation', hint: 'Style indirect, modification des pronoms et des temps, verbes introducteurs.', duree: '15 min' },
-        { nom: 'Techniques de l’analyse', hint: 'Restructurer selon la logique argumentative plutôt que selon l’ordre du texte.', duree: '15 min' },
-        { nom: 'Production et vérification', hint: 'Réduction au 1/3 ; indiquer le nombre exact de mots.', duree: '20 min' }
+        { nom: 'Travail préparatoire', hint: 'Repérer le thème, la thèse, le système énonciatif ; dégager la structure argumentative (thèse, connecteurs, arguments) ; traiter les exemples et les citations pour n’en garder que l’essentiel.', duree: '20 min' },
+        { nom: 'Reformulation des idées', hint: 'Reformuler les idées retenues, dans l’ordre et l’énonciation de l’auteur (résumé) ou en les distanciant (analyse).', duree: '15 min' },
+        { nom: 'Techniques de contraction', hint: 'Pronominalisation, nominalisation, phrase complexe → phrase simple (relative → adjectif ; complétive → groupe nominal ; circonstancielle → groupe prépositionnel).', duree: '15 min' },
+        { nom: 'Rédaction et vérification', hint: 'Rester dans l’intervalle (marge de 10 %) et INDIQUER le nombre exact de mots employés.', duree: '10 min' }
       ],
       texteSupport: { min: 550, max: 650, unite: 'mots', nature: 'texte argumentatif ou explicatif en français contemporain' },
       texteSupportParClasse: { '2nde': { min: 400, max: 500, unite: 'mots', nature: 'texte argumentatif ou explicatif d’actualité (guide pédagogique 2nd cycle)' } },
       typesTexte: ['ARGUMENTATIF', 'EXPLICATIF'],
       exigencesCorpus: ['Texte ARGUMENTATIF ou EXPLICATIF, contemporain, d’actualité.', '400 à 500 mots en 2nde ; 550 à 650 mots en 1ère et en Terminale.'],
-      regleCle: 'L’analyse autorise la réorganisation mais impose la distanciation. Réduction au 1/3, marge de 10 % ; le candidat indique le nombre de mots employés. Barème /9 : compréhension et pertinence 3, cohérence et technique 3, expression 3.',
+      regleCle: 'L’analyse réduit au 1/3 en CHANGEANT le système énonciatif (distanciation), en respectant ou non l’ordre des idées, en mettant en évidence les liens logiques (marge de 10 %) ; nombre exact de mots indiqué. Barème : /8 en 2nde ; /9 en 1ère et Terminale.',
       grille: 'resumeDetail',
-      source: 'Draft EST — descriptif des épreuves ; corrigés harmonisés OBC',
+      source: 'guide pédagogique du 2nd cycle (« Changements 2nde », IGE) — la contraction de texte ; Draft EST — descriptif des épreuves ; corrigés harmonisés OBC',
       confiance: 'officiel'
     },
     {
@@ -746,41 +793,44 @@
         { nom: 'Rédaction de la conclusion', hint: 'Bilan, réponse au problème, ouverture.', duree: '1 h' }
       ],
       typesTexte: ['ARGUMENTATIF', 'EXPLICATIF'],
-      regleCle: 'Le sujet cite MOT POUR MOT une phrase du texte de la contraction et pose un problème qu’il éclaire. Aucune limite de mots. Barème /9 : compréhension et pertinence 3, organisation et cohérence 3, expression 3.',
+      regleCle: 'La discussion, mini-dissertation, prend appui sur le texte à résumer : elle porte SOIT sur un problème abordé dans le texte, SOIT sur un passage précis (cité alors mot pour mot). Ce n’est pas une reprise du texte. L’élève donne un avis argumenté, nourri de son expérience et de ses lectures. Aucune limite de mots. Barème : /10 en 2nde (compréhension 4, organisation 3, expression 3) ; /9 en 1ère et Terminale (3 + 3 + 3).',
       source: 'Draft EST — progression 2nde, séquence III', confiance: 'officiel',
       note: 'La discussion vaut 9 points dans le sujet de type 1 du Probatoire et du BAC.'
     },
     {
       id: 'dissertation', nom: 'La dissertation', famille: 'cours', cycle: '2nd', icon: 'pen', tint: '#e7f1fb',
       tag: 'méthodologie',
-      desc: 'Dissertation littéraire ou de culture générale, sur citation ou problématique.',
+      desc: 'Un jugement ou une opinion sur un problème littéraire ou général, et une consigne.',
       phases: [
-        { nom: 'Présentation de l’exercice', hint: 'Ce qu’est une dissertation, ce qu’elle n’est pas.', duree: '1 h' },
-        { nom: 'Analyse du libellé et de la citation', hint: 'Mots-clés, présupposés, champ de réflexion ouvert.', duree: '1 h' },
-        { nom: 'Choix du plan', hint: 'Dialectique si « discutez » ou « dans quelle mesure » ; analytique si « commentez », « expliquez », « montrez ».', duree: '1 h' },
-        { nom: 'Rédaction guidée', hint: 'Introduction, paragraphes, transitions, conclusion.', duree: '2 h' }
+        { nom: 'Analyse du sujet', hint: 'Expliquer l’opinion ; analyser la consigne (type de sujet — dialectique, analytique ou mixte — et plan induit ; domaine d’application) ; reformuler ; dégager le problème et formuler la problématique.', duree: '2 h' },
+        { nom: 'Élaboration du plan', hint: 'Plan d’ensemble (réponses aux questions de la problématique), puis plan détaillé : arguments, exemples tirés des œuvres au programme, citations, hiérarchisés.', duree: '1 h' },
+        { nom: 'Rédaction de l’introduction et de la conclusion', hint: 'Introduction : amener le sujet, poser le problème, énoncer la problématique, annoncer le plan. Conclusion : rappel de la problématique, bilan, ouverture.', duree: '1 h' },
+        { nom: 'Rédaction du développement', hint: 'Le paragraphe argumentatif (idée, argument, exemple, citation insérée) et les transitions.', duree: '1 h' }
       ],
       grille: 'apc4',
+      regleCle: 'Le sujet : un JUGEMENT ou une OPINION sur un problème littéraire, artistique ou général, suivi d’une CONSIGNE. Le type de sujet commande le plan. Barème /20 : 6 + 6 + 6 + 2.',
       interdits: ['Un libellé « sur citation » ne prête jamais à un auteur des mots non vérifiés dans l’œuvre : à défaut, une affirmation non attribuée (« On a pu dire que… »).', 'Les exemples viennent des œuvres AU PROGRAMME de la classe, jamais d’une œuvre du 1er cycle.'],
-      source: 'Draft EST — progression 2nde, séquence III ; descriptif des épreuves',
-      confiance: 'officiel',
-      note: 'Une grille critériée est annexée au libellé dans les épreuves techniques.'
+      source: 'guide pédagogique du 2nd cycle (« Changements 2nde », IGE) — la dissertation et sa grille ; Draft EST, progressions',
+      confiance: 'officiel'
     },
     {
       id: 'commentaire', nom: 'Le commentaire composé', famille: 'cours', cycle: '2nd', icon: 'search', tint: '#efe8fa',
       tag: 'séries A et ABI',
-      desc: 'Commentaire d’un texte de 20 à 30 lignes ou d’une vingtaine de vers.',
+      desc: 'Sur un extrait de 20 à 30 lignes d’une œuvre au programme : thème, centres d’intérêt, plan détaillé.',
       phases: [
-        { nom: 'Présentation de l’exercice', hint: 'Différence avec l’explication de texte et la dissertation.', duree: '1 h' },
-        { nom: 'Lecture et repérage', hint: 'Relevés stylistiques et thématiques.', duree: '1 h' },
-        { nom: 'Construction des axes', hint: 'Deux ou trois centres d’intérêt, jamais un relevé linéaire.', duree: '1 h' },
-        { nom: 'Rédaction', hint: 'Grille officielle : compréhension et pertinence /6 · organisation et cohérence /6 · expression /6 · originalité et présentation /2. En 2nde, on s’arrête au plan détaillé.', duree: '2 h' }
+        { nom: 'Découverte de l’épreuve', hint: 'Paratexte et lecture → premières impressions ; repérage du genre et du type de texte ; examen de la consigne (exprimer le thème ; donner les centres d’intérêt avec leurs éléments constitutifs).', duree: '1 h' },
+        { nom: 'Analyse détaillée du texte', hint: 'Outils d’analyse textuelle adaptés au genre et au type du texte.', duree: '1 h' },
+        { nom: 'Regroupement des données par affinités', hint: 'Formuler deux ou trois centres d’intérêt pertinents ; y rattacher les interprétations. Le commentaire ne suit pas le fil du texte et ne sépare pas le fond de la forme.', duree: '1 h' },
+        { nom: 'Plan détaillé', hint: 'Pour chaque centre d’intérêt : idées directrices, idées-arguments, moyens d’expression (vocabulaire, syntaxe, figures). En 1ère et Terminale seulement : rédaction (introduction, paragraphes explicatifs, conclusion).', duree: '2 h' }
       ],
       grille: 'apc4',
-      texteSupport: { min: 150, max: 400, unite: 'mots', note: '20 à 30 lignes, ou une vingtaine de vers ayant une unité de sens.' },
+      texteSupport: { min: 150, max: 400, unite: 'mots', note: '20 à 30 lignes (200 à 250 mots) ou une vingtaine de vers ayant une unité de sens, tirés d’une œuvre au programme.' },
+      exigencesCorpus: ['Extrait d’une ŒUVRE INTÉGRALE AU PROGRAMME de la classe.', '20 à 30 lignes (200 à 250 mots) ou une vingtaine de vers ayant une unité de sens.'],
+      regleCle: 'Exercice écrit, entièrement rédigé, « composé » : il regroupe les remarques en centres d’intérêt au lieu de suivre le texte. En 2nde, on s’arrête au plan détaillé. Barème /20 : compréhension et pertinence 6, organisation et cohérence 6, expression 6, originalité et présentation 2.',
       seriesReservees: ['A', 'ABI'],
-      source: 'Draft EST — descriptif des sujets ESG', confiance: 'officiel',
-      note: 'Le descriptif officiel réserve le commentaire composé aux séries A et ABI. Ne pas le proposer en C, D, E ou TI.'
+      source: 'Draft EST — descriptif des sujets ESG ; guide pédagogique du 2nd cycle (« Changements 2nde », IGE) — initiation au commentaire composé et grille',
+      confiance: 'officiel',
+      note: 'Réservé aux séries A et ABI. Ne pas le proposer en C, D, E ou TI.'
     },
     {
       id: 'cultureGen', nom: 'Dissertation de culture générale', famille: 'cours', cycle: '2nd', icon: 'mic', tint: '#e6f5ec',
@@ -799,8 +849,8 @@
     /* ============ SECOND CYCLE — LANGUE ET COMMUNICATION ============ */
     {
       id: 'langue2', nom: 'Langue française (2nd cycle)', famille: 'cours', cycle: '2nd', icon: 'book', tint: '#e7f1fb',
-      tag: '4 rubriques',
-      desc: 'Communication, morphosyntaxe, sémantique/lexicologie, stylistique/rhétorique.',
+      tag: '5 étapes',
+      desc: 'Observation, analyse, vérification, formulation de la règle, consolidation — sur un corpus d’une quinzaine de lignes.',
       sousTypes: [
         'I. Communication — émetteur/récepteur, référent et ses substituts, contenus latents et manifestes',
         'II. Morphosyntaxe — mots variables, structure de la phrase, liaisons',
@@ -808,16 +858,17 @@
         'IV. Stylistique / Rhétorique des textes — types et genres de textes, figures'
       ],
       phases: [
-        { nom: 'Observation du corpus', hint: 'Texte littéraire ou non, contenant le fait visé.', duree: '10 min' },
-        { nom: 'Repérage', hint: 'Relever les occurrences du fait de langue.', duree: '10 min' },
-        { nom: 'Analyse', hint: 'Comment le fait fonctionne dans ce texte-ci.', duree: '15 min' },
-        { nom: 'Interprétation', hint: 'Quel effet de sens il produit. C’est ce que l’épreuve appelle la question b.', duree: '15 min' },
-        { nom: 'Réemploi', hint: 'Production d’énoncés mobilisant le fait étudié.', duree: '10 min' }
+        { nom: 'Observation / découverte', hint: 'Lecture du corpus ; découverte et reconnaissance du fait de langue EN CONTEXTE par un questionnaire guide.', duree: '10 min' },
+        { nom: 'Analyse', hint: 'Repérage des signes par des questions précises, puis manipulations (transformation, substitution, permutation, addition, suppression) : les FORMES et les VALEURS du fait de langue.', duree: '20 min' },
+        { nom: 'Vérification / confrontation', hint: 'Les apprenants évaluent leurs travaux, relèvent les erreurs, les expliquent et les corrigent ; les règles se dégagent.', duree: '10 min' },
+        { nom: 'Formulation de la règle', hint: 'Les élèves formulent la règle ; le professeur l’améliore.', duree: '5 min' },
+        { nom: 'Consolidation', hint: 'Entraînement sur une NOUVELLE situation : repérer, analyser, interpréter — comme à l’épreuve.', duree: '15 min' }
       ],
+      exigencesCorpus: ['Texte littéraire ou non, d’une quinzaine de lignes, ayant une unité sémantique (ou document iconique, sonore).', 'Contient les faits de langue à maîtriser et repose sur un domaine de vie.'],
       grille: 'langue4rub5',
-      source: 'Draft EST — utilisation des outils de la langue ; descriptif de l’épreuve de langue',
+      source: 'guide pédagogique du 2nd cycle (« Changements 2nde », IGE) — méthode d’apprentissage de la langue ; Draft EST, progressions (1 h)',
       confiance: 'officiel',
-      note: 'Les questions d’examen portent toujours sur le repérage, l’analyse ET l’interprétation : une leçon qui s’arrête au repérage ne prépare pas à l’épreuve.'
+      note: 'À l’épreuve, chaque question renvoie au repérage (ou à l’identification), à l’analyse et à l’interprétation : la consolidation entraîne à ces trois opérations.'
     },
     {
       id: 'typologie', nom: 'Typologie textuelle', famille: 'cours', cycle: '2nd', icon: 'book', tint: '#efe8fa',
@@ -1173,14 +1224,25 @@
          Application.
        Sans correspondance, le « Bilan » d'une leçon déjà écrite se serait
        affiché sous « Confrontation ». Une leçon marquée `phasesRev` est déjà
-       au nouveau déroulé ; on n'y touche plus. */
-    PHASES_REV: '2026-10-16',
+       au nouveau déroulé ; on n'y touche plus.
+       Rév. « 2026-10-16b » : la leçon de langue du 2nd cycle suit à son tour
+       le guide du 2nd cycle (voir plus bas). */
+    PHASES_REV: '2026-10-16b',
     phasesDuCours: function (cours) {
       var pc = (cours && cours.phaseContent) || {};
-      if (!cours || cours.phasesRev === '2026-10-16') return pc;
+      if (!cours || cours.phasesRev === '2026-10-16b') return pc;
       var o = {}, k;
       for (k in pc) if (Object.prototype.hasOwnProperty.call(pc, k)) o[k] = pc[k];
       var joindre = function (a, b) { return [a, b].filter(function (x) { return x && String(x).trim(); }).join('\n\n'); };
+      var avant1 = cours.phasesRev !== '2026-10-16';   // pas encore passé au déroulé du 16/10 (1er cycle)
+      /* Leçon de langue du 2nd cycle (16/10, guide) : Observation, Repérage,
+         Analyse, Interprétation, Réemploi → Observation, Analyse (repérage +
+         manipulations, formes ET valeurs), Vérification, Règle, Consolidation. */
+      if (cours.gabarit === 'langue2' && (o[2] != null || o[3] != null)) {
+        o[1] = joindre(joindre(o[1], o[2]), o[3]); delete o[2]; delete o[3];
+        return o;
+      }
+      if (!avant1) return o;
       if (cours.gabarit === 'suivie' && o[3] != null && o[4] == null) {
         o[4] = o[3]; delete o[3];
       } else if (cours.gabarit === 'ee' && (o[2] != null || o[3] != null) && o[4] == null) {
@@ -1192,6 +1254,13 @@
     oeuvresDe: function (classe) { return OEUVRES[cleClasse(classe)] || []; },
     /* Longueur du texte support POUR CETTE CLASSE : la 2nde contracte un
        texte de 400 à 500 mots, la 1ère et la Terminale un texte plus long. */
+    /* Parties DE LA CLASSE : la 2nde note la contraction 8 + 10 + 2 et
+       arrête le commentaire au plan détaillé (guide du 2nd cycle). */
+    partiesPour: function (ep, classe) {
+      if (!ep) return [];
+      var par = ep.partiesParClasse && ep.partiesParClasse[cleClasse(classe)];
+      return par || ep.parties || [];
+    },
     texteSupportPour: function (ep, classe) {
       if (!ep) return null;
       var par = ep.texteSupportParClasse && ep.texteSupportParClasse[cleClasse(classe)];
@@ -1234,6 +1303,34 @@
     gabaritsParCycle: function (cycle) {
       if (!cycle) return GABARITS;
       return GABARITS.filter(function (g) { return g.cycle === cycle || g.cycle === 'tous'; });
+    },
+    /* LA NORME D'UN TYPE DE LEÇON, telle qu'Ambassa doit la lire (16/10/2026).
+       L'audit d'une leçon et la proposition d'objectif n'envoyaient que les
+       NOMS des phases : ni leur contenu attendu, ni le corpus exigé, ni la
+       règle de l'exercice, ni les interdits. Une seule source pour les deux. */
+    normeDuGabarit: function (id, classe) {
+      var g = typeof id === 'string' ? this.gabaritParId(id) : id;
+      if (!g) return [];
+      var l = [];
+      l.push('Type de leçon : ' + g.nom + (g.cycle && g.cycle !== 'tous' ? ' (' + g.cycle + ' cycle)' : '') + (g.demarche ? ' — démarche ' + g.demarche : '') + '.');
+      l.push('Déroulé officiel :');
+      g.phases.forEach(function (p, i) { l.push('  ' + (i + 1) + '. ' + p.nom + ' (' + p.duree + ') — ' + p.hint); });
+      var cle = cleClasse(classe);
+      var ts = (g.texteSupportParClasse && g.texteSupportParClasse[cle]) || g.texteSupport;
+      var sansPoint = function (x) { return String(x || '').replace(/[.\s]+$/, ''); };
+      if (ts) l.push('Texte support : ' + ts.min + ' à ' + ts.max + ' mots' + (ts.nature ? ', ' + sansPoint(ts.nature) : '') + (ts.note ? ' — ' + sansPoint(ts.note) : '') + '.');
+      if (g.typesTexte) l.push('Type de texte exigé : ' + g.typesTexte.map(function (t) { return t.toLowerCase(); }).join(' ou ') + '.');
+      (g.exigencesCorpus || []).forEach(function (x) { l.push('Corpus : ' + x); });
+      if (g.regleCle) l.push('Règle de l’exercice : ' + g.regleCle);
+      (g.interdits || []).forEach(function (x) { l.push('Interdit : ' + x); });
+      if (g.objectifsInterdits && g.objectifsInterdits.length) l.push('Objectifs bannis pour ce type de leçon : ' + g.objectifsInterdits.map(function (x) { return '« ' + x + ' »'; }).join(', ') + '.');
+      if (g.seriesReservees) l.push('Réservé aux séries : ' + g.seriesReservees.join(', ') + '.');
+      if (g.note) l.push('À savoir : ' + g.note);
+      var oe = OEUVRES[cle];
+      if (oe && oe.length && g.cycle !== '1er' && /oeuvre|œuvre|commentaire|lecture|augurales|contexte|ensemble|dissertation|gt/.test(g.id + ' ' + g.nom.toLowerCase()))
+        l.push('Œuvres au programme de la classe : ' + oe.map(function (o) { return '« ' + o.titre + ' » (' + o.auteur + ')'; }).join(', ') + '.');
+      if (g.source) l.push('Source : ' + sansPoint(g.source) + '.');
+      return l;
     },
     gabaritParId: function (id) {
       for (var i = 0; i < GABARITS.length; i++) if (GABARITS[i].id === id) return GABARITS[i];
