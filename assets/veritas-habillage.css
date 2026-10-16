@@ -142,6 +142,9 @@
   border-top:1px solid #E4E7EF;margin-top:8px}
 .vmn-mob .vmn-col{margin-bottom:2px}
 
+/* Cibles tactiles >= 24 px (audit 16/10/2026) : liens du pied de page,
+   « Découvrir » et calendrier mesuraient 20 à 22 px sur téléphone. */
+.vh1,.vh50,a.vcal-lien,[data-vrt-item] a[style*="inline-flex"]{padding-top:2px;padding-bottom:2px}
 .vh1:hover{color:#fff;text-decoration:underline}
 .vh2:hover{color:#1E499B;border-bottom-color:#1E499B}
 .vh3:hover{color:#0E7C86;border-bottom-color:#0E7C86}

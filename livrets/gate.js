@@ -912,7 +912,9 @@
          sans adresse sous la main, et un champ obligatoire de plus, c'est une
          vente qui n'aboutit pas. */
       + '<input id="vrt-mail" type="email" inputmode="email" autocomplete="email" '
-      + 'placeholder="Ton e-mail (facultatif) — pour recevoir ton code" style="' + INP + '">'
+      // Placeholder court : à 375 px, « — pour recevoir ton code » était coupé ;
+      // la raison est dite juste en dessous.
+      + 'placeholder="Ton e-mail (facultatif)" style="' + INP + '">'
       + '<div style="font-size:11px;color:#98a1aa;margin:-4px 0 2px;line-height:1.45">'
       + 'Avec une adresse, ton code t’est envoyé même si tu fermes cette page.</div>'
       /* CODE AMI — le même champ que l'application, sur la surface la plus
@@ -934,6 +936,9 @@
       + '</div>'
       + '<div id="vrt-msg" style="font-size:12.5px;color:#c0453f;min-height:17px;margin-top:2px"></div>'
       + '<button id="vrt-go" style="' + BTN + '">Payer ' + fmt(prix(cfg.kind, qte)) + ' FCFA</button>'
+      // Le moyen de paiement était tu jusqu'à la page suivante (audit 16/10/2026).
+      + '<div style="font-size:12px;color:#5c666f;margin:6px 0 2px;line-height:1.45">'
+      + 'Paiement par MTN Mobile Money ou Orange Money : la demande arrive sur ton téléphone.</div>'
       + '<button id="vrt-deja" style="' + BTN2 + '">J\'ai déjà payé — retrouver mon code</button>'
       /* ══ ESSAYER AVANT D'ACHETER ═══════════════════════════════════════════
          `livrets/apercu.html` existe depuis longtemps — deux leçons entières,
