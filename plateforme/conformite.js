@@ -452,7 +452,7 @@
 
     /* Phases du gabarit */
     if (g) {
-      var pc = cours.phaseContent || {};
+      var pc = (M.phasesDuCours ? M.phasesDuCours(cours) : cours.phaseContent) || {};
       var vides = g.phases.filter(function (p, i) {
         var v = pc[i] || pc[p.nom];
         return !v || !String(v).trim();
@@ -616,7 +616,7 @@
       l.push('Titre : ' + (objet.title || '(sans titre)') + ' · Classe : ' + (objet.classe || '?'));
       l.push('Objectif : ' + [objet.objAgir, objet.objContexte, objet.objFonction].filter(Boolean).join(' — '));
       if (objet.regle) l.push('Règle visée : ' + objet.regle);
-      var pc = objet.phaseContent || {};
+      var pc = (M.phasesDuCours ? M.phasesDuCours(objet) : objet.phaseContent) || {};
       if (g) g.phases.forEach(function (p, i) {
         l.push('• ' + p.nom + ' : ' + (String(pc[i] || pc[p.nom] || '(vide)').slice(0, 700)));
       });

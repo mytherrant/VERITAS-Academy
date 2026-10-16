@@ -29,8 +29,8 @@
 <meta property="og:image" content="https://veritas-school.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <script src="./support.js?v=b7335820"></script>
-<script src="./minesec.js?v=a87a5f79"></script>
-<script src="./conformite.js?v=16718cfe"></script>
+<script src="./minesec.js?v=c6660ff8"></script>
+<script src="./conformite.js?v=c6acd615"></script>
 <script src="./exercices.js?v=c6d93301"></script>
 <script src="./generateur.js?v=23c33c33"></script>
 <script src="./texte.js?v=43fa1e84"></script>
@@ -7957,7 +7957,7 @@ class Component extends DCLogic {
   _annotCss(an,sel){let c='cursor:pointer;border-radius:3px;padding:0 1px;transition:background .12s';if(an){if(an.style==='surligner')c+=';background:'+(an.color||'var(--cfff3a3,#fff3a3)');else if(an.style==='surbrillance')c+=';background:'+(an.color||'var(--cffdcb0,#ffdcb0)')+';font-weight:700';else if(an.style==='souligner')c+=';text-decoration:underline;text-decoration-color:'+(an.color||'var(--c1a72bb,#1a72bb)')+';text-decoration-thickness:2px;text-underline-offset:2px';if(an.comment)c+=';border-bottom:2px dotted var(--cc26a12,#c26a12)';}if(sel)c+=';box-shadow:0 0 0 2px var(--c1a72bb,#1a72bb)';return c;}
   _activeCours(){return this.state.cours.find(c=>c.id===this.state.activeCoursId)||null;}
   _updateCours(patch,act){this.setState(st=>{const cours=st.cours.map(c=>{if(c.id!==st.activeCoursId)return c;const nc={...c,...patch,updatedAt:Date.now()};if(act){const v=(c.history&&c.history.length?c.history[c.history.length-1].version:1);nc.history=[...(c.history||[]),{userId:st.currentUserId,text:act,ts:Date.now(),version:v}];}return nc;});return{cours};},()=>this._persist());}
-  _newCours(gabId){const g=this.gabaritDefs.find(x=>x.id===gabId)||this.gabaritDefs[0];const me=this._me();const id='k'+Date.now();const nc={id,groupeId:this._groupeActif(),gabarit:g.id,title:'',type:g.name,classe:'',sequence:'',competence:'',duree:'',coeff:'',objAgir:'',objContexte:'',objFonction:'',regle:'',intContexte:'',intTache:'',intProduction:'',intConsignes:'',intContraintes:'',phaseContent:{},status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),history:[{userId:me.id,text:'a créé le cours à partir du gabarit « '+g.name+' »',ts:Date.now(),version:1}]};this.setState(st=>({cours:[nc,...st.cours],activeCoursId:id,screen:'coursEdit'}),()=>{this._persist();window.scrollTo(0,0);});}
+  _newCours(gabId){const g=this.gabaritDefs.find(x=>x.id===gabId)||this.gabaritDefs[0];const me=this._me();const id='k'+Date.now();const nc={id,groupeId:this._groupeActif(),gabarit:g.id,phasesRev:MINESEC.PHASES_REV,title:'',type:g.name,classe:'',sequence:'',competence:'',duree:'',coeff:'',objAgir:'',objContexte:'',objFonction:'',regle:'',intContexte:'',intTache:'',intProduction:'',intConsignes:'',intContraintes:'',phaseContent:{},status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),history:[{userId:me.id,text:'a créé le cours à partir du gabarit « '+g.name+' »',ts:Date.now(),version:1}]};this.setState(st=>({cours:[nc,...st.cours],activeCoursId:id,screen:'coursEdit'}),()=>{this._persist();window.scrollTo(0,0);});}
   _setF(k,v){this.setState({filters:{...this.state.filters,[k]:v}});}
   /* Repli sans accents ni ponctuation, pour comparer deux chaines comme
      l'oeil les compare. « eluard » doit trouver « Éluard », « theatre »
@@ -9142,7 +9142,7 @@ class Component extends DCLogic {
       lockChip:cActive.status==='valide'?'font-size:11px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:3px 10px;border-radius:999px;font-family:Poppins':hidden,
       locked:cLocked,savedNote:'Enregistré · '+this._ago(cActive.updatedAt),
       stepsLabel:cDef.stepsLabel,
-      phases:cDef.phases.map((p,i)=>{const cyc=['var(--c1a72bb,#1a72bb)','var(--c7b52c7,#7b52c7)','var(--cc26a12,#c26a12)','var(--c1f9d55,#1f9d55)','var(--c0e8a9c,#0e8a9c)'];const col=cyc[i%cyc.length];return{num:i+1,name:p.name,hint:p.hint,duration:p.duration,rowBg:i%2?'var(--cfbfcfe,#fbfcfe)':'var(--cffffff,#fff)',headBg:i%2?'var(--cf2f6fb,#f2f6fb)':'var(--cf7f9fc,#f7f9fc)',dotBg:col,content:(cActive.phaseContent||{})[i]||'',set:e=>{if(cLocked)return;const pc={...(cActive.phaseContent||{})};pc[i]=val(e);this._updateCours({phaseContent:pc});}};}),
+      phases:cDef.phases.map((p,i)=>{const cyc=['var(--c1a72bb,#1a72bb)','var(--c7b52c7,#7b52c7)','var(--cc26a12,#c26a12)','var(--c1f9d55,#1f9d55)','var(--c0e8a9c,#0e8a9c)'];const col=cyc[i%cyc.length];return{num:i+1,name:p.name,hint:p.hint,duration:p.duration,rowBg:i%2?'var(--cfbfcfe,#fbfcfe)':'var(--cffffff,#fff)',headBg:i%2?'var(--cf2f6fb,#f2f6fb)':'var(--cf7f9fc,#f7f9fc)',dotBg:col,content:(MINESEC.phasesDuCours(cActive)||{})[i]||'',set:e=>{if(cLocked)return;/* Écrire = passer au déroulé du 16/10 (MINESEC.phasesDuCours). */const pc={...(MINESEC.phasesDuCours(cActive)||{})};pc[i]=val(e);this._updateCours({phaseContent:pc,phasesRev:MINESEC.PHASES_REV});}};}),
       collaborators:cCollabs.map(u=>({name:u.name,initials:this._initials(u.name),avatar:this._av(u,28)})),
       step1Style:cStep(cs1),step2Style:cStep(cs2),step3Style:cStep(cs3),step1Dot:cDot(cs2||cs3,cs1),step2Dot:cDot(cs3,cs2),step3Dot:cDot(false,cs3),
       canSubmit:perm.edit&&cs1,canValidate:perm.validate&&cs2,canUnlock:perm.validate&&cs3,

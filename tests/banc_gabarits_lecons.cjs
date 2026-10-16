@@ -80,5 +80,41 @@ dire(!ty('ARGUMENTATIF') && !ty('EXPLICATIF') && ty('NARRATIF') && ty('POÉTIQUE
 dire(ecarts('resume', 'Tle A', 600).some(e => e.titre === 'Règle de l’exercice' && /ordre de l’auteur/.test(e.detail)), 'la règle de l’exercice est affichée (champ jusqu’ici lu par personne)');
 dire(!ecarts('resume', 'Tle A', 600).some(e => e.titre === 'Règle de l’exercice' && e.severite !== 'conseil'), 'la règle est un conseil, pas une alerte');
 
+console.log(`\n${G}④ Durées et déroulés : les documents de Jacques font foi${R}`);
+/* « Vérification 1er cycle » : chaque séance du 1er cycle dure 55 minutes.
+   Draft EST, progressions du 2nd cycle : chaque leçon vaut 1 h. */
+const total = x => x.phases.reduce((a, p) => a + minutes(p.duree), 0);
+const hors1 = GAB.filter(x => x.cycle === '1er' && total(x) !== 55);
+dire(!hors1.length, '1er cycle : chaque séance fait 55 min', hors1.map(x => x.id + '=' + total(x)).join(', '));
+const parLecon = GAB.filter(x => x.cycle === '2nd' && x.phases.every(p => /min/.test(p.duree)));
+const hors2 = parLecon.filter(x => total(x) !== 60);
+dire(parLecon.length >= 10 && !hors2.length, '2nd cycle : chaque leçon fait 1 h (' + parLecon.length + ' gabarits)', hors2.map(x => x.id + '=' + total(x)).join(', '));
+const parSeance = GAB.filter(x => x.cycle === '2nd' && !parLecon.includes(x));
+dire(parSeance.every(x => x.phases.every(p => minutes(p.duree) % 60 === 0)), 'les méthodologies en plusieurs séances comptent en heures entières');
+dire(JSON.stringify(g('suivie').phases.map(p => p.nom)) === JSON.stringify(['Situation de l’extrait', 'Lecture du texte', 'Élaboration de la grille de lecture', 'Confrontation', 'Bilan']),
+  'lecture suivie : les 5 étapes de la fiche, dans l’ordre');
+dire(/fin|clôt/.test(g('suivie').note || '') && /fiche d’identité/.test(g('suivie').note || ''), 'la fiche d’identité vient À LA FIN de l’étude de l’œuvre, pas en ouverture');
+dire(/^Lecture silencieuse par les élèves, puis lecture expressive du professeur/.test(g('lecture').phases[0].hint), 'lecture méthodique : lecture silencieuse d’abord, puis lecture du professeur');
+dire(g('ee').phases.map(p => p.nom).join(' → ') === 'Découverte de la situation-problème → Analyse du corpus et production → Confrontation → Formulation de la règle → Exercices d’application',
+  'expression écrite : la démarche de l’écrit de la fiche');
+const e1 = n => M.epreuveParCode(n);
+dire(e1('CO_1C').duree === '1 h' && e1('CO_1C').coeff === '1' && e1('ET_1C').duree === '1 h' && e1('ET_1C').coeff === '1' && e1('EE_1C').duree === '2 h' && e1('EE_1C').coeff === '2',
+  'évaluations du 1er cycle : CO 1 h coef 1, étude de texte 1 h coef 1, expression écrite 2 h coef 2');
+dire(e1('BEPC_ORTHO').duree === '45 min', 'le BEPC garde ses 45 min (Draft EST)');
+
+console.log(`\n${G}⑤ Une leçon déjà écrite garde son contenu sous les bons titres${R}`);
+const ps = M.phasesDuCours({ gabarit: 'suivie', phaseContent: { 0: 'fiche', 1: 'lecture', 2: 'compréhension', 3: 'bilan' } });
+dire(ps[4] === 'bilan' && ps[3] === undefined && ps[2] === 'compréhension', 'lecture suivie : l’ancien « Bilan » reste sous « Bilan »', JSON.stringify(ps));
+const pe = M.phasesDuCours({ gabarit: 'ee', phaseContent: { 0: 'a', 1: 'plan', 2: 'prod', 3: 'relecture' } });
+dire(pe[1] === 'plan\n\nprod' && pe[2] === 'relecture' && pe[3] === undefined, 'écrit : préparation + production fusionnées, amélioration → confrontation', JSON.stringify(pe));
+const neuf = { gabarit: 'suivie', phasesRev: M.PHASES_REV, phaseContent: { 3: 'confrontation' } };
+dire(M.phasesDuCours(neuf)[3] === 'confrontation', 'une leçon au nouveau déroulé n’est jamais déplacée');
+const ixd = require('fs').readFileSync(P('plateforme/index.html'), 'utf8');
+dire(/gabarit:g\.id,phasesRev:MINESEC\.PHASES_REV,/.test(ixd), 'une leçon CRÉÉE naît au nouveau déroulé (sinon sa « Confrontation » partirait sous « Bilan »)');
+dire(/this\._updateCours\(\{phaseContent:pc,phasesRev:MINESEC\.PHASES_REV\}\)/.test(ixd) && /MINESEC\.phasesDuCours\(cActive\)/.test(ixd), 'l’éditeur lit par la correspondance et écrit au nouveau déroulé');
+const vieux = C.verifierCours({ title: 'L', classe: '5e', gabarit: 'suivie', objAgir: 'x', phaseContent: { 0: 'a', 1: 'b', 2: 'c', 3: 'd' } }, '');
+dire(!vieux.some(e => /phase\(s\) non renseignée/.test(e.titre) && /Bilan/.test(e.quoiFaire || '')), 'le garde-fou lit aussi par la correspondance : le Bilan d’une ancienne leçon n’est pas « vide »',
+  JSON.stringify(vieux.filter(e => /phase/.test(e.titre)).map(e => e.quoiFaire)));
+
 console.log(`\n  ${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko ? 1 : 0);

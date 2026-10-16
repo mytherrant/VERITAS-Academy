@@ -557,16 +557,16 @@
       tag: '6 étapes',
       desc: 'Lecture, hypothèses, axes, analyse en tableau à 4 entrées, confrontation, synthèse.',
       phases: [
-        { nom: 'Lecture du texte', hint: 'Lecture magistrale puis silencieuse.', duree: '5 min' },
-        { nom: 'Observation et hypothèses de lecture', hint: 'Paratexte, première impression, hypothèses à vérifier.', duree: '10 min' },
-        { nom: 'Choix des axes de lecture', hint: 'Les axes se déduisent des hypothèses ; ils ne sont pas donnés d’avance.', duree: '5 min' },
-        { nom: 'Analyse en tableau à 4 entrées', hint: 'Outils d’analyse | Repérage des indices | Analyse | Interprétation.', duree: '20 min' },
-        { nom: 'Confrontation / vérification des hypothèses', hint: 'On revient aux hypothèses de départ : confirmées, nuancées, écartées.', duree: '10 min' },
-        { nom: 'Synthèse', hint: 'Interprétation d’ensemble construite avec la classe.', duree: '10 min' }
+        { nom: 'Lecture du texte', hint: 'Lecture silencieuse par les élèves, puis lecture expressive du professeur.', duree: '5 min' },
+        { nom: 'Observation et hypothèses de lecture', hint: 'Paratexte, éléments formels (mise en page, typographie, ponctuation), premières impressions, hypothèses à vérifier.', duree: '10 min' },
+        { nom: 'Choix des axes de lecture', hint: 'Les axes se déduisent des hypothèses ; chacun étudie ensemble le fond et la forme.', duree: '5 min' },
+        { nom: 'Analyse en tableau à 4 entrées', hint: 'Outils d’analyse | Repérage des indices | Analyse | Interprétation — en partant des outils de la langue.', duree: '15 min' },
+        { nom: 'Confrontation des résultats', hint: 'Les apprenants justifient leur bilan de lecture ; on revient aux hypothèses : confirmées, nuancées, écartées.', duree: '10 min' },
+        { nom: 'Synthèse', hint: 'Tableau d’analyse et sens du texte : la trace écrite. Lecture expressive finale si le temps le permet.', duree: '10 min' }
       ],
       texteSupport: { min: 250, max: 400, unite: 'mots', note: 'La poésie peut être plus courte.' },
       objectifsInterdits: ['construire le sens', 'montrer que le personnage est'],
-      source: 'Programme officiel MINESEC 1er cycle', confiance: 'officiel',
+      source: 'Fiche « Vérification 1er cycle » (démarches officielles du 1er cycle) : séance de 55 min ; Programme officiel MINESEC 1er cycle', confiance: 'officiel',
       note: 'Un texte par module doit être rattaché aux contenus transversaux (EVF/EMP, VIH-SIDA, EPA).'
     },
     {
@@ -574,26 +574,29 @@
       tag: '~100 lignes',
       desc: 'Compréhension globale d’un extrait long, avec fiche d’identité de l’œuvre.',
       phases: [
-        { nom: 'Fiche d’identité de l’œuvre', hint: 'Auteur, titre, éditeur, genre, situation de l’extrait.', duree: '10 min' },
-        { nom: 'Lecture de l’extrait', hint: 'Environ 100 lignes.', duree: '15 min' },
-        { nom: 'Compréhension globale', hint: 'Ce qui se passe, qui agit, où, quand, pourquoi.', duree: '20 min' },
-        { nom: 'Bilan de lecture', hint: 'Ce que l’extrait apporte à la compréhension de l’œuvre entière.', duree: '15 min' }
+        { nom: 'Situation de l’extrait', hint: 'Les apprenants situent le passage dans l’action de l’œuvre.', duree: '5 min' },
+        { nom: 'Lecture du texte', hint: 'Lecture expressive du professeur pour donner le ton, puis lecture de quelques élèves.', duree: '15 min' },
+        { nom: 'Élaboration de la grille de lecture', hint: 'Compréhension GLOBALE : qui parle ? à qui ? de quoi ? où, quand ? — en groupes.', duree: '15 min' },
+        { nom: 'Confrontation', hint: 'Chaque groupe présente et justifie sa grille ; les mots difficiles s’expliquent en contexte, sans s’y attarder.', duree: '10 min' },
+        { nom: 'Bilan', hint: 'Synthèse : grille améliorée, résumé ou leçon tirée du texte, notés par les élèves.', duree: '10 min' }
       ],
       objectifsInterdits: ['lire couramment', 'formuler la leçon de morale', 'saisir le sens'],
       interdits: ['Ne pas expliquer systématiquement les mots difficiles : l’objectif est la compréhension GLOBALE.'],
-      source: 'Programme officiel MINESEC 1er cycle', confiance: 'officiel'
+      note: 'L’étude de l’œuvre s’ouvre par des activités augurales et se clôt par la fiche d’identité (fiche structure) établie par les élèves. Hors de la classe : lecture des autres passages, résumé ou compte rendu.',
+      source: 'Fiche « Vérification 1er cycle » (démarches officielles du 1er cycle) : séance de 55 min ; Programme officiel MINESEC 1er cycle', confiance: 'officiel'
     },
     {
-      id: 'ee', nom: 'Expression écrite', famille: 'cours', cycle: '1er', icon: 'pen', tint: '#fdefdb', tag: '4 phases',
-      desc: 'Découverte du sujet, préparation, production, amélioration.',
+      id: 'ee', nom: 'Expression écrite', famille: 'cours', cycle: '1er', icon: 'pen', tint: '#fdefdb', tag: '5 étapes',
+      desc: 'Situation-problème, analyse du corpus et production, confrontation, règle, application.',
       phases: [
-        { nom: 'Découverte du sujet', hint: 'Analyse de la consigne et du type de texte attendu.', duree: '10 min' },
-        { nom: 'Préparation / plan', hint: 'Recherche d’idées, organisation.', duree: '15 min' },
-        { nom: 'Production', hint: 'Rédaction individuelle.', duree: '25 min' },
-        { nom: 'Amélioration', hint: 'Relecture et réécriture au regard des critères de la grille.', duree: '10 min' }
+        { nom: 'Découverte de la situation-problème', hint: 'Un corpus (texte court ou sujet) et un questionnaire : les traits saillants de l’objet d’étude.', duree: '10 min' },
+        { nom: 'Analyse du corpus et production', hint: 'Vocabulaire, syntaxe, organisation, intention, style, idées ; travail individuel ou en équipes, temps fixé.', duree: '20 min' },
+        { nom: 'Confrontation', hint: 'Chaque groupe présente et justifie sa production ; les erreurs sont décelées et corrigées.', duree: '10 min' },
+        { nom: 'Formulation de la règle', hint: 'Les corrections sont synthétisées et notées dans le cahier.', duree: '5 min' },
+        { nom: 'Exercices d’application', hint: 'Repérage, transformation, substitution, reconstruction, production.', duree: '10 min' }
       ],
       grille: 'ee1erCycle',
-      source: 'Programme officiel MINESEC', confiance: 'officiel'
+      source: 'Fiche « Vérification 1er cycle » (démarches officielles du 1er cycle) : séance de 55 min', confiance: 'officiel'
     },
     {
       id: 'eo', nom: 'Expression orale', famille: 'cours', cycle: '1er', icon: 'mic', tint: '#e6f5ec', tag: '4 phases',
@@ -654,8 +657,8 @@
       phases: [
         { nom: 'Situation de l’extrait', hint: 'Où l’extrait se place dans l’œuvre et ce qui précède.', duree: '5 min' },
         { nom: 'Lecture et première impression', hint: 'Lecture, relevé des impressions dominantes.', duree: '10 min' },
-        { nom: 'Hypothèses et axes de lecture', hint: 'Deux ou trois axes, déduits des hypothèses.', duree: '10 min' },
-        { nom: 'Analyse des procédés d’écriture', hint: 'Tableau : outils | relevé | analyse | interprétation. Types et genres de textes.', duree: '25 min' },
+        { nom: 'Hypothèses et axes de lecture', hint: 'Deux ou trois axes, déduits des hypothèses.', duree: '5 min' },
+        { nom: 'Analyse des procédés d’écriture', hint: 'Tableau : outils | relevé | analyse | interprétation. Types et genres de textes.', duree: '20 min' },
         { nom: 'Confrontation des hypothèses', hint: 'Ce que l’analyse confirme, nuance ou écarte.', duree: '10 min' },
         { nom: 'Synthèse et ouverture', hint: 'Interprétation d’ensemble, rapport à l’œuvre entière.', duree: '10 min' }
       ],
@@ -669,11 +672,11 @@
       tag: 'synthèse d’œuvre',
       desc: 'Personnages, espace, temps, actions, rythme, forces agissantes, écriture, thèmes.',
       phases: [
-        { nom: 'Personnages et forces agissantes', hint: 'Schéma actantiel : sujet, objet, adjuvants, opposants, destinateur, destinataire.', duree: '20 min' },
-        { nom: 'Espace et temps', hint: 'Lieux, chronologie, rythme du récit (sommaire, scène, ellipse, pause).', duree: '15 min' },
-        { nom: 'Actions et structure', hint: 'Schéma narratif, articulation des séquences.', duree: '15 min' },
+        { nom: 'Personnages et forces agissantes', hint: 'Schéma actantiel : sujet, objet, adjuvants, opposants, destinateur, destinataire.', duree: '15 min' },
+        { nom: 'Espace et temps', hint: 'Lieux, chronologie, rythme du récit (sommaire, scène, ellipse, pause).', duree: '10 min' },
+        { nom: 'Actions et structure', hint: 'Schéma narratif, articulation des séquences.', duree: '10 min' },
         { nom: 'Écriture et points de vue narratifs', hint: 'Narrateur, focalisation, registres, style.', duree: '15 min' },
-        { nom: 'Thèmes', hint: 'Thèmes majeurs et leur traitement.', duree: '15 min' }
+        { nom: 'Thèmes', hint: 'Thèmes majeurs et leur traitement.', duree: '10 min' }
       ],
       source: 'Draft EST — éléments de l’étude d’ensemble', confiance: 'officiel'
     },
@@ -697,9 +700,9 @@
       tag: 'au ¼',
       desc: 'Réduire un texte au quart en conservant l’ordre et l’énonciation de l’auteur.',
       phases: [
-        { nom: 'Présentation de l’exercice', hint: 'Ce qu’on attend, ce qui est sanctionné, la marge tolérée.', duree: '10 min' },
-        { nom: 'Repérage du thème, de la thèse et des arguments', hint: 'Travail préparatoire.', duree: '15 min' },
-        { nom: 'Repérage des parties essentielles', hint: 'Articulations logiques, connecteurs, hiérarchie des idées.', duree: '15 min' },
+        { nom: 'Présentation de l’exercice', hint: 'Ce qu’on attend, ce qui est sanctionné, la marge tolérée.', duree: '5 min' },
+        { nom: 'Repérage du thème, de la thèse et des arguments', hint: 'Travail préparatoire.', duree: '10 min' },
+        { nom: 'Repérage des parties essentielles', hint: 'Articulations logiques, connecteurs, hiérarchie des idées.', duree: '10 min' },
         { nom: 'Techniques du résumé', hint: 'Nominalisation, généralisation, suppression de l’exemple et de la redondance.', duree: '15 min' },
         { nom: 'Production et vérification', hint: 'Compter les mots et INDIQUER le nombre exact.', duree: '20 min' }
       ],
@@ -718,9 +721,9 @@
       desc: 'Réduire au tiers avec distanciation : le candidat parle de ce que dit l’auteur.',
       phases: [
         { nom: 'Ce qui distingue l’analyse du résumé', hint: 'Réorganisation possible ; distanciation OBLIGATOIRE.', duree: '10 min' },
-        { nom: 'Les marques de la distanciation', hint: 'Style indirect, modification des pronoms et des temps, verbes introducteurs.', duree: '20 min' },
-        { nom: 'Techniques de l’analyse', hint: 'Restructurer selon la logique argumentative plutôt que selon l’ordre du texte.', duree: '20 min' },
-        { nom: 'Production et vérification', hint: 'Réduction au 1/3 ; indiquer le nombre exact de mots.', duree: '25 min' }
+        { nom: 'Les marques de la distanciation', hint: 'Style indirect, modification des pronoms et des temps, verbes introducteurs.', duree: '15 min' },
+        { nom: 'Techniques de l’analyse', hint: 'Restructurer selon la logique argumentative plutôt que selon l’ordre du texte.', duree: '15 min' },
+        { nom: 'Production et vérification', hint: 'Réduction au 1/3 ; indiquer le nombre exact de mots.', duree: '20 min' }
       ],
       texteSupport: { min: 550, max: 650, unite: 'mots', nature: 'texte argumentatif ou explicatif en français contemporain' },
       texteSupportParClasse: { '2nde': { min: 400, max: 500, unite: 'mots', nature: 'texte argumentatif ou explicatif d’actualité (guide pédagogique 2nd cycle)' } },
@@ -825,7 +828,7 @@
         { nom: 'Observation d’un corpus contrasté', hint: 'Deux textes de types différents sur un même thème.', duree: '15 min' },
         { nom: 'Caractéristiques', hint: 'Marques linguistiques repérables : temps, personnes, connecteurs, lexique.', duree: '15 min' },
         { nom: 'Fonctions', hint: 'À quoi ce type de texte sert dans la communication.', duree: '10 min' },
-        { nom: 'Production', hint: 'Rédiger un court texte du type étudié.', duree: '15 min' }
+        { nom: 'Production', hint: 'Rédiger un court texte du type étudié.', duree: '20 min' }
       ],
       source: 'Draft EST — rhétorique des textes ; progression 2nde',
       confiance: 'officiel'
@@ -836,8 +839,8 @@
       desc: 'Première de couverture, affiches et illustrations diverses.',
       phases: [
         { nom: 'Description objective', hint: 'Ce qu’on voit, sans interpréter : plans, cadrage, couleurs, texte.', duree: '10 min' },
-        { nom: 'Composition', hint: 'Organisation, lignes de force, place du regard.', duree: '10 min' },
-        { nom: 'Connotations', hint: 'Ce que l’image suggère : symboles, stéréotypes, références.', duree: '15 min' },
+        { nom: 'Composition', hint: 'Organisation, lignes de force, place du regard.', duree: '15 min' },
+        { nom: 'Connotations', hint: 'Ce que l’image suggère : symboles, stéréotypes, références.', duree: '20 min' },
         { nom: 'Fonction et destinataire', hint: 'À qui l’image parle et ce qu’elle cherche à obtenir.', duree: '15 min' }
       ],
       source: 'Draft EST — « lire l’image : a) la première de couverture ; b) affiches et illustrations diverses »',
@@ -848,11 +851,11 @@
       tag: 'oral et écrit',
       desc: 'Présenter un compte rendu, une note de lecture ou une note critique.',
       phases: [
-        { nom: 'Choix et délimitation du sujet', hint: 'Un problème précis, pas un thème vague.', duree: '15 min' },
-        { nom: 'Recherche et prise de notes', hint: 'Sources identifiées, citations relevées avec leur référence.', duree: '20 min' },
-        { nom: 'Plan de l’exposé', hint: 'Annonce, développement en deux ou trois points, conclusion.', duree: '15 min' },
+        { nom: 'Choix et délimitation du sujet', hint: 'Un problème précis, pas un thème vague.', duree: '5 min' },
+        { nom: 'Recherche et prise de notes', hint: 'Sources identifiées, citations relevées avec leur référence.', duree: '5 min' },
+        { nom: 'Plan de l’exposé', hint: 'Annonce, développement en deux ou trois points, conclusion.', duree: '10 min' },
         { nom: 'Présentation orale', hint: '30 minutes en classe, questions comprises.', duree: '30 min' },
-        { nom: 'Note de lecture écrite', hint: 'Fiche : référence, thèse, structure, appréciation critique.', duree: '20 min' }
+        { nom: 'Note de lecture écrite', hint: 'Fiche : référence, thèse, structure, appréciation critique.', duree: '10 min' }
       ],
       source: 'Draft EST — présentation d’un compte rendu, d’une note de lecture, note critique ; progression 2nde',
       confiance: 'officiel'
@@ -863,9 +866,9 @@
       desc: 'Lettre administrative, rapport, compte rendu professionnel.',
       sousTypes: ['Lettre administrative', 'Rapport', 'Compte rendu'],
       phases: [
-        { nom: 'La situation de communication professionnelle', hint: 'Émetteur, destinataire, objet, enjeu.', duree: '15 min' },
-        { nom: 'La forme normée', hint: 'Mentions obligatoires, disposition, formules d’appel et de politesse.', duree: '20 min' },
-        { nom: 'La rédaction', hint: 'Respect de la forme /6 · Organisation des idées /6 · Maîtrise de la langue /6 · Présentation /2.', duree: '30 min' },
+        { nom: 'La situation de communication professionnelle', hint: 'Émetteur, destinataire, objet, enjeu.', duree: '10 min' },
+        { nom: 'La forme normée', hint: 'Mentions obligatoires, disposition, formules d’appel et de politesse.', duree: '15 min' },
+        { nom: 'La rédaction', hint: 'Respect de la forme /6 · Organisation des idées /6 · Maîtrise de la langue /6 · Présentation /2.', duree: '25 min' },
         { nom: 'Relecture normative', hint: 'Vérifier la forme avant le fond : c’est elle qui est notée en premier.', duree: '10 min' }
       ],
       source: 'Draft EST — BP Industriel', confiance: 'officiel'
@@ -1160,6 +1163,32 @@
     questionnement: QUESTIONNEMENT,
     oeuvres: OEUVRES,
     cleClasse: cleClasse,
+    /* PHASES D'UNE LEÇON ENREGISTRÉE. Le contenu des phases est rangé par
+       POSITION (phaseContent[0], [1]…). Le 16/10/2026, deux gabarits ont
+       changé de déroulé pour suivre la fiche « Vérification 1er cycle » :
+       - lecture suivie : Fiche d'identité, Lecture, Compréhension globale,
+         Bilan  →  Situation, Lecture, Grille, Confrontation, Bilan ;
+       - expression écrite : Découverte, Préparation, Production, Amélioration
+         →  Situation-problème, Analyse et production, Confrontation, Règle,
+         Application.
+       Sans correspondance, le « Bilan » d'une leçon déjà écrite se serait
+       affiché sous « Confrontation ». Une leçon marquée `phasesRev` est déjà
+       au nouveau déroulé ; on n'y touche plus. */
+    PHASES_REV: '2026-10-16',
+    phasesDuCours: function (cours) {
+      var pc = (cours && cours.phaseContent) || {};
+      if (!cours || cours.phasesRev === '2026-10-16') return pc;
+      var o = {}, k;
+      for (k in pc) if (Object.prototype.hasOwnProperty.call(pc, k)) o[k] = pc[k];
+      var joindre = function (a, b) { return [a, b].filter(function (x) { return x && String(x).trim(); }).join('\n\n'); };
+      if (cours.gabarit === 'suivie' && o[3] != null && o[4] == null) {
+        o[4] = o[3]; delete o[3];
+      } else if (cours.gabarit === 'ee' && (o[2] != null || o[3] != null) && o[4] == null) {
+        o[1] = joindre(o[1], o[2]); o[2] = o[3]; delete o[3];
+        if (o[2] == null) delete o[2];
+      }
+      return o;
+    },
     oeuvresDe: function (classe) { return OEUVRES[cleClasse(classe)] || []; },
     /* Longueur du texte support POUR CETTE CLASSE : la 2nde contracte un
        texte de 400 à 500 mots, la 1ère et la Terminale un texte plus long. */
