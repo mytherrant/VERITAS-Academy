@@ -36834,6 +36834,7 @@ window._codeAmiAdminCharger = function(){
   _codeAmiApi('admin', { admin:true }).then(function(d){
     if(!d || !d.ok){ hote.innerHTML = '<div class="ib ibr"><span>⚠️</span><span>' + _esc((d && d.error) || 'Registre illisible') + '</span></div>'; return; }
     var r = d.regle || {}, t = d.totaux || {};
+    window._CODE_AMI_REGLE = Object.assign({}, window._CODE_AMI_REGLE, r);
     var F = function(n){ return fmt(n || 0); };
     var dateCourte = function(ts){ return ts ? new Date(ts * 1000).toLocaleDateString('fr-FR') : '—'; };
     var h = '<div class="card"><div class="ct">Règle en vigueur</div>'
@@ -36841,6 +36842,12 @@ window._codeAmiAdminCharger = function(){
       + '<div class="fg"><span class="fl">Remise du filleul (%)</span><input class="fi" id="caRemise" type="number" min="0" max="50" value="' + (r.remisePct || 0) + '"></div>'
       + '<div class="fg"><span class="fl">Commission du parrain (%)</span><input class="fi" id="caComm" type="number" min="0" max="50" value="' + (r.commissionPct || 0) + '"></div>'
       + '<div class="fg"><span class="fl">Versement dès (FCFA)</span><input class="fi" id="caSeuil" type="number" min="500" step="500" value="' + (r.seuilVersement || 2000) + '"></div>'
+      + '</div>'
+      + '<div class="fg2">'
+      + '<div class="fg"><span class="fl">Commission enseignant-partenaire (%)</span><input class="fi" id="caCommPart" type="number" min="0" max="50" value="' + (r.commissionPartenairePct != null ? r.commissionPartenairePct : 20) + '"></div>'
+      + '<div class="fg"><span class="fl">Part des co-gérants (% de l’encaissé)</span><input class="fi" id="caCog" type="number" min="0" max="100" value="' + (r.cogerantsPct != null ? r.cogerantsPct : 30) + '"></div>'
+      + '<div class="fg"><span class="fl">Accès Atelier offert aux partenaires (jours)</span><input class="fi" id="caPartJours" type="number" min="7" max="366" value="' + (r.partenaireJours || 60) + '"></div>'
+      + '<div class="fg"><span class="fl">Filleuls payants pour reconduire</span><input class="fi" id="caPartSeuil" type="number" min="1" max="100" value="' + (r.partenaireSeuil || 5) + '"></div>'
       + '</div>'
       + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caActif"' + (r.actif ? ' checked' : '') + '> Programme actif (les codes s’appliquent)</label>'
       + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caAuto"' + (r.versementAuto ? ' checked' : '') + '> Versement automatique dès le seuil (CamerPay)</label>'
@@ -36854,6 +36861,7 @@ window._codeAmiAdminCharger = function(){
       + _statCard('🚚', F(t.enCours), 'En cours de versement', '#5B4FA8')
       + _statCard('✅', F(t.verse), 'Versées', '#142554')
       + '</div>';
+    h += _partAdminHtml(d);
     var ps = d.parrains || [];
     h += '<div class="card"><div class="ct" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span>Parrains</span>'
       + '<button class="btn bo sm" onclick="_codeAmiAdminVerser(\'\')">Verser tous les soldes dus</button></div>'
@@ -36898,7 +36906,9 @@ window._codeAmiAdminReglages = function(){
   var c = function(id){ var e = document.getElementById(id); return !!(e && e.checked); };
   _codeAmiApi('reglages', { admin:true, body:{
     remisePct: parseInt(v('caRemise'), 10), commissionPct: parseInt(v('caComm'), 10),
-    seuilVersement: parseInt(v('caSeuil'), 10), actif: c('caActif'), versementAuto: c('caAuto')
+    seuilVersement: parseInt(v('caSeuil'), 10), actif: c('caActif'), versementAuto: c('caAuto'),
+    commissionPartenairePct: parseInt(v('caCommPart'), 10), cogerantsPct: parseInt(v('caCog'), 10),
+    partenaireJours: parseInt(v('caPartJours'), 10), partenaireSeuil: parseInt(v('caPartSeuil'), 10)
   }}).then(function(j){
     if(j && j.ok){
       window._CODE_AMI_REGLE = Object.assign({}, window._CODE_AMI_REGLE, j.regle || {});
@@ -36927,6 +36937,209 @@ window._codeAmiAdminRegler = function(ref, etat){
     toast(j && j.ok ? '✓ Versement réglé' : ((j && j.error) || 'Refusé'), j && j.ok ? 'ok' : 'warn');
     _codeAmiAdminCharger();
   });
+};
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ENSEIGNANTS-PARTENAIRES (grille du 16/10/2026)
+   ──────────────────────────────────────────────────────────────────────────
+   Un professeur reçoit, en un geste : un compte de l'Atelier, un CODE DE
+   REPRISE (rendu une seule fois par le serveur — on le met aussitôt dans son
+   message), un CODE PUBLIC à partager (−10 % pour l'apprenant, 20 % pour lui)
+   et l'Atelier pour 60 jours, reconduits à chaque groupe de 5 nouveaux
+   filleuls payants, ou ici à la main.
+   Aucune donnée personnelle ici : les noms et numéros vivent au registre du
+   serveur, pas dans ce fichier public.
+   ══════════════════════════════════════════════════════════════════════════ */
+window._partApi = function(body){
+  var url = _VRT_API + '/plateforme.php?action=partenaires';
+  var h = { 'Accept':'application/json', 'Authorization':'Bearer ' + ((DB.cloudConfig && DB.cloudConfig.secret) || '') };
+  var init = { method: body ? 'POST' : 'GET', headers: h };
+  if(body){ h['Content-Type'] = 'application/json'; init.body = JSON.stringify(body); }
+  return fetch(url, init).then(function(r){
+    return r.json().catch(function(){ return { ok:false, error:'Réponse illisible du serveur (' + r.status + ')' }; });
+  }).catch(function(){ return { ok:false, error:'Serveur injoignable' }; });
+};
+
+window._partAdminHtml = function(d){
+  var F = function(n){ return fmt(n || 0); };
+  var rg = d.regle || {}, rp = (d.repartition || {});
+  var ligneRep = function(t, titre){
+    t = t || {};
+    return '<tr><td><b>' + titre + '</b><div class="xs2 mut">' + (t.n || 0) + ' abonnement(s), dont ' + (t.avecCode || 0) + ' avec code</div></td>'
+      + '<td>' + F(t.encaisse) + '</td><td>' + F(t.partenaires) + '</td><td>' + F(t.cogerants) + '</td><td>' + F(t.pool) + '</td></tr>';
+  };
+  var cp = rg.commissionPartenairePct != null ? rg.commissionPartenairePct : 20, cg = rg.cogerantsPct != null ? rg.cogerantsPct : 30;
+  var h = '<div class="card mt12"><div class="ct">Répartition des abonnements</div>'
+    + '<div class="s mut mb8">Avec code : enseignant-partenaire ' + cp + ' % · co-gérants ' + cg + ' % · pool des enseignants ' + Math.max(0, 100 - cp - cg) + ' %. '
+    + 'Sans code : co-gérants ' + cg + ' % · pool ' + (100 - cg) + ' %. Calculée par le serveur à chaque abonnement payé.</div>'
+    + '<div class="tw"><table><thead><tr><th>Période</th><th>Encaissé</th><th>Partenaires</th><th>Co-gérants</th><th>Pool enseignants</th></tr></thead><tbody>'
+    + ligneRep(rp.mois, 'Ce mois-ci') + ligneRep(rp.tout, 'Depuis le début') + '</tbody></table></div></div>';
+
+  var ps = d.partenaires || [];
+  var dateC = function(ts){ return ts ? new Date(ts * 1000).toLocaleDateString('fr-FR') : '—'; };
+  h += '<div class="card mt12"><div class="ct">Enseignants-partenaires</div>'
+    + '<div class="s mut mb8">Accès Atelier offert ' + (rg.partenaireJours || 60) + ' jours, reconduit à chaque groupe de ' + (rg.partenaireSeuil || 5)
+    + ' nouveaux filleuls payants. Commission ' + cp + ' %.</div>'
+    + (ps.length ? '<div class="tw"><table><thead><tr><th>Professeur</th><th>Code</th><th>Accès jusqu’au</th><th>Filleuls</th><th>Gagné</th><th>À verser</th><th></th></tr></thead><tbody>'
+      + ps.map(function(p){
+          var etat = !p.actif ? '<span style="color:#AE5353">suspendu</span>'
+            : (p.ouvert ? dateC(p.fin) + ' <span class="xs2 mut">(' + p.resteJours + ' j)</span>' : '<span style="color:#AE5353">expiré le ' + dateC(p.fin) + '</span>');
+          var a = _esc(p.accId);
+          return '<tr><td>' + _esc(p.nom) + '<div class="xs2 mut">' + _esc(p.tel) + '</div></td>'
+            + '<td style="font-family:monospace">' + _esc(p.code) + '</td><td>' + etat + '</td>'
+            + '<td>' + p.filleuls + '<div class="xs2 mut">' + p.cycle + '/' + p.seuil + ' vers la reconduction</div></td>'
+            + '<td>' + F(p.gagne) + '</td><td><b>' + F(p.solde) + '</b></td>'
+            + '<td style="white-space:nowrap">'
+            + '<button class="btn xs bi" onclick="_partAgir(\'' + a + '\',\'reconduire\')">+' + Math.round((rg.partenaireJours || 60) / 30) + ' mois</button> '
+            + (p.actif ? '<button class="btn xs bo" onclick="_partAgir(\'' + a + '\',\'suspendre\')">Suspendre</button> '
+                       : '<button class="btn xs bo" onclick="_partAgir(\'' + a + '\',\'reactiver\')">Réactiver</button> ')
+            + '<button class="btn xs bo" onclick="_partNouveauCode(\'' + a + '\')" title="Pose un nouveau code de reprise et prépare son message">Code + message</button>'
+            + '</td></tr>';
+        }).join('') + '</tbody></table></div>'
+      : '<div class="s mut">Aucun enseignant-partenaire pour l’instant.</div>')
+    + '<div class="mt12"><div class="semi mb6">Ajouter des professeurs</div>'
+    + '<div class="xs2 mut mb6">Une ligne par professeur : <code>Nom ; téléphone ; CODE</code> (le code est facultatif — PROF-NOM par défaut). '
+    + 'Un numéro déjà enregistré est mis à jour, sans doublon (mais son code de reprise est remplacé).</div>'
+    + '<textarea class="fi" id="partLot" rows="6" placeholder="M. Exemple ; 6XXXXXXXX ; PROF-EXEMPLE"></textarea>'
+    + '<div style="margin-top:8px"><button class="btn bi" onclick="_partCreerLot()">Créer et préparer les messages</button></div>'
+    + '<div id="partMessages" class="mt12"></div></div>'
+    + '</div>';
+  return h;
+};
+
+/* Le code par défaut : PROF- + le dernier mot du nom, sans accents ni titre. */
+window._partCodeDefaut = function(nom){
+  var mots = String(nom || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase()
+    .replace(/[^A-Z0-9 ]/g, ' ').split(/\s+/).filter(function(m){ return m && ['M','MME','MLLE','MR','IPR','PR','DR','PROF'].indexOf(m) < 0; });
+  return ('PROF-' + (mots[0] || 'X')).slice(0, 20);
+};
+
+window._partCreerLot = function(){
+  if(!iA()) return;
+  var el = _ge('partLot'); if(!el) return;
+  var lignes = el.value.split(/\n/).map(function(l){ return l.trim(); }).filter(Boolean).map(function(l){
+    var c = l.split(/[;|\t]/).map(function(x){ return x.trim(); });
+    return { nom: c[0] || '', tel: c[1] || '', code: (c[2] || _partCodeDefaut(c[0])).toUpperCase() };
+  });
+  if(!lignes.length){ toast('Aucune ligne à créer', 'warn'); return; }
+  if(!(DB.cloudConfig && DB.cloudConfig.secret)){ toast('Clé serveur absente (Paramètres → Cloud)', 'err'); return; }
+  var hote = _ge('partMessages');
+  if(hote) hote.innerHTML = '<div class="s mut">Création en cours…</div>';
+  var faits = [], erreurs = [];
+  /* Une requête après l'autre : l'hébergeur bannit une adresse qui en
+     enchaîne trop d'un coup, et la base s'écrit sous verrou. */
+  var suivant = function(i){
+    if(i >= lignes.length){
+      _partAfficherMessages(faits, erreurs);
+      if(faits.length) el.value = erreurs.map(function(e){ return e.l.nom + ' ; ' + e.l.tel + ' ; ' + e.l.code; }).join('\n');
+      return;
+    }
+    var l = lignes[i];
+    _partApi({ op:'creer', nom:l.nom, tel:l.tel, code:l.code }).then(function(j){
+      if(j && j.ok) faits.push({ nom:l.nom, tel:l.tel, code:j.code, reprise:j.reprise, fin:j.fin, cree:j.cree });
+      else erreurs.push({ l:l, err:(j && j.error) || 'refusé' });
+      setTimeout(function(){ suivant(i + 1); }, 1200);
+    });
+  };
+  suivant(0);
+};
+
+window._partNouveauCode = function(accId){
+  if(!confirm('Poser un NOUVEAU code de reprise pour ce professeur ?\n\nL’ancien cessera aussitôt de valoir (ses appareils déjà connectés le restent). Son message sera préparé avec le nouveau code.')) return;
+  _partApi({ op:'code_reprise', accId:accId }).then(function(j){
+    if(!j || !j.ok){ toast((j && j.error) || 'Refusé', 'err'); return; }
+    _partApi(null).then(function(l){
+      var p = ((l && l.partenaires) || []).find(function(x){ return x.accId === accId; }) || {};
+      _partAfficherMessages([{ nom:p.nom, tel:p.tel, code:p.code, reprise:j.reprise,
+        fin: p.fin ? new Date(p.fin * 1000).toISOString().slice(0, 10) : '' }], []);
+    });
+  });
+};
+
+window._partAgir = function(accId, op){
+  var rg = window._CODE_AMI_REGLE || {};
+  var jours = rg.partenaireJours || 60;
+  var q = { reconduire:'Prolonger l’accès de ' + jours + ' jours ?', suspendre:'Suspendre ce partenaire ? (accès fermé, commission ramenée au taux ordinaire)', reactiver:'Réactiver ce partenaire ?' }[op];
+  if(q && !confirm(q)) return;
+  _partApi({ op:op, accId:accId, jours:jours }).then(function(j){
+    toast(j && j.ok ? '✓ Fait' + (j.fin ? ' — accès jusqu’au ' + new Date(j.fin).toLocaleDateString('fr-FR') : '') : ((j && j.error) || 'Refusé'), j && j.ok ? 'ok' : 'warn');
+    _codeAmiAdminCharger();
+  });
+};
+
+/* Le message individuel. Les chiffres viennent de la règle du serveur. */
+window._partMessage = function(f){
+  var rg = window._CODE_AMI_REGLE || {};
+  var remise = rg.remisePct != null ? rg.remisePct : 10, comm = rg.commissionPartenairePct != null ? rg.commissionPartenairePct : 20;
+  var jours = rg.partenaireJours || 60, seuil = rg.partenaireSeuil || 5, mois = Math.round(jours / 30);
+  var exPaye = Math.round(12000 * (100 - remise) / 100), exGain = Math.round(exPaye * comm / 100);
+  var fin = f.fin ? new Date(f.fin).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' }) : '';
+  var site = 'https://veritas-school.com';
+  return 'Bonjour ' + f.nom + ',\n\n'
+    + 'Le Centre VÉRITAS est heureux de vous compter parmi ses enseignants-partenaires. Voici comment cela fonctionne.\n\n'
+    + '1) VOTRE ACCÈS GRATUIT À L’ATELIER DE FRANÇAIS (' + mois + ' mois)\n'
+    + 'Ouvrez ce lien sur votre téléphone ou votre ordinateur — votre compte s’ouvre directement :\n'
+    + site + '/plateforme/#reprise=' + f.reprise + '\n'
+    + 'Votre code de reprise personnel : ' + f.reprise + '\n'
+    + '(Gardez-le pour vous : il rouvre votre compte sur un autre appareil, rubrique « Déjà abonné ? ».)\n'
+    + (fin ? 'Votre accès est ouvert jusqu’au ' + fin + '.\n' : '') + '\n'
+    + '2) VOTRE CODE PARTENAIRE, À PARTAGER : ' + f.code + '\n'
+    + 'Toute personne qui s’abonne ou achète sur ' + site + ' avec ce code obtient ' + remise + ' % de réduction. '
+    + 'Elle vous reste rattachée : ses paiements suivants comptent aussi pour vous.\n'
+    + 'Lien prêt à partager : ' + site + '/?ref=' + f.code + '\n\n'
+    + '3) VOTRE RÉMUNÉRATION : ' + comm + ' % de chaque paiement fait avec votre code\n'
+    + 'Exemple : un abonnement de 12 000 F → l’apprenant paie ' + fmtN(exPaye) + ' F → vous recevez ' + fmtN(exGain) + ' F.\n'
+    + 'Vos gains sont versés sur votre Mobile Money (' + f.tel + ') dès que votre solde atteint ' + fmtN(rg.seuilVersement || 2000) + ' F.\n\n'
+    + '4) RECONDUCTION DE VOTRE ACCÈS\n'
+    + 'Chaque fois que ' + seuil + ' nouvelles personnes paient avec votre code, votre accès à l’Atelier est prolongé de ' + mois + ' mois, automatiquement. '
+    + 'À défaut, je peux aussi le reconduire moi-même.\n\n'
+    + 'Je reste à votre disposition pour toute question.\n'
+    + 'Jacques Miterand TAKOU — Centre VÉRITAS';
+};
+
+window._partAfficherMessages = function(faits, erreurs){
+  var hote = _ge('partMessages'); if(!hote) return;
+  window._partMsgs = faits.map(_partMessage);
+  var h = '';
+  if(erreurs.length){
+    h += '<div class="ib ibr mb8"><span>⚠️</span><span>' + erreurs.map(function(e){ return '<b>' + _esc(e.l.nom) + '</b> : ' + _esc(e.err); }).join('<br>')
+      + '<br>Les lignes refusées sont restées dans la zone de saisie.</span></div>';
+  }
+  if(faits.length){
+    h += '<div class="ib ibi mb8"><span>🔑</span><span><b>Les codes de reprise ne sont affichés qu’ici, maintenant.</b> Envoyez chaque message avant de quitter la page '
+      + '(sinon : « Code + message » en posera un nouveau).</span></div>';
+    h += faits.map(function(f, i){
+      var wa = 'https://wa.me/237' + String(f.tel).replace(/\D/g, '').slice(-9) + '?text=' + encodeURIComponent(window._partMsgs[i]);
+      return '<div class="card mt8"><div class="semi">' + _esc(f.nom) + ' — <span style="font-family:monospace">' + _esc(f.code) + '</span>'
+        + (f.cree === false ? ' <span class="xs2 mut">(compte existant rattaché)</span>' : '') + '</div>'
+        + '<textarea class="fi mt6" rows="8" readonly>' + _esc(window._partMsgs[i]) + '</textarea>'
+        + '<div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">'
+        + '<a class="btn bi sm" href="' + _esc(wa) + '" target="_blank" rel="noopener">Envoyer par WhatsApp</a>'
+        + '<button class="btn bo sm" onclick="_partCopier(' + i + ')">Copier</button></div></div>';
+    }).join('');
+  }
+  hote.innerHTML = h || '<div class="s mut">Rien n’a été créé.</div>';
+  if(faits.length) setTimeout(_codeAmiAdminChargerListe, 0);
+};
+
+window._partCopier = function(i){
+  var t = (window._partMsgs || [])[i] || '';
+  try{ navigator.clipboard.writeText(t).then(function(){ toast('✓ Message copié'); }); }catch(e){ toast('Copie impossible : sélectionnez le texte', 'warn'); }
+};
+
+/* Rafraîchit la liste SANS effacer les messages préparés (ils portent les seuls exemplaires des codes de reprise). */
+window._codeAmiAdminChargerListe = function(){
+  var msgs = _ge('partMessages'), garde = msgs ? msgs.innerHTML : '';
+  var gardeMsgs = window._partMsgs;
+  var hote = document.getElementById('codeAmiAdmin');
+  if(!hote) return;
+  var obs = new MutationObserver(function(){
+    var m = _ge('partMessages');
+    if(m && garde && !m.innerHTML){ m.innerHTML = garde; window._partMsgs = gardeMsgs; obs.disconnect(); }
+  });
+  obs.observe(hote, { childList:true, subtree:true });
+  setTimeout(function(){ obs.disconnect(); }, 15000);
+  _codeAmiAdminCharger();
 };
 
 // ════════════════════════════════════════════════════════════════════
