@@ -187,9 +187,12 @@ const cands = [
   { n: 91, level: 'Tle', type: 'NARRATIF', words: 600, text: TEXTE, title: 'Récit' },
   { n: 92, level: 'Tle', type: 'EXPLICATIF', words: 600, text: TEXTE, title: 'Exposé' },
   { n: 93, level: 'Tle', type: 'ARGUMENTATIF', words: 600, text: TEXTE, title: 'Essai' }];
-const cl = GEN.classerTextes(cands, { classe: 'Tle A', bornes: plan.texteSupport, genre: 'resume' });
+/* `alea` FIXÉ : le classement ajoute exprès 0 à 6 points au hasard pour varier
+   les textes d'une épreuve à l'autre. Laissé libre, ce contrôle passait sur le
+   poste (écart 1,2) et rougissait en CI (5,1) — un banc intermittent. */
+const cl = GEN.classerTextes(cands, { classe: 'Tle A', bornes: plan.texteSupport, genre: 'resume', alea: () => 0 });
 const sc = n => (cl.find(x => x.f.n === n) || {}).score;
-dire(Math.abs(sc(92) - sc(93)) < 5 && sc(92) > sc(91) + 50, 'au choix du texte, l’explicatif vaut l’argumentatif, devant le narratif', JSON.stringify(cl.map(x => [x.f.n, x.score])));
+dire(sc(92) === sc(93) && sc(92) > sc(91) + 50, 'au choix du texte, l’explicatif vaut l’argumentatif, devant le narratif', JSON.stringify(cl.map(x => [x.f.n, x.score])));
 dire(/argumentatif ou explicatif/.test(MINESEC.epreuveParCode('A_LITT').texteSupport.nature) && /argumentatif ou explicatif/.test(MINESEC.texteSupportPour(MINESEC.epreuveParCode('CDETI_LITT'), '2nde C').nature),
   'le référentiel (1ère-Tle et 2nde) dit « argumentatif ou explicatif »');
 
