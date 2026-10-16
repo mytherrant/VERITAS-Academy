@@ -677,7 +677,9 @@ if (!defined('VRT_AUTH_LIB')) {
     /* ══════════════════════════════════════════════════════════════════════
        FORMULES ÉLÈVE & FAMILLE — grille arrêtée par Jacques le 13/09/2026.
 
-       Au mois : Starter 1 000 · Pro 2 000 · Élite 3 000 · Famille 10 000 F.
+       Au mois : Starter 1 200 · Pro 2 400 · Élite 3 600 · Famille 12 000 F (grille du
+       16/10/2026 : Starter à 12 000 F l'année, prix de référence de la note de
+       répartition 20 % partenaire / 30 % co-gérants / pool).
        À l'année : douze mois pour le prix de dix (deux mois offerts). Le prix
        « ancien », barré sur les cartes, est celui de douze mois payés un à un.
 
@@ -703,13 +705,13 @@ if (!defined('VRT_AUTH_LIB')) {
         $eleve   = ['plan1', 'plan2', 'plan5', 'plan6'];
         $complet = ['plan1', 'plan2', 'plan4', 'plan5', 'plan6'];
         $f = [
-            'starter' => ['nom' => 'STARTER', 'public' => 'eleve', 'mois' => 1000, 'cible' => 'Élève · 6ᵉ → Tˡᵉ', 'tags' => $eleve,
+            'starter' => ['nom' => 'STARTER', 'public' => 'eleve', 'mois' => 1200, 'cible' => 'Élève · 6ᵉ → Tˡᵉ', 'tags' => $eleve,
                           'avantages' => ['Tous les cours de sa classe, par séquence', 'Œuvres au programme', 'Épreuves et annales corrigées', '5 questions par jour au Professeur Ambassa', 'Suivi des résultats']],
-            'pro'     => ['nom' => 'PRO', 'public' => 'eleve', 'mois' => 2000, 'cible' => 'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', 'tags' => $eleve, 'populaire' => true,
+            'pro'     => ['nom' => 'PRO', 'public' => 'eleve', 'mois' => 2400, 'cible' => 'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', 'tags' => $eleve, 'populaire' => true,
                           'avantages' => ['Tout Starter', '30 questions par jour au tuteur', 'Labos virtuels PCT & SVT', 'Bulletins blancs notés', 'Fiches de révision imprimables']],
-            'elite'   => ['nom' => 'ÉLITE', 'public' => 'eleve', 'mois' => 3000, 'cible' => 'Accompagnement complet', 'tags' => $complet,
+            'elite'   => ['nom' => 'ÉLITE', 'public' => 'eleve', 'mois' => 3600, 'cible' => 'Accompagnement complet', 'tags' => $complet,
                           'avantages' => ['Tout Pro', 'Tuteur IA sans limite', 'Classes virtuelles en direct', 'Concours blancs corrigés', 'Entretien d’orientation']],
-            'famille' => ['nom' => 'FAMILLE', 'public' => 'parent', 'mois' => 10000, 'cible' => 'Jusqu’à 4 enfants', 'tags' => $complet, 'enfantsMax' => 4,
+            'famille' => ['nom' => 'FAMILLE', 'public' => 'parent', 'mois' => 12000, 'cible' => 'Jusqu’à 4 enfants', 'tags' => $complet, 'enfantsMax' => 4,
                           'avantages' => ['Jusqu’à 4 enfants sur un seul paiement', 'Chaque enfant au niveau Élite', 'Suivi parent : notes, absences, progression', 'Tuteur IA sans limite pour chacun']],
         ];
         $out = [];
@@ -2101,15 +2103,15 @@ if (!defined('VRT_AUTH_LIB')) {
                 vrt_pay_log("[COMMISSION_REFUSEE] ref=$ref partenaire=$pid motif=non actif"); continue;
             }
 
-            /* Le taux se calcule sur le VOLUME réellement apporté — abonnés
-               actifs et payés — et non sur un grade posé à la main. Le grade
-               nommé reste un plancher : personne ne voit sa commission baisser
-               parce qu'on a changé de méthode. */
-            $niveau = (string) ($partenaire['level'] ?? 'bronze');
-            $tauxNiveau = (float) ($paliers[$niveau]['commission'] ?? ($paliers['bronze']['commission'] ?? 0.10));
-            $tauxVolume = vrt_taux_par_volume($db, $pid);
-            $taux = max($tauxNiveau, $tauxVolume);
-            if ($taux <= 0 || $taux > 0.5) $taux = 0.10;              // palier aberrant en base
+            /* UN SEUL TAUX (grille du 16/10/2026) : celui de l'enseignant-
+               partenaire, 20 % par défaut, réglé dans le registre du Code ami.
+               Les paliers Bronze · Argent · Or · Diamant ne changent plus le
+               taux et ne versent plus de prime : ils restent une distinction
+               (le nombre de ventes et un parchemin). Taux progressif + prime de
+               palier + commission de code, c'était payer deux fois la même
+               vente. */
+            $taux = function_exists('vrt_parr_cfg') ? ((int) vrt_parr_cfg($db)['commissionPartenairePct']) / 100 : 0.20;
+            if ($taux <= 0 || $taux > 0.5) $taux = 0.20;
 
             $assiette = (int) ($c['saleAmount'] ?? 0);
             if ($assiette <= 0 || $assiette > $paye) $assiette = $paye;   // jamais plus que l'encaissé
