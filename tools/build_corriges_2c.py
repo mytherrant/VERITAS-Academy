@@ -51,7 +51,8 @@ NIVEAUX_2C = [
     dict(slug="1ere-cd", label="1ʳᵉ C-D", long="Classe de 1ʳᵉ C-D", cycle="2nd", examen="Probatoire",
          manuel="Mon Cahier de français — 1ʳᵉ C-D", seo="francais-premiere"),
     dict(slug="3e-cahier", label="3ᵉ", long="Classe de 3ᵉ", cycle="1er", examen="BEPC",
-         manuel="Mon Cahier de français 3ᵉ — cahier d'activités", seo="francais-3eme"),
+         manuel="Mon Cahier de français 3ᵉ — cahier d'activités", seo="francais-3eme",
+         edition_cahier="édition 2026-2027"),
 ]
 DOTS = re.compile(r"…{2,}|\.{5,}| … ")
 

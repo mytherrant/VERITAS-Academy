@@ -47,7 +47,8 @@ NIVEAUX = [
     dict(slug="4e",   label="4ᵉ",  long="Classe de 4ᵉ",        cycle="1er", examen=None,
          manuel="Mon Cahier de français 4ᵉ", livret="Livret d'activités 4ᵉ", kw="4eme quatrieme"),
     dict(slug="3e",   label="3ᵉ",  long="Classe de 3ᵉ",        cycle="1er", examen="BEPC",
-         manuel="Mon Cahier de français 3ᵉ", livret="Livret d'activités 3ᵉ", kw="3eme troisieme BEPC"),
+         manuel="Mon Cahier de français 3ᵉ", livret="Livret d'activités 3ᵉ", kw="3eme troisieme BEPC",
+         edition_cahier="ancienne édition"),
     dict(slug="2nde", label="2ⁿᵈᵉ", long="Classe de 2ⁿᵈᵉ A",   cycle="2nd", examen=None,
          manuel="Mon Cahier de français 2ⁿᵈᵉ A",
          livret="Livret d'activités 2ⁿᵈᵉ A", kw="seconde 2nde A"),
@@ -778,8 +779,14 @@ def render_sequence_page(niv, page, pages, axe="livret"):
     quoi = "cahier de français" if cah else "livret d'activités"
     ton = "ton cahier" if cah else "ton livret"
     exam = (" · préparation au %s" % niv["examen"]) if niv["examen"] else ""
+    # Deux éditions d'un même cahier (3ᵉ : ancienne et 2026-2027) donnaient des
+    # titres IDENTIQUES à des pages différentes — Google les met en concurrence.
+    # `edition_cahier` les distingue dans le titre et le bandeau (16/10/2026).
+    lib = "Cahier" if cah else "Livret"
+    if cah and niv.get("edition_cahier"):
+        lib = "Cahier (%s)" % niv["edition_cahier"]
     title = "Corrigés %s %s — %s | VÉRITAS" % (
-        niv["label"], "Cahier" if cah else "Livret", court(page.titre, 34))
+        niv["label"], lib, court(page.titre, 34))
     desc = ("%s exercices corrigés du %s %s — %s. Programme MINESEC%s. "
             "Les énoncés restent dans %s."
             % (num(n_ex), "cahier" if cah else "livret", niv["label"], court(page.titre, 52).rstrip("…"),
@@ -794,7 +801,7 @@ def render_sequence_page(niv, page, pages, axe="livret"):
     body = ['<header class="top"><span class="badge">Corrigés · %s · %s</span>'
             "<h1>%s — %s</h1><p>%s exercices corrigés du %s « %s ». "
             "Les énoncés restent dans %s ; ici, les corrections — et elles sont gratuites.</p></header>"
-            % (esc(niv["long"]), "Cahier" if cah else "Livret", esc(niv["long"]), esc(page.titre),
+            % (esc(niv["long"]), esc(lib), esc(niv["long"]), esc(page.titre),
                num(n_ex), quoi, esc(ouvrage), ton),
             '<div class="wrap">',
             '<div class="intro">' + ico("i-notebook", "i lg") + ' <strong>Comment t\'en servir ?</strong> Ouvre %s '
