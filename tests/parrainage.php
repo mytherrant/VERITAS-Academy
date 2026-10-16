@@ -562,6 +562,26 @@ ok('un code déjà pris par quelqu’un d’autre est refusé', !vrt_parr_code_l
 $tot = vrt_parr_repartition_totaux(reg());
 ok('totaux de répartition : 7 abonnements dont 6 avec code', $tot['tout']['n'] === 7 && $tot['tout']['avecCode'] === 6, json_encode($tot));
 
+// ═════════════════════════════════════════════════════════════════════════
+titre('11. Versement fait à la main (aucun fournisseur de versement depuis CamerPay)');
+$soldeAv = (int) (reg()['comptes']['acc:va_prof']['solde'] ?? 0);
+$verseAv = (int) (reg()['comptes']['acc:va_prof']['verse'] ?? 0);
+$r = vrt_parr_versement_manuel('acc:va_prof', $soldeAv + 1, '699000001', 'IPR Test');
+ok('plus que le solde : refusé', empty($r['ok']), json_encode($r));
+$r = vrt_parr_versement_manuel('acc:va_prof', 0, '699000001', 'IPR Test');
+ok('zéro : refusé', empty($r['ok']));
+$r = vrt_parr_versement_manuel('acc:va_prof', 1000, '699000001', 'IPR Test', 'TX123');
+$cP = reg()['comptes']['acc:va_prof'];
+ok('1 000 F versés à la main : le solde baisse, le versé monte',
+   !empty($r['ok']) && (int) $cP['solde'] === $soldeAv - 1000 && (int) $cP['verse'] === $verseAv + 1000, json_encode([$r, $cP]));
+$vM = reg()['versements']['v:' . ($r['ref'] ?? '')] ?? [];
+ok('le versement est inscrit à l’historique, état « versé », référence MAN-…',
+   ($vM['etat'] ?? '') === 'verse' && strpos((string) ($vM['ref'] ?? ''), 'MAN-') === 0 && strpos((string) ($vM['raison'] ?? ''), 'TX123') !== false, json_encode($vM));
+vrt_parr_tx(function (array &$rg) { $rg['comptes']['acc:va_prof']['enCours'] = 500; });
+$r = vrt_parr_versement_manuel('acc:va_prof', 100, '699000001', 'IPR Test');
+ok('un versement automatique en cours bloque le versement manuel (pas de double paiement)', empty($r['ok']), json_encode($r));
+vrt_parr_tx(function (array &$rg) { $rg['comptes']['acc:va_prof']['enCours'] = 0; });
+
 echo "\n────────────────────────────────────────────────────────────────────\n";
 if ($T['ko'] === 0) {
     echo "\033[32m\033[1m  ✓ {$T['ok']}/{$T['ok']} contrôles passés — le Code ami paie juste.\033[0m\n\n";

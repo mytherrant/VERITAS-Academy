@@ -213,6 +213,21 @@ if ($action === 'crediter' && $method === 'POST') {
               'aVerser' => !empty($r['aVerser']), 'message' => !empty($r['deja']) ? 'Déjà crédité pour cette référence.' : '']);
 }
 
+// Versement fait à la main (Mobile Money envoyé depuis le téléphone du centre).
+if ($action === 'versement_manuel' && $method === 'POST') {
+    parr_exiger_admin();
+    $in = parr_entree();
+    $benef = substr(trim((string) ($in['benef'] ?? '')), 0, 80);
+    $montant = (int) ($in['montant'] ?? 0);
+    if (!preg_match('/^(acc|prt|ens):[A-Za-z0-9_.\-]{1,64}$/', $benef)) parr_out(['ok' => false, 'error' => 'benef invalide'], 400);
+    $db = vrt_load_db() ?: [];
+    $pers = vrt_parr_personne($db, $benef);
+    $r = vrt_parr_versement_manuel($benef, $montant, $pers ? vrt_parr_tel9((string) $pers['tel']) : '',
+        $pers ? trim($pers['pre'] . ' ' . $pers['nom']) : '', substr(trim((string) ($in['note'] ?? '')), 0, 120));
+    vrt_pay_log('[CODE_AMI_VERSEMENT_MANUEL] benef=' . $benef . ' montant=' . $montant . ' ok=' . (!empty($r['ok']) ? 1 : 0));
+    parr_out($r);
+}
+
 if ($action === 'versement_regler' && $method === 'POST') {
     parr_exiger_admin();
     $in = parr_entree();
