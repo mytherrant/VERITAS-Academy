@@ -478,7 +478,9 @@ const attendre = ms => new Promise(r => setTimeout(r, ms));
   const c = atelier(() => ({ corps: { ok: true } }));
   await new Promise(r => c._ensureDraft(() => r()));
   c._composerAvecAmbassa('tout');
-  dire(/Renseignements/.test(c.state.genErr || '') && !c.__journal.some(x => /ia_proxy/.test(x.url)),
+  // Le message dit QUOI choisir (la classe) ; depuis le 16/10/2026 il renvoie
+  // au panneau lui-même, qui porte la classe et la nature, plus aux Renseignements.
+  dire(/Choisissez d.abord la classe/.test(c.state.genErr || '') && !c.__journal.some(x => /ia_proxy/.test(x.url)),
     'sans classe ni nature d’épreuve : aucun appel, un message qui dit quoi renseigner');
 
   console.log(`\n  ${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);

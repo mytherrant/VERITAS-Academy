@@ -1854,10 +1854,24 @@
           <button onClick="{{ genToggle }}" style="{{ exToggleStyle }}">{{ genToggleLabel }}</button>
         </div>
         <sc-if value="{{ genOuvert }}" hint-placeholder-val="{{ true }}">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px">
-            <span style="{{ genCibleStyle }}">{{ genCible }}</span>
-            <input value="{{ genTheme }}" onChange="{{ setGenTheme }}" disabled="{{ cannotEdit }}" placeholder="Thème ou domaine de vie (facultatif) — ex. la santé, l’environnement, le travail" style="flex:1 1 240px;min-width:0;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 11px;font-size:12.5px;color:var(--c33404f,#33404f);background:var(--cffffff,#fff)">
+          <!-- CLASSE ET NATURE SE CHOISISSENT ICI (16/10/2026). Le panneau
+               renvoyait aux « Renseignements », plus bas dans la page : un
+               enseignant tapait « 6e étude de texte » dans le champ Thème,
+               qu'il prenait pour le bon, et Ambassa refusait de composer.
+               Mêmes listes et mêmes gestes que les Renseignements : les deux
+               endroits écrivent la même donnée. -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px">
+            <label style="{{ genLblStyle }}">1. Classe
+              <select value="{{ ep.classe }}" onChange="{{ setClasse }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}"><option value="">— Choisir la classe —</option><sc-for list="{{ classeOptions }}" as="c" hint-placeholder-count="8"><option value="{{ c }}">{{ c }}</option></sc-for></select>
+            </label>
+            <label style="{{ genLblStyle }}">2. Nature de l’épreuve
+              <select value="{{ ep.epreuveCode }}" onChange="{{ setEpreuveType }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}"><option value="">Automatique selon la classe</option><sc-for list="{{ natureOptions }}" as="n" hint-placeholder-count="10"><option value="{{ n.code }}">{{ n.label }}</option></sc-for></select>
+            </label>
+            <label style="{{ genLblStyle }}">3. Thème (facultatif)
+              <input value="{{ genTheme }}" onChange="{{ setGenTheme }}" disabled="{{ cannotEdit }}" placeholder="ex. la santé, l’environnement" style="{{ genSelStyle }}">
+            </label>
           </div>
+          <div style="margin-top:10px"><span style="{{ genCibleStyle }}">{{ genCible }}</span></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
             <button onClick="{{ genTout }}" title="Ambassa choisit le texte (sauf s’il y en a déjà), rédige questions, barème, corrigé et sujets. Consomme un appel IA." style="{{ genToutStyle }}">{{ genToutIcone }}<span>{{ genToutLabel }}</span></button>
             <button onClick="{{ genCompleter }}" title="Vos questions restent intactes : Ambassa ajoute seulement le barème, le corrigé et les sujets manquants." style="{{ genBtnSec }}">Compléter sans toucher à nos questions</button>
@@ -5013,7 +5027,7 @@ class Component extends DCLogic {
     if(a.status==='valide'&&!perm.validate){this.setState({genOuvert:true,genErr:'Cette épreuve est validée : repassez-la en brouillon pour la faire recomposer.'});return;}
     const struct=this._structureDe(a);
     if(!a.classe||!struct){
-      this.setState({genOuvert:true,genErr:'Choisissez d’abord la classe et la nature de l’épreuve dans les Renseignements : '
+      this.setState({genOuvert:true,genErr:'Choisissez d’abord la classe (et, si vous le souhaitez, la nature de l’épreuve) juste au-dessus : '
         +'c’est elle qui fixe la structure et le barème qu’Ambassa doit suivre.'});
       return;
     }
@@ -9460,7 +9474,21 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       epFilterAll:()=>this.setState({epFilter:'all'}),epFilterMine:()=>this.setState({epFilter:'mine'}),epFilterReview:()=>this.setState({epFilter:'review'}),epFilterLib:()=>this.setState({epFilter:'lib'}),
       epTabAll:tab('all'),epTabMine:tab('mine'),epTabReview:tab('review'),epTabLib:tab('lib'),
       hasActive:!!active,noActive:!active,ep:{title:ep.title,etab:ep.etab,classe:ep.classe,duree:ep.duree,coeff:ep.coeff,date:ep.date,consigne:ep.consigne,epreuveCode:(active&&active.epreuveCode)||'',echeance:(active&&active.echeance)||''},
-      setTitle:setField('title'),setEtab:setField('etab'),setClasse:setField('classe'),setDuree:setField('duree'),setCoeff:setField('coeff'),setDate:setField('date'),setConsigne:setField('consigne'),setEcheance:setField('echeance'),
+      setTitle:setField('title'),setEtab:setField('etab'),
+      /* Changer de classe EFFACE une nature qui n'existe pas pour elle
+         (16/10/2026). Elle restait enregistrée : _structureDe() la lit en
+         premier, et Ambassa composait une 6ᵉ avec la structure de Terminale. */
+      setClasse:e=>{
+        if(!perm.edit)return;
+        const cl=val(e), a=this._active()||{};
+        const maj={classe:cl};
+        if(a.epreuveCode){
+          const def=MINESEC.epreuveParCode(a.epreuveCode);
+          const cs=(def&&def.classes)||[];
+          if(!def||(cl&&cs.length&&cs.indexOf(cl)<0))maj.epreuveCode='';
+        }
+        this._updateActive(maj);
+      },setDuree:setField('duree'),setCoeff:setField('coeff'),setDate:setField('date'),setConsigne:setField('consigne'),setEcheance:setField('echeance'),
       natureOptions,
       /* Choisir la nature APPELLE son gabarit : durée et coefficient
          descendent du référentiel MINESEC au lieu d'être retapés. On
@@ -9593,8 +9621,10 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       genOuvert:genEstOuvert,
       genToggle:()=>this.setState({genOuvert:!genEstOuvert,genErr:''}),
       genToggleLabel:genEstOuvert?'Replier':'Ouvrir',
-      genCible:(()=>{const s2=this._structureDe(active);if(!active||!active.classe)return'Classe à choisir dans les Renseignements';
-        return s2?(active.classe+' · '+s2.nom+' · '+MINESEC.totalAttendu(s2)+' pts'):'Nature de l’épreuve à choisir';})(),
+      genCible:(()=>{const s2=this._structureDe(active);if(!active||!active.classe)return'Choisissez d’abord la classe';
+        return s2?('Ambassa suivra : '+active.classe+' · '+s2.nom+' · '+MINESEC.totalAttendu(s2)+' pts'):'Choisissez la nature de l’épreuve';})(),
+      genLblStyle:'display:flex;flex-direction:column;gap:5px;font-size:11.5px;font-weight:700;font-family:Poppins;color:var(--c14375f,#14375f);min-width:0',
+      genSelStyle:'width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:9px;padding:9px 11px;font-size:13px;font-weight:500;font-family:inherit;color:var(--c33404f,#33404f);background:var(--cffffff,#fff);min-height:40px',
       genCibleStyle:'font-size:11.5px;font-weight:700;font-family:Poppins;color:var(--c14375f,#14375f);background:var(--ce7f1fb,#e7f1fb);border-radius:999px;padding:5px 11px;flex:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap',
       genTheme:st.genTheme||'',
       setGenTheme:e=>this.setState({genTheme:val(e).slice(0,120)}),

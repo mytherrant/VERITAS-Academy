@@ -58,9 +58,18 @@ dire(iVar > 0 && iFlex > 0 && iVar > iFlex,
 
 /* ── ② Le sélecteur de nature est nommé, et une seule fois ─────────────── */
 console.log(`\n${G}② La nature de l'épreuve : un seul champ, et il est nommé${R}`);
+/* Depuis le 16/10/2026, le panneau « Composer avec Ambassa » porte AUSSI la
+   classe et la nature : un enseignant les cherchait là et tapait « 6e étude
+   de texte » dans le champ Thème. La règle reste celle du doublon interdit —
+   pas deux champs qui écriraient des données DIFFÉRENTES : hors des
+   Renseignements, le seul second sélecteur admis vit dans #vrt-composer et
+   appelle le MÊME gestionnaire (setEpreuveType), donc la même donnée. */
 const nbSelectCode = (src.match(/onChange="\{\{ setEpreuveType \}\}"/g) || []).length;
-dire(nbSelectCode === 1, 'un seul sélecteur de nature dans toute la page',
-  nbSelectCode + ' occurrence(s)');
+const composeur = (src.match(/<section id="vrt-composer"[\s\S]*?<\/section>/) || [''])[0];
+const dansComposeur = (composeur.match(/onChange="\{\{ setEpreuveType \}\}"/g) || []).length;
+dire(nbSelectCode === 1 || (nbSelectCode === 2 && dansComposeur === 1),
+  'un seul sélecteur de nature hors du panneau Ambassa (qui écrit la même donnée)',
+  nbSelectCode + ' occurrence(s), dont ' + dansComposeur + ' dans #vrt-composer');
 dire(/Nature de l’épreuve<select/.test(src),
   'il porte une étiquette lisible (pas un menu anonyme)');
 dire(!/setEpreuveCode/.test(src.replace(/\/\*[\s\S]*?\*\/|<!--[\s\S]*?-->/g, '')),
