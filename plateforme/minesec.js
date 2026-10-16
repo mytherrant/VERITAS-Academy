@@ -264,10 +264,15 @@
       confiance: 'officiel'
     },
 
+    /* 2NDE (16/10/2026) — aucune épreuve ne la citait : la classe n'existait
+       pas dans l'Atelier, et un professeur de 2nde ne pouvait pas composer
+       avec Ambassa. Pas d'examen national en 2nde : ses épreuves de CLASSE
+       suivent le descriptif ESG du second cycle (mêmes types de sujets, même
+       barème sur 20), comme le font les cahiers de 2nde A et 2nde C-D. */
     /* ============ ESG — Probatoire et BAC séries A et ABI ============ */
     {
       code: 'A_LITT', examen: 'Probatoire / BAC', cycle: 'Second cycle général',
-      classes: ['1ère', 'Terminale'], series: ['A', 'ABI'],
+      classes: ['2nde', '1ère', 'Terminale'], series: ['A', 'ABI'],
       nom: 'Littérature ou culture générale — A, ABI',
       duree: '4 h', coeff: '3', sujetsAuChoix: 3, grille: 'contraction992',
       texteSupport: { min: 550, max: 650, unite: 'mots', nature: 'texte argumentatif en français contemporain' },
@@ -287,7 +292,7 @@
     },
     {
       code: 'A_LANGUE', examen: 'Probatoire / BAC', cycle: 'Second cycle général',
-      classes: ['1ère', 'Terminale'], series: ['A', 'ABI'],
+      classes: ['2nde', '1ère', 'Terminale'], series: ['A', 'ABI'],
       nom: 'Langue française — A, ABI',
       duree: '2 h', coeff: '1', sujetsAuChoix: 1, grille: 'langue4rub5',
       texteSupport: { min: 250, max: 400, unite: 'mots', nature: 'texte littéraire ou non littéraire' },
@@ -306,7 +311,7 @@
     /* ========== ESG — Probatoire et BAC séries C, D, E, TI ========== */
     {
       code: 'CDETI_LITT', examen: 'Probatoire / BAC', cycle: 'Second cycle général scientifique',
-      classes: ['1ère', 'Terminale'], series: ['C', 'D', 'E', 'TI'],
+      classes: ['2nde', '1ère', 'Terminale'], series: ['C', 'D', 'E', 'TI'],
       nom: 'Littérature ou culture générale — C, D, E, TI',
       duree: '3 h', coeff: '2', sujetsAuChoix: 2, grille: 'contraction992',
       texteSupport: { min: 550, max: 650, unite: 'mots', nature: 'texte argumentatif en français contemporain' },
@@ -324,7 +329,7 @@
     },
     {
       code: 'CDETI_LANGUE', examen: 'Probatoire / BAC', cycle: 'Second cycle général scientifique',
-      classes: ['1ère', 'Terminale'], series: ['C', 'D', 'E', 'TI'],
+      classes: ['2nde', '1ère', 'Terminale'], series: ['C', 'D', 'E', 'TI'],
       nom: 'Langue française — C, D, E, TI',
       duree: '2 h', coeff: '1', sujetsAuChoix: 1, grille: 'langue4rub5',
       texteSupport: { min: 250, max: 400, unite: 'mots', nature: 'texte littéraire ou non littéraire' },
