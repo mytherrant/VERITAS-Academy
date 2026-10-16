@@ -65,7 +65,7 @@ jobs:
       - name: 📲 SkySMS — un rappel forgé, une réf recopiée, une page devinée n'ouvrent rien ?
         run: php tests/banc_skysms.php
 
-      - name: 📲 SkySMS — abonnement, Atelier, cahier, livre : chaque paiement livre-t-il son droit ?
+      - name: "📲 SkySMS — abonnement, Atelier, cahier, livre : chaque paiement livre-t-il son droit ?"
         run: php tests/banc_skysms_droits.php
 
       - name: 🤖 Un SMS de réception sert-il le pass, et un faux SMS jamais ?
