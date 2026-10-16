@@ -18,7 +18,25 @@ Deux relectures indépendantes : `php-reviewer` (tout `api/` et `api/campus/`) e
 | A9 | MOYENNE | Le banc SkySMS ne bloquait pas le déploiement | Ajouté à `deploy.yml` (`07efcf7`) |
 | A10 | MOYENNE | Après 12 min, le tunnel invitait à « réessayer » : risque de payer deux fois | Message : WhatsApp + référence avant de repayer (`bf1a9cd`) |
 
-## Restent OUVERTS (non corrigés, avec la raison)
+## 3ᵉ passe (16/10/2026) — CORRIGÉ et déployé (prod 1.20.30)
+| Point | Correctif | Vérifié en prod |
+|---|---|---|
+| Corrigés « tout en un » trop lourds | Chargement à la demande depuis les pages détaillées (`tools/alleger_corriges.py`, accroché à `build_corriges.py`) | `tous-les-corriges.html` : 2,1 Mo → **13 Ko** transférés ; livret à compléter : 543 Ko → **12,7 Ko** |
+| Titres en double (3ᵉ, deux éditions) | « Cahier (ancienne édition) » / « Cahier (édition 2026-2027) » | titres distincts servis |
+| Erreur console du cahier (`frame-ancestors` en `<meta>`) | retirée (protection par `X-Frame-Options`) | 0 occurrence |
+| « Bonjour Moi » (Atelier) | « Bonjour » pour un invité | ✓ |
+| Tunnel du cahier | moyen de paiement annoncé ; **champ e-mail retiré** (le code part par SMS) | ✓ |
+| Cibles tactiles < 24 px | +2 px (pied de page, « Découvrir », calendrier) | ✓ |
+| O5 synchro « ✅ » après échec | bilan selon ce qui a réussi | ✓ (app.js 1.20.30) |
+| O6 alerte marquée envoyée sur échec | posée seulement si le courriel part (5 essais) | bancs remise verts |
+| O7 news_proxy TLS non vérifié | TLS vérifié, liens http(s), actualisation ≥ 60 s | 12 articles chargés à neuf |
+| O8 cahier.php sans verrou | verrou par cahier d'élève | bancs cahier verts |
+| O9 `_payRef` | 8 caractères par `crypto` | ✓ |
+| O11 content.php / demandes.php | confinement avec séparateur, scripts jamais servis ; sujet de courriel encodé | lint + CI |
+
+Restent ouverts : O1 (secret de synchro unique), O2 (paiement Campus non branché), O3 (alerte sur rappel SkySMS refusé), O4 (format réel de l'id_operation), O10 (HTML accepté à l'upload admin), O12 (comptes S256). `robots.txt` : purge du cache LWS (Jacques).
+
+## Restent OUVERTS (2ᵉ passe) (non corrigés, avec la raison)
 | # | Gravité | Problème | Pourquoi pas maintenant |
 |---|---|---|---|
 | O1 | HAUTE | Un seul secret de synchro sert à tout : base, uploads, clé HMAC des jetons de compte. Il est accepté en `?_secret=` (donc dans les journaux). | Retirer le repli GET peut casser un client ancien ; séparer la clé HMAC invaliderait les sessions en cours. **Décision à prendre par vous.** |
