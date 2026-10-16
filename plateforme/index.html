@@ -32,7 +32,7 @@
 <script src="./minesec.js?v=c6660ff8"></script>
 <script src="./conformite.js?v=c6acd615"></script>
 <script src="./exercices.js?v=c6d93301"></script>
-<script src="./generateur.js?v=23c33c33"></script>
+<script src="./generateur.js?v=4f4fb478"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=090324b1"></script>
 <!--vrt-habillage:tete-->
@@ -6666,6 +6666,12 @@ class Component extends DCLogic {
     const reste=s.slice(i+fin.length).replace(/^[\s»"”.…]+/,'').trim();
     return reste||s;
   }
+  _titreLangueSeule(stru,classe){
+    if(!stru||typeof VRT_GENERATEUR==='undefined')return '';
+    const p=VRT_GENERATEUR.planEpreuve(stru,{classe:classe});
+    if(p.support!=='texte'||p.comp.points)return '';
+    return p.productions.length?'Résumé et langue':'Questions de langue';
+  }
   _modeChoix(stru){return !!(stru&&(stru.sujetsAuChoix||1)>1&&stru.texteSupport);}
   _titreSujet(t){return String(t||'Sujet').replace(/^Sujet\s+de\s+type\s+\d+\s*[—–-]\s*/i,'').replace(/^Sujet\s+\d+\s*[—–-]\s*/i,'');}
   /* Corrige et bareme, pour la page « reservee a l'enseignant » de l'export.
@@ -6680,7 +6686,8 @@ class Component extends DCLogic {
     let nSujet=1;
     (a.textIds||[]).forEach((n,ti)=>{const f=this.all.find(x=>x.n===n);if(!f)return;
       if(choix&&a.customQ&&a.customQ[n]&&a.customQ[n].role==='commentaire')return;
-      const titres=choix?[['comp',''],['expl','']]:[['comp','I. Compréhension'],['expl','II. Langue et production']];
+      const tl=this._titreLangueSeule(stru,a.classe);
+      const titres=choix?[['comp',''],['expl','']]:[['comp','I. Compréhension'],['expl',tl||'II. Langue et production']];
       let k2=0;
       titres.forEach(([k,t])=>{
         const qs=this._qListOf(a,f,k);if(!qs.length)return;
@@ -6707,7 +6714,7 @@ class Component extends DCLogic {
     const estCom=f=>!!(a.customQ&&a.customQ[f.n]&&a.customQ[f.n].role==='commentaire');
     const pres=(a.sujets||[]).find(s=>s&&s.genre==='presentation');
     const textes=fiches.filter(f=>!(choix&&estCom(f))).map(f=>{
-      const t={mots:f.words,reference:this._refPropre(f.reference||''),texte:f.text||'',
+      const t={titreExpl:this._titreLangueSeule(stru,a.classe)||undefined,mots:f.words,reference:this._refPropre(f.reference||''),texte:f.text||'',
         comp:this._qListOf(a,f,'comp').map((q,i)=>({texte:q,points:this._qPts(f.n,'comp',i)})),
         expl:this._qListOf(a,f,'expl').map((q,i)=>({texte:q,points:this._qPts(f.n,'expl',i)}))};
       if(choix){
@@ -8272,13 +8279,23 @@ class Component extends DCLogic {
     const planAct=(structAct&&typeof VRT_GENERATEUR!=='undefined')?VRT_GENERATEUR.planEpreuve(structAct,{classe:active.classe}):null;
     const sansComp=!!(planAct&&planAct.support==='texte'&&!planAct.comp.points&&!planAct.expl.points&&planAct.productions.length);
     const titreSujetTexte=(planAct&&planAct.sujetTexte)?String(planAct.sujetTexte).replace(/^Sujet de type 1\s*—\s*/,''):'Contraction de texte et discussion';
+    /* PAS DE COMPRÉHENSION DANS LA STRUCTURE (16/10/2026, capture de Jacques
+       sur une Langue française de 2nd cycle) : « I. Compréhension » s'affichait
+       vide au-dessus des quatre rubriques de langue. Seule la contraction était
+       traitée. Désormais toute structure sans points de compréhension (Langue
+       française, STT…) masque la zone — sauf si le texte porte déjà des
+       questions de compréhension : on ne cache jamais un contenu existant. */
+    const sansCompStruct=!!(planAct&&planAct.support==='texte'&&!planAct.comp.points);
+    const titreLangue=(planAct&&planAct.expl.rubriques.length)
+      ?(planAct.productions.length?'Résumé et langue':'Questions de langue — '+planAct.expl.rubriques.length+' rubriques')
+      :'II. Langue & production';
     const selectedFiches=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean).map((f,i)=>{const ann=this._wordAnnots(f.n);const annCount=Object.keys(ann).length;const ko=f._partiel||f._syncKo;const koFerme=(f._libre===false||f._syncKo==='abonnement');
       const replie=!!(st.txtReplies||{})[f.n];
       const estCom=!!(active&&active.customQ&&active.customQ[f.n]&&active.customQ[f.n].role==='commentaire');
       return{pos:i+1,type:f.type,words:f.words,level:f.level,ancre:'vrt-txt-'+f.n,
         titreComp:'I. Compréhension',
-        titreExpl:sansComp?('Sujet 1 — '+titreSujetTexte):'II. Langue & production',
-        compZone:(sansComp||estCom)?hidden:'',
+        titreExpl:sansComp?('Sujet 1 — '+titreSujetTexte):(sansCompStruct?titreLangue:'II. Langue & production'),
+        compZone:(sansComp||estCom||(sansCompStruct&&!this._qListOf(active,f,'comp').length))?hidden:'',
         explZone:estCom?hidden:'',
         texteBloc:'margin-top:13px;padding-top:13px;border-top:1px dashed var(--ce2eaf3,#e2eaf3)'+(replie?';display:none':''),
         texteToggleLabel:replie?'Afficher le texte ('+(f.words||0)+' mots)':'Replier le texte',

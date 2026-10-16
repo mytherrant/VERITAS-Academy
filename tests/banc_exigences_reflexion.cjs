@@ -110,7 +110,11 @@ r = valider(o);
 dire(r.aReparer.some(x => x.defauts.some(d => d.code === 'tutoiement')), 'une consigne qui tutoie au second cycle part en réécriture');
 
 o = conforme(); o.questions[0].q = 'Ce texte compte 600 mots. Résume-le au quart, soit environ 150 mots.';
-dire(valider(o).aReparer.some(x => x.defauts.some(d => d.code === 'tutoiement')), '« Résume-le » à la 2e phrase est vu');
+/* Depuis le 16/10 (vouvoyer) : corrigé SUR PLACE, sans appel de réécriture. */
+r = valider(o);
+dire(/Résumez-le au quart/.test(r.questions[1].expl[0].q) && !r.aReparer.some(x => x.defauts.some(d => d.code === 'tutoiement')),
+  '« Résume-le » à la 2e phrase est vouvoyé sur place (« Résumez-le »), sans appel d’IA', r.questions[1].expl[0].q);
+dire(GEN.tutoie('Ce texte compte 600 mots. Résume-le au quart.'), 'le détecteur, lui, voit toujours « Résume-le » à la 2e phrase');
 
 o = conforme(); o.questions[1].q = 'Vous discuterez ce point de vue sur la jeunesse dans un développement argumenté.';
 dire(valider(o).aReparer.some(x => x.defauts.some(d => d.code === 'discussion')), 'une discussion qui ne cite pas le texte part en réécriture');
@@ -188,6 +192,29 @@ const sc = n => (cl.find(x => x.f.n === n) || {}).score;
 dire(Math.abs(sc(92) - sc(93)) < 5 && sc(92) > sc(91) + 50, 'au choix du texte, l’explicatif vaut l’argumentatif, devant le narratif', JSON.stringify(cl.map(x => [x.f.n, x.score])));
 dire(/argumentatif ou explicatif/.test(MINESEC.epreuveParCode('A_LITT').texteSupport.nature) && /argumentatif ou explicatif/.test(MINESEC.texteSupportPour(MINESEC.epreuveParCode('CDETI_LITT'), '2nde C').nature),
   'le référentiel (1ère-Tle et 2nde) dit « argumentatif ou explicatif »');
+
+console.log(`\n${G}⑤ Langue française (2nd cycle) : capture de Jacques du 16/10/2026${R}`);
+/* Ambassa recopiait l'en-tête de rubrique et les points dans la question,
+   numérotait lui-même (« 1. b. »), et tutoyait en Terminale. */
+const stL = MINESEC.epreuveParCode('A_LANGUE');
+const plL = GEN.planEpreuve(stL, { classe: 'Tle A' });
+const blL = GEN.blocsDuPlan(plL);
+const ctxL = { plan: plL, struct: stL, classe: 'Tle A', textes: [{ n: 1, role: 'support', type: 'NARRATIF', words: 300, text: TEXTE }] };
+const rL = GEN.validerEpreuve({ titre: 'x', questions: [
+  { texte: 1, liste: 'expl', bloc: blL[0].cle, pts: 1.5, q: 'I. Communication (5 points)\n1. a. Relève la phrase qui ouvre le texte. (1,5 pts)', corrige: 'La phrase est : « La jeunesse africaine doit inventer son propre avenir. » Barème : 1,5 pt' },
+  { texte: 1, liste: 'expl', bloc: blL[0].cle, pts: 1, q: '1. b. Interprète l’effet produit par cette phrase. (1 pt)', corrige: 'Elle pose la thèse.' },
+  { texte: 1, liste: 'expl', bloc: blL[1].cle, pts: 2, q: 'II. Morphosyntaxe — 2. a. Transforme la phrase « Le chômage des diplômés nourrit le doute sur l’école. » à la voix passive, puis justifie ta réponse.', corrige: 'Le doute… Barème : 2 pts' }] }, ctxL);
+const qL = rL.questions[1].expl.map(x => x.q);
+dire(qL[0] === 'I. Communication — a. Relevez la phrase qui ouvre le texte.', 'en-tête de rubrique, numéro et « (1,5 pts) » retirés ; le préfixe posé UNE fois', qL[0]);
+dire(qL[1] === 'I. Communication — b. Interprétez l’effet produit par cette phrase.', 'plus de « — b. 1. b. » : la lettre vient du préfixe seul', qL[1]);
+dire(/^II\. Morphosyntaxe — a\. Transformez la phrase « Le chômage des diplômés nourrit le doute sur l’école\. » à la voix passive, puis justifiez votre réponse\.$/.test(qL[2]),
+  'vouvoiement posé, la citation intacte (mot pour mot)', qL[2]);
+dire(!rL.aReparer.some(x => x.defauts.some(d => d.code === 'tutoiement')), 'plus aucune question renvoyée en réécriture pour tutoiement (un appel d’IA épargné)');
+const rL1 = GEN.validerEpreuve({ questions: [{ texte: 1, liste: 'comp', bloc: 'comp', pts: 10, q: 'Relève deux personnages du texte.', corrige: 'x Barème : 10 pts' }] },
+  { plan: GEN.planEpreuve(MINESEC.epreuveParCode('BEPC_ETUDE')), struct: MINESEC.epreuveParCode('BEPC_ETUDE'), classe: '3e', textes: [{ n: 1, role: 'support', words: 220, text: TEXTE }] });
+dire(rL1.questions[1].comp[0].q === 'Relève deux personnages du texte.', 'au 1er cycle, la 2e personne reste (« Relève »)');
+dire(GEN.vouvoyer('Résumé au quart : 150 mots.') === 'Résumé au quart : 150 mots.' && GEN.vouvoyer('Analyse au tiers.') === 'Analyse au tiers.'
+  && GEN.vouvoyer('Analyse le rôle du narrateur.') === 'Analysez le rôle du narrateur.', '« Résumé » et « Analyse » noms restent des noms ; verbes, ils s’accordent');
 
 console.log(`\n  ${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko ? 1 : 0);

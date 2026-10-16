@@ -848,6 +848,81 @@
     return d;
   }
 
+  /* ÉNONCÉ NETTOYÉ (16/10/2026, capture de Jacques, Langue française) :
+     Ambassa recopiait dans la question l'en-tête de rubrique et les points
+     (« I. Communication (5 points)\n1. a. Relève … (1,5 pts) »), puis notre
+     préfixe s'ajoutait au sien (« I. Communication — b. 1. b. Interprète »).
+     Les points vivent dans leur champ ; la rubrique et la lettre, c'est le
+     préfixe qui les pose. On retire donc, en tête, tout titre de rubrique
+     connu et toute numérotation, et en queue l'annonce des points. */
+  function nettoyerEnonce(q, titres) {
+    var t = String(q || '').replace(/\r/g, '');
+    for (var tour = 0; tour < 4; tour++) {
+      var avant = t;
+      (titres || []).forEach(function (ti) {
+        var nt = norm(ti), nq = norm(t);
+        if (nt && nq.indexOf(nt) === 0) {
+          // On coupe à la même longueur de caractères que le titre d'origine.
+          t = t.slice(ti.length).replace(/^\s*\(\s*\d+(?:[.,]\d+)?\s*(?:pts?|points?)\s*\)/i, '');
+        }
+      });
+      t = t.replace(/^[\s—–:\-]+/, '')
+        .replace(/^\(?\d{1,2}[.)]\s*(?=\S)/, '')
+        .replace(/^\(?[a-d][.)]\s+/i, '');
+      if (t === avant) break;
+    }
+    t = t.replace(/\s*\(\s*\d+(?:[.,]\d+)?\s*(?:pts?|points?)\s*\)\s*$/i, '')
+      .replace(/\s*\n\s*/g, ' ').replace(/\s{2,}/g, ' ').trim();
+    return t || String(q || '').trim();
+  }
+
+  /* Vouvoiement d'une consigne (2nd cycle) : le verbe qui OUVRE chaque
+     phrase, et les possessifs « ta, ton, tes ». Hors citations, qui se
+     recopient mot pour mot. Une réécriture par Ambassa coûte un appel —
+     et l'essai épuisé n'en a plus. */
+  var VOUS = {
+    ecris: 'écrivez', mets: 'mettez', decoupe: 'découpez', situe: 'situez', choisis: 'choisissez', fais: 'faites',
+    repere: 'repérez', transpose: 'transposez', construis: 'construisez', prepare: 'préparez', propose: 'proposez',
+    dis: 'dites', donne: 'donnez', indique: 'indiquez', precise: 'précisez', trouve: 'trouvez', encadre: 'encadrez',
+    conjugue: 'conjuguez', accorde: 'accordez', remplace: 'remplacez', complete: 'complétez', souligne: 'soulignez',
+    releve: 'relevez', redige: 'rédigez', montre: 'montrez', imagine: 'imaginez', commente: 'commentez',
+    discute: 'discutez', compare: 'comparez', emploie: 'employez', utilise: 'utilisez', ajoute: 'ajoutez',
+    supprime: 'supprimez', reduis: 'réduisez', developpe: 'développez', justifie: 'justifiez', explique: 'expliquez',
+    identifie: 'identifiez', nomme: 'nommez', cite: 'citez', recopie: 'recopiez', transforme: 'transformez',
+    reecris: 'réécrivez', etudie: 'étudiez', interprete: 'interprétez', deduis: 'déduisez', apprecie: 'appréciez',
+    prolonge: 'prolongez', poursuis: 'poursuivez', raconte: 'racontez', decris: 'décrivez', compose: 'composez',
+    lis: 'lisez', observe: 'observez', associe: 'associez', distingue: 'distinguez', retrouve: 'retrouvez',
+    delimite: 'délimitez', formule: 'formulez', presente: 'présentez', enumere: 'énumérez', reconstitue: 'reconstituez',
+    prouve: 'prouvez', resume: 'résumez', analyse: 'analysez'
+  };
+  function vouvoyer(q) {
+    var morceaux = String(q || '').split(/(«[^»]*»|"[^"]*")/);
+    return morceaux.map(function (m, i) {
+      if (i % 2) return m;   // citation : intacte
+      return m
+        .replace(/(^|[.!?:;]\s+|\n\s*|—\s*|\b(?:puis|et|ensuite)\s+)([A-Za-zÀ-ÿ]+)(?=[\s,-]|$)/g, function (tout, av, mot, pos, chaine) {
+          var cle = norm(mot);
+          if (!VOUS[cle]) return tout;
+          /* Les mots qui sont AUSSI des noms ou des adjectifs (« Résumé au
+             quart », « Analyse au tiers », « Présente… ») : on n'accorde que
+             s'ils sont suivis d'un déterminant ou d'un pronom complément —
+             « Analyse le rôle », « Résume-le ». Un mot en « é » n'est jamais
+             un impératif. */
+          if (/é$/.test(mot)) return tout;
+          if (AMBIGUS_SG.concat(['presente', 'compose', 'imagine', 'observe']).indexOf(cle) >= 0) {
+            var suite = chaine.slice(pos + tout.length);
+            if (!/^(?:-(?:le|la|les|en)\b|\s+(?:le|la|les|l['’]|ce|cet|cette|ces|un|une|des|du|en|chaque|deux|trois|quatre|cinq|dix|votre|vos|ta|ton|tes|son|sa|ses)\b)/i.test(suite)) return tout;
+          }
+          var pl = VOUS[cle];
+          if (mot.charAt(0) === mot.charAt(0).toUpperCase()) pl = pl.charAt(0).toUpperCase() + pl.slice(1);
+          return av + pl;
+        })
+        .replace(/\b([Tt])(a|on)\s+(?=[a-zà-ÿ])/g, function (t0, T) { return (T === 'T' ? 'V' : 'v') + 'otre '; })
+        .replace(/\b([Tt])es\s+(?=[a-zà-ÿ])/g, function (t0, T) { return (T === 'T' ? 'V' : 'v') + 'os '; })
+        .replace(/-(le|la|les|en)\b/g, '-$1');
+    }).join('');
+  }
+
   /* Tutoiement HORS citation : le second cycle compose au vouvoiement.
      « ton » est exclu (« le ton ironique du texte ») ; « résumé »,
      « analyse », « compte », « classe », « forme » aussi, qui ouvrent une
@@ -1038,6 +1113,15 @@
           });
         });
       });
+      var titresRub = blocs.map(function (b) { return b.titre; });
+      Object.keys(res.questions).forEach(function (n) {
+        ['comp', 'expl'].forEach(function (k) {
+          res.questions[n][k].forEach(function (it) {
+            it.q = nettoyerEnonce(it.q, titresRub);
+            if (vousQ) it.q = vouvoyer(it.q);
+          });
+        });
+      });
       /* Préfixe de rubrique : dans la liste plate du composeur, « I.
          Communication — a. … » doit rester lisible une fois imprimé. */
       Object.keys(res.questions).forEach(function (n) {
@@ -1073,6 +1157,7 @@
       }
       var v = brutsS[iS++] || {};
       var texte = propre(typeof v === 'string' ? v : v.texte, 5000);
+      if (vousQ) texte = vouvoyer(texte);
       res.sujets.push({ genre: s.genre, titre: s.titre, texte: texte, pts: s.points, auChoix: !!s.auChoix, corrige: propre(v.corrige, 16000) });
     });
     /* La dictée n'a rien à rédiger : son « sujet » est le texte lui-même.
@@ -1606,7 +1691,7 @@
   }
 
   root.VRT_GENERATEUR = {
-    scoriesOCR: scoriesOCR,
+    scoriesOCR: scoriesOCR, nettoyerEnonce: nettoyerEnonce, vouvoyer: vouvoyer, tutoie: tutoie,
     classer: classer, segmentsConsigne: segmentsConsigne, planEpreuve: planEpreuve, blocsDuPlan: blocsDuPlan, totalNote: totalNote,
     jetonsNiveau: jetonsNiveau, niveauxCibles: niveauxCibles, classerTextes: classerTextes,
     exemplesOfficiels: exemplesOfficiels, formationMinesec: formationMinesec,
