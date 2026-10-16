@@ -52,6 +52,9 @@ $cacheDir  = sys_get_temp_dir() . '/';
 $cacheFile = $cacheDir . 'veritas_news_' . $cat . '.json';
 $noCache   = isset($_GET['nocache']) && $_GET['nocache']==='1';
 $cacheAge  = file_exists($cacheFile) ? (time() - filemtime($cacheFile)) : 999999;
+// « Actualiser » est public : sans plancher, chaque appel déclenchait une
+// requête sortante. Une actualisation par minute suffit (audit 16/10/2026).
+if ($noCache && $cacheAge < 60) $noCache = false;
 if (!$noCache && file_exists($cacheFile) && $cacheAge < 600) {
     $cached = json_decode(file_get_contents($cacheFile), true);
     $cached['from_cache']  = true;
@@ -68,9 +71,11 @@ $ctx = stream_context_create([
         'timeout' => 12,
         'header'  => "User-Agent: Mozilla/5.0 (compatible; VERITAS-News/1.0)\r\n",
     ],
+    // Certificat VÉRIFIÉ (audit 16/10/2026) : sans contrôle, un intermédiaire
+    // pouvait injecter le flux affiché sur le site.
     'ssl' => [
-        'verify_peer'      => false,
-        'verify_peer_name' => false,
+        'verify_peer'      => true,
+        'verify_peer_name' => true,
     ],
 ]);
 
@@ -91,6 +96,8 @@ $items = [];
 foreach ($rss->channel->item as $item) {
     $title  = html_entity_decode((string)$item->title, ENT_QUOTES, 'UTF-8');
     $link   = (string)$item->link;
+    // Seuls des liens web : un « javascript: » venu du flux n'atteint jamais un href.
+    if (!preg_match('#^https?://#i', $link)) continue;
     $date   = (string)$item->pubDate;
     $source = '';
     if (isset($item->source)) $source = (string)$item->source;
