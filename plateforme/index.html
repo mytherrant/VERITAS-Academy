@@ -8969,7 +8969,8 @@ class Component extends DCLogic {
       goAccueil:()=>this._go('accueil'),goListe:()=>this._go('liste'),goEpreuves:()=>this._go('epreuves'),goComposeur:()=>this._go('composeur'),goEquipe:()=>this._go('equipe'),goProfil:()=>this._go('profil'),goCours:()=>this._go('cours'),
       navAccueil:nav('accueil'),navListe:nav('liste'),navEpreuves:nav('epreuves'),navComposeur:nav('composeur'),navEquipe:nav('equipe'),navCours:nav('cours'),
       epCount:st.epreuves.length,epCountBadge:'display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-left:7px;background:'+(st.epreuves.length?'var(--c1a72bb,#1a72bb)':'var(--ccdd9e6,#cdd9e6)')+';color:var(--cffffff,#fff);border-radius:999px;font-size:11px;font-weight:700;font-family:Open Sans',
-      me:{name:me.name,first:me.name.replace(/^(M\.|Mme|Mlle)\s+/,'').split(' ')[0],initials:this._initials(me.name),roleShort:(me.role||'').split(' / ')[0],role:me.role,avatarLg:this._av(me,38),avatarXl:this._av(me,64)},
+      // « Moi » = invité qui n'a pas encore donné son nom : « Bonjour », pas « Bonjour Moi ».
+      me:{name:me.name,first:(me.name==='Moi'?'':me.name.replace(/^(M\.|Mme|Mlle)\s+/,'').split(' ')[0]),initials:this._initials(me.name),roleShort:(me.role||'').split(' / ')[0],role:me.role,avatarLg:this._av(me,38),avatarXl:this._av(me,64)},
       /* Le nom affiche partout est celui du GROUPE ACTIF. st.team ne porte
          plus que le plan et les quotas : garder son ancien nom afficherait
          l'ancien etablissement apres une bascule ou une inscription. */
