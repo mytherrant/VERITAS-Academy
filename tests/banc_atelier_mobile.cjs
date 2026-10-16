@@ -160,7 +160,9 @@ function extraireM(s, entete) {
   return null;
 }
 const mCorps = ['_renseignementsComplets(ep){', '_resumeRenseignements(ep){',
-  '_repliAuto(cle, ferme, ouvert, complets, resume){']
+  /* 6e argument `travail` (16/10/2026) : l'épreuve a un texte ; sur
+     téléphone le volet ne se déplie plus devant (banc_planche_mobile). */
+  '_repliAuto(cle, ferme, ouvert, complets, resume, travail){']
   .map(e => extraireM(src, e));
 dire(mCorps.every(Boolean), 'les trois fonctions du repli automatique existent');
 

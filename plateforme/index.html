@@ -966,7 +966,11 @@
     .vrt-col3 > *{min-width:0}
   }
   @media (max-width:820px){
-    .vrt-col2{grid-template-columns:1fr!important}
+    /* `minmax(0,1fr)` et non `1fr` (même piège que .vrt-col3) : une rangée
+       qui défile horizontalement — les outils d'annotation — élargissait la
+       piste à sa largeur minimale ; la page faisait 481 px sur 375. */
+    .vrt-col2{grid-template-columns:minmax(0,1fr)!important}
+    .vrt-col2 > *{min-width:0}
     .vrt-panier{width:100%!important;max-width:100%!important}
   }
   @media (max-width:1180px){
@@ -1128,6 +1132,47 @@
       flex-wrap:wrap!important;padding:12px 16px!important;gap:10px!important}
     main > div[data-noprint="1"]:is([style*="top:66px"],[style*="top: 66px"]) > button{margin-left:0!important}
 
+  }
+  /* ── L'ESPACE DE TRAVAIL D'ABORD : LE TEXTE ET LES QUESTIONS (16/10/2026) ──
+     Mesuré au composeur sur 375 × 812, une épreuve de BEPC à un texte de
+     220 mots et six questions : le texte commençait à 1 894 px (2,3 écrans
+     plus bas), la première question à 3 501 px. Trois causes :
+     1. le volet « Renseignements » restait DÉPLIÉ (948 px) tant qu'un champ
+        manquait — il se replie désormais dès qu'il y a un texte (voir
+        `_repliAuto`), son bouton disant ce qui reste à compléter ;
+     2. trois rembourrages s'empilaient autour du texte (page 16 + carte 17
+        + encadré 18 px, de chaque côté) : 273 px de large pour lire sur un
+        écran de 375 ;
+     3. chaque question réservait deux lignes de saisie, même pour une
+        consigne d'une ligne : 111 px par question.
+     Rien ne change sur ordinateur : tout est sous la requête de média. */
+  @media screen and (max-width:820px){
+    main{padding-left:10px!important;padding-right:10px!important}
+    .vrt-txtcarte{padding:11px 10px!important;border-radius:10px!important}
+    .vrt-txtcarte > div:first-child{gap:9px!important}
+    .vrt-txtcorps{padding:10px 9px!important;line-height:1.75!important}
+    /* Les outils d'annotation : une seule ligne qui glisse, sans libellé. */
+    .vrt-annot{flex-wrap:nowrap!important;overflow-x:auto;max-width:100%;min-width:0;gap:8px!important;margin-bottom:8px!important;
+      scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    .vrt-annot::-webkit-scrollbar{display:none}
+    .vrt-annot > *{flex:none}
+    .vrt-annot > span:first-child{display:none}
+    /* Ce qui se lit une fois : le libellé du titre, la source du descriptif
+       (elle reste au détail de la conformité). */
+    .vrt-titrelbl,.vrt-confsrc{display:none!important}
+    /* « Composer avec Ambassa » FERMÉ fait doublon avec « Générer » de la
+       rangée d'actions, qui l'ouvre et y conduit (genAller) : 57 px de moins
+       avant le texte. Ouvert, le panneau reparaît tel quel. Sans `:has()`,
+       la carte reste affichée : rien ne casse. */
+    #vrt-composer:not(:has(> :nth-child(2))){display:none!important}
+  }
+  @media screen and (max-width:560px){
+    /* La zone de saisie prend la hauteur de son contenu : une ligne pour une
+       consigne d'une ligne. `field-sizing` est lu par Chrome (Android) ; les
+       autres gardent une hauteur minimale d'une ligne et la poignée. */
+    .vrt-qrow{padding:4px 6px!important;gap:6px!important}
+    .vrt-qrow > textarea{min-height:36px!important;field-sizing:content}
+    .vrt-qrow > input{padding:4px!important;height:30px!important;box-sizing:border-box}
   }
   @media (prefers-reduced-motion:reduce){ header[data-noprint="1"]{transition:none} }
 
@@ -1832,7 +1877,7 @@
              soumise, validée ou publiée engage l'équipe. -->
         <button onClick="{{ supprimerBrouillon }}" style="{{ supprBrouillonStyle }}" title="Supprimer définitivement ce brouillon">Supprimer ce brouillon</button>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8)">Titre de l'épreuve · cliquez pour modifier</span></div>
+      <div class="vrt-titrelbl" style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8)">Titre de l'épreuve · cliquez pour modifier</span></div>
       <input value="{{ ep.title }}" onChange="{{ setTitle }}" disabled="{{ cannotEdit }}" style="font-family:'Poppins';font-size:24px;font-weight:700;color:var(--c14375f,#14375f);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;background:var(--cffffff,#fff);width:100%;padding:8px 12px;margin-bottom:6px" style-hover="border-color:var(--cbcd9f2,#bcd9f2)" style-focus="border-color:var(--c1a72bb,#1a72bb);box-shadow:0 0 0 3px rgba(26,114,187,.12)" placeholder="Intitulé de l'épreuve">
       <!-- Ce rappel dit comment démarrer une épreuve. Il sert la première
            fois, sur une épreuve encore vide ; il ne sert plus du tout quand
@@ -1944,7 +1989,7 @@
              2 h · coefficient 2… »). Il reste visible quand la rangée de
              réglage se replie : c'est lui qui empêche l'effet « la donnée a
              disparu ». -->
-        <div style="{{ confSousTitreStyle }}">{{ confSousTitre }}</div>
+        <div class="vrt-confsrc" style="{{ confSousTitreStyle }}">{{ confSousTitre }}</div>
         <sc-if value="{{ confOpen }}" hint-placeholder-val="{{ true }}">
           <!-- L'exemplaire du telephone. `vrt-only-sm` et `vrt-hide-xs` sont
                exclusifs : il n'y a jamais deux boutons a l'ecran. -->
@@ -2125,7 +2170,7 @@
           <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ false }}">
             <div style="display:flex;flex-direction:column;gap:11px;margin-bottom:20px">
               <sc-for list="{{ selectedFiches }}" as="f" hint-placeholder-count="3">
-                <article id="{{ f.ancre }}" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:11px;padding:15px 17px;box-shadow:0 2px 8px rgba(20,55,95,.05);animation:popIn .3s ease both">
+                <article id="{{ f.ancre }}" class="vrt-txtcarte" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:11px;padding:15px 17px;box-shadow:0 2px 8px rgba(20,55,95,.05);animation:popIn .3s ease both">
                   <div style="display:flex;gap:14px;align-items:flex-start">
                     <span style="font-family:'Poppins';font-size:20px;font-weight:700;color:var(--c1a72bb,#1a72bb);min-width:26px">{{ f.pos }}</span>
                     <div style="flex:1;min-width:0">
@@ -2139,7 +2184,7 @@
                        travailler les questions sans défiler (27/09/2026). -->
                   <button type="button" onClick="{{ f.texteToggle }}" style="margin-top:11px;width:100%;background:var(--cf4f8fc,#f4f8fc);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c14375f,#14375f);font-family:Poppins;font-size:12.5px;font-weight:700;padding:9px 11px;border-radius:9px;cursor:pointer;text-align:left">{{ f.texteToggleLabel }}</button>
                   <div style="{{ f.texteBloc }}">
-                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+                    <div class="vrt-annot" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
                       <span style="font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);font-family:Poppins">Texte — traiter :</span>
                       <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:8px;padding:3px">
                         <button onClick="{{ toolSurligner }}" style="{{ toolSurlStyle }}">Surligner</button>
@@ -2151,7 +2196,7 @@
                       </div>
                       <span style="{{ f.annBadge }}">{{ f.annCount }} annotation(s)</span>
                     </div>
-                    <div class="vrt-protege" data-filigrane="{{ filigrane }}" style="font-size:15.5px;line-height:1.92;color:var(--c2c3745,#2c3745);background:var(--cfbfcfe,#fbfcfe);border:1px solid var(--ceef2f7,#eef2f7);border-radius:10px;padding:16px 18px;text-wrap:pretty"><sc-for list="{{ f.paras }}" as="pa" hint-placeholder-count="4"><p style="{{ pa.style }}"><sc-for list="{{ pa.tokens }}" as="tk" hint-placeholder-count="24"><span onClick="{{ tk.click }}" style="{{ tk.style }}">{{ tk.t }}</span></sc-for></p></sc-for></div>
+                    <div class="vrt-protege vrt-txtcorps" data-filigrane="{{ filigrane }}" style="font-size:15.5px;line-height:1.92;color:var(--c2c3745,#2c3745);background:var(--cfbfcfe,#fbfcfe);border:1px solid var(--ceef2f7,#eef2f7);border-radius:10px;padding:16px 18px;text-wrap:pretty"><sc-for list="{{ f.paras }}" as="pa" hint-placeholder-count="4"><p style="{{ pa.style }}"><sc-for list="{{ pa.tokens }}" as="tk" hint-placeholder-count="24"><span onClick="{{ tk.click }}" style="{{ tk.style }}">{{ tk.t }}</span></sc-for></p></sc-for></div>
                     <p style="font-size:12.5px;font-style:italic;color:var(--c7a8598,#7a8598);margin:8px 0 0;text-align:right">— {{ f.reference }}</p>
                   </div>
                   <div style="margin-top:13px;padding-top:13px;border-top:1px dashed var(--ce2eaf3,#e2eaf3)">
@@ -4612,11 +4657,18 @@ class Component extends DCLogic {
   /* Repli dont l'etat par defaut se DEDUIT du contenu, au lieu d'etre fixe.
      `null` = automatique (jamais touche par l'utilisateur) ; un booleen = son
      choix, qui l'emporte ensuite. */
-  _repliAuto(cle, ferme, ouvert, complets, resume){
+  /* `travail` (facultatif) : l'épreuve a déjà un texte. Sur TÉLÉPHONE, le
+     volet ne se déplie plus de lui-même par-dessus : empilé avant le texte, il
+     le repoussait de 948 px (16/10/2026). Le bouton dit ce qui reste à faire,
+     et le garde-fou le signale aussi. Sur ordinateur, rien ne change : le
+     volet est à côté du texte, pas devant. */
+  _repliAuto(cle, ferme, ouvert, complets, resume, travail){
     const drapeau = cle + 'Open';
     const brut = this.state[drapeau];
     const auto = (brut === null || brut === undefined);
-    const est = auto ? !complets : !!brut;
+    const tel = !!(travail && typeof window !== 'undefined' && window.matchMedia
+      && window.matchMedia('(max-width:820px)').matches);
+    const est = auto ? (!complets && !tel) : !!brut;
     const out = {};
     out[cle + 'Toggle'] = () => this.setState({[drapeau]: !est});
     out[cle + 'ToggleLabel'] = est ? ouvert
@@ -5675,6 +5727,11 @@ class Component extends DCLogic {
   _montrerAstuce(){
     try{
       if(document.hidden)return;
+      /* Sur téléphone, la bulle (89 px, fixe) recouvrait le texte ou la
+         question en cours d'écriture : pas d'astuce sur les deux planches de
+         travail. Elle revient sur les autres écrans (16/10/2026). */
+      if((this.state.screen==='composeur'||this.state.screen==='coursEdit')
+        &&window.matchMedia&&window.matchMedia('(max-width:820px)').matches)return;
       const t=Date.now();
       if(this._astuceLe&&t-this._astuceLe<60000)return;
       const l=this._astuces();
@@ -9422,7 +9479,9 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       /* Repli AUTOMATIQUE : renseigne, le panneau se referme et son bouton
          porte le resume (« 3e · 2 h · coef 2 · Trimestre 1 »). */
       ...this._repliAuto('renseignements','Renseignements de l’épreuve','Masquer les renseignements',
-        this._renseignementsComplets(active), this._resumeRenseignements(active)),
+        this._renseignementsComplets(active),
+        [this._resumeRenseignements(active),this._renseignementsComplets(active)?'':'à compléter'].filter(Boolean).join(' · '),
+        !!(active&&(active.textIds||[]).length)),
       /* Le libellé nomme AUSSI la validation : les boutons « Soumettre à
          relecture » et « Valider » vivent dans ce volet, et un volet replié
          dont le nom ne les annonce pas les rend introuvables. */

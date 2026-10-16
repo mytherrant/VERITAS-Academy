@@ -1022,6 +1022,11 @@ jobs:
       - name: "✨ Atelier — les gabarits de leçon disent-ils la même chose que les épreuves ?"
         run: node tests/banc_gabarits_lecons.cjs
 
+      # Téléphone : le texte et les questions avant les bandeaux (texte à
+      # 884 px au lieu de 1 894, aucun défilement horizontal).
+      - name: "📱 Atelier — sur téléphone, la planche de travail passe-t-elle d’abord ?"
+        run: node tests/banc_planche_mobile.cjs
+
       # La métadonnée et le contenu descendent séparément. Quand le second
       # transfert échoue, l'export Word annonce 387 mots au-dessus d'un texte
       # de 33 — et l'épreuve part en photocopie.

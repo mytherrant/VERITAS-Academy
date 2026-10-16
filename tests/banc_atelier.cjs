@@ -184,6 +184,18 @@ const serveur = http.createServer((req, res) => {
     const action = u.searchParams.get('action') || '';
     res.setHeader('Access-Control-Allow-Origin', '*');
 
+    /* Entrée libre (09/09/2026) : « Ouvrir l'Atelier » demande un jeton
+       d'invité d'appareil. Sans cette action, le banc ne laissait plus
+       entrer personne par le chemin que prennent les enseignants. */
+    if (u.pathname.indexOf('plateforme.php') >= 0 && action === 'invite') {
+      noter('invite (entrée libre)');
+      JETON = 'BANC-INV-' + Date.now().toString(36);
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      return res.end(JSON.stringify({ ok: true, token: JETON,
+        compte: { id: 'inv_banc_001', nom: 'Invité du banc', role: 'ens' },
+        droit: { ok: true, motif: 'abonnement' } }));
+    }
+
     /* Connexion : on emet un jeton, comme le fait api/plateforme.php. */
     if (u.pathname.indexOf('plateforme.php') >= 0 && action === 'session') {
       noter('session (connexion)');
