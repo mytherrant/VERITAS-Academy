@@ -248,6 +248,9 @@ jobs:
       - name: 📲 SkySMS — le flux de paiement tient-il encore ?
         run: php tests/banc_skysms.php
 
+      - name: 📲 SkySMS — chaque paiement livre-t-il son droit (abonnement, Atelier, code par SMS) ?
+        run: php tests/banc_skysms_droits.php
+
       # ── 🤖 RAPPROCHEMENT SMS (25/09/2026). Un SMS de réception conforme sert
       #    le livret/manuel sans humain ; un faux SMS (solde incohérent, txid
       #    rejoué, expéditeur inconnu) ne sert JAMAIS rien.
