@@ -160,7 +160,11 @@ if (!empty($contenu['fichierProtege'])) {
     content_err(409, 'Ce contenu est encore stocké en local (data:/IndexedDB). Republiez-le en fichier serveur pour activer la diffusion protégée.');
 }
 
-if ($path === false || $path === null || strpos($path, $uploadsBase) !== 0 || !is_file($path)) {
+/* Confinement STRICT (audit 16/10/2026) : le préfixe se compare AVEC son
+   séparateur — sans lui, un dossier voisin « uploads_x » passait le test — et
+   aucun script n'est jamais servi, même confiné. */
+if ($path === false || $path === null || strpos($path, rtrim($uploadsBase, '/\\') . DIRECTORY_SEPARATOR) !== 0 || !is_file($path)
+    || preg_match('/\.(php\d?|phtml|phar|pht|cgi|pl|py|sh|htaccess)$/i', $path)) {
     content_err(404, 'Fichier indisponible');
 }
 

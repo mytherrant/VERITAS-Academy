@@ -85,6 +85,10 @@ function dem_notifier(array $d): void {
     $titre = $d['type'] === 'campus'
         ? 'Nouvelle demande VÉRITAS Campus — ' . $d['etablissement']
         : 'Demande d\'accompagnement à domicile — ' . $d['nom'];
+    /* Le sujet reprend une saisie publique : un saut de ligne y injectait des
+       en-têtes de courriel (Bcc:…). dem_txt ne retirait que \r. Encodé en
+       MIME, il ne peut plus rien injecter (audit 16/10/2026). */
+    $titre = '=?UTF-8?B?' . base64_encode(mb_substr(preg_replace('/[\r\n\t\0]+/', ' ', $titre), 0, 150)) . '?=';
     $corps = "Référence : " . $d['ref'] . "\n"
            . "Reçue le  : " . $d['created_at'] . "\n"
            . "Contact   : " . $d['nom'] . ' · ' . $d['tel'] . ' · ' . $d['email'] . "\n\n"
