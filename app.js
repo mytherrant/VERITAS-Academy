@@ -8582,6 +8582,7 @@ async function _runForceFullSync(){
   var btn=document.getElementById('forceSyncBtn');
   if(btn){btn.disabled=true;btn.innerHTML='⏳ En cours…';}
   var stat=document.getElementById('forceSyncStatus');
+  var _okBase=false,_okLws=false;
   function _step(html){if(stat)stat.innerHTML+=html;}
   _step('<div style="font-size:12px;color:var(--ink3);padding:4px 0">⏳ Étape 1/3 : Upload des fichiers locaux…</div>');
   // ── Étape 1 : binaires AVEC TIMEOUT GLOBAL (90s max) — évite le hang ──
@@ -8609,6 +8610,7 @@ async function _runForceFullSync(){
     var dbLight=_buildDbLight();
     var res=await _fbFetch(LWS_API.db,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(dbLight)});
     if(!res.ok)throw new Error('HTTP '+res.status);
+    _okBase=true;
     _step('<div style="font-size:12px;color:#059669;padding:4px 0">✓ Firebase synchronisé ('+Math.round(JSON.stringify(dbLight).length/1024)+' Ko)</div>');
   }catch(e){
     _step('<div style="font-size:12px;color:#AE5353;padding:4px 0">✗ Firebase : '+_esc(e.message)+'</div>');
@@ -8616,8 +8618,12 @@ async function _runForceFullSync(){
   // Étape 3 : POST LWS
   _step('<div style="font-size:12px;color:var(--ink3);padding:4px 0">⏳ Étape 3/3 : Sauvegarde sur LWS (200 Go)…</div>');
   try{
+    /* Remis à zéro AVANT l'appel : _backupDBToLWS ne lève jamais, et l'info
+       d'un ancien succès annonçait « ✓ sauvegardé » après un échec (audit 16/10/2026). */
+    window._lwsBackupInfo=null;
     await _backupDBToLWS(_buildDbLight());
     if(window._lwsBackupInfo){
+      _okLws=true;
       _step('<div style="font-size:12px;color:#059669;padding:4px 0">✓ LWS backup : '+window._lwsBackupInfo.sizeKo+' Ko à '+window._lwsBackupInfo.at+'</div>');
     } else {
       _step('<div style="font-size:12px;color:#D97706;padding:4px 0">⚠️ LWS : statut inconnu (voir console)</div>');
@@ -8625,7 +8631,14 @@ async function _runForceFullSync(){
   }catch(e){
     _step('<div style="font-size:12px;color:#AE5353;padding:4px 0">✗ LWS : '+_esc(e.message)+'</div>');
   }
-  _step('<div style="margin-top:12px;padding:10px;background:#F0FDF4;border-radius:8px;font-size:13px;font-weight:600;color:#16A34A">✅ Synchronisation terminée — tes données sont sauvegardées à 2 endroits indépendants.</div>');
+  // Le bilan dit ce qui a RÉUSSI, pas ce qu'on espérait.
+  if(_okBase&&_okLws){
+    _step('<div style="margin-top:12px;padding:10px;background:#F0FDF4;border-radius:8px;font-size:13px;font-weight:600;color:#16A34A">✅ Synchronisation terminée — tes données sont sauvegardées à 2 endroits indépendants.</div>');
+  } else {
+    _step('<div style="margin-top:12px;padding:10px;background:#FEF2F2;border-radius:8px;font-size:13px;font-weight:600;color:#AE5353">⚠️ Synchronisation incomplète — '
+      +(!_okBase&&!_okLws?'aucune sauvegarde n’a abouti':(!_okBase?'la base en ligne n’a pas été mise à jour':'la copie de secours LWS a échoué'))
+      +'. Vérifie ta connexion puis relance.</div>');
+  }
   if(btn){btn.disabled=false;btn.innerHTML='✓ Terminé · Fermer';btn.setAttribute('onclick','cm()');}
 }
 
@@ -32250,7 +32263,12 @@ function _payRef(prefix){
   var y = d.getFullYear().toString().slice(2);
   var m = ('0'+(d.getMonth()+1)).slice(-2);
   var dd = ('0'+d.getDate()).slice(-2);
-  var rnd = Math.random().toString(36).toUpperCase().slice(2,6);
+  /* 8 caractères tirés par crypto (audit 16/10/2026) : Math.random sur 4
+     caractères laissait des références devinables, et parfois plus courtes
+     (slice sur un nombre court). Alphabet sans 0/O/1/I : lisible au téléphone. */
+  var A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', rnd='';
+  try{ var b=new Uint8Array(8); crypto.getRandomValues(b); for(var i=0;i<8;i++) rnd+=A[b[i]%A.length]; }
+  catch(e){ for(var j=0;j<8;j++) rnd+=A[Math.floor(Math.random()*A.length)]; }
   return (prefix||'VT')+y+m+dd+'-'+rnd;
 }
 
