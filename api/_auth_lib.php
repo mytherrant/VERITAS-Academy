@@ -1524,6 +1524,25 @@ if (!defined('VRT_AUTH_LIB')) {
                 }
                 $msg = 'Abonnement ' . ($plan['nom'] ?? $targetId) . ' activé';
                 if ($rattaches)    $msg .= ' — ' . count($rattaches) . ' enfant(s) rattaché(s)';
+
+                /* SMS DE CONFIRMATION (16/10/2026) : formule + date de fin, au
+                   numéro qui a payé (sinon celui du compte). Simple mise en file
+                   — nous sommes sous le verrou de la base ; l'envoi part après
+                   (vrt_grant_entitlement_to_file). Idempotent par référence :
+                   un rappel rejoué n'envoie pas un second SMS. Un échec de mise
+                   en file n'annule JAMAIS un abonnement payé. */
+                if (function_exists('vrt_notify_enfiler')) {
+                    $telSms = $tel !== '' ? $tel : (string) ($db[$titulaire['coll']][$titulaire['idx']]['tel'] ?? '');
+                    $atelierPlan = isset($dureeAtelier[$targetId]);
+                    $nq = vrt_notify_enfiler([
+                        'ref' => $ref, 'type' => 'abonnement', 'kind' => 'abonnement',
+                        'tel' => $telSms, 'mail' => (string) ($state['clientEmail'] ?? ''),
+                        'titre' => (string) ($plan['nom'] ?? ($label !== '' ? $label : $targetId)),
+                        'exp' => (int) floor($finTs / 1000),
+                        'lien' => vrt_notify_site() . ($atelierPlan ? '/plateforme/' : '/app.html#abonnements'),
+                    ]);
+                    if ($nq !== '' && $nq !== 'deja en file') vrt_pay_log('[ABO_REMISE] ref=' . $ref . ' non enfilee : ' . $nq);
+                }
                 if ($introuvables) {
                     return ['changed' => true, 'a_regler' => true,
                             'msg' => $msg . ' ; identifiant(s) introuvable(s) à rattacher : ' . implode(', ', $introuvables)];

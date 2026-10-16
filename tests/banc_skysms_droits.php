@@ -156,6 +156,12 @@ try {
     $abo = null; foreach ((base()['elearning']['abonnements'] ?? []) as $a) if (($a['ref'] ?? '') === 'BD-ABO1') $abo = $a;
     $jours = $abo ? (((int) $abo['dateFinTs'] / 1000) - time()) / 86400 : 0;
     verifier('abonnement « Activé », échéance ≈ 1 an', $abo && ($abo['statut'] ?? '') === 'Activé' && $jours > 360 && $jours < 370, sprintf('%.1f jours', $jours));
+    $sms = smsPour('690000011');
+    $fin = $abo ? date('d/m/Y', (int) ($abo['dateFinTs'] / 1000)) : '§';
+    verifier('SMS de confirmation au numéro qui a payé', count($sms) === 1, count($sms) . ' SMS');
+    $m = (string) ($sms[0] ?? '');
+    verifier('…avec la formule et la date de fin', strpos($m, 'Premium annuel') !== false && strpos($m, $fin) !== false, mb_substr($m, 0, 200));
+    verifier('…et le lien vers les abonnements', strpos($m, '/app.html#abonnements') !== false, mb_substr($m, 0, 200));
 
     echo "\n\033[1m② Abonnement de l'Atelier (800 F, MENSUEL)\033[0m\n";
     $e = acheter('BD-ATL1', 'subscription', 'ens_mois', 800, '690000012', 'acc_test');
@@ -166,6 +172,11 @@ try {
     $abo = null; foreach ((base()['elearning']['abonnements'] ?? []) as $a) if (($a['ref'] ?? '') === 'BD-ATL1') $abo = $a;
     $jours = $abo ? (((int) $abo['dateFinTs'] / 1000) - time()) / 86400 : 0;
     verifier('durée d\'UN MOIS, pas d\'un an', $jours > 27 && $jours < 32, sprintf('%.1f jours', $jours));
+    $sms = smsPour('690000012');
+    $fin = $abo ? date('d/m/Y', (int) ($abo['dateFinTs'] / 1000)) : '§';
+    $m = (string) ($sms[0] ?? '');
+    verifier('SMS Atelier : un seul, avec la date de fin', count($sms) === 1 && strpos($m, $fin) !== false, count($sms) . ' SMS · ' . mb_substr($m, 0, 200));
+    verifier('…et le lien vers l\'Atelier', strpos($m, '/plateforme/') !== false, mb_substr($m, 0, 200));
     [$c] = req('POST', "$API?action=init", ['ref' => 'BD-ATL2', 'montant' => 100, 'intent' => 'subscription', 'targetId' => 'ens_mois',
         'clientTel' => '690000012', 'accountId' => 'acc_test'], ["Authorization: Bearer $PUB"]);
     verifier('Atelier à 100 F au lieu de 800 : refusé avant débit', $c === 409, "http $c");
@@ -207,6 +218,11 @@ try {
     $nouveaux = array_slice(recuSky(), $avant);
     $sms2 = array_filter($nouveaux, function ($r) { return strpos($r['uri'], '/sendsms/') === 0; });
     verifier('aucun SMS de plus', count($sms2) === 0, count($sms2) . ' SMS');
+    $avant = count(recuSky());
+    $st = etat('BD-ABO1'); $idc = (string) (array_slice((array) $st['id_clients'], -1)[0]);
+    req('GET', "$API?action=skysms_notify&cle=" . rawurlencode($CLE) . '&' . http_build_query(['id_operation' => $st['ops'][$idc], 'id_client' => $idc, 'statut' => '1']));
+    $sms3 = array_filter(array_slice(recuSky(), $avant), function ($r) { return strpos($r['uri'], '/sendsms/') === 0; });
+    verifier('abonnement rejoué : pas de second SMS de confirmation', count($sms3) === 0, count($sms3) . ' SMS');
 } finally {
     foreach ([$srvApi, $srvSky] as $p) { if (is_resource($p)) { proc_terminate($p); proc_close($p); } }
 }

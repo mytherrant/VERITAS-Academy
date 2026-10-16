@@ -192,6 +192,19 @@ if (!defined('VRT_NOTIFY_LIB')) {
             return $accents ? $t : vrt_notify_sans_accents($t);
         }
 
+        /* ABONNEMENT PAYÉ (16/10/2026) — e-learning ou Atelier. Pas de code :
+           le droit vit sur le compte. Le payeur a quitté le navigateur pour
+           valider sur son téléphone ; ce SMS lui dit que c'est ouvert, quelle
+           formule, et jusqu'à quand. */
+        if ((string) ($v['type'] ?? 'code') === 'abonnement') {
+            $t = 'VERITAS — paiement recu, abonnement active' . "\n"
+               . ($titre !== '' ? $titre . "\n" : '')
+               . ($exp > 0 ? 'Valable jusqu’au ' . date('d/m/Y', $exp) . "\n" : '')
+               . 'Acceder : ' . ($lien !== '' ? $lien : vrt_notify_site()) . "\n"
+               . 'Aide : ' . $aide;
+            return $accents ? $t : vrt_notify_sans_accents($t);
+        }
+
         // LIVRE NUMÉRIQUE : pas de code, l'accès est sur le compte de l'acheteur.
         if ((string) ($v['type'] ?? 'code') === 'livre') {
             $login = (string) ($v['login'] ?? '');
