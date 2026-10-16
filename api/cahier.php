@@ -135,6 +135,17 @@ function ch_ecrire(string $f, array $d): bool {
     return true;
 }
 
+/* VERROU PAR CAHIER (audit 16/10/2026). Lire, fusionner, réécrire sans
+   verrou : deux appareils du même élève — ou le professeur qui annote pendant
+   un enregistrement — se faisaient perdre leurs modifications l'un l'autre.
+   Le verrou vit dans un fichier à part et se rend tout seul en fin de requête
+   (y compris sur ch_err / ch_out, qui terminent le script). */
+function ch_verrou(string $f) {
+    $fp = @fopen($f . '.lock', 'c');
+    if ($fp) @flock($fp, LOCK_EX);
+    return $fp;
+}
+
 /** La forme d'une clé d'exercice. On refuse tout le reste — une clé libre
  *  serait un chemin de fichier déguisé, et un moyen d'écrire n'importe où. */
 function ch_cle_valide(string $k): bool {
@@ -216,6 +227,7 @@ if ($action === 'enregistrer') {
     if (!is_array($envoi)) ch_err(400, 'Aucune réponse à enregistrer.', 'vide');
 
     $f = ch_fichier($ouvrage, $moi);
+    $verrou = ch_verrou($f);
     $d = ch_lire($f);
 
     /* FUSION, jamais remplacement. Le client n'envoie que ce qui a changé
@@ -383,6 +395,7 @@ if ($action === 'annoter') {
 
     $f = ch_fichier($ouvrage, $eleve);
     if (!is_file($f)) ch_err(404, 'Cette copie n’existe pas.', 'unknown');
+    $verrou = ch_verrou($f);
     $d = ch_lire($f);
 
     $texte = ch_texte($in['texte'] ?? '', CH_MAX_ANNOT);
