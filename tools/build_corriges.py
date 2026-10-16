@@ -1150,6 +1150,18 @@ def main():
               "tous-les-corriges.html n'a pas ete regeneree (%s). Elle reste "
               "en ligne avec son contenu precedent, qui peut avoir vieilli." % e)
 
+    # 16/10/2026 : les deux pages « tout en un » pesaient 11 Mo et 3,2 Mo — une
+    # page qui ne s'ouvre pas en 3G. Leurs documents se chargent désormais à
+    # l'ouverture depuis la page détaillée (tools/alleger_corriges.py, qui
+    # refuse d'écrire si une page détaillée manque ou diffère).
+    try:
+        import alleger_corriges
+        if alleger_corriges.main() != 0:
+            print("::warning title=Corriges non alleges::une page detaillee manque ou differe : "
+                  "les pages tout-en-un restent lourdes (voir tools/alleger_corriges.py)")
+    except Exception as e:                       # noqa: BLE001
+        print("::warning title=Corriges non alleges::%s" % e)
+
     with open(os.path.join(OUT, "sitemap-corriges.xml"), "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
