@@ -205,33 +205,60 @@
     corps.push(ligneInfos(ep));
     if (ep.consigne) corps.push(p(ep.consigne, { italique: true, taille: 20, align: 'center', couleur: '5A6678', espaceApres: 220 }));
 
-    (textes || []).forEach(function (t, i) {
-      corps.push(p('TEXTE ' + (i + 1) + (t.mots ? '  ·  ' + t.mots + ' mots' : ''),
-        { gras: true, taille: 20, couleur: '1A72BB', espaceAvant: 200, espaceApres: 80, bordureBas: true }));
-      corps.push(p(t.texte || '', { taille: 22, align: 'both', espaceApres: 80 }));
+    var ROMAINS = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+    function pointsDe(v) {
+      return (v == null || v === '') ? '' : '   (' + v + ' point' + (parseFloat(v) > 1 ? 's' : '') + ')';
+    }
+    /* Un texte support : son en-tête (« TEXTE 1 · 391 mots » par défaut, ou
+       l'intitulé d'un SUJET quand l'épreuve se compose de sujets au choix),
+       le texte, sa référence. */
+    function blocTexte(entete, t) {
+      corps.push(p(entete, { gras: true, taille: 20, couleur: '1A72BB', espaceAvant: 200, espaceApres: 80, bordureBas: true }));
+      if (t.texte) corps.push(p(t.texte, { taille: 22, align: 'both', espaceApres: 80 }));
       if (t.reference) corps.push(p('— ' + t.reference, { italique: true, taille: 18, align: 'right', couleur: '5A6678', espaceApres: 160 }));
+    }
 
-      [['I. Compréhension du texte', t.comp], ['II. Connaissance et maniement de la langue', t.expl]]
+    (textes || []).forEach(function (t, i) {
+      blocTexte(t.entete || ('TEXTE ' + (i + 1) + (t.mots ? '  ·  ' + t.mots + ' mots' : '')), t);
+
+      /* `t.romain` (sujet de contraction) : les consignes se numérotent
+         I., II., III. sans intitulé de rubrique — « Résumé », « Discussion »
+         et « Présentation » SONT les rubriques. */
+      if (t.romain) {
+        var k2 = 0;
+        (t.comp || []).concat(t.expl || []).forEach(function (q) {
+          corps.push(p(ROMAINS[k2++] + '. ' + (q.texte || q) + pointsDe(q.points), { taille: 21, indent: 260, espaceApres: 90 }));
+        });
+        (t.apres || []).forEach(function (l) { corps.push(p(ROMAINS[k2++] + '. ' + l, { taille: 21, indent: 260, espaceApres: 90 })); });
+        return;
+      }
+      [[t.titreComp || 'I. Compréhension du texte', t.comp], [t.titreExpl || 'II. Connaissance et maniement de la langue', t.expl]]
         .forEach(function (paire) {
           var titre = paire[0], liste = paire[1] || [];
           if (!liste.length) return;
           corps.push(p(titre, { gras: true, taille: 20, couleur: '14375F', espaceAvant: 120, espaceApres: 80 }));
           liste.forEach(function (q, k) {
-            var pts = (q.points == null || q.points === '') ? '' : '   (' + q.points + ' pt' + (parseFloat(q.points) > 1 ? 's' : '') + ')';
-            corps.push(p((k + 1) + '. ' + (q.texte || q) + pts, { taille: 21, indent: 260, espaceApres: 70 }));
+            corps.push(p((k + 1) + '. ' + (q.texte || q) + pointsDe(q.points), { taille: 21, indent: 260, espaceApres: 70 }));
           });
         });
     });
 
-    /* Sujets rédigés : situation-problème, dissertation, texte fautif… */
+    /* Sujets rédigés : situation-problème, dissertation, texte fautif…
+       `s.entete` remplace l'intitulé par défaut ; `s.support` imprime le texte
+       du sujet (commentaire composé) DANS le sujet, avant sa consigne. */
     (ep.sujets || []).forEach(function (s) {
       if (s.genre === 'presentation') {
         corps.push(p('Présentation de la copie' + (s.pts ? ' : ' + s.pts + ' pts' : ''),
           { italique: true, taille: 20, couleur: '5A6678', espaceAvant: 160, espaceApres: 60 }));
         return;
       }
-      corps.push(p((s.auChoix ? 'SUJET AU CHOIX — ' : '') + String(s.titre || 'Sujet').toUpperCase() + (s.pts ? '  ·  ' + s.pts + ' pts' : ''),
-        { gras: true, taille: 20, couleur: '1A72BB', espaceAvant: 200, espaceApres: 80, bordureBas: true }));
+      var entete = s.entete || ((s.auChoix ? 'SUJET AU CHOIX — ' : '') + String(s.titre || 'Sujet').toUpperCase() + (s.pts ? '  ·  ' + s.pts + ' pts' : ''));
+      if (s.support) {
+        blocTexte(entete, s.support);
+        corps.push(p(s.texte || '', { taille: 22, align: 'both', espaceApres: 120 }));
+        return;
+      }
+      corps.push(p(entete, { gras: true, taille: 20, couleur: '1A72BB', espaceAvant: 200, espaceApres: 80, bordureBas: true }));
       corps.push(p(s.texte || '', { taille: 22, align: 'both', espaceApres: 120 }));
     });
 

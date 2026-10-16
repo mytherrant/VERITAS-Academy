@@ -256,7 +256,8 @@ const attendre = ms => new Promise(r => setTimeout(r, ms));
   dire(errDelai === 'delai', 'un serveur muet est abandonné après le délai de garde (erreur « delai »)', errDelai);
 
   /* Le proxy : JSON imposé et réflexion bornée, pour CETTE action seule. */
-  const proxy = fs.readFileSync(P('api/ia_proxy.php'), 'utf8');
+  // core.autocrlf : sur le poste le fichier est en CRLF, le motif attend \n.
+  const proxy = fs.readFileSync(P('api/ia_proxy.php'), 'utf8').replace(/\r\n/g, '\n');
   const bloc = (proxy.match(/if \(\(string\) \(\$body\['action'\] \?\? ''\) === 'epreuve_minesec'\) \{[\s\S]*?\}\n/) || [''])[0];
   dire(/responseMimeType' => 'application\/json'/.test(bloc) && /thinkingBudget/.test(bloc)
     && /array_merge\(\['temperature' => 0\.7, 'maxOutputTokens' => \$maxTok\], \$reglages\)/.test(proxy)

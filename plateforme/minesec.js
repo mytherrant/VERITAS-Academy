@@ -184,18 +184,19 @@
     {
       code: 'CO_1C', examen: 'Évaluation sommative', cycle: 'Premier cycle',
       classes: ['6e', '5e', '4e', '3e'], nom: 'Correction orthographique',
-      duree: '45 min', coeff: '—', sujetsAuChoix: 1, grille: 'orthoBEPC',
+      duree: '1 h', coeff: '1', sujetsAuChoix: 1, grille: 'orthoBEPC',
       texteSupport: { min: 120, max: 150, unite: 'mots', nature: 'texte contemporain en prose, lié aux domaines de vie du cycle' },
       parties: [{ titre: 'Texte fautif à corriger', points: 20, consigne: 'Recopie le texte en corrigeant les fautes. 15 fautes injectées.' }],
       interdits: ['Ne pas intituler l’épreuve « Dictée » : le programme du 1er cycle prescrit une CORRECTION ORTHOGRAPHIQUE, où l’élève corrige un texte fautif.'],
-      source: 'Programme officiel MINESEC 1er cycle ; arrêté N° 08/19 pour la longueur 120-150 mots',
+      consignesRedaction: ['Texte fautif noté sur une base de 00/20 : 15 fautes exactement — 5 de grammaire ou conjugaison (2 pts), 4 d’accent, majuscule, ponctuation ou coupure de mot (0,5 pt), 4 d’orthographe simple (1 pt), 2 d’orthographe à incidence sémantique (2 pts). L’examinateur ne note que les fautes prévues.'],
+      source: 'Programme officiel MINESEC 1er cycle ; arrêté N° 08/19 pour la longueur 120-150 mots ; guide pédagogique 1er cycle (IGE) : 1 h, coefficient 1',
       confiance: 'officiel',
       note: 'Au BEPC, le descriptif officiel porte le texte à 150-200 mots.'
     },
     {
       code: 'ET_1C', examen: 'Évaluation sommative', cycle: 'Premier cycle',
       classes: ['6e', '5e', '4e', '3e'], nom: 'Étude de texte',
-      duree: '2 h', coeff: '2', sujetsAuChoix: 1, grille: 'etudeTexte1010',
+      duree: '1 h', coeff: '1', sujetsAuChoix: 1, grille: 'etudeTexte1010',
       texteSupport: { min: 150, max: 250, unite: 'mots', nature: 'texte contemporain de compréhension aisée' },
       parties: [
         { titre: 'I. Compréhension du texte', points: 10, consigne: 'Action, personnages, idées, éléments culturels.' },
@@ -205,7 +206,12 @@
         'Aucune question théorique (« Qu’est-ce qu’un… ? », « Récite la règle »).',
         'Aucune analyse logique : le programme la bannit de cette épreuve.'
       ],
-      source: 'Programme officiel MINESEC 1er cycle',
+      consignesRedaction: [
+        'Compréhension : questions sur l’action, les personnages, les idées, les éléments culturels du texte.',
+        'Langue : le vocabulaire sert la compréhension du texte ; la grammaire et la conjugaison se pratiquent par MANIPULATION d’une phrase du texte (expansion, réduction, transformation, substitution, déplacement, transposition, comparaison, groupes fonctionnels).',
+        'Les réponses de l’élève sont entièrement rédigées.'
+      ],
+      source: 'Programme officiel MINESEC 1er cycle ; guide pédagogique 1er cycle (IGE) : 1 h, coefficient 1',
       confiance: 'officiel',
       note: 'Au BEPC, le descriptif officiel porte le texte à 200-250 mots.'
     },
@@ -218,7 +224,8 @@
         { titre: 'Situation de communication', points: 0, consigne: 'Encadré de mise en situation de 40 à 50 mots.' },
         { titre: 'Production écrite', points: 20, consigne: 'Consigne en trois temps (1-2-3).' }
       ],
-      source: 'Programme officiel MINESEC 1er cycle',
+      consignesRedaction: ['L’énoncé d’intégration réunit : le CONTEXTE (situation de vie), le PROBLÈME à résoudre, la PRODUCTION attendue (type de texte), les CONSIGNES (durée, longueur en lignes) et les CONTRAINTES (ex. : « au moins trois raisons assorties d’exemples »). Ex. du guide : « Vous faites partie du club environnement… votre paragraphe, rédigé en 1 heure, ne devra pas dépasser 15 lignes. »'],
+      source: 'Programme officiel MINESEC 1er cycle ; guide pédagogique 1er cycle (IGE) : 2 h, coefficient 2, grille 6/6/6/2',
       confiance: 'officiel'
     },
 
@@ -276,6 +283,7 @@
       nom: 'Littérature ou culture générale — A, ABI',
       duree: '4 h', coeff: '3', sujetsAuChoix: 3, grille: 'contraction992',
       texteSupport: { min: 550, max: 650, unite: 'mots', nature: 'texte argumentatif en français contemporain' },
+      texteSupportParClasse: { '2nde': { min: 400, max: 500, unite: 'mots', nature: 'texte argumentatif d’actualité, sans grande difficulté de compréhension (guide pédagogique 2nd cycle : 400 à 500 mots en 2nde)' } },
       parties: [
         { titre: 'Sujet de type 1 — Contraction de texte et discussion', points: 20, consigne: 'Résumé au ¼ ou analyse au 1/3 /9 · Discussion d’un problème tiré du texte /9 · Présentation /2.' },
         { titre: 'Sujet de type 2 — Commentaire composé', points: 20, consigne: 'Texte de 20 à 30 lignes ou une vingtaine de vers, avec une consigne non contraignante.' },
@@ -296,6 +304,7 @@
       nom: 'Langue française — A, ABI',
       duree: '2 h', coeff: '1', sujetsAuChoix: 1, grille: 'langue4rub5',
       texteSupport: { min: 250, max: 400, unite: 'mots', nature: 'texte littéraire ou non littéraire' },
+      texteSupportParClasse: { '2nde': { min: 200, max: 250, unite: 'mots', nature: 'texte littéraire ou non (guide pédagogique 2nd cycle : 200 à 250 mots en 2nde littéraire)' } },
       parties: [
         { titre: 'I. Communication', points: 5 },
         { titre: 'II. Morphosyntaxe', points: 5 },
@@ -315,6 +324,7 @@
       nom: 'Littérature ou culture générale — C, D, E, TI',
       duree: '3 h', coeff: '2', sujetsAuChoix: 2, grille: 'contraction992',
       texteSupport: { min: 550, max: 650, unite: 'mots', nature: 'texte argumentatif en français contemporain' },
+      texteSupportParClasse: { '2nde': { min: 400, max: 500, unite: 'mots', nature: 'texte argumentatif d’actualité, sans grande difficulté de compréhension (guide pédagogique 2nd cycle : 400 à 500 mots en 2nde)' } },
       parties: [
         { titre: 'Sujet de type 1 — Contraction de texte et discussion', points: 20, consigne: 'Résumé au ¼ ou analyse au 1/3 /9 · Discussion d’un problème tiré du texte /9 · Présentation /2.' },
         { titre: 'Sujet de type 2 — Dissertation', points: 20, consigne: 'Dissertation littéraire ou de culture générale.' }
@@ -333,6 +343,7 @@
       nom: 'Langue française — C, D, E, TI',
       duree: '2 h', coeff: '1', sujetsAuChoix: 1, grille: 'langue4rub5',
       texteSupport: { min: 250, max: 400, unite: 'mots', nature: 'texte littéraire ou non littéraire' },
+      texteSupportParClasse: { '2nde': { min: 150, max: 200, unite: 'mots', nature: 'texte littéraire ou non (guide pédagogique 2nd cycle : 150 à 200 mots en 2nde scientifique)' } },
       parties: [
         { titre: 'I. Communication', points: 5 },
         { titre: 'II. Morphosyntaxe', points: 5 },
@@ -1062,6 +1073,63 @@
   };
 
   /* ------------------------------------------------------------------
+     5 bis. ŒUVRES INTÉGRALES AU PROGRAMME, par classe
+     ------------------------------------------------------------------
+     Relevé du 16/10/2026 : programme 2nde du département (« Œuvres
+     intégrales »), bibliothèque d'œuvres fournie par Jacques (Desktop/Adit
+     manuels), couvertures des cahiers d'œuvre et des cahiers 6e-3e du site.
+     Le genre n'est écrit que s'il a été vérifié dans l'œuvre elle-même.
+     Une œuvre du 1er cycle ne sert JAMAIS au 2nd cycle (règle du 04/10). */
+  var OEUVRES = {
+    '6e': [
+      { titre: 'Les Contes de Korotoumou', auteur: 'Amadou Koné', genre: 'contes (veillée malinké)' },
+      { titre: 'Les Bimanes', auteur: 'Séverin Cécile Abega' },
+      { titre: 'Les Chants de la forêt', auteur: 'Lucien Anya Noa', genre: 'contes et chantefables béti' }
+    ],
+    '5e': [
+      { titre: 'N’kum-Wam, le 8e notable', auteur: 'David Massoma Pandong' },
+      { titre: 'L’Arbre fétiche', auteur: 'Jean Pliya', genre: 'nouvelles' },
+      { titre: 'Père inconnu', auteur: 'Pabé Mongo', genre: 'récit' }
+    ],
+    '4e': [
+      { titre: 'Cœur du Sahel', auteur: 'Djaïli Amadou Amal', genre: 'roman' },
+      { titre: 'Trois prétendants… un mari', auteur: 'Guillaume Oyônô Mbia', genre: 'comédie' },
+      { titre: 'L’Attachement au sol natal', auteur: 'Ernest Alima', genre: 'poésie' }
+    ],
+    '3e': [
+      { titre: 'Ville cruelle', auteur: 'Eza Boto', genre: 'roman' },
+      { titre: 'La Marmite de Koka-Mbala', auteur: 'Guy Menga', genre: 'théâtre' },
+      { titre: 'Petites gouttes de chant pour créer l’homme', auteur: 'René Philombe', genre: 'poésie' }
+    ],
+    '2nde': [
+      { titre: 'Les Tribus de Capitoline', auteur: 'P.-C. Ombété Bella', genre: 'roman' },
+      { titre: 'Poèmes sauvages éclairés au feu de brousse', auteur: 'Henri N’koumo', genre: 'poésie' },
+      { titre: 'Tartuffe ou l’Imposteur', auteur: 'Molière', genre: 'comédie' }
+    ],
+    '1ere': [
+      { titre: 'Balafon', auteur: 'Engelbert Mveng', genre: 'poésie' },
+      { titre: 'Le Lion et la Perle', auteur: 'Wole Soyinka', genre: 'théâtre' },
+      { titre: 'Au cœur des ténèbres', auteur: 'Joseph Conrad', genre: 'récit' }
+    ],
+    tle: [
+      { titre: 'Ngum a Jemea', auteur: 'David Mbanga Eyombwan', genre: 'théâtre' },
+      { titre: 'Stances et Poèmes', auteur: 'Sully Prudhomme', genre: 'poésie' },
+      { titre: 'Le Vieux Nègre et la Médaille', auteur: 'Ferdinand Oyono', genre: 'roman' }
+    ]
+  };
+
+  /* « 2nde A », « Tle C », « 1ère », « 4e » → clé d'OEUVRES. */
+  function cleClasse(c) {
+    var s = String(c || '').toLowerCase();
+    if (s.normalize) s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (/terminale|\btle\b/.test(s)) return 'tle';
+    if (/1ere|premiere|\b1re\b/.test(s)) return '1ere';
+    if (/2nde|seconde|\b2de\b/.test(s)) return '2nde';
+    var m = s.match(/\b([3-6])(?:e|eme)\b/);
+    return m ? m[1] + 'e' : '';
+  }
+
+  /* ------------------------------------------------------------------
      6. ACCÈS
      ------------------------------------------------------------------ */
 
@@ -1075,6 +1143,16 @@
     sequenceType: SEQUENCE_TYPE,
     formulations: FORMULATIONS,
     questionnement: QUESTIONNEMENT,
+    oeuvres: OEUVRES,
+    cleClasse: cleClasse,
+    oeuvresDe: function (classe) { return OEUVRES[cleClasse(classe)] || []; },
+    /* Longueur du texte support POUR CETTE CLASSE : la 2nde contracte un
+       texte de 400 à 500 mots, la 1ère et la Terminale un texte plus long. */
+    texteSupportPour: function (ep, classe) {
+      if (!ep) return null;
+      var par = ep.texteSupportParClasse && ep.texteSupportParClasse[cleClasse(classe)];
+      return par || ep.texteSupport || null;
+    },
 
     epreuveParCode: function (code) {
       for (var i = 0; i < EPREUVES.length; i++) if (EPREUVES[i].code === code) return EPREUVES[i];

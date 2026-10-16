@@ -1011,6 +1011,12 @@ jobs:
       - name: ✨ Atelier — Ambassa compose-t-elle une épreuve conforme ?
         run: node tests/banc_composition_ambassa.cjs
 
+      # Probatoire / BAC : résumé modèle RECOMPTÉ, barèmes ADDITIONNÉS,
+      # vouvoiement, œuvres de la classe, citations attribuées. Éprouvé par
+      # mutation le 16/10/2026 : 11 au rouge sans les contrôles.
+      - name: "✨ Atelier — les exigences du BAC sont-elles vérifiées, pas seulement demandées ?"
+        run: node tests/banc_exigences_reflexion.cjs
+
       # La métadonnée et le contenu descendent séparément. Quand le second
       # transfert échoue, l'export Word annonce 387 mots au-dessus d'un texte
       # de 33 — et l'épreuve part en photocopie.

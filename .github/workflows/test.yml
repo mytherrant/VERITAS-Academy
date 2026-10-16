@@ -104,6 +104,12 @@ jobs:
       - name: ✨ Atelier — Ambassa compose-t-elle une épreuve conforme ?
         run: node tests/banc_composition_ambassa.cjs
 
+      # Probatoire / BAC : résumé modèle RECOMPTÉ, barèmes ADDITIONNÉS,
+      # vouvoiement, œuvres de la classe, citations attribuées. Éprouvé par
+      # mutation le 16/10/2026 : 11 au rouge sans les contrôles.
+      - name: "✨ Atelier — les exigences du BAC sont-elles vérifiées, pas seulement demandées ?"
+        run: node tests/banc_exigences_reflexion.cjs
+
       - name: "✨ Atelier — classe et nature dans le composeur, 2nde, brouillon supprimé"
         run: node tests/banc_atelier_composer.cjs
 

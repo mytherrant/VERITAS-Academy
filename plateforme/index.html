@@ -29,12 +29,12 @@
 <meta property="og:image" content="https://veritas-school.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <script src="./support.js?v=b7335820"></script>
-<script src="./minesec.js?v=68930187"></script>
+<script src="./minesec.js?v=0ec7e1a6"></script>
 <script src="./conformite.js?v=70d66d2a"></script>
 <script src="./exercices.js?v=c6d93301"></script>
-<script src="./generateur.js?v=7c16d0c8"></script>
+<script src="./generateur.js?v=4644c996"></script>
 <script src="./texte.js?v=43fa1e84"></script>
-<script src="./docx.js?v=8979cf66"></script>
+<script src="./docx.js?v=090324b1"></script>
 <!--vrt-habillage:tete-->
 <link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.30">
 <script>window.VRT_DATA=window.VRT_DATA||{"citations":[{"t":"Le génie, c’est un pour cent d’inspiration et quatre-vingt-dix-neuf pour cent de transpiration.","a":"Thomas Edison"},{"t":"Ce n’est pas parce que les choses sont difficiles que nous n’osons pas ; c’est parce que nous n’osons pas qu’elles sont difficiles.","a":"Sénèque"},{"t":"L’éducation est l’arme la plus puissante pour changer le monde.","a":"Nelson Mandela"},{"t":"Un peu chaque jour vaut mieux que beaucoup un seul jour.","a":"Proverbe"},{"t":"La chance sourit à l’esprit préparé.","a":"Louis Pasteur"},{"t":"Tomber sept fois, se relever huit.","a":"Proverbe japonais"}],"themeSombre":"\n      body{background:#0A1428!important}\n      [style*=\"background:#fff\"],[style*=\"background:#FAFBFE\"],[style*=\"background:#FCFDFE\"],[style*=\"background:#F7F9FD\"]{background:#132241!important}\n      [style*=\"background:#F4F5F8\"],[style*=\"background:#F4F6FB\"],[style*=\"background:#EFF2F7\"],[style*=\"background:#F5F9FF\"]{background:#0F1B33!important}\n      [style*=\"background:rgba(255,255,255,.96)\"]{background:rgba(13,25,48,.96)!important}\n      [style*=\"radial-gradient(1100px\"],[style*=\"radial-gradient(900px\"]{background:#0C1730!important}\n      [style*=\"linear-gradient(180deg,#FBF8F1\"]{background:#0C1730!important}\n      [style*=\"color:#001136\"]{color:#EEF3FC!important}\n      [style*=\"color:#0C2A6A\"]{color:#DCE6F8!important}\n      [style*=\"color:#4D5163\"],[style*=\"color:#6B5A42\"]{color:#B6C2D8!important}\n      [style*=\"color:#6E7385\"],[style*=\"color:#9BA6BE\"]{color:#8D9AB4!important}\n      [style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"]{border-color:#24334F!important}\n      [style*=\"\"],[style*=\"\"]{border-bottom-color:#24334F!important}\n      [style*=\"\"]{border-top-color:#24334F!important}\n      [style*=\"border-left:4px solid\"]{border-left-color:#FFC93C!important}\n      input,input::placeholder{color:#C7D2E6!important}\n    "};</script>
@@ -2155,7 +2155,9 @@
                     <p style="font-size:12.5px;font-style:italic;color:var(--c7a8598,#7a8598);margin:8px 0 0;text-align:right">— {{ f.reference }}</p>
                   </div>
                   <div style="margin-top:13px;padding-top:13px;border-top:1px dashed var(--ce2eaf3,#e2eaf3)">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px"><span style="width:7px;height:7px;border-radius:50%;background:var(--c1a72bb,#1a72bb)"></span><span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c1a72bb,#1a72bb);font-family:Poppins">I. Compréhension</span><span style="{{ f.qEditedComp }}">modifié</span></div>
+                    <!-- Rubriques adaptées à la structure (16/10/2026) : une contraction n’a pas de « Compréhension », le texte du commentaire composé n’a pas de questions. -->
+                    <div style="{{ f.compZone }}">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px"><span style="width:7px;height:7px;border-radius:50%;background:var(--c1a72bb,#1a72bb)"></span><span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c1a72bb,#1a72bb);font-family:Poppins">{{ f.titreComp }}</span><span style="{{ f.qEditedComp }}">modifié</span></div>
                     <div style="display:flex;flex-direction:column;gap:6px">
                       <sc-for list="{{ f.compItems }}" as="q" hint-placeholder-count="3">
                         <div class="vrt-qrow" style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;background:{{ q.rowBg }};border-radius:8px;padding:5px 8px">
@@ -2168,7 +2170,9 @@
                       </sc-for>
                     </div>
                     <button onClick="{{ f.addComp }}" style="{{ f.addQBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb);color:var(--c1a72bb,#1a72bb);background:var(--cf5faff,#f5faff)">+ Ajouter une question</button>
-                    <div style="display:flex;align-items:center;gap:8px;margin:14px 0 9px"><span style="width:7px;height:7px;border-radius:50%;background:var(--cc26a12,#c26a12)"></span><span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--cc26a12,#c26a12);font-family:Poppins">II. Langue &amp; production</span><span style="{{ f.qEditedExpl }}">modifié</span></div>
+                    </div>
+                    <div style="{{ f.explZone }}">
+                    <div style="display:flex;align-items:center;gap:8px;margin:14px 0 9px"><span style="width:7px;height:7px;border-radius:50%;background:var(--cc26a12,#c26a12)"></span><span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--cc26a12,#c26a12);font-family:Poppins">{{ f.titreExpl }}</span><span style="{{ f.qEditedExpl }}">modifié</span></div>
                     <div style="display:flex;flex-direction:column;gap:6px">
                       <sc-for list="{{ f.explItems }}" as="q" hint-placeholder-count="3">
                         <div class="vrt-qrow" style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;background:{{ q.rowBg }};border-radius:8px;padding:5px 8px">
@@ -2181,6 +2185,7 @@
                       </sc-for>
                     </div>
                     <button onClick="{{ f.addExpl }}" style="{{ f.addQBtn }}" style-hover="border-color:var(--cc26a12,#c26a12);color:var(--cc26a12,#c26a12);background:var(--cfdf5ea,#fdf5ea)">+ Ajouter une question</button>
+                    </div>
                   </div>
                 </article>
               </sc-for>
@@ -5036,7 +5041,7 @@ class Component extends DCLogic {
       return;
     }
     const G=VRT_GENERATEUR;
-    const plan=G.planEpreuve(struct);
+    const plan=G.planEpreuve(struct,{classe:a.classe});
     const textesChoisis=(a.textIds||[]).slice();
     if(mode==='completer'&&plan.support==='texte'&&!textesChoisis.length)mode='tout';
     if(mode==='tout'&&this._aDuContenu(a)&&typeof window!=='undefined'&&window.confirm
@@ -5192,7 +5197,15 @@ class Component extends DCLogic {
         controles.push({ok:false,libelle:'Texte hors de la longueur officielle ('+ab.bornes.min+'-'+ab.bornes.max
           +' mots) : '+ab.fermes+' texte(s) conforme(s) sont r\u00e9serv\u00e9s \u00e0 une formule sup\u00e9rieure.'});
       }else if(ab&&ab.bornes&&!ab.dansNorme){
-        controles.push({ok:false,libelle:'Aucun texte du corpus ne tombe dans la longueur officielle ('+ab.bornes.min+'-'+ab.bornes.max+' mots) : coupez l\u2019extrait en marquant [\u2026].'});
+        /* Couper n'aide que si le texte est trop LONG. Trop court (extraits
+           du corpus plafonn\u00e9s vers 400 mots, contraction \u00e0 550-650), il faut
+           un autre texte : on ne rallonge pas un texte d'auteur (16/10). */
+        const sp0=ctx.textes.filter(t=>t.role==='support')[0];
+        const m0=sp0?(sp0.words||String(sp0.text||'').split(/\s+/).filter(Boolean).length):0;
+        controles.push({ok:false,libelle:'Aucun texte du corpus ne tombe dans la longueur officielle ('+ab.bornes.min+'-'+ab.bornes.max+' mots)'
+          +(m0&&m0<ab.bornes.min
+            ?' : le texte retenu n\u2019a que '+m0+' mots. Ajoutez un texte de '+ab.bornes.min+' \u00e0 '+ab.bornes.max+' mots (onglet Corpus, \u00ab Importer un corpus \u00bb), sans jamais rallonger un texte d\u2019auteur.'
+            :' : coupez l\u2019extrait en marquant [\u2026].')});
       }
       this.setState({genBusy:false,genEtape:'',genCorrigeVisible:true,
         genRapport:{controles:controles,remarques:res.remarques||'',texte:ref}});
@@ -6539,35 +6552,98 @@ class Component extends DCLogic {
     this._consommerQuota('export',()=>this._fabriquerWord(a));
   }
   /* Fabrication proprement dite, appelee UNIQUEMENT apres accord du serveur. */
+  /* ── MISE EN FORME DE L'EXPORT (16/10/2026, audit d'une épreuve de
+     Littérature A composée par Ambassa) ─────────────────────────────────
+     Une épreuve à SUJETS AU CHOIX (Probatoire / BAC : contraction,
+     commentaire, dissertation) sortait comme une étude de texte : « deux
+     parties dont une obligatoire », le résumé et la discussion sous
+     « II. Connaissance et maniement de la langue », la présentation entre
+     deux textes, le texte du commentaire imprimé deux fois, du Markdown
+     (« **… ** ») dans le corrigé, et des références de fichier (« Theatre 03 »). */
+  _refPropre(r){
+    return String(r||'').replace(/,\s*(Th[ée][aâ]tre|Texte|Extrait|Po[ée]sie|Roman|Document)\s*\d+\s*$/i,'').trim();
+  }
+  _sansMarkdown(s){
+    return String(s||'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/__([^_]+)__/g,'$1')
+      .replace(/^#{1,6}\s*/gm,'').replace(/^(\s*)[*-]\s+/gm,'$1• ');
+  }
+  /* Ambassa recopiait parfois le texte du commentaire dans le sujet : il
+     s'imprimait alors deux fois. On garde ce qui SUIT le texte (la consigne). */
+  _sansTexteRecopie(sujet,support){
+    const s=String(sujet||''),t=String(support||'').trim();
+    if(t.length<80)return s;
+    const fin=t.slice(-40),i=s.indexOf(fin);
+    if(i<0)return s;
+    const reste=s.slice(i+fin.length).replace(/^[\s»"”.…]+/,'').trim();
+    return reste||s;
+  }
+  _modeChoix(stru){return !!(stru&&(stru.sujetsAuChoix||1)>1&&stru.texteSupport);}
+  _titreSujet(t){return String(t||'Sujet').replace(/^Sujet\s+de\s+type\s+\d+\s*[—–-]\s*/i,'').replace(/^Sujet\s+\d+\s*[—–-]\s*/i,'');}
   /* Corrige et bareme, pour la page « reservee a l'enseignant » de l'export.
      La norme le demande (« toujours associer le corrige et le texte original
      a l'epreuve proposee ») ; on ne l'imprime jamais sur la feuille du
      candidat. */
   _corrigePourExport(a){
     const blocs=[];
+    const stru=a.epreuveCode?MINESEC.epreuveParCode(a.epreuveCode):null;
+    const choix=this._modeChoix(stru);
+    const R=['I','II','III','IV','V','VI'];
+    let nSujet=1;
     (a.textIds||[]).forEach((n,ti)=>{const f=this.all.find(x=>x.n===n);if(!f)return;
-      [['comp','I. Compréhension'],['expl','II. Langue et production']].forEach(([k,t])=>{
+      if(choix&&a.customQ&&a.customQ[n]&&a.customQ[n].role==='commentaire')return;
+      const titres=choix?[['comp',''],['expl','']]:[['comp','I. Compréhension'],['expl','II. Langue et production']];
+      let k2=0;
+      titres.forEach(([k,t])=>{
         const qs=this._qListOf(a,f,k);if(!qs.length)return;
         const c=(a.corrige&&a.corrige[n]&&a.corrige[n][k])||[];
         const pp=(a.pts&&a.pts[n]&&a.pts[n][k])||[];
-        blocs.push({titre:'Texte '+(ti+1)+' — '+t,lignes:qs.map((q,i)=>(i+1)+'. '+q
-          +(pp[i]!=null&&pp[i]!==''?' ('+pp[i]+' pt'+((parseFloat(pp[i])||0)>1?'s':'')+')':'')
-          +'\n   → '+(c[i]||'à compléter'))});});});
+        blocs.push({titre:choix?('Sujet 1 — '+this._titreSujet(stru.parties&&stru.parties[0]&&stru.parties[0].titre||'Contraction de texte et discussion'))
+                              :('Texte '+(ti+1)+' — '+t),
+          lignes:qs.map((q,i)=>(choix?R[k2++]+'. ':(i+1)+'. ')+q
+          +(pp[i]!=null&&pp[i]!==''?' ('+pp[i]+' point'+((parseFloat(pp[i])||0)>1?'s':'')+')':'')
+          +'\n   → '+this._sansMarkdown(c[i]||'à compléter'))});});});
     (a.sujets||[]).forEach(s=>{if(!s||!s.corrige)return;
-      blocs.push({titre:(s.titre||'Sujet')+(s.pts?' ('+s.pts+' pts)':''),lignes:[s.corrige]});});
+      if(choix&&s.genre==='presentation')return;
+      const t=choix?('Sujet '+(++nSujet)+' — '+this._titreSujet(s.titre)):(s.titre||'Sujet');
+      blocs.push({titre:t+(s.pts?' ('+s.pts+' points)':''),lignes:[this._sansMarkdown(s.corrige)]});});
     if((a.grilleIA||[]).length)blocs.push({titre:'Grille de correction',
-      lignes:a.grilleIA.map(g=>'• '+g.critere+(g.points!=null?' — '+g.points+' pts':'')+(g.indicateurs?' : '+g.indicateurs:''))});
-    const stru=a.epreuveCode?MINESEC.epreuveParCode(a.epreuveCode):null;
+      lignes:a.grilleIA.map(g=>'• '+this._sansMarkdown(g.critere)+(g.points!=null?' — '+g.points+' pts':'')+(g.indicateurs?' : '+this._sansMarkdown(g.indicateurs):''))});
     if(stru&&stru.formulesCorrige&&stru.formulesCorrige.length)blocs.push({titre:'À rappeler aux correcteurs',lignes:stru.formulesCorrige});
     return blocs.length?blocs:null;
   }
   _fabriquerWord(a){
     const stru=a.epreuveCode?MINESEC.epreuveParCode(a.epreuveCode):null;
-    const textes=(a.textIds||[]).map(nn=>this.all.find(x=>x.n===nn)).filter(Boolean).map(f=>({
-      mots:f.words,reference:f.reference||'',texte:f.text||'',
-      comp:this._qListOf(a,f,'comp').map((q,i)=>({texte:q,points:this._qPts(f.n,'comp',i)})),
-      expl:this._qListOf(a,f,'expl').map((q,i)=>({texte:q,points:this._qPts(f.n,'expl',i)}))
-    }));
+    const choix=this._modeChoix(stru);
+    const fiches=(a.textIds||[]).map(nn=>this.all.find(x=>x.n===nn)).filter(Boolean);
+    const estCom=f=>!!(a.customQ&&a.customQ[f.n]&&a.customQ[f.n].role==='commentaire');
+    const pres=(a.sujets||[]).find(s=>s&&s.genre==='presentation');
+    const textes=fiches.filter(f=>!(choix&&estCom(f))).map(f=>{
+      const t={mots:f.words,reference:this._refPropre(f.reference||''),texte:f.text||'',
+        comp:this._qListOf(a,f,'comp').map((q,i)=>({texte:q,points:this._qPts(f.n,'comp',i)})),
+        expl:this._qListOf(a,f,'expl').map((q,i)=>({texte:q,points:this._qPts(f.n,'expl',i)}))};
+      if(choix){
+        const p0=(stru.parties&&stru.parties[0])||{};
+        t.entete='SUJET 1 — '+this._titreSujet(p0.titre||'Contraction de texte et discussion').toUpperCase()
+          +(p0.points?'  ·  '+p0.points+' points':'')+(f.words?'  ·  texte de '+f.words+' mots':'');
+        t.romain=true;
+        t.apres=pres?['Présentation de la copie'+(pres.pts?'   ('+pres.pts+' points)':'')]:[];
+      }
+      return t;
+    });
+    let nS=1;
+    const sujets=choix
+      ?(a.sujets||[]).filter(s=>s&&s.texte&&s.genre!=='presentation').map(s=>{
+          const x={...s,texte:this._sansMarkdown(s.texte)};
+          x.entete='SUJET '+(++nS)+' — '+this._titreSujet(s.titre).toUpperCase()+(s.pts?'  ·  '+s.pts+' points':'');
+          if(s.genre==='commentaire'){
+            const fc=fiches.find(estCom);
+            if(fc){x.support={texte:fc.text||'',reference:this._refPropre(fc.reference||'')};x.texte=this._sansTexteRecopie(x.texte,fc.text);}
+          }
+          return x;})
+      :(a.sujets||[]).filter(s=>s&&(s.texte||s.genre==='presentation')).map(s=>({...s,texte:this._sansMarkdown(s.texte)}));
+    /* La règle officielle, imprimée telle quelle : Ambassa avait écrit « deux
+       parties, dont la première est obligatoire » — l'inverse du descriptif. */
+    const consigne=choix?('Le candidat traitera l’un des '+(1+sujets.length)+' sujets au choix.'):(a.consigne||'');
     const grp=(this.state.groupes||[]).find(g=>g.id===this.state.groupeId)||(this.state.groupes||[])[0];
     const an=new Date().getFullYear();
     VRT_DOCX.telecharger({
@@ -6575,9 +6651,9 @@ class Component extends DCLogic {
       titre:a.title||'Épreuve de français',
       sousTitre:stru?stru.nom:'',
       classe:a.classe||'',duree:a.duree||'',coeff:a.coeff||'',
-      total:MINESEC.totalAttendu(stru),totalBareme:this._baremeTotal(),
-      consigne:a.consigne||'',
-      sujets:(a.sujets||[]).filter(s=>s&&(s.texte||s.genre==='presentation')),
+      total:MINESEC.totalAttendu(stru),totalBareme:choix?null:this._baremeTotal(),
+      consigne:consigne,
+      sujets:sujets,
       corrige:this.state.genCorrigeWord===false?null:this._corrigePourExport(a),
       pied:'Épreuve composée avec Atelier de Français — Centre VÉRITAS'
     },textes);
@@ -8099,9 +8175,22 @@ class Component extends DCLogic {
           style:'margin:0 0 '+(rep?'7px':'12px')+';'+(rep?'padding-left:1.4em;text-indent:-1.4em':'')};
       }).filter(x=>x.tokens.some(t=>t.click));};
     const mkTokens=(f)=>mkParas(f).reduce((a,x)=>a.concat(x.tokens),[]);
+    /* RUBRIQUES SELON LA STRUCTURE (16/10/2026). Une contraction de texte
+       (Probatoire / BAC, sujet de type 1) n'a ni « Compréhension » ni
+       « Langue » : résumé et discussion s'affichaient sous « II. Langue &
+       production », avec une rubrique I vide au-dessus. */
+    const structAct=active?this._structureDe(active):null;
+    const planAct=(structAct&&typeof VRT_GENERATEUR!=='undefined')?VRT_GENERATEUR.planEpreuve(structAct,{classe:active.classe}):null;
+    const sansComp=!!(planAct&&planAct.support==='texte'&&!planAct.comp.points&&!planAct.expl.points&&planAct.productions.length);
+    const titreSujetTexte=(planAct&&planAct.sujetTexte)?String(planAct.sujetTexte).replace(/^Sujet de type 1\s*—\s*/,''):'Contraction de texte et discussion';
     const selectedFiches=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean).map((f,i)=>{const ann=this._wordAnnots(f.n);const annCount=Object.keys(ann).length;const ko=f._partiel||f._syncKo;const koFerme=(f._libre===false||f._syncKo==='abonnement');
       const replie=!!(st.txtReplies||{})[f.n];
+      const estCom=!!(active&&active.customQ&&active.customQ[f.n]&&active.customQ[f.n].role==='commentaire');
       return{pos:i+1,type:f.type,words:f.words,level:f.level,ancre:'vrt-txt-'+f.n,
+        titreComp:'I. Compréhension',
+        titreExpl:sansComp?('Sujet 1 — '+titreSujetTexte):'II. Langue & production',
+        compZone:(sansComp||estCom)?hidden:'',
+        explZone:estCom?hidden:'',
         texteBloc:'margin-top:13px;padding-top:13px;border-top:1px dashed var(--ce2eaf3,#e2eaf3)'+(replie?';display:none':''),
         texteToggleLabel:replie?'Afficher le texte ('+(f.words||0)+' mots)':'Replier le texte',
         texteToggle:()=>this.setState(s2=>({txtReplies:{...(s2.txtReplies||{}),[f.n]:!replie}})),
