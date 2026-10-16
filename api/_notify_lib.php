@@ -483,7 +483,9 @@ if (!defined('VRT_NOTIFY_LIB')) {
             /* Un acheteur sans contact du tout ne se rattrape pas par un
                réessai : il se rattrape par un humain. On prévient une fois,
                puis on laisse la ligne visible dans l'inventaire. */
-            if (($m['etat'] ?? '') === 'sans_contact' && empty($m['alerte'])) {
+            // « echec » aussi : une alerte dont le courriel n'est pas parti
+            // (alerte encore à 0) est retentée ici, au lieu d'être perdue.
+            if (in_array(($m['etat'] ?? ''), ['sans_contact', 'echec'], true) && empty($m['alerte'])) {
                 vrt_notify_alerte($m);
                 vrt_notify_ecrire($m);
                 continue;
@@ -795,7 +797,12 @@ if (!defined('VRT_NOTIFY_LIB')) {
               $corps,
               "MIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\n"
               . 'From: =?UTF-8?B?' . base64_encode('VÉRITAS') . "?= <$de>\r\n", '-f' . $de);
-        $m['alerte'] = 1;                     // même en cas d'échec : le journal porte la trace
+        /* Posé seulement si l'alerte est PARTIE (audit 16/10/2026) : posé « même en
+           cas d'échec », un mail() refusé — courant en mutualisé — enterrait pour
+           toujours l'alerte d'un code payé non remis. En échec, on retentera au
+           passage suivant, borné à 5 essais pour ne pas boucler. */
+        $m['alerte_essais'] = (int) ($m['alerte_essais'] ?? 0) + 1;
+        if ($ok || $m['alerte_essais'] >= 5) $m['alerte'] = 1;
         vrt_notify_log('[ALERTE] ref=' . (string) ($m['ref'] ?? '') . ' vers=' . $a
             . ' envoi=' . ($ok ? 'ok' : 'echec'));
     }
