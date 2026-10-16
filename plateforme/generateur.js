@@ -285,7 +285,7 @@
 
   var TYPES_PREFERES = {
     resume: ['ARGUMENTATIF', 'EXPLICATIF'],
-    discussion: ['ARGUMENTATIF'],
+    discussion: ['ARGUMENTATIF', 'EXPLICATIF'],
     synthese: ['ARGUMENTATIF', 'EXPLICATIF'],
     essai: ['ARGUMENTATIF', 'EXPLICATIF'],
     fautif: ['NARRATIF', 'DESCRIPTIF', 'EXPLICATIF'],
@@ -354,14 +354,15 @@
         }
       }
       if (types && types.indexOf(String(f.type || '').toUpperCase()) >= 0) { score += 12; raisons.push(String(f.type).toLowerCase()); }
-      /* CONTRACTION (Probatoire / BAC) : « un texte ARGUMENTATIF en français
-         CONTEMPORAIN » (Draft EST). Le bonus de type ne suffisait pas : une
+      /* CONTRACTION (Probatoire / BAC) : un texte ARGUMENTATIF OU EXPLICATIF
+         en français contemporain (Draft EST ; précision de Jacques, 16/10/2026 :
+         l'explicatif vaut l'argumentatif, à égalité). Le bonus de type ne suffisait pas : une
          scène de théâtre de Labiche (XIXᵉ s., typée « explicatif ») passait
          devant, faute d'argumentatif assez long (16/10/2026). */
       if (opts.genre === 'resume' || opts.genre === 'discussion') {
         var ty = String(f.type || '').toUpperCase();
         if (ty === 'ARGUMENTATIF') score += 35;
-        else if (ty === 'EXPLICATIF') score += 5;
+        else if (ty === 'EXPLICATIF') score += 35;
         else score -= 45;
         if (/th[ée][aâ]tre|sc[eè]ne|acte\s+[ivx]/i.test(String(f.title || '') + ' ' + String(f.reference || ''))) score -= 40;
         if (bornes && /contemporain/.test(norm(bornes.nature || '')) && f.src === 'libre') score -= 30;
@@ -535,7 +536,7 @@
       l.push('SUJETS DE RÉFLEXION — guide pédagogique du second cycle et Draft EST :');
       if (plan && plan.productions.some(function (p) { return p.genre === 'resume'; })) {
         var tsc = plan.texteSupport;
-        l.push('- CONTRACTION DE TEXTE (résumé ou analyse /9) : texte d’actualité sans grande difficulté de compréhension (jeunesse, immigration, chômage, sports et loisirs, TIC…)' + (tsc ? ', de ' + tsc.min + ' à ' + tsc.max + ' mots' : '') + '. Le libellé dit la NATURE du travail, le NOMBRE EXACT de mots du texte et la réduction : « Ce texte compte N mots. Résumez-le au quart de sa longueur, soit environ X mots, ou analysez-le au tiers, soit environ Y mots. Une marge de 10 % en plus ou en moins est admise. Vous indiquerez à la fin de votre travail le nombre de mots employés. »');
+        l.push('- CONTRACTION DE TEXTE (résumé ou analyse /9) : texte ARGUMENTATIF OU EXPLICATIF d’actualité, sans grande difficulté de compréhension (jeunesse, immigration, chômage, sports et loisirs, TIC…)' + (tsc ? ', de ' + tsc.min + ' à ' + tsc.max + ' mots' : '') + '. Le libellé dit la NATURE du travail, le NOMBRE EXACT de mots du texte et la réduction : « Ce texte compte N mots. Résumez-le au quart de sa longueur, soit environ X mots, ou analysez-le au tiers, soit environ Y mots. Une marge de 10 % en plus ou en moins est admise. Vous indiquerez à la fin de votre travail le nombre de mots employés. »');
         l.push('  Corrigé : (1) thème, thèse, système d’énonciation et structure argumentative du texte ; (2) les idées essentielles, numérotées dans l’ordre de l’auteur ; (3) un RÉSUMÉ MODÈLE rédigé au quart, avec son nombre de mots entre parenthèses ; (4) « ' + BAREMES.resume + ' ».');
       }
       if (plan && plan.productions.some(function (p) { return p.genre === 'discussion'; })) {
@@ -1200,15 +1201,15 @@
           }
         });
       });
-      /* Le texte de la contraction : argumentatif, contemporain, 550 à 650
+      /* Le texte de la contraction : argumentatif ou explicatif, contemporain, 550 à 650
          mots (Draft EST). On dit précisément ce qui manque, et quoi faire. */
       if (plan.productions.some(function (p) { return p.genre === 'resume'; }) && plan.texteSupport) {
         var bo = plan.texteSupport, typ = String(sp.type || '').toUpperCase();
-        var okLong = mots >= bo.min && mots <= bo.max, okType = typ === 'ARGUMENTATIF';
+        var okLong = mots >= bo.min && mots <= bo.max, okType = typ === 'ARGUMENTATIF' || typ === 'EXPLICATIF';
         if (!okLong || !okType) {
-          res.controles.push({ ok: false, libelle: 'Texte de la contraction : ' + (okType ? 'argumentatif' : (typ ? typ.toLowerCase() : 'type inconnu') + ' au lieu d’argumentatif')
+          res.controles.push({ ok: false, libelle: 'Texte de la contraction : ' + (okType ? typ.toLowerCase() : (typ ? typ.toLowerCase() : 'type inconnu') + ' au lieu d’argumentatif ou explicatif')
             + ', ' + mots + ' mots' + (okLong ? '' : ' au lieu de ' + bo.min + '-' + bo.max)
-            + ' — remplacez-le par un texte argumentatif contemporain de ' + bo.min + ' à ' + bo.max + ' mots (onglet Corpus, « Importer un corpus »).' });
+            + ' — remplacez-le par un texte argumentatif ou explicatif contemporain de ' + bo.min + ' à ' + bo.max + ' mots (onglet Corpus, « Importer un corpus »).' });
         }
       }
     }

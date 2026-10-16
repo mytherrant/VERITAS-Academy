@@ -29,10 +29,10 @@
 <meta property="og:image" content="https://veritas-school.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <script src="./support.js?v=b7335820"></script>
-<script src="./minesec.js?v=0ec7e1a6"></script>
-<script src="./conformite.js?v=ddfccb1b"></script>
+<script src="./minesec.js?v=a87a5f79"></script>
+<script src="./conformite.js?v=16718cfe"></script>
 <script src="./exercices.js?v=c6d93301"></script>
-<script src="./generateur.js?v=a988f24c"></script>
+<script src="./generateur.js?v=23c33c33"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=090324b1"></script>
 <!--vrt-habillage:tete-->
@@ -4027,7 +4027,7 @@ class Component extends DCLogic {
        relit ici plutot que de dupliquer la logique de renderVals. */
     const corpus=(c.corpusN!=null)?this.all.find(x=>x.n===c.corpusN):null;
     const texte=(corpus&&corpus.text)||'';
-    const locaux=CONFORMITE.verifierCours(c,texte);
+    const locaux=CONFORMITE.verifierCours(c,texte,corpus);
     this.setState({coConfIABusy:true,coConfIAErr:'',coConfOpen:true});
     CONFORMITE.analyserAvecAmbassa('cours',c,corpus?[corpus]:[],locaux,{token:this._jeton()})
       .then(r=>this.setState({coConfIA:r,coConfIABusy:false}))
@@ -5096,7 +5096,7 @@ class Component extends DCLogic {
       return;
     }
     /* PRÉVENIR AVANT, PAS DÉNONCER APRÈS (16/10/2026). Le corpus n'a aucun
-       argumentatif de 550 à 650 mots : Ambassa composait quand même, puis le
+       argumentatif ou explicatif de 550 à 650 mots : Ambassa composait quand même, puis le
        rapport alignait trois alertes sur la longueur. Un texte d'auteur ne
        se rallonge pas : l'enseignant choisit, avant qu'un appel soit décompté. */
     const ab0=abonnement;
@@ -5107,7 +5107,7 @@ class Component extends DCLogic {
         +(ab0.fermes?' ('+ab0.fermes+' texte(s) conforme(s) dans une formule supérieure)':'')+'.\n\n'
         +'OK : composer quand même sur ce texte (l’épreuve sera signalée hors norme).\n'
         +'Annuler : importer d’abord votre texte (onglet Corpus, « Importer un corpus »), puis relancer.')){
-      this.setState({genBusy:false,genEtape:'',genErr:'Composition annulée : aucun appel décompté. Importez un texte argumentatif de '
+      this.setState({genBusy:false,genEtape:'',genErr:'Composition annulée : aucun appel décompté. Importez un texte argumentatif ou explicatif de '
         +ab0.bornes.min+' à '+ab0.bornes.max+' mots (onglet Corpus, « Importer un corpus »), ajoutez-le à l’épreuve, puis relancez.'});
       return;
     }
@@ -9065,7 +9065,7 @@ class Component extends DCLogic {
           +(f.title?', '+f.title:'')+' ('+f.words+' mots)'+(r?' \u00b7 '+r:'')};
     });
     const coTexte=cActive&&cActive.corpusN?all.find(x=>String(x.n)===String(cActive.corpusN)):null;
-    const coEcarts=cActive?CONFORMITE.verifierCours(cActive,coTexte?coTexte.text:''):[];
+    const coEcarts=cActive?CONFORMITE.verifierCours(cActive,coTexte?coTexte.text:'',coTexte):[];
     const coEcartsTous=coEcarts.concat((st.coConfIA&&st.coConfIA.ecarts)||[]);
     const coRes=CONFORMITE.resume(coEcartsTous);;
     const OUTILS=[['surligner','Surligner'],['souligner','Souligner'],['barrer','Barrer']];

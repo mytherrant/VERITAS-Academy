@@ -282,8 +282,8 @@
       classes: ['2nde', '1ère', 'Terminale'], series: ['A', 'ABI'],
       nom: 'Littérature ou culture générale — A, ABI',
       duree: '4 h', coeff: '3', sujetsAuChoix: 3, grille: 'contraction992',
-      texteSupport: { min: 550, max: 650, unite: 'mots', nature: 'texte argumentatif en français contemporain' },
-      texteSupportParClasse: { '2nde': { min: 400, max: 500, unite: 'mots', nature: 'texte argumentatif d’actualité, sans grande difficulté de compréhension (guide pédagogique 2nd cycle : 400 à 500 mots en 2nde)' } },
+      texteSupport: { min: 550, max: 650, unite: 'mots', nature: 'texte argumentatif ou explicatif en français contemporain' },
+      texteSupportParClasse: { '2nde': { min: 400, max: 500, unite: 'mots', nature: 'texte argumentatif ou explicatif d’actualité, sans grande difficulté de compréhension (guide pédagogique 2nd cycle : 400 à 500 mots en 2nde)' } },
       parties: [
         { titre: 'Sujet de type 1 — Contraction de texte et discussion', points: 20, consigne: 'Résumé au ¼ ou analyse au 1/3 /9 · Discussion d’un problème tiré du texte /9 · Présentation /2.' },
         { titre: 'Sujet de type 2 — Commentaire composé', points: 20, consigne: 'Texte de 20 à 30 lignes ou une vingtaine de vers, avec une consigne non contraignante.' },
@@ -323,8 +323,8 @@
       classes: ['2nde', '1ère', 'Terminale'], series: ['C', 'D', 'E', 'TI'],
       nom: 'Littérature ou culture générale — C, D, E, TI',
       duree: '3 h', coeff: '2', sujetsAuChoix: 2, grille: 'contraction992',
-      texteSupport: { min: 550, max: 650, unite: 'mots', nature: 'texte argumentatif en français contemporain' },
-      texteSupportParClasse: { '2nde': { min: 400, max: 500, unite: 'mots', nature: 'texte argumentatif d’actualité, sans grande difficulté de compréhension (guide pédagogique 2nd cycle : 400 à 500 mots en 2nde)' } },
+      texteSupport: { min: 550, max: 650, unite: 'mots', nature: 'texte argumentatif ou explicatif en français contemporain' },
+      texteSupportParClasse: { '2nde': { min: 400, max: 500, unite: 'mots', nature: 'texte argumentatif ou explicatif d’actualité, sans grande difficulté de compréhension (guide pédagogique 2nd cycle : 400 à 500 mots en 2nde)' } },
       parties: [
         { titre: 'Sujet de type 1 — Contraction de texte et discussion', points: 20, consigne: 'Résumé au ¼ ou analyse au 1/3 /9 · Discussion d’un problème tiré du texte /9 · Présentation /2.' },
         { titre: 'Sujet de type 2 — Dissertation', points: 20, consigne: 'Dissertation littéraire ou de culture générale.' }
@@ -624,10 +624,10 @@
       id: 'remediation', nom: 'Compte rendu et remédiation', famille: 'cours', cycle: 'tous', icon: 'puzzle', tint: '#fdefdb', tag: 'après évaluation',
       desc: 'Rendre la copie, analyser les erreurs, remédier, revérifier.',
       phases: [
-        { nom: 'Compte rendu de l’évaluation', hint: 'Résultats, attentes du barème, erreurs les plus fréquentes.', duree: '20 min' },
-        { nom: 'Typologie des erreurs', hint: 'Classer : compréhension, méthode, langue, présentation.', duree: '15 min' },
-        { nom: 'Remédiation ciblée', hint: 'Un exercice par type d’erreur dominant, pas un cours entier refait.', duree: '20 min' },
-        { nom: 'Vérification', hint: 'Reprise d’une tâche du même type pour mesurer le progrès.', duree: '15 min' }
+        { nom: 'Compte rendu de l’évaluation', hint: 'Résultats, attentes du barème, erreurs les plus fréquentes.', duree: '30 min' },
+        { nom: 'Typologie des erreurs', hint: 'Classer : compréhension, méthode, langue, présentation.', duree: '30 min' },
+        { nom: 'Remédiation ciblée', hint: 'Un exercice par type d’erreur dominant, pas un cours entier refait.', duree: '40 min' },
+        { nom: 'Vérification', hint: 'Reprise d’une tâche du même type pour mesurer le progrès.', duree: '20 min' }
       ],
       source: 'Draft EST — progression : « Comptes rendus (1h) · Remédiation (1h) » en fin de séquence',
       confiance: 'officiel'
@@ -703,7 +703,12 @@
         { nom: 'Techniques du résumé', hint: 'Nominalisation, généralisation, suppression de l’exemple et de la redondance.', duree: '15 min' },
         { nom: 'Production et vérification', hint: 'Compter les mots et INDIQUER le nombre exact.', duree: '20 min' }
       ],
-      regleCle: 'Le résumé conserve l’ordre de l’auteur et son système d’énonciation. Réduction au ¼, marge de 10 %.',
+      texteSupport: { min: 550, max: 650, unite: 'mots', nature: 'texte argumentatif ou explicatif en français contemporain' },
+      texteSupportParClasse: { '2nde': { min: 400, max: 500, unite: 'mots', nature: 'texte argumentatif ou explicatif d’actualité (guide pédagogique 2nd cycle)' } },
+      typesTexte: ['ARGUMENTATIF', 'EXPLICATIF'],
+      exigencesCorpus: ['Texte ARGUMENTATIF ou EXPLICATIF, contemporain, d’actualité (jeunesse, chômage, TIC, sports…).', '400 à 500 mots en 2nde ; 550 à 650 mots en 1ère et en Terminale.', 'Texte d’auteur reproduit mot pour mot : on coupe en marquant […], on ne rallonge jamais.'],
+      regleCle: 'Le résumé conserve l’ordre de l’auteur et son système d’énonciation. Réduction au ¼, marge de 10 % ; le candidat indique le nombre de mots employés. Barème /9 : compréhension et pertinence 3, cohérence et technique 3, expression 3.',
+      grille: 'resumeDetail',
       source: 'Draft EST — progression 2nde, séquence I ; descriptif des épreuves',
       confiance: 'officiel'
     },
@@ -717,7 +722,12 @@
         { nom: 'Techniques de l’analyse', hint: 'Restructurer selon la logique argumentative plutôt que selon l’ordre du texte.', duree: '20 min' },
         { nom: 'Production et vérification', hint: 'Réduction au 1/3 ; indiquer le nombre exact de mots.', duree: '25 min' }
       ],
-      regleCle: 'L’analyse autorise la réorganisation mais impose la distanciation. Réduction au 1/3.',
+      texteSupport: { min: 550, max: 650, unite: 'mots', nature: 'texte argumentatif ou explicatif en français contemporain' },
+      texteSupportParClasse: { '2nde': { min: 400, max: 500, unite: 'mots', nature: 'texte argumentatif ou explicatif d’actualité (guide pédagogique 2nd cycle)' } },
+      typesTexte: ['ARGUMENTATIF', 'EXPLICATIF'],
+      exigencesCorpus: ['Texte ARGUMENTATIF ou EXPLICATIF, contemporain, d’actualité.', '400 à 500 mots en 2nde ; 550 à 650 mots en 1ère et en Terminale.'],
+      regleCle: 'L’analyse autorise la réorganisation mais impose la distanciation. Réduction au 1/3, marge de 10 % ; le candidat indique le nombre de mots employés. Barème /9 : compréhension et pertinence 3, cohérence et technique 3, expression 3.',
+      grille: 'resumeDetail',
       source: 'Draft EST — descriptif des épreuves ; corrigés harmonisés OBC',
       confiance: 'officiel'
     },
@@ -732,6 +742,8 @@
         { nom: 'Rédaction du paragraphe argumentatif', hint: 'Idée, argument, exemple, retour à la thèse.', duree: '1 h' },
         { nom: 'Rédaction de la conclusion', hint: 'Bilan, réponse au problème, ouverture.', duree: '1 h' }
       ],
+      typesTexte: ['ARGUMENTATIF', 'EXPLICATIF'],
+      regleCle: 'Le sujet cite MOT POUR MOT une phrase du texte de la contraction et pose un problème qu’il éclaire. Aucune limite de mots. Barème /9 : compréhension et pertinence 3, organisation et cohérence 3, expression 3.',
       source: 'Draft EST — progression 2nde, séquence III', confiance: 'officiel',
       note: 'La discussion vaut 9 points dans le sujet de type 1 du Probatoire et du BAC.'
     },
@@ -746,6 +758,7 @@
         { nom: 'Rédaction guidée', hint: 'Introduction, paragraphes, transitions, conclusion.', duree: '2 h' }
       ],
       grille: 'apc4',
+      interdits: ['Un libellé « sur citation » ne prête jamais à un auteur des mots non vérifiés dans l’œuvre : à défaut, une affirmation non attribuée (« On a pu dire que… »).', 'Les exemples viennent des œuvres AU PROGRAMME de la classe, jamais d’une œuvre du 1er cycle.'],
       source: 'Draft EST — progression 2nde, séquence III ; descriptif des épreuves',
       confiance: 'officiel',
       note: 'Une grille critériée est annexée au libellé dans les épreuves techniques.'
@@ -758,8 +771,10 @@
         { nom: 'Présentation de l’exercice', hint: 'Différence avec l’explication de texte et la dissertation.', duree: '1 h' },
         { nom: 'Lecture et repérage', hint: 'Relevés stylistiques et thématiques.', duree: '1 h' },
         { nom: 'Construction des axes', hint: 'Deux ou trois centres d’intérêt, jamais un relevé linéaire.', duree: '1 h' },
-        { nom: 'Rédaction', hint: 'Introduction /3, axes d’étude /12, conclusion /3, langue /2.', duree: '2 h' }
+        { nom: 'Rédaction', hint: 'Grille officielle : compréhension et pertinence /6 · organisation et cohérence /6 · expression /6 · originalité et présentation /2. En 2nde, on s’arrête au plan détaillé.', duree: '2 h' }
       ],
+      grille: 'apc4',
+      texteSupport: { min: 150, max: 400, unite: 'mots', note: '20 à 30 lignes, ou une vingtaine de vers ayant une unité de sens.' },
       seriesReservees: ['A', 'ABI'],
       source: 'Draft EST — descriptif des sujets ESG', confiance: 'officiel',
       note: 'Le descriptif officiel réserve le commentaire composé aux séries A et ABI. Ne pas le proposer en C, D, E ou TI.'

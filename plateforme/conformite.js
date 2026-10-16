@@ -208,7 +208,7 @@
       textes.forEach(function (f, i) {
         /* Le texte du commentaire composé (sujet au choix) n'est pas le texte
            de la contraction : il se mesure en lignes (20 à 30), pas à
-           l'aune des 550-650 mots du texte argumentatif. */
+           l'aune des 550-650 mots du texte argumentatif ou explicatif. */
         var cq = ep.customQ && ep.customQ[f.n];
         if (cq && cq.role === 'commentaire') {
           var nc = f.words || compterMots(f.text);
@@ -399,7 +399,9 @@
      CONTRÔLE D'UN COURS
      ------------------------------------------------------------------ */
 
-  function verifierCours(cours, corpusTexte) {
+  /* `fiche` (facultatif) : la fiche du corpus rattachée à la leçon — elle
+     porte le TYPE du texte, que la seule chaîne ne dit pas. */
+  function verifierCours(cours, corpusTexte, fiche) {
     var out = [];
     if (!cours) return out;
     var g = M.gabaritParId(cours.gabarit);
@@ -485,17 +487,32 @@
       }
     }
 
-    /* Lecture méthodique */
-    if (g && g.id === 'lecture' && corpusTexte) {
+    /* Longueur du texte : TOUT gabarit qui la déclare (lecture méthodique
+       des deux cycles, résumé, analyse, commentaire), aux bornes de la classe.
+       Seule la méthodique du 1er cycle était contrôlée (16/10/2026). */
+    if (g && g.texteSupport && corpusTexte) {
       var nm = compterMots(corpusTexte);
-      var ts = g.texteSupport;
-      if (ts && (nm < ts.min || nm > ts.max)) {
+      var cle = M.cleClasse ? M.cleClasse(cours.classe) : '';
+      var ts = (g.texteSupportParClasse && g.texteSupportParClasse[cle]) || g.texteSupport;
+      if (nm < ts.min || nm > ts.max) {
         out.push(ecart('ecart', 'Texte de ' + nm + ' mots',
-          'La lecture méthodique demande un texte de ' + ts.min + ' à ' + ts.max + ' mots. ' + (ts.note || ''),
-          nm > ts.max ? 'Coupez en marquant les suppressions par […].' : 'Prenez un extrait plus long.',
+          g.nom + ' demande un texte de ' + ts.min + ' à ' + ts.max + ' mots' + (ts.nature ? ' (' + ts.nature + ')' : '') + '. ' + (ts.note || ''),
+          nm > ts.max ? 'Coupez en marquant les suppressions par […].' : 'Prenez un extrait plus long, ou importez le vôtre — un texte d’auteur ne se rallonge pas.',
           'corpus'));
       }
     }
+    /* Type du texte : la contraction et la discussion portent sur un texte
+       ARGUMENTATIF ou EXPLICATIF (Jacques, 16/10/2026). */
+    if (g && g.typesTexte && fiche && fiche.type) {
+      var ty = String(fiche.type).toUpperCase();
+      if (g.typesTexte.indexOf(ty) < 0) {
+        out.push(ecart('ecart', 'Texte ' + ty.toLowerCase() + ' pour ' + g.nom.toLowerCase(),
+          g.nom + ' porte sur un texte ' + g.typesTexte.map(function (t) { return t.toLowerCase(); }).join(' ou ') + '.',
+          'Rattachez un texte ' + g.typesTexte.map(function (t) { return t.toLowerCase(); }).join(' ou ') + '.', 'corpus'));
+      }
+    }
+    /* La règle de l'exercice se rappelle : elle n'était affichée nulle part. */
+    if (g && g.regleCle) out.push(ecart('conseil', 'Règle de l’exercice', g.regleCle, '', 'phases'));
 
     /* Activité d'intégration */
     if (g && g.champsObligatoires) {

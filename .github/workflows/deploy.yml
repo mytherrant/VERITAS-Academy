@@ -1017,6 +1017,11 @@ jobs:
       - name: "✨ Atelier — les exigences du BAC sont-elles vérifiées, pas seulement demandées ?"
         run: node tests/banc_exigences_reflexion.cjs
 
+      # Gabarits de leçon : ce qu'on enseigne est ce qui est noté (commentaire
+      # 6/6/6/2, résumé argumentatif OU explicatif aux bornes de la classe).
+      - name: "✨ Atelier — les gabarits de leçon disent-ils la même chose que les épreuves ?"
+        run: node tests/banc_gabarits_lecons.cjs
+
       # La métadonnée et le contenu descendent séparément. Quand le second
       # transfert échoue, l'export Word annonce 387 mots au-dessus d'un texte
       # de 33 — et l'épreuve part en photocopie.

@@ -175,5 +175,19 @@ dire(!GEN.diagnostiquer('Relevez le ton ironique de l’auteur.', { vous: true }
 dire(!GEN.diagnostiquer('Résumé au quart : 150 mots environ.', { vous: true }).some(d => d.code === 'tutoiement'), '« Résumé » (nom) n’est pas un impératif');
 dire(!!s1, 'structure BEPC présente');
 
+console.log(`\n${G}④ Texte de la contraction : argumentatif OU explicatif (Jacques, 16/10/2026)${R}`);
+const avecType = ty => GEN.validerEpreuve(conforme(), Object.assign({}, ctx, { textes: [Object.assign({}, ctx.textes[0], { type: ty }), ctx.textes[1]] }));
+dire(!avec(avecType('EXPLICATIF'), /Texte de la contraction/).length, 'un texte EXPLICATIF de 600 mots est accepté');
+dire(avec(avecType('NARRATIF'), /narratif au lieu d’argumentatif ou explicatif/).length === 1, 'un texte NARRATIF est refusé, et le message cite les deux types admis');
+const cands = [
+  { n: 91, level: 'Tle', type: 'NARRATIF', words: 600, text: TEXTE, title: 'Récit' },
+  { n: 92, level: 'Tle', type: 'EXPLICATIF', words: 600, text: TEXTE, title: 'Exposé' },
+  { n: 93, level: 'Tle', type: 'ARGUMENTATIF', words: 600, text: TEXTE, title: 'Essai' }];
+const cl = GEN.classerTextes(cands, { classe: 'Tle A', bornes: plan.texteSupport, genre: 'resume' });
+const sc = n => (cl.find(x => x.f.n === n) || {}).score;
+dire(Math.abs(sc(92) - sc(93)) < 5 && sc(92) > sc(91) + 50, 'au choix du texte, l’explicatif vaut l’argumentatif, devant le narratif', JSON.stringify(cl.map(x => [x.f.n, x.score])));
+dire(/argumentatif ou explicatif/.test(MINESEC.epreuveParCode('A_LITT').texteSupport.nature) && /argumentatif ou explicatif/.test(MINESEC.texteSupportPour(MINESEC.epreuveParCode('CDETI_LITT'), '2nde C').nature),
+  'le référentiel (1ère-Tle et 2nde) dit « argumentatif ou explicatif »');
+
 console.log(`\n  ${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
 process.exit(ko ? 1 : 0);

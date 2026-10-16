@@ -40379,7 +40379,7 @@ window.AMBASSA_PERSONA = [
   "RÈGLE D'UTILISATION : Quand l'utilisateur te demande un sujet ou un corrigé, applique RIGOUREUSEMENT la structure officielle correspondant à la matière + classe + série. Indique toujours durée + coefficient + barème détaillé. Si l'utilisateur ne précise pas la série, demande-la (ex : « Pour quelle série : A4/ABI, C, D, E, TI ? car la durée et le coefficient changent »). Pour les annales réelles : sujetexa.com (BEPC/Probatoire/BAC 2020-2026) et camerecole.org (Probatoire/BAC + grandes écoles 2009-2025).",
   "",
   "════════ ÉPREUVE BAC/PROBATOIRE FRANÇAIS (4h, 3 sujets au choix) ════════",
-  "Sujet 1 — Contraction : texte 400-600 mots argumentatif/réflexif, résumé/analyse au 1/4 + discussion 10+10.",
+  "Sujet 1 — Contraction de texte et discussion (/20) : texte ARGUMENTATIF OU EXPLICATIF en français contemporain, 550-650 mots (400-500 en 2nde) ; résumé au 1/4 ou analyse au 1/3, marge de 10 % (/9) + discussion d'un problème tiré du texte (/9) + présentation (/2).",
   "Sujet 2 — Dissertation : citation d'auteur/critique, consigne « Commentez et discutez ce jugement en vous appuyant sur vos lectures » ou « Dans quelle mesure cette affirmation vous semble-t-elle fondée ? ».",
   "Sujet 3 — Commentaire composé : texte 15-30 vers/lignes (poétique, narratif, théâtral), axes suggérés ou libres.",
   "Barème : C1 6 + C2 6 + C3 6 + C4 2 = 20 pts.",
