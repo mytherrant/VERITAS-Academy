@@ -997,6 +997,33 @@ if (!defined('VRT_PARR_LIB')) {
         });
     }
 
+    /**
+     * Versement fait À LA MAIN par l'administration (Mobile Money depuis son
+     * téléphone), enregistré pour que le solde dû baisse et que l'historique
+     * le dise. Depuis la résiliation de CamerPay (15/10/2026), c'est le seul
+     * chemin : aucun fournisseur actuel n'offre d'API de versement.
+     * Refusé si un versement automatique est en cours (il pourrait partir
+     * aussi) ou si le montant dépasse le solde.
+     */
+    function vrt_parr_versement_manuel(string $benef, int $montant, string $tel, string $nom, string $note = ''): array {
+        return vrt_parr_tx(function (array &$reg) use ($benef, $montant, $tel, $nom, $note) {
+            $c = $reg['comptes'][$benef] ?? null;
+            if (!is_array($c)) return ['ok' => false, 'error' => 'Aucune commission pour ce bénéficiaire'];
+            if ((int) ($c['enCours'] ?? 0) > 0) return ['ok' => false, 'error' => 'Un versement est déjà en cours : réglez-le d’abord'];
+            $solde = (int) ($c['solde'] ?? 0);
+            if ($montant <= 0 || $montant > $solde) return ['ok' => false, 'error' => 'Montant entre 1 et ' . $solde . ' F'];
+            $pref = 'MAN-' . strtoupper(base_convert((string) time(), 10, 36)) . '-' . strtoupper(bin2hex(random_bytes(3)));
+            $reg['comptes'][$benef]['solde'] = $solde - $montant;
+            $reg['comptes'][$benef]['verse'] = (int) ($c['verse'] ?? 0) + $montant;
+            $reg['comptes'][$benef]['dernierVersement'] = time();
+            unset($reg['comptes'][$benef]['blocage']);
+            $reg['versements']['v:' . $pref] = ['ref' => $pref, 'b' => $benef, 'm' => $montant, 'tel' => $tel, 'meth' => 'manuel',
+                'nom' => $nom, 'etat' => 'verse', 't' => time(), 'maj' => time(), 'manuel' => true,
+                'raison' => mb_substr('Versé à la main' . ($note !== '' ? ' — ' . $note : ''), 0, 200)];
+            return ['ok' => true, 'ref' => $pref, 'solde' => $solde - $montant];
+        });
+    }
+
     /** Une impossibilité de verser (numéro absent…) doit se LIRE : chez le parrain et chez l'administrateur. */
     function vrt_parr_bloquer(string $benef, string $motif): void {
         vrt_parr_tx(function (array &$reg) use ($benef, $motif) {

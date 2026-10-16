@@ -36864,13 +36864,13 @@ window._codeAmiAdminCharger = function(){
     h += _partAdminHtml(d);
     var ps = d.parrains || [];
     h += '<div class="card"><div class="ct" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span>Parrains</span>'
-      + '<button class="btn bo sm" onclick="_codeAmiAdminVerser(\'\')">Verser tous les soldes dus</button></div>'
+      + '<span class="xs2 mut">Versements : à la main (aucun fournisseur de versement automatique depuis la fin de CamerPay)</span></div>'
       + (ps.length ? '<div class="tw"><table><thead><tr><th>Parrain</th><th>Code</th><th>Filleuls</th><th>Ventes</th><th>Gagné</th><th>Versé</th><th>À verser</th><th>En cours</th><th></th></tr></thead><tbody>'
         + ps.map(function(p){
             return '<tr><td>' + _esc(p.nom) + (p.blocage ? '<div style="color:#AE5353;font-size:11px">' + _esc(p.blocage) + '</div>' : '') + '</td>'
               + '<td style="font-family:monospace">' + _esc(p.code) + '</td><td>' + p.filleuls + '</td><td>' + p.ventes + '</td>'
               + '<td>' + F(p.gagne) + '</td><td>' + F(p.verse) + '</td><td><b>' + F(p.solde) + '</b></td><td>' + F(p.enCours) + '</td>'
-              + '<td>' + (p.solde > 0 && !p.enCours ? '<button class="btn xs bi" onclick="_codeAmiAdminVerser(\'' + _esc(p.benef) + '\')">Verser</button>' : '') + '</td></tr>';
+              + '<td>' + (p.solde > 0 && !p.enCours ? '<button class="btn xs bi" onclick="_codeAmiVerseMain(\'' + _esc(p.benef) + '\',' + p.solde + ')">Versé à la main</button>' : '') + '</td></tr>';
           }).join('') + '</tbody></table></div>'
         : '<div class="s mut">Aucune commission encore. Elles apparaissent ici dès le premier paiement d’un filleul.</div>')
       + '</div>';
@@ -36929,6 +36929,21 @@ window._codeAmiAdminVerser = function(benef){
     toast(j && j.message ? j.message : ((j && j.error) || 'Réponse inattendue'), (j && j.success) ? 'ok' : 'warn');
     _codeAmiAdminCharger();
   }).catch(function(){ toast('Serveur de paiement injoignable', 'err'); });
+};
+
+/* Depuis la résiliation de CamerPay, aucun fournisseur ne verse tout seul :
+   l'administration envoie le Mobile Money depuis son téléphone, puis
+   l'enregistre ici pour que le solde dû baisse. */
+window._codeAmiVerseMain = function(benef, solde){
+  var t = prompt('Montant envoyé à la main sur son Mobile Money (FCFA) :', String(solde || ''));
+  if(t === null) return;
+  var m = parseInt(String(t).replace(/\D/g, ''), 10);
+  if(!(m > 0)){ toast('Montant invalide', 'warn'); return; }
+  var note = prompt('Référence de la transaction (facultatif) :', '') || '';
+  _codeAmiApi('versement_manuel', { admin:true, body:{ benef:benef, montant:m, note:note } }).then(function(j){
+    toast(j && j.ok ? '✓ Versement de ' + fmt(m) + ' enregistré' : ((j && j.error) || 'Refusé'), j && j.ok ? 'ok' : 'warn');
+    _codeAmiAdminCharger();
+  });
 };
 
 window._codeAmiAdminRegler = function(ref, etat){
@@ -36994,6 +37009,7 @@ window._partAdminHtml = function(d){
             + (p.actif ? '<button class="btn xs bo" onclick="_partAgir(\'' + a + '\',\'suspendre\')">Suspendre</button> '
                        : '<button class="btn xs bo" onclick="_partAgir(\'' + a + '\',\'reactiver\')">Réactiver</button> ')
             + '<button class="btn xs bo" onclick="_partNouveauCode(\'' + a + '\')" title="Pose un nouveau code de reprise et prépare son message">Code + message</button>'
+            + (p.solde > 0 ? ' <button class="btn xs bi" onclick="_codeAmiVerseMain(\'' + _esc(p.benef) + '\',' + p.solde + ')">Versé à la main</button>' : '')
             + '</td></tr>';
         }).join('') + '</tbody></table></div>'
       : '<div class="s mut">Aucun enseignant-partenaire pour l’instant.</div>')
