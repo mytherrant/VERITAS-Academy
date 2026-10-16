@@ -35981,8 +35981,8 @@ window._codeAmiRendre = function(hote, d){
       + _statCard('✅', fmtF(d.verse), 'Déjà versé', '#5B4FA8')
       + '</div>';
     h += '<div class="card" style="margin-bottom:12px"><div class="semi mb8">📱 Où recevoir vos commissions</div>'
-      + '<div class="s mb8">Versement automatique dès <b>' + fmtF(r.seuilVersement || 2000) + '</b> cumulés, sur votre Mobile Money '
-      + (d.numero ? '(<b>' + _esc(d.operateur) + ' ' + _esc(d.numero) + '</b>)' : '') + '. CamerPay valide chaque versement en quelques heures ouvrées.</div>'
+      + '<div class="s mb8">Vos commissions vous sont versées par le Centre VÉRITAS sur votre Mobile Money '
+      + (d.numero ? '(<b>' + _esc(d.operateur) + ' ' + _esc(d.numero) + '</b>)' : '') + ', à partir de <b>' + fmtF(r.seuilVersement || 2000) + '</b> cumulés.</div>'
       + (d.enCours ? '<div class="ib ibt mb8"><span>⏳</span><span>' + fmtF(d.enCours) + ' en cours de versement.</span></div>' : '')
       + (d.blocage ? '<div class="ib ibr mb8"><span>⚠️</span><span>' + _esc(d.blocage) + '</span></div>' : '')
       + '<div style="display:flex;gap:8px;flex-wrap:wrap"><input class="fi" id="codeAmiTel" type="tel" placeholder="Numéro MTN ou Orange (6XX XX XX XX)" style="flex:1;min-width:200px">'
@@ -36850,7 +36850,7 @@ window._codeAmiAdminCharger = function(){
       + '<div class="fg"><span class="fl">Filleuls payants pour reconduire</span><input class="fi" id="caPartSeuil" type="number" min="1" max="100" value="' + (r.partenaireSeuil || 5) + '"></div>'
       + '</div>'
       + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caActif"' + (r.actif ? ' checked' : '') + '> Programme actif (les codes s’appliquent)</label>'
-      + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caAuto"' + (r.versementAuto ? ' checked' : '') + '> Versement automatique dès le seuil (CamerPay)</label>'
+      + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caAuto"' + (r.versementAuto ? ' checked' : '') + '> Versement automatique dès le seuil <span class="xs2 mut">(sans effet : aucun fournisseur de versement actif)</span></label>'
       + '<div class="s mut mb8">Bornes serveur : 50 % maximum chacun, 60 % cumulés ; seuil de 500 F minimum. La remise ne s’applique ni aux frais d’inscription, ni à la scolarité, ni aux paniers.</div>'
       + '<button class="btn bi" onclick="_codeAmiAdminReglages()">Enregistrer la règle</button></div>';
     h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0">'
@@ -37105,7 +37105,7 @@ window._partMessage = function(f){
     + 'Lien prêt à partager : ' + site + '/?ref=' + f.code + '\n\n'
     + '3) VOTRE RÉMUNÉRATION : ' + comm + ' % de chaque paiement fait avec votre code\n'
     + 'Exemple : un abonnement de 12 000 F → l’apprenant paie ' + fmtN(exPaye) + ' F → vous recevez ' + fmtN(exGain) + ' F.\n'
-    + 'Vos gains sont versés sur votre Mobile Money (' + f.tel + ') dès que votre solde atteint ' + fmtN(rg.seuilVersement || 2000) + ' F.\n\n'
+    + 'Vos gains s’accumulent sur votre compte VÉRITAS et vous sont versés par le Centre sur votre Mobile Money (' + f.tel + '), à partir de ' + fmtN(rg.seuilVersement || 2000) + ' F cumulés.\n\n'
     + '4) RECONDUCTION DE VOTRE ACCÈS\n'
     + 'Chaque fois que ' + seuil + ' nouvelles personnes paient avec votre code, votre accès à l’Atelier est prolongé de ' + mois + ' mois, automatiquement. '
     + 'À défaut, je peux aussi le reconduire moi-même.\n\n'
@@ -54048,10 +54048,10 @@ function pgPrixCalculs(){
       '<div class="fg2">'
       + '<div class="fg"><span class="fl">Remise du filleul (%)</span>' + num('caRemise', rg.remisePct != null ? rg.remisePct : 10, 0, 50) + '</div>'
       + '<div class="fg"><span class="fl">Commission du parrain (% du montant payé)</span>' + num('caComm', rg.commissionPct != null ? rg.commissionPct : 10, 0, 50) + '</div>'
-      + '<div class="fg"><span class="fl">Versement automatique dès (FCFA)</span>' + num('caSeuil', rg.seuilVersement || 2000, 500, 200000, 500) + '</div>'
+      + '<div class="fg"><span class="fl">Seuil de versement (FCFA)</span>' + num('caSeuil', rg.seuilVersement || 2000, 500, 200000, 500) + '</div>'
       + '</div>'
       + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caActif"' + (rg.actif !== false ? ' checked' : '') + '> Programme actif (les codes s’appliquent)</label>'
-      + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caAuto"' + (rg.versementAuto !== false ? ' checked' : '') + '> Verser automatiquement dès le seuil (CamerPay)</label>'
+      + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caAuto"' + (rg.versementAuto !== false ? ' checked' : '') + '> Verser automatiquement dès le seuil <span class="xs2 mut">(sans effet : aucun fournisseur de versement actif)</span></label>'
       + '<div class="ib ibt mt8" id="pc_ca_ex"></div>'
       + '<div class="xs2 mut mt6">Bornes du serveur : 50 % au plus chacun, 60 % cumulés ; seuil de 500 F au moins. Ne s’applique ni aux frais d’inscription, ni à la scolarité, ni aux paniers.</div>',
     '<button class="btn bi" onclick="_codeAmiAdminReglages()">' + _ico('check', 15) + ' Enregistrer sur le serveur</button>'
