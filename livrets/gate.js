@@ -901,22 +901,14 @@
             + '<input id="vrt-n" type="number" min="1" max="500" value="' + qte + '" style="' + INP + '">'
           : '')
       + '<input id="vrt-tel" type="tel" inputmode="tel" placeholder="Ton numéro (6XX XX XX XX)" style="' + INP + '">'
-      /* L'ADRESSE, ET POURQUOI ELLE EST DEMANDÉE ICI.
-         Jusqu'au 01/09/2026, le tunnel ne collectait QUE le numéro. Le code
-         n'avait donc aucun chemin vers l'acheteur en dehors de l'onglet resté
-         ouvert — et cinq clients l'ont appris à leurs dépens. Une adresse
-         change tout : le serveur poste le code dès que le paiement est
-         confirmé, que la page soit ouverte ou fermée, sur le bon téléphone ou
-         sur un autre.
-         Facultative, et dite comme telle : beaucoup paient par Orange Money
-         sans adresse sous la main, et un champ obligatoire de plus, c'est une
-         vente qui n'aboutit pas. */
-      + '<input id="vrt-mail" type="email" inputmode="email" autocomplete="email" '
-      // Placeholder court : à 375 px, « — pour recevoir ton code » était coupé ;
-      // la raison est dite juste en dessous.
-      + 'placeholder="Ton e-mail (facultatif)" style="' + INP + '">'
+      /* PLUS DE CHAMP E-MAIL (16/10/2026, Jacques) : le code part désormais par
+         SMS au numéro qui a payé (SkySMS), que la page soit ouverte ou fermée.
+         L'adresse, ajoutée le 01/09 faute d'autre canal, n'est plus qu'un champ
+         de trop dans le tunnel. La lecture plus bas (#vrt-mail) rend '' quand
+         le champ est absent : le serveur reçoit clientEmail vide, comme avant
+         quand l'acheteur ne la saisissait pas. */
       + '<div style="font-size:11px;color:#98a1aa;margin:-4px 0 2px;line-height:1.45">'
-      + 'Avec une adresse, ton code t’est envoyé même si tu fermes cette page.</div>'
+      + 'Ton code t’est envoyé par SMS à ce numéro, même si tu fermes cette page.</div>'
       /* CODE AMI — le même champ que l'application, sur la surface la plus
          achetée du site. Masqué pour un pack : le serveur refuse d'y cumuler
          un code avec les paliers de volume, et proposer un champ qui ne peut
