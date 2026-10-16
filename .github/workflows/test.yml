@@ -104,6 +104,9 @@ jobs:
       - name: ✨ Atelier — Ambassa compose-t-elle une épreuve conforme ?
         run: node tests/banc_composition_ambassa.cjs
 
+      - name: "✨ Atelier — classe et nature dans le composeur, 2nde, brouillon supprimé"
+        run: node tests/banc_atelier_composer.cjs
+
       - name: 🎁 Le Code ami vaut-il aussi dans la boutique ?
         run: node tests/banc_code_ami_boutique.cjs
 

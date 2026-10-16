@@ -1827,6 +1827,10 @@
         <span style="{{ activeStatusChip }}">{{ activeStatusLabel }}</span>
         <span style="{{ readOnlyChip }}">Lecture seule</span>
         <span style="margin-left:auto;font-size:12px;color:var(--c9aa5b5,#9aa5b5)">{{ savedNote }}</span>
+        <!-- Supprimer un BROUILLON (16/10/2026) : rien ne permettait d'effacer
+             une épreuve créée par erreur. Brouillon seulement : une épreuve
+             soumise, validée ou publiée engage l'équipe. -->
+        <button onClick="{{ supprimerBrouillon }}" style="{{ supprBrouillonStyle }}" title="Supprimer définitivement ce brouillon">Supprimer ce brouillon</button>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8)">Titre de l'épreuve · cliquez pour modifier</span></div>
       <input value="{{ ep.title }}" onChange="{{ setTitle }}" disabled="{{ cannotEdit }}" style="font-family:'Poppins';font-size:24px;font-weight:700;color:var(--c14375f,#14375f);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;background:var(--cffffff,#fff);width:100%;padding:8px 12px;margin-bottom:6px" style-hover="border-color:var(--cbcd9f2,#bcd9f2)" style-focus="border-color:var(--c1a72bb,#1a72bb);box-shadow:0 0 0 3px rgba(26,114,187,.12)" placeholder="Intitulé de l'épreuve">
@@ -5815,6 +5819,7 @@ class Component extends DCLogic {
             convs:st.convs||[],
             msgs:this._msgsPartageables(),
             props:st.proposals||{},
+            epSuppr:this._epSuppr(),
             maj:Date.now()};
   }
   /* Les messages partent BORNES : une conversation d'annee scolaire ne doit
@@ -6008,7 +6013,13 @@ class Component extends DCLogic {
            version enverrait encore son decor, et la fusion le reinstallerait
            ici. Filtrer a l'envoi seul ne suffit pas tant que tout le monde
            n'a pas recharge sa page. */
-        const ep=this._fusionner(this.state.epreuves,this._sansDecor(c.epreuves,/^e[1-3]$/));
+        // Registre des brouillons supprimés : union, la date la plus récente gagne.
+        const reg=Object.assign({},this._epSuppr());
+        if(c.epSuppr&&typeof c.epSuppr==='object'&&!Array.isArray(c.epSuppr)){
+          Object.keys(c.epSuppr).forEach(k=>{const t=+c.epSuppr[k]||0;if(t>(reg[k]||0))reg[k]=t;});
+          this.__epSuppr=reg;this._save('minesec_epsuppr',reg);
+        }
+        const ep=this._sansSupprimees(this._fusionner(this.state.epreuves,this._sansDecor(c.epreuves,/^e[1-3]$/)),reg);
         const co=this._fusionner(this.state.cours,this._sansDecor(c.cours,/^k[1-2]$/));
         /* Les annotations sont un objet indexe par numero de texte : on
            prend les deux cotes, le distant l'emporte sur une meme cle. */
@@ -7375,6 +7386,24 @@ class Component extends DCLogic {
   _statusMeta(s){return s==='valide'?{label:'Validé',c:'var(--c1f9d55,#1f9d55)',bg:'var(--ce6f5ec,#e6f5ec)'}:s==='relecture'?{label:'En relecture',c:'var(--cc26a12,#c26a12)',bg:'var(--cfdefdb,#fdefdb)'}:{label:'Brouillon',c:'var(--c5a6678,#5a6678)',bg:'var(--ceef2f7,#eef2f7)'};}
   _statusChip(s){const m=this._statusMeta(s);return'font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:3px 10px;border-radius:999px;font-family:Poppins;color:'+m.c+';background:'+m.bg;}
   _active(){return this.state.epreuves.find(e=>e.id===this.state.activeId)||null;}
+  /* BROUILLONS SUPPRIMÉS (16/10/2026). La fusion d'équipe ne supprime jamais
+     un objet absent d'un côté (voir _fusionner) : retirer l'épreuve de la
+     liste locale ne suffisait pas, le prochain _syncTirer la ramenait. Le
+     registre { id: date } voyage avec l'état partagé ; à la fusion, une
+     épreuve est écartée si elle a été supprimée APRÈS sa dernière
+     modification — un collègue qui l'a retouchée ensuite la garde. */
+  _epSuppr(){if(!this.__epSuppr)this.__epSuppr=this._load('minesec_epsuppr',{})||{};return this.__epSuppr;}
+  _sansSupprimees(liste,reg){reg=reg||this._epSuppr();return (liste||[]).filter(e=>!(e&&reg[e.id]&&reg[e.id]>=(e.updatedAt||0)));}
+  _supprimerBrouillon(){
+    const a=this._active(),perm=this._perm(this._me().role);
+    if(!a||!perm.edit||a.demo)return;
+    if((a.status||'brouillon')!=='brouillon')return;
+    let ok=true;try{ok=window.confirm('Supprimer le brouillon « '+(a.title||'Nouvelle épreuve')+' » ? Ses textes, questions et corrigé seront effacés.');}catch(e){}
+    if(!ok)return;
+    const reg=Object.assign({},this._epSuppr(),{[a.id]:Date.now()});
+    this.__epSuppr=reg;this._save('minesec_epsuppr',reg);
+    this.setState(st=>({epreuves:st.epreuves.filter(e=>e.id!==a.id),activeId:null,screen:'epreuves'}),()=>{this._persist();try{window.scrollTo(0,0);}catch(e){}});
+  }
   _updateActive(patch,act){this.setState(st=>{const eps=st.epreuves.map(e=>{if(e.id!==st.activeId)return e;const ne={...e,...patch,updatedAt:Date.now()};if(act)ne.activity=[...(e.activity||[]),{userId:st.currentUserId,text:act,ts:Date.now()}];return ne;});return{epreuves:eps};},()=>this._persist());}
   _ensureDraft(cb){const a=this._active();if(a){cb&&cb(a.id);return;}const me=this._me();const id='e'+Date.now();const ep={id,groupeId:this._groupeActif(),title:'Nouvelle épreuve',etab:'',classe:'',duree:'2 h',coeff:'',date:'',consigne:'Lis attentivement le(s) texte(s) puis réponds aux questions.',textIds:[],status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),comments:[],activity:[{userId:me.id,text:'a créé l\u2019épreuve',ts:Date.now()}]};this.setState(st=>({epreuves:[ep,...st.epreuves],activeId:id}),()=>{this._persist();cb&&cb(id);});}
   /* Ajoute -- ou retire -- un texte de l'epreuve en cours.
@@ -9474,6 +9503,10 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       epFilterAll:()=>this.setState({epFilter:'all'}),epFilterMine:()=>this.setState({epFilter:'mine'}),epFilterReview:()=>this.setState({epFilter:'review'}),epFilterLib:()=>this.setState({epFilter:'lib'}),
       epTabAll:tab('all'),epTabMine:tab('mine'),epTabReview:tab('review'),epTabLib:tab('lib'),
       hasActive:!!active,noActive:!active,ep:{title:ep.title,etab:ep.etab,classe:ep.classe,duree:ep.duree,coeff:ep.coeff,date:ep.date,consigne:ep.consigne,epreuveCode:(active&&active.epreuveCode)||'',echeance:(active&&active.echeance)||''},
+      supprimerBrouillon:()=>this._supprimerBrouillon(),
+      supprBrouillonStyle:(perm.edit&&active&&(active.status||'brouillon')==='brouillon'&&!active.demo)
+        ?'background:none;border:1px solid var(--cf1c7c7,#f1c7c7);color:var(--cb33a3a,#b33a3a);font-size:12px;font-weight:600;font-family:Poppins;padding:6px 11px;border-radius:999px;cursor:pointer'
+        :hidden,
       setTitle:setField('title'),setEtab:setField('etab'),
       /* Changer de classe EFFACE une nature qui n'existe pas pour elle
          (16/10/2026). Elle restait enregistrée : _structureDe() la lit en
