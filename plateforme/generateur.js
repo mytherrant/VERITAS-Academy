@@ -438,6 +438,18 @@
       && (plan.productions.length || plan.sujets.some(function (s) { return /commentaire|dissertation|essai/.test(s.genre); }));
   }
 
+  /* Barèmes des GRILLES OFFICIELLES (Draft EST, corrigés harmonisés OBC),
+     relevés le 16/10/2026. Une seule source : la formation les montre à
+     Ambassa, la validation les REPOSE quand son corrigé les tronque ou les
+     fausse — on ne signale pas à l'enseignant ce qu'on sait réparer. */
+  var BAREMES = {
+    resume: 'Barème : compréhension et pertinence 3 pts (texte réduit 1, fidélité au texte 1, proportions respectées 1) + cohérence et technique 3 pts (ordre des idées et système d’énonciation 1, enchaînement et connecteurs 1, idées convergentes 1) + expression 3 pts (vocabulaire personnel 1, orthographe et grammaire 1, syntaxe 1)',
+    discussion: 'Barème : compréhension et pertinence 3 pts (type de production 1, reformulation et problématique 1, arguments et exemples pertinents 1) + organisation et cohérence 3 pts (introduction-développement-conclusion 1, enchaînement et connecteurs 1, cohésion 1) + expression 3 pts (vocabulaire 1, orthographe 1, syntaxe 1)',
+    commentaire2nde: 'Barème : compréhension et pertinence 6 pts (centres d’intérêt dégagés 2, plan détaillé pertinent lié aux faits de langue 4) + organisation et cohérence 6 pts (progression des idées 3, congruence centre d’intérêt – idées – moyens d’expression 3) + expression 6 pts (vocabulaire et orthographe 3, syntaxe, temps et modes 3) + originalité et présentation 2 pts',
+    commentaire: 'Barème : compréhension et pertinence 6 pts (idées directrices pertinentes 2, arguments adéquats 2, illustrations justes 2) + organisation et cohérence 6 pts (congruence 2, articulation par connecteurs 2, progression vers le thème structurateur 2) + expression 6 pts (vocabulaire 2, orthographe et grammaire 2, syntaxe, temps et modes 2) + originalité et présentation 2 pts',
+    dissertation: 'Barème : compréhension et pertinence 6 pts (type de production 2, reformulation et problématique 2, arguments et exemples pertinents 2) + organisation et cohérence 6 pts (structure 2, enchaînement et connecteurs 2, convergence 2) + expression 6 pts (vocabulaire 2, orthographe 2, syntaxe, temps et modes 2) + originalité et présentation 2 pts'
+  };
+
   function formationMinesec(struct, plan, classe, exemples, opts) {
     var ref = M(opts);
     var l = [];
@@ -524,24 +536,24 @@
       if (plan && plan.productions.some(function (p) { return p.genre === 'resume'; })) {
         var tsc = plan.texteSupport;
         l.push('- CONTRACTION DE TEXTE (résumé ou analyse /9) : texte d’actualité sans grande difficulté de compréhension (jeunesse, immigration, chômage, sports et loisirs, TIC…)' + (tsc ? ', de ' + tsc.min + ' à ' + tsc.max + ' mots' : '') + '. Le libellé dit la NATURE du travail, le NOMBRE EXACT de mots du texte et la réduction : « Ce texte compte N mots. Résumez-le au quart de sa longueur, soit environ X mots, ou analysez-le au tiers, soit environ Y mots. Une marge de 10 % en plus ou en moins est admise. Vous indiquerez à la fin de votre travail le nombre de mots employés. »');
-        l.push('  Corrigé : (1) thème, thèse, système d’énonciation et structure argumentative du texte ; (2) les idées essentielles, numérotées dans l’ordre de l’auteur ; (3) un RÉSUMÉ MODÈLE rédigé au quart, avec son nombre de mots entre parenthèses ; (4) « Barème : compréhension et pertinence 3 pts (texte réduit 1, fidélité au texte 1, proportions respectées 1) + cohérence et technique 3 pts (ordre des idées et système d’énonciation 1, enchaînement et connecteurs 1, idées convergentes 1) + expression 3 pts (vocabulaire personnel 1, orthographe et grammaire 1, syntaxe 1) ».');
+        l.push('  Corrigé : (1) thème, thèse, système d’énonciation et structure argumentative du texte ; (2) les idées essentielles, numérotées dans l’ordre de l’auteur ; (3) un RÉSUMÉ MODÈLE rédigé au quart, avec son nombre de mots entre parenthèses ; (4) « ' + BAREMES.resume + ' ».');
       }
       if (plan && plan.productions.some(function (p) { return p.genre === 'discussion'; })) {
         l.push('- DISCUSSION (/9) : une question formulée À PARTIR DU TEXTE, qui pose un problème dont le texte éclaire au moins un aspect ; elle cite MOT POUR MOT entre « » la phrase visée, puis : « Vous discuterez ce point de vue dans un développement argumenté, en vous appuyant sur votre expérience et sur vos lectures. » Ce n’est pas une reprise du texte. AUCUNE limite de mots.');
-        l.push('  Corrigé : reformulation du sujet et problématique, plan détaillé (thèse puis antithèse, arguments et exemples précis), introduction RÉDIGÉE ; « Barème : compréhension et pertinence 3 pts (type de production 1, reformulation et problématique 1, arguments et exemples pertinents 1) + organisation et cohérence 3 pts (introduction-développement-conclusion 1, enchaînement et connecteurs 1, cohésion 1) + expression 3 pts (vocabulaire 1, orthographe 1, syntaxe 1) ».');
+        l.push('  Corrigé : reformulation du sujet et problématique, plan détaillé (thèse puis antithèse, arguments et exemples précis), introduction RÉDIGÉE ; « ' + BAREMES.discussion + ' ».');
       }
       if (plan && plan.sujets.some(function (s) { return s.genre === 'commentaire'; })) {
         if (seconde) {
           l.push('- COMMENTAIRE COMPOSÉ EN 2NDE (/20) : TEXTE 2, littéraire, de 200 à 250 mots (20 à 30 lignes ou vers ayant une unité de sens). En 2nde on s’arrête au PLAN DÉTAILLÉ. La consigne ne recopie pas le texte : « 1. Exprimez le thème du texte. 2. Dégagez deux ou trois centres d’intérêt et présentez-les en plan détaillé : idées directrices, idées secondaires, moyens d’expression. »');
-          l.push('  Corrigé : le thème ; pour chaque centre d’intérêt, ses idées directrices, ses idées secondaires et leurs moyens d’expression (procédé nommé + citation EXACTE) ; « Barème : compréhension et pertinence 6 pts (centres d’intérêt dégagés 2, plan détaillé pertinent lié aux faits de langue 4) + organisation et cohérence 6 pts (progression des idées 3, congruence centre d’intérêt – idées – moyens d’expression 3) + expression 6 pts (vocabulaire et orthographe 3, syntaxe, temps et modes 3) + originalité et présentation 2 pts ».');
+          l.push('  Corrigé : le thème ; pour chaque centre d’intérêt, ses idées directrices, ses idées secondaires et leurs moyens d’expression (procédé nommé + citation EXACTE) ; « ' + BAREMES.commentaire2nde + ' ».');
         } else {
           l.push('- COMMENTAIRE COMPOSÉ (/20) : TEXTE 2, littéraire, de 200 à 250 mots (20 à 30 lignes ou une vingtaine de vers). La consigne ne recopie PAS le texte (il est imprimé à part) et reste non contraignante : « Vous ferez de ce texte un commentaire composé. Vous pourrez, par exemple, montrer comment … et analyser … » — deux ou trois centres d’intérêt complémentaires.');
-          l.push('  Corrigé : situation du texte, thème et problématique, introduction RÉDIGÉE, plan détaillé en deux ou trois centres d’intérêt où chaque idée s’appuie sur un procédé nommé et une citation EXACTE, conclusion ; « Barème : compréhension et pertinence 6 pts (idées directrices pertinentes 2, arguments adéquats 2, illustrations justes 2) + organisation et cohérence 6 pts (congruence 2, articulation par connecteurs 2, progression vers le thème structurateur 2) + expression 6 pts (vocabulaire 2, orthographe et grammaire 2, syntaxe, temps et modes 2) + originalité et présentation 2 pts ».');
+          l.push('  Corrigé : situation du texte, thème et problématique, introduction RÉDIGÉE, plan détaillé en deux ou trois centres d’intérêt où chaque idée s’appuie sur un procédé nommé et une citation EXACTE, conclusion ; « ' + BAREMES.commentaire + ' ».');
         }
       }
       if (plan && plan.sujets.some(function (s) { return s.genre === 'dissertation'; })) {
         l.push('- DISSERTATION (/20) : un JUGEMENT ou une OPINION sur un problème littéraire, artistique ou général (monde contemporain), suivi d’une CONSIGNE (« Vous expliquerez, puis discuterez… », « Vous apprécierez… »). Le type de sujet — dialectique, analytique ou mixte — commande le plan. N’attribue JAMAIS une phrase à un auteur réel si tu n’es pas certain de ses mots : formule une affirmation non attribuée (« On a pu dire que… »). Évite les sujets rebattus sans angle.');
-        l.push('  Corrigé : analyse des termes et problématique ; introduction RÉDIGÉE (amener le sujet, le citer, poser le problème, annoncer le plan) ; plan détaillé illustré d’exemples tirés des œuvres au programme de la classe (liste ci-dessous) ; conclusion (rappel de la problématique, bilan, ouverture) ; « Barème : compréhension et pertinence 6 pts (type de production 2, reformulation et problématique 2, arguments et exemples pertinents 2) + organisation et cohérence 6 pts (structure 2, enchaînement et connecteurs 2, convergence 2) + expression 6 pts (vocabulaire 2, orthographe 2, syntaxe, temps et modes 2) + originalité et présentation 2 pts ».');
+        l.push('  Corrigé : analyse des termes et problématique ; introduction RÉDIGÉE (amener le sujet, le citer, poser le problème, annoncer le plan) ; plan détaillé illustré d’exemples tirés des œuvres au programme de la classe (liste ci-dessous) ; conclusion (rappel de la problématique, bilan, ouverture) ; « ' + BAREMES.dissertation + ' ».');
       }
       l.push('- PRÉSENTATION ET PERFECTIONNEMENT (/2) : mise en page, propreté, lisibilité de toute la copie — elle ne se rédige pas comme un sujet.');
       l.push('- VÉRIFIÉ AUTOMATIQUEMENT après toi, et signalé à l’enseignant : le résumé modèle est RECOMPTÉ mot à mot (écris-le en un seul paragraphe suivi de « (N mots) ») ; chaque ligne « Barème : … » est ADDITIONNÉE (les points hors parenthèses doivent faire 9 ou 20) ; tout tutoiement est refusé ; toute œuvre d’une autre classe est refusée ; toute citation attribuée à un auteur est signalée « à vérifier ».');
@@ -891,6 +903,11 @@
        premiers mots. */
     var debut = t.split(' ').slice(0, 10);
     if (debut.some(function (w) { return IMPERATIFS.indexOf(w) >= 0; })) return true;
+    /* « À partir de l’affirmation de l’auteur : « …trente mots… », discutez
+       ce point de vue » : la citation repoussait le verbe hors des dix
+       premiers mots (16/10/2026). On cherche le verbe hors citations. */
+    var horsCit = norm(String(q || '').replace(/«[^»]*»|"[^"]*"/g, ' ')).replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim().split(' ').slice(0, 16);
+    if (horsCit.some(function (w) { return IMPERATIFS.indexOf(w) >= 0; })) return true;
     /* Le second cycle libelle aussi au FUTUR : « Vous discuterez ce point de
        vue », « Vous ferez de ce texte un commentaire composé » (Draft EST).
        Refusé, chaque discussion de BAC partait en réécriture (16/10). */
@@ -942,6 +959,11 @@
     var phrases = String(txt || '').replace(/([.!?])\s+/g, '$1\n').split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean);
     var gardees = phrases.filter(function (ph) {
       var p0 = plat(ph);
+      /* Longueur des textes, texte « coupé » ou « incomplet » : l'Atelier le
+         MESURE et coupe lui-même pour l'envoi. Ambassa, qui ne voit que
+         l'extrait transmis, se trompait (« légèrement court, mais dans la
+         marge » pour 381 mots au lieu de 550). */
+      if (/ (mots|longueur|court|courte|long|longue|coupe|coupee|tronque|incomplet|incomplete|marge) /.test(p0) && / texte /.test(p0)) return false;
       return !plats.some(function (d) { return p0.indexOf(d.slice(0, 40)) >= 0 || d.indexOf(p0.slice(0, 40)) >= 0; });
     });
     return gardees.slice(0, 4).join(' ').slice(0, 600);
@@ -978,7 +1000,7 @@
           var venues = brutes.filter(function (x) { return x && String(x.liste) === k && (numParRang[x.texte] || support[0] && support[0].n) == n; });
           (ctx.fixes[n][k] || []).forEach(function (q, i) {
             var v = venues[i] || {};
-            res.questions[n][k].push({ q: q, pts: nombre(v.pts), niveau: String(v.niveau || ''), corrige: propre(v.corrige, 1400), bloc: k, fixe: true });
+            res.questions[n][k].push({ q: q, pts: nombre(v.pts), niveau: String(v.niveau || ''), corrige: propre(v.corrige, 9000), bloc: k, fixe: true });
           });
         });
       });
@@ -994,7 +1016,26 @@
           var b0 = blocs.filter(function (b) { return b.kind === k && !b.production; })[0] || blocs.filter(function (b) { return b.kind === k; })[0];
           bloc = b0 ? b0.cle : k;
         }
-        res.questions[n][k].push({ q: propre(x.q, 900), pts: nombre(x.pts), niveau: String(x.niveau || ''), corrige: propre(x.corrige, 2600), bloc: bloc });
+        res.questions[n][k].push({ q: propre(x.q, 900), pts: nombre(x.pts), niveau: String(x.niveau || ''), corrige: propre(x.corrige, 9000), bloc: bloc });
+      });
+      /* UN BLOC DE PRODUCTION = UNE CONSIGNE. Ambassa glissait la
+         « Présentation de la copie » dans le bloc du résumé : 9 points
+         coupés en 7,5 + 1,5, un item III « Ce texte compte 381 mots.
+         Présentation… » et un faux « aucun résumé modèle » (16/10/2026).
+         La présentation est un sujet à part, notée à part. */
+      var aPresentation = plan.sujets.some(function (s) { return s.genre === 'presentation'; });
+      Object.keys(res.questions).forEach(function (n) {
+        ['comp', 'expl'].forEach(function (k) {
+          var vusProd = {};
+          res.questions[n][k] = res.questions[n][k].filter(function (it) {
+            if (aPresentation && /^\W*(?:[IVX]+\.\s*)?pr[ée]sentation\b|pr[ée]sentation (?:et perfectionnement )?de (?:la|votre) copie/i.test(it.q)) return false;
+            var b = cleValides[it.bloc];
+            if (!b || !b.production) return true;
+            if (vusProd[it.bloc]) return false;
+            vusProd[it.bloc] = 1;
+            return true;
+          });
+        });
       });
       /* Préfixe de rubrique : dans la liste plate du composeur, « I.
          Communication — a. … » doit rester lisible une fois imprimé. */
@@ -1031,7 +1072,7 @@
       }
       var v = brutsS[iS++] || {};
       var texte = propre(typeof v === 'string' ? v : v.texte, 5000);
-      res.sujets.push({ genre: s.genre, titre: s.titre, texte: texte, pts: s.points, auChoix: !!s.auChoix, corrige: propre(v.corrige, 6000) });
+      res.sujets.push({ genre: s.genre, titre: s.titre, texte: texte, pts: s.points, auChoix: !!s.auChoix, corrige: propre(v.corrige, 16000) });
     });
     /* La dictée n'a rien à rédiger : son « sujet » est le texte lui-même.
        On IMPOSE la mention, même si Ambassa a écrit quelque chose : ce champ
@@ -1064,6 +1105,8 @@
         repartir(its.map(function (it) { return it.pts; }), b.points).forEach(function (p, i) { its[i].pts = p; });
       });
     }
+
+    reparerReflexion(res, ctx, cleValides);
 
     /* --- contrôles déterministes --- */
     var nbQ = 0, total = 0, parNiveau = {}, corrigesManquants = 0, baremesNonVentiles = 0, citationsCorrige = 0;
@@ -1200,7 +1243,7 @@
     var para = avant.length ? avant[avant.length - 1] : '';
     // « Résumé modèle : … » — l'étiquette ne compte pas.
     para = para.replace(/^(?:\(?\d\)?[.)]?\s*)?(?:-\s*)?r[ée]sum[ée][^:«]{0,30}:\s*/i, '').replace(/^[«"]\s*|\s*[»"]\s*$/g, '');
-    return { annonce: parseInt(der[1], 10), compte: compterMots(para) };
+    return { annonce: parseInt(der[1], 10), compte: compterMots(para), debut: der.index, fin: der.index + der[0].length };
   }
 
   /* Somme d'une ligne « Barème : … » : les nombres suivis de « pt(s) » ou
@@ -1217,6 +1260,9 @@
       else if (c === ')') prof = Math.max(0, prof - 1);
       else if (!prof) plat0 += c;
     }
+    // Parenthèse jamais refermée = ligne TRONQUÉE (« … (vocabulaire 1, o ») :
+    // ses totaux visibles ne prouvent rien.
+    if (prof) return NaN;
     var re = /(\d+(?:[.,]\d+)?)\s*(?:pts?|points?)\b/gi, m, tot = 0, vu = 0;
     while ((m = re.exec(plat0))) { tot += parseFloat(m[1].replace(',', '.')); vu++; }
     return vu ? Math.round(tot * 100) / 100 : null;
@@ -1258,6 +1304,114 @@
     return false;
   }
 
+  /* Recale une citation sur le texte : Ambassa écrit « les élites
+     occidentales » quand le texte dit « ces élites occidentales ». Si un
+     passage du texte reprend au moins 85 % de ses mots dans l'ordre, on
+     substitue le passage EXACT (règle du verbatim). Sinon, null : la
+     citation reste signalée. */
+  function recaler(cit, texte) {
+    var c = String(cit || '');
+    if (/\[|…|\.\.\./.test(c)) return null;
+    var cw = plat(c).trim().split(' ').filter(Boolean), n = cw.length;
+    if (n < 4) return null;
+    var src = String(texte || ''), mots = [], re = /\S+/g, m;
+    while ((m = re.exec(src))) {
+      plat(m[0]).trim().split(' ').filter(Boolean).forEach(function (w) { mots.push({ w: w, d: m.index, f: m.index + m[0].length }); });
+    }
+    var best = null;
+    for (var i = 0; i < mots.length; i++) {
+      if (mots[i].w !== cw[0] && (i + 1 >= mots.length || mots[i + 1].w !== cw[1])) continue;
+      for (var L = Math.max(3, n - 2); L <= n + 2 && i + L <= mots.length; L++) {
+        var j = 0, k = 0, com = 0;
+        while (j < n && k < L) {
+          if (cw[j] === mots[i + k].w) { com++; j++; k++; }
+          else if (k + 1 < L && cw[j] === mots[i + k + 1].w) k++;
+          else j++;
+        }
+        var score = com / Math.max(n, L);
+        if (score >= 0.85 && (!best || score > best.score)) best = { score: score, d: mots[i].d, f: mots[i + L - 1].f };
+      }
+    }
+    if (!best) return null;
+    var exact = src.slice(best.d, best.f).replace(/^[«"“\s]+|[»"”\s]+$/g, '').replace(/[,;:]$/, '');
+    // Le point final du texte ne s'ajoute pas à une citation qui n'en avait pas.
+    return /[.!?]$/.test(c.trim()) ? exact : exact.replace(/\.$/, '');
+  }
+  function recalerCitations(str, texte) {
+    var tp = plat(texte), nb = 0;
+    if (!str || !texte) return { s: str, nb: 0 };
+    var out = String(str).replace(/«\s*([^»]{1,400}?)\s*»/g, function (tout, c) {
+      if (tp.indexOf(plat(c)) >= 0) return tout;
+      var r = recaler(c, texte);
+      if (!r) return tout;
+      nb++;
+      return '« ' + r + ' »';
+    });
+    return { s: out, nb: nb };
+  }
+
+  /* PASSE DE RÉPARATION — avant les contrôles. Ce qui se répare sans
+     l'enseignant se répare : il ne reçoit que ce qui demande son jugement
+     (16/10/2026 : neuf alertes sur une épreuve dont sept étaient de la
+     mécanique — barèmes tronqués, nombre de mots faux, citation à un mot
+     près). Chaque réparation est consignée dans `res.reparations`. */
+  function reparerReflexion(res, ctx, cleValides) {
+    var plan = ctx.plan, notes = [];
+    var sp = (ctx.textes || []).filter(function (t) { return t.role === 'support'; })[0];
+    var com = (ctx.textes || []).filter(function (t) { return t.role === 'commentaire'; })[0];
+    var seconde = en2nde(M(), ctx.classe);
+    var nbCit = 0, nbBar = 0, nbMots = 0;
+    function poserBareme(corrige, ligne) {
+      var garde = String(corrige || '').split('\n').filter(function (l) { return !/bar[eè]me/i.test(l); }).join('\n').replace(/\s+$/, '');
+      return garde + '\n' + ligne;
+    }
+    Object.keys(res.questions || {}).forEach(function (n) {
+      var tx = (ctx.textes || []).filter(function (t) { return String(t.n) === String(n); })[0];
+      var texte = tx ? tx.text : (sp && sp.text);
+      ['comp', 'expl'].forEach(function (k) {
+        (res.questions[n][k] || []).forEach(function (it) {
+          if (!it.fixe) { var rq = recalerCitations(it.q, texte); it.q = rq.s; nbCit += rq.nb; }
+          var rc = recalerCitations(it.corrige, texte); it.corrige = rc.s; nbCit += rc.nb;
+          var b = cleValides[it.bloc];
+          if (!b || !b.production || !it.corrige) return;
+          var off = BAREMES[b.production];
+          if (off && it.pts === 9 && sommeBareme(it.corrige) !== 9) { it.corrige = poserBareme(it.corrige, off); nbBar++; }
+          if (b.production === 'resume') {
+            var rm = resumeModele(it.corrige);
+            if (rm && Math.abs(rm.compte - rm.annonce) > Math.max(2, rm.annonce * 0.03)) {
+              it.corrige = it.corrige.slice(0, rm.debut) + '(' + rm.compte + ' mots)' + it.corrige.slice(rm.fin);
+              nbMots++;
+            }
+          }
+        });
+      });
+    });
+    res.sujets.forEach(function (s) {
+      if (!s.corrige || s.genre === 'presentation') return;
+      if (s.genre === 'commentaire' && com) {
+        var rc = recalerCitations(s.corrige, com.text); s.corrige = rc.s; nbCit += rc.nb;
+        /* Le texte recopié dans la consigne : on garde ce qui le SUIT. */
+        var t = String(com.text || '').trim(), fin = t.slice(-40), i = String(s.texte || '').lastIndexOf(fin);
+        /* Seulement si le sujet COMMENCE par le texte : une consigne qui en
+           cite la fin (« Montrez comment « … » ») ne doit pas être amputée. */
+        var amorce = plat(t.slice(0, 60)).trim();
+        var commence = amorce.length > 20 && plat(s.texte).slice(0, amorce.length + 40).indexOf(amorce) >= 0;
+        if (t.length >= 80 && i >= 0 && commence) {
+          var reste = s.texte.slice(i + fin.length).replace(/^[\s»"”.…]+/, '').trim();
+          if (reste.length > 30) s.texte = reste;
+        }
+      }
+      var off2 = s.genre === 'commentaire' ? (seconde ? BAREMES.commentaire2nde : BAREMES.commentaire)
+        : s.genre === 'dissertation' ? BAREMES.dissertation : null;
+      if (off2 && s.pts === 20 && sommeBareme(s.corrige) !== 20) { s.corrige = poserBareme(s.corrige, off2); nbBar++; }
+    });
+    if (nbBar) notes.push(nbBar + ' barème(s) officiel(s) reposé(s) (absent, tronqué ou faux dans le corrigé d’Ambassa)');
+    if (nbMots) notes.push('nombre de mots du résumé modèle recompté et corrigé');
+    if (nbCit) notes.push(nbCit + ' citation(s) recalée(s) mot pour mot sur le texte');
+    res.reparations = notes;
+    if (notes.length) res.controles.push({ ok: true, libelle: 'Réparé automatiquement : ' + notes.join(' ; ') + '.' });
+  }
+
   function exigencesReflexion(res, ctx, cleValides, opts) {
     var plan = ctx.plan, ref = M(opts);
     var vous = secondCycle(ctx.struct, ctx.classe);
@@ -1274,12 +1428,10 @@
           if (!rm) {
             res.controles.push({ ok: false, libelle: 'Corrigé du résumé : aucun résumé modèle suivi de son nombre de mots « (N mots) » — à rédiger (environ ' + quart + ' mots).' });
           } else {
-            var ecartAnnonce = Math.abs(rm.compte - rm.annonce) > Math.max(3, rm.annonce * 0.05);
             var horsMarge = Math.abs(rm.compte - quart) > quart * 0.1;
-            res.controles.push({ ok: !ecartAnnonce && !horsMarge,
-              libelle: 'Résumé modèle : ' + rm.compte + ' mots recomptés'
-                + (ecartAnnonce ? ' (Ambassa en annonce ' + rm.annonce + ')' : '')
-                + ' pour ' + quart + ' attendus' + (horsMarge ? ' — hors de la marge de 10 % (' + Math.ceil(quart * 0.9) + ' à ' + Math.floor(quart * 1.1) + '), à reprendre' : ', dans la marge de 10 %') });
+            res.controles.push({ ok: !horsMarge,
+              libelle: 'Résumé modèle : ' + rm.compte + ' mots recomptés pour ' + quart + ' attendus'
+                + (horsMarge ? ' — hors de la marge de 10 % (' + Math.ceil(quart * 0.9) + ' à ' + Math.floor(quart * 1.1) + '), à reprendre' : ', dans la marge de 10 %') });
           }
         }
         var sb = sommeBareme(it.corrige);
@@ -1299,7 +1451,7 @@
         else if (s.pts && Math.abs(sb - s.pts) > 0.001) res.controles.push({ ok: false, libelle: 'Corrigé « ' + s.titre + ' » : barème de ' + sb + ' points pour un sujet sur ' + s.pts + ' — à rectifier.' });
       }
       if (s.genre === 'commentaire' && com && recopie(s.texte, com.text)) {
-        res.controles.push({ ok: false, libelle: 'Sujet de commentaire : le texte y est recopié — il est déjà imprimé à part ; ne gardez que la consigne.' });
+        res.controles.push({ ok: false, libelle: 'Sujet de commentaire : des passages du texte y sont recopiés — il est déjà imprimé à part ; ne gardez que la consigne.' });
       }
       if (vous && tutoie(s.texte)) {
         res.controles.push({ ok: false, libelle: 'Sujet « ' + s.titre + ' » : tutoiement — le second cycle compose au vouvoiement (« Vous montrerez… »).' });

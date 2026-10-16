@@ -30,9 +30,9 @@
 <meta name="twitter:card" content="summary_large_image">
 <script src="./support.js?v=b7335820"></script>
 <script src="./minesec.js?v=0ec7e1a6"></script>
-<script src="./conformite.js?v=70d66d2a"></script>
+<script src="./conformite.js?v=ddfccb1b"></script>
 <script src="./exercices.js?v=c6d93301"></script>
-<script src="./generateur.js?v=4644c996"></script>
+<script src="./generateur.js?v=a988f24c"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=090324b1"></script>
 <!--vrt-habillage:tete-->
@@ -5074,7 +5074,7 @@ class Component extends DCLogic {
     let abonnement=null;
     const choisir=(bornes,g,exclure,principal)=>{
       const l=G.classerTextes(this.all,{classe:a.classe,theme:st.genTheme||'',bornes:bornes,genre:g,exclure:dejaVus.concat(exclure||[])});
-      if(principal)abonnement={fermes:l.fermesConformes||0,bornes:bornes||null,
+      if(principal)abonnement={fermes:l.fermesConformes||0,bornes:bornes||null,mots:l.length?l[0].mots:0,
         dansNorme:!!(l.length&&bornes&&l[0].mots>=bornes.min&&l[0].mots<=bornes.max)};
       return l.length?l[0].f.n:null;
     };
@@ -5093,6 +5093,22 @@ class Component extends DCLogic {
     }
     if(plan.support!=='aucun'&&!roles.some(r=>r.role!=='commentaire')){
       this.setState({genBusy:false,genEtape:'',genErr:'Aucun texte du corpus ouvert à votre abonnement ne convient à cette classe. Ajoutez un texte à la main, puis relancez.'});
+      return;
+    }
+    /* PRÉVENIR AVANT, PAS DÉNONCER APRÈS (16/10/2026). Le corpus n'a aucun
+       argumentatif de 550 à 650 mots : Ambassa composait quand même, puis le
+       rapport alignait trois alertes sur la longueur. Un texte d'auteur ne
+       se rallonge pas : l'enseignant choisit, avant qu'un appel soit décompté. */
+    const ab0=abonnement;
+    if(!textesChoisis.length&&ab0&&ab0.bornes&&!ab0.dansNorme&&ab0.mots
+      &&plan.productions.some(p=>p.genre==='resume')&&typeof window!=='undefined'&&window.confirm
+      &&!window.confirm('Contraction de texte : le corpus '+(ab0.fermes?'ouvert à votre formule ':'')
+        +'ne contient aucun texte de '+ab0.bornes.min+' à '+ab0.bornes.max+' mots. Le plus proche compte '+ab0.mots+' mots'
+        +(ab0.fermes?' ('+ab0.fermes+' texte(s) conforme(s) dans une formule supérieure)':'')+'.\n\n'
+        +'OK : composer quand même sur ce texte (l’épreuve sera signalée hors norme).\n'
+        +'Annuler : importer d’abord votre texte (onglet Corpus, « Importer un corpus »), puis relancer.')){
+      this.setState({genBusy:false,genEtape:'',genErr:'Composition annulée : aucun appel décompté. Importez un texte argumentatif de '
+        +ab0.bornes.min+' à '+ab0.bornes.max+' mots (onglet Corpus, « Importer un corpus »), ajoutez-le à l’épreuve, puis relancez.'});
       return;
     }
     etape('Téléchargement du texte intégral…');
@@ -5196,6 +5212,8 @@ class Component extends DCLogic {
       if(ab&&ab.bornes&&!ab.dansNorme&&ab.fermes>0){
         controles.push({ok:false,libelle:'Texte hors de la longueur officielle ('+ab.bornes.min+'-'+ab.bornes.max
           +' mots) : '+ab.fermes+' texte(s) conforme(s) sont r\u00e9serv\u00e9s \u00e0 une formule sup\u00e9rieure.'});
+      }else if(ab&&ab.bornes&&!ab.dansNorme&&controles.some(c=>/^Texte de la contraction/.test(c.libelle||''))){
+        /* Déjà dit, avec le type et la marche à suivre : une seule alerte. */
       }else if(ab&&ab.bornes&&!ab.dansNorme){
         /* Couper n'aide que si le texte est trop LONG. Trop court (extraits
            du corpus plafonn\u00e9s vers 400 mots, contraction \u00e0 550-650), il faut

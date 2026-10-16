@@ -203,7 +203,8 @@
        entier. Il n'est digne de foi que si le contenu a suivi -- d'ou le
        controle 2 bis juste au-dessus, qui signale le cas contraire. */
     if (struct && struct.texteSupport) {
-      var ts = struct.texteSupport;
+      // Bornes DE LA CLASSE : la 2nde contracte 400 à 500 mots, pas 550 à 650.
+      var ts = (M.texteSupportPour && M.texteSupportPour(struct, ep.classe)) || struct.texteSupport;
       textes.forEach(function (f, i) {
         /* Le texte du commentaire composé (sujet au choix) n'est pas le texte
            de la contraction : il se mesure en lignes (20 à 30), pas à
@@ -221,7 +222,7 @@
             'Texte ' + (i + 1) + ' hors norme : ' + n + ' mots',
             struct.nom + ' demande un texte de ' + ts.min + ' à ' + ts.max + ' mots' + (ts.nature ? ' (' + ts.nature + ')' : '') + '.',
             n > ts.max ? 'Coupez le texte, en marquant les suppressions par […].'
-                       : 'Choisissez un extrait plus long dans le corpus.',
+                       : 'Choisissez un extrait plus long dans le corpus, ou importez le vôtre (onglet Corpus, « Importer un corpus ») — un texte d’auteur ne se rallonge pas.',
             'texte-' + f.n));
         }
       });

@@ -229,6 +229,7 @@ function atelier(repondre) {
   const C = vm.runInContext('Component', ctx);
   const a = new C({});
   a.__journal = journal;
+  a.__win = win;
   if (a._installerBase) a._installerBase();
   return a;
 }
@@ -483,6 +484,32 @@ const attendre = ms => new Promise(r => setTimeout(r, ms));
   // au panneau lui-même, qui porte la classe et la nature, plus aux Renseignements.
   dire(/Choisissez d.abord la classe/.test(c.state.genErr || '') && !c.__journal.some(x => /ia_proxy/.test(x.url)),
     'sans classe ni nature d’épreuve : aucun appel, un message qui dit quoi renseigner');
+
+  /* PRÉVENIR AVANT DE DÉPENSER (16/10/2026). Contraction de Tle sans aucun
+     texte de 550 à 650 mots dans le corpus : l'enseignant est averti AVANT
+     le quota et l'appel ; « Annuler » ne coûte rien. */
+  for (const accepte of [false, true]) {
+    let iaC = 0;
+    const t = atelier((url) => {
+      if (/ia_proxy/.test(url)) { iaC++; return { corps: { text: JSON.stringify({ titre: 'x', questions: [], sujets: [] }) } }; }
+      return { status: 200, corps: { ok: true } };
+    });
+    t.all = t.all.filter(x => x.n !== 13);           // plus d'argumentatif de 600 mots
+    let question = '';
+    t.__win.confirm = m => { question = m; return accepte; };
+    await new Promise(r => t._ensureDraft(() => r()));
+    t._updateActive({ classe: 'Tle A', epreuveCode: 'A_LITT', etab: 'Lycée' });
+    t._composerAvecAmbassa('tout');
+    for (let i = 0; i < 60 && t.state.genBusy; i++) await attendre(100);
+    const quota = t.__journal.filter(x => /action=quota/.test(x.url)).length;
+    if (!accepte) {
+      dire(/aucun texte de 550 à 650 mots\. Le plus proche compte \d+ mots/.test(question) && iaC === 0 && quota === 0
+        && /Composition annulée : aucun appel décompté/.test(t.state.genErr || '') && !t.state.genBusy,
+        'contraction sans texte conforme : l’enseignant est prévenu AVANT, « Annuler » ne décompte rien', JSON.stringify({ question: question.slice(0, 80), iaC, quota, err: t.state.genErr }));
+    } else {
+      dire(iaC === 1, '« OK » : la composition part quand même, sur le texte le plus proche', iaC);
+    }
+  }
 
   console.log(`\n  ${G}${ok} contrôle(s) au vert, ${ko} au rouge.${R}\n`);
   process.exit(ko ? 1 : 0);
