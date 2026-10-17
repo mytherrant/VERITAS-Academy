@@ -649,7 +649,13 @@ def main():
         if not os.path.exists(chemin) or (base == RACINE and nom == 'app.html'):
             continue
         s = open(chemin, encoding='utf-8', newline='').read()
-        neuf = habiller_app(s, donnees, vitrine)
+        # Un poste Windows extrait la coquille en CRLF (core.autocrlf) : les
+        # motifs ci-dessus s'écrivent en LF. On travaille en LF et on rend
+        # au fichier ses fins de ligne d'origine.
+        crlf = '\r\n' in s
+        neuf = habiller_app(s.replace('\r\n', '\n'), donnees, vitrine)
+        if crlf:
+            neuf = neuf.replace('\n', '\r\n')
         n += 1
         if neuf.count('<h1') != s.count('<h1') or neuf.count('id="vContent"') != 1:
             raise SystemExit('habiller_pages : %s — le corps de l\'application a changé.' % nom)
