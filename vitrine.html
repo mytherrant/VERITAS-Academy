@@ -766,6 +766,18 @@ html{scroll-behavior:smooth}
    laisse l'or au bouton juste en dessous. */
 .vbq-prix{ display:block;font:600 21px/1.1 Poppins,sans-serif;color:#A84200;white-space:nowrap; }
 .vbq-mention{ display:block;margin-top:3px;font:400 11.5px Poppins,sans-serif;color:#6E7385; }
+/* 18/10/2026 — « centre les titres et mets les éléments importants en
+   couleur » (Jacques). La carte se lit au centre, comme les panneaux de
+   formules : rayon, titre, description, pages. La description n'est plus
+   justifiée (trois mots écartés jusqu'aux bords sur une colonne de 260 px).
+   En couleur, ce qui décide l'achat : l'essai gratuit en vert, l'icône des
+   pages dans la teinte de la carte. Le prix reste brique (voir ci-dessus). */
+.vbq-body{ text-align:center; }
+.vbq-cat, .vbq-titre{ text-align:center; }
+.vbq-type{ text-align:center!important; hyphens:manual; }
+.vbq-exos{ align-self:center; }
+.vbq-exos svg{ color:var(--vbq-teinte,#1E499B); }
+.vbq-mention{ font-weight:600;color:#007E11; }
 /* `flex:1 1 auto` et non `0 0 auto` : une action renvoyée à la ligne suivante
    par le `wrap` ci-dessus doit l'occuper, pas y flotter à gauche en laissant
    un vide. Sur une carte à une seule action, le comportement est identique —

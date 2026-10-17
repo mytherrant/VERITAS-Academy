@@ -4810,3 +4810,4 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
   background:var(--vf); color:var(--vt);
 }
 #VISITOR#VISITOR#VISITOR#VISITOR .vfo-ligne-t .vfo-ligne-tx{ flex:1 1 auto; min-width:0; }
+#VISITOR#VISITOR#VISITOR#VISITOR .vm-flux{ flex:1 1 auto; min-width:0; display:inline; }

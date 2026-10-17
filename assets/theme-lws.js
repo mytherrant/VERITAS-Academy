@@ -422,6 +422,42 @@
       if (l1 > 0 && l1 <= 60) t1.classList.add('vm-titre');
     }
 
+    /* 1 ter. TEXTE ÉCLATÉ EN COLONNES (18/10/2026). Un conteneur flexible
+          en ligne dont le texte n'est pas enveloppé fait de CHAQUE morceau
+          (« texte », <b>, « texte », <b>…) une colonne : le cadre « Aucun
+          fichier n'est téléchargeable » de la fiche livre s'affichait en
+          quatre colonnes sur téléphone. On regroupe chaque suite de texte et
+          de balises en ligne dans un seul <span>. */
+    var EN_LIGNE_FLUX = /^(B|STRONG|EM|I|A|SMALL|SPAN|CODE|MARK|U|S|SUP|SUB|BR)$/;
+    var flex = zone.querySelectorAll('div,p,li,label,span,a');
+    for (var fx = 0; fx < flex.length; fx++) {
+      var fe = flex[fx];
+      if (fe.closest('.vrt-hab') || fe.classList.contains('vm-flux')) continue;
+      var aTexte = false, aBalise = false;
+      for (var q = 0; q < fe.childNodes.length; q++) {
+        var cn = fe.childNodes[q];
+        if (cn.nodeType === 3 && cn.textContent.trim()) aTexte = true;
+        else if (cn.nodeType === 1 && EN_LIGNE_FLUX.test(cn.tagName) && !cn.classList.contains('vm-med')) aBalise = true;
+      }
+      if (!aTexte || !aBalise) continue;
+      var dcs = getComputedStyle(fe);
+      if (dcs.display.indexOf('flex') < 0 || dcs.flexDirection.indexOf('row') !== 0) continue;
+      var run = [], groupes = [];
+      for (var q2 = 0; q2 < fe.childNodes.length; q2++) {
+        var c2 = fe.childNodes[q2];
+        var flux = c2.nodeType === 3 || (c2.nodeType === 1 && EN_LIGNE_FLUX.test(c2.tagName) && c2.tagName !== 'SPAN' || (c2.nodeType === 1 && c2.tagName === 'SPAN' && !c2.querySelector('svg') && !c2.classList.contains('vm-med')));
+        if (flux) run.push(c2); else { if (run.length) groupes.push(run); run = []; }
+      }
+      if (run.length) groupes.push(run);
+      groupes.forEach(function (g) {
+        if (g.length < 2 || !g.some(function (n) { return n.nodeType === 3 && n.textContent.trim(); })) return;
+        var sp = document.createElement('span');
+        sp.className = 'vm-flux';
+        g[0].parentNode.insertBefore(sp, g[0]);
+        g.forEach(function (n) { sp.appendChild(n); });
+      });
+    }
+
     /* 2. PUCES — le disque coché de la teinte du bloc. */
     var lis = zone.querySelectorAll('li');
     for (var l = 0; l < lis.length; l++) {

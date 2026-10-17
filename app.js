@@ -42183,6 +42183,29 @@ openPaymentModal = function(payInfo){
 };
 window.openPaymentModal = openPaymentModal;
 
+/* ── LA SONDE AVANT LA MODALE (18/10/2026) ───────────────────────────────
+   « Le Tube digestif n'ouvre pas le canal de paiement » (Jacques, au
+   téléphone). La tuile ⚡ AUTO (collecte SkySMS) ne s'affiche que si la sonde
+   du serveur est revenue (window._VRT_CAMPAY). Sur un téléphone lent, un clic
+   sur « Acheter » AVANT son retour construisait la modale en mode manuel seul
+   — codes marchands à composer soi-même, bouton « J'ai payé » sous le pli —
+   et elle n'était jamais reconstruite. Mesuré en production le 18/10 : sonde
+   revenue → tuile présente ; c'est bien une course. On attend donc la sonde
+   (4 s au plus, puis repli manuel) avant d'ouvrir. */
+(function(){
+  var _ouvrir = openPaymentModal;
+  openPaymentModal = function(){
+    var self = this, args = arguments;
+    if(window._VRT_CAMPAY || typeof _payCampayProbe !== 'function') return _ouvrir.apply(self, args);
+    var fait = false;
+    var go = function(){ if(fait) return; fait = true; _ouvrir.apply(self, args); };
+    try{ if(typeof toast === 'function') toast('Préparation du paiement…', 'info'); }catch(e){}
+    try{ _payCampayProbe().then(go, go); }catch(e){ go(); }
+    setTimeout(go, 4000);
+  };
+  window.openPaymentModal = openPaymentModal;
+})();
+
 function _payGoStep(step){
   var s1=document.getElementById('payStep1'), s2=document.getElementById('payStep2'), s3=document.getElementById('payStep3');
   var i1=document.getElementById('payStep1Ind'), i2=document.getElementById('payStep2Ind'), i3=document.getElementById('payStep3Ind');
@@ -51903,14 +51926,17 @@ window._bookCommentRecevoir = function(b){
     h += '<li><span class="bkrec-n">' + (i + 1) + '</span><div><b>' + e[0] + '</b><span>' + e[1] + '</span></div></li>';
   });
   h += '</ol>'
-     + '<p class="bkrec-note">' + ICO('i-shield')
+     /* Le texte dans UN <span> : .bkrec-note est en flex (icône + texte), et
+        chaque <b> nu y devenait une colonne — le cadre vert s'affichait en
+        quatre colonnes illisibles sur téléphone (18/10/2026). */
+     + '<p class="bkrec-note">' + ICO('i-shield') + '<span>'
      + (numerique
         ? 'Aucun fichier n\'est téléchargeable : le livre se lit sur veritas-school.com, '
           + 'en <b>pages fidèles</b> à l\'édition imprimée ou en <b>texte adapté au téléphone</b>. '
           + 'Chaque page affichée porte votre nom — c\'est ce qui protège l\'auteur, pas un verrou de plus.'
         : 'Le manuel se paie ; <b>les corrigés en ligne restent gratuits pour tout le monde</b>, acheteur ou non. '
           + 'C\'est le cahier qu\'on vend, jamais l\'accès aux corrections.')
-     + '</p>'
+     + '</span></p>'
      + '</section>';
   return h;
 };
