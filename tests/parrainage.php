@@ -82,7 +82,11 @@ function base(): array {
             ['id' => 'pc3', 'code' => 'VIEUX', 'reduction' => 10, 'type' => 'percent', 'actif' => true, 'expireLe' => '2020-01-01'],
             ['id' => 'pc4', 'code' => 'LIBRAIRIE', 'reduction' => 10, 'type' => 'percent', 'actif' => true, 'partnerId' => 'prt_lib'],
         ],
-        'elearning' => ['plans' => [], 'abonnements' => [], 'contenus' => []],
+        // Pro à 2 000 F réglé « par l'administration » : les sections 4 à 11
+        // calculent des commissions sur ce prix, indépendamment de la grille
+        // par défaut (éprouvée, elle, en section 3, base vidée de ses plans).
+        'elearning' => ['plans' => [['id' => 'abo_pro_m', 'nom' => 'PRO', 'prix' => 2000, 'duree' => 'mensuel',
+                                     'planTags' => ['plan1', 'plan2', 'plan5', 'plan6']]], 'abonnements' => [], 'contenus' => []],
         'visitorOrders' => [], 'livretVentes' => [],
     ];
 }
@@ -135,16 +139,18 @@ ok('le code calculé d’un enseignant du centre est reconnu',
 // ═════════════════════════════════════════════════════════════════════════
 titre('3. Les formules Starter · Pro · Élite · Famille');
 $db = base();
-$attendus = ['abo_starter_m' => 1000, 'abo_pro_m' => 2000, 'abo_elite_m' => 3000, 'abo_famille_m' => 10000,
-             'abo_starter_a' => 10000, 'abo_pro_a' => 20000, 'abo_elite_a' => 30000, 'abo_famille_a' => 100000];
+$db['elearning']['plans'] = [];   // la grille PAR DÉFAUT, sans aucun réglage en base
+// Grille du 16/10/2026 : Starter à 12 000 F l'année (prix de référence de la note), +20 %.
+$attendus = ['abo_starter_m' => 1200, 'abo_pro_m' => 2400, 'abo_elite_m' => 3600, 'abo_famille_m' => 12000,
+             'abo_starter_a' => 12000, 'abo_pro_a' => 24000, 'abo_elite_a' => 36000, 'abo_famille_a' => 120000];
 $prixOk = true; $detail = '';
 foreach ($attendus as $id => $p) {
     $v = vrt_prix_catalogue($db, 'subscription', $id);
     if ($v !== $p) { $prixOk = false; $detail .= $id . '=' . var_export($v, true) . ' au lieu de ' . $p . ' '; }
 }
-ok('tarifs connus du serveur SANS ligne en base (1 000/2 000/3 000/10 000 F par mois, l’année = 10 mois)', $prixOk, $detail);
+ok('tarifs connus du serveur SANS ligne en base (1 200/2 400/3 600/12 000 F par mois, l’année = 10 mois)', $prixOk, $detail);
 $f = vrt_plans_formules();
-ok('le prix barré de l’année est celui de 12 mois (12 000 F pour Starter)', (int) $f['abo_starter_a']['ancien'] === 12000);
+ok('le prix barré de l’année est celui de 12 mois (14 400 F pour Starter)', (int) $f['abo_starter_a']['ancien'] === 14400);
 $db2 = $db; $db2['elearning']['plans'][] = ['id' => 'abo_pro_m', 'nom' => 'PRO', 'prix' => 2500, 'duree' => 'mensuel'];
 ok('un tarif réglé en base par l’administration l’emporte', vrt_prix_catalogue($db2, 'subscription', 'abo_pro_m') === 2500);
 
@@ -152,22 +158,22 @@ $g = vrt_grant_entitlement($db, ['intent' => 'subscription', 'targetId' => 'abo_
 ok('Pro mensuel payé 100 F : refusé, aucun plan écrit', empty($g['changed']) && !empty($g['underpaid']) && !in_array('abo_pro_m', $db['visitorAccounts'][1]['plans'], true), $g['msg'] ?? '');
 
 $avant = (int) round(microtime(true) * 1000);
-$g = vrt_grant_entitlement($db, ['intent' => 'subscription', 'targetId' => 'abo_pro_m', 'montant' => 2000, 'ref' => 'F-M1', 'accountId' => 'va_filleul']);
+$g = vrt_grant_entitlement($db, ['intent' => 'subscription', 'targetId' => 'abo_pro_m', 'montant' => 2400, 'ref' => 'F-M1', 'accountId' => 'va_filleul']);
 $abo = end($db['elearning']['abonnements']);
 $jours = (int) round(((int) $abo['dateFinTs'] - $avant) / 86400000);
-ok('Pro mensuel payé 2 000 F : activé pour 30 jours (et non 365)', !empty($g['changed']) && $jours === 30, "jours=$jours " . ($g['msg'] ?? ''));
+ok('Pro mensuel payé 2 400 F : activé pour 30 jours (et non 365)', !empty($g['changed']) && $jours === 30, "jours=$jours " . ($g['msg'] ?? ''));
 $acc = vrt_parr_trouver_compte($db, 'va_filleul');
 $tags = vrt_effective_plantags($acc, $db);
 ok('le Pro ouvre les contenus existants (étiquettes plan1, plan2, plan5, plan6)', !array_diff(['plan1', 'plan2', 'plan5', 'plan6'], $tags), json_encode($tags));
-$g = vrt_grant_entitlement($db, ['intent' => 'subscription', 'targetId' => 'abo_pro_m', 'montant' => 2000, 'ref' => 'F-M2', 'accountId' => 'va_filleul']);
+$g = vrt_grant_entitlement($db, ['intent' => 'subscription', 'targetId' => 'abo_pro_m', 'montant' => 2400, 'ref' => 'F-M2', 'accountId' => 'va_filleul']);
 $abo2 = end($db['elearning']['abonnements']);
 $jours2 = (int) round(((int) $abo2['dateFinTs'] - $avant) / 86400000);
 ok('réabonnement avant l’échéance : la nouvelle période part de la fin de l’ancienne (60 jours)', $jours2 === 60, "jours=$jours2");
-$g = vrt_grant_entitlement($db, ['intent' => 'subscription', 'targetId' => 'abo_elite_a', 'montant' => 30000, 'ref' => 'F-A1', 'accountId' => 'va_parrain']);
+$g = vrt_grant_entitlement($db, ['intent' => 'subscription', 'targetId' => 'abo_elite_a', 'montant' => 36000, 'ref' => 'F-A1', 'accountId' => 'va_parrain']);
 $abo3 = end($db['elearning']['abonnements']);
 ok('Élite à l’année : 365 jours', (int) round(((int) $abo3['dateFinTs'] - $avant) / 86400000) === 365);
 
-$g = vrt_grant_entitlement($db, ['intent' => 'subscription', 'targetId' => 'abo_famille_m', 'montant' => 10000, 'ref' => 'F-FAM',
+$g = vrt_grant_entitlement($db, ['intent' => 'subscription', 'targetId' => 'abo_famille_m', 'montant' => 12000, 'ref' => 'F-FAM',
                                  'accountId' => 'va_filleul', 'beneficiaires' => ['enfant1', 'va_enfant2', 'inconnu9']]);
 $e1 = vrt_parr_trouver_compte($db, 'va_enfant1'); $e2 = vrt_parr_trouver_compte($db, 'va_enfant2');
 ok('Famille : chaque enfant désigné reçoit le plan et SA ligne d’abonnement',
@@ -175,7 +181,7 @@ ok('Famille : chaque enfant désigné reçoit le plan et SA ligne d’abonnement
 ok('Famille : un identifiant introuvable est signalé « à régler », sans annuler les autres',
    !empty($g['changed']) && !empty($g['a_regler']) && strpos((string) $g['msg'], 'inconnu9') !== false, $g['msg'] ?? '');
 $db3 = base();
-$g = vrt_grant_entitlement($db3, ['intent' => 'subscription', 'targetId' => 'abo_famille_m', 'montant' => 10000, 'ref' => 'F-FAM5',
+$g = vrt_grant_entitlement($db3, ['intent' => 'subscription', 'targetId' => 'abo_famille_m', 'montant' => 12000, 'ref' => 'F-FAM5',
                                   'accountId' => 'va_filleul', 'beneficiaires' => ['enfant1', 'enfant2', 'sansnum', 'awa2', 'zed']]);
 $nbLignes = count(array_filter($db3['elearning']['abonnements'], function ($a) { return ($a['plan'] ?? '') === 'abo_famille_m'; }));
 ok('Famille : jamais plus de 4 enfants couverts, en plus du payeur (5 lignes au plus)', $nbLignes === 5, "lignes=$nbLignes");
@@ -370,6 +376,7 @@ if ($okExtrait) {
 // ═════════════════════════════════════════════════════════════════════════
 titre('8. Prix réglés dans « Prix & calculs » : le serveur les applique');
 $db = base();
+$db['elearning']['plans'] = [];   // on part de la grille par défaut : seuls les réglages ci-dessous comptent
 // Une formule retirée de la vente : ni tarif, ni vitrine, ni repli.
 $db['elearning']['plans'][] = ['id' => 'abo_elite_m', 'formule' => true, 'groupe' => 'elite', 'variante' => 'mois',
                                'nom' => 'ÉLITE', 'prix' => 3000, 'duree' => 'mensuel', 'actif' => false];

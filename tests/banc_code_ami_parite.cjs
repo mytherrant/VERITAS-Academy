@@ -58,7 +58,7 @@ function php(code) {
     });
     ok('chaque champ affiché est celui que le serveur encaisse', ecarts.length === 0, ecarts.slice(0, 6).join(' | '));
     const pro = js.find(x => x.id === 'abo_pro_a');
-    ok('Pro à l’année : 20 000 F, barré 24 000 F (deux mois offerts)', pro && pro.prix === 20000 && pro.ancien === 24000);
+    ok('Pro à l’année : 24 000 F, barré 28 800 F (deux mois offerts — grille du 16/10/2026)', pro && pro.prix === 24000 && pro.ancien === 28800);
   }
 
   // ─────────────────────────────────────────────────────────────────────────

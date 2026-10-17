@@ -1193,13 +1193,13 @@ function _fixHtdocsUrls(){
 function _formulesDefaut(){
   var eleve = ['plan1','plan2','plan5','plan6'], complet = ['plan1','plan2','plan4','plan5','plan6'];
   var F = [
-    {g:'starter', nom:'STARTER', pub:'eleve',  mois:1000,  cible:'Élève · 6ᵉ → Tˡᵉ', tags:eleve,
+    {g:'starter', nom:'STARTER', pub:'eleve',  mois:1200,  cible:'Élève · 6ᵉ → Tˡᵉ', tags:eleve,
      av:['Tous les cours de sa classe, par séquence','Œuvres au programme','Épreuves et annales corrigées','5 questions par jour au Professeur Ambassa','Suivi des résultats']},
-    {g:'pro',     nom:'PRO',     pub:'eleve',  mois:2000,  cible:'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', tags:eleve, pop:true,
+    {g:'pro',     nom:'PRO',     pub:'eleve',  mois:2400,  cible:'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', tags:eleve, pop:true,
      av:['Tout Starter','30 questions par jour au tuteur','Labos virtuels PCT & SVT','Bulletins blancs notés','Fiches de révision imprimables']},
-    {g:'elite',   nom:'ÉLITE',   pub:'eleve',  mois:3000,  cible:'Accompagnement complet', tags:complet,
+    {g:'elite',   nom:'ÉLITE',   pub:'eleve',  mois:3600,  cible:'Accompagnement complet', tags:complet,
      av:['Tout Pro','Tuteur IA sans limite','Classes virtuelles en direct','Concours blancs corrigés','Entretien d’orientation']},
-    {g:'famille', nom:'FAMILLE', pub:'parent', mois:10000, cible:'Jusqu’à 4 enfants', tags:complet, enfants:4,
+    {g:'famille', nom:'FAMILLE', pub:'parent', mois:12000, cible:'Jusqu’à 4 enfants', tags:complet, enfants:4,
      av:['Jusqu’à 4 enfants sur un seul paiement','Chaque enfant au niveau Élite','Suivi parent : notes, absences, progression','Tuteur IA sans limite pour chacun']}
   ];
   var out = [];
@@ -1553,8 +1553,8 @@ function _migrateDB(){
     DB.partnerLevels={
       bronze:  { min:0,   commission:0.05, label:'Bronze',  badge:'🥉', bonusFixe:0,     color:'#CD7F32' },
       argent:  { min:20,  commission:0.08, label:'Argent',  badge:'🥈', bonusFixe:0,     color:'#C0C0C0' },
-      or:      { min:50,  commission:0.10, label:'Or',      badge:'🥇', bonusFixe:10000, color:'#FFD700' },
-      diamant: { min:100, commission:0.12, label:'Diamant', badge:'💎', bonusFixe:50000, color:'#B9F2FF' }
+      or:      { min:50,  commission:0.10, label:'Or',      badge:'🥇', bonusFixe:0,     color:'#FFD700' },
+      diamant: { min:100, commission:0.12, label:'Diamant', badge:'💎', bonusFixe:0,     color:'#B9F2FF' }
     };
   }
   if(!DB.partnerTypes){
@@ -35981,8 +35981,8 @@ window._codeAmiRendre = function(hote, d){
       + _statCard('✅', fmtF(d.verse), 'Déjà versé', '#5B4FA8')
       + '</div>';
     h += '<div class="card" style="margin-bottom:12px"><div class="semi mb8">📱 Où recevoir vos commissions</div>'
-      + '<div class="s mb8">Versement automatique dès <b>' + fmtF(r.seuilVersement || 2000) + '</b> cumulés, sur votre Mobile Money '
-      + (d.numero ? '(<b>' + _esc(d.operateur) + ' ' + _esc(d.numero) + '</b>)' : '') + '. CamerPay valide chaque versement en quelques heures ouvrées.</div>'
+      + '<div class="s mb8">Vos commissions vous sont versées par le Centre VÉRITAS sur votre Mobile Money '
+      + (d.numero ? '(<b>' + _esc(d.operateur) + ' ' + _esc(d.numero) + '</b>)' : '') + ', à partir de <b>' + fmtF(r.seuilVersement || 2000) + '</b> cumulés.</div>'
       + (d.enCours ? '<div class="ib ibt mb8"><span>⏳</span><span>' + fmtF(d.enCours) + ' en cours de versement.</span></div>' : '')
       + (d.blocage ? '<div class="ib ibr mb8"><span>⚠️</span><span>' + _esc(d.blocage) + '</span></div>' : '')
       + '<div style="display:flex;gap:8px;flex-wrap:wrap"><input class="fi" id="codeAmiTel" type="tel" placeholder="Numéro MTN ou Orange (6XX XX XX XX)" style="flex:1;min-width:200px">'
@@ -36144,7 +36144,7 @@ window._posFinish=function(){
 // stockés dans DB.certificats, retrouvables par pgCertificateVerify.
 window._certRegister = function(type, name, meta){
   DB.certificats = DB.certificats || [];
-  var pfx = {ambassadeur:'AMB', associe:'ASC', honneur:'HON'}[type] || 'CERT';
+  var pfx = {ambassadeur:'AMB', associe:'ASC', honneur:'HON', palier:'PAL'}[type] || 'CERT';
   var year = new Date().getFullYear();
   var seq = DB.certificats.filter(function(c){ return c.year===year; }).length + 1;
   var id = 'VRT-'+pfx+'-'+year+'-'+('0000'+seq).slice(-4);
@@ -36487,8 +36487,8 @@ window.I18N_SUBS_EN = {
   "📚 Nos Manuels les Mieux Notés": "📚 Our Best-Rated Textbooks",
   "📬 Coordonnées": "📬 Contact details",
   "🤝 Programme de Partenariat VÉRITAS": "🤝 VÉRITAS Partnership Programme",
-  "🎁 Système de récompenses Bronze · Argent · Or · Diamant":
-    "🎁 Rewards: Bronze · Silver · Gold · Diamond",
+  "📜 Paliers de reconnaissance Bronze · Argent · Or · Diamant":
+    "📜 Recognition tiers: Bronze · Silver · Gold · Diamond",
   "🧠 Quiz Interactifs — Entraînez-vous par matière":
     "🧠 Interactive quizzes — practise by subject",
   "⭐ Avis de nos Clients": "⭐ What our learners say",
@@ -36850,7 +36850,7 @@ window._codeAmiAdminCharger = function(){
       + '<div class="fg"><span class="fl">Filleuls payants pour reconduire</span><input class="fi" id="caPartSeuil" type="number" min="1" max="100" value="' + (r.partenaireSeuil || 5) + '"></div>'
       + '</div>'
       + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caActif"' + (r.actif ? ' checked' : '') + '> Programme actif (les codes s’appliquent)</label>'
-      + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caAuto"' + (r.versementAuto ? ' checked' : '') + '> Versement automatique dès le seuil (CamerPay)</label>'
+      + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caAuto"' + (r.versementAuto ? ' checked' : '') + '> Versement automatique dès le seuil <span class="xs2 mut">(sans effet : aucun fournisseur de versement actif)</span></label>'
       + '<div class="s mut mb8">Bornes serveur : 50 % maximum chacun, 60 % cumulés ; seuil de 500 F minimum. La remise ne s’applique ni aux frais d’inscription, ni à la scolarité, ni aux paniers.</div>'
       + '<button class="btn bi" onclick="_codeAmiAdminReglages()">Enregistrer la règle</button></div>';
     h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0">'
@@ -37105,7 +37105,7 @@ window._partMessage = function(f){
     + 'Lien prêt à partager : ' + site + '/?ref=' + f.code + '\n\n'
     + '3) VOTRE RÉMUNÉRATION : ' + comm + ' % de chaque paiement fait avec votre code\n'
     + 'Exemple : un abonnement de 12 000 F → l’apprenant paie ' + fmtN(exPaye) + ' F → vous recevez ' + fmtN(exGain) + ' F.\n'
-    + 'Vos gains sont versés sur votre Mobile Money (' + f.tel + ') dès que votre solde atteint ' + fmtN(rg.seuilVersement || 2000) + ' F.\n\n'
+    + 'Vos gains s’accumulent sur votre compte VÉRITAS et vous sont versés par le Centre sur votre Mobile Money (' + f.tel + '), à partir de ' + fmtN(rg.seuilVersement || 2000) + ' F cumulés.\n\n'
     + '4) RECONDUCTION DE VOTRE ACCÈS\n'
     + 'Chaque fois que ' + seuil + ' nouvelles personnes paient avec votre code, votre accès à l’Atelier est prolongé de ' + mois + ' mois, automatiquement. '
     + 'À défaut, je peux aussi le reconduire moi-même.\n\n'
@@ -42566,7 +42566,7 @@ function pgPaiementsAdmin(){
       var oNom = op ? (op.nom||op.name||op.code||'—') : (p.partnerNom||'');
       h += '<tr><td style="font-family:monospace;font-weight:700">'+_esc(p.code||'')+'</td><td>'+_esc(red)+'</td>'
         +'<td>'+(oNom ? _esc(oNom) : '<span style="opacity:.5">— personne —</span>')+'</td>'
-        +'<td>'+(olv ? '<b>'+Math.round((olv.commission||0)*100)+' %</b> <span style="opacity:.6;font-size:11px">'+_esc(olv.label||'')+'</span>' : '<span style="opacity:.5">—</span>')+'</td>'
+        +'<td>'+(olv ? '<b>'+Math.round(_prtTaux()*100)+' %</b> <span style="opacity:.6;font-size:11px">'+_esc(olv.label||'')+'</span>' : '<span style="opacity:.5">—</span>')+'</td>'
         +'<td>'+_esc(p.desc||'')+'</td><td>'+(p.usage||0)+'</td>'
         +'<td><span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:'+(actif?'var(--gr)':'var(--re)')+';color:#fff">'+(actif?'ACTIF':'INACTIF')+'</span></td></tr>';
     });
@@ -43223,8 +43223,18 @@ setTimeout(function(){initTickerFixed();},3000);
 function _prtL(){ return (typeof DB!=='undefined' && DB.partnerLevels) ? DB.partnerLevels
   : {bronze:{min:0,commission:0.05,label:'Bronze',badge:'🥉',bonusFixe:0,color:'#CD7F32'},
      argent:{min:20,commission:0.08,label:'Argent',badge:'🥈',bonusFixe:0,color:'#C0C0C0'},
-     or:{min:50,commission:0.10,label:'Or',badge:'🥇',bonusFixe:10000,color:'#FFD700'},
-     diamant:{min:100,commission:0.12,label:'Diamant',badge:'💎',bonusFixe:50000,color:'#B9F2FF'}}; }
+     or:{min:50,commission:0.10,label:'Or',badge:'🥇',bonusFixe:0,color:'#FFD700'},
+     diamant:{min:100,commission:0.12,label:'Diamant',badge:'💎',bonusFixe:0,color:'#B9F2FF'}}; }
+/* UN SEUL TAUX pour tous les paliers (grille du 16/10/2026) : celui de
+   l'enseignant-partenaire, lu au serveur. Le palier n'est plus qu'une
+   distinction — le nombre de ventes et un parchemin —, jamais de l'argent :
+   taux progressif + prime de palier + commission de code payaient deux fois
+   la même vente. Les `commission` / `bonusFixe` encore en base sont ignorés. */
+function _prtTaux(){
+  var r = window._CODE_AMI_REGLE || {};
+  var p = (r.commissionPartenairePct != null) ? +r.commissionPartenairePct : 20;
+  return (p > 0 && p <= 50) ? p / 100 : 0.20;
+}
 function _prtT(){ return (typeof DB!=='undefined' && DB.partnerTypes) ? DB.partnerTypes : {}; }
 function _prtSafe(s){ return (typeof _esc==='function')?_esc(s):String(s==null?'':s); }
 function _prtFmt(n){ return (typeof fmt==='function')?fmt(n):(n+' FCFA'); }
@@ -43295,7 +43305,8 @@ function pgPartnerships(){
   });
   h += '</div>';
   // Bloc paliers
-  h += '<div style="max-width:780px;margin:30px auto;padding:0 14px"><div class="ct" style="text-align:center;margin-bottom:14px">🎁 Système de récompenses Bronze · Argent · Or · Diamant</div>'
+  h += '<div style="max-width:780px;margin:30px auto;padding:0 14px"><div class="ct" style="text-align:center;margin-bottom:14px">📜 Paliers de reconnaissance Bronze · Argent · Or · Diamant</div>'
+    + '<div style="text-align:center;font-size:13px;color:var(--ink3);margin:-6px 0 14px">Une seule commission pour tous : <strong>' + Math.round(_prtTaux()*100) + ' %</strong> de chaque paiement fait avec votre code. Chaque palier atteint vous vaut un parchemin VÉRITAS, vérifiable par QR code.</div>'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">';
   ['bronze','argent','or','diamant'].forEach(function(k){
     var lv = L[k];
@@ -43305,8 +43316,7 @@ function pgPartnerships(){
       + '<div style="font-size:40px;margin-bottom:6px;line-height:1;filter:drop-shadow(0 4px 10px '+lv.color+'80)">'+lv.badge+'</div>'
       + '<div style="font-size:15px;font-weight:900;color:#142554;margin-bottom:6px;letter-spacing:.3px">'+lv.label+'</div>'
       + '<div style="font-size:11px;color:var(--ink3);margin-bottom:8px">À partir de <strong>'+lv.min+'</strong> ventes</div>'
-      + '<div style="display:inline-block;font-size:13px;font-weight:800;color:#142554;background:'+lv.color+'33;border-radius:20px;padding:3px 12px">'+Math.round(lv.commission*100)+'% commission</div>'
-      + (lv.bonusFixe>0?'<div style="font-size:11px;color:#059669;font-weight:700;margin-top:6px">+ Bonus '+_prtFmt(lv.bonusFixe)+'</div>':'')
+      + '<div style="display:inline-block;font-size:13px;font-weight:800;color:#142554;background:'+lv.color+'33;border-radius:20px;padding:3px 12px">📜 Parchemin '+lv.label+'</div>'
       + '</div>';
   });
   h += '</div></div>';
@@ -43328,12 +43338,12 @@ function pgPartnerProgram(type){
   // Avantages détaillés par type (extraits du brief Jacques)
   var avantages = {
     enseignant:[
-      '💰 Commission attractive sur chaque ouvrage recommandé (5 à 12% selon palier)',
-      '💰 Bonus de performance selon le volume de commandes',
+      '💰 20 % de chaque paiement fait avec votre code — l’apprenant, lui, a 10 % de réduction',
+      '📜 Un parchemin VÉRITAS vérifiable à chaque palier atteint (Bronze → Diamant)',
       '📚 Accès gratuit : situations-problèmes, fiches pédagogiques, progressions',
       '📚 Accès gratuit : protocoles de TP, évaluations corrigées, examens blancs',
       '🎓 Formations gratuites : IA en éducation, création de contenus, outils numériques',
-      '🎁 Programme parrainage : prime pour chaque collègue intégré au réseau',
+      '🎁 Vos collègues aussi : votre code vaut pour les enseignants qui s’abonnent grâce à vous',
       '🏆 Classement trimestriel des meilleurs ambassadeurs'
     ],
     createur:[
@@ -43748,7 +43758,7 @@ function mPartnerDetail(partnerId){
   var body = '<div style="font-size:13px;line-height:1.7">'
     + '<div style="display:grid;grid-template-columns:140px 1fr;gap:8px">'
     +   '<div style="color:var(--ink3)">Type</div><div>'+t.emoji+' '+t.label+'</div>'
-    +   '<div style="color:var(--ink3)">Palier</div><div>'+lv.badge+' '+lv.label+' ('+Math.round(lv.commission*100)+'%)</div>'
+    +   '<div style="color:var(--ink3)">Palier</div><div>'+lv.badge+' '+lv.label+' ('+Math.round(_prtTaux()*100)+'%)</div>'
     +   '<div style="color:var(--ink3)">Code parrainage</div><div style="font-family:monospace;font-weight:700;color:#142554">'+_prtSafe(p.code)+'</div>'
     +   '<div style="color:var(--ink3)">Email</div><div>'+_prtSafe(p.email)+'</div>'
     +   '<div style="color:var(--ink3)">Téléphone</div><div><a href="https://wa.me/'+(p.tel||'').replace(/[^0-9]/g,'')+'" target="_blank" style="color:#25D366">'+_prtSafe(p.tel)+'</a></div>'
@@ -43825,7 +43835,7 @@ function applyPartnerCode(code, data){
   if(!partner) return null;
   var L = _prtL();
   var lv = L[partner.level||'bronze'] || L.bronze;
-  var pct = lv.commission;
+  var pct = _prtTaux();   // le palier ne change plus le taux
   var amount = Math.round((data.saleAmount||0) * pct);
   if(amount<=0) return null;
   var c = {
@@ -43936,7 +43946,20 @@ function calculatePartnerLevel(partnerId){
     if(newLevel==='bronze' && lv!=='bronze' && totalSales >= (L[lv].min||0)) newLevel = lv;
   });
   if(newLevel !== partner.level){
-    var bonus = (L[newLevel].bonusFixe||0);
+    /* Plus de prime de palier (grille du 16/10/2026) : la distinction est un
+       PARCHEMIN vérifiable et le nombre de ventes, pas de l'argent. Le bloc
+       ci-dessous ne s'exécute donc plus (bonus = 0), quelles que soient les
+       valeurs `bonusFixe` encore en base. */
+    var bonus = 0;
+    var _rang = ['bronze','argent','or','diamant'];
+    if(newLevel !== 'bronze' && _rang.indexOf(newLevel) > _rang.indexOf(partner.level||'bronze') && typeof _certRegister==='function'){
+      try{
+        var _parch = _certRegister('palier', partner.name||partner.nom||'', { palier:L[newLevel].label, ventes:totalSales, partnerId:partner.id });
+        partner.parchemins = partner.parchemins || [];
+        partner.parchemins.push({ palier:newLevel, ref:_parch && _parch.id, token:_parch && _parch.token, ventes:totalSales,
+          date:(typeof today==='function')?today():new Date().toISOString().substring(0,10) });
+      }catch(e){}
+    }
     if(bonus>0){
       if(!DB.commissions) DB.commissions=[];
       var _bonusCom = {
@@ -43962,7 +43985,7 @@ function calculatePartnerLevel(partnerId){
     partner.stats.levelUnlockedAt = (typeof today==='function')?today():new Date().toISOString().substring(0,10);
     if(typeof autoNotify==='function'){
       autoNotify('🎉 Nouveau palier atteint',
-        partner.name+' · '+L[newLevel].badge+' '+L[newLevel].label+(bonus?' (+ bonus '+_prtFmt(bonus)+')':''),
+        partner.name+' · '+L[newLevel].badge+' '+L[newLevel].label+' — '+totalSales+' ventes · parchemin délivré',
         'admin');
     }
   }
@@ -44076,7 +44099,7 @@ function pgPartnerPortal(){
   var h = '<div class="pgt">'+lv.badge+' Espace Partenaire — '+_prtSafe(partner.name)+'</div>';
   h += '<div style="background:linear-gradient(135deg,'+lv.color+'33,'+lv.color+'08);border:2px solid '+lv.color+';border-radius:14px;padding:18px;margin-bottom:14px;text-align:center">'
     + '<div style="font-size:42px">'+lv.badge+'</div>'
-    + '<div style="font-size:18px;font-weight:800;color:#142554">Palier '+lv.label+' · '+Math.round(lv.commission*100)+'% commission</div>'
+    + '<div style="font-size:18px;font-weight:800;color:#142554">Palier '+lv.label+' · '+Math.round(_prtTaux()*100)+'% commission</div>'
     + (nextLv ? '<div style="font-size:12px;color:var(--ink3);margin-top:6px">Plus que <strong>'+toNext+'</strong> ventes pour passer '+L[nextLv].badge+' '+L[nextLv].label+'</div>' : '<div style="font-size:12px;color:#059669;margin-top:6px">🏆 Palier maximal atteint !</div>')
     + '</div>';
   h += '<div style="background:#142554;color:#fff;padding:16px;border-radius:12px;text-align:center;margin-bottom:14px">'
@@ -54048,10 +54071,10 @@ function pgPrixCalculs(){
       '<div class="fg2">'
       + '<div class="fg"><span class="fl">Remise du filleul (%)</span>' + num('caRemise', rg.remisePct != null ? rg.remisePct : 10, 0, 50) + '</div>'
       + '<div class="fg"><span class="fl">Commission du parrain (% du montant payé)</span>' + num('caComm', rg.commissionPct != null ? rg.commissionPct : 10, 0, 50) + '</div>'
-      + '<div class="fg"><span class="fl">Versement automatique dès (FCFA)</span>' + num('caSeuil', rg.seuilVersement || 2000, 500, 200000, 500) + '</div>'
+      + '<div class="fg"><span class="fl">Seuil de versement (FCFA)</span>' + num('caSeuil', rg.seuilVersement || 2000, 500, 200000, 500) + '</div>'
       + '</div>'
       + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caActif"' + (rg.actif !== false ? ' checked' : '') + '> Programme actif (les codes s’appliquent)</label>'
-      + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caAuto"' + (rg.versementAuto !== false ? ' checked' : '') + '> Verser automatiquement dès le seuil (CamerPay)</label>'
+      + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="caAuto"' + (rg.versementAuto !== false ? ' checked' : '') + '> Verser automatiquement dès le seuil <span class="xs2 mut">(sans effet : aucun fournisseur de versement actif)</span></label>'
       + '<div class="ib ibt mt8" id="pc_ca_ex"></div>'
       + '<div class="xs2 mut mt6">Bornes du serveur : 50 % au plus chacun, 60 % cumulés ; seuil de 500 F au moins. Ne s’applique ni aux frais d’inscription, ni à la scolarité, ni aux paniers.</div>',
     '<button class="btn bi" onclick="_codeAmiAdminReglages()">' + _ico('check', 15) + ' Enregistrer sur le serveur</button>'

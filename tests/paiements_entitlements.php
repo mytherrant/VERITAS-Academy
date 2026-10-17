@@ -471,9 +471,11 @@ $out = vrt_commissions_verifiees(baseDeTest(), $etat);
    On vérifie donc AUSSI que le montant retenu n'est pas celui qui a été
    demandé : sans cette seconde condition, un jour où le plafonnement sauterait,
    l'égalité stricte pourrait être satisfaite par accident. */
-ok('commission      → 2 000 000 demandés ramenés au palier bronze (10 %)',
+/* 1 000 depuis le 16/10/2026 : un SEUL taux pour tous les paliers, celui de
+   l'enseignant-partenaire (20 %). Le palier n'est plus qu'une distinction. */
+ok('commission      → 2 000 000 demandés ramenés au taux unique (20 %)',
    count($out) === 1
-     && (int) $out[0]['commissionAmount'] === 500
+     && (int) $out[0]['commissionAmount'] === 1000
      && (int) $out[0]['commissionAmount'] !== 2000000,
    'montant retenu : ' . (isset($out[0]) ? $out[0]['commissionAmount'] : 'aucune ligne'));
 
