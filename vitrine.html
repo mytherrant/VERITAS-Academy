@@ -766,6 +766,18 @@ html{scroll-behavior:smooth}
    laisse l'or au bouton juste en dessous. */
 .vbq-prix{ display:block;font:600 21px/1.1 Poppins,sans-serif;color:#A84200;white-space:nowrap; }
 .vbq-mention{ display:block;margin-top:3px;font:400 11.5px Poppins,sans-serif;color:#6E7385; }
+/* 18/10/2026 — « centre les titres et mets les éléments importants en
+   couleur » (Jacques). La carte se lit au centre, comme les panneaux de
+   formules : rayon, titre, description, pages. La description n'est plus
+   justifiée (trois mots écartés jusqu'aux bords sur une colonne de 260 px).
+   En couleur, ce qui décide l'achat : l'essai gratuit en vert, l'icône des
+   pages dans la teinte de la carte. Le prix reste brique (voir ci-dessus). */
+.vbq-body{ text-align:center; }
+.vbq-cat, .vbq-titre{ text-align:center; }
+.vbq-type{ text-align:center!important; hyphens:manual; }
+.vbq-exos{ align-self:center; }
+.vbq-exos svg{ color:var(--vbq-teinte,#1E499B); }
+.vbq-mention{ font-weight:600;color:#007E11; }
 /* `flex:1 1 auto` et non `0 0 auto` : une action renvoyée à la ligne suivante
    par le `wrap` ci-dessus doit l'occuper, pas y flotter à gauche en laissant
    un vide. Sur une carte à une seule action, le comportement est identique —
@@ -2311,10 +2323,10 @@ html{scroll-behavior:smooth}
               <div style="padding:20px 22px 26px;display:flex;flex-direction:column;flex:1">
                 <div data-vrt-an style="text-align:center;background:#F2F7FF;border:1px dashed #BFD3F5;border-radius:10px;padding:9px 10px;margin-bottom:14px">
                   <span style="display:block;font:400 12.5px Poppins,sans-serif;color:#4D5163">Ou toute l'année en une fois</span>
-                  <span style="display:inline-flex;align-items:baseline;flex-wrap:wrap;justify-content:center;gap:4px 8px;margin-top:2px"><s data-vrt-f="ancien" style="font:400 14px Poppins,sans-serif;color:#8B93A6">12 000 F</s><b data-vrt-f="an" style="font:700 19px Poppins,sans-serif;color:#001136">10 000 F</b><span data-vrt-f="eco" style="font:600 11.5px Poppins,sans-serif;color:#006B10;background:#DFF3E3;border-radius:100px;padding:2px 9px">2 mois offerts</span></span>
+                  <span style="display:inline-flex;align-items:baseline;flex-wrap:wrap;justify-content:center;gap:4px 8px;margin-top:2px"><s data-vrt-f="ancien" style="font:400 14px Poppins,sans-serif;color:#8B93A6">12 000 F</s><b data-vrt-f="an" style="font:700 19px Poppins,sans-serif;color:#0E7C86">10 000 F</b><span data-vrt-f="eco" style="font:600 11.5px Poppins,sans-serif;color:#006B10;background:#DFF3E3;border-radius:100px;padding:2px 9px">2 mois offerts</span></span>
                 </div>
                 <span style="display:block;text-align:center;font:600 11px Poppins,sans-serif;color:#6E7385;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:9px">Élève</span>
-                <span style="display:block;text-align:center;font:400 13px/1.6 Poppins,sans-serif;color:#4D5163;margin-bottom:16px;text-wrap:pretty">5 questions au tuteur / jour</span>
+                <span style="display:block;text-align:center;font:600 14px/1.6 Poppins,sans-serif;color:#001136;margin-bottom:16px;text-wrap:pretty"><b style="color:#0E7C86;font-weight:700">5</b> questions au tuteur / jour</span>
                 <span aria-hidden="true" style="display:block;height:3px;border-radius:3px;background:linear-gradient(90deg,#0E7C86,#7BD1CE);margin-bottom:18px"></span>
 
                 <ul style="list-style:none;margin:0 0 20px;padding:0;display:flex;flex-direction:column;gap:12px">
@@ -2359,10 +2371,10 @@ html{scroll-behavior:smooth}
               <div style="padding:20px 22px 26px;display:flex;flex-direction:column;flex:1">
                 <div data-vrt-an style="text-align:center;background:#F2F7FF;border:1px dashed #BFD3F5;border-radius:10px;padding:9px 10px;margin-bottom:14px">
                   <span style="display:block;font:400 12.5px Poppins,sans-serif;color:#4D5163">Ou toute l'année en une fois</span>
-                  <span style="display:inline-flex;align-items:baseline;flex-wrap:wrap;justify-content:center;gap:4px 8px;margin-top:2px"><s data-vrt-f="ancien" style="font:400 14px Poppins,sans-serif;color:#8B93A6">24 000 F</s><b data-vrt-f="an" style="font:700 19px Poppins,sans-serif;color:#001136">20 000 F</b><span data-vrt-f="eco" style="font:600 11.5px Poppins,sans-serif;color:#006B10;background:#DFF3E3;border-radius:100px;padding:2px 9px">2 mois offerts</span></span>
+                  <span style="display:inline-flex;align-items:baseline;flex-wrap:wrap;justify-content:center;gap:4px 8px;margin-top:2px"><s data-vrt-f="ancien" style="font:400 14px Poppins,sans-serif;color:#8B93A6">24 000 F</s><b data-vrt-f="an" style="font:700 19px Poppins,sans-serif;color:#1E499B">20 000 F</b><span data-vrt-f="eco" style="font:600 11.5px Poppins,sans-serif;color:#006B10;background:#DFF3E3;border-radius:100px;padding:2px 9px">2 mois offerts</span></span>
                 </div>
                 <span style="display:block;text-align:center;font:600 11px Poppins,sans-serif;color:#6E7385;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:9px">Année d’examen</span>
-                <span style="display:block;text-align:center;font:400 13px/1.6 Poppins,sans-serif;color:#4D5163;margin-bottom:16px;text-wrap:pretty">30 questions au tuteur / jour</span>
+                <span style="display:block;text-align:center;font:600 14px/1.6 Poppins,sans-serif;color:#001136;margin-bottom:16px;text-wrap:pretty"><b style="color:#1E499B;font-weight:700">30</b> questions au tuteur / jour</span>
                 <span aria-hidden="true" style="display:block;height:3px;border-radius:3px;background:linear-gradient(90deg,#1E499B,#FFC93C);margin-bottom:18px"></span>
 
                 <ul style="list-style:none;margin:0 0 20px;padding:0;display:flex;flex-direction:column;gap:12px">
@@ -2405,10 +2417,10 @@ html{scroll-behavior:smooth}
               <div style="padding:20px 22px 26px;display:flex;flex-direction:column;flex:1">
                 <div data-vrt-an style="text-align:center;background:#F2F7FF;border:1px dashed #BFD3F5;border-radius:10px;padding:9px 10px;margin-bottom:14px">
                   <span style="display:block;font:400 12.5px Poppins,sans-serif;color:#4D5163">Ou toute l'année en une fois</span>
-                  <span style="display:inline-flex;align-items:baseline;flex-wrap:wrap;justify-content:center;gap:4px 8px;margin-top:2px"><s data-vrt-f="ancien" style="font:400 14px Poppins,sans-serif;color:#8B93A6">36 000 F</s><b data-vrt-f="an" style="font:700 19px Poppins,sans-serif;color:#001136">30 000 F</b><span data-vrt-f="eco" style="font:600 11.5px Poppins,sans-serif;color:#006B10;background:#DFF3E3;border-radius:100px;padding:2px 9px">2 mois offerts</span></span>
+                  <span style="display:inline-flex;align-items:baseline;flex-wrap:wrap;justify-content:center;gap:4px 8px;margin-top:2px"><s data-vrt-f="ancien" style="font:400 14px Poppins,sans-serif;color:#8B93A6">36 000 F</s><b data-vrt-f="an" style="font:700 19px Poppins,sans-serif;color:#5B4FA8">30 000 F</b><span data-vrt-f="eco" style="font:600 11.5px Poppins,sans-serif;color:#006B10;background:#DFF3E3;border-radius:100px;padding:2px 9px">2 mois offerts</span></span>
                 </div>
                 <span style="display:block;text-align:center;font:600 11px Poppins,sans-serif;color:#6E7385;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:9px">Accompagnement</span>
-                <span style="display:block;text-align:center;font:400 13px/1.6 Poppins,sans-serif;color:#4D5163;margin-bottom:16px;text-wrap:pretty">Tuteur IA sans limite</span>
+                <span style="display:block;text-align:center;font:600 14px/1.6 Poppins,sans-serif;color:#001136;margin-bottom:16px;text-wrap:pretty">Tuteur IA <b style="color:#5B4FA8;font-weight:700">sans limite</b></span>
                 <span aria-hidden="true" style="display:block;height:3px;border-radius:3px;background:linear-gradient(90deg,#5B4FA8,#B03A6E);margin-bottom:18px"></span>
 
                 <ul style="list-style:none;margin:0 0 20px;padding:0;display:flex;flex-direction:column;gap:12px">
@@ -2451,10 +2463,10 @@ html{scroll-behavior:smooth}
               <div style="padding:20px 22px 26px;display:flex;flex-direction:column;flex:1">
                 <div data-vrt-an style="text-align:center;background:#F2F7FF;border:1px dashed #BFD3F5;border-radius:10px;padding:9px 10px;margin-bottom:14px">
                   <span style="display:block;font:400 12.5px Poppins,sans-serif;color:#4D5163">Ou toute l'année en une fois</span>
-                  <span style="display:inline-flex;align-items:baseline;flex-wrap:wrap;justify-content:center;gap:4px 8px;margin-top:2px"><s data-vrt-f="ancien" style="font:400 14px Poppins,sans-serif;color:#8B93A6">120 000 F</s><b data-vrt-f="an" style="font:700 19px Poppins,sans-serif;color:#001136">100 000 F</b><span data-vrt-f="eco" style="font:600 11.5px Poppins,sans-serif;color:#006B10;background:#DFF3E3;border-radius:100px;padding:2px 9px">2 mois offerts</span></span>
+                  <span style="display:inline-flex;align-items:baseline;flex-wrap:wrap;justify-content:center;gap:4px 8px;margin-top:2px"><s data-vrt-f="ancien" style="font:400 14px Poppins,sans-serif;color:#8B93A6">120 000 F</s><b data-vrt-f="an" style="font:700 19px Poppins,sans-serif;color:#A84200">100 000 F</b><span data-vrt-f="eco" style="font:600 11.5px Poppins,sans-serif;color:#006B10;background:#DFF3E3;border-radius:100px;padding:2px 9px">2 mois offerts</span></span>
                 </div>
                 <span style="display:block;text-align:center;font:600 11px Poppins,sans-serif;color:#6E7385;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:9px">Toute la famille</span>
-                <span style="display:block;text-align:center;font:400 13px/1.6 Poppins,sans-serif;color:#4D5163;margin-bottom:16px;text-wrap:pretty">Jusqu’à 4 enfants, niveau Élite</span>
+                <span style="display:block;text-align:center;font:600 14px/1.6 Poppins,sans-serif;color:#001136;margin-bottom:16px;text-wrap:pretty">Jusqu’à <b style="color:#A84200;font-weight:700">4 enfants</b>, niveau Élite</span>
                 <span aria-hidden="true" style="display:block;height:3px;border-radius:3px;background:linear-gradient(90deg,#A84200,#FFC93C);margin-bottom:18px"></span>
 
                 <ul style="list-style:none;margin:0 0 20px;padding:0;display:flex;flex-direction:column;gap:12px">
@@ -2494,38 +2506,45 @@ html{scroll-behavior:smooth}
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:18px">
           
             <div data-reveal style="border:1px solid transparent;border-radius:12px;padding:24px;background:#FAFBFE;transition:border-color .18s,box-shadow .18s" class="vh41">
+              <span data-vrt-num aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#DBE8FE;color:#1E499B;font:600 14px Poppins,sans-serif;margin-bottom:12px">1</span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 9px">Faut-il une carte bancaire pour s’abonner ?</h3>
-              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Non. MTN MoMo et Orange Money suffisent. La carte et PayPal existent surtout pour les proches qui paient depuis l’étranger.</p>
+              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty"><b style="font-weight:600;color:#1E499B">Non.</b> <b style="font-weight:600;color:#1E499B">MTN MoMo et Orange Money suffisent</b>. La carte et PayPal existent surtout pour les proches qui paient depuis l’étranger.</p>
             </div>
           
             <div data-reveal style="border:1px solid transparent;border-radius:12px;padding:24px;background:#FAFBFE;transition:border-color .18s,box-shadow .18s" class="vh41">
+              <span data-vrt-num aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#E3F1EE;color:#0E7C86;font:600 14px Poppins,sans-serif;margin-bottom:12px">2</span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 9px">L’abonnement est-il engageant ?</h3>
-              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Non. Au mois, il s’arrête quand vous cessez de renouveler. À l’année, vous payez dix mois pour douze. Aucun frais de résiliation.</p>
+              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty"><b style="font-weight:600;color:#0E7C86">Non.</b> Au mois, il s’arrête quand vous cessez de renouveler. À l’année, vous payez <b style="font-weight:600;color:#0E7C86">dix mois pour douze</b>. <b style="font-weight:600;color:#0E7C86">Aucun frais de résiliation</b>.</p>
             </div>
           
             <div data-reveal style="border:1px solid transparent;border-radius:12px;padding:24px;background:#FAFBFE;transition:border-color .18s,box-shadow .18s" class="vh41">
+              <span data-vrt-num aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#E7F7EC;color:#007E11;font:600 14px Poppins,sans-serif;margin-bottom:12px">3</span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 9px">Un ami m’a donné un code : à quoi sert-il ?</h3>
-              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Saisissez-le à l’inscription ou au paiement : vous payez 10 % de moins sur vos abonnements et achats dans l’application, sans limite de durée. Et votre propre code, partagé à votre tour, vous rapporte 10 % de ce que paient vos amis.</p>
+              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Saisissez-le à l’inscription ou au paiement : vous payez <b style="font-weight:600;color:#007E11">10 % de moins</b> sur vos abonnements et achats dans l’application, <b style="font-weight:600;color:#007E11">sans limite de durée</b>. Et votre propre code, partagé à votre tour, vous rapporte <b style="font-weight:600;color:#007E11">10 % de ce que paient vos amis</b>.</p>
             </div>
           
             <div data-reveal style="border:1px solid transparent;border-radius:12px;padding:24px;background:#FAFBFE;transition:border-color .18s,box-shadow .18s" class="vh41">
+              <span data-vrt-num aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#EEE9F8;color:#5B4FA8;font:600 14px Poppins,sans-serif;margin-bottom:12px">4</span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 9px">Un abonnement couvre combien d’enfants ?</h3>
-              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Starter, Pro et Élite couvrent un élève. La formule Famille couvre jusqu’à quatre enfants pour un seul paiement. Le compte parent, lui, est gratuit.</p>
+              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Starter, Pro et Élite couvrent <b style="font-weight:600;color:#5B4FA8">un élève</b>. La formule Famille couvre <b style="font-weight:600;color:#5B4FA8">jusqu’à quatre enfants pour un seul paiement</b>. Le compte parent, lui, <b style="font-weight:600;color:#5B4FA8">est gratuit</b>.</p>
             </div>
           
             <div data-reveal style="border:1px solid transparent;border-radius:12px;padding:24px;background:#FAFBFE;transition:border-color .18s,box-shadow .18s" class="vh41">
+              <span data-vrt-num aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#FBE9F1;color:#B03A6E;font:600 14px Poppins,sans-serif;margin-bottom:12px">5</span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 9px">Que se passe-t-il si je ne renouvelle pas ?</h3>
-              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Le compte reste ouvert et les ressources gratuites restent accessibles. Les contenus premium se referment jusqu’au prochain paiement.</p>
+              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty"><b style="font-weight:600;color:#B03A6E">Le compte reste ouvert</b> et les ressources gratuites restent accessibles. Les contenus premium se referment <b style="font-weight:600;color:#B03A6E">jusqu’au prochain paiement</b>.</p>
             </div>
           
             <div data-reveal style="border:1px solid transparent;border-radius:12px;padding:24px;background:#FAFBFE;transition:border-color .18s,box-shadow .18s" class="vh41">
+              <span data-vrt-num aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#FFF3E4;color:#A84200;font:600 14px Poppins,sans-serif;margin-bottom:12px">6</span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 9px">Les corrigés gratuits vont-ils devenir payants ?</h3>
-              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Non. Les corrigés des cahiers imprimés restent en accès libre : ils accompagnent un cahier déjà acheté.</p>
+              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty"><b style="font-weight:600;color:#A84200">Non.</b> Les corrigés des cahiers imprimés restent <b style="font-weight:600;color:#A84200">en accès libre</b> : ils accompagnent un cahier déjà acheté.</p>
             </div>
           
             <div data-reveal style="border:1px solid transparent;border-radius:12px;padding:24px;background:#FAFBFE;transition:border-color .18s,box-shadow .18s" class="vh41">
+              <span data-vrt-num aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#DBE8FE;color:#1E499B;font:600 14px Poppins,sans-serif;margin-bottom:12px">7</span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 9px">Comment obtenir un reçu ?</h3>
-              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Chaque paiement génère un reçu numéroté, imprimable, avec un QR de vérification. Il arrive aussi par WhatsApp.</p>
+              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Chaque paiement génère un <b style="font-weight:600;color:#1E499B">reçu numéroté</b>, imprimable, avec un <b style="font-weight:600;color:#1E499B">QR de vérification</b>. Il arrive aussi par <b style="font-weight:600;color:#1E499B">WhatsApp</b>.</p>
             </div>
           
         </div>

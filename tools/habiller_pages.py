@@ -46,6 +46,7 @@ Usage :
     python tools/habiller_pages.py            # dépôt
     python tools/habiller_pages.py deploy     # dossier de déploiement (CI)
     python tools/habiller_pages.py --controle # échoue si une page n'est pas à jour
+    python tools/habiller_pages.py --app      # la coquille de l'application seule
 """
 import importlib.util
 import json
@@ -463,6 +464,131 @@ def habiller(s, donnees, rel=''):
     return s
 
 
+# ── L'application (VERITAS_v1.2.html → app.html) ───────────────────────────
+# 17/10/2026 — « harmonise exactement comme sur la vitrine pour que
+# l'utilisateur ne sente pas le déphasage » (Jacques). Chaque bouton
+# « Connexion », « Rechercher », « Choisir » de la vitrine mène ici : c'était
+# la SEULE page publique encore sans l'habillage, avec sa propre barre (logo,
+# globe, soleil, burger), un pied réduit à « VÉRITAS v1.19 » et ses propres
+# bulles. On y pose les MÊMES blocs, mais DANS #VISITOR — c'est lui qui
+# défile (position:fixed, overflow:auto) : la barre y reste collante, et rien
+# ne déborde sur l'administration (#APP) ni sur l'écran de connexion (#LS).
+APP_SHELLS = ('VERITAS_v1.2.html', 'app.html')
+
+# L'ancienne barre et l'ancien pied restent dans le document (app.js écrit
+# dans #vLoginBtns, #vNav sert d'ancre à plusieurs scripts) : on les masque.
+# Les boutons flottants de l'application (Ambassa à gauche, WhatsApp « Besoin
+# d'aide ? », citation) doublaient les bulles de la vitrine : ils cèdent la
+# place — la bulle Ambassa de la vitrine ouvre l'Ambassa de l'application
+# (pont dans app.js, _vrtPontApp).
+# Sans :has() : ces règles ne sont posées QUE si l'habillage l'est, et
+# certains WebView Android anciens ne connaissent pas :has().
+CSS_APP = ('<style>'
+           '#VISITOR > .vlogin-bar,#vNav,#VISITOR > footer:not(.vrt-hab),'
+           '#vAmbassaFab,#vtWaFab,#vCitFloat'
+           '{display:none!important}'
+           # #VISITOR est le conteneur qui défile : la barre colle à SON haut.
+           # Ce que les blocs HÉRITENT du <body> de la vitrine : son encre et
+           # sa pile de polices (#VISITOR transmettait #16233F).
+           '#VISITOR > .vrt-hab{color:#4D5163;font-family:Poppins,system-ui,-apple-system,'
+           '"Segoe UI",Roboto,Helvetica,Arial,sans-serif}'
+           '#VISITOR > nav.vrt-hab{flex:none;width:100%}'
+           '#VISITOR > footer.vrt-hab{flex:none;width:100%}'
+           '</style>')
+
+
+# ── Les panneaux de formules de la vitrine, dans l'application ──────────────
+# « Mets les mêmes panneaux que sur la vitrine » (Jacques, 17/10/2026).
+# L'application dessinait ses propres cartes Starter / Pro / Élite / Famille
+# (_formulesGrille, app.js) : même offre, autre dessin. On recopie la grille
+# de vitrine.html TELLE QUELLE dans un <template> de la coquille ; app.js
+# l'affiche et y pose les prix réglés par l'administration. Une seule source :
+# changer un panneau sur la vitrine le change dans l'application.
+def _bloc_div(html, debut):
+    """Le <div> qui commence à `debut`, balises équilibrées."""
+    prof = 0
+    for m in re.finditer(r'<div\b|</div>', html[debut:]):
+        prof += 1 if m.group(0) != '</div>' else -1
+        if prof == 0:
+            return html[debut:debut + m.end()]
+    raise SystemExit('habiller_pages : grille des formules non refermée dans vitrine.html.')
+
+
+def _regle_css(css, motif):
+    """Toutes les règles (ou @keyframes) dont l'en-tête correspond à `motif`."""
+    out = []
+    for m in re.finditer(motif, css):
+        i = css.find('{', m.start())
+        prof, j = 0, i
+        while j < len(css):
+            if css[j] == '{':
+                prof += 1
+            elif css[j] == '}':
+                prof -= 1
+                if prof == 0:
+                    break
+            j += 1
+        out.append(css[m.start():j + 1])
+    return out
+
+
+def formules_vitrine(vitrine):
+    i = vitrine.find('data-vrt-formule=')
+    if i < 0:
+        raise SystemExit('habiller_pages : aucune carte data-vrt-formule dans vitrine.html.')
+    j = vitrine.rfind('<div style="display:grid', 0, i)
+    grille = _bloc_div(vitrine, j)
+    # data-reveal : l'apparition au défilement est pilotée par la vitrine
+    # seule ; dans l'application la carte resterait invisible.
+    grille = re.sub(r'\sdata-reveal\b', '', grille)
+    css = '\n'.join(re.findall(r'<style[^>]*>([\s\S]*?)</style>', vitrine))
+    regles = []
+    for cl in sorted(set(re.findall(r'class="(vh\d+)"', grille)), key=lambda c: int(c[2:])):
+        regles += _regle_css(css, r'\.' + cl + r'\b[^{,]*\{')
+    for nom in sorted(set(re.findall(r'animation:\s*([a-zA-Z][\w-]*)', grille))):
+        k = _regle_css(css, r'@keyframes\s+' + re.escape(nom) + r'\s*\{')
+        if k:
+            regles.append(k[-1])        # la vitrine en redéfinit : la dernière gagne
+    regles.append('.vrt-formules{color:#4D5163;font:400 16px/1.6 Poppins,system-ui,-apple-system,'
+                  '"Segoe UI",Roboto,Helvetica,Arial,sans-serif;text-align:left;margin:8px 0 24px}')
+    regles.append('@media (max-width:999.98px){.vrt-formules>[style*="grid-template-columns"]'
+                  '{grid-template-columns:repeat(2,minmax(0,1fr))!important}}')
+    regles.append('@media (max-width:700px){.vrt-formules>[style*="grid-template-columns"]'
+                  '{grid-template-columns:minmax(0,1fr)!important}}')
+    regles.append('@media (prefers-reduced-motion:reduce){.vrt-formules *{animation:none!important}}')
+    return ('<style>' + '\n'.join(regles) + '</style>\n'
+            '<template id="vrtFormulesVitrine">' + absolu(grille) + '</template>')
+
+
+def habiller_app(s, donnees, vitrine):
+    """Pose l'habillage de la vitrine sur la coquille de l'application."""
+    s = retirer_blocs(s)
+    m = re.search(r'app\.js\?v=([0-9.]+)', s)
+    v = m.group(1) if m else BP.VER
+    tete = ('<link rel="stylesheet" href="/assets/veritas-habillage.css?v=%s">\n'
+            '<script>window.VRT_DATA=window.VRT_DATA||%s;</script>\n%s') % (v, donnees, CSS_APP)
+    s = s.replace('</head>', bloc('tete', tete) + '\n</head>', 1)
+
+    mv = re.search(r'<div id="VISITOR"[^>]*>\n', s)
+    if not mv:
+        raise SystemExit('habiller_pages : #VISITOR introuvable dans la coquille de l\'application.')
+    s = s[:mv.end()] + bloc('barre', NAV + '\n' + PROMO) + '\n' + s[mv.end():]
+
+    # Pied + bulles DANS #VISITOR, juste avant sa fermeture : le pied défile
+    # avec le contenu, les bulles (position:fixed) suivent son empilement.
+    mf = re.search(r'<footer role="contentinfo"[\s\S]*?</footer>\n</div>\n', s)
+    if not mf:
+        raise SystemExit('habiller_pages : pied de #VISITOR introuvable dans la coquille de l\'application.')
+    i = mf.end() - len('</div>\n')
+    s = s[:i] + bloc('pied', PIED + '\n' + BULLES) + '\n' + s[i:]
+
+    j = s.rfind('</body>')
+    s = s[:j] + bloc('formules', formules_vitrine(vitrine)) + '\n' + s[j:]
+    j = s.rfind('</body>')
+    s = s[:j] + bloc('script', '<script src="/assets/vitrine.js?v=%s" defer></script>' % v) + '\n' + s[j:]
+    return s
+
+
 def pages(base):
     liste = subprocess.check_output(
         ['git', '-c', 'core.quotepath=off', 'ls-files', '-z', '*.html'], cwd=RACINE
@@ -495,14 +621,17 @@ def main():
     donnees = donnees_vitrine(vitrine)
 
     a_jour = []
-    if base == RACINE:
+    if base == RACINE and '--app' not in sys.argv:
         if maj_sprite(vitrine, not controle):
             a_jour.append('assets/veritas-icons.svg')
         if ecrire_css(not controle):
             a_jour.append('assets/veritas-habillage.css')
 
     n = 0
-    for rel, chemin, s in pages(base):
+    # --app : la seule coquille de l'application (essais locaux sans toucher
+    # aux ~260 pages statiques).
+    seule_app = '--app' in sys.argv
+    for rel, chemin, s in ([] if seule_app else pages(base)):
         neuf = habiller(s, donnees, rel)
         n += 1
         # Garde : le corps de la page est intact, hormis ce qu'on remplace.
@@ -512,6 +641,28 @@ def main():
             a_jour.append(rel)
             if not controle:
                 open(chemin, 'w', encoding='utf-8', newline='\n').write(neuf)
+
+    for nom in APP_SHELLS:
+        chemin = os.path.join(base, nom)
+        # Dans le dépôt, app.html n'est pas suivi (la CI le copie depuis
+        # VERITAS_v1.2.html) : on ne touche qu'à la coquille réellement servie.
+        if not os.path.exists(chemin) or (base == RACINE and nom == 'app.html'):
+            continue
+        s = open(chemin, encoding='utf-8', newline='').read()
+        # Un poste Windows extrait la coquille en CRLF (core.autocrlf) : les
+        # motifs ci-dessus s'écrivent en LF. On travaille en LF et on rend
+        # au fichier ses fins de ligne d'origine.
+        crlf = '\r\n' in s
+        neuf = habiller_app(s.replace('\r\n', '\n'), donnees, vitrine)
+        if crlf:
+            neuf = neuf.replace('\n', '\r\n')
+        n += 1
+        if neuf.count('<h1') != s.count('<h1') or neuf.count('id="vContent"') != 1:
+            raise SystemExit('habiller_pages : %s — le corps de l\'application a changé.' % nom)
+        if neuf != s:
+            a_jour.append(nom)
+            if not controle:
+                open(chemin, 'w', encoding='utf-8', newline='').write(neuf)
 
     if controle and a_jour:
         raise SystemExit('habiller_pages --controle : %d fichier(s) sans l\'habillage à jour, '
