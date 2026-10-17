@@ -32345,11 +32345,16 @@ window._payCoordHtml = _payCoordHtml;
    avant les tuiles. La promesse de délai est celle que le site tenait déjà
    (« sous 24 h ») — on n'en invente pas une plus courte. */
 function _payBandeauManuel(ref){
-  return '<div style="border:2px solid #DC2626;background:#FEF2F2;color:#7F1D1D;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:12.5px;line-height:1.6">'
-    + '<div style="font-weight:800;color:#DC2626;font-size:13.5px;margin-bottom:4px">🔴 Paiement par code marchand MTN MoMo ou Orange Money</div>'
-    + 'Les comptes sont au nom de <strong>VERITAS EDUCATION</strong>. Payez le montant exact, puis passez à l\'étape suivante et confirmez avec votre référence'
-    + (ref ? ' <strong style="font-family:monospace">'+_esc(ref)+'</strong>' : '') + '.<br>'
-    + '<strong>Votre accès (ou votre code) est activé dès que nous avons vu votre paiement</strong> — au plus tard sous 24 h. Vous êtes prévenu par notification et sur WhatsApp.'
+  /* 18/10/2026 — l'encadré d'information de la VITRINE (fond #F2F7FF, filet
+     pointillé #BFD3F5, titre bleu), plus le rouge d'alerte : un bandeau rouge
+     cerclé de rouge, au moment de payer, se lisait comme une erreur. */
+  return '<div style="border:1px dashed #BFD3F5;background:#F2F7FF;color:#4D5163;border-radius:12px;padding:12px 14px;margin-bottom:14px;font:400 13px/1.65 Poppins,sans-serif">'
+    + '<div style="display:flex;align-items:center;gap:8px;font:600 14px Poppins,sans-serif;color:#1E499B;margin-bottom:5px">'
+    +   '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-shield"/></svg>'
+    +   'Paiement par code marchand MTN MoMo ou Orange Money</div>'
+    + 'Les comptes sont au nom de <strong style="color:#001136">VERITAS EDUCATION</strong>. Payez le montant exact, puis passez à l\'étape suivante et confirmez avec votre référence'
+    + (ref ? ' <strong style="font-family:monospace;color:#A84200">'+_esc(ref)+'</strong>' : '') + '.<br>'
+    + '<strong style="color:#007E11">Votre accès (ou votre code) est activé dès que nous avons vu votre paiement</strong> — au plus tard sous 24 h. Vous êtes prévenu par notification et sur WhatsApp.'
     + '</div>';
 }
 window._payBandeauManuel = _payBandeauManuel;

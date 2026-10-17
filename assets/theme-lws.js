@@ -297,7 +297,7 @@
      est dans theme-lws.css, § 40). Même ordre de teintes que
      assets/veritas-medaillons.js sur les pages statiques. */
   var TEINTES = ['bleu', 'sarcelle', 'vert', 'violet', 'rose', 'brique'];
-  var HORS_CONTENU = 'button,.btn,input,select,textarea,label,nav,.vftab,.vftabs,[role="tablist"],[role="menu"],.vrt-hab,.vm-puce,.vfo-ligne-t';
+  var HORS_CONTENU = 'button,.btn,input,select,textarea,label,nav,.vftab,.vftabs,[role="tablist"],[role="menu"],.vrt-hab,.vm-puce,.vfo-ligne-t,[id^="payStep"]';
   var EN_LIGNE = /^(H[1-6]|P|SPAN|B|STRONG|SMALL|EM|I|A|LABEL|LI|TD|TH|BUTTON)$/;
   var PUCE_TEXTE = /^[\s ]*[✓✔✅•·▸►→–\-]️?[\s ]*/;
   var NS = 'http://www.w3.org/2000/svg';
@@ -504,10 +504,33 @@
   window._vtVitriner = function () { try { vitriner(document.getElementById('vContent')); } catch (e) {} };
   window._vtPasseTheme = function () { try { passe(); } catch (e) {} };
 
+  /* 18/10/2026 — LES FENÊTRES AUSSI (« harmonise toutes les autres pages »).
+     Les modales (#MC) vivent HORS de #VISITOR : ni médaillons, ni puces, ni
+     correction de contraste n'y passaient. On les traite quand l'espace
+     visiteur est à l'écran — jamais au-dessus de l'administration (#APP),
+     qui garde sa propre charte. Les tuiles de paiement (#payStep…) gardent
+     leurs couleurs d'opérateur (exclues par HORS_CONTENU). */
+  function modales() {
+    var mc = document.getElementById('MC'), app = document.getElementById('APP');
+    if (!mc || !mc.firstElementChild) return;
+    if (app && getComputedStyle(app).display !== 'none') return;
+    vitriner(mc);
+    var nn = mc.querySelectorAll('*');
+    for (var k = 0; k < nn.length; k++) {
+      var el = nn[k];
+      if (el.closest('.vrt-hab')) continue;
+      for (var c = 0; c < el.childNodes.length; c++) {
+        var n = el.childNodes[c];
+        if (n.nodeType === 3 && n.textContent.trim().length > 1) { corrigerCouleur(el); break; }
+      }
+    }
+  }
+
   function passe(racine) {
     var portail = racine || document.getElementById('VISITOR');
     if (!portail) return;
     try { vitriner(document.getElementById('vContent')); } catch (e) {}
+    try { modales(); } catch (e) {}
 
     /* 1. Aplatir d'abord : la correction de l'or lit le fond effectif, qui
           n'est juste qu'une fois les dégradés remplacés par leur aplat. */
@@ -578,6 +601,10 @@
         }
       }
     }).observe(portail, { childList: true, subtree: true });
+    var mcObs = document.getElementById('MC');
+    if (mcObs) new MutationObserver(function () {
+      requestAnimationFrame(function () { try { modales(); } catch (e) {} });
+    }).observe(mcObs, { childList: true, subtree: false });
 
     /* Le bouton de thème (`vrtToggleTheme`) bascule `data-theme` sur
        <html>. L'observateur ci-dessus n'écoute que les AJOUTS de nœuds :

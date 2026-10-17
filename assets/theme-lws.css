@@ -4662,14 +4662,14 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
    Préfixe à quatre #VISITOR : il faut passer devant les règles
    #VISITOR#VISITOR#VISITOR … !important des sections précédentes.
    ════════════════════════════════════════════════════════════════════════ */
-#VISITOR [data-vm="bleu"]    { --vm-fond:#DBE8FE; --vm-trait:#1E499B; }
-#VISITOR [data-vm="sarcelle"]{ --vm-fond:#E3F1EE; --vm-trait:#0E7C86; }
-#VISITOR [data-vm="vert"]    { --vm-fond:#E7F7EC; --vm-trait:#007E11; }
-#VISITOR [data-vm="violet"]  { --vm-fond:#EEE9F8; --vm-trait:#5B4FA8; }
-#VISITOR [data-vm="rose"]    { --vm-fond:#FBE9F1; --vm-trait:#B03A6E; }
-#VISITOR [data-vm="brique"]  { --vm-fond:#FFF3E4; --vm-trait:#A84200; }
+:is(#VISITOR, #MC) [data-vm="bleu"]    { --vm-fond:#DBE8FE; --vm-trait:#1E499B; }
+:is(#VISITOR, #MC) [data-vm="sarcelle"]{ --vm-fond:#E3F1EE; --vm-trait:#0E7C86; }
+:is(#VISITOR, #MC) [data-vm="vert"]    { --vm-fond:#E7F7EC; --vm-trait:#007E11; }
+:is(#VISITOR, #MC) [data-vm="violet"]  { --vm-fond:#EEE9F8; --vm-trait:#5B4FA8; }
+:is(#VISITOR, #MC) [data-vm="rose"]    { --vm-fond:#FBE9F1; --vm-trait:#B03A6E; }
+:is(#VISITOR, #MC) [data-vm="brique"]  { --vm-fond:#FFF3E4; --vm-trait:#A84200; }
 
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-med{
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-med{
   display:inline-flex !important; align-items:center !important; justify-content:center !important;
   flex:0 0 auto !important;
   width:42px !important; height:42px !important; min-width:42px !important;
@@ -4679,52 +4679,52 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
   font-size:0 !important; line-height:0 !important;
   transition:transform .18s cubic-bezier(.34,1.56,.64,1) !important;
 }
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-med svg{
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-med svg{
   width:20px !important; height:20px !important; margin:0 !important;
   color:inherit !important; stroke:currentColor !important; fill:none !important;
   stroke-width:2 !important; vertical-align:0 !important;
 }
 /* Un médaillon au-dessus d'un titre centré se centre avec lui. */
-#VISITOR#VISITOR#VISITOR#VISITOR [data-vm]:is([style*="text-align:center"],.vm-carte) > .vm-med{ margin:0 auto 13px !important; }
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-carte{
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) [data-vm]:is([style*="text-align:center"],.vm-carte) > .vm-med{ margin:0 auto 13px !important; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-carte{
   background:#fff !important; background-image:none !important;
   border:1px solid #E4E9F2 !important; border-radius:16px !important;
   box-shadow:0 4px 14px rgba(0,17,54,.05) !important;
   transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease !important;
 }
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-carte::before,
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-carte::after{ display:none !important; }
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-clic:hover{
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-carte::before,
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-carte::after{ display:none !important; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-clic:hover{
   transform:translateY(-4px) !important; box-shadow:0 12px 26px rgba(0,17,54,.09) !important;
   border-color:#E4E9F2 !important;
 }
-#VISITOR#VISITOR#VISITOR#VISITOR :is(.vm-carte, [data-vm]):hover > .vm-med{ transform:scale(1.08) rotate(-4deg); }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) :is(.vm-carte, [data-vm]):hover > .vm-med{ transform:scale(1.08) rotate(-4deg); }
 /* Le bouton principal d'une carte prend la teinte de la carte (les quatre
    portes de la vitrine : Élève bleu, Parents sarcelle…). L'or reste l'or. */
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-carte .btn.bi{
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-carte .btn.bi{
   background:var(--vm-trait,#1E499B) !important; border-color:var(--vm-trait,#1E499B) !important;
   color:#fff !important; border-radius:10px !important;
 }
 
-#VISITOR#VISITOR#VISITOR#VISITOR ul.vm-ul{ list-style:none !important; padding-left:0 !important; }
-#VISITOR#VISITOR#VISITOR#VISITOR li.vm-li{
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) ul.vm-ul{ list-style:none !important; padding-left:0 !important; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) li.vm-li{
   display:flex !important; align-items:flex-start !important; gap:10px !important;
   list-style:none !important; padding-left:0 !important;
 }
-#VISITOR#VISITOR#VISITOR#VISITOR li.vm-li::before,
-#VISITOR#VISITOR#VISITOR#VISITOR li.vm-li::marker{ content:none !important; display:none !important; }
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-puce{
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) li.vm-li::before,
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) li.vm-li::marker{ content:none !important; display:none !important; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-puce{
   flex:0 0 auto !important; width:22px !important; height:22px !important;
   border-radius:50% !important; margin-top:1px !important;
   background:var(--vm-trait,#1E499B) !important;
   display:inline-flex !important; align-items:center !important; justify-content:center !important;
 }
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-puce svg{
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-puce svg{
   width:13px !important; height:13px !important; stroke:#fff !important; fill:none !important; stroke-width:3.2 !important;
 }
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-li-tx{ flex:1 1 auto; min-width:0; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-li-tx{ flex:1 1 auto; min-width:0; }
 
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-pas{
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-pas{
   border-radius:100px !important; padding:6px 13px !important;
   font:600 12.5px/1.3 Poppins, sans-serif !important;
   letter-spacing:normal !important; text-transform:none !important;
@@ -4732,82 +4732,99 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
 }
 
 /* Thème sombre : la teinte pâle disparaîtrait sur le fond nuit. */
-:root[data-theme="dark"] #VISITOR#VISITOR#VISITOR#VISITOR .vm-med{ background:rgba(255,255,255,.10) !important; color:#9CC0FF !important; }
-:root[data-theme="dark"] #VISITOR#VISITOR#VISITOR#VISITOR .vm-carte{ background:#14224A !important; border-color:#24345F !important; box-shadow:0 4px 14px rgba(0,0,0,.25) !important; }
+:root[data-theme="dark"] :is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-med{ background:rgba(255,255,255,.10) !important; color:#9CC0FF !important; }
+:root[data-theme="dark"] :is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-carte{ background:#14224A !important; border-color:#24345F !important; box-shadow:0 4px 14px rgba(0,0,0,.25) !important; }
 @media (prefers-reduced-motion:reduce){
-  #VISITOR#VISITOR#VISITOR#VISITOR :is(.vm-carte,.vm-med){ transition:none !important; }
-  #VISITOR#VISITOR#VISITOR#VISITOR .vm-clic:hover,
-  #VISITOR#VISITOR#VISITOR#VISITOR :is(.vm-carte,[data-vm]):hover > .vm-med{ transform:none !important; }
+  :is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) :is(.vm-carte,.vm-med){ transition:none !important; }
+  :is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-clic:hover,
+  :is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) :is(.vm-carte,[data-vm]):hover > .vm-med{ transform:none !important; }
 }
 /* Titre de carte : celui des cartes de la vitrine (« Quelqu'un suit votre enfant »). */
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-titre{
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-titre{
   font-family:Poppins, sans-serif !important; font-weight:600 !important;
   font-size:17px !important; line-height:1.35 !important; color:#001136 !important;
   text-transform:none !important; letter-spacing:normal !important; margin-bottom:6px !important;
 }
-:root[data-theme="dark"] #VISITOR#VISITOR#VISITOR#VISITOR .vm-titre{ color:#F2F5FC !important; }
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-med.vm-centre{ margin-left:auto !important; margin-right:auto !important; }
+:root[data-theme="dark"] :is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-titre{ color:#F2F5FC !important; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-med.vm-centre{ margin-left:auto !important; margin-right:auto !important; }
 /* Titre de page : celui des sections de la vitrine (« Élèves, parents,
    enseignants, partenaires : chacun son espace ») — centré, 600, encre
    #001136, et SANS la barre dégradée bleu-or que la vitrine n'a pas. */
-#VISITOR#VISITOR#VISITOR#VISITOR #vContent .pgt{
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) #vContent .pgt{
   font-family:Poppins, sans-serif !important; font-weight:600 !important;
   font-size:clamp(24px, 3.2vw, 31px) !important; line-height:1.32 !important;
   color:#001136 !important; text-align:center !important; letter-spacing:normal !important;
   text-transform:none !important; justify-content:center !important;
 }
-#VISITOR#VISITOR#VISITOR#VISITOR #vContent .pgt::after,
-#VISITOR#VISITOR#VISITOR#VISITOR #vContent .pgt::before{ display:none !important; }
-#VISITOR#VISITOR#VISITOR#VISITOR #vContent .pgt + div:not([class]){
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) #vContent .pgt::after,
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) #vContent .pgt::before{ display:none !important; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) #vContent .pgt + div:not([class]){
   font-size:16px !important; line-height:1.7 !important; color:#4D5163 !important; text-align:center !important;
 }
-:root[data-theme="dark"] #VISITOR#VISITOR#VISITOR#VISITOR #vContent .pgt{ color:#F2F5FC !important; }
-:root[data-theme="dark"] #VISITOR#VISITOR#VISITOR#VISITOR #vContent .pgt + div:not([class]){ color:#C4CDE0 !important; }
+:root[data-theme="dark"] :is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) #vContent .pgt{ color:#F2F5FC !important; }
+:root[data-theme="dark"] :is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) #vContent .pgt + div:not([class]){ color:#C4CDE0 !important; }
 /* Ligne à icône : médaillon à gauche, texte juste à côté (Contact, avantages).
    Une feuille plus ancienne étirait la ligne : le médaillon flottait au
    milieu et le texte partait au bord droit. */
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-ligne{
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-ligne{
   display:flex !important; flex-direction:row !important; flex-wrap:nowrap !important;
   align-items:flex-start !important; justify-content:flex-start !important;
   gap:14px !important; text-align:left !important; list-style:none !important;
 }
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-ligne > .vm-med{ margin:0 !important; }
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-ligne > :not(.vm-med){
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-ligne > .vm-med{ margin:0 !important; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-ligne > :not(.vm-med){
   flex:1 1 auto !important; min-width:0 !important; margin:0 !important;
   text-align:left !important; align-self:center !important;
 }
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-ligne::before,
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-ligne::marker{ content:none !important; display:none !important; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-ligne::before,
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-ligne::marker{ content:none !important; display:none !important; }
 /* Carte : icône et titre CENTRÉS, comme les cartes de la vitrine. */
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-carte{ text-align:center !important; }
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-carte:is([style*="display:flex"],[style*="display: flex"]){
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-carte{ text-align:center !important; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-carte:is([style*="display:flex"],[style*="display: flex"]){
   flex-direction:column !important; align-items:center !important;
 }
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-carte > .vm-med{ margin:0 auto 13px !important; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-carte > .vm-med{ margin:0 auto 13px !important; }
 /* Les « autres offres » et le comparatif : une teinte par ligne / par
    formule (--vt trait, --vf fond, posés par app.js). Le bouton reste un
    bouton secondaire de la vitrine — contour et encre de la teinte, plein
    de la teinte au survol. */
-#VISITOR#VISITOR#VISITOR#VISITOR .vfo-ligne-t .vfo-cta2,
-#VISITOR#VISITOR#VISITOR#VISITOR .vfo-cta2.vfo-ligne-t{
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vfo-ligne-t .vfo-cta2,
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vfo-cta2.vfo-ligne-t{
   color:var(--vt) !important; border-color:var(--vt) !important; background:#fff !important;
 }
-#VISITOR#VISITOR#VISITOR#VISITOR .vfo-ligne-t .vfo-cta2:hover,
-#VISITOR#VISITOR#VISITOR#VISITOR .vfo-cta2.vfo-ligne-t:hover{
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vfo-ligne-t .vfo-cta2:hover,
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vfo-cta2.vfo-ligne-t:hover{
   background:var(--vt) !important; color:#fff !important;
 }
-#VISITOR#VISITOR#VISITOR#VISITOR .vfo-ligne-t .vfo-ligne-pub{ color:var(--vt) !important; font-weight:600 !important; }
-#VISITOR#VISITOR#VISITOR#VISITOR .vfo-ligne-t .vfo-ligne-prix{ color:var(--vt) !important; font-weight:700 !important; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vfo-ligne-t .vfo-ligne-pub{ color:var(--vt) !important; font-weight:600 !important; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vfo-ligne-t .vfo-ligne-prix{ color:var(--vt) !important; font-weight:700 !important; }
 /* Même grille que § « autres offres », plus la colonne du médaillon. */
-#VISITOR#VISITOR#VISITOR#VISITOR .vfo-ligne-t{ display:grid !important; grid-template-columns:42px minmax(0,1fr) auto 170px !important; align-items:center !important; gap:14px !important; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vfo-ligne-t{ display:grid !important; grid-template-columns:42px minmax(0,1fr) auto 170px !important; align-items:center !important; gap:14px !important; }
 @media (max-width:620px){
-  #VISITOR#VISITOR#VISITOR#VISITOR .vfo-ligne-t{ grid-template-columns:42px minmax(0,1fr) auto !important; }
-  #VISITOR#VISITOR#VISITOR#VISITOR .vfo-ligne-t .vfo-cta2{ grid-column:1 / -1 !important; }
+  :is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vfo-ligne-t{ grid-template-columns:42px minmax(0,1fr) auto !important; }
+  :is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vfo-ligne-t .vfo-cta2{ grid-column:1 / -1 !important; }
 }
-#VISITOR#VISITOR#VISITOR#VISITOR .vfo-ligne-med{
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vfo-ligne-med{
   flex:0 0 auto; width:42px; height:42px; border-radius:50%;
   display:inline-flex; align-items:center; justify-content:center;
   background:var(--vf); color:var(--vt);
 }
-#VISITOR#VISITOR#VISITOR#VISITOR .vfo-ligne-t .vfo-ligne-tx{ flex:1 1 auto; min-width:0; }
-#VISITOR#VISITOR#VISITOR#VISITOR .vm-flux{ flex:1 1 auto; min-width:0; display:inline; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vfo-ligne-t .vfo-ligne-tx{ flex:1 1 auto; min-width:0; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-flux{ flex:1 1 auto; min-width:0; display:inline; }
+/* 18/10/2026 — « corrige le décalage de l'affichage » : un bouton à long
+   libellé en `white-space:nowrap` élargissait la page au téléphone
+   (« Demander l'ouverture d'une cagnotte » : 389 px pour un écran de 375 —
+   toute la page glissait sous le pouce). Sous 620 px, le libellé passe à la
+   ligne et le bouton ne dépasse jamais son bloc. */
+@media (max-width:620px){
+  :is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) #vContent :is(.btn, .vfo-cta, .vfo-cta2, .pk-btn){
+    white-space:normal !important; max-width:100% !important; height:auto !important;
+    overflow-wrap:anywhere;
+  }
+}
+/* Formulaires à deux colonnes (.fg2) : sous 480 px, une seule. À 375 px les
+   deux champs du paiement faisaient 138 px — « Ex: MBALLA Jea… » tronqué,
+   le numéro WhatsApp illisible pendant qu'on le tape. */
+@media (max-width:480px){
+  :is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .fg2{ grid-template-columns:minmax(0,1fr) !important; }
+}
