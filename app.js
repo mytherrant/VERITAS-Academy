@@ -48436,10 +48436,20 @@ window._espacePerso = function(role){
     ] : [];
   if(actions.length){
     h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:18px">';
-    actions.forEach(function(a){
-      h += '<button type="button" onclick="'+a[2]+'" style="text-align:left;background:#fff;border:1px solid var(--r-ligne,#E4E9F2);border-radius:14px;padding:15px;cursor:pointer;display:flex;gap:11px;align-items:center;transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 10px 22px rgba(12,42,106,.10)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">'
-        + '<span style="color:'+accent+';flex:0 0 auto">'+ICO(a[0])+'</span>'
-        + '<span style="font-weight:700;font-size:13.5px;color:var(--r-encre,#16233F)">'+a[1]+'</span>'
+    /* 18/10/2026 — Les tuiles de la vitrine : médaillon rond dans une teinte
+       qui ALTERNE (bleu, sarcelle, vert, violet, rose, brique — l'ordre des
+       pages statiques), libellé 600 #001136, chevron de la teinte.
+       La classe n'est pas décorative : sans elle, veritas-motion.js prenait
+       cette rangée de boutons sans classe pour une barre de FILTRES et la
+       changeait en onglets gris (role="tab"). */
+    var _TE = [['#DBE8FE','#1E499B'],['#E3F1EE','#0E7C86'],['#E7F7EC','#007E11'],
+               ['#EEE9F8','#5B4FA8'],['#FBE9F1','#B03A6E'],['#FFF3E4','#A84200']];
+    actions.forEach(function(a, i){
+      var te = _TE[i % _TE.length];
+      h += '<button type="button" class="vesp-act" onclick="'+a[2]+'" style="text-align:left;background:#fff;border:1px solid #E4E9F2;border-radius:14px;padding:14px 15px;cursor:pointer;display:flex;gap:12px;align-items:center;box-shadow:0 4px 14px rgba(0,17,54,.05);transition:transform .18s,box-shadow .18s" onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 12px 26px rgba(0,17,54,.09)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 4px 14px rgba(0,17,54,.05)\'">'
+        + '<span aria-hidden="true" style="flex:0 0 auto;width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:'+te[0]+';color:'+te[1]+'">'+ICO(a[0])+'</span>'
+        + '<span style="flex:1;font:600 14.5px/1.4 Poppins,sans-serif;color:#001136">'+a[1]+'</span>'
+        + '<span aria-hidden="true" style="flex:0 0 auto;color:'+te[1]+'">'+ICO('lc-chevron-right')+'</span>'
         + '</button>';
     });
     h += '</div>';

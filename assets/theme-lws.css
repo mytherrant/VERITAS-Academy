@@ -1374,7 +1374,23 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
 
 /* 18.c — Plafond de graisse : 400 par défaut, 500 pour l'appui,
    600 pour les titres et les boutons. Rien au-dessus, jamais. */
-#VISITOR#VISITOR *{ font-weight:400 !important; }
+/* 18/10/2026 — PLUS de « * { 400 } » aveugle. Il éteignait AUSSI les
+   <b>, les <strong>, les titres et toute graisse écrite en ligne : « Bonjour
+   … » écrit en 900, les mises en évidence des réponses, les prix — tout
+   retombait à 400. La vitrine, elle, titre et souligne en 600 : c'est sa
+   règle qu'on reprend (400 par défaut, 500 pour l'appui, 600 pour ce qui
+   compte, rien au-dessus). :where() garde la spécificité de l'ancien `*` —
+   les règles plus précises qui suivent l'emportent comme avant. */
+#VISITOR#VISITOR :where(:not(b, strong, h1, h2, h3, h4, h5, h6, th, [style*="font-weight"], [style*="font:"],
+  b *, strong *, h1 *, h2 *, h3 *, h4 *, h5 *, h6 *, th *)){ font-weight:400 !important; }
+#VISITOR#VISITOR :where(b, strong, h1, h2, h3, h4, h5, h6, th,
+  [style*="font-weight:6"], [style*="font-weight:7"], [style*="font-weight:8"], [style*="font-weight:9"],
+  [style*="font-weight: 6"], [style*="font-weight: 7"], [style*="font-weight: 8"], [style*="font-weight: 9"],
+  [style*="font-weight:bold"], [style*="font:6"], [style*="font:7"], [style*="font:8"], [style*="font:9"],
+  [style*="font:bold"]){ font-weight:600 !important; }
+#VISITOR#VISITOR :where([style*="font-weight:5"], [style*="font-weight: 5"], [style*="font:5"]){ font-weight:500 !important; }
+#VISITOR#VISITOR :where([style*="font-weight:4"], [style*="font-weight: 4"], [style*="font:4"],
+  [style*="font-weight:normal"]){ font-weight:400 !important; }
 #VISITOR#VISITOR :is(.lws-nav-links > button.on, .acc-plan-pour, .vlit-banner__label,
   .acc-role-go, .vmenu-col button b, .fl, .acc-news-item .tx b, .vmenu-t){
   font-weight:500 !important;
