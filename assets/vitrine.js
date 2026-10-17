@@ -2775,7 +2775,10 @@
 
     try {
       var t = localStorage.getItem('vrt_theme');
-      if (t === 'sombre') { S.theme = 'sombre'; appliquerTheme('sombre'); }
+      /* « dark » : la valeur qu'écrit l'APPLICATION sous la même clé. Sans
+         elle, un thème sombre choisi dans l'application redevenait clair en
+         revenant sur la vitrine (17/10/2026). */
+      if (t === 'sombre' || t === 'dark') { S.theme = 'sombre'; appliquerTheme('sombre'); }
     } catch (e) {}
 
     /* Le tunnel est pré-rendu dans le document avec les champs de la maquette :

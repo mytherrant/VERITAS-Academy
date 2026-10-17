@@ -1734,6 +1734,19 @@ jobs:
       - name: 🧥 Habiller les pages générées au déploiement
         run: python tools/habiller_pages.py deploy
 
+      # ── 🧥 L'habillage de la vitrine dans l'application reste-t-il celui de
+      #    la vitrine ? (17/10/2026) La barre, le bandeau, le pied, les bulles
+      #    et les panneaux de formules sont posés DANS #VISITOR, où les feuilles
+      #    de l'application (app.css, theme-lws.css…) visent tout en
+      #    `#VISITOR#VISITOR#VISITOR … !important` : le pied passait de #001136
+      #    à #0C2A6A, chaque bouton de la barre prenait 44 px de haut. On exclut
+      #    l'habillage de ces feuilles, sur les COPIES de deploy/ seulement, par
+      #    un :where() de spécificité nulle — la cascade de l'application ne
+      #    bouge pas. APRÈS l'habillage, AVANT les cache-busters (l'empreinte
+      #    doit couvrir les feuilles réécrites).
+      - name: 🧥 Isoler l'habillage de la vitrine des feuilles de l'application
+        run: python tools/isoler_habillage.py deploy
+
       - name: 🔗 Aligner les cache-busters de tous les assets
         run: |
           # Les ?v= de /assets/*.css|js étaient maintenus À LA MAIN, page par page,

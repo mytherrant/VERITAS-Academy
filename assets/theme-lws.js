@@ -78,9 +78,72 @@
      (blanc par défaut si la page n'en pose aucune), puis on les fusionne
      de l'arrière vers l'avant. Le résultat est toujours une couleur
      opaque, donc une luminance juste. */
+  /* ── CONTRASTE AU SENS DES NORMES (17/10/2026) ──────────────────────────
+     L'écart de luminance ci-dessous ne rattrape que l'encre « de la couleur
+     du fond ». Il laissait passer, mesuré sur les écrans publics, du gris à
+     2,3–2,9:1 (« 10 questions · 30 min », les prix, « Toutes classes ») et
+     le vert WhatsApp à 1,98:1 sur blanc — rien de tout cela n'existe sur la
+     vitrine, dont le gris le plus pâle (#6E7385) fait 4,9:1. On mesure donc
+     le rapport WCAG, et sous le seuil (4,5:1, ou 3:1 pour un grand texte)
+     on fonce — ou on éclaircit — LA MÊME teinte : un vert reste vert. */
+  function lumW(c) {
+    var v = c.map(function (x) { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); });
+    return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
+  }
+  function rapport(a, b) {
+    var x = lumW(a), y = lumW(b);
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  }
+  function relever(el, s) {
+    var txt = false;
+    for (var i = 0; i < el.childNodes.length; i++) {
+      if (el.childNodes[i].nodeType === 3 && el.childNodes[i].textContent.trim().length > 1) { txt = true; break; }
+    }
+    if (!txt) return;
+    var f = rgbDe(fondEffectif(el));
+    var m = String(s.color).match(/[\d.]+/g);
+    if (!f || !m || m.length < 3) return;
+    var a = m.length > 3 ? +m[3] : 1;
+    var c = [0, 1, 2].map(function (k) { return +m[k] * a + f[k] * (1 - a); });
+    var taille = parseFloat(s.fontSize) || 16;
+    var seuil = (taille >= 24 || (taille >= 18.6 && (+s.fontWeight || 400) >= 700)) ? 3 : 4.5;
+    if (rapport(c, f) >= seuil) return;
+    var clair = lumW(f) > 0.18;
+    for (var n = 0; n < 24 && rapport(c, f) < seuil; n++) {
+      c = clair ? c.map(function (x) { return x * 0.9; })
+                : c.map(function (x) { return x + (255 - x) * 0.15; });
+    }
+    el.style.setProperty('color', 'rgb(' + c.map(Math.round).join(',') + ')', 'important');
+  }
+
+  /* « #1E499B », « #fff » ou « rgb(…) » → [r, g, b] ; null sinon. */
+  function rgbDe(c) {
+    if (!c) return null;
+    c = String(c).trim();
+    if (c.charAt(0) === '#') {
+      var h = c.slice(1);
+      if (h.length === 3 || h.length === 4) h = h.charAt(0) + h.charAt(0) + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2);
+      if (h.length < 6) return null;
+      return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+    }
+    var m = c.match(/[\d.]+/g);
+    return m && m.length >= 3 ? [+m[0], +m[1], +m[2]] : null;
+  }
+
   function fondEffectif(el) {
     var couches = [], n = el;
     while (n && n.nodeType === 1) {
+      /* 17/10/2026 — un fond peut être un DÉGRADÉ venu d'une feuille (pas
+         d'un style en ligne : `aplatir` ne le voit pas). Lu comme
+         « transparent », il faisait juger du texte navy « posé sur du
+         blanc » alors qu'il l'était sur du bleu nuit — « Rejoindre l'équipe
+         VÉRITAS » (Pour vous, enseignant) était illisible en production.
+         On prend sa première couleur, comme couche opaque. */
+      var bi = getComputedStyle(n).backgroundImage;
+      if (bi && bi !== 'none' && /gradient\(/i.test(bi)) {
+        var pc = rgbDe(premiereCouleur(bi));
+        if (pc) { couches.push([pc[0], pc[1], pc[2], 1]); break; }
+      }
       var m = String(getComputedStyle(n).backgroundColor).match(/[\d.]+/g);
       if (m && m.length >= 3) {
         var a = m.length > 3 ? parseFloat(m[3]) : 1;
@@ -138,7 +201,7 @@
       var l = luminance(v);
       return l !== null && Math.abs(l - lFond) < ECART_MINI;
     });
-    if (!aCorriger.length) return;
+    if (!aCorriger.length) { relever(el, s); return; }
 
     var remplacement = lFond < 0.5 ? '#FFFFFF' : BLEU;
     aCorriger.forEach(function (p) {
@@ -213,22 +276,274 @@
     }
   }
 
+  /* 17/10/2026 — L'HABILLAGE DE LA VITRINE n'est pas à nous. La barre, le
+     bandeau, le pied et les bulles (.vrt-hab, posés dans #VISITOR par
+     tools/habiller_pages.py) doivent rester ceux de la vitrine au pixel
+     près : aplatis ou « corrigés » ici, le bandeau perdait son dégradé et
+     « Orange Money » passait du brique au blanc. */
+  function horsHabillage(el) {
+    return !(el.closest && el.closest('.vrt-hab'));
+  }
+
+  /* ═══ LA VITRINE DANS LE CONTENU (17/10/2026) ═══════════════════════════
+     « N'oublie pas les icônes, les puces, les pastilles, les alternances de
+     couleurs exactement comme sur la vitrine » (Jacques). Les écrans de
+     l'application emploient déjà les icônes Lucide de la vitrine (lc-*),
+     mais NUES : noires, toutes pareilles, posées au-dessus du titre. La
+     vitrine, elle, les met dans un MÉDAILLON rond teinté, fait tourner six
+     teintes de bloc en bloc, coche ses listes d'un disque de la teinte et
+     arrondit ses pastilles. On ne réécrit pas les ~40 fonctions de rendu :
+     on lit ce qu'elles produisent et on pose les classes vm-* (le dessin
+     est dans theme-lws.css, § 40). Même ordre de teintes que
+     assets/veritas-medaillons.js sur les pages statiques. */
+  var TEINTES = ['bleu', 'sarcelle', 'vert', 'violet', 'rose', 'brique'];
+  var HORS_CONTENU = 'button,.btn,input,select,textarea,label,nav,.vftab,.vftabs,[role="tablist"],[role="menu"],.vrt-hab,.vm-puce,.vfo-ligne-t,[id^="payStep"]';
+  var EN_LIGNE = /^(H[1-6]|P|SPAN|B|STRONG|SMALL|EM|I|A|LABEL|LI|TD|TH|BUTTON)$/;
+  var PUCE_TEXTE = /^[\s ]*[✓✔✅•·▸►→–\-]️?[\s ]*/;
+  var NS = 'http://www.w3.org/2000/svg';
+
+  function visible(el) { return !!(el.offsetWidth || el.offsetHeight); }
+  function estIcone(n) {
+    return n && n.nodeType === 1 && n.tagName.toLowerCase() === 'svg' && !!n.querySelector('use');
+  }
+  /* Un porte-icône : ne contient QUE des icônes (et des liants d'émoji). */
+  function porteIcone(el) {
+    var svgs = 0;
+    for (var i = 0; i < el.childNodes.length; i++) {
+      var n = el.childNodes[i];
+      if (n.nodeType === 3) { if (n.textContent.replace(/[\s‍️]/g, '')) return false; }
+      else if (estIcone(n)) svgs++;
+      else if (n.nodeType === 1) return false;
+    }
+    return svgs >= 1 && svgs <= 3;
+  }
+  /* L'élément ouvre-t-il son bloc (rien de visible avant lui) ? */
+  function enTete(el) {
+    for (var n = el.parentNode.firstChild; n && n !== el; n = n.nextSibling) {
+      if (n.nodeType === 3 && n.textContent.trim()) return false;
+      if (n.nodeType === 1 && visible(n)) return false;
+    }
+    return true;
+  }
+  function estCarte(el) {
+    if (!el || el.tagName === 'LI' || el.id === 'vContent') return false;
+    var cs = getComputedStyle(el);
+    if ((parseFloat(cs.borderTopLeftRadius) || 0) < 8) return false;
+    var fond = cs.backgroundColor && !/rgba\(0, 0, 0, 0\)|transparent/.test(cs.backgroundColor);
+    return fond || parseFloat(cs.borderTopWidth) > 0 || cs.boxShadow !== 'none';
+  }
+  function puce() {
+    var s = document.createElement('span');
+    s.className = 'vm-puce';
+    s.setAttribute('aria-hidden', 'true');
+    var svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('width', '13'); svg.setAttribute('height', '13');
+    svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', '#fff');
+    svg.setAttribute('stroke-width', '3.2'); svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    var u = document.createElementNS(NS, 'use');
+    u.setAttribute('href', '#lc-check');
+    svg.appendChild(u); s.appendChild(svg);
+    return s;
+  }
+
+  function vitriner(zone) {
+    if (!zone) return;
+    /* 1. MÉDAILLONS — l'icône de tête d'un bloc. */
+    var meds = [];
+    var cands = zone.querySelectorAll('div,span,svg');
+    for (var i = 0; i < cands.length; i++) {
+      var el = cands[i];
+      if (el.classList.contains('vm-med')) { meds.push(el); continue; }
+      if (el.closest(HORS_CONTENU) || el.closest('.vm-med')) continue;
+      var bloc = el.parentElement;
+      if (!bloc || bloc === zone || !visible(el)) continue;
+      var tag = el.tagName.toLowerCase();
+      if (tag === 'svg') {
+        // Icône nue : seulement si elle ouvre un BLOC (pas une ligne de texte).
+        if (!estIcone(el) || EN_LIGNE.test(bloc.tagName) || el.getBoundingClientRect().width < 16) continue;
+      } else if (!porteIcone(el)) continue;
+      if (!enTete(el) || !(bloc.textContent || '').trim()) continue;
+      var med = el;
+      if (tag === 'svg') {
+        med = document.createElement('span');
+        bloc.insertBefore(med, el); med.appendChild(el);
+      } else {
+        // Un émoji composé (👨‍🏫) avait donné DEUX icônes collées : la vitrine
+        // n'en montre qu'une par médaillon.
+        var svgs = med.querySelectorAll(':scope > svg');
+        for (var k = 1; k < svgs.length; k++) svgs[k].remove();
+        for (var t = med.childNodes.length - 1; t >= 0; t--) if (med.childNodes[t].nodeType === 3) med.removeChild(med.childNodes[t]);
+      }
+      med.classList.add('vm-med');
+      med.setAttribute('aria-hidden', 'true');
+      meds.push(med);
+    }
+    for (var m = 0; m < meds.length; m++) {
+      var teinte = TEINTES[m % TEINTES.length];
+      meds[m].setAttribute('data-vm', teinte);
+      var c = meds[m].parentElement;
+      // Une ligne (icône à gauche, libellé et valeur à droite) : contact,
+      // avantages… Le médaillon se pose À CÔTÉ du texte, jamais au milieu.
+      if (c && meds[m] === c.firstElementChild && c.children.length >= 2 && (c.tagName === 'LI' || !estCarte(c))) {
+        var dc = getComputedStyle(c);
+        if (c.tagName === 'LI' || (dc.display.indexOf('flex') >= 0 && dc.flexDirection.indexOf('row') === 0)) {
+          c.classList.add('vm-ligne');
+          c.setAttribute('data-vm', teinte);
+          continue;
+        }
+      }
+      if (c && !c.closest('li')) {
+        c.setAttribute('data-vm', teinte);
+        // Le titre de la carte : l'élément qui suit le médaillon, s'il est court.
+        var ti = meds[m].nextElementSibling;
+        if (ti && estCarte(c) && !/^H[12]$/.test(ti.tagName) && !ti.classList.contains('pgt') &&
+            !ti.classList.contains('vm-titre') && !ti.closest(HORS_CONTENU) && !ti.querySelector('div,p,ul,button')) {
+          var lt = (ti.textContent || '').trim().length;
+          if (lt > 0 && lt <= 60) ti.classList.add('vm-titre');
+        }
+        if (getComputedStyle(c).textAlign === 'center') meds[m].classList.add('vm-centre');
+        if (estCarte(c)) {
+          c.classList.add('vm-carte');
+          if (c.tagName === 'A' || c.hasAttribute('onclick') || c.getAttribute('role') === 'button') c.classList.add('vm-clic');
+        }
+      }
+    }
+
+    /* 1 bis. TITRES DES CARTES SANS MÉDAILLON (« Inscription au Centre
+          VÉRITAS ») : la première ligne courte d'une carte est son titre. */
+    var cartes = zone.querySelectorAll('.vcard,.card');
+    for (var ct = 0; ct < cartes.length; ct++) {
+      var t1 = cartes[ct].firstElementChild;
+      if (!t1 || t1.classList.contains('vm-med') || t1.classList.contains('vm-ligne') || t1.classList.contains('pgt') ||
+          /^H1$/.test(t1.tagName) || t1.closest(HORS_CONTENU) || t1.querySelector('div,p,ul,button,input')) continue;
+      var l1 = (t1.textContent || '').trim().length;
+      if (l1 > 0 && l1 <= 60) t1.classList.add('vm-titre');
+    }
+
+    /* 1 ter. TEXTE ÉCLATÉ EN COLONNES (18/10/2026). Un conteneur flexible
+          en ligne dont le texte n'est pas enveloppé fait de CHAQUE morceau
+          (« texte », <b>, « texte », <b>…) une colonne : le cadre « Aucun
+          fichier n'est téléchargeable » de la fiche livre s'affichait en
+          quatre colonnes sur téléphone. On regroupe chaque suite de texte et
+          de balises en ligne dans un seul <span>. */
+    var EN_LIGNE_FLUX = /^(B|STRONG|EM|I|A|SMALL|SPAN|CODE|MARK|U|S|SUP|SUB|BR)$/;
+    var flex = zone.querySelectorAll('div,p,li,label,span,a');
+    for (var fx = 0; fx < flex.length; fx++) {
+      var fe = flex[fx];
+      if (fe.closest('.vrt-hab') || fe.classList.contains('vm-flux')) continue;
+      var aTexte = false, aBalise = false;
+      for (var q = 0; q < fe.childNodes.length; q++) {
+        var cn = fe.childNodes[q];
+        if (cn.nodeType === 3 && cn.textContent.trim()) aTexte = true;
+        else if (cn.nodeType === 1 && EN_LIGNE_FLUX.test(cn.tagName) && !cn.classList.contains('vm-med')) aBalise = true;
+      }
+      if (!aTexte || !aBalise) continue;
+      var dcs = getComputedStyle(fe);
+      if (dcs.display.indexOf('flex') < 0 || dcs.flexDirection.indexOf('row') !== 0) continue;
+      var run = [], groupes = [];
+      for (var q2 = 0; q2 < fe.childNodes.length; q2++) {
+        var c2 = fe.childNodes[q2];
+        var flux = c2.nodeType === 3 || (c2.nodeType === 1 && EN_LIGNE_FLUX.test(c2.tagName) && c2.tagName !== 'SPAN' || (c2.nodeType === 1 && c2.tagName === 'SPAN' && !c2.querySelector('svg') && !c2.classList.contains('vm-med')));
+        if (flux) run.push(c2); else { if (run.length) groupes.push(run); run = []; }
+      }
+      if (run.length) groupes.push(run);
+      groupes.forEach(function (g) {
+        if (g.length < 2 || !g.some(function (n) { return n.nodeType === 3 && n.textContent.trim(); })) return;
+        var sp = document.createElement('span');
+        sp.className = 'vm-flux';
+        g[0].parentNode.insertBefore(sp, g[0]);
+        g.forEach(function (n) { sp.appendChild(n); });
+      });
+    }
+
+    /* 2. PUCES — le disque coché de la teinte du bloc. */
+    var lis = zone.querySelectorAll('li');
+    for (var l = 0; l < lis.length; l++) {
+      var li = lis[l];
+      if (li.classList.contains('vm-li') || li.closest(HORS_CONTENU) || li.querySelector('.vm-med,button,input,select,a.btn')) continue;
+      var ul = li.parentElement;
+      if (!ul || ul.tagName === 'OL') continue;
+      var premier = li.firstChild;
+      while (premier && premier.nodeType === 3 && !premier.textContent.trim()) premier = premier.nextSibling;
+      var marque = false;
+      if (estIcone(premier)) { premier.remove(); marque = true; }
+      else if (premier && premier.nodeType === 3 && PUCE_TEXTE.test(premier.textContent)) {
+        premier.textContent = premier.textContent.replace(PUCE_TEXTE, ''); marque = true;
+      } else if (getComputedStyle(ul).listStyleType !== 'none') marque = true;
+      else {
+        // Puce dessinée par une feuille (::before) : « Apportez les documents… »
+        var av = getComputedStyle(li, '::before').content;
+        if (av && av !== 'none' && av !== 'normal') marque = true;
+      }
+      if (!marque) continue;
+      // Le reste du contenu passe dans un seul bloc, à droite de la puce.
+      var corps = document.createElement('span');
+      corps.className = 'vm-li-tx';
+      while (li.firstChild) corps.appendChild(li.firstChild);
+      li.appendChild(puce()); li.appendChild(corps);
+      li.classList.add('vm-li');
+      ul.classList.add('vm-ul');
+    }
+
+    /* 3. PASTILLES — la forme de la vitrine (on garde leur couleur : un
+          « Gratuit » vert ou un « Premium » or disent quelque chose). */
+    var pas = zone.querySelectorAll('[class*="badge"],[class*="tag"],[class*="chip"],[class*="pill"],[class*="pastille"],span[style*="border-radius"]');
+    for (var p = 0; p < pas.length; p++) {
+      var b = pas[p];
+      if (b.classList.contains('vm-pas') || b.closest(HORS_CONTENU) || b.classList.contains('vm-med') || !visible(b)) continue;
+      var tx = (b.textContent || '').trim();
+      if (!tx || tx.length > 42 || b.querySelector('div,p,ul,img')) continue;
+      var r = b.getBoundingClientRect();
+      if (r.height > 34 || r.height < 14) continue;
+      b.classList.add('vm-pas');
+    }
+  }
+
+  window._vtVitriner = function () { try { vitriner(document.getElementById('vContent')); } catch (e) {} };
+  window._vtPasseTheme = function () { try { passe(); } catch (e) {} };
+
+  /* 18/10/2026 — LES FENÊTRES AUSSI (« harmonise toutes les autres pages »).
+     Les modales (#MC) vivent HORS de #VISITOR : ni médaillons, ni puces, ni
+     correction de contraste n'y passaient. On les traite quand l'espace
+     visiteur est à l'écran — jamais au-dessus de l'administration (#APP),
+     qui garde sa propre charte. Les tuiles de paiement (#payStep…) gardent
+     leurs couleurs d'opérateur (exclues par HORS_CONTENU). */
+  function modales() {
+    var mc = document.getElementById('MC'), app = document.getElementById('APP');
+    if (!mc || !mc.firstElementChild) return;
+    if (app && getComputedStyle(app).display !== 'none') return;
+    vitriner(mc);
+    var nn = mc.querySelectorAll('*');
+    for (var k = 0; k < nn.length; k++) {
+      var el = nn[k];
+      if (el.closest('.vrt-hab')) continue;
+      for (var c = 0; c < el.childNodes.length; c++) {
+        var n = el.childNodes[c];
+        if (n.nodeType === 3 && n.textContent.trim().length > 1) { corrigerCouleur(el); break; }
+      }
+    }
+  }
+
   function passe(racine) {
     var portail = racine || document.getElementById('VISITOR');
     if (!portail) return;
+    try { vitriner(document.getElementById('vContent')); } catch (e) {}
+    try { modales(); } catch (e) {}
 
     /* 1. Aplatir d'abord : la correction de l'or lit le fond effectif, qui
           n'est juste qu'une fois les dégradés remplacés par leur aplat. */
     aplatir(portail);
     var deg = portail.querySelectorAll('[style*="gradient"]');
-    for (var i = 0; i < deg.length; i++) aplatir(deg[i]);
+    for (var i = 0; i < deg.length; i++) if (horsHabillage(deg[i])) aplatir(deg[i]);
 
     /* 2. Puis les couleurs en ligne, texte et tracés SVG. On ne balaie que
           les éléments qui EN DÉCLARENT une : inutile d'auditer les 868
           nœuds de la page à chaque re-rendu. */
     var teintes = portail.querySelectorAll(
       '[style*="color"],[style*="fill"],[style*="stroke"]');
-    for (var j = 0; j < teintes.length; j++) corrigerCouleur(teintes[j]);
+    for (var j = 0; j < teintes.length; j++) if (horsHabillage(teintes[j])) corrigerCouleur(teintes[j]);
 
     /* 3. Le filet de sécurité — DANS LES DEUX THÈMES.
           Les étapes 1 et 2 ne regardent que les éléments qui DÉCLARENT une
@@ -264,7 +579,7 @@
         var n = el.childNodes[c];
         if (n.nodeType === 3 && n.textContent.trim().length > 1) { porteDuTexte = true; break; }
       }
-      if (porteDuTexte) corrigerCouleur(el);
+      if (porteDuTexte && horsHabillage(el)) corrigerCouleur(el);
     }
   }
 
@@ -286,6 +601,10 @@
         }
       }
     }).observe(portail, { childList: true, subtree: true });
+    var mcObs = document.getElementById('MC');
+    if (mcObs) new MutationObserver(function () {
+      requestAnimationFrame(function () { try { modales(); } catch (e) {} });
+    }).observe(mcObs, { childList: true, subtree: false });
 
     /* Le bouton de thème (`vrtToggleTheme`) bascule `data-theme` sur
        <html>. L'observateur ci-dessus n'écoute que les AJOUTS de nœuds :
