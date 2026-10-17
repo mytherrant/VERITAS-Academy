@@ -6802,6 +6802,26 @@ function goToVisitor(){
   $("VISITOR").style.display="flex";
   initVisitor();
 }
+/* Sortie VOLONTAIRE vers le portail public (onglet « Visiteur », « Retour au
+   portail public »). PAS logout() : _portailChanger l'enchaîne avec
+   showLogin(), qu'un départ de page casserait. goToVisitor() ne fait que démasquer
+   #VISITOR : or, arrivé par /app.html#connexion, le routeur y a rendu
+   l'ANCIEN accueil de l'application (« VÉRITAS Academy ») pour ne pas laisser
+   de page blanche sous la modale. Démasquer #VISITOR montrait donc cet
+   accueil supprimé au lieu de la vitrine. Le portail public, c'est « / ».
+   Mêmes garde-fous que _renvoyerVersVitrine : anonyme seulement, et
+   uniquement depuis /app.html (anti-rebond si la vitrine manque). */
+function _allerVitrine(){
+  try{
+    var p = String(location.pathname || '').toLowerCase().replace(/\/+$/, '');
+    if(!(typeof SES !== 'undefined' && SES) && p === '/app.html'){
+      location.assign('/');
+      return;
+    }
+  }catch(e){}
+  goToVisitor();
+}
+window._allerVitrine = _allerVitrine;
 function showLogin(role){
   hideAll();
   $("LS").style.display="flex";
@@ -11153,7 +11173,7 @@ function swLR(t){
   const lfa=$("lFormArea"),lb=$("lBtn"),ls=$("lSubtitle");
   if(t==="visiteur"){
     if(lfa)lfa.innerHTML=`<div id="lVisitorMsg" style="padding:14px;background:var(--blb);border-radius:var(--r);border:1px solid var(--bld);text-align:center;font-size:13px;color:var(--bl)"><div style="font-size:24px;margin-bottom:8px">🌐</div><div class="semi">Portail Public</div><div style="font-size:13px;color:var(--ink4);margin-top:4px">Accédez aux informations du centre sans connexion</div></div>`;
-    lb.textContent="Accéder au portail →";lb.onclick=()=>goToVisitor();
+    lb.textContent="Accéder au portail →";lb.onclick=()=>_allerVitrine();
     if(ls)ls.textContent="Portail Public";
   } else {
     const labels={eleve:"Espace Élève",enseignant:"Espace Enseignant",admin:"Administration",superadmin:"Super Administration"};
@@ -11333,7 +11353,7 @@ async function doLogin(){
   if(!_checkLoginRateLimit())return;
   var u=($("lu")?.value||"").trim(),p=$("lp")?.value||"";
   $("lerr").style.display="none";
-  if(lr==="visiteur"){goToVisitor();return;}
+  if(lr==="visiteur"){_allerVitrine();return;}
   if(!u||!p){$("lerr").style.display="block";$("lerr").textContent="Veuillez remplir tous les champs.";return;}
   // Anti brute-force par compte
   var lock=_checkLoginLock(u);

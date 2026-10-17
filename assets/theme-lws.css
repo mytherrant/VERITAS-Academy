@@ -3142,7 +3142,11 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
    D'où un formulaire d'inscription resté en navy/or, dans une autre
    police, au milieu d'un site refondu.
    ═════════════════════════════════════════════════════════════════════ */
-#MC, #MC *, #LS, #LS *{ font-family:var(--lws-font) !important; }
+/* Mêmes exemptions qu'en 3.6 : un `*` nu rabattait aussi les polices
+   d'icônes sur Poppins — l'icône 🌐 de l'onglet « Visiteur » s'écrivait
+   alors en toutes lettres (« language »), et de même dans les modales. */
+#MC, #MC *:not([class*="material"]):not(.vico):not(.v-ico):not(.i),
+#LS, #LS *:not([class*="material"]):not(.vico):not(.v-ico):not(.i){ font-family:var(--lws-font) !important; }
 #MC .modal{
   background:#fff !important; border:0 !important;
   border-radius:16px !important;
