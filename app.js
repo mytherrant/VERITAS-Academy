@@ -4748,7 +4748,11 @@ function initVisitor(){
     // Filet : si aucune section ne s'est rendue, on ne laisse pas un écran vide.
     setTimeout(function(){
       try{
-        if(typeof SES !== 'undefined' && SES) return;
+        // Connecté sans rien à l'écran : son espace, pas l'ancien accueil.
+        if(typeof SES !== 'undefined' && SES){
+          if(!window._vCurrentSec && typeof _vEspaceSiFondVide === 'function') _vEspaceSiFondVide();
+          return;
+        }
         /* v1.19.20 — Les écrans de FONCTIONS (recherche, calendrier, connexion,
            compte, inscription) ouvrent une MODALE : ils ne rendent rien dans
            #vContent, qui reste donc légitimement vide. Le filet les prenait pour
@@ -4956,7 +4960,10 @@ function _fetchPublicData(){
       var lbl=document.getElementById('vBrandName');
       if(lbl&&DB.school&&DB.school.nom)lbl.textContent=DB.school.nom;
       // Re-rendre la section courante si ses données ont été mises à jour
-      var curSec=window._vCurrentSec||'presentation';
+      /* Sans section notée, on ne rend RIEN : le repli « presentation »
+         écrivait l'ancien accueil par-dessus une page qui ne note pas sa
+         section (fond neutre d'une modale, fiche ouverte hors vShowSec). */
+      var curSec=window._vCurrentSec||'';
       /* ⚠️ TROISIÈME ARGUMENT : ce re-rendu est un RAFRAÎCHISSEMENT interne, pas
          une navigation. Sans lui, il passe par _renvoyerVersVitrine et téléporte
          vers « / » un visiteur qui lisait tranquillement — une seconde après le
@@ -5397,6 +5404,16 @@ function _gateBloque(sec){
 }
 
 function vShowSec(sec,btn,_boot){
+  /* « presentation » = l'ancien accueil, supprimé comme page publique. Un
+     anonyme qui le DEMANDE (lien #presentation, menu « Le centre ») part sur
+     la vitrine. Pas pour un rafraîchissement interne (_boot) : c'était la
+     course qui éjectait les lecteurs (voir _VITRINE_COUVRE). */
+  if(sec==='presentation' && _boot!==true && !(typeof SES!=='undefined' && SES)){
+    try{
+      var _pp=String(location.pathname||'').toLowerCase().replace(/\/+$/,'');
+      if(_pp==='/app.html'){ location.replace('/'); return; }
+    }catch(e){}
+  }
   if(_renvoyerVersVitrine(sec, _boot)) return;
   window._vCurrentSec=sec;
   /* ── DEUX INTERFACES EMPILÉES — la vraie « double interface » ─────────────
@@ -6803,18 +6820,21 @@ function goToVisitor(){
   initVisitor();
 }
 /* Sortie VOLONTAIRE vers le portail public (onglet « Visiteur », « Retour au
-   portail public »). PAS logout() : _portailChanger l'enchaîne avec
-   showLogin(), qu'un départ de page casserait. goToVisitor() ne fait que démasquer
+   portail public », déconnexions). logout(true) reste sur place :
+   _portailChanger l'enchaîne avec showLogin(). goToVisitor() ne fait que démasquer
    #VISITOR : or, arrivé par /app.html#connexion, le routeur y a rendu
    l'ANCIEN accueil de l'application (« VÉRITAS Academy ») pour ne pas laisser
    de page blanche sous la modale. Démasquer #VISITOR montrait donc cet
    accueil supprimé au lieu de la vitrine. Le portail public, c'est « / ».
    Mêmes garde-fous que _renvoyerVersVitrine : anonyme seulement, et
    uniquement depuis /app.html (anti-rebond si la vitrine manque). */
-function _allerVitrine(){
+function _allerVitrine(toujours){
   try{
     var p = String(location.pathname || '').toLowerCase().replace(/\/+$/, '');
-    if(!(typeof SES !== 'undefined' && SES) && p === '/app.html'){
+    // `toujours` : lien explicite vers une page publique (« Le centre »,
+    // « Retour à l'accueil ») — vaut aussi pour un compte connecté, dont la
+    // session survit au passage par la vitrine (sessionStorage).
+    if((toujours || !(typeof SES !== 'undefined' && SES)) && p === '/app.html'){
       location.assign('/');
       return;
     }
@@ -6822,6 +6842,152 @@ function _allerVitrine(){
   goToVisitor();
 }
 window._allerVitrine = _allerVitrine;
+
+/* ═══ PLUS JAMAIS L'ANCIEN ACCUEIL SOUS UNE MODALE (17/10/2026) ═══════════
+   Les liens profonds qui ouvrent une MODALE ou l'écran de connexion
+   (#recherche, #connexion, #compte, #inscription, #calendrier, #partenaire,
+   #abonnement) rendaient l'ancien accueil « VÉRITAS Academy » dessous, pour
+   éviter une page blanche. Conséquence mesurée : fermer la recherche de la
+   vitrine, se connecter ou s'inscrire depuis la vitrine menait à cet accueil
+   supprimé — qui proposait même « J'ai déjà un compte » à un élève connecté.
+   On pose à la place un fond neutre ; quand plus rien n'est ouvert par-dessus,
+   l'anonyme repart sur la vitrine et le connecté sur SON espace. */
+function _vFondNeutre(){
+  var c = document.getElementById('vContent');
+  if(!c) return;
+  if(c.innerHTML.trim() === '' || c.querySelector('.acc-wrap'))
+    c.innerHTML = '<div id="vFondModale" class="vsec" style="min-height:70vh" aria-hidden="true"></div>';
+}
+function _vFondVide(){
+  var c = document.getElementById('vContent');
+  if(!c) return false;
+  return c.innerHTML.trim() === '' || !!c.querySelector('#vFondModale') || !!c.querySelector('.acc-wrap');
+}
+/* Connecté (élève, parent, enseignant inscrit) : s'il n'a rien de réel sous
+   les yeux, on lui ouvre son espace — jamais le fond neutre ni l'ancien accueil. */
+function _vEspaceSiFondVide(role){
+  try{
+    if(typeof SES === 'undefined' || !SES || !_vFondVide()) return;
+    if(SES.type !== 'visiteur_inscrit' && SES.type !== 'visiteur') return;   // admin/enseignant : #APP
+    if(typeof _espacePerso === 'function') _espacePerso(role || SES.role || 'eleve');
+  }catch(e){}
+}
+/* Appelée par cm(). Délai : les enchaînements « cm(); ouvrir autre chose »
+   rouvrent en ≤ 80 ms ; on ne juge qu'une fois la pile stabilisée. */
+function _vApresFermetureModale(){
+  setTimeout(function(){
+    try{
+      var mc = document.getElementById('MC');
+      if(mc && mc.innerHTML.trim() !== '') return;                       // une autre modale a pris la place
+      var vis = function(id){ var e = document.getElementById(id); return !!(e && getComputedStyle(e).display !== 'none'); };
+      if(vis('LS') || vis('APP') || !vis('VISITOR')) return;
+      if(!_vFondVide()) return;
+      if(typeof SES !== 'undefined' && SES){ _vEspaceSiFondVide(); return; }
+      _allerVitrine();
+    }catch(e){}
+  }, 400);
+}
+
+/* ═══ L'HABILLAGE DE LA VITRINE DANS L'APPLICATION (17/10/2026) ══════════
+   tools/habiller_pages.py pose dans #VISITOR la barre, le bandeau, le pied et
+   les bulles de la vitrine (mêmes blocs que sur les ~260 pages statiques).
+   Ces blocs parlent à assets/vitrine.js (VRT.act). Deux choses à raccorder :
+
+   1. LES BULLES. Leur Ambassa est le mini-chat de la vitrine (3 questions par
+      semaine) ; l'application a le TUTEUR COMPLET (mAgentAmbassa) — c'est lui
+      qu'on ouvre. Leur langue réécrit le « passage du jour » de la vitrine ;
+      ici elle doit traduire l'application (setLang). Leur thème écrit la même
+      clé que celui de l'application : on repeint ensuite l'application.
+   2. L'ÉTAT CONNECTÉ. La barre de la vitrine ne connaît que « Connexion ».
+      Connecté, le bouton devient « Mon espace » et une « Déconnexion » le
+      suit — l'ancienne barre de l'application (masquée) portait ces deux
+      gestes, il ne fallait pas les perdre en route. */
+function _vrtPontApp(){
+  try{
+    if(!window.VRT || typeof window.VRT.act !== 'function') return false;
+    if(window.VRT._pontApp) return true;
+    var orig = window.VRT.act;
+    window.VRT.act = function(nom, el, ev){
+      try{
+        if((nom === 'basculerIA' || nom === 'ouvrirIA') && typeof window.mAgentAmbassa === 'function'){
+          if(ev && ev.preventDefault) ev.preventDefault();
+          window.mAgentAmbassa();
+          return;
+        }
+        if((nom === 'mettreFr' || nom === 'mettreEn') && typeof window.setLang === 'function'){
+          if(ev && ev.preventDefault) ev.preventDefault();
+          window.setLang(nom === 'mettreEn' ? 'en' : 'fr');
+          var tp = document.getElementById('vrtTrad'); if(tp) tp.hidden = true;
+          if(window.VRT.etat) window.VRT.etat.trad = false;
+          return;
+        }
+        if(nom === 'basculerTheme'){
+          var r = orig.call(this, nom, el, ev);
+          if(typeof window.vrtThemeSync === 'function') window.vrtThemeSync();
+          return r;
+        }
+      }catch(e){}
+      return orig.call(this, nom, el, ev);
+    };
+    window.VRT._pontApp = true;
+    return true;
+  }catch(e){ return false; }
+}
+function _vrtNavEtat(){
+  try{
+    var co = (typeof SES !== 'undefined' && SES && (SES.type === 'visiteur_inscrit' || SES.type === 'visiteur'));
+    var liens = document.querySelectorAll('#vrtNav a[href$="#connexion"]');
+    for(var i = 0; i < liens.length; i++){
+      var a = liens[i], txt = null;
+      for(var k = a.childNodes.length - 1; k >= 0; k--){
+        if(a.childNodes[k].nodeType === 3 && a.childNodes[k].textContent.trim()){ txt = a.childNodes[k]; break; }
+      }
+      if(!a.getAttribute('data-vrt-lib')) a.setAttribute('data-vrt-lib', txt ? txt.textContent : 'Connexion');
+      if(txt) txt.textContent = co ? 'Mon espace' : a.getAttribute('data-vrt-lib');
+      a.onclick = co ? function(ev){
+        if(ev && ev.preventDefault) ev.preventDefault();
+        try{ if(typeof _navMenuFermer === 'function') _navMenuFermer(); }catch(e){}
+        var bg = document.getElementById('vrtBurger'); if(bg) bg.hidden = true;
+        if(typeof _espacePerso === 'function') _espacePerso(SES.role || 'eleve');
+        try{ document.getElementById('VISITOR').scrollTop = 0; }catch(e){}
+      } : null;
+    }
+    var d = document.getElementById('vrtNavDeco');
+    var cnx = document.querySelector('#vrtNav a.vh10');
+    if(co && !d && cnx){
+      d = document.createElement('button');
+      d.id = 'vrtNavDeco'; d.type = 'button';
+      d.textContent = 'Déconnexion';
+      d.setAttribute('style', 'background:none;border:0;cursor:pointer;padding:0 6px 0 12px;font:500 14px Poppins,sans-serif;color:#6E7385;white-space:nowrap');
+      d.onclick = function(){ if(typeof deconnecter === 'function') deconnecter(); };
+      cnx.parentNode.insertBefore(d, cnx.nextSibling);
+    }
+    if(!co && d) d.remove();
+    // Menu mobile : le lien bureau (.vrt-large) y est masqué — sans cette
+    // seconde entrée, un élève connecté sur téléphone ne pouvait plus se
+    // déconnecter. Même gabarit que « Mon espace », en version secondaire.
+    var dm = document.getElementById('vrtNavDecoMob');
+    var mob = document.querySelector('#vrtBurger a.vh8');
+    if(co && !dm && mob){
+      dm = document.createElement('button');
+      dm.id = 'vrtNavDecoMob'; dm.type = 'button';
+      dm.textContent = 'Déconnexion';
+      dm.setAttribute('style', 'margin-top:8px;display:flex;align-items:center;justify-content:center;width:100%;padding:12px;border-radius:10px;background:#fff;border:1px solid #E4E9F2;cursor:pointer;color:#001136;font:500 15px Poppins,sans-serif');
+      dm.onclick = function(){ if(typeof deconnecter === 'function') deconnecter(); };
+      mob.parentNode.insertBefore(dm, mob.nextSibling);
+    }
+    if(!co && dm) dm.remove();
+  }catch(e){}
+}
+(function(){
+  var essais = 0;
+  function brancher(){
+    _vrtNavEtat();
+    if(!_vrtPontApp() && essais++ < 40) setTimeout(brancher, 250);   // vitrine.js est différé
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', brancher);
+  else brancher();
+})();
 function showLogin(role){
   hideAll();
   $("LS").style.display="flex";
@@ -11376,7 +11542,7 @@ async function doLogin(){
         role:va2.role||'eleve', isTeacher:!!va2.isTeacher, isParent:!!va2.isParent, isPartner:!!va2.isPartner, childId:va2.childId||null});
       // v1.4.9 : compte au profil anglophone → interface intégralement en anglais au login
       try{ if(va2.profil&&va2.profil.sys==='en'&&typeof setLang==='function') setLang('en', true); }catch(e){}
-      hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);setTimeout(function(){try{if(typeof _welcomeBack==='function')_welcomeBack();}catch(e){}},1200);_studentSyncBg(u,p);
+      hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);setTimeout(function(){try{_vEspaceSiFondVide();}catch(e){}},650);setTimeout(function(){try{if(typeof _welcomeBack==='function')_welcomeBack();}catch(e){}},1200);_studentSyncBg(u,p);
       /* RATTRAPAGE des comptes nés avant api/compte.php — ils n'existent que
          dans ce navigateur. La connexion est le seul instant où l'on tient le
          mot de passe en clair, donc le seul où l'on peut prouver au serveur
@@ -11409,7 +11575,7 @@ async function doLogin(){
          compte et `mat` le login. Ici les deux valaient le login. */
       var _acId=_ac.id||_ac.user;
       _createSession({id:_acId,nom:_ac.nom||'',pre:_ac.pre||'',mat:_ac.user,cls:_ac.cls||'',type:'visiteur_inscrit',accountId:_acId,plans:_ac.plans||[]});
-      hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);
+      hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);setTimeout(function(){try{_vEspaceSiFondVide();}catch(e){}},650);
       return;
     }
   } else if(lr==="enseignant"){
@@ -11658,10 +11824,15 @@ function go2SES(acc){
     console.error("go2SES error:",err);
   }
 }
-function logout(){
-  SES=null;
+/* `rester` : _portailChanger enchaîne avec showLogin() sur la même page.
+   Sans lui, on sort vers la vitrine.
+   17/10/2026 — _destroySession() : SES=null seul laissait la session dans
+   sessionStorage, et le rechargement suivant RECONNECTAIT le compte. */
+function logout(rester){
+  try{ _destroySession(); }catch(e){ SES=null; }
   pg="dashboard";
-  goToVisitor();
+  if(rester){ goToVisitor(); return; }
+  _allerVitrine();
 }
 // ─── NAVIGATIONS PAR RÔLE ────────────────────────
 // ─── NAV ADMIN — Refonte v1.2 : 8 sections logiques, sans doublons ────────
@@ -12008,6 +12179,7 @@ function cm(){
   $("MC").innerHTML='';
   // v2 a11y : restituer le focus à l'élément qui a ouvert la modale (si possible)
   try { if(window._lastFocusedBeforeModal && document.contains(window._lastFocusedBeforeModal)) window._lastFocusedBeforeModal.focus(); } catch(e){}
+  try{ if(typeof _vApresFermetureModale==='function') _vApresFermetureModale(); }catch(e){}
 }
 function toast(msg,t='ok'){const d=document.createElement('div');const c={ok:['var(--gr)','✓'],warn:['var(--or)','⚠'],err:['var(--re)','✕'],info:['#3C8DFF','ℹ']}[t]||['var(--gr)','✓'];d.style.cssText=`position:fixed;bottom:20px;right:20px;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E6EAF2;color:#142554;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 10px 30px rgba(20,37,84,.16);max-width:360px;animation:su .24s cubic-bezier(.16,1,.3,1);`;d.innerHTML=`<span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${c[0]};color:#fff;font-size:13px;font-weight:800">${c[1]}</span><span>${(''+msg).replace(/</g,'&lt;')}</span>`;document.body.appendChild(d);setTimeout(()=>{d.style.transition='opacity .3s,transform .3s';d.style.opacity='0';d.style.transform='translateY(8px)';setTimeout(()=>d.remove(),300);},3500);}
 // Toast enrichi avec bouton d'action — utilisé quand cloud KO et fichiers locaux en attente
@@ -26777,7 +26949,7 @@ function _buildRegisterHTML(role){
     +"</p>"
     +"<button class='btn bi' style='width:100%;margin-top:14px;font-size:14px;padding:13px;font-family:Montserrat,sans-serif' onclick='doRegister()'><svg class='vico bico' aria-hidden='true'><use href='#lc-sparkles'/></svg>"+H.btn+"</button>"
     +"<div style='text-align:center;margin-top:14px;font-size:12px;color:#9CA3AF'>Déjà un compte ? "
-    +"<button onclick=\"hideAll();$('LS').style.display='flex';swLR('visiteur')\" style='background:none;border:none;color:#3C8DFF;font-weight:700;cursor:pointer;font-size:12px'>Se connecter</button></div>"
+    +"<button onclick=\"hideAll();$('LS').style.display='flex';swLR('eleve')\" style='background:none;border:none;color:#3C8DFF;font-weight:700;cursor:pointer;font-size:12px'>Se connecter</button></div>"
     +"</div>";
 }
 
@@ -27072,6 +27244,7 @@ async function doRegister(){
   setTimeout(function(){ try{ if((acc.role==='parent'||acc.role==='enseignant'||acc.isPartner) && typeof _espacePerso==='function') _espacePerso(acc.role); }catch(e){} },450);
   if(acc.role==='auteur'){
     toast("Bienvenue "+pre+" ✍️ Compte auteur créé — soumettez votre 1re ressource !");
+  setTimeout(function(){try{_vEspaceSiFondVide();}catch(e){}},650);   // élève : son espace, pas l'ancien accueil (17/10/2026)
     setTimeout(function(){ if(typeof mMarketplaceSubmit==='function') mMarketplaceSubmit(); },500);
   } else if(acc.isPartner){
     toast("Bienvenue "+pre+" 🤝 Compte partenaire créé — notre équipe vous recontacte vite !");
@@ -27105,6 +27278,7 @@ function _updateVisitorHeader(){
   var bar=document.getElementById("vLoginBtns");
   if(!bar||!SES)return;
   var acc=(DB.visitorAccounts||[]).find(function(a){return a.id===SES.accountId;});
+  try{ if(typeof _vrtNavEtat==='function') _vrtNavEtat(); }catch(e){}   // barre de la vitrine : « Mon espace »
   var plans=acc?acc.plans||[]:SES.plans||[];
   var badge=plans.length
     ?"<span style='background:#FFC93C;color:#0F172A;font-size:9px;font-weight:900;padding:2px 9px;border-radius:8px;margin-left:5px'>"+plans.map(function(p){return p.toUpperCase();}).join(" · ")+"</span>"
@@ -27226,7 +27400,8 @@ window._sendRapportParent=function(){
 };
 
 function deconnecter(){
-  SES=null;
+  // 17/10/2026 — purge AUSSI sessionStorage (sinon reconnexion au rechargement).
+  try{ _destroySession(); }catch(e){ SES=null; }
   if(_autoSyncTimer){clearTimeout(_autoSyncTimer);_autoSyncTimer=null;}
   _autoSyncDirty=false;
   hideAll();$("VISITOR").style.display="flex";
@@ -27236,7 +27411,9 @@ function deconnecter(){
     +' <button class="btn sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2)" onclick="showLogin(\'enseignant\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-users"/></svg>\u200d🏫 Enseignant</button>'
     +'<span id="vSyncDot" onclick="iA()&&mSyncMenu()" title="Synchronisation cloud" style="display:none;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;cursor:pointer;color:#142554;flex-shrink:0;transition:background .4s"></span>'
     +'<span id="adminAccessPoint" aria-hidden="true" style="display:inline-block;width:44px;height:44px;cursor:default;opacity:0;vertical-align:middle" onclick="_adminTriple()" title=""></span>';
-  initVisitor();toast("Déconnecté");
+  toast("Déconnecté");
+  // Hors de l'espace perso qu'on vient de quitter : vitrine (repli : portail).
+  _allerVitrine();
 }
 
 // ── ADMIN: GESTION COMPTES VISITEURS ─────────────────────────────
@@ -46540,7 +46717,12 @@ function _cagCreer(eleveId){
       if(codeLien && typeof _codeAmiRetenir === 'function') _codeAmiRetenir(codeLien);
       if(window._vCurrentSec === 'abonnement:' + pid) return;
       window._vCurrentSec = 'abonnement:' + pid;
-      try{ window.vShowSec('elearning', null); }catch(e){}
+      /* 17/10/2026 — PAS vShowSec('elearning') : pour un anonyme sur
+         /app.html, « elearning » est renvoyé vers /#elearning AVANT que la
+         formule s'ouvre. Les 8 boutons « Choisir » de la vitrine ramenaient
+         ainsi au catalogue sans jamais ouvrir le paiement (mesuré en prod).
+         Fond neutre sous la modale ; la fermer ramène à la vitrine. */
+      try{ if(typeof _vFondNeutre === 'function') _vFondNeutre(); }catch(e){}
       if(pid && typeof _ouvrirAbonnementAncre === 'function') setTimeout(function(){ _ouvrirAbonnementAncre(pid); }, 300);
       return;
     }
@@ -46580,8 +46762,11 @@ function _cagCreer(eleveId){
       if(_MODALE_FN[sec]){
         try{
           var _vcBg = document.getElementById('vContent');
-          if(_vcBg && _vcBg.innerHTML.trim() === '' && typeof window.vShowSec === 'function'){
-            window.vShowSec('presentation', null, true);
+          /* 17/10/2026 — fond NEUTRE, plus l'ancien accueil : la fermeture
+             renvoie à la vitrine (ou à l'espace du connecté), voir
+             _vApresFermetureModale. */
+          if(_vcBg && _vcBg.innerHTML.trim() === '' && typeof _vFondNeutre === 'function'){
+            _vFondNeutre();
           }
         }catch(e){}
       }
@@ -47457,7 +47642,7 @@ window._portailAller = function(role){
 
 window._portailChanger = function(role){
   try{
-    if(typeof logout==='function'){ logout(); }
+    if(typeof logout==='function'){ logout(true); }
     else { try{ sessionStorage.removeItem('VERITAS_SES'); }catch(e){} }
   }catch(e){}
   setTimeout(function(){
@@ -48798,7 +48983,9 @@ function _formulesComparatif(){
         return '<td>' + (f.an ? '<b>' + fmtN(f.an.prix) + ' F</b>' + (_formuleEcoTxt(f.mois, f.an) ? '<div class="vfo-cmp-eco">' + _esc(_formuleEcoTxt(f.mois, f.an)) + '</div>' : '') : '—') + '</td>';
       }).join('') + '</tr>'
     + '<tr><th scope="row"></th>' + gs.map(function(f){
-        return '<td><button type="button" class="vfo-cta2" onclick="_ouvrirAbonnementAncre(\'' + _esc(f.mois.id) + '\')">Choisir</button></td>';
+        // Le bouton prend la couleur du panneau de sa formule (vitrine).
+        var tc = { starter:'#0E7C86', pro:'#1E499B', elite:'#5B4FA8', famille:'#A84200' }[f.groupe] || '#1E499B';
+        return '<td><button type="button" class="vfo-cta2 vfo-ligne-t" style="--vt:' + tc + '" onclick="_ouvrirAbonnementAncre(\'' + _esc(f.mois.id) + '\')">Choisir</button></td>';
       }).join('') + '</tr>'
     + '</tbody></table></div>';
   return h;
@@ -48936,10 +49123,19 @@ function _autresOffres(){
   plans = plans.filter(function(p){ return !retires[p.id] || p.enVente === true; });
   if(!plans.length) return '';
   var PUB = { enseignant:'Enseignants', parent:'Parents', etablissement:'Établissements', eleve:'Élèves' };
-  return '<div class="vfo-autres">' + plans.map(function(p){
+  /* 17/10/2026 — « alterne les couleurs » (Jacques) : chaque ligne prend une
+     teinte de la vitrine, dans l'ordre des pages statiques, et le médaillon
+     de son public. Neuf boutons bleus identiques empilés ne se lisaient
+     plus comme des offres différentes. */
+  var TEINTES = [['#DBE8FE','#1E499B'],['#E3F1EE','#0E7C86'],['#E7F7EC','#007E11'],
+                 ['#EEE9F8','#5B4FA8'],['#FBE9F1','#B03A6E'],['#FFF3E4','#A84200']];
+  var ICO = { enseignant:'lc-presentation', parent:'lc-users', etablissement:'lc-building', eleve:'lc-graduation' };
+  return '<div class="vfo-autres">' + plans.map(function(p, i){
     var devis = !!p.surDevis || !(Number(p.prix) > 0);
     var nom = String(p.nom || '').replace(/[\'"\\]/g, '');
-    return '<div class="vfo-ligne">'
+    var t = TEINTES[i % TEINTES.length];
+    return '<div class="vfo-ligne vfo-ligne-t" style="--vt:' + t[1] + ';--vf:' + t[0] + '">'
+      + '<span class="vfo-ligne-med" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#' + (ICO[p.public] || 'lc-star') + '"/></svg></span>'
       + '<div class="vfo-ligne-tx"><span class="vfo-ligne-pub">' + _esc(PUB[p.public] || p.cible || '') + '</span>'
       +   '<span class="vfo-ligne-nom">' + _esc(p.nom || '') + '</span></div>'
       + '<div class="vfo-ligne-prix">' + (devis ? 'Sur devis' : fmt(Number(p.prix)) + ' <small>' + _esc(_planUnite(p)) + '</small>') + '</div>'
@@ -49038,6 +49234,26 @@ function pgTarifs(){
     +'<div class="vfaq-wrap"><div class="vfaq-t">Les questions qu\'on nous pose</div>'+faq+'</div>'
 
     +'<div class="vabo-fin">'
+  /* 17/10/2026 — LES PANNEAUX DE LA VITRINE (« mets les mêmes panneaux que
+     sur la vitrine », Jacques). tools/habiller_pages.py recopie la grille des
+     formules de vitrine.html dans <template id="vrtFormulesVitrine"> ; on
+     l'affiche telle quelle (.vrt-hab : les feuilles de l'application ne la
+     touchent pas), on y pose les prix du serveur et on garde le Code ami.
+     Sans gabarit (coquille non habillée), l'ancien dessin ci-dessous sert
+     de repli. */
+  var tplF = document.getElementById('vrtFormulesVitrine');
+  if(tplF){
+    var ami = (opts.codeAmi !== false)
+      ? '<div class="vfo"><div class="vfo-ami">'
+        +   '<span class="vfo-ami-ic" aria-hidden="true">🎁</span>'
+        +   '<span class="vfo-ami-tx"><b>Code ami</b> — le code d’un ami vous fait payer <b>' + remise + ' % de moins</b> sur vos abonnements et achats, sans limite de durée. '
+        +   'Partagez le vôtre : <b>' + comm + ' %</b> de ce que paient vos amis vous revient, sur votre Mobile Money.</span>'
+        +   '<button type="button" class="vfo-ami-btn" onclick="mParrainage()">Mon code ami</button>'
+        + '</div></div>'
+      : '';
+    setTimeout(_vrtFormulesPrix, 0);
+    return ami + '<div class="vrt-hab vrt-formules">' + tplF.innerHTML + '</div>';
+  }
       +'<div class="vabo-fin-t">Une question avant de vous décider ?</div>'
       +'<div class="vabo-fin-d">Un enseignant du centre répond sur WhatsApp, jours ouvrés. Poser la question ne vous engage à rien.</div>'
       +'<button class="btn bi" onclick="(typeof _vtWaOpen===\'function\')?_vtWaOpen(\'tarifs\'):vShowSec(\'contact\',null)">'+_ico('message',15)+' Écrire au centre</button>'
@@ -49106,6 +49322,55 @@ function _aboPrixPhrase(){
   var prix = Number(p.prix);
   var annuel = /an|année|scolaire/i.test(String(p.duree||''));
   var out = '<b>' + fmt(prix) + '</b>';
+/* Les prix des panneaux de la vitrine : ceux que l'administration règle et
+   que le paiement exigera — même logique que poserFormules() dans
+   assets/vitrine.js. Une formule retirée de la vente disparaît ; les boutons
+   visent l'identifiant RÉEL du plan, pas celui écrit dans la maquette. */
+function _vrtFormulesPrix(){
+  try{
+    var gs = _formulesPlans(), par = {};
+    gs.forEach(function(f){ par[f.groupe] = f; });
+    var fmtP = function(n){ return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); };
+    var poser = function(racine, champ, texte){
+      racine.querySelectorAll('[data-vrt-f="' + champ + '"]').forEach(function(el){
+        el.textContent = texte + (/\sF$/.test(el.textContent) ? ' F' : '');
+      });
+    };
+    document.querySelectorAll('.vrt-formules [data-vrt-formule]').forEach(function(carte){
+      var f = par[carte.getAttribute('data-vrt-formule')];
+      if(!f || !f.mois){ carte.style.display = 'none'; return; }
+      carte.style.display = '';
+      poser(carte, 'mois', fmtP(f.mois.prix));
+      var cm = carte.querySelector('[data-vrt-cta="mois"]');
+      if(cm) cm.setAttribute('data-vrt-plan', f.mois.id);
+      var boite = carte.querySelector('[data-vrt-an]'), ca = carte.querySelector('[data-vrt-cta="an"]');
+      if(f.an){
+        var e = (typeof _formuleEcoTxt === 'function') ? _formuleEcoTxt(f.mois, f.an) : '';
+        poser(carte, 'an', fmtP(f.an.prix));
+        carte.querySelectorAll('[data-vrt-f="ancien"],[data-vrt-f="eco"]').forEach(function(x){ x.style.display = e ? '' : 'none'; });
+        if(e){ poser(carte, 'ancien', fmtP(f.an.ancien)); poser(carte, 'eco', e); }
+        if(boite) boite.style.display = '';
+        if(ca){ ca.style.display = ''; ca.setAttribute('data-vrt-plan', f.an.id); }
+      } else {
+        if(boite) boite.style.display = 'none';
+        if(ca) ca.style.display = 'none';
+      }
+    });
+  }catch(e){}
+}
+window._vrtFormulesPrix = _vrtFormulesPrix;
+/* Un clic sur « Choisir … » ouvre le paiement SUR PLACE. Le lien d'origine
+   (/app.html#abonnement?plan=…) ne déclencherait rien au second clic : même
+   ancre, aucun hashchange. */
+document.addEventListener('click', function(ev){
+  var a = ev.target && ev.target.closest && ev.target.closest('.vrt-formules a[data-vrt-cta]');
+  if(!a) return;
+  var id = a.getAttribute('data-vrt-plan') || ((a.getAttribute('href') || '').match(/plan=([\w-]+)/) || [])[1];
+  if(!id || typeof _ouvrirAbonnementAncre !== 'function') return;
+  ev.preventDefault();
+  _ouvrirAbonnementAncre(id);
+});
+
   if(annuel && prix >= 1000){
     var mois = Math.round(prix / 10 / 50) * 50;   // 10 mois d'année scolaire
     out += ' pour l\'année — soit <b>' + fmt(mois) + ' par mois</b> sur les '
@@ -49858,7 +50123,7 @@ function _demMerci(type, ref, d){
     +   '<div style="font-size:11.5px;color:#7B8AA6;margin-top:6px">Citez-la si vous appelez : elle retrouve votre dossier en une seconde.</div>'
     + '</div>'
     + '<button class="btn bi" onclick="_demWaSuivi(\'' + _esc(ref) + '\')">' + ICO('i-message', 'i bico') + 'Prévenir sur WhatsApp</button> '
-    + '<button class="btn bo" onclick="vShowSec(\'presentation\',null)">Retour à l\'accueil</button>'
+    + '<button class="btn bo" onclick="_allerVitrine(true)">Retour à l\'accueil</button>'
     + '</div>';
   if(typeof _vc === 'function') _vc(h);
   else if(typeof _si === 'function') _si('vContent', h);
