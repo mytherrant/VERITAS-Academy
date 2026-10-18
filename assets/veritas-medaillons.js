@@ -233,7 +233,109 @@
     }
   }
 
+  /* ── LISIBILITÉ (18/10/2026) ───────────────────────────────────────────
+     Le remappage des couleurs de veritas-pages.css repeint les titres et les
+     liens en bleu nuit — sans voir qu'ils sont parfois posés sur un fond
+     bleu nuit. Mesuré : le <h1> de /cours/… en #0C2A6A sur un en-tête
+     #0C2A6A, les chiffres du bandeau sombre de /outils/calcul-moyenne en
+     #16233F, le bouton « Voir les abonnements » de /parcours/ en #001136 sur
+     #1E499B. Même correcteur que dans l'application (theme-lws.js) : fond
+     réel, dégradés compris ; sous 4,5:1 (3:1 pour un grand texte), blanc sur
+     fond sombre, la MÊME teinte foncée sur fond clair. */
+  function rgbA(c) {
+    var m = String(c || '').match(/[\d.]+/g);
+    return m && m.length >= 3 ? [+m[0], +m[1], +m[2], m.length > 3 ? +m[3] : 1] : null;
+  }
+  function lumW(c) {
+    var v = c.slice(0, 3).map(function (x) { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); });
+    return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
+  }
+  function rapport(a, b) {
+    var x = lumW(a), y = lumW(b);
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  }
+  function fondDe(el) {
+    var couches = [];
+    for (var n = el; n && n.nodeType === 1; n = n.parentElement) {
+      var s = getComputedStyle(n);
+      if (/gradient\(/.test(s.backgroundImage)) {
+        var g = s.backgroundImage.match(/rgba?\([^)]*\)/);
+        var gc = g && rgbA(g[0]);
+        if (gc && gc[3] > 0) { couches.push(gc); if (gc[3] >= 1) break; }
+      }
+      var b = rgbA(s.backgroundColor);
+      if (b && b[3] > 0) { couches.push(b); if (b[3] >= 1) break; }
+    }
+    var base = [255, 255, 255];
+    if (couches.length && couches[couches.length - 1][3] >= 1) base = couches.pop().slice(0, 3);
+    for (var i = couches.length - 1; i >= 0; i--) {
+      var a = couches[i][3];
+      base = base.map(function (x, k) { return couches[i][k] * a + x * (1 - a); });
+    }
+    return base;
+  }
+  function lisibilite() {
+    var tous = document.querySelectorAll('body *');
+    for (var i = 0; i < tous.length; i++) {
+      var el = tous[i];
+      if (!el.offsetWidth || el.closest('.vrt-hab,script,style,svg')) continue;
+      var texte = false;
+      for (var c = 0; c < el.childNodes.length; c++) {
+        if (el.childNodes[c].nodeType === 3 && el.childNodes[c].textContent.trim().length > 1) { texte = true; break; }
+      }
+      if (!texte) continue;
+      var s = getComputedStyle(el);
+      if (s.visibility === 'hidden' || +s.opacity < 0.2) continue;
+      // Titre en dégradé détouré : l'encre est le dégradé, pas `color`.
+      if (/transparent|rgba\(0, 0, 0, 0\)/.test(s.webkitTextFillColor || '')) continue;
+      var f = fondDe(el), t = rgbA(s.color);
+      if (!t) continue;
+      var c2 = [0, 1, 2].map(function (k) { return t[k] * t[3] + f[k] * (1 - t[3]); });
+      var taille = parseFloat(s.fontSize) || 16;
+      var seuil = (taille >= 24 || (taille >= 18.6 && (+s.fontWeight || 400) >= 700)) ? 3 : 4.5;
+      if (rapport(c2, f) >= seuil) continue;
+      if (lumW(f) < 0.18) { el.style.setProperty('color', '#fff', 'important'); continue; }
+      for (var n = 0; n < 24 && rapport(c2, f) < seuil; n++) c2 = c2.map(function (x) { return x * 0.9; });
+      el.style.setProperty('color', 'rgb(' + c2.map(Math.round).join(',') + ')', 'important');
+    }
+  }
+
+  // Les encadrés de la vitrine n'ont aucun filet d'accent : un trait coloré à
+  // gauche ou en haut (« .intro », « .resume », « .plan », cartes à bandeau…)
+  // reprend le bord opposé. Les styles vivent dans chaque page : une règle de
+  // feuille ne pourrait pas tous les nommer. Un rond animé (chargement) garde
+  // son bord, c'est son dessin.
+  function filets() {
+    var tous = document.querySelectorAll('body *');
+    for (var i = 0; i < tous.length; i++) {
+      var el = tous[i];
+      if (!el.offsetWidth || el.closest('.vrt-hab,svg') || /^(INPUT|SELECT|TEXTAREA|HR|BUTTON)$/.test(el.tagName)) continue;
+      var s = getComputedStyle(el);
+      if (s.animationName !== 'none' || /50%/.test(s.borderRadius)) continue;
+      [['Left', 'Right'], ['Top', 'Bottom']].forEach(function (c) {
+        var w = parseFloat(s['border' + c[0] + 'Width']);
+        if (!(w >= 2) || s['border' + c[0] + 'Style'] === 'none') return;
+        var w2 = parseFloat(s['border' + c[1] + 'Width']) || 0;
+        if (w2 >= w && s['border' + c[1] + 'Color'] === s['border' + c[0] + 'Color']) return;
+        var cote = 'border-' + c[0].toLowerCase();
+        if (!w2 || s['border' + c[1] + 'Style'] === 'none') {
+          el.style.setProperty(cote, '0', 'important');
+        } else {
+          el.style.setProperty(cote, w2 + 'px ' + s['border' + c[1] + 'Style'] + ' ' + s['border' + c[1] + 'Color'], 'important');
+        }
+      });
+    }
+  }
+
+  function demarrer() {
+    poser();
+    try { filets(); } catch (e) {}
+    try { lisibilite(); } catch (e) {}
+    // Les pages qui complètent leur contenu après coup (recherche, filtres).
+    setTimeout(function () { try { filets(); lisibilite(); } catch (e) {} }, 1500);
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', poser);
-  } else { poser(); }
+    document.addEventListener('DOMContentLoaded', demarrer);
+  } else { demarrer(); }
 })();
