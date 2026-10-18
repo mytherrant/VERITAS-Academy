@@ -387,10 +387,14 @@
       var c = meds[m].parentElement;
       // Une ligne (icône à gauche, libellé et valeur à droite) : contact,
       // avantages… Le médaillon se pose À CÔTÉ du texte, jamais au milieu.
-      if (c && meds[m] === c.firstElementChild && c.children.length >= 2 && (c.tagName === 'LI' || !estCarte(c))) {
+      // Un titre de rubrique (« Vos avantages ») porte son texte en nœud nu : il compte.
+      var aCote = c ? (c.textContent || '').trim().length : 0;
+      if (c && meds[m] === c.firstElementChild && (c.children.length >= 2 || (aCote > 0 && aCote <= 60)) && (c.tagName === 'LI' || !estCarte(c))) {
         var dc = getComputedStyle(c);
         if (c.tagName === 'LI' || (dc.display.indexOf('flex') >= 0 && dc.flexDirection.indexOf('row') === 0)) {
           c.classList.add('vm-ligne');
+          // Titre de rubrique (icône + texte court, sans autre élément) : l'anneau, en petit.
+          if (c.children.length === 1 && c.tagName !== 'LI') meds[m].classList.add('vm-anneau');
           c.setAttribute('data-vm', teinte);
           continue;
         }
@@ -408,6 +412,13 @@
         if (estCarte(c)) {
           c.classList.add('vm-carte');
           if (c.tagName === 'A' || c.hasAttribute('onclick') || c.getAttribute('role') === 'button') c.classList.add('vm-clic');
+        } else {
+          /* 18/10/2026 — HORS carte, la vitrine n'emploie pas le rond pâle
+             mais l'ANNEAU : 66 px, fond blanc, cercle de 3 px dans la teinte,
+             icône bleu nuit (« Le programme officiel, pas un cours
+             importé »). Sur l'application, tout était en rond pâle : un seul
+             registre, d'où l'impression de monotonie. */
+          meds[m].classList.add('vm-anneau');
         }
       }
     }
@@ -497,15 +508,18 @@
 
     /* 2. PUCES — le disque coché de la teinte du bloc. */
     var lis = zone.querySelectorAll('li');
+    var rangListe = 0, vues = [];
     for (var l = 0; l < lis.length; l++) {
       var li = lis[l];
       if (li.classList.contains('vm-li') || li.closest(HORS_CONTENU) || li.querySelector('.vm-med,button,input,select,a.btn')) continue;
       var ul = li.parentElement;
-      if (!ul || ul.tagName === 'OL') continue;
+      if (!ul) continue;
+      var ordonnee = ul.tagName === 'OL';
       var premier = li.firstChild;
       while (premier && premier.nodeType === 3 && !premier.textContent.trim()) premier = premier.nextSibling;
       var marque = false;
-      if (estIcone(premier)) { premier.remove(); marque = true; }
+      if (ordonnee) marque = true;
+      else if (estIcone(premier)) { premier.remove(); marque = true; }
       else if (premier && premier.nodeType === 3 && PUCE_TEXTE.test(premier.textContent)) {
         premier.textContent = premier.textContent.replace(PUCE_TEXTE, ''); marque = true;
       } else if (getComputedStyle(ul).listStyleType !== 'none') marque = true;
@@ -519,7 +533,22 @@
       var corps = document.createElement('span');
       corps.className = 'vm-li-tx';
       while (li.firstChild) corps.appendChild(li.firstChild);
-      li.appendChild(puce()); li.appendChild(corps);
+      /* Une liste hors de tout bloc teinté prend SA teinte (rotation de la
+         vitrine) : dix listes à puces toutes bleues se lisaient comme une
+         seule. Une liste numérotée colore chaque numéro (1 bleu, 2
+         sarcelle…), comme les étapes de la vitrine. */
+      if (vues.indexOf(ul) < 0) {
+        vues.push(ul);
+        if (!ul.closest('[data-vm]')) ul.setAttribute('data-vm', TEINTES[rangListe++ % TEINTES.length]);
+      }
+      var marqueur = puce();
+      if (ordonnee) {
+        var rang = [].indexOf.call(ul.children, li) + (parseInt(ul.getAttribute('start'), 10) || 1);
+        marqueur.className = 'vm-puce vm-puce-n';
+        marqueur.textContent = String(rang);
+        marqueur.setAttribute('data-vm', TEINTES[(rang - 1) % TEINTES.length]);
+      }
+      li.appendChild(marqueur); li.appendChild(corps);
       li.classList.add('vm-li');
       ul.classList.add('vm-ul');
     }

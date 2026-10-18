@@ -4856,3 +4856,24 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
   font-family:Poppins, sans-serif !important; font-weight:600 !important;
   display:inline-flex !important; align-items:center !important; justify-content:center !important;
 }
+
+/* 18/10/2026 — ANNEAU de la vitrine (médaillon hors carte) et listes
+   numérotées en couleur. Valeurs relevées sur vitrine.html. */
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-med.vm-anneau{
+  width:66px !important; height:66px !important; min-width:66px !important;
+  background:#fff !important; border:3px solid var(--vm-trait,#1E499B) !important;
+  color:#001136 !important;
+}
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-med.vm-anneau svg{
+  width:31px !important; height:31px !important; stroke-width:1.6 !important;
+}
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-ligne > .vm-med.vm-anneau{
+  width:42px !important; height:42px !important; min-width:42px !important; border-width:2px !important;
+}
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-ligne > .vm-med.vm-anneau svg{ width:20px !important; height:20px !important; }
+:is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-puce.vm-puce-n{
+  color:#fff !important; font:600 12px/1 Poppins, sans-serif !important;
+}
+:root[data-theme="dark"] :is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-med.vm-anneau{
+  background:transparent !important; color:#F2F5FC !important;
+}

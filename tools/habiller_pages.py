@@ -358,6 +358,31 @@ nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!impor
 :root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) :is(a.dl,.dl){background:transparent;border-color:#24345F}
 :root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) > :is(h3,h2,h4,strong){color:#F2F5FC}
 :root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) a:not(.vrt-hab a){color:#9CC0FF}
+
+/* ════════════════════════════════════════════════════════════════════════
+   PUCES ET NUMÉROS — ceux de la vitrine (18/10/2026)
+   ════════════════════════════════════════════════════════════════════════
+   « Applique la même chose partout » (Jacques). Les pages statiques avaient
+   une pastille de 7 px cerclée d'un halo, et des numéros qui ne tournaient
+   que sur trois teintes. La vitrine coche ses listes d'un DISQUE PLEIN de
+   22 px (coche blanche) et fait tourner six teintes. Une liste d'encadré
+   garde la teinte de son encadré. */
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ul:not([class]) > li{padding-left:32px}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ul:not([class]) > li::before{
+  width:22px!important;height:22px!important;left:0!important;top:.12em!important;
+  background:var(--vl,#1E499B) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/13px 13px no-repeat!important;
+  box-shadow:none!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .retenir-box ul:not([class]) > li::before{--vl:#007E11}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .obj-box ul:not([class]) > li::before{--vl:#0E7C86}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .corpus-box ul:not([class]) > li::before{--vl:#5B4FA8}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.upsell,.vabo-inline) ul:not([class]) > li::before{--vl:#A84200}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li::before{
+  background-color:#1E499B!important;font-weight:600!important;box-shadow:none!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li:nth-child(6n+2)::before{background-color:#0E7C86!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li:nth-child(6n+3)::before{background-color:#007E11!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li:nth-child(6n+4)::before{background-color:#5B4FA8!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li:nth-child(6n+5)::before{background-color:#B03A6E!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li:nth-child(6n+6)::before{background-color:#A84200!important}
 """
 
 
