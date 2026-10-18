@@ -101,12 +101,15 @@ if (!function_exists('vrt_skysms_base')) {
 
     /**
      * GET vers SkySMS. Ne lève jamais.
-     * @return array{0:int,1:string,2:string} [http, corps, erreur curl]
+     * @return array{0:int,1:string,2:string,3:bool} [http, corps, erreur curl, requête partie]
+     *   « requête partie » = la connexion (TLS compris) a abouti et la requête
+     *   a été envoyée. Faux = SkySMS n'a JAMAIS reçu la demande (DNS, pare-feu
+     *   de l'hébergeur, certificat, délai de connexion).
      */
     function vrt_skysms_get(string $chemin, array $params, int $timeout): array {
-        if (!function_exists('curl_init')) return [0, '', 'curl absent sur ce serveur'];
+        if (!function_exists('curl_init')) return [0, '', 'curl absent sur ce serveur', false];
         $ch = curl_init(vrt_skysms_base() . $chemin . '?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986));
-        if ($ch === false) return [0, '', 'url invalide'];
+        if ($ch === false) return [0, '', 'url invalide', false];
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER     => ['Accept: application/json'],
@@ -119,9 +122,10 @@ if (!function_exists('vrt_skysms_base')) {
         $rep  = curl_exec($ch);
         $http = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $err  = curl_error($ch);
+        $partie = (float) curl_getinfo($ch, CURLINFO_PRETRANSFER_TIME) > 0;
         curl_close($ch);
-        if ($rep === false) return [0, '', $err !== '' ? $err : 'aucune réponse'];
-        return [$http, (string) $rep, ''];
+        if ($rep === false) return [0, '', $err !== '' ? $err : 'aucune réponse', $partie];
+        return [$http, (string) $rep, '', true];
     }
 
     /**
@@ -136,25 +140,39 @@ if (!function_exists('vrt_skysms_base')) {
         if ($local === '') return ['ok' => false, 'attente' => false, 'http' => 0, 'data' => [], 'msg' => 'Numéro invalide (6XXXXXXXX).'];
         $timeout = defined('SKYSMS_TIMEOUT') ? max(10, (int) SKYSMS_TIMEOUT) : 75;
         if (function_exists('set_time_limit')) @set_time_limit($timeout + 30);
-        [$http, $rep, $err] = vrt_skysms_get('/collecte_momo/v2/output=json', [
+        [$http, $rep, $err, $partie] = vrt_skysms_get('/collecte_momo/v2/output=json', [
             'uid' => vrt_skysms_const('SKYSMS_UID'), 'amount' => $montant,
             'phone' => $local, 'id_client' => $idClient,
         ], $timeout);
         if ($http === 0) {
+            /* SkySMS injoignable : la demande n'est JAMAIS partie. Avant, ce cas
+               était confondu avec l'attente ci-dessous et la page disait
+               « regardez votre téléphone » pour une demande qui n'existait pas. */
+            if (!$partie) {
+                return ['ok' => false, 'attente' => false, 'http' => 0, 'data' => [],
+                        'msg' => 'SkySMS injoignable depuis le serveur (' . substr($err, 0, 120) . ').'];
+            }
             // Mesuré : SkySMS garde la connexion ouverte pendant que le payeur
-            // valide, puis la coupe. Une coupure n'est donc PAS un refus.
+            // valide, puis la coupe. Une coupure APRÈS l'envoi n'est donc PAS un refus.
             return ['ok' => true, 'attente' => true, 'http' => 0, 'data' => [],
                     'msg' => 'Pas de réponse immédiate de SkySMS (' . substr($err, 0, 120) . ').'];
         }
         $d = json_decode($rep, true);
-        if (!is_array($d)) $d = ['brut' => substr($rep, 0, 300)];
+        if (!is_array($d)) {
+            // Page HTML, corps vide… : rien ne dit que la demande est enregistrée.
+            return ['ok' => false, 'attente' => false, 'http' => $http, 'data' => ['brut' => substr($rep, 0, 300)],
+                    'msg' => 'Réponse illisible de SkySMS (HTTP ' . $http . ').'];
+        }
         if ($http >= 400) {
             return ['ok' => false, 'attente' => false, 'http' => $http, 'data' => $d,
                     'msg' => (string) ($d['detail'] ?? $d['description'] ?? $d['message'] ?? ('HTTP ' . $http))];
         }
         $statut = strtolower(trim((string) ($d['statut'] ?? '')));
         $desc   = (string) ($d['description'] ?? '');
-        $refus  = ($statut !== '' && $statut[0] === '-')
+        /* « 1 » est le SEUL statut d'une demande enregistrée (mesuré le
+           15/10/2026). « 0 » (échec, d'après la table de SKYSOFT) passait pour
+           un succès : la demande était refusée, la page attendait en vain. */
+        $refus  = ($statut !== '' && $statut !== '1')
                || preg_match('/(echec|échec|erreur|invalide|insuffisant|refus|inexistant|inactif|expir|non autoris)/iu', $desc);
         return ['ok' => !$refus, 'attente' => false, 'http' => $http, 'data' => $d,
                 'msg' => $desc !== '' ? $desc : ($refus ? 'Demande refusée par SkySMS.' : 'Demande transmise.')];
@@ -326,7 +344,8 @@ if (!function_exists('vrt_skysms_base')) {
         $masque  = vrt_skysms_tel_masque($tel);
         $cfg = json_encode(['ref' => $ref, 'api' => $api, 'masque' => $masque, 't' => (string) ($state['jeton'] ?? ''),
                             'retour' => (string) ($state['retour'] ?? ''),
-                            'auto' => ($tel !== '' && empty($state['push_count']))],
+                            'auto' => ($tel !== '' && empty($state['push_count'])),
+                            'deja' => !empty($state['push_count'])],
                            JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
         return '<!doctype html><html lang="fr"><head><meta charset="utf-8">'
 . '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">'
@@ -375,9 +394,11 @@ if (!function_exists('vrt_skysms_base')) {
 . '.then(function(r){return r.json().then(function(j){return{s:r.status,j:j};});}).then(function(x){if(fini)return;'
 . 'if(x.j&&x.j.status==="paid"){sonder();return;}'
 . 'if(x.s>=400){b.disabled=false;dire("ko",(x.j&&x.j.error)||"La demande n’a pas pu être envoyée. Réessayez.");}'
-. 'else{setTimeout(function(){if(!fini)b.disabled=false;},30000);}'
+. 'else{if(x.j&&x.j.message&&!x.j.deja)dire("info",x.j.message);setTimeout(function(){if(!fini)b.disabled=false;},30000);}'
 . '}).catch(function(){setTimeout(function(){if(!fini)b.disabled=false;},30000);});}'
 . 'f.addEventListener("submit",function(ev){ev.preventDefault();pousser(false);});'
-. 'suivre();if(C.auto)pousser(true);})();</script></body></html>';
+/* Page rouverte après une demande : sans ce mot, rien ne disait qu'une
+   demande était déjà partie ni quoi faire si elle n'est jamais arrivée. */
+. 'suivre();if(C.auto)pousser(true);else if(C.deja&&!fini)dire("info","Une demande a déjà été envoyée sur votre téléphone. Rien reçu ? Appuyez sur « Recevoir la demande de paiement » pour la renvoyer.");})();</script></body></html>';
     }
 }
