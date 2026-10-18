@@ -97,6 +97,9 @@ require __DIR__ . '/payment_config.exemple.php';
   fs.writeFileSync(path.join(dir, 'sky', 'routeur.php'), `<?php
 header('Content-Type: application/json');
 if (strpos($_SERVER['REQUEST_URI'], '/collecte_momo/') !== false) {
+  // Deux numéros piégés : refus « 0 » de SkySMS, et page HTML au lieu de JSON.
+  if (($_GET['phone'] ?? '') === '690000009') { echo json_encode(['statut' => '0', 'description' => 'Service momentanement indisponible']); exit; }
+  if (($_GET['phone'] ?? '') === '690000008') { header('Content-Type: text/html'); echo '<html>Maintenance</html>'; exit; }
   echo json_encode(['statut' => '1', 'amount' => (int) ($_GET['amount'] ?? 0), 'telephone' => $_GET['phone'] ?? '',
     'description' => "Demande de collecte enregistrée avec succes.\\nVeuillez valider le paiement en saisissant votre code Pin.",
     'id_operation' => 'op-' . ($_GET['id_client'] ?? '')]);
@@ -250,6 +253,23 @@ async function attendre(url) {
     let j = {}; try { j = JSON.parse(r.t); } catch (x) {}
     verifier('avec jeton → totaux cohérents (1 payé, 1 sous-payé)', r.s === 200 && j.totaux && j.totaux.payes === 1 && j.totaux.a_regler >= 2,
              r.t.slice(0, 300));
+
+    titre('⑪ Une demande que SkySMS n\'a pas enregistrée se voit');
+    const pousser = (ref, tel) => appel('?action=skysms_collect', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                         body: JSON.stringify({ ref, tel }) });
+    semer('SKY-F');
+    r = await pousser('SKY-F', '690000009');
+    verifier('statut « 0 » de la collecte → erreur montrée au payeur', r.s === 502 && /indisponible/.test(r.t), `${r.s} ${r.t}`);
+    semer('SKY-G');
+    r = await pousser('SKY-G', '690000008');
+    verifier('réponse non JSON → erreur, pas « regardez votre téléphone »', r.s === 502 && /illisible/.test(r.t), `${r.s} ${r.t}`);
+    /* SkySMS injoignable (port fermé) : la demande n'est jamais partie. */
+    const inj = require('child_process').spawnSync('php', ['-r',
+      "define('SKYSMS_API_BASE','http://127.0.0.1:9/api/public');define('SKYSMS_UID','u');define('SKYSMS_TIMEOUT',10);"
+      + "require " + JSON.stringify(path.join(API, '_skysms_lib.php')) + ";"
+      + "echo json_encode(vrt_skysms_collecter('690000001',1500,'1234567890'));"], { encoding: 'utf8' });
+    let ji = {}; try { ji = JSON.parse(inj.stdout); } catch (x) {}
+    verifier('SkySMS injoignable → échec, pas « attente »', ji.ok === false && ji.attente === false && /injoignable/.test(ji.msg || ''), inj.stdout + inj.stderr);
   } catch (err) {
     ko++; console.log(rouge('✗ ' + (err && err.stack || err)));
   } finally {
