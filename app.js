@@ -11882,6 +11882,7 @@ const ANAV=[
     {k:"visitororders",i:"📦",l:"Commandes visiteurs"}
   ]},
   {s:"💰 Finances",i:[
+    {k:"fin_transactions",i:"🧾",l:"Transactions & versements"},
     {k:"suivi_skysms",i:"📲",l:"Suivi SkySMS (paiements, codes, SMS)"},
     {k:"prix_calculs",i:"🏷️",l:"Prix & calculs automatiques"},
     {k:"payments",i:"💳",l:"Paiements élèves"},
@@ -12016,6 +12017,7 @@ const PT={
   elearningmgmt:"E-Learning & Contenus premium",
   paywall:"Essais gratuits & mur d'abonnement",
   prix_calculs:"Prix & calculs automatiques",
+  fin_transactions:"Transactions & versements",
   suivi_skysms:"Suivi SkySMS — paiements, codes et SMS",
   plateforme:"Atelier de Français — abonnements & quotas",
   authorsmgmt:"Auteurs & Partage de droits",
@@ -12114,7 +12116,7 @@ function render(p){
     devoirs_teacher:pgDevoirsTeacher,perf_teacher:pgPerfTeacher,
     // Admin
     absences_admin:pgAbsencesAdmin,devoirs_admin:pgDevoirsAdmin,orientation_admin:pgOrientationAdmin,resPedago:pgResPedagoAdmin,paiements_admin:pgPaiementsAdmin,
-    stats_business:pgStatsBusiness,parrainage_admin:pgParrainageAdmin,paywall:pgPaywall,prix_calculs:pgPrixCalculs,suivi_skysms:pgSuiviSkysms,
+    stats_business:pgStatsBusiness,parrainage_admin:pgParrainageAdmin,paywall:pgPaywall,prix_calculs:pgPrixCalculs,suivi_skysms:pgSuiviSkysms,fin_transactions:function(){return pgFinTransactions();},
     forum_admin:pgForumAdmin,marketplace_admin:pgMarketplaceAdmin,centres_admin:pgCentresAdmin,
     calendrier_admin:pgCalendrierAdmin,
     partenaires_splits:pgPartenairesSplits,
@@ -37307,7 +37309,8 @@ window._partMessage = function(f){
     + 'Lien prêt à partager : ' + site + '/?ref=' + f.code + '\n\n'
     + '3) VOTRE RÉMUNÉRATION : ' + comm + ' % de chaque paiement fait avec votre code\n'
     + 'Exemple : un abonnement de 12 000 F → l’apprenant paie ' + fmtN(exPaye) + ' F → vous recevez ' + fmtN(exGain) + ' F.\n'
-    + 'Vos gains s’accumulent sur votre compte VÉRITAS et vous sont versés par le Centre sur votre Mobile Money (' + f.tel + '), à partir de ' + fmtN(rg.seuilVersement || 2000) + ' F cumulés.\n\n'
+    + 'Vos gains s’accumulent sur votre compte VÉRITAS et vous sont versés par le Centre sur votre Mobile Money (' + f.tel + ') à la fin de chaque mois, à partir de ' + fmtN(rg.seuilVersement || 2000) + ' F cumulés.\n'
+    + 'Suivez vos gains, vos filleuls et vos versements ici : ' + site + '/plateforme/gains.html#reprise=' + f.reprise + '\n\n'
     + '4) RECONDUCTION DE VOTRE ACCÈS\n'
     + 'Chaque fois que ' + seuil + ' nouvelles personnes paient avec votre code, votre accès à l’Atelier est prolongé de ' + mois + ' mois, automatiquement. '
     + 'À défaut, je peux aussi le reconduire moi-même.\n\n'
@@ -37358,6 +37361,272 @@ window._codeAmiAdminChargerListe = function(){
   obs.observe(hote, { childList:true, subtree:true });
   setTimeout(function(){ obs.disconnect(); }, 15000);
   _codeAmiAdminCharger();
+};
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TRANSACTIONS & VERSEMENTS — tableau de bord financier (18/10/2026)
+   ──────────────────────────────────────────────────────────────────────────
+   Demande de Jacques : « voir toutes les transactions abouties, échouées,
+   numéros, solde total, journal et bien d'autres », et payer les partenaires
+   à la FIN DU MOIS (aucun fournisseur ne verse : SkySMS garde les fonds chez
+   Nexah). Tout est lu au SERVEUR (api/parrainage.php : transactions, journal,
+   versements_mois) — lecture seule, sans rejouer aucun octroi.
+   ══════════════════════════════════════════════════════════════════════════ */
+window._FT = window._FT || { onglet:'bord', jours:90, data:null, journal:null, vers:null, f:{ statut:'', op:'', source:'', q:'', du:'', au:'' } };
+
+window.pgFinTransactions = function(){
+  if(!iA()) return na();
+  setTimeout(function(){ _ftCharger(); }, 0);
+  var o = _FT.onglet, tab = function(k, l){ return '<button class="btn ' + (o === k ? 'bi' : 'bo') + ' sm" onclick="_ftOnglet(\'' + k + '\')">' + l + '</button>'; };
+  return '<div class="pgt"><span class="pgt-ico">' + _ico('wallet', 19) + '</span>Transactions & versements</div>'
+    + '<div class="fl2 g8 fw fic mb12">' + tab('bord', '📊 Tableau de bord') + tab('tx', '🧾 Transactions') + tab('vers', '💸 Versements du mois') + tab('journal', '📜 Journal')
+    + '<span style="flex:1"></span><select class="fi" style="width:auto" onchange="_FT.jours=+this.value;_FT.data=null;_ftCharger()">'
+    + [[30,'30 jours'],[90,'90 jours'],[180,'6 mois'],[365,'12 mois']].map(function(x){ return '<option value="' + x[0] + '"' + (_FT.jours === x[0] ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('')
+    + '</select><button class="btn bo sm" onclick="_FT.data=null;_FT.journal=null;_FT.vers=null;_ftCharger()">↻ Actualiser</button></div>'
+    + '<div id="ftZone"><div class="card"><div class="s mut">Lecture du serveur…</div></div></div>';
+};
+window._ftOnglet = function(k){ _FT.onglet = k; re(); };
+
+window._ftCharger = function(){
+  var z = _ge('ftZone'); if(!z) return;
+  if(!(DB.cloudConfig && DB.cloudConfig.secret)){
+    z.innerHTML = '<div class="ib ibr"><span>⚠️</span><span>Clé serveur absente sur cet appareil (Paramètres → Cloud) : les transactions vivent sur le serveur.</span></div>';
+    return;
+  }
+  var o = _FT.onglet;
+  if(o === 'journal'){
+    if(_FT.journal) return _ftJournal();
+    _codeAmiApi('journal', { admin:true, query:{ n:600 } }).then(function(j){ if(!j || !j.ok) return _ftErreur(j); _FT.journal = j; _ftJournal(); });
+    return;
+  }
+  if(o === 'vers'){
+    if(_FT.vers) return _ftVersements();
+    _codeAmiApi('versements_mois', { admin:true }).then(function(j){ if(!j || !j.ok) return _ftErreur(j); _FT.vers = j; _ftVersements(); });
+    return;
+  }
+  if(_FT.data && _FT.data.jours === _FT.jours) return o === 'tx' ? _ftTransactions() : _ftBord();
+  _codeAmiApi('transactions', { admin:true, query:{ jours:_FT.jours } }).then(function(j){
+    if(!j || !j.ok) return _ftErreur(j);
+    _FT.data = j; (_FT.onglet === 'tx' ? _ftTransactions : _ftBord)();
+  });
+};
+window._ftErreur = function(j){
+  var z = _ge('ftZone'); if(z) z.innerHTML = '<div class="ib ibr"><span>⚠️</span><span>' + _esc((j && j.error) || 'Le serveur n’a pas répondu.') + '</span></div>';
+};
+var _ftF = function(n){ return fmt(n || 0); };
+var _ftDate = function(ts){ if(!ts) return '—'; var d = new Date(ts * 1000); return d.toLocaleDateString('fr-FR') + ' ' + d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }); };
+var _ftPast = function(st, a){
+  var m = { reussi:['Réussie','#047857','#D1FAE5'], echoue:['Échouée','#B91C1C','#FEE2E2'], attente:['En attente','#B45309','#FEF3C7'], rembourse:['Remboursée','#475569','#E2E8F0'] }[st] || [st, '#475569', '#E2E8F0'];
+  return '<span style="display:inline-block;border-radius:99px;padding:2px 9px;font-size:11.5px;font-weight:700;color:' + m[1] + ';background:' + m[2] + '">' + m[0] + '</span>'
+    + (a ? ' <span style="display:inline-block;border-radius:99px;padding:2px 9px;font-size:11.5px;font-weight:700;color:#B91C1C;background:#FEE2E2">À régler</span>' : '');
+};
+var _ftTuile = function(ico, v, l, n, c){
+  return '<div class="card" style="margin:0;padding:14px"><div style="font-size:12.5px;color:var(--ink3)">' + ico + ' ' + l + '</div>'
+    + '<div style="font-size:22px;font-weight:800;color:' + (c || 'var(--ink)') + ';margin-top:4px">' + v + '</div>'
+    + (n ? '<div style="font-size:11.5px;color:var(--ink4);margin-top:2px">' + n + '</div>' : '') + '</div>';
+};
+
+/* ── 1. Tableau de bord ──────────────────────────────────────────────── */
+window._ftBord = function(){
+  var d = _FT.data, t = d.totaux || {}, cm = d.ceMois || {}, z = _ge('ftZone'); if(!z) return;
+  var h = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:14px">'
+    + _ftTuile('💰', _ftF(t.encaisse), 'Encaissé (' + d.jours + ' j)', t.reussi + ' paiement(s) réussi(s)', '#047857')
+    + _ftTuile('📅', _ftF(cm.encaisse), 'Encaissé ce mois-ci', (cm.reussi || 0) + ' réussi(s) sur ' + (cm.n || 0))
+    + _ftTuile('✅', t.reussi || 0, 'Transactions réussies', 'panier moyen ' + _ftF(t.panierMoyen))
+    + _ftTuile('❌', t.echoue || 0, 'Transactions échouées', _ftF(t.echoueMontant) + ' non encaissés', (t.echoue ? '#B91C1C' : ''))
+    + _ftTuile('⏳', t.attente || 0, 'En attente', (t.aRegler ? t.aRegler + ' à régler · ' : '') + _ftF(t.attenteMontant), (t.aRegler ? '#B45309' : ''))
+    + _ftTuile('🎯', t.tauxReussite == null ? '—' : (String(t.tauxReussite).replace('.', ',') + ' %'), 'Taux de réussite', 'sur les transactions closes')
+    + _ftTuile('👥', t.payeursUniques || 0, 'Payeurs différents', (t.avecCode || 0) + ' paiement(s) avec un code')
+    + _ftTuile('🎁', _ftF(t.commissions), 'Commissions générées', 'sur la période')
+    + _ftTuile('💸', _ftF(d.commissionsDues), 'Commissions à verser', 'tous bénéficiaires, à ce jour', (d.commissionsDues ? '#B8860B' : ''))
+    + '</div>';
+
+  // Évolution mensuelle.
+  var pm = d.parMois || {}, ks = Object.keys(pm), mx = 1;
+  ks.forEach(function(k){ mx = Math.max(mx, pm[k].encaisse || 0); });
+  var M = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  h += '<div class="card"><div class="ct">Encaissé par mois</div>' + (ks.length
+    ? '<div style="display:flex;align-items:flex-end;gap:10px;height:190px;padding-top:6px">' + ks.map(function(k){
+        var x = pm[k], hh = Math.max(3, Math.round(140 * (x.encaisse || 0) / mx));
+        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0" title="' + x.reussi + ' réussie(s), ' + x.echoue + ' échouée(s)">'
+          + '<div style="font-size:11px;font-weight:700;color:var(--ink)">' + (x.encaisse ? _ftF(x.encaisse) : '') + '</div>'
+          + '<div style="width:70%;max-width:46px;height:' + hh + 'px;background:linear-gradient(180deg,#3C6BDF,#142554);border-radius:6px 6px 0 0"></div>'
+          + '<div style="font-size:11px;color:var(--ink3)">' + M[+k.slice(5) - 1] + ' ' + k.slice(2, 4) + '</div>'
+          + '<div style="font-size:10.5px;color:var(--ink4)">' + x.reussi + ' ✓ · ' + x.echoue + ' ✗</div></div>';
+      }).join('') + '</div>'
+    : '<div class="s mut">Aucune transaction sur la période.</div>') + '</div>';
+
+  // Opérateurs, sources, produits.
+  var rep = function(obj, titre){
+    var ks2 = Object.keys(obj || {}); if(!ks2.length) return '';
+    var tot = ks2.reduce(function(s, k){ return s + (obj[k].encaisse || 0); }, 0) || 1;
+    return '<div class="card" style="margin:0"><div class="ct">' + titre + '</div>' + ks2.map(function(k){
+      var x = obj[k], p = Math.round(100 * (x.encaisse || 0) / tot);
+      return '<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><b>' + _esc(k) + '</b><span>' + _ftF(x.encaisse) + ' · ' + p + ' %</span></div>'
+        + '<div style="height:8px;background:var(--bg2,#EEF2F7);border-radius:99px;overflow:hidden;margin-top:4px"><div style="height:100%;width:' + p + '%;background:#142554"></div></div>'
+        + '<div style="font-size:11px;color:var(--ink4)">' + (x.reussi || 0) + ' réussie(s) sur ' + (x.n || 0) + '</div></div>';
+    }).join('') + '</div>';
+  };
+  var pp = d.parProduit || {};
+  var produits = Object.keys(pp).length ? '<div class="card" style="margin:0"><div class="ct">Ce qui se vend</div><table style="width:100%;font-size:13px">'
+    + Object.keys(pp).map(function(k){ return '<tr><td style="padding:5px 0">' + _esc(k) + '</td><td style="text-align:right">' + pp[k].n + '×</td><td style="text-align:right;font-weight:700">' + _ftF(pp[k].encaisse) + '</td></tr>'; }).join('')
+    + '</table></div>' : '';
+  var r = (d.repartition || {}).mois || {};
+  var repart = '<div class="card" style="margin:0"><div class="ct">Répartition des abonnements (ce mois)</div>'
+    + '<table style="width:100%;font-size:13px"><tr><td>Encaissé</td><td style="text-align:right;font-weight:700">' + _ftF(r.encaisse) + '</td></tr>'
+    + '<tr><td>Enseignants-partenaires</td><td style="text-align:right">' + _ftF(r.partenaires) + '</td></tr>'
+    + '<tr><td>Co-gérants</td><td style="text-align:right">' + _ftF(r.cogerants) + '</td></tr>'
+    + '<tr><td>Pool des enseignants</td><td style="text-align:right">' + _ftF(r.pool) + '</td></tr></table></div>';
+  h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">'
+    + rep(d.parOperateur, 'Par opérateur') + rep(d.parSource, 'Par canal de paiement') + produits + repart + '</div>';
+  if((t.test || 0) > 0) h += '<div class="xs2 mut mt8">' + t.test + ' transaction(s) de test exclue(s) des totaux.</div>';
+  z.innerHTML = h;
+};
+
+/* ── 2. Transactions ─────────────────────────────────────────────────── */
+window._ftFiltrees = function(){
+  var f = _FT.f, q = (f.q || '').toLowerCase().replace(/\s+/g, '');
+  var du = f.du ? new Date(f.du + 'T00:00:00').getTime() / 1000 : 0, au = f.au ? new Date(f.au + 'T23:59:59').getTime() / 1000 : 0;
+  return ((_FT.data || {}).transactions || []).filter(function(r){
+    if(f.statut === 'aregler' ? !r.aRegler : (f.statut && r.statut !== f.statut)) return false;
+    if(f.op && r.operateur !== f.op) return false;
+    if(f.source && r.source !== f.source) return false;
+    if(du && r.t < du) return false;
+    if(au && r.t > au) return false;
+    if(q){ var hay = (r.ref + r.tel + r.nom + r.code + r.quoi).toLowerCase().replace(/\s+/g, ''); if(hay.indexOf(q) < 0) return false; }
+    return true;
+  });
+};
+window._ftFiltre = function(k, v){ _FT.f[k] = v; _ftTransactions(); };
+window._ftTransactions = function(){
+  var z = _ge('ftZone'); if(!z) return;
+  var f = _FT.f, rows = _ftFiltrees(), tous = (_FT.data || {}).transactions || [];
+  var opts = function(k, vals, lib){ return '<select class="fi" style="width:auto" onchange="_ftFiltre(\'' + k + '\',this.value)"><option value="">' + lib + '</option>'
+    + vals.map(function(v){ return '<option value="' + _esc(v[0]) + '"' + (f[k] === v[0] ? ' selected' : '') + '>' + _esc(v[1]) + '</option>'; }).join('') + '</select>'; };
+  var uniq = function(k){ var s = {}; tous.forEach(function(r){ if(r[k]) s[r[k]] = 1; }); return Object.keys(s).sort().map(function(x){ return [x, x]; }); };
+  var somme = rows.reduce(function(s, r){ return s + (r.statut === 'reussi' ? r.montant : 0); }, 0);
+  var h = '<div class="card"><div class="fl2 g8 fw fic">'
+    + '<input class="fi" style="flex:1;min-width:200px" placeholder="Rechercher : référence, numéro, nom, code…" value="' + _esc(f.q) + '" oninput="_FT.f.q=this.value;clearTimeout(window._ftT);window._ftT=setTimeout(_ftTransactions,250)">'
+    + opts('statut', [['reussi','Réussies'],['echoue','Échouées'],['attente','En attente'],['aregler','À régler'],['rembourse','Remboursées']], 'Tous les statuts')
+    + opts('op', uniq('operateur'), 'Tous les opérateurs') + opts('source', uniq('source'), 'Tous les canaux')
+    + '<input class="fi" type="date" style="width:auto" value="' + _esc(f.du) + '" onchange="_ftFiltre(\'du\',this.value)">'
+    + '<input class="fi" type="date" style="width:auto" value="' + _esc(f.au) + '" onchange="_ftFiltre(\'au\',this.value)">'
+    + '<button class="btn bo sm" onclick="_FT.f={statut:\'\',op:\'\',source:\'\',q:\'\',du:\'\',au:\'\'};_ftTransactions()">Effacer</button>'
+    + '<button class="btn bi sm" onclick="_ftExport()">⬇ Exporter (CSV)</button></div>'
+    + '<div class="s mt8"><b>' + rows.length + '</b> transaction(s) · <b>' + _ftF(somme) + '</b> encaissés dans cette sélection</div></div>';
+  h += '<div class="card"><div class="tw" style="max-height:62vh;overflow:auto"><table style="font-size:13px"><thead><tr style="position:sticky;top:0;background:var(--card,#fff)">'
+    + '<th>Date</th><th>Référence</th><th>Client</th><th>Opérateur</th><th>Achat</th><th style="text-align:right">Montant</th><th>Statut</th><th>Code / commission</th></tr></thead><tbody>'
+    + (rows.length ? rows.slice(0, 600).map(function(r){
+        var wa = r.tel ? ' <a href="https://wa.me/237' + _esc(r.tel) + '" target="_blank" rel="noopener" title="WhatsApp" style="text-decoration:none">💬</a>' : '';
+        return '<tr><td style="white-space:nowrap">' + _ftDate(r.t) + '</td>'
+          + '<td style="font-family:monospace;font-size:11.5px">' + _esc(r.ref) + '<div style="color:var(--ink4)">' + _esc(r.source) + '</div></td>'
+          + '<td>' + _esc(r.nom || '—') + '<div style="font-family:monospace">' + _esc(r.tel || '') + wa + '</div></td>'
+          + '<td>' + _esc(r.operateur || '—') + '</td><td>' + _esc(r.quoi || r.intent || '—') + '</td>'
+          + '<td style="text-align:right;font-weight:700;white-space:nowrap">' + _ftF(r.montant) + '</td>'
+          + '<td>' + _ftPast(r.statut, r.aRegler) + (r.motif && r.statut !== 'reussi' ? '<div style="font-size:11px;color:var(--ink4);max-width:240px">' + _esc(r.motif) + '</div>' : '')
+          + (r.statut === 'reussi' && !r.accorde ? '<div style="font-size:11px;color:#B45309">payé, accès pas encore ouvert</div>' : '') + '</td>'
+          + '<td>' + (r.code ? '<span style="font-family:monospace">' + _esc(r.code) + '</span>' + (r.commission ? '<div style="font-size:11px">' + _ftF(r.commission) + '</div>' : '') : '—') + '</td></tr>';
+      }).join('') : '<tr><td colspan="8" style="text-align:center;padding:18px;color:var(--ink3)">Aucune transaction ne correspond.</td></tr>')
+    + '</tbody></table></div>' + (rows.length > 600 ? '<div class="xs2 mut mt8">600 premières lignes affichées — l’export contient tout.</div>' : '') + '</div>';
+  z.innerHTML = h;
+};
+
+/* CSV au point-virgule, avec BOM : il s'ouvre tel quel dans Excel en français. */
+window._ftCsv = function(nom, entetes, lignes){
+  var c = function(v){ v = String(v == null ? '' : v); return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  var txt = '\ufeff' + [entetes].concat(lignes).map(function(l){ return l.map(c).join(';'); }).join('\r\n');
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([txt], { type:'text/csv;charset=utf-8' }));
+  a.download = nom; document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+};
+window._ftExport = function(){
+  var lib = { reussi:'réussie', echoue:'échouée', attente:'en attente', rembourse:'remboursée' };
+  _ftCsv('transactions_veritas_' + new Date().toISOString().slice(0, 10) + '.csv',
+    ['Date','Référence','Canal','Client','Numéro','Opérateur','Achat','Montant (F)','Statut','À régler','Accès ouvert','Code','Commission (F)','Motif'],
+    _ftFiltrees().map(function(r){ return [_ftDate(r.t), r.ref, r.source, r.nom, r.tel, r.operateur, r.quoi || r.intent, r.montant, lib[r.statut] || r.statut,
+      r.aRegler ? 'oui' : '', r.accorde ? 'oui' : 'non', r.code, r.commission || '', r.motif]; }));
+};
+
+/* ── 3. Versements de fin de mois ────────────────────────────────────── */
+window._ftVersements = function(){
+  var d = _FT.vers, z = _ge('ftZone'); if(!z || !d) return;
+  var L = d.lignes || [];
+  var h = '<div class="ib ibi mb12"><span>🗓️</span><span><b>Versements du mois — échéance le ' + new Date(d.echeance + 'T12:00:00').toLocaleDateString('fr-FR') + '.</b> '
+    + 'Aucun fournisseur ne verse automatiquement. 1) Demandez le paiement de votre solde chez SkySMS / Nexah ; '
+    + '2) envoyez à chaque personne cochée son montant par Mobile Money ; 3) cliquez « Marquer comme versés » : leur solde baisse et leur espace partenaire l’affiche. '
+    + 'Seuil de versement : <b>' + _ftF(d.seuil) + '</b> (en dessous, le solde est reporté).</span></div>';
+  h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:14px">'
+    + _ftTuile('💸', _ftF(d.aPayer), 'À verser ce mois', 'seuil atteint', '#B8860B')
+    + _ftTuile('🧾', _ftF(d.total), 'Total des soldes dus', L.length + ' bénéficiaire(s)')
+    + _ftTuile('☑️', '<span id="ftSel">0 F</span>', 'Sélection', 'ce que vous allez marquer versé') + '</div>';
+  h += '<div class="card"><div class="tw"><table style="font-size:13px"><thead><tr><th><input type="checkbox" onchange="document.querySelectorAll(\'.ftChk\').forEach(function(c){c.checked=this.checked}.bind(this));_ftSel()"></th>'
+    + '<th>Bénéficiaire</th><th>Code</th><th>Mobile Money</th><th style="text-align:right">Gagné</th><th style="text-align:right">Déjà versé</th><th style="text-align:right">À verser</th></tr></thead><tbody>'
+    + (L.length ? L.map(function(l, i){
+        var coche = l.seuilAtteint && l.tel && !l.enCours;
+        return '<tr' + (l.seuilAtteint ? '' : ' style="opacity:.6"') + '><td><input type="checkbox" class="ftChk" data-i="' + i + '"' + (coche ? ' checked' : '') + (l.enCours ? ' disabled' : '') + ' onchange="_ftSel()"></td>'
+          + '<td><b>' + _esc(l.nom) + '</b>' + (l.partenaire ? ' <span class="xs2" style="color:#B8860B">enseignant-partenaire</span>' : '')
+          + (l.seuilAtteint ? '' : '<div class="xs2 mut">sous le seuil : reporté</div>') + (l.blocage && !l.tel ? '<div class="xs2" style="color:#B91C1C">' + _esc(l.blocage) + '</div>' : '') + '</td>'
+          + '<td style="font-family:monospace">' + _esc(l.code) + '</td>'
+          + '<td>' + (l.tel ? '<span style="font-family:monospace">' + _esc(l.tel) + '</span><div class="xs2 mut">' + _esc(l.operateur) + '</div>' : '<span style="color:#B91C1C">aucun numéro</span>') + '</td>'
+          + '<td style="text-align:right">' + _ftF(l.gagne) + '</td><td style="text-align:right">' + _ftF(l.verse) + '</td>'
+          + '<td style="text-align:right"><input class="fi ftMt" data-i="' + i + '" type="number" min="1" max="' + l.solde + '" value="' + l.solde + '" style="width:110px;text-align:right" oninput="_ftSel()"></td></tr>';
+      }).join('') : '<tr><td colspan="7" style="text-align:center;padding:18px;color:var(--ink3)">Aucun solde à verser.</td></tr>')
+    + '</tbody></table></div>'
+    + '<div class="fl2 g8 fw fic mt12"><input class="fi" id="ftNote" placeholder="Référence ou note (ex. versements octobre 2026)" style="flex:1;min-width:220px">'
+    + '<button class="btn bo" onclick="_ftVersExport()">⬇ Liste à payer (CSV)</button>'
+    + '<button class="btn bi" onclick="_ftVersMarquer()">✓ Marquer comme versés</button></div></div>';
+  z.innerHTML = h;
+  _ftSel();
+};
+window._ftSelection = function(){
+  var L = (_FT.vers || {}).lignes || [], out = [];
+  document.querySelectorAll('.ftChk').forEach(function(c){
+    if(!c.checked) return;
+    var i = +c.dataset.i, mt = document.querySelector('.ftMt[data-i="' + i + '"]');
+    var m = Math.min(L[i].solde, Math.max(0, parseInt(mt && mt.value, 10) || 0));
+    if(m > 0) out.push({ l:L[i], montant:m });
+  });
+  return out;
+};
+window._ftSel = function(){ var e = _ge('ftSel'); if(e) e.textContent = _ftF(_ftSelection().reduce(function(s, x){ return s + x.montant; }, 0)); };
+window._ftVersExport = function(){
+  var s = _ftSelection(); if(!s.length){ toast('Cochez au moins une ligne', 'warn'); return; }
+  _ftCsv('versements_' + (_FT.vers.mois || '') + '.csv', ['Bénéficiaire','Code','Numéro','Opérateur','Montant (F)'],
+    s.map(function(x){ return [x.l.nom, x.l.code, x.l.tel, x.l.operateur, x.montant]; }));
+};
+window._ftVersMarquer = function(){
+  var s = _ftSelection(); if(!s.length){ toast('Cochez au moins une ligne', 'warn'); return; }
+  var tot = s.reduce(function(a, x){ return a + x.montant; }, 0);
+  if(!confirm('Confirmer que vous avez ENVOYÉ ces ' + s.length + ' versement(s), pour ' + fmt(tot) + ' au total ?\n\nLeur solde baissera d’autant. Ne cochez que ce qui est réellement parti.')) return;
+  var note = (_ge('ftNote') || {}).value || ('Versement de fin de mois ' + (_FT.vers.mois || ''));
+  _codeAmiApi('versements_mois', { admin:true, body:{ lignes:s.map(function(x){ return { benef:x.l.benef, montant:x.montant, note:note }; }) } }).then(function(j){
+    if(!j || !j.ok){ toast((j && j.error) || 'Refusé', 'err'); return; }
+    var ko = (j.resultats || []).filter(function(r){ return !r.ok; });
+    toast(ko.length ? (ko.length + ' ligne(s) refusée(s) : ' + ko.map(function(r){ return r.error; }).join(' · ')) : '✓ ' + s.length + ' versement(s) enregistré(s)', ko.length ? 'warn' : 'ok');
+    _FT.vers = null; _FT.data = null; _ftCharger();
+  });
+};
+
+/* ── 4. Journal ──────────────────────────────────────────────────────── */
+window._ftJournal = function(){
+  var d = _FT.journal, z = _ge('ftZone'); if(!z || !d) return;
+  var q = (_FT.jq || '').toLowerCase(), ty = _FT.jt || '';
+  var L = (d.lignes || []).filter(function(l){ return (!ty || l.type === ty) && (!q || l.texte.toLowerCase().indexOf(q) >= 0); });
+  var types = d.types || {};
+  var h = '<div class="card"><div class="fl2 g8 fw fic"><input class="fi" style="flex:1;min-width:220px" placeholder="Filtrer : référence, numéro, type…" value="' + _esc(_FT.jq || '') + '" oninput="_FT.jq=this.value;clearTimeout(window._ftT);window._ftT=setTimeout(_ftJournal,250)">'
+    + '<select class="fi" style="width:auto" onchange="_FT.jt=this.value;_ftJournal()"><option value="">Tous les événements</option>'
+    + Object.keys(types).map(function(k){ return '<option value="' + _esc(k) + '"' + (ty === k ? ' selected' : '') + '>' + _esc(k) + ' (' + types[k] + ')</option>'; }).join('') + '</select></div>'
+    + '<div class="s mt8">' + L.length + ' ligne(s) — journaux des paiements et des commissions écrits par le serveur.</div></div>';
+  h += '<div class="card"><div class="tw" style="max-height:66vh;overflow:auto"><table style="font-size:12px"><thead><tr style="position:sticky;top:0;background:var(--card,#fff)"><th>Quand</th><th>Journal</th><th>Événement</th><th>Détail</th></tr></thead><tbody>'
+    + (L.length ? L.map(function(l){
+        var err = /ERR|KO|REJECT|REFUS|ECHEC|MISMATCH|UNKNOWN/.test(l.type);
+        return '<tr><td style="white-space:nowrap">' + _ftDate(l.t) + '</td><td>' + _esc(l.source) + '</td>'
+          + '<td><span style="font-family:monospace;font-size:11px;color:' + (err ? '#B91C1C' : 'var(--ink)') + '">' + _esc(l.type || '—') + '</span></td>'
+          + '<td style="font-family:monospace;font-size:11px;word-break:break-all">' + _esc(l.texte.replace(/^\S+\s/, '')) + '</td></tr>';
+      }).join('') : '<tr><td colspan="4" style="text-align:center;padding:18px;color:var(--ink3)">Rien à afficher.</td></tr>')
+    + '</tbody></table></div></div>';
+  z.innerHTML = h;
 };
 
 // ════════════════════════════════════════════════════════════════════

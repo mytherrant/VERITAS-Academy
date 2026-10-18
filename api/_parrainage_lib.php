@@ -765,7 +765,9 @@ if (!defined('VRT_PARR_LIB')) {
             $cle = 'r:' . $ref;
             if (isset($reg['ops'][$cle])) return ['deja' => true, 'lienNeuf' => false, 'aVerser' => false, 'reconduit' => false];
             $reg['ops'][$cle] = [
-                'b' => $benef, 'p' => $payeurId, 'm' => $paye, 'pct' => (int) ($p['commissionPct'] ?? 0),
+                'b' => $benef, 'p' => $payeurId,
+                'pk' => $payeurId !== '' ? 'acc:' . $payeurId : ($payeurTel !== '' ? 'tel:' . $payeurTel : ''),
+                'm' => $paye, 'pct' => (int) ($p['commissionPct'] ?? 0),
                 'c' => $commission, 'code' => (string) ($p['code'] ?? ''), 'src' => (string) ($p['source'] ?? ''),
                 'i' => (string) ($state['intent'] ?? ''), 'l' => mb_substr((string) ($state['label'] ?? ''), 0, 80),
                 't' => $maintenant, 'refus' => $refus,
@@ -1084,8 +1086,44 @@ if (!defined('VRT_PARR_LIB')) {
         usort($vers, function ($a, $b) { return strcmp($b['date'], $a['date']); });
 
         $dest = vrt_parr_destination($db, $reg, $benef);
+
+        /* Gains par mois (6 derniers) : ce qu'un partenaire veut voir d'un coup
+           d'œil, et ce qui lui sera versé à la fin du mois. */
+        $parMois = [];
+        for ($k = 5; $k >= 0; $k--) $parMois[date('Y-m', strtotime(date('Y-m-01') . " -$k month"))] = ['ventes' => 0, 'paye' => 0, 'commission' => 0];
+        $filleulsPayants = [];
+        foreach (($reg['ops'] ?? []) as $o) {
+            if (!is_array($o) || ($o['b'] ?? '') !== $benef || !empty($o['refus'])) continue;
+            $m = date('Y-m', (int) ($o['t'] ?? 0));
+            if (isset($parMois[$m])) {
+                $parMois[$m]['ventes']++;
+                $parMois[$m]['paye'] += (int) ($o['m'] ?? 0);
+                $parMois[$m]['commission'] += (int) ($o['c'] ?? 0) - (int) ($o['annule'] ?? 0);
+            }
+            $cleF = (string) ($o['pk'] ?? (($o['p'] ?? '') !== '' ? 'acc:' . $o['p'] : ''));
+            if ($cleF !== '') $filleulsPayants[$cleF] = true;
+        }
+        $moisCourant = $parMois[date('Y-m')] ?? ['ventes' => 0, 'paye' => 0, 'commission' => 0];
+
+        $part = null;
+        $e = vrt_parr_partenaire_de($reg, $benef);
+        if ($e) {
+            $fin = (int) ($e['fin'] ?? 0);
+            $part = ['actif' => !empty($e['actif']), 'ouvert' => vrt_parr_partenaire_ouvert($e),
+                     'fin' => $fin ? date('Y-m-d', $fin) : '', 'resteJours' => $fin > time() ? (int) ceil(($fin - time()) / 86400) : 0,
+                     'cycle' => count((array) ($e['cycle'] ?? [])), 'seuil' => (int) $cfg['partenaireSeuil'],
+                     'jours' => (int) $cfg['partenaireJours'], 'filleulsPayants' => count((array) ($e['vus'] ?? []))];
+        }
         return [
             'ok' => true, 'code' => $code,
+            'nom' => $pers ? trim($pers['pre'] . ' ' . $pers['nom']) : '',
+            'commissionPct' => vrt_parr_taux($cfg, $reg, $benef),
+            /* Aucun fournisseur ne verse automatiquement : le Centre paie les
+               soldes à la main, à la fin de chaque mois (décision du 18/10/2026). */
+            'versement' => ['mode' => 'mensuel', 'prochain' => date('Y-m-t'), 'seuil' => (int) $cfg['seuilVersement']],
+            'ceMois' => $moisCourant, 'parMois' => $parMois,
+            'filleulsPayants' => count($filleulsPayants),
+            'partenaire' => $part,
             'lien' => 'https://veritas-school.com/?ref=' . rawurlencode($code),
             'regle' => ['remisePct' => $cfg['remisePct'], 'commissionPct' => $cfg['commissionPct'],
                         'seuilVersement' => $cfg['seuilVersement'], 'versementAuto' => $cfg['versementAuto'], 'actif' => $cfg['actif']],
