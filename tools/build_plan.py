@@ -836,6 +836,13 @@ CSS_CHROME = r"""  @keyframes vpulse{0%,100%{box-shadow:0 0 0 0 rgba(91,224,122,
 @media (max-width:700px){
   :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="grid-template-columns"]{grid-template-columns:minmax(0,1fr)!important}
   :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{padding-left:16px!important;padding-right:16px!important}
+  /* Pied au téléphone : deux colonnes centrées, la marque sur toute la
+     largeur, la colonne restée seule centrée — plus une liste alignée à
+     gauche sous une autre (Jacques, 18/10). */
+  :is(#vrtNav,footer[style*="background:#001136"]) > [style*="1.25fr"]{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:30px 16px!important;text-align:center}
+  :is(#vrtNav,footer[style*="background:#001136"]) > [style*="1.25fr"] > :first-child,:is(#vrtNav,footer[style*="background:#001136"]) > [style*="1.25fr"] > :last-child:nth-child(even){grid-column:1/-1}
+  :is(#vrtNav,footer[style*="background:#001136"]) > [style*="1.25fr"] :is([style*="display:flex"]){justify-content:center;align-items:center}
+  :is(#vrtNav,footer[style*="background:#001136"]) > [style*="1.25fr"] p{margin-left:auto!important;margin-right:auto!important}
 }
 @media (min-width:1440px){ :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{max-width:1330px!important} }
 @media (min-width:1760px){ :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{max-width:1440px!important} }"""

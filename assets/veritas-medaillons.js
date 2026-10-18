@@ -300,11 +300,39 @@
     }
   }
 
+  // Les encadrés de la vitrine n'ont aucun filet d'accent : un trait coloré à
+  // gauche ou en haut (« .intro », « .resume », « .plan », cartes à bandeau…)
+  // reprend le bord opposé. Les styles vivent dans chaque page : une règle de
+  // feuille ne pourrait pas tous les nommer. Un rond animé (chargement) garde
+  // son bord, c'est son dessin.
+  function filets() {
+    var tous = document.querySelectorAll('body *');
+    for (var i = 0; i < tous.length; i++) {
+      var el = tous[i];
+      if (!el.offsetWidth || el.closest('.vrt-hab,svg') || /^(INPUT|SELECT|TEXTAREA|HR|BUTTON)$/.test(el.tagName)) continue;
+      var s = getComputedStyle(el);
+      if (s.animationName !== 'none' || /50%/.test(s.borderRadius)) continue;
+      [['Left', 'Right'], ['Top', 'Bottom']].forEach(function (c) {
+        var w = parseFloat(s['border' + c[0] + 'Width']);
+        if (!(w >= 2) || s['border' + c[0] + 'Style'] === 'none') return;
+        var w2 = parseFloat(s['border' + c[1] + 'Width']) || 0;
+        if (w2 >= w && s['border' + c[1] + 'Color'] === s['border' + c[0] + 'Color']) return;
+        var cote = 'border-' + c[0].toLowerCase();
+        if (!w2 || s['border' + c[1] + 'Style'] === 'none') {
+          el.style.setProperty(cote, '0', 'important');
+        } else {
+          el.style.setProperty(cote, w2 + 'px ' + s['border' + c[1] + 'Style'] + ' ' + s['border' + c[1] + 'Color'], 'important');
+        }
+      });
+    }
+  }
+
   function demarrer() {
     poser();
+    try { filets(); } catch (e) {}
     try { lisibilite(); } catch (e) {}
     // Les pages qui complètent leur contenu après coup (recherche, filtres).
-    setTimeout(function () { try { lisibilite(); } catch (e) {} }, 1500);
+    setTimeout(function () { try { filets(); lisibilite(); } catch (e) {} }, 1500);
   }
 
   if (document.readyState === 'loading') {

@@ -427,7 +427,7 @@ nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!impor
    Une suite de .loupe.faq reçoit le même disque, avec un filet de la
    teinte de la question. */
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .wrap{counter-reset:vq}
-:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq{counter-increment:vq;border-left:4px solid var(--vq,#1E499B)!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq{counter-increment:vq}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq > h3::before{
   content:counter(vq);display:inline-flex;align-items:center;justify-content:center;
   width:30px;height:30px;margin-right:10px;border-radius:50%;vertical-align:middle;
