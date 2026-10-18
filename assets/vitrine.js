@@ -3061,8 +3061,27 @@
   /* ── 1 · Destination réelle de « Découvrir » ─────────────────────────────
      Table par mot-clé du TITRE de la carte. Une carte non listée garde son
      lien d'origine : on ne casse jamais ce qui marchait déjà. */
+  /* 18/10/2026 — les quatre cartes d'ACCOMPAGNEMENT menaient à #parents, une
+     page qui ne dit pas un mot des répétitions et n'offre aucun moyen de les
+     demander : « Découvrir » sur « Répétitions à domicile » était une
+     impasse. Elles ouvrent désormais le formulaire de devis de
+     l'application (#devis), la formule déjà choisie (?f=…). */
+  /* 18/10/2026 — cinq cartes n'avaient AUCUNE route et gardaient le lien du
+     gabarit, #boutique : « Découvrir » sur Professeur Ambassa, Support
+     WhatsApp, Espace Parents, Classes virtuelles ou Bulletins blancs ouvrait
+     la boutique de manuels. Et « Concours blancs » était happé par le motif
+     `cours` (sous-chaîne de « concours ») vers l'e-learning. Les entrées
+     précises passent donc AVANT les génériques. « !nom » = une action de la
+     vitrine (VRT.act), pas une adresse. */
   var ROUTES = [
-    [/r[ée]p[ée]tition|domicile|rattrapage|pr[ée]paration.*examen|soutien/i, '#parents'],
+    [/concours blanc|bulletins? blanc|classes? virtuelle/i, '#tarifs'],
+    [/ambassa|tuteur/i,                             '!ouvrirIA'],
+    [/whatsapp/i,                                   'https://wa.me/237697637739'],
+    [/espace parent/i,                              '#parents'],
+    [/domicile/i,                                   '/app.html#devis?f=domicile'],
+    [/rattrapage/i,                                 '/app.html#devis?f=rattrapage'],
+    [/pr[ée]paration.*examen/i,                     '/app.html#devis?f=examens'],
+    [/r[ée]p[ée]tition|soutien/i,                   '/app.html#devis?f=centre'],
     [/certificat|attestation/i,                    '/app.html#verifier-certificat'],
     [/orientation|s[ée]rie/i,                      '/app.html#orientation'],
     [/cagnotte/i,                                  '/app.html#cagnotte'],
@@ -3101,6 +3120,11 @@
     var cible = destination(titre);
     if (!cible) return;                       // rien de mieux à proposer : on laisse
     ev.preventDefault();
+    if (cible.charAt(0) === '!') {            // une action de la vitrine
+      try { window.VRT.act(cible.slice(1), a, ev); } catch (e) {}
+      return;
+    }
+    if (/^https?:/.test(cible)) { window.open(cible, '_blank', 'noopener'); return; }
     if (cible.charAt(0) === '#' && window.VRT && typeof window.VRT.act === 'function') {
       location.hash = cible;                  // écran interne de la vitrine
       var page = cible.slice(1);

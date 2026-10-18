@@ -6774,6 +6774,9 @@ window.mDevisAccompagnement = function(){
     +   '<option value="">— Choisir —</option>'
     +   opt('🏫 Répétitions au centre') + opt('🏠 Répétitions à domicile')
     +   opt('💻 Classes virtuelles (à distance)') + opt('📚 Stage de rattrapage')
+    // 18/10/2026 : la vitrine vend une « Préparation examens » sur devis —
+    // la formule manquait au formulaire même qui doit la chiffrer.
+    +   opt('🎯 Préparation aux examens (BEPC, Probatoire, BAC, GCE)')
     + '</select></div>'
     + '<div class="fg"><label class="fl" for="orNiveau">Classe de l’enfant</label><select class="fi" id="orNiveau"><option value="">— Choisir —</option>'
     +   niv.map(opt).join('') + '</select></div>'
@@ -6781,9 +6784,21 @@ window.mDevisAccompagnement = function(){
     + '<div class="fg"><label class="fl" for="orMatieres">Matière(s) concernée(s)</label><input class="fi" id="orMatieres" placeholder="Ex : Maths et Français"></div>'
     + '<div class="fg"><label class="fl" for="orDispo">Jours et heures qui vous arrangent</label><input class="fi" id="orDispo" placeholder="Ex : lundi matin, mercredi après-midi"></div>'
     + '<div class="fg"><label class="fl" for="orMsg">Précisions</label><textarea class="fi" id="orMsg" rows="3" placeholder="Ce qui bloque, les objectifs, une contrainte d’horaire…"></textarea></div>'
-    + '<p style="margin:10px 0 0;font-size:11.5px;line-height:1.6;color:#6B7A99">Vos coordonnées servent uniquement à vous rappeler. Voir la <a href="/legal/confidentialite.html" target="_blank" rel="noopener" style="color:#3C8DFF">politique de confidentialité</a>.</p>',
+    + '<p style="margin:10px 0 0;font-size:11.5px;line-height:1.6;color:#6B7A99">Vos coordonnées servent uniquement à vous rappeler. Voir la <a href="/legal/confidentialite.html" target="_blank" rel="noopener" style="color:#1E499B;font-weight:600">politique de confidentialité</a>.</p>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
     + '<button class="btn bi" onclick="submitOrientation(true)"><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>Envoyer ma demande</button>');
+  /* 18/10/2026 — #devis?f=domicile|centre|rattrapage|examens|virtuel : la
+     carte cliquée sur la vitrine dit déjà quelle formule on veut. */
+  try{
+    var f = ((location.hash || '').match(/[?&]f=([a-z]+)/) || [])[1];
+    var MOTS = { centre:/au centre/i, domicile:/domicile/i, rattrapage:/rattrapage/i, examens:/examens/i, virtuel:/virtuelles/i };
+    var sel = document.getElementById('orType');
+    if(f && MOTS[f] && sel){
+      for(var i = 0; i < sel.options.length; i++){
+        if(MOTS[f].test(sel.options[i].text)){ sel.selectedIndex = i; break; }
+      }
+    }
+  }catch(e){}
 };
 
 function submitOrientation(depuisModale){
