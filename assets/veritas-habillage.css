@@ -306,3 +306,85 @@ nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!impor
 :root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) :is(a.dl,.dl){background:transparent;border-color:#24345F}
 :root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) > :is(h3,h2,h4,strong){color:#F2F5FC}
 :root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) a:not(.vrt-hab a){color:#9CC0FF}
+
+/* ════════════════════════════════════════════════════════════════════════
+   PUCES ET NUMÉROS — ceux de la vitrine (18/10/2026)
+   ════════════════════════════════════════════════════════════════════════
+   « Applique la même chose partout » (Jacques). Les pages statiques avaient
+   une pastille de 7 px cerclée d'un halo, et des numéros qui ne tournaient
+   que sur trois teintes. La vitrine coche ses listes d'un DISQUE PLEIN de
+   22 px (coche blanche) et fait tourner six teintes. Une liste d'encadré
+   garde la teinte de son encadré. */
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ul:not([class]) > li{padding-left:32px}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ul:not([class]) > li::before{
+  width:22px!important;height:22px!important;left:0!important;top:.12em!important;
+  background:var(--vl,#1E499B) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/13px 13px no-repeat!important;
+  box-shadow:none!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .retenir-box ul:not([class]) > li::before{--vl:#007E11}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .obj-box ul:not([class]) > li::before{--vl:#0E7C86}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .corpus-box ul:not([class]) > li::before{--vl:#5B4FA8}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.upsell,.vabo-inline) ul:not([class]) > li::before{--vl:#A84200}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li::before{
+  background-color:#1E499B!important;font-weight:600!important;box-shadow:none!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li:nth-child(6n+2)::before{background-color:#0E7C86!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li:nth-child(6n+3)::before{background-color:#007E11!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li:nth-child(6n+4)::before{background-color:#5B4FA8!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li:nth-child(6n+5)::before{background-color:#B03A6E!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li:nth-child(6n+6)::before{background-color:#A84200!important}
+
+/* ════════════════════════════════════════════════════════════════════════
+   TUILES .cta ET ENCADRÉ .upsell — ceux de la vitrine (18/10/2026)
+   ════════════════════════════════════════════════════════════════════════
+   Mesuré sur /adopter/ : le titre de l'encadré sombre était #153A80 sur un
+   dégradé bleu nuit (illisible), et le bouton « Demander par WhatsApp »
+   portait un texte #1E499B sur un fond #1E499B — il paraissait VIDE. Les
+   tuiles .cta (198 pages) étaient des aplats bleus à filet gauche ; la
+   vitrine pose des cartes blanches à médaillon, teintes en rotation. */
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .upsell :is(h2,h3,h4,p,strong,b){color:#fff!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .upsell small{color:rgba(255,255,255,.78)!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .upsell h3 svg{color:#FFC93C!important;stroke:#FFC93C!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .upsell .btns a:not(.ghost){background:#FFC93C!important;border-color:#FFC93C!important;color:#001136!important;font-weight:600!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .upsell .btns a:not(.ghost) svg{color:#001136!important;stroke:#001136!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .upsell .btns a.ghost{background:transparent!important;border:1.5px solid rgba(255,255,255,.55)!important;color:#fff!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .upsell .btns a.ghost svg{color:#fff!important;stroke:#fff!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a{
+  background:#fff!important;color:#001136!important;border:1px solid #E4E9F2!important;
+  border-radius:14px!important;box-shadow:0 4px 14px rgba(0,17,54,.05)!important;
+  display:flex!important;flex-direction:column;align-items:center;justify-content:flex-start;
+  text-align:center;gap:4px;padding:18px 16px!important;font:600 15.5px/1.35 Poppins,sans-serif!important;
+  text-decoration:none!important;transition:transform .18s ease,box-shadow .18s ease}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:hover{background:#fff!important;transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09)!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a small{color:#6E7385!important;font:400 13px/1.5 Poppins,sans-serif!important;margin-top:2px!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a > svg{
+  width:42px!important;height:42px!important;padding:11px;box-sizing:border-box;margin:0 0 8px!important;
+  border-radius:50%;background:var(--vm-fond,#DBE8FE);color:var(--vm-trait,#1E499B)!important;
+  stroke:currentColor!important;transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:hover > svg{transform:scale(1.08) rotate(-4deg)}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:nth-child(6n+1){--vm-fond:#DBE8FE;--vm-trait:#1E499B}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:nth-child(6n+2){--vm-fond:#E3F1EE;--vm-trait:#0E7C86}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:nth-child(6n+3){--vm-fond:#E7F7EC;--vm-trait:#007E11}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:nth-child(6n+4){--vm-fond:#EEE9F8;--vm-trait:#5B4FA8}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:nth-child(6n+5){--vm-fond:#FBE9F1;--vm-trait:#B03A6E}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:nth-child(6n+6){--vm-fond:#FFF3E4;--vm-trait:#A84200}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a{background:#14224A!important;border-color:#24345F!important;color:#F2F5FC!important}
+
+/* ════════════════════════════════════════════════════════════════════════
+   FAQ NUMÉROTÉE — celle de la vitrine (18/10/2026)
+   ════════════════════════════════════════════════════════════════════════
+   La vitrine numérote ses questions d'un disque plein, teintes en rotation.
+   Une suite de .loupe.faq reçoit le même disque, avec un filet de la
+   teinte de la question. */
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .wrap{counter-reset:vq}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq{counter-increment:vq;border-left:4px solid var(--vq,#1E499B)!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq > h3::before{
+  content:counter(vq);display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:30px;margin-right:10px;border-radius:50%;vertical-align:middle;
+  background:var(--vq,#1E499B);color:#fff;font:600 14px/1 Poppins,sans-serif}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq > h3{color:#001136!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq > p strong{color:var(--vq,#1E499B)}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq{--vq:#1E499B}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq + .loupe.faq{--vq:#0E7C86}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq + .loupe.faq + .loupe.faq{--vq:#007E11}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq{--vq:#5B4FA8}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq{--vq:#B03A6E}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq{--vq:#A84200}

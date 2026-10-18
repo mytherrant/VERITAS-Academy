@@ -5885,9 +5885,9 @@ function vShowSec(sec,btn,_boot){
           return`<div class="featured-card" onclick="${hasExt?'_showExtrait':'viewBookDetail'}('${b.id}')">
           <div style="height:240px;background:linear-gradient(160deg,${cc},${cc}cc);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
             <div style="font-size:64px;position:absolute;z-index:0;opacity:.9">${b.ico}</div>${b.coverImg?'<img src="'+b.coverImg+'" style="width:100%;height:100%;object-fit:cover;position:relative;z-index:1" onerror="this.style.display=\'none\'">':''}
-            <div style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,.62);color:#FFC93C;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:800;z-index:2">${b.cls}</div>
+            <div style="position:absolute;top:6px;left:6px;background:rgba(255,255,255,.94);color:#001136;padding:3px 9px;border-radius:100px;font:600 11px Poppins,sans-serif;z-index:2">${b.cls}</div>
             ${_lisible?'<div style="position:absolute;top:6px;right:6px;background:rgba(255,201,60,.95);color:#142554;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:800;z-index:2">Lecture immédiate</div>':''}
-            ${hasExt?'<div style="position:absolute;bottom:6px;right:6px;background:rgba(5,150,105,.92);color:#fff;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:800;z-index:2">'+ICO('i-eye')+'Extrait</div>':''}
+            ${hasExt?'<div style="position:absolute;bottom:6px;right:6px;background:#007E11;color:#fff;padding:3px 9px;border-radius:100px;font:600 10.5px Poppins,sans-serif;z-index:2">'+ICO('i-eye')+'Extrait</div>':''}
           </div>
           <div style="padding:11px">
             <div style="font-size:13.5px;font-weight:800;line-height:1.25;margin-bottom:3px">${_esc(b.titre)}</div>
@@ -6774,6 +6774,9 @@ window.mDevisAccompagnement = function(){
     +   '<option value="">— Choisir —</option>'
     +   opt('🏫 Répétitions au centre') + opt('🏠 Répétitions à domicile')
     +   opt('💻 Classes virtuelles (à distance)') + opt('📚 Stage de rattrapage')
+    // 18/10/2026 : la vitrine vend une « Préparation examens » sur devis —
+    // la formule manquait au formulaire même qui doit la chiffrer.
+    +   opt('🎯 Préparation aux examens (BEPC, Probatoire, BAC, GCE)')
     + '</select></div>'
     + '<div class="fg"><label class="fl" for="orNiveau">Classe de l’enfant</label><select class="fi" id="orNiveau"><option value="">— Choisir —</option>'
     +   niv.map(opt).join('') + '</select></div>'
@@ -6781,9 +6784,21 @@ window.mDevisAccompagnement = function(){
     + '<div class="fg"><label class="fl" for="orMatieres">Matière(s) concernée(s)</label><input class="fi" id="orMatieres" placeholder="Ex : Maths et Français"></div>'
     + '<div class="fg"><label class="fl" for="orDispo">Jours et heures qui vous arrangent</label><input class="fi" id="orDispo" placeholder="Ex : lundi matin, mercredi après-midi"></div>'
     + '<div class="fg"><label class="fl" for="orMsg">Précisions</label><textarea class="fi" id="orMsg" rows="3" placeholder="Ce qui bloque, les objectifs, une contrainte d’horaire…"></textarea></div>'
-    + '<p style="margin:10px 0 0;font-size:11.5px;line-height:1.6;color:#6B7A99">Vos coordonnées servent uniquement à vous rappeler. Voir la <a href="/legal/confidentialite.html" target="_blank" rel="noopener" style="color:#3C8DFF">politique de confidentialité</a>.</p>',
+    + '<p style="margin:10px 0 0;font-size:11.5px;line-height:1.6;color:#6B7A99">Vos coordonnées servent uniquement à vous rappeler. Voir la <a href="/legal/confidentialite.html" target="_blank" rel="noopener" style="color:#1E499B;font-weight:600">politique de confidentialité</a>.</p>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
     + '<button class="btn bi" onclick="submitOrientation(true)"><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>Envoyer ma demande</button>');
+  /* 18/10/2026 — #devis?f=domicile|centre|rattrapage|examens|virtuel : la
+     carte cliquée sur la vitrine dit déjà quelle formule on veut. */
+  try{
+    var f = ((location.hash || '').match(/[?&]f=([a-z]+)/) || [])[1];
+    var MOTS = { centre:/au centre/i, domicile:/domicile/i, rattrapage:/rattrapage/i, examens:/examens/i, virtuel:/virtuelles/i };
+    var sel = document.getElementById('orType');
+    if(f && MOTS[f] && sel){
+      for(var i = 0; i < sel.options.length; i++){
+        if(MOTS[f].test(sel.options[i].text)){ sel.selectedIndex = i; break; }
+      }
+    }
+  }catch(e){}
 };
 
 function submitOrientation(depuisModale){
@@ -50321,8 +50336,16 @@ var _PICTO_MAP = {
   '🏗':'lc-tool','🛠':'lc-tool','⚖':'lc-clipboard','🗳':'lc-clipboard',
   // v1.19.26 — coche littérale ✓ (U+2713) relevée ~8× dans l'espace admin :
   // ramenée au même pictogramme que ICO('lc-check') pour une seule coche partout.
-  '✓':'lc-check','✔':'lc-check'
+  '✓':'lc-check','✔':'lc-check',
+  // 18/10/2026 — les derniers relevés sur les écrans publics (audit de
+  // toutes les sections, fenêtres et écrans connectés) : plus un émoji.
+  '🧪':'lc-flask','📦':'lc-package','🤖':'lc-brain','🏥':'lc-activity',
+  '→':'lc-arrow-right','➜':'lc-arrow-right','➡':'lc-arrow-right'
 };
+/* Chiffres cerclés (① ② ③ des étapes du paiement) : un simple chiffre —
+   la règle des ronds numérotés (theme-lws.js) lui donne le rond de la
+   vitrine. */
+var _PICTO_CHIFFRES = { '①':'1','②':'2','③':'3','④':'4','⑤':'5','⑥':'6','⑦':'7','⑧':'8','⑨':'9' };
 
 /* Les modificateurs de teinte de peau (U+1F3FB…U+1F3FF) suivent un émoji de
    personne. Une fois celui-ci remplacé par un pictogramme, le modificateur
@@ -50362,7 +50385,12 @@ window._vtPictos = function(racine){
   var zone = racine || document.getElementById('vContent') || document.body;
   if(!zone) return 0;
 
-  var re = /[⌚-➿⬀-⯿️\u{1F000}-\u{1FAFF}]/u;
+  var re = /[←-⇿⌚-➿⬀-⯿️\u{1F000}-\u{1FAFF}]/u;
+  /* « Supprime les émojis partout » (Jacques, 18/10/2026) : un émoji que la
+     table ne connaît pas n'est plus laissé à l'écran — il est retiré. Les
+     flèches typographiques (← ↑ ↓…) restent : ce sont des caractères de
+     texte, pas des émojis, sauf celles que la table convertit. */
+  var EMOJI_SEUL = /^(?:[\u{1F000}-\u{1FAFF}]|[⚡⚠⛔✅❌❗❓❕❔⭐⏳⌛⏰☕⚽⛳☀☁☔⛅⭕])$/u;   // jamais ★ ☆ ✕ ✓ : du texte
   var marcheur, aTraiter = [], n = 0;
   try{
     marcheur = document.createTreeWalker(zone, NodeFilter.SHOW_TEXT, {
@@ -50390,6 +50418,14 @@ window._vtPictos = function(racine){
       if(paire && i+1<txt.length){ c = txt.substr(i,2); }
       var cle = c.replace('️','');
       var id = _PICTO_MAP[cle];
+      if(!id && _PICTO_CHIFFRES[cle]){ tampon += _PICTO_CHIFFRES[cle]; converti = true; continue; }
+      if(!id && EMOJI_SEUL.test(cle)){
+        converti = true; n++;
+        if(paire) i++;
+        if(txt[i+1]==='️') i++;
+        if(txt[i+1]===' ' && !tampon.trim()) i++;     // pas d'espace orpheline en tête
+        continue;
+      }
       if(id){
         if(tampon){ frag.appendChild(document.createTextNode(tampon)); tampon=''; }
         frag.appendChild(_pictoSvg(id, taille));

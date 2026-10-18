@@ -282,7 +282,8 @@
      près : aplatis ou « corrigés » ici, le bandeau perdait son dégradé et
      « Orange Money » passait du brique au blanc. */
   function horsHabillage(el) {
-    return !(el.closest && el.closest('.vrt-hab'));
+    // Ronds numérotés et médaillons : couleur maîtrisée par le § 40.
+    return !(el.closest && el.closest('.vrt-hab, .vm-num, .vm-med'));
   }
 
   /* ═══ LA VITRINE DANS LE CONTENU (17/10/2026) ═══════════════════════════
@@ -386,10 +387,14 @@
       var c = meds[m].parentElement;
       // Une ligne (icône à gauche, libellé et valeur à droite) : contact,
       // avantages… Le médaillon se pose À CÔTÉ du texte, jamais au milieu.
-      if (c && meds[m] === c.firstElementChild && c.children.length >= 2 && (c.tagName === 'LI' || !estCarte(c))) {
+      // Un titre de rubrique (« Vos avantages ») porte son texte en nœud nu : il compte.
+      var aCote = c ? (c.textContent || '').trim().length : 0;
+      if (c && meds[m] === c.firstElementChild && (c.children.length >= 2 || (aCote > 0 && aCote <= 60)) && (c.tagName === 'LI' || !estCarte(c))) {
         var dc = getComputedStyle(c);
         if (c.tagName === 'LI' || (dc.display.indexOf('flex') >= 0 && dc.flexDirection.indexOf('row') === 0)) {
           c.classList.add('vm-ligne');
+          // Titre de rubrique (icône + texte court, sans autre élément) : l'anneau, en petit.
+          if (c.children.length === 1 && c.tagName !== 'LI') meds[m].classList.add('vm-anneau');
           c.setAttribute('data-vm', teinte);
           continue;
         }
@@ -407,6 +412,13 @@
         if (estCarte(c)) {
           c.classList.add('vm-carte');
           if (c.tagName === 'A' || c.hasAttribute('onclick') || c.getAttribute('role') === 'button') c.classList.add('vm-clic');
+        } else {
+          /* 18/10/2026 — HORS carte, la vitrine n'emploie pas le rond pâle
+             mais l'ANNEAU : 66 px, fond blanc, cercle de 3 px dans la teinte,
+             icône bleu nuit (« Le programme officiel, pas un cours
+             importé »). Sur l'application, tout était en rond pâle : un seul
+             registre, d'où l'impression de monotonie. */
+          meds[m].classList.add('vm-anneau');
         }
       }
     }
@@ -458,17 +470,56 @@
       });
     }
 
+    /* 1 quater. RONDS NUMÉROTÉS (18/10/2026). Les étapes « 1 · 2 · 3 » des
+          programmes de partenariat étaient des ronds en dégradé bleu nuit
+          #1E3A8A à chiffre doré ; la vitrine numérote dans un rond PÂLE, au
+          chiffre de la teinte (FAQ des tarifs). La teinte suit le numéro :
+          1 bleu, 2 sarcelle, 3 vert… — deux étapes voisines ne se
+          confondent jamais. */
+    var nums = zone.querySelectorAll('div,span,b,strong');
+    for (var nn = 0; nn < nums.length; nn++) {
+      var ne = nums[nn];
+      if (ne.children.length || ne.classList.contains('vm-num') || ne.closest(HORS_CONTENU)) continue;
+      var nt = (ne.textContent || '').trim();
+      if (!/^\d{1,2}$/.test(nt)) continue;
+      var nr = ne.getBoundingClientRect();
+      if (nr.width < 16 || nr.width > 48 || Math.abs(nr.width - nr.height) > 4) continue;
+      var nrad = parseFloat(getComputedStyle(ne).borderTopLeftRadius) || 0;
+      if (nrad < nr.width * 0.4) continue;
+      ne.classList.add('vm-num');
+      ne.setAttribute('data-vm', TEINTES[(parseInt(nt, 10) - 1 + TEINTES.length) % TEINTES.length]);
+    }
+
+    /* 1 quinquies. UNE SEULE MARQUE PAR LIGNE (18/10/2026, « double puce »).
+          Un émoji en tête de ligne (📁, 📘…) devient un pictogramme APRÈS la
+          pose de la puce (la conversion des émojis passe ensuite) : la ligne
+          portait alors la puce cochée ET un pictogramme. La vitrine n'a
+          qu'une puce : le pictogramme de tête s'efface. */
+    var tx = zone.querySelectorAll('li.vm-li > .vm-li-tx');
+    for (var tq = 0; tq < tx.length; tq++) {
+      var pr = tx[tq].firstChild;
+      while (pr && pr.nodeType === 3 && !pr.textContent.trim()) pr = pr.nextSibling;
+      if (estIcone(pr)) {
+        var suiv = pr.nextSibling;
+        pr.remove();
+        if (suiv && suiv.nodeType === 3) suiv.textContent = suiv.textContent.replace(/^[\s ]+/, '');
+      }
+    }
+
     /* 2. PUCES — le disque coché de la teinte du bloc. */
     var lis = zone.querySelectorAll('li');
+    var rangListe = 0, vues = [];
     for (var l = 0; l < lis.length; l++) {
       var li = lis[l];
       if (li.classList.contains('vm-li') || li.closest(HORS_CONTENU) || li.querySelector('.vm-med,button,input,select,a.btn')) continue;
       var ul = li.parentElement;
-      if (!ul || ul.tagName === 'OL') continue;
+      if (!ul) continue;
+      var ordonnee = ul.tagName === 'OL';
       var premier = li.firstChild;
       while (premier && premier.nodeType === 3 && !premier.textContent.trim()) premier = premier.nextSibling;
       var marque = false;
-      if (estIcone(premier)) { premier.remove(); marque = true; }
+      if (ordonnee) marque = true;
+      else if (estIcone(premier)) { premier.remove(); marque = true; }
       else if (premier && premier.nodeType === 3 && PUCE_TEXTE.test(premier.textContent)) {
         premier.textContent = premier.textContent.replace(PUCE_TEXTE, ''); marque = true;
       } else if (getComputedStyle(ul).listStyleType !== 'none') marque = true;
@@ -482,7 +533,22 @@
       var corps = document.createElement('span');
       corps.className = 'vm-li-tx';
       while (li.firstChild) corps.appendChild(li.firstChild);
-      li.appendChild(puce()); li.appendChild(corps);
+      /* Une liste hors de tout bloc teinté prend SA teinte (rotation de la
+         vitrine) : dix listes à puces toutes bleues se lisaient comme une
+         seule. Une liste numérotée colore chaque numéro (1 bleu, 2
+         sarcelle…), comme les étapes de la vitrine. */
+      if (vues.indexOf(ul) < 0) {
+        vues.push(ul);
+        if (!ul.closest('[data-vm]')) ul.setAttribute('data-vm', TEINTES[rangListe++ % TEINTES.length]);
+      }
+      var marqueur = puce();
+      if (ordonnee) {
+        var rang = [].indexOf.call(ul.children, li) + (parseInt(ul.getAttribute('start'), 10) || 1);
+        marqueur.className = 'vm-puce vm-puce-n';
+        marqueur.textContent = String(rang);
+        marqueur.setAttribute('data-vm', TEINTES[(rang - 1) % TEINTES.length]);
+      }
+      li.appendChild(marqueur); li.appendChild(corps);
       li.classList.add('vm-li');
       ul.classList.add('vm-ul');
     }
@@ -518,7 +584,7 @@
     var nn = mc.querySelectorAll('*');
     for (var k = 0; k < nn.length; k++) {
       var el = nn[k];
-      if (el.closest('.vrt-hab')) continue;
+      if (!horsHabillage(el)) continue;
       for (var c = 0; c < el.childNodes.length; c++) {
         var n = el.childNodes[c];
         if (n.nodeType === 3 && n.textContent.trim().length > 1) { corrigerCouleur(el); break; }
