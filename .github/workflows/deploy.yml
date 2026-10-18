@@ -500,6 +500,13 @@ jobs:
       - name: 🧑‍🏫 Les enseignants-partenaires reçoivent-ils leur accès ?
         run: node tests/banc_partenaires_enseignants.cjs
 
+      # ── 🧾 ESPACE PARTENAIRE ET TABLEAU FINANCIER (18/10/2026). Aucun
+      #    fournisseur ne verse : le Centre paie à la fin du mois. Le banc parle
+      #    aux vrais endpoints (transactions, journal, versements_mois, moi) et
+      #    vérifie que la lecture du tableau de bord ne réécrit aucun paiement.
+      - name: 🧾 Les transactions et les gains des partenaires sont-ils justes ?
+        run: node tests/banc_espaces_gains.cjs
+
       # ── 💳 LE CORPUS S'OUVRE-T-IL VRAIMENT AU PAIEMENT ?
       #    `paiements_entitlements.php` s'arrête à « le plan est écrit sur le
       #    compte ». Entre là et « le texte descend dans le navigateur » il

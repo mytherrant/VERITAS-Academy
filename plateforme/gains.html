@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Mes gains — Partenaires VÉRITAS</title>
+<link rel="icon" href="../assets/veritas-logo.png">
+<!--
+  ESPACE PARTENAIRE (18/10/2026) — gains, filleuls, commissions, versements.
+  Aucun fournisseur ne verse automatiquement (SkySMS garde les fonds chez
+  Nexah) : le Centre paie les soldes à la main, à la FIN DE CHAQUE MOIS.
+  Cette page le dit, et montre au partenaire tout ce qui lui est dû.
+
+  Connexion : le même jeton que l'Atelier (localStorage « minesec_token »,
+  même domaine) ; à défaut, le code de reprise remis par le Centre
+  (api/plateforme.php?action=reprise). Les chiffres viennent du registre du
+  serveur (api/parrainage.php?action=moi) — jamais d'un calcul local.
+-->
+<style>
+:root{--ink:#142554;--ink2:#334155;--ink3:#64748B;--line:#E2E8F0;--bg:#F4F6FB;--card:#fff;--gold:#FFC93C;--gold2:#B8860B;--ok:#047857;--ko:#B91C1C;--warn:#B45309;--soft:#EEF2FF}
+@media (prefers-color-scheme:dark){:root{--ink:#E8EDFB;--ink2:#CBD5E1;--ink3:#94A3B8;--line:#26324D;--bg:#0B1226;--card:#121B33;--soft:#18244A}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink2);font:15px/1.55 Poppins,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:inherit}
+.barre{background:#142554;color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.barre img{width:34px;height:34px;border-radius:8px;background:#fff}
+.barre b{font-size:16px;letter-spacing:.2px}
+.barre .esp{flex:1}
+.barre button,.barre a.btnb{background:transparent;border:1px solid #ffffff55;color:#fff;border-radius:9px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer;text-decoration:none}
+main{max-width:1040px;margin:0 auto;padding:20px 16px 48px}
+h1{color:var(--ink);font-size:24px;margin:4px 0 4px}
+.sous{color:var(--ink3);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+.card h2{color:var(--ink);font-size:16px;margin:0 0 12px}
+.tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.tuile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.tuile .l{font-size:12.5px;color:var(--ink3)}
+.tuile .v{font-size:22px;font-weight:700;color:var(--ink);margin-top:4px;font-variant-numeric:tabular-nums}
+.tuile .n{font-size:12px;color:var(--ink3);margin-top:2px}
+.tuile.or{border-color:var(--gold);background:linear-gradient(180deg,#FFC93C1f,transparent)}
+.code{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.code .c{font:700 22px/1 ui-monospace,Consolas,monospace;color:var(--ink);background:var(--soft);border:1px dashed var(--ink3);border-radius:10px;padding:10px 14px;letter-spacing:1px}
+.btn{display:inline-flex;align-items:center;gap:6px;border-radius:10px;padding:9px 14px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none}
+.btn.p{background:#142554;border-color:#142554;color:#fff}
+.btn.or{background:var(--gold);border-color:var(--gold);color:#142554}
+.fi{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;background:var(--card);color:var(--ink)}
+.ligne{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ib{display:flex;gap:10px;border-radius:12px;padding:12px 14px;font-size:14px;margin-bottom:12px}
+.ib.i{background:var(--soft)} .ib.w{background:#FEF3C7;color:#78350F} .ib.e{background:#FEE2E2;color:#7F1D1D}
+.barres{display:flex;align-items:flex-end;gap:10px;height:150px;padding-top:8px}
+.barres .b{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.barres .b i{display:block;width:70%;max-width:48px;background:linear-gradient(180deg,#3C6BDF,#142554);border-radius:6px 6px 0 0;min-height:3px}
+.barres .b small{font-size:11px;color:var(--ink3);white-space:nowrap}
+.barres .b em{font-style:normal;font-size:11px;font-weight:700;color:var(--ink)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--ink3);font-weight:600;font-size:12.5px;padding:8px 6px;border-bottom:1px solid var(--line)}
+td{padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+td.m{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tw{overflow-x:auto}
+.prog{height:10px;background:var(--soft);border-radius:99px;overflow:hidden;margin:8px 0 4px}
+.prog i{display:block;height:100%;background:var(--gold);border-radius:99px}
+.pastille{display:inline-block;border-radius:99px;padding:2px 9px;font-size:12px;font-weight:600}
+.pastille.ok{background:#D1FAE5;color:var(--ok)} .pastille.ko{background:#FEE2E2;color:var(--ko)} .pastille.at{background:#FEF3C7;color:var(--warn)}
+.deux{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.deux{grid-template-columns:1fr}.tuile .v{font-size:19px}h1{font-size:21px}}
+.vide{color:var(--ink3);text-align:center;padding:16px}
+.cache{display:none}
+.login{max-width:440px;margin:40px auto}
+</style>
+</head>
+<body>
+<header class="barre">
+  <img src="../assets/veritas-logo.png" alt="">
+  <b>VÉRITAS · Espace partenaire</b>
+  <span class="esp"></span>
+  <a class="btnb" href="./">Atelier</a>
+  <button id="sortir" class="cache" type="button">Se déconnecter</button>
+</header>
+<main id="zone"><div class="vide">Chargement…</div></main>
+
+<script>
+(function(){
+  'use strict';
+  var API = '../api/';
+  var zone = document.getElementById('zone');
+  var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); };
+  var F = function(n){ return (Math.round(+n || 0)).toLocaleString('fr-FR').replace(/ | /g, ' ') + ' F'; };
+  var D = function(s){ if(!s) return '—'; var d = new Date(String(s).length === 10 ? s + 'T12:00:00' : s); return isNaN(d) ? esc(s) : d.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'}); };
+  var MOIS = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  var jeton = function(){ try{ return localStorage.getItem('minesec_token') || ''; }catch(e){ return ''; } };
+  var poserJeton = function(t){ try{ if(t) localStorage.setItem('minesec_token', t); else localStorage.removeItem('minesec_token'); }catch(e){} };
+
+  function api(chemin, corps){
+    var h = { 'Accept':'application/json' };
+    var t = jeton(); if(t) h.Authorization = 'Bearer ' + t;
+    var init = { method: corps ? 'POST' : 'GET', headers: h };
+    if(corps){ h['Content-Type'] = 'application/json'; init.body = JSON.stringify(corps); }
+    return fetch(API + chemin, init).then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(j){ j = j || {}; j._http = r.status; return j; });
+    }).catch(function(){ return { ok:false, _http:0, error:'Connexion impossible. Vérifiez votre réseau.' }; });
+  }
+
+  /* ── Connexion par code de reprise ─────────────────────────────────── */
+  function ecranConnexion(msg){
+    document.getElementById('sortir').classList.add('cache');
+    zone.innerHTML = '<div class="card login"><h2>Accéder à mes gains</h2>'
+      + '<p class="sous" style="margin-bottom:12px">Entrez le <b>code de reprise</b> reçu du Centre VÉRITAS (format XXXX-XXXX-XXXX). '
+      + 'C’est le même code qui ouvre votre Atelier de Français.</p>'
+      + (msg ? '<div class="ib e">' + esc(msg) + '</div>' : '')
+      + '<input class="fi" id="rep" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX">'
+      + '<div class="ligne" style="margin-top:12px"><button class="btn p" id="ok" type="button">Voir mes gains</button></div>'
+      + '<p style="font-size:13px;color:var(--ink3);margin:14px 0 0">Code perdu ? Écrivez au Centre par WhatsApp au 697 63 77 39 : il se remplace.</p></div>';
+    var go = function(){
+      var c = (document.getElementById('rep').value || '').trim().toUpperCase();
+      if(c.length < 8){ ecranConnexion('Entrez le code de reprise complet.'); return; }
+      zone.querySelector('#ok').textContent = 'Vérification…';
+      api('plateforme.php?action=reprise', { code:c }).then(function(j){
+        if(!j.ok || !j.token){ ecranConnexion(j.error || 'Ce code n’a pas pu être vérifié.'); return; }
+        poserJeton(j.token); charger();
+      });
+    };
+    zone.querySelector('#ok').onclick = go;
+    zone.querySelector('#rep').onkeydown = function(e){ if(e.key === 'Enter') go(); };
+  }
+
+  /* ── Le tableau de bord ────────────────────────────────────────────── */
+  function charger(){
+    if(!jeton()){ ecranConnexion(''); return; }
+    api('parrainage.php?action=moi').then(function(d){
+      if(d._http === 401 || d._http === 403){ poserJeton(''); ecranConnexion('Votre session a expiré : entrez à nouveau votre code de reprise.'); return; }
+      if(!d.ok){ zone.innerHTML = '<div class="card"><div class="ib e">' + esc(d.error || 'Service momentanément indisponible.') + '</div><button class="btn" onclick="location.reload()">Réessayer</button></div>'; return; }
+      afficher(d);
+    });
+  }
+
+  function afficher(d){
+    document.getElementById('sortir').classList.remove('cache');
+    var v = d.versement || {}, p = d.partenaire, cm = d.ceMois || {};
+    var pct = d.commissionPct != null ? d.commissionPct : ((d.regle || {}).commissionPct || 0);
+    var remise = (d.regle || {}).remisePct || 0;
+    var lien = d.lien || ('https://veritas-school.com/?ref=' + encodeURIComponent(d.code || ''));
+    var partage = 'Abonnez-vous à VÉRITAS avec mon code ' + d.code + ' : ' + remise + ' % de réduction sur vos paiements. ' + lien;
+
+    var h = '<h1>Bonjour' + (d.nom ? ' ' + esc(d.nom) : '') + '</h1>'
+      + '<p class="sous">Vos gains, vos filleuls et vos versements, mis à jour à chaque paiement confirmé.</p>';
+
+    h += '<div class="ib i"><span>🗓️</span><span><b>Versement mensuel.</b> Votre solde est payé par le Centre VÉRITAS sur votre Mobile Money à la fin de chaque mois'
+      + (v.prochain ? ' — prochain versement : <b>' + D(v.prochain) + '</b>' : '') + ', à partir de <b>' + F(v.seuil || 0) + '</b> cumulés. '
+      + 'En dessous, le solde est simplement reporté au mois suivant.</span></div>';
+
+    h += '<div class="tuiles">'
+      + '<div class="tuile or"><div class="l">À recevoir à la fin du mois</div><div class="v">' + F(d.solde) + '</div><div class="n">' + (d.solde >= (v.seuil || 0) ? 'seuil atteint' : 'reporté si moins de ' + F(v.seuil || 0)) + '</div></div>'
+      + '<div class="tuile"><div class="l">Gagné ce mois-ci</div><div class="v">' + F(cm.commission) + '</div><div class="n">' + (cm.ventes || 0) + ' paiement(s) avec votre code</div></div>'
+      + '<div class="tuile"><div class="l">Total gagné</div><div class="v">' + F(d.gagne) + '</div><div class="n">depuis le début</div></div>'
+      + '<div class="tuile"><div class="l">Déjà versé</div><div class="v">' + F(d.verse) + '</div><div class="n">sur votre Mobile Money</div></div>'
+      /* Un filleul compte dès qu'il a PAYÉ avec le code ; le lien « à vie » ne
+         naît que pour un payeur qui a un compte — on montre le plus grand. */
+      + '<div class="tuile"><div class="l">Filleuls</div><div class="v">' + Math.max(d.filleuls || 0, d.filleulsPayants || 0) + '</div><div class="n">' + (d.filleulsPayants || 0) + ' ont déjà payé</div></div>'
+      + '<div class="tuile"><div class="l">Paiements avec votre code</div><div class="v">' + (d.ventes || 0) + '</div><div class="n">votre taux : ' + pct + ' %</div></div>'
+      + '</div>';
+
+    h += '<div class="card"><h2>Votre code à partager</h2><div class="code"><span class="c">' + esc(d.code) + '</span>'
+      + '<button class="btn" type="button" id="copier">Copier le lien</button>'
+      + '<a class="btn or" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(partage) + '">Partager sur WhatsApp</a></div>'
+      + '<p style="margin:12px 0 0;font-size:14px">Chaque personne qui paie avec ce code obtient <b>' + remise + ' %</b> de réduction, et vous recevez <b>' + pct + ' %</b> de ce qu’elle paie. '
+      + 'Elle vous reste rattachée : ses paiements suivants comptent aussi.</p></div>';
+
+    if(p){
+      var pc = Math.min(100, Math.round(100 * (p.cycle || 0) / Math.max(1, p.seuil || 5)));
+      var moisAcc = Math.round((p.jours || 60) / 30);
+      h += '<div class="card"><h2>Votre accès à l’Atelier de Français</h2>'
+        + (!p.actif ? '<div class="ib w">Votre statut d’enseignant-partenaire est suspendu. Contactez le Centre.</div>'
+           : p.ouvert ? '<p style="margin:0 0 6px">Ouvert jusqu’au <b>' + D(p.fin) + '</b> (' + p.resteJours + ' jour' + (p.resteJours > 1 ? 's' : '') + ').</p>'
+           : '<div class="ib w">Votre accès gratuit a pris fin le ' + D(p.fin) + '. Il se rouvre dès que ' + (p.seuil - (p.cycle || 0)) + ' nouvelle(s) personne(s) paient avec votre code, ou sur décision du Centre.</div>')
+        + '<div style="font-size:14px">Prochaine prolongation de <b>' + moisAcc + ' mois</b> : <b>' + (p.cycle || 0) + ' / ' + p.seuil + '</b> nouveaux filleuls payants</div>'
+        + '<div class="prog"><i style="width:' + pc + '%"></i></div>'
+        + '<div class="ligne" style="margin-top:10px"><a class="btn p" href="./">Ouvrir l’Atelier</a></div></div>';
+    }
+
+    // Six mois de commissions.
+    var pm = d.parMois || {}, cles = Object.keys(pm), max = 1;
+    cles.forEach(function(k){ max = Math.max(max, pm[k].commission || 0); });
+    h += '<div class="deux"><div class="card"><h2>Vos commissions, mois par mois</h2><div class="barres">'
+      + cles.map(function(k){
+          var x = pm[k] || {}, hh = Math.max(3, Math.round(120 * (x.commission || 0) / max));
+          return '<div class="b" title="' + esc(x.ventes || 0) + ' paiement(s)"><em>' + ((x.commission || 0) ? F(x.commission) : '') + '</em><i style="height:' + hh + 'px"></i><small>' + MOIS[+k.slice(5) - 1] + '</small></div>';
+        }).join('') + '</div></div>';
+
+    // Où recevoir.
+    h += '<div class="card"><h2>Où recevoir vos versements</h2>'
+      + (d.numero ? '<p style="margin:0 0 10px">Numéro enregistré : <b>' + esc(d.operateur) + ' ' + esc(d.numero) + '</b></p>'
+                  : '<div class="ib w">Aucun numéro enregistré : indiquez votre numéro MTN ou Orange pour être payé.</div>')
+      + (d.blocage ? '<div class="ib e">' + esc(d.blocage) + '</div>' : '')
+      + '<div class="ligne"><input class="fi" id="tel" inputmode="tel" placeholder="6XX XX XX XX" style="flex:1;min-width:180px"><button class="btn p" type="button" id="numOk">Enregistrer</button></div></div></div>';
+
+    var ops = d.operations || [];
+    h += '<div class="card"><h2>Dernières commissions</h2>' + (ops.length
+      ? '<div class="tw"><table><thead><tr><th>Date</th><th>Achat</th><th style="text-align:right">Payé</th><th style="text-align:right">Votre commission</th></tr></thead><tbody>'
+        + ops.map(function(o){ return '<tr><td>' + D(o.date) + '</td><td>' + esc(o.quoi || '—') + (o.annule ? ' <span class="pastille ko">remboursé</span>' : '') + '</td><td class="m">' + F(o.paye) + '</td><td class="m"><b>' + F(o.commission) + '</b></td></tr>'; }).join('')
+        + '</tbody></table></div>'
+      : '<div class="vide">Aucune commission pour l’instant. Partagez votre code : elles apparaissent ici dès le premier paiement.</div>') + '</div>';
+
+    var vs = d.versements || [];
+    h += '<div class="card"><h2>Versements reçus</h2>' + (vs.length
+      ? '<div class="tw"><table><thead><tr><th>Date</th><th style="text-align:right">Montant</th><th>État</th></tr></thead><tbody>'
+        + vs.map(function(x){
+            var e = x.etat === 'verse' ? '<span class="pastille ok">versé</span>' : x.etat === 'echec' ? '<span class="pastille ko">non abouti</span>' : '<span class="pastille at">en cours</span>';
+            return '<tr><td>' + D(x.date) + '</td><td class="m"><b>' + F(x.montant) + '</b></td><td>' + e + '</td></tr>'; }).join('')
+        + '</tbody></table></div>'
+      : '<div class="vide">Aucun versement pour l’instant. Le premier arrivera à la fin du mois où votre solde atteint ' + F(v.seuil || 0) + '.</div>') + '</div>';
+
+    zone.innerHTML = h;
+    zone.querySelector('#copier').onclick = function(){
+      var b = this;
+      try{ navigator.clipboard.writeText(lien).then(function(){ b.textContent = 'Lien copié ✓'; }); }catch(e){ prompt('Copiez ce lien :', lien); }
+    };
+    zone.querySelector('#numOk').onclick = function(){
+      var t = (document.getElementById('tel').value || '').trim();
+      api('parrainage.php?action=numero', { tel:t }).then(function(j){
+        if(j.ok) charger(); else alert(j.error || 'Numéro refusé.');
+      });
+    };
+  }
+
+  document.getElementById('sortir').onclick = function(){ poserJeton(''); ecranConnexion(''); };
+  /* Lien direct depuis le message du Centre : gains.html#reprise=XXXX-XXXX-XXXX */
+  var m = /[#&]reprise=([A-Za-z0-9-]{8,20})/.exec(location.hash || '');
+  if(m){
+    history.replaceState(null, '', location.pathname);
+    api('plateforme.php?action=reprise', { code:m[1].toUpperCase() }).then(function(j){
+      if(j.ok && j.token){ poserJeton(j.token); charger(); } else ecranConnexion(j.error || 'Ce code n’a pas pu être vérifié.');
+    });
+  } else charger();
+})();
+</script>
+</body>
+</html>
