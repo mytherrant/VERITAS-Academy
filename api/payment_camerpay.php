@@ -1377,6 +1377,8 @@ if ($action === 'skysms_diag' && $method === 'GET') {
         'identifiantsLongueur' => ['user' => strlen(vrt_skysms_const('SKYSMS_USER')), 'password' => strlen(vrt_skysms_const('SKYSMS_PASSWORD')),
                                    'sender' => vrt_skysms_const('SKYSMS_SENDER')],
         'soldeSms'       => vrt_skysms_sms_actif() ? vrt_skysms_solde() : null,
+        'joignable'      => skysmsJoignable(),
+        'dernieresDemandes' => skysmsDernieresDemandes($stateDir, 8),
     ]);
 }
 
@@ -2250,6 +2252,33 @@ function camerpaySkysmsPret() {
 /* Page d'origine de l'achat, d'après le Referer — acceptée seulement si elle
    est sur NOTRE domaine : la page de paiement y redirige, on n'en fait pas une
    redirection ouverte vers n'importe où. */
+/* Diagnostic (admin) : le serveur JOINT-il SkySMS ? Requête sans identifiants,
+   vers une route qui ne débite rien : seule compte la réponse, quelle qu'elle
+   soit. « partie: false » = pare-feu, DNS ou certificat — la demande de
+   paiement ne pouvait pas arriver sur le téléphone. */
+function skysmsJoignable() {
+    $t = microtime(true);
+    [$http, $rep, $err, $partie] = vrt_skysms_get('/soldesms/v1/output=json', [], 15);
+    return ['ok' => $http > 0, 'http' => $http, 'requetePartie' => $partie,
+            'ms' => (int) round((microtime(true) - $t) * 1000), 'erreur' => mb_substr($err, 0, 160)];
+}
+
+/* Diagnostic (admin) : ce que SkySMS a répondu aux dernières demandes poussées.
+   C'est là que se lit pourquoi un téléphone n'a rien reçu. Numéros masqués. */
+function skysmsDernieresDemandes($stateDir, $n) {
+    $out = [];
+    foreach (camerpayCollectStates($stateDir, 'skysms') as $p) {
+        if (empty($p['push_count'])) continue;
+        $out[] = ['ref' => (string) ($p['ref'] ?? ''), 'derniere' => (string) ($p['last_push_at'] ?? ''),
+                  'demandes' => (int) $p['push_count'], 'statut' => (string) ($p['status'] ?? ''),
+                  'tel' => vrt_skysms_tel_masque((string) ($p['clientTel'] ?? '')),
+                  'reponseSkysms' => $p['push_reponse'] ?? null, 'erreur' => (string) ($p['push_error'] ?? ''),
+                  'idOperation' => (string) ($p['id_operation'] ?? '')];
+    }
+    usort($out, function ($a, $b) { return strcmp($b['derniere'], $a['derniere']); });
+    return array_slice($out, 0, $n);
+}
+
 function skysmsRetour() {
     $r = (string) ($_SERVER['HTTP_REFERER'] ?? '');
     $p = $r !== '' ? parse_url($r) : false;
