@@ -2144,17 +2144,62 @@
               </div>
             </sc-if>
             <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin-bottom:9px">Circuit de validation</div>
-            <div style="display:flex;flex-direction:column;margin-bottom:14px">
+            <!-- Circuit de relecture (19/10/2026, lot B) : chaque relecteur rend une
+                 DÉCISION motivée — valider, demander un ajustement, rejeter — sur
+                 une portée (tout le sujet, le barème, le corrigé…). L'état de
+                 l'épreuve se DÉDUIT des décisions du tour en cours (_statutRevue) :
+                 un rejet l'emporte, puis un ajustement, puis le quorum de
+                 validations. Avant, un seul clic « Valider » sans trace, et
+                 « Renvoyer en brouillon » sans dire pourquoi. -->
+            <div style="display:flex;flex-direction:column;margin-bottom:10px">
               <div style="{{ step1Style }}"><span style="{{ step1Dot }}">1</span>Brouillon</div>
-              <div style="{{ step2Style }}"><span style="{{ step2Dot }}">2</span>En relecture</div>
+              <div style="{{ step2Style }}"><span style="{{ step2Dot }}">2</span>{{ step2Label }}</div>
               <div style="{{ step3Style }}"><span style="{{ step3Dot }}">3</span>Validé</div>
+              <div style="{{ step4Style }}"><span style="{{ step4Dot }}">4</span>Diffusé</div>
             </div>
+            <div style="{{ revEcheanceStyle }}">{{ revEcheanceLabel }}</div>
             <div style="display:flex;flex-direction:column;gap:8px">
-              <sc-if value="{{ canSubmit }}" hint-placeholder-val="{{ false }}"><button onClick="{{ submitReview }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:10px;font-size:13px;font-weight:700;border-radius:9px;cursor:pointer;font-family:Poppins" style-hover="background:var(--c135a96,#135a96)">Soumettre en relecture</button></sc-if>
-              <sc-if value="{{ canValidate }}" hint-placeholder-val="{{ false }}"><button onClick="{{ validate }}" style="background:var(--c1f9d55,#1f9d55);color:var(--cffffff,#fff);border:none;padding:10px;font-size:13px;font-weight:700;border-radius:9px;cursor:pointer;font-family:Poppins" style-hover="background:var(--c188047,#188047)">{{ icValide }} Valider l'épreuve</button></sc-if>
-              <sc-if value="{{ canSendBack }}" hint-placeholder-val="{{ false }}"><button onClick="{{ sendBack }}" style="background:var(--cffffff,#fff);color:var(--cc0392b,#c0392b);border:1px solid var(--cecc4bf,#ecc4bf);padding:9px;font-size:12.5px;font-weight:600;border-radius:9px;cursor:pointer" style-hover="background:var(--cfdecea,#fdecea)">Renvoyer en brouillon</button></sc-if>
+              <sc-if value="{{ canSubmit }}" hint-placeholder-val="{{ false }}">
+                <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--c5a6678,#5a6678)">Relectures requises
+                  <select value="{{ revRequis }}" onChange="{{ setRevRequis }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)"><sc-for list="{{ revRequisOptions }}" as="r" hint-placeholder-count="3"><option value="{{ r }}">{{ r }}</option></sc-for></select>
+                </label>
+                <button onClick="{{ submitReview }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:10px;font-size:13px;font-weight:700;border-radius:9px;cursor:pointer;font-family:Poppins" style-hover="background:var(--c135a96,#135a96)">{{ submitLabel }}</button>
+              </sc-if>
+              <sc-if value="{{ canDecider }}" hint-placeholder-val="{{ false }}">
+                <div style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:10px;padding:11px;display:flex;flex-direction:column;gap:8px;background:var(--cfbfcfe,#fbfcfe)">
+                  <div style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ revDecisionTitre }}</div>
+                  <div style="display:flex;gap:5px;flex-wrap:wrap">
+                    <sc-for list="{{ revVerdicts }}" as="v" hint-placeholder-count="3"><button onClick="{{ v.choisir }}" style="{{ v.style }}">{{ v.label }}</button></sc-for>
+                  </div>
+                  <select value="{{ revPortee }}" onChange="{{ setRevPortee }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)"><sc-for list="{{ revPortees }}" as="pt" hint-placeholder-count="6"><option value="{{ pt }}">{{ pt }}</option></sc-for></select>
+                  <textarea value="{{ revMotif }}" onChange="{{ setRevMotif }}" rows="3" placeholder="{{ revMotifAide }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 9px;font-size:12.5px;line-height:1.5;resize:vertical;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)"></textarea>
+                  <div style="{{ revErrStyle }}">{{ revErr }}</div>
+                  <button onClick="{{ rendreDecision }}" style="background:var(--c14375f,#14375f);color:var(--cffffff,#fff);border:none;padding:9px;font-size:12.5px;font-weight:700;border-radius:9px;cursor:pointer;font-family:Poppins" style-hover="filter:brightness(1.15)">Rendre ma décision</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ canSendBack }}" hint-placeholder-val="{{ false }}"><button onClick="{{ sendBack }}" style="background:var(--cffffff,#fff);color:var(--cc0392b,#c0392b);border:1px solid var(--cecc4bf,#ecc4bf);padding:9px;font-size:12.5px;font-weight:600;border-radius:9px;cursor:pointer" style-hover="background:var(--cfdecea,#fdecea)">Repasser en brouillon</button></sc-if>
               <sc-if value="{{ canPublish }}" hint-placeholder-val="{{ false }}"><button onClick="{{ togglePublish }}" style="background:var(--cffffff,#fff);color:var(--cc26a12,#c26a12);border:1px solid var(--cf0d9b0,#f0d9b0);padding:9px;font-size:12.5px;font-weight:600;border-radius:9px;cursor:pointer" style-hover="background:var(--cfdefdb,#fdefdb)">{{ publishLabel }}</button></sc-if>
             </div>
+            <sc-if value="{{ revHasSynthese }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--ceef2f7,#eef2f7)">
+                <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin-bottom:8px">Synthèse des retours</div>
+                <div style="font-size:12.5px;color:var(--c22303f,#22303f);line-height:1.5;font-weight:600">{{ revSynthese }}</div>
+                <div style="{{ revDesaccordStyle }}">Désaccord entre relecteurs : à trancher avant diffusion.</div>
+                <div style="font-size:12px;color:var(--c1a72bb,#1a72bb);line-height:1.5;margin:3px 0 10px;font-weight:600">{{ revRecommandation }}</div>
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <sc-for list="{{ revDecisions }}" as="d" hint-placeholder-count="2">
+                    <div style="display:flex;gap:9px;align-items:flex-start">
+                      <span style="{{ d.avatar }}">{{ d.initials }}</span>
+                      <div style="flex:1;min-width:0">
+                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><strong style="font-size:12.5px;color:var(--c22303f,#22303f)">{{ d.nom }}</strong><span style="{{ d.chip }}">{{ d.verdict }}</span></div>
+                        <div style="font-size:11px;color:var(--c8b97a8,#8b97a8);margin-top:2px">{{ d.meta }}</div>
+                        <div style="{{ d.motifStyle }}">{{ d.motif }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
                       </div>
           </aside>
         </div>
@@ -3680,7 +3725,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '19/10 · A';
+const ATELIER_BUILD = '19/10 · B';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -5949,6 +5994,22 @@ class Component extends DCLogic {
       if(!o||!o.id)return;
       const a=par[o.id];
       if(!a||((o.updatedAt||0)>(a.updatedAt||0)))par[o.id]=o;
+      /* Les DECISIONS de relecture sont des faits, comme les messages : deux
+         relecteurs qui tranchent dans la meme minute ont rendu deux avis, et
+         « le dernier gagne » en effacerait un — le quorum ne serait jamais
+         atteint, ou un rejet passerait inapercu. Union par relecteur et par
+         tour (la plus recente l'emporte), puis l'etat est RECALCULE, sauf
+         sur un brouillon : y revenir est un choix explicite. */
+      if(a&&((a.revue&&a.revue.decisions)||(o.revue&&o.revue.decisions))){
+        const w=par[o.id],der={};
+        [...((a.revue&&a.revue.decisions)||[]),...((o.revue&&o.revue.decisions)||[])].forEach(d=>{
+          if(!d)return;const k=d.uid+'|'+d.tour;if(!der[k]||(d.ts||0)>(der[k].ts||0))der[k]=d;});
+        const dec=Object.keys(der).map(k=>der[k]).sort((x,y)=>(x.ts||0)-(y.ts||0));
+        const rv={...this._revueDe(w),decisions:dec};
+        const ww={...w,revue:rv};
+        if(dec.length&&w.status!=='brouillon')ww.status=this._statutRevue(rv);
+        par[o.id]=ww;
+      }
     });
     return Object.keys(par).map(k=>par[k])
       .sort((x,y)=>(y.updatedAt||0)-(x.updatedAt||0));
@@ -7567,7 +7628,44 @@ class Component extends DCLogic {
   _splitQ(s){if(!s)return[];return String(s).split(/\s*\d\)\s*/).map(x=>x.trim()).filter(Boolean);}
   _splitFaits(s){if(!s)return[];return String(s).split(/\s*;\s*/).map(x=>x.trim().replace(/\.$/,'')).filter(Boolean);}
   _badge(sub){const b='font-size:10px;font-weight:700;letter-spacing:.03em;padding:2px 9px;border-radius:999px;text-transform:uppercase;font-family:Poppins';return sub==='evaluation'?b+';color:var(--cc26a12,#c26a12);background:var(--cfdefdb,#fdefdb)':b+';color:var(--c1a72bb,#1a72bb);background:var(--ce7f1fb,#e7f1fb)';}
-  _statusMeta(s){return s==='valide'?{label:'Validé',c:'var(--c1f9d55,#1f9d55)',bg:'var(--ce6f5ec,#e6f5ec)'}:s==='relecture'?{label:'En relecture',c:'var(--cc26a12,#c26a12)',bg:'var(--cfdefdb,#fdefdb)'}:{label:'Brouillon',c:'var(--c5a6678,#5a6678)',bg:'var(--ceef2f7,#eef2f7)'};}
+  _statusMeta(s){return s==='valide'?{label:'Validé',c:'var(--c1f9d55,#1f9d55)',bg:'var(--ce6f5ec,#e6f5ec)'}:s==='ajustement'?{label:'Ajustement demandé',c:'var(--cc26a12,#c26a12)',bg:'var(--cfdefdb,#fdefdb)'}:s==='rejete'?{label:'Rejeté',c:'var(--cc0392b,#c0392b)',bg:'var(--cfdecea,#fdecea)'}:s==='relecture'?{label:'En relecture',c:'var(--cc26a12,#c26a12)',bg:'var(--cfdefdb,#fdefdb)'}:{label:'Brouillon',c:'var(--c5a6678,#5a6678)',bg:'var(--ceef2f7,#eef2f7)'};}
+  /* ── Circuit de relecture (lot B, 19/10/2026) ──────────────────────────
+     `revue` vit sur l'épreuve : {tour, requis, echeance, decisions:[{uid,
+     nom, verdict, portee, motif, ts, tour}]}. Les décisions des tours
+     précédents restent : c'est l'historique de ce qui a été demandé. */
+  _delais(){const d=((this.state.admin||{}).delais)||{};return{validation:+d.validation||5,remplacement:+d.remplacement||3};}
+  _revueDe(e){const r=(e&&e.revue)||{};return{tour:r.tour||1,requis:Math.max(1,+r.requis||1),echeance:r.echeance||0,decisions:Array.isArray(r.decisions)?r.decisions:[]};}
+  _statutRevue(r){
+    const cur=r.decisions.filter(d=>d.tour===r.tour);
+    if(cur.some(d=>d.verdict==='rejete'))return'rejete';
+    if(cur.some(d=>d.verdict==='ajustement'))return'ajustement';
+    if(cur.filter(d=>d.verdict==='valide').length>=r.requis)return'valide';
+    return'relecture';
+  }
+  _soumettreRelecture(requis){
+    const a=this._active();if(!a)return;
+    const r=this._revueDe(a);
+    const dejaVue=r.decisions.some(d=>d.tour===r.tour);
+    const tour=dejaVue?r.tour+1:r.tour;
+    const ech=Date.now()+this._delais().validation*86400000;
+    this._updateActive({status:'relecture',revue:{...r,tour,requis:Math.max(1,+requis||r.requis),echeance:ech}},
+      tour>1?'a soumis la version corrigée (tour '+tour+')':'a soumis en relecture');
+  }
+  _rendreDecision(){
+    const st=this.state,a=this._active(),me=this._me();if(!a)return;
+    const verdict=st.revVerdict||'',motif=String(st.revMotif||'').trim(),portee=st.revPortee||'Tout le sujet';
+    if(!verdict){this.setState({revErr:'Choisissez une décision.'});return;}
+    if(verdict!=='valide'&&motif.length<8){this.setState({revErr:'Dites ce qui doit changer : un ajustement ou un rejet sans motif ne peut pas être traité.'});return;}
+    const r=this._revueDe(a);
+    const decisions=r.decisions.filter(d=>!(d.tour===r.tour&&d.uid===me.id))
+      .concat([{uid:me.id,nom:me.name,verdict,portee,motif,ts:Date.now(),tour:r.tour}]);
+    const r2={...r,decisions};
+    const statut=this._statutRevue(r2);
+    if(statut==='ajustement'||statut==='rejete')r2.echeance=Date.now()+this._delais().remplacement*86400000;
+    const lib=verdict==='valide'?'a validé':verdict==='ajustement'?'a demandé un ajustement':'a rejeté';
+    this._updateActive({status:statut,revue:r2},lib+' l’épreuve ('+portee.toLowerCase()+')'+(motif?' : '+motif.slice(0,140):''));
+    this.setState({revVerdict:'',revMotif:'',revErr:'',revPortee:''});
+  }
   _statusChip(s){const m=this._statusMeta(s);return'font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:3px 10px;border-radius:999px;font-family:Poppins;color:'+m.c+';background:'+m.bg;}
   _active(){return this.state.epreuves.find(e=>e.id===this.state.activeId)||null;}
   /* BROUILLONS SUPPRIMÉS (16/10/2026). La fusion d'équipe ne supprime jamais
@@ -8328,7 +8426,41 @@ class Component extends DCLogic {
     const activeCollaborators=collabs.map(u=>({name:u.name,initials:this._initials(u.name),avatar:this._av(u,28)}));
     const invitables=active?st.users.filter(u=>u.id!==active.ownerId&&!active.editorIds.includes(u.id)&&u.role!=='Élève (lecture seule)').slice(0,4).map(u=>({first:u.name.replace(/^(M\.|Mme|Mlle)\s+/,'').split(' ')[0],initials:this._initials(u.name),avatar:this._av(u,22),invite:()=>this._updateActive({editorIds:[...active.editorIds,u.id]},'a ajouté '+u.name+' comme co-éditeur')})):[];
 
-    const s=ep.status,s1=s==='brouillon',s2=s==='relecture',s3=s==='valide';
+    const s=ep.status,s1=s==='brouillon',s2=s==='relecture'||s==='ajustement'||s==='rejete',s3=s==='valide';
+    const sDiff=s3&&!!(active&&active.inLibrary);
+    const rv=this._revueDe(active);
+    const rvCur=rv.decisions.filter(d=>d.tour===rv.tour);
+    const rvN={valide:0,ajustement:0,rejete:0};rvCur.forEach(d=>{rvN[d.verdict]=(rvN[d.verdict]||0)+1;});
+    const rvJour=86400000;
+    const rvEch=(()=>{
+      if(!active||!rv.echeance||!(s==='relecture'||s==='ajustement'||s==='rejete'))return null;
+      const j=Math.ceil((rv.echeance-Date.now())/rvJour);
+      const quoi=s==='relecture'?'Relecture':'Version corrigée';
+      const date=new Date(rv.echeance).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+      if(j<0)return{t:quoi+' en retard de '+(-j)+' j (attendue le '+date+')',c:'var(--cc0392b,#c0392b)',bg:'var(--cfdecea,#fdecea)'};
+      if(j===0)return{t:quoi+' attendue aujourd’hui',c:'var(--cc26a12,#c26a12)',bg:'var(--cfdefdb,#fdefdb)'};
+      return{t:quoi+' attendue le '+date+' (dans '+j+' j)',c:'var(--c5a6678,#5a6678)',bg:'var(--cf2f6fb,#f2f6fb)'};
+    })();
+    const rvVerdictLbl={valide:'Validé',ajustement:'Ajustement',rejete:'Rejeté'};
+    const rvChip=v=>'font-size:10px;font-weight:700;font-family:Poppins;padding:2px 8px;border-radius:999px;'+(v==='valide'?'color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec)':v==='ajustement'?'color:var(--cc26a12,#c26a12);background:var(--cfdefdb,#fdefdb)':'color:var(--cc0392b,#c0392b);background:var(--cfdecea,#fdecea)');
+    const rvDejaDecide=!!rvCur.find(d=>d.uid===me.id);
+    const rvVerdicts=[['valide','Valider'],['ajustement','Ajustement'],['rejete','Rejeter']].map(([k,l])=>{const on=st.revVerdict===k;
+      const c=k==='valide'?'var(--c1f9d55,#1f9d55)':k==='ajustement'?'var(--cc26a12,#c26a12)':'var(--cc0392b,#c0392b)';
+      return{label:l,choisir:()=>this.setState({revVerdict:k,revErr:''}),
+        style:'flex:1;min-width:70px;padding:7px 6px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer;border:1px solid '+c+';'+(on?'background:'+c+';color:var(--cffffff,#fff)':'background:var(--cffffff,#fff);color:'+c)};});
+    const rvDecisions=rv.decisions.slice().sort((x,y)=>(y.tour-x.tour)||(y.ts-x.ts)).map(d=>{const u=st.users.find(x=>x.id===d.uid)||{id:d.uid,name:d.nom||'Relecteur'};
+      return{nom:d.nom||u.name,initials:this._initials(d.nom||u.name),avatar:this._av(u,24),verdict:rvVerdictLbl[d.verdict]||d.verdict,chip:rvChip(d.verdict),
+        meta:(d.portee||'Tout le sujet')+' · tour '+d.tour+' · '+this._ago(d.ts),motif:d.motif||'',
+        motifStyle:d.motif?'font-size:12px;color:var(--c5a6678,#5a6678);line-height:1.5;margin-top:3px;white-space:pre-wrap':hidden};});
+    const rvSynthese=(()=>{
+      if(!rvCur.length)return s==='relecture'?'Aucune décision rendue sur ce tour : '+rv.requis+' relecture(s) attendue(s).':'Tour '+rv.tour+' : pas encore de décision.';
+      const p=[];if(rvN.valide)p.push(rvN.valide+' validation(s)');if(rvN.ajustement)p.push(rvN.ajustement+' ajustement(s)');if(rvN.rejete)p.push(rvN.rejete+' rejet(s)');
+      return'Tour '+rv.tour+' — '+p.join(', ')+' · '+rvCur.length+'/'+rv.requis+' relecture(s) rendue(s).';
+    })();
+    const rvReco=rvN.rejete?'Recommandation : remplacer le sujet, puis le soumettre de nouveau.'
+      :rvN.ajustement?'Recommandation : corriger les points signalés, puis soumettre la version corrigée.'
+      :rvN.valide>=rv.requis&&rvCur.length?(sDiff?'Diffusée dans la bibliothèque.':'Recommandation : diffuser dans la bibliothèque.')
+      :rvCur.length?'Recommandation : attendre les relectures restantes.':'';
     const stepStyle=on=>'display:flex;align-items:center;gap:9px;padding:7px 0;font-size:13px;font-weight:'+(on?'700':'600')+';color:'+(on?'var(--c14375f,#14375f)':'var(--c9aa5b5,#9aa5b5)');
     const dotStyle=(done,cur2)=>'display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;font-family:Poppins;'+(done?'background:var(--c1f9d55,#1f9d55);color:var(--cffffff,#fff)':cur2?'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff)':'background:var(--ceef2f7,#eef2f7);color:var(--c9aa5b5,#9aa5b5)');
 
@@ -9495,7 +9627,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       coUnlock:()=>this._updateCours({status:'brouillon',inLibrary:false},'a déverrouillé le cours'),
       stats:this.stats||{total:0,authors:0,corpus:0,evalC:0},cycleCards,recentEpreuves,libraryCount:st.epreuves.filter(e=>e.inLibrary).length,
       liveStrip:(()=>{const other=st.users.find(u=>u.id!==me.id&&u.role!=='Élève (lecture seule)');const rel=st.epreuves.find(e=>e.status==='relecture');return (other?other.name.replace(/^(M\.|Mme|Mlle)\s+/,''):'Un collègue')+(rel?' travaille sur « '+rel.title+' »':' est en ligne')+' · '+st.users.filter(u=>u.id!==me.id).length+' collègues actifs';})(),
-      todos:(()=>{const t=[];st.epreuves.filter(e=>e.status==='relecture').forEach(e=>t.push({dot:'var(--cf39200,#f39200)',textEl:this._mentionEl('À relire : « '+e.title+' » attend une validation'),ago:this._ago(e.updatedAt)}));st.cours.filter(c=>c.status==='relecture').forEach(c=>t.push({dot:'var(--c7b52c7,#7b52c7)',textEl:this._mentionEl('Cours en relecture : « '+(c.title||'sans titre')+' »'),ago:this._ago(c.updatedAt)}));if(!t.length)t.push({dot:'var(--c1f9d55,#1f9d55)',textEl:this._mentionEl('Rien à traiter pour le moment. Tout est à jour.'),ago:''});return t.slice(0,4);})(),
+      todos:(()=>{const t=[];st.epreuves.filter(e=>(e.status==='ajustement'||e.status==='rejete')&&e.ownerId===me.id).forEach(e=>{const d=this._revueDe(e).decisions.filter(x=>x.verdict!=='valide').slice(-1)[0];t.push({dot:e.status==='rejete'?'var(--cc0392b,#c0392b)':'var(--cc26a12,#c26a12)',textEl:this._mentionEl((e.status==='rejete'?'Rejetée':'Ajustement demandé')+' : « '+e.title+' »'+(d&&d.motif?' \u2014 '+d.motif.slice(0,90):'')),ago:this._ago(e.updatedAt)});});st.epreuves.filter(e=>e.status==='relecture').forEach(e=>t.push({dot:'var(--cf39200,#f39200)',textEl:this._mentionEl('À relire : « '+e.title+' » attend une validation'),ago:this._ago(e.updatedAt)}));st.cours.filter(c=>c.status==='relecture').forEach(c=>t.push({dot:'var(--c7b52c7,#7b52c7)',textEl:this._mentionEl('Cours en relecture : « '+(c.title||'sans titre')+' »'),ago:this._ago(c.updatedAt)}));if(!t.length)t.push({dot:'var(--c1f9d55,#1f9d55)',textEl:this._mentionEl('Rien à traiter pour le moment. Tout est à jour.'),ago:''});return t.slice(0,4);})(),
       dashActivity:notifications.slice(0,4),
       newDraft:()=>{this._ensureDraft(id=>this.setState({activeId:id,screen:'composeur'},()=>window.scrollTo(0,0)));},
       /* Base vide et filtres trop etroits sont deux pannes differentes : le
@@ -9765,11 +9897,30 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       activeCollaborators,invitables,
       step1Style:stepStyle(s1),step2Style:stepStyle(s2),step3Style:stepStyle(s3),
       step1Dot:dotStyle(s2||s3,s1),step2Dot:dotStyle(s3,s2),step3Dot:dotStyle(false,s3),
-      canSubmit:perm.edit&&s1,canValidate:perm.validate&&s2,canSendBack:perm.validate&&(s2||s3),canPublish:perm.publish&&s3,
+      step4Style:stepStyle(sDiff),step4Dot:dotStyle(sDiff,false),
+      step2Label:s==='ajustement'?'Ajustement demandé':s==='rejete'?'Rejeté':'En relecture',
+      canSubmit:perm.edit&&(s1||s==='ajustement'||s==='rejete'),canValidate:perm.validate&&s2,canSendBack:perm.validate&&s3,canPublish:perm.publish&&s3,
+      submitLabel:s==='ajustement'||s==='rejete'?'Soumettre la version corrigée':'Soumettre en relecture',
+      revRequis:String(st.revRequis||rv.requis),revRequisOptions:['1','2','3'],
+      setRevRequis:e=>this.setState({revRequis:val(e)}),
+      revEcheanceLabel:rvEch?rvEch.t:'',
+      revEcheanceStyle:rvEch?'font-size:11.5px;font-weight:700;font-family:Poppins;border-radius:8px;padding:6px 9px;margin-bottom:10px;color:'+rvEch.c+';background:'+rvEch.bg:hidden,
+      canDecider:perm.validate&&s==='relecture',
+      revDecisionTitre:rvDejaDecide?'Modifier ma décision (tour '+rv.tour+')':'Votre décision',
+      revVerdicts:rvVerdicts,revPortee:st.revPortee||'Tout le sujet',
+      revPortees:['Tout le sujet','Texte(s) support','Questions','Barème','Corrigé','Consignes et présentation'],
+      setRevPortee:e=>this.setState({revPortee:val(e)}),
+      revMotif:st.revMotif||'',setRevMotif:e=>this.setState({revMotif:val(e),revErr:''}),
+      revMotifAide:st.revVerdict==='valide'?'Remarque facultative pour l’auteur':'Ce qui doit changer, et où (obligatoire)',
+      revErr:st.revErr||'',revErrStyle:st.revErr?'font-size:11.5px;color:var(--cc0392b,#c0392b);line-height:1.45':hidden,
+      rendreDecision:()=>this._rendreDecision(),
+      revHasSynthese:!!active&&(rv.decisions.length>0||s==='relecture'),
+      revSynthese:rvSynthese,revRecommandation:rvReco,revDecisions:rvDecisions,
+      revDesaccordStyle:rvN.valide&&(rvN.ajustement||rvN.rejete)?'font-size:12px;color:var(--cc26a12,#c26a12);font-weight:700;margin-top:3px':hidden,
       publishLabel:active&&active.inLibrary?'Retirer de la bibliothèque':'Publier dans la bibliothèque',
-      submitReview:()=>this._updateActive({status:'relecture'},'a soumis en relecture'),
+      submitReview:()=>{this._soumettreRelecture(st.revRequis||rv.requis);this.setState({revRequis:''});},
       validate:()=>this._updateActive({status:'valide'},'a validé l\u2019épreuve'),
-      sendBack:()=>this._updateActive({status:'brouillon'},'a renvoyé en brouillon'),
+      sendBack:()=>this._updateActive({status:'brouillon',inLibrary:false},'a repassé l’épreuve en brouillon'),
       togglePublish:()=>this._updateActive({inLibrary:!active.inLibrary},active.inLibrary?'a retiré de la bibliothèque':'a publié dans la bibliothèque'),
       hasComments:activeComments.length>0,noComments:activeComments.length===0,activeComments,
       commentDraft:st.commentDraft,setComment:e=>this.setState({commentDraft:val(e)}),
