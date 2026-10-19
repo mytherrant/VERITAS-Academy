@@ -11863,79 +11863,98 @@ function logout(rester){
   _allerVitrine();
 }
 // ─── NAVIGATIONS PAR RÔLE ────────────────────────
-// ─── NAV ADMIN — Refonte v1.2 : 8 sections logiques, sans doublons ────────
+// ─── NAV ADMIN — Reclassement du 19/10/2026 ───────────────────────────────
+/* Jacques : « trop de redondance, exploitation difficile à certains endroits ».
+   Ce qui a changé, et pourquoi :
+   · des sections nommées par MÉTIER (on cherche « où valider un paiement »,
+     pas « dans quelle rubrique technique ») : Finances, Partenaires & auteurs,
+     Ventes & catalogue, Abonnements & plateformes, Site public… ;
+   · plus de libellés jumeaux : « Enseignants & Paie » et « Attestations &
+     Paie » coexistaient ; « Portail visiteur » et « Contenu du site » ne
+     disaient pas ce qui les sépare ;
+   · la file des paiements par CODE MARCHAND à valider n'avait aucune entrée :
+     on n'y arrivait que par un bouton du tableau de bord ;
+   · trois écrans recalculent les paiements depuis le NAVIGATEUR (payAttempts) :
+     « Transactions & versements » lit le serveur et les remplace. Ils restent
+     joignables, rangés dans une section repliée, au lieu d'être supprimés ;
+   · la barre latérale se REPLIE par section et se FILTRE (buildNav). */
 const ANAV=[
   {s:"🏠 Accueil",i:[
     {k:"dashboard",i:"◈",l:"Tableau de bord"}
   ]},
+  {s:"💰 Finances",i:[
+    {k:"fin_transactions",i:"🧾",l:"Transactions & versements"},
+    {k:"a_valider",i:"☁️",l:"Paiements à valider (code marchand)"},
+    {k:"payments",i:"💳",l:"Scolarité des élèves"},
+    {k:"suivi_skysms",i:"📲",l:"Codes & SMS remis aux clients"},
+    {k:"prix_calculs",i:"🏷️",l:"Prix & calculs automatiques"},
+    {k:"autredep",i:"💸",l:"Dépenses"},
+    {k:"finance",i:"△",l:"Bilan financier"}
+  ]},
   {s:"🎓 Élèves",i:[
     {k:"students",i:"⊕",l:"Inscriptions"},
     {k:"listeclasse",i:"📋",l:"Listes par classe"},
-    {k:"certscol",i:"📜",l:"Certificats de scolarité"},
+    {k:"absences_admin",i:"✅",l:"Absences"},
     {k:"presence",i:"📝",l:"Fiches de présence"},
-    {k:"absences_admin",i:"✅",l:"Absences"}
+    {k:"certscol",i:"📜",l:"Certificats de scolarité"}
   ]},
   {s:"📚 Pédagogie",i:[
-    {k:"grades",i:"▦",l:"Notes & Bulletins"},
+    {k:"grades",i:"▦",l:"Notes & bulletins"},
     {k:"classstats",i:"📊",l:"Statistiques de classe"},
     {k:"honneur",i:"🏆",l:"Tableau d'honneur"},
     {k:"devoirs_admin",i:"📋",l:"Devoirs"},
-    {k:"schedule",i:"▣",l:"Emploi du temps"}
-  ]},
-  {s:"👨‍🏫 Personnel",i:[
-    {k:"teachers",i:"◉",l:"Enseignants & Paie"},
-    {k:"attesttravail",i:"📄",l:"Attestations & Paie"}
-  ]},
-  {s:"🛍️ Boutique & E-Learning",i:[
-    {k:"boutiquemgmt",i:"🛒",l:"Boutique articles"},
-    {k:"booksale",i:"📚",l:"Vente manuels"},
-    {k:"books2",i:"▤",l:"Bibliothèque"},
-    {k:"elearningmgmt",i:"🎓",l:"E-Learning"},
-    {k:"paywall",i:"🔓",l:"Essais & abonnements"},
-    {k:"plateforme",i:"🧩",l:"Atelier de Français"},
-    {k:"authorsmgmt",i:"✍️",l:"Auteurs & Partage"},
-    {k:"visitororders",i:"📦",l:"Commandes visiteurs"}
-  ]},
-  {s:"💰 Finances",i:[
-    {k:"fin_transactions",i:"🧾",l:"Transactions & versements"},
-    {k:"suivi_skysms",i:"📲",l:"Suivi SkySMS (paiements, codes, SMS)"},
-    {k:"prix_calculs",i:"🏷️",l:"Prix & calculs automatiques"},
-    {k:"payments",i:"💳",l:"Paiements élèves"},
-    {k:"paiements_admin",i:"💰",l:"Tentatives de paiement"},
-    {k:"partenaires_splits",i:"🤝",l:"Partage revenus partenaires"},
-    {k:"stats_business",i:"📊",l:"Stats Business (CA/Conv.)"},
-    {k:"autredep",i:"💸",l:"Autres dépenses"},
-    {k:"finance",i:"△",l:"Bilan financier"}
-  ]},
-  {s:"📢 Communication & Portail",i:[
-    {k:"announce",i:"◆",l:"Annonces"},
-    {k:"send",i:"◎",l:"Centre WhatsApp"},
-    {k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"},
-    {k:"parrainage_admin",i:"🎁",l:"Code ami (parrainage)"},
-    {k:"partenaires_admin",i:"🤝",l:"Programme Partenariat"},
-    {k:"demandes",i:"✉",l:"Demandes & devis"},
-    {k:"forum_admin",i:"💬",l:"Modération Forum"},
-    {k:"marketplace_admin",i:"🛒",l:"Marketplace auteurs"},
-    {k:"cms",i:"🌐",l:"Portail visiteur"},
-    /* La page ci-dessus edite DB.publicInfo ; l'accueil public n'en relit
-       qu'une poignee de champs (telephone, WhatsApp, e-mail, horaires,
-       adresse, bandeau, podium). « Contenu du site » edite tout le reste —
-       titres, chiffres, paragraphes, images — en s'appuyant sur l'inventaire
-       que la vitrine rend d'elle-meme. Les deux sont voisines exprès. */
-    {k:"accueil_cms",i:"✏️",l:"Contenu du site"},
+    {k:"schedule",i:"▣",l:"Emploi du temps"},
     {k:"calendrier_admin",i:"📅",l:"Calendrier scolaire"}
   ]},
-  {s:"⚙️ Système",i:[
-    {k:"accounts",i:"⨡",l:"Comptes admin/enseignants"},
-    {k:"visitor_accounts",i:"👥",l:"Comptes visiteurs inscrits"},
-    // Émission d'un code de cahier au comptoir (règlement en espèces). Placé
-    // dans ANAV et non dans SA_EN_PLUS : la personne qui encaisse au centre
-    // est un ADMIN ordinaire, pas forcément le super-administrateur. La page
-    // se garde elle-même par iA() — la navigation doit s'y accorder.
+  {s:"👨‍🏫 Personnel",i:[
+    {k:"teachers",i:"◉",l:"Enseignants & paie"},
+    {k:"attesttravail",i:"📄",l:"Attestations de travail"}
+  ]},
+  {s:"🤝 Partenaires & auteurs",i:[
+    {k:"parrainage_admin",i:"🎁",l:"Code ami & enseignants-partenaires"},
+    {k:"partenaires_admin",i:"🤝",l:"Programme partenariat"},
+    {k:"authorsmgmt",i:"✍️",l:"Auteurs & droits"},
+    {k:"marketplace_admin",i:"🛒",l:"Marketplace des auteurs"}
+  ]},
+  {s:"🛍️ Ventes & catalogue",i:[
+    {k:"booksale",i:"📚",l:"Vente des manuels"},
+    {k:"boutiquemgmt",i:"🛒",l:"Articles de la boutique"},
+    {k:"visitororders",i:"📦",l:"Commandes des visiteurs"},
+    // Émission d'un code de cahier au comptoir (règlement en espèces) : un
+    // ADMIN ordinaire encaisse au centre, la page se garde par iA().
     {k:"livret_codes",i:"🎟️",l:"Codes d'accès des cahiers"},
-    {k:"settings",i:"⊙",l:"Paramètres école"},
-    {k:"datareset",i:"🗑",l:"Nettoyage données"},
+    {k:"books2",i:"▤",l:"Bibliothèque"}
+  ]},
+  {s:"🎓 Abonnements & plateformes",i:[
+    {k:"elearningmgmt",i:"🎓",l:"E-Learning"},
+    {k:"paywall",i:"🔓",l:"Essais & abonnements"},
+    {k:"plateforme",i:"🧩",l:"Atelier de Français"}
+  ]},
+  {s:"📢 Communication",i:[
+    {k:"announce",i:"◆",l:"Annonces"},
+    {k:"send",i:"◎",l:"Centre WhatsApp"},
+    {k:"demandes",i:"✉",l:"Demandes & devis"},
+    {k:"orientation_admin",i:"🧭",l:"Orientation & conseil"},
+    {k:"forum_admin",i:"💬",l:"Modération du forum"}
+  ]},
+  {s:"🌐 Site public",i:[
+    /* « Coordonnées & bandeau » édite DB.publicInfo (téléphone, WhatsApp,
+       e-mail, horaires, adresse, bandeau, podium) ; « Contenu du site » tout
+       le reste — titres, chiffres, paragraphes, images. */
+    {k:"cms",i:"🌐",l:"Coordonnées & bandeau"},
+    {k:"accueil_cms",i:"✏️",l:"Contenu du site"}
+  ]},
+  {s:"⚙️ Système",i:[
+    {k:"accounts",i:"⨡",l:"Comptes admin & enseignants"},
+    {k:"visitor_accounts",i:"👥",l:"Comptes visiteurs"},
+    {k:"settings",i:"⊙",l:"Paramètres de l'école"},
+    {k:"datareset",i:"🗑",l:"Nettoyage des données"},
     {k:"guide",i:"📖",l:"Guide d'utilisation"}
+  ]},
+  {s:"🗄️ Anciens écrans",replie:true,i:[
+    {k:"paiements_admin",i:"💰",l:"Tentatives de paiement (ancien suivi)"},
+    {k:"stats_business",i:"📊",l:"Stats business (ancien calcul)"},
+    {k:"partenaires_splits",i:"🤝",l:"Partage des revenus (ancien)"}
   ]}
 ];
 /* ─── NAV SUPER ADMIN — DÉRIVÉE d'ANAV, et non plus recopiée ───────────────
@@ -11970,7 +11989,7 @@ const SA_SUPERVISION = {s:"👑 Supervision",i:[
    d'insertion : la clé après laquelle glisser l'entrée, ou null pour la
    placer en tête de section. Une section absente d'ANAV est ignorée. */
 const SA_EN_PLUS = [
-  {s:"🛍️ Boutique & E-Learning", apres:"paywall", i:[
+  {s:"📚 Pédagogie", apres:"honneur", i:[
     {k:"resPedago",i:"📄",l:"Ressources BAC"}
   ]},
   {s:"⚙️ Système", apres:null, i:[
@@ -12033,6 +12052,7 @@ const PT={
   paywall:"Essais gratuits & mur d'abonnement",
   prix_calculs:"Prix & calculs automatiques",
   fin_transactions:"Transactions & versements",
+  a_valider:"Paiements à valider (code marchand)",
   suivi_skysms:"Suivi SkySMS — paiements, codes et SMS",
   plateforme:"Atelier de Français — abonnements & quotas",
   authorsmgmt:"Auteurs & Partage de droits",
@@ -12072,6 +12092,51 @@ const PT={
   boutique:"Boutique manuels"
 };
 
+function _navNorm(t){ return String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); }
+function _navOuvertes(){ try{ return JSON.parse(localStorage.getItem('vrt_nav_ouvert')||'{}')||{}; }catch(e){ return {}; } }
+function _navMenu(){ return isSA()?SANAV:(iA()?ANAV:(isEnseignant()?TNAV:ENAV)); }
+function _navBasculer(si){
+  var sec=_navMenu()[si]; if(!sec) return;
+  var o=_navOuvertes(), el=document.querySelector('#snav .sbsec[data-sec="'+si+'"]');
+  var ouvert=el ? el.classList.contains('ferme') : true;
+  o[sec.s]=ouvert;
+  try{ localStorage.setItem('vrt_nav_ouvert', JSON.stringify(o)); }catch(e){}
+  if(el){ el.classList.toggle('ferme', !ouvert); var b=el.querySelector('.sbsl-btn'); if(b){ b.setAttribute('aria-expanded', ouvert); var c=b.querySelector('.sbsl-ch'); if(c) c.textContent=ouvert?'▾':'▸'; } }
+}
+/* Filtre du menu : sans reconstruire le DOM (le champ garderait sinon mal le
+   focus), on masque ce qui ne correspond pas et on déplie ce qui correspond. */
+function _navFiltrer(q){
+  window._navQ=q||''; var n=_navNorm(q).trim();
+  document.querySelectorAll('#snav .sbsec').forEach(function(sec){
+    var vus=0;
+    sec.querySelectorAll('.sbit').forEach(function(it){ var ok=!n||(it.getAttribute('data-l')||'').indexOf(n)>=0; it.style.display=ok?'':'none'; if(ok) vus++; });
+    sec.style.display=(n&&!vus)?'none':'';
+    sec.classList.toggle('cherche', !!n);
+  });
+}
+function _navStyle(){
+  if(document.getElementById('navStyle')) return;
+  var st=document.createElement('style'); st.id='navStyle';
+  st.textContent='.sbfiltre{padding:8px 14px 6px}.sbfiltre input{width:100%;box-sizing:border-box;border-radius:9px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;padding:8px 10px;font:inherit;font-size:13px;outline:none}.sbfiltre input::placeholder{color:rgba(255,255,255,.55)}'
+    +'.sbsl-btn{display:flex;align-items:center;gap:6px;width:100%;background:none;border:0;cursor:pointer;text-align:left}.sbsl-btn span:first-child{flex:1}.sbsl-n{font-size:10px;opacity:.7;letter-spacing:0}.sbsl-ch{font-size:11px;letter-spacing:0}'
+    +'.sbsec.ferme:not(.cherche) .sbsec-corps{display:none}.sbsl-btn:hover{opacity:1;color:#fff !important}';
+  document.head.appendChild(st);
+}
+/* Page « Paiements à valider » : la file des paiements par CODE MARCHAND
+   déclarés par les clients vit dans la fenêtre mPayAttempts. Elle n'avait
+   aucune entrée de menu. */
+function pgAValider(){
+  if(!iA()) return na();
+  setTimeout(function(){ if(typeof mPayAttempts==='function') mPayAttempts(); }, 50);
+  return '<div class="pgt">☁️ Paiements à valider (code marchand)</div>'
+    + '<div class="ib ibi mb12"><span>ℹ️</span><span>Les clients qui paient par <b>code marchand</b> déclarent leur paiement ; rien ne s\'ouvre tant que vous n\'avez pas vu l\'argent arriver et validé. '
+    + 'La liste s\'ouvre dans une fenêtre ; vous retrouvez aussi chaque paiement dans <b>Transactions & versements</b>.</span></div>'
+    + '<div class="fl2 g8 fw"><button class="btn bi" onclick="mPayAttempts()">☁️ Ouvrir les commandes à valider</button>'
+    + '<button class="btn bo" onclick="goTo(\'fin_transactions\')">🧾 Transactions & versements</button></div>';
+}
+window.pgAValider = pgAValider;
+window._navBasculer = _navBasculer;
+window._navFiltrer = _navFiltrer;
 function buildNav(){
   let nav;
   if(isSA())nav=SANAV;
@@ -12081,11 +12146,27 @@ function buildNav(){
   else nav=ENAV;
   const un=DB.payments.filter(p=>p.stat==='Impayé').length;
   const pendingAbos=(DB.elearning?.abonnements||[]).filter(function(a){return a.statut==='En attente';}).length;
-  $("snav").innerHTML=nav.map(s=>`<div class="sbsec"><div class="sbsl">${s.s}</div>${s.i.map(it=>{
+  /* Menu long (admin, super-admin) : sections REPLIABLES et champ de filtre.
+     La section de la page affichée s'ouvre d'elle-même ; les autres gardent
+     l'état choisi (stockage local de l'appareil). Les menus courts (élève,
+     enseignant) restent tout ouverts. */
+  const _repliable = nav.length > 4;
+  const _ouv = _repliable ? _navOuvertes() : {};
+  const _filtre = _repliable
+    ? `<div class="sbfiltre"><input type="search" placeholder="Rechercher une page…" aria-label="Rechercher une page du menu" oninput="_navFiltrer(this.value)" value="${(window._navQ||'').replace(/"/g,'&quot;')}"></div>` : '';
+  $("snav").innerHTML=_filtre+nav.map((s,si)=>{
+    const actif=s.i.some(it=>it.k===pg);
+    const ouvert=!_repliable||actif||(s.s in _ouv ? _ouv[s.s] : !s.replie && si===0);
+    const tete=_repliable
+      ? `<button type="button" class="sbsl sbsl-btn" aria-expanded="${ouvert}" onclick="_navBasculer(${si})"><span>${s.s}</span><span class="sbsl-n">${s.i.length}</span><span class="sbsl-ch">${ouvert?'▾':'▸'}</span></button>`
+      : `<div class="sbsl">${s.s}</div>`;
+    return `<div class="sbsec${ouvert?'':' ferme'}" data-sec="${si}">${tete}<div class="sbsec-corps">${s.i.map(it=>{
     const b=it.k==='payments'&&un>0&&iA()?`<span class="sbbg">${un}</span>`:'';
     const elBadge=it.k==='elearningmgmt'&&pendingAbos>0&&iA()?`<span class="sbbg" style="background:#AE5353">${pendingAbos}</span>`:'';
-    return`<div class="sbit${it.k===pg?' on':''}" onclick="goTo('${it.k}')"><span class="sbic">${PIC(it.i)}</span>${it.l}${b}${elBadge}</div>`;
-  }).join("")}</div>`).join("");
+    return`<div class="sbit${it.k===pg?' on':''}" data-l="${_navNorm(it.l+' '+s.s)}" onclick="goTo('${it.k}')"><span class="sbic">${PIC(it.i)}</span>${it.l}${b}${elBadge}</div>`;
+  }).join("")}</div></div>`;}).join("");
+  _navStyle();
+  if(window._navQ) _navFiltrer(window._navQ);
   const roleMap={admin:"aa",enseignant:"at",eleve:"ae",superadmin:"asa"};
   const ac=roleMap[SES?.type]||"ae";
   const roleLabel={admin:"Admin",enseignant:"Enseignant",eleve:"Élève",superadmin:"Super Admin"};
@@ -12131,7 +12212,7 @@ function render(p){
     devoirs_teacher:pgDevoirsTeacher,perf_teacher:pgPerfTeacher,
     // Admin
     absences_admin:pgAbsencesAdmin,devoirs_admin:pgDevoirsAdmin,orientation_admin:pgOrientationAdmin,resPedago:pgResPedagoAdmin,paiements_admin:pgPaiementsAdmin,
-    stats_business:pgStatsBusiness,parrainage_admin:pgParrainageAdmin,paywall:pgPaywall,prix_calculs:pgPrixCalculs,suivi_skysms:pgSuiviSkysms,fin_transactions:function(){return pgFinTransactions();},
+    stats_business:pgStatsBusiness,parrainage_admin:pgParrainageAdmin,paywall:pgPaywall,prix_calculs:pgPrixCalculs,suivi_skysms:pgSuiviSkysms,fin_transactions:function(){return pgFinTransactions();},a_valider:function(){return pgAValider();},
     forum_admin:pgForumAdmin,marketplace_admin:pgMarketplaceAdmin,centres_admin:pgCentresAdmin,
     calendrier_admin:pgCalendrierAdmin,
     partenaires_splits:pgPartenairesSplits,
