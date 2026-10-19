@@ -2948,7 +2948,9 @@ function _startBgPoll(){
         // BUG-03 FIX : ne remplacer DB que si l'utilisateur est admin
         if(!iA()){return;}
         // Remplacer par la version cloud (données admin)
+        var _empL=_empreintesLocales();
         DB=serverDB;
+        _reposerEmpreintes(_empL);
         // Re-injecter les suppressions locales (union avec cloud)
         function _uIds(a,b){var s={};(a||[]).forEach(function(x){s[x]=1;});(b||[]).forEach(function(x){s[x]=1;});return Object.keys(s);}
         DB.deletedJeux=_uIds(_localDel.dj,DB.deletedJeux);
@@ -3306,7 +3308,8 @@ function _cloudAutoSyncPush(attempt){
   // Strip plain passwords avant push Firebase (garder pwdHash bcrypt one-way)
   function _stripPlainPwdFb(o){
     if(!o)return;
-    if(o.pwd && !(typeof o.pwd==='string' && o.pwd.startsWith('$'))) delete o.pwd;
+    // Garder bcrypt (« $… ») ET S256 : supprimer S256 ici a vidé les comptes admin du serveur.
+    if(o.pwd && !(typeof o.pwd==='string' && (o.pwd.startsWith('$')||o.pwd.indexOf('S256$')===0))) delete o.pwd;
   }
   if(data.superAdmin)_stripPlainPwdFb(data.superAdmin);
   (data.admins||[]).forEach(_stripPlainPwdFb);
@@ -7267,6 +7270,83 @@ async function _migratePasswords(){
   if(changed)save();
 }
 
+/* ═══ Les EMPREINTES locales survivent à un rapatriement serveur ═══
+   Les filtres d'envoi supprimaient les empreintes S256 des admins (ils ne
+   gardaient que bcrypt) et `tpwd` part toujours vide : la copie SERVEUR des
+   comptes d'administration n'a donc pas de mot de passe. Chaque `DB=serverDB`
+   l'installait telle quelle, et à la déconnexion suivante plus aucun mot de
+   passe ne correspondait — admin ET superadmin bloqués sur tous les appareils.
+   On photographie les empreintes avant l'écrasement et on les repose là où le
+   serveur n'en porte aucune (jamais par-dessus une empreinte serveur). */
+function _empreintesLocales(){
+  var e={sa:null,admins:{},tpwd:{}};
+  try{
+    if(DB.superAdmin&&DB.superAdmin.pwd) e.sa={user:DB.superAdmin.user,pwd:DB.superAdmin.pwd};
+    (DB.admins||[]).forEach(function(a){ if(a&&a.user&&a.pwd) e.admins[a.user]=a.pwd; });
+    if(DB.tpwd) Object.keys(DB.tpwd).forEach(function(k){ if(DB.tpwd[k]) e.tpwd[k]=DB.tpwd[k]; });
+  }catch(x){}
+  return e;
+}
+function _reposerEmpreintes(e){
+  if(!e) return;
+  try{
+    if(e.sa&&DB.superAdmin&&DB.superAdmin.user===e.sa.user&&!DB.superAdmin.pwd) DB.superAdmin.pwd=e.sa.pwd;
+    (DB.admins||[]).forEach(function(a){ if(a&&a.user&&!a.pwd&&e.admins[a.user]) a.pwd=e.admins[a.user]; });
+    if(!DB.tpwd) DB.tpwd={};
+    Object.keys(e.tpwd).forEach(function(k){ if(!DB.tpwd[k]) DB.tpwd[k]=e.tpwd[k]; });
+  }catch(x){}
+}
+
+/* Réinitialisation d'un mot de passe d'administration SANS session, prouvée
+   par la clé de synchronisation (secret de niveau administrateur, vérifié par
+   le serveur sur db.php?meta=1). Sortie de secours quand le compte n'a plus
+   d'empreinte — ou quand le mot de passe est oublié. */
+window._reinitMdpAdmin = function(){
+  var cc='';
+  try{ cc=(DB.cloudConfig&&DB.cloudConfig.secret)||(_loadCloudConfigCache()||{}).secret||''; }catch(e){ cc=''; }
+  var opts='';
+  try{
+    if(DB.superAdmin&&DB.superAdmin.user) opts+='<option value="sa">'+_esc(DB.superAdmin.user)+' (super-admin)</option>';
+    (DB.admins||[]).forEach(function(a,i){ if(a&&a.user) opts+='<option value="a'+i+'">'+_esc(a.user)+' (admin)</option>'; });
+  }catch(e){}
+  if(!opts){ toast('Aucun compte d\'administration sur cet appareil : récupérez-les d\'abord depuis le serveur.','warn'); return; }
+  M('Réinitialiser un mot de passe administrateur',
+    'Prouvé par la clé de synchronisation',
+    '<div class="fg"><span class="fl">Compte</span><select class="fi" id="_rmaCpt">'+opts+'</select></div>'
+    +'<div class="fg"><span class="fl">Clé de synchronisation</span><input class="fi" id="_rmaSec" type="password" autocomplete="off" value="'+_esc(cc)+'"></div>'
+    +'<div class="fg"><span class="fl">Nouveau mot de passe (8 caractères min.)</span><input class="fi" id="_rmaP1" type="password" autocomplete="new-password"></div>'
+    +'<div class="fg"><span class="fl">Confirmer</span><input class="fi" id="_rmaP2" type="password" autocomplete="new-password"></div>'
+    +'<div id="_rmaMsg" style="margin-top:10px;font-size:13px"></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="_reinitMdpAdminGo()">Réinitialiser</button>');
+};
+window._reinitMdpAdminGo = async function(){
+  var cpt=(_ge('_rmaCpt')||{}).value||'', sec=((_ge('_rmaSec')||{}).value||'').trim();
+  var p1=(_ge('_rmaP1')||{}).value||'', p2=(_ge('_rmaP2')||{}).value||'';
+  if(!sec){ _si('_rmaMsg','<span style="color:#AE5353">Clé requise.</span>'); return; }
+  if(p1.length<8){ _si('_rmaMsg','<span style="color:#AE5353">8 caractères minimum.</span>'); return; }
+  if(p1!==p2){ _si('_rmaMsg','<span style="color:#AE5353">Les deux mots de passe diffèrent.</span>'); return; }
+  var cible = cpt==='sa' ? DB.superAdmin : (DB.admins||[])[parseInt(cpt.slice(1),10)];
+  if(!cible||!cible.user){ _si('_rmaMsg','<span style="color:#AE5353">Compte introuvable.</span>'); return; }
+  _si('_rmaMsg','<span style="color:var(--ink3)">Vérification de la clé…</span>');
+  try{
+    if(!DB.cloudConfig) DB.cloudConfig={ url:_VRT_API, secret:'', lastSync:'Jamais' };
+    var base=(DB.cloudConfig.url||_VRT_API||'https://veritas-school.com/api').replace(/\/$/,'');
+    var r=await fetch(base+'/db.php?meta=1&t='+Date.now(),{ headers:{ 'Authorization':'Bearer '+sec } });
+    if(r.status===401||r.status===403) throw new Error('Clé refusée par le serveur.');
+    if(!r.ok) throw new Error('Serveur injoignable (HTTP '+r.status+').');
+    cible.pwd=await hashPassword(p1,cible.user);
+    DB.cloudConfig.secret=sec;
+    try{ _saveCloudConfigCache&&_saveCloudConfigCache(); }catch(e){}
+    try{ _loginLock[String(cible.user).toLowerCase()]={attempts:0,locked:false,until:0}; _loginAttempts.count=0; _loginAttempts.locked=false; }catch(e){}
+    save();
+    _si('_rmaMsg','<span style="color:#0B7A2A">Mot de passe de « '+_esc(cible.user)+' » réinitialisé. Connectez-vous.</span>');
+    setTimeout(function(){ try{ cm(); }catch(e){} var lu=_ge('lu'); if(lu) lu.value=cible.user; var lp=_ge('lp'); if(lp){ lp.value=''; lp.focus(); } }, 1400);
+  }catch(e){
+    _si('_rmaMsg','<span style="color:#AE5353">'+_esc(e.message)+'</span>');
+  }
+};
+
 // ── Anti brute-force : verrouillage temporaire ──
 var _loginLock={};
 function _checkLoginLock(user){
@@ -8028,7 +8108,7 @@ function cloudSaveDB(){
   }
 
   // Strip plain pwd avant push Firebase (garder pwdHash bcrypt)
-  function _stripPlainPwdSave(o){if(!o)return;if(o.pwd&&!(typeof o.pwd==='string'&&o.pwd.startsWith('$')))delete o.pwd;}
+  function _stripPlainPwdSave(o){if(!o)return;if(o.pwd&&!(typeof o.pwd==='string'&&(o.pwd.startsWith('$')||o.pwd.indexOf('S256$')===0)))delete o.pwd;}
   var _pData=JSON.parse(payload);
   if(_pData.superAdmin)_stripPlainPwdSave(_pData.superAdmin);
   (_pData.admins||[]).forEach(_stripPlainPwdSave);
@@ -8678,7 +8758,7 @@ function _cloudSilentPushDB(onDone){
   // Strip plain pwd avant push Firebase (garder pwdHash bcrypt)
   function _stripPlainPwdSilent(o){
     if(!o)return;
-    if(o.pwd && !(typeof o.pwd==='string' && o.pwd.startsWith('$'))) delete o.pwd;
+    if(o.pwd && !(typeof o.pwd==='string' && (o.pwd.startsWith('$')||o.pwd.indexOf('S256$')===0))) delete o.pwd;
   }
   if(data.superAdmin)_stripPlainPwdSilent(data.superAdmin);
   (data.admins||[]).forEach(_stripPlainPwdSilent);
@@ -9129,7 +9209,9 @@ function cloudForcePull(){
     var lb=DB.books||[],lg=DB.galleryImages||[],le=(DB.elearning&&DB.elearning.contenus)||[];
     // FIX : préserver les suppressions locales (sinon jeux/labos/produits reviennent)
     var _ld={dj:(DB.deletedJeux||[]).slice(),pj:(DB.purgedJeux||[]).slice(),dd:(DB.deletedDefaults||[]).slice(),hl:(DB.hiddenLabos||[]).slice(),pl:(DB.purgedLabos||[]).slice(),dc:(DB.deletedCartes||[]).slice(),dp:(DB.deletedProducts||[]).slice()};
+    var _empL=_empreintesLocales();
     DB=serverDB;
+    _reposerEmpreintes(_empL);
     function _uIds2(a,b){var s={};(a||[]).forEach(function(x){s[x]=1;});(b||[]).forEach(function(x){s[x]=1;});return Object.keys(s);}
     DB.deletedJeux=_uIds2(_ld.dj,DB.deletedJeux);
     DB.purgedJeux=_uIds2(_ld.pj,DB.purgedJeux);
@@ -11675,6 +11757,22 @@ async function doLogin(){
     return;
   }
 
+  if(estAdmin){
+    // Compte présent mais sans empreinte = vidé par une synchro (voir _reposerEmpreintes) :
+    // aucun mot de passe ne peut passer, il faut le dire et ouvrir la sortie.
+    var sansMdp=false;
+    try{
+      if(lr==='superadmin') sansMdp=!DB.superAdmin.pwd;
+      else sansMdp=(DB.admins||[]).some(function(a){ return a && a.user===u && !a.pwd; });
+    }catch(e){}
+    $("lerr").innerHTML=(sansMdp
+      ? '<div>Ce compte n\'a plus de mot de passe enregistr\u00e9 sur cet appareil.</div>'
+      : '<div>Identifiants incorrects</div>')
+      + '<button class="btn bo" style="margin-top:9px;width:100%" onclick="_reinitMdpAdmin()">'
+      + 'R\u00e9initialiser avec la cl\u00e9 de synchronisation</button>';
+    return;
+  }
+
   $("lerr").innerHTML='<div>Identifiants incorrects</div>';
 }
 
@@ -11741,10 +11839,11 @@ window._restaurerComptesAdminGo = function(){
     })
     .then(function(d){
       if(!d || d.error) throw new Error((d && d.error) || 'R\u00e9ponse vide.');
-      var nb = 0;
+      var nb = 0, _empL = _empreintesLocales();
       if(Array.isArray(d.admins) && d.admins.length){ DB.admins = d.admins; nb += d.admins.length; }
       if(d.superAdmin && d.superAdmin.user){ DB.superAdmin = d.superAdmin; nb += 1; }
       if(!nb) throw new Error('Le serveur ne contient aucun compte d\'administration.');
+      _reposerEmpreintes(_empL);
       // La cl\u00e9 a fait ses preuves : on la garde pour la synchronisation \u00e0 venir.
       DB.cloudConfig.secret = sec;
       try{ _saveCloudConfigCache && _saveCloudConfigCache(); }catch(e){}
@@ -11811,7 +11910,9 @@ function go2SES(acc){
                 var cloudCfg=DB.cloudConfig;
                 function _mL(la,sa){var m=JSON.parse(JSON.stringify(sa||[]));var si={};m.forEach(function(x){si[x.id||x.mat]=true;});(la||[]).forEach(function(x){var k=x.id||x.mat;if(k&&!si[k])m.push(x);});return m;}
                 var lb2=DB.books||[],lg2=DB.galleryImages||[],le2=(DB.elearning&&DB.elearning.contenus)||[];
+                var _empL=_empreintesLocales();
                 DB=serverDB;
+                _reposerEmpreintes(_empL);
                 // BUG-09/BUG-03 FIX : re-migration systématique
                 _migrateDB();
                 DB.books=_mL(lb2,DB.books);
