@@ -34,7 +34,7 @@
 <script src="./exercices.js?v=0018edb0"></script>
 <script src="./generateur.js?v=85c8cdef"></script>
 <script src="./texte.js?v=43fa1e84"></script>
-<script src="./docx.js?v=090324b1"></script>
+<script src="./docx.js?v=221641f0"></script>
 <!--vrt-habillage:tete-->
 <link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.37">
 <script>window.VRT_DATA=window.VRT_DATA||{"citations":[{"t":"Le génie, c’est un pour cent d’inspiration et quatre-vingt-dix-neuf pour cent de transpiration.","a":"Thomas Edison"},{"t":"Ce n’est pas parce que les choses sont difficiles que nous n’osons pas ; c’est parce que nous n’osons pas qu’elles sont difficiles.","a":"Sénèque"},{"t":"L’éducation est l’arme la plus puissante pour changer le monde.","a":"Nelson Mandela"},{"t":"Un peu chaque jour vaut mieux que beaucoup un seul jour.","a":"Proverbe"},{"t":"La chance sourit à l’esprit préparé.","a":"Louis Pasteur"},{"t":"Tomber sept fois, se relever huit.","a":"Proverbe japonais"}],"themeSombre":"\n      body{background:#0A1428!important}\n      [style*=\"background:#fff\"],[style*=\"background:#FAFBFE\"],[style*=\"background:#FCFDFE\"],[style*=\"background:#F7F9FD\"]{background:#132241!important}\n      [style*=\"background:#F4F5F8\"],[style*=\"background:#F4F6FB\"],[style*=\"background:#EFF2F7\"],[style*=\"background:#F5F9FF\"]{background:#0F1B33!important}\n      [style*=\"background:rgba(255,255,255,.96)\"]{background:rgba(13,25,48,.96)!important}\n      [style*=\"radial-gradient(1100px\"],[style*=\"radial-gradient(900px\"]{background:#0C1730!important}\n      [style*=\"linear-gradient(180deg,#FBF8F1\"]{background:#0C1730!important}\n      [style*=\"color:#001136\"]{color:#EEF3FC!important}\n      [style*=\"color:#0C2A6A\"]{color:#DCE6F8!important}\n      [style*=\"color:#4D5163\"],[style*=\"color:#6B5A42\"]{color:#B6C2D8!important}\n      [style*=\"color:#6E7385\"],[style*=\"color:#9BA6BE\"]{color:#8D9AB4!important}\n      [style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"]{border-color:#24334F!important}\n      [style*=\"\"],[style*=\"\"]{border-bottom-color:#24334F!important}\n      [style*=\"\"]{border-top-color:#24334F!important}\n      [style*=\"border-left:4px solid\"]{border-left-color:#FFC93C!important}\n      input,input::placeholder{color:#C7D2E6!important}\n    "};</script>
@@ -2091,6 +2091,7 @@
         <button onClick="{{ epTabHistorique }}" style="{{ epTabHistoStyle }}">{{ epTabHistoIcon }} Historique</button>
         <button onClick="{{ epTabComparer }}" style="{{ epTabCompStyle }}">{{ epTabCompIcon }} Comparer</button>
         <button onClick="{{ epTabPropositions }}" style="{{ epTabPropStyle }}">{{ epTabPropIcon }} Propositions <span style="{{ epPropBadge }}">{{ epPropCount }}</span></button>
+        <button onClick="{{ epTabLivrables }}" style="{{ epTabLivStyle }}">{{ epTabLivIcon }} Livrables</button>
       </div>
       <sc-if value="{{ tabEdition }}" hint-placeholder-val="{{ true }}">
       <div class="vrt-col2" style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
@@ -2158,7 +2159,19 @@
               <div style="{{ step4Style }}"><span style="{{ step4Dot }}">4</span>Diffusé</div>
             </div>
             <div style="{{ revEcheanceStyle }}">{{ revEcheanceLabel }}</div>
+            <!-- Travail en SOLO (19/10/2026) : un enseignant seul n'a personne pour
+                 relire. Sans ce mode, son épreuve restait « En relecture » pour
+                 toujours. Il choisit de valider lui-même ; la décision est
+                 tracée comme une autre (« validée par l'auteur »). -->
+            <sc-if value="{{ revModeVisible }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:4px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-bottom:6px">
+                <button onClick="{{ revModeEquipe }}" style="{{ revModeEquipeStyle }}">Avec relecture</button>
+                <button onClick="{{ revModeSolo }}" style="{{ revModeSoloStyle }}">En solo</button>
+              </div>
+              <div style="font-size:11px;color:var(--c8b97a8,#8b97a8);line-height:1.45;margin-bottom:10px">{{ revModeAide }}</div>
+            </sc-if>
             <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-if value="{{ canSoloValider }}" hint-placeholder-val="{{ false }}"><button onClick="{{ soloValider }}" style="background:var(--c1f9d55,#1f9d55);color:var(--cffffff,#fff);border:none;padding:10px;font-size:13px;font-weight:700;border-radius:9px;cursor:pointer;font-family:Poppins" style-hover="background:var(--c188047,#188047)">{{ icValide }} Valider mon épreuve</button></sc-if>
               <sc-if value="{{ canSubmit }}" hint-placeholder-val="{{ false }}">
                 <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--c5a6678,#5a6678)">Relectures requises
                   <select value="{{ revRequis }}" onChange="{{ setRevRequis }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)"><sc-for list="{{ revRequisOptions }}" as="r" hint-placeholder-count="3"><option value="{{ r }}">{{ r }}</option></sc-for></select>
@@ -2325,6 +2338,83 @@
       </div>
       </sc-if>
 
+      <!-- ── LIVRABLES (19/10/2026, lot C) ─────────────────────────────────
+           Une épreuve ne se réduit pas à l'énoncé et au corrigé : celui qui
+           corrige a besoin des CRITÈRES (ce qui vaut des points, ce qui en
+           retire, à quoi ressemble une copie de 12), et celui qui relit a
+           besoin de savoir POURQUOI ce texte, sur quel périmètre, et ce qu'on
+           lui soumet. Deux documents de plus, joints à l'export Word sur des
+           pages « réservées », jamais sur la feuille du candidat. -->
+      <sc-if value="{{ tabLivrables }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+          <button onClick="{{ livOngGuide }}" style="{{ livOngGuideStyle }}">Guide de correction</button>
+          <button onClick="{{ livOngNote }}" style="{{ livOngNoteStyle }}">Note au relecteur</button>
+          <button onClick="{{ livToggleWord }}" style="margin-left:auto;background:none;border:none;color:var(--c1a72bb,#1a72bb);font-size:12.5px;font-weight:700;font-family:Poppins;cursor:pointer">{{ livWordLabel }}</button>
+        </div>
+
+        <sc-if value="{{ livSousGuide }}" hint-placeholder-val="{{ true }}">
+          <section style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(20,55,95,.05);margin-bottom:16px">
+            <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
+              <div style="flex:1;min-width:240px">
+                <h3 style="font-family:Poppins;font-size:15px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 4px">Guide de correction et de notation</h3>
+                <p style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin:0 0 14px;line-height:1.55;max-width:80ch">Un critère par ligne du barème : ce qui est attendu, et les repères qui font monter ou descendre la note. Réservé aux correcteurs.</p>
+              </div>
+              <button onClick="{{ guidePreremplir }}" style="background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c14375f,#14375f);padding:8px 14px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer">{{ guidePreremplirLabel }}</button>
+            </div>
+            <div style="{{ guideTotalStyle }}">{{ guideTotal }}</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ guideCriteres }}" as="gc" hint-placeholder-count="3">
+                <div style="border:1px solid var(--ceef2f7,#eef2f7);border-radius:10px;padding:11px;background:var(--cfbfcfe,#fbfcfe)">
+                  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                    <span style="font-family:Poppins;font-weight:700;color:var(--c1a72bb,#1a72bb);min-width:22px">{{ gc.num }}</span>
+                    <input value="{{ gc.critere }}" onChange="{{ gc.setCritere }}" placeholder="Critère (ex. Compréhension et fidélité)" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:7px 9px;font-size:13px;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);box-sizing:border-box;flex:1;min-width:180px;font-weight:600">
+                    <input value="{{ gc.pts }}" onChange="{{ gc.setPts }}" placeholder="pts" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:7px 9px;font-size:13px;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);box-sizing:border-box;width:64px;text-align:center">
+                    <button onClick="{{ gc.retirer }}" title="Retirer ce critère" style="width:30px;height:30px;border-radius:8px;border:1px solid var(--ce6ecf3,#e6ecf3);background:var(--cffffff,#fff);color:var(--cc0392b,#c0392b);cursor:pointer;flex:none">×</button>
+                  </div>
+                  <div class="vrt-col2" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+                    <textarea value="{{ gc.attendu }}" onChange="{{ gc.setAttendu }}" rows="3" placeholder="Attendu : les éléments de réponse et leur valeur" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
+                    <textarea value="{{ gc.reperes }}" onChange="{{ gc.setReperes }}" rows="3" placeholder="Repères : ce qui plafonne la note, ce qui la retire (contresens, recopie…)" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <button onClick="{{ guideAjouter }}" style="margin-top:10px;background:none;border:1px dashed var(--ccdd9e6,#cdd9e6);color:var(--c5a6678,#5a6678);padding:8px 14px;font-size:12.5px;font-weight:600;border-radius:9px;cursor:pointer">+ Ajouter un critère</button>
+
+            <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Pénalités</label>
+            <textarea value="{{ guidePenalites }}" onChange="{{ setGuidePenalites }}" rows="3" placeholder="Longueur, décompte des mots, langue (ex. au-delà de cinq fautes, −0,5 par tranche de cinq, dans la limite de 2 points)…" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
+
+            <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Repères de niveau</label>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <sc-for list="{{ guideNiveaux }}" as="gn" hint-placeholder-count="4">
+                <div style="display:flex;gap:9px;align-items:flex-start">
+                  <span style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--c14375f,#14375f);min-width:86px;padding-top:8px">{{ gn.tranche }}</span>
+                  <textarea value="{{ gn.profil }}" onChange="{{ gn.setProfil }}" rows="2" placeholder="{{ gn.aide }}" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical;flex:1"></textarea>
+                </div>
+              </sc-for>
+            </div>
+
+            <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Erreurs attendues et traitement</label>
+            <textarea value="{{ guideErreurs }}" onChange="{{ setGuideErreurs }}" rows="4" placeholder="Les contresens prévisibles, les confusions fréquentes, et le critère où chacune se sanctionne — sans les cumuler." style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ livSousNote }}" hint-placeholder-val="{{ false }}">
+          <section style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(20,55,95,.05);margin-bottom:16px">
+            <h3 style="font-family:Poppins;font-size:15px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 4px">Note au relecteur</h3>
+            <p style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin:0 0 14px;line-height:1.55;max-width:80ch">Ce que le relecteur doit savoir pour trancher vite : le texte retenu et pourquoi, le périmètre évalué, et les points sur lesquels vous attendez son avis.</p>
+            <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Textes retenus</label>
+            <div style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.5">
+              <sc-for list="{{ noteTextes }}" as="nt" hint-placeholder-count="1"><div>• {{ nt.ligne }}</div></sc-for>
+            </div>
+            <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Choix du texte et du sujet</label>
+            <textarea value="{{ noteChoix }}" onChange="{{ setNoteChoix }}" rows="3" placeholder="Pourquoi ce texte : lien avec la séquence, structure, longueur, difficulté visée…" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
+            <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Périmètre évalué</label>
+            <textarea value="{{ notePerimetre }}" onChange="{{ setNotePerimetre }}" rows="3" placeholder="Séquences et notions évaluées, notions volontairement exclues, programme borné au…" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
+            <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Points soumis au relecteur</label>
+            <textarea value="{{ notePoints }}" onChange="{{ setNotePoints }}" rows="4" placeholder="Un point par ligne : une question dont vous doutez, un barème à confirmer, une date…" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
+          </section>
+        </sc-if>
+      </sc-if>
       <sc-if value="{{ tabHistorique }}" hint-placeholder-val="{{ false }}">
       <div style="max-width:760px">
         <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 20px;text-align:justify">Chronologie de l'épreuve : ajouts de textes, modifications de questions, commentaires et décisions de validation, du plus récent au plus ancien.</p>
@@ -3725,7 +3815,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '19/10 · B';
+const ATELIER_BUILD = '19/10 · C';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -6780,6 +6870,51 @@ class Component extends DCLogic {
     if(stru&&stru.formulesCorrige&&stru.formulesCorrige.length)blocs.push({titre:'À rappeler aux correcteurs',lignes:stru.formulesCorrige});
     return blocs.length?blocs:null;
   }
+  /* ── Livrables (lot C) ──────────────────────────────────────────────── */
+  _guideDe(a){const g=(a&&a.guide)||{};return{criteres:Array.isArray(g.criteres)?g.criteres:[],penalites:g.penalites||'',
+    niveaux:g.niveaux&&typeof g.niveaux==='object'?g.niveaux:{},erreurs:g.erreurs||''};}
+  _noteDe(a){const n=(a&&a.note)||{};return{choix:n.choix||'',perimetre:n.perimetre||'',points:n.points||''};}
+  /* Un critère par ligne du barème. La grille d'Ambassa, quand elle existe,
+     passe devant : elle porte déjà critères et indicateurs. On ne remplace
+     JAMAIS un guide déjà écrit sans le demander. */
+  _criteresDepuisBareme(a){
+    if((a.grilleIA||[]).length)return a.grilleIA.map(g=>({critere:this._sansMarkdown(g.critere||''),pts:g.points!=null?String(g.points):'',
+      attendu:this._sansMarkdown(g.indicateurs||''),reperes:''}));
+    const out=[];
+    (a.textIds||[]).forEach((n,ti)=>{const f=this.all.find(x=>x.n===n);if(!f)return;
+      [['comp','Compréhension'],['expl','Langue et production']].forEach(([k,lib])=>{
+        const qs=this._qListOf(a,f,k);const pp=(a.pts&&a.pts[n]&&a.pts[n][k])||[];const c=(a.corrige&&a.corrige[n]&&a.corrige[n][k])||[];
+        qs.forEach((q,i)=>out.push({critere:'Texte '+(ti+1)+' · '+lib+' · Q'+(i+1)+' — '+String(q).slice(0,70),
+          pts:pp[i]!=null&&pp[i]!==''?String(pp[i]):'',attendu:this._sansMarkdown(c[i]||'').slice(0,400),reperes:''}));});});
+    (a.sujets||[]).forEach(sj=>{if(!sj)return;out.push({critere:sj.titre||'Sujet',pts:sj.pts?String(sj.pts):'',
+      attendu:this._sansMarkdown(sj.corrige||'').slice(0,400),reperes:''});});
+    return out;
+  }
+  _annexesPourExport(a){
+    if(this.state.livWord===false)return [];
+    const g=this._guideDe(a),n=this._noteDe(a),T=this._tranchesGuide(),out=[];
+    const lignes=t=>String(t||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+    const bg=[];
+    const cr=g.criteres.filter(c=>c&&(c.critere||c.attendu));
+    if(cr.length)bg.push({titre:'Critères et barème',lignes:cr.map((c,i)=>(i+1)+'. '+(c.critere||'Critère')+(c.pts?' — '+c.pts+' pt'+((parseFloat(String(c.pts).replace(',','.'))||0)>1?'s':''):'')
+      +(c.attendu?'\n   Attendu : '+c.attendu:'')+(c.reperes?'\n   Repères : '+c.reperes:''))});
+    if(lignes(g.penalites).length)bg.push({titre:'Pénalités',lignes:lignes(g.penalites)});
+    const nv=T.filter(t=>g.niveaux[t]).map(t=>t+' : '+g.niveaux[t]);
+    if(nv.length)bg.push({titre:'Repères de niveau',lignes:nv});
+    if(lignes(g.erreurs).length)bg.push({titre:'Erreurs attendues et traitement',lignes:lignes(g.erreurs)});
+    if(bg.length)out.push({titre:'GUIDE DE CORRECTION ET DE NOTATION — RÉSERVÉ AUX CORRECTEURS',blocs:bg});
+    const bn=[];
+    const tx=this._noteTextes(a);if(tx.length)bn.push({titre:'Textes retenus',lignes:tx.map(x=>'• '+x)});
+    if(lignes(n.choix).length)bn.push({titre:'Choix du texte et du sujet',lignes:lignes(n.choix)});
+    if(lignes(n.perimetre).length)bn.push({titre:'Périmètre évalué',lignes:lignes(n.perimetre)});
+    if(lignes(n.points).length)bn.push({titre:'Points soumis au relecteur',lignes:lignes(n.points).map((x,i)=>(i+1)+'. '+x)});
+    if(lignes(n.choix).length||lignes(n.perimetre).length||lignes(n.points).length)
+      out.push({titre:'NOTE AU RELECTEUR — DOCUMENT INTERNE',blocs:bn});
+    return out;
+  }
+  _tranchesGuide(){return['16 à 20','12 à 15,5','8 à 11,5','0 à 7,5'];}
+  _noteTextes(a){return (a.textIds||[]).map(nn=>this.all.find(x=>x.n===nn)).filter(Boolean)
+    .map(f=>(f.author||'Anonyme')+(f.title?', « '+f.title+' »':'')+(f.words?' — '+f.words+' mots':'')+(f.reference?' — '+this._refPropre(f.reference):''));}
   _fabriquerWord(a){
     const stru=a.epreuveCode?MINESEC.epreuveParCode(a.epreuveCode):null;
     const choix=this._modeChoix(stru);
@@ -6824,6 +6959,7 @@ class Component extends DCLogic {
       consigne:consigne,
       sujets:sujets,
       corrige:this.state.genCorrigeWord===false?null:this._corrigePourExport(a),
+      annexes:this._annexesPourExport(a),
       pied:'Épreuve composée avec Atelier de Français — Centre VÉRITAS'
     },textes);
   }
@@ -7650,6 +7786,22 @@ class Component extends DCLogic {
     const ech=Date.now()+this._delais().validation*86400000;
     this._updateActive({status:'relecture',revue:{...r,tour,requis:Math.max(1,+requis||r.requis),echeance:ech}},
       tour>1?'a soumis la version corrigée (tour '+tour+')':'a soumis en relecture');
+  }
+  /* Personne d'autre que moi ne peut valider dans l'équipe : le solo s'impose
+     par défaut. `ep.solo` (booléen) est le choix explicite de l'auteur. */
+  _estSolo(a){
+    if(!a)return false;
+    if(a.solo===true||a.solo===false)return a.solo;
+    const me=this._me();
+    return !(this.state.users||[]).some(u=>u&&u.id!==me.id&&u.role!=='Élève (lecture seule)'&&this._perm(u.role).validate);
+  }
+  _validerSolo(){
+    const a=this._active(),me=this._me();if(!a)return;
+    const r=this._revueDe(a);
+    const tour=r.decisions.some(d=>d.tour===r.tour)?r.tour+1:r.tour;
+    const decisions=r.decisions.concat([{uid:me.id,nom:me.name,verdict:'valide',portee:'Tout le sujet',
+      motif:'Validée par l’auteur — travail en solo, sans relecteur.',ts:Date.now(),tour,solo:true}]);
+    this._updateActive({status:'valide',solo:true,revue:{...r,tour,requis:1,echeance:0,decisions}},'a validé son épreuve (travail en solo)');
   }
   _rendreDecision(){
     const st=this.state,a=this._active(),me=this._me();if(!a)return;
@@ -9380,6 +9532,48 @@ class Component extends DCLogic {
       sendIcon:this._icon('send','var(--cffffff,#fff)',17),fabChatIcon:this._icon('chat','var(--c1a72bb,#1a72bb)',22),fabPlusIcon:this._icon('plus','var(--cffffff,#fff)',19),
       epTabEdition:()=>this.setState({epTab:'edition'}),epTabHistorique:()=>this.setState({epTab:'historique'}),epTabComparer:()=>this.setState({epTab:'comparer'}),epTabPropositions:()=>{if(perm.proposer)this.setState({epTab:'propositions'});},
       tabEdition:st.epTab==='edition',tabHistorique:st.epTab==='historique',tabComparer:st.epTab==='comparer',tabPropositions:st.epTab==='propositions',
+      tabLivrables:st.epTab==='livrables',epTabLivrables:()=>this.setState({epTab:'livrables'}),
+      epTabLivStyle:this._epTab(st.epTab==='livrables'),epTabLivIcon:this._icon('file',st.epTab==='livrables'?'var(--c1a72bb,#1a72bb)':'var(--c8b97a8,#8b97a8)',15),
+      ...(()=>{
+        const g=this._guideDe(active),n=this._noteDe(active);
+        const sous=st.livSous||'guide';
+        const ong=on=>'padding:8px 14px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer;border:1px solid '+(on?'var(--c1a72bb,#1a72bb);background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff)':'var(--ce2eaf3,#e2eaf3);background:var(--cffffff,#fff);color:var(--c5a6678,#5a6678)');
+        const majG=patch=>{if(!perm.edit||!active)return;this._updateActive({guide:{...this._guideDe(this._active()),...patch}});};
+        const majN=patch=>{if(!perm.edit||!active)return;this._updateActive({note:{...this._noteDe(this._active()),...patch}});};
+        const majC=(i,k,v)=>{const cr=this._guideDe(this._active()).criteres.slice();cr[i]={...cr[i],[k]:v};majG({criteres:cr});};
+        const num=x=>parseFloat(String(x||'').replace(',','.'))||0;
+        const totC=g.criteres.reduce((t,c)=>t+num(c&&c.pts),0);
+        const totB=active?this._baremeTotal():0;
+        const ecart=g.criteres.length>0&&totB>0&&Math.abs(totC-totB)>0.01;
+        return{
+          livSousGuide:sous==='guide',livSousNote:sous==='note',
+          livOngGuide:()=>this.setState({livSous:'guide'}),livOngNote:()=>this.setState({livSous:'note'}),
+          livOngGuideStyle:ong(sous==='guide'),livOngNoteStyle:ong(sous==='note'),
+          livWordLabel:(st.livWord===false?'☐':'☑')+' Joints à l’export Word',
+          livToggleWord:()=>this.setState({livWord:st.livWord===false}),
+          guidePreremplirLabel:g.criteres.length?'Refaire depuis le barème':'Pré-remplir depuis le barème',
+          guidePreremplir:()=>{if(!perm.edit||!active)return;const a=this._active();
+            if(this._guideDe(a).criteres.some(c=>c&&(c.attendu||c.reperes))){let ok=true;try{ok=window.confirm('Remplacer les critères déjà rédigés par ceux du barème ?');}catch(e){}if(!ok)return;}
+            const cr=this._criteresDepuisBareme(a);
+            if(!cr.length){this._avis('Aucune question ni aucun sujet à reprendre : composez d’abord l’épreuve.','attention');return;}
+            this._updateActive({guide:{...this._guideDe(a),criteres:cr}},'a pré-rempli le guide de correction');},
+          guideCriteres:g.criteres.map((c,i)=>({num:i+1,critere:(c&&c.critere)||'',pts:(c&&c.pts)||'',attendu:(c&&c.attendu)||'',reperes:(c&&c.reperes)||'',
+            setCritere:e=>majC(i,'critere',val(e)),setPts:e=>majC(i,'pts',val(e)),setAttendu:e=>majC(i,'attendu',val(e)),setReperes:e=>majC(i,'reperes',val(e)),
+            retirer:()=>{const cr=this._guideDe(this._active()).criteres.slice();cr.splice(i,1);majG({criteres:cr});}})),
+          guideAjouter:()=>majG({criteres:[...this._guideDe(this._active()).criteres,{critere:'',pts:'',attendu:'',reperes:''}]}),
+          guideTotal:g.criteres.length?('Total des critères : '+String(totC).replace('.',',')+' pt'+(totC>1?'s':'')+(totB?' · barème de l’épreuve : '+String(totB).replace('.',','):'')+(ecart?' — les deux ne concordent pas.':'')):'',
+          guideTotalStyle:g.criteres.length?'font-size:12px;font-weight:700;font-family:Poppins;margin:0 0 10px;color:'+(ecart?'var(--cc0392b,#c0392b)':'var(--c1f9d55,#1f9d55)'):hidden,
+          guidePenalites:g.penalites,setGuidePenalites:e=>majG({penalites:val(e)}),
+          guideNiveaux:this._tranchesGuide().map((t,i)=>({tranche:t,profil:g.niveaux[t]||'',
+            aide:['Copie qui maîtrise la méthode et nuance son propos…','Sujet compris, méthode tenue, exemples parfois juxtaposés…','Réponses partielles, paraphrase, méthode incomplète…','Hors sujet, contresens majeur, copie très inachevée…'][i],
+            setProfil:e=>majG({niveaux:{...this._guideDe(this._active()).niveaux,[t]:val(e)}})})),
+          guideErreurs:g.erreurs,setGuideErreurs:e=>majG({erreurs:val(e)}),
+          noteTextes:active?(this._noteTextes(active).length?this._noteTextes(active).map(l=>({ligne:l})):[{ligne:'Aucun texte du corpus dans cette épreuve.'}]):[],
+          noteChoix:n.choix,setNoteChoix:e=>majN({choix:val(e)}),
+          notePerimetre:n.perimetre,setNotePerimetre:e=>majN({perimetre:val(e)}),
+          notePoints:n.points,setNotePoints:e=>majN({points:val(e)}),
+        };
+      })(),
       epTabEditionStyle:this._epTab(st.epTab==='edition'),epTabHistoStyle:this._epTab(st.epTab==='historique'),epTabCompStyle:this._epTab(st.epTab==='comparer'),epTabPropStyle:perm.proposer?this._epTab(st.epTab==='propositions'):hidden,
       epTabEditionIcon:this._icon('pen',st.epTab==='edition'?'var(--c1a72bb,#1a72bb)':'var(--c8b97a8,#8b97a8)',15),epTabHistoIcon:this._icon('clock',st.epTab==='historique'?'var(--c1a72bb,#1a72bb)':'var(--c8b97a8,#8b97a8)',15),epTabCompIcon:this._icon('diff',st.epTab==='comparer'?'var(--c1a72bb,#1a72bb)':'var(--c8b97a8,#8b97a8)',15),epTabPropIcon:this._icon('inbox',st.epTab==='propositions'?'var(--c1a72bb,#1a72bb)':'var(--c8b97a8,#8b97a8)',15),
       epPropCount:epProps.filter(p=>p.status==='pending').length,epPropBadge:epProps.filter(p=>p.status==='pending').length?'display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 4px;background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border-radius:999px;font-size:10.5px;font-weight:700;margin-left:4px':hidden,
@@ -9899,7 +10093,24 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       step1Dot:dotStyle(s2||s3,s1),step2Dot:dotStyle(s3,s2),step3Dot:dotStyle(false,s3),
       step4Style:stepStyle(sDiff),step4Dot:dotStyle(sDiff,false),
       step2Label:s==='ajustement'?'Ajustement demandé':s==='rejete'?'Rejeté':'En relecture',
-      canSubmit:perm.edit&&(s1||s==='ajustement'||s==='rejete'),canValidate:perm.validate&&s2,canSendBack:perm.validate&&s3,canPublish:perm.publish&&s3,
+      ...(()=>{
+        const solo=this._estSolo(active),auteur=!!active&&(active.ownerId===me.id||perm.validate);
+        const ouvert=s1||s==='ajustement'||s==='rejete';
+        const mode=on=>'flex:1;padding:6px 8px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer;border:none;'+(on?'background:var(--cffffff,#fff);color:var(--c14375f,#14375f);box-shadow:0 1px 4px rgba(20,55,95,.12)':'background:none;color:var(--c8b97a8,#8b97a8)');
+        return{
+          revModeVisible:perm.edit&&auteur&&ouvert,
+          revModeEquipe:()=>this._updateActive({solo:false}),revModeSolo:()=>this._updateActive({solo:true}),
+          revModeEquipeStyle:mode(!solo),revModeSoloStyle:mode(solo),
+          revModeAide:solo?'Vous validez vous-même : aucune relecture n’est demandée, la décision reste tracée.'
+            :'Un ou plusieurs collègues relisent et décident avant la validation.',
+          canSoloValider:perm.edit&&auteur&&ouvert&&solo,
+          soloValider:()=>this._validerSolo(),
+          canSubmit:perm.edit&&ouvert&&!solo,
+          canSendBack:s3&&(perm.validate||(solo&&auteur)),
+          canPublish:s3&&(perm.publish||(solo&&auteur)),
+        };
+      })(),
+      canValidate:perm.validate&&s2,
       submitLabel:s==='ajustement'||s==='rejete'?'Soumettre la version corrigée':'Soumettre en relecture',
       revRequis:String(st.revRequis||rv.requis),revRequisOptions:['1','2','3'],
       setRevRequis:e=>this.setState({revRequis:val(e)}),
