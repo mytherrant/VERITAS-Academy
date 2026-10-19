@@ -392,3 +392,17 @@ nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!impor
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq{--vq:#5B4FA8}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq{--vq:#B03A6E}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq{--vq:#A84200}
+
+/* ════════════════════════════════════════════════════════════════════════
+   ATELIER : ENCRES DE LA VITRINE (19/10/2026)
+   ════════════════════════════════════════════════════════════════════════
+   Mesuré en production, session enseignant, huit vues : les légendes de
+   l'Atelier (#8B97A8, #9AA5B5, #7A8598) tombaient entre 2,2 et 3,7:1, les
+   pastilles orange #C26A12 et vertes #1F9D55 à 3,2-3,9:1 — et aucune de ces
+   teintes n'est celle de la vitrine. Ses couleurs passent par des variables
+   posées sur :root : les redéfinir suffit, sans toucher au code React.
+   Thème clair seulement : le sombre a ses propres valeurs. Après : 0 texte
+   sous 4,5:1 (3:1 en grand corps) sur les huit vues. */
+html:not([data-theme="sombre"]):has(#dc-root){
+  --sb-fg-dim:#5F6475;--c8b97a8:#5F6475;--c9aa5b5:#5F6475;--c7a8598:#4D5163;
+  --cc26a12:#A84200;--c1f9d55:#007E11;--c0e8a9c:#0E7C86}
