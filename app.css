@@ -6397,6 +6397,13 @@ button .i,a .i{margin-right:.4em}
   background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16);
   color:inherit; }
 #sbTheme:hover{ background:rgba(255,255,255,.16); }
+/* Carte utilisateur de la barre latérale, sur deux lignes (19/10/2026). */
+.sbu{flex-wrap:wrap;row-gap:9px}
+.sbu .sbu-id{display:flex;align-items:center;gap:9px;flex:1 1 100%;min-width:0}
+.sbu .sbun{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sbu .sbur{white-space:nowrap;letter-spacing:.4px}
+.sbu .sbu-act{display:flex;align-items:center;gap:8px;flex:1 1 100%}
+.sbu .sbu-act .sblo{flex:1;justify-content:center;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px}
 
 /* ═══ 5. Média ═══════════════════════════════════════════════════════
    Captures et scans de manuels sont des documents blancs : en sombre on les
