@@ -32,7 +32,7 @@
 <script src="./minesec.js?v=5109f163"></script>
 <script src="./conformite.js?v=7948efec"></script>
 <script src="./exercices.js?v=0018edb0"></script>
-<script src="./generateur.js?v=85c8cdef"></script>
+<script src="./generateur.js?v=1d6ec81d"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=221641f0"></script>
 <!--vrt-habillage:tete-->
@@ -1901,6 +1901,17 @@
                qu'il prenait pour le bon, et Ambassa refusait de composer.
                Mêmes listes et mêmes gestes que les Renseignements : les deux
                endroits écrivent la même donnée. -->
+          <!-- ASSISTANT EN QUATRE ÉTAPES (19/10/2026, lot D) : cadre, programme,
+               notions à exclure, récapitulatif. Les étapes sont des ONGLETS, pas
+               un tunnel : les boutons de composition restent sous la main à
+               chaque étape — qui veut composer d'un clic le peut toujours.
+               Ce qui est choisi ici part dans la consigne d'Ambassa (programme
+               couvert, notions exclues « même implicitement ») et reste
+               consigné sur l'épreuve (`genParams`), lisible par le relecteur. -->
+          <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">
+            <sc-for list="{{ assEtapes }}" as="et" hint-placeholder-count="4"><button onClick="{{ et.go }}" style="{{ et.style }}"><span style="{{ et.dot }}">{{ et.n }}</span>{{ et.label }}</button></sc-for>
+          </div>
+          <sc-if value="{{ assE1 }}" hint-placeholder-val="{{ true }}">
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px">
             <label style="{{ genLblStyle }}">1. Classe
               <select value="{{ ep.classe }}" onChange="{{ setClasse }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}"><option value="">— Choisir la classe —</option><sc-for list="{{ classeOptions }}" as="c" hint-placeholder-count="8"><option value="{{ c }}">{{ c }}</option></sc-for></select>
@@ -1908,10 +1919,45 @@
             <label style="{{ genLblStyle }}">2. Nature de l’épreuve
               <select value="{{ ep.epreuveCode }}" onChange="{{ setEpreuveType }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}"><option value="">Automatique selon la classe</option><sc-for list="{{ natureOptions }}" as="n" hint-placeholder-count="10"><option value="{{ n.code }}">{{ n.label }}</option></sc-for></select>
             </label>
-            <label style="{{ genLblStyle }}">3. Thème (facultatif)
-              <input value="{{ genTheme }}" onChange="{{ setGenTheme }}" disabled="{{ cannotEdit }}" placeholder="ex. la santé, l’environnement" style="{{ genSelStyle }}">
+            <label style="{{ genLblStyle }}">Type d’évaluation
+              <select value="{{ assType }}" onChange="{{ setAssType }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}"><sc-for list="{{ assTypes }}" as="ty" hint-placeholder-count="5"><option value="{{ ty }}">{{ ty }}</option></sc-for></select>
+            </label>
+            <label style="{{ genLblStyle }}">Numéro
+              <input value="{{ assNumero }}" onChange="{{ setAssNumero }}" disabled="{{ cannotEdit }}" placeholder="ex. 2" style="{{ genSelStyle }}">
             </label>
           </div>
+          </sc-if>
+          <sc-if value="{{ assE2 }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:12px">
+              <div style="{{ genLblStyle }}">Leçons déjà faites en classe <span style="font-weight:400;color:var(--c8b97a8,#8b97a8)">— {{ assCoursAide }}</span></div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><sc-for list="{{ assCours }}" as="ac" hint-placeholder-count="3"><button onClick="{{ ac.toggle }}" style="{{ ac.style }}">{{ ac.label }}</button></sc-for></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px">
+              <label style="{{ genLblStyle }}">Œuvre au programme
+                <select value="{{ assOeuvre }}" onChange="{{ setAssOeuvre }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}"><option value="">— Aucune —</option><sc-for list="{{ assOeuvres }}" as="oe" hint-placeholder-count="3"><option value="{{ oe }}">{{ oe }}</option></sc-for></select>
+              </label>
+              <label style="{{ genLblStyle }}">Thème (facultatif)
+                <input value="{{ genTheme }}" onChange="{{ setGenTheme }}" disabled="{{ cannotEdit }}" placeholder="ex. la santé, l’environnement" style="{{ genSelStyle }}">
+              </label>
+              <label style="{{ genLblStyle }}">Programme borné au
+                <input type="date" value="{{ assBorne }}" onChange="{{ setAssBorne }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}">
+              </label>
+            </div>
+          </sc-if>
+          <sc-if value="{{ assE3 }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:12px">
+              <div style="font-size:12px;color:var(--c5a6678,#5a6678);line-height:1.5;max-width:80ch">Ambassa n’utilisera pas ces notions, même implicitement — une partie pas encore traitée, ou réservée à une évaluation ultérieure.</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><sc-for list="{{ assExclChips }}" as="ax" hint-placeholder-count="3"><button onClick="{{ ax.toggle }}" style="{{ ax.style }}">{{ ax.label }}</button></sc-for></div>
+              <textarea value="{{ assExclLibre }}" onChange="{{ setAssExclLibre }}" disabled="{{ cannotEdit }}" rows="2" placeholder="Autres notions à exclure, séparées par des virgules (ex. le discours rapporté, les figures d’insistance)" style="{{ genSelStyle }};width:100%;margin-top:8px;resize:vertical;font-family:Open Sans"></textarea>
+            </div>
+          </sc-if>
+          <sc-if value="{{ assE4 }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:12px;border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:10px;overflow:hidden">
+              <sc-for list="{{ assResume }}" as="rs" hint-placeholder-count="5">
+                <div style="display:flex;gap:12px;padding:8px 12px;border-bottom:1px solid var(--ceef2f7,#eef2f7);font-size:12.5px;line-height:1.5"><span style="min-width:150px;color:var(--c8b97a8,#8b97a8);font-weight:700;font-family:Poppins;font-size:11.5px">{{ rs.k }}</span><span style="flex:1;color:var(--c22303f,#22303f)">{{ rs.v }}</span></div>
+              </sc-for>
+            </div>
+          </sc-if>
           <div style="margin-top:10px"><span style="{{ genCibleStyle }}">{{ genCible }}</span></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
             <button onClick="{{ genTout }}" title="Ambassa choisit le texte (sauf s’il y en a déjà), rédige questions, barème, corrigé et sujets. Consomme un appel IA." style="{{ genToutStyle }}">{{ genToutIcone }}<span>{{ genToutLabel }}</span></button>
@@ -2406,6 +2452,12 @@
             <div style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.5">
               <sc-for list="{{ noteTextes }}" as="nt" hint-placeholder-count="1"><div>• {{ nt.ligne }}</div></sc-for>
             </div>
+            <sc-if value="{{ noteAParams }}" hint-placeholder-val="{{ false }}">
+              <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Paramètres de génération</label>
+              <div style="display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.5">
+                <sc-for list="{{ noteParams }}" as="np" hint-placeholder-count="4"><div>{{ np.ligne }}</div></sc-for>
+              </div>
+            </sc-if>
             <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Choix du texte et du sujet</label>
             <textarea value="{{ noteChoix }}" onChange="{{ setNoteChoix }}" rows="3" placeholder="Pourquoi ce texte : lien avec la séquence, structure, longueur, difficulté visée…" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
             <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Périmètre évalué</label>
@@ -3815,7 +3867,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '19/10 · C';
+const ATELIER_BUILD = '19/10 · D';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -5204,6 +5256,24 @@ class Component extends DCLogic {
       this._completerTexte(nn,r=>ok(!!r));
     });
   }
+  /* ── Assistant de composition (lot D) ─────────────────────────────── */
+  _memeClasse(x,y){const c=v=>MINESEC.cleClasse(String(v||'').normalize?String(v||'').normalize('NFKC'):String(v||''));return !!c(x)&&c(x)===c(y);}
+  _assDe(a){const z=(a&&a.assistant)||{};return{type:z.type||'Devoir',numero:z.numero||'',coursIds:Array.isArray(z.coursIds)?z.coursIds:[],
+    oeuvre:z.oeuvre||'',borne:z.borne||'',exclCours:Array.isArray(z.exclCours)?z.exclCours:[],exclLibre:z.exclLibre||''};}
+  _coursDeLaClasse(a){return (this.state.cours||[]).filter(c=>c&&a&&this._memeClasse(c.classe,a.classe));}
+  /* Ce qui part dans la consigne d'Ambassa : du texte, lisible tel quel par
+     le relecteur dans la note (genParams). */
+  _paramsGeneration(a){
+    const z=this._assDe(a),cours=this._coursDeLaClasse(a);
+    const titre=id=>{const c=cours.find(x=>x.id===id)||(this.state.cours||[]).find(x=>x.id===id);return c?(c.title||'Leçon sans titre'):'';};
+    /* Une leçon EXCLUE sort du programme couvert : la donner à Ambassa des
+       deux côtés (« appuie-toi dessus » et « ne l'utilise pas ») le laissait
+       choisir. */
+    const faits=z.coursIds.filter(id=>!z.exclCours.includes(id)).map(titre).filter(Boolean);
+    const exclus=z.exclCours.map(titre).filter(Boolean).concat(String(z.exclLibre||'').split(/[,;\n]+/).map(x=>x.trim()).filter(Boolean));
+    const borne=z.borne?new Date(z.borne+'T00:00:00').toLocaleDateString('fr-FR'):'';
+    return{cadre:z.type+(z.numero?' n°'+z.numero:''),faits,oeuvre:z.oeuvre,borne,exclus,theme:this.state.genTheme||''};
+  }
   _composerAvecAmbassa(mode){
     const st=this.state;
     if(st.genBusy)return;
@@ -5324,7 +5394,10 @@ class Component extends DCLogic {
         fixes={};
         textes.filter(t=>t.role==='support').forEach(t=>{fixes[t.n]={comp:this._qListOf(a,t,'comp'),expl:this._qListOf(a,t,'expl')};});
       }
+      const gp=this._paramsGeneration(a);
+      this._updateActive({genParams:{...gp,le:Date.now()}});
       const ctx={plan:plan,struct:struct,classe:a.classe,serie:a.serie||'',theme:st.genTheme||'',textes:textes,fixes:fixes,abonnement:abonnement,
+        cadre:gp.cadre,programmeFait:gp.faits,oeuvre:gp.oeuvre,borne:gp.borne,exclusions:gp.exclus,
         exemples:G.exemplesOfficiels(this.all,a.classe,principal?principal.n:null,2)};
       etape('Vérification de votre quota Ambassa…');
       return new Promise((ok,ko)=>this._consommerQuota('ia',()=>ok(true),m=>ko({quotaRefus:m})))
@@ -6905,6 +6978,7 @@ class Component extends DCLogic {
     if(bg.length)out.push({titre:'GUIDE DE CORRECTION ET DE NOTATION — RÉSERVÉ AUX CORRECTEURS',blocs:bg});
     const bn=[];
     const tx=this._noteTextes(a);if(tx.length)bn.push({titre:'Textes retenus',lignes:tx.map(x=>'• '+x)});
+    const gp=a.genParams;if(gp)bn.push({titre:'Paramètres de génération (Ambassa)',lignes:this._lignesParams(gp)});
     if(lignes(n.choix).length)bn.push({titre:'Choix du texte et du sujet',lignes:lignes(n.choix)});
     if(lignes(n.perimetre).length)bn.push({titre:'Périmètre évalué',lignes:lignes(n.perimetre)});
     if(lignes(n.points).length)bn.push({titre:'Points soumis au relecteur',lignes:lignes(n.points).map((x,i)=>(i+1)+'. '+x)});
@@ -6912,6 +6986,9 @@ class Component extends DCLogic {
       out.push({titre:'NOTE AU RELECTEUR — DOCUMENT INTERNE',blocs:bn});
     return out;
   }
+  _lignesParams(gp){return['Cadre : '+(gp.cadre||'Devoir'),'Programme couvert : '+((gp.faits||[]).join(' · ')||'non précisé'),
+    'Œuvre au programme : '+(gp.oeuvre||'aucune'),'Borné au : '+(gp.borne||'non précisé'),'Notions exclues : '+((gp.exclus||[]).join(' · ')||'aucune'),
+    'Thème : '+(gp.theme||'libre')].concat(gp.le?['Généré le '+new Date(gp.le).toLocaleDateString('fr-FR')]:[]);}
   _tranchesGuide(){return['16 à 20','12 à 15,5','8 à 11,5','0 à 7,5'];}
   _noteTextes(a){return (a.textIds||[]).map(nn=>this.all.find(x=>x.n===nn)).filter(Boolean)
     .map(f=>(f.author||'Anonyme')+(f.title?', « '+f.title+' »':'')+(f.words?' — '+f.words+' mots':'')+(f.reference?' — '+this._refPropre(f.reference):''));}
@@ -9569,6 +9646,7 @@ class Component extends DCLogic {
             setProfil:e=>majG({niveaux:{...this._guideDe(this._active()).niveaux,[t]:val(e)}})})),
           guideErreurs:g.erreurs,setGuideErreurs:e=>majG({erreurs:val(e)}),
           noteTextes:active?(this._noteTextes(active).length?this._noteTextes(active).map(l=>({ligne:l})):[{ligne:'Aucun texte du corpus dans cette épreuve.'}]):[],
+          noteAParams:!!(active&&active.genParams),noteParams:active&&active.genParams?this._lignesParams(active.genParams).map(l=>({ligne:l})):[],
           noteChoix:n.choix,setNoteChoix:e=>majN({choix:val(e)}),
           notePerimetre:n.perimetre,setNotePerimetre:e=>majN({perimetre:val(e)}),
           notePoints:n.points,setNotePoints:e=>majN({points:val(e)}),
@@ -10230,6 +10308,40 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       genSelStyle:'width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:9px;padding:9px 11px;font-size:13px;font-weight:500;font-family:inherit;color:var(--c33404f,#33404f);background:var(--cffffff,#fff);min-height:40px',
       genCibleStyle:'font-size:11.5px;font-weight:700;font-family:Poppins;color:var(--c14375f,#14375f);background:var(--ce7f1fb,#e7f1fb);border-radius:999px;padding:5px 11px;flex:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap',
       genTheme:st.genTheme||'',
+      ...(()=>{
+        const z=this._assDe(active),e=st.assEtape||1;
+        const majZ=patch=>{if(!perm.edit||!active)return;this._updateActive({assistant:{...this._assDe(this._active()),...patch}});};
+        const tog=(cle,id)=>{const cur=this._assDe(this._active())[cle];majZ({[cle]:cur.includes(id)?cur.filter(x=>x!==id):cur.concat([id])});};
+        const chip=on=>'padding:6px 11px;font-size:12px;font-weight:600;border-radius:999px;cursor:pointer;border:1px solid '+(on?'var(--c1a72bb,#1a72bb);background:var(--ce7f1fb,#e7f1fb);color:var(--c14375f,#14375f)':'var(--ce2eaf3,#e2eaf3);background:var(--cffffff,#fff);color:var(--c5a6678,#5a6678)');
+        const chipX=on=>'padding:6px 11px;font-size:12px;font-weight:600;border-radius:999px;cursor:pointer;border:1px solid '+(on?'var(--cc0392b,#c0392b);background:var(--cfdecea,#fdecea);color:var(--cc0392b,#c0392b);text-decoration:line-through':'var(--ce2eaf3,#e2eaf3);background:var(--cffffff,#fff);color:var(--c5a6678,#5a6678)');
+        const cours=active?this._coursDeLaClasse(active):[];
+        const gp=active?this._paramsGeneration(active):{faits:[],exclus:[]};
+        const lib=['Cadre','Programme','Notions à exclure','Récapitulatif'];
+        return{
+          assEtapes:lib.map((l,i)=>({n:i+1,label:l,go:()=>this.setState({assEtape:i+1}),
+            style:'display:inline-flex;align-items:center;gap:7px;padding:6px 12px 6px 6px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer;border:1px solid '+(e===i+1?'var(--c1a72bb,#1a72bb);background:var(--cffffff,#fff);color:var(--c14375f,#14375f)':'transparent;background:var(--cf2f6fb,#f2f6fb);color:var(--c7a8598,#7a8598)'),
+            dot:'display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;font-size:10.5px;'+(e===i+1?'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff)':'background:var(--cffffff,#fff);color:var(--c8b97a8,#8b97a8)')})),
+          assE1:e===1,assE2:e===2,assE3:e===3,assE4:e===4,
+          assTypes:['Devoir','Évaluation séquentielle','Composition trimestrielle','Examen blanc','Devoir de vacances'],
+          assType:z.type,setAssType:ev=>majZ({type:val(ev)}),
+          assNumero:z.numero,setAssNumero:ev=>majZ({numero:val(ev).slice(0,6)}),
+          assCoursAide:!active||!active.classe?'choisissez d’abord la classe':(cours.length?cours.length+' leçon(s) de cette classe dans vos Cours':'aucune leçon de cette classe dans vos Cours'),
+          assCours:cours.map(c=>({label:c.title||'Leçon sans titre',toggle:()=>tog('coursIds',c.id),style:chip(z.coursIds.includes(c.id))})),
+          assOeuvres:active?MINESEC.oeuvresDe(active.classe).map(o=>o.titre+' — '+o.auteur):[],
+          assOeuvre:z.oeuvre,setAssOeuvre:ev=>majZ({oeuvre:val(ev)}),
+          assBorne:z.borne,setAssBorne:ev=>majZ({borne:val(ev)}),
+          assExclChips:cours.filter(c=>z.coursIds.includes(c.id)).map(c=>({label:c.title||'Leçon sans titre',toggle:()=>tog('exclCours',c.id),style:chipX(z.exclCours.includes(c.id))})),
+          assExclLibre:z.exclLibre,setAssExclLibre:ev=>majZ({exclLibre:val(ev).slice(0,400)}),
+          assResume:[
+            {k:'Classe et nature',v:(active&&active.classe?active.classe:'classe non choisie')+(active&&active.epreuveCode?' · '+((MINESEC.epreuveParCode(active.epreuveCode)||{}).nom||''):' · nature automatique')},
+            {k:'Cadre',v:gp.cadre||'Devoir'},
+            {k:'Programme couvert',v:gp.faits&&gp.faits.length?gp.faits.join(' · '):'non précisé'},
+            {k:'Œuvre au programme',v:gp.oeuvre||'aucune'},
+            {k:'Borné au',v:gp.borne||'non précisé'},
+            {k:'Notions exclues',v:gp.exclus&&gp.exclus.length?gp.exclus.join(' · '):'aucune'},
+            {k:'Thème',v:gp.theme||'libre'}],
+        };
+      })(),
       setGenTheme:e=>this.setState({genTheme:val(e).slice(0,120)}),
       genTout:()=>this._composerAvecAmbassa('tout'),
       /* Ouvre le panneau « Composer avec Ambassa » et l'amene sous les yeux :

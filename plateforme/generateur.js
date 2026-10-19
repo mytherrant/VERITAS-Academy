@@ -646,6 +646,14 @@
     l.push('Compose l’épreuve suivante et réponds en JSON strict.');
     l.push('Épreuve : ' + (plan.nom || 'épreuve de français') + ' — classe ' + (ctx.classe || '?') + (ctx.serie ? ', série ' + ctx.serie : '') + '. Total : ' + plan.total + ' points.');
     if (ctx.theme) l.push('Thème ou domaine de vie souhaité par l’enseignant : ' + ctx.theme + '.');
+    /* Assistant de composition (19/10/2026) : le cadre, ce qui a été fait en
+       classe, l'œuvre, et surtout ce qu'il NE FAUT PAS évaluer. Une notion
+       pas encore vue qui tombe à l'épreuve, c'est une copie sanctionnée pour
+       un cours que l'élève n'a pas eu. */
+    if (ctx.cadre) l.push('Cadre : ' + ctx.cadre + (ctx.borne ? ', programme borné au ' + ctx.borne : '') + '.');
+    if (ctx.programmeFait && ctx.programmeFait.length) l.push('Leçons déjà faites en classe (le sujet s’y appuie) : ' + ctx.programmeFait.join(' ; ') + '.');
+    if (ctx.oeuvre) l.push('Œuvre au programme étudiée : ' + ctx.oeuvre + ' — privilégie-la pour les sujets qui portent sur une œuvre ; n’en invente aucune citation.');
+    if (ctx.exclusions && ctx.exclusions.length) l.push('NOTIONS EXCLUES — ne les utilise pas, même implicitement, ni dans les questions ni dans le corrigé : ' + ctx.exclusions.join(' ; ') + '.');
     /* Sujets au choix (Probatoire / BAC) : le sujet sur le texte en est UN,
        pas une « première partie obligatoire » (audit 16/10/2026). */
     var nbChoix = plan.sujets.filter(function (s) { return s.auChoix; }).length + (plan.sujetTexte ? 1 : 0);
