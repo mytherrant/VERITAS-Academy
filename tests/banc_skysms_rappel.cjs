@@ -269,6 +269,12 @@ async function attendre(url) {
       + "require " + JSON.stringify(path.join(API, '_skysms_lib.php')) + ";"
       + "echo json_encode(vrt_skysms_collecter('690000001',1500,'1234567890'));"], { encoding: 'utf8' });
     let ji = {}; try { ji = JSON.parse(inj.stdout); } catch (x) {}
+    r = await appel('?action=skysms_diag', { headers: { Authorization: 'Bearer ' + SECRET } });
+    let jd = {}; try { jd = JSON.parse(r.t); } catch (x) {}
+    verifier('diagnostic : le serveur joint SkySMS', r.s === 200 && jd.joignable && jd.joignable.ok === true, r.t.slice(0, 300));
+    const dF = (jd.dernieresDemandes || []).find((x) => x.ref === 'SKY-F');
+    verifier('diagnostic : la réponse de SkySMS à la dernière demande se lit', !!dF && /indisponible/.test(dF.erreur) && !/690000009/.test(r.t),
+             JSON.stringify(dF));
     verifier('SkySMS injoignable → échec, pas « attente »', ji.ok === false && ji.attente === false && /injoignable/.test(ji.msg || ''), inj.stdout + inj.stderr);
   } catch (err) {
     ko++; console.log(rouge('✗ ' + (err && err.stack || err)));
