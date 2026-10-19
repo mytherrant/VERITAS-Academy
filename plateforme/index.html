@@ -1295,13 +1295,12 @@
       <button onClick="{{ goListe }}" style="{{ sbRessources }}" style-hover="background:var(--sb-hover)">{{ sbIcRessources }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Ressources</span></button>
       <button onClick="{{ goEpreuves }}" style="{{ sbEpreuves }}" style-hover="background:var(--sb-hover)">{{ sbIcEpreuves }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Épreuves</span></button>
       <button onClick="{{ goCours }}" style="{{ sbCours }}" style-hover="background:var(--sb-hover)">{{ sbIcCours }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Cours</span></button>
-      <button onClick="{{ goCollab }}" style="{{ sbCollab }}" style-hover="background:var(--sb-hover)">{{ sbIcCollab }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Collaboration</span></button>
+      <button onClick="{{ goCollab }}" style="{{ sbCollab }}" style-hover="background:var(--sb-hover)">{{ sbIcCollab }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Collaboration</span><span style="{{ sbMsgBadge }}">{{ msgCount }}</span></button>
     </nav>
 
     <div style="height:1px;background:var(--sb-border);margin:20px 0"></div>
 
     <nav style="display:flex;flex-direction:column;gap:3px">
-      <button onClick="{{ goCollab }}" style="{{ sbMessages }}" style-hover="background:var(--sb-hover)">{{ sbIcChat }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Messages</span><span style="{{ sbMsgBadge }}">{{ msgCount }}</span></button>
       <button onClick="{{ goActivite }}" style="{{ sbNotifs }}" style-hover="background:var(--sb-hover)">{{ sbIcBell }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Notifications</span><span style="{{ sbNotifBadge }}">{{ notifCount }}</span></button>
       <button onClick="{{ goProfil }}" style="{{ sbProfil }}" style-hover="background:var(--sb-hover)">{{ sbIcUser }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Profil</span></button>
       <button onClick="{{ goAdmin }}" style="{{ sbAdmin }}" style-hover="background:var(--sb-hover)">{{ sbIcAdmin }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Administration</span></button>
@@ -1314,13 +1313,6 @@
       <div style="height:5px;border-radius:99px;background:var(--sb-track);overflow:hidden"><div style="{{ creditBar }}"></div></div>
       <button onClick="{{ goAbo }}" style="background:none;border:none;color:var(--sb-link);font-size:12px;font-weight:600;cursor:pointer;padding:12px 0 0;font-family:Poppins;text-align:left" style-hover="color:var(--sb-strong)">Voir mon abonnement</button>
 
-      <div style="margin-top:20px;background:var(--sb-card);border:1px solid var(--sb-card-border);border-radius:12px;padding:13px 14px;display:flex;gap:10px;align-items:flex-start">
-        <span style="flex:none;margin-top:1px">{{ sbIcAide }}</span>
-        <div style="min-width:0">
-          <div style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--sb-strong)">Besoin d'aide ?</div>
-          <div style="font-size:11px;color:var(--sb-fg-dim);line-height:1.5;margin-top:2px">Consultez le guide ou écrivez au support.</div>
-        </div>
-      </div>
     </div>
   </aside>
   </sc-if>
@@ -1356,7 +1348,7 @@
       <button onClick="{{ togglePanier }}" title="Mon panier de textes" style="{{ panierBtnStyle }}">{{ panierIcon }}<span style="{{ panierBadge }}">{{ panierN }}</span></button>
       <button onClick="{{ toggleTheme }}" title="{{ themeTitre }}" class="vrt-hide-xs" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ themeIcon }}</button>
       <button onClick="{{ goActivite }}" title="Activité" class="vrt-hide-xs" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ bellIcon }}<span style="{{ notifDot }}"></span></button>
-      <button onClick="{{ goCollab }}" title="Discussion d'équipe" class="vrt-hide-xs" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ chatIcon }}<span style="{{ chatDot }}"></span></button>
+      <button onClick="{{ toggleChat }}" title="Discussion d'équipe" class="vrt-hide-xs" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ chatIcon }}<span style="{{ chatDot }}"></span></button>
       <!-- Voyant de partage. `syncEtat` était calculé et affiché nulle part :
            l'enseignant pouvait croire partager avec son équipe alors que rien
            ne partait. Un travail qu'on croit transmis se découvre en réunion,
@@ -3665,12 +3657,10 @@
     </sc-for>
   </nav>
   </sc-if>
-  <sc-if value="{{ showFab }}" hint-placeholder-val="{{ false }}">
-  <div data-noprint="1" class="vrt-fab" style="position:fixed;right:26px;bottom:26px;z-index:45;display:flex;flex-direction:column;gap:14px;align-items:center">
-    <button onClick="{{ toggleChat }}" title="Discussion d'équipe" style="position:relative;width:52px;height:52px;border-radius:50%;border:none;background:var(--cffffff,#fff);color:var(--c1a72bb,#1a72bb);box-shadow:0 6px 20px rgba(20,55,95,.22);cursor:pointer;display:grid;place-items:center;border:1px solid var(--ce2eaf3,#e2eaf3)" style-hover="transform:translateY(-2px);box-shadow:0 10px 26px rgba(20,55,95,.28)">{{ fabChatIcon }}<span style="position:absolute;top:8px;right:9px;width:9px;height:9px;border-radius:50%;background:var(--cf39200,#f39200);border:2px solid var(--cffffff,#fff)"></span></button>
-    <button onClick="{{ newDraft }}" title="Nouvelle épreuve" style="display:flex;align-items:center;gap:9px;height:56px;padding:0 24px;border-radius:999px;border:none;background:var(--cf39200,#f39200);color:var(--cffffff,#fff);font-family:Poppins;font-weight:700;font-size:14.5px;cursor:pointer;box-shadow:0 8px 24px rgba(12,42,106,.4)" style-hover="background:var(--ce07f00,#e07f00);transform:translateY(-2px)">{{ fabPlusIcon }}Nouvelle épreuve</button>
-  </div>
-  </sc-if>
+  <!-- Bouton flottant retiré (19/10/2026, lot A « épurer ») : « Nouvelle épreuve »
+       existait trois fois (Créer, bouton de la page, bouton flottant) et le
+       flottant masquait « Publier » sous les commentaires. La discussion
+       d'équipe s'ouvre depuis la barre du haut. -->
 
   <!-- ── Ce pied de page ne CLIQUAIT PAS (audit du 27/08/2026) ────────────────
      « CGU », « Confidentialité » et « Support » étaient trois <span> nus :
@@ -3690,7 +3680,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '16/10 · 1';
+const ATELIER_BUILD = '19/10 · A';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -9050,7 +9040,7 @@ class Component extends DCLogic {
     const confTextes=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean);
     const confActif=!!active&&(((active.textIds||[]).length>0)||this._aDuContenu(active));
     const genEstOuvert=(st.genOuvert===null||st.genOuvert===undefined)
-      ?!(active&&this._aDuContenu(active))||!!st.genBusy||!!st.genErr||!!st.genRapport
+      ?!(active&&(this._aDuContenu(active)||(active.textIds||[]).length>0))||!!st.genBusy||!!st.genErr||!!st.genRapport
       :!!st.genOuvert;
     const confLocaux=active?CONFORMITE.verifierEpreuve(active,confTextes,
       (f,k)=>this._qList(f,k),(n2,k,i)=>this._qPts(n2,k,i)):[];
@@ -9067,14 +9057,14 @@ class Component extends DCLogic {
     const confAControler = (confRes.bloquants || 0) + (confRes.ecarts || 0);
     /* Ouverture automatique : la preference « Garde-fou toujours deplie »
        (Profil) etait affichee mais lue nulle part. Cochee -> ouvert des qu'il
-       y a un ecart ; decochee -> replie ; sans choix -> ouvert sur un poste
-       de travail, REPLIE sur telephone, ou la liste des ecarts poussait les
-       textes a 1 500 px plus bas (mesure le 27/09/2026). L'en-tete garde le
-       compte des ecarts : rien n'est cache, c'est un menu deroulant. */
+       y a un ecart ; sans choix -> REPLIE partout depuis le 19/10/2026 (lot A
+       « epurer ») : deplie, la liste poussait le texte et les questions sous
+       la ligne de flottaison, sur poste comme sur telephone (1 500 px mesures
+       le 27/09). L'en-tete garde le compte des ecarts : rien n'est cache,
+       c'est un menu deroulant. */
     const confPref=((me&&me.prefs)||{}).confAuto;
-    const surTel=typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(max-width:820px)').matches;
     const confEstOuvert = (st.confOpen === null || st.confOpen === undefined)
-      ? (confAControler > 0 && (confPref===true || (confPref!==false && !surTel)))
+      ? (confAControler > 0 && confPref===true)
       : !!st.confOpen;
     const confStruct=active&&active.epreuveCode?MINESEC.epreuveParCode(active.epreuveCode):null;
     const confCible=MINESEC.totalAttendu(confStruct);
@@ -9256,7 +9246,6 @@ class Component extends DCLogic {
       presenceTitle:st.users.filter(u=>u.id!==me.id).slice(0,2).map(u=>u.name).join(', ')+' en ligne',
       chatIcon:this._icon('chat','var(--c5a6678,#5a6678)',18),chatDot:'position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--c1a72bb,#1a72bb);border:1.5px solid var(--cffffff,#fff)',
       sendIcon:this._icon('send','var(--cffffff,#fff)',17),fabChatIcon:this._icon('chat','var(--c1a72bb,#1a72bb)',22),fabPlusIcon:this._icon('plus','var(--cffffff,#fff)',19),
-      showFab:ready&&st.screen!=='login'&&st.screen!=='apercu'&&!perm.readOnly,
       epTabEdition:()=>this.setState({epTab:'edition'}),epTabHistorique:()=>this.setState({epTab:'historique'}),epTabComparer:()=>this.setState({epTab:'comparer'}),epTabPropositions:()=>{if(perm.proposer)this.setState({epTab:'propositions'});},
       tabEdition:st.epTab==='edition',tabHistorique:st.epTab==='historique',tabComparer:st.epTab==='comparer',tabPropositions:st.epTab==='propositions',
       epTabEditionStyle:this._epTab(st.epTab==='edition'),epTabHistoStyle:this._epTab(st.epTab==='historique'),epTabCompStyle:this._epTab(st.epTab==='comparer'),epTabPropStyle:perm.proposer?this._epTab(st.epTab==='propositions'):hidden,
