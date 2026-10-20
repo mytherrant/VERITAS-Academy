@@ -7301,6 +7301,16 @@ function _reposerEmpreintes(e){
    par la clé de synchronisation (secret de niveau administrateur, vérifié par
    le serveur sur db.php?meta=1). Sortie de secours quand le compte n'a plus
    d'empreinte — ou quand le mot de passe est oublié. */
+/* 401 = clé fausse (requireAuth) ; 403 = pare-feu de LWS, qui bannit l'IP après
+   quelques requêtes refusées — la clé n'y est pour rien ; 429 = limiteur de db.php.
+   Tout rendre par « Clé refusée » envoyait l'administrateur re-saisir une clé
+   juste, ce qui prolongeait le bannissement. */
+function _msgStatutCle(st){
+  if(st===401) return 'Cl'+'\u00e9 incorrecte (v\u00e9rifiez le copier-coller, sans espace).';
+  if(st===403) return 'Acc\u00e8s bloqu\u00e9 par le pare-feu de l\'h\u00e9bergeur (HTTP 403) : trop d\'essais depuis ce r\u00e9seau. Attendez 15 minutes ou changez de r\u00e9seau (Wi-Fi \u2194 donn\u00e9es mobiles), puis r\u00e9essayez une seule fois.';
+  if(st===429) return 'Trop de tentatives (HTTP 429). Attendez une minute.';
+  return 'Serveur injoignable (HTTP '+st+').';
+}
 window._reinitMdpAdmin = function(){
   var cc='';
   try{ cc=(DB.cloudConfig&&DB.cloudConfig.secret)||(_loadCloudConfigCache()||{}).secret||''; }catch(e){ cc=''; }
@@ -7335,8 +7345,7 @@ window._reinitMdpAdminGo = async function(){
     if(!DB.cloudConfig) DB.cloudConfig={ url:_VRT_API, secret:'', lastSync:'Jamais' };
     var base=(DB.cloudConfig.url||_VRT_API||'https://veritas-school.com/api').replace(/\/$/,'');
     var r=await fetch(base+'/db.php?meta=1&t='+Date.now(),{ headers:{ 'Authorization':'Bearer '+sec } });
-    if(r.status===401||r.status===403) throw new Error('Clé refusée par le serveur.');
-    if(!r.ok) throw new Error('Serveur injoignable (HTTP '+r.status+').');
+    if(!r.ok) throw new Error(_msgStatutCle(r.status));
     cible.pwd=await hashPassword(p1,cible.user);
     DB.cloudConfig.secret=sec;
     try{ _saveCloudConfigCache&&_saveCloudConfigCache(); }catch(e){}
@@ -11837,8 +11846,7 @@ window._restaurerComptesAdminGo = function(){
   var base = (DB.cloudConfig.url || _VRT_API || 'https://veritas-school.com/api').replace(/\/$/,'');
   fetch(base + '/db.php?t=' + Date.now(), { headers:{ 'Authorization':'Bearer ' + sec } })
     .then(function(r){
-      if(r.status === 401 || r.status === 403) throw new Error('Cl\u00e9 refus\u00e9e par le serveur.');
-      if(!r.ok) throw new Error('Serveur injoignable (HTTP ' + r.status + ').');
+      if(!r.ok) throw new Error(_msgStatutCle(r.status));
       return r.json();
     })
     .then(function(d){
