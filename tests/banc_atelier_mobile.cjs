@@ -294,8 +294,10 @@ dire(/confWrap:confActif\?/.test(src),
   'le garde-fou n’apparaît qu’une fois l’épreuve composée (pas de reproches sur une épreuve vide)');
 dire(/const confActif=!!active&&\(\(\(active\.textIds\|\|\[\]\)\.length>0\)\|\|this\._aDuContenu\(active\)\)/.test(src),
   '« composée » = un texte ou du contenu (questions, barème, sujets, corrigé)');
-dire(/confAControler > 0 && \(confPref===true \|\| \(confPref!==false && !surTel\)\)/.test(src),
-  'garde-fou replié par défaut sur téléphone, et la préférence du Profil est enfin lue');
+/* 19/10/2026 (lot A « épurer ») : replié par défaut PARTOUT, plus seulement
+   sur téléphone ; la préférence « toujours déplié » du Profil l'ouvre. */
+dire(/confAControler > 0 && confPref===true\)/.test(src),
+  'garde-fou replié par défaut (poste et téléphone), la préférence du Profil l’ouvre');
 dire(/const genEstOuvert=\(st\.genOuvert===null\|\|st\.genOuvert===undefined\)/.test(src) && /genOuvert:null,genBusy:false/.test(src),
   '« Composer avec Ambassa » se replie d’office une fois l’épreuve composée');
 dire(/onClick="\{\{ f\.texteToggle \}\}"/.test(src) && /txtReplies/.test(src),
