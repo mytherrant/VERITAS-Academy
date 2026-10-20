@@ -4895,8 +4895,8 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
    active garde l'or d'action. Les polices d'icônes et le code sont épargnés.
    Le reste du contraste — couleurs écrites en dur par les fonctions de
    rendu — est relevé par theme-lws.js (passeApp), comme côté visiteur. */
-#APP#APP#APP *:not(.material-symbols-rounded):not(pre):not(kbd):not(samp),
-body:has(#APP[style*="flex"]) #MC#MC#MC *:not(.material-symbols-rounded):not(pre):not(kbd):not(samp){
+#APP#APP#APP *:not([class*="material"]):not(pre):not(kbd):not(samp),
+body:has(#APP[style*="flex"]) #MC#MC#MC *:not([class*="material"]):not(pre):not(kbd):not(samp){
   font-family:Poppins, system-ui, "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif !important;
 }
 #APP#APP#APP :is(h1,h2,h3,h4,.ct,.mtt,.pgt,.tbp,.scl,.sbsl){ letter-spacing:normal !important; }
@@ -4935,7 +4935,7 @@ body:has(#APP[style*="flex"]) #MC#MC#MC *:not(.material-symbols-rounded):not(pre
   /* Orange d'action #FF6500 (blanc à 2,95:1) et vert #059669 (3,77:1) :
      la brique et le vert de la vitrine. */
   --lws-action:#A84200; --gr:#007E11; --ds-ok:#007E11; --success-700:#007E11; }
-body > [id^="_"]:not(script), body > [id^="_"]:not(script) *{ font-family:Poppins, system-ui, sans-serif !important; }
+body > [id^="_"]:not(script), body > [id^="_"]:not(script) *:not([class*="material"]){ font-family:Poppins, system-ui, sans-serif !important; }
 /* L'orange d'accent (--lws-orange → --lws-action #FF6500) portait du blanc à
    2,95:1 — disques des toasts, posés hors de #APP, compris : la brique de la
    vitrine, partout. */
@@ -4981,3 +4981,11 @@ body > [id^="_"]:not(script), body > [id^="_"]:not(script) *{ font-family:Poppin
 :is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="gradient("][style*="#3C8DFF"]{ background:#1E499B !important; background-image:none !important; }
 :is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style^="color:#3C8DFF"],
 :is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*=";color:#3C8DFF"]{ color:#1E499B !important; }
+/* Carte utilisateur de la barre latérale : dans 240 px, avatar + nom + rôle
+   + bouton thème + « Déconnexion » sur UNE ligne écrasaient le nom en « S… »
+   et cassaient « SUPER ADMIN » sur deux lignes. Les boutons passent dessous. */
+#APP#APP#APP .sb .sbu{ flex-wrap:wrap !important; row-gap:8px !important; }
+#APP#APP#APP .sb .sbu > div:nth-child(2){ flex:1 1 calc(100% - 42px) !important; min-width:0 !important; }
+#APP#APP#APP .sb .sbur{ white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; letter-spacing:.3px !important; }
+#APP#APP#APP .sb .sbu #sbTheme{ flex:0 0 auto !important; }
+#APP#APP#APP .sb .sbu .sblo{ flex:1 1 auto !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; }

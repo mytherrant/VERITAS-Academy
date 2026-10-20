@@ -7301,6 +7301,16 @@ function _reposerEmpreintes(e){
    par la clé de synchronisation (secret de niveau administrateur, vérifié par
    le serveur sur db.php?meta=1). Sortie de secours quand le compte n'a plus
    d'empreinte — ou quand le mot de passe est oublié. */
+/* 401 = clé fausse (requireAuth) ; 403 = pare-feu de LWS, qui bannit l'IP après
+   quelques requêtes refusées — la clé n'y est pour rien ; 429 = limiteur de db.php.
+   Tout rendre par « Clé refusée » envoyait l'administrateur re-saisir une clé
+   juste, ce qui prolongeait le bannissement. */
+function _msgStatutCle(st){
+  if(st===401) return 'Cl'+'\u00e9 incorrecte (v\u00e9rifiez le copier-coller, sans espace).';
+  if(st===403) return 'Acc\u00e8s bloqu\u00e9 par le pare-feu de l\'h\u00e9bergeur (HTTP 403) : trop d\'essais depuis ce r\u00e9seau. Attendez 15 minutes ou changez de r\u00e9seau (Wi-Fi \u2194 donn\u00e9es mobiles), puis r\u00e9essayez une seule fois.';
+  if(st===429) return 'Trop de tentatives (HTTP 429). Attendez une minute.';
+  return 'Serveur injoignable (HTTP '+st+').';
+}
 window._reinitMdpAdmin = function(){
   var cc='';
   try{ cc=(DB.cloudConfig&&DB.cloudConfig.secret)||(_loadCloudConfigCache()||{}).secret||''; }catch(e){ cc=''; }
@@ -7319,6 +7329,8 @@ window._reinitMdpAdmin = function(){
     +'<div id="_rmaMsg" style="margin-top:10px;font-size:13px"></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
     +'<button class="btn bi" onclick="_reinitMdpAdminGo()">Réinitialiser</button>');
+  // L'écran de connexion (#LS, z 9999) recouvrait la fenêtre (#mOvl, z 9500) : le bouton semblait ne rien faire.
+  try{ var _ov=_ge('mOvl'); if(_ov) _ov.style.zIndex='10001'; }catch(e){}
 };
 window._reinitMdpAdminGo = async function(){
   var cpt=(_ge('_rmaCpt')||{}).value||'', sec=((_ge('_rmaSec')||{}).value||'').trim();
@@ -7333,8 +7345,7 @@ window._reinitMdpAdminGo = async function(){
     if(!DB.cloudConfig) DB.cloudConfig={ url:_VRT_API, secret:'', lastSync:'Jamais' };
     var base=(DB.cloudConfig.url||_VRT_API||'https://veritas-school.com/api').replace(/\/$/,'');
     var r=await fetch(base+'/db.php?meta=1&t='+Date.now(),{ headers:{ 'Authorization':'Bearer '+sec } });
-    if(r.status===401||r.status===403) throw new Error('Clé refusée par le serveur.');
-    if(!r.ok) throw new Error('Serveur injoignable (HTTP '+r.status+').');
+    if(!r.ok) throw new Error(_msgStatutCle(r.status));
     cible.pwd=await hashPassword(p1,cible.user);
     DB.cloudConfig.secret=sec;
     try{ _saveCloudConfigCache&&_saveCloudConfigCache(); }catch(e){}
@@ -11823,6 +11834,8 @@ window._restaurerComptesAdmin = function(){
     + '<div id="_racMsg" style="margin-top:10px;font-size:13px"></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
     + '<button class="btn bi" onclick="_restaurerComptesAdminGo()">R\u00e9cup\u00e9rer</button>');
+  // L'écran de connexion (#LS, z 9999) recouvrait la fenêtre (#mOvl, z 9500) : le bouton semblait ne rien faire.
+  try{ var _ov=_ge('mOvl'); if(_ov) _ov.style.zIndex='10001'; }catch(e){}
 };
 
 window._restaurerComptesAdminGo = function(){
@@ -11833,8 +11846,7 @@ window._restaurerComptesAdminGo = function(){
   var base = (DB.cloudConfig.url || _VRT_API || 'https://veritas-school.com/api').replace(/\/$/,'');
   fetch(base + '/db.php?t=' + Date.now(), { headers:{ 'Authorization':'Bearer ' + sec } })
     .then(function(r){
-      if(r.status === 401 || r.status === 403) throw new Error('Cl\u00e9 refus\u00e9e par le serveur.');
-      if(!r.ok) throw new Error('Serveur injoignable (HTTP ' + r.status + ').');
+      if(!r.ok) throw new Error(_msgStatutCle(r.status));
       return r.json();
     })
     .then(function(d){
@@ -12282,7 +12294,7 @@ function buildNav(){
   const roleMap={admin:"aa",enseignant:"at",eleve:"ae",superadmin:"asa"};
   const ac=roleMap[SES?.type]||"ae";
   const roleLabel={admin:"Admin",enseignant:"Enseignant",eleve:"Élève",superadmin:"Super Admin"};
-  $("sbu").innerHTML=`<div class="sba ${ac}">${SES?.nom?.[0]||'?'}</div><div style="flex:1;min-width:0"><div class="sbun">${SES?.pre?SES.pre+' '+SES.nom:SES?.nom||''}</div><div class="sbur">${roleLabel[SES?.type]||''}</div></div><button id="sbTheme" data-theme-toggle aria-label="Basculer entre thème clair et sombre" onclick="vrtToggleTheme()" oncontextmenu="vrtThemeAuto();return false"><svg class="vth-ico vth-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sun"/></svg><svg class="vth-ico vth-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-moon"/></svg></button><button class="sblo" onclick="logout()" title="Déconnexion">⏻ Déconnexion</button>`;
+  $("sbu").innerHTML=`<div class="sba ${ac}">${SES?.nom?.[0]||'?'}</div><div style="flex:1;min-width:0"><div class="sbun">${SES?.pre?SES.pre+' '+SES.nom:SES?.nom||''}</div><div class="sbur">${roleLabel[SES?.type]||''}</div></div><button id="sbTheme" data-theme-toggle aria-label="Basculer entre thème clair et sombre" onclick="vrtToggleTheme()" oncontextmenu="vrtThemeAuto();return false"><svg class="vth-ico vth-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sun"/></svg><svg class="vth-ico vth-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-moon"/></svg></button><button class="sblo" onclick="logout()" title="Déconnexion">Déconnexion</button>`;
   if(typeof vrtThemeSync==='function') vrtThemeSync();
   $("sbfi").textContent=`${DB.students.length} élèves · ${DB.teachers.length} enseignants`;
   const lg=getLogo();
