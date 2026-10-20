@@ -123,6 +123,14 @@ jobs:
       - name: "✨ Atelier — classe et nature dans le composeur, 2nde, brouillon supprimé"
         run: node tests/banc_atelier_composer.cjs
 
+      # Progressions nationales (lot I, 20/10/2026) : 33 classes, séquences
+      # complètes, semaines datées hors interruptions, tâche d'intégration.
+      - name: "📅 Atelier — les progressions nationales sont-elles complètes et bien datées ?"
+        run: node tests/banc_progressions.cjs
+
+      - name: "🧭 Atelier — Ambassa reçoit-il la méthode, le guide et la note ?"
+        run: node tests/banc_ambassa_guide.cjs
+
       - name: 🎁 Le Code ami vaut-il aussi dans la boutique ?
         run: node tests/banc_code_ami_boutique.cjs
 
