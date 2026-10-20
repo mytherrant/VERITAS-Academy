@@ -4877,3 +4877,12 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
 :root[data-theme="dark"] :is(#VISITOR#VISITOR#VISITOR#VISITOR, #MC#MC#MC#MC) .vm-med.vm-anneau{
   background:transparent !important; color:#F2F5FC !important;
 }
+
+/* Carte utilisateur de la barre latérale : dans 240 px, avatar + nom + rôle
+   + bouton thème + « Déconnexion » sur UNE ligne écrasaient le nom en « S… »
+   et cassaient « SUPER ADMIN » sur deux lignes. Les boutons passent dessous. */
+#APP#APP#APP .sb .sbu{ flex-wrap:wrap !important; row-gap:8px !important; }
+#APP#APP#APP .sb .sbu > div:nth-child(2){ flex:1 1 calc(100% - 42px) !important; min-width:0 !important; }
+#APP#APP#APP .sb .sbur{ white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; letter-spacing:.3px !important; }
+#APP#APP#APP .sb .sbu #sbTheme{ flex:0 0 auto !important; }
+#APP#APP#APP .sb .sbu .sblo{ flex:1 1 auto !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; }
