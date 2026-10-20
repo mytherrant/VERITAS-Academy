@@ -7319,6 +7319,8 @@ window._reinitMdpAdmin = function(){
     +'<div id="_rmaMsg" style="margin-top:10px;font-size:13px"></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
     +'<button class="btn bi" onclick="_reinitMdpAdminGo()">Réinitialiser</button>');
+  // L'écran de connexion (#LS, z 9999) recouvrait la fenêtre (#mOvl, z 9500) : le bouton semblait ne rien faire.
+  try{ var _ov=_ge('mOvl'); if(_ov) _ov.style.zIndex='10001'; }catch(e){}
 };
 window._reinitMdpAdminGo = async function(){
   var cpt=(_ge('_rmaCpt')||{}).value||'', sec=((_ge('_rmaSec')||{}).value||'').trim();
@@ -11823,6 +11825,8 @@ window._restaurerComptesAdmin = function(){
     + '<div id="_racMsg" style="margin-top:10px;font-size:13px"></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
     + '<button class="btn bi" onclick="_restaurerComptesAdminGo()">R\u00e9cup\u00e9rer</button>');
+  // L'écran de connexion (#LS, z 9999) recouvrait la fenêtre (#mOvl, z 9500) : le bouton semblait ne rien faire.
+  try{ var _ov=_ge('mOvl'); if(_ov) _ov.style.zIndex='10001'; }catch(e){}
 };
 
 window._restaurerComptesAdminGo = function(){
