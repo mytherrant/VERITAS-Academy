@@ -2971,7 +2971,7 @@
             <div style="display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--cd5e0ec,#d5e0ec);padding-bottom:6px;margin-bottom:12px"><h2 style="font-family:'Poppins';font-size:16px;font-weight:700;margin:0;color:var(--c14375f,#14375f)">Texte {{ f.pos }}</h2><span style="font-size:11px;color:var(--c7a8598,#7a8598);text-transform:uppercase;letter-spacing:.05em">{{ f.type }} · {{ f.words }} mots</span></div>
             <p style="font-size:14.5px;line-height:1.75;color:var(--c22303f,#22303f);margin:0;white-space:pre-wrap;text-wrap:pretty">{{ f.text }}</p>
             <p style="font-size:13px;font-style:italic;text-align:right;color:var(--c5a6678,#5a6678);margin:10px 0 16px">— {{ f.reference }}</p>
-            <div style="{{ f.qBlocStyle }}"><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">I. Compréhension</p><ol style="margin:0 0 12px;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.compQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">II. Langue et production</p><ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.explQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol></div>
+            <div style="{{ f.qBlocStyle }}"><div style="{{ f.compBloc }}"><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">I. Compréhension</p><ol style="margin:0 0 12px;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.compQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol></div><div style="{{ f.explBloc }}"><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">{{ f.titreExplAp }}</p><ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.explQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol></div></div>
           </section>
         </sc-for>
         <sc-for list="{{ printSujets }}" as="sj" hint-placeholder-count="1">
@@ -8180,7 +8180,30 @@ class Component extends DCLogic {
     this._updateActive({pts},'a appliqué le barème type ('+cible+' points)');}
   /* _qList lisait TOUJOURS l'épreuve active : calculer l'avancement d'une
      autre épreuve lui prêtait les questions de celle qui est ouverte. */
-  _qListOf(ep,f,kind){const cq=(ep&&ep.customQ&&ep.customQ[f.n])||null;if(cq&&cq[kind])return cq[kind].slice();return this._splitQ(kind==='comp'?f.comprehension:f.exploitation);}
+  /* QUESTIONS DU CORPUS PAR DÉFAUT (20/10/2026, signalé par Jacques :
+     « compréhension et langue reviennent toujours à toutes les épreuves »).
+     Tant que l'épreuve n'avait pas de questions rédigées, l'Atelier reprenait
+     celles livrées avec le texte du corpus — compréhension ET langue —, quelle
+     que soit l'épreuve : une correction orthographique, une dictée, une
+     expression écrite ou une contraction en héritaient, à l'écran, à
+     l'aperçu et à l'export. Elles ne sont plus reprises que si la STRUCTURE
+     de l'épreuve comporte cette rubrique notée. Ce que l'enseignant (ou
+     Ambassa) a écrit reste toujours affiché. */
+  _rubriquesPrevues(ep){
+    if(!ep||typeof VRT_GENERATEUR==='undefined')return null;
+    const cle=(ep.epreuveCode||'')+'|'+(ep.classe||'')+'|'+(ep.serie||'');
+    this._rubCache=this._rubCache||{};
+    if(cle in this._rubCache)return this._rubCache[cle];
+    let r=null;
+    try{const st=this._structureDe(ep);
+      if(st){const pl=VRT_GENERATEUR.planEpreuve(st,{classe:ep.classe});
+        r=pl.support!=='texte'?{comp:false,expl:false,zoneExpl:false}
+          :{comp:!!pl.comp.points,expl:!!pl.expl.points,zoneExpl:!!(pl.expl.points||(pl.productions||[]).length)};}}catch(e){r=null;}
+    this._rubCache[cle]=r;return r;
+  }
+  _qListOf(ep,f,kind){const cq=(ep&&ep.customQ&&ep.customQ[f.n])||null;if(cq&&cq[kind])return cq[kind].slice();
+    const r=this._rubriquesPrevues(ep);if(r&&!r[kind])return [];
+    return this._splitQ(kind==='comp'?f.comprehension:f.exploitation);}
   _qList(f,kind){return this._qListOf(this._active(),f,kind);}
   /* Avancement d'une épreuve : cinq jalons vérifiables, pas une estimation. */
   _progressEpreuve(e){
@@ -8778,8 +8801,8 @@ class Component extends DCLogic {
       return{pos:i+1,type:f.type,words:f.words,level:f.level,ancre:'vrt-txt-'+f.n,
         titreComp:'I. Compréhension',
         titreExpl:sansComp?('Sujet 1 — '+titreSujetTexte):(sansCompStruct?titreLangue:'II. Langue & production'),
-        compZone:(sansComp||estCom||(sansCompStruct&&!this._qListOf(active,f,'comp').length))?hidden:'',
-        explZone:estCom?hidden:'',
+        compZone:(sansComp||estCom||((sansCompStruct||(()=>{const r=this._rubriquesPrevues(active);return r&&!r.comp;})())&&!this._qListOf(active,f,'comp').length))?hidden:'',
+        explZone:(estCom||((()=>{const r=this._rubriquesPrevues(active);return r&&!r.zoneExpl;})()&&!this._qListOf(active,f,'expl').length))?hidden:'',
         texteBloc:'margin-top:13px;padding-top:13px;border-top:1px dashed var(--ce2eaf3,#e2eaf3)'+(replie?';display:none':''),
         texteToggleLabel:replie?'Afficher le texte ('+(f.words||0)+' mots)':'Replier le texte',
         texteToggle:()=>this.setState(s2=>({txtReplies:{...(s2.txtReplies||{}),[f.n]:!replie}})),
@@ -8868,7 +8891,9 @@ class Component extends DCLogic {
 
     const mkPrintQ=(f,kind)=>this._qList(f,kind).map((t,qi)=>{const p=this._qPts(f.n,kind,qi);return{text:t,pts:(p===null?'':'('+p+' pt'+((parseFloat(p)||0)>1?'s':'')+')'),ptsStyle:(p===null?'display:none':'font-weight:700;color:var(--c14375f,#14375f);white-space:nowrap;margin-left:6px')};});
     const printFiches=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean).map((f,i)=>({pos:i+1,
-      qBlocStyle:(this._qList(f,'comp').length||this._qList(f,'expl').length)?'font-size:13px;color:var(--c22303f,#22303f)':'display:none',type:f.type,words:f.words,text:f.text||'',reference:f.reference||'',compList:this._qList(f,'comp'),explList:this._qList(f,'expl'),compQ:mkPrintQ(f,'comp'),explQ:mkPrintQ(f,'expl')}));
+      qBlocStyle:(this._qList(f,'comp').length||this._qList(f,'expl').length)?'font-size:13px;color:var(--c22303f,#22303f)':'display:none',type:f.type,words:f.words,text:f.text||'',reference:f.reference||'',compList:this._qList(f,'comp'),explList:this._qList(f,'expl'),compQ:mkPrintQ(f,'comp'),explQ:mkPrintQ(f,'expl'),
+      compBloc:this._qList(f,'comp').length?'':'display:none',explBloc:this._qList(f,'expl').length?'':'display:none',
+      titreExplAp:this._qList(f,'comp').length?'II. Langue et production':'Questions'}));
     const epView={etab:ep.etab||'Établissement scolaire',title:ep.title||'Épreuve de français',classe:ep.classe||'—',duree:ep.duree||'—',coeff:ep.coeff||'—',date:ep.date||'',consigne:ep.consigne||''};
 
     /* ---- Accueil ------------------------------------------------------

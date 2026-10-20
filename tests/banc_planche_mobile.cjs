@@ -82,8 +82,14 @@ const horsMedia = html.replace(/@media[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, ''
 dire(!/\.vrt-txtcarte\{|\.vrt-txtcorps\{|\.vrt-annot\{/.test(horsMedia), 'aucune de ces règles n’existe hors requête de média : l’ordinateur est intact');
 
 console.log(`\n${G}④ Pas de « Compréhension » sans compréhension (capture du 16/10/2026)${R}`);
-dire(/compZone:\(sansComp\|\|estCom\|\|\(sansCompStruct&&!this\._qListOf\(active,f,'comp'\)\.length\)\)\?hidden:''/.test(html),
-  'une structure sans points de compréhension (Langue française, STT) masque la zone — sauf si des questions y existent déjà');
+/* 20/10/2026 : la règle s'étend à TOUTE structure sans compréhension
+   (correction orthographique, dictée, expression écrite…), et les questions
+   du corpus ne sont plus reprises par défaut quand la structure n'a pas la
+   rubrique (« compréhension et langue reviennent à toutes les épreuves »). */
+dire(/compZone:\(sansComp\|\|estCom\|\|\(\(sansCompStruct\|\|\(\(\)=>\{const r=this\._rubriquesPrevues\(active\);return r&&!r\.comp;\}\)\(\)\)&&!this\._qListOf\(active,f,'comp'\)\.length\)\)\?hidden:''/.test(html),
+  'une structure sans points de compréhension masque la zone — sauf si des questions y existent déjà');
+dire(/const r=this\._rubriquesPrevues\(ep\);if\(r&&!r\[kind\]\)return \[\];/.test(html),
+  'les questions du corpus ne sont reprises que si la structure prévoit la rubrique');
 dire(/const sansCompStruct=!!\(planAct&&planAct\.support==='texte'&&!planAct\.comp\.points\);/.test(html), 'le critère est la structure, pas le seul cas de la contraction');
 dire(/titreExpl:this\._titreLangueSeule\(stru,a\.classe\)\|\|undefined/.test(html) && /\['expl',tl\|\|'II\. Langue et production'\]/.test(html),
   'l’export Word et le corrigé ne titrent plus « II. » une épreuve sans partie I');
