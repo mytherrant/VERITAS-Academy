@@ -3259,6 +3259,92 @@
       </sc-for>
     </div>
 
+    <!-- ---------- PILOTAGE (19/10/2026, lot E) ----------
+         Ce qu'un chef de département ouvre en premier : où en sont les
+         épreuves du groupe, ce qui est en retard, ce qui attend une version
+         corrigée, et les délais qui règlent le circuit. Chaque ligne OUVRE
+         son épreuve : une alerte qu'on ne peut pas cliquer se remet à plus tard. -->
+    <sc-if value="{{ admIsPilotage }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px">
+        <sc-for list="{{ pilTuiles }}" as="pt" hint-placeholder-count="6">
+          <button onClick="{{ pt.filtrer }}" style="{{ pt.style }}">
+            <span style="{{ pt.chiffreStyle }}">{{ pt.n }}</span>
+            <span style="display:block;font-size:12px;color:var(--c5a6678,#5a6678);margin-top:4px;font-weight:600">{{ pt.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+
+      <section style="{{ cardStyle }};margin-bottom:16px">
+        <h2 class="vrt-titre-file" style="{{ cardTitle }}">À traiter</h2>
+        <div style="{{ pilVideStyle }}">Rien en retard ni en attente : le circuit est à jour.</div>
+        <div style="display:flex;flex-direction:column">
+          <sc-for list="{{ pilTraiter }}" as="tr" hint-placeholder-count="3">
+            <button onClick="{{ tr.ouvrir }}" style="display:flex;align-items:center;gap:12px;padding:11px 4px;border:none;border-bottom:1px solid var(--ceef2f7,#eef2f7);background:none;cursor:pointer;text-align:left;width:100%" style-hover="background:var(--cf5faff,#f5faff)">
+              <span style="{{ tr.dot }}"></span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-family:Poppins;font-size:13.5px;font-weight:700;color:var(--c22303f,#22303f)">{{ tr.titre }}</span><span style="display:block;font-size:12px;color:var(--c8b97a8,#8b97a8);margin-top:2px">{{ tr.sous }}</span></span>
+              <span style="{{ tr.chip }}">{{ tr.quand }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="{{ cardStyle }};margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+          <h2 class="vrt-titre-file" style="{{ cardTitle }};margin:0">Toutes les épreuves</h2>
+          <span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ pilFiltreLabel }}</span>
+          <button onClick="{{ pilToutes }}" style="{{ pilToutesStyle }}">Tout afficher</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="border-collapse:collapse;width:100%;min-width:720px;font-size:12.5px">
+            <thead><tr>
+              <th style="{{ admTh }}">Épreuve</th><th style="{{ admTh }}">Classe</th><th style="{{ admTh }}">Auteur</th>
+              <th style="{{ admTh }}">Statut</th><th style="{{ admTh }}">Relectures</th><th style="{{ admTh }}">Échéance</th><th style="{{ admTh }}">Mise à jour</th>
+            </tr></thead>
+            <tbody>
+              <sc-for list="{{ pilLignes }}" as="pl" hint-placeholder-count="5">
+                <tr onClick="{{ pl.ouvrir }}" style="cursor:pointer" style-hover="background:var(--cf5faff,#f5faff)">
+                  <td style="{{ admTd }};font-weight:700;color:var(--c14375f,#14375f)">{{ pl.titre }}</td>
+                  <td style="{{ admTd }}">{{ pl.classe }}</td>
+                  <td style="{{ admTd }}">{{ pl.auteur }}</td>
+                  <td style="{{ admTd }}"><span style="{{ pl.chip }}">{{ pl.statut }}</span></td>
+                  <td style="{{ admTd }}">{{ pl.relectures }}</td>
+                  <td style="{{ admTd }}"><span style="{{ pl.echStyle }}">{{ pl.echeance }}</span></td>
+                  <td style="{{ admTd }};color:var(--c8b97a8,#8b97a8)">{{ pl.maj }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <div style="{{ pilAucuneStyle }}">Aucune épreuve dans ce statut.</div>
+      </section>
+
+      <div class="vrt-col2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <section style="{{ cardStyle }}">
+          <h2 class="vrt-titre-file" style="{{ cardTitle }}">Délais en vigueur</h2>
+          <p style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin:-8px 0 14px;line-height:1.55">Ils fixent l’échéance affichée dans le circuit de chaque épreuve, au moment où elle est soumise ou renvoyée.</p>
+          <sc-for list="{{ pilDelais }}" as="dl" hint-placeholder-count="2">
+            <label style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--ceef2f7,#eef2f7);font-size:13px;color:var(--c22303f,#22303f)">
+              <span style="flex:1"><strong style="font-family:Poppins">{{ dl.label }}</strong><span style="display:block;font-size:11.5px;color:var(--c8b97a8,#8b97a8)">{{ dl.aide }}</span></span>
+              <input type="number" min="1" max="60" value="{{ dl.valeur }}" onChange="{{ dl.set }}" style="{{ admNum }}"><span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">jours</span>
+            </label>
+          </sc-for>
+        </section>
+        <section style="{{ cardStyle }}">
+          <h2 class="vrt-titre-file" style="{{ cardTitle }}">Production sur six mois</h2>
+          <p style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin:-8px 0 14px">Épreuves créées par mois.</p>
+          <div style="display:flex;align-items:flex-end;gap:10px;height:130px">
+            <sc-for list="{{ pilMois }}" as="pm" hint-placeholder-count="6">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end">
+                <span style="font-family:Poppins;font-size:12px;font-weight:700;color:var(--c14375f,#14375f)">{{ pm.n }}</span>
+                <span style="{{ pm.barre }}"></span>
+                <span style="font-size:11px;color:var(--c8b97a8,#8b97a8)">{{ pm.mois }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
     <!-- ---------- FONCTIONNALITÉS ---------- -->
     <sc-if value="{{ admIsFonctions }}" hint-placeholder-val="{{ true }}">
       <section style="{{ cardStyle }}">
@@ -3401,7 +3487,7 @@
     <!-- ---------- PAIEMENT ---------- -->
     <sc-if value="{{ admIsPaiement }}" hint-placeholder-val="{{ false }}">
       <section style="{{ cardStyle }};margin-bottom:16px">
-        <h2 class="vrt-titre-file" style="{{ cardTitle }}">Encaissement — CamerPay</h2>
+        <h2 class="vrt-titre-file" style="{{ cardTitle }}">Encaissement — {{ admPayFourn }}</h2>
         <div style="{{ admPayBanner }}">{{ admPayEtat }}</div>
         <div style="display:flex;flex-direction:column;margin-top:14px">
           <sc-for list="{{ admPayInfos }}" as="i" hint-placeholder-count="4">
@@ -3411,7 +3497,7 @@
             </div>
           </sc-for>
         </div>
-        <p style="font-size:12px;color:var(--c8b97a8,#8b97a8);line-height:1.6;margin:14px 0 0">Les identifiants CamerPay ne sont jamais dans le navigateur : ils vivent dans <code>api/payment_config.php</code>, hors dépôt. Cette page ne fait que lire l'état de la sonde serveur.</p>
+        <p style="font-size:12px;color:var(--c8b97a8,#8b97a8);line-height:1.6;margin:14px 0 0">Les identifiants du fournisseur ne sont jamais dans le navigateur : ils vivent dans <code>api/payment_config.php</code>, hors dépôt. Cette page ne fait que lire l'état de la sonde serveur.</p>
       </section>
 
       <section style="{{ cardStyle }}">
@@ -3867,7 +3953,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '19/10 · D';
+const ATELIER_BUILD = '20/10 · E';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -4045,7 +4131,7 @@ class Component extends DCLogic {
          lui promet « Commenter et proposer ». */
       propCible:'',propTexte:'',propMsg:'',propMsgTon:'',
       actFilter:'toutes',collabTab:'discussions',
-      coursTab:'gabarits',cycleFiltre:'',createOpen:false,admTab:'fonctions',
+      coursTab:'gabarits',cycleFiltre:'',createOpen:false,admTab:'pilotage',
       profTab:'infos',profSaved:'',coCorpusQ:'',coCorpusConseilles:false,coConfOpen:!this._petitEcran(),
       panier:this._load('minesec_panier',[])||[],panierOpen:false,
       corpusSource:'',corpusErr:'',corpusLong:false,corpusEtat:'',corpusDroit:null,corpusPalier:'',corpusPlafonds:null,corpusLibres:0,
@@ -9037,7 +9123,7 @@ class Component extends DCLogic {
     const qIA=this._quotaIA();
     const PP=st.payProvider;
     /* ---- Tableau de bord administrateur -------------------------------- */
-    const admT=st.admTab||'fonctions';
+    const admT=st.admTab||'pilotage';
     const admRow=(i2)=>'display:flex;align-items:center;gap:13px;padding:13px 12px;border-radius:10px;background:'+(i2%2?'var(--cfbfcfe,#fbfcfe)':'transparent');
     const admSw=(on)=>'width:44px;height:25px;border-radius:99px;border:none;cursor:pointer;flex:none;position:relative;padding:0;background:'+(on?'var(--c1f9d55,#1f9d55)':'var(--ccdd9e6,#cdd9e6)');
     const admKnob=(on)=>'position:absolute;top:3px;left:'+(on?'22px':'3px')+';width:19px;height:19px;border-radius:50%;background:var(--cffffff,#fff);transition:left .16s ease';
@@ -9154,14 +9240,70 @@ class Component extends DCLogic {
       return{label:f.label,aide:f.aide,rowStyle:admRow(i2),switchStyle:admSw(on),knobStyle:admKnob(on),
         toggle:()=>majAdmin({connexion:{...CX,[f.k]:!on}})};});
 
+    /* Le fournisseur se lit dans la sonde du serveur (`provider`) : l'écran
+       annonçait « CamerPay » en dur, alors que le serveur encaisse par SkySMS
+       depuis le 15/10/2026 (le fichier garde son nom, payment_camerpay.php). */
+    const fournNom=p0=>({skysms:'SkySMS',camerpay:'CamerPay',campay:'CamPay'})[String((p0&&p0.provider)||'').toLowerCase()]||'le serveur d\u2019encaissement';
+    const estSky=!!(PP&&PP.provider==='skysms');
     const admPayInfos=[
-      {label:'Fournisseur',valeur:'CamerPay'},
-      {label:'Moyens accept\u00e9s',valeur:'Orange Money \u00b7 MTN MoMo \u00b7 Carte \u00b7 PayPal'},
+      {label:'Fournisseur',valeur:PP===null?'\u2026':fournNom(PP)},
+      {label:'Moyens accept\u00e9s',valeur:estSky?'Orange Money \u00b7 MTN MoMo':'Orange Money \u00b7 MTN MoMo \u00b7 Carte \u00b7 PayPal'},
       {label:'Devise',valeur:'FCFA (XAF)'},
-      {label:'Page de paiement',valeur:'H\u00e9berg\u00e9e par CamerPay (redirection)'},
-      {label:'Confirmation',valeur:'Webhook sign\u00e9 + relance par sondage'}
+      {label:'Page de paiement',valeur:estSky?'Page V\u00c9RITAS : la demande arrive sur le t\u00e9l\u00e9phone du payeur':'H\u00e9berg\u00e9e par le fournisseur (redirection)'},
+      {label:'Confirmation',valeur:'Rappel sign\u00e9 + suivi du statut'}
     ].map((x,i2)=>({label:x.label,valeur:x.valeur,rowStyle:admRow(i2)}));
 
+    /* ── Pilotage (lot E) ─────────────────────────────────────────────── */
+    const pilEps=(st.epreuves||[]).filter(e=>e&&!/^e[1-3]$/.test(e.id));
+    const pilJour=86400000,pilNow=Date.now();
+    const pilEtat=e=>e.status==='valide'&&e.inLibrary?'diffuse':(e.status||'brouillon');
+    const pilDefs=[['brouillon','Brouillons','var(--c5a6678,#5a6678)'],['relecture','En relecture','var(--cc26a12,#c26a12)'],
+      ['ajustement','Ajustement demandé','var(--cc26a12,#c26a12)'],['rejete','Rejetées','var(--cc0392b,#c0392b)'],
+      ['valide','Validées, à diffuser','var(--c1f9d55,#1f9d55)'],['diffuse','Diffusées','var(--c1a72bb,#1a72bb)']];
+    const pilF=st.pilFiltre||'';
+    const pilOuvrir=e=>()=>this.setState({activeId:e.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);});
+    const pilEch=e=>{const r=this._revueDe(e);if(!r.echeance||!['relecture','ajustement','rejete'].includes(e.status))return null;
+      return Math.ceil((r.echeance-pilNow)/pilJour);};
+    const pilNom=id=>{const u=(st.users||[]).find(x=>x.id===id);return u?u.name:'\u2014';};
+    const pilTraiterL=pilEps.filter(e=>['relecture','ajustement','rejete'].includes(e.status))
+      .map(e=>({e,j:pilEch(e)})).sort((a2,b2)=>(a2.j==null?99:a2.j)-(b2.j==null?99:b2.j)).slice(0,8)
+      .map(({e,j})=>{const enRetard=j!=null&&j<0,proche=j!=null&&j<=2;
+        const c=enRetard?'var(--cc0392b,#c0392b)':proche?'var(--cc26a12,#c26a12)':'var(--c8b97a8,#8b97a8)';
+        const r=this._revueDe(e),n=r.decisions.filter(d=>d.tour===r.tour).length;
+        return{titre:e.title||'\u00c9preuve sans titre',ouvrir:pilOuvrir(e),
+          sous:this._statusMeta(e.status).label+' \u00b7 '+pilNom(e.ownerId)+(e.status==='relecture'?' \u00b7 '+n+'/'+r.requis+' relecture(s)':' \u00b7 version corrig\u00e9e attendue'),
+          quand:j==null?'sans \u00e9ch\u00e9ance':enRetard?'retard '+(-j)+' j':j===0?'aujourd\u2019hui':'dans '+j+' j',
+          dot:'width:9px;height:9px;border-radius:50%;flex:none;background:'+c,
+          chip:'font-size:11px;font-weight:700;font-family:Poppins;padding:3px 10px;border-radius:999px;white-space:nowrap;color:'+c+';background:var(--cf2f6fb,#f2f6fb)'};});
+    const pilFiltrees=pilEps.filter(e=>!pilF||pilEtat(e)===pilF).sort((a2,b2)=>(b2.updatedAt||0)-(a2.updatedAt||0));
+    const pilMoisL=(()=>{const out=[];const d0=new Date();
+      for(let k=5;k>=0;k--){const d=new Date(d0.getFullYear(),d0.getMonth()-k,1),d1=new Date(d0.getFullYear(),d0.getMonth()-k+1,1);
+        const n=pilEps.filter(e=>{const t=parseInt(String(e.id).replace(/^e/,''),10)||e.updatedAt||0;return t>=d.getTime()&&t<d1.getTime();}).length;
+        out.push({mois:d.toLocaleDateString('fr-FR',{month:'short'}),n});}
+      const mx=Math.max(1,...out.map(x=>x.n));
+      return out.map(x=>({...x,barre:'display:block;width:100%;max-width:34px;border-radius:6px 6px 2px 2px;background:var(--c1a72bb,#1a72bb);opacity:'+(x.n?'1':'.18')+';height:'+Math.max(4,Math.round(x.n/mx*86))+'px'}));})();
+    const pilDel=this._delais();
+    const pilVals={
+      pilTuiles:pilDefs.map(([k,l,c])=>{const n=pilEps.filter(e=>pilEtat(e)===k).length,on=pilF===k;
+        return{n,label:l,filtrer:()=>this.setState({pilFiltre:on?'':k}),
+          style:'background:var(--cffffff,#fff);border:1px solid '+(on?c:'var(--ce6ecf3,#e6ecf3)')+';border-radius:12px;padding:16px;text-align:center;cursor:pointer;box-shadow:'+(on?'0 0 0 3px var(--ce7f1fb,#e7f1fb)':'none'),
+          chiffreStyle:'display:block;font-family:Poppins;font-size:26px;font-weight:700;line-height:1;color:'+c};}),
+      pilTraiter:pilTraiterL,pilVideStyle:pilTraiterL.length?hidden:'font-size:12.5px;color:var(--c1f9d55,#1f9d55);font-weight:600',
+      pilLignes:pilFiltrees.map(e=>{const r=this._revueDe(e),j=pilEch(e),m=this._statusMeta(e.status==='valide'&&e.inLibrary?'valide':e.status);
+        return{titre:e.title||'\u00c9preuve sans titre',classe:e.classe||'\u2014',auteur:pilNom(e.ownerId),
+          statut:e.status==='valide'&&e.inLibrary?'Diffus\u00e9e':m.label,chip:this._statusChip(e.status),
+          relectures:e.solo?'solo':(r.decisions.length?r.decisions.filter(d=>d.tour===r.tour).length+'/'+r.requis+' (tour '+r.tour+')':'\u2014'),
+          echeance:j==null?'\u2014':j<0?'retard '+(-j)+' j':new Date(r.echeance).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}),
+          echStyle:j!=null&&j<0?'color:var(--cc0392b,#c0392b);font-weight:700':'',
+          maj:this._ago(e.updatedAt||0),ouvrir:pilOuvrir(e)};}),
+      pilAucuneStyle:pilFiltrees.length?hidden:'font-size:12.5px;color:var(--c8b97a8,#8b97a8);padding:12px 4px',
+      pilFiltreLabel:pilF?('Filtre : '+((pilDefs.find(x=>x[0]===pilF)||[])[1]||'')+' \u00b7 '+pilFiltrees.length):(pilEps.length+' \u00e9preuve(s)'),
+      pilToutes:()=>this.setState({pilFiltre:''}),
+      pilToutesStyle:pilF?'margin-left:auto;background:none;border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
+      pilDelais:[['validation','Relecture','D\u00e9lai laiss\u00e9 aux relecteurs apr\u00e8s la soumission.'],['remplacement','Version corrig\u00e9e','D\u00e9lai laiss\u00e9 \u00e0 l\u2019auteur apr\u00e8s un ajustement ou un rejet.']]
+        .map(([k,l,a2])=>({label:l,aide:a2,valeur:String(pilDel[k]),
+          set:e=>{const v=Math.max(1,Math.min(60,parseInt(val(e),10)||0));if(!v)return;majAdmin({delais:{...(ADM.delais||{}),[k]:v}});}})),
+      pilMois:pilMoisL};
     const admTarifs=this.plans.map((p,i2)=>({name:p.name,
       prix:p.price==='0'?'Gratuit':(p.price+' '+p.period),
       quota:p.quota+' \u00e9preuves',seats:p.seats,
@@ -10787,7 +10929,9 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           +((PP.manuel.orange||{}).codeMarchand||'')+' ('+((PP.manuel.orange||{}).ussd||'')+' \u2192 Paiement marchand). '
           +'Votre abonnement s\u2019ouvrira ici tout seul d\u00e8s que nous aurons vu votre paiement \u2014 au plus tard sous 24 h. Vous pouvez fermer cette fen\u00eatre.')
         :PP===null?'V\u00e9rification du service d\u2019encaissement\u2026'
-        :(PP.ok?('Paiement s\u00e9curis\u00e9 par CamerPay'+(PP.mode?(' \u2014 mode '+PP.mode):'')+'. Vous serez redirig\u00e9 vers sa page pour choisir Orange Money, MTN MoMo ou la carte.')
+        :(PP.ok?(PP.provider==='skysms'
+              ?'Paiement s\u00e9curis\u00e9 par Orange Money ou MTN MoMo : la demande arrive sur votre t\u00e9l\u00e9phone, vous la validez avec votre code secret.'
+              :('Paiement s\u00e9curis\u00e9 par '+fournNom(PP)+(PP.mode?(' \u2014 mode '+PP.mode):'')+'. Vous serez redirig\u00e9 vers sa page pour choisir Orange Money, MTN MoMo ou la carte.'))
               :(PP.hors?('\ud83d\udd34 '+PP.message)
                 :('Encaissement indisponible \u2014 '+(PP.message||'le service n\u2019est pas configur\u00e9 sur ce serveur.')))),
       payBannerStyle:'border-radius:10px;padding:11px 13px;font-size:12.5px;line-height:1.55;font-weight:600;'
@@ -10804,13 +10948,13 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       sbIcAdmin:this._icon('lock',sbCol(st.screen==='admin'),19),
       admScope:grpActif.nom+' \u00b7 groupe '+(grpActif.type==='ouvert'?'ouvert':'ferm\u00e9'),
       admScopeChip:'font-size:11.5px;font-weight:700;font-family:Poppins;color:var(--c1a72bb,#1a72bb);background:var(--ce7f1fb,#e7f1fb);padding:4px 12px;border-radius:999px',
-      admTabs:[admOngl('fonctions','Fonctionnalit\u00e9s','puzzle'),admOngl('corpus','Corpus','layers'),
+      admTabs:[admOngl('pilotage','Pilotage','layers'),admOngl('fonctions','Fonctionnalit\u00e9s','puzzle'),admOngl('corpus','Corpus','layers'),
                admOngl('groupes','Groupes','users'),admOngl('profils','Profils','user'),
                admOngl('connexion','Connexion','lock'),admOngl('paiement','Paiement','card')],
-      admIsFonctions:admT==='fonctions',admIsCorpus:admT==='corpus',admIsGroupes:admT==='groupes',
+      admIsPilotage:admT==='pilotage',admIsFonctions:admT==='fonctions',admIsCorpus:admT==='corpus',admIsGroupes:admT==='groupes',
       admIsProfils:admT==='profils',admIsConnexion:admT==='connexion',admIsPaiement:admT==='paiement',
-      admFeatures,admSources,admCycles,admGroupes,admProfils,admConnexion,admPayInfos,admTarifs,
-      admMessage:CX.message||'',
+      admFeatures,admSources,admCycles,admGroupes,admProfils,admConnexion,admPayInfos,admTarifs,...pilVals,
+      admMessage:CX.message||'',admPayFourn:PP===null?'\u2026':fournNom(PP),
       setAdmMessage:e=>majAdmin({connexion:{...CX,message:val(e)}}),
       admTh:'text-align:left;padding:10px 11px;font-family:Poppins;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);border-bottom:1px solid var(--ce6ecf3,#e6ecf3);white-space:nowrap',
       admTd:'padding:10px 11px;color:var(--c22303f,#22303f);vertical-align:middle',
@@ -10819,7 +10963,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       admAddStyle:'margin-left:auto;background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:9px 16px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer',
       admClearStyle:this.custom.length?'background:var(--cffffff,#fff);border:1px solid var(--cecc4bf,#ecc4bf);color:var(--cc0392b,#c0392b);padding:9px 15px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer':hidden,
       admPayBanner:'display:flex;align-items:center;gap:9px;border-radius:11px;padding:12px 14px;font-size:12.5px;font-weight:600;line-height:1.5;'+(PP&&PP.ok?'background:var(--ce6f5ec,#e6f5ec);border:1px solid var(--cb6e2c6,#b6e2c6);color:var(--c188047,#188047)':'background:var(--cfdefdb,#fdefdb);border:1px solid var(--cf0d9b0,#f0d9b0);color:var(--cc26a12,#c26a12)'),
-      admPayEtat:PP===null?'Interrogation du serveur d\u2019encaissement\u2026':(PP.ok?('CamerPay r\u00e9pond'+(PP.mode?(' en mode '+PP.mode):'')+' : les abonnements peuvent \u00eatre encaiss\u00e9s.'):('CamerPay ne r\u00e9pond pas \u2014 '+(PP.message||'identifiants absents de api/payment_config.php.'))),
+      admPayEtat:PP===null?'Interrogation du serveur d\u2019encaissement\u2026':(PP.ok?(fournNom(PP)+' r\u00e9pond'+(PP.mode?(' en mode '+PP.mode):'')+' : les abonnements peuvent \u00eatre encaiss\u00e9s.'):(fournNom(PP)+' ne r\u00e9pond pas \u2014 '+(PP.message||'identifiants absents de api/payment_config.php.'))),
       newGroupe:()=>{const id='g'+Date.now();
         const gs=[...groupes,{id,nom:'Nouvel \u00e9tablissement',type:'ferme',
           code:'G-'+String(Date.now()).slice(-4),membres:[me.id]}];
