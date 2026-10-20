@@ -277,14 +277,30 @@
       corps.push(p((ep.titre || 'Épreuve de français') + (ep.classe ? '  ·  ' + ep.classe : ''), { taille: 20, align: 'center', couleur: '5A6678', espaceApres: 200 }));
       ep.corrige.forEach(function (b) {
         corps.push(p(b.titre || '', { gras: true, taille: 21, couleur: '1F9D55', espaceAvant: 160, espaceApres: 80, bordureBas: true }));
-        (b.lignes || []).forEach(function (l) { corps.push(p(l, { taille: 20, align: 'both', espaceApres: 70 })); });
+        (b.lignes || []).forEach(function (l) { corps.push(p(l, { taille: 20, align: l.indexOf('\n') >= 0 ? 'left' : 'both', espaceApres: 70 })); });
       });
     }
 
+    /* Annexes (19/10/2026) : guide de correction, note au relecteur. Chacune
+       sur sa page, comme le corrigé, pour qu'on la détache avant de
+       photocopier. */
+    (ep.annexes || []).forEach(function (ax) {
+      if (!ax || !ax.blocs || !ax.blocs.length) return;
+      corps.push('<w:p><w:r><w:br w:type="page"/></w:r></w:p>');
+      corps.push(p(ax.titre || '', { gras: true, taille: 24, align: 'center', couleur: '14375F', espaceApres: 60 }));
+      corps.push(p((ep.titre || 'Épreuve de français') + (ep.classe ? '  ·  ' + ep.classe : ''), { taille: 20, align: 'center', couleur: '5A6678', espaceApres: 200 }));
+      ax.blocs.forEach(function (b) {
+        corps.push(p(b.titre || '', { gras: true, taille: 21, couleur: '1A72BB', espaceAvant: 160, espaceApres: 80, bordureBas: true }));
+        (b.lignes || []).forEach(function (l) { corps.push(p(l, { taille: 20, align: l.indexOf('\n') >= 0 ? 'left' : 'both', espaceApres: 70 })); });
+      });
+    });
+
     return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"' +
+      ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
       '<w:body>' + corps.join('') +
-      '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>' +
+      '<w:sectPr><w:headerReference w:type="default" r:id="rId2"/><w:footerReference w:type="default" r:id="rId3"/>' +
+      '<w:pgSz w:w="11906" w:h="16838"/>' +
       '<w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="708" w:footer="708" w:gutter="0"/>' +
       '</w:sectPr></w:body></w:document>';
   }
@@ -296,6 +312,8 @@
     '<Default Extension="xml" ContentType="application/xml"/>' +
     '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
     '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>' +
+    '<Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>' +
+    '<Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>' +
     '</Types>';
 
   var RELS =
@@ -308,7 +326,42 @@
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
     '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
+    '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/>' +
+    '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>' +
     '</Relationships>';
+
+  /* ── En-tête et pied de page VÉRITAS (19/10/2026) ──────────────────────
+     Chaque page sortie de l'Atelier porte la marque du site, comme la vitrine :
+     en-tête « VÉRITAS · Centre d'Excellence Scolaire », pied avec l'adresse
+     du site et la pagination. Pas de filigrane (choix de Jacques, 19/10) :
+     la feuille doit rester propre à la photocopie. */
+  var NS_HF = ' xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"' +
+    ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+
+  function enTete() {
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:hdr' + NS_HF + '>' +
+      p('VÉRITAS  ·  Centre d’Excellence Scolaire', { gras: true, taille: 16, align: 'right', couleur: '14375F', espaceApres: 0 }) +
+      p('Atelier de Français  ·  veritas-school.com', { taille: 14, align: 'right', couleur: '8B97A8', espaceApres: 0, bordureBas: true }) +
+      '</w:hdr>';
+  }
+
+  function champ(code) {
+    return '<w:r><w:rPr><w:sz w:val="15"/><w:color w:val="8B97A8"/></w:rPr><w:fldChar w:fldCharType="begin"/></w:r>' +
+      '<w:r><w:rPr><w:sz w:val="15"/><w:color w:val="8B97A8"/></w:rPr><w:instrText xml:space="preserve"> ' + code + ' </w:instrText></w:r>' +
+      '<w:r><w:rPr><w:sz w:val="15"/><w:color w:val="8B97A8"/></w:rPr><w:fldChar w:fldCharType="separate"/></w:r>' +
+      '<w:r><w:rPr><w:sz w:val="15"/><w:color w:val="8B97A8"/></w:rPr><w:t>1</w:t></w:r>' +
+      '<w:r><w:rPr><w:sz w:val="15"/><w:color w:val="8B97A8"/></w:rPr><w:fldChar w:fldCharType="end"/></w:r>';
+  }
+  function texteGris(t) {
+    return '<w:r><w:rPr><w:sz w:val="15"/><w:color w:val="8B97A8"/></w:rPr><w:t xml:space="preserve">' + esc(t) + '</w:t></w:r>';
+  }
+
+  function piedDePage() {
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr' + NS_HF + '>' +
+      '<w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="4" w:space="4" w:color="C9D6E4"/></w:pBdr><w:jc w:val="center"/></w:pPr>' +
+      texteGris('© VÉRITAS EDUCATION  ·  veritas-school.com  ·  Page ') + champ('PAGE') + texteGris(' / ') + champ('NUMPAGES') +
+      '</w:p></w:ftr>';
+  }
 
   /* Une police unique déclarée par défaut : sans styles.xml, Word applique sa
      police d'interface et le rendu diffère d'un poste à l'autre. */
@@ -330,7 +383,9 @@
       { nom: '_rels/.rels', contenu: RELS },
       { nom: 'word/_rels/document.xml.rels', contenu: DOC_RELS },
       { nom: 'word/document.xml', contenu: construireDocument(ep, textes) },
-      { nom: 'word/styles.xml', contenu: STYLES }
+      { nom: 'word/styles.xml', contenu: STYLES },
+      { nom: 'word/header1.xml', contenu: enTete() },
+      { nom: 'word/footer1.xml', contenu: piedDePage() }
     ]);
   }
 

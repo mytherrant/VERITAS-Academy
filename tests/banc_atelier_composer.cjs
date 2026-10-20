@@ -49,7 +49,9 @@ dire(/1\. Classe\s*<select value="\{\{ ep\.classe \}\}" onChange="\{\{ setClasse
   'sélecteur de classe dans le panneau, relié à la même donnée que les Renseignements');
 dire(/2\. Nature de l’épreuve\s*<select value="\{\{ ep\.epreuveCode \}\}" onChange="\{\{ setEpreuveType \}\}"/.test(composeur),
   'sélecteur de nature dans le panneau, même gestionnaire');
-dire(/3\. Thème \(facultatif\)/.test(composeur), 'le champ Thème dit qu’il est facultatif');
+/* 19/10/2026 (lot D) : le Thème a rejoint l’étape « Programme » de l’assistant
+   et n’est plus numéroté ; il doit toujours se dire facultatif. */
+dire(/>\s*Thème \(facultatif\)/.test(composeur), 'le champ Thème dit qu’il est facultatif');
 dire(!/dans les Renseignements/.test(composeur + (src.match(/genErr:'Choisissez d’abord la classe[^']*'/) || [''])[0]),
   'plus aucun renvoi « dans les Renseignements » depuis le panneau');
 

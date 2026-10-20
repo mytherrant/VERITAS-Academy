@@ -32,9 +32,10 @@
 <script src="./minesec.js?v=5109f163"></script>
 <script src="./conformite.js?v=7948efec"></script>
 <script src="./exercices.js?v=0018edb0"></script>
-<script src="./generateur.js?v=85c8cdef"></script>
+<script src="./generateur.js?v=5ebe87de"></script>
 <script src="./texte.js?v=43fa1e84"></script>
-<script src="./docx.js?v=090324b1"></script>
+<script src="./docx.js?v=221641f0"></script>
+<script defer src="./progressions.js?v=800320a5"></script>
 <!--vrt-habillage:tete-->
 <link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.37">
 <script>window.VRT_DATA=window.VRT_DATA||{"citations":[{"t":"Le génie, c’est un pour cent d’inspiration et quatre-vingt-dix-neuf pour cent de transpiration.","a":"Thomas Edison"},{"t":"Ce n’est pas parce que les choses sont difficiles que nous n’osons pas ; c’est parce que nous n’osons pas qu’elles sont difficiles.","a":"Sénèque"},{"t":"L’éducation est l’arme la plus puissante pour changer le monde.","a":"Nelson Mandela"},{"t":"Un peu chaque jour vaut mieux que beaucoup un seul jour.","a":"Proverbe"},{"t":"La chance sourit à l’esprit préparé.","a":"Louis Pasteur"},{"t":"Tomber sept fois, se relever huit.","a":"Proverbe japonais"}],"themeSombre":"\n      body{background:#0A1428!important}\n      [style*=\"background:#fff\"],[style*=\"background:#FAFBFE\"],[style*=\"background:#FCFDFE\"],[style*=\"background:#F7F9FD\"]{background:#132241!important}\n      [style*=\"background:#F4F5F8\"],[style*=\"background:#F4F6FB\"],[style*=\"background:#EFF2F7\"],[style*=\"background:#F5F9FF\"]{background:#0F1B33!important}\n      [style*=\"background:rgba(255,255,255,.96)\"]{background:rgba(13,25,48,.96)!important}\n      [style*=\"radial-gradient(1100px\"],[style*=\"radial-gradient(900px\"]{background:#0C1730!important}\n      [style*=\"linear-gradient(180deg,#FBF8F1\"]{background:#0C1730!important}\n      [style*=\"color:#001136\"]{color:#EEF3FC!important}\n      [style*=\"color:#0C2A6A\"]{color:#DCE6F8!important}\n      [style*=\"color:#4D5163\"],[style*=\"color:#6B5A42\"]{color:#B6C2D8!important}\n      [style*=\"color:#6E7385\"],[style*=\"color:#9BA6BE\"]{color:#8D9AB4!important}\n      [style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"]{border-color:#24334F!important}\n      [style*=\"\"],[style*=\"\"]{border-bottom-color:#24334F!important}\n      [style*=\"\"]{border-top-color:#24334F!important}\n      [style*=\"border-left:4px solid\"]{border-left-color:#FFC93C!important}\n      input,input::placeholder{color:#C7D2E6!important}\n    "};</script>
@@ -1269,6 +1270,37 @@
     [data-print-sheet]{padding:24px 16px 30px!important;margin:12px 8px!important}
     [data-print-sheet] ol{padding-left:18px!important}
   }
+  /* ── Mode focus du composeur (lot H, 20/10/2026) ─────────────────────── */
+  @media screen and (min-width:821px){
+    html.vrt-focus #vrtNav,html.vrt-focus footer.vrt-hab,html.vrt-focus #vrt-astuce{display:none!important}
+    html.vrt-focus aside[data-noprint]{width:76px!important}
+    html.vrt-focus aside[data-noprint] .vrt-sblabel{display:none!important}
+    html.vrt-focus .vrt-compo-main{max-width:1520px!important}
+    html.vrt-focus .vrt-compo-grille{grid-template-columns:1fr!important}
+    html.vrt-focus .vrt-compo-gauche{display:none!important}
+    html.vrt-focus.vrt-tiroir .vrt-compo-gauche{display:flex!important;position:fixed!important;top:0!important;left:76px;bottom:0;width:350px;
+      overflow-y:auto;z-index:45;background:var(--cf4f7fb,#f4f7fb);padding:16px;box-shadow:8px 0 30px rgba(20,55,95,.18);animation:fadeIn .18s ease both}
+  }
+  /* ── Mode document (lot G, 20/10/2026) ───────────────────────────────
+     html.vrt-doc est posé pendant l'aperçu : tout ce qui n'est pas la
+     feuille disparaît — barre et pied de la vitrine, menu latéral, barre de
+     l'Atelier, astuces flottantes. */
+  html.vrt-doc #vrtNav,html.vrt-doc footer.vrt-hab,html.vrt-doc aside[data-noprint],
+  html.vrt-doc header[data-noprint],html.vrt-doc .vrt-mobilebar,html.vrt-doc #vrt-astuce{display:none!important}
+  /* Mise en forme allégée : une police de corps, celle de l'export Word. */
+  .vrt-docfeuille p,.vrt-docfeuille li,.vrt-docfeuille span,.vrt-docfeuille strong{font-family:Cambria,Georgia,'Times New Roman',serif!important}
+  .vrt-docfeuille h2{font-family:Cambria,Georgia,serif!important;letter-spacing:0!important}
+  .vrt-docfeuille p,.vrt-docfeuille li{font-size:11.5pt!important;line-height:1.55!important}
+  @page{size:A4;margin:16mm 15mm 18mm;
+    @top-right{content:"VÉRITAS · Centre d’Excellence Scolaire";font:700 8.5pt Cambria,Georgia,serif;color:#14375F}
+    @bottom-center{content:"© VÉRITAS EDUCATION · veritas-school.com · Page " counter(page) " / " counter(pages);font:8pt Cambria,Georgia,serif;color:#8B97A8}}
+  @media print{
+    .vrt-docfeuille{zoom:1!important;width:auto!important;min-height:0!important;margin:0!important;padding:0!important;box-shadow:none!important;background:none!important}
+    .vrt-doc-entete,.vrt-doc-pied{display:none!important}
+    .vrt-doc-section{break-before:page}
+    .vrt-doc-main{background:none!important}
+  }
+  @media screen{.vrt-doc-section{border-top:2px dashed var(--cc9d6e4,#c9d6e4);margin-top:28px;padding-top:22px}}
   @media print{
     [data-noprint]{display:none!important}
     body{background:var(--cffffff,#fff)}
@@ -1284,7 +1316,7 @@
   <aside data-noprint="1" style="{{ sbWrap }}">
     <button onClick="{{ goAccueil }}" style="display:flex;align-items:center;gap:11px;background:none;border:none;cursor:pointer;padding:0;text-align:left;width:100%;margin-bottom:26px">
       <span style="width:38px;height:38px;border-radius:10px;background:var(--sb-logo-bg);display:grid;place-items:center;flex:none">{{ sbIcLogo }}</span>
-      <span style="line-height:1.15;{{ sbLabelShow }}">
+      <span class="vrt-sblabel" style="line-height:1.15;{{ sbLabelShow }}">
         <span style="display:block;font-family:'Poppins';font-size:15.5px;font-weight:700;color:var(--sb-strong);letter-spacing:-.01em">VÉRITAS</span>
         <span style="display:block;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--sb-fg-dim);margin-top:2px;font-weight:600">Éducation</span>
       </span>
@@ -1295,13 +1327,14 @@
       <button onClick="{{ goListe }}" style="{{ sbRessources }}" style-hover="background:var(--sb-hover)">{{ sbIcRessources }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Ressources</span></button>
       <button onClick="{{ goEpreuves }}" style="{{ sbEpreuves }}" style-hover="background:var(--sb-hover)">{{ sbIcEpreuves }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Épreuves</span></button>
       <button onClick="{{ goCours }}" style="{{ sbCours }}" style-hover="background:var(--sb-hover)">{{ sbIcCours }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Cours</span></button>
-      <button onClick="{{ goCollab }}" style="{{ sbCollab }}" style-hover="background:var(--sb-hover)">{{ sbIcCollab }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Collaboration</span></button>
+      <button onClick="{{ goProgressions }}" style="{{ sbProgressions }}" style-hover="background:var(--sb-hover)">{{ sbIcProg }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Progressions</span></button>
+      <button onClick="{{ goSuivi }}" style="{{ sbSuivi }}" style-hover="background:var(--sb-hover)">{{ sbIcSuivi }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Suivi</span><span style="{{ sbSuiviBadge }}">{{ suiviRetardsN }}</span></button>
+      <button onClick="{{ goCollab }}" style="{{ sbCollab }}" style-hover="background:var(--sb-hover)">{{ sbIcCollab }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Collaboration</span><span style="{{ sbMsgBadge }}">{{ msgCount }}</span></button>
     </nav>
 
     <div style="height:1px;background:var(--sb-border);margin:20px 0"></div>
 
     <nav style="display:flex;flex-direction:column;gap:3px">
-      <button onClick="{{ goCollab }}" style="{{ sbMessages }}" style-hover="background:var(--sb-hover)">{{ sbIcChat }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Messages</span><span style="{{ sbMsgBadge }}">{{ msgCount }}</span></button>
       <button onClick="{{ goActivite }}" style="{{ sbNotifs }}" style-hover="background:var(--sb-hover)">{{ sbIcBell }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Notifications</span><span style="{{ sbNotifBadge }}">{{ notifCount }}</span></button>
       <button onClick="{{ goProfil }}" style="{{ sbProfil }}" style-hover="background:var(--sb-hover)">{{ sbIcUser }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Profil</span></button>
       <button onClick="{{ goAdmin }}" style="{{ sbAdmin }}" style-hover="background:var(--sb-hover)">{{ sbIcAdmin }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Administration</span></button>
@@ -1314,13 +1347,6 @@
       <div style="height:5px;border-radius:99px;background:var(--sb-track);overflow:hidden"><div style="{{ creditBar }}"></div></div>
       <button onClick="{{ goAbo }}" style="background:none;border:none;color:var(--sb-link);font-size:12px;font-weight:600;cursor:pointer;padding:12px 0 0;font-family:Poppins;text-align:left" style-hover="color:var(--sb-strong)">Voir mon abonnement</button>
 
-      <div style="margin-top:20px;background:var(--sb-card);border:1px solid var(--sb-card-border);border-radius:12px;padding:13px 14px;display:flex;gap:10px;align-items:flex-start">
-        <span style="flex:none;margin-top:1px">{{ sbIcAide }}</span>
-        <div style="min-width:0">
-          <div style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--sb-strong)">Besoin d'aide ?</div>
-          <div style="font-size:11px;color:var(--sb-fg-dim);line-height:1.5;margin-top:2px">Consultez le guide ou écrivez au support.</div>
-        </div>
-      </div>
     </div>
   </aside>
   </sc-if>
@@ -1356,7 +1382,7 @@
       <button onClick="{{ togglePanier }}" title="Mon panier de textes" style="{{ panierBtnStyle }}">{{ panierIcon }}<span style="{{ panierBadge }}">{{ panierN }}</span></button>
       <button onClick="{{ toggleTheme }}" title="{{ themeTitre }}" class="vrt-hide-xs" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ themeIcon }}</button>
       <button onClick="{{ goActivite }}" title="Activité" class="vrt-hide-xs" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ bellIcon }}<span style="{{ notifDot }}"></span></button>
-      <button onClick="{{ goCollab }}" title="Discussion d'équipe" class="vrt-hide-xs" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ chatIcon }}<span style="{{ chatDot }}"></span></button>
+      <button onClick="{{ toggleChat }}" title="Discussion d'équipe" class="vrt-hide-xs" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ chatIcon }}<span style="{{ chatDot }}"></span></button>
       <!-- Voyant de partage. `syncEtat` était calculé et affiché nulle part :
            l'enseignant pouvait croire partager avec son équipe alors que rien
            ne partait. Un travail qu'on croit transmis se découvre en réunion,
@@ -1444,6 +1470,13 @@
 
     <h2 style="font-family:'Poppins';font-weight:700;font-size:30px;line-height:1.15;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.02em" class="vrt-th">Bonjour {{ me.first }}</h2>
     <p style="font-size:14px;color:var(--c7a8598,#7a8598);margin:6px 0 24px">{{ team.name }}</p>
+    <!-- « Cette semaine » (20/10/2026, lot J) : où en est la première de mes
+         classes dans sa progression, et la prochaine échéance à tenir. -->
+    <div style="{{ accSemaineStyle }}">
+      <span style="flex:none">{{ accSemaineIcone }}</span>
+      <span style="flex:1;min-width:220px"><span style="display:block;font-family:Poppins;font-size:13.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ accSemaine }}</span><span style="display:block;font-size:12.5px;color:var(--c5a6678,#5a6678);margin-top:2px">{{ accEcheance }}</span></span>
+      <button onClick="{{ accSemaineAller }}" style="background:var(--cffffff,#fff);border:1px solid var(--cf0d9b0,#f0d9b0);color:var(--c14375f,#14375f);padding:7px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">{{ accSemaineBouton }}</button>
+    </div>
     <!-- Visite guidee : dire pourquoi les compteurs sont a zero. Un profil
          d'exemple n'ouvre pas de compte, donc pas de repertoire ; sans cette
          ligne l'interface a l'air cassee alors qu'elle fait ce qu'elle
@@ -1865,13 +1898,19 @@
 
   <!-- ============ COMPOSEUR ============ -->
   <sc-if value="{{ isComposeur }}" hint-placeholder-val="{{ false }}">
-  <main style="flex:1;max-width:1240px;margin:0 auto;padding:26px 28px 72px;width:100%">
+  <main class="vrt-compo-main" style="flex:1;max-width:1240px;margin:0 auto;padding:26px 28px 72px;width:100%">
     <sc-if value="{{ hasActive }}" hint-placeholder-val="{{ true }}">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap">
         <button onClick="{{ goEpreuves }}" style="background:none;border:none;color:var(--c1a72bb,#1a72bb);font-size:13px;cursor:pointer;padding:0;font-weight:600" style-hover="color:var(--c135a96,#135a96)">{{ icRetour }} Épreuves</button>
         <span style="{{ activeStatusChip }}">{{ activeStatusLabel }}</span>
         <span style="{{ readOnlyChip }}">Lecture seule</span>
+        <button onClick="{{ focusTiroirBasculer }}" style="{{ focusTiroirStyle }}">{{ focusTiroirLabel }}</button>
         <span style="margin-left:auto;font-size:12px;color:var(--c9aa5b5,#9aa5b5)">{{ savedNote }}</span>
+        <!-- MODE FOCUS (20/10/2026, lot H) : la barre de la vitrine disparaît,
+             le menu latéral se réduit à ses icônes, la colonne
+             Renseignements / Collaboration devient un tiroir ; la planche
+             prend toute la largeur. Le choix est retenu sur ce poste. -->
+        <button onClick="{{ focusBasculer }}" title="{{ focusTitre }}" class="vrt-hide-xs" style="{{ focusStyle }}">{{ focusLabel }}</button>
         <!-- Supprimer un BROUILLON (16/10/2026) : rien ne permettait d'effacer
              une épreuve créée par erreur. Brouillon seulement : une épreuve
              soumise, validée ou publiée engage l'équipe. -->
@@ -1909,6 +1948,17 @@
                qu'il prenait pour le bon, et Ambassa refusait de composer.
                Mêmes listes et mêmes gestes que les Renseignements : les deux
                endroits écrivent la même donnée. -->
+          <!-- ASSISTANT EN QUATRE ÉTAPES (19/10/2026, lot D) : cadre, programme,
+               notions à exclure, récapitulatif. Les étapes sont des ONGLETS, pas
+               un tunnel : les boutons de composition restent sous la main à
+               chaque étape — qui veut composer d'un clic le peut toujours.
+               Ce qui est choisi ici part dans la consigne d'Ambassa (programme
+               couvert, notions exclues « même implicitement ») et reste
+               consigné sur l'épreuve (`genParams`), lisible par le relecteur. -->
+          <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">
+            <sc-for list="{{ assEtapes }}" as="et" hint-placeholder-count="4"><button onClick="{{ et.go }}" style="{{ et.style }}"><span style="{{ et.dot }}">{{ et.n }}</span>{{ et.label }}</button></sc-for>
+          </div>
+          <sc-if value="{{ assE1 }}" hint-placeholder-val="{{ true }}">
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px">
             <label style="{{ genLblStyle }}">1. Classe
               <select value="{{ ep.classe }}" onChange="{{ setClasse }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}"><option value="">— Choisir la classe —</option><sc-for list="{{ classeOptions }}" as="c" hint-placeholder-count="8"><option value="{{ c }}">{{ c }}</option></sc-for></select>
@@ -1916,10 +1966,54 @@
             <label style="{{ genLblStyle }}">2. Nature de l’épreuve
               <select value="{{ ep.epreuveCode }}" onChange="{{ setEpreuveType }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}"><option value="">Automatique selon la classe</option><sc-for list="{{ natureOptions }}" as="n" hint-placeholder-count="10"><option value="{{ n.code }}">{{ n.label }}</option></sc-for></select>
             </label>
-            <label style="{{ genLblStyle }}">3. Thème (facultatif)
-              <input value="{{ genTheme }}" onChange="{{ setGenTheme }}" disabled="{{ cannotEdit }}" placeholder="ex. la santé, l’environnement" style="{{ genSelStyle }}">
+            <label style="{{ genLblStyle }}">Type d’évaluation
+              <select value="{{ assType }}" onChange="{{ setAssType }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}"><sc-for list="{{ assTypes }}" as="ty" hint-placeholder-count="5"><option value="{{ ty }}">{{ ty }}</option></sc-for></select>
+            </label>
+            <label style="{{ genLblStyle }}">Numéro
+              <input value="{{ assNumero }}" onChange="{{ setAssNumero }}" disabled="{{ cannotEdit }}" placeholder="ex. 2" style="{{ genSelStyle }}">
             </label>
           </div>
+          </sc-if>
+          <sc-if value="{{ assE2 }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px">
+              <label style="{{ genLblStyle }}">Progression nationale
+                <select value="{{ assProgId }}" onChange="{{ setAssProgId }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}"><option value="">— Aucune —</option><sc-for list="{{ assProgOptions }}" as="po" hint-placeholder-count="4"><option value="{{ po.id }}">{{ po.label }}</option></sc-for></select>
+              </label>
+              <label style="{{ genLblStyle }}">Séquence évaluée
+                <select value="{{ assProgSeq }}" onChange="{{ setAssProgSeq }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}"><option value="">—</option><sc-for list="{{ assProgSeqOptions }}" as="ps" hint-placeholder-count="6"><option value="{{ ps.v }}">{{ ps.label }}</option></sc-for></select>
+              </label>
+            </div>
+            <div style="{{ assProgResumeStyle }}">{{ assProgResume }}</div>
+            <div style="margin-top:12px">
+              <div style="{{ genLblStyle }}">Leçons déjà faites en classe <span style="font-weight:400;color:var(--c8b97a8,#8b97a8)">— {{ assCoursAide }}</span></div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><sc-for list="{{ assCours }}" as="ac" hint-placeholder-count="3"><button onClick="{{ ac.toggle }}" style="{{ ac.style }}">{{ ac.label }}</button></sc-for></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px">
+              <label style="{{ genLblStyle }}">Œuvre au programme
+                <select value="{{ assOeuvre }}" onChange="{{ setAssOeuvre }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}"><option value="">— Aucune —</option><sc-for list="{{ assOeuvres }}" as="oe" hint-placeholder-count="3"><option value="{{ oe }}">{{ oe }}</option></sc-for></select>
+              </label>
+              <label style="{{ genLblStyle }}">Thème (facultatif)
+                <input value="{{ genTheme }}" onChange="{{ setGenTheme }}" disabled="{{ cannotEdit }}" placeholder="ex. la santé, l’environnement" style="{{ genSelStyle }}">
+              </label>
+              <label style="{{ genLblStyle }}">Programme borné au
+                <input type="date" value="{{ assBorne }}" onChange="{{ setAssBorne }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}">
+              </label>
+            </div>
+          </sc-if>
+          <sc-if value="{{ assE3 }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:12px">
+              <div style="font-size:12px;color:var(--c5a6678,#5a6678);line-height:1.5;max-width:80ch">Ambassa n’utilisera pas ces notions, même implicitement — une partie pas encore traitée, ou réservée à une évaluation ultérieure.</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><sc-for list="{{ assExclChips }}" as="ax" hint-placeholder-count="3"><button onClick="{{ ax.toggle }}" style="{{ ax.style }}">{{ ax.label }}</button></sc-for></div>
+              <textarea value="{{ assExclLibre }}" onChange="{{ setAssExclLibre }}" disabled="{{ cannotEdit }}" rows="2" placeholder="Autres notions à exclure, séparées par des virgules (ex. le discours rapporté, les figures d’insistance)" style="{{ genSelStyle }};width:100%;margin-top:8px;resize:vertical;font-family:Open Sans"></textarea>
+            </div>
+          </sc-if>
+          <sc-if value="{{ assE4 }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:12px;border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:10px;overflow:hidden">
+              <sc-for list="{{ assResume }}" as="rs" hint-placeholder-count="5">
+                <div style="display:flex;gap:12px;padding:8px 12px;border-bottom:1px solid var(--ceef2f7,#eef2f7);font-size:12.5px;line-height:1.5"><span style="min-width:150px;color:var(--c8b97a8,#8b97a8);font-weight:700;font-family:Poppins;font-size:11.5px">{{ rs.k }}</span><span style="flex:1;color:var(--c22303f,#22303f)">{{ rs.v }}</span></div>
+              </sc-for>
+            </div>
+          </sc-if>
           <div style="margin-top:10px"><span style="{{ genCibleStyle }}">{{ genCible }}</span></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
             <button onClick="{{ genTout }}" title="Ambassa choisit le texte (sauf s’il y en a déjà), rédige questions, barème, corrigé et sujets. Consomme un appel IA." style="{{ genToutStyle }}">{{ genToutIcone }}<span>{{ genToutLabel }}</span></button>
@@ -2099,10 +2193,11 @@
         <button onClick="{{ epTabHistorique }}" style="{{ epTabHistoStyle }}">{{ epTabHistoIcon }} Historique</button>
         <button onClick="{{ epTabComparer }}" style="{{ epTabCompStyle }}">{{ epTabCompIcon }} Comparer</button>
         <button onClick="{{ epTabPropositions }}" style="{{ epTabPropStyle }}">{{ epTabPropIcon }} Propositions <span style="{{ epPropBadge }}">{{ epPropCount }}</span></button>
+        <button onClick="{{ epTabLivrables }}" style="{{ epTabLivStyle }}">{{ epTabLivIcon }} Livrables</button>
       </div>
       <sc-if value="{{ tabEdition }}" hint-placeholder-val="{{ true }}">
-      <div class="vrt-col2" style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
-        <div style="display:flex;flex-direction:column;gap:16px;position:sticky;top:86px">
+      <div class="vrt-col2 vrt-compo-grille" style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
+        <div class="vrt-compo-gauche" style="display:flex;flex-direction:column;gap:16px;position:sticky;top:86px">
           <aside style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(20,55,95,.05)">
             <h3 style="{{ secHead }}" class="vrt-hide-xs">Renseignements</h3>
             <!-- Sur téléphone, ce formulaire s'intercale entre les onglets et
@@ -2152,17 +2247,74 @@
               </div>
             </sc-if>
             <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin-bottom:9px">Circuit de validation</div>
-            <div style="display:flex;flex-direction:column;margin-bottom:14px">
+            <!-- Circuit de relecture (19/10/2026, lot B) : chaque relecteur rend une
+                 DÉCISION motivée — valider, demander un ajustement, rejeter — sur
+                 une portée (tout le sujet, le barème, le corrigé…). L'état de
+                 l'épreuve se DÉDUIT des décisions du tour en cours (_statutRevue) :
+                 un rejet l'emporte, puis un ajustement, puis le quorum de
+                 validations. Avant, un seul clic « Valider » sans trace, et
+                 « Renvoyer en brouillon » sans dire pourquoi. -->
+            <div style="display:flex;flex-direction:column;margin-bottom:10px">
               <div style="{{ step1Style }}"><span style="{{ step1Dot }}">1</span>Brouillon</div>
-              <div style="{{ step2Style }}"><span style="{{ step2Dot }}">2</span>En relecture</div>
+              <div style="{{ step2Style }}"><span style="{{ step2Dot }}">2</span>{{ step2Label }}</div>
               <div style="{{ step3Style }}"><span style="{{ step3Dot }}">3</span>Validé</div>
+              <div style="{{ step4Style }}"><span style="{{ step4Dot }}">4</span>Diffusé</div>
             </div>
+            <div style="{{ revEcheanceStyle }}">{{ revEcheanceLabel }}</div>
+            <!-- Travail en SOLO (19/10/2026) : un enseignant seul n'a personne pour
+                 relire. Sans ce mode, son épreuve restait « En relecture » pour
+                 toujours. Il choisit de valider lui-même ; la décision est
+                 tracée comme une autre (« validée par l'auteur »). -->
+            <sc-if value="{{ revModeVisible }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:4px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-bottom:6px">
+                <button onClick="{{ revModeEquipe }}" style="{{ revModeEquipeStyle }}">Avec relecture</button>
+                <button onClick="{{ revModeSolo }}" style="{{ revModeSoloStyle }}">En solo</button>
+              </div>
+              <div style="font-size:11px;color:var(--c8b97a8,#8b97a8);line-height:1.45;margin-bottom:10px">{{ revModeAide }}</div>
+            </sc-if>
             <div style="display:flex;flex-direction:column;gap:8px">
-              <sc-if value="{{ canSubmit }}" hint-placeholder-val="{{ false }}"><button onClick="{{ submitReview }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:10px;font-size:13px;font-weight:700;border-radius:9px;cursor:pointer;font-family:Poppins" style-hover="background:var(--c135a96,#135a96)">Soumettre en relecture</button></sc-if>
-              <sc-if value="{{ canValidate }}" hint-placeholder-val="{{ false }}"><button onClick="{{ validate }}" style="background:var(--c1f9d55,#1f9d55);color:var(--cffffff,#fff);border:none;padding:10px;font-size:13px;font-weight:700;border-radius:9px;cursor:pointer;font-family:Poppins" style-hover="background:var(--c188047,#188047)">{{ icValide }} Valider l'épreuve</button></sc-if>
-              <sc-if value="{{ canSendBack }}" hint-placeholder-val="{{ false }}"><button onClick="{{ sendBack }}" style="background:var(--cffffff,#fff);color:var(--cc0392b,#c0392b);border:1px solid var(--cecc4bf,#ecc4bf);padding:9px;font-size:12.5px;font-weight:600;border-radius:9px;cursor:pointer" style-hover="background:var(--cfdecea,#fdecea)">Renvoyer en brouillon</button></sc-if>
+              <sc-if value="{{ canSoloValider }}" hint-placeholder-val="{{ false }}"><button onClick="{{ soloValider }}" style="background:var(--c1f9d55,#1f9d55);color:var(--cffffff,#fff);border:none;padding:10px;font-size:13px;font-weight:700;border-radius:9px;cursor:pointer;font-family:Poppins" style-hover="background:var(--c188047,#188047)">{{ icValide }} Valider mon épreuve</button></sc-if>
+              <sc-if value="{{ canSubmit }}" hint-placeholder-val="{{ false }}">
+                <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--c5a6678,#5a6678)">Relectures requises
+                  <select value="{{ revRequis }}" onChange="{{ setRevRequis }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)"><sc-for list="{{ revRequisOptions }}" as="r" hint-placeholder-count="3"><option value="{{ r }}">{{ r }}</option></sc-for></select>
+                </label>
+                <button onClick="{{ submitReview }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:10px;font-size:13px;font-weight:700;border-radius:9px;cursor:pointer;font-family:Poppins" style-hover="background:var(--c135a96,#135a96)">{{ submitLabel }}</button>
+              </sc-if>
+              <sc-if value="{{ canDecider }}" hint-placeholder-val="{{ false }}">
+                <div style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:10px;padding:11px;display:flex;flex-direction:column;gap:8px;background:var(--cfbfcfe,#fbfcfe)">
+                  <div style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ revDecisionTitre }}</div>
+                  <div style="display:flex;gap:5px;flex-wrap:wrap">
+                    <sc-for list="{{ revVerdicts }}" as="v" hint-placeholder-count="3"><button onClick="{{ v.choisir }}" style="{{ v.style }}">{{ v.label }}</button></sc-for>
+                  </div>
+                  <select value="{{ revPortee }}" onChange="{{ setRevPortee }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)"><sc-for list="{{ revPortees }}" as="pt" hint-placeholder-count="6"><option value="{{ pt }}">{{ pt }}</option></sc-for></select>
+                  <textarea value="{{ revMotif }}" onChange="{{ setRevMotif }}" rows="3" placeholder="{{ revMotifAide }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 9px;font-size:12.5px;line-height:1.5;resize:vertical;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)"></textarea>
+                  <div style="{{ revErrStyle }}">{{ revErr }}</div>
+                  <button onClick="{{ rendreDecision }}" style="background:var(--c14375f,#14375f);color:var(--cffffff,#fff);border:none;padding:9px;font-size:12.5px;font-weight:700;border-radius:9px;cursor:pointer;font-family:Poppins" style-hover="filter:brightness(1.15)">Rendre ma décision</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ canSendBack }}" hint-placeholder-val="{{ false }}"><button onClick="{{ sendBack }}" style="background:var(--cffffff,#fff);color:var(--cc0392b,#c0392b);border:1px solid var(--cecc4bf,#ecc4bf);padding:9px;font-size:12.5px;font-weight:600;border-radius:9px;cursor:pointer" style-hover="background:var(--cfdecea,#fdecea)">Repasser en brouillon</button></sc-if>
               <sc-if value="{{ canPublish }}" hint-placeholder-val="{{ false }}"><button onClick="{{ togglePublish }}" style="background:var(--cffffff,#fff);color:var(--cc26a12,#c26a12);border:1px solid var(--cf0d9b0,#f0d9b0);padding:9px;font-size:12.5px;font-weight:600;border-radius:9px;cursor:pointer" style-hover="background:var(--cfdefdb,#fdefdb)">{{ publishLabel }}</button></sc-if>
             </div>
+            <sc-if value="{{ revHasSynthese }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--ceef2f7,#eef2f7)">
+                <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin-bottom:8px">Synthèse des retours</div>
+                <div style="font-size:12.5px;color:var(--c22303f,#22303f);line-height:1.5;font-weight:600">{{ revSynthese }}</div>
+                <div style="{{ revDesaccordStyle }}">Désaccord entre relecteurs : à trancher avant diffusion.</div>
+                <div style="font-size:12px;color:var(--c1a72bb,#1a72bb);line-height:1.5;margin:3px 0 10px;font-weight:600">{{ revRecommandation }}</div>
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <sc-for list="{{ revDecisions }}" as="d" hint-placeholder-count="2">
+                    <div style="display:flex;gap:9px;align-items:flex-start">
+                      <span style="{{ d.avatar }}">{{ d.initials }}</span>
+                      <div style="flex:1;min-width:0">
+                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><strong style="font-size:12.5px;color:var(--c22303f,#22303f)">{{ d.nom }}</strong><span style="{{ d.chip }}">{{ d.verdict }}</span></div>
+                        <div style="font-size:11px;color:var(--c8b97a8,#8b97a8);margin-top:2px">{{ d.meta }}</div>
+                        <div style="{{ d.motifStyle }}">{{ d.motif }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
                       </div>
           </aside>
         </div>
@@ -2288,6 +2440,89 @@
       </div>
       </sc-if>
 
+      <!-- ── LIVRABLES (19/10/2026, lot C) ─────────────────────────────────
+           Une épreuve ne se réduit pas à l'énoncé et au corrigé : celui qui
+           corrige a besoin des CRITÈRES (ce qui vaut des points, ce qui en
+           retire, à quoi ressemble une copie de 12), et celui qui relit a
+           besoin de savoir POURQUOI ce texte, sur quel périmètre, et ce qu'on
+           lui soumet. Deux documents de plus, joints à l'export Word sur des
+           pages « réservées », jamais sur la feuille du candidat. -->
+      <sc-if value="{{ tabLivrables }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+          <button onClick="{{ livOngGuide }}" style="{{ livOngGuideStyle }}">Guide de correction</button>
+          <button onClick="{{ livOngNote }}" style="{{ livOngNoteStyle }}">Note au relecteur</button>
+          <button onClick="{{ livToggleWord }}" style="margin-left:auto;background:none;border:none;color:var(--c1a72bb,#1a72bb);font-size:12.5px;font-weight:700;font-family:Poppins;cursor:pointer">{{ livWordLabel }}</button>
+        </div>
+
+        <sc-if value="{{ livSousGuide }}" hint-placeholder-val="{{ true }}">
+          <section style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(20,55,95,.05);margin-bottom:16px">
+            <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
+              <div style="flex:1;min-width:240px">
+                <h3 style="font-family:Poppins;font-size:15px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 4px">Guide de correction et de notation</h3>
+                <p style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin:0 0 14px;line-height:1.55;max-width:80ch">Un critère par ligne du barème : ce qui est attendu, et les repères qui font monter ou descendre la note. Réservé aux correcteurs.</p>
+              </div>
+              <button onClick="{{ guidePreremplir }}" style="background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c14375f,#14375f);padding:8px 14px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer">{{ guidePreremplirLabel }}</button>
+            </div>
+            <div style="{{ guideTotalStyle }}">{{ guideTotal }}</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ guideCriteres }}" as="gc" hint-placeholder-count="3">
+                <div style="border:1px solid var(--ceef2f7,#eef2f7);border-radius:10px;padding:11px;background:var(--cfbfcfe,#fbfcfe)">
+                  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                    <span style="font-family:Poppins;font-weight:700;color:var(--c1a72bb,#1a72bb);min-width:22px">{{ gc.num }}</span>
+                    <input value="{{ gc.critere }}" onChange="{{ gc.setCritere }}" placeholder="Critère (ex. Compréhension et fidélité)" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:7px 9px;font-size:13px;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);box-sizing:border-box;flex:1;min-width:180px;font-weight:600">
+                    <input value="{{ gc.pts }}" onChange="{{ gc.setPts }}" placeholder="pts" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:7px 9px;font-size:13px;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);box-sizing:border-box;width:64px;text-align:center">
+                    <button onClick="{{ gc.retirer }}" title="Retirer ce critère" style="width:30px;height:30px;border-radius:8px;border:1px solid var(--ce6ecf3,#e6ecf3);background:var(--cffffff,#fff);color:var(--cc0392b,#c0392b);cursor:pointer;flex:none">×</button>
+                  </div>
+                  <div class="vrt-col2" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+                    <textarea value="{{ gc.attendu }}" onChange="{{ gc.setAttendu }}" rows="3" placeholder="Attendu : les éléments de réponse et leur valeur" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
+                    <textarea value="{{ gc.reperes }}" onChange="{{ gc.setReperes }}" rows="3" placeholder="Repères : ce qui plafonne la note, ce qui la retire (contresens, recopie…)" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <button onClick="{{ guideAjouter }}" style="margin-top:10px;background:none;border:1px dashed var(--ccdd9e6,#cdd9e6);color:var(--c5a6678,#5a6678);padding:8px 14px;font-size:12.5px;font-weight:600;border-radius:9px;cursor:pointer">+ Ajouter un critère</button>
+
+            <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Pénalités</label>
+            <textarea value="{{ guidePenalites }}" onChange="{{ setGuidePenalites }}" rows="3" placeholder="Longueur, décompte des mots, langue (ex. au-delà de cinq fautes, −0,5 par tranche de cinq, dans la limite de 2 points)…" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
+
+            <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Repères de niveau</label>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <sc-for list="{{ guideNiveaux }}" as="gn" hint-placeholder-count="4">
+                <div style="display:flex;gap:9px;align-items:flex-start">
+                  <span style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--c14375f,#14375f);min-width:86px;padding-top:8px">{{ gn.tranche }}</span>
+                  <textarea value="{{ gn.profil }}" onChange="{{ gn.setProfil }}" rows="2" placeholder="{{ gn.aide }}" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical;flex:1"></textarea>
+                </div>
+              </sc-for>
+            </div>
+
+            <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Erreurs attendues et traitement</label>
+            <textarea value="{{ guideErreurs }}" onChange="{{ setGuideErreurs }}" rows="4" placeholder="Les contresens prévisibles, les confusions fréquentes, et le critère où chacune se sanctionne — sans les cumuler." style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ livSousNote }}" hint-placeholder-val="{{ false }}">
+          <section style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(20,55,95,.05);margin-bottom:16px">
+            <h3 style="font-family:Poppins;font-size:15px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 4px">Note au relecteur</h3>
+            <p style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin:0 0 14px;line-height:1.55;max-width:80ch">Ce que le relecteur doit savoir pour trancher vite : le texte retenu et pourquoi, le périmètre évalué, et les points sur lesquels vous attendez son avis.</p>
+            <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Textes retenus</label>
+            <div style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.5">
+              <sc-for list="{{ noteTextes }}" as="nt" hint-placeholder-count="1"><div>• {{ nt.ligne }}</div></sc-for>
+            </div>
+            <sc-if value="{{ noteAParams }}" hint-placeholder-val="{{ false }}">
+              <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Paramètres de génération</label>
+              <div style="display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.5">
+                <sc-for list="{{ noteParams }}" as="np" hint-placeholder-count="4"><div>{{ np.ligne }}</div></sc-for>
+              </div>
+            </sc-if>
+            <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Choix du texte et du sujet</label>
+            <textarea value="{{ noteChoix }}" onChange="{{ setNoteChoix }}" rows="3" placeholder="Pourquoi ce texte : lien avec la séquence, structure, longueur, difficulté visée…" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
+            <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Périmètre évalué</label>
+            <textarea value="{{ notePerimetre }}" onChange="{{ setNotePerimetre }}" rows="3" placeholder="Séquences et notions évaluées, notions volontairement exclues, programme borné au…" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
+            <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin:14px 0 6px">Points soumis au relecteur</label>
+            <textarea value="{{ notePoints }}" onChange="{{ setNotePoints }}" rows="4" placeholder="Un point par ligne : une question dont vous doutez, un barème à confirmer, une date…" style="width:100%;box-sizing:border-box;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.55;font-family:Open Sans;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
+          </section>
+        </sc-if>
+      </sc-if>
       <sc-if value="{{ tabHistorique }}" hint-placeholder-val="{{ false }}">
       <div style="max-width:760px">
         <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 20px;text-align:justify">Chronologie de l'épreuve : ajouts de textes, modifications de questions, commentaires et décisions de validation, du plus récent au plus ancien.</p>
@@ -2740,14 +2975,28 @@
 
   <!-- ============ APERCU ============ -->
   <sc-if value="{{ isApercu }}" hint-placeholder-val="{{ false }}">
-  <main style="flex:1;background:var(--ce7eef6,#e7eef6);padding:0">
-    <div data-noprint="1" style="background:var(--c14375f,#14375f);color:var(--cffffff,#fff);padding:14px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:66px;z-index:10">
-      <button onClick="{{ goComposeur }}" style="background:none;border:1px solid var(--c3d5f88,#3d5f88);color:var(--cdbe8f5,#dbe8f5);padding:9px 16px;font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" style-hover="border-color:var(--c7aa3cc,#7aa3cc)">{{ icRetour }} Modifier</button>
-      <span style="{{ activeStatusChip }}">{{ activeStatusLabel }}</span>
-      <span style="font-size:13px;color:var(--ca9c0d8,#a9c0d8)">{{ selCount }} exercice(s)</span>
-      <button onClick="{{ exportWord }}" style="{{ exportWordStyle }}" title="Télécharger un .docx modifiable">{{ exportIcon }}<span>Exporter en Word</span></button><button onClick="{{ doPrint }}" style="margin-left:12px;background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:11px 24px;font-size:13.5px;font-weight:700;cursor:pointer;border-radius:999px;font-family:'Poppins';box-shadow:0 4px 12px rgba(12,42,106,.3)" style-hover="background:var(--ce07f00,#e07f00)">Imprimer / PDF</button>
-    </div>
-    <div data-print-sheet="1" style="max-width:820px;margin:28px auto;background:var(--cffffff,#fff);box-shadow:0 6px 28px rgba(20,55,95,.14);border-radius:6px;padding:56px 60px 64px">
+   <!-- APERÇU EN MODE DOCUMENT (20/10/2026, lot G). La feuille ne faisait que
+        ~480 px sur un écran de 1 366 : barre de la vitrine, barre de l'Atelier,
+        menu latéral et bandeau sombre se partageaient l'écran, et l'on ne
+        voyait que l'énoncé. Désormais : plein écran (html.vrt-doc masque le
+        reste), une barre fine, une feuille A4 réelle (210 mm) avec repères de
+        page et zoom, et les quatre documents en onglets — comme les livrables
+        d'un sujet de concours. -->
+   <main class="vrt-doc-main" style="flex:1;background:var(--ce9eef4,#e9eef4);padding:0;min-height:100vh">
+     <div data-noprint="1" style="position:sticky;top:0;z-index:20;background:var(--cffffff,#fff);border-bottom:1px solid var(--ce2eaf3,#e2eaf3);display:flex;align-items:center;gap:8px;padding:8px 16px;flex-wrap:wrap">
+       <button onClick="{{ goComposeur }}" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px">{{ icRetour }} Modifier</button>
+       <span style="{{ activeStatusChip }}">{{ activeStatusLabel }}</span>
+       <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-left:6px;flex-wrap:wrap">
+         <sc-for list="{{ docOnglets }}" as="o" hint-placeholder-count="5"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+       </div>
+       <span style="margin-left:auto;font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ docPagesLabel }}</span>
+       <button onClick="{{ docZoomBasculer }}" title="Ajuster à la fenêtre ou taille réelle" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px">{{ docZoomLabel }}</button>
+       <button onClick="{{ exportWord }}" style="{{ exportWordStyle }}" title="Télécharger un .docx modifiable">{{ exportIcon }}<span>Word</span></button>
+       <button onClick="{{ doPrint }}" style="background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;border-radius:999px;font-family:'Poppins'" style-hover="background:var(--ce07f00,#e07f00)">Imprimer / PDF</button>
+     </div>
+     <div data-print-sheet="1" class="vrt-docfeuille" style="{{ docFeuilleStyle }}">
+       <div class="vrt-doc-entete" style="text-align:right;border-bottom:1px solid var(--c14375f,#14375f);padding-bottom:4px;margin-bottom:14px;line-height:1.3"><div style="font:700 9.5pt Cambria,Georgia,serif;color:var(--c14375f,#14375f)">VÉRITAS · Centre d’Excellence Scolaire</div><div style="font:8pt Cambria,Georgia,serif;color:var(--c8b97a8,#8b97a8)">Atelier de Français · veritas-school.com</div></div>
+       <sc-if value="{{ docVoitEnonce }}" hint-placeholder-val="{{ true }}">
       <div style="text-align:center;border-bottom:2px solid var(--c14375f,#14375f);padding-bottom:18px;margin-bottom:8px"><div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--c5a6678,#5a6678);font-weight:600">République du Cameroun · MINESEC</div><div style="font-family:'Poppins';font-size:16px;font-weight:600;margin-top:6px;color:var(--c14375f,#14375f)">{{ epView.etab }}</div></div>
       <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--c3a4658,#3a4658);margin-bottom:26px;flex-wrap:wrap;gap:6px"><span>Classe : <strong style="font-weight:700">{{ epView.classe }}</strong></span><span>Durée : <strong style="font-weight:700">{{ epView.duree }}</strong></span><span>Coef. : <strong style="font-weight:700">{{ epView.coeff }}</strong></span><span>{{ epView.date }}</span></div>
       <h2 style="font-family:'Poppins';font-size:23px;font-weight:700;text-align:center;margin:0 0 6px;color:var(--c14375f,#14375f)" class="vrt-th">{{ epView.title }}</h2>
@@ -2758,7 +3007,7 @@
             <div style="display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--cd5e0ec,#d5e0ec);padding-bottom:6px;margin-bottom:12px"><h2 style="font-family:'Poppins';font-size:16px;font-weight:700;margin:0;color:var(--c14375f,#14375f)">Texte {{ f.pos }}</h2><span style="font-size:11px;color:var(--c7a8598,#7a8598);text-transform:uppercase;letter-spacing:.05em">{{ f.type }} · {{ f.words }} mots</span></div>
             <p style="font-size:14.5px;line-height:1.75;color:var(--c22303f,#22303f);margin:0;white-space:pre-wrap;text-wrap:pretty">{{ f.text }}</p>
             <p style="font-size:13px;font-style:italic;text-align:right;color:var(--c5a6678,#5a6678);margin:10px 0 16px">— {{ f.reference }}</p>
-            <div style="{{ f.qBlocStyle }}"><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">I. Compréhension</p><ol style="margin:0 0 12px;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.compQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">II. Langue et production</p><ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.explQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol></div>
+            <div style="{{ f.qBlocStyle }}"><div style="{{ f.compBloc }}"><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">I. Compréhension</p><ol style="margin:0 0 12px;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.compQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol></div><div style="{{ f.explBloc }}"><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">{{ f.titreExplAp }}</p><ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.explQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol></div></div>
           </section>
         </sc-for>
         <sc-for list="{{ printSujets }}" as="sj" hint-placeholder-count="1">
@@ -2768,7 +3017,147 @@
           </section>
         </sc-for>
       </div>
+       </sc-if>
+       <sc-for list="{{ docVues }}" as="v" hint-placeholder-count="1">
+         <section class="vrt-doc-section" style="{{ v.style }}">
+           <div style="text-align:center;margin-bottom:16px"><div style="font:700 13pt Cambria,Georgia,serif;color:var(--c14375f,#14375f);letter-spacing:.02em">{{ v.titre }}</div><div style="font:10pt Cambria,Georgia,serif;color:var(--c5a6678,#5a6678);margin-top:2px">{{ v.sous }}</div></div>
+           <sc-for list="{{ v.blocs }}" as="b" hint-placeholder-count="2">
+             <div style="break-inside:avoid-page;margin-bottom:12px">
+               <div style="font:700 11pt Cambria,Georgia,serif;color:var(--c1a72bb,#1a72bb);border-bottom:1px solid var(--cd5e0ec,#d5e0ec);padding-bottom:3px;margin:10px 0 6px">{{ b.titre }}</div>
+               <sc-for list="{{ b.lignes }}" as="l" hint-placeholder-count="2"><p style="font:11pt/1.5 Cambria,Georgia,serif;color:var(--c22303f,#22303f);margin:0 0 5px;white-space:pre-wrap">{{ l }}</p></sc-for>
+             </div>
+           </sc-for>
+         </section>
+       </sc-for>
+       <div class="vrt-doc-pied" style="margin-top:26px;border-top:1px solid var(--cc9d6e4,#c9d6e4);padding-top:5px;text-align:center;font:8pt Cambria,Georgia,serif;color:var(--c8b97a8,#8b97a8)">© VÉRITAS EDUCATION · veritas-school.com</div>
+     </div>
+   </main>
+  </sc-if>
+
+  <!-- ============ SUIVI (20/10/2026, lot J) ============
+       Comme le « Suivi » de Tchouskou : un calendrier DÉDUIT des progressions
+       de mes classes — sujet prêt une semaine avant l'évaluation (S5),
+       épreuve en S5, corrigé et compte rendu en S6 — et, pour chaque
+       échéance, l'état réel de l'épreuve liée. -->
+  <sc-if value="{{ isSuivi }}" hint-placeholder-val="{{ false }}">
+  <main style="flex:1;max-width:1360px;margin:0 auto;padding:28px 30px 48px;width:100%">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
+      <h2 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Suivi</h2>
+      <button onClick="{{ goProgressions }}" style="margin-left:auto;background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:7px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer">Progressions et mes classes</button>
     </div>
+    <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 16px;max-width:86ch;line-height:1.55">Échéances déduites des progressions de vos classes et du calendrier officiel ; chaque ligne dit où en est l’épreuve qui y répond.</p>
+    <div style="{{ suiviVideStyle }}">
+      <div style="font-family:Poppins;font-size:14px;font-weight:700;color:var(--c14375f,#14375f)">Aucune classe suivie</div>
+      <div style="font-size:12.5px;color:var(--c5a6678,#5a6678);margin:4px 0 10px">Choisissez vos classes dans Progressions (bouton « Ajouter à mes classes ») : le suivi se construit tout seul.</div>
+      <button onClick="{{ goProgressions }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:8px 14px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">Ouvrir les progressions</button>
+    </div>
+    <div style="{{ suiviCorpsStyle }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px">
+        <sc-for list="{{ suiviTuiles }}" as="t" hint-placeholder-count="4">
+          <div style="{{ t.style }}"><span style="{{ t.chiffre }}">{{ t.n }}</span><span style="display:block;font-size:12px;color:var(--c5a6678,#5a6678);margin-top:4px;font-weight:600">{{ t.label }}</span></div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px">
+          <sc-for list="{{ suiviHorizons }}" as="h" hint-placeholder-count="4"><button onClick="{{ h.go }}" style="{{ h.style }}">{{ h.label }}</button></sc-for>
+        </div>
+        <select value="{{ suiviClasse }}" onChange="{{ setSuiviClasse }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;padding:7px 10px;font-size:12.5px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)"><option value="">Toutes mes classes</option><sc-for list="{{ suiviClasses }}" as="c" hint-placeholder-count="2"><option value="{{ c.id }}">{{ c.label }}</option></sc-for></select>
+        <button onClick="{{ suiviRetardsBasculer }}" style="{{ suiviRetardsStyle }}">Retards seulement</button>
+        <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-left:auto">
+          <button onClick="{{ suiviVueListe }}" style="{{ suiviVueListeStyle }}">Échéances</button>
+          <button onClick="{{ suiviVueMois }}" style="{{ suiviVueMoisStyle }}">Calendrier</button>
+        </div>
+      </div>
+
+      <sc-if value="{{ suiviEnListe }}" hint-placeholder-val="{{ true }}">
+        <div style="{{ suiviAucuneStyle }}">Aucune échéance dans cet horizon.</div>
+        <sc-for list="{{ suiviGroupes }}" as="gr" hint-placeholder-count="2">
+          <section style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:12px 16px;margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ gr.titre }}</span><span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ gr.sous }}</span></div>
+            <sc-for list="{{ gr.lignes }}" as="l" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;padding:9px 2px;border-top:1px solid var(--ceef2f7,#eef2f7);flex-wrap:wrap">
+                <div style="min-width:104px"><div style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--c22303f,#22303f)">{{ l.date }}</div><div style="{{ l.relStyle }}">{{ l.rel }}</div></div>
+                <div style="flex:1;min-width:200px"><div style="font-size:13px;font-weight:700;color:var(--c22303f,#22303f)">{{ l.titre }}</div><div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin-top:2px">{{ l.sous }}</div></div>
+                <span style="{{ l.chip }}">{{ l.etat }}</span>
+                <button onClick="{{ l.agir }}" style="{{ l.agirStyle }}">{{ l.agirLabel }}</button>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+      </sc-if>
+
+      <sc-if value="{{ suiviEnMois }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:14px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <button onClick="{{ moisPrec }}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--ce2eaf3,#e2eaf3);background:var(--cffffff,#fff);cursor:pointer;color:var(--c14375f,#14375f)">‹</button>
+            <span style="font-family:Poppins;font-size:15px;font-weight:700;color:var(--c14375f,#14375f);min-width:150px;text-align:center">{{ moisTitre }}</span>
+            <button onClick="{{ moisSuiv }}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--ce2eaf3,#e2eaf3);background:var(--cffffff,#fff);cursor:pointer;color:var(--c14375f,#14375f)">›</button>
+            <span style="margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--c5a6678,#5a6678)"><span>▢ <span style="color:var(--c8b97a8,#8b97a8)">vacances</span></span><span style="color:var(--cc0392b,#c0392b)">● férié</span><span style="color:var(--c1a72bb,#1a72bb)">● journée</span><span style="color:var(--cc26a12,#c26a12)">● échéance</span></span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px">
+            <sc-for list="{{ moisEntetes }}" as="me2" hint-placeholder-count="7"><div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--c8b97a8,#8b97a8);text-align:center;padding:3px 0">{{ me2 }}</div></sc-for>
+            <sc-for list="{{ moisJours }}" as="j" hint-placeholder-count="35">
+              <div style="{{ j.style }}">
+                <div style="{{ j.numStyle }}">{{ j.num }}</div>
+                <sc-for list="{{ j.marques }}" as="mq" hint-placeholder-count="1"><div style="{{ mq.style }}" title="{{ mq.titre }}">{{ mq.texte }}</div></sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- ============ PROGRESSIONS (20/10/2026, lot I) ============
+       Les progressions nationales de français 2026-2027 (ESG, EST), datées
+       semaine par semaine par le calendrier scolaire officiel. Données :
+       plateforme/progressions.js, GÉNÉRÉ par tools/importer_progressions.py. -->
+  <sc-if value="{{ isProgressions }}" hint-placeholder-val="{{ false }}">
+  <main style="flex:1;max-width:1360px;margin:0 auto;padding:28px 30px 48px;width:100%">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
+      <h2 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Progressions</h2>
+      <span style="font-size:11.5px;font-weight:700;font-family:Poppins;color:var(--c1a72bb,#1a72bb);background:var(--ce7f1fb,#e7f1fb);padding:4px 12px;border-radius:999px">{{ progAnnee }}</span>
+    </div>
+    <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 16px;max-width:86ch;line-height:1.55">Progressions nationales de français, datées semaine par semaine d’après le calendrier officiel (arrêté conjoint MINEDUB/MINESEC) : vacances sautées, fériés signalés. Chaque séquence ouvre une épreuve déjà cadrée.</p>
+    <div style="{{ progAbsentStyle }}">Les progressions se chargent… Si ce message reste, rechargez la page.</div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+      <select value="{{ progId }}" onChange="{{ setProgId }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;padding:8px 10px;font-size:13px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);min-width:240px"><sc-for list="{{ progOptions }}" as="po" hint-placeholder-count="6"><option value="{{ po.id }}">{{ po.label }}</option></sc-for></select>
+      <button onClick="{{ progToggleMienne }}" style="{{ progMienneStyle }}">{{ progMienneLabel }}</button>
+      <sc-for list="{{ progMes }}" as="pm" hint-placeholder-count="2"><button onClick="{{ pm.go }}" style="{{ pm.style }}">{{ pm.label }}</button></sc-for>
+    </div>
+    <div style="{{ progCetteSemaineStyle }}">{{ progCetteSemaine }}</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <sc-for list="{{ progSeqs }}" as="sq" hint-placeholder-count="3">
+        <section style="{{ sq.carte }}">
+          <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
+            <span style="{{ sq.num }}">{{ sq.n }}</span>
+            <div style="flex:1;min-width:220px">
+              <div style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ sq.titre }}</div>
+              <div style="font-size:12px;color:var(--c8b97a8,#8b97a8);margin-top:2px">{{ sq.dates }}</div>
+              <div style="font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.5;margin-top:5px">{{ sq.competence }}</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button onClick="{{ sq.toggle }}" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">{{ sq.toggleLabel }}</button>
+              <button onClick="{{ sq.composer }}" style="{{ sq.composerStyle }}">Composer l’évaluation</button>
+            </div>
+          </div>
+          <div style="{{ sq.detail }}">
+            <sc-for list="{{ sq.semaines }}" as="w" hint-placeholder-count="6">
+              <div style="{{ w.ligne }}">
+                <div style="min-width:118px"><span style="{{ w.chip }}">S{{ w.n }} · {{ w.type }}</span><div style="font-size:11px;color:var(--c8b97a8,#8b97a8);margin-top:4px">{{ w.dates }}</div><div style="{{ w.ferieStyle }}">{{ w.ferie }}</div></div>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                  <sc-for list="{{ w.contenus }}" as="ct" hint-placeholder-count="3"><div style="font-size:12.5px;color:var(--c22303f,#22303f);line-height:1.45">• {{ ct }}</div></sc-for>
+                </div>
+              </div>
+            </sc-for>
+            <div style="{{ sq.integrationStyle }}"><strong style="font-family:Poppins;color:var(--c14375f,#14375f)">Tâche d’intégration (S4) — </strong>{{ sq.integration }}</div>
+            <div style="{{ sq.evaluationStyle }}"><strong style="font-family:Poppins;color:var(--c14375f,#14375f)">Évaluation (S5) — </strong>{{ sq.evaluation }}</div>
+          </div>
+        </section>
+      </sc-for>
+    </div>
+    <p style="font-size:11px;color:var(--c9aa5b5,#9aa5b5);margin:16px 0 0">{{ progSource }}</p>
   </main>
   </sc-if>
 
@@ -3080,6 +3469,92 @@
       </sc-for>
     </div>
 
+    <!-- ---------- PILOTAGE (19/10/2026, lot E) ----------
+         Ce qu'un chef de département ouvre en premier : où en sont les
+         épreuves du groupe, ce qui est en retard, ce qui attend une version
+         corrigée, et les délais qui règlent le circuit. Chaque ligne OUVRE
+         son épreuve : une alerte qu'on ne peut pas cliquer se remet à plus tard. -->
+    <sc-if value="{{ admIsPilotage }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px">
+        <sc-for list="{{ pilTuiles }}" as="pt" hint-placeholder-count="6">
+          <button onClick="{{ pt.filtrer }}" style="{{ pt.style }}">
+            <span style="{{ pt.chiffreStyle }}">{{ pt.n }}</span>
+            <span style="display:block;font-size:12px;color:var(--c5a6678,#5a6678);margin-top:4px;font-weight:600">{{ pt.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+
+      <section style="{{ cardStyle }};margin-bottom:16px">
+        <h2 class="vrt-titre-file" style="{{ cardTitle }}">À traiter</h2>
+        <div style="{{ pilVideStyle }}">Rien en retard ni en attente : le circuit est à jour.</div>
+        <div style="display:flex;flex-direction:column">
+          <sc-for list="{{ pilTraiter }}" as="tr" hint-placeholder-count="3">
+            <button onClick="{{ tr.ouvrir }}" style="display:flex;align-items:center;gap:12px;padding:11px 4px;border:none;border-bottom:1px solid var(--ceef2f7,#eef2f7);background:none;cursor:pointer;text-align:left;width:100%" style-hover="background:var(--cf5faff,#f5faff)">
+              <span style="{{ tr.dot }}"></span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-family:Poppins;font-size:13.5px;font-weight:700;color:var(--c22303f,#22303f)">{{ tr.titre }}</span><span style="display:block;font-size:12px;color:var(--c8b97a8,#8b97a8);margin-top:2px">{{ tr.sous }}</span></span>
+              <span style="{{ tr.chip }}">{{ tr.quand }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="{{ cardStyle }};margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+          <h2 class="vrt-titre-file" style="{{ cardTitle }};margin:0">Toutes les épreuves</h2>
+          <span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ pilFiltreLabel }}</span>
+          <button onClick="{{ pilToutes }}" style="{{ pilToutesStyle }}">Tout afficher</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="border-collapse:collapse;width:100%;min-width:720px;font-size:12.5px">
+            <thead><tr>
+              <th style="{{ admTh }}">Épreuve</th><th style="{{ admTh }}">Classe</th><th style="{{ admTh }}">Auteur</th>
+              <th style="{{ admTh }}">Statut</th><th style="{{ admTh }}">Relectures</th><th style="{{ admTh }}">Échéance</th><th style="{{ admTh }}">Mise à jour</th>
+            </tr></thead>
+            <tbody>
+              <sc-for list="{{ pilLignes }}" as="pl" hint-placeholder-count="5">
+                <tr onClick="{{ pl.ouvrir }}" style="cursor:pointer" style-hover="background:var(--cf5faff,#f5faff)">
+                  <td style="{{ admTd }};font-weight:700;color:var(--c14375f,#14375f)">{{ pl.titre }}</td>
+                  <td style="{{ admTd }}">{{ pl.classe }}</td>
+                  <td style="{{ admTd }}">{{ pl.auteur }}</td>
+                  <td style="{{ admTd }}"><span style="{{ pl.chip }}">{{ pl.statut }}</span></td>
+                  <td style="{{ admTd }}">{{ pl.relectures }}</td>
+                  <td style="{{ admTd }}"><span style="{{ pl.echStyle }}">{{ pl.echeance }}</span></td>
+                  <td style="{{ admTd }};color:var(--c8b97a8,#8b97a8)">{{ pl.maj }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <div style="{{ pilAucuneStyle }}">Aucune épreuve dans ce statut.</div>
+      </section>
+
+      <div class="vrt-col2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <section style="{{ cardStyle }}">
+          <h2 class="vrt-titre-file" style="{{ cardTitle }}">Délais en vigueur</h2>
+          <p style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin:-8px 0 14px;line-height:1.55">Ils fixent l’échéance affichée dans le circuit de chaque épreuve, au moment où elle est soumise ou renvoyée.</p>
+          <sc-for list="{{ pilDelais }}" as="dl" hint-placeholder-count="2">
+            <label style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--ceef2f7,#eef2f7);font-size:13px;color:var(--c22303f,#22303f)">
+              <span style="flex:1"><strong style="font-family:Poppins">{{ dl.label }}</strong><span style="display:block;font-size:11.5px;color:var(--c8b97a8,#8b97a8)">{{ dl.aide }}</span></span>
+              <input type="number" min="1" max="60" value="{{ dl.valeur }}" onChange="{{ dl.set }}" style="{{ admNum }}"><span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">jours</span>
+            </label>
+          </sc-for>
+        </section>
+        <section style="{{ cardStyle }}">
+          <h2 class="vrt-titre-file" style="{{ cardTitle }}">Production sur six mois</h2>
+          <p style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin:-8px 0 14px">Épreuves créées par mois.</p>
+          <div style="display:flex;align-items:flex-end;gap:10px;height:130px">
+            <sc-for list="{{ pilMois }}" as="pm" hint-placeholder-count="6">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end">
+                <span style="font-family:Poppins;font-size:12px;font-weight:700;color:var(--c14375f,#14375f)">{{ pm.n }}</span>
+                <span style="{{ pm.barre }}"></span>
+                <span style="font-size:11px;color:var(--c8b97a8,#8b97a8)">{{ pm.mois }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
     <!-- ---------- FONCTIONNALITÉS ---------- -->
     <sc-if value="{{ admIsFonctions }}" hint-placeholder-val="{{ true }}">
       <section style="{{ cardStyle }}">
@@ -3222,7 +3697,7 @@
     <!-- ---------- PAIEMENT ---------- -->
     <sc-if value="{{ admIsPaiement }}" hint-placeholder-val="{{ false }}">
       <section style="{{ cardStyle }};margin-bottom:16px">
-        <h2 class="vrt-titre-file" style="{{ cardTitle }}">Encaissement — CamerPay</h2>
+        <h2 class="vrt-titre-file" style="{{ cardTitle }}">Encaissement — {{ admPayFourn }}</h2>
         <div style="{{ admPayBanner }}">{{ admPayEtat }}</div>
         <div style="display:flex;flex-direction:column;margin-top:14px">
           <sc-for list="{{ admPayInfos }}" as="i" hint-placeholder-count="4">
@@ -3232,7 +3707,7 @@
             </div>
           </sc-for>
         </div>
-        <p style="font-size:12px;color:var(--c8b97a8,#8b97a8);line-height:1.6;margin:14px 0 0">Les identifiants CamerPay ne sont jamais dans le navigateur : ils vivent dans <code>api/payment_config.php</code>, hors dépôt. Cette page ne fait que lire l'état de la sonde serveur.</p>
+        <p style="font-size:12px;color:var(--c8b97a8,#8b97a8);line-height:1.6;margin:14px 0 0">Les identifiants du fournisseur ne sont jamais dans le navigateur : ils vivent dans <code>api/payment_config.php</code>, hors dépôt. Cette page ne fait que lire l'état de la sonde serveur.</p>
       </section>
 
       <section style="{{ cardStyle }}">
@@ -3665,12 +4140,10 @@
     </sc-for>
   </nav>
   </sc-if>
-  <sc-if value="{{ showFab }}" hint-placeholder-val="{{ false }}">
-  <div data-noprint="1" class="vrt-fab" style="position:fixed;right:26px;bottom:26px;z-index:45;display:flex;flex-direction:column;gap:14px;align-items:center">
-    <button onClick="{{ toggleChat }}" title="Discussion d'équipe" style="position:relative;width:52px;height:52px;border-radius:50%;border:none;background:var(--cffffff,#fff);color:var(--c1a72bb,#1a72bb);box-shadow:0 6px 20px rgba(20,55,95,.22);cursor:pointer;display:grid;place-items:center;border:1px solid var(--ce2eaf3,#e2eaf3)" style-hover="transform:translateY(-2px);box-shadow:0 10px 26px rgba(20,55,95,.28)">{{ fabChatIcon }}<span style="position:absolute;top:8px;right:9px;width:9px;height:9px;border-radius:50%;background:var(--cf39200,#f39200);border:2px solid var(--cffffff,#fff)"></span></button>
-    <button onClick="{{ newDraft }}" title="Nouvelle épreuve" style="display:flex;align-items:center;gap:9px;height:56px;padding:0 24px;border-radius:999px;border:none;background:var(--cf39200,#f39200);color:var(--cffffff,#fff);font-family:Poppins;font-weight:700;font-size:14.5px;cursor:pointer;box-shadow:0 8px 24px rgba(12,42,106,.4)" style-hover="background:var(--ce07f00,#e07f00);transform:translateY(-2px)">{{ fabPlusIcon }}Nouvelle épreuve</button>
-  </div>
-  </sc-if>
+  <!-- Bouton flottant retiré (19/10/2026, lot A « épurer ») : « Nouvelle épreuve »
+       existait trois fois (Créer, bouton de la page, bouton flottant) et le
+       flottant masquait « Publier » sous les commentaires. La discussion
+       d'équipe s'ouvre depuis la barre du haut. -->
 
   <!-- ── Ce pied de page ne CLIQUAIT PAS (audit du 27/08/2026) ────────────────
      « CGU », « Confidentialité » et « Support » étaient trois <span> nus :
@@ -3690,7 +4163,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '16/10 · 1';
+const ATELIER_BUILD = '20/10 · K';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -3868,7 +4341,7 @@ class Component extends DCLogic {
          lui promet « Commenter et proposer ». */
       propCible:'',propTexte:'',propMsg:'',propMsgTon:'',
       actFilter:'toutes',collabTab:'discussions',
-      coursTab:'gabarits',cycleFiltre:'',createOpen:false,admTab:'fonctions',
+      coursTab:'gabarits',cycleFiltre:'',createOpen:false,admTab:'pilotage',
       profTab:'infos',profSaved:'',coCorpusQ:'',coCorpusConseilles:false,coConfOpen:!this._petitEcran(),
       panier:this._load('minesec_panier',[])||[],panierOpen:false,
       corpusSource:'',corpusErr:'',corpusLong:false,corpusEtat:'',corpusDroit:null,corpusPalier:'',corpusPlafonds:null,corpusLibres:0,
@@ -5079,6 +5552,39 @@ class Component extends DCLogic {
       this._completerTexte(nn,r=>ok(!!r));
     });
   }
+  /* ── Assistant de composition (lot D) ─────────────────────────────── */
+  _memeClasse(x,y){const c=v=>MINESEC.cleClasse(String(v||'').normalize?String(v||'').normalize('NFKC'):String(v||''));return !!c(x)&&c(x)===c(y);}
+  _assDe(a){const z=(a&&a.assistant)||{};return{type:z.type||'Devoir',numero:z.numero||'',coursIds:Array.isArray(z.coursIds)?z.coursIds:[],
+    oeuvre:z.oeuvre||'',borne:z.borne||'',exclCours:Array.isArray(z.exclCours)?z.exclCours:[],exclLibre:z.exclLibre||'',
+    progId:z.progId||'',progSeq:z.progSeq||''};}
+  _coursDeLaClasse(a){return (this.state.cours||[]).filter(c=>c&&a&&this._memeClasse(c.classe,a.classe));}
+  /* Ce qui part dans la consigne d'Ambassa : du texte, lisible tel quel par
+     le relecteur dans la note (genParams). */
+  _paramsGeneration(a){
+    const z=this._assDe(a),cours=this._coursDeLaClasse(a);
+    const titre=id=>{const c=cours.find(x=>x.id===id)||(this.state.cours||[]).find(x=>x.id===id);return c?(c.title||'Leçon sans titre'):'';};
+    /* Une leçon EXCLUE sort du programme couvert : la donner à Ambassa des
+       deux côtés (« appuie-toi dessus » et « ne l'utilise pas ») le laissait
+       choisir. */
+    const faits=z.coursIds.filter(id=>!z.exclCours.includes(id)).map(titre).filter(Boolean);
+    const exclus=z.exclCours.map(titre).filter(Boolean).concat(String(z.exclLibre||'').split(/[,;\n]+/).map(x=>x.trim()).filter(Boolean));
+    const borne=z.borne?new Date(z.borne+'T00:00:00').toLocaleDateString('fr-FR'):'';
+    /* Progression nationale (lot I) : la séquence évaluée apporte ses
+       notions (S1 à S3) et sa tâche d'intégration officielle ; la séquence
+       SUIVANTE, pas encore enseignée, ses notions à exclure. Bornées : la
+       consigne d'Ambassa a un plafond. */
+    const pc=this._progClasse(z.progId),sq=pc&&z.progSeq?pc.sequences.find(x=>x.num===+z.progSeq):null;
+    let progFaits=[],progExclus=[],tache='',progression='';
+    if(sq){
+      progFaits=this._contenusSeq(sq,3).slice(0,24);
+      const nx=pc.sequences.find(x=>x.num===sq.num+1);
+      progExclus=nx?this._contenusSeq(nx,3).filter(c=>progFaits.indexOf(c)<0).slice(0,10):[];
+      tache=String(sq.integration||'').slice(0,700);
+      progression=pc.libelle+' — séquence '+sq.num+(sq.module?' : '+sq.module:'')+(sq.competence?' — '+sq.competence.slice(0,220):'');
+    }
+    return{cadre:z.type+(z.numero?' n°'+z.numero:''),faits:faits.concat(progFaits),oeuvre:z.oeuvre,borne,
+      exclus:exclus.concat(progExclus),theme:this.state.genTheme||'',tache,progression};
+  }
   _composerAvecAmbassa(mode){
     const st=this.state;
     if(st.genBusy)return;
@@ -5199,7 +5705,10 @@ class Component extends DCLogic {
         fixes={};
         textes.filter(t=>t.role==='support').forEach(t=>{fixes[t.n]={comp:this._qListOf(a,t,'comp'),expl:this._qListOf(a,t,'expl')};});
       }
+      const gp=this._paramsGeneration(a);
+      this._updateActive({genParams:{...gp,le:Date.now()}});
       const ctx={plan:plan,struct:struct,classe:a.classe,serie:a.serie||'',theme:st.genTheme||'',textes:textes,fixes:fixes,abonnement:abonnement,
+        cadre:gp.cadre,programmeFait:gp.faits,oeuvre:gp.oeuvre,borne:gp.borne,exclusions:gp.exclus,tache:gp.tache,progression:gp.progression,
         exemples:G.exemplesOfficiels(this.all,a.classe,principal?principal.n:null,2)};
       etape('Vérification de votre quota Ambassa…');
       return new Promise((ok,ko)=>this._consommerQuota('ia',()=>ok(true),m=>ko({quotaRefus:m})))
@@ -5260,6 +5769,17 @@ class Component extends DCLogic {
       coeff:a.coeff||(struct.coeff&&struct.coeff!=='—'?struct.coeff:''),
       texteSource:source?source.n:null,
       grilleIA:res.grille||[],
+      /* Guide et note rédigés par Ambassa (20/10/2026) : ils remplissent ce
+         qui est VIDE ; un guide déjà écrit par l'enseignant n'est remplacé
+         qu'en recomposition complète (« Tout composer »). */
+      ...(()=>{const o2={};const g0=this._guideDe(a),n0=this._noteDe(a);
+        const gEcrit=g0.criteres.some(c=>c&&(c.attendu||c.reperes))||g0.penalites||g0.erreurs;
+        if(res.guide&&(!gEcrit||mode==='tout'))o2.guide={
+          criteres:res.guide.criteres.map(c=>({critere:c.critere,pts:c.points!=null?String(c.points).replace('.',','):'',attendu:c.attendu||'',reperes:c.reperes||''})),
+          penalites:(res.guide.penalites||[]).join('\n'),niveaux:res.guide.niveaux||{},erreurs:(res.guide.erreurs||[]).join('\n')};
+        if(res.note&&(!(n0.choix||n0.perimetre||n0.points)||mode==='tout'))o2.note={
+          choix:res.note.choix||'',perimetre:res.note.perimetre||'',points:(res.note.points||[]).join('\n')};
+        return o2;})(),
       iaNote:{mode:mode,ts:Date.now(),remarques:res.remarques||'',controles:res.controles||[]}};
     if((defautTitre||mode==='tout')&&res.titre)patch.title=res.titre;
     if((defautConsigne||mode==='tout')&&res.consigne)patch.consigne=res.consigne;
@@ -5959,6 +6479,22 @@ class Component extends DCLogic {
       if(!o||!o.id)return;
       const a=par[o.id];
       if(!a||((o.updatedAt||0)>(a.updatedAt||0)))par[o.id]=o;
+      /* Les DECISIONS de relecture sont des faits, comme les messages : deux
+         relecteurs qui tranchent dans la meme minute ont rendu deux avis, et
+         « le dernier gagne » en effacerait un — le quorum ne serait jamais
+         atteint, ou un rejet passerait inapercu. Union par relecteur et par
+         tour (la plus recente l'emporte), puis l'etat est RECALCULE, sauf
+         sur un brouillon : y revenir est un choix explicite. */
+      if(a&&((a.revue&&a.revue.decisions)||(o.revue&&o.revue.decisions))){
+        const w=par[o.id],der={};
+        [...((a.revue&&a.revue.decisions)||[]),...((o.revue&&o.revue.decisions)||[])].forEach(d=>{
+          if(!d)return;const k=d.uid+'|'+d.tour;if(!der[k]||(d.ts||0)>(der[k].ts||0))der[k]=d;});
+        const dec=Object.keys(der).map(k=>der[k]).sort((x,y)=>(x.ts||0)-(y.ts||0));
+        const rv={...this._revueDe(w),decisions:dec};
+        const ww={...w,revue:rv};
+        if(dec.length&&w.status!=='brouillon')ww.status=this._statutRevue(rv);
+        par[o.id]=ww;
+      }
     });
     return Object.keys(par).map(k=>par[k])
       .sort((x,y)=>(y.updatedAt||0)-(x.updatedAt||0));
@@ -6729,6 +7265,55 @@ class Component extends DCLogic {
     if(stru&&stru.formulesCorrige&&stru.formulesCorrige.length)blocs.push({titre:'À rappeler aux correcteurs',lignes:stru.formulesCorrige});
     return blocs.length?blocs:null;
   }
+  /* ── Livrables (lot C) ──────────────────────────────────────────────── */
+  _guideDe(a){const g=(a&&a.guide)||{};return{criteres:Array.isArray(g.criteres)?g.criteres:[],penalites:g.penalites||'',
+    niveaux:g.niveaux&&typeof g.niveaux==='object'?g.niveaux:{},erreurs:g.erreurs||''};}
+  _noteDe(a){const n=(a&&a.note)||{};return{choix:n.choix||'',perimetre:n.perimetre||'',points:n.points||''};}
+  /* Un critère par ligne du barème. La grille d'Ambassa, quand elle existe,
+     passe devant : elle porte déjà critères et indicateurs. On ne remplace
+     JAMAIS un guide déjà écrit sans le demander. */
+  _criteresDepuisBareme(a){
+    if((a.grilleIA||[]).length)return a.grilleIA.map(g=>({critere:this._sansMarkdown(g.critere||''),pts:g.points!=null?String(g.points):'',
+      attendu:this._sansMarkdown(g.indicateurs||''),reperes:''}));
+    const out=[];
+    (a.textIds||[]).forEach((n,ti)=>{const f=this.all.find(x=>x.n===n);if(!f)return;
+      [['comp','Compréhension'],['expl','Langue et production']].forEach(([k,lib])=>{
+        const qs=this._qListOf(a,f,k);const pp=(a.pts&&a.pts[n]&&a.pts[n][k])||[];const c=(a.corrige&&a.corrige[n]&&a.corrige[n][k])||[];
+        qs.forEach((q,i)=>out.push({critere:'Texte '+(ti+1)+' · '+lib+' · Q'+(i+1)+' — '+String(q).slice(0,70),
+          pts:pp[i]!=null&&pp[i]!==''?String(pp[i]):'',attendu:this._sansMarkdown(c[i]||'').slice(0,400),reperes:''}));});});
+    (a.sujets||[]).forEach(sj=>{if(!sj)return;out.push({critere:sj.titre||'Sujet',pts:sj.pts?String(sj.pts):'',
+      attendu:this._sansMarkdown(sj.corrige||'').slice(0,400),reperes:''});});
+    return out;
+  }
+  _annexesPourExport(a,toujours){
+    if(!toujours&&this.state.livWord===false)return [];
+    const g=this._guideDe(a),n=this._noteDe(a),T=this._tranchesGuide(),out=[];
+    const lignes=t=>String(t||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+    const bg=[];
+    const cr=g.criteres.filter(c=>c&&(c.critere||c.attendu));
+    if(cr.length)bg.push({titre:'Critères et barème',lignes:cr.map((c,i)=>(i+1)+'. '+(c.critere||'Critère')+(c.pts?' — '+c.pts+' pt'+((parseFloat(String(c.pts).replace(',','.'))||0)>1?'s':''):'')
+      +(c.attendu?'\n   Attendu : '+c.attendu:'')+(c.reperes?'\n   Repères : '+c.reperes:''))});
+    if(lignes(g.penalites).length)bg.push({titre:'Pénalités',lignes:lignes(g.penalites)});
+    const nv=T.filter(t=>g.niveaux[t]).map(t=>t+' : '+g.niveaux[t]);
+    if(nv.length)bg.push({titre:'Repères de niveau',lignes:nv});
+    if(lignes(g.erreurs).length)bg.push({titre:'Erreurs attendues et traitement',lignes:lignes(g.erreurs)});
+    if(bg.length)out.push({titre:'GUIDE DE CORRECTION ET DE NOTATION — RÉSERVÉ AUX CORRECTEURS',blocs:bg});
+    const bn=[];
+    const tx=this._noteTextes(a);if(tx.length)bn.push({titre:'Textes retenus',lignes:tx.map(x=>'• '+x)});
+    const gp=a.genParams;if(gp)bn.push({titre:'Paramètres de génération (Ambassa)',lignes:this._lignesParams(gp)});
+    if(lignes(n.choix).length)bn.push({titre:'Choix du texte et du sujet',lignes:lignes(n.choix)});
+    if(lignes(n.perimetre).length)bn.push({titre:'Périmètre évalué',lignes:lignes(n.perimetre)});
+    if(lignes(n.points).length)bn.push({titre:'Points soumis au relecteur',lignes:lignes(n.points).map((x,i)=>(i+1)+'. '+x)});
+    if(lignes(n.choix).length||lignes(n.perimetre).length||lignes(n.points).length)
+      out.push({titre:'NOTE AU RELECTEUR — DOCUMENT INTERNE',blocs:bn});
+    return out;
+  }
+  _lignesParams(gp){return(gp.progression?['Progression : '+gp.progression]:[]).concat(['Cadre : '+(gp.cadre||'Devoir'),'Programme couvert : '+((gp.faits||[]).join(' · ')||'non précisé'),
+    'Œuvre au programme : '+(gp.oeuvre||'aucune'),'Borné au : '+(gp.borne||'non précisé'),'Notions exclues : '+((gp.exclus||[]).join(' · ')||'aucune'),
+    'Thème : '+(gp.theme||'libre')]).concat(gp.tache?['Tâche d\u2019intégration officielle : '+gp.tache]:[]).concat(gp.le?['Généré le '+new Date(gp.le).toLocaleDateString('fr-FR')]:[]);}
+  _tranchesGuide(){return['16 à 20','12 à 15,5','8 à 11,5','0 à 7,5'];}
+  _noteTextes(a){return (a.textIds||[]).map(nn=>this.all.find(x=>x.n===nn)).filter(Boolean)
+    .map(f=>(f.author||'Anonyme')+(f.title?', « '+f.title+' »':'')+(f.words?' — '+f.words+' mots':'')+(f.reference?' — '+this._refPropre(f.reference):''));}
   _fabriquerWord(a){
     const stru=a.epreuveCode?MINESEC.epreuveParCode(a.epreuveCode):null;
     const choix=this._modeChoix(stru);
@@ -6773,6 +7358,7 @@ class Component extends DCLogic {
       consigne:consigne,
       sujets:sujets,
       corrige:this.state.genCorrigeWord===false?null:this._corrigePourExport(a),
+      annexes:this._annexesPourExport(a),
       pied:'Épreuve composée avec Atelier de Français — Centre VÉRITAS'
     },textes);
   }
@@ -7577,7 +8163,60 @@ class Component extends DCLogic {
   _splitQ(s){if(!s)return[];return String(s).split(/\s*\d\)\s*/).map(x=>x.trim()).filter(Boolean);}
   _splitFaits(s){if(!s)return[];return String(s).split(/\s*;\s*/).map(x=>x.trim().replace(/\.$/,'')).filter(Boolean);}
   _badge(sub){const b='font-size:10px;font-weight:700;letter-spacing:.03em;padding:2px 9px;border-radius:999px;text-transform:uppercase;font-family:Poppins';return sub==='evaluation'?b+';color:var(--cc26a12,#c26a12);background:var(--cfdefdb,#fdefdb)':b+';color:var(--c1a72bb,#1a72bb);background:var(--ce7f1fb,#e7f1fb)';}
-  _statusMeta(s){return s==='valide'?{label:'Validé',c:'var(--c1f9d55,#1f9d55)',bg:'var(--ce6f5ec,#e6f5ec)'}:s==='relecture'?{label:'En relecture',c:'var(--cc26a12,#c26a12)',bg:'var(--cfdefdb,#fdefdb)'}:{label:'Brouillon',c:'var(--c5a6678,#5a6678)',bg:'var(--ceef2f7,#eef2f7)'};}
+  _statusMeta(s){return s==='valide'?{label:'Validé',c:'var(--c1f9d55,#1f9d55)',bg:'var(--ce6f5ec,#e6f5ec)'}:s==='ajustement'?{label:'Ajustement demandé',c:'var(--cc26a12,#c26a12)',bg:'var(--cfdefdb,#fdefdb)'}:s==='rejete'?{label:'Rejeté',c:'var(--cc0392b,#c0392b)',bg:'var(--cfdecea,#fdecea)'}:s==='relecture'?{label:'En relecture',c:'var(--cc26a12,#c26a12)',bg:'var(--cfdefdb,#fdefdb)'}:{label:'Brouillon',c:'var(--c5a6678,#5a6678)',bg:'var(--ceef2f7,#eef2f7)'};}
+  /* ── Circuit de relecture (lot B, 19/10/2026) ──────────────────────────
+     `revue` vit sur l'épreuve : {tour, requis, echeance, decisions:[{uid,
+     nom, verdict, portee, motif, ts, tour}]}. Les décisions des tours
+     précédents restent : c'est l'historique de ce qui a été demandé. */
+  _delais(){const d=((this.state.admin||{}).delais)||{};return{validation:+d.validation||5,remplacement:+d.remplacement||3};}
+  _revueDe(e){const r=(e&&e.revue)||{};return{tour:r.tour||1,requis:Math.max(1,+r.requis||1),echeance:r.echeance||0,decisions:Array.isArray(r.decisions)?r.decisions:[]};}
+  _statutRevue(r){
+    const cur=r.decisions.filter(d=>d.tour===r.tour);
+    if(cur.some(d=>d.verdict==='rejete'))return'rejete';
+    if(cur.some(d=>d.verdict==='ajustement'))return'ajustement';
+    if(cur.filter(d=>d.verdict==='valide').length>=r.requis)return'valide';
+    return'relecture';
+  }
+  _soumettreRelecture(requis){
+    const a=this._active();if(!a)return;
+    const r=this._revueDe(a);
+    const dejaVue=r.decisions.some(d=>d.tour===r.tour);
+    const tour=dejaVue?r.tour+1:r.tour;
+    const ech=Date.now()+this._delais().validation*86400000;
+    this._updateActive({status:'relecture',revue:{...r,tour,requis:Math.max(1,+requis||r.requis),echeance:ech}},
+      tour>1?'a soumis la version corrigée (tour '+tour+')':'a soumis en relecture');
+  }
+  /* Personne d'autre que moi ne peut valider dans l'équipe : le solo s'impose
+     par défaut. `ep.solo` (booléen) est le choix explicite de l'auteur. */
+  _estSolo(a){
+    if(!a)return false;
+    if(a.solo===true||a.solo===false)return a.solo;
+    const me=this._me();
+    return !(this.state.users||[]).some(u=>u&&u.id!==me.id&&u.role!=='Élève (lecture seule)'&&this._perm(u.role).validate);
+  }
+  _validerSolo(){
+    const a=this._active(),me=this._me();if(!a)return;
+    const r=this._revueDe(a);
+    const tour=r.decisions.some(d=>d.tour===r.tour)?r.tour+1:r.tour;
+    const decisions=r.decisions.concat([{uid:me.id,nom:me.name,verdict:'valide',portee:'Tout le sujet',
+      motif:'Validée par l’auteur — travail en solo, sans relecteur.',ts:Date.now(),tour,solo:true}]);
+    this._updateActive({status:'valide',solo:true,revue:{...r,tour,requis:1,echeance:0,decisions}},'a validé son épreuve (travail en solo)');
+  }
+  _rendreDecision(){
+    const st=this.state,a=this._active(),me=this._me();if(!a)return;
+    const verdict=st.revVerdict||'',motif=String(st.revMotif||'').trim(),portee=st.revPortee||'Tout le sujet';
+    if(!verdict){this.setState({revErr:'Choisissez une décision.'});return;}
+    if(verdict!=='valide'&&motif.length<8){this.setState({revErr:'Dites ce qui doit changer : un ajustement ou un rejet sans motif ne peut pas être traité.'});return;}
+    const r=this._revueDe(a);
+    const decisions=r.decisions.filter(d=>!(d.tour===r.tour&&d.uid===me.id))
+      .concat([{uid:me.id,nom:me.name,verdict,portee,motif,ts:Date.now(),tour:r.tour}]);
+    const r2={...r,decisions};
+    const statut=this._statutRevue(r2);
+    if(statut==='ajustement'||statut==='rejete')r2.echeance=Date.now()+this._delais().remplacement*86400000;
+    const lib=verdict==='valide'?'a validé':verdict==='ajustement'?'a demandé un ajustement':'a rejeté';
+    this._updateActive({status:statut,revue:r2},lib+' l’épreuve ('+portee.toLowerCase()+')'+(motif?' : '+motif.slice(0,140):''));
+    this.setState({revVerdict:'',revMotif:'',revErr:'',revPortee:''});
+  }
   _statusChip(s){const m=this._statusMeta(s);return'font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:3px 10px;border-radius:999px;font-family:Poppins;color:'+m.c+';background:'+m.bg;}
   _active(){return this.state.epreuves.find(e=>e.id===this.state.activeId)||null;}
   /* BROUILLONS SUPPRIMÉS (16/10/2026). La fusion d'équipe ne supprime jamais
@@ -7719,7 +8358,30 @@ class Component extends DCLogic {
     this._updateActive({pts},'a appliqué le barème type ('+cible+' points)');}
   /* _qList lisait TOUJOURS l'épreuve active : calculer l'avancement d'une
      autre épreuve lui prêtait les questions de celle qui est ouverte. */
-  _qListOf(ep,f,kind){const cq=(ep&&ep.customQ&&ep.customQ[f.n])||null;if(cq&&cq[kind])return cq[kind].slice();return this._splitQ(kind==='comp'?f.comprehension:f.exploitation);}
+  /* QUESTIONS DU CORPUS PAR DÉFAUT (20/10/2026, signalé par Jacques :
+     « compréhension et langue reviennent toujours à toutes les épreuves »).
+     Tant que l'épreuve n'avait pas de questions rédigées, l'Atelier reprenait
+     celles livrées avec le texte du corpus — compréhension ET langue —, quelle
+     que soit l'épreuve : une correction orthographique, une dictée, une
+     expression écrite ou une contraction en héritaient, à l'écran, à
+     l'aperçu et à l'export. Elles ne sont plus reprises que si la STRUCTURE
+     de l'épreuve comporte cette rubrique notée. Ce que l'enseignant (ou
+     Ambassa) a écrit reste toujours affiché. */
+  _rubriquesPrevues(ep){
+    if(!ep||typeof VRT_GENERATEUR==='undefined')return null;
+    const cle=(ep.epreuveCode||'')+'|'+(ep.classe||'')+'|'+(ep.serie||'');
+    this._rubCache=this._rubCache||{};
+    if(cle in this._rubCache)return this._rubCache[cle];
+    let r=null;
+    try{const st=this._structureDe(ep);
+      if(st){const pl=VRT_GENERATEUR.planEpreuve(st,{classe:ep.classe});
+        r=pl.support!=='texte'?{comp:false,expl:false,zoneExpl:false}
+          :{comp:!!pl.comp.points,expl:!!pl.expl.points,zoneExpl:!!(pl.expl.points||(pl.productions||[]).length)};}}catch(e){r=null;}
+    this._rubCache[cle]=r;return r;
+  }
+  _qListOf(ep,f,kind){const cq=(ep&&ep.customQ&&ep.customQ[f.n])||null;if(cq&&cq[kind])return cq[kind].slice();
+    const r=this._rubriquesPrevues(ep);if(r&&!r[kind])return [];
+    return this._splitQ(kind==='comp'?f.comprehension:f.exploitation);}
   _qList(f,kind){return this._qListOf(this._active(),f,kind);}
   /* Avancement d'une épreuve : cinq jalons vérifiables, pas une estimation. */
   _progressEpreuve(e){
@@ -7799,6 +8461,68 @@ class Component extends DCLogic {
   /* Epreuve NEUVE datee du jour choisi. Pas _ensureDraft : il reprend
      l'epreuve active, et dater un nouveau sujet ne doit pas re-dater celui
      qu'on avait ouvert. */
+  /* ── Progressions nationales (lot I) ──────────────────────────────── */
+  _progs(){return (typeof window!=='undefined'&&window.VRT_PROGRESSIONS)||null;}
+  _progClasse(id){const P=this._progs();return P&&id?(P.classes.find(c=>c.id===id)||null):null;}
+  _isoAuj(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  _fmtIso(iso,o){if(!iso)return'';const d=new Date(iso+'T00:00:00');return d.toLocaleDateString('fr-FR',o||{day:'numeric',month:'short'});}
+  /* La semaine de la progression qui contient `iso` (samedi et dimanche
+     rattachés à la semaine qui s'achève) ; à défaut, la prochaine. */
+  _semaineDe(cls,iso){
+    if(!cls)return null;let prochaine=null;
+    for(const sq of cls.sequences)for(const w of (sq.semaines||[])){
+      if(!w.debut)continue;
+      const fin=new Date(w.fin+'T00:00:00');fin.setDate(fin.getDate()+2);
+      const finIso=fin.getFullYear()+'-'+String(fin.getMonth()+1).padStart(2,'0')+'-'+String(fin.getDate()).padStart(2,'0');
+      if(w.debut<=iso&&iso<=finIso)return{seq:sq,w,prochaine:false};
+      if(w.debut>iso&&(!prochaine||w.debut<prochaine.w.debut))prochaine={seq:sq,w,prochaine:true};
+    }
+    return prochaine;
+  }
+  _isoDe(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  _isoPlus(iso,j){const d=new Date(iso+'T00:00:00');d.setDate(d.getDate()+j);return this._isoDe(d);}
+  /* Le module des progressions arrive en `defer` : l'écran qui en a besoin
+     se redessine dès qu'il est là. */
+  _attendreProgs(){
+    if(this._progs()||this._progAttente)return;
+    this._progAttente=setInterval(()=>{if(this._progs()){clearInterval(this._progAttente);this._progAttente=null;this.setState({progCharge:Date.now()});}},400);
+  }
+  /* Échéances de mes classes, déduites des progressions (lot J). Trois par
+     séquence : sujet prêt (une semaine avant l'évaluation), épreuve (S5),
+     corrigé et compte rendu (S6). L'épreuve liée est celle que
+     « Composer l'évaluation » a ouverte (assistant.progId / progSeq). */
+  _echeancesProg(){
+    const P=this._progs();if(!P)return[];
+    const mes=((this._me().prefs||{}).mesClasses)||[];const auj=this._isoAuj();
+    const libEtat={brouillon:'brouillon',relecture:'en relecture',ajustement:'ajustement demandé',rejete:'rejeté',valide:'validé'};
+    const out=[];
+    mes.map(id=>this._progClasse(id)).filter(Boolean).forEach(cls=>cls.sequences.forEach(sq=>{
+      const w5=(sq.semaines||[]).find(w=>w.n===5),w6=(sq.semaines||[]).find(w=>w.n===6);
+      if(!w5||!w5.debut)return;
+      const ep=(this.state.epreuves||[]).find(e=>e&&e.assistant&&e.assistant.progId===cls.id&&String(e.assistant.progSeq)===String(sq.num))||null;
+      const valide=!!(ep&&ep.status==='valide'),diffuse=!!(valide&&ep.inLibrary);
+      const etat=!ep?'aucun sujet':(diffuse?'diffusé':(libEtat[ep.status]||ep.status||'brouillon'));
+      [{genre:'sujet',lib:'Sujet prêt',date:this._isoPlus(w5.debut,-7),fait:valide},
+       {genre:'epreuve',lib:'Épreuve',date:w5.debut,fait:valide&&w5.debut<=auj},
+       {genre:'corrige',lib:'Corrigé et compte rendu',date:(w6&&w6.debut)||w5.fin,fait:diffuse}]
+        .forEach(x=>out.push({...x,cls,sq,ep,etat,retard:!x.fait&&x.date<auj}));
+    }));
+    return out.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  }
+  _contenusSeq(sq,jusqua){const out=[];(sq&&sq.semaines||[]).filter(w=>w.n<=(jusqua||3)).forEach(w=>(w.contenus||[]).forEach(c=>{if(c&&out.indexOf(c)<0)out.push(c);}));return out;}
+  /* Évaluation d'une séquence : épreuve NEUVE, datée de la semaine
+     d'évaluation (S5), classe et assistant déjà réglés. */
+  _composerSequence(cls,sq){
+    const w5=(sq.semaines||[]).find(w=>w.n===5)||(sq.semaines||[]).slice(-1)[0]||{};
+    const w4=(sq.semaines||[]).find(w=>w.n===4)||{};
+    this._nouvelleEpreuveLe(w5.debut||'');
+    setTimeout(()=>{const a=this._active();if(!a)return;
+      this._updateActive({classe:cls.atelier||a.classe||'',
+        title:'Évaluation de la séquence '+sq.num+(sq.module?' — '+sq.module.charAt(0)+sq.module.slice(1).toLowerCase():''),
+        assistant:{...this._assDe(a),type:'Évaluation séquentielle',numero:String(sq.num),progId:cls.id,progSeq:String(sq.num),borne:w4.fin||''}},
+        'a ouvert l’évaluation de la séquence '+sq.num+' ('+cls.libelle+')');
+      this.setState({genOuvert:true,assEtape:2});},0);
+  }
   _nouvelleEpreuveLe(iso){
     const me=this._me();
     /* Meme droit que « Creer » : un relecteur ou un eleve ne cree pas
@@ -8317,8 +9041,8 @@ class Component extends DCLogic {
       return{pos:i+1,type:f.type,words:f.words,level:f.level,ancre:'vrt-txt-'+f.n,
         titreComp:'I. Compréhension',
         titreExpl:sansComp?('Sujet 1 — '+titreSujetTexte):(sansCompStruct?titreLangue:'II. Langue & production'),
-        compZone:(sansComp||estCom||(sansCompStruct&&!this._qListOf(active,f,'comp').length))?hidden:'',
-        explZone:estCom?hidden:'',
+        compZone:(sansComp||estCom||((sansCompStruct||(()=>{const r=this._rubriquesPrevues(active);return r&&!r.comp;})())&&!this._qListOf(active,f,'comp').length))?hidden:'',
+        explZone:(estCom||((()=>{const r=this._rubriquesPrevues(active);return r&&!r.zoneExpl;})()&&!this._qListOf(active,f,'expl').length))?hidden:'',
         texteBloc:'margin-top:13px;padding-top:13px;border-top:1px dashed var(--ce2eaf3,#e2eaf3)'+(replie?';display:none':''),
         texteToggleLabel:replie?'Afficher le texte ('+(f.words||0)+' mots)':'Replier le texte',
         texteToggle:()=>this.setState(s2=>({txtReplies:{...(s2.txtReplies||{}),[f.n]:!replie}})),
@@ -8338,7 +9062,41 @@ class Component extends DCLogic {
     const activeCollaborators=collabs.map(u=>({name:u.name,initials:this._initials(u.name),avatar:this._av(u,28)}));
     const invitables=active?st.users.filter(u=>u.id!==active.ownerId&&!active.editorIds.includes(u.id)&&u.role!=='Élève (lecture seule)').slice(0,4).map(u=>({first:u.name.replace(/^(M\.|Mme|Mlle)\s+/,'').split(' ')[0],initials:this._initials(u.name),avatar:this._av(u,22),invite:()=>this._updateActive({editorIds:[...active.editorIds,u.id]},'a ajouté '+u.name+' comme co-éditeur')})):[];
 
-    const s=ep.status,s1=s==='brouillon',s2=s==='relecture',s3=s==='valide';
+    const s=ep.status,s1=s==='brouillon',s2=s==='relecture'||s==='ajustement'||s==='rejete',s3=s==='valide';
+    const sDiff=s3&&!!(active&&active.inLibrary);
+    const rv=this._revueDe(active);
+    const rvCur=rv.decisions.filter(d=>d.tour===rv.tour);
+    const rvN={valide:0,ajustement:0,rejete:0};rvCur.forEach(d=>{rvN[d.verdict]=(rvN[d.verdict]||0)+1;});
+    const rvJour=86400000;
+    const rvEch=(()=>{
+      if(!active||!rv.echeance||!(s==='relecture'||s==='ajustement'||s==='rejete'))return null;
+      const j=Math.ceil((rv.echeance-Date.now())/rvJour);
+      const quoi=s==='relecture'?'Relecture':'Version corrigée';
+      const date=new Date(rv.echeance).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+      if(j<0)return{t:quoi+' en retard de '+(-j)+' j (attendue le '+date+')',c:'var(--cc0392b,#c0392b)',bg:'var(--cfdecea,#fdecea)'};
+      if(j===0)return{t:quoi+' attendue aujourd’hui',c:'var(--cc26a12,#c26a12)',bg:'var(--cfdefdb,#fdefdb)'};
+      return{t:quoi+' attendue le '+date+' (dans '+j+' j)',c:'var(--c5a6678,#5a6678)',bg:'var(--cf2f6fb,#f2f6fb)'};
+    })();
+    const rvVerdictLbl={valide:'Validé',ajustement:'Ajustement',rejete:'Rejeté'};
+    const rvChip=v=>'font-size:10px;font-weight:700;font-family:Poppins;padding:2px 8px;border-radius:999px;'+(v==='valide'?'color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec)':v==='ajustement'?'color:var(--cc26a12,#c26a12);background:var(--cfdefdb,#fdefdb)':'color:var(--cc0392b,#c0392b);background:var(--cfdecea,#fdecea)');
+    const rvDejaDecide=!!rvCur.find(d=>d.uid===me.id);
+    const rvVerdicts=[['valide','Valider'],['ajustement','Ajustement'],['rejete','Rejeter']].map(([k,l])=>{const on=st.revVerdict===k;
+      const c=k==='valide'?'var(--c1f9d55,#1f9d55)':k==='ajustement'?'var(--cc26a12,#c26a12)':'var(--cc0392b,#c0392b)';
+      return{label:l,choisir:()=>this.setState({revVerdict:k,revErr:''}),
+        style:'flex:1;min-width:70px;padding:7px 6px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer;border:1px solid '+c+';'+(on?'background:'+c+';color:var(--cffffff,#fff)':'background:var(--cffffff,#fff);color:'+c)};});
+    const rvDecisions=rv.decisions.slice().sort((x,y)=>(y.tour-x.tour)||(y.ts-x.ts)).map(d=>{const u=st.users.find(x=>x.id===d.uid)||{id:d.uid,name:d.nom||'Relecteur'};
+      return{nom:d.nom||u.name,initials:this._initials(d.nom||u.name),avatar:this._av(u,24),verdict:rvVerdictLbl[d.verdict]||d.verdict,chip:rvChip(d.verdict),
+        meta:(d.portee||'Tout le sujet')+' · tour '+d.tour+' · '+this._ago(d.ts),motif:d.motif||'',
+        motifStyle:d.motif?'font-size:12px;color:var(--c5a6678,#5a6678);line-height:1.5;margin-top:3px;white-space:pre-wrap':hidden};});
+    const rvSynthese=(()=>{
+      if(!rvCur.length)return s==='relecture'?'Aucune décision rendue sur ce tour : '+rv.requis+' relecture(s) attendue(s).':'Tour '+rv.tour+' : pas encore de décision.';
+      const p=[];if(rvN.valide)p.push(rvN.valide+' validation(s)');if(rvN.ajustement)p.push(rvN.ajustement+' ajustement(s)');if(rvN.rejete)p.push(rvN.rejete+' rejet(s)');
+      return'Tour '+rv.tour+' — '+p.join(', ')+' · '+rvCur.length+'/'+rv.requis+' relecture(s) rendue(s).';
+    })();
+    const rvReco=rvN.rejete?'Recommandation : remplacer le sujet, puis le soumettre de nouveau.'
+      :rvN.ajustement?'Recommandation : corriger les points signalés, puis soumettre la version corrigée.'
+      :rvN.valide>=rv.requis&&rvCur.length?(sDiff?'Diffusée dans la bibliothèque.':'Recommandation : diffuser dans la bibliothèque.')
+      :rvCur.length?'Recommandation : attendre les relectures restantes.':'';
     const stepStyle=on=>'display:flex;align-items:center;gap:9px;padding:7px 0;font-size:13px;font-weight:'+(on?'700':'600')+';color:'+(on?'var(--c14375f,#14375f)':'var(--c9aa5b5,#9aa5b5)');
     const dotStyle=(done,cur2)=>'display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;font-family:Poppins;'+(done?'background:var(--c1f9d55,#1f9d55);color:var(--cffffff,#fff)':cur2?'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff)':'background:var(--ceef2f7,#eef2f7);color:var(--c9aa5b5,#9aa5b5)');
 
@@ -8373,7 +9131,9 @@ class Component extends DCLogic {
 
     const mkPrintQ=(f,kind)=>this._qList(f,kind).map((t,qi)=>{const p=this._qPts(f.n,kind,qi);return{text:t,pts:(p===null?'':'('+p+' pt'+((parseFloat(p)||0)>1?'s':'')+')'),ptsStyle:(p===null?'display:none':'font-weight:700;color:var(--c14375f,#14375f);white-space:nowrap;margin-left:6px')};});
     const printFiches=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean).map((f,i)=>({pos:i+1,
-      qBlocStyle:(this._qList(f,'comp').length||this._qList(f,'expl').length)?'font-size:13px;color:var(--c22303f,#22303f)':'display:none',type:f.type,words:f.words,text:f.text||'',reference:f.reference||'',compList:this._qList(f,'comp'),explList:this._qList(f,'expl'),compQ:mkPrintQ(f,'comp'),explQ:mkPrintQ(f,'expl')}));
+      qBlocStyle:(this._qList(f,'comp').length||this._qList(f,'expl').length)?'font-size:13px;color:var(--c22303f,#22303f)':'display:none',type:f.type,words:f.words,text:f.text||'',reference:f.reference||'',compList:this._qList(f,'comp'),explList:this._qList(f,'expl'),compQ:mkPrintQ(f,'comp'),explQ:mkPrintQ(f,'expl'),
+      compBloc:this._qList(f,'comp').length?'':'display:none',explBloc:this._qList(f,'expl').length?'':'display:none',
+      titreExplAp:this._qList(f,'comp').length?'II. Langue et production':'Questions'}));
     const epView={etab:ep.etab||'Établissement scolaire',title:ep.title||'Épreuve de français',classe:ep.classe||'—',duree:ep.duree||'—',coeff:ep.coeff||'—',date:ep.date||'',consigne:ep.consigne||''};
 
     /* ---- Accueil ------------------------------------------------------
@@ -8572,6 +9332,9 @@ class Component extends DCLogic {
       {label:'Corpus',icon:mobIc('layers',st.screen==='liste'||st.screen==='fiche'),style:mobBtn(st.screen==='liste'||st.screen==='fiche'),go:()=>this._go('liste')},
       {label:'\u00c9preuves',icon:mobIc('file',['epreuves','composeur','apercu'].indexOf(st.screen)>=0),style:mobBtn(['epreuves','composeur','apercu'].indexOf(st.screen)>=0),go:()=>this._go('epreuves')},
       {label:'Cours',icon:mobIc('book',['cours','coursEdit'].indexOf(st.screen)>=0),style:mobBtn(['cours','coursEdit'].indexOf(st.screen)>=0),go:()=>this._go('cours')},
+      /* Sur téléphone le menu latéral est masqué : sans cet onglet, Suivi
+         et Progressions n'étaient joignables par aucun bouton (20/10/2026). */
+      {label:'Suivi',icon:mobIc('clock',['suivi','progressions'].indexOf(st.screen)>=0),style:mobBtn(['suivi','progressions'].indexOf(st.screen)>=0),go:()=>this._go('suivi')},
       {label:'\u00c9quipe',icon:mobIc('users',['collab','equipe','activite','profil'].indexOf(st.screen)>=0),style:mobBtn(['collab','equipe','activite','profil'].indexOf(st.screen)>=0),go:()=>this._go('collab')}
     ];
     /* ---- Profil et inscription ------------------------------------------
@@ -8686,7 +9449,7 @@ class Component extends DCLogic {
     const qIA=this._quotaIA();
     const PP=st.payProvider;
     /* ---- Tableau de bord administrateur -------------------------------- */
-    const admT=st.admTab||'fonctions';
+    const admT=st.admTab||'pilotage';
     const admRow=(i2)=>'display:flex;align-items:center;gap:13px;padding:13px 12px;border-radius:10px;background:'+(i2%2?'var(--cfbfcfe,#fbfcfe)':'transparent');
     const admSw=(on)=>'width:44px;height:25px;border-radius:99px;border:none;cursor:pointer;flex:none;position:relative;padding:0;background:'+(on?'var(--c1f9d55,#1f9d55)':'var(--ccdd9e6,#cdd9e6)');
     const admKnob=(on)=>'position:absolute;top:3px;left:'+(on?'22px':'3px')+';width:19px;height:19px;border-radius:50%;background:var(--cffffff,#fff);transition:left .16s ease';
@@ -8803,14 +9566,70 @@ class Component extends DCLogic {
       return{label:f.label,aide:f.aide,rowStyle:admRow(i2),switchStyle:admSw(on),knobStyle:admKnob(on),
         toggle:()=>majAdmin({connexion:{...CX,[f.k]:!on}})};});
 
+    /* Le fournisseur se lit dans la sonde du serveur (`provider`) : l'écran
+       annonçait « CamerPay » en dur, alors que le serveur encaisse par SkySMS
+       depuis le 15/10/2026 (le fichier garde son nom, payment_camerpay.php). */
+    const fournNom=p0=>({skysms:'SkySMS',camerpay:'CamerPay',campay:'CamPay'})[String((p0&&p0.provider)||'').toLowerCase()]||'le serveur d\u2019encaissement';
+    const estSky=!!(PP&&PP.provider==='skysms');
     const admPayInfos=[
-      {label:'Fournisseur',valeur:'CamerPay'},
-      {label:'Moyens accept\u00e9s',valeur:'Orange Money \u00b7 MTN MoMo \u00b7 Carte \u00b7 PayPal'},
+      {label:'Fournisseur',valeur:PP===null?'\u2026':fournNom(PP)},
+      {label:'Moyens accept\u00e9s',valeur:estSky?'Orange Money \u00b7 MTN MoMo':'Orange Money \u00b7 MTN MoMo \u00b7 Carte \u00b7 PayPal'},
       {label:'Devise',valeur:'FCFA (XAF)'},
-      {label:'Page de paiement',valeur:'H\u00e9berg\u00e9e par CamerPay (redirection)'},
-      {label:'Confirmation',valeur:'Webhook sign\u00e9 + relance par sondage'}
+      {label:'Page de paiement',valeur:estSky?'Page V\u00c9RITAS : la demande arrive sur le t\u00e9l\u00e9phone du payeur':'H\u00e9berg\u00e9e par le fournisseur (redirection)'},
+      {label:'Confirmation',valeur:'Rappel sign\u00e9 + suivi du statut'}
     ].map((x,i2)=>({label:x.label,valeur:x.valeur,rowStyle:admRow(i2)}));
 
+    /* ── Pilotage (lot E) ─────────────────────────────────────────────── */
+    const pilEps=(st.epreuves||[]).filter(e=>e&&!/^e[1-3]$/.test(e.id));
+    const pilJour=86400000,pilNow=Date.now();
+    const pilEtat=e=>e.status==='valide'&&e.inLibrary?'diffuse':(e.status||'brouillon');
+    const pilDefs=[['brouillon','Brouillons','var(--c5a6678,#5a6678)'],['relecture','En relecture','var(--cc26a12,#c26a12)'],
+      ['ajustement','Ajustement demandé','var(--cc26a12,#c26a12)'],['rejete','Rejetées','var(--cc0392b,#c0392b)'],
+      ['valide','Validées, à diffuser','var(--c1f9d55,#1f9d55)'],['diffuse','Diffusées','var(--c1a72bb,#1a72bb)']];
+    const pilF=st.pilFiltre||'';
+    const pilOuvrir=e=>()=>this.setState({activeId:e.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);});
+    const pilEch=e=>{const r=this._revueDe(e);if(!r.echeance||!['relecture','ajustement','rejete'].includes(e.status))return null;
+      return Math.ceil((r.echeance-pilNow)/pilJour);};
+    const pilNom=id=>{const u=(st.users||[]).find(x=>x.id===id);return u?u.name:'\u2014';};
+    const pilTraiterL=pilEps.filter(e=>['relecture','ajustement','rejete'].includes(e.status))
+      .map(e=>({e,j:pilEch(e)})).sort((a2,b2)=>(a2.j==null?99:a2.j)-(b2.j==null?99:b2.j)).slice(0,8)
+      .map(({e,j})=>{const enRetard=j!=null&&j<0,proche=j!=null&&j<=2;
+        const c=enRetard?'var(--cc0392b,#c0392b)':proche?'var(--cc26a12,#c26a12)':'var(--c8b97a8,#8b97a8)';
+        const r=this._revueDe(e),n=r.decisions.filter(d=>d.tour===r.tour).length;
+        return{titre:e.title||'\u00c9preuve sans titre',ouvrir:pilOuvrir(e),
+          sous:this._statusMeta(e.status).label+' \u00b7 '+pilNom(e.ownerId)+(e.status==='relecture'?' \u00b7 '+n+'/'+r.requis+' relecture(s)':' \u00b7 version corrig\u00e9e attendue'),
+          quand:j==null?'sans \u00e9ch\u00e9ance':enRetard?'retard '+(-j)+' j':j===0?'aujourd\u2019hui':'dans '+j+' j',
+          dot:'width:9px;height:9px;border-radius:50%;flex:none;background:'+c,
+          chip:'font-size:11px;font-weight:700;font-family:Poppins;padding:3px 10px;border-radius:999px;white-space:nowrap;color:'+c+';background:var(--cf2f6fb,#f2f6fb)'};});
+    const pilFiltrees=pilEps.filter(e=>!pilF||pilEtat(e)===pilF).sort((a2,b2)=>(b2.updatedAt||0)-(a2.updatedAt||0));
+    const pilMoisL=(()=>{const out=[];const d0=new Date();
+      for(let k=5;k>=0;k--){const d=new Date(d0.getFullYear(),d0.getMonth()-k,1),d1=new Date(d0.getFullYear(),d0.getMonth()-k+1,1);
+        const n=pilEps.filter(e=>{const t=parseInt(String(e.id).replace(/^e/,''),10)||e.updatedAt||0;return t>=d.getTime()&&t<d1.getTime();}).length;
+        out.push({mois:d.toLocaleDateString('fr-FR',{month:'short'}),n});}
+      const mx=Math.max(1,...out.map(x=>x.n));
+      return out.map(x=>({...x,barre:'display:block;width:100%;max-width:34px;border-radius:6px 6px 2px 2px;background:var(--c1a72bb,#1a72bb);opacity:'+(x.n?'1':'.18')+';height:'+Math.max(4,Math.round(x.n/mx*86))+'px'}));})();
+    const pilDel=this._delais();
+    const pilVals={
+      pilTuiles:pilDefs.map(([k,l,c])=>{const n=pilEps.filter(e=>pilEtat(e)===k).length,on=pilF===k;
+        return{n,label:l,filtrer:()=>this.setState({pilFiltre:on?'':k}),
+          style:'background:var(--cffffff,#fff);border:1px solid '+(on?c:'var(--ce6ecf3,#e6ecf3)')+';border-radius:12px;padding:16px;text-align:center;cursor:pointer;box-shadow:'+(on?'0 0 0 3px var(--ce7f1fb,#e7f1fb)':'none'),
+          chiffreStyle:'display:block;font-family:Poppins;font-size:26px;font-weight:700;line-height:1;color:'+c};}),
+      pilTraiter:pilTraiterL,pilVideStyle:pilTraiterL.length?hidden:'font-size:12.5px;color:var(--c1f9d55,#1f9d55);font-weight:600',
+      pilLignes:pilFiltrees.map(e=>{const r=this._revueDe(e),j=pilEch(e),m=this._statusMeta(e.status==='valide'&&e.inLibrary?'valide':e.status);
+        return{titre:e.title||'\u00c9preuve sans titre',classe:e.classe||'\u2014',auteur:pilNom(e.ownerId),
+          statut:e.status==='valide'&&e.inLibrary?'Diffus\u00e9e':m.label,chip:this._statusChip(e.status),
+          relectures:e.solo?'solo':(r.decisions.length?r.decisions.filter(d=>d.tour===r.tour).length+'/'+r.requis+' (tour '+r.tour+')':'\u2014'),
+          echeance:j==null?'\u2014':j<0?'retard '+(-j)+' j':new Date(r.echeance).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}),
+          echStyle:j!=null&&j<0?'color:var(--cc0392b,#c0392b);font-weight:700':'',
+          maj:this._ago(e.updatedAt||0),ouvrir:pilOuvrir(e)};}),
+      pilAucuneStyle:pilFiltrees.length?hidden:'font-size:12.5px;color:var(--c8b97a8,#8b97a8);padding:12px 4px',
+      pilFiltreLabel:pilF?('Filtre : '+((pilDefs.find(x=>x[0]===pilF)||[])[1]||'')+' \u00b7 '+pilFiltrees.length):(pilEps.length+' \u00e9preuve(s)'),
+      pilToutes:()=>this.setState({pilFiltre:''}),
+      pilToutesStyle:pilF?'margin-left:auto;background:none;border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
+      pilDelais:[['validation','Relecture','D\u00e9lai laiss\u00e9 aux relecteurs apr\u00e8s la soumission.'],['remplacement','Version corrig\u00e9e','D\u00e9lai laiss\u00e9 \u00e0 l\u2019auteur apr\u00e8s un ajustement ou un rejet.']]
+        .map(([k,l,a2])=>({label:l,aide:a2,valeur:String(pilDel[k]),
+          set:e=>{const v=Math.max(1,Math.min(60,parseInt(val(e),10)||0));if(!v)return;majAdmin({delais:{...(ADM.delais||{}),[k]:v}});}})),
+      pilMois:pilMoisL};
     const admTarifs=this.plans.map((p,i2)=>({name:p.name,
       prix:p.price==='0'?'Gratuit':(p.price+' '+p.period),
       quota:p.quota+' \u00e9preuves',seats:p.seats,
@@ -9050,7 +9869,7 @@ class Component extends DCLogic {
     const confTextes=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean);
     const confActif=!!active&&(((active.textIds||[]).length>0)||this._aDuContenu(active));
     const genEstOuvert=(st.genOuvert===null||st.genOuvert===undefined)
-      ?!(active&&this._aDuContenu(active))||!!st.genBusy||!!st.genErr||!!st.genRapport
+      ?!(active&&(this._aDuContenu(active)||(active.textIds||[]).length>0))||!!st.genBusy||!!st.genErr||!!st.genRapport
       :!!st.genOuvert;
     const confLocaux=active?CONFORMITE.verifierEpreuve(active,confTextes,
       (f,k)=>this._qList(f,k),(n2,k,i)=>this._qPts(n2,k,i)):[];
@@ -9067,14 +9886,14 @@ class Component extends DCLogic {
     const confAControler = (confRes.bloquants || 0) + (confRes.ecarts || 0);
     /* Ouverture automatique : la preference « Garde-fou toujours deplie »
        (Profil) etait affichee mais lue nulle part. Cochee -> ouvert des qu'il
-       y a un ecart ; decochee -> replie ; sans choix -> ouvert sur un poste
-       de travail, REPLIE sur telephone, ou la liste des ecarts poussait les
-       textes a 1 500 px plus bas (mesure le 27/09/2026). L'en-tete garde le
-       compte des ecarts : rien n'est cache, c'est un menu deroulant. */
+       y a un ecart ; sans choix -> REPLIE partout depuis le 19/10/2026 (lot A
+       « epurer ») : deplie, la liste poussait le texte et les questions sous
+       la ligne de flottaison, sur poste comme sur telephone (1 500 px mesures
+       le 27/09). L'en-tete garde le compte des ecarts : rien n'est cache,
+       c'est un menu deroulant. */
     const confPref=((me&&me.prefs)||{}).confAuto;
-    const surTel=typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(max-width:820px)').matches;
     const confEstOuvert = (st.confOpen === null || st.confOpen === undefined)
-      ? (confAControler > 0 && (confPref===true || (confPref!==false && !surTel)))
+      ? (confAControler > 0 && confPref===true)
       : !!st.confOpen;
     const confStruct=active&&active.epreuveCode?MINESEC.epreuveParCode(active.epreuveCode):null;
     const confCible=MINESEC.totalAttendu(confStruct);
@@ -9256,9 +10075,51 @@ class Component extends DCLogic {
       presenceTitle:st.users.filter(u=>u.id!==me.id).slice(0,2).map(u=>u.name).join(', ')+' en ligne',
       chatIcon:this._icon('chat','var(--c5a6678,#5a6678)',18),chatDot:'position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--c1a72bb,#1a72bb);border:1.5px solid var(--cffffff,#fff)',
       sendIcon:this._icon('send','var(--cffffff,#fff)',17),fabChatIcon:this._icon('chat','var(--c1a72bb,#1a72bb)',22),fabPlusIcon:this._icon('plus','var(--cffffff,#fff)',19),
-      showFab:ready&&st.screen!=='login'&&st.screen!=='apercu'&&!perm.readOnly,
       epTabEdition:()=>this.setState({epTab:'edition'}),epTabHistorique:()=>this.setState({epTab:'historique'}),epTabComparer:()=>this.setState({epTab:'comparer'}),epTabPropositions:()=>{if(perm.proposer)this.setState({epTab:'propositions'});},
       tabEdition:st.epTab==='edition',tabHistorique:st.epTab==='historique',tabComparer:st.epTab==='comparer',tabPropositions:st.epTab==='propositions',
+      tabLivrables:st.epTab==='livrables',epTabLivrables:()=>this.setState({epTab:'livrables'}),
+      epTabLivStyle:this._epTab(st.epTab==='livrables'),epTabLivIcon:this._icon('file',st.epTab==='livrables'?'var(--c1a72bb,#1a72bb)':'var(--c8b97a8,#8b97a8)',15),
+      ...(()=>{
+        const g=this._guideDe(active),n=this._noteDe(active);
+        const sous=st.livSous||'guide';
+        const ong=on=>'padding:8px 14px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer;border:1px solid '+(on?'var(--c1a72bb,#1a72bb);background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff)':'var(--ce2eaf3,#e2eaf3);background:var(--cffffff,#fff);color:var(--c5a6678,#5a6678)');
+        const majG=patch=>{if(!perm.edit||!active)return;this._updateActive({guide:{...this._guideDe(this._active()),...patch}});};
+        const majN=patch=>{if(!perm.edit||!active)return;this._updateActive({note:{...this._noteDe(this._active()),...patch}});};
+        const majC=(i,k,v)=>{const cr=this._guideDe(this._active()).criteres.slice();cr[i]={...cr[i],[k]:v};majG({criteres:cr});};
+        const num=x=>parseFloat(String(x||'').replace(',','.'))||0;
+        const totC=g.criteres.reduce((t,c)=>t+num(c&&c.pts),0);
+        const totB=active?this._baremeTotal():0;
+        const ecart=g.criteres.length>0&&totB>0&&Math.abs(totC-totB)>0.01;
+        return{
+          livSousGuide:sous==='guide',livSousNote:sous==='note',
+          livOngGuide:()=>this.setState({livSous:'guide'}),livOngNote:()=>this.setState({livSous:'note'}),
+          livOngGuideStyle:ong(sous==='guide'),livOngNoteStyle:ong(sous==='note'),
+          livWordLabel:(st.livWord===false?'☐':'☑')+' Joints à l’export Word',
+          livToggleWord:()=>this.setState({livWord:st.livWord===false}),
+          guidePreremplirLabel:g.criteres.length?'Refaire depuis le barème':'Pré-remplir depuis le barème',
+          guidePreremplir:()=>{if(!perm.edit||!active)return;const a=this._active();
+            if(this._guideDe(a).criteres.some(c=>c&&(c.attendu||c.reperes))){let ok=true;try{ok=window.confirm('Remplacer les critères déjà rédigés par ceux du barème ?');}catch(e){}if(!ok)return;}
+            const cr=this._criteresDepuisBareme(a);
+            if(!cr.length){this._avis('Aucune question ni aucun sujet à reprendre : composez d’abord l’épreuve.','attention');return;}
+            this._updateActive({guide:{...this._guideDe(a),criteres:cr}},'a pré-rempli le guide de correction');},
+          guideCriteres:g.criteres.map((c,i)=>({num:i+1,critere:(c&&c.critere)||'',pts:(c&&c.pts)||'',attendu:(c&&c.attendu)||'',reperes:(c&&c.reperes)||'',
+            setCritere:e=>majC(i,'critere',val(e)),setPts:e=>majC(i,'pts',val(e)),setAttendu:e=>majC(i,'attendu',val(e)),setReperes:e=>majC(i,'reperes',val(e)),
+            retirer:()=>{const cr=this._guideDe(this._active()).criteres.slice();cr.splice(i,1);majG({criteres:cr});}})),
+          guideAjouter:()=>majG({criteres:[...this._guideDe(this._active()).criteres,{critere:'',pts:'',attendu:'',reperes:''}]}),
+          guideTotal:g.criteres.length?('Total des critères : '+String(totC).replace('.',',')+' pt'+(totC>1?'s':'')+(totB?' · barème de l’épreuve : '+String(totB).replace('.',','):'')+(ecart?' — les deux ne concordent pas.':'')):'',
+          guideTotalStyle:g.criteres.length?'font-size:12px;font-weight:700;font-family:Poppins;margin:0 0 10px;color:'+(ecart?'var(--cc0392b,#c0392b)':'var(--c1f9d55,#1f9d55)'):hidden,
+          guidePenalites:g.penalites,setGuidePenalites:e=>majG({penalites:val(e)}),
+          guideNiveaux:this._tranchesGuide().map((t,i)=>({tranche:t,profil:g.niveaux[t]||'',
+            aide:['Copie qui maîtrise la méthode et nuance son propos…','Sujet compris, méthode tenue, exemples parfois juxtaposés…','Réponses partielles, paraphrase, méthode incomplète…','Hors sujet, contresens majeur, copie très inachevée…'][i],
+            setProfil:e=>majG({niveaux:{...this._guideDe(this._active()).niveaux,[t]:val(e)}})})),
+          guideErreurs:g.erreurs,setGuideErreurs:e=>majG({erreurs:val(e)}),
+          noteTextes:active?(this._noteTextes(active).length?this._noteTextes(active).map(l=>({ligne:l})):[{ligne:'Aucun texte du corpus dans cette épreuve.'}]):[],
+          noteAParams:!!(active&&active.genParams),noteParams:active&&active.genParams?this._lignesParams(active.genParams).map(l=>({ligne:l})):[],
+          noteChoix:n.choix,setNoteChoix:e=>majN({choix:val(e)}),
+          notePerimetre:n.perimetre,setNotePerimetre:e=>majN({perimetre:val(e)}),
+          notePoints:n.points,setNotePoints:e=>majN({points:val(e)}),
+        };
+      })(),
       epTabEditionStyle:this._epTab(st.epTab==='edition'),epTabHistoStyle:this._epTab(st.epTab==='historique'),epTabCompStyle:this._epTab(st.epTab==='comparer'),epTabPropStyle:perm.proposer?this._epTab(st.epTab==='propositions'):hidden,
       epTabEditionIcon:this._icon('pen',st.epTab==='edition'?'var(--c1a72bb,#1a72bb)':'var(--c8b97a8,#8b97a8)',15),epTabHistoIcon:this._icon('clock',st.epTab==='historique'?'var(--c1a72bb,#1a72bb)':'var(--c8b97a8,#8b97a8)',15),epTabCompIcon:this._icon('diff',st.epTab==='comparer'?'var(--c1a72bb,#1a72bb)':'var(--c8b97a8,#8b97a8)',15),epTabPropIcon:this._icon('inbox',st.epTab==='propositions'?'var(--c1a72bb,#1a72bb)':'var(--c8b97a8,#8b97a8)',15),
       epPropCount:epProps.filter(p=>p.status==='pending').length,epPropBadge:epProps.filter(p=>p.status==='pending').length?'display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 4px;background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border-radius:999px;font-size:10.5px;font-weight:700;margin-left:4px':hidden,
@@ -9506,7 +10367,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       coUnlock:()=>this._updateCours({status:'brouillon',inLibrary:false},'a déverrouillé le cours'),
       stats:this.stats||{total:0,authors:0,corpus:0,evalC:0},cycleCards,recentEpreuves,libraryCount:st.epreuves.filter(e=>e.inLibrary).length,
       liveStrip:(()=>{const other=st.users.find(u=>u.id!==me.id&&u.role!=='Élève (lecture seule)');const rel=st.epreuves.find(e=>e.status==='relecture');return (other?other.name.replace(/^(M\.|Mme|Mlle)\s+/,''):'Un collègue')+(rel?' travaille sur « '+rel.title+' »':' est en ligne')+' · '+st.users.filter(u=>u.id!==me.id).length+' collègues actifs';})(),
-      todos:(()=>{const t=[];st.epreuves.filter(e=>e.status==='relecture').forEach(e=>t.push({dot:'var(--cf39200,#f39200)',textEl:this._mentionEl('À relire : « '+e.title+' » attend une validation'),ago:this._ago(e.updatedAt)}));st.cours.filter(c=>c.status==='relecture').forEach(c=>t.push({dot:'var(--c7b52c7,#7b52c7)',textEl:this._mentionEl('Cours en relecture : « '+(c.title||'sans titre')+' »'),ago:this._ago(c.updatedAt)}));if(!t.length)t.push({dot:'var(--c1f9d55,#1f9d55)',textEl:this._mentionEl('Rien à traiter pour le moment. Tout est à jour.'),ago:''});return t.slice(0,4);})(),
+      todos:(()=>{const t=[];st.epreuves.filter(e=>(e.status==='ajustement'||e.status==='rejete')&&e.ownerId===me.id).forEach(e=>{const d=this._revueDe(e).decisions.filter(x=>x.verdict!=='valide').slice(-1)[0];t.push({dot:e.status==='rejete'?'var(--cc0392b,#c0392b)':'var(--cc26a12,#c26a12)',textEl:this._mentionEl((e.status==='rejete'?'Rejetée':'Ajustement demandé')+' : « '+e.title+' »'+(d&&d.motif?' \u2014 '+d.motif.slice(0,90):'')),ago:this._ago(e.updatedAt)});});st.epreuves.filter(e=>e.status==='relecture').forEach(e=>t.push({dot:'var(--cf39200,#f39200)',textEl:this._mentionEl('À relire : « '+e.title+' » attend une validation'),ago:this._ago(e.updatedAt)}));st.cours.filter(c=>c.status==='relecture').forEach(c=>t.push({dot:'var(--c7b52c7,#7b52c7)',textEl:this._mentionEl('Cours en relecture : « '+(c.title||'sans titre')+' »'),ago:this._ago(c.updatedAt)}));if(!t.length)t.push({dot:'var(--c1f9d55,#1f9d55)',textEl:this._mentionEl('Rien à traiter pour le moment. Tout est à jour.'),ago:''});return t.slice(0,4);})(),
       dashActivity:notifications.slice(0,4),
       newDraft:()=>{this._ensureDraft(id=>this.setState({activeId:id,screen:'composeur'},()=>window.scrollTo(0,0)));},
       /* Base vide et filtres trop etroits sont deux pannes differentes : le
@@ -9776,11 +10637,47 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       activeCollaborators,invitables,
       step1Style:stepStyle(s1),step2Style:stepStyle(s2),step3Style:stepStyle(s3),
       step1Dot:dotStyle(s2||s3,s1),step2Dot:dotStyle(s3,s2),step3Dot:dotStyle(false,s3),
-      canSubmit:perm.edit&&s1,canValidate:perm.validate&&s2,canSendBack:perm.validate&&(s2||s3),canPublish:perm.publish&&s3,
+      step4Style:stepStyle(sDiff),step4Dot:dotStyle(sDiff,false),
+      step2Label:s==='ajustement'?'Ajustement demandé':s==='rejete'?'Rejeté':'En relecture',
+      ...(()=>{
+        const solo=this._estSolo(active),auteur=!!active&&(active.ownerId===me.id||perm.validate);
+        const ouvert=s1||s==='ajustement'||s==='rejete';
+        const mode=on=>'flex:1;padding:6px 8px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer;border:none;'+(on?'background:var(--cffffff,#fff);color:var(--c14375f,#14375f);box-shadow:0 1px 4px rgba(20,55,95,.12)':'background:none;color:var(--c8b97a8,#8b97a8)');
+        return{
+          revModeVisible:perm.edit&&auteur&&ouvert,
+          revModeEquipe:()=>this._updateActive({solo:false}),revModeSolo:()=>this._updateActive({solo:true}),
+          revModeEquipeStyle:mode(!solo),revModeSoloStyle:mode(solo),
+          revModeAide:solo?'Vous validez vous-même : aucune relecture n’est demandée, la décision reste tracée.'
+            :'Un ou plusieurs collègues relisent et décident avant la validation.',
+          canSoloValider:perm.edit&&auteur&&ouvert&&solo,
+          soloValider:()=>this._validerSolo(),
+          canSubmit:perm.edit&&ouvert&&!solo,
+          canSendBack:s3&&(perm.validate||(solo&&auteur)),
+          canPublish:s3&&(perm.publish||(solo&&auteur)),
+        };
+      })(),
+      canValidate:perm.validate&&s2,
+      submitLabel:s==='ajustement'||s==='rejete'?'Soumettre la version corrigée':'Soumettre en relecture',
+      revRequis:String(st.revRequis||rv.requis),revRequisOptions:['1','2','3'],
+      setRevRequis:e=>this.setState({revRequis:val(e)}),
+      revEcheanceLabel:rvEch?rvEch.t:'',
+      revEcheanceStyle:rvEch?'font-size:11.5px;font-weight:700;font-family:Poppins;border-radius:8px;padding:6px 9px;margin-bottom:10px;color:'+rvEch.c+';background:'+rvEch.bg:hidden,
+      canDecider:perm.validate&&s==='relecture',
+      revDecisionTitre:rvDejaDecide?'Modifier ma décision (tour '+rv.tour+')':'Votre décision',
+      revVerdicts:rvVerdicts,revPortee:st.revPortee||'Tout le sujet',
+      revPortees:['Tout le sujet','Texte(s) support','Questions','Barème','Corrigé','Consignes et présentation'],
+      setRevPortee:e=>this.setState({revPortee:val(e)}),
+      revMotif:st.revMotif||'',setRevMotif:e=>this.setState({revMotif:val(e),revErr:''}),
+      revMotifAide:st.revVerdict==='valide'?'Remarque facultative pour l’auteur':'Ce qui doit changer, et où (obligatoire)',
+      revErr:st.revErr||'',revErrStyle:st.revErr?'font-size:11.5px;color:var(--cc0392b,#c0392b);line-height:1.45':hidden,
+      rendreDecision:()=>this._rendreDecision(),
+      revHasSynthese:!!active&&(rv.decisions.length>0||s==='relecture'),
+      revSynthese:rvSynthese,revRecommandation:rvReco,revDecisions:rvDecisions,
+      revDesaccordStyle:rvN.valide&&(rvN.ajustement||rvN.rejete)?'font-size:12px;color:var(--cc26a12,#c26a12);font-weight:700;margin-top:3px':hidden,
       publishLabel:active&&active.inLibrary?'Retirer de la bibliothèque':'Publier dans la bibliothèque',
-      submitReview:()=>this._updateActive({status:'relecture'},'a soumis en relecture'),
+      submitReview:()=>{this._soumettreRelecture(st.revRequis||rv.requis);this.setState({revRequis:''});},
       validate:()=>this._updateActive({status:'valide'},'a validé l\u2019épreuve'),
-      sendBack:()=>this._updateActive({status:'brouillon'},'a renvoyé en brouillon'),
+      sendBack:()=>this._updateActive({status:'brouillon',inLibrary:false},'a repassé l’épreuve en brouillon'),
       togglePublish:()=>this._updateActive({inLibrary:!active.inLibrary},active.inLibrary?'a retiré de la bibliothèque':'a publié dans la bibliothèque'),
       hasComments:activeComments.length>0,noComments:activeComments.length===0,activeComments,
       commentDraft:st.commentDraft,setComment:e=>this.setState({commentDraft:val(e)}),
@@ -9879,6 +10776,55 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       genSelStyle:'width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:9px;padding:9px 11px;font-size:13px;font-weight:500;font-family:inherit;color:var(--c33404f,#33404f);background:var(--cffffff,#fff);min-height:40px',
       genCibleStyle:'font-size:11.5px;font-weight:700;font-family:Poppins;color:var(--c14375f,#14375f);background:var(--ce7f1fb,#e7f1fb);border-radius:999px;padding:5px 11px;flex:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap',
       genTheme:st.genTheme||'',
+      ...(()=>{
+        const z=this._assDe(active),e=st.assEtape||1;
+        const majZ=patch=>{if(!perm.edit||!active)return;this._updateActive({assistant:{...this._assDe(this._active()),...patch}});};
+        const tog=(cle,id)=>{const cur=this._assDe(this._active())[cle];majZ({[cle]:cur.includes(id)?cur.filter(x=>x!==id):cur.concat([id])});};
+        const chip=on=>'padding:6px 11px;font-size:12px;font-weight:600;border-radius:999px;cursor:pointer;border:1px solid '+(on?'var(--c1a72bb,#1a72bb);background:var(--ce7f1fb,#e7f1fb);color:var(--c14375f,#14375f)':'var(--ce2eaf3,#e2eaf3);background:var(--cffffff,#fff);color:var(--c5a6678,#5a6678)');
+        const chipX=on=>'padding:6px 11px;font-size:12px;font-weight:600;border-radius:999px;cursor:pointer;border:1px solid '+(on?'var(--cc0392b,#c0392b);background:var(--cfdecea,#fdecea);color:var(--cc0392b,#c0392b);text-decoration:line-through':'var(--ce2eaf3,#e2eaf3);background:var(--cffffff,#fff);color:var(--c5a6678,#5a6678)');
+        const cours=active?this._coursDeLaClasse(active):[];
+        const gp=active?this._paramsGeneration(active):{faits:[],exclus:[]};
+        const lib=['Cadre','Programme','Notions à exclure','Récapitulatif'];
+        return{
+          assEtapes:lib.map((l,i)=>({n:i+1,label:l,go:()=>this.setState({assEtape:i+1}),
+            style:'display:inline-flex;align-items:center;gap:7px;padding:6px 12px 6px 6px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer;border:1px solid '+(e===i+1?'var(--c1a72bb,#1a72bb);background:var(--cffffff,#fff);color:var(--c14375f,#14375f)':'transparent;background:var(--cf2f6fb,#f2f6fb);color:var(--c7a8598,#7a8598)'),
+            dot:'display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;font-size:10.5px;'+(e===i+1?'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff)':'background:var(--cffffff,#fff);color:var(--c8b97a8,#8b97a8)')})),
+          assE1:e===1,assE2:e===2,assE3:e===3,assE4:e===4,
+          assTypes:['Devoir','Évaluation séquentielle','Composition trimestrielle','Examen blanc','Devoir de vacances'],
+          assType:z.type,setAssType:ev=>majZ({type:val(ev)}),
+          assNumero:z.numero,setAssNumero:ev=>majZ({numero:val(ev).slice(0,6)}),
+          assCoursAide:!active||!active.classe?'choisissez d’abord la classe':(cours.length?cours.length+' leçon(s) de cette classe dans vos Cours':'aucune leçon de cette classe dans vos Cours'),
+          assCours:cours.map(c=>({label:c.title||'Leçon sans titre',toggle:()=>tog('coursIds',c.id),style:chip(z.coursIds.includes(c.id))})),
+          assOeuvres:active?MINESEC.oeuvresDe(active.classe).map(o=>o.titre+' — '+o.auteur):[],
+          assOeuvre:z.oeuvre,setAssOeuvre:ev=>majZ({oeuvre:val(ev)}),
+          assBorne:z.borne,setAssBorne:ev=>majZ({borne:val(ev)}),
+          ...(()=>{const P=this._progs();if(!P||!active)return{assProgOptions:[],assProgId:'',setAssProgId:()=>{},assProgSeqOptions:[],assProgSeq:'',setAssProgSeq:()=>{},assProgResume:'',assProgResumeStyle:hidden};
+            const mes=((me.prefs||{}).mesClasses)||[];
+            const rang=c=>(mes.includes(c.id)?0:(c.atelier&&this._memeClasse(c.atelier,active.classe)?1:2));
+            const opts=P.classes.slice().sort((x,y)=>rang(x)-rang(y)).map(c=>({id:c.id,label:(rang(c)===0?'★ ':'')+c.systeme+' · '+c.libelle}));
+            const pc=this._progClasse(z.progId),sq=pc&&z.progSeq?pc.sequences.find(x=>x.num===+z.progSeq):null;
+            const nb=sq?this._contenusSeq(sq,3).length:0;
+            return{assProgOptions:opts,assProgId:z.progId,
+              setAssProgId:ev=>majZ({progId:val(ev),progSeq:''}),
+              assProgSeqOptions:pc?pc.sequences.map(x=>({v:String(x.num),label:'Séquence '+x.num+(x.module?' — '+x.module:'')+' ('+this._fmtIso(x.debut)+' → '+this._fmtIso(x.fin)+')'})):[],
+              assProgSeq:z.progSeq,
+              setAssProgSeq:ev=>{const v=val(ev);const q=pc?pc.sequences.find(x=>x.num===+v):null;const w4=q?(q.semaines||[]).find(w=>w.n===4):null;
+                majZ({progSeq:v,borne:(w4&&w4.fin)||this._assDe(this._active()).borne});},
+              assProgResume:sq?('Ambassa reçoit les '+nb+' notion(s) des semaines 1 à 3 de cette séquence'+(sq.integration?', et sa tâche d’intégration officielle':'')+' ; les notions de la séquence suivante sont exclues. Programme borné à la fin de la semaine 4.'):'',
+              assProgResumeStyle:sq?'margin-top:8px;font-size:12px;color:var(--c188047,#188047);background:var(--ce6f5ec,#e6f5ec);border-radius:8px;padding:8px 10px;line-height:1.5':hidden};})(),
+          assExclChips:cours.filter(c=>z.coursIds.includes(c.id)).map(c=>({label:c.title||'Leçon sans titre',toggle:()=>tog('exclCours',c.id),style:chipX(z.exclCours.includes(c.id))})),
+          assExclLibre:z.exclLibre,setAssExclLibre:ev=>majZ({exclLibre:val(ev).slice(0,400)}),
+          assResume:[
+            {k:'Classe et nature',v:(active&&active.classe?active.classe:'classe non choisie')+(active&&active.epreuveCode?' · '+((MINESEC.epreuveParCode(active.epreuveCode)||{}).nom||''):' · nature automatique')},
+            {k:'Progression',v:gp.progression||'aucune'},
+            {k:'Cadre',v:gp.cadre||'Devoir'},
+            {k:'Programme couvert',v:gp.faits&&gp.faits.length?(gp.faits.slice(0,10).join(' \u00b7 ')+(gp.faits.length>10?' \u2026 (+'+(gp.faits.length-10)+')':'')):'non précisé'},
+            {k:'Œuvre au programme',v:gp.oeuvre||'aucune'},
+            {k:'Borné au',v:gp.borne||'non précisé'},
+            {k:'Notions exclues',v:gp.exclus&&gp.exclus.length?gp.exclus.join(' · '):'aucune'},
+            {k:'Thème',v:gp.theme||'libre'}],
+        };
+      })(),
       setGenTheme:e=>this.setState({genTheme:val(e).slice(0,120)}),
       genTout:()=>this._composerAvecAmbassa('tout'),
       /* Ouvre le panneau « Composer avec Ambassa » et l'amene sous les yeux :
@@ -10324,7 +11270,9 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           +((PP.manuel.orange||{}).codeMarchand||'')+' ('+((PP.manuel.orange||{}).ussd||'')+' \u2192 Paiement marchand). '
           +'Votre abonnement s\u2019ouvrira ici tout seul d\u00e8s que nous aurons vu votre paiement \u2014 au plus tard sous 24 h. Vous pouvez fermer cette fen\u00eatre.')
         :PP===null?'V\u00e9rification du service d\u2019encaissement\u2026'
-        :(PP.ok?('Paiement s\u00e9curis\u00e9 par CamerPay'+(PP.mode?(' \u2014 mode '+PP.mode):'')+'. Vous serez redirig\u00e9 vers sa page pour choisir Orange Money, MTN MoMo ou la carte.')
+        :(PP.ok?(PP.provider==='skysms'
+              ?'Paiement s\u00e9curis\u00e9 par Orange Money ou MTN MoMo : la demande arrive sur votre t\u00e9l\u00e9phone, vous la validez avec votre code secret.'
+              :('Paiement s\u00e9curis\u00e9 par '+fournNom(PP)+(PP.mode?(' \u2014 mode '+PP.mode):'')+'. Vous serez redirig\u00e9 vers sa page pour choisir Orange Money, MTN MoMo ou la carte.'))
               :(PP.hors?('\ud83d\udd34 '+PP.message)
                 :('Encaissement indisponible \u2014 '+(PP.message||'le service n\u2019est pas configur\u00e9 sur ce serveur.')))),
       payBannerStyle:'border-radius:10px;padding:11px 13px;font-size:12.5px;line-height:1.55;font-weight:600;'
@@ -10341,13 +11289,13 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       sbIcAdmin:this._icon('lock',sbCol(st.screen==='admin'),19),
       admScope:grpActif.nom+' \u00b7 groupe '+(grpActif.type==='ouvert'?'ouvert':'ferm\u00e9'),
       admScopeChip:'font-size:11.5px;font-weight:700;font-family:Poppins;color:var(--c1a72bb,#1a72bb);background:var(--ce7f1fb,#e7f1fb);padding:4px 12px;border-radius:999px',
-      admTabs:[admOngl('fonctions','Fonctionnalit\u00e9s','puzzle'),admOngl('corpus','Corpus','layers'),
+      admTabs:[admOngl('pilotage','Pilotage','layers'),admOngl('fonctions','Fonctionnalit\u00e9s','puzzle'),admOngl('corpus','Corpus','layers'),
                admOngl('groupes','Groupes','users'),admOngl('profils','Profils','user'),
                admOngl('connexion','Connexion','lock'),admOngl('paiement','Paiement','card')],
-      admIsFonctions:admT==='fonctions',admIsCorpus:admT==='corpus',admIsGroupes:admT==='groupes',
+      admIsPilotage:admT==='pilotage',admIsFonctions:admT==='fonctions',admIsCorpus:admT==='corpus',admIsGroupes:admT==='groupes',
       admIsProfils:admT==='profils',admIsConnexion:admT==='connexion',admIsPaiement:admT==='paiement',
-      admFeatures,admSources,admCycles,admGroupes,admProfils,admConnexion,admPayInfos,admTarifs,
-      admMessage:CX.message||'',
+      admFeatures,admSources,admCycles,admGroupes,admProfils,admConnexion,admPayInfos,admTarifs,...pilVals,
+      admMessage:CX.message||'',admPayFourn:PP===null?'\u2026':fournNom(PP),
       setAdmMessage:e=>majAdmin({connexion:{...CX,message:val(e)}}),
       admTh:'text-align:left;padding:10px 11px;font-family:Poppins;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);border-bottom:1px solid var(--ce6ecf3,#e6ecf3);white-space:nowrap',
       admTd:'padding:10px 11px;color:var(--c22303f,#22303f);vertical-align:middle',
@@ -10356,7 +11304,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       admAddStyle:'margin-left:auto;background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:9px 16px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer',
       admClearStyle:this.custom.length?'background:var(--cffffff,#fff);border:1px solid var(--cecc4bf,#ecc4bf);color:var(--cc0392b,#c0392b);padding:9px 15px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer':hidden,
       admPayBanner:'display:flex;align-items:center;gap:9px;border-radius:11px;padding:12px 14px;font-size:12.5px;font-weight:600;line-height:1.5;'+(PP&&PP.ok?'background:var(--ce6f5ec,#e6f5ec);border:1px solid var(--cb6e2c6,#b6e2c6);color:var(--c188047,#188047)':'background:var(--cfdefdb,#fdefdb);border:1px solid var(--cf0d9b0,#f0d9b0);color:var(--cc26a12,#c26a12)'),
-      admPayEtat:PP===null?'Interrogation du serveur d\u2019encaissement\u2026':(PP.ok?('CamerPay r\u00e9pond'+(PP.mode?(' en mode '+PP.mode):'')+' : les abonnements peuvent \u00eatre encaiss\u00e9s.'):('CamerPay ne r\u00e9pond pas \u2014 '+(PP.message||'identifiants absents de api/payment_config.php.'))),
+      admPayEtat:PP===null?'Interrogation du serveur d\u2019encaissement\u2026':(PP.ok?(fournNom(PP)+' r\u00e9pond'+(PP.mode?(' en mode '+PP.mode):'')+' : les abonnements peuvent \u00eatre encaiss\u00e9s.'):(fournNom(PP)+' ne r\u00e9pond pas \u2014 '+(PP.message||'identifiants absents de api/payment_config.php.'))),
       newGroupe:()=>{const id='g'+Date.now();
         const gs=[...groupes,{id,nom:'Nouvel \u00e9tablissement',type:'ferme',
           code:'G-'+String(Date.now()).slice(-4),membres:[me.id]}];
@@ -10473,6 +11421,10 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       topIcPlus:this._icon('plus','var(--cffffff,#ffffff)',17),
       sbAccueil:sbBtn(sbAccueilOn),sbRessources:sbBtn(sbResOn),sbEpreuves:sbBtn(sbEpOn),
       sbCours:sbBtn(sbCoursOn),sbCollab:sbBtn(sbCollabOn),sbMessages:sbBtn(false),
+      sbProgressions:sbBtn(st.screen==='progressions'),sbIcProg:this._icon('calendar',sbCol(st.screen==='progressions'),19),
+      goProgressions:()=>this._go('progressions'),isProgressions:ready&&st.screen==='progressions',
+      goSuivi:()=>this._go('suivi'),isSuivi:ready&&st.screen==='suivi',
+      sbSuivi:sbBtn(st.screen==='suivi'),sbIcSuivi:this._icon('clock',sbCol(st.screen==='suivi'),19),
       sbNotifs:sbBtn(sbActOn),sbProfil:sbBtn(sbProfOn),
       msgCount:nbMsg,notifCount:nbNotif,
       sbMsgBadge:sbBadge(nbMsg),sbNotifBadge:sbBadge(nbNotif),
@@ -10586,6 +11538,193 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
         ?'margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--cffffff,#fff);border:1px solid var(--cbcd9f2,#bcd9f2);color:var(--c1a72bb,#1a72bb);padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;border-radius:999px;font-family:Poppins'
         :hidden,
       epView,printFiches,doPrint:()=>window.print(),
+      ...(()=>{
+        const vu=ready&&['suivi','accueil'].indexOf(st.screen)>=0;
+        if(vu)this._attendreProgs();
+        const P=this._progs();
+        const ech=P?this._echeancesProg():[];
+        const auj=this._isoAuj();
+        const nRetard=ech.filter(x=>x.retard).length;
+        const mes=((me.prefs||{}).mesClasses)||[];
+        const fmtL=iso=>this._fmtIso(iso,{weekday:'short',day:'numeric',month:'short'});
+        const joursDe=iso=>Math.round((new Date(iso+'T00:00:00')-new Date(auj+'T00:00:00'))/86400000);
+        const rel=iso=>{const j=joursDe(iso);return j===0?'aujourd’hui':j===1?'demain':j===-1?'hier':j>0?'dans '+j+' j':'il y a '+(-j)+' j';};
+        const chipE=x=>{const c=x.fait?['var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)']:x.retard?['var(--cc0392b,#c0392b)','var(--cfdecea,#fdecea)']:x.ep?['var(--cc26a12,#c26a12)','var(--cfdefdb,#fdefdb)']:['var(--c5a6678,#5a6678)','var(--cf2f6fb,#f2f6fb)'];
+          return 'font-size:11px;font-weight:700;font-family:Poppins;padding:3px 10px;border-radius:999px;white-space:nowrap;color:'+c[0]+';background:'+c[1];};
+        const ouvrir=x=>()=>{if(x.ep)this.setState({activeId:x.ep.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);});else this._composerSequence(x.cls,x.sq);};
+        const vals={suiviRetardsN:nRetard||'',sbSuiviBadge:nRetard?'margin-left:auto;display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--cc0392b,#c0392b);color:var(--cffffff,#fff);font-size:10.5px;font-weight:700':hidden};
+        /* Accueil */
+        const cls0=mes.map(id=>this._progClasse(id)).filter(Boolean)[0];
+        const ici=cls0?this._semaineDe(cls0,auj):null;
+        const proch=ech.find(x=>!x.fait&&x.date>=auj);
+        const libT={ressources:'ressources',integration:'intégration',evaluation:'évaluation',remediation:'remédiation'};
+        Object.assign(vals,{
+          accSemaineStyle:(ready&&st.screen==='accueil'&&P)?'display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--cfffaf2,#fffaf2);border:1px solid var(--cf0d9b0,#f0d9b0);border-radius:12px;padding:12px 16px;margin:-8px 0 20px':hidden,
+          accSemaineIcone:this._icon('calendar','var(--cc26a12,#c26a12)',22),
+          accSemaine:cls0?(ici?((ici.prochaine?'Prochaine semaine de cours — ':'Cette semaine — ')+cls0.libelle+' : séquence '+ici.seq.num+', semaine '+ici.w.n+' ('+libT[ici.w.type]+')'+(ici.w.feries&&ici.w.feries.length?' · férié : '+ici.w.feries.join(', '):'')):cls0.libelle+' : hors période de cours'):'Suivez vos classes semaine par semaine',
+          accEcheance:cls0?(proch?('Prochaine échéance : '+proch.lib.toLowerCase()+' — '+proch.cls.libelle+', séquence '+proch.sq.num+', '+fmtL(proch.date)+' ('+rel(proch.date)+')'+(nRetard?' · '+nRetard+' en retard':'')):'Aucune échéance à venir.'):'Choisissez vos classes dans Progressions : séquences datées, échéances et rappels se construisent tout seuls.',
+          accSemaineBouton:cls0?'Voir le suivi':'Choisir mes classes',
+          accSemaineAller:()=>this._go(cls0?'suivi':'progressions')});
+        if(!(ready&&st.screen==='suivi'))return Object.assign(vals,{suiviVideStyle:hidden,suiviCorpsStyle:hidden,suiviTuiles:[],suiviHorizons:[],suiviClasses:[],suiviClasse:'',setSuiviClasse:()=>{},suiviRetardsBasculer:()=>{},suiviRetardsStyle:hidden,
+          suiviVueListe:()=>{},suiviVueMois:()=>{},suiviVueListeStyle:hidden,suiviVueMoisStyle:hidden,suiviEnListe:false,suiviEnMois:false,suiviAucuneStyle:hidden,suiviGroupes:[],moisPrec:()=>{},moisSuiv:()=>{},moisTitre:'',moisEntetes:[],moisJours:[]});
+        const hz=+(st.suiviHorizon||60);
+        const fin=this._isoPlus(auj,hz>=365?400:hz);
+        const filtreC=st.suiviClasse||'';
+        const parC=ech.filter(x=>!filtreC||x.cls.id===filtreC);
+        const visibles=parC.filter(x=>st.suiviRetards?x.retard:(x.retard||(x.date>=this._isoPlus(auj,-14)&&x.date<=fin)));
+        const ong=on=>'border:none;padding:6px 11px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer;'+(on?'background:var(--cffffff,#fff);color:var(--c14375f,#14375f);box-shadow:0 1px 4px rgba(20,55,95,.12)':'background:none;color:var(--c7a8598,#7a8598)');
+        const tuile=(n,l,c)=>({n,label:l,style:'background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:14px;text-align:center',chiffre:'display:block;font-family:Poppins;font-size:24px;font-weight:700;line-height:1;color:'+c});
+        const groupes={};
+        visibles.forEach(x=>{(groupes[x.cls.id]=groupes[x.cls.id]||{cls:x.cls,l:[]}).l.push(x);});
+        const vue=st.suiviVue||'liste';
+        /* Calendrier du mois */
+        const moisIso=st.suiviMois||auj.slice(0,7);
+        const d0=new Date(moisIso+'-01T00:00:00');
+        const premier=new Date(d0);premier.setDate(1-((d0.getDay()+6)%7));
+        const cal=P?P.calendrier:{vacances:[],feries:[],journees:[]};
+        const jours=[];
+        for(let k=0;k<42;k++){const d=new Date(premier);d.setDate(premier.getDate()+k);const iso=this._isoDe(d);
+          if(k>=35&&d.getMonth()!==d0.getMonth())break;
+          const vac=cal.vacances.find(v=>v.debut<=iso&&iso<v.fin);
+          const fer=cal.feries.filter(f=>f.date===iso);
+          const jou=cal.journees.filter(j=>j.date===iso||(j.fin&&j.date<=iso&&iso<=j.fin));
+          const ec=parC.filter(x=>x.date===iso);
+          const dans=d.getMonth()===d0.getMonth(),we=d.getDay()===0||d.getDay()===6;
+          const marques=[].concat(
+            fer.map(f=>({texte:f.nom,titre:f.nom,style:'font-size:9.5px;line-height:1.25;color:var(--cc0392b,#c0392b);font-weight:700;margin-top:2px'})),
+            ec.map(x=>({texte:x.lib+' · '+x.cls.libelle+' S'+x.sq.num,titre:x.lib+' — '+x.cls.libelle+', séquence '+x.sq.num+' ('+x.etat+')',style:'font-size:9.5px;line-height:1.25;color:'+(x.fait?'var(--c188047,#188047)':x.retard?'var(--cc0392b,#c0392b)':'var(--cc26a12,#c26a12)')+';font-weight:700;margin-top:2px'})),
+            jou.slice(0,1).map(j=>({texte:j.nom,titre:j.nom,style:'font-size:9.5px;line-height:1.25;color:var(--c1a72bb,#1a72bb);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'})),
+            vac&&dans&&!we?[{texte:vac.label.replace(/\s*\(.*\)/,''),titre:vac.label,style:'font-size:9px;color:var(--c8b97a8,#8b97a8);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'}]:[]);
+          jours.push({num:d.getDate(),marques,
+            style:'min-height:64px;border-radius:8px;padding:4px 5px;overflow:hidden;border:1px solid '+(iso===auj?'var(--cf39200,#f39200)':'var(--ceef2f7,#eef2f7)')+';background:'+(!dans?'transparent':vac?'var(--cf2f6fb,#f2f6fb)':we?'var(--cfbfcfe,#fbfcfe)':'var(--cffffff,#fff)')+(dans?'':';opacity:.45'),
+            numStyle:'font-size:11.5px;font-weight:700;font-family:Poppins;color:'+(fer.length?'var(--cc0392b,#c0392b)':iso===auj?'var(--cf39200,#f39200)':'var(--c22303f,#22303f)')});}
+        const decaler=n=>()=>{const d=new Date(moisIso+'-01T00:00:00');d.setMonth(d.getMonth()+n);this.setState({suiviMois:this._isoDe(d).slice(0,7)});};
+        return Object.assign(vals,{
+          suiviVideStyle:(P&&!mes.length)?'background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);border-radius:12px;padding:18px 20px;margin-bottom:12px':hidden,
+          suiviCorpsStyle:(P&&mes.length)?'':hidden,
+          suiviTuiles:[tuile(parC.filter(x=>x.retard).length,'en retard','var(--cc0392b,#c0392b)'),
+            tuile(parC.filter(x=>!x.fait&&x.date>=auj&&x.date<=this._isoPlus(auj,7)).length,'dans les 7 jours','var(--cc26a12,#c26a12)'),
+            tuile(parC.filter(x=>!x.fait&&x.date>auj&&x.date<=fin).length,'à venir ('+(hz>=365?'année':hz+' j')+')','var(--c1a72bb,#1a72bb)'),
+            tuile(parC.filter(x=>x.fait).length,'faites','var(--c188047,#188047)')],
+          suiviHorizons:[[30,'30 j'],[60,'60 j'],[120,'120 j'],[365,'Année']].map(([v,l])=>({label:l,go:()=>this.setState({suiviHorizon:v}),style:ong(hz===v)})),
+          suiviClasses:mes.map(id=>this._progClasse(id)).filter(Boolean).map(c=>({id:c.id,label:c.libelle})),
+          suiviClasse:filtreC,setSuiviClasse:e=>this.setState({suiviClasse:val(e)}),
+          suiviRetardsBasculer:()=>this.setState({suiviRetards:!st.suiviRetards}),
+          suiviRetardsStyle:'border:1px solid '+(st.suiviRetards?'var(--cc0392b,#c0392b)':'var(--ce2eaf3,#e2eaf3)')+';background:'+(st.suiviRetards?'var(--cfdecea,#fdecea)':'var(--cffffff,#fff)')+';color:'+(st.suiviRetards?'var(--cc0392b,#c0392b)':'var(--c5a6678,#5a6678)')+';padding:7px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer',
+          suiviVueListe:()=>this.setState({suiviVue:'liste'}),suiviVueMois:()=>this.setState({suiviVue:'mois'}),
+          suiviVueListeStyle:ong(vue==='liste'),suiviVueMoisStyle:ong(vue==='mois'),
+          suiviEnListe:vue==='liste',suiviEnMois:vue==='mois',
+          suiviAucuneStyle:visibles.length?hidden:'font-size:12.5px;color:var(--c8b97a8,#8b97a8);padding:10px 2px',
+          suiviGroupes:Object.keys(groupes).map(k=>{const g=groupes[k];const nr=g.l.filter(x=>x.retard).length;
+            return{titre:g.cls.libelle,sous:g.l.length+' échéance(s)'+(nr?' · '+nr+' en retard':''),
+              lignes:g.l.map(x=>({date:fmtL(x.date),rel:rel(x.date),relStyle:'font-size:11px;margin-top:1px;color:'+(x.retard?'var(--cc0392b,#c0392b)':'var(--c8b97a8,#8b97a8)')+';font-weight:'+(x.retard?'700':'400'),
+                titre:x.lib+' — séquence '+x.sq.num+(x.sq.module?' · '+x.sq.module:''),
+                sous:x.ep?('« '+(x.ep.title||'Épreuve')+' »'):'Aucune épreuve ouverte pour cette séquence',
+                etat:x.fait?'fait':(x.retard?'en retard · ':'')+x.etat,chip:chipE(x),
+                agir:ouvrir(x),agirLabel:x.ep?'Ouvrir':'Composer',
+                agirStyle:(x.ep||perm.creer)?'background:'+(x.ep?'var(--cffffff,#fff)':'var(--c1a72bb,#1a72bb)')+';color:'+(x.ep?'var(--c14375f,#14375f)':'var(--cffffff,#fff)')+';border:1px solid '+(x.ep?'var(--ce2eaf3,#e2eaf3)':'var(--c1a72bb,#1a72bb)')+';padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden}))};}),
+          moisPrec:decaler(-1),moisSuiv:decaler(1),
+          moisTitre:d0.toLocaleDateString('fr-FR',{month:'long',year:'numeric'}),
+          moisEntetes:['lun','mar','mer','jeu','ven','sam','dim'],
+          moisJours:jours});
+      })(),
+      ...(()=>{
+        const P=this._progs();
+        if(!(ready&&st.screen==='progressions'))return{progOptions:[],progSeqs:[],progMes:[],progId:'',setProgId:()=>{},progAnnee:'',progSource:'',progAbsentStyle:hidden,progToggleMienne:()=>{},progMienneLabel:'',progMienneStyle:hidden,progCetteSemaine:'',progCetteSemaineStyle:hidden};
+        if(!P){if(!this._progAttente){this._progAttente=setInterval(()=>{if(this._progs()){clearInterval(this._progAttente);this._progAttente=null;this.forceUpdate&&this.forceUpdate();this.setState({progCharge:Date.now()});}},400);}
+          return{progOptions:[],progSeqs:[],progMes:[],progId:'',setProgId:()=>{},progAnnee:'',progSource:'',progAbsentStyle:'font-size:13px;color:var(--c8b97a8,#8b97a8);padding:10px 0',progToggleMienne:()=>{},progMienneLabel:'',progMienneStyle:hidden,progCetteSemaine:'',progCetteSemaineStyle:hidden};}
+        const mesPr=me.prefs||{};const mes=mesPr.mesClasses||[];
+        const idSel=st.progId||mes[0]||((P.classes.find(c=>active&&c.atelier&&this._memeClasse(c.atelier,active.classe))||P.classes[0]).id);
+        const cls=this._progClasse(idSel)||P.classes[0];
+        const auj=this._isoAuj();const ici=this._semaineDe(cls,auj);
+        const ouverts=st.progOuverts||{};
+        const coul={ressources:['var(--c1a72bb,#1a72bb)','var(--ce7f1fb,#e7f1fb)'],integration:['var(--c7b52c7,#7b52c7)','var(--cefe8fa,#efe8fa)'],evaluation:['var(--cc26a12,#c26a12)','var(--cfdefdb,#fdefdb)'],remediation:['var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)']};
+        const libT={ressources:'ressources',integration:'intégration',evaluation:'évaluation',remediation:'remédiation'};
+        const estMienne=mes.includes(cls.id);
+        return{
+          progAbsentStyle:hidden,progAnnee:P.annee,
+          progSource:'Sources : '+P.sources.ESG+' ; '+P.sources.EST+' ; '+P.sources.calendrier+'.',
+          progOptions:P.classes.map(c=>({id:c.id,label:(mes.includes(c.id)?'★ ':'')+c.systeme+' · '+c.libelle})),
+          progId:cls.id,setProgId:ev=>this.setState({progId:val(ev),progOuverts:{}}),
+          progToggleMienne:()=>majMoi({prefs:{...mesPr,mesClasses:estMienne?mes.filter(x=>x!==cls.id):mes.concat([cls.id])}}),
+          progMienneLabel:estMienne?'★ Dans mes classes':'☆ Ajouter à mes classes',
+          progMienneStyle:'border:1px solid '+(estMienne?'var(--cc26a12,#c26a12)':'var(--ce2eaf3,#e2eaf3)')+';background:'+(estMienne?'var(--cfdefdb,#fdefdb)':'var(--cffffff,#fff)')+';color:'+(estMienne?'var(--cc26a12,#c26a12)':'var(--c14375f,#14375f)')+';padding:8px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer',
+          progMes:mes.map(id=>this._progClasse(id)).filter(Boolean).filter(c=>c.id!==cls.id).map(c=>({label:c.libelle,go:()=>this.setState({progId:c.id,progOuverts:{}}),
+            style:'border:1px solid var(--ce2eaf3,#e2eaf3);background:var(--cf7f9fc,#f7f9fc);color:var(--c5a6678,#5a6678);padding:7px 12px;font-size:12px;font-weight:600;border-radius:999px;cursor:pointer'})),
+          progCetteSemaine:ici?((ici.prochaine?'Prochaine semaine de cours : ':'Cette semaine : ')+'séquence '+ici.seq.num+' · semaine '+ici.w.n+' ('+libT[ici.w.type]+') — du '+this._fmtIso(ici.w.debut,{weekday:'short',day:'numeric',month:'short'})+' au '+this._fmtIso(ici.w.fin,{weekday:'short',day:'numeric',month:'short'})+(ici.w.feries&&ici.w.feries.length?' · férié : '+ici.w.feries.join(', '):'')):'Hors période de cours.',
+          progCetteSemaineStyle:'font-family:Poppins;font-size:13px;font-weight:700;color:var(--c14375f,#14375f);background:var(--cfdefdb,#fdefdb);border:1px solid var(--cf0d9b0,#f0d9b0);border-radius:10px;padding:10px 14px;margin-bottom:14px',
+          progSeqs:cls.sequences.map(sq=>{const on=ouverts[sq.num]!==undefined?!!ouverts[sq.num]:!!(ici&&ici.seq.num===sq.num);const cour=!!(ici&&ici.seq.num===sq.num);
+            return{n:sq.num,titre:'Séquence '+sq.num+(sq.module?' — '+sq.module:''),
+              dates:this._fmtIso(sq.debut,{day:'numeric',month:'long'})+' → '+this._fmtIso(sq.fin,{day:'numeric',month:'long',year:'numeric'})+' · trimestre '+sq.trimestre,
+              competence:sq.competence||'',
+              carte:'background:var(--cffffff,#fff);border:1px solid '+(cour?'var(--cf39200,#f39200)':'var(--ce6ecf3,#e6ecf3)')+';border-radius:12px;padding:16px 18px'+(cour?';box-shadow:0 0 0 3px var(--cfdefdb,#fdefdb)':''),
+              num:'display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;font-family:Poppins;font-weight:700;font-size:14px;flex:none;'+(cour?'background:var(--cf39200,#f39200);color:var(--cffffff,#fff)':'background:var(--ce7f1fb,#e7f1fb);color:var(--c1a72bb,#1a72bb)'),
+              toggle:()=>this.setState({progOuverts:{...ouverts,[sq.num]:!on}}),toggleLabel:on?'Replier':'Voir les semaines',
+              composer:()=>this._composerSequence(cls,sq),
+              composerStyle:perm.creer?'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:8px 13px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
+              detail:on?'margin-top:12px;border-top:1px solid var(--ceef2f7,#eef2f7);padding-top:10px':hidden,
+              semaines:(sq.semaines||[]).map(w=>{const c=coul[w.type]||coul.ressources;const ceW=!!(ici&&!ici.prochaine&&ici.w===w);
+                return{n:w.n,type:libT[w.type]||w.type,dates:w.debut?(this._fmtIso(w.debut)+' → '+this._fmtIso(w.fin)):'',
+                  chip:'display:inline-block;font-size:10.5px;font-weight:700;font-family:Poppins;padding:3px 9px;border-radius:999px;color:'+c[0]+';background:'+c[1],
+                  ferie:w.feries&&w.feries.length?'Férié : '+w.feries.join(', '):'',ferieStyle:w.feries&&w.feries.length?'font-size:10.5px;color:var(--cc0392b,#c0392b);margin-top:3px;font-weight:700':hidden,
+                  ligne:'display:flex;gap:14px;padding:9px 8px;border-bottom:1px solid var(--ceef2f7,#eef2f7);flex-wrap:wrap'+(ceW?';background:var(--cfffaf2,#fffaf2);border-radius:8px':''),
+                  contenus:(w.contenus||[]).length?w.contenus:[w.type==='evaluation'?(sq.evaluation||'Évaluation'):w.type==='integration'?'Activités d’intégration':'—']};}),
+              integration:sq.integration||'',integrationStyle:sq.integration?'font-size:12.5px;color:var(--c22303f,#22303f);line-height:1.55;margin-top:10px;background:var(--cf7f9fc,#f7f9fc);border-radius:8px;padding:10px 12px':hidden,
+              evaluation:sq.evaluation||'',evaluationStyle:sq.evaluation?'font-size:12.5px;color:var(--c5a6678,#5a6678);margin-top:6px':hidden};}),
+        };
+      })(),
+      ...(()=>{
+        if(st.focus===undefined&&!this._focusLu){this._focusLu=true;let v=false;try{v=localStorage.getItem('atelier_focus')==='1';}catch(e){}
+          if(v)setTimeout(()=>this.setState({focus:true}),0);}
+        const enFocus=!!st.focus&&ready&&st.screen==='composeur';
+        if(typeof document!=='undefined'){try{const h=document.documentElement;h.classList.toggle('vrt-focus',enFocus);h.classList.toggle('vrt-tiroir',enFocus&&!!st.focusTiroir);}catch(e){}}
+        const btn=on=>'background:'+(on?'var(--c14375f,#14375f)':'var(--cffffff,#fff)')+';color:'+(on?'var(--cffffff,#fff)':'var(--c14375f,#14375f)')+';border:1px solid '+(on?'var(--c14375f,#14375f)':'var(--ce2eaf3,#e2eaf3)')+';padding:6px 13px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer';
+        return{
+          focusBasculer:()=>{const v=!st.focus;try{localStorage.setItem('atelier_focus',v?'1':'0');}catch(e){}this.setState({focus:v,focusTiroir:false});},
+          focusLabel:st.focus?'Quitter le focus':'Focus',focusTitre:st.focus?'Revenir à l’affichage complet':'Masquer la barre du site et les colonnes : la planche prend toute la largeur',
+          focusStyle:btn(!!st.focus),
+          focusTiroirBasculer:()=>this.setState({focusTiroir:!st.focusTiroir}),
+          focusTiroirLabel:st.focusTiroir?'Fermer le volet':'Renseignements & collaboration',
+          focusTiroirStyle:enFocus?btn(!!st.focusTiroir):hidden,
+        };
+      })(),
+      ...(()=>{
+        if(typeof document!=='undefined'){try{document.documentElement.classList.toggle('vrt-doc',ready&&st.screen==='apercu');}catch(e){}}
+        if(!(ready&&st.screen==='apercu')||!active)return{docOnglets:[],docVues:[],docVoitEnonce:true,docFeuilleStyle:'',docPagesLabel:'',docZoomLabel:'',docZoomBasculer:()=>{}};
+        const cor=this._corrigePourExport(active)||[];
+        const ann=this._annexesPourExport(active,true);
+        const guide=ann.find(x=>/^GUIDE/.test(x.titre)),note=ann.find(x=>/^NOTE/.test(x.titre));
+        const sousT=(active.title||'Épreuve de français')+(active.classe?' · '+active.classe:'');
+        const vues={corrige:cor.length?{titre:'CORRIGÉ ET BARÈME — RÉSERVÉ À L’ENSEIGNANT',blocs:cor}:null,
+          guide:guide?{titre:guide.titre,blocs:guide.blocs}:null,note:note?{titre:note.titre,blocs:note.blocs}:null};
+        const dispo=['enonce'].concat(['corrige','guide','note'].filter(k=>vues[k]));
+        const lib={enonce:'Énoncé',corrige:'Corrigé',guide:'Guide de correction',note:'Note au relecteur',tout:'Tout'};
+        const ong=dispo.length>1?dispo.concat(['tout']):dispo;
+        const v=ong.includes(st.docVue)?st.docVue:'enonce';
+        const montrer=v==='tout'?dispo.filter(k=>k!=='enonce'):(v==='enonce'?[]:[v]);
+        const larg=(st.docLarg||(typeof window!=='undefined'?window.innerWidth:1200));
+        const reel=st.docZoom==='100';
+        const z=reel?1:Math.max(0.42,Math.min(1,(larg-36)/794));
+        if(!this._docResize&&typeof window!=='undefined'){this._docResize=true;
+          window.addEventListener('resize',()=>{clearTimeout(this._docRT);this._docRT=setTimeout(()=>{if(this.state.screen==='apercu')this.setState({docLarg:window.innerWidth});},150);});}
+        /* Repères de page : un trait tous les 297 mm, et le nombre de pages
+           estimé d'après la hauteur réelle de la feuille (mesurée après
+           rendu ; on ne rend à nouveau que si le nombre change). */
+        setTimeout(()=>{try{const f=document.querySelector('.vrt-docfeuille');if(!f)return;
+          const n=Math.max(1,Math.ceil((f.scrollHeight)/1122.5));if(n!==this.state.docPages)this.setState({docPages:n});}catch(e){}},60);
+        return{
+          docOnglets:ong.map(k=>({label:lib[k],go:()=>this.setState({docVue:k}),
+            style:'border:none;padding:6px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer;'+(k===v?'background:var(--cffffff,#fff);color:var(--c14375f,#14375f);box-shadow:0 1px 4px rgba(20,55,95,.12)':'background:none;color:var(--c7a8598,#7a8598)')})),
+          docVoitEnonce:v==='enonce'||v==='tout',
+          docVues:montrer.map((k,i)=>({titre:vues[k].titre,sous:sousT,blocs:vues[k].blocs.map(b=>({titre:b.titre||'',lignes:(b.lignes||[]).map(l=>String(l))})),
+            style:(v==='tout'||i>0)?'':'border-top:none;margin-top:0;padding-top:0'})),
+          docFeuilleStyle:'width:210mm;min-height:297mm;box-sizing:border-box;margin:22px auto 60px;background-color:var(--cffffff,#fff);padding:16mm 15mm 18mm;box-shadow:0 2px 14px rgba(20,55,95,.12);zoom:'+z.toFixed(3)+';'
+            +'background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) 297mm)',
+          docPagesLabel:st.docPages?('≈ '+st.docPages+' page'+(st.docPages>1?'s':'')+' A4'):'',
+          docZoomLabel:reel?'Ajuster':'Taille réelle',
+          docZoomBasculer:()=>this.setState({docZoom:reel?'':'100'}),
+        };
+      })(),
       /* Sujets rediges, sur la feuille du candidat : jamais leur corrige. */
       printSujets:((active&&active.sujets)||[]).filter(x=>x&&(x.texte||x.genre==='presentation')).map(x=>({
         titre:(x.auChoix?'Sujet au choix \u2014 ':'')+(x.titre||'Sujet'),

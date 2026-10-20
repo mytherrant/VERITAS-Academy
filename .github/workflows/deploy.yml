@@ -1579,7 +1579,7 @@ jobs:
           # minesec.js, c'est un ecran blanc, et le job serait vert.
           # Quatre incidents passes ont cette meme cause (fichier ecrit,
           # jamais « git add » — la CI ne le voit pas au checkout).
-          for m in index.html support.js minesec.js conformite.js exercices.js generateur.js texte.js docx.js; do
+          for m in index.html support.js minesec.js conformite.js exercices.js generateur.js texte.js docx.js progressions.js; do
             if [ ! -f "deploy/plateforme/$m" ]; then
               echo "::error title=Module manquant::plateforme/$m absent du checkout (oubli de git add ?) — deploiement interrompu."
               exit 1
@@ -1594,7 +1594,7 @@ jobs:
           # refuse un deploiement pour cet ecart-la, alors que les six modules
           # etaient rigoureusement identiques. git stocke du LF et le serveur
           # sert du LF : c'est le LF qui fait foi, ici comme dans le versionneur.
-          for m in support minesec conformite exercices generateur texte docx; do
+          for m in support minesec conformite exercices generateur texte docx progressions; do
             reel=$(tr -d '\r' < "deploy/plateforme/$m.js" | sha1sum | cut -c1-8)
             html=$(grep -oE "$m\.js\?v=[0-9a-f]+" deploy/plateforme/index.html | head -1 | sed 's/.*v=//')
             if [ "$reel" != "$html" ]; then
@@ -1853,7 +1853,7 @@ jobs:
           # valide un fichier qu'une etape ulterieure a ensuite reecrit, et la
           # production est partie fausse avec un job vert. On revalide ici, sur
           # les octets qui vont reellement etre televerses.
-          for m in support minesec conformite exercices generateur texte docx; do
+          for m in support minesec conformite exercices generateur texte docx progressions; do
             reel=$(tr -d '\r' < "deploy/plateforme/$m.js" | sha1sum | cut -c1-8)
             html=$(grep -oE "$m\.js\?v=[0-9a-f]+" deploy/plateforme/index.html | head -1 | sed 's/.*v=//')
             if [ "$reel" != "$html" ]; then

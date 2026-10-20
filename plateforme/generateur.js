@@ -596,6 +596,59 @@
     l.push('FORME : texte brut, sans aucune mise en forme Markdown — pas d’astérisques, pas de dièses. Listes avec « - », plans avec « I. », « A. », « 1. ».');
     l.push('REMARQUES : trois points au plus, propres à CETTE épreuve (une citation à vérifier, une date incertaine, un passage du texte coupé). Ne recopie jamais les règles ci-dessus ni les formules du corrigé.');
     l.push('Ne fabrique JAMAIS un fait, une date ou une citation d’auteur. Si une information te manque, écris « à vérifier ».');
+
+    /* ── MÉTHODE DE CONCEPTION (20/10/2026) ──────────────────────────────
+       Relevée sur des sujets de concours relus et validés (guide de
+       correction, annexe aux intervenants) : ce qui fait qu'un sujet se
+       corrige vite et sans litige. Ambassa produisait le sujet et le
+       corrigé ; le correcteur devait encore inventer les critères, les
+       plafonds et les repères — c'est là que deux correcteurs divergent. */
+    l.push('');
+    l.push('MÉTHODE DE CONCEPTION — ce qui rend un sujet corrigeable sans litige :');
+    l.push('- Avant d’écrire, vérifie que chaque question porte sur un aspect IMPORTANT du texte et sur une notion déjà étudiée. Aucune question sur un détail anecdotique, aucune sur une notion exclue.');
+    l.push('- Une seule difficulté par question, et une seule réponse juste possible pour les questions de repérage et d’analyse.');
+    if (reflexion || (plan && plan.sujets.some(function (s) { return /commentaire|dissertation|essai|discussion/.test(s.genre || ''); }))) {
+      l.push('- SUJET DE RÉFLEXION : la thèse ou la citation proposée est attribuée (auteur, œuvre, et passage s’il est connu). La consigne ORIENTE la réflexion par une ou deux questions directrices (« Vous vous demanderez notamment si… »), sans jamais livrer le plan.');
+      l.push('- Dans le corrigé d’un sujet de réflexion : la problématique en une phrase, un plan détaillé possible (I., A., 1.), les exemples attendus de l’œuvre ou de la culture de l’élève, et le principal contresens à éviter.');
+    }
+    if (plan && plan.productions && plan.productions.some(function (x) { return x.genre === 'resume'; })) {
+      l.push('- RÉSUMÉ OU CONTRACTION : la consigne donne le nombre de mots visé, la tolérance (10 % en plus ou en moins) et demande d’indiquer le nombre de mots employés à la fin. Le corrigé propose un résumé modèle qui respecte cette longueur, dans l’ordre et l’énonciation du texte (jamais « l’auteur dit »).');
+    }
+    l.push('- Pour chaque question, le corrigé nomme le CONTRESENS ou l’erreur la plus probable, et ce qu’elle coûte.');
+    l.push('');
+    l.push('GUIDE DE CORRECTION (clé "guide" du JSON) — court et chiffré, au plus 8 critères :');
+    l.push('- "criteres" : un critère par partie notée (compréhension, langue, production, chaque sujet), avec ses points (la somme égale le total de l’épreuve), "attendu" (les éléments qui rapportent les points, en une ou deux phrases) et "reperes" (les PLAFONDS : « contresens sur la thèse : 2 au plus », « paraphrase : moitié des points », « hors sujet : 0 »).');
+    l.push('- "penalites" : deux à quatre règles chiffrées et plafonnées — langue (ex. au-delà de cinq fautes, 0,5 point par tranche de cinq, dans la limite de 2 points), longueur, présentation.');
+    l.push('- "niveaux" : le profil d’une copie dans chaque tranche, une phrase chacune : "16 à 20", "12 à 15,5", "8 à 11,5", "0 à 7,5".');
+    l.push('- "erreurs" : trois à cinq erreurs prévisibles des élèves de cette classe, et le critère où chacune se sanctionne — sans les cumuler.');
+    /* ── RENFORCEMENT (20/10/2026, demandé par Jacques) ─────────────────
+       Le registre et la longueur des productions selon le sous-cycle étaient
+       décrits dans MINESEC.sousCycles et jamais transmis ; l'ancrage
+       camerounais, la typographie et la relecture finale ne l'étaient pas
+       davantage. La relecture est formulée en tâches VÉRIFIABLES : Ambassa
+       ne s'auto-certifie pas, l'Atelier recompte, mais un premier tri évite
+       des réécritures (et le quota qu'elles coûtent). */
+    /* Premier cycle seulement : la seule entrée du second cycle décrit les
+       séries scientifiques et techniques — l'envoyer à une Terminale A
+       aurait été faux. */
+    var premierCycle = !!(ref && ref.cleClasse && /^[3-6]e$/.test(ref.cleClasse(classe || '')));
+    var sc = premierCycle && ref.sousCycles ? ref.sousCycles.filter(function (x) {
+      return (x.classes || []).some(function (c) { return ref.cleClasse && ref.cleClasse(c) === ref.cleClasse(classe); });
+    })[0] : null;
+    if (sc) l.push('- NIVEAU ATTENDU — ' + sc.nom + ' : ' + sc.style);
+    l.push('- CONTEXTE : situations de vie camerounaises et africaines (école, quartier, marché, famille, village, ville), prénoms et lieux camerounais, sans caricature ni stéréotype ; jamais de référence à un contexte qu’un élève camerounais ne connaît pas.');
+    l.push('- TYPOGRAPHIE FRANÇAISE : guillemets « » avec espaces, espace avant « : ; ? ! », majuscules accentuées (« À », « É »), titres d’œuvres cités exactement.');
+    l.push('');
+    l.push('AVANT DE RÉPONDRE — relis ta copie et corrige-la toi-même :');
+    l.push('1. La somme des points égale le total annoncé, bloc par bloc ; aucune question à moins de 0,5 point.');
+    l.push('2. Chaque citation entre « » se trouve mot pour mot dans le texte support.');
+    l.push('3. Aucune question ne porte sur une notion exclue ni sur un passage du texte non transmis.');
+    l.push('4. Chaque consigne de production donne le type de texte, la longueur et la situation ; la tâche est réalisable dans la durée de l’épreuve.');
+    l.push('5. Chaque question a son corrigé, et le corrigé répond à la question posée, pas à une autre.');
+    l.push('6. Le guide de correction reprend le barème réel, critère par critère.');
+    l.push('7. Langue irréprochable : orthographe, accords, conjugaison, ponctuation — une épreuve de français fautive est inutilisable.');
+    l.push('');
+    l.push('NOTE AU RELECTEUR (clé "note") — trois à cinq lignes en tout : "choix" (pourquoi ce texte et ce sujet : lien avec la séquence, structure, difficulté visée), "perimetre" (notions évaluées), "points" (deux à quatre points précis sur lesquels le relecteur doit trancher : une question dont tu doutes, un barème discutable, une référence à vérifier).');
     l.push('Classe visée : ' + (classe || 'non précisée') + '.');
     return l.join('\n');
   }
@@ -646,6 +699,20 @@
     l.push('Compose l’épreuve suivante et réponds en JSON strict.');
     l.push('Épreuve : ' + (plan.nom || 'épreuve de français') + ' — classe ' + (ctx.classe || '?') + (ctx.serie ? ', série ' + ctx.serie : '') + '. Total : ' + plan.total + ' points.');
     if (ctx.theme) l.push('Thème ou domaine de vie souhaité par l’enseignant : ' + ctx.theme + '.');
+    /* Assistant de composition (19/10/2026) : le cadre, ce qui a été fait en
+       classe, l'œuvre, et surtout ce qu'il NE FAUT PAS évaluer. Une notion
+       pas encore vue qui tombe à l'épreuve, c'est une copie sanctionnée pour
+       un cours que l'élève n'a pas eu. */
+    if (ctx.cadre) l.push('Cadre : ' + ctx.cadre + (ctx.borne ? ', programme borné au ' + ctx.borne : '') + '.');
+    if (ctx.progression) l.push('Progression nationale suivie : ' + ctx.progression + '.');
+    if (ctx.tache) l.push('Tâche d’intégration OFFICIELLE de cette séquence (modèle de situation-problème et de consigne en 1-2-3 pour l’expression écrite ; adapte-la, ne la recopie pas) : ' + ctx.tache);
+    if (ctx.programmeFait && ctx.programmeFait.length) {
+      l.push('Leçons déjà faites en classe (le sujet s’y appuie) : ' + ctx.programmeFait.map(function (x) { return String(x).slice(0, 140); }).join(' ; ') + '.');
+      l.push('Les questions de langue portent EN PRIORITÉ sur ces notions, appliquées à des phrases du texte ; une notion de la liste absente du texte ne s’invente pas, on en prend une autre de la liste.');
+    }
+    if (ctx.oeuvre) l.push('Œuvre au programme étudiée : ' + ctx.oeuvre + ' — privilégie-la pour les sujets qui portent sur une œuvre ; n’en invente aucune citation.');
+    if (ctx.cadre && /maison|vacances/i.test(ctx.cadre)) l.push('DEVOIR FAIT HORS DE LA CLASSE : dans "guide.erreurs", ajoute les indices d’une copie rédigée par une IA ou recopiée (citations introuvables dans l’œuvre ou le texte, épisodes inexistants, langue uniformément lisse sans aucune trace de brouillon, plan identique à une copie voisine) et la conduite à tenir : convoquer l’élève pour qu’il explique sa démarche, sans annoter la copie.');
+    if (ctx.exclusions && ctx.exclusions.length) l.push('NOTIONS EXCLUES — ne les utilise pas, même implicitement, ni dans les questions ni dans le corrigé : ' + ctx.exclusions.join(' ; ') + '.');
     /* Sujets au choix (Probatoire / BAC) : le sujet sur le texte en est UN,
        pas une « première partie obligatoire » (audit 16/10/2026). */
     var nbChoix = plan.sujets.filter(function (s) { return s.auChoix; }).length + (plan.sujetTexte ? 1 : 0);
@@ -710,7 +777,11 @@
     l.push('{"titre":"…","consigne":"consigne générale courte",'
       + '"questions":[{"texte":1,"liste":"comp|expl","bloc":"c0|comp|r0|expl|p0…","q":"énoncé","pts":1.5,"niveau":"reperage|analyse|interpretation|production","corrige":"réponse attendue"}],'
       + '"sujets":[{"texte":"énoncé complet du sujet","corrige":"attentes et plan possible"}],'
-      + '"grille":[{"critere":"…","points":6,"indicateurs":"…"}],"remarques":"ce que l’enseignant doit vérifier"}');
+      + '"grille":[{"critere":"…","points":6,"indicateurs":"…"}],'
+      + '"guide":{"criteres":[{"critere":"…","points":4,"attendu":"…","reperes":"…"}],"penalites":["…"],'
+      + '"niveaux":{"16 à 20":"…","12 à 15,5":"…","8 à 11,5":"…","0 à 7,5":"…"},"erreurs":["…"]},'
+      + '"note":{"choix":"…","perimetre":"…","points":["…"]},'
+      + '"remarques":"ce que l’enseignant doit vérifier"}');
     return l.join('\n');
   }
 
@@ -1190,6 +1261,28 @@
     (o && Array.isArray(o.grille) ? o.grille : []).forEach(function (g) {
       if (g && g.critere) res.grille.push({ critere: propre(g.critere, 160), points: nombre(g.points), indicateurs: propre(g.indicateurs, 500) });
     });
+
+    /* --- guide de correction et note au relecteur (20/10/2026) ---
+       Bornés comme le reste : une réponse trop bavarde ne doit pas remplir
+       l'écran de l'enseignant. Absents, ils restent absents — le guide se
+       pré-remplit alors depuis le barème, comme avant. */
+    var gd = o && o.guide && typeof o.guide === 'object' ? o.guide : null;
+    var liste = function (x, n, max) { return (Array.isArray(x) ? x : (x ? [x] : [])).map(function (y) { return propre(y, max); }).filter(Boolean).slice(0, n); };
+    if (gd) {
+      var niv = {};
+      ['16 à 20', '12 à 15,5', '8 à 11,5', '0 à 7,5'].forEach(function (t) { if (gd.niveaux && gd.niveaux[t]) niv[t] = propre(gd.niveaux[t], 300); });
+      res.guide = {
+        criteres: (Array.isArray(gd.criteres) ? gd.criteres : []).filter(function (c) { return c && c.critere; }).slice(0, 8).map(function (c) {
+          return { critere: propre(c.critere, 160), points: nombre(c.points), attendu: propre(c.attendu, 500), reperes: propre(c.reperes, 400) }; }),
+        penalites: liste(gd.penalites, 5, 300), niveaux: niv, erreurs: liste(gd.erreurs, 7, 300)
+      };
+      if (!res.guide.criteres.length && !res.guide.penalites.length && !res.guide.erreurs.length) res.guide = null;
+    }
+    var nt = o && o.note && typeof o.note === 'object' ? o.note : null;
+    if (nt) {
+      res.note = { choix: propre(nt.choix, 600), perimetre: propre(nt.perimetre, 400), points: liste(nt.points, 5, 300) };
+      if (!res.note.choix && !res.note.perimetre && !res.note.points.length) res.note = null;
+    }
 
     /* --- barème : recalé bloc par bloc sur le plan --- */
     if (ctx.fixes) {
