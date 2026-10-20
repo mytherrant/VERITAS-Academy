@@ -12238,6 +12238,17 @@ function pgAValider(){
 window.pgAValider = pgAValider;
 window._navBasculer = _navBasculer;
 window._navFiltrer = _navFiltrer;
+/* 19/10/2026 — L'émoji de tête d'un intitulé de section (« 💰 Finances »)
+   devient le pictogramme au trait de la vitrine dès le rendu. vtIconize()
+   ne le voyait pas : il n'agit que sur un nœud texte placé en PREMIER dans
+   .sbsl, et le menu repliable enveloppe le libellé dans un <span>. Le texte
+   brut (clés de _ouv, recherche data-l) n'est pas touché. */
+function _navLib(t){
+  var m=String(t).match(/^(\S+)\s+([\s\S]*)$/);
+  if(!m||typeof PIC!=='function') return t;
+  var ico=PIC(m[1]);
+  return ico!==m[1] ? '<span class="vt-ico-pre">'+ico+'</span>'+m[2] : t;
+}
 function buildNav(){
   let nav;
   if(isSA())nav=SANAV;
@@ -12259,8 +12270,8 @@ function buildNav(){
     const actif=s.i.some(it=>it.k===pg);
     const ouvert=!_repliable||actif||(s.s in _ouv ? _ouv[s.s] : !s.replie && si===0);
     const tete=_repliable
-      ? `<button type="button" class="sbsl sbsl-btn" aria-expanded="${ouvert}" onclick="_navBasculer(${si})"><span>${s.s}</span><span class="sbsl-n">${s.i.length}</span><span class="sbsl-ch">${ouvert?'▾':'▸'}</span></button>`
-      : `<div class="sbsl">${s.s}</div>`;
+      ? `<button type="button" class="sbsl sbsl-btn" aria-expanded="${ouvert}" onclick="_navBasculer(${si})"><span>${_navLib(s.s)}</span><span class="sbsl-n">${s.i.length}</span><span class="sbsl-ch">${ouvert?'▾':'▸'}</span></button>`
+      : `<div class="sbsl">${_navLib(s.s)}</div>`;
     return `<div class="sbsec${ouvert?'':' ferme'}" data-sec="${si}">${tete}<div class="sbsec-corps">${s.i.map(it=>{
     const b=it.k==='payments'&&un>0&&iA()?`<span class="sbbg">${un}</span>`:'';
     const elBadge=it.k==='elearningmgmt'&&pendingAbos>0&&iA()?`<span class="sbbg" style="background:#AE5353">${pendingAbos}</span>`:'';
@@ -12395,7 +12406,7 @@ function cm(){
   try { if(window._lastFocusedBeforeModal && document.contains(window._lastFocusedBeforeModal)) window._lastFocusedBeforeModal.focus(); } catch(e){}
   try{ if(typeof _vApresFermetureModale==='function') _vApresFermetureModale(); }catch(e){}
 }
-function toast(msg,t='ok'){const d=document.createElement('div');const c={ok:['var(--gr)','✓'],warn:['var(--or)','⚠'],err:['var(--re)','✕'],info:['#3C8DFF','ℹ']}[t]||['var(--gr)','✓'];d.style.cssText=`position:fixed;bottom:20px;right:20px;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E6EAF2;color:#142554;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 10px 30px rgba(20,37,84,.16);max-width:360px;animation:su .24s cubic-bezier(.16,1,.3,1);`;d.innerHTML=`<span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${c[0]};color:#fff;font-size:13px;font-weight:800">${c[1]}</span><span>${(''+msg).replace(/</g,'&lt;')}</span>`;document.body.appendChild(d);setTimeout(()=>{d.style.transition='opacity .3s,transform .3s';d.style.opacity='0';d.style.transform='translateY(8px)';setTimeout(()=>d.remove(),300);},3500);}
+function toast(msg,t='ok'){const d=document.createElement('div');const c={ok:['var(--gr)','✓'],warn:['var(--or)','⚠'],err:['var(--re)','✕'],info:['#1E499B','ℹ']}[t]||['var(--gr)','✓'];d.style.cssText=`position:fixed;bottom:20px;right:20px;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E6EAF2;color:#142554;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 10px 30px rgba(20,37,84,.16);max-width:360px;animation:su .24s cubic-bezier(.16,1,.3,1);`;d.innerHTML=`<span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${c[0]};color:#fff;font-size:13px;font-weight:800">${c[1]}</span><span>${(''+msg).replace(/</g,'&lt;')}</span>`;document.body.appendChild(d);setTimeout(()=>{d.style.transition='opacity .3s,transform .3s';d.style.opacity='0';d.style.transform='translateY(8px)';setTimeout(()=>d.remove(),300);},3500);}
 // Toast enrichi avec bouton d'action — utilisé quand cloud KO et fichiers locaux en attente
 function _toastRetrySync(){
   var d=document.createElement('div');
@@ -12474,7 +12485,7 @@ function pgDash(){
     return`<div class="card mb16" style="background:linear-gradient(135deg,#1a6e40,#228844);color:#fff;border:none;padding:22px">
       <div class="fl2 fic g12"><img src="${getLogo()}" alt="" style="width:50px;height:50px;border-radius:50%;background:#fff;padding:3px"><div>
         <div style="font-family:Libre Baskerville,serif;font-size:20px;color:#edfaf3">${s.pre} ${s.nom}</div>
-        <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:2px">Matricule: <strong style="color:#fff">${s.mat}</strong> · Classe: <strong style="color:#fff">${s.cls}</strong></div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:2px">Matricule: <strong style="color:#fff">${_esc(s.mat||'—')}</strong> · Classe: <strong style="color:#fff">${_esc(s.cls||'—')}</strong></div>
         <div style="font-size:13px;color:rgba(255,255,255,.4);margin-top:2px">Inscrit le ${s.ins||'—'} · ${s.stat||'—'}</div>
       </div></div>
     </div>
@@ -12659,7 +12670,7 @@ function pgMonBulletin(){
     <div class="fl2 fic fsb fw g12">
       <div class="fl2 fic g12"><img src="${getLogo()}" alt="" style="width:46px;height:46px;border-radius:50%;background:#fff;padding:3px">
         <div><div style="font-family:Libre Baskerville,serif;font-size:18px;color:#FFC93C">${s.pre} ${s.nom}</div>
-        <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:2px">Matricule: ${s.mat} · Classe: ${s.cls}</div></div>
+        <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:2px">Matricule: ${_esc(s.mat||'—')} · Classe: ${_esc(s.cls||'—')}</div></div>
       </div>
       <div class="fl2 g16 fw">
         <div style="text-align:center"><div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px">Moyenne</div><div class="mono bold" style="font-size:28px;color:${ap?.col||'#fff'}">${moy!==null?moy.toFixed(2):'—'}</div><div style="font-size:13px;color:${ap?.col||'rgba(255,255,255,.5)'}">${ap?.lbl||'—'}</div></div>
@@ -14672,7 +14683,7 @@ function _printBulletinHtmlLegacy(sid,tri){
       <div><span style="color:#888">Nom & Prénoms / Full name :</span> <strong>${s.pre} ${s.nom}</strong></div>
       <div><span style="color:#888">Classe / Class :</span> <strong>${s.cls}</strong> — Effectif / Enrolment : <strong>${DB.students.filter(st=>st.cls===s.cls).length}</strong></div>
       <div><span style="color:#888">Né(e) le / Date of birth :</span> <strong>${s.dob||'—'}</strong></div>
-      <div><span style="color:#888">Matricule / ID :</span> <strong style="color:#9a7228">${s.mat}</strong></div>
+      <div><span style="color:#888">Matricule / ID :</span> <strong style="color:#9a7228">${_esc(s.mat||'—')}</strong></div>
       <div><span style="color:#888">Sexe / Sex :</span> <strong>${s.sex==='F'?'Féminin / Female':'Masculin / Male'}</strong></div>
       <div><span style="color:#888">Parent/Tuteur / Parent or guardian :</span> <strong>${s.parent||'—'}</strong> ${s.ptel?'· <span style="color:#1a3a8a">'+s.ptel+'</span>':''}</div>
       <div><span style="color:#888">Statut / Status :</span> <strong style="color:${isRedoublant?'#b82828':'#1a6e40'}">${isRedoublant?'Redoublant(e) / Repeating':'Non-redoublant(e) / First attempt'}</strong></div>
@@ -16781,7 +16792,7 @@ function _cloudEtatHtml(){
     titre='Plus aucune sauvegarde depuis '+jours+' jours';
     detail='Vos saisies des '+jours+' derniers jours n’existent que dans CE navigateur. Exportez une sauvegarde JSON, puis lancez « Tester la connexion » : une clé refusée (401) se corrige en la ressaisissant ci-dessus.';
   }
-  return '<div class="mt14" style="border-left:4px solid '+ton+';background:'+ton+'12;border-radius:0 10px 10px 0;padding:11px 14px">'
+  return '<div class="mt14" style="border:1px solid '+ton+'33;background:'+ton+'12;border-radius:10px;padding:11px 14px">'
     +'<div style="font-weight:800;font-size:13.5px;color:'+ton+'">'+ico+' '+_esc(titre)+'</div>'
     +'<div style="font-size:12.5px;color:var(--ink3,#5A6785);margin-top:3px;line-height:1.5">'+_esc(detail)+'</div>'
     +(brut?'<div style="font-size:11.5px;color:var(--ink4,#8A96AE);margin-top:5px">Dernière réussite : '+_esc(brut)+'</div>':'')
@@ -46471,7 +46482,8 @@ window.EMO2ICO = {
   '⚔':'i-target',       '🎭':'i-quote',       '🌿':'i-feather',    '🔌':'i-tool',
   '📺':'i-play',        '👋':'i-users',       '👍':'i-check',      '🏙':'i-school',
   '🌆':'i-school',      '🚌':'i-bus',         '🛏':'i-bed',        '🍽':'i-utensils',
-  '🫕':'i-utensils',    '📶':'i-chart',       '🗳':'i-box',        '🎗':'i-award'
+  '🫕':'i-utensils',    '📶':'i-chart',       '🗳':'i-box',        '🎗':'i-award',
+  '👨‍🏫':'i-teacher',    '👩‍🏫':'i-teacher',  '🗄':'i-box'
 
   /* Volontairement NON mappés — ce ne sont pas des icônes d'interface :
      — 🟠 🔵 🟢 ⚪ 🔴 🟡 🟣 : pastilles d'état, leur couleur EST l'information ;
@@ -51894,7 +51906,7 @@ window._payResumeFromHash = function(){
    ══════════════════════════════════════════════════════════════════════ */
 (function(){
   // Conteneurs dont le rôle est de porter une icône, et rien d'autre.
-  var PORTE_ICONE = '.sci,.sbic,.i-disc,.rc-ico,.stat-ico,.kpi-ico,.card-ico';
+  var PORTE_ICONE = '.sci,.sbic,.i-disc,.rc-ico,.stat-ico,.kpi-ico,.card-ico,.si';
   // Conteneurs qui commencent par une icône, suivie d'un libellé.
   var PREFIXE = '.mtt,.pgt,.sbsl,.scl';
 
@@ -51935,6 +51947,40 @@ window._payResumeFromHash = function(){
       el.insertBefore(boite, el.firstChild);
       n++;
     });
+
+    /* 19/10/2026 — « supprime les émojis partout » : les boutons, liens et
+       en-têtes de l'administration ouvrent souvent sur un émoji (« 🗑 »,
+       « 💡 Astuce », « 🔍 »), hors des conteneurs ci-dessus. On parcourt les
+       nœuds de TEXTE de l'espace connecté seulement (contenu, menu, et les
+       fenêtres quand il est à l'écran) ; seul un émoji placé EN TÊTE d'un
+       élément d'interface, et qui a son pictogramme, est remplacé. */
+    var app = document.getElementById('APP');
+    if(app && app.style.display !== 'none'){
+      ['cnt','sb','MC'].forEach(function(id){
+        var z = document.getElementById(id);
+        if(!z || !(racine === document.body || racine.contains(z) || z.contains(racine))) return;
+        var w = document.createTreeWalker(z, NodeFilter.SHOW_TEXT, null), lot = [], t;
+        while((t = w.nextNode())) if(EMO.test(t.nodeValue)) lot.push(t);
+        lot.forEach(function(t){
+          var el = t.parentNode;
+          if(!el || el.nodeType !== 1 || el.closest('svg,textarea,pre,code,[contenteditable]')) return;
+          if(!el.closest('button,a,th,h1,h2,h3,h4,h5,label,summary,.btn,[onclick],.badge,[class*="tag"],[class*="chip"]')) return;
+          for(var k = t.previousSibling; k; k = k.previousSibling){
+            if((k.nodeType === 3 && k.nodeValue.trim()) || (k.nodeType === 1 && k.textContent.trim())) return;
+          }
+          var m = t.nodeValue.match(EMO);
+          if(!m) return;
+          var svg = svgPour(m[1]);
+          if(!svg) return;
+          t.nodeValue = t.nodeValue.slice(m[0].length);
+          var boite = document.createElement('span');
+          boite.className = 'vt-ico-pre';
+          boite.innerHTML = svg;
+          el.insertBefore(boite, t);
+          n++;
+        });
+      });
+    }
     return n;
   }
   window.vtIconize = balayer;
@@ -51946,8 +51992,14 @@ window._payResumeFromHash = function(){
   var enCours = false, minuteur = null, obs = null;
   function planifier(){
     if(enCours) return;
-    clearTimeout(minuteur);
+    /* 19/10/2026 — borné, plus repoussé : un anti-rebond pur (clearTimeout à
+       chaque mutation) ne partait JAMAIS tant que la page bougeait encore —
+       horloge, compteurs, rendus en cascade. Les intitulés du menu admin
+       restaient en émojis (« 🎓 Élèves »). Désormais : au plus 60 ms après
+       la PREMIÈRE mutation. */
+    if(minuteur) return;
     minuteur = setTimeout(function(){
+      minuteur = null;
       enCours = true;
       try{ balayer(document.body); } catch(e){}
       enCours = false;

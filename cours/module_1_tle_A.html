@@ -7,18 +7,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --or:#b8860b;--or-clair:#fef7e0;--vert:#1a5c3a;--vert-clair:#e8f5ee;
-  --rouge:#8b1a1a;--rouge-clair:#f8e8e8;--bleu:#1a3a6b;--bleu-clair:#e0eaf5;
-  --violet:#4a1a7a;--violet-clair:#ede8ff;--teal:#0d5c5c;--teal-clair:#e0f5f5;
-  --bg:#faf8f3;--card:#fff;--text:#1a1208;--muted:#6b5a3a;--radius:14px;
-  --marine:#0a2a4a;
+  --or:#A84200;--or-clair:#FFF3E4;--vert:#007E11;--vert-clair:#E7F7EC;
+  --rouge:#8b1a1a;--rouge-clair:#f8e8e8;--bleu:#1E499B;--bleu-clair:#DBE8FE;
+  --violet:#5B4FA8;--violet-clair:#EEE9F8;--teal:#0E7C86;--teal-clair:#E3F1EE;
+  --bg:#F4F5F8;--card:#fff;--text:#001136;--muted:#5F6475;--radius:14px;
+  --marine:#001136;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
 /* ── HEADER ── */
 .main-header{
-  background:linear-gradient(135deg,#1a0a08 0%,#3a1808 40%,#1a5c3a 70%,#b8860b 100%);
+  background:linear-gradient(135deg,#001136 0%,#142554 55%,#1E499B 100%);
   color:#fff;padding:36px 20px 28px;text-align:center;position:relative;overflow:hidden
 }
 .main-header::before{content:'';position:absolute;inset:0;
@@ -60,18 +60,20 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .lesson-header{border-radius:var(--radius);padding:22px 24px;margin-bottom:22px;color:#fff;position:relative;overflow:hidden}
 .lesson-header::before{content:'';position:absolute;inset:0;
   background:repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 1px,transparent 1px,transparent 18px)}
-.lesson-header.or{background:linear-gradient(135deg,#1a0a08,#3a2408,#b8860b)}
-.lesson-header.vert{background:linear-gradient(135deg,#0a1a10,#1a5c3a)}
-.lesson-header.bleu{background:linear-gradient(135deg,#0a1a2a,#1a3a6b)}
-.lesson-header.violet{background:linear-gradient(135deg,#1a0a3a,#4a1a7a)}
-.lesson-header.rouge{background:linear-gradient(135deg,#1a0808,#8b1a1a)}
-.lesson-header.teal{background:linear-gradient(135deg,#0a1a1a,#0d5c5c)}
-.lesson-header.marine{background:linear-gradient(135deg,#060e16,#0a2a4a,#0d5c5c)}
+.lesson-header.or{background:linear-gradient(135deg,#001136,#142554,#1E499B)}
+.lesson-header.vert{background:linear-gradient(135deg,#00450A,#007E11)}
+.lesson-header.bleu{background:linear-gradient(135deg,#001136,#1E499B)}
+.lesson-header.violet{background:linear-gradient(135deg,#2E2766,#5B4FA8)}
+.lesson-header.rouge{background:linear-gradient(135deg,#5E1F3B,#B03A6E)}
+.lesson-header.teal{background:linear-gradient(135deg,#06474D,#0E7C86)}
+.lesson-header.marine{background:linear-gradient(135deg,#001136,#142554,#0E7C86)}
 .lesson-tag{display:inline-block;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.3);
   border-radius:99px;font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
   padding:3px 12px;margin-bottom:8px}
 .lesson-header h2{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;line-height:1.2;margin-bottom:4px}
 .lesson-header p{font-size:.84rem;opacity:.8}
+/* .or (couleur d'accent) repeignait le texte de l'en-tête sur fond sombre. */
+.lesson-header.or,.lesson-header.or p{color:#fff}
 
 /* ── CARDS ── */
 .card{background:var(--card);border-radius:var(--radius);padding:20px;margin-bottom:16px;
@@ -148,7 +150,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 /* ── TABLE ── */
 .table-wrap{overflow-x:auto;border-radius:var(--radius);box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:16px}
 table{width:100%;border-collapse:collapse;background:#fff;font-size:.84rem}
-thead tr{background:linear-gradient(135deg,#1a0a08,#3a2408);color:var(--or-clair)}
+thead tr{background:linear-gradient(135deg,#001136,#142554);color:var(--or-clair)}
 th,td{padding:11px 13px;text-align:left;border-bottom:1px solid #f0e8d8}
 th{font-family:'Playfair Display',serif;font-weight:700;font-size:.86rem}
 tr:hover td{background:#fdf8f0}
@@ -197,7 +199,7 @@ td:first-child{font-weight:700;color:var(--muted)}
 
 /* ── PLAN ── */
 .plan-box{border-radius:var(--radius);overflow:hidden;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
-.plan-header{background:linear-gradient(135deg,#1a0a08,#3a2408);color:var(--or-clair);
+.plan-header{background:linear-gradient(135deg,#001136,#142554);color:var(--or-clair);
   padding:11px 17px;font-family:'Playfair Display',serif;font-size:.92rem;font-weight:700}
 .plan-body{background:#fff;padding:13px 17px;font-size:.87rem;line-height:1.78}
 .plan-body strong{color:var(--or)}
@@ -247,7 +249,7 @@ td:first-child{font-weight:700;color:var(--muted)}
 .recap-list .ico{font-size:1.3rem;flex-shrink:0}
 
 /* ── MOBILE ── */
-.menu-toggle{display:none;position:fixed;top:12px;left:12px;z-index:999;
+.menu-toggle{display:none;position:fixed;bottom:20px;left:16px;z-index:999;
   background:var(--or);color:#fff;border:none;border-radius:50%;
   width:42px;height:42px;font-size:1.2rem;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.2)}
 @media(max-width:700px){
@@ -2561,7 +2563,7 @@ function resetMythDrop() {
         <p style="font-size:14px;line-height:1.7;margin:0 0 16px;max-width:300px">Centre d'Excellence Scolaire — Douala, Cameroun. Cours, corrigés et accompagnement conformes au programme MINESEC.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border-radius:100px;padding:6px 12px;font:500 12px Poppins,sans-serif;color:#FFC93C"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-smartphone"></use></svg>MTN MoMo</span>
-          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border-radius:100px;padding:6px 12px;font:500 12px Poppins,sans-serif;color:#A84200"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-coins"></use></svg>Orange Money</span>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border-radius:100px;padding:6px 12px;font:500 12px Poppins,sans-serif;color:#FF9F5A"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-coins"></use></svg>Orange Money</span>
           <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border-radius:100px;padding:6px 12px;font:500 12px Poppins,sans-serif;color:#7BD99C"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shield"></use></svg>Reçu automatique</span>
         </div>
       </div>

@@ -592,7 +592,42 @@
     }
   }
 
+  /* 19/10/2026 — L'ESPACE CONNECTÉ AUSSI (« tout doit être aligné sur la
+     vitrine », espaces élève, enseignant et administration compris). Audit
+     local des 122 écrans : plus de 3 000 textes sous 4,5:1, presque tous
+     écrits EN DUR par les fonctions de rendu (pgDash, pgPaywall…) pour un
+     fond qui n'est plus le leur. Ici, seule l'ENCRE est corrigée : ni
+     aplatissement des dégradés, ni médaillons — les cartes et les bandeaux
+     de l'administration restent ce qu'ils sont. Police et barre latérale :
+     §41 de theme-lws.css. */
+  function passeApp() {
+    var app = document.getElementById('APP');
+    if (!app || getComputedStyle(app).display === 'none') return;
+    /* Émojis de tête → pictogrammes (vtIconize, app.js). Son propre
+       observateur ne se déclenche plus : on le rejoue à chaque rendu. Un
+       second passage ne trouve plus rien, donc ne mute rien — pas de boucle. */
+    try { if (typeof window.vtIconize === 'function') window.vtIconize(document.body); } catch (e) {}
+    var zones = [document.getElementById('cnt'), document.getElementById('sb'),
+                 document.getElementById('MC')];
+    for (var z = 0; z < zones.length; z++) {
+      if (!zones[z]) continue;
+      var nn = zones[z].querySelectorAll('*');
+      for (var k = 0; k < nn.length; k++) {
+        var el = nn[k];
+        for (var c = 0; c < el.childNodes.length; c++) {
+          var n = el.childNodes[c];
+          if (n.nodeType === 3 && n.textContent.trim().length > 1) {
+            if (horsHabillage(el)) corrigerCouleur(el);
+            break;
+          }
+        }
+      }
+    }
+  }
+  window._vtPasseApp = function () { try { passeApp(); } catch (e) {} };
+
   function passe(racine) {
+    try { passeApp(); } catch (e) {}
     var portail = racine || document.getElementById('VISITOR');
     if (!portail) return;
     try { vitriner(document.getElementById('vContent')); } catch (e) {}
@@ -669,8 +704,17 @@
     }).observe(portail, { childList: true, subtree: true });
     var mcObs = document.getElementById('MC');
     if (mcObs) new MutationObserver(function () {
-      requestAnimationFrame(function () { try { modales(); } catch (e) {} });
+      requestAnimationFrame(function () { try { modales(); } catch (e) {} try { passeApp(); } catch (e) {} });
     }).observe(mcObs, { childList: true, subtree: false });
+    /* goTo() remplace #cnt d'un bloc ; certaines pages complètent ensuite
+       leur contenu (fetch, minuteries) : on écoute tout le sous-arbre, une
+       passe par image au plus. */
+    var cntObs = document.getElementById('cnt'), appAttente = false;
+    if (cntObs) new MutationObserver(function () {
+      if (appAttente) return;
+      appAttente = true;
+      requestAnimationFrame(function () { appAttente = false; try { passeApp(); } catch (e) {} });
+    }).observe(cntObs, { childList: true, subtree: true });
 
     /* Le bouton de thème (`vrtToggleTheme`) bascule `data-theme` sur
        <html>. L'observateur ci-dessus n'écoute que les AJOUTS de nœuds :

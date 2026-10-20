@@ -327,12 +327,68 @@
     }
   }
 
+  // 19/10/2026 — « supprime les émojis partout, mets les mêmes icônes que
+  // la vitrine ». Les pages écrites à la main posent des émojis en tête de
+  // leurs boutons, onglets et titres (« 🖨️ Imprimer », « 📍 Section
+  // active », « 🔓 Afficher le corrigé »). On les remplace par le
+  // pictogramme au trait du sprite de la vitrine — la table est celle de
+  // l'application (EMO2ICO, app.js), restreinte aux symboles présents dans
+  // veritas-icons.svg. Seul l'émoji placé EN TÊTE est concerné : un ✔ au
+  // milieu d'un corrigé est du contenu. ✔ ✓ ✗ ★ ☆ ♂ ♀ restent des signes.
+  var PICTOS = {"📚":"i-book","📖":"i-book-open","📘":"i-book","📗":"i-book","📕":"i-book","📙":"i-book","📓":"i-notebook","📄":"i-file-text","📃":"i-file-text","📝":"i-pen","✍":"i-feather","✏":"i-pen","🖊":"i-pen","🖋":"i-feather","📋":"i-clipboard-check","📜":"i-file-text","📎":"i-link","🔗":"i-link","📁":"i-box","📂":"i-box","🗂":"i-box","📐":"i-scale","📏":"i-scale","🎓":"i-graduation","🏫":"i-school","🏛":"i-school","🧠":"i-brain","💡":"i-lightbulb","✅":"i-check","☑":"i-check","✔":"i-check","✓":"i-check","❌":"i-x-circle","✗":"i-x-circle","✕":"i-x-circle","🚫":"i-x-circle","🎯":"i-target","📊":"i-chart","📈":"i-chart","📉":"i-chart","🏆":"i-award","🥇":"i-award","🥈":"i-award","🥉":"i-award","🏅":"i-award","🎖":"i-award","🏵":"i-award","👑":"i-award","⭐":"i-star","🌟":"i-star","✨":"i-sparkle","💫":"i-sparkle","👤":"i-users","👥":"i-users","👨":"i-users","👩":"i-users","🧑":"i-users","👧":"i-users","👦":"i-users","🧒":"i-users","👪":"i-users","🤝":"i-users","🧑‍🏫":"i-teacher","💰":"i-coins","💵":"i-coins","💴":"i-coins","💶":"i-coins","💸":"i-coins","🏦":"i-briefcase","💳":"i-credit-card","🧾":"i-receipt","🛒":"i-box","🛍":"i-box","🏪":"i-briefcase","📦":"i-box","💼":"i-briefcase","🎁":"i-box","🏢":"i-briefcase","🎟":"i-badge","💬":"i-message","💭":"i-message","📢":"i-megaphone","📣":"i-megaphone","🔔":"i-megaphone","📧":"i-mail","✉":"i-mail","📩":"i-mail","📨":"i-mail","📬":"i-mail","📭":"i-mail","📞":"i-phone","☎":"i-phone","📱":"i-phone","📲":"i-phone","🌐":"i-globe","🌍":"i-globe","📡":"i-globe","🔒":"i-lock","🔐":"i-lock","🔓":"i-lock","🔑":"i-key","🛡":"i-shield","⚠":"i-warning","🚨":"i-warning","❓":"i-lightbulb","🗑":"i-trash","🔄":"i-refresh","🔁":"i-refresh","➕":"i-plus","🔍":"i-search","🔎":"i-search","👁":"i-eye","💾":"i-cloud","☁":"i-cloud","📤":"i-download","📥":"i-download","🖨":"i-printer","⚙":"i-tool","🔧":"i-tool","🛠":"i-tool","🧰":"i-tool","🧹":"i-tool","📌":"i-map","📍":"i-map","🗺":"i-map","🧭":"i-compass","🔬":"i-flask","🧪":"i-flask","⚗":"i-flask","🧬":"i-flask","🎮":"i-gamepad","🧩":"i-puzzle","🎨":"i-image","🖼":"i-image","📸":"i-image","📷":"i-image","🎬":"i-play","🎥":"i-play","📹":"i-play","🎵":"i-music","🎶":"i-music","🔊":"i-volume","🎧":"i-volume","🔇":"i-volume","🎤":"i-mic","🤖":"i-bot","🧮":"i-calculator","💻":"i-grid","🖥":"i-grid","⚖":"i-scale","📅":"i-calendar","📆":"i-calendar","🗓":"i-calendar","🕐":"i-clock","⏰":"i-clock","⚡":"i-sparkle","🚀":"i-sparkle","🔥":"i-sparkle","💪":"i-award","🌱":"i-feather","💎":"i-sparkle","🏗":"i-tool","🎉":"i-sparkle","🎊":"i-sparkle","🏠":"i-home","🏥":"i-first-aid","📰":"i-file-text","👔":"i-briefcase","🎒":"i-backpack","🏷":"i-badge","🔢":"i-calculator","⚔":"i-target","🎭":"i-quote","🌿":"i-feather","🔌":"i-tool","📺":"i-play","👋":"i-users","👍":"i-check","🏙":"i-school","🌆":"i-school","🚌":"i-bus","🛏":"i-bed","🍽":"i-utensils","🫕":"i-utensils","📶":"i-chart","🗳":"i-box","🎗":"i-award","👨‍🏫":"i-teacher","👩‍🏫":"i-teacher","⏱":"i-clock","⏲":"i-clock","🔤":"i-type","🗄":"i-box","✂":"i-scissors","🩺":"i-first-aid"};
+  var EMO_TETE = /^\s*((?:\p{Extended_Pictographic}|\p{Regional_Indicator})(?:️|‍(?:\p{Extended_Pictographic})️?|\p{Emoji_Modifier}|\p{Regional_Indicator})*)\s*/u;
+  var SIGNES = /^[✓-✘★☆♀♂]/;
+  var INTERFACE = 'button,a,h1,h2,h3,h4,h5,h6,summary,label,th,li,' +
+    '[class*="tab"],[class*="chip"],[class*="badge"],[class*="pill"],[class*="btn"],' +
+    '[class*="tag"],[class*="ico"],[class*="titre"],[class*="title"],[class*="head"]';
+  var RETIRABLE = /^(BUTTON|A|H[1-6]|SUMMARY|LABEL|TH)$/;
+  function svgPicto(id) {
+    var ns = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('class', 'vm-pic');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('width', '1em'); svg.setAttribute('height', '1em');
+    var u = document.createElementNS(ns, 'use');
+    u.setAttribute('href', SPRITE + id);
+    svg.appendChild(u);
+    return svg;
+  }
+  function pictos() {
+    // On parcourt les nœuds de TEXTE : l'émoji peut ouvrir un <div> d'état
+    // (« ⏱ Temps », « 📍 Section active ») aussi bien qu'un bouton.
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), lot = [], n;
+    while ((n = w.nextNode())) if (EMO_TETE.test(n.nodeValue)) lot.push(n);
+    for (var i = 0; i < lot.length; i++) {
+      var t = lot[i], el = t.parentNode;
+      if (!el || el.nodeType !== 1 || el.closest('.vrt-hab,svg,script,style,textarea,pre,code')) continue;
+      // En tête de son élément : aucun texte avant lui dans le parent.
+      var avant = false;
+      for (var k = t.previousSibling; k; k = k.previousSibling) {
+        if ((k.nodeType === 3 && k.nodeValue.trim()) || (k.nodeType === 1 && k.textContent.trim())) { avant = true; break; }
+      }
+      if (avant) continue;
+      var m = t.nodeValue.match(EMO_TETE);
+      if (!m || SIGNES.test(m[1])) continue;
+      var id = PICTOS[m[1].replace(/️/g, '')] || PICTOS[m[1]];
+      var ui = el.closest(INTERFACE);
+      if (!id && !(ui && (RETIRABLE.test(ui.tagName) || /tab|chip|btn|badge|pill/i.test(ui.className || '')))) continue;
+      var reste = t.nodeValue.slice(m[0].length);
+      if (id) {
+        var ico = svgPicto(id);
+        if (reste.trim()) ico.style.marginRight = '.4em';
+        el.insertBefore(ico, t);
+      }
+      t.nodeValue = m[0].match(/^\s*/)[0] + reste;
+    }
+  }
+
   function demarrer() {
     poser();
+    try { pictos(); } catch (e) {}
     try { filets(); } catch (e) {}
     try { lisibilite(); } catch (e) {}
     // Les pages qui complètent leur contenu après coup (recherche, filtres).
-    setTimeout(function () { try { filets(); lisibilite(); } catch (e) {} }, 1500);
+    setTimeout(function () { try { pictos(); filets(); lisibilite(); } catch (e) {} }, 1500);
   }
 
   if (document.readyState === 'loading') {
