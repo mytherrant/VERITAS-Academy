@@ -32,7 +32,7 @@
 <script src="./minesec.js?v=5109f163"></script>
 <script src="./conformite.js?v=7948efec"></script>
 <script src="./exercices.js?v=0018edb0"></script>
-<script src="./generateur.js?v=1d6ec81d"></script>
+<script src="./generateur.js?v=115de51a"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=221641f0"></script>
 <!--vrt-habillage:tete-->
@@ -3953,7 +3953,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '20/10 · E';
+const ATELIER_BUILD = '20/10 · F';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -5544,6 +5544,17 @@ class Component extends DCLogic {
       coeff:a.coeff||(struct.coeff&&struct.coeff!=='—'?struct.coeff:''),
       texteSource:source?source.n:null,
       grilleIA:res.grille||[],
+      /* Guide et note rédigés par Ambassa (20/10/2026) : ils remplissent ce
+         qui est VIDE ; un guide déjà écrit par l'enseignant n'est remplacé
+         qu'en recomposition complète (« Tout composer »). */
+      ...(()=>{const o2={};const g0=this._guideDe(a),n0=this._noteDe(a);
+        const gEcrit=g0.criteres.some(c=>c&&(c.attendu||c.reperes))||g0.penalites||g0.erreurs;
+        if(res.guide&&(!gEcrit||mode==='tout'))o2.guide={
+          criteres:res.guide.criteres.map(c=>({critere:c.critere,pts:c.points!=null?String(c.points).replace('.',','):'',attendu:c.attendu||'',reperes:c.reperes||''})),
+          penalites:(res.guide.penalites||[]).join('\n'),niveaux:res.guide.niveaux||{},erreurs:(res.guide.erreurs||[]).join('\n')};
+        if(res.note&&(!(n0.choix||n0.perimetre||n0.points)||mode==='tout'))o2.note={
+          choix:res.note.choix||'',perimetre:res.note.perimetre||'',points:(res.note.points||[]).join('\n')};
+        return o2;})(),
       iaNote:{mode:mode,ts:Date.now(),remarques:res.remarques||'',controles:res.controles||[]}};
     if((defautTitre||mode==='tout')&&res.titre)patch.title=res.titre;
     if((defautConsigne||mode==='tout')&&res.consigne)patch.consigne=res.consigne;
