@@ -1400,6 +1400,53 @@
   </header>
   </sc-if>
 
+  <!-- ============ VOLET PROGRESSION (20/10/2026) ============
+       Pour l'enseignant qui compose À LA MAIN : la progression de la classe,
+       consultable sans quitter l'épreuve — notions semaine par semaine,
+       compétence, tâche d'intégration officielle, évaluation prévue. On y
+       vérifie qu'une question porte sur une notion déjà vue ; on peut copier
+       la tâche, l'insérer comme sujet, ou relier l'épreuve à la séquence
+       (Ambassa reçoit alors les mêmes notions). -->
+  <sc-if value="{{ pvOuvert }}" hint-placeholder-val="{{ false }}">
+  <div data-noprint="1" onClick="{{ pvFermer }}" style="position:fixed;inset:0;background:rgba(14,46,77,.28);z-index:55;animation:fadeIn .2s ease both"></div>
+  <aside data-noprint="1" style="position:fixed;top:0;right:0;width:440px;max-width:94vw;height:100vh;background:var(--cffffff,#fff);border-left:1px solid var(--ce2eaf3,#e2eaf3);box-shadow:-8px 0 30px rgba(20,55,95,.16);z-index:56;display:flex;flex-direction:column;animation:chatIn .28s cubic-bezier(.22,.61,.36,1) both">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--ceef2f7,#eef2f7);display:flex;align-items:center;gap:10px">
+      <div style="flex:1;min-width:0"><div style="font-family:Poppins;font-size:15px;font-weight:700;color:var(--c14375f,#14375f)">Progression</div><div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin-top:1px">{{ pvSous }}</div></div>
+      <button onClick="{{ pvFermer }}" style="width:30px;height:30px;border-radius:50%;border:none;background:var(--cf2f6fb,#f2f6fb);color:var(--c5a6678,#5a6678);cursor:pointer">{{ icClose }}</button>
+    </div>
+    <div style="padding:12px 18px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--ceef2f7,#eef2f7)">
+      <select value="{{ pvClasse }}" onChange="{{ setPvClasse }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:7px 9px;font-size:12.5px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)"><sc-for list="{{ pvClasses }}" as="po" hint-placeholder-count="4"><option value="{{ po.id }}">{{ po.label }}</option></sc-for></select>
+      <div style="display:flex;gap:4px;flex-wrap:wrap"><sc-for list="{{ pvSeqs }}" as="ps" hint-placeholder-count="6"><button onClick="{{ ps.go }}" title="{{ ps.titre }}" style="{{ ps.style }}">{{ ps.label }}</button></sc-for></div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:14px 18px 22px">
+      <div style="{{ pvAbsentStyle }}">Les progressions se chargent…</div>
+      <div style="font-family:Poppins;font-size:14px;font-weight:700;color:var(--c14375f,#14375f)">{{ pvTitre }}</div>
+      <div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin:2px 0 6px">{{ pvDates }}</div>
+      <div style="font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.5;margin-bottom:10px">{{ pvCompetence }}</div>
+      <div style="{{ pvLienStyle }}">{{ pvLien }}</div>
+      <sc-for list="{{ pvSemaines }}" as="w" hint-placeholder-count="6">
+        <div style="padding:8px 0;border-top:1px solid var(--ceef2f7,#eef2f7)">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="{{ w.chip }}">S{{ w.n }} · {{ w.type }}</span><span style="font-size:11px;color:var(--c8b97a8,#8b97a8)">{{ w.dates }}</span><span style="{{ w.ferieStyle }}">{{ w.ferie }}</span></div>
+          <div style="display:flex;flex-direction:column;gap:2px;margin-top:5px"><sc-for list="{{ w.contenus }}" as="ct" hint-placeholder-count="3"><div style="font-size:12.5px;color:var(--c22303f,#22303f);line-height:1.45">• {{ ct }}</div></sc-for></div>
+        </div>
+      </sc-for>
+      <div style="{{ pvTacheStyle }}">
+        <div style="font-family:Poppins;font-size:12px;font-weight:700;color:var(--c7b52c7,#7b52c7);margin-bottom:4px">Tâche d’intégration officielle (S4)</div>
+        <div style="font-size:12.5px;color:var(--c22303f,#22303f);line-height:1.55;white-space:pre-wrap">{{ pvTache }}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+          <button onClick="{{ pvCopier }}" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:6px 11px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">{{ pvCopierLabel }}</button>
+          <button onClick="{{ pvInserer }}" style="{{ pvInsererStyle }}">Insérer comme sujet</button>
+        </div>
+      </div>
+      <div style="{{ pvEvalStyle }}"><strong style="font-family:Poppins;color:var(--c14375f,#14375f)">Évaluation prévue (S5) — </strong>{{ pvEval }}</div>
+    </div>
+    <div style="padding:12px 18px;border-top:1px solid var(--ceef2f7,#eef2f7);display:flex;gap:8px;flex-wrap:wrap">
+      <button onClick="{{ pvRelier }}" style="{{ pvRelierStyle }}">{{ pvRelierLabel }}</button>
+      <button onClick="{{ goProgressions }}" style="background:none;border:none;color:var(--c1a72bb,#1a72bb);font-size:12.5px;font-weight:700;font-family:Poppins;cursor:pointer">Toutes les progressions</button>
+    </div>
+  </aside>
+  </sc-if>
+
   <!-- ============ DISCUSSION D'ÉQUIPE ============ -->
   <sc-if value="{{ chatOpen }}" hint-placeholder-val="{{ false }}">
   <div data-noprint="1" onClick="{{ closeChat }}" style="position:fixed;inset:0;background:rgba(14,46,77,.28);z-index:55;animation:fadeIn .2s ease both"></div>
@@ -1905,6 +1952,7 @@
         <span style="{{ activeStatusChip }}">{{ activeStatusLabel }}</span>
         <span style="{{ readOnlyChip }}">Lecture seule</span>
         <button onClick="{{ focusTiroirBasculer }}" style="{{ focusTiroirStyle }}">{{ focusTiroirLabel }}</button>
+        <button onClick="{{ pvOuvrir }}" title="Consulter la progression de la classe sans quitter l’épreuve" style="{{ pvBoutonStyle }}">{{ pvIcone }}<span>Progression</span></button>
         <span style="margin-left:auto;font-size:12px;color:var(--c9aa5b5,#9aa5b5)">{{ savedNote }}</span>
         <!-- MODE FOCUS (20/10/2026, lot H) : la barre de la vitrine disparaît,
              le menu latéral se réduit à ses icônes, la colonne
@@ -4163,7 +4211,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '20/10 · K';
+const ATELIER_BUILD = '20/10 · L';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -6442,6 +6490,26 @@ class Component extends DCLogic {
     if(st.activeCoursId&&!cos.some(function(c){return c.id===st.activeCoursId;}))suite.activeCoursId=null;
     this.setState(suite,()=>this._persist());
   }
+  /* « MES CLASSES » D'UN APPAREIL À L'AUTRE (20/10/2026). Les préférences
+     vivent dans le compte local (users) qui n'est PAS dans l'état d'équipe :
+     les classes choisies sur l'ordinateur n'apparaissaient pas sur le
+     téléphone. Elles voyagent désormais dans l'état d'équipe, une entrée
+     par compte, horodatée — la plus récente l'emporte. L'état est réécrit en
+     ENTIER à chaque envoi : on garde donc les entrées des autres membres
+     (fusion), sinon chaque envoi effacerait les leurs. */
+  _prefsComptesLocal(){
+    const reg=Object.assign({},this._load('minesec_prefcomptes',{})||{});
+    const me=this._me();const pr=(me&&me.prefs)||{};
+    if(me&&pr.mesClassesLe&&(!reg[me.id]||(reg[me.id].le||0)<pr.mesClassesLe))
+      reg[me.id]={mesClasses:pr.mesClasses||[],le:pr.mesClassesLe};
+    return reg;
+  }
+  _prefsComptesFusion(a,b){
+    const out=Object.assign({},a||{});
+    Object.keys(b||{}).forEach(k=>{const x=b[k];if(!x||!Array.isArray(x.mesClasses))return;
+      if(!out[k]||(+x.le||0)>(+out[k].le||0))out[k]={mesClasses:x.mesClasses.slice(0,40),le:+x.le||0};});
+    return out;
+  }
   _syncContenu(){
     const st=this.state;
     return {epreuves:this._sansDecor(st.epreuves,/^e[1-3]$/),
@@ -6451,6 +6519,7 @@ class Component extends DCLogic {
             msgs:this._msgsPartageables(),
             props:st.proposals||{},
             epSuppr:this._epSuppr(),
+            prefsComptes:this._prefsComptesLocal(),
             maj:Date.now()};
   }
   /* Les messages partent BORNES : une conversation d'annee scolaire ne doit
@@ -6677,12 +6746,18 @@ class Component extends DCLogic {
         const convs=this._fusionnerConvs(this.state.convs,c.convs);
         const msgs=this._fusionnerMsgs(this.state.msgsByConv,c.msgs);
         const props=this._fusionnerProps(this.state.proposals,c.props);
+        const pcs=this._prefsComptesFusion(this._prefsComptesLocal(),c.prefsComptes);
+        this._save('minesec_prefcomptes',pcs);
+        let usersPrefs=users;
+        {const moi=this._me();const mien=moi&&pcs[moi.id];const loc=((moi&&moi.prefs)||{}).mesClassesLe||0;
+          if(mien&&(+mien.le||0)>loc){
+            usersPrefs=(users||this.state.users||[]).map(u=>u.id===moi.id?{...u,prefs:{...(u.prefs||{}),mesClasses:mien.mesClasses,mesClassesLe:+mien.le}}:u);}}
         this._save('minesec_convs',convs);
         this._save('minesec_convmsgs',msgs);
         this._save('minesec_props',props);
         this.setState(Object.assign({epreuves:ep,cours:co,convs:convs,msgsByConv:msgs,
           proposals:props,syncEtat:'ok',syncLe:Date.now(),
-          annotVersion:(this.state.annotVersion||0)+1},users?{users:users}:{}),
+          annotVersion:(this.state.annotVersion||0)+1},usersPrefs?{users:usersPrefs}:{}),
           ()=>this._persistLocal());
       })
       .catch(e=>{this._syncIncident(e);});
@@ -11539,6 +11614,60 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
         :hidden,
       epView,printFiches,doPrint:()=>window.print(),
       ...(()=>{
+        const enCompo=ready&&st.screen==='composeur'&&!!active;
+        const ouvert=enCompo&&!!st.pvOuvert;
+        const base={pvOuvrir:()=>{this._attendreProgs();this.setState({pvOuvert:true});},pvFermer:()=>this.setState({pvOuvert:false}),
+          pvIcone:this._icon('calendar','var(--c1a72bb,#1a72bb)',15),
+          pvBoutonStyle:enCompo?'display:inline-flex;align-items:center;gap:6px;background:var(--cffffff,#fff);border:1px solid var(--cbcd9f2,#bcd9f2);color:var(--c1a72bb,#1a72bb);padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer':hidden,
+          pvOuvert:ouvert};
+        const vide={pvSous:'',pvClasses:[],pvClasse:'',setPvClasse:()=>{},pvSeqs:[],pvAbsentStyle:hidden,pvTitre:'',pvDates:'',pvCompetence:'',pvLien:'',pvLienStyle:hidden,pvSemaines:[],pvTache:'',pvTacheStyle:hidden,pvCopier:()=>{},pvCopierLabel:'',pvInserer:()=>{},pvInsererStyle:hidden,pvEval:'',pvEvalStyle:hidden,pvRelier:()=>{},pvRelierLabel:'',pvRelierStyle:hidden};
+        if(!ouvert)return Object.assign(base,vide);
+        const P=this._progs();
+        if(!P){this._attendreProgs();return Object.assign(base,vide,{pvAbsentStyle:'font-size:12.5px;color:var(--c8b97a8,#8b97a8)'});}
+        const z=this._assDe(active);const mes=((me.prefs||{}).mesClasses)||[];
+        const proches=P.classes.filter(c=>c.atelier&&this._memeClasse(c.atelier,active.classe));
+        const idC=st.pvClasse||z.progId||(mes.find(id=>proches.some(c=>c.id===id)))||(proches[0]&&proches[0].id)||mes[0]||P.classes[0].id;
+        const cls=this._progClasse(idC)||P.classes[0];
+        const auj=this._isoAuj();const ici=this._semaineDe(cls,auj);
+        const numDef=(z.progId===cls.id&&z.progSeq)?+z.progSeq:(ici?ici.seq.num:1);
+        const num=st.pvSeq&&st.pvClasse===cls.id?st.pvSeq:(st.pvSeq&&!st.pvClasse?st.pvSeq:numDef);
+        const sq=cls.sequences.find(x=>x.num===+num)||cls.sequences[0];
+        const rang=c=>(mes.includes(c.id)?0:proches.some(x=>x.id===c.id)?1:2);
+        const coul={ressources:['var(--c1a72bb,#1a72bb)','var(--ce7f1fb,#e7f1fb)'],integration:['var(--c7b52c7,#7b52c7)','var(--cefe8fa,#efe8fa)'],evaluation:['var(--cc26a12,#c26a12)','var(--cfdefdb,#fdefdb)'],remediation:['var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)']};
+        const libT={ressources:'ressources',integration:'intégration',evaluation:'évaluation',remediation:'remédiation'};
+        const relie=z.progId===cls.id&&String(z.progSeq)===String(sq.num);
+        return Object.assign(base,{
+          pvSous:cls.libelle+(ici&&!ici.prochaine?' · cette semaine : séquence '+ici.seq.num+', S'+ici.w.n:''),
+          pvClasses:P.classes.slice().sort((a,b)=>rang(a)-rang(b)).map(c=>({id:c.id,label:(mes.includes(c.id)?'★ ':'')+c.systeme+' · '+c.libelle})),
+          pvClasse:cls.id,setPvClasse:e=>this.setState({pvClasse:val(e),pvSeq:null}),
+          pvSeqs:cls.sequences.map(x=>{const on=x.num===sq.num,cour=!!(ici&&ici.seq.num===x.num);
+            return{label:'Séq. '+x.num,titre:x.module||x.competence||'',go:()=>this.setState({pvClasse:cls.id,pvSeq:x.num}),
+              style:'padding:5px 10px;font-size:11.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer;border:1px solid '+(on?'var(--c1a72bb,#1a72bb)':cour?'var(--cf39200,#f39200)':'var(--ce2eaf3,#e2eaf3)')+';background:'+(on?'var(--c1a72bb,#1a72bb)':'var(--cffffff,#fff)')+';color:'+(on?'var(--cffffff,#fff)':'var(--c5a6678,#5a6678)')};}),
+          pvAbsentStyle:hidden,
+          pvTitre:'Séquence '+sq.num+(sq.module?' — '+sq.module:''),
+          pvDates:this._fmtIso(sq.debut,{day:'numeric',month:'long'})+' → '+this._fmtIso(sq.fin,{day:'numeric',month:'long',year:'numeric'}),
+          pvCompetence:sq.competence||'',
+          pvLien:relie?'Cette épreuve est reliée à cette séquence : Ambassa en reçoit les notions.':'',
+          pvLienStyle:relie?'font-size:12px;color:var(--c188047,#188047);background:var(--ce6f5ec,#e6f5ec);border-radius:8px;padding:7px 10px;margin-bottom:8px':hidden,
+          pvSemaines:(sq.semaines||[]).map(w=>{const c=coul[w.type]||coul.ressources;return{n:w.n,type:libT[w.type]||w.type,dates:w.debut?this._fmtIso(w.debut)+' → '+this._fmtIso(w.fin):'',
+            chip:'font-size:10.5px;font-weight:700;font-family:Poppins;padding:2px 8px;border-radius:999px;color:'+c[0]+';background:'+c[1],
+            ferie:w.feries&&w.feries.length?'férié : '+w.feries.join(', '):'',ferieStyle:w.feries&&w.feries.length?'font-size:10.5px;color:var(--cc0392b,#c0392b);font-weight:700':hidden,
+            contenus:(w.contenus||[]).length?w.contenus:[w.type==='evaluation'?(sq.evaluation||'Évaluation'):w.type==='integration'?'Activités d’intégration':'—']};}),
+          pvTache:sq.integration||'',pvTacheStyle:sq.integration?'margin-top:12px;background:var(--cf7f9fc,#f7f9fc);border:1px solid var(--ceef2f7,#eef2f7);border-radius:10px;padding:11px 12px':hidden,
+          pvCopier:()=>{try{navigator.clipboard.writeText(sq.integration||'');this.setState({pvCopie:Date.now()});}catch(e){}},
+          pvCopierLabel:st.pvCopie&&Date.now()-st.pvCopie<2500?'Copiée ✓':'Copier la tâche',
+          pvInserer:()=>{if(!perm.edit)return;const a=this._active();if(!a)return;
+            const l=(a.sujets||[]).concat([{id:'s'+Date.now().toString(36),genre:'expression',titre:'Expression écrite — tâche d’intégration (séquence '+sq.num+')',texte:sq.integration||'',pts:null,auChoix:false,corrige:'',aRelire:false}]);
+            this._updateActive({sujets:l},'a inséré la tâche d’intégration officielle de la séquence '+sq.num+' ('+cls.libelle+')');this._avis('Tâche insérée comme sujet : vous pouvez l’adapter.','ok');},
+          pvInsererStyle:perm.edit?'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:6px 11px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
+          pvEval:sq.evaluation||'',pvEvalStyle:sq.evaluation?'font-size:12px;color:var(--c5a6678,#5a6678);margin-top:10px;line-height:1.5':hidden,
+          pvRelier:()=>{if(!perm.edit)return;const w4=(sq.semaines||[]).find(w=>w.n===4)||{};
+            this._updateActive({assistant:{...this._assDe(this._active()),progId:relie?'':cls.id,progSeq:relie?'':String(sq.num),borne:relie?this._assDe(this._active()).borne:(w4.fin||this._assDe(this._active()).borne)}},
+              relie?'a détaché l’épreuve de la progression':'a relié l’épreuve à la séquence '+sq.num+' ('+cls.libelle+')');},
+          pvRelierLabel:relie?'Détacher de cette séquence':'Relier l’épreuve à cette séquence',
+          pvRelierStyle:perm.edit?'background:'+(relie?'var(--cffffff,#fff)':'var(--c14375f,#14375f)')+';color:'+(relie?'var(--cc0392b,#c0392b)':'var(--cffffff,#fff)')+';border:1px solid '+(relie?'var(--cecc4bf,#ecc4bf)':'var(--c14375f,#14375f)')+';padding:8px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden});
+      })(),
+      ...(()=>{
         const vu=ready&&['suivi','accueil'].indexOf(st.screen)>=0;
         if(vu)this._attendreProgs();
         const P=this._progs();
@@ -11646,7 +11775,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           progSource:'Sources : '+P.sources.ESG+' ; '+P.sources.EST+' ; '+P.sources.calendrier+'.',
           progOptions:P.classes.map(c=>({id:c.id,label:(mes.includes(c.id)?'★ ':'')+c.systeme+' · '+c.libelle})),
           progId:cls.id,setProgId:ev=>this.setState({progId:val(ev),progOuverts:{}}),
-          progToggleMienne:()=>majMoi({prefs:{...mesPr,mesClasses:estMienne?mes.filter(x=>x!==cls.id):mes.concat([cls.id])}}),
+          progToggleMienne:()=>majMoi({prefs:{...mesPr,mesClasses:estMienne?mes.filter(x=>x!==cls.id):mes.concat([cls.id]),mesClassesLe:Date.now()}}),
           progMienneLabel:estMienne?'★ Dans mes classes':'☆ Ajouter à mes classes',
           progMienneStyle:'border:1px solid '+(estMienne?'var(--cc26a12,#c26a12)':'var(--ce2eaf3,#e2eaf3)')+';background:'+(estMienne?'var(--cfdefdb,#fdefdb)':'var(--cffffff,#fff)')+';color:'+(estMienne?'var(--cc26a12,#c26a12)':'var(--c14375f,#14375f)')+';padding:8px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer',
           progMes:mes.map(id=>this._progClasse(id)).filter(Boolean).filter(c=>c.id!==cls.id).map(c=>({label:c.libelle,go:()=>this.setState({progId:c.id,progOuverts:{}}),
