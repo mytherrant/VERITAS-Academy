@@ -1328,6 +1328,7 @@
       <button onClick="{{ goEpreuves }}" style="{{ sbEpreuves }}" style-hover="background:var(--sb-hover)">{{ sbIcEpreuves }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Épreuves</span></button>
       <button onClick="{{ goCours }}" style="{{ sbCours }}" style-hover="background:var(--sb-hover)">{{ sbIcCours }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Cours</span></button>
       <button onClick="{{ goProgressions }}" style="{{ sbProgressions }}" style-hover="background:var(--sb-hover)">{{ sbIcProg }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Progressions</span></button>
+      <button onClick="{{ goSuivi }}" style="{{ sbSuivi }}" style-hover="background:var(--sb-hover)">{{ sbIcSuivi }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Suivi</span><span style="{{ sbSuiviBadge }}">{{ suiviRetardsN }}</span></button>
       <button onClick="{{ goCollab }}" style="{{ sbCollab }}" style-hover="background:var(--sb-hover)">{{ sbIcCollab }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Collaboration</span><span style="{{ sbMsgBadge }}">{{ msgCount }}</span></button>
     </nav>
 
@@ -1469,6 +1470,13 @@
 
     <h2 style="font-family:'Poppins';font-weight:700;font-size:30px;line-height:1.15;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.02em" class="vrt-th">Bonjour {{ me.first }}</h2>
     <p style="font-size:14px;color:var(--c7a8598,#7a8598);margin:6px 0 24px">{{ team.name }}</p>
+    <!-- « Cette semaine » (20/10/2026, lot J) : où en est la première de mes
+         classes dans sa progression, et la prochaine échéance à tenir. -->
+    <div style="{{ accSemaineStyle }}">
+      <span style="flex:none">{{ accSemaineIcone }}</span>
+      <span style="flex:1;min-width:220px"><span style="display:block;font-family:Poppins;font-size:13.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ accSemaine }}</span><span style="display:block;font-size:12.5px;color:var(--c5a6678,#5a6678);margin-top:2px">{{ accEcheance }}</span></span>
+      <button onClick="{{ accSemaineAller }}" style="background:var(--cffffff,#fff);border:1px solid var(--cf0d9b0,#f0d9b0);color:var(--c14375f,#14375f);padding:7px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">{{ accSemaineBouton }}</button>
+    </div>
     <!-- Visite guidee : dire pourquoi les compteurs sont a zero. Un profil
          d'exemple n'ouvre pas de compte, donc pas de repertoire ; sans cette
          ligne l'interface a l'air cassee alors qu'elle fait ce qu'elle
@@ -3026,6 +3034,81 @@
    </main>
   </sc-if>
 
+  <!-- ============ SUIVI (20/10/2026, lot J) ============
+       Comme le « Suivi » de Tchouskou : un calendrier DÉDUIT des progressions
+       de mes classes — sujet prêt une semaine avant l'évaluation (S5),
+       épreuve en S5, corrigé et compte rendu en S6 — et, pour chaque
+       échéance, l'état réel de l'épreuve liée. -->
+  <sc-if value="{{ isSuivi }}" hint-placeholder-val="{{ false }}">
+  <main style="flex:1;max-width:1360px;margin:0 auto;padding:28px 30px 48px;width:100%">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
+      <h2 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Suivi</h2>
+      <button onClick="{{ goProgressions }}" style="margin-left:auto;background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:7px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer">Progressions et mes classes</button>
+    </div>
+    <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 16px;max-width:86ch;line-height:1.55">Échéances déduites des progressions de vos classes et du calendrier officiel ; chaque ligne dit où en est l’épreuve qui y répond.</p>
+    <div style="{{ suiviVideStyle }}">
+      <div style="font-family:Poppins;font-size:14px;font-weight:700;color:var(--c14375f,#14375f)">Aucune classe suivie</div>
+      <div style="font-size:12.5px;color:var(--c5a6678,#5a6678);margin:4px 0 10px">Choisissez vos classes dans Progressions (bouton « Ajouter à mes classes ») : le suivi se construit tout seul.</div>
+      <button onClick="{{ goProgressions }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:8px 14px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">Ouvrir les progressions</button>
+    </div>
+    <div style="{{ suiviCorpsStyle }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px">
+        <sc-for list="{{ suiviTuiles }}" as="t" hint-placeholder-count="4">
+          <div style="{{ t.style }}"><span style="{{ t.chiffre }}">{{ t.n }}</span><span style="display:block;font-size:12px;color:var(--c5a6678,#5a6678);margin-top:4px;font-weight:600">{{ t.label }}</span></div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px">
+          <sc-for list="{{ suiviHorizons }}" as="h" hint-placeholder-count="4"><button onClick="{{ h.go }}" style="{{ h.style }}">{{ h.label }}</button></sc-for>
+        </div>
+        <select value="{{ suiviClasse }}" onChange="{{ setSuiviClasse }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;padding:7px 10px;font-size:12.5px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)"><option value="">Toutes mes classes</option><sc-for list="{{ suiviClasses }}" as="c" hint-placeholder-count="2"><option value="{{ c.id }}">{{ c.label }}</option></sc-for></select>
+        <button onClick="{{ suiviRetardsBasculer }}" style="{{ suiviRetardsStyle }}">Retards seulement</button>
+        <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-left:auto">
+          <button onClick="{{ suiviVueListe }}" style="{{ suiviVueListeStyle }}">Échéances</button>
+          <button onClick="{{ suiviVueMois }}" style="{{ suiviVueMoisStyle }}">Calendrier</button>
+        </div>
+      </div>
+
+      <sc-if value="{{ suiviEnListe }}" hint-placeholder-val="{{ true }}">
+        <div style="{{ suiviAucuneStyle }}">Aucune échéance dans cet horizon.</div>
+        <sc-for list="{{ suiviGroupes }}" as="gr" hint-placeholder-count="2">
+          <section style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:12px 16px;margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ gr.titre }}</span><span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ gr.sous }}</span></div>
+            <sc-for list="{{ gr.lignes }}" as="l" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;padding:9px 2px;border-top:1px solid var(--ceef2f7,#eef2f7);flex-wrap:wrap">
+                <div style="min-width:104px"><div style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--c22303f,#22303f)">{{ l.date }}</div><div style="{{ l.relStyle }}">{{ l.rel }}</div></div>
+                <div style="flex:1;min-width:200px"><div style="font-size:13px;font-weight:700;color:var(--c22303f,#22303f)">{{ l.titre }}</div><div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin-top:2px">{{ l.sous }}</div></div>
+                <span style="{{ l.chip }}">{{ l.etat }}</span>
+                <button onClick="{{ l.agir }}" style="{{ l.agirStyle }}">{{ l.agirLabel }}</button>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+      </sc-if>
+
+      <sc-if value="{{ suiviEnMois }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:14px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <button onClick="{{ moisPrec }}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--ce2eaf3,#e2eaf3);background:var(--cffffff,#fff);cursor:pointer;color:var(--c14375f,#14375f)">‹</button>
+            <span style="font-family:Poppins;font-size:15px;font-weight:700;color:var(--c14375f,#14375f);min-width:150px;text-align:center">{{ moisTitre }}</span>
+            <button onClick="{{ moisSuiv }}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--ce2eaf3,#e2eaf3);background:var(--cffffff,#fff);cursor:pointer;color:var(--c14375f,#14375f)">›</button>
+            <span style="margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--c5a6678,#5a6678)"><span>▢ <span style="color:var(--c8b97a8,#8b97a8)">vacances</span></span><span style="color:var(--cc0392b,#c0392b)">● férié</span><span style="color:var(--c1a72bb,#1a72bb)">● journée</span><span style="color:var(--cc26a12,#c26a12)">● échéance</span></span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px">
+            <sc-for list="{{ moisEntetes }}" as="me2" hint-placeholder-count="7"><div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--c8b97a8,#8b97a8);text-align:center;padding:3px 0">{{ me2 }}</div></sc-for>
+            <sc-for list="{{ moisJours }}" as="j" hint-placeholder-count="35">
+              <div style="{{ j.style }}">
+                <div style="{{ j.numStyle }}">{{ j.num }}</div>
+                <sc-for list="{{ j.marques }}" as="mq" hint-placeholder-count="1"><div style="{{ mq.style }}" title="{{ mq.titre }}">{{ mq.texte }}</div></sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </main>
+  </sc-if>
+
   <!-- ============ PROGRESSIONS (20/10/2026, lot I) ============
        Les progressions nationales de français 2026-2027 (ESG, EST), datées
        semaine par semaine par le calendrier scolaire officiel. Données :
@@ -4080,7 +4163,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '20/10 · I';
+const ATELIER_BUILD = '20/10 · J';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -8396,6 +8479,36 @@ class Component extends DCLogic {
     }
     return prochaine;
   }
+  _isoDe(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  _isoPlus(iso,j){const d=new Date(iso+'T00:00:00');d.setDate(d.getDate()+j);return this._isoDe(d);}
+  /* Le module des progressions arrive en `defer` : l'écran qui en a besoin
+     se redessine dès qu'il est là. */
+  _attendreProgs(){
+    if(this._progs()||this._progAttente)return;
+    this._progAttente=setInterval(()=>{if(this._progs()){clearInterval(this._progAttente);this._progAttente=null;this.setState({progCharge:Date.now()});}},400);
+  }
+  /* Échéances de mes classes, déduites des progressions (lot J). Trois par
+     séquence : sujet prêt (une semaine avant l'évaluation), épreuve (S5),
+     corrigé et compte rendu (S6). L'épreuve liée est celle que
+     « Composer l'évaluation » a ouverte (assistant.progId / progSeq). */
+  _echeancesProg(){
+    const P=this._progs();if(!P)return[];
+    const mes=((this._me().prefs||{}).mesClasses)||[];const auj=this._isoAuj();
+    const libEtat={brouillon:'brouillon',relecture:'en relecture',ajustement:'ajustement demandé',rejete:'rejeté',valide:'validé'};
+    const out=[];
+    mes.map(id=>this._progClasse(id)).filter(Boolean).forEach(cls=>cls.sequences.forEach(sq=>{
+      const w5=(sq.semaines||[]).find(w=>w.n===5),w6=(sq.semaines||[]).find(w=>w.n===6);
+      if(!w5||!w5.debut)return;
+      const ep=(this.state.epreuves||[]).find(e=>e&&e.assistant&&e.assistant.progId===cls.id&&String(e.assistant.progSeq)===String(sq.num))||null;
+      const valide=!!(ep&&ep.status==='valide'),diffuse=!!(valide&&ep.inLibrary);
+      const etat=!ep?'aucun sujet':(diffuse?'diffusé':(libEtat[ep.status]||ep.status||'brouillon'));
+      [{genre:'sujet',lib:'Sujet prêt',date:this._isoPlus(w5.debut,-7),fait:valide},
+       {genre:'epreuve',lib:'Épreuve',date:w5.debut,fait:valide&&w5.debut<=auj},
+       {genre:'corrige',lib:'Corrigé et compte rendu',date:(w6&&w6.debut)||w5.fin,fait:diffuse}]
+        .forEach(x=>out.push({...x,cls,sq,ep,etat,retard:!x.fait&&x.date<auj}));
+    }));
+    return out.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  }
   _contenusSeq(sq,jusqua){const out=[];(sq&&sq.semaines||[]).filter(w=>w.n<=(jusqua||3)).forEach(w=>(w.contenus||[]).forEach(c=>{if(c&&out.indexOf(c)<0)out.push(c);}));return out;}
   /* Évaluation d'une séquence : épreuve NEUVE, datée de la semaine
      d'évaluation (S5), classe et assistant déjà réglés. */
@@ -9219,6 +9332,9 @@ class Component extends DCLogic {
       {label:'Corpus',icon:mobIc('layers',st.screen==='liste'||st.screen==='fiche'),style:mobBtn(st.screen==='liste'||st.screen==='fiche'),go:()=>this._go('liste')},
       {label:'\u00c9preuves',icon:mobIc('file',['epreuves','composeur','apercu'].indexOf(st.screen)>=0),style:mobBtn(['epreuves','composeur','apercu'].indexOf(st.screen)>=0),go:()=>this._go('epreuves')},
       {label:'Cours',icon:mobIc('book',['cours','coursEdit'].indexOf(st.screen)>=0),style:mobBtn(['cours','coursEdit'].indexOf(st.screen)>=0),go:()=>this._go('cours')},
+      /* Sur téléphone le menu latéral est masqué : sans cet onglet, Suivi
+         et Progressions n'étaient joignables par aucun bouton (20/10/2026). */
+      {label:'Suivi',icon:mobIc('clock',['suivi','progressions'].indexOf(st.screen)>=0),style:mobBtn(['suivi','progressions'].indexOf(st.screen)>=0),go:()=>this._go('suivi')},
       {label:'\u00c9quipe',icon:mobIc('users',['collab','equipe','activite','profil'].indexOf(st.screen)>=0),style:mobBtn(['collab','equipe','activite','profil'].indexOf(st.screen)>=0),go:()=>this._go('collab')}
     ];
     /* ---- Profil et inscription ------------------------------------------
@@ -11307,6 +11423,8 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       sbCours:sbBtn(sbCoursOn),sbCollab:sbBtn(sbCollabOn),sbMessages:sbBtn(false),
       sbProgressions:sbBtn(st.screen==='progressions'),sbIcProg:this._icon('calendar',sbCol(st.screen==='progressions'),19),
       goProgressions:()=>this._go('progressions'),isProgressions:ready&&st.screen==='progressions',
+      goSuivi:()=>this._go('suivi'),isSuivi:ready&&st.screen==='suivi',
+      sbSuivi:sbBtn(st.screen==='suivi'),sbIcSuivi:this._icon('clock',sbCol(st.screen==='suivi'),19),
       sbNotifs:sbBtn(sbActOn),sbProfil:sbBtn(sbProfOn),
       msgCount:nbMsg,notifCount:nbNotif,
       sbMsgBadge:sbBadge(nbMsg),sbNotifBadge:sbBadge(nbNotif),
@@ -11420,6 +11538,96 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
         ?'margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--cffffff,#fff);border:1px solid var(--cbcd9f2,#bcd9f2);color:var(--c1a72bb,#1a72bb);padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;border-radius:999px;font-family:Poppins'
         :hidden,
       epView,printFiches,doPrint:()=>window.print(),
+      ...(()=>{
+        const vu=ready&&['suivi','accueil'].indexOf(st.screen)>=0;
+        if(vu)this._attendreProgs();
+        const P=this._progs();
+        const ech=P?this._echeancesProg():[];
+        const auj=this._isoAuj();
+        const nRetard=ech.filter(x=>x.retard).length;
+        const mes=((me.prefs||{}).mesClasses)||[];
+        const fmtL=iso=>this._fmtIso(iso,{weekday:'short',day:'numeric',month:'short'});
+        const joursDe=iso=>Math.round((new Date(iso+'T00:00:00')-new Date(auj+'T00:00:00'))/86400000);
+        const rel=iso=>{const j=joursDe(iso);return j===0?'aujourd’hui':j===1?'demain':j===-1?'hier':j>0?'dans '+j+' j':'il y a '+(-j)+' j';};
+        const chipE=x=>{const c=x.fait?['var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)']:x.retard?['var(--cc0392b,#c0392b)','var(--cfdecea,#fdecea)']:x.ep?['var(--cc26a12,#c26a12)','var(--cfdefdb,#fdefdb)']:['var(--c5a6678,#5a6678)','var(--cf2f6fb,#f2f6fb)'];
+          return 'font-size:11px;font-weight:700;font-family:Poppins;padding:3px 10px;border-radius:999px;white-space:nowrap;color:'+c[0]+';background:'+c[1];};
+        const ouvrir=x=>()=>{if(x.ep)this.setState({activeId:x.ep.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);});else this._composerSequence(x.cls,x.sq);};
+        const vals={suiviRetardsN:nRetard||'',sbSuiviBadge:nRetard?'margin-left:auto;display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--cc0392b,#c0392b);color:var(--cffffff,#fff);font-size:10.5px;font-weight:700':hidden};
+        /* Accueil */
+        const cls0=mes.map(id=>this._progClasse(id)).filter(Boolean)[0];
+        const ici=cls0?this._semaineDe(cls0,auj):null;
+        const proch=ech.find(x=>!x.fait&&x.date>=auj);
+        const libT={ressources:'ressources',integration:'intégration',evaluation:'évaluation',remediation:'remédiation'};
+        Object.assign(vals,{
+          accSemaineStyle:(ready&&st.screen==='accueil'&&P)?'display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--cfffaf2,#fffaf2);border:1px solid var(--cf0d9b0,#f0d9b0);border-radius:12px;padding:12px 16px;margin:-8px 0 20px':hidden,
+          accSemaineIcone:this._icon('calendar','var(--cc26a12,#c26a12)',22),
+          accSemaine:cls0?(ici?((ici.prochaine?'Prochaine semaine de cours — ':'Cette semaine — ')+cls0.libelle+' : séquence '+ici.seq.num+', semaine '+ici.w.n+' ('+libT[ici.w.type]+')'+(ici.w.feries&&ici.w.feries.length?' · férié : '+ici.w.feries.join(', '):'')):cls0.libelle+' : hors période de cours'):'Suivez vos classes semaine par semaine',
+          accEcheance:cls0?(proch?('Prochaine échéance : '+proch.lib.toLowerCase()+' — '+proch.cls.libelle+', séquence '+proch.sq.num+', '+fmtL(proch.date)+' ('+rel(proch.date)+')'+(nRetard?' · '+nRetard+' en retard':'')):'Aucune échéance à venir.'):'Choisissez vos classes dans Progressions : séquences datées, échéances et rappels se construisent tout seuls.',
+          accSemaineBouton:cls0?'Voir le suivi':'Choisir mes classes',
+          accSemaineAller:()=>this._go(cls0?'suivi':'progressions')});
+        if(!(ready&&st.screen==='suivi'))return Object.assign(vals,{suiviVideStyle:hidden,suiviCorpsStyle:hidden,suiviTuiles:[],suiviHorizons:[],suiviClasses:[],suiviClasse:'',setSuiviClasse:()=>{},suiviRetardsBasculer:()=>{},suiviRetardsStyle:hidden,
+          suiviVueListe:()=>{},suiviVueMois:()=>{},suiviVueListeStyle:hidden,suiviVueMoisStyle:hidden,suiviEnListe:false,suiviEnMois:false,suiviAucuneStyle:hidden,suiviGroupes:[],moisPrec:()=>{},moisSuiv:()=>{},moisTitre:'',moisEntetes:[],moisJours:[]});
+        const hz=+(st.suiviHorizon||60);
+        const fin=this._isoPlus(auj,hz>=365?400:hz);
+        const filtreC=st.suiviClasse||'';
+        const parC=ech.filter(x=>!filtreC||x.cls.id===filtreC);
+        const visibles=parC.filter(x=>st.suiviRetards?x.retard:(x.retard||(x.date>=this._isoPlus(auj,-14)&&x.date<=fin)));
+        const ong=on=>'border:none;padding:6px 11px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer;'+(on?'background:var(--cffffff,#fff);color:var(--c14375f,#14375f);box-shadow:0 1px 4px rgba(20,55,95,.12)':'background:none;color:var(--c7a8598,#7a8598)');
+        const tuile=(n,l,c)=>({n,label:l,style:'background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:14px;text-align:center',chiffre:'display:block;font-family:Poppins;font-size:24px;font-weight:700;line-height:1;color:'+c});
+        const groupes={};
+        visibles.forEach(x=>{(groupes[x.cls.id]=groupes[x.cls.id]||{cls:x.cls,l:[]}).l.push(x);});
+        const vue=st.suiviVue||'liste';
+        /* Calendrier du mois */
+        const moisIso=st.suiviMois||auj.slice(0,7);
+        const d0=new Date(moisIso+'-01T00:00:00');
+        const premier=new Date(d0);premier.setDate(1-((d0.getDay()+6)%7));
+        const cal=P?P.calendrier:{vacances:[],feries:[],journees:[]};
+        const jours=[];
+        for(let k=0;k<42;k++){const d=new Date(premier);d.setDate(premier.getDate()+k);const iso=this._isoDe(d);
+          if(k>=35&&d.getMonth()!==d0.getMonth())break;
+          const vac=cal.vacances.find(v=>v.debut<=iso&&iso<v.fin);
+          const fer=cal.feries.filter(f=>f.date===iso);
+          const jou=cal.journees.filter(j=>j.date===iso||(j.fin&&j.date<=iso&&iso<=j.fin));
+          const ec=parC.filter(x=>x.date===iso);
+          const dans=d.getMonth()===d0.getMonth(),we=d.getDay()===0||d.getDay()===6;
+          const marques=[].concat(
+            fer.map(f=>({texte:f.nom,titre:f.nom,style:'font-size:9.5px;line-height:1.25;color:var(--cc0392b,#c0392b);font-weight:700;margin-top:2px'})),
+            ec.map(x=>({texte:x.lib+' · '+x.cls.libelle+' S'+x.sq.num,titre:x.lib+' — '+x.cls.libelle+', séquence '+x.sq.num+' ('+x.etat+')',style:'font-size:9.5px;line-height:1.25;color:'+(x.fait?'var(--c188047,#188047)':x.retard?'var(--cc0392b,#c0392b)':'var(--cc26a12,#c26a12)')+';font-weight:700;margin-top:2px'})),
+            jou.slice(0,1).map(j=>({texte:j.nom,titre:j.nom,style:'font-size:9.5px;line-height:1.25;color:var(--c1a72bb,#1a72bb);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'})),
+            vac&&dans&&!we?[{texte:vac.label.replace(/\s*\(.*\)/,''),titre:vac.label,style:'font-size:9px;color:var(--c8b97a8,#8b97a8);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'}]:[]);
+          jours.push({num:d.getDate(),marques,
+            style:'min-height:64px;border-radius:8px;padding:4px 5px;overflow:hidden;border:1px solid '+(iso===auj?'var(--cf39200,#f39200)':'var(--ceef2f7,#eef2f7)')+';background:'+(!dans?'transparent':vac?'var(--cf2f6fb,#f2f6fb)':we?'var(--cfbfcfe,#fbfcfe)':'var(--cffffff,#fff)')+(dans?'':';opacity:.45'),
+            numStyle:'font-size:11.5px;font-weight:700;font-family:Poppins;color:'+(fer.length?'var(--cc0392b,#c0392b)':iso===auj?'var(--cf39200,#f39200)':'var(--c22303f,#22303f)')});}
+        const decaler=n=>()=>{const d=new Date(moisIso+'-01T00:00:00');d.setMonth(d.getMonth()+n);this.setState({suiviMois:this._isoDe(d).slice(0,7)});};
+        return Object.assign(vals,{
+          suiviVideStyle:(P&&!mes.length)?'background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);border-radius:12px;padding:18px 20px;margin-bottom:12px':hidden,
+          suiviCorpsStyle:(P&&mes.length)?'':hidden,
+          suiviTuiles:[tuile(parC.filter(x=>x.retard).length,'en retard','var(--cc0392b,#c0392b)'),
+            tuile(parC.filter(x=>!x.fait&&x.date>=auj&&x.date<=this._isoPlus(auj,7)).length,'dans les 7 jours','var(--cc26a12,#c26a12)'),
+            tuile(parC.filter(x=>!x.fait&&x.date>auj&&x.date<=fin).length,'à venir ('+(hz>=365?'année':hz+' j')+')','var(--c1a72bb,#1a72bb)'),
+            tuile(parC.filter(x=>x.fait).length,'faites','var(--c188047,#188047)')],
+          suiviHorizons:[[30,'30 j'],[60,'60 j'],[120,'120 j'],[365,'Année']].map(([v,l])=>({label:l,go:()=>this.setState({suiviHorizon:v}),style:ong(hz===v)})),
+          suiviClasses:mes.map(id=>this._progClasse(id)).filter(Boolean).map(c=>({id:c.id,label:c.libelle})),
+          suiviClasse:filtreC,setSuiviClasse:e=>this.setState({suiviClasse:val(e)}),
+          suiviRetardsBasculer:()=>this.setState({suiviRetards:!st.suiviRetards}),
+          suiviRetardsStyle:'border:1px solid '+(st.suiviRetards?'var(--cc0392b,#c0392b)':'var(--ce2eaf3,#e2eaf3)')+';background:'+(st.suiviRetards?'var(--cfdecea,#fdecea)':'var(--cffffff,#fff)')+';color:'+(st.suiviRetards?'var(--cc0392b,#c0392b)':'var(--c5a6678,#5a6678)')+';padding:7px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer',
+          suiviVueListe:()=>this.setState({suiviVue:'liste'}),suiviVueMois:()=>this.setState({suiviVue:'mois'}),
+          suiviVueListeStyle:ong(vue==='liste'),suiviVueMoisStyle:ong(vue==='mois'),
+          suiviEnListe:vue==='liste',suiviEnMois:vue==='mois',
+          suiviAucuneStyle:visibles.length?hidden:'font-size:12.5px;color:var(--c8b97a8,#8b97a8);padding:10px 2px',
+          suiviGroupes:Object.keys(groupes).map(k=>{const g=groupes[k];const nr=g.l.filter(x=>x.retard).length;
+            return{titre:g.cls.libelle,sous:g.l.length+' échéance(s)'+(nr?' · '+nr+' en retard':''),
+              lignes:g.l.map(x=>({date:fmtL(x.date),rel:rel(x.date),relStyle:'font-size:11px;margin-top:1px;color:'+(x.retard?'var(--cc0392b,#c0392b)':'var(--c8b97a8,#8b97a8)')+';font-weight:'+(x.retard?'700':'400'),
+                titre:x.lib+' — séquence '+x.sq.num+(x.sq.module?' · '+x.sq.module:''),
+                sous:x.ep?('« '+(x.ep.title||'Épreuve')+' »'):'Aucune épreuve ouverte pour cette séquence',
+                etat:x.fait?'fait':(x.retard?'en retard · ':'')+x.etat,chip:chipE(x),
+                agir:ouvrir(x),agirLabel:x.ep?'Ouvrir':'Composer',
+                agirStyle:(x.ep||perm.creer)?'background:'+(x.ep?'var(--cffffff,#fff)':'var(--c1a72bb,#1a72bb)')+';color:'+(x.ep?'var(--c14375f,#14375f)':'var(--cffffff,#fff)')+';border:1px solid '+(x.ep?'var(--ce2eaf3,#e2eaf3)':'var(--c1a72bb,#1a72bb)')+';padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden}))};}),
+          moisPrec:decaler(-1),moisSuiv:decaler(1),
+          moisTitre:d0.toLocaleDateString('fr-FR',{month:'long',year:'numeric'}),
+          moisEntetes:['lun','mar','mer','jeu','ven','sam','dim'],
+          moisJours:jours});
+      })(),
       ...(()=>{
         const P=this._progs();
         if(!(ready&&st.screen==='progressions'))return{progOptions:[],progSeqs:[],progMes:[],progId:'',setProgId:()=>{},progAnnee:'',progSource:'',progAbsentStyle:hidden,progToggleMienne:()=>{},progMienneLabel:'',progMienneStyle:hidden,progCetteSemaine:'',progCetteSemaineStyle:hidden};
