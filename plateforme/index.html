@@ -4267,7 +4267,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '20/10 · M';
+const ATELIER_BUILD = '20/10 · N';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -8679,9 +8679,44 @@ class Component extends DCLogic {
       cl.querySelectorAll('.vrt-doc-section').forEach(e=>{e.style.borderTop='none';});
       boite.appendChild(cl);document.body.appendChild(boite);
       const doc=new window.jspdf.jsPDF({unit:'mm',format:'a4',compress:true});
-      return doc.html(cl,{margin:[18,15,20,15],width:180,windowWidth:680,autoPaging:'text',
-        html2canvas:{useCORS:true,logging:false,backgroundColor:'#ffffff'}}).then(()=>{
+      /* IMAGE FIDÈLE, COUPÉE ENTRE DEUX LIGNES (20/10/2026). doc.html()
+         redessinait le texte avec les polices standard du PDF (Times,
+         Helvetica) aux positions mesurées en Cambria : chaque mot, plus
+         étroit, laissait un trou (« Établissement   scolaire », signalé par
+         Jacques). On photographie la page telle que le navigateur la dessine,
+         et l'on coupe chaque page dans un interligne : la position de chaque
+         ligne de texte est lue dans le DOM, une ligne n'est jamais tranchée. */
+      const LARG=680,HAUT_PAGE=Math.floor((297-18-20)/180*LARG);
+      const base=cl.getBoundingClientRect().top;
+      const lignes=[];
+      const marche=document.createTreeWalker(cl,NodeFilter.SHOW_TEXT,null);
+      for(let t=marche.nextNode();t;t=marche.nextNode()){
+        if(!t.nodeValue||!t.nodeValue.trim())continue;
+        const r=document.createRange();r.selectNodeContents(t);
+        for(const b of r.getClientRects()){if(b.height>0)lignes.push([b.top-base,b.bottom-base]);}
+      }
+      const total=Math.ceil(cl.scrollHeight);
+      const coupes=[0];
+      while(coupes[coupes.length-1]+HAUT_PAGE<total){
+        const debut=coupes[coupes.length-1],limite=debut+HAUT_PAGE;
+        let b=limite;
+        const dedans=y=>lignes.some(([h,bas])=>h<y-0.5&&bas>y+0.5);
+        if(dedans(b)){const cand=lignes.map(x=>x[1]).filter(y=>y>debut+HAUT_PAGE*0.5&&y<=limite&&!dedans(y));
+          if(cand.length)b=Math.max(...cand);}
+        coupes.push(Math.floor(b));
+      }
+      coupes.push(total);
+      const echelle=Math.min(2,30000/Math.max(1,total));
+      return window.html2canvas(cl,{scale:echelle,useCORS:true,logging:false,backgroundColor:'#ffffff'}).then(cv=>{
         boite.remove();
+        for(let i=0;i<coupes.length-1;i++){
+          const y0=coupes[i],y1=coupes[i+1];if(y1-y0<2)continue;
+          if(i>0)doc.addPage();
+          const pc=document.createElement('canvas');pc.width=Math.round(LARG*echelle);pc.height=Math.round((y1-y0)*echelle);
+          const g=pc.getContext('2d');g.fillStyle='#ffffff';g.fillRect(0,0,pc.width,pc.height);
+          g.drawImage(cv,0,Math.round(y0*echelle),pc.width,pc.height,0,0,pc.width,pc.height);
+          doc.addImage(pc.toDataURL('image/jpeg',0.92),'JPEG',15,18,180,(y1-y0)*180/LARG,undefined,'FAST');
+        }
         const n=doc.getNumberOfPages();
         for(let i=1;i<=n;i++){doc.setPage(i);
           doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(20,55,95);
