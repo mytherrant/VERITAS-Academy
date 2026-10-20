@@ -977,12 +977,16 @@
   @media (max-width:1180px){
     main[style*="grid-template-columns:minmax(220px,280px)"]{grid-template-columns:1fr!important}
   }
+  /* Le MENU LATÉRAL seulement (20/10/2026). Ces règles visaient tous les
+     aside[data-noprint] : sous 1 024 px les volets (Ambassa, panier,
+     discussion, progression) tombaient à 74 px de large, et sur téléphone
+     ils étaient masqués — « les boutons ne font rien », signalé par Jacques. */
   @media (max-width:1024px){
-    aside[data-noprint]{width:74px!important}
-    aside[data-noprint] .vrt-sblabel{display:none!important}
+    aside.vrt-sidebar{width:74px!important}
+    aside.vrt-sidebar .vrt-sblabel{display:none!important}
   }
   @media (max-width:820px){
-    aside[data-noprint]{display:none!important}
+    aside.vrt-sidebar{display:none!important}
     .vrt-mobilebar{display:flex!important}
     main{padding-left:16px!important;padding-right:16px!important;padding-bottom:92px!important}
     header[data-noprint]{padding-left:14px!important;padding-right:14px!important}
@@ -1273,8 +1277,8 @@
   /* ── Mode focus du composeur (lot H, 20/10/2026) ─────────────────────── */
   @media screen and (min-width:821px){
     html.vrt-focus #vrtNav,html.vrt-focus footer.vrt-hab,html.vrt-focus #vrt-astuce{display:none!important}
-    html.vrt-focus aside[data-noprint]{width:76px!important}
-    html.vrt-focus aside[data-noprint] .vrt-sblabel{display:none!important}
+    html.vrt-focus aside.vrt-sidebar{width:76px!important}
+    html.vrt-focus aside.vrt-sidebar .vrt-sblabel{display:none!important}
     html.vrt-focus .vrt-compo-main{max-width:1520px!important}
     html.vrt-focus .vrt-compo-grille{grid-template-columns:1fr!important}
     html.vrt-focus .vrt-compo-gauche{display:none!important}
@@ -1285,7 +1289,7 @@
      html.vrt-doc est posé pendant l'aperçu : tout ce qui n'est pas la
      feuille disparaît — barre et pied de la vitrine, menu latéral, barre de
      l'Atelier, astuces flottantes. */
-  html.vrt-doc #vrtNav,html.vrt-doc footer.vrt-hab,html.vrt-doc aside[data-noprint],
+  html.vrt-doc #vrtNav,html.vrt-doc footer.vrt-hab,html.vrt-doc aside.vrt-sidebar,
   html.vrt-doc header[data-noprint],html.vrt-doc .vrt-mobilebar,html.vrt-doc #vrt-astuce{display:none!important}
   /* Mise en forme allégée : une police de corps, celle de l'export Word. */
   .vrt-docfeuille p,.vrt-docfeuille li,.vrt-docfeuille span,.vrt-docfeuille strong{font-family:Cambria,Georgia,'Times New Roman',serif!important}
@@ -1313,7 +1317,7 @@
 
   <!-- ================= BARRE LATÉRALE ================= -->
   <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
-  <aside data-noprint="1" style="{{ sbWrap }}">
+  <aside data-noprint="1" class="vrt-sidebar" style="{{ sbWrap }}">
     <button onClick="{{ goAccueil }}" style="display:flex;align-items:center;gap:11px;background:none;border:none;cursor:pointer;padding:0;text-align:left;width:100%;margin-bottom:26px">
       <span style="width:38px;height:38px;border-radius:10px;background:var(--sb-logo-bg);display:grid;place-items:center;flex:none">{{ sbIcLogo }}</span>
       <span class="vrt-sblabel" style="line-height:1.15;{{ sbLabelShow }}">
@@ -1966,6 +1970,12 @@
       </div>
       <div class="vrt-titrelbl" style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8)">Titre de l'épreuve · cliquez pour modifier</span></div>
       <input value="{{ ep.title }}" onChange="{{ setTitle }}" disabled="{{ cannotEdit }}" style="font-family:'Poppins';font-size:24px;font-weight:700;color:var(--c14375f,#14375f);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;background:var(--cffffff,#fff);width:100%;padding:8px 12px;margin-bottom:6px" style-hover="border-color:var(--cbcd9f2,#bcd9f2)" style-focus="border-color:var(--c1a72bb,#1a72bb);box-shadow:0 0 0 3px rgba(26,114,187,.12)" placeholder="Intitulé de l'épreuve">
+      <!-- Frise du circuit (20/10/2026), comme la fiche d'un sujet chez
+           Tchouskou : où en est l'épreuve, d'un coup d'œil, sans ouvrir la
+           colonne Collaboration. -->
+      <div style="{{ friseStyle }}">
+        <sc-for list="{{ frise }}" as="fz" hint-placeholder-count="4"><span style="{{ fz.trait }}"></span><span style="{{ fz.dot }}"></span><span style="{{ fz.lab }}">{{ fz.label }}</span></sc-for>
+      </div>
       <!-- Ce rappel dit comment démarrer une épreuve. Il sert la première
            fois, sur une épreuve encore vide ; il ne sert plus du tout quand
            on relit son travail, et il coûte alors 54 px — un tiers d'écran
@@ -2272,7 +2282,7 @@
                  haut, dans « Composer avec Ambassa » : une fois la classe
                  choisie, rien sous le doigt ne permettait de lancer l'IA. -->
             <div style="{{ genRensWrap }}">
-              <button onClick="{{ genDepuisRens }}" style="{{ genRensBtn }}">{{ genToutIcone }}<span>{{ genRensLabel }}</span></button>
+              <button onClick="{{ genDepuisRens }}" style="{{ genRensBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb);background:var(--cf5faff,#f5faff)">{{ genRensIcone }}<span>{{ genRensLabel }}</span></button>
               <div style="font-size:11.5px;color:var(--c7a8598,#7a8598);line-height:1.5;margin-top:7px;text-align:center">{{ genRensAide }}</div>
             </div>
             <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--ceef2f7,#eef2f7);display:flex;justify-content:space-between;font-size:12.5px;color:var(--c5a6678,#5a6678)"><span>{{ selCount }} texte(s)</span><span>{{ totalWords }} mots</span></div>
@@ -2349,18 +2359,7 @@
                 <div style="font-size:12.5px;color:var(--c22303f,#22303f);line-height:1.5;font-weight:600">{{ revSynthese }}</div>
                 <div style="{{ revDesaccordStyle }}">Désaccord entre relecteurs : à trancher avant diffusion.</div>
                 <div style="font-size:12px;color:var(--c1a72bb,#1a72bb);line-height:1.5;margin:3px 0 10px;font-weight:600">{{ revRecommandation }}</div>
-                <div style="display:flex;flex-direction:column;gap:9px">
-                  <sc-for list="{{ revDecisions }}" as="d" hint-placeholder-count="2">
-                    <div style="display:flex;gap:9px;align-items:flex-start">
-                      <span style="{{ d.avatar }}">{{ d.initials }}</span>
-                      <div style="flex:1;min-width:0">
-                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><strong style="font-size:12.5px;color:var(--c22303f,#22303f)">{{ d.nom }}</strong><span style="{{ d.chip }}">{{ d.verdict }}</span></div>
-                        <div style="font-size:11px;color:var(--c8b97a8,#8b97a8);margin-top:2px">{{ d.meta }}</div>
-                        <div style="{{ d.motifStyle }}">{{ d.motif }}</div>
-                      </div>
-                    </div>
-                  </sc-for>
-                </div>
+                <div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8)">Le détail des retours est sous la planche de travail.</div>
               </div>
             </sc-if>
                       </div>
@@ -2456,13 +2455,53 @@
               </div>
             </section>
             </sc-if>
-            <div style="background:linear-gradient(135deg,var(--c1a72bb,#1a72bb),var(--c134f88,#134f88));color:var(--cffffff,#fff);padding:22px 26px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;border-radius:14px;box-shadow:0 8px 24px rgba(20,55,95,.22);margin-bottom:22px">
-              <div style="flex:1;min-width:200px"><div style="font-family:'Poppins';font-size:17px;font-weight:700;margin-bottom:5px">Générer l'épreuve</div><div style="font-size:12px;color:var(--cd6e6f5,#d6e6f5);line-height:1.55">Quota — vous : <span style="{{ meInlineStyle }}">{{ meRemaining }}/{{ meLimit }}</span> ce mois, vérifié par le serveur à chaque aperçu.</div></div>
-              <sc-if value="{{ canGenerate }}" hint-placeholder-val="{{ true }}"><button onClick="{{ generate }}" style="background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:14px 26px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;border-radius:999px;font-family:'Poppins';box-shadow:0 4px 14px rgba(12,42,106,.35)" style-hover="background:var(--ce07f00,#e07f00)">Générer &amp; aperçu {{ icSuite }}</button></sc-if>
-              <sc-if value="{{ genBlocked }}" hint-placeholder-val="{{ false }}"><div style="text-align:right"><div style="font-size:12.5px;color:var(--cffd08a,#ffd08a);font-weight:700;margin-bottom:7px;font-family:'Poppins'">{{ quotaMsg }}</div><button onClick="{{ goAbo }}" style="background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:11px 20px;font-size:13px;font-weight:700;cursor:pointer;border-radius:999px;font-family:'Poppins'" style-hover="background:var(--ce07f00,#e07f00)">Gérer les quotas</button></div></sc-if>
+            <!-- Panneau de génération (20/10/2026) : carte de la vitrine — fond
+                 blanc, la couleur dans l'anneau et le bouton (« la couleur
+                 qualifie, elle n'inonde pas »). Un quota inconnu ne s'affiche
+                 plus « —/— ». -->
+            <div style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:14px;padding:18px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 4px 14px rgba(0,17,54,.05);margin-bottom:22px" style-hover="border-color:var(--cf0d9b0,#f0d9b0)">
+              <span style="flex:none;display:flex">{{ genPanneauIcone }}</span>
+              <div style="flex:1;min-width:200px"><div style="font-family:'Poppins';font-size:16.5px;font-weight:700;margin-bottom:4px;color:var(--c001136,#001136)">Générer l'épreuve</div><div style="font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.55">{{ genQuotaAvant }}<span style="{{ genQuotaChip }}">{{ genQuotaChiffre }}</span>{{ genQuotaApres }}</div></div>
+              <sc-if value="{{ canGenerate }}" hint-placeholder-val="{{ true }}"><button onClick="{{ generate }}" style="display:inline-flex;align-items:center;gap:8px;background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:12px 22px;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;border-radius:999px;font-family:'Poppins';box-shadow:0 6px 16px rgba(0,17,54,.16)" style-hover="background:var(--ce07f00,#e07f00)">Générer &amp; aperçu {{ icSuiteBlanc }}</button></sc-if>
+              <sc-if value="{{ genBlocked }}" hint-placeholder-val="{{ false }}"><div style="text-align:right"><div style="font-size:12.5px;color:var(--cc26a12,#c26a12);font-weight:700;margin-bottom:7px;font-family:'Poppins'">{{ quotaMsg }}</div><button onClick="{{ goAbo }}" style="background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:11px 20px;font-size:13px;font-weight:700;cursor:pointer;border-radius:999px;font-family:'Poppins'" style-hover="background:var(--ce07f00,#e07f00)">Gérer les quotas</button></div></sc-if>
             </div>
           </sc-if>
           <sc-if value="{{ emptySelection }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:54px 24px;background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);border-radius:14px;margin-bottom:22px"><p style="font-family:'Poppins';font-size:16px;color:var(--c22303f,#22303f);margin:0 0 6px;font-weight:600">Aucun texte dans cette épreuve</p><p style="font-size:13.5px;color:var(--c7a8598,#7a8598);margin:0 0 18px">Ajoutez des textes depuis le corpus.</p><button onClick="{{ goListe }}" style="background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:12px 22px;font-size:13.5px;cursor:pointer;border-radius:999px;font-weight:700;font-family:Poppins">Parcourir le corpus {{ icSuite }}</button></div></sc-if>
+          <!-- SYNTHÈSE DES RETOURS (20/10/2026) : pleine largeur, comme la fiche
+               d'un sujet chez Tchouskou — les décisions rendues, puis chaque
+               retour avec sa version et sa date. Style des cartes de la vitrine. -->
+          <sc-if value="{{ revHasSynthese }}" hint-placeholder-val="{{ false }}">
+          <section style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:14px;padding:20px 22px;box-shadow:0 4px 14px rgba(0,17,54,.05);margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><span style="display:flex">{{ synthIcone }}</span><span style="font-family:Poppins;font-size:16px;font-weight:700;color:var(--c001136,#001136)">Synthèse des retours</span></div>
+            <div style="border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:14px 18px">
+              <div style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c001136,#001136);margin-bottom:4px">Décisions rendues</div>
+              <sc-for list="{{ revDecisions }}" as="d" hint-placeholder-count="2">
+                <div style="display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--ceef2f7,#eef2f7);flex-wrap:wrap">
+                  <div style="flex:1;min-width:220px">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><strong style="font-family:Poppins;font-size:13px;color:var(--c001136,#001136)">{{ d.nom }}</strong><span style="{{ d.chip }}">{{ d.verdict }}</span></div>
+                    <div style="font-size:12px;color:var(--c5a6678,#5a6678);margin-top:3px;line-height:1.45">{{ d.portee }} — {{ d.motifCourt }}</div>
+                  </div>
+                  <div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);white-space:nowrap">{{ d.date }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="font-size:12.5px;color:var(--c5a6678,#5a6678);margin-top:10px;line-height:1.5">{{ revSynthese }} <span style="color:var(--c1a72bb,#1a72bb);font-weight:600">{{ revRecommandation }}</span></div>
+            <div style="{{ revDesaccordStyle }}">Désaccord entre relecteurs : à trancher avant diffusion.</div>
+          </section>
+          <section style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:14px;padding:20px 22px;box-shadow:0 4px 14px rgba(0,17,54,.05);margin-bottom:16px">
+            <div style="font-family:Poppins;font-size:16px;font-weight:700;color:var(--c001136,#001136);margin-bottom:6px">Retours</div>
+            <sc-for list="{{ revDecisions }}" as="d" hint-placeholder-count="2">
+              <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--ceef2f7,#eef2f7)">
+                <span style="{{ d.avatarLg }}">{{ d.initials }}</span>
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><strong style="font-family:Poppins;font-size:14px;color:var(--c001136,#001136)">{{ d.nom }}</strong><span style="{{ d.chip }}">{{ d.verdict }}</span></div>
+                  <div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin-top:2px">v{{ d.tour }} · {{ d.date }} · {{ d.portee }}</div>
+                  <div style="{{ d.motifStyle }}">{{ d.motif }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </section>
+          </sc-if>
           <section style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:22px 24px;box-shadow:0 2px 10px rgba(20,55,95,.05)">
             <h3 style="{{ secHead }}" class="vrt-hide-xs">Commentaires &amp; relecture</h3>
             <!-- Dernier bloc sous la planche de travail : replié sur
@@ -3037,10 +3076,27 @@
        <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-left:6px;flex-wrap:wrap">
          <sc-for list="{{ docOnglets }}" as="o" hint-placeholder-count="5"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
        </div>
+       <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px">
+         <button onClick="{{ docModeApercu }}" style="{{ docModeApercuStyle }}">Aperçu</button>
+         <button onClick="{{ docModePdf }}" style="{{ docModePdfStyle }}">PDF</button>
+       </div>
        <span style="margin-left:auto;font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ docPagesLabel }}</span>
        <button onClick="{{ docZoomBasculer }}" title="Ajuster à la fenêtre ou taille réelle" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px">{{ docZoomLabel }}</button>
        <button onClick="{{ exportWord }}" style="{{ exportWordStyle }}" title="Télécharger un .docx modifiable">{{ exportIcon }}<span>Word</span></button>
        <button onClick="{{ doPrint }}" style="background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;border-radius:999px;font-family:'Poppins'" style-hover="background:var(--ce07f00,#e07f00)">Imprimer / PDF</button>
+     </div>
+     <!-- VISIONNEUSE PDF (20/10/2026) : le PDF réel de la vue choisie,
+          fabriqué dans le navigateur et montré par sa visionneuse (pages,
+          zoom, téléchargement) — « comme ici », capture de Tchouskou. Sur
+          téléphone, Chrome n'affiche pas un PDF intégré : on l'ouvre. -->
+     <div data-noprint="1" style="{{ pdfZoneStyle }}">
+       <div style="{{ pdfMsgStyle }}">{{ pdfMsg }}</div>
+       <button onClick="{{ pdfRefaire }}" style="{{ pdfRefaireStyle }}">Réessayer</button>
+       <sc-if value="{{ pdfIframe }}" hint-placeholder-val="{{ false }}"><iframe src="{{ pdfUrl }}" title="Aperçu PDF de l’épreuve" style="width:100%;height:calc(100vh - 58px);border:0;display:block;background:#525659"></iframe></sc-if>
+       <div style="{{ pdfMobileStyle }}">
+         <button onClick="{{ pdfOuvrir }}" style="background:var(--c14375f,#14375f);color:var(--cffffff,#fff);border:none;padding:10px 16px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:10px;cursor:pointer">Ouvrir le PDF</button>
+         <button onClick="{{ pdfTelecharger }}" style="background:var(--cffffff,#fff);color:var(--c14375f,#14375f);border:1px solid var(--ce2eaf3,#e2eaf3);padding:10px 16px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:10px;cursor:pointer">Télécharger</button>
+       </div>
      </div>
      <div data-print-sheet="1" class="vrt-docfeuille" style="{{ docFeuilleStyle }}">
        <div class="vrt-doc-entete" style="text-align:right;border-bottom:1px solid var(--c14375f,#14375f);padding-bottom:4px;margin-bottom:14px;line-height:1.3"><div style="font:700 9.5pt Cambria,Georgia,serif;color:var(--c14375f,#14375f)">VÉRITAS · Centre d’Excellence Scolaire</div><div style="font:8pt Cambria,Georgia,serif;color:var(--c8b97a8,#8b97a8)">Atelier de Français · veritas-school.com</div></div>
@@ -4211,7 +4267,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '20/10 · L';
+const ATELIER_BUILD = '20/10 · M';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -8598,6 +8654,50 @@ class Component extends DCLogic {
         'a ouvert l’évaluation de la séquence '+sq.num+' ('+cls.libelle+')');
       this.setState({genOuvert:true,assEtape:2});},0);
   }
+  /* ── PDF dans le navigateur (20/10/2026) ───────────────────────────────
+     Mêmes bibliothèques que l'application (html2canvas 1.4.1, jsPDF 2.5.1),
+     chargées à la demande. `autoPaging:'text'` ne coupe pas une ligne en
+     deux ; en-tête et pied VÉRITAS sont posés en texte sur chaque page. */
+  _script(url){return new Promise((ok,ko)=>{const s=document.createElement('script');s.src=url;s.async=true;s.crossOrigin='anonymous';s.onload=()=>ok();s.onerror=()=>ko(new Error('chargement '+url));document.head.appendChild(s);});}
+  _libsPdf(){
+    if(this._libsPdfP)return this._libsPdfP;
+    const un=(test,urls)=>test()?Promise.resolve():urls.reduce((p,u)=>p.catch(()=>this._script(u)),Promise.reject());
+    this._libsPdfP=un(()=>!!window.html2canvas,['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js','https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js'])
+      .then(()=>un(()=>!!(window.jspdf&&window.jspdf.jsPDF),['https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js','https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js']))
+      .catch(e=>{this._libsPdfP=null;throw e;});
+    return this._libsPdfP;
+  }
+  _fabriquerPdf(cle){
+    const src=document.querySelector('.vrt-docfeuille');if(!src)return;
+    this._pdfEnCours=cle;this.setState({pdfEtat:'encours',pdfErr:''});
+    this._libsPdf().then(()=>{
+      const boite=document.createElement('div');
+      boite.style.cssText='position:fixed;left:-30000px;top:0;width:680px;background:#ffffff';
+      const cl=src.cloneNode(true);
+      cl.setAttribute('style','width:680px;margin:0;padding:0;background:#ffffff;box-shadow:none;zoom:1;min-height:0');
+      cl.querySelectorAll('.vrt-doc-entete,.vrt-doc-pied').forEach(e=>e.remove());
+      cl.querySelectorAll('.vrt-doc-section').forEach(e=>{e.style.borderTop='none';});
+      boite.appendChild(cl);document.body.appendChild(boite);
+      const doc=new window.jspdf.jsPDF({unit:'mm',format:'a4',compress:true});
+      return doc.html(cl,{margin:[18,15,20,15],width:180,windowWidth:680,autoPaging:'text',
+        html2canvas:{useCORS:true,logging:false,backgroundColor:'#ffffff'}}).then(()=>{
+        boite.remove();
+        const n=doc.getNumberOfPages();
+        for(let i=1;i<=n;i++){doc.setPage(i);
+          doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(20,55,95);
+          doc.text('VÉRITAS · Centre d’Excellence Scolaire',195,9,{align:'right'});
+          doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(139,151,168);
+          doc.text('Atelier de Français · veritas-school.com',195,12.5,{align:'right'});
+          doc.setDrawColor(20,55,95);doc.setLineWidth(0.3);doc.line(15,14.5,195,14.5);
+          doc.setDrawColor(201,214,228);doc.line(15,284,195,284);
+          doc.text('© VÉRITAS EDUCATION · veritas-school.com · Page '+i+' / '+n,105,289,{align:'center'});}
+        const blob=doc.output('blob');
+        if(this.state.pdfUrl){try{URL.revokeObjectURL(this.state.pdfUrl);}catch(e){}}
+        this._pdfEnCours=null;
+        this.setState({pdfUrl:URL.createObjectURL(blob),pdfEtat:'pret',pdfCle:cle,pdfPages:n});
+      },e=>{boite.remove();throw e;});
+    }).catch(e=>{this._pdfEnCours=null;this.setState({pdfEtat:'erreur',pdfErr:String((e&&e.message)||e),pdfCle:cle});});
+  }
   _nouvelleEpreuveLe(iso){
     const me=this._me();
     /* Meme droit que « Creer » : un relecteur ou un eleve ne cree pas
@@ -8680,6 +8780,7 @@ class Component extends DCLogic {
     return P[((i%P.length)+P.length)%P.length];
   }
   _icon(name,color,size){const s=size||20;const c=color||'var(--c1a72bb,#1a72bb)';const p={width:s,height:s,viewBox:'0 0 24 24',fill:'none',stroke:c,strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round'};const P=(d)=>React.createElement('path',{d});const paths={
+    arrowRight:[React.createElement('path',{key:1,d:'M5 12h14'}),React.createElement('path',{key:2,d:'m13 6 6 6-6 6'})],
     book:[React.createElement('path',{key:1,d:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20'}),React.createElement('path',{key:2,d:'M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'})],
     search:[React.createElement('circle',{key:1,cx:11,cy:11,r:7}),React.createElement('path',{key:2,d:'m21 21-4.3-4.3'})],
     pen:[React.createElement('path',{key:1,d:'M12 20h9'}),React.createElement('path',{key:2,d:'M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z'})],
@@ -9161,7 +9262,9 @@ class Component extends DCLogic {
         style:'flex:1;min-width:70px;padding:7px 6px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer;border:1px solid '+c+';'+(on?'background:'+c+';color:var(--cffffff,#fff)':'background:var(--cffffff,#fff);color:'+c)};});
     const rvDecisions=rv.decisions.slice().sort((x,y)=>(y.tour-x.tour)||(y.ts-x.ts)).map(d=>{const u=st.users.find(x=>x.id===d.uid)||{id:d.uid,name:d.nom||'Relecteur'};
       return{nom:d.nom||u.name,initials:this._initials(d.nom||u.name),avatar:this._av(u,24),verdict:rvVerdictLbl[d.verdict]||d.verdict,chip:rvChip(d.verdict),
-        meta:(d.portee||'Tout le sujet')+' · tour '+d.tour+' · '+this._ago(d.ts),motif:d.motif||'',
+        meta:(d.portee||'Tout le sujet')+' \u00b7 tour '+d.tour+' \u00b7 '+this._ago(d.ts),motif:d.motif||'',
+        portee:d.portee||'Tout le sujet',tour:d.tour,motifCourt:d.motif?String(d.motif).slice(0,160):'sans remarque',avatarLg:this._av(u,36),
+        date:d.ts?new Date(d.ts).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'',
         motifStyle:d.motif?'font-size:12px;color:var(--c5a6678,#5a6678);line-height:1.5;margin-top:3px;white-space:pre-wrap':hidden};});
     const rvSynthese=(()=>{
       if(!rvCur.length)return s==='relecture'?'Aucune décision rendue sur ce tour : '+rv.requis+' relecture(s) attendue(s).':'Tour '+rv.tour+' : pas encore de décision.';
@@ -10713,6 +10816,17 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       step1Style:stepStyle(s1),step2Style:stepStyle(s2),step3Style:stepStyle(s3),
       step1Dot:dotStyle(s2||s3,s1),step2Dot:dotStyle(s3,s2),step3Dot:dotStyle(false,s3),
       step4Style:stepStyle(sDiff),step4Dot:dotStyle(sDiff,false),
+      synthIcone:this._icon('sparkle','var(--c1a72bb,#1a72bb)',18),
+      friseStyle:active?'display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:14px;padding:12px 18px;margin:0 0 14px;box-shadow:0 4px 14px rgba(0,17,54,.05)':hidden,
+      frise:(()=>{const vert='var(--c3f6b4f,#3f6b4f)',gris='var(--cc3ccd8,#c3ccd8)';
+        const c2=s==='rejete'?'var(--cc0392b,#c0392b)':s==='ajustement'?'var(--cc26a12,#c26a12)':'var(--c1a72bb,#1a72bb)';
+        const et=[{l:'Brouillon',fait:!s1,cour:s1,c:'var(--c1a72bb,#1a72bb)'},
+          {l:s==='ajustement'?'Ajustement demandé':s==='rejete'?'Rejeté':'En relecture',fait:s3,cour:s2,c:c2},
+          {l:'Validé',fait:sDiff,cour:s3&&!sDiff,c:vert},{l:'Diffusé',fait:sDiff,cour:false,c:vert}];
+        return et.map((x,i)=>({label:x.l,
+          trait:i?'width:34px;height:1.5px;flex:none;background:'+(x.fait||x.cour?vert:gris):'display:none',
+          dot:'width:10px;height:10px;border-radius:50%;flex:none;'+(x.fait?'background:'+vert:x.cour?'background:'+x.c+';box-shadow:0 0 0 3px rgba(0,0,0,.05)':'background:var(--cffffff,#fff);border:1.5px solid '+gris),
+          lab:'font-size:12.5px;font-family:Poppins;white-space:nowrap;font-weight:'+(x.cour?'700':'500')+';color:'+(x.cour?x.c:x.fait?vert:'var(--c8b97a8,#8b97a8)')}));})(),
       step2Label:s==='ajustement'?'Ajustement demandé':s==='rejete'?'Rejeté':'En relecture',
       ...(()=>{
         const solo=this._estSolo(active),auteur=!!active&&(active.ownerId===me.id||perm.validate);
@@ -10780,7 +10894,12 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       /* --- pictogrammes remplaces par des icones --- */
       icClose:this._icon('close','var(--c8b97a8,#8b97a8)',15),
       icRetour:this._icon('arrowLeft','var(--c1a72bb,#1a72bb)',15),
-      icSuite:this._icon('arrowRight','var(--c1a72bb,#1a72bb)',14),
+      icSuite:this._icon('arrowRight','var(--c1a72bb,#1a72bb)',14),icSuiteBlanc:this._icon('arrowRight','var(--cffffff,#fff)',15),
+      genPanneauIcone:this._icoRond('sparkle','var(--cf39200,#f39200)',46),
+      genQuotaAvant:meQuotaInconnu?'Le serveur vérifie votre quota à chaque aperçu.':'Il vous reste ',
+      genQuotaChiffre:meQuotaInconnu?'':(meRemaining+' / '+meLimit),
+      genQuotaChip:meQuotaInconnu?'display:none':'font-family:Poppins;font-weight:700;color:var(--cc26a12,#c26a12);background:var(--cfdefdb,#fdefdb);padding:1px 8px;border-radius:999px',
+      genQuotaApres:meQuotaInconnu?'':' aperçu(s) ce mois, vérifié par le serveur.',
       icEtoile:this._icon('star','var(--cc26a12,#c26a12)',12),
       icImport:this._icon('upload','var(--c1a72bb,#1a72bb)',15),
       icFichier:this._icon('file','var(--c9aa5b5,#9aa5b5)',26),
@@ -10918,7 +11037,8 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
         else this._composerAvecAmbassa('tout');
         setTimeout(()=>{const el=document.getElementById('vrt-composer');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},60);},
       genRensWrap:perm.ia?'margin-top:16px;padding:14px;border-radius:12px;background:var(--cf5faff,#f5faff);border:1px solid var(--cd6e8f8,#d6e8f8)':hidden,
-      genRensBtn:'width:100%;display:flex;align-items:center;justify-content:center;gap:8px;border:none;padding:12px 16px;font-size:13.5px;font-weight:700;font-family:Poppins;border-radius:10px;color:var(--cffffff,#fff);cursor:'+(st.genBusy?'default':'pointer')+';background:'+(st.genBusy?'var(--c8b97a8,#8b97a8)':'linear-gradient(135deg,var(--c14375f,#14375f),var(--c1a72bb,#1a72bb))'),
+      genRensBtn:'width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 14px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:12px;cursor:'+(st.genBusy?'default':'pointer')+';'+(st.genBusy?'background:var(--cf2f6fb,#f2f6fb);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c8b97a8,#8b97a8)':'background:var(--cffffff,#fff);border:1px solid var(--cbcd9f2,#bcd9f2);color:var(--c14375f,#14375f);box-shadow:0 4px 14px rgba(0,17,54,.05)'),
+      genRensIcone:this._icoRond('sparkle',st.genBusy?'var(--c8b97a8,#8b97a8)':'var(--c1a72bb,#1a72bb)',30),
       genRensLabel:!perm.edit?(/^u\d+$/.test(String(me.id))?'Profil de d\u00e9monstration en lecture seule':(this._roleSoloRepare(st.users,me.id)!==st.users?'Reprendre le r\u00f4le Enseignant pour g\u00e9n\u00e9rer':'Demander le droit d\u2019\u00e9dition')):st.genBusy?'Ambassa compose\u2026':(active&&this._aDuContenu(active)?'Recomposer l\u2019\u00e9preuve avec Ambassa':'G\u00e9n\u00e9rer l\u2019\u00e9preuve avec Ambassa'),
       genRensAide:!perm.edit?('Votre r\u00f4le \u00ab '+perm.roleNom+' \u00bb ne permet ni de modifier ni de g\u00e9n\u00e9rer cette \u00e9preuve : les champs sont verrouill\u00e9s.'):st.genErr?st.genErr:!(active&&active.classe)?'Choisissez d\u2019abord la classe : la nature et le bar\u00e8me officiels en d\u00e9coulent.'
         :'Ambassa choisit le texte, r\u00e9dige les questions, le bar\u00e8me, le corrig\u00e9 et les sujets. Vous relisez ensuite.',
@@ -11819,7 +11939,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       })(),
       ...(()=>{
         if(typeof document!=='undefined'){try{document.documentElement.classList.toggle('vrt-doc',ready&&st.screen==='apercu');}catch(e){}}
-        if(!(ready&&st.screen==='apercu')||!active)return{docOnglets:[],docVues:[],docVoitEnonce:true,docFeuilleStyle:'',docPagesLabel:'',docZoomLabel:'',docZoomBasculer:()=>{}};
+        if(!(ready&&st.screen==='apercu')||!active)return{docModeApercu:()=>{},docModePdf:()=>{},docModeApercuStyle:hidden,docModePdfStyle:hidden,pdfZoneStyle:hidden,pdfIframe:false,pdfUrl:'',pdfMsg:'',pdfMsgStyle:hidden,pdfRefaire:()=>{},pdfRefaireStyle:hidden,pdfMobileStyle:hidden,pdfOuvrir:()=>{},pdfTelecharger:()=>{},docOnglets:[],docVues:[],docVoitEnonce:true,docFeuilleStyle:'',docPagesLabel:'',docZoomLabel:'',docZoomBasculer:()=>{}};
         const cor=this._corrigePourExport(active)||[];
         const ann=this._annexesPourExport(active,true);
         const guide=ann.find(x=>/^GUIDE/.test(x.titre)),note=ann.find(x=>/^NOTE/.test(x.titre));
@@ -11848,8 +11968,28 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           docVues:montrer.map((k,i)=>({titre:vues[k].titre,sous:sousT,blocs:vues[k].blocs.map(b=>({titre:b.titre||'',lignes:(b.lignes||[]).map(l=>String(l))})),
             style:(v==='tout'||i>0)?'':'border-top:none;margin-top:0;padding-top:0'})),
           docFeuilleStyle:'width:210mm;min-height:297mm;box-sizing:border-box;margin:22px auto 60px;background-color:var(--cffffff,#fff);padding:16mm 15mm 18mm;box-shadow:0 2px 14px rgba(20,55,95,.12);zoom:'+z.toFixed(3)+';'
-            +'background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) 297mm)',
-          docPagesLabel:st.docPages?('≈ '+st.docPages+' page'+(st.docPages>1?'s':'')+' A4'):'',
+            +'background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) 297mm)'+(st.docMode==='pdf'||(!st.docMode&&!(typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(max-width:820px)').matches))?';position:absolute;left:-30000px;top:0':''),
+          ...(()=>{
+            const mobile=typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(max-width:820px)').matches;
+            const mode=st.docMode||(mobile?'apercu':'pdf');
+            const cle=(active.updatedAt||0)+'|'+v;
+            if(mode==='pdf'&&cle!==st.pdfCle&&this._pdfEnCours!==cle){clearTimeout(this._pdfT);this._pdfT=setTimeout(()=>this._fabriquerPdf(cle),300);}
+            const seg=on=>'border:none;padding:6px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer;'+(on?'background:var(--cffffff,#fff);color:var(--c14375f,#14375f);box-shadow:0 1px 4px rgba(20,55,95,.12)':'background:none;color:var(--c7a8598,#7a8598)');
+            const pret=st.pdfEtat==='pret'&&!!st.pdfUrl;
+            const nomPdf=(typeof VRT_DOCX!=='undefined'?VRT_DOCX.nomFichier(active.title||'epreuve'):'epreuve.docx').replace(/\.docx$/,'.pdf');
+            return{
+              docModeApercu:()=>this.setState({docMode:'apercu'}),docModePdf:()=>this.setState({docMode:'pdf'}),
+              docModeApercuStyle:seg(mode==='apercu'),docModePdfStyle:seg(mode==='pdf'),
+              pdfZoneStyle:mode==='pdf'?'':hidden,
+              pdfIframe:mode==='pdf'&&pret&&!mobile,pdfUrl:st.pdfUrl||'',
+              pdfMsg:st.pdfEtat==='erreur'?('Le PDF n’a pas pu être fabriqué ('+(st.pdfErr||'erreur inconnue')+'). L’aperçu et l’impression restent disponibles.'):(st.pdfEtat==='pret'&&st.pdfCle===cle?(mobile?'PDF prêt — '+st.pdfPages+' page(s).':''):'Fabrication du PDF…'),
+              pdfMsgStyle:(st.pdfEtat==='pret'&&st.pdfCle===cle&&!mobile)?hidden:'font-size:13px;color:'+(st.pdfEtat==='erreur'?'var(--cc0392b,#c0392b)':'var(--c5a6678,#5a6678)')+';padding:18px 20px 8px;text-align:center',
+              pdfRefaire:()=>this.setState({pdfCle:''}),
+              pdfRefaireStyle:st.pdfEtat==='erreur'?'display:block;margin:0 auto 14px;background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 14px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
+              pdfMobileStyle:mode==='pdf'&&pret&&mobile?'display:flex;gap:10px;justify-content:center;padding:6px 16px 18px;flex-wrap:wrap':hidden,
+              pdfOuvrir:()=>{if(st.pdfUrl)window.open(st.pdfUrl,'_blank');},
+              pdfTelecharger:()=>{if(!st.pdfUrl)return;const a=document.createElement('a');a.href=st.pdfUrl;a.download=nomPdf;document.body.appendChild(a);a.click();a.remove();},
+              docPagesLabel:mode==='pdf'?(pret?(st.pdfPages+' page'+(st.pdfPages>1?'s':'')+' A4'):''):(st.docPages?('≈ '+st.docPages+' page'+(st.docPages>1?'s':'')+' A4'):'')};})(),
           docZoomLabel:reel?'Ajuster':'Taille réelle',
           docZoomBasculer:()=>this.setState({docZoom:reel?'':'100'}),
         };
