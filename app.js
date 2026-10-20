@@ -11768,8 +11768,8 @@ async function doLogin(){
     $("lerr").innerHTML=(sansMdp
       ? '<div>Ce compte n\'a plus de mot de passe enregistr\u00e9 sur cet appareil.</div>'
       : '<div>Identifiants incorrects</div>')
-      + '<button class="btn bo" style="margin-top:9px;width:100%" onclick="_reinitMdpAdmin()">'
-      + 'R\u00e9initialiser avec la cl\u00e9 de synchronisation</button>';
+      + '<button class="btn bo" style="margin-top:9px;width:100%;white-space:normal;height:auto;line-height:1.35;padding:9px 12px" onclick="_reinitMdpAdmin()">'
+      + 'R\u00e9initialiser le mot de passe</button>';
     return;
   }
 
