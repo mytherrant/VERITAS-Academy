@@ -677,7 +677,9 @@
        pas encore vue qui tombe à l'épreuve, c'est une copie sanctionnée pour
        un cours que l'élève n'a pas eu. */
     if (ctx.cadre) l.push('Cadre : ' + ctx.cadre + (ctx.borne ? ', programme borné au ' + ctx.borne : '') + '.');
-    if (ctx.programmeFait && ctx.programmeFait.length) l.push('Leçons déjà faites en classe (le sujet s’y appuie) : ' + ctx.programmeFait.join(' ; ') + '.');
+    if (ctx.progression) l.push('Progression nationale suivie : ' + ctx.progression + '.');
+    if (ctx.tache) l.push('Tâche d’intégration OFFICIELLE de cette séquence (modèle de situation-problème et de consigne en 1-2-3 pour l’expression écrite ; adapte-la, ne la recopie pas) : ' + ctx.tache);
+    if (ctx.programmeFait && ctx.programmeFait.length) l.push('Leçons déjà faites en classe (le sujet s’y appuie) : ' + ctx.programmeFait.map(function (x) { return String(x).slice(0, 140); }).join(' ; ') + '.');
     if (ctx.oeuvre) l.push('Œuvre au programme étudiée : ' + ctx.oeuvre + ' — privilégie-la pour les sujets qui portent sur une œuvre ; n’en invente aucune citation.');
     if (ctx.cadre && /maison|vacances/i.test(ctx.cadre)) l.push('DEVOIR FAIT HORS DE LA CLASSE : dans "guide.erreurs", ajoute les indices d’une copie rédigée par une IA ou recopiée (citations introuvables dans l’œuvre ou le texte, épisodes inexistants, langue uniformément lisse sans aucune trace de brouillon, plan identique à une copie voisine) et la conduite à tenir : convoquer l’élève pour qu’il explique sa démarche, sans annoter la copie.');
     if (ctx.exclusions && ctx.exclusions.length) l.push('NOTIONS EXCLUES — ne les utilise pas, même implicitement, ni dans les questions ni dans le corrigé : ' + ctx.exclusions.join(' ; ') + '.');
