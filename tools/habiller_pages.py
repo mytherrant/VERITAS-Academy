@@ -440,6 +440,50 @@ nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!impor
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq{--vq:#5B4FA8}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq{--vq:#B03A6E}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq + .loupe.faq{--vq:#A84200}
+
+/* ════════════════════════════════════════════════════════════════════════
+   ATELIER : ENCRES DE LA VITRINE (19/10/2026)
+   ════════════════════════════════════════════════════════════════════════
+   Mesuré en production, session enseignant, huit vues : les légendes de
+   l'Atelier (#8B97A8, #9AA5B5, #7A8598) tombaient entre 2,2 et 3,7:1, les
+   pastilles orange #C26A12 et vertes #1F9D55 à 3,2-3,9:1 — et aucune de ces
+   teintes n'est celle de la vitrine. Ses couleurs passent par des variables
+   posées sur :root : les redéfinir suffit, sans toucher au code React.
+   Thème clair seulement : le sombre a ses propres valeurs. Après : 0 texte
+   sous 4,5:1 (3:1 en grand corps) sur les huit vues. */
+html:not([data-theme="sombre"]):has(#dc-root){
+  --sb-fg-dim:#5F6475;--c8b97a8:#5F6475;--c9aa5b5:#5F6475;--c7a8598:#4D5163;
+  --cc26a12:#A84200;--c1f9d55:#007E11;--c0e8a9c:#0E7C86}
+
+/* ════════════════════════════════════════════════════════════════════════
+   SUJETS D'EXAMEN — la police et les encres de la vitrine (19/10/2026)
+   ════════════════════════════════════════════════════════════════════════
+   Dix pages (evaluations/*) à feuille propre : trois palettes « papier »
+   (encre #12100E, fond crème #F4F0E6, gris #6B5C40, filets #D6CBB5) et
+   quatre polices (Playfair Display, Source Serif 4, Libre Baskerville,
+   Times). Leurs variables prennent les valeurs de la vitrine ; l'or reste
+   celui de chaque page (fond d'un bouton ici, encre d'un filet là) —
+   veritas-medaillons.js relève ce qui manquerait de contraste. */
+:root:has(link[data-vrt-epreuve]){--ink:#001136;--bg:#F4F5F8;--cream:#FFFFFF;--teal:#0E7C86;--blue:#1E499B;--violet:#5B4FA8;
+  --muted:#5F6475;--border:#E4E9F2;--navy:#001136;--success-b:#007E11}
+:root:has(link[data-vrt-epreuve]) body{background:#F4F5F8!important}
+:root:has(link[data-vrt-epreuve]) body :not(.vrt-hab):not(.vrt-hab *):not(svg):not(svg *):not(code):not(pre){font-family:Poppins,system-ui,sans-serif!important}
+:root:has(link[data-vrt-epreuve]) body :is(h1,h2,h3,h4):not(.vrt-hab *){font-weight:600!important;letter-spacing:normal!important}
+
+/* Pictogrammes posés par veritas-medaillons.js (pictos) à la place des
+   émojis de tête : le trait de la vitrine, à la taille et à la couleur du texte. */
+.vm-pic{display:inline-block;width:1em;height:1em;vertical-align:-.14em;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+
+/* CITATIONS EN POPPINS (19/10/2026) — les fiches d'œuvre citaient en Georgia
+   (.hook, .cit blockquote) ; la vitrine cite en Poppins italique. */
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.hook,blockquote){font-family:Poppins,system-ui,sans-serif!important}
+/* Une scansion de vers d'un seul tenant (« Hom-me-li-bre-tou-jours… ») sortait
+   de l'écran à 375 px : elle peut se couper n'importe où. */
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .k{overflow-wrap:anywhere}
+
+/* UNE SEULE POLICE (19/10/2026) — les cours posaient Nunito, Baloo 2 et
+   Playfair Display, l'index des cahiers Klee One : la vitrine n'a que Poppins. */
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :not(.vrt-hab):not(.vrt-hab *):not(svg):not(svg *):not(code):not(pre):not(kbd){font-family:Poppins,system-ui,sans-serif!important}
 """
 
 
@@ -486,10 +530,21 @@ def habiller(s, donnees, rel=''):
     v = version(s)
     outil = any(r.search(rel) for r in OUTILS)
     atelier = rel == 'plateforme/index.html'
+    # 19/10/2026 — Les sujets d'examen ont chacun leur feuille en ligne (papier
+    # crème, Playfair / Source Serif / Times, émojis en couleur) et aucune des
+    # feuilles partagées : rien de la vitrine ne les atteignait. Un marqueur
+    # sur NOTRE lien les désigne à veritas-habillage.css (« :has() ») sans
+    # script ni flash au chargement ; veritas-medaillons.js y passe ses
+    # corrections (filets, contraste, pictogrammes).
+    # Les pages d'erreur et de service (403, 404, validation admin,
+    # réinitialisation) sont dans le même cas : feuille propre, police système.
+    epreuve = (rel.startswith('evaluations/') and not rel.endswith('index.html')) or rel in (
+        '403.html', '404.html', 'admin-validation.html', 'reset.html')
 
     # <head>
-    tete = ('<link rel="stylesheet" href="/assets/veritas-habillage.css?v=%s">\n'
-            '<script>window.VRT_DATA=window.VRT_DATA||%s;</script>') % (v, donnees)
+    tete = ('<link rel="stylesheet" href="/assets/veritas-habillage.css?v=%s"%s>\n'
+            '<script>window.VRT_DATA=window.VRT_DATA||%s;</script>') % (
+        v, ' data-vrt-epreuve' if epreuve else '', donnees)
     # La barre est dessinée en Poppins : une page qui ne la charge pas
     # (évaluations, Campus, Atelier…) la recevrait en police système.
     if not re.search(r'fonts\.googleapis\.com/css2\?family=[^"]*Poppins', s):
@@ -537,7 +592,7 @@ def habiller(s, donnees, rel=''):
 
     # Fin du corps : pied, bulles, scripts.
     scripts = ''
-    if 'veritas-medaillons.js' not in s and not outil and any(f in s for f in FEUILLES):
+    if 'veritas-medaillons.js' not in s and not outil and (epreuve or any(f in s for f in FEUILLES)):
         scripts += '<script src="/assets/veritas-medaillons.js?v=%s" defer></script>\n' % v
     scripts += '<script src="/assets/vitrine.js?v=%s" defer></script>' % v
     fin = PIED + '\n' + ('' if outil else BULLES + '\n') + scripts

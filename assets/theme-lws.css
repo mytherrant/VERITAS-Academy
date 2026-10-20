@@ -4878,6 +4878,109 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
   background:transparent !important; color:#F2F5FC !important;
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   § 41 — L'ESPACE CONNECTÉ AUX COULEURS ET À LA POLICE DE LA VITRINE
+   (19/10/2026)
+   ════════════════════════════════════════════════════════════════════════
+   « Tout doit être aligné sur la vitrine », espaces élève, enseignant et
+   administration compris. Audit local des 122 écrans (sessions de test,
+   copie isolée comme en CI) :
+     · quatre polices que la vitrine n'emploie pas, sur CHAQUE écran —
+       Libre Baskerville (titres, marque, nom de l'élève), Montserrat
+       (étiquettes), Plus Jakarta Sans (menu), Fira Code (notes) ;
+     · la barre latérale en dégradé #1E499B, ses légendes entre 1,9 et
+       3,4:1 (#839BC8, #5677B4, #6D89BE…).
+   La vitrine n'a qu'une police, Poppins, et son bleu nuit est #001136 (son
+   pied). La barre latérale prend ce bleu nuit et l'encre du pied ; l'entrée
+   active garde l'or d'action. Les polices d'icônes et le code sont épargnés.
+   Le reste du contraste — couleurs écrites en dur par les fonctions de
+   rendu — est relevé par theme-lws.js (passeApp), comme côté visiteur. */
+#APP#APP#APP *:not([class*="material"]):not(pre):not(kbd):not(samp),
+body:has(#APP[style*="flex"]) #MC#MC#MC *:not([class*="material"]):not(pre):not(kbd):not(samp){
+  font-family:Poppins, system-ui, "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif !important;
+}
+#APP#APP#APP :is(h1,h2,h3,h4,.ct,.mtt,.pgt,.tbp,.scl,.sbsl){ letter-spacing:normal !important; }
+#APP#APP#APP :is(h1,h2,h3,h4,.ct,.mtt,.tbp){ font-weight:600 !important; }
+#APP#APP#APP .tbp{ color:#001136 !important; }
+/* Notes « 16/20 + 15/20 » et montants (.mono, <code>) : Poppins, chiffres
+   alignés — la vitrine n'a pas de police à chasse fixe. */
+#APP#APP#APP :is(.mono,code), #APP#APP#APP [style*="monospace"], #APP#APP#APP [style*="Fira"], #APP#APP#APP [style*="JetBrains"]{ font-variant-numeric:tabular-nums !important; }
+
+/* Barre latérale : le bleu nuit et l'encre du pied de la vitrine. */
+#APP#APP#APP .sb{ background:#001136 !important; background-image:none !important; }
+#APP#APP#APP .sb .sbsl{ color:#8FA0C4 !important; font-size:11px !important; font-weight:600 !important; letter-spacing:1px !important; }
+#APP#APP#APP .sb .sbit{ color:rgba(255,255,255,.78) !important; }
+#APP#APP#APP .sb .sbit:hover{ color:#fff !important; background:rgba(255,255,255,.08) !important; }
+#APP#APP#APP .sb .sbit.on{ color:#FFC93C !important; background:rgba(255,201,60,.12) !important; }
+#APP#APP#APP .sb :is(.sbur,#sbfi,#sbSchoolSlogan,#sbSchoolCity){ color:#8FA0C4 !important; }
+#APP#APP#APP .sb :is(.sbun,#sbSchoolName){ color:#fff !important; }
+#APP#APP#APP .sb :is(#sbSchoolName){ font-weight:600 !important; }
+
+/* Boutons de l'espace connecté. Le principal (.bi, 367 occurrences) était
+   un dégradé #3C8DFF → #2B7CE8 portant du blanc à 3,26:1 ; la passe de
+   contraste le « réparait » en noircissant le texte. Il prend le bleu de la
+   vitrine (#1E499B, blanc à 8,6:1). L'or (.bg) et le violet (.bvi, .bpu)
+   sont ceux de la vitrine. */
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) .btn.bi{ background:#1E499B !important; background-image:none !important; color:#fff !important; }
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) .btn.bi:hover{ background:#163A80 !important; }
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) .btn.bg{ background:#FFC93C !important; background-image:none !important; color:#001136 !important; }
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) .btn:is(.bvi,.bpu){ background:#5B4FA8 !important; background-image:none !important; color:#fff !important; }
+#APP#APP#APP .tbd{ color:#5F6475 !important; }
+.skip-link{ background:#FFC93C !important; color:#001136 !important; }
+/* Le gris secondaire de l'espace connecté (#6E7385, jetons --ink3 / --ink4 /
+   --lws-text2) tombait à 4,32:1 sur le fond #F4F5F8 des cartes de chiffres :
+   un cran plus sombre, comme dans l'Atelier. Le bandeau « appareil non
+   synchronisé » est posé hors de #APP : il reçoit la police à part. */
+#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC{ --ink3:#5F6475; --ink4:#5F6475; --lws-text2:#5F6475;
+  /* Orange d'action #FF6500 (blanc à 2,95:1) et vert #059669 (3,77:1) :
+     la brique et le vert de la vitrine. */
+  --lws-action:#A84200; --gr:#007E11; --ds-ok:#007E11; --success-700:#007E11; }
+body > [id^="_"]:not(script), body > [id^="_"]:not(script) *:not([class*="material"]){ font-family:Poppins, system-ui, sans-serif !important; }
+/* L'orange d'accent (--lws-orange → --lws-action #FF6500) portait du blanc à
+   2,95:1 — disques des toasts, posés hors de #APP, compris : la brique de la
+   vitrine, partout. */
+:root{ --lws-orange:#A84200; }
+/* Fonds écrits en dur par les fonctions de rendu de l'administration, sous
+   du texte blanc : #059669 (3,77:1), #25D366 WhatsApp (1,98:1), #0891B2,
+   #D97706, #3A8F73, #3C8DFF… La passe de contraste ne savait que noircir
+   le texte. Ils prennent la teinte de la vitrine la plus proche : vert,
+   sarcelle, brique ou bleu — le blanc y passe 4,9 à 8,6:1. */
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="background:#059669"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="gradient("][style*="#059669"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="background:#16A34A"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="gradient("][style*="#16A34A"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="background:#3A8F73"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="gradient("][style*="#3A8F73"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="background:#25D366"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="gradient("][style*="#25D366"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="background:#25d366"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="gradient("][style*="#25d366"]{ background:#007E11 !important; background-image:none !important; }
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style^="color:#059669"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*=";color:#059669"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style^="color:#16A34A"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*=";color:#16A34A"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style^="color:#3A8F73"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*=";color:#3A8F73"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style^="color:#25D366"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*=";color:#25D366"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style^="color:#25d366"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*=";color:#25d366"]{ color:#007E11 !important; }
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="background:#0891B2"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="gradient("][style*="#0891B2"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="background:#0D9488"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="gradient("][style*="#0D9488"]{ background:#0E7C86 !important; background-image:none !important; }
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style^="color:#0891B2"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*=";color:#0891B2"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style^="color:#0D9488"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*=";color:#0D9488"]{ color:#0E7C86 !important; }
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="background:#D97706"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="gradient("][style*="#D97706"]{ background:#A84200 !important; background-image:none !important; }
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style^="color:#D97706"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*=";color:#D97706"]{ color:#A84200 !important; }
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="background:#3C8DFF"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*="gradient("][style*="#3C8DFF"]{ background:#1E499B !important; background-image:none !important; }
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style^="color:#3C8DFF"],
+:is(#APP#APP#APP, body:has(#APP[style*="flex"]) #MC#MC#MC) [style*=";color:#3C8DFF"]{ color:#1E499B !important; }
 /* Carte utilisateur de la barre latérale : dans 240 px, avatar + nom + rôle
    + bouton thème + « Déconnexion » sur UNE ligne écrasaient le nom en « S… »
    et cassaient « SUPER ADMIN » sur deux lignes. Les boutons passent dessous. */
