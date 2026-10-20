@@ -621,6 +621,33 @@
     l.push('- "penalites" : deux à quatre règles chiffrées et plafonnées — langue (ex. au-delà de cinq fautes, 0,5 point par tranche de cinq, dans la limite de 2 points), longueur, présentation.');
     l.push('- "niveaux" : le profil d’une copie dans chaque tranche, une phrase chacune : "16 à 20", "12 à 15,5", "8 à 11,5", "0 à 7,5".');
     l.push('- "erreurs" : trois à cinq erreurs prévisibles des élèves de cette classe, et le critère où chacune se sanctionne — sans les cumuler.');
+    /* ── RENFORCEMENT (20/10/2026, demandé par Jacques) ─────────────────
+       Le registre et la longueur des productions selon le sous-cycle étaient
+       décrits dans MINESEC.sousCycles et jamais transmis ; l'ancrage
+       camerounais, la typographie et la relecture finale ne l'étaient pas
+       davantage. La relecture est formulée en tâches VÉRIFIABLES : Ambassa
+       ne s'auto-certifie pas, l'Atelier recompte, mais un premier tri évite
+       des réécritures (et le quota qu'elles coûtent). */
+    /* Premier cycle seulement : la seule entrée du second cycle décrit les
+       séries scientifiques et techniques — l'envoyer à une Terminale A
+       aurait été faux. */
+    var premierCycle = !!(ref && ref.cleClasse && /^[3-6]e$/.test(ref.cleClasse(classe || '')));
+    var sc = premierCycle && ref.sousCycles ? ref.sousCycles.filter(function (x) {
+      return (x.classes || []).some(function (c) { return ref.cleClasse && ref.cleClasse(c) === ref.cleClasse(classe); });
+    })[0] : null;
+    if (sc) l.push('- NIVEAU ATTENDU — ' + sc.nom + ' : ' + sc.style);
+    l.push('- CONTEXTE : situations de vie camerounaises et africaines (école, quartier, marché, famille, village, ville), prénoms et lieux camerounais, sans caricature ni stéréotype ; jamais de référence à un contexte qu’un élève camerounais ne connaît pas.');
+    l.push('- TYPOGRAPHIE FRANÇAISE : guillemets « » avec espaces, espace avant « : ; ? ! », majuscules accentuées (« À », « É »), titres d’œuvres cités exactement.');
+    l.push('');
+    l.push('AVANT DE RÉPONDRE — relis ta copie et corrige-la toi-même :');
+    l.push('1. La somme des points égale le total annoncé, bloc par bloc ; aucune question à moins de 0,5 point.');
+    l.push('2. Chaque citation entre « » se trouve mot pour mot dans le texte support.');
+    l.push('3. Aucune question ne porte sur une notion exclue ni sur un passage du texte non transmis.');
+    l.push('4. Chaque consigne de production donne le type de texte, la longueur et la situation ; la tâche est réalisable dans la durée de l’épreuve.');
+    l.push('5. Chaque question a son corrigé, et le corrigé répond à la question posée, pas à une autre.');
+    l.push('6. Le guide de correction reprend le barème réel, critère par critère.');
+    l.push('7. Langue irréprochable : orthographe, accords, conjugaison, ponctuation — une épreuve de français fautive est inutilisable.');
+    l.push('');
     l.push('NOTE AU RELECTEUR (clé "note") — trois à cinq lignes en tout : "choix" (pourquoi ce texte et ce sujet : lien avec la séquence, structure, difficulté visée), "perimetre" (notions évaluées), "points" (deux à quatre points précis sur lesquels le relecteur doit trancher : une question dont tu doutes, un barème discutable, une référence à vérifier).');
     l.push('Classe visée : ' + (classe || 'non précisée') + '.');
     return l.join('\n');
@@ -677,7 +704,12 @@
        pas encore vue qui tombe à l'épreuve, c'est une copie sanctionnée pour
        un cours que l'élève n'a pas eu. */
     if (ctx.cadre) l.push('Cadre : ' + ctx.cadre + (ctx.borne ? ', programme borné au ' + ctx.borne : '') + '.');
-    if (ctx.programmeFait && ctx.programmeFait.length) l.push('Leçons déjà faites en classe (le sujet s’y appuie) : ' + ctx.programmeFait.join(' ; ') + '.');
+    if (ctx.progression) l.push('Progression nationale suivie : ' + ctx.progression + '.');
+    if (ctx.tache) l.push('Tâche d’intégration OFFICIELLE de cette séquence (modèle de situation-problème et de consigne en 1-2-3 pour l’expression écrite ; adapte-la, ne la recopie pas) : ' + ctx.tache);
+    if (ctx.programmeFait && ctx.programmeFait.length) {
+      l.push('Leçons déjà faites en classe (le sujet s’y appuie) : ' + ctx.programmeFait.map(function (x) { return String(x).slice(0, 140); }).join(' ; ') + '.');
+      l.push('Les questions de langue portent EN PRIORITÉ sur ces notions, appliquées à des phrases du texte ; une notion de la liste absente du texte ne s’invente pas, on en prend une autre de la liste.');
+    }
     if (ctx.oeuvre) l.push('Œuvre au programme étudiée : ' + ctx.oeuvre + ' — privilégie-la pour les sujets qui portent sur une œuvre ; n’en invente aucune citation.');
     if (ctx.cadre && /maison|vacances/i.test(ctx.cadre)) l.push('DEVOIR FAIT HORS DE LA CLASSE : dans "guide.erreurs", ajoute les indices d’une copie rédigée par une IA ou recopiée (citations introuvables dans l’œuvre ou le texte, épisodes inexistants, langue uniformément lisse sans aucune trace de brouillon, plan identique à une copie voisine) et la conduite à tenir : convoquer l’élève pour qu’il explique sa démarche, sans annoter la copie.');
     if (ctx.exclusions && ctx.exclusions.length) l.push('NOTIONS EXCLUES — ne les utilise pas, même implicitement, ni dans les questions ni dans le corrigé : ' + ctx.exclusions.join(' ; ') + '.');

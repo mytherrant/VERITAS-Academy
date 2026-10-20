@@ -32,9 +32,10 @@
 <script src="./minesec.js?v=5109f163"></script>
 <script src="./conformite.js?v=7948efec"></script>
 <script src="./exercices.js?v=0018edb0"></script>
-<script src="./generateur.js?v=115de51a"></script>
+<script src="./generateur.js?v=5ebe87de"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=221641f0"></script>
+<script defer src="./progressions.js?v=800320a5"></script>
 <!--vrt-habillage:tete-->
 <link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.37">
 <script>window.VRT_DATA=window.VRT_DATA||{"citations":[{"t":"Le génie, c’est un pour cent d’inspiration et quatre-vingt-dix-neuf pour cent de transpiration.","a":"Thomas Edison"},{"t":"Ce n’est pas parce que les choses sont difficiles que nous n’osons pas ; c’est parce que nous n’osons pas qu’elles sont difficiles.","a":"Sénèque"},{"t":"L’éducation est l’arme la plus puissante pour changer le monde.","a":"Nelson Mandela"},{"t":"Un peu chaque jour vaut mieux que beaucoup un seul jour.","a":"Proverbe"},{"t":"La chance sourit à l’esprit préparé.","a":"Louis Pasteur"},{"t":"Tomber sept fois, se relever huit.","a":"Proverbe japonais"}],"themeSombre":"\n      body{background:#0A1428!important}\n      [style*=\"background:#fff\"],[style*=\"background:#FAFBFE\"],[style*=\"background:#FCFDFE\"],[style*=\"background:#F7F9FD\"]{background:#132241!important}\n      [style*=\"background:#F4F5F8\"],[style*=\"background:#F4F6FB\"],[style*=\"background:#EFF2F7\"],[style*=\"background:#F5F9FF\"]{background:#0F1B33!important}\n      [style*=\"background:rgba(255,255,255,.96)\"]{background:rgba(13,25,48,.96)!important}\n      [style*=\"radial-gradient(1100px\"],[style*=\"radial-gradient(900px\"]{background:#0C1730!important}\n      [style*=\"linear-gradient(180deg,#FBF8F1\"]{background:#0C1730!important}\n      [style*=\"color:#001136\"]{color:#EEF3FC!important}\n      [style*=\"color:#0C2A6A\"]{color:#DCE6F8!important}\n      [style*=\"color:#4D5163\"],[style*=\"color:#6B5A42\"]{color:#B6C2D8!important}\n      [style*=\"color:#6E7385\"],[style*=\"color:#9BA6BE\"]{color:#8D9AB4!important}\n      [style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"]{border-color:#24334F!important}\n      [style*=\"\"],[style*=\"\"]{border-bottom-color:#24334F!important}\n      [style*=\"\"]{border-top-color:#24334F!important}\n      [style*=\"border-left:4px solid\"]{border-left-color:#FFC93C!important}\n      input,input::placeholder{color:#C7D2E6!important}\n    "};</script>
@@ -1269,6 +1270,37 @@
     [data-print-sheet]{padding:24px 16px 30px!important;margin:12px 8px!important}
     [data-print-sheet] ol{padding-left:18px!important}
   }
+  /* ── Mode focus du composeur (lot H, 20/10/2026) ─────────────────────── */
+  @media screen and (min-width:821px){
+    html.vrt-focus #vrtNav,html.vrt-focus footer.vrt-hab,html.vrt-focus #vrt-astuce{display:none!important}
+    html.vrt-focus aside[data-noprint]{width:76px!important}
+    html.vrt-focus aside[data-noprint] .vrt-sblabel{display:none!important}
+    html.vrt-focus .vrt-compo-main{max-width:1520px!important}
+    html.vrt-focus .vrt-compo-grille{grid-template-columns:1fr!important}
+    html.vrt-focus .vrt-compo-gauche{display:none!important}
+    html.vrt-focus.vrt-tiroir .vrt-compo-gauche{display:flex!important;position:fixed!important;top:0!important;left:76px;bottom:0;width:350px;
+      overflow-y:auto;z-index:45;background:var(--cf4f7fb,#f4f7fb);padding:16px;box-shadow:8px 0 30px rgba(20,55,95,.18);animation:fadeIn .18s ease both}
+  }
+  /* ── Mode document (lot G, 20/10/2026) ───────────────────────────────
+     html.vrt-doc est posé pendant l'aperçu : tout ce qui n'est pas la
+     feuille disparaît — barre et pied de la vitrine, menu latéral, barre de
+     l'Atelier, astuces flottantes. */
+  html.vrt-doc #vrtNav,html.vrt-doc footer.vrt-hab,html.vrt-doc aside[data-noprint],
+  html.vrt-doc header[data-noprint],html.vrt-doc .vrt-mobilebar,html.vrt-doc #vrt-astuce{display:none!important}
+  /* Mise en forme allégée : une police de corps, celle de l'export Word. */
+  .vrt-docfeuille p,.vrt-docfeuille li,.vrt-docfeuille span,.vrt-docfeuille strong{font-family:Cambria,Georgia,'Times New Roman',serif!important}
+  .vrt-docfeuille h2{font-family:Cambria,Georgia,serif!important;letter-spacing:0!important}
+  .vrt-docfeuille p,.vrt-docfeuille li{font-size:11.5pt!important;line-height:1.55!important}
+  @page{size:A4;margin:16mm 15mm 18mm;
+    @top-right{content:"VÉRITAS · Centre d’Excellence Scolaire";font:700 8.5pt Cambria,Georgia,serif;color:#14375F}
+    @bottom-center{content:"© VÉRITAS EDUCATION · veritas-school.com · Page " counter(page) " / " counter(pages);font:8pt Cambria,Georgia,serif;color:#8B97A8}}
+  @media print{
+    .vrt-docfeuille{zoom:1!important;width:auto!important;min-height:0!important;margin:0!important;padding:0!important;box-shadow:none!important;background:none!important}
+    .vrt-doc-entete,.vrt-doc-pied{display:none!important}
+    .vrt-doc-section{break-before:page}
+    .vrt-doc-main{background:none!important}
+  }
+  @media screen{.vrt-doc-section{border-top:2px dashed var(--cc9d6e4,#c9d6e4);margin-top:28px;padding-top:22px}}
   @media print{
     [data-noprint]{display:none!important}
     body{background:var(--cffffff,#fff)}
@@ -1284,7 +1316,7 @@
   <aside data-noprint="1" style="{{ sbWrap }}">
     <button onClick="{{ goAccueil }}" style="display:flex;align-items:center;gap:11px;background:none;border:none;cursor:pointer;padding:0;text-align:left;width:100%;margin-bottom:26px">
       <span style="width:38px;height:38px;border-radius:10px;background:var(--sb-logo-bg);display:grid;place-items:center;flex:none">{{ sbIcLogo }}</span>
-      <span style="line-height:1.15;{{ sbLabelShow }}">
+      <span class="vrt-sblabel" style="line-height:1.15;{{ sbLabelShow }}">
         <span style="display:block;font-family:'Poppins';font-size:15.5px;font-weight:700;color:var(--sb-strong);letter-spacing:-.01em">VÉRITAS</span>
         <span style="display:block;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--sb-fg-dim);margin-top:2px;font-weight:600">Éducation</span>
       </span>
@@ -1295,6 +1327,8 @@
       <button onClick="{{ goListe }}" style="{{ sbRessources }}" style-hover="background:var(--sb-hover)">{{ sbIcRessources }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Ressources</span></button>
       <button onClick="{{ goEpreuves }}" style="{{ sbEpreuves }}" style-hover="background:var(--sb-hover)">{{ sbIcEpreuves }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Épreuves</span></button>
       <button onClick="{{ goCours }}" style="{{ sbCours }}" style-hover="background:var(--sb-hover)">{{ sbIcCours }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Cours</span></button>
+      <button onClick="{{ goProgressions }}" style="{{ sbProgressions }}" style-hover="background:var(--sb-hover)">{{ sbIcProg }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Progressions</span></button>
+      <button onClick="{{ goSuivi }}" style="{{ sbSuivi }}" style-hover="background:var(--sb-hover)">{{ sbIcSuivi }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Suivi</span><span style="{{ sbSuiviBadge }}">{{ suiviRetardsN }}</span></button>
       <button onClick="{{ goCollab }}" style="{{ sbCollab }}" style-hover="background:var(--sb-hover)">{{ sbIcCollab }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Collaboration</span><span style="{{ sbMsgBadge }}">{{ msgCount }}</span></button>
     </nav>
 
@@ -1436,6 +1470,13 @@
 
     <h2 style="font-family:'Poppins';font-weight:700;font-size:30px;line-height:1.15;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.02em" class="vrt-th">Bonjour {{ me.first }}</h2>
     <p style="font-size:14px;color:var(--c7a8598,#7a8598);margin:6px 0 24px">{{ team.name }}</p>
+    <!-- « Cette semaine » (20/10/2026, lot J) : où en est la première de mes
+         classes dans sa progression, et la prochaine échéance à tenir. -->
+    <div style="{{ accSemaineStyle }}">
+      <span style="flex:none">{{ accSemaineIcone }}</span>
+      <span style="flex:1;min-width:220px"><span style="display:block;font-family:Poppins;font-size:13.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ accSemaine }}</span><span style="display:block;font-size:12.5px;color:var(--c5a6678,#5a6678);margin-top:2px">{{ accEcheance }}</span></span>
+      <button onClick="{{ accSemaineAller }}" style="background:var(--cffffff,#fff);border:1px solid var(--cf0d9b0,#f0d9b0);color:var(--c14375f,#14375f);padding:7px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">{{ accSemaineBouton }}</button>
+    </div>
     <!-- Visite guidee : dire pourquoi les compteurs sont a zero. Un profil
          d'exemple n'ouvre pas de compte, donc pas de repertoire ; sans cette
          ligne l'interface a l'air cassee alors qu'elle fait ce qu'elle
@@ -1857,13 +1898,19 @@
 
   <!-- ============ COMPOSEUR ============ -->
   <sc-if value="{{ isComposeur }}" hint-placeholder-val="{{ false }}">
-  <main style="flex:1;max-width:1240px;margin:0 auto;padding:26px 28px 72px;width:100%">
+  <main class="vrt-compo-main" style="flex:1;max-width:1240px;margin:0 auto;padding:26px 28px 72px;width:100%">
     <sc-if value="{{ hasActive }}" hint-placeholder-val="{{ true }}">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap">
         <button onClick="{{ goEpreuves }}" style="background:none;border:none;color:var(--c1a72bb,#1a72bb);font-size:13px;cursor:pointer;padding:0;font-weight:600" style-hover="color:var(--c135a96,#135a96)">{{ icRetour }} Épreuves</button>
         <span style="{{ activeStatusChip }}">{{ activeStatusLabel }}</span>
         <span style="{{ readOnlyChip }}">Lecture seule</span>
+        <button onClick="{{ focusTiroirBasculer }}" style="{{ focusTiroirStyle }}">{{ focusTiroirLabel }}</button>
         <span style="margin-left:auto;font-size:12px;color:var(--c9aa5b5,#9aa5b5)">{{ savedNote }}</span>
+        <!-- MODE FOCUS (20/10/2026, lot H) : la barre de la vitrine disparaît,
+             le menu latéral se réduit à ses icônes, la colonne
+             Renseignements / Collaboration devient un tiroir ; la planche
+             prend toute la largeur. Le choix est retenu sur ce poste. -->
+        <button onClick="{{ focusBasculer }}" title="{{ focusTitre }}" class="vrt-hide-xs" style="{{ focusStyle }}">{{ focusLabel }}</button>
         <!-- Supprimer un BROUILLON (16/10/2026) : rien ne permettait d'effacer
              une épreuve créée par erreur. Brouillon seulement : une épreuve
              soumise, validée ou publiée engage l'équipe. -->
@@ -1928,6 +1975,15 @@
           </div>
           </sc-if>
           <sc-if value="{{ assE2 }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px">
+              <label style="{{ genLblStyle }}">Progression nationale
+                <select value="{{ assProgId }}" onChange="{{ setAssProgId }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}"><option value="">— Aucune —</option><sc-for list="{{ assProgOptions }}" as="po" hint-placeholder-count="4"><option value="{{ po.id }}">{{ po.label }}</option></sc-for></select>
+              </label>
+              <label style="{{ genLblStyle }}">Séquence évaluée
+                <select value="{{ assProgSeq }}" onChange="{{ setAssProgSeq }}" disabled="{{ cannotEdit }}" style="{{ genSelStyle }}"><option value="">—</option><sc-for list="{{ assProgSeqOptions }}" as="ps" hint-placeholder-count="6"><option value="{{ ps.v }}">{{ ps.label }}</option></sc-for></select>
+              </label>
+            </div>
+            <div style="{{ assProgResumeStyle }}">{{ assProgResume }}</div>
             <div style="margin-top:12px">
               <div style="{{ genLblStyle }}">Leçons déjà faites en classe <span style="font-weight:400;color:var(--c8b97a8,#8b97a8)">— {{ assCoursAide }}</span></div>
               <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><sc-for list="{{ assCours }}" as="ac" hint-placeholder-count="3"><button onClick="{{ ac.toggle }}" style="{{ ac.style }}">{{ ac.label }}</button></sc-for></div>
@@ -2140,8 +2196,8 @@
         <button onClick="{{ epTabLivrables }}" style="{{ epTabLivStyle }}">{{ epTabLivIcon }} Livrables</button>
       </div>
       <sc-if value="{{ tabEdition }}" hint-placeholder-val="{{ true }}">
-      <div class="vrt-col2" style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
-        <div style="display:flex;flex-direction:column;gap:16px;position:sticky;top:86px">
+      <div class="vrt-col2 vrt-compo-grille" style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
+        <div class="vrt-compo-gauche" style="display:flex;flex-direction:column;gap:16px;position:sticky;top:86px">
           <aside style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(20,55,95,.05)">
             <h3 style="{{ secHead }}" class="vrt-hide-xs">Renseignements</h3>
             <!-- Sur téléphone, ce formulaire s'intercale entre les onglets et
@@ -2919,14 +2975,28 @@
 
   <!-- ============ APERCU ============ -->
   <sc-if value="{{ isApercu }}" hint-placeholder-val="{{ false }}">
-  <main style="flex:1;background:var(--ce7eef6,#e7eef6);padding:0">
-    <div data-noprint="1" style="background:var(--c14375f,#14375f);color:var(--cffffff,#fff);padding:14px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:66px;z-index:10">
-      <button onClick="{{ goComposeur }}" style="background:none;border:1px solid var(--c3d5f88,#3d5f88);color:var(--cdbe8f5,#dbe8f5);padding:9px 16px;font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" style-hover="border-color:var(--c7aa3cc,#7aa3cc)">{{ icRetour }} Modifier</button>
-      <span style="{{ activeStatusChip }}">{{ activeStatusLabel }}</span>
-      <span style="font-size:13px;color:var(--ca9c0d8,#a9c0d8)">{{ selCount }} exercice(s)</span>
-      <button onClick="{{ exportWord }}" style="{{ exportWordStyle }}" title="Télécharger un .docx modifiable">{{ exportIcon }}<span>Exporter en Word</span></button><button onClick="{{ doPrint }}" style="margin-left:12px;background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:11px 24px;font-size:13.5px;font-weight:700;cursor:pointer;border-radius:999px;font-family:'Poppins';box-shadow:0 4px 12px rgba(12,42,106,.3)" style-hover="background:var(--ce07f00,#e07f00)">Imprimer / PDF</button>
-    </div>
-    <div data-print-sheet="1" style="max-width:820px;margin:28px auto;background:var(--cffffff,#fff);box-shadow:0 6px 28px rgba(20,55,95,.14);border-radius:6px;padding:56px 60px 64px">
+   <!-- APERÇU EN MODE DOCUMENT (20/10/2026, lot G). La feuille ne faisait que
+        ~480 px sur un écran de 1 366 : barre de la vitrine, barre de l'Atelier,
+        menu latéral et bandeau sombre se partageaient l'écran, et l'on ne
+        voyait que l'énoncé. Désormais : plein écran (html.vrt-doc masque le
+        reste), une barre fine, une feuille A4 réelle (210 mm) avec repères de
+        page et zoom, et les quatre documents en onglets — comme les livrables
+        d'un sujet de concours. -->
+   <main class="vrt-doc-main" style="flex:1;background:var(--ce9eef4,#e9eef4);padding:0;min-height:100vh">
+     <div data-noprint="1" style="position:sticky;top:0;z-index:20;background:var(--cffffff,#fff);border-bottom:1px solid var(--ce2eaf3,#e2eaf3);display:flex;align-items:center;gap:8px;padding:8px 16px;flex-wrap:wrap">
+       <button onClick="{{ goComposeur }}" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px">{{ icRetour }} Modifier</button>
+       <span style="{{ activeStatusChip }}">{{ activeStatusLabel }}</span>
+       <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-left:6px;flex-wrap:wrap">
+         <sc-for list="{{ docOnglets }}" as="o" hint-placeholder-count="5"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+       </div>
+       <span style="margin-left:auto;font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ docPagesLabel }}</span>
+       <button onClick="{{ docZoomBasculer }}" title="Ajuster à la fenêtre ou taille réelle" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px">{{ docZoomLabel }}</button>
+       <button onClick="{{ exportWord }}" style="{{ exportWordStyle }}" title="Télécharger un .docx modifiable">{{ exportIcon }}<span>Word</span></button>
+       <button onClick="{{ doPrint }}" style="background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;border-radius:999px;font-family:'Poppins'" style-hover="background:var(--ce07f00,#e07f00)">Imprimer / PDF</button>
+     </div>
+     <div data-print-sheet="1" class="vrt-docfeuille" style="{{ docFeuilleStyle }}">
+       <div class="vrt-doc-entete" style="text-align:right;border-bottom:1px solid var(--c14375f,#14375f);padding-bottom:4px;margin-bottom:14px;line-height:1.3"><div style="font:700 9.5pt Cambria,Georgia,serif;color:var(--c14375f,#14375f)">VÉRITAS · Centre d’Excellence Scolaire</div><div style="font:8pt Cambria,Georgia,serif;color:var(--c8b97a8,#8b97a8)">Atelier de Français · veritas-school.com</div></div>
+       <sc-if value="{{ docVoitEnonce }}" hint-placeholder-val="{{ true }}">
       <div style="text-align:center;border-bottom:2px solid var(--c14375f,#14375f);padding-bottom:18px;margin-bottom:8px"><div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--c5a6678,#5a6678);font-weight:600">République du Cameroun · MINESEC</div><div style="font-family:'Poppins';font-size:16px;font-weight:600;margin-top:6px;color:var(--c14375f,#14375f)">{{ epView.etab }}</div></div>
       <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--c3a4658,#3a4658);margin-bottom:26px;flex-wrap:wrap;gap:6px"><span>Classe : <strong style="font-weight:700">{{ epView.classe }}</strong></span><span>Durée : <strong style="font-weight:700">{{ epView.duree }}</strong></span><span>Coef. : <strong style="font-weight:700">{{ epView.coeff }}</strong></span><span>{{ epView.date }}</span></div>
       <h2 style="font-family:'Poppins';font-size:23px;font-weight:700;text-align:center;margin:0 0 6px;color:var(--c14375f,#14375f)" class="vrt-th">{{ epView.title }}</h2>
@@ -2937,7 +3007,7 @@
             <div style="display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--cd5e0ec,#d5e0ec);padding-bottom:6px;margin-bottom:12px"><h2 style="font-family:'Poppins';font-size:16px;font-weight:700;margin:0;color:var(--c14375f,#14375f)">Texte {{ f.pos }}</h2><span style="font-size:11px;color:var(--c7a8598,#7a8598);text-transform:uppercase;letter-spacing:.05em">{{ f.type }} · {{ f.words }} mots</span></div>
             <p style="font-size:14.5px;line-height:1.75;color:var(--c22303f,#22303f);margin:0;white-space:pre-wrap;text-wrap:pretty">{{ f.text }}</p>
             <p style="font-size:13px;font-style:italic;text-align:right;color:var(--c5a6678,#5a6678);margin:10px 0 16px">— {{ f.reference }}</p>
-            <div style="{{ f.qBlocStyle }}"><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">I. Compréhension</p><ol style="margin:0 0 12px;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.compQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">II. Langue et production</p><ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.explQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol></div>
+            <div style="{{ f.qBlocStyle }}"><div style="{{ f.compBloc }}"><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">I. Compréhension</p><ol style="margin:0 0 12px;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.compQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol></div><div style="{{ f.explBloc }}"><p style="font-weight:700;margin:0 0 6px;font-family:'Poppins';color:var(--c1a72bb,#1a72bb)">{{ f.titreExplAp }}</p><ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:5px"><sc-for list="{{ f.explQ }}" as="q" hint-placeholder-count="3"><li style="line-height:1.5">{{ q.text }}<span style="{{ q.ptsStyle }}">{{ q.pts }}</span></li></sc-for></ol></div></div>
           </section>
         </sc-for>
         <sc-for list="{{ printSujets }}" as="sj" hint-placeholder-count="1">
@@ -2947,7 +3017,147 @@
           </section>
         </sc-for>
       </div>
+       </sc-if>
+       <sc-for list="{{ docVues }}" as="v" hint-placeholder-count="1">
+         <section class="vrt-doc-section" style="{{ v.style }}">
+           <div style="text-align:center;margin-bottom:16px"><div style="font:700 13pt Cambria,Georgia,serif;color:var(--c14375f,#14375f);letter-spacing:.02em">{{ v.titre }}</div><div style="font:10pt Cambria,Georgia,serif;color:var(--c5a6678,#5a6678);margin-top:2px">{{ v.sous }}</div></div>
+           <sc-for list="{{ v.blocs }}" as="b" hint-placeholder-count="2">
+             <div style="break-inside:avoid-page;margin-bottom:12px">
+               <div style="font:700 11pt Cambria,Georgia,serif;color:var(--c1a72bb,#1a72bb);border-bottom:1px solid var(--cd5e0ec,#d5e0ec);padding-bottom:3px;margin:10px 0 6px">{{ b.titre }}</div>
+               <sc-for list="{{ b.lignes }}" as="l" hint-placeholder-count="2"><p style="font:11pt/1.5 Cambria,Georgia,serif;color:var(--c22303f,#22303f);margin:0 0 5px;white-space:pre-wrap">{{ l }}</p></sc-for>
+             </div>
+           </sc-for>
+         </section>
+       </sc-for>
+       <div class="vrt-doc-pied" style="margin-top:26px;border-top:1px solid var(--cc9d6e4,#c9d6e4);padding-top:5px;text-align:center;font:8pt Cambria,Georgia,serif;color:var(--c8b97a8,#8b97a8)">© VÉRITAS EDUCATION · veritas-school.com</div>
+     </div>
+   </main>
+  </sc-if>
+
+  <!-- ============ SUIVI (20/10/2026, lot J) ============
+       Comme le « Suivi » de Tchouskou : un calendrier DÉDUIT des progressions
+       de mes classes — sujet prêt une semaine avant l'évaluation (S5),
+       épreuve en S5, corrigé et compte rendu en S6 — et, pour chaque
+       échéance, l'état réel de l'épreuve liée. -->
+  <sc-if value="{{ isSuivi }}" hint-placeholder-val="{{ false }}">
+  <main style="flex:1;max-width:1360px;margin:0 auto;padding:28px 30px 48px;width:100%">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
+      <h2 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Suivi</h2>
+      <button onClick="{{ goProgressions }}" style="margin-left:auto;background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:7px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer">Progressions et mes classes</button>
     </div>
+    <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 16px;max-width:86ch;line-height:1.55">Échéances déduites des progressions de vos classes et du calendrier officiel ; chaque ligne dit où en est l’épreuve qui y répond.</p>
+    <div style="{{ suiviVideStyle }}">
+      <div style="font-family:Poppins;font-size:14px;font-weight:700;color:var(--c14375f,#14375f)">Aucune classe suivie</div>
+      <div style="font-size:12.5px;color:var(--c5a6678,#5a6678);margin:4px 0 10px">Choisissez vos classes dans Progressions (bouton « Ajouter à mes classes ») : le suivi se construit tout seul.</div>
+      <button onClick="{{ goProgressions }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:8px 14px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">Ouvrir les progressions</button>
+    </div>
+    <div style="{{ suiviCorpsStyle }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px">
+        <sc-for list="{{ suiviTuiles }}" as="t" hint-placeholder-count="4">
+          <div style="{{ t.style }}"><span style="{{ t.chiffre }}">{{ t.n }}</span><span style="display:block;font-size:12px;color:var(--c5a6678,#5a6678);margin-top:4px;font-weight:600">{{ t.label }}</span></div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px">
+          <sc-for list="{{ suiviHorizons }}" as="h" hint-placeholder-count="4"><button onClick="{{ h.go }}" style="{{ h.style }}">{{ h.label }}</button></sc-for>
+        </div>
+        <select value="{{ suiviClasse }}" onChange="{{ setSuiviClasse }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;padding:7px 10px;font-size:12.5px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)"><option value="">Toutes mes classes</option><sc-for list="{{ suiviClasses }}" as="c" hint-placeholder-count="2"><option value="{{ c.id }}">{{ c.label }}</option></sc-for></select>
+        <button onClick="{{ suiviRetardsBasculer }}" style="{{ suiviRetardsStyle }}">Retards seulement</button>
+        <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-left:auto">
+          <button onClick="{{ suiviVueListe }}" style="{{ suiviVueListeStyle }}">Échéances</button>
+          <button onClick="{{ suiviVueMois }}" style="{{ suiviVueMoisStyle }}">Calendrier</button>
+        </div>
+      </div>
+
+      <sc-if value="{{ suiviEnListe }}" hint-placeholder-val="{{ true }}">
+        <div style="{{ suiviAucuneStyle }}">Aucune échéance dans cet horizon.</div>
+        <sc-for list="{{ suiviGroupes }}" as="gr" hint-placeholder-count="2">
+          <section style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:12px 16px;margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ gr.titre }}</span><span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ gr.sous }}</span></div>
+            <sc-for list="{{ gr.lignes }}" as="l" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;padding:9px 2px;border-top:1px solid var(--ceef2f7,#eef2f7);flex-wrap:wrap">
+                <div style="min-width:104px"><div style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--c22303f,#22303f)">{{ l.date }}</div><div style="{{ l.relStyle }}">{{ l.rel }}</div></div>
+                <div style="flex:1;min-width:200px"><div style="font-size:13px;font-weight:700;color:var(--c22303f,#22303f)">{{ l.titre }}</div><div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin-top:2px">{{ l.sous }}</div></div>
+                <span style="{{ l.chip }}">{{ l.etat }}</span>
+                <button onClick="{{ l.agir }}" style="{{ l.agirStyle }}">{{ l.agirLabel }}</button>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+      </sc-if>
+
+      <sc-if value="{{ suiviEnMois }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:14px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <button onClick="{{ moisPrec }}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--ce2eaf3,#e2eaf3);background:var(--cffffff,#fff);cursor:pointer;color:var(--c14375f,#14375f)">‹</button>
+            <span style="font-family:Poppins;font-size:15px;font-weight:700;color:var(--c14375f,#14375f);min-width:150px;text-align:center">{{ moisTitre }}</span>
+            <button onClick="{{ moisSuiv }}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--ce2eaf3,#e2eaf3);background:var(--cffffff,#fff);cursor:pointer;color:var(--c14375f,#14375f)">›</button>
+            <span style="margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--c5a6678,#5a6678)"><span>▢ <span style="color:var(--c8b97a8,#8b97a8)">vacances</span></span><span style="color:var(--cc0392b,#c0392b)">● férié</span><span style="color:var(--c1a72bb,#1a72bb)">● journée</span><span style="color:var(--cc26a12,#c26a12)">● échéance</span></span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px">
+            <sc-for list="{{ moisEntetes }}" as="me2" hint-placeholder-count="7"><div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--c8b97a8,#8b97a8);text-align:center;padding:3px 0">{{ me2 }}</div></sc-for>
+            <sc-for list="{{ moisJours }}" as="j" hint-placeholder-count="35">
+              <div style="{{ j.style }}">
+                <div style="{{ j.numStyle }}">{{ j.num }}</div>
+                <sc-for list="{{ j.marques }}" as="mq" hint-placeholder-count="1"><div style="{{ mq.style }}" title="{{ mq.titre }}">{{ mq.texte }}</div></sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- ============ PROGRESSIONS (20/10/2026, lot I) ============
+       Les progressions nationales de français 2026-2027 (ESG, EST), datées
+       semaine par semaine par le calendrier scolaire officiel. Données :
+       plateforme/progressions.js, GÉNÉRÉ par tools/importer_progressions.py. -->
+  <sc-if value="{{ isProgressions }}" hint-placeholder-val="{{ false }}">
+  <main style="flex:1;max-width:1360px;margin:0 auto;padding:28px 30px 48px;width:100%">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
+      <h2 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Progressions</h2>
+      <span style="font-size:11.5px;font-weight:700;font-family:Poppins;color:var(--c1a72bb,#1a72bb);background:var(--ce7f1fb,#e7f1fb);padding:4px 12px;border-radius:999px">{{ progAnnee }}</span>
+    </div>
+    <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 16px;max-width:86ch;line-height:1.55">Progressions nationales de français, datées semaine par semaine d’après le calendrier officiel (arrêté conjoint MINEDUB/MINESEC) : vacances sautées, fériés signalés. Chaque séquence ouvre une épreuve déjà cadrée.</p>
+    <div style="{{ progAbsentStyle }}">Les progressions se chargent… Si ce message reste, rechargez la page.</div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+      <select value="{{ progId }}" onChange="{{ setProgId }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;padding:8px 10px;font-size:13px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);min-width:240px"><sc-for list="{{ progOptions }}" as="po" hint-placeholder-count="6"><option value="{{ po.id }}">{{ po.label }}</option></sc-for></select>
+      <button onClick="{{ progToggleMienne }}" style="{{ progMienneStyle }}">{{ progMienneLabel }}</button>
+      <sc-for list="{{ progMes }}" as="pm" hint-placeholder-count="2"><button onClick="{{ pm.go }}" style="{{ pm.style }}">{{ pm.label }}</button></sc-for>
+    </div>
+    <div style="{{ progCetteSemaineStyle }}">{{ progCetteSemaine }}</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <sc-for list="{{ progSeqs }}" as="sq" hint-placeholder-count="3">
+        <section style="{{ sq.carte }}">
+          <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
+            <span style="{{ sq.num }}">{{ sq.n }}</span>
+            <div style="flex:1;min-width:220px">
+              <div style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ sq.titre }}</div>
+              <div style="font-size:12px;color:var(--c8b97a8,#8b97a8);margin-top:2px">{{ sq.dates }}</div>
+              <div style="font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.5;margin-top:5px">{{ sq.competence }}</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button onClick="{{ sq.toggle }}" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">{{ sq.toggleLabel }}</button>
+              <button onClick="{{ sq.composer }}" style="{{ sq.composerStyle }}">Composer l’évaluation</button>
+            </div>
+          </div>
+          <div style="{{ sq.detail }}">
+            <sc-for list="{{ sq.semaines }}" as="w" hint-placeholder-count="6">
+              <div style="{{ w.ligne }}">
+                <div style="min-width:118px"><span style="{{ w.chip }}">S{{ w.n }} · {{ w.type }}</span><div style="font-size:11px;color:var(--c8b97a8,#8b97a8);margin-top:4px">{{ w.dates }}</div><div style="{{ w.ferieStyle }}">{{ w.ferie }}</div></div>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                  <sc-for list="{{ w.contenus }}" as="ct" hint-placeholder-count="3"><div style="font-size:12.5px;color:var(--c22303f,#22303f);line-height:1.45">• {{ ct }}</div></sc-for>
+                </div>
+              </div>
+            </sc-for>
+            <div style="{{ sq.integrationStyle }}"><strong style="font-family:Poppins;color:var(--c14375f,#14375f)">Tâche d’intégration (S4) — </strong>{{ sq.integration }}</div>
+            <div style="{{ sq.evaluationStyle }}"><strong style="font-family:Poppins;color:var(--c14375f,#14375f)">Évaluation (S5) — </strong>{{ sq.evaluation }}</div>
+          </div>
+        </section>
+      </sc-for>
+    </div>
+    <p style="font-size:11px;color:var(--c9aa5b5,#9aa5b5);margin:16px 0 0">{{ progSource }}</p>
   </main>
   </sc-if>
 
@@ -3953,7 +4163,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '20/10 · F';
+const ATELIER_BUILD = '20/10 · K';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -5345,7 +5555,8 @@ class Component extends DCLogic {
   /* ── Assistant de composition (lot D) ─────────────────────────────── */
   _memeClasse(x,y){const c=v=>MINESEC.cleClasse(String(v||'').normalize?String(v||'').normalize('NFKC'):String(v||''));return !!c(x)&&c(x)===c(y);}
   _assDe(a){const z=(a&&a.assistant)||{};return{type:z.type||'Devoir',numero:z.numero||'',coursIds:Array.isArray(z.coursIds)?z.coursIds:[],
-    oeuvre:z.oeuvre||'',borne:z.borne||'',exclCours:Array.isArray(z.exclCours)?z.exclCours:[],exclLibre:z.exclLibre||''};}
+    oeuvre:z.oeuvre||'',borne:z.borne||'',exclCours:Array.isArray(z.exclCours)?z.exclCours:[],exclLibre:z.exclLibre||'',
+    progId:z.progId||'',progSeq:z.progSeq||''};}
   _coursDeLaClasse(a){return (this.state.cours||[]).filter(c=>c&&a&&this._memeClasse(c.classe,a.classe));}
   /* Ce qui part dans la consigne d'Ambassa : du texte, lisible tel quel par
      le relecteur dans la note (genParams). */
@@ -5358,7 +5569,21 @@ class Component extends DCLogic {
     const faits=z.coursIds.filter(id=>!z.exclCours.includes(id)).map(titre).filter(Boolean);
     const exclus=z.exclCours.map(titre).filter(Boolean).concat(String(z.exclLibre||'').split(/[,;\n]+/).map(x=>x.trim()).filter(Boolean));
     const borne=z.borne?new Date(z.borne+'T00:00:00').toLocaleDateString('fr-FR'):'';
-    return{cadre:z.type+(z.numero?' n°'+z.numero:''),faits,oeuvre:z.oeuvre,borne,exclus,theme:this.state.genTheme||''};
+    /* Progression nationale (lot I) : la séquence évaluée apporte ses
+       notions (S1 à S3) et sa tâche d'intégration officielle ; la séquence
+       SUIVANTE, pas encore enseignée, ses notions à exclure. Bornées : la
+       consigne d'Ambassa a un plafond. */
+    const pc=this._progClasse(z.progId),sq=pc&&z.progSeq?pc.sequences.find(x=>x.num===+z.progSeq):null;
+    let progFaits=[],progExclus=[],tache='',progression='';
+    if(sq){
+      progFaits=this._contenusSeq(sq,3).slice(0,24);
+      const nx=pc.sequences.find(x=>x.num===sq.num+1);
+      progExclus=nx?this._contenusSeq(nx,3).filter(c=>progFaits.indexOf(c)<0).slice(0,10):[];
+      tache=String(sq.integration||'').slice(0,700);
+      progression=pc.libelle+' — séquence '+sq.num+(sq.module?' : '+sq.module:'')+(sq.competence?' — '+sq.competence.slice(0,220):'');
+    }
+    return{cadre:z.type+(z.numero?' n°'+z.numero:''),faits:faits.concat(progFaits),oeuvre:z.oeuvre,borne,
+      exclus:exclus.concat(progExclus),theme:this.state.genTheme||'',tache,progression};
   }
   _composerAvecAmbassa(mode){
     const st=this.state;
@@ -5483,7 +5708,7 @@ class Component extends DCLogic {
       const gp=this._paramsGeneration(a);
       this._updateActive({genParams:{...gp,le:Date.now()}});
       const ctx={plan:plan,struct:struct,classe:a.classe,serie:a.serie||'',theme:st.genTheme||'',textes:textes,fixes:fixes,abonnement:abonnement,
-        cadre:gp.cadre,programmeFait:gp.faits,oeuvre:gp.oeuvre,borne:gp.borne,exclusions:gp.exclus,
+        cadre:gp.cadre,programmeFait:gp.faits,oeuvre:gp.oeuvre,borne:gp.borne,exclusions:gp.exclus,tache:gp.tache,progression:gp.progression,
         exemples:G.exemplesOfficiels(this.all,a.classe,principal?principal.n:null,2)};
       etape('Vérification de votre quota Ambassa…');
       return new Promise((ok,ko)=>this._consommerQuota('ia',()=>ok(true),m=>ko({quotaRefus:m})))
@@ -7060,8 +7285,8 @@ class Component extends DCLogic {
       attendu:this._sansMarkdown(sj.corrige||'').slice(0,400),reperes:''});});
     return out;
   }
-  _annexesPourExport(a){
-    if(this.state.livWord===false)return [];
+  _annexesPourExport(a,toujours){
+    if(!toujours&&this.state.livWord===false)return [];
     const g=this._guideDe(a),n=this._noteDe(a),T=this._tranchesGuide(),out=[];
     const lignes=t=>String(t||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
     const bg=[];
@@ -7083,9 +7308,9 @@ class Component extends DCLogic {
       out.push({titre:'NOTE AU RELECTEUR — DOCUMENT INTERNE',blocs:bn});
     return out;
   }
-  _lignesParams(gp){return['Cadre : '+(gp.cadre||'Devoir'),'Programme couvert : '+((gp.faits||[]).join(' · ')||'non précisé'),
+  _lignesParams(gp){return(gp.progression?['Progression : '+gp.progression]:[]).concat(['Cadre : '+(gp.cadre||'Devoir'),'Programme couvert : '+((gp.faits||[]).join(' · ')||'non précisé'),
     'Œuvre au programme : '+(gp.oeuvre||'aucune'),'Borné au : '+(gp.borne||'non précisé'),'Notions exclues : '+((gp.exclus||[]).join(' · ')||'aucune'),
-    'Thème : '+(gp.theme||'libre')].concat(gp.le?['Généré le '+new Date(gp.le).toLocaleDateString('fr-FR')]:[]);}
+    'Thème : '+(gp.theme||'libre')]).concat(gp.tache?['Tâche d\u2019intégration officielle : '+gp.tache]:[]).concat(gp.le?['Généré le '+new Date(gp.le).toLocaleDateString('fr-FR')]:[]);}
   _tranchesGuide(){return['16 à 20','12 à 15,5','8 à 11,5','0 à 7,5'];}
   _noteTextes(a){return (a.textIds||[]).map(nn=>this.all.find(x=>x.n===nn)).filter(Boolean)
     .map(f=>(f.author||'Anonyme')+(f.title?', « '+f.title+' »':'')+(f.words?' — '+f.words+' mots':'')+(f.reference?' — '+this._refPropre(f.reference):''));}
@@ -8133,7 +8358,30 @@ class Component extends DCLogic {
     this._updateActive({pts},'a appliqué le barème type ('+cible+' points)');}
   /* _qList lisait TOUJOURS l'épreuve active : calculer l'avancement d'une
      autre épreuve lui prêtait les questions de celle qui est ouverte. */
-  _qListOf(ep,f,kind){const cq=(ep&&ep.customQ&&ep.customQ[f.n])||null;if(cq&&cq[kind])return cq[kind].slice();return this._splitQ(kind==='comp'?f.comprehension:f.exploitation);}
+  /* QUESTIONS DU CORPUS PAR DÉFAUT (20/10/2026, signalé par Jacques :
+     « compréhension et langue reviennent toujours à toutes les épreuves »).
+     Tant que l'épreuve n'avait pas de questions rédigées, l'Atelier reprenait
+     celles livrées avec le texte du corpus — compréhension ET langue —, quelle
+     que soit l'épreuve : une correction orthographique, une dictée, une
+     expression écrite ou une contraction en héritaient, à l'écran, à
+     l'aperçu et à l'export. Elles ne sont plus reprises que si la STRUCTURE
+     de l'épreuve comporte cette rubrique notée. Ce que l'enseignant (ou
+     Ambassa) a écrit reste toujours affiché. */
+  _rubriquesPrevues(ep){
+    if(!ep||typeof VRT_GENERATEUR==='undefined')return null;
+    const cle=(ep.epreuveCode||'')+'|'+(ep.classe||'')+'|'+(ep.serie||'');
+    this._rubCache=this._rubCache||{};
+    if(cle in this._rubCache)return this._rubCache[cle];
+    let r=null;
+    try{const st=this._structureDe(ep);
+      if(st){const pl=VRT_GENERATEUR.planEpreuve(st,{classe:ep.classe});
+        r=pl.support!=='texte'?{comp:false,expl:false,zoneExpl:false}
+          :{comp:!!pl.comp.points,expl:!!pl.expl.points,zoneExpl:!!(pl.expl.points||(pl.productions||[]).length)};}}catch(e){r=null;}
+    this._rubCache[cle]=r;return r;
+  }
+  _qListOf(ep,f,kind){const cq=(ep&&ep.customQ&&ep.customQ[f.n])||null;if(cq&&cq[kind])return cq[kind].slice();
+    const r=this._rubriquesPrevues(ep);if(r&&!r[kind])return [];
+    return this._splitQ(kind==='comp'?f.comprehension:f.exploitation);}
   _qList(f,kind){return this._qListOf(this._active(),f,kind);}
   /* Avancement d'une épreuve : cinq jalons vérifiables, pas une estimation. */
   _progressEpreuve(e){
@@ -8213,6 +8461,68 @@ class Component extends DCLogic {
   /* Epreuve NEUVE datee du jour choisi. Pas _ensureDraft : il reprend
      l'epreuve active, et dater un nouveau sujet ne doit pas re-dater celui
      qu'on avait ouvert. */
+  /* ── Progressions nationales (lot I) ──────────────────────────────── */
+  _progs(){return (typeof window!=='undefined'&&window.VRT_PROGRESSIONS)||null;}
+  _progClasse(id){const P=this._progs();return P&&id?(P.classes.find(c=>c.id===id)||null):null;}
+  _isoAuj(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  _fmtIso(iso,o){if(!iso)return'';const d=new Date(iso+'T00:00:00');return d.toLocaleDateString('fr-FR',o||{day:'numeric',month:'short'});}
+  /* La semaine de la progression qui contient `iso` (samedi et dimanche
+     rattachés à la semaine qui s'achève) ; à défaut, la prochaine. */
+  _semaineDe(cls,iso){
+    if(!cls)return null;let prochaine=null;
+    for(const sq of cls.sequences)for(const w of (sq.semaines||[])){
+      if(!w.debut)continue;
+      const fin=new Date(w.fin+'T00:00:00');fin.setDate(fin.getDate()+2);
+      const finIso=fin.getFullYear()+'-'+String(fin.getMonth()+1).padStart(2,'0')+'-'+String(fin.getDate()).padStart(2,'0');
+      if(w.debut<=iso&&iso<=finIso)return{seq:sq,w,prochaine:false};
+      if(w.debut>iso&&(!prochaine||w.debut<prochaine.w.debut))prochaine={seq:sq,w,prochaine:true};
+    }
+    return prochaine;
+  }
+  _isoDe(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  _isoPlus(iso,j){const d=new Date(iso+'T00:00:00');d.setDate(d.getDate()+j);return this._isoDe(d);}
+  /* Le module des progressions arrive en `defer` : l'écran qui en a besoin
+     se redessine dès qu'il est là. */
+  _attendreProgs(){
+    if(this._progs()||this._progAttente)return;
+    this._progAttente=setInterval(()=>{if(this._progs()){clearInterval(this._progAttente);this._progAttente=null;this.setState({progCharge:Date.now()});}},400);
+  }
+  /* Échéances de mes classes, déduites des progressions (lot J). Trois par
+     séquence : sujet prêt (une semaine avant l'évaluation), épreuve (S5),
+     corrigé et compte rendu (S6). L'épreuve liée est celle que
+     « Composer l'évaluation » a ouverte (assistant.progId / progSeq). */
+  _echeancesProg(){
+    const P=this._progs();if(!P)return[];
+    const mes=((this._me().prefs||{}).mesClasses)||[];const auj=this._isoAuj();
+    const libEtat={brouillon:'brouillon',relecture:'en relecture',ajustement:'ajustement demandé',rejete:'rejeté',valide:'validé'};
+    const out=[];
+    mes.map(id=>this._progClasse(id)).filter(Boolean).forEach(cls=>cls.sequences.forEach(sq=>{
+      const w5=(sq.semaines||[]).find(w=>w.n===5),w6=(sq.semaines||[]).find(w=>w.n===6);
+      if(!w5||!w5.debut)return;
+      const ep=(this.state.epreuves||[]).find(e=>e&&e.assistant&&e.assistant.progId===cls.id&&String(e.assistant.progSeq)===String(sq.num))||null;
+      const valide=!!(ep&&ep.status==='valide'),diffuse=!!(valide&&ep.inLibrary);
+      const etat=!ep?'aucun sujet':(diffuse?'diffusé':(libEtat[ep.status]||ep.status||'brouillon'));
+      [{genre:'sujet',lib:'Sujet prêt',date:this._isoPlus(w5.debut,-7),fait:valide},
+       {genre:'epreuve',lib:'Épreuve',date:w5.debut,fait:valide&&w5.debut<=auj},
+       {genre:'corrige',lib:'Corrigé et compte rendu',date:(w6&&w6.debut)||w5.fin,fait:diffuse}]
+        .forEach(x=>out.push({...x,cls,sq,ep,etat,retard:!x.fait&&x.date<auj}));
+    }));
+    return out.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  }
+  _contenusSeq(sq,jusqua){const out=[];(sq&&sq.semaines||[]).filter(w=>w.n<=(jusqua||3)).forEach(w=>(w.contenus||[]).forEach(c=>{if(c&&out.indexOf(c)<0)out.push(c);}));return out;}
+  /* Évaluation d'une séquence : épreuve NEUVE, datée de la semaine
+     d'évaluation (S5), classe et assistant déjà réglés. */
+  _composerSequence(cls,sq){
+    const w5=(sq.semaines||[]).find(w=>w.n===5)||(sq.semaines||[]).slice(-1)[0]||{};
+    const w4=(sq.semaines||[]).find(w=>w.n===4)||{};
+    this._nouvelleEpreuveLe(w5.debut||'');
+    setTimeout(()=>{const a=this._active();if(!a)return;
+      this._updateActive({classe:cls.atelier||a.classe||'',
+        title:'Évaluation de la séquence '+sq.num+(sq.module?' — '+sq.module.charAt(0)+sq.module.slice(1).toLowerCase():''),
+        assistant:{...this._assDe(a),type:'Évaluation séquentielle',numero:String(sq.num),progId:cls.id,progSeq:String(sq.num),borne:w4.fin||''}},
+        'a ouvert l’évaluation de la séquence '+sq.num+' ('+cls.libelle+')');
+      this.setState({genOuvert:true,assEtape:2});},0);
+  }
   _nouvelleEpreuveLe(iso){
     const me=this._me();
     /* Meme droit que « Creer » : un relecteur ou un eleve ne cree pas
@@ -8731,8 +9041,8 @@ class Component extends DCLogic {
       return{pos:i+1,type:f.type,words:f.words,level:f.level,ancre:'vrt-txt-'+f.n,
         titreComp:'I. Compréhension',
         titreExpl:sansComp?('Sujet 1 — '+titreSujetTexte):(sansCompStruct?titreLangue:'II. Langue & production'),
-        compZone:(sansComp||estCom||(sansCompStruct&&!this._qListOf(active,f,'comp').length))?hidden:'',
-        explZone:estCom?hidden:'',
+        compZone:(sansComp||estCom||((sansCompStruct||(()=>{const r=this._rubriquesPrevues(active);return r&&!r.comp;})())&&!this._qListOf(active,f,'comp').length))?hidden:'',
+        explZone:(estCom||((()=>{const r=this._rubriquesPrevues(active);return r&&!r.zoneExpl;})()&&!this._qListOf(active,f,'expl').length))?hidden:'',
         texteBloc:'margin-top:13px;padding-top:13px;border-top:1px dashed var(--ce2eaf3,#e2eaf3)'+(replie?';display:none':''),
         texteToggleLabel:replie?'Afficher le texte ('+(f.words||0)+' mots)':'Replier le texte',
         texteToggle:()=>this.setState(s2=>({txtReplies:{...(s2.txtReplies||{}),[f.n]:!replie}})),
@@ -8821,7 +9131,9 @@ class Component extends DCLogic {
 
     const mkPrintQ=(f,kind)=>this._qList(f,kind).map((t,qi)=>{const p=this._qPts(f.n,kind,qi);return{text:t,pts:(p===null?'':'('+p+' pt'+((parseFloat(p)||0)>1?'s':'')+')'),ptsStyle:(p===null?'display:none':'font-weight:700;color:var(--c14375f,#14375f);white-space:nowrap;margin-left:6px')};});
     const printFiches=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean).map((f,i)=>({pos:i+1,
-      qBlocStyle:(this._qList(f,'comp').length||this._qList(f,'expl').length)?'font-size:13px;color:var(--c22303f,#22303f)':'display:none',type:f.type,words:f.words,text:f.text||'',reference:f.reference||'',compList:this._qList(f,'comp'),explList:this._qList(f,'expl'),compQ:mkPrintQ(f,'comp'),explQ:mkPrintQ(f,'expl')}));
+      qBlocStyle:(this._qList(f,'comp').length||this._qList(f,'expl').length)?'font-size:13px;color:var(--c22303f,#22303f)':'display:none',type:f.type,words:f.words,text:f.text||'',reference:f.reference||'',compList:this._qList(f,'comp'),explList:this._qList(f,'expl'),compQ:mkPrintQ(f,'comp'),explQ:mkPrintQ(f,'expl'),
+      compBloc:this._qList(f,'comp').length?'':'display:none',explBloc:this._qList(f,'expl').length?'':'display:none',
+      titreExplAp:this._qList(f,'comp').length?'II. Langue et production':'Questions'}));
     const epView={etab:ep.etab||'Établissement scolaire',title:ep.title||'Épreuve de français',classe:ep.classe||'—',duree:ep.duree||'—',coeff:ep.coeff||'—',date:ep.date||'',consigne:ep.consigne||''};
 
     /* ---- Accueil ------------------------------------------------------
@@ -9020,6 +9332,9 @@ class Component extends DCLogic {
       {label:'Corpus',icon:mobIc('layers',st.screen==='liste'||st.screen==='fiche'),style:mobBtn(st.screen==='liste'||st.screen==='fiche'),go:()=>this._go('liste')},
       {label:'\u00c9preuves',icon:mobIc('file',['epreuves','composeur','apercu'].indexOf(st.screen)>=0),style:mobBtn(['epreuves','composeur','apercu'].indexOf(st.screen)>=0),go:()=>this._go('epreuves')},
       {label:'Cours',icon:mobIc('book',['cours','coursEdit'].indexOf(st.screen)>=0),style:mobBtn(['cours','coursEdit'].indexOf(st.screen)>=0),go:()=>this._go('cours')},
+      /* Sur téléphone le menu latéral est masqué : sans cet onglet, Suivi
+         et Progressions n'étaient joignables par aucun bouton (20/10/2026). */
+      {label:'Suivi',icon:mobIc('clock',['suivi','progressions'].indexOf(st.screen)>=0),style:mobBtn(['suivi','progressions'].indexOf(st.screen)>=0),go:()=>this._go('suivi')},
       {label:'\u00c9quipe',icon:mobIc('users',['collab','equipe','activite','profil'].indexOf(st.screen)>=0),style:mobBtn(['collab','equipe','activite','profil'].indexOf(st.screen)>=0),go:()=>this._go('collab')}
     ];
     /* ---- Profil et inscription ------------------------------------------
@@ -10483,12 +10798,27 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           assOeuvres:active?MINESEC.oeuvresDe(active.classe).map(o=>o.titre+' — '+o.auteur):[],
           assOeuvre:z.oeuvre,setAssOeuvre:ev=>majZ({oeuvre:val(ev)}),
           assBorne:z.borne,setAssBorne:ev=>majZ({borne:val(ev)}),
+          ...(()=>{const P=this._progs();if(!P||!active)return{assProgOptions:[],assProgId:'',setAssProgId:()=>{},assProgSeqOptions:[],assProgSeq:'',setAssProgSeq:()=>{},assProgResume:'',assProgResumeStyle:hidden};
+            const mes=((me.prefs||{}).mesClasses)||[];
+            const rang=c=>(mes.includes(c.id)?0:(c.atelier&&this._memeClasse(c.atelier,active.classe)?1:2));
+            const opts=P.classes.slice().sort((x,y)=>rang(x)-rang(y)).map(c=>({id:c.id,label:(rang(c)===0?'★ ':'')+c.systeme+' · '+c.libelle}));
+            const pc=this._progClasse(z.progId),sq=pc&&z.progSeq?pc.sequences.find(x=>x.num===+z.progSeq):null;
+            const nb=sq?this._contenusSeq(sq,3).length:0;
+            return{assProgOptions:opts,assProgId:z.progId,
+              setAssProgId:ev=>majZ({progId:val(ev),progSeq:''}),
+              assProgSeqOptions:pc?pc.sequences.map(x=>({v:String(x.num),label:'Séquence '+x.num+(x.module?' — '+x.module:'')+' ('+this._fmtIso(x.debut)+' → '+this._fmtIso(x.fin)+')'})):[],
+              assProgSeq:z.progSeq,
+              setAssProgSeq:ev=>{const v=val(ev);const q=pc?pc.sequences.find(x=>x.num===+v):null;const w4=q?(q.semaines||[]).find(w=>w.n===4):null;
+                majZ({progSeq:v,borne:(w4&&w4.fin)||this._assDe(this._active()).borne});},
+              assProgResume:sq?('Ambassa reçoit les '+nb+' notion(s) des semaines 1 à 3 de cette séquence'+(sq.integration?', et sa tâche d’intégration officielle':'')+' ; les notions de la séquence suivante sont exclues. Programme borné à la fin de la semaine 4.'):'',
+              assProgResumeStyle:sq?'margin-top:8px;font-size:12px;color:var(--c188047,#188047);background:var(--ce6f5ec,#e6f5ec);border-radius:8px;padding:8px 10px;line-height:1.5':hidden};})(),
           assExclChips:cours.filter(c=>z.coursIds.includes(c.id)).map(c=>({label:c.title||'Leçon sans titre',toggle:()=>tog('exclCours',c.id),style:chipX(z.exclCours.includes(c.id))})),
           assExclLibre:z.exclLibre,setAssExclLibre:ev=>majZ({exclLibre:val(ev).slice(0,400)}),
           assResume:[
             {k:'Classe et nature',v:(active&&active.classe?active.classe:'classe non choisie')+(active&&active.epreuveCode?' · '+((MINESEC.epreuveParCode(active.epreuveCode)||{}).nom||''):' · nature automatique')},
+            {k:'Progression',v:gp.progression||'aucune'},
             {k:'Cadre',v:gp.cadre||'Devoir'},
-            {k:'Programme couvert',v:gp.faits&&gp.faits.length?gp.faits.join(' · '):'non précisé'},
+            {k:'Programme couvert',v:gp.faits&&gp.faits.length?(gp.faits.slice(0,10).join(' \u00b7 ')+(gp.faits.length>10?' \u2026 (+'+(gp.faits.length-10)+')':'')):'non précisé'},
             {k:'Œuvre au programme',v:gp.oeuvre||'aucune'},
             {k:'Borné au',v:gp.borne||'non précisé'},
             {k:'Notions exclues',v:gp.exclus&&gp.exclus.length?gp.exclus.join(' · '):'aucune'},
@@ -11091,6 +11421,10 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       topIcPlus:this._icon('plus','var(--cffffff,#ffffff)',17),
       sbAccueil:sbBtn(sbAccueilOn),sbRessources:sbBtn(sbResOn),sbEpreuves:sbBtn(sbEpOn),
       sbCours:sbBtn(sbCoursOn),sbCollab:sbBtn(sbCollabOn),sbMessages:sbBtn(false),
+      sbProgressions:sbBtn(st.screen==='progressions'),sbIcProg:this._icon('calendar',sbCol(st.screen==='progressions'),19),
+      goProgressions:()=>this._go('progressions'),isProgressions:ready&&st.screen==='progressions',
+      goSuivi:()=>this._go('suivi'),isSuivi:ready&&st.screen==='suivi',
+      sbSuivi:sbBtn(st.screen==='suivi'),sbIcSuivi:this._icon('clock',sbCol(st.screen==='suivi'),19),
       sbNotifs:sbBtn(sbActOn),sbProfil:sbBtn(sbProfOn),
       msgCount:nbMsg,notifCount:nbNotif,
       sbMsgBadge:sbBadge(nbMsg),sbNotifBadge:sbBadge(nbNotif),
@@ -11204,6 +11538,193 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
         ?'margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--cffffff,#fff);border:1px solid var(--cbcd9f2,#bcd9f2);color:var(--c1a72bb,#1a72bb);padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;border-radius:999px;font-family:Poppins'
         :hidden,
       epView,printFiches,doPrint:()=>window.print(),
+      ...(()=>{
+        const vu=ready&&['suivi','accueil'].indexOf(st.screen)>=0;
+        if(vu)this._attendreProgs();
+        const P=this._progs();
+        const ech=P?this._echeancesProg():[];
+        const auj=this._isoAuj();
+        const nRetard=ech.filter(x=>x.retard).length;
+        const mes=((me.prefs||{}).mesClasses)||[];
+        const fmtL=iso=>this._fmtIso(iso,{weekday:'short',day:'numeric',month:'short'});
+        const joursDe=iso=>Math.round((new Date(iso+'T00:00:00')-new Date(auj+'T00:00:00'))/86400000);
+        const rel=iso=>{const j=joursDe(iso);return j===0?'aujourd’hui':j===1?'demain':j===-1?'hier':j>0?'dans '+j+' j':'il y a '+(-j)+' j';};
+        const chipE=x=>{const c=x.fait?['var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)']:x.retard?['var(--cc0392b,#c0392b)','var(--cfdecea,#fdecea)']:x.ep?['var(--cc26a12,#c26a12)','var(--cfdefdb,#fdefdb)']:['var(--c5a6678,#5a6678)','var(--cf2f6fb,#f2f6fb)'];
+          return 'font-size:11px;font-weight:700;font-family:Poppins;padding:3px 10px;border-radius:999px;white-space:nowrap;color:'+c[0]+';background:'+c[1];};
+        const ouvrir=x=>()=>{if(x.ep)this.setState({activeId:x.ep.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);});else this._composerSequence(x.cls,x.sq);};
+        const vals={suiviRetardsN:nRetard||'',sbSuiviBadge:nRetard?'margin-left:auto;display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--cc0392b,#c0392b);color:var(--cffffff,#fff);font-size:10.5px;font-weight:700':hidden};
+        /* Accueil */
+        const cls0=mes.map(id=>this._progClasse(id)).filter(Boolean)[0];
+        const ici=cls0?this._semaineDe(cls0,auj):null;
+        const proch=ech.find(x=>!x.fait&&x.date>=auj);
+        const libT={ressources:'ressources',integration:'intégration',evaluation:'évaluation',remediation:'remédiation'};
+        Object.assign(vals,{
+          accSemaineStyle:(ready&&st.screen==='accueil'&&P)?'display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--cfffaf2,#fffaf2);border:1px solid var(--cf0d9b0,#f0d9b0);border-radius:12px;padding:12px 16px;margin:-8px 0 20px':hidden,
+          accSemaineIcone:this._icon('calendar','var(--cc26a12,#c26a12)',22),
+          accSemaine:cls0?(ici?((ici.prochaine?'Prochaine semaine de cours — ':'Cette semaine — ')+cls0.libelle+' : séquence '+ici.seq.num+', semaine '+ici.w.n+' ('+libT[ici.w.type]+')'+(ici.w.feries&&ici.w.feries.length?' · férié : '+ici.w.feries.join(', '):'')):cls0.libelle+' : hors période de cours'):'Suivez vos classes semaine par semaine',
+          accEcheance:cls0?(proch?('Prochaine échéance : '+proch.lib.toLowerCase()+' — '+proch.cls.libelle+', séquence '+proch.sq.num+', '+fmtL(proch.date)+' ('+rel(proch.date)+')'+(nRetard?' · '+nRetard+' en retard':'')):'Aucune échéance à venir.'):'Choisissez vos classes dans Progressions : séquences datées, échéances et rappels se construisent tout seuls.',
+          accSemaineBouton:cls0?'Voir le suivi':'Choisir mes classes',
+          accSemaineAller:()=>this._go(cls0?'suivi':'progressions')});
+        if(!(ready&&st.screen==='suivi'))return Object.assign(vals,{suiviVideStyle:hidden,suiviCorpsStyle:hidden,suiviTuiles:[],suiviHorizons:[],suiviClasses:[],suiviClasse:'',setSuiviClasse:()=>{},suiviRetardsBasculer:()=>{},suiviRetardsStyle:hidden,
+          suiviVueListe:()=>{},suiviVueMois:()=>{},suiviVueListeStyle:hidden,suiviVueMoisStyle:hidden,suiviEnListe:false,suiviEnMois:false,suiviAucuneStyle:hidden,suiviGroupes:[],moisPrec:()=>{},moisSuiv:()=>{},moisTitre:'',moisEntetes:[],moisJours:[]});
+        const hz=+(st.suiviHorizon||60);
+        const fin=this._isoPlus(auj,hz>=365?400:hz);
+        const filtreC=st.suiviClasse||'';
+        const parC=ech.filter(x=>!filtreC||x.cls.id===filtreC);
+        const visibles=parC.filter(x=>st.suiviRetards?x.retard:(x.retard||(x.date>=this._isoPlus(auj,-14)&&x.date<=fin)));
+        const ong=on=>'border:none;padding:6px 11px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer;'+(on?'background:var(--cffffff,#fff);color:var(--c14375f,#14375f);box-shadow:0 1px 4px rgba(20,55,95,.12)':'background:none;color:var(--c7a8598,#7a8598)');
+        const tuile=(n,l,c)=>({n,label:l,style:'background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:14px;text-align:center',chiffre:'display:block;font-family:Poppins;font-size:24px;font-weight:700;line-height:1;color:'+c});
+        const groupes={};
+        visibles.forEach(x=>{(groupes[x.cls.id]=groupes[x.cls.id]||{cls:x.cls,l:[]}).l.push(x);});
+        const vue=st.suiviVue||'liste';
+        /* Calendrier du mois */
+        const moisIso=st.suiviMois||auj.slice(0,7);
+        const d0=new Date(moisIso+'-01T00:00:00');
+        const premier=new Date(d0);premier.setDate(1-((d0.getDay()+6)%7));
+        const cal=P?P.calendrier:{vacances:[],feries:[],journees:[]};
+        const jours=[];
+        for(let k=0;k<42;k++){const d=new Date(premier);d.setDate(premier.getDate()+k);const iso=this._isoDe(d);
+          if(k>=35&&d.getMonth()!==d0.getMonth())break;
+          const vac=cal.vacances.find(v=>v.debut<=iso&&iso<v.fin);
+          const fer=cal.feries.filter(f=>f.date===iso);
+          const jou=cal.journees.filter(j=>j.date===iso||(j.fin&&j.date<=iso&&iso<=j.fin));
+          const ec=parC.filter(x=>x.date===iso);
+          const dans=d.getMonth()===d0.getMonth(),we=d.getDay()===0||d.getDay()===6;
+          const marques=[].concat(
+            fer.map(f=>({texte:f.nom,titre:f.nom,style:'font-size:9.5px;line-height:1.25;color:var(--cc0392b,#c0392b);font-weight:700;margin-top:2px'})),
+            ec.map(x=>({texte:x.lib+' · '+x.cls.libelle+' S'+x.sq.num,titre:x.lib+' — '+x.cls.libelle+', séquence '+x.sq.num+' ('+x.etat+')',style:'font-size:9.5px;line-height:1.25;color:'+(x.fait?'var(--c188047,#188047)':x.retard?'var(--cc0392b,#c0392b)':'var(--cc26a12,#c26a12)')+';font-weight:700;margin-top:2px'})),
+            jou.slice(0,1).map(j=>({texte:j.nom,titre:j.nom,style:'font-size:9.5px;line-height:1.25;color:var(--c1a72bb,#1a72bb);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'})),
+            vac&&dans&&!we?[{texte:vac.label.replace(/\s*\(.*\)/,''),titre:vac.label,style:'font-size:9px;color:var(--c8b97a8,#8b97a8);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'}]:[]);
+          jours.push({num:d.getDate(),marques,
+            style:'min-height:64px;border-radius:8px;padding:4px 5px;overflow:hidden;border:1px solid '+(iso===auj?'var(--cf39200,#f39200)':'var(--ceef2f7,#eef2f7)')+';background:'+(!dans?'transparent':vac?'var(--cf2f6fb,#f2f6fb)':we?'var(--cfbfcfe,#fbfcfe)':'var(--cffffff,#fff)')+(dans?'':';opacity:.45'),
+            numStyle:'font-size:11.5px;font-weight:700;font-family:Poppins;color:'+(fer.length?'var(--cc0392b,#c0392b)':iso===auj?'var(--cf39200,#f39200)':'var(--c22303f,#22303f)')});}
+        const decaler=n=>()=>{const d=new Date(moisIso+'-01T00:00:00');d.setMonth(d.getMonth()+n);this.setState({suiviMois:this._isoDe(d).slice(0,7)});};
+        return Object.assign(vals,{
+          suiviVideStyle:(P&&!mes.length)?'background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);border-radius:12px;padding:18px 20px;margin-bottom:12px':hidden,
+          suiviCorpsStyle:(P&&mes.length)?'':hidden,
+          suiviTuiles:[tuile(parC.filter(x=>x.retard).length,'en retard','var(--cc0392b,#c0392b)'),
+            tuile(parC.filter(x=>!x.fait&&x.date>=auj&&x.date<=this._isoPlus(auj,7)).length,'dans les 7 jours','var(--cc26a12,#c26a12)'),
+            tuile(parC.filter(x=>!x.fait&&x.date>auj&&x.date<=fin).length,'à venir ('+(hz>=365?'année':hz+' j')+')','var(--c1a72bb,#1a72bb)'),
+            tuile(parC.filter(x=>x.fait).length,'faites','var(--c188047,#188047)')],
+          suiviHorizons:[[30,'30 j'],[60,'60 j'],[120,'120 j'],[365,'Année']].map(([v,l])=>({label:l,go:()=>this.setState({suiviHorizon:v}),style:ong(hz===v)})),
+          suiviClasses:mes.map(id=>this._progClasse(id)).filter(Boolean).map(c=>({id:c.id,label:c.libelle})),
+          suiviClasse:filtreC,setSuiviClasse:e=>this.setState({suiviClasse:val(e)}),
+          suiviRetardsBasculer:()=>this.setState({suiviRetards:!st.suiviRetards}),
+          suiviRetardsStyle:'border:1px solid '+(st.suiviRetards?'var(--cc0392b,#c0392b)':'var(--ce2eaf3,#e2eaf3)')+';background:'+(st.suiviRetards?'var(--cfdecea,#fdecea)':'var(--cffffff,#fff)')+';color:'+(st.suiviRetards?'var(--cc0392b,#c0392b)':'var(--c5a6678,#5a6678)')+';padding:7px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer',
+          suiviVueListe:()=>this.setState({suiviVue:'liste'}),suiviVueMois:()=>this.setState({suiviVue:'mois'}),
+          suiviVueListeStyle:ong(vue==='liste'),suiviVueMoisStyle:ong(vue==='mois'),
+          suiviEnListe:vue==='liste',suiviEnMois:vue==='mois',
+          suiviAucuneStyle:visibles.length?hidden:'font-size:12.5px;color:var(--c8b97a8,#8b97a8);padding:10px 2px',
+          suiviGroupes:Object.keys(groupes).map(k=>{const g=groupes[k];const nr=g.l.filter(x=>x.retard).length;
+            return{titre:g.cls.libelle,sous:g.l.length+' échéance(s)'+(nr?' · '+nr+' en retard':''),
+              lignes:g.l.map(x=>({date:fmtL(x.date),rel:rel(x.date),relStyle:'font-size:11px;margin-top:1px;color:'+(x.retard?'var(--cc0392b,#c0392b)':'var(--c8b97a8,#8b97a8)')+';font-weight:'+(x.retard?'700':'400'),
+                titre:x.lib+' — séquence '+x.sq.num+(x.sq.module?' · '+x.sq.module:''),
+                sous:x.ep?('« '+(x.ep.title||'Épreuve')+' »'):'Aucune épreuve ouverte pour cette séquence',
+                etat:x.fait?'fait':(x.retard?'en retard · ':'')+x.etat,chip:chipE(x),
+                agir:ouvrir(x),agirLabel:x.ep?'Ouvrir':'Composer',
+                agirStyle:(x.ep||perm.creer)?'background:'+(x.ep?'var(--cffffff,#fff)':'var(--c1a72bb,#1a72bb)')+';color:'+(x.ep?'var(--c14375f,#14375f)':'var(--cffffff,#fff)')+';border:1px solid '+(x.ep?'var(--ce2eaf3,#e2eaf3)':'var(--c1a72bb,#1a72bb)')+';padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden}))};}),
+          moisPrec:decaler(-1),moisSuiv:decaler(1),
+          moisTitre:d0.toLocaleDateString('fr-FR',{month:'long',year:'numeric'}),
+          moisEntetes:['lun','mar','mer','jeu','ven','sam','dim'],
+          moisJours:jours});
+      })(),
+      ...(()=>{
+        const P=this._progs();
+        if(!(ready&&st.screen==='progressions'))return{progOptions:[],progSeqs:[],progMes:[],progId:'',setProgId:()=>{},progAnnee:'',progSource:'',progAbsentStyle:hidden,progToggleMienne:()=>{},progMienneLabel:'',progMienneStyle:hidden,progCetteSemaine:'',progCetteSemaineStyle:hidden};
+        if(!P){if(!this._progAttente){this._progAttente=setInterval(()=>{if(this._progs()){clearInterval(this._progAttente);this._progAttente=null;this.forceUpdate&&this.forceUpdate();this.setState({progCharge:Date.now()});}},400);}
+          return{progOptions:[],progSeqs:[],progMes:[],progId:'',setProgId:()=>{},progAnnee:'',progSource:'',progAbsentStyle:'font-size:13px;color:var(--c8b97a8,#8b97a8);padding:10px 0',progToggleMienne:()=>{},progMienneLabel:'',progMienneStyle:hidden,progCetteSemaine:'',progCetteSemaineStyle:hidden};}
+        const mesPr=me.prefs||{};const mes=mesPr.mesClasses||[];
+        const idSel=st.progId||mes[0]||((P.classes.find(c=>active&&c.atelier&&this._memeClasse(c.atelier,active.classe))||P.classes[0]).id);
+        const cls=this._progClasse(idSel)||P.classes[0];
+        const auj=this._isoAuj();const ici=this._semaineDe(cls,auj);
+        const ouverts=st.progOuverts||{};
+        const coul={ressources:['var(--c1a72bb,#1a72bb)','var(--ce7f1fb,#e7f1fb)'],integration:['var(--c7b52c7,#7b52c7)','var(--cefe8fa,#efe8fa)'],evaluation:['var(--cc26a12,#c26a12)','var(--cfdefdb,#fdefdb)'],remediation:['var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)']};
+        const libT={ressources:'ressources',integration:'intégration',evaluation:'évaluation',remediation:'remédiation'};
+        const estMienne=mes.includes(cls.id);
+        return{
+          progAbsentStyle:hidden,progAnnee:P.annee,
+          progSource:'Sources : '+P.sources.ESG+' ; '+P.sources.EST+' ; '+P.sources.calendrier+'.',
+          progOptions:P.classes.map(c=>({id:c.id,label:(mes.includes(c.id)?'★ ':'')+c.systeme+' · '+c.libelle})),
+          progId:cls.id,setProgId:ev=>this.setState({progId:val(ev),progOuverts:{}}),
+          progToggleMienne:()=>majMoi({prefs:{...mesPr,mesClasses:estMienne?mes.filter(x=>x!==cls.id):mes.concat([cls.id])}}),
+          progMienneLabel:estMienne?'★ Dans mes classes':'☆ Ajouter à mes classes',
+          progMienneStyle:'border:1px solid '+(estMienne?'var(--cc26a12,#c26a12)':'var(--ce2eaf3,#e2eaf3)')+';background:'+(estMienne?'var(--cfdefdb,#fdefdb)':'var(--cffffff,#fff)')+';color:'+(estMienne?'var(--cc26a12,#c26a12)':'var(--c14375f,#14375f)')+';padding:8px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer',
+          progMes:mes.map(id=>this._progClasse(id)).filter(Boolean).filter(c=>c.id!==cls.id).map(c=>({label:c.libelle,go:()=>this.setState({progId:c.id,progOuverts:{}}),
+            style:'border:1px solid var(--ce2eaf3,#e2eaf3);background:var(--cf7f9fc,#f7f9fc);color:var(--c5a6678,#5a6678);padding:7px 12px;font-size:12px;font-weight:600;border-radius:999px;cursor:pointer'})),
+          progCetteSemaine:ici?((ici.prochaine?'Prochaine semaine de cours : ':'Cette semaine : ')+'séquence '+ici.seq.num+' · semaine '+ici.w.n+' ('+libT[ici.w.type]+') — du '+this._fmtIso(ici.w.debut,{weekday:'short',day:'numeric',month:'short'})+' au '+this._fmtIso(ici.w.fin,{weekday:'short',day:'numeric',month:'short'})+(ici.w.feries&&ici.w.feries.length?' · férié : '+ici.w.feries.join(', '):'')):'Hors période de cours.',
+          progCetteSemaineStyle:'font-family:Poppins;font-size:13px;font-weight:700;color:var(--c14375f,#14375f);background:var(--cfdefdb,#fdefdb);border:1px solid var(--cf0d9b0,#f0d9b0);border-radius:10px;padding:10px 14px;margin-bottom:14px',
+          progSeqs:cls.sequences.map(sq=>{const on=ouverts[sq.num]!==undefined?!!ouverts[sq.num]:!!(ici&&ici.seq.num===sq.num);const cour=!!(ici&&ici.seq.num===sq.num);
+            return{n:sq.num,titre:'Séquence '+sq.num+(sq.module?' — '+sq.module:''),
+              dates:this._fmtIso(sq.debut,{day:'numeric',month:'long'})+' → '+this._fmtIso(sq.fin,{day:'numeric',month:'long',year:'numeric'})+' · trimestre '+sq.trimestre,
+              competence:sq.competence||'',
+              carte:'background:var(--cffffff,#fff);border:1px solid '+(cour?'var(--cf39200,#f39200)':'var(--ce6ecf3,#e6ecf3)')+';border-radius:12px;padding:16px 18px'+(cour?';box-shadow:0 0 0 3px var(--cfdefdb,#fdefdb)':''),
+              num:'display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;font-family:Poppins;font-weight:700;font-size:14px;flex:none;'+(cour?'background:var(--cf39200,#f39200);color:var(--cffffff,#fff)':'background:var(--ce7f1fb,#e7f1fb);color:var(--c1a72bb,#1a72bb)'),
+              toggle:()=>this.setState({progOuverts:{...ouverts,[sq.num]:!on}}),toggleLabel:on?'Replier':'Voir les semaines',
+              composer:()=>this._composerSequence(cls,sq),
+              composerStyle:perm.creer?'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:8px 13px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
+              detail:on?'margin-top:12px;border-top:1px solid var(--ceef2f7,#eef2f7);padding-top:10px':hidden,
+              semaines:(sq.semaines||[]).map(w=>{const c=coul[w.type]||coul.ressources;const ceW=!!(ici&&!ici.prochaine&&ici.w===w);
+                return{n:w.n,type:libT[w.type]||w.type,dates:w.debut?(this._fmtIso(w.debut)+' → '+this._fmtIso(w.fin)):'',
+                  chip:'display:inline-block;font-size:10.5px;font-weight:700;font-family:Poppins;padding:3px 9px;border-radius:999px;color:'+c[0]+';background:'+c[1],
+                  ferie:w.feries&&w.feries.length?'Férié : '+w.feries.join(', '):'',ferieStyle:w.feries&&w.feries.length?'font-size:10.5px;color:var(--cc0392b,#c0392b);margin-top:3px;font-weight:700':hidden,
+                  ligne:'display:flex;gap:14px;padding:9px 8px;border-bottom:1px solid var(--ceef2f7,#eef2f7);flex-wrap:wrap'+(ceW?';background:var(--cfffaf2,#fffaf2);border-radius:8px':''),
+                  contenus:(w.contenus||[]).length?w.contenus:[w.type==='evaluation'?(sq.evaluation||'Évaluation'):w.type==='integration'?'Activités d’intégration':'—']};}),
+              integration:sq.integration||'',integrationStyle:sq.integration?'font-size:12.5px;color:var(--c22303f,#22303f);line-height:1.55;margin-top:10px;background:var(--cf7f9fc,#f7f9fc);border-radius:8px;padding:10px 12px':hidden,
+              evaluation:sq.evaluation||'',evaluationStyle:sq.evaluation?'font-size:12.5px;color:var(--c5a6678,#5a6678);margin-top:6px':hidden};}),
+        };
+      })(),
+      ...(()=>{
+        if(st.focus===undefined&&!this._focusLu){this._focusLu=true;let v=false;try{v=localStorage.getItem('atelier_focus')==='1';}catch(e){}
+          if(v)setTimeout(()=>this.setState({focus:true}),0);}
+        const enFocus=!!st.focus&&ready&&st.screen==='composeur';
+        if(typeof document!=='undefined'){try{const h=document.documentElement;h.classList.toggle('vrt-focus',enFocus);h.classList.toggle('vrt-tiroir',enFocus&&!!st.focusTiroir);}catch(e){}}
+        const btn=on=>'background:'+(on?'var(--c14375f,#14375f)':'var(--cffffff,#fff)')+';color:'+(on?'var(--cffffff,#fff)':'var(--c14375f,#14375f)')+';border:1px solid '+(on?'var(--c14375f,#14375f)':'var(--ce2eaf3,#e2eaf3)')+';padding:6px 13px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer';
+        return{
+          focusBasculer:()=>{const v=!st.focus;try{localStorage.setItem('atelier_focus',v?'1':'0');}catch(e){}this.setState({focus:v,focusTiroir:false});},
+          focusLabel:st.focus?'Quitter le focus':'Focus',focusTitre:st.focus?'Revenir à l’affichage complet':'Masquer la barre du site et les colonnes : la planche prend toute la largeur',
+          focusStyle:btn(!!st.focus),
+          focusTiroirBasculer:()=>this.setState({focusTiroir:!st.focusTiroir}),
+          focusTiroirLabel:st.focusTiroir?'Fermer le volet':'Renseignements & collaboration',
+          focusTiroirStyle:enFocus?btn(!!st.focusTiroir):hidden,
+        };
+      })(),
+      ...(()=>{
+        if(typeof document!=='undefined'){try{document.documentElement.classList.toggle('vrt-doc',ready&&st.screen==='apercu');}catch(e){}}
+        if(!(ready&&st.screen==='apercu')||!active)return{docOnglets:[],docVues:[],docVoitEnonce:true,docFeuilleStyle:'',docPagesLabel:'',docZoomLabel:'',docZoomBasculer:()=>{}};
+        const cor=this._corrigePourExport(active)||[];
+        const ann=this._annexesPourExport(active,true);
+        const guide=ann.find(x=>/^GUIDE/.test(x.titre)),note=ann.find(x=>/^NOTE/.test(x.titre));
+        const sousT=(active.title||'Épreuve de français')+(active.classe?' · '+active.classe:'');
+        const vues={corrige:cor.length?{titre:'CORRIGÉ ET BARÈME — RÉSERVÉ À L’ENSEIGNANT',blocs:cor}:null,
+          guide:guide?{titre:guide.titre,blocs:guide.blocs}:null,note:note?{titre:note.titre,blocs:note.blocs}:null};
+        const dispo=['enonce'].concat(['corrige','guide','note'].filter(k=>vues[k]));
+        const lib={enonce:'Énoncé',corrige:'Corrigé',guide:'Guide de correction',note:'Note au relecteur',tout:'Tout'};
+        const ong=dispo.length>1?dispo.concat(['tout']):dispo;
+        const v=ong.includes(st.docVue)?st.docVue:'enonce';
+        const montrer=v==='tout'?dispo.filter(k=>k!=='enonce'):(v==='enonce'?[]:[v]);
+        const larg=(st.docLarg||(typeof window!=='undefined'?window.innerWidth:1200));
+        const reel=st.docZoom==='100';
+        const z=reel?1:Math.max(0.42,Math.min(1,(larg-36)/794));
+        if(!this._docResize&&typeof window!=='undefined'){this._docResize=true;
+          window.addEventListener('resize',()=>{clearTimeout(this._docRT);this._docRT=setTimeout(()=>{if(this.state.screen==='apercu')this.setState({docLarg:window.innerWidth});},150);});}
+        /* Repères de page : un trait tous les 297 mm, et le nombre de pages
+           estimé d'après la hauteur réelle de la feuille (mesurée après
+           rendu ; on ne rend à nouveau que si le nombre change). */
+        setTimeout(()=>{try{const f=document.querySelector('.vrt-docfeuille');if(!f)return;
+          const n=Math.max(1,Math.ceil((f.scrollHeight)/1122.5));if(n!==this.state.docPages)this.setState({docPages:n});}catch(e){}},60);
+        return{
+          docOnglets:ong.map(k=>({label:lib[k],go:()=>this.setState({docVue:k}),
+            style:'border:none;padding:6px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer;'+(k===v?'background:var(--cffffff,#fff);color:var(--c14375f,#14375f);box-shadow:0 1px 4px rgba(20,55,95,.12)':'background:none;color:var(--c7a8598,#7a8598)')})),
+          docVoitEnonce:v==='enonce'||v==='tout',
+          docVues:montrer.map((k,i)=>({titre:vues[k].titre,sous:sousT,blocs:vues[k].blocs.map(b=>({titre:b.titre||'',lignes:(b.lignes||[]).map(l=>String(l))})),
+            style:(v==='tout'||i>0)?'':'border-top:none;margin-top:0;padding-top:0'})),
+          docFeuilleStyle:'width:210mm;min-height:297mm;box-sizing:border-box;margin:22px auto 60px;background-color:var(--cffffff,#fff);padding:16mm 15mm 18mm;box-shadow:0 2px 14px rgba(20,55,95,.12);zoom:'+z.toFixed(3)+';'
+            +'background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) 297mm)',
+          docPagesLabel:st.docPages?('≈ '+st.docPages+' page'+(st.docPages>1?'s':'')+' A4'):'',
+          docZoomLabel:reel?'Ajuster':'Taille réelle',
+          docZoomBasculer:()=>this.setState({docZoom:reel?'':'100'}),
+        };
+      })(),
       /* Sujets rediges, sur la feuille du candidat : jamais leur corrige. */
       printSujets:((active&&active.sujets)||[]).filter(x=>x&&(x.texte||x.genre==='presentation')).map(x=>({
         titre:(x.auChoix?'Sujet au choix \u2014 ':'')+(x.titre||'Sujet'),

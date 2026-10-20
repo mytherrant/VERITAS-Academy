@@ -30,6 +30,17 @@ ok(G.promptEpreuve(ctxDM).includes('DEVOIR FAIT HORS DE LA CLASSE'), 'devoir de 
 ok(!G.promptEpreuve({ ...ctxDM, cadre: 'Devoir' }).includes('DEVOIR FAIT HORS DE LA CLASSE'), 'devoir surveillé : pas d’indices IA');
 const fmt = G.promptEpreuve(ctxDM);
 ok(fmt.includes('"guide":{"criteres"') && fmt.includes('"note":{"choix"'), 'format JSON : guide et note');
+/* Renforcement du 20/10/2026 : relecture finale, contexte, typographie,
+   style du sous-cycle (premier cycle seulement), ancrage sur les notions vues. */
+ok(/AVANT DE RÉPONDRE/.test(sys) && /^7\. /m.test(sys), 'consigne système : relecture finale en sept points');
+ok(/CONTEXTE : situations de vie camerounaises/.test(sys) && /TYPOGRAPHIE FRANÇAISE/.test(sys), 'consigne système : contexte camerounais et typographie');
+ok(/NIVEAU ATTENDU — Sous-cycle d’orientation/.test(sys), '4e : style du sous-cycle d’orientation transmis');
+if (stBac) {
+  const sysT = G.formationMinesec(stBac, G.planEpreuve(stBac, { classe: 'Terminale' }), 'Terminale', [], {});
+  ok(!/NIVEAU ATTENDU/.test(sysT), 'Terminale : aucun style de sous-cycle (le seul du 2nd cycle décrit les séries scientifiques)');
+}
+ok(G.promptEpreuve({ ...ctxDM, programmeFait: ['Les reprises nominales'] }).includes('EN PRIORITÉ sur ces notions'), 'les questions de langue s’ancrent sur les notions vues');
+ok(G.octets(sys) < 20000, 'consigne système sous le plafond serveur (20 Ko)');
 console.log('  taille consigne système : ' + G.octets(sys) + ' octets ; plafond du prompt : ' + G.PLAFOND_PROMPT);
 
 const base = { titre: 'T', consigne: 'C', questions: [], sujets: [], grille: [], remarques: '' };
