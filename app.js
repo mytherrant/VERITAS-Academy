@@ -2426,10 +2426,18 @@ function save(){
       // Ne montrer le toast que si : admin connecté ET 2+ échecs consécutifs
       // (premier échec souvent dû au timing auth au démarrage)
       if(iA() && window._fbSaveFails >= 2){
-        if(typeof _hasLocalBinaries==='function'&&_hasLocalBinaries()){
-          _toastRetrySync();
+        /* « Cloud KO » ne disait pas POURQUOI. Le cas courant : un appareil où
+           l'on s'est connecté sans jamais saisir la clé de synchronisation —
+           db.php répond 401 à chaque envoi, et « ↻ Sync » ne pouvait rien y
+           faire. 401/403 ou pas de clé → on propose de saisir la clé. */
+        var _stKo=0; try{ var _mKo=/HTTP (\d+)/.exec(String(e&&e.message||'')); if(_mKo) _stKo=parseInt(_mKo[1],10); }catch(eK){}
+        var _sansCle=!(DB&&DB.cloudConfig&&DB.cloudConfig.secret);
+        if(_sansCle||_stKo===401||_stKo===403){
+          _toastRetrySync('cle',_stKo);
+        } else if(typeof _hasLocalBinaries==='function'&&_hasLocalBinaries()){
+          _toastRetrySync('reseau',_stKo);
         } else {
-          toast('⚠ Sauvegarde locale uniquement','warn');
+          toast('⚠ Serveur injoignable'+(_stKo?' (HTTP '+_stKo+')':'')+' — modifications gardées sur cet appareil','warn');
         }
       }
     }
@@ -12409,18 +12417,25 @@ function cm(){
 }
 function toast(msg,t='ok'){const d=document.createElement('div');const c={ok:['var(--gr)','✓'],warn:['var(--or)','⚠'],err:['var(--re)','✕'],info:['#3C8DFF','ℹ']}[t]||['var(--gr)','✓'];d.style.cssText=`position:fixed;bottom:20px;right:20px;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E6EAF2;color:#142554;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 10px 30px rgba(20,37,84,.16);max-width:360px;animation:su .24s cubic-bezier(.16,1,.3,1);`;d.innerHTML=`<span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${c[0]};color:#fff;font-size:13px;font-weight:800">${c[1]}</span><span>${(''+msg).replace(/</g,'&lt;')}</span>`;document.body.appendChild(d);setTimeout(()=>{d.style.transition='opacity .3s,transform .3s';d.style.opacity='0';d.style.transform='translateY(8px)';setTimeout(()=>d.remove(),300);},3500);}
 // Toast enrichi avec bouton d'action — utilisé quand cloud KO et fichiers locaux en attente
-function _toastRetrySync(){
+function _toastRetrySync(cause,st){
   var d=document.createElement('div');
   d.style.cssText='position:fixed;bottom:20px;right:20px;background:var(--orb);border:1px solid var(--ord);color:var(--or);padding:11px 18px;border-radius:var(--r);font-size:13px;font-weight:600;z-index:9999;box-shadow:var(--sh2);max-width:380px;animation:su .22s;display:flex;align-items:center;gap:10px';
   var txt=document.createElement('span');
-  txt.textContent='⚠ Cloud KO — fichiers locaux en attente';
+  var _cle=(cause==='cle');
+  txt.textContent=_cle
+    ? (st===403
+        ? '⚠ Synchro refusée (HTTP 403) : clé incorrecte ou pare-feu de l\'hébergeur. Modifications gardées sur cet appareil.'
+        : '⚠ Synchro impossible : clé de synchronisation absente ou incorrecte sur cet appareil. Modifications gardées ici.')
+    : '⚠ Serveur injoignable'+(st?' (HTTP '+st+')':'')+' — fichiers locaux en attente';
   var btn=document.createElement('button');
-  btn.textContent='↻ Sync';
+  btn.textContent=_cle?'🔐 Saisir la clé':'↻ Sync';
   btn.style.cssText='background:var(--or);color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0';
-  btn.onclick=function(){d.remove();if(typeof cloudSyncBinaries==='function')cloudSyncBinaries();};
+  btn.onclick=function(){d.remove();
+    if(_cle){ window._cloudSecretPrompted=false; if(typeof _ensureCloudSecret==='function')_ensureCloudSecret(); return; }
+    if(typeof cloudSyncBinaries==='function')cloudSyncBinaries();};
   d.appendChild(txt);d.appendChild(btn);
   document.body.appendChild(d);
-  setTimeout(function(){if(d.parentNode)d.remove();},6000);
+  setTimeout(function(){if(d.parentNode)d.remove();},_cle?12000:6000);
 }
 
 // ═══════════════════════════════════════════════
