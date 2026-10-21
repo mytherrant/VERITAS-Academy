@@ -776,6 +776,11 @@
     if (ctx.programmeFait && ctx.programmeFait.length) {
       l.push('Leçons déjà faites en classe (le sujet s’y appuie) : ' + ctx.programmeFait.map(function (x) { return String(x).slice(0, 140); }).join(' ; ') + '.');
       l.push('Les questions de langue portent EN PRIORITÉ sur ces notions, appliquées à des phrases du texte ; une notion de la liste absente du texte ne s’invente pas, on en prend une autre de la liste.');
+      /* Constaté en production (6e, 21/10/2026) : « remplace “taxes” par un
+         synonyme issu du lexique des sensations » et « remplace “monsieur”
+         par un homophone qui maintient le sens » — deux notions de la
+         séquence plaquées sur des mots qui ne les portent pas. */
+      l.push('Ne PLAQUE jamais une notion sur un mot qui ne la porte pas : on ne demande un synonyme « du lexique des sensations » que pour un mot de ce lexique ; un homophone ne garde JAMAIS le sens (on fait choisir entre homophones dans une phrase, on n’en substitue pas un) ; une transformation de temps n’est demandée que si elle reste naturelle dans la phrase.');
     }
     if (ctx.oeuvre) l.push('Œuvre au programme étudiée : ' + ctx.oeuvre + ' — privilégie-la pour les sujets qui portent sur une œuvre ; n’en invente aucune citation.');
     if (ctx.cadre && /maison|vacances/i.test(ctx.cadre)) l.push('DEVOIR FAIT HORS DE LA CLASSE : dans "guide.erreurs", ajoute les indices d’une copie rédigée par une IA ou recopiée (citations introuvables dans l’œuvre ou le texte, épisodes inexistants, langue uniformément lisse sans aucune trace de brouillon, plan identique à une copie voisine) et la conduite à tenir : convoquer l’élève pour qu’il explique sa démarche, sans annoter la copie.');
