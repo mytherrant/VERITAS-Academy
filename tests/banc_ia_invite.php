@@ -88,6 +88,25 @@ verifie($buteF > 0 && $buteF <= 3, 'jeton forgé : palier anonyme, refusé au pl
 $cpt = glob("$tmp/api/data/_rate/iainvite_*");
 verifie(count($cpt) === 1, 'un seul compteur d’invité tenu (celui de A)', count($cpt) . ' compteur(s)');
 
+echo "\n\033[1m③ Abonné « pro » désynchronisé : il retrouve son palier, sans appel gratuit de plus\033[0m\n";
+/* Situation de production du 21/10/2026 : la synchro admin avait ramené
+   accordés à 2, le compteur du proxy était à 8, et le quota gratuit du jour
+   (5) était consommé. L'abonné recevait 429 « Quota IA du jour atteint ». */
+@mkdir("$tmp/data", 0777, true);
+file_put_contents("$tmp/data/veritas_db.json", json_encode([
+    'visitorAccounts' => [['id' => 'accP', 'user' => 'profbanc', 'plans' => ['pro'], 'tokenVer' => 0, 'statut' => 'actif']],
+    'elearning' => ['abonnements' => []],
+    'plateforme' => ['quotas' => ['accP|ia' => ['mois' => date('Y-m'), 'utilise' => 2]]],
+]));
+file_put_contents("$tmp/api/data/_rate/iaatelier_" . substr(md5('accP'), 0, 16) . '_' . date('Ym') . '.txt', '8');
+file_put_contents("$tmp/api/data/_rate/iauser_" . substr(md5('profbanc'), 0, 16) . '_' . date('Ymd') . '.txt', '5');
+$bodyP = b64u(json_encode(['u' => 'profbanc', 'eid' => 'accP', 't' => 'visiteur', 'exp' => time() + 3600, 'v' => 0]));
+$tP = $bodyP . '.' . b64u(hash_hmac('sha256', $bodyP, $HMAC, true));
+$rP1 = appel($tP, 31);
+verifie(!quotaJour($rP1), 'l’appel accordé passe (palier enseignant retrouvé)', "HTTP {$rP1[0]} " . substr($rP1[1], 0, 160));
+$rP2 = appel($tP, 32);
+verifie(quotaJour($rP2), 'un appel de plus, sans accord de plateforme.php, reste refusé', "HTTP {$rP2[0]} " . substr($rP2[1], 0, 160));
+
 proc_terminate($srv);
 echo "\n" . ($ko ? "\033[31m$ko échec(s) sur $vu\033[0m" : "\033[32m$vu vérification(s) au vert\033[0m") . "\n";
 exit($ko ? 1 : 0);

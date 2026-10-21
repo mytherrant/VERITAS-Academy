@@ -360,6 +360,23 @@ if ($jetonIA !== '') {
                             ? (int) ($qAt['utilise'] ?? 0) : 0;
                         $fAt = $rateDir . 'iaatelier_' . substr(md5($accAt), 0, 16) . '_' . date('Ym') . '.txt';
                         $utilisesAt = is_file($fAt) ? (int) @file_get_contents($fAt) : 0;
+                        /* RECALAGE (21/10/2026). Tant que la synchro de
+                           l'administration remettait `plateforme.quotas` à sa
+                           valeur d'avant (corrigé dans db.php), ce compteur-ci
+                           dépassait les appels accordés : un abonné « pro »
+                           restait au palier gratuit des jours durant. Il ne
+                           peut pas légitimement dépasser ce qui a été accordé.
+                           plateforme.php accorde AVANT l'appel : le dernier
+                           accord est celui de l'appel en cours, d'où le
+                           recalage à « accordés − 1 ». Un appel direct, sans
+                           accord préalable, reste refusé. */
+                        /* Strictement supérieur : à égalité, tous les accords
+                           ont été consommés et l'appel est refusé — sinon un
+                           appel direct se recalerait lui-même indéfiniment. */
+                        if ($accAt !== '' && $accordesAt > 0 && $utilisesAt > $accordesAt) {
+                            $utilisesAt = $accordesAt - 1;
+                            @file_put_contents($fAt, (string) $utilisesAt, LOCK_EX);
+                        }
                         if ($accAt !== '' && $utilisesAt < $accordesAt) {
                             $abonneAtelier = true;
                             $fichierAtelier = $fAt;

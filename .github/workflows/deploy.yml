@@ -256,6 +256,11 @@ jobs:
       - name: 🧑‍🏫 Ambassa — l'invité de l'Atelier reçoit-il ses appels, et pas plus ?
         run: php tests/banc_ia_invite.php
 
+      # La synchro admin pousse la base entière : elle ne doit pas remettre à zéro
+      # les compteurs de l'Atelier (plateforme.quotas), décomptés par le serveur.
+      - name: 🧮 Atelier — la synchro admin préserve-t-elle les compteurs de quotas ?
+        run: php tests/banc_db_quotas.php
+
       # ── 🤖 RAPPROCHEMENT SMS (25/09/2026). Un SMS de réception conforme sert
       #    le livret/manuel sans humain ; un faux SMS (solde incohérent, txid
       #    rejoué, expéditeur inconnu) ne sert JAMAIS rien.

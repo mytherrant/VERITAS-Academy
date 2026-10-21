@@ -296,6 +296,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'PUT
         }
     }
 
+    /* ── 🛟 PRÉSERVER LES COMPTEURS DE L'ATELIER (21/10/2026) ───────────────
+       api/plateforme.php décompte les quotas mensuels (épreuves, appels à
+       Ambassa, exports) dans `plateforme.quotas` de CETTE base, sous verrou.
+       La copie de l'administrateur, elle, date de son dernier chargement : sa
+       synchro remettait donc les compteurs à leur valeur d'alors. Constaté en
+       production : UNE seule clé restait dans toute la base, à 2 appels, pour
+       un compte qui en avait consommé plus de huit dans la journée. Double
+       effet — le quota payé repartait de zéro à chaque synchro admin, et
+       ia_proxy.php, qui ne reconnaît l'abonné qu'à hauteur des appels déjà
+       accordés, ramenait un compte « pro » au palier gratuit (5 par jour).
+       Un compteur ne recule pas : pour chaque clé, on garde le mois le plus
+       récent et, à mois égal, la plus grande valeur. */
+    if (is_file($DB_FILE)) {
+        $srvDb3 = json_decode((string) @file_get_contents($DB_FILE), true);
+        $srvQ = (is_array($srvDb3) && isset($srvDb3['plateforme']['quotas']) && is_array($srvDb3['plateforme']['quotas']))
+            ? $srvDb3['plateforme']['quotas'] : [];
+        if ($srvQ) {
+            if (!isset($data['plateforme']) || !is_array($data['plateforme'])) $data['plateforme'] = [];
+            $pousses = (isset($data['plateforme']['quotas']) && is_array($data['plateforme']['quotas'])) ? $data['plateforme']['quotas'] : [];
+            $rattrapes = 0;
+            foreach ($srvQ as $cle => $sq) {
+                if (!is_array($sq)) continue;
+                $pq = $pousses[$cle] ?? null;
+                $mS = (string) ($sq['mois'] ?? ''); $uS = (int) ($sq['utilise'] ?? 0);
+                $mP = is_array($pq) ? (string) ($pq['mois'] ?? '') : ''; $uP = is_array($pq) ? (int) ($pq['utilise'] ?? 0) : -1;
+                if (!is_array($pq) || strcmp($mS, $mP) > 0 || ($mS === $mP && $uS > $uP)) {
+                    $pousses[$cle] = $sq; $rattrapes++;
+                }
+            }
+            $data['plateforme']['quotas'] = $pousses;
+            $reEnc3 = json_encode($data, JSON_UNESCAPED_UNICODE);
+            if ($reEnc3 !== false) {
+                $raw = $reEnc3;
+                if ($rattrapes) {
+                    @file_put_contents(__DIR__ . '/data/_access_log.txt',
+                        date('c') . ' MERGE_KEEP ' . $rattrapes . ' compteur(s) Atelier serveur preserve(s) ip=' . $ip . "\n", FILE_APPEND);
+                }
+            }
+        }
+    }
+
     // ── 💾 v1.2.3 Sauvegarde horodatée AVANT écrasement (rétention 30) ───────
     // La synchro est en « dernière écriture gagne » (le verrou optimiste côté
     // client est inopérant). Cette copie convertit une perte SILENCIEUSE en perte
