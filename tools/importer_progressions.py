@@ -177,7 +177,11 @@ def nettoyer(t):
 # mot long se recolle ; un volume horaire collé se décolle.
 RECOLLER = re.compile(r'\b([A-Za-zÀ-ÿ]{5,}) ([sfx])(?=\s|\d|$|[,;)])')
 DECOLLER = re.compile(r'([A-Za-zÀ-ÿ\)])(\d+\s*[hH])\b')
-MOTS = {'pronominau ': 'pronominaux ', 'pronominau(': 'pronominaux ('}
+MOTS = {'pronominau ': 'pronominaux ', 'pronominau(': 'pronominaux (',
+        # relevées le 21/10/2026 : une lettre détachée que la règle générale ne peut pas
+        # recoller sans risque (« le », « e », « t » sont aussi des mots)
+        'Villecruell e': 'Ville cruelle', 'socioculturel le': 'socioculturelle',
+        'environnemen t': 'environnement'}
 
 def nettoyer_contenu(t):
     t = nettoyer(t)
@@ -331,7 +335,7 @@ def progressions(chemin, systeme):
                     if not c2 or HEURE_SEULE.match(c2) or OUTIL.match(c2) or SAVOIR_ETRE.search(c2): continue
                     if SITUATIONS.match(c2):
                         for x in re.split(r'\s*(?=\d\s*[-.)]\s*(?:[ÉE]crire|Parler|Lire)\b)', c2):
-                            x = nettoyer(re.sub(r'^\d\s*[-.)]\s*', '', x))
+                            x = nettoyer_contenu(re.sub(r'^\d\s*[-.)]\s*', '', x))
                             x = re.sub(r'\s*Exemples? de situations? d.int[ée]gration\s*$', '', x)
                             if x and x not in seq['situations']: seq['situations'].append(x)
                         continue
