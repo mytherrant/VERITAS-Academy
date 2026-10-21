@@ -4989,3 +4989,5 @@ body > [id^="_"]:not(script), body > [id^="_"]:not(script) *:not([class*="materi
 #APP#APP#APP .sb .sbur{ white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; letter-spacing:.3px !important; }
 #APP#APP#APP .sb .sbu #sbTheme{ flex:0 0 auto !important; }
 #APP#APP#APP .sb .sbu .sblo{ flex:1 1 auto !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; }
+/* « Déconnexion » de la barre latérale : #C46F6F sur bleu nuit (4,05:1). */
+#APP#APP#APP .sb .sblo{ color:#FFB4B4 !important; }
