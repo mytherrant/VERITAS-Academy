@@ -521,8 +521,20 @@
     l.push('');
     l.push('EXIGENCES MINESEC — elles font foi sur toute autre habitude :');
     if (struct) {
-      l.push('- Épreuve : ' + struct.nom + ' (' + struct.examen + ', ' + struct.cycle + '). Durée ' + struct.duree + ', coefficient ' + struct.coeff + ', ' + struct.sujetsAuChoix + ' sujet(s) au choix.');
-      if ((struct.sujetsAuChoix || 1) > 1) {
+      /* Sujets limités à la progression (21/10/2026) : la consigne système
+         annonçait encore les 3 sujets officiels, et Ambassa écrivait « Le
+         candidat traitera l’un des 3 sujets au choix. (Pour cette évaluation,
+         seul le sujet de dissertation est proposé.) » — constaté en production. */
+      var nbProposes = plan && plan.restreint
+        ? plan.sujets.filter(function (x) { return x.genre !== 'presentation'; }).length + (plan.sujetTexte ? 1 : 0)
+        : (struct.sujetsAuChoix || 1);
+      l.push('- Épreuve : ' + struct.nom + ' (' + struct.examen + ', ' + struct.cycle + '). Durée ' + struct.duree + ', coefficient ' + struct.coeff + ', '
+        + (plan && plan.restreint ? nbProposes + ' sujet(s) proposé(s) d’après la progression' : struct.sujetsAuChoix + ' sujet(s) au choix') + '.');
+      if (plan && plan.restreint && nbProposes === 1) {
+        l.push('- STRUCTURE : UN seul sujet, imposé, noté sur 20. La consigne générale est exactement « Le candidat traitera le sujet suivant. » — ne parle d’aucun autre sujet.');
+      } else if (plan && plan.restreint) {
+        l.push('- STRUCTURE : « Le candidat traitera l’un des ' + nbProposes + ' sujets au choix. » Chaque sujet est COMPLET et noté sur 20. La consigne générale reprend cette phrase mot pour mot.');
+      } else if ((struct.sujetsAuChoix || 1) > 1) {
         l.push('- STRUCTURE : « Le candidat traitera l’un des ' + struct.sujetsAuChoix + ' sujets au choix. » Chaque sujet est COMPLET et noté sur 20 ; aucun n’est obligatoire, il n’y a ni « première partie » ni « seconde partie ». La consigne générale reprend cette phrase mot pour mot.');
       }
       var tsp = (plan && plan.texteSupport) || struct.texteSupport;
@@ -1308,6 +1320,11 @@
       }
       var v = brutsS[iS++] || {};
       var texte = propre(typeof v === 'string' ? v : v.texte, 5000);
+      /* « Sujet de type 3 — Dissertation (20 points) » en tête d'énoncé
+         doublait le titre que l'Atelier pose au-dessus (21/10/2026). */
+      var l1 = texte.split('\n')[0];
+      if (texte.indexOf('\n') > 0 && (norm(l1).indexOf(norm(s.titre)) === 0 || /^\s*sujet\s+(de\s+type\s+)?([0-9ivx]+)\b/i.test(l1))
+          && l1.length < 120) texte = texte.slice(texte.indexOf('\n') + 1).replace(/^\s+/, '');
       if (vousQ) texte = vouvoyer(texte);
       res.sujets.push({ genre: s.genre, titre: s.titre, texte: texte, pts: s.points, auChoix: !!s.auChoix, corrige: propre(v.corrige, 16000) });
     });
@@ -1475,6 +1492,8 @@
        descriptif, pas une paraphrase (« deux parties dont une obligatoire »). */
     var nbAuChoix = plan.sujets.filter(function (s) { return s.auChoix; }).length + (plan.sujetTexte ? 1 : 0);
     if (plan.sujetTexte && nbAuChoix > 1) res.consigne = 'Le candidat traitera l’un des ' + nbAuChoix + ' sujets au choix.';
+    else if (plan.restreint) res.consigne = nbAuChoix > 1 ? 'Le candidat traitera l’un des ' + nbAuChoix + ' sujets au choix.'
+      : 'Le candidat traitera le sujet suivant.';
     exigencesReflexion(res, ctx, cleValides, opts);
     return res;
   }
