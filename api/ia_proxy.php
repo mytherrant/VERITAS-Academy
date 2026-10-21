@@ -285,6 +285,43 @@ $utilisateurVerifie = '';
 $abonneAtelier = false;
 $fichierAtelier = ''; $compteAtelier = 0;
 $jetonIA = (string) ($body['token'] ?? '');
+/* INVITÉ DE L'ATELIER (21/10/2026). Le jeton « inv. » de l'invité d'appareil
+   n'est pas un jeton de compte : vrt_verify_token le rejetait, et l'invité
+   tombait au palier « anon » — 2 appels par JOUR, alors que son essai lui en
+   accorde 5 par mois et qu'une composition en demande un, parfois deux (la
+   réparation). Résultat constaté : une seule épreuve par jour, puis « quota
+   épuisé ». On reconnaît désormais ce jeton (même signature que
+   plateforme.php, plat_inv_verifier) et l'on suit la règle des abonnés : le
+   palier « free » ne vaut qu'à hauteur des appels que plateforme.php a DÉJÀ
+   accordés ce mois-ci à cet appareil (registre _plat_invites.json). Appeler
+   ce proxy directement n'ouvre donc rien de plus que le quota de l'essai. */
+$inviteAtelier = false; $fichierInvite = ''; $compteInvite = 0; $idInvite = '';
+if (strpos($jetonIA, 'inv.') === 0) {
+    @include_once __DIR__ . '/_auth_lib.php';
+    if (defined('VRT_HMAC_KEY') && function_exists('vrt_b64url_encode') && function_exists('vrt_b64url_decode')) {
+        $partsInv = explode('.', substr($jetonIA, 4));
+        if (count($partsInv) === 2) {
+            $attenduInv = vrt_b64url_encode(hash_hmac('sha256', 'invite|' . $partsInv[0], VRT_HMAC_KEY, true));
+            $pInv = hash_equals($attenduInv, $partsInv[1]) ? json_decode(vrt_b64url_decode($partsInv[0]), true) : null;
+            $cleInv = is_array($pInv) ? (string) ($pInv['d'] ?? '') : '';
+            if ($cleInv !== '' && (int) ($pInv['exp'] ?? 0) >= time()) {
+                $regInv = json_decode((string) @file_get_contents(__DIR__ . '/data/_plat_invites.json'), true);
+                $qInv = is_array($regInv) ? ($regInv['appareils'][$cleInv]['q']['ia'] ?? null) : null;
+                $accordesInv = (is_array($qInv) && (string) ($qInv['mois'] ?? '') === date('Y-m'))
+                    ? (int) ($qInv['utilise'] ?? 0) : 0;
+                $fInv = $rateDir . 'iainvite_' . substr(md5($cleInv), 0, 16) . '_' . date('Ym') . '.txt';
+                $utilisesInv = is_file($fInv) ? (int) @file_get_contents($fInv) : 0;
+                $idInvite = 'inv:' . substr(md5($cleInv), 0, 16);
+                if ($utilisesInv < $accordesInv) {
+                    $inviteAtelier = true;
+                    $fichierInvite = $fInv;
+                    $compteInvite  = $utilisesInv;
+                }
+            }
+        }
+    }
+    $jetonIA = '';   // ce n'est pas un jeton de compte : on ne le soumet pas à vrt_verify_token
+}
 if ($jetonIA !== '') {
     @include_once __DIR__ . '/_auth_lib.php';
     if (function_exists('vrt_verify_token')) {
@@ -349,6 +386,17 @@ if ($utilisateurVerifie === '') {
 } else {
     // Le compteur suit l'identité PROUVÉE (un jeton = un compte).
     $userId = $utilisateurVerifie;
+}
+if ($utilisateurVerifie === '' && $idInvite !== '') {
+    // L'invité est compté sur SON appareil, pas sur l'adresse IP partagée.
+    $userId = $idInvite;
+    if ($inviteAtelier && in_array($userTier, ['anon', 'free'], true)) {
+        $userTier = 'free';
+        if (!is_dir($rateDir)) @mkdir($rateDir, 0755, true);
+        @file_put_contents($fichierInvite, ($compteInvite + 1) . '', LOCK_EX);
+    }
+}
+if ($utilisateurVerifie !== '') {
     if ($abonneAtelier && in_array($userTier, ['anon', 'free', 'starter', 'pro', 'elite'], true)) {
         $userTier = 'teach';
         if (!is_dir($rateDir)) @mkdir($rateDir, 0755, true);

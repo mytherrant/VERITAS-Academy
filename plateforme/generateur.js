@@ -264,6 +264,11 @@
     if (!garderTexte) retires.push(plan.sujetTexte);
     plan.sujets.forEach(function (s) { if (gardes.indexOf(s) < 0) retires.push(s.titre); });
     if (!retires.length) return plan;
+    /* La « présentation de la copie » (2 pts) appartient à la grille de la
+       CONTRACTION (9 + 9 + 2) ; commentaire et dissertation comptent déjà la
+       leur dans leurs 20 points. La garder sans la contraction donnait un
+       barème de 22 / 20 (constaté en production le 21/10/2026). */
+    if (!garderTexte) gardes = gardes.filter(function (s) { return s.genre !== 'presentation'; });
     plan.sujets = gardes;
     if (!garderTexte) {
       plan.support = 'aucun'; plan.texteSupport = null; plan.sujetTexte = null;

@@ -251,6 +251,11 @@ jobs:
       - name: 📲 SkySMS — chaque paiement livre-t-il son droit (abonnement, Atelier, code par SMS) ?
         run: php tests/banc_skysms_droits.php
 
+      # L'invité de l'Atelier : ses appels IA suivent son essai (accordés par
+      # plateforme.php), ni 2 par jour, ni plus que ce que l'essai lui ouvre.
+      - name: 🧑‍🏫 Ambassa — l'invité de l'Atelier reçoit-il ses appels, et pas plus ?
+        run: php tests/banc_ia_invite.php
+
       # ── 🤖 RAPPROCHEMENT SMS (25/09/2026). Un SMS de réception conforme sert
       #    le livret/manuel sans humain ; un faux SMS (solde incohérent, txid
       #    rejoué, expéditeur inconnu) ne sert JAMAIS rien.

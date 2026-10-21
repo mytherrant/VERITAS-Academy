@@ -27,14 +27,18 @@ ok(genres(p2) === 'dissertation', 'séquence 2 (dissertation) : la dissertation 
 ok(p2.support === 'aucun' && !p2.productions.length, 'séquence 2 : ni texte support ni contraction');
 ok(p2.sujets.filter(s => s.genre === 'dissertation').every(s => !s.auChoix), 'séquence 2 : un sujet unique n’est plus « au choix »');
 ok(!!(p2.restreint && p2.restreint.retires.length === 2), 'séquence 2 : deux sujets retirés et nommés');
+const total = p => G.totalNote(p.comp.points + p.expl.points + p.productions.reduce((a, x) => a + x.points, 0), p.sujets);
+ok(total(p2) === 20, 'séquence 2 : barème sur 20 (la présentation de la contraction ne reste pas) — obtenu ' + total(p2));
 
 const p3 = plan(3);
 ok(genres(p3) === 'commentaire,dissertation', 'séquence 3 (commentaire) : commentaire et dissertation — obtenu ' + genres(p3));
 ok(p3.sujets.filter(s => s.genre !== 'presentation').every(s => s.auChoix), 'séquence 3 : deux sujets, au choix');
+ok(total(p3) === 20, 'séquence 3 : barème sur 20 — obtenu ' + total(p3));
 
 const p5 = plan(5);
 ok(genres(p5) === 'commentaire,contraction,dissertation', 'séquence 5 (contraction) : les trois sujets — obtenu ' + genres(p5));
 ok(!p5.restreint && p5.support === 'texte', 'séquence 5 : structure officielle intacte');
+ok(total(p5) === 20, 'séquence 5 : barème sur 20 — obtenu ' + total(p5));
 
 /* Aucun genre reconnu : rien n'est retiré (BP, ENIET…). */
 const pBp = G.restreindreSujets(G.planEpreuve(MINESEC.epreuveParCode('BP_IND'), { classe: 'BP' }), ['dissertation']);
