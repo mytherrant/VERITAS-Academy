@@ -942,6 +942,10 @@ tr:hover td{background:var(--bg)}
 .sm{padding:5px 12px;font-size:12px}.xs{padding:3px 9px;font-size:12px}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .fg2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+/* Écran de connexion/inscription (#LS) : la règle mobile de theme-lws.css ne
+   vise que #VISITOR et #MC. À 375 px, WhatsApp et e-mail faisaient 142 px,
+   numéro tronqué pendant la saisie. */
+@media (max-width:480px){#LS .fg2{grid-template-columns:minmax(0,1fr)}}
 .fg{display:flex;flex-direction:column;gap:5px}.fg.full{grid-column:1/-1}
 .fl{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink3)}
 .fi{width:100%;padding:10px 13px;border:1.5px solid var(--bg3);border-radius:var(--r);background:var(--bg2);color:var(--ink);font-size:13px;transition:all .16s;outline:none;-webkit-appearance:none}
