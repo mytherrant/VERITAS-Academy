@@ -425,6 +425,12 @@ if ((string) ($body['action'] ?? '') === 'epreuve_minesec') {
         'temperature'      => 0.3,
         'responseMimeType' => 'application/json',
         'thinkingConfig'   => ['thinkingBudget' => 2048],
+        /* La réflexion (2 048) se décompte du plafond de sortie : à 8 192,
+           il restait ≈ 6 000 jetons de réponse. Une épreuve de Terminale à
+           trois sujets, corrigés et guide s'arrêtait au milieu du guide
+           (24 433 caractères, constaté en production le 21/10/2026). Le
+           relèvement ne vaut que pour cette action. */
+        'maxOutputTokens'  => defined('IA_MAX_OUTPUT_TOKENS_EPREUVE') ? (int) IA_MAX_OUTPUT_TOKENS_EPREUVE : 16384,
     ];
 }
 

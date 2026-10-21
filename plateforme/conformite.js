@@ -230,7 +230,7 @@
 
     /* --- 4. Nombre de sujets au choix --- */
     var sujetsChoix = sujetsRediges.filter(function (s) { return s.auChoix; }).length;
-    if (struct && struct.sujetsAuChoix > 1 && sujetsChoix + 1 < struct.sujetsAuChoix) {
+    if (struct && struct.sujetsAuChoix > 1 && sujetsChoix + 1 < struct.sujetsAuChoix && !(ep.sujetsSelonProgression && ep.sujetsSelonProgression.length)) {
       out.push(ecart('conseil',
         struct.sujetsAuChoix + ' sujets au choix attendus',
         struct.nom + ' propose ' + struct.sujetsAuChoix + ' sujets au choix au candidat. Le composeur produit pour l’instant un sujet unique.',
