@@ -171,6 +171,33 @@ def nettoyer(t):
     t = re.sub(r'\s+', ' ', t)
     return t.strip(' .;')
 
+# Coquilles de saisie des Word, relevées dans l'Atelier le 21/10/2026 :
+# « argumentati f1h », « subjoncti f », « circonstancielle s de »,
+# « pronominau1h », « paragraphe () 1h ». Une lettre isolée détachée d'un
+# mot long se recolle ; un volume horaire collé se décolle.
+RECOLLER = re.compile(r'\b([A-Za-zÀ-ÿ]{5,}) ([sfx])(?=\s|\d|$|[,;)])')
+DECOLLER = re.compile(r'([A-Za-zÀ-ÿ\)])(\d+\s*[hH])\b')
+MOTS = {'pronominau ': 'pronominaux ', 'pronominau(': 'pronominaux ('}
+
+def nettoyer_contenu(t):
+    t = nettoyer(t)
+    t = RECOLLER.sub(r'\1\2', t)
+    t = DECOLLER.sub(r'\1 \2', t)
+    for a, b in MOTS.items(): t = t.replace(a, b)
+    t = re.sub(r'\(\s*\)', '', t)
+    t = re.sub(r'\s+', ' ', t).strip(' .;')
+    return t
+
+def cle_contenu(t):
+    # deux saisies du même cours (« (1h) » / « 1h », « Dissertation: » /
+    # « Dissertation : ») ne font qu'un contenu
+    k = sans_accents(t).lower()
+    k = re.sub(r'\(?\s*\d+\s*h\s*\)?', ' ', k)
+    k = re.sub(r'\(hors horaire\)', ' ', k)
+    return re.sub(r'[^a-z0-9]+', ' ', k).strip()
+
+HEURE_SEULE = re.compile(r'^\(?\s*\d+\s*h\s*\)?$', re.I)
+
 SAVOIR_ETRE = re.compile(r"l[’']observation|esprit critique|la curiosit|l[’']humilit", re.I)
 SITUATIONS = re.compile(r'^\s*(?:\d+\s*[-.)]\s*)?(?:[ÉE]crire|Parler|Lire)\s*(?:/\s*\w+\s*)?pour\b', re.I)
 OUTIL = re.compile(r'^(?:Enseignement des savoirs notionnels|Int[ée]gration|[ÉE]valuation|Compte[- ]?rendu.*|Apprentissage de l.int[ée]gration|Exemples? de t[âa]ches? d.int[ée]gration|X)$', re.I)
@@ -300,14 +327,15 @@ def progressions(chemin, systeme):
                 ty = type_semaine(n, ' '.join(row))
                 contenus = []
                 for c in cells:
-                    c2 = nettoyer(c)
-                    if not c2 or OUTIL.match(c2) or SAVOIR_ETRE.search(c2): continue
+                    c2 = nettoyer_contenu(c)
+                    if not c2 or HEURE_SEULE.match(c2) or OUTIL.match(c2) or SAVOIR_ETRE.search(c2): continue
                     if SITUATIONS.match(c2):
                         for x in re.split(r'\s*(?=\d\s*[-.)]\s*(?:[ÉE]crire|Parler|Lire)\b)', c2):
                             x = nettoyer(re.sub(r'^\d\s*[-.)]\s*', '', x))
                             x = re.sub(r'\s*Exemples? de situations? d.int[ée]gration\s*$', '', x)
                             if x and x not in seq['situations']: seq['situations'].append(x)
                         continue
+                    if any(cle_contenu(x) == cle_contenu(c2) for x in contenus): continue
                     contenus.append(c2)
                 if ty == 'integration':
                     # la tâche : la cellule qui l'annonce, ou à défaut la plus longue
@@ -317,7 +345,7 @@ def progressions(chemin, systeme):
                 if ty == 'evaluation' and contenus and not seq['evaluation']:
                     seq['evaluation'] = ' ; '.join(contenus); contenus = []
                 ex = next((s for s in seq['semaines'] if s['n'] == n), None)
-                if ex: ex['contenus'] += [c for c in contenus if c not in ex['contenus']]
+                if ex: ex['contenus'] += [c for c in contenus if all(cle_contenu(c) != cle_contenu(x) for x in ex['contenus'])]
                 else: seq['semaines'].append({'n': n, 'type': ty, 'contenus': contenus})
     classes = {}; ordre = []
     for r in runs:
