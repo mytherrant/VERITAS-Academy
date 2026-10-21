@@ -131,6 +131,11 @@ jobs:
       - name: "🧭 Atelier — Ambassa reçoit-il la méthode, le guide et la note ?"
         run: node tests/banc_ambassa_guide.cjs
 
+      # Au 2nd cycle, les sujets au choix suivent la séquence évaluée : une
+      # séquence de dissertation ne fait pas composer une contraction.
+      - name: "🎯 Atelier — les sujets suivent-ils la progression ?"
+        run: node tests/banc_sujets_progression.cjs
+
       - name: 🎁 Le Code ami vaut-il aussi dans la boutique ?
         run: node tests/banc_code_ami_boutique.cjs
 

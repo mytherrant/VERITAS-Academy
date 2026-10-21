@@ -30,12 +30,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <script src="./support.js?v=b7335820"></script>
 <script src="./minesec.js?v=5109f163"></script>
-<script src="./conformite.js?v=7948efec"></script>
+<script src="./conformite.js?v=2c2aee2a"></script>
 <script src="./exercices.js?v=0018edb0"></script>
-<script src="./generateur.js?v=5ebe87de"></script>
+<script src="./generateur.js?v=fe0df7eb"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=221641f0"></script>
-<script defer src="./progressions.js?v=800320a5"></script>
+<script defer src="./progressions.js?v=a27c8564"></script>
 <!--vrt-habillage:tete-->
 <link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.39">
 <script>window.VRT_DATA=window.VRT_DATA||{"citations":[{"t":"Le génie, c’est un pour cent d’inspiration et quatre-vingt-dix-neuf pour cent de transpiration.","a":"Thomas Edison"},{"t":"Ce n’est pas parce que les choses sont difficiles que nous n’osons pas ; c’est parce que nous n’osons pas qu’elles sont difficiles.","a":"Sénèque"},{"t":"L’éducation est l’arme la plus puissante pour changer le monde.","a":"Nelson Mandela"},{"t":"Un peu chaque jour vaut mieux que beaucoup un seul jour.","a":"Proverbe"},{"t":"La chance sourit à l’esprit préparé.","a":"Louis Pasteur"},{"t":"Tomber sept fois, se relever huit.","a":"Proverbe japonais"}],"themeSombre":"\n      body{background:#0A1428!important}\n      [style*=\"background:#fff\"],[style*=\"background:#FAFBFE\"],[style*=\"background:#FCFDFE\"],[style*=\"background:#F7F9FD\"]{background:#132241!important}\n      [style*=\"background:#F4F5F8\"],[style*=\"background:#F4F6FB\"],[style*=\"background:#EFF2F7\"],[style*=\"background:#F5F9FF\"]{background:#0F1B33!important}\n      [style*=\"background:rgba(255,255,255,.96)\"]{background:rgba(13,25,48,.96)!important}\n      [style*=\"radial-gradient(1100px\"],[style*=\"radial-gradient(900px\"]{background:#0C1730!important}\n      [style*=\"linear-gradient(180deg,#FBF8F1\"]{background:#0C1730!important}\n      [style*=\"color:#001136\"]{color:#EEF3FC!important}\n      [style*=\"color:#0C2A6A\"]{color:#DCE6F8!important}\n      [style*=\"color:#4D5163\"],[style*=\"color:#6B5A42\"]{color:#B6C2D8!important}\n      [style*=\"color:#6E7385\"],[style*=\"color:#9BA6BE\"]{color:#8D9AB4!important}\n      [style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"]{border-color:#24334F!important}\n      [style*=\"\"],[style*=\"\"]{border-bottom-color:#24334F!important}\n      [style*=\"\"]{border-top-color:#24334F!important}\n      [style*=\"border-left:4px solid\"]{border-left-color:#FFC93C!important}\n      input,input::placeholder{color:#C7D2E6!important}\n    "};</script>
@@ -157,6 +157,11 @@
     .vrt-pont-marque .vrt-pont-ici{display:none}
   }
   @media print{.vrt-pont{display:none!important}}
+  /* Le gabarit est masqué DÈS L'ANALYSE de la page, pas seulement quand
+     support.js l'a lu : sinon le navigateur charge ce qu'il contient —
+     l'<iframe src="{{ pdfUrl }}"> demandait « /plateforme/%7B%7B pdfUrl %7D%7D »
+     (404) à chaque ouverture de l'Atelier (constaté le 21/10/2026). */
+  x-dc{display:none!important}
 </style>
 <x-dc>
 <helmet>
@@ -1982,7 +1987,7 @@
            de téléphone — avant la première ligne du texte. Un conseil qui se
            répète indéfiniment cesse d'être un conseil. -->
       <sc-if value="{{ emptySelection }}" hint-placeholder-val="{{ true }}">
-      <div style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin-bottom:18px">Modifiez le titre et les <strong style="color:var(--c1a72bb,#1a72bb);font-weight:700">Renseignements</strong> ci-dessous, puis ajoutez des textes depuis l'onglet <button onClick="{{ goListe }}" style="background:none;border:none;color:var(--c1a72bb,#1a72bb);font-weight:700;cursor:pointer;padding:0;font-size:12.5px;font-family:inherit" style-hover="text-decoration:underline">Corpus {{ icSuite }}</button></div>
+      <div style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin-bottom:18px">Modifiez le titre et les <strong style="color:var(--c1a72bb,#1a72bb);font-weight:700">Renseignements</strong> ci-dessous, puis ajoutez des textes depuis l'onglet <button onClick="{{ goListe }}" style="display:inline-flex;align-items:center;gap:3px;vertical-align:baseline;background:none;border:none;color:var(--c1a72bb,#1a72bb);font-weight:700;cursor:pointer;padding:0;font-size:12.5px;font-family:inherit" style-hover="text-decoration:underline">Corpus {{ icSuite }}</button></div>
       </sc-if>
       <!-- ============ COMPOSER AVEC AMBASSA — MODE HYBRIDE ============
            Ambassa rédige l'épreuve entière (texte choisi dans le corpus,
@@ -2466,7 +2471,7 @@
               <sc-if value="{{ genBlocked }}" hint-placeholder-val="{{ false }}"><div style="text-align:right"><div style="font-size:12.5px;color:var(--cc26a12,#c26a12);font-weight:700;margin-bottom:7px;font-family:'Poppins'">{{ quotaMsg }}</div><button onClick="{{ goAbo }}" style="background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:11px 20px;font-size:13px;font-weight:700;cursor:pointer;border-radius:999px;font-family:'Poppins'" style-hover="background:var(--ce07f00,#e07f00)">Gérer les quotas</button></div></sc-if>
             </div>
           </sc-if>
-          <sc-if value="{{ emptySelection }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:54px 24px;background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);border-radius:14px;margin-bottom:22px"><p style="font-family:'Poppins';font-size:16px;color:var(--c22303f,#22303f);margin:0 0 6px;font-weight:600">Aucun texte dans cette épreuve</p><p style="font-size:13.5px;color:var(--c7a8598,#7a8598);margin:0 0 18px">Ajoutez des textes depuis le corpus.</p><button onClick="{{ goListe }}" style="background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:12px 22px;font-size:13.5px;cursor:pointer;border-radius:999px;font-weight:700;font-family:Poppins">Parcourir le corpus {{ icSuite }}</button></div></sc-if>
+          <sc-if value="{{ emptySelection }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:54px 24px;background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);border-radius:14px;margin-bottom:22px"><p style="font-family:'Poppins';font-size:16px;color:var(--c22303f,#22303f);margin:0 0 6px;font-weight:600">Aucun texte dans cette épreuve</p><p style="font-size:13.5px;color:var(--c7a8598,#7a8598);margin:0 0 18px">Ajoutez des textes depuis le corpus.</p><button onClick="{{ goListe }}" style="display:inline-flex;align-items:center;gap:8px;background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:12px 22px;font-size:13.5px;cursor:pointer;border-radius:999px;font-weight:700;font-family:Poppins">Parcourir le corpus {{ icSuiteBlanc }}</button></div></sc-if>
           <!-- SYNTHÈSE DES RETOURS (20/10/2026) : pleine largeur, comme la fiche
                d'un sujet chez Tchouskou — les décisions rendues, puis chaque
                retour avec sa version et sa date. Style des cartes de la vitrine. -->
@@ -2912,6 +2917,7 @@
         </div>
         <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
           <button onClick="{{ introRevoir }}" style="{{ profRevoirBtn }}">Revoir la présentation</button>
+          <button onClick="{{ goCompte }}" style="{{ goCompteStyle }}">Se connecter à mon compte</button>
           <button onClick="{{ goLogin }}" style="{{ profLogoutBtn }}">{{ logoutLabel }}</button>
         </div>
       </section>
@@ -3092,7 +3098,7 @@
      <div data-noprint="1" style="{{ pdfZoneStyle }}">
        <div style="{{ pdfMsgStyle }}">{{ pdfMsg }}</div>
        <button onClick="{{ pdfRefaire }}" style="{{ pdfRefaireStyle }}">Réessayer</button>
-       <sc-if value="{{ pdfIframe }}" hint-placeholder-val="{{ false }}"><iframe src="{{ pdfUrl }}" title="Aperçu PDF de l’épreuve" style="width:100%;height:calc(100vh - 58px);border:0;display:block;background:#525659"></iframe></sc-if>
+       <sc-if value="{{ pdfIframe }}" hint-placeholder-val="{{ false }}"><iframe src="{{ pdfUrl }}" loading="lazy" title="Aperçu PDF de l’épreuve" style="width:100%;height:calc(100vh - 58px);border:0;display:block;background:#525659"></iframe></sc-if>
        <div style="{{ pdfMobileStyle }}">
          <button onClick="{{ pdfOuvrir }}" style="background:var(--c14375f,#14375f);color:var(--cffffff,#fff);border:none;padding:10px 16px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:10px;cursor:pointer">Ouvrir le PDF</button>
          <button onClick="{{ pdfTelecharger }}" style="background:var(--cffffff,#fff);color:var(--c14375f,#14375f);border:1px solid var(--ce2eaf3,#e2eaf3);padding:10px 16px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:10px;cursor:pointer">Télécharger</button>
@@ -4267,7 +4273,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '20/10 · N';
+const ATELIER_BUILD = '21/10 · A';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -5682,7 +5688,14 @@ class Component extends DCLogic {
     if(sq){
       progFaits=this._contenusSeq(sq,3).slice(0,24);
       const nx=pc.sequences.find(x=>x.num===sq.num+1);
-      progExclus=nx?this._contenusSeq(nx,3).filter(c=>progFaits.indexOf(c)<0).slice(0,10):[];
+      /* Comparaison sur une clé normalisée : « La Marmite de Koka- Mballa »
+         (fait) et « La marmite de Koka Mballa … 1h » (séquence suivante)
+         désignent la même œuvre, encore étudiée — elle partait des deux
+         côtés de la consigne d'Ambassa (constaté le 21/10/2026). */
+      const cleC=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+        .replace(/\(?\s*\d+\s*h\s*\)?/g,' ').replace(/[^a-z0-9]+/g,' ').trim();
+      const vus=progFaits.map(cleC).filter(v=>v.length>=12);
+      progExclus=nx?this._contenusSeq(nx,3).filter(c=>{const k=cleC(c);return k&&!vus.some(v=>v===k||(k.length>=12&&(v.indexOf(k)>=0||k.indexOf(v)>=0)));}).slice(0,10):[];
       tache=String(sq.integration||'').slice(0,700);
       progression=pc.libelle+' — séquence '+sq.num+(sq.module?' : '+sq.module:'')+(sq.competence?' — '+sq.competence.slice(0,220):'');
     }
@@ -5705,6 +5718,9 @@ class Component extends DCLogic {
     }
     const G=VRT_GENERATEUR;
     const plan=G.planEpreuve(struct,{classe:a.classe});
+    /* Les sujets au choix suivent la séquence de la progression évaluée. */
+    try{const z0=this._assDe(a),pc0=this._progClasse(z0.progId);
+      if(pc0&&z0.progSeq&&G.restreindreSujets)G.restreindreSujets(plan,G.genresDeSequences(pc0.sequences,+z0.progSeq));}catch(e){}
     const textesChoisis=(a.textIds||[]).slice();
     if(mode==='completer'&&plan.support==='texte'&&!textesChoisis.length)mode='tout';
     if(mode==='tout'&&this._aDuContenu(a)&&typeof window!=='undefined'&&window.confirm
@@ -5735,8 +5751,18 @@ class Component extends DCLogic {
     /* `abonnement` garde ce que la formule a laisse de cote pour le texte
        principal : le rapport le dira, sans jamais utiliser un texte ferme. */
     let abonnement=null;
+    /* LE TEXTE SUIT LE DOMAINE DE VIE DE LA SÉQUENCE (audit du 21/10/2026).
+       Sans thème saisi, « Citoyenneté et environnement » (3e, séquence 3)
+       recevait une notice biographique de Corbière : le classement ne
+       voyait que le niveau et la longueur. Au 1er cycle, le module de la
+       séquence EST le domaine de vie ; au 2nd cycle il nomme un exercice
+       (« la dissertation ») et ne dit rien du sujet du texte. */
+    let themeSeq='';
+    try{const z1=this._assDe(a),pc1=this._progClasse(z1.progId),sq1=pc1&&z1.progSeq?pc1.sequences.find(x=>x.num===+z1.progSeq):null;
+      const mod=sq1?String(sq1.module||''):'';
+      if(mod&&!/exercice|dissertation|commentaire|contraction|r[ée]sum|expos/i.test(mod))themeSeq=mod;}catch(e){}
     const choisir=(bornes,g,exclure,principal)=>{
-      const l=G.classerTextes(this.all,{classe:a.classe,theme:st.genTheme||'',bornes:bornes,genre:g,exclure:dejaVus.concat(exclure||[])});
+      const l=G.classerTextes(this.all,{classe:a.classe,theme:st.genTheme||themeSeq,bornes:bornes,genre:g,exclure:dejaVus.concat(exclure||[])});
       if(principal)abonnement={fermes:l.fermesConformes||0,bornes:bornes||null,mots:l.length?l[0].mots:0,
         dansNorme:!!(l.length&&bornes&&l[0].mots>=bornes.min&&l[0].mots<=bornes.max)};
       return l.length?l[0].f.n:null;
@@ -5824,7 +5850,7 @@ class Component extends DCLogic {
         });
     }).catch(e=>this.setState({genBusy:false,genEtape:'',genErr:(e&&e.quotaRefus)?e.quotaRefus
       :(e&&e.message==='quota')
-      ?this._messageQuotaIA()
+      ?(e.serveur?'Ambassa refuse pour l\u2019instant : '+e.serveur:this._messageQuotaIA())
       :(e&&/reponse_/.test(e.message||''))?'Ambassa a renvoyé une réponse incomplète : votre épreuve n’a pas été modifiée. Vous pouvez relancer (un nouvel appel IA sera décompté).'
       :(e&&e.message==='delai')?'Ambassa n’a pas répondu à temps (plus de deux minutes). Votre épreuve n’a pas été modifiée : relancez dans un instant.'
       :'Ambassa est injoignable pour le moment. Votre épreuve n’a pas été modifiée.'}));
@@ -5865,7 +5891,11 @@ class Component extends DCLogic {
     if(plan.support==='texte')textIds=ctx.textes.filter(t=>t.role==='support').map(t=>t.n);
     else textIds=[];
     if(com)textIds=textIds.concat([com.n]);
-    const defautTitre=!a.title||a.title==='Nouvelle épreuve';
+    /* Un titre REDIGE par l'enseignant reste le sien, même en recomposition
+       complète : seuls le titre d'attente et le nom de la structure (posé
+       tout seul au choix de la nature) sont des titres par défaut. */
+    const defautTitre=!a.title||a.title==='Nouvelle épreuve'
+      ||(MINESEC.epreuves||[]).some(x=>x.nom===a.title);
     const defautConsigne=!a.consigne||/^Lis attentivement le\(s\) texte\(s\)/.test(a.consigne);
     const patch={textIds,customQ,pts,corrige,iaRelire,sujets,
       epreuveCode:a.epreuveCode||struct.code,
@@ -5884,8 +5914,9 @@ class Component extends DCLogic {
         if(res.note&&(!(n0.choix||n0.perimetre||n0.points)||mode==='tout'))o2.note={
           choix:res.note.choix||'',perimetre:res.note.perimetre||'',points:(res.note.points||[]).join('\n')};
         return o2;})(),
+      sujetsSelonProgression:(ctx.plan&&ctx.plan.restreint)?ctx.plan.restreint.genres.slice():null,
       iaNote:{mode:mode,ts:Date.now(),remarques:res.remarques||'',controles:res.controles||[]}};
-    if((defautTitre||mode==='tout')&&res.titre)patch.title=res.titre;
+    if(defautTitre&&res.titre)patch.title=res.titre;
     if((defautConsigne||mode==='tout')&&res.consigne)patch.consigne=res.consigne;
     this.setState({activeId:id},()=>{
       this._updateActive(patch,mode==='tout'
@@ -5893,6 +5924,9 @@ class Component extends DCLogic {
         :'a fait compléter l’épreuve par Ambassa (barème, corrigé, sujets) — à relire');
       const ref=ctx.textes.filter(t=>t.role!=='commentaire').map(t=>'n\u00b0'+t.n+(t.reference?' \u2014 '+t.reference:'')).join(' \u00b7 ');
       const controles=(res.controles||[]).slice();
+      const rs0=ctx.plan&&ctx.plan.restreint;
+      if(rs0)controles.unshift({ok:true,libelle:'Sujets limités à la progression ('+rs0.genres.join(', ')
+        +') : non proposé(s) — '+rs0.retires.join(' ; ')+'.'});
       /* L'epreuve composee passe aussitot le garde-fou complet : ce que
          l'enseignant verra dans la carte de conformite, on le lui dit ici. */
       try{
@@ -5925,7 +5959,7 @@ class Component extends DCLogic {
             :' : coupez l\u2019extrait en marquant [\u2026].')});
       }
       this.setState({genBusy:false,genEtape:'',genCorrigeVisible:true,
-        genRapport:{controles:controles,remarques:res.remarques||'',texte:ref}});
+        genRapport:{ep:id,controles:controles,remarques:res.remarques||'',texte:ref}});
     });
   }
   /* Une relecture retire la marque. Modifier la question ou son corrige
@@ -8369,6 +8403,20 @@ class Component extends DCLogic {
     this.setState(st=>({epreuves:st.epreuves.filter(e=>e.id!==a.id),activeId:null,screen:'epreuves'}),()=>{this._persist();try{window.scrollTo(0,0);}catch(e){}});
   }
   _updateActive(patch,act){this.setState(st=>{const eps=st.epreuves.map(e=>{if(e.id!==st.activeId)return e;const ne={...e,...patch,updatedAt:Date.now()};if(act)ne.activity=[...(e.activity||[]),{userId:st.currentUserId,text:act,ts:Date.now()}];return ne;});return{epreuves:eps};},()=>this._persist());}
+  /* NOUVELLE ÉPREUVE = UNE ÉPREUVE NEUVE (audit en production, 21/10/2026).
+     « + Créer → Nouvelle épreuve » appelait _ensureDraft, qui REND l'épreuve
+     ouverte s'il y en a une : on rouvrait le brouillon en cours, et « Tout
+     composer » réécrivait le travail de la veille (constaté : « Évaluation de
+     la séquence 3 — Citoyenneté et environnement » remplacée par une étude de
+     texte générique). On ne réutilise que le brouillon VIERGE qu'on vient
+     d'ouvrir — sans quoi chaque clic empilerait une épreuve vide. */
+  _creerEpreuve(cb){
+    const a=this._active();
+    const vierge=a&&a.status==='brouillon'&&(a.title==='Nouvelle épreuve'||!a.title)
+      &&!(a.textIds||[]).length&&!(a.sujets||[]).length&&!this._aDuContenu(a)&&!a.epreuveCode&&!a.classe;
+    if(vierge){cb&&cb(a.id);return;}
+    this.setState({activeId:null,genRapport:null,genErr:'',genEtape:''},()=>this._ensureDraft(cb));
+  }
   _ensureDraft(cb){const a=this._active();if(a){cb&&cb(a.id);return;}const me=this._me();const id='e'+Date.now();const ep={id,groupeId:this._groupeActif(),title:'Nouvelle épreuve',etab:'',classe:'',duree:'2 h',coeff:'',date:'',consigne:'Lis attentivement le(s) texte(s) puis réponds aux questions.',textIds:[],status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),comments:[],activity:[{userId:me.id,text:'a créé l\u2019épreuve',ts:Date.now()}]};this.setState(st=>({epreuves:[ep,...st.epreuves],activeId:id}),()=>{this._persist();cb&&cb(id);});}
   /* Ajoute -- ou retire -- un texte de l'epreuve en cours.
 
@@ -8726,6 +8774,8 @@ class Component extends DCLogic {
           doc.setDrawColor(20,55,95);doc.setLineWidth(0.3);doc.line(15,14.5,195,14.5);
           doc.setDrawColor(201,214,228);doc.line(15,284,195,284);
           doc.text('© VÉRITAS EDUCATION · veritas-school.com · Page '+i+' / '+n,105,289,{align:'center'});}
+        try{const a0=this._active()||{};doc.setProperties({title:(a0.title||'Épreuve')+(a0.classe?' — '+a0.classe:''),
+          author:'VÉRITAS · Atelier de Français',creator:'veritas-school.com'});}catch(e){}
         const blob=doc.output('blob');
         if(this.state.pdfUrl){try{URL.revokeObjectURL(this.state.pdfUrl);}catch(e){}}
         this._pdfEnCours=null;
@@ -10081,8 +10131,10 @@ class Component extends DCLogic {
        garde-fou plutôt qu'un bouton qu'on oublie de cliquer. */
     const confTextes=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean);
     const confActif=!!active&&(((active.textIds||[]).length>0)||this._aDuContenu(active));
+    const genRap=(st.genRapport&&(!st.genRapport.ep||st.genRapport.ep===(active&&active.id)))?st.genRapport:null;
+    const genErrIci=st.genErr;
     const genEstOuvert=(st.genOuvert===null||st.genOuvert===undefined)
-      ?!(active&&(this._aDuContenu(active)||(active.textIds||[]).length>0))||!!st.genBusy||!!st.genErr||!!st.genRapport
+      ?!(active&&(this._aDuContenu(active)||(active.textIds||[]).length>0))||!!st.genBusy||!!genErrIci||!!genRap
       :!!st.genOuvert;
     const confLocaux=active?CONFORMITE.verifierEpreuve(active,confTextes,
       (f,k)=>this._qList(f,k),(n2,k,i)=>this._qPts(n2,k,i)):[];
@@ -10552,6 +10604,10 @@ class Component extends DCLogic {
       },
       loginIcLogo:this._icon('book','var(--sb-logo-fg)',24),
 plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,screen:'login'},()=>this._persist());},
+      /* L'invité qui a un compte n'avait aucun chemin vers sa connexion : il
+         fallait « Fermer cet accès » puis déplier un lien replié. */
+      goCompte:()=>{this.setState({authed:false,screen:'login',cxOuverte:true},()=>{this._persist();try{window.scrollTo(0,0);}catch(e){}});},
+      goCompteStyle:st.estInvite?'background:var(--c1a72bb,#1a72bb);border:none;color:var(--cffffff,#fff);padding:10px 18px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer':'display:none',
       payOpen:st.payOpen,payFormShown:!st.payDone,payDoneShown:st.payDone,payPlanName:payPlan.name,
       payPlanPrice:_remiseVaut?_fFCFA(st.payMontant):payPlan.price+(payPlan.period.includes('gratuit')?'':' FCFA'),
       payRemiseShown:_remiseVaut,payPrixAvant:_fFCFA(_tarifPlan),
@@ -10582,7 +10638,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       liveStrip:(()=>{const other=st.users.find(u=>u.id!==me.id&&u.role!=='Élève (lecture seule)');const rel=st.epreuves.find(e=>e.status==='relecture');return (other?other.name.replace(/^(M\.|Mme|Mlle)\s+/,''):'Un collègue')+(rel?' travaille sur « '+rel.title+' »':' est en ligne')+' · '+st.users.filter(u=>u.id!==me.id).length+' collègues actifs';})(),
       todos:(()=>{const t=[];st.epreuves.filter(e=>(e.status==='ajustement'||e.status==='rejete')&&e.ownerId===me.id).forEach(e=>{const d=this._revueDe(e).decisions.filter(x=>x.verdict!=='valide').slice(-1)[0];t.push({dot:e.status==='rejete'?'var(--cc0392b,#c0392b)':'var(--cc26a12,#c26a12)',textEl:this._mentionEl((e.status==='rejete'?'Rejetée':'Ajustement demandé')+' : « '+e.title+' »'+(d&&d.motif?' \u2014 '+d.motif.slice(0,90):'')),ago:this._ago(e.updatedAt)});});st.epreuves.filter(e=>e.status==='relecture').forEach(e=>t.push({dot:'var(--cf39200,#f39200)',textEl:this._mentionEl('À relire : « '+e.title+' » attend une validation'),ago:this._ago(e.updatedAt)}));st.cours.filter(c=>c.status==='relecture').forEach(c=>t.push({dot:'var(--c7b52c7,#7b52c7)',textEl:this._mentionEl('Cours en relecture : « '+(c.title||'sans titre')+' »'),ago:this._ago(c.updatedAt)}));if(!t.length)t.push({dot:'var(--c1f9d55,#1f9d55)',textEl:this._mentionEl('Rien à traiter pour le moment. Tout est à jour.'),ago:''});return t.slice(0,4);})(),
       dashActivity:notifications.slice(0,4),
-      newDraft:()=>{this._ensureDraft(id=>this.setState({activeId:id,screen:'composeur'},()=>window.scrollTo(0,0)));},
+      newDraft:()=>{this._creerEpreuve(id=>this.setState({activeId:id,screen:'composeur'},()=>window.scrollTo(0,0)));},
       /* Base vide et filtres trop etroits sont deux pannes differentes : le
          message, le detail et le bouton doivent l'etre aussi. */
       videMsg:all.length
@@ -10828,9 +10884,14 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
         const maj={epreuveCode:code};
         if(def){
           const a=this._active()||{};
-          if(!String(a.duree||'').trim() && def.duree) maj.duree=def.duree;
-          if(!String(a.coeff||'').trim() && def.coeff && def.coeff!=='—') maj.coeff=String(def.coeff);
-          if(!String(a.title||'').trim() || a.title==='Nouvelle épreuve') maj.title=def.nom;
+          /* « Par défaut » = vide, la valeur d'attente du brouillon (2 h), ou
+             celle que la nature PRÉCÉDENTE avait posée. Passer de « Langue
+             française » (2 h) à « Littérature » (4 h, coef 3) laissait 2 h. */
+          const avant=(MINESEC.epreuves||[]).find(x=>x.code===a.epreuveCode)||{};
+          const dur=String(a.duree||'').trim(),coe=String(a.coeff||'').trim(),tit=String(a.title||'').trim();
+          if(def.duree&&(!dur||dur==='2 h'||dur===String(avant.duree||''))) maj.duree=def.duree;
+          if(def.coeff&&def.coeff!=='—'&&(!coe||coe===String(avant.coeff||''))) maj.coeff=String(def.coeff);
+          if(!tit||tit==='Nouvelle épreuve'||tit===String(avant.nom||'')) maj.title=def.nom;
         }
         /* Même journal que l'ancien `setEpreuveCode` : rattacher une épreuve à
            une structure officielle est un acte que l'équipe doit voir passer. */
@@ -11099,13 +11160,13 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       genEtapeStyle:st.genBusy?'margin-top:11px;font-size:12.5px;color:var(--c1a72bb,#1a72bb);font-weight:600':hidden,
       genErr:st.genErr||'',
       genErrStyle:st.genErr?'margin-top:11px;padding:10px 13px;border-radius:10px;background:var(--cfffaf2,#fffaf2);border:1px solid var(--cf5e3c8,#f5e3c8);color:var(--c8a5a14,#8a5a14);font-size:12.5px;line-height:1.5':hidden,
-      genARapport:!!st.genRapport,
-      genRapportTexte:(st.genRapport&&st.genRapport.texte)||'aucun (sujet rédigé)',
-      genControles:((st.genRapport&&st.genRapport.controles)||[]).map(c=>({libelle:c.libelle,
+      genARapport:!!genRap,
+      genRapportTexte:(genRap&&genRap.texte)||'aucun (sujet rédigé)',
+      genControles:((genRap&&genRap.controles)||[]).map(c=>({libelle:c.libelle,
         sceau:c.ok?'✓':'⚠',
         style:'font-size:12.5px;line-height:1.5;font-weight:600;color:'+(c.ok?'var(--c1f9d55,#1f9d55)':'var(--cc26a12,#c26a12)')})),
-      genRemarques:(st.genRapport&&st.genRapport.remarques)||'',
-      genRemarquesStyle:(st.genRapport&&st.genRapport.remarques)?'font-size:12px;color:var(--c5a6678,#5a6678);line-height:1.55':hidden,
+      genRemarques:(genRap&&genRap.remarques)||'',
+      genRemarquesStyle:(genRap&&genRap.remarques)?'font-size:12px;color:var(--c5a6678,#5a6678);line-height:1.55':hidden,
       /* --- sujets rediges --- */
       hasSujets:!!(active&&(active.sujets||[]).length),
       sujetsSous:(()=>{const l=(active&&active.sujets)||[];const c=l.filter(x=>x.auChoix).length;
@@ -11565,7 +11626,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
         {label:'Nouvelle \u00e9preuve',sub:'Composer un sujet depuis le corpus',icon:this._icoRond('file','var(--c14375f,#14375f)',34),
          tile:'display:flex;flex:none',
          style:'display:flex;align-items:center;gap:11px;width:100%;border:none;background:none;padding:12px 14px;cursor:pointer;text-align:left',
-         go:()=>{this.setState({createOpen:false});this._ensureDraft(id=>this.setState({activeId:id,screen:'composeur'},()=>window.scrollTo(0,0)));}},
+         go:()=>{this.setState({createOpen:false});this._creerEpreuve(id=>this.setState({activeId:id,screen:'composeur'},()=>window.scrollTo(0,0)));}},
         {label:'Nouveau cours',sub:'Partir d\u2019un gabarit MINESEC',icon:this._icoRond('book','var(--c1f9d55,#1f9d55)',34),
          tile:'display:flex;flex:none',
          style:'display:flex;align-items:center;gap:11px;width:100%;border:none;background:none;padding:12px 14px;cursor:pointer;text-align:left;border-top:1px solid var(--ceef2f7,#eef2f7)',

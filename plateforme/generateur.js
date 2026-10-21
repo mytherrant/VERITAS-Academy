@@ -225,6 +225,55 @@
     return plan;
   }
 
+  /* LES SUJETS SUIVENT LA PROGRESSION (Jacques, 21/10/2026 : « on peut
+     solliciter un seul ou deux selon l'évolution du programme et des
+     séquences »). Au 2nd cycle, la structure officielle propose trois
+     sujets au choix — contraction, commentaire, dissertation. En séquence 2
+     de Terminale A, seule la dissertation a été enseignée : demander une
+     contraction (séquences 5-6) évaluait un exercice que la classe n'a pas
+     encore appris, et faisait déborder la réponse d'Ambassa (trois sujets,
+     trois corrigés, un guide : réponse tronquée, constaté en production).
+     On garde les exercices DÉJÀ ENSEIGNÉS, d'après le titre des séquences
+     jusqu'à la séquence évaluée comprise. */
+  var GENRES_SEQ = [
+    { genre: 'contraction', re: /contraction|r[ée]sum[ée]/i },
+    { genre: 'commentaire', re: /commentaire/i },
+    { genre: 'dissertation', re: /dissertation/i }
+  ];
+  function genresDeSequences(sequences, num) {
+    var vus = [];
+    (sequences || []).forEach(function (s) {
+      if (!s || +s.num > +num) return;
+      var t = String(s.module || '') + ' ' + String(s.competence || '');
+      GENRES_SEQ.forEach(function (x) { if (x.re.test(t) && vus.indexOf(x.genre) < 0) vus.push(x.genre); });
+    });
+    return vus;
+  }
+  function restreindreSujets(plan, genres) {
+    if (!plan || !genres || !genres.length) return plan;
+    var concernes = plan.sujets.filter(function (s) { return s.auChoix && (s.genre === 'commentaire' || s.genre === 'dissertation'); });
+    var texteContraction = !!plan.sujetTexte && /contraction|r[ée]sum[ée]/i.test(plan.sujetTexte);
+    if (!concernes.length && !texteContraction) return plan;
+    var garderTexte = !texteContraction || genres.indexOf('contraction') >= 0;
+    var gardes = plan.sujets.filter(function (s) {
+      return !s.auChoix || !(s.genre === 'commentaire' || s.genre === 'dissertation') || genres.indexOf(s.genre) >= 0;
+    });
+    var restants = gardes.filter(function (s) { return s.auChoix; }).length + (garderTexte && plan.sujetTexte ? 1 : 0);
+    if (!restants) return plan;   // rien d'enseigné qui corresponde : on ne retire rien
+    var retires = [];
+    if (!garderTexte) retires.push(plan.sujetTexte);
+    plan.sujets.forEach(function (s) { if (gardes.indexOf(s) < 0) retires.push(s.titre); });
+    if (!retires.length) return plan;
+    plan.sujets = gardes;
+    if (!garderTexte) {
+      plan.support = 'aucun'; plan.texteSupport = null; plan.sujetTexte = null;
+      plan.comp = { points: 0, rubriques: [] }; plan.expl = { points: 0, rubriques: [] }; plan.productions = [];
+    }
+    if (restants === 1) plan.sujets.forEach(function (s) { s.auChoix = false; });
+    plan.restreint = { genres: genres.slice(), retires: retires };
+    return plan;
+  }
+
   /* Total effectivement noté : questions + sujets imposés. Quand TOUS les
      sujets sont au choix et qu'aucune question ne porte sur un texte (BP,
      ENIET 3e année), le candidat traite un seul sujet : c'est lui qui fait
@@ -644,7 +693,8 @@
     l.push('2. Chaque citation entre « » se trouve mot pour mot dans le texte support.');
     l.push('3. Aucune question ne porte sur une notion exclue ni sur un passage du texte non transmis.');
     l.push('4. Chaque consigne de production donne le type de texte, la longueur et la situation ; la tâche est réalisable dans la durée de l’épreuve.');
-    l.push('5. Chaque question a son corrigé, et le corrigé répond à la question posée, pas à une autre.');
+    l.push('5. Chaque question a son corrigé, et le corrigé répond à la question posée, pas à une autre ; « relève trois éléments » appelle trois éléments au corrigé, ni plus ni moins, avec un barème qui en tient compte.');
+    l.push('5 bis. Toute transformation demandée est grammaticalement possible sur la phrase citée : une relative ne devient pas une complétive, un groupe nominal ne se remplace par un pronom que s’il peut l’être sans rendre la phrase fautive.');
     l.push('6. Le guide de correction reprend le barème réel, critère par critère.');
     l.push('7. Langue irréprochable : orthographe, accords, conjugaison, ponctuation — une épreuve de français fautive est inutilisable.');
     l.push('');
@@ -715,6 +765,8 @@
     if (ctx.exclusions && ctx.exclusions.length) l.push('NOTIONS EXCLUES — ne les utilise pas, même implicitement, ni dans les questions ni dans le corrigé : ' + ctx.exclusions.join(' ; ') + '.');
     /* Sujets au choix (Probatoire / BAC) : le sujet sur le texte en est UN,
        pas une « première partie obligatoire » (audit 16/10/2026). */
+    if (plan.restreint) l.push('SUJETS LIMITÉS À LA PROGRESSION : seuls les exercices déjà enseignés sont proposés ('
+      + plan.restreint.genres.join(', ') + '). Ne rédige PAS ' + plan.restreint.retires.join(' ni ') + '.');
     var nbChoix = plan.sujets.filter(function (s) { return s.auChoix; }).length + (plan.sujetTexte ? 1 : 0);
     if (plan.sujetTexte && nbChoix > 1) {
       l.push('STRUCTURE : ' + nbChoix + ' sujets au choix, chacun noté sur 20. "consigne" = exactement « Le candidat traitera l’un des ' + nbChoix
@@ -773,6 +825,11 @@
     });
 
     l.push('');
+    /* La réponse d'Ambassa est bornée (≈ 8 000 jetons). Constaté le
+       21/10/2026 : « "texte": "TEXTE 1\nLe crédit proposé… » — le texte
+       support entier recopié dans la réponse, qui s'est arrêtée au milieu
+       du guide. */
+    l.push('LONGUEUR : ne recopie JAMAIS un texte support dans ta réponse — dans "questions", "texte" est le NUMÉRO du texte (1 ou 2). Corrigés concis ; réponse complète sous 18 000 caractères.');
     l.push('FORMAT DE RÉPONSE — JSON strict, sans texte autour, sans ```:');
     l.push('{"titre":"…","consigne":"consigne générale courte",'
       + '"questions":[{"texte":1,"liste":"comp|expl","bloc":"c0|comp|r0|expl|p0…","q":"énoncé","pts":1.5,"niveau":"reperage|analyse|interpretation|production","corrige":"réponse attendue"}],'
@@ -1812,7 +1869,14 @@
       signal: coupe ? coupe.signal : undefined
     }).then(function (r) {
       desarmer();
-      if (r.status === 402 || r.status === 429) throw new Error('quota');
+      /* Le refus du serveur dit LEQUEL des plafonds est atteint (débit par
+         minute, quota du jour, quota du mois) : on garde sa phrase. L'Atelier
+         affichait « quota épuisé (10 ce mois) » pour un plafond JOURNALIER. */
+      if (r.status === 402 || r.status === 429) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          var e = new Error('quota'); e.serveur = (j && j.error) ? String(j.error) : ''; throw e;
+        });
+      }
       if (!r.ok) throw new Error('http_' + r.status);
       return r.json();
     }).then(function (j) {
@@ -1857,7 +1921,7 @@
 
   root.VRT_GENERATEUR = {
     scoriesOCR: scoriesOCR, operationLangue: operationLangue, texteDeLOeuvre: texteDeLOeuvre, nettoyerEnonce: nettoyerEnonce, vouvoyer: vouvoyer, tutoie: tutoie,
-    classer: classer, segmentsConsigne: segmentsConsigne, planEpreuve: planEpreuve, blocsDuPlan: blocsDuPlan, totalNote: totalNote,
+    classer: classer, segmentsConsigne: segmentsConsigne, planEpreuve: planEpreuve, genresDeSequences: genresDeSequences, restreindreSujets: restreindreSujets, blocsDuPlan: blocsDuPlan, totalNote: totalNote,
     jetonsNiveau: jetonsNiveau, niveauxCibles: niveauxCibles, classerTextes: classerTextes,
     exemplesOfficiels: exemplesOfficiels, formationMinesec: formationMinesec,
     promptEpreuve: promptEpreuve, ajusterPrompt: ajusterPrompt, octets: octets, PLAFOND_PROMPT: PLAFOND_PROMPT,
