@@ -50,5 +50,21 @@ const pr = G.promptEpreuve ? G.promptEpreuve(ctx) : '';
 ok(!pr || /SUJETS LIMITÉS À LA PROGRESSION/.test(pr), 'la consigne annonce les sujets retirés');
 ok(!pr || /ne recopie JAMAIS un texte support/.test(pr), 'la consigne interdit de recopier le texte support');
 
+/* La consigne SYSTÈME suit les sujets proposés (constaté en production le
+   21/10/2026 : « l’un des 3 sujets au choix. (Pour cette évaluation, seul le
+   sujet de dissertation est proposé.) »). */
+const sys2 = G.formationMinesec(MINESEC.epreuveParCode('A_LITT'), p2, 'Terminale', [], {});
+ok(/UN seul sujet, imposé/.test(sys2) && !/l’un des 3 sujets au choix/.test(sys2), 'séquence 2 : la consigne système annonce UN sujet, pas trois');
+const sys3 = G.formationMinesec(MINESEC.epreuveParCode('A_LITT'), p3, 'Terminale', [], {});
+ok(/l’un des 2 sujets au choix/.test(sys3), 'séquence 3 : la consigne système annonce deux sujets au choix');
+
+/* La réponse d'Ambassa est recalée : consigne générale, et titre non recopié. */
+const rep = G.validerEpreuve({ titre: 'Évaluation', consigne: 'Le candidat traitera l’un des 3 sujets au choix. (Pour cette évaluation, seul…)',
+  questions: [], sujets: [{ texte: 'Sujet de type 3 — Dissertation (20 points)\nOn a pu affirmer que la littérature… Vous discuterez.', corrige: 'Plan.' }] },
+  { plan: plan(2), struct: MINESEC.epreuveParCode('A_LITT'), classe: 'Terminale', textes: [] }, {});
+ok(rep.consigne === 'Le candidat traitera le sujet suivant.', 'séquence 2 : consigne générale recalée — obtenu « ' + rep.consigne + ' »');
+const dis = rep.sujets.find(s => s.genre === 'dissertation');
+ok(!!dis && /^On a pu affirmer/.test(dis.texte), 'le titre du sujet n’est plus recopié en tête d’énoncé — obtenu « ' + (dis && dis.texte.slice(0, 40)) + ' »');
+
 console.log(ko ? '\n  ' + ko + ' échec(s)' : '\n  Tout au vert');
 process.exit(ko ? 1 : 0);
