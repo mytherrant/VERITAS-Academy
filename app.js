@@ -27684,15 +27684,16 @@ function pgVisitorAccounts(){
 
   var rows=accs.map(function(a,i){
     var pb=(a.plans||[]).length
-      ?"<div style='display:flex;gap:3px;flex-wrap:wrap'>"+(a.plans||[]).map(function(p){return "<span style='background:#EDE9FE;color:#6C56A6;font-size:9px;font-weight:800;padding:2px 7px;border-radius:7px'>"+p+"</span>";}).join("")+"</div>"
+      ?"<div style='display:flex;gap:3px;flex-wrap:wrap'>"+(a.plans||[]).map(function(p){return "<span style='background:#EDE9FE;color:#6C56A6;font-size:9px;font-weight:800;padding:2px 7px;border-radius:7px'>"+_esc(String(p))+"</span>";}).join("")+"</div>"
       :"<span style='background:#F0F4FF;color:#9CA3AF;font-size:9px;font-weight:700;padding:2px 7px;border-radius:7px'>GRATUIT</span>";
     return "<tr>"
-      +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF'><div style='font-size:12px;font-weight:700;color:#142554'>"+a.pre+" "+a.nom+"</div><div style='font-size:10px;color:#9CA3AF;font-family:monospace'>"+a.user+" · "+a.cls+"</div></td>"
-      +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF;font-size:11px;color:#6B7A99'>"+a.tel+"</td>"
+      +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF'><div style='font-size:12px;font-weight:700;color:#142554'>"+_esc(a.pre||"")+" "+_esc(a.nom||"")+"</div><div style='font-size:10px;color:#9CA3AF;font-family:monospace'>"+_esc(a.user||"")+" · "+_esc(a.cls||"")+(a.pwd?"":" · <span style='color:#AE5353;font-weight:800'>sans mot de passe</span>")+"</div></td>"
+      +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF;font-size:11px;color:#6B7A99'>"+_esc(a.tel||"")+"</td>"
       +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF'>"+pb+"</td>"
       +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF'><span style='background:"+(a.statut==="actif"?"#D1FAE5":"#FEE2E2")+";color:"+(a.statut==="actif"?"#059669":"#AE5353")+";font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap'>"+a.statut.toUpperCase()+"</span></td>"
       +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF;white-space:nowrap'>"
-      +"<button class='btn bi xs' onclick='_mgrPlans(\""+a.id+"\")' title='Gérer les abonnements'>⭐</button> "
+      +"<button class='btn bi xs' onclick='_mgrPlans(\""+a.id+"\")' title='Gérer les abonnements (dont l’Atelier de Français)'>⭐</button> "
+      +"<button class='btn bo xs' onclick='_mgrPwd(\""+a.id+"\")' title='Définir le mot de passe'>🔑</button> "
       +"<button class='btn bo xs' onclick='_mgrToggle(\""+a.id+"\")' title='Activer/Suspendre'>⇄</button> "
       +"<button class='btn br2 xs' onclick='_mgrDelAcc(\""+a.id+"\")' title='Supprimer'>🗑</button>"
       +"</td></tr>";
@@ -27729,9 +27730,20 @@ function _mgrPlans(id){
     {id:"bepc",l:"📝 Pack BEPC"},
     {id:"bac",l:"🏆 Pack BAC"},
   ];
-  var customPlans=(DB.elearning&&DB.elearning.plans||[]).map(function(p){return{id:p.id,l:"📦 "+p.nom};});
-  var allPlans=stdPlans.concat(customPlans);
-  M("⭐ Plans de "+acc.pre+" "+acc.nom,"Abonnements actifs pour cet utilisateur",
+  var customPlans=(DB.elearning&&DB.elearning.plans||[]).map(function(p){return{id:p.id,l:"📦 "+_esc(p.nom||p.id)};});
+  /* ATELIER DE FRANÇAIS (21/10/2026). Ses quatre plans n'apparaissaient pas
+     ici : pour ouvrir un compte « pro » à un enseignant, il fallait écrire
+     dans la console. Mêmes identifiants que plat_plans_atelier()
+     (api/plateforme.php) ; un plan coché sans abonnement payé reste ouvert
+     tant qu'on ne le décoche pas (vrt_account_active_plans). */
+  var atelierPlans=[
+    {id:"ens_mois",l:"✏️ Atelier — Enseignant (mensuel) · 30 épreuves / mois"},
+    {id:"ens",l:"✏️ Atelier — Enseignant (annuel) · 30 épreuves / mois"},
+    {id:"etab",l:"🏫 Atelier — Établissement · 120 épreuves / mois"},
+    {id:"pro",l:"🚀 Atelier — Pro · 400 épreuves / mois"}
+  ];
+  var allPlans=stdPlans.concat(customPlans).concat(atelierPlans);
+  M("⭐ Plans de "+_esc(acc.pre||"")+" "+_esc(acc.nom||""),"Abonnements actifs pour cet utilisateur",
     "<div class='ib ibt mb14'><span>💡</span><span>Cochez les abonnements auxquels cet utilisateur a souscrit. L'accès aux contenus premium sera débloqué immédiatement.</span></div>"
     +"<div style='display:grid;grid-template-columns:1fr;gap:8px'>"
     +allPlans.map(function(p){
@@ -27749,8 +27761,37 @@ function _savePlans(id){
   var acc=(DB.visitorAccounts||[]).find(function(a){return a.id===id;});
   if(!acc){toast("Compte introuvable","warn");return;}
   acc.plans=Array.from(document.querySelectorAll("input[name='planCk']:checked")).map(function(c){return c.value;});
-  save();cm();toast("Plans mis à jour pour "+acc.pre+" ✅");
+  save();cm();re();toast("Plans mis à jour pour "+(acc.pre||acc.user)+" ✅");
   if(SES&&(SES.accountId===id||SES.id===id)){SES.plans=acc.plans;_updateVisitorHeader();}
+}
+
+/* MOT DE PASSE D'UN COMPTE VISITEUR / ENSEIGNANT (21/10/2026).
+   Rien ne permettait de le définir : deux comptes enseignants n'en avaient
+   AUCUN sur le serveur, et l'Atelier répondait « Identifiants invalides »
+   quel que soit le mot de passe tapé. On l'enregistre haché (S256, que le
+   serveur accepte puis convertit en bcrypt à la première connexion) : la
+   synchronisation retire tout mot de passe en clair avant l'envoi. */
+function _mgrPwd(id){
+  var acc=(DB.visitorAccounts||[]).find(function(a){return a.id===id;});
+  if(!acc){toast("Compte introuvable","warn");return;}
+  M("🔑 Mot de passe de "+_esc(acc.pre||"")+" "+_esc(acc.nom||""),"Identifiant : "+_esc(acc.user||""),
+    (acc.pwd?"":"<div class='ib ibt mb14'><span>⚠️</span><span>Ce compte n’a aucun mot de passe enregistré : il ne peut pas se connecter à l’Atelier tant qu’on ne lui en donne pas un.</span></div>")
+    +"<div class='fg'><span class='fl'>Nouveau mot de passe (8 caractères min.)</span><input class='fi' id='vaPwd1' type='password' autocomplete='new-password'></div>"
+    +"<div class='fg mt8'><span class='fl'>Confirmer</span><input class='fi' id='vaPwd2' type='password' autocomplete='new-password'></div>"
+    +"<div class='ib ibi mt8'><span>🔒</span><span>Le mot de passe est haché avant d’être enregistré ; il n’est jamais envoyé en clair.</span></div>",
+    "<button class='btn bo' onclick='cm()'>Annuler</button>"
+    +"<button class='btn bi' onclick='_mgrPwdSave(\""+id+"\")'><svg class='vico bico' aria-hidden='true'><use href='#lc-check'/></svg>Enregistrer</button>");
+}
+async function _mgrPwdSave(id){
+  var p1=(_ge('vaPwd1')||{}).value||'', p2=(_ge('vaPwd2')||{}).value||'';
+  if(p1.length<8){toast('8 caractères minimum','warn');return;}
+  if(p1!==p2){toast('Les deux mots de passe diffèrent','warn');return;}
+  var acc=(DB.visitorAccounts||[]).find(function(a){return a.id===id;});
+  if(!acc){toast("Compte introuvable","warn");return;}
+  var h=(typeof hashPassword==='function')?await hashPassword(p1,acc.user):'';
+  if(!h||h.indexOf('S256$')!==0){toast('Hachage impossible sur ce navigateur : rien n’a été changé.','err');return;}
+  acc.pwd=h;
+  save();cm();re();toast('🔑 Mot de passe enregistré pour '+(acc.user||'')+' ✅');
 }
 
 function _mgrToggle(id){
