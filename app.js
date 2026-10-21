@@ -53814,7 +53814,7 @@ function pgPaywall(){
      + '<select class="fi" id="pw_ids" multiple size="10" style="height:auto;padding:6px">';
   contenus.slice(0, 500).forEach(function(c){
     var sel = (cl.ids && cl.ids.indexOf(c.id) >= 0) ? ' selected' : '';
-    h += '<option value="'+_esc(c.id)+'"'+sel+'>'+(c.gratuit?'✅ ':'💰 ')+_esc(c.titre||c.id)+' — '+_esc(c.classe||'')+'</option>';
+    h += '<option value="'+_esc(c.id)+'"'+sel+'>'+(c.gratuit?'Gratuit · ':'Payant · ')+_esc(c.titre||c.id)+' — '+_esc(c.classe||'')+'</option>';
   });
   h += '</select></div>';
   if(contenus.length > 500) h += '<div class="xs2 mut">(Catalogue tronqué à 500 lignes dans cette liste.)</div>';
