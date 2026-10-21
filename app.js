@@ -51991,7 +51991,10 @@ window._payResumeFromHash = function(){
         lot.forEach(function(t){
           var el = t.parentNode;
           if(!el || el.nodeType !== 1 || el.closest('svg,textarea,pre,code,[contenteditable]')) return;
-          if(!el.closest('button,a,th,h1,h2,h3,h4,h5,label,summary,.btn,[onclick],.badge,[class*="tag"],[class*="chip"]')) return;
+          // Un élément qui ne porte QUE l'émoji est un porte-icône (🥇 du
+          // podium, 🧮 d'un encadré) : converti où qu'il soit.
+          var mm = (el.textContent || '').match(EMO), seul = !!mm && !(el.textContent || '').slice(mm[0].length).trim();
+          if(!seul && !el.closest('button,a,th,h1,h2,h3,h4,h5,label,summary,.btn,[onclick],.badge,[class*="tag"],[class*="chip"]')) return;
           for(var k = t.previousSibling; k; k = k.previousSibling){
             if((k.nodeType === 3 && k.nodeValue.trim()) || (k.nodeType === 1 && k.textContent.trim())) return;
           }
