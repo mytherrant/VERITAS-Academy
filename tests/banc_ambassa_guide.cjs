@@ -57,5 +57,19 @@ ok(r1.guide.niveaux['16 à 20'] === 'excellent' && !('faux' in r1.guide.niveaux)
 ok(r1.note && r1.note.points.length === 2, 'note : points lus');
 const r2 = G.validerEpreuve(base, { plan, struct: st, classe: '4e', textes: [] }, {});
 ok(!r2.guide && !r2.note, 'réponse sans guide ni note : rien d’inventé');
+
+/* Le corrigé qui désavoue sa question (3e, production, 21/10/2026). */
+const texteS = 'Cette statue avait été cent ans debout ; elle fut renversée le 12 août 1792. Le peuple la mit en pièces.';
+const blocs = G.blocsDuPlan(plan);
+const bl = (blocs.find(b => b.kind === 'expl') || blocs[0] || { cle: 'expl', kind: 'expl' });
+const r3 = G.validerEpreuve({ ...base, questions: [
+  { texte: 1, liste: bl.kind, bloc: bl.cle, q: 'Dans « elle fut renversée le 12 août 1792 », donne la valeur du présent de l’indicatif.', pts: 2,
+    corrige: 'Le verbe « fut renversée » est au passé simple, pas au présent. La question est mal posée. Barème : 2 pts.' },
+  { texte: 1, liste: bl.kind, bloc: bl.cle, q: 'Relève le complément circonstanciel de temps de la phrase « elle fut renversée le 12 août 1792 ».', pts: 2,
+    corrige: '« le 12 août 1792 ». Barème : 2 pts.' }] },
+  { plan, struct: st, classe: '4e', textes: [{ n: 77, text: texteS, role: 'support', words: 20 }] }, {});
+const cD = (r3.controles || []).find(c => c.cle === 'desavoue');
+ok(!!cD && cD.ok === false && /1 question/.test(cD.libelle), 'un corrigé qui déclare sa question « mal posée » est signalé — ' + (cD ? cD.libelle.slice(0, 80) : 'rien'));
+ok(/5 ter\./.test(sys), 'consigne système : corriger la question plutôt que la désavouer');
 console.log(ko ? ('\n' + ko + ' au rouge') : '\nTout au vert');
 process.exit(ko ? 1 : 0);
