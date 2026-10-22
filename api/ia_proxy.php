@@ -482,7 +482,10 @@ $modelFree  = defined('GEMINI_MODEL')       ? GEMINI_MODEL       : 'gemini-2.5-f
 // Défaut aligné sur Flash ; une valeur PRO encore définie dans
 // payment_config.php est tolérée : après son premier 404, call_gemini() la
 // saute pendant 24 h (ia_marquer_indispo).
-$modelElite = defined('GEMINI_MODEL_ELITE') ? GEMINI_MODEL_ELITE : $modelFree;
+// Banc du 22/10/2026 sur les DEUX clés de prod : gemini-3.5-flash répond sur
+// les deux (~3,5 s) alors que gemini-2.5-flash est refusé (404) à la 2e clé ;
+// gemini-3.8-flash et gemini-flash-latest restaient muets 90 s — à éviter.
+$modelElite = defined('GEMINI_MODEL_ELITE') ? GEMINI_MODEL_ELITE : 'gemini-3.5-flash';
 // Réserve GRATUITE : chaque modèle a son propre quota journalier chez Google,
 // un Flash-Lite de 3e génération double donc la capacité sans rien coûter.
 $modelReserve = defined('GEMINI_MODEL_RESERVE') ? GEMINI_MODEL_RESERVE : 'gemini-3.5-flash-lite';
@@ -747,6 +750,9 @@ function call_openai_chat(string $url, string $apiKey, string $model, string $sy
 
     if ($err) return [false, '', $label . ' cURL: ' . $err];
     if ($http === 404) ia_marquer_indispo($indispo, time() + 86400); // modèle retiré
+    // Clé refusée (401), paiement exigé (402), modèle hors offre (403) : rien ne
+    // changera dans la minute ; on évite 2-3 s perdues à chaque requête pendant 1 h.
+    if (in_array($http, [401, 402, 403], true)) ia_marquer_indispo($indispo, time() + 3600);
     if ($http !== 200) return [false, '', $label . ' ' . $model . ' HTTP ' . $http . ': ' . substr((string)$raw, 0, 200)];
 
     $data = json_decode($raw, true);
@@ -769,6 +775,7 @@ function ia_modele(string $constante, string $defaut): string {
         'llama-3.3-70b-versatile'             => 'openai/gpt-oss-120b',             // Groq
         'llama-3.3-70b'                       => 'gpt-oss-120b',                    // Cerebras
         'deepseek/deepseek-chat-v3-0324:free' => 'minimax/minimax-m3.1-flash:free', // OpenRouter
+        'mistral-large-latest'                => 'mistral-medium-latest',           // Mistral : Large hors offre gratuite (403)
     ];
     $m = defined($constante) ? (string) constant($constante) : $defaut;
     return $retires[$m] ?? $m;
@@ -823,7 +830,7 @@ function call_sambanova(string $apiKey, string $sys, string $rag, string $prompt
 
 function call_mistral(string $apiKey, string $sys, string $rag, string $prompt): array {
     // Mistral — excellent en français. Clé gratuite : https://console.mistral.ai/api-keys
-    $model = defined('MISTRAL_MODEL') ? MISTRAL_MODEL : 'mistral-large-latest';
+    $model = ia_modele('MISTRAL_MODEL', 'mistral-medium-latest');
     return call_openai_chat('https://api.mistral.ai/v1/chat/completions',
                             $apiKey, $model, $sys, $rag, $prompt, 'Mistral');
 }
