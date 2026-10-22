@@ -14,8 +14,9 @@
  *  1. Client (frontend) envoie POST {prompt, ragContext?, sysPrompt?, userId, plan}
  *  2. PHP calcule le tier RÉEL côté serveur (abonnement) → choix du modèle
  *  3. PHP cherche d'abord dans le CACHE VALIDÉ (table veritas_validated_answers)
- *  4. Cache miss → CHAÎNE PAR PERFORMANCE : Gemini 2.5 Pro/Flash → DeepSeek
- *     (OpenRouter) → Groq Llama 70B → Mistral Large. Claude et Pollinations retirés.
+ *  4. Cache miss → CHAÎNE GRATUITE (22/10/2026) : Gemini Flash → Flash-Lite
+ *     (chaque clé) → OpenRouter :free → Cerebras → Groq gpt-oss-120b →
+ *     SambaNova → Mistral. Claude et Pollinations retirés.
  *  5. Stocke la réponse en attente de validation enseignant
  *  6. Retourne la réponse au client
  */
@@ -255,8 +256,10 @@ if ($IA_GLOBAL_DAILY_MAX > 0 && $gCount >= $IA_GLOBAL_DAILY_MAX) {
     echo json_encode(['error' => 'Assistant IA très sollicité aujourd’hui — réessayez plus tard. Les réponses déjà validées restent disponibles.']);
     exit;
 }
-// Incrément best-effort (lecture-écriture non atomique = tolérable pour un plafond souple)
-@file_put_contents($gFile, ($gCount + 1) . '');
+// L'incrément a lieu APRÈS le quota par formule (section 4ter, audit du
+// 22/10/2026) : posé ici, il comptait aussi les requêtes que 4ter refusait,
+// si bien qu'un visiteur à court d'essais qui insistait (jusqu'à 300 fois
+// par IP et par jour) brûlait le budget de tout le site sans rien coûter.
 
 // ── 4ter. 🔐 QUOTAS STRICTS PAR FORMULE — ratio d'abonnement vérifié SERVEUR ──
 // Stratégie v1.3.3 : TOUS les utilisateurs (visiteurs inclus) accèdent aux
@@ -379,6 +382,9 @@ if ($uDailyMax > 0) {
     }
     @file_put_contents($uFile, ($uCount + 1) . '');
 }
+// Plafond global : on ne compte que les requêtes qui partent vraiment vers un
+// moteur (incrément best-effort, non atomique = tolérable pour un plafond souple).
+@file_put_contents($gFile, ($gCount + 1) . '');
 
 // ── 5. CHOIX DU MODÈLE — v1.3.3 : LE MEILLEUR POUR TOUS ─────────────────
 // Stratégie commerciale (décision Jacques) : le visiteur teste la MEILLEURE
@@ -397,7 +403,15 @@ $geminiKeys = array_values(array_filter([
 ], function ($k) { return $k !== ''; }));
 $isElite    = in_array($userTier, ['elite', 'admin', 'teach'], true); // conservé pour stats
 $modelFree  = defined('GEMINI_MODEL')       ? GEMINI_MODEL       : 'gemini-2.5-flash';
-$modelElite = defined('GEMINI_MODEL_ELITE') ? GEMINI_MODEL_ELITE : 'gemini-2.5-pro';
+// ⚠️ 22/10/2026 : gemini-2.5-pro répond 404 « no longer available to new
+// users » sur notre clé — chaque requête perdait un appel avant le repli Flash.
+// Défaut aligné sur Flash ; une valeur PRO encore définie dans
+// payment_config.php est tolérée : après son premier 404, call_gemini() la
+// saute pendant 24 h (ia_marquer_indispo).
+$modelElite = defined('GEMINI_MODEL_ELITE') ? GEMINI_MODEL_ELITE : $modelFree;
+// Réserve GRATUITE : chaque modèle a son propre quota journalier chez Google,
+// un Flash-Lite de 3e génération double donc la capacité sans rien coûter.
+$modelReserve = defined('GEMINI_MODEL_RESERVE') ? GEMINI_MODEL_RESERVE : 'gemini-3.5-flash-lite';
 $model      = $modelElite; // 🚀 top modèle pour TOUS (visiteurs inclus)
 
 // 🚀 CHAÎNE DE MOTEURS PAR PERFORMANCE (v1.4.2 — « jamais à court de tokens ») :
@@ -428,12 +442,17 @@ if ((string) ($body['action'] ?? '') === 'epreuve_minesec') {
     ];
 }
 
+// Ordre par clé : modèle « élite » → Flash → réserve Flash-Lite (doublons retirés).
+$geminiModeles = array_values(array_unique(array_filter([$model, $modelFree, $modelReserve])));
 foreach ($geminiKeys as $gIdx => $gk) {
-    [$ok, $text, $error] = call_gemini($gk, $sysPrompt, $ragContext, $prompt, $model, $geminiReglages);
-    if ($ok) { $source = 'gemini_pro' . ($gIdx ? ('_k' . ($gIdx + 1)) : ''); break; }
-    if ($model !== $modelFree) { // repli Flash sur la même clé
-        [$okF, $textF, $errF] = call_gemini($gk, $sysPrompt, $ragContext, $prompt, $modelFree, $geminiReglages);
-        if ($okF) { $ok = true; $text = $textF; $error = null; $source = 'gemini_flash' . ($gIdx ? ('_k' . ($gIdx + 1)) : ''); break; }
+    foreach ($geminiModeles as $gm) {
+        [$okG, $textG, $errG] = call_gemini($gk, $sysPrompt, $ragContext, $prompt, $gm, $geminiReglages);
+        if ($okG) {
+            $ok = true; $text = $textG; $error = null;
+            $source = 'gemini_' . preg_replace(['/^gemini-/', '/[^a-z0-9.]+/'], ['', '-'], $gm) . ($gIdx ? ('_k' . ($gIdx + 1)) : '');
+            break 2;
+        }
+        if ($error === null) $error = $errG;
     }
 }
 
@@ -521,7 +540,10 @@ function call_gemini(string $apiKey, string $sys, string $rag, string $prompt, s
     }
     // v1.2.2 : le modèle peut être imposé par l'appelant (Pro pour l'Élite, Flash sinon).
     if ($model === '') $model = defined('GEMINI_MODEL') ? GEMINI_MODEL : 'gemini-2.5-flash';
-    $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . $model
+    // Modèle retiré, ou quota du jour épuisé sur CETTE clé : inutile de rappeler.
+    $indispo = 'gemini|' . md5($apiKey) . '|' . $model;
+    if (ia_est_indispo($indispo)) return [false, '', 'Gemini ' . $model . ' ignoré (indisponible ou quota du jour épuisé)'];
+    $url ='https://generativelanguage.googleapis.com/v1beta/models/' . $model
          . ':generateContent?key=' . urlencode($apiKey);
 
     // 🚀 v1.3.2 : 2048 → 8192 tokens. Une dissertation ou un commentaire composé
@@ -552,12 +574,22 @@ function call_gemini(string $apiKey, string $sys, string $rag, string $prompt, s
         $err  = curl_error($ch);
         curl_close($ch);
         if ($http === 200) break;
+        // Quota JOURNALIER épuisé (quotaId « …PerDay… ») : il ne revient qu'à
+        // minuit heure du Pacifique. Le réessayer coûtait 2 × 0,9 s par clé et
+        // par requête ; on mémorise l'épuisement jusqu'à la remise à zéro.
+        if ($http === 429 && stripos((string) $raw, 'PerDay') !== false) {
+            ia_marquer_indispo($indispo, ia_minuit_pacifique());
+            break;
+        }
         if ($http === 503 || $http === 429 || $http >= 500) { usleep(900000); continue; } // transitoire → réessai
         break; // autre erreur → pas de réessai
     }
 
     if ($err) return [false, '', 'cURL: ' . $err];
-    if ($http !== 200) return [false, '', 'Gemini HTTP ' . $http . ': ' . substr((string)$raw, 0, 200)];
+    // 404 = modèle retiré pour ce compte : on le saute 24 h au lieu de perdre un
+    // appel à chaque requête (constaté sur gemini-2.5-pro le 22/10/2026).
+    if ($http === 404) ia_marquer_indispo($indispo, time() + 86400);
+    if ($http !== 200) return [false, '', 'Gemini ' . $model . ' HTTP ' . $http . ': ' . substr((string)$raw, 0, 200)];
 
     $data = json_decode($raw, true);
     $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
@@ -565,6 +597,12 @@ function call_gemini(string $apiKey, string $sys, string $rag, string $prompt, s
         $blocked = $data['promptFeedback']['blockReason'] ?? ($data['candidates'][0]['finishReason'] ?? '');
         return [false, '', 'Réponse vide de Gemini' . ($blocked ? ' (' . $blocked . ')' : '')];
     }
+    $u = $data['usageMetadata'] ?? [];
+    ia_dernier_usage([
+        'in'    => (int) ($u['promptTokenCount'] ?? 0),
+        'out'   => (int) ($u['candidatesTokenCount'] ?? 0),
+        'think' => (int) ($u['thoughtsTokenCount'] ?? 0),
+    ]);
     return [true, $text, null];
 }
 
@@ -575,7 +613,10 @@ function call_gemini(string $apiKey, string $sys, string $rag, string $prompt, s
  * v1.2.2 — Helper générique pour les API "OpenAI-compatible" (Groq, Mistral, etc.).
  * Même format de requête/réponse → un seul code pour plusieurs fournisseurs.
  */
-function call_openai_chat(string $url, string $apiKey, string $model, string $sys, string $rag, string $prompt, string $label): array {
+function call_openai_chat(string $url, string $apiKey, string $model, string $sys, string $rag, string $prompt, string $label, int $maxTok = 0): array {
+    $indispo = $label . '|' . md5($apiKey) . '|' . $model;
+    if (ia_est_indispo($indispo)) return [false, '', $label . ' ' . $model . ' ignoré (modèle indisponible)'];
+    if ($maxTok <= 0) $maxTok = defined('IA_MAX_OUTPUT_TOKENS') ? (int) IA_MAX_OUTPUT_TOKENS : 8192;
     $fullSys = trim($sys);
     if ($rag !== '') {
         $fullSys .= "\n\n═══ CONTEXTE FACTUEL (annales et corrigés MINESEC) ═══\n" . $rag
@@ -588,8 +629,9 @@ function call_openai_chat(string $url, string $apiKey, string $model, string $sy
     $payload = json_encode([
         'model'       => $model,
         'messages'    => $messages,
-        // v1.3.2 : 4096 → 8192 (aligné sur Gemini — dissertations complètes)
-        'max_tokens'  => defined('IA_MAX_OUTPUT_TOKENS') ? (int) IA_MAX_OUTPUT_TOKENS : 8192,
+        // v1.3.2 : 4096 → 8192 (aligné sur Gemini — dissertations complètes) ;
+        // un fournisseur au plafond de jetons/minute serré passe sa propre borne.
+        'max_tokens'  => $maxTok,
         'temperature' => 0.7
     ], JSON_UNESCAPED_UNICODE);
 
@@ -609,25 +651,47 @@ function call_openai_chat(string $url, string $apiKey, string $model, string $sy
     curl_close($ch);
 
     if ($err) return [false, '', $label . ' cURL: ' . $err];
-    if ($http !== 200) return [false, '', $label . ' HTTP ' . $http . ': ' . substr((string)$raw, 0, 200)];
+    if ($http === 404) ia_marquer_indispo($indispo, time() + 86400); // modèle retiré
+    if ($http !== 200) return [false, '', $label . ' ' . $model . ' HTTP ' . $http . ': ' . substr((string)$raw, 0, 200)];
 
     $data = json_decode($raw, true);
     $text = $data['choices'][0]['message']['content'] ?? '';
     if ($text === '') return [false, '', $label . ' : réponse vide'];
+    $u = $data['usage'] ?? [];
+    ia_dernier_usage([
+        'in'  => (int) ($u['prompt_tokens'] ?? 0),
+        'out' => (int) ($u['completion_tokens'] ?? 0),
+    ]);
     return [true, $text, null];
 }
 
-function call_groq(string $apiKey, string $sys, string $rag, string $prompt): array {
-    // Groq — ultra-rapide (Llama 70B). Clé gratuite : https://console.groq.com/keys
-    $model = defined('GROQ_MODEL') ? GROQ_MODEL : 'llama-3.3-70b-versatile';
-    return call_openai_chat('https://api.groq.com/openai/v1/chat/completions',
-                            $apiKey, $model, $sys, $rag, $prompt, 'Groq');
+/* MODÈLES RETIRÉS (vérifié le 22/10/2026 sur les pages des fournisseurs).
+   payment_config.php.exemple a longtemps proposé ces identifiants : une config
+   copiée de l'exemple les définit encore, et la constante l'emportait sur le
+   défaut du code → secours morts en silence. On les remplace ici. */
+function ia_modele(string $constante, string $defaut): string {
+    $retires = [
+        'llama-3.3-70b-versatile'             => 'openai/gpt-oss-120b',             // Groq
+        'llama-3.3-70b'                       => 'gpt-oss-120b',                    // Cerebras
+        'deepseek/deepseek-chat-v3-0324:free' => 'minimax/minimax-m3.1-flash:free', // OpenRouter
+    ];
+    $m = defined($constante) ? (string) constant($constante) : $defaut;
+    return $retires[$m] ?? $m;
 }
 
-// Cerebras — 1 MILLION de tokens/jour GRATUITS (le tier le plus généreux 2026),
-// inférence wafer-scale ~20× plus rapide. Clé : https://cloud.cerebras.ai
+function call_groq(string $apiKey, string $sys, string $rag, string $prompt): array {
+    // Groq — ultra-rapide, gratuit : 30 req/min, 1 000 req/jour, mais 8 000
+    // jetons/MINUTE et 200 000/jour. 8 192 jetons de sortie demandés suffisaient
+    // à dépasser la minute : on borne à 3 000. Clé : https://console.groq.com/keys
+    $model = ia_modele('GROQ_MODEL', 'openai/gpt-oss-120b');
+    return call_openai_chat('https://api.groq.com/openai/v1/chat/completions',
+                            $apiKey, $model, $sys, $rag, $prompt, 'Groq', 3000);
+}
+
+// Cerebras — ⚠️ plus d'offre gratuite permanente (oct. 2026) : essai de 5 $
+// valable 30 jours (1 M jetons/jour, 5 req/min). Clé : https://cloud.cerebras.ai
 function call_cerebras(string $apiKey, string $sys, string $rag, string $prompt): array {
-    $model = defined('CEREBRAS_MODEL') ? CEREBRAS_MODEL : 'llama-3.3-70b';
+    $model = ia_modele('CEREBRAS_MODEL', 'gpt-oss-120b');
     return call_openai_chat('https://api.cerebras.ai/v1/chat/completions',
                             $apiKey, $model, $sys, $rag, $prompt, 'Cerebras');
 }
@@ -649,10 +713,11 @@ function call_mistral(string $apiKey, string $sys, string $rag, string $prompt):
 
 // OpenRouter — passerelle OpenAI-compatible vers des modèles GRATUITS très puissants
 // (DeepSeek V3 / R1, Llama, Qwen…). Une seule clé → de nombreux modèles.
-// Clé gratuite : https://openrouter.ai/keys . Modèle par défaut : DeepSeek V3 (free),
-// excellent en raisonnement maths/sciences et en français.
+// Clé gratuite : https://openrouter.ai/keys . Modèles « :free » : 20 req/min et
+// 50 req/jour (1 000/jour après un achat unique de 10 $ de crédits). DeepSeek V3
+// gratuit a disparu du catalogue ; liste à jour : openrouter.ai/api/v1/models.
 function call_openrouter(string $apiKey, string $sys, string $rag, string $prompt): array {
-    $model = defined('OPENROUTER_MODEL') ? OPENROUTER_MODEL : 'deepseek/deepseek-chat-v3-0324:free';
+    $model = ia_modele('OPENROUTER_MODEL', 'minimax/minimax-m3.1-flash:free');
     return call_openai_chat('https://openrouter.ai/api/v1/chat/completions',
                             $apiKey, $model, $sys, $rag, $prompt, 'OpenRouter');
 }
@@ -690,8 +755,46 @@ function store_pending_answer(string $hash, string $q, string $a, string $userId
 }
 
 function log_request(string $userId, string $plan, string $action, int $bytes): void {
-    $line = date('Y-m-d H:i:s') . " | " . $plan . " | " . $userId . " | " . $action . " | " . $bytes . " bytes\n";
+    // Jetons réellement facturés par le moteur (usageMetadata / usage) : sans
+    // eux on ne mesurait que des octets, impossible d'estimer la capacité.
+    $u = ia_dernier_usage();
+    $tok = $u ? (' | tok_in=' . (int) ($u['in'] ?? 0) . ' tok_out=' . (int) ($u['out'] ?? 0)
+                 . (isset($u['think']) ? ' tok_think=' . (int) $u['think'] : '')) : '';
+    $line = date('Y-m-d H:i:s') . " | " . $plan . " | " . $userId . " | " . $action . " | " . $bytes . " bytes" . $tok . "\n";
     @file_put_contents(__DIR__ . '/data/ia_proxy.log', $line, FILE_APPEND | LOCK_EX);
+}
+
+// Usage du DERNIER appel réussi (null = aucun appel moteur dans cette requête).
+function ia_dernier_usage(?array $set = null): ?array {
+    static $u = null;
+    if ($set !== null) $u = $set;
+    return $u;
+}
+
+// Mémoire « inutile de rappeler » : modèle retiré (404) ou quota du jour épuisé.
+// Un fichier par (fournisseur, clé, modèle) contenant l'échéance en timestamp.
+function ia_indispo_fichier(string $quoi): string {
+    return __DIR__ . '/data/_rate/ia_indispo_' . substr(md5($quoi), 0, 16) . '.txt';
+}
+function ia_est_indispo(string $quoi): bool {
+    $f = ia_indispo_fichier($quoi);
+    if (!is_file($f)) return false;
+    if ((int) @file_get_contents($f) > time()) return true;
+    @unlink($f);
+    return false;
+}
+function ia_marquer_indispo(string $quoi, int $jusqua): void {
+    $dir = __DIR__ . '/data/_rate/';
+    if (!is_dir($dir)) @mkdir($dir, 0750, true);
+    @file_put_contents(ia_indispo_fichier($quoi), (string) $jusqua, LOCK_EX);
+}
+// Les quotas journaliers Gemini repartent à minuit, heure du Pacifique.
+function ia_minuit_pacifique(): int {
+    try {
+        return (new DateTime('tomorrow', new DateTimeZone('America/Los_Angeles')))->getTimestamp();
+    } catch (Throwable $e) {
+        return time() + 3600;
+    }
 }
 
 /**
