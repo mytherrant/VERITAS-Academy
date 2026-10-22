@@ -16,7 +16,8 @@
  *  3. PHP cherche d'abord dans le CACHE VALIDÉ (table veritas_validated_answers)
  *  4. Cache miss → CHAÎNE GRATUITE (22/10/2026) : Gemini Flash → Flash-Lite
  *     (chaque clé) → OpenRouter :free → Cerebras → Groq gpt-oss-120b →
- *     SambaNova → Mistral. Claude et Pollinations retirés.
+ *     Cloudflare Workers AI → NVIDIA → SambaNova → Mistral.
+ *     Claude et Pollinations retirés.
  *  5. Stocke la réponse en attente de validation enseignant
  *  6. Retourne la réponse au client
  */
@@ -460,6 +461,9 @@ if (!$ok) {
     $orKey       = defined('OPENROUTER_API_KEY') ? OPENROUTER_API_KEY : (getenv('OPENROUTER_API_KEY') ?: '');
     $cerebrasKey = defined('CEREBRAS_API_KEY')   ? CEREBRAS_API_KEY   : (getenv('CEREBRAS_API_KEY') ?: '');
     $groqKey     = defined('GROQ_API_KEY')       ? GROQ_API_KEY       : (getenv('GROQ_API_KEY') ?: '');
+    $cfToken     = defined('CLOUDFLARE_AI_TOKEN')   ? CLOUDFLARE_AI_TOKEN   : (getenv('CLOUDFLARE_AI_TOKEN') ?: '');
+    $cfCompte    = defined('CLOUDFLARE_ACCOUNT_ID') ? CLOUDFLARE_ACCOUNT_ID : (getenv('CLOUDFLARE_ACCOUNT_ID') ?: '');
+    $nvKey       = defined('NVIDIA_API_KEY')     ? NVIDIA_API_KEY     : (getenv('NVIDIA_API_KEY') ?: '');
     $snKey       = defined('SAMBANOVA_API_KEY')  ? SAMBANOVA_API_KEY  : (getenv('SAMBANOVA_API_KEY') ?: '');
     $mistralKey  = defined('MISTRAL_API_KEY')    ? MISTRAL_API_KEY    : (getenv('MISTRAL_API_KEY') ?: '');
 
@@ -477,6 +481,16 @@ if (!$ok) {
         [$okG, $textG, $errG] = call_groq($groqKey, $sysPrompt, $ragContext, $prompt);
         if ($okG) { $ok = true; $text = $textG; $error = null; $source .= '_fallback_groq'; }
         elseif ($error === null) { $error = $errG; }
+    }
+    if (!$ok && $cfToken !== '' && $cfCompte !== '') {  // Cloudflare : 10 000 neurones/jour gratuits
+        [$okW, $textW, $errW] = call_cloudflare($cfToken, $cfCompte, $sysPrompt, $ragContext, $prompt);
+        if ($okW) { $ok = true; $text = $textW; $error = null; $source .= '_fallback_cloudflare'; }
+        elseif ($error === null) { $error = $errW; }
+    }
+    if (!$ok && $nvKey !== '') {  // NVIDIA build.nvidia.com : ~40 req/min gratuites
+        [$okN, $textN, $errN] = call_nvidia($nvKey, $sysPrompt, $ragContext, $prompt);
+        if ($okN) { $ok = true; $text = $textN; $error = null; $source .= '_fallback_nvidia'; }
+        elseif ($error === null) { $error = $errN; }
     }
     if (!$ok && $snKey !== '') {  // SambaNova : tier gratuit persistant (Llama 70B)
         [$okS, $textS, $errS] = call_sambanova($snKey, $sysPrompt, $ragContext, $prompt);
@@ -614,7 +628,9 @@ function call_gemini(string $apiKey, string $sys, string $rag, string $prompt, s
  * Même format de requête/réponse → un seul code pour plusieurs fournisseurs.
  */
 function call_openai_chat(string $url, string $apiKey, string $model, string $sys, string $rag, string $prompt, string $label, int $maxTok = 0): array {
-    $indispo = $label . '|' . md5($apiKey) . '|' . $model;
+    // L'URL entre dans la clé : chez Cloudflare elle porte l'identifiant de
+    // compte, dont une erreur (404) ne doit plus bloquer 24 h une fois corrigée.
+    $indispo = $url . '|' . md5($apiKey) . '|' . $model;
     if (ia_est_indispo($indispo)) return [false, '', $label . ' ' . $model . ' ignoré (modèle indisponible)'];
     if ($maxTok <= 0) $maxTok = defined('IA_MAX_OUTPUT_TOKENS') ? (int) IA_MAX_OUTPUT_TOKENS : 8192;
     $fullSys = trim($sys);
@@ -694,6 +710,28 @@ function call_cerebras(string $apiKey, string $sys, string $rag, string $prompt)
     $model = ia_modele('CEREBRAS_MODEL', 'gpt-oss-120b');
     return call_openai_chat('https://api.cerebras.ai/v1/chat/completions',
                             $apiKey, $model, $sys, $rag, $prompt, 'Cerebras');
+}
+
+// Cloudflare Workers AI — 10 000 « neurones »/jour gratuits (≈ 80 à 200
+// réponses selon le modèle), remis à zéro à 0 h UTC. Point d'accès compatible
+// OpenAI, propre au COMPTE : il faut le jeton API (permission « Workers AI »)
+// ET l'identifiant de compte. Sortie bornée à 3 000 jetons : chaque jeton
+// coûte des neurones, une dissertation de 8 000 viderait le budget du jour.
+// Jeton : https://dash.cloudflare.com/profile/api-tokens
+function call_cloudflare(string $token, string $compte, string $sys, string $rag, string $prompt): array {
+    $model = ia_modele('CLOUDFLARE_MODEL', '@cf/openai/gpt-oss-120b');
+    $url = 'https://api.cloudflare.com/client/v4/accounts/' . rawurlencode($compte) . '/ai/v1/chat/completions';
+    return call_openai_chat($url, $token, $model, $sys, $rag, $prompt, 'Cloudflare', 3000);
+}
+
+// NVIDIA (build.nvidia.com) — catalogue gratuit compatible OpenAI, ~40 req/min.
+// ⚠️ Les conditions semblent réserver l'accès gratuit au développement : maillon
+// placé en fin de chaîne, à lire avant de compter dessus. Liste des modèles :
+// https://integrate.api.nvidia.com/v1/models . Clé : https://build.nvidia.com
+function call_nvidia(string $apiKey, string $sys, string $rag, string $prompt): array {
+    $model = ia_modele('NVIDIA_MODEL', 'deepseek-ai/deepseek-v4.1-flash');
+    return call_openai_chat('https://integrate.api.nvidia.com/v1/chat/completions',
+                            $apiKey, $model, $sys, $rag, $prompt, 'NVIDIA', 4096);
 }
 
 // SambaNova — tier gratuit PERSISTANT (Llama 3.3 70B, jusqu'à 405B).
