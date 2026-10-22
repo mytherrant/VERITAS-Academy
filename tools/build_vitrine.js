@@ -566,6 +566,21 @@ function brancherEnOrdre(html, ancre, cibles, quoi) {
 }
 corps = brancherEnOrdre(corps, '#lien', FOOTER, 'du pied de page');
 
+/* 22/10/2026 — « supprime tout ceci, c'est déjà dans le menu en haut »
+   (Jacques). Les trois colonnes de liens du pied (Apprendre / Services / Le
+   centre) doublaient le menu : on les retire APRÈS le câblage ci-dessus, pour
+   que la maquette reste intacte et que son garde-fou compte toujours juste.
+   Restent l'identité (logo, présentation, badges) et les mentions légales.
+   Même coupe dans tools/build_plan.py (FOOTER_VITRINE) et VERITAS_v1.2.html. */
+function retirerColonnesPied(html) {
+  const colonnes = /\r?\n[ \t]*(?:\r?\n)?[ \t]*<div>\s*<div style="font:600 12px Poppins,sans-serif;color:#fff;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px">(?:Apprendre|Services|Le centre)<\/div>\s*<div style="display:flex;flex-direction:column;gap:9px">[\s\S]*?<\/div>\s*<\/div>/g;
+  const n = (html.match(colonnes) || []).length;
+  if (n !== 3) throw new Error('Pied de page : ' + n + ' colonnes de liens trouvées au lieu de 3. La maquette a changé — vérifier AVANT de déployer.');
+  return html.replace(colonnes, '').replace('display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:34px',
+    'display:grid;grid-template-columns:minmax(0,1fr);gap:34px;justify-items:center;text-align:center');
+}
+corps = retirerColonnesPied(corps);
+
 /* ── Le calendrier scolaire, lu à la SOURCE ────────────────────────────────
    CALENDRIER_SCOLAIRE (app.js) porte l'arrêté conjoint MINEDUB/MINESEC
    2026-2027 : trois trimestres, six séquences, les interruptions et les
@@ -876,7 +891,11 @@ const MENU = [
     { t: 'Devenir partenaire',   d: '9 formules, marges revendeur',i: 'lc-users',       c: '#B03A6E', f: '#FBE4EE', h: APP + '#partenariat' },
     { t: 'Nos partenaires',      d: 'Ceux qui nous accompagnent',  i: 'lc-handshake',   c: '#0E7C86', f: '#DDF2F4', h: APP + '#nos-partenaires' },
     { t: 'VÉRITAS Campus',       d: 'Pour les établissements',     i: 'lc-university',  c: '#0C2A6A', f: '#E4E9F2', h: 'campus/' },
-    { t: 'Constellation VÉRITAS',d: 'Tout l’écosystème',           i: 'lc-sparkles',    c: '#B03A6E', f: '#FBE4EE', h: 'constellation.html' }
+    { t: 'Constellation VÉRITAS',d: 'Tout l’écosystème',           i: 'lc-sparkles',    c: '#B03A6E', f: '#FBE4EE', h: 'constellation.html' },
+    /* 22/10/2026 : la porte du plan partenaire vivait au pied de page, retiré
+       ce jour (il doublait ce menu). Sans elle, ce public n'aurait plus aucune
+       entrée vers ses 14 pages (garde « Public(s) sans porte » plus bas). */
+    { t: 'Espace partenaire',    d: 'Toutes ses pages, réunies',   i: 'lc-map',         c: '#0C2A6A', f: '#E4E9F2', h: 'plan.html#partenaire' }
   ]},
   { titre: 'Le centre', sous: 'Nous connaître', entrees: [
     /* ⚠️ PAS `app.html#presentation`. Vérifié dans le code (app.js, vShowSec) et
