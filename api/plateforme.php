@@ -1454,6 +1454,9 @@ if (($action === 'corpus' || $action === 'citations') && $method === 'GET') {
             'title'     => (string) ($t['title'] ?? ''),
             'reference' => (string) ($t['reference'] ?? ''),
             'faits'     => $ouvert ? (string) ($t['faits'] ?? '') : '',
+            // Note pour l'enseignant (texte au contenu sensible repêché en octobre 2026) :
+            // un conseil de lecture, pas du contenu — servie même fiche fermée.
+            'note'      => (string) ($t['note'] ?? ''),
             'libre'     => $ouvert,
             // Les premières lignes, pour reconnaître le texte et le retrouver
             // dans une recherche. Jamais de quoi composer une épreuve avec.
@@ -1488,6 +1491,7 @@ if (($action === 'corpus' || $action === 'citations') && $method === 'GET') {
                     'title'     => (string) ($t['title'] ?? ''),
                     'reference' => (string) ($t['reference'] ?? ''),
                     'faits'     => (string) ($t['faits'] ?? ''),
+                    'note'      => (string) ($t['note'] ?? ''),
                     'libre'     => true,
                     'extrait'   => (string) ($t['text'] ?? ''),
                 ];
