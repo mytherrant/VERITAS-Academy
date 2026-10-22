@@ -96,6 +96,32 @@
       "pagesLibres": 0,
       "ajoute": "2026-08-27"
     },
+    "est-2nde": {
+      "titre": "Cahier de français 2ⁿᵈᵉ S&T",
+      "niveau": "2nde",
+      "mode": "interactif",
+      "kinds": [
+        "livret"
+      ],
+      "prix": 1500,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0,
+      "ajoute": "2026-10-22"
+    },
+    "est-1ere": {
+      "titre": "Cahier de français 1ʳᵉ S&T",
+      "niveau": "1ere",
+      "mode": "interactif",
+      "kinds": [
+        "livret"
+      ],
+      "prix": 1500,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0,
+      "ajoute": "2026-10-22"
+    },
     "est-tle": {
       "titre": "Cahier de français Tˡᵉ S&T",
       "niveau": "tle",

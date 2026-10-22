@@ -96,6 +96,13 @@ CAHIERS: dict[str, dict] = {
              "src": L2 / "livret-data.js"},
     "est-tle": {"titre": "Cahier de français Tˡᵉ S&T", "niveau": "tle",
                 "src": L2 / "livrettlest-data.js"},
+    # 22/10/2026 — produits par tools/docx_vers_manuel.py depuis les cahiers
+    # Manuel_EST remontés sur la progression nationale (écrits utilitaires en
+    # séquences 5-6) : leur seule source survivante est le DOCX.
+    "est-2nde": {"titre": "Cahier de français 2ⁿᵈᵉ S&T", "niveau": "2nde",
+                 "src": L2 / "livret2ndest-data.js"},
+    "est-1ere": {"titre": "Cahier de français 1ʳᵉ S&T", "niveau": "1ere",
+                 "src": L2 / "livret1erest-data.js"},
 
     # ── Bords : le cahier complet, leçons et corrigés modèles ───────────────
     "bord-6e":   {"titre": "Bord — Cahier de français 6ᵉ",  "niveau": "6e",
@@ -890,7 +897,8 @@ def extraire(blocs: list[dict]) -> list[dict]:
             entete = entete[-2:]
             continue
         if y in LECONS:
-            courante = {"entete": list(entete), "titre": titre_de(b), "blocs": [b]}
+            courante = {"entete": list(entete), "titre": titre_de(b),
+                        "no": txt(b.get("no")), "blocs": [b]}
             lecons.append(courante)
             continue
         if courante is not None:
@@ -904,6 +912,13 @@ def extraire(blocs: list[dict]) -> list[dict]:
         utiles = [l for l in lecons if "corrigé" not in l["titre"].lower()]
     if not utiles:
         return blocs[:120]
+    # Un aperçu montre des LEÇONS : une épreuve ou une remédiation n'apprend
+    # rien à qui hésite. Les cahiers EST remontés (22/10/2026) mêlent leçons
+    # numérotées et blocs sans numéro (intégration, épreuves, consolidation) ;
+    # l'extrait de 2nde S&T était tombé sur une épreuve et une remédiation.
+    numerotees = [l for l in utiles if l.get("no")]
+    if len(numerotees) >= 2:
+        utiles = numerotees
 
     if len(utiles) == 1:
         choisies = utiles
