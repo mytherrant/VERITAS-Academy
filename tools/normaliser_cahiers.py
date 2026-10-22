@@ -103,6 +103,12 @@ CAHIERS: dict[str, dict] = {
                  "src": L2 / "livret2ndest-data.js"},
     "est-1ere": {"titre": "Cahier de français 1ʳᵉ S&T", "niveau": "1ere",
                  "src": L2 / "livret1erest-data.js"},
+    # La Tˡᵉ S&T remontée est une NOUVELLE ÉDITION, pas un remplacement : les clés
+    # de réponse dépendent du texte des consignes, et la version vendue depuis
+    # le 27/08 n'en partage que 38 % avec elle. `est-tle` reste donc intact pour
+    # ses acheteurs, avec toutes leurs réponses.
+    "est-tle-ed2": {"titre": "Cahier de français Tˡᵉ S&T — nouvelle édition", "niveau": "tle",
+                    "src": L2 / "livrettlest2-data.js"},
 
     # ── Bords : le cahier complet, leçons et corrigés modèles ───────────────
     "bord-6e":   {"titre": "Bord — Cahier de français 6ᵉ",  "niveau": "6e",

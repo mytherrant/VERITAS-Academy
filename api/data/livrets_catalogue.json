@@ -135,6 +135,19 @@
       "pagesLibres": 0,
       "ajoute": "2026-08-27"
     },
+    "est-tle-ed2": {
+      "titre": "Cahier de français Tˡᵉ S&T — nouvelle édition",
+      "niveau": "tle",
+      "mode": "interactif",
+      "kinds": [
+        "livret"
+      ],
+      "prix": 1500,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0,
+      "ajoute": "2026-10-22"
+    },
     "bord-6e": {
       "titre": "Bord — Cahier de français 6ᵉ",
       "niveau": "6e",
