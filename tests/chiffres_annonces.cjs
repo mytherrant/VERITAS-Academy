@@ -50,7 +50,40 @@ for (const niv of NIVEAUX) {
 
 t(Object.keys(reel).length === NIVEAUX.length,
   `les ${Object.keys(reel).length} pages de niveau annoncent chacune leur total`);
+
+/* 22/10/2026 — « Recompte et affiche les vrais chiffres » (Jacques). La vitrine
+   ne comptait que les anciens cahiers « Bord » (9 709 exercices, 90 pages) et
+   taisait les corrigés des cahiers 2026-2027, publiés depuis le 05/10. On les
+   ajoute, lus dans le <title> que build_corriges_2c écrit d'après le contenu.
+   Le « livret à compléter » regroupe ces MÊMES cahiers par onglets : il ne
+   s'ajoute pas. La liste des dossiers vient de build_corriges.py (ORDRE_2026),
+   pour qu'un cahier publié demain entre dans le compte sans toucher au banc. */
+const ordre2026 = (fs.readFileSync(path.join(RACINE, 'tools', 'build_corriges.py'), 'utf8')
+  .match(/ORDRE_2026\s*=\s*\[([^\]]*)\]/) || [, ''])[1]
+  .match(/"[^"]+"/g)?.map((s) => s.slice(1, -1)) || [];
+t(ordre2026.length > 0, `liste des cahiers 2026-2027 lue dans build_corriges.py (${ordre2026.length} entrées)`);
+const dossiers = [...NIVEAUX];
+for (const slug of ordre2026) {
+  const p = path.join(RACINE, 'corriges', slug, 'index.html');
+  if (!fs.existsSync(p)) continue;                 // cahier pas encore publié
+  const m = fs.readFileSync(p, 'utf8').match(/<title>[^<]*?(\d[\d\s  ]*) exercices/);
+  if (!m) { t(false, `corriges/${slug}/ ne dit pas son nombre d'exercices`); continue; }
+  const n = parseInt(m[1].replace(/[\s  ]/g, ''), 10);
+  reel[slug] = n;
+  total += n;
+  dossiers.push(slug);
+}
 t(total > 0, `total réel des corrigés publiés : ${total}`);
+
+/* Les pages de corrigés : une par séquence/module dans chaque dossier, plus les
+   trois cahiers scientifiques et techniques (est-*.html). Les sommaires
+   (index.html) ne sont pas des pages de corrigés. */
+let pages = 0;
+for (const d of dossiers) {
+  const dir = path.join(RACINE, 'corriges', d);
+  if (fs.existsSync(dir)) pages += fs.readdirSync(dir).filter((f) => f.endsWith('.html') && f !== 'index.html').length;
+}
+pages += fs.readdirSync(path.join(RACINE, 'corriges')).filter((f) => /^est-.*\.html$/.test(f)).length;
 
 /* ── 2. Ce que la vitrine annonce ─────────────────────────────────────────
    On lit la PAGE LIVRÉE, pas la maquette : c'est elle que le visiteur reçoit,
@@ -77,6 +110,15 @@ if (!fs.existsSync(vitrine)) {
       distincts[0] === total
         ? `le total annoncé (${distincts[0]}) est bien celui des corrigés publiés`
         : `la vitrine annonce ${distincts[0]} corrigés, il en existe ${total} — écart de ${Math.abs(distincts[0] - total)}`);
+  }
+
+  const annoncesPages = [...v.matchAll(/(\d[\d\s  ]*)\s*pages de corrigés/g)]
+    .map((m) => parseInt(m[1].replace(/[\s  ]/g, ''), 10));
+  for (const n of new Set(annoncesPages)) {
+    t(n === pages,
+      n === pages
+        ? `« ${n} pages de corrigés » : c’est bien le nombre de pages publiées`
+        : `la vitrine annonce ${n} pages de corrigés, il en existe ${pages}`);
   }
 
   /* La répartition par classe doit s'additionner au total, sinon les deux
