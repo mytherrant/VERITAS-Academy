@@ -992,7 +992,14 @@
 
   /* Défauts d'une question, du plus grave au moins grave. Chacun porte un
      `motif` (affiché) et une `consigne` (envoyée à Ambassa pour réécriture). */
-  var PLAQUEE_LEXIQUE = /\b(?:synonyme|antonyme|terme|mot)s?\b[^.?!]{0,30}\b(?:issus?|appartenan\w*|appartien\w*|relevant|tir[ée]e?s?|pris)\s+(?:du|au|de\s+la|à\s+la|dans\s+le)\s+(?:lexique|vocabulaire|champ\s+lexical|registre)/i;
+  /* Élargi le 22/10/2026 : « par un synonyme du lexique des sensations »
+     (sans participe) passait encore en production. Le REGISTRE n'en fait
+     plus partie : « un synonyme de registre soutenu » est une vraie
+     question de langue. */
+  /* Un REMPLACEMENT imposé dans un lexique (« par un synonyme / un mot du
+     lexique de… ») ou un synonyme / antonyme imposé — pas le RELEVÉ d'un
+     champ lexical (« relève trois mots du champ lexical de la nature »). */
+  var PLAQUEE_LEXIQUE = /(?:\bpar\s+(?:un|une|des|le|la)\s+(?:synonyme|antonyme|terme|mot)s?|\b(?:synonyme|antonyme)s?)\b[^.?!]{0,30}?\b(?:(?:issus?|appartenan\w*|appartien\w*|relevant|tir[ée]e?s?|pris)\s+)?(?:du|au|de\s+la|à\s+la|dans\s+le)\s+(?:lexique|vocabulaire|champ\s+lexical)\b/i;
   var PLAQUEE_HOMOPHONE = /\bhomophones?\b[^.?!]{0,60}\b(?:garde|gardant|maintien\w*|conserv\w*|m[êe]me\s+sens|sens\s+identique)/i;
 
   function diagnostiquer(q, contexte, opts) {
