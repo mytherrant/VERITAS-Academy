@@ -857,10 +857,13 @@
        21/10/2026 : « "texte": "TEXTE 1\nLe crédit proposé… » — le texte
        support entier recopié dans la réponse, qui s'est arrêtée au milieu
        du guide. */
+    /* 21/10/2026 : en production, 8 corrigés sur 8 arrivaient sans barème
+       ventilé — le format donné en exemple n'en montrait pas. */
+    l.push('BARÈME DANS CHAQUE CORRIGÉ : chaque "corrige" se termine par une ligne « Barème : … » qui répartit EXACTEMENT les points de la question entre les éléments attendus (« 1 pt par élément relevé, 0,5 pt pour la justification »).');
     l.push('LONGUEUR : ne recopie JAMAIS un texte support dans ta réponse — dans "questions", "texte" est le NUMÉRO du texte (1 ou 2). Corrigés concis ; réponse complète sous 18 000 caractères.');
     l.push('FORMAT DE RÉPONSE — JSON strict, sans texte autour, sans ```:');
     l.push('{"titre":"…","consigne":"consigne générale courte",'
-      + '"questions":[{"texte":1,"liste":"comp|expl","bloc":"c0|comp|r0|expl|p0…","q":"énoncé","pts":1.5,"niveau":"reperage|analyse|interpretation|production","corrige":"réponse attendue"}],'
+      + '"questions":[{"texte":1,"liste":"comp|expl","bloc":"c0|comp|r0|expl|p0…","q":"énoncé","pts":1.5,"niveau":"reperage|analyse|interpretation|production","corrige":"réponse attendue. Barème : 1 pt pour …, 0,5 pt pour …"}],'
       + '"sujets":[{"texte":"énoncé complet du sujet","corrige":"attentes et plan possible"}],'
       + '"grille":[{"critere":"…","points":6,"indicateurs":"…"}],'
       + '"guide":{"criteres":[{"critere":"…","points":4,"attendu":"…","reperes":"…"}],"penalites":["…"],'
@@ -986,6 +989,9 @@
 
   /* Défauts d'une question, du plus grave au moins grave. Chacun porte un
      `motif` (affiché) et une `consigne` (envoyée à Ambassa pour réécriture). */
+  var PLAQUEE_LEXIQUE = /\b(?:synonyme|antonyme|terme|mot)s?\b[^.?!]{0,30}\b(?:issus?|appartenan\w*|appartien\w*|relevant|tir[ée]e?s?|pris)\s+(?:du|au|de\s+la|à\s+la|dans\s+le)\s+(?:lexique|vocabulaire|champ\s+lexical|registre)/i;
+  var PLAQUEE_HOMOPHONE = /\bhomophones?\b[^.?!]{0,60}\b(?:garde|gardant|maintien\w*|conserv\w*|m[êe]me\s+sens|sens\s+identique)/i;
+
   function diagnostiquer(q, contexte, opts) {
     var d = [], ref = M(opts);
     var banni = motifBanni(q, contexte.bannies || motsBannis(opts));
@@ -1016,6 +1022,19 @@
        obligatoire. L'exiger (règle du 16/10 matin) était plus strict que le
        texte officiel — corrigé le soir même. Une citation, si elle est faite,
        reste vérifiée mot pour mot (code « citation »). */
+    /* NOTION PLAQUÉE (production, 21/10/2026, 6e et 3e) : « remplace “taxes”
+       par un synonyme issu du lexique des sensations », « par un synonyme qui
+       appartient au vocabulaire de la vie socioculturelle », « par un
+       homophone qui maintient le sens ». Ambassa force une notion de la
+       séquence sur un mot qui ne la porte pas ; l'élève ne peut pas répondre. */
+    if (PLAQUEE_LEXIQUE.test(q)) {
+      d.push({ code: 'plaquee', motif: 'notion plaquée (lexique imposé au synonyme)',
+        consigne: 'ne demande pas un synonyme « issu » ou « appartenant » à un lexique : demande un synonyme du mot dans son contexte, ou choisis dans le texte un mot qui appartient VRAIMENT à ce lexique' });
+    }
+    if (PLAQUEE_HOMOPHONE.test(q)) {
+      d.push({ code: 'plaquee', motif: 'homophone qui « garde le sens »',
+        consigne: 'un homophone ne garde jamais le sens : fais plutôt choisir entre deux homophones pour compléter une phrase, ou distinguer leur sens' });
+    }
     if (contexte.vous && tutoie(q)) {
       d.push({ code: 'tutoiement', motif: 'tutoiement au second cycle', consigne: 'réécris la consigne au vouvoiement (« Relevez », « Vous montrerez »), comme aux examens du second cycle' });
     }
@@ -1235,7 +1254,7 @@
     var res = {
       titre: propre(o && o.titre, 160), consigne: propre(o && o.consigne, 600),
       questions: {}, sujets: [], grille: [], remarques: nettoyerRemarques(propre(o && o.remarques, 900), ctx.struct, M(opts)),
-      controles: [], aReparer: []
+      controles: [], aReparer: [], aVentiler: []
     };
     support.forEach(function (t) { res.questions[t.n] = { comp: [], expl: [] }; });
 
@@ -1412,7 +1431,10 @@
              corrigé : « fut reversée est au passé simple. La question est mal
              posée. » Une telle question partait à l'élève. */
           else if (CORRIGE_DESAVOUE.test(it.corrige)) desavoues.push((desavoues.length + 1) + '. « ' + String(it.q).slice(0, 70) + '… »');
-          else if ((it.pts || 0) > 1 && !/bar[eè]me|\d+(?:[.,]\d+)?\s*pts?\b/i.test(it.corrige)) baremesNonVentiles++;
+          else if ((it.pts || 0) > 1 && !/bar[eè]me|\d+(?:[.,]\d+)?\s*pts?\b/i.test(it.corrige)) {
+            baremesNonVentiles++;
+            res.aVentiler.push({ n: n, kind: k, i: i, q: it.q, pts: it.pts, corrige: it.corrige });
+          }
           if (it.corrige && tx) {
             var tpc = plat(tx);
             citationsCorrige += citations(it.corrige).filter(function (c) { var pc = plat(c); return pc.trim().split(' ').length >= 3 && tpc.indexOf(pc) < 0; }).length;
@@ -1438,7 +1460,8 @@
     }
     res.controles.push(libelleEnonces(res.aReparer, false));
     if (nbQ) {
-      res.controles.push({ ok: !corrigesManquants && !baremesNonVentiles,
+      res._corrigesManquants = corrigesManquants;
+      res.controles.push({ cle: 'corriges', ok: !corrigesManquants && !baremesNonVentiles,
         libelle: corrigesManquants ? corrigesManquants + ' question(s) sans corrigé — à compléter'
           : baremesNonVentiles ? baremesNonVentiles + ' corrigé(s) sans barème ventilé — à préciser'
           : 'Corrigé rédigé et barème ventilé pour chaque question' });
@@ -1848,9 +1871,10 @@
      demander de citer juste sans montrer ce qu'il faut citer. */
   var CORRIGE_DESAVOUE = /\b(?:la\s+)?(?:question|consigne)\s+(?:est\s+|semble\s+|para[iî]t\s+)?(?:mal\s+(?:pos[ée]e|formul[ée]e)|erron[ée]e|incorrecte|impr[ée]cise\s+car)|(?:la\s+)?question\s+(?:contient|comporte)\s+une\s+erreur|si\s+la\s+question\s+visait/i;
 
-  function promptReparation(aReparer, texte) {
+  function promptReparation(aReparer, texte, aVentiler) {
     var l = [];
-    l.push('Réécris chaque question ci-dessous pour la rendre conforme au MINESEC. Garde la même tâche, le même niveau et la même difficulté ; corrige seulement ce qui est signalé.');
+    aVentiler = aVentiler || [];
+    if (aReparer.length) l.push('Réécris chaque question ci-dessous pour la rendre conforme au MINESEC. Garde la même tâche, le même niveau et la même difficulté ; corrige seulement ce qui est signalé.');
     aReparer.forEach(function (r, i) {
       var consignes = (r.defauts || [{ consigne: 'supprime la formulation « ' + r.motif + ' »' }]).map(function (d) { return d.consigne; }).join(' ; ');
       l.push((i + 1) + '. ' + r.q);
@@ -1862,8 +1886,17 @@
       l.push('TEXTE SUPPORT (les citations se recopient ici, mot pour mot) :');
       l.push(String(texte).slice(0, 3800));
     }
+    if (aVentiler.length) {
+      l.push('');
+      l.push('CORRIGÉS À VENTILER — pour chacun, écris UNE ligne « Barème : … » qui répartit EXACTEMENT ses points entre les éléments attendus :');
+      aVentiler.forEach(function (v, i) {
+        l.push('B' + (i + 1) + '. Question (' + v.pts + ' pts) : ' + String(v.q).slice(0, 200));
+        l.push('    Corrigé : ' + String(v.corrige).slice(0, 400));
+      });
+    }
     l.push('');
-    l.push('JSON strict : {"questions":["question 1 réécrite","question 2 réécrite"]}');
+    l.push('JSON strict : {"questions":["question 1 réécrite","question 2 réécrite"]'
+      + (aVentiler.length ? ',"baremes":["Barème : … (pour B1)","Barème : … (pour B2)"]' : '') + '}');
     return l.join('\n');
   }
 
@@ -1884,8 +1917,23 @@
       else restant.push(r);
     });
     res.aReparer = restant;
+    /* Barèmes ventilés : acceptés seulement s'ils commencent par « Barème »
+       et donnent au moins un nombre de points. */
+    var baremes = (o && Array.isArray(o.baremes)) ? o.baremes : [];
+    var nonVentiles = [];
+    (res.aVentiler || []).forEach(function (v, j) {
+      var b = typeof baremes[j] === 'string' ? baremes[j].trim() : '';
+      var cible = res.questions[v.n] && res.questions[v.n][v.kind] && res.questions[v.n][v.kind][v.i];
+      if (cible && /^bar[eè]me\s*:/i.test(b) && /\d/.test(b)) cible.corrige = String(cible.corrige || '').replace(/\s+$/, '') + '\n' + b;
+      else nonVentiles.push(v);
+    });
+    res.aVentiler = nonVentiles;
     res.controles = res.controles.map(function (c) {
-      return c.cle === 'enonces' ? libelleEnonces(restant, true) : c;
+      if (c.cle === 'enonces') return libelleEnonces(restant, true);
+      if (c.cle === 'corriges' && !res._corrigesManquants) return { cle: 'corriges', ok: !nonVentiles.length,
+        libelle: nonVentiles.length ? nonVentiles.length + ' corrigé(s) sans barème ventilé — à préciser'
+          : 'Corrigé rédigé et barème ventilé pour chaque question' };
+      return c;
     });
     return res;
   }
@@ -1942,17 +1990,19 @@
     var prompt = ajusterPrompt(ctx);
     return appeler(prompt, sys, opts).then(function (o) {
       var res = validerEpreuve(o, ctx, opts);
-      if (!res.aReparer.length || !opts.reparer) return res;
+      if ((!res.aReparer.length && !(res.aVentiler || []).length) || !opts.reparer) return res;
       /* `reparer` peut répondre tout de suite (booléen) ou plus tard
          (promesse) : l'Atelier demande l'accord au SERVEUR de quota. */
       return Promise.resolve(opts.reparer()).then(function (accord) {
         if (!accord) return res;
-        if (opts.etape) opts.etape('Ambassa réécrit ' + res.aReparer.length + ' question(s) non conforme(s)…');
+        if (opts.etape) opts.etape(res.aReparer.length
+          ? 'Ambassa réécrit ' + res.aReparer.length + ' question(s) non conforme(s)…'
+          : 'Ambassa détaille le barème de ' + res.aVentiler.length + ' corrigé(s)…');
         /* Le proxy refuse deux appels du même compte à moins de 2 s. */
         return new Promise(function (ok) { setTimeout(ok, opts.pause == null ? 2300 : opts.pause); })
           .then(function () {
             var principal = (ctx.textes || []).filter(function (t) { return t.role === 'support'; })[0];
-            return appeler(promptReparation(res.aReparer, principal && principal.text), sys, Object.assign({}, opts, { max: 1500 }));
+            return appeler(promptReparation(res.aReparer, principal && principal.text, res.aVentiler), sys, Object.assign({}, opts, { max: 2500 }));
           })
           .then(function (o2) {
             var parN = {};

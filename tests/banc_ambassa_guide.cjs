@@ -71,5 +71,52 @@ const r3 = G.validerEpreuve({ ...base, questions: [
 const cD = (r3.controles || []).find(c => c.cle === 'desavoue');
 ok(!!cD && cD.ok === false && /1 question/.test(cD.libelle), 'un corrigé qui déclare sa question « mal posée » est signalé — ' + (cD ? cD.libelle.slice(0, 80) : 'rien'));
 ok(/5 ter\./.test(sys), 'consigne système : corriger la question plutôt que la désavouer');
-console.log(ko ? ('\n' + ko + ' au rouge') : '\nTout au vert');
-process.exit(ko ? 1 : 0);
+
+/* Notion plaquée (production, 21/10/2026, 6e et 3e) : détectée, donc réécrite. */
+const diag = q => G.diagnostiquer(q, { texte: '' }, {}).map(d => d.code);
+ok(diag('Dans la phrase « Tu le taxes à combien ? », remplace le mot « taxes » par un synonyme issu du lexique des sensations.').includes('plaquee'),
+  'notion plaquée : « synonyme issu du lexique des sensations » détecté');
+ok(diag('Remplace le groupe nominal « l’homme enterré » par un synonyme qui appartient au vocabulaire de la vie socioculturelle.').includes('plaquee'),
+  'notion plaquée : « synonyme qui appartient au vocabulaire de… » détecté');
+ok(diag('Remplace le mot « monsieur » par un homophone qui maintient le sens de moquerie.').includes('plaquee'),
+  'notion plaquée : « homophone qui maintient le sens » détecté');
+ok(!diag('Remplace le mot « taxes » par un synonyme qui convient dans la phrase.').includes('plaquee')
+  && !diag('Complète la phrase avec l’homophone qui convient : « sens » ou « cent ».').includes('plaquee'),
+  'notion plaquée : une question juste n’est pas signalée');
+
+/* Barème ventilé : exigé par le format, et repris par la réparation. */
+ok(/BARÈME DANS CHAQUE CORRIGÉ/.test(G.promptEpreuve({ plan, struct: st, classe: '4e', textes: [{ n: 77, text: texteS, role: 'support', words: 20 }] })),
+  'consigne : chaque corrigé se termine par « Barème : … »');
+const r4 = G.validerEpreuve({ ...base, questions: [
+  { texte: 1, liste: bl.kind, bloc: bl.cle, q: 'Relève le complément circonstanciel de temps de la phrase « elle fut renversée le 12 août 1792 ».', pts: 2,
+    corrige: 'Le complément est « le 12 août 1792 », il situe l’action.' }] },
+  { plan, struct: st, classe: '4e', textes: [{ n: 77, text: texteS, role: 'support', words: 20 }] }, {});
+ok(r4.aVentiler.length === 1, 'un corrigé sans barème part à la réparation');
+const pR = G.promptReparation(r4.aReparer, texteS, r4.aVentiler);
+ok(/CORRIGÉS À VENTILER/.test(pR) && /"baremes"/.test(pR), 'la réparation demande le barème');
+G.appliquerReparation(r4, { questions: [], baremes: ['Barème : 1,5 pt pour le relevé, 0,5 pt pour la valeur.'] }, {}, { 77: texteS });
+const qF = r4.questions[Object.keys(r4.questions)[0]][bl.kind][0];
+ok(/Barème : 1,5 pt/.test(qF.corrige) && r4.aVentiler.length === 0, 'le barème reçu est ajouté au corrigé');
+const cC = r4.controles.find(c => c.cle === 'corriges');
+ok(cC && cC.ok === true, 'le compte rendu ne signale plus de corrigé sans barème — ' + (cC && cC.libelle));
+
+/* Parcours complet : composer() avec un faux serveur IA (deux appels). */
+const appels = [];
+const fauxFetch = (url, init) => {
+  const corps = JSON.parse(init.body); appels.push(corps.prompt);
+  const rep = appels.length === 1
+    ? { titre: 'T', consigne: 'C', sujets: [], questions: [
+        { texte: 1, liste: bl.kind, bloc: bl.cle, q: 'Remplace le mot « peuple » par un synonyme issu du lexique des sensations.', pts: 2, corrige: 'foule' }] }
+    : { questions: ['Remplace le mot « peuple » par un synonyme qui convient dans la phrase « Le peuple la mit en pièces. ».'],
+        baremes: ['Barème : 1 pt pour le synonyme, 1 pt pour la phrase réécrite.'] };
+  return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ text: JSON.stringify(rep) }) });
+};
+G.composer({ plan, struct: st, classe: '4e', textes: [{ n: 77, text: texteS, role: 'support', words: 20 }], exemples: [] },
+  { fetch: fauxFetch, reparer: () => true, pause: 0 }).then(res => {
+  const q1 = res.questions[Object.keys(res.questions)[0]][bl.kind][0];
+  ok(appels.length === 2 && /CORRIGÉS À VENTILER/.test(appels[1]), 'composer : un seul appel de réparation, qui demande aussi le barème');
+  ok(!/lexique des sensations/.test(q1.q), 'composer : la question plaquée est réécrite — « ' + q1.q.slice(0, 60) + ' »');
+  ok(/Barème : 1 pt/.test(q1.corrige), 'composer : le corrigé porte son barème ventilé');
+  console.log(ko ? ('\n' + ko + ' au rouge') : '\nTout au vert');
+  process.exit(ko ? 1 : 0);
+}).catch(e => { console.log('  KO composer a levé : ' + (e && e.message)); process.exit(1); });
