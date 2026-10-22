@@ -85,6 +85,16 @@ on:
   # Lancement manuel depuis GitHub → Actions → Run workflow
   workflow_dispatch:
 
+# Un seul envoi FTP à la fois. Le 21/10/2026, les PR #116 et #118 mergées à
+# quelques minutes d'écart ont lancé deux envois en parallèle : le dernier fini
+# gagne, même s'il porte le plus vieux commit — la prod aurait pu repartir en
+# arrière sans qu'aucun run ne passe au rouge. Ici, un run attend la fin du
+# précédent ; s'il en arrive un troisième, GitHub ne garde que le plus récent
+# en attente (il contient les autres).
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
 jobs:
   deploy:
     name: 📤 Upload vers LWS (FTP)
