@@ -340,6 +340,17 @@ if (!defined('SAMBANOVA_MODEL')) define('SAMBANOVA_MODEL',   'Meta-Llama-3.3-70B
 if (!defined('GEMINI_API_KEY_2')) define('GEMINI_API_KEY_2', '');                         // ← 2e clé Gemini (optionnel)
 if (!defined('GEMINI_API_KEY_3')) define('GEMINI_API_KEY_3', '');                         // ← 3e clé Gemini (optionnel)
 //
+// 🔗 CASCADE (22/10/2026) — ordre : Gemini (chaque clé × chaque modèle) → Groq →
+//    OpenRouter → Cloudflare → NVIDIA → Mistral → SambaNova → Cerebras →
+//    réponse déjà générée pour la même question. Réglages FACULTATIFS :
+// if (!defined('IA_BUDGET_SECONDES')) define('IA_BUDGET_SECONDES', 100);  // durée max d'une requête
+// if (!defined('GEMINI_MODELS_EXTRA')) define('GEMINI_MODELS_EXTRA', 'gemini-2.5-flash-lite,gemini-3.1-flash-lite');
+// if (!defined('GROQ_MODELS')) define('GROQ_MODELS', 'openai/gpt-oss-120b,qwen/qwen3.8-27b,openai/gpt-oss-20b');
+//    (idem OPENROUTER_MODELS, CLOUDFLARE_MODELS, NVIDIA_MODELS, MISTRAL_MODELS,
+//     SAMBANOVA_MODELS, CEREBRAS_MODELS : la liste remplace celle du code)
+// ⚠️ Toutes les lignes define() doivent être HORS de function requirePayAuth() :
+//    définies dedans, elles n'existent que pendant un paiement, jamais pour l'IA.
+//
 // 👉 PAYANT (optionnel) — Claude pour le « Plan Élite » :
 //    https://console.anthropic.com → API Keys. Si vide, l'Élite utilise aussi Gemini.
 if (!defined('ANTHROPIC_API_KEY')) define('ANTHROPIC_API_KEY', '');               // ← clé Anthropic (optionnel, pour Sonnet)
