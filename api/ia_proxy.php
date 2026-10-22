@@ -136,9 +136,17 @@ MISSION : faire RÉUSSIR l'élève au BEPC, au CAP, au Probatoire, au BACCALAUR�
 MINESEC;
 $sysPrompt = $MINESEC_BASE . ($sysPrompt !== '' ? ("\n\n" . $sysPrompt) : '');
 
-if ($prompt === '' || strlen($prompt) > 8000) {
+/* La composition d'une épreuve de l'Atelier porte le TEXTE SUPPORT entier
+   (contraction : 550 à 650 mots) et l'extrait du commentaire composé, en plus
+   du barème bloc par bloc et du programme de la séquence : sa partie fixe
+   pèse déjà ≈ 7 Ko. À 8 000 octets, toute contraction de BAC était refusée
+   (400, « Prompt invalide »), affichée « Ambassa est injoignable » —
+   constaté en production le 22/10/2026, dès que le corpus a offert des
+   textes de la bonne longueur. Plafond propre à cette action. */
+$plafondPrompt = ((string) ($body['action'] ?? '') === 'epreuve_minesec') ? 16000 : 8000;
+if ($prompt === '' || strlen($prompt) > $plafondPrompt) {
     http_response_code(400);
-    echo json_encode(['error' => 'Prompt invalide (1-8000 chars)']);
+    echo json_encode(['error' => 'Prompt invalide (1-' . $plafondPrompt . ' octets)']);
     exit;
 }
 
