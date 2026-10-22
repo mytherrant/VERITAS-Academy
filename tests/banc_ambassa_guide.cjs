@@ -80,6 +80,11 @@ ok(diag('Remplace le groupe nominal « l’homme enterré » par un synonyme qui
   'notion plaquée : « synonyme qui appartient au vocabulaire de… » détecté');
 ok(diag('Remplace le mot « monsieur » par un homophone qui maintient le sens de moquerie.').includes('plaquee'),
   'notion plaquée : « homophone qui maintient le sens » détecté');
+ok(diag('Dans la phrase « Mais la réalité laisse les députés sidérés », remplace le verbe « laisse » par un synonyme du lexique des sensations, sans modifier le sens.').includes('plaquee'),
+  'notion plaquée : « synonyme du lexique des sensations » (sans participe) détecté — production 22/10');
+ok(!diag('Remplace le mot « bagnole » par un synonyme de registre soutenu.').includes('plaquee')
+  && !diag('Relève dans le texte trois mots du champ lexical de la nature.').includes('plaquee'),
+  'notion plaquée : registre de langue et relevé de champ lexical ne sont pas signalés');
 ok(!diag('Remplace le mot « taxes » par un synonyme qui convient dans la phrase.').includes('plaquee')
   && !diag('Complète la phrase avec l’homophone qui convient : « sens » ou « cent ».').includes('plaquee'),
   'notion plaquée : une question juste n’est pas signalée');
