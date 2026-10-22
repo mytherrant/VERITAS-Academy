@@ -44,6 +44,24 @@ if (!defined('MTN_TARGET_ENV')) define('MTN_TARGET_ENV',       'sandbox');
 if (!defined('MTN_API_BASE')) define('MTN_API_BASE',         'https://sandbox.momodeveloper.mtn.com');
 
 // ============================================================
+// 🟢 MONETBIL — agrégateur camerounais (Widget API v2.1, redirection)
+// ============================================================
+// ⭐ EN ÉTUDE (24/09/2026) — squelette SANDBOX, non branché au frontend, non
+//    déployé. Voir api/payment_monetbil.php pour l'état exact et les limites
+//    connues (notamment : PAS d'API de versement documentée à ce jour, donc
+//    le parrainage automatique ne peut pas encore passer par Monetbil).
+//
+// 👉 1. Compte créé sur https://www.monetbil.com/try-monetbil
+// 👉 2. Service créé sur https://www.monetbil.com/services/create
+// 👉 3. Récupérez Service key + Service secret sur la fiche du service
+// 👉 4. Déclarez l'URL de notification dans la config du service :
+//       https://veritas-school.com/api/payment_monetbil.php?action=notify
+//       (méthode POST, recommandé)
+
+if (!defined('MONETBIL_SERVICE_KEY')) define('MONETBIL_SERVICE_KEY', 'À_REMPLIR_DEPUIS_MONETBIL_SERVICES');
+if (!defined('MONETBIL_SERVICE_SECRET')) define('MONETBIL_SERVICE_SECRET', 'À_REMPLIR_DEPUIS_MONETBIL_SERVICES');
+
+// ============================================================
 // 🔀 QUEL FOURNISSEUR ENCAISSE ? (CamerPay ou CamPay)
 // ============================================================
 // VÉRITAS sait parler aux deux. Cette constante tranche :
@@ -263,19 +281,27 @@ if (!defined('GEMINI_API_KEY')) define('GEMINI_API_KEY',  '');                 /
 //   GEMINI_MODEL       = tier gratuit/visiteurs. Options (mai 2026) :
 //     'gemini-2.5-flash'      → 250 req/jour (bon équilibre, défaut)
 //     'gemini-2.5-flash-lite' → 1000 req/jour (plus de volume, un peu moins fin)
-//   GEMINI_MODEL_ELITE = abonnés Élite (raisonnement avancé) :
-//     'gemini-2.5-pro'        → 100 req/jour gratuit (le plus puissant encore gratuit)
-//   ⚠️ Gemini 3.x = payant uniquement en 2026.
+//   GEMINI_MODEL_ELITE = essayé en premier pour tous.
+//     ⚠️ 22/10/2026 : 'gemini-2.5-pro' répond 404 (« no longer available to new
+//     users ») et 'gemini-3.1-pro-preview' n'a pas d'offre gratuite → Flash.
+//   GEMINI_MODEL_RESERVE = 3e modèle gratuit, quota journalier distinct
+//     (essayé quand Flash est épuisé) : 'gemini-3.5-flash-lite'.
 if (!defined('GEMINI_MODEL')) define('GEMINI_MODEL',       'gemini-2.5-flash');
-if (!defined('GEMINI_MODEL_ELITE')) define('GEMINI_MODEL_ELITE', 'gemini-2.5-pro');
+if (!defined('GEMINI_MODEL_ELITE')) define('GEMINI_MODEL_ELITE', 'gemini-2.5-flash');
+if (!defined('GEMINI_MODEL_RESERVE')) define('GEMINI_MODEL_RESERVE', 'gemini-3.5-flash-lite');
 //
 // 🔁 REPLIS AUTOMATIQUES (remplacent Pollinations déprécié). Laisser vide = repli ignoré.
 //    Ordre de bascule si Gemini échoue/sature : Groq → Mistral → Pollinations.
 //
-// 👉 GROQ (le plus rapide, Llama 70B, ~1000 req/jour gratuit) :
-//    https://console.groq.com/keys
+// 👉 GROQ (le plus rapide, gratuit : 1 000 req/jour, 200 000 jetons/jour) :
+//    https://console.groq.com/keys — Llama 3.3 70B retiré du catalogue (oct. 2026).
 if (!defined('GROQ_API_KEY')) define('GROQ_API_KEY',    '');                          // ← clé Groq (gratuite)
-if (!defined('GROQ_MODEL')) define('GROQ_MODEL',      'llama-3.3-70b-versatile');
+if (!defined('GROQ_MODEL')) define('GROQ_MODEL',      'openai/gpt-oss-120b');
+//
+// 👉 OPENROUTER (modèles « :free » : 50 req/jour, sans carte) :
+//    https://openrouter.ai/keys — liste à jour : https://openrouter.ai/api/v1/models
+if (!defined('OPENROUTER_API_KEY')) define('OPENROUTER_API_KEY', '');                    // ← clé OpenRouter (gratuite)
+if (!defined('OPENROUTER_MODEL')) define('OPENROUTER_MODEL', 'minimax/minimax-m3.1-flash:free');
 //
 // 👉 MISTRAL (excellent français, 1 milliard de tokens/mois gratuit) :
 //    https://console.mistral.ai/api-keys
@@ -283,10 +309,10 @@ if (!defined('MISTRAL_API_KEY')) define('MISTRAL_API_KEY', '');                 
 if (!defined('MISTRAL_MODEL')) define('MISTRAL_MODEL',   'mistral-large-latest');
 //
 // 🚀 v1.4.2 — « JAMAIS À COURT DE TOKENS » :
-// 👉 CEREBRAS — 1 MILLION de tokens/JOUR gratuits (le plus généreux 2026),
-//    inférence ~20× plus rapide. Clé : https://cloud.cerebras.ai
-if (!defined('CEREBRAS_API_KEY')) define('CEREBRAS_API_KEY', '');                         // ← clé Cerebras (gratuite)
-if (!defined('CEREBRAS_MODEL')) define('CEREBRAS_MODEL',   'llama-3.3-70b');
+// 👉 CEREBRAS — ⚠️ plus de gratuit permanent (oct. 2026) : essai 5 $ / 30 jours.
+//    Clé : https://cloud.cerebras.ai
+if (!defined('CEREBRAS_API_KEY')) define('CEREBRAS_API_KEY', '');                         // ← clé Cerebras (essai)
+if (!defined('CEREBRAS_MODEL')) define('CEREBRAS_MODEL',   'gpt-oss-120b');
 //
 // 👉 SAMBANOVA — tier gratuit PERSISTANT (Llama 3.3 70B → 405B).
 //    Clé : https://cloud.sambanova.ai
