@@ -184,6 +184,35 @@
   :is(#vrtNav,footer[style*="background:#001136"]) > [style*="1.25fr"] :is([style*="display:flex"]){justify-content:center;align-items:center}
   :is(#vrtNav,footer[style*="background:#001136"]) > [style*="1.25fr"] p{margin-left:auto!important;margin-right:auto!important}
 }
+
+/* ── Pied SOBRE au téléphone (22/10/2026) ──────────────────────────────────
+   Mesuré à 375 px : 1 258 px de pied, un écran et demi. Jacques : « trop long
+   et surchargé ». On garde tout le contenu, on retire la mise en scène :
+   · les trois listes perdent leur titre de colonne et coulent en lignes
+     centrées (17 liens en ~6 lignes au lieu de 17) ;
+   · les pastilles MTN / Orange / Reçu sous la marque répétaient les logos de
+     « Paiements acceptés » : elles partent, les logos restent sur UNE ligne ;
+   · la barre du bas garde de quoi passer sous la bulle d'Ambassa. */
+.vrt-burger-outils{display:none}
+@media (max-width:700px){
+  footer[style*="background:#001136"] > [style*="1.25fr"]{grid-template-columns:minmax(0,1fr)!important;gap:16px!important;padding-top:36px!important;padding-bottom:20px!important}
+  footer[style*="background:#001136"] > [style*="1.25fr"] > :first-child > p{margin-bottom:0!important;font-size:13.5px!important}
+  footer[style*="background:#001136"] > [style*="1.25fr"] > :first-child > [style*="flex-wrap:wrap"]{display:none!important}
+  footer[style*="background:#001136"] > [style*="1.25fr"] > :not(:first-child) > :first-child{display:none!important}
+  footer[style*="background:#001136"] > [style*="1.25fr"] > :not(:first-child) > [style*="flex-direction:column"]{flex-direction:row!important;flex-wrap:wrap;justify-content:center;gap:4px 16px!important}
+  footer[style*="background:#001136"] > [style*="1.25fr"] > :not(:first-child) a{font-size:13.5px!important}
+  footer[style*="background:#001136"] [style*="1.4fr"]{gap:16px!important;padding-top:18px!important;padding-bottom:18px!important}
+  footer[style*="background:#001136"] [style*="1.4fr"] > :last-child{text-align:center}
+  footer[style*="background:#001136"] div:has(> [role="img"][aria-label]){flex-wrap:nowrap!important;justify-content:center;gap:6px!important}
+  footer[style*="background:#001136"] [role="img"][aria-label]{height:30px!important;padding:0 4px!important}
+  footer[style*="background:#001136"] [role="img"][aria-label] svg{width:40px;height:16px}
+  footer[style*="background:#001136"] [style*="space-between"]{justify-content:center!important;text-align:center;padding-top:14px!important;padding-bottom:88px!important}
+  /* Thème et traduction passent dans le menu ☰ : au téléphone, trois bulles
+     empilées couvraient le texte sur toute la marge droite. Ambassa reste. */
+  .vh60,.vh61{display:none!important}
+  .vrt-burger-outils{display:flex;gap:8px;margin-top:8px}
+}
+.vrt-burger-outils button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px;border-radius:10px;border:1px solid rgba(0,17,54,.12);background:transparent;font:500 14px Poppins,sans-serif;color:inherit;cursor:pointer}
 @media (min-width:1440px){ :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{max-width:1330px!important} }
 @media (min-width:1760px){ :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{max-width:1440px!important} }
 

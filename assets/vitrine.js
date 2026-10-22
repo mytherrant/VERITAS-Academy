@@ -2743,6 +2743,21 @@
   };
 
   /* ── Démarrage ─────────────────────────────────────────────────────────── */
+  /* Prose justifiée au téléphone : seuls les paragraphes qui COULENT (alignés
+     à gauche, plus de 120 signes) reçoivent `.vjust-m` — la feuille ne s'en
+     sert que sous 700 px. Un texte centré, un libellé, le pied : jamais. */
+  function marquerProse() {
+    var ps = document.querySelectorAll('p');
+    for (var i = 0; i < ps.length; i++) {
+      var p = ps[i];
+      if (p.closest('footer, nav, button, #vrtBurger')) continue;
+      var a = getComputedStyle(p).textAlign;
+      if ((a === 'start' || a === 'left') && (p.textContent || '').trim().length > 120) {
+        p.classList.add('vjust-m');
+      }
+    }
+  }
+
   function demarrer() {
     /* Le lien du site est attaché AU PREMIER RENDU, pas quand l'extrait du
        jour arrive. Les href de partage sont figés au build, sans adresse : si
@@ -2758,6 +2773,7 @@
     reveler();
     marquerProchaineDate();
     animerAnneaux();
+    marquerProse();
     /* Les actualités partent APRÈS le premier rendu : elles viennent d'un flux
        externe (via notre proxy), elles ne doivent pas retarder d'une
        milliseconde l'affichage de la page. L'onglet MINESEC est celui qui

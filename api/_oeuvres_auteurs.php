@@ -220,6 +220,16 @@ function oa_exclus()
         'lemalafricainaliougargahamanadjizlibrary' => 'essai',
         'rivieredesangenquetessurlesmortsnonelucideesquiarolk' => 'enquête criminelle',
         'titusedzoameditationsdeprisonepublivres' => 'témoignage politique',
+        /* Extraction qui a perdu les sauts de ligne : le mot de fin de vers
+           est recollé au suivant (« abîmevampire », « aveccompassion »).
+           Mesuré le 22/10/2026 : 19 à 26 mots recollés pour mille chez Kayo,
+           ~2-3 pour mille ici, contre moins de 1 dans les œuvres saines.
+           Les afficher publierait un texte d'auteur altéré ; ils reviendront
+           quand l'index aura été refait depuis une source propre. */
+        'patricekayovepredesjoursdedoute' => 'vers recollés à l\'extraction',
+        'patricekayohymneetsagessesuivideparolesintimes' => 'vers recollés à l\'extraction',
+        'ezabotovillecruelle' => 'mots recollés à l\'extraction',
+        'jusquanouvelavis' => 'mots recollés à l\'extraction',
     ];
 }
 

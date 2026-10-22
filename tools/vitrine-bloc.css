@@ -413,8 +413,17 @@ html{scroll-behavior:smooth}
   flex: 0 0 auto;
 }
 
+/* Au téléphone, la prose reste JUSTIFIÉE (demande de Jacques, 22/10/2026) :
+   la colonne est unique et pleine largeur, et la césure française évite les
+   rivières. Les puces de liste, elles, restent au fil — trop courtes. */
 @media (max-width: 640px) {
-  [data-vp] p, [data-vp] li, .vcard p, .vsec-sub {
+  [data-vp] p, .vcard p, .vsec-sub {
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+  [data-vp] li {
     text-align: start;
     hyphens: manual;
     -webkit-hyphens: manual;
