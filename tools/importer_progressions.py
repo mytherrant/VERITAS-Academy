@@ -222,6 +222,12 @@ def atelier_de(lib, systeme):
     """La classe telle que l'Atelier la nomme, pour relier une épreuve à sa
     progression ; '' quand l'Atelier n'a pas d'équivalent exact."""
     s = sans_accents(lib).lower()
+    # EST 1er cycle (22/10/2026, Jacques) : la Ne année puise dans les textes
+    # du niveau ESG voisin, rangés dans les mêmes domaines de vie que ses
+    # 5 modules. La 4e année garde la classe de l'Atelier qui porte le CAP.
+    m = re.match(r'^([1-4])\s*(?:re|ere|e|eme)?\s+annee\b', s)
+    if systeme == 'EST' and m:
+        return {'1': '6e', '2': '5e', '3': '4e', '4': '4e année technique'}[m.group(1)]
     for k, v in (('6', '6e'), ('5', '5e'), ('4', '4e'), ('3', '3e')):
         if re.match(r'^' + k + r'\s*(e|eme)\b', s) and 'annee' not in s: return v
     if 'seconde' in s or s.startswith('2nde'): return '2nde'
