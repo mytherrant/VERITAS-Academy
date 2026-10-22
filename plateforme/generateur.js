@@ -336,6 +336,11 @@
     if (/4e annee technique|cap/.test(t)) return ['3', 'tech'];
     if (/eniet 1|bep|\bbp\b/.test(t)) return ['3', '2nde', 'tech'];
     if (/eniet|capiet/.test(t)) return ['2nde', '1ere', 'tech'];
+    /* EST 1er cycle : « 1re année » → textes de 6e … « 3e année » → 4e. Sans
+       cela « 3e année STT » recevait des textes de 3e et « 1re année » aucun
+       niveau (22/10/2026). */
+    var an = t.match(/\b([1-4])(?:re|ere|e|eme)? annee\b/);
+    if (an) return [String(7 - +an[1]), 'tech'];
     return j.length ? j : [];
   }
 
