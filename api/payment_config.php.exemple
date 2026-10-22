@@ -287,7 +287,9 @@ if (!defined('GEMINI_API_KEY')) define('GEMINI_API_KEY',  '');                 /
 //   GEMINI_MODEL_RESERVE = 3e modèle gratuit, quota journalier distinct
 //     (essayé quand Flash est épuisé) : 'gemini-3.5-flash-lite'.
 if (!defined('GEMINI_MODEL')) define('GEMINI_MODEL',       'gemini-2.5-flash');
-if (!defined('GEMINI_MODEL_ELITE')) define('GEMINI_MODEL_ELITE', 'gemini-2.5-flash');
+//   ✅ Banc du 22/10/2026 : 'gemini-3.5-flash' répond sur toutes nos clés ;
+//   ⛔ 'gemini-3.8-flash' et 'gemini-flash-latest' restaient muets 90 s.
+if (!defined('GEMINI_MODEL_ELITE')) define('GEMINI_MODEL_ELITE', 'gemini-3.5-flash');
 if (!defined('GEMINI_MODEL_RESERVE')) define('GEMINI_MODEL_RESERVE', 'gemini-3.5-flash-lite');
 //
 // 🔁 REPLIS AUTOMATIQUES (remplacent Pollinations déprécié). Laisser vide = repli ignoré.
@@ -306,7 +308,7 @@ if (!defined('OPENROUTER_MODEL')) define('OPENROUTER_MODEL', 'minimax/minimax-m3
 // 👉 MISTRAL (excellent français, 1 milliard de tokens/mois gratuit) :
 //    https://console.mistral.ai/api-keys
 if (!defined('MISTRAL_API_KEY')) define('MISTRAL_API_KEY', '');                          // ← clé Mistral (gratuite)
-if (!defined('MISTRAL_MODEL')) define('MISTRAL_MODEL',   'mistral-large-latest');
+if (!defined('MISTRAL_MODEL')) define('MISTRAL_MODEL',   'mistral-medium-latest'); // Large = hors offre gratuite (403)
 //
 // 🚀 v1.4.2 — « JAMAIS À COURT DE TOKENS » :
 // 👉 CEREBRAS — ⚠️ plus de gratuit permanent (oct. 2026) : essai 5 $ / 30 jours.
