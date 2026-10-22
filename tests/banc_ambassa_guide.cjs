@@ -100,6 +100,24 @@ ok(/Barème : 1,5 pt/.test(qF.corrige) && r4.aVentiler.length === 0, 'le barème
 const cC = r4.controles.find(c => c.cle === 'corriges');
 ok(cC && cC.ok === true, 'le compte rendu ne signale plus de corrigé sans barème — ' + (cC && cC.libelle));
 
+/* Sujet de commentaire qui recopie l'extrait (production, 22/10/2026, Tle A) :
+   le passage est retiré, la consigne reste, le tutoiement du roman ne fait plus
+   lever d'alerte. */
+if (stBac) {
+  const extrait = 'Meka était en avance sur le bonjour du Seigneur, le premier coup de cloche de la mission. Tu sais bien, lui dit sa femme, que tu ne dormiras plus avant que le jour se lève sur le village entier. Il se leva, alluma sa lampe et sortit dans la cour encore noire.';
+  const planC = G.planEpreuve(stBac, { classe: 'Terminale' });
+  const rC = G.validerEpreuve({ titre: 'T', consigne: 'C', questions: [], sujets: [
+    { texte: 'TEXTE 2 : Ferdinand Oyono, Le Vieux Nègre et la médaille — L’incipit\n' + extrait
+      + '\nVous ferez de ce texte un commentaire composé. Vous pourrez montrer comment l’auteur peint l’attente de Meka.', corrige: 'Plan. Barème : 6 + 6 + 6 + 2.' },
+    { texte: 'Dissertation.', corrige: 'Barème : 20 pts.' }] },
+    { plan: planC, struct: stBac, classe: 'Terminale',
+      textes: [{ n: 1, role: 'support', text: texteS, words: 20 }, { n: 2, role: 'commentaire', text: extrait, words: 50 }] }, {});
+  const sC = rC.sujets.find(s => s.genre === 'commentaire');
+  ok(sC && !/Meka était en avance/.test(sC.texte) && !/^TEXTE 2/.test(sC.texte) && /commentaire composé/.test(sC.texte),
+    'commentaire : l’extrait recopié et l’en-tête « TEXTE 2 » sont retirés, la consigne reste — « ' + (sC && sC.texte.slice(0, 50)) + ' »');
+  ok(!rC.controles.some(c => /tutoiement/.test(c.libelle || '')), 'commentaire : le tutoiement du roman recopié ne lève plus d’alerte');
+}
+
 /* Parcours complet : composer() avec un faux serveur IA (deux appels). */
 const appels = [];
 const fauxFetch = (url, init) => {

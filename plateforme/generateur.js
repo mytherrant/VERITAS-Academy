@@ -1617,6 +1617,24 @@
 
   /* Le sujet recopie-t-il le texte support ? Douze mots consécutifs du
      texte retrouvés dans le sujet suffisent à le dire. */
+  /* Le sujet sans les paragraphes repris du texte (12 mots consécutifs
+     au moins) ni l'en-tête « TEXTE 2 : auteur, titre ». */
+  function sansRecopie(sujet, texte) {
+    var pt = ' ' + plat(texte) + ' ';
+    var garde = String(sujet || '').split(/\n+/).filter(function (par) {
+      var t = par.trim();
+      if (!t) return false;
+      if (/^\s*texte\s*(?:2|ii|n\s*°?\s*2)\b/i.test(t) && t.length < 260) return false;
+      var mots = plat(t).trim().split(' ');
+      if (mots.length < 12) return true;
+      for (var i = 0; i + 12 <= mots.length; i += 4) {
+        if (pt.indexOf(' ' + mots.slice(i, i + 12).join(' ') + ' ') >= 0) return false;
+      }
+      return true;
+    });
+    return garde.join('\n').trim();
+  }
+
   function recopie(sujet, texte) {
     var ps = plat(sujet), mt = plat(texte).trim().split(' ');
     if (mt.length < 24) return false;
@@ -1826,8 +1844,20 @@
         if (sb === null) res.controles.push({ ok: false, libelle: 'Corrigé « ' + s.titre + ' » : aucune ligne « Barème : … » chiffrée — à ajouter.' });
         else if (s.pts && Math.abs(sb - s.pts) > 0.001) res.controles.push({ ok: false, libelle: 'Corrigé « ' + s.titre + ' » : barème de ' + sb + ' points pour un sujet sur ' + s.pts + ' — à rectifier.' });
       }
+      /* LE SUJET DE COMMENTAIRE NE RECOPIE PAS LE TEXTE (production,
+         22/10/2026, Terminale A) : Ambassa y remettait « TEXTE 2 : … » et
+         l'extrait d'Oyono, déjà imprimé à part — et le tutoiement du roman
+         faisait lever une fausse alerte de tutoiement. On retire les
+         paragraphes recopiés et l'en-tête « TEXTE 2 » ; on ne garde que la
+         consigne, et on ne signale que si rien de propre ne reste. */
       if (s.genre === 'commentaire' && com && recopie(s.texte, com.text)) {
-        res.controles.push({ ok: false, libelle: 'Sujet de commentaire : des passages du texte y sont recopiés — il est déjà imprimé à part ; ne gardez que la consigne.' });
+        var propreC = sansRecopie(s.texte, com.text);
+        if (propreC && /commentaire|centres?\s+d.int[ée]r[eê]t|montrer|analyse/i.test(propreC)) {
+          s.texte = vous ? vouvoyer(propreC) : propreC;
+          res.controles.push({ ok: true, libelle: 'Sujet de commentaire : passages du texte recopiés retirés automatiquement — seule la consigne reste.' });
+        } else {
+          res.controles.push({ ok: false, libelle: 'Sujet de commentaire : des passages du texte y sont recopiés — il est déjà imprimé à part ; ne gardez que la consigne.' });
+        }
       }
       if (vous && tutoie(s.texte)) {
         res.controles.push({ ok: false, libelle: 'Sujet « ' + s.titre + ' » : tutoiement — le second cycle compose au vouvoiement (« Vous montrerez… »).' });
