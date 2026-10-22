@@ -30,8 +30,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <script src="./support.js?v=b7335820"></script>
 <script src="./minesec.js?v=5109f163"></script>
-<script src="./conformite.js?v=2c2aee2a"></script>
-<script src="./exercices.js?v=0018edb0"></script>
+<script src="./conformite.js?v=582339b2"></script>
+<script src="./exercices.js?v=4b2beb71"></script>
 <script src="./generateur.js?v=355c6046"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=221641f0"></script>
@@ -508,6 +508,14 @@
      feuille : il ne bouge pas. */
   button, a[href], input[type="submit"], input[type="button"]{
     text-align:center; justify-content:center}
+  /* …mais `text-align:left` en ligne ne retenait que le TEXTE : le
+     contenu flex restait centré par la règle ci-dessus. Mesuré le
+     22/10/2026 dans le menu latéral : l'icône d'« Accueil » à 76 px,
+     celle de « Notifications » à 58 px — chaque entrée centrée sur sa
+     propre largeur, aucune colonne d'icônes. Un bouton qui se déclare
+     aligné à gauche l'est donc aussi en flex. */
+  button[style*="text-align: left"],button[style*="text-align:left"],
+  a[href][style*="text-align: left"],a[href][style*="text-align:left"]{justify-content:flex-start}
 
   /* ═══════════ CENTRAGE, ESPACES, CONFORT DE LECTURE ═══════════
      Mesuré : les dix anneaux d'icônes étaient déjà centrés à l'intérieur
@@ -4468,6 +4476,7 @@ class Component extends DCLogic {
       coObjProp:null,coObjBusy:false,coObjErr:'',
       assistOuvert:false,assistSaisie:'',assistBusy:false,assistErr:'',
       assistMsgs:this._load('minesec_assistant',[])||[],
+      notifVu:this._load('minesec_notif_vu',null)||{ts:0,ech:[]},
       introEtape:0,introOuverte:!this._load('minesec_intro_vue',false),
       invSaisie:'',invMsg:'',invMsgTon:'',invCopie:0,
       /* AUCUNE EQUIPE PAR DEFAUT. Il y en avait une, ecrite en dur :
@@ -4665,7 +4674,7 @@ class Component extends DCLogic {
       .then(r=>this.setState({coConfIA:r,coConfIABusy:false}))
       .catch(e=>this.setState({coConfIABusy:false,coConfIAErr:
         (e&&e.message==='quota')?'Quota d\u2019analyse IA \u00e9puis\u00e9 pour aujourd\u2019hui.'
-        :'Ambassa est injoignable. Les contr\u00f4les automatiques restent valables.'}));
+        :(e&&e.serveur)||'Ambassa est injoignable. Les contr\u00f4les automatiques restent valables.'}));
     },m=>this.setState({coConfIAErr:m,coConfOpen:true}));
   }
   /* Blocage du clic droit et de la copie sur les seuls textes du corpus.
@@ -5406,9 +5415,12 @@ class Component extends DCLogic {
         this.setState({assistMsgs:suite,assistBusy:false});
       })
       .catch(e=>this.setState({assistBusy:false,assistErr:(e&&e.message==='quota')
-        ?this._messageQuotaIA():'Ambassa est injoignable pour le moment.'}));
+        ?this._messageQuotaIA():(e&&e.serveur)||'Ambassa est injoignable pour le moment.'}));
     },m=>this.setState({assistErr:m}));
   }
+  /* Ouvrir l'écran Activité vaut lecture : l'heure et les échéances vues
+     sont retenues, la cloche ne compte plus que ce qui arrive ensuite. */
+  _notifsVues(ech){const v={ts:Date.now(),ech:ech||[]};this._save('minesec_notif_vu',v);return v;}
   _viderAssistant(){this._save('minesec_assistant',[]);this.setState({assistMsgs:[],assistErr:''});}
   /* ---- Quota d'IA par usager -------------------------------------------
      Chaque appel a Ambassa est decompte du compte de CELUI qui le declenche.
@@ -5536,7 +5548,7 @@ class Component extends DCLogic {
           source:t.reference||t.author||''},r)});
       })
       .catch(e=>this.setState({exBusy:false,exErr:(e&&e.message==='quota')
-        ?this._messageQuotaIA():'Ambassa est injoignable pour le moment.'}));
+        ?this._messageQuotaIA():(e&&e.serveur)||'Ambassa est injoignable pour le moment.'}));
     },m=>this.setState({exErr:m,exOuvert:true}));
   }
   _proposerObjectif(){
@@ -5553,7 +5565,7 @@ class Component extends DCLogic {
         this.setState({coObjBusy:false,coObjProp:o});
       })
       .catch(e=>this.setState({coObjBusy:false,coObjErr:(e&&e.message==='quota')
-        ?this._messageQuotaIA():'Ambassa est injoignable pour le moment.'}));
+        ?this._messageQuotaIA():(e&&e.serveur)||'Ambassa est injoignable pour le moment.'}));
     },m=>this.setState({coObjErr:m}));
   }
   _appliquerObjectif(){
@@ -5609,7 +5621,7 @@ class Component extends DCLogic {
     }).catch(e=>this.setState({exBusy:false,
       exErr:(e&&e.message==='quota')
         ?'Quota d\u2019IA \u00e9puis\u00e9 pour aujourd\u2019hui. Les exercices calcul\u00e9s (grille, anagrammes, texte \u00e0 trous) restent disponibles.'
-        :'Ambassa est injoignable. Les exercices calcul\u00e9s restent disponibles.'}));
+        :(e&&e.serveur)||'Ambassa est injoignable. Les exercices calcul\u00e9s restent disponibles.'}));
     },m=>this.setState({exErr:m}));
   }
   /* L'annexe est rangee SUR l'epreuve : elle suit la relecture, la validation
@@ -5858,7 +5870,7 @@ class Component extends DCLogic {
       ?'Le serveur a refusé la demande ('+(e.serveur||'demande invalide')+') : votre épreuve n\u2019a pas été modifiée. Signalez-le au centre si cela se répète.'
       :(e&&/reponse_/.test(e.message||''))?'Ambassa a renvoyé une réponse incomplète : votre épreuve n’a pas été modifiée. Vous pouvez relancer (un nouvel appel IA sera décompté).'
       :(e&&e.message==='delai')?'Ambassa n’a pas répondu à temps (plus de deux minutes). Votre épreuve n’a pas été modifiée : relancez dans un instant.'
-      :'Ambassa est injoignable pour le moment. Votre épreuve n’a pas été modifiée.'}));
+      :(e&&e.serveur)||'Ambassa est injoignable pour le moment. Votre épreuve n’a pas été modifiée.'}));
   }
   _appliquerComposition(id,res,ctx,struct,mode){
     const a=(this.state.epreuves||[]).find(e=>e.id===id);
@@ -8512,7 +8524,7 @@ class Component extends DCLogic {
       .then(r=>this.setState({confIA:r,confIABusy:false}))
       .catch(e=>this.setState({confIABusy:false,confIAErr:
         e&&e.message==='quota'?'Quota d\u2019analyse IA épuisé pour aujourd\u2019hui.'
-        :'Ambassa est injoignable pour le moment. Les contr\u00f4les automatiques restent valables.'}));
+        :(e&&e.serveur)||'Ambassa est injoignable pour le moment. Les contr\u00f4les automatiques restent valables.'}));
     },m=>this.setState({confIAErr:m,confOpen:true}));
   }
   _qPts(n,kind,idx){const a=this._active();if(!a||!a.pts)return null;
@@ -10057,6 +10069,18 @@ class Component extends DCLogic {
           if(e)this.setState({activeId:e.id,screen:'composeur'},()=>{this._persist();window.scrollTo(0,0);});}};};
 
     const gTraiter=[];
+    /* Les échéances comptées par la cloche figurent aussi dans la liste :
+       elle annonçait 42, l'écran répondait « Rien à afficher ». */
+    echeancesUrgentes.forEach(x=>gTraiter.push({
+      avatar:'display:inline-grid;place-items:center;width:32px;height:32px;border-radius:9px;flex:none;'
+        +'font-family:Poppins;font-size:11px;font-weight:700;color:var(--cffffff,#fff);background:'+x.urgence.couleur,
+      initials:x.genre==='cours'?'C':'E',
+      textEl:this._mentionEl('\u00ab\u00a0'+x.titre+'\u00a0\u00bb '+(x.urgence.cle==='retard'?'est en retard':'est \u00e0 rendre '+x.urgence.libelle)),
+      ago:x.urgence.libelle,
+      chip:'font-size:10.5px;font-weight:700;font-family:Poppins;color:var(--cffffff,#fff);background:'+x.urgence.couleur+';padding:3px 10px;border-radius:999px;flex:none',
+      chipLabel:'\u00c9ch\u00e9ance',
+      open:()=>this.setState(x.genre==='cours'?{activeCoursId:x.id,screen:'cours'}:{activeId:x.id,screen:'composeur'},
+        ()=>{this._persist();window.scrollTo(0,0);})}));
     st.epreuves.filter(e=>e.status==='relecture').forEach(e=>gTraiter.push({
       avatar:this._av(st.users.find(u=>u.id===e.ownerId)||{name:'?'},32),
       initials:this._initials((st.users.find(u=>u.id===e.ownerId)||{name:'?'}).name),
@@ -10129,7 +10153,17 @@ class Component extends DCLogic {
        afficher (il lisait « Trimestre 1 » comme une date) et la cloche ne
        comptait que l'activite. On ne retient que le depasse et les sept jours
        qui viennent — au-dela, ce n'est plus une alerte. */
-    const nbNotif=acts.length+echeancesUrgentes.length;
+    /* ⚠️ LA CLOCHE NE COMPTE QUE LE NOUVEAU (22/10/2026, « les notifications
+       ne fonctionnent pas » — Jacques, badge à 42). Elle additionnait TOUTE
+       l'activité depuis la création, ses propres actions comprises, et ne
+       retenait jamais ce qui avait été vu : le nombre ne pouvait que
+       monter. Désormais : l'activité des AUTRES depuis la dernière visite
+       de l'écran Activité, et les échéances urgentes pas encore vues (une
+       échéance qui passe de « demain » à « en retard » revient). */
+    const notifVu=st.notifVu||{ts:0,ech:[]};
+    const cleEch=x=>x.genre+':'+x.id+':'+x.urgence.cle;
+    const nbNotif=acts.filter(a=>a.userId!==me.id&&(a.ts||0)>(notifVu.ts||0)).length
+      +echeancesUrgentes.filter(x=>(notifVu.ech||[]).indexOf(cleEch(x))<0).length;
     const creditPct=meLimit>0?Math.max(0,Math.min(100,Math.round((meRemaining/meLimit)*100))):100;
     /* ---- Garde-fou de conformité -------------------------------------
        Recalculé à CHAQUE rendu, sans appel réseau : c'est ce qui en fait un
@@ -10492,7 +10526,7 @@ class Component extends DCLogic {
         const par={...(st.msgsByConv||{}),[convIdAct]:msgs};
         this._save('minesec_convmsgs',par);
         this.setState({msgsByConv:par,chatDraft:''},()=>this._persist());},
-      notifDot:acts.length?'position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--cf39200,#f39200);border:1.5px solid var(--cffffff,#fff)':hidden,
+      notifDot:nbNotif?'position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--cf39200,#f39200);border:1.5px solid var(--cffffff,#fff)':hidden,
       notReady:!ready&&st.screen!=='login',isAccueil:ready&&st.screen==='accueil',isListe:ready&&st.screen==='liste',isFiche:ready&&st.screen==='fiche',isEpreuves:ready&&st.screen==='epreuves',isComposeur:ready&&st.screen==='composeur',isEquipe:ready&&st.screen==='equipe',isProfil:ready&&st.screen==='profil',isApercu:ready&&st.screen==='apercu',isCours:ready&&st.screen==='cours',isCoursEdit:ready&&st.screen==='coursEdit',
       gabarits:cGabarits,coursView:cCoursView,co:cCo,newCours:()=>this.setState({screen:'cours'},()=>window.scrollTo(0,0)),
       showChrome:ready&&st.screen!=='login',isLogin:st.screen==='login',isAbo:ready&&st.screen==='abo',
@@ -11733,7 +11767,8 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       topIconBtn:'width:40px;height:40px;border-radius:10px;border:1px solid var(--ce6ecf3,#e6ecf3);background:var(--cffffff,#fff);cursor:pointer;display:grid;place-items:center;position:relative;flex:none',
       searchGlobal:e=>{const v=val(e);this.setState(s2=>({filters:{...s2.filters,q:v},screen:v&&s2.screen!=='liste'?'liste':s2.screen}));},
       goCollab:()=>this.setState({screen:'collab',chatOpen:false,notifOpen:false},()=>window.scrollTo(0,0)),
-      goActivite:()=>this.setState({screen:'activite',notifOpen:false,chatOpen:false},()=>window.scrollTo(0,0)),
+      goActivite:()=>this.setState({screen:'activite',notifOpen:false,chatOpen:false,
+        notifVu:this._notifsVues(echeancesUrgentes.map(cleEch))},()=>window.scrollTo(0,0)),
       isCollab:ready&&st.screen==='collab',
       isActivite:ready&&st.screen==='activite',
       /* Le garde-fou n'apparait qu'une fois l'epreuve COMPOSEE (un texte, des
