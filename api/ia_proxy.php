@@ -15,9 +15,9 @@
  *  2. PHP calcule le tier RÉEL côté serveur (abonnement) → choix du modèle
  *  3. PHP cherche d'abord dans le CACHE VALIDÉ (table veritas_validated_answers)
  *  4. Cache miss → CHAÎNE GRATUITE (22/10/2026) : Gemini Flash → Flash-Lite
- *     (chaque clé) → OpenRouter :free → Cerebras → Groq gpt-oss-120b →
- *     Cloudflare Workers AI → NVIDIA → SambaNova → Mistral.
- *     Claude et Pollinations retirés.
+ *     (chaque clé) → Groq → OpenRouter :free → Cloudflare Workers AI →
+ *     NVIDIA → Mistral. Claude, Pollinations, SambaNova et Cerebras retirés
+ *     (ces deux derniers exigent désormais un moyen de paiement).
  *  5. Stocke la réponse en attente de validation enseignant
  *  6. Retourne la réponse au client
  */
@@ -496,7 +496,7 @@ $model      = $modelElite; // 🚀 top modèle pour TOUS (visiteurs inclus)
 //      → réserves). Google compte le quota PAR MODÈLE : chaque modèle ajouté est
 //      un quota journalier de plus, gratuit.
 //   2. Groq : gpt-oss-120b → qwen3.8-27b → gpt-oss-20b (quota par modèle aussi).
-//   3. OpenRouter :free → Cloudflare → NVIDIA → Mistral → SambaNova → Cerebras.
+//   3. OpenRouter :free → Cloudflare → NVIDIA → Mistral.
 //   4. Dernier recours : une réponse déjà générée pour la même question.
 // Un maillon sans clé est ignoré ; un maillon épuisé, retiré ou refusé est mis
 // de côté (ia_marquer_indispo) au lieu d'être rappelé à chaque requête.
@@ -541,7 +541,9 @@ if ((string) ($body['action'] ?? '') === 'epreuve_minesec') {
 // Ordre par clé : modèle « élite » → Flash → réserve Flash-Lite → réserves
 // supplémentaires (GEMINI_MODELS_EXTRA, liste séparée par des virgules ; un
 // modèle absent pour une clé est sauté 24 h après son premier 404).
-$geminiExtra = defined('GEMINI_MODELS_EXTRA') ? (string) GEMINI_MODELS_EXTRA : 'gemini-2.5-flash-lite,gemini-3.1-flash-lite';
+// gemini-2.5-flash-lite retiré : 404 « no longer available » sur nos 3 clés
+// (banc du 22/10/2026). gemini-3.1-flash-lite répond, mais lent (6-14 s) : en dernier.
+$geminiExtra = defined('GEMINI_MODELS_EXTRA') ? (string) GEMINI_MODELS_EXTRA : 'gemini-3.1-flash-lite';
 $geminiModeles = array_values(array_unique(array_filter(array_map('trim',
     array_merge([$model, $modelFree, $modelReserve], explode(',', $geminiExtra))))));
 foreach ($geminiKeys as $gIdx => $gk) {
@@ -778,9 +780,9 @@ function call_openai_chat(string $url, string $apiKey, string $model, string $sy
 function ia_modele(string $constante, string $defaut): string {
     $retires = [
         'llama-3.3-70b-versatile'             => 'openai/gpt-oss-120b',             // Groq
-        'llama-3.3-70b'                       => 'gpt-oss-120b',                    // Cerebras
         'deepseek/deepseek-chat-v3-0324:free' => 'minimax/minimax-m3.1-flash:free', // OpenRouter
         'mistral-large-latest'                => 'mistral-medium-latest',           // Mistral : Large hors offre gratuite (403)
+        'deepseek-ai/deepseek-v4.1-flash'     => 'nvidia/nemotron-3-ultra-550b-a55b', // NVIDIA : muet 90 s au banc
     ];
     $m = defined($constante) ? (string) constant($constante) : $defaut;
     return $retires[$m] ?? $m;
@@ -822,22 +824,21 @@ function ia_maillons_secours(): array {
         'modeles' => ia_liste_modeles('CLOUDFLARE_MODELS', ia_modele('CLOUDFLARE_MODEL', '@cf/openai/gpt-oss-120b'), [])];
     // NVIDIA (build.nvidia.com) — ~40 req/min ; ⚠️ conditions : l'accès gratuit
     // semble réservé au développement. Modèles : integrate.api.nvidia.com/v1/models
+    // Banc du 22/10/2026 : nemotron-3-ultra 2,6 s, bon français ; lightning
+    // 8 s (il raisonne d'abord, d'où 4 096 jetons). Muets 90 s : deepseek-v4.1-flash,
+    // glm-5.3, gemma-4 ; absents du compte (404) : mistral-large-2, kimi-k2.6.
     if (($k = ia_cle('NVIDIA_API_KEY')) !== '') $m[] = ['id' => 'nvidia', 'label' => 'NVIDIA', 'cle' => $k, 'max' => 4096,
         'url' => 'https://integrate.api.nvidia.com/v1/chat/completions',
-        'modeles' => ia_liste_modeles('NVIDIA_MODELS', ia_modele('NVIDIA_MODEL', 'deepseek-ai/deepseek-v4.1-flash'), ['mistralai/mistral-large-2-instruct'])];
+        'modeles' => ia_liste_modeles('NVIDIA_MODELS', ia_modele('NVIDIA_MODEL', 'nvidia/nemotron-3-ultra-550b-a55b'), ['nvidia/nemotron-3.5-lightning-30b-a3b'])];
     // Mistral — excellent français ; offre « Experiment » (téléphone vérifié).
     // Large est hors offre gratuite (403). Clé : https://console.mistral.ai/api-keys
     if (($k = ia_cle('MISTRAL_API_KEY')) !== '') $m[] = ['id' => 'mistral', 'label' => 'Mistral', 'cle' => $k, 'max' => 0,
         'url' => 'https://api.mistral.ai/v1/chat/completions',
         'modeles' => ia_liste_modeles('MISTRAL_MODELS', ia_modele('MISTRAL_MODEL', 'mistral-medium-latest'), ['mistral-small-latest'])];
-    // SambaNova — offre gratuite incertaine (oct. 2026). Clé : https://cloud.sambanova.ai
-    if (($k = ia_cle('SAMBANOVA_API_KEY')) !== '') $m[] = ['id' => 'sambanova', 'label' => 'SambaNova', 'cle' => $k, 'max' => 0,
-        'url' => 'https://api.sambanova.ai/v1/chat/completions',
-        'modeles' => ia_liste_modeles('SAMBANOVA_MODELS', ia_modele('SAMBANOVA_MODEL', 'Meta-Llama-3.3-70B-Instruct'), ['gpt-oss-120b'])];
-    // Cerebras — plus de gratuit permanent : essai de 5 $ / 30 jours. En dernier.
-    if (($k = ia_cle('CEREBRAS_API_KEY')) !== '') $m[] = ['id' => 'cerebras', 'label' => 'Cerebras', 'cle' => $k, 'max' => 0,
-        'url' => 'https://api.cerebras.ai/v1/chat/completions',
-        'modeles' => ia_liste_modeles('CEREBRAS_MODELS', ia_modele('CEREBRAS_MODEL', 'gpt-oss-120b'), [])];
+    // SambaNova et Cerebras RETIRÉS (22/10/2026) : tous deux exigent désormais
+    // un moyen de paiement (SambaNova 402 PAYMENT_METHOD_REQUIRED, Cerebras
+    // « Payment required »). Leurs constantes, si une config les définit
+    // encore, sont ignorées.
     return $m;
 }
 
