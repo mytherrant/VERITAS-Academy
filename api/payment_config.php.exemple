@@ -314,6 +314,20 @@ if (!defined('MISTRAL_MODEL')) define('MISTRAL_MODEL',   'mistral-large-latest')
 if (!defined('CEREBRAS_API_KEY')) define('CEREBRAS_API_KEY', '');                         // ← clé Cerebras (essai)
 if (!defined('CEREBRAS_MODEL')) define('CEREBRAS_MODEL',   'gpt-oss-120b');
 //
+// 👉 CLOUDFLARE WORKERS AI — 10 000 « neurones »/jour gratuits (~80-200 réponses),
+//    remise à zéro à 0 h UTC. Il faut les DEUX valeurs :
+//    1. jeton API avec la permission « Workers AI » : https://dash.cloudflare.com/profile/api-tokens
+//    2. identifiant de compte (Account ID), affiché dans dash.cloudflare.com → AI → Workers AI
+if (!defined('CLOUDFLARE_AI_TOKEN')) define('CLOUDFLARE_AI_TOKEN', '');                   // ← jeton Workers AI (gratuit)
+if (!defined('CLOUDFLARE_ACCOUNT_ID')) define('CLOUDFLARE_ACCOUNT_ID', '');               // ← identifiant de compte Cloudflare
+if (!defined('CLOUDFLARE_MODEL')) define('CLOUDFLARE_MODEL', '@cf/openai/gpt-oss-120b');
+//
+// 👉 NVIDIA — catalogue gratuit build.nvidia.com, ~40 req/min.
+//    ⚠️ Conditions à lire : l'accès gratuit semble réservé au développement.
+//    Clé : https://build.nvidia.com · modèles : https://integrate.api.nvidia.com/v1/models
+if (!defined('NVIDIA_API_KEY')) define('NVIDIA_API_KEY', '');                             // ← clé NVIDIA (gratuite)
+if (!defined('NVIDIA_MODEL')) define('NVIDIA_MODEL', 'deepseek-ai/deepseek-v4.1-flash');
+//
 // 👉 SAMBANOVA — tier gratuit PERSISTANT (Llama 3.3 70B → 405B).
 //    Clé : https://cloud.sambanova.ai
 if (!defined('SAMBANOVA_API_KEY')) define('SAMBANOVA_API_KEY', '');                        // ← clé SambaNova (gratuite)
