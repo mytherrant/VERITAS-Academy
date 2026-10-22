@@ -32,10 +32,10 @@
 <script src="./minesec.js?v=5109f163"></script>
 <script src="./conformite.js?v=2c2aee2a"></script>
 <script src="./exercices.js?v=0018edb0"></script>
-<script src="./generateur.js?v=b82b74e1"></script>
+<script src="./generateur.js?v=08e7a426"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=221641f0"></script>
-<script defer src="./progressions.js?v=a27c8564"></script>
+<script defer src="./progressions.js?v=6fedeb24"></script>
 <!-- seo-tete -->
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CollectionPage","name":"Atelier de Français","description":"Composez des épreuves de français conformes au programme MINESEC : l’IA Ambassa rédige l’épreuve complète (texte, questions, barème, corrigé), vous relisez. Corpus indexé par classe et par module, contrôle de conformité, export Word.","url":"https://veritas-school.com/plateforme/","inLanguage":"fr","publisher":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://veritas-school.com/"},{"@type":"ListItem","position":2,"name":"Atelier de Français","item":"https://veritas-school.com/plateforme/"}]}]}</script>
 <!-- /seo-tete -->
@@ -1912,7 +1912,7 @@
       <button onClick="{{ goComposeur }}" style="background:var(--cffffff,#fff);border:1.5px solid var(--cbcd9f2,#bcd9f2);color:var(--c1a72bb,#1a72bb);padding:12px 22px;font-size:13.5px;cursor:pointer;border-radius:999px;font-weight:600;font-family:'Poppins'" style-hover="border-color:var(--c1a72bb,#1a72bb);background:var(--cf5faff,#f5faff)">Voir le composeur</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr;gap:24px">
-      <section style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:22px 26px;box-shadow:0 2px 10px rgba(20,55,95,.05)"><h3 style="{{ secHead }}">Faits de langue repérés</h3><ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px"><sc-for list="{{ cur.faitsList }}" as="ff" hint-placeholder-count="3"><li style="font-size:14.5px;line-height:1.5;color:var(--c3a4658,#3a4658);padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--c1a72bb,#1a72bb);font-weight:700">•</span>{{ ff }}</li></sc-for></ul></section>
+      <sc-if value="{{ cur.hasNote }}" hint-placeholder-val="{{ false }}"><section style="background:var(--cfffaf0,#fffaf0);border:1px solid var(--cf0d9a8,#f0d9a8);border-radius:12px;padding:18px 26px"><h3 style="{{ secHead }};color:var(--c9a5b00,#9a5b00)">Note pour l’enseignant</h3><p style="margin:0;font-size:14.5px;line-height:1.55;color:var(--c3a4658,#3a4658)">{{ cur.note }}</p></section></sc-if><section style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:22px 26px;box-shadow:0 2px 10px rgba(20,55,95,.05)"><h3 style="{{ secHead }}">Faits de langue repérés</h3><ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px"><sc-for list="{{ cur.faitsList }}" as="ff" hint-placeholder-count="3"><li style="font-size:14.5px;line-height:1.5;color:var(--c3a4658,#3a4658);padding-left:18px;position:relative"><span style="position:absolute;left:0;color:var(--c1a72bb,#1a72bb);font-weight:700">•</span>{{ ff }}</li></sc-for></ul></section>
       <section style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:22px 26px;box-shadow:0 2px 10px rgba(20,55,95,.05)"><h3 style="{{ secHead }}">Compréhension</h3><ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:9px"><sc-for list="{{ cur.compList }}" as="q" hint-placeholder-count="3"><li style="font-size:14.5px;line-height:1.55;color:var(--c3a4658,#3a4658)">{{ q }}</li></sc-for></ol></section>
       <section style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:22px 26px;box-shadow:0 2px 10px rgba(20,55,95,.05)"><h3 style="{{ secHead }}">Exploitation (langue &amp; production)</h3><ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:9px"><sc-for list="{{ cur.explList }}" as="q" hint-placeholder-count="3"><li style="font-size:14.5px;line-height:1.55;color:var(--c3a4658,#3a4658)">{{ q }}</li></sc-for></ol></section>
     </div>
@@ -3850,7 +3850,7 @@
       <div style="width:56px;height:56px;border-radius:15px;background:var(--sb-logo-bg);display:grid;place-items:center;margin:0 auto 18px">{{ loginIcLogo }}</div>
       <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);font-weight:700;margin-bottom:12px">Atelier de Français · Français MINESEC</div>
       <h1 style="font-family:'Poppins';font-size:31px;font-weight:700;line-height:1.2;margin:0 auto 14px;max-width:20ch;color:var(--c14375f,#14375f);letter-spacing:-.02em">Un espace collaboratif pour vos cours et vos épreuves</h1>
-      <p style="font-size:14.5px;line-height:1.7;color:var(--c5a6678,#5a6678);max-width:62ch;margin:0 auto 34px">Ambassa, l’IA de VÉRITAS, compose l’épreuve entière selon le descriptif MINESEC — texte choisi dans le corpus, questions, barème et corrigé — en une trentaine de secondes : vous relisez et corrigez. Vos épreuves et vos leçons puisent dans 2 054 textes vérifiés — dont 1 014 ouverts sans abonnement — et un garde-fou contrôle la conformité pendant que vous écrivez.</p>
+      <p style="font-size:14.5px;line-height:1.7;color:var(--c5a6678,#5a6678);max-width:62ch;margin:0 auto 34px">Ambassa, l’IA de VÉRITAS, compose l’épreuve entière selon le descriptif MINESEC — texte choisi dans le corpus, questions, barème et corrigé — en une trentaine de secondes : vous relisez et corrigez. Vos épreuves et vos leçons puisent dans 4 932 textes vérifiés — dont 1 014 ouverts sans abonnement — et un garde-fou contrôle la conformité pendant que vous écrivez.</p>
 
       <!-- ═══════════ DÉMONSTRATION ANIMÉE ═══════════
            Elle remplace la « Visite guidée » par profils d'exemple, qui
@@ -3875,7 +3875,7 @@
                  renoncer avant d'avoir commence. -->
             <div class="vrt-scene">
               <h4><b>1</b>Entrer</h4>
-              <p>Aucun compte, aucun mot de passe : les 2 054 textes du répertoire s’ouvrent tout de suite, dont 1 014 sans aucun abonnement.</p>
+              <p>Aucun compte, aucun mot de passe : les 5 006 textes du répertoire s’ouvrent tout de suite, dont 1 019 sans aucun abonnement.</p>
               <div class="vrt-boite" style="max-width:290px;text-align:center">
                 <div style="font-size:9.5px;font-weight:700;color:var(--c8b97a8,#8b97a8);font-family:Poppins,sans-serif;letter-spacing:.06em;margin-bottom:9px">RIEN À REMPLIR</div>
                 <div style="display:flex;gap:6px;justify-content:center;margin-bottom:12px">
@@ -4276,7 +4276,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '21/10 · D';
+const ATELIER_BUILD = '22/10 · C';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -9198,7 +9198,7 @@ class Component extends DCLogic {
     const annColors=[{c:'var(--cfff3a3,#fff3a3)',n:'Jaune'},{c:'var(--cc8f2d4,#c8f2d4)',n:'Vert'},{c:'var(--ccfe4f7,#cfe4f7)',n:'Bleu'},{c:'var(--cf7d0e4,#f7d0e4)',n:'Rose'},{c:'var(--cffdcb0,#ffdcb0)',n:'Orange'},{c:'var(--ce3d4f7,#e3d4f7)',n:'Violet'}];
     const annList=Object.keys(cAnn).map(k=>({...cAnn[k],idx:+k})).sort((a,b)=>a.idx-b.idx).map(a=>{const u=st.users.find(x=>x.id===a.userId)||{name:'?'};return{word:rawTok.filter(t=>!/^\s*$/.test(t))[a.idx]||'—',styleLabel:a.style,color:a.color||'var(--cfff3a3,#fff3a3)',comment:a.comment||'',who:this._initials(u.name),avatar:this._av(u,24),ago:this._ago(a.ts),go:()=>this._selectWord(cf.n,a.idx)};});
     const selAnn=aSel!=null?(cAnn[aSel]||{}):null;
-    const cur={n:cf.n,type:cf.type,words:cf.words,level:cf.level,cycle:cf.cycle,group:cf.group,text:cf.text||'',tokens:curTokens,reference:cf.reference||'',dot:this.dots[cf.type]||'var(--c1a72bb,#1a72bb)',badge:this._badge(cf.subkind),subLabel:(cf.subkind==='evaluation')?'Évaluation':'Corpus',faitsList:this._splitFaits(cf.faits),compList:this._splitQ(cf.comprehension),explList:this._splitQ(cf.exploitation),addStyleLg:lgAdd(cf.n),addLabelLg:inActive(cf.n)?'✓ Retirer de l\u2019épreuve':'Ajouter à l\u2019épreuve',toggle:()=>this._toggleText(cf.n)};
+    const cur={n:cf.n,type:cf.type,words:cf.words,level:cf.level,cycle:cf.cycle,group:cf.group,text:cf.text||'',tokens:curTokens,reference:cf.reference||'',dot:this.dots[cf.type]||'var(--c1a72bb,#1a72bb)',badge:this._badge(cf.subkind),subLabel:(cf.subkind==='evaluation')?'Évaluation':'Corpus',note:cf.note||'',hasNote:!!cf.note,faitsList:this._splitFaits(cf.faits),compList:this._splitQ(cf.comprehension),explList:this._splitQ(cf.exploitation),addStyleLg:lgAdd(cf.n),addLabelLg:inActive(cf.n)?'✓ Retirer de l\u2019épreuve':'Ajouter à l\u2019épreuve',toggle:()=>this._toggleText(cf.n)};
 
     const ep=active||{title:'',etab:'',classe:'',duree:'',coeff:'',date:'',consigne:'',textIds:[],status:'brouillon',editorIds:[],comments:[]};
     const setField=k=>e=>{if(!perm.edit)return;this._updateActive({[k]:val(e)});};
@@ -9666,7 +9666,7 @@ class Component extends DCLogic {
       {sceau:'book',titre:'Atelier de Fran\u00e7ais',
        sous:'Composer des \u00e9preuves et des le\u00e7ons conformes aux programmes MINESEC, \u00e0 partir d\u2019un corpus v\u00e9rifi\u00e9.',
        puces:[
-         {ic:'layers',t:'2 054 textes v\u00e9rifi\u00e9s',d:'Extraits d\u2019auteurs class\u00e9s par cycle, module et type \u2014 dont 1 014 sans abonnement.'},
+         {ic:'layers',t:'5 006 textes v\u00e9rifi\u00e9s',d:'Extraits d\u2019auteurs class\u00e9s par cycle, module et type \u2014 dont 1 019 sans abonnement.'},
          {ic:'search',t:'Garde-fou de conformit\u00e9',d:'Longueurs, bar\u00e8mes et structures contr\u00f4l\u00e9s pendant que vous \u00e9crivez.'},
          {ic:'users',t:'Travail \u00e0 plusieurs',d:'Relecture, validation, biblioth\u00e8que partag\u00e9e du d\u00e9partement.'},
          {ic:'file',t:'Impression et export Word',d:'Votre en-t\u00eate, votre logo, pr\u00eat \u00e0 tirer.'}]},
@@ -10734,7 +10734,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       essaiTitre:(function(){
         const d=st.corpusDroit||{};
         if(d.motif==='essai_termine')
-          return 'Votre essai est terminé. Les 1 014 textes gratuits restent ouverts ; l’abonnement rouvre le répertoire MINESEC et lève les plafonds.';
+          return 'Votre essai est terminé. Les 1 019 textes gratuits restent ouverts ; l’abonnement rouvre le répertoire MINESEC et lève les plafonds.';
         const j=(d.resteJours==null)?null:(d.resteJours|0);
         return (j==null)?'' :('Il vous reste '+j+' jour'+(j>1?'s':'')+' d’essai. Cliquez pour voir les abonnements — à partir de 800 FCFA par mois.');
       })(),
@@ -10830,7 +10830,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       invBtnNeutre:'background:var(--cffffff,#fff);color:var(--c5a6678,#5a6678);border:1px solid var(--cd5e0ec,#d5e0ec);padding:9px 16px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer',
       filters:st.filters,filteredCount:filtered.length,visibleFiches,
       /* Le filtre annonce ce que chaque source contient : « Libres de droits
-         — 1 014 textes » se choisit sans avoir à essayer pour voir. */
+         — 1 019 textes » se choisit sans avoir à essayer pour voir. */
       nbLibres:all.filter(x=>x.src==="libre").length,
       nbMinesec:all.filter(x=>!x._custom&&x.src!=="libre").length,hasResults:filtered.length>0,noResults:filtered.length===0,truncated:filtered.length>150,
       cycleOptions,groupOptions,typeOptions:this.types||[],

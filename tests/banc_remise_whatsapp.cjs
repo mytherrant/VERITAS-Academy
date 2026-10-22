@@ -203,9 +203,10 @@ ok('la page d’aperçu existe',
 /* Elle doit RAMENER vers l'achat : un essai qui ne convertit pas est une fuite. */
 const APERCU = fs.readFileSync(path.join(RACINE, 'livrets', 'apercu.html'), 'utf8');
 ok('l’aperçu ramène vers l’achat', /Obtenir\s+(le cahier|mon code)/.test(APERCU));
-/* Sous le bouton de paiement : celui qui est décidé ne doit pas être détourné. */
-ok('le lien est placé APRÈS le bouton « Payer »',
-   GATE.indexOf('id="vrt-essai"') > GATE.indexOf('id="vrt-go"'));
+/* 22/10/2026 — en haut et en couleur (Jacques) : l'essai gratuit est un
+   argument de vente, pas une issue de secours cachée sous « Payer ». */
+ok('le lien est placé AVANT le bouton « Payer »',
+   GATE.indexOf('id="vrt-essai"') < GATE.indexOf('id="vrt-go"'));
 
 /* ══ LA DEVANTURE ANNONCE-T-ELLE L'ESSAI ? ════════════════════════════════
    Mesuré en production le 12/09/2026 : les 29 cartes de la boutique disaient

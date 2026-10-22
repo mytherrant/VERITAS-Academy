@@ -177,7 +177,11 @@ def nettoyer(t):
 # mot long se recolle ; un volume horaire collé se décolle.
 RECOLLER = re.compile(r'\b([A-Za-zÀ-ÿ]{5,}) ([sfx])(?=\s|\d|$|[,;)])')
 DECOLLER = re.compile(r'([A-Za-zÀ-ÿ\)])(\d+\s*[hH])\b')
-MOTS = {'pronominau ': 'pronominaux ', 'pronominau(': 'pronominaux ('}
+MOTS = {'pronominau ': 'pronominaux ', 'pronominau(': 'pronominaux (',
+        # relevées le 21/10/2026 : une lettre détachée que la règle générale ne peut pas
+        # recoller sans risque (« le », « e », « t » sont aussi des mots)
+        'Villecruell e': 'Ville cruelle', 'socioculturel le': 'socioculturelle',
+        'environnemen t': 'environnement'}
 
 def nettoyer_contenu(t):
     t = nettoyer(t)
@@ -218,6 +222,12 @@ def atelier_de(lib, systeme):
     """La classe telle que l'Atelier la nomme, pour relier une épreuve à sa
     progression ; '' quand l'Atelier n'a pas d'équivalent exact."""
     s = sans_accents(lib).lower()
+    # EST 1er cycle (22/10/2026, Jacques) : la Ne année puise dans les textes
+    # du niveau ESG voisin, rangés dans les mêmes domaines de vie que ses
+    # 5 modules. La 4e année garde la classe de l'Atelier qui porte le CAP.
+    m = re.match(r'^([1-4])\s*(?:re|ere|e|eme)?\s+annee\b', s)
+    if systeme == 'EST' and m:
+        return {'1': '6e', '2': '5e', '3': '4e', '4': '4e année technique'}[m.group(1)]
     for k, v in (('6', '6e'), ('5', '5e'), ('4', '4e'), ('3', '3e')):
         if re.match(r'^' + k + r'\s*(e|eme)\b', s) and 'annee' not in s: return v
     if 'seconde' in s or s.startswith('2nde'): return '2nde'
@@ -331,7 +341,7 @@ def progressions(chemin, systeme):
                     if not c2 or HEURE_SEULE.match(c2) or OUTIL.match(c2) or SAVOIR_ETRE.search(c2): continue
                     if SITUATIONS.match(c2):
                         for x in re.split(r'\s*(?=\d\s*[-.)]\s*(?:[ÉE]crire|Parler|Lire)\b)', c2):
-                            x = nettoyer(re.sub(r'^\d\s*[-.)]\s*', '', x))
+                            x = nettoyer_contenu(re.sub(r'^\d\s*[-.)]\s*', '', x))
                             x = re.sub(r'\s*Exemples? de situations? d.int[ée]gration\s*$', '', x)
                             if x and x not in seq['situations']: seq['situations'].append(x)
                         continue

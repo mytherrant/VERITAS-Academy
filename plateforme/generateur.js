@@ -336,6 +336,11 @@
     if (/4e annee technique|cap/.test(t)) return ['3', 'tech'];
     if (/eniet 1|bep|\bbp\b/.test(t)) return ['3', '2nde', 'tech'];
     if (/eniet|capiet/.test(t)) return ['2nde', '1ere', 'tech'];
+    /* EST 1er cycle : « 1re année » → textes de 6e … « 3e année » → 4e. Sans
+       cela « 3e année STT » recevait des textes de 3e et « 1re année » aucun
+       niveau (22/10/2026). */
+    var an = t.match(/\b([1-4])(?:re|ere|e|eme)? annee\b/);
+    if (an) return [String(7 - +an[1]), 'tech'];
     return j.length ? j : [];
   }
 
@@ -712,6 +717,7 @@
     l.push('4. Chaque consigne de production donne le type de texte, la longueur et la situation ; la tâche est réalisable dans la durée de l’épreuve.');
     l.push('5. Chaque question a son corrigé, et le corrigé répond à la question posée, pas à une autre ; « relève trois éléments » appelle trois éléments au corrigé, ni plus ni moins, avec un barème qui en tient compte.');
     l.push('5 bis. Toute transformation demandée est grammaticalement possible sur la phrase citée : une relative ne devient pas une complétive, un groupe nominal ne se remplace par un pronom que s’il peut l’être sans rendre la phrase fautive.');
+    l.push('5 ter. Si ton corrigé devait dire qu\u2019une question est « mal posée » (temps, mode, nature ou fonction mal nommés), c\u2019est la QUESTION qu\u2019il faut corriger : nomme exactement ce que la phrase citée contient (« fut reversée » est un passé simple passif, pas un présent).');
     l.push('6. Le guide de correction reprend le barème réel, critère par critère.');
     l.push('7. Langue irréprochable : orthographe, accords, conjugaison, ponctuation — une épreuve de français fautive est inutilisable.');
     l.push('');
@@ -1390,7 +1396,7 @@
     reparerReflexion(res, ctx, cleValides);
 
     /* --- contrôles déterministes --- */
-    var nbQ = 0, total = 0, parNiveau = {}, corrigesManquants = 0, baremesNonVentiles = 0, citationsCorrige = 0;
+    var nbQ = 0, total = 0, parNiveau = {}, corrigesManquants = 0, baremesNonVentiles = 0, citationsCorrige = 0, desavoues = [];
     var ref = M(opts);
     var vues = [];
     Object.keys(res.questions).forEach(function (n) {
@@ -1401,6 +1407,11 @@
           var nv = ref && ref.niveauQuestion ? ref.niveauQuestion(it.q) : null;
           if (nv) parNiveau[nv.id] = (parNiveau[nv.id] || 0) + (it.pts || 0);
           if (!it.corrige) corrigesManquants++;
+          /* LE CORRIGÉ QUI DÉSAVOUE SA QUESTION (3e, production, 21/10/2026) :
+             « quelle est la valeur du présent dans “fut reversée” ? » — et le
+             corrigé : « fut reversée est au passé simple. La question est mal
+             posée. » Une telle question partait à l'élève. */
+          else if (CORRIGE_DESAVOUE.test(it.corrige)) desavoues.push((desavoues.length + 1) + '. « ' + String(it.q).slice(0, 70) + '… »');
           else if ((it.pts || 0) > 1 && !/bar[eè]me|\d+(?:[.,]\d+)?\s*pts?\b/i.test(it.corrige)) baremesNonVentiles++;
           if (it.corrige && tx) {
             var tpc = plat(tx);
@@ -1432,6 +1443,8 @@
           : baremesNonVentiles ? baremesNonVentiles + ' corrigé(s) sans barème ventilé — à préciser'
           : 'Corrigé rédigé et barème ventilé pour chaque question' });
       if (citationsCorrige) res.controles.push({ ok: false, libelle: citationsCorrige + ' citation(s) du corrigé introuvable(s) dans le texte — à vérifier' });
+      if (desavoues.length) res.controles.push({ ok: false, cle: 'desavoue',
+        libelle: desavoues.length + ' question(s) que le corrigé d’Ambassa déclare lui-même erronée(s) — à réécrire avant diffusion : ' + desavoues.join(' ') });
     }
     var sujetsVides = res.sujets.filter(function (s) { return s.genre !== 'presentation' && !s.texte; });
     if (plan.sujets.length) {
@@ -1833,6 +1846,8 @@
   /* Réécriture ciblée des questions refusées par le contrôle. Le texte
      support est joint quand une citation est en cause : on ne peut pas
      demander de citer juste sans montrer ce qu'il faut citer. */
+  var CORRIGE_DESAVOUE = /\b(?:la\s+)?(?:question|consigne)\s+(?:est\s+|semble\s+|para[iî]t\s+)?(?:mal\s+(?:pos[ée]e|formul[ée]e)|erron[ée]e|incorrecte|impr[ée]cise\s+car)|(?:la\s+)?question\s+(?:contient|comporte)\s+une\s+erreur|si\s+la\s+question\s+visait/i;
+
   function promptReparation(aReparer, texte) {
     var l = [];
     l.push('Réécris chaque question ci-dessous pour la rendre conforme au MINESEC. Garde la même tâche, le même niveau et la même difficulté ; corrige seulement ce qui est signalé.');

@@ -888,6 +888,37 @@
          les cahiers du collège, qui ont bel et bien leurs corrigés, y
          perdaient la mention pour toujours. */
       + '<div id="vrt-accroche" style="' + SUB + '">' + accroche() + '</div>'
+      /* ══ ESSAYER AVANT D'ACHETER ═══════════════════════════════════════════
+         `livrets/apercu.html` existe depuis longtemps — deux leçons entières,
+         gratuites, avec leurs corrections. `livrets/index.html` y mène 23 fois.
+         Mais depuis l'unification de la boutique (30/08), la carte d'un cahier
+         dépose l'acheteur sur la page de SON ouvrage — /livrets/6e.html — et
+         ces pages-là n'y mènent PAS une seule fois : vérifié, 0 occurrence dans
+         6e.html, 4e.html, 2nde.html. Le seul chemin réel vers l'achat était
+         donc le seul d'où l'essai gratuit avait disparu.
+
+         On le remet ICI plutôt que dans chaque coquille : gate.js est le seul
+         fichier que toutes chargent, et c'est la leçon déjà tirée pour la règle
+         d'impression — cinq endroits où poser la même chose, c'est cinq endroits
+         pour l'oublier à la prochaine publication.
+
+         22/10/2026 — EN HAUT ET EN COULEUR, à la demande de Jacques : l'essai
+         gratuit est un argument de vente, pas une issue de secours. Placé sous
+         « Payer », en gris, il passait pour un bouton d'annulation. L'aperçu
+         ramène vers l'achat par ses propres boutons (« Obtenir mon code »). */
+      /* ⚠️ L'APERÇU EST PROPRE À L'OUVRAGE : apercu.html lit `?o=<slug>` et
+         retombe sur « 6e » quand le paramètre manque. Un lien nu y envoyait
+         donc TOUT LE MONDE sur l'aperçu de sixième — un enseignant de
+         Terminale compris, qui en aurait conclu que le cahier n'est pas le
+         sien. On passe `cfg.classe`, le slug que le tunnel connaît déjà. */
+      + '<a id="vrt-essai" href="/livrets/apercu.html?o='
+        + encodeURIComponent(cfg.classe || '6e') + '" style="display:flex;align-items:center;'
+        + 'justify-content:center;gap:8px;margin:12px 0 4px;padding:11px 12px;border-radius:10px;'
+        + 'background:#FFC93C;color:#142554;border:1px solid #E5AE1F;text-decoration:none;'
+        + 'font-family:\'Baloo 2\',sans-serif;font-weight:800;font-size:15px;line-height:1.25;'
+        + 'box-sizing:border-box;box-shadow:0 2px 6px rgba(20,37,84,.15)">'
+        + ico('livre', 20, '#142554')
+        + '<span>Lire 2 leçons gratuitement, sans payer →</span></a>'
       + '<div style="font-family:\'Baloo 2\',sans-serif;font-weight:800;font-size:30px;color:#c0453f;margin:14px 0 2px" class="vrt-prix">'
       + fmt(prix(cfg.kind, qte)) + ' FCFA</div>'
       /* 15/10/2026 — le bandeau rouge « Paiement par code marchand… » est
@@ -932,32 +963,6 @@
       + '<div style="font-size:12px;color:#5c666f;margin:6px 0 2px;line-height:1.45">'
       + 'Paiement par MTN Mobile Money ou Orange Money : la demande arrive sur ton téléphone.</div>'
       + '<button id="vrt-deja" style="' + BTN2 + '">J\'ai déjà payé — retrouver mon code</button>'
-      /* ══ ESSAYER AVANT D'ACHETER ═══════════════════════════════════════════
-         `livrets/apercu.html` existe depuis longtemps — deux leçons entières,
-         gratuites, avec leurs corrections. `livrets/index.html` y mène 23 fois.
-         Mais depuis l'unification de la boutique (30/08), la carte d'un cahier
-         dépose l'acheteur sur la page de SON ouvrage — /livrets/6e.html — et
-         ces pages-là n'y mènent PAS une seule fois : vérifié, 0 occurrence dans
-         6e.html, 4e.html, 2nde.html. Le seul chemin réel vers l'achat était
-         donc le seul d'où l'essai gratuit avait disparu.
-
-         On le remet ICI plutôt que dans chaque coquille : gate.js est le seul
-         fichier que toutes chargent, et c'est la leçon déjà tirée pour la règle
-         d'impression — cinq endroits où poser la même chose, c'est cinq endroits
-         pour l'oublier à la prochaine publication.
-
-         SOUS le bouton de paiement, pas au-dessus : celui qui est décidé ne doit
-         pas être détourné. C'est l'hésitant qu'on rattrape, et l'aperçu ramène
-         vers l'achat par ses propres boutons (« Obtenir mon code — 1 500 FCFA »). */
-      /* ⚠️ L'APERÇU EST PROPRE À L'OUVRAGE : apercu.html lit `?o=<slug>` et
-         retombe sur « 6e » quand le paramètre manque. Un lien nu y envoyait
-         donc TOUT LE MONDE sur l'aperçu de sixième — un enseignant de
-         Terminale compris, qui en aurait conclu que le cahier n'est pas le
-         sien. On passe `cfg.classe`, le slug que le tunnel connaît déjà. */
-      + '<a id="vrt-essai" href="/livrets/apercu.html?o='
-        + encodeURIComponent(cfg.classe || '6e') + '" style="' + BTN2
-        + ';display:block;text-align:center;text-decoration:none;box-sizing:border-box">'
-        + 'Lire deux leçons gratuitement, sans payer</a>'
       + '<button id="vrt-close" style="' + BTN2 + '">Annuler</button>'
       + '<div style="font-size:11px;color:#98a1aa;margin-top:12px;line-height:1.5">'
       + 'Le code d\'accès est envoyé dès que le paiement est confirmé. '
