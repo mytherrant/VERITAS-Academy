@@ -278,9 +278,12 @@ const attendre = ms => new Promise(r => setTimeout(r, ms));
   // core.autocrlf : sur le poste le fichier est en CRLF, le motif attend \n.
   const proxy = fs.readFileSync(P('api/ia_proxy.php'), 'utf8').replace(/\r\n/g, '\n');
   const bloc = (proxy.match(/if \(\(string\) \(\$body\['action'\] \?\? ''\) === 'epreuve_minesec'\) \{[\s\S]*?\}\n/) || [''])[0];
+  // Depuis la cascade du 22/10, un seul appel dans la boucle des modèles (plus
+  // Pro puis Flash) : chaque appel, quel qu'en soit le nombre, porte les réglages.
+  const appelsGemini = proxy.match(/call_gemini\(\$[^;]*;/g) || [];
   dire(/responseMimeType' => 'application\/json'/.test(bloc) && /thinkingBudget/.test(bloc)
     && /array_merge\(\['temperature' => 0\.7, 'maxOutputTokens' => \$maxTok\], \$reglages\)/.test(proxy)
-    && (proxy.match(/call_gemini\([^)]*\$geminiReglages\)/g) || []).length === 2,
+    && appelsGemini.length >= 1 && appelsGemini.every(s => /\$geminiReglages\b/.test(s)),
     'ia_proxy.php : JSON imposé et réflexion bornée pour epreuve_minesec, les autres actions inchangées');
 
   let appelsIA = 0;
