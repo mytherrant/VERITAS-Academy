@@ -279,8 +279,9 @@ if (!defined('PAY_API_SECRET')) define('PAY_API_SECRET',       'GENEREZ_UN_SECRE
 if (!defined('GEMINI_API_KEY')) define('GEMINI_API_KEY',  '');                 // ← clé Gemini gratuite (laisser vide = IA désactivée)
 // v1.2.2 : TOUT passe par Gemini. Le plan choisit le MODÈLE.
 //   GEMINI_MODEL       = tier gratuit/visiteurs. Options (mai 2026) :
-//     'gemini-2.5-flash'      → 250 req/jour (bon équilibre, défaut)
-//     'gemini-2.5-flash-lite' → 1000 req/jour (plus de volume, un peu moins fin)
+//     'gemini-2.5-flash'      → 250 req/jour (bon équilibre, défaut) ; ⚠️ refusé
+//                               (404) aux clés créées après oct. 2026
+//     'gemini-2.5-flash-lite' → ⛔ retiré (404 sur toutes nos clés, 22/10/2026)
 //   GEMINI_MODEL_ELITE = essayé en premier pour tous.
 //     ⚠️ 22/10/2026 : 'gemini-2.5-pro' répond 404 (« no longer available to new
 //     users ») et 'gemini-3.1-pro-preview' n'a pas d'offre gratuite → Flash.
@@ -305,21 +306,21 @@ if (!defined('GROQ_MODEL')) define('GROQ_MODEL',      'openai/gpt-oss-120b');
 if (!defined('OPENROUTER_API_KEY')) define('OPENROUTER_API_KEY', '');                    // ← clé OpenRouter (gratuite)
 if (!defined('OPENROUTER_MODEL')) define('OPENROUTER_MODEL', 'minimax/minimax-m3.1-flash:free');
 //
-// 👉 MISTRAL (excellent français, 1 milliard de tokens/mois gratuit) :
-//    https://console.mistral.ai/api-keys
+// 👉 MISTRAL (excellent français) : https://console.mistral.ai/api-keys
+//    ⚠️ La clé seule ne suffit pas : sans le plan gratuit « Experiment »
+//    (téléphone vérifié), chaque appel répond 429 « Rate limit exceeded ».
 if (!defined('MISTRAL_API_KEY')) define('MISTRAL_API_KEY', '');                          // ← clé Mistral (gratuite)
 if (!defined('MISTRAL_MODEL')) define('MISTRAL_MODEL',   'mistral-medium-latest'); // Large = hors offre gratuite (403)
 //
-// 🚀 v1.4.2 — « JAMAIS À COURT DE TOKENS » :
-// 👉 CEREBRAS — ⚠️ plus de gratuit permanent (oct. 2026) : essai 5 $ / 30 jours.
-//    Clé : https://cloud.cerebras.ai
-if (!defined('CEREBRAS_API_KEY')) define('CEREBRAS_API_KEY', '');                         // ← clé Cerebras (essai)
-if (!defined('CEREBRAS_MODEL')) define('CEREBRAS_MODEL',   'gpt-oss-120b');
+// ⛔ CEREBRAS et SAMBANOVA retirés de la cascade (22/10/2026) : tous deux
+//    exigent désormais un moyen de paiement. Leurs constantes sont ignorées.
 //
 // 👉 CLOUDFLARE WORKERS AI — 10 000 « neurones »/jour gratuits (~80-200 réponses),
 //    remise à zéro à 0 h UTC. Il faut les DEUX valeurs :
 //    1. jeton API avec la permission « Workers AI » : https://dash.cloudflare.com/profile/api-tokens
-//    2. identifiant de compte (Account ID), affiché dans dash.cloudflare.com → AI → Workers AI
+//    2. identifiant de compte (Account ID) : 32 caractères hexadécimaux, affiché
+//       dans dash.cloudflare.com → AI → Workers AI (et dans l'adresse de la page).
+//       ⚠️ Ce n'est PAS le jeton (qui commence par « cfut_ »).
 if (!defined('CLOUDFLARE_AI_TOKEN')) define('CLOUDFLARE_AI_TOKEN', '');                   // ← jeton Workers AI (gratuit)
 if (!defined('CLOUDFLARE_ACCOUNT_ID')) define('CLOUDFLARE_ACCOUNT_ID', '');               // ← identifiant de compte Cloudflare
 if (!defined('CLOUDFLARE_MODEL')) define('CLOUDFLARE_MODEL', '@cf/openai/gpt-oss-120b');
@@ -328,12 +329,7 @@ if (!defined('CLOUDFLARE_MODEL')) define('CLOUDFLARE_MODEL', '@cf/openai/gpt-oss
 //    ⚠️ Conditions à lire : l'accès gratuit semble réservé au développement.
 //    Clé : https://build.nvidia.com · modèles : https://integrate.api.nvidia.com/v1/models
 if (!defined('NVIDIA_API_KEY')) define('NVIDIA_API_KEY', '');                             // ← clé NVIDIA (gratuite)
-if (!defined('NVIDIA_MODEL')) define('NVIDIA_MODEL', 'deepseek-ai/deepseek-v4.1-flash');
-//
-// 👉 SAMBANOVA — tier gratuit PERSISTANT (Llama 3.3 70B → 405B).
-//    Clé : https://cloud.sambanova.ai
-if (!defined('SAMBANOVA_API_KEY')) define('SAMBANOVA_API_KEY', '');                        // ← clé SambaNova (gratuite)
-if (!defined('SAMBANOVA_MODEL')) define('SAMBANOVA_MODEL',   'Meta-Llama-3.3-70B-Instruct');
+if (!defined('NVIDIA_MODEL')) define('NVIDIA_MODEL', 'nvidia/nemotron-3-ultra-550b-a55b'); // 2,6 s au banc du 22/10
 //
 // 👉 ROTATION MULTI-CLÉS GEMINI — créez 2-3 clés AI Studio (comptes Google
 //    distincts) pour MULTIPLIER le quota du moteur primaire :
@@ -341,13 +337,13 @@ if (!defined('GEMINI_API_KEY_2')) define('GEMINI_API_KEY_2', '');               
 if (!defined('GEMINI_API_KEY_3')) define('GEMINI_API_KEY_3', '');                         // ← 3e clé Gemini (optionnel)
 //
 // 🔗 CASCADE (22/10/2026) — ordre : Gemini (chaque clé × chaque modèle) → Groq →
-//    OpenRouter → Cloudflare → NVIDIA → Mistral → SambaNova → Cerebras →
+//    OpenRouter → Cloudflare → NVIDIA → Mistral →
 //    réponse déjà générée pour la même question. Réglages FACULTATIFS :
 // if (!defined('IA_BUDGET_SECONDES')) define('IA_BUDGET_SECONDES', 100);  // durée max d'une requête
-// if (!defined('GEMINI_MODELS_EXTRA')) define('GEMINI_MODELS_EXTRA', 'gemini-2.5-flash-lite,gemini-3.1-flash-lite');
+// if (!defined('GEMINI_MODELS_EXTRA')) define('GEMINI_MODELS_EXTRA', 'gemini-3.1-flash-lite');
 // if (!defined('GROQ_MODELS')) define('GROQ_MODELS', 'openai/gpt-oss-120b,qwen/qwen3.8-27b,openai/gpt-oss-20b');
-//    (idem OPENROUTER_MODELS, CLOUDFLARE_MODELS, NVIDIA_MODELS, MISTRAL_MODELS,
-//     SAMBANOVA_MODELS, CEREBRAS_MODELS : la liste remplace celle du code)
+//    (idem OPENROUTER_MODELS, CLOUDFLARE_MODELS, NVIDIA_MODELS, MISTRAL_MODELS :
+//     la liste remplace celle du code)
 // ⚠️ Toutes les lignes define() doivent être HORS de function requirePayAuth() :
 //    définies dedans, elles n'existent que pendant un paiement, jamais pour l'IA.
 //
