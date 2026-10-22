@@ -730,7 +730,10 @@
      4. LA COMMANDE — le prompt proprement dit
      ------------------------------------------------------------------ */
 
-  var PLAFOND_PROMPT = 7600;   // octets ; le proxy refuse au-delà de 8 000
+  /* Octets. Le proxy accepte 16 000 pour l'action `epreuve_minesec` (8 000
+     ailleurs) : à 7 600, la partie fixe (≈ 7 Ko) ne laissait plus la place
+     d'un texte de contraction de 600 mots (production, 22/10/2026). */
+  var PLAFOND_PROMPT = 15000;
 
   function consignesProduction(genre, texteMots) {
     if (genre === 'resume') {
@@ -1964,6 +1967,13 @@
       /* Le refus du serveur dit LEQUEL des plafonds est atteint (débit par
          minute, quota du jour, quota du mois) : on garde sa phrase. L'Atelier
          affichait « quota épuisé (10 ce mois) » pour un plafond JOURNALIER. */
+      /* Demande refusée par le serveur (trop longue, mal formée) : ce n'est
+         pas une panne réseau, et il ne faut pas l'afficher comme telle. */
+      if (r.status === 400) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          var e = new Error('refus'); e.serveur = (j && j.error) ? String(j.error) : ''; throw e;
+        });
+      }
       if (r.status === 402 || r.status === 429) {
         return r.json().catch(function () { return {}; }).then(function (j) {
           var e = new Error('quota'); e.serveur = (j && j.error) ? String(j.error) : ''; throw e;
