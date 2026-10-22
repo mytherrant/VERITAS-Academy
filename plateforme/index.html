@@ -3872,7 +3872,7 @@
                  renoncer avant d'avoir commence. -->
             <div class="vrt-scene">
               <h4><b>1</b>Entrer</h4>
-              <p>Aucun compte, aucun mot de passe : les 4 932 textes du répertoire s’ouvrent tout de suite, dont 1 014 sans aucun abonnement.</p>
+              <p>Aucun compte, aucun mot de passe : les 5 006 textes du répertoire s’ouvrent tout de suite, dont 1 019 sans aucun abonnement.</p>
               <div class="vrt-boite" style="max-width:290px;text-align:center">
                 <div style="font-size:9.5px;font-weight:700;color:var(--c8b97a8,#8b97a8);font-family:Poppins,sans-serif;letter-spacing:.06em;margin-bottom:9px">RIEN À REMPLIR</div>
                 <div style="display:flex;gap:6px;justify-content:center;margin-bottom:12px">
@@ -4273,7 +4273,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '22/10 · A';
+const ATELIER_BUILD = '22/10 · B';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -9663,7 +9663,7 @@ class Component extends DCLogic {
       {sceau:'book',titre:'Atelier de Fran\u00e7ais',
        sous:'Composer des \u00e9preuves et des le\u00e7ons conformes aux programmes MINESEC, \u00e0 partir d\u2019un corpus v\u00e9rifi\u00e9.',
        puces:[
-         {ic:'layers',t:'4 932 textes v\u00e9rifi\u00e9s',d:'Extraits d\u2019auteurs class\u00e9s par cycle, module et type \u2014 dont 1 014 sans abonnement.'},
+         {ic:'layers',t:'5 006 textes v\u00e9rifi\u00e9s',d:'Extraits d\u2019auteurs class\u00e9s par cycle, module et type \u2014 dont 1 019 sans abonnement.'},
          {ic:'search',t:'Garde-fou de conformit\u00e9',d:'Longueurs, bar\u00e8mes et structures contr\u00f4l\u00e9s pendant que vous \u00e9crivez.'},
          {ic:'users',t:'Travail \u00e0 plusieurs',d:'Relecture, validation, biblioth\u00e8que partag\u00e9e du d\u00e9partement.'},
          {ic:'file',t:'Impression et export Word',d:'Votre en-t\u00eate, votre logo, pr\u00eat \u00e0 tirer.'}]},
@@ -10731,7 +10731,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       essaiTitre:(function(){
         const d=st.corpusDroit||{};
         if(d.motif==='essai_termine')
-          return 'Votre essai est terminé. Les 1 014 textes gratuits restent ouverts ; l’abonnement rouvre le répertoire MINESEC et lève les plafonds.';
+          return 'Votre essai est terminé. Les 1 019 textes gratuits restent ouverts ; l’abonnement rouvre le répertoire MINESEC et lève les plafonds.';
         const j=(d.resteJours==null)?null:(d.resteJours|0);
         return (j==null)?'' :('Il vous reste '+j+' jour'+(j>1?'s':'')+' d’essai. Cliquez pour voir les abonnements — à partir de 800 FCFA par mois.');
       })(),
@@ -10827,7 +10827,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       invBtnNeutre:'background:var(--cffffff,#fff);color:var(--c5a6678,#5a6678);border:1px solid var(--cd5e0ec,#d5e0ec);padding:9px 16px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer',
       filters:st.filters,filteredCount:filtered.length,visibleFiches,
       /* Le filtre annonce ce que chaque source contient : « Libres de droits
-         — 1 014 textes » se choisit sans avoir à essayer pour voir. */
+         — 1 019 textes » se choisit sans avoir à essayer pour voir. */
       nbLibres:all.filter(x=>x.src==="libre").length,
       nbMinesec:all.filter(x=>!x._custom&&x.src!=="libre").length,hasResults:filtered.length>0,noResults:filtered.length===0,truncated:filtered.length>150,
       cycleOptions,groupOptions,typeOptions:this.types||[],

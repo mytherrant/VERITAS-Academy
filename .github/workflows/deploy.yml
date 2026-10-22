@@ -1686,7 +1686,7 @@ jobs:
           # et que le fichier porte aussi l'appareil pedagogique. Le corpus
           # MINESEC, lui, reste hors depot : ses auteurs sont vivants.
           if [ ! -f api/data/corpus_libre.json ]; then
-            echo "::error title=Repertoire libre manquant::api/data/corpus_libre.json est suivi par git mais absent du checkout. La page annonce 1 014 textes sans abonnement : les servir est une PROMESSE. Deploiement ANNULE plutot que de la rompre en silence."
+            echo "::error title=Repertoire libre manquant::api/data/corpus_libre.json est suivi par git mais absent du checkout. La page annonce 1 019 textes sans abonnement : les servir est une PROMESSE. Deploiement ANNULE plutot que de la rompre en silence."
             exit 1
           fi
           if [ -f api/data/corpus_libre.json ]; then
