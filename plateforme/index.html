@@ -1387,7 +1387,7 @@
       <div style="position:relative;flex:none">
         <button onClick="{{ toggleCreate }}" style="{{ topCreateStyle }}" style-hover="background:var(--c135a96,#135a96)">{{ topIcPlus }}<span class="vrt-hide-sm">Créer</span></button>
         <sc-if value="{{ createOpen }}" hint-placeholder-val="{{ false }}">
-          <div style="position:absolute;right:0;top:48px;width:262px;background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;box-shadow:0 14px 36px rgba(20,55,95,.18);overflow:hidden;z-index:40">
+          <div style="{{ createBoite }}">
             <sc-for list="{{ createMenu }}" as="c" hint-placeholder-count="3">
               <button onClick="{{ c.go }}" style="{{ c.style }}" style-hover="background:var(--cf5faff,#f5faff)">
                 <span style="{{ c.tile }}">{{ c.icon }}</span>
@@ -11711,7 +11711,18 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       newCoursDirect:()=>this.setState({coursTab:'gabarits',cycleFiltre:''},()=>window.scrollTo(0,0)),
       btnPrimaire:perm.edit?'display:flex;align-items:center;gap:7px;margin-left:auto;background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;border-radius:10px;font-family:Poppins':hidden,
       /* --- menu Creer --- */
-      toggleCreate:()=>this.setState({createOpen:!st.createOpen}),
+      /* MENU « + CRÉER » HORS DE L'ÉCRAN (23/10/2026, capture de Jacques au
+         téléphone). Il est ancré au bord DROIT du bouton et s'étend vers la
+         gauche : parfait quand le bouton est à droite de la barre. Au
+         téléphone, la barre passe à la ligne et le bouton se retrouve au bord
+         GAUCHE : 262 px partaient hors champ. La position du bouton dépend de
+         la mise en page (à 1 024 px il est au milieu), pas d'un seuil de
+         largeur : on MESURE à l'ouverture et l'on ancre du côté où il tient. */
+      toggleCreate:e=>{let gauche=false;
+        try{const r=e&&e.currentTarget&&e.currentTarget.getBoundingClientRect();if(r)gauche=r.right-262<12;}catch(_){}
+        this.setState({createOpen:!st.createOpen,createGauche:gauche});},
+      createBoite:'position:absolute;'+(st.createGauche?'left:0':'right:0')+';top:48px;width:262px;max-width:calc(100vw - 24px);'
+        +'background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;box-shadow:0 14px 36px rgba(20,55,95,.18);overflow:hidden;z-index:40',
       createOpen:st.createOpen,
       createMenu:[].concat(perm.creer?[
         {label:'Nouvelle \u00e9preuve',sub:'Composer un sujet depuis le corpus',icon:this._icoRond('file','var(--c14375f,#14375f)',34),
