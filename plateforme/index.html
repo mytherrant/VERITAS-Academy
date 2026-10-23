@@ -5421,6 +5421,58 @@ class Component extends DCLogic {
   /* Ouvrir l'écran Activité vaut lecture : l'heure et les échéances vues
      sont retenues, la cloche ne compte plus que ce qui arrive ensuite. */
   _notifsVues(ech){const v={ts:Date.now(),ech:ech||[]};this._save('minesec_notif_vu',v);return v;}
+  /* MARKDOWN D'AMBASSA (22/10/2026, capture de Jacques : « **résumé** »
+     affiché tel quel). Les modèles écrivent en Markdown malgré la consigne ;
+     on rend le strict utile -- gras, italique, code, titres, puces -- en
+     ÉLÉMENTS React, jamais en HTML : le texte reste échappé, une balise
+     glissée dans une réponse s'affiche comme du texte. Un astérisque isolé
+     (« 2 * 3 ») ou collé à un mot (« note*coef ») n'est pas pris pour de
+     l'italique : il faut une frontière de mot de part et d'autre.
+     PRÉSENTATION (« présente bien les résultats avec les titres, mots en
+     couleur, gras » -- Jacques) : intertitres en bleu VÉRITAS, gras coloré,
+     puces et numéros en pastilles de couleur, paragraphes aérés. Pas de
+     filet à gauche (règle de la vitrine). */
+  _mdEl(text){
+    const h=React.createElement;
+    const BLEU='var(--c1a72bb,#1a72bb)',NUIT='var(--c14375f,#14375f)',GRIS='var(--c5a6678,#5a6678)';
+    const re=/\*\*([^*\n]+?)\*\*|__([^_\n]+?)__|(^|[^\w*])\*([^*\s](?:[^*\n]*?[^*\s])?)\*(?![\w*])|`([^`\n]+)`/g;
+    const enLigne=(s,cle)=>{const out=[];let i=0,m;re.lastIndex=0;
+      while((m=re.exec(s))){
+        const debut=m.index;
+        if(m[3]!=null){out.push(s.slice(i,debut)+m[3]);}
+        else if(debut>i)out.push(s.slice(i,debut));
+        const k=cle+'-'+debut;
+        if(m[1]!=null||m[2]!=null)out.push(h('strong',{key:k,style:{color:NUIT,fontWeight:700}},m[1]!=null?m[1]:m[2]));
+        else if(m[4]!=null)out.push(h('em',{key:k,style:{color:GRIS}},m[4]));
+        else out.push(h('code',{key:k,style:{fontFamily:'ui-monospace,Consolas,monospace',fontSize:'.92em',color:NUIT,background:'var(--ceef2f7,#eef2f7)',padding:'1px 5px',borderRadius:'5px'}},m[5]));
+        i=re.lastIndex;}
+      if(i<s.length)out.push(s.slice(i));return out;};
+    const pastille=(contenu,k)=>h('span',{key:k,style:{flex:'none',minWidth:'20px',height:'20px',borderRadius:'50%',
+      display:'inline-grid',placeItems:'center',marginTop:'1px',fontFamily:'Poppins',fontSize:'10.5px',fontWeight:700,
+      color:'var(--cffffff,#fff)',background:BLEU}},contenu);
+    const lignes=String(text||'').replace(/\r\n/g,'\n').split('\n');
+    const blocs=[];let vide=false;
+    lignes.forEach((l,n)=>{
+      if(!l.trim()){vide=true;return;}
+      const marge=blocs.length?(vide?'10px':'4px'):'0';vide=false;
+      const ti=/^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$/.exec(l);
+      if(ti){
+        const niv=ti[1].length;
+        blocs.push(h('div',{key:n,style:{margin:(blocs.length?'14px':'0')+' 0 4px',fontFamily:'Poppins',fontWeight:700,
+          fontSize:niv<=2?'14.5px':'13.5px',lineHeight:1.4,color:niv<=2?NUIT:BLEU}},enLigne(ti[2],'t'+n)));
+        return;}
+      const puce=/^(\s*)[*\-•]\s+(.*)$/.exec(l), num=/^(\s*)(\d{1,2})[.)]\s+(.*)$/.exec(l);
+      if(puce||num){
+        const retrait=((puce||num)[1].length>=2)?'18px':'0';
+        blocs.push(h('div',{key:n,style:{display:'flex',gap:'9px',alignItems:'flex-start',margin:marge+' 0 0 '+retrait}},
+          puce?h('span',{style:{flex:'none',width:'7px',height:'7px',borderRadius:'50%',background:BLEU,marginTop:'8px'}})
+              :pastille(num[2],'p'),
+          h('span',{style:{flex:'1 1 auto',minWidth:0}},enLigne(puce?puce[2]:num[3],'l'+n))));
+        return;}
+      blocs.push(h('div',{key:n,style:{marginTop:marge}},enLigne(l,'l'+n)));
+    });
+    return h(React.Fragment,null,blocs);
+  }
   _viderAssistant(){this._save('minesec_assistant',[]);this.setState({assistMsgs:[],assistErr:''});}
   /* ---- Quota d'IA par usager -------------------------------------------
      Chaque appel a Ambassa est decompte du compte de CELUI qui le declenche.
@@ -11371,14 +11423,14 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
         go:()=>this._demanderAmbassa(q)})),
       assistMessages:(st.assistMsgs||[]).map(m=>{
         const moi=m.role==='moi';
-        return{auteur:moi?'Vous':'Ambassa',texte:m.texte,
+        return{auteur:moi?'Vous':'Ambassa',texte:moi?m.texte:this._mdEl(m.texte),
           wrap:'display:flex;flex-direction:column;align-items:'+(moi?'flex-end':'flex-start'),
           qui:'font-family:Poppins;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--c9aa5b5,#9aa5b5);margin-bottom:4px',
           bulle:'max-width:94%;white-space:pre-wrap;font-size:13px;line-height:1.65;padding:11px 13px;border-radius:'
             +(moi?'12px 3px 12px 12px':'3px 12px 12px 12px')+';'
             +(moi?'background:var(--ce7f1fb,#e7f1fb);color:var(--c22303f,#22303f)'
                  :'background:var(--cfbfcfe,#fbfcfe);border:1px solid var(--ce6ecf3,#e6ecf3);color:var(--c22303f,#22303f)'),
-          aFaire:m.aFaire?('\u00c0 faire : '+m.aFaire):'',
+          aFaire:m.aFaire?this._mdEl('\u00c0 faire : '+m.aFaire):'',
           aFaireStyle:m.aFaire?'max-width:94%;margin-top:6px;font-size:12px;font-weight:700;color:var(--c1a72bb,#1a72bb);line-height:1.5':hidden,
           doutStyle:m.incertain?'max-width:94%;margin-top:5px;font-size:11.5px;font-weight:700;color:var(--cc26a12,#c26a12);line-height:1.5':hidden};}),
       assistChargeStyle:st.assistBusy?'margin-top:12px;font-size:12.5px;color:var(--c8b97a8,#8b97a8);font-weight:600':hidden,
