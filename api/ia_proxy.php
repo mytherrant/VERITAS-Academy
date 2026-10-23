@@ -297,6 +297,23 @@ $utilisateurVerifie = '';
 $abonneAtelier = false;
 $fichierAtelier = ''; $compteAtelier = 0;
 $jetonIA = (string) ($body['token'] ?? '');
+/* LE JETON PEUT AUSSI VENIR DE L'EN-TÊTE (22/10/2026). La composition
+   d'épreuve (generateur.js) le met dans le corps ; l'assistant, les
+   exercices, le résumé (exercices.js) et la conformité (conformite.js)
+   ne l'envoyaient que dans « Authorization: Bearer ». Le proxy ne lisait
+   que le corps : ces appels tombaient au palier anonyme — 2 par jour et
+   par IP — puis l'Atelier affichait « Ambassa est injoignable » sur le
+   429. Même lecture que api/plateforme.php. */
+if ($jetonIA === '') {
+    $authIA = '';
+    if (function_exists('getallheaders')) {
+        foreach ((array) getallheaders() as $kIA => $vIA) {
+            if (strtolower((string) $kIA) === 'authorization') { $authIA = (string) $vIA; break; }
+        }
+    }
+    if ($authIA === '') $authIA = (string) ($_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '');
+    if (stripos($authIA, 'Bearer ') === 0) $jetonIA = trim(substr($authIA, 7));
+}
 /* INVITÉ DE L'ATELIER (21/10/2026). Le jeton « inv. » de l'invité d'appareil
    n'est pas un jeton de compte : vrt_verify_token le rejetait, et l'invité
    tombait au palier « anon » — 2 appels par JOUR, alors que son essai lui en
