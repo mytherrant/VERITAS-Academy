@@ -581,6 +581,29 @@ function retirerColonnesPied(html) {
 }
 corps = retirerColonnesPied(corps);
 
+/* 24/10/2026 — « Pied de page très surchargé : Centre d'Excellence… est déjà
+   mentionné d'entrée. Redondance. Conserver juste l'essentiel » (Jacques).
+   On retire le bloc d'identité (logo, présentation, pastilles MoMo / Orange /
+   Reçu : la barre du haut porte la marque, les logos de paiement disent le
+   reste), la phrase sous les logos, et le lien « Mentions légales » du bas,
+   qui doublait le volet — le volet mène désormais à la page complète.
+   Même coupe dans tools/build_plan.py (FOOTER_VITRINE). */
+function allegerPied(html) {
+  const identite = /    <div style="max-width:1170px;margin:0 auto;padding:52px 24px 30px[\s\S]*?\n    <div style="border-top:1px solid rgba\(255,255,255,\.12\)">/;
+  const phrase = /\n[ \t]*<p style="margin:12px 0 0;font:400 12px\/1\.7 Poppins,sans-serif;color:rgba\(255,255,255,\.5\)">Aucun frais supplémentaire côté famille\. Reçu[^<]*<\/p>/;
+  const lienBas = /\n[ \t]*<a href="legal\/mentions-legales\.html"[^>]*>Mentions légales<\/a>/;
+  const impots = 'Centre des impôts : CFLP Douala 3<sup>e</sup> bis.</p>';
+  for (const [nom, re] of [['identité', identite], ['phrase', phrase], ['lien du bas', lienBas]]) {
+    if (!re.test(html)) throw new Error('Pied de page : « ' + nom + ' » introuvable. La maquette a changé — vérifier AVANT de déployer.');
+  }
+  if (html.split(impots).length !== 2) throw new Error('Pied de page : mention du centre des impôts introuvable.');
+  return html.replace(identite, '    <div>').replace(phrase, '').replace(lienBas, '')
+    .replace(impots, impots + '\n          <a href="legal/mentions-legales.html" style="display:inline-block;margin-top:10px;font:500 12px Poppins,sans-serif;color:#FFC93C" class="vh50">Lire les mentions légales complètes</a>')
+    .replace('<footer style="background:#001136;color:rgba(255,255,255,.72);margin-top:64px">',
+             '<footer style="background:#001136;color:rgba(255,255,255,.72);margin-top:48px">');
+}
+corps = allegerPied(corps);
+
 /* ── Le calendrier scolaire, lu à la SOURCE ────────────────────────────────
    CALENDRIER_SCOLAIRE (app.js) porte l'arrêté conjoint MINEDUB/MINESEC
    2026-2027 : trois trimestres, six séquences, les interruptions et les

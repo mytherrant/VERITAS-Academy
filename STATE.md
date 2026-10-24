@@ -1,3 +1,21 @@
+## Pied de page allégé (24/10/2026, v1.20.43)
+
+Demande de Jacques (capture de l'Atelier au téléphone) : « Pied de page très surchargé. « Centre d'Excellence… » est déjà mentionné d'entrée. Redondance. Conserver juste l'essentiel. »
+
+**Retiré** :
+- le bloc d'identité (logo, « La réussite assurée », présentation « Centre d'Excellence Scolaire — Douala… », pastilles MTN MoMo / Orange Money / Reçu automatique). La barre du haut porte déjà la marque, et les logos de paiement disent le reste ;
+- la phrase sous les logos (« Aucun frais supplémentaire… ») ;
+- le lien « Mentions légales » du bas, qui doublait le volet. Le volet porte désormais « Lire les mentions légales complètes ».
+
+**Restent** : les mentions légales (volet), les paiements acceptés, le © et les liens CGV, Confidentialité, Contact. Le pied fait environ 355 px de haut au téléphone et 240 px sur ordinateur.
+
+**Où** :
+- `tools/build_plan.py` (FOOTER_VITRINE), propagé par `tools/habiller_pages.py` à 271 pages et à l'application ;
+- `tools/build_vitrine.js` (`allegerPied`, avec garde-fous) ;
+- `vitrine.html` et `constellation.html`, édités directement.
+
+⚠️ `vitrine.html` ne se régénère plus à l'identique depuis la maquette : il a été retouché à la main depuis (prix « Dès 1 200 F », styles de la boutique, pied au téléphone). Une régénération écraserait ces retouches, d'où l'édition directe. À réconcilier un jour dans la maquette.
+
 ## Espaces élève, enseignant, parent + programme de 3ᵉ (24/10/2026, v1.20.42)
 
 Demande de Jacques : « Il n'y a pas de contraction en 3ᵉ. Corrige tout. Vérifier que les espaces élèves, enseignants, parents sont bien alimentés et que chacun accède facilement aux pages et infos le concernant. »
