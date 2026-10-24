@@ -1,3 +1,24 @@
+## Espaces élève, enseignant, parent + programme de 3ᵉ (24/10/2026, v1.20.42)
+
+Demande de Jacques : « Il n'y a pas de contraction en 3ᵉ. Corrige tout. Vérifier que les espaces élèves, enseignants, parents sont bien alimentés et que chacun accède facilement aux pages et infos le concernant. »
+
+**Programme de 3ᵉ** (`niveaux/francais-3eme.html`) : le « résumé / la contraction de texte » est retiré (épreuve du Probatoire et du BAC). Il est remplacé par la **dictée**, qui fait partie du BEPC avec l'étude de texte et la rédaction (structure donnée par `ressources/bepc-francais.html`). Les métadonnées SEO et l'introduction sont corrigées aussi. Le mot-clé « BEPC » est retiré de `ressources/methode-resume-contraction.html`. Ailleurs (app, Atelier), la contraction n'est associée qu'au 2nd cycle, ce qui est juste.
+
+**Espace parent, le défaut majeur** : il n'était pas alimenté. `api/student_data.php` ne renvoyait au compte parent que sa propre tranche, qui est vide. « Notes & bulletin de mon enfant » cherchait donc l'enfant dans la base du navigateur. Sur le téléphone d'un parent, c'est la base de démonstration : le matricule VRT-001 rattachait un vrai parent à un élève fictif, et un vrai matricule ne trouvait rien.
+- Serveur : la tranche de l'enfant (fiche, notes, absences, paiements, devoirs de sa classe, soumissions) redescend au compte parent seulement si le matricule correspond ET si le téléphone du compte est celui que le centre a enregistré pour le parent (`ptel`, comparaison sur 9 chiffres). Le matricule seul ne suffit pas, puisqu'il s'imprime partout. Le rôle du compte redescend aussi.
+- Client : synchronisation à la connexion, à l'inscription et au rattachement ; même contrôle du téléphone en local ; vraie fiche de suivi (moyenne par trimestre, notes, absences, paiements, devoirs à rendre, plusieurs enfants, impression du bulletin).
+- Sur un appareil neuf, la connexion par le serveur perdait le rôle : un parent ou un enseignant tombait dans l'espace élève. C'est corrigé.
+- **À faire par le centre** : renseigner le téléphone du parent (`ptel`) sur chaque fiche élève. Sans lui, le rattachement est refusé avec un message explicite.
+
+**Autres correctifs** :
+- Les tableaux de bord internes de l'élève et de l'enseignant affichent la grille « Tout ce qui vous concerne » (corrigés, œuvres, programmes, évaluations…), qui n'existait que dans l'espace des comptes en ligne.
+- Saisie de notes de l'enseignant : elle s'ouvrait sur la 6ᵉ (« 0 élève ») ; elle s'ouvre maintenant sur sa classe.
+- Les titres des pages « ambassa », « marketplace_teacher » et « parrainage_teacher » affichaient la clé technique.
+- « Mon paiement » de l'élève affichait l'échéancier deux fois.
+- La Bibliothèque affichait « undefined stock undefined vendus ».
+
+**Nouveau banc** `tests/banc_parent_enfant.cjs` (16 contrôles, dans `test.yml` et `deploy.yml`), avec un vrai `php -S`. Les parcours navigateur (élève, enseignant, parent avec ou sans enfant, connexion sur un appareil neuf) ne montrent aucune erreur JS.
+
 ## Audit final du site, hors SkySMS (15/10/2026, v1.20.26)
 
 Rapport complet : `AUDIT_FINAL_v1.20.26.md`. Bilan : 69/70 bancs au vert, 68/68 vues navigateur sans erreur, aucun lien interne cassé.

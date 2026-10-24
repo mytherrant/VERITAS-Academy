@@ -436,6 +436,12 @@ jobs:
       - name: 💳 Le rappel SkySMS ouvre-t-il l'accès payé, et seulement lui ?
         run: node tests/banc_skysms_rappel.cjs
 
+      # ── 👪 LE PARENT voit-il SON enfant, et seulement lui ? ──
+      #    Matricule + téléphone enregistré par le centre ; le matricule seul
+      #    n'ouvre rien ; aucun autre élève ne fuit ; le rôle redescend.
+      - name: 👪 Le parent voit-il son enfant, et seulement lui ?
+        run: node tests/banc_parent_enfant.cjs
+
       # ── 🔑 LA CLÉ D'UN EXERCICE survit-elle à une correction du cahier ?
       #    Si elle bouge, l'élève retrouve ses réponses sous les mauvaises
       #    questions et l'annotation du professeur désigne un autre exercice.

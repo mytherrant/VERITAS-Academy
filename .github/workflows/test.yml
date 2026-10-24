@@ -169,6 +169,7 @@ jobs:
           node tests/banc_livret_codes.cjs
           node tests/banc_remise_sms.cjs
           node tests/banc_skysms_rappel.cjs
+          node tests/banc_parent_enfant.cjs
 
       # ⚠️ `banc_cahiers_reels.cjs` A ÉTÉ RETIRÉ D'ICI, ET SON ABSENCE EST LE
       # CORRECTIF. Son en-tête le dit depuis toujours : « IL N'EST PAS DANS LA
