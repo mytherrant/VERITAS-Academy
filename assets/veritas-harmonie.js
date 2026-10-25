@@ -60,6 +60,16 @@
     return false;
   }
 
+  /* LIRE PUIS ÉCRIRE. La première version alternait lecture (getComputedStyle,
+     offsetWidth) et écriture de style élément par élément : chaque écriture
+     invalidait la mise en page, la lecture suivante en forçait un recalcul
+     complet — quadratique sur ~10 000 éléments. Sur la CI (2 cœurs), la page
+     se FIGEAIT au-delà de 45 s ; un téléphone d'entrée de gamme aurait souffert
+     pareil. Les deux fonctions ci-dessous ne font plus que DÉCIDER ; `passe`
+     applique tout en une seule écriture groupée. */
+  var aEcrire = [];
+  function poser(el, prop, val) { aEcrire.push([el, prop, val]); }
+
   function relever(el, cs) {
     if (el.hasAttribute('data-vh')) return;
     var fs = parseFloat(cs.fontSize);
@@ -70,8 +80,8 @@
        13 px — à 15 px elle ferait éclater sa pastille. */
     var etiquette = cs.textTransform === 'uppercase' || parseFloat(cs.letterSpacing) > 0.6;
     var cible = etiquette ? Math.max(13, fs + GAIN) : Math.max(PLANCHER, fs + GAIN);
-    el.setAttribute('data-vh', 't');
-    el.style.setProperty('font-size', Math.round(cible * 2) / 2 + 'px', 'important');
+    poser(el, 'data-vh', 't');
+    poser(el, 'font-size', Math.round(cible * 2) / 2 + 'px');
   }
 
   /* Rond plein → anneau. Rond = carré de 26 à 90 px, rayon ≥ moitié ; plein =
@@ -113,29 +123,43 @@
         teinte = hex(bg);                                                          // rond plein foncé
       }
     }
-    el.setAttribute('data-vh-anneau', '1');
-    el.style.setProperty('background', sombre() ? 'transparent' : '#fff', 'important');
-    el.style.setProperty('border', '3px solid ' + teinte, 'important');
-    el.style.setProperty('box-sizing', 'border-box', 'important');
-    el.style.setProperty('color', num ? teinte : (sombre() ? '#F2F5FC' : '#001136'), 'important');
-    el.style.setProperty('box-shadow', 'none', 'important');
+    poser(el, 'data-vh-anneau', '1');
+    poser(el, 'background', sombre() ? 'transparent' : '#fff');
+    poser(el, 'border', '3px solid ' + teinte);
+    poser(el, 'box-sizing', 'border-box');
+    poser(el, 'color', num ? teinte : (sombre() ? '#F2F5FC' : '#001136'));
+    poser(el, 'box-shadow', 'none');
   }
 
-  function passe(racine) {
-    var els = (racine || document.body).querySelectorAll('*');
-    for (var i = 0; i < els.length; i++) {
-      var el = els[i];
-      if (el.closest(EXCLU)) continue;
-      if (el.closest('[data-vp]') && document.getElementById('vrt-secondaires')) continue; // la vitrine a sa feuille
-      if (el.hasAttribute('data-vh') && el.hasAttribute('data-vh-anneau')) continue;
-      var cs = getComputedStyle(el);
-      if (cs.position === 'fixed' && el !== racine) continue;          // bulles flottantes
-      /* Un élément MASQUÉ au rendu (onglet fermé, carte pas encore révélée)
-         a déjà sa taille calculée : on le relève quand même. L'anneau, lui,
-         se mesure — il attend que l'élément soit affiché (voir demarrer). */
-      if (texteDirect(el)) relever(el, cs);
-      if (/^(SPAN|DIV|I|B)$/.test(el.tagName) && cs.display !== 'none') anneau(el, cs);
+  function examiner(el) {
+    if (el.closest(EXCLU)) return;
+    if (el.closest('[data-vp]') && document.getElementById('vrt-secondaires')) return; // la vitrine a sa feuille
+    var direct = texteDirect(el), rond = /^(SPAN|DIV|I|B)$/.test(el.tagName) && !el.hasAttribute('data-vh-anneau');
+    if (!(direct && !el.hasAttribute('data-vh')) && !rond) return;    // rien à décider : aucune lecture
+    var cs = getComputedStyle(el);
+    if (cs.position === 'fixed') return;                              // bulles flottantes
+    /* Un élément MASQUÉ au rendu (onglet fermé, carte pas encore révélée)
+       a déjà sa taille calculée : on le relève quand même. L'anneau, lui,
+       se mesure — il attend que l'élément soit affiché. */
+    if (direct) relever(el, cs);
+    if (rond && cs.display !== 'none') anneau(el, cs);
+  }
+
+  function passe(racines) {
+    aEcrire = [];
+    (racines || [document.body]).forEach(function (r) {
+      if (!r || !r.isConnected || r.nodeType !== 1) return;
+      examiner(r);
+      var els = r.getElementsByTagName('*');
+      for (var i = 0; i < els.length; i++) examiner(els[i]);
+    });
+    // Une seule écriture groupée : aucune lecture entre deux écritures.
+    for (var k = 0; k < aEcrire.length; k++) {
+      var w = aEcrire[k];
+      if (w[1].indexOf('data-') === 0) w[0].setAttribute(w[1], w[2]);
+      else w[0].style.setProperty(w[1], w[2], 'important');
     }
+    aEcrire = [];
   }
 
   /* Seconde passe, complète, 800 ms après la DERNIÈRE modification : des
@@ -145,7 +169,7 @@
   var tRattrapage = 0;
   function rattraper() {
     clearTimeout(tRattrapage);
-    tRattrapage = setTimeout(function () { try { passe(document.body); } catch (e) { window.__vrtHarmonieErreur = String(e && e.message || e); } }, 800);
+    tRattrapage = setTimeout(function () { try { passe(null); } catch (e) { window.__vrtHarmonieErreur = String(e && e.message || e); } }, 800);
   }
 
   var enAttente = false, cibles = [];
@@ -158,8 +182,7 @@
       enAttente = false;
       var lot = cibles.splice(0);
       try {
-        if (!lot.length) passe(document.body);
-        else lot.forEach(function (c) { if (c.isConnected) { passe(c); if (!c.closest(EXCLU)) { var cs = getComputedStyle(c); if (texteDirect(c)) relever(c, cs); anneau(c, cs); } } });
+        passe(lot.length ? lot : null);
       } catch (e) { window.__vrtHarmonieErreur = String(e && e.message || e); }
     });
   }

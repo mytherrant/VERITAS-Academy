@@ -11,6 +11,7 @@ Demandes de Jacques :
 - Il traite aussi les sections dessinées après coup (MutationObserver), les éléments révélés plus tard (clic, fin d'animation) et ceux qui prennent leur forme d'un autre script (seconde passe 800 ms après la dernière modification). Au repos, aucune boucle : 15 mesures en 4 s.
 - Relevé à 390 px, avant → après. Textes sous 15 px : application, de 40-55 % à quelques étiquettes ; Atelier, de 40 sur 55 à 2. Ronds pleins : plan du site, Constellation, évaluations, cours, sections de l'application et Atelier, de nombreux à 0, hors indicateurs d'état.
 - Tuiles des espaces : l'anneau est passé en `!important`, puisque `theme-lws.css` l'effaçait.
+- ⚠️ **Gel corrigé avant mise en ligne** : la première version alternait lectures (`getComputedStyle`, `offsetWidth`) et écritures de style, élément par élément. La mise en page était recalculée à chaque fois, en coût quadratique, et la page se figeait sur la CI (smoke : 45 s dépassées, titre vide). Le module décide désormais tout en lecture, puis écrit en un seul lot. Mesure à CPU ×2 : sans module 42 s et 41,8 s de tâches longues ; ancienne version, page figée ; nouvelle version 44 s et 43,5 s. Le rapporteur `github` de Playwright transforme désormais les échecs en annotations de PR.
 
 **Recensement des modules invisibles** (ils existaient, aucune porte publique n'y menait) :
 
