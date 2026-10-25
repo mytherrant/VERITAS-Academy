@@ -144,7 +144,12 @@ jobs:
 
   smoke:
     name: 🌐 Boot du portail (Chromium headless)
-    runs-on: ubuntu-latest
+    # 25/10/2026 — `ubuntu-latest` bascule vers Ubuntu 26 depuis le 19/10
+    # (actions/runner-images#14748) : `npx playwright install --with-deps
+    # chromium` y échoue avec la version de Playwright du projet, et ce job
+    # était rouge sans qu'une ligne du site ait changé. On reste sur l'image
+    # où il passait, jusqu'à la montée de version de Playwright.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
