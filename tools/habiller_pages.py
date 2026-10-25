@@ -374,7 +374,7 @@ nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!impor
    18 px entre deux éléments. Les encadrés gardent leur teinte (--vl) ; le
    thème sombre et l'encadré sombre .upsell gardent leurs couleurs. */
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ul:not([class]) > li{
-  padding-left:40px;margin:0 0 18px;font-size:19px;line-height:1.7;letter-spacing:.005em}
+  padding-left:40px;margin:0 0 20px;font-size:19px;line-height:1.8;letter-spacing:.005em}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ul:not([class]) > li:last-child{margin-bottom:0}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ul:not([class]){margin:18px 0 22px}
 :root:not([data-vrt-theme="sombre"]):has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ul:not([class]) > li{color:#5B6170}
@@ -416,7 +416,7 @@ nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!impor
    lieu de flotter dans trois cadres emboîtés. Thème sombre inchangé. */
 :root:not([data-vrt-theme="sombre"]):has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)){background:#fff}
 :root:not([data-vrt-theme="sombre"]):has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(main,.wrap){background:transparent}
-:root:not([data-vrt-theme="sombre"]):has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) > p{font-size:19px;line-height:1.75;color:#5B6170}
+:root:not([data-vrt-theme="sombre"]):has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) > p{font-size:19px;line-height:1.85;color:#5B6170;margin:0 0 20px}
 :root:not([data-vrt-theme="sombre"]):has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) > p :is(strong,b){color:#1E499B;font-weight:600}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) h1{font-size:clamp(28px,4.2vw,36px);line-height:1.22;letter-spacing:-.01em}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) h2{font-size:clamp(22px,3vw,26px);line-height:1.3;margin-top:34px}
@@ -435,7 +435,12 @@ nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!impor
    de section posent leur icône centrée AU-DESSUS du titre, comme les blocs
    de lws.fr. Les coches d'une liste de premier niveau tournent sur les six
    teintes de la vitrine ; une liste d'encadré garde la teinte de son encadré. */
-:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) :is(p,li){text-align:justify;-webkit-hyphens:auto;hyphens:auto;hyphenate-limit-chars:7 3 3}
+/* 25/10/2026, suite : « si la justification dérange, tu laisses » (Jacques).
+   Elle reste sur les PARAGRAPHES d'écran large, où la ligne est assez longue
+   pour ne pas se trouer ; listes et téléphone restent alignés à gauche. */
+@media (min-width:601px){
+  :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) > p{text-align:justify;-webkit-hyphens:auto;hyphens:auto;hyphenate-limit-chars:7 3 3}}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) :is(ul,ol):not([class]) > li{text-align:left}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) h2{flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important;gap:10px!important;padding-top:18px!important;padding-bottom:16px!important}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) h2 > svg.vi{width:34px!important;height:34px!important;margin:0!important;flex:none;color:var(--vh,#1E499B)}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) h2:nth-of-type(6n+2) > svg.vi{--vh:#A84200}
@@ -448,16 +453,11 @@ nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!impor
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) > ul:not([class]) > li:nth-child(6n+4)::before{--vl:#5B4FA8}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) > ul:not([class]) > li:nth-child(6n+5)::before{--vl:#B03A6E}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) > ul:not([class]) > li:nth-child(6n+6)::before{--vl:#A84200}
-:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li{font-size:19px;line-height:1.7;margin:0 0 18px;padding-left:46px}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li{font-size:19px;line-height:1.8;margin:0 0 20px;padding-left:46px}
 :root:not([data-vrt-theme="sombre"]):has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li{color:#5B6170}
 :root:not([data-vrt-theme="sombre"]):has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li :is(strong,b){color:#1E499B;font-weight:600}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li::before{width:30px!important;height:30px!important;line-height:30px!important;font-size:15px!important;top:.05em!important;color:#fff!important;border-radius:50%!important;text-align:center!important}
-/* Au téléphone, une ligne de liste courte qui porte de longs mots en gras
-   se trouait de blancs une fois justifiée (« La    rédaction    argumentative »,
-   mesuré à 390 px) : les listes s'y alignent à gauche, les paragraphes
-   restent justifiés. */
 @media (max-width:600px){
-  :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) :is(ul,ol):not([class]) > li{text-align:left}
   :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li{font-size:18px;padding-left:42px}
   :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li::before{width:28px!important;height:28px!important;line-height:28px!important;font-size:14px!important}
 }

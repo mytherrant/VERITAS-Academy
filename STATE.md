@@ -27,6 +27,7 @@ Le thème sombre et l'encadré sombre `.upsell` gardent leurs couleurs.
 - Titres de section centrés, avec l'icône de 34 px AU-DESSUS du titre. La couleur de l'icône tourne sur six teintes.
 - Les coches d'une liste de premier niveau tournent sur six teintes ; une liste d'encadré garde la teinte de son encadré.
 - Pastilles numérotées de 30 px (28 px au téléphone), en couleurs alternées.
+- Puis : « si la justification dérange, tu laisses ». La justification ne reste que sur les paragraphes d'écran large ; listes et téléphone sont alignés à gauche. L'interligne passe à 1,85 (paragraphes) et 1,8 (listes), avec 20 px entre deux blocs.
 
 ## Pied de page allégé (24/10/2026, v1.20.43)
 
