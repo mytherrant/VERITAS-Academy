@@ -881,6 +881,7 @@ const MENU = [
     { t: 'Tester mon niveau',    d: '10 questions, forces et lacunes', i: 'lc-target',  c: '#B03A6E', f: '#FBE4EE', h: APP + '#positionnement' },
     { t: 'Ma progression',       d: 'XP, série, badges à débloquer', i: 'lc-award',     c: '#007E11', f: '#E0F5E5', h: APP + '#progression', g: 1 },
     { t: 'Jeux et battles',      d: 'Réviser en jouant, défis hebdo', i: 'lc-game',     c: '#5B4FA8', f: '#EAE7F7', h: APP + '#jeux' },
+    { t: 'Examen blanc',         d: 'Sujet officiel + chronomètre', i: 'lc-clock',      c: '#A84200', f: '#FFF3E4', h: APP + '#simulateur' },
     /* ⚠️ TROIS SERVICES QUI EXISTAIENT SANS ÊTRE ANNONÇÉS (31/08/2026).
        Chacun a sa page publiée, indexée, alimentée — et aucune entrée de menu.
        Un visiteur ne pouvait les atteindre qu'en connaissant leur URL. */

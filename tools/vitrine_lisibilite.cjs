@@ -38,6 +38,10 @@ function cssSecondaires() {
     css += sel.join(',') + '{font-size:' + n + 'px!important}\n';
   }
   for (const [c, n] of Object.entries(CLASSES)) css += '[data-vp] .' + c + '{font-size:' + n + 'px!important}\n';
+  /* Titres plus affirmés (25/10/2026) : 600 → 700/800, comme sur toutes les
+     autres surfaces (assets/veritas-harmonie.js). */
+  css += '[data-vp] :is(h1,h2)[style*="font:600"]{font-weight:800!important}'
+       + '[data-vp] :is(h3,h4)[style*="font:600"]{font-weight:700!important}\n';
   /* Tunnel de paiement, au téléphone : les champs « Numéro Mobile Money » et
      « Confirmer le numéro » se partageaient deux colonnes de 150 px, et leurs
      libellés se chevauchaient (relevé le 25/10/2026, antérieur à ce module).
@@ -61,8 +65,22 @@ function anneaux(html) {
         + 'border:3px solid ' + teinte + ';box-sizing:border-box;color:' + teinte + ';');
 }
 
+/* 25/10/2026 — 3G (« les téléphones 3G doivent naviguer avec fluidité »).
+   Trois photos de l'accueil pesaient 352 Ko : deux fonds de cartes de 172 px
+   de haut servis en 748 px, et l'image principale en 1 400 px même sur un
+   écran de 390 px. Versions allégées (transparence conservée) : 140 Ko.
+   NOUVEAUX NOMS : .htaccess sert les images « immutable » un an — un fichier
+   modifié sous le même nom ne serait jamais rechargé. */
+function images(html) {
+  return html
+    .replace(/url\(assets\/photo-groupe\.webp\)/g, 'url(assets/photo-groupe-600.webp)')
+    .replace(/url\(assets\/photo-examen\.webp\)/g, 'url(assets/photo-examen-600.webp)')
+    .replace(/<img([^>]*?) src="assets\/hero-eleves\.webp"(?![^>]*srcset)/g,
+      '<img$1 src="assets/hero-eleves.webp" srcset="assets/hero-eleves-800.webp 800w, assets/hero-eleves.webp 1400w" sizes="(max-width: 999px) 100vw, 640px"');
+}
+
 function appliquer(html) {
-  let out = anneaux(html);
+  let out = images(anneaux(html));
   out = out.replace(/<style id="vrt-secondaires">[\s\S]*?<\/style>\n?/, '');
   if (out.split('</head>').length !== 2) throw new Error('vitrine_lisibilite : </head> introuvable ou multiple.');
   return out.replace('</head>', cssSecondaires() + '</head>');
