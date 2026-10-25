@@ -442,7 +442,8 @@ nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!impor
   :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) > p{text-align:justify;-webkit-hyphens:auto;hyphens:auto;hyphenate-limit-chars:7 3 3}}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) :is(ul,ol):not([class]) > li{text-align:left}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) h2{flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important;gap:10px!important;padding-top:18px!important;padding-bottom:16px!important}
-:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) h2 > svg.vi{width:34px!important;height:34px!important;margin:0!important;flex:none;color:var(--vh,#1E499B)}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) h2 > svg.vi{box-sizing:border-box!important;width:60px!important;height:60px!important;padding:14px!important;margin:0!important;flex:none;border-radius:50%!important;border:3px solid var(--vh,#1E499B)!important;background:#fff!important;color:#001136!important;stroke-width:1.6}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) h2 > svg.vi{background:transparent!important;color:#F2F5FC!important}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) h2:nth-of-type(6n+2) > svg.vi{--vh:#A84200}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) h2:nth-of-type(6n+3) > svg.vi{--vh:#007E11}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) h2:nth-of-type(6n+4) > svg.vi{--vh:#5B4FA8}
@@ -460,6 +461,34 @@ nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!impor
 @media (max-width:600px){
   :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li{font-size:18px;padding-left:42px}
   :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) ol:not([class]) > li::before{width:28px!important;height:28px!important;line-height:28px!important;font-size:14px!important}
+}
+
+/* 25/10/2026 — « Harmonise le système des icônes et pictogrammes, centre-
+   les, et augmente un peu la taille des textes secondaires » (Jacques,
+   capture de la vitrine). UN SEUL SYSTÈME : l'anneau de la vitrine — rond
+   blanc, filet de 3 px dans la teinte en rotation, icône bleu nuit, centré.
+   Il remplace la pastille pâle de 42 px des cartes (.ico) et l'icône nue des
+   titres de section. 60 px (54 au téléphone). Sur fond sombre : anneau blanc. */
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico{width:60px!important;height:60px!important;margin:0 auto 14px!important;
+  background:#fff!important;border:3px solid var(--vm-trait,#1E499B)!important;color:#001136!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico svg{width:27px!important;height:27px!important;stroke-width:1.6}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico.sur-sombre{background:transparent!important;border-color:#fff!important;color:#fff!important}
+/* Le médaillon que veritas-medaillons.js pose devant le premier titre d'une
+   carte DOUBLAIT l'anneau du titre de section qui suit : deux ronds empilés. */
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico:has(+ h2 > svg.vi){display:none!important}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico{background:transparent!important;color:#F2F5FC!important}
+/* Textes secondaires : auteurs sous les œuvres, liens de bas de page,
+   mentions, légendes. Ils tombaient à 12-14 px sous un texte de 19 px. */
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .works span{font-size:15.5px!important;margin-top:2px}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .works a{padding:13px 16px!important}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .works a strong{font-size:17.5px}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.rel,.note,figcaption,.meta,.sub,.vcal-note){font-size:16px!important;line-height:1.65}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) small{font-size:max(15px,.88em)}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) > p{font-size:17px}
+@media (max-width:600px){
+  :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico{width:54px!important;height:54px!important}
+  :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.card,.tile) .ico svg{width:25px!important;height:25px!important}
+  :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,.card,article) h2 > svg.vi{width:54px!important;height:54px!important;padding:12px!important}
 }
 
 /* ════════════════════════════════════════════════════════════════════════
