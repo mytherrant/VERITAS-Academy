@@ -1,3 +1,18 @@
+## Un seul système d'icônes, textes secondaires agrandis (25/10/2026, v1.20.45)
+
+Demande de Jacques (capture de la vitrine) : « Harmonise le système des icônes et pictogrammes, centre-les et augmente un peu la taille des textes secondaires. »
+
+**Icônes** : il n'y a plus qu'un système, l'anneau de la vitrine (rond blanc, filet de 3 px dans une teinte en rotation, icône bleu nuit, centré).
+- Il remplace la pastille pâle de 42 px des cartes (`.ico`) et l'icône nue des titres de section.
+- Taille : 60 px, 54 px au téléphone.
+- Sur fond sombre et en thème sombre, l'anneau est transparent et l'icône claire.
+- Le médaillon posé devant un titre qui a déjà son anneau est masqué : deux ronds s'empilaient.
+- Règles dans `tools/habiller_pages.py`, pour les 271 pages.
+
+**Textes secondaires** :
+- pages de contenu : auteurs sous les œuvres 15,5 px, titres d'œuvres 17,5 px, mentions et légendes 16 px, texte des cartes 17 px, `small` au moins 15 px ;
+- vitrine : les tailles écrites en ligne gagnent 1,5 px (13 → 14,5, 14,5 → 16…), seulement dans les sections (`[data-vp]`) : bloc `<style id="vrt-secondaires">` dans `vitrine.html`, reproduit par `tools/build_vitrine.js`. Dans le générateur, `page` passe de `const` à `let`.
+
 ## Lecture « LWS » sur les pages de contenu (25/10/2026, v1.20.44)
 
 Demande de Jacques (captures de lws.fr/nom-de-domaine) : « la même mise en forme professionnelle, en augmentant la police et en éclaircissant », puis « fond blanc, police plus grande, plus captivant, écran du téléphone bien rempli et équilibré ».
