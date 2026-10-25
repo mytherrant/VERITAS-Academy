@@ -2634,9 +2634,9 @@ if ('serviceWorker' in navigator) {
 </body>
 </html>
 `;
-/* 25/10/2026 — textes secondaires relevés de 1,5 px (Jacques) : même bloc
-   que dans vitrine.html, posé avant </head>. */
-if (page.indexOf('vrt-secondaires') < 0) page = page.replace('</head>', "<style id=\"vrt-secondaires\">\n/* 25/10/2026 — textes secondaires un peu plus grands (Jacques). Les tailles\n   sont écrites EN LIGNE par la maquette : on les relève dans les sections\n   (data-vp), jamais dans la barre ni le pied. */\n[data-vp] p[style*=\"font-size:13px\"]{font-size:14.5px!important}\n[data-vp] p[style*=\"font-size:13.5px\"]{font-size:15px!important}\n[data-vp] p[style*=\"font-size:14px\"]{font-size:15.5px!important}\n[data-vp] p[style*=\"font-size:14.5px\"]{font-size:16px!important}\n[data-vp] p[style*=\"font-size:15px\"]{font-size:16.5px!important}\n</style>\n" + '</head>');
+/* 25/10/2026 — anneaux d'icônes et textes secondaires : voir
+   tools/vitrine_lisibilite.cjs (appliqué aussi à vitrine.html, retouché à la main). */
+page = require('./vitrine_lisibilite.cjs').appliquer(page);
 if (OUT) { fs.writeFileSync(OUT, page); console.log('écrit      :', OUT, '—', page.length, 'octets'); }
 
 console.log('');
