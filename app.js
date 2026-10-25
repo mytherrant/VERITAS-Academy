@@ -47660,7 +47660,21 @@ function _cagCreer(eleveId){
                     // fonction de rendu, n'est PAS une section de vShowSec, et
                     // n'était donc atteignable que par une tuile de l'accueil
                     // connecté. La vitrine y renvoie maintenant par ancre.
-                    calendrier:'showCalendrier' };
+                    calendrier:'showCalendrier',
+                    /* 25/10/2026 — « Je ne vois pas orientation scolaire, badge
+                       de progression, tester le niveau de l'apprenant… Ce sont
+                       des modules qui existent et qui ne sont pas visibles »
+                       (Jacques). Recensés : le test de positionnement n'avait
+                       PLUS AUCUNE porte depuis son retrait du panneau des
+                       gagnants (v1.9.1) ; parcours, badges, jeux, battles,
+                       étude en groupe et orientation IA n'étaient atteignables que depuis l'ancien accueil de
+                       l'application, que la vitrine a remplacé. Une adresse
+                       chacun : le menu, le plan du site et les espaces y
+                       mènent désormais. */
+                    positionnement:'mPositionnement', progression:'mMonParcours',
+                    badges:'mAchievements', jeux:'showJeuxEdu', battles:'mBattles',
+                    groupe:'mStudyRoom', 'orientation-ia':'mAIOrientation',
+                    ambassa:'mAgentAmbassa' };
 
   function sectionDuHash(){
     var h = (window.location.hash || '').replace(/^#/, '');
@@ -47771,7 +47785,8 @@ function _cagCreer(eleveId){
          vide) — vShowSec('presentation',_,true) : le 3ᵉ argument _boot évite le
          renvoi vers la vitrine. La modale s'ouvre par-dessus ; la fermer révèle
          une vraie page, plus jamais un vide. */
-      var _MODALE_FN = { recherche:1, calendrier:1, connexion:1, compte:1, inscription:1, partenaire:1 };
+      var _MODALE_FN = { recherche:1, calendrier:1, connexion:1, compte:1, inscription:1, partenaire:1,
+                         positionnement:1, progression:1, badges:1, battles:1, groupe:1, 'orientation-ia':1, ambassa:1 };
       if(_MODALE_FN[sec]){
         try{
           var _vcBg = document.getElementById('vContent');
@@ -49407,9 +49422,17 @@ window._espacePerso = function(role){
       ['lc-graduation','Le programme de ma classe','window.open(\'/niveaux/\',\'_blank\',\'noopener\')'],
       ['lc-check','Les corrigés des cahiers','window.open(\'/corriges/\',\'_blank\',\'noopener\')'],
       ['lc-clipboard','M’évaluer avant l’examen','window.open(\'/evaluations/\',\'_blank\',\'noopener\')'],
-      ['lc-message','Demander au tuteur IA','if(typeof mAgentAmbassa===\'function\')mAgentAmbassa()']
+      ['lc-message','Demander au tuteur IA','if(typeof mAgentAmbassa===\'function\')mAgentAmbassa()'],
+      /* 25/10/2026 — modules existants que l'élève ne trouvait nulle part
+         (« les usagers ne savent pas qu'ils existent », Jacques). */
+      ['lc-target','Tester mon niveau (10 questions)','if(typeof mPositionnement===\'function\')mPositionnement()'],
+      ['lc-award','Ma progression &amp; mes badges','if(typeof mMonParcours===\'function\')mMonParcours()'],
+      ['lc-compass','Mon orientation','vShowSec(\'orientation\',null)'],
+      ['lc-game','Jeux éducatifs &amp; battles','if(typeof showJeuxEdu===\'function\')showJeuxEdu()']
     ] : role==='parent' ? [
       ['lc-chart','Notes &amp; bulletin de mon enfant','_espaceParentEnfant()'],
+      ['lc-target','Tester le niveau de mon enfant','if(typeof mPositionnement===\'function\')mPositionnement()'],
+      ['lc-compass','Orientation scolaire','vShowSec(\'orientation\',null)'],
       ['lc-wallet','Payer / Cagnotte de scolarité','vShowSec(\'cagnotte\',null)'],
       ['lc-graduation','Le catalogue e-learning','vShowSec(\'elearning\',null)'],
       ['lc-shield','Vérifier un certificat','vShowSec(\'verifier-certificat\',null)']
@@ -49423,6 +49446,9 @@ window._espacePerso = function(role){
     h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:18px">';
     /* 25/10/2026 — le médaillon devient l'ANNEAU de la vitrine (rond blanc,
        filet teinté, icône bleu nuit) : un seul système d'icônes partout.
+       Le filet est en !important EN LIGNE : theme-lws.css retire toute
+       bordure sous #VISITOR (« #VISITOR#VISITOR * {border… 0 !important} »),
+       et seule une déclaration en ligne importante passe devant.
        18/10/2026 — Les tuiles de la vitrine : médaillon rond dans une teinte
        qui ALTERNE (bleu, sarcelle, vert, violet, rose, brique — l'ordre des
        pages statiques), libellé 600 #001136, chevron de la teinte.
@@ -49434,7 +49460,7 @@ window._espacePerso = function(role){
     actions.forEach(function(a, i){
       var te = _TE[i % _TE.length];
       h += '<button type="button" class="vesp-act" onclick="'+a[2]+'" style="text-align:left;background:#fff;border:1px solid #E4E9F2;border-radius:14px;padding:14px 15px;cursor:pointer;display:flex;gap:12px;align-items:center;box-shadow:0 4px 14px rgba(0,17,54,.05);transition:transform .18s,box-shadow .18s" onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 12px 26px rgba(0,17,54,.09)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 4px 14px rgba(0,17,54,.05)\'">'
-        + '<span aria-hidden="true" style="flex:0 0 auto;width:46px;height:46px;box-sizing:border-box;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:3px solid '+te[1]+';color:#001136">'+ICO(a[0])+'</span>'
+        + '<span aria-hidden="true" style="flex:0 0 auto;width:46px;height:46px;box-sizing:border-box;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:3px solid '+te[1]+' !important;color:#001136">'+ICO(a[0])+'</span>'
         + '<span style="flex:1;font:600 14.5px/1.4 Poppins,sans-serif;color:#001136">'+a[1]+'</span>'
         + '<span aria-hidden="true" style="flex:0 0 auto;color:'+te[1]+'">'+ICO('lc-chevron-right')+'</span>'
         + '</button>';
