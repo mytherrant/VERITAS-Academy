@@ -701,6 +701,9 @@ def habiller(s, donnees, rel=''):
     scripts = ''
     if 'veritas-medaillons.js' not in s and not outil and (epreuve or any(f in s for f in FEUILLES)):
         scripts += '<script src="/assets/veritas-medaillons.js?v=%s" defer></script>\n' % v
+    # 25/10/2026 — même lecture partout (textes ≥ 15 px, anneaux) : voir
+    # l'en-tête de assets/veritas-harmonie.js.
+    scripts += '<script src="/assets/veritas-harmonie.js?v=%s" defer></script>\n' % v
     scripts += '<script src="/assets/vitrine.js?v=%s" defer></script>' % v
     fin = PIED + '\n' + ('' if outil else BULLES + '\n') + scripts
     i = s.rfind('</body>')
@@ -829,7 +832,7 @@ def habiller_app(s, donnees, vitrine):
     j = s.rfind('</body>')
     s = s[:j] + bloc('formules', formules_vitrine(vitrine)) + '\n' + s[j:]
     j = s.rfind('</body>')
-    s = s[:j] + bloc('script', '<script src="/assets/vitrine.js?v=%s" defer></script>' % v) + '\n' + s[j:]
+    s = s[:j] + bloc('script', '<script src="/assets/veritas-harmonie.js?v=%s" defer></script>\n<script src="/assets/vitrine.js?v=%s" defer></script>' % (v, v)) + '\n' + s[j:]
     return s
 
 

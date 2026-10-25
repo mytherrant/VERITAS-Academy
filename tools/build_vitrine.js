@@ -874,6 +874,13 @@ const MENU = [
     { t: 'Œuvres au programme',  d: 'Analyses et fiches',          i: 'lc-bookopen',    c: '#1E499B', f: '#DBE8FE', h: 'oeuvres/' },
     { t: 'Programmes par classe',d: 'De la 6ᵉ à la Terminale',     i: 'lc-graduation',  c: '#0E7C86', f: '#DDF2F4', h: 'niveaux/' },
     { t: 'Outils gratuits',      d: 'Calculateurs de moyenne',     i: 'lc-calculator',  c: '#007E11', f: '#E0F5E5', h: 'outils/' },
+    /* 25/10/2026 — des MODULES de l'application sans aucune porte publique
+       (« tester le niveau, badges de progression… les usagers ne savent pas
+       qu'ils existent », Jacques). Le test de positionnement n'était même plus
+       atteignable depuis l'application (retiré d'un panneau en v1.9.1). */
+    { t: 'Tester mon niveau',    d: '10 questions, forces et lacunes', i: 'lc-target',  c: '#B03A6E', f: '#FBE4EE', h: APP + '#positionnement' },
+    { t: 'Ma progression',       d: 'XP, série, badges à débloquer', i: 'lc-award',     c: '#007E11', f: '#E0F5E5', h: APP + '#progression', g: 1 },
+    { t: 'Jeux et battles',      d: 'Réviser en jouant, défis hebdo', i: 'lc-game',     c: '#5B4FA8', f: '#EAE7F7', h: APP + '#jeux' },
     /* ⚠️ TROIS SERVICES QUI EXISTAIENT SANS ÊTRE ANNONÇÉS (31/08/2026).
        Chacun a sa page publiée, indexée, alimentée — et aucune entrée de menu.
        Un visiteur ne pouvait les atteindre qu'en connaissant leur URL. */
@@ -883,6 +890,7 @@ const MENU = [
   ]},
   { titre: 'Parent', sous: 'Suivre et soutenir', entrees: [
     { t: 'Orientation',          d: 'Choisir sa série',            i: 'lc-compass',     c: '#0E7C86', f: '#DDF2F4', h: APP + '#orientation' },
+    { t: 'Tester son niveau',    d: 'Le point avant de commencer', i: 'lc-target',      c: '#B03A6E', f: '#FBE4EE', h: APP + '#positionnement' },
     { t: 'Matières et coefficients', d: 'Poids réels, orientation',i: 'lc-scale',       c: '#5B4FA8', f: '#EAE7F7', h: 'parcours/' },
     { t: 'Cagnotte de scolarité',d: 'Faire financer son année',    i: 'lc-gift',        c: '#A84200', f: '#FFF3E4', h: APP + '#cagnotte' },
     { t: 'Trophées VÉRITAS',     d: 'Vote gratuit et unique',      i: 'lc-trophy',      c: '#B8860B', f: '#FFF6DA', h: APP + '#trophees' },

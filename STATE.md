@@ -1,3 +1,42 @@
+## Même lecture sur tout le site, et modules cachés rendus visibles (25/10/2026, v1.20.47)
+
+Demandes de Jacques :
+- « Applique ces changements à toutes les pages, pas uniquement la vitrine. Il ne faut pas qu'on sente le déphasage d'une page à l'autre. N'oublie pas l'Atelier de Français. Aérer, rendre l'interface intuitive et captivante. »
+- « Toujours inchangé » (capture du plan du site, qui avait encore ses pastilles pâles).
+- « Je ne vois pas orientation scolaire, badges de progression, tester le niveau… Ce sont des modules qui existent et qui ne sont pas visibles. Recense les problèmes de ce genre, orienté usagers. »
+
+**Une seule lecture partout : `assets/veritas-harmonie.js`**, chargé par l'application, l'Atelier, les 271 pages statiques (via `habiller_pages.py`), `plan.html` (via `build_plan.py`) et `constellation.html`. La vitrine garde `tools/vitrine_lisibilite.cjs`.
+- Il mesure ce qui est affiché. Un texte sous 15 px monte à 15 px ; une étiquette en capitales gagne 2 px, sans descendre sous 13.
+- Un rond plein portant une icône ou un numéro devient l'anneau, avec un filet `!important` en ligne : `theme-lws.css` retire toute bordure sous `#VISITOR`. La teinte vient de la couleur du rond, sinon du trait de l'icône, sinon du fond assombri.
+- Il traite aussi les sections dessinées après coup (MutationObserver), les éléments révélés plus tard (clic, fin d'animation) et ceux qui prennent leur forme d'un autre script (seconde passe 800 ms après la dernière modification). Au repos, aucune boucle : 15 mesures en 4 s.
+- Relevé à 390 px, avant → après. Textes sous 15 px : application, de 40-55 % à quelques étiquettes ; Atelier, de 40 sur 55 à 2. Ronds pleins : plan du site, Constellation, évaluations, cours, sections de l'application et Atelier, de nombreux à 0, hors indicateurs d'état.
+- Tuiles des espaces : l'anneau est passé en `!important`, puisque `theme-lws.css` l'effaçait.
+
+**Recensement des modules invisibles** (ils existaient, aucune porte publique n'y menait) :
+
+| Module | Fonction | Situation avant |
+|---|---|---|
+| Test de positionnement (niveau, forces, lacunes) | `mPositionnement` | **aucun appel** depuis son retrait du panneau des gagnants (v1.9.1) |
+| Progression : XP, série, niveau | `mMonParcours` | ancien accueil de l'application seulement |
+| Badges (30+) | `mAchievements` | idem |
+| Jeux éducatifs | `showJeuxEdu` | menus internes de l'application |
+| Battles de la semaine | `mBattles` | idem |
+| Étude en groupe | `mStudyRoom` | ancien accueil seulement |
+| Orientation par IA | `mAIOrientation` | dans la section orientation seulement |
+| Prof. Ambassa (tuteur IA) | `mAgentAmbassa` | bulle flottante, sans adresse |
+| Simulateur d'examen | `_simulerExamen` | aucun appel (demande l'identifiant d'une épreuve, non branché ici) |
+| Calcul mental | `lancerCalculMental` | aucun appel direct (passe par le catalogue de jeux) |
+
+**Ce qui a été fait** :
+- adresses directes : `app.html#positionnement`, `#progression`, `#badges`, `#jeux`, `#battles`, `#groupe`, `#orientation-ia`, `#ambassa`. Celles qui s'ouvrent en fenêtre ont un fond neutre ;
+- menu « Plus » (vitrine et toutes les pages) : Élève → « Tester mon niveau », « Ma progression », « Jeux et battles » ; Parent → « Tester son niveau » ;
+- plan du site : 7 rubriques ajoutées (Élèves 18, Parents 15) ;
+- espace élève : « Tester mon niveau », « Ma progression & mes badges », « Mon orientation », « Jeux éducatifs & battles ». Espace parent : « Tester le niveau de mon enfant », « Orientation scolaire ».
+
+**Restent à décider** :
+- le simulateur d'examen n'a toujours pas de porte : il lui faut une épreuve choisie, et le brancher sur la page des épreuves est un chantier à part ;
+- « œuvres interactives » (`_showLittMenu`) demande une œuvre précise, et n'a donc pas d'adresse générique.
+
 ## MTN et Orange seuls, résultats animés, petits textes et anneaux de la vitrine (25/10/2026, v1.20.46)
 
 Demande de Jacques (quatre captures de la vitrine) : « Garde juste Orange / MTN comme moyen de paiement. Les résultats ne sont plus animés comme avant. Taille de police inchangée et encore très petite à certains endroits. Arrière-plan des icônes coloré à certains endroits alors qu'il faut le cercle dessus avec fond blanc comme les autres. Corrige tous les bugs similaires. »
