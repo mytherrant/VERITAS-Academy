@@ -9,7 +9,10 @@ module.exports = defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
+  // 'github' : chaque échec devient une ANNOTATION de la PR (message + ligne),
+  // lisible sans télécharger le rapport — le journal brut n'est pas toujours
+  // accessible depuis l'endroit où l'on diagnostique.
+  reporter: process.env.CI ? [['list'], ['github'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: 'http://localhost:8099',
     headless: true,
