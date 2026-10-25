@@ -827,8 +827,8 @@
         <div data-reveal style="display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center">
           <div>
             <span style="font:600 12px Poppins,sans-serif;color:#A84200;letter-spacing:1.1px;text-transform:uppercase">Paiement</span>
-            <h3 style="font:600 27px/37px Poppins,sans-serif;color:#001136;margin:9px 0 13px">Payer d'ici, ou depuis l'étranger</h3>
-            <p style="margin:0 0 16px;font-size:15.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">MTN MoMo, Orange Money, carte bancaire et PayPal. Chaque paiement déclenche un reçu numéroté imprimable avec QR de vérification. La cagnotte de scolarité permet à un parent installé à l'étranger de régler une tranche directement.</p>
+            <h3 style="font:600 27px/37px Poppins,sans-serif;color:#001136;margin:9px 0 13px">Payer en MTN MoMo ou Orange Money</h3>
+            <p style="margin:0 0 16px;font-size:15.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">MTN MoMo et Orange Money. Chaque paiement déclenche un reçu numéroté imprimable avec QR de vérification. La cagnotte de scolarité permet à un parent installé à l'étranger de régler une tranche directement.</p>
             <div style="display:flex;flex-wrap:wrap;gap:10px;max-width:460px">
               <sc-for list="{{ marquesPaiement }}" as="mq" hint-placeholder-count="6">
                 <span role="img" aria-label="{{ mq.nom }}" title="{{ mq.nom }}" style="display:flex;align-items:center;justify-content:center;height:44px;padding:0 6px;background:#FAFBFE;border:1px solid transparent;border-radius:10px;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-3px);box-shadow:0 12px 26px rgba(0,17,54,.09)">
@@ -1311,7 +1311,7 @@
           <div style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px">
             <span style="width:48px;height:48px;border-radius:50%;background:#fff;border:3px solid #A84200;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:13px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"></use></svg></span>
             <h3 style="font:600 18px/27px Poppins,sans-serif;color:#001136;margin:0 0 8px">Cagnotte de scolarité</h3>
-            <p style="margin:0 0 14px;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Un parent, un oncle ou un parrain installé à l'étranger règle une tranche par carte ou PayPal. Le reçu numéroté part automatiquement aux deux parties.</p>
+            <p style="margin:0 0 14px;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Un parent, un oncle ou un parrain installé à l'étranger règle une tranche en MTN MoMo ou Orange Money. Le reçu numéroté part automatiquement aux deux parties.</p>
             <a href="#cagnotte" style="display:inline-flex;align-items:center;gap:6px;font:500 14.5px Poppins,sans-serif">Comment ça marche<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
           </div>
         </div>
@@ -2324,18 +2324,12 @@ class Component extends DCLogic {
       reperesOeuvre: ['R\u00e9sum\u00e9 par chapitre', 'Fiches personnages', 'Sujets de dissertation corrig\u00e9s'],
       marquesPaiement: [
         { nom: 'MTN Mobile Money', ico: '#pay-mtn' },
-        { nom: 'Orange Money', ico: '#pay-orange' },
-        { nom: 'Visa', ico: '#pay-visa' },
-        { nom: 'Mastercard', ico: '#pay-mc' },
-        { nom: 'PayPal', ico: '#pay-paypal' },
-        { nom: 'Stripe', ico: '#pay-stripe' }
+        { nom: 'Orange Money', ico: '#pay-orange' }
       ],
       moyensPaiement: (() => {
         const m = [
           { nom: 'MTN Mobile Money', desc: 'Le plus utilis\u00e9 \u00b7 confirmation imm\u00e9diate', ico: '#lc-smartphone', marque: '#pay-mtn', teinte: '#A84200', pastille: '#FFF3E4' },
-          { nom: 'Orange Money', desc: 'Confirmation par SMS en 30 secondes', ico: '#lc-coins', marque: '#pay-orange', teinte: '#FF7900', pastille: '#FDF0E2' },
-          { nom: 'Carte bancaire', desc: 'Visa et Mastercard \u00b7 depuis l\u2019\u00e9tranger', ico: '#lc-card', marque: '#pay-visa', teinte: '#1A1F71', pastille: '#DBE8FE' },
-          { nom: 'PayPal', desc: 'Pour la diaspora \u00b7 conversion automatique', ico: '#lc-globe', marque: '#pay-paypal', teinte: '#003087', pastille: '#EEE9F8' }
+          { nom: 'Orange Money', desc: 'Confirmation par SMS en 30 secondes', ico: '#lc-coins', marque: '#pay-orange', teinte: '#FF7900', pastille: '#FDF0E2' }
         ];
         const actif = this.state.moyen === undefined ? 0 : this.state.moyen;
         return m.map((x, i) => ({
@@ -2588,7 +2582,7 @@ class Component extends DCLogic {
         { q: '\u00ab Je ne sais pas ce qu\u2019il fait en classe. \u00bb', r: 'Les notes de chaque s\u00e9quence, mati\u00e8re par mati\u00e8re, avec la moyenne et la position dans la promotion.' },
         { q: '\u00ab Est-il all\u00e9 au cours ce matin ? \u00bb', r: 'Les absences et retards sont enregistr\u00e9s par l\u2019\u00e9tablissement et visibles le jour m\u00eame.' },
         { q: '\u00ab Combien reste-t-il \u00e0 payer ? \u00bb', r: 'Le d\u00e9tail des tranches r\u00e9gl\u00e9es et restantes, avec le re\u00e7u num\u00e9rot\u00e9 de chaque paiement.' },
-        { q: '\u00ab Je suis \u00e0 l\u2019\u00e9tranger, comment payer ? \u00bb', r: 'La cagnotte accepte carte et PayPal ; le paiement s\u2019impute directement sur la scolarit\u00e9 de l\u2019enfant.' },
+        { q: '\u00ab Je suis \u00e0 l\u2019\u00e9tranger, comment payer ? \u00bb', r: 'La cagnotte se règle en MTN MoMo ou Orange Money ; le paiement s\u2019impute directement sur la scolarit\u00e9 de l\u2019enfant.' },
         { q: '\u00ab Ce certificat est-il authentique ? \u00bb', r: 'Chaque attestation porte un code de contr\u00f4le v\u00e9rifiable en ligne, sans compte.' }
       ],
       parentsCartes: [

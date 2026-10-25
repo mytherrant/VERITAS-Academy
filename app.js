@@ -16664,10 +16664,10 @@ function _guideContent(section,role){
       +_step('3',"Enregistrer le paiement","Montant, date, trimestre, moyen (MoMo, Orange Money, espèces, virement). Référence auto-générée.")
       +_step('4',"Reçu PDF","Cliquer 🧾 Reçu → PDF avec en-tête école + cachet + signature.")
     )+_block('💰','Moyens de paiement intégrés',
-      '<ul style="padding-left:22px"><li>📱 <strong>MTN Mobile Money</strong> — numéro configurable dans Paramètres</li><li>📱 <strong>Orange Money</strong></li><li>💳 <strong>Stripe / PayPal</strong> (cartes internationales)</li><li>🏦 <strong>Virement bancaire</strong></li><li>💵 <strong>Espèces</strong> au guichet</li></ul>'
+      '<ul style="padding-left:22px"><li>📱 <strong>MTN Mobile Money</strong> — numéro configurable dans Paramètres</li><li>📱 <strong>Orange Money</strong></li><li>💵 <strong>Espèces</strong> au guichet</li></ul>'
     )+_block('△','Bilan financier',
       'Menu <strong>Bilan financier</strong> — Recettes (paiements), dépenses (Autres dépenses + Paie enseignants), solde. Export Excel disponible.'
-    )+_warn("Les paiements via MoMo / Orange Money / PayPal nécessitent une vérification manuelle dans <strong>Paramètres → Cloud → 💰 Paiements</strong>. C'est l'admin qui marque 'payé' après vérification du téléphone/relevé bancaire.");
+    )+_warn("Les paiements via MTN MoMo / Orange Money nécessitent une vérification manuelle dans <strong>Paramètres → Cloud → 💰 Paiements</strong>. C'est l'admin qui marque 'payé' après vérification du téléphone/relevé bancaire.");
   }
 
   if(section==='elearning'){
@@ -32608,6 +32608,12 @@ window.VERITAS_PAYMENTS = (function(){
       });
     }
   } catch(e){}
+  /* 25/10/2026 — « Garde juste Orange / MTN comme moyen de paiement »
+     (Jacques). Carte, PayPal et virement sont coupés APRÈS la fusion de
+     DB.payConfig : une adresse PayPal restée dans la configuration ne peut
+     pas les rallumer. Toutes les tuiles passent par _payOK, qui refuse une
+     chaîne vide. */
+  defaults.paypal.url=''; defaults.stripe.url=''; defaults.bank.iban='';
   return defaults;
 })();
 
@@ -33027,7 +33033,7 @@ function openPaymentModal(payInfo){
     "Bonjour,\n\nJe viens d'effectuer un paiement pour " + label + ".\n"
     + "Montant : " + montantFmt + "\n"
     + "Référence : " + ref + "\n"
-    + "Moyen de paiement : [à préciser : MoMo / Orange Money / PayPal / Carte / Virement]\n"
+    + "Moyen de paiement : [à préciser : MTN MoMo / Orange Money]\n"
     + "Nom de l'expéditeur : [votre nom]\n\n"
     + "Merci de valider mon inscription / ma commande."
   );
@@ -33452,7 +33458,7 @@ function _payTilePlaceholder(){
 }
 function _payTileBandeau(){
   return (_payFlowIsRedirect() && !_payIsSkysms())
-    ? '<strong>Paiement automatique disponible :</strong> réglez par MoMo, Orange Money, carte bancaire ou PayPal, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24 h).'
+    ? '<strong>Paiement automatique disponible :</strong> réglez par MTN MoMo ou Orange Money, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24 h).'
     : '<strong>Paiement automatique disponible :</strong> payez avec votre numéro MTN ou Orange, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24 h).';
 }
 window._payTileTitre = _payTileTitre;
@@ -33584,7 +33590,7 @@ function _campayRenderDiag(){
       }
       el.style.background = 'rgba(5,150,105,.10)';
       el.innerHTML = '✅ <strong>Encaissement automatique opérationnel</strong> via <strong>'+nom+'</strong> — MTN, Orange'
-        + (c.provider === 'camerpay' ? ', carte bancaire et PayPal' : '') + '. Rien d\'autre à faire.'
+        + '. Rien d\'autre à faire.'
         + _hook;
       return;
     }
@@ -43075,11 +43081,11 @@ openPaymentModal = function(payInfo){
     +'<div style="font-family:monospace;font-size:14px;font-weight:800;color:'+P.orange.couleur+'">'+P.orange.numero+'</div>'
     +'<div style="font-size:10px;color:var(--ink4);margin-top:4px">'+_payCoordHtml(P.orange,true)+'</div>'
     +'<div style="font-size:9px;color:var(--ink4);margin-top:4px;font-style:italic">👆 Cliquez pour copier</div></div>'
-    // PayPal
-    +'<a href="'+P.paypal.url+'" target="_blank" rel="noopener" style="text-decoration:none;background:#fff;border:2px solid '+P.paypal.couleur+';border-radius:12px;padding:12px;display:block">'
+    // PayPal (affiché seulement si configuré — coupé depuis le 25/10/2026)
+    + (_payOK(P.paypal.url) ? ('<a href="'+P.paypal.url+'" target="_blank" rel="noopener" style="text-decoration:none;background:#fff;border:2px solid '+P.paypal.couleur+';border-radius:12px;padding:12px;display:block">'
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="font-size:24px">'+P.paypal.ico+'</div><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;color:#142554">'+P.paypal.label+'</div></div>'
     +'<div style="font-size:11px;color:var(--ink4)">Paiement international sécurisé</div>'
-    +'<div style="font-size:10px;color:'+P.paypal.couleur+';margin-top:4px;font-weight:700">→ Ouvrir PayPal</div></a>'
+    +'<div style="font-size:10px;color:'+P.paypal.couleur+';margin-top:4px;font-weight:700">→ Ouvrir PayPal</div></a>') : '')
     // Stripe (affiché seulement si configuré)
     + (_payOK(P.stripe.url) ? ('<a href="'+P.stripe.url+'" target="_blank" rel="noopener" style="text-decoration:none;background:#fff;border:2px solid '+P.stripe.couleur+';border-radius:12px;padding:12px;display:block">'
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="font-size:24px">'+P.stripe.ico+'</div><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;color:#142554">'+P.stripe.label+'</div></div>'
@@ -49415,7 +49421,9 @@ window._espacePerso = function(role){
     ] : [];
   if(actions.length){
     h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:18px">';
-    /* 18/10/2026 — Les tuiles de la vitrine : médaillon rond dans une teinte
+    /* 25/10/2026 — le médaillon devient l'ANNEAU de la vitrine (rond blanc,
+       filet teinté, icône bleu nuit) : un seul système d'icônes partout.
+       18/10/2026 — Les tuiles de la vitrine : médaillon rond dans une teinte
        qui ALTERNE (bleu, sarcelle, vert, violet, rose, brique — l'ordre des
        pages statiques), libellé 600 #001136, chevron de la teinte.
        La classe n'est pas décorative : sans elle, veritas-motion.js prenait
@@ -49426,7 +49434,7 @@ window._espacePerso = function(role){
     actions.forEach(function(a, i){
       var te = _TE[i % _TE.length];
       h += '<button type="button" class="vesp-act" onclick="'+a[2]+'" style="text-align:left;background:#fff;border:1px solid #E4E9F2;border-radius:14px;padding:14px 15px;cursor:pointer;display:flex;gap:12px;align-items:center;box-shadow:0 4px 14px rgba(0,17,54,.05);transition:transform .18s,box-shadow .18s" onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 12px 26px rgba(0,17,54,.09)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 4px 14px rgba(0,17,54,.05)\'">'
-        + '<span aria-hidden="true" style="flex:0 0 auto;width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:'+te[0]+';color:'+te[1]+'">'+ICO(a[0])+'</span>'
+        + '<span aria-hidden="true" style="flex:0 0 auto;width:46px;height:46px;box-sizing:border-box;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:3px solid '+te[1]+';color:#001136">'+ICO(a[0])+'</span>'
         + '<span style="flex:1;font:600 14.5px/1.4 Poppins,sans-serif;color:#001136">'+a[1]+'</span>'
         + '<span aria-hidden="true" style="flex:0 0 auto;color:'+te[1]+'">'+ICO('lc-chevron-right')+'</span>'
         + '</button>';

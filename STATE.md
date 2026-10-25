@@ -1,3 +1,22 @@
+## MTN et Orange seuls, résultats animés, petits textes et anneaux de la vitrine (25/10/2026, v1.20.46)
+
+Demande de Jacques (quatre captures de la vitrine) : « Garde juste Orange / MTN comme moyen de paiement. Les résultats ne sont plus animés comme avant. Taille de police inchangée et encore très petite à certains endroits. Arrière-plan des icônes coloré à certains endroits alors qu'il faut le cercle dessus avec fond blanc comme les autres. Corrige tous les bugs similaires. »
+
+**MTN MoMo et Orange Money seuls** :
+- vitrine : logos Visa, Mastercard, PayPal et Stripe retirés (pied, section paiement) ; tuiles « Carte bancaire » et « PayPal » retirées du tunnel, avec leurs données intégrées ; textes de la FAQ, de la cagnotte et du don réécrits ;
+- `assets/vitrine.js` : `MOYENS = ['mtn_momo','orange_money']`. Les indices 0 et 1 sont inchangés ;
+- pied commun (`tools/build_plan.py`, 271 pages, application), `constellation.html`, maquette source ;
+- application : carte, PayPal et virement coupés APRÈS la fusion de `DB.payConfig`, de sorte qu'une URL PayPal restée en configuration ne les rallume pas. La tuile PayPal de la fenêtre de paiement, qui s'affichait sans condition, passe par `_payOK`. Textes d'aide corrigés.
+
+**Résultats d'examens** : le commentaire promettait que « le pourcentage compte en même temps » que l'anneau ; rien ne le faisait. `compterTaux()` fait compter le chiffre de 0 au taux réel. L'anneau est remis à zéro dès son premier pixel visible et rejoué à partir du tiers : avant, on le voyait plein, puis il se vidait.
+
+**Petits textes et anneaux de la vitrine** : nouveau `tools/vitrine_lisibilite.cjs`, appelé par `build_vitrine.js` et appliqué à `vitrine.html`.
+- ~300 textes des sections étaient sous 15 px. Chaque taille en ligne (`font-size:` ou `font:<graisse> <taille>`) et chaque classe `.vbq-*`, `.vcle-*`, `.vnews-*`, `.vcal-*` gagne 1,5 à 2 px. La barre et le pied ne sont pas touchés.
+- 16 ronds pleins (pastille pâle ou dégradé sombre) deviennent l'anneau : rond blanc, filet de 3 px teinté. Il s'agit des 3 icônes de l'accueil, des 3 étapes, des 7 numéros de la FAQ des tarifs et des 4 étapes enseignants. Les deux ronds d'état du tunnel (fait / en cours) restent pleins.
+- Tunnel au téléphone : « Numéro Mobile Money » et « Confirmer le numéro » se chevauchaient (défaut antérieur). Les champs passent sur une colonne sous 600 px.
+
+**Application** : les tuiles d'action des espaces élève, parent, enseignant et partenaire passent aussi à l'anneau.
+
 ## Un seul système d'icônes, textes secondaires agrandis (25/10/2026, v1.20.45)
 
 Demande de Jacques (capture de la vitrine) : « Harmonise le système des icônes et pictogrammes, centre-les et augmente un peu la taille des textes secondaires. »
