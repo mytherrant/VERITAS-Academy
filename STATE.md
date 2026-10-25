@@ -1,3 +1,33 @@
+## Lecture « LWS » sur les pages de contenu (25/10/2026, v1.20.44)
+
+Demande de Jacques (captures de lws.fr/nom-de-domaine) : « la même mise en forme professionnelle, en augmentant la police et en éclaircissant », puis « fond blanc, police plus grande, plus captivant, écran du téléphone bien rempli et équilibré ».
+
+Toutes les règles sont dans `tools/habiller_pages.py`, qui les écrit dans `assets/veritas-habillage.css`. Cela couvre les 271 pages statiques : niveaux, œuvres, ressources, corrigés, cours, légal, espaces…
+
+**Listes** :
+- la coche devient un trait vert #1FA53A, sans disque (masque SVG teinté par `--vl`). Les encadrés gardent leur teinte ;
+- le texte passe à 18 px (17 px au téléphone), en gris #5B6170 ; le gras passe en #3A4150, graisse 600 ;
+- 18 px séparent deux éléments, l'alignement est à gauche (une ligne était justifiée sur ordinateur).
+
+**Texte et fond** :
+- le corps des pages passe en blanc ;
+- les paragraphes passent à 18 px (17,5 px au téléphone), en gris #5B6170 ;
+- titres agrandis : h1 de 28 à 36 px, h2 de 22 à 26 px, h3 de 19 à 21 px.
+
+**Téléphone** : les cartes perdent cadre, ombre et marge intérieure. La colonne de texte fait 354 px sur 390, et l'écran est rempli.
+
+**Thème sombre** : les cartes d'œuvres (`.works`) et les bandeaux de titres pastel restaient clairs sous un texte devenu blanc, donc illisibles. Le défaut est antérieur à cette retouche ; il est corrigé.
+
+Le thème sombre et l'encadré sombre `.upsell` gardent leurs couleurs.
+
+**Suite (même jour)** : « Justifie les textes, centre les icônes, augmente la police. Utilise les gras, les couleurs, les puces, pastilles, numérotation colorées. »
+- Paragraphes et listes justifiés, avec césure. Au téléphone, les listes s'alignent à gauche : une ligne courte avec de longs mots en gras s'y trouait de grands blancs.
+- Texte à 19 px (18 px au téléphone).
+- Gras en bleu VÉRITAS #1E499B.
+- Titres de section centrés, avec l'icône de 34 px AU-DESSUS du titre. La couleur de l'icône tourne sur six teintes.
+- Les coches d'une liste de premier niveau tournent sur six teintes ; une liste d'encadré garde la teinte de son encadré.
+- Pastilles numérotées de 30 px (28 px au téléphone), en couleurs alternées.
+
 ## Pied de page allégé (24/10/2026, v1.20.43)
 
 Demande de Jacques (capture de l'Atelier au téléphone) : « Pied de page très surchargé. « Centre d'Excellence… » est déjà mentionné d'entrée. Redondance. Conserver juste l'essentiel. »
