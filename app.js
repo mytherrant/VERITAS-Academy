@@ -23969,62 +23969,109 @@ async function _downloadEpreuvePDF(){
 }
 
 // ── SIMULATEUR D'EXAMEN ───────────────────────────────────────────
+/* 25/10/2026 — « Branche-les chez les élèves » (Jacques). Le simulateur
+   n'avait AUCUN appelant, et il n'aurait pas marché : il lisait `ep.duree`,
+   qu'aucune épreuve ne renseigne (chronomètre « NaN:NaN »), et redessinait
+   TOUTE la page chaque seconde — le brouillon de l'élève s'effaçait à chaque
+   tic. Désormais : la page est posée une fois, seul le chronomètre bouge ; le
+   sujet est affiché ; le brouillon survit au temps écoulé. */
+function _dureeEpreuve(ep){
+  if(ep && +ep.duree > 0) return +ep.duree;
+  return /\b(BAC|Baccalaur|Probatoire|GCE)\b/i.test((ep&&ep.titre)||'') ? 180 : 120;
+}
+function _simEpreuves(){
+  return (DB.elearningLibrary||[]).filter(function(e){return e.cat==="cat1"||e.cat==="cat4"||e.cat==="cat6";})
+    .concat(DB.customEpreuves||[]);
+}
 function _simulerExamen(epId){
-  var libEpreuves=(DB.elearningLibrary||[]).filter(function(e){return e.cat==="cat1"||e.cat==="cat4"||e.cat==="cat6";});
-  var ep=libEpreuves.concat(DB.customEpreuves||[]).find(function(e){return e.id===epId;});
-  if(!ep)return;
-  var duree=ep.duree||60;
+  var ep=_simEpreuves().find(function(e){return e.id===epId;});
+  if(!ep){ toast('Épreuve introuvable','warn'); return; }
+  var duree=_dureeEpreuve(ep);
   cm();
-  var totalSec=ep.duree*60;
-  var elapsed=0;
-  var timer=null;
-  
-  function renderTimer(){
-    var remaining=totalSec-elapsed;
-    var mn=Math.floor(remaining/60);
-    var sc=remaining%60;
+  var totalSec=duree*60, elapsed=0, timer=null;
+  if(window._simTimer) clearInterval(window._simTimer);
+  _vc("<div class='vsec'>"
+    +"<div style='background:linear-gradient(135deg,#0F172A,#1E3A8A);border-radius:18px;padding:24px;color:#fff;margin-bottom:20px'>"
+    +"<div class='fl2 fic fsb mb12' style='gap:10px'>"
+    +"<div style='font-family:Montserrat,sans-serif;font-size:16px;font-weight:800'>"+_esc(ep.titre||'Épreuve')+"</div>"
+    +"<button onclick='_stopTimer()' style='background:rgba(220,38,38,.2);color:#FCA5A5;border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;flex:none'>■ Arrêter</button>"
+    +"</div>"
+    +"<div style='text-align:center;padding:16px 0'>"
+    +"<div id='simChrono' style='font-family:monospace;font-size:52px;font-weight:900;letter-spacing:4px'></div>"
+    +"<div id='simReste' style='font-size:13px;color:rgba(255,255,255,.6);margin-top:6px'></div>"
+    +"</div>"
+    +"<div style='background:rgba(255,255,255,.1);border-radius:20px;height:8px;overflow:hidden'>"
+    +"<div id='simBarre' style='height:100%;width:0;border-radius:20px;transition:width .5s'></div></div>"
+    +"<div style='font-size:12px;color:rgba(255,255,255,.5);margin-top:6px'>Durée de l'épreuve : "+Math.floor(duree/60)+" h"+(duree%60?(' '+duree%60):'')+"</div>"
+    +"</div>"
+    +"<div id='simFin'></div>"
+    +(ep.apercu?"<div class='card mb16'><div class='ct mb12'>Le sujet</div><div style='white-space:pre-line;line-height:1.75'>"+_esc(ep.apercu)+"</div></div>":"")
+    +"<div class='card'>"
+    +"<div class='ct mb12'>Mon brouillon</div>"
+    +"<div class='ib ibt mb10'><span>💡</span><span>Composez sur papier comme le jour de l'examen ; notez ici votre plan, vos formules, vos idées.</span></div>"
+    +"<textarea id='simNotes' class='fi' rows='9' placeholder='Plan, formules, brouillon…' style='font-family:Georgia,serif'></textarea>"
+    +"</div>"
+    +"<div style='text-align:center;margin:18px 0'><button class='btn bo' onclick='mChoisirSimulation()'>Choisir une autre épreuve</button></div>"
+    +"</div>");
+  function tic(){
+    var reste=Math.max(0,totalSec-elapsed), mn=Math.floor(reste/60), sc=reste%60;
     var pct=Math.round((elapsed/totalSec)*100);
-    var col=remaining<600?"#AE5353":remaining<1800?"#D97706":"#059669";
-    
-    _vc(
-      "<div class='vsec'>"
-      +"<div style='background:linear-gradient(135deg,#0F172A,#1E3A8A);border-radius:18px;padding:24px;color:#fff;margin-bottom:20px'>"
-      +"<div class='fl2 fic fsb mb12'>"
-      +"<div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:800'>⏱️ "+ep.titre+"</div>"
-      +"<button onclick='_stopTimer()' style='background:rgba(220,38,38,.2);color:#FCA5A5;border:none;border-radius:10px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer'>■ Arrêter</button>"
-      +"</div>"
-      +"<div style='text-align:center;padding:20px 0'>"
-      +"<div style='font-family:monospace;font-size:56px;font-weight:900;color:"+col+";letter-spacing:4px'>"+String(mn).padStart(2,'0')+":"+String(sc).padStart(2,'0')+"</div>"
-      +"<div style='font-size:12px;color:rgba(255,255,255,.5);margin-top:6px'>"+mn+" min "+sc+" sec restantes</div>"
-      +"</div>"
-      +"<div style='background:rgba(255,255,255,.1);border-radius:20px;height:8px;overflow:hidden'>"
-      +"<div style='background:"+col+";height:100%;width:"+pct+"%;border-radius:20px;transition:width .5s'></div>"
-      +"</div>"
-      +"<div style='font-size:11px;color:rgba(255,255,255,.4);text-align:right;margin-top:4px'>"+pct+"% écoulé</div>"
-      +"</div>"
-      +"<div class='card'>"
-      +"<div class='ct mb12'><span class='ct-ico'><svg class='vico' aria-hidden='true'><use href='#lc-pencil'/></svg></span>Composition en cours</div>"
-      +"<div class='ib ibt mb10'><span>💡</span><span>Traitez l'épreuve sur papier. Ce chronomètre reproduit les conditions réelles de l'examen.</span></div>"
-      +"<textarea id='simNotes' class='fi' rows='8' placeholder='Notez ici vos brouillons, formules importantes, plan de rédaction...' style='font-family:Georgia,serif;font-size:13px'></textarea>"
-      +"</div>"
-      +"</div>");
-    
-    if(remaining<=0){
+    var col=reste<600?"#F87171":reste<1800?"#FBBF24":"#34D399";
+    var c=_ge('simChrono'); if(!c){ clearInterval(timer); return; }   // l'élève a quitté la page
+    c.textContent=String(mn).padStart(2,'0')+":"+String(sc).padStart(2,'0'); c.style.color=col;
+    _st('simReste', mn+' min '+sc+' s restantes');
+    var bar=_ge('simBarre'); if(bar){ bar.style.width=pct+'%'; bar.style.background=col; }
+    if(reste<=0){
       clearInterval(timer);
-      _vc(
-        "<div class='vsec'><div class='vcard' style='text-align:center;padding:40px'>"
-        +"<div style='font-size:56px;margin-bottom:16px'>⏰</div>"
-        +"<div style='font-family:Montserrat,sans-serif;font-size:22px;font-weight:800;color:#AE5353;margin-bottom:8px'>Temps écoulé !</div>"
-        +"<div style='font-size:14px;color:#6B7A99;margin-bottom:20px'>La session de "+ep.duree+" minutes est terminée.</div>"
-        +"<button class='btn bi' onclick='showEpreuves()'>← Retour aux épreuves</button>"
-        +"</div></div>");
+      _si('simFin',"<div class='vcard' style='text-align:center;padding:24px;margin-bottom:16px'><div style='font-family:Montserrat,sans-serif;font-size:20px;font-weight:800;color:#AE5353;margin-bottom:6px'>Temps écoulé</div>"
+        +"<div style='color:#6B7A99;margin-bottom:12px'>Posez le stylo. Votre brouillon reste ci-dessous.</div>"
+        +"<button class='btn bi' onclick='mChoisirSimulation()'>Nouvelle épreuve</button></div>");
     }
   }
-  
-  window._stopTimer=function(){clearInterval(timer);showEpreuves();};
-  timer=setInterval(function(){elapsed++;renderTimer();},1000);
-  renderTimer();
+  window._stopTimer=function(){ clearInterval(timer); if(typeof _espacePerso==='function' && SES && SES.type==='visiteur_inscrit') _espacePerso(SES.role||'eleve'); else showEpreuves(); };
+  timer=setInterval(function(){ elapsed++; tic(); },1000);
+  window._simTimer=timer;
+  tic();
 }
+
+/* Choisir l'épreuve à simuler : la classe de l'élève d'abord. */
+window.mChoisirSimulation = function(filtre){
+  var tout=_simEpreuves();
+  var cls=(typeof SES!=='undefined'&&SES&&(SES.cls||(SES.profil&&SES.profil.cls)))||'';
+  var classes=[]; tout.forEach(function(e){ if(e.classe && classes.indexOf(e.classe)<0) classes.push(e.classe); });
+  var sel=(filtre!==undefined)?filtre:(classes.indexOf(cls)>=0?cls:'');
+  var lot=tout.filter(function(e){ return !sel || e.classe===sel; });
+  var puces='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">'
+    +['' ].concat(classes).map(function(c){ return '<button type="button" class="tab'+(c===sel?' on':'')+'" onclick="mChoisirSimulation(\''+_esc(c)+'\')">'+(c?_esc(c):'Toutes')+'</button>'; }).join('')+'</div>';
+  var liste=lot.length?lot.map(function(e){
+      return '<button type="button" onclick="_simulerExamen(\''+_esc(e.id)+'\')" style="display:block;width:100%;text-align:left;background:#fff;border:1px solid #E4E9F2;border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer">'
+        +'<div style="font-weight:700;color:#001136">'+_esc(e.titre||'Épreuve')+'</div>'
+        +'<div style="color:#5B6170;margin-top:2px">'+_esc([e.matiere,e.classe,(Math.floor(_dureeEpreuve(e)/60)+' h')].filter(Boolean).join(' · '))+'</div></button>';
+    }).join(''):'<div style="color:#5B6170">Aucune épreuve pour cette classe pour l’instant.</div>';
+  M('Examen blanc chronométré','Choisissez une épreuve : le chronomètre suit la durée officielle', puces+liste,
+    '<button class="btn bo" onclick="cm()">Fermer</button>', true);
+};
+
+/* Choisir une œuvre : fiche, carte mentale, QCM, citations, contrôle. */
+window.mChoisirOeuvre = function(){
+  var ouvrir=function(){
+    var cles=Object.keys(window.LITT_OEUVRES||{});
+    if(!cles.length){ toast('Œuvres indisponibles pour le moment','warn'); return; }
+    var parCls={}; cles.forEach(function(k){ var o=LITT_OEUVRES[k]; var c=o.classe||'Autres'; (parCls[c]=parCls[c]||[]).push(k); });
+    var h=Object.keys(parCls).map(function(c){
+      return '<div style="font-weight:800;color:#001136;margin:12px 0 6px">'+_esc(c)+'</div>'
+        + parCls[c].map(function(k){ var o=LITT_OEUVRES[k];
+          return '<button type="button" onclick="cm();_showLittMenu(\''+k+'\',\''+k+'\')" style="display:block;width:100%;text-align:left;background:#fff;border:1px solid #E4E9F2;border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer">'
+            +'<div style="font-weight:700;color:#001136">'+_esc(o.titre||k)+'</div><div style="color:#5B6170;margin-top:2px">'+_esc(o.auteur||'')+'</div></button>'; }).join('');
+    }).join('');
+    M('Œuvres au programme, en interactif','Fiche, carte mentale, QCM, citations et contrôle — œuvre par œuvre', h,
+      '<button class="btn bo" onclick="cm()">Fermer</button>', true);
+  };
+  if(typeof _littCharge==='function' && _littCharge()) return ouvrir();
+  toast('Chargement des œuvres…','info');
+  Promise.all([_lazyChunk('litt-oeuvres'), _lazyChunk('jeux')]).then(function(){ setTimeout(ouvrir, 150); })
+    .catch(function(){ toast('Connexion lente : réessayez dans un instant','warn'); });
+};
 
 // ── LABORATOIRES VIRTUELS ─────────────────────────────────────────
 var LABO_EXPERIENCES=[
@@ -47674,7 +47721,8 @@ function _cagCreer(eleveId){
                     positionnement:'mPositionnement', progression:'mMonParcours',
                     badges:'mAchievements', jeux:'showJeuxEdu', battles:'mBattles',
                     groupe:'mStudyRoom', 'orientation-ia':'mAIOrientation',
-                    ambassa:'mAgentAmbassa' };
+                    ambassa:'mAgentAmbassa',
+                    simulateur:'mChoisirSimulation', 'oeuvres-interactives':'mChoisirOeuvre' };
 
   function sectionDuHash(){
     var h = (window.location.hash || '').replace(/^#/, '');
@@ -47786,7 +47834,8 @@ function _cagCreer(eleveId){
          renvoi vers la vitrine. La modale s'ouvre par-dessus ; la fermer révèle
          une vraie page, plus jamais un vide. */
       var _MODALE_FN = { recherche:1, calendrier:1, connexion:1, compte:1, inscription:1, partenaire:1,
-                         positionnement:1, progression:1, badges:1, battles:1, groupe:1, 'orientation-ia':1, ambassa:1 };
+                         positionnement:1, progression:1, badges:1, battles:1, groupe:1, 'orientation-ia':1, ambassa:1,
+                         simulateur:1, 'oeuvres-interactives':1 };
       if(_MODALE_FN[sec]){
         try{
           var _vcBg = document.getElementById('vContent');
@@ -49428,7 +49477,9 @@ window._espacePerso = function(role){
       ['lc-target','Tester mon niveau (10 questions)','if(typeof mPositionnement===\'function\')mPositionnement()'],
       ['lc-award','Ma progression &amp; mes badges','if(typeof mMonParcours===\'function\')mMonParcours()'],
       ['lc-compass','Mon orientation','vShowSec(\'orientation\',null)'],
-      ['lc-game','Jeux éducatifs &amp; battles','if(typeof showJeuxEdu===\'function\')showJeuxEdu()']
+      ['lc-game','Jeux éducatifs &amp; battles','if(typeof showJeuxEdu===\'function\')showJeuxEdu()'],
+      ['lc-clock','Examen blanc chronométré','mChoisirSimulation()'],
+      ['lc-bookopen','Œuvres au programme, en interactif','mChoisirOeuvre()']
     ] : role==='parent' ? [
       ['lc-chart','Notes &amp; bulletin de mon enfant','_espaceParentEnfant()'],
       ['lc-target','Tester le niveau de mon enfant','if(typeof mPositionnement===\'function\')mPositionnement()'],

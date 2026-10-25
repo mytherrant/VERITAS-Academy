@@ -1,0 +1,15 @@
+# VÉRITAS — Atelier de Français : la page peut être GARDÉE par le navigateur.
+# 25/10/2026. La règle générale du site (« HTML : jamais mis en cache »,
+# no-store) obligeait le moteur de gabarits (support.js) à RETÉLÉCHARGER la
+# page qu'il venait de recevoir pour en relire le gabarit brut : 970 Ko bruts,
+# 198 Ko compressés de plus à chaque ouverture — plusieurs secondes en 3G.
+# « no-cache » laisse le navigateur garder la copie mais l'oblige à la
+# revalider à chaque visite : la page reste toujours à jour après un
+# déploiement, et support.js relit la copie (fetch … cache:'force-cache').
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+    Header unset Pragma
+    Header unset Expires
+  </FilesMatch>
+</IfModule>

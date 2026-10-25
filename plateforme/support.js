@@ -156,7 +156,13 @@
     runtime.setRootName(rootName);
     runtime.adoptParsed(rootName, parsed);
     if (!window.__resources) {
-      fetch(location.href).then((res) => res.ok ? res.text() : "").then((t) => {
+      /* VÉRITAS, 25/10/2026 — relecture du gabarit brut (la casse des attributs
+         comme onClick se perd dans le DOM) SANS second téléchargement : la page
+         vient d'arriver, on relit la copie du navigateur. plateforme/.htaccess
+         l'autorise à la garder (no-cache, revalidée à chaque visite, au lieu de
+         no-store). Sans copie, le navigateur retombe sur le réseau. Mesuré :
+         198 Ko compressés de moins à chaque ouverture de l'Atelier, en 3G. */
+      fetch(location.href, { cache: "force-cache" }).then((res) => res.ok ? res.text() : "").then((t) => {
         const raw = t ? parseDcText(t) : null;
         if (raw?.template) runtime.updateHtml(rootName, raw.template);
       }).catch(() => {

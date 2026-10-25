@@ -32,7 +32,9 @@
 
   var PLANCHER = 15;          // en dessous, le texte est relevé
   var GAIN = 2;               // de combien
-  var EXCLU = 'nav.vrt-hab,footer.vrt-hab,#vrtNav,[data-vh-ignore],svg,input,textarea,select,option,'
+  // .vrt-hab : TOUS les blocs communs (barre, bandeau, pied, bulles), réglés
+  // une fois pour toutes sur la vitrine — ils restent identiques partout.
+  var EXCLU = '.vrt-hab,#vrtNav,[data-vh-ignore],svg,input,textarea,select,option,'
             + '[class*="couv"],.vbq-couv,code,pre,kbd,.mono';
 
   function rgb(c) {
@@ -90,7 +92,13 @@
     if (el.hasAttribute('data-vh-anneau')) return;
     var w = el.offsetWidth, h = el.offsetHeight;
     if (w < 26 || w > 90 || Math.abs(w - h) > 2) return;
-    if (!(cs.borderTopLeftRadius.indexOf('%') > 0 ? parseFloat(cs.borderTopLeftRadius) >= 50 : parseFloat(cs.borderTopLeftRadius) >= w / 2 - 1)) return;
+    var rayon = cs.borderTopLeftRadius.indexOf('%') > 0 ? parseFloat(cs.borderTopLeftRadius) / 100 * w : parseFloat(cs.borderTopLeftRadius);
+    var rond = rayon >= w / 2 - 1;
+    /* Carré ARRONDI qui ne porte qu'une icône (la tuile du haut de l'Atelier,
+       56 px, rayon 16) : même famille de pictogramme, même anneau. Un carré
+       qui porte du texte reste un carré (pastille, étiquette, bouton). */
+    var carreIcone = !rond && rayon >= w * 0.2 && el.children.length === 1 && el.children[0].tagName.toLowerCase() === 'svg' && !el.textContent.trim();
+    if (!rond && !carreIcone) return;
     if (el.tagName === 'IMG' || el.querySelector('img')) return;                    // avatar, logo
     if (/^(A|BUTTON)$/.test(el.tagName) && cs.position === 'fixed') return;
     var icone = el.querySelector('svg');
@@ -129,19 +137,39 @@
     poser(el, 'box-sizing', 'border-box');
     poser(el, 'color', num ? teinte : (sombre() ? '#F2F5FC' : '#001136'));
     poser(el, 'box-shadow', 'none');
+    if (carreIcone) poser(el, 'border-radius', '50%');
+  }
+
+  /* 25/10/2026 — « Renforce le gras sur les titres et sous-titres, et les
+     couleurs, partout dans l'application » (Jacques). Titres (h1, h2) en 800
+     bleu nuit, sous-titres (h3, h4, titres de cartes .ct de l'application)
+     en 700 bleu VÉRITAS. On ne remplace qu'une couleur NEUTRE (gris, noir) :
+     un titre déjà teinté, ou blanc sur un fond sombre, garde la sienne. */
+  var SOUS_TITRE = /(^|\s)(ct|card-title|vsec-t|sec-title|stitle)(\s|$)/;
+  function titre(el, cs) {
+    if (el.hasAttribute('data-vh-titre')) return;
+    var niv = /^H[12]$/.test(el.tagName) ? 1 : 2;
+    var poids = parseFloat(cs.fontWeight) || 400, cible = niv === 1 ? 800 : 700;
+    var c = rgb(cs.color), neutre = c && (Math.max(c[0], c[1], c[2]) - Math.min(c[0], c[1], c[2])) < 30 && lum(c) < 0.3;
+    if (poids >= cible && !neutre) return;
+    poser(el, 'data-vh-titre', '1');
+    if (poids < cible) poser(el, 'font-weight', String(cible));
+    if (neutre && !sombre()) poser(el, 'color', niv === 1 ? '#001136' : '#1E499B');
   }
 
   function examiner(el) {
     if (el.closest(EXCLU)) return;
     if (el.closest('[data-vp]') && document.getElementById('vrt-secondaires')) return; // la vitrine a sa feuille
     var direct = texteDirect(el), rond = /^(SPAN|DIV|I|B)$/.test(el.tagName) && !el.hasAttribute('data-vh-anneau');
-    if (!(direct && !el.hasAttribute('data-vh')) && !rond) return;    // rien à décider : aucune lecture
+    var estTitre = (/^H[1-4]$/.test(el.tagName) || SOUS_TITRE.test(typeof el.className === 'string' ? el.className : '')) && !el.hasAttribute('data-vh-titre');
+    if (!(direct && !el.hasAttribute('data-vh')) && !rond && !estTitre) return;    // rien à décider : aucune lecture
     var cs = getComputedStyle(el);
     if (cs.position === 'fixed') return;                              // bulles flottantes
     /* Un élément MASQUÉ au rendu (onglet fermé, carte pas encore révélée)
        a déjà sa taille calculée : on le relève quand même. L'anneau, lui,
        se mesure — il attend que l'élément soit affiché. */
     if (direct) relever(el, cs);
+    if (estTitre) titre(el, cs);
     if (rond && cs.display !== 'none') anneau(el, cs);
   }
 

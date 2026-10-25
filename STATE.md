@@ -1,3 +1,47 @@
+## Élèves : examen blanc et œuvres interactives ; Atelier : import Word/PDF ; 3G ; titres (25/10/2026, v1.20.48)
+
+Demandes de Jacques :
+- « Branche-les chez les élèves » (le simulateur d'examen et les œuvres interactives) ;
+- « Travailler sur la rapidité et la fluidité, que les pages s'ouvrent plus vite et que les téléphones 3G naviguent facilement » ;
+- « Import des textes en Word, texte ou PDF, CSV et JSON ne sont pas des formats communs pour les enseignants de français. Centre les icônes dans l'Atelier » ;
+- « Renforce le gras sur les titres et sous-titres, et les couleurs, partout ».
+
+**Simulateur d'examen** (`_simulerExamen`, aucun appelant jusqu'ici). Il n'aurait d'ailleurs pas marché :
+- il lisait `ep.duree`, qu'aucune épreuve ne renseigne, d'où un chronomètre « NaN:NaN » ;
+- il redessinait toute la page chaque seconde, ce qui effaçait le brouillon.
+
+Réécrit :
+- la page est posée une fois, seul le chronomètre bouge ;
+- durée de 2 h, ou de 3 h pour le Probatoire, le BAC et le GCE ;
+- le sujet est affiché et le brouillon est conservé ;
+- choix de l'épreuve par `mChoisirSimulation()`, qui commence par la classe de l'élève (41 épreuves).
+
+**Œuvres interactives** : `mChoisirOeuvre()` charge le catalogue (chunk de 300 Ko), puis liste les 22 œuvres par classe et ouvre `_showLittMenu`.
+- Adresses : `#simulateur` et `#oeuvres-interactives`.
+- Portes : espace élève (2 tuiles), plan du site, menu « Plus » (Élève → « Examen blanc »).
+
+**Atelier, import** : nouveau `plateforme/lecteur-textes.js`.
+- Formats : Word (.docx) et LibreOffice (.odt) via la lecture du ZIP et `DecompressionStream`, sans bibliothèque ; PDF via pdf.js 4.10.38 (Apache 2.0, dans `assets/vendor/pdfjs-4.10.38/`, chargé seulement au choix d'un PDF) ; texte brut.
+- L'ancien `.doc` est refusé, avec la consigne d'enregistrer en `.docx`.
+- Découpage : un fichier = un texte, `---` sépare plusieurs textes ; première ligne courte = titre ; « — Auteur, Œuvre » = référence. Les lignes coupées par Word ou le PDF sont recollées, les vers d'un poème restent séparés.
+- L'onglet « Coller » accepte du texte libre ; JSON et CSV restent acceptés.
+- La fenêtre ne déborde plus au téléphone : la liste des champs techniques est remplacée par une explication simple.
+- Corrigé au passage : une référence par défaut « , Titre » quand l'auteur manque.
+- Vérifié de bout en bout dans la vraie fenêtre : docx 2 textes, PDF 1, collage 1.
+
+**Icônes de l'Atelier** : les carrés arrondis qui ne portent qu'une icône (la tuile du haut) deviennent des anneaux centrés (`veritas-harmonie.js`). Sur les écrans accessibles sans compte, aucun rond n'a son icône décentrée.
+
+**3G** :
+- l'application chargeait la police Material Symbols COMPLÈTE (plus de 3 000 icônes, tous les axes variables, plusieurs Mo). Elle demande maintenant les 136 icônes utilisées (`icon_names=`), et seulement les axes servis : FILL 0–1, wght 400–500, opsz 24–48 ;
+- l'Atelier téléchargeait sa page DEUX fois : `support.js` la relit pour son gabarit brut. Désormais `fetch(…, {cache:'force-cache'})`, et `plateforme/.htaccess` passe la page de `no-store` à `no-cache` (gardée, revalidée à chaque visite). Le déploiement copie ce `.htaccess`. Gain : 198 Ko compressés par ouverture ;
+- photos de l'accueil : 352 → 140 Ko. `hero-eleves-800.webp` est servi par `srcset` au téléphone ; `photo-groupe-600.webp` et `photo-examen-600.webp` gardent la transparence. Les noms sont NOUVEAUX, puisque les images sont immuables un an. Le remplacement est fait par `tools/vitrine_lisibilite.cjs`.
+
+**Titres** : h1 et h2 passent en 800 bleu nuit ; h3, h4 et `.ct` en 700 bleu VÉRITAS, seulement si la couleur était neutre. Sur la vitrine, les titres en `font:600` passent à 700 ou 800. `veritas-harmonie.js` exclut désormais TOUS les blocs `.vrt-hab` (bandeau, bulles).
+
+**Note** : en local, le bandeau et la bulle de citation de l'application semblent sans fond, parce que `theme-lws.css` y retire les dégradés. En production, `isoler_habillage.py` exclut `.vrt-hab` de ces feuilles au déploiement : ce n'est pas un défaut en ligne.
+
+**Reste** : `app.js` pèse 765 Ko compressés (3,7 Mo à analyser). Le découper davantage, au-delà des chunks existants, est un chantier à part. Les polices Google (Poppins) pourraient aussi être hébergées sur le site, ce qui économiserait deux connexions en 3G.
+
 ## Même lecture sur tout le site, et modules cachés rendus visibles (25/10/2026, v1.20.47)
 
 Demandes de Jacques :
