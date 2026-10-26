@@ -2125,7 +2125,12 @@ jobs:
             grep -q 'vrt-habillage:barre' /tmp/p.html || manque="$manque barre"
             grep -q 'vrt-habillage:pied' /tmp/p.html || manque="$manque pied"
             grep -q "veritas-habillage.css?v=$VER" /tmp/p.html || manque="$manque feuille-v$VER"
-            grep -q 'fonts.googleapis.com/css2?family=[^"]*Poppins' /tmp/p.html || manque="$manque Poppins"
+            # Poppins est servie par le site depuis le 26/10 (tools/polices_locales.py) :
+            # la page demande /assets/polices.css à la version déployée ; un lien
+            # Google ne subsiste que sur les pages qui mêlent d'autres familles.
+            grep -q "/assets/polices.css?v=$VER" /tmp/p.html \
+              || grep -q 'fonts.googleapis.com/css2?family=[^"]*Poppins' /tmp/p.html \
+              || manque="$manque Poppins"
             if [ "$chemin" = "/plateforme/" ]; then
               grep -q 'class="vrt-pont"' /tmp/p.html && manque="$manque (ancien-bandeau-encore-là)"
               grep -q 'vrt-outil' /tmp/p.html || manque="$manque barre-compacte"
