@@ -92,6 +92,51 @@ CARREFOURS = ['decouvrir/index.html', 'livrets/index.html', 'livrets/mode-emploi
 
 DEBUT, FIN = '<!-- seo-tete -->', '<!-- /seo-tete -->'
 
+# 26/10/2026 — audit du 21/10 : 42 pages des sitemaps (ressources, niveaux,
+# découvrir, outils, légal, est-*…) partaient sur WhatsApp et Facebook SANS
+# vignette, faute d'og:image. Les carrefours reçoivent désormais les balises
+# Open Graph qui leur manquent ; toute autre page des sitemaps qui n'a pas
+# d'og:image reçoit un bloc « og seul » (aucun JSON-LD : elle a peut-être le
+# sien). Titre et description existants, repris tels quels.
+def og_manquants(sans, nom, desc, url):
+    if re.search(r'property=["\']og:image["\']', sans, re.I):
+        return []
+    lignes = []
+    for p, v in (('og:type', 'website'), ('og:site_name', 'Centre VÉRITAS'), ('og:locale', 'fr_CM'),
+                 ('og:title', nom), ('og:description', desc), ('og:url', url),
+                 ('og:image', BASE + 'og-image.jpg')):
+        if v and not re.search(r'property=["\']%s["\']' % re.escape(p), sans, re.I):
+            lignes.append('<meta property="%s" content="%s">' % (p, html.escape(v, quote=True)))
+    if not re.search(r'name=["\']twitter:card["\']', sans, re.I):
+        lignes.append('<meta name="twitter:card" content="summary_large_image">')
+    return lignes
+
+
+def og_seuls():
+    """Pages des sitemaps hors CONTENU/CARREFOURS dont le HTML, bloc seo-tete
+    retiré, n'a pas d'og:image."""
+    vus, out = set(CONTENU) | set(CARREFOURS), []
+    for racine, _, fichiers in os.walk(RACINE):
+        if 'node_modules' in racine or os.sep + '.' in racine:
+            continue
+        for f in fichiers:
+            if not (f.startswith('sitemap') and f.endswith('.xml')):
+                continue
+            xml = open(os.path.join(racine, f), encoding='utf-8').read()
+            for loc in re.findall(r'<loc>' + re.escape(BASE) + r'([^<]*)</loc>', xml):
+                rel = (loc or 'index.html') + ('index.html' if loc.endswith('/') else '')
+                if rel in vus or not rel.endswith('.html') or rel == 'index.html':
+                    continue
+                vus.add(rel)
+                chemin = os.path.join(RACINE, rel)
+                if not os.path.exists(chemin):
+                    continue
+                s = open(chemin, encoding='utf-8', errors='ignore').read()
+                sans = re.sub(re.escape(DEBUT) + r'[\s\S]*?' + re.escape(FIN), '', s)
+                if not re.search(r'property=["\']og:image["\']', sans, re.I):
+                    out.append(rel)
+    return sorted(out)
+
 
 def url_de(rel):
     return BASE + re.sub(r'(^|/)index\.html$', r'\1', rel)
@@ -138,6 +183,9 @@ def bloc(rel, s):
             graphe.insert(0, {'@type': 'WebPage', 'name': nom, 'description': desc, 'url': url, 'inLanguage': 'fr', 'publisher': ORG})
     else:
         desc = lire(sans, r'<meta[^>]+name=["\']description["\'][^>]+content=["\']([^"\']*)') or ''
+        lignes += og_manquants(sans, nom, desc, url)
+        if rel not in CARREFOURS:                     # « og seul » : pas de JSON-LD
+            return DEBUT + '\n' + '\n'.join(lignes) + '\n' + FIN
         typ = 'CollectionPage' if rel.endswith('index.html') or rel == 'plan.html' else 'WebPage'
         graphe = [{'@type': typ, 'name': nom, 'description': desc, 'url': url, 'inLanguage': 'fr', 'publisher': ORG},
                   fil(rel, nom)]
@@ -163,7 +211,7 @@ def traiter(rel, ecrire):
 
 def main():
     controle = '--controle' in sys.argv
-    changes = [rel for rel in list(CONTENU) + CARREFOURS if traiter(rel, not controle)]
+    changes = [rel for rel in list(CONTENU) + CARREFOURS + og_seuls() if traiter(rel, not controle)]
     if controle and changes:
         print('seo_tetes --controle : %d page(s) à mettre à jour, dont %s' % (len(changes), ', '.join(changes[:4])))
         sys.exit(1)
