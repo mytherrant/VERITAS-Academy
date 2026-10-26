@@ -85,6 +85,16 @@ on:
   # Lancement manuel depuis GitHub → Actions → Run workflow
   workflow_dispatch:
 
+# Un seul envoi FTP à la fois. Le 21/10/2026, les PR #116 et #118 mergées à
+# quelques minutes d'écart ont lancé deux envois en parallèle : le dernier fini
+# gagne, même s'il porte le plus vieux commit — la prod aurait pu repartir en
+# arrière sans qu'aucun run ne passe au rouge. Ici, un run attend la fin du
+# précédent ; s'il en arrive un troisième, GitHub ne garde que le plus récent
+# en attente (il contient les autres).
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
 jobs:
   deploy:
     name: 📤 Upload vers LWS (FTP)
@@ -919,6 +929,14 @@ jobs:
       #    renommé, pourvu de contenu ou acheté.
       - name: 📕 La boutique ne vend-elle que ce qui existe ?
         run: node tests/banc_faux_livres.cjs
+
+      # ── 🎭 LA DÉMONSTRATION SE MÊLE-T-ELLE AU SUIVI ? Le 22/10/2026 le
+      #    tableau de bord de production comptait les 12 élèves, 4 enseignants
+      #    et 13 paiements fictifs de defaultDB() (« Masse salariale 465 000 »).
+      #    _separerDemo() les écarte dans DB._demoArchive sans rien perdre ni
+      #    toucher à ce qui a été modifié ou est cité par un enregistrement réel.
+      - name: 🎭 La démonstration est-elle tenue à l'écart du suivi réel ?
+        run: node tests/banc_demo_separee.cjs
 
       # ── 💰 Quinze ouvrages en vente depuis le 27/08, contre cinq avant.
       #    `vrt_verifier_prix()` laisse passer N'IMPORTE QUEL montant quand le
@@ -1773,6 +1791,16 @@ jobs:
       #    doit couvrir les feuilles réécrites).
       - name: 🧥 Isoler l'habillage de la vitrine des feuilles de l'application
         run: python tools/isoler_habillage.py deploy
+
+      # ── 🔤 POPPINS SERVIE PAR LE SITE. Chaque page demandait Poppins à
+      #    fonts.googleapis.com puis fonts.gstatic.com : deux connexions tierces
+      #    avant le texte, la moitié du premier affichage en 3G. Les liens qui
+      #    ne demandent QUE Poppins pointent vers assets/polices.css (woff2 OFL
+      #    dans assets/polices/). Sur deploy/ seulement — habiller_pages se
+      #    repère sur ces liens dans le dépôt — APRÈS l'habillage, AVANT les
+      #    cache-busters qui remplacent son « ?v=1 ».
+      - name: 🔤 Poppins servie par le site, plus par Google
+        run: python tools/polices_locales.py deploy
 
       - name: 🔗 Aligner les cache-busters de tous les assets
         run: |
