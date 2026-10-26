@@ -1792,6 +1792,16 @@ jobs:
       - name: 🧥 Isoler l'habillage de la vitrine des feuilles de l'application
         run: python tools/isoler_habillage.py deploy
 
+      # ── 🔤 POPPINS SERVIE PAR LE SITE. Chaque page demandait Poppins à
+      #    fonts.googleapis.com puis fonts.gstatic.com : deux connexions tierces
+      #    avant le texte, la moitié du premier affichage en 3G. Les liens qui
+      #    ne demandent QUE Poppins pointent vers assets/polices.css (woff2 OFL
+      #    dans assets/polices/). Sur deploy/ seulement — habiller_pages se
+      #    repère sur ces liens dans le dépôt — APRÈS l'habillage, AVANT les
+      #    cache-busters qui remplacent son « ?v=1 ».
+      - name: 🔤 Poppins servie par le site, plus par Google
+        run: python tools/polices_locales.py deploy
+
       - name: 🔗 Aligner les cache-busters de tous les assets
         run: |
           # Les ?v= de /assets/*.css|js étaient maintenus À LA MAIN, page par page,
