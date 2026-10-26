@@ -924,6 +924,14 @@ jobs:
       - name: 📕 La boutique ne vend-elle que ce qui existe ?
         run: node tests/banc_faux_livres.cjs
 
+      # ── 🎭 LA DÉMONSTRATION SE MÊLE-T-ELLE AU SUIVI ? Le 22/10/2026 le
+      #    tableau de bord de production comptait les 12 élèves, 4 enseignants
+      #    et 13 paiements fictifs de defaultDB() (« Masse salariale 465 000 »).
+      #    _separerDemo() les écarte dans DB._demoArchive sans rien perdre ni
+      #    toucher à ce qui a été modifié ou est cité par un enregistrement réel.
+      - name: 🎭 La démonstration est-elle tenue à l'écart du suivi réel ?
+        run: node tests/banc_demo_separee.cjs
+
       # ── 💰 Quinze ouvrages en vente depuis le 27/08, contre cinq avant.
       #    `vrt_verifier_prix()` laisse passer N'IMPORTE QUEL montant quand le
       #    tarif de référence est indéterminable — c'est le trou par lequel

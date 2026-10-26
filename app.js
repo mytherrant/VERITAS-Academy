@@ -1241,6 +1241,89 @@ function _avisCompte(l){
   return n+' avis'+(v===n&&n?' vérifié'+(n>1?'s':''):(v?' dont '+v+' vérifié'+(v>1?'s':''):''));
 }
 
+/* ── LA DÉMONSTRATION N'EST PAS LE SUIVI DU CENTRE (22/10/2026) ─────────────
+   Constaté en prod : le tableau de bord annonçait 12 élèves, « Recettes
+   340 000 », « Masse salariale 465 000 » — exactement le jeu de démonstration
+   de defaultDB() (12 identifiants sur 12). Jacques : « séparer de mon suivi
+   réel ». Une base créée ne rejoue jamais le seed, d'où ce passage à chaque
+   chargement, sur le modèle de _retirerFauxLivres :
+   · un enregistrement n'est écarté que s'il est ENCORE identique au seed sur
+     chacun des champs semés (pwd excepté : son empreinte a pu être remise à
+     niveau) — modifié à la main, il est réputé réel et reste ;
+   · un élève ou enseignant de démo auquel un enregistrement RÉEL se rapporte
+     (paiement, note, devoir…) reste aussi, sans quoi ce dernier serait orphelin ;
+   · rien n'est supprimé : tout part dans DB._demoArchive, et Réglages permet
+     de le remettre (DB._demoVisible) puis de l'écarter de nouveau ;
+   · repassé à chaque chargement : une vieille base resynchronisée qui ramène
+     la démo la voit écartée de nouveau. */
+var _DEMO_COLS = ['students','teachers','payments','grades','absences','devoirs',
+  'submissions','teacherHours','depenses','studentAccounts'];
+function _demoIntact(seed, rec){
+  if (!rec || rec.id !== seed.id) return false;
+  for (var k in seed){
+    if (k === 'pwd' || !Object.prototype.hasOwnProperty.call(seed, k)) continue;
+    if (JSON.stringify(seed[k]) !== JSON.stringify(rec[k])) return false;
+  }
+  return true;
+}
+function _separerDemo(){
+  if (!DB || DB._demoVisible) return 0;
+  var seed; try { seed = defaultDB(); } catch (e) { return 0; }
+  var parCol = {};
+  _DEMO_COLS.forEach(function(k){
+    var s = seed[k]; if (!Array.isArray(s) || !Array.isArray(DB[k])) return;
+    var idx = {}; s.forEach(function(x){ if (x && x.id) idx[x.id] = x; });
+    /* Les OBJETS, pas les identifiants : un « s1 » réattribué à un vrai élève
+       peut cohabiter avec le « s1 » de démo, et seul ce dernier doit partir. */
+    parCol[k] = DB[k].filter(function(r){ return r && idx[r.id] && _demoIntact(idx[r.id], r); });
+  });
+  /* Élèves et enseignants de démo encore cités par un enregistrement réel. */
+  var cites = {};
+  _DEMO_COLS.forEach(function(k){
+    (DB[k] || []).forEach(function(r){
+      if (!r || (parCol[k] || []).indexOf(r) >= 0) return;
+      ['eid','tid'].forEach(function(f){ if (r[f]) cites[r[f]] = 1; });
+    });
+  });
+  ['students','teachers'].forEach(function(k){
+    parCol[k] = (parCol[k] || []).filter(function(r){ return !cites[r.id]; });
+  });
+  var n = 0, arch = DB._demoArchive || {};
+  _DEMO_COLS.forEach(function(k){
+    var objs = parCol[k] || []; if (!objs.length) return;
+    var deja = (arch[k] || []).map(function(r){ return r.id; });
+    DB[k] = DB[k].filter(function(r){
+      if (objs.indexOf(r) < 0) return true;
+      if (deja.indexOf(r.id) < 0) (arch[k] = arch[k] || []).push(r);
+      n++; return false;
+    });
+  });
+  if (n){ DB._demoArchive = arch; console.info('[démo] ' + n + ' enregistrement(s) de démonstration mis à l\'écart du suivi réel'); }
+  return n;
+}
+function _demoCompte(){
+  var a = DB._demoArchive || {}, n = 0;
+  for (var k in a) if (Array.isArray(a[k])) n += a[k].length;
+  return n;
+}
+function demoAfficher(){
+  if (!iA()) return;
+  var a = DB._demoArchive || {};
+  for (var k in a){
+    if (!Array.isArray(a[k]) || !Array.isArray(DB[k])) continue;
+    var ids = DB[k].map(function(r){ return r && r.id; });
+    a[k].forEach(function(r){ if (ids.indexOf(r.id) < 0) DB[k].push(r); });
+  }
+  DB._demoArchive = {}; DB._demoVisible = true;
+  save(); re(); toast('Démonstration réintégrée — elle se mêle de nouveau à vos chiffres', 'warn');
+}
+function demoEcarter(){
+  if (!iA()) return;
+  DB._demoVisible = false;
+  var n = _separerDemo();
+  save(); re(); toast(n ? '✓ ' + n + ' enregistrement(s) de démonstration mis à l\'écart' : 'Aucune donnée de démonstration intacte à écarter');
+}
+
 function _migrateDB(){
   /* ── DEUX ABONNEMENTS ENSEIGNANTS PORTAIENT LE MÊME NOM (02/09/2026) ──────
      « ENSEIGNANT — ANNÉE » à 7 000 F ici, et « Enseignant » à 5 000 F/an dans
@@ -1380,6 +1463,8 @@ function _migrateDB(){
     if (retires.length) console.info('[boutique] ' + retires.length + ' livre(s) de démonstration retiré(s) : ' + retires.join(', '));
     if (gardes.length) console.warn('[boutique] livre(s) du seed CONSERVÉ(S) (modifié, vendu ou pourvu de contenu) : ' + gardes.join(', '));
   })();
+
+  _separerDemo();
 
   /* ── GRILLE PAR PUBLIC CIBLE (20/08/2026) ────────────────────────────────
      Les offres parents et chefs d'établissement, et le forfait enseignant au
@@ -16847,6 +16932,14 @@ function pgSettings(){
       <div class="fg mb10"><span class="fl">WhatsApp contact</span><input class="fi" id="pi_whatsapp" value="${DB.publicInfo?.whatsapp||''}"></div>
       <button class="btn bi mt14" onclick="savePublicInfo()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer portail</button>
     </div>
+  </div>
+  <div class="card mt16">
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-eye"/></svg></span>Données de démonstration</div>
+      ${DB._demoVisible
+        ? `<div class="ib ibw mb14"><span>⚠️</span><span>La démonstration (élèves, enseignants, paiements, notes… fictifs) est <strong>mêlée à votre suivi réel</strong> : le tableau de bord et les finances la comptent.</span></div>
+           <button class="btn bi" onclick="demoEcarter()">Mettre la démonstration à l\'écart</button>`
+        : `<div class="ib ibt mb14"><span>✓</span><span>${_demoCompte() ? _demoCompte()+' enregistrement(s) fictifs de démonstration sont <strong>tenus à l\'écart</strong> : tableau de bord, finances et listes ne montrent que votre activité réelle.' : 'Aucune donnée de démonstration dans votre base : tout ce qui s\'affiche est votre activité réelle.'}</span></div>
+           ${_demoCompte() ? `<button class="btn bo" onclick="demoAfficher()">Réafficher la démonstration</button>` : ''}`}
   </div>
   <div class="card mt16">
       <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-refresh"/></svg></span>Synchronisation & Sauvegarde</div>
