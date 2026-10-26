@@ -64,8 +64,12 @@ const lancer = (ecran, large) => {
   return montree > 0;
 };
 dire(!lancer('composeur', false) && !lancer('coursEdit', false), 'téléphone : aucune astuce au composeur ni à l’éditeur de cours');
-dire(lancer('accueil', false), 'téléphone : l’astuce revient sur les autres écrans');
-dire(lancer('composeur', true), 'ordinateur : inchangé au composeur');
+/* Règle du 26/10/2026 (audit d'usage) : sur téléphone, la bulle (89 px)
+   s'ajoutait à la barre d'onglets (71 px) sur TOUS les écrans. Plus
+   d'astuce au téléphone, ni sur l'accueil où l'on s'oriente. */
+dire(!lancer('liste', false) && !lancer('accueil', false), 'téléphone : aucune astuce, sur aucun écran');
+dire(!lancer('accueil', true), 'ordinateur : aucune astuce sur l’accueil');
+dire(lancer('composeur', true) && lancer('liste', true), 'ordinateur : l’astuce reste au composeur et au corpus');
 
 console.log(`\n${G}③ La feuille de style${R}`);
 const bloc = (html.match(/L'ESPACE DE TRAVAIL D'ABORD[\s\S]*?@media screen and \(max-width:560px\)\{[\s\S]*?\n  \}/) || [''])[0];
