@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Évaluation BAC – Anglais</title>
+  <link rel="icon" href="/assets/veritas-logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -144,6 +145,24 @@ textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(13,52,96,.08)}
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","name":"Évaluation BAC – Anglais","description":"BAC A (A1 à A5), English Language Examination : 3 heures, coefficient 4, 40 points. Évaluation interactive corrigée, MINESEC – OBC.","url":"https://veritas-school.com/evaluations/evaluation_bac_anglais.html","inLanguage":"fr","learningResourceType":"Épreuve d'examen","educationalLevel":"Terminale","isAccessibleForFree":true,"provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"publisher":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://veritas-school.com/"},{"@type":"ListItem","position":2,"name":"Sujets d'examen","item":"https://veritas-school.com/evaluations/"},{"@type":"ListItem","position":3,"name":"Évaluation BAC – Anglais","item":"https://veritas-school.com/evaluations/evaluation_bac_anglais.html"}]}]}</script>
 <!-- /seo-tete -->
+<style id="chrono-mobile">
+/* Audit du 26/10/2026. La pile flottante (thème, langue, Ambassa) est fixée en
+   bas à droite au même z-index que la barre : quand la barre la croise, elle
+   recouvrait Pause/Terminer. La barre passe devant, et laisse sur grand écran
+   la colonne de la pile libre.
+   Au téléphone, une fois la page défilée, la frise « Début / mi-temps / Fin »
+   imposait sa largeur : les boutons sortaient de l'écran (358 px pour 345). */
+#chrono-bar{z-index:201}
+@media (min-width:421px){#chrono-bar{padding-right:96px}}
+@media (max-width:420px){
+  #chrono-bar{gap:8px;padding:8px 10px}
+  #chrono-bar>div:nth-child(2){min-width:0}
+  #chrono-bar>div:nth-child(2)>div:last-child{display:none!important}
+  #chrono-bar>div:last-child{flex-shrink:0}
+  #chrono-display{font-size:1.2rem;min-width:0}
+  #chrono-bar button{padding:5px 9px;white-space:nowrap}
+}
+</style>
 <!--vrt-habillage:tete-->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.49" data-vrt-epreuve>
@@ -981,9 +1000,9 @@ textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(13,52,96,.08)}
 <div id="modal">
   <div class="modal-box">
     <div style="font-size:2.8rem">⏰</div>
-    <h2>Time's up!</h2>
-    <p>The 3 hours of the examination are over. Consult the answer keys to self-evaluate your responses.</p>
-    <p style="font-size:.82rem;margin-top:6px">« Hard work is the key to success. » — Good luck!</p>
+    <h2>Temps écoulé !</h2>
+    <p>Les 3 heures de l'épreuve sont terminées. Consultez les corrigés pour auto-évaluer vos réponses.</p>
+    <p style="font-size:.82rem;margin-top:6px">« Hard work is the key to success. » — Bonne continuation !</p>
     <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">Consulter les corrigés →</button>
   </div>
 </div>

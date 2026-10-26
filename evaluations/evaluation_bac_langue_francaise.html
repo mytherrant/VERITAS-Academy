@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Évaluation BAC – Langue Française</title>
+  <link rel="icon" href="/assets/veritas-logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -188,6 +189,24 @@ textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(13,52,96,.08)}
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","name":"Évaluation BAC – Langue Française","description":"BAC A, épreuve de langue française : 2 heures, coefficient 2, 20 points. Évaluation interactive corrigée, conforme au programme MINESEC – OBC.","url":"https://veritas-school.com/evaluations/evaluation_bac_langue_francaise.html","inLanguage":"fr","learningResourceType":"Épreuve d'examen","educationalLevel":"Terminale","isAccessibleForFree":true,"provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"publisher":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://veritas-school.com/"},{"@type":"ListItem","position":2,"name":"Sujets d'examen","item":"https://veritas-school.com/evaluations/"},{"@type":"ListItem","position":3,"name":"Évaluation BAC – Langue Française","item":"https://veritas-school.com/evaluations/evaluation_bac_langue_francaise.html"}]}]}</script>
 <!-- /seo-tete -->
+<style id="chrono-mobile">
+/* Audit du 26/10/2026. La pile flottante (thème, langue, Ambassa) est fixée en
+   bas à droite au même z-index que la barre : quand la barre la croise, elle
+   recouvrait Pause/Terminer. La barre passe devant, et laisse sur grand écran
+   la colonne de la pile libre.
+   Au téléphone, une fois la page défilée, la frise « Début / mi-temps / Fin »
+   imposait sa largeur : les boutons sortaient de l'écran (358 px pour 345). */
+#chrono-bar{z-index:201}
+@media (min-width:421px){#chrono-bar{padding-right:96px}}
+@media (max-width:420px){
+  #chrono-bar{gap:8px;padding:8px 10px}
+  #chrono-bar>div:nth-child(2){min-width:0}
+  #chrono-bar>div:nth-child(2)>div:last-child{display:none!important}
+  #chrono-bar>div:last-child{flex-shrink:0}
+  #chrono-display{font-size:1.2rem;min-width:0}
+  #chrono-bar button{padding:5px 9px;white-space:nowrap}
+}
+</style>
 <!--vrt-habillage:tete-->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.49" data-vrt-epreuve>

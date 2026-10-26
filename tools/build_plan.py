@@ -899,7 +899,7 @@ def page(entrees, vitrine):
 <meta property="og:title" content="Plan du site — tout VÉRITAS, classé par profil">
 <meta property="og:description" content="Tout ce que publie le Centre VÉRITAS, rangé par profil : élève, parent, enseignant, partenaire.">
 <meta property="og:url" content="__SITE__/plan.html">
-<meta property="og:image" content="__SITE__/uploads/logo-veritas.png">
+<meta property="og:image" content="__SITE__/og-image.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
