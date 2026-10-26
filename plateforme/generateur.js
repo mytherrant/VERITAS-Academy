@@ -730,7 +730,10 @@
      4. LA COMMANDE — le prompt proprement dit
      ------------------------------------------------------------------ */
 
-  var PLAFOND_PROMPT = 7600;   // octets ; le proxy refuse au-delà de 8 000
+  /* Octets. Le proxy accepte 16 000 pour l'action `epreuve_minesec` (8 000
+     ailleurs) : à 7 600, la partie fixe (≈ 7 Ko) ne laissait plus la place
+     d'un texte de contraction de 600 mots (production, 22/10/2026). */
+  var PLAFOND_PROMPT = 15000;
 
   function consignesProduction(genre, texteMots) {
     if (genre === 'resume') {
@@ -989,7 +992,14 @@
 
   /* Défauts d'une question, du plus grave au moins grave. Chacun porte un
      `motif` (affiché) et une `consigne` (envoyée à Ambassa pour réécriture). */
-  var PLAQUEE_LEXIQUE = /\b(?:synonyme|antonyme|terme|mot)s?\b[^.?!]{0,30}\b(?:issus?|appartenan\w*|appartien\w*|relevant|tir[ée]e?s?|pris)\s+(?:du|au|de\s+la|à\s+la|dans\s+le)\s+(?:lexique|vocabulaire|champ\s+lexical|registre)/i;
+  /* Élargi le 22/10/2026 : « par un synonyme du lexique des sensations »
+     (sans participe) passait encore en production. Le REGISTRE n'en fait
+     plus partie : « un synonyme de registre soutenu » est une vraie
+     question de langue. */
+  /* Un REMPLACEMENT imposé dans un lexique (« par un synonyme / un mot du
+     lexique de… ») ou un synonyme / antonyme imposé — pas le RELEVÉ d'un
+     champ lexical (« relève trois mots du champ lexical de la nature »). */
+  var PLAQUEE_LEXIQUE = /(?:\bpar\s+(?:un|une|des|le|la)\s+(?:synonyme|antonyme|terme|mot)s?|\b(?:synonyme|antonyme)s?)\b[^.?!]{0,30}?\b(?:(?:issus?|appartenan\w*|appartien\w*|relevant|tir[ée]e?s?|pris)\s+)?(?:du|au|de\s+la|à\s+la|dans\s+le)\s+(?:lexique|vocabulaire|champ\s+lexical)\b/i;
   var PLAQUEE_HOMOPHONE = /\bhomophones?\b[^.?!]{0,60}\b(?:garde|gardant|maintien\w*|conserv\w*|m[êe]me\s+sens|sens\s+identique)/i;
 
   function diagnostiquer(q, contexte, opts) {
@@ -1614,6 +1624,24 @@
 
   /* Le sujet recopie-t-il le texte support ? Douze mots consécutifs du
      texte retrouvés dans le sujet suffisent à le dire. */
+  /* Le sujet sans les paragraphes repris du texte (12 mots consécutifs
+     au moins) ni l'en-tête « TEXTE 2 : auteur, titre ». */
+  function sansRecopie(sujet, texte) {
+    var pt = ' ' + plat(texte) + ' ';
+    var garde = String(sujet || '').split(/\n+/).filter(function (par) {
+      var t = par.trim();
+      if (!t) return false;
+      if (/^\s*texte\s*(?:2|ii|n\s*°?\s*2)\b/i.test(t) && t.length < 260) return false;
+      var mots = plat(t).trim().split(' ');
+      if (mots.length < 12) return true;
+      for (var i = 0; i + 12 <= mots.length; i += 4) {
+        if (pt.indexOf(' ' + mots.slice(i, i + 12).join(' ') + ' ') >= 0) return false;
+      }
+      return true;
+    });
+    return garde.join('\n').trim();
+  }
+
   function recopie(sujet, texte) {
     var ps = plat(sujet), mt = plat(texte).trim().split(' ');
     if (mt.length < 24) return false;
@@ -1823,8 +1851,20 @@
         if (sb === null) res.controles.push({ ok: false, libelle: 'Corrigé « ' + s.titre + ' » : aucune ligne « Barème : … » chiffrée — à ajouter.' });
         else if (s.pts && Math.abs(sb - s.pts) > 0.001) res.controles.push({ ok: false, libelle: 'Corrigé « ' + s.titre + ' » : barème de ' + sb + ' points pour un sujet sur ' + s.pts + ' — à rectifier.' });
       }
+      /* LE SUJET DE COMMENTAIRE NE RECOPIE PAS LE TEXTE (production,
+         22/10/2026, Terminale A) : Ambassa y remettait « TEXTE 2 : … » et
+         l'extrait d'Oyono, déjà imprimé à part — et le tutoiement du roman
+         faisait lever une fausse alerte de tutoiement. On retire les
+         paragraphes recopiés et l'en-tête « TEXTE 2 » ; on ne garde que la
+         consigne, et on ne signale que si rien de propre ne reste. */
       if (s.genre === 'commentaire' && com && recopie(s.texte, com.text)) {
-        res.controles.push({ ok: false, libelle: 'Sujet de commentaire : des passages du texte y sont recopiés — il est déjà imprimé à part ; ne gardez que la consigne.' });
+        var propreC = sansRecopie(s.texte, com.text);
+        if (propreC && /commentaire|centres?\s+d.int[ée]r[eê]t|montrer|analyse/i.test(propreC)) {
+          s.texte = vous ? vouvoyer(propreC) : propreC;
+          res.controles.push({ ok: true, libelle: 'Sujet de commentaire : passages du texte recopiés retirés automatiquement — seule la consigne reste.' });
+        } else {
+          res.controles.push({ ok: false, libelle: 'Sujet de commentaire : des passages du texte y sont recopiés — il est déjà imprimé à part ; ne gardez que la consigne.' });
+        }
       }
       if (vous && tutoie(s.texte)) {
         res.controles.push({ ok: false, libelle: 'Sujet « ' + s.titre + ' » : tutoiement — le second cycle compose au vouvoiement (« Vous montrerez… »).' });
@@ -1964,6 +2004,13 @@
       /* Le refus du serveur dit LEQUEL des plafonds est atteint (débit par
          minute, quota du jour, quota du mois) : on garde sa phrase. L'Atelier
          affichait « quota épuisé (10 ce mois) » pour un plafond JOURNALIER. */
+      /* Demande refusée par le serveur (trop longue, mal formée) : ce n'est
+         pas une panne réseau, et il ne faut pas l'afficher comme telle. */
+      if (r.status === 400) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          var e = new Error('refus'); e.serveur = (j && j.error) ? String(j.error) : ''; throw e;
+        });
+      }
       if (r.status === 402 || r.status === 429) {
         return r.json().catch(function () { return {}; }).then(function (j) {
           var e = new Error('quota'); e.serveur = (j && j.error) ? String(j.error) : ''; throw e;

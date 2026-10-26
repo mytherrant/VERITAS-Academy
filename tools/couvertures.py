@@ -103,6 +103,7 @@ COUVERTURES: dict[str, dict] = {
     "est-2nde":    {"src": "1ère ST.png", "part": 0, "parts": 3},
     "est-1ere":    {"src": "ST.png"},          # existe seule, meilleure définition
     "est-tle":     {"src": "1ère ST.png", "part": 2, "parts": 3},
+    "est-tle-ed2": {"src": "1ère ST.png", "part": 2, "parts": 3},   # même couverture, nouvelle édition
 }
 
 

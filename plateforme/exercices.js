@@ -264,11 +264,18 @@
     if (opts.token) entetes['Authorization'] = 'Bearer ' + opts.token;
     return fetch(url, {
       method: 'POST', headers: entetes,
-      body: JSON.stringify({ action: opts.action || 'exercices_minesec', prompt: prompt, sysPrompt: opts.sysPrompt || '',
+      body: JSON.stringify({ action: opts.action || 'exercices_minesec', token: opts.token || undefined, prompt: prompt, sysPrompt: opts.sysPrompt || '',
                              max_tokens: opts.max || 1600, temperature: 0.35 })
     }).then(function (r) {
       if (r.status === 402) throw new Error('quota');
-      if (!r.ok) throw new Error('http_' + r.status);
+      /* Refus motivé (400 demande trop longue, 429 essais du jour…) : on garde
+         la phrase du serveur, comme generateur.js. « Injoignable » ne vaut
+         que pour une vraie panne. */
+      if (!r.ok) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          var e = new Error('http_' + r.status); e.serveur = (j && j.error) ? String(j.error) : ''; throw e;
+        });
+      }
       return r.json();
     }).then(function (j) {
       return extraireJSON(j.text || j.reponse || j.response || j.content || '');

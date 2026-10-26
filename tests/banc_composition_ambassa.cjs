@@ -102,7 +102,25 @@ MINESEC.epreuves.forEach(s => {
   const pr = GEN.ajusterPrompt({ plan: p, struct: s, classe: '3e', textes, exemples: [] });
   pire = Math.max(pire, GEN.octets(pr));
 });
-dire(pire <= 8000, 'même avec un texte de 900 mots, le prompt tient sous les 8 000 octets du proxy (' + pire + ' o)');
+/* Plafond du proxy pour `epreuve_minesec` : 16 000 octets (8 000 avant le
+   22/10/2026 — toute contraction de BAC était alors refusée en 400). */
+const PROXY = 16000;
+dire(pire <= PROXY, 'même avec un texte de 900 mots, le prompt tient sous les ' + PROXY + ' octets du proxy (' + pire + ' o)');
+const fs0 = require('fs');
+const proxyPhp = fs0.readFileSync(require('path').join(__dirname, '..', 'api', 'ia_proxy.php'), 'utf8');
+dire(/'epreuve_minesec'\) \? 16000 : 8000/.test(proxyPhp), 'ia_proxy.php accepte bien 16 000 octets pour la composition d’une épreuve');
+dire(GEN.PLAFOND_PROMPT < PROXY, 'le plafond du générateur reste sous celui du proxy (' + GEN.PLAFOND_PROMPT + ' < ' + PROXY + ')');
+/* La contraction du BAC : un texte de 620 mots ET l'extrait du commentaire,
+   avec le programme de la séquence — la demande ne doit plus être coupée. */
+const sA = MINESEC.epreuveParCode('A_LITT'), pA2 = GEN.planEpreuve(sA, { classe: 'Terminale' });
+const t620 = { n: 901, role: 'support', type: 'ARGUMENTATIF', words: 620, reference: 'Auteur, Titre, 2007',
+  text: ('La croissance africaine pose des questions que les économistes ne règlent pas seuls. ').repeat(50).slice(0, 4300) };
+const tCom = { n: 902, role: 'commentaire', words: 300, reference: 'Oyono', text: ('Le vieux Meka regardait la médaille. ').repeat(60) };
+const ctxA = { plan: pA2, struct: sA, classe: 'Terminale', textes: [t620, tCom], exemples: [],
+  programmeFait: Array.from({ length: 24 }, (_, i) => 'Contraction de texte : rédaction du résumé, séance ' + (i + 1) + ' (1h)'),
+  exclusions: Array.from({ length: 10 }, (_, i) => 'Notion exclue numéro ' + (i + 1)), tache: 'x'.repeat(600), progression: 'Terminale littéraire — séquence 5' };
+const prA = GEN.ajusterPrompt(ctxA);
+dire(GEN.octets(prA) <= PROXY && !t620._coupe, 'contraction de BAC : texte de 620 mots transmis en entier, demande sous ' + PROXY + ' o (' + GEN.octets(prA) + ' o)');
 const sys = GEN.formationMinesec(MINESEC.epreuveParCode('BEPC_ETUDE'), null, '3e', GEN.exemplesOfficiels(CORPUS, '3e', 12, 2));
 dire(/Relève les personnages|Identifie le narrateur/.test(sys) && /pourquoi/.test(sys) && /200 à 250 mots/.test(sys),
   'la formation d’Ambassa porte le descriptif, les formulations proscrites et des questions RÉELLES de la classe');
@@ -260,9 +278,12 @@ const attendre = ms => new Promise(r => setTimeout(r, ms));
   // core.autocrlf : sur le poste le fichier est en CRLF, le motif attend \n.
   const proxy = fs.readFileSync(P('api/ia_proxy.php'), 'utf8').replace(/\r\n/g, '\n');
   const bloc = (proxy.match(/if \(\(string\) \(\$body\['action'\] \?\? ''\) === 'epreuve_minesec'\) \{[\s\S]*?\}\n/) || [''])[0];
+  // Depuis la cascade du 22/10, un seul appel dans la boucle des modèles (plus
+  // Pro puis Flash) : chaque appel, quel qu'en soit le nombre, porte les réglages.
+  const appelsGemini = proxy.match(/call_gemini\(\$[^;]*;/g) || [];
   dire(/responseMimeType' => 'application\/json'/.test(bloc) && /thinkingBudget/.test(bloc)
     && /array_merge\(\['temperature' => 0\.7, 'maxOutputTokens' => \$maxTok\], \$reglages\)/.test(proxy)
-    && (proxy.match(/call_gemini\([^)]*\$geminiReglages\)/g) || []).length === 2,
+    && appelsGemini.length >= 1 && appelsGemini.every(s => /\$geminiReglages\b/.test(s)),
     'ia_proxy.php : JSON imposé et réflexion bornée pour epreuve_minesec, les autres actions inchangées');
 
   let appelsIA = 0;

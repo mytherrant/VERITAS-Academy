@@ -1115,7 +1115,8 @@ def main():
 
     est = [("est-2nde.html", "2ⁿᵈᵉ scientifique & technique", "Les Tribus de Capitoline · Le Tartuffe"),
            ("est-1ere.html", "1ʳᵉ scientifique & technique (Probatoire)", "Au cœur des ténèbres · Le Lion et la Perle"),
-           ("est-tle.html", "Terminale scientifique & technique (BAC)", "Ngum a Jemea · Le Vieux Nègre et la Médaille")]
+           ("est-tle-ed2.html", "Terminale scientifique & technique (BAC) — nouvelle édition", "Le Vieux Nègre et la Médaille · CV et requête"),
+           ("est-tle.html", "Terminale scientifique & technique (BAC) — première édition", "Ngum a Jemea · Le Vieux Nègre et la Médaille")]
     with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as f:
         f.write(render_hub(levels, est))
     print("  %s manuels.html (compteurs)" % ("✓" if maj_manuels_html(levels) else "!!"))

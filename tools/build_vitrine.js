@@ -566,6 +566,44 @@ function brancherEnOrdre(html, ancre, cibles, quoi) {
 }
 corps = brancherEnOrdre(corps, '#lien', FOOTER, 'du pied de page');
 
+/* 22/10/2026 — « supprime tout ceci, c'est déjà dans le menu en haut »
+   (Jacques). Les trois colonnes de liens du pied (Apprendre / Services / Le
+   centre) doublaient le menu : on les retire APRÈS le câblage ci-dessus, pour
+   que la maquette reste intacte et que son garde-fou compte toujours juste.
+   Restent l'identité (logo, présentation, badges) et les mentions légales.
+   Même coupe dans tools/build_plan.py (FOOTER_VITRINE) et VERITAS_v1.2.html. */
+function retirerColonnesPied(html) {
+  const colonnes = /\r?\n[ \t]*(?:\r?\n)?[ \t]*<div>\s*<div style="font:600 12px Poppins,sans-serif;color:#fff;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px">(?:Apprendre|Services|Le centre)<\/div>\s*<div style="display:flex;flex-direction:column;gap:9px">[\s\S]*?<\/div>\s*<\/div>/g;
+  const n = (html.match(colonnes) || []).length;
+  if (n !== 3) throw new Error('Pied de page : ' + n + ' colonnes de liens trouvées au lieu de 3. La maquette a changé — vérifier AVANT de déployer.');
+  return html.replace(colonnes, '').replace('display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:34px',
+    'display:grid;grid-template-columns:minmax(0,1fr);gap:34px;justify-items:center;text-align:center');
+}
+corps = retirerColonnesPied(corps);
+
+/* 24/10/2026 — « Pied de page très surchargé : Centre d'Excellence… est déjà
+   mentionné d'entrée. Redondance. Conserver juste l'essentiel » (Jacques).
+   On retire le bloc d'identité (logo, présentation, pastilles MoMo / Orange /
+   Reçu : la barre du haut porte la marque, les logos de paiement disent le
+   reste), la phrase sous les logos, et le lien « Mentions légales » du bas,
+   qui doublait le volet — le volet mène désormais à la page complète.
+   Même coupe dans tools/build_plan.py (FOOTER_VITRINE). */
+function allegerPied(html) {
+  const identite = /    <div style="max-width:1170px;margin:0 auto;padding:52px 24px 30px[\s\S]*?\n    <div style="border-top:1px solid rgba\(255,255,255,\.12\)">/;
+  const phrase = /\n[ \t]*<p style="margin:12px 0 0;font:400 12px\/1\.7 Poppins,sans-serif;color:rgba\(255,255,255,\.5\)">Aucun frais supplémentaire côté famille\. Reçu[^<]*<\/p>/;
+  const lienBas = /\n[ \t]*<a href="legal\/mentions-legales\.html"[^>]*>Mentions légales<\/a>/;
+  const impots = 'Centre des impôts : CFLP Douala 3<sup>e</sup> bis.</p>';
+  for (const [nom, re] of [['identité', identite], ['phrase', phrase], ['lien du bas', lienBas]]) {
+    if (!re.test(html)) throw new Error('Pied de page : « ' + nom + ' » introuvable. La maquette a changé — vérifier AVANT de déployer.');
+  }
+  if (html.split(impots).length !== 2) throw new Error('Pied de page : mention du centre des impôts introuvable.');
+  return html.replace(identite, '    <div>').replace(phrase, '').replace(lienBas, '')
+    .replace(impots, impots + '\n          <a href="legal/mentions-legales.html" style="display:inline-block;margin-top:10px;font:500 12px Poppins,sans-serif;color:#FFC93C" class="vh50">Lire les mentions légales complètes</a>')
+    .replace('<footer style="background:#001136;color:rgba(255,255,255,.72);margin-top:64px">',
+             '<footer style="background:#001136;color:rgba(255,255,255,.72);margin-top:48px">');
+}
+corps = allegerPied(corps);
+
 /* ── Le calendrier scolaire, lu à la SOURCE ────────────────────────────────
    CALENDRIER_SCOLAIRE (app.js) porte l'arrêté conjoint MINEDUB/MINESEC
    2026-2027 : trois trimestres, six séquences, les interruptions et les
@@ -836,6 +874,14 @@ const MENU = [
     { t: 'Œuvres au programme',  d: 'Analyses et fiches',          i: 'lc-bookopen',    c: '#1E499B', f: '#DBE8FE', h: 'oeuvres/' },
     { t: 'Programmes par classe',d: 'De la 6ᵉ à la Terminale',     i: 'lc-graduation',  c: '#0E7C86', f: '#DDF2F4', h: 'niveaux/' },
     { t: 'Outils gratuits',      d: 'Calculateurs de moyenne',     i: 'lc-calculator',  c: '#007E11', f: '#E0F5E5', h: 'outils/' },
+    /* 25/10/2026 — des MODULES de l'application sans aucune porte publique
+       (« tester le niveau, badges de progression… les usagers ne savent pas
+       qu'ils existent », Jacques). Le test de positionnement n'était même plus
+       atteignable depuis l'application (retiré d'un panneau en v1.9.1). */
+    { t: 'Tester mon niveau',    d: '10 questions, forces et lacunes', i: 'lc-target',  c: '#B03A6E', f: '#FBE4EE', h: APP + '#positionnement' },
+    { t: 'Ma progression',       d: 'XP, série, badges à débloquer', i: 'lc-award',     c: '#007E11', f: '#E0F5E5', h: APP + '#progression', g: 1 },
+    { t: 'Jeux et battles',      d: 'Réviser en jouant, défis hebdo', i: 'lc-game',     c: '#5B4FA8', f: '#EAE7F7', h: APP + '#jeux' },
+    { t: 'Examen blanc',         d: 'Sujet officiel + chronomètre', i: 'lc-clock',      c: '#A84200', f: '#FFF3E4', h: APP + '#simulateur' },
     /* ⚠️ TROIS SERVICES QUI EXISTAIENT SANS ÊTRE ANNONÇÉS (31/08/2026).
        Chacun a sa page publiée, indexée, alimentée — et aucune entrée de menu.
        Un visiteur ne pouvait les atteindre qu'en connaissant leur URL. */
@@ -845,6 +891,7 @@ const MENU = [
   ]},
   { titre: 'Parent', sous: 'Suivre et soutenir', entrees: [
     { t: 'Orientation',          d: 'Choisir sa série',            i: 'lc-compass',     c: '#0E7C86', f: '#DDF2F4', h: APP + '#orientation' },
+    { t: 'Tester son niveau',    d: 'Le point avant de commencer', i: 'lc-target',      c: '#B03A6E', f: '#FBE4EE', h: APP + '#positionnement' },
     { t: 'Matières et coefficients', d: 'Poids réels, orientation',i: 'lc-scale',       c: '#5B4FA8', f: '#EAE7F7', h: 'parcours/' },
     { t: 'Cagnotte de scolarité',d: 'Faire financer son année',    i: 'lc-gift',        c: '#A84200', f: '#FFF3E4', h: APP + '#cagnotte' },
     { t: 'Trophées VÉRITAS',     d: 'Vote gratuit et unique',      i: 'lc-trophy',      c: '#B8860B', f: '#FFF6DA', h: APP + '#trophees' },
@@ -876,7 +923,11 @@ const MENU = [
     { t: 'Devenir partenaire',   d: '9 formules, marges revendeur',i: 'lc-users',       c: '#B03A6E', f: '#FBE4EE', h: APP + '#partenariat' },
     { t: 'Nos partenaires',      d: 'Ceux qui nous accompagnent',  i: 'lc-handshake',   c: '#0E7C86', f: '#DDF2F4', h: APP + '#nos-partenaires' },
     { t: 'VÉRITAS Campus',       d: 'Pour les établissements',     i: 'lc-university',  c: '#0C2A6A', f: '#E4E9F2', h: 'campus/' },
-    { t: 'Constellation VÉRITAS',d: 'Tout l’écosystème',           i: 'lc-sparkles',    c: '#B03A6E', f: '#FBE4EE', h: 'constellation.html' }
+    { t: 'Constellation VÉRITAS',d: 'Tout l’écosystème',           i: 'lc-sparkles',    c: '#B03A6E', f: '#FBE4EE', h: 'constellation.html' },
+    /* 22/10/2026 : la porte du plan partenaire vivait au pied de page, retiré
+       ce jour (il doublait ce menu). Sans elle, ce public n'aurait plus aucune
+       entrée vers ses 14 pages (garde « Public(s) sans porte » plus bas). */
+    { t: 'Espace partenaire',    d: 'Toutes ses pages, réunies',   i: 'lc-map',         c: '#0C2A6A', f: '#E4E9F2', h: 'plan.html#partenaire' }
   ]},
   { titre: 'Le centre', sous: 'Nous connaître', entrees: [
     /* ⚠️ PAS `app.html#presentation`. Vérifié dans le code (app.js, vShowSec) et
@@ -2528,7 +2579,7 @@ ${fs.readFileSync(path.join(__dirname, 'vitrine-bloc.css'), 'utf8')}
 }
 `;
 
-const page = `<!DOCTYPE html>
+let page = `<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
@@ -2592,6 +2643,9 @@ if ('serviceWorker' in navigator) {
 </body>
 </html>
 `;
+/* 25/10/2026 — anneaux d'icônes et textes secondaires : voir
+   tools/vitrine_lisibilite.cjs (appliqué aussi à vitrine.html, retouché à la main). */
+page = require('./vitrine_lisibilite.cjs').appliquer(page);
 if (OUT) { fs.writeFileSync(OUT, page); console.log('écrit      :', OUT, '—', page.length, 'octets'); }
 
 console.log('');

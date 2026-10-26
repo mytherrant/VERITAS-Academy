@@ -139,8 +139,16 @@ dire(/const calEvents=echeances\.slice/.test(src),
   'la liste « à venir » aussi — et elle n’est plus bornée au mois affiché');
 dire(/const echeancesUrgentes=echeances\.filter\(x=>x\.urgence\.poids<=3\)/.test(src),
   'la cloche ne retient que le dépassé et les sept jours qui viennent');
-dire(/const nbNotif=acts\.length\+echeancesUrgentes\.length/.test(src),
-  'et son compteur les additionne à l’activité');
+/* 22/10/2026 : le compteur additionnait TOUTE l'activité (ses propres actions
+   comprises) et ne retenait jamais ce qui avait été vu — 42 chez Jacques,
+   « les notifications ne fonctionnent pas ». Il additionne toujours les
+   échéances urgentes à l'activité, mais seulement ce qui est NOUVEAU. */
+dire(/const nbNotif=acts\.filter\(a=>a\.userId!==me\.id&&\(a\.ts\|\|0\)>\(notifVu\.ts\|\|0\)\)\.length\s*\+echeancesUrgentes\.filter\(/.test(src),
+  'et son compteur les additionne à l’activité des autres, depuis la dernière visite');
+dire(/goActivite:\(\)=>this\.setState\(\{[^}]*notifVu:this\._notifsVues\(echeancesUrgentes\.map\(cleEch\)\)/.test(src),
+  'ouvrir l’écran Activité vaut lecture : la cloche retombe');
+dire(/echeancesUrgentes\.forEach\(x=>gTraiter\.push\(/.test(src),
+  'les échéances comptées figurent aussi dans la liste « À traiter »');
 dire(/type="date" value="\{\{ ep\.echeance \}\}"/.test(src),
   'le champ de saisie est de type `date` — la forme est imposée, pas devinée');
 dire(/setEcheance:setField\('echeance'\)/.test(src),

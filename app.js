@@ -11764,6 +11764,9 @@ async function doLogin(){
          le 28/08/2026 resterait à jamais inconnu de l'Atelier. Idempotent :
          `srvSync` posé, on ne repasse plus. */
       try{ _compteRemonter(va2,p); }catch(e){}
+      /* Parent : les notes de l'enfant vivent sur le serveur, pas dans ce
+         navigateur. On les redescend à chaque connexion (et le jeton avec). */
+      if(va2.role==='parent'||va2.isParent){ try{ _parentSynchroniser({login:u,password:p}); }catch(e){} }
       // v1.19.28 : parent/enseignant/partenaire → leur espace personnel (avec offres ciblées).
       setTimeout(function(){ try{ var r=va2.role; if((r==='parent'||r==='enseignant'||r==='partenaire'||va2.isPartner)&&typeof _espacePerso==='function') _espacePerso(r||'partenaire'); }catch(e){} },500);
       return;}
@@ -11788,8 +11791,15 @@ async function doLogin(){
          chemin sur le chemin local : là, `id` a toujours été l'identifiant du
          compte et `mat` le login. Ici les deux valaient le login. */
       var _acId=_ac.id||_ac.user;
-      _createSession({id:_acId,nom:_ac.nom||'',pre:_ac.pre||'',mat:_ac.user,cls:_ac.cls||'',type:'visiteur_inscrit',accountId:_acId,plans:_ac.plans||[]});
-      hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);setTimeout(function(){try{_vEspaceSiFondVide();}catch(e){}},650);
+      /* Le rôle venait à manquer ici : un parent ou un enseignant qui se
+         connectait sur un appareil neuf tombait dans l'espace élève. */
+      var _acRole=_ac.role||(_ac.isParent?'parent':(_ac.isPartner?'partenaire':''));
+      _createSession({id:_acId,nom:_ac.nom||'',pre:_ac.pre||'',mat:_ac.user,cls:_ac.cls||'',type:'visiteur_inscrit',accountId:_acId,plans:_ac.plans||[],
+        role:_acRole||'eleve', isParent:_acRole==='parent', isPartner:!!_ac.isPartner, isTeacher:_acRole==='enseignant', childMat:_ac.childMat||'', childId:null});
+      if(_acRole==='parent'){ try{ _parentAppliquer(_slice); }catch(e){} }
+      hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);
+      if(_acRole==='parent'||_acRole==='enseignant'||_acRole==='partenaire'){ setTimeout(function(){ try{ _espacePerso(_acRole); }catch(e){} },500); }
+      else setTimeout(function(){try{_vEspaceSiFondVide();}catch(e){}},650);
       return;
     }
   } else if(lr==="enseignant"){
@@ -12289,6 +12299,9 @@ const PT={
   soumissions:"Soumissions reçues",
   devoirs_teacher:"Mes devoirs",
   perf_teacher:"Performances de mes classes",
+  ambassa:"Prof. Ambassa — quiz, évaluations, fiches",
+  marketplace_teacher:"Marketplace — vendre mes cours",
+  parrainage_teacher:"Mes filleuls & commissions",
   // Pages élève
   mon_bulletin:"Mes notes & Bulletin",
   mes_evaluations:"Évaluations en ligne",
@@ -12639,7 +12652,8 @@ function pgDash(){
           <button class="btn bo sm mt8" onclick="goTo('announce')">Toutes les annonces →</button>
         </div>
       </div>
-    </div>`;
+    </div>
+    ${typeof _accesProfilHtml==='function'?_accesProfilHtml('eleve'):''}`;
   }
 
   if(isEnseignant()){
@@ -12676,7 +12690,8 @@ function pgDash(){
           <button class="btn bo sm mt8" onclick="goTo('perf_teacher')"><svg class="vico bico" aria-hidden="true"><use href="#lc-chart"/></svg>Analyse complète →</button>
         </div>
       </div>
-    </div>`;
+    </div>
+    ${typeof _accesProfilHtml==='function'?_accesProfilHtml('enseignant'):''}`;
   }
 
   // Admin / Super Admin dashboard
@@ -12895,7 +12910,6 @@ function pgMonPaiement(){
     <div class="sc scgr"><div class="sci">✅</div><div class="scl">Total versé</div><div class="scv vgr" style="font-size:18px">${fmt(tpays)}</div></div>
     <div class="sc scb"><div class="sci">📚</div><div class="scl">Achats manuels</div><div class="scv vb">${purchases.length}</div><div class="scs">${fmt(purchases.reduce((a,b)=>a+b.mnt,0))}</div></div>
   </div>
-  ${_echStudentHTML(s.id)}
   ${_echStudentHTML(s.id)}
   ${s.stat!=='Payé'?`<div class="ib ibr mb14"><span>⚠️</span><span>Votre paiement du mois est en attente. Veuillez vous rendre à l\'administration pour régulariser votre situation.</span></div>`:''}
   <div class="card mb16"><div class="ct">Historique des paiements de scolarité</div>
@@ -14405,9 +14419,12 @@ window._gFilterClsChips=function(q){
   });
 };
 function pgGrades(){
-  const selT=window._gT||TRS[0],selC=window._gC||CLS[0];
   const cls=isEnseignant()?[...new Set(DB.students.map(s=>s.cls))]:CLS;
   const t=isEnseignant()?T(SES.tid):null;
+  /* L'enseignant arrivait sur la 6ème (CLS[0]), souvent vide pour lui
+     (« 0 élève ») : on ouvre sur SA classe — titulaire, puis ses classes. */
+  const _clsEns=t?[t.titulaire].concat(t.classes||[]).filter(c=>c&&cls.indexOf(c)>=0):[];
+  const selT=window._gT||TRS[0],selC=window._gC||_clsEns[0]||(isEnseignant()?cls[0]:null)||CLS[0];
   const subFilt=isEnseignant()?t?.mat2:null;
   const sts=DB.students.filter(s=>s.cls===selC);
   const gr=DB.grades.filter(g=>g.cls===selC&&g.tri===selT&&(!subFilt||g.sub===subFilt));
@@ -15127,9 +15144,9 @@ function pgBooks2(){
       <div style="padding:12px">
         <div class="semi s mb4">${b.titre}</div>
         <div style="font-size:13px;color:var(--ink4);margin-bottom:6px">${b.cls} · ${b.auteur}</div>
-        <div class="fl2 fic fsb mb8"><span class="mono bold s" style="color:var(--gold)">${fmt(b.prix)}</span><span class="bg ${b.stock>0?'bgg':'bgr'}">${b.stock} stock</span></div>
+        <div class="fl2 fic fsb mb8"><span class="mono bold s" style="color:var(--gold)">${fmt(b.prix)}</span><span class="bg ${(b.numeriqueSeul||b.stock>0)?'bgg':'bgr'}">${b.numeriqueSeul?'Numérique':(b.stock>0?b.stock+' en stock':'Rupture')}</span></div>
         <div class="pb mb8"><div class="pf pfg" style="width:${b.vendu+b.stock>0?Math.round(b.vendu/(b.vendu+b.stock)*100):0}%"></div></div>
-        <div class="xs2 mut mb8">${b.vendu} vendus · ${b.pages} pages</div>
+        <div class="xs2 mut mb8">${[(+b.vendu>0?b.vendu+' vendus':''),(b.pages?b.pages+' pages':'')].filter(Boolean).join(' · ')}</div>
         <div class="fl2 g6 fw">
           <button class="btn bgr2 xs" onclick="viewBook('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Voir</button>
           ${(b.fichierUrl||b.fichierKey)?`<button class="btn xs" style="background:#E0F2FE;color:#0369A1;border:1px solid #BAE6FD" onclick="_previewManuel('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-search"/></svg>Visualiser</button>`:''}
@@ -16732,10 +16749,10 @@ function _guideContent(section,role){
       +_step('3',"Enregistrer le paiement","Montant, date, trimestre, moyen (MoMo, Orange Money, espèces, virement). Référence auto-générée.")
       +_step('4',"Reçu PDF","Cliquer 🧾 Reçu → PDF avec en-tête école + cachet + signature.")
     )+_block('💰','Moyens de paiement intégrés',
-      '<ul style="padding-left:22px"><li>📱 <strong>MTN Mobile Money</strong> — numéro configurable dans Paramètres</li><li>📱 <strong>Orange Money</strong></li><li>💳 <strong>Stripe / PayPal</strong> (cartes internationales)</li><li>🏦 <strong>Virement bancaire</strong></li><li>💵 <strong>Espèces</strong> au guichet</li></ul>'
+      '<ul style="padding-left:22px"><li>📱 <strong>MTN Mobile Money</strong> — numéro configurable dans Paramètres</li><li>📱 <strong>Orange Money</strong></li><li>💵 <strong>Espèces</strong> au guichet</li></ul>'
     )+_block('△','Bilan financier',
       'Menu <strong>Bilan financier</strong> — Recettes (paiements), dépenses (Autres dépenses + Paie enseignants), solde. Export Excel disponible.'
-    )+_warn("Les paiements via MoMo / Orange Money / PayPal nécessitent une vérification manuelle dans <strong>Paramètres → Cloud → 💰 Paiements</strong>. C'est l'admin qui marque 'payé' après vérification du téléphone/relevé bancaire.");
+    )+_warn("Les paiements via MTN MoMo / Orange Money nécessitent une vérification manuelle dans <strong>Paramètres → Cloud → 💰 Paiements</strong>. C'est l'admin qui marque 'payé' après vérification du téléphone/relevé bancaire.");
   }
 
   if(section==='elearning'){
@@ -24045,62 +24062,109 @@ async function _downloadEpreuvePDF(){
 }
 
 // ── SIMULATEUR D'EXAMEN ───────────────────────────────────────────
+/* 25/10/2026 — « Branche-les chez les élèves » (Jacques). Le simulateur
+   n'avait AUCUN appelant, et il n'aurait pas marché : il lisait `ep.duree`,
+   qu'aucune épreuve ne renseigne (chronomètre « NaN:NaN »), et redessinait
+   TOUTE la page chaque seconde — le brouillon de l'élève s'effaçait à chaque
+   tic. Désormais : la page est posée une fois, seul le chronomètre bouge ; le
+   sujet est affiché ; le brouillon survit au temps écoulé. */
+function _dureeEpreuve(ep){
+  if(ep && +ep.duree > 0) return +ep.duree;
+  return /\b(BAC|Baccalaur|Probatoire|GCE)\b/i.test((ep&&ep.titre)||'') ? 180 : 120;
+}
+function _simEpreuves(){
+  return (DB.elearningLibrary||[]).filter(function(e){return e.cat==="cat1"||e.cat==="cat4"||e.cat==="cat6";})
+    .concat(DB.customEpreuves||[]);
+}
 function _simulerExamen(epId){
-  var libEpreuves=(DB.elearningLibrary||[]).filter(function(e){return e.cat==="cat1"||e.cat==="cat4"||e.cat==="cat6";});
-  var ep=libEpreuves.concat(DB.customEpreuves||[]).find(function(e){return e.id===epId;});
-  if(!ep)return;
-  var duree=ep.duree||60;
+  var ep=_simEpreuves().find(function(e){return e.id===epId;});
+  if(!ep){ toast('Épreuve introuvable','warn'); return; }
+  var duree=_dureeEpreuve(ep);
   cm();
-  var totalSec=ep.duree*60;
-  var elapsed=0;
-  var timer=null;
-  
-  function renderTimer(){
-    var remaining=totalSec-elapsed;
-    var mn=Math.floor(remaining/60);
-    var sc=remaining%60;
+  var totalSec=duree*60, elapsed=0, timer=null;
+  if(window._simTimer) clearInterval(window._simTimer);
+  _vc("<div class='vsec'>"
+    +"<div style='background:linear-gradient(135deg,#0F172A,#1E3A8A);border-radius:18px;padding:24px;color:#fff;margin-bottom:20px'>"
+    +"<div class='fl2 fic fsb mb12' style='gap:10px'>"
+    +"<div style='font-family:Montserrat,sans-serif;font-size:16px;font-weight:800'>"+_esc(ep.titre||'Épreuve')+"</div>"
+    +"<button onclick='_stopTimer()' style='background:rgba(220,38,38,.2);color:#FCA5A5;border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;flex:none'>■ Arrêter</button>"
+    +"</div>"
+    +"<div style='text-align:center;padding:16px 0'>"
+    +"<div id='simChrono' style='font-family:monospace;font-size:52px;font-weight:900;letter-spacing:4px'></div>"
+    +"<div id='simReste' style='font-size:13px;color:rgba(255,255,255,.6);margin-top:6px'></div>"
+    +"</div>"
+    +"<div style='background:rgba(255,255,255,.1);border-radius:20px;height:8px;overflow:hidden'>"
+    +"<div id='simBarre' style='height:100%;width:0;border-radius:20px;transition:width .5s'></div></div>"
+    +"<div style='font-size:12px;color:rgba(255,255,255,.5);margin-top:6px'>Durée de l'épreuve : "+Math.floor(duree/60)+" h"+(duree%60?(' '+duree%60):'')+"</div>"
+    +"</div>"
+    +"<div id='simFin'></div>"
+    +(ep.apercu?"<div class='card mb16'><div class='ct mb12'>Le sujet</div><div style='white-space:pre-line;line-height:1.75'>"+_esc(ep.apercu)+"</div></div>":"")
+    +"<div class='card'>"
+    +"<div class='ct mb12'>Mon brouillon</div>"
+    +"<div class='ib ibt mb10'><span>💡</span><span>Composez sur papier comme le jour de l'examen ; notez ici votre plan, vos formules, vos idées.</span></div>"
+    +"<textarea id='simNotes' class='fi' rows='9' placeholder='Plan, formules, brouillon…' style='font-family:Georgia,serif'></textarea>"
+    +"</div>"
+    +"<div style='text-align:center;margin:18px 0'><button class='btn bo' onclick='mChoisirSimulation()'>Choisir une autre épreuve</button></div>"
+    +"</div>");
+  function tic(){
+    var reste=Math.max(0,totalSec-elapsed), mn=Math.floor(reste/60), sc=reste%60;
     var pct=Math.round((elapsed/totalSec)*100);
-    var col=remaining<600?"#AE5353":remaining<1800?"#D97706":"#059669";
-    
-    _vc(
-      "<div class='vsec'>"
-      +"<div style='background:linear-gradient(135deg,#0F172A,#1E3A8A);border-radius:18px;padding:24px;color:#fff;margin-bottom:20px'>"
-      +"<div class='fl2 fic fsb mb12'>"
-      +"<div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:800'>⏱️ "+ep.titre+"</div>"
-      +"<button onclick='_stopTimer()' style='background:rgba(220,38,38,.2);color:#FCA5A5;border:none;border-radius:10px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer'>■ Arrêter</button>"
-      +"</div>"
-      +"<div style='text-align:center;padding:20px 0'>"
-      +"<div style='font-family:monospace;font-size:56px;font-weight:900;color:"+col+";letter-spacing:4px'>"+String(mn).padStart(2,'0')+":"+String(sc).padStart(2,'0')+"</div>"
-      +"<div style='font-size:12px;color:rgba(255,255,255,.5);margin-top:6px'>"+mn+" min "+sc+" sec restantes</div>"
-      +"</div>"
-      +"<div style='background:rgba(255,255,255,.1);border-radius:20px;height:8px;overflow:hidden'>"
-      +"<div style='background:"+col+";height:100%;width:"+pct+"%;border-radius:20px;transition:width .5s'></div>"
-      +"</div>"
-      +"<div style='font-size:11px;color:rgba(255,255,255,.4);text-align:right;margin-top:4px'>"+pct+"% écoulé</div>"
-      +"</div>"
-      +"<div class='card'>"
-      +"<div class='ct mb12'><span class='ct-ico'><svg class='vico' aria-hidden='true'><use href='#lc-pencil'/></svg></span>Composition en cours</div>"
-      +"<div class='ib ibt mb10'><span>💡</span><span>Traitez l'épreuve sur papier. Ce chronomètre reproduit les conditions réelles de l'examen.</span></div>"
-      +"<textarea id='simNotes' class='fi' rows='8' placeholder='Notez ici vos brouillons, formules importantes, plan de rédaction...' style='font-family:Georgia,serif;font-size:13px'></textarea>"
-      +"</div>"
-      +"</div>");
-    
-    if(remaining<=0){
+    var col=reste<600?"#F87171":reste<1800?"#FBBF24":"#34D399";
+    var c=_ge('simChrono'); if(!c){ clearInterval(timer); return; }   // l'élève a quitté la page
+    c.textContent=String(mn).padStart(2,'0')+":"+String(sc).padStart(2,'0'); c.style.color=col;
+    _st('simReste', mn+' min '+sc+' s restantes');
+    var bar=_ge('simBarre'); if(bar){ bar.style.width=pct+'%'; bar.style.background=col; }
+    if(reste<=0){
       clearInterval(timer);
-      _vc(
-        "<div class='vsec'><div class='vcard' style='text-align:center;padding:40px'>"
-        +"<div style='font-size:56px;margin-bottom:16px'>⏰</div>"
-        +"<div style='font-family:Montserrat,sans-serif;font-size:22px;font-weight:800;color:#AE5353;margin-bottom:8px'>Temps écoulé !</div>"
-        +"<div style='font-size:14px;color:#6B7A99;margin-bottom:20px'>La session de "+ep.duree+" minutes est terminée.</div>"
-        +"<button class='btn bi' onclick='showEpreuves()'>← Retour aux épreuves</button>"
-        +"</div></div>");
+      _si('simFin',"<div class='vcard' style='text-align:center;padding:24px;margin-bottom:16px'><div style='font-family:Montserrat,sans-serif;font-size:20px;font-weight:800;color:#AE5353;margin-bottom:6px'>Temps écoulé</div>"
+        +"<div style='color:#6B7A99;margin-bottom:12px'>Posez le stylo. Votre brouillon reste ci-dessous.</div>"
+        +"<button class='btn bi' onclick='mChoisirSimulation()'>Nouvelle épreuve</button></div>");
     }
   }
-  
-  window._stopTimer=function(){clearInterval(timer);showEpreuves();};
-  timer=setInterval(function(){elapsed++;renderTimer();},1000);
-  renderTimer();
+  window._stopTimer=function(){ clearInterval(timer); if(typeof _espacePerso==='function' && SES && SES.type==='visiteur_inscrit') _espacePerso(SES.role||'eleve'); else showEpreuves(); };
+  timer=setInterval(function(){ elapsed++; tic(); },1000);
+  window._simTimer=timer;
+  tic();
 }
+
+/* Choisir l'épreuve à simuler : la classe de l'élève d'abord. */
+window.mChoisirSimulation = function(filtre){
+  var tout=_simEpreuves();
+  var cls=(typeof SES!=='undefined'&&SES&&(SES.cls||(SES.profil&&SES.profil.cls)))||'';
+  var classes=[]; tout.forEach(function(e){ if(e.classe && classes.indexOf(e.classe)<0) classes.push(e.classe); });
+  var sel=(filtre!==undefined)?filtre:(classes.indexOf(cls)>=0?cls:'');
+  var lot=tout.filter(function(e){ return !sel || e.classe===sel; });
+  var puces='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">'
+    +['' ].concat(classes).map(function(c){ return '<button type="button" class="tab'+(c===sel?' on':'')+'" onclick="mChoisirSimulation(\''+_esc(c)+'\')">'+(c?_esc(c):'Toutes')+'</button>'; }).join('')+'</div>';
+  var liste=lot.length?lot.map(function(e){
+      return '<button type="button" onclick="_simulerExamen(\''+_esc(e.id)+'\')" style="display:block;width:100%;text-align:left;background:#fff;border:1px solid #E4E9F2;border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer">'
+        +'<div style="font-weight:700;color:#001136">'+_esc(e.titre||'Épreuve')+'</div>'
+        +'<div style="color:#5B6170;margin-top:2px">'+_esc([e.matiere,e.classe,(Math.floor(_dureeEpreuve(e)/60)+' h')].filter(Boolean).join(' · '))+'</div></button>';
+    }).join(''):'<div style="color:#5B6170">Aucune épreuve pour cette classe pour l’instant.</div>';
+  M('Examen blanc chronométré','Choisissez une épreuve : le chronomètre suit la durée officielle', puces+liste,
+    '<button class="btn bo" onclick="cm()">Fermer</button>', true);
+};
+
+/* Choisir une œuvre : fiche, carte mentale, QCM, citations, contrôle. */
+window.mChoisirOeuvre = function(){
+  var ouvrir=function(){
+    var cles=Object.keys(window.LITT_OEUVRES||{});
+    if(!cles.length){ toast('Œuvres indisponibles pour le moment','warn'); return; }
+    var parCls={}; cles.forEach(function(k){ var o=LITT_OEUVRES[k]; var c=o.classe||'Autres'; (parCls[c]=parCls[c]||[]).push(k); });
+    var h=Object.keys(parCls).map(function(c){
+      return '<div style="font-weight:800;color:#001136;margin:12px 0 6px">'+_esc(c)+'</div>'
+        + parCls[c].map(function(k){ var o=LITT_OEUVRES[k];
+          return '<button type="button" onclick="cm();_showLittMenu(\''+k+'\',\''+k+'\')" style="display:block;width:100%;text-align:left;background:#fff;border:1px solid #E4E9F2;border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer">'
+            +'<div style="font-weight:700;color:#001136">'+_esc(o.titre||k)+'</div><div style="color:#5B6170;margin-top:2px">'+_esc(o.auteur||'')+'</div></button>'; }).join('');
+    }).join('');
+    M('Œuvres au programme, en interactif','Fiche, carte mentale, QCM, citations et contrôle — œuvre par œuvre', h,
+      '<button class="btn bo" onclick="cm()">Fermer</button>', true);
+  };
+  if(typeof _littCharge==='function' && _littCharge()) return ouvrir();
+  toast('Chargement des œuvres…','info');
+  Promise.all([_lazyChunk('litt-oeuvres'), _lazyChunk('jeux')]).then(function(){ setTimeout(ouvrir, 150); })
+    .catch(function(){ toast('Connexion lente : réessayez dans un instant','warn'); });
+};
 
 // ── LABORATOIRES VIRTUELS ─────────────────────────────────────────
 var LABO_EXPERIENCES=[
@@ -27522,8 +27586,12 @@ async function doRegister(){
   else if(_role==='parent'){
     acc.isParent=true;
     acc.childMat=(document.getElementById("rChildMat")?.value||"").trim().toUpperCase();
-    // Rattachement immédiat si le matricule saisi correspond à un élève connu.
-    try{ var _st=(DB.students||[]).find(function(s){return String(s.mat||'').toUpperCase()===acc.childMat && acc.childMat;}); if(_st){ acc.childId=_st.id; acc.children=[_st.id]; } }catch(e){}
+    /* Rattachement immédiat SEULEMENT si le centre a enregistré ce téléphone
+       pour le parent de l'élève. Le matricule seul rattachait n'importe qui à
+       n'importe quel élève — et, sur un téléphone neuf, à un élève de
+       démonstration (VRT-001 existe dans la base de départ). Le serveur fait
+       la même vérification (api/student_data.php) et prend le relais. */
+    try{ var _st=_parentEleveLocal(acc.childMat, tel); if(_st){ acc.childId=_st.id; acc.children=[_st.id]; } }catch(e){}
   }
   /* ── Le serveur d'abord, le localStorage ensuite ────────────────────────
      L'ordre compte. Enregistrer localement puis prévenir le serveur
@@ -27590,6 +27658,7 @@ async function doRegister(){
   hideAll();$("VISITOR").style.display="flex";initVisitor();
   setTimeout(_updateVisitorHeader,120);
   setTimeout(function(){ try{ if((acc.role==='parent'||acc.role==='enseignant'||acc.isPartner) && typeof _espacePerso==='function') _espacePerso(acc.role); }catch(e){} },450);
+  if(acc.role==='parent' && acc.childMat){ try{ _parentSynchroniser({login:user,password:pwd}); }catch(e){} }
   if(acc.role==='auteur'){
     toast("Bienvenue "+pre+" ✍️ Compte auteur créé — soumettez votre 1re ressource !");
   setTimeout(function(){try{_vEspaceSiFondVide();}catch(e){}},650);   // élève : son espace, pas l'ancien accueil (17/10/2026)
@@ -32679,6 +32748,12 @@ window.VERITAS_PAYMENTS = (function(){
       });
     }
   } catch(e){}
+  /* 25/10/2026 — « Garde juste Orange / MTN comme moyen de paiement »
+     (Jacques). Carte, PayPal et virement sont coupés APRÈS la fusion de
+     DB.payConfig : une adresse PayPal restée dans la configuration ne peut
+     pas les rallumer. Toutes les tuiles passent par _payOK, qui refuse une
+     chaîne vide. */
+  defaults.paypal.url=''; defaults.stripe.url=''; defaults.bank.iban='';
   return defaults;
 })();
 
@@ -33098,7 +33173,7 @@ function openPaymentModal(payInfo){
     "Bonjour,\n\nJe viens d'effectuer un paiement pour " + label + ".\n"
     + "Montant : " + montantFmt + "\n"
     + "Référence : " + ref + "\n"
-    + "Moyen de paiement : [à préciser : MoMo / Orange Money / PayPal / Carte / Virement]\n"
+    + "Moyen de paiement : [à préciser : MTN MoMo / Orange Money]\n"
     + "Nom de l'expéditeur : [votre nom]\n\n"
     + "Merci de valider mon inscription / ma commande."
   );
@@ -33523,7 +33598,7 @@ function _payTilePlaceholder(){
 }
 function _payTileBandeau(){
   return (_payFlowIsRedirect() && !_payIsSkysms())
-    ? '<strong>Paiement automatique disponible :</strong> réglez par MoMo, Orange Money, carte bancaire ou PayPal, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24 h).'
+    ? '<strong>Paiement automatique disponible :</strong> réglez par MTN MoMo ou Orange Money, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24 h).'
     : '<strong>Paiement automatique disponible :</strong> payez avec votre numéro MTN ou Orange, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24 h).';
 }
 window._payTileTitre = _payTileTitre;
@@ -33655,7 +33730,7 @@ function _campayRenderDiag(){
       }
       el.style.background = 'rgba(5,150,105,.10)';
       el.innerHTML = '✅ <strong>Encaissement automatique opérationnel</strong> via <strong>'+nom+'</strong> — MTN, Orange'
-        + (c.provider === 'camerpay' ? ', carte bancaire et PayPal' : '') + '. Rien d\'autre à faire.'
+        + '. Rien d\'autre à faire.'
         + _hook;
       return;
     }
@@ -43146,11 +43221,11 @@ openPaymentModal = function(payInfo){
     +'<div style="font-family:monospace;font-size:14px;font-weight:800;color:'+P.orange.couleur+'">'+P.orange.numero+'</div>'
     +'<div style="font-size:10px;color:var(--ink4);margin-top:4px">'+_payCoordHtml(P.orange,true)+'</div>'
     +'<div style="font-size:9px;color:var(--ink4);margin-top:4px;font-style:italic">👆 Cliquez pour copier</div></div>'
-    // PayPal
-    +'<a href="'+P.paypal.url+'" target="_blank" rel="noopener" style="text-decoration:none;background:#fff;border:2px solid '+P.paypal.couleur+';border-radius:12px;padding:12px;display:block">'
+    // PayPal (affiché seulement si configuré — coupé depuis le 25/10/2026)
+    + (_payOK(P.paypal.url) ? ('<a href="'+P.paypal.url+'" target="_blank" rel="noopener" style="text-decoration:none;background:#fff;border:2px solid '+P.paypal.couleur+';border-radius:12px;padding:12px;display:block">'
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="font-size:24px">'+P.paypal.ico+'</div><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;color:#142554">'+P.paypal.label+'</div></div>'
     +'<div style="font-size:11px;color:var(--ink4)">Paiement international sécurisé</div>'
-    +'<div style="font-size:10px;color:'+P.paypal.couleur+';margin-top:4px;font-weight:700">→ Ouvrir PayPal</div></a>'
+    +'<div style="font-size:10px;color:'+P.paypal.couleur+';margin-top:4px;font-weight:700">→ Ouvrir PayPal</div></a>') : '')
     // Stripe (affiché seulement si configuré)
     + (_payOK(P.stripe.url) ? ('<a href="'+P.stripe.url+'" target="_blank" rel="noopener" style="text-decoration:none;background:#fff;border:2px solid '+P.stripe.couleur+';border-radius:12px;padding:12px;display:block">'
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="font-size:24px">'+P.stripe.ico+'</div><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;color:#142554">'+P.stripe.label+'</div></div>'
@@ -47725,7 +47800,22 @@ function _cagCreer(eleveId){
                     // fonction de rendu, n'est PAS une section de vShowSec, et
                     // n'était donc atteignable que par une tuile de l'accueil
                     // connecté. La vitrine y renvoie maintenant par ancre.
-                    calendrier:'showCalendrier' };
+                    calendrier:'showCalendrier',
+                    /* 25/10/2026 — « Je ne vois pas orientation scolaire, badge
+                       de progression, tester le niveau de l'apprenant… Ce sont
+                       des modules qui existent et qui ne sont pas visibles »
+                       (Jacques). Recensés : le test de positionnement n'avait
+                       PLUS AUCUNE porte depuis son retrait du panneau des
+                       gagnants (v1.9.1) ; parcours, badges, jeux, battles,
+                       étude en groupe et orientation IA n'étaient atteignables que depuis l'ancien accueil de
+                       l'application, que la vitrine a remplacé. Une adresse
+                       chacun : le menu, le plan du site et les espaces y
+                       mènent désormais. */
+                    positionnement:'mPositionnement', progression:'mMonParcours',
+                    badges:'mAchievements', jeux:'showJeuxEdu', battles:'mBattles',
+                    groupe:'mStudyRoom', 'orientation-ia':'mAIOrientation',
+                    ambassa:'mAgentAmbassa',
+                    simulateur:'mChoisirSimulation', 'oeuvres-interactives':'mChoisirOeuvre' };
 
   function sectionDuHash(){
     var h = (window.location.hash || '').replace(/^#/, '');
@@ -47836,7 +47926,9 @@ function _cagCreer(eleveId){
          vide) — vShowSec('presentation',_,true) : le 3ᵉ argument _boot évite le
          renvoi vers la vitrine. La modale s'ouvre par-dessus ; la fermer révèle
          une vraie page, plus jamais un vide. */
-      var _MODALE_FN = { recherche:1, calendrier:1, connexion:1, compte:1, inscription:1, partenaire:1 };
+      var _MODALE_FN = { recherche:1, calendrier:1, connexion:1, compte:1, inscription:1, partenaire:1,
+                         positionnement:1, progression:1, badges:1, battles:1, groupe:1, 'orientation-ia':1, ambassa:1,
+                         simulateur:1, 'oeuvres-interactives':1 };
       if(_MODALE_FN[sec]){
         try{
           var _vcBg = document.getElementById('vContent');
@@ -49472,9 +49564,19 @@ window._espacePerso = function(role){
       ['lc-graduation','Le programme de ma classe','window.open(\'/niveaux/\',\'_blank\',\'noopener\')'],
       ['lc-check','Les corrigés des cahiers','window.open(\'/corriges/\',\'_blank\',\'noopener\')'],
       ['lc-clipboard','M’évaluer avant l’examen','window.open(\'/evaluations/\',\'_blank\',\'noopener\')'],
-      ['lc-message','Demander au tuteur IA','if(typeof mAgentAmbassa===\'function\')mAgentAmbassa()']
+      ['lc-message','Demander au tuteur IA','if(typeof mAgentAmbassa===\'function\')mAgentAmbassa()'],
+      /* 25/10/2026 — modules existants que l'élève ne trouvait nulle part
+         (« les usagers ne savent pas qu'ils existent », Jacques). */
+      ['lc-target','Tester mon niveau (10 questions)','if(typeof mPositionnement===\'function\')mPositionnement()'],
+      ['lc-award','Ma progression &amp; mes badges','if(typeof mMonParcours===\'function\')mMonParcours()'],
+      ['lc-compass','Mon orientation','vShowSec(\'orientation\',null)'],
+      ['lc-game','Jeux éducatifs &amp; battles','if(typeof showJeuxEdu===\'function\')showJeuxEdu()'],
+      ['lc-clock','Examen blanc chronométré','mChoisirSimulation()'],
+      ['lc-bookopen','Œuvres au programme, en interactif','mChoisirOeuvre()']
     ] : role==='parent' ? [
       ['lc-chart','Notes &amp; bulletin de mon enfant','_espaceParentEnfant()'],
+      ['lc-target','Tester le niveau de mon enfant','if(typeof mPositionnement===\'function\')mPositionnement()'],
+      ['lc-compass','Orientation scolaire','vShowSec(\'orientation\',null)'],
       ['lc-wallet','Payer / Cagnotte de scolarité','vShowSec(\'cagnotte\',null)'],
       ['lc-graduation','Le catalogue e-learning','vShowSec(\'elearning\',null)'],
       ['lc-shield','Vérifier un certificat','vShowSec(\'verifier-certificat\',null)']
@@ -49486,7 +49588,12 @@ window._espacePerso = function(role){
     ] : [];
   if(actions.length){
     h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:18px">';
-    /* 18/10/2026 — Les tuiles de la vitrine : médaillon rond dans une teinte
+    /* 25/10/2026 — le médaillon devient l'ANNEAU de la vitrine (rond blanc,
+       filet teinté, icône bleu nuit) : un seul système d'icônes partout.
+       Le filet est en !important EN LIGNE : theme-lws.css retire toute
+       bordure sous #VISITOR (« #VISITOR#VISITOR * {border… 0 !important} »),
+       et seule une déclaration en ligne importante passe devant.
+       18/10/2026 — Les tuiles de la vitrine : médaillon rond dans une teinte
        qui ALTERNE (bleu, sarcelle, vert, violet, rose, brique — l'ordre des
        pages statiques), libellé 600 #001136, chevron de la teinte.
        La classe n'est pas décorative : sans elle, veritas-motion.js prenait
@@ -49497,7 +49604,7 @@ window._espacePerso = function(role){
     actions.forEach(function(a, i){
       var te = _TE[i % _TE.length];
       h += '<button type="button" class="vesp-act" onclick="'+a[2]+'" style="text-align:left;background:#fff;border:1px solid #E4E9F2;border-radius:14px;padding:14px 15px;cursor:pointer;display:flex;gap:12px;align-items:center;box-shadow:0 4px 14px rgba(0,17,54,.05);transition:transform .18s,box-shadow .18s" onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 12px 26px rgba(0,17,54,.09)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 4px 14px rgba(0,17,54,.05)\'">'
-        + '<span aria-hidden="true" style="flex:0 0 auto;width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:'+te[0]+';color:'+te[1]+'">'+ICO(a[0])+'</span>'
+        + '<span aria-hidden="true" style="flex:0 0 auto;width:46px;height:46px;box-sizing:border-box;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:3px solid '+te[1]+' !important;color:#001136">'+ICO(a[0])+'</span>'
         + '<span style="flex:1;font:600 14.5px/1.4 Poppins,sans-serif;color:#001136">'+a[1]+'</span>'
         + '<span aria-hidden="true" style="flex:0 0 auto;color:'+te[1]+'">'+ICO('lc-chevron-right')+'</span>'
         + '</button>';
@@ -49549,41 +49656,183 @@ function _pvPartnerOffre(){
     + '</div>';
 }
 
-// Parent — bulletin de l'enfant rattaché (ou invitation à le rattacher).
-window._espaceParentEnfant = function(){
-  var child = (typeof SES!=='undefined'&&SES&&SES.childId&&typeof S==='function') ? S(SES.childId) : null;
-  if(!child){ _espaceRattacherEnfant(); return; }
-  // On réutilise le bulletin élève si disponible, sinon un récapitulatif simple.
-  if(typeof _bulletinHTML==='function'){
-    try{ M('Bulletin de '+_esc((child.pre||'')+' '+(child.nom||'')), _esc(child.cls||''), _bulletinHTML(child.id), '<button class="btn bo" onclick="cm()">Fermer</button>', true); return; }catch(e){}
+/* ═══ PARENT → ENFANT (24/10/2026) ═══════════════════════════════════════
+   L'espace parent promettait « les notes de chaque séquence en temps réel » et
+   ne pouvait rien tenir : il cherchait l'enfant dans la base de CE navigateur.
+   Sur le téléphone d'un parent, cette base est celle de démonstration — le
+   matricule VRT-001 rattachait donc un parent réel à un élève fictif, et un
+   vrai matricule ne trouvait rien.
+   Désormais la tranche de l'enfant vient du serveur (api/student_data.php),
+   qui ne la donne qu'au compte dont le TÉLÉPHONE est celui que le centre a
+   enregistré pour le parent de l'élève (`ptel`). Le même contrôle s'applique
+   à la base locale, utile sur l'appareil du centre. */
+function _parentTel9(t){ var d=String(t||'').replace(/\D+/g,''); return d.length>=9?d.slice(-9):''; }
+window._parentEleveLocal = function(mat, tel){
+  mat=String(mat||'').trim().toUpperCase(); var t9=_parentTel9(tel);
+  if(!mat||!t9) return null;
+  return (DB.students||[]).find(function(s){
+    return String(s.mat||'').toUpperCase()===mat && _parentTel9(s.ptel)===t9;
+  })||null;
+};
+function _parentCompte(){
+  try{ return (DB.visitorAccounts||[]).find(function(a){return a.id===(SES&&SES.accountId);})||null; }catch(e){ return null; }
+}
+function _parentTelSession(){
+  var acc=_parentCompte();
+  return (SES&&SES.tel)||(acc&&acc.tel)||'';
+}
+/* Fusionne les enfants renvoyés par le serveur et mémorise le rattachement
+   (session + compte local). Renvoie la liste des refus ({mat, raison}). */
+window._parentAppliquer = function(j){
+  if(!j||!j.ok) return [];
+  var ids=[];
+  (j.children||[]).forEach(function(c){
+    if(!c||!c.student||!c.student.id) return;
+    try{ _studentApplySlice(c); }catch(e){}
+    ids.push(c.student.id);
+  });
+  if(ids.length){
+    if(SES){ SES.childId=ids[0]; SES.children=ids; try{ sessionStorage.setItem('VERITAS_SES',JSON.stringify(SES)); }catch(e){} }
+    var acc=_parentCompte();
+    if(acc){ acc.childId=ids[0]; acc.children=ids; try{ save(); }catch(e){} }
   }
-  var notes = (DB.grades||[]).filter(function(g){return g.eid===child.id;});
-  var abs = (DB.absences||[]).filter(function(a){return a.eid===child.id;});
-  var body = '<div style="font-size:13px;line-height:1.7">'
-    + '<div><b>'+notes.length+'</b> note(s) enregistrée(s) · <b>'+abs.length+'</b> absence(s).</div>'
-    + (notes.length? '<div style="margin-top:8px">'+notes.slice(0,12).map(function(g){return _esc(g.sub||'—')+' : '+_esc(String((g.n1!=null?g.n1:'')+(g.n2!=null?' / '+g.n2:'')))+'</div>';}).join(''):'<div style="color:#64748B;margin-top:8px">Aucune note publiée pour l’instant.</div>')
+  return j.childrenRefused||[];
+};
+/* Interroge le serveur : par jeton si on l'a, sinon par identifiants (au
+   moment de la connexion). `childMat` ajoute un matricule à vérifier. */
+window._parentSynchroniser = function(opts){
+  opts=opts||{};
+  var url=(typeof _studentSyncUrl==='function')?_studentSyncUrl():'';
+  if(!url||(typeof navigator!=='undefined'&&navigator.onLine===false)) return Promise.resolve(null);
+  var corps={action:'fetch'};
+  var tok=(typeof _contentToken==='function')?_contentToken():'';
+  if(opts.login&&opts.password){ corps.login=opts.login; corps.password=opts.password; }
+  else if(tok){ corps.token=tok; }
+  else return Promise.resolve(null);
+  if(opts.childMat) corps.childMat=String(opts.childMat).trim().toUpperCase();
+  return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(corps)})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(j){
+      if(!j||!j.ok) return null;
+      if(j.token){ try{ window._vrtContentToken=j.token; sessionStorage.setItem('_vrtCT',j.token); }catch(e){} }
+      var refus=_parentAppliquer(j);
+      if(!opts.silencieux && window._vCurrentSec==='espace-parent'){ try{ _espacePerso('parent'); }catch(e){} }
+      return {j:j, refus:refus};
+    })
+    .catch(function(){ return null; });
+};
+
+function _parentEnfants(){
+  var ids=(SES&&SES.children&&SES.children.length)?SES.children:((SES&&SES.childId)?[SES.childId]:[]);
+  return ids.map(function(id){ return (typeof S==='function')?S(id):null; }).filter(Boolean);
+}
+
+// Le suivi complet d'un enfant : notes par trimestre, absences, paiements, devoirs.
+window._parentSuiviHTML = function(child){
+  var tri=window._parentTri||(TRS&&TRS[0]);
+  var gr=(DB.grades||[]).filter(function(g){return g.eid===child.id&&g.tri===tri;});
+  var tc=gr.reduce(function(a,g){return a+(+g.coef||1);},0)||1;
+  var moy=gr.length?gr.reduce(function(a,g){return a+_subMoy(g)*(+g.coef||1);},0)/tc:null;
+  var ap=moy!==null?getAppr(moy):null;
+  var abs=(DB.absences||[]).filter(function(a){return a.eid===child.id;});
+  var hAbs=abs.reduce(function(a,b){return a+(+b.heures||0);},0);
+  var nj=abs.filter(function(a){return !a.justifie;}).length;
+  var pays=(DB.payments||[]).filter(function(p){return p.eid===child.id;});
+  var verse=pays.filter(function(p){return p.stat==='Payé';}).reduce(function(a,p){return a+(+p.mnt||0);},0);
+  var subs=(DB.submissions||[]).filter(function(x){return x.eid===child.id;});
+  var dvs=(DB.devoirs||[]).filter(function(d){return d.cls===child.cls;});
+  var aRendre=dvs.filter(function(d){return !subs.find(function(x){return x.dvid===d.id;}) && (!d.dateLimit||new Date(d.dateLimit)>=new Date(Date.now()-864e5));});
+  var carte=function(l,v,c){ return '<div style="flex:1;min-width:120px;background:#F6F8FC;border:1px solid #E4E9F2;border-radius:12px;padding:10px 12px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#64748B">'+l+'</div><div style="font:800 19px Montserrat,sans-serif;color:'+(c||'#16233F')+';margin-top:2px">'+v+'</div></div>'; };
+  var h='<div style="font-size:13px;line-height:1.6">';
+  h+='<div style="color:#64748B;margin-bottom:10px">Matricule '+_esc(child.mat||'—')+' · Classe '+_esc(child.cls||'—')+'</div>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">'+(TRS||[]).map(function(t){
+      return '<button type="button" class="tab'+(t===tri?' on':'')+'" onclick="window._parentTri=\''+t+'\';_espaceParentEnfant(\''+child.id+'\')">'+_esc(t)+'</button>'; }).join('')+'</div>';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">'
+    + carte('Moyenne '+_esc(tri), moy!==null?moy.toFixed(2)+'/20':'—', ap?ap.col:'')
+    + carte('Absences', hAbs+' h'+(nj?' · '+nj+' non justifiée'+(nj>1?'s':''):''), nj?'#AE5353':'')
+    + carte('Scolarité', _esc(child.stat||'—'), child.stat==='Payé'?'#007E11':'#A84200')
+    + carte('Devoirs à rendre', String(aRendre.length))
     + '</div>';
-  M('Suivi de '+_esc((child.pre||'')+' '+(child.nom||'')), _esc(child.cls||''), body, '<button class="btn bo" onclick="cm()">Fermer</button>');
+  h+='<div style="font-weight:800;margin:6px 0">Notes — '+_esc(tri)+'</div>';
+  h+= gr.length ? '<div class="tw"><table><thead><tr><th>Matière</th><th>Coef.</th><th>Dev. 1</th><th>Dev. 2</th><th>Moyenne</th></tr></thead><tbody>'
+      + gr.map(function(g){ var m=_subMoy(g), a2=getAppr(m); return '<tr><td>'+_esc(g.sub||'—')+'</td><td>'+_esc(String(g.coef||1))+'</td><td>'+(g.n1!=null?_esc(String(g.n1)):'—')+'</td><td>'+(g.n2!=null?_esc(String(g.n2)):'—')+'</td><td style="font-weight:800;color:'+a2.col+'">'+m.toFixed(2)+'</td></tr>'; }).join('')
+      + '</tbody></table></div>'
+    : '<div style="color:#64748B">Aucune note publiée pour ce trimestre.</div>';
+  h+='<div style="font-weight:800;margin:14px 0 6px">Absences récentes</div>';
+  h+= abs.length ? abs.slice().sort(function(a,b){return String(b.date).localeCompare(String(a.date));}).slice(0,8).map(function(a){
+      return '<div>'+_esc(a.date||'')+' · '+_esc(a.matiere||'—')+' · '+_esc(String(a.heures||0))+' h · '+(a.justifie?'justifiée':'<b style="color:#AE5353">non justifiée</b>')+'</div>'; }).join('')
+    : '<div style="color:#64748B">Aucune absence enregistrée.</div>';
+  h+='<div style="font-weight:800;margin:14px 0 6px">Paiements</div>';
+  h+= pays.length ? '<div>Total versé : <b>'+fmt(verse)+'</b></div>'+pays.slice(-6).map(function(p){
+      return '<div>'+_esc(p.mo||p.dt||'')+' · '+fmt(+p.mnt||0)+' · '+_esc(p.stat||'')+'</div>'; }).join('')
+    : '<div style="color:#64748B">Aucun paiement enregistré.</div>';
+  if(aRendre.length){
+    h+='<div style="font-weight:800;margin:14px 0 6px">Devoirs à rendre</div>'+aRendre.slice(0,6).map(function(d){
+      return '<div>'+_esc(d.sub||'')+' — '+_esc(d.titre||'')+(d.dateLimit?' · avant le '+_esc(new Date(d.dateLimit).toLocaleDateString('fr-FR')):'')+'</div>'; }).join('');
+  }
+  return h+'</div>';
+};
+
+// Parent — suivi de l'enfant rattaché (ou invitation à le rattacher).
+window._espaceParentEnfant = function(id){
+  var enfants=_parentEnfants();
+  if(!enfants.length){
+    // Rien en local : le serveur a peut-être l'enfant (appareil neuf).
+    var tok=(typeof _contentToken==='function')?_contentToken():'';
+    if(tok && !window._parentEssai){
+      window._parentEssai=true;
+      toast('Recherche du dossier de votre enfant…','info');
+      _parentSynchroniser({silencieux:true}).then(function(){ window._parentEssai=false;
+        if(_parentEnfants().length) _espaceParentEnfant(); else _espaceRattacherEnfant(); });
+      return;
+    }
+    _espaceRattacherEnfant(); return;
+  }
+  var child=enfants.find(function(c){return c.id===id;})||enfants[0];
+  var choix = enfants.length>1 ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'+enfants.map(function(c){
+      return '<button type="button" class="btn '+(c.id===child.id?'bi':'bo')+' sm" onclick="_espaceParentEnfant(\''+c.id+'\')">'+_esc(c.pre||c.nom||c.mat)+'</button>'; }).join('')+'</div>' : '';
+  M('Suivi de '+_esc(((child.pre||'')+' '+(child.nom||'')).trim()), _esc(child.cls||''),
+    choix+_parentSuiviHTML(child),
+    '<button class="btn bo" onclick="_espaceRattacherEnfant()">Rattacher un autre enfant</button>'
+    +(typeof printBulletin==='function'?'<button class="btn bo" onclick="printBulletin(\''+child.id+'\',\''+(window._parentTri||(TRS&&TRS[0])||'')+'\')">Imprimer le bulletin</button>':'')
+    +'<button class="btn bi" onclick="cm()">Fermer</button>', true);
+  // Rafraîchit en arrière-plan : les notes saisies depuis arrivent sans reconnexion.
+  if(!window._parentRafraichi){ window._parentRafraichi=true;
+    _parentSynchroniser({silencieux:true}).then(function(r){ window._parentRafraichi=false; }); }
 };
 
 // Parent — rattacher un enfant par son matricule.
 window._espaceRattacherEnfant = function(){
   M('Rattacher mon enfant','Saisissez le matricule communiqué par le centre',
     '<div class="fg"><span class="fl">Matricule de l’élève</span><input class="fi" id="_ratMat" placeholder="VRT-001" style="text-transform:uppercase"></div>'
+    +'<div style="font-size:12px;color:var(--ink3,#64748B);margin-top:6px;line-height:1.5">Par sécurité, le numéro de téléphone de votre compte doit être celui que le centre a enregistré pour le parent de cet élève.</div>'
     +'<div id="_ratMsg" style="font-size:12.5px;margin-top:8px;color:var(--ink3,#64748B)"></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_espaceRattacherGo()">Rattacher</button>');
 };
 window._espaceRattacherGo = function(){
   var mat = ((_ge('_ratMat')&&_ge('_ratMat').value)||'').trim().toUpperCase();
   if(!mat){ _si('_ratMsg','<span style="color:#AE5353">Matricule requis.</span>'); return; }
-  var st = (DB.students||[]).find(function(s){return String(s.mat||'').toUpperCase()===mat;});
-  if(!st){ _si('_ratMsg','<span style="color:#AE5353">Aucun élève avec ce matricule. Vérifiez auprès du centre.</span>'); return; }
-  if(SES){ SES.childId=st.id; }
-  // Persister sur le compte visiteur
-  try{ var acc=(DB.visitorAccounts||[]).find(function(a){return a.id===(SES&&SES.accountId);}); if(acc){ acc.childId=st.id; acc.children=[st.id]; save(); } }catch(e){}
-  cm();
-  toast('✓ Enfant rattaché : '+((st.pre||'')+' '+(st.nom||'')).trim(),'ok');
-  if(typeof _espacePerso==='function') _espacePerso('parent');
+  var fini=function(st){
+    if(SES){ SES.childId=st.id; SES.children=(SES.children||[]).filter(function(x){return x!==st.id;}).concat([st.id]);
+      try{ sessionStorage.setItem('VERITAS_SES',JSON.stringify(SES)); }catch(e){} }
+    var acc=_parentCompte();
+    if(acc){ acc.childId=st.id; acc.childMat=mat; acc.children=(SES&&SES.children)||[st.id]; try{ save(); }catch(e){} }
+    cm();
+    toast('✓ Enfant rattaché : '+((st.pre||'')+' '+(st.nom||'')).trim(),'ok');
+    if(typeof _espacePerso==='function') _espacePerso('parent');
+  };
+  _si('_ratMsg','Vérification…');
+  _parentSynchroniser({childMat:mat, silencieux:true}).then(function(r){
+    var st=(DB.students||[]).find(function(s){return String(s.mat||'').toUpperCase()===mat;});
+    if(r && r.j && (r.j.children||[]).some(function(c){return c.student&&String(c.student.mat||'').toUpperCase()===mat;})){ fini(st); return; }
+    var refus=r&&(r.refus||[]).find(function(x){return x.mat===mat;});
+    // Hors ligne ou serveur muet : la base locale, sous la MÊME condition de téléphone.
+    var local=_parentEleveLocal(mat,_parentTelSession());
+    if(!refus && local){ fini(local); return; }
+    _si('_ratMsg','<span style="color:#AE5353">'+(refus&&refus.raison==='telephone'
+      ? 'Ce matricule existe, mais le numéro de votre compte n’est pas celui enregistré par le centre pour le parent de cet élève. Contactez le centre pour le faire mettre à jour.'
+      : 'Aucun élève avec ce matricule. Vérifiez auprès du centre.')+'</span>');
+  });
 };
 
 // v1.19.28 — PORTE DU CANAL PARTENAIRE (branchée sur l'accueil via #partenaire).

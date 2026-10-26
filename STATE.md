@@ -1,3 +1,191 @@
+## Élèves : examen blanc et œuvres interactives ; Atelier : import Word/PDF ; 3G ; titres (25/10/2026, v1.20.48)
+
+Demandes de Jacques :
+- « Branche-les chez les élèves » (le simulateur d'examen et les œuvres interactives) ;
+- « Travailler sur la rapidité et la fluidité, que les pages s'ouvrent plus vite et que les téléphones 3G naviguent facilement » ;
+- « Import des textes en Word, texte ou PDF, CSV et JSON ne sont pas des formats communs pour les enseignants de français. Centre les icônes dans l'Atelier » ;
+- « Renforce le gras sur les titres et sous-titres, et les couleurs, partout ».
+
+**Simulateur d'examen** (`_simulerExamen`, aucun appelant jusqu'ici). Il n'aurait d'ailleurs pas marché :
+- il lisait `ep.duree`, qu'aucune épreuve ne renseigne, d'où un chronomètre « NaN:NaN » ;
+- il redessinait toute la page chaque seconde, ce qui effaçait le brouillon.
+
+Réécrit :
+- la page est posée une fois, seul le chronomètre bouge ;
+- durée de 2 h, ou de 3 h pour le Probatoire, le BAC et le GCE ;
+- le sujet est affiché et le brouillon est conservé ;
+- choix de l'épreuve par `mChoisirSimulation()`, qui commence par la classe de l'élève (41 épreuves).
+
+**Œuvres interactives** : `mChoisirOeuvre()` charge le catalogue (chunk de 300 Ko), puis liste les 22 œuvres par classe et ouvre `_showLittMenu`.
+- Adresses : `#simulateur` et `#oeuvres-interactives`.
+- Portes : espace élève (2 tuiles), plan du site, menu « Plus » (Élève → « Examen blanc »).
+
+**Atelier, import** : nouveau `plateforme/lecteur-textes.js`.
+- Formats : Word (.docx) et LibreOffice (.odt) via la lecture du ZIP et `DecompressionStream`, sans bibliothèque ; PDF via pdf.js 4.10.38 (Apache 2.0, dans `assets/vendor/pdfjs-4.10.38/`, chargé seulement au choix d'un PDF) ; texte brut.
+- L'ancien `.doc` est refusé, avec la consigne d'enregistrer en `.docx`.
+- Découpage : un fichier = un texte, `---` sépare plusieurs textes ; première ligne courte = titre ; « — Auteur, Œuvre » = référence. Les lignes coupées par Word ou le PDF sont recollées, les vers d'un poème restent séparés.
+- L'onglet « Coller » accepte du texte libre ; JSON et CSV restent acceptés.
+- La fenêtre ne déborde plus au téléphone : la liste des champs techniques est remplacée par une explication simple.
+- Corrigé au passage : une référence par défaut « , Titre » quand l'auteur manque.
+- Vérifié de bout en bout dans la vraie fenêtre : docx 2 textes, PDF 1, collage 1.
+
+**Icônes de l'Atelier** : les carrés arrondis qui ne portent qu'une icône (la tuile du haut) deviennent des anneaux centrés (`veritas-harmonie.js`). Sur les écrans accessibles sans compte, aucun rond n'a son icône décentrée.
+
+**3G** :
+- l'application chargeait la police Material Symbols COMPLÈTE (plus de 3 000 icônes, tous les axes variables, plusieurs Mo). Elle demande maintenant les 136 icônes utilisées (`icon_names=`), et seulement les axes servis : FILL 0–1, wght 400–500, opsz 24–48 ;
+- l'Atelier téléchargeait sa page DEUX fois : `support.js` la relit pour son gabarit brut. Désormais `fetch(…, {cache:'force-cache'})`, et `plateforme/.htaccess` passe la page de `no-store` à `no-cache` (gardée, revalidée à chaque visite). Le déploiement copie ce `.htaccess`. Gain : 198 Ko compressés par ouverture ;
+- photos de l'accueil : 352 → 140 Ko. `hero-eleves-800.webp` est servi par `srcset` au téléphone ; `photo-groupe-600.webp` et `photo-examen-600.webp` gardent la transparence. Les noms sont NOUVEAUX, puisque les images sont immuables un an. Le remplacement est fait par `tools/vitrine_lisibilite.cjs`.
+
+**Titres** : h1 et h2 passent en 800 bleu nuit ; h3, h4 et `.ct` en 700 bleu VÉRITAS, seulement si la couleur était neutre. Sur la vitrine, les titres en `font:600` passent à 700 ou 800. `veritas-harmonie.js` exclut désormais TOUS les blocs `.vrt-hab` (bandeau, bulles).
+
+**Note** : en local, le bandeau et la bulle de citation de l'application semblent sans fond, parce que `theme-lws.css` y retire les dégradés. En production, `isoler_habillage.py` exclut `.vrt-hab` de ces feuilles au déploiement : ce n'est pas un défaut en ligne.
+
+**Reste** : `app.js` pèse 765 Ko compressés (3,7 Mo à analyser). Le découper davantage, au-delà des chunks existants, est un chantier à part. Les polices Google (Poppins) pourraient aussi être hébergées sur le site, ce qui économiserait deux connexions en 3G.
+
+## Même lecture sur tout le site, et modules cachés rendus visibles (25/10/2026, v1.20.47)
+
+Demandes de Jacques :
+- « Applique ces changements à toutes les pages, pas uniquement la vitrine. Il ne faut pas qu'on sente le déphasage d'une page à l'autre. N'oublie pas l'Atelier de Français. Aérer, rendre l'interface intuitive et captivante. »
+- « Toujours inchangé » (capture du plan du site, qui avait encore ses pastilles pâles).
+- « Je ne vois pas orientation scolaire, badges de progression, tester le niveau… Ce sont des modules qui existent et qui ne sont pas visibles. Recense les problèmes de ce genre, orienté usagers. »
+
+**Une seule lecture partout : `assets/veritas-harmonie.js`**, chargé par l'application, l'Atelier, les 271 pages statiques (via `habiller_pages.py`), `plan.html` (via `build_plan.py`) et `constellation.html`. La vitrine garde `tools/vitrine_lisibilite.cjs`.
+- Il mesure ce qui est affiché. Un texte sous 15 px monte à 15 px ; une étiquette en capitales gagne 2 px, sans descendre sous 13.
+- Un rond plein portant une icône ou un numéro devient l'anneau, avec un filet `!important` en ligne : `theme-lws.css` retire toute bordure sous `#VISITOR`. La teinte vient de la couleur du rond, sinon du trait de l'icône, sinon du fond assombri.
+- Il traite aussi les sections dessinées après coup (MutationObserver), les éléments révélés plus tard (clic, fin d'animation) et ceux qui prennent leur forme d'un autre script (seconde passe 800 ms après la dernière modification). Au repos, aucune boucle : 15 mesures en 4 s.
+- Relevé à 390 px, avant → après. Textes sous 15 px : application, de 40-55 % à quelques étiquettes ; Atelier, de 40 sur 55 à 2. Ronds pleins : plan du site, Constellation, évaluations, cours, sections de l'application et Atelier, de nombreux à 0, hors indicateurs d'état.
+- Tuiles des espaces : l'anneau est passé en `!important`, puisque `theme-lws.css` l'effaçait.
+- ⚠️ **Gel corrigé avant mise en ligne** : la première version alternait lectures (`getComputedStyle`, `offsetWidth`) et écritures de style, élément par élément. La mise en page était recalculée à chaque fois, en coût quadratique, et la page se figeait sur la CI (smoke : 45 s dépassées, titre vide). Le module décide désormais tout en lecture, puis écrit en un seul lot. Mesure à CPU ×2 : sans module 42 s et 41,8 s de tâches longues ; ancienne version, page figée ; nouvelle version 44 s et 43,5 s. Le rapporteur `github` de Playwright transforme désormais les échecs en annotations de PR.
+
+**Recensement des modules invisibles** (ils existaient, aucune porte publique n'y menait) :
+
+| Module | Fonction | Situation avant |
+|---|---|---|
+| Test de positionnement (niveau, forces, lacunes) | `mPositionnement` | **aucun appel** depuis son retrait du panneau des gagnants (v1.9.1) |
+| Progression : XP, série, niveau | `mMonParcours` | ancien accueil de l'application seulement |
+| Badges (30+) | `mAchievements` | idem |
+| Jeux éducatifs | `showJeuxEdu` | menus internes de l'application |
+| Battles de la semaine | `mBattles` | idem |
+| Étude en groupe | `mStudyRoom` | ancien accueil seulement |
+| Orientation par IA | `mAIOrientation` | dans la section orientation seulement |
+| Prof. Ambassa (tuteur IA) | `mAgentAmbassa` | bulle flottante, sans adresse |
+| Simulateur d'examen | `_simulerExamen` | aucun appel (demande l'identifiant d'une épreuve, non branché ici) |
+| Calcul mental | `lancerCalculMental` | aucun appel direct (passe par le catalogue de jeux) |
+
+**Ce qui a été fait** :
+- adresses directes : `app.html#positionnement`, `#progression`, `#badges`, `#jeux`, `#battles`, `#groupe`, `#orientation-ia`, `#ambassa`. Celles qui s'ouvrent en fenêtre ont un fond neutre ;
+- menu « Plus » (vitrine et toutes les pages) : Élève → « Tester mon niveau », « Ma progression », « Jeux et battles » ; Parent → « Tester son niveau » ;
+- plan du site : 7 rubriques ajoutées (Élèves 18, Parents 15) ;
+- espace élève : « Tester mon niveau », « Ma progression & mes badges », « Mon orientation », « Jeux éducatifs & battles ». Espace parent : « Tester le niveau de mon enfant », « Orientation scolaire ».
+
+**Restent à décider** :
+- le simulateur d'examen n'a toujours pas de porte : il lui faut une épreuve choisie, et le brancher sur la page des épreuves est un chantier à part ;
+- « œuvres interactives » (`_showLittMenu`) demande une œuvre précise, et n'a donc pas d'adresse générique.
+
+## MTN et Orange seuls, résultats animés, petits textes et anneaux de la vitrine (25/10/2026, v1.20.46)
+
+Demande de Jacques (quatre captures de la vitrine) : « Garde juste Orange / MTN comme moyen de paiement. Les résultats ne sont plus animés comme avant. Taille de police inchangée et encore très petite à certains endroits. Arrière-plan des icônes coloré à certains endroits alors qu'il faut le cercle dessus avec fond blanc comme les autres. Corrige tous les bugs similaires. »
+
+**MTN MoMo et Orange Money seuls** :
+- vitrine : logos Visa, Mastercard, PayPal et Stripe retirés (pied, section paiement) ; tuiles « Carte bancaire » et « PayPal » retirées du tunnel, avec leurs données intégrées ; textes de la FAQ, de la cagnotte et du don réécrits ;
+- `assets/vitrine.js` : `MOYENS = ['mtn_momo','orange_money']`. Les indices 0 et 1 sont inchangés ;
+- pied commun (`tools/build_plan.py`, 271 pages, application), `constellation.html`, maquette source ;
+- application : carte, PayPal et virement coupés APRÈS la fusion de `DB.payConfig`, de sorte qu'une URL PayPal restée en configuration ne les rallume pas. La tuile PayPal de la fenêtre de paiement, qui s'affichait sans condition, passe par `_payOK`. Textes d'aide corrigés.
+
+**Résultats d'examens** : le commentaire promettait que « le pourcentage compte en même temps » que l'anneau ; rien ne le faisait. `compterTaux()` fait compter le chiffre de 0 au taux réel. L'anneau est remis à zéro dès son premier pixel visible et rejoué à partir du tiers : avant, on le voyait plein, puis il se vidait.
+
+**Petits textes et anneaux de la vitrine** : nouveau `tools/vitrine_lisibilite.cjs`, appelé par `build_vitrine.js` et appliqué à `vitrine.html`.
+- ~300 textes des sections étaient sous 15 px. Chaque taille en ligne (`font-size:` ou `font:<graisse> <taille>`) et chaque classe `.vbq-*`, `.vcle-*`, `.vnews-*`, `.vcal-*` gagne 1,5 à 2 px. La barre et le pied ne sont pas touchés.
+- 16 ronds pleins (pastille pâle ou dégradé sombre) deviennent l'anneau : rond blanc, filet de 3 px teinté. Il s'agit des 3 icônes de l'accueil, des 3 étapes, des 7 numéros de la FAQ des tarifs et des 4 étapes enseignants. Les deux ronds d'état du tunnel (fait / en cours) restent pleins.
+- Tunnel au téléphone : « Numéro Mobile Money » et « Confirmer le numéro » se chevauchaient (défaut antérieur). Les champs passent sur une colonne sous 600 px.
+
+**Application** : les tuiles d'action des espaces élève, parent, enseignant et partenaire passent aussi à l'anneau.
+
+## Un seul système d'icônes, textes secondaires agrandis (25/10/2026, v1.20.45)
+
+Demande de Jacques (capture de la vitrine) : « Harmonise le système des icônes et pictogrammes, centre-les et augmente un peu la taille des textes secondaires. »
+
+**Icônes** : il n'y a plus qu'un système, l'anneau de la vitrine (rond blanc, filet de 3 px dans une teinte en rotation, icône bleu nuit, centré).
+- Il remplace la pastille pâle de 42 px des cartes (`.ico`) et l'icône nue des titres de section.
+- Taille : 60 px, 54 px au téléphone.
+- Sur fond sombre et en thème sombre, l'anneau est transparent et l'icône claire.
+- Le médaillon posé devant un titre qui a déjà son anneau est masqué : deux ronds s'empilaient.
+- Règles dans `tools/habiller_pages.py`, pour les 271 pages.
+
+**Textes secondaires** :
+- pages de contenu : auteurs sous les œuvres 15,5 px, titres d'œuvres 17,5 px, mentions et légendes 16 px, texte des cartes 17 px, `small` au moins 15 px ;
+- vitrine : les tailles écrites en ligne gagnent 1,5 px (13 → 14,5, 14,5 → 16…), seulement dans les sections (`[data-vp]`) : bloc `<style id="vrt-secondaires">` dans `vitrine.html`, reproduit par `tools/build_vitrine.js`. Dans le générateur, `page` passe de `const` à `let`.
+
+## Lecture « LWS » sur les pages de contenu (25/10/2026, v1.20.44)
+
+Demande de Jacques (captures de lws.fr/nom-de-domaine) : « la même mise en forme professionnelle, en augmentant la police et en éclaircissant », puis « fond blanc, police plus grande, plus captivant, écran du téléphone bien rempli et équilibré ».
+
+Toutes les règles sont dans `tools/habiller_pages.py`, qui les écrit dans `assets/veritas-habillage.css`. Cela couvre les 271 pages statiques : niveaux, œuvres, ressources, corrigés, cours, légal, espaces…
+
+**Listes** :
+- la coche devient un trait vert #1FA53A, sans disque (masque SVG teinté par `--vl`). Les encadrés gardent leur teinte ;
+- le texte passe à 18 px (17 px au téléphone), en gris #5B6170 ; le gras passe en #3A4150, graisse 600 ;
+- 18 px séparent deux éléments, l'alignement est à gauche (une ligne était justifiée sur ordinateur).
+
+**Texte et fond** :
+- le corps des pages passe en blanc ;
+- les paragraphes passent à 18 px (17,5 px au téléphone), en gris #5B6170 ;
+- titres agrandis : h1 de 28 à 36 px, h2 de 22 à 26 px, h3 de 19 à 21 px.
+
+**Téléphone** : les cartes perdent cadre, ombre et marge intérieure. La colonne de texte fait 354 px sur 390, et l'écran est rempli.
+
+**Thème sombre** : les cartes d'œuvres (`.works`) et les bandeaux de titres pastel restaient clairs sous un texte devenu blanc, donc illisibles. Le défaut est antérieur à cette retouche ; il est corrigé.
+
+Le thème sombre et l'encadré sombre `.upsell` gardent leurs couleurs.
+
+**Suite (même jour)** : « Justifie les textes, centre les icônes, augmente la police. Utilise les gras, les couleurs, les puces, pastilles, numérotation colorées. »
+- Paragraphes et listes justifiés, avec césure. Au téléphone, les listes s'alignent à gauche : une ligne courte avec de longs mots en gras s'y trouait de grands blancs.
+- Texte à 19 px (18 px au téléphone).
+- Gras en bleu VÉRITAS #1E499B.
+- Titres de section centrés, avec l'icône de 34 px AU-DESSUS du titre. La couleur de l'icône tourne sur six teintes.
+- Les coches d'une liste de premier niveau tournent sur six teintes ; une liste d'encadré garde la teinte de son encadré.
+- Pastilles numérotées de 30 px (28 px au téléphone), en couleurs alternées.
+- Puis : « si la justification dérange, tu laisses ». La justification ne reste que sur les paragraphes d'écran large ; listes et téléphone sont alignés à gauche. L'interligne passe à 1,85 (paragraphes) et 1,8 (listes), avec 20 px entre deux blocs.
+
+## Pied de page allégé (24/10/2026, v1.20.43)
+
+Demande de Jacques (capture de l'Atelier au téléphone) : « Pied de page très surchargé. « Centre d'Excellence… » est déjà mentionné d'entrée. Redondance. Conserver juste l'essentiel. »
+
+**Retiré** :
+- le bloc d'identité (logo, « La réussite assurée », présentation « Centre d'Excellence Scolaire — Douala… », pastilles MTN MoMo / Orange Money / Reçu automatique). La barre du haut porte déjà la marque, et les logos de paiement disent le reste ;
+- la phrase sous les logos (« Aucun frais supplémentaire… ») ;
+- le lien « Mentions légales » du bas, qui doublait le volet. Le volet porte désormais « Lire les mentions légales complètes ».
+
+**Restent** : les mentions légales (volet), les paiements acceptés, le © et les liens CGV, Confidentialité, Contact. Le pied fait environ 355 px de haut au téléphone et 240 px sur ordinateur.
+
+**Où** :
+- `tools/build_plan.py` (FOOTER_VITRINE), propagé par `tools/habiller_pages.py` à 271 pages et à l'application ;
+- `tools/build_vitrine.js` (`allegerPied`, avec garde-fous) ;
+- `vitrine.html` et `constellation.html`, édités directement.
+
+⚠️ `vitrine.html` ne se régénère plus à l'identique depuis la maquette : il a été retouché à la main depuis (prix « Dès 1 200 F », styles de la boutique, pied au téléphone). Une régénération écraserait ces retouches, d'où l'édition directe. À réconcilier un jour dans la maquette.
+
+## Espaces élève, enseignant, parent + programme de 3ᵉ (24/10/2026, v1.20.42)
+
+Demande de Jacques : « Il n'y a pas de contraction en 3ᵉ. Corrige tout. Vérifier que les espaces élèves, enseignants, parents sont bien alimentés et que chacun accède facilement aux pages et infos le concernant. »
+
+**Programme de 3ᵉ** (`niveaux/francais-3eme.html`) : le « résumé / la contraction de texte » est retiré (épreuve du Probatoire et du BAC). Il est remplacé par la **dictée**, qui fait partie du BEPC avec l'étude de texte et la rédaction (structure donnée par `ressources/bepc-francais.html`). Les métadonnées SEO et l'introduction sont corrigées aussi. Le mot-clé « BEPC » est retiré de `ressources/methode-resume-contraction.html`. Ailleurs (app, Atelier), la contraction n'est associée qu'au 2nd cycle, ce qui est juste.
+
+**Espace parent, le défaut majeur** : il n'était pas alimenté. `api/student_data.php` ne renvoyait au compte parent que sa propre tranche, qui est vide. « Notes & bulletin de mon enfant » cherchait donc l'enfant dans la base du navigateur. Sur le téléphone d'un parent, c'est la base de démonstration : le matricule VRT-001 rattachait un vrai parent à un élève fictif, et un vrai matricule ne trouvait rien.
+- Serveur : la tranche de l'enfant (fiche, notes, absences, paiements, devoirs de sa classe, soumissions) redescend au compte parent seulement si le matricule correspond ET si le téléphone du compte est celui que le centre a enregistré pour le parent (`ptel`, comparaison sur 9 chiffres). Le matricule seul ne suffit pas, puisqu'il s'imprime partout. Le rôle du compte redescend aussi.
+- Client : synchronisation à la connexion, à l'inscription et au rattachement ; même contrôle du téléphone en local ; vraie fiche de suivi (moyenne par trimestre, notes, absences, paiements, devoirs à rendre, plusieurs enfants, impression du bulletin).
+- Sur un appareil neuf, la connexion par le serveur perdait le rôle : un parent ou un enseignant tombait dans l'espace élève. C'est corrigé.
+- **À faire par le centre** : renseigner le téléphone du parent (`ptel`) sur chaque fiche élève. Sans lui, le rattachement est refusé avec un message explicite.
+
+**Autres correctifs** :
+- Les tableaux de bord internes de l'élève et de l'enseignant affichent la grille « Tout ce qui vous concerne » (corrigés, œuvres, programmes, évaluations…), qui n'existait que dans l'espace des comptes en ligne.
+- Saisie de notes de l'enseignant : elle s'ouvrait sur la 6ᵉ (« 0 élève ») ; elle s'ouvre maintenant sur sa classe.
+- Les titres des pages « ambassa », « marketplace_teacher » et « parrainage_teacher » affichaient la clé technique.
+- « Mon paiement » de l'élève affichait l'échéancier deux fois.
+- La Bibliothèque affichait « undefined stock undefined vendus ».
+
+**Nouveau banc** `tests/banc_parent_enfant.cjs` (16 contrôles, dans `test.yml` et `deploy.yml`), avec un vrai `php -S`. Les parcours navigateur (élève, enseignant, parent avec ou sans enfant, connexion sur un appareil neuf) ne montrent aucune erreur JS.
+
 ## Audit final du site, hors SkySMS (15/10/2026, v1.20.26)
 
 Rapport complet : `AUDIT_FINAL_v1.20.26.md`. Bilan : 69/70 bancs au vert, 68/68 vues navigateur sans erreur, aucun lien interne cassé.

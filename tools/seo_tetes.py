@@ -86,7 +86,7 @@ CONTENU = {
 # Carrefours : JSON-LD seul (titre et description existants)
 CARREFOURS = ['decouvrir/index.html', 'livrets/index.html', 'livrets/mode-emploi.html', 'manuels.html',
               'niveaux/index.html', 'oeuvres/index.html', 'plan.html', 'ressources/index.html',
-              'plateforme/index.html', 'corriges/est-1ere.html', 'corriges/est-2nde.html', 'corriges/est-tle.html',
+              'plateforme/index.html', 'corriges/est-1ere.html', 'corriges/est-2nde.html', 'corriges/est-tle.html', 'corriges/est-tle-ed2.html',
               'legal/cgv.html', 'legal/charte-pedagogique.html', 'legal/confidentialite.html',
               'legal/mentions-legales.html']
 

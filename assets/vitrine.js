@@ -728,24 +728,57 @@
      ils affichent le bon taux. On ne les remet à zéro que juste avant de les
      rejouer, et seulement quand ils entrent dans l'écran — remettre à zéro un
      anneau déjà visible ferait clignoter le chiffre. */
+  /* 25/10/2026 — « Les résultats ne sont plus animés comme avant » (Jacques).
+     Le commentaire de la feuille promettait que « le pourcentage compte en
+     même temps » que l'anneau se remplit ; rien ne le faisait. Le chiffre
+     part de 0 et rejoint le taux RÉEL écrit dans la page, au rythme de
+     l'anneau (1,15 s, même courbe). Il ne fabrique rien : sans JS, ou si la
+     lecture échoue, le texte d'origine reste tel quel. */
+  function compterTaux(anneau) {
+    var b = anneau.querySelector('b');
+    if (!b) return;
+    var m = String(b.getAttribute('data-taux') || b.textContent).match(/^(\s*)(\d+)(\s*%.*)$/);
+    if (!m) return;
+    var cible = parseInt(m[2], 10), debut = performance.now(), duree = 1150;
+    (function pas(t) {
+      var p = Math.min(1, (t - debut) / duree);
+      var e = 1 - Math.pow(1 - p, 4);            // proche de cubic-bezier(.22,1,.36,1)
+      b.textContent = m[1] + Math.round(cible * e) + m[3];
+      if (p < 1) requestAnimationFrame(pas);
+    })(debut);
+  }
+
   function animerAnneaux() {
     var anneaux = document.querySelectorAll('.vring');
     if (!anneaux.length || !('IntersectionObserver' in window)) return;
     if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
 
+    /* Deux temps (25/10/2026). L'anneau était remis à zéro seulement une fois
+       visible au tiers : au défilement, on le voyait d'abord PLEIN, puis il
+       se vidait et se remplissait — un saut. Il est désormais remis à zéro dès
+       son premier pixel visible, et rejoué à partir du tiers. */
     var obs = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
         if (!e.isIntersecting) return;
         var el = e.target;
-        el.classList.add('vring-anim');            // passe la main à la feuille
+        if (!el.classList.contains('vring-anim')) {
+          el.classList.add('vring-anim');            // passe la main à la feuille : 0°
+          var b0 = el.querySelector('b');
+          if (b0 && /\d/.test(b0.textContent)) {
+            b0.setAttribute('data-taux', b0.textContent);   // le taux réel, pour le compteur
+            b0.textContent = String(b0.textContent).replace(/\d+/, '0');
+          }
+        }
+        if (e.intersectionRatio < 0.35) return;
         // Deux images d'écart : le temps que --vr-deg:0 soit appliqué, sinon
         // la transition n'a pas d'état de départ et l'anneau saute.
         requestAnimationFrame(function () {
           requestAnimationFrame(function () { el.classList.add('vring-on'); });
         });
+        compterTaux(el);
         obs.unobserve(el);
       });
-    }, { threshold: 0.35 });
+    }, { threshold: [0, 0.35] });
 
     for (var i = 0; i < anneaux.length; i++) obs.observe(anneaux[i]);
   }
@@ -766,10 +799,11 @@
      données de carte sans en avoir ni le droit ni le besoin.
      ══════════════════════════════════════════════════════════════════════ */
 
-  /* L'ordre suit celui des moyens affichés dans le tunnel. Ces quatre
-     valeurs sont exactement celles que le serveur accepte ; toute autre
-     chaîne fait répondre « Méthode inconnue ». */
-  var MOYENS = ['mtn_momo', 'orange_money', 'stripe', 'paypal'];
+  /* L'ordre suit celui des moyens affichés dans le tunnel. Ces valeurs sont
+     exactement celles que le serveur accepte ; toute autre chaîne fait
+     répondre « Méthode inconnue ». Depuis le 25/10/2026, seuls MTN MoMo et
+     Orange Money sont proposés (« garde juste Orange / MTN », Jacques). */
+  var MOYENS = ['mtn_momo', 'orange_money'];
 
   function apiBase() {
     try { if (location.protocol.indexOf('http') === 0) return location.origin + '/api'; } catch (e) {}

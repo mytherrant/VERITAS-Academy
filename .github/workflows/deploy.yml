@@ -446,6 +446,12 @@ jobs:
       - name: 💳 Le rappel SkySMS ouvre-t-il l'accès payé, et seulement lui ?
         run: node tests/banc_skysms_rappel.cjs
 
+      # ── 👪 LE PARENT voit-il SON enfant, et seulement lui ? ──
+      #    Matricule + téléphone enregistré par le centre ; le matricule seul
+      #    n'ouvre rien ; aucun autre élève ne fuit ; le rôle redescend.
+      - name: 👪 Le parent voit-il son enfant, et seulement lui ?
+        run: node tests/banc_parent_enfant.cjs
+
       # ── 🔑 LA CLÉ D'UN EXERCICE survit-elle à une correction du cahier ?
       #    Si elle bouge, l'élève retrouve ses réponses sous les mauvaises
       #    questions et l'annotation du professeur désigne un autre exercice.
@@ -1603,12 +1609,15 @@ jobs:
               *) cp "$f" deploy/plateforme/ ;;
             esac
           done
+          # Ses en-têtes de cache (no-cache au lieu de no-store) : sans eux,
+          # support.js retélécharge la page à chaque ouverture (198 Ko en 3G).
+          [ -f plateforme/.htaccess ] && cp plateforme/.htaccess deploy/plateforme/.htaccess
           # ECHEC BRUYANT sur les modules attendus. Un « [ -f ] || continue »
           # seul suffirait a deployer une page amputee : index.html sans
           # minesec.js, c'est un ecran blanc, et le job serait vert.
           # Quatre incidents passes ont cette meme cause (fichier ecrit,
           # jamais « git add » — la CI ne le voit pas au checkout).
-          for m in index.html support.js minesec.js conformite.js exercices.js generateur.js texte.js docx.js progressions.js; do
+          for m in index.html support.js minesec.js conformite.js exercices.js generateur.js texte.js docx.js progressions.js lecteur-textes.js; do
             if [ ! -f "deploy/plateforme/$m" ]; then
               echo "::error title=Module manquant::plateforme/$m absent du checkout (oubli de git add ?) — deploiement interrompu."
               exit 1
@@ -1623,7 +1632,7 @@ jobs:
           # refuse un deploiement pour cet ecart-la, alors que les six modules
           # etaient rigoureusement identiques. git stocke du LF et le serveur
           # sert du LF : c'est le LF qui fait foi, ici comme dans le versionneur.
-          for m in support minesec conformite exercices generateur texte docx progressions; do
+          for m in support minesec conformite exercices generateur texte docx progressions lecteur-textes; do
             reel=$(tr -d '\r' < "deploy/plateforme/$m.js" | sha1sum | cut -c1-8)
             html=$(grep -oE "$m\.js\?v=[0-9a-f]+" deploy/plateforme/index.html | head -1 | sed 's/.*v=//')
             if [ "$reel" != "$html" ]; then
@@ -1882,7 +1891,7 @@ jobs:
           # valide un fichier qu'une etape ulterieure a ensuite reecrit, et la
           # production est partie fausse avec un job vert. On revalide ici, sur
           # les octets qui vont reellement etre televerses.
-          for m in support minesec conformite exercices generateur texte docx progressions; do
+          for m in support minesec conformite exercices generateur texte docx progressions lecteur-textes; do
             reel=$(tr -d '\r' < "deploy/plateforme/$m.js" | sha1sum | cut -c1-8)
             html=$(grep -oE "$m\.js\?v=[0-9a-f]+" deploy/plateforme/index.html | head -1 | sed 's/.*v=//')
             if [ "$reel" != "$html" ]; then

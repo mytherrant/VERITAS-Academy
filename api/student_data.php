@@ -219,6 +219,47 @@ if ($action === 'fetch') {
         ];
     }
 
+    /* PARENT → ENFANT. Le compte parent n'a pas de notes à lui : sa tranche
+       était vide, et sur son téléphone « Notes & bulletin de mon enfant » ne
+       pouvait trouver que les élèves de démonstration de la base locale.
+       Le matricule seul ne suffit pas (il s'imprime sur les bulletins, les
+       listes, les reçus) : il faut AUSSI que le téléphone du compte soit
+       celui que le centre a enregistré pour le parent de cet élève (`ptel`).
+       Lecture seule ; aucune écriture, aucun autre élève exposé. */
+    $children = [];
+    $childrenRefused = [];
+    $estParent = ($accType === 'visiteur') && (!empty($acc['isParent']) || (($acc['role'] ?? '') === 'parent'));
+    if ($estParent) {
+        $tel9 = function ($t): string { $d = preg_replace('/\D+/', '', (string) $t); return strlen($d) >= 9 ? substr($d, -9) : ''; };
+        $mats = [];
+        foreach (array_merge([(string) ($acc['childMat'] ?? ''), (string) ($in['childMat'] ?? '')], (array) ($acc['childMats'] ?? [])) as $m) {
+            $m = strtoupper(substr(trim((string) $m), 0, 30));
+            if ($m !== '' && !in_array($m, $mats, true)) $mats[] = $m;
+        }
+        $mats = array_slice($mats, 0, 4);
+        $telParent = $tel9($acc['tel'] ?? '');
+        foreach ($mats as $m) {
+            $st = null;
+            foreach (($db['students'] ?? []) as $s) {
+                if (is_array($s) && strtoupper((string) ($s['mat'] ?? '')) === $m) { $st = $s; break; }
+            }
+            if ($st === null) { $childrenRefused[] = ['mat' => $m, 'raison' => 'introuvable']; continue; }
+            if ($telParent === '' || $tel9($st['ptel'] ?? '') !== $telParent) { $childrenRefused[] = ['mat' => $m, 'raison' => 'telephone']; continue; }
+            unset($st['pwd'], $st['pwdHash']);
+            $cid = (string) ($st['id'] ?? '');
+            $children[] = [
+                'student'     => $st,
+                'grades'      => _by_owner($db['grades'] ?? [], $cid),
+                'payments'    => _by_owner($db['payments'] ?? [], $cid),
+                'absences'    => _by_owner($db['absences'] ?? [], $cid),
+                'submissions' => _by_owner($db['submissions'] ?? [], $cid),
+                'devoirs'     => array_values(array_filter($db['devoirs'] ?? [], function ($d) use ($st) {
+                    return is_array($d) && (string) ($d['cls'] ?? '') === (string) ($st['cls'] ?? '');
+                })),
+            ];
+        }
+    }
+
     echo json_encode([
         'ok'      => true,
         // S3 v1.2.x (Étape 3) : token par compte → content.php sans renvoyer le mot de passe.
@@ -248,7 +289,15 @@ if ($action === 'fetch') {
                relues ici à chaque connexion. */
             'matieres'   => array_values(array_filter((array) ($acc['matieres'] ?? []), 'is_string')),
             'discipline' => (string) ($acc['discipline'] ?? ''),
+            /* Le rôle redescend aussi : sans lui, un parent qui se connecte
+               sur un appareil neuf tombait dans l'espace élève générique. */
+            'role'       => (string) ($acc['role'] ?? ''),
+            'isParent'   => !empty($acc['isParent']),
+            'isPartner'  => !empty($acc['isPartner']),
+            'childMat'   => (string) ($acc['childMat'] ?? ''),
         ],
+        'children'          => $children,
+        'childrenRefused'   => $childrenRefused,
         'student'           => $student,
         'grades'            => _by_owner($db['grades'] ?? [], $eid),
         'payments'          => _by_owner($db['payments'] ?? [], $eid),
