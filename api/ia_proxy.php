@@ -193,7 +193,13 @@ $ipHits[] = $nowTs;
 @file_put_contents($ipFile, implode("\n", $ipHits), LOCK_EX);
 
 // ── 4. CACHE VALIDÉ : vérifier si la question a déjà une réponse validée ─
-$questionHash = sha1(strtolower(trim($prompt)));
+// La clé couvre la QUESTION ET SON CONTEXTE (audit du 22/10/2026) : sur le
+// seul texte du prompt, « Corrige ce sujet » posé depuis deux écrans (consignes
+// et contexte différents) recevait la même réponse en cache — validée pour
+// l'un, fausse pour l'autre. Les réponses mises en cache avant ce changement
+// ne sont plus retrouvées : elles restent dans la table, sans effet.
+$questionHash = sha1(strtolower(trim($prompt)) . "\x1f" . sha1((string) $sysPrompt)
+    . "\x1f" . sha1((string) $ragContext) . "\x1f" . (string) ($body['action'] ?? ''));
 $cachedAnswer = check_validated_cache($questionHash);
 if ($cachedAnswer !== null) {
     log_request($userId, $userPlan, 'cache_hit', strlen($cachedAnswer));
@@ -605,6 +611,14 @@ if (!$ok) {
     // le visiteur reçoit TOUJOURS un message neutre et rassurant.
     @file_put_contents(__DIR__ . '/data/_security_log.txt',
         date('c') . ' [IA_FAIL] source=' . $source . ' err=' . substr((string) $error, 0, 300) . "\n", FILE_APPEND);
+    // Aucune réponse servie : on REND le crédit pris avant l'appel (quota de la
+    // formule, crédit Atelier, plafond global). Sans cela, un élève dont les
+    // deux essais tombaient pendant une panne perdait sa journée sans rien
+    // recevoir. Le compteur par IP (anti-abus) reste, lui, décompté.
+    ia_rendre_credit($uFile ?? '');
+    if ($abonneAtelier && $fichierAtelier !== '') ia_rendre_credit($fichierAtelier);
+    ia_rendre_credit($gFile);
+    if ($isShared) ia_rendre_credit($sGenFile ?? '');
     http_response_code(502);
     echo json_encode(['error' => 'Le Professeur Ambassa est momentanément indisponible — réessayez dans quelques instants.', 'source' => $source]);
     log_request($userId, $userPlan, 'fail', 0);
@@ -914,6 +928,13 @@ function log_request(string $userId, string $plan, string $action, int $bytes): 
                  . (isset($u['think']) ? ' tok_think=' . (int) $u['think'] : '')) : '';
     $line = date('Y-m-d H:i:s') . " | " . $plan . " | " . $userId . " | " . $action . " | " . $bytes . " bytes" . $tok . "\n";
     @file_put_contents(__DIR__ . '/data/ia_proxy.log', $line, FILE_APPEND | LOCK_EX);
+}
+
+// Décrémente un compteur de quota (fichier « n ») sans jamais passer sous zéro.
+function ia_rendre_credit(string $fichier): void {
+    if ($fichier === '' || !is_file($fichier)) return;
+    $n = (int) @file_get_contents($fichier);
+    if ($n > 0) @file_put_contents($fichier, (string) ($n - 1), LOCK_EX);
 }
 
 // Usage du DERNIER appel réussi (null = aucun appel moteur dans cette requête).
