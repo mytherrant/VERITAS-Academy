@@ -89,6 +89,14 @@ jobs:
       - name: ✍️ La part d'un auteur repose-t-elle sur l'argent reçu ?
         run: php tests/banc_recettes_livres.php
 
+      # Ne tournaient qu'au déploiement : la PR #145 est passée verte et a
+      # bloqué le déploiement suivant (26/10/2026). Les voir dès la PR.
+      - name: 🧑‍🏫 Ambassa — l'invité de l'Atelier reçoit-il ses appels, et pas plus ?
+        run: php tests/banc_ia_invite.php
+
+      - name: 🧮 Atelier — la synchro admin préserve-t-elle les compteurs de quotas ?
+        run: php tests/banc_db_quotas.php
+
       - name: ✍️ Les écrans lisent-ils l'argent reçu ?
         run: node tests/banc_recettes_parts_auteur.cjs
 

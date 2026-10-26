@@ -9,8 +9,10 @@
  *   - au 5e appel, au-delà de ce qui lui a été accordé, il retombe au
  *     palier anonyme — et bute ;
  *   - un jeton d'invité FORGÉ (mauvaise signature) n'ouvre rien.
- * Aucune clé IA n'est configurée : les appels qui passent échouent chez le
- * fournisseur (absent), ce qui suffit — on ne regarde que le refus 429.
+ * Aucune clé IA n'est configurée : un moteur SIMULÉ (IA_BANC_REPONSE) répond.
+ * Il le faut depuis le 26/10/2026 : un appel en échec rend désormais son
+ * crédit, si bien qu'avec des 502 le banc ne comptait plus rien et exigeait,
+ * sans le dire, que l'échec soit facturé. On regarde le refus 429.
  *
  *   php tests/banc_ia_invite.php
  */
@@ -33,6 +35,7 @@ $HMAC = 'cle-hmac-du-banc-ia-invite-0123456789-assez-longue';
 file_put_contents("$tmp/api/payment_config.php", '<?php
 define("API_SECRET", ' . var_export($HMAC, true) . ');
 define("VRT_HMAC_KEY", ' . var_export($HMAC, true) . ');
+define("IA_BANC_REPONSE", "Réponse simulée du banc.");
 ');
 $cleA = str_repeat('a', 32); $cleB = str_repeat('b', 32);
 file_put_contents("$tmp/api/data/_plat_invites.json", json_encode([

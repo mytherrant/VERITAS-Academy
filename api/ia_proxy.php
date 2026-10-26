@@ -569,7 +569,14 @@ if ((string) ($body['action'] ?? '') === 'epreuve_minesec') {
 $geminiExtra = defined('GEMINI_MODELS_EXTRA') ? (string) GEMINI_MODELS_EXTRA : 'gemini-3.1-flash-lite';
 $geminiModeles = array_values(array_unique(array_filter(array_map('trim',
     array_merge([$model, $modelFree, $modelReserve], explode(',', $geminiExtra))))));
-foreach ($geminiKeys as $gIdx => $gk) {
+// MOTEUR SIMULÉ des bancs de CI (tests/banc_ia_invite.php) : sans clé IA, tout
+// appel échouait, et depuis que l'échec rend le crédit (26/10/2026) un banc de
+// quotas ne pouvait plus rien compter. Défini UNIQUEMENT par la config d'un
+// banc — jamais dans le payment_config.php du serveur.
+if (defined('IA_BANC_REPONSE') && (string) IA_BANC_REPONSE !== '') {
+    $ok = true; $text = (string) IA_BANC_REPONSE; $source = 'banc';
+}
+if (!$ok) foreach ($geminiKeys as $gIdx => $gk) {
     foreach ($geminiModeles as $gm) {
         if ($iaReste() < 15) break 2;
         [$okG, $textG, $errG] = call_gemini($gk, $sysPrompt, $ragContext, $prompt, $gm, $geminiReglages, min(45, $iaReste()));
