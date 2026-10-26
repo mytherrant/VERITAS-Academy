@@ -1256,8 +1256,18 @@ function _avisCompte(l){
      de le remettre (DB._demoVisible) puis de l'écarter de nouveau ;
    · repassé à chaque chargement : une vieille base resynchronisée qui ramène
      la démo la voit écartée de nouveau. */
+/* 'sched.items' : l'emploi du temps semé cite les quatre enseignants fictifs ;
+   resté en place, il les aurait retenus comme « cités par du réel ». */
 var _DEMO_COLS = ['students','teachers','payments','grades','absences','devoirs',
-  'submissions','teacherHours','depenses','studentAccounts'];
+  'submissions','teacherHours','depenses','studentAccounts','sched.items'];
+function _demoLire(o, k){
+  return k.split('.').reduce(function(v, p){ return v == null ? v : v[p]; }, o);
+}
+function _demoPoser(o, k, val){
+  var p = k.split('.'), d = o;
+  for (var i = 0; i < p.length - 1; i++){ if (d[p[i]] == null) return; d = d[p[i]]; }
+  d[p[p.length - 1]] = val;
+}
 function _demoIntact(seed, rec){
   if (!rec || rec.id !== seed.id) return false;
   for (var k in seed){
@@ -1271,16 +1281,17 @@ function _separerDemo(){
   var seed; try { seed = defaultDB(); } catch (e) { return 0; }
   var parCol = {};
   _DEMO_COLS.forEach(function(k){
-    var s = seed[k]; if (!Array.isArray(s) || !Array.isArray(DB[k])) return;
+    var s = _demoLire(seed, k), cur = _demoLire(DB, k);
+    if (!Array.isArray(s) || !Array.isArray(cur)) return;
     var idx = {}; s.forEach(function(x){ if (x && x.id) idx[x.id] = x; });
     /* Les OBJETS, pas les identifiants : un « s1 » réattribué à un vrai élève
        peut cohabiter avec le « s1 » de démo, et seul ce dernier doit partir. */
-    parCol[k] = DB[k].filter(function(r){ return r && idx[r.id] && _demoIntact(idx[r.id], r); });
+    parCol[k] = cur.filter(function(r){ return r && idx[r.id] && _demoIntact(idx[r.id], r); });
   });
   /* Élèves et enseignants de démo encore cités par un enregistrement réel. */
   var cites = {};
   _DEMO_COLS.forEach(function(k){
-    (DB[k] || []).forEach(function(r){
+    (_demoLire(DB, k) || []).forEach(function(r){
       if (!r || (parCol[k] || []).indexOf(r) >= 0) return;
       ['eid','tid'].forEach(function(f){ if (r[f]) cites[r[f]] = 1; });
     });
@@ -1292,11 +1303,11 @@ function _separerDemo(){
   _DEMO_COLS.forEach(function(k){
     var objs = parCol[k] || []; if (!objs.length) return;
     var deja = (arch[k] || []).map(function(r){ return r.id; });
-    DB[k] = DB[k].filter(function(r){
+    _demoPoser(DB, k, _demoLire(DB, k).filter(function(r){
       if (objs.indexOf(r) < 0) return true;
       if (deja.indexOf(r.id) < 0) (arch[k] = arch[k] || []).push(r);
       n++; return false;
-    });
+    }));
   });
   if (n){ DB._demoArchive = arch; console.info('[démo] ' + n + ' enregistrement(s) de démonstration mis à l\'écart du suivi réel'); }
   return n;
@@ -1310,9 +1321,10 @@ function demoAfficher(){
   if (!iA()) return;
   var a = DB._demoArchive || {};
   for (var k in a){
-    if (!Array.isArray(a[k]) || !Array.isArray(DB[k])) continue;
-    var ids = DB[k].map(function(r){ return r && r.id; });
-    a[k].forEach(function(r){ if (ids.indexOf(r.id) < 0) DB[k].push(r); });
+    var cur = _demoLire(DB, k);
+    if (!Array.isArray(a[k]) || !Array.isArray(cur)) continue;
+    var ids = cur.map(function(r){ return r && r.id; });
+    a[k].forEach(function(r){ if (ids.indexOf(r.id) < 0) cur.push(r); });
   }
   DB._demoArchive = {}; DB._demoVisible = true;
   save(); re(); toast('Démonstration réintégrée — elle se mêle de nouveau à vos chiffres', 'warn');

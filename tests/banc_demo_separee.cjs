@@ -60,8 +60,13 @@ console.log(`\n${G}LA DÉMONSTRATION EST-ELLE TENUE À L'ÉCART DU SUIVI RÉEL ?
   const m = fabrique(); const db = m.defaultDB(); const avant = total(db);
   m.setDB(db); const n = m._separerDemo();
   dire(avant > 30, `le seed contient bien une démonstration (${avant} enregistrements)`);
-  dire(n === avant && total(db) === 0, `base neuve : les ${avant} enregistrements fictifs partent à l'écart`, `${n} écartés, ${total(db)} restants`);
-  dire(archive(db) === avant, `rien n'est perdu : ${archive(db)} dans DB._demoArchive`);
+  const creneaux = (m.defaultDB().sched.items || []).length;
+  dire(n === avant + creneaux && total(db) === 0,
+    `base neuve : les ${avant} enregistrements fictifs et ${creneaux} créneaux partent à l'écart`, `${n} écartés, ${total(db)} restants`);
+  dire(archive(db) === avant + (m.defaultDB().sched.items || []).length,
+    `rien n'est perdu : ${archive(db)} dans DB._demoArchive (emploi du temps compris)`);
+  dire(Array.isArray(db.sched.items) && db.sched.items.length === 0 && db.sched.days.length > 0,
+    'l’emploi du temps fictif part aussi (il citait les enseignants fictifs), la grille jours/créneaux reste');
 }
 
 /* ② modifié à la main */
