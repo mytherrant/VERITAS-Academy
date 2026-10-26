@@ -3547,3 +3547,52 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', lancer);
   else lancer();
 })();
+
+/* ── « ALLER AU CONTENU » ET CIBLES TACTILES DU PIED (26/10/2026) ──────────
+   Audit du 21/10 : aucune page n'offrait de lien d'évitement — au clavier ou
+   au lecteur d'écran, il fallait traverser la barre, le menu « Plus » et le
+   bandeau avant d'atteindre le texte. Et les liens du pied (CGV,
+   Confidentialité, Contact) faisaient 25 px de haut au téléphone, pour 44
+   visés. Posé ICI parce que ce script est chargé par la vitrine, l'application
+   et les pages habillées : les blocs de barre et de pied, eux, sont recopiés
+   de vitrine.html par build_plan.py et vérifiés à l'identique.
+   Cible : le titre de la page (chaque page publique a un seul <h1>) ; à
+   défaut, ce qui suit immédiatement la barre. */
+(function () {
+  'use strict';
+  function poser() {
+    if (document.getElementById('vrtSkip')) return;
+    var st = document.createElement('style');
+    st.textContent =
+      '#vrtSkip{position:absolute;left:-9999px;top:8px;z-index:1000;padding:12px 18px;border-radius:10px;' +
+      'background:#001136;color:#fff;font:600 15px Poppins,system-ui,sans-serif;text-decoration:none;' +
+      'box-shadow:0 6px 22px rgba(0,17,54,.35)}' +
+      '#vrtSkip:focus{left:12px;outline:3px solid #FFC93C;outline-offset:2px}' +
+      'footer a.vh50{display:inline-flex;align-items:center;min-height:44px}';
+    document.head.appendChild(st);
+    var lien = document.createElement('a');
+    lien.id = 'vrtSkip';
+    lien.href = '#';
+    lien.textContent = 'Aller au contenu';
+    lien.addEventListener('click', function (e) {
+      e.preventDefault();
+      /* L'Atelier (plateforme/) n'a pas de <h1> une fois rendu, et derrière
+         sa barre viennent d'abord des <style>/<script> : on cherche le premier
+         élément VISIBLE, pas le premier frère. */
+      var vu = function (x) { return x && x.getBoundingClientRect().height > 0; };
+      var cible = [].slice.call(document.querySelectorAll('h1')).filter(vu)[0] ||
+        [].slice.call(document.querySelectorAll('main,[role=main]')).filter(vu)[0];
+      var nav = document.getElementById('vrtNav');
+      for (var x = nav && nav.nextElementSibling; !cible && x; x = x.nextElementSibling) {
+        if (!/^(STYLE|SCRIPT|LINK|TEMPLATE)$/.test(x.tagName) && vu(x)) cible = x;
+      }
+      cible = cible || document.body;
+      if (!cible.hasAttribute('tabindex')) cible.setAttribute('tabindex', '-1');
+      cible.focus();
+      if (cible.scrollIntoView) cible.scrollIntoView({ block: 'start' });
+    });
+    document.body.insertBefore(lien, document.body.firstChild);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', poser);
+  else poser();
+})();
