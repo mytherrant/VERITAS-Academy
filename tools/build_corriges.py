@@ -590,7 +590,7 @@ def head(title, desc, canonical, depth=1, jsonld=""):
 <meta property="og:title" content="%(title)s">
 <meta property="og:description" content="%(desc)s">
 <meta property="og:url" content="%(can)s">
-<meta property="og:image" content="%(site)s/uploads/logo-veritas.png">
+<meta property="og:image" content="%(site)s/og-image.jpg">
 <link rel="canonical" href="%(can)s">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

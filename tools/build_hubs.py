@@ -71,6 +71,9 @@ HUBS = [
      'lc-shield', 'sarcelle'),
 ]
 
+# Le nom de dossier n'a pas d'accent : « Evaluations » s'affichait tel quel.
+BADGES = {'evaluations': 'Évaluations', 'legal': 'Légal'}
+
 # Fichiers qui ne sont pas des pages : notes de travail, gabarits, verrous.
 EXCLUS = re.compile(r'^(index\.html|_|\.)')
 
@@ -110,6 +113,16 @@ def annexes(dossier):
         etiquette = re.sub(r'^(1ere|2nde|tle|3e|4e|5e|6e)\b',
                            lambda m: {'1ere': '1ʳᵉ', 'tle': 'Tˡᵉ', '2nde': '2ⁿᵈᵉ'}.get(m.group(1), m.group(1) + 'ᵉ'),
                            etiquette)
+        # Le nom de fichier perd les accents et les majuscules (« coeur des
+        # tenebres ») : le vrai titre est dans la première ligne du corrigé,
+        # « # CORRIGÉS MODÈLES — *Titre* (Auteur, 1899) — Classe de 1ère ».
+        with open(os.path.join(chemin, nom), encoding='utf-8') as f:
+            tete = f.readline()
+        t = re.search(r'\*([^*]+)\*\s*\(([^),]+)', tete)
+        if t:
+            niveau = etiquette.split(' ', 1)[0]
+            out.append({'url': nom, 'titre': 'Corrigé — ' + niveau + ' · ' + t.group(1).strip() + ' (' + t.group(2).strip() + ')'})
+            continue
         out.append({'url': nom, 'titre': 'Corrigé — ' + etiquette[0].upper() + etiquette[1:]})
     return out
 
@@ -136,7 +149,7 @@ GABARIT = """<!doctype html>
 <meta property="og:title" content="__TITRE__ — Centre VÉRITAS">
 <meta property="og:description" content="__DESC__">
 <meta property="og:url" content="__SITE__/__DOSSIER__/">
-<meta property="og:image" content="__SITE__/uploads/logo-veritas.png">
+<meta property="og:image" content="__SITE__/og-image.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
@@ -205,7 +218,7 @@ def construire(dossier, titre, sous, desc, icone, famille, vitrine):
             .replace('__CARTES__', cartes)
             .replace('__ANNEXES__', annexe_html)
             .replace('__JSONLD__', jsonld)
-            .replace('__BADGE__', BP.esc(dossier.capitalize()))
+            .replace('__BADGE__', BP.esc(BADGES.get(dossier, dossier.capitalize())))
             .replace('__TITRE__', BP.esc(titre))
             .replace('__SOUS__', BP.esc(sous))
             .replace('__DESC__', BP.esc(desc))
