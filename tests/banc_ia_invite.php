@@ -110,6 +110,62 @@ verifie(!quotaJour($rP1), 'l’appel accordé passe (palier enseignant retrouvé
 $rP2 = appel($tP, 32);
 verifie(quotaJour($rP2), 'un appel de plus, sans accord de plateforme.php, reste refusé', "HTTP {$rP2[0]} " . substr($rP2[1], 0, 160));
 
+echo "\n\033[1m④ Un appel qui échoue rend le crédit qu'il a pris, et rien de plus\033[0m\n";
+/* Depuis le 26/10/2026, un échec de tous les moteurs rend le crédit. Rien ne
+   le vérifiait : ni l'essai d'invité (jamais rendu), ni le crédit Atelier d'un
+   palier enseignant (rendu sans avoir été pris). Le moteur simulé est retiré :
+   sans clé IA, l'appel échoue vraiment. */
+file_put_contents("$tmp/api/payment_config.php", '<?php
+define("API_SECRET", ' . var_export($HMAC, true) . ');
+define("VRT_HMAC_KEY", ' . var_export($HMAC, true) . ');
+');
+$cleC = str_repeat('c', 32);
+$reg = json_decode(file_get_contents("$tmp/api/data/_plat_invites.json"), true);
+$reg['appareils'][$cleC] = ['id' => 'invC', 'q' => ['ia' => ['mois' => date('Y-m'), 'utilise' => 4]]];
+file_put_contents("$tmp/api/data/_plat_invites.json", json_encode($reg));
+function compteur($motif) {
+    global $tmp; $t = 0;
+    foreach (glob("$tmp/api/data/_rate/$motif") as $f) $t += (int) file_get_contents($f);
+    return $t;
+}
+// L'invité est compté sous « inv:<empreinte de sa clé> », pas sous son id.
+$jourC = 'iauser_' . substr(md5('inv:' . substr(md5($cleC), 0, 16)), 0, 16) . '_*';
+$avant = [compteur('iainvite_*'), compteur($jourC)];
+$rC = appel(jeton('invC', $cleC, $HMAC), 41);
+verifie($rC[0] === 502, 'sans moteur, l’appel échoue (502)', "HTTP {$rC[0]} " . substr($rC[1], 0, 160));
+verifie(count(glob("$tmp/api/data/_rate/$jourC")) === 1, 'le compteur du jour de l’invité existe (le motif vise le bon fichier)');
+$apres = [compteur('iainvite_*'), compteur($jourC)];
+verifie($apres[0] === $avant[0], 'l’essai d’invité est rendu', "avant {$avant[0]}, après {$apres[0]}");
+verifie($apres[1] === $avant[1], 'le quota du jour est rendu', "avant {$avant[1]}, après {$apres[1]}");
+$fAt = "$tmp/api/data/_rate/iaatelier_" . substr(md5('accP'), 0, 16) . '_' . date('Ym') . '.txt';
+$atAvant = (int) file_get_contents($fAt);
+file_put_contents("$tmp/data/veritas_db.json", json_encode([
+    'visitorAccounts' => [['id' => 'accP', 'user' => 'profbanc', 'plans' => ['pro'], 'tokenVer' => 0, 'statut' => 'actif']],
+    'elearning' => ['abonnements' => []],
+    'plateforme' => ['quotas' => ['accP|ia' => ['mois' => date('Y-m'), 'utilise' => 50]]],
+]));
+$rP3 = appel($tP, 42);
+verifie($rP3[0] === 502, 'abonné : sans moteur, l’appel échoue (502)', "HTTP {$rP3[0]} " . substr($rP3[1], 0, 160));
+$atApres = (int) file_get_contents($fAt);
+verifie($atApres === $atAvant, 'le crédit Atelier pris est rendu', "avant $atAvant, après $atApres");
+// Un compte ENSEIGNANT n'entame pas le crédit Atelier (palier « teach ») : un
+// échec ne doit donc rien lui rendre. Le code du 26/10 le rendait quand même.
+file_put_contents("$tmp/data/veritas_db.json", json_encode([
+    'visitorAccounts' => [['id' => 'accP', 'user' => 'profbanc', 'plans' => ['pro'], 'tokenVer' => 0, 'statut' => 'actif']],
+    'teachers' => [['id' => 'tProf', 'user' => 'profbanc']],
+    'elearning' => ['abonnements' => []],
+    'plateforme' => ['quotas' => ['accP|ia' => ['mois' => date('Y-m'), 'utilise' => 50]]],
+]));
+$atAvant = (int) file_get_contents($fAt);
+verifie($atAvant > 0, 'le crédit Atelier de départ n’est pas nul (sinon rien ne peut descendre)', "compteur $atAvant");
+// Quatorze appels depuis la même adresse : le bouclier (_sentinel.php) finit
+// par demander un défi. On repart d'une fenêtre neuve, comme un autre poste.
+array_map('unlink', glob("$tmp/api/data/_sentinel/*.txt") ?: []);
+$rT = appel($tP, 43);
+verifie($rT[0] === 502, 'enseignant : sans moteur, l’appel échoue (502)', "HTTP {$rT[0]} " . substr($rT[1], 0, 160));
+$atApres = (int) file_get_contents($fAt);
+verifie($atApres === $atAvant, 'enseignant : rien n’est rendu, puisque rien n’a été pris', "avant $atAvant, après $atApres");
+
 proc_terminate($srv);
 echo "\n" . ($ko ? "\033[31m$ko échec(s) sur $vu\033[0m" : "\033[32m$vu vérification(s) au vert\033[0m") . "\n";
 exit($ko ? 1 : 0);
