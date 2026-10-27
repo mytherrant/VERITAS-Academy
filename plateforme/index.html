@@ -974,6 +974,13 @@
   .vrt-mobilebar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--cffffff,#fff);
     border-top:1px solid var(--ce6ecf3,#e6ecf3);box-shadow:0 -2px 14px rgba(20,55,95,.08);
     padding:7px 6px calc(7px + env(safe-area-inset-bottom));justify-content:space-around}
+  /* Six onglets de 8 px de marge chacun ne tenaient pas sur 375 px : le
+     dernier, « Équipe », sortait de l'écran (mesuré le 26/10/2026). Chaque
+     onglet prend une part égale et peut rétrécir. */
+  .vrt-mobilebar{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  .vrt-mobilebar > button{flex:1 1 0;min-width:0;padding-left:0!important;padding-right:0!important}
+  .vrt-mobilebar > button > span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .vrt-mobilebar > button > span{font-size:10.5px!important;letter-spacing:0!important}
   /* Colonnes fixes : sur un telephone, une colonne de filtres de 244 px plus
      la liste font deborder la page. On les empile. */
   @media (max-width:900px){
@@ -1291,6 +1298,15 @@
     [data-print-sheet]{padding:24px 16px 30px!important;margin:12px 8px!important}
     [data-print-sheet] ol{padding-left:18px!important}
   }
+  /* ── Une seule barre dans l'espace de travail (22/10/2026) ─────────────
+     Connecté, l'enseignant voyait DEUX barres : celle du site (qui lui
+     proposait « Connexion » alors qu'il l'était) puis celle de l'Atelier.
+     html.vrt-app est posé dès que l'Atelier est ouvert ; l'écran d'entrée
+     garde la barre du site, c'est lui qui relie au reste de VÉRITAS.
+     Écrans larges seulement (26/10/2026) : au téléphone, la barre de
+     l'Atelier n'a ni logo ni menu — masquer celle du site y coupait le seul
+     chemin vers le reste de VÉRITAS. */
+  @media (min-width:821px){html.vrt-app #vrtNav{display:none!important}}
   /* ── Mode focus du composeur (lot H, 20/10/2026) ─────────────────────── */
   @media screen and (min-width:821px){
     html.vrt-focus #vrtNav,html.vrt-focus footer.vrt-hab,html.vrt-focus #vrt-astuce{display:none!important}
@@ -1345,12 +1361,12 @@
 
     <nav style="display:flex;flex-direction:column;gap:3px">
       <button onClick="{{ goAccueil }}" style="{{ sbAccueil }}" style-hover="background:var(--sb-hover)">{{ sbIcAccueil }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Accueil</span></button>
-      <button onClick="{{ goListe }}" style="{{ sbRessources }}" style-hover="background:var(--sb-hover)">{{ sbIcRessources }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Ressources</span></button>
+      <button onClick="{{ goListe }}" style="{{ sbRessources }}" style-hover="background:var(--sb-hover)">{{ sbIcRessources }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Corpus</span></button>
       <button onClick="{{ goEpreuves }}" style="{{ sbEpreuves }}" style-hover="background:var(--sb-hover)">{{ sbIcEpreuves }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Épreuves</span></button>
       <button onClick="{{ goCours }}" style="{{ sbCours }}" style-hover="background:var(--sb-hover)">{{ sbIcCours }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Cours</span></button>
       <button onClick="{{ goProgressions }}" style="{{ sbProgressions }}" style-hover="background:var(--sb-hover)">{{ sbIcProg }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Progressions</span></button>
       <button onClick="{{ goSuivi }}" style="{{ sbSuivi }}" style-hover="background:var(--sb-hover)">{{ sbIcSuivi }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Suivi</span><span style="{{ sbSuiviBadge }}">{{ suiviRetardsN }}</span></button>
-      <button onClick="{{ goCollab }}" style="{{ sbCollab }}" style-hover="background:var(--sb-hover)">{{ sbIcCollab }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Collaboration</span><span style="{{ sbMsgBadge }}">{{ msgCount }}</span></button>
+      <button onClick="{{ goCollab }}" style="{{ sbCollab }}" style-hover="background:var(--sb-hover)">{{ sbIcCollab }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Équipe</span><span style="{{ sbMsgBadge }}">{{ msgCount }}</span></button>
     </nav>
 
     <div style="height:1px;background:var(--sb-border);margin:20px 0"></div>
@@ -1362,10 +1378,14 @@
     </nav>
 
     <div class="vrt-sblabel" style="margin-top:auto;padding-top:24px;{{ sbLabelShow }}">
-      <div style="font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--sb-fg-dim);font-weight:700;margin-bottom:5px">Crédits</div>
+      <!-- Deux quotas serveur distincts, nommés partout pareil (audit 26/10/2026) :
+           l'accueil disait « Crédits », la barre « épreuves », le composeur
+           « aperçus » et « analyses IA » — trois mots pour deux réserves. -->
+      <div style="font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--sb-fg-dim);font-weight:700;margin-bottom:5px">Ce mois-ci</div>
       <div style="font-family:'Poppins';font-size:27px;font-weight:700;color:var(--sb-strong);line-height:1">{{ meRemaining }}</div>
-      <div style="font-size:11.5px;color:var(--sb-fg-dim);margin:3px 0 10px">/ {{ meLimit }} épreuves ce mois</div>
+      <div style="font-size:11.5px;color:var(--sb-fg-dim);margin:3px 0 10px">/ {{ meLimit }} aperçus d’épreuve restants</div>
       <div style="height:5px;border-radius:99px;background:var(--sb-track);overflow:hidden"><div style="{{ creditBar }}"></div></div>
+      <div style="font-size:11.5px;color:var(--sb-fg-dim);margin-top:9px">{{ sbIAQuota }}</div>
       <button onClick="{{ goAbo }}" style="background:none;border:none;color:var(--sb-link);font-size:12px;font-weight:600;cursor:pointer;padding:12px 0 0;font-family:Poppins;text-align:left" style-hover="color:var(--sb-strong)">Voir mon abonnement</button>
 
     </div>
@@ -1385,7 +1405,7 @@
     </div>
 
     <div style="margin-left:auto;display:flex;align-items:center;gap:9px">
-      <div style="position:relative;flex:none">
+      <div data-vrt-creer="1" style="position:relative;flex:none">
         <button onClick="{{ toggleCreate }}" style="{{ topCreateStyle }}" style-hover="background:var(--c135a96,#135a96)">{{ topIcPlus }}<span class="vrt-hide-sm">Créer</span></button>
         <sc-if value="{{ createOpen }}" hint-placeholder-val="{{ false }}">
           <div style="{{ createBoite }}">
@@ -4255,7 +4275,9 @@
 
 
   <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
-  <nav data-noprint="1" class="vrt-mobilebar" style="display:none">
+  <!-- data-vh-ignore : veritas-harmonie.js relevait ces libellés à 15 px ;
+       six onglets ne tiennent alors plus sur 360 px (26/10/2026). -->
+  <nav data-noprint="1" data-vh-ignore="1" class="vrt-mobilebar" style="display:none">
     <sc-for list="{{ mobileTabs }}" as="t" hint-placeholder-count="5">
       <button onClick="{{ t.go }}" style="{{ t.style }}">{{ t.icon }}<span style="font-size:9.5px;font-weight:700;font-family:Poppins;letter-spacing:.01em">{{ t.label }}</span></button>
     </sc-for>
@@ -4284,7 +4306,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '22/10 · G';
+const ATELIER_BUILD = '26/10 · simple';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -4548,6 +4570,10 @@ class Component extends DCLogic {
     sur(()=>this._reconcilierPaiements(),'paiements en attente');
     sur(()=>this._installerProtection(),'protection du corpus');
     sur(()=>this._installerRetour(),'touche retour');
+    sur(()=>this._installerFermetureCreer(),'menu Créer');
+    sur(()=>{document.addEventListener('input',(e)=>{
+      const t=e.target;if(t&&t.tagName==='TEXTAREA')this._ajusterChamp(t,true);},true);
+      this._ajusterChamps();},'champs auto-hauteur');
     /* REPRISE D'IDENTITE. Un poste connecte AVANT ce correctif a garde
        `currentUserId:'u1'` alors que son compte est bien enregistre :
        la connexion se contentait alors de RENOMMER le profil de
@@ -6211,6 +6237,49 @@ class Component extends DCLogic {
         importOpen:false,notifOpen:false,createOpen:false});
     });
   }
+  /* MENU « CREER » COLLANT (audit du 26/10/2026). Il ne se fermait que par
+     son propre bouton : ni Echap, ni clic a cote, ni changement d'ecran. Il
+     restait ouvert par-dessus Cours, Progressions, Suivi, et le clic qu'on
+     donnait « a cote » pour s'en debarrasser tombait sur une carte de gabarit
+     -- qui cree un brouillon. Le clic exterieur ferme donc le menu ET s'arrete
+     la : il n'atteint pas ce qu'il y a dessous. */
+  _installerFermetureCreer(){
+    if(this._fermCreerInstalle)return;
+    this._fermCreerInstalle=true;
+    window.addEventListener('keydown',(e)=>{
+      if(e.key==='Escape'&&this.state.createOpen)this.setState({createOpen:false});
+    });
+    document.addEventListener('click',(e)=>{
+      if(!this.state.createOpen)return;
+      const t=e.target;
+      if(t&&t.closest&&t.closest('[data-vrt-creer]'))return;
+      e.preventDefault();e.stopPropagation();
+      this.setState({createOpen:false});
+    },true);
+  }
+  /* CHAMPS A LA HAUTEUR DE LEUR TEXTE (audit du 26/10/2026). Le composeur
+     tenait questions et corriges dans des champs d'une ou deux lignes : 15 sur
+     17 etaient tronques, et la molette defilait DANS le champ au lieu de la
+     page. Un champ grandit desormais jusqu'a montrer tout son texte ; il ne
+     descend jamais sous la hauteur prevue par son `rows`. Rejoue apres chaque
+     rendu : le moteur peut reecrire l'attribut `style` du champ. */
+  /* `saisie` : on peut aussi RETRECIR (texte efface). Apres un rendu on ne
+     fait que grandir : remettre la hauteur a zero ferait sauter la page. */
+  _ajusterChamp(t,saisie){
+    try{
+      if(!t||!t.isConnected||t.offsetParent===null)return;
+      if(saisie){t.style.height='';t.style.overflowY='';}
+      const plein=t.scrollHeight,vu=t.clientHeight;
+      if(plein>vu+1){
+        const cs=getComputedStyle(t);
+        const bords=parseFloat(cs.borderTopWidth)+parseFloat(cs.borderBottomWidth);
+        t.style.height=(plein+bords)+'px';t.style.overflowY='hidden';
+      }
+    }catch(e){}
+  }
+  _ajusterChamps(){
+    try{document.querySelectorAll('textarea').forEach(t=>this._ajusterChamp(t));}catch(e){}
+  }
   /* Message discret : on ne peut pas empecher la sortie, on peut prevenir. */
   _toastRetour(){
     try{
@@ -6233,6 +6302,11 @@ class Component extends DCLogic {
   /* Le moteur n'appelle componentDidUpdate qu'avec prevProps : il n'y a pas de
      prevState a comparer. On garde donc notre propre instantane. */
   componentDidUpdate(){
+    /* Le menu « Creer » ne survit pas a un changement d'ecran. */
+    if(this.state.createOpen&&this._ecranCreer!==undefined&&this._ecranCreer!==this.state.screen)
+      this.setState({createOpen:false});
+    this._ecranCreer=this.state.screen;
+    this._ajusterChamps();
     this._reparerAttente();
     this._syncEpreuveOuverte();
     const remplacer=this._histRemplacer;this._histRemplacer=false;
@@ -6477,11 +6551,15 @@ class Component extends DCLogic {
   _montrerAstuce(){
     try{
       if(document.hidden)return;
-      /* Sur téléphone, la bulle (89 px, fixe) recouvrait le texte ou la
-         question en cours d'écriture : pas d'astuce sur les deux planches de
-         travail. Elle revient sur les autres écrans (16/10/2026). */
-      if((this.state.screen==='composeur'||this.state.screen==='coursEdit')
-        &&window.matchMedia&&window.matchMedia('(max-width:820px)').matches)return;
+      /* UNE ASTUCE PAR SESSION, PAS UNE TOUTES LES TROIS MINUTES (audit du
+         26/10/2026). Sur téléphone, la bulle (89 px) s'ajoutait à la barre
+         d'onglets (71 px) : 160 px sur 740 couverts en bas de l'écran, sur
+         tous les écrans. Sur l'accueil, elle passait par-dessus les cartes
+         où l'on s'oriente. Désormais : jamais au téléphone, jamais sur
+         l'accueil, et une seule fois par onglet ouvert. */
+      if(window.matchMedia&&window.matchMedia('(max-width:820px)').matches)return;
+      if(this.state.screen==='accueil')return;
+      try{if(sessionStorage.getItem('vrt_astuce_vue'))return;}catch(_){}
       const t=Date.now();
       if(this._astuceLe&&t-this._astuceLe<60000)return;
       const l=this._astuces();
@@ -6499,6 +6577,7 @@ class Component extends DCLogic {
       const choix=autreTitre.length?autreTitre:(autreTexte.length?autreTexte:l);
       const a=choix[Math.floor(Math.random()*choix.length)];
       this._astuceDerniere=a.t;this._astuceSign=a.t+'|'+a.c;this._astuceLe=t;
+      try{sessionStorage.setItem('vrt_astuce_vue','1');}catch(_){}
       this._bulleAstuce(a.t,a.c);
     }catch(e){}
   }
@@ -9525,7 +9604,7 @@ class Component extends DCLogic {
        go:()=>this.setState({screen:'epreuves',epFilter:'review'},()=>window.scrollTo(0,0))},
       {ic:'bell',v:acts.length,l:'Nouvelles activit\u00e9s',cta:'Voir',
        go:()=>this.setState({screen:'activite'},()=>window.scrollTo(0,0))},
-      {ic:'database',v:meQuotaInconnu?'\u2014':meRemaining,l:'Cr\u00e9dits disponibles',cta:'D\u00e9tails',
+      {ic:'database',v:meQuotaInconnu?'\u2014':meRemaining,l:'Aper\u00e7us d\u2019\u00e9preuve restants',cta:'D\u00e9tails',
        go:()=>this._go('abo')}
     ];
     const statCards=statBrut.map((x,i2)=>({
@@ -10437,7 +10516,9 @@ class Component extends DCLogic {
       quotaGrille:'display:grid;grid-template-columns:'+(/^u\d+$/.test(String(me.id))?'1fr 1fr':'1fr')+';gap:16px;margin-bottom:26px',
       quotaEquipeCarte:/^u\d+$/.test(String(me.id))?'background:linear-gradient(135deg,var(--c1a72bb,#1a72bb),var(--c134f88,#134f88));color:var(--cffffff,#fff);border-radius:14px;padding:22px 24px;box-shadow:0 6px 18px rgba(20,55,95,.18)':hidden,
       quotaNote:/^u\d+$/.test(String(me.id))?'Le quota individuel se d\u00e9compte aussi du quota d\u2019\u00e9quipe.':'D\u00e9compt\u00e9 par le serveur pour votre compte, remis \u00e0 z\u00e9ro chaque mois.',
-      meRemaining:meQuotaInconnu?'\u2014':meRemaining,meLimit:meQuotaInconnu?'\u2014':meLimit,teamRemaining,teamLimit,teamUsed:tq.used,teamReset:new Date(tq.resetsOn).toLocaleDateString('fr-FR',{day:'numeric',month:'long'}),
+      meRemaining:meQuotaInconnu?'\u2014':meRemaining,meLimit:meQuotaInconnu?'\u2014':meLimit,
+      sbIAQuota:qIA.limite<0?'Analyses IA illimit\u00e9es':(qIA.reste+' / '+qIA.limite+' analyses IA restantes'),
+      teamRemaining,teamLimit,teamUsed:tq.used,teamReset:new Date(tq.resetsOn).toLocaleDateString('fr-FR',{day:'numeric',month:'long'}),
       quotaNumStyle:'font-weight:700;color:'+(meRemaining<=3?'var(--cf39200,#f39200)':'var(--c14375f,#14375f)'),
       meBar:'height:100%;width:'+Math.min(100,Math.round(me.quota.used/Math.max(1,me.quota.limit)*100))+'%;background:'+(meRemaining<=3?'var(--cf39200,#f39200)':'var(--c1a72bb,#1a72bb)'),
       teamBar:'height:100%;width:'+Math.min(100,Math.round(tq.used/Math.max(1,tq.limit)*100))+'%;background:var(--cffd08a,#ffd08a)',
@@ -11101,7 +11182,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       genQuotaAvant:meQuotaInconnu?'Le serveur vérifie votre quota à chaque aperçu.':'Il vous reste ',
       genQuotaChiffre:meQuotaInconnu?'':(meRemaining+' / '+meLimit),
       genQuotaChip:meQuotaInconnu?'display:none':'font-family:Poppins;font-weight:700;color:var(--cc26a12,#c26a12);background:var(--cfdefdb,#fdefdb);padding:1px 8px;border-radius:999px',
-      genQuotaApres:meQuotaInconnu?'':' aperçu(s) ce mois, vérifié par le serveur.',
+      genQuotaApres:meQuotaInconnu?'':' aperçus d’épreuve ce mois, vérifié par le serveur.',
       icEtoile:this._icon('star','var(--cc26a12,#c26a12)',12),
       icImport:this._icon('upload','var(--c1a72bb,#1a72bb)',15),
       icFichier:this._icon('file','var(--c9aa5b5,#9aa5b5)',26),
@@ -12152,7 +12233,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
         };
       })(),
       ...(()=>{
-        if(typeof document!=='undefined'){try{document.documentElement.classList.toggle('vrt-doc',ready&&st.screen==='apercu');}catch(e){}}
+        if(typeof document!=='undefined'){try{document.documentElement.classList.toggle('vrt-doc',ready&&st.screen==='apercu');document.documentElement.classList.toggle('vrt-app',ready&&st.screen!=='login');}catch(e){}}
         if(!(ready&&st.screen==='apercu')||!active)return{docModeApercu:()=>{},docModePdf:()=>{},docModeApercuStyle:hidden,docModePdfStyle:hidden,pdfZoneStyle:hidden,pdfIframe:false,pdfUrl:'',pdfMsg:'',pdfMsgStyle:hidden,pdfRefaire:()=>{},pdfRefaireStyle:hidden,pdfMobileStyle:hidden,pdfOuvrir:()=>{},pdfTelecharger:()=>{},docOnglets:[],docVues:[],docVoitEnonce:true,docFeuilleStyle:'',docPagesLabel:'',docZoomLabel:'',docZoomBasculer:()=>{}};
         const cor=this._corrigePourExport(active)||[];
         const ann=this._annexesPourExport(active,true);

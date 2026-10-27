@@ -26,7 +26,7 @@ const P = f => path.join(RACINE, f);
 const html = fs.readFileSync(P('plateforme/index.html'), 'utf8');
 const iScript = html.indexOf('<script type="text/x-dc"');
 
-function atelier() {
+function atelier(opts) {
   const stock = {};
   const elt = () => ({
     style: {}, dataset: {}, classList: { add() {}, remove() {}, toggle() {} },
@@ -50,6 +50,13 @@ function atelier() {
     navigator: { userAgent: 'sonde', clipboard: { writeText: () => Promise.resolve() } },
     __VRT_API: '/api/', __VRT_TOKEN: ''
   };
+  /* Stockage de session à la demande : sans lui, la règle « une astuce par
+     session » ne s'applique pas (l'Atelier tolère son absence). */
+  if (opts && opts.session) {
+    const sess = {};
+    win.sessionStorage = { getItem: k => (k in sess ? sess[k] : null),
+      setItem: (k, v) => { sess[k] = String(v); }, removeItem: k => { delete sess[k]; } };
+  }
   win.document = { documentElement: elt(), head: elt(), body: elt(), hidden: false,
     createElement: () => elt(), createTextNode: () => elt(),
     getElementById: () => null, querySelector: () => null, querySelectorAll: () => [],
@@ -182,12 +189,31 @@ console.log('\n  GOÛTS, SUGGESTIONS ET ASTUCES — Atelier de Français\n');
   const a = atelier();
   const vues = [];
   a._bulleAstuce = (t) => vues.push(t);
+  /* Depuis le 26/10/2026 l'astuce se tait sur l'accueil et ne revient pas
+     dans la même session : on se place sur le corpus, et le bac à sable n'a
+     pas de sessionStorage — la règle « une par session » ne s'applique pas. */
+  a.state.screen = 'liste';
   a._montrerAstuce();
   a._astuceLe = 0;              // on lève la limite d'une par minute
   a._montrerAstuce();
   juger('Deux astuces d’affilée ne sont jamais la même',
     vues.length === 2 && vues[0] !== vues[1],
     vues.length + ' astuce(s) : ' + vues.join(' / ').slice(0, 70));
+}
+
+/* --- 8 bis. Une seule astuce par session, aucune sur l'accueil -------- */
+{
+  const a = atelier({ session: true });
+  const vues = [];
+  a._bulleAstuce = (t) => vues.push(t);
+  a.state.screen = 'accueil';
+  a._montrerAstuce();
+  juger('Aucune astuce ne passe sur l’accueil', vues.length === 0, vues.length + ' astuce(s)');
+  a.state.screen = 'liste';
+  a._montrerAstuce();
+  a._astuceLe = 0;              // la limite d'une par minute ne joue plus
+  a._montrerAstuce();
+  juger('Une seule astuce par session', vues.length === 1, vues.length + ' astuce(s)');
 }
 
 /* --- 8 bis. Le panier PESE, et il pese le poids annonce ---------------
