@@ -118,6 +118,18 @@ function plat_compte(array $db): array
        confondu, et vrt_verify_token le rejetterait de toute façon. */
     $inv = plat_inv_verifier($tok);
     if ($inv !== null) {
+        /* JETON SIGNÉ, APPAREIL DISPARU (contre-expertise du 27/10/2026).
+           L'entrée est retirée à la promotion et purgée après cinq mois de
+           silence, mais le jeton vit six mois. Sans entrée, l'essai passait
+           pour « jamais entamé » et le quota s'accordait faute de ligne à
+           incrémenter : garder l'ancien jeton après un ?action=promouvoir
+           (gratuit) ouvrait un essai éternel. On le refuse comme un jeton
+           expiré ; le navigateur redemande un invité, sous plafond par IP.
+           Registre illisible : on laisse passer, comme partout ailleurs. */
+        $reg = json_decode((string) @file_get_contents(plat_inv_fichier()), true);
+        if (is_array($reg) && !isset($reg['appareils'][$inv['cle']])) {
+            jsonResponse(['ok' => false, 'error' => 'Session expirée', 'code' => 'jeton'], 401);
+        }
         return [
             'acc'  => plat_inv_compte($inv['id'], $inv['cle']),
             'type' => 'invite',
@@ -486,7 +498,11 @@ function plat_essai_stamp(array $v): void
 function plat_inv_quota(string $cle, string $genre, int $plafond, string $mois): array
 {
     $res = plat_inv_muter(function (array $reg) use ($cle, $genre, $plafond, $mois) {
-        if (!isset($reg['appareils'][$cle]) || !is_array($reg['appareils'][$cle])) return null;
+        /* Appareil absent = refus, pas « registre inaccessible » : rendre
+           null ici tombait sur le repli qui ACCORDE. */
+        if (!isset($reg['appareils'][$cle]) || !is_array($reg['appareils'][$cle])) {
+            return [$reg, ['accorde' => false, 'utilise' => 0, 'plafond' => $plafond]];
+        }
         $q = $reg['appareils'][$cle]['q'] ?? [];
         if (!is_array($q)) $q = [];
         $c = $q[$genre] ?? null;
