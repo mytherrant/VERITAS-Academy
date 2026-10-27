@@ -302,6 +302,10 @@ if ($IA_GLOBAL_DAILY_MAX > 0 && $gCount >= $IA_GLOBAL_DAILY_MAX) {
 $utilisateurVerifie = '';
 $abonneAtelier = false;
 $fichierAtelier = ''; $compteAtelier = 0;
+// Vrai seulement si un crédit a RÉELLEMENT été pris (section 4bis) : un échec
+// moteur ne rend que ce qui a été décompté — un palier enseignant ou admin
+// n'entame pas le crédit Atelier et ne doit pas en regagner.
+$atelierDecompte = false; $inviteDecompte = false;
 $jetonIA = (string) ($body['token'] ?? '');
 /* LE JETON PEUT AUSSI VENIR DE L'EN-TÊTE (22/10/2026). La composition
    d'épreuve (generateur.js) le met dans le corps ; l'assistant, les
@@ -446,6 +450,7 @@ if ($utilisateurVerifie === '' && $idInvite !== '') {
         $userTier = 'free';
         if (!is_dir($rateDir)) @mkdir($rateDir, 0755, true);
         @file_put_contents($fichierInvite, ($compteInvite + 1) . '', LOCK_EX);
+        $inviteDecompte = true;
     }
 }
 if ($utilisateurVerifie !== '') {
@@ -453,6 +458,7 @@ if ($utilisateurVerifie !== '') {
         $userTier = 'teach';
         if (!is_dir($rateDir)) @mkdir($rateDir, 0755, true);
         @file_put_contents($fichierAtelier, ($compteAtelier + 1) . '', LOCK_EX);
+        $atelierDecompte = true;
     }
 }
 $tierDaily = ['anon' => 2, 'free' => 5, 'starter' => 15, 'pro' => 50, 'teach' => 120, 'elite' => 100, 'admin' => -1];
@@ -572,8 +578,10 @@ $geminiModeles = array_values(array_unique(array_filter(array_map('trim',
 // MOTEUR SIMULÉ des bancs de CI (tests/banc_ia_invite.php) : sans clé IA, tout
 // appel échouait, et depuis que l'échec rend le crédit (26/10/2026) un banc de
 // quotas ne pouvait plus rien compter. Défini UNIQUEMENT par la config d'un
-// banc — jamais dans le payment_config.php du serveur.
-if (defined('IA_BANC_REPONSE') && (string) IA_BANC_REPONSE !== '') {
+// banc — jamais dans le payment_config.php du serveur. Exige en plus le serveur
+// de développement (`php -S`) : un payment_config.php de banc copié par erreur
+// en production servirait sinon la réponse simulée à tous, sans erreur.
+if (PHP_SAPI === 'cli-server' && defined('IA_BANC_REPONSE') && (string) IA_BANC_REPONSE !== '') {
     $ok = true; $text = (string) IA_BANC_REPONSE; $source = 'banc';
 }
 if (!$ok) foreach ($geminiKeys as $gIdx => $gk) {
@@ -623,7 +631,8 @@ if (!$ok) {
     // deux essais tombaient pendant une panne perdait sa journée sans rien
     // recevoir. Le compteur par IP (anti-abus) reste, lui, décompté.
     ia_rendre_credit($uFile ?? '');
-    if ($abonneAtelier && $fichierAtelier !== '') ia_rendre_credit($fichierAtelier);
+    if ($atelierDecompte && $fichierAtelier !== '') ia_rendre_credit($fichierAtelier);
+    if ($inviteDecompte && $fichierInvite !== '') ia_rendre_credit($fichierInvite);
     ia_rendre_credit($gFile);
     if ($isShared) ia_rendre_credit($sGenFile ?? '');
     http_response_code(502);
@@ -938,10 +947,18 @@ function log_request(string $userId, string $plan, string $action, int $bytes): 
 }
 
 // Décrémente un compteur de quota (fichier « n ») sans jamais passer sous zéro.
+// Lecture ET écriture sous le même verrou : deux échecs simultanés ne perdent
+// pas une mise à jour.
 function ia_rendre_credit(string $fichier): void {
     if ($fichier === '' || !is_file($fichier)) return;
-    $n = (int) @file_get_contents($fichier);
-    if ($n > 0) @file_put_contents($fichier, (string) ($n - 1), LOCK_EX);
+    $h = @fopen($fichier, 'c+');
+    if (!$h) return;
+    if (flock($h, LOCK_EX)) {
+        $n = (int) stream_get_contents($h);
+        if ($n > 0) { ftruncate($h, 0); rewind($h); fwrite($h, (string) ($n - 1)); fflush($h); }
+        flock($h, LOCK_UN);
+    }
+    fclose($h);
 }
 
 // Usage du DERNIER appel réussi (null = aucun appel moteur dans cette requête).
