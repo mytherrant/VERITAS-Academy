@@ -35,7 +35,9 @@ $HMAC = 'cle-hmac-du-banc-ia-invite-0123456789-assez-longue';
 file_put_contents("$tmp/api/payment_config.php", '<?php
 define("API_SECRET", ' . var_export($HMAC, true) . ');
 define("VRT_HMAC_KEY", ' . var_export($HMAC, true) . ');
-define("IA_BANC_REPONSE", "Réponse simulée du banc.");
+// Le bloc ④ coupe le moteur simulé en posant ce témoin : réécrire ce fichier
+// ne suffirait pas, le cache d\'opcodes de la CI servait encore l\'ancienne version.
+if (!is_file(__DIR__ . "/data/_banc_sans_moteur")) define("IA_BANC_REPONSE", "Réponse simulée du banc.");
 ');
 $cleA = str_repeat('a', 32); $cleB = str_repeat('b', 32);
 file_put_contents("$tmp/api/data/_plat_invites.json", json_encode([
@@ -115,10 +117,7 @@ echo "\n\033[1m④ Un appel qui échoue rend le crédit qu'il a pris, et rien de
    le vérifiait : ni l'essai d'invité (jamais rendu), ni le crédit Atelier d'un
    palier enseignant (rendu sans avoir été pris). Le moteur simulé est retiré :
    sans clé IA, l'appel échoue vraiment. */
-file_put_contents("$tmp/api/payment_config.php", '<?php
-define("API_SECRET", ' . var_export($HMAC, true) . ');
-define("VRT_HMAC_KEY", ' . var_export($HMAC, true) . ');
-');
+file_put_contents("$tmp/api/data/_banc_sans_moteur", '1');
 $cleC = str_repeat('c', 32);
 $reg = json_decode(file_get_contents("$tmp/api/data/_plat_invites.json"), true);
 $reg['appareils'][$cleC] = ['id' => 'invC', 'q' => ['ia' => ['mois' => date('Y-m'), 'utilise' => 4]]];
