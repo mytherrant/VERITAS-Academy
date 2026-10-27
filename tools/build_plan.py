@@ -794,7 +794,13 @@ CSS_CHROME = r"""  @keyframes vpulse{0%,100%{box-shadow:0 0 0 0 rgba(91,224,122,
   :is(#vrtNav,footer[style*="background:#001136"]) > [style*="1.25fr"] p{margin-left:auto!important;margin-right:auto!important}
 }
 @media (min-width:1440px){ :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{max-width:1330px!important} }
-@media (min-width:1760px){ :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{max-width:1440px!important} }"""
+@media (min-width:1760px){ :is(#vrtNav,footer[style*="background:#001136"],.vrt-hab) [style*="max-width:1170px"]{max-width:1440px!important} }
+/* MENU OUVERT = PILE FLOTTANTE RETIRÉE (Jacques, 27/10/2026, capture au
+   téléphone). La pile (bulle de motivation, thème, traduction, Ambassa)
+   est à z-index 200, le menu ☰ dans #vrtNav à 60 : elle recouvrait
+   « Boutique », « Accueil » et le bouton « Connexion ». Elle revient à la
+   fermeture du menu. */
+html:has(#vrtBurger:not([hidden])) body > div:has([aria-label="Professeur Ambassa"]):not(:has(#vrtBurger)){display:none!important}"""
 
 
 CSS_CARTES = """  /* LA CARTE DE LA VITRINE, reproduite cote pour cote. Toute couleur écrite
