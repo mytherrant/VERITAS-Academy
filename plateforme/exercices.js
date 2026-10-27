@@ -221,18 +221,26 @@
     var s = String(txt || '');
     var i = s.indexOf('{');
     if (i < 0) throw new Error('reponse_illisible');
-    var depth = 0, inStr = false, esc = false;
+    /* `propre` recopie l'objet en échappant les retours à la ligne BRUTS
+       laissés dans une chaîne : un modèle à qui l'on demande des puces
+       (assistant, 27/10/2026) en écrit parfois, et JSON.parse les refuse. */
+    var depth = 0, inStr = false, esc = false, propre = '';
     for (var k = i; k < s.length; k++) {
       var c = s[k];
       if (inStr) {
         if (esc) esc = false;
         else if (c === '\\') esc = true;
         else if (c === '"') inStr = false;
+        else if (c === '\n') { propre += '\\n'; continue; }
+        else if (c === '\r') continue;
+        else if (c === '\t') { propre += '\\t'; continue; }
+        propre += c;
         continue;
       }
+      propre += c;
       if (c === '"') inStr = true;
       else if (c === '{') depth++;
-      else if (c === '}') { depth--; if (!depth) return JSON.parse(s.slice(i, k + 1)); }
+      else if (c === '}') { depth--; if (!depth) return JSON.parse(propre); }
     }
     throw new Error('reponse_tronquee');
   }
@@ -447,8 +455,17 @@
     l.push('');
     l.push('RÈGLES :');
     l.push('- Le cadre est le programme MINESEC du Cameroun. Si une notion porte un autre sens ailleurs, dis-le.');
-    l.push('- Trois paragraphes au plus. Pas d’introduction ni de conclusion de politesse.');
+    l.push('- Pas d’introduction ni de conclusion de politesse. 180 mots au plus.');
     l.push('- Quand la question porte sur une épreuve, donne la durée, le coefficient et le barème s’ils sont connus.');
+    /* PRÉSENTATION (Jacques, 27/10/2026, capture : un seul bloc de prose,
+       durées et coefficients noyés dans la phrase). Le panneau rend ce
+       Markdown réduit en intertitres bleus, puces et gras (_mdEl). */
+    l.push('- PRÉSENTE la réponse, ne la rédige pas en un seul bloc. Dans « reponse », utilise ce Markdown réduit, lignes séparées par \\n :');
+    l.push('  · une phrase de réponse directe en tête ;');
+    l.push('  · puis 1 à 3 intertitres courts « ### Titre », chacun suivi de puces « - … » d’une ligne ;');
+    l.push('  · les chiffres et termes clés en **gras** (durées, coefficients, points, séries, noms d’épreuves) ;');
+    l.push('  · une série ou un cas par puce — jamais une énumération entre parenthèses dans une phrase.');
+    l.push('  Ni tableau, ni lien, ni HTML.');
     l.push('- Si tu n’es pas sûr, dis-le franchement et renvoie à la circulaire de la session. Ne fabrique jamais un barème.');
     l.push('- Termine par une ligne « À FAIRE : » avec un geste concret, quand la question s’y prête.');
     if (contexte) {
