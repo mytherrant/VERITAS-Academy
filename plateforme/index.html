@@ -4310,7 +4310,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '27/10 · ambassa';
+const ATELIER_BUILD = '27/10 · solde';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -4860,6 +4860,13 @@ class Component extends DCLogic {
         /* `fini` est appele HORS de la chaine : sinon une exception du rendu
            serait prise pour un echec reseau et declencherait le repli local,
            qui masquerait la vraie cause. */
+        /* SOLDE D'ANALYSES IA DÈS L'OUVERTURE (27/10/2026). Le compteur
+           partait d'un défaut du navigateur (20) et ne se recalait qu'à la
+           première question : un visiteur en essai lisait 20, puis 9. Le
+           serveur rend désormais plafond ET consommé avec le répertoire. */
+        if(j.plafonds&&typeof j.plafonds.ia==='number'&&j.consomme&&typeof j.consomme.ia==='number'){
+          try{this._majQuotaLocal('ia',j.consomme.ia,j.plafonds.ia);}catch(e){}
+        }
         this.setState({corpusSource:'serveur',corpusDroit:j.droit||null,
           corpusPalier:j.palier||'',corpusPlafonds:j.plafonds||null,
           corpusLibres:j.libres||0},
