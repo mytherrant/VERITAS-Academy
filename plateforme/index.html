@@ -35,7 +35,7 @@
 <script src="./generateur.js?v=355c6046"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=221641f0"></script>
-<script src="./lecteur-textes.js?v=94c2e28c"></script>
+<script src="./lecteur-textes.js?v=4153b09f"></script>
 <script defer src="./progressions.js?v=6fedeb24"></script>
 <!-- seo-tete -->
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CollectionPage","name":"Atelier de Français","description":"Composez des épreuves de français conformes au programme MINESEC : l’IA Ambassa rédige l’épreuve complète (texte, questions, barème, corrigé), vous relisez. Corpus indexé par classe et par module, contrôle de conformité, export Word.","url":"https://veritas-school.com/plateforme/","inLanguage":"fr","publisher":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://veritas-school.com/"},{"@type":"ListItem","position":2,"name":"Atelier de Français","item":"https://veritas-school.com/plateforme/"}]}]}</script>
@@ -4310,7 +4310,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '27/10 · solde';
+const ATELIER_BUILD = '27/10 · import';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -4319,6 +4319,8 @@ class Component extends DCLogic {
           ? Object.assign({},f,{text:VRT_TEXTE.formaterDialogue(f.text)}) : f)
       : [];
     this.custom = this._load('minesec_custom', []);
+    /* Premier numéro des textes importés (voir _applyImport). */
+    this._N_IMPORT = 900000;
     this.all = this.base.concat(this.custom);
     this.dots={DESCRIPTIF:'oklch(0.62 0.11 150)',NARRATIF:'oklch(0.62 0.13 40)',ARGUMENTATIF:'oklch(0.58 0.13 262)',EXPLICATIF:'oklch(0.60 0.12 205)',DIALOGUE:'oklch(0.60 0.12 322)',INJONCTIF:'oklch(0.64 0.13 70)'};
     this.cShort={'PREMIER CYCLE':'Premier cycle','SECOND CYCLE':'Second cycle','ENSEIGNEMENT SECONDAIRE TECHNIQUE':'Enseignement technique'};
@@ -5037,6 +5039,13 @@ class Component extends DCLogic {
       ?VRT_TEXTE.formaterDialogue:null;
     this.base=fmt?src.map(f=>(f&&f.text&&/[—–]/.test(f.text))
       ?Object.assign({},f,{text:fmt(f.text)}):f):src;
+    /* Un texte importé AVANT le 27/10/2026 peut porter le numéro d'un texte
+       du serveur (voir _applyImport) : on le déplace dans la plage des
+       imports. Sans cela, `find(n)` rend le texte du serveur à sa place. */
+    const prisN=new Set(this.base.map(f=>f.n));
+    let libreN=this.custom.reduce((m,f)=>Math.max(m,f.n||0),this._N_IMPORT-1),deplaces=0;
+    this.custom.forEach(f=>{if(prisN.has(f.n)||!(f.n>0)){libreN+=1;f.n=libreN;deplaces++;}prisN.add(f.n);});
+    if(deplaces)this._save('minesec_custom',this.custom);
     this.all=this.base.concat(this.custom);
     this._buildMeta();
     return this.base.length;
@@ -9205,7 +9214,13 @@ class Component extends DCLogic {
   _applyImport(rows){
     const good=rows.map(r=>this._normalize(r)).filter(Boolean);
     if(!good.length){this.setState({importErrorMsg:'Aucun texte trouvé dans ce contenu.',importPreviewMsg:''});return;}
-    let maxN=this.all.reduce((m,f)=>Math.max(m,f.n||0),0);
+    /* PLAGE RÉSERVÉE AUX IMPORTS (27/10/2026). Le numéro valait « le plus
+       grand du répertoire + 1 » et restait gravé dans le navigateur ; le
+       répertoire libre grandit (5 006 puis 5 007 textes), et un texte ajouté
+       au serveur pouvait reprendre ce numéro — `n` est la clé partout, une
+       épreuve aurait mêlé deux textes. Les imports vivent désormais à partir
+       de 900 000, loin du MINESEC (< 10 000) et du libre (10 000 +). */
+    let maxN=this.all.reduce((m,f)=>Math.max(m,f.n||0),this._N_IMPORT-1);
     good.forEach(g=>{maxN+=1;g.n=maxN;});
     this.custom=this.custom.concat(good);this._save('minesec_custom',this.custom);
     this.all=this.base.concat(this.custom);this._buildMeta();
