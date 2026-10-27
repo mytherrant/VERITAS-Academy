@@ -951,5 +951,100 @@ function toggleCorrige(id){
 <script src="/assets/veritas-harmonie.js?v=1.20.49" defer></script>
 <script src="/assets/vitrine.js?v=1.20.49" defer></script>
 <!--/vrt-habillage:pied-->
+<script>
+/* CHRONO SUR L'HORLOGE, QUI SURVIT AU RECHARGEMENT (contre-expertise du
+   27/10/2026). Le décompte précédent retirait une seconde par tic de
+   setInterval : (1) un rechargement — perte de la 3G, appel entrant — le
+   remettait à la durée pleine ; (2) Android ralentit les minuteries d'un
+   onglet en veille, si bien que le chrono prenait du retard sur la vraie
+   épreuve ; (3) « Terminer » ouvrait « Temps écoulé ! » sans confirmation,
+   même à la troisième seconde. On retient l'HEURE DE FIN dans le
+   navigateur et l'on recalcule le reste à chaque tic. Ce bloc remplace
+   startChrono / toggleChrono / endExam ; updateDisplay reste celui de la page. */
+(function(){
+  var CLE='vrt_chrono:'+location.pathname;
+  var MODAL=document.getElementById('modal')?'modal':'modal-end';
+  var fin=0,tic=null,fini=false,restaure=false,arme=null;
+  function lire(){try{return JSON.parse(localStorage.getItem(CLE)||'null');}catch(e){return null;}}
+  function ecrire(o){try{localStorage.setItem(CLE,JSON.stringify(o));}catch(e){}}
+  function btn(t){var b=document.getElementById('btn-pause');if(b)b.textContent=t;}
+  function hms(s){var h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;
+    return (h?h+' h ':'')+String(m).padStart(2,'0')+' min '+String(x).padStart(2,'0')+' s';}
+  function battre(){
+    remaining=Math.max(0,Math.min(TOTAL,Math.round((fin-Date.now())/1000)));
+    updateDisplay();
+    if(remaining<=0)terminer('temps');
+  }
+  function ouvrirFin(motif){
+    var m=document.getElementById(MODAL);if(!m)return;
+    var h=m.querySelector('h2'),p=m.querySelector('p');
+    if(h&&!h.dataset.orig)h.dataset.orig=h.textContent;
+    if(p&&!p.dataset.orig)p.dataset.orig=p.textContent;
+    if(motif==='temps'){if(h)h.textContent=h.dataset.orig;if(p)p.textContent=p.dataset.orig;}
+    else{
+      if(h)h.textContent='Copie remise';
+      if(p)p.textContent='Vous avez terminé avec '+hms(remaining)
+        +' d’avance. Consultez les corrigés pour auto-évaluer vos réponses.';
+    }
+    if(!m.querySelector('[data-recommencer]')){
+      var r=document.createElement('button');
+      r.type='button';r.setAttribute('data-recommencer','1');
+      r.textContent='Recommencer l’épreuve';
+      r.style.cssText='display:block;margin:10px auto 0;background:none;border:none;'
+        +'color:inherit;text-decoration:underline;cursor:pointer;font:inherit;min-height:44px';
+      r.onclick=function(){try{localStorage.removeItem(CLE);}catch(e){}location.reload();};
+      (m.firstElementChild||m).appendChild(r);
+    }
+    m.classList.add('open');
+  }
+  function terminer(motif){
+    clearInterval(tic);running=false;fini=true;
+    ecrire({fini:1,reste:remaining,motif:motif});
+    btn('Épreuve terminée');
+    ouvrirFin(motif);
+  }
+  function restaurer(){
+    restaure=true;
+    var s=lire();if(!s)return false;
+    if(s.fini){fini=true;remaining=Math.max(0,s.reste|0);updateDisplay();
+      btn('Épreuve terminée');ouvrirFin(s.motif);return true;}
+    if(s.pause){remaining=Math.max(0,Math.min(TOTAL,s.reste|0));updateDisplay();
+      running=false;btn('▶ Reprendre');return true;}
+    if(s.fin){remaining=Math.max(0,Math.min(TOTAL,Math.round((s.fin-Date.now())/1000)));
+      updateDisplay();if(remaining<=0){terminer('temps');return true;}}
+    return false;
+  }
+  window.startChrono=function(){
+    if(!restaure&&restaurer())return;
+    if(fini)return;
+    clearInterval(tic);running=true;
+    fin=Date.now()+remaining*1000;ecrire({fin:fin});
+    btn('⏸ Pause');
+    tic=setInterval(battre,1000);
+  };
+  window.toggleChrono=function(){
+    if(fini)return;
+    if(running){clearInterval(tic);battre();running=false;
+      ecrire({pause:1,reste:remaining});btn('▶ Reprendre');}
+    else window.startChrono();
+  };
+  /* « Terminer » demande une confirmation (deux clics en 4 s). Pas de
+     window.confirm : il fige Chrome sur certains téléphones. */
+  window.endExam=function(){
+    if(fini){ouvrirFin(lire()&&lire().motif);return;}
+    var b=document.querySelector('[onclick="endExam()"]');
+    if(!arme){
+      var avant=b?b.textContent:'';
+      if(b)b.textContent='Confirmer ?';
+      arme=setTimeout(function(){arme=null;if(b&&!fini)b.textContent=avant;},4000);
+      return;
+    }
+    clearTimeout(arme);arme=null;
+    if(running)battre();
+    terminer('remise');
+  };
+  document.addEventListener('visibilitychange',function(){if(running&&!document.hidden)battre();});
+})();
+</script>
 </body>
 </html>
