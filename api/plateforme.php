@@ -118,10 +118,26 @@ function plat_compte(array $db): array
        confondu, et vrt_verify_token le rejetterait de toute façon. */
     $inv = plat_inv_verifier($tok);
     if ($inv !== null) {
+        /* JETON SIGNÉ, APPAREIL DISPARU (contre-expertise du 27/10/2026).
+           L'entrée est retirée à la promotion et purgée après cinq mois de
+           silence, mais le jeton vit six mois. Sans entrée, l'essai passait
+           pour « jamais entamé » et le quota s'accordait faute de ligne à
+           incrémenter : garder l'ancien jeton après un ?action=promouvoir
+           (gratuit) ouvrait un essai éternel. On le refuse comme un jeton
+           expiré ; le navigateur redemande un invité, sous plafond par IP.
+           Registre illisible : on laisse passer, comme partout ailleurs.
+           Jeton VOLATILE (rendu quand le registre n'a pas pu être écrit) :
+           il n'a jamais eu d'entrée, on le laisse passer — il ne vit qu'un
+           jour, voir plat_inv_jeton. Le registre n'est lu qu'une fois. */
+        $reg = json_decode((string) @file_get_contents(plat_inv_fichier()), true);
+        if (empty($inv['volatile']) && is_array($reg) && !isset($reg['appareils'][$inv['cle']])) {
+            jsonResponse(['ok' => false, 'error' => 'Session expirée', 'code' => 'jeton'], 401);
+        }
         return [
-            'acc'  => plat_inv_compte($inv['id'], $inv['cle']),
+            'acc'  => plat_inv_compte($inv['id'], $inv['cle'], is_array($reg) ? $reg : null),
             'type' => 'invite',
             'cle'  => $inv['cle'],
+            'volatile' => !empty($inv['volatile']),
         ];
     }
 
@@ -326,11 +342,14 @@ function plat_inv_cle(string $brut): string
 
 /** Jeton d'invité. Format distinct du jeton de compte (préfixe « inv. ») pour
     qu'aucun des deux ne puisse être pris pour l'autre par accident. */
-function plat_inv_jeton(string $id, string $cle): string
+function plat_inv_jeton(string $id, string $cle, bool $volatile = false): string
 {
-    $body = vrt_b64url_encode(json_encode(
-        ['id' => $id, 'd' => $cle, 'exp' => time() + VRT_INV_TTL],
-        JSON_UNESCAPED_UNICODE));
+    /* Un invité VOLATILE (registre non inscriptible) n'a pas d'entrée qui
+       compte son essai ni ses quotas : son jeton ne vit qu'un jour, puis le
+       navigateur en redemande un — persisté, si le registre est réparé. */
+    $p = ['id' => $id, 'd' => $cle, 'exp' => time() + ($volatile ? 86400 : VRT_INV_TTL)];
+    if ($volatile) $p['v'] = 1;
+    $body = vrt_b64url_encode(json_encode($p, JSON_UNESCAPED_UNICODE));
     return 'inv.' . $body . '.' . vrt_b64url_encode(
         hash_hmac('sha256', 'invite|' . $body, VRT_HMAC_KEY, true));
 }
@@ -351,7 +370,7 @@ function plat_inv_verifier(string $tok): ?array
     $id  = (string) ($p['id'] ?? '');
     $cle = (string) ($p['d'] ?? '');
     if ($id === '' || $cle === '') return null;
-    return ['id' => $id, 'cle' => $cle];
+    return ['id' => $id, 'cle' => $cle, 'volatile' => !empty($p['v'])];
 }
 
 /** Adresse IP rangée : un registre d'invités n'a pas à conserver des adresses
@@ -416,9 +435,9 @@ function plat_inv_ouvrir(string $cleBrute, int $plafondIp): array
  * `plans` est TOUJOURS vide : un invité n'a pas d'abonnement — s'il en achète
  * un, il cesse d'être invité (voir ?action=promouvoir).
  */
-function plat_inv_compte(string $id, string $cle): array
+function plat_inv_compte(string $id, string $cle, ?array $reg = null): array
 {
-    $reg = plat_inv_lire();
+    if ($reg === null) $reg = plat_inv_lire();
     $a   = $reg['appareils'][$cle] ?? [];
     return [
         'id'             => $id,
@@ -486,7 +505,11 @@ function plat_essai_stamp(array $v): void
 function plat_inv_quota(string $cle, string $genre, int $plafond, string $mois): array
 {
     $res = plat_inv_muter(function (array $reg) use ($cle, $genre, $plafond, $mois) {
-        if (!isset($reg['appareils'][$cle]) || !is_array($reg['appareils'][$cle])) return null;
+        /* Appareil absent = refus, pas « registre inaccessible » : rendre
+           null ici tombait sur le repli qui ACCORDE. */
+        if (!isset($reg['appareils'][$cle]) || !is_array($reg['appareils'][$cle])) {
+            return [$reg, ['accorde' => false, 'utilise' => 0, 'plafond' => $plafond]];
+        }
         $q = $reg['appareils'][$cle]['q'] ?? [];
         if (!is_array($q)) $q = [];
         $c = $q[$genre] ?? null;
@@ -1016,7 +1039,7 @@ if ($action === 'invite' && $method === 'POST') {
 
     jsonResponse([
         'ok'     => true,
-        'token'  => plat_inv_jeton((string) $res['id'], (string) $res['cle']),
+        'token'  => plat_inv_jeton((string) $res['id'], (string) $res['cle'], !empty($res['volatile'])),
         'compte' => ['id' => (string) $res['id'], 'nom' => '', 'type' => 'invite'],
         'neuf'   => !empty($res['neuf']),
         'droit'  => $droit,
@@ -2090,6 +2113,11 @@ if ($action === 'quota' && $method === 'POST') {
        repousse en entier à chaque synchronisation. Le plafond appliqué est le
        MÊME (plat_paliers reste la seule table) ; seul le tiroir diffère. */
     if (($v['type'] ?? '') === 'invite') {
+        /* Invité volatile : pas d'entrée où compter. Comportement d'avant le
+           27/10 — on accorde, son jeton ne vit qu'un jour. */
+        if (!empty($v['volatile'])) {
+            jsonResponse(['ok' => true, 'accorde' => true, 'utilise' => 0, 'plafond' => $plafond]);
+        }
         $r = plat_inv_quota((string) ($v['cle'] ?? ''), $genre, $plafond, $mois);
         if (!$r['accorde']) {
             jsonResponse(['ok' => false, 'error' => 'Quota épuisé'] + $r, 402);

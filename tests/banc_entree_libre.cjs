@@ -344,6 +344,20 @@ const lireRegistre = () => {
     dire(!Object.values(regApres.appareils).some(a => a.id === e1.j.compte.id),
       'l’entrée d’invité est retirée du registre : plus d’essai parallèle sur la même machine');
 
+    /* LE JETON D'INVITÉ GARDÉ EN POCHE (contre-expertise du 27/10/2026).
+       Retirer l'entrée du registre ne suffit pas : le jeton reste signé et
+       valable six mois. Sans entrée, plat_droit voyait un essai « jamais
+       entamé » (ok pour toujours) et plat_inv_quota, faute de ligne à
+       incrémenter, ACCORDAIT. Promouvoir (gratuit) puis garder l'ancien
+       jeton donnait donc un essai éternel et des quotas sans fond. */
+    const vieuxIdx = await lit('?action=corpus&mode=index', jetonA);
+    dire(vieuxIdx.http === 401 && vieuxIdx.j.code === 'jeton',
+      'l’ancien jeton d’invité est refusé (401 « jeton ») : le navigateur en redemande un, rien de plus',
+      'HTTP ' + vieuxIdx.http + ' ' + JSON.stringify(vieuxIdx.j).slice(0, 90));
+    const vieuxQ = await poste('?action=quota', { genre: 'epreuve' }, jetonA);
+    dire(vieuxQ.j.ok === false,
+      'et il n’obtient plus aucun quota', 'HTTP ' + vieuxQ.http + ' ' + JSON.stringify(vieuxQ.j).slice(0, 90));
+
     // ── ⑨ Le code de reprise ─────────────────────────────────────────────
     console.log(`\n${G}⑨ Le code de reprise rouvre l’abonnement, ailleurs${R}`);
     const rep = await poste('?action=reprise', { code: pr.j.code });
