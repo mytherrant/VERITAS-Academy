@@ -257,6 +257,11 @@ nav.vrt-hab a,div.vrt-hab a,footer.vrt-hab a{text-decoration:none}
    Un bouton de l'habillage qui n'écrit pas son padding n'en a aucun, et une
    icône ne se laisse jamais comprimer. */
 .vrt-hab button:not([style*="padding"]){padding:0}
+/* …sauf les rubriques du menu, qui tiennent leur padding de `.vmn-i` : les
+   entrées en <button> (« Catalogue e-learning ») collaient au bord, 13 px
+   plus à gauche que leurs voisines en <a> (mesuré le 27/10/2026). */
+.vrt-hab button.vmn-i.vmn-i{padding:9px 12px}
+.vrt-hab .vmn-mob button.vmn-i.vmn-i{padding:9px 13px}
 .vrt-hab svg{flex-shrink:0}
 /* Police de la vitrine sur tout l'habillage : sans elle, les liens du pied
    prenaient la police de la page (Times sur les épreuves imprimables). */
