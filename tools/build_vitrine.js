@@ -2532,6 +2532,8 @@ ${fs.readFileSync(path.join(__dirname, 'vitrine-bloc.css'), 'utf8')}
   max-height:none;overflow:visible;animation:none;background:none;
   border-top:1px solid #E4E7EF;margin-top:8px}
 .vmn-mob .vmn-col{margin-bottom:2px}
+/* Au téléphone, les rubriques suivent la grille des entrées du haut (pastille 36 px, 12 px, 13 px) : leurs libellés commençaient 4 px plus à gauche (27/10/2026). */
+.vmn-mob .vmn-i{gap:12px;padding-left:13px;padding-right:13px}.vmn-mob .vmn-p{width:36px;height:36px}
 
 /* ── Couche responsive ─────────────────────────────────────────────────────
    La maquette ne contient AUCUNE media query en dehors de

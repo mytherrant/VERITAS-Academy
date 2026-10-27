@@ -437,7 +437,7 @@ NAV_VITRINE = r"""  <nav id="vrtNav" style="position:sticky;top:0;z-index:60;bac
               
                 <button type="button" onclick="VRT.act('mm__aller',this,event)" data-go="elearning" style="display:flex;align-items:center;gap:12px;padding:12px 13px;border:0;border-radius:10px;background:none;cursor:pointer;text-align:left;font:500 15px Poppins,sans-serif;color:#001136;transition:background .18s" class="vh7">
                   <span style="width:36px;height:36px;border-radius:10px;background:#DBE8FE;color:#1E499B;display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"></use></svg></span>
-                  <span style="display:flex;flex-direction:column;line-height:1.35;flex:1;min-width:0">Catalogue E-Learning<small style="font:400 12px Poppins,sans-serif;color:#6E7385">Matières et œuvres</small></span>
+                  <span style="display:flex;flex-direction:column;line-height:1.35;flex:1;min-width:0">Catalogue e-learning<small style="font:400 12px Poppins,sans-serif;color:#6E7385">Matières et œuvres</small></span>
                 </button>
               
                 <button type="button" onclick="VRT.act('mm__aller',this,event)" data-go="tarifs" style="display:flex;align-items:center;gap:12px;padding:12px 13px;border:0;border-radius:10px;background:none;cursor:pointer;text-align:left;font:500 15px Poppins,sans-serif;color:#001136;transition:background .18s" class="vh7">
@@ -750,6 +750,8 @@ CSS_CHROME = r"""  @keyframes vpulse{0%,100%{box-shadow:0 0 0 0 rgba(91,224,122,
   max-height:none;overflow:visible;animation:none;background:none;
   border-top:1px solid #E4E7EF;margin-top:8px}
 .vmn-mob .vmn-col{margin-bottom:2px}
+/* Au téléphone, les rubriques suivent la grille des entrées du haut (pastille 36 px, 12 px, 13 px) : leurs libellés commençaient 4 px plus à gauche (27/10/2026). */
+.vmn-mob .vmn-i{gap:12px;padding-left:13px;padding-right:13px}.vmn-mob .vmn-p{width:36px;height:36px}
 
 /* Cibles tactiles >= 24 px (audit 16/10/2026) : liens du pied de page,
    « Découvrir » et calendrier mesuraient 20 à 22 px sur téléphone. */
