@@ -192,12 +192,21 @@ console.log(`\n${G}④ Les cahiers arrivent avec leur couverture${R}`);
 const sansCouv = livrets.filter(x => !x.couv);
 const fichiersManquants = livrets
   .filter(x => x.couv)
-  .filter(x => !fs.existsSync(path.join(RACINE, x.couv.replace(/^\//, ''))));
+  // `?v=<date>` : la version n'est pas dans le nom du fichier.
+  .filter(x => !fs.existsSync(path.join(RACINE, x.couv.replace(/^\//, '').replace(/\?.*$/, ''))));
 dire(sansCouv.length === 0, 'tous portent une couverture',
   sansCouv.slice(0, 3).map(x => x.titre).join(', '));
 dire(fichiersManquants.length === 0,
   'et le fichier existe pour chacune — la couverture est constatée, pas déclarée',
   fichiersManquants.slice(0, 3).map(x => x.couv).join(', '));
+/* Les couvertures sont servies « immutable » un an : sans version dans
+   l'adresse, une couverture remplacée restait l'ancienne chez tout visiteur
+   déjà venu (constaté le 28/10/2026 : la version, posée dans une seule des
+   quatre fonctions qui calculaient le lien, n'atteignait pas la boutique). */
+const sansVersion = livrets.filter(x => x.couv && !/\.jpg\?v=\d+$/.test(x.couv));
+dire(sansVersion.length === 0,
+  'et chaque adresse de couverture porte sa version (?v=)',
+  sansVersion.slice(0, 3).map(x => x.couv).join(', '));
 
 /* ── ⑤ ON NE VEND QUE CE QU'ON PEUT LIVRER ─────────────────────────────────
    LE GARDE-FOU ÉTAIT DEVENU DÉCORATIF SANS QU'UNE LIGNE DE SON CODE CHANGE.

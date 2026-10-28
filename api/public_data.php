@@ -123,8 +123,10 @@ if ($backupFile === '' || !file_exists($backupFile)) {
                 'prix' => (int)$__x['prix'], 'ancienPrix' => 0,
                 'pages' => (int)($__x['pages'] ?? 0), 'chaps' => 0,
                 'ico' => '', 'couleur' => '',
-                'couv' => is_file($__dc . 'livret_' . $__s . '.jpg')
-                        ? '/uploads/oeuvres/livret_' . $__s . '.jpg' : '',
+                'couv' => function_exists('vrt_livret_couverture')
+                        ? vrt_livret_couverture((string) $__s)
+                        : (is_file($__dc . 'livret_' . $__s . '.jpg')
+                           ? '/uploads/oeuvres/livret_' . $__s . '.jpg' : ''),
                 'numerique' => true, 'stock' => null, 'vendu' => 0, 'apercu' => true,
                 'kind' => 'livret',
                 'url' => '/livrets/' . $__e['lien'],
@@ -578,8 +580,10 @@ if (function_exists('vrt_livret_catalogue')) {
            un chemin écrit à la main survit à la disparition du fichier, et une
            image cassée sur la vitrine d'un produit payant est pire que pas
            d'image du tout. */
-        $__couv = is_file($__pd_dirCouv . 'livret_' . $__slug . '.jpg')
-                ? '/uploads/oeuvres/livret_' . $__slug . '.jpg' : '';
+        $__couv = function_exists('vrt_livret_couverture')
+                ? vrt_livret_couverture((string) $__slug)
+                : (is_file($__pd_dirCouv . 'livret_' . $__slug . '.jpg')
+                   ? '/uploads/oeuvres/livret_' . $__slug . '.jpg' : '');
         $__pd_livres[] = [
             'id'         => 'livret:' . $__slug,
             'titre'      => vrt_pd_coupe((string)($__o['titre'] ?? $__slug), 120),

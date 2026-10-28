@@ -746,8 +746,7 @@ if ($action === 'catalogue') {
     $dirCouv = dirname(__DIR__) . '/uploads/oeuvres/';
     $out = [];
     foreach (vrt_livret_catalogue() as $slug => $o) {
-        $couv = is_file($dirCouv . 'livret_' . $slug . '.jpg')
-              ? '/uploads/oeuvres/livret_' . $slug . '.jpg' : '';
+        $couv = vrt_livret_couverture($slug);   // versionnée : cache d'un an
 
         /* ── « DISPONIBLE » : deux façons d'exister, une seule preuve ────────
            Historiquement, un ouvrage n'était publié que s'il avait SA page :

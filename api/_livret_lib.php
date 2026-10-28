@@ -382,13 +382,26 @@ if (!defined('VRT_LIVRET_LIB')) {
                     : (($mode === 'lecture' && $coquille)
                        ? ($slug . '.html')
                        : ('cahier.html?o=' . rawurlencode($slug))),
-            /* La couverture est servie « immutable » pendant un an : remplacée
-               sous le même nom, elle resterait l'ancienne chez tout visiteur déjà
-               venu. La date du fichier en version change l'adresse avec l'image. */
-            'couverture' => is_file($dirCouv . 'livret_' . $slug . '.jpg')
-                    ? '/uploads/oeuvres/livret_' . $slug . '.jpg?v='
-                      . (int) @filemtime($dirCouv . 'livret_' . $slug . '.jpg') : '',
+            'couverture' => vrt_livret_couverture($slug),
         ];
+    }
+
+    /**
+     * L'adresse de la couverture d'un ouvrage, VERSIONNÉE — ou '' sans fichier.
+     *
+     * Les couvertures sont servies « immutable » pendant un an : remplacée sous
+     * le même nom, une couverture restait l'ancienne chez tout visiteur déjà
+     * venu. La date du fichier en version change l'adresse avec l'image.
+     * Une seule règle pour les quatre lecteurs (état d'un ouvrage, catalogue
+     * de livret.php, deux branches de public_data.php) : le 28/10/2026, la
+     * version posée ici seule n'atteignait ni la boutique ni la vitrine, qui
+     * recalculaient le lien chacune de leur côté.
+     */
+    function vrt_livret_couverture(string $slug): string {
+        $f = dirname(__DIR__) . '/uploads/oeuvres/livret_' . $slug . '.jpg';
+        return is_file($f)
+            ? '/uploads/oeuvres/livret_' . $slug . '.jpg?v=' . (int) @filemtime($f)
+            : '';
     }
 
     /* ── TARIFS ───────────────────────────────────────────────────────────────
