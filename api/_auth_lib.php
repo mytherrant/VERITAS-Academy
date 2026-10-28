@@ -1070,7 +1070,8 @@ if (!defined('VRT_AUTH_LIB')) {
 
     /**
      * Le montant d'un PANIER couvre-t-il ce qu'il contient ? — contrôlé AVANT le débit.
-     * ['ok'=>bool, 'attendu'=>?int, 'motif'=>string]
+     * ['ok'=>bool, 'attendu'=>?int, 'motif'=>string] ; pour un panier physique
+     * accepté, aussi 'label' (rédigé par le serveur), 'article' et 'assiette'.
      *
      * ⚠️ CONTRE-EXPERTISE DU 28/10/2026 (X1). vrt_prix_catalogue() rend null pour
      * `cart` : l'init acceptait donc n'importe quel montant pour un panier. Le
@@ -1084,9 +1085,19 @@ if (!defined('VRT_AUTH_LIB')) {
      *   · physique — le navigateur dit QUOI (`article` : id, qte, livr), le
      *     serveur calcule COMBIEN : prix du catalogue × quantité, remise du
      *     code validé, frais de livraison de sa propre table.
+     *
+     * Un panier est l'un OU l'autre. La première version sortait dès qu'une
+     * ligne numérique valait son prix, sans regarder `article` : une ligne à
+     * 200 F glissée à côté de neuf cahiers les faisait passer pour 200 F
+     * (relecture du 28/10). On refuse donc tout mélange, en comptant les lignes
+     * BRUTES — les lignes physiques disparaissent au nettoyage.
      */
-    function vrt_verifier_panier(array $db, array $lignes, $article, int $montant, ?array $parrainage): array {
+    function vrt_verifier_panier(array $db, array $lignes, $lignesBrutes, $article, int $montant, ?array $parrainage): array {
+        $brutes = is_array($lignesBrutes) ? array_values(array_filter($lignesBrutes, 'is_array')) : [];
+        $refus  = function ($motif) { return ['ok' => false, 'attendu' => null, 'motif' => $motif]; };
+
         if ($lignes) {
+            if ($article !== null || count($brutes) !== count($lignes)) return $refus('panier mixte ou ligne invalide');
             $reste = $montant;
             foreach ($lignes as $i => $l) {
                 $m = min(max(0, (int) ($l['montant'] ?? 0)), $reste);
@@ -1094,42 +1105,59 @@ if (!defined('VRT_AUTH_LIB')) {
                 $st = ['intent' => (string) ($l['intent'] ?? ''), 'targetId' => (string) ($l['targetId'] ?? ''),
                        'montant' => $m, 'montant_paye' => $m];
                 if ($parrainage) $st['parrainage'] = $parrainage;
-                if (vrt_prix_catalogue($db, $st['intent'], $st['targetId']) === null) {
-                    return ['ok' => false, 'attendu' => null, 'motif' => 'ligne ' . ($i + 1) . ' absente du catalogue'];
-                }
-                $pv = vrt_verifier_prix($db, $st);
-                if (!$pv['ok']) {
-                    return ['ok' => false, 'attendu' => $pv['plancher'], 'motif' => 'ligne ' . ($i + 1) . ' sous-payée'];
-                }
+                // Plus strict que l'octroi, qui laisse passer un tarif inconnu :
+                // un objet sans prix serveur ne se règle pas dans un panier.
+                if (vrt_prix_catalogue($db, $st['intent'], $st['targetId']) === null) return $refus('ligne ' . ($i + 1) . ' absente du catalogue');
+                if (!vrt_verifier_prix($db, $st)['ok']) return $refus('ligne ' . ($i + 1) . ' sous-payée');
             }
             return ['ok' => true, 'attendu' => null, 'motif' => ''];
         }
 
-        if (!is_array($article)) return ['ok' => false, 'attendu' => null, 'motif' => 'panier sans détail'];
-        $id   = substr(trim((string) ($article['id'] ?? '')), 0, 80);
-        $qte  = (int) ($article['qte'] ?? 0);
-        $livr = (int) ($article['livr'] ?? -1);
-        if ($id === '' || $qte < 1 || $qte > 50) return ['ok' => false, 'attendu' => null, 'motif' => 'article ou quantité invalide'];
+        foreach ($brutes as $l) {
+            if (trim((string) (is_scalar($l['intent'] ?? '') ? ($l['intent'] ?? '') : 'x')) !== '') return $refus('ligne invalide');
+        }
+        if (!is_array($article)) return $refus('panier sans détail');
+        foreach (['id', 'qte', 'livr'] as $k) {
+            if (!isset($article[$k]) || !is_scalar($article[$k])) return $refus('article incomplet');
+        }
+        $id   = substr(trim((string) $article['id']), 0, 80);
+        $qte  = (int) $article['qte'];
+        $livr = (int) $article['livr'];
+        if ($id === '' || $qte < 1 || $qte > 50) return $refus('article ou quantité invalide');
 
-        // Prix unitaire : le plus BAS des tarifs légitimes de l'article (la
-        // vitrine affiche le prix numérique d'une fiche de catalogue quand il
-        // existe). On ne prend jamais un chiffre envoyé par le navigateur.
+        /* Prix unitaire : celui que la vitrine AFFICHE (api/public_data.php),
+           jamais un chiffre du navigateur. Un livre de la base y est publié à
+           son prix papier (`prix`) ; une fiche du seul catalogue, à
+           `prixDigital ?? prix`. Prendre le plus bas des deux pour tout le
+           monde laissait acheter un manuel papier au prix du numérique. */
+        $titre = '';
         if (strpos($id, 'livret:') === 0) {
             $slug = substr($id, 7);
-            $pu = (function_exists('vrt_livret_classes') && isset(vrt_livret_classes()[$slug]))
-                ? vrt_prix_catalogue($db, 'livret', $slug . ':livret') : null;
+            $cat  = function_exists('vrt_livret_catalogue') ? vrt_livret_catalogue() : [];
+            $pu   = isset($cat[$slug]) ? vrt_prix_catalogue($db, 'livret', $slug . ':livret') : null;
+            $titre = (string) ($cat[$slug]['titre'] ?? $slug);
         } else {
-            $pu = null;
-            foreach (['book', 'digitalbook'] as $it) {
-                $p = vrt_prix_catalogue($db, $it, $id);
-                if ($p !== null && $p > 0 && ($pu === null || $p < $pu)) $pu = $p;
+            $enBase = null;
+            foreach (($db['books'] ?? []) as $b) {
+                if (is_array($b) && (string) ($b['id'] ?? '') === $id) { $enBase = $b; break; }
+            }
+            if ($enBase !== null) {
+                $pu = vrt_prix_catalogue($db, 'book', $id);
+                $titre = (string) ($enBase['titre'] ?? '');
+            } else {
+                $pu = vrt_prix_catalogue($db, 'digitalbook', $id);
+                $fiche = vrt_catalogue_livre($id);
+                $titre = (string) ($fiche['titre'] ?? '');
             }
         }
-        if ($pu === null || $pu <= 0) return ['ok' => false, 'attendu' => null, 'motif' => 'article absent du catalogue'];
+        if ($pu === null || $pu <= 0) return $refus('article absent du catalogue');
 
+        // La vitrine affiche [0, 1 000, 2 500] : une table en base plus courte
+        // ou vide refuserait toutes les commandes, on retombe donc sur celle-là.
         $frais = (isset($db['tarifs']['livraison']) && is_array($db['tarifs']['livraison']))
-            ? array_values($db['tarifs']['livraison']) : [0, 1000, 2500];
-        if (!isset($frais[$livr])) return ['ok' => false, 'attendu' => null, 'motif' => 'mode de livraison inconnu'];
+            ? array_values($db['tarifs']['livraison']) : [];
+        if (count($frais) < 3) $frais = [0, 1000, 2500];
+        if (!isset($frais[$livr])) return $refus('mode de livraison inconnu');
 
         $sousTotal = $pu * $qte;
         $plancher  = (defined('VRT_REMISE_SANS_CODE') && VRT_REMISE_SANS_CODE) ? vrt_prix_plancher($db, $sousTotal) : $sousTotal;
@@ -1138,9 +1166,15 @@ if (!defined('VRT_AUTH_LIB')) {
             if ($pc < $plancher) $plancher = $pc;
         }
         $attendu = $plancher + max(0, (int) $frais[$livr]);
-        return ($montant >= $attendu)
-            ? ['ok' => true,  'attendu' => $attendu, 'motif' => '']
-            : ['ok' => false, 'attendu' => $attendu, 'motif' => 'sous-paiement'];
+        if ($montant < $attendu) return ['ok' => false, 'attendu' => $attendu, 'motif' => 'sous-paiement'];
+
+        /* Le centre livre d'après le libellé : il est donc rédigé ICI, d'après ce
+           qui vient d'être contrôlé, et non repris du navigateur. */
+        $modes = ['retrait au centre', 'livraison Douala', 'livraison régions'];
+        return ['ok' => true, 'attendu' => $attendu, 'motif' => '',
+                'label'    => mb_substr(($titre !== '' ? $titre : $id) . ' × ' . $qte . ' — ' . ($modes[$livr] ?? ('livraison ' . $livr)), 0, 160),
+                'article'  => ['id' => $id, 'qte' => $qte, 'livr' => $livr, 'pu' => $pu, 'frais' => (int) $frais[$livr]],
+                'assiette' => $plancher];
     }
 
     /**

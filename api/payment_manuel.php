@@ -195,6 +195,28 @@ if ($action === 'declarer' && $method === 'POST') {
                 ], 409);
             }
         }
+        /* Un panier n'a pas de tarif propre (contre-expertise du 28/10, X1) : même
+           contrôle que l'init de payment_camerpay.php — une déclaration peut être
+           servie sans humain par le rapprochement SMS, sur le montant déclaré. */
+        if ($intent === 'cart' && function_exists('vrt_verifier_panier')) {
+            $propres = [];
+            foreach ((isset($in['lignes']) && is_array($in['lignes'])) ? $in['lignes'] : [] as $l) {
+                if (!is_array($l) || !is_scalar($l['intent'] ?? '')) continue;
+                $li = strtolower(trim((string) ($l['intent'] ?? '')));
+                if ($li === '' || $li === 'cart' || !preg_match('/^[a-z_]{1,30}$/', $li)) continue;
+                $propres[] = ['intent' => $li, 'targetId' => substr(trim((string) (is_scalar($l['targetId'] ?? '') ? ($l['targetId'] ?? '') : '')), 0, 64),
+                              'montant' => max(0, (int) (is_scalar($l['montant'] ?? 0) ? ($l['montant'] ?? 0) : 0))];
+            }
+            $pp = vrt_verifier_panier($dbD, $propres, $in['lignes'] ?? null, $in['article'] ?? null, $mont, $parrainageEtat);
+            if (!$pp['ok']) {
+                pmLog('[PRIX_REFUSE_PANIER_DECLARE] ref=' . $ref . ' montant=' . $mont
+                    . ' attendu=' . var_export($pp['attendu'], true) . ' motif=' . $pp['motif']);
+                pmOut(['error' => 'Ce panier ne correspond plus aux articles et aux tarifs en vente. Actualisez la page puis réessayez — ne payez pas ce montant-ci.',
+                       'code' => 'PRIX_INCOHERENT', 'attendu' => $pp['attendu']], 409);
+            }
+        }
+    } elseif ($intent === 'cart') {
+        pmOut(['error' => 'Le paiement est momentanément indisponible. Réessayez dans quelques minutes — ne payez pas maintenant.'], 503);
     }
 
     $etat = pmEtat([

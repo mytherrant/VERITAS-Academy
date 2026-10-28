@@ -241,6 +241,38 @@ try {
     verifier('le même panier au juste prix : accepté', $c === 200 && !empty($j['success']), "http $c " . json_encode($j));
     [$c, , $j] = $panier('BANC-P5', 3000, ['lignes' => [['intent' => 'book', 'targetId' => 'cahier-5000', 'montant' => 3000]]]);
     verifier('panier numérique sous-payé : refusé avant le débit, pas après', $c === 409 && !etat('BANC-P5'), "http $c " . json_encode($j));
+
+    // Relecture du 28/10 : une ligne numérique au juste prix ne doit pas couvrir neuf cahiers.
+    $base = json_decode((string) file_get_contents($db), true) ?: [];
+    $base['books'][] = ['id' => 'manuel-papier', 'prix' => 5000, 'prixDigital' => 2000, 'titre' => 'Manuel papier'];
+    $base['microPrix'] = ['epreuve' => ['montant' => 200]];
+    $base['tarifs'] = ['livraison' => []];
+    file_put_contents($db, json_encode($base));
+    [$c, , $j] = $panier('BANC-P6', 200, ['lignes' => [['intent' => 'micro_epreuve', 'targetId' => 'x', 'montant' => 200],
+        ['nom' => 'Cahier', 'qte' => 9, 'pu' => 5000]], 'article' => ['id' => 'cahier-5000', 'qte' => 9, 'livr' => 2]]);
+    verifier('panier mixte (ligne à 200 F + 9 cahiers) : refusé', $c === 409 && !etat('BANC-P6'), "http $c " . json_encode($j));
+    [$c, , $j] = $panier('BANC-P7', 2000, $vitrine + ['article' => ['id' => 'manuel-papier', 'qte' => 1, 'livr' => 0]]);
+    verifier('manuel papier au prix du numérique : refusé (5 000 attendus)', $c === 409 && (int) ($j['attendu'] ?? 0) === 5000, "http $c " . json_encode($j));
+    [$c, , $j] = $panier('BANC-P8', 5000, $vitrine + ['article' => ['id' => ['manuel-papier'], 'qte' => 1, 'livr' => 0]]);
+    verifier('article.id en tableau : refusé proprement', $c === 409, "http $c");
+    [$c, , $j] = $panier('BANC-P9', 7500, $vitrine + ['label' => 'Spécial BAC × 9 — livraison régions',
+        'article' => ['id' => 'manuel-papier', 'qte' => 1, 'livr' => 2]]);
+    $st = etat('BANC-P9');
+    verifier('table de livraison vide en base : repli 0/1 000/2 500, accepté', $c === 200, "http $c " . json_encode($j));
+    verifier('le libellé livré est celui du serveur, pas celui du navigateur', ($st['label'] ?? '') === 'Manuel papier × 1 — livraison régions', (string) ($st['label'] ?? ''));
+    verifier('l\'article contrôlé est écrit dans l\'état', (int) ($st['article']['qte'] ?? 0) === 1 && (int) ($st['article']['frais'] ?? -1) === 2500, json_encode($st['article'] ?? null));
+
+    // Le paiement DÉCLARÉ (payment_manuel.php) passe par la même règle : il peut
+    // être servi sans humain par le rapprochement SMS, sur le montant déclaré.
+    $MAN = str_replace('payment_camerpay.php', 'payment_manuel.php', $API);
+    [$c, , $j] = req('POST', "$MAN?action=declarer", ['ref' => 'BANC-D1', 'intent' => 'cart', 'montant' => 100,
+        'clientTel' => '690000001', 'label' => 'Cahier', 'lignes' => [['nom' => 'Cahier', 'qte' => 1, 'pu' => 100]],
+        'article' => ['id' => 'cahier-5000', 'qte' => 1, 'livr' => 0]]);
+    verifier('déclaration : 100 F pour un cahier à 5 000 refusés', $c === 409 && ($j['code'] ?? '') === 'PRIX_INCOHERENT', "http $c " . json_encode($j));
+    [$c, , $j] = req('POST', "$MAN?action=declarer", ['ref' => 'BANC-D2', 'intent' => 'cart', 'montant' => 5000,
+        'clientTel' => '690000001', 'label' => 'Cahier', 'lignes' => [['nom' => 'Cahier', 'qte' => 1, 'pu' => 5000]],
+        'article' => ['id' => 'cahier-5000', 'qte' => 1, 'livr' => 0]]);
+    verifier('déclaration au juste prix : acceptée', $c === 200 && !empty($j['ok']), "http $c " . json_encode($j));
 } finally {
     foreach ([$srvApi, $srvSky] as $p) { if (is_resource($p)) { proc_terminate($p); proc_close($p); } }
 }
