@@ -866,7 +866,6 @@
      `alt` vide + `aria-hidden` : le titre du cahier est juste en dessous, en
      texte ; répéter « couverture du cahier de 6ᵉ » n'apprendrait rien à un
      lecteur d'écran et allongerait sa lecture. */
-  var posees = 0;
   var poserCouverture = function (carte, o) {
     if (!carte || !o || !o.couverture || carte.querySelector('.couv')) return;
     var img = document.createElement('img');
@@ -874,16 +873,17 @@
     img.alt = '';
     img.setAttribute('aria-hidden', 'true');
     img.decoding = 'async';
-    /* LES TROIS PREMIÈRES TOUT DE SUITE, LES AUTRES À L'APPROCHE (28/10/2026).
+    /* TOUTES À L'APPROCHE (28/10/2026).
        Toutes partaient d'emblée (`eager`) parce qu'au banc, en navigateur
        piloté, deux couvertures sur cinq ne se chargeaient jamais en `lazy` —
        un onglet qui n'est pas peint ne déclenche pas le report. Mais en 3G le
-       prix était réel : 1,45 Mo de vignettes avant même qu'on fasse défiler,
-       mesuré le 28/10. Un vrai téléphone peint son onglet ; le défaut du banc
-       ne justifie plus de faire payer chaque visiteur.
+       prix était réel : 34 vignettes JPG demandées avant même qu'on fasse
+       défiler. Et au téléphone (360 px, mesuré en production le 28/10), les
+       34 sont SOUS le premier écran, les trois premières comprises : aucune
+       ne mérite la priorité. Le navigateur charge de lui-même, sans attendre,
+       celles qui approchent de l'écran.
        L'attribut se pose AVANT `src` ; après, le navigateur a déjà tranché. */
-    img.setAttribute('loading', posees < 3 ? 'eager' : 'lazy');
-    if (posees < 3) img.setAttribute('fetchpriority', 'high');
+    img.setAttribute('loading', 'lazy');
     // Dimensions de la vignette WebP : le cadre est réservé avant l'image.
     img.width = 360; img.height = 480;
     /* `?v=` : la couverture porte sa version (cache d'un an) ; la vignette la
@@ -897,7 +897,6 @@
     };
     img.src = o.couverture.replace(/\.jpg(\?|$)/, '_v.webp$1');
     carte.insertBefore(img, carte.firstChild);
-    posees++;
   };
 
   /* Les cartes écrites à la main n'ont pas de couverture : elles sont plus
