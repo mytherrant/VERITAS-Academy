@@ -1491,7 +1491,16 @@
     }
 
     /* ── E-mail ────────────────────────────────────────────────────────── */
-    var mail = pi.email || ec.email || '';
+    /* MÊME FILTRE QUE L'APPLICATION (_emailPublic, app.js), 28/10/2026, S3.
+       La base porte « www.<boîte personnelle>@gmail.com » : sans filtre, cette
+       adresse invalide remplaçait le contact@veritas-school.com de TOUTES les
+       pages habillées (/enseignant/, CGV…) — les demandes de code enseignant
+       n'arrivaient pas, et la ligne débordait à 360 px. Une adresse non
+       valide ou en boîte gratuite ne remplace plus rien : la page garde la
+       sienne. */
+    var mail = String(pi.email || ec.email || '').trim().replace(/^(www\.)+/i, '');
+    if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(mail)
+        || /@(gmail|googlemail|yahoo|ymail|hotmail|outlook|live|msn|aol|icloud|gmx|mail\.ru|yandex)\./i.test(mail)) mail = '';
     if (mail) {
       var ms = document.querySelectorAll('a[href^="mailto:"]');
       for (var k = 0; k < ms.length; k++) {

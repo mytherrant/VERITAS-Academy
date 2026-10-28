@@ -18,16 +18,25 @@ Disallow: /*?secret=
 
 # ════════════════════════════════════════════════════════════════════
 # 🛡️ ANTI-IA — Interdiction d'utilisation pour entraînement de modèles
-# Conformément à l'article L122-4 du Code de la propriété intellectuelle
+# Conformément à la loi camerounaise n° 2000/011 du 19 décembre 2000
+# relative au droit d'auteur et aux droits voisins.
 # ════════════════════════════════════════════════════════════════════
 
 # OpenAI (ChatGPT, GPT-4, etc.)
 User-agent: GPTBot
 Disallow: /
+# Recherche et consultation à la demande (28/10/2026, décision de Jacques) :
+# admis sur les pages publiques pour figurer dans les réponses de ChatGPT.
+# Ils n'entraînent pas de modèle ; GPTBot, lui, reste bloqué ci-dessus.
 User-agent: ChatGPT-User
-Disallow: /
 User-agent: OAI-SearchBot
-Disallow: /
+Allow: /
+Disallow: /api/
+Disallow: /uploads/private/
+Disallow: /data/
+Disallow: /*?admin
+Disallow: /*?token=
+Disallow: /*?secret=
 
 # Anthropic (Claude)
 User-agent: ClaudeBot

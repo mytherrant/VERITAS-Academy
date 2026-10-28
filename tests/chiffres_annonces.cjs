@@ -135,6 +135,32 @@ if (!fs.existsSync(vitrine)) {
   }
 }
 
+/* ── 3. Les autres pages qui annoncent le total (28/10/2026) ─────────────
+   Contre-expertise : 14 049 sur l'accueil, 9 709 sur /corriges/, 4 212 sur
+   /adopter/ et la Constellation. Jacques a tranché : un seul nombre, le total
+   réel. Ces pages ne passaient par aucun banc. On lit tout nombre de plus de
+   quatre chiffres suivi de « exercices » ; la phrase qui renvoie aux seuls
+   anciens cahiers (« Les N corrigés, tous niveaux réunis ») n'en est pas un. */
+for (const rel of ['corriges/index.html', 'adopter/index.html', 'constellation.html', 'manuels.html']) {
+  const p = path.join(RACINE, rel);
+  if (!fs.existsSync(p)) continue;
+  const h = fs.readFileSync(p, 'utf8');
+  /* /corriges/ détaille aussi un total PAR CLASSE (cartes « 1 151 exercices
+     corrigés ») : seules ses annonces globales — titre, descriptions, en-tête —
+     doivent porter le total. */
+  const motif = rel === 'corriges/index.html'
+    ? /(?:Terminale — |content="|"description":"|<p>)(\d{1,3}[\s  ]\d{3})\s*exercices/g
+    : /(\d{1,3}[\s  ]\d{3})\s*exercices/g;
+  const vus = [...h.matchAll(motif)]
+    .map((m) => parseInt(m[1].replace(/[\s  ]/g, ''), 10))
+    .filter((n) => n > 999);
+  const faux = [...new Set(vus)].filter((n) => n !== total);
+  t(vus.length > 0 && faux.length === 0,
+    faux.length === 0
+      ? `${rel} annonce le total réel (${total}), ${vus.length} fois`
+      : `${rel} annonce ${faux.join(' / ')} exercices au lieu de ${total}`);
+}
+
 console.log('\n  Détail réel par niveau :');
 for (const [k, n] of Object.entries(reel)) console.log(`    ${k.padEnd(6)} ${n}`);
 

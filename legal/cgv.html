@@ -138,7 +138,7 @@ footer{text-align:center;color:#4D5163;font-size:14px;padding:28px 20px 40px}
 <h1>Conditions générales de vente</h1>
 <p>Ces conditions régissent les commandes passées sur <strong>veritas-school.com</strong> auprès de
 VÉRITAS EDUCATION SARL (Centre VÉRITAS), Douala, Cameroun. Passer commande vaut acceptation.
-Dernière mise à jour : août 2026.</p>
+Dernière mise à jour : octobre 2026.</p>
 
 <h2>1. Ce que nous vendons</h2>
 <table>
@@ -151,6 +151,76 @@ Dernière mise à jour : août 2026.</p>
 <p>Une partie du contenu reste gratuite et sans compte : les corrigés publiés sur <a href="/corriges/">/corriges/</a>
 et une ressource offerte à l'inscription. Les prix affichés sont en francs CFA (XAF), toutes taxes comprises,
 et n'incluent pas les frais de livraison.</p>
+
+<!-- GRILLE TARIFAIRE (décision de Jacques, 28/10/2026, rapport S7). Aucun prix
+     n'est écrit ici : la grille est lue aux deux sources que le paiement
+     applique (public_data.php pour les formules, plateforme.php pour l'Atelier).
+     Un prix changé en administration se met à jour ici sans redéploiement, et
+     le prix affiché ne peut pas s'écarter du prix encaissé. -->
+<h3 id="tarifs">Tarifs en vigueur</h3>
+<div id="vrt-tarifs"><p class="vrt-tarifs-repli">La grille des tarifs est lue sur notre serveur de paiement.
+Si elle ne s'affiche pas, elle reste consultable dans la section
+<a href="/#tarifs">Abonnements</a> et, pour les enseignants, dans l'<a href="/plateforme/#abo">Atelier de Français</a>.</p></div>
+<script>
+(function () {
+  var zone = document.getElementById('vrt-tarifs');
+  if (!zone || !window.fetch) return;
+  var fcfa = function (n) { return new Intl.NumberFormat('fr-FR').format(n) + ' FCFA'; };
+  var table = function (titre, lignes) {
+    var t = document.createElement('table'), tr = document.createElement('tr');
+    ['Formule', 'Pour qui', 'Prix'].forEach(function (h) { var th = document.createElement('th'); th.textContent = h; tr.appendChild(th); });
+    t.appendChild(tr);
+    lignes.forEach(function (l) {
+      var r = document.createElement('tr');
+      l.forEach(function (v) { var td = document.createElement('td'); td.textContent = v; r.appendChild(td); });
+      t.appendChild(r);
+    });
+    /* Au téléphone, trois colonnes de libellés longs débordaient (390 px pour
+       360) : le tableau prend la largeur, ses cellules passent à la ligne, et
+       un défilement interne reste le dernier recours. */
+    t.style.cssText = 'width:100%;table-layout:fixed;font-size:14px';
+    [].forEach.call(t.querySelectorAll('td,th'), function (c) { c.style.overflowWrap = 'anywhere'; c.style.verticalAlign = 'top'; });
+    var defil = document.createElement('div');
+    defil.style.cssText = 'overflow-x:auto;max-width:100%';
+    defil.appendChild(t);
+    var bloc = document.createElement('div'), h = document.createElement('p'), s = document.createElement('strong');
+    s.textContent = titre; h.appendChild(s);
+    bloc.appendChild(h); bloc.appendChild(defil);
+    return bloc;
+  };
+  var periode = function (d) {
+    d = String(d || '').toLowerCase();
+    if (/mens|mois/.test(d)) return ' / mois';
+    if (/annu|ann[ée]e|\ban\b/.test(d)) return ' / an';
+    return d ? ' · ' + d : '';
+  };
+  Promise.all([
+    fetch('/api/public_data.php').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+    fetch('/api/plateforme.php?action=config').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+  ]).then(function (res) {
+    var blocs = [];
+    var plans = (res[0] && res[0].elearning_plans) || [];
+    var abos = plans.filter(function (p) { return p && +p.prix > 0; })
+      .map(function (p) { return [String(p.nom || ''), String(p.cible || ''), fcfa(+p.prix) + periode(p.duree)]; });
+    if (abos.length) blocs.push(table('Abonnements et prestations', abos));
+    var t = res[1] && res[1].tarifs;
+    if (t) {
+      var at = [['ens_mois', 'Enseignant, au mois', '1 enseignant', ' / mois'], ['ens', 'Enseignant, à l’année', '1 enseignant', ' / an'],
+                ['etab', 'Collège', 'jusqu’à 15 enseignants', ' / an'], ['pro', 'Bassin', 'enseignants illimités', ' / an']]
+        .filter(function (x) { return +t[x[0]] > 0; })
+        .map(function (x) { return ['Atelier de Français — ' + x[1], x[2], fcfa(+t[x[0]]) + x[3]]; });
+      if (at.length) blocs.push(table('Atelier de Français (enseignants)', at));
+    }
+    if (!blocs.length) return;               // le texte de repli reste affiché
+    zone.textContent = '';
+    blocs.forEach(function (b) { zone.appendChild(b); });
+    var note = document.createElement('p');
+    note.textContent = 'Prix lus sur notre serveur de paiement le ' + new Date().toLocaleDateString('fr-FR')
+      + ' : ce sont ceux qui vous seront demandés.';
+    zone.appendChild(note);
+  });
+})();
+</script>
 
 <h2>2. Commande et acceptation</h2>
 <p>La commande est formée lorsque vous validez le récapitulatif et lancez le paiement. Avant cela, vous

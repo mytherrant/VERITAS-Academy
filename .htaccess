@@ -126,7 +126,7 @@ DirectoryIndex index.php index.html
 # 2bis. Bloquer les bots IA au niveau serveur (avant même PHP)
 # ─────────────────────────────────────────────────────────
 <IfModule mod_rewrite.c>
-  RewriteCond %{HTTP_USER_AGENT} (GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|anthropic-ai|Claude-Web|Claude-User|Google-Extended|GoogleOther|Bytespider|CCBot|PerplexityBot|cohere-ai|FacebookBot|Meta-ExternalAgent|Amazonbot|Applebot-Extended|MistralAI-User|YouBot|Diffbot|Omgili|ImagesiftBot|DataForSeoBot|SerpstatBot) [NC]
+  RewriteCond %{HTTP_USER_AGENT} (GPTBot|ClaudeBot|anthropic-ai|Claude-Web|Claude-User|Google-Extended|GoogleOther|Bytespider|CCBot|PerplexityBot|cohere-ai|FacebookBot|Meta-ExternalAgent|Amazonbot|Applebot-Extended|MistralAI-User|YouBot|Diffbot|Omgili|ImagesiftBot|DataForSeoBot|SerpstatBot) [NC]
   RewriteRule .* - [F,L]
 </IfModule>
 
