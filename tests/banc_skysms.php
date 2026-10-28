@@ -218,6 +218,29 @@ try {
     verifier('journal non vide', strlen($log) > 50);
     verifier('aucun 690000001 / 670000002 en clair', strpos($log, '690000001') === false && strpos($log, '670000002') === false,
         implode(' | ', array_slice(preg_grep('/69000000|67000000/', explode("\n", $log)) ?: [], 0, 2)));
+
+    /* Contre-expertise du 28/10 (X1) : un panier n'a pas de tarif propre, et
+       l'init acceptait n'importe quel montant — 100 F « payaient » un cahier
+       à 5 000 F. Le serveur recalcule désormais depuis son catalogue. */
+    echo "\n\033[1m⑧ le montant d'un panier se recalcule au serveur\033[0m\n";
+    $base = json_decode((string) file_get_contents($db), true) ?: [];
+    $base['books'] = [['id' => 'cahier-5000', 'prix' => 5000]];
+    file_put_contents($db, json_encode($base));
+    $panier = function ($ref, $montant, $corps) use ($API, $PUB) {
+        return req('POST', "$API?action=init", ['ref' => $ref, 'montant' => $montant, 'intent' => 'cart',
+            'clientTel' => '690000001', 'label' => 'Banc panier'] + $corps, ["Authorization: Bearer $PUB"]);
+    };
+    $vitrine = ['lignes' => [['nom' => 'Cahier', 'qte' => 1, 'pu' => 100]]];
+    [$c, , $j] = $panier('BANC-P1', 100, $vitrine + ['article' => ['id' => 'cahier-5000', 'qte' => 1, 'livr' => 0]]);
+    verifier('100 F pour un cahier à 5 000 : refusé avant tout débit', $c === 409 && ($j['code'] ?? '') === 'PRIX_INCOHERENT' && !etat('BANC-P1'), "http $c " . json_encode($j));
+    [$c, , $j] = $panier('BANC-P2', 100, $vitrine);
+    verifier('panier sans article ni ligne (requête forgée) : refusé', $c === 409 && !etat('BANC-P2'), "http $c");
+    [$c, , $j] = $panier('BANC-P3', 6000, $vitrine + ['article' => ['id' => 'cahier-5000', 'qte' => 2, 'livr' => 1]]);
+    verifier('2 exemplaires + livraison Douala payés 6 000 : refusé (11 000 attendus)', $c === 409 && (int) ($j['attendu'] ?? 0) === 11000, "http $c " . json_encode($j));
+    [$c, , $j] = $panier('BANC-P4', 11000, $vitrine + ['article' => ['id' => 'cahier-5000', 'qte' => 2, 'livr' => 1]]);
+    verifier('le même panier au juste prix : accepté', $c === 200 && !empty($j['success']), "http $c " . json_encode($j));
+    [$c, , $j] = $panier('BANC-P5', 3000, ['lignes' => [['intent' => 'book', 'targetId' => 'cahier-5000', 'montant' => 3000]]]);
+    verifier('panier numérique sous-payé : refusé avant le débit, pas après', $c === 409 && !etat('BANC-P5'), "http $c " . json_encode($j));
 } finally {
     foreach ([$srvApi, $srvSky] as $p) { if (is_resource($p)) { proc_terminate($p); proc_close($p); } }
 }

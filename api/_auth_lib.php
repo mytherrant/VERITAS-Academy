@@ -1069,6 +1069,81 @@ if (!defined('VRT_AUTH_LIB')) {
     }
 
     /**
+     * Le montant d'un PANIER couvre-t-il ce qu'il contient ? — contrôlé AVANT le débit.
+     * ['ok'=>bool, 'attendu'=>?int, 'motif'=>string]
+     *
+     * ⚠️ CONTRE-EXPERTISE DU 28/10/2026 (X1). vrt_prix_catalogue() rend null pour
+     * `cart` : l'init acceptait donc n'importe quel montant pour un panier. Le
+     * panier NUMÉRIQUE était rattrapé à l'octroi (chaque ligne y repasse par
+     * vrt_verifier_prix), mais APRÈS le débit : l'acheteur payait un refus. Le
+     * panier PHYSIQUE de la vitrine ({nom, qte, pu}, sans intent) n'était
+     * contrôlé nulle part : 100 F « payaient » un cahier à 5 000 F livré.
+     *
+     *   · numérique — on rejoue ici, ligne par ligne et avec le même plafond
+     *     « au reste encaissé », le contrôle exact de l'octroi ;
+     *   · physique — le navigateur dit QUOI (`article` : id, qte, livr), le
+     *     serveur calcule COMBIEN : prix du catalogue × quantité, remise du
+     *     code validé, frais de livraison de sa propre table.
+     */
+    function vrt_verifier_panier(array $db, array $lignes, $article, int $montant, ?array $parrainage): array {
+        if ($lignes) {
+            $reste = $montant;
+            foreach ($lignes as $i => $l) {
+                $m = min(max(0, (int) ($l['montant'] ?? 0)), $reste);
+                $reste -= $m;
+                $st = ['intent' => (string) ($l['intent'] ?? ''), 'targetId' => (string) ($l['targetId'] ?? ''),
+                       'montant' => $m, 'montant_paye' => $m];
+                if ($parrainage) $st['parrainage'] = $parrainage;
+                if (vrt_prix_catalogue($db, $st['intent'], $st['targetId']) === null) {
+                    return ['ok' => false, 'attendu' => null, 'motif' => 'ligne ' . ($i + 1) . ' absente du catalogue'];
+                }
+                $pv = vrt_verifier_prix($db, $st);
+                if (!$pv['ok']) {
+                    return ['ok' => false, 'attendu' => $pv['plancher'], 'motif' => 'ligne ' . ($i + 1) . ' sous-payée'];
+                }
+            }
+            return ['ok' => true, 'attendu' => null, 'motif' => ''];
+        }
+
+        if (!is_array($article)) return ['ok' => false, 'attendu' => null, 'motif' => 'panier sans détail'];
+        $id   = substr(trim((string) ($article['id'] ?? '')), 0, 80);
+        $qte  = (int) ($article['qte'] ?? 0);
+        $livr = (int) ($article['livr'] ?? -1);
+        if ($id === '' || $qte < 1 || $qte > 50) return ['ok' => false, 'attendu' => null, 'motif' => 'article ou quantité invalide'];
+
+        // Prix unitaire : le plus BAS des tarifs légitimes de l'article (la
+        // vitrine affiche le prix numérique d'une fiche de catalogue quand il
+        // existe). On ne prend jamais un chiffre envoyé par le navigateur.
+        if (strpos($id, 'livret:') === 0) {
+            $slug = substr($id, 7);
+            $pu = (function_exists('vrt_livret_classes') && isset(vrt_livret_classes()[$slug]))
+                ? vrt_prix_catalogue($db, 'livret', $slug . ':livret') : null;
+        } else {
+            $pu = null;
+            foreach (['book', 'digitalbook'] as $it) {
+                $p = vrt_prix_catalogue($db, $it, $id);
+                if ($p !== null && $p > 0 && ($pu === null || $p < $pu)) $pu = $p;
+            }
+        }
+        if ($pu === null || $pu <= 0) return ['ok' => false, 'attendu' => null, 'motif' => 'article absent du catalogue'];
+
+        $frais = (isset($db['tarifs']['livraison']) && is_array($db['tarifs']['livraison']))
+            ? array_values($db['tarifs']['livraison']) : [0, 1000, 2500];
+        if (!isset($frais[$livr])) return ['ok' => false, 'attendu' => null, 'motif' => 'mode de livraison inconnu'];
+
+        $sousTotal = $pu * $qte;
+        $plancher  = (defined('VRT_REMISE_SANS_CODE') && VRT_REMISE_SANS_CODE) ? vrt_prix_plancher($db, $sousTotal) : $sousTotal;
+        if ($parrainage && function_exists('vrt_parr_remise')) {
+            $pc = max(0, $sousTotal - vrt_parr_remise($sousTotal, $parrainage));
+            if ($pc < $plancher) $plancher = $pc;
+        }
+        $attendu = $plancher + max(0, (int) $frais[$livr]);
+        return ($montant >= $attendu)
+            ? ['ok' => true,  'attendu' => $attendu, 'motif' => '']
+            : ['ok' => false, 'attendu' => $attendu, 'motif' => 'sous-paiement'];
+    }
+
+    /**
      * MANUEL PAPIER PAYÉ ⇒ LECTURE NUMÉRIQUE OUVERTE TOUT DE SUITE.
      *
      * Payer un livre puis attendre de passer à l'administration pour le retirer,

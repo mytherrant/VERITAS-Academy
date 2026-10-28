@@ -815,8 +815,12 @@
      transactions, le second récupère l'URL déjà obtenue. */
   function nouvelleRef() {
     var d = new Date(), p = function (n) { return ('0' + n).slice(-2); };
-    var al = '', C = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    for (var i = 0; i < 4; i++) al += C.charAt(Math.floor(Math.random() * C.length));
+    /* 8 caractères tirés par crypto (contre-expertise du 28/10, X3) : avec 4,
+       la référence s'énumérait et ouvrait la page de paiement d'un autre. */
+    var al = '', C = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', buf = new Uint8Array(8);
+    if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(buf);
+    else for (var j = 0; j < 8; j++) buf[j] = Math.random() * 256;
+    for (var i = 0; i < 8; i++) al += C.charAt(buf[i] % C.length);
     return 'VT' + String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate()) + '-' + al;
   }
 
@@ -1099,7 +1103,10 @@
             lignes: [{ nom: (S.article && S.article.titre) || '', qte: S.qte, pu: prixUnitaire() },
                      { nom: 'Livraison ' + ['(retrait au centre)', 'Douala', 'régions'][S.livr]
                             + (S.livr > 0 ? ' — ' + (S.saisie.vpAdr || '').trim() : ''),
-                       qte: 1, pu: [0, 1000, 2500][S.livr] }]
+                       qte: 1, pu: [0, 1000, 2500][S.livr] }],
+            /* Ce que le serveur RECALCULE depuis son catalogue : l'article, la
+               quantité, le mode de livraison. Sans lui, l'init refuse le panier. */
+            article: { id: (S.article && S.article.id) || '', qte: S.qte, livr: S.livr }
         };
         if (remiseAmi() > 0) {
           corps.code = S.codeAmi.code;
@@ -1491,7 +1498,14 @@
     }
 
     /* ── E-mail ────────────────────────────────────────────────────────── */
-    var mail = pi.email || ec.email || '';
+    /* Même règle que _emailPublic() d'app.js (contre-expertise du 28/10, S3) :
+       la base portait « www.…@gmail.com », recopiée telle quelle dans tous les
+       mailto: — adresse invalide, demandes de code enseignant perdues. On
+       retire le « www. », on refuse ce qui n'est pas une adresse, et une boîte
+       gratuite ne remplace pas l'adresse du domaine écrite dans la page. */
+    var mail = String(pi.email || ec.email || '').trim().replace(/^(www\.)+/i, '');
+    if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(mail)
+        || /@(gmail|googlemail|yahoo|ymail|hotmail|outlook|live|msn|aol|icloud|gmx|mail\.ru|yandex)\./i.test(mail)) mail = '';
     if (mail) {
       var ms = document.querySelectorAll('a[href^="mailto:"]');
       for (var k = 0; k < ms.length; k++) {

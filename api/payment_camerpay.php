@@ -610,6 +610,24 @@ if ($action === 'init' && $method === 'POST') {
                 'plancher' => $pvInit['plancher'],
             ], 409);
         }
+        /* Un panier n'a pas de tarif propre : vrt_verifier_prix() le laissait
+           passer à n'importe quel montant (contre-expertise du 28/10, X1). */
+        if ($intent === 'cart' && function_exists('vrt_verifier_panier')) {
+            $pvPanier = vrt_verifier_panier($dbInit, camerpaySanitizeLignes($input['lignes'] ?? null),
+                                            $input['article'] ?? null, $montant, $parrainageEtat);
+            if (!$pvPanier['ok'] && $modePrix !== 'log') {
+                vrt_pay_log('[PRIX_REFUSE_PANIER] ref=' . $ref . ' montant=' . $montant
+                    . ' attendu=' . var_export($pvPanier['attendu'], true) . ' motif=' . $pvPanier['motif']);
+                jsonRespCy([
+                    'error'   => ($pvPanier['attendu'] === null)
+                        ? 'Ce panier ne correspond à aucun article en vente. Actualisez la page puis réessayez : vous n’avez pas été débité.'
+                        : 'Le montant ne correspond plus au tarif (' . number_format((int) $pvPanier['attendu'], 0, ',', ' ')
+                          . ' FCFA attendus). Actualisez la page puis réessayez : vous n’avez pas été débité.',
+                    'code'    => 'PRIX_INCOHERENT',
+                    'attendu' => $pvPanier['attendu'],
+                ], 409);
+            }
+        }
     }
 
     // Méthode : soit imposée par le client, soit déduite du préfixe quand il est
