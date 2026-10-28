@@ -222,13 +222,54 @@ function statutNavigateur(e) {
     await pousse(B.jeton, [epreuve('brB', { ownerId: B.id, updatedAt: tic() })]);
     await pousse(B.jeton, [], { epSuppr: { brB: Date.now() } });
     dire(!!((etatServeur(gid).epSuppr || {}).brB), 'B supprime son propre brouillon');
-    await pousse(B.jeton, [], { epSuppr: { loin: Date.now() + 9e12 } });
-    dire(((etatServeur(gid).epSuppr || {}).loin || 0) <= Date.now() + 86400000 + 5000, 'une date de suppression dans le futur lointain est bornée');
+    dire(!ep(gid, 'brB').id, 'et le brouillon supprimé quitte l’état du serveur (il n’est plus renvoyé à chaque tirage)');
+    await pousse(B.jeton, [epreuve('brL', { ownerId: B.id, updatedAt: tic() })]);
+    await pousse(B.jeton, [], { epSuppr: { brL: Date.now() + 9e12 } });
+    const tL = (etatServeur(gid).epSuppr || {}).brL || 0;
+    dire(tL > 0 && tL <= Date.now() + 86400000 + 5000, 'une date de suppression dans le futur lointain est bornée', String(tL));
+    const fantomes = {}; for (let i = 0; i < 500; i++) fantomes['x' + i + '_' + Math.random().toString(36).slice(2, 8)] = Date.now();
+    // Envoyés par A, qui a tous les droits de suppression : seule la règle « épreuve connue » les arrête.
+    await pousse(A.jeton, [], { epSuppr: fantomes });
+    dire(Object.keys(etatServeur(gid).epSuppr || {}).length < 10,
+      'cinq cents identifiants inconnus ne gonflent pas le registre (il bloquait la synchro à 2 Mo)', String(Object.keys(etatServeur(gid).epSuppr || {}).length));
+    await pousse(A.jeton, [epreuve('brA', { ownerId: A.id, updatedAt: tic() })]);
+    r = await pousse(B.jeton, [], { epSuppr: { brA: Date.now() } });
+    dire(Array.isArray(r.j.suppRefusees) && r.j.suppRefusees.includes('brA') && !!ep(gid, 'brA').id,
+      'B ne supprime pas le brouillon de A, et la réponse le dit (le navigateur purge son registre)', JSON.stringify(r.j));
 
     console.log(`\n${G}⑦ Ce que le serveur garde est ce que le navigateur affiche${R}`);
     const toutes = (etatServeur(gid).epreuves || []).filter(e => e.revue && (e.revue.decisions || []).length && e.status !== 'brouillon');
     const ecarts = toutes.filter(e => statutNavigateur(e) !== e.status).map(e => e.id + ':' + e.status + '≠' + statutNavigateur(e));
     dire(toutes.length > 0 && ecarts.length === 0, 'chaque épreuve stockée a le statut que _statutRevue en déduirait', ecarts.join(', '));
+
+    console.log(`\n${G}⑨ Seconde relecture : retouche après validation, dates, copies${R}`);
+    // L'auteur retire le statut de son épreuve validée, la retouche, la resoumet au même tour.
+    const v1 = epreuve('v1', { ownerId: B.id, status: 'relecture', updatedAt: tic(), revue: { tour: 1, requis: 1, echeance: 0, decisions: [] } });
+    await pousse(B.jeton, [v1]);
+    await pousse(Dd.jeton, [Object.assign({}, ep(gid, 'v1'), { status: 'valide', updatedAt: tic(),
+      revue: Object.assign({}, ep(gid, 'v1').revue, { decisions: [D(Dd.id, 'valide')] }) })]);
+    dire(ep(gid, 'v1').status === 'valide', 'v1 validée par D');
+    await pousse(B.jeton, [Object.assign({}, ep(gid, 'v1'), { status: 'brouillon', updatedAt: tic() })]);
+    await pousse(B.jeton, [Object.assign({}, ep(gid, 'v1'), { status: 'relecture', title: 'CONTENU FALSIFIÉ', updatedAt: tic() })]);
+    dire(ep(gid, 'v1').status !== 'valide' && statutNavigateur(ep(gid, 'v1')) !== 'valide' && ep(gid, 'v1').revue.tour === 2,
+      'retirer le statut, retoucher, resoumettre au même tour : la décision de D ne valide pas l’autre texte',
+      JSON.stringify({ s: ep(gid, 'v1').status, nav: statutNavigateur(ep(gid, 'v1')), t: ep(gid, 'v1').revue.tour }));
+    // Date forgée très loin dans le futur.
+    await pousse(A.jeton, [epreuve('v2', { ownerId: A.id, status: 'brouillon', title: 'Original', updatedAt: tic() })]);
+    await pousse(B.jeton, [Object.assign({}, ep(gid, 'v2'), { title: 'DÉTRUIT', updatedAt: 9e15 })]);
+    dire(ep(gid, 'v2').updatedAt <= Date.now() + 86400000 + 5000, 'une date en l’an 300 000 est écrêtée à un jour', String(ep(gid, 'v2').updatedAt));
+    // Un poste en retard ne repousse pas la date du serveur (l'édition de A pendant l'aller-retour gagne).
+    const t0 = ep(gid, 'v2').updatedAt;
+    await pousse(A.jeton, [Object.assign({}, ep(gid, 'v2'), { title: 'A, maintenant', updatedAt: t0 + 1 })]);
+    const tA = ep(gid, 'v2').updatedAt;
+    r = await pousse(B.jeton, [epreuve('v2', { ownerId: A.id, title: 'vieux', updatedAt: t0 - 1000 })]);
+    dire(ep(gid, 'v2').updatedAt === tA && ep(gid, 'v2').title === 'A, maintenant',
+      'un envoi en retard garde la version du serveur SANS lui donner l’heure du serveur', JSON.stringify({ avant: tA, apres: ep(gid, 'v2').updatedAt }));
+    // Une copie qui a gardé les décisions de l'original : retirées, sans avis de refus.
+    r = await pousse(B.jeton, [Object.assign({}, ep(gid, 'v1'), { id: 'copie1', ownerId: B.id, status: 'brouillon', updatedAt: tic(),
+      revue: { tour: 1, requis: 1, echeance: 0, decisions: [D(Dd.id, 'valide')] } })]);
+    dire(r.j.corriges === 0 && (ep(gid, 'copie1').revue || { decisions: [] }).decisions.length === 0,
+      'une copie qui a gardé les décisions de l’original : retirées, sans avis de refus', JSON.stringify(r.j));
 
     console.log(`\n${G}⑧ Le rôle part avec le membre${R}`);
     await poste('?action=groupe&op=retirer', { groupe: gid, membre: C.id }, A.jeton);

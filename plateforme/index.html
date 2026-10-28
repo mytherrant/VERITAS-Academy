@@ -6979,6 +6979,14 @@ class Component extends DCLogic {
           /* Le serveur a ramené une partie de l'envoi à ce que ce rôle peut
              décider (X2) : on relit tout de suite sa version, sinon ce poste
              afficherait seul « validé » jusqu'au prochain envoi d'un collègue. */
+          /* Suppression refusée : on la retire du registre local, sinon elle
+             repartirait — et serait refusée — à chaque envoi. L'épreuve revient
+             à la relecture qui suit. */
+          if(j&&Array.isArray(j.suppRefusees)&&j.suppRefusees.length){
+            const reg=Object.assign({},this._epSuppr());
+            j.suppRefusees.forEach(id=>{delete reg[id];});
+            this.__epSuppr=reg;this._save('minesec_epsuppr',reg);
+          }
           if(j&&(j.corriges>0||j.fusionnes>0)){
             this._syncRev=null;
             if(j.corriges>0)this._avis('Une validation, une publication ou une suppression demande un rôle que vous n’avez pas dans cette équipe : le serveur ne l’a pas retenue.','ko');
@@ -8663,6 +8671,11 @@ class Component extends DCLogic {
     const a=this._active(),perm=this._perm(this._me().role);
     if(!a||!perm.edit||a.demo)return;
     if((a.status||'brouillon')!=='brouillon')return;
+    /* En équipe, le serveur ne retient la suppression d'un brouillon que de
+       son auteur ou d'un rôle qui valide : on ne la propose pas à un autre. */
+    if(this._groupeActif()&&a.ownerId&&a.ownerId!==this._me().id&&!perm.validate){
+      this._avis('Seul son auteur, ou un relecteur de l’équipe, peut supprimer ce brouillon.','ko');return;
+    }
     let ok=true;try{ok=window.confirm('Supprimer le brouillon « '+(a.title||'Nouvelle épreuve')+' » ? Ses textes, questions et corrigé seront effacés.');}catch(e){}
     if(!ok)return;
     const reg=Object.assign({},this._epSuppr(),{[a.id]:Date.now()});
@@ -9433,7 +9446,11 @@ class Component extends DCLogic {
     const cycleCards=(this.meta||[]).map(c=>({short:this.cShort[c.cycle]||c.cycle,sub:this.cSub[c.cycle]||(c.count+' textes'),count:c.count,open:()=>this.setState({filters:{q:'',cycle:c.cycle,group:'',type:'',subkind:'',length:'',source:''},screen:'liste'},()=>window.scrollTo(0,0))}));
 
     const wordsOf=e=>e.textIds.reduce((a,n)=>{const f=all.find(x=>x.n===n);return a+(f?f.words:0);},0);
-    const epCard=e=>{const owner=st.users.find(u=>u.id===e.ownerId);const sm=this._statusMeta(e.status);return{id:e.id,title:e.title,classe:e.classe||'—',count:e.textIds.length,words:wordsOf(e),statusLabel:sm.label,statusChip:this._statusChip(e.status),libChip:e.inLibrary?'font-size:10px;font-weight:700;color:var(--cc26a12,#c26a12);background:var(--cfdefdb,#fdefdb);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,ago:'MàJ '+this._ago(e.updatedAt),avatars:avStack([e.ownerId,...e.editorIds]),ownerLine:owner?owner.name.replace(/^(M\.|Mme|Mlle)\s+/,''):'',open:()=>this.setState({activeId:e.id,screen:'composeur'},()=>{this._persist();window.scrollTo(0,0);}),openLabel:perm.readOnly?'Consulter':'Ouvrir',dupStyle:perm.readOnly?hidden:'background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:13px',duplicate:()=>{const id='e'+Date.now();const copy={...e,id,title:e.title+' (copie)',status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),comments:[],activity:[{userId:me.id,text:'a dupliqué l\u2019épreuve',ts:Date.now()}]};this.setState(s=>({epreuves:[copy,...s.epreuves],activeId:id,screen:'composeur'}),()=>this._persist());}};};
+    const epCard=e=>{const owner=st.users.find(u=>u.id===e.ownerId);const sm=this._statusMeta(e.status);return{id:e.id,title:e.title,classe:e.classe||'—',count:e.textIds.length,words:wordsOf(e),statusLabel:sm.label,statusChip:this._statusChip(e.status),libChip:e.inLibrary?'font-size:10px;font-weight:700;color:var(--cc26a12,#c26a12);background:var(--cfdefdb,#fdefdb);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,ago:'MàJ '+this._ago(e.updatedAt),avatars:avStack([e.ownerId,...e.editorIds]),ownerLine:owner?owner.name.replace(/^(M\.|Mme|Mlle)\s+/,''):'',open:()=>this.setState({activeId:e.id,screen:'composeur'},()=>{this._persist();window.scrollTo(0,0);}),openLabel:perm.readOnly?'Consulter':'Ouvrir',dupStyle:perm.readOnly?hidden:'background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:13px',duplicate:()=>{const id='e'+Date.now();const copy={...e,id,title:e.title+' (copie)',status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),comments:[],
+          /* Une copie est une épreuve NEUVE : elle repart sans les décisions de
+             relecture, le mode solo ni l'historique de l'original (le serveur
+             retire ces décisions, que la fusion ressuscitait à chaque envoi). */
+          revue:undefined,solo:undefined,history:undefined,activity:[{userId:me.id,text:'a dupliqué l\u2019épreuve',ts:Date.now()}]};this.setState(s=>({epreuves:[copy,...s.epreuves],activeId:id,screen:'composeur'}),()=>this._persist());}};};
     /* Visibilite : une epreuve appartient a un groupe. Un groupe ferme la
        garde pour ses membres ; un groupe ouvert la montre aux autres
        membres de la plateforme ; publiee dans la bibliotheque, elle est
