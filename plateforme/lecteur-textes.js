@@ -58,18 +58,33 @@
     throw new Error('contenu introuvable dans le fichier');
   }
 
+  /* Vrai si `n` a pour ancêtre un nœud nommé dans `noms`. */
+  function sous(n, noms) {
+    for (var p = n.parentNode; p && p.nodeType === 1; p = p.parentNode) if (noms.indexOf(p.nodeName) >= 0) return true;
+    return false;
+  }
+
   // Paragraphes d'un XML Word / OpenDocument, sans les balises.
+  /* 27/10/2026 — Une zone de texte Word est écrite deux fois (mc:Choice et
+     son repli mc:Fallback) et ses paragraphes sont IMBRIQUÉS dans celui qui
+     la porte : son texte sortait en double, voire en triple. On ignore le
+     repli, et un paragraphe ne recopie pas la zone de texte qu'il contient
+     (elle a ses propres paragraphes). */
   function paragraphes(xml, balisePara, baliseTexte, tab, saut) {
     var doc = new DOMParser().parseFromString(xml, 'application/xml');
     var out = [];
     var ps = doc.getElementsByTagName(balisePara);
     for (var i = 0; i < ps.length; i++) {
+      if (sous(ps[i], ['mc:Fallback'])) continue;
       var t = '';
       (function parcourir(n) {
         for (var c = n.firstChild; c; c = c.nextSibling) {
           if (c.nodeType === 3) { if (n.nodeName === baliseTexte || baliseTexte === '*') t += c.nodeValue; continue; }
-          if (c.nodeName === tab) t += '\t';
-          else if (c.nodeName === saut) t += '\n';
+          var nm = c.nodeName;
+          if (nm === tab) t += '\t';
+          else if (nm === saut || nm === 'w:cr') t += '\n';
+          else if (nm === 'w:noBreakHyphen') t += '-';
+          else if (nm === 'mc:Fallback' || nm === 'w:txbxContent') continue;
           else parcourir(c);
         }
       })(ps[i]);
@@ -86,9 +101,28 @@
     var xml = new TextDecoder().decode(await entreeZip(buf, 'content.xml'));
     var doc = new DOMParser().parseFromString(xml, 'application/xml'), out = [];
     var tout = doc.getElementsByTagName('*');
+    /* 27/10/2026 — `textContent` perdait les retours à la ligne (text:line-
+       break) et les tabulations : les vers d'un poème se collaient
+       (« vers unvers deux »). Il versait aussi dans le paragraphe le texte de
+       ses notes de bas de page et de ses commentaires. */
+    var lire = function (n) {
+      var t = '';
+      for (var c = n.firstChild; c; c = c.nextSibling) {
+        if (c.nodeType === 3) { t += c.nodeValue; continue; }
+        if (c.nodeType !== 1) continue;
+        var nm = c.nodeName;
+        if (nm === 'text:line-break') t += '\n';
+        else if (nm === 'text:tab') t += '\t';
+        else if (nm === 'text:s') t += new Array((parseInt(c.getAttribute('text:c'), 10) || 1) + 1).join(' ');
+        else if (nm === 'text:note' || nm === 'office:annotation') continue;
+        else t += lire(c);
+      }
+      return t;
+    };
     for (var i = 0; i < tout.length; i++) {
       var nm = tout[i].nodeName;
-      if (nm === 'text:p' || nm === 'text:h') out.push((tout[i].textContent || '').replace(/ /g, ' '));
+      if ((nm === 'text:p' || nm === 'text:h') && !sous(tout[i], ['text:note', 'office:annotation']))
+        out.push(lire(tout[i]).replace(/ /g, ' '));
     }
     return out.join('\n');
   }
@@ -102,10 +136,20 @@
     var doc = await pdfjs.getDocument({ data: new Uint8Array(buf), isEvalSupported: false }).promise;
     var pages = [];
     for (var p = 1; p <= doc.numPages; p++) {
-      var tc = await (await doc.getPage(p)).getTextContent(), ligne = '', lignes = [];
+      var tc = await (await doc.getPage(p)).getTextContent(), ligne = '', lignes = [], fin = null, haut = null;
+      /* 27/10/2026 — pdf.js ne marque pas toujours la fin d'une ligne
+         (hasEOL), et livre souvent les mots d'une même ligne SANS l'espace
+         qui les sépare : « 3 932exercices » (affiche-enseignant.pdf). On
+         coupe la ligne quand le morceau change de hauteur, et on rend
+         l'espace quand il commence plus loin que la fin du précédent. */
       tc.items.forEach(function (it) {
-        ligne += it.str;
-        if (it.hasEOL) { lignes.push(ligne); ligne = ''; }
+        var s = it.str || '', tr = it.transform || [1, 0, 0, 1, 0, 0];
+        var corps = Math.hypot(tr[0], tr[1]) || it.height || 10;
+        if (s && ligne && haut !== null && Math.abs(tr[5] - haut) > corps * 0.5) { lignes.push(ligne); ligne = ''; fin = null; }
+        else if (s && ligne && fin !== null && !/\s$/.test(ligne) && !/^\s/.test(s) && tr[4] - fin > corps * 0.12) ligne += ' ';
+        ligne += s;
+        if (s) { fin = tr[4] + (it.width || 0); haut = tr[5]; }
+        if (it.hasEOL) { lignes.push(ligne); ligne = ''; fin = null; }
       });
       if (ligne) lignes.push(ligne);
       pages.push(lignes.join('\n'));
@@ -119,10 +163,14 @@
      lignes d'un même paragraphe (ligne qui ne finit pas par une ponctuation
      forte suivie d'une ligne qui commence en minuscule). Les vers d'un poème
      commencent d'ordinaire par une majuscule : ils restent séparés. */
+  /* 27/10/2026 — Le mot coupé se recolle AVANT la ligne : dans l'ordre
+     inverse, la règle des lignes (« - » n'est pas une ponctuation forte)
+     changeait « quotidienne-⏎ment » en « quotidienne- ment », et celle des
+     mots coupés n'avait plus rien à recoller. */
   function recoller(t) {
     return t.replace(/\r/g, '').replace(/[ \t]+\n/g, '\n')
+      .replace(/([a-zàâäçéèêëîïôöùûüœ])-\n(?=[a-zàâäçéèêëîïôöùûüœ])/g, '$1')
       .replace(/([^\n.!?:;»"…])\n(?=[a-zàâäçéèêëîïôöùûüœ])/g, '$1 ')
-      .replace(/-\n(?=[a-zàâäçéèêëîïôöùûü])/g, '')
       .replace(/\n{3,}/g, '\n\n').trim();
   }
 

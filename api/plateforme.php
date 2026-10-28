@@ -1341,6 +1341,22 @@ if ($action === 'code' && $method === 'POST') {
     jsonResponse(['ok' => true, 'code' => $code]);
 }
 
+/**
+ * Ce que le porteur a déjà consommé CE MOIS-CI pour un genre de quota, lu
+ * au même endroit que ?action=quota l'incrémente : le registre des invités
+ * pour un invité, `plateforme.quotas` pour un compte. Lecture seule.
+ */
+function plat_consomme(array $v, array $db, string $genre): int
+{
+    $mois = date('Y-m');
+    if (($v['type'] ?? '') === 'invite') {
+        $c = plat_inv_lire()['appareils'][(string) ($v['cle'] ?? '')]['q'][$genre] ?? null;
+    } else {
+        $c = $db['plateforme']['quotas'][(string) ($v['acc']['id'] ?? '') . '|' . $genre] ?? null;
+    }
+    return (is_array($c) && (string) ($c['mois'] ?? '') === $mois) ? (int) ($c['utilise'] ?? 0) : 0;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────
    3. CORPUS — sous condition de droit
    ───────────────────────────────────────────────────────────────────────── */
@@ -1534,6 +1550,10 @@ if (($action === 'corpus' || $action === 'citations') && $method === 'GET') {
         'libresDroit' => $nLibres,
         'palier'  => $palier,
         'plafonds' => $caps,
+        /* Le solde d'analyses IA dès l'ouverture (27/10/2026) : sans lui,
+           l'Atelier affichait un défaut du navigateur (20) jusqu'à la
+           première question, puis le vrai solde (9 sur 10 en essai). */
+        'consomme' => ['ia' => plat_consomme($v, $db, 'ia')],
         ($estCitation ? 'citations' : 'textes') => $index,
         'droit'   => $droit,
     ]);

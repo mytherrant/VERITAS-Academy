@@ -242,6 +242,16 @@ const lireRegistre = () => {
       'il reste les 7 jours entiers — l’attente ne les a pas rognés',
       String(apresQuota.j.droit.resteJours));
 
+    /* SOLDE IA DÈS L'OUVERTURE (27/10/2026) : l'index rend plafond ET
+       consommé, sinon l'Atelier affiche un défaut du navigateur (20). */
+    dire(apresQuota.j.consomme && apresQuota.j.consomme.ia === 0 && apresQuota.j.plafonds.ia === 5,
+      'l’index rend le solde IA réel (0 consommé sur 5) avant toute question',
+      JSON.stringify({ consomme: apresQuota.j.consomme, ia: (apresQuota.j.plafonds || {}).ia }));
+    await poste('?action=quota', { genre: 'ia' }, jetonA);
+    const apresIA = await lit('?action=corpus&mode=index', jetonA);
+    dire(apresIA.j.consomme && apresIA.j.consomme.ia === 1,
+      'et suit le compteur du serveur après une analyse (1)', JSON.stringify(apresIA.j.consomme));
+
     const debut1 = lireRegistre().appareils[Object.keys(lireRegistre().appareils)[0]].essai;
     await poste('?action=quota', { genre: 'export' }, jetonA);
     const debut2 = lireRegistre().appareils[Object.keys(lireRegistre().appareils)[0]].essai;
