@@ -1977,7 +1977,7 @@
       // La VIGNETTE (460 px) plutôt que la couverture pleine : le bandeau en
       // affiche une dizaine, et la page se charge souvent en 3G.
       var couv = String(b.couv || '');
-      if (couv) img.style.backgroundImage = 'url("' + couv.replace(/(\/livret_[a-z0-9-]+)\.jpg$/, '$1_v.jpg').replace(/"/g, '') + '")';
+      if (couv) img.style.backgroundImage = 'url("' + couv.replace(/(\/livret_[a-z0-9-]+)\.jpg(\?|$)/, '$1_v.jpg$2').replace(/"/g, '') + '")';
       var x = document.createElement('span'); x.className = 'vn-x';
       var bd = document.createElement('span'); bd.className = 'vn-b';
       var j = joursDepuis(b.ajoute);

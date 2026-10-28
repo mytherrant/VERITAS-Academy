@@ -195,8 +195,16 @@ def page(slug: str, o: dict) -> str:
     # `vrt_livret_etat()` — un seul endroit décide, des deux côtés.
     autonome = str(o.get("mode") or "") == "autonome"
     porte = f"cahier-{slug}.html" if autonome else f"cahier.html?o={slug}"
-    couv_rel = f"/uploads/oeuvres/livret_{slug}.jpg"
     a_couv = (COUVERTURES / f"livret_{slug}.jpg").is_file()
+    # Versionnée par le CONTENU (le cache sert les images « immutable » un an) :
+    # une couverture remplacée change d'adresse. Pas la date du fichier : la CI
+    # rejoue ce script sur un checkout neuf, où toutes les dates sont celles du
+    # clonage, et la page changerait à chaque déploiement.
+    v = ""
+    if a_couv:
+        import hashlib
+        v = "?v=" + hashlib.sha1((COUVERTURES / f"livret_{slug}.jpg").read_bytes()).hexdigest()[:8]
+    couv_rel = f"/uploads/oeuvres/livret_{slug}.jpg{v}"
     simple = sans_accents_titre(titre)
     # Le titre part dans du JavaScript, pas dans du HTML : `html.escape` y
     # écrirait « &#39; » que le visiteur lirait tel quel sur l'écran de

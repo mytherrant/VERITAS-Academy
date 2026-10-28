@@ -209,6 +209,14 @@
         $('titre').textContent = 'Aperçu gratuit — ' + o.titre;
         document.title = 'Aperçu gratuit — ' + o.titre + ' · Centre VÉRITAS';
       }
+      /* LE PRIX DU BOUTON FINAL VIENT DU CATALOGUE. Il était écrit en dur
+         « 1 500 FCFA » : les cahiers à 1 000 F (œuvres du collège, cahiers S&T)
+         annonçaient un prix faux sur la dernière ligne avant l'achat. */
+      var prix = o && parseInt(o.prix, 10);
+      if (btnFin && prix > 0) {
+        btnFin.textContent = 'Obtenir mon code — '
+          + String(prix).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' FCFA';
+      }
       if (!o || !o.aCorriges) sansCorrection();
     })
     .catch(function () { sansCorrection(); });

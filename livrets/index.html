@@ -509,21 +509,21 @@
     <div class="card cardlv" data-slug="est-2nde"><h3>Classe de 2ⁿᵈᵉ <small class="t">(S&amp;T)</small></h3>
       <p class="note">Livret interactif de l'enseignement technique, dans l'ordre du programme national : dissertation, résumé, compte rendu écrit et oral.</p>
       <div class="duo">
-        <a class="dl" href="est-2nde.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
+        <a class="dl" href="est-2nde.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 000 F</span></a>
       </div>
       <a class="note" href="apercu.html?o=est-2nde" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
     </div>
     <div class="card cardlv" data-slug="est-1ere"><h3>Classe de 1ʳᵉ <small class="t">(S&amp;T)</small></h3>
       <p class="note">Livret interactif de l'enseignement technique, dans l'ordre du programme national : dissertation, résumé, lettre de motivation et rapport.</p>
       <div class="duo">
-        <a class="dl" href="est-1ere.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
+        <a class="dl" href="est-1ere.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 000 F</span></a>
       </div>
       <a class="note" href="apercu.html?o=est-1ere" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
     </div>
     <div class="card cardlv" data-slug="est-tle-ed2"><h3>Classe de Tˡᵉ <small class="t">(S&amp;T) — nouvelle édition</small></h3>
       <p class="note">Livret interactif de l'enseignement technique, dans l'ordre du programme national : dissertation, résumé, CV et requête (entretien d'embauche en TI : BT).</p>
       <div class="duo">
-        <a class="dl" href="est-tle-ed2.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 500 F</span></a>
+        <a class="dl" href="est-tle-ed2.html"><span><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Ouvrir le livret</span><span class="pill prix">1 000 F</span></a>
       </div>
       <a class="note" href="apercu.html?o=est-tle-ed2" style="font-weight:600"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-eye"/></svg>Essayer 2 leçons gratuitement →</a>
     </div>
@@ -888,7 +888,8 @@
        L'attribut se pose AVANT `src` ; après, le navigateur a déjà tranché. */
     img.setAttribute('loading', 'eager');
     if (posees < 3) img.setAttribute('fetchpriority', 'high');
-    img.src = o.couverture.replace(/\.jpg$/, '_v.jpg');
+    // `?v=` : la couverture porte sa version (cache d'un an) ; la vignette la garde.
+    img.src = o.couverture.replace(/\.jpg(\?|$)/, '_v.jpg$1');
     // Une couverture absente ne doit pas laisser un cadre vide et cassé.
     img.onerror = function () { img.remove(); };
     carte.insertBefore(img, carte.firstChild);
@@ -1069,7 +1070,7 @@
       a.href = o.lien || (String(o.slug) + '.html');
       var im = document.createElement('span'); im.className = 'lvn-i';
       var couv = String(o.couverture || '');
-      if (couv) im.style.backgroundImage = 'url("' + couv.replace(/\.jpg$/, '_v.jpg').replace(/"/g, '') + '")';
+      if (couv) im.style.backgroundImage = 'url("' + couv.replace(/\.jpg(\?|$)/, '_v.jpg$1').replace(/"/g, '') + '")';
       var x = document.createElement('span'); x.className = 'lvn-x';
       var b = document.createElement('span'); b.className = 'lv-neuf'; b.style.marginLeft = '0';
       b.style.alignSelf = 'flex-start';

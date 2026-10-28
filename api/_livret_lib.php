@@ -382,8 +382,12 @@ if (!defined('VRT_LIVRET_LIB')) {
                     : (($mode === 'lecture' && $coquille)
                        ? ($slug . '.html')
                        : ('cahier.html?o=' . rawurlencode($slug))),
+            /* La couverture est servie « immutable » pendant un an : remplacée
+               sous le même nom, elle resterait l'ancienne chez tout visiteur déjà
+               venu. La date du fichier en version change l'adresse avec l'image. */
             'couverture' => is_file($dirCouv . 'livret_' . $slug . '.jpg')
-                    ? '/uploads/oeuvres/livret_' . $slug . '.jpg' : '',
+                    ? '/uploads/oeuvres/livret_' . $slug . '.jpg?v='
+                      . (int) @filemtime($dirCouv . 'livret_' . $slug . '.jpg') : '',
         ];
     }
 

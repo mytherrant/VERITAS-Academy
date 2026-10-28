@@ -82,6 +82,9 @@ RENFORT = dict(radius=0.7, percent=85, threshold=3)
 # un écran à densité double sans servir douze fois la pleine définition.
 VIGNETTE_L, VIGNETTE_H = 460, 613
 
+# Poids maximal d'une pleine définition tirée d'une source déjà compressée.
+PLAFOND_COMPRESSEE = 800 * 1024
+
 # ── Manifeste ────────────────────────────────────────────────────────────────
 # slug d'ouvrage → fichier source, et pour une planche : la part à découper.
 COUVERTURES: dict[str, dict] = {
@@ -100,8 +103,9 @@ COUVERTURES: dict[str, dict] = {
     "bord-6e":     {"src": "6e.png"},
     "bord-5e":     {"src": "5e.png"},
     # La planche S&T : trois couvertures sur une seule image.
-    "est-2nde":    {"src": "1ère ST.png", "part": 0, "parts": 3},
-    "est-1ere":    {"src": "ST.png"},          # existe seule, meilleure définition
+    # Couvertures définitives fournies par Jacques le 28/10/2026 (édition 2026-2027).
+    "est-2nde":    {"src": "Couverture_EST_2nde_2026-2027.webp"},
+    "est-1ere":    {"src": "Couverture_EST_1ere_2026-2027.webp"},
     "est-tle":     {"src": "1ère ST.png", "part": 2, "parts": 3},
     "est-tle-ed2": {"src": "1ère ST.png", "part": 2, "parts": 3},   # même couverture, nouvelle édition
 }
@@ -243,7 +247,12 @@ def traiter(slug: str, spec: dict, controle: bool) -> tuple[bool, str]:
 
     # Une couverture qui GROSSIT signale une erreur de traitement, pas une
     # optimisation : on le dit au lieu de la laisser passer.
-    if poids_apres >= poids_avant:
+    # Sauf quand la source est DÉJÀ compressée (WebP, JPEG) : un JPEG 4:4:4 de
+    # qualité 92 pèse forcément plus qu'un WebP. Là, la garde est un plafond.
+    if src.suffix.lower() in (".webp", ".jpg", ".jpeg"):
+        if poids_apres > PLAFOND_COMPRESSEE:
+            return False, f"⚠ {poids_apres // 1024} Ko (au-delà de {PLAFOND_COMPRESSEE // 1024} Ko)"
+    elif poids_apres >= poids_avant:
         return False, f"⚠ {poids_avant // 1024} Ko → {poids_apres // 1024} Ko (aucun gain)"
     return True, (f"{im.size[0]}×{im.size[1]} {poids_apres // 1024} Ko  +  "
                   f"vignette {v.size[0]}×{v.size[1]} {poids_v // 1024} Ko"
