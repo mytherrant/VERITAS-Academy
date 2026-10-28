@@ -24,7 +24,7 @@
      entière. `aspect-ratio` réserve le cadre AVANT que l'image n'arrive —
      sans lui, chaque couverture qui se charge pousse la page vers le bas et
      l'on clique sur la mauvaise carte. */
-  .cardlv .couv{ display:block; width:100%; aspect-ratio:3/4; object-fit:contain;
+  .cardlv .couv{ display:block; width:100%; height:auto; aspect-ratio:3/4; object-fit:contain;
     border-radius:10px; border:1px solid var(--vp-line,#E3E9F2);
     background:#f4f7fb; margin-bottom:2px; }
   .cardlv .duo{ display:flex; gap:8px; flex-wrap:wrap; }
@@ -866,7 +866,6 @@
      `alt` vide + `aria-hidden` : le titre du cahier est juste en dessous, en
      texte ; répéter « couverture du cahier de 6ᵉ » n'apprendrait rien à un
      lecteur d'écran et allongerait sa lecture. */
-  var posees = 0;
   var poserCouverture = function (carte, o) {
     if (!carte || !o || !o.couverture || carte.querySelector('.couv')) return;
     var img = document.createElement('img');
@@ -874,26 +873,30 @@
     img.alt = '';
     img.setAttribute('aria-hidden', 'true');
     img.decoding = 'async';
-    /* CHARGEMENT IMMÉDIAT POUR TOUTES — et c'est un choix, pas un oubli.
-       Le report (`loading="lazy"`) est la bonne pratique par défaut, et c'est
-       ce qui était écrit ici d'abord. Mais au banc, deux couvertures sur cinq
-       ne se chargeaient JAMAIS, même après défilement jusqu'en bas de page.
-       C'est probablement un artefact du navigateur piloté (Chrome ne déclenche
-       pas le report dans un onglet qui n'est pas peint) — probablement, donc
-       pas démontré. Or l'enjeu est la seule image d'un produit qu'on demande
-       de payer : une carte sans couverture coûte plus cher que les kilo-octets
-       épargnés. La grille tient en une douzaine de vignettes de ~62 Ko, soit
-       ~750 Ko au pire — le poids d'UNE seule couverture d'origine.
-       Les trois premières passent en priorité haute : ce sont elles qu'on voit.
+    /* TOUTES À L'APPROCHE (28/10/2026).
+       Toutes partaient d'emblée (`eager`) parce qu'au banc, en navigateur
+       piloté, deux couvertures sur cinq ne se chargeaient jamais en `lazy` —
+       un onglet qui n'est pas peint ne déclenche pas le report. Mais en 3G le
+       prix était réel : 34 vignettes JPG demandées avant même qu'on fasse
+       défiler. Et au téléphone (360 px, mesuré en production le 28/10), les
+       34 sont SOUS le premier écran, les trois premières comprises : aucune
+       ne mérite la priorité. Le navigateur charge de lui-même, sans attendre,
+       celles qui approchent de l'écran.
        L'attribut se pose AVANT `src` ; après, le navigateur a déjà tranché. */
-    img.setAttribute('loading', 'eager');
-    if (posees < 3) img.setAttribute('fetchpriority', 'high');
-    // `?v=` : la couverture porte sa version (cache d'un an) ; la vignette la garde.
-    img.src = o.couverture.replace(/\.jpg(\?|$)/, '_v.jpg$1');
-    // Une couverture absente ne doit pas laisser un cadre vide et cassé.
-    img.onerror = function () { img.remove(); };
+    img.setAttribute('loading', 'lazy');
+    // Dimensions de la vignette WebP : le cadre est réservé avant l'image.
+    img.width = 360; img.height = 480;
+    /* `?v=` : la couverture porte sa version (cache d'un an) ; la vignette la
+       garde. WebP d'abord (~29 Ko contre ~61 Ko) ; s'il échoue — navigateur
+       sans WebP, fichier absent — on retombe sur le JPG, puis on retire. */
+    var jpg = o.couverture.replace(/\.jpg(\?|$)/, '_v.jpg$1');
+    img.onerror = function () {
+      if (img.src.indexOf('_v.webp') !== -1) { img.src = jpg; return; }
+      // Une couverture absente ne doit pas laisser un cadre vide et cassé.
+      img.remove();
+    };
+    img.src = o.couverture.replace(/\.jpg(\?|$)/, '_v.webp$1');
     carte.insertBefore(img, carte.firstChild);
-    posees++;
   };
 
   /* Les cartes écrites à la main n'ont pas de couverture : elles sont plus

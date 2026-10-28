@@ -51,6 +51,14 @@ dit(sansVignette.length === 0,
   'chacune a sa vignette `_v.jpg` — sans quoi la carte s’affiche nue',
   sansVignette.slice(0, 5).join(', ') + (sansVignette.length > 5 ? ` (+${sansVignette.length - 5})` : ''));
 
+/* La grille demande le WebP d'abord (28/10/2026). Absent, la carte retombe
+   sur le JPG : pas nue, mais deux requêtes et le double du poids en 3G. */
+const sansWebp = couvertures.filter(
+  f => !fs.existsSync(path.join(dossier, f.replace(/\.jpg$/, '_v.webp'))));
+dit(sansWebp.length === 0,
+  'chacune a aussi sa vignette `_v.webp` — `python tools/vignettes_couvertures.py`',
+  sansWebp.slice(0, 5).join(', ') + (sansWebp.length > 5 ? ` (+${sansWebp.length - 5})` : ''));
+
 /* ── ② Le relevé des cartes porte sur TOUTE la page ─────────────────────── */
 console.log(`\n${G}2. Le script lit les trois grilles, pas seulement la première${R}`);
 const idx = fs.readFileSync(path.join(RACINE, 'livrets', 'index.html'), 'utf8');

@@ -393,7 +393,9 @@ html[data-vrt-theme="sombre"] #VISITOR#VISITOR :is(.card, .vcard, .vsec, .lws-ca
    `#VISITOR#VISITOR` passe devant sans ajouter un cran d'!important. */
 #VISITOR#VISITOR .vnav-brand-ic,
 .vnav-brand-ic{
-  background:url('/assets/veritas-logo.png') center/contain no-repeat !important;
+  /* WebP 96 px (7 Ko) : le PNG est servi « immutable » sans ?v=, et un
+     visiteur d'avant le 21/10 y garde 91 Ko. Audit 3G du 28/10/2026. */
+  background:url('/assets/veritas-logo-96.webp') center/contain no-repeat !important;
   box-shadow:none !important;
   border-radius:0 !important;
 }

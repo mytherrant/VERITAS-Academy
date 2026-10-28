@@ -1608,9 +1608,13 @@ function _migrateDB(){
       ];
     }
   }
-  // Identité école (toujours forcer depuis source embarquée)
+  // Identité école (toujours forcer depuis source embarquée).
+  // Depuis l'audit 3G du 28/10/2026, #_logoData pointe vers un fichier
+  // (/assets/veritas-logo-doc.webp, 26 Ko) au lieu de porter le PNG en base64
+  // (125 Ko, deux fois, dans chaque chargement d'app.html). `.src` rend l'URL
+  // absolue : elle vaut dans les fenêtres d'impression comme sur le canvas.
   var _ldEl=document.getElementById('_logoData');
-  var _ldSrc=(_ldEl&&_ldEl.src&&_ldEl.src.startsWith('data:'))?_ldEl.src:'';
+  var _ldSrc=(_ldEl&&_ldEl.src&&/^(data:|https?:)/.test(_ldEl.src))?_ldEl.src:'';
   if(_ldSrc){DB.school=DB.school||{};DB.school.logo=_ldSrc;}
   if(!DB.school)DB.school={};
   if(!DB.school.nom)DB.school.nom='VERITAS Academy';
