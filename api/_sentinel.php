@@ -234,8 +234,10 @@ const VRT_IA_ENTRAINEMENT =
 //     actuel les interdit déjà : on reste donc cohérent avec ce qui est
 //     annoncé. Pour les accueillir à nouveau, vider cette liste (chaîne vide)
 //     — un seul geste, aucun autre changement nécessaire.
+// 28/10/2026 — Jacques tranche : ChatGPT-User et OAI-SearchBot sont admis
+// (visibilité dans les réponses de ChatGPT) ; robots.txt et .htaccess suivent.
 const VRT_IA_A_LA_DEMANDE =
-    'ChatGPT-User|OAI-SearchBot|Claude-User|MistralAI-User|Perplexity-User';
+    'Claude-User|MistralAI-User|Perplexity-User';
 
 // (c) ASPIRATEURS SEO COMMERCIAUX — ils revendent l'analyse de votre site et
 //     consomment la bande passante du mutualisé sans rien apporter.
