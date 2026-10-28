@@ -36589,6 +36589,21 @@ window._codeAmiAppliquer = function(ref, silencieux){
     var btn = document.getElementById('payCampayBtn_' + ref);
     if(btn) btn.textContent = '⚡ Payer maintenant — ' + fmtF(montant);
   };
+  /* Un panier NUMÉRIQUE (« Payer tout », collections) ne se remise pas : le
+     serveur le juge sur ses lignes (vrt_parr_panier_physique) et refuse à
+     l'init tout montant remisé. La sonde, elle, ne voit pas les lignes et
+     annonçait une remise : le filleul recevait un 409 à chaque essai
+     (relecture du 28/10). Même règle ici que là-bas. */
+  var numerique = X.intent === 'cart' && (X.lignes || []).some(function(l){
+    return l && /^[a-z_]{1,30}$/.test(String(l.intent || '').toLowerCase()) && String(l.intent).toLowerCase() !== 'cart';
+  });
+  if(numerique){
+    X.montantFinal = 0; X.code = ''; X.remise = 0;
+    peindre(base);
+    var msg = 'Les codes ne s’appliquent pas à un panier de plusieurs achats en ligne : réglez-les un par un pour en profiter.';
+    if(fb) fb.innerHTML = (code && !silencieux) ? '<span style="color:var(--re);font-size:12px;font-weight:600">❌ ' + msg + '</span>' : '';
+    return Promise.resolve({ ok:false, message:msg });
+  }
   if(fb && code && !silencieux) fb.innerHTML = '<span style="font-size:12px;color:var(--ink4)">Vérification du code…</span>';
   return _codeAmiApi('verifier', { query:{ code:code, intent:X.intent||'', targetId:X.targetId||'', montant:base } })
     .then(function(j){

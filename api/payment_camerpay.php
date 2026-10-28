@@ -447,7 +447,8 @@ if ($action === 'init' && $method === 'POST') {
     $montant   = intval($input['montant']   ?? 0);
     $ref       = trim($input['ref']         ?? '');
     $label     = trim($input['label']       ?? 'Paiement VÉRITAS');
-    $intent    = trim($input['intent']      ?? 'generic');
+    // En minuscules : « Cart » échappait au contrôle du panier (relecture du 28/10).
+    $intent    = strtolower(trim((string) ($input['intent'] ?? 'generic')));
     $targetId  = trim($input['targetId']    ?? '');
     $accountId = trim($input['accountId']   ?? '');
     $clientNom = trim($input['clientNom']   ?? '');
@@ -562,6 +563,10 @@ if ($action === 'init' && $method === 'POST') {
     $codeSaisi = substr(trim((string) ($input['code'] ?? '')), 0, 32);
     $parrainageEtat = null;
     $dbInit = function_exists('vrt_load_db') ? vrt_load_db() : null;
+    $articleEtat = null;
+    if ($intent === 'cart' && !is_array($dbInit)) {
+        jsonRespCy(['error' => 'Le paiement en ligne est momentanément indisponible. Réessayez dans quelques minutes : vous n’avez pas été débité.'], 503);
+    }
     if (is_array($dbInit)) {
         $prixRef = vrt_prix_catalogue($dbInit, $intent, $targetId);
         /* Seul un tunnel qui AFFICHE la remise l'annonce, en envoyant la clé
@@ -609,6 +614,35 @@ if ($action === 'init' && $method === 'POST') {
                 'attendu'  => $pvInit['attendu'],
                 'plancher' => $pvInit['plancher'],
             ], 409);
+        }
+        /* Un panier n'a pas de tarif propre : vrt_verifier_prix() le laissait
+           passer à n'importe quel montant (contre-expertise du 28/10, X1). */
+        if ($intent === 'cart' && function_exists('vrt_verifier_panier')) {
+            $pvPanier = vrt_verifier_panier($dbInit, camerpaySanitizeLignes($input['lignes'] ?? null),
+                                            $input['lignes'] ?? null, $input['article'] ?? null, $montant, $parrainageEtat);
+            // Journalisé dans TOUS les modes : en mode `log`, c'est la seule trace de ce qui aurait été refusé.
+            if (!$pvPanier['ok']) {
+                vrt_pay_log('[PRIX_REFUSE_PANIER] ref=' . $ref . ' montant=' . $montant . ' mode=' . $modePrix
+                    . ' attendu=' . var_export($pvPanier['attendu'], true) . ' motif=' . $pvPanier['motif']);
+            }
+            if (!$pvPanier['ok'] && $modePrix !== 'log') {
+                jsonRespCy([
+                    'error'   => ($pvPanier['attendu'] === null)
+                        ? 'Ce panier ne correspond plus aux articles et aux tarifs en vente. Actualisez la page puis réessayez : vous n’avez pas été débité.'
+                        : 'Le montant ne correspond plus au tarif (' . number_format((int) $pvPanier['attendu'], 0, ',', ' ')
+                          . ' FCFA attendus). Actualisez la page puis réessayez : vous n’avez pas été débité.',
+                    'code'    => 'PRIX_INCOHERENT',
+                    'attendu' => $pvPanier['attendu'],
+                ], 409);
+            }
+            /* Panier physique accepté : ce qui sera livré est ce qui a été
+               contrôlé. Le libellé et la ligne d'article viennent du serveur,
+               et l'assiette de la commission aussi (articles, remise déduite). */
+            if ($pvPanier['ok'] && !empty($pvPanier['article'])) {
+                $label = $pvPanier['label'];
+                $articleEtat = $pvPanier['article'];
+                if ($parrainageEtat && !empty($parrainageEtat['panierPhysique'])) $parrainageEtat['assiette'] = (int) $pvPanier['assiette'];
+            }
         }
     }
 
@@ -710,6 +744,7 @@ if ($action === 'init' && $method === 'POST') {
             'parrainage'   => $parrainageEtat,
             'beneficiaires'=> camerpaySanitizeBeneficiaires($input['beneficiaires'] ?? null),
             'lignes'       => camerpaySanitizeLignes($input['lignes'] ?? null),
+            'article'      => $articleEtat,
             'push_count'   => 0,
             // Page d'où l'acheteur est parti (même site seulement) : la page de
             // paiement l'y ramène une fois le paiement confirmé.
@@ -850,6 +885,7 @@ if ($action === 'init' && $method === 'POST') {
         // confirmé par webhook ne pouvait débloquer AUCUN des articles côté
         // serveur — seul le navigateur du payeur savait ce qu'il avait acheté.
         // Borné à 50 lignes et aux 4 champs utiles : c'est une entrée client.
+        'article'        => $articleEtat,
         'lignes'         => camerpaySanitizeLignes($input['lignes'] ?? null)
     ];
     file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
