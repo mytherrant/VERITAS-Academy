@@ -1023,6 +1023,9 @@
      y apparaissait sans sa taille, un « ‹ » de 34×24 px qui ne menait nulle
      part (contre-expertise du 27/10/2026). */
   @media (min-width:821px){.vrt-retour{display:none!important}}
+  /* Pastille d'essai : libellé complet, ou court sous 480 px (A1, 28/10). */
+  .vrt-essai-court{display:none}
+  @media (max-width:480px){.vrt-essai-long{display:none}.vrt-essai-court{display:inline}}
   @media (max-width:820px){
     .vrt-hide-sm{display:none!important}
     header[data-noprint]{min-height:62px!important;gap:9px!important}
@@ -1364,21 +1367,21 @@
     </button>
 
     <nav style="display:flex;flex-direction:column;gap:3px">
-      <button onClick="{{ goAccueil }}" style="{{ sbAccueil }}" style-hover="background:var(--sb-hover)">{{ sbIcAccueil }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Accueil</span></button>
-      <button onClick="{{ goListe }}" style="{{ sbRessources }}" style-hover="background:var(--sb-hover)">{{ sbIcRessources }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Corpus</span></button>
-      <button onClick="{{ goEpreuves }}" style="{{ sbEpreuves }}" style-hover="background:var(--sb-hover)">{{ sbIcEpreuves }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Épreuves</span></button>
-      <button onClick="{{ goCours }}" style="{{ sbCours }}" style-hover="background:var(--sb-hover)">{{ sbIcCours }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Cours</span></button>
-      <button onClick="{{ goProgressions }}" style="{{ sbProgressions }}" style-hover="background:var(--sb-hover)">{{ sbIcProg }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Progressions</span></button>
-      <button onClick="{{ goSuivi }}" style="{{ sbSuivi }}" style-hover="background:var(--sb-hover)">{{ sbIcSuivi }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Suivi</span><span style="{{ sbSuiviBadge }}">{{ suiviRetardsN }}</span></button>
-      <button onClick="{{ goCollab }}" style="{{ sbCollab }}" style-hover="background:var(--sb-hover)">{{ sbIcCollab }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Équipe</span><span style="{{ sbMsgBadge }}">{{ msgCount }}</span></button>
+      <button title="Accueil" aria-label="Accueil" onClick="{{ goAccueil }}" style="{{ sbAccueil }}" style-hover="background:var(--sb-hover)">{{ sbIcAccueil }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Accueil</span></button>
+      <button title="Corpus" aria-label="Corpus" onClick="{{ goListe }}" style="{{ sbRessources }}" style-hover="background:var(--sb-hover)">{{ sbIcRessources }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Corpus</span></button>
+      <button title="Épreuves" aria-label="Épreuves" onClick="{{ goEpreuves }}" style="{{ sbEpreuves }}" style-hover="background:var(--sb-hover)">{{ sbIcEpreuves }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Épreuves</span></button>
+      <button title="Cours" aria-label="Cours" onClick="{{ goCours }}" style="{{ sbCours }}" style-hover="background:var(--sb-hover)">{{ sbIcCours }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Cours</span></button>
+      <button title="Progressions" aria-label="Progressions" onClick="{{ goProgressions }}" style="{{ sbProgressions }}" style-hover="background:var(--sb-hover)">{{ sbIcProg }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Progressions</span></button>
+      <button title="Suivi" aria-label="Suivi" onClick="{{ goSuivi }}" style="{{ sbSuivi }}" style-hover="background:var(--sb-hover)">{{ sbIcSuivi }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Suivi</span><span style="{{ sbSuiviBadge }}">{{ suiviRetardsN }}</span></button>
+      <button title="Équipe" aria-label="Équipe" onClick="{{ goCollab }}" style="{{ sbCollab }}" style-hover="background:var(--sb-hover)">{{ sbIcCollab }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Équipe</span><span style="{{ sbMsgBadge }}">{{ msgCount }}</span></button>
     </nav>
 
     <div style="height:1px;background:var(--sb-border);margin:20px 0"></div>
 
     <nav style="display:flex;flex-direction:column;gap:3px">
-      <button onClick="{{ goActivite }}" style="{{ sbNotifs }}" style-hover="background:var(--sb-hover)">{{ sbIcBell }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Notifications</span><span style="{{ sbNotifBadge }}">{{ notifCount }}</span></button>
-      <button onClick="{{ goProfil }}" style="{{ sbProfil }}" style-hover="background:var(--sb-hover)">{{ sbIcUser }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Profil</span></button>
-      <button onClick="{{ goAdmin }}" style="{{ sbAdmin }}" style-hover="background:var(--sb-hover)">{{ sbIcAdmin }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Administration</span></button>
+      <button title="Notifications" aria-label="Notifications" onClick="{{ goActivite }}" style="{{ sbNotifs }}" style-hover="background:var(--sb-hover)">{{ sbIcBell }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Notifications</span><span style="{{ sbNotifBadge }}">{{ notifCount }}</span></button>
+      <button title="Profil" aria-label="Profil" onClick="{{ goProfil }}" style="{{ sbProfil }}" style-hover="background:var(--sb-hover)">{{ sbIcUser }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Profil</span></button>
+      <button title="Administration" aria-label="Administration" onClick="{{ goAdmin }}" style="{{ sbAdmin }}" style-hover="background:var(--sb-hover)">{{ sbIcAdmin }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Administration</span></button>
     </nav>
 
     <div class="vrt-sblabel" style="margin-top:auto;padding-top:24px;{{ sbLabelShow }}">
@@ -1435,7 +1438,11 @@
       <!-- Rappel de l'essai. `resteJours` arrivait du serveur depuis le
            premier jour et n'était lu nulle part : l'enseignant découvrait la
            fin de son essai en butant dessus. Un clic mène aux abonnements. -->
-      <button onClick="{{ goAbo }}" title="{{ essaiTitre }}" style="{{ essaiChip }}">{{ essaiLabel }}</button>
+      <!-- Au téléphone, « Essai terminé · S’abonner » portait la barre à
+           447 px sur 360 : la page défilait en largeur et l'avatar (Mon
+           compte) sortait de l'écran. Sous 480 px, la pastille dit l'essentiel
+           (contre-expertise du 28/10/2026, A1). -->
+      <button onClick="{{ goAbo }}" title="{{ essaiTitre }}" aria-label="{{ essaiTitre }}" style="{{ essaiChip }}"><span class="vrt-essai-long">{{ essaiLabel }}</span><span class="vrt-essai-court">{{ essaiCourt }}</span></button>
       <span title="{{ syncTitre }}" style="{{ syncStyle }}">{{ syncLabel }}</span>
       <button onClick="{{ goProfil }}" title="Mon compte" style="display:flex;align-items:center;gap:9px;background:none;border:none;cursor:pointer;padding:3px 6px 3px 3px;border-radius:999px" style-hover="background:var(--cf2f6fb,#f2f6fb)">
         <span style="{{ me.avatarLg }}">{{ me.initials }}</span>
@@ -1560,7 +1567,7 @@
   <sc-if value="{{ isAccueil }}" hint-placeholder-val="{{ true }}">
   <main style="flex:1;padding:28px 30px 40px;max-width:1560px;width:100%;margin:0 auto">
 
-    <h2 style="font-family:'Poppins';font-weight:700;font-size:30px;line-height:1.15;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.02em" class="vrt-th">Bonjour {{ me.first }}</h2>
+    <h1 style="font-family:'Poppins';font-weight:700;font-size:30px;line-height:1.15;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.02em" class="vrt-th">Bonjour {{ me.first }}</h1>
     <p style="font-size:14px;color:var(--c7a8598,#7a8598);margin:6px 0 24px">{{ team.name }}</p>
     <!-- « Cette semaine » (20/10/2026, lot J) : où en est la première de mes
          classes dans sa progression, et la prochaine échéance à tenir. -->
@@ -1769,7 +1776,7 @@
   <sc-if value="{{ isListe }}" hint-placeholder-val="{{ true }}">
   <main style="flex:1;max-width:1200px;margin:0 auto;padding:30px 28px 72px;width:100%">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;flex-wrap:wrap">
-      <h2 style="font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f)" class="vrt-th">Corpus</h2>
+      <h1 style="font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f)" class="vrt-th">Corpus</h1>
       <span style="font-size:13px;color:var(--c7a8598,#7a8598);font-weight:600">{{ filteredCount }} texte(s)</span>
       <span style="{{ activeEpPill }}">Épreuve active : {{ activeEpTitle }}</span>
       <div style="margin-left:auto;display:flex;gap:12px;align-items:center">
@@ -1810,7 +1817,7 @@
                 <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;flex-wrap:wrap">
                   <span style="width:9px;height:9px;border-radius:50%;background:{{ f.dot }};flex:none"></span>
                   <span style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--c5a6678,#5a6678);font-weight:700;font-family:'Poppins'">{{ f.type }}</span>
-                  <span style="font-size:12px;color:var(--c7a8598,#7a8598)">· {{ f.words }} mots · Niveau {{ f.level }}</span>
+                  <span style="font-size:12px;color:var(--c7a8598,#7a8598)">{{ f.words }} mots · Niveau {{ f.level }}</span>
                   <span style="{{ f.badge }}">{{ f.subLabel }}</span>
                   <span style="{{ f.importChip }}">Importé</span>
                   <span style="{{ f.lockChip }}">{{ f.lockIcon }}Abonnement</span>
@@ -1893,7 +1900,7 @@
       <span style="width:9px;height:9px;border-radius:50%;background:{{ cur.dot }}"></span>
       <span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--c5a6678,#5a6678);font-weight:700;font-family:'Poppins'">{{ cur.type }}</span>
       <span style="{{ cur.badge }}">{{ cur.subLabel }}</span>
-      <span style="font-size:12px;color:var(--c7a8598,#7a8598)">· {{ cur.words }} mots · Niveau {{ cur.level }}</span>
+      <span style="font-size:12px;color:var(--c7a8598,#7a8598)">{{ cur.words }} mots · Niveau {{ cur.level }}</span>
     </div>
     <div style="font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--c1a72bb,#1a72bb);font-weight:700;margin-bottom:22px;font-family:'Poppins'">{{ cur.cycle }} — {{ cur.group }}</div>
     <div style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:22px 34px 30px;margin-bottom:16px;box-shadow:0 2px 12px rgba(20,55,95,.06)">
@@ -1920,7 +1927,7 @@
       <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><span style="width:8px;height:8px;border-radius:50%;background:var(--c1a72bb,#1a72bb)"></span><span style="font-family:Poppins;font-size:13px;font-weight:700;color:var(--c14375f,#14375f)">Annotation du mot sélectionné</span><button onClick="{{ annotClear }}" style="margin-left:auto;background:var(--cffffff,#fff);border:1px solid var(--cecc4bf,#ecc4bf);color:var(--cc0392b,#c0392b);padding:6px 12px;font-size:12px;cursor:pointer;border-radius:8px;font-weight:600" style-hover="background:var(--cfdecea,#fdecea)">Effacer l'annotation</button></div>
       <div style="display:flex;gap:8px;align-items:flex-start">
         <span style="{{ me.avatarLg }}">{{ me.initials }}</span>
-        <textarea value="{{ annotComment }}" onChange="{{ setAnnotComment }}" rows="2" placeholder="Ajouter un commentaire sur ce mot (visible par vos collègues)…" style="{{ fieldIn }};resize:vertical;flex:1;line-height:1.45"></textarea>
+        <textarea aria-label="Commentaire sur le mot" value="{{ annotComment }}" onChange="{{ setAnnotComment }}" rows="2" placeholder="Ajouter un commentaire sur ce mot (visible par vos collègues)…" style="{{ fieldIn }};resize:vertical;flex:1;line-height:1.45"></textarea>
         <button onClick="{{ annotSaveComment }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:10px 16px;font-size:13px;font-weight:700;border-radius:9px;cursor:pointer;font-family:Poppins;flex:none" style-hover="background:var(--c135a96,#135a96)">Publier</button>
       </div>
     </div>
@@ -1955,7 +1962,7 @@
   <sc-if value="{{ isEpreuves }}" hint-placeholder-val="{{ false }}">
   <main style="flex:1;max-width:1200px;margin:0 auto;padding:30px 28px 72px;width:100%">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-      <h2 style="font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f)" class="vrt-th">Épreuves</h2>
+      <h1 style="font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f)" class="vrt-th">Épreuves</h1>
       <div style="display:flex;gap:4px;background:var(--ceaf1f8,#eaf1f8);border-radius:10px;padding:4px;margin-left:6px">
         <button onClick="{{ epFilterAll }}" style="{{ epTabAll }}">Toutes</button>
         <button onClick="{{ epFilterMine }}" style="{{ epTabMine }}">Les miennes</button>
@@ -2009,7 +2016,7 @@
         <button onClick="{{ supprimerBrouillon }}" style="{{ supprBrouillonStyle }}" title="Supprimer définitivement ce brouillon">Supprimer ce brouillon</button>
       </div>
       <div class="vrt-titrelbl" style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8)">Titre de l'épreuve · cliquez pour modifier</span></div>
-      <input value="{{ ep.title }}" onChange="{{ setTitle }}" disabled="{{ cannotEdit }}" style="font-family:'Poppins';font-size:24px;font-weight:700;color:var(--c14375f,#14375f);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;background:var(--cffffff,#fff);width:100%;padding:8px 12px;margin-bottom:6px" style-hover="border-color:var(--cbcd9f2,#bcd9f2)" style-focus="border-color:var(--c1a72bb,#1a72bb);box-shadow:0 0 0 3px rgba(26,114,187,.12)" placeholder="Intitulé de l'épreuve">
+      <input aria-label="Intitulé de l’épreuve" value="{{ ep.title }}" onChange="{{ setTitle }}" disabled="{{ cannotEdit }}" style="font-family:'Poppins';font-size:24px;font-weight:700;color:var(--c14375f,#14375f);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;background:var(--cffffff,#fff);width:100%;padding:8px 12px;margin-bottom:6px" style-hover="border-color:var(--cbcd9f2,#bcd9f2)" style-focus="border-color:var(--c1a72bb,#1a72bb);box-shadow:0 0 0 3px rgba(26,114,187,.12)" placeholder="Intitulé de l'épreuve">
       <!-- Frise du circuit (20/10/2026), comme la fiche d'un sujet chez
            Tchouskou : où en est l'épreuve, d'un coup d'œil, sans ouvrir la
            colonne Collaboration. -->
@@ -2557,7 +2564,7 @@
             <sc-if value="{{ canComment }}" hint-placeholder-val="{{ true }}">
               <div style="display:flex;gap:10px;align-items:flex-start">
                 <span style="{{ me.avatarLg }}">{{ me.initials }}</span>
-                <textarea value="{{ commentDraft }}" onChange="{{ setComment }}" rows="2" placeholder="Ajouter un commentaire…" style="{{ fieldIn }};resize:vertical;flex:1;line-height:1.45"></textarea>
+                <textarea aria-label="Ajouter un commentaire" value="{{ commentDraft }}" onChange="{{ setComment }}" rows="2" placeholder="Ajouter un commentaire…" style="{{ fieldIn }};resize:vertical;flex:1;line-height:1.45"></textarea>
                 <button onClick="{{ addComment }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:10px 16px;font-size:13px;font-weight:700;border-radius:9px;cursor:pointer;font-family:Poppins;flex:none" style-hover="background:var(--c135a96,#135a96)">Publier</button>
               </div>
             </sc-if>
@@ -2731,7 +2738,7 @@
   <!-- ============ ÉQUIPE ============ -->
   <sc-if value="{{ isEquipe }}" hint-placeholder-val="{{ false }}">
   <main style="flex:1;max-width:1100px;margin:0 auto;padding:30px 28px 72px;width:100%">
-    <h2 style="font-size:26px;font-weight:700;margin:0 0 4px;color:var(--c14375f,#14375f)" class="vrt-th">{{ team.name }}</h2>
+    <h1 style="font-size:26px;font-weight:700;margin:0 0 4px;color:var(--c14375f,#14375f)" class="vrt-th">{{ team.name }}</h1>
     <p style="font-size:13.5px;color:var(--c7a8598,#7a8598);margin:0 0 24px">{{ memberCount }} membre(s) · Abonnement {{ team.plan }}</p>
     <!-- ============ INVITER UN COLLÈGUE ============
          Auditée absente le 25/08 : on ne pouvait inviter que des profils
@@ -2856,7 +2863,7 @@
   <sc-if value="{{ isProfil }}" hint-placeholder-val="{{ false }}">
   <main style="flex:1;max-width:1100px;margin:0 auto;padding:28px 30px 48px;width:100%">
 
-    <h2 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0 0 18px;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Mon compte</h2>
+    <h1 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0 0 18px;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Mon compte</h1>
 
     <div style="display:flex;gap:6px;border-bottom:1px solid var(--ce6ecf3,#e6ecf3);margin-bottom:22px;overflow-x:auto">
       <sc-for list="{{ profTabs }}" as="t" hint-placeholder-count="4">
@@ -2885,7 +2892,6 @@
             <span style="{{ me.avatarXl }}">{{ me.initials }}</span>
             <div style="font-family:Poppins;font-size:15px;font-weight:700;color:var(--c14375f,#14375f);margin-top:13px">{{ me.name }}</div>
             <div style="font-size:12.5px;color:var(--c8b97a8,#8b97a8);margin-top:3px">{{ me.role }}</div>
-            <div style="font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.55;margin-top:12px">Les initiales servent d'avatar tant que l'envoi de photo n'est pas raccordé au serveur.</div>
           </section>
 
           <section style="{{ cardStyle }}">
@@ -2996,7 +3002,7 @@
   <sc-if value="{{ isActivite }}" hint-placeholder-val="{{ false }}">
   <main style="flex:1;padding:28px 30px 44px;max-width:1080px;width:100%;margin:0 auto">
     <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:16px">
-      <h2 style="font-family:'Poppins';font-weight:700;font-size:26px;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Activité</h2>
+      <h1 style="font-family:'Poppins';font-weight:700;font-size:26px;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Activité</h1>
       <span style="font-size:13px;color:var(--c7a8598,#7a8598)">{{ actTotal }}</span>
     </div>
 
@@ -3144,7 +3150,7 @@
        <sc-if value="{{ docVoitEnonce }}" hint-placeholder-val="{{ true }}">
       <div style="text-align:center;border-bottom:2px solid var(--c14375f,#14375f);padding-bottom:18px;margin-bottom:8px"><div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--c5a6678,#5a6678);font-weight:600">République du Cameroun · MINESEC</div><div style="font-family:'Poppins';font-size:16px;font-weight:600;margin-top:6px;color:var(--c14375f,#14375f)">{{ epView.etab }}</div></div>
       <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--c3a4658,#3a4658);margin-bottom:26px;flex-wrap:wrap;gap:6px"><span>Classe : <strong style="font-weight:700">{{ epView.classe }}</strong></span><span>Durée : <strong style="font-weight:700">{{ epView.duree }}</strong></span><span>Coef. : <strong style="font-weight:700">{{ epView.coeff }}</strong></span><span>{{ epView.date }}</span></div>
-      <h2 style="font-family:'Poppins';font-size:23px;font-weight:700;text-align:center;margin:0 0 6px;color:var(--c14375f,#14375f)" class="vrt-th">{{ epView.title }}</h2>
+      <h1 style="font-family:'Poppins';font-size:23px;font-weight:700;text-align:center;margin:0 0 6px;color:var(--c14375f,#14375f)" class="vrt-th">{{ epView.title }}</h1>
       <p style="text-align:center;font-size:13px;font-style:italic;color:var(--c5a6678,#5a6678);margin:0 0 34px;text-wrap:pretty">{{ epView.consigne }}</p>
       <div style="display:flex;flex-direction:column;gap:34px">
         <sc-for list="{{ printFiches }}" as="f" hint-placeholder-count="2">
@@ -3187,7 +3193,7 @@
   <sc-if value="{{ isSuivi }}" hint-placeholder-val="{{ false }}">
   <main style="flex:1;max-width:1360px;margin:0 auto;padding:28px 30px 48px;width:100%">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
-      <h2 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Suivi</h2>
+      <h1 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Suivi</h1>
       <button onClick="{{ goProgressions }}" style="margin-left:auto;background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:7px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer">Progressions et mes classes</button>
     </div>
     <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 16px;max-width:86ch;line-height:1.55">Échéances déduites des progressions de vos classes et du calendrier officiel ; chaque ligne dit où en est l’épreuve qui y répond.</p>
@@ -3261,7 +3267,7 @@
   <sc-if value="{{ isProgressions }}" hint-placeholder-val="{{ false }}">
   <main style="flex:1;max-width:1360px;margin:0 auto;padding:28px 30px 48px;width:100%">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
-      <h2 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Progressions</h2>
+      <h1 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Progressions</h1>
       <span style="font-size:11.5px;font-weight:700;font-family:Poppins;color:var(--c1a72bb,#1a72bb);background:var(--ce7f1fb,#e7f1fb);padding:4px 12px;border-radius:999px">{{ progAnnee }}</span>
     </div>
     <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 16px;max-width:86ch;line-height:1.55">Progressions nationales de français, datées semaine par semaine d’après le calendrier officiel (arrêté conjoint MINEDUB/MINESEC) : vacances sautées, fériés signalés. Chaque séquence ouvre une épreuve déjà cadrée.</p>
@@ -3311,7 +3317,7 @@
   <main style="flex:1;max-width:1560px;margin:0 auto;padding:28px 30px 44px;width:100%">
 
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
-      <h2 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Cours &amp; leçons</h2>
+      <h1 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Cours &amp; leçons</h1>
       <button onClick="{{ newCoursDirect }}" style="{{ btnPrimaire }}" style-hover="background:var(--c135a96,#135a96)">{{ topIcPlus }}<span>Créer un cours</span></button>
     </div>
     <p style="font-size:13.5px;color:var(--c7a8598,#7a8598);margin:0 0 18px;max-width:78ch">Composez vos leçons à partir de gabarits conformes au programme MINESEC : objectif en agir compétent, phases de la démarche, corpus et activité d'intégration.</p>
@@ -3603,7 +3609,7 @@
   <main style="flex:1;max-width:1360px;margin:0 auto;padding:28px 30px 48px;width:100%">
 
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
-      <h2 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Administration</h2>
+      <h1 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Administration</h1>
       <span style="{{ admScopeChip }}">{{ admScope }}</span>
     </div>
     <p style="font-size:13.5px;color:var(--c7a8598,#7a8598);margin:0 0 18px;max-width:80ch">Tout ce qui est réglé ici s'applique immédiatement à votre groupe. Les réglages sont conservés localement tant que le raccordement au serveur VÉRITAS n'est pas fait.</p>
@@ -3907,7 +3913,7 @@
                  renoncer avant d'avoir commence. -->
             <div class="vrt-scene">
               <h4><b>1</b>Entrer</h4>
-              <p>Aucun compte, aucun mot de passe : les 5 006 textes du répertoire s’ouvrent tout de suite, dont 1 019 sans aucun abonnement.</p>
+              <p>Aucun compte, aucun mot de passe : le répertoire s’ouvre tout de suite. Plus de 1 000 textes du domaine public s’y lisent en entier sans abonnement ; le répertoire MINESEC s’ouvre en entier avec l’abonnement.</p>
               <div class="vrt-boite" style="max-width:290px;text-align:center">
                 <div style="font-size:9.5px;font-weight:700;color:var(--c8b97a8,#8b97a8);font-family:Poppins,sans-serif;letter-spacing:.06em;margin-bottom:9px">RIEN À REMPLIR</div>
                 <div style="display:flex;gap:6px;justify-content:center;margin-bottom:12px">
@@ -4063,7 +4069,7 @@
   <sc-if value="{{ isAbo }}" hint-placeholder-val="{{ false }}">
   <main style="flex:1;max-width:1100px;margin:0 auto;padding:34px 28px 72px;width:100%">
     <button onClick="{{ goEquipe }}" style="background:none;border:none;color:var(--c1a72bb,#1a72bb);font-size:13px;cursor:pointer;padding:0;margin-bottom:16px;font-weight:600" style-hover="color:var(--c135a96,#135a96)">{{ icRetour }} Équipe</button>
-    <h2 style="font-size:27px;font-weight:700;margin:0 0 6px;color:var(--c14375f,#14375f)" class="vrt-th">Abonnement &amp; quotas</h2>
+    <h1 style="font-size:27px;font-weight:700;margin:0 0 6px;color:var(--c14375f,#14375f)" class="vrt-th">Abonnement &amp; quotas</h1>
     <p style="font-size:14px;color:var(--c5a6678,#5a6678);margin:0 0 26px;max-width:70ch;text-align:justify">Le quota d'épreuves générées est limité par mois selon le plan, afin d'éviter les abus. Le compteur se réinitialise chaque début de mois et s'applique à l'équipe comme à chaque membre.</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px">
       <sc-for list="{{ plansView }}" as="p" hint-placeholder-count="4">
@@ -4310,7 +4316,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '28/10 · parcours';
+const ATELIER_BUILD = '28/10 · audit';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -4464,7 +4470,7 @@ class Component extends DCLogic {
          renseignements se DEDUIT de son contenu (voir _repliAuto). Un
          booleen n'y arrive que lorsque l'enseignant a clique. */
       filtresOpen:false,renseignementsOpen:null,collabOpen:false,
-      screen:'accueil',authed:store?(store.authed!==false):true,currentN:this.all[0]?this.all[0].n:1,
+      screen:this._ecranDeLAdresse()||'accueil',authed:store?(store.authed!==false):true,currentN:this.all[0]?this.all[0].n:1,
       qEditN:null,authMail:'',authMdp:'',authErr:'',authBusy:false,essaiJours:7,
       /* ENTREE LIBRE (09/09/2026). `estInvite` dit que ce navigateur
          travaille sous une identite d'appareil, sans compte ni mot de
@@ -6215,6 +6221,21 @@ class Component extends DCLogic {
       });
     }catch(e){}
   }
+  /* LIENS DIRECTS (contre-expertise du 28/10/2026, A2). /plateforme/#suivi,
+     un favori ou un lien envoyé à un collègue ouvraient toujours l'accueil :
+     l'écran de départ était écrit en dur. On lit l'adresse ; seules les
+     sections de premier niveau sont acceptées (un éditeur sans épreuve ou
+     sans cours choisi n'a rien à montrer). */
+  _ecranDeLAdresse(){
+    try{
+      const h=String(location.hash||'').replace(/^#/,'').split(/[&?]/)[0].toLowerCase();
+      const alias={corpus:'liste',ressources:'liste',equipe:'collab','équipe':'collab',
+        collaboration:'collab',notifications:'activite',compte:'profil',abonnement:'abo'};
+      const e=alias[h]||h;
+      return ['accueil','liste','epreuves','cours','progressions','suivi','collab','activite','profil','abo']
+        .indexOf(e)>=0?e:'';
+    }catch(e){return '';}
+  }
   _installerRetour(){
     if(this._retourInstalle)return;
     this._retourInstalle=true;
@@ -6226,6 +6247,22 @@ class Component extends DCLogic {
       this._histCle=this._cleHist(this.state);
     }catch(e){}
     window.addEventListener('popstate',(ev)=>{
+      /* Adresse changée À LA MAIN (ou lien interne « #suivi ») : le
+         navigateur émet un popstate SANS état. Il était pris pour un retour
+         sur la sentinelle — renvoi à l'accueil et « Appuyez de nouveau pour
+         quitter ». On ouvre la section demandée (28/10/2026, A2). */
+      if(!(ev&&ev.state)){
+        const vise=this._ecranDeLAdresse();
+        if(vise&&vise!=='accueil'){
+          /* L'entrée vient d'être créée par le navigateur : la synchro de
+             componentDidUpdate la REMPLACE (avec son état) au lieu d'en
+             empiler une seconde — sinon « retour » tombait sur un doublon. */
+          this._histRemplacer=true;
+          this.setState({screen:this._ecranTenable(vise),panierOpen:false,chatOpen:false,payOpen:false,
+            importOpen:false,notifOpen:false,createOpen:false});
+          return;
+        }
+      }
       const et=(ev&&ev.state&&ev.state.vrt)||'';
       this._retourEnCours=true;
       this._histCle=et;
@@ -10955,6 +10992,13 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
         if(j==null)return '';
         return 'Essai · '+j+' jour'+(j>1?'s':'');
       })(),
+      essaiCourt:(function(){
+        const d=st.corpusDroit||{};
+        if(d.motif==='abonnement')return '';
+        if(d.motif==='essai_termine')return 'S’abonner';
+        const j=(d.resteJours==null)?null:(d.resteJours|0);
+        return (j==null)?'':('Essai · '+j+' j');
+      })(),
       essaiTitre:(function(){
         const d=st.corpusDroit||{};
         if(d.motif==='essai_termine')
@@ -11710,7 +11754,26 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
                 profOngl('secu','S\u00e9curit\u00e9','lock'),profOngl('abo','Abonnement','card')],
       profIsInfos:pT==='infos',profIsPrefs:pT==='prefs',profIsSecu:pT==='secu',profIsAbo:pT==='abo',
       profNom:me.name||'',setProfNom:e=>majMoi({name:val(e)}),
-      profRole:me.role||'',setProfRole:e=>majMoi({role:val(e)}),
+      /* SE PROMOUVOIR SOI-MÊME (contre-expertise du 28/10/2026, A5). Les
+         droits suivent le rôle, et « Fonction » se choisissait librement :
+         dans une équipe, n'importe quel membre pouvait se déclarer Chef ou
+         Inspecteur et valider, publier. Seul, le choix reste libre (il n'y a
+         personne au-dessus de qui passer) ; en équipe, un rôle qui DONNE des
+         droits s'attribue dans Équipe → Membres, par un responsable.
+         ⚠️ Garde d'interface : le serveur accepte encore l'état d'équipe de
+         tout membre sans lire son rôle — voir le rapport du 28/10. */
+      profRole:me.role||'',setProfRole:e=>{
+        const nr=val(e);
+        const avant=this._perm(me.role),apres=this._perm(nr);
+        const monte=(apres.validate&&!avant.validate)||(apres.publish&&!avant.publish)
+          ||(apres.manageTeam&&!avant.manageTeam)||(apres.gererAbo&&!avant.gererAbo)
+          ||(apres.concevoirCorpus&&!avant.concevoirCorpus);
+        if(monte&&membresReels.length>1){
+          this._avis('Ce rôle donne des droits sur l’équipe : il s’attribue dans Équipe → Membres, par un responsable.','ko');
+          this.setState({});return;
+        }
+        majMoi({role:nr});
+      },
       profEtab:me.etab||st.team.name||'',setProfEtab:e=>majMoi({etab:val(e)}),
       profMail:me.mail||'',setProfMail:e=>majMoi({mail:val(e)}),
       profTel:me.tel||'',setProfTel:e=>majMoi({tel:val(e)}),
