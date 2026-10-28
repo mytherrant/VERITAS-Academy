@@ -441,6 +441,32 @@
       "pages": 0,
       "pagesLibres": 0,
       "ajoute": "2026-09-20"
+    },
+    "philo-tle": {
+      "titre": "Mon livret de philosophie — Terminale A4",
+      "niveau": "tle",
+      "mode": "autonome",
+      "kinds": [
+        "livret"
+      ],
+      "prix": 1500,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0,
+      "ajoute": "2026-10-28"
+    },
+    "philo-1ere": {
+      "titre": "Mon livret de philosophie — Première ABI",
+      "niveau": "1ere",
+      "mode": "autonome",
+      "kinds": [
+        "livret"
+      ],
+      "prix": 1500,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0,
+      "ajoute": "2026-10-28"
     }
   }
 }

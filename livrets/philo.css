@@ -1,0 +1,251 @@
+/* livrets/philo.css — LA MAQUETTE DES LIVRETS DE PHILOSOPHIE, À L'ÉCRAN
+   © 2026 Les Enseignants de VÉRITAS. Tous droits réservés.
+
+   Chaque règle reproduit une macro du livret imprimé (sources LaTeX,
+   build/main.tex) : mêmes polices, mêmes couleurs, mêmes proportions. Les
+   tailles sont données en points du livret et converties par --k (pixels
+   par point) : la page garde ses rapports, à toutes les largeurs d'écran.
+   Seule différence voulue : une colonne au lieu de deux — deux colonnes
+   qu'on fait défiler obligent à remonter au milieu de la lecture.          */
+
+/* @polices — écrit par tools/philo_livrets.py */
+@font-face{font-family:"VP Playfair";font-weight:700;font-style:normal;src:url(polices-philo/play-700.dc343b07.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Playfair";font-weight:800;font-style:normal;src:url(polices-philo/play-800.00592a53.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Playfair";font-weight:400;font-style:italic;src:url(polices-philo/play-400i.1a5ca0d5.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Nunito";font-weight:400;font-style:normal;src:url(polices-philo/nunito-400.f48fe214.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Nunito";font-weight:800;font-style:normal;src:url(polices-philo/nunito-800.a6c62d8c.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Lato";font-weight:400;font-style:normal;src:url(polices-philo/lato-400.022cb79f.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Lato";font-weight:700;font-style:normal;src:url(polices-philo/lato-700.d3d6f111.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Lato";font-weight:400;font-style:italic;src:url(polices-philo/lato-400i.4f9a66ba.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Lora";font-weight:400;font-style:normal;src:url(polices-philo/lora-400.f49f3134.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Lora";font-weight:700;font-style:normal;src:url(polices-philo/lora-700.9d3354d2.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Lora";font-weight:400;font-style:italic;src:url(polices-philo/lora-400i.c87bb72a.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Andika";font-weight:400;font-style:normal;src:url(polices-philo/andika-400.b4eb524d.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Andika";font-weight:700;font-style:normal;src:url(polices-philo/andika-700.e5ca0995.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Andika";font-weight:400;font-style:italic;src:url(polices-philo/andika-400i.7a19e503.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Literata";font-weight:400;font-style:normal;src:url(polices-philo/literata-400.b76006ef.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Literata";font-weight:700;font-style:normal;src:url(polices-philo/literata-700.e1de3c65.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Literata";font-weight:400;font-style:italic;src:url(polices-philo/literata-400i.1df88618.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Playpen";font-weight:400;font-style:normal;src:url(polices-philo/playpen-400.5cd3aef7.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Playpen";font-weight:700;font-style:normal;src:url(polices-philo/playpen-700.5a4d9c89.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Inter";font-weight:400;font-style:normal;src:url(polices-philo/inter-400.8e785bbc.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP Inter";font-weight:600 700;font-style:normal;src:url(polices-philo/inter-700.901ba001.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"VP FA";font-weight:900;font-style:normal;src:url(polices-philo/fa-s.515a8de5.woff2) format("woff2");font-display:block}
+@font-face{font-family:"VP Poppins";font-weight:700;src:url(/assets/polices/poppins-700-latin.woff2) format("woff2");font-display:swap}
+/* /polices */
+
+.lp{--k:1.58px;--ink:#1F2230;--muted:#5F6472;--tabline:#C9B8A6;--ulc:#8A3C22;
+  color:var(--ink);font:400 calc(var(--k)*10.8)/1.25 "Times New Roman",Tinos,"Liberation Serif","Noto Serif",serif;
+  text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;font-kerning:normal;
+  hyphens:auto;-webkit-hyphens:auto}
+@media (max-width:560px){.lp{--k:1.46px}}
+.lp *{box-sizing:border-box}
+.lp p{margin:0 0 calc(var(--k)*1.2);text-align:justify;text-indent:calc(var(--k)*22.7)}
+.lp p:first-child,.lp h3+p,.lp h4+p,.lp h5+p,.lp .box p,.lp .stackrow p,.lp .td p,.lp li p{text-indent:0}
+.lp b{font-weight:700}
+.lp .fa{font:normal 900 1.08em/1 "VP FA";display:inline-block;vertical-align:-.06em;font-style:normal}
+.lp .sc{font-variant:small-caps}
+.lp sup{font-size:.7em}
+.lp a{color:inherit}
+.lp a.pref{color:#7F2A4C;font-weight:700;text-decoration:underline}
+
+/* ── titres ─────────────────────────────────────────────────────────── */
+.lp .pagetitle{font:700 calc(var(--k)*28)/1.14 "VP Playfair",Georgia,serif;text-align:center;margin:calc(var(--k)*2) 0 calc(var(--k)*2)}
+.lp .hzero{font:700 calc(var(--k)*18)/1.22 "VP Playfair",Georgia,serif;text-align:center;margin:calc(var(--k)*10) 0 calc(var(--k)*1)}
+.lp .hone{font:700 calc(var(--k)*14.2)/1.2 "VP Playfair",Georgia,serif;margin:calc(var(--k)*12) 0 calc(var(--k)*4);
+  padding-bottom:calc(var(--k)*1.5);border-bottom:calc(var(--k)*.8) solid color-mix(in srgb,currentColor 35%,#fff)}
+.lp .hone .hico{font-size:calc(var(--k)*12.5);display:inline-block;width:1.45em}
+.lp .htwo{font:700 calc(var(--k)*12.4)/1.21 "VP Playfair",Georgia,serif;margin:calc(var(--k)*9) 0 calc(var(--k)*2.5)}
+.lp .hthree{font:800 calc(var(--k)*11)/1.22 "VP Nunito",sans-serif;margin:calc(var(--k)*7) 0 calc(var(--k)*1.5)}
+.lp .htwo .hico,.lp .hthree .hico{display:inline-block;min-width:1.7em}
+.lp .hnum{font:italic 400 1em/1 "VP Playfair",Georgia,serif}
+.lp .ornament{display:flex;align-items:center;justify-content:center;gap:calc(var(--k)*6);margin:calc(var(--k)*2) 0 calc(var(--k)*4)}
+.lp .ornament i{display:block;height:calc(var(--k)*.6);width:25%;background:var(--o)}
+.lp .ornament b{display:block;width:calc(var(--k)*6.4);height:calc(var(--k)*3.2);background:var(--o);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);filter:brightness(.8)}
+
+/* ── parties et chapitres ───────────────────────────────────────────── */
+.lp .partpage{position:relative;background:#1F2230;border-radius:calc(var(--k)*4);overflow:hidden;
+  padding:calc(var(--k)*10) calc(var(--k)*12) calc(var(--k)*16);margin:calc(var(--k)*2) 0 calc(var(--k)*12);color:#fff}
+.lp .partpage .kick{font:600 calc(var(--k)*8)/1.25 "VP Inter",sans-serif;color:#E2B13C;letter-spacing:.02em}
+.lp .partpage .ptitle{font:700 calc(var(--k)*27)/1.15 "VP Playfair",Georgia,serif;margin:calc(var(--k)*8.5) 0}
+.lp .partpage .pdesc{font:400 calc(var(--k)*9.4)/1.3 "VP Inter",sans-serif;color:#D2D3D6}
+.lp .strip7{position:absolute;left:0;right:0;bottom:0;height:calc(var(--k)*4);display:flex}
+.lp .strip7 i{flex:1}
+.lp .chapbanner{display:flex;align-items:stretch;border-radius:calc(var(--k)*4);overflow:hidden;color:#fff;
+  min-height:calc(var(--k)*44);margin:calc(var(--k)*4) 0 calc(var(--k)*8)}
+.lp .chnum{flex:0 0 calc(var(--k)*48);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--k)*1)}
+.lp .chnum span{font:400 calc(var(--k)*6.5)/1 "VP Inter",sans-serif;letter-spacing:.04em}
+.lp .chnum b{font:700 calc(var(--k)*26)/1 "VP Poppins",sans-serif}
+.lp .chtxt{padding:calc(var(--k)*7) calc(var(--k)*10);display:flex;flex-direction:column;justify-content:center}
+.lp .chtitle{font:700 calc(var(--k)*19)/1.16 "VP Playfair",Georgia,serif}
+.lp .chsub{font:400 calc(var(--k)*8.4)/1.2 "VP Inter",sans-serif;opacity:.9;margin-top:calc(var(--k)*2)}
+.lp .hprob{color:#fff;border-radius:calc(var(--k)*4);padding:calc(var(--k)*4) calc(var(--k)*8);
+  font:700 calc(var(--k)*11.5)/1.22 "VP Playfair",Georgia,serif;margin:0 0 calc(var(--k)*2)}
+.lp .hprob .hnum{font-weight:400}
+.lp .authorbox{border:calc(var(--k)*1.1) solid;border-radius:calc(var(--k)*5);padding:calc(var(--k)*8) calc(var(--k)*10);
+  text-align:center;margin:calc(var(--k)*12) 0 calc(var(--k)*10)}
+.lp .abk{font:700 calc(var(--k)*9.5)/1.2 "VP Playfair",Georgia,serif;text-transform:uppercase}
+.lp .abname{font:700 calc(var(--k)*20)/1.2 "VP Playfair",Georgia,serif;margin-top:calc(var(--k)*3)}
+.lp .abw{font-size:calc(var(--k)*11);margin-bottom:calc(var(--k)*4)}
+.lp .abn{font:400 calc(var(--k)*8.8)/1.23 "VP Lato",sans-serif}
+
+/* ── étiquettes ─────────────────────────────────────────────────────── */
+.lp .theselabel{font:800 calc(var(--k)*9)/1.22 "VP Nunito",sans-serif;padding:calc(var(--k)*3) calc(var(--k)*3);margin:calc(var(--k)*6) 0 calc(var(--k)*2)}
+.lp .badgewrap{margin:calc(var(--k)*8) 0 calc(var(--k)*2)}
+.lp .badge{display:inline-block;color:#fff;border-radius:calc(var(--k)*2);padding:calc(var(--k)*3) calc(var(--k)*6);
+  font:800 calc(var(--k)*8.4)/1.19 "VP Nunito",sans-serif}
+.lp .tablesub{border-top:calc(var(--k)*1.2) solid;font:800 calc(var(--k)*9.4)/1.23 "VP Nunito",sans-serif;padding:calc(var(--k)*2) calc(var(--k)*3);margin-top:calc(var(--k)*5)}
+.lp .exo{display:flex;align-items:flex-start;gap:calc(var(--k)*6);margin:calc(var(--k)*11) 0 calc(var(--k)*3)}
+.lp .exob{flex:0 0 auto;color:#fff;border-radius:calc(var(--k)*3);padding:calc(var(--k)*3.5) calc(var(--k)*6);
+  font:800 calc(var(--k)*10.5)/1.05 "VP Nunito",sans-serif;white-space:nowrap}
+.lp .exot{font:400 calc(var(--k)*9.6)/1.23 "VP Nunito",sans-serif;padding-top:calc(var(--k)*1.5)}
+.lp .numlab{font:700 1em/1 "VP Poppins",sans-serif;color:var(--accent,#7F2A4C)}
+.lp u.ulw{text-decoration:underline;text-decoration-color:var(--ulc);text-decoration-thickness:calc(var(--k)*.6);text-underline-offset:calc(var(--k)*2)}
+
+/* ── listes ─────────────────────────────────────────────────────────── */
+.lp ul.puces,.lp ul.numeros{list-style:none;margin:calc(var(--k)*2) 0;padding:0}
+.lp ul.puces li,.lp ul.numeros li{display:flex;gap:calc(var(--k)*5);margin:calc(var(--k)*2) 0;text-align:justify}
+.lp ul.puces .pu{flex:0 0 auto;font-size:calc(var(--k)*6);padding-top:calc(var(--k)*3.5)}
+.lp ul.numeros .nu{flex:0 0 calc(var(--k)*14);font-family:"VP Poppins",sans-serif;font-weight:700}
+.lp ul.puces li>div,.lp ul.numeros li>div{flex:1;min-width:0}
+.lp .qcm{display:flex;gap:calc(var(--k)*5);align-items:flex-start;margin:calc(var(--k)*1.5) 0;padding-left:calc(var(--k)*2);cursor:pointer}
+.lp .subline{display:flex;gap:calc(var(--k)*4);margin:calc(var(--k)*1.5) 0;text-align:justify}
+.lp .subline .sl{flex:0 0 1.5em}
+.lp .source{font:italic 400 calc(var(--k)*9)/1.22 "VP Lora",Georgia,serif;color:var(--muted);text-align:right;margin-top:calc(var(--k)*1)}
+
+/* ── cases à cocher et lignes d'écriture ────────────────────────────── */
+.lp input.cb{appearance:none;-webkit-appearance:none;flex:0 0 auto;width:1.05em;height:1.05em;margin:.12em 0 0;
+  border:calc(var(--k)*1) solid currentColor;border-radius:calc(var(--k)*2);background:#fff;cursor:pointer;vertical-align:-.15em;color:var(--accent,#7F2A4C)}
+.lp input.cb:checked{background:currentColor;box-shadow:inset 0 0 0 calc(var(--k)*2) #fff}
+.lp textarea.lignes{display:block;width:100%;border:0;resize:vertical;margin:calc(var(--k)*2) 0 calc(var(--k)*6);
+  padding:0 calc(var(--k)*2);font:400 calc(var(--k)*11)/calc(var(--k)*15.6) "VP Playpen","VP Andika",sans-serif;color:#1D3A8A;
+  background:transparent repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--k)*14.6),#9a9eaa calc(var(--k)*14.6),#9a9eaa calc(var(--k)*15.6));
+  background-size:calc(var(--k)*3.2) calc(var(--k)*15.6);
+  -webkit-mask:none;outline:none}
+.lp textarea.lignes{background-image:radial-gradient(circle at 50% calc(var(--k)*14.9),#8a8e9a calc(var(--k)*.55),transparent calc(var(--k)*.7))}
+.lp textarea.lignes:focus{background-color:#FFFBEA}
+.lp .dotline{display:inline-block;min-width:8em;border-bottom:calc(var(--k)*1) dotted #5F6472;outline:none;font-family:"VP Playpen",sans-serif;color:#1D3A8A}
+.lp .relpt{display:inline-block;width:calc(var(--k)*5.6);height:calc(var(--k)*5.6);border-radius:50%;border:calc(var(--k)*.8) solid var(--accent,#7F2A4C);background:#fff;vertical-align:middle}
+.lp .grillerep{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;margin:calc(var(--k)*3) 0 calc(var(--k)*6)}
+.lp .gcell{border:calc(var(--k)*.5) solid var(--tabline);margin-left:calc(var(--k)*-.5);display:flex;flex-direction:column;min-height:calc(var(--k)*20)}
+.lp .gcell span{font:800 calc(var(--k)*7.5)/1 "VP Nunito",sans-serif;padding:calc(var(--k)*1.5)}
+.lp .gcell input{border:0;width:100%;flex:1;font:400 calc(var(--k)*10)/1 "VP Playpen",sans-serif;color:#1D3A8A;text-align:center;background:transparent;outline:none}
+.lp .chrono{margin:calc(var(--k)*4) 0 calc(var(--k)*6)}
+.lp .chl{font:800 calc(var(--k)*9.6)/1.25 "VP Nunito",sans-serif}
+.lp .chb{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:calc(var(--k)*1.6);margin-top:calc(var(--k)*3)}
+.lp .chbox{width:calc(var(--k)*20);height:calc(var(--k)*16);border:calc(var(--k)*.7) solid;text-align:center;font:400 calc(var(--k)*10)/1 "VP Playpen",sans-serif;color:#1D3A8A}
+.lp .cocheliste{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--k)*3) calc(var(--k)*8);border-radius:calc(var(--k)*3);
+  padding:calc(var(--k)*4);margin:calc(var(--k)*3) 0 calc(var(--k)*7);font:400 calc(var(--k)*9.8)/1.25 "VP Lato",sans-serif}
+.lp .coche{display:flex;gap:calc(var(--k)*4);align-items:flex-start;cursor:pointer}
+.lp .coche input.cb{border-radius:0}
+
+/* ── encadrés ───────────────────────────────────────────────────────── */
+.lp .box{border-radius:calc(var(--k)*3);padding:calc(var(--k)*5) calc(var(--k)*7);margin:calc(var(--k)*5) 0;position:relative}
+.lp .box.callout{border-radius:calc(var(--k)*5);font:400 calc(var(--k)*10.6)/1.3 "VP Andika",sans-serif}
+.lp .box.notebox,.lp .box.citebox{font:400 calc(var(--k)*10.4)/1.27 "VP Lato",sans-serif}
+.lp .box.citebox{padding-top:calc(var(--k)*3.5);padding-bottom:calc(var(--k)*3.5);margin:calc(var(--k)*4) 0}
+.lp .box.orientation{font:400 calc(var(--k)*10.2)/1.25 "VP Lato",sans-serif;padding-top:calc(var(--k)*10)}
+.lp .box.tagged{margin-top:calc(var(--k)*14);padding-top:calc(var(--k)*12.5)}
+.lp .box .tag{position:absolute;left:calc(var(--k)*8);top:0;transform:translateY(-50%);color:#fff;border-radius:calc(var(--k)*2);
+  padding:calc(var(--k)*2.2) calc(var(--k)*5);font:800 calc(var(--k)*8)/1.12 "VP Nunito",sans-serif;max-width:calc(100% - var(--k)*40)}
+.lp .box.orientation .tag{font:700 calc(var(--k)*7.6)/1.05 "VP Inter",sans-serif}
+.lp .box p{text-align:left;margin-bottom:calc(var(--k)*2)}
+.lp .box.callout p,.lp .box.notebox p{text-align:justify}
+.lp .texte{border-top:calc(var(--k)*1.1) solid;border-bottom:calc(var(--k)*.5) solid #C9B8A6;margin:calc(var(--k)*6) 0;padding:calc(var(--k)*4) calc(var(--k)*3) calc(var(--k)*3);
+  font:400 calc(var(--k)*11.6)/1.28 "VP Lora",Georgia,serif}
+.lp .texte .quo{float:left;font-size:calc(var(--k)*13);margin-right:.6em;line-height:1.1}
+.lp .texte p{text-indent:1.2em;margin-bottom:calc(var(--k)*1)}
+.lp .texte p:first-of-type{text-indent:0}
+
+/* ── tableaux ───────────────────────────────────────────────────────── */
+.lp .tabbloc{margin:calc(var(--k)*5) 0 calc(var(--k)*6);border-top:calc(var(--k)*.5) solid var(--tabline);
+  font:400 calc(var(--k)*9.8)/1.245 "VP Lato",sans-serif;overflow-x:auto}
+.lp .tr{display:grid;border-bottom:calc(var(--k)*.5) solid var(--tabline);border-left:calc(var(--k)*.5) solid var(--tabline);min-width:min(100%,520px)}
+.lp .td{display:flex;flex-direction:column;justify-content:center;padding:calc(var(--k)*3) calc(var(--k)*4) calc(var(--k)*4);border-right:calc(var(--k)*.5) solid var(--tabline);min-width:0;text-align:justify;overflow-wrap:anywhere;hyphens:auto}
+.lp .td.c{text-align:center;align-items:center}
+.lp .td>*{max-width:100%}
+.lp .tr.hdr .td{color:#fff}
+.lp .th{font:800 calc(var(--k)*9)/1.22 "VP Nunito",sans-serif;color:#fff}
+.lp .td p{margin:0 0 calc(var(--k)*2);text-align:inherit}
+.lp .stacktab{margin:calc(var(--k)*5) 0 calc(var(--k)*6);font:400 calc(var(--k)*10.2)/1.255 "VP Lato",sans-serif;border-bottom:calc(var(--k)*.5) solid var(--tabline)}
+.lp .sth{font:800 calc(var(--k)*9)/1.22 "VP Nunito",sans-serif;color:#fff;padding:calc(var(--k)*3)}
+.lp .stackrow{border-top:calc(var(--k)*.5) solid var(--tabline);padding:calc(var(--k)*3) 0}
+.lp .srh{font:800 1em/1.25 "VP Nunito",sans-serif;padding-bottom:calc(var(--k)*1.5);border-bottom:calc(var(--k)*.6) solid;margin-bottom:calc(var(--k)*2)}
+.lp .srb{padding-left:calc(var(--k)*4);text-align:justify}
+.lp .srb p{margin-bottom:calc(var(--k)*1)}
+.lp hr.isep{border:0;border-top:calc(var(--k)*.5) dotted #9a9eaa;margin:calc(var(--k)*2.5) 0}
+.lp hr.sepparts{border:0;border-top:calc(var(--k)*.8) dashed;margin:calc(var(--k)*5) 0 calc(var(--k)*3)}
+.lp hr.separgs{border:0;border-top:calc(var(--k)*.5) dotted #9a9eaa;margin:calc(var(--k)*3) 0 calc(var(--k)*2)}
+.lp .relier{margin:calc(var(--k)*3) 0 calc(var(--k)*5);font:400 calc(var(--k)*9.8)/1.245 "VP Lato",sans-serif}
+.lp .rel{display:grid;grid-template-columns:1fr auto calc(var(--k)*40) auto 1.25fr;gap:calc(var(--k)*3);align-items:center;padding:calc(var(--k)*2) 0}
+.lp .rel.rh{font:800 1em/1.2 "VP Nunito",sans-serif;border-bottom:calc(var(--k)*.5) solid var(--tabline);margin-bottom:calc(var(--k)*2)}
+.lp table.tabx{width:100%;border-collapse:collapse;font:400 calc(var(--k)*9.8)/1.245 "VP Lato",sans-serif;margin:calc(var(--k)*3) 0 calc(var(--k)*6)}
+.lp table.tabx td{border:calc(var(--k)*.6) solid var(--tabline);padding:calc(var(--k)*3);vertical-align:top}
+.lp table.tabx tr.rh td{color:#fff}
+.lp .rephead{font:800 calc(var(--k)*8.2)/1.2 "VP Nunito",sans-serif}
+
+/* ── copies modèles ─────────────────────────────────────────────────── */
+.lp .copie{margin:calc(var(--k)*1) 0 calc(var(--k)*7);font-size:calc(var(--k)*11.6);line-height:1.285}
+.lp .copie.f-dev{font-family:"VP Literata",Georgia,serif}
+.lp .copie.f-kalam{font-family:"VP Playpen","VP Andika",sans-serif}
+.lp .cpar{display:flex;gap:calc(var(--k)*6);padding:calc(var(--k)*1) 0}
+.lp .cpar.trans .cptxt{background:#FFF1B8}
+.lp .cplab{flex:0 0 calc(var(--k)*22);align-self:flex-start;margin-top:calc(var(--k)*3);color:#fff;border-radius:calc(var(--k)*1.5);text-align:center;
+  font:700 calc(var(--k)*6.4)/1.1 "VP Inter",sans-serif;padding:calc(var(--k)*1.6) calc(var(--k)*1)}
+.lp .cplab:empty{visibility:hidden}
+.lp .cptxt{flex:1;min-width:0;text-align:justify;text-indent:1.5em}
+.lp .cptxt textarea{text-indent:0}
+.lp .saute{font:400 calc(var(--k)*7.8)/1.2 "VP Inter",sans-serif;padding:calc(var(--k)*3) 0 calc(var(--k)*10) calc(var(--k)*28)}
+.lp .copyintro{font-size:calc(var(--k)*9.8);color:var(--muted);text-indent:0}
+.lp .corriges{columns:3 14em;column-gap:calc(var(--k)*14);font:400 calc(var(--k)*8.4)/1.21 "VP Lato",sans-serif;margin-top:calc(var(--k)*4)}
+.lp .corriges p.corr{text-indent:0;text-align:left;padding-left:.8em;text-indent:-.8em;margin-bottom:calc(var(--k)*2.2);break-inside:avoid-column}
+.lp .corriges p.corr b{font-family:"VP Nunito",sans-serif;font-weight:800}
+.lp .bibsec{font:800 calc(var(--k)*10)/1.2 "VP Nunito",sans-serif;margin:calc(var(--k)*9) 0 calc(var(--k)*3);padding-bottom:calc(var(--k)*1);border-bottom:calc(var(--k)*.5) solid #C9CBD3}
+.lp p.bib{font:400 calc(var(--k)*9.2)/1.23 "VP Lato",sans-serif;text-indent:-1em;padding-left:1em;text-align:left;margin-bottom:calc(var(--k)*2.4)}
+
+@media (max-width:560px){
+  .lp .tr{font-size:calc(var(--k)*9.4)}
+  .lp .rel{grid-template-columns:1fr auto calc(var(--k)*16) auto 1.2fr}
+  .lp .cocheliste{grid-template-columns:1fr}
+  .lp .exo{flex-direction:column;gap:calc(var(--k)*3)}
+}
+@media print{.lp{display:none!important}}
+
+/* ── le lecteur (livrets/philo.js) ──────────────────────────────────── */
+html,body{margin:0;background:#E9EAEF}
+#ph{min-height:100vh;font-family:"VP Inter",system-ui,sans-serif}
+#ph-bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:8px;background:#142554;color:#fff;padding:8px 12px;box-shadow:0 2px 12px rgba(20,37,84,.25)}
+#ph-tit{flex:1;min-width:0;line-height:1.2}
+#ph-tit small{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#FFC93C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ph-tit b{display:block;font:700 15px/1.25 "VP Playfair",Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph-b{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:10px;background:#FFC93C;color:#142554;font:700 14px/1 "VP Inter",sans-serif;padding:9px 12px;cursor:pointer}
+.ph-b.g{background:rgba(255,255,255,.14);color:#fff;font-size:22px;padding:4px 13px}
+.ph-b:disabled{opacity:.35;cursor:default}
+@media (max-width:560px){.ph-b span{display:none}}
+#ph-offre{position:sticky;top:56px;z-index:25;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 14px;
+  background:#FFF4D1;border-bottom:1px solid #F2D27A;padding:8px 14px;font-size:14px;color:#3A2F0B;text-align:center}
+#ph-offre[hidden],#ph-nav[hidden],#ph-voile[hidden]{display:none}
+.ph-cta{border:0;border-radius:10px;background:#FFC93C;color:#142554;font:800 15px/1.1 "VP Inter",sans-serif;padding:11px 16px;cursor:pointer;box-shadow:0 3px 10px rgba(20,37,84,.18)}
+.ph-lien{border:0;background:none;color:#142554;font:600 14px/1 "VP Inter",sans-serif;text-decoration:underline;cursor:pointer;padding:8px}
+#ph-nav{position:fixed;top:0;left:0;bottom:0;z-index:50;width:min(380px,88vw);overflow-y:auto;background:#fff;box-shadow:6px 0 30px rgba(0,0,0,.25)}
+#ph-nav-t{position:sticky;top:0;background:#142554;color:#FFC93C;font:700 18px/1 "VP Playfair",Georgia,serif;padding:16px}
+#ph-nav-l a{display:block;text-decoration:none;color:#1F2230;padding:7px 16px;font-size:14px;line-height:1.3;border-bottom:1px solid #F0F0F4}
+#ph-nav-l a.p{font:700 15px/1.25 "VP Playfair",Georgia,serif;color:#7F2A4C;background:#FAF6F8;padding-top:11px;padding-bottom:11px}
+#ph-nav-l a.s{font-weight:700}
+#ph-nav-l a.ss{padding-left:30px;color:#5F6472;font-size:13px}
+#ph-nav-l a.ferme{color:#9096A3}
+#ph-nav-l .off{display:inline-block;background:#2D7D4F;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;margin-left:4px}
+#ph-voile{position:fixed;inset:0;z-index:45;background:rgba(20,37,84,.45)}
+#ph-main{max-width:820px;margin:18px auto 40px;padding:0 10px}
+#ph-page{background:#fff;padding:26px 30px 30px;border-radius:6px;box-shadow:0 6px 24px rgba(20,37,84,.10);-webkit-user-select:text;user-select:text}
+@media (max-width:560px){#ph-main{margin-top:8px;padding:0}#ph-page{padding:16px 16px 22px;border-radius:0}}
+#ph-pied{display:flex;justify-content:space-between;gap:12px;margin-top:14px}
+#ph-pied a{flex:0 1 48%;text-decoration:none;background:#fff;color:#142554;border-radius:10px;padding:12px 14px;font:700 14px/1.3 "VP Inter",sans-serif;box-shadow:0 3px 12px rgba(20,37,84,.08)}
+#ph-pied a.ph-ps{text-align:right}
+.ph-cad{text-align:center;max-width:520px;margin:30px auto 10px;font-family:"VP Inter",sans-serif}
+.ph-cad-i{font-size:40px}
+.ph-cad h2{font:700 24px/1.2 "VP Playfair",Georgia,serif;color:#142554;margin:8px 0}
+.ph-cad p{text-indent:0;text-align:center;font-size:15px;line-height:1.5;color:#3d4250}
+.ph-cad .ph-pay{font-size:12.5px;color:#7a7f8c;margin-top:10px}
+.ph-cad .ph-cta{width:100%;margin-top:8px;padding:14px}
+@media (max-width:560px){#ph-offre{position:static;padding:7px 10px;font-size:13px;gap:4px 10px}#ph-offre .ph-cta{padding:9px 13px;font-size:14px}}

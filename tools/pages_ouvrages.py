@@ -134,7 +134,30 @@ FAMILLES["edition"] = {
 }
 
 
+# Les deux livrets de philosophie (28/10/2026) : Terminale A4 et Première
+# ABI. Ce qui est dit ici est ce que porte le livret, vérifié sur son
+# contenu : méthode du commentaire et de la dissertation, une fiche par
+# chapitre de la progression, des copies modèles rédigées, des épreuves
+# types et leurs corrigés en fin de livret.
+FAMILLES["philo"] = {
+    "etiquette": "Livret d'activités de philosophie",
+    "phrase": "Le livret de philosophie tel qu'il est imprimé, mis en page pour "
+              "l'écran : la méthode, une fiche par chapitre du programme, des "
+              "copies modèles rédigées et des épreuves corrigées.",
+    "resume": [
+        ("Pour l'élève",
+         "il lit la leçon, s'entraîne dans la page — lignes d'écriture, cases à "
+         "cocher, grilles — et vérifie ses réponses dans les corrigés du livret."),
+        ("Pour l'enseignant",
+         "la progression harmonisée sous les yeux, chapitre par chapitre, avec "
+         "les textes, les sujets et les copies modèles prêts pour la classe."),
+    ],
+}
+
+
 def famille(slug: str) -> dict:
+    if slug.startswith("philo-"):
+        return FAMILLES["philo"]
     # Avant « bord- » : `bord-2nde-ed1` commence comme un Bord mais n'en est pas un.
     if slug.endswith("-ed1"):
         return FAMILLES["edition"]
@@ -244,7 +267,14 @@ def page(slug: str, o: dict) -> str:
     if len(court) > 34:
         court = court[:33].rsplit(" ", 1)[0] + "…"
     prix_lisible = format(prix, ",").replace(",", " ")
-    if autonome:
+    philo = slug.startswith("philo-")
+    if philo:
+        serie = "Terminale A4" if niveau == "tle" else "Première ABI"
+        titre_seo = f"Livret de philosophie {serie} — en ligne"
+        desc = (f"Livret d'activités de philosophie {serie} : méthode du commentaire "
+                f"et de la dissertation, fiches par chapitre, copies modèles, "
+                f"épreuves corrigées. {prix_lisible} FCFA l'année.")
+    elif autonome:
         # Ce que tape un parent : « œuvres au programme 6e Cameroun ». Le titre
         # du catalogue (« Étude des œuvres intégrales — 6ᵉ ») dit déjà les deux
         # mots, mais avec un exposant que Google n'indexe pas comme « 6e ».
@@ -289,7 +319,17 @@ def page(slug: str, o: dict) -> str:
     # prennent qu'un. Devant un cahier d'œuvres, elle n'a pas de sens : il n'a
     # pas de jumeau, il vient en plus. Poser la mauvaise question au bas d'une
     # page de vente, c'est envoyer comparer ailleurs quelqu'un qui était prêt.
-    if autonome:
+    if philo:
+        encadre_famille = f'''<div class="card" style="margin-top:1rem">
+    <h3>{ico('i-eye')}Deux leçons à lire avant d'acheter</h3>
+    <p>L'avant-propos et deux leçons entières s'ouvrent sans code, dans la mise
+       en page du livret imprimé : on voit exactement ce que l'on achète. Le
+       reste du livret — tous les chapitres, les épreuves types et leurs
+       corrigés — s'ouvre avec le code d'accès.</p>
+    <a class="dl" href="{porte}"><span>{ico('i-eye')}Lire les deux leçons
+      gratuites</span><span class="pill gris">sans code</span></a>
+  </div>'''
+    elif autonome:
         encadre_famille = f'''<div class="card" style="margin-top:1rem">
     <h3>{ico('i-book-open')}Ce cahier remplace-t-il les livres ?</h3>
     <p>Non, et c'est le seul point sur lequel il ne cède pas : il faut lire les
@@ -319,6 +359,13 @@ def page(slug: str, o: dict) -> str:
     <a class="dl" href="/livrets/"><span>{ico('i-book-open')}Comparer et choisir</span>
       <span class="pill gris">tous les cahiers</span></a>
   </div>'''
+
+    note_bas = ('<p class="note">Les corrigés de ce livret sont dans le livret '
+                "lui-même, en fin d'ouvrage, et s'ouvrent avec le code.</p>"
+                if philo else
+                '<p class="note">Les corrigés des cahiers restent gratuits et sans compte sur\n'
+                '     <a href="/corriges/">la page des corrigés</a>. Ce cahier-ci est l\'ouvrage\n'
+                '     lui-même, à remplir en ligne.</p>')
 
     resume = "".join(
         f'<p><b>{html.escape(qui)}</b> — {html.escape(quoi)}</p>'
@@ -410,9 +457,7 @@ def page(slug: str, o: dict) -> str:
 
   {encadre_famille}
 
-  <p class="note">Les corrigés des cahiers restent gratuits et sans compte sur
-     <a href="/corriges/">la page des corrigés</a>. Ce cahier-ci est l'ouvrage
-     lui-même, à remplir en ligne.</p>
+  {note_bas}
 
 </div>
 <!-- ⚠️ LE BOUTON D'ACHAT DOIT OUVRIR LE TUNNEL, PAS RENVOYER A LA BOUTIQUE.

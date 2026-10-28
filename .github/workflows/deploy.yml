@@ -1288,7 +1288,9 @@ jobs:
               #    passee sans un mot — le produit vendu, en clair, dans un
               #    depot GitHub public. La garde ne vaut que ce que vaut sa
               #    liste ; celle-ci vient de s'allonger.
-              if grep -qE 'window[.](BOOKLET|GUIDE|OI_DOC)[A-Z0-9_]* *=' "$f"; then
+              #    QUATRE depuis le 28/10/2026 : les livrets de philosophie
+              #    posent `window.PHILO_DOC` (livrets/philo.js).
+              if grep -qE 'window[.](BOOKLET|GUIDE|OI_DOC|PHILO_DOC)[A-Z0-9_]* *=' "$f"; then
                 echo "::error title=Contenu dans la coquille::$f embarque les donnees du livret — le produit partirait en clair. Deploiement ANNULE."
                 exit 1
               fi
@@ -1342,6 +1344,19 @@ jobs:
               fi
               if [ "$c" -gt 2 ]; then
                 echo "::error title=Apercu trop long::$f contient $c oeuvres ouvertes (2 au plus). Deploiement ANNULE."
+                exit 1
+              fi
+              # Format des livrets de philosophie (window.PHILO_DOC) : chaque
+              # section ouverte porte "libre":true — l'avant-propos et deux
+              # lecons, trois au plus. Les corriges (section "corrige") n'y
+              # ont jamais de HTML.
+              p=$(grep -o '"libre":true' "$f" | wc -l)
+              if [ "$p" -gt 3 ]; then
+                echo "::error title=Apercu trop long::$f ouvre $p sections (avant-propos + 2 lecons au plus). Deploiement ANNULE."
+                exit 1
+              fi
+              if grep -qE '"kind":"corrige"[^}]*"html":"[^"]' "$f"; then
+                echo "::error title=Corrige dans un apercu gratuit::$f ouvre la section des corriges. Regenerer avec: python tools/philo_livrets.py. Deploiement ANNULE."
                 exit 1
               fi
             done
