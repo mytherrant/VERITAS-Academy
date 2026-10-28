@@ -5813,7 +5813,7 @@ function vShowSec(sec,btn,_boot){
         <div class="vcard">
           <div class="ct"><span class="ct-ico">${_ico('mappin',17)}</span>Informations pratiques</div>
           ${[['clock','Horaires',pi.horaires],
-             ['phone','Téléphone',_telPublic(pi)],
+             ['phone','Appels',_telPublic(pi)],
              ['whatsapp','WhatsApp',_telPropre(pi.whatsapp)],
              ['mail','Email',_emailPublic(pi)],
              ['mappin','Adresse',pi.adresse||DB.school?.ville],
@@ -6826,7 +6826,7 @@ function vShowSec(sec,btn,_boot){
              sur la page même où l'on demande au visiteur de nous faire confiance.
              Une ligne sans valeur valable n'est plus affichée du tout : mieux
              vaut un bloc court que « — » en face de « Téléphone ». -->
-        ${[['phone','Téléphone',_telPublic(pi)],
+        ${[['phone','Appels',_telPublic(pi)],
            ['whatsapp','WhatsApp',_telPropre(pi.whatsapp)],
            ['mail','Email',_emailPublic(pi)],
            ['mappin','Adresse',pi.adresse||DB.school?.ville],

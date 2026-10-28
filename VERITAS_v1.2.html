@@ -767,15 +767,15 @@ if('MutationObserver' in window){
 <link rel="stylesheet" href="/assets/veritas-tokens.css?v=1.19.29">
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.20.49">
+<link rel="preload" as="script" href="/app.js?v=1.20.50">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.20.49" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.20.49"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.20.50" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.20.50"></noscript>
 <!-- Panneaux, onglets flottants et mouvement. Couche autonome, chargée APRÈS
      app.css (elle en reprend quelques surfaces) et sans bloquer le rendu. -->
 <link rel="preload" as="style" href="/assets/veritas-motion.css?v=1.19.29" onload="this.onload=null;this.rel='stylesheet'">
@@ -798,8 +798,8 @@ if('MutationObserver' in window){
      que la vitrine tenait 15 à 16,5 px — c'est l'écart que l'on décrivait
      comme « l'ancienne page qui revient ». Elle bat app.css et theme-lws.css
      par un identifiant doublé ; la déplacer plus haut la rendrait inopérante. -->
-<link rel="preload" as="style" href="/assets/veritas-refonte-app.css?v=1.20.49" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/assets/veritas-refonte-app.css?v=1.20.49"></noscript>
+<link rel="preload" as="style" href="/assets/veritas-refonte-app.css?v=1.20.50" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/veritas-refonte-app.css?v=1.20.50"></noscript>
 <!-- Compagnon indispensable de la feuille ci-dessus : elle éteint TOUS les
      dégradés, y compris ceux que le JS de rendu pose en style en ligne —
      lesquels se retrouveraient alors sans aucun fond (texte blanc sur
@@ -868,7 +868,7 @@ if('MutationObserver' in window){
 })();
 </script>
 <!--vrt-habillage:tete-->
-<link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.49">
+<link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.50">
 <script>window.VRT_DATA=window.VRT_DATA||{"citations":[{"t":"Le génie, c’est un pour cent d’inspiration et quatre-vingt-dix-neuf pour cent de transpiration.","a":"Thomas Edison"},{"t":"Ce n’est pas parce que les choses sont difficiles que nous n’osons pas ; c’est parce que nous n’osons pas qu’elles sont difficiles.","a":"Sénèque"},{"t":"L’éducation est l’arme la plus puissante pour changer le monde.","a":"Nelson Mandela"},{"t":"Un peu chaque jour vaut mieux que beaucoup un seul jour.","a":"Proverbe"},{"t":"La chance sourit à l’esprit préparé.","a":"Louis Pasteur"},{"t":"Tomber sept fois, se relever huit.","a":"Proverbe japonais"}],"themeSombre":"\n      body{background:#0A1428!important}\n      [style*=\"background:#fff\"],[style*=\"background:#FAFBFE\"],[style*=\"background:#FCFDFE\"],[style*=\"background:#F7F9FD\"]{background:#132241!important}\n      [style*=\"background:#F4F5F8\"],[style*=\"background:#F4F6FB\"],[style*=\"background:#EFF2F7\"],[style*=\"background:#F5F9FF\"]{background:#0F1B33!important}\n      [style*=\"background:rgba(255,255,255,.96)\"]{background:rgba(13,25,48,.96)!important}\n      [style*=\"radial-gradient(1100px\"],[style*=\"radial-gradient(900px\"]{background:#0C1730!important}\n      [style*=\"linear-gradient(180deg,#FBF8F1\"]{background:#0C1730!important}\n      [style*=\"color:#001136\"]{color:#EEF3FC!important}\n      [style*=\"color:#0C2A6A\"]{color:#DCE6F8!important}\n      [style*=\"color:#4D5163\"],[style*=\"color:#6B5A42\"]{color:#B6C2D8!important}\n      [style*=\"color:#6E7385\"],[style*=\"color:#9BA6BE\"]{color:#8D9AB4!important}\n      [style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"]{border-color:#24334F!important}\n      [style*=\"\"],[style*=\"\"]{border-bottom-color:#24334F!important}\n      [style*=\"\"]{border-top-color:#24334F!important}\n      [style*=\"border-left:4px solid\"]{border-left-color:#FFC93C!important}\n      input,input::placeholder{color:#C7D2E6!important}\n    "};</script>
 <style>#VISITOR > .vlogin-bar,#vNav,#VISITOR > footer:not(.vrt-hab),#vAmbassaFab,#vtWaFab,#vCitFloat{display:none!important}#VISITOR > .vrt-hab{color:#4D5163;font-family:Poppins,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}#VISITOR > nav.vrt-hab{flex:none;width:100%}#VISITOR > footer.vrt-hab{flex:none;width:100%}</style>
 <!--/vrt-habillage:tete-->
@@ -1910,7 +1910,7 @@ setTimeout(_vAmbassaFab,3000);
    restaient en cache après déploiement. Repli sur la valeur figée si le
    sélecteur ne trouve rien. */
 window._VRT_ASSET_VER=(function(){try{var e=document.querySelector('link[href*="app.js?v="],script[src*="app.js?v="]');var m=e&&String(e.href||e.src||'').match(/app\.js\?v=([0-9.]+)/);return m?m[1]:'1.15.9';}catch(x){return '1.15.9';}})();</script>
-<script defer src="/app.js?v=1.20.49"></script>
+<script defer src="/app.js?v=1.20.50"></script>
 <!-- Promotion des barres de filtres en onglets flottants. `defer` la place
      après app.js : elle habille un DOM qui existe déjà. Amélioration
      progressive — son absence ne retire aucune fonctionnalité. -->
@@ -4035,8 +4035,8 @@ html{scroll-behavior:smooth}
         </div></template>
 <!--/vrt-habillage:formules-->
 <!--vrt-habillage:script-->
-<script src="/assets/veritas-harmonie.js?v=1.20.49" defer></script>
-<script src="/assets/vitrine.js?v=1.20.49" defer></script>
+<script src="/assets/veritas-harmonie.js?v=1.20.50" defer></script>
+<script src="/assets/vitrine.js?v=1.20.50" defer></script>
 <!--/vrt-habillage:script-->
 </body>
 </html>
