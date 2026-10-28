@@ -447,7 +447,8 @@ if ($action === 'init' && $method === 'POST') {
     $montant   = intval($input['montant']   ?? 0);
     $ref       = trim($input['ref']         ?? '');
     $label     = trim($input['label']       ?? 'Paiement VÉRITAS');
-    $intent    = trim($input['intent']      ?? 'generic');
+    // En minuscules : « Cart » échappait au contrôle du panier (relecture du 28/10).
+    $intent    = strtolower(trim((string) ($input['intent'] ?? 'generic')));
     $targetId  = trim($input['targetId']    ?? '');
     $accountId = trim($input['accountId']   ?? '');
     $clientNom = trim($input['clientNom']   ?? '');

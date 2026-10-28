@@ -272,7 +272,21 @@ try {
     [$c, , $j] = req('POST', "$MAN?action=declarer", ['ref' => 'BANC-D2', 'intent' => 'cart', 'montant' => 5000,
         'clientTel' => '690000001', 'label' => 'Cahier', 'lignes' => [['nom' => 'Cahier', 'qte' => 1, 'pu' => 5000]],
         'article' => ['id' => 'cahier-5000', 'qte' => 1, 'livr' => 0]]);
-    verifier('déclaration au juste prix : acceptée', $c === 200 && !empty($j['ok']), "http $c " . json_encode($j));
+    verifier('déclaration d\'un panier PHYSIQUE, même au juste prix : refusée (aucun tunnel ne la fait)', $c === 409, "http $c " . json_encode($j));
+    [$c, , $j] = req('POST', "$MAN?action=declarer", ['ref' => 'BANC-D3', 'intent' => 'cart', 'montant' => 5000,
+        'clientTel' => '690000001', 'label' => 'Payer tout', 'lignes' => [['intent' => 'book', 'targetId' => 'cahier-5000', 'montant' => 5000]]]);
+    verifier('déclaration d\'un panier numérique au juste prix : acceptée', $c === 200 && !empty($j['ok']), "http $c " . json_encode($j));
+
+    // Relecture du 28/10 (2ᵉ passe) : la casse et la clé `vitrine`.
+    [$c, , $j] = req('POST', "$API?action=init", ['ref' => 'BANC-P10', 'montant' => 100, 'intent' => 'Cart', 'clientTel' => '690000001',
+        'lignes' => [['nom' => 'Cahier', 'qte' => 1, 'pu' => 100]], 'article' => ['id' => 'cahier-5000', 'qte' => 1, 'livr' => 0]],
+        ["Authorization: Bearer $PUB"]);
+    verifier('« Cart » en majuscule : même contrôle, refusé', $c === 409, "http $c " . json_encode($j));
+    $base = json_decode((string) file_get_contents($db), true) ?: [];
+    $base['books'][] = ['id' => 'retire', 'prix' => 4000, 'vitrine' => false];
+    file_put_contents($db, json_encode($base));
+    [$c, , $j] = $panier('BANC-P11', 4000, $vitrine + ['article' => ['id' => 'retire', 'qte' => 1, 'livr' => 0]]);
+    verifier('livre retiré de la vitrine (vitrine:false) : ne se vend pas', $c === 409, "http $c " . json_encode($j));
 } finally {
     foreach ([$srvApi, $srvSky] as $p) { if (is_resource($p)) { proc_terminate($p); proc_close($p); } }
 }

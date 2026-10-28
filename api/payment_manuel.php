@@ -207,6 +207,14 @@ if ($action === 'declarer' && $method === 'POST') {
                 $propres[] = ['intent' => $li, 'targetId' => substr(trim((string) (is_scalar($l['targetId'] ?? '') ? ($l['targetId'] ?? '') : '')), 0, 64),
                               'montant' => max(0, (int) (is_scalar($l['montant'] ?? 0) ? ($l['montant'] ?? 0) : 0))];
             }
+            /* Aucun tunnel ne déclare un panier PHYSIQUE (la vitrine passe par
+               payment_camerpay.php) : un tel envoi est forgé, et son libellé
+               libre deviendrait le bon de livraison. Numérique seulement. */
+            if (!$propres) {
+                pmLog('[PANIER_PHYSIQUE_DECLARE_REFUSE] ref=' . $ref . ' montant=' . $mont);
+                pmOut(['error' => 'Ce panier ne peut pas être réglé par ce moyen. Actualisez la page puis réessayez — ne payez pas ce montant-ci.',
+                       'code' => 'PRIX_INCOHERENT'], 409);
+            }
             $pp = vrt_verifier_panier($dbD, $propres, $in['lignes'] ?? null, $in['article'] ?? null, $mont, $parrainageEtat);
             if (!$pp['ok']) {
                 pmLog('[PRIX_REFUSE_PANIER_DECLARE] ref=' . $ref . ' montant=' . $mont

@@ -1141,13 +1141,22 @@ if (!defined('VRT_AUTH_LIB')) {
             foreach (($db['books'] ?? []) as $b) {
                 if (is_array($b) && (string) ($b['id'] ?? '') === $id) { $enBase = $b; break; }
             }
-            if ($enBase !== null) {
-                $pu = vrt_prix_catalogue($db, 'book', $id);
+            // Même partage que public_data.php : la base tranche dès qu'elle porte
+            // la clé `vitrine` (vrai = publié au prix papier, faux = retiré) ;
+            // sinon c'est la fiche du catalogue qui est publiée, à prixDigital ?? prix.
+            if ($enBase !== null && array_key_exists('vitrine', $enBase)) {
+                $pu = !empty($enBase['vitrine']) ? vrt_prix_catalogue($db, 'book', $id) : null;
                 $titre = (string) ($enBase['titre'] ?? '');
             } else {
-                $pu = vrt_prix_catalogue($db, 'digitalbook', $id);
                 $fiche = vrt_catalogue_livre($id);
-                $titre = (string) ($fiche['titre'] ?? '');
+                $pu = null;
+                if ($fiche !== null) {
+                    $pu = (int) ($fiche['prixDigital'] ?? $fiche['prix'] ?? 0);
+                    $titre = (string) ($fiche['titre'] ?? '');
+                } elseif ($enBase !== null) {
+                    $pu = vrt_prix_catalogue($db, 'book', $id);
+                    $titre = (string) ($enBase['titre'] ?? '');
+                }
             }
         }
         if ($pu === null || $pu <= 0) return $refus('article absent du catalogue');
