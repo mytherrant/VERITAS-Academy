@@ -3882,7 +3882,7 @@
       <div style="width:56px;height:56px;border-radius:15px;background:var(--sb-logo-bg);display:grid;place-items:center;margin:0 auto 18px">{{ loginIcLogo }}</div>
       <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);font-weight:700;margin-bottom:12px">Atelier de Français · Français MINESEC</div>
       <h1 style="font-family:'Poppins';font-size:31px;font-weight:700;line-height:1.2;margin:0 auto 14px;max-width:20ch;color:var(--c14375f,#14375f);letter-spacing:-.02em">Un espace collaboratif pour vos cours et vos épreuves</h1>
-      <p style="font-size:14.5px;line-height:1.7;color:var(--c5a6678,#5a6678);max-width:62ch;margin:0 auto 34px">Ambassa, l’IA de VÉRITAS, compose l’épreuve entière selon le descriptif MINESEC — texte choisi dans le corpus, questions, barème et corrigé — en une trentaine de secondes : vous relisez et corrigez. Vos épreuves et vos leçons puisent dans 4 932 textes vérifiés — dont 1 014 ouverts sans abonnement — et un garde-fou contrôle la conformité pendant que vous écrivez.</p>
+      <p style="font-size:14.5px;line-height:1.7;color:var(--c5a6678,#5a6678);max-width:62ch;margin:0 auto 34px">Ambassa, l’IA de VÉRITAS, compose l’épreuve entière selon le descriptif MINESEC — texte choisi dans le corpus, questions, barème et corrigé — en une trentaine de secondes : vous relisez et corrigez. Vos épreuves et vos leçons puisent dans plus de 5 000 textes vérifiés — dont plus de 1 000 ouverts sans abonnement — et un garde-fou contrôle la conformité pendant que vous écrivez.</p>
 
       <!-- ═══════════ DÉMONSTRATION ANIMÉE ═══════════
            Elle remplace la « Visite guidée » par profils d'exemple, qui
@@ -4310,7 +4310,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '27/10 · import';
+const ATELIER_BUILD = '28/10 · parcours';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -6383,12 +6383,17 @@ class Component extends DCLogic {
     const s=this.state;
     if(s.ready){this._reparN=0;return;}
     /* La visite guidee est un choix, pas une panne : on n'y touche pas. */
-    if(s.corpusErr||s.screen==='login'||this._enVol||this._reparT)return;
+    /* `_inviteEnVol` (27/10/2026) : pendant que le démarrage ouvre l'accès
+       d'invité, il n'y a ni jeton ni chargement en vol — la réparation se
+       croyait seule, se mettait dans la file de l'invitation, et les DEUX
+       rappels chargeaient le répertoire : 2 × 1,15 Mo pour chaque nouveau
+       visiteur (mesuré en production, pile d'appels à l'appui). */
+    if(s.corpusErr||s.screen==='login'||this._enVol||this._inviteEnVol||this._reparT)return;
     /* Court delai : on laisse le rendu en cours se terminer, et on evite de
        declencher sur un etat transitoire d'une milliseconde. */
     this._reparT=setTimeout(()=>{this._reparT=null;
       const t=this.state;
-      if(t.ready||t.corpusErr||t.screen==='login'||this._enVol)return;
+      if(t.ready||t.corpusErr||t.screen==='login'||this._enVol||this._inviteEnVol)return;
       if(!this._jeton()){
         /* Plus de jeton : on en redemande un plutot que de renvoyer a un
            formulaire. Une seule fois -- au-dela, c'est que le serveur ne
