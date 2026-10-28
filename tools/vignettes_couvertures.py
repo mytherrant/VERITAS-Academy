@@ -28,6 +28,13 @@ LE GABARIT
   2:0, et le même renfort de netteté que `couvertures_oeuvres.py` — une image
   réduite au tiers perd son piqué, et une couverture floue dans une grille se
   lit comme un produit bâclé.
+
+LA VIGNETTE WEBP (28/10/2026)
+  À côté de chaque `_v.jpg`, un `_v.webp` de 360 × 480, qualité 80. C'est lui
+  que la grille demande d'abord ; le JPG ne sert plus que de repli au
+  navigateur qui ne lit pas le WebP (iOS 13 et avant). Mesuré sur les 36
+  couvertures : 2,15 Mo en JPG 460 px, 1,06 Mo en WebP 360 px. La carte la plus
+  large fait ~330 px CSS au téléphone : 360 px reste net sans payer le surplus.
 """
 from __future__ import annotations
 
@@ -49,6 +56,7 @@ DOSSIER = RACINE / "uploads" / "oeuvres"
 VIGNETTE_L, VIGNETTE_H = 460, 613
 RENFORT = dict(radius=0.7, percent=85, threshold=3)
 QUALITE = 80
+WEBP_L, WEBP_H = 360, 480
 
 
 def couvertures() -> list[Path]:
@@ -67,13 +75,14 @@ def main() -> int:
         return 1
 
     manquantes = [p for p in couvertures()
-                  if not p.with_name(p.stem + "_v.jpg").is_file()]
+                  if not p.with_name(p.stem + "_v.jpg").is_file()
+                  or not p.with_name(p.stem + "_v.webp").is_file()]
     total = len(couvertures())
 
     if a.controle:
         if manquantes:
             for p in manquantes:
-                print(f"::error title=Vignette manquante::{p.name} — la carte de "
+                print(f"::error title=Vignette manquante::{p.name} (jpg ou webp) — la carte de "
                       f"la boutique s'affichera sans visuel")
             print(f"\n✗ {len(manquantes)} couverture(s) sur {total} sans vignette.")
             return 1
@@ -86,14 +95,23 @@ def main() -> int:
 
     for p in manquantes:
         im = Image.open(p).convert("RGB")
-        v = im.copy()
-        v.thumbnail((VIGNETTE_L, VIGNETTE_H), Image.LANCZOS)
-        v = v.filter(ImageFilter.UnsharpMask(**RENFORT))
         dest = p.with_name(p.stem + "_v.jpg")
-        v.save(dest, "JPEG", quality=QUALITE, optimize=True,
-               progressive=True, subsampling=2)
-        print(f"  + {dest.name}  {v.width}×{v.height}  "
-              f"{dest.stat().st_size // 1024} Ko")
+        if not dest.is_file():
+            v = im.copy()
+            v.thumbnail((VIGNETTE_L, VIGNETTE_H), Image.LANCZOS)
+            v = v.filter(ImageFilter.UnsharpMask(**RENFORT))
+            v.save(dest, "JPEG", quality=QUALITE, optimize=True,
+                   progressive=True, subsampling=2)
+            print(f"  + {dest.name}  {v.width}×{v.height}  "
+                  f"{dest.stat().st_size // 1024} Ko")
+        dest = p.with_name(p.stem + "_v.webp")
+        if not dest.is_file():
+            v = im.copy()
+            v.thumbnail((WEBP_L, WEBP_H), Image.LANCZOS)
+            v = v.filter(ImageFilter.UnsharpMask(**RENFORT))
+            v.save(dest, "WEBP", quality=QUALITE, method=6)
+            print(f"  + {dest.name}  {v.width}×{v.height}  "
+                  f"{dest.stat().st_size // 1024} Ko")
 
     print(f"\n  {len(manquantes)} vignette(s) produite(s) sur {total} couvertures.")
     return 0

@@ -1802,6 +1802,16 @@ jobs:
       - name: 🔤 Poppins servie par le site, plus par Google
         run: python tools/polices_locales.py deploy
 
+      # ── 🪶 LE LOGO EN 7 Ko, SOUS UNE URL NEUVE (audit 3G du 28/10/2026).
+      #    Affiché en 46 px partout, le logo vient de assets/veritas-logo.png,
+      #    servi « immutable » SANS ?v= : allégé le 21/10, il reste à 91 Ko
+      #    pour tout visiteur venu avant. Les <img> passent à
+      #    assets/veritas-logo-96.webp ; favicon, JSON-LD et og:image gardent
+      #    le PNG. Sur deploy/ seulement, pour la même raison que la passe
+      #    Poppins ci-dessus : l'habillage du dépôt se compare à son modèle.
+      - name: 🪶 Le logo des pages en WebP 96 px
+        run: python tools/logo_leger.py deploy
+
       - name: 🔗 Aligner les cache-busters de tous les assets
         run: |
           # Les ?v= de /assets/*.css|js étaient maintenus À LA MAIN, page par page,
@@ -1970,6 +1980,17 @@ jobs:
           else
             echo "   Aucune version résiduelle — tous les assets partagent $VER."
           fi
+
+      # ── 🗜️ LES COMMENTAIRES RESTENT DANS LE DÉPÔT (audit 3G du 28/10/2026).
+      #    L'Atelier, l'accueil et app.html livraient leurs commentaires de
+      #    développement à chaque visiteur (197, 47 et 45 Ko) — dont le récit
+      #    des failles corrigées. Retirés ici, sur deploy/ seulement, avec le
+      #    CSS et le JS en ligne minifiés (sans renommage). Les marqueurs d'un
+      #    mot (`<!--vrt-habillage:barre-->`) restent : 🔭 les cherche en
+      #    production. APRÈS les cache-busters et les gardes de jetons, qui
+      #    lisent les pages telles qu'écrites. Tout bloc douteux part tel quel.
+      - name: 🗜️ Alléger les pages les plus lourdes (commentaires, CSS et JS en ligne)
+        run: npx --yes -p esbuild@0.28.2 -c "node tools/alleger_html.cjs deploy"
 
       # ═══════════════════════════════════════════════════════════════════════
       # UN DÉPLOIEMENT PEUT EFFACER LE SITE. LE 30/08, IL L'A FAIT.
