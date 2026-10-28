@@ -1427,10 +1427,10 @@ deplacerSectionApres("Trois portes d'entrée", 'Un répétiteur coûte',
 {
   const RETOUCHES = [
     ['Un répétiteur coûte 25 000 F par mois et rate des séances. VÉRITAS coûte 1 000 F, ouvre à toute heure et couvre la 6',
-     'La plateforme ouvre à toute heure pour 1 000 F par mois et couvre la 6',
+     'La plateforme ouvre à toute heure pour 1 200 F par mois et couvre la 6',
      'accroche du bandeau'],
     ['Moins cher qu’un répétiteur', 'Le suivi, sans quitter la maison', 'sur-titre de la carte Parents'],
-    ['33 F par jour — 25× moins qu’un répétiteur', '33 F par jour, et un répétiteur à domicile en option',
+    ['33 F par jour — 25× moins qu’un répétiteur', '40 F par jour, et un répétiteur à domicile en option',
      'mention de prix']
   ];
   let faites = 0;

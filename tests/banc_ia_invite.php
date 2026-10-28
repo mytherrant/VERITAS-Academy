@@ -165,6 +165,45 @@ verifie($rT[0] === 502, 'enseignant : sans moteur, l’appel échoue (502)', "HT
 $atApres = (int) file_get_contents($fAt);
 verifie($atApres === $atAvant, 'enseignant : rien n’est rendu, puisque rien n’a été pris', "avant $atAvant, après $atApres");
 
+echo "\n\033[1m⑤ Un échec provoqué ne rend pas l’appel gratuit à l’infini\033[0m\n";
+/* Trois crédits rendus par identité et par jour (IA_RENDUS_JOUR), et aucun
+   quand le moteur refuse la demande elle-même (27/10/2026). */
+$cleD = str_repeat('d', 32);
+$reg = json_decode(file_get_contents("$tmp/api/data/_plat_invites.json"), true);
+$reg['appareils'][$cleD] = ['id' => 'invD', 'q' => ['ia' => ['mois' => date('Y-m'), 'utilise' => 4]]];
+file_put_contents("$tmp/api/data/_plat_invites.json", json_encode($reg));
+// Fenêtre neuve pour le bouclier ET pour le plafond IA par adresse (15/min) :
+// ce sont eux, pas le plafond des rendus, que le cumul des blocs atteignait.
+array_map('unlink', glob("$tmp/api/data/_sentinel/*.txt") ?: []);
+array_map('unlink', glob("$tmp/api/data/_rate/ia_*.txt") ?: []);
+$fInvD = "$tmp/api/data/_rate/iainvite_" . substr(md5($cleD), 0, 16) . '_' . date('Ym') . '.txt';
+$tD = jeton('invD', $cleD, $HMAC);
+$codesD = [];
+for ($n = 1; $n <= 4; $n++) { $rD = appel($tD, 50 + $n); $codesD[] = $rD[0]; if ($rD[0] !== 502) echo "      (appel $n : " . substr($rD[1], 0, 200) . ")
+"; }
+verifie($codesD === [502, 502, 502, 502], 'quatre échecs de suite (502)', implode(', ', $codesD));
+$resteD = is_file($fInvD) ? (int) file_get_contents($fInvD) : -1;
+verifie($resteD === 1, 'trois essais rendus, le quatrième reste décompté', "compteur d’essais : $resteD");
+
+$srcP = file_get_contents("$RACINE/api/ia_proxy.php");
+if (preg_match('/function ia_echec_du_client\(.*?\n}\n/s', str_replace("\r\n", "\n", $srcP), $mF)) {
+    eval($mF[0]);
+    verifie(ia_echec_du_client('Gemini gemini-2.5-pro HTTP 400: {"error":"invalid"}')
+         && ia_echec_du_client('Réponse vide de Gemini (SAFETY)'),
+         'une demande refusée par le moteur (400, contenu bloqué) ne rend rien');
+    verifie(!ia_echec_du_client('cURL: Operation timed out') && !ia_echec_du_client('Gemini x HTTP 429: quota')
+         && !ia_echec_du_client('Groq llama HTTP 503: down') && !ia_echec_du_client('Réponse vide de Gemini')
+         && !ia_echec_du_client('Gemini x HTTP 4000: ?') && !ia_echec_du_client(null),
+         'une panne du fournisseur (réseau, 429, 5xx, réponse vide) rend le crédit');
+    verifie(!ia_echec_du_client('Gemini gemini-2.5-pro HTTP 400: {"error":{"message":"API key not valid","status":"INVALID_ARGUMENT"}}')
+         && !ia_echec_du_client('Gemini x HTTP 400: User location is not supported')
+         && !ia_echec_du_client('Groq llama HTTP 400: {"error":{"code":"model_decommissioned"}}')
+         && !ia_echec_du_client('Réponse vide de Gemini (MAX_TOKENS)'),
+         'notre configuration en défaut (clé, région, modèle retiré) ou une réponse coupée rendent le crédit');
+} else {
+    verifie(false, 'ia_echec_du_client introuvable dans ia_proxy.php');
+}
+
 proc_terminate($srv);
 echo "\n" . ($ko ? "\033[31m$ko échec(s) sur $vu\033[0m" : "\033[32m$vu vérification(s) au vert\033[0m") . "\n";
 exit($ko ? 1 : 0);
