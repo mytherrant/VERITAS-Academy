@@ -1893,8 +1893,12 @@ setTimeout(_vAmbassaFab,3000);
     <div class="cnt" id="cnt"></div>
   </div>
 </div>
-<img id="_logoData" src="/assets/veritas-logo-doc.webp" style="display:none" alt="">
-<img id="_watermarkData" src="/assets/veritas-logo-doc.webp" style="display:none" alt="">
+<!-- loading="eager" EXPLICITE : le « lazy loading universel » plus haut pose
+     loading="lazy" sur toute <img> qui n'en a pas, et une image cachée en
+     différé ne se charge jamais — le logo des exports (canvas) sautait sans
+     un mot. La data-URI d'avant y échappait ; l'URL, non. Vu en prod le 28/10. -->
+<img id="_logoData" src="/assets/veritas-logo-doc.webp" style="display:none" alt="" loading="eager">
+<img id="_watermarkData" src="/assets/veritas-logo-doc.webp" style="display:none" alt="" loading="eager">
 <!-- v1.2.14 (P3) : defer → app.js (préchargé L.621) ne bloque plus le parsing/rendu.
      Sûr : app.js s'auto-amorce (start() via readyState/DOMContentLoaded) et tous les
      appels inline à ses fonctions sont gardés (typeof) ou différés (setTimeout/DCL).
