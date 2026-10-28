@@ -996,9 +996,15 @@ def cahiers_2026():
 def render_hub(levels, est):
     total = sum(sum(p.n_items for p in pages) + sum(p.n_items for p in cah)
                 for _, pages, cah in levels)
-    title = "Corrigés de français 6ᵉ à Terminale — %s exercices | VÉRITAS" % num(total)
+    neufs = cahiers_2026()
+    # 28/10/2026 — Jacques tranche : un seul nombre, le total RÉEL (14 049 ce jour),
+    # celui que tests/chiffres_annonces.cjs recompte. La page n'annonçait que les
+    # anciens cahiers (9 709) alors qu'elle présente aussi ceux de 2026-2027.
+    # `total` reste celui des anciens cahiers : c'est ce que tous-les-corriges.html réunit.
+    total_publie = total + sum(n for _, n, _ in neufs)
+    title = "Corrigés de français 6ᵉ à Terminale — %s exercices | VÉRITAS" % num(total_publie)
     desc = ("%s exercices de français corrigés, de la 6ᵉ à la Terminale : cahiers et livrets "
-            "du Centre VÉRITAS, programme MINESEC du Cameroun. Séries A, C, D et techniques." % num(total))
+            "du Centre VÉRITAS, programme MINESEC du Cameroun. Séries A, C, D et techniques." % num(total_publie))
     url = SITE + "/corriges/"
     crumbs = [("Accueil", SITE), ("Corrigés des manuels", url)]
     h = head(title, desc, url, depth=1, jsonld=jsonld_page(title, desc, url, "Secondaire", crumbs))
@@ -1016,7 +1022,6 @@ def render_hub(levels, est):
         return "".join(out)
     c1 = group([x for x in levels if x[0]["cycle"] == "1er"])
     c2 = group([x for x in levels if x[0]["cycle"] == "2nd"])
-    neufs = cahiers_2026()
     c26 = "".join('<div class="card"><h3>%s%s</h3><p class="note">%s exercices corrigés · %d page%s</p>'
                   '<a class="dl" href="%s"><span>Voir les corrigés</span><span class="pill">%s exos</span></a>'
                   '</div>' % (esc(niv["long"]), (' <small class="note">(%s)</small>' % niv["examen"])
@@ -1040,7 +1045,7 @@ def render_hub(levels, est):
     body = ['<header class="top"><span class="badge">Centre VÉRITAS · Espace Manuels</span>'
             "<h1>Corrigés des cahiers de français — 6ᵉ à Terminale</h1>"
             "<p>%s exercices corrigés, séquence par séquence, pour les cahiers du Centre VÉRITAS. "
-            "Programme MINESEC · Cameroun.</p></header>" % num(total),
+            "Programme MINESEC · Cameroun.</p></header>" % num(total_publie),
             '<div class="wrap">',
             '<div class="intro">' + ico("i-book-open", "i lg") + ' <strong>C\'est la page annoncée dans ton cahier</strong> (encadré '
             + ico("i-globe") + ' Espace VÉRITAS '
