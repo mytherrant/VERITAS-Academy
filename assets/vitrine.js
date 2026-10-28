@@ -2372,6 +2372,17 @@
       corps = ((sc.passage1 || '') + ' ' + (sc.passage2 || '')).trim();
       signature = 'Le Tube Digestif, Alobwed’Epie';
     }
+    /* COURTE CITATION (contre-expertise du 28/10/2026, S4). Le passage
+       entier partait dans le message : illisible dans une conversation, et
+       la reproduction d'un long extrait d'œuvre sous droits. On garde
+       l'amorce (160 signes au plus, coupés sur un mot) ; la suite se lit
+       sur la page, que le lien ouvre. */
+    corps = String(corps || '').replace(/\s+/g, ' ').trim();
+    if (corps.length > 160) {
+      var coupe = corps.slice(0, 160);
+      var esp = coupe.lastIndexOf(' ');
+      corps = (esp > 100 ? coupe.slice(0, esp) : coupe).replace(/[\s,;:.—–-]+$/, '') + '…';
+    }
     return '« ' + corps + ' »\n— ' + signature
          + '\nPassage du jour · VÉRITAS\n' + lienSite();
   }
