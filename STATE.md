@@ -1,3 +1,20 @@
+## Harmonisation du design : vitrine, pages statiques et application (29/10/2026)
+
+Demande de Jacques : audit design en prod, puis « corrige 4, 5, 6, 8, 9 (dégradé maillé), 10, 11, 12 », « toutes les icônes doivent apparaître dans Plus, dans le cercle coloré, inspire-toi de lws.fr », « vérifie que toutes les pages sont harmonisées, corrige le conflit entre vitrine et app, surtout au niveau du design ».
+
+- **Menu « Plus »** (vitrine.html + CSS_CHROME de build_plan.py) : les 37 rubriques restent ; anneau du site (rond blanc, filet 3 px) teinté par public ; survoler Élèves, Parents, Enseignants ou Partenaires ouvre le panneau et éclaire la colonne ; la colonne Élève prend deux pistes pour que tout tienne sur 1366 × 768 ; fermeture au défilement (.vrt-defile, vitrine.js).
+- **En-tête unique** : le dégradé maillé de l'espace élève sur header.top, .eh et .vh-hero (CSS_CARTES). vitrine.js crée le .vh-hero des pages sans en-tête (œuvres, niveaux, méthodes, outils, légal, Découvrir) et celui des écrans publics de l'application (.vh-app, premier .pgt / .vsec-title + chapeau, MutationObserver). Exceptions voulues : Campus (marque blanche), Atelier, épreuves imprimables.
+- **Conflit vitrine / application** : theme-lws.css éteint tous les dégradés de #VISITOR et app.css imposait Montserrat aux titres. Exception à cinq identifiants pour l'en-tête ; Poppins sur les titres des écrans publics.
+- **Échelle** : titres de page 44 px, de section 30 px partout ; tailles relevées par tools/vitrine_lisibilite.cjs ramenées sur 13 · 15 · 17 px ; demi-pixels en ligne arrondis.
+- **Texte fer à gauche**, sans césure (justification retirée : vitrine, pages, espace visiteur).
+- **Formes** : rayons 8 / 14 / pilule sur la vitrine, plus de lueur jaune, boutons d'action en pilule.
+- **Défauts** : carte du podium vide masquée ; chiffres de /eleve recomptés (14 049 et le total par classe) ; mention « Atelier 28/10 · audit » retirée de l'écran de chargement de l'Atelier.
+- **Prix et grille** : montants insécables ; grille de services en auto-fit (plus d'orpheline).
+- **Réassurance** : une seule bande, sous « Ce que 1 200 F par mois changent ».
+- **Cache** : REV_HABILLAGE = '.29' suffixe veritas-habillage.css, veritas-harmonie.js et vitrine.js sur toutes les pages ; plan.html et constellation.html chargent désormais veritas-habillage.css ; empreinte d'index.php 2026-10-29a.
+
+**Reste à faire (Jacques)** : enregistrer la grille du 16/10 dans l'admin « Prix & calculs automatiques » (Starter 1 200 / 12 000, Pro 2 400 / 24 000, Élite 3 600 / 36 000, Famille 12 000 / 120 000) : la base de production facture encore 1 000 / 2 000 / 3 000 / 10 000 F et la vitrine se repeint sur ces prix.
+
 ## Élèves : examen blanc et œuvres interactives ; Atelier : import Word/PDF ; 3G ; titres (25/10/2026, v1.20.48)
 
 Demandes de Jacques :

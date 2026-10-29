@@ -644,7 +644,7 @@ CSS_CHROME = r"""  @keyframes vpulse{0%,100%{box-shadow:0 0 0 0 rgba(91,224,122,
       était « au pointeur de la souris » — la media query dit exactement
       cela. */
 @media (hover:hover) and (pointer:fine){
-  *:has(> #vrtPlus):hover > #vrtPlus[hidden]{display:flex!important}
+  *:has(> #vrtPlus):hover > #vrtPlus[hidden]{display:grid!important}
   /* Pont de survol : sans lui, les quelques pixels entre le bouton et le
      panneau referment le menu en cours de trajet. */
   *:has(> #vrtPlus){position:relative}
@@ -802,7 +802,60 @@ CSS_CHROME = r"""  @keyframes vpulse{0%,100%{box-shadow:0 0 0 0 rgba(91,224,122,
    est à z-index 200, le menu ☰ dans #vrtNav à 60 : elle recouvrait
    « Boutique », « Accueil » et le bouton « Connexion ». Elle revient à la
    fermeture du menu. */
-html:has(#vrtBurger:not([hidden])) body > div:has([aria-label="Professeur Ambassa"]):not(:has(#vrtBurger)){display:none!important}"""
+html:has(#vrtBurger:not([hidden])) body > div:has([aria-label="Professeur Ambassa"]):not(:has(#vrtBurger)){display:none!important}
+/* ══ MENU « PLUS » — 29/10/2026 ════════════════════════════════════════════
+   « Toutes les icônes doivent apparaître dans Plus. Harmonise juste, dans le
+   cercle coloré. Les internautes sont pressés : les icônes doivent déjà
+   renseigner l'étendue et la variété des services » (Jacques, modèle lws.fr).
+   1. Chaque rubrique porte l'ANNEAU du site (rond blanc, filet de 3 px teinté,
+      icône bleu nuit), le même dessin que les cartes et les médaillons.
+   2. Une teinte par colonne : Élève bleu, Parent sarcelle, Enseignant rose,
+      Partenaire brique, Le centre violet. On voit d'un coup d'œil à qui
+      s'adresse chaque groupe.
+   3. Comme sur lws.fr : survoler n'importe quelle rubrique de la barre ouvre
+      le panneau complet, et la colonne de cette rubrique s'éclaire. Le
+      visiteur n'a plus à deviner qu'il faut passer sur « Plus ».
+   4. Le panneau se ferme quand la page défile (vitrine.js pose .vrt-defile
+      sur <html> pendant le défilement). */
+.vmn-col{--vt:#1E499B;--vf:#EEF3FC;border-radius:14px;padding:0 4px 8px;transition:background .18s ease}
+.vmn-col:nth-child(5n+2){--vt:#0E7C86;--vf:#E9F5F3}
+.vmn-col:nth-child(5n+3){--vt:#B03A6E;--vf:#FBEEF3}
+.vmn-col:nth-child(5n+4){--vt:#A84200;--vf:#FFF4E8}
+.vmn-col:nth-child(5n+5){--vt:#5B4FA8;--vf:#F1EEF9}
+.vmn-p{width:40px!important;height:40px!important;border-radius:50%!important;
+  background:#fff!important;border:3px solid var(--vt);box-sizing:border-box;color:#001136}
+.vmn-p svg{stroke:#001136!important;width:17px;height:17px}
+.vmn-t{color:var(--vt)!important}
+.vmn-i:hover,.vmn-i:focus-visible{background:var(--vf)!important;color:#001136!important}
+@media (hover:hover) and (pointer:fine){
+  .vrt-large:hover #vrtPlus[hidden]{display:grid!important}
+  .vrt-large:has(> [data-go="elearning"]:hover) .vmn-col:nth-child(1),
+  .vrt-large:has(> [data-go="parents"]:hover) .vmn-col:nth-child(2),
+  .vrt-large:has(> [data-go="enseignants"]:hover) .vmn-col:nth-child(3),
+  .vrt-large:has(> a[href*="partenariat"]:hover) .vmn-col:nth-child(4){background:var(--vf)}
+  :root.vrt-defile #vrtPlus#vrtPlus[hidden]{display:none!important}
+}
+/* Tout le panneau tient sans défilement interne sur un écran d'ordinateur
+   courant (1366 × 768) : rien de caché sous la ligne de flottaison du menu. */
+.vmn{gap:0 18px!important;max-height:min(88vh,780px)!important;padding-top:18px!important;padding-bottom:20px!important}
+.vmn-i{padding:6px 8px!important;gap:10px!important}
+.vmn-p{width:36px!important;height:36px!important}
+.vmn-x{line-height:1.3!important;font-size:14px}
+.vmn-x small{font-size:12px!important;line-height:1.3!important}
+.vmn-t{margin:4px 0 4px!important}
+/* La colonne Élève porte deux fois plus de rubriques que les autres : sur
+   grand écran elle prend deux pistes, et ses rubriques se rangent sur deux
+   colonnes. Le panneau garde ainsi la hauteur d'un écran de portable. */
+@media (min-width:1240px){
+  .vmn{grid-template-columns:repeat(6,minmax(0,1fr))!important;
+    padding-left:max(24px,calc((100vw - 1280px)/2))!important;padding-right:max(24px,calc((100vw - 1280px)/2))!important}
+  .vmn-col:first-child{grid-column:span 2;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:8px;align-content:start}
+  .vmn-col:first-child > .vmn-t{grid-column:1/-1}
+}
+:root[data-vrt-theme="sombre"] .vmn-p{background:transparent!important}
+:root[data-vrt-theme="sombre"] .vmn-p svg{stroke:#F2F5FC!important}
+:root[data-vrt-theme="sombre"] .vmn-col:hover,:root[data-vrt-theme="sombre"] .vmn-i:hover{background:rgba(255,255,255,.06)!important;color:#F2F5FC!important}
+"""
 
 
 CSS_CARTES = """  /* LA CARTE DE LA VITRINE, reproduite cote pour cote. Toute couleur écrite
@@ -913,6 +966,7 @@ def page(entrees, vitrine):
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"></noscript>
 <link rel="stylesheet" href="/assets/veritas-pages.css?v=__VER__">
+<link rel="stylesheet" href="/assets/veritas-habillage.css?v=__VER__.29">
 <style>
 __CSS__
 </style>
@@ -945,8 +999,8 @@ __PROMO_VITRINE__
 </div>
 __FOOTER_VITRINE__
 __WIDGETS_VITRINE__
-<script src="/assets/veritas-harmonie.js?v=__VER__" defer></script>
-<script src="/assets/vitrine.js?v=__VER__" defer></script>
+<script src="/assets/veritas-harmonie.js?v=__VER__.29" defer></script>
+<script src="/assets/vitrine.js?v=__VER__.29" defer></script>
 </body>
 </html>
 """.replace('__CSS__', CSS_CARTES) \

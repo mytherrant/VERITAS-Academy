@@ -2948,7 +2948,105 @@
       S.plus = S.burger = S.ia = S.trad = false;
       fermerMenus(); panneau('vrtIA', false); panneau('vrtTrad', false);
     });
+    /* 29/10/2026 — Le panneau « Plus » se ferme quand la page défile. Ouvert
+       au survol, il restait posé sur le contenu tant que la souris ne bougeait
+       pas. La classe .vrt-defile, posée le temps du défilement, suspend aussi
+       l'ouverture au survol (règle dans vitrine.html et veritas-habillage.css). */
+    var minuterieDefile = 0;
+    window.addEventListener('scroll', function () {
+      if (S.plus) { S.plus = false; fermerMenus(); }
+      document.documentElement.classList.add('vrt-defile');
+      clearTimeout(minuterieDefile);
+      minuterieDefile = setTimeout(function () {
+        document.documentElement.classList.remove('vrt-defile');
+      }, 400);
+    }, { passive: true });
+    enTetePage();
+    enTeteApp();
   }
+
+  /* 29/10/2026 — En-tête de page unique (chantier design, point 9). Les pages
+     de veritas-refonte.css (œuvres, « Découvrir »…) commençaient par un simple
+     <h1> dans la colonne de texte : aucun en-tête, quand toutes les autres
+     pages en ont un. Ce titre et son chapeau passent dans le même en-tête
+     maillé que le reste du site (style .vh-hero, veritas-habillage.css).
+     Le contenu ne change pas : deux nœuds déplacés, rien d'ajouté sinon la
+     mention « Centre VÉRITAS » que portent les autres en-têtes. */
+  /* 29/10/2026 — « Corrige le conflit entre vitrine et app, surtout au niveau
+     du design » (Jacques). Les écrans publics de l'application (épreuves,
+     partenariat, cagnotte, trophées, certificats…) ouvraient sur un titre posé
+     à plat — pictogramme à gauche, titre à droite, chapeau en italique gris —
+     quand toute la vitrine ouvre sur l'en-tête maillé. Le premier titre de
+     l'écran passe dans ce même en-tête (.vh-hero), avec une ou deux lignes de
+     chapeau. L'application réécrit #vContent à chaque navigation : un
+     MutationObserver refait le geste, une fois par image au plus. Le texte
+     n'est pas touché (les titres servent de clés à la traduction anglaise). */
+  function enTeteApp() {
+    var zone = document.getElementById('vContent');
+    if (!zone || !document.getElementById('VISITOR')) return;
+    var prevu = false;
+    function poser() {
+      prevu = false;
+      if (zone.querySelector('.vh-hero')) return;
+      var t = zone.querySelector('.pgt, .vsec-title');
+      if (!t || !t.offsetWidth) return;
+      // Seulement un titre d'OUVERTURE : pas un intertitre au milieu de l'écran.
+      if (t.getBoundingClientRect().top - zone.getBoundingClientRect().top > 260) return;
+      var tete = document.createElement('header');
+      tete.className = 'vh-hero vh-app';
+      t.parentNode.insertBefore(tete, t);
+      tete.appendChild(t);
+      for (var n = 0; n < 2; n++) {
+        var s = tete.nextElementSibling, txt = s ? s.textContent.trim() : '';
+        if (!s || !/^(P|DIV)$/.test(s.tagName) || !txt || txt.length > 260
+            || s.querySelector('button,a,input,select,img,table,ul,ol,.pgt,.vsec-title')) break;
+        tete.appendChild(s);
+      }
+    }
+    poser();
+    new MutationObserver(function () {
+      if (!prevu) { prevu = true; requestAnimationFrame(poser); }
+    }).observe(zone, { childList: true, subtree: true });
+  }
+
+  function enTetePage() {
+    if (!document.querySelector('link[href*="veritas-refonte.css"],link[href*="veritas-pages.css"]')) return;
+    if (document.querySelector('link[data-vrt-epreuve], nav.vrt-outil')) return;   // épreuve imprimable, outil
+    if (document.querySelector('header.top, .eh, .vh-hero')) return;
+    // 1. Un <header> nu qui porte le titre (corrigés STI) : il devient l'en-tête.
+    var nu = document.querySelector('body > header:not([class]):not(.vrt-hab)');
+    if (nu && nu.querySelector('h1')) { nu.classList.add('vh-hero'); return; }
+    // 2. Le titre dans la colonne de texte : page simple, fiche (carte), page
+    //    juridique (fil d'Ariane avant le titre).
+    var h1 = document.querySelector('.wrap h1');
+    if (!h1) return;
+    var wrap = h1.closest('.wrap'), cadre = h1.parentNode;
+    if (cadre !== wrap && !(cadre.parentNode === wrap && /^(ARTICLE|DIV)$/.test(cadre.tagName))) return;
+    // Seulement un titre d'OUVERTURE : il ne doit avoir devant lui qu'un fil
+    // d'Ariane ou une étiquette.
+    for (var a = h1.previousElementSibling; a; a = a.previousElementSibling)
+      if (!a.matches('.crumb,.badge,.kicker')) return;
+    if (cadre !== wrap)
+      for (var c = cadre.previousElementSibling; c; c = c.previousElementSibling)
+        if (!c.matches('.crumb, .nav')) return;   // fil d'Ariane, onglets de niveau
+    var tete = document.createElement('header');
+    tete.className = 'vh-hero';
+    var etiquette = h1.previousElementSibling;
+    if (etiquette && etiquette.matches('.badge,.kicker')) tete.appendChild(etiquette);
+    else {
+      var marque = document.createElement('span');
+      marque.className = 'badge';
+      marque.textContent = 'Centre VÉRITAS';
+      tete.appendChild(marque);
+    }
+    var chapeau = h1.nextElementSibling;
+    tete.appendChild(h1);
+    if (chapeau && /^(P|DIV)$/.test(chapeau.tagName) && chapeau.textContent.trim().length < 340
+        && !chapeau.querySelector('img,table,ul,ol,form,input,button,iframe,video'))
+      tete.appendChild(chapeau);
+    wrap.parentNode.insertBefore(tete, wrap);
+  }
+
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer);
   else demarrer();

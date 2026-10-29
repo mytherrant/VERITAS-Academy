@@ -596,6 +596,96 @@ html:not([data-theme="sombre"]):has(#dc-root){
 /* UNE SEULE POLICE (19/10/2026) — les cours posaient Nunito, Baloo 2 et
    Playfair Display, l'index des cahiers Klee One : la vitrine n'a que Poppins. */
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :not(.vrt-hab):not(.vrt-hab *):not(svg):not(svg *):not(code):not(pre):not(kbd){font-family:Poppins,system-ui,sans-serif!important}
+
+/* ════════════════════════════════════════════════════════════════════════
+   EN-TÊTE DE PAGE UNIQUE — 29/10/2026 (chantier design, point 9)
+   ════════════════════════════════════════════════════════════════════════
+   Cinq gabarits d'en-tête coexistaient : dégradé maillé sur l'espace élève,
+   aplat bleu centré sur les corrigés, les livrets et l'espace enseignant, et
+   AUCUN en-tête sur les œuvres et « Découvrir ». Jacques a choisi le dégradé
+   maillé de l'espace élève : il devient l'en-tête de toutes les pages.
+   · header.top : pages de veritas-pages.css ;
+   · .eh        : espace élève (veritas-eleve.css) ;
+   · .vh-hero   : pages de veritas-refonte.css, dont vitrine.js réunit le
+                  premier <h1> et son chapeau dans un en-tête.
+   Le maillage est FIXE (dégradés superposés) : aucune animation ajoutée. */
+:root{--vrt-maille:radial-gradient(55% 90% at 0% 0%,rgba(255,201,60,.34),transparent 62%),
+  radial-gradient(50% 85% at 100% 100%,rgba(110,70,192,.55),transparent 64%),
+  radial-gradient(35% 60% at 80% 30%,rgba(15,155,142,.30),transparent 66%),
+  linear-gradient(135deg,#0d1a3d 0%,#1d3168 48%,#3a2a7a 100%)}
+/* background-color écrit À PART : veritas-harmonie.js lit la couleur de fond
+   calculée pour choisir l'encre du titre. Sous un dégradé seul elle vaut
+   « transparent », et le script repeignait le titre en bleu nuit sur fond
+   bleu nuit. */
+header.top,.eh,.vh-hero{background:var(--vrt-maille)!important;background-color:#1d3168!important;color:#fff;text-align:center;
+  position:relative;overflow:hidden;isolation:isolate}
+header.top,.vh-hero{padding:3.2rem 1rem 3.6rem!important}
+header.top::before{display:none!important}
+header.top::after,.vh-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;
+  z-index:4;background:linear-gradient(90deg,transparent,#FFC93C,transparent)}
+header.top>*,.vh-hero>*{position:relative;z-index:1}
+.vh-hero>*{max-width:920px;margin-left:auto;margin-right:auto}
+header.top .badge,.eh .kicker,.vh-hero .badge{display:inline-flex;align-items:center;gap:.45rem;
+  border:1.5px solid rgba(255,201,60,.55)!important;background:rgba(255,201,60,.10)!important;
+  color:#FFC93C!important;border-radius:999px!important;padding:.25rem .9rem!important;
+  font-size:.76rem!important;font-weight:700!important;letter-spacing:.1em;text-transform:uppercase;margin-bottom:0}
+header.top h1,.eh h1,.vh-hero h1{font-size:clamp(28px,18px + 2.6vw,44px)!important;
+  line-height:1.1!important;font-weight:800!important;letter-spacing:-.02em;color:#fff!important;
+  margin:.9rem auto .5rem!important;max-width:900px;text-wrap:balance}
+header.top p,.eh p.sub,.vh-hero p,.vh-hero>div:not(.badge){color:#cdd8f2!important;max-width:64ch;margin:.2rem auto 0!important;
+  font-size:clamp(1rem,.95rem + .3vw,1.1rem)!important;line-height:1.6;text-align:center!important}
+header.top p a,.vh-hero p a{color:#FFC93C}
+.eh .chip .i,.eh .chip b{color:#FFC93C!important}
+.eh h1 .or{color:#FFC93C!important}
+/* Bandeau « contact » commun (.vrtc) : son titre suit l'échelle des titres de section. */
+h2.vrtc-t{font-size:clamp(22px,16px + 1.4vw,30px)!important;line-height:1.22!important}  /* var(--gold) n'est pas définie sur cette page : le mot restait blanc */
+/* ── Écrans publics de l'application : le même en-tête que la vitrine ─────
+   assets/vitrine.js place le premier titre de l'écran (.pgt ou .vsec-title)
+   et son chapeau dans un .vh-hero.vh-app. Carte arrondie : l'écran vit dans
+   la colonne de l'application, pas sur toute la largeur. */
+.vh-app{border-radius:20px;margin:4px 0 26px!important;padding:2.6rem 1.2rem 3rem!important}
+.vh-app::after{border-radius:0 0 20px 20px}
+#VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app :is(.pgt,.vsec-title){display:flex!important;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;margin:.4rem auto .5rem!important;padding:0!important;background:none!important;
+  font-family:Poppins,system-ui,sans-serif!important;font-size:clamp(28px,18px + 2.6vw,44px)!important;
+  line-height:1.12!important;font-weight:800!important;color:#fff!important;text-align:center!important;
+  letter-spacing:-.02em;-webkit-text-fill-color:#fff!important;border:0!important}
+#VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app :is(.pgt,.vsec-title)::after,#VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app :is(.pgt,.vsec-title)::before{display:none!important}
+#VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app .pgt-ico,#VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app .vsec-title > :is(span,svg):first-child{width:52px!important;height:52px!important;
+  border-radius:50%!important;background:#fff!important;border:3px solid #FFC93C!important;color:#001136!important;
+  box-shadow:none!important;box-sizing:border-box}
+#VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app > :not(:first-child){color:#cdd8f2!important;font-style:normal!important;
+  font-size:clamp(1rem,.95rem + .3vw,1.1rem)!important;text-align:center!important;max-width:64ch;
+  margin:.3rem auto 0!important;background:none!important;border:0!important;padding:0!important}
+/* Une seule police sur les écrans publics : Poppins, comme la vitrine
+   (app.css imposait Montserrat aux titres). */
+#VISITOR :is(h1,h2,h3,h4,.ct,.mtt,.pgt,.vsec-title,.vhero-title){font-family:Poppins,system-ui,sans-serif!important}
+/* theme-lws.css éteint tous les dégradés de l'espace visiteur
+   (#VISITOR#VISITOR *{background-image:none!important}). L'en-tête maillé est
+   la seule exception voulue : trois identifiants pour passer devant. */
+#VISITOR#VISITOR#VISITOR .vh-hero{background-color:#1d3168!important;background-image:
+  radial-gradient(55% 90% at 0% 0%,rgba(255,201,60,.34),transparent 62%),
+  radial-gradient(50% 85% at 100% 100%,rgba(110,70,192,.55),transparent 64%),
+  radial-gradient(35% 60% at 80% 30%,rgba(15,155,142,.30),transparent 66%),
+  linear-gradient(135deg,#0d1a3d 0%,#1d3168 48%,#3a2a7a 100%)!important}
+#VISITOR#VISITOR#VISITOR .vh-hero::after{background-image:linear-gradient(90deg,transparent,#FFC93C,transparent)!important}
+
+/* ── Titres de section et boutons : une seule échelle (points 5 et 8) ────── */
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,main) h2:not(.vrt-hab h2):not(.card h2):not(.tile h2){
+  font-size:clamp(1.4rem,1.1rem + 1.2vw,1.875rem)!important;line-height:1.22}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) a.btn{border-radius:999px!important}
+/* ── Texte courant : fer à gauche, sans césure (point 6) ─────────────────
+   Remplace la justification de veritas-pages.css, de veritas-refonte.css et
+   de l'espace visiteur de l'application : en colonne étroite elle creusait
+   des trous et coupait les mots (« in-fluenceurs », « exa-men »).
+   « inherit » et non « left » : un texte posé dans une carte centrée (carte à
+   médaillon, en-tête) reste centré ; ailleurs il revient au fer à gauche.
+   Un alignement écrit EN LIGNE sur l'élément reste prioritaire. */
+:is(.wrap>p,.card .note,.loupe li,.duo .bloc p,details.sol .body p,.ex .q,.step p,.condition li,
+  .wrap p,.wrap li,.wrap dd,.wrap blockquote p,.card p,.card li,.wrap>ul>li,.wrap>ol>li,blockquote p
+):not([style*="text-align"]){text-align:inherit!important;hyphens:manual!important;-webkit-hyphens:manual!important}
+#VISITOR#VISITOR#VISITOR :is(p,.acc-plan-av li,.vbook-desc,.lx-catcard-desc,.lws-path-d,.vsec-tx,.acc-foot-tx,.acc-promesse-tx):not([style*="text-align"]){
+  text-align:inherit!important;hyphens:manual!important;-webkit-hyphens:manual!important}
 """
 
 
@@ -623,6 +713,9 @@ def retirer_blocs(s):
     # Chaque bloc est inséré suivi d'UN saut de ligne, et retiré avec lui :
     # c'est ce qui rend la passe idempotente octet pour octet.
     return re.sub(r'<!--vrt-habillage:([a-z]+)-->[\s\S]*?<!--/vrt-habillage:\1-->\n', '', s)
+
+
+REV_HABILLAGE = '.29'   # 29/10/2026 — à changer quand veritas-habillage.css, veritas-harmonie.js ou vitrine.js changent
 
 
 def version(s):
@@ -656,7 +749,7 @@ def habiller(s, donnees, rel=''):
     # <head>
     tete = ('<link rel="stylesheet" href="/assets/veritas-habillage.css?v=%s"%s>\n'
             '<script>window.VRT_DATA=window.VRT_DATA||%s;</script>') % (
-        v, ' data-vrt-epreuve' if epreuve else '', donnees)
+        v + REV_HABILLAGE, ' data-vrt-epreuve' if epreuve else '', donnees)
     # La barre est dessinée en Poppins : une page qui ne la charge pas
     # (évaluations, Campus, Atelier…) la recevrait en police système.
     if not re.search(r'fonts\.googleapis\.com/css2\?family=[^"]*Poppins', s):
@@ -708,8 +801,8 @@ def habiller(s, donnees, rel=''):
         scripts += '<script src="/assets/veritas-medaillons.js?v=%s" defer></script>\n' % v
     # 25/10/2026 — même lecture partout (textes ≥ 15 px, anneaux) : voir
     # l'en-tête de assets/veritas-harmonie.js.
-    scripts += '<script src="/assets/veritas-harmonie.js?v=%s" defer></script>\n' % v
-    scripts += '<script src="/assets/vitrine.js?v=%s" defer></script>' % v
+    scripts += '<script src="/assets/veritas-harmonie.js?v=%s" defer></script>\n' % (v + REV_HABILLAGE)
+    scripts += '<script src="/assets/vitrine.js?v=%s" defer></script>' % (v + REV_HABILLAGE)
     fin = PIED + '\n' + ('' if outil else BULLES + '\n') + scripts
     i = s.rfind('</body>')
     s = s[:i] + bloc('pied', fin) + '\n' + s[i:]
@@ -818,7 +911,7 @@ def habiller_app(s, donnees, vitrine):
     m = re.search(r'app\.js\?v=([0-9.]+)', s)
     v = m.group(1) if m else BP.VER
     tete = ('<link rel="stylesheet" href="/assets/veritas-habillage.css?v=%s">\n'
-            '<script>window.VRT_DATA=window.VRT_DATA||%s;</script>\n%s') % (v, donnees, CSS_APP)
+            '<script>window.VRT_DATA=window.VRT_DATA||%s;</script>\n%s') % (v + REV_HABILLAGE, donnees, CSS_APP)
     s = s.replace('</head>', bloc('tete', tete) + '\n</head>', 1)
 
     mv = re.search(r'<div id="VISITOR"[^>]*>\n', s)
@@ -837,7 +930,7 @@ def habiller_app(s, donnees, vitrine):
     j = s.rfind('</body>')
     s = s[:j] + bloc('formules', formules_vitrine(vitrine)) + '\n' + s[j:]
     j = s.rfind('</body>')
-    s = s[:j] + bloc('script', '<script src="/assets/veritas-harmonie.js?v=%s" defer></script>\n<script src="/assets/vitrine.js?v=%s" defer></script>' % (v, v)) + '\n' + s[j:]
+    s = s[:j] + bloc('script', '<script src="/assets/veritas-harmonie.js?v=%s" defer></script>\n<script src="/assets/vitrine.js?v=%s" defer></script>' % (v + REV_HABILLAGE, v + REV_HABILLAGE)) + '\n' + s[j:]
     return s
 
 
