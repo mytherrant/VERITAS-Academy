@@ -3328,3 +3328,12 @@ séquence 6, 1 citation hors cahier, 3 « axe ».
   sw.js), puis build_corriges, build_plan, build_vitrine, habiller_pages.
 - Laissés HORS du commit (autre chantier) : `api/payment_monetbil.php`,
   `api/payment_config.php.exemple`, sondes `tests/_*`, brouillons `tools/_*` et `_*.txt`.
+
+## 29/10/2026 (soir) — cartes « sombres et bizarres » reprises
+- Manuels : les tuiles de niveau portaient tout leur descriptif DANS le bouton plein (gros pavé foncé sur 3 lignes). Descriptif en note, bouton « Voir les corrigés » + compteur (build_corriges.py et manuels.html).
+- Boutons de carte à pastille (corrigés, manuels…) : la pastille devient un surtitre en capitales au-dessus du libellé ; carte en colonne, bouton au pied, aligné d'une carte à l'autre.
+- veritas-medaillons.js ne « corrige » plus l'encre des boutons pleins de carte (noircissait « Module 1 », « 830 exos »).
+- Livrets : libellé du bouton orange en 600 et sur une ligne, boutons alignés au pied, clé et œil retirés faute de place.
+- Partenariat : pastille « Parchemin » sur une ligne, au pied de la carte.
+- Tuiles « Continuer » (.cta) : icône dans l'anneau du site (blanc, filet teinté 3 px, encre bleu nuit) au lieu du disque pâle.
+- Versions : app 1.20.53, REV_HABILLAGE .32.

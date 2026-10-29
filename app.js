@@ -44357,17 +44357,20 @@ function pgPartnerships(){
      médaillon en ANNEAU teinté, titre gras bleu nuit, pastille du parchemin
      pâle. Avant, trois cartes teintées et une blanche : Diamant (#B9F2FF,
      presque blanc) ne ressemblait pas aux autres. lv.color reste la couleur
-     du palier ailleurs (badges, parchemins) ; ici on prend une encre lisible. */
+     du palier ailleurs (badges, parchemins) ; ici on prend une encre lisible.
+     La pastille ne dit plus que « Parchemin » (le palier est le titre) : à
+     140 px, « Parchemin Diamant » se cassait en deux, et elle descend au pied
+     de la carte pour s'aligner d'un palier à l'autre. */
   var ENCRE = { bronze:['#A84200','#FFF3E4'], argent:['#5F6B80','#EEF1F6'], or:['#A67608','#FFF4D6'], diamant:['#0E7C86','#E3F1EE'] };
   ['bronze','argent','or','diamant'].forEach(function(k){
     var lv = L[k], e = ENCRE[k];
-    h += '<div style="position:relative;background:#fff;border:1px solid #E4E9F2;border-radius:14px;padding:20px 14px;text-align:center;box-shadow:0 4px 14px rgba(0,17,54,.05);transition:transform .18s,box-shadow .18s" '
+    h += '<div style="position:relative;background:#fff;border:1px solid #E4E9F2;border-radius:14px;padding:20px 14px;text-align:center;display:flex;flex-direction:column;align-items:center;box-shadow:0 4px 14px rgba(0,17,54,.05);transition:transform .18s,box-shadow .18s" '
       + 'onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 12px 26px rgba(0,17,54,.09)\'" '
       + 'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 4px 14px rgba(0,17,54,.05)\'">'
       + '<div style="width:60px;height:60px;margin:0 auto 10px;border-radius:50%;background:#fff;border:3px solid '+e[0]+';box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1;color:#001136">'+lv.badge+'</div>'
       + '<div style="font-size:18px;font-weight:700;color:#001136;margin-bottom:4px">'+lv.label+'</div>'
       + '<div style="font-size:15px;color:#4D5163;margin-bottom:12px">À partir de <strong style="color:#001136">'+lv.min+'</strong> ventes</div>'
-      + '<div style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:'+e[0]+';background:'+e[1]+';border-radius:999px;padding:6px 14px">📜 Parchemin '+lv.label+'</div>'
+      + '<div style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:'+e[0]+';background:'+e[1]+';border-radius:999px;padding:6px 14px;margin-top:auto;white-space:nowrap" title="Parchemin '+lv.label+'">📜 Parchemin</div>'
       + '</div>';
   });
   h += '</div></div>';

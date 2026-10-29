@@ -941,10 +941,11 @@ def maj_manuels_html(levels):
             quoi += " + sujets d'examen"
         cartes.append(
             '    <div class="card"><h3>%s%s</h3>\n'
-            '      <a class="dl" href="corriges/%s/"><span>%sCorrigés · %s</span>'
+            '      <p class="note">%s</p>\n'
+            '      <a class="dl" href="corriges/%s/"><span>Voir les corrigés</span>'
             '<span class="pill">%s exos</span></a></div>'
-            % (esc(niv["long"].replace("Classe de ", "Classe de ")), ex, niv["slug"],
-               ico("i-book"), quoi, num(tot)))
+            % (esc(niv["long"].replace("Classe de ", "Classe de ")), ex, quoi, niv["slug"],
+               num(tot)))
     bloc = '<div class="grid" id="niveaux">\n' + "\n".join(cartes)
     open(p, "w", encoding="utf-8").write(src[:deb] + bloc + src[fin:])
     return True

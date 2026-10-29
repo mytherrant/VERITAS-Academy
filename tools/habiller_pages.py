@@ -520,8 +520,8 @@ nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!impor
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:hover{background:#fff!important;transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09)!important}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a small{color:#6E7385!important;font:400 13px/1.5 Poppins,sans-serif!important;margin-top:2px!important}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a > svg{
-  width:42px!important;height:42px!important;padding:11px;box-sizing:border-box;margin:0 0 8px!important;
-  border-radius:50%;background:var(--vm-fond,#DBE8FE);color:var(--vm-trait,#1E499B)!important;
+  width:52px!important;height:52px!important;padding:13px;box-sizing:border-box;margin:0 0 8px!important;
+  border-radius:50%;background:#fff;border:3px solid var(--vm-trait,#1E499B);color:#001136!important;
   stroke:currentColor!important;transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:hover > svg{transform:scale(1.08) rotate(-4deg)}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:nth-child(6n+1){--vm-fond:#DBE8FE;--vm-trait:#1E499B}
@@ -531,6 +531,7 @@ nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!impor
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:nth-child(6n+5){--vm-fond:#FBE9F1;--vm-trait:#B03A6E}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:nth-child(6n+6){--vm-fond:#FFF3E4;--vm-trait:#A84200}
 :root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a{background:#14224A!important;border-color:#24345F!important;color:#F2F5FC!important}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a > svg{background:#0F1A3A;color:#F2F5FC!important}
 
 /* ════════════════════════════════════════════════════════════════════════
    FAQ NUMÉROTÉE — celle de la vitrine (18/10/2026)
@@ -679,6 +680,19 @@ html body :is(.card,.tile) > a.dl:only-of-type,html body :is(.card,.tile,.loupe)
 html body :is(.card,.tile) > a.dl:only-of-type *,html body :is(.card,.tile,.loupe) a.go *,html body .pl-go *{font-weight:600!important}
 :is(.card,.tile) > a.dl:only-of-type{flex-wrap:wrap;row-gap:6px}
 :is(.card,.tile) > a.dl:only-of-type{text-align:center}
+/* Le compteur « 830 exos » passait en encre foncée sur le bouton violet
+   (veritas-medaillons.js juge le fond de la pastille) : il reste blanc. */
+html body :is(.card,.tile) > a.dl:only-of-type .pill{color:#fff!important;font-weight:700!important}
+html body :is(.card,.tile) > p.note + a.dl:only-of-type{margin-top:auto!important}
+/* Le bouton à pastille (« Voir les corrigés » + « Module 1 ») se cassait
+   en deux lignes bancales, pastille foncée en dessous. La pastille devient
+   un surtitre discret AU-DESSUS du libellé : deux lignes voulues, pas subies.
+   Et la carte passe en colonne pour que le bouton tombe au pied, aligné
+   d'une carte à l'autre (il flottait à mi-hauteur). */
+:is(.card,.tile):has(> a.dl:only-of-type){display:flex!important;flex-direction:column}
+html body :is(.card,.tile) > a.dl:only-of-type:has(.pill){flex-direction:column!important;flex-wrap:nowrap!important;gap:2px!important;padding:10px 14px!important}
+html body :is(.card,.tile) > a.dl:only-of-type .pill{order:-1;background:none!important;padding:0!important;
+  font-size:11.5px!important;letter-spacing:.06em;text-transform:uppercase;opacity:.85;line-height:1.3}
 /* Espace élève : le numéro de chaque partie était un carré bleu nuit plein,
    son chiffre invisible (var(--gold) n'existe pas sur la page). Il prend
    l'anneau du site, comme toutes les pastilles. */
@@ -774,7 +788,7 @@ def retirer_blocs(s):
     return re.sub(r'<!--vrt-habillage:([a-z]+)-->[\s\S]*?<!--/vrt-habillage:\1-->\n', '', s)
 
 
-REV_HABILLAGE = '.31'   # 29/10/2026 (2e passe) — à changer quand veritas-habillage.css, veritas-harmonie.js ou vitrine.js changent
+REV_HABILLAGE = '.32'   # 29/10/2026 (2e passe) — à changer quand veritas-habillage.css, veritas-harmonie.js ou vitrine.js changent
 
 
 def version(s):
