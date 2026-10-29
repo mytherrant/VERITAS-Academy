@@ -638,7 +638,58 @@ header.top p a,.vh-hero p a{color:#FFC93C}
 .eh .chip .i,.eh .chip b{color:#FFC93C!important}
 .eh h1 .or{color:#FFC93C!important}
 /* Bandeau « contact » commun (.vrtc) : son titre suit l'échelle des titres de section. */
-h2.vrtc-t{font-size:clamp(22px,16px + 1.4vw,30px)!important;line-height:1.22!important}  /* var(--gold) n'est pas définie sur cette page : le mot restait blanc */
+h2.vrtc-t{font-size:clamp(22px,16px + 1.4vw,30px)!important;line-height:1.22!important}
+
+/* ════════════════════════════════════════════════════════════════════════
+   CARTES VIVANTES, PLUS AUCUN TRAIT — 29/10/2026
+   ════════════════════════════════════════════════════════════════════════
+   « La mise en forme n'est pas comme sur la vitrine, c'est trop pâle et
+   monotone. Fais comme ceci [cartes Partenariat : titre gras, bouton plein
+   teinté]. Enlève les traits foncés partout » (Jacques).
+   1. Titres de carte : 700, bleu nuit, 17 à 19 px (ils allaient de 15,5 px
+      maigre sur le plan à 30 px sur les corrigés).
+   2. L'action d'une carte devient un bouton plein, à la teinte de son
+      médaillon : « Ouvrir » (plan), « Voir les corrigés » (corrigés),
+      « Ouvrir les corrigés » (Constellation).
+   3. Les filets d'accent tombent : barre jaune à gauche des encadrés .intro,
+      liseré de couleur en haut des tuiles de l'espace élève. */
+:is(.card,.tile,.loupe) > :is(h3,h4),.pl-t,.ft > :is(h3,h4){font-size:clamp(17px,15px + .4vw,19px)!important;
+  font-weight:700!important;line-height:1.3!important;color:#001136!important}
+:is(.card,.tile,.loupe){--vt:#1E499B}
+:is(.card,.tile,.loupe):has(.ico[data-vm="sarcelle"]){--vt:#0E7C86}
+:is(.card,.tile,.loupe):has(.ico[data-vm="vert"]){--vt:#007E11}
+:is(.card,.tile,.loupe):has(.ico[data-vm="violet"]){--vt:#5B4FA8}
+:is(.card,.tile,.loupe):has(.ico[data-vm="rose"]){--vt:#B03A6E}
+:is(.card,.tile,.loupe):has(.ico[data-vm="brique"]){--vt:#A84200}
+:is(.card,.tile) > a.dl:only-of-type,:is(.card,.tile,.loupe) a.go,.pl-go{
+  display:flex!important;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;
+  margin-top:auto!important;padding:11px 16px!important;border-radius:10px!important;border:0!important;
+  background:var(--vt,var(--trait,#1E499B))!important;color:#fff!important;font-weight:600!important;
+  text-decoration:none!important;box-shadow:none!important;transition:filter .18s,transform .18s}
+.pl-go{background:var(--trait,#1E499B)!important}
+:is(.card,.tile) > a.dl:only-of-type *,:is(.card,.tile,.loupe) a.go *,.pl-go *{color:#fff!important}
+:is(.card,.tile) > a.dl:only-of-type .pill{background:rgba(255,255,255,.18)!important;border:0!important}
+:is(.card,.tile) > a.dl:only-of-type:hover,:is(.card,.tile,.loupe) a.go:hover,a.pl-c:hover .pl-go{filter:brightness(1.08)}
+.intro::before,article.ft::after,.cl::before{display:none!important}
+/* veritas-pages.css ramène à 400 tout span, div et lien hors habillage
+   (body span:not(.vrt-hab *) …{font-weight:400!important}) : il faut la même
+   arme, plus spécifique, pour que titres et boutons de carte restent gras. */
+html body :is(.card,.tile,.loupe) > :is(h3,h4),html body .pl-t,html body .ft > :is(h3,h4){font-weight:700!important}
+html body :is(.card,.tile) > a.dl:only-of-type,html body :is(.card,.tile,.loupe) a.go,html body .pl-go,
+html body :is(.card,.tile) > a.dl:only-of-type *,html body :is(.card,.tile,.loupe) a.go *,html body .pl-go *{font-weight:600!important}
+:is(.card,.tile) > a.dl:only-of-type{flex-wrap:wrap;row-gap:6px}
+:is(.card,.tile) > a.dl:only-of-type{text-align:center}
+/* Espace élève : le numéro de chaque partie était un carré bleu nuit plein,
+   son chiffre invisible (var(--gold) n'existe pas sur la page). Il prend
+   l'anneau du site, comme toutes les pastilles. */
+.sh .num{background:#fff!important;border:3px solid #1E499B!important;color:#001136!important;
+  border-radius:50%!important;width:36px!important;height:36px!important;box-sizing:border-box;
+  display:inline-flex!important;align-items:center;justify-content:center;font-weight:700!important}
+/* Espace élève : « 1 685 corrigés » prenait le cadre gris des exercices
+   (.ex de veritas-pages.css) — un nom de classe partagé par hasard. */
+.cl .ex{border:0!important;padding:0!important;background:none!important;margin:.35rem 0 0!important;box-shadow:none!important}
+/* L'application : même police partout sur les écrans publics. */
+#VISITOR :is(.vsec-h,.vsh,.sc-title,.b-title,.h-display,.h-1,.h-2){font-family:Poppins,system-ui,sans-serif!important}  /* var(--gold) n'est pas définie sur cette page : le mot restait blanc */
 /* ── Écrans publics de l'application : le même en-tête que la vitrine ─────
    assets/vitrine.js place le premier titre de l'écran (.pgt ou .vsec-title)
    et son chapeau dans un .vh-hero.vh-app. Carte arrondie : l'écran vit dans
@@ -715,7 +766,7 @@ def retirer_blocs(s):
     return re.sub(r'<!--vrt-habillage:([a-z]+)-->[\s\S]*?<!--/vrt-habillage:\1-->\n', '', s)
 
 
-REV_HABILLAGE = '.29'   # 29/10/2026 — à changer quand veritas-habillage.css, veritas-harmonie.js ou vitrine.js changent
+REV_HABILLAGE = '.30'   # 29/10/2026 (2e passe) — à changer quand veritas-habillage.css, veritas-harmonie.js ou vitrine.js changent
 
 
 def version(s):

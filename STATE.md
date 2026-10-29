@@ -13,6 +13,12 @@ Demande de Jacques : audit design en prod, puis « corrige 4, 5, 6, 8, 9 (dégra
 - **Réassurance** : une seule bande, sous « Ce que 1 200 F par mois changent ».
 - **Cache** : REV_HABILLAGE = '.29' suffixe veritas-habillage.css, veritas-harmonie.js et vitrine.js sur toutes les pages ; plan.html et constellation.html chargent désormais veritas-habillage.css ; empreinte d'index.php 2026-10-29a.
 
+**2e passe (même jour)** — « trop pâle et monotone, fais comme les cartes Partenariat ; enlève les traits foncés partout ; double police » :
+- Cartes : titres 700 bleu nuit, action en bouton plein à la teinte du médaillon (plan « Ouvrir », corrigés « Voir les corrigés », Constellation « Ouvrir les corrigés »). veritas-pages.css ramène tout à 400 hors .vrt-hab : règles en « html body » ; la barre et le pied de plan.html et constellation.html portent désormais la classe vrt-hab.
+- Traits retirés : barre jaune des encadrés .intro, liseré haut des tuiles .ft, barre basse des tuiles de classe .cl, barre verticale de l'interruption du calendrier (vitrine), carré bleu nuit des numéros de partie de l'espace élève (devenu anneau).
+- Citation du jour entièrement en Poppins (le second paragraphe et l'auteur étaient en Georgia).
+- REV_HABILLAGE passe à '.30'.
+
 **Reste à faire (Jacques)** : enregistrer la grille du 16/10 dans l'admin « Prix & calculs automatiques » (Starter 1 200 / 12 000, Pro 2 400 / 24 000, Élite 3 600 / 36 000, Famille 12 000 / 120 000) : la base de production facture encore 1 000 / 2 000 / 3 000 / 10 000 F et la vitrine se repeint sur ces prix.
 
 ## Élèves : examen blanc et œuvres interactives ; Atelier : import Word/PDF ; 3G ; titres (25/10/2026, v1.20.48)

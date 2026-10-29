@@ -966,7 +966,7 @@ def page(entrees, vitrine):
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"></noscript>
 <link rel="stylesheet" href="/assets/veritas-pages.css?v=__VER__">
-<link rel="stylesheet" href="/assets/veritas-habillage.css?v=__VER__.29">
+<link rel="stylesheet" href="/assets/veritas-habillage.css?v=__VER__.30">
 <style>
 __CSS__
 </style>
@@ -999,8 +999,8 @@ __PROMO_VITRINE__
 </div>
 __FOOTER_VITRINE__
 __WIDGETS_VITRINE__
-<script src="/assets/veritas-harmonie.js?v=__VER__.29" defer></script>
-<script src="/assets/vitrine.js?v=__VER__.29" defer></script>
+<script src="/assets/veritas-harmonie.js?v=__VER__.30" defer></script>
+<script src="/assets/vitrine.js?v=__VER__.30" defer></script>
 </body>
 </html>
 """.replace('__CSS__', CSS_CARTES) \
@@ -1028,6 +1028,11 @@ def main():
 
     entrees = construire()
     html = page(entrees, vitrine)
+    # 29/10/2026 — la page charge veritas-pages.css, qui ramène à 400 toute
+    # graisse hors des blocs .vrt-hab : sans cette classe, la barre et le pied
+    # recopiés de la vitrine sortaient plus pâles qu'ailleurs (« Partenaires »).
+    html = html.replace('<nav id="vrtNav" ', '<nav id="vrtNav" class="vrt-hab" ', 1) \
+               .replace('<footer style="background:#001136', '<footer class="vrt-hab" style="background:#001136', 1)
 
     # ── Garde 1 : aucune couleur qui ne soit pas celle de la vitrine ────────
     # C'est par une couleur « à soi » que l'orange était entré, et qu'il avait
