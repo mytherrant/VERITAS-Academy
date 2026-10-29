@@ -44262,15 +44262,22 @@ function pgPartnerships(){
   h += '<div style="max-width:780px;margin:30px auto;padding:0 14px"><div class="ct" style="text-align:center;margin-bottom:14px">📜 Paliers de reconnaissance Bronze · Argent · Or · Diamant</div>'
     + '<div style="text-align:center;font-size:13px;color:var(--ink3);margin:-6px 0 14px">Une seule commission pour tous : <strong>' + Math.round(_prtTaux()*100) + ' %</strong> de chaque paiement fait avec votre code. Chaque palier atteint vous vaut un parchemin VÉRITAS, vérifiable par QR code.</div>'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">';
+  /* 29/10/2026 — « comme les cartes Partenariat » (Jacques) : les quatre
+     paliers partagent la carte de la vitrine — fond blanc, filet neutre,
+     médaillon en ANNEAU teinté, titre gras bleu nuit, pastille du parchemin
+     pâle. Avant, trois cartes teintées et une blanche : Diamant (#B9F2FF,
+     presque blanc) ne ressemblait pas aux autres. lv.color reste la couleur
+     du palier ailleurs (badges, parchemins) ; ici on prend une encre lisible. */
+  var ENCRE = { bronze:['#A84200','#FFF3E4'], argent:['#5F6B80','#EEF1F6'], or:['#A67608','#FFF4D6'], diamant:['#0E7C86','#E3F1EE'] };
   ['bronze','argent','or','diamant'].forEach(function(k){
-    var lv = L[k];
-    h += '<div style="position:relative;background:linear-gradient(135deg,'+lv.color+'2e,'+lv.color+'0a);border:2px solid '+lv.color+';border-radius:16px;padding:18px 14px;text-align:center;box-shadow:0 8px 24px '+lv.color+'40;transition:transform .25s,box-shadow .25s;overflow:hidden" '
-      + 'onmouseover="this.style.transform=\'translateY(-6px) scale(1.03)\';this.style.boxShadow=\'0 16px 38px '+lv.color+'66\'" '
-      + 'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 8px 24px '+lv.color+'40\'">'
-      + '<div style="font-size:40px;margin-bottom:6px;line-height:1;filter:drop-shadow(0 4px 10px '+lv.color+'80)">'+lv.badge+'</div>'
-      + '<div style="font-size:15px;font-weight:900;color:#142554;margin-bottom:6px;letter-spacing:.3px">'+lv.label+'</div>'
-      + '<div style="font-size:11px;color:var(--ink3);margin-bottom:8px">À partir de <strong>'+lv.min+'</strong> ventes</div>'
-      + '<div style="display:inline-block;font-size:13px;font-weight:800;color:#142554;background:'+lv.color+'33;border-radius:20px;padding:3px 12px">📜 Parchemin '+lv.label+'</div>'
+    var lv = L[k], e = ENCRE[k];
+    h += '<div style="position:relative;background:#fff;border:1px solid #E4E9F2;border-radius:14px;padding:20px 14px;text-align:center;box-shadow:0 4px 14px rgba(0,17,54,.05);transition:transform .18s,box-shadow .18s" '
+      + 'onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 12px 26px rgba(0,17,54,.09)\'" '
+      + 'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 4px 14px rgba(0,17,54,.05)\'">'
+      + '<div style="width:60px;height:60px;margin:0 auto 10px;border-radius:50%;background:#fff;border:3px solid '+e[0]+';box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1;color:#001136">'+lv.badge+'</div>'
+      + '<div style="font-size:18px;font-weight:700;color:#001136;margin-bottom:4px">'+lv.label+'</div>'
+      + '<div style="font-size:15px;color:#4D5163;margin-bottom:12px">À partir de <strong style="color:#001136">'+lv.min+'</strong> ventes</div>'
+      + '<div style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:'+e[0]+';background:'+e[1]+';border-radius:999px;padding:6px 14px">📜 Parchemin '+lv.label+'</div>'
       + '</div>';
   });
   h += '</div></div>';
