@@ -3836,7 +3836,11 @@ function confirmVisitorOrder(bid){
         code: promoCode
       });
     } else {
-      toast('✓ Commande enregistrée ! Nous vous contacterons au '+tel);
+      /* 29/10/2026 — sans paiement, la commande n'existait que dans
+         DB.visitorOrders, donc dans ce seul navigateur : « nous vous
+         contacterons » ne pouvait arriver. Elle part par WhatsApp. */
+      toast('✓ Commande prête — WhatsApp s\'ouvre pour l\'envoyer au centre');
+      try{ window.open('https://wa.me/237697637739?text='+encodeURIComponent('Bonjour VÉRITAS, je commande : '+b.titre+'\nNom : '+nom+'\nTél : '+tel+'\nLivraison : '+adresse),'_blank','noopener'); }catch(e){}
     }
   }, 100);
 }
@@ -6918,8 +6922,8 @@ function submitOrientation(depuisModale){
   const tel=(document.getElementById('orTel')?.value||'').trim();
   const type=document.getElementById('orType')?.value||'';
   if(!nom||!tel||!type){toast('Nom, téléphone et type de service requis','warn');return;}
-  if(!DB.orientationDemandes)DB.orientationDemandes=[];
-  DB.orientationDemandes.push({
+  if(submitOrientation._enCours) return;
+  var dem={
     id:gid(),
     nom,tel,
     niveau:document.getElementById('orNiveau')?.value||'—',
@@ -6930,9 +6934,31 @@ function submitOrientation(depuisModale){
     matieres:document.getElementById('orMatieres')?.value||'',
     date:today(),
     statut:'En attente'
-  });
+  };
+  if(!DB.orientationDemandes)DB.orientationDemandes=[];
+  DB.orientationDemandes.push(dem);
   save();
-  toast('✓ Demande envoyée ! Nous vous contacterons au '+tel);
+  /* 29/10/2026 — save() n'écrit que dans CE navigateur pour un visiteur
+     (seules les sessions admin/enseignant synchronisent) : « Demande
+     envoyée » s'affichait, le centre ne recevait rien. La demande part donc
+     à api/demandes.php (type « domicile », que le tableau de bord relit).
+     Le serveur exige quartier et matière ; une demande d'orientation n'en a
+     pas toujours : on le dit plutôt que de la faire rejeter. */
+  var corps={
+    nom:nom, tel:tel, niveau:dem.niveau==='—'?'':dem.niveau,
+    quartier:dem.quartier.trim()||'non précisé',
+    matieres:(dem.matieres.split(/[,;]+|\bet\b/).map(function(s){return s.trim();}).filter(Boolean)),
+    creneaux:dem.dispo, objectif:type,
+    message:'Formule : '+type+(dem.msg?'\n'+dem.msg:'')
+  };
+  if(!corps.matieres.length) corps.matieres=['non précisé'];
+  submitOrientation._enCours=true;
+  _demEnvoyer('domicile', corps).then(function(j){
+    toast('✓ Demande reçue (réf. '+(j.ref||'')+') — nous vous rappelons au '+tel,'ok');
+  }).catch(function(e){
+    toast("⚠️ L'envoi n'a pas abouti — WhatsApp s'ouvre avec votre demande",'warn');
+    _demReplWhatsApp('domicile', corps, e && e.message);
+  }).then(function(){ submitOrientation._enCours=false; });
   if(depuisModale && typeof cm==='function'){ cm(); return; }
   ['orNom','orTel','orNiveau','orType','orMsg','orDispo','orQuartier','orMatieres'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
@@ -11348,7 +11374,9 @@ function validerCommandeContenu(itemId){
         customerTel: tel
       });
     } else {
-      toast('✓ Commande envoyée ! Livraison par WhatsApp sous 24h.');
+      // 29/10/2026 — « envoyée » sans rien envoyer : la commande restait locale.
+      toast('✓ Commande prête — WhatsApp s\'ouvre pour l\'envoyer au centre');
+      try{ window.open('https://wa.me/237697637739?text='+encodeURIComponent('Bonjour VÉRITAS, je commande le contenu : '+(item?item.titre:itemId)+'\nNom : '+nom+'\nTél : '+tel),'_blank','noopener'); }catch(e){}
     }
   }, 100);
 }
@@ -44246,6 +44274,17 @@ function _prtFmt(n){ return (typeof fmt==='function')?fmt(n):(n+' FCFA'); }
 function _prtFmtN(n){ return (typeof fmtN==='function')?fmtN(n):String(n); }
 function _prtToast(m,t){ if(typeof toast==='function') toast(m,t||'ok'); }
 function _prtSave(){ if(typeof save==='function') save(); }
+/* 29/10/2026 — _prtSave() n'écrit que dans le navigateur du candidat (save()
+   ne synchronise que pour admin/enseignant) : « Candidature reçue ! »
+   s'affichait, le centre ne voyait rien. La candidature part donc aussi à
+   api/demandes.php ; si le réseau lâche, WhatsApp prend le relais. */
+function _prtTransmettre(d){
+  if(typeof _demEnvoyer!=='function') return;
+  _demEnvoyer('partenaire', d).catch(function(e){
+    if(typeof toast==='function') toast("⚠️ Candidature non transmise — WhatsApp s'ouvre pour l'envoyer",'warn');
+    if(typeof _demReplWhatsApp==='function') _demReplWhatsApp('partenaire', d, e && e.message);
+  });
+}
 function _prtRe(){ if(typeof re==='function') re(); }
 function _prtCm(){ if(typeof cm==='function') cm(); }
 
@@ -44521,6 +44560,12 @@ function submitPartnerApplication(type){
   if(!DB.partnerApplications) DB.partnerApplications=[];
   DB.partnerApplications.push(app);
   _prtSave();
+  _prtTransmettre({
+    nom:nom, email:email, tel:tel, ville:app.ville, etablissement:app.etablissement,
+    formule:(DB.partnerTypes&&DB.partnerTypes[type]?DB.partnerTypes[type].label:type),
+    matieres:app.matieres, social:app.social, followers:app.followers,
+    adresse:app.adresse, secteur:app.secteur, message:app.motivation
+  });
   // Notification admin si dispo
   if(typeof autoNotify==='function'){
     autoNotify('🤝 Nouvelle candidature partenaire',
@@ -45731,6 +45776,10 @@ function _ajSubmit(){
       'admin');
   }
   _prtSave();
+  _prtTransmettre({
+    nom:nom, email:email, tel:tel, ville:app.ville, etablissement:app.etablissement,
+    classe:app.classe, formule:'Ambassadeur Junior', message:app.motivation
+  });
   _prtCm();
   // Si seuil OK → auto-validation en 1,5s pour effet "magie"
   if(seuilOK){
@@ -51485,6 +51534,14 @@ function _demRecap(type, d){
     if(d.effectif) L.push('Effectif : ' + d.effectif + ' élèves');
     if(d.mode)     L.push('Hébergement souhaité : ' + ({managed:"géré par VÉRITAS", self:"serveur de l'établissement", local:"poste de la direction"}[d.mode] || d.mode));
     if(d.besoins && d.besoins.length) L.push('Besoins : ' + d.besoins.join(', '));
+  } else if(type === 'partenaire'){
+    L.push('Programme : ' + d.formule);
+    if(d.etablissement) L.push('Établissement : ' + d.etablissement);
+    if(d.classe)   L.push('Classe : ' + d.classe);
+    if(d.ville)    L.push('Ville : ' + d.ville);
+    if(d.secteur)  L.push('Secteur : ' + d.secteur);
+    if(d.social)   L.push('Réseaux : ' + d.social + (d.followers ? ' (' + d.followers + ' abonnés)' : ''));
+    if(d.message)  L.push('Motivation : ' + d.message);
   } else {
     if(d.niveau)   L.push('Classe : ' + d.niveau);
     if(d.matieres && d.matieres.length) L.push('Matières : ' + d.matieres.join(', '));
@@ -51528,7 +51585,7 @@ function _demEnvoyer(type, d){
 function _demReplWhatsApp(type, d, raison){
   var titre = (type === 'campus')
     ? "Demande VÉRITAS Campus (gestion d'établissement)"
-    : "Demande d'accompagnement à domicile";
+    : (type === 'partenaire' ? 'Candidature partenaire' : "Demande d'accompagnement à domicile");
   var msg = 'Bonjour VÉRITAS.\n' + titre + '\n\n' + _demRecap(type, d);
   var num = (typeof _vtWaNumber === 'function') ? _vtWaNumber() : '237697637739';
   try{
@@ -51856,6 +51913,7 @@ window.pgDemandes = function(){
     if(f === 'tout')     return true;
     if(f === 'campus')   return d.type === 'campus';
     if(f === 'domicile') return d.type === 'domicile';
+    if(f === 'partenaire') return d.type === 'partenaire';
     return d.statut === f;
   });
   var nb = function(test){ return liste.filter(test).length; };
@@ -51866,6 +51924,7 @@ window.pgDemandes = function(){
     +  _demTuile('À traiter',  nb(function(d){ return d.statut === 'nouveau'; }), '#B45309')
     +  _demTuile('Établissements', nb(function(d){ return d.type === 'campus'; }), '#6C56A6')
     +  _demTuile('À domicile', nb(function(d){ return d.type === 'domicile'; }), '#3A6EA8')
+    +  _demTuile('Partenaires', nb(function(d){ return d.type === 'partenaire'; }), '#B03A6E')
     +  _demTuile('Devis envoyés', nb(function(d){ return d.statut === 'devis_envoye'; }), '#3A8F73')
     + '</div>';
 
@@ -51875,7 +51934,7 @@ window.pgDemandes = function(){
 
   h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">';
   [['tout','Toutes'],['nouveau','À traiter'],['campus','Établissements'],['domicile','À domicile'],
-   ['devis_envoye','Devis envoyés'],['clos','Closes']].forEach(function(o){
+   ['partenaire','Partenaires'],['devis_envoye','Devis envoyés'],['clos','Closes']].forEach(function(o){
     var actif = (f === o[0]);
     h += '<button class="btn ' + (actif ? 'bi' : 'bo') + ' sm" onclick="window._demFiltre=\'' + o[0] + '\';re()">' + o[1] + '</button>';
   });
@@ -51896,10 +51955,19 @@ window.pgDemandes = function(){
 
   vues.forEach(function(d){
     var estCampus = (d.type === 'campus');
+    var estPart = (d.type === 'partenaire');
     var titre = estCampus ? (d.etablissement || '(établissement non précisé)')
-                          : ((d.niveau ? d.niveau + ' · ' : '') + (d.matieres || []).join(', '));
+              : estPart ? ('Partenaire · ' + (d.formule || '—'))
+                        : ((d.niveau ? d.niveau + ' · ' : '') + (d.matieres || []).join(', '));
     var lignes = [];
-    if(estCampus){
+    if(estPart){
+      if(d.etablissement) lignes.push(['Établissement', d.etablissement]);
+      if(d.classe)  lignes.push(['Classe', d.classe]);
+      if(d.secteur) lignes.push(['Secteur', d.secteur]);
+      if(d.social)  lignes.push(['Réseaux', d.social + (d.followers ? ' · ' + d.followers + ' abonnés' : '')]);
+      if(d.adresse) lignes.push(['Adresse', d.adresse]);
+      if((d.matieres || []).length) lignes.push(['Matières', d.matieres.join(', ')]);
+    } else if(estCampus){
       if(d.fonction) lignes.push(['Fonction', d.fonction]);
       if(d.effectif) lignes.push(['Effectif', d.effectif + ' élèves']);
       lignes.push(['Hébergement', ({managed:'Géré par VÉRITAS', self:'Serveur de l\'établissement', local:'Poste de la direction'})[d.mode] || d.mode || '—']);

@@ -3232,10 +3232,13 @@
     [/ambassa|tuteur/i,                             '!ouvrirIA'],
     [/whatsapp/i,                                   'https://wa.me/237697637739'],
     [/espace parent/i,                              '#parents'],
-    [/domicile/i,                                   '/app.html#devis?f=domicile'],
-    [/rattrapage/i,                                 '/app.html#devis?f=rattrapage'],
-    [/pr[ée]paration.*examen/i,                     '/app.html#devis?f=examens'],
-    [/r[ée]p[ée]tition|soutien/i,                   '/app.html#devis?f=centre'],
+    /* 29/10/2026 — /app.html#devis chargeait toute l'application (~6 s) pour
+       un formulaire qui, de surcroît, ne quittait pas le navigateur du
+       visiteur. La page légère poste à api/demandes.php. */
+    [/domicile/i,                                   '/decouvrir/devis.html?f=domicile'],
+    [/rattrapage/i,                                 '/decouvrir/devis.html?f=rattrapage'],
+    [/pr[ée]paration.*examen/i,                     '/decouvrir/devis.html?f=examens'],
+    [/r[ée]p[ée]tition|soutien/i,                   '/decouvrir/devis.html?f=centre'],
     [/certificat|attestation/i,                    '/app.html#verifier-certificat'],
     [/orientation|s[ée]rie/i,                      '/app.html#orientation'],
     [/cagnotte/i,                                  '/app.html#cagnotte'],
@@ -3268,6 +3271,16 @@
     if (!document.querySelector('[data-vp]')) return;
     var a = ev.target && ev.target.closest ? ev.target.closest('a') : null;
     if (!a || !/^\s*D[ée]couvrir/i.test(a.textContent || '')) return;
+    /* 29/10/2026 — La table ROUTES date du temps où les cartes n'avaient pas
+       de destination. build_vitrine.js leur en écrit une désormais (champ
+       `dest`), et ROUTES la court-circuitait : « Œuvres au programme »
+       (oeuvres/) ouvrait l'e-learning verrouillé, « Mon cahier en ligne »
+       (livrets/) la boutique, « Orientation » (parcours/) chargeait toute
+       l'application, « Espace Parents » (plan.html#parent) la présentation.
+       Un lien vers une vraie page est donc suivi tel quel ; seuls les liens
+       internes (#…) ou vides passent encore par la table. */
+    var hrefCarte = a.getAttribute('href') || '';
+    if (hrefCarte && hrefCarte.charAt(0) !== '#' && !/^(javascript|https?|mailto|tel):/i.test(hrefCarte)) return;
     var carte = carteDe(a);
     var h3 = carte ? carte.querySelector('h3') : null;
     var titre = h3 ? (h3.textContent || '') : (carte ? carte.textContent || '' : '');

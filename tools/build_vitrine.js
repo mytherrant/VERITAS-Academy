@@ -434,10 +434,12 @@ const DEST_SERVICES = {
   'Certificats vérifiables': APP + '#verifier-certificat',
   /* Répétitions — la carte EST la description (prix compris) ; « Découvrir »
      ne peut mener qu'à quelqu'un à qui parler, pas à une page de plus. */
-  'Répétitions au centre':   APP + '#contact',
-  'Répétitions à domicile':  APP + '#contact',
-  'Cours de rattrapage':     APP + '#contact',
-  'Préparation examens':     APP + '#contact'
+  /* 29/10/2026 — pas APP + '#contact' : charger l'application (~6 s) pour
+     un contact. La page de devis est légère et poste au serveur. */
+  'Répétitions au centre':   'decouvrir/devis.html?f=centre',
+  'Répétitions à domicile':  'decouvrir/devis.html?f=domicile',
+  'Cours de rattrapage':     'decouvrir/devis.html?f=rattrapage',
+  'Préparation examens':     'decouvrir/devis.html?f=examens'
 };
 
 /* Mêmes règles de vérification que pour ANCRES : une destination sur disque
