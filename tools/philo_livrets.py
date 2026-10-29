@@ -63,7 +63,7 @@ OUVRAGES = {
     },
     "philo-1ere": {
         "build": "p1/build", "niveau": "1ere",
-        "titre": "Mon livret de philosophie — Première ABI",
+        "titre": "Mon livret de philosophie — Première A4",
         # Les « Rubriques » de la première partie sont aussi des bandeaux de
         # chapitre ; seuls les CHAPITRES (leçons) de la deuxième partie
         # comptent ici.

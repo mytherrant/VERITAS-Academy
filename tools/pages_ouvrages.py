@@ -269,7 +269,7 @@ def page(slug: str, o: dict) -> str:
     prix_lisible = format(prix, ",").replace(",", " ")
     philo = slug.startswith("philo-")
     if philo:
-        serie = "Terminale A4" if niveau == "tle" else "Première ABI"
+        serie = "Terminale A4" if niveau == "tle" else "Première A4"
         titre_seo = f"Livret de philosophie {serie} — en ligne"
         desc = (f"Livret d'activités de philosophie {serie} : méthode du commentaire "
                 f"et de la dissertation, fiches par chapitre, copies modèles, "

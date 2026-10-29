@@ -108,10 +108,10 @@ COUVERTURES: dict[str, dict] = {
     "est-1ere":    {"src": "Couverture_EST_1ere_2026-2027.webp"},
     "est-tle":     {"src": "1ère ST.png", "part": 2, "parts": 3},
     "est-tle-ed2": {"src": "1ère ST.png", "part": 2, "parts": 3},   # même couverture, nouvelle édition
-    # Livrets de philosophie (28/10/2026) : couverture INTÉRIEURE du livret
-    # (page 1 du PDF couleur), en attendant les couvertures imprimées.
-    "philo-tle":   {"src": "Couverture_Philo_Tle_interieure.png"},
-    "philo-1ere":  {"src": "Couverture_Philo_1ere_interieure.png"},
+    # Livrets de philosophie : couvertures imprimées fournies par Jacques le 29/10/2026
+    # (face avant découpée de la planche dos-tranche-face).
+    "philo-tle":   {"src": "Couverture_Philo_Tle.png"},
+    "philo-1ere":  {"src": "Couverture_Philo_1ere.png"},
 }
 
 
