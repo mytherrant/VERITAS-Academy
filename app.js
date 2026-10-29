@@ -28041,24 +28041,75 @@ function showEvaluations(){
     var uid=SES&&(SES.accountId||SES.id);
     var myR=uid&&(ev.resultats||[]).find(function(r){return r.uid===uid;});
     var col=myR?(myR.score>=80?"#059669":myR.score>=60?"#D97706":"#AE5353"):"#142554";
-    h+="<div class='vcard' style='--vcol:#142554'>"
-      +"<div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#142554;margin-bottom:6px'>"+ev.titre+"</div>"
-      +"<div style='font-size:11px;color:#6B7A99;margin-bottom:3px'>"+ev.matiere+(ev.classe?" · "+ev.classe:"")+"</div>"
-      +"<div style='font-size:11px;color:#9CA3AF;margin-bottom:14px'>"+ev.questions.length+" questions · "+ev.duree+" min</div>";
+    var th=_evalTheme(ev.matiere);
+    /* 29/10/2026 — « trop monotone » (Jacques) : chaque carte prend la teinte
+       et le médaillon en anneau de sa matière, comme les cartes de la vitrine. */
+    h+="<div class='vcard' style='--vcol:"+th.c+";display:flex;flex-direction:column;text-align:center'>"
+      +"<span style='width:56px;height:56px;margin:0 auto 12px;border-radius:50%;background:#fff;border:3px solid "+th.c+";box-sizing:border-box;display:flex;align-items:center;justify-content:center;color:#001136'><svg class='vico vico-21' aria-hidden='true'><use href='#"+th.i+"'/></svg></span>"
+      +"<div style='font-family:Poppins,sans-serif;font-size:17px;font-weight:700;color:#001136;line-height:1.3;margin-bottom:8px'>"+_evalEsc(ev.titre)+"</div>"
+      +"<div style='margin-bottom:6px'><span style='display:inline-block;font-size:13px;font-weight:600;color:"+th.c+";background:"+th.f+";border-radius:999px;padding:4px 12px'>"+_evalEsc(ev.matiere)+(ev.classe?" · "+_evalEsc(ev.classe):"")+"</span></div>"
+      +"<div style='font-size:14px;color:#4D5163;margin-bottom:14px'>"+ev.questions.length+" questions · "+ev.duree+" min</div>";
     if(myR){
       h+="<div style='background:#F8FAFF;border-radius:10px;padding:10px;text-align:center;margin-bottom:12px'>"
-        +"<div style='font-family:Georgia,serif;font-size:22px;font-weight:700;color:"+col+"'>"+myR.score+"%</div>"
-        +"<div style='font-size:10px;color:#9CA3AF'>Passé le "+myR.date+" · "+myR.correct+"/"+myR.total+"</div></div>";
+        +"<div style='font-family:Poppins,sans-serif;font-size:22px;font-weight:700;color:"+col+"'>"+myR.score+"%</div>"
+        +"<div style='font-size:13px;color:#5F6B80'>Passé le "+myR.date+" · "+myR.correct+"/"+myR.total+"</div></div>";
     }
-    h+="<button class='btn bi' style='width:100%' onclick='lancerEvaluation(\""+ev.id+"\")'>"
-      +(SES?(myR?"🔄 Repasser":"▶ Commencer"):"🔒 Connexion requise")+"</button></div>";
+    /* Le visiteur voyait « Connexion requise » et un clic ne montrait rien
+       d'autre qu'un message : il ouvre maintenant la fiche de l'évaluation
+       (contenu, durée, deux questions d'exemple), et c'est au moment de
+       commencer qu'on lui propose le compte gratuit. */
+    h+="<button class='btn bi' style='width:100%;margin-top:auto;background:"+th.c+";border-color:"+th.c+";color:#fff;justify-content:center' onclick='lancerEvaluation(\""+ev.id+"\")'>"
+      +(SES?(myR?"🔄 Repasser":"▶ Commencer"):"Voir l'évaluation →")+"</button></div>";
   });
   h+="</div></div>";
   _vc(h);
 }
 
+var _EVAL_THEMES={
+  'math':{c:'#1E499B',f:'#E3EBF8',i:'lc-ruler'},'fran':{c:'#B03A6E',f:'#FBEEF3',i:'lc-bookopen'},
+  'litt':{c:'#B03A6E',f:'#FBEEF3',i:'lc-book'},'phys':{c:'#5B4FA8',f:'#F1EEF9',i:'lc-flask'},
+  'chim':{c:'#5B4FA8',f:'#F1EEF9',i:'lc-flask'},'svt':{c:'#007E11',f:'#E7F7EC',i:'lc-sprout'},
+  'bio':{c:'#007E11',f:'#E7F7EC',i:'lc-sprout'},'hist':{c:'#A84200',f:'#FFF3E4',i:'lc-globe'},
+  'géo':{c:'#A84200',f:'#FFF3E4',i:'lc-map'},'angl':{c:'#0E7C86',f:'#E3F1EE',i:'lc-message'},
+  'engl':{c:'#0E7C86',f:'#E3F1EE',i:'lc-message'},'philo':{c:'#5B4FA8',f:'#F1EEF9',i:'lc-lightbulb'},
+  'info':{c:'#0E7C86',f:'#E3F1EE',i:'lc-laptop'},'ecm':{c:'#1E499B',f:'#E3EBF8',i:'lc-flag'}
+};
+function _evalTheme(m){
+  var s=String(m||'').toLowerCase();
+  for(var k in _EVAL_THEMES){ if(s.indexOf(k)>=0) return _EVAL_THEMES[k]; }
+  return {c:'#1E499B',f:'#E3EBF8',i:'lc-clipboard'};
+}
+function _evalEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+/* Fiche d'une évaluation pour le visiteur non connecté : ce qu'il va passer,
+   avant de lui demander un compte. Les réponses ne sont jamais montrées. */
+function apercuEvaluation(evId){
+  var ev=(DB.evaluations||[]).find(function(e){return e.id===evId;});
+  if(!ev||!ev.questions||!ev.questions.length){toast("Évaluation introuvable","warn");return;}
+  var th=_evalTheme(ev.matiere);
+  var ex=ev.questions.slice(0,2).map(function(q,i){
+    var txt=q.q||q.question||q.enonce||q.text||'';
+    return "<li style='margin:0 0 10px;font-size:15px;line-height:1.6;color:#16233F'><b style='color:"+th.c+"'>Question "+(i+1)+".</b> "+_evalEsc(txt)+"</li>";
+  }).join('');
+  var h="<div class='vsec'><div class='vsec-title'>"+_evalEsc(ev.titre)+"</div>"
+    +"<div class='vsec-sub'>"+_evalEsc(ev.matiere)+(ev.classe?" · "+_evalEsc(ev.classe):"")+" · "+ev.questions.length+" questions · "+ev.duree+" min · correction instantanée</div>"
+    +"<div style='max-width:760px;margin:0 auto'>"
+    +"<div class='vcard' style='text-align:left;margin-bottom:18px'>"
+    +"<div style='font-size:17px;font-weight:700;color:#001136;margin-bottom:12px'>Deux questions pour vous faire une idée</div>"
+    +(ex?"<ol style='list-style:none;margin:0;padding:0'>"+ex+"</ol>":"")
+    +"<div style='font-size:14px;color:#4D5163;margin-top:6px'>Le chronomètre démarre quand vous commencez. La note et la correction s'affichent à la fin.</div></div>"
+    +"<div style='display:flex;gap:12px;flex-wrap:wrap;justify-content:center'>"
+    +"<button class='btn' style='background:#FFC93C;color:#001136;border-color:#FFC93C;font-weight:700;padding:12px 22px' onclick='(typeof showRegisterForm===\"function\"?showRegisterForm(\"eleve\"):0)'>Créer mon compte gratuit pour commencer</button>"
+    +"<button class='btn bo' style='padding:12px 22px' onclick='(typeof _ouvrirConnexionAncre===\"function\"?_ouvrirConnexionAncre():(typeof showLogin===\"function\"?showLogin(\"eleve\"):0))'>J'ai déjà un compte</button>"
+    +"</div>"
+    +"<div style='text-align:center;margin-top:18px'><a href='#' onclick='showEvaluations();return false' style='color:#1E499B;font-weight:600'>← Toutes les évaluations</a></div>"
+    +"</div></div>";
+  _vc(h);
+  try{ window.scrollTo({top:0,behavior:'instant'}); }catch(e){ window.scrollTo(0,0); }
+}
+
 function lancerEvaluation(evId){
-  if(!SES){toast("Connectez-vous pour passer une évaluation","warn");return;}
+  if(!SES){apercuEvaluation(evId);return;}
   var ev=(DB.evaluations||[]).find(function(e){return e.id===evId;});
   if(!ev||!ev.questions||!ev.questions.length){toast("Évaluation introuvable","warn");return;}
   var qIdx=0,answers=[],elapsed=0,total=ev.duree*60,timer=null;
