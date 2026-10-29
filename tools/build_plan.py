@@ -852,6 +852,16 @@ html:has(#vrtBurger:not([hidden])) body > div:has([aria-label="Professeur Ambass
   .vmn-col:first-child{grid-column:span 2;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:8px;align-content:start}
   .vmn-col:first-child > .vmn-t{grid-column:1/-1}
 }
+
+/* Téléphone (29/10/2026) : les bulles flottantes recouvraient la fin des
+   lignes. Plus petites, plus près du bord ; la citation tient dans la largeur. */
+@media (max-width:600px){
+  button[aria-label="Thème clair ou sombre"],button[aria-label="Traducteur"]{width:38px!important;height:38px!important}
+  button[aria-label="Thème clair ou sombre"] svg,button[aria-label="Traducteur"] svg{width:17px!important;height:17px!important}
+  button[aria-label="Professeur Ambassa"]{width:50px!important;height:50px!important}
+  div:has(> #vrtCit){right:12px!important;bottom:12px!important;gap:8px!important}
+  #vrtCit{max-width:calc(100vw - 24px)!important;padding:12px 14px!important;font-size:14px}
+}
 :root[data-vrt-theme="sombre"] .vmn-p{background:transparent!important}
 :root[data-vrt-theme="sombre"] .vmn-p svg{stroke:#F2F5FC!important}
 :root[data-vrt-theme="sombre"] .vmn-col:hover,:root[data-vrt-theme="sombre"] .vmn-i:hover{background:rgba(255,255,255,.06)!important;color:#F2F5FC!important}
@@ -966,7 +976,7 @@ def page(entrees, vitrine):
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"></noscript>
 <link rel="stylesheet" href="/assets/veritas-pages.css?v=__VER__">
-<link rel="stylesheet" href="/assets/veritas-habillage.css?v=__VER__.30">
+<link rel="stylesheet" href="/assets/veritas-habillage.css?v=__VER__.31">
 <style>
 __CSS__
 </style>
@@ -999,8 +1009,8 @@ __PROMO_VITRINE__
 </div>
 __FOOTER_VITRINE__
 __WIDGETS_VITRINE__
-<script src="/assets/veritas-harmonie.js?v=__VER__.30" defer></script>
-<script src="/assets/vitrine.js?v=__VER__.30" defer></script>
+<script src="/assets/veritas-harmonie.js?v=__VER__.31" defer></script>
+<script src="/assets/vitrine.js?v=__VER__.31" defer></script>
 </body>
 </html>
 """.replace('__CSS__', CSS_CARTES) \

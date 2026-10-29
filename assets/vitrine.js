@@ -2927,6 +2927,8 @@
              citation a simplement fini son temps. Mettre citOn à false
              empêcherait le bouton de la rouvrir. */
           panneau('vrtCit', false);
+          // Une fois par session : elle ne revient pas sur chaque page visitée.
+          try { sessionStorage.setItem(CLE_CIT, '1'); } catch (e) {}
         }, DUREE_CIT);
       }, 6000);
     }
