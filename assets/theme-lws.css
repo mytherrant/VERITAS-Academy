@@ -4991,3 +4991,27 @@ body > [id^="_"]:not(script), body > [id^="_"]:not(script) *:not([class*="materi
 #APP#APP#APP .sb .sbu .sblo{ flex:1 1 auto !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; }
 /* « Déconnexion » de la barre latérale : #C46F6F sur bleu nuit (4,05:1). */
 #APP#APP#APP .sb .sblo{ color:#FFB4B4 !important; }
+/* 29/10/2026 — Sur un écran de 551 px de haut, l'en-tête (286 px) et le pied
+   (91 px) ne laissaient que 174 px au menu : on n'y voyait que trois
+   rubriques. veritas-harmonie.js relève en ligne chaque texte à 15 px au
+   moins (lisibilité) — on n'y touche pas : la place se gagne sur la mise en
+   page. Le nom et le slogan tiennent sur UNE ligne, les marges se
+   resserrent, et sous 760 px de haut le slogan (tronqué à 15 px dans
+   270 px) cède la place à la ville, et le copyright s'efface. */
+#APP#APP#APP .sb{ overflow-y:auto !important; overscroll-behavior:contain; }
+#APP#APP#APP .sb .sbnav{ flex:1 0 200px !important; }
+#APP#APP#APP .sb .sbh{ padding:10px 14px !important; }
+#APP#APP#APP .sb .sbh > div:first-child{ margin-bottom:8px !important; gap:10px !important; }
+#APP#APP#APP .sb .sbh > div:first-child > div{ min-width:0 !important; flex:1 1 auto !important; }
+#APP#APP#APP .sb .sb-logo{ width:38px !important; height:38px !important; }
+#APP#APP#APP .sb :is(#sbSchoolName,#sbSchoolSlogan,#sbSchoolCity){
+  white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important;
+  line-height:1.3 !important; letter-spacing:.3px !important; margin-top:0 !important; }
+#APP#APP#APP .sb .sbu{ margin-top:0 !important; padding:8px 10px !important; row-gap:6px !important; }
+#APP#APP#APP .sb .sbu :is(.sbun,.sbur){ line-height:1.3 !important; }
+#APP#APP#APP .sb .sbu :is(#sbTheme,.sblo){ height:30px !important; min-height:30px !important; padding-top:0 !important; padding-bottom:0 !important; }
+#APP#APP#APP .sb .sbft{ padding:8px 14px !important; line-height:1.35 !important; }
+@media (max-height:760px){
+  #APP#APP#APP .sb #sbSchoolSlogan{ display:none !important; }
+  #APP#APP#APP .sb .sbft > div:last-child{ display:none !important; }
+}
