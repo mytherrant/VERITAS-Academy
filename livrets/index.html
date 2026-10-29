@@ -972,8 +972,23 @@
      son prix annoncé et son essai gratuit, parce qu'un visiteur qui cherche
      la 1ʳᵉ doit voir qu'elle existe. Il ne peut simplement pas payer pour
      rien. Serveur muet : on ne touche à rien, la page reste telle quelle. */
+  /* Promotion réglée dans l'administration : l'ancien prix barré devant la
+     pastille. Le prix promo lui-même est déjà `o.prix` (tarif effectif). */
+  var poserPromo = function (pastille, o) {
+    if (!pastille || !o.promo) return;
+    var n = parseInt(o.prixNormal, 10), p = parseInt(o.prix, 10);
+    if (!(n > p)) return;
+    var s = document.createElement('s');
+    s.style.cssText = 'opacity:.7;font-weight:400;margin-right:4px';
+    s.textContent = prixTexte(n);
+    pastille.insertBefore(s, pastille.firstChild);
+    pastille.title = 'Promotion −' + parseInt(o.promo.pct, 10) + ' %' + (o.promo.libelle ? ' — ' + o.promo.libelle : '');
+  };
+
   var mettreAJour = function (carte, o, slug) {
     if (!carte) return;
+    // Retiré de la vente depuis l'administration : la carte disparaît.
+    if (o.retire) { carte.parentNode && carte.parentNode.removeChild(carte); return; }
     poserCouverture(carte, o);
 
     var prix = parseInt(o.prix, 10) > 0 ? parseInt(o.prix, 10) : 0;
@@ -1001,6 +1016,7 @@
     if (pastille && prix && pastille.textContent !== prixTexte(prix)) {
       pastille.textContent = prixTexte(prix);
     }
+    poserPromo(pastille, o);
     /* ── ET LE LIBELLÉ SUIT LE MODE, comme le href et le prix ────────────────
        Les cartes ajoutées par ce même script disent déjà « Feuilleter
        l'ouvrage » ou « Ouvrir le livret » selon `o.mode`. Les vingt-et-une
@@ -1150,6 +1166,7 @@
         var slug = String(o.slug || '').toLowerCase();
         if (!slug) return;
         if (deja[slug]) { mettreAJour(carteDe(slug), o, slug); return; } // déjà sur la page
+        if (o.retire) return;   // retiré de la vente depuis l'administration
         /* DÉCLARÉ ≠ PUBLIÉ — mais « pas encore en vente » ≠ « invisible ».
            Ce filtre renvoyait purement et simplement les ouvrages dont le
            contenu n'est pas encore déposé sur le serveur. Il évitait bien le
@@ -1200,6 +1217,7 @@
           a.querySelector('span').insertAdjacentText('beforeend',
             lecture ? 'Feuilleter l’ouvrage' : 'Ouvrir le livret');
           a.querySelector('.prix').textContent = prixTexte(prix);
+          poserPromo(a.querySelector('.prix'), o);
           duo.appendChild(a);
         } else {
           /* Pas de bouton d'achat tant que le contenu n'est pas sur le

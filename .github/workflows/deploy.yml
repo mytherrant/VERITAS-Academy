@@ -1015,6 +1015,12 @@ jobs:
             exit 1
           fi
 
+      # ── La page « Livrets » de l'administration : fiches ajoutées, retrait
+      #    de la vente, promotions. Le serveur applique ces réglages au prix
+      #    EXIGÉ : une promo mal bornée vendrait au rabais sans que rien ne le dise.
+      - name: 📗 Fiches, retraits et promotions des livrets sont-ils appliqués ?
+        run: php tests/banc_livrets_admin.php
+
       # ── 🛡️ Le bouclier anti-robots garde MAINTENANT toutes les surfaces
       #    publiques, y compris les payantes. Une régression y est invisible
       #    dans les deux sens : soit les portes s'ouvrent, soit les élèves

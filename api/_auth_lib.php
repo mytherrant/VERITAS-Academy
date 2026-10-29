@@ -1061,6 +1061,23 @@ if (!defined('VRT_AUTH_LIB')) {
             $pc = max(0, $attendu - vrt_parr_remise($attendu, $state['parrainage']));
             if ($pc < $plancher) $plancher = $pc;
         }
+        /* FIN DE PROMOTION D'UN LIVRET PENDANT LE PAIEMENT. Le prix promo est
+           encore admis 48 h après la fin annoncée : un client qui a payé au
+           prix affiché ne doit pas être refusé parce que la confirmation de
+           l'opérateur est arrivée après minuit. */
+        if (($intent === 'livret' || $intent === 'livret_pack') && function_exists('vrt_livret_promo')) {
+            $lb = explode(':', $targetId);
+            $ls = strtolower(trim((string) ($lb[0] ?? '')));
+            $lk = strtolower(trim((string) ($lb[1] ?? 'livret')));
+            if (!isset(vrt_livret_kinds()[$lk])) $lk = 'livret';
+            if ($ls !== '' && isset(vrt_livret_classes()[$ls])) {
+                $grace = 48 * 3600;
+                $tol = ($intent === 'livret_pack')
+                     ? ((int) ($lb[2] ?? 0) >= 1 ? vrt_livret_prix_pack($db, $lk, (int) $lb[2], $ls, $grace) : $plancher)
+                     : vrt_livret_prix($db, $lk, $ls, $grace);
+                if ($tol < $plancher) $plancher = $tol;
+            }
+        }
         if ($paye >= $plancher) {
             return ['ok' => true, 'attendu' => $attendu, 'paye' => $paye, 'plancher' => $plancher,
                     'motif' => ($paye < $attendu) ? 'remise admise' : ''];
