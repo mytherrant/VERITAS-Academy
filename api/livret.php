@@ -785,6 +785,14 @@ if ($action === 'catalogue') {
                ira chercher au moment de l'octroi. */
             'prix'  => vrt_livret_prix($__tarifs, 'livret', (string) $slug),
             'prixGuide' => vrt_livret_prix($__tarifs, 'guide', (string) $slug),
+            // Le tarif hors promotion, à barrer à côté du prix promo — et la
+            // promotion elle-même (null hors promotion).
+            'prixNormal' => vrt_livret_prix_normal($__tarifs, 'livret', (string) $slug),
+            'prixGuideNormal' => vrt_livret_prix_normal($__tarifs, 'guide', (string) $slug),
+            'promo' => vrt_livret_promo($__tarifs, (string) $slug),
+            // Retiré de la vente depuis l'administration : la boutique le
+            // masque, l'administration le montre (pour pouvoir le remettre).
+            'retire' => !empty($etat['retire']),
             'disponible' => (bool) $etat['disponible'],
             // Où mène la carte de la boutique. Le serveur le dit, parce que
             // lui seul sait laquelle des deux formes existe.

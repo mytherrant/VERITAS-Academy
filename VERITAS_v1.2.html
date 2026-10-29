@@ -767,7 +767,7 @@ if('MutationObserver' in window){
 <link rel="stylesheet" href="/assets/veritas-tokens.css?v=1.19.29">
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.20.53">
+<link rel="preload" as="script" href="/app.js?v=1.20.54">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
@@ -1910,7 +1910,7 @@ setTimeout(_vAmbassaFab,3000);
    restaient en cache après déploiement. Repli sur la valeur figée si le
    sélecteur ne trouve rien. */
 window._VRT_ASSET_VER=(function(){try{var e=document.querySelector('link[href*="app.js?v="],script[src*="app.js?v="]');var m=e&&String(e.href||e.src||'').match(/app\.js\?v=([0-9.]+)/);return m?m[1]:'1.15.9';}catch(x){return '1.15.9';}})();</script>
-<script defer src="/app.js?v=1.20.53"></script>
+<script defer src="/app.js?v=1.20.54"></script>
 <!-- Promotion des barres de filtres en onglets flottants. `defer` la place
      après app.js : elle habille un DOM qui existe déjà. Amélioration
      progressive — son absence ne retire aucune fonctionnalité. -->

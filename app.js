@@ -12182,6 +12182,7 @@ const ANAV=[
     {k:"visitororders",i:"📦",l:"Commandes des visiteurs"},
     // Émission d'un code de cahier au comptoir (règlement en espèces) : un
     // ADMIN ordinaire encaisse au centre, la page se garde par iA().
+    {k:"livrets_admin",i:"📗",l:"Livrets : catalogue, prix & promos"},
     {k:"livret_codes",i:"🎟️",l:"Codes d'accès des cahiers"},
     {k:"books2",i:"▤",l:"Bibliothèque"}
   ]},
@@ -12334,6 +12335,7 @@ const PT={
   superoverview:"Vue d'ensemble système",
   sacontrol:"Centre de contrôle Super Admin",
   livret_codes:"Codes d'accès des cahiers",
+  livrets_admin:"Livrets — catalogue, prix & promotions",
   loginlog:"Journal des connexions",
   allaccounts:"Tous les comptes",
   // Pages enseignant
@@ -12522,6 +12524,8 @@ function render(p){
     plateforme:  (typeof pgPlateforme==='function' ? pgPlateforme : null),
     // Émission manuelle des codes de cahier (règlement en espèces au centre).
     livret_codes: (typeof pgLivretCodes==='function' ? pgLivretCodes : null),
+    // Catalogue des livrets : ajout, retrait de la vente, prix, promotions.
+    livrets_admin: (typeof pgLivretsAdmin==='function' ? pgLivretsAdmin : null),
     // Guide d'utilisation (tous rôles)
     guide:pgGuide,
   };
@@ -54740,6 +54744,352 @@ window._lvcRendreTable  = _lvcRendreTable;
 
 
 /* ══════════════════════════════════════════════════════════════════════════
+   LIVRETS — CATALOGUE, PRIX ET PROMOTIONS (page « livrets_admin »)
+   ──────────────────────────────────────────────────────────────────────────
+   Aucune page ne gérait les livrets eux-mêmes : on émettait des codes
+   (« Codes d'accès des cahiers ») et l'on réglait des prix au fond de
+   « Prix & calculs », mais ajouter un livret, le retirer de la vente ou le
+   mettre en promotion demandait de refaire le JSON du catalogue et de le
+   redéposer par FTP.
+
+   Tout se règle ici, en base, dans DB.tarifs — la tranche que le serveur lit
+   déjà pour ses prix (vrt_tarifs_lire) :
+     · livretFiches      { slug: { titre, niveau, mode, kinds, ajoute, cree } }
+                         ajoute un ouvrage, ou corrige celui du catalogue ;
+     · livretRetires     { slug: true }  — plus en vente, codes vendus intacts ;
+     · livretParOuvrage  { slug: { livret, guide } }  — prix (existait déjà) ;
+     · livretPromos      { slug | "*": { pct, debut, fin, libelle } }.
+   Le SERVEUR applique la promotion (vrt_livret_prix) : le prix affiché par la
+   boutique est celui qu'exige l'octroi. Rien n'est calculé que dans ce
+   navigateur.
+   ══════════════════════════════════════════════════════════════════════════ */
+var _LVA = { cat: null, busy: false, err: '', q: '' };
+
+function _lvaCharger(){
+  _LVA.busy = true; _LVA.err = '';
+  fetch(_VRT_API + '/livret.php', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{"action":"catalogue"}', cache:'no-store' })
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if(!j || !j.ok || !Array.isArray(j.ouvrages)) throw new Error((j && j.error) || 'réponse invalide');
+      _LVA.cat = j.ouvrages;
+    })
+    .catch(function(e){ _LVA.cat = _LVA.cat || []; _LVA.err = 'Catalogue du serveur injoignable (' + (e && e.message || e) + ').'; })
+    .then(function(){ _LVA.busy = false; if(typeof pg !== 'undefined' && pg === 'livrets_admin') re(); });
+}
+
+function _lvaT(){ DB.tarifs = DB.tarifs || {}; return DB.tarifs; }
+function _lvaAuj(){ var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function _lvaDateFr(s){ return /^\d{4}-\d{2}-\d{2}$/.test(s || '') ? s.split('-').reverse().join('/') : ''; }
+
+/** Promotion en cours pour un ouvrage — même règle que vrt_livret_promo(). */
+function _lvaPromo(slug){
+  var P = _lvaT().livretPromos || {}, auj = _lvaAuj();
+  var cles = [slug, '*'];
+  for(var i = 0; i < cles.length; i++){
+    var p = P[cles[i]];
+    if(!p || !(p.pct >= 1 && p.pct <= 90)) continue;
+    if(p.debut && auj < p.debut) continue;
+    if(p.fin && auj > p.fin) continue;
+    return Object.assign({ portee: cles[i] === '*' ? 'tous' : 'ouvrage' }, p);
+  }
+  return null;
+}
+
+/** Les ouvrages vus par l'administration : le catalogue du serveur, plus les
+ *  réglages faits sur ce poste et pas encore synchronisés. */
+function _lvaOuvrages(){
+  var T = _lvaT(), fiches = T.livretFiches || {}, ret = T.livretRetires || {}, par = T.livretParOuvrage || {};
+  var gen = { livret: T.livret || 1500, guide: T.livretGuide || 5000 };
+  var vus = {}, out = [];
+  (_LVA.cat || []).forEach(function(o){ vus[o.slug] = 1; out.push(Object.assign({}, o)); });
+  Object.keys(fiches).forEach(function(s){
+    if(vus[s]) return;
+    var f = fiches[s] || {};
+    out.push({ slug: s, titre: f.titre || s, niveau: f.niveau || '', mode: f.mode || 'interactif',
+               kinds: f.kinds || ['livret'], disponible: false, nonSynchro: true,
+               prixNormal: gen.livret, prixGuideNormal: gen.guide, ajoute: f.ajoute || '' });
+  });
+  out.forEach(function(o){
+    var f = fiches[o.slug];
+    if(f){
+      if(f.titre) o.titre = f.titre;
+      if(f.niveau != null) o.niveau = f.niveau;
+      if(f.mode) o.mode = f.mode;
+      if(Array.isArray(f.kinds) && f.kinds.length) o.kinds = f.kinds;
+      o.cree = !!f.cree;
+    }
+    o.retire = !!ret[o.slug];
+    // Prix HORS promotion : le réglage de ce poste l'emporte sur ce qu'a lu le serveur.
+    var pp = par[o.slug] || {};
+    o.pLivret = pp.livret > 0 ? pp.livret : (parseInt(o.prixNormal || o.prix, 10) || gen.livret);
+    o.pGuide  = pp.guide  > 0 ? pp.guide  : (parseInt(o.prixGuideNormal || o.prixGuide, 10) || gen.guide);
+    o.promoL = _lvaPromo(o.slug);
+  });
+  out.sort(function(a, b){ return String(a.niveau + a.titre).localeCompare(String(b.niveau + b.titre), 'fr'); });
+  return out;
+}
+
+function pgLivretsAdmin(){
+  if(!iA()) return na();
+  if(_LVA.cat === null && !_LVA.busy) _lvaCharger();
+  var T = _lvaT();
+  var liste = _lvaOuvrages();
+  var nVente = liste.filter(function(o){ return o.disponible !== false && !o.retire; }).length;
+  var nRet = liste.filter(function(o){ return o.retire; }).length;
+  var nPromo = liste.filter(function(o){ return o.promoL && !o.retire; }).length;
+  var synchro = !!(DB.cloudConfig && DB.cloudConfig.secret);
+
+  var h = '<div class="pgt">📗 Livrets — catalogue, prix & promotions</div>'
+    + '<div class="card mb16">'
+    +   '<div class="ib ibi mb12"><span>💡</span><span>Ajoutez un livret, retirez-le de la vente, changez son prix ou lancez une promotion. '
+    +   'Les réglages sont appliqués <strong>par le serveur</strong> : le prix affiché en boutique est celui que le paiement exigera. '
+    +   'Un livret retiré n’est plus vendu, mais les codes déjà achetés continuent d’ouvrir.</span></div>'
+    +   (synchro ? '' : '<div class="ib ibr mb12"><span>🔒</span><span>Ce poste n’a pas de clé de synchronisation : vos réglages resteront locaux et la boutique ne les verra pas. '
+    +     'Ouvrez <strong>Système → Centre de contrôle SA → Clé de synchronisation Cloud</strong>.</span></div>')
+    +   '<div class="fl2 fw g8 mb12">'
+    +     '<div class="ib ibt" style="flex:1 1 140px;margin:0"><span>📚</span><span><b>' + liste.length + '</b> livret(s)</span></div>'
+    +     '<div class="ib ibt" style="flex:1 1 140px;margin:0"><span>🛒</span><span><b>' + nVente + '</b> en vente</span></div>'
+    +     '<div class="ib ibt" style="flex:1 1 140px;margin:0"><span>🏷️</span><span><b>' + nPromo + '</b> en promotion</span></div>'
+    +     '<div class="ib ibt" style="flex:1 1 140px;margin:0"><span>🚫</span><span><b>' + nRet + '</b> retiré(s)</span></div>'
+    +   '</div>'
+    +   '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    +     '<button class="btn bi" onclick="_lvaFiche(\'\')">➕ Ajouter un livret</button>'
+    +     '<button class="btn bo" onclick="_lvaPromoModal(\'*\')">🏷️ Promotion sur tous les livrets</button>'
+    +     '<button class="btn bo" onclick="_lvaTarifsGeneraux()">💰 Tarifs généraux</button>'
+    +     '<button class="btn bo" onclick="goTo(\'livret_codes\')">🎟️ Codes d’accès</button>'
+    +     '<button class="btn bo" onclick="_LVA.cat=null;re()">↻ Actualiser</button>'
+    +   '</div>'
+    + '</div>';
+
+  var g = (T.livretPromos || {})['*'];
+  if(g && g.pct){
+    var act = _lvaPromo('__aucun__');
+    h += '<div class="ib ' + (act ? 'ibg' : 'ibt') + ' mb16"><span>🏷️</span><span><strong>Promotion générale −' + g.pct + ' %</strong>'
+      + (g.libelle ? ' « ' + _esc(g.libelle) + ' »' : '')
+      + (g.debut ? ' du ' + _lvaDateFr(g.debut) : '') + (g.fin ? ' au ' + _lvaDateFr(g.fin) : '')
+      + (act ? ' — <b>en cours</b>' : ' — <b>pas en cours</b> (dates)')
+      + '. Une promotion propre à un livret l’emporte sur celle-ci. '
+      + '<a href="javascript:void(0)" onclick="_lvaPromoModal(\'*\')">Modifier</a> · '
+      + '<a href="javascript:void(0)" onclick="_lvaPromoSuppr(\'*\')">Arrêter</a></span></div>';
+  }
+
+  if(_LVA.err) h += '<div class="ib ibr mb12"><span>⚠️</span><span>' + _esc(_LVA.err) + '</span></div>';
+
+  h += '<div class="card">'
+    + '<div class="fg"><input class="fi" id="lvaQ" placeholder="🔎 Rechercher un livret (titre, niveau, identifiant)…" value="' + _esc(_LVA.q) + '" oninput="_LVA.q=this.value;_lvaFiltrer()"></div>'
+    + '<div class="tw" id="lvaTable">' + (_LVA.cat === null ? '<div class="xs2 mut">Chargement du catalogue…</div>' : _lvaTable(liste)) + '</div>'
+    + '</div>';
+  return h;
+}
+
+function _lvaFiltrer(){
+  var e = document.getElementById('lvaTable');
+  if(e) e.innerHTML = _lvaTable(_lvaOuvrages());
+}
+
+function _lvaTable(liste){
+  var q = String(_LVA.q || '').toLowerCase().trim();
+  if(q) liste = liste.filter(function(o){ return (o.titre + ' ' + o.niveau + ' ' + o.slug).toLowerCase().indexOf(q) >= 0; });
+  if(!liste.length) return '<div class="xs2 mut">Aucun livret.</div>';
+  var prixCel = function(o, kind){
+    if((o.kinds || ['livret']).indexOf(kind) < 0) return '<span class="xs2 mut">non vendu</span>';
+    var n = kind === 'guide' ? o.pGuide : o.pLivret;
+    if(o.promoL){
+      var p = Math.max(1, Math.round(n * (100 - o.promoL.pct) / 100));
+      return '<s class="xs2 mut">' + fmt(n) + '</s><br><b style="color:#c0453f">' + fmt(p) + '</b>';
+    }
+    return fmt(n);
+  };
+  var h = '<table><thead><tr><th>Livret</th><th>État</th><th>Livret élève</th><th>Guide enseignant</th><th>Promotion</th><th></th></tr></thead><tbody>';
+  liste.forEach(function(o){
+    var s = _esc(o.slug).replace(/'/g, '');
+    var etat;
+    if(o.retire) etat = '<span style="color:#b91c1c;font-weight:600">Retiré de la vente</span>';
+    else if(o.nonSynchro) etat = '<span style="color:#92400e;font-weight:600">Pas encore synchronisé</span>';
+    else if(o.disponible === false) etat = '<span style="color:#92400e;font-weight:600">Contenu non déposé</span>';
+    else etat = '<span style="color:#16a34a;font-weight:600">En vente</span>';
+    var promo = o.promoL
+      ? '<b>−' + o.promoL.pct + ' %</b>' + (o.promoL.portee === 'tous' ? ' <span class="xs2 mut">(générale)</span>' : '')
+        + (o.promoL.fin ? '<br><span class="xs2 mut">jusqu’au ' + _lvaDateFr(o.promoL.fin) + '</span>' : '')
+      : '<span class="xs2 mut">—</span>';
+    h += '<tr>'
+      + '<td><b>' + _esc(o.titre || o.slug) + '</b><br><span class="xs2 mut">' + _esc(o.slug) + (o.niveau ? ' · ' + _esc(o.niveau) : '')
+      + ' · ' + _esc(o.mode || 'interactif') + (o.cree ? ' · ajouté ici' : '') + '</span></td>'
+      + '<td>' + etat + '</td>'
+      + '<td>' + prixCel(o, 'livret') + '</td>'
+      + '<td>' + prixCel(o, 'guide') + '</td>'
+      + '<td>' + promo + '</td>'
+      + '<td style="white-space:nowrap">'
+      +   '<button class="btn bo xs" title="Modifier" onclick="_lvaFiche(\'' + s + '\')">✏️</button> '
+      +   '<button class="btn bo xs" title="Promotion" onclick="_lvaPromoModal(\'' + s + '\')">🏷️</button> '
+      +   (o.retire
+            ? '<button class="btn bi xs" title="Remettre en vente" onclick="_lvaRetirer(\'' + s + '\',false)">✅</button> '
+            : '<button class="btn bo xs" title="Retirer de la vente" onclick="_lvaRetirer(\'' + s + '\',true)">🚫</button> ')
+      +   (o.cree ? '<button class="btn bo xs" title="Supprimer" onclick="_lvaSupprimer(\'' + s + '\')">🗑️</button>' : '')
+      + '</td></tr>';
+  });
+  return h + '</tbody></table>';
+}
+
+function _lvaEnregistrer(msg){
+  save();
+  toast('✓ ' + msg + ((DB.cloudConfig && DB.cloudConfig.secret) ? '' : ' (non synchronisé : appareil sans clé serveur)'));
+  re();
+}
+
+/** Ajouter (slug vide) ou modifier un livret. */
+function _lvaFiche(slug){
+  var o = slug ? (_lvaOuvrages().find(function(x){ return x.slug === slug; }) || {}) : {};
+  var kinds = o.kinds || ['livret'];
+  var opt = function(v, l){ return '<option value="' + v + '"' + ((o.mode || 'interactif') === v ? ' selected' : '') + '>' + l + '</option>'; };
+  M(slug ? 'Modifier un livret' : 'Ajouter un livret', slug ? _esc(o.titre || slug) : 'Nouvelle fiche au catalogue',
+    (slug ? '' : '<div class="fg"><span class="fl">Identifiant <span class="mut">(lettres minuscules, chiffres, tirets — ex. « bord-6e »)</span></span>'
+      + '<input class="fi" id="lvaSlug" maxlength="40" placeholder="ex. cahier-oeuvres-2nde"></div>')
+    + '<div class="fg"><span class="fl">Titre</span><input class="fi" id="lvaTitre" maxlength="120" value="' + _esc(o.titre || '') + '"></div>'
+    + '<div class="fg2">'
+    +   '<div class="fg"><span class="fl">Niveau</span><input class="fi" id="lvaNiveau" maxlength="20" placeholder="6e, 1ère, Tle…" value="' + _esc(o.niveau || '') + '"></div>'
+    +   '<div class="fg"><span class="fl">Format</span><select class="fi" id="lvaMode">'
+    +     opt('interactif', 'Cahier interactif') + opt('lecture', 'Feuilletage (pages)') + opt('autonome', 'Cahier autonome') + '</select></div>'
+    + '</div>'
+    + '<div class="fg"><span class="fl">Versions vendues</span>'
+    +   '<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="lvaKL"' + (kinds.indexOf('livret') >= 0 ? ' checked' : '') + '> Livret de l’élève</label>'
+    +   '<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="lvaKG"' + (kinds.indexOf('guide') >= 0 ? ' checked' : '') + '> Guide de l’enseignant</label></div>'
+    + '<div class="fg2">'
+    +   '<div class="fg"><span class="fl">Prix livret élève (FCFA)</span><input class="fi" id="lvaPL" type="number" min="100" step="50" value="' + (o.pLivret || _lvaT().livret || 1500) + '"></div>'
+    +   '<div class="fg"><span class="fl">Prix guide enseignant (FCFA)</span><input class="fi" id="lvaPG" type="number" min="100" step="50" value="' + (o.pGuide || _lvaT().livretGuide || 5000) + '"></div>'
+    + '</div>'
+    + (slug ? '' : '<div class="ib ibt mt8"><span>📦</span><span>La fiche met le livret au catalogue. Il passe <strong>en vente</strong> dès que son contenu est déposé sur le serveur '
+      + '(<code>booklet-&lt;identifiant&gt;.js</code> dans le dossier des livrets protégés, ou ses pages <code>&lt;identifiant&gt;/p001.jpg</code> pour un feuilletage). '
+      + 'D’ici là, il apparaît « bientôt en vente » et ne peut pas être payé.</span></div>'),
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="_lvaFicheSave(\'' + _esc(slug).replace(/'/g, '') + '\')">✓ Enregistrer</button>');
+}
+
+function _lvaFicheSave(slug){
+  var T = _lvaT();
+  var neuf = !slug;
+  if(neuf){
+    slug = String((_ge('lvaSlug') || {}).value || '').toLowerCase().trim().replace(/\s+/g, '-');
+    if(!/^[a-z0-9][a-z0-9_-]{0,39}$/.test(slug)){ toast('Identifiant : lettres minuscules, chiffres et tirets', 'warn'); return; }
+    if(_lvaOuvrages().some(function(x){ return x.slug === slug; })){ toast('Cet identifiant existe déjà', 'warn'); return; }
+  }
+  var titre = String((_ge('lvaTitre') || {}).value || '').trim();
+  if(!titre){ toast('Titre requis', 'warn'); return; }
+  var kinds = [];
+  if((_ge('lvaKL') || {}).checked) kinds.push('livret');
+  if((_ge('lvaKG') || {}).checked) kinds.push('guide');
+  if(!kinds.length){ toast('Cochez au moins une version', 'warn'); return; }
+  var pl = Math.round(Number((_ge('lvaPL') || {}).value)), pgd = Math.round(Number((_ge('lvaPG') || {}).value));
+  if(!(pl >= 100 && pl <= 1000000) || !(pgd >= 100 && pgd <= 1000000)){ toast('Prix : de 100 à 1 000 000 F', 'warn'); return; }
+
+  var fiches = T.livretFiches = T.livretFiches || {};
+  var f = fiches[slug] || {};
+  f.titre = titre;
+  f.niveau = String((_ge('lvaNiveau') || {}).value || '').trim();
+  f.mode = (_ge('lvaMode') || {}).value || 'interactif';
+  f.kinds = kinds;
+  if(neuf){ f.cree = true; f.ajoute = _lvaAuj(); }
+  fiches[slug] = f;
+  // Le prix n'est inscrit que s'il CHANGE : un ouvrage qui suit le tarif
+  // général doit continuer de le suivre.
+  var avant = slug ? (_lvaOuvrages().find(function(x){ return x.slug === slug; }) || {}) : {};
+  var par = T.livretParOuvrage = T.livretParOuvrage || {};
+  if(neuf || pl !== avant.pLivret){ par[slug] = par[slug] || {}; par[slug].livret = pl; }
+  if(neuf || pgd !== avant.pGuide){ par[slug] = par[slug] || {}; par[slug].guide = pgd; }
+  cm();
+  _lvaEnregistrer(neuf ? 'Livret ajouté au catalogue' : 'Livret modifié');
+}
+
+function _lvaRetirer(slug, oui){
+  var T = _lvaT();
+  if(oui && !confirm('Retirer « ' + slug + ' » de la vente ?\n\nIl disparaît de la boutique et ne peut plus être payé. Les codes déjà vendus continuent d’ouvrir.')) return;
+  T.livretRetires = T.livretRetires || {};
+  if(oui) T.livretRetires[slug] = true; else delete T.livretRetires[slug];
+  _lvaEnregistrer(oui ? 'Livret retiré de la vente' : 'Livret remis en vente');
+}
+
+/** Supprimer une fiche AJOUTÉE ici. Un ouvrage du catalogue d'origine ne se
+ *  supprime pas (des codes sont vendus dessus) : il se retire de la vente. */
+function _lvaSupprimer(slug){
+  var T = _lvaT();
+  if(!(T.livretFiches && T.livretFiches[slug] && T.livretFiches[slug].cree)){ toast('Seul un livret ajouté ici peut être supprimé — retirez-le de la vente', 'warn'); return; }
+  if(!confirm('Supprimer définitivement la fiche « ' + slug + ' » ?\n\nSes prix et sa promotion sont effacés. Si des codes ont été vendus dessus, préférez « Retirer de la vente ».')) return;
+  delete T.livretFiches[slug];
+  if(T.livretRetires) delete T.livretRetires[slug];
+  if(T.livretParOuvrage) delete T.livretParOuvrage[slug];
+  if(T.livretPromos) delete T.livretPromos[slug];
+  _lvaEnregistrer('Livret supprimé');
+}
+
+function _lvaPromoModal(slug){
+  var P = _lvaT().livretPromos || {}, p = P[slug] || {};
+  var tous = slug === '*';
+  var o = tous ? null : _lvaOuvrages().find(function(x){ return x.slug === slug; });
+  M(tous ? 'Promotion sur tous les livrets' : 'Promotion', tous ? 'S’applique à chaque livret sans promotion propre' : _esc((o && o.titre) || slug),
+    '<div class="fg2">'
+    + '<div class="fg"><span class="fl">Remise (%)</span><input class="fi" id="lvaPct" type="number" min="1" max="90" value="' + (p.pct || 20) + '" oninput="_lvaPromoApercu(\'' + _esc(slug).replace(/'/g, '') + '\')"></div>'
+    + '<div class="fg"><span class="fl">Libellé <span class="mut">(facultatif)</span></span><input class="fi" id="lvaLib" maxlength="40" placeholder="ex. Rentrée scolaire" value="' + _esc(p.libelle || '') + '"></div>'
+    + '<div class="fg"><span class="fl">Début <span class="mut">(vide = dès maintenant)</span></span><input class="fi" id="lvaDeb" type="date" value="' + _esc(p.debut || '') + '"></div>'
+    + '<div class="fg"><span class="fl">Fin incluse <span class="mut">(vide = sans fin)</span></span><input class="fi" id="lvaFin" type="date" value="' + _esc(p.fin || '') + '"></div>'
+    + '</div><div class="ib ibt mt8" id="lvaPromoEx"></div>'
+    + '<div class="xs2 mut mt6">Le serveur applique la remise : la boutique affiche l’ancien prix barré, et le paiement exige le prix remisé. '
+    + 'Elle se cumule avec la remise de volume des packs établissement.</div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + (P[slug] ? '<button class="btn bo" onclick="_lvaPromoSuppr(\'' + _esc(slug).replace(/'/g, '') + '\')">Arrêter la promotion</button>' : '')
+    + '<button class="btn bi" onclick="_lvaPromoSave(\'' + _esc(slug).replace(/'/g, '') + '\')">✓ Appliquer</button>');
+  setTimeout(function(){ _lvaPromoApercu(slug); }, 0);
+}
+
+function _lvaPromoApercu(slug){
+  var e = _ge('lvaPromoEx'); if(!e) return;
+  var pct = Math.round(Number((_ge('lvaPct') || {}).value));
+  var o = slug === '*' ? null : _lvaOuvrages().find(function(x){ return x.slug === slug; });
+  var base = (o && o.pLivret) || _lvaT().livret || 1500;
+  e.innerHTML = (pct >= 1 && pct <= 90)
+    ? '<span>🧮</span><span>Livret élève' + (o ? '' : ' au tarif général') + ' : <s>' + fmt(base) + '</s> → <b>' + fmt(Math.max(1, Math.round(base * (100 - pct) / 100))) + '</b></span>'
+    : '<span>⚠️</span><span>Remise de 1 à 90 %</span>';
+}
+
+function _lvaPromoSave(slug){
+  var pct = Math.round(Number((_ge('lvaPct') || {}).value));
+  if(!(pct >= 1 && pct <= 90)){ toast('Remise : de 1 à 90 %', 'warn'); return; }
+  var deb = (_ge('lvaDeb') || {}).value || '', fin = (_ge('lvaFin') || {}).value || '';
+  if(deb && fin && fin < deb){ toast('La fin précède le début', 'warn'); return; }
+  if(fin && fin < _lvaAuj()){ toast('La date de fin est déjà passée', 'warn'); return; }
+  var T = _lvaT();
+  T.livretPromos = T.livretPromos || {};
+  T.livretPromos[slug] = { pct: pct, debut: deb, fin: fin, libelle: String((_ge('lvaLib') || {}).value || '').trim().slice(0, 40) };
+  cm();
+  _lvaEnregistrer('Promotion −' + pct + ' % enregistrée');
+}
+
+function _lvaPromoSuppr(slug){
+  var T = _lvaT();
+  if(T.livretPromos) delete T.livretPromos[slug];
+  cm();
+  _lvaEnregistrer('Promotion arrêtée');
+}
+
+/** Les tarifs généraux (ouvrage sans prix propre) vivent dans « Prix &
+ *  calculs » avec les remises de pack ; on y mène plutôt que les dupliquer. */
+function _lvaTarifsGeneraux(){ goTo('prix_calculs'); }
+
+window.pgLivretsAdmin     = pgLivretsAdmin;
+window._lvaCharger        = _lvaCharger;
+window._lvaFiltrer        = _lvaFiltrer;
+window._lvaFiche          = _lvaFiche;
+window._lvaFicheSave      = _lvaFicheSave;
+window._lvaRetirer        = _lvaRetirer;
+window._lvaSupprimer      = _lvaSupprimer;
+window._lvaPromoModal     = _lvaPromoModal;
+window._lvaPromoApercu    = _lvaPromoApercu;
+window._lvaPromoSave      = _lvaPromoSave;
+window._lvaPromoSuppr     = _lvaPromoSuppr;
+window._lvaTarifsGeneraux = _lvaTarifsGeneraux;
+window._LVA               = _LVA;
+
+
+/* ══════════════════════════════════════════════════════════════════════════
    CONTENU DU SITE — éditeur des textes et des images de la vitrine
    ──────────────────────────────────────────────────────────────────────────
    L'accueil public est une page STATIQUE : elle ne charge ni app.js ni DB.
@@ -55527,7 +55877,7 @@ function pgPrixCalculs(){
       + '<div class="fg"><span class="fl">Livret élève — tarif général (FCFA)</span>' + num('pc_l_livret', T.livret || 1500, 100, 1000000, 100) + '</div>'
       + '<div class="fg"><span class="fl">Guide enseignant — tarif général (FCFA)</span>' + num('pc_l_guide', T.livretGuide || 5000, 100, 1000000, 100) + '</div>'
       + '</div>'
-      + '<div class="xs2 mut">Un cahier dont la fiche porte son propre prix garde ce prix : réglez-le ouvrage par ouvrage ci-dessous.</div>'
+      + '<div class="xs2 mut">Un cahier dont la fiche porte son propre prix garde ce prix : réglez-le ouvrage par ouvrage ci-dessous, ou dans <a href="javascript:void(0)" onclick="goTo(\'livrets_admin\')">Livrets : catalogue, prix &amp; promos</a> (ajout, retrait, promotions).</div>'
       + '<div id="pc_ouvrages" class="mt8"><div class="xs2 mut">Chargement des ouvrages…</div></div>'
       + '<div class="fl mt12">Remise de volume d’un pack établissement</div>'
       + '<div class="tw"><table><thead><tr><th>À partir de (codes)</th><th>Remise (%)</th><th>Exemple : pack au tarif général</th></tr></thead><tbody>'
@@ -55746,7 +56096,8 @@ function _pcOuvragesCharger(){
                 ? '<input class="fi" type="number" min="100" step="100" value="' + (parseInt(v, 10) || '') + '" data-pc-ouvrage="' + _esc(o.slug) + '" data-pc-kind="' + kind + '" data-pc-avant="' + (parseInt(v, 10) || 0) + '">'
                 : '<span class="xs2 mut">non vendu</span>';
             };
-            return '<tr><td>' + _esc(o.titre || o.slug) + (o.disponible ? '' : ' <span class="xs2 mut">(non publié)</span>') + '</td><td>' + cel('livret', o.prix) + '</td><td>' + cel('guide', o.prixGuide) + '</td></tr>';
+            // Prix HORS promotion : c'est lui qu'on règle ici (la promotion se règle dans « Livrets »).
+            return '<tr><td>' + _esc(o.titre || o.slug) + (o.disponible ? '' : ' <span class="xs2 mut">(non publié)</span>') + (o.promo ? ' <span class="xs2 mut">(promo −' + parseInt(o.promo.pct, 10) + ' % en cours)</span>' : '') + '</td><td>' + cel('livret', o.prixNormal || o.prix) + '</td><td>' + cel('guide', o.prixGuideNormal || o.prixGuide) + '</td></tr>';
           }).join('')
         + '</tbody></table></div></details>';
     })

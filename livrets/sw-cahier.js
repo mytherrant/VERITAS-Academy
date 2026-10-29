@@ -67,7 +67,7 @@
    des cahiers aligné »). L'oublier ici ne fige donc rien chez personne, et le
    lever à la main ne suffirait pas si la CI ne passait pas. On le tient à jour
    pour que le dépôt dise la même chose que la production, pas pour purger. */
-const CACHE = 'vrt-cahier-v1.20.21';
+const CACHE = 'vrt-cahier-v1.20.54';
 
 const COQUILLE = [
   '/livrets/cahier.html',

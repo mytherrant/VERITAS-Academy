@@ -100,8 +100,13 @@ if ($backupFile === '' || !file_exists($backupFile)) {
     if (!function_exists('vrt_livret_catalogue')) @require_once __DIR__ . '/_livret_lib.php';
     if (function_exists('vrt_livret_catalogue')) {
         $__dc = dirname(__DIR__) . '/uploads/oeuvres/';
+        $__tl = function_exists('vrt_livret_reglages') ? ['tarifs' => vrt_livret_reglages()] : [];
         foreach (vrt_livret_catalogue() as $__s => $__x) {
-            if (!is_array($__x) || (int)($__x['prix'] ?? 0) <= 0) continue;
+            if (!is_array($__x)) continue;
+            // Le tarif EFFECTIF (réglage par ouvrage, promotion) — celui qu'exigera l'octroi.
+            $__px = function_exists('vrt_livret_prix') ? vrt_livret_prix($__tl, 'livret', (string)$__s) : (int)($__x['prix'] ?? 0);
+            $__pn = function_exists('vrt_livret_prix_normal') ? vrt_livret_prix_normal($__tl, 'livret', (string)$__s) : $__px;
+            if ($__px <= 0) continue;
             /* Meme regle que plus bas : on ne met en devanture que ce que
                le serveur peut livrer. Sans cette garde, le repli publiait
                plus large que le chemin normal — exactement l'inverse de ce
@@ -120,7 +125,7 @@ if ($backupFile === '' || !file_exists($backupFile)) {
                           ? 'Cahier à remplir en ligne, avec correction immédiate.'
                           : 'Cahier à remplir en ligne, réponses enregistrées.',
                 'ajoute' => (string)($__x['ajoute'] ?? ''),
-                'prix' => (int)$__x['prix'], 'ancienPrix' => 0,
+                'prix' => $__px, 'ancienPrix' => ($__pn > $__px ? $__pn : 0),
                 'pages' => (int)($__x['pages'] ?? 0), 'chaps' => 0,
                 'ico' => '', 'couleur' => '',
                 'couv' => function_exists('vrt_livret_couverture')
@@ -516,7 +521,7 @@ if (function_exists('vrt_catalogue_livres')) {
             'etiquette'  => '',
             'desc'       => vrt_pd_coupe((string)($__f['desc'] ?? ''), 180),
             'prix'       => $__prix,
-            'ancienPrix' => 0,
+            'ancienPrix' => ($__prixN > $__prix ? $__prixN : 0),
             'pages'      => (int)($__f['pages'] ?? 0),
             'chaps'      => (isset($__f['chaps']) && is_array($__f['chaps'])) ? count($__f['chaps']) : 0,
             'ico'        => vrt_pd_coupe((string)($__f['ico'] ?? ''), 8),
@@ -563,10 +568,13 @@ if (!function_exists('vrt_livret_catalogue')) {
 }
 if (function_exists('vrt_livret_catalogue')) {
     $__pd_dirCouv = dirname(__DIR__) . '/uploads/oeuvres/';
+    $__pd_tl = function_exists('vrt_livret_reglages') ? ['tarifs' => vrt_livret_reglages()] : [];
     foreach (vrt_livret_catalogue() as $__slug => $__o) {
         if (!is_array($__o)) continue;
         if (count($__pd_livres) >= 120) break;
-        $__prix = (int)($__o['prix'] ?? 0);
+        // Tarif EFFECTIF (réglage par ouvrage, promotion), comme api/livret.php.
+        $__prix = function_exists('vrt_livret_prix') ? vrt_livret_prix($__pd_tl, 'livret', (string)$__slug) : (int)($__o['prix'] ?? 0);
+        $__prixN = function_exists('vrt_livret_prix_normal') ? vrt_livret_prix_normal($__pd_tl, 'livret', (string)$__slug) : $__prix;
         if ($__prix <= 0) continue;          // pas de prix : pas en devanture
         /* ⚠️ DÉCLARÉ N'EST PAS PUBLIÉ. Ce bloc ne regardait que le prix : il
            mettait donc en devanture tout ouvrage tarifé, sans vérifier qu'il
