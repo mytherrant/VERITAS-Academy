@@ -20013,7 +20013,16 @@ async function callAmbassaIA(prompt, sysPrompt){
       try{ if(typeof _track==='function') _track('ia_try'); }catch(_eT){}
       if(_j&&_j.text&&!/legacy text API|deprecat|enter\.pollinations/i.test(_j.text)){ console.log('[IA] via ia_proxy ('+(_j.source||'?')+')'); return _j.text; }
       if(_j&&_j.error){ console.warn('[IA] ia_proxy:',_j.error); return "⚠️ "+_j.error; }
-    } else { console.warn('[IA] ia_proxy HTTP '+_r.status); }
+    } else {
+      console.warn('[IA] ia_proxy HTTP '+_r.status);
+      /* 30/10/2026 — Le refus du serveur a une RAISON, rédigée pour le
+         visiteur : « Vos 2 essais gratuits du jour sont épuisés. Créez un
+         compte gratuit… », « Trop de requêtes IA… ». On la jetait, et l'élève
+         lisait « vérifiez votre connexion » — sa connexion n'y était pour
+         rien (dissertation de Jacques sur Le Lion et la Perle). ia_proxy ne
+         met jamais de détail technique dans `error` : on peut l'afficher. */
+      try{ var _je=await _r.json(); if(_je&&_je.error) return "⚠️ "+_je.error; }catch(_eJ){}
+    }
   } catch(_eP){ console.warn('[IA] ia_proxy injoignable:',_eP.message); }
   // v1.3.3 : message VISITEUR neutre — aucun détail technique/serveur exposé.
   // Le diagnostic admin reste dans la console ([IA] …) et les logs serveur.
