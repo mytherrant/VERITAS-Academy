@@ -226,8 +226,13 @@ def controles(charge: Path | None) -> list[str]:
     #    le garde-fou — un refus juste dans sa forme et faux sur le fond.
     #    Le contrôle de longueur de ligne ci-dessous continue, lui, de vérifier
     #    qu'il ne se met pas à porter un cahier.
+    #    30/10/2026 — `philo.js` (28/10) : le lecteur des livrets de
+    #    philosophie. Il range en leçons le HTML que pose window.PHILO_DOC ;
+    #    l'ouvrage complet arrive par api/livret.php après le code. 283 lignes,
+    #    228 caractères au plus : du code. Le garde-fou échouait depuis son
+    #    arrivée, sur tous les commits de master.
     MOTEURS = {"gate.js", "collab.js", "support.js", "support-oi.js",
-               "liseur.js", "cahier.js", "sw-cahier.js"}
+               "liseur.js", "cahier.js", "sw-cahier.js", "philo.js"}
     #    Seuil relevé au-dessus du plus long littéral constaté dans un moteur
     #    (support.js : 968 caractères) et très en dessous des vraies données
     #    (feuilletage-4e-livret.js : 24 825). Entre les deux, il n'y a rien.
