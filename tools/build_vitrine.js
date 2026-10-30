@@ -408,6 +408,9 @@ for (const cible of Object.values(ANCRES)) {
    prévenir, et une carte inconnue arrête la construction plutôt que de partir
    avec un lien mort.
    ══════════════════════════════════════════════════════════════════════════ */
+/* 30/10/2026 — Jeux, Concours blancs et Professeur Ambassa ont chacun une
+   adresse dans l'application (#jeux, #simulateur, #ambassa) : ils ne
+   renvoient plus à l'écran e-learning général. */
 const DEST_SERVICES = {
   /* Apprendre */
   'Cours par séquence':      '#elearning',
@@ -416,14 +419,14 @@ const DEST_SERVICES = {
   'Mon cahier en ligne':     'livrets/',
   'Œuvres au programme':     'oeuvres/',
   'Labos virtuels':          '#elearning',
-  'Jeux pédagogiques':       '#elearning',
+  'Jeux pédagogiques':       APP + '#jeux',
   /* S'entraîner */
   'Épreuves & annales':      APP + '#epreuves',
   'Corrigés des cahiers':    'corriges/',
   'Bulletins blancs':        '#elearning',
-  'Concours blancs':         '#elearning',
+  'Concours blancs':         APP + '#simulateur',
   /* Se faire aider */
-  'Professeur Ambassa':      '#elearning',
+  'Professeur Ambassa':      APP + '#ambassa',
   'Classes virtuelles':      '#elearning',
   'Orientation':             'parcours/',
   'Support WhatsApp':        'https://wa.me/237' + TEL.slice(4),

@@ -720,7 +720,7 @@ CTA = """
   <h2 class="sec">%(ar)sContinuer</h2>
   <div class="cta">
     <a href="/eleve/">%(sac)sMon espace élève<small>Toutes mes ressources au même endroit</small></a>
-    <a href="%(site)s">%(bot)sProf. Ambassa (IA)<small>Poser une question sur un corrigé</small></a>
+    <a href="%(site)s/app.html#ambassa">%(bot)sProf. Ambassa (IA)<small>Poser une question sur un corrigé</small></a>
     <a href="/outils/">%(calc)sOutils gratuits<small>Moyenne, points manquants, planning</small></a>
     <a href="/constellation.html">%(comp)sLa Constellation VÉRITAS<small>Tout ce qui accompagne le cahier</small></a>
   </div>
