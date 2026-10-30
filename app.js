@@ -25031,8 +25031,15 @@ function showLabosVirtuels(){
   if(typeof window.LABO_DB==='undefined'){
     toast('Chargement des laboratoires…','info');
     _lazyChunk('labo')
-      .then(function(){ showLabosVirtuels(); })
-      .catch(function(){ toast('Laboratoires momentanément indisponibles','err'); });
+      .then(function(){
+        /* Deux pannes, deux messages (30/10/2026) : le .catch couvrait aussi
+           une exception d'AFFICHAGE, annoncée comme un module absent. Et un
+           module chargé sans LABO_DB aurait relancé ce chargement sans fin. */
+        if(typeof window.LABO_DB==='undefined') throw new Error('module labo chargé sans LABO_DB');
+        try{ showLabosVirtuels(); }
+        catch(e){ _journalErreur('showLabosVirtuels', e); toast('Les laboratoires n\'ont pas pu s\'afficher — réessayez.','err'); }
+      })
+      .catch(function(e){ _journalErreur('chunk labo', e); toast('Laboratoires momentanément indisponibles — vérifiez votre connexion et réessayez.','err'); });
     return;
   }
   // v1.4.3 : catégorie initiale alignée sur le PARCOURS (anglophone → English,
@@ -25044,8 +25051,10 @@ function showLabosVirtuels(){
   // v1.4.2 : + catégories Anglophone (GCE) et Enseignement technique
   var cats=["tous","physique","chimie","svt","maths","english","technique","geo","histoire","info","langues"];
   var catLabels={"tous":"Tous","physique":"⚡ Physique","chimie":"⚗️ Chimie","svt":"🧬 SVT","maths":"📐 Maths","english":"🇬🇧 English (GCE)","technique":"🔧 Technique","geo":"🗺️ Géo","histoire":"🏛️ Histoire","info":"💻 Info","langues":"✍️ Langues"};
-  var _hiddenLV=DB.hiddenLabos||[];
-  var _purgedLV=DB.purgedLabos||[];
+  // Une base synchronisée peut porter ces listes sous une autre forme :
+  // indexOf sur un objet levait une TypeError et vidait la page des labos.
+  var _hiddenLV=Array.isArray(DB.hiddenLabos)?DB.hiddenLabos:[];
+  var _purgedLV=Array.isArray(DB.purgedLabos)?DB.purgedLabos:[];
   var _visibleLabo=window.LABO_DB.filter(function(l){return _hiddenLV.indexOf(l.id)<0&&_purgedLV.indexOf(l.id)<0;});
   var list=_visibleLabo.filter(function(l){return cat==="tous"||l.cat===cat;});
   var gratuits=list.filter(function(l){return l.gratuit;}).length;
@@ -25127,8 +25136,8 @@ function lancerLabo(id){
   if(typeof window.LABO_DB==='undefined'){
     toast('Chargement du laboratoire…','info');
     _lazyChunk('labo')
-      .then(function(){ lancerLabo(id); })
-      .catch(function(){ toast('Laboratoire momentanément indisponible','err'); });
+      .then(function(){ if(typeof window.LABO_DB==='undefined') throw new Error('module labo chargé sans LABO_DB'); lancerLabo(id); })
+      .catch(function(err){ _journalErreur('chunk labo', err); toast('Laboratoire momentanément indisponible — vérifiez votre connexion et réessayez.','err'); });
     return;
   }
   var lv=window.LABO_DB.find(function(x){return x.id===id;});
@@ -48639,40 +48648,60 @@ window._VRT_CHUNKS = window._VRT_CHUNKS || {};
 function _lazyChunk(nom){
   if(window._VRT_CHUNKS[nom]) return window._VRT_CHUNKS[nom];
 
+  /* 30/10/2026 — UNE SECONDE CHANCE. « Laboratoires momentanément
+     indisponibles » au téléphone, alors que le module se charge au banc, y
+     compris minifié comme en production. Un premier échec (réseau mobile
+     coupé, réponse gardée par le service worker ou un cache intermédiaire)
+     emportait tout. La seconde tentative demande une adresse NEUVE (&r=…),
+     qu'aucun cache ne connaît. Délai par tentative porté de 15 à 25 s : le
+     module des labos pèse 187 Ko, et la 3G de province n'est pas le banc. */
   window._VRT_CHUNKS[nom] = new Promise(function(resoudre, rejeter){
-    var fini = false;
-    var s = document.createElement('script');
-    // Chemin RELATIF : le mode file:// et les sous-dossiers doivent continuer
-    // de fonctionner. La version suit celle des assets pour le cache.
-    s.src   = 'chunks/' + nom + '.js?v=' + (window._VRT_ASSET_VER || '1.15.1');
-    s.async = true;
-
-    // Filet : un script qui ne répond jamais laisserait l'appelant sur un
-    // « Chargement… » perpétuel. On tranche au bout de 15 s.
-    var minuteur = setTimeout(function(){
-      if(fini) return;
-      fini = true;
-      delete window._VRT_CHUNKS[nom];
-      rejeter(new Error('délai dépassé : ' + nom));
-    }, 15000);
-
-    s.onload = function(){
-      if(fini) return;
-      fini = true; clearTimeout(minuteur);
-      resoudre(nom);
-    };
-    s.onerror = function(){
-      if(fini) return;
-      fini = true; clearTimeout(minuteur);
-      delete window._VRT_CHUNKS[nom];   // un échec réseau doit rester réessayable
-      rejeter(new Error('module introuvable : ' + nom));
-    };
-    document.head.appendChild(s);
+    function essai(n){
+      var fini = false;
+      var s = document.createElement('script');
+      // Chemin RELATIF : le mode file:// et les sous-dossiers doivent continuer
+      // de fonctionner. La version suit celle des assets pour le cache.
+      s.src   = 'chunks/' + nom + '.js?v=' + (window._VRT_ASSET_VER || '1.15.1') + (n > 1 ? '&r=' + Date.now() : '');
+      s.async = true;
+      function echec(raison){
+        if(fini) return;
+        fini = true; clearTimeout(minuteur);
+        if(s.parentNode) s.parentNode.removeChild(s);
+        if(n < 2){ essai(n + 1); return; }
+        delete window._VRT_CHUNKS[nom];   // un échec réseau doit rester réessayable
+        rejeter(new Error(raison + ' : ' + nom));
+      }
+      // Filet : un script qui ne répond jamais laisserait l'appelant sur un
+      // « Chargement… » perpétuel.
+      var minuteur = setTimeout(function(){ echec('délai dépassé'); }, 25000);
+      s.onload = function(){
+        if(fini) return;
+        fini = true; clearTimeout(minuteur);
+        resoudre(nom);
+      };
+      s.onerror = function(){ echec('module introuvable'); };
+      document.head.appendChild(s);
+    }
+    essai(1);
   });
 
   return window._VRT_CHUNKS[nom];
 }
 window._lazyChunk = _lazyChunk;
+
+/* Inscrit une erreur ATTRAPÉE dans le même journal que window.onerror
+   (localStorage._veritasErrors, lu par showVeritasErrors()) : un .catch qui
+   n'affiche qu'un toast neutre ne laissait aucune trace à diagnostiquer. */
+window._journalErreur = function(ou, e){
+  try{
+    console.error('[' + ou + ']', e);
+    var logs = JSON.parse(localStorage.getItem('_veritasErrors') || '[]');
+    logs.push({ msg: String((e && e.message) || e).substring(0,500), src: ou, line: 0, col: 0,
+                stack: e && e.stack ? String(e.stack).substring(0,1000) : '', when: new Date().toISOString() });
+    if(logs.length > 50) logs = logs.slice(-50);
+    localStorage.setItem('_veritasErrors', JSON.stringify(logs));
+  }catch(x){}
+};
 
 /* Le catalogue des œuvres est chargé à la demande : l'objet existe toujours
    (déclaré vide au démarrage), il faut donc tester son CONTENU et non son
@@ -48810,6 +48839,15 @@ window._chargerCatalogueElearning = _chargerCatalogueElearning;
    et seul le module du résultat CHOISI est téléchargé. Chercher coûte 35 Ko
    au lieu de 1,1 Mo ; ouvrir coûte ce que pèse la ressource ouverte. */
 
+var _RECH_SYNONYMES = {
+  oeuvre:    'oeuvre livre roman lecture litterature analyse',
+  jeu:       'jeu jeux jouer quiz',
+  labo:      'laboratoire labo virtuel experience tp travaux pratiques simulation sciences',
+  ressource: 'ressource document',
+  contenu:   'elearning cours lecon catalogue',
+  corrige:   'corrige correction exercice',
+  page:      ''
+};
 var _RECH_TYPES = {
   oeuvre:    { l:'Œuvre',      ic:'lc-book',      c:'#6C56A6' },
   jeu:       { l:'Jeu',        ic:'lc-game',      c:'#0EA5E9' },
@@ -48881,9 +48919,13 @@ function _rechFiltrer(){
       if(parType[e.t] <= 2) liste.push(e);
     });
   } else {
-    var mots = q.split(' ');
+    /* 30/10/2026 — « Laboratoire » ne trouvait RIEN : on ne cherchait que dans
+       le titre et le sous-titre (« Circuit Électrique Interactif · Physique »).
+       Le type de l'entrée et ses synonymes entrent désormais dans le champ, et
+       le pluriel se réduit (« laboratoires », « jeux » trouvent aussi). */
+    var mots = q.split(' ').filter(Boolean).map(function(m){ return m.length > 3 ? m.replace(/(s|x)$/, '') : m; });
     liste = idx.filter(function(e){
-      var champ = _rechNorm(e.l + ' ' + (e.s||''));
+      var champ = _rechNorm(e.l + ' ' + (e.s||'') + ' ' + ((_RECH_TYPES[e.t]||{}).l||'') + ' ' + (_RECH_SYNONYMES[e.t]||''));
       return mots.every(function(m){ return champ.indexOf(m) >= 0; });
     }).slice(0, 40);
   }
