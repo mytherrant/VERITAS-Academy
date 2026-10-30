@@ -862,6 +862,21 @@ html:has(#vrtBurger:not([hidden])) body > div:has([aria-label="Professeur Ambass
   div:has(> #vrtCit){right:12px!important;bottom:12px!important;gap:8px!important}
   #vrtCit{max-width:calc(100vw - 24px)!important;padding:12px 14px!important;font-size:14px}
 }
+/* TIROIR ☰ AU TÉLÉPHONE (30/10/2026, captures de Jacques) : les rubriques
+   « Plus » flottaient sans fond par-dessus la page, centrées et en désordre.
+   1. Les réglages du panneau d'ordinateur ci-dessus (max-height 780 px,
+      marges, en !important) gagnaient aussi la copie .vmn-mob : bornée en
+      hauteur mais overflow visible, elle débordait du fond du tiroir
+      (2 606 px de contenu pour une boîte de 1 226). Elle reprend sa hauteur.
+   2. Le tiroir, plus haut que l'écran, ne défilait pas : la fin du menu
+      restait hors d'atteinte. Il défile désormais en lui-même.
+   3. La règle des pages « button, a[href] { justify-content:center } »
+      centrait les rubriques en <a> et pas celles en <button> : les
+      pastilles ne formaient plus une colonne. Tout s'aligne à gauche. */
+.vmn.vmn-mob{max-height:none!important;padding:4px 0 0!important;gap:0!important}
+.vmn-mob .vmn-i{justify-content:flex-start;text-align:left}
+#vrtBurger{max-height:calc(100vh - 110px);max-height:calc(100dvh - 110px);
+  overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 :root[data-vrt-theme="sombre"] .vmn-p{background:transparent!important}
 :root[data-vrt-theme="sombre"] .vmn-p svg{stroke:#F2F5FC!important}
 :root[data-vrt-theme="sombre"] .vmn-col:hover,:root[data-vrt-theme="sombre"] .vmn-i:hover{background:rgba(255,255,255,.06)!important;color:#F2F5FC!important}

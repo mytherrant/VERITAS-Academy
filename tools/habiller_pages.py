@@ -788,7 +788,7 @@ def retirer_blocs(s):
     return re.sub(r'<!--vrt-habillage:([a-z]+)-->[\s\S]*?<!--/vrt-habillage:\1-->\n', '', s)
 
 
-REV_HABILLAGE = '.32'   # 29/10/2026 (2e passe) — à changer quand veritas-habillage.css, veritas-harmonie.js ou vitrine.js changent
+REV_HABILLAGE = '.33'   # 30/10/2026 (tiroir ☰ mobile) — à changer quand veritas-habillage.css, veritas-harmonie.js ou vitrine.js changent
 
 
 def version(s):
