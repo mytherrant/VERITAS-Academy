@@ -5441,6 +5441,8 @@ function _renvoyerVersVitrine(sec, boot){
     if(boot === true) return false;
     if(typeof SES !== 'undefined' && SES) return false;               // connecté : chez lui
     if(!Object.prototype.hasOwnProperty.call(_VITRINE_COUVRE, sec)) return false;
+    // Entré au catalogue par une carte de matière (#matiere) : il y navigue.
+    if(sec === 'elearning' && window._elDansApp === true) return false;
     var p = String(location.pathname || '').toLowerCase().replace(/\/+$/, '');
     if(p !== '/app.html') return false;                               // anti-rebond
     location.replace('/' + _VITRINE_COUVRE[sec]);
@@ -5519,6 +5521,44 @@ function _gateBloque(sec){
   return !_estMembreInscrit();
 }
 
+/* ── Filtre par MATIÈRE du catalogue e-learning (30/10/2026) ──────────────
+   Le catalogue se range par TYPE (épreuves, cours, fiches…), la vitrine par
+   MATIÈRE. #matiere?m=<clé> pose window._elMat ; le catalogue ne garde alors
+   que les ressources de la matière, dans toutes ses vues. Une clé couvre les
+   intitulés des deux sous-systèmes (Mathématiques / Mathematics…). */
+var _EL_MATIERES = {
+  'francais':         { nom:'Français',             m:['Français','Littérature','French'] },
+  'mathematiques':    { nom:'Mathématiques',        m:['Mathématiques','Mathematics','Maths'] },
+  'pct':              { nom:'PCT',                  m:['Physique-Chimie','Physique','Chimie','Physics','Chemistry','Technologie','PCT'] },
+  'svt':              { nom:'SVT',                  m:['SVT','Biology'] },
+  'histoire-geo':     { nom:'Histoire-Géo',         m:['Histoire-Géographie','Histoire','Géographie','History','Geography'] },
+  'anglais':          { nom:'Anglais',              m:['Anglais','English'] },
+  'philosophie':      { nom:'Philosophie',          m:['Philosophie','Philosophy'] },
+  'ecm-informatique': { nom:'ECM & Informatique',   m:['ECM','Éducation civique','Informatique','Computer Science'] }
+};
+function _elMatConcorde(x){
+  var cle = window._elMat;
+  if(!cle || !_EL_MATIERES[cle]) return true;
+  var em = String((x && x.matiere) || '').toLowerCase();
+  return _EL_MATIERES[cle].m.some(function(n){ return em === n.toLowerCase(); });
+}
+function _elMatBandeau(){
+  var cle = window._elMat;
+  if(!cle || !_EL_MATIERES[cle]) return '';
+  /* Une matière sans ressource : on le DIT, et on ouvre le reste du
+     catalogue d'un clic — pas une grille de tuiles « Bientôt » muette. */
+  var _del = DB.deletedDefaults || [];
+  var n = ((DB.elearning && DB.elearning.contenus) || []).filter(function(x){ return x && _del.indexOf(x.id) < 0 && _elMatConcorde(x); }).length;
+  var vide = n ? '' : '<div class="card" style="padding:18px 20px;margin:0 0 16px;text-align:center;color:var(--ink2)">'
+    + 'Les ressources de <b>' + _esc(_EL_MATIERES[cle].nom) + '</b> arrivent bientôt sur la plateforme. '
+    + '<a href="#" onclick="window._elMat=\'\';window._vCurrentSec=\'\';vShowSec(\'elearning\',null,true);return false" style="font-weight:700;color:#1E499B">Voir tout le catalogue</a></div>';
+  return vide + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 16px">'
+    + '<span style="font-size:13px;color:var(--ink3)">Matière :</span>'
+    + '<span style="display:inline-flex;align-items:center;gap:8px;padding:6px 8px 6px 14px;border-radius:20px;background:#EEF3FC;color:#1E499B;font-weight:700;font-size:13px">'
+    + _esc(_EL_MATIERES[cle].nom)
+    + '<button type="button" aria-label="Voir toutes les matières" onclick="window._elMat=\'\';window._vCurrentSec=\'\';vShowSec(\'elearning\',null,true)" style="border:0;background:#fff;color:#1E499B;width:24px;height:24px;border-radius:50%;cursor:pointer;font-weight:700;line-height:1">×</button>'
+    + '</span></div>';
+}
 function vShowSec(sec,btn,_boot){
   /* « presentation » = l'ancien accueil, supprimé comme page publique. Un
      anonyme qui le DEMANDE (lien #presentation, menu « Le centre ») part sur
@@ -6061,7 +6101,7 @@ function vShowSec(sec,btn,_boot){
     // Ce que le visiteur peut réellement ouvrir : les contenus par défaut que
     // l'administration a supprimés (deletedDefaults) ne comptent nulle part.
     var _delDefH=DB.deletedDefaults||[];
-    var _visibles=(el.contenus||[]).filter(function(x){return x&&_delDefH.indexOf(x.id)<0;});
+    var _visibles=(el.contenus||[]).filter(function(x){return x&&_delDefH.indexOf(x.id)<0&&_elMatConcorde(x);});
     var _nbGratuits=_visibles.filter(function(x){return (typeof _pwEstGratuit==='function')?_pwEstGratuit(x):!!x.gratuit;}).length;
     if(!selCat){
       // ── HERO BANNER ──
@@ -6116,6 +6156,7 @@ function vShowSec(sec,btn,_boot){
       // ayants droit (abonnement actif ou groupe acheté). Jusqu'ici la
       // résolution du groupe (_resolveWaGroup) n'était appelée nulle part.
       try{ if(typeof _vBlocGroupeWA==='function') h+=_vBlocGroupeWA(); }catch(e){}
+      h+=_elMatBandeau();
 
       // v1.4.4 (étude vidéo Sharesub) : cartes à BANDEAU — en-tête navy sobre
       // (icône + nom blancs), corps blanc épuré, CTA pilule bleu vif. Entrée en
@@ -6192,6 +6233,7 @@ function vShowSec(sec,btn,_boot){
       var filtered=(el.contenus||[]).filter(function(item){
         if(_delDef.indexOf(item.id)>=0) return false;
         if(item.cat!==selCat) return false;
+        if(!_elMatConcorde(item)) return false;
         if(selCls!=='Toutes'&&item.classe!==selCls) return false;
         // v1.4.3 : filtre RÉEL par section du profil (les classes composites type
         // « 3ème-2nde » passent si l'un des niveaux appartient au groupe)
@@ -47955,6 +47997,7 @@ function _cagCreer(eleveId){
     if(FONCTIONS[sec]) return sec;
     if(sec === 'livre') return 'livre';   // lien partagé d'un manuel : #livre?id=…
     if(sec === 'abonnement') return 'abonnement';   // bouton « Choisir » d'une formule : #abonnement?plan=…
+    if(sec === 'matiere') return 'matiere';         // carte de matière de la vitrine : #matiere?m=…
     // Programmes de partenariat : « partenariat-parent », « partenariat-sponsor »…
     if(sec.indexOf('partenariat-') === 0) return sec;
     if(sec.indexOf('pour-') === 0) return sec;          // hubs par public (v1.14)
@@ -47996,6 +48039,28 @@ function _cagCreer(eleveId){
         window._vCurrentSec = 'livre:' + id;
         _bookOpenFromHash(id, achat);
       }
+      return;
+    }
+
+    /* Carte de matière de la vitrine : #matiere?m=mathematiques (30/10/2026).
+       Les huit cartes de /#elearning pointaient sur #elearning, l'écran où le
+       visiteur se trouvait déjà : un clic, rien. Elles ouvrent maintenant le
+       catalogue de l'application filtré sur la matière. `_boot` (3ᵉ argument)
+       évite le renvoi d'un anonyme vers la vitrine (_renvoyerVersVitrine) :
+       c'est la vitrine qui l'envoie ici. Chaque ressource payante garde son
+       propre cadenas (connexion / abonnement). */
+    if(sec === 'matiere'){
+      var qm = (window.location.hash || '').split('?')[1] || '', cleMat = '';
+      qm.split('&').forEach(function(kv){
+        var p = kv.split('=');
+        if(decodeURIComponent(p[0] || '') === 'm') cleMat = decodeURIComponent(p[1] || '');
+      });
+      if(window._vCurrentSec === 'matiere:' + cleMat) return;
+      window._elMat = Object.prototype.hasOwnProperty.call(_EL_MATIERES, cleMat) ? cleMat : '';
+      window._elDansApp = true;
+      window._elCat = '';
+      try{ window.vShowSec('elearning', null, true); }catch(e){}
+      window._vCurrentSec = 'matiere:' + cleMat;
       return;
     }
 

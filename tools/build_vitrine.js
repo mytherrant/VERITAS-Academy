@@ -334,7 +334,12 @@ const ANCRES = {
      mais de câblage : 25 liens sur 44 n'avaient aucune raison de sortir. */
   '#souscrire': '#tarifs',
   '#compte-parent': '#parents',
-  '#matiere': '#elearning',
+  /* 30/10/2026 — PAS '#elearning' : les cartes de matières SONT sur l'écran
+     #elearning, elles y renvoyaient donc le visiteur — un clic, rien. Chaque
+     carte ouvre le catalogue de l'application filtré sur SA matière (passe
+     MATIERES ci-dessous) ; une carte de matière inconnue de la table ouvre
+     le catalogue entier plutôt que de tourner en rond. */
+  '#matiere': APP + '#matiere',
   /* ── Ce qui sort LÉGITIMEMENT vers l'application ────────────────────────
      Aucun équivalent dans la vitrine : ces parcours vivent dans l'app. */
   '#partenariat': APP + '#partenariat',
@@ -470,6 +475,24 @@ for (const cible of Object.values(DEST_SERVICES)) {
       return '<h3' + attrs + '>' + titre + '</h3>' + milieu + 'href="' + cible + '"';
     });
   console.log('découvrir   : ' + posees + ' carte(s) rendue(s) branchée(s) sur leur destination');
+}
+
+/* Cartes de matières → catalogue de l'application filtré (#matiere?m=…).
+   Clés lues par _EL_MATIERES dans app.js : les deux tables vont ensemble. */
+const MATIERES = {
+  'Français': 'francais', 'Mathématiques': 'mathematiques', 'PCT': 'pct', 'SVT': 'svt',
+  'Histoire-Géo': 'histoire-geo', 'Anglais': 'anglais', 'Philosophie': 'philosophie',
+  'ECM & Informatique': 'ecm-informatique', 'ECM &amp; Informatique': 'ecm-informatique'
+};
+{
+  let posees = 0;
+  corps = corps.replace(/href="#matiere"([^>]*>[\s\S]*?<h3[^>]*>)([^<]+)<\/h3>/g, function (tout, milieu, titre) {
+    const cle = MATIERES[titre.trim()];
+    if (!cle) return tout;
+    posees++;
+    return 'href="' + APP + '#matiere?m=' + cle + '"' + milieu + titre + '</h3>';
+  });
+  console.log('matières    : ' + posees + ' carte(s) branchée(s) sur le catalogue filtré');
 }
 
 for (const [ancre, cible] of Object.entries(ANCRES)) {
