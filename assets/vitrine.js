@@ -324,34 +324,76 @@
        place, mais un appel direct à VRT.act('mettreEn') réécraserait le texte
        affiché par la traduction du Tube Digestif. */
     if (PDJ) return;
+    /* Les pages du site n'embarquent que `citations` et `themeSombre` dans
+       VRT_DATA : `D.scal[…]` y levait une TypeError, avalée par VRT.act. Le
+       traducteur ne s'ouvrait donc jamais hors de l'accueil (30/10/2026). */
+    if (!D.scal) return;
     var sc = D.scal[S.langue] || {};
     poser('passage1', sc.passage1 || '');
     poser('passage2', sc.passage2 || '');
     poser('decryptage', sc.decryptage || '');
-    rendre('partages', D.partages[S.langue]);
+    rendre('partages', (D.partages || {})[S.langue]);
     /* `rendre` repose les href figés au build : sans ce rappel, changer de
        langue effacerait le lien qu'on vient d'attacher. */
     majPartages();
   }
 
+  /* Page servie par Google Traduction : https://veritas--school-com.translate.goog/… */
+  function pageTraduite() { return /\.translate\.goog$/.test(location.hostname); }
+  function adresseOriginale() { return 'https://veritas-school.com' + location.pathname + location.hash; }
+
   /* ── Thème sombre ──────────────────────────────────────────────────────── */
+  /* ── MODE SOMBRE PAR INVERSION (30/10/2026) ──────────────────────────────
+     Mesuré au navigateur, page par page, après défilement complet : 25 textes
+     illisibles sur /corriges/, 393 sur un corrigé de séquence, 175 sur
+     /parcours/, 25 sur l'accueil — bleu nuit sur bleu nuit, blanc sur blanc.
+     La feuille sombre de la maquette et adapterSurfaces DEVINAIENT les
+     surfaces (styles en ligne, couleur calculée) et éclaircissaient le texte
+     partout : chaque page a ses propres fonds, la devinette ratait toujours
+     quelque part, et les règles [data-vrt-theme="sombre"] des pages s'y
+     ajoutaient en désordre.
+     On ne devine plus : la page reste en CLAIR (data-vrt-theme="clair", donc
+     aucune règle sombre des pages ne s'applique) et on l'inverse en entier.
+     Une inversion conserve le rapport de contraste de chaque texte avec SON
+     fond : ce qui était lisible en clair l'est en sombre, sur toutes les
+     pages, sans une règle par page. Photos et vidéos sont ré-inversées pour
+     garder leurs vraies couleurs.
+     L'APPLICATION (coquille VERITAS_v1.2.html) a son propre thème sombre
+     dessiné (data-theme="dark", ~200 règles dans app.css) : la bulle le pilote
+     au lieu d'inverser. */
+  var NUIT = 'html{filter:invert(.93) hue-rotate(180deg);background:#fff}'
+    + 'img,video,picture,iframe,canvas,embed,object,'
+    + '[style*="background-image:url"],[style*="background-image: url"],'
+    + '[style*="background:url"],[style*="background: url"]'
+    + '{filter:invert(1) hue-rotate(180deg)}'
+    + 'picture img{filter:none}';
   function appliquerTheme(mode) {
+    var sombre = mode === 'sombre';
+    var racine = document.documentElement;
+    if (typeof window.vrtToggleTheme === 'function' && racine.hasAttribute('data-theme')) {
+      /* La clé est écrite dans le vocabulaire de l'application AVANT de la
+         repeindre : écrite « sombre » d'abord, vrtToggleTheme lisait déjà du
+         sombre et rebasculait en clair. */
+      var voulu = sombre ? 'dark' : 'light';
+      try { localStorage.setItem('vrt_theme', voulu); } catch (e) {}
+      if (typeof window.vrtThemeSync === 'function') { try { window.vrtThemeSync(); } catch (e) {} }
+      else if (racine.getAttribute('data-theme') !== voulu) { try { window.vrtToggleTheme(); } catch (e) {} }
+      return;
+    }
+    try { localStorage.setItem('vrt_theme', mode); } catch (e) {}
     var el = document.getElementById('vrt-theme');
     if (!el) { el = document.createElement('style'); el.id = 'vrt-theme'; document.head.appendChild(el); }
-    el.textContent = mode === 'sombre' ? (D.themeSombre || '') : '';
-    /* Repère de thème sur <html>.
-       Le thème sombre de la maquette reconnaît les surfaces en cherchant une
-       CHAÎNE dans les styles en ligne : [style*="background:#fff"], etc. Le
-       procédé tient tant que rien ne bouge, mais il rate toute surface dont
-       le fond vient d'une feuille et non d'un attribut — et il assombrit
-       alors le texte sans assombrir son fond, ce qui donne du gris clair sur
-       du blanc. Mesuré sur l'écran tarifs : 21 textes sous le seuil en mode
-       sombre contre 10 en clair.
-       Cet attribut donne une prise STABLE, indépendante du style en ligne,
-       pour écrire de vraies règles sombres. */
-    try { document.documentElement.setAttribute('data-vrt-theme', mode); } catch (e) {}
-    try { localStorage.setItem('vrt_theme', mode); } catch (e) {}
-    adapterSurfaces(mode === 'sombre');
+    el.textContent = sombre ? NUIT : '';
+    try { racine.setAttribute('data-vrt-theme', 'clair'); racine.setAttribute('data-vrt-nuit', sombre ? '1' : '0'); } catch (e) {}
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (sombre) {
+      if (!m) { m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); }
+      if (!m.hasAttribute('data-vrt-clair')) m.setAttribute('data-vrt-clair', m.getAttribute('content') || '');
+      m.setAttribute('content', '#0A1024');
+    } else if (m && m.hasAttribute('data-vrt-clair')) {
+      m.setAttribute('content', m.getAttribute('data-vrt-clair'));
+    }
+    adapterSurfaces(false);     // rend les fonds qu'une ancienne version aurait assombris
   }
 
   /* ── Le mode sombre effaçait un texte sur trois ───────────────────────────
@@ -584,11 +626,25 @@
     },
     ajouterArticle: function () { S.qte = Math.min(S.qte + 1, 9); majTotaux(); },
     retirerArticle: function () { S.qte = Math.max(S.qte - 1, 1); majTotaux(); },
-    mettreFr: function () { S.langue = 'fr'; S.trad = false; majLangue(); },
-    mettreEn: function () { S.langue = 'en'; S.trad = false; majLangue(); },
+    /* « Langue du site » (30/10/2026, choix de Jacques) : seul l'encart du
+       passage du jour existait en anglais — « English » ne traduisait rien
+       ailleurs. Il ouvre désormais la page traduite par Google Traduction
+       (*.translate.goog) ; « Français » ramène à l'adresse d'origine. Le
+       panneau ne change plus de langue à sa simple ouverture. */
+    mettreFr: function () {
+      S.trad = false; panneau('vrtTrad', false);
+      if (pageTraduite()) { location.href = adresseOriginale(); return; }
+      S.langue = 'fr'; majLangue();
+    },
+    mettreEn: function () {
+      S.trad = false; panneau('vrtTrad', false);
+      if (pageTraduite()) return;
+      S.langue = 'en'; majLangue();
+      if (!/^https?:$/.test(location.protocol) || /^(localhost|127\.)/.test(location.hostname)) return;
+      location.href = 'https://translate.google.com/translate?sl=fr&tl=en&u=' + encodeURIComponent(location.href);
+    },
     basculerTraducteur: function () {
       S.trad = !S.trad; S.ia = false;
-      if (S.trad) { S.langue = S.langue === 'fr' ? 'en' : 'fr'; majLangue(); }
       panneau('vrtTrad', S.trad); panneau('vrtIA', false);
     },
     basculerTheme: function () {
@@ -2656,6 +2712,9 @@
     try { var k = iaSemaineCle(); var n = parseInt(localStorage.getItem(k) || '0', 10) || 0; localStorage.setItem(k, String(n + 1)); }
     catch (e) {}
   }
+  function jetonCompte() {
+    try { return window._vrtContentToken || sessionStorage.getItem('_vrtCT') || ''; } catch (e) { return ''; }
+  }
   function majIAQuota() {
     var el = document.getElementById('vrtIAQuota');
     if (!el) return;
@@ -2720,7 +2779,12 @@
     fetch(base + '/ia_proxy.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: envoi, plan: 'anon', userId: '' })
+      /* Jeton de compte (30/10/2026) : sans lui, un élève CONNECTÉ dans
+         l'application tombait ici au palier anonyme — 2 questions par jour
+         et par IP — puis lisait « essais épuisés ». L'application le range
+         en sessionStorage (_vrtCT, voir _contentToken d'app.js) : même
+         origine, même onglet, la page le lit. ia_proxy.php le vérifie. */
+      body: JSON.stringify({ prompt: envoi, plan: 'anon', userId: '', token: jetonCompte() })
     })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; }, function () { return { ok: r.ok, status: r.status, j: {} }; }); })
       .then(function (res) {
