@@ -21819,7 +21819,7 @@ function _littCorrigeIA(oeuvreKey, mode){
     +'<div id="littCorrigeBox" class="vcard ai-md" style="margin-top:16px;line-height:1.7">'
       +'<div style="text-align:center;color:var(--ink4);padding:28px"><span style="animation:pulse 1.2s infinite;font-size:30px">🤖</span><br>Le Professeur Ambassa rédige…<br><small>Cela peut prendre 20 à 60 secondes.</small></div>'
     +'</div></div>');
-  callAmbassaIA(base+(prompts[mode]||prompts.complet), (typeof AMBASSA_PERSONA!=='undefined'?AMBASSA_PERSONA:'')).then(function(txt){
+  callAmbassaIA(base+(prompts[mode]||prompts.complet), (typeof _personaAmbassa==='function'?_personaAmbassa('oeuvres'):'')).then(function(txt){
     var box=document.getElementById('littCorrigeBox');
     if(box) box.innerHTML=((typeof _iaBadgeHtml==='function')?_iaBadgeHtml():'')
       +((typeof _aiMarkdown==='function')?_aiMarkdown(txt):('<pre style="white-space:pre-wrap">'+_esc(txt)+'</pre>'));
@@ -41747,6 +41747,36 @@ window.AMBASSA_PERSONA = [
   "• ANCRAGE AUTONOMIE : propose régulièrement une auto-évaluation (mini-quiz de 2-3 questions, fiche à compléter, application sur un autre exemple) pour que l'élève s'exerce seul."
 ].join("\n");
 
+/* ── LA CONSIGNE D'AMBASSA, COMPOSÉE SELON LA TÂCHE (30/10/2026) ───────────
+   AMBASSA_PERSONA pèse 35 Ko. api/ia_proxy.php coupe toute consigne à
+   20 000 octets (plafond anti-abus) : tout ce qui suivait disparaissait sans
+   bruit — structures du Probatoire et du BAC, en-tête des corrigés, et
+   surtout les RÈGLES ANTI-HALLUCINATION, la posture et l'interaction. Une
+   dissertation de Tle était rédigée sans « n'invente aucune citation ». Le
+   socle MINESEC du serveur s'y ajoutant, la consigne dépassait aussi les
+   8 000 jetons/minute de Groq : ce secours ne pouvait jamais répondre.
+   On envoie donc : le NOYAU (présentation, style, anti-hallucination,
+   posture, interaction) + les sections utiles à la tâche, dans l'ordre
+   d'origine. Les sections sont repérées par leur TITRE : une section
+   renommée tombe simplement hors de la sélection, jamais le noyau. */
+window._personaAmbassa = function(tache){
+  var P = window.AMBASSA_PERSONA || '';
+  var parts = P.split(/\n(?=════════ )/);
+  var NOYAU = ['STYLE & EXIGENCES', 'RÈGLES ANTI-HALLUCINATION', 'POSTURE PÉDAGOGIQUE', 'INTERACTION & AUTONOMIE'];
+  var TACHES = {
+    oeuvres: ['PROGRAMMES MAÎTRISÉS', 'GRILLES OFFICIELLES OBC', 'MÉTHODOLOGIE — COMMENTAIRE COMPOSÉ',
+              'MÉTHODOLOGIE — DISSERTATION LITTÉRAIRE', 'ÉPREUVE BAC/PROBATOIRE FRANÇAIS', 'EN-TÊTE OFFICIEL CORRIGÉ'],
+    devoir:  ['PROGRAMMES MAÎTRISÉS', 'GRILLES OFFICIELLES OBC', 'STRUCTURES OFFICIELLES DES ÉPREUVES',
+              'ÉPREUVE BAC/PROBATOIRE FRANÇAIS', 'EN-TÊTE OFFICIEL CORRIGÉ']
+  };
+  var voulues = NOYAU.concat(TACHES[tache] || TACHES.devoir);
+  return parts.filter(function(sec, i){
+    if(i === 0) return true;                       // « Tu es AMBASSA… »
+    var titre = sec.split('\n')[0];
+    return voulues.some(function(v){ return titre.indexOf(v) >= 0; });
+  }).join('\n');
+};
+
 window.AMBASSA_TACHES = [
   { id:'quiz',       ic:'pencil',    col:'#3C8DFF', t:'Générer un quiz',           d:'QCM / Vrai-Faux / Questions ouvertes — sur n\'importe quel sujet' },
   { id:'corrige',    ic:'check',     col:'#3A8F73', t:'Générer un corrigé',         d:'Pour un sujet d\'épreuve, exercice ou QCM existant' },
@@ -42176,7 +42206,7 @@ window._ambassaGenerate = async function(taskId){
   _ge('mvResult').innerHTML = '<div style="background:#EEF2FF;border:1px solid #C7D2FE;border-radius:12px;padding:14px;text-align:center"><div style="font-size:32px;margin-bottom:6px;animation:pulse 1.2s infinite">🎓</div><div style="font-weight:700;color:#3730A3">Le professeur Ambassa rédige…</div><div style="font-size:11px;color:#6366F1;margin-top:4px;font-style:italic">Cela peut prendre 10-30 secondes pour les contenus longs</div></div>';
 
   try {
-    var resp = await callAmbassaIA(prompt, AMBASSA_PERSONA);
+    var resp = await callAmbassaIA(prompt, _personaAmbassa('devoir'));
 
     // ═══ v2.9.12 : Mode QCM INTERACTIF si c'est un quiz QCM ═══
     // L'apprenant fait l'exercice d'abord, puis voit les corrigés
@@ -42260,7 +42290,7 @@ window._ambassaCorrigerProposition = async function(cls, mat, sujet, taskId){
     + '4) 💡 CONSEIL — 1 à 2 conseils méthodologiques concrets pour progresser.\n'
     + 'Ne réécris pas toute la copie à sa place : guide-le. Valorise l\'effort.';
   try {
-    var resp = await callAmbassaIA(prompt, (typeof AMBASSA_PERSONA!=='undefined'?AMBASSA_PERSONA:''));
+    var resp = await callAmbassaIA(prompt, _personaAmbassa('devoir'));
     if(out) out.innerHTML = '<div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:12px;padding:14px">'
       +'<div style="font-size:11px;font-weight:800;color:#92400E;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🎓 Correction d\'Ambassa</div>'
       +'<div class="ai-md" style="max-height:360px;overflow-y:auto">'+_aiMarkdown(resp)+'</div></div>';
