@@ -47998,6 +47998,7 @@ function _cagCreer(eleveId){
     if(sec === 'livre') return 'livre';   // lien partagé d'un manuel : #livre?id=…
     if(sec === 'abonnement') return 'abonnement';   // bouton « Choisir » d'une formule : #abonnement?plan=…
     if(sec === 'matiere') return 'matiere';         // carte de matière de la vitrine : #matiere?m=…
+    if(sec === 'oeuvre') return 'oeuvre';           // bandeau d'une page /oeuvres/ : #oeuvre?k=…
     // Programmes de partenariat : « partenariat-parent », « partenariat-sponsor »…
     if(sec.indexOf('partenariat-') === 0) return sec;
     if(sec.indexOf('pour-') === 0) return sec;          // hubs par public (v1.14)
@@ -48039,6 +48040,25 @@ function _cagCreer(eleveId){
         window._vCurrentSec = 'livre:' + id;
         _bookOpenFromHash(id, achat);
       }
+      return;
+    }
+
+    /* Bandeau « Analyse complète, carte mentale… » des pages /oeuvres/ :
+       #oeuvre?k=tle_stances_poemes (30/10/2026). Il menait à l'accueil du
+       site : le lecteur cherchait l'œuvre, ne la trouvait pas. On ouvre le
+       menu de l'œuvre (fiche, carte mentale, QCM, citations…), celui du
+       sélecteur « Œuvres au programme », une fois ses données chargées. */
+    if(sec === 'oeuvre'){
+      var qo = (window.location.hash || '').split('?')[1] || '', cleOe = '';
+      qo.split('&').forEach(function(kv){
+        var p = kv.split('=');
+        if(decodeURIComponent(p[0] || '') === 'k') cleOe = decodeURIComponent(p[1] || '');
+      });
+      if(!/^[a-z0-9_]+$/.test(cleOe) || window._vCurrentSec === 'oeuvre:' + cleOe) return;
+      window._vCurrentSec = 'oeuvre:' + cleOe;
+      Promise.all([_lazyChunk('litt-oeuvres'), _lazyChunk('jeux')])
+        .then(function(){ _showLittMenu(cleOe, cleOe); })
+        .catch(function(){ toast('Œuvre momentanément indisponible','err'); });
       return;
     }
 
