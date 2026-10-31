@@ -12,7 +12,11 @@
      VRT_DATA ; un nonce est impossible sur un fichier statique servi tel
      quel. « connect-src 'self' » suffit : le seul appel réseau du script est
      /api/payment_camerpay.php, sur la même origine. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; frame-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self'">
+<!-- « English » ouvre la page via Google Traduction (veritas--school-com.translate.goog).
+     Là-bas, 'self' désigne le proxy : sans les domaines de Google, ses scripts de
+     traduction étaient bloqués (rien n'était traduit) et les images et polices
+     restées sur veritas-school.com aussi (logo cassé). 31/10/2026. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; frame-src 'none'; img-src 'self' data: https://veritas-school.com https://translate.googleapis.com https://translate.google.com https://www.gstatic.com; media-src 'self' https://veritas-school.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://veritas-school.com https://translate.googleapis.com https://translate.google.com https://www.gstatic.com; font-src 'self' https://fonts.gstatic.com https://veritas-school.com; script-src 'self' 'unsafe-inline' https://veritas-school.com https://translate.googleapis.com https://translate.google.com https://www.gstatic.com; connect-src 'self' https://veritas-school.com https://translate.googleapis.com https://translate-pa.googleapis.com">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VÉRITAS — Cours et corrigés, programme camerounais 6ᵉ-Tˡᵉ</title>
