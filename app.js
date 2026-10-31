@@ -2457,15 +2457,20 @@ function save(){
       function _stripPlainPwd(o){
         if(!o)return;
         if(typeof o.pwd!=='string' || !o.pwd) return;
-        var _estEmpreinte = o.pwd.charAt(0)==='$' || o.pwd.indexOf('S256$')===0;
+        var _estEmpreinte = o.pwd.charAt(0)==='$' || o.pwd.indexOf('S256$')===0 || o.pwd.indexOf('H$')===0;
         if(!_estEmpreinte) delete o.pwd;   // du clair : jamais vers le serveur
       }
-      if(dbLight.superAdmin)_stripPlainPwd(dbLight.superAdmin);
-      (dbLight.admins||[]).forEach(_stripPlainPwd);
-      (dbLight.visitorAccounts||[]).forEach(function(v){
-        _stripPlainPwd(v);
-        // pwdHash : OK à garder (hash bcrypt), permet auth sur autres appareils
-      });
+      /* Le filtre ne visitait que superAdmin, admins et visitorAccounts. Un
+         « pwd » en clair resté ailleurs (studentAccounts, authors,
+         authorAccounts…) partait donc tel quel, et db.php rejetait l'envoi
+         ENTIER en HTTP 400 — synchro bloquée sans que rien ne dise pourquoi.
+         On parcourt désormais toute la copie. */
+      (function _stripPartout(o,prof){
+        if(!o||typeof o!=='object'||prof>8)return;
+        if(Array.isArray(o)){for(var i=0;i<o.length;i++)_stripPartout(o[i],prof+1);return;}
+        _stripPlainPwd(o);
+        for(var k in o){if(Object.prototype.hasOwnProperty.call(o,k)&&o[k]&&typeof o[k]==='object')_stripPartout(o[k],prof+1);}
+      })(dbLight,0);
       if(dbLight.tpwd)dbLight.tpwd={};
       // Stripping binaires lourds (videos, PDFs base64)
       (dbLight.elearning&&dbLight.elearning.contenus||[]).forEach(function(c){delete c.fichierData;});
@@ -2502,7 +2507,12 @@ function save(){
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify(dbLight)
       });
-      if(!res.ok) throw new Error('HTTP '+res.status);
+      if(!res.ok){
+        // db.php explique son refus dans le corps JSON ({error:"…"}) : le garder.
+        var _motif=''; try{ var _jErr=await res.json(); _motif=(_jErr&&_jErr.error)||''; }catch(eJ){}
+        var _eHttp=new Error('HTTP '+res.status+(_motif?' : '+_motif:''));
+        _eHttp.motif=_motif; throw _eHttp;
+      }
       // Mémoriser le lastModified du push pour optimistic-lock du prochain PUT
       window._fbLastSyncedMs=DB.lastModified||Date.now();
       window._fbSaveFails=0; // reset compteur d'échecs
@@ -2535,6 +2545,9 @@ function save(){
         var _sansCle=!(DB&&DB.cloudConfig&&DB.cloudConfig.secret);
         if(_sansCle||_stKo===401||_stKo===403){
           _toastRetrySync('cle',_stKo);
+        } else if(_stKo===400||_stKo===409||_stKo===413){
+          // Le serveur répond : il REFUSE les données. « Injoignable » serait faux.
+          toast('⚠ Synchro refusée par le serveur (HTTP '+_stKo+')'+(e&&e.motif?' : '+e.motif:'')+' — modifications gardées sur cet appareil','warn');
         } else if(typeof _hasLocalBinaries==='function'&&_hasLocalBinaries()){
           _toastRetrySync('reseau',_stKo);
         } else {
@@ -7442,6 +7455,14 @@ async function _migratePasswords(){
   if(DB.authorAccounts){for(var a=0;a<DB.authorAccounts.length;a++){
     if(DB.authorAccounts[a].pwd&&!isHashed(DB.authorAccounts[a].pwd)){
       DB.authorAccounts[a].pwd=await hashPassword(DB.authorAccounts[a].pwd,DB.authorAccounts[a].user);changed=true;
+    }
+  }}
+  // Auteurs (DB.authors) : créés en clair avant le correctif du 12/09/2026,
+  // jamais repris par cette migration — et db.php refuse la synchro tant qu'il
+  // en reste un.
+  if(DB.authors){for(var au=0;au<DB.authors.length;au++){
+    if(DB.authors[au].pwd&&!isHashed(DB.authors[au].pwd)){
+      DB.authors[au].pwd=await hashPassword(DB.authors[au].pwd,DB.authors[au].user);changed=true;
     }
   }}
   if(changed)save();
@@ -14132,14 +14153,22 @@ function mAddStudentAccount(){
   },100);
 }
 function autoFillSaPwd(){const sel=document.getElementById('saEtu');if(!sel)return;const sid=sel.value;const st=S(sid);if(st){const u=document.getElementById('saUser');const p=document.getElementById('saPwd2');if(u)u.value=st.mat;if(p)p.value=st.nom+'2024!';}}
-function createStudentAccount(){
+/* Le mot de passe était poussé EN CLAIR dans DB.studentAccounts, et save()
+   l'envoyait aussitôt : db.php refuse tout « pwd » en clair (HTTP 400), si bien
+   que CHAQUE synchro échouait jusqu'au rechargement suivant de la page
+   (_migratePasswords ne tourne qu'au chargement). Bandeau « Serveur injoignable
+   (HTTP 400) » du 31/10/2026. On hache ici, comme _saveStudentPwd(). */
+async function createStudentAccount(){
   const eid=document.getElementById('saEtu')?.value;
   const user=(document.getElementById('saUser')?.value||'').trim();
   const pwd=document.getElementById('saPwd2')?.value||'';
   if(!eid||!user||!pwd){toast('Tous les champs requis','warn');return;}
   if(DB.studentAccounts?.find(sa=>sa.user.toLowerCase()===user.toLowerCase())){toast('Identifiant déjà utilisé','warn');return;}
+  var _pwdStocke;
+  try{ _pwdStocke=await hashPassword(pwd,user); }
+  catch(e){ toast('Chiffrement du mot de passe impossible — compte non créé','err'); return; }
   if(!DB.studentAccounts)DB.studentAccounts=[];
-  DB.studentAccounts.push({id:gid(),eid,user,pwd,lastLogin:null});
+  DB.studentAccounts.push({id:gid(),eid,user,pwd:_pwdStocke,lastLogin:null});
   save();cm();re();toast('✓ Compte élève créé');
 }
 

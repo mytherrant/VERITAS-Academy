@@ -166,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'PUT
         exit;
     }
     // ── 🔐 Détecter et BLOQUER les payloads contenant des mots de passe en clair ──
-    if (preg_match('/"pwd"\s*:\s*"(?!S256\$|S256!|S256-)[^"]{1,40}"/', $raw, $m)) {
+    if (preg_match('/"pwd"\s*:\s*"(?!S256\$|S256!|S256-|H\$)[^"]{1,40}"/', $raw, $m)) {
         @file_put_contents(__DIR__.'/data/_security_log.txt',
             date('c').' [PLAIN_PWD_REJECTED] db.php ip='.$ip.' pattern='.substr($m[0],0,80)."\n", FILE_APPEND);
         http_response_code(400);
