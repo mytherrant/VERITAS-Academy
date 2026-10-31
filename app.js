@@ -44183,8 +44183,13 @@ setTimeout(function(){initTickerFixed();},3000);
   }
 
   // Post-process: fix icon colors based on actual background luminosity
+  /* Lecture d'abord, écriture ensuite : poser `color` au fil de la boucle
+     forçait un recalcul de style avant chaque getComputedStyle suivant. Et une
+     icône sur fond clair n'était jamais marquée, donc réexaminée à CHAQUE
+     passe (toutes les mutations du body) : on la marque comme vue. */
   function _fixIconColors(){
-    var icons = document.querySelectorAll('.v-ico, .material-symbols-rounded, .material-icons-round');
+    var icons = document.querySelectorAll('.v-ico:not([data-color-vu]), .material-symbols-rounded:not([data-color-vu]), .material-icons-round:not([data-color-vu])');
+    var aBlanchir = [];
     for(var i=0; i<icons.length; i++){
       var el = icons[i];
       if(el.getAttribute('data-color-fixed')) continue;
@@ -44208,12 +44213,13 @@ setTimeout(function(){initTickerFixed();},3000);
         var r=parseInt(m[1]),g=parseInt(m[2]),b=parseInt(m[3]);
         // Relative luminance (simplified)
         var lum = (0.299*r + 0.587*g + 0.114*b);
-        if(lum < 80){
-          // Dark background → white icon
-          el.style.color = '#fff';
-          el.setAttribute('data-color-fixed','1');
-        }
+        if(lum < 80) aBlanchir.push(el);   // Dark background → white icon
       }
+    }
+    for(var j=0; j<icons.length; j++) icons[j].setAttribute('data-color-vu','1');
+    for(var k=0; k<aBlanchir.length; k++){
+      aBlanchir[k].style.color = '#fff';
+      aBlanchir[k].setAttribute('data-color-fixed','1');
     }
   }
 
@@ -51602,11 +51608,20 @@ window._vtPictos = function(racine){
 
   while(marcheur.nextNode()) aTraiter.push(marcheur.currentNode);
 
-  aTraiter.forEach(function(nd){
+  /* Tailles lues AVANT toute écriture : _pictoTaille appelle getComputedStyle,
+     et chaque replaceChild ci-dessous invalide les styles. Entrelacées, les
+     deux forçaient un recalcul complet par émoji (1,2 s mesurée sur six
+     changements de page en administration, 31/10/2026). */
+  var tailles = aTraiter.map(function(nd){
+    var p = nd.parentNode;
+    return p ? _pictoTaille(p.nodeType===1 ? p : zone) : 15;
+  });
+
+  aTraiter.forEach(function(nd, idx){
     var txt = (nd.nodeValue||'').replace(_PICTO_TEINTES, '');
     var parent = nd.parentNode;
     if(!parent) return;
-    var taille = _pictoTaille(parent.nodeType===1 ? parent : zone);
+    var taille = tailles[idx];
     var frag = document.createDocumentFragment();
     var tampon = '', converti = false;
 
