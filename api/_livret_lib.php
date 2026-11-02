@@ -156,8 +156,13 @@ if (!defined('VRT_LIVRET_LIB')) {
                on les COMPTE sur le disque. Une fiche ajoutée depuis le panneau,
                avec un PDF converti en pages, n'a personne pour écrire ce nombre
                à la main — et à 0 le liseur ne sait pas où s'arrêter. */
-            if (($o['mode'] ?? '') === 'lecture' && (int) ($o['pages'] ?? 0) <= 0) {
-                $out[$slug]['pages'] = vrt_livret_pages_deposees((string) $slug);
+            /* Et quand il y a des pages sur le disque, c'est leur nombre qui
+               fait foi : un PDF remplacé depuis le panneau peut compter plus
+               ou moins de pages que la fiche d'origine, et le liseur s'arrête
+               au nombre annoncé — trop court, il cache la fin du livre payé. */
+            if (($o['mode'] ?? '') === 'lecture') {
+                $surDisque = vrt_livret_pages_deposees((string) $slug);
+                if ($surDisque > 0 || (int) ($o['pages'] ?? 0) <= 0) $out[$slug]['pages'] = $surDisque;
             }
         }
         $cache = $out;
@@ -219,8 +224,12 @@ if (!defined('VRT_LIVRET_LIB')) {
     function vrt_livret_promo(array $db, string $slug, int $grace = 0): ?array {
         $promos = $db['tarifs']['livretPromos'] ?? null;
         if (!is_array($promos)) return null;
-        $auj  = date('Y-m-d');
-        $finT = date('Y-m-d', time() - max(0, $grace));
+        /* L'heure du CAMEROUN, pas celle de l'hébergeur (en France) : une
+           promotion « jusqu'au 30/11 » doit finir à minuit à Douala, comme le
+           compte le navigateur de l'administration. */
+        $tz   = new \DateTimeZone('Africa/Douala');
+        $auj  = (new \DateTime('now', $tz))->format('Y-m-d');
+        $finT = (new \DateTime('@' . (time() - max(0, $grace))))->setTimezone($tz)->format('Y-m-d');
         foreach ([$slug, '*'] as $cle) {
             $p = $promos[$cle] ?? null;
             if (!is_array($p)) continue;

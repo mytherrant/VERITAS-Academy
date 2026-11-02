@@ -55042,6 +55042,40 @@ function _lvaOuvrages(){
   return out;
 }
 
+/* Styles propres à la page — une seule feuille, posée avec la page, plutôt
+   que des attributs `style` répétés sur chaque ligne. Jetons --ds-* (v3). */
+var _LVA_CSS = '<style id="lvaCss">'
+  + '.lva-chips{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 14px}'
+  + '.lva-chip{border:1px solid var(--ds-border,#e2e6ee);background:var(--ds-surface,#fff);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--ds-text-2,#45506a)}'
+  + '.lva-chip b{color:var(--ds-text,#142554);margin-right:4px}'
+  + '.lva-chip.on{background:var(--ds-primary,#142554);border-color:var(--ds-primary,#142554);color:#fff}.lva-chip.on b{color:#FFC93C}'
+  + '.lva-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.lva-bar .sp{flex:1}'
+  + '.lva-grp td{background:var(--ds-surface-2,#f5f7fb);font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ds-text-2,#45506a);padding:6px 10px}'
+  + '.lva-pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700;white-space:nowrap}'
+  + '.lva-ok{background:#e8f6ee;color:#15803d}.lva-attente{background:#fff4e0;color:#9a5b00}.lva-off{background:#fde8e8;color:#b91c1c}.lva-promo{background:#fdecea;color:#c0453f}'
+  + '.lva-meta{font-size:12px;color:var(--ds-text-3,#7a88a6)}'
+  + '.lva-act{display:flex;gap:4px;justify-content:flex-end;flex-wrap:wrap}'
+  + '.lva-prix s{color:var(--ds-text-3,#7a88a6);font-size:12px;margin-right:4px}.lva-prix .g{display:block;font-size:12px;color:var(--ds-text-2,#45506a)}'
+  + '.lva-sec{border:1px solid var(--ds-border,#e2e6ee);border-radius:12px;padding:12px 14px;margin:0 0 12px}'
+  + '.lva-sec h4{margin:0 0 8px;font-size:14px}'
+  + '@media(min-width:900px){#lvaTable .lva-act{flex-wrap:nowrap}}'
+  // Téléphone : chaque livret devient une fiche — un tableau à 4 colonnes y
+  // cachait justement la colonne des actions hors de l'écran.
+  + '@media(max-width:640px){#lvaTable thead{display:none}#lvaTable table,#lvaTable tbody,#lvaTable tr,#lvaTable td{display:block;width:100%;box-sizing:border-box}'
+  + '#lvaTable tr{border-bottom:1px solid var(--ds-border,#e2e6ee);padding:8px 0}#lvaTable td{border:0;padding:3px 4px}'
+  + '#lvaTable .lva-act{justify-content:flex-start;margin-top:4px}#lvaTable .lva-grp td{margin-top:6px}}'
+  + '</style>';
+
+/** Les filtres-pastilles : ce que l'on cherche le plus souvent dans un
+ *  catalogue de 40 livrets, c'est « ce qui ne se vend pas » et pourquoi. */
+var _LVA_FILTRES = [
+  ['tous',    'Tous',            function(o){ return true; }],
+  ['vente',   'En vente',        function(o){ return o.disponible !== false && !o.retire && !o.nonSynchro; }],
+  ['contenu', 'Sans contenu',    function(o){ return (o.disponible === false || o.nonSynchro) && !o.retire; }],
+  ['promo',   'En promotion',    function(o){ return !!o.promoL && !o.retire; }],
+  ['retire',  'Retirés',         function(o){ return o.retire; }]
+];
+
 function pgLivretsAdmin(){
   if(!iA()) return na();
   if(_LVA.cat === null && !_LVA.busy) _lvaCharger();
@@ -55049,61 +55083,62 @@ function pgLivretsAdmin(){
   var tous = _lvaOuvrages();
   var liste = tous.filter(function(o){ return !o.supprime; });
   var corbeille = tous.filter(function(o){ return o.supprime; });
-  var nVente = liste.filter(function(o){ return o.disponible !== false && !o.retire; }).length;
-  var nRet = liste.filter(function(o){ return o.retire; }).length;
-  var nSansContenu = liste.filter(function(o){ return o.disponible === false && !o.retire; }).length;
-  var nPromo = liste.filter(function(o){ return o.promoL && !o.retire; }).length;
   var synchro = !!(DB.cloudConfig && DB.cloudConfig.secret);
+  _LVA.f = _LVA.f || 'tous';
 
-  var h = '<div class="pgt">📗 Livrets — catalogue, prix & promotions</div>'
-    + '<div class="card mb16">'
-    +   '<div class="ib ibi mb12"><span>💡</span><span>Ajoutez un livret, retirez-le de la vente, changez son prix ou lancez une promotion. '
-    +   'Les réglages sont appliqués <strong>par le serveur</strong> : le prix affiché en boutique est celui que le paiement exigera. '
-    +   'Un livret retiré n’est plus vendu, mais les codes déjà achetés continuent d’ouvrir.</span></div>'
-    +   (synchro ? '' : '<div class="ib ibr mb12"><span>🔒</span><span>Ce poste n’a pas de clé de synchronisation : vos réglages resteront locaux et la boutique ne les verra pas. '
-    +     'Ouvrez <strong>Système → Centre de contrôle SA → Clé de synchronisation Cloud</strong>.</span></div>')
-    +   '<div class="fl2 fw g8 mb12">'
-    +     '<div class="ib ibt" style="flex:1 1 140px;margin:0"><span>📚</span><span><b>' + liste.length + '</b> livret(s)</span></div>'
-    +     '<div class="ib ibt" style="flex:1 1 140px;margin:0"><span>🛒</span><span><b>' + nVente + '</b> en vente</span></div>'
-    +     '<div class="ib ibt" style="flex:1 1 140px;margin:0"><span>🏷️</span><span><b>' + nPromo + '</b> en promotion</span></div>'
-    +     '<div class="ib ibt" style="flex:1 1 140px;margin:0"><span>🚫</span><span><b>' + nRet + '</b> retiré(s)</span></div>'
-    +   '</div>'
-    +   (nSansContenu ? '<div class="ib ibw mb12"><span>📦</span><span><strong>' + nSansContenu + ' livret(s) sans contenu sur le serveur</strong> : ils ne peuvent pas être achetés. '
-    +     'Cliquez <strong>📁 Fichiers</strong> sur la ligne du livret pour déposer son PDF (ou ses fichiers de cahier).</span></div>' : '')
-    +   '<div style="display:flex;gap:8px;flex-wrap:wrap">'
-    +     '<button class="btn bi" onclick="_lvaFiche(\'\')">➕ Ajouter un livret</button>'
-    +     '<button class="btn bo" onclick="_lvaPromoModal(\'*\')">🏷️ Promotion sur tous les livrets</button>'
-    +     '<button class="btn bo" onclick="_lvaTarifsGeneraux()">💰 Tarifs généraux</button>'
-    +     '<button class="btn bo" onclick="goTo(\'livret_codes\')">🎟️ Codes d’accès</button>'
-    +     '<button class="btn bo" onclick="_LVA.cat=null;re()">↻ Actualiser</button>'
-    +   '</div>'
+  var h = _LVA_CSS + '<div class="pgt">📗 Livrets — catalogue, prix & promotions</div>';
+
+  // ── Ce qui empêche de travailler, en premier
+  if(!synchro) h += '<div class="ib ibr mb12"><span>🔒</span><span><strong>Clé de synchronisation absente sur ce poste</strong> : vos réglages restent locaux et vous ne pouvez pas déposer de fichiers. '
+    + 'Ouvrez <strong>Système → Centre de contrôle SA → Clé de synchronisation Cloud</strong>.</span></div>';
+  if(_LVA.err) h += '<div class="ib ibr mb12"><span>⚠️</span><span>' + _esc(_LVA.err) + '</span></div>';
+
+  // ── Barre d'actions
+  h += '<div class="card mb12"><div class="lva-bar">'
+    + '<button class="btn bi" onclick="_lvaFiche(\'\')">➕ Ajouter un livret</button>'
+    + '<button class="btn bo" onclick="_lvaPromoModal(\'*\')">🏷️ Promotion générale</button>'
+    + '<span class="sp"></span>'
+    + '<button class="btn bo sm" onclick="_lvaTarifsGeneraux()">💰 Tarifs généraux</button>'
+    + '<button class="btn bo sm" onclick="goTo(\'livret_codes\')">🎟️ Codes d’accès</button>'
+    + '<button class="btn bo sm" title="Relire le catalogue du serveur" onclick="_LVA.cat=null;re()">↻</button>'
     + '</div>';
 
   var g = (T.livretPromos || {})['*'];
   if(g && g.pct){
     var act = _lvaPromo('__aucun__');
-    h += '<div class="ib ' + (act ? 'ibg' : 'ibt') + ' mb16"><span>🏷️</span><span><strong>Promotion générale −' + g.pct + ' %</strong>'
+    h += '<div class="ib ' + (act ? 'ibg' : 'ibt') + ' mt12 mb0"><span>🏷️</span><span><strong>Promotion générale −' + g.pct + ' %</strong>'
       + (g.libelle ? ' « ' + _esc(g.libelle) + ' »' : '')
       + (g.debut ? ' du ' + _lvaDateFr(g.debut) : '') + (g.fin ? ' au ' + _lvaDateFr(g.fin) : '')
-      + (act ? ' — <b>en cours</b>' : ' — <b>pas en cours</b> (dates)')
-      + '. Une promotion propre à un livret l’emporte sur celle-ci. '
-      + '<a href="javascript:void(0)" onclick="_lvaPromoModal(\'*\')">Modifier</a> · '
+      + (act ? ' — en cours.' : ' — pas en cours (dates).')
+      + ' <a href="javascript:void(0)" onclick="_lvaPromoModal(\'*\')">Modifier</a> · '
       + '<a href="javascript:void(0)" onclick="_lvaPromoSuppr(\'*\')">Arrêter</a></span></div>';
   }
+  h += '<details style="margin-top:14px"><summary class="xs2" style="cursor:pointer;color:var(--ds-text-2,#45506a)">ℹ️ Comment ça marche</summary>'
+    + '<ul class="xs2" style="margin:8px 0 0 18px;line-height:1.6;color:var(--ds-text-2,#45506a)">'
+    + '<li><b>Ajouter</b> crée la fiche ; <b>📁 Fichiers</b> y dépose le PDF (lu page par page) ou les fichiers de cahier interactif, et la couverture.</li>'
+    + '<li>Un livret n’est <b>achetable</b> que si son contenu est sur le serveur : sinon il s’affiche « bientôt en vente ».</li>'
+    + '<li>Les prix et promotions sont appliqués <b>par le serveur</b> : le prix affiché est celui que le paiement exige.</li>'
+    + '<li><b>Retirer</b> arrête la vente ; <b>Supprimer</b> l’envoie aussi à la corbeille (restaurable). Dans les deux cas, les codes déjà vendus continuent d’ouvrir.</li>'
+    + '</ul></details></div>';
 
-  if(_LVA.err) h += '<div class="ib ibr mb12"><span>⚠️</span><span>' + _esc(_LVA.err) + '</span></div>';
-
-  h += '<div class="card">'
-    + '<div class="fg"><input class="fi" id="lvaQ" placeholder="🔎 Rechercher un livret (titre, niveau, identifiant)…" value="' + _esc(_LVA.q) + '" oninput="_LVA.q=this.value;_lvaFiltrer()"></div>'
+  // ── Filtres + recherche + tableau
+  h += '<div class="card"><div class="lva-chips">'
+    + _LVA_FILTRES.map(function(f){
+        var n = liste.filter(f[2]).length;
+        return '<button class="lva-chip' + (_LVA.f === f[0] ? ' on' : '') + '" onclick="_lvaFiltre(\'' + f[0] + '\')"><b>' + n + '</b>' + f[1] + '</button>';
+      }).join('')
+    + '</div>'
+    + '<div class="fg"><input class="fi" id="lvaQ" placeholder="🔎 Rechercher (titre, niveau, identifiant)…" value="' + _esc(_LVA.q) + '" oninput="_LVA.q=this.value;_lvaFiltrer()"></div>'
     + '<div class="tw" id="lvaTable">' + (_LVA.cat === null ? '<div class="xs2 mut">Chargement du catalogue…</div>' : _lvaTable(liste)) + '</div>'
     + '</div>';
+
   if(corbeille.length){
-    h += '<div class="card mt16"><details><summary class="semi" style="cursor:pointer">🗑️ Corbeille — ' + corbeille.length + ' livret(s) supprimé(s)</summary>'
-      + '<div class="xs2 mut mt8">Un livret supprimé n’est plus vendu ni affiché. Ses codes déjà vendus continuent d’ouvrir, et ses fichiers restent sur le serveur : vous pouvez le restaurer.</div>'
+    h += '<div class="card mt16"><details><summary class="semi" style="cursor:pointer">🗑️ Corbeille — ' + corbeille.length + ' livret(s)</summary>'
+      + '<div class="xs2 mut mt8">Plus vendus ni affichés. Leurs codes vendus continuent d’ouvrir et leurs fichiers restent sur le serveur.</div>'
       + '<div class="tw mt8"><table><tbody>'
       + corbeille.map(function(o){
           var s = _esc(o.slug).replace(/'/g, '');
-          return '<tr><td><b>' + _esc(o.titre || o.slug) + '</b><br><span class="xs2 mut">' + _esc(o.slug) + '</span></td>'
+          return '<tr><td><b>' + _esc(o.titre || o.slug) + '</b><div class="lva-meta">' + _esc(o.slug) + '</div></td>'
             + '<td style="text-align:right"><button class="btn bi xs" onclick="_lvaRestaurer(\'' + s + '\')">↩️ Restaurer</button></td></tr>';
         }).join('')
       + '</tbody></table></div></details></div>';
@@ -55111,54 +55146,80 @@ function pgLivretsAdmin(){
   return h;
 }
 
+function _lvaFiltre(k){ _LVA.f = k; re(); }
+
 function _lvaFiltrer(){
   var e = document.getElementById('lvaTable');
-  if(e) e.innerHTML = _lvaTable(_lvaOuvrages());
+  // La corbeille a sa propre section : la recherche ne doit pas la rouvrir.
+  if(e) e.innerHTML = _lvaTable(_lvaOuvrages().filter(function(o){ return !o.supprime; }));
+}
+
+/** Badge d'état : une couleur par cause, un mot qui dit quoi faire. */
+function _lvaEtat(o){
+  if(o.retire)                return '<span class="lva-pill lva-off">Retiré</span>';
+  if(o.nonSynchro)            return '<span class="lva-pill lva-attente">Synchronisation…</span>';
+  if(o.disponible === false)  return '<span class="lva-pill lva-attente">Sans contenu</span>';
+  return '<span class="lva-pill lva-ok">En vente</span>';
 }
 
 function _lvaTable(liste){
+  var f = _LVA_FILTRES.find(function(x){ return x[0] === (_LVA.f || 'tous'); }) || _LVA_FILTRES[0];
+  liste = liste.filter(f[2]);
   var q = String(_LVA.q || '').toLowerCase().trim();
   if(q) liste = liste.filter(function(o){ return (o.titre + ' ' + o.niveau + ' ' + o.slug).toLowerCase().indexOf(q) >= 0; });
-  if(!liste.length) return '<div class="xs2 mut">Aucun livret.</div>';
-  var prixCel = function(o, kind){
-    if((o.kinds || ['livret']).indexOf(kind) < 0) return '<span class="xs2 mut">non vendu</span>';
-    var n = kind === 'guide' ? o.pGuide : o.pLivret;
-    if(o.promoL){
-      var p = Math.max(1, Math.round(n * (100 - o.promoL.pct) / 100));
-      return '<s class="xs2 mut">' + fmt(n) + '</s><br><b style="color:#c0453f">' + fmt(p) + '</b>';
-    }
-    return fmt(n);
+  if(!liste.length) return '<div class="xs2 mut" style="padding:12px 0">Aucun livret ' + (f[0] === 'tous' ? '' : 'dans « ' + f[1] + ' » ') + (q ? 'pour cette recherche' : '') + '.</div>';
+
+  var prix = function(o){
+    var un = function(n){
+      if(!o.promoL) return fmt(n);
+      return '<s>' + fmt(n) + '</s><b style="color:#c0453f">' + fmt(Math.max(1, Math.round(n * (100 - o.promoL.pct) / 100))) + '</b>';
+    };
+    var k = o.kinds || ['livret'];
+    return '<div class="lva-prix">' + (k.indexOf('livret') >= 0 ? un(o.pLivret) : '<span class="mut">—</span>')
+      + (k.indexOf('guide') >= 0 ? '<span class="g">Guide : ' + un(o.pGuide) + '</span>' : '') + '</div>';
   };
-  var h = '<table><thead><tr><th>Livret</th><th>État</th><th>Livret élève</th><th>Guide enseignant</th><th>Promotion</th><th></th></tr></thead><tbody>';
+
+  var h = '<table><thead><tr><th>Livret</th><th>État</th><th>Prix</th><th style="text-align:right">Actions</th></tr></thead><tbody>';
+  var niveau = null;
   liste.forEach(function(o){
+    // Un intertitre par niveau : 40 lignes à plat ne se parcourent pas.
+    var nv = o.niveau || 'Sans niveau';
+    if(nv !== niveau){ niveau = nv; h += '<tr class="lva-grp"><td colspan="4">' + _esc(nv) + '</td></tr>'; }
     var s = _esc(o.slug).replace(/'/g, '');
-    var etat;
-    if(o.retire) etat = '<span style="color:#b91c1c;font-weight:600">Retiré de la vente</span>';
-    else if(o.nonSynchro) etat = '<span style="color:#92400e;font-weight:600">Pas encore synchronisé</span>';
-    else if(o.disponible === false) etat = '<span style="color:#92400e;font-weight:600">Contenu non déposé</span><br><a href="javascript:void(0)" class="xs2" onclick="_lvaFichiers(\'' + s + '\')">Déposer →</a>';
-    else etat = '<span style="color:#16a34a;font-weight:600">En vente</span>';
-    var promo = o.promoL
-      ? '<b>−' + o.promoL.pct + ' %</b>' + (o.promoL.portee === 'tous' ? ' <span class="xs2 mut">(générale)</span>' : '')
-        + (o.promoL.fin ? '<br><span class="xs2 mut">jusqu’au ' + _lvaDateFr(o.promoL.fin) + '</span>' : '')
-      : '<span class="xs2 mut">—</span>';
+    var meta = [_esc(o.slug), _esc(_lvaModeLib(o.mode))];
+    if(o.mode === 'lecture' && o.pages) meta.push(o.pages + ' pages');
+    if(o.cree) meta.push('ajouté ici');
     h += '<tr>'
-      + '<td><b>' + _esc(o.titre || o.slug) + '</b><br><span class="xs2 mut">' + _esc(o.slug) + (o.niveau ? ' · ' + _esc(o.niveau) : '')
-      + ' · ' + _esc(_lvaModeLib(o.mode)) + (o.mode === 'lecture' && o.pages ? ' · ' + o.pages + ' p.' : '') + (o.cree ? ' · ajouté ici' : '') + '</span></td>'
-      + '<td>' + etat + '</td>'
-      + '<td>' + prixCel(o, 'livret') + '</td>'
-      + '<td>' + prixCel(o, 'guide') + '</td>'
-      + '<td>' + promo + '</td>'
-      + '<td><div style="display:flex;gap:4px;flex-wrap:wrap;min-width:150px">'
-      +   '<button class="btn bi xs" onclick="_lvaFichiers(\'' + s + '\')">📁 Fichiers</button>'
+      + '<td><b>' + _esc(o.titre || o.slug) + '</b><div class="lva-meta">' + meta.join(' · ') + '</div></td>'
+      + '<td>' + _lvaEtat(o)
+      +   (o.promoL && !o.retire ? ' <span class="lva-pill lva-promo" title="' + (o.promoL.fin ? 'jusqu’au ' + _lvaDateFr(o.promoL.fin) : 'sans date de fin') + '">−' + o.promoL.pct + ' %' + (o.promoL.portee === 'tous' ? ' (générale)' : '') + '</span>' : '')
+      + '</td>'
+      + '<td>' + prix(o) + '</td>'
+      + '<td><div class="lva-act">'
+      +   '<button class="btn ' + (o.disponible === false && !o.retire ? 'bi' : 'bo') + ' xs" onclick="_lvaFichiers(\'' + s + '\')">📁 Fichiers</button>'
       +   '<button class="btn bo xs" onclick="_lvaFiche(\'' + s + '\')">✏️ Modifier</button>'
-      +   '<button class="btn bo xs" onclick="_lvaPromoModal(\'' + s + '\')">🏷️ Promo</button>'
-      +   (o.retire
-            ? '<button class="btn bo xs" onclick="_lvaRetirer(\'' + s + '\',false)">✅ Remettre en vente</button>'
-            : '<button class="btn bo xs" onclick="_lvaRetirer(\'' + s + '\',true)">🚫 Retirer</button>')
-      +   '<button class="btn bo xs" onclick="_lvaSupprimer(\'' + s + '\')">🗑️ Supprimer</button>'
+      +   '<button class="btn bo xs" title="Promotion, retrait, suppression…" onclick="_lvaPlus(\'' + s + '\')">⋯ Plus</button>'
       + '</div></td></tr>';
   });
   return h + '</tbody></table>';
+}
+
+/** Les actions moins fréquentes, réunies : la ligne garde trois boutons. */
+function _lvaPlus(slug){
+  var o = _lvaOuvrages().find(function(x){ return x.slug === slug; }) || { slug: slug };
+  var s = _esc(slug).replace(/'/g, '');
+  var b = function(cls, txt, js, aide){
+    return '<button class="btn ' + cls + '" style="width:100%;justify-content:flex-start;margin:0 0 8px" onclick="cm();' + js + '">' + txt
+      + (aide ? '<span class="xs2" style="margin-left:auto;opacity:.75;font-weight:400">' + aide + '</span>' : '') + '</button>';
+  };
+  M(_esc(o.titre || slug), _esc(slug) + ' · ' + _esc(_lvaModeLib(o.mode)),
+    b('bo', '🏷️ Promotion', '_lvaPromoModal(\'' + s + '\')', o.promoL ? 'en cours : −' + o.promoL.pct + ' %' : '')
+    + (o.retire && !o.supprime
+        ? b('bo', '✅ Remettre en vente', '_lvaRetirer(\'' + s + '\',false)', '')
+        : b('bo', '🚫 Retirer de la vente', '_lvaRetirer(\'' + s + '\',true)', 'codes vendus conservés'))
+    + (o.disponible !== false && o.lien ? '<a class="btn bo" style="width:100%;justify-content:flex-start;margin:0 0 8px" href="/livrets/' + _esc(o.lien) + '" target="_blank" rel="noopener">👁️ Voir en boutique ↗</a>' : '')
+    + b('bo', '🗑️ Supprimer', '_lvaSupprimer(\'' + s + '\')', 'restaurable'),
+    '<button class="btn bo" onclick="cm()">Fermer</button>');
 }
 
 function _lvaEnregistrer(msg){
@@ -55213,11 +55274,22 @@ function _lvaFicheSave(slug){
   var pl = Math.round(Number((_ge('lvaPL') || {}).value)), pgd = Math.round(Number((_ge('lvaPG') || {}).value));
   if(!(pl >= 100 && pl <= 1000000) || !(pgd >= 100 && pgd <= 1000000)){ toast('Prix : de 100 à 1 000 000 F', 'warn'); return; }
 
+  /* CHANGER LE FORMAT D'UN LIVRET EN VENTE N'EST PAS UN DÉTAIL DE FICHE.
+     Le format décide de la porte : un cahier interactif passé en
+     « feuilletage » envoie ses acheteurs vers un lecteur de pages — vide s'il
+     n'a pas de pages — et le retire de la vente. On le dit avant. */
+  var modeNouveau = (_ge('lvaMode') || {}).value || 'interactif';
+  var actuel = neuf ? null : (_lvaOuvrages().find(function(x){ return x.slug === slug; }) || {});
+  if(actuel && actuel.mode && actuel.mode !== modeNouveau && actuel.disponible !== false && !actuel.retire){
+    if(!confirm('Changer le format de « ' + titre + ' » de « ' + _lvaModeLib(actuel.mode) + ' » en « ' + _lvaModeLib(modeNouveau) + ' » ?\n\n'
+      + 'Ce livret est EN VENTE. Ses acheteurs seront envoyés vers le nouveau format : s’il n’a pas encore son contenu '
+      + '(PDF ou fichier de cahier), ils ne pourront plus le lire et il sortira de la boutique.\n\nContinuer ?')) return;
+  }
   var fiches = T.livretFiches = T.livretFiches || {};
   var f = fiches[slug] || {};
   f.titre = titre;
   f.niveau = String((_ge('lvaNiveau') || {}).value || '').trim();
-  f.mode = (_ge('lvaMode') || {}).value || 'interactif';
+  f.mode = modeNouveau;
   f.kinds = kinds;
   var libres = Math.round(Number((_ge('lvaLibres') || {}).value));
   if(libres >= 0 && libres <= 50) f.pagesLibres = libres;
@@ -55237,7 +55309,8 @@ function _lvaFicheSave(slug){
 
 function _lvaRetirer(slug, oui){
   var T = _lvaT();
-  if(oui && !confirm('Retirer « ' + slug + ' » de la vente ?\n\nIl disparaît de la boutique et ne peut plus être payé. Les codes déjà vendus continuent d’ouvrir.')) return;
+  var o = _lvaOuvrages().find(function(x){ return x.slug === slug; }) || {};
+  if(oui && !confirm('Retirer « ' + (o.titre || slug) + ' » de la vente ?\n\nIl disparaît de la boutique et ne peut plus être payé. Les codes déjà vendus continuent d’ouvrir.')) return;
   T.livretRetires = T.livretRetires || {};
   if(oui) T.livretRetires[slug] = true; else delete T.livretRetires[slug];
   _lvaEnregistrer(oui ? 'Livret retiré de la vente' : 'Livret remis en vente');
@@ -55283,6 +55356,14 @@ function _lvaModeLib(m){
    le filigrane de l'acheteur. Le PDF d'origine reste sur ce poste. */
 var _LVF = { slug: '', info: null, busy: false };
 
+/** Un envoi interrompu par la fermeture de l'onglet laisse un lot partiel
+ *  (sans danger : il n'est jamais servi), mais l'administrateur croit avoir
+ *  fini. On le prévient. */
+function _lvfGardeFermeture(oui){
+  if(oui){ window.onbeforeunload = function(){ return 'Un envoi de livret est en cours.'; }; }
+  else if(window.onbeforeunload && !_LVF.busy){ window.onbeforeunload = null; }
+}
+
 function _lvaApiFichier(champs, fichier, nom){
   var sec = (DB.cloudConfig && DB.cloudConfig.secret) ? DB.cloudConfig.secret : '';
   var fd = new FormData();
@@ -55295,7 +55376,10 @@ function _lvaApiFichier(champs, fichier, nom){
           if(!r.ok || !j || !j.ok){
             var e = new Error((r.status === 401) ? 'Clé d’administration refusée (Système → Centre de contrôle → Clé de synchronisation Cloud).'
                               : ((j && j.error) || ('HTTP ' + r.status)));
-            e.code = j && j.code; throw e;
+            e.code = j && j.code; e.status = r.status;
+            // Clé refusée : on se tait partout (frein partagé, voir _vrtFreiner).
+            if((r.status === 401 || r.status === 403) && typeof _vrtFreiner === 'function') _vrtFreiner('livrets : clé refusée');
+            throw e;
           }
           return j;
         });
@@ -55303,17 +55387,28 @@ function _lvaApiFichier(champs, fichier, nom){
 }
 
 /** Une fiche toute neuve n'est connue du serveur qu'après la synchronisation
- *  (quelques secondes). On patiente au lieu d'échouer. */
+ *  (quelques secondes). On patiente au lieu d'échouer.
+ *  ⚠️ On attend sur le catalogue PUBLIC (réponse 200), pas sur l'action
+ *  d'administration : celle-ci répond 404 tant que la fiche n'est pas arrivée,
+ *  et LWS bannit l'adresse IP — site ENTIER compris — à six « mauvaises »
+ *  réponses par minute. Interroger en boucle une porte qui dit non, c'est
+ *  exactement ce qu'il ne faut pas faire. */
 function _lvaAttendreServeur(slug, essais){
-  essais = essais == null ? 12 : essais;
-  return _lvcApi('admin_fichiers', { o: slug }).catch(function(e){
-    if(essais > 0 && /inconnu/i.test(e.message || '')){
+  essais = essais == null ? 10 : essais;
+  var connu = (_LVA.cat || []).some(function(o){ return o.slug === slug; });
+  if(connu) return _lvcApi('admin_fichiers', { o: slug });
+  return fetch(_VRT_API + '/livret.php', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{"action":"catalogue"}', cache:'no-store' })
+    .then(function(r){ return r.json(); }).catch(function(){ return null; })
+    .then(function(j){
+      if(j && j.ok && Array.isArray(j.ouvrages)){
+        _LVA.cat = j.ouvrages;
+        if(j.ouvrages.some(function(o){ return o.slug === slug; })) return _lvcApi('admin_fichiers', { o: slug });
+      }
+      if(essais <= 0) throw new Error('Le serveur ne connaît pas encore ce livret : la fiche n’a pas été synchronisée. Vérifiez la clé de synchronisation, puis rouvrez cette fenêtre.');
       _lvfEtat('⏳ Envoi de la fiche au serveur… (synchronisation)');
       if(typeof save === 'function' && essais % 4 === 0) save();
-      return new Promise(function(ok){ setTimeout(ok, 2500); }).then(function(){ return _lvaAttendreServeur(slug, essais - 1); });
-    }
-    throw e;
-  });
+      return new Promise(function(ok){ setTimeout(ok, 4000); }).then(function(){ return _lvaAttendreServeur(slug, essais - 1); });
+    });
 }
 
 function _lvfEtat(html, pct){
@@ -55341,6 +55436,9 @@ function _lvaFichiers(slug){
 }
 
 function _lvfRecharger(){
+  // La liste derrière la fenêtre a changé (état, nombre de pages) : elle se
+  // relira au prochain affichage, même si l'on ferme par la croix.
+  _LVA.cat = null;
   return _lvcApi('admin_fichiers', { o: _LVF.slug }).then(function(j){ _LVF.info = j; _lvfRendre(); });
 }
 
@@ -55349,57 +55447,59 @@ function _lvfTaille(n){ return n > 1048576 ? (Math.round(n / 104857.6) / 10) + '
 function _lvfRendre(){
   var j = _LVF.info; if(!j) return;
   var o = _lvaOuvrages().find(function(x){ return x.slug === _LVF.slug; }) || {};
-  var lecture = (o.mode || j.mode) === 'lecture';
+  var mode = o.mode || j.mode;
+  var lecture = mode === 'lecture';
+  var sl = _esc(_LVF.slug).replace(/'/g, '');
+  var nP = (j.pages && j.pages.n) || 0;
+
   var ligneJs = function(quoi, lib, aide){
     var f = j[quoi] || {};
-    var etat = !f.depose ? '<span class="mut">pas déposé</span>'
-      : (f.intact === false ? '<b style="color:#b91c1c">déposé mais abîmé — à remplacer</b>'
-                            : '<b style="color:#16a34a">✓ déposé</b> <span class="xs2 mut">' + _lvfTaille(f.octets) + '</span>');
-    return '<tr><td><b>' + lib + '</b><br><span class="xs2 mut">' + aide + '</span></td><td>' + etat + '</td><td style="white-space:nowrap">'
-      + '<button class="btn bi xs" onclick="_lvfChoisirJs(\'' + quoi + '\')">' + (f.depose ? '🔁 Remplacer' : '⬆️ Déposer') + '</button> '
-      + (f.depose ? '<button class="btn bo xs" onclick="_lvfRetirer(\'' + quoi + '\')">🗑️ Retirer</button>' : '')
-      + '</td></tr>';
+    var etat = !f.depose ? '<span class="lva-pill lva-attente">Pas déposé</span>'
+      : (f.intact === false ? '<span class="lva-pill lva-off">Abîmé — à remplacer</span>'
+                            : '<span class="lva-pill lva-ok">Déposé</span> <span class="lva-meta">' + _lvfTaille(f.octets) + '</span>');
+    return '<tr><td><b>' + lib + '</b><div class="lva-meta">' + aide + '</div></td><td>' + etat + '</td><td><div class="lva-act">'
+      + '<button class="btn ' + (f.depose ? 'bo' : 'bi') + ' xs" onclick="_lvfChoisirJs(\'' + quoi + '\')">' + (f.depose ? '🔁 Remplacer' : '⬆️ Déposer') + '</button>'
+      + (f.depose ? '<button class="btn bo xs" onclick="_lvfRetirer(\'' + quoi + '\')">🗑️</button>' : '')
+      + '</div></td></tr>';
   };
-  var h = '<div class="ib ' + (j.disponible ? 'ibg' : 'ibw') + ' mb12"><span>' + (j.disponible ? '🛒' : '📦') + '</span><span>'
-    + (j.disponible ? '<strong>Ce livret peut être acheté</strong> : son contenu est sur le serveur.'
-                    : '<strong>Pas encore achetable</strong> : ' + (lecture ? 'déposez son PDF ci-dessous.' : 'déposez le fichier du livret élève ci-dessous.'))
-    + ' Format : <b>' + _esc(_lvaModeLib(o.mode || j.mode)) + '</b> <a href="javascript:void(0)" onclick="cm();_lvaFiche(\'' + _esc(_LVF.slug) + '\')">changer</a>.'
-    + (j.disponible && j.lien ? ' <a href="/livrets/' + _esc(j.lien) + '" target="_blank" rel="noopener">Voir en boutique ↗</a>' : '')
-    + '</span></div>';
 
-  // ── Feuilletage
-  h += '<div class="fl mt8">📄 Feuilletage — le livret en pages ' + (lecture ? '' : '<span class="xs2 mut">(utilisé si le format est « feuilletage »)</span>') + '</div>'
-    + '<div class="card" style="padding:12px;margin:6px 0 14px">'
-    + (j.pages && j.pages.n
-        ? '<div><b style="color:#16a34a">✓ ' + j.pages.n + ' page(s) déposée(s)</b> <span class="xs2 mut">' + _lvfTaille(j.pages.octets) + '</span>'
-          + (o.pagesLibres != null ? ' · <span class="xs2">' + o.pagesLibres + ' offerte(s) en aperçu</span>' : '') + '</div>'
-        : '<div class="mut">Aucune page déposée.</div>')
-    + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'
-    +   '<button class="btn bi sm" onclick="_ge(\'lvfPdf\').click()">' + (j.pages && j.pages.n ? '🔁 Remplacer par un PDF' : '⬆️ Déposer le PDF') + '</button>'
-    +   '<button class="btn bo sm" onclick="_ge(\'lvfImgs\').click()">🖼️ Déposer des images de pages</button>'
-    +   (j.pages && j.pages.n ? '<button class="btn bo sm" onclick="_lvfRetirerPages()">🗑️ Retirer les pages</button>' : '')
+  var secPages = '<div class="lva-sec"><h4>📄 Pages du livret (PDF)</h4>'
+    + (nP ? '<div><span class="lva-pill lva-ok">' + nP + ' page(s) en ligne</span> <span class="lva-meta">' + _lvfTaille(j.pages.octets)
+          + (o.pagesLibres != null ? ' · ' + o.pagesLibres + ' offerte(s) en aperçu' : '') + '</span></div>'
+          : '<div><span class="lva-pill lva-attente">Aucune page</span></div>')
+    + '<div class="lva-bar mt8">'
+    +   '<button class="btn bi sm" onclick="_ge(\'lvfPdf\').click()">' + (nP ? '🔁 Remplacer par un PDF' : '⬆️ Déposer le PDF') + '</button>'
+    +   '<button class="btn bo sm" onclick="_ge(\'lvfImgs\').click()">🖼️ Images de pages</button>'
+    +   (nP ? '<button class="btn bo sm" onclick="_lvfRetirerPages()">🗑️ Retirer</button>' : '')
     + '</div>'
-    + '<div class="xs2 mut mt6">Le PDF est découpé ici, dans votre navigateur, en une image par page ; seules les images partent sur le serveur. '
-    + 'Les images de pages sont prises dans l’ordre alphabétique de leur nom (page-01, page-02…).</div>'
-    + '</div>';
+    + '<div class="lva-meta mt6">Le PDF est découpé dans votre navigateur (une image par page) : il ne quitte pas ce poste. '
+    + 'Pendant l’envoi, les lecteurs voient l’ancienne version jusqu’à la dernière page.</div></div>';
 
-  // ── Cahier interactif
-  h += '<div class="fl">🧩 Cahier interactif — fichiers produits par l’outil de publication ' + (lecture ? '<span class="xs2 mut">(utilisés si le format est « cahier interactif »)</span>' : '') + '</div>'
-    + '<div class="tw" style="margin:6px 0 14px"><table><tbody>'
+  var secCahier = '<div class="lva-sec"><h4>🧩 Fichiers du cahier interactif</h4>'
+    + '<div class="tw"><table><tbody>'
     + ligneJs('booklet', 'Livret de l’élève', 'booklet-' + _esc(_LVF.slug) + '.js')
     + ligneJs('guide', 'Guide de l’enseignant', 'guide-' + _esc(_LVF.slug) + '.js')
     + ligneJs('corrige', 'Corrigés', 'corrige-' + _esc(_LVF.slug) + '.js')
-    + '</tbody></table></div>';
+    + '</tbody></table></div>'
+    + '<div class="lva-meta mt6">Fichiers produits par l’outil de publication. Un fichier illisible est refusé et l’ancien reste en place.</div></div>';
 
-  // ── Couverture
-  h += '<div class="fl">🖼️ Couverture</div>'
-    + '<div class="card" style="padding:12px;margin:6px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap">'
-    + (j.couverture ? '<img src="' + _esc(j.couverture) + '" alt="" style="height:110px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.15)">' : '<div class="mut">Aucune couverture.</div>')
-    + '<div style="display:flex;gap:6px;flex-wrap:wrap">'
-    +   '<button class="btn bi sm" onclick="_ge(\'lvfCouv\').click()">' + (j.couverture ? '🔁 Remplacer' : '⬆️ Déposer une image') + '</button>'
-    +   (j.couverture ? '<button class="btn bo sm" onclick="_lvfRetirer(\'couverture\')">🗑️ Retirer</button>' : '')
-    + '</div></div>'
-    + '<div class="xs2 mut">Rien n’est effacé : un fichier remplacé ou retiré est rangé dans la corbeille protégée du serveur (récupérable par FTP).</div>';
+  var secCouv = '<div class="lva-sec"><h4>🖼️ Couverture</h4><div class="lva-bar">'
+    + (j.couverture ? '<img src="' + _esc(j.couverture) + '" alt="" style="height:96px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.15)">' : '<span class="lva-pill lva-attente">Aucune</span>')
+    + '<button class="btn ' + (j.couverture ? 'bo' : 'bi') + ' sm" onclick="_ge(\'lvfCouv\').click()">' + (j.couverture ? '🔁 Remplacer' : '⬆️ Déposer une image') + '</button>'
+    + (j.couverture ? '<button class="btn bo sm" onclick="_lvfRetirer(\'couverture\')">🗑️</button>' : '')
+    + '</div></div>';
+
+  var h = '<div class="ib ' + (j.disponible ? 'ibg' : 'ibw') + ' mb12"><span>' + (j.disponible ? '🛒' : '📦') + '</span><span>'
+    + (j.disponible ? '<strong>Achetable</strong> — le contenu est sur le serveur.'
+                    : '<strong>Pas encore achetable</strong> — ' + (lecture ? 'déposez son PDF.' : 'déposez le fichier « Livret de l’élève ».'))
+    + ' Format : <b>' + _esc(_lvaModeLib(mode)) + '</b> (<a href="javascript:void(0)" onclick="cm();_lvaFiche(\'' + sl + '\')">changer</a>)'
+    + (j.disponible && j.lien ? ' · <a href="/livrets/' + _esc(j.lien) + '" target="_blank" rel="noopener">voir en boutique ↗</a>' : '')
+    + '</span></div>';
+  // Le format du livret d'abord ; l'autre, replié — on ne le cherche que pour changer de format.
+  var autre = lecture ? secCahier : secPages;
+  h += (lecture ? secPages : secCahier) + secCouv
+    + '<details><summary class="xs2" style="cursor:pointer;color:var(--ds-text-2,#45506a)">Autre format : ' + (lecture ? 'cahier interactif' : 'pages (PDF)') + '</summary><div class="mt8">' + autre + '</div></details>'
+    + '<div class="lva-meta mt8">Rien n’est effacé : un fichier remplacé ou retiré est gardé 60 jours dans la corbeille protégée du serveur.</div>';
   _si('lvfCorps', h);
 }
 
@@ -55452,17 +55552,16 @@ function _lvfImage(fichier){
   });
 }
 
-/** Avant une nouvelle série de pages, l'ancienne part à la corbeille : sinon
- *  un PDF plus court laisserait les pages en trop de l'ancien à la suite. */
-function _lvfViderPagesSiBesoin(){
-  if(!(_LVF.info && _LVF.info.pages && _LVF.info.pages.n)) return Promise.resolve();
-  return _lvcApi('admin_retirer_fichier', { o:_LVF.slug, quoi:'pages' });
-}
-
-/** Après une série de pages : le livret devient un feuilletage s'il ne l'était pas. */
+/** Après une série de pages : le livret devient un feuilletage s'il ne l'était
+ *  pas — sauf s'il se vend déjà sous une autre forme : un cahier interactif en
+ *  vente qui basculerait en feuilletage changerait ce que reçoivent ses
+ *  acheteurs. Là, on demande. */
 function _lvfPasserEnLecture(){
   var o = _lvaOuvrages().find(function(x){ return x.slug === _LVF.slug; }) || {};
   if(o.mode === 'lecture') return;
+  var autreFormeEnVente = _LVF.info && _LVF.info.booklet && _LVF.info.booklet.depose && _LVF.info.booklet.intact !== false;
+  if(autreFormeEnVente && !confirm('Les pages sont déposées.\n\nCe livret se vend aujourd’hui comme « ' + _lvaModeLib(o.mode) + ' ». '
+    + 'Le passer en « feuilletage » pour que ses acheteurs lisent ces pages ?\n\n(Annuler : le format ne change pas, les pages restent prêtes.)')) return;
   var T = _lvaT(), fiches = T.livretFiches = T.livretFiches || {};
   fiches[_LVF.slug] = Object.assign(fiches[_LVF.slug] || {}, { mode: 'lecture' });
   if(fiches[_LVF.slug].pagesLibres == null) fiches[_LVF.slug].pagesLibres = 2;
@@ -55470,25 +55569,64 @@ function _lvfPasserEnLecture(){
   toast('Format du livret passé en « feuilletage »');
 }
 
+/** Les pages partent dans un lot d'attente du serveur, puis remplacent les
+ *  pages en ligne d'un seul geste (admin_publier_pages). Pendant l'envoi, les
+ *  acheteurs continuent de lire l'ancienne version ; un envoi interrompu ne
+ *  touche à rien.
+ *  Une coupure réseau ou une erreur 5xx se retente (3 fois, avec un délai
+ *  croissant) : sur une connexion mobile, perdre un PDF de 120 pages pour une
+ *  seconde de réseau serait absurde. Un refus du serveur (4xx), lui, ne se
+ *  retente JAMAIS — il ne changerait pas d'avis, et chaque refus rapproche du
+ *  bannissement de l'adresse IP. */
+function _lvfEnvoyerPage(n, blob, essai){
+  essai = essai || 0;
+  return _lvaApiFichier({ action:'admin_deposer', o:_LVF.slug, quoi:'page', n:n }, blob, 'p' + n + '.jpg')
+    .catch(function(e){
+      var transitoire = !e.status || e.status >= 500;
+      if(!transitoire || essai >= 3) throw e;
+      _lvfEtat('⚠️ Réseau instable — nouvelle tentative pour la page ' + n + '…');
+      return new Promise(function(ok){ setTimeout(ok, 3000 * (essai + 1)); })
+        .then(function(){ return _lvfEnvoyerPage(n, blob, essai + 1); });
+    });
+}
+
 function _lvfEnvoyerPages(total, produirePage){
   _LVF.busy = true;
+  _lvfGardeFermeture(true);
   var n = 0;
   var suivante = function(){
     if(n >= total) return Promise.resolve();
     n++;
-    _lvfEtat('⬆️ Page ' + n + ' / ' + total + '… <span class="xs2 mut">gardez cette fenêtre ouverte</span>', (n - 1) / total * 100);
-    return produirePage(n).then(function(blob){
-      return _lvaApiFichier({ action:'admin_deposer', o:_LVF.slug, quoi:'page', n:n }, blob, 'p' + n + '.jpg');
-    }).then(suivante);
+    _lvfEtat('⬆️ Page ' + n + ' / ' + total + '… <span class="xs2 mut">gardez cette fenêtre ouverte — les lecteurs voient l’ancienne version jusqu’à la fin</span>', (n - 1) / total * 100);
+    return produirePage(n).then(function(blob){ return _lvfEnvoyerPage(n, blob); }).then(suivante);
   };
-  return _lvfViderPagesSiBesoin().then(suivante).then(function(){
+  return suivante().then(function(){
+    _lvfEtat('🔁 Mise en ligne des ' + total + ' pages…', 100);
+    return _lvcApi('admin_publier_pages', { o:_LVF.slug, total:total });
+  }).then(function(){
     _lvfPasserEnLecture();
-    _lvfEtat('<b style="color:#16a34a">✓ ' + total + ' page(s) déposée(s).</b>', 100);
-    toast('✓ ' + total + ' pages déposées');
+    _lvfEtat('<b style="color:#16a34a">✓ ' + total + ' page(s) en ligne.</b>', 100);
+    toast('✓ ' + total + ' pages en ligne');
     return _lvfRecharger();
   }).catch(function(e){
-    _lvfEtat('<b style="color:#b91c1c">⚠️ Arrêt à la page ' + n + ' : ' + _esc(e.message || e) + '</b> — relancez le dépôt pour reprendre depuis le début.');
-  }).then(function(){ _LVF.busy = false; });
+    _lvfEtat('<b style="color:#b91c1c">⚠️ Arrêt à la page ' + n + ' : ' + _esc(e.message || e) + '</b> — rien n’a changé pour les lecteurs ; relancez le dépôt.');
+  }).then(function(){ _LVF.busy = false; _lvfGardeFermeture(false); });
+}
+
+/** pdf.js : celui de la fiche des livres (CDN), et sinon la copie servie par
+ *  le site lui-même (assets/vendor) — une coupure du CDN ne doit pas empêcher
+ *  de publier un livret. */
+function _lvfPdfLib(){
+  var cdn = (typeof window._bookPdfReady === 'function') ? window._bookPdfReady() : Promise.reject(new Error('indisponible'));
+  return cdn.catch(function(){
+    var base = '/assets/vendor/pdfjs-4.10.38/';
+    return import(base + 'pdf.min.js').then(function(){
+      var L = window.pdfjsLib;
+      if(!L || !L.getDocument) throw new Error('Lecteur PDF indisponible. Rechargez la page et réessayez.');
+      if(!L.GlobalWorkerOptions.workerSrc) L.GlobalWorkerOptions.workerSrc = base + 'pdf.worker.min.js';
+      return L;
+    });
+  });
 }
 
 function _lvfPdfChoisi(inp){
@@ -55496,8 +55634,7 @@ function _lvfPdfChoisi(inp){
   if(!f || _lvfOccupe()) return;
   if(_LVF.info && _LVF.info.pages && _LVF.info.pages.n && !confirm('Remplacer les ' + _LVF.info.pages.n + ' pages actuelles par ce PDF ?')) return;
   _lvfEtat('📖 Ouverture du PDF…');
-  var lib = (typeof window._bookPdfReady === 'function') ? window._bookPdfReady() : Promise.reject(new Error('Lecteur PDF indisponible'));
-  lib.then(function(L){ return f.arrayBuffer().then(function(buf){ return L.getDocument({ data: buf }).promise; }); })
+  _lvfPdfLib().then(function(L){ return f.arrayBuffer().then(function(buf){ return L.getDocument({ data: buf }).promise; }); })
     .then(function(pdf){
       if(pdf.numPages > 2000) throw new Error('PDF trop long (2 000 pages au plus).');
       return _lvfEnvoyerPages(pdf.numPages, function(n){
@@ -55610,6 +55747,9 @@ window._lvfRetirerPages   = _lvfRetirerPages;
 window._lvfPdfChoisi      = _lvfPdfChoisi;
 window._lvfImagesChoisies = _lvfImagesChoisies;
 window._lvfCouvChoisie    = _lvfCouvChoisie;
+window._lvfPdfLib         = _lvfPdfLib;
+window._lvaFiltre         = _lvaFiltre;
+window._lvaPlus           = _lvaPlus;
 
 
 /* ══════════════════════════════════════════════════════════════════════════
