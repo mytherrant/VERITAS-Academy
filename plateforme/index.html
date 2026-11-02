@@ -51,6 +51,38 @@
 <!-- seo-tete -->
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CollectionPage","name":"Atelier de Français","description":"Composez des épreuves de français conformes au programme MINESEC : l’IA Ambassa rédige l’épreuve complète (texte, questions, barème, corrigé), vous relisez. Corpus indexé par classe et par module, contrôle de conformité, export Word.","url":"https://veritas-school.com/plateforme/","inLanguage":"fr","publisher":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://veritas-school.com/"},{"@type":"ListItem","position":2,"name":"Atelier de Français","item":"https://veritas-school.com/plateforme/"}]}]}</script>
 <!-- /seo-tete -->
+<style id="vrt-sujet">
+/* En-tête du sujet et visionneuse PDF (11/2026) — voir le gabarit APERCU. */
+.vrt-sj{position:relative;background:#fff;border-bottom:1px solid #e2eaf3;padding:12px 16px 0;display:grid;grid-template-columns:1fr auto;gap:10px 12px;align-items:center}
+.vrt-sj-l1{display:flex;align-items:center;gap:10px;min-width:0;grid-column:1/2}
+.vrt-sj-retour{background:#fff;border:1px solid #e2eaf3;color:#14375f;padding:7px 12px;font:700 12.5px Poppins,sans-serif;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;flex:none}
+.vrt-sj-titre{font:700 17px/1.3 Poppins,sans-serif;color:#14375f;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vrt-sj-export{grid-column:2/3;grid-row:1/2;position:relative;justify-self:end}
+.vrt-sj-btn{background:#fff;border:1px solid #d5e0ec;color:#14375f;padding:9px 16px;font:700 14px Poppins,sans-serif;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.vrt-sj-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:40;background:#fff;border:1px solid #e2eaf3;border-radius:12px;box-shadow:0 12px 30px rgba(20,55,95,.18);padding:6px;min-width:230px}
+.vrt-sj-menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 12px;border-radius:8px;font:600 13.5px Poppins,sans-serif;color:#14375f;cursor:pointer}
+.vrt-sj-menu button:hover{background:#f2f6fb}
+.vrt-sj-chips{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.vrt-sj-frise{grid-column:1/-1;display:flex;align-items:center;border:1px solid #e2eaf3;border-radius:16px;padding:12px 16px;overflow-x:auto;max-width:640px;box-sizing:border-box}
+.vrt-sj-l2{grid-column:1/-1;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.vrt-sj-seg{display:inline-flex;gap:3px;background:#eef2f7;border-radius:12px;padding:4px}
+.vrt-sj-seg button{border:0!important;padding:8px 18px!important;font-size:14px!important;border-radius:9px!important}
+.vrt-sj-onglets{grid-column:1/-1;display:flex;overflow-x:auto;border-bottom:1px solid #e2eaf3;margin:0 -16px;padding:0 16px}
+.vrt-pdfv{max-width:900px;margin:16px auto 40px;border-radius:14px;overflow:hidden;background:#525659;box-shadow:0 6px 24px rgba(20,37,84,.18)}
+.vrt-pdfv-bar{display:flex;align-items:center;gap:6px;background:#2b2f33;color:#fff;padding:10px 14px;font:500 14px Poppins,sans-serif;position:sticky;top:0;z-index:2}
+.vrt-pdfv-bar button{background:none;border:0;color:#fff;font-size:20px;line-height:1;width:36px;height:34px;border-radius:8px;cursor:pointer}
+.vrt-pdfv-bar button:hover{background:rgba(255,255,255,.12)}
+.vrt-pdfv-zoom{min-width:52px;text-align:center;font-variant-numeric:tabular-nums}
+.vrt-pdfv-pages{max-height:calc(100vh - 150px);overflow:auto;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:14px;-webkit-overflow-scrolling:touch}
+.vrt-pdfv-pages canvas{background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.35);max-width:none}
+@media(max-width:640px){
+  .vrt-sj{padding:10px 12px 0}
+  .vrt-sj-titre{font-size:15px;white-space:normal}
+  .vrt-sj-onglets{margin:0 -12px;padding:0 12px}
+  .vrt-pdfv{margin:12px 8px 30px;border-radius:12px}
+  .vrt-pdfv-pages{max-height:calc(100vh - 120px)}
+}
+</style>
 <!--vrt-habillage:tete-->
 <link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.62.34">
 <script>window.VRT_DATA=window.VRT_DATA||{"citations":[{"t":"Le génie, c’est un pour cent d’inspiration et quatre-vingt-dix-neuf pour cent de transpiration.","a":"Thomas Edison"},{"t":"Ce n’est pas parce que les choses sont difficiles que nous n’osons pas ; c’est parce que nous n’osons pas qu’elles sont difficiles.","a":"Sénèque"},{"t":"L’éducation est l’arme la plus puissante pour changer le monde.","a":"Nelson Mandela"},{"t":"Un peu chaque jour vaut mieux que beaucoup un seul jour.","a":"Proverbe"},{"t":"La chance sourit à l’esprit préparé.","a":"Louis Pasteur"},{"t":"Tomber sept fois, se relever huit.","a":"Proverbe japonais"}],"themeSombre":"\n      body{background:#0A1428!important}\n      [style*=\"background:#fff\"],[style*=\"background:#FAFBFE\"],[style*=\"background:#FCFDFE\"],[style*=\"background:#F7F9FD\"]{background:#132241!important}\n      [style*=\"background:#F4F5F8\"],[style*=\"background:#F4F6FB\"],[style*=\"background:#EFF2F7\"],[style*=\"background:#F5F9FF\"]{background:#0F1B33!important}\n      [style*=\"background:rgba(255,255,255,.96)\"]{background:rgba(13,25,48,.96)!important}\n      [style*=\"radial-gradient(1100px\"],[style*=\"radial-gradient(900px\"]{background:#0C1730!important}\n      [style*=\"linear-gradient(180deg,#FBF8F1\"]{background:#0C1730!important}\n      [style*=\"color:#001136\"]{color:#EEF3FC!important}\n      [style*=\"color:#0C2A6A\"]{color:#DCE6F8!important}\n      [style*=\"color:#4D5163\"],[style*=\"color:#6B5A42\"]{color:#B6C2D8!important}\n      [style*=\"color:#6E7385\"],[style*=\"color:#9BA6BE\"]{color:#8D9AB4!important}\n      [style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"]{border-color:#24334F!important}\n      [style*=\"\"],[style*=\"\"]{border-bottom-color:#24334F!important}\n      [style*=\"\"]{border-top-color:#24334F!important}\n      [style*=\"border-left:4px solid\"]{border-left-color:#FFC93C!important}\n      input,input::placeholder{color:#C7D2E6!important}\n    "};</script>
@@ -3127,32 +3159,59 @@
         page et zoom, et les quatre documents en onglets — comme les livrables
         d'un sujet de concours. -->
    <main class="vrt-doc-main" style="flex:1;background:var(--ce9eef4,#e9eef4);padding:0;min-height:100vh">
-     <div data-noprint="1" style="position:sticky;top:0;z-index:20;background:var(--cffffff,#fff);border-bottom:1px solid var(--ce2eaf3,#e2eaf3);display:flex;align-items:center;gap:8px;padding:8px 16px;flex-wrap:wrap">
-       <button onClick="{{ goComposeur }}" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px">{{ icRetour }} Modifier</button>
-       <span style="{{ activeStatusChip }}">{{ activeStatusLabel }}</span>
-       <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-left:6px;flex-wrap:wrap">
+     <!-- EN-TÊTE DU SUJET (11/2026) — sur le modèle de la fiche de sujet de
+          Tchouskou montrée par Jacques : pastilles d'identité, « Exporter »,
+          frise d'état, bascule Aperçu/PDF, onglets soulignés. Une seule barre
+          d'outils remplace les six boutons qui se disputaient la largeur. -->
+     <div data-noprint="1" class="vrt-sj">
+       <div class="vrt-sj-l1">
+         <button onClick="{{ goComposeur }}" class="vrt-sj-retour">{{ icRetour }} Modifier</button>
+         <div class="vrt-sj-titre">{{ docTitre }}</div>
+       </div>
+       <div class="vrt-sj-chips">
+         <sc-for list="{{ docChips }}" as="c" hint-placeholder-count="4"><span style="{{ c.style }}">{{ c.label }}</span></sc-for>
+       </div>
+       <div class="vrt-sj-export">
+         <button onClick="{{ exportMenuBasculer }}" class="vrt-sj-btn">{{ exportIcon }}<span>Exporter</span><span style="font-size:10px;opacity:.6">▾</span></button>
+         <div style="{{ exportMenuStyle }}" class="vrt-sj-menu" onClick="{{ exportMenuFermer }}">
+           <button onClick="{{ pdfTelecharger }}">⬇️ Télécharger le PDF</button>
+           <button onClick="{{ exportWord }}">📝 Word modifiable (.docx)</button>
+           <button onClick="{{ doPrint }}">🖨️ Imprimer</button>
+         </div>
+       </div>
+       <div class="vrt-sj-frise">
+         <sc-for list="{{ docEtapes }}" as="e" hint-placeholder-count="3"><span class="vrt-sj-etape" style="{{ e.style }}"><i style="{{ e.point }}"></i>{{ e.label }}</span><span style="{{ e.trait }}"></span></sc-for>
+       </div>
+       <div class="vrt-sj-l2">
+         <div class="vrt-sj-seg">
+           <button onClick="{{ docModeApercu }}" style="{{ docModeApercuStyle }}">Aperçu</button>
+           <button onClick="{{ docModePdf }}" style="{{ docModePdfStyle }}">PDF</button>
+         </div>
+         <button onClick="{{ docZoomBasculer }}" style="{{ docZoomStyle }}" title="Ajuster à la fenêtre ou taille réelle">{{ docZoomLabel }}</button>
+       </div>
+       <div class="vrt-sj-onglets">
          <sc-for list="{{ docOnglets }}" as="o" hint-placeholder-count="5"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
        </div>
-       <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px">
-         <button onClick="{{ docModeApercu }}" style="{{ docModeApercuStyle }}">Aperçu</button>
-         <button onClick="{{ docModePdf }}" style="{{ docModePdfStyle }}">PDF</button>
-       </div>
-       <span style="margin-left:auto;font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ docPagesLabel }}</span>
-       <button onClick="{{ docZoomBasculer }}" title="Ajuster à la fenêtre ou taille réelle" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px">{{ docZoomLabel }}</button>
-       <button onClick="{{ exportWord }}" style="{{ exportWordStyle }}" title="Télécharger un .docx modifiable">{{ exportIcon }}<span>Word</span></button>
-       <button onClick="{{ doPrint }}" style="background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;border-radius:999px;font-family:'Poppins'" style-hover="background:var(--ce07f00,#e07f00)">Imprimer / PDF</button>
      </div>
-     <!-- VISIONNEUSE PDF (20/10/2026) : le PDF réel de la vue choisie,
-          fabriqué dans le navigateur et montré par sa visionneuse (pages,
-          zoom, téléchargement) — « comme ici », capture de Tchouskou. Sur
-          téléphone, Chrome n'affiche pas un PDF intégré : on l'ouvre. -->
+     <!-- VISIONNEUSE PDF (11/2026) : les pages du PDF réel, dessinées par
+          pdf.js dans la page — sur ordinateur COMME SUR TÉLÉPHONE. L'iframe
+          d'avant n'affichait rien sous Chrome Android, qui ne sait pas
+          intégrer un PDF : on n'y proposait que « Ouvrir » et « Télécharger ».
+          Barre : page courante, zoom, ouvrir, télécharger (voir VRT_PDFV). -->
      <div data-noprint="1" style="{{ pdfZoneStyle }}">
        <div style="{{ pdfMsgStyle }}">{{ pdfMsg }}</div>
        <button onClick="{{ pdfRefaire }}" style="{{ pdfRefaireStyle }}">Réessayer</button>
-       <sc-if value="{{ pdfIframe }}" hint-placeholder-val="{{ false }}"><iframe src="{{ pdfUrl }}" loading="lazy" title="Aperçu PDF de l’épreuve" style="width:100%;height:calc(100vh - 58px);border:0;display:block;background:#525659"></iframe></sc-if>
-       <div style="{{ pdfMobileStyle }}">
-         <button onClick="{{ pdfOuvrir }}" style="background:var(--c14375f,#14375f);color:var(--cffffff,#fff);border:none;padding:10px 16px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:10px;cursor:pointer">Ouvrir le PDF</button>
-         <button onClick="{{ pdfTelecharger }}" style="background:var(--cffffff,#fff);color:var(--c14375f,#14375f);border:1px solid var(--ce2eaf3,#e2eaf3);padding:10px 16px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:10px;cursor:pointer">Télécharger</button>
+       <div class="vrt-pdfv" style="{{ pdfVueStyle }}">
+         <div class="vrt-pdfv-bar">
+           <span class="vrt-pdfv-num">Page <b id="vrtPdfPage">1</b> / {{ pdfPagesNb }}</span>
+           <span style="flex:1"></span>
+           <button onClick="{{ pdfZoomMoins }}" aria-label="Réduire">−</button>
+           <span id="vrtPdfZoom" class="vrt-pdfv-zoom">100 %</span>
+           <button onClick="{{ pdfZoomPlus }}" aria-label="Agrandir">+</button>
+           <button onClick="{{ pdfOuvrir }}" aria-label="Ouvrir dans un onglet" title="Ouvrir dans un onglet">↗</button>
+           <button onClick="{{ pdfTelecharger }}" aria-label="Télécharger" title="Télécharger">⬇</button>
+         </div>
+         <div id="vrtPdfPages" class="vrt-pdfv-pages"></div>
        </div>
      </div>
      <div data-print-sheet="1" class="vrt-docfeuille" style="{{ docFeuilleStyle }}">
@@ -12352,7 +12411,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       })(),
       ...(()=>{
         if(typeof document!=='undefined'){try{document.documentElement.classList.toggle('vrt-doc',ready&&st.screen==='apercu');document.documentElement.classList.toggle('vrt-app',ready&&st.screen!=='login');}catch(e){}}
-        if(!(ready&&st.screen==='apercu')||!active)return{docModeApercu:()=>{},docModePdf:()=>{},docModeApercuStyle:hidden,docModePdfStyle:hidden,pdfZoneStyle:hidden,pdfIframe:false,pdfUrl:'',pdfMsg:'',pdfMsgStyle:hidden,pdfRefaire:()=>{},pdfRefaireStyle:hidden,pdfMobileStyle:hidden,pdfOuvrir:()=>{},pdfTelecharger:()=>{},docOnglets:[],docVues:[],docVoitEnonce:true,docFeuilleStyle:'',docPagesLabel:'',docZoomLabel:'',docZoomBasculer:()=>{}};
+        if(!(ready&&st.screen==='apercu')||!active)return{docModeApercu:()=>{},docModePdf:()=>{},docModeApercuStyle:hidden,docModePdfStyle:hidden,pdfZoneStyle:hidden,pdfIframe:false,pdfUrl:'',pdfMsg:'',pdfMsgStyle:hidden,pdfRefaire:()=>{},pdfRefaireStyle:hidden,pdfMobileStyle:hidden,pdfOuvrir:()=>{},pdfTelecharger:()=>{},pdfVueStyle:hidden,pdfPagesNb:'',exportMenuFermer:()=>{},pdfZoomMoins:()=>{},pdfZoomPlus:()=>{},docTitre:'',docChips:[],docEtapes:[],exportMenuBasculer:()=>{},exportMenuStyle:hidden,docZoomStyle:hidden,docOnglets:[],docVues:[],docVoitEnonce:true,docFeuilleStyle:'',docPagesLabel:'',docZoomLabel:'',docZoomBasculer:()=>{}};
         const cor=this._corrigePourExport(active)||[];
         const ann=this._annexesPourExport(active,true);
         const guide=ann.find(x=>/^GUIDE/.test(x.titre)),note=ann.find(x=>/^NOTE/.test(x.titre));
@@ -12376,34 +12435,61 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           const n=Math.max(1,Math.ceil((f.scrollHeight)/1122.5));if(n!==this.state.docPages)this.setState({docPages:n});}catch(e){}},60);
         return{
           docOnglets:ong.map(k=>({label:lib[k],go:()=>this.setState({docVue:k}),
-            style:'border:none;padding:6px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer;'+(k===v?'background:var(--cffffff,#fff);color:var(--c14375f,#14375f);box-shadow:0 1px 4px rgba(20,55,95,.12)':'background:none;color:var(--c7a8598,#7a8598)')})),
+            style:'border:none;background:none;padding:10px 4px 9px;margin-right:18px;font-size:14px;font-weight:700;font-family:Poppins;cursor:pointer;white-space:nowrap;border-bottom:3px solid '+(k===v?'var(--c14375f,#14375f);color:var(--c14375f,#14375f)':'transparent;color:var(--c8b97a8,#8b97a8)')})),
+          /* Identité du sujet, en pastilles — classe, durée, coefficient,
+             échéance, dernière modification — et sa frise d'état. */
+          docTitre:active.title||'Épreuve sans titre',
+          docChips:(()=>{const pil=(t,c,bg)=>({label:t,style:'display:inline-block;font-size:12px;font-weight:600;font-family:Poppins;padding:5px 12px;border-radius:999px;border:1px solid '+(bg?'transparent':'var(--cd5e0ec,#d5e0ec)')+';color:'+(c||'var(--c33404f,#33404f)')+';background:'+(bg||'var(--cffffff,#fff)')});
+            const l=[];if(active.classe)l.push(pil(active.classe));if(active.duree)l.push(pil('Durée '+active.duree,'var(--c1a72bb,#1a72bb)','var(--ce8f1fb,#e8f1fb)'));
+            if(active.coeff)l.push(pil('Coef. '+active.coeff));
+            if(active.echeance){try{l.push(pil('À rendre le '+new Date(active.echeance).toLocaleDateString('fr-FR'),'var(--c8a5a00,#8a5a00)','var(--cfdf1d6,#fdf1d6)'));}catch(e){}}
+            if(active.updatedAt)l.push(pil('Modifié le '+new Date(active.updatedAt).toLocaleDateString('fr-FR'),'var(--c5a6678,#5a6678)','var(--ceef2f7,#eef2f7)'));
+            return l;})(),
+          docEtapes:(()=>{const s0=active.status||'brouillon';
+            const pos=s0==='valide'?2:(s0==='relecture'||s0==='ajustement'||s0==='rejete')?1:0;
+            const lab=['Brouillon',s0==='ajustement'?'Ajustement demandé':s0==='rejete'?'Rejeté':'En relecture','Validé'];
+            // Étapes passées en vert, étape en cours en or (rouge/orange si rejet/ajustement).
+            const coul=s0==='rejete'?'#c0392b':s0==='ajustement'?'#c26a12':'#d4a017';
+            return lab.map((t,i)=>({label:t,
+              style:'display:inline-flex;align-items:center;gap:7px;font-family:Poppins;font-size:13px;white-space:nowrap;font-weight:'+(i===pos?'700':'500')+';color:'+(i<=pos?'var(--c14375f,#14375f)':'var(--c8b97a8,#8b97a8)'),
+              point:'display:inline-block;width:12px;height:12px;border-radius:50%;background:'+(i<pos?'#1f9d55':i===pos?coul:'var(--cd5e0ec,#d5e0ec)')+(i===pos?';box-shadow:0 0 0 4px '+coul+'33':''),
+              trait:i<2?'flex:1;min-width:16px;height:2px;margin:0 8px;background:'+(i<pos?'#1f9d55':'var(--cd5e0ec,#d5e0ec)'):'display:none'}));})(),
+          exportMenuBasculer:()=>this.setState({exportMenu:!st.exportMenu}),
+          exportMenuStyle:st.exportMenu?'':'display:none',
+          exportMenuFermer:()=>{if(this.state.exportMenu)this.setState({exportMenu:false});},
           docVoitEnonce:v==='enonce'||v==='tout',
           docVues:montrer.map((k,i)=>({titre:vues[k].titre,sous:sousT,blocs:vues[k].blocs.map(b=>({titre:b.titre||'',lignes:(b.lignes||[]).map(l=>String(l))})),
             style:(v==='tout'||i>0)?'':'border-top:none;margin-top:0;padding-top:0'})),
           docFeuilleStyle:'width:210mm;min-height:297mm;box-sizing:border-box;margin:22px auto 60px;background-color:var(--cffffff,#fff);padding:16mm 15mm 18mm;box-shadow:0 2px 14px rgba(20,55,95,.12);zoom:'+z.toFixed(3)+';'
-            +'background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) 297mm)'+(st.docMode==='pdf'||(!st.docMode&&!(typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(max-width:820px)').matches))?';position:absolute;left:-30000px;top:0':''),
+            +'background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) 297mm)'+((st.docMode||'pdf')==='pdf'?';position:absolute;left:-30000px;top:0':''),
           ...(()=>{
             const mobile=typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(max-width:820px)').matches;
-            const mode=st.docMode||(mobile?'apercu':'pdf');
+            const mode=st.docMode||'pdf';
             const cle=(active.updatedAt||0)+'|'+v;
             if(mode==='pdf'&&cle!==st.pdfCle&&this._pdfEnCours!==cle){clearTimeout(this._pdfT);this._pdfT=setTimeout(()=>this._fabriquerPdf(cle),300);}
             const seg=on=>'border:none;padding:6px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer;'+(on?'background:var(--cffffff,#fff);color:var(--c14375f,#14375f);box-shadow:0 1px 4px rgba(20,55,95,.12)':'background:none;color:var(--c7a8598,#7a8598)');
             const pret=st.pdfEtat==='pret'&&!!st.pdfUrl;
             const nomPdf=(typeof VRT_DOCX!=='undefined'?VRT_DOCX.nomFichier(active.title||'epreuve'):'epreuve.docx').replace(/\.docx$/,'.pdf');
             return{
-              docModeApercu:()=>this.setState({docMode:'apercu'}),docModePdf:()=>this.setState({docMode:'pdf'}),
+              docModeApercu:()=>this.setState({docMode:'apercu',exportMenu:false}),docModePdf:()=>this.setState({docMode:'pdf',exportMenu:false}),
+              pdfVueStyle:mode==='pdf'&&pret?'':'display:none',
+              pdfPagesNb:pret?String(st.pdfPages||''):'',
+              pdfZoomMoins:()=>{if(window.VRT_PDFV)VRT_PDFV.zoom(-1);},pdfZoomPlus:()=>{if(window.VRT_PDFV)VRT_PDFV.zoom(1);},
+              ...(()=>{if(mode==='pdf'&&pret&&st.pdfCle===cle)setTimeout(()=>{if(window.VRT_PDFV)VRT_PDFV.assurer(st.pdfUrl);},0);return{};})(),
               docModeApercuStyle:seg(mode==='apercu'),docModePdfStyle:seg(mode==='pdf'),
               pdfZoneStyle:mode==='pdf'?'':hidden,
-              pdfIframe:mode==='pdf'&&pret&&!mobile,pdfUrl:st.pdfUrl||'',
-              pdfMsg:st.pdfEtat==='erreur'?('Le PDF n’a pas pu être fabriqué ('+(st.pdfErr||'erreur inconnue')+'). L’aperçu et l’impression restent disponibles.'):(st.pdfEtat==='pret'&&st.pdfCle===cle?(mobile?'PDF prêt — '+st.pdfPages+' page(s).':''):'Fabrication du PDF…'),
-              pdfMsgStyle:(st.pdfEtat==='pret'&&st.pdfCle===cle&&!mobile)?hidden:'font-size:13px;color:'+(st.pdfEtat==='erreur'?'var(--cc0392b,#c0392b)':'var(--c5a6678,#5a6678)')+';padding:18px 20px 8px;text-align:center',
+              pdfIframe:false,pdfUrl:st.pdfUrl||'',
+              pdfMsg:st.pdfEtat==='erreur'?('Le PDF n’a pas pu être fabriqué ('+(st.pdfErr||'erreur inconnue')+'). L’aperçu et l’impression restent disponibles.'):(st.pdfEtat==='pret'&&st.pdfCle===cle?'':'Fabrication du PDF…'),
+              pdfMsgStyle:(st.pdfEtat==='pret'&&st.pdfCle===cle)?hidden:'font-size:13px;color:'+(st.pdfEtat==='erreur'?'var(--cc0392b,#c0392b)':'var(--c5a6678,#5a6678)')+';padding:18px 20px 8px;text-align:center',
               pdfRefaire:()=>this.setState({pdfCle:''}),
               pdfRefaireStyle:st.pdfEtat==='erreur'?'display:block;margin:0 auto 14px;background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 14px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
-              pdfMobileStyle:mode==='pdf'&&pret&&mobile?'display:flex;gap:10px;justify-content:center;padding:6px 16px 18px;flex-wrap:wrap':hidden,
+              pdfMobileStyle:hidden,
               pdfOuvrir:()=>{if(st.pdfUrl)window.open(st.pdfUrl,'_blank');},
-              pdfTelecharger:()=>{if(!st.pdfUrl)return;const a=document.createElement('a');a.href=st.pdfUrl;a.download=nomPdf;document.body.appendChild(a);a.click();a.remove();},
+              pdfTelecharger:()=>{if(st.exportMenu)this.setState({exportMenu:false});if(!st.pdfUrl){this._avis&&this._avis('Le PDF est en cours de fabrication — réessayez dans un instant.','ko');return;}const a=document.createElement('a');a.href=st.pdfUrl;a.download=nomPdf;document.body.appendChild(a);a.click();a.remove();},
               docPagesLabel:mode==='pdf'?(pret?(st.pdfPages+' page'+(st.pdfPages>1?'s':'')+' A4'):''):(st.docPages?('≈ '+st.docPages+' page'+(st.docPages>1?'s':'')+' A4'):'')};})(),
           docZoomLabel:reel?'Ajuster':'Taille réelle',
+          // Le zoom de la feuille ne sert qu'à l'aperçu : le PDF a le sien.
+          docZoomStyle:(st.docMode==='apercu')?'background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':'display:none',
           docZoomBasculer:()=>this.setState({docZoom:reel?'':'100'}),
         };
       })(),
@@ -12415,6 +12501,81 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
     };
   }
 }
+</script>
+<script>
+/* VISIONNEUSE PDF DE L'APERÇU (11/2026) — VRT_PDFV.
+   Dessine les pages du PDF fabriqué dans le navigateur (adresse blob:) avec
+   pdf.js, servi par le site lui-même (assets/vendor, comme lecteur-textes.js).
+   Indépendante du moteur de gabarit : celui-ci n'appelle qu'assurer(url) après
+   chaque rendu ; si le conteneur a été recréé ou vidé, on redessine, sinon
+   rien. Zoom par pas de 20 %, « ajusté à la largeur » au départ ; la page
+   courante suit le défilement. */
+window.VRT_PDFV = (function () {
+  var BASE = '/assets/vendor/pdfjs-4.10.38/';
+  var lib = null, doc = null, url = '', zoom = 0, l1 = 595, tour = 0;
+  function hote() { return document.getElementById('vrtPdfPages'); }
+  function charger() {
+    if (lib) return Promise.resolve(lib);
+    return import(BASE + 'pdf.min.js').then(function (m) {
+      lib = m; m.GlobalWorkerOptions.workerSrc = BASE + 'pdf.worker.min.js'; return m;
+    });
+  }
+  function echelle() {
+    var h = hote(); if (zoom) return zoom;
+    var w = h ? h.clientWidth - 20 : 600;
+    // Ajusté à la largeur, sans dépasser 115 % : au-delà, sur grand écran,
+    // une page A4 devient une affiche qu'on lit en défilant.
+    return Math.max(0.3, Math.min(1.15, w / l1));
+  }
+  function majZoom() { var z = document.getElementById('vrtPdfZoom'); if (z) z.textContent = Math.round(echelle() * 100) + ' %'; }
+  function suivre() {
+    var h = hote(); if (!h) return;
+    var haut = h.getBoundingClientRect().top, n = 1;
+    h.querySelectorAll('canvas').forEach(function (c) { if (c.getBoundingClientRect().top - haut < h.clientHeight * 0.45) n = +c.getAttribute('data-p'); });
+    var e = document.getElementById('vrtPdfPage'); if (e) e.textContent = n;
+  }
+  function dessiner() {
+    var h = hote(); if (!h || !doc) return;
+    var t = ++tour, e = echelle(), dpr = Math.min(2, window.devicePixelRatio || 1);
+    h.innerHTML = ''; majZoom();
+    var i = 0;
+    (function suivante() {
+      if (t !== tour || ++i > doc.numPages) { suivre(); return; }
+      doc.getPage(i).then(function (p) {
+        if (t !== tour) return;
+        var vp = p.getViewport({ scale: e * dpr }), c = document.createElement('canvas');
+        c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
+        c.style.width = Math.floor(vp.width / dpr) + 'px'; c.style.height = Math.floor(vp.height / dpr) + 'px';
+        c.setAttribute('data-p', i); h.appendChild(c);
+        return p.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+      }).then(suivante, suivante);
+    })();
+  }
+  return {
+    assurer: function (u) {
+      var h = hote(); if (!h || !u) return;
+      if (h.getAttribute('data-u') === u && h.querySelector('canvas')) return;
+      h.setAttribute('data-u', u);
+      if (!h._vrtEcoute) { h._vrtEcoute = true; h.addEventListener('scroll', suivre, { passive: true }); }
+      if (u === url && doc) { dessiner(); return; }
+      url = u; zoom = 0;
+      charger().then(function (m) { return m.getDocument({ url: u, isEvalSupported: false }).promise; })
+        .then(function (d) {
+          if (url !== u) return;
+          doc = d;
+          return d.getPage(1).then(function (p) { l1 = p.getViewport({ scale: 1 }).width || 595; dessiner(); });
+        })
+        .catch(function (e) {
+          var x = hote(); if (x) x.innerHTML = '<div style="color:#fff;padding:24px;text-align:center;font:14px Poppins,sans-serif">Affichage du PDF impossible ici (' + String((e && e.message) || e).replace(/[<>&]/g, '') + '). Utilisez ↗ pour l’ouvrir ou ⬇ pour le télécharger.</div>';
+        });
+    },
+    zoom: function (sens) {
+      if (!doc) return;
+      zoom = Math.max(0.3, Math.min(3, echelle() * (sens > 0 ? 1.2 : 1 / 1.2)));
+      dessiner();
+    }
+  };
+})();
 </script>
 <script>
 /* Barre d'outils repliable au téléphone (voir « LA PLANCHE D'ABORD »).
