@@ -475,19 +475,39 @@ if (strpos($action, 'admin_') === 0) {
         }
         return $slug;
     };
-    $lvCorbeille = static function (string $chemin, string $nom): void {
-        if (!is_file($chemin)) return;
+    /* Corbeille : une COPIE de l'ancien fichier, faite AVANT le remplacement.
+       Le déplacer d'abord laissait un instant — et, si le `rename` suivant
+       échouait, pour de bon — un livret vendu sans son fichier. Copier puis
+       renommer par-dessus garde l'ancien en place jusqu'à la dernière seconde.
+       Purge des entrées de plus de 60 jours : l'hébergement n'a pas un disque
+       infini, et deux mois laissent le temps de s'apercevoir d'une erreur. */
+    $lvCorbeille = static function (string $chemin, string $nom, bool $deplacer = false): bool {
+        if (!file_exists($chemin)) return true;
         $c = lv_dir() . '/_corbeille';
         if (!is_dir($c)) @mkdir($c, 0750, true);
-        @rename($chemin, $c . '/' . date('Ymd-His') . '_' . $nom);
+        $dest = $c . '/' . date('Ymd-His') . '_' . $nom;
+        $ok = $deplacer ? @rename($chemin, $dest) : @copy($chemin, $dest);
+        $limite = time() - 60 * 86400;
+        foreach (glob($c . '/*') ?: [] as $v) {
+            if ((int) @filemtime($v) >= $limite) continue;
+            if (is_dir($v)) { foreach (glob($v . '/*') ?: [] as $x) @unlink($x); @rmdir($v); }
+            else @unlink($v);
+        }
+        return $ok;
     };
     $lvCibles = static function (string $slug, string $quoi, int $n = 0): ?string {
         switch ($quoi) {
             case 'booklet': case 'guide': case 'corrige':
                 return lv_dir() . '/' . $quoi . '-' . $slug . '.js';
             case 'page':
+                /* Les pages arrivent dans un LOT D'ATTENTE (`<slug>~lot/`),
+                   jamais servi. Elles ne remplacent les pages en ligne qu'en
+                   bloc, une fois toutes reçues (admin_publier_pages). Écrire
+                   directement dans `<slug>/` mettait en vente un livre à
+                   moitié déposé pendant tout l'envoi — et pour de bon si
+                   l'envoi s'interrompait. */
                 if ($n < 1 || $n > 2000) return null;
-                return lv_dir() . '/' . $slug . '/p' . str_pad((string) $n, 3, '0', STR_PAD_LEFT) . '.jpg';
+                return lv_dir() . '/' . $slug . '~lot/p' . str_pad((string) $n, 3, '0', STR_PAD_LEFT) . '.jpg';
             case 'couverture':
                 return dirname(__DIR__) . '/uploads/oeuvres/livret_' . $slug . '.jpg';
         }
@@ -548,15 +568,39 @@ if (strpos($action, 'admin_') === 0) {
             }
         }
         $dir = dirname($cible);
+        // La page 1 ouvre un nouveau lot : les restes d'un envoi interrompu
+        // ne doivent pas se mêler au suivant.
+        if ($quoi === 'page' && $n === 1 && is_dir($dir)) {
+            foreach (glob($dir . '/*') ?: [] as $x) @unlink($x);
+        }
         if (!is_dir($dir) && !@mkdir($dir, 0750, true)) lv_err(500, 'Dossier du livret impossible à créer.', 'io');
         $part = $cible . '.part';
         if (!@move_uploaded_file($tmp, $part)) lv_err(500, 'Écriture impossible sur le serveur.', 'io');
         @chmod($part, $quoi === 'couverture' ? 0644 : 0640);
-        $lvCorbeille($cible, $slug . '_' . basename($cible));
+        if ($quoi !== 'page') $lvCorbeille($cible, $slug . '_' . basename($cible));
         if (!@rename($part, $cible)) { @unlink($part); lv_err(500, 'Écriture impossible sur le serveur.', 'io'); }
         lv_log('[ADMIN-DEPOT] o=' . $slug . ' quoi=' . $quoi . ($quoi === 'page' ? ' n=' . $n : '') . ' octets=' . $taille);
         lv_out(200, ['ok' => true, 'slug' => $slug, 'quoi' => $quoi, 'n' => $n, 'octets' => $taille,
                      'pages' => vrt_livret_pages_deposees($slug)]);
+    }
+
+    /* Le lot d'attente est complet : il REMPLACE les pages en ligne d'un seul
+       geste. On vérifie d'abord qu'il contient exactement p001…pN, sans trou —
+       ce que le client annonce n'est pas une preuve. */
+    if ($action === 'admin_publier_pages') {
+        $slug  = $lvSlugAdmin();
+        $total = (int) ($in['total'] ?? 0);
+        $lot   = lv_dir() . '/' . $slug . '~lot';
+        $vu = 0;
+        while ($vu < 2000 && is_file($lot . '/p' . str_pad((string) ($vu + 1), 3, '0', STR_PAD_LEFT) . '.jpg')) $vu++;
+        if ($total < 1 || $vu !== $total) {
+            lv_err(409, 'Envoi incomplet : ' . $vu . ' page(s) reçue(s) sur ' . $total . '. Les pages en ligne n’ont pas été touchées ; relancez le dépôt.', 'incomplet');
+        }
+        $live = lv_dir() . '/' . $slug;
+        if (is_dir($live) && !$lvCorbeille($live, $slug . '_pages', true)) lv_err(500, 'Remplacement impossible.', 'io');
+        if (!@rename($lot, $live)) lv_err(500, 'Publication des pages impossible.', 'io');
+        lv_log('[ADMIN-PAGES] o=' . $slug . ' pages=' . $total);
+        lv_out(200, ['ok' => true, 'pages' => vrt_livret_pages_deposees($slug)]);
     }
 
     if ($action === 'admin_retirer_fichier') {
@@ -569,10 +613,8 @@ if (strpos($action, 'admin_') === 0) {
             $d = lv_dir() . '/' . $slug;
             $n = 0;
             if (is_dir($d)) {
-                $c = lv_dir() . '/_corbeille';
-                if (!is_dir($c)) @mkdir($c, 0750, true);
                 $n = count(glob($d . '/p*.jpg') ?: []);
-                if (!@rename($d, $c . '/' . date('Ymd-His') . '_' . $slug . '_pages')) lv_err(500, 'Retrait impossible.', 'io');
+                if (!$lvCorbeille($d, $slug . '_pages', true)) lv_err(500, 'Retrait impossible.', 'io');
             }
             lv_log('[ADMIN-RETRAIT] o=' . $slug . ' pages=' . $n);
             lv_out(200, ['ok' => true, 'retirees' => $n]);
@@ -580,7 +622,7 @@ if (strpos($action, 'admin_') === 0) {
         $cible = $lvCibles($slug, $quoi, (int) ($in['n'] ?? 0));
         if ($cible === null || $quoi === 'page') lv_err(400, 'Type de fichier inconnu.', 'quoi');
         if (!is_file($cible)) lv_err(404, 'Ce fichier n’est pas sur le serveur.', 'absent');
-        $lvCorbeille($cible, $slug . '_' . basename($cible));
+        if (!$lvCorbeille($cible, $slug . '_' . basename($cible), true)) lv_err(500, 'Retrait impossible.', 'io');
         lv_log('[ADMIN-RETRAIT] o=' . $slug . ' quoi=' . $quoi);
         lv_out(200, ['ok' => true]);
     }
