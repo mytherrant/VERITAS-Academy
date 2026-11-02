@@ -35,9 +35,11 @@ $tarifs = [
     'livret' => 1500,
     'livretFiches'  => [
         'nouveau-cahier' => ['titre' => 'Nouveau cahier', 'niveau' => '2nde', 'kinds' => ['livret'], 'cree' => true],
+        'feuillete' => ['titre' => 'Livret en PDF', 'mode' => 'lecture', 'pagesLibres' => 2, 'cree' => true],
         '6e'             => ['titre' => 'Sixième (titre corrigé)'],
     ],
     'livretRetires' => ['5e' => true],
+    'livretSupprimes' => ['3e' => true],
     'livretPromos'  => [
         '*'  => ['pct' => 10, 'debut' => '', 'fin' => ''],
         '4e' => ['pct' => 20, 'debut' => $auj, 'fin' => $demain],
@@ -51,6 +53,14 @@ file_put_contents($dbFile, json_encode(['tarifs' => $tarifs]));
 define('VRT_DB_FICHIER', $dbFile);
 define('VRT_LIVRET_CATALOGUE', $tmp . '/absent.json');   // repli : les cinq classes d'origine
 define('VRT_LIVRET_DIR', $tmp);
+// Les données vendues : un feuilletage de 3 pages (p001…p003) déposé ici.
+define('VRT_LIVRET_DONNEES', $tmp . '/donnees');
+@mkdir($tmp . '/donnees/feuillete', 0700, true);
+foreach ([1, 2, 3] as $i) file_put_contents($tmp . '/donnees/feuillete/p00' . $i . '.jpg', "\xFF\xD8\xFF");
+register_shutdown_function(function () use ($tmp) {
+    foreach (glob($tmp . '/donnees/feuillete/*') ?: [] as $f) @unlink($f);
+    @rmdir($tmp . '/donnees/feuillete'); @rmdir($tmp . '/donnees');
+});
 if (!defined('VRT_PRICE_ENFORCE')) define('VRT_PRICE_ENFORCE', 'strict');
 
 require_once $racine . '/api/_auth_lib.php';
@@ -79,6 +89,15 @@ dit(isset($cat['5e']), 'un ouvrage retiré reste au catalogue (codes vendus)');
 dit(!empty($cat['5e']['retire']), 'marqué « retiré »');
 $e5 = vrt_livret_etat('5e');
 dit(empty($e5['disponible']) && !empty($e5['retire']), 'et vrt_livret_etat() le ferme à la vente');
+
+echo "\n{$G}2 bis. Corbeille et feuilletage déposé depuis le panneau{$R}\n";
+dit(isset($cat['3e']) && !empty($cat['3e']['supprime']), 'un livret supprimé reste au catalogue, marqué « supprimé »');
+dit(!empty($cat['3e']['retire']) && empty(vrt_livret_etat('3e')['disponible']), 'et il n’est plus en vente');
+dit(($cat['feuillete']['pages'] ?? 0) === 3, 'les pages d’un feuilletage sont comptées sur le disque', (string) ($cat['feuillete']['pages'] ?? ''));
+$ef = vrt_livret_etat('feuillete');
+dit(!empty($ef['disponible']), 'un feuilletage avec ses pages est disponible');
+dit(($ef['lien'] ?? '') === 'lire.html?o=feuillete' && ($ef['porte'] ?? '') === 'lire.html?o=feuillete',
+    'sans page dédiée, il s’ouvre dans le lecteur générique', ($ef['lien'] ?? '') . ' / ' . ($ef['porte'] ?? ''));
 
 echo "\n{$G}3. Promotions{$R}\n";
 dit(vrt_livret_prix_normal($db, 'livret', '4e') === 1500, 'prix normal 4e : 1 500');

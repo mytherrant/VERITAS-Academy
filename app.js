@@ -55009,6 +55009,7 @@ function _lvaPromo(slug){
  *  réglages faits sur ce poste et pas encore synchronisés. */
 function _lvaOuvrages(){
   var T = _lvaT(), fiches = T.livretFiches || {}, ret = T.livretRetires || {}, par = T.livretParOuvrage || {};
+  var sup = T.livretSupprimes || {};
   var gen = { livret: T.livret || 1500, guide: T.livretGuide || 5000 };
   var vus = {}, out = [];
   (_LVA.cat || []).forEach(function(o){ vus[o.slug] = 1; out.push(Object.assign({}, o)); });
@@ -55026,9 +55027,11 @@ function _lvaOuvrages(){
       if(f.niveau != null) o.niveau = f.niveau;
       if(f.mode) o.mode = f.mode;
       if(Array.isArray(f.kinds) && f.kinds.length) o.kinds = f.kinds;
+      if(f.pagesLibres != null) o.pagesLibres = f.pagesLibres;
       o.cree = !!f.cree;
     }
-    o.retire = !!ret[o.slug];
+    o.supprime = !!sup[o.slug];
+    o.retire = !!ret[o.slug] || o.supprime;
     // Prix HORS promotion : le réglage de ce poste l'emporte sur ce qu'a lu le serveur.
     var pp = par[o.slug] || {};
     o.pLivret = pp.livret > 0 ? pp.livret : (parseInt(o.prixNormal || o.prix, 10) || gen.livret);
@@ -55043,9 +55046,12 @@ function pgLivretsAdmin(){
   if(!iA()) return na();
   if(_LVA.cat === null && !_LVA.busy) _lvaCharger();
   var T = _lvaT();
-  var liste = _lvaOuvrages();
+  var tous = _lvaOuvrages();
+  var liste = tous.filter(function(o){ return !o.supprime; });
+  var corbeille = tous.filter(function(o){ return o.supprime; });
   var nVente = liste.filter(function(o){ return o.disponible !== false && !o.retire; }).length;
   var nRet = liste.filter(function(o){ return o.retire; }).length;
+  var nSansContenu = liste.filter(function(o){ return o.disponible === false && !o.retire; }).length;
   var nPromo = liste.filter(function(o){ return o.promoL && !o.retire; }).length;
   var synchro = !!(DB.cloudConfig && DB.cloudConfig.secret);
 
@@ -55062,6 +55068,8 @@ function pgLivretsAdmin(){
     +     '<div class="ib ibt" style="flex:1 1 140px;margin:0"><span>🏷️</span><span><b>' + nPromo + '</b> en promotion</span></div>'
     +     '<div class="ib ibt" style="flex:1 1 140px;margin:0"><span>🚫</span><span><b>' + nRet + '</b> retiré(s)</span></div>'
     +   '</div>'
+    +   (nSansContenu ? '<div class="ib ibw mb12"><span>📦</span><span><strong>' + nSansContenu + ' livret(s) sans contenu sur le serveur</strong> : ils ne peuvent pas être achetés. '
+    +     'Cliquez <strong>📁 Fichiers</strong> sur la ligne du livret pour déposer son PDF (ou ses fichiers de cahier).</span></div>' : '')
     +   '<div style="display:flex;gap:8px;flex-wrap:wrap">'
     +     '<button class="btn bi" onclick="_lvaFiche(\'\')">➕ Ajouter un livret</button>'
     +     '<button class="btn bo" onclick="_lvaPromoModal(\'*\')">🏷️ Promotion sur tous les livrets</button>'
@@ -55089,6 +55097,17 @@ function pgLivretsAdmin(){
     + '<div class="fg"><input class="fi" id="lvaQ" placeholder="🔎 Rechercher un livret (titre, niveau, identifiant)…" value="' + _esc(_LVA.q) + '" oninput="_LVA.q=this.value;_lvaFiltrer()"></div>'
     + '<div class="tw" id="lvaTable">' + (_LVA.cat === null ? '<div class="xs2 mut">Chargement du catalogue…</div>' : _lvaTable(liste)) + '</div>'
     + '</div>';
+  if(corbeille.length){
+    h += '<div class="card mt16"><details><summary class="semi" style="cursor:pointer">🗑️ Corbeille — ' + corbeille.length + ' livret(s) supprimé(s)</summary>'
+      + '<div class="xs2 mut mt8">Un livret supprimé n’est plus vendu ni affiché. Ses codes déjà vendus continuent d’ouvrir, et ses fichiers restent sur le serveur : vous pouvez le restaurer.</div>'
+      + '<div class="tw mt8"><table><tbody>'
+      + corbeille.map(function(o){
+          var s = _esc(o.slug).replace(/'/g, '');
+          return '<tr><td><b>' + _esc(o.titre || o.slug) + '</b><br><span class="xs2 mut">' + _esc(o.slug) + '</span></td>'
+            + '<td style="text-align:right"><button class="btn bi xs" onclick="_lvaRestaurer(\'' + s + '\')">↩️ Restaurer</button></td></tr>';
+        }).join('')
+      + '</tbody></table></div></details></div>';
+  }
   return h;
 }
 
@@ -55116,7 +55135,7 @@ function _lvaTable(liste){
     var etat;
     if(o.retire) etat = '<span style="color:#b91c1c;font-weight:600">Retiré de la vente</span>';
     else if(o.nonSynchro) etat = '<span style="color:#92400e;font-weight:600">Pas encore synchronisé</span>';
-    else if(o.disponible === false) etat = '<span style="color:#92400e;font-weight:600">Contenu non déposé</span>';
+    else if(o.disponible === false) etat = '<span style="color:#92400e;font-weight:600">Contenu non déposé</span><br><a href="javascript:void(0)" class="xs2" onclick="_lvaFichiers(\'' + s + '\')">Déposer →</a>';
     else etat = '<span style="color:#16a34a;font-weight:600">En vente</span>';
     var promo = o.promoL
       ? '<b>−' + o.promoL.pct + ' %</b>' + (o.promoL.portee === 'tous' ? ' <span class="xs2 mut">(générale)</span>' : '')
@@ -55124,19 +55143,20 @@ function _lvaTable(liste){
       : '<span class="xs2 mut">—</span>';
     h += '<tr>'
       + '<td><b>' + _esc(o.titre || o.slug) + '</b><br><span class="xs2 mut">' + _esc(o.slug) + (o.niveau ? ' · ' + _esc(o.niveau) : '')
-      + ' · ' + _esc(o.mode || 'interactif') + (o.cree ? ' · ajouté ici' : '') + '</span></td>'
+      + ' · ' + _esc(_lvaModeLib(o.mode)) + (o.mode === 'lecture' && o.pages ? ' · ' + o.pages + ' p.' : '') + (o.cree ? ' · ajouté ici' : '') + '</span></td>'
       + '<td>' + etat + '</td>'
       + '<td>' + prixCel(o, 'livret') + '</td>'
       + '<td>' + prixCel(o, 'guide') + '</td>'
       + '<td>' + promo + '</td>'
-      + '<td style="white-space:nowrap">'
-      +   '<button class="btn bo xs" title="Modifier" onclick="_lvaFiche(\'' + s + '\')">✏️</button> '
-      +   '<button class="btn bo xs" title="Promotion" onclick="_lvaPromoModal(\'' + s + '\')">🏷️</button> '
+      + '<td><div style="display:flex;gap:4px;flex-wrap:wrap;min-width:150px">'
+      +   '<button class="btn bi xs" onclick="_lvaFichiers(\'' + s + '\')">📁 Fichiers</button>'
+      +   '<button class="btn bo xs" onclick="_lvaFiche(\'' + s + '\')">✏️ Modifier</button>'
+      +   '<button class="btn bo xs" onclick="_lvaPromoModal(\'' + s + '\')">🏷️ Promo</button>'
       +   (o.retire
-            ? '<button class="btn bi xs" title="Remettre en vente" onclick="_lvaRetirer(\'' + s + '\',false)">✅</button> '
-            : '<button class="btn bo xs" title="Retirer de la vente" onclick="_lvaRetirer(\'' + s + '\',true)">🚫</button> ')
-      +   (o.cree ? '<button class="btn bo xs" title="Supprimer" onclick="_lvaSupprimer(\'' + s + '\')">🗑️</button>' : '')
-      + '</td></tr>';
+            ? '<button class="btn bo xs" onclick="_lvaRetirer(\'' + s + '\',false)">✅ Remettre en vente</button>'
+            : '<button class="btn bo xs" onclick="_lvaRetirer(\'' + s + '\',true)">🚫 Retirer</button>')
+      +   '<button class="btn bo xs" onclick="_lvaSupprimer(\'' + s + '\')">🗑️ Supprimer</button>'
+      + '</div></td></tr>';
   });
   return h + '</tbody></table>';
 }
@@ -55149,7 +55169,7 @@ function _lvaEnregistrer(msg){
 
 /** Ajouter (slug vide) ou modifier un livret. */
 function _lvaFiche(slug){
-  var o = slug ? (_lvaOuvrages().find(function(x){ return x.slug === slug; }) || {}) : {};
+  var o = slug ? (_lvaOuvrages().find(function(x){ return x.slug === slug; }) || {}) : { mode: 'lecture' };
   var kinds = o.kinds || ['livret'];
   var opt = function(v, l){ return '<option value="' + v + '"' + ((o.mode || 'interactif') === v ? ' selected' : '') + '>' + l + '</option>'; };
   M(slug ? 'Modifier un livret' : 'Ajouter un livret', slug ? _esc(o.titre || slug) : 'Nouvelle fiche au catalogue',
@@ -55159,8 +55179,10 @@ function _lvaFiche(slug){
     + '<div class="fg2">'
     +   '<div class="fg"><span class="fl">Niveau</span><input class="fi" id="lvaNiveau" maxlength="20" placeholder="6e, 1ère, Tle…" value="' + _esc(o.niveau || '') + '"></div>'
     +   '<div class="fg"><span class="fl">Format</span><select class="fi" id="lvaMode">'
-    +     opt('interactif', 'Cahier interactif') + opt('lecture', 'Feuilletage (pages)') + opt('autonome', 'Cahier autonome') + '</select></div>'
+    +     opt('lecture', 'Feuilletage (PDF converti en pages)') + opt('interactif', 'Cahier interactif (fichier .js)') + opt('autonome', 'Cahier autonome') + '</select></div>'
     + '</div>'
+    + '<div class="fg"><span class="fl">Pages offertes en aperçu <span class="mut">(feuilletage : lisibles sans payer)</span></span>'
+    +   '<input class="fi" id="lvaLibres" type="number" min="0" max="50" value="' + (o.pagesLibres != null ? o.pagesLibres : 2) + '"></div>'
     + '<div class="fg"><span class="fl">Versions vendues</span>'
     +   '<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="lvaKL"' + (kinds.indexOf('livret') >= 0 ? ' checked' : '') + '> Livret de l’élève</label>'
     +   '<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="lvaKG"' + (kinds.indexOf('guide') >= 0 ? ' checked' : '') + '> Guide de l’enseignant</label></div>'
@@ -55168,9 +55190,8 @@ function _lvaFiche(slug){
     +   '<div class="fg"><span class="fl">Prix livret élève (FCFA)</span><input class="fi" id="lvaPL" type="number" min="100" step="50" value="' + (o.pLivret || _lvaT().livret || 1500) + '"></div>'
     +   '<div class="fg"><span class="fl">Prix guide enseignant (FCFA)</span><input class="fi" id="lvaPG" type="number" min="100" step="50" value="' + (o.pGuide || _lvaT().livretGuide || 5000) + '"></div>'
     + '</div>'
-    + (slug ? '' : '<div class="ib ibt mt8"><span>📦</span><span>La fiche met le livret au catalogue. Il passe <strong>en vente</strong> dès que son contenu est déposé sur le serveur '
-      + '(<code>booklet-&lt;identifiant&gt;.js</code> dans le dossier des livrets protégés, ou ses pages <code>&lt;identifiant&gt;/p001.jpg</code> pour un feuilletage). '
-      + 'D’ici là, il apparaît « bientôt en vente » et ne peut pas être payé.</span></div>'),
+    + (slug ? '' : '<div class="ib ibt mt8"><span>📦</span><span>Après l’enregistrement, la fenêtre <strong>📁 Fichiers</strong> s’ouvre : déposez-y le <strong>PDF</strong> du livret (il sera lu en feuilletage) '
+      + 'ou ses fichiers de cahier interactif, et une couverture. Tant qu’aucun contenu n’est déposé, le livret apparaît « bientôt en vente » et ne peut pas être payé.</span></div>'),
     '<button class="btn bo" onclick="cm()">Annuler</button>'
     + '<button class="btn bi" onclick="_lvaFicheSave(\'' + _esc(slug).replace(/'/g, '') + '\')">✓ Enregistrer</button>');
 }
@@ -55198,6 +55219,8 @@ function _lvaFicheSave(slug){
   f.niveau = String((_ge('lvaNiveau') || {}).value || '').trim();
   f.mode = (_ge('lvaMode') || {}).value || 'interactif';
   f.kinds = kinds;
+  var libres = Math.round(Number((_ge('lvaLibres') || {}).value));
+  if(libres >= 0 && libres <= 50) f.pagesLibres = libres;
   if(neuf){ f.cree = true; f.ajoute = _lvaAuj(); }
   fiches[slug] = f;
   // Le prix n'est inscrit que s'il CHANGE : un ouvrage qui suit le tarif
@@ -55208,6 +55231,8 @@ function _lvaFicheSave(slug){
   if(neuf || pgd !== avant.pGuide){ par[slug] = par[slug] || {}; par[slug].guide = pgd; }
   cm();
   _lvaEnregistrer(neuf ? 'Livret ajouté au catalogue' : 'Livret modifié');
+  // Un livret ajouté n'a encore rien à vendre : on enchaîne sur ses fichiers.
+  if(neuf) setTimeout(function(){ _lvaFichiers(slug); }, 300);
 }
 
 function _lvaRetirer(slug, oui){
@@ -55218,17 +55243,295 @@ function _lvaRetirer(slug, oui){
   _lvaEnregistrer(oui ? 'Livret retiré de la vente' : 'Livret remis en vente');
 }
 
-/** Supprimer une fiche AJOUTÉE ici. Un ouvrage du catalogue d'origine ne se
- *  supprime pas (des codes sont vendus dessus) : il se retire de la vente. */
+/** Supprimer un livret. On ne DÉTRUIT jamais un ouvrage vendu : il part à la
+ *  corbeille (DB.tarifs.livretSupprimes) — plus vendu, plus affiché, codes
+ *  vendus intacts, fichiers gardés — et se restaure en un clic. Seule une
+ *  fiche ajoutée ici et encore jamais synchronisée s'efface tout à fait. */
 function _lvaSupprimer(slug){
   var T = _lvaT();
-  if(!(T.livretFiches && T.livretFiches[slug] && T.livretFiches[slug].cree)){ toast('Seul un livret ajouté ici peut être supprimé — retirez-le de la vente', 'warn'); return; }
-  if(!confirm('Supprimer définitivement la fiche « ' + slug + ' » ?\n\nSes prix et sa promotion sont effacés. Si des codes ont été vendus dessus, préférez « Retirer de la vente ».')) return;
-  delete T.livretFiches[slug];
-  if(T.livretRetires) delete T.livretRetires[slug];
-  if(T.livretParOuvrage) delete T.livretParOuvrage[slug];
-  if(T.livretPromos) delete T.livretPromos[slug];
-  _lvaEnregistrer('Livret supprimé');
+  var o = _lvaOuvrages().find(function(x){ return x.slug === slug; }) || {};
+  if(o.nonSynchro && T.livretFiches && T.livretFiches[slug]){
+    if(!confirm('Supprimer la fiche « ' + (o.titre || slug) + ' » ?\n\nElle n’a jamais été envoyée au serveur : elle est effacée.')) return;
+    delete T.livretFiches[slug];
+    ['livretRetires', 'livretParOuvrage', 'livretPromos', 'livretSupprimes'].forEach(function(k){ if(T[k]) delete T[k][slug]; });
+    _lvaEnregistrer('Livret supprimé');
+    return;
+  }
+  if(!confirm('Supprimer « ' + (o.titre || slug) + ' » ?\n\nIl disparaît de la boutique et de cette liste, et ne peut plus être acheté. '
+    + 'Les codes déjà vendus continuent d’ouvrir et ses fichiers restent sur le serveur.\n\nVous pourrez le restaurer depuis la corbeille, en bas de la page.')) return;
+  T.livretSupprimes = T.livretSupprimes || {};
+  T.livretSupprimes[slug] = true;
+  _lvaEnregistrer('Livret supprimé (restaurable depuis la corbeille)');
+}
+
+function _lvaRestaurer(slug){
+  var T = _lvaT();
+  if(T.livretSupprimes) delete T.livretSupprimes[slug];
+  _lvaEnregistrer('Livret restauré');
+}
+
+function _lvaModeLib(m){
+  return m === 'lecture' ? 'feuilletage' : (m === 'autonome' ? 'cahier autonome' : 'cahier interactif');
+}
+
+/* ══ FICHIERS D'UN LIVRET ═════════════════════════════════════════════════
+   Déposer, remplacer, retirer — sans FTP. Le serveur contrôle chaque fichier
+   avant de l'accepter (api/livret.php, admin_deposer) et range l'ancien dans
+   une corbeille protégée au lieu de l'effacer.
+   Un PDF ne part JAMAIS tel quel : il est découpé ici, dans le navigateur, en
+   une image par page — c'est ce que le feuilletage sert, page par page, avec
+   le filigrane de l'acheteur. Le PDF d'origine reste sur ce poste. */
+var _LVF = { slug: '', info: null, busy: false };
+
+function _lvaApiFichier(champs, fichier, nom){
+  var sec = (DB.cloudConfig && DB.cloudConfig.secret) ? DB.cloudConfig.secret : '';
+  var fd = new FormData();
+  Object.keys(champs).forEach(function(k){ fd.append(k, champs[k]); });
+  fd.append('fichier', fichier, nom || 'fichier');
+  return fetch(_VRT_API + '/livret.php', { method:'POST', headers: sec ? { 'Authorization':'Bearer ' + sec } : {}, body: fd })
+    .then(function(r){
+      return r.json().catch(function(){ return { ok:false, error:'Réponse illisible du serveur (HTTP ' + r.status + ').' }; })
+        .then(function(j){
+          if(!r.ok || !j || !j.ok){
+            var e = new Error((r.status === 401) ? 'Clé d’administration refusée (Système → Centre de contrôle → Clé de synchronisation Cloud).'
+                              : ((j && j.error) || ('HTTP ' + r.status)));
+            e.code = j && j.code; throw e;
+          }
+          return j;
+        });
+    });
+}
+
+/** Une fiche toute neuve n'est connue du serveur qu'après la synchronisation
+ *  (quelques secondes). On patiente au lieu d'échouer. */
+function _lvaAttendreServeur(slug, essais){
+  essais = essais == null ? 12 : essais;
+  return _lvcApi('admin_fichiers', { o: slug }).catch(function(e){
+    if(essais > 0 && /inconnu/i.test(e.message || '')){
+      _lvfEtat('⏳ Envoi de la fiche au serveur… (synchronisation)');
+      if(typeof save === 'function' && essais % 4 === 0) save();
+      return new Promise(function(ok){ setTimeout(ok, 2500); }).then(function(){ return _lvaAttendreServeur(slug, essais - 1); });
+    }
+    throw e;
+  });
+}
+
+function _lvfEtat(html, pct){
+  var e = _ge('lvfEtat'); if(!e) return;
+  e.style.display = html ? '' : 'none';
+  e.innerHTML = html + (pct != null ? '<div style="height:6px;background:#e5e7eb;border-radius:4px;margin-top:6px"><div style="height:6px;border-radius:4px;background:#142554;width:' + Math.max(2, Math.min(100, pct)) + '%"></div></div>' : '');
+}
+
+function _lvaFichiers(slug){
+  if(!(DB.cloudConfig && DB.cloudConfig.secret)){
+    toast('Saisissez d’abord la clé de synchronisation (Système → Centre de contrôle SA)', 'warn'); return;
+  }
+  var o = _lvaOuvrages().find(function(x){ return x.slug === slug; }) || { slug: slug, titre: slug };
+  _LVF.slug = slug; _LVF.info = null;
+  M('📁 Fichiers du livret', _esc(o.titre || slug),
+    '<div id="lvfEtat" class="ib ibt mb12" style="display:none"></div>'
+    + '<div id="lvfCorps"><div class="xs2 mut">Lecture de ce qui est déposé sur le serveur…</div></div>'
+    + '<input type="file" id="lvfPdf" accept="application/pdf,.pdf" style="display:none" onchange="_lvfPdfChoisi(this)">'
+    + '<input type="file" id="lvfImgs" accept="image/*" multiple style="display:none" onchange="_lvfImagesChoisies(this)">'
+    + '<input type="file" id="lvfCouv" accept="image/*" style="display:none" onchange="_lvfCouvChoisie(this)">'
+    + '<input type="file" id="lvfJs" accept=".js,application/javascript,text/javascript" style="display:none" onchange="_lvfJsChoisi(this)">',
+    '<button class="btn bo" onclick="cm();_LVA.cat=null;re()">Fermer</button>', true);
+  _lvaAttendreServeur(slug).then(function(j){ _lvfEtat(''); _LVF.info = j; _lvfRendre(); })
+    .catch(function(e){ _lvfEtat(''); _si('lvfCorps', '<div class="ib ibr"><span>⚠️</span><span>' + _esc(e.message || e) + '</span></div>'); });
+}
+
+function _lvfRecharger(){
+  return _lvcApi('admin_fichiers', { o: _LVF.slug }).then(function(j){ _LVF.info = j; _lvfRendre(); });
+}
+
+function _lvfTaille(n){ return n > 1048576 ? (Math.round(n / 104857.6) / 10) + ' Mo' : Math.max(1, Math.round(n / 1024)) + ' Ko'; }
+
+function _lvfRendre(){
+  var j = _LVF.info; if(!j) return;
+  var o = _lvaOuvrages().find(function(x){ return x.slug === _LVF.slug; }) || {};
+  var lecture = (o.mode || j.mode) === 'lecture';
+  var ligneJs = function(quoi, lib, aide){
+    var f = j[quoi] || {};
+    var etat = !f.depose ? '<span class="mut">pas déposé</span>'
+      : (f.intact === false ? '<b style="color:#b91c1c">déposé mais abîmé — à remplacer</b>'
+                            : '<b style="color:#16a34a">✓ déposé</b> <span class="xs2 mut">' + _lvfTaille(f.octets) + '</span>');
+    return '<tr><td><b>' + lib + '</b><br><span class="xs2 mut">' + aide + '</span></td><td>' + etat + '</td><td style="white-space:nowrap">'
+      + '<button class="btn bi xs" onclick="_lvfChoisirJs(\'' + quoi + '\')">' + (f.depose ? '🔁 Remplacer' : '⬆️ Déposer') + '</button> '
+      + (f.depose ? '<button class="btn bo xs" onclick="_lvfRetirer(\'' + quoi + '\')">🗑️ Retirer</button>' : '')
+      + '</td></tr>';
+  };
+  var h = '<div class="ib ' + (j.disponible ? 'ibg' : 'ibw') + ' mb12"><span>' + (j.disponible ? '🛒' : '📦') + '</span><span>'
+    + (j.disponible ? '<strong>Ce livret peut être acheté</strong> : son contenu est sur le serveur.'
+                    : '<strong>Pas encore achetable</strong> : ' + (lecture ? 'déposez son PDF ci-dessous.' : 'déposez le fichier du livret élève ci-dessous.'))
+    + ' Format : <b>' + _esc(_lvaModeLib(o.mode || j.mode)) + '</b> <a href="javascript:void(0)" onclick="cm();_lvaFiche(\'' + _esc(_LVF.slug) + '\')">changer</a>.'
+    + (j.disponible && j.lien ? ' <a href="/livrets/' + _esc(j.lien) + '" target="_blank" rel="noopener">Voir en boutique ↗</a>' : '')
+    + '</span></div>';
+
+  // ── Feuilletage
+  h += '<div class="fl mt8">📄 Feuilletage — le livret en pages ' + (lecture ? '' : '<span class="xs2 mut">(utilisé si le format est « feuilletage »)</span>') + '</div>'
+    + '<div class="card" style="padding:12px;margin:6px 0 14px">'
+    + (j.pages && j.pages.n
+        ? '<div><b style="color:#16a34a">✓ ' + j.pages.n + ' page(s) déposée(s)</b> <span class="xs2 mut">' + _lvfTaille(j.pages.octets) + '</span>'
+          + (o.pagesLibres != null ? ' · <span class="xs2">' + o.pagesLibres + ' offerte(s) en aperçu</span>' : '') + '</div>'
+        : '<div class="mut">Aucune page déposée.</div>')
+    + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'
+    +   '<button class="btn bi sm" onclick="_ge(\'lvfPdf\').click()">' + (j.pages && j.pages.n ? '🔁 Remplacer par un PDF' : '⬆️ Déposer le PDF') + '</button>'
+    +   '<button class="btn bo sm" onclick="_ge(\'lvfImgs\').click()">🖼️ Déposer des images de pages</button>'
+    +   (j.pages && j.pages.n ? '<button class="btn bo sm" onclick="_lvfRetirerPages()">🗑️ Retirer les pages</button>' : '')
+    + '</div>'
+    + '<div class="xs2 mut mt6">Le PDF est découpé ici, dans votre navigateur, en une image par page ; seules les images partent sur le serveur. '
+    + 'Les images de pages sont prises dans l’ordre alphabétique de leur nom (page-01, page-02…).</div>'
+    + '</div>';
+
+  // ── Cahier interactif
+  h += '<div class="fl">🧩 Cahier interactif — fichiers produits par l’outil de publication ' + (lecture ? '<span class="xs2 mut">(utilisés si le format est « cahier interactif »)</span>' : '') + '</div>'
+    + '<div class="tw" style="margin:6px 0 14px"><table><tbody>'
+    + ligneJs('booklet', 'Livret de l’élève', 'booklet-' + _esc(_LVF.slug) + '.js')
+    + ligneJs('guide', 'Guide de l’enseignant', 'guide-' + _esc(_LVF.slug) + '.js')
+    + ligneJs('corrige', 'Corrigés', 'corrige-' + _esc(_LVF.slug) + '.js')
+    + '</tbody></table></div>';
+
+  // ── Couverture
+  h += '<div class="fl">🖼️ Couverture</div>'
+    + '<div class="card" style="padding:12px;margin:6px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap">'
+    + (j.couverture ? '<img src="' + _esc(j.couverture) + '" alt="" style="height:110px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.15)">' : '<div class="mut">Aucune couverture.</div>')
+    + '<div style="display:flex;gap:6px;flex-wrap:wrap">'
+    +   '<button class="btn bi sm" onclick="_ge(\'lvfCouv\').click()">' + (j.couverture ? '🔁 Remplacer' : '⬆️ Déposer une image') + '</button>'
+    +   (j.couverture ? '<button class="btn bo sm" onclick="_lvfRetirer(\'couverture\')">🗑️ Retirer</button>' : '')
+    + '</div></div>'
+    + '<div class="xs2 mut">Rien n’est effacé : un fichier remplacé ou retiré est rangé dans la corbeille protégée du serveur (récupérable par FTP).</div>';
+  _si('lvfCorps', h);
+}
+
+function _lvfOccupe(){ if(_LVF.busy){ toast('Un envoi est déjà en cours…', 'warn'); return true; } return false; }
+
+function _lvfChoisirJs(quoi){ _LVF.quoiJs = quoi; var i = _ge('lvfJs'); if(i){ i.value = ''; i.click(); } }
+
+function _lvfJsChoisi(inp){
+  var f = inp.files && inp.files[0]; if(!f || _lvfOccupe()) return;
+  _LVF.busy = true; _lvfEtat('⬆️ Envoi de « ' + _esc(f.name) + ' »…');
+  _lvaApiFichier({ action:'admin_deposer', o:_LVF.slug, quoi:_LVF.quoiJs }, f, f.name)
+    .then(function(){ toast('✓ Fichier déposé et vérifié'); _lvfEtat(''); return _lvfRecharger(); })
+    .catch(function(e){ _lvfEtat('<b style="color:#b91c1c">⚠️ ' + _esc(e.message || e) + '</b>'); })
+    .then(function(){ _LVF.busy = false; inp.value = ''; });
+}
+
+function _lvfRetirer(quoi){
+  var lib = { booklet:'le livret de l’élève', guide:'le guide de l’enseignant', corrige:'les corrigés', couverture:'la couverture' }[quoi] || quoi;
+  if(!confirm('Retirer ' + lib + ' du serveur ?\n\nLe fichier est rangé dans la corbeille protégée.' + (quoi === 'booklet' ? ' Le livret ne pourra plus être acheté tant qu’un nouveau fichier n’est pas déposé.' : ''))) return;
+  _lvcApi('admin_retirer_fichier', { o:_LVF.slug, quoi:quoi })
+    .then(function(){ toast('✓ Retiré'); return _lvfRecharger(); })
+    .catch(function(e){ toast(e.message || String(e), 'err'); });
+}
+
+function _lvfRetirerPages(){
+  if(!confirm('Retirer toutes les pages de ce livret ?\n\nElles sont rangées dans la corbeille protégée. Le livret ne pourra plus être lu ni acheté tant que de nouvelles pages ne sont pas déposées.')) return;
+  _lvcApi('admin_retirer_fichier', { o:_LVF.slug, quoi:'pages' })
+    .then(function(){ toast('✓ Pages retirées'); return _lvfRecharger(); })
+    .catch(function(e){ toast(e.message || String(e), 'err'); });
+}
+
+/** Une toile → JPEG. Largeur bornée : assez nette pour lire, assez légère
+ *  pour une connexion mobile. */
+function _lvfToile(src, largeurMax){
+  var w = src.width, hgt = src.height, k = Math.min(1, largeurMax / w);
+  var c = document.createElement('canvas');
+  c.width = Math.round(w * k); c.height = Math.round(hgt * k);
+  var ctx = c.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+  ctx.drawImage(src, 0, 0, c.width, c.height);
+  return new Promise(function(ok, ko){ c.toBlob(function(b){ b ? ok(b) : ko(new Error('Conversion de l’image impossible')); }, 'image/jpeg', 0.85); });
+}
+
+function _lvfImage(fichier){
+  return new Promise(function(ok, ko){
+    var u = URL.createObjectURL(fichier), im = new Image();
+    im.onload = function(){ ok(im); setTimeout(function(){ URL.revokeObjectURL(u); }, 1000); };
+    im.onerror = function(){ ko(new Error('Image illisible : ' + fichier.name)); };
+    im.src = u;
+  });
+}
+
+/** Avant une nouvelle série de pages, l'ancienne part à la corbeille : sinon
+ *  un PDF plus court laisserait les pages en trop de l'ancien à la suite. */
+function _lvfViderPagesSiBesoin(){
+  if(!(_LVF.info && _LVF.info.pages && _LVF.info.pages.n)) return Promise.resolve();
+  return _lvcApi('admin_retirer_fichier', { o:_LVF.slug, quoi:'pages' });
+}
+
+/** Après une série de pages : le livret devient un feuilletage s'il ne l'était pas. */
+function _lvfPasserEnLecture(){
+  var o = _lvaOuvrages().find(function(x){ return x.slug === _LVF.slug; }) || {};
+  if(o.mode === 'lecture') return;
+  var T = _lvaT(), fiches = T.livretFiches = T.livretFiches || {};
+  fiches[_LVF.slug] = Object.assign(fiches[_LVF.slug] || {}, { mode: 'lecture' });
+  if(fiches[_LVF.slug].pagesLibres == null) fiches[_LVF.slug].pagesLibres = 2;
+  save();
+  toast('Format du livret passé en « feuilletage »');
+}
+
+function _lvfEnvoyerPages(total, produirePage){
+  _LVF.busy = true;
+  var n = 0;
+  var suivante = function(){
+    if(n >= total) return Promise.resolve();
+    n++;
+    _lvfEtat('⬆️ Page ' + n + ' / ' + total + '… <span class="xs2 mut">gardez cette fenêtre ouverte</span>', (n - 1) / total * 100);
+    return produirePage(n).then(function(blob){
+      return _lvaApiFichier({ action:'admin_deposer', o:_LVF.slug, quoi:'page', n:n }, blob, 'p' + n + '.jpg');
+    }).then(suivante);
+  };
+  return _lvfViderPagesSiBesoin().then(suivante).then(function(){
+    _lvfPasserEnLecture();
+    _lvfEtat('<b style="color:#16a34a">✓ ' + total + ' page(s) déposée(s).</b>', 100);
+    toast('✓ ' + total + ' pages déposées');
+    return _lvfRecharger();
+  }).catch(function(e){
+    _lvfEtat('<b style="color:#b91c1c">⚠️ Arrêt à la page ' + n + ' : ' + _esc(e.message || e) + '</b> — relancez le dépôt pour reprendre depuis le début.');
+  }).then(function(){ _LVF.busy = false; });
+}
+
+function _lvfPdfChoisi(inp){
+  var f = inp.files && inp.files[0]; inp.value = '';
+  if(!f || _lvfOccupe()) return;
+  if(_LVF.info && _LVF.info.pages && _LVF.info.pages.n && !confirm('Remplacer les ' + _LVF.info.pages.n + ' pages actuelles par ce PDF ?')) return;
+  _lvfEtat('📖 Ouverture du PDF…');
+  var lib = (typeof window._bookPdfReady === 'function') ? window._bookPdfReady() : Promise.reject(new Error('Lecteur PDF indisponible'));
+  lib.then(function(L){ return f.arrayBuffer().then(function(buf){ return L.getDocument({ data: buf }).promise; }); })
+    .then(function(pdf){
+      if(pdf.numPages > 2000) throw new Error('PDF trop long (2 000 pages au plus).');
+      return _lvfEnvoyerPages(pdf.numPages, function(n){
+        return pdf.getPage(n).then(function(page){
+          var v1 = page.getViewport({ scale: 1 });
+          var vp = page.getViewport({ scale: Math.min(3, 1400 / v1.width) });
+          var c = document.createElement('canvas');
+          c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+          var ctx = c.getContext('2d');
+          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+          return page.render({ canvasContext: ctx, viewport: vp }).promise.then(function(){ return _lvfToile(c, 1400); });
+        });
+      });
+    })
+    .catch(function(e){ _lvfEtat('<b style="color:#b91c1c">⚠️ ' + _esc(e.message || e) + '</b>'); });
+}
+
+function _lvfImagesChoisies(inp){
+  var fs = Array.prototype.slice.call(inp.files || []); inp.value = '';
+  if(!fs.length || _lvfOccupe()) return;
+  fs.sort(function(a, b){ return a.name.localeCompare(b.name, 'fr', { numeric: true }); });
+  if(_LVF.info && _LVF.info.pages && _LVF.info.pages.n && !confirm('Remplacer les ' + _LVF.info.pages.n + ' pages actuelles par ces ' + fs.length + ' image(s) ?')) return;
+  _lvfEnvoyerPages(fs.length, function(n){ return _lvfImage(fs[n - 1]).then(function(im){ return _lvfToile(im, 1400); }); });
+}
+
+function _lvfCouvChoisie(inp){
+  var f = inp.files && inp.files[0]; inp.value = '';
+  if(!f || _lvfOccupe()) return;
+  _LVF.busy = true; _lvfEtat('⬆️ Envoi de la couverture…');
+  _lvfImage(f).then(function(im){ return _lvfToile(im, 900); })
+    .then(function(b){ return _lvaApiFichier({ action:'admin_deposer', o:_LVF.slug, quoi:'couverture' }, b, 'couverture.jpg'); })
+    .then(function(){ toast('✓ Couverture déposée'); _lvfEtat(''); return _lvfRecharger(); })
+    .catch(function(e){ _lvfEtat('<b style="color:#b91c1c">⚠️ ' + _esc(e.message || e) + '</b>'); })
+    .then(function(){ _LVF.busy = false; });
 }
 
 function _lvaPromoModal(slug){
@@ -55297,6 +55600,16 @@ window._lvaPromoSave      = _lvaPromoSave;
 window._lvaPromoSuppr     = _lvaPromoSuppr;
 window._lvaTarifsGeneraux = _lvaTarifsGeneraux;
 window._LVA               = _LVA;
+window._LVF               = _LVF;
+window._lvaRestaurer      = _lvaRestaurer;
+window._lvaFichiers       = _lvaFichiers;
+window._lvfChoisirJs      = _lvfChoisirJs;
+window._lvfJsChoisi       = _lvfJsChoisi;
+window._lvfRetirer        = _lvfRetirer;
+window._lvfRetirerPages   = _lvfRetirerPages;
+window._lvfPdfChoisi      = _lvfPdfChoisi;
+window._lvfImagesChoisies = _lvfImagesChoisies;
+window._lvfCouvChoisie    = _lvfCouvChoisie;
 
 
 /* ══════════════════════════════════════════════════════════════════════════
