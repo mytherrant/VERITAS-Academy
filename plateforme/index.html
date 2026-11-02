@@ -2612,6 +2612,10 @@
               </div>
             </section>
             </sc-if>
+            <!-- Ajouter un sujet SANS passer par Ambassa (02/11/2026) : le seul bouton
+                 vivait dans le panneau replié « Composer avec Ambassa » — qui composait
+                 à la main ne trouvait aucun moyen d'ajouter sa production écrite. -->
+            <button onClick="{{ ajouterSujet }}" style="{{ sujetAjoutStyle }}" title="Production écrite, situation d’intégration, dissertation, texte fautif…">{{ sujetAjoutLabel }}</button>
             <!-- Panneau de génération (20/10/2026) : carte de la vitrine — fond
                  blanc, la couleur dans l'anneau et le bouton (« la couleur
                  qualifie, elle n'inonde pas »). Un quota inconnu ne s'affiche
@@ -4443,6 +4447,7 @@
     <div onClick="{{ stop }}" style="background:var(--cffffff,#fff);border-radius:16px;box-shadow:0 24px 70px rgba(14,46,77,.4);width:100%;max-width:460px;overflow:hidden;animation:popIn .28s ease both">
       <sc-if value="{{ payFormShown }}" hint-placeholder-val="{{ true }}">
         <div style="padding:22px 26px;border-bottom:1px solid var(--ceef2f7,#eef2f7)"><h2 style="font-family:Poppins;font-size:18px;font-weight:700;color:var(--c14375f,#14375f);margin:0">Paiement — plan {{ payPlanName }}</h2><p style="font-size:12.5px;color:var(--c8b97a8,#8b97a8);margin:5px 0 0"><sc-if value="{{ payRemiseShown }}" hint-placeholder-val="{{ false }}"><span style="text-decoration:line-through;margin-right:7px">{{ payPrixAvant }}</span></sc-if>{{ payPlanPrice }} · renouvellement mensuel</p></div>
+        <div role="status" style="{{ payMotifStyle }}">{{ payMotif }}</div>
         <div style="padding:22px 26px">
           <div style="{{ payBannerStyle }}">{{ payBanner }}</div>
           <div style="display:flex;gap:8px;margin:14px 0 18px">
@@ -6520,11 +6525,18 @@ class Component extends DCLogic {
      donnait « a cote » pour s'en debarrasser tombait sur une carte de gabarit
      -- qui cree un brouillon. Le clic exterieur ferme donc le menu ET s'arrete
      la : il n'atteint pas ce qu'il y a dessous. */
+  /* Ferme la fenêtre de paiement — bouton Annuler, clic au-dehors, Échap.
+     Pas pendant une demande en cours : la réponse de l'opérateur doit
+     trouver la fenêtre où l'afficher. */
+  _fermerPaiement(){if(this.state.payBusy)return;
+    this.setState({payOpen:false,payDone:false,payCode:'',payCodeMsg:'',payMotif:'',
+      payCodeOk:false,payRemise:0,payMontant:0,payBase:0});}
   _installerFermetureCreer(){
     if(this._fermCreerInstalle)return;
     this._fermCreerInstalle=true;
     window.addEventListener('keydown',(e)=>{
       if(e.key==='Escape'&&this.state.createOpen)this.setState({createOpen:false});
+      else if(e.key==='Escape'&&this.state.payOpen)this._fermerPaiement();
     });
     document.addEventListener('click',(e)=>{
       if(!this.state.createOpen)return;
@@ -8252,11 +8264,14 @@ class Component extends DCLogic {
        minute. Le message du serveur (retenu au premier 402 reel) reste
        prioritaire quand on l'a. */
     var n=(this.all||[]).filter(function(x){return x&&x.src!=='libre';}).length;
-    this._avis(this._msgAbo
+    /* Le motif s'affiche DANS la fenêtre de paiement (02/11/2026) : en
+       bandeau flottant (_avis), il se posait sur le titre de la fenêtre et
+       les deux devenaient illisibles. */
+    const motif=this._msgAbo
       || ('Ce texte fait partie du répertoire complet. Abonnez-vous pour ouvrir '
          +(n>0?('les '+n.toLocaleString('fr-FR')+' textes'):'tout le répertoire')
-         +', leurs questions et leurs faits de langue.'),'attention');
-    this.setState({payOpen:true,paySelected:'ens',payDone:false,
+         +', leurs questions et leurs faits de langue.');
+    this.setState({payOpen:true,paySelected:'ens',payDone:false,payMotif:motif,
       payCode:this._codeAmiRetenu(),payCodeMsg:'',payCodeOk:false,
       payRemise:0,payMontant:0,payBase:0},()=>{if(this.state.payCode)this._verifierCodeAmi();});
   }
@@ -10900,7 +10915,7 @@ class Component extends DCLogic {
       {a:'var(--c7b52c7,#7b52c7)',t:'var(--cefe8fa,#efe8fa)'}];
     const plansView=this.plans.map((p,ip)=>{const isCur=p.name===curPlanName;const th=THEMES_PLAN[ip%THEMES_PLAN.length];return{name:p.name,price:p.price,period:p.period,seats:p.seats,
       carte:'background:linear-gradient(180deg,'+th.t+' 0,var(--cffffff,#fff) 170px);border:2px solid '+(isCur?th.a:'var(--ce2eaf3,#e2eaf3)')+';border-top:5px solid '+th.a+';border-radius:16px;padding:24px 22px;display:flex;flex-direction:column;box-shadow:0 3px 12px rgba(20,55,95,.06);animation:popIn .34s ease both',
-      titleColor:th.a,currentChip:isCur?'font-size:10px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,features:p.features.map(f=>({label:f,icon:this._icon('check','var(--cffffff,#fff)',12),check:'display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:'+th.a+';flex:none;margin-top:1px'})),cta:isCur?'Plan actuel':'Choisir ce plan',btn:isCur?'background:var(--ceef2f7,#eef2f7);color:var(--c8b97a8,#8b97a8);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:default;font-family:Poppins':'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;font-family:Poppins',btnHover:isCur?'':'background:var(--c135a96,#135a96)',choose:()=>{if(!isCur)this.setState({payOpen:true,paySelected:p.id,payDone:false,payCode:this._codeAmiRetenu(),payCodeMsg:'',payCodeOk:false,payRemise:0,payMontant:0,payBase:0},()=>{if(this.state.payCode)this._verifierCodeAmi();});}};});
+      titleColor:th.a,currentChip:isCur?'font-size:10px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,features:p.features.map(f=>({label:f,icon:this._icon('check','var(--cffffff,#fff)',12),check:'display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:'+th.a+';flex:none;margin-top:1px'})),cta:isCur?'Plan actuel':'Choisir ce plan',btn:isCur?'background:var(--ceef2f7,#eef2f7);color:var(--c8b97a8,#8b97a8);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:default;font-family:Poppins':'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;font-family:Poppins',btnHover:isCur?'':'background:var(--c135a96,#135a96)',choose:()=>{if(!isCur)this.setState({payOpen:true,paySelected:p.id,payDone:false,payMotif:'',payCode:this._codeAmiRetenu(),payCodeMsg:'',payCodeOk:false,payRemise:0,payMontant:0,payBase:0},()=>{if(this.state.payCode)this._verifierCodeAmi();});}};});
     const payPlan=this.plans.find(p=>p.id===st.paySelected)||this.plans[1];
     /* CODE AMI — la remise ne vaut que pour le plan sur lequel le serveur l'a
        accordee. Changer de plan dans la meme fenetre la rend caduque : sans ce
@@ -11228,8 +11243,9 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       payCheckIcon:this._icon('check','var(--c1f9d55,#1f9d55)',30),
       /* On referme AVEC la remise : la garder ferait rouvrir la fenetre sur un
          prix remise que plus rien n'a valide cote serveur. */
-      closePay:()=>this.setState({payOpen:false,payDone:false,payCode:'',payCodeMsg:'',
-        payCodeOk:false,payRemise:0,payMontant:0,payBase:0}),
+      closePay:()=>this._fermerPaiement(),
+      payMotif:st.payMotif||'',
+      payMotifStyle:st.payMotif?'margin:0;padding:12px 26px;font-size:12.5px;line-height:1.5;font-weight:600;color:var(--c8a5a00,#8a5a00);background:var(--cfff7e6,#fff7e6);border-bottom:1px solid var(--cf0d9b0,#f0d9b0)':'display:none',
       confirmPay:()=>this._payerCamerpay(),
       epreuveSeries:this.epreuveSeries.map(s=>({code:s.code,cycle:s.cycle,name:s.name,structure:s.structure,duree:s.duree,coeff:s.coeff,create:()=>{const me=this._me();const id='e'+Date.now();const ep={id,groupeId:grpActif.id,title:s.name,etab:'',classe:(s.classes&&s.classes[0])||'',duree:s.duree,coeff:s.coeff==='—'?'':s.coeff,date:'',epreuveCode:s.code,consigne:'Lis attentivement le(s) texte(s) puis réponds aux questions.',textIds:[],status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),comments:[],activity:[{userId:me.id,text:'a créé une épreuve à partir du gabarit '+s.code,ts:Date.now()}]};this.setState(st2=>({epreuves:[ep,...st2.epreuves],activeId:id,screen:'composeur'}),()=>{this._persist();window.scrollTo(0,0);});}})),
       setCoTitle:e=>{if(cActive&&!cLocked)this._updateCours({title:val(e)});},
@@ -11764,6 +11780,8 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       genBtnSec:'background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c14375f,#14375f);padding:8px 13px;font-size:12px;font-weight:600;font-family:Poppins;border-radius:999px;cursor:pointer',
       genBtnSecEdit:perm.edit?'background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);color:var(--c5a6678,#5a6678);padding:8px 13px;font-size:12px;font-weight:600;font-family:Poppins;border-radius:999px;cursor:pointer':hidden,
       ajouterSujet:()=>{if(perm.edit)this._ensureDraft(()=>this._ajouterSujet());},
+      sujetAjoutLabel:(active&&(active.sujets||[]).some(x=>x&&x.genre!=='presentation'))?'＋ Ajouter un autre sujet':'＋ Ajouter un sujet (production écrite, dissertation…)',
+      sujetAjoutStyle:(perm.edit&&active)?'display:block;width:100%;margin:0 0 22px;background:var(--cffffff,#fff);border:1.5px dashed var(--ccdd9e6,#cdd9e6);color:var(--c1f9d55,#1f9d55);padding:11px 14px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:12px;cursor:pointer;text-align:center':'display:none',
       genToggleCorrige:()=>this.setState({genCorrigeVisible:!st.genCorrigeVisible}),
       genCorrigeLabel:st.genCorrigeVisible?'Masquer le corrigé':'Afficher le corrigé',
       genToggleWord:()=>this.setState({genCorrigeWord:st.genCorrigeWord===false}),

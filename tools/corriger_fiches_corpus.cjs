@@ -18,6 +18,11 @@
 const fs = require('fs');
 
 const CORRECTIONS = [
+  // Récit (une fillette vend des beignets) classé « injonctif » — constaté en
+  // production le 02/11/2026 (n° 1279 à cette date).
+  { author: 'Mongo Beti', title: 'Branle-Bas en Noir et Blanc',
+    debut: 'L\'enfant s’improvisa marchande de beignets',
+    fix: { type: 'NARRATIF' } },
   // L'auteur « Gaston-Paul Effa » coupé en deux : « Effa » passait dans le titre.
   // `reference` est la ligne de source imprimée sous le texte : elle se corrige avec.
   { author: 'Gaston Paul', title: "Effa L'enfant que tu as été marche à côté de toi",
@@ -42,7 +47,10 @@ if (!Array.isArray(items)) { console.error('Format inattendu : un tableau de fic
 let n = 0;
 for (const it of items) {
   for (const c of CORRECTIONS) {
-    if (it.author === c.author && it.title === c.title) {
+    /* `debut` vise UN extrait quand l'œuvre en compte plusieurs (même
+       auteur, même titre) : on compare le début du texte. */
+    const corps = String(it.text || it.texte || it.extrait || '');
+    if (it.author === c.author && it.title === c.title && (!c.debut || corps.startsWith(c.debut))) {
       console.log('n°' + it.n + ' : « ' + it.author + ' — ' + it.title + ' » → « '
         + (c.fix.author || it.author) + ' — ' + (c.fix.title || it.title) + ' »');
       Object.assign(it, c.fix);
