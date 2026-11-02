@@ -1,0 +1,557 @@
+<?php
+/**
+ * gestion/api/index.php — Point d'entrée unique de l'API (route dans ?r=).
+ * © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
+ *
+ *   POST auth/connexion   {identifiant, mdp, appareil}
+ *   POST auth/deconnexion
+ *   GET  moi              profil, accès par centre, capacités
+ *   POST moi/mdp          {ancien, nouveau}
+ *   GET  sessions         [{id}] sessions d'un compte (le sien, ou admin/responsable)
+ *   POST sessions/revoquer {id}
+ *   GET  comptes          comptes visibles
+ *   POST comptes/enregistrer {id?, identifiant, nom, tel, actif, admin_global, acces:[{centre_id, role}]}
+ *   POST comptes/mdp      {id} → nouveau mot de passe, affiché une seule fois
+ *   GET  journal          {centre?, avant?, limite?}
+ *   GET  sync/tirer       {depuis}
+ *   POST sync/pousser     {ops:[{op, t, id, suppr?, champs}]}
+ */
+declare(strict_types=1);
+
+require_once __DIR__ . '/_boot.php';
+require_once __DIR__ . '/_auth.php';
+require_once __DIR__ . '/_schema.php';
+
+$route   = trim((string) ($_GET['r'] ?? ''), '/');
+$methode = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$pdo     = g_pdo();
+
+function g_exiger_post(string $methode): void {
+    if ($methode !== 'POST') { g_fail('Méthode non autorisée.', 405); }
+}
+
+/** Profil renvoyé au téléphone après connexion et à chaque ouverture. */
+function g_profil(array $ctx): array {
+    return [
+        'utilisateur' => ['id' => $ctx['uid'], 'identifiant' => $ctx['identifiant'], 'nom' => $ctx['nom'], 'admin' => $ctx['admin']],
+        'acces'       => (object) $ctx['acces'],
+        'capacites'   => g_capacites(),
+    ];
+}
+
+/** Le compte $ctx peut-il gérer le compte cible (accès [centre => rôle], admin_global) ? */
+function g_peut_gerer_compte(array $ctx, array $accesCible, bool $cibleAdmin): bool {
+    if ($ctx['admin']) { return true; }
+    if ($cibleAdmin) { return false; }
+    foreach ($accesCible as $cid => $role) {
+        // Un responsable ne gère que les secrétaires et enseignants de SES centres.
+        if (!g_peut($ctx, 'comptes.gerer', (string) $cid) || !in_array($role, ['secretaire', 'enseignant'], true)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+switch ($route) {
+
+// ─────────────────────────────── Connexion ───────────────────────────────
+case 'auth/connexion': {
+    g_exiger_post($methode);
+    $ident = mb_strtolower(trim((string) g_param('identifiant', '')));
+    $mdp   = (string) g_param('mdp', '');
+    if ($ident === '' || $mdp === '') { g_fail('Identifiant et mot de passe requis.', 422); }
+    g_garde_connexion($ident);
+    $st = $pdo->prepare('SELECT id, mdp_hash, actif FROM g_utilisateurs WHERE identifiant = ?');
+    $st->execute([$ident]);
+    $u = $st->fetch();
+    // password_verify même sans compte : même durée de réponse, on ne révèle pas qui existe.
+    $okMdp = password_verify($mdp, $u ? (string) $u['mdp_hash'] : '$2y$12$' . str_repeat('x', 53));
+    if (!$u || !$okMdp) {
+        g_journal(null, 'connexion_echec', 'utilisateur', $ident);
+        g_fail('Identifiant ou mot de passe incorrect.', 401);
+    }
+    if ((int) $u['actif'] !== 1) { g_fail('Compte désactivé. Contactez l\'administrateur.', 403); }
+    if (password_needs_rehash((string) $u['mdp_hash'], PASSWORD_BCRYPT, ['cost' => (int) G_BCRYPT_COST])) {
+        $pdo->prepare('UPDATE g_utilisateurs SET mdp_hash = ? WHERE id = ?')->execute([g_hash_mdp($mdp), $u['id']]);
+    }
+    $session = g_ouvrir_session((string) $u['id'], (string) g_param('appareil', ''));
+    $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer ' . $session['jeton'];
+    $ctx = g_exiger_session();
+    g_journal($ctx, 'connexion', 'utilisateur', $ctx['uid']);
+    g_ok(['session' => $session] + g_profil($ctx));
+}
+
+case 'auth/deconnexion': {
+    g_exiger_post($methode);
+    $ctx = g_exiger_session();
+    g_fermer_session();
+    g_journal($ctx, 'deconnexion', 'utilisateur', $ctx['uid']);
+    g_ok();
+}
+
+case 'moi': {
+    g_ok(g_profil(g_exiger_session()));
+}
+
+case 'moi/mdp': {
+    g_exiger_post($methode);
+    $ctx = g_exiger_session();
+    $ancien = (string) g_param('ancien', '');
+    $nouveau = (string) g_param('nouveau', '');
+    if (mb_strlen($nouveau) < 8) { g_fail('Nouveau mot de passe : 8 caractères minimum.', 422); }
+    g_garde_connexion($ctx['identifiant']);
+    $st = $pdo->prepare('SELECT mdp_hash FROM g_utilisateurs WHERE id = ?');
+    $st->execute([$ctx['uid']]);
+    if (!password_verify($ancien, (string) $st->fetchColumn())) {
+        g_journal($ctx, 'connexion_echec', 'utilisateur', $ctx['identifiant']);
+        g_fail('Mot de passe actuel incorrect.', 403);
+    }
+    $pdo->prepare('UPDATE g_utilisateurs SET mdp_hash = ?, maj_le = ? WHERE id = ?')->execute([g_hash_mdp($nouveau), g_now(), $ctx['uid']]);
+    // Les autres appareils sont déconnectés ; celui-ci garde sa session.
+    $pdo->prepare('DELETE FROM g_sessions WHERE utilisateur_id = ? AND id <> ?')->execute([$ctx['uid'], $ctx['session_id']]);
+    g_journal($ctx, 'mdp_change', 'utilisateur', $ctx['uid']);
+    g_ok();
+}
+
+// ─────────────────────────────── Sessions ───────────────────────────────
+case 'sessions': {
+    $ctx = g_exiger_session();
+    $cible = (string) g_param('id', $ctx['uid']);
+    if ($cible !== $ctx['uid']) {
+        $st = $pdo->prepare('SELECT admin_global FROM g_utilisateurs WHERE id = ?');
+        $st->execute([$cible]);
+        if (!g_peut_gerer_compte($ctx, g_acces_de($cible), (int) $st->fetchColumn() === 1)) { g_fail('Non autorisé.', 403); }
+    }
+    $st = $pdo->prepare('SELECT id, appareil, ip, cree_le, vu_le, expire_le FROM g_sessions WHERE utilisateur_id = ? ORDER BY vu_le DESC');
+    $st->execute([$cible]);
+    $lignes = $st->fetchAll();
+    foreach ($lignes as &$l) { $l['courante'] = $l['id'] === $ctx['session_id']; }
+    g_ok(['sessions' => $lignes]);
+}
+
+case 'sessions/revoquer': {
+    g_exiger_post($methode);
+    $ctx = g_exiger_session();
+    $sid = (string) g_param('id', '');
+    $st = $pdo->prepare('SELECT s.utilisateur_id, u.admin_global FROM g_sessions s JOIN g_utilisateurs u ON u.id = s.utilisateur_id WHERE s.id = ?');
+    $st->execute([$sid]);
+    $s = $st->fetch();
+    if (!$s) { g_fail('Session introuvable.', 404); }
+    $proprio = (string) $s['utilisateur_id'];
+    if ($proprio !== $ctx['uid'] && !g_peut_gerer_compte($ctx, g_acces_de($proprio), (int) $s['admin_global'] === 1)) {
+        g_fail('Non autorisé.', 403);
+    }
+    $pdo->prepare('DELETE FROM g_sessions WHERE id = ?')->execute([$sid]);
+    g_journal($ctx, 'session_revoquee', 'utilisateur', $proprio);
+    g_ok();
+}
+
+// ─────────────────────────────── Comptes ───────────────────────────────
+case 'comptes': {
+    $ctx = g_exiger_session();
+    $centres = g_centres_avec($ctx, 'comptes.gerer');
+    if (!$centres && !$ctx['admin']) { g_fail('Non autorisé.', 403); }
+    $users = $pdo->query('SELECT id, identifiant, nom, tel, admin_global, actif, matieres, cree_le FROM g_utilisateurs ORDER BY nom')->fetchAll();
+    $acces = [];
+    foreach ($pdo->query('SELECT utilisateur_id, centre_id, role FROM g_acces')->fetchAll() as $a) {
+        $acces[$a['utilisateur_id']][$a['centre_id']] = $a['role'];
+    }
+    $vus = $pdo->query('SELECT utilisateur_id, MAX(vu_le) AS vu FROM g_sessions GROUP BY utilisateur_id')->fetchAll(PDO::FETCH_KEY_PAIR);
+    $out = [];
+    foreach ($users as $u) {
+        $a = $acces[$u['id']] ?? [];
+        if (!$ctx['admin']) {
+            // Un responsable voit les comptes rattachés à ses centres (hors admins).
+            if ((int) $u['admin_global'] === 1 || !array_intersect(array_keys($a), $centres)) { continue; }
+        }
+        $u['admin_global'] = (int) $u['admin_global'] === 1;
+        $u['actif'] = (int) $u['actif'] === 1;
+        $u['acces'] = (object) $a;
+        $u['matieres'] = array_values(array_filter(explode(',', (string) $u['matieres'])));
+        $u['vu_le'] = $vus[$u['id']] ?? null;
+        $u['gerable'] = g_peut_gerer_compte($ctx, $a, $u['admin_global']);
+        $out[] = $u;
+    }
+    g_ok(['comptes' => $out]);
+}
+
+case 'comptes/enregistrer': {
+    g_exiger_post($methode);
+    $ctx = g_exiger_session();
+    $id    = (string) g_param('id', '');
+    $ident = mb_strtolower(trim((string) g_param('identifiant', '')));
+    $nom   = trim((string) g_param('nom', ''));
+    $tel   = trim((string) g_param('tel', ''));
+    $actif = g_param('actif', true) ? 1 : 0;
+    $admin = g_param('admin_global', false) ? 1 : 0;
+    $accesDemandes = [];
+    foreach ((array) g_param('acces', []) as $a) {
+        $cid = (string) ($a['centre_id'] ?? ''); $role = (string) ($a['role'] ?? '');
+        if ($cid !== '' && in_array($role, G_ROLES, true)) { $accesDemandes[$cid] = $role; }
+    }
+    if (!preg_match('/^[a-z0-9._-]{3,60}$/', $ident)) { g_fail('Identifiant : 3 à 60 caractères (lettres, chiffres, . _ -).', 422); }
+    if ($nom === '') { g_fail('Le nom est obligatoire.', 422); }
+    $matieres = array_values(array_unique(array_filter(array_map('strval', (array) g_param('matieres', [])))));
+    if ($matieres) {
+        $ph = implode(',', array_fill(0, count($matieres), '?'));
+        $st = $pdo->prepare("SELECT COUNT(*) FROM g_matieres WHERE supprime = 0 AND id IN ($ph)");
+        $st->execute($matieres);
+        if ((int) $st->fetchColumn() !== count($matieres)) { g_fail('Matière inconnue.', 422); }
+    }
+    $matieresTxt = mb_substr(implode(',', $matieres), 0, 500);
+    if ($accesDemandes) {
+        $ph = implode(',', array_fill(0, count($accesDemandes), '?'));
+        $st = $pdo->prepare("SELECT COUNT(*) FROM g_centres WHERE supprime = 0 AND id IN ($ph)");
+        $st->execute(array_keys($accesDemandes));
+        if ((int) $st->fetchColumn() !== count($accesDemandes)) { g_fail('Centre inconnu.', 422); }
+    }
+    if (!$admin && !$accesDemandes) { g_fail('Donnez au moins un rôle dans un centre.', 422); }
+    if ($admin && !$ctx['admin']) { g_fail('Seul l\'administrateur peut créer un administrateur.', 403); }
+
+    $avant = null;
+    if ($id !== '') {
+        $st = $pdo->prepare('SELECT id, identifiant, nom, tel, admin_global, actif, matieres FROM g_utilisateurs WHERE id = ?');
+        $st->execute([$id]);
+        $avant = $st->fetch();
+        if (!$avant) { g_fail('Compte introuvable.', 404); }
+        $avant['acces'] = g_acces_de($id);
+        if (!g_peut_gerer_compte($ctx, $avant['acces'], (int) $avant['admin_global'] === 1)) { g_fail('Non autorisé.', 403); }
+        if ($id === $ctx['uid'] && (!$actif || ($ctx['admin'] && !$admin))) {
+            g_fail('Vous ne pouvez pas vous désactiver ni retirer votre propre rôle d\'administrateur.', 422);
+        }
+    }
+    if (!g_peut_gerer_compte($ctx, $accesDemandes, (bool) $admin)) { g_fail('Vous ne pouvez attribuer que des rôles secrétaire ou enseignant dans vos centres.', 403); }
+    $st = $pdo->prepare('SELECT id FROM g_utilisateurs WHERE identifiant = ? AND id <> ?');
+    $st->execute([$ident, $id]);
+    if ($st->fetchColumn()) { g_fail('Cet identifiant est déjà pris.', 409); }
+
+    $mdpClair = null;
+    $pdo->beginTransaction();
+    try {
+        if ($id === '') {
+            $id = g_id();
+            $mdpClair = g_mdp_aleatoire();
+            $pdo->prepare('INSERT INTO g_utilisateurs (id, identifiant, nom, tel, mdp_hash, admin_global, actif, matieres, cree_le, maj_le) VALUES (?,?,?,?,?,?,?,?,?,?)')
+                ->execute([$id, $ident, $nom, $tel, g_hash_mdp($mdpClair), $admin, $actif, $matieresTxt, g_now(), g_now()]);
+        } else {
+            $pdo->prepare('UPDATE g_utilisateurs SET identifiant = ?, nom = ?, tel = ?, admin_global = ?, actif = ?, matieres = ?, maj_le = ? WHERE id = ?')
+                ->execute([$ident, $nom, $tel, $admin, $actif, $matieresTxt, g_now(), $id]);
+        }
+        $pdo->prepare('DELETE FROM g_acces WHERE utilisateur_id = ?')->execute([$id]);
+        $ins = $pdo->prepare('INSERT INTO g_acces (id, utilisateur_id, centre_id, role, cree_le) VALUES (?,?,?,?,?)');
+        foreach ($accesDemandes as $cid => $role) { $ins->execute([g_id(), $id, $cid, $role, g_now()]); }
+        if (!$actif) { $pdo->prepare('DELETE FROM g_sessions WHERE utilisateur_id = ?')->execute([$id]); }
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
+    $apres = ['identifiant' => $ident, 'nom' => $nom, 'tel' => $tel, 'admin_global' => $admin, 'actif' => $actif, 'acces' => $accesDemandes, 'matieres' => $matieres];
+    foreach (array_keys($accesDemandes + ($avant['acces'] ?? [])) as $cid) {
+        g_journal($ctx, $avant ? 'compte_modifie' : 'compte_cree', 'utilisateur', $id, $avant, $apres, (string) $cid);
+    }
+    if (!$accesDemandes && !($avant['acces'] ?? [])) {
+        g_journal($ctx, $avant ? 'compte_modifie' : 'compte_cree', 'utilisateur', $id, $avant, $apres);
+    }
+    g_ok(['id' => $id, 'mdp' => $mdpClair]);
+}
+
+case 'comptes/mdp': {
+    g_exiger_post($methode);
+    $ctx = g_exiger_session();
+    $id = (string) g_param('id', '');
+    $st = $pdo->prepare('SELECT admin_global FROM g_utilisateurs WHERE id = ?');
+    $st->execute([$id]);
+    $adm = $st->fetchColumn();
+    if ($adm === false) { g_fail('Compte introuvable.', 404); }
+    if (!g_peut_gerer_compte($ctx, g_acces_de($id), (int) $adm === 1)) { g_fail('Non autorisé.', 403); }
+    $mdp = g_mdp_aleatoire();
+    $pdo->prepare('UPDATE g_utilisateurs SET mdp_hash = ?, maj_le = ? WHERE id = ?')->execute([g_hash_mdp($mdp), g_now(), $id]);
+    $pdo->prepare('DELETE FROM g_sessions WHERE utilisateur_id = ?')->execute([$id]);
+    g_journal($ctx, 'mdp_reinitialise', 'utilisateur', $id);
+    g_ok(['mdp' => $mdp]);
+}
+
+// ─────────────────────────────── Journal ───────────────────────────────
+case 'journal': {
+    $ctx = g_exiger_session();
+    $centres = g_centres_avec($ctx, 'journal.voir');
+    if (!$centres && !$ctx['admin']) { g_fail('Non autorisé.', 403); }
+    $centre = (string) g_param('centre', '');
+    $avant  = (string) g_param('avant', '');
+    $limite = max(10, min(200, (int) g_param('limite', 50)));
+    $where = []; $args = [];
+    if ($centre !== '') {
+        if (!in_array($centre, $centres, true)) { g_fail('Non autorisé pour ce centre.', 403); }
+        $where[] = 'centre_id = ?'; $args[] = $centre;
+    } elseif (!$ctx['admin']) {
+        $where[] = 'centre_id IN (' . implode(',', array_fill(0, count($centres), '?')) . ')';
+        $args = array_merge($args, $centres);
+    }
+    if ($avant !== '') { $where[] = 'le < ?'; $args[] = $avant; }
+    $sql = 'SELECT id, centre_id, identifiant, action, entite, entite_id, avant, apres, ip, le FROM g_journal'
+         . ($where ? ' WHERE ' . implode(' AND ', $where) : '') . ' ORDER BY le DESC LIMIT ' . $limite;
+    $st = $pdo->prepare($sql);
+    $st->execute($args);
+    g_ok(['lignes' => $st->fetchAll()]);
+}
+
+// ─────────────────────────────── Synchronisation ───────────────────────────────
+case 'sync/tirer': {
+    $ctx = g_exiger_session();
+    $debut = g_rev();
+    // Recouvrement de 5 s : une écriture validée juste après notre lecture précédente,
+    // mais horodatée juste avant, n'est pas perdue (le téléphone dédoublonne par id).
+    $depuis = max(0, (int) g_param('depuis', 0) - 5000);
+    $out = [];
+    foreach (g_registre() as $nom => $r) {
+        $where = 'rev > ?'; $args = [$depuis];
+        if ($r['portee'] !== null && !$ctx['admin']) {
+            $centres = $r['lire'] === 'tous' ? array_keys($ctx['acces']) : g_centres_avec($ctx, $r['lire']);
+            if (!$centres) { continue; }
+            $where .= ' AND ' . $r['portee'] . ' IN (' . implode(',', array_fill(0, count($centres), '?')) . ')';
+            $args = array_merge($args, $centres);
+        }
+        $st = $pdo->prepare('SELECT * FROM ' . $r['table'] . ' WHERE ' . $where);
+        $st->execute($args);
+        $out[$nom] = $st->fetchAll();
+    }
+    // Équipe des centres visibles : de quoi choisir un enseignant hors ligne.
+    // Noms, rôles et matières seulement — ni téléphone, ni identifiant.
+    $centresEquipe = g_centres_avec($ctx, 'centre.voir');
+    $equipe = [];
+    if ($centresEquipe) {
+        $st = $pdo->prepare('SELECT u.id, u.nom, u.matieres, a.centre_id, a.role FROM g_acces a JOIN g_utilisateurs u ON u.id = a.utilisateur_id
+                              WHERE u.actif = 1 AND a.centre_id IN (' . implode(',', array_fill(0, count($centresEquipe), '?')) . ') ORDER BY u.nom');
+        $st->execute($centresEquipe);
+        $equipe = $st->fetchAll();
+    }
+    g_ok(['rev' => $debut, 'lignes' => $out, 'equipe' => $equipe]);
+}
+
+case 'sync/pousser': {
+    g_exiger_post($methode);
+    $ctx = g_exiger_session();
+    $ops = g_param('ops', []);
+    if (!is_array($ops) || count($ops) > 500) { g_fail('Lot invalide (500 opérations au plus).', 422); }
+    $registre = g_registre();
+    $schema = g_schema();
+    $resultats = [];
+    foreach ($ops as $op) {
+        $opId = (string) ($op['op'] ?? '');
+        try {
+            if (!preg_match('/^[a-zA-Z0-9-]{8,40}$/', $opId)) { throw new DomainException('Opération sans identifiant valide.'); }
+            $st = $pdo->prepare('SELECT 1 FROM g_ops WHERE id = ?');
+            $st->execute([$opId]);
+            if ($st->fetchColumn()) { $resultats[] = ['op' => $opId, 'ok' => true, 'deja' => true]; continue; }
+
+            $r = $registre[(string) ($op['t'] ?? '')] ?? null;
+            if (!$r) { throw new DomainException('Table inconnue.'); }
+            $id = (string) ($op['id'] ?? '');
+            if (!preg_match('/^[a-zA-Z0-9-]{8,40}$/', $id)) { throw new DomainException('Identifiant de ligne invalide.'); }
+            $types = $schema[$r['table']]['cols'];
+            $champs = [];
+            foreach ((array) ($op['champs'] ?? []) as $c => $v) {
+                if (!in_array($c, $r['champs'], true)) { continue; }
+                $t = $types[$c];
+                if ($t === 'int' || strncmp($t, 'int:', 4) === 0 || $t === 'bigint') { $champs[$c] = (int) $v; }
+                elseif (strncmp($t, 'str:', 4) === 0) { $champs[$c] = $v === null ? null : mb_substr(trim((string) $v), 0, (int) substr($t, 4)); }
+                else { $champs[$c] = $v === null ? null : (string) $v; }
+            }
+            $suppr = !empty($op['suppr']);
+
+            $st = $pdo->prepare('SELECT * FROM ' . $r['table'] . ' WHERE id = ?');
+            $st->execute([$id]);
+            $existant = $st->fetch() ?: null;
+
+            // Centre(s) concerné(s) : l'ancien ET le nouveau si la ligne change de centre.
+            $centres = [];
+            if ($r['portee'] === 'id') { $centres[] = $id; }
+            elseif ($r['portee'] !== null) {
+                if ($existant) { $centres[] = (string) $existant[$r['portee']]; }
+                if (isset($champs[$r['portee']])) { $centres[] = (string) $champs[$r['portee']]; }
+                if (!$centres) { throw new DomainException('Centre manquant.'); }
+            }
+            // Un refus ne vaut que pour CETTE opération : le reste du lot passe.
+            if ($r['ecrire'] === 'admin' && !$ctx['admin']) { throw new DomainException('Réservé à l\'administrateur.'); }
+            if ($r['ecrire'] !== 'admin') {
+                foreach (array_unique($centres) as $cid) {
+                    if (!g_peut($ctx, $r['ecrire'], $cid)) { throw new DomainException('Action non autorisée pour votre rôle dans ce centre.'); }
+                }
+            }
+
+            g_valider_ligne($pdo, $r['table'], $id, $existant, $champs, $suppr);
+
+            $meta = ['rev' => g_rev(), 'maj_par' => $ctx['uid'], 'maj_le' => g_now()];
+            $pdo->beginTransaction();
+            if ($existant) {
+                $maj = $suppr ? ['supprime' => 1] + $meta : $champs + $meta;
+                $set = implode(', ', array_map(fn($c) => $c . ' = ?', array_keys($maj)));
+                $pdo->prepare('UPDATE ' . $r['table'] . ' SET ' . $set . ' WHERE id = ?')->execute([...array_values($maj), $id]);
+            } elseif (!$suppr) {
+                if ($r['table'] === 'g_eleves') { $champs = g_completer_eleve($pdo, $champs); }
+                $ins = ['id' => $id] + $champs + $meta;
+                $pdo->prepare('INSERT INTO ' . $r['table'] . ' (' . implode(', ', array_keys($ins)) . ') VALUES ('
+                    . implode(',', array_fill(0, count($ins), '?')) . ')')->execute(array_values($ins));
+            }
+            $pdo->prepare('INSERT INTO g_ops (id, utilisateur_id, recu_le) VALUES (?,?,?)')->execute([$opId, $ctx['uid'], g_now()]);
+            $pdo->commit();
+
+            // Journal : seulement les champs réellement changés.
+            $avantDiff = []; $apresDiff = [];
+            foreach ($champs as $c => $v) {
+                if (!$existant || (string) $existant[$c] !== (string) $v) { $avantDiff[$c] = $existant[$c] ?? null; $apresDiff[$c] = $v; }
+            }
+            $action = $suppr ? 'suppression' : ($existant ? 'modification' : 'creation');
+            if ($suppr || $apresDiff) {
+                g_journal($ctx, $action, $r['table'], $id, $existant ? ($suppr ? $existant : $avantDiff) : null,
+                          $suppr ? null : $apresDiff, $centres[count($centres) - 1] ?? null);
+            }
+            $resultats[] = ['op' => $opId, 'ok' => true];
+        } catch (DomainException $e) {
+            if ($pdo->inTransaction()) { $pdo->rollBack(); }
+            $resultats[] = ['op' => $opId, 'ok' => false, 'erreur' => $e->getMessage()];
+        }
+    }
+    g_ok(['resultats' => $resultats]);
+}
+
+default:
+    g_fail('Route inconnue.', 404);
+}
+
+/**
+ * Nouvel élève : matricule « AAAA-NNNN » (année scolaire en cours, séquence par
+ * centre), date d'inscription et statut par défaut. Appelé DANS la transaction.
+ */
+function g_completer_eleve(PDO $pdo, array $champs): array {
+    $libelle = (string) ($pdo->query("SELECT libelle FROM g_annees WHERE active = 1 AND supprime = 0 ORDER BY debut DESC LIMIT 1")->fetchColumn() ?: '');
+    $prefixe = preg_match('/^\d{2}(\d{2})-\d{2}(\d{2})$/', $libelle, $m) ? $m[1] . $m[2] : date('y') . date('y', strtotime('+1 year'));
+    $st = $pdo->prepare('SELECT matricule FROM g_eleves WHERE centre_id = ? AND matricule LIKE ?');
+    $st->execute([(string) $champs['centre_id'], $prefixe . '-%']);
+    $max = 0;
+    foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $mat) { $max = max($max, (int) substr((string) $mat, 5)); }
+    $champs['matricule'] = $prefixe . '-' . str_pad((string) ($max + 1), 4, '0', STR_PAD_LEFT);
+    if (empty($champs['date_inscription'])) { $champs['date_inscription'] = date('Y-m-d'); }
+    if (empty($champs['statut'])) { $champs['statut'] = 'actif'; }
+    return $champs;
+}
+
+/**
+ * Règles métier vérifiées côté serveur avant toute écriture synchronisée.
+ * Lève DomainException : l'opération est refusée, le téléphone affiche pourquoi.
+ */
+function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, array &$champs, bool $suppr): void {
+    if ($suppr) { return; }
+    $val = fn(string $c) => array_key_exists($c, $champs) ? $champs[$c] : ($existant[$c] ?? null);
+    if ($table === 'g_centres' && trim((string) $val('nom')) === '') { throw new DomainException('Le nom du centre est obligatoire.'); }
+    if ($table === 'g_centres') {
+        $j = (int) $val('jour_echeance');
+        if ($j < 1 || $j > 28) { throw new DomainException('Jour d\'échéance : entre 1 et 28.'); }
+    }
+    if ($table === 'g_annees' && !preg_match('/^\d{4}-\d{4}$/', (string) $val('libelle'))) {
+        throw new DomainException('Année : format 2026-2027.');
+    }
+    if ($table === 'g_eleves') {
+        if (trim((string) $val('nom')) === '') { throw new DomainException('Le nom de l\'élève est obligatoire.'); }
+        foreach (['parent_tel', 'parent_whatsapp', 'parent2_tel', 'tel_eleve'] as $c) {
+            if (!array_key_exists($c, $champs)) { continue; }
+            $t = g_tel($champs[$c]);
+            if ($t === null) { throw new DomainException('Téléphone invalide (' . $champs[$c] . ') : 9 chiffres, ex. 697 63 77 39.'); }
+            $champs[$c] = $t;
+        }
+        if (!in_array((string) $val('sexe'), ['', 'F', 'M'], true)) { throw new DomainException('Sexe : F ou M.'); }
+        if (!in_array((string) ($val('statut') ?: 'actif'), ['actif', 'suspendu', 'parti'], true)) { throw new DomainException('Statut inconnu.'); }
+        $centre = (string) $val('centre_id');
+        if ((string) $val('classe_id') !== '') {
+            $st = $pdo->prepare('SELECT COUNT(*) FROM g_classes WHERE id = ? AND centre_id = ? AND supprime = 0');
+            $st->execute([(string) $val('classe_id'), $centre]);
+            if (!(int) $st->fetchColumn()) { throw new DomainException('Classe inconnue dans ce centre.'); }
+        }
+        foreach (['date_naissance', 'date_inscription'] as $c) {
+            if ((string) $val($c) !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $val($c))) { throw new DomainException('Date invalide.'); }
+        }
+        // Doublon : même nom complet (accents, casse et ordre des mots ignorés) dans le centre,
+        // sauf homonyme confirmé. (Un même élève figurait deux fois sur un cahier papier.)
+        $nomChange = !$existant || array_key_exists('nom', $champs) || array_key_exists('prenoms', $champs);
+        if ($nomChange && !(int) $val('doublon_ok')) {
+            $cle = g_cle_nom($val('nom') . ' ' . $val('prenoms'));
+            $st = $pdo->prepare("SELECT nom, prenoms, matricule FROM g_eleves WHERE centre_id = ? AND id <> ? AND supprime = 0 AND statut <> 'parti'");
+            $st->execute([$centre, $id]);
+            foreach ($st->fetchAll() as $e) {
+                if (g_cle_nom($e['nom'] . ' ' . $e['prenoms']) === $cle) {
+                    throw new DomainException('Déjà inscrit : ' . trim($e['nom'] . ' ' . $e['prenoms']) . ($e['matricule'] ? ' (' . $e['matricule'] . ')' : '') . '. Confirmez s\'il s\'agit d\'un homonyme.');
+                }
+            }
+        }
+    }
+    if ($table === 'g_horaires') {
+        $jour = (int) $val('jour');
+        $debut = (string) $val('debut');
+        $fin = (string) $val('fin');
+        if ($jour < 1 || $jour > 7) { throw new DomainException('Jour invalide.'); }
+        if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $debut) || !preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $fin) || $debut >= $fin) {
+            throw new DomainException('Heures invalides : la fin doit suivre le début (HH:MM).');
+        }
+        $permis = ['Primaire', '6e', '5e', '4e', '3e', '2nde', '1ère', 'Tle', 'Autre'];
+        foreach (array_filter(explode(',', (string) $val('niveaux'))) as $n) {
+            if (!in_array($n, $permis, true)) { throw new DomainException('Niveau inconnu : ' . $n . '.'); }
+        }
+    }
+    if ($table === 'g_matieres' && trim((string) $val('nom')) === '') { throw new DomainException('Le nom de la matière est obligatoire.'); }
+    if ($table === 'g_classes' && trim((string) $val('nom')) === '') { throw new DomainException('Le nom de la classe est obligatoire.'); }
+    if ($table === 'g_classes') {
+        // Comparaison en PHP : LOWER() de SQLite ignore les lettres accentuées (« 1ÈRE » ≠ « 1ère »).
+        $st = $pdo->prepare('SELECT nom FROM g_classes WHERE centre_id = ? AND supprime = 0 AND id <> ?');
+        $st->execute([(string) $val('centre_id'), $id]);
+        $cle = mb_strtolower(preg_replace('/\s+/u', ' ', trim((string) $val('nom'))));
+        foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $autre) {
+            if (mb_strtolower(preg_replace('/\s+/u', ' ', trim((string) $autre))) === $cle) { throw new DomainException('Une classe porte déjà ce nom dans ce centre.'); }
+        }
+    }
+    if ($table === 'g_creneaux') {
+        $centre = (string) $val('centre_id');
+        $jour = (int) $val('jour');
+        $debut = (string) $val('debut');
+        $fin = (string) $val('fin');
+        if ($jour < 1 || $jour > 7) { throw new DomainException('Jour invalide.'); }
+        if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $debut) || !preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $fin) || $debut >= $fin) {
+            throw new DomainException('Heures invalides : la fin doit suivre le début (HH:MM).');
+        }
+        $st = $pdo->prepare('SELECT nom FROM g_classes WHERE id = ? AND centre_id = ? AND supprime = 0');
+        $st->execute([(string) $val('classe_id'), $centre]);
+        $classe = $st->fetchColumn();
+        if ($classe === false) { throw new DomainException('Classe inconnue dans ce centre.'); }
+        $st = $pdo->prepare('SELECT COUNT(*) FROM g_matieres WHERE id = ? AND supprime = 0');
+        $st->execute([(string) $val('matiere_id')]);
+        if (!(int) $st->fetchColumn()) { throw new DomainException('Matière inconnue.'); }
+        $ens = (string) $val('enseignant_id');
+        if ($ens !== '') {
+            $st = $pdo->prepare("SELECT COUNT(*) FROM g_acces WHERE utilisateur_id = ? AND centre_id = ? AND role = 'enseignant'");
+            $st->execute([$ens, $centre]);
+            if (!(int) $st->fetchColumn()) { throw new DomainException('Cette personne n\'est pas enseignant dans ce centre.'); }
+        }
+        // Conflits : même classe, ou même enseignant (y compris dans l'AUTRE centre), sur des heures qui se chevauchent.
+        $st = $pdo->prepare(
+            'SELECT c.debut, c.fin, c.classe_id, c.enseignant_id, k.nom AS classe, ce.nom_court AS centre
+               FROM g_creneaux c LEFT JOIN g_classes k ON k.id = c.classe_id LEFT JOIN g_centres ce ON ce.id = c.centre_id
+              WHERE c.supprime = 0 AND c.id <> ? AND c.jour = ? AND c.debut < ? AND c.fin > ?
+                AND (c.classe_id = ? OR (c.enseignant_id = ? AND c.enseignant_id <> \'\'))'
+        );
+        $st->execute([$id, $jour, $fin, $debut, (string) $val('classe_id'), $ens === '' ? '§' : $ens]);
+        if ($c = $st->fetch()) {
+            if ((string) $c['classe_id'] === (string) $val('classe_id')) {
+                throw new DomainException('La classe ' . $classe . ' a déjà cours de ' . $c['debut'] . ' à ' . $c['fin'] . '.');
+            }
+            throw new DomainException('Cet enseignant est déjà pris de ' . $c['debut'] . ' à ' . $c['fin'] . ' (' . $c['classe'] . ', ' . $c['centre'] . ').');
+        }
+    }
+    if ($table === 'g_actionnaires') {
+        if (trim((string) $val('nom')) === '') { throw new DomainException('Le nom de l\'actionnaire est obligatoire.'); }
+        $part = (int) $val('part_centiemes');
+        if ($part < 0 || $part > 10000) { throw new DomainException('Part : entre 0 et 100 %.'); }
+        $st = $pdo->prepare('SELECT COALESCE(SUM(part_centiemes), 0) FROM g_actionnaires WHERE centre_id = ? AND supprime = 0 AND id <> ?');
+        $st->execute([(string) $val('centre_id'), $id]);
+        if ((int) $st->fetchColumn() + $part > 10000) { throw new DomainException('Le total des parts du centre dépasserait 100 %.'); }
+    }
+}

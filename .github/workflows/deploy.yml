@@ -52,6 +52,7 @@ on:
       - 'adopter/**'
       - 'cours/**'
       - 'campus/**'
+      - 'gestion/**'
       - 'plateforme/**'
       # NOTE : les corpus (corpus_minesec.json, citations_minesec.json) ne
       # figurent PAS ici. Ils sont gitignores — 1040 textes et 137 citations,
@@ -136,7 +137,7 @@ jobs:
           php_fail=0
           echo "→ Lint PHP (php -l) sur api/*.php et api/campus/*.php"
           if command -v php >/dev/null 2>&1; then
-            for f in api/*.php api/campus/*.php; do
+            for f in api/*.php api/campus/*.php gestion/api/*.php; do
               [ -f "$f" ] || continue
               if ! php -l "$f"; then php_fail=1; fi
             done
@@ -145,7 +146,7 @@ jobs:
           fi
           js_fail=0
           echo "→ Lint JS (node --check) sur app.js, sw.js, assets/*.js et chunks/*.js"
-          for j in app.js sw.js $(ls assets/*.js 2>/dev/null) $(ls chunks/*.js 2>/dev/null); do
+          for j in app.js sw.js gestion/app.js gestion/sw.js $(ls assets/*.js 2>/dev/null) $(ls chunks/*.js 2>/dev/null); do
             [ -f "$j" ] || continue
             if ! node --check "$j"; then js_fail=1; fi
           done
@@ -154,6 +155,9 @@ jobs:
             exit 1
           fi
           echo "✅ Syntaxe PHP + JS valide — déploiement autorisé."
+          # VÉRITAS Gestion : CSS/JS servis « immutable » un an → le ?v= doit
+          # changer partout à la fois, sinon les téléphones gardent l'ancienne version.
+          node tests/banc_gestion_versions.cjs
 
           # ── Cohérence de version des assets (coquille ⇄ service worker) ──
           # La coquille demande /app.js?v=X ; sw.js précharge /app.js?v=ASSET_VER
@@ -218,11 +222,11 @@ jobs:
           manquants=0
           SUIVIS=$(git ls-files)
           connu() { printf '%s' "$SUIVIS" | grep -qxF "$1"; }
-          for f in $(git ls-files 'api/*.php' 'api/campus/*.php'); do
+          for f in $(git ls-files 'api/*.php' 'api/campus/*.php' 'gestion/api/*.php'); do
             d=$(dirname "$f")
             for rel in $(grep -ohE "(require|include)(_once)?[ (]*__DIR__ *[.] *'[^']+'" "$f" 2>/dev/null | sed -E "s/.*'([^']+)'.*/\1/"); do
               cible=$(echo "$d$rel" | sed 's#/[.]/#/#g')
-              case "$cible" in api/config.php|api/payment_config.php|api/campus/_config.php) continue ;; esac
+              case "$cible" in api/config.php|api/payment_config.php|api/campus/_config.php|gestion/api/_config.php) continue ;; esac
               if [ ! -f "$cible" ]; then
                 echo "::error title=Dependance absente::$f requiert $rel - fichier introuvable."; manquants=1
               elif ! connu "$cible"; then
@@ -1616,6 +1620,32 @@ jobs:
             cp api/campus/schema.sql deploy/api/campus/
             cp api/campus/.htaccess deploy/api/campus/
             echo "  ✓ api/campus/ ($(ls deploy/api/campus/*.php | wc -l) fichiers PHP + schema.sql + verrou)"
+          fi
+
+          # ── VÉRITAS Gestion (gestion/ → gestion.veritas-school.com) ──
+          # Application des centres : coquille + API. Le sous-domaine pointe
+          # sur ce dossier (panneau LWS). _config.php (surcharges locales) et
+          # la base SQLite de développement ne partent JAMAIS ; sans les deux
+          # verrous .htaccess, les _*.php seraient appelables : on annule.
+          if [ -d gestion ]; then
+            if [ ! -f gestion/api/.htaccess ] || [ ! -f gestion/api/data/.htaccess ]; then
+              echo "::error title=Gestion sans verrou::gestion/api/.htaccess ou gestion/api/data/.htaccess manquant. Déploiement ANNULÉ."
+              exit 1
+            fi
+            mkdir -p deploy/gestion/api/data deploy/gestion/polices
+            for f in index.html app.css app.js sw.js manifest.webmanifest icone-512.png .htaccess; do
+              cp "gestion/$f" deploy/gestion/
+            done
+            cp gestion/polices/*.woff2 deploy/gestion/polices/
+            for f in gestion/api/*.php; do
+              case "$(basename "$f")" in
+                _config.php) echo "  ↷ gestion/api/_config.php ignoré (poste de développement)" ;;
+                *) cp "$f" deploy/gestion/api/ ;;
+              esac
+            done
+            cp gestion/api/.htaccess deploy/gestion/api/
+            cp gestion/api/data/.htaccess deploy/gestion/api/data/
+            echo "  ✓ gestion/ ($(ls deploy/gestion/api/*.php | wc -l) fichiers PHP, coquille, polices, verrous)"
           fi
 
           # ── Atelier de Francais (plateforme/) ────────────────────

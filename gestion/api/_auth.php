@@ -1,0 +1,189 @@
+<?php
+/**
+ * gestion/api/_auth.php — Sessions, rôles par centre, journal.
+ * © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
+ *
+ * Jetons opaques aléatoires, stockés HACHÉS (SHA-256) dans g_sessions :
+ * révocables un par un (téléphone perdu) — même choix que api/campus/_auth.php.
+ * Mots de passe en bcrypt.
+ *
+ * Modèle d'accès : un compte peut être « admin global » (les deux centres, la
+ * vue consolidée) et/ou avoir un rôle dans un ou plusieurs centres (g_acces).
+ * Le serveur filtre CHAQUE lecture et CHAQUE écriture sur ces centres : le
+ * téléphone ne décide de rien.
+ */
+declare(strict_types=1);
+
+const G_ROLES = ['responsable', 'actionnaire', 'secretaire', 'enseignant'];
+
+/** Capacités par rôle de centre. L'admin global a tout, partout. */
+function g_capacites(): array {
+    return [
+        'responsable' => ['centre.voir', 'eleves.gerer', 'appel.faire', 'paiements.encaisser', 'finances.voir',
+                          'depenses.saisir', 'enseignants.gerer', 'comptes.gerer', 'journal.voir', 'stats.voir', 'emploi.gerer'],
+        // Demande de Jacques (02/11/2026) : les actionnaires tiennent l'emploi du temps de leur centre.
+        'actionnaire' => ['centre.voir', 'finances.voir', 'stats.voir', 'emploi.gerer'],
+        'secretaire'  => ['centre.voir', 'eleves.gerer', 'appel.faire', 'paiements.encaisser', 'depenses.saisir'],
+        'enseignant'  => ['centre.voir', 'appel.faire'],
+    ];
+}
+
+function g_bearer(): string {
+    $auth = '';
+    if (function_exists('getallheaders')) {
+        foreach (getallheaders() as $k => $v) {
+            if (strtolower((string) $k) === 'authorization') { $auth = (string) $v; break; }
+        }
+    }
+    if ($auth === '') {
+        $auth = (string) ($_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '');
+    }
+    return trim((string) preg_replace('/^\s*bearer\s+/i', '', $auth));
+}
+
+function g_hash_mdp(string $clair): string {
+    return password_hash($clair, PASSWORD_BCRYPT, ['cost' => (int) G_BCRYPT_COST]);
+}
+
+/** Mot de passe lisible (sans 0/O, 1/l), mélangé à source cryptographique. */
+function g_mdp_aleatoire(int $long = 10): string {
+    $maj = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    $min = 'abcdefghijkmnpqrstuvwxyz';
+    $chf = '23456789';
+    $pool = $maj . $min . $chf;
+    $c = [$maj[random_int(0, 23)], $min[random_int(0, 23)], $chf[random_int(0, 7)]];
+    while (count($c) < $long) { $c[] = $pool[random_int(0, strlen($pool) - 1)]; }
+    for ($i = count($c) - 1; $i > 0; $i--) { $j = random_int(0, $i); [$c[$i], $c[$j]] = [$c[$j], $c[$i]]; }
+    return implode('', $c);
+}
+
+/**
+ * Anti-force-brute, à appeler AVANT de vérifier un mot de passe : compte les
+ * échecs récents consignés au journal, par IP et par identifiant.
+ * Fail-open si le journal répond mal (le mot de passe reste exigé).
+ */
+function g_garde_connexion(string $identifiant): void {
+    try {
+        $depuis = g_now('-' . (int) G_LOGIN_FENETRE_MIN . ' minutes');
+        $st = g_pdo()->prepare(
+            "SELECT SUM(CASE WHEN ip = ? THEN 1 ELSE 0 END) AS par_ip,
+                    SUM(CASE WHEN entite_id = ? THEN 1 ELSE 0 END) AS par_compte
+               FROM g_journal WHERE action = 'connexion_echec' AND le > ?"
+        );
+        $st->execute([g_ip(), $identifiant, $depuis]);
+        $r = $st->fetch() ?: [];
+        if ((int) ($r['par_ip'] ?? 0) >= G_LOGIN_MAX_IP || (int) ($r['par_compte'] ?? 0) >= G_LOGIN_MAX_COMPTE) {
+            header('Retry-After: ' . (G_LOGIN_FENETRE_MIN * 60));
+            g_fail('Trop de tentatives. Réessayez dans ' . G_LOGIN_FENETRE_MIN . ' minutes.', 429);
+        }
+    } catch (Throwable $e) {
+        error_log('[gestion][garde] ' . $e->getMessage());
+    }
+}
+
+function g_ouvrir_session(string $uid, string $appareil): array {
+    $jeton = bin2hex(random_bytes(32));
+    $expire = g_now('+' . (int) G_SESSION_JOURS . ' days');
+    g_pdo()->prepare(
+        'INSERT INTO g_sessions (id, jeton_hash, utilisateur_id, appareil, ip, cree_le, expire_le, vu_le)
+         VALUES (?,?,?,?,?,?,?,?)'
+    )->execute([g_id(), hash('sha256', $jeton), $uid, mb_substr($appareil, 0, 120), g_ip(), g_now(), $expire, g_now()]);
+    return ['jeton' => $jeton, 'expire_le' => $expire];
+}
+
+function g_fermer_session(): void {
+    $j = g_bearer();
+    if ($j !== '') {
+        g_pdo()->prepare('DELETE FROM g_sessions WHERE jeton_hash = ?')->execute([hash('sha256', $j)]);
+    }
+}
+
+/** Accès du compte : [centre_id => rôle]. */
+function g_acces_de(string $uid): array {
+    $st = g_pdo()->prepare('SELECT centre_id, role FROM g_acces WHERE utilisateur_id = ?');
+    $st->execute([$uid]);
+    $out = [];
+    foreach ($st->fetchAll() as $r) { $out[(string) $r['centre_id']] = (string) $r['role']; }
+    return $out;
+}
+
+/**
+ * Exige une session valide. Contexte renvoyé :
+ *   uid, identifiant, nom, admin (bool), acces [centre_id => rôle], session_id
+ */
+function g_exiger_session(): array {
+    $j = g_bearer();
+    if ($j === '') { g_fail('Connexion requise.', 401); }
+    $pdo = g_pdo();
+    $st = $pdo->prepare(
+        'SELECT s.id AS sid, s.expire_le, u.id, u.identifiant, u.nom, u.admin_global, u.actif
+           FROM g_sessions s JOIN g_utilisateurs u ON u.id = s.utilisateur_id
+          WHERE s.jeton_hash = ?'
+    );
+    $st->execute([hash('sha256', $j)]);
+    $r = $st->fetch();
+    if (!$r) { g_fail('Session invalide ou révoquée.', 401); }
+    if ((string) $r['expire_le'] < g_now()) {
+        $pdo->prepare('DELETE FROM g_sessions WHERE id = ?')->execute([$r['sid']]);
+        g_fail('Session expirée. Reconnectez-vous.', 401);
+    }
+    if ((int) $r['actif'] !== 1) { g_fail('Compte désactivé.', 403); }
+    try { $pdo->prepare('UPDATE g_sessions SET vu_le = ? WHERE id = ?')->execute([g_now(), $r['sid']]); } catch (Throwable $e) {}
+    return [
+        'uid'         => (string) $r['id'],
+        'identifiant' => (string) $r['identifiant'],
+        'nom'         => (string) $r['nom'],
+        'admin'       => (int) $r['admin_global'] === 1,
+        'acces'       => g_acces_de((string) $r['id']),
+        'session_id'  => (string) $r['sid'],
+    ];
+}
+
+/** Le compte a-t-il la capacité $cap dans le centre $centreId ? */
+function g_peut(array $ctx, string $cap, ?string $centreId): bool {
+    if ($ctx['admin']) { return true; }
+    if ($centreId === null || !isset($ctx['acces'][$centreId])) { return false; }
+    return in_array($cap, g_capacites()[$ctx['acces'][$centreId]] ?? [], true);
+}
+
+function g_exiger(array $ctx, string $cap, ?string $centreId): void {
+    if (!g_peut($ctx, $cap, $centreId)) { g_fail('Action non autorisée pour votre rôle dans ce centre.', 403); }
+}
+
+function g_exiger_admin(array $ctx): void {
+    if (!$ctx['admin']) { g_fail('Réservé à l\'administrateur.', 403); }
+}
+
+/** Centres où le compte a la capacité $cap (tous pour l'admin). */
+function g_centres_avec(array $ctx, string $cap): array {
+    if ($ctx['admin']) {
+        return array_map('strval', g_pdo()->query('SELECT id FROM g_centres WHERE supprime = 0')->fetchAll(PDO::FETCH_COLUMN));
+    }
+    $out = [];
+    foreach ($ctx['acces'] as $cid => $role) {
+        if (in_array($cap, g_capacites()[$role] ?? [], true)) { $out[] = (string) $cid; }
+    }
+    return $out;
+}
+
+/**
+ * Journal « qui a modifié quoi ». Best-effort : un échec d'écriture du journal
+ * ne doit jamais faire échouer l'action métier (mais il est consigné au log PHP).
+ */
+function g_journal(?array $ctx, string $action, string $entite = '', string $entiteId = '',
+                   ?array $avant = null, ?array $apres = null, ?string $centreId = null): void {
+    try {
+        g_pdo()->prepare(
+            'INSERT INTO g_journal (id, centre_id, utilisateur_id, identifiant, action, entite, entite_id, avant, apres, ip, le)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?)'
+        )->execute([
+            g_id(), $centreId, $ctx['uid'] ?? null, $ctx['identifiant'] ?? null, $action, $entite,
+            mb_substr($entiteId, 0, 80),
+            $avant !== null ? json_encode($avant, JSON_UNESCAPED_UNICODE) : null,
+            $apres !== null ? json_encode($apres, JSON_UNESCAPED_UNICODE) : null,
+            g_ip(), g_now(),
+        ]);
+    } catch (Throwable $e) {
+        error_log('[gestion][journal] ' . $e->getMessage());
+    }
+}
