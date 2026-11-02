@@ -145,10 +145,50 @@ if (!defined('VRT_LIVRET_LIB')) {
         }
         // Retiré de la vente : l'ouvrage RESTE au catalogue — les codes déjà
         // vendus continuent d'ouvrir — mais vrt_livret_etat() le ferme à la vente.
+        // « Supprimé » depuis l'administration vaut retrait, en plus caché de la
+        // liste de travail (corbeille) : on ne détruit jamais un ouvrage vendu.
         $retires = (array) ($reg['livretRetires'] ?? []);
-        foreach ($out as $slug => $o) { $out[$slug]['retire'] = !empty($retires[$slug]); }
+        $supprimes = (array) ($reg['livretSupprimes'] ?? []);
+        foreach ($out as $slug => $o) {
+            $out[$slug]['supprime'] = !empty($supprimes[$slug]);
+            $out[$slug]['retire'] = !empty($retires[$slug]) || $out[$slug]['supprime'];
+            /* Un feuilletage dont la fiche ne dit pas combien il a de pages :
+               on les COMPTE sur le disque. Une fiche ajoutée depuis le panneau,
+               avec un PDF converti en pages, n'a personne pour écrire ce nombre
+               à la main — et à 0 le liseur ne sait pas où s'arrêter. */
+            /* Et quand il y a des pages sur le disque, c'est leur nombre qui
+               fait foi : un PDF remplacé depuis le panneau peut compter plus
+               ou moins de pages que la fiche d'origine, et le liseur s'arrête
+               au nombre annoncé — trop court, il cache la fin du livre payé. */
+            if (($o['mode'] ?? '') === 'lecture') {
+                $surDisque = vrt_livret_pages_deposees((string) $slug);
+                if ($surDisque > 0 || (int) ($o['pages'] ?? 0) <= 0) $out[$slug]['pages'] = $surDisque;
+            }
+        }
         $cache = $out;
         return $cache;
+    }
+
+    /** Le dossier protégé des données vendues (même chemin que lv_dir()). */
+    function vrt_livret_dossier_donnees(): string {
+        return function_exists('lv_dir')
+             ? lv_dir()
+             : (defined('VRT_LIVRET_DONNEES')
+                ? (string) VRT_LIVRET_DONNEES
+                : dirname(__DIR__) . '/uploads/protected/livrets');
+    }
+
+    /** Pages d'un feuilletage RÉELLEMENT déposées : p001.jpg, p002.jpg… sans
+     *  trou. On s'arrête au premier manquant : une page absente au milieu
+     *  ferait un livre qu'on ne peut pas tourner au-delà. */
+    function vrt_livret_pages_deposees(string $slug): int {
+        $slug = (string) preg_replace('/[^a-z0-9_-]/', '', strtolower($slug));
+        if ($slug === '') return 0;
+        $d = vrt_livret_dossier_donnees() . '/' . $slug;
+        if (!is_dir($d)) return 0;
+        $n = 0;
+        while ($n < 2000 && is_file($d . '/p' . str_pad((string) ($n + 1), 3, '0', STR_PAD_LEFT) . '.jpg')) $n++;
+        return $n;
     }
 
     /** Les réglages commerciaux des livrets, tels qu'en base (DB.tarifs).
@@ -184,8 +224,12 @@ if (!defined('VRT_LIVRET_LIB')) {
     function vrt_livret_promo(array $db, string $slug, int $grace = 0): ?array {
         $promos = $db['tarifs']['livretPromos'] ?? null;
         if (!is_array($promos)) return null;
-        $auj  = date('Y-m-d');
-        $finT = date('Y-m-d', time() - max(0, $grace));
+        /* L'heure du CAMEROUN, pas celle de l'hébergeur (en France) : une
+           promotion « jusqu'au 30/11 » doit finir à minuit à Douala, comme le
+           compte le navigateur de l'administration. */
+        $tz   = new \DateTimeZone('Africa/Douala');
+        $auj  = (new \DateTime('now', $tz))->format('Y-m-d');
+        $finT = (new \DateTime('@' . (time() - max(0, $grace))))->setTimezone($tz)->format('Y-m-d');
         foreach ([$slug, '*'] as $cle) {
             $p = $promos[$cle] ?? null;
             if (!is_array($p)) continue;
@@ -445,7 +489,9 @@ if (!defined('VRT_LIVRET_LIB')) {
                        lire ses blocs. */
                     : (($mode === 'autonome')
                        ? ('cahier-' . $slug . '.html')
-                       : ('cahier.html?o=' . rawurlencode($slug))),
+                       : (($mode === 'lecture')
+                          ? ('lire.html?o=' . rawurlencode($slug))
+                          : ('cahier.html?o=' . rawurlencode($slug)))),
             /* ── LA VITRINE ET LA PORTE NE SONT PAS LE MÊME LIEN ─────────────
                `lien` ci-dessus mène où l'on PRÉSENTE l'ouvrage : depuis les
                pages d'atterrissage du 31/08/2026, `<slug>.html` est une page
@@ -464,10 +510,13 @@ if (!defined('VRT_LIVRET_LIB')) {
                autre : le moteur générique pour un cahier qu'on remplit, la
                coquille du liseur pour un ouvrage qu'on feuillette, et sa page
                propre pour un cahier qui porte son moteur avec lui. */
+            /* Un feuilletage SANS page dédiée (ajouté depuis le panneau, PDF
+               converti en pages) s'ouvre dans le lecteur générique
+               `lire.html` : `cahier.html` ne sait pas afficher des images. */
             'porte' => ($mode === 'autonome')
                     ? ('cahier-' . $slug . '.html')
-                    : (($mode === 'lecture' && $coquille)
-                       ? ($slug . '.html')
+                    : (($mode === 'lecture')
+                       ? ($coquille ? ($slug . '.html') : ('lire.html?o=' . rawurlencode($slug)))
                        : ('cahier.html?o=' . rawurlencode($slug))),
             'couverture' => vrt_livret_couverture($slug),
         ];
