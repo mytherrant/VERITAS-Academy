@@ -75,7 +75,43 @@
 .vrt-pdfv-zoom{min-width:52px;text-align:center;font-variant-numeric:tabular-nums}
 .vrt-pdfv-pages{max-height:calc(100vh - 150px);overflow:auto;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:14px;-webkit-overflow-scrolling:touch}
 .vrt-pdfv-pages canvas{background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.35);max-width:none}
+/* Fiches « libellé — valeur » (épreuves, échéances), calendrier annuel et
+   menu à deux lignes (11/2026) — sur le modèle de Tchouskou. */
+.vrt-kv-carte{background:#fff;border:1px solid #e2eaf3;border-radius:16px;padding:16px 18px;box-shadow:0 2px 10px rgba(20,55,95,.05);display:flex;flex-direction:column}
+.vrt-kv-titre{font:700 16px/1.3 Poppins,sans-serif;color:#1d3b2a;flex:1;word-break:break-word}
+.vrt-kv{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid #eef2f7;font-size:13.5px;color:#22303f}
+.vrt-kv:last-of-type{border-bottom:0}
+.vrt-kv>span:first-child{color:#7a8598;font-size:13px}
+.vrt-kv-cadre{display:inline-block;border:1.5px solid #1d3b2a;border-radius:999px;padding:3px 12px;font:600 12.5px Poppins,sans-serif;color:#1d3b2a;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vrt-kv-fort{font:700 15px Poppins,sans-serif;color:#1d3b2a}
+.vrt-kv-pastille{display:inline-block;background:#e8f1f4;color:#1a4f6b;border-radius:999px;padding:3px 11px;font:700 12px Poppins,sans-serif}
+.vrt-kv-barre{display:inline-block;width:80px;height:7px;border-radius:99px;background:#e6ece8;overflow:hidden;flex:none}
+.vrt-kv>span:last-child{white-space:normal;min-width:0}
+.vrt-kv-lien{background:none;border:0;padding:0;color:#1a72bb;font:600 12px Poppins,sans-serif;cursor:pointer}
+.vrt-kv-carte button{white-space:nowrap}
+.vrt-ech-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:8px}
+.vrt-an-legende{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:#33404f;margin:2px 0 14px}
+.vrt-an-legende span{display:inline-flex;align-items:center;gap:7px}
+.vrt-an-legende i{display:inline-block;width:12px;height:12px;border-radius:50%}
+.vrt-an-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.vrt-an-mois{background:#fff;border:1px solid #e2eaf3;border-radius:16px;padding:14px}
+.vrt-an-tete{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 8px;width:100%;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.vrt-an-tete:hover b{text-decoration:underline}
+.vrt-an-tete b{font:700 16px Poppins,sans-serif;color:#1d3b2a}
+.vrt-an-tete span{font:600 12.5px Poppins,sans-serif;color:#5a6678}
+.vrt-an-jours{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.vrt-an-sem{text-align:center;font:600 11px Poppins,sans-serif;color:#8b97a8;padding:2px 0}
+.vrt-an-pts{display:flex;gap:2px;align-items:center;flex-wrap:wrap;min-height:7px}
+.vrt-an-pts i{display:inline-block;width:6px;height:6px;border-radius:50%}
+.vrt-an-pts small{font-size:9px;color:#5a6678}
+.vrt-sbgrp{font:700 10.5px Poppins,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--sb-fg-dim);padding:14px 12px 4px}
+.vrt-sbnav .vrt-sbgrp:first-child{padding-top:0}
+.vrt-sbl2{line-height:1.2;text-align:left;min-width:0}
+.vrt-sbl2 b{display:block;font-weight:600}
+.vrt-sbl2 small{display:block;font-size:11px;font-weight:400;color:var(--sb-fg-dim);margin-top:2px;white-space:normal}
 @media(max-width:640px){
+  .vrt-kv{grid-template-columns:104px 1fr}
+  .vrt-ech-grille,.vrt-an-grille{grid-template-columns:1fr}
   .vrt-sj{padding:10px 12px 0}
   .vrt-sj-titre{font-size:15px;white-space:normal}
   .vrt-sj-onglets{margin:0 -12px;padding:0 12px}
@@ -1409,22 +1445,24 @@
       </span>
     </button>
 
-    <nav style="display:flex;flex-direction:column;gap:3px">
-      <button title="Accueil" aria-label="Accueil" onClick="{{ goAccueil }}" style="{{ sbAccueil }}" style-hover="background:var(--sb-hover)">{{ sbIcAccueil }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Accueil</span></button>
-      <button title="Corpus" aria-label="Corpus" onClick="{{ goListe }}" style="{{ sbRessources }}" style-hover="background:var(--sb-hover)">{{ sbIcRessources }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Corpus</span></button>
-      <button title="Épreuves" aria-label="Épreuves" onClick="{{ goEpreuves }}" style="{{ sbEpreuves }}" style-hover="background:var(--sb-hover)">{{ sbIcEpreuves }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Épreuves</span></button>
-      <button title="Cours" aria-label="Cours" onClick="{{ goCours }}" style="{{ sbCours }}" style-hover="background:var(--sb-hover)">{{ sbIcCours }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Cours</span></button>
-      <button title="Progressions" aria-label="Progressions" onClick="{{ goProgressions }}" style="{{ sbProgressions }}" style-hover="background:var(--sb-hover)">{{ sbIcProg }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Progressions</span></button>
-      <button title="Suivi" aria-label="Suivi" onClick="{{ goSuivi }}" style="{{ sbSuivi }}" style-hover="background:var(--sb-hover)">{{ sbIcSuivi }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Suivi</span><span style="{{ sbSuiviBadge }}">{{ suiviRetardsN }}</span></button>
-      <button title="Équipe" aria-label="Équipe" onClick="{{ goCollab }}" style="{{ sbCollab }}" style-hover="background:var(--sb-hover)">{{ sbIcCollab }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Équipe</span><span style="{{ sbMsgBadge }}">{{ msgCount }}</span></button>
-    </nav>
-
-    <div style="height:1px;background:var(--sb-border);margin:20px 0"></div>
-
-    <nav style="display:flex;flex-direction:column;gap:3px">
-      <button title="Notifications" aria-label="Notifications" onClick="{{ goActivite }}" style="{{ sbNotifs }}" style-hover="background:var(--sb-hover)">{{ sbIcBell }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Notifications</span><span style="{{ sbNotifBadge }}">{{ notifCount }}</span></button>
-      <button title="Profil" aria-label="Profil" onClick="{{ goProfil }}" style="{{ sbProfil }}" style-hover="background:var(--sb-hover)">{{ sbIcUser }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Profil</span></button>
-      <button title="Administration" aria-label="Administration" onClick="{{ goAdmin }}" style="{{ sbAdmin }}" style-hover="background:var(--sb-hover)">{{ sbIcAdmin }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Administration</span></button>
+    <!-- MENU GROUPÉ (11/2026), sur le modèle de Tchouskou : des rubriques
+         titrées, et sous chaque entrée une ligne qui dit à quoi elle sert.
+         Replié, le menu ne garde que les icônes (vrt-sblabel). -->
+    <nav class="vrt-sbnav" style="display:flex;flex-direction:column;gap:2px">
+      <div class="vrt-sblabel vrt-sbgrp" style="{{ sbLabelShow }}">Pilotage</div>
+      <button title="Accueil" aria-label="Accueil" onClick="{{ goAccueil }}" style="{{ sbAccueil }}" style-hover="background:var(--sb-hover)">{{ sbIcAccueil }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Accueil</b><small>vue d’ensemble</small></span></button>
+      <button title="Suivi" aria-label="Suivi" onClick="{{ goSuivi }}" style="{{ sbSuivi }}" style-hover="background:var(--sb-hover)">{{ sbIcSuivi }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Suivi</b><small>échéances, retards, calendrier</small></span><span style="{{ sbSuiviBadge }}">{{ suiviRetardsN }}</span></button>
+      <button title="Progressions" aria-label="Progressions" onClick="{{ goProgressions }}" style="{{ sbProgressions }}" style-hover="background:var(--sb-hover)">{{ sbIcProg }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Progressions</b><small>séquences de l’année</small></span></button>
+      <div class="vrt-sblabel vrt-sbgrp" style="{{ sbLabelShow }}">Contenus</div>
+      <button title="Épreuves" aria-label="Épreuves" onClick="{{ goEpreuves }}" style="{{ sbEpreuves }}" style-hover="background:var(--sb-hover)">{{ sbIcEpreuves }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Épreuves</b><small>composer, relire, valider</small></span></button>
+      <button title="Cours" aria-label="Cours" onClick="{{ goCours }}" style="{{ sbCours }}" style-hover="background:var(--sb-hover)">{{ sbIcCours }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Cours</b><small>leçons et fiches</small></span></button>
+      <button title="Corpus" aria-label="Corpus" onClick="{{ goListe }}" style="{{ sbRessources }}" style-hover="background:var(--sb-hover)">{{ sbIcRessources }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Corpus</b><small>textes MINESEC</small></span></button>
+      <div class="vrt-sblabel vrt-sbgrp" style="{{ sbLabelShow }}">Équipe</div>
+      <button title="Équipe" aria-label="Équipe" onClick="{{ goCollab }}" style="{{ sbCollab }}" style-hover="background:var(--sb-hover)">{{ sbIcCollab }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Équipe</b><small>discussion, rôles, invitations</small></span><span style="{{ sbMsgBadge }}">{{ msgCount }}</span></button>
+      <button title="Notifications" aria-label="Notifications" onClick="{{ goActivite }}" style="{{ sbNotifs }}" style-hover="background:var(--sb-hover)">{{ sbIcBell }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Notifications</b><small>activité récente</small></span><span style="{{ sbNotifBadge }}">{{ notifCount }}</span></button>
+      <div class="vrt-sblabel vrt-sbgrp" style="{{ sbLabelShow }}">Compte</div>
+      <button title="Profil" aria-label="Profil" onClick="{{ goProfil }}" style="{{ sbProfil }}" style-hover="background:var(--sb-hover)">{{ sbIcUser }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Profil</b><small>mes classes, préférences</small></span></button>
+      <button title="Administration" aria-label="Administration" onClick="{{ goAdmin }}" style="{{ sbAdmin }}" style-hover="background:var(--sb-hover)">{{ sbIcAdmin }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Administration</b><small>établissement, membres</small></span></button>
     </nav>
 
     <div class="vrt-sblabel" style="margin-top:auto;padding-top:24px;{{ sbLabelShow }}">
@@ -2016,16 +2054,26 @@
     <sc-if value="{{ hasEpreuves }}" hint-placeholder-val="{{ true }}">
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px">
         <sc-for list="{{ epreuvesView }}" as="e" hint-placeholder-count="4">
-          <article style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:13px;padding:18px 19px;box-shadow:0 2px 10px rgba(20,55,95,.05);display:flex;flex-direction:column">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:11px"><span style="{{ e.statusChip }}">{{ e.statusLabel }}</span><span style="{{ e.libChip }}">{{ icEtoile }} Bibliothèque</span><span style="margin-left:auto;font-size:11px;color:var(--c9aa5b5,#9aa5b5)">{{ e.ago }}</span></div>
-            <div style="font-family:'Poppins';font-size:16px;font-weight:600;color:var(--c22303f,#22303f);line-height:1.3;margin-bottom:6px">{{ e.title }}</div>
-            <div style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin-bottom:14px">{{ e.count }} texte(s) · {{ e.classe }} · {{ e.words }} mots</div>
-            <div style="display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:13px;border-top:1px solid var(--ceef2f7,#eef2f7)">
+          <!-- FICHE D'ÉPREUVE (11/2026) — sur le modèle des fiches de sujet de
+               Tchouskou : titre, puis des lignes « libellé — valeur » qui
+               disent tout de l'épreuve sans l'ouvrir (statut, situation par
+               rapport à l'échéance, progression de la validation). -->
+          <article class="vrt-kv-carte">
+            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:6px"><div class="vrt-kv-titre">{{ e.title }}</div><span style="{{ e.libChip }}">{{ icEtoile }} Bibliothèque</span></div>
+            <div class="vrt-kv"><span>Classe</span><span>{{ e.classe }}</span></div>
+            <div class="vrt-kv"><span>Type</span><span><span class="vrt-kv-cadre">{{ e.type }}</span></span></div>
+            <div class="vrt-kv"><span>Statut</span><span><span style="{{ e.statusChip }}">● {{ e.statusLabel }}</span></span></div>
+            <div class="vrt-kv"><span>Situation</span><span><span style="{{ e.situationStyle }}">{{ e.situation }}</span></span></div>
+            <div class="vrt-kv" style="{{ e.echeanceLigne }}"><span>Échéance</span><span>{{ e.echeance }}</span></div>
+            <div class="vrt-kv" style="{{ e.seqLigne }}"><span>Séquence</span><span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="vrt-kv-pastille">{{ e.seqCourt }}</span>{{ e.seqLib }}<button onClick="{{ e.voirSuivi }}" class="vrt-kv-lien">voir le suivi ›</button></span></div>
+            <div class="vrt-kv"><span>Contenu</span><span>{{ e.count }} texte(s) · {{ e.words }} mots</span></div>
+            <div class="vrt-kv"><span>Validation</span><span style="display:flex;align-items:center;gap:8px;white-space:nowrap"><span class="vrt-kv-barre"><i style="{{ e.validBarre }}"></i></span>{{ e.validLabel }}</span></div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:12px;border-top:1px solid var(--ceef2f7,#eef2f7)">
               <span style="display:flex">{{ e.avatars }}</span>
-              <span style="font-size:11.5px;color:var(--c8b97a8,#8b97a8)">{{ e.ownerLine }}</span>
+              <span style="font-size:11.5px;color:var(--c8b97a8,#8b97a8)">{{ e.ownerLine }} · {{ e.ago }}</span>
               <div style="margin-left:auto;display:flex;gap:7px">
                 <button onClick="{{ e.duplicate }}" title="Dupliquer" style="{{ e.dupStyle }}">⧉</button>
-                <button onClick="{{ e.open }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:8px 16px;font-size:12.5px;cursor:pointer;border-radius:8px;font-weight:700;font-family:Poppins" style-hover="background:var(--c135a96,#135a96)">{{ e.openLabel }}</button>
+                <button onClick="{{ e.open }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:8px 16px;font-size:12.5px;cursor:pointer;border-radius:8px;font-weight:700;font-family:Poppins" style-hover="background:var(--c135a96,#135a96)">{{ e.openLabel }} ›</button>
               </div>
             </div>
           </article>
@@ -3285,7 +3333,8 @@
         <button onClick="{{ suiviRetardsBasculer }}" style="{{ suiviRetardsStyle }}">Retards seulement</button>
         <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-left:auto">
           <button onClick="{{ suiviVueListe }}" style="{{ suiviVueListeStyle }}">Échéances</button>
-          <button onClick="{{ suiviVueMois }}" style="{{ suiviVueMoisStyle }}">Calendrier</button>
+          <button onClick="{{ suiviVueMois }}" style="{{ suiviVueMoisStyle }}">Mois</button>
+          <button onClick="{{ suiviVueAnnee }}" style="{{ suiviVueAnneeStyle }}">Calendrier annuel</button>
         </div>
       </div>
 
@@ -3294,16 +3343,43 @@
         <sc-for list="{{ suiviGroupes }}" as="gr" hint-placeholder-count="2">
           <section style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:12px 16px;margin-bottom:12px">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ gr.titre }}</span><span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ gr.sous }}</span></div>
+            <!-- Une FICHE par échéance (11/2026), comme le Suivi de Tchouskou :
+                 date et délai, nature de l'échéance, séquence, épreuve liée,
+                 état — teintée en rose quand elle est en retard. -->
+            <div class="vrt-ech-grille">
             <sc-for list="{{ gr.lignes }}" as="l" hint-placeholder-count="4">
-              <div style="display:flex;align-items:center;gap:12px;padding:9px 2px;border-top:1px solid var(--ceef2f7,#eef2f7);flex-wrap:wrap">
-                <div style="min-width:104px"><div style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--c22303f,#22303f)">{{ l.date }}</div><div style="{{ l.relStyle }}">{{ l.rel }}</div></div>
-                <div style="flex:1;min-width:200px"><div style="font-size:13px;font-weight:700;color:var(--c22303f,#22303f)">{{ l.titre }}</div><div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin-top:2px">{{ l.sous }}</div></div>
-                <span style="{{ l.chip }}">{{ l.etat }}</span>
-                <button onClick="{{ l.agir }}" style="{{ l.agirStyle }}">{{ l.agirLabel }}</button>
+              <div class="vrt-kv-carte" style="{{ l.carteStyle }}">
+                <div class="vrt-kv"><span>Date</span><span><b>{{ l.date }}</b> <span style="{{ l.relStyle }}">{{ l.rel }}</span></span></div>
+                <div class="vrt-kv"><span>Échéance</span><span class="vrt-kv-fort">{{ l.lib }}</span></div>
+                <div class="vrt-kv"><span>Séquence</span><span><span class="vrt-kv-pastille">{{ l.seq }}</span> {{ l.module }}</span></div>
+                <div class="vrt-kv"><span>Épreuve</span><span>{{ l.sous }}</span></div>
+                <div class="vrt-kv"><span>État</span><span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="{{ l.chip }}">{{ l.etat }}</span><button onClick="{{ l.agir }}" style="{{ l.agirStyle }}">{{ l.agirLabel }}</button></span></div>
               </div>
             </sc-for>
+            </div>
           </section>
         </sc-for>
+      </sc-if>
+
+      <!-- CALENDRIER ANNUEL (11/2026), comme celui de Tchouskou : l'année
+           scolaire mois par mois, un point de couleur par échéance, les
+           vacances et les jours fériés teintés, le compte d'échéances du mois. -->
+      <sc-if value="{{ suiviEnAnnee }}" hint-placeholder-val="{{ false }}">
+        <div class="vrt-an-legende">
+          <span><i style="background:#1d3b2a"></i>Sujet prêt</span><span><i style="background:#8fbc9a"></i>Épreuve</span><span><i style="background:#c0532b"></i>Corrigé et compte rendu</span>
+          <span><i style="background:#f3e3b9;border:1px solid #e3cf95"></i>vacances</span><span><i style="background:#fbd9d3;border:1px solid #f0b8ad"></i>jour férié</span><span><i style="background:#fff;border:2px solid #f39200"></i>aujourd’hui</span>
+        </div>
+        <div class="vrt-an-grille">
+          <sc-for list="{{ anMois }}" as="am" hint-placeholder-count="10">
+            <section class="vrt-an-mois">
+              <button class="vrt-an-tete" onClick="{{ am.ouvrir }}" title="Voir ce mois en détail"><b>{{ am.titre }}</b><span>{{ am.compte }} ›</span></button>
+              <div class="vrt-an-jours">
+                <sc-for list="{{ moisEntetesCourts }}" as="me3" hint-placeholder-count="7"><span class="vrt-an-sem">{{ me3 }}</span></sc-for>
+                <sc-for list="{{ am.jours }}" as="aj" hint-placeholder-count="35"><div style="{{ aj.style }}" title="{{ aj.titre }}"><span>{{ aj.num }}</span><span class="vrt-an-pts"><sc-for list="{{ aj.pts }}" as="pt" hint-placeholder-count="0"><i style="{{ pt.s }}"></i></sc-for><small>{{ aj.plus }}</small></span></div></sc-for>
+              </div>
+            </section>
+          </sc-for>
+        </div>
       </sc-if>
 
       <sc-if value="{{ suiviEnMois }}" hint-placeholder-val="{{ false }}">
@@ -9445,7 +9521,26 @@ class Component extends DCLogic {
     const cycleCards=(this.meta||[]).map(c=>({short:this.cShort[c.cycle]||c.cycle,sub:this.cSub[c.cycle]||(c.count+' textes'),count:c.count,open:()=>this.setState({filters:{q:'',cycle:c.cycle,group:'',type:'',subkind:'',length:'',source:''},screen:'liste'},()=>window.scrollTo(0,0))}));
 
     const wordsOf=e=>e.textIds.reduce((a,n)=>{const f=all.find(x=>x.n===n);return a+(f?f.words:0);},0);
-    const epCard=e=>{const owner=st.users.find(u=>u.id===e.ownerId);const sm=this._statusMeta(e.status);return{id:e.id,title:e.title,classe:e.classe||'—',count:e.textIds.length,words:wordsOf(e),statusLabel:sm.label,statusChip:this._statusChip(e.status),libChip:e.inLibrary?'font-size:10px;font-weight:700;color:var(--cc26a12,#c26a12);background:var(--cfdefdb,#fdefdb);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,ago:'MàJ '+this._ago(e.updatedAt),avatars:avStack([e.ownerId,...e.editorIds]),ownerLine:owner?owner.name.replace(/^(M\.|Mme|Mlle)\s+/,''):'',open:()=>this.setState({activeId:e.id,screen:'composeur'},()=>{this._persist();window.scrollTo(0,0);}),openLabel:perm.readOnly?'Consulter':'Ouvrir',dupStyle:perm.readOnly?hidden:'background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:13px',duplicate:()=>{const id='e'+Date.now();const copy={...e,id,title:e.title+' (copie)',status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),comments:[],activity:[{userId:me.id,text:'a dupliqué l\u2019épreuve',ts:Date.now()}]};this.setState(s=>({epreuves:[copy,...s.epreuves],activeId:id,screen:'composeur'}),()=>this._persist());}};};
+    const epCard=e=>{const owner=st.users.find(u=>u.id===e.ownerId);const sm=this._statusMeta(e.status);
+      /* Ce que la fiche dit sans ouvrir l'épreuve : sa situation par rapport
+         à l'échéance (champ « borne » de l'assistant) et où en est le circuit
+         de validation (brouillon → relecture → validé). */
+      const ass=this._assDe(e),s0=e.status||'brouillon';
+      const jr=ass.borne?Math.round((new Date(ass.borne+'T00:00:00')-new Date(this._isoAuj()+'T00:00:00'))/86400000):null;
+      const fini=s0==='valide';
+      const sit=fini?(e.inLibrary?'diffusé':'validé'):jr===null?'sans échéance':jr<0?'en retard de '+(-jr)+' j':jr===0?'aujourd’hui':'sous '+jr+' j';
+      const sitC=fini?['var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)']:jr!==null&&jr<0?['var(--cc0392b,#c0392b)','var(--cfdecea,#fdecea)']:jr!==null&&jr<=3?['var(--c8a5a00,#8a5a00)','var(--cfdf1d6,#fdf1d6)']:['var(--c5a6678,#5a6678)','var(--ceef2f7,#eef2f7)'];
+      const pas=s0==='valide'?3:(s0==='relecture'||s0==='ajustement')?2:1;
+      return{id:e.id,title:e.title,type:ass.type+(ass.numero?' n°'+ass.numero:''),
+        situation:sit,situationStyle:'font-size:12px;font-weight:700;font-family:Poppins;padding:3px 10px;border-radius:999px;color:'+sitC[0]+';background:'+sitC[1],
+        echeance:ass.borne?new Date(ass.borne+'T00:00:00').toLocaleDateString('fr-FR'):'',echeanceLigne:ass.borne?'':'display:none',
+        validLabel:pas+'/3 · '+Math.round(pas/3*100)+' %',
+        /* L'épreuve reliée à une séquence (bouton « Relier » des
+           Progressions, ou « Composer » depuis le Suivi) le dit, et mène à
+           son suivi filtré sur sa classe. */
+        ...(()=>{const c=ass.progId?this._progClasse(ass.progId):null;
+          return{seqLigne:c&&ass.progSeq?'':'display:none',seqCourt:'S'+(ass.progSeq||''),seqLib:c?c.libelle:'',
+            voirSuivi:()=>{this.setState({suiviClasse:c?c.id:'',suiviVue:'liste'});this._go('suivi');}};})(),validBarre:'display:block;height:100%;border-radius:99px;background:'+(s0==='rejete'?'#c0392b':'#7fb08f')+';width:'+Math.round(pas/3*100)+'%',classe:e.classe||'—',count:e.textIds.length,words:wordsOf(e),statusLabel:sm.label,statusChip:this._statusChip(e.status),libChip:e.inLibrary?'font-size:10px;font-weight:700;color:var(--cc26a12,#c26a12);background:var(--cfdefdb,#fdefdb);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,ago:'MàJ '+this._ago(e.updatedAt),avatars:avStack([e.ownerId,...e.editorIds]),ownerLine:owner?owner.name.replace(/^(M\.|Mme|Mlle)\s+/,''):'',open:()=>this.setState({activeId:e.id,screen:'composeur'},()=>{this._persist();window.scrollTo(0,0);}),openLabel:perm.readOnly?'Consulter':'Ouvrir',dupStyle:perm.readOnly?hidden:'background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:13px',duplicate:()=>{const id='e'+Date.now();const copy={...e,id,title:e.title+' (copie)',status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),comments:[],activity:[{userId:me.id,text:'a dupliqué l\u2019épreuve',ts:Date.now()}]};this.setState(s=>({epreuves:[copy,...s.epreuves],activeId:id,screen:'composeur'}),()=>this._persist());}};};
     /* Visibilite : une epreuve appartient a un groupe. Un groupe ferme la
        garde pour ses membres ; un groupe ouvert la montre aux autres
        membres de la plateforme ; publiee dans la bibliotheque, elle est
@@ -12287,7 +12382,8 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           accSemaineBouton:cls0?'Voir le suivi':'Choisir mes classes',
           accSemaineAller:()=>this._go(cls0?'suivi':'progressions')});
         if(!(ready&&st.screen==='suivi'))return Object.assign(vals,{suiviVideStyle:hidden,suiviCorpsStyle:hidden,suiviTuiles:[],suiviHorizons:[],suiviClasses:[],suiviClasse:'',setSuiviClasse:()=>{},suiviRetardsBasculer:()=>{},suiviRetardsStyle:hidden,
-          suiviVueListe:()=>{},suiviVueMois:()=>{},suiviVueListeStyle:hidden,suiviVueMoisStyle:hidden,suiviEnListe:false,suiviEnMois:false,suiviAucuneStyle:hidden,suiviGroupes:[],moisPrec:()=>{},moisSuiv:()=>{},moisTitre:'',moisEntetes:[],moisJours:[]});
+          suiviVueListe:()=>{},suiviVueMois:()=>{},suiviVueListeStyle:hidden,suiviVueMoisStyle:hidden,suiviEnListe:false,suiviEnMois:false,suiviAucuneStyle:hidden,suiviGroupes:[],moisPrec:()=>{},moisSuiv:()=>{},moisTitre:'',moisEntetes:[],moisJours:[],
+          suiviVueAnnee:()=>{},suiviVueAnneeStyle:hidden,suiviEnAnnee:false,anMois:[],moisEntetesCourts:[]});
         const hz=+(st.suiviHorizon||60);
         const fin=this._isoPlus(auj,hz>=365?400:hz);
         const filtreC=st.suiviClasse||'';
@@ -12335,10 +12431,45 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           suiviVueListe:()=>this.setState({suiviVue:'liste'}),suiviVueMois:()=>this.setState({suiviVue:'mois'}),
           suiviVueListeStyle:ong(vue==='liste'),suiviVueMoisStyle:ong(vue==='mois'),
           suiviEnListe:vue==='liste',suiviEnMois:vue==='mois',
+          suiviVueAnnee:()=>this.setState({suiviVue:'annee'}),suiviVueAnneeStyle:ong(vue==='annee'),suiviEnAnnee:vue==='annee',
+          moisEntetesCourts:['L','M','M','J','V','S','D'],
+          anMois:vue!=='annee'?[]:(()=>{
+            /* L'année scolaire de septembre à juillet, celle qui contient
+               aujourd'hui (à partir d'août, la suivante se prépare). */
+            const a0=+auj.slice(0,4)-(+auj.slice(5,7)<8?1:0);
+            const coulE={sujet:'#1d3b2a',epreuve:'#8fbc9a',corrige:'#c0532b'};
+            const out=[];
+            for(let m=0;m<11;m++){
+              const d1=new Date(a0,8+m,1),mo=d1.getMonth();
+              const deb=new Date(d1);deb.setDate(1-((d1.getDay()+6)%7));
+              const jours=[];let n=0;
+              for(let k=0;k<42;k++){const d=new Date(deb);d.setDate(deb.getDate()+k);
+                if(k>=35&&d.getMonth()!==mo)break;
+                const iso=this._isoDe(d),dans=d.getMonth()===mo;
+                if(!dans){jours.push({num:'',pts:[],plus:'',titre:'',style:'min-height:34px'});continue;}
+                const vac=cal.vacances.find(v=>v.debut<=iso&&iso<v.fin);
+                const fer=cal.feries.filter(f=>f.date===iso);
+                const ec=parC.filter(x=>x.date===iso);n+=ec.length;
+                const we=d.getDay()===0||d.getDay()===6;
+                // Un point par échéance, à la couleur de sa nature ; cerclé de rouge si en retard.
+                const pts=ec.slice(0,4).map(x=>({s:'background:'+(coulE[x.genre]||'#8fbc9a')+(x.retard&&!x.fait?';box-shadow:0 0 0 2px #e05a4f':'')}));
+                jours.push({num:d.getDate(),pts,plus:ec.length>4?'+'+(ec.length-4):'',
+                  titre:[].concat(fer.map(f=>f.nom),vac?[vac.label]:[],ec.map(x=>x.lib+' — '+x.cls.libelle+', séq. '+x.sq.num+' ('+(x.fait?'fait':x.retard?'en retard':x.etat)+')')).join(' · '),
+                  style:'min-height:34px;border-radius:7px;padding:3px 4px;font:600 12px Poppins,sans-serif;display:flex;flex-direction:column;justify-content:space-between;'
+                    +'background:'+(fer.length?'#fbd9d3':vac?'#f3e3b9':we?'#f2f4f6':ec.length?'#fff':'transparent')+';'
+                    +'border:'+(iso===auj?'2px solid #f39200':ec.length?'1px solid #cfd8d3':'1px solid transparent')+';color:'+(fer.length?'#a3352a':'#22303f')});}
+              // Le titre du mois mène à sa vue détaillée (libellés des échéances).
+              const mIso=this._isoDe(d1).slice(0,7);
+              out.push({ouvrir:()=>this.setState({suiviVue:'mois',suiviMois:mIso}),
+                titre:d1.toLocaleDateString('fr-FR',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase()),
+                compte:n?n+' échéance'+(n>1?'s':''):'',jours});}
+            return out;})(),
           suiviAucuneStyle:visibles.length?hidden:'font-size:12.5px;color:var(--c8b97a8,#8b97a8);padding:10px 2px',
           suiviGroupes:Object.keys(groupes).map(k=>{const g=groupes[k];const nr=g.l.filter(x=>x.retard).length;
             return{titre:g.cls.libelle,sous:g.l.length+' échéance(s)'+(nr?' · '+nr+' en retard':''),
-              lignes:g.l.map(x=>({date:fmtL(x.date),rel:rel(x.date),relStyle:'font-size:11px;margin-top:1px;color:'+(x.retard?'var(--cc0392b,#c0392b)':'var(--c8b97a8,#8b97a8)')+';font-weight:'+(x.retard?'700':'400'),
+              lignes:g.l.map(x=>({lib:x.lib,seq:'S'+x.sq.num,module:x.sq.module||'',
+                carteStyle:x.retard&&!x.fait?'background:#fdf0ee;border-color:#f3c9c1':'',
+                date:fmtL(x.date),rel:rel(x.date),relStyle:'font-size:11px;margin-top:1px;color:'+(x.retard?'var(--cc0392b,#c0392b)':'var(--c8b97a8,#8b97a8)')+';font-weight:'+(x.retard?'700':'400'),
                 titre:x.lib+' — séquence '+x.sq.num+(x.sq.module?' · '+x.sq.module:''),
                 sous:x.ep?('« '+(x.ep.title||'Épreuve')+' »'):'Aucune épreuve ouverte pour cette séquence',
                 etat:x.fait?'fait':(x.retard?'en retard · ':'')+x.etat,chip:chipE(x),
