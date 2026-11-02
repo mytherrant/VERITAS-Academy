@@ -295,6 +295,18 @@ _, t = req("sync/tirer", jeton=secB)
 p1s = next(p for p in t["lignes"]["presences"] if p["id"] == p1)
 verifier("pointage effacé puis refait : la ligne revit", r["resultats"][0]["ok"] is True and int(p1s["supprime"]) == 0 and p1s["statut"] == "present", (r, p1s))
 
+# Messages aux parents (étape 4) : trace « message préparé », modèles par centre.
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "presences", "id": p0, "champs": {"notifie": "2026-11-02 18:05:00 whatsapp", "statut": "justifie"}}]}, secB)
+verifier("trace d'un message sur une absence ancienne : permise", r["resultats"][0]["ok"] is True, r)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "presences", "id": p0, "champs": {"notifie": "n'importe quoi"}}]}, secB)
+verifier("trace de message mal formée : refusée", r["resultats"][0]["ok"] is False, r)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "presences", "id": p0, "champs": {"notifie": "2026-11-02 18:06:00 sms", "statut": "present", "arrivee": "16:00"}}]}, secB)
+verifier("la trace ne sert pas de passe-droit au verrou des 2 jours", r["resultats"][0]["ok"] is False, r)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "centres", "id": A, "champs": {"msg_absence": "Bonjour {parent}, {eleve} absent le {date}."}}]}, adm)
+_, t = req("sync/tirer", jeton=respA)
+verifier("modèle de message du centre enregistré et synchronisé", next(c for c in t["lignes"]["centres"] if c["id"] == A)["msg_absence"].startswith("Bonjour {parent}"), r)
+req("sync/pousser", {"ops": [{"op": op(), "t": "centres", "id": A, "champs": {"msg_absence": ""}}]}, adm)
+
 # Élève d'un autre centre, enseignant hors de ses classes.
 _, r = req("sync/pousser", {"ops": [{"op": op(), "t": "presences", "id": pid(), "champs": {"centre_id": Bc, "seance_id": s1, "eleve_id": "el-inexistant-000"}}]}, secB)
 verifier("élève inconnu du centre refusé", r["resultats"][0]["ok"] is False, r)

@@ -450,6 +450,9 @@ function g_valider_appel(PDO $pdo, string $table, string $id, ?array $existant, 
         $champs['date'] = $date;
     }
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) { throw new DomainException('Date invalide.'); }
+    if ($table === 'g_presences' && (string) $val('notifie') !== '' && !preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} (whatsapp|sms)$/', (string) $val('notifie'))) {
+        throw new DomainException('Trace de message invalide.');
+    }
     if ($date > date('Y-m-d')) { throw new DomainException('On ne fait pas l\'appel d\'un jour à venir.'); }
 
     $role = $ctx && !$ctx['admin'] ? ($ctx['acces'][$centre] ?? '') : 'admin';
@@ -493,8 +496,10 @@ function g_valider_appel(PDO $pdo, string $table, string $id, ?array $existant, 
     }
     if ($ancien && !$correcteur) {
         $justification = $existant && $existant['statut'] === 'absent' && $statut === 'justifie'
-            && !array_diff(array_keys($champs), ['statut', 'motif', 'date', 'centre_id', 'seance_id', 'eleve_id']);
-        if (!$justification) { throw new DomainException('Appel de plus de 2 jours : seul un responsable peut le corriger (vous pouvez justifier une absence).'); }
+            && !array_diff(array_keys($champs), ['statut', 'motif', 'date', 'centre_id', 'seance_id', 'eleve_id', 'notifie']);
+        $simpleTrace = $existant && !array_diff(array_keys($champs), ['notifie', 'statut', 'date', 'centre_id', 'seance_id', 'eleve_id'])
+            && (!array_key_exists('statut', $champs) || $champs['statut'] === $existant['statut']);
+        if (!$justification && !$simpleTrace) { throw new DomainException('Appel de plus de 2 jours : seul un responsable peut le corriger (vous pouvez justifier une absence).'); }
     }
     // Retard : calculé ici, jamais cru sur parole.
     if (in_array($statut, ['present', 'retard'], true)) {

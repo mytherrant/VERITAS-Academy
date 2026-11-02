@@ -28,6 +28,9 @@ function g_schema(): array {
             'alerte_direction_min' => 'int:30',  // appel toujours pas fait → admin
             'jour_echeance'        => 'int:10',  // « les paiements se font au plus tard le 10 du mois »
             'ordre' => 'int',
+            // Modèles des messages aux parents ({eleve}, {parent}, {classe}, {date}, {horaire},
+            // {debut}, {arrivee}, {minutes}, {centre}, {tel_centre}). Vide = modèle par défaut.
+            'msg_absence' => 'text', 'msg_retard' => 'text',
         ] + G_COLS_SYNC, 'index' => [['rev']]],
 
         'g_annees' => ['cols' => [
@@ -111,6 +114,7 @@ function g_schema(): array {
         'g_presences' => ['cols' => [
             'id' => 'id', 'centre_id' => 'ref', 'seance_id' => 'ref', 'eleve_id' => 'ref', 'date' => 'str:10',
             'statut' => 'str:10', 'arrivee' => 'str:5', 'depart' => 'str:5', 'retard_min' => 'int', 'motif' => 'str:200',
+            'notifie' => 'str:40',              // « AAAA-MM-JJ HH:MM:SS whatsapp|sms » : message préparé au parent
         ] + G_COLS_SYNC, 'index' => [['seance_id'], ['eleve_id'], ['centre_id', 'date'], ['rev']], 'unique' => [['seance_id', 'eleve_id']]],
 
         // Opérations déjà appliquées : un envoi répété (réseau coupé au mauvais
@@ -133,7 +137,7 @@ function g_registre(): array {
         'centres' => [
             'table' => 'g_centres', 'portee' => 'id', 'lire' => 'centre.voir', 'ecrire' => 'admin',
             'champs' => ['nom', 'nom_court', 'adresse', 'telephones', 'devise', 'tolerance_retard_min',
-                         'alerte_appel_min', 'alerte_direction_min', 'jour_echeance', 'ordre'],
+                         'alerte_appel_min', 'alerte_direction_min', 'jour_echeance', 'ordre', 'msg_absence', 'msg_retard'],
         ],
         'annees' => [
             'table' => 'g_annees', 'portee' => null, 'lire' => 'tous', 'ecrire' => 'admin',
@@ -167,7 +171,7 @@ function g_registre(): array {
         ],
         'presences' => [
             'table' => 'g_presences', 'portee' => 'centre_id', 'lire' => 'centre.voir', 'ecrire' => 'appel.faire',
-            'champs' => ['centre_id', 'seance_id', 'eleve_id', 'date', 'statut', 'arrivee', 'depart', 'motif'],
+            'champs' => ['centre_id', 'seance_id', 'eleve_id', 'date', 'statut', 'arrivee', 'depart', 'motif', 'notifie'],
         ],
         'actionnaires' => [
             'table' => 'g_actionnaires', 'portee' => 'centre_id', 'lire' => 'finances.voir', 'ecrire' => 'admin',

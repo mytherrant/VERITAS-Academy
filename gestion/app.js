@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.5.0';
+  var VERSION = '0.6.0';
   var API = 'api/index.php';
   var INTERVALLE_SYNC = 25000;
   var VERROU_APRES_MS = 5 * 60 * 1000;
@@ -729,6 +729,9 @@
       h += '<div class="carte alerte-appel"><b>' + ico('alert', 'p') + ' Appels non faits</b><p class="doux">au-delà de ' + esc(centre.alerte_appel_min) + ' min après le début du cours</p>' +
         manquants.map(function (x) { var r = retardAppel(x, centre) + Number(centre.alerte_appel_min); return '<p>' + esc(x.classe.nom) + ' · depuis ' + heureLisible(x.debut) + (r >= Number(centre.alerte_direction_min) ? ' <span class="badge danger">direction alertée</span>' : '') + '</p>'; }).join('') + '</div>';
     }
+    var pointees = liste.filter(function (x) { return etatSeance(x).pointes; });
+    if (pointees.length > 1) h += '<div class="actions"><button class="btn clair" type="button" data-a="export-jour">' + ico('download', 'p') + 'Partager les ' + pointees.length + ' feuilles du jour</button></div>';
+    E.cache.appelsJour = pointees;
     h += '<div class="liste">' + liste.map(function (x) {
       var e = etatSeance(x);
       var close = x.existante && x.existante.statut === 'close';
@@ -780,6 +783,8 @@
         (p && p._attente ? '<span class="badge alerte">en attente</span>' : '') + '<span class="boutons">' + boutons + '</span></div>';
     }).join('') + '</div>';
     if (modifiable && eleves.length && !close) h += '<div class="actions"><button class="btn" type="button" data-a="clore-appel" data-seance="' + esc(x.id) + '">' + ico('checkcircle', 'p') + 'Clore l\'appel</button></div>';
+    if (e.pointes) h += '<div class="actions"><button class="btn or" type="button" data-a="ouvrir-export">' + ico('download', 'p') + 'Partager la feuille du jour</button></div>';
+    if (modifiable || justifiable) h += blocMessages(x);
     var se = x.existante || {};
     h += '<h2>Cahier de textes</h2><form data-f="cahier" data-seance="' + esc(x.id) + '"><label class="champ"><span>Ce qui a été fait</span><textarea name="contenu" rows="2"' + (modifiable ? '' : ' disabled') + '>' + esc(se.contenu || '') + '</textarea></label>' +
       '<label class="champ"><span>Travail donné</span><textarea name="travail" rows="2"' + (modifiable ? '' : ' disabled') + '>' + esc(se.travail || '') + '</textarea></label>' +
@@ -816,6 +821,223 @@
       '<label class="champ"><span>Motif ou justificatif</span><input type="text" name="motif" value="' + esc(p.motif || '') + '" placeholder="ex. : maladie, certificat médical"></label>' +
       '<div class="actions"><button class="btn" type="submit">Enregistrer</button>' + (p.id && correcteur(x.centre_id) ? '<button class="btn danger" type="button" data-a="suppr-presence" data-id="' + esc(p.id) + '">Effacer le pointage</button>' : '') +
       '<button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
+  }
+
+  // ───────────────────────────── Feuille du jour : image et PDF ─────────────────────────────
+  // Dessinée sur un canvas (Poppins, logo, couleurs du site), puis :
+  //  - PNG d'un seul tenant : ce qui passe le mieux dans un groupe WhatsApp ;
+  //  - PDF A4 : le JPEG de chaque page enveloppé dans un PDF écrit à la main.
+  // Aucune bibliothèque : marche hors ligne et sans CDN (la CSP n'autorise que 'self').
+  var LOGO = null;
+  function chargerLogo() {
+    if (LOGO) return Promise.resolve(LOGO);
+    return new Promise(function (ok) {
+      var i = new Image();
+      i.onload = function () { LOGO = i; ok(i); };
+      i.onerror = function () { ok(null); };
+      i.src = 'icone-512.png';
+    });
+  }
+  function lignesFeuille(x) {
+    var eleves = elevesActifs(x.centre_id).filter(function (e) { return e.classe_id === x.classe.id; });
+    presencesDe(x.id).forEach(function (p) { if (!eleves.some(function (e) { return e.id === p.eleve_id; })) { var e = ligne('eleves', p.eleve_id); if (e) eleves.push(e); } });
+    return eleves.sort(function (a, b) { return nomComplet(a).localeCompare(nomComplet(b), 'fr'); }).map(function (e) {
+      return { eleve: e, p: ligne('presences', idPresence(x.id, e.id)) || presencesDe(x.id).filter(function (q) { return q.eleve_id === e.id; })[0] || null };
+    });
+  }
+  var COUL = { present: '#17803D', retard: '#9A5B00', absent: '#B42318', justifie: '#6B7185' };
+
+  /** Dessine la feuille. hauteurMax : pour paginer en A4 ; sinon une seule grande image. */
+  function dessinerFeuillePresence(x, logo, debutLigne, maxLignes) {
+    var L = 1240, M = 70, H_LIGNE = 54;
+    var rows = lignesFeuille(x);
+    var tranche = rows.slice(debutLigne || 0, maxLignes ? (debutLigne || 0) + maxLignes : undefined);
+    var derniere = !maxLignes || (debutLigne || 0) + maxLignes >= rows.length;
+    var haut = maxLignes ? 1754 : 360 + tranche.length * H_LIGNE + 230;
+    var cv = document.createElement('canvas');
+    cv.width = L; cv.height = haut;
+    var g = cv.getContext('2d');
+    var centre = ligne('centres', x.centre_id) || {};
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, L, haut);
+    // En-tête : bande bleue profonde, logo, identité du centre.
+    g.fillStyle = '#0C2A6A'; g.fillRect(0, 0, L, 150);
+    if (logo) g.drawImage(logo, M, 25, 100, 100);
+    g.fillStyle = '#ffffff'; g.font = '600 38px Poppins, sans-serif'; g.fillText(centre.nom || 'VÉRITAS', M + 125, 70);
+    g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#C9D6F2';
+    var tels = String(centre.telephones || '').split('/').map(function (t) { return telLisible(t.replace(/\D+/g, '')); }).filter(Boolean).join(' / ');
+    g.fillText(texteCoupe(g, [centre.adresse, tels].filter(Boolean).join(' · '), L - M * 2 - 125), M + 125, 108);
+    g.fillStyle = '#FFC93C'; g.fillRect(0, 150, L, 6);
+    // Titre.
+    g.fillStyle = '#001136'; g.font = '600 34px Poppins, sans-serif';
+    g.fillText('Feuille de présence — ' + x.classe.nom, M, 220);
+    g.font = '400 24px Poppins, sans-serif'; g.fillStyle = '#4D5163';
+    var mat = x.creneaux.map(function (c) { return nomDe('matieres', c.matiere_id); }).filter(Boolean).join(', ');
+    g.fillText(texteCoupe(g, dateLongue(x.date).replace(/^./, function (c) { return c.toUpperCase(); }) + ' · cours de ' + heureLisible(x.debut) + ' à ' + heureLisible(x.fin) + (mat ? ' · ' + mat : ''), L - M * 2), M, 262);
+    if (maxLignes && rows.length > maxLignes) { g.textAlign = 'right'; g.fillText('page ' + (Math.floor((debutLigne || 0) / maxLignes) + 1) + ' / ' + Math.ceil(rows.length / maxLignes), L - M, 220); g.textAlign = 'left'; }
+    // Tableau.
+    var cols = [M, M + 70, M + 540, M + 690, M + 830];
+    var y = 310;
+    g.fillStyle = '#EEF3FC'; g.fillRect(M - 10, y, L - 2 * M + 20, 46);
+    g.fillStyle = '#0C2A6A'; g.font = '600 21px Poppins, sans-serif';
+    ['N°', 'Élève', 'Arrivée', 'Départ', 'Statut'].forEach(function (t, i) { g.fillText(t, cols[i], y + 31); });
+    y += 46;
+    tranche.forEach(function (r, i) {
+      var n = (debutLigne || 0) + i + 1;
+      if (i % 2) { g.fillStyle = '#F7F9FC'; g.fillRect(M - 10, y, L - 2 * M + 20, H_LIGNE); }
+      g.fillStyle = '#E1E6F0'; g.fillRect(M - 10, y + H_LIGNE - 1, L - 2 * M + 20, 1);
+      var p = r.p;
+      g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#6B7185'; g.fillText(String(n), cols[0], y + 35);
+      g.fillStyle = '#001136'; g.font = '500 23px Poppins, sans-serif'; g.fillText(texteCoupe(g, nomComplet(r.eleve), cols[2] - cols[1] - 20), cols[1], y + 35);
+      g.font = '400 23px Poppins, sans-serif';
+      g.fillText(p && p.arrivee ? p.arrivee.replace(':', ' h ') : '—', cols[2], y + 35);
+      g.fillText(p && p.depart ? p.depart.replace(':', ' h ') : '—', cols[3], y + 35);
+      var st = !p ? 'Non pointé' : LIB_STATUT[p.statut] + (Number(p.retard_min) ? ' (+' + p.retard_min + ' min)' : '');
+      g.fillStyle = p ? COUL[p.statut] : '#6B7185'; g.font = '600 22px Poppins, sans-serif';
+      g.fillText(texteCoupe(g, st, L - M - cols[4]), cols[4], y + 35);
+      y += H_LIGNE;
+    });
+    if (derniere) {
+      var e = etatSeance(x);
+      y += 40;
+      g.fillStyle = '#001136'; g.font = '600 24px Poppins, sans-serif';
+      g.fillText('Présents : ' + e.present + '    Retards : ' + e.retard + '    Absents : ' + (e.absent + e.justifie) + (e.justifie ? ' (dont ' + e.justifie + ' justifié' + (e.justifie > 1 ? 's' : '') + ')' : '') + '    Effectif : ' + rows.length, M, y);
+      var se = ligne('seances', x.id) || {};
+      if (se.travail) { y += 40; g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#4D5163'; g.fillText(texteCoupe(g, 'Travail donné : ' + se.travail, L - 2 * M), M, y); }
+    }
+    filigrane(g, x.classe.nom, L, haut);
+    g.font = '400 18px Poppins, sans-serif'; g.fillStyle = '#6B7185';
+    g.fillText('Édité le ' + new Date().toLocaleDateString('fr-FR') + ' à ' + heureLisible(heureMaintenant()) + ' par ' + E.profil.utilisateur.nom + ' · VÉRITAS Gestion', M, haut - 40);
+    return cv;
+  }
+  /**
+   * Filigrane : le nom de la classe en grand, en diagonale, très pâle, répété sur
+   * toute la hauteur. Une feuille partagée dans un groupe WhatsApp reste identifiable
+   * même recadrée, et ne se confond pas avec celle d'une autre classe.
+   */
+  function filigrane(g, texte, L, haut) {
+    g.save();
+    g.globalAlpha = 0.07;
+    g.fillStyle = '#0C2A6A';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    var taille = 150;
+    g.font = '600 ' + taille + 'px Poppins, sans-serif';
+    while (taille > 60 && g.measureText(texte).width > L * 1.05) { taille -= 10; g.font = '600 ' + taille + 'px Poppins, sans-serif'; }
+    for (var y = 620; y < haut - 120; y += 820) {
+      g.save(); g.translate(L / 2, y); g.rotate(-Math.PI / 7); g.fillText(texte, 0, 0); g.restore();
+    }
+    g.restore();
+  }
+  function texteCoupe(g, t, largeur) {
+    t = String(t || '');
+    if (g.measureText(t).width <= largeur) return t;
+    while (t.length > 1 && g.measureText(t + '…').width > largeur) t = t.slice(0, -1);
+    return t + '…';
+  }
+  function versBlob(cv, type, qualite) { return new Promise(function (ok) { cv.toBlob(ok, type, qualite); }); }
+  function nomFichier(x, ext) {
+    var base = ('presence-' + x.classe.nom + '-' + x.date).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9-]+/g, '-').replace(/-+/g, '-');
+    return base + '.' + ext;
+  }
+  function imageFeuille(x) {
+    return Promise.all([chargerLogo(), document.fonts ? document.fonts.load('600 24px Poppins') : null]).then(function (r) {
+      return versBlob(dessinerFeuillePresence(x, r[0]), 'image/png');
+    }).then(function (b) { return new File([b], nomFichier(x, 'png'), { type: 'image/png' }); });
+  }
+  /** PDF minimal : une page A4 par tranche de 24 élèves, chaque page = une image JPEG. */
+  function pdfFeuille(x) {
+    var PAR_PAGE = 24;
+    return Promise.all([chargerLogo(), document.fonts ? document.fonts.load('600 24px Poppins') : null]).then(function (r) {
+      var n = Math.max(1, Math.ceil(lignesFeuille(x).length / PAR_PAGE));
+      var pages = [];
+      for (var i = 0; i < n; i++) pages.push(dessinerFeuillePresence(x, r[0], i * PAR_PAGE, PAR_PAGE));
+      return Promise.all(pages.map(function (cv) { return versBlob(cv, 'image/jpeg', 0.9).then(function (b) { return b.arrayBuffer(); }).then(function (a) { return { cv: cv, jpeg: new Uint8Array(a) }; }); }));
+    }).then(function (pages) {
+      var morceaux = [], pos = 0, offsets = [];
+      var ecrire = function (t) { var b = typeof t === 'string' ? new TextEncoder().encode(t) : t; morceaux.push(b); pos += b.length; };
+      var objet = function (num, corps) { offsets[num] = pos; ecrire(num + ' 0 obj\n'); corps(); ecrire('\nendobj\n'); };
+      ecrire('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
+      var kids = pages.map(function (_, i) { return (3 + i * 3) + ' 0 R'; }).join(' ');
+      objet(1, function () { ecrire('<< /Type /Catalog /Pages 2 0 R >>'); });
+      objet(2, function () { ecrire('<< /Type /Pages /Kids [' + kids + '] /Count ' + pages.length + ' >>'); });
+      pages.forEach(function (pg, i) {
+        var nP = 3 + i * 3, nC = nP + 1, nI = nP + 2;
+        var contenu = 'q 595.28 0 0 841.89 0 0 cm /Im' + i + ' Do Q';
+        objet(nP, function () { ecrire('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im' + i + ' ' + nI + ' 0 R >> >> /Contents ' + nC + ' 0 R >>'); });
+        objet(nC, function () { ecrire('<< /Length ' + contenu.length + ' >>\nstream\n' + contenu + '\nendstream'); });
+        objet(nI, function () {
+          ecrire('<< /Type /XObject /Subtype /Image /Width ' + pg.cv.width + ' /Height ' + pg.cv.height + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + pg.jpeg.length + ' >>\nstream\n');
+          ecrire(pg.jpeg); ecrire('\nendstream');
+        });
+      });
+      var nb = 3 + pages.length * 3;
+      var xref = pos;
+      var t = 'xref\n0 ' + nb + '\n0000000000 65535 f \n';
+      for (var k = 1; k < nb; k++) t += ('000000000' + offsets[k]).slice(-10) + ' 00000 n \n';
+      ecrire(t + 'trailer\n<< /Size ' + nb + ' /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF\n');
+      return new File(morceaux, nomFichier(x, 'pdf'), { type: 'application/pdf' });
+    });
+  }
+  /** Partage natif (WhatsApp, etc.) si le téléphone sait partager des fichiers ; sinon téléchargement. */
+  function partagerFichiers(fichiers, titre) {
+    if (navigator.canShare && navigator.share && navigator.canShare({ files: fichiers })) {
+      return navigator.share({ files: fichiers, title: titre }).catch(function (e) { if (e && e.name !== 'AbortError') telecharger(fichiers); });
+    }
+    telecharger(fichiers);
+    return Promise.resolve();
+  }
+  function telecharger(fichiers) {
+    fichiers.forEach(function (f, i) {
+      setTimeout(function () {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(f); a.download = f.name;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+      }, i * 400);
+    });
+    toast(fichiers.length > 1 ? fichiers.length + ' fichiers enregistrés dans Téléchargements.' : 'Fichier enregistré dans Téléchargements.');
+  }
+  function feuilleExport(x) {
+    ouvrirFeuille('<h2>Partager la feuille du jour</h2><p class="doux">' + esc(x.classe.nom) + ' · ' + esc(dateLongue(x.date)) + '</p>' +
+      '<div class="liste"><button class="ligne" type="button" data-a="export" data-v="png"><span class="pastille">' + ico('camera') + '</span><span class="corps"><b>Image</b><small>Idéale pour le groupe WhatsApp des parents</small></span></button>' +
+      '<button class="ligne" type="button" data-a="export" data-v="pdf"><span class="pastille">' + ico('doc') + '</span><span class="corps"><b>PDF (A4)</b><small>À imprimer ou archiver</small></span></button></div>' +
+      '<div id="apercu-export"></div><div class="actions"><button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
+  }
+
+  // ───────────────────────────── Messages aux parents ─────────────────────────────
+  var MODELES = {
+    absence: 'Bonjour {parent}, le centre {centre} vous informe que {eleve} ({classe}) était absent(e) au cours du {date} ({horaire}). Merci de nous en indiquer le motif au {tel_centre}.',
+    retard: 'Bonjour {parent}, {eleve} ({classe}) est arrivé(e) à {arrivee} au cours du {date}, soit {minutes} min après le début ({debut}). Merci de veiller à sa ponctualité. {centre} — {tel_centre}'
+  };
+  function messageParent(x, p) {
+    var el = ligne('eleves', p.eleve_id) || {};
+    var c = ligne('centres', x.centre_id) || {};
+    var modele = (p.statut === 'retard' ? c.msg_retard : c.msg_absence) || MODELES[p.statut === 'retard' ? 'retard' : 'absence'];
+    var v = {
+      eleve: nomComplet(el), parent: el.parent_nom || 'cher parent', classe: x.classe.nom, date: dateLongue(x.date), horaire: heureLisible(x.debut) + ' – ' + heureLisible(x.fin),
+      debut: heureLisible(x.debut), arrivee: heureLisible(p.arrivee), minutes: String(p.retard_min || 0), centre: c.nom || 'VÉRITAS',
+      tel_centre: telLisible(String(c.telephones || '').split('/')[0].replace(/\D+/g, ''))
+    };
+    return modele.replace(/\{(\w+)\}/g, function (m, k) { return v[k] != null ? v[k] : m; });
+  }
+  function blocMessages(x) {
+    var l = presencesDe(x.id).filter(function (p) { return p.statut === 'absent' || p.statut === 'retard'; })
+      .map(function (p) { return { p: p, el: ligne('eleves', p.eleve_id) }; }).filter(function (r) { return r.el; })
+      .sort(function (a, b) { return nomComplet(a.el).localeCompare(nomComplet(b.el), 'fr'); });
+    if (!l.length) return '';
+    var nonFaits = l.filter(function (r) { return !r.p.notifie; }).length;
+    return '<h2>Messages aux parents</h2><p class="sous-titre">' + l.length + ' absent' + (l.length > 1 ? 's ou retardataires' : ' ou retardataire') + (nonFaits ? ' · ' + nonFaits + ' message' + (nonFaits > 1 ? 's' : '') + ' à envoyer' : ' · tous préparés') + '</p><div class="liste">' +
+      l.map(function (r) {
+        var tel = r.el.parent_whatsapp || r.el.parent_tel;
+        var sms = r.el.parent_tel || r.el.parent_whatsapp;
+        var txt = messageParent(x, r.p);
+        var trace = r.p.notifie ? '<small class="st-present">' + ico('check', 'p') + ' préparé à ' + esc(String(r.p.notifie).slice(11, 16).replace(':', ' h ')) + ' (' + (/sms$/.test(r.p.notifie) ? 'SMS' : 'WhatsApp') + ')</small>' : '';
+        return '<div class="ligne message"><span class="corps"><b>' + esc(nomComplet(r.el)) + '</b><small class="st-' + r.p.statut + '">' + (r.p.statut === 'retard' ? 'retard de ' + r.p.retard_min + ' min' : 'absent(e)') + '</small>' + trace + '</span>' +
+          (tel || sms ? '<span class="boutons">' +
+            (tel ? '<a class="btn clair petit" target="_blank" rel="noopener" data-a="msg-parent" data-canal="whatsapp" data-id="' + esc(r.p.id) + '" href="https://wa.me/237' + esc(tel) + '?text=' + encodeURIComponent(txt) + '">' + ico('message', 'p') + 'WhatsApp</a>' : '') +
+            (sms ? '<a class="btn clair petit" data-a="msg-parent" data-canal="sms" data-id="' + esc(r.p.id) + '" href="sms:+237' + esc(sms) + '?body=' + encodeURIComponent(txt) + '">SMS</a>' : '') + '</span>'
+            : '<span class="doux">pas de numéro</span>') + '</div>';
+      }).join('') + '</div>';
   }
 
   // ───────────────────────────── Assiduité ─────────────────────────────
@@ -1437,6 +1659,9 @@
       '<label class="champ"><span>Échéance : le … du mois</span><input type="number" name="jour_echeance" min="1" max="28" required value="' + n('jour_echeance') + '"></label></div>' +
       '<div class="deux"><label class="champ"><span>Appel non fait : alerte responsable après (min)</span><input type="number" name="alerte_appel_min" min="5" max="120" required value="' + n('alerte_appel_min') + '"></label>' +
       '<label class="champ"><span>Puis alerte administrateur après (min)</span><input type="number" name="alerte_direction_min" min="5" max="240" required value="' + n('alerte_direction_min') + '"></label></div>' +
+      '<h3>Messages aux parents</h3><p class="doux">Variables : {eleve} {parent} {classe} {date} {horaire} {debut} {arrivee} {minutes} {centre} {tel_centre}. Laisser vide pour le modèle par défaut.</p>' +
+      '<label class="champ"><span>Absence</span><textarea name="msg_absence" rows="3" placeholder="' + esc(MODELES.absence) + '">' + n('msg_absence') + '</textarea></label>' +
+      '<label class="champ"><span>Retard</span><textarea name="msg_retard" rows="3" placeholder="' + esc(MODELES.retard) + '">' + n('msg_retard') + '</textarea></label>' +
       '<div class="actions"><button class="btn" type="submit">Enregistrer</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
   }
 
@@ -1510,6 +1735,33 @@
         : v === 'depart' ? { depart: heureMaintenant(), statut: p.statut, arrivee: p.arrivee }
         : { statut: 'absent', motif: '' };
       pointer(x, el.dataset.eleve, champs).then(rendre);
+    },
+    'ouvrir-export': function () { feuilleExport(E.cache.pointage); },
+    export: function (el) {
+      var x = E.cache.pointage;
+      el.disabled = true;
+      (el.dataset.v === 'pdf' ? pdfFeuille(x) : imageFeuille(x)).then(function (f) {
+        el.disabled = false;
+        E.cache.dernierExport = f;
+        return partagerFichiers([f], 'Feuille de présence — ' + x.classe.nom);
+      }).catch(function (e) { el.disabled = false; toast('Export impossible : ' + (e && e.message), true); });
+    },
+    'export-jour': function (el) {
+      var l = E.cache.appelsJour || [];
+      el.disabled = true;
+      toast('Préparation de ' + l.length + ' feuilles…');
+      Promise.all(l.map(imageFeuille)).then(function (fichiers) {
+        el.disabled = false;
+        E.cache.dernierExport = fichiers;
+        return partagerFichiers(fichiers, 'Feuilles de présence du ' + dateLongue(APL.date));
+      }).catch(function (e) { el.disabled = false; toast('Export impossible : ' + (e && e.message), true); });
+    },
+    'msg-parent': function (el, ev) {
+      // Le lien s'ouvre (WhatsApp, SMS) ; on note seulement qu'un message a été préparé.
+      var href = el.getAttribute('href');
+      if (el.dataset.canal === 'whatsapp') window.open(href, '_blank', 'noopener'); else location.href = href;
+      var p = ligne('presences', el.dataset.id);
+      if (p) muter('presences', p.id, { notifie: maintenantSql() + ' ' + el.dataset.canal, statut: p.statut }).then(rendre);
     },
     'detail-presence': function (el) { feuillePresence(E.cache.pointage, el.dataset.eleve); },
     'suppr-presence': function (el) { confirmer('Effacer ce pointage ?', 'Effacer', function () { muter('presences', el.dataset.id, {}, true).then(rendre); }); },
@@ -1654,7 +1906,7 @@
       var id = form.dataset.id || nouvelId();
       var champs = {
         nom: v.nom, nom_court: v.nom_court, adresse: v.adresse, telephones: v.telephones, devise: v.devise,
-        tolerance_retard_min: +v.tolerance_retard_min, jour_echeance: +v.jour_echeance,
+        tolerance_retard_min: +v.tolerance_retard_min, jour_echeance: +v.jour_echeance, msg_absence: v.msg_absence, msg_retard: v.msg_retard,
         alerte_appel_min: +v.alerte_appel_min, alerte_direction_min: +v.alerte_direction_min
       };
       if (!form.dataset.id) champs.ordre = lignes('centres').length + 1;

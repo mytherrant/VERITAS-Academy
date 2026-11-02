@@ -312,3 +312,10 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.45; }
 .stats.petites { grid-template-columns: repeat(3, 1fr); }
 .stats.petites b { font-size: 18px; }
 @media (min-width: 640px) { .stats { grid-template-columns: repeat(4, 1fr); } }
+
+/* ── Messages aux parents ── */
+.ligne.message { flex-wrap: wrap; cursor: default; }
+.ligne.message .corps small { display: flex; align-items: center; gap: 4px; }
+.ligne.message .boutons { gap: 6px; }
+.ligne.message .boutons .btn { min-height: 38px; }
+@media (max-width: 380px) { .ligne.message .boutons { width: 100%; } .ligne.message .boutons .btn { flex: 1; } }
