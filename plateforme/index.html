@@ -1384,7 +1384,6 @@
       <button title="Cours" aria-label="Cours" onClick="{{ goCours }}" style="{{ sbCours }}" style-hover="background:var(--sb-hover)">{{ sbIcCours }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Cours</span></button>
       <button title="Progressions" aria-label="Progressions" onClick="{{ goProgressions }}" style="{{ sbProgressions }}" style-hover="background:var(--sb-hover)">{{ sbIcProg }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Progressions</span></button>
       <button title="Suivi" aria-label="Suivi" onClick="{{ goSuivi }}" style="{{ sbSuivi }}" style-hover="background:var(--sb-hover)">{{ sbIcSuivi }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Suivi</span><span style="{{ sbSuiviBadge }}">{{ suiviRetardsN }}</span></button>
-      <button title="Notes" aria-label="Notes" onClick="{{ goNotes }}" style="{{ sbNotes }}" style-hover="background:var(--sb-hover)">{{ sbIcNotes }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Notes</span></button>
       <button title="Équipe" aria-label="Équipe" onClick="{{ goCollab }}" style="{{ sbCollab }}" style-hover="background:var(--sb-hover)">{{ sbIcCollab }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Équipe</span><span style="{{ sbMsgBadge }}">{{ msgCount }}</span></button>
     </nav>
 
@@ -2310,7 +2309,6 @@
         <button onClick="{{ epTabComparer }}" style="{{ epTabCompStyle }}">{{ epTabCompIcon }} Comparer</button>
         <button onClick="{{ epTabPropositions }}" style="{{ epTabPropStyle }}">{{ epTabPropIcon }} Propositions <span style="{{ epPropBadge }}">{{ epPropCount }}</span></button>
         <button onClick="{{ epTabLivrables }}" style="{{ epTabLivStyle }}">{{ epTabLivIcon }} Livrables</button>
-        <button onClick="{{ epTabNotes }}" style="{{ epTabNotesStyle }}" title="Saisir les notes de cette épreuve">{{ epTabNotesIcon }} Notes</button>
       </div>
       <sc-if value="{{ tabEdition }}" hint-placeholder-val="{{ true }}">
       <div class="vrt-col2 vrt-compo-grille" style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
@@ -3206,8 +3204,7 @@
   <main style="flex:1;max-width:1360px;margin:0 auto;padding:28px 30px 48px;width:100%">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
       <h1 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Suivi</h1>
-      <button onClick="{{ goNotes }}" style="margin-left:auto;background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:7px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer">Notes des épreuves</button>
-      <button onClick="{{ goProgressions }}" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:7px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer">Progressions et mes classes</button>
+      <button onClick="{{ goProgressions }}" style="margin-left:auto;background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:7px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer">Progressions et mes classes</button>
     </div>
     <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 16px;max-width:86ch;line-height:1.55">Échéances déduites des progressions de vos classes et du calendrier officiel ; chaque ligne dit où en est l’épreuve qui y répond.</p>
     <div style="{{ suiviVideStyle }}">
@@ -3230,7 +3227,7 @@
         <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-left:auto">
           <button onClick="{{ suiviVueListe }}" style="{{ suiviVueListeStyle }}">Échéances</button>
           <button onClick="{{ suiviVueMois }}" style="{{ suiviVueMoisStyle }}">Calendrier</button>
-          <button onClick="{{ suiviVueCouv }}" style="{{ suiviVueCouvStyle }}" title="Séquences évaluées, notées, ou restées sans évaluation">Couverture</button>
+          <button onClick="{{ suiviVueCouv }}" style="{{ suiviVueCouvStyle }}" title="Séquences évaluées, sujets validés, ou restées sans évaluation">Couverture</button>
         </div>
       </div>
 
@@ -3272,7 +3269,7 @@
       </sc-if>
       <!-- Couverture du programme (lot L, 02/11/2026) — d'après « Couverture
            du programme » et « Contenus non évalués » de Tchouskou : pour
-           chaque séquence de mes classes, a-t-elle été évaluée, notée, ou
+           chaque séquence de mes classes, son sujet est-il prêt, validé, ou
            son évaluation est-elle passée sans épreuve ? -->
       <sc-if value="{{ suiviEnCouv }}" hint-placeholder-val="{{ false }}">
         <sc-for list="{{ couvGroupes }}" as="cg" hint-placeholder-count="1">
@@ -3289,113 +3286,6 @@
           </section>
         </sc-for>
       </sc-if>
-    </div>
-  </main>
-  </sc-if>
-
-  <!-- ============ NOTES DES ÉPREUVES (02/11/2026, lot K) ============
-       D'après « Notes des épreuves » de Tchouskou : une feuille de notes par
-       épreuve, la correction PAR QUESTION sur le barème de l'épreuve, les
-       statistiques de la classe, les élèves en alerte (sous 8), l'export
-       tableur et un procès-verbal à signer. Les notes restent sur l'appareil. -->
-  <sc-if value="{{ isNotes }}" hint-placeholder-val="{{ false }}">
-  <main style="flex:1;max-width:1360px;margin:0 auto;padding:28px 30px 48px;width:100%">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
-      <h1 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Notes des épreuves</h1>
-      <button onClick="{{ goSuivi }}" style="margin-left:auto;background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:7px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer">Suivi et couverture</button>
-    </div>
-    <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 16px;max-width:86ch;line-height:1.55">Saisissez les notes d’une épreuve, globalement ou question par question sur son barème : moyenne, écart-type, répartition, questions les moins réussies et élèves en alerte se calculent seuls. Les notes restent sur cet appareil ; exportez-les pour les conserver.</p>
-    <div style="{{ ntVideStyle }}">
-      <div style="font-family:Poppins;font-size:14px;font-weight:700;color:var(--c14375f,#14375f)">Aucune épreuve à noter</div>
-      <div style="font-size:12.5px;color:var(--c5a6678,#5a6678);margin:4px 0 10px">Composez d’abord une épreuve : sa feuille de notes s’ouvrira ici.</div>
-      <button onClick="{{ goEpreuves }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:8px 14px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">Mes épreuves</button>
-    </div>
-    <div style="{{ ntCorpsStyle }}">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
-        <select value="{{ ntEpId }}" onChange="{{ setNtEp }}" aria-label="Épreuve" style="flex:1;min-width:220px;max-width:520px;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;padding:8px 10px;font-size:13px;font-weight:700;color:var(--c14375f,#14375f);background:var(--cffffff,#fff)"><sc-for list="{{ ntEpOptions }}" as="o" hint-placeholder-count="3"><option value="{{ o.id }}">{{ o.label }}</option></sc-for></select>
-        <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px">
-          <button onClick="{{ ntModeGlobal }}" style="{{ ntModeGlobalStyle }}">Note globale</button>
-          <button onClick="{{ ntModeQuestion }}" style="{{ ntModeQuestionStyle }}">Par question</button>
-        </div>
-        <button onClick="{{ ntOuvrirEp }}" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">Ouvrir l’épreuve</button>
-        <button onClick="{{ ntCsv }}" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:7px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">Exporter (tableur)</button>
-        <button onClick="{{ ntPV }}" style="background:var(--c14375f,#14375f);border:1px solid var(--c14375f,#14375f);color:var(--cffffff,#fff);padding:7px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">Procès-verbal</button>
-      </div>
-      <div style="font-size:12px;color:var(--c8b97a8,#8b97a8);margin:0 0 12px">{{ ntEpInfo }}</div>
-      <div style="{{ ntBaremeAvisStyle }}">{{ ntBaremeAvis }}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;margin-bottom:14px">
-        <sc-for list="{{ ntTuiles }}" as="t" hint-placeholder-count="6">
-          <div style="{{ t.style }}"><span style="{{ t.chiffre }}">{{ t.n }}</span><span style="display:block;font-size:11.5px;color:var(--c5a6678,#5a6678);margin-top:4px;font-weight:600">{{ t.label }}</span></div>
-        </sc-for>
-      </div>
-
-      <section style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:12px 14px;margin-bottom:14px">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
-          <span style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c14375f,#14375f)">Feuille de notes</span>
-          <span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ ntSousFeuille }}</span>
-          <select value="" onChange="{{ ntReprendre }}" aria-label="Reprendre une liste d’élèves" style="{{ ntReprendreStyle }}"><option value="">Reprendre la liste d’une autre épreuve…</option><sc-for list="{{ ntReprendreOptions }}" as="o" hint-placeholder-count="2"><option value="{{ o.id }}">{{ o.label }}</option></sc-for></select>
-          <button onClick="{{ ntTrier }}" style="{{ ntTrierStyle }}">Trier A → Z</button>
-          <button onClick="{{ ntVider }}" style="{{ ntViderStyle }}">{{ ntViderLabel }}</button>
-        </div>
-        <div style="{{ ntAucunEleveStyle }}">Collez ci-dessous la liste de la classe, un élève par ligne (copiée d’un tableur ou d’un document : les numéros d’ordre sont retirés).</div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-          <div style="{{ ntTableStyle }}">
-            <div style="{{ ntGrille }};padding:4px 2px 6px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--c8b97a8,#8b97a8)">
-              <span style="text-align:right">N°</span><span>Élève</span><span>Présence</span>
-              <sc-for list="{{ ntCols }}" as="hc" hint-placeholder-count="3"><span title="{{ hc.titre }}" style="text-align:center;line-height:1.2">{{ hc.lib }}<span style="display:block;font-weight:600;text-transform:none;letter-spacing:0">{{ hc.sous }}</span></span></sc-for>
-              <span style="{{ ntHNoteStyle }}">Note /20</span><span style="{{ ntHTotalStyle }}">{{ ntTotalLabel }}</span><span style="{{ ntHSur20Style }}">/20</span>
-              <span>Appréciation</span><span></span>
-            </div>
-            <sc-for list="{{ ntLignes }}" as="l" hint-placeholder-count="3">
-              <div style="{{ ntGrille }};padding:5px 2px;border-top:1px solid var(--ceef2f7,#eef2f7)">
-                <span style="font-size:12px;color:var(--c8b97a8,#8b97a8);text-align:right">{{ l.n }}</span>
-                <input value="{{ l.nom }}" onChange="{{ l.setNom }}" aria-label="Nom de l’élève" style="{{ l.nomStyle }}">
-                <select value="{{ l.etat }}" onChange="{{ l.setEtat }}" aria-label="Présence" style="{{ l.etatStyle }}"><option value="p">Présent</option><option value="abs">Absent</option><option value="nr">Copie non rendue</option></select>
-                <sc-for list="{{ l.cases }}" as="c" hint-placeholder-count="3"><input value="{{ c.v }}" onChange="{{ c.set }}" type="number" step="0.25" min="0" max="{{ c.max }}" title="{{ c.titre }}" aria-label="{{ c.titre }}" disabled="{{ l.off }}" style="{{ c.style }}"></sc-for>
-                <input value="{{ l.note }}" onChange="{{ l.setNote }}" type="number" step="0.25" min="0" max="20" aria-label="Note sur 20" disabled="{{ l.off }}" style="{{ l.noteStyle }}">
-                <span style="{{ l.totalStyle }}">{{ l.total }}</span>
-                <span style="{{ l.sur20Style }}">{{ l.sur20 }}</span>
-                <input value="{{ l.comm }}" onChange="{{ l.setComm }}" placeholder="Appréciation portée sur la copie" aria-label="Appréciation" disabled="{{ l.off }}" style="{{ l.commStyle }}">
-                <button onClick="{{ l.suppr }}" title="{{ l.supprTitre }}" aria-label="{{ l.supprTitre }}" style="{{ l.supprStyle }}">{{ l.supprTexte }}</button>
-              </div>
-            </sc-for>
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;margin-top:10px">
-          <textarea value="{{ ntListe }}" onChange="{{ setNtListe }}" rows="3" placeholder="NGONO Marie&#10;ETOA Paul&#10;…" aria-label="Liste d’élèves à ajouter" style="flex:1;min-width:220px;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);resize:vertical"></textarea>
-          <button onClick="{{ ntAjouter }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:9px 14px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">Ajouter à la feuille</button>
-        </div>
-      </section>
-
-      <div style="{{ ntAnalyseStyle }}">
-        <section style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:12px 14px">
-          <div style="font-family:Poppins;font-size:14px;font-weight:700;color:var(--c14375f,#14375f);margin-bottom:10px">Répartition des notes</div>
-          <div style="display:flex;align-items:flex-end;gap:8px;height:130px;padding-top:4px">
-            <sc-for list="{{ ntTranches }}" as="tr" hint-placeholder-count="7">
-              <div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%"><span style="font-size:11px;font-weight:700;color:var(--c22303f,#22303f)">{{ tr.n }}</span><span style="{{ tr.barre }}"></span><span style="font-size:9.5px;line-height:1.15;color:var(--c8b97a8,#8b97a8);margin-top:4px;text-align:center;overflow-wrap:anywhere">{{ tr.lib }}</span></div>
-            </sc-for>
-          </div>
-        </section>
-        <section style="{{ ntItemsStyle }}">
-          <div style="font-family:Poppins;font-size:14px;font-weight:700;color:var(--c14375f,#14375f);margin-bottom:2px">Réussite par question</div>
-          <div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin-bottom:8px">Des moins réussies aux mieux réussies : les premières sont à reprendre en remédiation.</div>
-          <sc-for list="{{ ntItemsStats }}" as="it" hint-placeholder-count="4">
-            <div style="display:flex;align-items:center;gap:8px;padding:4px 0" title="{{ it.titre }}">
-              <span style="width:44px;flex:none;font-family:Poppins;font-size:12px;font-weight:700;color:var(--c14375f,#14375f)">{{ it.lib }}</span>
-              <span style="flex:1;min-width:0;font-size:11.5px;color:var(--c5a6678,#5a6678);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ it.titre }}</span>
-              <span style="width:90px;flex:none;height:8px;border-radius:999px;background:var(--ceef2f7,#eef2f7);overflow:hidden"><span style="{{ it.barre }}"></span></span>
-              <span style="{{ it.tauxStyle }}">{{ it.taux }}</span>
-            </div>
-          </sc-for>
-        </section>
-        <section style="{{ ntAlertesStyle }}">
-          <div style="font-family:Poppins;font-size:14px;font-weight:700;color:var(--cc0392b,#c0392b);margin-bottom:2px">Élèves en alerte</div>
-          <div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin-bottom:8px">Note sous 8/20, ou copie non rendue.</div>
-          <sc-for list="{{ ntAlertes }}" as="al" hint-placeholder-count="3">
-            <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--ceef2f7,#eef2f7)"><span style="flex:1;font-size:12.5px;font-weight:700;color:var(--c22303f,#22303f)">{{ al.nom }}</span><span style="font-size:12px;font-weight:700;color:var(--cc0392b,#c0392b)">{{ al.note }}</span></div>
-          </sc-for>
-        </section>
-      </div>
     </div>
   </main>
   </sc-if>
@@ -9038,85 +8928,6 @@ class Component extends DCLogic {
     }));
     return out.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
   }
-  /* ── Notes des épreuves (lot K, 02/11/2026) ──────────────────────────
-     Feuilles de notes par épreuve, dans `minesec_notes` : {epId:{parQ,
-     eleves:[{id,nom,etat:'p'|'abs'|'nr',note,pts:{clé:valeur},comm}],maj}}.
-     Données d'élèves : ni `_persist()`, ni synchro, ni équipe. */
-  _notesTout(){if(!this.__notes){const v=this._load('minesec_notes',{});this.__notes=(v&&typeof v==='object'&&!Array.isArray(v))?v:{};}return this.__notes;}
-  _notesMaj(epId,fn){const T={...this._notesTout()};const f=T[epId]||{parQ:false,eleves:[]};T[epId]={...fn(f),maj:Date.now()};this.__notes=T;this._save('minesec_notes',T);this.setState({notesV:Date.now()});}
-  _ouvrirNotes(epId){this.setState({ntEpId:epId,ntVider:false,ntSuppr:'',screen:'notes',notifOpen:false});if(typeof window!=='undefined')window.scrollTo(0,0);}
-  /* Les éléments notés d'une épreuve, dans l'ordre du sujet : les questions
-     (numérotées Q1, Q2… à travers les textes), les sujets imposés, puis UN
-     sujet au choix (l'élève n'en traite qu'un). */
-  _notesItems(ep){const items=[];if(!ep)return items;let q=0;
-    (ep.textIds||[]).forEach(n=>{const f=this.all.find(x=>x.n===n);if(!f)return;
-      ['comp','expl'].forEach(k=>{this._qListOf(ep,f,k).forEach((txt,i)=>{q++;
-        const t=(ep.pts&&ep.pts[n]&&ep.pts[n][k])?ep.pts[n][k][i]:null;const p=parseFloat(t);
-        items.push({k:n+'.'+k+'.'+i,lib:'Q'+q,titre:(k==='comp'?'Compréhension':'Exploitation')+' — '+String(txt||'').replace(/\s+/g,' ').trim().slice(0,160),max:isFinite(p)&&p>0?p:0});});});});
-    let choix=0;(ep.sujets||[]).forEach((s,i)=>{if(!s)return;const p=parseFloat(s.pts)||0;
-      if(s.auChoix)choix=Math.max(choix,p);
-      else if(p>0)items.push({k:'s'+i,lib:'S'+(i+1),titre:'Sujet — '+String(s.texte||'').replace(/\s+/g,' ').trim().slice(0,160),max:p});});
-    if(choix>0)items.push({k:'sc',lib:'PE',titre:'Production écrite — sujet au choix',max:choix});
-    return items;}
-  /* Note d'un élève. Par question : somme des points saisis, chacun borné à
-     son barème, ramenée sur 20. Absent ou copie non rendue : pas de note. */
-  _noteEleve(el,items,parQ,bareme){
-    const vide={total:null,sur20:null};
-    if(!el||el.etat==='abs'||el.etat==='nr')return vide;
-    const num=v=>{if(v===''||v===null||v===undefined)return null;const x=parseFloat(String(v).replace(',','.'));return isFinite(x)?x:null;};
-    if(parQ){let t=0,n=0;(items||[]).forEach(it=>{const v=num((el.pts||{})[it.k]);if(v!==null){t+=Math.min(Math.max(v,0),it.max||v);n++;}});
-      if(!n)return vide;t=Math.round(t*100)/100;return{total:t,sur20:bareme>0?Math.round(t/bareme*2000)/100:null};}
-    const v=num(el.note);if(v===null)return vide;const c=Math.min(Math.max(v,0),20);return{total:c,sur20:c};}
-  _statsNotes(a){const n=a.length;if(!n)return{n:0,moy:null,med:null,min:null,max:null,et:null,reussite:0};
-    const s=a.slice().sort((x,y)=>x-y);const moy=s.reduce((t,x)=>t+x,0)/n;
-    const med=n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2;
-    const et=Math.sqrt(s.reduce((t,x)=>t+(x-moy)*(x-moy),0)/n);
-    return{n,moy,med,min:s[0],max:s[n-1],et,reussite:s.filter(x=>x>=10).length/n};}
-  /* Une liste collée depuis un tableur ou un document : un élève par ligne,
-     numéro d'ordre et colonnes suivantes retirés, en-têtes ignorés. */
-  _nomsDeListe(txt){const out=[];String(txt||'').split(/\r?\n/).forEach(l=>{
-      let s=l.split(/\t|;/)[0].replace(/^\s*(?:n[°o]\s*)?\d+\s*[.)\-–:]?\s+/i,'').replace(/^[\s•·*\-–]+/,'').replace(/\s+/g,' ').trim();
-      if(!s||/^(n[°o]|noms?|[ée]l[èe]ves?|pr[ée]noms?)(?=[\s.:;,]|$)/i.test(s)||/^\d+$/.test(s))return;
-      if(out.map(x=>x.toLowerCase()).indexOf(s.toLowerCase())<0)out.push(s);});
-    return out;}
-  _notesFichier(ep,ext){return 'Notes_'+String((ep&&ep.title)||'epreuve').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,60)+'.'+ext;}
-  _notesTelecharger(nom,txt,type){try{const b=new Blob([txt],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=nom;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove();},1000);}catch(e){}}
-  _notesCsv(ep){const f=this._notesTout()[ep.id]||{parQ:false,eleves:[]};const items=this._notesItems(ep);
-    const bareme=items.reduce((s,x)=>s+(x.max||0),0);const parQ=!!f.parQ&&bareme>0;
-    const c=v=>{const s=(v===null||v===undefined)?'':String(v);return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
-    const d=x=>(x===null||x===undefined)?'':String(Math.round(x*100)/100).replace('.',',');
-    const etat={p:'présent',abs:'absent',nr:'copie non rendue'};
-    const lignes=[['N°','Élève','Présence'].concat(parQ?items.map(it=>it.lib+' (/'+d(it.max)+')'):[]).concat(parQ?['Total (/'+d(bareme)+')']:[]).concat(['Note /20','Appréciation'])];
-    (f.eleves||[]).forEach((el,i)=>{const r=this._noteEleve(el,items,parQ,bareme);
-      lignes.push([i+1,el.nom||'',etat[el.etat||'p']].concat(parQ?items.map(it=>{const v=(el.pts||{})[it.k];const x=(v===undefined||v===null||v==='')?NaN:parseFloat(String(v).replace(',','.'));return isFinite(x)?d(x):'';}):[]).concat(parQ?[d(r.total)]:[]).concat([d(r.sur20),el.comm||'']));});
-    this._notesTelecharger(this._notesFichier(ep,'csv'),'﻿'+lignes.map(l=>l.map(c).join(';')).join('\r\n'),'text/csv;charset=utf-8');}
-  /* Procès-verbal à imprimer et signer, comme « Établir le procès-verbal »
-     de Tchouskou : en-tête de l'épreuve, statistiques, liste des notes. */
-  _notesPV(ep){const f=this._notesTout()[ep.id]||{parQ:false,eleves:[]};const items=this._notesItems(ep);
-    const bareme=items.reduce((s,x)=>s+(x.max||0),0);const parQ=!!f.parQ&&bareme>0;
-    const E=s=>String(s===null||s===undefined?'':s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
-    const d=x=>(x===null||x===undefined)?'—':String(Math.round(x*100)/100).replace('.',',');
-    const rows=(f.eleves||[]).map(el=>({el,r:this._noteEleve(el,items,parQ,bareme)}));
-    const S=this._statsNotes(rows.filter(x=>x.r.sur20!==null).map(x=>x.r.sur20));
-    const me=this._me()||{};const auj=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-    const etat={abs:'absent',nr:'copie non rendue'};
-    const html='<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>'+E('Procès-verbal — '+(ep.title||'Épreuve'))+'</title><style>'
-      +'body{font-family:Georgia,"Times New Roman",serif;color:#14243a;margin:28px 34px;font-size:12.5px}h1{font-size:19px;margin:0 0 2px;color:#142554}'
-      +'.s{color:#5a6678;margin:0 0 14px}.g{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 14px;border:1px solid #cdd9e6;border-radius:8px;padding:10px 12px;margin-bottom:14px}'
-      +'.g b{display:block;font-size:15px;color:#142554}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cdd9e6;padding:5px 7px;text-align:left}th{background:#f2f6fb;font-size:11px;text-transform:uppercase;letter-spacing:.04em}'
-      +'td.n{text-align:center;font-weight:700;white-space:nowrap}.sig{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:34px}.sig div{border-top:1px solid #14243a;padding-top:6px;min-height:60px}'
-      +'.pied{margin-top:26px;font-size:10.5px;color:#7a8598;text-align:center}@media print{body{margin:12mm}}</style></head><body>'
-      +'<div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#a07a12;font-weight:700">Procès-verbal de notes</div>'
-      +'<h1>'+E(ep.title||'Épreuve')+'</h1><p class="s">'+E([ep.etab,ep.classe,ep.date,ep.duree?'durée '+ep.duree:'',ep.coeff?'coefficient '+ep.coeff:''].filter(Boolean).join(' · '))+'</p>'
-      +'<div class="g"><span>Effectif<b>'+rows.length+'</b></span><span>Notés<b>'+S.n+'</b></span><span>Absents<b>'+rows.filter(x=>x.el.etat==='abs').length+'</b></span><span>Copies non rendues<b>'+rows.filter(x=>x.el.etat==='nr').length+'</b></span>'
-      +'<span>Moyenne<b>'+d(S.moy)+'/20</b></span><span>Médiane<b>'+d(S.med)+'</b></span><span>Min – max<b>'+(S.n?d(S.min)+' – '+d(S.max):'—')+'</b></span><span>Au moins 10/20<b>'+(S.n?Math.round(S.reussite*100)+' %':'—')+'</b></span></div>'
-      +'<table><thead><tr><th style="width:34px">N°</th><th>Élève</th>'+(parQ?'<th>Total /'+d(bareme)+'</th>':'')+'<th>Note /20</th><th>Appréciation</th></tr></thead><tbody>'
-      +rows.map((x,i)=>'<tr><td class="n">'+(i+1)+'</td><td>'+E(x.el.nom)+'</td>'+(parQ?'<td class="n">'+(etat[x.el.etat]?'':d(x.r.total))+'</td>':'')+'<td class="n">'+(etat[x.el.etat]?E(etat[x.el.etat]):d(x.r.sur20))+'</td><td>'+E(x.el.comm)+'</td></tr>').join('')
-      +'</tbody></table><div class="sig"><div>Le correcteur'+(me.name?' : '+E(me.name):'')+'<br><small>Date et signature</small></div><div>Visa du chef d’établissement ou du censeur</div></div>'
-      +'<div class="pied">Établi le '+E(auj)+' avec l’Atelier de français — Centre VÉRITAS</div></body></html>';
-    let w=null;try{w=window.open('','_blank');}catch(e){}
-    if(!w){this._notesTelecharger(this._notesFichier(ep,'html').replace(/^Notes_/,'PV_'),html,'text/html;charset=utf-8');return;}
-    w.document.open();w.document.write(html);w.document.close();setTimeout(()=>{try{w.focus();w.print();}catch(e){}},400);}
   _contenusSeq(sq,jusqua){const out=[];(sq&&sq.semaines||[]).filter(w=>w.n<=(jusqua||3)).forEach(w=>(w.contenus||[]).forEach(c=>{if(c&&out.indexOf(c)<0)out.push(c);}));return out;}
   /* Évaluation d'une séquence : épreuve NEUVE, datée de la semaine
      d'évaluation (S5), classe et assistant déjà réglés. */
@@ -9320,7 +9131,6 @@ class Component extends DCLogic {
     user:[React.createElement('circle',{key:1,cx:12,cy:8,r:4}),React.createElement('path',{key:2,d:'M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1'})],
     menu:[React.createElement('path',{key:1,d:'M4 6h16M4 12h16M4 18h16'})],
     help:[React.createElement('circle',{key:1,cx:12,cy:12,r:9}),React.createElement('path',{key:2,d:'M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4v.6'}),React.createElement('path',{key:3,d:'M12 17.2h.01'})],
-    chart:[React.createElement('path',{key:1,d:'M3 3v18h18'}),React.createElement('path',{key:2,d:'M8 17v-5'}),React.createElement('path',{key:3,d:'M13 17V8'}),React.createElement('path',{key:4,d:'M18 17v-9'})],
     calendar:[React.createElement('rect',{key:1,x:3,y:5,width:18,height:16,rx:2}),React.createElement('path',{key:2,d:'M3 10h18M8 3v4M16 3v4'})],
     bulb:[React.createElement('path',{key:1,d:'M9 18h6'}),React.createElement('path',{key:2,d:'M10 21h4'}),React.createElement('path',{key:3,d:'M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .8 1.6h5.4c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3z'})],
     alerte:[React.createElement('path',{key:1,d:'M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'}),React.createElement('path',{key:2,d:'M12 9v4'}),React.createElement('path',{key:3,d:'M12 17h.01'})],
@@ -10048,7 +9858,7 @@ class Component extends DCLogic {
       {label:'Cours',icon:mobIc('book',['cours','coursEdit'].indexOf(st.screen)>=0),style:mobBtn(['cours','coursEdit'].indexOf(st.screen)>=0),go:()=>this._go('cours')},
       /* Sur téléphone le menu latéral est masqué : sans cet onglet, Suivi
          et Progressions n'étaient joignables par aucun bouton (20/10/2026). */
-      {label:'Suivi',icon:mobIc('clock',['suivi','progressions','notes'].indexOf(st.screen)>=0),style:mobBtn(['suivi','progressions','notes'].indexOf(st.screen)>=0),go:()=>this._go('suivi')},
+      {label:'Suivi',icon:mobIc('clock',['suivi','progressions'].indexOf(st.screen)>=0),style:mobBtn(['suivi','progressions'].indexOf(st.screen)>=0),go:()=>this._go('suivi')},
       {label:'\u00c9quipe',icon:mobIc('users',['collab','equipe','activite','profil'].indexOf(st.screen)>=0),style:mobBtn(['collab','equipe','activite','profil'].indexOf(st.screen)>=0),go:()=>this._go('collab')}
     ];
     /* ---- Profil et inscription ------------------------------------------
@@ -10827,7 +10637,6 @@ class Component extends DCLogic {
       epTabEdition:()=>this.setState({epTab:'edition'}),epTabHistorique:()=>this.setState({epTab:'historique'}),epTabComparer:()=>this.setState({epTab:'comparer'}),epTabPropositions:()=>{if(perm.proposer)this.setState({epTab:'propositions'});},
       tabEdition:st.epTab==='edition',tabHistorique:st.epTab==='historique',tabComparer:st.epTab==='comparer',tabPropositions:st.epTab==='propositions',
       tabLivrables:st.epTab==='livrables',epTabLivrables:()=>this.setState({epTab:'livrables'}),
-      epTabNotes:()=>{if(active)this._ouvrirNotes(active.id);},epTabNotesStyle:this._epTab(false),epTabNotesIcon:this._icon('chart','var(--c8b97a8,#8b97a8)',15),
       epTabLivStyle:this._epTab(st.epTab==='livrables'),epTabLivIcon:this._icon('file',st.epTab==='livrables'?'var(--c1a72bb,#1a72bb)':'var(--c8b97a8,#8b97a8)',15),
       ...(()=>{
         const g=this._guideDe(active),n=this._noteDe(active);
@@ -12237,7 +12046,6 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       sbProgressions:sbBtn(st.screen==='progressions'),sbIcProg:this._icon('calendar',sbCol(st.screen==='progressions'),19),
       goProgressions:()=>this._go('progressions'),isProgressions:ready&&st.screen==='progressions',
       goSuivi:()=>this._go('suivi'),isSuivi:ready&&st.screen==='suivi',
-      goNotes:()=>this._go('notes'),isNotes:ready&&st.screen==='notes',sbNotes:sbBtn(st.screen==='notes'),sbIcNotes:this._icon('chart',sbCol(st.screen==='notes'),19),
       sbSuivi:sbBtn(st.screen==='suivi'),sbIcSuivi:this._icon('clock',sbCol(st.screen==='suivi'),19),
       sbNotifs:sbBtn(sbActOn),sbProfil:sbBtn(sbProfOn),
       msgCount:nbMsg,notifCount:nbNotif,
@@ -12474,24 +12282,21 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
             numStyle:'font-size:11.5px;font-weight:700;font-family:Poppins;color:'+(fer.length?'var(--cc0392b,#c0392b)':iso===auj?'var(--cf39200,#f39200)':'var(--c22303f,#22303f)')});}
         const decaler=n=>()=>{const d=new Date(moisIso+'-01T00:00:00');d.setMonth(d.getMonth()+n);this.setState({suiviMois:this._isoDe(d).slice(0,7)});};
         /* Couverture (lot L) : une ligne par séquence de mes classes. */
-        const NT=this._notesTout();
-        const noteeDe=e=>!!(e&&NT[e.id]&&(NT[e.id].eleves||[]).some(el=>this._noteEleve(el,this._notesItems(e),!!NT[e.id].parQ,0).sur20!==null||(NT[e.id].parQ&&Object.keys(el.pts||{}).length)));
         const couvGroupes=vue!=='couv'?[]:mes.map(id=>this._progClasse(id)).filter(c=>c&&(!filtreC||c.id===filtreC)).map(cls=>{
           let passees=0,evaluees=0;
           const lignes=cls.sequences.map(sq=>{
             const w5=(sq.semaines||[]).find(w=>w.n===5)||{};
             const ep=(st.epreuves||[]).find(e=>e&&e.assistant&&e.assistant.progId===cls.id&&String(e.assistant.progSeq)===String(sq.num))||null;
             const passee=!!(w5.debut&&w5.debut<=auj);
-            const notee=noteeDe(ep);
             if(passee){passees++;if(ep)evaluees++;}
-            const c=notee?['var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)','notée']:ep?['var(--cc26a12,#c26a12)','var(--cfdefdb,#fdefdb)',passee?'évaluée · notes à saisir':'épreuve prête']:passee?['var(--cc0392b,#c0392b)','var(--cfdecea,#fdecea)','non évaluée']:['var(--c5a6678,#5a6678)','var(--cf2f6fb,#f2f6fb)','à venir'];
+            const valide=!!(ep&&ep.status==='valide');const c=valide?['var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)',ep.inLibrary?'sujet diffusé':'sujet validé']:ep?['var(--cc26a12,#c26a12)','var(--cfdefdb,#fdefdb)',passee?'évaluée · sujet non validé':({brouillon:'en préparation',relecture:'en relecture',ajustement:'ajustement demandé',rejete:'rejeté'}[ep.status]||'en préparation')]:passee?['var(--cc0392b,#c0392b)','var(--cfdecea,#fdecea)','non évaluée']:['var(--c5a6678,#5a6678)','var(--cf2f6fb,#f2f6fb)','à venir'];
             const contenus=(!ep&&passee)?this._contenusSeq(sq,3).slice(0,4):[];
-            const agirLabel=ep?(passee?'Saisir les notes':'Ouvrir'):(passee?'Évaluer':'Préparer');
+            const agirLabel=ep?'Ouvrir':(passee?'Évaluer':'Préparer');
             return{num:sq.num,date:w5.debut?'évaluation '+fmtL(w5.debut):'',titre:sq.module||('Séquence '+sq.num),
               sous:ep?('« '+(ep.title||'Épreuve')+' »'):contenus.length?'Contenus non évalués : '+contenus.join(' · '):'Aucune épreuve pour cette séquence',
               sousStyle:'font-size:11.5px;margin-top:2px;line-height:1.45;color:'+(contenus.length?'var(--cc0392b,#c0392b)':'var(--c8b97a8,#8b97a8)'),
               etat:c[2],chip:'font-size:11px;font-weight:700;font-family:Poppins;padding:3px 10px;border-radius:999px;white-space:nowrap;color:'+c[0]+';background:'+c[1],
-              agir:()=>{if(ep){if(passee)this._ouvrirNotes(ep.id);else this.setState({activeId:ep.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);});}else this._composerSequence(cls,sq);},
+              agir:()=>{if(ep)this.setState({activeId:ep.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);});else this._composerSequence(cls,sq);},
               agirLabel,agirStyle:(ep||perm.creer)?'background:'+(ep?'var(--cffffff,#fff)':'var(--c1a72bb,#1a72bb)')+';color:'+(ep?'var(--c14375f,#14375f)':'var(--cffffff,#fff)')+';border:1px solid '+(ep?'var(--ce2eaf3,#e2eaf3)':'var(--c1a72bb,#1a72bb)')+';padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden};});
           const pc=passees?Math.round(evaluees/passees*100):0;
           return{titre:cls.libelle,sous:passees?(evaluees+' séquence(s) évaluée(s) sur '+passees+' passée(s) · '+pc+' %'):'Aucune évaluation encore passée',
@@ -12526,113 +12331,6 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           moisTitre:d0.toLocaleDateString('fr-FR',{month:'long',year:'numeric'}),
           moisEntetes:['lun','mar','mer','jeu','ven','sam','dim'],
           moisJours:jours});
-      })(),
-      ...(()=>{
-        /* ── Notes des épreuves (lot K, 02/11/2026) ─────────────────────────
-           D'après « Notes des épreuves » de Tchouskou. Les notes d'élèves sont
-           des données personnelles : elles restent dans CE navigateur
-           (`minesec_notes`), hors de `_persist()` et de la synchro d'équipe. */
-        const vide={ntVideStyle:hidden,ntCorpsStyle:hidden,ntEpOptions:[],ntEpId:'',setNtEp:()=>{},ntEpInfo:'',ntOuvrirEp:()=>{},
-          ntModeGlobal:()=>{},ntModeQuestion:()=>{},ntModeGlobalStyle:hidden,ntModeQuestionStyle:hidden,ntBaremeAvis:'',ntBaremeAvisStyle:hidden,
-          ntTuiles:[],ntSousFeuille:'',ntListe:'',setNtListe:()=>{},ntAjouter:()=>{},ntReprendreOptions:[],ntReprendre:()=>{},ntReprendreStyle:hidden,
-          ntTrier:()=>{},ntTrierStyle:hidden,ntVider:()=>{},ntViderLabel:'',ntViderStyle:hidden,ntAucunEleveStyle:hidden,ntTableStyle:hidden,ntGrille:'',
-          ntCols:[],ntLignes:[],ntHNoteStyle:hidden,ntHTotalStyle:hidden,ntHSur20Style:hidden,ntTotalLabel:'',
-          ntCsv:()=>{},ntPV:()=>{},ntAnalyseStyle:hidden,ntTranches:[],ntItemsStyle:hidden,ntItemsStats:[],ntAlertesStyle:hidden,ntAlertes:[]};
-        if(!(ready&&st.screen==='notes'))return vide;
-        const eps=st.epreuves.filter(estVisible);
-        if(!eps.length)return Object.assign(vide,{ntVideStyle:'background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);border-radius:12px;padding:18px 20px'});
-        const ep=eps.find(e=>e.id===st.ntEpId)||(active&&eps.find(e=>e.id===active.id))||eps[0];
-        const NT=this._notesTout();
-        const fe=NT[ep.id]||{parQ:false,eleves:[]};
-        const items=this._notesItems(ep);
-        const bareme=Math.round(items.reduce((s,x)=>s+(x.max||0),0)*100)/100;
-        const parQ=!!fe.parQ&&bareme>0;
-        const maj=fn=>this._notesMaj(ep.id,fn);
-        const fr=x=>(x===null||x===undefined)?'—':String(Math.round(x*100)/100).replace('.',',');
-        const majEl=(id,patch)=>maj(f=>({...f,eleves:(f.eleves||[]).map(el=>el.id===id?{...el,...patch}:el)}));
-        const rows=(fe.eleves||[]).map(el=>({el,r:this._noteEleve(el,items,parQ,bareme)}));
-        const presents=rows.filter(x=>(x.el.etat||'p')==='p').length;
-        const notes=rows.filter(x=>x.r.sur20!==null).map(x=>x.r.sur20);
-        const S=this._statsNotes(notes);
-        const tuile=(n,l,c)=>({n,label:l,style:'background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:12px 10px;text-align:center',chiffre:'display:block;font-family:Poppins;font-size:21px;font-weight:700;line-height:1;color:'+c});
-        const ong=on=>'border:none;padding:6px 11px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer;'+(on?'background:var(--cffffff,#fff);color:var(--c14375f,#14375f);box-shadow:0 1px 4px rgba(20,55,95,.12)':'background:none;color:var(--c7a8598,#7a8598)');
-        const champ='border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:7px;padding:6px 7px;font-size:12.5px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);width:100%;min-width:0;box-sizing:border-box;font-family:inherit';
-        const chiffreIn=(bad,off)=>'border:1px solid '+(bad?'var(--cc0392b,#c0392b)':'var(--ce2eaf3,#e2eaf3)')+';border-radius:7px;padding:6px 3px;font-size:12.5px;text-align:center;color:var(--c14375f,#14375f);font-weight:700;font-family:Poppins;background:'+(off?'var(--cf2f6fb,#f2f6fb)':bad?'var(--cfdecea,#fdecea)':'var(--cffffff,#fff)')+';width:100%;min-width:0;box-sizing:border-box';
-        const n0=v=>{if(v===''||v===null||v===undefined)return null;const x=parseFloat(String(v).replace(',','.'));return isFinite(x)?x:null;};
-        const grille='display:grid;gap:6px;align-items:center;grid-template-columns:30px minmax(150px,1.6fr) 128px '+(parQ?'repeat('+items.length+',58px) 64px 56px':'82px')+' minmax(160px,2fr) 30px';
-        const largeur=30+150+128+(parQ?items.length*58+64+56:82)+160+30+6*(parQ?items.length+7:6);
-        const autres=eps.filter(e=>e.id!==ep.id&&NT[e.id]&&(NT[e.id].eleves||[]).length);
-        const avecDonnee=el=>n0(el.note)!==null||Object.keys(el.pts||{}).some(k=>n0(el.pts[k])!==null)||!!(el.comm||'').trim();
-        const classe=ep.classe||'';
-        const stru=ep.epreuveCode?MINESEC.epreuveParCode(ep.epreuveCode):null;
-        return Object.assign(vide,{
-          ntCorpsStyle:'',
-          ntEpOptions:eps.map(e=>({id:e.id,label:(e.title||'Épreuve sans titre')+(e.classe?' — '+e.classe:'')+(NT[e.id]&&(NT[e.id].eleves||[]).length?' · '+NT[e.id].eleves.length+' élève(s)':'')})),
-          ntEpId:ep.id,setNtEp:e=>this.setState({ntEpId:val(e),ntVider:false,ntSuppr:''}),
-          ntEpInfo:[classe,ep.date,ep.duree,stru?stru.libelle||stru.nom||'':'',bareme?('barème : '+fr(bareme)+' pts sur '+items.length+' élément(s)'):'barème non réglé'].filter(Boolean).join(' · '),
-          ntOuvrirEp:()=>this.setState({activeId:ep.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);}),
-          ntModeGlobal:()=>maj(f=>({...f,parQ:false})),
-          ntModeQuestion:()=>{if(bareme>0)maj(f=>({...f,parQ:true}));},
-          ntModeGlobalStyle:ong(!parQ),ntModeQuestionStyle:ong(parQ)+(bareme>0?'':';opacity:.45;cursor:not-allowed'),
-          ntBaremeAvis:bareme>0?'':'Le barème de cette épreuve n’est pas encore réglé : la correction par question s’ouvrira dès que les points des questions et des sujets seront fixés dans l’édition.',
-          ntBaremeAvisStyle:bareme>0?hidden:'font-size:12px;color:var(--c8a5a00,#8a5a00);background:var(--cfff7e6,#fff7e6);border:1px solid var(--cf0d9b0,#f0d9b0);border-radius:9px;padding:8px 12px;margin-bottom:12px',
-          ntTuiles:[tuile(notes.length+'/'+presents,'notes saisies','var(--c14375f,#14375f)'),
-            tuile(rows.filter(x=>x.el.etat==='abs').length+' · '+rows.filter(x=>x.el.etat==='nr').length,'absents · non rendues','var(--c5a6678,#5a6678)'),
-            tuile(fr(S.moy),'moyenne /20',S.moy===null?'var(--c8b97a8,#8b97a8)':S.moy>=10?'var(--c188047,#188047)':'var(--cc0392b,#c0392b)'),
-            tuile(fr(S.med),'médiane','var(--c1a72bb,#1a72bb)'),
-            tuile(S.n?fr(S.min)+' – '+fr(S.max):'—','min – max','var(--c1a72bb,#1a72bb)'),
-            tuile(fr(S.et),'écart-type','var(--c1a72bb,#1a72bb)'),
-            tuile(S.n?Math.round(S.reussite*100)+' %':'—','au moins 10/20',S.n&&S.reussite>=.5?'var(--c188047,#188047)':'var(--cc26a12,#c26a12)')],
-          ntSousFeuille:(fe.eleves||[]).length?((fe.eleves||[]).length+' élève(s)'+(parQ?' · correction par question':' · note globale')):'aucun élève',
-          ntListe:st.ntListe||'',setNtListe:e=>this.setState({ntListe:val(e)}),
-          ntAjouter:()=>{const noms=this._nomsDeListe(st.ntListe||'');if(!noms.length)return;
-            maj(f=>({...f,eleves:(f.eleves||[]).concat(noms.map((nm,i)=>({id:'el'+Date.now().toString(36)+i,nom:nm,etat:'p',note:'',pts:{},comm:''})))}));this.setState({ntListe:''});},
-          ntReprendreOptions:autres.map(e=>({id:e.id,label:(e.title||'Épreuve')+(e.classe?' — '+e.classe:'')+' ('+NT[e.id].eleves.length+' élèves)'})),
-          ntReprendre:e=>{const s=NT[val(e)];if(!s)return;const deja=(fe.eleves||[]).map(x=>(x.nom||'').toLowerCase());
-            const noms=(s.eleves||[]).map(x=>x.nom).filter(nm=>nm&&deja.indexOf(nm.toLowerCase())<0);
-            maj(f=>({...f,eleves:(f.eleves||[]).concat(noms.map((nm,i)=>({id:'el'+Date.now().toString(36)+i,nom:nm,etat:'p',note:'',pts:{},comm:''})))}));},
-          ntReprendreStyle:autres.length?'border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);margin-left:auto;max-width:280px':hidden,
-          ntTrier:()=>maj(f=>({...f,eleves:(f.eleves||[]).slice().sort((a,b)=>(a.nom||'').localeCompare(b.nom||'','fr',{sensitivity:'base'}))})),
-          ntTrierStyle:(fe.eleves||[]).length>1?'background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:6px 11px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer'+(autres.length?'':';margin-left:auto'):hidden,
-          ntVider:()=>{if(!st.ntVider){this.setState({ntVider:true});return;}maj(f=>({...f,eleves:[]}));this.setState({ntVider:false});},
-          ntViderLabel:st.ntVider?'Confirmer : tout effacer':'Vider la feuille',
-          ntViderStyle:(fe.eleves||[]).length?'background:'+(st.ntVider?'var(--cc0392b,#c0392b)':'var(--cffffff,#fff)')+';border:1px solid '+(st.ntVider?'var(--cc0392b,#c0392b)':'var(--cecc4bf,#ecc4bf)')+';color:'+(st.ntVider?'var(--cffffff,#fff)':'var(--cc0392b,#c0392b)')+';padding:6px 11px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
-          ntAucunEleveStyle:(fe.eleves||[]).length?hidden:'font-size:12.5px;color:var(--c5a6678,#5a6678);padding:4px 2px 6px',
-          ntTableStyle:(fe.eleves||[]).length?'min-width:'+largeur+'px':hidden,ntGrille:grille,
-          ntCols:parQ?items.map(it=>({lib:it.lib,sous:'/'+fr(it.max),titre:it.titre})):[],
-          ntHNoteStyle:parQ?hidden:'text-align:center',ntHTotalStyle:parQ?'text-align:center':hidden,ntHSur20Style:parQ?'text-align:center':hidden,
-          ntTotalLabel:'Total /'+fr(bareme),
-          ntLignes:rows.map(({el,r},i)=>{const etat=el.etat||'p',off=etat!=='p';
-            const vN=n0(el.note);const conf=st.ntSuppr===el.id;
-            return{n:i+1,nom:el.nom||'',setNom:e=>majEl(el.id,{nom:val(e)}),nomStyle:champ+';font-weight:700',
-              etat,setEtat:e=>majEl(el.id,{etat:val(e)}),etatStyle:champ+';padding:6px 4px;color:'+(off?'var(--cc0392b,#c0392b)':'var(--c22303f,#22303f)'),off,
-              cases:parQ?items.map(it=>{const v=(el.pts||{})[it.k];const x=n0(v);
-                return{v:v===undefined||v===null?'':String(v),max:it.max,titre:it.lib+' — '+it.titre+' (/'+fr(it.max)+')',
-                  set:e=>{const pts={...(el.pts||{})};const s=val(e);if(s==='')delete pts[it.k];else pts[it.k]=s;majEl(el.id,{pts});},
-                  style:chiffreIn(x!==null&&(x<0||x>it.max),off)};}):[],
-              note:el.note===undefined||el.note===null?'':String(el.note),setNote:e=>majEl(el.id,{note:val(e)}),
-              noteStyle:parQ?hidden:chiffreIn(vN!==null&&(vN<0||vN>20),off),
-              total:off?(etat==='abs'?'abs.':'n.r.'):fr(r.total),totalStyle:parQ?'text-align:center;font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--c22303f,#22303f)':hidden,
-              sur20:off?'':fr(r.sur20),sur20Style:parQ?'text-align:center;font-family:Poppins;font-size:13px;font-weight:700;color:'+(r.sur20===null?'var(--c8b97a8,#8b97a8)':r.sur20<8?'var(--cc0392b,#c0392b)':r.sur20>=10?'var(--c188047,#188047)':'var(--cc26a12,#c26a12)'):hidden,
-              comm:el.comm||'',setComm:e=>majEl(el.id,{comm:val(e)}),commStyle:champ,
-              suppr:()=>{if(conf||!avecDonnee(el)){maj(f=>({...f,eleves:(f.eleves||[]).filter(x=>x.id!==el.id)}));this.setState({ntSuppr:''});}else this.setState({ntSuppr:el.id});},
-              supprTexte:conf?'✓':'×',supprTitre:conf?'Confirmer le retrait de '+(el.nom||'cet élève'):'Retirer '+(el.nom||'cet élève')+' de la feuille',
-              supprStyle:'width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:14px;font-weight:700;line-height:1;border:1px solid '+(conf?'var(--cc0392b,#c0392b)':'var(--ce2eaf3,#e2eaf3)')+';background:'+(conf?'var(--cc0392b,#c0392b)':'var(--cffffff,#fff)')+';color:'+(conf?'var(--cffffff,#fff)':'var(--c8b97a8,#8b97a8)')};}),
-          ntCsv:()=>this._notesCsv(ep),ntPV:()=>this._notesPV(ep),
-          ntAnalyseStyle:S.n?'display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px':hidden,
-          ntTranches:(()=>{const T=[[0,5,'0–5'],[5,8,'5–8'],[8,10,'8–10'],[10,12,'10–12'],[12,14,'12–14'],[14,16,'14–16'],[16,20.01,'16–20']];
-            const c=T.map(t=>notes.filter(x=>x>=t[0]&&x<t[1]).length);const mx=Math.max(1,...c);
-            return T.map((t,k)=>({lib:t[2],n:c[k]||'',barre:'display:block;width:100%;max-width:46px;border-radius:6px 6px 0 0;margin-top:3px;height:'+Math.max(c[k]?6:2,Math.round(c[k]/mx*88))+'px;background:'+(t[0]<8?'var(--cc0392b,#c0392b)':t[0]<10?'var(--cc26a12,#c26a12)':'var(--c188047,#188047)')+(c[k]?'':';opacity:.25')}));})(),
-          ntItemsStyle:parQ&&S.n?'background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:12px 14px':hidden,
-          ntItemsStats:!parQ?[]:items.filter(it=>it.max>0).map(it=>{const v=rows.filter(x=>(x.el.etat||'p')==='p').map(x=>n0((x.el.pts||{})[it.k])).filter(x=>x!==null);
-              return{it,t:v.length?v.reduce((s,x)=>s+Math.min(Math.max(x,0),it.max),0)/v.length/it.max:null};})
-            .filter(x=>x.t!==null).sort((a,b)=>a.t-b.t)
-            .map(({it,t})=>({lib:it.lib,titre:it.titre,taux:Math.round(t*100)+' %',
-              tauxStyle:'width:42px;flex:none;text-align:right;font-family:Poppins;font-size:12px;font-weight:700;color:'+(t<.5?'var(--cc0392b,#c0392b)':t<.7?'var(--cc26a12,#c26a12)':'var(--c188047,#188047)'),
-              barre:'display:block;height:100%;width:'+Math.round(t*100)+'%;background:'+(t<.5?'var(--cc0392b,#c0392b)':t<.7?'var(--cc26a12,#c26a12)':'var(--c188047,#188047)')})),
-          ntAlertesStyle:rows.some(x=>x.el.etat==='nr'||(x.r.sur20!==null&&x.r.sur20<8))?'background:var(--cffffff,#fff);border:1px solid var(--cecc4bf,#ecc4bf);border-radius:12px;padding:12px 14px':hidden,
-          ntAlertes:rows.filter(x=>x.el.etat==='nr'||(x.r.sur20!==null&&x.r.sur20<8)).sort((a,b)=>(a.r.sur20===null?-1:a.r.sur20)-(b.r.sur20===null?-1:b.r.sur20))
-            .map(x=>({nom:x.el.nom||'Élève',note:x.el.etat==='nr'?'copie non rendue':fr(x.r.sur20)+'/20'}))});
       })(),
       ...(()=>{
         const P=this._progs();
