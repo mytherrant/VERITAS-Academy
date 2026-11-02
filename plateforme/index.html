@@ -44,7 +44,7 @@
 <script defer src="./exercices.js?v=4cde4eaa"></script>
 <script defer src="./generateur.js?v=355c6046"></script>
 <script defer src="./texte.js?v=43fa1e84"></script>
-<script defer src="./docx.js?v=221641f0"></script>
+<script defer src="./docx.js?v=857dffca"></script>
 <script defer src="./lecteur-textes.js?v=4153b09f"></script>
 <script defer src="./progressions.js?v=6fedeb24"></script>
 <script defer src="./support.js?v=9c859a28"></script>
@@ -7849,12 +7849,12 @@ class Component extends DCLogic {
         blocs.push({titre:choix?('Sujet 1 — '+this._titreSujet(stru.parties&&stru.parties[0]&&stru.parties[0].titre||'Contraction de texte et discussion'))
                               :('Texte '+(ti+1)+' — '+t),
           lignes:qs.map((q,i)=>(choix?R[k2++]+'. ':(i+1)+'. ')+q
-          +(pp[i]!=null&&pp[i]!==''?' ('+pp[i]+' point'+((parseFloat(pp[i])||0)>1?'s':'')+')':'')
+          +(pp[i]!=null&&pp[i]!==''?' ('+this._ptFr(pp[i])+' point'+((parseFloat(pp[i])||0)>1?'s':'')+')':'')
           +'\n   → '+this._sansMarkdown(c[i]||'à compléter'))});});});
     (a.sujets||[]).forEach(s=>{if(!s||!s.corrige)return;
       if(choix&&s.genre==='presentation')return;
       const t=choix?('Sujet '+(++nSujet)+' — '+this._titreSujet(s.titre)):(s.titre||'Sujet');
-      blocs.push({titre:t+(s.pts?' ('+s.pts+' points)':''),lignes:[this._sansMarkdown(s.corrige)]});});
+      blocs.push({titre:t+(s.pts?' ('+this._ptFr(s.pts)+' points)':''),lignes:[this._sansMarkdown(s.corrige)]});});
     if((a.grilleIA||[]).length)blocs.push({titre:'Grille de correction',
       lignes:a.grilleIA.map(g=>'• '+this._sansMarkdown(g.critere)+(g.points!=null?' — '+g.points+' pts':'')+(g.indicateurs?' : '+this._sansMarkdown(g.indicateurs):''))});
     if(stru&&stru.formulesCorrige&&stru.formulesCorrige.length)blocs.push({titre:'À rappeler aux correcteurs',lignes:stru.formulesCorrige});
@@ -8961,10 +8961,35 @@ class Component extends DCLogic {
     const items=[];(a.textIds||[]).forEach(n=>{const f=this.all.find(x=>x.n===n);if(!f)return;
       ['comp','expl'].forEach(k=>{this._qList(f,k).forEach((q,i)=>items.push([n,k,i]));});});
     if(!items.length){return;}
-    const part=Math.floor((cible/items.length)*10)/10;
-    const pts={};items.forEach(([n,k,i],idx)=>{pts[n]=pts[n]||{};pts[n][k]=pts[n][k]||[];
-      pts[n][k][i]=(idx===items.length-1)?Math.round((cible-part*(items.length-1))*100)/100:part;});
-    this._updateActive({pts},'a appliqué le barème type ('+cible+' points)');}
+    /* PAR PARTIE (02/11/2026). Le barème était étalé à parts égales sur
+       toutes les questions : une Étude de texte « I. Compréhension /10 ·
+       II. Langue /10 » à deux questions de compréhension et une de langue
+       donnait 13,2 / 6,8 — démenti par le garde-fou affiché juste à côté.
+       Chaque partie de la structure va désormais à SES questions
+       (compréhension → comp, langue/exploitation → expl) ; une partie de
+       production va aux sujets. Sans correspondance, on garde l'étalement. */
+    const genreDe=t=>/compr[ée]hension/i.test(t)?'comp':/langue|exploitation|vocabul|grammaire|maniement/i.test(t)?'expl':'sujet';
+    const parts=((st&&st.parties)||[]).map(p=>({g:genreDe(p.titre||''),pts:parseFloat(p.points)||0})).filter(p=>p.pts>0);
+    const parGenre={comp:0,expl:0,sujet:0};parts.forEach(p=>{parGenre[p.g]+=p.pts;});
+    const repartir=(liste,total,poser)=>{if(!liste.length||!(total>0))return;const part=Math.floor((total/liste.length)*10)/10;
+      liste.forEach((x,idx)=>poser(x,(idx===liste.length-1)?Math.round((total-part*(liste.length-1))*100)/100:part));};
+    const pts={};const poserQ=([n,k,i],v)=>{pts[n]=pts[n]||{};pts[n][k]=pts[n][k]||[];pts[n][k][i]=v;};
+    const comp=items.filter(x=>x[1]==='comp'),expl=items.filter(x=>x[1]==='expl');
+    const parPartie=(parGenre.comp>0||parGenre.expl>0)&&(!comp.length||parGenre.comp>0)&&(!expl.length||parGenre.expl>0);
+    const patch={};
+    if(parPartie){
+      repartir(comp,parGenre.comp,poserQ);repartir(expl,parGenre.expl,poserQ);
+      /* Partie de production : aux sujets imposés (répartie), et chaque sujet
+         au choix la vaut entière — l'élève n'en traite qu'un. */
+      const sj=(a.sujets||[]).filter(s=>s&&s.genre!=='presentation');
+      if(parGenre.sujet>0&&sj.length){const imposes=sj.filter(s=>!s.auChoix);const vals={};
+        repartir(imposes,parGenre.sujet,(s,v)=>{vals[s.id]=v;});
+        patch.sujets=(a.sujets||[]).map(s=>!s||s.genre==='presentation'?s:{...s,pts:s.auChoix?parGenre.sujet:(vals[s.id]!=null?vals[s.id]:s.pts)});}
+    }else repartir(items,cible,poserQ);
+    patch.pts=pts;
+    this._updateActive(patch,'a appliqué le barème type ('+cible+' points'+(parPartie?', par partie':'')+')');}
+  /* Les points s'impriment à la française : « 6,5 pts », pas « 6.5 pts ». */
+  _ptFr(v){return String(v).replace('.',',');}
   /* _qList lisait TOUJOURS l'épreuve active : calculer l'avancement d'une
      autre épreuve lui prêtait les questions de celle qui est ouverte. */
   /* QUESTIONS DU CORPUS PAR DÉFAUT (20/10/2026, signalé par Jacques :
@@ -9929,7 +9954,7 @@ class Component extends DCLogic {
        visite guidee, avant toute connexion. */
     const accountSwitch=(st.compteId?[]:st.users).map(u=>({name:u.name,initials:this._initials(u.name),avatar:this._av(u,36),role:u.role,current:u.id===me.id,currentChip:u.id===me.id?'font-size:11px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:3px 10px;border-radius:999px':hidden,rowStyle:'display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid '+(u.id===me.id?'var(--cbcd9f2,#bcd9f2)':'var(--ceef2f7,#eef2f7)')+';border-radius:11px;background:'+(u.id===me.id?'var(--cf5faff,#f5faff)':'var(--cffffff,#fff)')+';cursor:pointer;text-align:left',select:()=>this.setState({currentUserId:u.id,screen:'accueil'},()=>{this._persist();window.scrollTo(0,0);})}));
 
-    const mkPrintQ=(f,kind)=>this._qList(f,kind).map((t,qi)=>{const p=this._qPts(f.n,kind,qi);return{text:t,pts:(p===null?'':'('+p+' pt'+((parseFloat(p)||0)>1?'s':'')+')'),ptsStyle:(p===null?'display:none':'font-weight:700;color:var(--c14375f,#14375f);white-space:nowrap;margin-left:6px')};});
+    const mkPrintQ=(f,kind)=>this._qList(f,kind).map((t,qi)=>{const p=this._qPts(f.n,kind,qi);return{text:t,pts:(p===null?'':'('+this._ptFr(p)+' pt'+((parseFloat(p)||0)>1?'s':'')+')'),ptsStyle:(p===null?'display:none':'font-weight:700;color:var(--c14375f,#14375f);white-space:nowrap;margin-left:6px')};});
     const printFiches=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean).map((f,i)=>({pos:i+1,
       qBlocStyle:(this._qList(f,'comp').length||this._qList(f,'expl').length)?'font-size:13px;color:var(--c22303f,#22303f)':'display:none',type:f.type,words:f.words,text:f.text||'',reference:f.reference||'',compList:this._qList(f,'comp'),explList:this._qList(f,'expl'),compQ:mkPrintQ(f,'comp'),explQ:mkPrintQ(f,'expl'),
       compBloc:this._qList(f,'comp').length?'':'display:none',explBloc:this._qList(f,'expl').length?'':'display:none',
