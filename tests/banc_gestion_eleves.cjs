@@ -89,6 +89,8 @@ const SUF = Date.now().toString(36).slice(-4).toUpperCase();
   await page.click('#feuille button[type=submit]');
   await aJour();
   await page.waitForTimeout(300);
+  // Après l'import, la liste montre la classe importée : on revient sur « Toutes » pour comparer.
+  await page.click('[data-a="eleves-classe"][data-v=""]');
   const apres = (await page.$$eval('#zone-eleves .ligne', (x) => x.length));
   ok('import : deux élèves de plus', apres === avant + 2, avant + ' → ' + apres);
   l = await lignesListe();

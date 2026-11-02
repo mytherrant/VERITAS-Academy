@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.4.1';
+  var VERSION = '0.5.0';
   var API = 'api/index.php';
   var INTERVALLE_SYNC = 25000;
   var VERROU_APRES_MS = 5 * 60 * 1000;
@@ -197,7 +197,7 @@
     var op = { op: nouvelId(), t: t, id: id, champs: champs || {}, suppr: !!suppr, n: Date.now(), uid: E.profil.utilisateur.id };
     var avant = ligne(t, id);
     var l = Object.assign({}, avant || { id: id, _nouveau: true }, champs || {}, { _attente: true, maj_le: maintenantSql() });
-    if (suppr) l.supprime = 1;
+    l.supprime = suppr ? 1 : 0;
     E.sortie.push(op);
     return Promise.all([poserLigne(t, l), idbMettre('sortie', op)]).then(function () {
       majPuce();
@@ -378,7 +378,7 @@
   // ───────────────────────────── Rendu ─────────────────────────────
   function route() {
     var h = (location.hash || '#/accueil').replace(/^#\/?/, '').split('/');
-    return { nom: h[0] || 'accueil', arg: h[1] ? decodeURIComponent(h[1]) : '' };
+    return { nom: h[0] || 'accueil', arg: h.slice(1).map(decodeURIComponent).join('/') };
   }
 
   function rendre(messageConnexion) {
@@ -409,10 +409,12 @@
   }
 
   function navBasse(actif) {
-    var items = [['accueil', 'home', 'Accueil'], ['eleves', 'graduation', 'Élèves'], ['emploi', 'calendar', 'Planning'], ['moi', 'list', 'Plus']];
-    var sousPlus = ['comptes', 'compte', 'journal', 'centres', 'actionnaires'];
+    var items = [['accueil', 'home', 'Accueil']];
+    if (peutQuelquePart('appel.faire')) items.push(['appel', 'checkcircle', 'Appel']);
+    items.push(['eleves', 'graduation', 'Élèves'], ['emploi', 'calendar', 'Planning'], ['moi', 'list', 'Plus']);
+    var sousPlus = ['comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite'];
     return '<nav class="nav-basse" aria-label="Navigation">' + items.map(function (i) {
-      var on = i[0] === actif || (i[0] === 'moi' && sousPlus.indexOf(actif) >= 0);
+      var on = i[0] === actif || (i[0] === 'moi' && sousPlus.indexOf(actif) >= 0) || (i[0] === 'appel' && actif === 'pointage');
       return '<a href="#/' + i[0] + '" class="' + (on ? 'actif' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + ico(i[1]) + i[2] + '</a>';
     }).join('') + '</nav>';
   }
@@ -453,7 +455,6 @@
 
   // ───────────────────────────── Pages ─────────────────────────────
   var A_VENIR = [
-    ['checkcircle', 'Appel du jour', 'Arrivées, départs, retards', 3],
     ['download', 'Feuille du jour', 'PDF, image, WhatsApp aux parents', 4],
     ['wallet', 'Caisse', 'Versements, reçus et relances WhatsApp', 5],
     ['graduation', 'Enseignants', 'Heures, rémunération', 6]
@@ -479,12 +480,23 @@
               var d = new Date().getDay(); var pl = horairesDuJour(c.id, d === 0 ? 7 : d);
               return pl.length ? 'Cours aujourd\'hui : ' + pl.map(function (x) { return heureLisible(x.debut) + ' – ' + heureLisible(x.fin) + (x.niveaux ? ' (' + x.niveaux.split(',').join(', ') + ')' : ''); }).join(' ; ') : 'Pas de cours aujourd\'hui';
             })() + '</p>' +
+            (function () {
+              var prevues = seancesPrevues(c.id, isoLocal(new Date()));
+              if (!prevues.length) return '';
+              var faites = prevues.filter(function (x) { return etatSeance(x).pointes > 0; }).length;
+              var enRetard = prevues.filter(function (x) { return retardAppel(x, c) > 0; }).length;
+              return '<p><a class="lien-appel" href="#/appel">' + ico('checkcircle', 'p') + ' Appels du jour : <b>' + faites + ' / ' + prevues.length + '</b>' +
+                (enRetard ? ' <span class="badge danger">' + enRetard + ' en retard</span>' : '') + '</a></p>';
+            })() +
+            (function () { var n = alertesAssiduite(c.id).length; return n ? '<p><a class="lien-appel" href="#/assiduite">' + ico('alert', 'p') + ' <b>' + n + '</b> alerte' + (n > 1 ? 's' : '') + ' d\'assiduité</a></p>' : ''; })() +
             '<p class="chiffres"><span><b>' + elevesActifs(c.id).length + '</b> élèves</span><span><b>' + lignes('classes').filter(function (k) { return k.centre_id === c.id; }).length + '</b> classes</span><span><b>' + lignes('creneaux').filter(function (k) { return k.centre_id === c.id; }).length + '</b> cours/semaine</span></p>' +
             '<p><span class="badge or">' + esc(role) + '</span><span class="badge">Échéance le ' + esc(c.jour_echeance) + ' du mois</span><span class="badge">Retard au-delà de ' + esc(c.tolerance_retard_min) + ' min</span></p></div></div>';
         });
         if (estAdmin()) h += '<div class="actions"><button class="btn clair" type="button" data-a="editer-centre" data-id="">' + ico('plus', 'p') + 'Ouvrir un nouveau centre</button></div>';
 
         var tuiles = [];
+        if (peutQuelquePart('appel.faire')) tuiles.push(['#/appel', 'checkcircle', 'Appel du jour', 'Arrivées, départs, retards']);
+        tuiles.push(['#/assiduite', 'activity', 'Assiduité', 'Taux, retards, alertes']);
         tuiles.push(['#/eleves', 'graduation', 'Élèves', peutQuelquePart('eleves.gerer') ? 'Inscrire, rechercher, importer' : 'Fiches et contacts des parents']);
         tuiles.push(['#/emploi', 'calendar', 'Emploi du temps', peutQuelquePart('emploi.gerer') ? 'Classes, créneaux, enseignants' : 'Les cours de la semaine']);
         if (estAdmin()) tuiles.push(['#/centres', 'building', 'Centres et année', 'Coordonnées, matières, mois facturés']);
@@ -556,6 +568,17 @@
       html: function () { return pageEmploi(); }
     },
 
+    appel: {
+      droit: function () { return peutQuelquePart('appel.faire'); },
+      html: function () { return pageAppel(); }
+    },
+    pointage: {
+      html: function (arg) { return pagePointage(arg); }
+    },
+    assiduite: {
+      html: function () { return pageAssiduite(); }
+    },
+
     eleves: {
       html: function () { return pageEleves(); },
       apres: function () { dessinerListeEleves(); }
@@ -588,7 +611,7 @@
         }).join('');
         var h = '<h1>Mon compte</h1><div class="carte"><h3>' + esc(u.nom) + '</h3><p class="doux">Identifiant : ' + esc(u.identifiant) + '</p><p>' +
           (u.admin ? '<span class="badge or">Administrateur des deux centres</span>' : '') + acces + '</p></div>';
-        var liens = [];
+        var liens = [['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']];
         if (peutQuelquePart('comptes.gerer')) liens.push(['#/comptes', 'users', 'Comptes et accès', 'Qui peut faire quoi']);
         if (peutQuelquePart('journal.voir')) liens.push(['#/journal', 'clock', 'Journal', 'Qui a modifié quoi']);
         if (estAdmin()) liens.push(['#/centres', 'building', 'Centres, année et matières', 'Ouvrir un centre, mois facturés']);
@@ -618,6 +641,252 @@
       }
     }
   };
+
+  // ───────────────────────────── Appel ─────────────────────────────
+  var APL = { centre: '', date: '' };
+  var LIB_STATUT = { present: 'Présent', retard: 'En retard', absent: 'Absent', justifie: 'Absence justifiée' };
+
+  function isoLocal(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function heureMaintenant() { var d = new Date(); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+  function jourDe(iso) { var d = new Date(iso + 'T12:00:00'); var j = d.getDay(); return j === 0 ? 7 : j; }
+  function dateLongue(iso) { return new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }); }
+  function decalerJour(iso, n) { var d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return isoLocal(d); }
+  /** Identifiants déterministes : deux téléphones hors ligne ouvrent la MÊME feuille, le MÊME pointage. */
+  function idSeance(iso, classeId) { return 'sa' + iso.replace(/-/g, '') + classeId; }
+  function hache(t, graine) { var h = graine >>> 0; for (var i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return ('0000000' + h.toString(16)).slice(-8); }
+  function idPresence(seanceId, eleveId) { var t = seanceId + '|' + eleveId; return 'pr' + hache(t, 2166136261) + hache(t, 3355443) + hache(t, 1234567); }
+
+  /**
+   * Feuilles prévues un jour donné : une par classe qui a cours ce jour-là, d'après
+   * l'emploi du temps (créneaux) ou, à défaut, les horaires du centre pour son niveau.
+   * Les feuilles déjà ouvertes ce jour s'y ajoutent (cours de rattrapage).
+   */
+  function seancesPrevues(cid, iso) {
+    var j = jourDe(iso);
+    var out = [];
+    lignes('classes').filter(function (k) { return k.centre_id === cid; }).forEach(function (k) {
+      var id = idSeance(iso, k.id);
+      var existante = ligne('seances', id);
+      var crs = lignes('creneaux').filter(function (c) { return c.classe_id === k.id && Number(c.jour) === j; });
+      var pl = crs.length ? crs : horairesPour(cid, k.niveau).filter(function (h) { return Number(h.jour) === j; });
+      if (!pl.length && !(existante && !Number(existante.supprime))) return;
+      var debut = existante ? existante.debut : pl.map(function (x) { return x.debut; }).sort()[0];
+      var fin = existante ? existante.fin : pl.map(function (x) { return x.fin; }).sort().slice(-1)[0];
+      out.push({ id: id, centre_id: cid, classe: k, date: iso, debut: debut, fin: fin, creneaux: crs, existante: existante });
+    });
+    return out.sort(function (a, b) { return a.debut < b.debut ? -1 : a.debut > b.debut ? 1 : String(a.classe.nom).localeCompare(b.classe.nom, 'fr'); });
+  }
+  function presencesDe(seanceId) { return lignes('presences').filter(function (p) { return p.seance_id === seanceId; }); }
+  function etatSeance(x) {
+    var pr = presencesDe(x.id);
+    var c = { present: 0, retard: 0, absent: 0, justifie: 0, pointes: pr.length, inscrits: elevesActifs(x.centre_id).filter(function (e) { return e.classe_id === x.classe.id; }).length };
+    pr.forEach(function (p) { c[p.statut] = (c[p.statut] || 0) + 1; });
+    return c;
+  }
+  /** Minutes de retard de l'APPEL (0 si fait, pas encore dû, ou pas aujourd'hui). */
+  function retardAppel(x, centre) {
+    if (x.date !== isoLocal(new Date()) || etatSeance(x).pointes) return 0;
+    var m = minutes(heureMaintenant()) - minutes(x.debut) - (Number(centre.alerte_appel_min) || 15);
+    return m > 0 ? m : 0;
+  }
+  function statutCalcule(arrivee, debut, cid) {
+    var tol = Number((ligne('centres', cid) || {}).tolerance_retard_min) || 0;
+    var r = Math.max(0, minutes(arrivee) - minutes(debut));
+    return { statut: r > tol ? 'retard' : 'present', retard_min: r > tol ? r : 0 };
+  }
+  function peutPointer(cid, classeId, iso) {
+    if (!peut('appel.faire', cid)) return false;
+    if (!estAdmin() && roleDans(cid) === 'enseignant') {
+      var u = E.profil.utilisateur.id;
+      if (!lignes('creneaux').some(function (c) { return c.enseignant_id === u && c.classe_id === classeId && Number(c.jour) === jourDe(iso); })) return false;
+    }
+    return true;
+  }
+  function correcteur(cid) { return estAdmin() || roleDans(cid) === 'responsable'; }
+  function trop_ancien(iso) { return iso < decalerJour(isoLocal(new Date()), -2); }
+
+  function pageAppel() {
+    var auj = isoLocal(new Date());
+    if (!APL.date) APL.date = auj;
+    var dispo = centresChoisis().filter(function (c) { return peut('appel.faire', c.id); });
+    if (!dispo.some(function (c) { return c.id === APL.centre; })) APL.centre = dispo.length ? dispo[0].id : '';
+    var cid = APL.centre;
+    var centre = ligne('centres', cid) || {};
+    var h = '<h1>Appel</h1><div class="nav-date"><button type="button" class="btn clair petit" data-a="appel-date" data-v="-1" aria-label="Jour précédent">‹</button>' +
+      '<b>' + esc(APL.date === auj ? 'Aujourd\'hui' : dateLongue(APL.date)) + '</b>' +
+      '<button type="button" class="btn clair petit" data-a="appel-date" data-v="1" aria-label="Jour suivant"' + (APL.date >= auj ? ' disabled' : '') + '>›</button></div>' +
+      (APL.date === auj ? '<p class="sous-titre">' + esc(dateLongue(auj)) + '</p>' : '<p class="sous-titre"><a href="#/appel" data-a="appel-auj">Revenir à aujourd\'hui</a></p>');
+    if (dispo.length > 1) {
+      h += '<div class="puces">' + dispo.map(function (c) { return '<button type="button" class="puce' + (c.id === cid ? ' on' : '') + '" data-a="appel-centre" data-v="' + esc(c.id) + '">' + esc(c.nom_court || c.nom) + '</button>'; }).join('') + '</div>';
+    }
+    if (!cid) return h + '<div class="carte vide">Aucun centre.</div>';
+    var liste = seancesPrevues(cid, APL.date).filter(function (x) { return peutPointer(cid, x.classe.id, APL.date) || estAdmin(); });
+    if (!liste.length) {
+      return h + '<div class="carte vide">Pas de cours prévu ' + (APL.date === auj ? 'aujourd\'hui' : 'ce jour-là') + '.<br><small>Les cours viennent de l\'emploi du temps ou des horaires du centre (Planning).</small></div>';
+    }
+    var manquants = liste.filter(function (x) { return retardAppel(x, centre) > 0; });
+    if (manquants.length) {
+      h += '<div class="carte alerte-appel"><b>' + ico('alert', 'p') + ' Appels non faits</b><p class="doux">au-delà de ' + esc(centre.alerte_appel_min) + ' min après le début du cours</p>' +
+        manquants.map(function (x) { var r = retardAppel(x, centre) + Number(centre.alerte_appel_min); return '<p>' + esc(x.classe.nom) + ' · depuis ' + heureLisible(x.debut) + (r >= Number(centre.alerte_direction_min) ? ' <span class="badge danger">direction alertée</span>' : '') + '</p>'; }).join('') + '</div>';
+    }
+    h += '<div class="liste">' + liste.map(function (x) {
+      var e = etatSeance(x);
+      var close = x.existante && x.existante.statut === 'close';
+      var etat = close ? '<span class="badge ok">close</span>' : e.pointes ? '<span class="badge">en cours</span>' : retardAppel(x, centre) ? '<span class="badge danger">en retard</span>' : '<span class="badge alerte">à faire</span>';
+      var profs = x.creneaux.map(function (c) { return nomDe('matieres', c.matiere_id) + (c.enseignant_id ? ' (' + nomPersonne(c.enseignant_id) + ')' : ''); }).filter(Boolean).join(', ');
+      return '<a class="ligne creneau" href="#/pointage/' + encodeURIComponent(x.classe.id) + '/' + x.date + '"><span class="horaire"><b>' + esc(x.debut) + '</b><small>' + esc(x.fin) + '</small></span>' +
+        '<span class="corps"><b>' + esc(x.classe.nom) + '</b><small>' + (e.pointes ? e.present + ' présents · ' + e.retard + ' retards · ' + (e.absent + e.justifie) + ' absents' : e.inscrits + ' inscrits') + (profs ? ' · ' + esc(profs) : '') + '</small></span>' + etat + '</a>';
+    }).join('') + '</div>';
+    return h;
+  }
+
+  function pagePointage(arg) {
+    var parts = String(arg).split('/');
+    var classe = ligne('classes', parts[0]);
+    var iso = parts[1] || isoLocal(new Date());
+    if (!classe) return '<div class="carte vide">Classe introuvable.</div>';
+    var cid = classe.centre_id;
+    var x = seancesPrevues(cid, iso).filter(function (s) { return s.classe.id === classe.id; })[0] ||
+      { id: idSeance(iso, classe.id), centre_id: cid, classe: classe, date: iso, debut: '16:00', fin: '18:00', creneaux: [], existante: ligne('seances', idSeance(iso, classe.id)) };
+    var modifiable = peutPointer(cid, classe.id, iso) && (!trop_ancien(iso) || correcteur(cid));
+    var justifiable = peut('eleves.gerer', cid) || correcteur(cid);
+    var e = etatSeance(x);
+    var eleves = elevesActifs(cid).filter(function (el) { return el.classe_id === classe.id; }).sort(function (a, b) { return nomComplet(a).localeCompare(nomComplet(b), 'fr'); });
+    // Les élèves partis depuis gardent leur ligne s'ils ont été pointés.
+    presencesDe(x.id).forEach(function (p) { if (!eleves.some(function (el) { return el.id === p.eleve_id; })) { var el = ligne('eleves', p.eleve_id); if (el) eleves.push(el); } });
+    var close = x.existante && x.existante.statut === 'close';
+    var h = '<p class="retour"><a href="#/appel">‹ Appel</a></p><h1>' + esc(classe.nom) + '</h1><p class="sous-titre">' + esc(dateLongue(iso)) + ' · ' + heureLisible(x.debut) + ' – ' + heureLisible(x.fin) +
+      (x.creneaux.length ? ' · ' + esc(x.creneaux.map(function (c) { return nomDe('matieres', c.matiere_id); }).join(', ')) : '') + (close ? ' · <span class="badge ok">appel clos</span>' : '') + '</p>';
+    h += '<div class="compteurs"><span class="c-ok"><b>' + e.present + '</b>présents</span><span class="c-retard"><b>' + e.retard + '</b>retards</span><span class="c-abs"><b>' + (e.absent + e.justifie) + '</b>absents</span><span><b>' + Math.max(0, eleves.length - e.pointes) + '</b>à pointer</span></div>';
+    if (!modifiable) h += '<p class="note">' + (trop_ancien(iso) && peut('appel.faire', cid) ? 'Appel de plus de 2 jours : seul un responsable peut le corriger.' + (justifiable ? ' Vous pouvez encore justifier une absence.' : '') : 'Consultation seule.') + '</p>';
+    if (modifiable && eleves.length) {
+      h += '<div class="actions">' + (eleves.length > e.pointes ? '<button class="btn or" type="button" data-a="tous-presents" data-seance="' + esc(x.id) + '">' + ico('check', 'p') + 'Tous présents à l\'heure</button>' : '') +
+        '<button class="btn clair" type="button" data-a="fin-cours" data-seance="' + esc(x.id) + '">' + ico('clock', 'p') + 'Fin du cours</button></div>';
+    }
+    if (!eleves.length) h += '<div class="carte vide">Aucun élève inscrit dans cette classe.</div>';
+    h += '<div class="liste pointage">' + eleves.map(function (el) {
+      var p = ligne('presences', idPresence(x.id, el.id)) || presencesDe(x.id).filter(function (q) { return q.eleve_id === el.id; })[0];
+      var etat = !p ? '<small class="a-pointer">à pointer</small>'
+        : '<small class="st-' + p.statut + '">' + LIB_STATUT[p.statut] + (p.arrivee ? ' · ' + p.arrivee : '') + (Number(p.retard_min) ? ' (+' + p.retard_min + ' min)' : '') + (p.depart ? ' → ' + p.depart : '') + (p.motif ? ' · ' + esc(p.motif) : '') + '</small>';
+      var boutons = '';
+      if (modifiable) {
+        if (!p || p.statut === 'absent' || p.statut === 'justifie') boutons += '<button type="button" class="rond ok" data-a="pointer" data-v="arrive" data-seance="' + esc(x.id) + '" data-eleve="' + esc(el.id) + '" aria-label="Arrivé maintenant">' + ico('check') + '</button>';
+        else if (!p.depart) boutons += '<button type="button" class="rond" data-a="pointer" data-v="depart" data-seance="' + esc(x.id) + '" data-eleve="' + esc(el.id) + '" aria-label="Parti maintenant">' + ico('download') + '</button>';
+        if (!p || p.statut === 'present' || p.statut === 'retard') boutons += '<button type="button" class="rond abs" data-a="pointer" data-v="absent" data-seance="' + esc(x.id) + '" data-eleve="' + esc(el.id) + '" aria-label="Absent">' + ico('x') + '</button>';
+      } else if (justifiable && p && p.statut === 'absent') {
+        boutons += '<button type="button" class="btn clair petit" data-a="detail-presence" data-seance="' + esc(x.id) + '" data-eleve="' + esc(el.id) + '">Justifier</button>';
+      }
+      return '<div class="ligne' + (p ? ' pt-' + p.statut : '') + '"><button type="button" class="corps nom-eleve" data-a="detail-presence" data-seance="' + esc(x.id) + '" data-eleve="' + esc(el.id) + '"' + (modifiable || (justifiable && p) ? '' : ' disabled') + '><b>' + esc(nomComplet(el)) + '</b>' + etat + '</button>' +
+        (p && p._attente ? '<span class="badge alerte">en attente</span>' : '') + '<span class="boutons">' + boutons + '</span></div>';
+    }).join('') + '</div>';
+    if (modifiable && eleves.length && !close) h += '<div class="actions"><button class="btn" type="button" data-a="clore-appel" data-seance="' + esc(x.id) + '">' + ico('checkcircle', 'p') + 'Clore l\'appel</button></div>';
+    var se = x.existante || {};
+    h += '<h2>Cahier de textes</h2><form data-f="cahier" data-seance="' + esc(x.id) + '"><label class="champ"><span>Ce qui a été fait</span><textarea name="contenu" rows="2"' + (modifiable ? '' : ' disabled') + '>' + esc(se.contenu || '') + '</textarea></label>' +
+      '<label class="champ"><span>Travail donné</span><textarea name="travail" rows="2"' + (modifiable ? '' : ' disabled') + '>' + esc(se.travail || '') + '</textarea></label>' +
+      (modifiable ? '<div class="actions"><button class="btn clair" type="submit">Enregistrer</button></div>' : '') + '</form>';
+    E.cache.pointage = x;
+    return h;
+  }
+
+  /** La feuille existe-t-elle ? Sinon on l'ouvre (une fois) avant le premier pointage. */
+  function assurerSeance(x) {
+    if (ligne('seances', x.id) && !Number(ligne('seances', x.id).supprime)) return Promise.resolve();
+    x.existante = { debut: x.debut, fin: x.fin, statut: 'ouverte' };
+    return muter('seances', x.id, { centre_id: x.centre_id, classe_id: x.classe.id, date: x.date, debut: x.debut, fin: x.fin, statut: 'ouverte', ouverte_par: E.profil.utilisateur.id });
+  }
+  function pointer(x, eleveId, champs) {
+    var pid = idPresence(x.id, eleveId);
+    var avant = ligne('presences', pid);
+    var c = Object.assign({ centre_id: x.centre_id, seance_id: x.id, eleve_id: eleveId, date: x.date }, champs);
+    if ((c.statut === 'present' || c.statut === 'retard') && c.arrivee) Object.assign(c, statutCalcule(c.arrivee, x.debut, x.centre_id));
+    if (c.statut === 'absent') { c.arrivee = ''; c.depart = ''; c.retard_min = 0; }
+    if (avant) { delete c.centre_id; delete c.seance_id; delete c.eleve_id; delete c.date; }
+    return assurerSeance(x).then(function () { return muter('presences', pid, c); });
+  }
+  function feuillePresence(x, eleveId) {
+    var el = ligne('eleves', eleveId);
+    var p = ligne('presences', idPresence(x.id, eleveId)) || {};
+    var modifiable = peutPointer(x.centre_id, x.classe.id, x.date) && (!trop_ancien(x.date) || correcteur(x.centre_id));
+    var opts = modifiable ? ['present', 'retard', 'absent', 'justifie'] : ['absent', 'justifie'];
+    ouvrirFeuille('<h2>' + esc(nomComplet(el)) + '</h2><p class="doux">' + esc(x.classe.nom) + ' · ' + esc(dateLongue(x.date)) + ' · début ' + heureLisible(x.debut) + '</p>' +
+      '<form data-f="presence" data-eleve="' + esc(eleveId) + '">' +
+      '<label class="champ"><span>Statut</span><select name="statut">' + opts.map(function (o) { return '<option value="' + o + '"' + ((p.statut || 'present') === o ? ' selected' : '') + '>' + LIB_STATUT[o] + '</option>'; }).join('') + '</select><small>Présent ou en retard : décidé par l\'heure d\'arrivée (tolérance ' + esc((ligne('centres', x.centre_id) || {}).tolerance_retard_min) + ' min).</small></label>' +
+      (modifiable ? '<div class="deux"><label class="champ"><span>Arrivée</span><input type="time" name="arrivee" value="' + esc(p.arrivee || heureMaintenant()) + '"></label>' +
+        '<label class="champ"><span>Départ</span><input type="time" name="depart" value="' + esc(p.depart || '') + '"></label></div>' : '') +
+      '<label class="champ"><span>Motif ou justificatif</span><input type="text" name="motif" value="' + esc(p.motif || '') + '" placeholder="ex. : maladie, certificat médical"></label>' +
+      '<div class="actions"><button class="btn" type="submit">Enregistrer</button>' + (p.id && correcteur(x.centre_id) ? '<button class="btn danger" type="button" data-a="suppr-presence" data-id="' + esc(p.id) + '">Effacer le pointage</button>' : '') +
+      '<button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
+  }
+
+  // ───────────────────────────── Assiduité ─────────────────────────────
+  var ASD = { centre: '', periode: '30' };
+  function bilan(pres) {
+    var b = { present: 0, retard: 0, absent: 0, justifie: 0, minutes: 0, total: 0 };
+    pres.forEach(function (p) { b[p.statut] = (b[p.statut] || 0) + 1; b.minutes += Number(p.retard_min) || 0; b.total++; });
+    b.taux = b.total ? Math.round(100 * (b.present + b.retard) / b.total) : null;
+    b.ponctualite = (b.present + b.retard) ? Math.round(100 * b.present / (b.present + b.retard)) : null;
+    return b;
+  }
+  /** 3 absences (non justifiées) ou 3 retards aux 3 DERNIERS pointages de l'élève. */
+  function alertesAssiduite(cid) {
+    var parEleve = {};
+    lignes('presences').forEach(function (p) { if (p.centre_id === cid) (parEleve[p.eleve_id] = parEleve[p.eleve_id] || []).push(p); });
+    var out = [];
+    elevesActifs(cid).forEach(function (el) {
+      var l = (parEleve[el.id] || []).sort(function (a, b) { return a.date < b.date ? 1 : -1; }).slice(0, 3);
+      if (l.length < 3) return;
+      if (l.every(function (p) { return p.statut === 'absent'; })) out.push({ eleve: el, type: 'absences', depuis: l[2].date });
+      else if (l.every(function (p) { return p.statut === 'retard'; })) out.push({ eleve: el, type: 'retards', depuis: l[2].date, minutes: l.reduce(function (s, p) { return s + (Number(p.retard_min) || 0); }, 0) });
+    });
+    return out;
+  }
+  function messageAlerte(a) {
+    var c = ligne('centres', a.eleve.centre_id) || {};
+    return 'Bonjour' + (a.eleve.parent_nom ? ' ' + a.eleve.parent_nom : '') + ', le centre ' + (c.nom || 'VÉRITAS') + ' vous informe que ' + nomComplet(a.eleve) +
+      (a.type === 'absences' ? ' a été absent(e) aux 3 dernières séances (depuis le ' + dateLisible(a.depuis, true) + ').' : ' est arrivé(e) en retard aux 3 dernières séances (' + a.minutes + ' min au total).') +
+      ' Merci de nous contacter au ' + telLisible(String(c.telephones || '').split('/')[0].replace(/\D+/g, '')) + '.';
+  }
+  function pageAssiduite() {
+    var dispo = centresChoisis();
+    if (!dispo.some(function (c) { return c.id === ASD.centre; })) ASD.centre = dispo.length ? dispo[0].id : '';
+    var cid = ASD.centre;
+    var h = '<h1>Assiduité et ponctualité</h1>';
+    if (dispo.length > 1) h += '<div class="puces">' + dispo.map(function (c) { return '<button type="button" class="puce' + (c.id === cid ? ' on' : '') + '" data-a="asd-centre" data-v="' + esc(c.id) + '">' + esc(c.nom_court || c.nom) + '</button>'; }).join('') + '</div>';
+    if (!cid) return h + '<div class="carte vide">Aucun centre.</div>';
+    h += '<div class="onglets">' + [['7', '7 jours'], ['30', '30 jours'], ['an', 'Année']].map(function (o) { return '<button type="button" class="' + (ASD.periode === o[0] ? 'on' : '') + '" data-a="asd-periode" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>';
+    var debut = ASD.periode === 'an' ? ((lignes('annees').filter(function (a) { return Number(a.active); })[0] || {}).debut || '2000-01-01') : decalerJour(isoLocal(new Date()), -Number(ASD.periode));
+    var pres = lignes('presences').filter(function (p) { return p.centre_id === cid && p.date >= debut; });
+    var b = bilan(pres);
+    h += '<div class="stats"><div><b>' + (b.taux == null ? '—' : b.taux + ' %') + '</b><small>assiduité</small></div><div><b>' + (b.ponctualite == null ? '—' : b.ponctualite + ' %') + '</b><small>ponctualité</small></div>' +
+      '<div><b>' + b.retard + '</b><small>retards · ' + dureeLisible(b.minutes) + '</small></div><div><b>' + b.absent + '</b><small>absences non justifiées</small></div></div>';
+    var al = alertesAssiduite(cid);
+    if (al.length) {
+      h += '<h2>' + ico('alert', 'p') + ' Alertes</h2><div class="liste">' + al.map(function (a) {
+        var tel = a.eleve.parent_whatsapp || a.eleve.parent_tel;
+        return '<div class="ligne"><span class="corps"><b>' + esc(nomComplet(a.eleve)) + '</b><small>' + (a.type === 'absences' ? '3 absences de suite' : '3 retards de suite (' + a.minutes + ' min)') + ' · ' + esc(nomDe('classes', a.eleve.classe_id)) + '</small></span>' +
+          (tel ? '<a class="btn clair petit" target="_blank" rel="noopener" href="https://wa.me/237' + esc(tel) + '?text=' + encodeURIComponent(messageAlerte(a)) + '">' + ico('message', 'p') + 'Parent</a>' : '<span class="doux">pas de numéro</span>') + '</div>';
+      }).join('') + '</div>';
+    }
+    var classes = lignes('classes').filter(function (k) { return k.centre_id === cid; });
+    h += '<h2>Par classe</h2><div class="liste">' + classes.map(function (k) {
+      var ids = {}; lignes('eleves').forEach(function (el) { if (el.classe_id === k.id) ids[el.id] = 1; });
+      var bk = bilan(pres.filter(function (p) { return ids[p.eleve_id]; }));
+      return '<div class="ligne"><span class="corps"><b>' + esc(k.nom) + '</b><small>' + bk.total + ' pointages · ' + bk.retard + ' retards · ' + bk.absent + ' absences</small></span><span class="fin"><b>' + (bk.taux == null ? '—' : bk.taux + ' %') + '</b></span></div>';
+    }).join('') + '</div>';
+    var parEleve = elevesActifs(cid).map(function (el) { return { el: el, b: bilan(pres.filter(function (p) { return p.eleve_id === el.id; })) }; }).filter(function (x) { return x.b.total; });
+    if (parEleve.length) {
+      var ligneEl = function (x) {
+        return '<button class="ligne" type="button" data-a="voir-eleve" data-id="' + esc(x.el.id) + '"><span class="corps"><b>' + esc(nomComplet(x.el)) + '</b><small>' + esc(nomDe('classes', x.el.classe_id)) + ' · ' + x.b.retard + ' retard' + (x.b.retard > 1 ? 's' : '') + (x.b.minutes ? ' (' + dureeLisible(x.b.minutes) + ')' : '') + ' · ' + (x.b.absent + x.b.justifie) + ' absence' + (x.b.absent + x.b.justifie > 1 ? 's' : '') + '</small></span><span class="fin"><b>' + x.b.taux + ' %</b></span></button>';
+      };
+      var aSuivre = parEleve.slice().sort(function (a, b) { return a.b.taux - b.b.taux || b.b.minutes - a.b.minutes; }).filter(function (x) { return x.b.taux < 100 || x.b.retard; }).slice(0, 10);
+      var modeles = parEleve.slice().sort(function (a, b) { return b.b.taux - a.b.taux || a.b.minutes - b.b.minutes; }).filter(function (x) { return x.b.taux === 100 && !x.b.retard; }).slice(0, 10);
+      if (aSuivre.length) h += '<h2>À suivre</h2><div class="liste">' + aSuivre.map(ligneEl).join('') + '</div>';
+      if (modeles.length) h += '<h2>Assidus et ponctuels</h2><div class="liste">' + modeles.map(ligneEl).join('') + '</div>';
+    } else {
+      h += '<div class="carte vide">Aucun pointage sur la période.</div>';
+    }
+    return h;
+  }
 
   // ───────────────────────────── Élèves ─────────────────────────────
   var ELV = { centre: '', classe: '', q: '', tous: false };
@@ -722,6 +991,13 @@
       '<div class="infos">' + ligneInfo('Sexe', e.sexe === 'F' ? 'Fille' : e.sexe === 'M' ? 'Garçon' : '') + ligneInfo('Né(e) le', e.date_naissance ? dateLisible(e.date_naissance, true) : '') +
       ligneInfo('Établissement', e.etablissement) + ligneInfo('Matières suivies', mat.join(', ')) + ligneInfo('Téléphone de l\'élève', telLisible(e.tel_eleve)) +
       ligneInfo('Quartier', e.quartier) + ligneInfo('Inscrit le', e.date_inscription ? dateLisible(e.date_inscription, true) : '') + ligneInfo('Observations', e.observations) + '</div>' +
+      (function () {
+        var pr = lignes('presences').filter(function (p) { return p.eleve_id === e.id; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+        if (!pr.length) return '';
+        var b = bilan(pr);
+        return '<h3>Assiduité</h3><div class="stats petites"><div><b>' + b.taux + ' %</b><small>présent</small></div><div><b>' + b.retard + '</b><small>retards · ' + dureeLisible(b.minutes) + '</small></div><div><b>' + (b.absent + b.justifie) + '</b><small>absences' + (b.justifie ? ' (' + b.justifie + ' just.)' : '') + '</small></div></div>' +
+          '<div class="infos">' + pr.slice(0, 8).map(function (p) { return '<div class="info"><span>' + esc(dateLisible(p.date, true)) + '</span><b class="st-' + p.statut + '">' + LIB_STATUT[p.statut] + (p.arrivee ? ' · ' + p.arrivee : '') + (Number(p.retard_min) ? ' (+' + p.retard_min + ')' : '') + (p.depart ? ' → ' + p.depart : '') + '</b></div>'; }).join('') + '</div>';
+      })() +
       '<div class="actions">' + (gere ? '<button class="btn" type="button" data-a="editer-eleve" data-id="' + esc(e.id) + '">' + ico('edit', 'p') + 'Modifier</button>' +
         ((e.statut || 'actif') === 'actif' ? '<button class="btn danger" type="button" data-a="statut-eleve" data-id="' + esc(e.id) + '" data-v="parti">A quitté le centre</button>'
           : '<button class="btn clair" type="button" data-a="statut-eleve" data-id="' + esc(e.id) + '" data-v="actif">Réinscrire</button>') : '') +
@@ -1221,6 +1497,54 @@
     'copier-secret': function () { copier(E.cache.messageSecret || ''); },
     'partager-secret': function () { navigator.share({ text: E.cache.messageSecret }).catch(function () {}); },
     'journal-suite': function () { chargerJournal(true); },
+    'appel-centre': function (el) { APL.centre = el.dataset.v; rendre(); },
+    'appel-date': function (el) { APL.date = decalerJour(APL.date, +el.dataset.v); rendre(); },
+    'appel-auj': function () { APL.date = ''; rendre(); },
+    'asd-centre': function (el) { ASD.centre = el.dataset.v; rendre(); },
+    'asd-periode': function (el) { ASD.periode = el.dataset.v; rendre(); },
+    pointer: function (el) {
+      var x = E.cache.pointage;
+      var v = el.dataset.v;
+      var p = ligne('presences', idPresence(x.id, el.dataset.eleve));
+      var champs = v === 'arrive' ? { statut: 'present', arrivee: heureMaintenant(), depart: '', motif: '' }
+        : v === 'depart' ? { depart: heureMaintenant(), statut: p.statut, arrivee: p.arrivee }
+        : { statut: 'absent', motif: '' };
+      pointer(x, el.dataset.eleve, champs).then(rendre);
+    },
+    'detail-presence': function (el) { feuillePresence(E.cache.pointage, el.dataset.eleve); },
+    'suppr-presence': function (el) { confirmer('Effacer ce pointage ?', 'Effacer', function () { muter('presences', el.dataset.id, {}, true).then(rendre); }); },
+    'tous-presents': function () {
+      var x = E.cache.pointage;
+      var suite = Promise.resolve();
+      var n = 0;
+      elevesActifs(x.centre_id).filter(function (e) { return e.classe_id === x.classe.id; }).forEach(function (e) {
+        if (ligne('presences', idPresence(x.id, e.id))) return;
+        n++;
+        suite = suite.then(function () { return pointer(x, e.id, { statut: 'present', arrivee: x.debut }); });
+      });
+      suite.then(function () { toast(n + ' élève' + (n > 1 ? 's' : '') + ' pointé' + (n > 1 ? 's' : '') + ' présent' + (n > 1 ? 's' : '') + '.'); rendre(); });
+    },
+    'fin-cours': function () {
+      var x = E.cache.pointage;
+      var h = heureMaintenant() < x.fin ? heureMaintenant() : x.fin;
+      var l = presencesDe(x.id).filter(function (p) { return (p.statut === 'present' || p.statut === 'retard') && !p.depart; });
+      if (!l.length) { toast('Aucun élève présent sans heure de départ.'); return; }
+      var suite = Promise.resolve();
+      l.forEach(function (p) { suite = suite.then(function () { return pointer(x, p.eleve_id, { depart: h, statut: p.statut, arrivee: p.arrivee }); }); });
+      suite.then(function () { toast('Départ ' + heureLisible(h) + ' noté pour ' + l.length + ' élève' + (l.length > 1 ? 's' : '') + '.'); rendre(); });
+    },
+    'clore-appel': function () {
+      var x = E.cache.pointage;
+      var restants = elevesActifs(x.centre_id).filter(function (e) { return e.classe_id === x.classe.id && !ligne('presences', idPresence(x.id, e.id)); });
+      var faire = function () {
+        var suite = Promise.resolve();
+        restants.forEach(function (e) { suite = suite.then(function () { return pointer(x, e.id, { statut: 'absent' }); }); });
+        suite.then(function () { return assurerSeance(x); }).then(function () { return muter('seances', x.id, { statut: 'close', close_le: maintenantSql() }); })
+          .then(function () { toast('Appel clos.'); rendre(); });
+      };
+      if (restants.length) confirmer(restants.length + ' élève' + (restants.length > 1 ? 's' : '') + ' non pointé' + (restants.length > 1 ? 's seront marqués' : ' sera marqué') + ' absent' + (restants.length > 1 ? 's' : '') + '.', 'Clore l\'appel', faire);
+      else faire();
+    },
     'eleves-centre': function (el) { ELV.centre = el.dataset.v; ELV.classe = ''; rendre(); },
     'eleves-classe': function (el) { ELV.classe = el.dataset.v; rendre(); },
     'voir-eleve': function (el) { feuilleVoirEleve(el.dataset.id); },
@@ -1427,6 +1751,20 @@
         });
       });
       suite.then(function () { ELV.classe = classe; toast(l.length + ' élève' + (l.length > 1 ? 's' : '') + ' inscrit' + (l.length > 1 ? 's' : '') + '.'); rendre(); });
+    },
+    presence: function (form) {
+      var x = E.cache.pointage;
+      var v = valeurs(form);
+      var champs = { statut: v.statut, motif: v.motif };
+      if (v.arrivee !== undefined) { champs.arrivee = v.statut === 'absent' || v.statut === 'justifie' ? '' : v.arrivee; champs.depart = champs.arrivee ? v.depart : ''; }
+      if (champs.depart && champs.arrivee && champs.depart < champs.arrivee) { toast('Le départ ne peut pas précéder l\'arrivée.', true); return; }
+      fermerFeuille();
+      pointer(x, form.dataset.eleve, champs).then(rendre);
+    },
+    cahier: function (form) {
+      var x = E.cache.pointage;
+      var v = valeurs(form);
+      assurerSeance(x).then(function () { return muter('seances', x.id, { contenu: v.contenu, travail: v.travail }); }).then(function () { toast('Cahier de textes enregistré.'); rendre(); });
     },
     creneau: function (form) {
       var v = valeurs(form);

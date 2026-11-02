@@ -98,6 +98,21 @@ function g_schema(): array {
             'doublon_ok' => 'int',              // homonyme confirmé (frères et sœurs, vrais homonymes)
         ] + G_COLS_SYNC, 'index' => [['centre_id'], ['rev'], ['classe_id']]],
 
+        // Appel : une feuille par classe et par jour (id déterministe « sa » + AAAAMMJJ + classe,
+        // pour que deux téléphones hors ligne ouvrent la MÊME feuille). debut/fin figés
+        // à l'ouverture : l'historique ne bouge pas si l'emploi du temps change.
+        'g_seances' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'classe_id' => 'ref', 'date' => 'str:10', 'debut' => 'str:5', 'fin' => 'str:5',
+            'statut' => 'str:10', 'contenu' => 'text', 'travail' => 'text', 'ouverte_par' => 'ref', 'close_le' => 'str:19',
+        ] + G_COLS_SYNC, 'index' => [['centre_id', 'date'], ['rev']]],
+
+        // Une ligne par élève et par feuille. retard_min et le statut présent/retard sont
+        // recalculés par le SERVEUR (heure d'arrivée, début de la feuille, tolérance du centre).
+        'g_presences' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'seance_id' => 'ref', 'eleve_id' => 'ref', 'date' => 'str:10',
+            'statut' => 'str:10', 'arrivee' => 'str:5', 'depart' => 'str:5', 'retard_min' => 'int', 'motif' => 'str:200',
+        ] + G_COLS_SYNC, 'index' => [['seance_id'], ['eleve_id'], ['centre_id', 'date'], ['rev']], 'unique' => [['seance_id', 'eleve_id']]],
+
         // Opérations déjà appliquées : un envoi répété (réseau coupé au mauvais
         // moment) n'est jamais appliqué deux fois.
         'g_ops' => ['cols' => [
@@ -145,6 +160,14 @@ function g_registre(): array {
             'champs' => ['centre_id', 'classe_id', 'nom', 'prenoms', 'sexe', 'date_naissance', 'etablissement', 'matieres',
                          'tel_eleve', 'quartier', 'parent_nom', 'parent_lien', 'parent_tel', 'parent_whatsapp', 'parent2_nom',
                          'parent2_tel', 'date_inscription', 'statut', 'observations', 'doublon_ok'],
+        ],
+        'seances' => [
+            'table' => 'g_seances', 'portee' => 'centre_id', 'lire' => 'centre.voir', 'ecrire' => 'appel.faire',
+            'champs' => ['centre_id', 'classe_id', 'date', 'debut', 'fin', 'statut', 'contenu', 'travail', 'ouverte_par', 'close_le'],
+        ],
+        'presences' => [
+            'table' => 'g_presences', 'portee' => 'centre_id', 'lire' => 'centre.voir', 'ecrire' => 'appel.faire',
+            'champs' => ['centre_id', 'seance_id', 'eleve_id', 'date', 'statut', 'arrivee', 'depart', 'motif'],
         ],
         'actionnaires' => [
             'table' => 'g_actionnaires', 'portee' => 'centre_id', 'lire' => 'finances.voir', 'ecrire' => 'admin',

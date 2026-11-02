@@ -269,3 +269,46 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.45; }
 .plage span:first-child { width: 92px; flex: none; }
 .plage b { font-weight: 500; flex: 1; }
 .plage[disabled] { cursor: default; }
+
+/* ── Appel ── */
+.nav-date { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 6px 0 2px; }
+.nav-date b { font-weight: 600; color: var(--titre); text-transform: capitalize; }
+.nav-date .btn { min-width: 44px; font-size: 20px; }
+.retour { margin: 0 0 6px; font-size: 14px; }
+.retour a { text-decoration: none; }
+.compteurs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 4px 0 12px; }
+.compteurs span { background: #fff; border: 1px solid var(--trait); border-radius: var(--rayon); padding: 8px 4px; text-align: center; font-size: 12px; color: var(--doux); display: grid; }
+.compteurs b { font-size: 20px; font-weight: 600; color: var(--titre); }
+.compteurs .c-ok b { color: var(--ok); }
+.compteurs .c-retard b { color: var(--alerte); }
+.compteurs .c-abs b { color: var(--danger); }
+.liste.pointage .ligne { padding: 8px 10px 8px 14px; cursor: default; }
+.nom-eleve { border: 0; background: none; text-align: left; padding: 4px 0; cursor: pointer; font: inherit; color: inherit; min-width: 0; }
+.nom-eleve[disabled] { cursor: default; }
+.boutons { display: flex; gap: 8px; flex: none; }
+.rond { width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--trait); background: #fff; display: grid; place-items: center; cursor: pointer; color: var(--bleu); }
+.rond.ok { background: var(--ok-fond); border-color: transparent; color: var(--ok); }
+.rond.abs { background: var(--danger-fond); border-color: transparent; color: var(--danger); }
+.rond .ico { width: 22px; height: 22px; stroke-width: 2.2; }
+.st-present { color: var(--ok) !important; }
+.st-retard { color: var(--alerte) !important; }
+.st-absent { color: var(--danger) !important; }
+.st-justifie { color: var(--doux) !important; }
+.a-pointer { color: var(--doux); font-style: italic; }
+.ligne.pt-present { box-shadow: inset 4px 0 0 var(--ok); }
+.ligne.pt-retard { box-shadow: inset 4px 0 0 var(--action-fonce); }
+.ligne.pt-absent { box-shadow: inset 4px 0 0 var(--danger); }
+.ligne.pt-justifie { box-shadow: inset 4px 0 0 #A9B0C2; }
+.carte.alerte-appel { border-color: #F1C0BB; background: var(--danger-fond); color: var(--danger); }
+.carte.alerte-appel b { color: var(--danger); display: flex; align-items: center; gap: 6px; }
+.carte.alerte-appel .doux { color: #8f3a32; }
+.lien-appel { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-size: 14px; }
+
+/* ── Assiduité ── */
+.stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 8px; }
+.stats div { background: #fff; border: 1px solid var(--trait); border-radius: var(--rayon); padding: 12px; display: grid; gap: 2px; }
+.stats b { font-size: 24px; font-weight: 600; color: var(--titre); }
+.stats small { color: var(--doux); font-size: 13px; }
+.stats.petites { grid-template-columns: repeat(3, 1fr); }
+.stats.petites b { font-size: 18px; }
+@media (min-width: 640px) { .stats { grid-template-columns: repeat(4, 1fr); } }

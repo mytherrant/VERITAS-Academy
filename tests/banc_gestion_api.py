@@ -238,6 +238,84 @@ _, r = req("sync/pousser", {"ops": [{"op": op(), "t": "horaires", "id": hA, "cha
 verifier("une secrétaire ne change pas les horaires", r["resultats"][0]["ok"] is False, r)
 req("sync/pousser", {"ops": [{"op": op(), "t": "horaires", "id": hA, "suppr": True}]}, adm)
 
+# ── Appel et ponctualité (étape 3) ──
+import datetime
+auj = datetime.date.today()
+jj = lambda d: d.strftime("%Y-%m-%d")
+sid = lambda d, cl: "sa" + d.strftime("%Y%m%d") + cl
+# Une classe neuve par passage : le banc se rejoue sans retrouver ses feuilles d'hier.
+clX = "cl-" + uuid.uuid4().hex[:12]
+req("sync/pousser", {"ops": [{"op": op(), "t": "classes", "id": clX, "champs": {"centre_id": Bc, "nom": "Appel " + clX[-5:]}}]}, adm)
+s1 = sid(auj, clX)
+pid = lambda: "pr-" + uuid.uuid4().hex[:20]
+p1, p3 = pid(), pid()
+_, r = req("sync/pousser", {"ops": [
+    {"op": op(), "t": "seances", "id": s1, "champs": {"centre_id": Bc, "classe_id": clX, "date": jj(auj), "debut": "16:00", "fin": "18:00", "statut": "ouverte"}},
+    {"op": op(), "t": "presences", "id": p1, "champs": {"centre_id": Bc, "seance_id": s1, "eleve_id": el1, "statut": "present", "arrivee": "16:03"}},
+    {"op": op(), "t": "presences", "id": p3, "champs": {"centre_id": Bc, "seance_id": s1, "eleve_id": el3, "statut": "present", "arrivee": "16:20"}},
+    {"op": op(), "t": "presences", "id": pid(), "champs": {"centre_id": Bc, "seance_id": s1, "eleve_id": el1, "statut": "absent"}},           # 2e pointage
+    {"op": op(), "t": "presences", "id": pid(), "champs": {"centre_id": Bc, "seance_id": s1, "eleve_id": el3, "statut": "present", "arrivee": "17:00", "depart": "16:30"}},
+    {"op": op(), "t": "seances", "id": sid(auj + datetime.timedelta(days=1), clX), "champs": {"centre_id": Bc, "classe_id": clX, "date": jj(auj + datetime.timedelta(days=1)), "debut": "16:00", "fin": "18:00"}},
+]}, secB)
+res = r["resultats"]
+verifier("la secrétaire ouvre la feuille du jour", res[0]["ok"] is True, res[0])
+verifier("pointage à l'heure accepté", res[1]["ok"] is True and res[2]["ok"] is True, res[1:3])
+verifier("un seul pointage par élève et par feuille", res[3]["ok"] is False and "déjà pointé" in res[3].get("erreur", ""), res[3])
+verifier("départ avant l'arrivée refusé", res[4]["ok"] is False, res[4])
+verifier("pas d'appel pour un jour à venir", res[5]["ok"] is False, res[5])
+_, t = req("sync/tirer", jeton=secB)
+pr = {p["id"]: p for p in t["lignes"].get("presences", [])}
+verifier("3 min de retard (tolérance 5) : présent", pr.get(p1, {}).get("statut") == "present" and int(pr[p1]["retard_min"]) == 0, pr.get(p1))
+verifier("20 min de retard : statut « retard » posé par le serveur", pr.get(p3, {}).get("statut") == "retard" and int(pr[p3]["retard_min"]) == 20, pr.get(p3))
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "presences", "id": p1, "champs": {"statut": "present", "arrivee": "16:45"}}]}, secB)
+_, t = req("sync/tirer", jeton=secB)
+p1s = next(p for p in t["lignes"]["presences"] if p["id"] == p1)
+verifier("corriger l'heure d'arrivée recalcule le retard", p1s["statut"] == "retard" and int(p1s["retard_min"]) == 45, p1s)
+
+# Verrou des 2 jours : la secrétaire ne réécrit pas l'histoire, mais peut justifier.
+vieux = auj - datetime.timedelta(days=5)
+s0 = sid(vieux, clX)
+p0 = pid()
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "seances", "id": s0, "champs": {"centre_id": Bc, "classe_id": clX, "date": jj(vieux), "debut": "16:00", "fin": "18:00"}}]}, secB)
+verifier("feuille de plus de 2 jours : refusée à la secrétaire", r["resultats"][0]["ok"] is False, r)
+_, r = req("sync/pousser", {"ops": [
+    {"op": op(), "t": "seances", "id": s0, "champs": {"centre_id": Bc, "classe_id": clX, "date": jj(vieux), "debut": "16:00", "fin": "18:00"}},
+    {"op": op(), "t": "presences", "id": p0, "champs": {"centre_id": Bc, "seance_id": s0, "eleve_id": el1, "statut": "absent"}},
+]}, adm)
+verifier("l'admin corrige un appel ancien", all(x["ok"] for x in r["resultats"]), r)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "presences", "id": p0, "champs": {"statut": "present", "arrivee": "16:00"}}]}, secB)
+verifier("la secrétaire ne transforme pas une vieille absence en présence", r["resultats"][0]["ok"] is False, r)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "presences", "id": p0, "champs": {"statut": "justifie", "motif": "Certificat médical"}}]}, secB)
+verifier("la secrétaire justifie une vieille absence", r["resultats"][0]["ok"] is True, r)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "presences", "id": p1, "suppr": True}]}, secB)
+verifier("la secrétaire ne supprime pas un pointage", r["resultats"][0]["ok"] is False, r)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "presences", "id": p1, "suppr": True}]}, adm)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "presences", "id": p1, "champs": {"centre_id": Bc, "seance_id": s1, "eleve_id": el1, "statut": "present", "arrivee": "16:00"}}]}, secB)
+_, t = req("sync/tirer", jeton=secB)
+p1s = next(p for p in t["lignes"]["presences"] if p["id"] == p1)
+verifier("pointage effacé puis refait : la ligne revit", r["resultats"][0]["ok"] is True and int(p1s["supprime"]) == 0 and p1s["statut"] == "present", (r, p1s))
+
+# Élève d'un autre centre, enseignant hors de ses classes.
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "presences", "id": pid(), "champs": {"centre_id": Bc, "seance_id": s1, "eleve_id": "el-inexistant-000"}}]}, secB)
+verifier("élève inconnu du centre refusé", r["resultats"][0]["ok"] is False, r)
+clT, clU = "cl-" + uuid.uuid4().hex[:12], "cl-" + uuid.uuid4().hex[:12]
+jourAuj = auj.isoweekday()
+req("sync/pousser", {"ops": [
+    {"op": op(), "t": "classes", "id": clT, "champs": {"centre_id": A, "nom": "Prof " + clT[-5:]}},
+    {"op": op(), "t": "classes", "id": clU, "champs": {"centre_id": A, "nom": "Autre " + clU[-5:]}},
+    {"op": op(), "t": "creneaux", "id": "cr-" + uuid.uuid4().hex[:12], "champs": {"centre_id": A, "classe_id": clT, "matiere_id": mat["Mathématiques"],
+        "enseignant_id": ens_id, "jour": jourAuj, "debut": "23:00", "fin": "23:30", "salle": ""}},
+]}, adm)
+prof = connexion("prof.maths", req("comptes/mdp", {"id": ens_id}, adm)[1]["mdp"])
+_, r = req("sync/pousser", {"ops": [
+    {"op": op(), "t": "seances", "id": sid(auj, clT), "champs": {"centre_id": A, "classe_id": clT, "date": jj(auj), "debut": "23:00", "fin": "23:30"}},
+    {"op": op(), "t": "seances", "id": sid(auj, clU), "champs": {"centre_id": A, "classe_id": clU, "date": jj(auj), "debut": "16:00", "fin": "18:00"}},
+]}, prof)
+verifier("l'enseignant fait l'appel de SA classe du jour", r["resultats"][0]["ok"] is True, r["resultats"][0])
+verifier("l'enseignant ne pointe pas une classe où il n'a pas cours", r["resultats"][1]["ok"] is False, r["resultats"][1])
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "seances", "id": sid(auj, clX) + "x", "champs": {"centre_id": Bc, "classe_id": clX, "date": jj(auj), "debut": "16:00", "fin": "18:00"}}]}, actA)
+verifier("un actionnaire ne fait pas l'appel", r["resultats"][0]["ok"] is False, r)
+
 _, j = req("journal", {"limite": 200}, jeton=adm)
 actions = {l["action"] for l in j["lignes"]}
 verifier("journal : créations, refus de connexion, comptes", {"creation", "connexion_echec", "compte_cree"} <= actions, actions)

@@ -1,7 +1,7 @@
 # VÉRITAS Gestion — gestion.veritas-school.com
 
 Application des centres de répétition (Ndog-passi III, Ndog-passi II, et ceux qu'on ouvrira) :
-rôles par centre, emploi du temps et jours/horaires, inscriptions ; puis appel, exports, caisse, enseignants.
+rôles par centre, emploi du temps et jours/horaires, inscriptions, appel et assiduité ; puis exports, caisse, enseignants.
 
 > Ce fichier n'est pas déployé (la CI copie une liste fermée de fichiers).
 
@@ -20,6 +20,11 @@ centres du compte (`g_acces`). Le téléphone applique ses modifications tout de
 dans une file et les envoie dès que le réseau le permet ; une opération refusée est retirée et
 l'écran revient à la version du serveur. Chaque opération a un identifiant : un envoi répété
 n'est jamais appliqué deux fois.
+
+**Appel :** une feuille par classe et par jour (id déterministe « sa » + date + classe), un pointage
+par élève (id déterministe). Le serveur recalcule le retard (arrivée − début, tolérance du centre),
+refuse un jour à venir, limite l'enseignant à ses classes du jour, et verrouille l'appel après
+2 jours (sauf responsable/admin ; une absence reste justifiable).
 
 **Rôles :** admin global (les deux centres) · responsable · actionnaire (consultation des
 finances + emploi du temps) · secrétaire/surveillant · enseignant. Voir `g_capacites()`.
@@ -52,6 +57,7 @@ node tests/banc_gestion_versions.cjs             # ?v= identique partout
 node tests/banc_gestion_horsligne.cjs <dossier>  # vrai hors ligne (Playwright)
 node tests/banc_gestion_emploi.cjs <dossier>     # emploi du temps (Playwright)
 node tests/banc_gestion_eleves.cjs <dossier>     # inscriptions, homonymes, import, horaires (Playwright)
+node tests/banc_gestion_appel.cjs <dossier>      # appel, retards, clôture, alertes, hors ligne (Playwright)
 ```
 
 **Noms fictifs uniquement** dans le code et les bancs : le dépôt est public, les élèves sont mineurs.

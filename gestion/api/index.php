@@ -380,12 +380,14 @@ case 'sync/pousser': {
                 }
             }
 
+            $GLOBALS['g_ctx'] = $ctx;
             g_valider_ligne($pdo, $r['table'], $id, $existant, $champs, $suppr);
 
             $meta = ['rev' => g_rev(), 'maj_par' => $ctx['uid'], 'maj_le' => g_now()];
             $pdo->beginTransaction();
             if ($existant) {
-                $maj = $suppr ? ['supprime' => 1] + $meta : $champs + $meta;
+                // Réécrire une ligne effacée la fait revivre (pointage refait, classe recréée…).
+                $maj = $suppr ? ['supprime' => 1] + $meta : $champs + ['supprime' => 0] + $meta;
                 $set = implode(', ', array_map(fn($c) => $c . ' = ?', array_keys($maj)));
                 $pdo->prepare('UPDATE ' . $r['table'] . ' SET ' . $set . ' WHERE id = ?')->execute([...array_values($maj), $id]);
             } elseif (!$suppr) {
@@ -421,6 +423,98 @@ default:
 }
 
 /**
+ * Règles de l'appel.
+ *  - Feuille : classe du centre, date et heures valides, statut ouverte|close.
+ *  - Présence : feuille et élève du même centre ; un seul pointage par élève et
+ *    par feuille ; retard calculé ici (arrivée − début, tolérance du centre).
+ *  - Un enseignant ne pointe que les classes où il a cours ce jour-là.
+ *  - Au-delà de 2 jours, seul un responsable (ou l'admin) peut corriger ; les
+ *    autres peuvent encore JUSTIFIER une absence (le justificatif arrive tard).
+ */
+function g_valider_appel(PDO $pdo, string $table, string $id, ?array $existant, array &$champs): void {
+    $ctx = $GLOBALS['g_ctx'] ?? null;
+    $val = fn(string $c) => array_key_exists($c, $champs) ? $champs[$c] : ($existant[$c] ?? null);
+    $centre = (string) $val('centre_id');
+    $heure = '/^([01]\d|2[0-3]):[0-5]\d$/';
+
+    if ($table === 'g_seances') {
+        $date = (string) $val('date');
+        $classe = (string) $val('classe_id');
+    } else {
+        $st = $pdo->prepare('SELECT * FROM g_seances WHERE id = ? AND supprime = 0');
+        $st->execute([(string) $val('seance_id')]);
+        $seance = $st->fetch();
+        if (!$seance || (string) $seance['centre_id'] !== $centre) { throw new DomainException('Feuille d\'appel introuvable dans ce centre.'); }
+        $date = (string) $seance['date'];
+        $classe = (string) $seance['classe_id'];
+        $champs['date'] = $date;
+    }
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) { throw new DomainException('Date invalide.'); }
+    if ($date > date('Y-m-d')) { throw new DomainException('On ne fait pas l\'appel d\'un jour à venir.'); }
+
+    $role = $ctx && !$ctx['admin'] ? ($ctx['acces'][$centre] ?? '') : 'admin';
+    if ($role === 'enseignant') {
+        $jour = (int) date('N', strtotime($date));
+        $st = $pdo->prepare('SELECT COUNT(*) FROM g_creneaux WHERE enseignant_id = ? AND classe_id = ? AND jour = ? AND supprime = 0');
+        $st->execute([$ctx['uid'], $classe, $jour]);
+        if (!(int) $st->fetchColumn()) { throw new DomainException('Vous n\'avez pas cours avec cette classe ce jour-là.'); }
+    }
+    $ancien = $date < date('Y-m-d', strtotime('-2 days'));
+    $correcteur = in_array($role, ['admin', 'responsable'], true);
+
+    if ($table === 'g_seances') {
+        $st = $pdo->prepare('SELECT COUNT(*) FROM g_classes WHERE id = ? AND centre_id = ? AND supprime = 0');
+        $st->execute([$classe, $centre]);
+        if (!(int) $st->fetchColumn()) { throw new DomainException('Classe inconnue dans ce centre.'); }
+        if (!preg_match($heure, (string) $val('debut')) || !preg_match($heure, (string) $val('fin')) || $val('debut') >= $val('fin')) {
+            throw new DomainException('Heures de la feuille invalides.');
+        }
+        if (!in_array((string) ($val('statut') ?: 'ouverte'), ['ouverte', 'close'], true)) { throw new DomainException('Statut de feuille inconnu.'); }
+        if ($ancien && !$correcteur) { throw new DomainException('Feuille de plus de 2 jours : seul un responsable peut la modifier.'); }
+        return;
+    }
+
+    // ── Présence ──
+    $statut = (string) $val('statut');
+    if (!in_array($statut, ['present', 'retard', 'absent', 'justifie'], true)) { throw new DomainException('Statut de présence inconnu.'); }
+    foreach (['arrivee', 'depart'] as $c) {
+        if ((string) $val($c) !== '' && !preg_match($heure, (string) $val($c))) { throw new DomainException('Heure invalide (HH:MM).'); }
+    }
+    if ((string) $val('arrivee') !== '' && (string) $val('depart') !== '' && $val('depart') < $val('arrivee')) {
+        throw new DomainException('Le départ ne peut pas précéder l\'arrivée.');
+    }
+    $st = $pdo->prepare('SELECT COUNT(*) FROM g_eleves WHERE id = ? AND centre_id = ? AND supprime = 0');
+    $st->execute([(string) $val('eleve_id'), $centre]);
+    if (!(int) $st->fetchColumn()) { throw new DomainException('Élève inconnu dans ce centre.'); }
+    if (!$existant) {
+        $st = $pdo->prepare('SELECT COUNT(*) FROM g_presences WHERE seance_id = ? AND eleve_id = ? AND supprime = 0');
+        $st->execute([(string) $val('seance_id'), (string) $val('eleve_id')]);
+        if ((int) $st->fetchColumn()) { throw new DomainException('Cet élève est déjà pointé sur cette feuille.'); }
+    }
+    if ($ancien && !$correcteur) {
+        $justification = $existant && $existant['statut'] === 'absent' && $statut === 'justifie'
+            && !array_diff(array_keys($champs), ['statut', 'motif', 'date', 'centre_id', 'seance_id', 'eleve_id']);
+        if (!$justification) { throw new DomainException('Appel de plus de 2 jours : seul un responsable peut le corriger (vous pouvez justifier une absence).'); }
+    }
+    // Retard : calculé ici, jamais cru sur parole.
+    if (in_array($statut, ['present', 'retard'], true)) {
+        $arrivee = (string) $val('arrivee');
+        if ($arrivee === '') { $arrivee = (string) $seance['debut']; $champs['arrivee'] = $arrivee; }
+        $st = $pdo->prepare('SELECT tolerance_retard_min FROM g_centres WHERE id = ?');
+        $st->execute([$centre]);
+        $tol = (int) $st->fetchColumn();
+        [$ha, $ma] = array_map('intval', explode(':', $arrivee));
+        [$hd, $md] = array_map('intval', explode(':', (string) $seance['debut']));
+        $retard = max(0, ($ha * 60 + $ma) - ($hd * 60 + $md));
+        $champs['statut'] = $retard > $tol ? 'retard' : 'present';
+        $champs['retard_min'] = $champs['statut'] === 'retard' ? $retard : 0;
+    } else {
+        $champs['retard_min'] = 0;
+        if (!array_key_exists('arrivee', $champs) || $statut === 'absent') { $champs['arrivee'] = ''; $champs['depart'] = ''; }
+    }
+}
+
+/**
  * Nouvel élève : matricule « AAAA-NNNN » (année scolaire en cours, séquence par
  * centre), date d'inscription et statut par défaut. Appelé DANS la transaction.
  */
@@ -442,7 +536,16 @@ function g_completer_eleve(PDO $pdo, array $champs): array {
  * Lève DomainException : l'opération est refusée, le téléphone affiche pourquoi.
  */
 function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, array &$champs, bool $suppr): void {
-    if ($suppr) { return; }
+    if ($suppr) {
+        // Effacer un pointage ou une feuille d'appel : responsable ou admin seulement
+        // (sinon une absence gênante disparaîtrait sans laisser de correction motivée).
+        if ($table === 'g_seances' || $table === 'g_presences') {
+            $ctx = $GLOBALS['g_ctx'] ?? null;
+            $role = $ctx && !$ctx['admin'] ? ($ctx['acces'][(string) ($existant['centre_id'] ?? '')] ?? '') : 'admin';
+            if (!in_array($role, ['admin', 'responsable'], true)) { throw new DomainException('Seul un responsable peut supprimer un appel.'); }
+        }
+        return;
+    }
     $val = fn(string $c) => array_key_exists($c, $champs) ? $champs[$c] : ($existant[$c] ?? null);
     if ($table === 'g_centres' && trim((string) $val('nom')) === '') { throw new DomainException('Le nom du centre est obligatoire.'); }
     if ($table === 'g_centres') {
@@ -485,6 +588,7 @@ function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, 
             }
         }
     }
+    if ($table === 'g_seances' || $table === 'g_presences') { g_valider_appel($pdo, $table, $id, $existant, $champs); return; }
     if ($table === 'g_horaires') {
         $jour = (int) $val('jour');
         $debut = (string) $val('debut');
