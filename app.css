@@ -8496,3 +8496,24 @@ body.vmenu-lock{overflow:hidden}
 }
 .bkret-note .i{width:14px;height:14px;margin:0;flex:none;margin-top:2px;color:var(--n400,#8A8FA3)}
 .bkret-note a{color:#1E499B;font-weight:700}
+
+/* ════════════════════════════════════════════════════════════════
+   Toilettage du panneau d'administration (11/2026)
+   ════════════════════════════════════════════════════════════════ */
+/* Les bandeaux d'alerte fixes réservent leur place (mesurée par
+   _vrtBandeaux dans app.js) au lieu de recouvrir le haut et le bas. */
+#APP{margin-top:var(--vrt-haut,0px);height:calc(100vh - var(--vrt-haut,0px) - var(--vrt-bas,0px))}
+@media(max-width:768px){
+  .sb{top:var(--vrt-haut,0px);bottom:var(--vrt-bas,0px)}
+}
+@media(max-width:640px){
+  /* Titre de page : le trait décoratif (180 px) était un élément flex À CÔTÉ
+     du titre et l'écrasait sur trois lignes. Il passe dessous. */
+  .pgt{flex-wrap:wrap}
+  .pgt::after{flex:0 0 100%;max-width:120px}
+}
+@media(max-width:900px){
+  /* Cartes de compteurs : l'icône, posée en haut à droite, recouvrait la fin
+     du libellé (« COMPTES ADM▣ », « ENCOURAGEM▣ENTS »). */
+  .sc .scl{padding-right:34px}
+}

@@ -2696,6 +2696,33 @@ async function _pwdIsDefault(stored, plain, salt){
   }catch(e){}
   return false;
 }
+/* ── LES BANDEAUX D'ALERTE RÉSERVENT LEUR PLACE ──────────────────────────────
+   Quatre bandeaux sont posés en `position:fixed` : « mot de passe par défaut »
+   en haut ; « appareil non synchronisé », « clé refusée » et « bouclier » en
+   bas. Ils RECOUVRAIENT la page : en haut le titre et le bouton de menu (sur
+   téléphone, 80 px sur 844), en bas les derniers boutons de chaque écran — et
+   les bandeaux du bas s'empilaient l'un sur l'autre au même endroit.
+   On mesure ce qui est affiché et on réserve exactement cette place à
+   l'application (variables --vrt-haut / --vrt-bas, lues par app.css) ; les
+   bandeaux du bas se rangent les uns au-dessus des autres. */
+function _vrtBandeaux(){
+  try{
+    var s=document.getElementById('_secBanner');
+    var haut=s?s.offsetHeight:0, bas=0;
+    ['_notSyncBanner','_authFailBanner','_shieldBanner'].forEach(function(id){
+      var e=document.getElementById(id); if(!e) return;
+      e.style.bottom=bas+'px'; bas+=e.offsetHeight;
+    });
+    var r=document.documentElement.style;
+    r.setProperty('--vrt-haut',haut+'px'); r.setProperty('--vrt-bas',bas+'px');
+  }catch(e){}
+}
+try{
+  // Un bandeau qui apparaît ou que l'on ferme (« × ») change la place à réserver.
+  new MutationObserver(function(){ _vrtBandeaux(); }).observe(document.body||document.documentElement,{childList:true});
+  window.addEventListener('resize',function(){ _vrtBandeaux(); });
+}catch(e){}
+
 function _showSecurityBanner(msg){
   try{
     if(document.getElementById('_secBanner'))return;
@@ -12399,6 +12426,15 @@ const PT={
   sacontrol:"Centre de contrôle Super Admin",
   livret_codes:"Codes d'accès des cahiers",
   livrets_admin:"Livrets — catalogue, prix & promotions",
+  // Pages ajoutées sans titre : la barre affichait leur identifiant brut.
+  centres_admin:"Centres clients SaaS",
+  calendrier_admin:"Calendrier scolaire",
+  parrainage_admin:"Code ami & enseignants-partenaires",
+  partenaires_admin:"Programme partenariat",
+  marketplace_admin:"Marketplace des auteurs",
+  forum_admin:"Modération du forum",
+  stats_business:"Stats business (ancien calcul)",
+  partenaires_splits:"Partage des revenus (ancien)",
   loginlog:"Journal des connexions",
   allaccounts:"Tous les comptes",
   // Pages enseignant
@@ -12635,11 +12671,14 @@ function cm(){
   try { if(window._lastFocusedBeforeModal && document.contains(window._lastFocusedBeforeModal)) window._lastFocusedBeforeModal.focus(); } catch(e){}
   try{ if(typeof _vApresFermetureModale==='function') _vApresFermetureModale(); }catch(e){}
 }
-function toast(msg,t='ok'){const d=document.createElement('div');const c={ok:['var(--gr)','✓'],warn:['var(--or)','⚠'],err:['var(--re)','✕'],info:['#1E499B','ℹ']}[t]||['var(--gr)','✓'];d.style.cssText=`position:fixed;bottom:20px;right:20px;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E6EAF2;color:#142554;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 10px 30px rgba(20,37,84,.16);max-width:360px;animation:su .24s cubic-bezier(.16,1,.3,1);`;d.innerHTML=`<span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${c[0]};color:#fff;font-size:13px;font-weight:800">${c[1]}</span><span>${(''+msg).replace(/</g,'&lt;')}</span>`;document.body.appendChild(d);setTimeout(()=>{d.style.transition='opacity .3s,transform .3s';d.style.opacity='0';d.style.transform='translateY(8px)';setTimeout(()=>d.remove(),300);},3500);}
+function toast(msg,t='ok'){const d=document.createElement('div');const c={ok:['var(--gr)','✓'],warn:['var(--or)','⚠'],err:['var(--re)','✕'],info:['#1E499B','ℹ']}[t]||['var(--gr)','✓'];d.style.cssText=`position:fixed;bottom:calc(20px + var(--vrt-bas,0px));right:20px;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E6EAF2;color:#142554;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 10px 30px rgba(20,37,84,.16);max-width:360px;animation:su .24s cubic-bezier(.16,1,.3,1);`;d.innerHTML=`<span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${c[0]};color:#fff;font-size:13px;font-weight:800">${c[1]}</span><span>${(''+msg).replace(/</g,'&lt;')}</span>`;document.body.appendChild(d);setTimeout(()=>{d.style.transition='opacity .3s,transform .3s';d.style.opacity='0';d.style.transform='translateY(8px)';setTimeout(()=>d.remove(),300);},3500);}
 // Toast enrichi avec bouton d'action — utilisé quand cloud KO et fichiers locaux en attente
 function _toastRetrySync(cause,st){
   var d=document.createElement('div');
-  d.style.cssText='position:fixed;bottom:20px;right:20px;background:var(--orb);border:1px solid var(--ord);color:var(--or);padding:11px 18px;border-radius:var(--r);font-size:13px;font-weight:600;z-index:9999;box-shadow:var(--sh2);max-width:380px;animation:su .22s;display:flex;align-items:center;gap:10px';
+  // La bannière persistante dit déjà « clé absente / refusée » : un second
+  // avertissement flottant, au même moment et au même endroit, ne dit rien de plus.
+  if(cause==='cle' && (document.getElementById('_notSyncBanner')||document.getElementById('_authFailBanner'))) return;
+  d.style.cssText='position:fixed;bottom:calc(20px + var(--vrt-bas,0px));right:20px;background:var(--orb);border:1px solid var(--ord);color:var(--or);padding:11px 18px;border-radius:var(--r);font-size:13px;font-weight:600;z-index:9999;box-shadow:var(--sh2);max-width:380px;animation:su .22s;display:flex;align-items:center;gap:10px';
   var txt=document.createElement('span');
   var _cle=(cause==='cle');
   txt.textContent=_cle
@@ -14091,6 +14130,29 @@ function printStudentHonneur(sid,tri){
 // ═══════════════════════════════════════════════
 // INSCRIPTIONS ÉLÈVES (admin/superadmin)
 // ═══════════════════════════════════════════════
+/* Filtre par classe de la page Inscriptions. Il affichait UN BOUTON PAR
+   CLASSE DU CATALOGUE — près de deux cents (toutes les séries techniques et
+   CAP), un mur qui repoussait la liste des élèves sous l'écran. On ne montre
+   en boutons que les classes qui ont des élèves (avec leur effectif) ; toutes
+   les autres restent accessibles dans une liste déroulante. */
+function _stuFiltreClasses(fc){
+  var eff={};
+  (DB.students||[]).forEach(function(s){ if(s&&s.cls) eff[s.cls]=(eff[s.cls]||0)+1; });
+  var avec=CLS.filter(function(c){ return eff[c]; });
+  var esc=function(c){ return String(c).replace(/[&<>"']/g,function(x){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x];}); };
+  var clic=function(c){ return "window._scls='"+esc(c).replace(/&#39;/g,"\\'")+"';re()"; };
+  var h='<div class="tabs"><button class="tab'+(fc==='Toutes'?' on':'')+'" onclick="'+clic('Toutes')+'">Toutes <span class="mut">'+(DB.students||[]).length+'</span></button>'
+    +avec.map(function(c){ return '<button class="tab'+(fc===c?' on':'')+'" onclick="'+clic(c)+'">'+esc(c)+' <span class="mut">'+eff[c]+'</span></button>'; }).join('')
+    +'</div>';
+  if(avec.length<CLS.length){
+    h+='<select class="fi" style="width:auto;min-width:150px" aria-label="Autre classe" onchange="if(this.value){window._scls=this.value;re()}">'
+      +'<option value="">'+(fc!=='Toutes'&&!eff[fc]?esc(fc):'Autre classe…')+'</option>'
+      +CLS.filter(function(c){ return !eff[c]; }).map(function(c){ return '<option value="'+esc(c)+'"'+(fc===c?' selected':'')+'>'+esc(c)+'</option>'; }).join('')
+      +'</select>';
+  }
+  return h;
+}
+
 function pgStudents(){
   if(!iA())return na();
   const fc=window._scls||'Toutes',q=(window._sq||'').toLowerCase();
@@ -14106,7 +14168,7 @@ function pgStudents(){
     <div class="fl2 fic fsb mb16 fw g8">
       <div class="fl2 fic g8 fw">
         <div class="srch" style="width:220px"><span class="si">🔍</span><input class="fi" style="padding-left:33px" placeholder="Nom, matricule..." value="${window._sq||''}" oninput="window._sq=this.value;re()"></div>
-        <div class="tabs">${['Toutes',...CLS].map(c=>`<button class="tab${fc===c?' on':''}" onclick="window._scls='${c}';re()">${c}</button>`).join('')}</div>
+        ${_stuFiltreClasses(fc)}
       </div>
       <div class="fl2 g8">
         <button class="btn bi" onclick="mAddStu()">＋ Nouvelle inscription</button>
