@@ -14,9 +14,10 @@ const ok = (nom, c, d) => { console.log((c ? '  OK    ' : '  ÉCHEC ') + nom + (
   const erreurs = [];
   page.on('pageerror', (e) => erreurs.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') erreurs.push(m.text()); });
-  // Panneau d'administration caché : 4 taps sur le logo (sinon ni comptes, ni journal, ni nouveau centre).
+  // Administration : entrée visible dans Plus (le geste caché du logo est retiré).
   const ouvrirPanneau = async () => {
-    for (let i = 0; i < 4; i++) await page.click('.entete .marque');
+    await page.goto(B + '#/moi');
+    await page.click('a[data-a="ouvrir-admin"]');
     await page.waitForSelector('main h1:text("Administration")');
   };
   const aJour = () => page.waitForFunction(() => document.getElementById('puce-sync').textContent === 'À jour', null, { timeout: 10000 }).catch(() => {});
@@ -30,7 +31,8 @@ const ok = (nom, c, d) => { console.log((c ? '  OK    ' : '  ÉCHEC ') + nom + (
 
   // Fiche compte : matières enseignées
   await page.goto(B + '#/comptes');
-  ok('comptes cachés tant que le panneau est fermé', !(await page.isVisible('#zone-comptes')), 'visibles');
+  await page.waitForSelector('#zone-comptes');
+  ok('comptes accessibles à l\'administrateur, sans geste caché', await page.isVisible('#zone-comptes'), 'invisibles');
   await ouvrirPanneau();
   await page.goto(B + '#/comptes');
   await page.waitForSelector('#zone-comptes .ligne');
