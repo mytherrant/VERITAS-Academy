@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.9.1';
+  var VERSION = '0.9.2';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -441,6 +441,12 @@
   }
   /** Écrans réservés : pour l'admin, seulement panneau ouvert ; pour un responsable, selon ses droits. */
   function accesGestion(cap) { return estAdmin() ? panneauOuvert() : peutQuelquePart(cap); }
+  /** Ouvre le panneau sans changer d'écran (bouton visible, en plus des 4 taps sur le logo). */
+  function ouvrirPanneauDiscret() { if (estAdmin() && !panneauOuvert()) E.panneauJusqua = Date.now() + PANNEAU_MS; }
+  function peutCreerEnseignant(cid) { return estAdmin() || peut('comptes.gerer', cid); }
+  function boutonAjoutEnseignant(cid) {
+    return peutCreerEnseignant(cid) ? '<button class="btn or" type="button" data-a="ajouter-enseignant" data-centre="' + esc(cid) + '">' + ico('plus', 'p') + 'Ajouter un enseignant</button>' : '';
+  }
   var masqueLe = 0;
 
   // ───────────────────────────── Feuille (modale) ─────────────────────────────
@@ -613,12 +619,12 @@
         tuiles.push(['#/assiduite', 'activity', 'Assiduité', 'Taux, retards, alertes']);
         tuiles.push(['#/eleves', 'graduation', 'Élèves', peutQuelquePart('eleves.gerer') ? 'Inscrire, rechercher, importer' : 'Fiches et contacts des parents']);
         tuiles.push(['#/emploi', 'calendar', 'Emploi du temps', peutQuelquePart('emploi.gerer') ? 'Classes, créneaux, enseignants' : 'Les cours de la semaine']);
-        if (panneauOuvert()) tuiles.push(['#/admin', 'shield', 'Administration', 'Partenaires et droits, centres, journal']);
+        if (estAdmin()) tuiles.push(['#/admin', 'shield', 'Administration', 'Comptes, identifiants, partenaires et droits', 'ouvrir-admin']);
         if (peutQuelquePart('finances.voir')) tuiles.push(['#/actionnaires', 'handshake', 'Actionnaires', 'Parts de chaque centre']);
         if (!estAdmin() && accesGestion('comptes.gerer')) tuiles.push(['#/comptes', 'users', 'Comptes et accès', 'Qui peut faire quoi']);
         if (!estAdmin() && accesGestion('journal.voir')) tuiles.push(['#/journal', 'clock', 'Journal', 'Qui a modifié quoi']);
         h += '<h2>Disponible</h2><div class="grille">' + tuiles.map(function (t) {
-          return '<a class="tuile" href="' + t[0] + '"><span class="pastille">' + ico(t[1]) + '</span><b>' + t[2] + '</b><small>' + t[3] + '</small></a>';
+          return '<a class="tuile" href="' + t[0] + '"' + (t[4] ? ' data-a="' + t[4] + '"' : '') + '><span class="pastille">' + ico(t[1]) + '</span><b>' + t[2] + '</b><small>' + t[3] + '</small></a>';
         }).join('') + '<a class="tuile" href="#/moi"><span class="pastille">' + ico('lock') + '</span><b>Mon compte</b><small>Mot de passe, code, appareils</small></a></div>';
 
         if (A_VENIR.length) h += '<h2>En construction</h2><div class="grille">' + A_VENIR.map(function (t) {
@@ -685,7 +691,7 @@
       droit: panneauOuvert,
       html: function () {
         var reste = Math.max(1, Math.round((E.panneauJusqua - Date.now()) / 60000));
-        return '<h1>Administration</h1><p class="sous-titre">Accès caché : 4 taps sur le logo. Se referme seul dans ' + reste + ' min.</p>' +
+        return '<h1>Administration</h1><p class="sous-titre">Ouvert depuis Plus › Administration (ou 4 taps sur le logo). Se referme seul dans ' + reste + ' min.</p>' +
           '<div class="liste">' +
           [['#/centres', 'building', 'Centres, année et matières', 'Ouvrir un centre, horaires, tarifs, messages'], ['#/comptes', 'users', 'Comptes et accès', 'Créer, désactiver, mots de passe, appareils'],
            ['#/journal', 'clock', 'Journal', 'Qui a modifié quoi, partout']].map(function (l) {
@@ -763,13 +769,13 @@
         if (peutQuelquePart('finances.voir')) liens.push(['#/bilan', 'chart', 'Bilan financier', 'Recettes, dépenses, parts des actionnaires']);
         if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) liens.push(['#/enseignants', 'graduation', 'Enseignants', 'Heures faites, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) liens.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
-        if (panneauOuvert()) liens.push(['#/admin', 'shield', 'Panneau d\'administration', 'Partenaires et droits, centres, journal']);
+        if (estAdmin()) liens.push(['#/admin', 'shield', 'Administration', 'Comptes et identifiants, partenaires et droits, centres, journal', 'ouvrir-admin']);
         if (!estAdmin() && accesGestion('comptes.gerer')) liens.push(['#/comptes', 'users', 'Comptes et accès', 'Qui peut faire quoi']);
         if (!estAdmin() && accesGestion('journal.voir')) liens.push(['#/journal', 'clock', 'Journal', 'Qui a modifié quoi']);
         if (peutQuelquePart('finances.voir')) liens.push(['#/actionnaires', 'handshake', 'Actionnaires', 'Parts de chaque centre']);
         if (liens.length) {
           h += '<h2>Gestion</h2><div class="liste">' + liens.map(function (l) {
-            return '<a class="ligne" href="' + l[0] + '"><span class="pastille">' + ico(l[1]) + '</span><span class="corps"><b>' + l[2] + '</b><small>' + l[3] + '</small></span><span class="fin">›</span></a>';
+            return '<a class="ligne" href="' + l[0] + '"' + (l[4] ? ' data-a="' + l[4] + '"' : '') + '><span class="pastille">' + ico(l[1]) + '</span><span class="corps"><b>' + l[2] + '</b><small>' + l[3] + '</small></span><span class="fin">›</span></a>';
           }).join('') + '</div><h2>Mon compte</h2>';
         }
         h += '<div class="liste">' +
@@ -1007,7 +1013,9 @@
     if (dispo.length > 1) h += '<div class="puces">' + dispo.map(function (c) { return '<button type="button" class="puce' + (c.id === cid ? ' on' : '') + '" data-a="ens-centre" data-v="' + esc(c.id) + '">' + esc(c.nom_court || c.nom) + '</button>'; }).join('') + '</div>';
     if (!cid) return h + '<div class="carte vide">Aucun centre.</div>';
     var profs = enseignantsDu(cid);
-    if (!profs.length) return h + '<div class="carte vide">Aucun enseignant : donnez le rôle « Enseignant » dans Comptes et accès.</div>';
+    if (!profs.length) return h + '<div class="carte vide">Aucun enseignant dans ce centre pour l\'instant.' + (peutCreerEnseignant(cid) ? '' : ' Demandez à l\'administrateur de créer leurs comptes.') + '</div>' +
+      '<div class="actions">' + boutonAjoutEnseignant(cid) + '</div>';
+    h += '<div class="actions">' + boutonAjoutEnseignant(cid) + '</div>';
     var tot = { du: 0, verse: 0 };
     var rows = profs.map(function (t) {
       var b = bilanEnseignant(t.id, cid, ENS.mois);
@@ -2232,7 +2240,7 @@
       // Un enseignant voit aussi ses cours dans l'autre centre : son vrai emploi du temps.
       var source = EMP.mode === 'enseignant' ? lignes('creneaux') : crs;
       var siens = source.filter(function (c) { return c[cle] === EMP.filtre; }).sort(function (a, b) { return a.jour - b.jour || (a.debut < b.debut ? -1 : 1); });
-      if (!choix.length) h += '<div class="carte vide">' + (EMP.mode === 'classe' ? 'Aucune classe : créez-en une ci-dessous.' : 'Aucun enseignant dans ce centre : donnez le rôle « Enseignant » dans Comptes et accès.') + '</div>';
+      if (!choix.length) h += '<div class="carte vide">' + (EMP.mode === 'classe' ? 'Aucune classe : créez-en une ci-dessous.' : 'Aucun enseignant dans ce centre.') + '</div>' + (EMP.mode === 'classe' ? '' : '<div class="actions">' + boutonAjoutEnseignant(cid) + '</div>');
       else if (!siens.length) h += '<div class="carte vide">Aucun cours.</div>';
       var total = 0;
       [1, 2, 3, 4, 5, 6, 7].forEach(function (j) {
@@ -2419,21 +2427,22 @@
       '<div class="actions"><button class="btn" type="submit">Enregistrer les droits</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
   }
 
-  function feuilleCompte(id) {
+  function feuilleCompte(id, preset) {
     var u = id ? (E.cache.comptes || []).filter(function (x) { return x.id === id; })[0] : null;
     var centres = lignes('centres');
     var rolesPermis = function (cid) {
       if (estAdmin()) return Object.keys(ROLES);
       return peut('comptes.gerer', cid) ? ['secretaire', 'enseignant'] : [];
     };
-    var h = '<h2>' + (u ? 'Modifier le compte' : 'Nouveau compte') + '</h2><form data-f="compte" data-id="' + esc(id || '') + '">' +
+    var h = '<h2>' + (u ? 'Modifier le compte' : preset && preset.role === 'enseignant' ? 'Nouvel enseignant' : 'Nouveau compte') + '</h2>' +
+      (u ? '' : '<p class="doux">Un mot de passe sera créé et affiché une seule fois, à transmettre par WhatsApp.</p>') + '<form data-f="compte" data-id="' + esc(id || '') + '">' +
       '<label class="champ"><span>Nom et prénom</span><input type="text" name="nom" required value="' + esc(u ? u.nom : '') + '"></label>' +
       '<div class="deux"><label class="champ"><span>Identifiant</span><input type="text" name="identifiant" required autocapitalize="none" spellcheck="false" pattern="[a-z0-9._\\-]{3,60}" value="' + esc(u ? u.identifiant : '') + '"><small>ex. : marie.ndogpassi3</small></label>' +
       '<label class="champ"><span>Téléphone</span><input type="tel" name="tel" value="' + esc(u ? u.tel || '' : '') + '"></label></div>' +
       '<h3>Rôle dans chaque centre</h3>';
     centres.forEach(function (c) {
       var permis = rolesPermis(c.id);
-      var actuel = u ? u.acces[c.id] || '' : '';
+      var actuel = u ? u.acces[c.id] || '' : (preset && preset.centre === c.id && permis.indexOf(preset.role) >= 0 ? preset.role : '');
       if (!permis.length && !actuel) return;
       h += '<label class="champ"><span>' + esc(c.nom) + '</span><select name="role_' + esc(c.id) + '"' + (permis.length ? '' : ' disabled') + '><option value="">Aucun accès</option>' +
         Object.keys(ROLES).filter(function (r) { return permis.indexOf(r) >= 0 || r === actuel; }).map(function (r) {
@@ -2589,6 +2598,18 @@
     'suppr-actionnaire': function (el) {
       var a = ligne('actionnaires', el.dataset.id);
       if (a) confirmer('Retirer ' + a.nom + ' des actionnaires ?', 'Retirer', function () { muter('actionnaires', a.id, {}, true).then(rendre); });
+    },
+    'ouvrir-admin': function () {
+      if (!estAdmin()) return;
+      ouvrirPanneauDiscret();
+      if (location.hash === '#/admin') rendre(); else location.hash = '#/admin';
+    },
+    'ajouter-enseignant': function (el) {
+      var cid = el.dataset.centre;
+      if (!peutCreerEnseignant(cid)) return;
+      if (!E.enLigne) { toast('Créer un compte demande une connexion internet.', true); return; }
+      ouvrirPanneauDiscret();
+      feuilleCompte('', { role: 'enseignant', centre: cid });
     },
     'editer-compte': function (el) {
       if (!E.enLigne) { toast('La gestion des comptes demande une connexion internet.', true); return; }
@@ -2912,6 +2933,8 @@
       occupe(form, true);
       api('comptes/enregistrer', corps).then(function (r) {
         chargerComptes();
+        // L'équipe (enseignants de chaque centre) arrive avec la synchro : écran Enseignants à jour.
+        synchroniser();
         if (r.mdp) feuilleSecret('Compte créé', corps.nom, corps.identifiant, r.mdp);
         else { fermerFeuille(); toast('Compte enregistré.'); }
       }, function (e) { occupe(form, false); toast(e.message, true); });
