@@ -584,3 +584,7 @@ input[type="date"], input[type="time"], input[type="month"] { min-width: 0; }
 .aide-connexion ul { margin: 6px 0 6px 18px; padding: 0; }
 .note.maj-dispo { display: block; background: var(--alerte-fond); color: var(--alerte); border-radius: var(--rayon); padding: 10px 12px; margin-bottom: 12px; font-size: 13px; }
 .note.maj-dispo .btn { margin-top: 8px; }
+
+/* Case « Trésorier de … » sous le rôle du centre, dans la fiche d'un compte. */
+.case.tresorier { margin: -6px 0 14px; padding: 8px 10px; background: var(--ok-fond); border-radius: var(--rayon); font-size: 14px; }
+.case.tresorier small { color: var(--doux); }

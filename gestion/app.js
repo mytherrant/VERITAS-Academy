@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.11.2';
+  var VERSION = '0.11.3';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -3445,7 +3445,9 @@
     });
     if (!liste.length) { z.innerHTML = '<div class="carte vide">Aucun compte pour ce centre.</div>'; return; }
     z.innerHTML = '<div class="liste">' + liste.map(function (u) {
-      var badges = (u.admin_global ? '<span class="badge or">Administrateur</span>' : '') + Object.keys(u.acces).map(function (cid) {
+      var badges = (u.admin_global ? '<span class="badge or">Administrateur</span>' : '') + lignes('centres').filter(function (c) { return tresorierDe(c.id) === u.id; }).map(function (c) {
+        return '<span class="badge ok">Trésorier' + (lignes('centres').length > 1 ? ' · ' + esc(c.nom_court || c.nom) : '') + '</span>';
+      }).join('') + Object.keys(u.acces).map(function (cid) {
         var c = ligne('centres', cid);
         return '<span class="badge">' + esc(ROLES[u.acces[cid]] || u.acces[cid]) + (lignes('centres').length > 1 && c ? ' · ' + esc(c.nom_court || c.nom) : '') + '</span>';
       }).join('');
@@ -3523,14 +3525,18 @@
       h += '<label class="champ"><span>' + esc(c.nom) + '</span><select name="role_' + esc(c.id) + '"' + (permis.length ? '' : ' disabled') + '><option value="">Aucun accès</option>' +
         Object.keys(ROLES).filter(function (r) { return permis.indexOf(r) >= 0 || r === actuel; }).map(function (r) {
           return '<option value="' + r + '"' + (r === actuel ? ' selected' : '') + '>' + esc(ROLES[r]) + '</option>';
-        }).join('') + '</select></label>';
+        }).join('') + '</select></label>' +
+        // Trésorier : désigné par l'admin, un par centre (il garde les fonds et confirme les remises).
+        (estAdmin() ? '<label class="case tresorier"><input type="checkbox" name="tresorier_' + esc(c.id) + '"' + (u && tresorierDe(c.id) === u.id ? ' checked' : '') + '> ' + ico('wallet', 'p') +
+          ' Trésorier de ' + esc(c.nom_court || c.nom) + (tresorierDe(c.id) && (!u || tresorierDe(c.id) !== u.id) ? ' <small>(remplace ' + esc(nomCompte(tresorierDe(c.id))) + ')</small>' : '') + '</label>' : '');
     });
     var siennes = u ? u.matieres || [] : [];
     h += '<h3>Matières enseignées</h3><p class="doux">Pour les enseignants : elles les proposent en premier dans l\'emploi du temps.</p><div class="deux">' +
       lignes('matieres').map(function (m) { return '<label class="case"><input type="checkbox" name="matiere" value="' + esc(m.id) + '"' + (siennes.indexOf(m.id) >= 0 ? ' checked' : '') + '> ' + esc(m.nom) + '</label>'; }).join('') + '</div>';
     if (estAdmin()) h += '<label class="case"><input type="checkbox" name="admin_global"' + (u && u.admin_global ? ' checked' : '') + '> Administrateur des deux centres (vue consolidée, finances, tous les réglages)</label>';
     if (u) h += '<label class="case"><input type="checkbox" name="actif"' + (u.actif ? ' checked' : '') + '> Compte actif (décocher coupe immédiatement ses sessions)</label>';
-    h += '<div class="legende-roles">' + ORDRE_ROLES.map(function (r) {
+    h += (estAdmin() ? '<p class="doux">' + ico('wallet', 'p') + ' <b>Trésorier</b> : cochez la case sous le centre. Il garde les fonds du centre et confirme chaque remise des partenaires.</p>' : '') +
+      '<div class="legende-roles">' + ORDRE_ROLES.map(function (r) {
       var f = ficheRole(r);
       return '<div class="espace-' + f.espace + '">' + ico(ESPACES[f.espace].ico, 'p') + '<span><b>' + esc(f.nom) + '</b> ' + esc(f.resume) + '</span></div>';
     }).join('') + '</div>' +
@@ -4275,6 +4281,14 @@
       if (!corps.admin_global && !acces.length) { toast('Choisissez au moins un rôle dans un centre.', true); return; }
       occupe(form, true);
       api('comptes/enregistrer', corps).then(function (r) {
+        // Trésorier coché / décoché : la fiche du centre suit (l'admin seul écrit les centres).
+        var uidC = r.id || id;
+        if (estAdmin() && uidC) lignes('centres').forEach(function (c) {
+          var caseT = form.querySelector('[name="tresorier_' + c.id + '"]');
+          if (!caseT) return;
+          if (caseT.checked && tresorierDe(c.id) !== uidC) muter('centres', c.id, { tresorier_id: uidC });
+          else if (!caseT.checked && tresorierDe(c.id) === uidC) muter('centres', c.id, { tresorier_id: '' });
+        });
         chargerComptes();
         // L'équipe (enseignants de chaque centre) arrive avec la synchro : écran Enseignants à jour.
         synchroniser();
