@@ -922,6 +922,20 @@ function g_completer_eleve(PDO $pdo, array $champs): array {
  * Lève DomainException : l'opération est refusée, le téléphone affiche pourquoi.
  */
 function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, array &$champs, bool $suppr): void {
+    // Mois clôturé : plus rien n'y entre ni n'en sort (versements, dépenses, paies, remises).
+    // Seule exception : le trésorier tranche encore une remise du mois (reçu / pas reçu).
+    if (in_array($table, ['g_paiements', 'g_depenses', 'g_paies', 'g_remises'], true)) {
+        $centreL = (string) ($champs['centre_id'] ?? ($existant['centre_id'] ?? ''));
+        $seulementTrancher = $table === 'g_remises' && $existant && !$suppr && !array_diff(array_keys($champs), ['statut', 'motif']);
+        if (!$seulementTrancher) {
+            foreach ([$existant['date'] ?? null, $champs['date'] ?? null] as $d) {
+                if ($d && ($m = g_mois_clos($pdo, $centreL, (string) $d))) {
+                    throw new DomainException('Le mois de ' . $m . ' est clôturé (comptes et partage faits) : rien ne peut plus y être enregistré ni modifié.');
+                }
+            }
+        }
+    }
+    if ($table === 'g_clotures') { g_valider_cloture($pdo, $id, $existant, $champs, $suppr); return; }
     if ($suppr) {
         // Effacer un pointage ou une feuille d'appel : responsable ou admin seulement
         // (sinon une absence gênante disparaîtrait sans laisser de correction motivée).
@@ -1283,4 +1297,56 @@ function g_valider_equipe(PDO $pdo, string $table, ?array $existant, array &$cha
     if (!$existant) { $champs['auteur'] = $uid; $champs['cree_le'] = g_now(); }
     if ($statut === 'fait' && (!$existant || (string) $existant['statut'] !== 'fait')) { $champs['fait_le'] = g_now(); }
     if ($statut !== 'fait') { $champs['fait_le'] = ''; }
+}
+
+/** Libellé du mois si la date tombe dans un mois clôturé pour ce centre, sinon chaîne vide. */
+function g_mois_clos(PDO $pdo, string $centre, string $date): string {
+    if ($centre === '' || !preg_match('/^(\d{4}-\d{2})/', $date, $m)) { return ''; }
+    static $cache = [];
+    $cle = $centre . '|' . $m[1];
+    if (!array_key_exists($cle, $cache)) {
+        try {
+            $st = $pdo->prepare('SELECT COUNT(*) FROM g_clotures WHERE centre_id = ? AND mois = ? AND supprime = 0');
+            $st->execute([$centre, $m[1]]);
+            $cache[$cle] = (int) $st->fetchColumn() > 0;
+        } catch (Throwable $e) { $cache[$cle] = false; }   // table pas encore créée : rien de clôturé
+    }
+    if (!$cache[$cle]) { return ''; }
+    $mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    return $mois[(int) substr($m[1], 5, 2) - 1] . ' ' . substr($m[1], 0, 4);
+}
+
+/**
+ * Clôture d'un mois : par un responsable (caisse.corriger) ou l'admin ; une par centre et par mois ;
+ * jamais un mois à venir ; totaux recalculés ici. Rouvrir (supprimer la clôture) : admin seulement.
+ */
+function g_valider_cloture(PDO $pdo, string $id, ?array $existant, array &$champs, bool $suppr): void {
+    $ctx = $GLOBALS['g_ctx'] ?? [];
+    if ($suppr) {
+        if (empty($ctx['admin'])) { throw new DomainException('Seul l\'administrateur rouvre un mois clôturé.'); }
+        return;
+    }
+    if ($existant && !(int) $existant['supprime']) { throw new DomainException('Ce mois est déjà clôturé.'); }
+    $centre = (string) ($champs['centre_id'] ?? ($existant['centre_id'] ?? ''));
+    $mois = (string) ($champs['mois'] ?? ($existant['mois'] ?? ''));
+    if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $mois)) { throw new DomainException('Mois invalide.'); }
+    if ($mois > date('Y-m')) { throw new DomainException('On ne clôture pas un mois à venir.'); }
+    if ($id !== 'clo-' . $centre . '-' . $mois) { throw new DomainException('Identifiant de clôture invalide.'); }
+    $somme = function (string $sql) use ($pdo, $centre, $mois): int {
+        $st = $pdo->prepare($sql);
+        $st->execute([$centre, $mois . '%']);
+        return (int) $st->fetchColumn();
+    };
+    $r = $somme('SELECT COALESCE(SUM(montant),0) FROM g_paiements WHERE centre_id = ? AND date LIKE ? AND annule = 0 AND supprime = 0');
+    $d = $somme("SELECT COALESCE(SUM(montant),0) FROM g_depenses WHERE centre_id = ? AND date LIKE ? AND statut = 'validee' AND supprime = 0");
+    $p = $somme('SELECT COALESCE(SUM(montant),0) FROM g_paies WHERE centre_id = ? AND date LIKE ? AND annule = 0 AND supprime = 0');
+    $champs['recettes'] = $r; $champs['depenses'] = $d; $champs['paies'] = $p; $champs['resultat'] = $r - $d - $p;
+    $parts = json_decode((string) ($champs['parts'] ?? '[]'), true);
+    if (!is_array($parts)) { $parts = []; }
+    // Parts recalculées sur le résultat du serveur, d'après les actionnaires du centre.
+    $st = $pdo->prepare('SELECT nom, part_centiemes FROM g_actionnaires WHERE centre_id = ? AND supprime = 0');
+    $st->execute([$centre]);
+    $champs['parts'] = json_encode(array_map(fn($a) => ['nom' => $a['nom'], 'part' => (int) $a['part_centiemes'], 'montant' => (int) round(($r - $d - $p) * (int) $a['part_centiemes'] / 10000)], $st->fetchAll()), JSON_UNESCAPED_UNICODE);
+    $champs['clos_par'] = $ctx['uid'] ?? null;
+    $champs['clos_le'] = g_now();
 }

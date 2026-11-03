@@ -598,3 +598,20 @@ input[type="date"], input[type="time"], input[type="month"] { min-width: 0; }
 
 /* Élève qui doit : pastille rouge devant son nom (liste, appel, recherche de la caisse). */
 .marque-doit { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--danger); margin-right: 7px; vertical-align: 1px; box-shadow: 0 0 0 3px var(--danger-fond); flex: none; }
+
+/* Clôture mensuelle (Bilan) */
+.carte.cloture { border-left: 4px solid var(--action-fonce); }
+.carte.cloture.faite { border-left-color: var(--ok); background: #F6FBF7; }
+.carte.cloture h3 { display: flex; align-items: center; gap: 6px; }
+
+/* ── Rapports ── */
+table.rapport { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 520px; }
+.rapport th, .rapport td { padding: 7px 8px; border-bottom: 1px solid #EEF1F6; text-align: left; white-space: nowrap; }
+.rapport th { background: var(--bleu-pale); color: var(--bleu-profond); font-weight: 600; position: sticky; top: 0; }
+.rapport .d { text-align: right; font-variant-numeric: tabular-nums; }
+.rapport tr.groupe td { background: #fff; color: var(--bleu-profond); font-weight: 600; padding-top: 14px; }
+.rapport tr.sous-total td { background: #FFF6DA; font-weight: 600; }
+.rapport tr.doit td:first-child { color: var(--danger); font-weight: 500; }
+.rapport tfoot td { background: var(--bleu-profond); color: #fff; font-weight: 600; }
+.rapport td.vide { text-align: center; color: var(--doux); padding: 20px; }
+.export-rapport { flex-wrap: wrap; }
