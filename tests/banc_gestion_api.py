@@ -307,6 +307,101 @@ _, t = req("sync/tirer", jeton=respA)
 verifier("modèle de message du centre enregistré et synchronisé", next(c for c in t["lignes"]["centres"] if c["id"] == A)["msg_absence"].startswith("Bonjour {parent}"), r)
 req("sync/pousser", {"ops": [{"op": op(), "t": "centres", "id": A, "champs": {"msg_absence": ""}}]}, adm)
 
+# ── Finances (étape 5) ──
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "classes", "id": clA, "champs": {"inscription": 2500, "mensualite": 7500}}]}, respA)
+verifier("le responsable fixe les tarifs de sa classe", r["resultats"][0]["ok"] is True, r)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "classes", "id": clA, "champs": {"mensualite": 100}}]}, actA)
+verifier("un actionnaire ne change pas les tarifs", r["resultats"][0]["ok"] is False and "tarifs" in r["resultats"][0].get("erreur", ""), r)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "classes", "id": clA, "champs": {"niveau": "1ère", "inscription": 2500, "mensualite": 7500}}]}, actA)
+verifier("… mais modifie la classe si les tarifs restent les mêmes", r["resultats"][0]["ok"] is True, r)
+req("sync/pousser", {"ops": [{"op": op(), "t": "centres", "id": Bc, "champs": {"inscription_option": 4000, "inscription_option_libelle": "avec Mon cahier de français"}}]}, adm)
+_, r = req("sync/pousser", {"ops": [
+    {"op": op(), "t": "eleves", "id": el1, "champs": {"inscription_due": 4000}},
+    {"op": op(), "t": "eleves", "id": el1, "champs": {"mensualite_due": 3000}},
+]}, secB)
+verifier("la secrétaire choisit l'option d'inscription prévue (4 000 F)", r["resultats"][0]["ok"] is True, r["resultats"][0])
+verifier("la secrétaire n'accorde pas de remise", r["resultats"][1]["ok"] is False and "responsable" in r["resultats"][1].get("erreur", ""), r["resultats"][1])
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "eleves", "id": el1, "champs": {"mensualite_due": 5000, "remise_motif": "Fratrie"}}]}, adm)
+verifier("l'admin accorde une remise motivée", r["resultats"][0]["ok"] is True, r)
+
+pay = lambda: "pa-" + uuid.uuid4().hex[:20]
+pa1, pa2 = pay(), pay()
+_, r = req("sync/pousser", {"ops": [
+    {"op": op(), "t": "paiements", "id": pa1, "champs": {"centre_id": Bc, "eleve_id": el1, "montant": 7500, "date": jj(auj), "mode": "especes"}},
+    {"op": op(), "t": "paiements", "id": pa2, "champs": {"centre_id": Bc, "eleve_id": el1, "montant": 2000, "date": jj(auj), "mode": "om", "reference": "MP2611.1234"}},
+    {"op": op(), "t": "paiements", "id": pay(), "champs": {"centre_id": Bc, "eleve_id": el1, "montant": 0, "date": jj(auj), "mode": "especes"}},
+    {"op": op(), "t": "paiements", "id": pay(), "champs": {"centre_id": Bc, "eleve_id": el1, "montant": 500, "date": jj(auj), "mode": "bitcoin"}},
+    {"op": op(), "t": "paiements", "id": pay(), "champs": {"centre_id": Bc, "eleve_id": el1, "montant": 500, "date": jj(auj + datetime.timedelta(days=1)), "mode": "especes"}},
+    {"op": op(), "t": "paiements", "id": pay(), "champs": {"centre_id": Bc, "eleve_id": el1, "montant": 500, "date": jj(auj - datetime.timedelta(days=6)), "mode": "especes"}},
+    {"op": op(), "t": "paiements", "id": pay(), "champs": {"centre_id": Bc, "eleve_id": "el-inconnu-0000", "montant": 500, "date": jj(auj), "mode": "especes"}},
+]}, secB)
+res = r["resultats"]
+verifier("versements encaissés par la secrétaire", res[0]["ok"] is True and res[1]["ok"] is True, res[:2])
+verifier("montant nul refusé", res[2]["ok"] is False, res[2])
+verifier("mode de paiement inconnu refusé", res[3]["ok"] is False, res[3])
+verifier("versement daté du lendemain refusé", res[4]["ok"] is False, res[4])
+verifier("versement de plus de 2 jours refusé à la secrétaire", res[5]["ok"] is False, res[5])
+verifier("élève inconnu refusé", res[6]["ok"] is False, res[6])
+_, t = req("sync/tirer", jeton=secB)
+pp = {p["id"]: p for p in t["lignes"].get("paiements", [])}
+idSecB = next(c["id"] for c in req("comptes", jeton=adm)[1]["comptes"] if c["identifiant"] == "sec.b")
+verifier("numéro de reçu posé par le serveur (AAAA-NNNN)", bool(re.match(r"^\d{4}-\d{4}$", pp.get(pa1, {}).get("numero") or "")), pp.get(pa1))
+verifier("numéros de reçu consécutifs", int(pp[pa2]["numero"][5:]) == int(pp[pa1]["numero"][5:]) + 1, (pp[pa1]["numero"], pp[pa2]["numero"]))
+verifier("« encaissé par » = la personne connectée", pp[pa1]["encaisse_par"] == idSecB, pp[pa1]["encaisse_par"])
+
+_, r = req("sync/pousser", {"ops": [
+    {"op": op(), "t": "paiements", "id": pa1, "champs": {"montant": 750}},
+    {"op": op(), "t": "paiements", "id": pa1, "champs": {"annule": 1, "motif_annulation": "Erreur de saisie"}},
+    {"op": op(), "t": "paiements", "id": pa1, "champs": {"envoye_le": "2026-11-02 18:10:00 whatsapp"}},
+    {"op": op(), "t": "paiements", "id": pa1, "suppr": True},
+]}, secB)
+res = r["resultats"]
+verifier("un versement ne se modifie pas", res[0]["ok"] is False and "ne se modifie pas" in res[0].get("erreur", ""), res[0])
+verifier("la secrétaire n'annule pas un versement", res[1]["ok"] is False, res[1])
+verifier("trace « reçu envoyé » permise", res[2]["ok"] is True, res[2])
+verifier("un versement ne se supprime pas", res[3]["ok"] is False, res[3])
+_, r = req("sync/pousser", {"ops": [
+    {"op": op(), "t": "paiements", "id": pa2, "champs": {"annule": 1, "motif_annulation": ""}},
+    {"op": op(), "t": "paiements", "id": pa2, "champs": {"annule": 1, "motif_annulation": "Doublon de saisie"}},
+    {"op": op(), "t": "paiements", "id": pa2, "champs": {"annule": 1, "motif_annulation": "Encore une fois"}},
+    {"op": op(), "t": "paiements", "id": pay(), "champs": {"centre_id": Bc, "eleve_id": el1, "montant": 500, "date": jj(auj - datetime.timedelta(days=6)), "mode": "especes"}},
+]}, adm)
+res = r["resultats"]
+verifier("annulation sans motif refusée", res[0]["ok"] is False, res[0])
+verifier("annulation motivée par l'admin", res[1]["ok"] is True, res[1])
+verifier("pas de double annulation", res[2]["ok"] is False, res[2])
+verifier("l'admin saisit un versement ancien", res[3]["ok"] is True, res[3])
+_, t = req("sync/tirer", jeton=actA)
+verifier("l'actionnaire A ne voit pas les versements de B", all(p["centre_id"] == A for p in t["lignes"].get("paiements", [])))
+prof = connexion("prof.maths", req("comptes/mdp", {"id": ens_id}, adm)[1]["mdp"])
+_, t = req("sync/tirer", jeton=prof)
+verifier("un enseignant ne voit aucun versement", not t["lignes"].get("paiements"), len(t["lignes"].get("paiements", [])))
+
+dep = lambda: "de-" + uuid.uuid4().hex[:20]
+d1, d2 = dep(), dep()
+_, r = req("sync/pousser", {"ops": [
+    {"op": op(), "t": "depenses", "id": d1, "champs": {"centre_id": Bc, "date": jj(auj), "libelle": "Craies et marqueurs", "categorie": "fournitures", "montant": 3500, "mode": "especes"}},
+    {"op": op(), "t": "depenses", "id": dep(), "champs": {"centre_id": Bc, "date": jj(auj), "libelle": "Loyer", "categorie": "loyer", "montant": 50000, "statut": "validee"}},
+]}, secB)
+verifier("dépense saisie « en attente »", r["resultats"][0]["ok"] is True, r["resultats"][0])
+verifier("la secrétaire ne valide pas une dépense", r["resultats"][1]["ok"] is False, r["resultats"][1])
+_, r = req("sync/pousser", {"ops": [
+    {"op": op(), "t": "depenses", "id": d1, "champs": {"statut": "refusee"}},
+    {"op": op(), "t": "depenses", "id": d1, "champs": {"statut": "validee"}},
+    {"op": op(), "t": "depenses", "id": d1, "champs": {"montant": 9999}},
+    {"op": op(), "t": "depenses", "id": d1, "suppr": True},
+]}, adm)
+res = r["resultats"]
+verifier("refus sans motif refusé", res[0]["ok"] is False, res[0])
+verifier("l'admin valide la dépense", res[1]["ok"] is True, res[1])
+verifier("dépense validée : figée", res[2]["ok"] is False and res[3]["ok"] is False, res[2:])
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "depenses", "id": d2, "champs": {"centre_id": A, "date": jj(auj), "libelle": "Électricité", "categorie": "electricite", "montant": 12000}}]}, respA)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "depenses", "id": d2, "champs": {"statut": "validee"}}]}, respA)
+verifier("un responsable ne valide pas sa propre dépense", r["resultats"][0]["ok"] is False, r)
+_, t = req("sync/tirer", jeton=adm)
+dd = next(x for x in t["lignes"]["depenses"] if x["id"] == d1)
+verifier("validation tracée (par qui, quand)", dd["statut"] == "validee" and dd["valide_par"] and dd["valide_le"], dd)
+
 # Élève d'un autre centre, enseignant hors de ses classes.
 _, r = req("sync/pousser", {"ops": [{"op": op(), "t": "presences", "id": pid(), "champs": {"centre_id": Bc, "seance_id": s1, "eleve_id": "el-inexistant-000"}}]}, secB)
 verifier("élève inconnu du centre refusé", r["resultats"][0]["ok"] is False, r)

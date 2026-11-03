@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.6.0';
+  var VERSION = '0.7.1';
   var API = 'api/index.php';
   var INTERVALLE_SYNC = 25000;
   var VERROU_APRES_MS = 5 * 60 * 1000;
@@ -206,8 +206,16 @@
   }
 
   // ───────────────────────────── Synchronisation ─────────────────────────────
+  /**
+   * Un seul échange à la fois. Appelée pendant un échange, elle ATTEND sa fin, puis
+   * repart si des modifications sont arrivées entre-temps : qui attend un résultat
+   * (le numéro d'un reçu) l'obtient, au lieu d'un « fini » prématuré.
+   */
   function synchroniser() {
-    if (E.syncEnCours || !E.jeton || E.verrouille) return Promise.resolve();
+    if (!E.jeton || E.verrouille) return Promise.resolve();
+    if (E.syncEnCours) {
+      return E.syncPromesse.then(function () { return E.sortie.length && E.enLigne ? synchroniser() : null; });
+    }
     E.syncEnCours = true;
     majPuce();
     var uid = E.profil.utilisateur.id;
@@ -264,7 +272,7 @@
       });
     }
 
-    return pousser().then(tirer).then(function () {
+    E.syncPromesse = pousser().then(tirer).then(function () {
       E.enLigne = true;
       E.derniereSync = Date.now();
     }, function (e) {
@@ -275,6 +283,7 @@
       majPuce();
       if (change) rendre();
     });
+    return E.syncPromesse;
   }
 
   function majPuce() {
@@ -411,8 +420,11 @@
   function navBasse(actif) {
     var items = [['accueil', 'home', 'Accueil']];
     if (peutQuelquePart('appel.faire')) items.push(['appel', 'checkcircle', 'Appel']);
-    items.push(['eleves', 'graduation', 'Élèves'], ['emploi', 'calendar', 'Planning'], ['moi', 'list', 'Plus']);
-    var sousPlus = ['comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite'];
+    items.push(['eleves', 'graduation', 'Élèves']);
+    var caisse = peutQuelquePart('paiements.voir');
+    items.push(caisse ? ['caisse', 'wallet', 'Caisse'] : ['emploi', 'calendar', 'Planning']);
+    items.push(['moi', 'list', 'Plus']);
+    var sousPlus = ['comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan'].concat(caisse ? ['emploi'] : []);
     return '<nav class="nav-basse" aria-label="Navigation">' + items.map(function (i) {
       var on = i[0] === actif || (i[0] === 'moi' && sousPlus.indexOf(actif) >= 0) || (i[0] === 'appel' && actif === 'pointage');
       return '<a href="#/' + i[0] + '" class="' + (on ? 'actif' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + ico(i[1]) + i[2] + '</a>';
@@ -456,7 +468,6 @@
   // ───────────────────────────── Pages ─────────────────────────────
   var A_VENIR = [
     ['download', 'Feuille du jour', 'PDF, image, WhatsApp aux parents', 4],
-    ['wallet', 'Caisse', 'Versements, reçus et relances WhatsApp', 5],
     ['graduation', 'Enseignants', 'Heures, rémunération', 6]
   ];
 
@@ -488,6 +499,14 @@
               return '<p><a class="lien-appel" href="#/appel">' + ico('checkcircle', 'p') + ' Appels du jour : <b>' + faites + ' / ' + prevues.length + '</b>' +
                 (enRetard ? ' <span class="badge danger">' + enRetard + ' en retard</span>' : '') + '</a></p>';
             })() +
+            (function () {
+              if (!peut('paiements.voir', c.id)) return '';
+              var auj = isoLocal(new Date());
+              var jour = lignes('paiements').filter(function (p) { return p.centre_id === c.id && p.date === auj && !Number(p.annule); }).reduce(function (s, p) { return s + Number(p.montant); }, 0);
+              var imp = impayes(c.id);
+              return '<p><a class="lien-appel" href="#/caisse">' + ico('wallet', 'p') + ' Encaissé aujourd\'hui : <b>' + fcfa(jour) + '</b></a>' +
+                (imp.length ? ' · <a class="lien-appel" href="#/caisse" data-a="caisse-onglet" data-v="impayes"><b>' + imp.length + '</b> impayé' + (imp.length > 1 ? 's' : '') + '</a>' : '') + '</p>';
+            })() +
             (function () { var n = alertesAssiduite(c.id).length; return n ? '<p><a class="lien-appel" href="#/assiduite">' + ico('alert', 'p') + ' <b>' + n + '</b> alerte' + (n > 1 ? 's' : '') + ' d\'assiduité</a></p>' : ''; })() +
             '<p class="chiffres"><span><b>' + elevesActifs(c.id).length + '</b> élèves</span><span><b>' + lignes('classes').filter(function (k) { return k.centre_id === c.id; }).length + '</b> classes</span><span><b>' + lignes('creneaux').filter(function (k) { return k.centre_id === c.id; }).length + '</b> cours/semaine</span></p>' +
             '<p><span class="badge or">' + esc(role) + '</span><span class="badge">Échéance le ' + esc(c.jour_echeance) + ' du mois</span><span class="badge">Retard au-delà de ' + esc(c.tolerance_retard_min) + ' min</span></p></div></div>';
@@ -496,6 +515,8 @@
 
         var tuiles = [];
         if (peutQuelquePart('appel.faire')) tuiles.push(['#/appel', 'checkcircle', 'Appel du jour', 'Arrivées, départs, retards']);
+        if (peutQuelquePart('paiements.voir')) tuiles.push(['#/caisse', 'wallet', 'Caisse', 'Encaisser, reçus, impayés, dépenses']);
+        if (peutQuelquePart('finances.voir')) tuiles.push(['#/bilan', 'chart', 'Bilan', 'Recettes, dépenses, parts']);
         tuiles.push(['#/assiduite', 'activity', 'Assiduité', 'Taux, retards, alertes']);
         tuiles.push(['#/eleves', 'graduation', 'Élèves', peutQuelquePart('eleves.gerer') ? 'Inscrire, rechercher, importer' : 'Fiches et contacts des parents']);
         tuiles.push(['#/emploi', 'calendar', 'Emploi du temps', peutQuelquePart('emploi.gerer') ? 'Classes, créneaux, enseignants' : 'Les cours de la semaine']);
@@ -578,6 +599,15 @@
     assiduite: {
       html: function () { return pageAssiduite(); }
     },
+    caisse: {
+      droit: function () { return peutQuelquePart('paiements.voir'); },
+      html: function () { return pageCaisse(); },
+      apres: function () { if (CAI.onglet === 'encaisser') dessinerRechercheCaisse(); }
+    },
+    bilan: {
+      droit: function () { return peutQuelquePart('finances.voir'); },
+      html: function () { return pageBilan(); }
+    },
 
     eleves: {
       html: function () { return pageEleves(); },
@@ -611,7 +641,8 @@
         }).join('');
         var h = '<h1>Mon compte</h1><div class="carte"><h3>' + esc(u.nom) + '</h3><p class="doux">Identifiant : ' + esc(u.identifiant) + '</p><p>' +
           (u.admin ? '<span class="badge or">Administrateur des deux centres</span>' : '') + acces + '</p></div>';
-        var liens = [['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']];
+        var liens = [['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']];
+        if (peutQuelquePart('finances.voir')) liens.push(['#/bilan', 'chart', 'Bilan financier', 'Recettes, dépenses, parts des actionnaires']);
         if (peutQuelquePart('comptes.gerer')) liens.push(['#/comptes', 'users', 'Comptes et accès', 'Qui peut faire quoi']);
         if (peutQuelquePart('journal.voir')) liens.push(['#/journal', 'clock', 'Journal', 'Qui a modifié quoi']);
         if (estAdmin()) liens.push(['#/centres', 'building', 'Centres, année et matières', 'Ouvrir un centre, mois facturés']);
@@ -779,7 +810,8 @@
       } else if (justifiable && p && p.statut === 'absent') {
         boutons += '<button type="button" class="btn clair petit" data-a="detail-presence" data-seance="' + esc(x.id) + '" data-eleve="' + esc(el.id) + '">Justifier</button>';
       }
-      return '<div class="ligne' + (p ? ' pt-' + p.statut : '') + '"><button type="button" class="corps nom-eleve" data-a="detail-presence" data-seance="' + esc(x.id) + '" data-eleve="' + esc(el.id) + '"' + (modifiable || (justifiable && p) ? '' : ' disabled') + '><b>' + esc(nomComplet(el)) + '</b>' + etat + '</button>' +
+      var impaye = peut('paiements.voir', cid) ? echeancier(el).impaye : 0;
+      return '<div class="ligne' + (p ? ' pt-' + p.statut : '') + '"><button type="button" class="corps nom-eleve" data-a="detail-presence" data-seance="' + esc(x.id) + '" data-eleve="' + esc(el.id) + '"' + (modifiable || (justifiable && p) ? '' : ' disabled') + '><b>' + esc(nomComplet(el)) + (impaye ? ' <span class="badge danger" title="Impayé échu">impayé ' + fcfa(impaye) + '</span>' : '') + '</b>' + etat + '</button>' +
         (p && p._attente ? '<span class="badge alerte">en attente</span>' : '') + '<span class="boutons">' + boutons + '</span></div>';
     }).join('') + '</div>';
     if (modifiable && eleves.length && !close) h += '<div class="actions"><button class="btn" type="button" data-a="clore-appel" data-seance="' + esc(x.id) + '">' + ico('checkcircle', 'p') + 'Clore l\'appel</button></div>';
@@ -828,7 +860,17 @@
   //  - PNG d'un seul tenant : ce qui passe le mieux dans un groupe WhatsApp ;
   //  - PDF A4 : le JPEG de chaque page enveloppé dans un PDF écrit à la main.
   // Aucune bibliothèque : marche hors ligne et sans CDN (la CSP n'autorise que 'self').
-  var LOGO = null;
+  var LOGO = null, LOGO_DETOURE = null;
+  /** Logo détouré (fond transparent, sans cadre) : pour les filigranes. */
+  function chargerLogoDetoure() {
+    if (LOGO_DETOURE) return Promise.resolve(LOGO_DETOURE);
+    return new Promise(function (ok) {
+      var i = new Image();
+      i.onload = function () { LOGO_DETOURE = i; ok(i); };
+      i.onerror = function () { ok(null); };
+      i.src = 'logo.png';
+    });
+  }
   function chargerLogo() {
     if (LOGO) return Promise.resolve(LOGO);
     return new Promise(function (ok) {
@@ -952,7 +994,11 @@
       var pages = [];
       for (var i = 0; i < n; i++) pages.push(dessinerFeuillePresence(x, r[0], i * PAR_PAGE, PAR_PAGE));
       return Promise.all(pages.map(function (cv) { return versBlob(cv, 'image/jpeg', 0.9).then(function (b) { return b.arrayBuffer(); }).then(function (a) { return { cv: cv, jpeg: new Uint8Array(a) }; }); }));
-    }).then(function (pages) {
+    }).then(function (pages) { return new File([pdfDepuisJpeg(pages, 595.28, 841.89)], nomFichier(x, 'pdf'), { type: 'application/pdf' }); });
+  }
+  /** PDF minimal : une page par image JPEG (largeur × hauteur en points). */
+  function pdfDepuisJpeg(pages, largeur, hauteur) {
+    {
       var morceaux = [], pos = 0, offsets = [];
       var ecrire = function (t) { var b = typeof t === 'string' ? new TextEncoder().encode(t) : t; morceaux.push(b); pos += b.length; };
       var objet = function (num, corps) { offsets[num] = pos; ecrire(num + ' 0 obj\n'); corps(); ecrire('\nendobj\n'); };
@@ -962,8 +1008,8 @@
       objet(2, function () { ecrire('<< /Type /Pages /Kids [' + kids + '] /Count ' + pages.length + ' >>'); });
       pages.forEach(function (pg, i) {
         var nP = 3 + i * 3, nC = nP + 1, nI = nP + 2;
-        var contenu = 'q 595.28 0 0 841.89 0 0 cm /Im' + i + ' Do Q';
-        objet(nP, function () { ecrire('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im' + i + ' ' + nI + ' 0 R >> >> /Contents ' + nC + ' 0 R >>'); });
+        var contenu = 'q ' + largeur + ' 0 0 ' + hauteur + ' 0 0 cm /Im' + i + ' Do Q';
+        objet(nP, function () { ecrire('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + largeur + ' ' + hauteur + '] /Resources << /XObject << /Im' + i + ' ' + nI + ' 0 R >> >> /Contents ' + nC + ' 0 R >>'); });
         objet(nC, function () { ecrire('<< /Length ' + contenu.length + ' >>\nstream\n' + contenu + '\nendstream'); });
         objet(nI, function () {
           ecrire('<< /Type /XObject /Subtype /Image /Width ' + pg.cv.width + ' /Height ' + pg.cv.height + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + pg.jpeg.length + ' >>\nstream\n');
@@ -975,8 +1021,8 @@
       var t = 'xref\n0 ' + nb + '\n0000000000 65535 f \n';
       for (var k = 1; k < nb; k++) t += ('000000000' + offsets[k]).slice(-10) + ' 00000 n \n';
       ecrire(t + 'trailer\n<< /Size ' + nb + ' /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF\n');
-      return new File(morceaux, nomFichier(x, 'pdf'), { type: 'application/pdf' });
-    });
+      return new Blob(morceaux, { type: 'application/pdf' });
+    }
   }
   /** Partage natif (WhatsApp, etc.) si le téléphone sait partager des fichiers ; sinon téléchargement. */
   function partagerFichiers(fichiers, titre) {
@@ -1038,6 +1084,382 @@
             (sms ? '<a class="btn clair petit" data-a="msg-parent" data-canal="sms" data-id="' + esc(r.p.id) + '" href="sms:+237' + esc(sms) + '?body=' + encodeURIComponent(txt) + '">SMS</a>' : '') + '</span>'
             : '<span class="doux">pas de numéro</span>') + '</div>';
       }).join('') + '</div>';
+  }
+
+  // ───────────────────────────── Finances ─────────────────────────────
+  var MOIS_COURTS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  var MODES = { especes: 'Espèces', momo: 'MTN MoMo', om: 'Orange Money', virement: 'Virement', autre: 'Autre' };
+  var CATEGORIES = { loyer: 'Loyer', salaires: 'Salaires', fournitures: 'Fournitures', electricite: 'Électricité / eau', transport: 'Transport', communication: 'Communication', autre: 'Autre' };
+  /** « 12 500 F » — espace insécable simple (le canvas n'a pas toujours l'espace fine). */
+  function fcfa(n) { return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0') + '\u00a0F'; }
+  function anneeActive() { return lignes('annees').filter(function (a) { return Number(a.active); })[0] || null; }
+
+  /**
+   * Échéancier d'un élève pour l'année en cours : inscription, puis une mensualité par
+   * mois facturé à partir de son mois d'inscription (septembre gratuit), échue le N du mois.
+   * Les versements (non annulés) s'imputent dans l'ordre : du plus ancien dû au plus récent.
+   */
+  function echeancier(e) {
+    var an = anneeActive();
+    var classe = ligne('classes', e.classe_id) || {};
+    var centre = ligne('centres', e.centre_id) || {};
+    var jourEch = Number(centre.jour_echeance) || 10;
+    var insc = Number(e.inscription_due) || Number(classe.inscription) || 0;
+    var mens = Number(e.mensualite_due) || Number(classe.mensualite) || 0;
+    var items = [];
+    var dInsc = e.date_inscription || (an && an.debut) || isoLocal(new Date());
+    if (insc) items.push({ cle: 'insc', libelle: 'Inscription', court: 'inscription', montant: insc, echeance: dInsc });
+    if (an && mens) {
+      var y0 = Number(String(an.libelle).slice(0, 4)) || Number(String(an.debut).slice(0, 4));
+      var m0 = Number(String(an.debut).slice(5, 7)) || 9;
+      var debutAm = dInsc.slice(0, 7);
+      var finAm = e.statut === 'parti' && e.date_depart ? e.date_depart.slice(0, 7) : '9999-99';
+      String(an.mois_factures || '').split(',').filter(Boolean).forEach(function (mm) {
+        var m = Number(mm);
+        var y = m >= m0 ? y0 : y0 + 1;
+        var am = y + '-' + ('0' + m).slice(-2);
+        if (am < debutAm || am > finAm) return;
+        items.push({ cle: am, libelle: MOIS[m - 1].replace(/^./, function (c) { return c.toUpperCase(); }) + ' ' + y, court: MOIS_COURTS[m - 1], montant: mens, echeance: am + '-' + ('0' + jourEch).slice(-2), mois: am });
+      });
+    }
+    var vers = lignes('paiements').filter(function (p) { return p.eleve_id === e.id && !Number(p.annule); })
+      .sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : String(a.numero || 'zz') < String(b.numero || 'zz') ? -1 : 1; });
+    var paye = vers.reduce(function (s, p) { return s + Number(p.montant); }, 0);
+    var reste = paye;
+    items.forEach(function (it) { it.paye = Math.min(it.montant, reste); reste -= it.paye; });
+    var auj = isoLocal(new Date());
+    var moisCourant = auj.slice(0, 7);
+    var du = items.filter(function (it) { return !it.mois || it.mois <= moisCourant; });
+    var echus = items.filter(function (it) { return it.echeance < auj && it.paye < it.montant; });
+    return {
+      items: items, versements: vers, mensualite: mens, inscription: insc, paye: paye, credit: reste,
+      duAcejour: du.reduce(function (s, it) { return s + it.montant; }, 0),
+      resteAcejour: du.reduce(function (s, it) { return s + it.montant - it.paye; }, 0),
+      impaye: echus.reduce(function (s, it) { return s + it.montant - it.paye; }, 0),
+      moisImpayes: echus, totalAnnee: items.reduce(function (s, it) { return s + it.montant; }, 0)
+    };
+  }
+  /** Ce que couvre UN versement : on rejoue l'imputation jusqu'à lui. */
+  function couverture(p) {
+    var e = ligne('eleves', p.eleve_id);
+    if (!e) return { lignes: [], reste: 0 };
+    var ech = echeancier(e);
+    var avant = 0;
+    ech.versements.some(function (v) { if (v.id === p.id) return true; avant += Number(v.montant); return false; });
+    var lignesC = [], a = avant, b = avant + (Number(p.annule) ? 0 : Number(p.montant));
+    var cumul = 0;
+    ech.items.forEach(function (it) {
+      var d = cumul, f = cumul + it.montant;
+      var pris = Math.max(0, Math.min(f, b) - Math.max(d, a));
+      if (pris > 0) lignesC.push({ libelle: it.libelle, court: it.court, pris: pris, complet: Math.min(f, b) >= f, resteItem: f - Math.min(f, b), montant: it.montant });
+      cumul = f;
+    });
+    if (b > cumul) lignesC.push({ libelle: 'Avance', court: 'avance', pris: b - Math.max(a, cumul), complet: true, resteItem: 0 });
+    return { lignes: lignesC, reste: ech.resteAcejour, ech: ech };
+  }
+  function impayes(cid) {
+    return lignes('eleves').filter(function (e) { return e.centre_id === cid && e.statut !== 'suspendu'; })
+      .map(function (e) { return { e: e, ech: echeancier(e) }; }).filter(function (x) { return x.ech.impaye > 0; })
+      .sort(function (a, b) { return b.ech.impaye - a.ech.impaye; });
+  }
+
+  /** Nombre en toutes lettres (règles de 1990 : traits d'union partout), pour la ligne « Somme de ». */
+  function enLettres(n) {
+    n = Math.floor(Number(n) || 0);
+    if (n === 0) return 'zéro';
+    var U = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize'];
+    var D = ['', 'dix', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt'];
+    function c99(x) {
+      if (x < 17) return U[x];
+      if (x < 20) return 'dix-' + U[x - 10];
+      var d = Math.floor(x / 10), u = x % 10;
+      if (d === 7 || d === 9) return D[d] + (u === 1 && d === 7 ? '-et-' : '-') + U[10 + u];
+      if (d === 8) return u ? 'quatre-vingt-' + U[u] : 'quatre-vingts';
+      return D[d] + (u === 1 ? '-et-un' : u ? '-' + U[u] : '');
+    }
+    function c999(x) {
+      var c = Math.floor(x / 100), r = x % 100;
+      var t = c === 0 ? '' : c === 1 ? 'cent' : U[c] + '-cent' + (r === 0 ? 's' : '');
+      return t + (t && r ? '-' : '') + (r ? c99(r) : '');
+    }
+    var mil = Math.floor(n / 1000000), mille = Math.floor((n % 1000000) / 1000), reste = n % 1000;
+    var out = [];
+    if (mil) out.push((mil === 1 ? 'un' : c999(mil)) + '-million' + (mil > 1 ? 's' : ''));
+    if (mille) out.push(mille === 1 ? 'mille' : c999(mille).replace(/(cent|vingt)s$/, '$1') + '-mille');
+    if (reste) out.push(c999(reste));
+    return out.join('-');
+  }
+
+  var CAI = { centre: '', onglet: 'encaisser', q: '' };
+  function centreCaisse() {
+    var dispo = centresChoisis().filter(function (c) { return peut('paiements.voir', c.id); });
+    if (!dispo.some(function (c) { return c.id === CAI.centre; })) CAI.centre = dispo.length ? dispo[0].id : '';
+    return { cid: CAI.centre, dispo: dispo };
+  }
+  function pageCaisse() {
+    var cc = centreCaisse(), cid = cc.cid;
+    var encaisse = peut('paiements.encaisser', cid);
+    if (!encaisse && CAI.onglet === 'encaisser') CAI.onglet = 'jour';
+    var h = '<h1>Caisse</h1>';
+    if (cc.dispo.length > 1) h += '<div class="puces">' + cc.dispo.map(function (c) { return '<button type="button" class="puce' + (c.id === cid ? ' on' : '') + '" data-a="caisse-centre" data-v="' + esc(c.id) + '">' + esc(c.nom_court || c.nom) + '</button>'; }).join('') + '</div>';
+    if (!cid) return h + '<div class="carte vide">Aucun centre.</div>';
+    var imp = impayes(cid);
+    var onglets = (encaisse ? [['encaisser', 'Encaisser']] : []).concat([['jour', 'Journal'], ['impayes', 'Impayés' + (imp.length ? ' · ' + imp.length : '')]]);
+    if (peut('depenses.voir', cid)) onglets.push(['depenses', 'Dépenses']);
+    h += '<div class="onglets">' + onglets.map(function (o) { return '<button type="button" class="' + (CAI.onglet === o[0] ? 'on' : '') + '" data-a="caisse-onglet" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>';
+
+    if (CAI.onglet === 'encaisser') {
+      h += '<label class="recherche"><span class="sr">Rechercher un élève</span>' + ico('search') + '<input type="search" data-input="recherche-caisse" placeholder="Élève, matricule, téléphone du parent" value="' + esc(CAI.q) + '" autocomplete="off"></label><div id="zone-caisse"></div>';
+    } else if (CAI.onglet === 'jour') {
+      var auj = isoLocal(new Date());
+      CAI.date = CAI.date || auj;
+      var du = lignes('paiements').filter(function (p) { return p.centre_id === cid && p.date === CAI.date; }).sort(function (a, b) { return String(b.numero || 'zz').localeCompare(String(a.numero || 'zz')); });
+      var valides = du.filter(function (p) { return !Number(p.annule); });
+      var parMode = {};
+      valides.forEach(function (p) { parMode[p.mode] = (parMode[p.mode] || 0) + Number(p.montant); });
+      h += '<div class="nav-date"><button type="button" class="btn clair petit" data-a="caisse-date" data-v="-1" aria-label="Jour précédent">‹</button><b>' + esc(CAI.date === auj ? 'Aujourd\'hui' : dateLongue(CAI.date)) + '</b><button type="button" class="btn clair petit" data-a="caisse-date" data-v="1"' + (CAI.date >= auj ? ' disabled' : '') + ' aria-label="Jour suivant">›</button></div>';
+      h += '<div class="stats"><div><b>' + fcfa(valides.reduce(function (s, p) { return s + Number(p.montant); }, 0)) + '</b><small>' + valides.length + ' versement' + (valides.length > 1 ? 's' : '') + '</small></div>' +
+        Object.keys(MODES).filter(function (m) { return parMode[m]; }).map(function (m) { return '<div><b>' + fcfa(parMode[m]) + '</b><small>' + MODES[m] + '</small></div>'; }).join('') + '</div>';
+      h += du.length ? '<div class="liste">' + du.map(ligneVersement).join('') + '</div>' : '<div class="carte vide">Aucun versement ce jour-là.</div>';
+    } else if (CAI.onglet === 'impayes') {
+      var total = imp.reduce(function (s, x) { return s + x.ech.impaye; }, 0);
+      var c = ligne('centres', cid) || {};
+      h += '<p class="sous-titre">Échéance le ' + esc(c.jour_echeance || 10) + ' du mois · <b>' + imp.length + '</b> élève' + (imp.length > 1 ? 's' : '') + ' · <b>' + fcfa(total) + '</b> à recouvrer</p>';
+      h += imp.length ? '<div class="liste">' + imp.map(function (x) {
+        var e = x.e, tel = e.parent_whatsapp || e.parent_tel, sms = e.parent_tel || e.parent_whatsapp;
+        var txt = messageRelance(e, x.ech);
+        var trace = e.relance_le ? '<small class="st-present">' + ico('check', 'p') + ' relancé le ' + esc(dateLisible(e.relance_le)) + '</small>' : '';
+        return '<div class="ligne message"><button type="button" class="corps nom-eleve" data-a="voir-eleve" data-id="' + esc(e.id) + '"><b>' + esc(nomComplet(e)) + (e.statut === 'parti' ? ' <span class="badge">parti</span>' : '') + '</b><small>' + esc(nomDe('classes', e.classe_id)) + ' · ' + esc(x.ech.moisImpayes.map(function (it) { return it.court; }).join(', ')) + '</small><small class="st-absent"><b class="st-absent">' + fcfa(x.ech.impaye) + '</b></small>' + trace + '</button>' +
+          '<span class="boutons">' + (tel ? '<a class="btn clair petit" target="_blank" rel="noopener" data-a="relancer" data-canal="whatsapp" data-id="' + esc(e.id) + '" href="https://wa.me/237' + esc(tel) + '?text=' + encodeURIComponent(txt) + '">' + ico('message', 'p') + 'Relancer</a>' : '') +
+          (sms ? '<a class="btn clair petit" data-a="relancer" data-canal="sms" data-id="' + esc(e.id) + '" href="sms:+237' + esc(sms) + '?body=' + encodeURIComponent(txt) + '">SMS</a>' : '') + (!tel && !sms ? '<span class="doux">pas de numéro</span>' : '') + '</span></div>';
+      }).join('') + '</div>' : '<div class="carte vide">Aucun impayé échu. </div>';
+    } else {
+      var deps = lignes('depenses').filter(function (d) { return d.centre_id === cid; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+      var att = deps.filter(function (d) { return d.statut === 'en_attente'; });
+      h += '<p class="sous-titre">' + (att.length ? '<b>' + att.length + '</b> en attente de validation · ' : '') + 'Une dépense validée ne se modifie plus.</p>';
+      h += deps.length ? '<div class="liste">' + deps.slice(0, 80).map(function (d) {
+        var st = d.statut === 'validee' ? '<span class="badge ok">validée</span>' : d.statut === 'refusee' ? '<span class="badge danger">refusée</span>' : '<span class="badge alerte">en attente</span>';
+        return '<button class="ligne" type="button" data-a="voir-depense" data-id="' + esc(d.id) + '"><span class="corps"><b>' + esc(d.libelle) + '</b><small>' + esc(dateLisible(d.date, true) + ' · ' + (CATEGORIES[d.categorie] || d.categorie) + (d.beneficiaire ? ' · ' + d.beneficiaire : '') + ' · saisie par ' + (nomPersonne(d.saisie_par) || (d.saisie_par === E.profil.utilisateur.id ? 'vous' : '—'))) + '</small></span><span class="fin"><b>' + fcfa(d.montant) + '</b>' + st + '</span></button>';
+      }).join('') + '</div>' : '<div class="carte vide">Aucune dépense.</div>';
+      if (peut('depenses.saisir', cid)) h += '<button class="fab" type="button" data-a="editer-depense" data-id="">' + ico('plus') + 'Dépense</button>';
+    }
+    return h;
+  }
+  function ligneVersement(p) {
+    var e = ligne('eleves', p.eleve_id) || {};
+    return '<button class="ligne" type="button" data-a="voir-recu" data-id="' + esc(p.id) + '"><span class="corps"><b>' + esc(nomComplet(e)) + (Number(p.annule) ? ' <span class="badge danger">annulé</span>' : '') + '</b><small>' +
+      esc((p.numero ? 'Reçu n° ' + p.numero : 'n° à la synchro') + ' · ' + MODES[p.mode] + ' · ' + nomDe('classes', e.classe_id)) + '</small></span><span class="fin"><b' + (Number(p.annule) ? ' class="barre-txt"' : '') + '>' + fcfa(p.montant) + '</b>' + (p._attente ? '<span class="badge alerte">en attente</span>' : '') + '</span></button>';
+  }
+  function dessinerRechercheCaisse() {
+    var z = $('#zone-caisse');
+    if (!z) return;
+    var cid = CAI.centre;
+    var q = cleNom(CAI.q), qTel = String(CAI.q).replace(/\D+/g, '');
+    var l = lignes('eleves').filter(function (e) {
+      if (e.centre_id !== cid || e.statut === 'parti') return false;
+      if (!q && !qTel) return true;
+      var cle = cleNom(e.nom + ' ' + e.prenoms + ' ' + (e.matricule || ''));
+      return (q && q.split(' ').every(function (m) { return cle.indexOf(m) >= 0; })) || (qTel.length >= 3 && [e.parent_tel, e.parent_whatsapp].some(function (t) { return t && String(t).indexOf(qTel) >= 0; }));
+    }).map(function (e) { return { e: e, ech: echeancier(e) }; })
+      .sort(function (a, b) { return CAI.q ? nomComplet(a.e).localeCompare(nomComplet(b.e), 'fr') : b.ech.impaye - a.ech.impaye || nomComplet(a.e).localeCompare(nomComplet(b.e), 'fr'); });
+    if (!l.length) { z.innerHTML = '<div class="carte vide">Aucun élève.</div>'; return; }
+    z.innerHTML = '<div class="liste">' + l.slice(0, 60).map(function (x) {
+      var etat = x.ech.impaye ? '<span class="badge danger">' + fcfa(x.ech.impaye) + ' en retard</span>' : x.ech.resteAcejour ? '<span class="badge alerte">' + fcfa(x.ech.resteAcejour) + ' à payer</span>' : '<span class="badge ok">à jour</span>';
+      return '<button class="ligne" type="button" data-a="encaisser" data-id="' + esc(x.e.id) + '"><span class="avatar' + (x.e.sexe === 'F' ? ' f' : '') + '">' + esc(initiales(nomComplet(x.e))) + '</span><span class="corps"><b>' + esc(nomComplet(x.e)) + '</b><small>' + esc(nomDe('classes', x.e.classe_id) + ' · mensualité ' + fcfa(x.ech.mensualite)) + '</small></span>' + etat + '</button>';
+    }).join('') + '</div>';
+  }
+
+  function feuillePaiement(eleveId) {
+    var e = ligne('eleves', eleveId);
+    var ech = echeancier(e);
+    var cid = e.centre_id;
+    var prochain = ech.items.filter(function (it) { return it.paye < it.montant; })[0];
+    var choix = [];
+    if (ech.impaye) choix.push([ech.impaye, 'Tout le retard']);
+    if (prochain && prochain.montant - prochain.paye !== ech.impaye) choix.push([prochain.montant - prochain.paye, prochain.libelle]);
+    if (ech.resteAcejour && choix.every(function (c) { return c[0] !== ech.resteAcejour; })) choix.push([ech.resteAcejour, 'Tout le dû à ce jour']);
+    if (ech.mensualite && choix.every(function (c) { return c[0] !== ech.mensualite; })) choix.push([ech.mensualite, 'Une mensualité']);
+    var correct = correcteur(cid);
+    ouvrirFeuille('<h2>Encaisser</h2><p><b>' + esc(nomComplet(e)) + '</b> · ' + esc(nomDe('classes', e.classe_id)) + '</p>' +
+      '<div class="stats petites"><div><b>' + fcfa(ech.resteAcejour) + '</b><small>reste à ce jour</small></div><div><b class="' + (ech.impaye ? 'st-absent' : '') + '">' + fcfa(ech.impaye) + '</b><small>en retard</small></div><div><b>' + fcfa(ech.paye) + '</b><small>déjà versé</small></div></div>' +
+      '<form data-f="paiement" data-eleve="' + esc(e.id) + '">' +
+      (choix.length ? '<div class="puces">' + choix.map(function (c) { return '<button type="button" class="puce" data-a="montant-rapide" data-v="' + c[0] + '">' + esc(c[1]) + ' · ' + fcfa(c[0]) + '</button>'; }).join('') + '</div>' : '') +
+      '<label class="champ"><span>Montant (FCFA)</span><input type="number" name="montant" id="montant-paiement" inputmode="numeric" min="1" step="1" required value="' + (choix.length ? choix[0][0] : '') + '"></label>' +
+      '<div class="deux"><label class="champ"><span>Mode</span><select name="mode" data-change="mode-paiement">' + Object.keys(MODES).map(function (m) { return '<option value="' + m + '">' + MODES[m] + '</option>'; }).join('') + '</select></label>' +
+      '<label class="champ"><span>Date</span><input type="date" name="date" value="' + isoLocal(new Date()) + '" max="' + isoLocal(new Date()) + '"' + (correct ? '' : ' min="' + decalerJour(isoLocal(new Date()), -2) + '"') + '></label></div>' +
+      '<label class="champ" id="champ-reference" hidden><span>Référence de la transaction</span><input type="text" name="reference" placeholder="ex. : MP261102.1543.A12345"></label>' +
+      '<label class="champ"><span>Note</span><input type="text" name="note" placeholder="facultatif"></label>' +
+      '<p class="doux">Un versement ne se modifie plus : en cas d\'erreur, un responsable l\'annule avec un motif.</p>' +
+      '<div class="actions"><button class="btn or" type="submit">' + ico('check', 'p') + 'Encaisser</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
+  }
+
+  // Reçu : même gabarit que les carnets papier, en image (WhatsApp) ou en PDF.
+  function dessinerRecu(p, logo, filigraneLogo) {
+    var L = 1240, H = 1240, M = 70;
+    var e = ligne('eleves', p.eleve_id) || {};
+    var c = ligne('centres', p.centre_id) || {};
+    var cv = couverture(p);
+    var cvs = document.createElement('canvas'); cvs.width = L; cvs.height = H;
+    var g = cvs.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, L, H);
+    g.fillStyle = '#0C2A6A'; g.fillRect(0, 0, L, 170);
+    if (logo) g.drawImage(logo, M, 30, 110, 110);
+    g.fillStyle = '#fff'; g.font = '600 40px Poppins, sans-serif'; g.fillText(texteCoupe(g, c.nom || 'VÉRITAS', L - M * 2 - 140), M + 135, 78);
+    g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#C9D6F2';
+    g.fillText(texteCoupe(g, c.devise || '', L - M * 2 - 140), M + 135, 112);
+    var tels = String(c.telephones || '').split('/').map(function (t) { return telLisible(t.replace(/\D+/g, '')); }).filter(Boolean).join(' / ');
+    g.fillText(texteCoupe(g, [c.adresse, tels].filter(Boolean).join(' · '), L - M * 2 - 140), M + 135, 144);
+    g.fillStyle = '#FFC93C'; g.fillRect(0, 170, L, 6);
+    var an = anneeActive();
+    g.fillStyle = '#001136'; g.font = '600 42px Poppins, sans-serif'; g.fillText('Reçu n° ' + (p.numero || '— (en attente)'), M, 250);
+    g.textAlign = 'right'; g.font = '400 24px Poppins, sans-serif'; g.fillStyle = '#4D5163'; g.fillText('Année scolaire ' + (an ? an.libelle.replace('-', ' - ') : ''), L - M, 250); g.textAlign = 'left';
+    var y = 320;
+    var champ = function (lib, val, gras) {
+      g.font = '400 25px Poppins, sans-serif'; g.fillStyle = '#6B7185'; g.fillText(lib, M, y);
+      g.font = (gras ? '600' : '500') + ' 27px Poppins, sans-serif'; g.fillStyle = '#001136'; g.fillText(texteCoupe(g, val, L - M * 2 - 300), M + 300, y);
+      g.fillStyle = '#E1E6F0'; g.fillRect(M, y + 18, L - 2 * M, 1);
+      y += 66;
+    };
+    champ('Nom', String(e.nom || '').toUpperCase(), true);
+    champ('Prénoms', e.prenoms || '');
+    champ('Classe', nomDe('classes', e.classe_id) + (e.matricule ? '   ·   matricule ' + e.matricule : ''));
+    champ('Somme de', fcfa(p.montant) + ' (' + enLettres(p.montant) + ' francs CFA)', true);
+    champ('Mois', cv.lignes.map(function (l) { return l.libelle + (l.complet ? '' : ' (partiel)'); }).join(', ') || '—');
+    var partiel = cv.lignes.filter(function (l) { return !l.complet; })[0];
+    champ('Avance / Reste', partiel ? 'Avance ' + fcfa(partiel.pris) + ' · Reste ' + fcfa(partiel.resteItem) + ' sur ' + partiel.libelle.toLowerCase() : 'Mois soldé' + (cv.lignes.length > 1 ? 's' : ''));
+    champ('Reste dû à ce jour', fcfa(cv.reste), true);
+    champ('Mode', MODES[p.mode] + (p.reference ? ' · réf. ' + p.reference : ''));
+    champ('Élaboré par', 'M. ' + (nomPersonne(p.encaisse_par) || (p.encaisse_par === E.profil.utilisateur.id ? E.profil.utilisateur.nom : '—')));
+    champ('Fait à Douala le', dateLisible(p.date, true));
+    g.fillStyle = '#FFF4DB'; g.fillRect(M, y + 4, L - 2 * M, 64);
+    g.fillStyle = '#6A4200'; g.font = '500 24px Poppins, sans-serif';
+    g.fillText('NB : les paiements se font au plus tard le ' + (c.jour_echeance || 10) + ' du mois.', M + 20, y + 45);
+    g.textAlign = 'right'; g.fillStyle = '#001136'; g.font = 'italic 500 26px Poppins, sans-serif'; g.fillText('La Direction', L - M, H - 70); g.textAlign = 'left';
+    g.font = '400 18px Poppins, sans-serif'; g.fillStyle = '#6B7185'; g.fillText('VÉRITAS Gestion · reçu édité le ' + new Date().toLocaleDateString('fr-FR'), M, H - 40);
+    if (Number(p.annule)) {
+      g.save(); g.globalAlpha = 0.18; g.fillStyle = '#B42318'; g.font = '600 200px Poppins, sans-serif'; g.textAlign = 'center';
+      g.translate(L / 2, H / 2); g.rotate(-Math.PI / 7); g.fillText('ANNULÉ', 0, 0); g.restore();
+    } else if (filigraneLogo) {
+      // Filigrane sans cadre : le logo détouré, centré, très pâle.
+      var lf = 560, hf = Math.round(lf * filigraneLogo.naturalHeight / filigraneLogo.naturalWidth);
+      g.save(); g.globalAlpha = 0.07; g.drawImage(filigraneLogo, L / 2 - lf / 2, 340 + (560 - hf) / 2, lf, hf); g.restore();
+    }
+    return cvs;
+  }
+  function fichierRecu(p, format) {
+    return Promise.all([chargerLogo(), document.fonts ? document.fonts.load('600 24px Poppins') : null, chargerLogoDetoure()]).then(function (r) {
+      var cv = dessinerRecu(p, r[0], r[2]);
+      var e = ligne('eleves', p.eleve_id) || {};
+      var base = ('recu-' + (p.numero || 'provisoire') + '-' + (e.nom || '')).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9-]+/g, '-');
+      if (format !== 'pdf') return versBlob(cv, 'image/png').then(function (b) { return new File([b], base + '.png', { type: 'image/png' }); });
+      return versBlob(cv, 'image/jpeg', 0.92).then(function (b) { return b.arrayBuffer(); }).then(function (a) { return new File([pdfDepuisJpeg([{ cv: cv, jpeg: new Uint8Array(a) }], 595.28, 595.28)], base + '.pdf', { type: 'application/pdf' }); });
+    });
+  }
+  function messageRecu(p) {
+    var e = ligne('eleves', p.eleve_id) || {};
+    var c = ligne('centres', p.centre_id) || {};
+    var cv = couverture(p);
+    var modele = c.msg_recu || 'Bonjour {parent}, nous accusons réception de {montant} pour {eleve} ({classe}), reçu n° {numero} du {date} : {couvre}. Reste à payer à ce jour : {reste}. Merci ! {centre}';
+    var v = { parent: e.parent_nom || 'cher parent', montant: fcfa(p.montant), eleve: nomComplet(e), classe: nomDe('classes', e.classe_id), numero: p.numero || '', date: dateLisible(p.date, true),
+      couvre: cv.lignes.map(function (l) { return l.libelle.toLowerCase() + (l.complet ? '' : ' (partiel)'); }).join(', '), reste: fcfa(cv.reste), centre: c.nom || 'VÉRITAS' };
+    return modele.replace(/\{(\w+)\}/g, function (m, k) { return v[k] != null ? v[k] : m; });
+  }
+  function messageRelance(e, ech) {
+    var c = ligne('centres', e.centre_id) || {};
+    var modele = c.msg_relance || 'Bonjour {parent}, sauf erreur de notre part, il reste {montant} à régler pour {eleve} ({classe}) : {mois}. Les paiements se font au plus tard le {jour} du mois. Merci de votre compréhension. {centre} — {tel_centre}';
+    var v = { parent: e.parent_nom || 'cher parent', montant: fcfa(ech.impaye), eleve: nomComplet(e), classe: nomDe('classes', e.classe_id),
+      mois: ech.moisImpayes.map(function (it) { return it.libelle.toLowerCase() + (it.paye ? ' (reste ' + fcfa(it.montant - it.paye) + ')' : ''); }).join(', '),
+      jour: c.jour_echeance || 10, centre: c.nom || 'VÉRITAS', tel_centre: telLisible(String(c.telephones || '').split('/')[0].replace(/\D+/g, '')) };
+    return modele.replace(/\{(\w+)\}/g, function (m, k) { return v[k] != null ? v[k] : m; });
+  }
+  function feuilleRecu(pid) {
+    var p = ligne('paiements', pid);
+    if (!p) return;
+    var e = ligne('eleves', p.eleve_id) || {};
+    var tel = e.parent_whatsapp || e.parent_tel;
+    var pret = !!p.numero;
+    ouvrirFeuille('<h2>Reçu ' + (p.numero ? 'n° ' + esc(p.numero) : '') + (Number(p.annule) ? ' <span class="badge danger">annulé</span>' : '') + '</h2>' +
+      '<p class="doux">' + esc(nomComplet(e)) + ' · ' + fcfa(p.montant) + ' · ' + esc(MODES[p.mode]) + (p.envoye_le ? ' · envoyé le ' + esc(dateLisible(p.envoye_le)) : '') + '</p>' +
+      (Number(p.annule) ? '<p class="note">Annulé : ' + esc(p.motif_annulation || '') + '</p>' : '') +
+      (pret ? '' : '<p class="note">Le numéro du reçu est attribué par le serveur dès la synchronisation (il faut du réseau).</p>') +
+      '<div id="apercu-recu" class="apercu-recu"><p class="doux">Préparation de l\'aperçu…</p></div>' +
+      '<div class="actions">' + (tel && pret && !Number(p.annule) ? '<a class="btn or" target="_blank" rel="noopener" data-a="envoyer-recu" data-canal="whatsapp" data-id="' + esc(p.id) + '" href="https://wa.me/237' + esc(tel) + '?text=' + encodeURIComponent(messageRecu(p)) + '">' + ico('message', 'p') + 'Message au parent</a>' : '') +
+      (pret ? '<button class="btn clair" type="button" data-a="partager-recu" data-v="png" data-id="' + esc(p.id) + '">' + ico('camera', 'p') + 'Image du reçu</button><button class="btn clair" type="button" data-a="partager-recu" data-v="pdf" data-id="' + esc(p.id) + '">' + ico('doc', 'p') + 'PDF</button>' : '') + '</div>' +
+      '<div class="actions">' + (correcteur(p.centre_id) && !Number(p.annule) ? '<button class="btn danger" type="button" data-a="annuler-versement" data-id="' + esc(p.id) + '">Annuler ce versement</button>' : '') + '<button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
+    Promise.all([chargerLogo(), document.fonts ? document.fonts.load('600 24px Poppins') : null, chargerLogoDetoure()]).then(function (r) {
+      var z = $('#apercu-recu');
+      if (!z) return;
+      var img = new Image();
+      img.alt = 'Aperçu du reçu';
+      img.src = dessinerRecu(p, r[0], r[2]).toDataURL('image/png');
+      z.innerHTML = ''; z.appendChild(img);
+    });
+  }
+
+  function feuilleDepense(id) {
+    var cid = id ? ligne('depenses', id).centre_id : CAI.centre;
+    var d = id ? ligne('depenses', id) : { date: isoLocal(new Date()), categorie: 'fournitures', mode: 'especes', statut: 'en_attente' };
+    var modifiable = d.statut === 'en_attente' && peut('depenses.saisir', cid);
+    var moi = E.profil.utilisateur.id;
+    var valideur = d.statut === 'en_attente' && id && (estAdmin() || (roleDans(cid) === 'responsable' && d.saisie_par !== moi));
+    var dis = modifiable ? '' : ' disabled';
+    ouvrirFeuille('<h2>' + (id ? 'Dépense' : 'Nouvelle dépense') + '</h2>' + (id ? '<p class="doux">Saisie par ' + esc(nomPersonne(d.saisie_par) || (d.saisie_par === moi ? 'vous' : '—')) + (d.valide_par ? ' · ' + (d.statut === 'validee' ? 'validée' : 'refusée') + ' par ' + esc(nomPersonne(d.valide_par) || (d.valide_par === moi ? 'vous' : '—')) + ' le ' + esc(dateLisible(d.valide_le)) : '') + '</p>' : '') +
+      (d.statut === 'refusee' ? '<p class="note">Refusée : ' + esc(d.motif_refus || '') + '</p>' : '') +
+      '<form data-f="depense" data-id="' + esc(id || '') + '" data-centre="' + esc(cid) + '">' +
+      '<label class="champ"><span>Libellé</span><input type="text" name="libelle" required value="' + esc(d.libelle || '') + '"' + dis + ' placeholder="ex. : Loyer de novembre"></label>' +
+      '<div class="deux"><label class="champ"><span>Montant (FCFA)</span><input type="number" name="montant" min="1" required value="' + esc(d.montant || '') + '"' + dis + '></label>' +
+      '<label class="champ"><span>Date</span><input type="date" name="date" max="' + isoLocal(new Date()) + '" value="' + esc(d.date) + '"' + dis + '></label></div>' +
+      '<div class="deux"><label class="champ"><span>Catégorie</span><select name="categorie"' + dis + '>' + Object.keys(CATEGORIES).map(function (k) { return '<option value="' + k + '"' + (d.categorie === k ? ' selected' : '') + '>' + CATEGORIES[k] + '</option>'; }).join('') + '</select></label>' +
+      '<label class="champ"><span>Payé en</span><select name="mode"' + dis + '>' + Object.keys(MODES).map(function (k) { return '<option value="' + k + '"' + (d.mode === k ? ' selected' : '') + '>' + MODES[k] + '</option>'; }).join('') + '</select></label></div>' +
+      '<label class="champ"><span>Bénéficiaire</span><input type="text" name="beneficiaire" value="' + esc(d.beneficiaire || '') + '"' + dis + '></label>' +
+      (modifiable ? '<div class="actions"><button class="btn" type="submit">Enregistrer</button></div>' : '') + '</form>' +
+      (valideur ? '<div class="actions"><button class="btn or" type="button" data-a="valider-depense" data-id="' + esc(id) + '">' + ico('check', 'p') + 'Valider</button><button class="btn danger" type="button" data-a="refuser-depense" data-id="' + esc(id) + '">Refuser</button></div>' : '') +
+      '<div class="actions">' + (id && modifiable ? '<button class="btn danger" type="button" data-a="suppr-depense" data-id="' + esc(id) + '">Retirer</button>' : '') + '<button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
+  }
+
+  var BIL = { mois: '' };
+  function pageBilan() {
+    var auj = isoLocal(new Date());
+    if (!BIL.mois) BIL.mois = auj.slice(0, 7);
+    var centres = centresChoisis().filter(function (c) { return peut('finances.voir', c.id); });
+    var an = anneeActive();
+    var annee = BIL.mois === 'annee';
+    var lib = annee ? 'Année ' + (an ? an.libelle : '') : MOIS[Number(BIL.mois.slice(5, 7)) - 1].replace(/^./, function (c) { return c.toUpperCase(); }) + ' ' + BIL.mois.slice(0, 4);
+    var dans = function (date) { return annee ? (!an || (date >= an.debut && date <= an.fin)) : String(date).slice(0, 7) === BIL.mois; };
+    var h = '<h1>Bilan financier</h1><div class="nav-date"><button type="button" class="btn clair petit" data-a="bilan-mois" data-v="-1"' + (annee ? ' disabled' : '') + ' aria-label="Mois précédent">‹</button><b>' + esc(lib) + '</b>' +
+      '<button type="button" class="btn clair petit" data-a="bilan-mois" data-v="1"' + (annee || BIL.mois >= auj.slice(0, 7) ? ' disabled' : '') + ' aria-label="Mois suivant">›</button></div>' +
+      '<div class="onglets"><button type="button" class="' + (annee ? '' : 'on') + '" data-a="bilan-mois" data-v="mois">Mois</button><button type="button" class="' + (annee ? 'on' : '') + '" data-a="bilan-mois" data-v="annee">Année scolaire</button></div>';
+    var tot = { rec: 0, dep: 0 };
+    centres.forEach(function (c) {
+      var pay = lignes('paiements').filter(function (p) { return p.centre_id === c.id && !Number(p.annule) && dans(p.date); });
+      var deps = lignes('depenses').filter(function (d) { return d.centre_id === c.id && dans(d.date); });
+      var depV = deps.filter(function (d) { return d.statut === 'validee'; });
+      var rec = pay.reduce(function (s, p) { return s + Number(p.montant); }, 0);
+      var dep = depV.reduce(function (s, d) { return s + Number(d.montant); }, 0);
+      tot.rec += rec; tot.dep += dep;
+      var res = rec - dep;
+      // Attendu de la période : échéances des élèves tombant dans la période.
+      var attendu = 0;
+      lignes('eleves').filter(function (e) { return e.centre_id === c.id; }).forEach(function (e) {
+        echeancier(e).items.forEach(function (it) { if (dans(it.mois ? it.mois + '-01' : it.echeance)) attendu += it.montant; });
+      });
+      var parMode = {}; pay.forEach(function (p) { parMode[p.mode] = (parMode[p.mode] || 0) + Number(p.montant); });
+      var parCat = {}; depV.forEach(function (d) { parCat[d.categorie] = (parCat[d.categorie] || 0) + Number(d.montant); });
+      var acts = lignes('actionnaires').filter(function (a) { return a.centre_id === c.id; });
+      h += '<h2>' + esc(c.nom) + '</h2><div class="stats"><div><b>' + fcfa(rec) + '</b><small>recettes</small></div><div><b>' + fcfa(dep) + '</b><small>dépenses validées</small></div>' +
+        '<div><b class="' + (res < 0 ? 'st-absent' : 'st-present') + '">' + fcfa(res) + '</b><small>résultat</small></div><div><b>' + (attendu ? Math.round(100 * rec / attendu) + ' %' : '—') + '</b><small>recouvrement (' + fcfa(attendu) + ' attendus)</small></div></div>';
+      h += '<div class="infos">' + Object.keys(parMode).map(function (m) { return '<div class="info"><span>' + MODES[m] + '</span><b>' + fcfa(parMode[m]) + '</b></div>'; }).join('') +
+        Object.keys(parCat).map(function (k) { return '<div class="info"><span>Dépenses · ' + CATEGORIES[k] + '</span><b>− ' + fcfa(parCat[k]) + '</b></div>'; }).join('') +
+        (deps.some(function (d) { return d.statut === 'en_attente'; }) ? '<div class="info"><span>Dépenses en attente (non comptées)</span><b>' + fcfa(deps.filter(function (d) { return d.statut === 'en_attente'; }).reduce(function (s, d) { return s + Number(d.montant); }, 0)) + '</b></div>' : '') + '</div>';
+      if (acts.length) {
+        h += '<h3>Part des actionnaires</h3><div class="liste">' + acts.map(function (a) {
+          return '<div class="ligne"><span class="corps"><b>' + esc(a.nom) + '</b><small>' + pourcent(a.part_centiemes) + '</small></span><span class="fin"><b>' + fcfa(Math.round(res * Number(a.part_centiemes) / 10000)) + '</b></span></div>';
+        }).join('') + '</div>';
+      }
+    });
+    if (centres.length > 1) h += '<h2>Ensemble des centres</h2><div class="stats"><div><b>' + fcfa(tot.rec) + '</b><small>recettes</small></div><div><b>' + fcfa(tot.dep) + '</b><small>dépenses</small></div><div><b>' + fcfa(tot.rec - tot.dep) + '</b><small>résultat</small></div></div>';
+    if (!centres.length) h += '<div class="carte vide">Aucun centre.</div>';
+    return h;
   }
 
   // ───────────────────────────── Assiduité ─────────────────────────────
@@ -1220,7 +1642,18 @@
         return '<h3>Assiduité</h3><div class="stats petites"><div><b>' + b.taux + ' %</b><small>présent</small></div><div><b>' + b.retard + '</b><small>retards · ' + dureeLisible(b.minutes) + '</small></div><div><b>' + (b.absent + b.justifie) + '</b><small>absences' + (b.justifie ? ' (' + b.justifie + ' just.)' : '') + '</small></div></div>' +
           '<div class="infos">' + pr.slice(0, 8).map(function (p) { return '<div class="info"><span>' + esc(dateLisible(p.date, true)) + '</span><b class="st-' + p.statut + '">' + LIB_STATUT[p.statut] + (p.arrivee ? ' · ' + p.arrivee : '') + (Number(p.retard_min) ? ' (+' + p.retard_min + ')' : '') + (p.depart ? ' → ' + p.depart : '') + '</b></div>'; }).join('') + '</div>';
       })() +
-      '<div class="actions">' + (gere ? '<button class="btn" type="button" data-a="editer-eleve" data-id="' + esc(e.id) + '">' + ico('edit', 'p') + 'Modifier</button>' +
+      (function () {
+        if (!peut('paiements.voir', e.centre_id)) return '';
+        var ech = echeancier(e);
+        return '<h3>Scolarité ' + (anneeActive() ? esc(anneeActive().libelle) : '') + '</h3><div class="stats petites"><div><b>' + fcfa(ech.paye) + '</b><small>versé</small></div><div><b>' + fcfa(ech.resteAcejour) + '</b><small>reste à ce jour</small></div><div><b class="' + (ech.impaye ? 'st-absent' : 'st-present') + '">' + fcfa(ech.impaye) + '</b><small>en retard</small></div></div>' +
+          (e.mensualite_due || e.inscription_due ? '<p class="doux">Tarif particulier : ' + (e.inscription_due ? 'inscription ' + fcfa(e.inscription_due) + ' ' : '') + (e.mensualite_due ? 'mensualité ' + fcfa(e.mensualite_due) : '') + (e.remise_motif ? ' (' + esc(e.remise_motif) + ')' : '') + '</p>' : '') +
+          '<div class="echeancier">' + ech.items.map(function (it) {
+            var etat = it.paye >= it.montant ? 'ok' : it.echeance < isoLocal(new Date()) ? 'danger' : it.paye ? 'alerte' : '';
+            return '<span class="badge ' + etat + '" title="' + esc(it.libelle + ' : ' + fcfa(it.paye) + ' / ' + fcfa(it.montant)) + '">' + esc(it.court) + (it.paye && it.paye < it.montant ? ' ' + Math.round(100 * it.paye / it.montant) + ' %' : '') + '</span>';
+          }).join('') + '</div>' +
+          (ech.versements.length ? '<div class="liste">' + lignes('paiements').filter(function (p) { return p.eleve_id === e.id; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; }).map(ligneVersement).join('') + '</div>' : '<p class="doux">Aucun versement.</p>');
+      })() +
+      '<div class="actions">' + (peut('paiements.encaisser', e.centre_id) && e.statut !== 'parti' ? '<button class="btn or" type="button" data-a="encaisser" data-id="' + esc(e.id) + '">' + ico('wallet', 'p') + 'Encaisser</button>' : '') + (gere ? '<button class="btn" type="button" data-a="editer-eleve" data-id="' + esc(e.id) + '">' + ico('edit', 'p') + 'Modifier</button>' +
         ((e.statut || 'actif') === 'actif' ? '<button class="btn danger" type="button" data-a="statut-eleve" data-id="' + esc(e.id) + '" data-v="parti">A quitté le centre</button>'
           : '<button class="btn clair" type="button" data-a="statut-eleve" data-id="' + esc(e.id) + '" data-v="actif">Réinscrire</button>') : '') +
       '<button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
@@ -1251,6 +1684,20 @@
       '<label class="champ"><span>WhatsApp, s\'il diffère</span><input type="tel" name="parent_whatsapp" inputmode="tel" value="' + esc(telLisible(e.parent_whatsapp)) + '"></label></div>' +
       '<div class="deux"><label class="champ"><span>Second contact</span><input type="text" name="parent2_nom" value="' + v('parent2_nom') + '"></label>' +
       '<label class="champ"><span>Son téléphone</span><input type="tel" name="parent2_tel" inputmode="tel" value="' + esc(telLisible(e.parent2_tel)) + '"></label></div>' +
+      (function () {
+        var centre = ligne('centres', cid) || {};
+        var opt = Number(centre.inscription_option) || 0;
+        var h2 = '';
+        if (opt) {
+          h2 += '<label class="champ"><span>Inscription</span><select name="inscription_due"><option value="0">Tarif de la classe</option><option value="' + opt + '"' + (Number(e.inscription_due) === opt ? ' selected' : '') + '>' + fcfa(opt) + ' ' + esc(centre.inscription_option_libelle || '') + '</option>' +
+            (Number(e.inscription_due) && Number(e.inscription_due) !== opt ? '<option value="' + Number(e.inscription_due) + '" selected>' + fcfa(e.inscription_due) + ' (particulier)</option>' : '') + '</select></label>';
+        }
+        if (correcteur(cid)) {
+          h2 += '<div class="deux"><label class="champ"><span>Mensualité particulière</span><input type="number" name="mensualite_due" min="0" value="' + (Number(e.mensualite_due) || '') + '" placeholder="tarif de la classe"></label>' +
+            '<label class="champ"><span>Motif de la remise</span><input type="text" name="remise_motif" value="' + v('remise_motif') + '" placeholder="ex. : fratrie, bourse"></label></div>';
+        }
+        return h2 ? '<h3>Tarif</h3>' + h2 : '';
+      })() +
       '<h3>Matières suivies</h3><div class="deux">' + lignes('matieres').map(function (m) { return '<label class="case"><input type="checkbox" name="matiere" value="' + esc(m.id) + '"' + (mats.indexOf(m.id) >= 0 ? ' checked' : '') + '> ' + esc(m.nom) + '</label>'; }).join('') + '</div>' +
       '<label class="champ"><span>Observations</span><textarea name="observations" rows="2">' + v('observations') + '</textarea></label>' +
       '<div class="actions"><button class="btn or" type="submit">' + (id ? 'Enregistrer' : 'Inscrire') + '</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
@@ -1417,7 +1864,7 @@
 
     h += '<h2>Classes du centre</h2><div class="liste">' + (classes.length ? classes.map(function (k) {
       var n = crs.filter(function (c) { return c.classe_id === k.id; }).length;
-      return '<button class="ligne" type="button" data-a="editer-classe" data-id="' + esc(k.id) + '"' + (gere ? '' : ' disabled') + '><span class="corps"><b>' + esc(k.nom) + '</b><small>' + esc([k.niveau, elevesActifs(cid).filter(function (e) { return e.classe_id === k.id; }).length + ' élèves', n + ' cours par semaine'].filter(Boolean).join(' · ')) + '</small></span>' +
+      return '<button class="ligne" type="button" data-a="editer-classe" data-id="' + esc(k.id) + '"' + (gere ? '' : ' disabled') + '><span class="corps"><b>' + esc(k.nom) + '</b><small>' + esc([k.niveau, elevesActifs(cid).filter(function (e) { return e.classe_id === k.id; }).length + ' élèves', n + ' cours par semaine', Number(k.mensualite) ? fcfa(k.mensualite) + '/mois' : ''].filter(Boolean).join(' · ')) + '</small></span>' +
         (k._attente ? '<span class="badge alerte">en attente</span>' : '') + '</button>';
     }).join('') : '<div class="vide">Aucune classe.</div>') + '</div>';
     if (gere) h += '<div class="actions"><button class="btn clair" type="button" data-a="editer-classe" data-id="">' + ico('plus', 'p') + 'Ajouter une classe</button></div>';
@@ -1491,6 +1938,9 @@
     ouvrirFeuille('<h2>' + (id ? esc(k.nom) : 'Nouvelle classe') + '</h2><form data-f="classe" data-id="' + esc(id || '') + '" data-centre="' + esc(id ? k.centre_id : centreEmploi()) + '">' +
       '<label class="champ"><span>Nom</span><input type="text" name="nom" required value="' + esc(k.nom) + '" placeholder="ex. : 1ère C, Tle D, 3e"></label>' +
       '<label class="champ"><span>Niveau</span><select name="niveau">' + niveaux.map(function (n) { return '<option' + (n === k.niveau ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></label>' +
+      '<div class="deux"><label class="champ"><span>Inscription (F)</span><input type="number" name="inscription" min="0" value="' + (Number(k.inscription) || '') + '"' + (correcteur(id ? k.centre_id : centreEmploi()) ? '' : ' disabled') + '></label>' +
+      '<label class="champ"><span>Mensualité (F)</span><input type="number" name="mensualite" min="0" value="' + (Number(k.mensualite) || '') + '"' + (correcteur(id ? k.centre_id : centreEmploi()) ? '' : ' disabled') + '></label></div>' +
+      (correcteur(id ? k.centre_id : centreEmploi()) ? '' : '<p class="doux">Les tarifs sont fixés par le responsable du centre.</p>') +
       '<div class="actions"><button class="btn" type="submit">Enregistrer</button>' + (id ? '<button class="btn danger" type="button" data-a="suppr-classe" data-id="' + esc(id) + '">Supprimer</button>' : '') +
       '<button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
   }
@@ -1662,6 +2112,10 @@
       '<h3>Messages aux parents</h3><p class="doux">Variables : {eleve} {parent} {classe} {date} {horaire} {debut} {arrivee} {minutes} {centre} {tel_centre}. Laisser vide pour le modèle par défaut.</p>' +
       '<label class="champ"><span>Absence</span><textarea name="msg_absence" rows="3" placeholder="' + esc(MODELES.absence) + '">' + n('msg_absence') + '</textarea></label>' +
       '<label class="champ"><span>Retard</span><textarea name="msg_retard" rows="3" placeholder="' + esc(MODELES.retard) + '">' + n('msg_retard') + '</textarea></label>' +
+      '<label class="champ"><span>Relance d\'impayé</span><textarea name="msg_relance" rows="3" placeholder="Variables : {parent} {eleve} {classe} {montant} {mois} {jour} {centre} {tel_centre}">' + n('msg_relance') + '</textarea></label>' +
+      '<label class="champ"><span>Accusé de réception d\'un versement</span><textarea name="msg_recu" rows="3" placeholder="Variables : {parent} {eleve} {classe} {montant} {numero} {date} {couvre} {reste} {centre}">' + n('msg_recu') + '</textarea></label>' +
+      '<h3>Option d\'inscription</h3><div class="deux"><label class="champ"><span>Montant (F)</span><input type="number" name="inscription_option" min="0" value="' + (Number(c.inscription_option) || '') + '" placeholder="aucune"></label>' +
+      '<label class="champ"><span>Libellé</span><input type="text" name="inscription_option_libelle" value="' + n('inscription_option_libelle') + '" placeholder="avec Mon cahier de français"></label></div>' +
       '<div class="actions"><button class="btn" type="submit">Enregistrer</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
   }
 
@@ -1736,6 +2190,49 @@
         : { statut: 'absent', motif: '' };
       pointer(x, el.dataset.eleve, champs).then(rendre);
     },
+    'caisse-centre': function (el) { CAI.centre = el.dataset.v; rendre(); },
+    'caisse-onglet': function (el) { CAI.onglet = el.dataset.v; if (location.hash !== '#/caisse') location.hash = '#/caisse'; else rendre(); },
+    'caisse-date': function (el) { CAI.date = decalerJour(CAI.date, +el.dataset.v); rendre(); },
+    encaisser: function (el) { feuillePaiement(el.dataset.id); },
+    'montant-rapide': function (el) { var i = $('#montant-paiement'); if (i) { i.value = el.dataset.v; i.focus(); } },
+    'voir-recu': function (el) { feuilleRecu(el.dataset.id); },
+    'partager-recu': function (el) {
+      var p = ligne('paiements', el.dataset.id);
+      fichierRecu(p, el.dataset.v).then(function (f) {
+        E.cache.dernierExport = f;
+        return partagerFichiers([f], 'Reçu n° ' + p.numero).then(function () { return muter('paiements', p.id, { envoye_le: maintenantSql() + ' partage' }); });
+      }).catch(function (e) { toast('Export impossible : ' + (e && e.message), true); });
+    },
+    'envoyer-recu': function (el) {
+      window.open(el.getAttribute('href'), '_blank', 'noopener');
+      muter('paiements', el.dataset.id, { envoye_le: maintenantSql() + ' ' + el.dataset.canal });
+    },
+    'annuler-versement': function (el) {
+      var p = ligne('paiements', el.dataset.id);
+      ouvrirFeuille('<h2>Annuler le versement</h2><p>' + fcfa(p.montant) + ' · reçu n° ' + esc(p.numero || '') + '</p><p class="doux">Le versement reste visible, barré, avec le motif et votre nom.</p>' +
+        '<form data-f="annulation" data-id="' + esc(p.id) + '"><label class="champ"><span>Motif</span><input type="text" name="motif" required minlength="5" placeholder="ex. : erreur de montant, doublon"></label>' +
+        '<div class="actions"><button class="btn danger" type="submit">Annuler le versement</button><button class="btn clair" type="button" data-a="fermer">Retour</button></div></form>');
+    },
+    relancer: function (el) {
+      var href = el.getAttribute('href');
+      if (el.dataset.canal === 'whatsapp') window.open(href, '_blank', 'noopener'); else location.href = href;
+      muter('eleves', el.dataset.id, { relance_le: maintenantSql() + ' ' + el.dataset.canal }).then(rendre);
+    },
+    'voir-depense': function (el) { feuilleDepense(el.dataset.id); },
+    'editer-depense': function (el) { feuilleDepense(el.dataset.id); },
+    'valider-depense': function (el) { fermerFeuille(); muter('depenses', el.dataset.id, { statut: 'validee' }).then(function () { toast('Dépense validée.'); rendre(); }); },
+    'refuser-depense': function (el) {
+      ouvrirFeuille('<h2>Refuser la dépense</h2><form data-f="refus" data-id="' + esc(el.dataset.id) + '"><label class="champ"><span>Motif</span><input type="text" name="motif" required></label>' +
+        '<div class="actions"><button class="btn danger" type="submit">Refuser</button><button class="btn clair" type="button" data-a="fermer">Retour</button></div></form>');
+    },
+    'suppr-depense': function (el) { confirmer('Retirer cette dépense ?', 'Retirer', function () { muter('depenses', el.dataset.id, {}, true).then(rendre); }); },
+    'bilan-mois': function (el) {
+      var v = el.dataset.v;
+      if (v === 'annee') BIL.mois = 'annee';
+      else if (v === 'mois') BIL.mois = '';
+      else { var d = new Date(BIL.mois + '-15T12:00:00'); d.setMonth(d.getMonth() + Number(v)); BIL.mois = isoLocal(d).slice(0, 7); }
+      rendre();
+    },
     'ouvrir-export': function () { feuilleExport(E.cache.pointage); },
     export: function (el) {
       var x = E.cache.pointage;
@@ -1805,7 +2302,7 @@
     'statut-eleve': function (el) {
       var e = ligne('eleves', el.dataset.id);
       var v = el.dataset.v;
-      var faire = function () { muter('eleves', e.id, { statut: v }).then(function () { toast(v === 'actif' ? 'Élève réinscrit.' : 'Élève retiré des effectifs.'); rendre(); }); };
+      var faire = function () { muter('eleves', e.id, { statut: v, date_depart: v === 'parti' ? isoLocal(new Date()) : '' }).then(function () { toast(v === 'actif' ? 'Élève réinscrit.' : 'Élève retiré des effectifs.'); rendre(); }); };
       if (v === 'parti') confirmer(nomComplet(e) + ' a quitté le centre ? Sa fiche est conservée (historique, paiements).', 'Confirmer', faire);
       else { fermerFeuille(); faire(); }
     },
@@ -1907,6 +2404,7 @@
       var champs = {
         nom: v.nom, nom_court: v.nom_court, adresse: v.adresse, telephones: v.telephones, devise: v.devise,
         tolerance_retard_min: +v.tolerance_retard_min, jour_echeance: +v.jour_echeance, msg_absence: v.msg_absence, msg_retard: v.msg_retard,
+        msg_relance: v.msg_relance, msg_recu: v.msg_recu, inscription_option: Number(v.inscription_option) || 0, inscription_option_libelle: v.inscription_option_libelle,
         alerte_appel_min: +v.alerte_appel_min, alerte_direction_min: +v.alerte_direction_min
       };
       if (!form.dataset.id) champs.ordre = lignes('centres').length + 1;
@@ -1968,6 +2466,8 @@
         parent_nom: v.parent_nom, parent_lien: v.parent_lien, parent2_nom: v.parent2_nom, observations: v.observations,
         matieres: Array.prototype.map.call(form.querySelectorAll('input[name=matiere]:checked'), function (i) { return i.value; }).join(',')
       };
+      if (v.inscription_due !== undefined) champs.inscription_due = Number(v.inscription_due) || 0;
+      if (v.mensualite_due !== undefined) { champs.mensualite_due = Number(v.mensualite_due) || 0; champs.remise_motif = v.remise_motif; }
       var erreurTel = '';
       ['tel_eleve', 'parent_tel', 'parent_whatsapp', 'parent2_tel'].forEach(function (k) {
         var t = telNormal(v[k]);
@@ -2003,6 +2503,35 @@
         });
       });
       suite.then(function () { ELV.classe = classe; toast(l.length + ' élève' + (l.length > 1 ? 's' : '') + ' inscrit' + (l.length > 1 ? 's' : '') + '.'); rendre(); });
+    },
+    paiement: function (form) {
+      var v = valeurs(form);
+      var montant = Math.round(Number(v.montant));
+      if (!(montant > 0)) { toast('Montant invalide.', true); return; }
+      var e = ligne('eleves', form.dataset.eleve);
+      var id = 'pa' + nouvelId();
+      fermerFeuille();
+      muter('paiements', id, { centre_id: e.centre_id, eleve_id: e.id, montant: montant, date: v.date || isoLocal(new Date()), mode: v.mode, reference: v.reference || '', note: v.note || '' })
+        .then(function () { toast(fcfa(montant) + ' encaissés.'); rendre(); return synchroniser(); })
+        .then(function () { feuilleRecu(id); });
+    },
+    annulation: function (form) {
+      var v = valeurs(form);
+      fermerFeuille();
+      muter('paiements', form.dataset.id, { annule: 1, motif_annulation: v.motif }).then(function () { toast('Versement annulé.'); rendre(); });
+    },
+    depense: function (form) {
+      var v = valeurs(form);
+      var id = form.dataset.id || 'de' + nouvelId();
+      var champs = { centre_id: form.dataset.centre, libelle: v.libelle, montant: Math.round(Number(v.montant)), date: v.date, categorie: v.categorie, mode: v.mode, beneficiaire: v.beneficiaire };
+      if (!form.dataset.id) champs.statut = 'en_attente';
+      fermerFeuille();
+      muter('depenses', id, champs).then(function () { toast('Dépense enregistrée : en attente de validation.'); rendre(); });
+    },
+    refus: function (form) {
+      var v = valeurs(form);
+      fermerFeuille();
+      muter('depenses', form.dataset.id, { statut: 'refusee', motif_refus: v.motif }).then(function () { toast('Dépense refusée.'); rendre(); });
     },
     presence: function (form) {
       var x = E.cache.pointage;
@@ -2054,6 +2583,7 @@
       var v = valeurs(form);
       var id = form.dataset.id || nouvelId();
       var champs = { centre_id: form.dataset.centre, nom: v.nom, niveau: v.niveau };
+      if (v.inscription !== undefined) { champs.inscription = Number(v.inscription) || 0; champs.mensualite = Number(v.mensualite) || 0; }
       if (!form.dataset.id) champs.ordre = lignes('classes').filter(function (k) { return k.centre_id === form.dataset.centre; }).length + 1;
       fermerFeuille();
       muter('classes', id, champs).then(function () { toast('Classe enregistrée.'); rendre(); });
@@ -2099,6 +2629,7 @@
     if (f && FORMULAIRES[f.dataset.f]) { ev.preventDefault(); FORMULAIRES[f.dataset.f](f); }
   });
   document.addEventListener('change', function (ev) {
+    if (ev.target.dataset && ev.target.dataset.change === 'mode-paiement') { var c = $('#champ-reference'); if (c) c.hidden = !/^(momo|om|virement)$/.test(ev.target.value); return; }
     if (ev.target.dataset && ev.target.dataset.change === 'eleves-tous') { ELV.tous = ev.target.checked; dessinerListeEleves(); return; }
     if (ev.target.dataset && ev.target.dataset.change === 'emploi-filtre') { EMP.filtre = ev.target.value; rendre(); return; }
     if (ev.target.dataset && ev.target.dataset.change === 'creneau-matiere') {
@@ -2117,6 +2648,7 @@
     var k = ev.target.dataset && ev.target.dataset.input;
     if (k === 'recherche-eleve') { ELV.q = ev.target.value; dessinerListeEleves(); }
     if (k === 'apercu-import') apercuImport(ev.target.form);
+    if (k === 'recherche-caisse') { CAI.q = ev.target.value; dessinerRechercheCaisse(); }
   });
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !$('#feuille').hidden) fermerFeuille(); });
   window.addEventListener('hashchange', function () { fermerFeuille(); rendre(); window.scrollTo(0, 0); });

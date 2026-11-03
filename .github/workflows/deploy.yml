@@ -1633,7 +1633,7 @@ jobs:
               exit 1
             fi
             mkdir -p deploy/gestion/api/data deploy/gestion/polices
-            for f in index.html app.css app.js sw.js manifest.webmanifest icone-512.png .htaccess; do
+            for f in index.html app.css app.js sw.js manifest.webmanifest icone-512.png logo.png .htaccess; do
               cp "gestion/$f" deploy/gestion/
             done
             cp gestion/polices/*.woff2 deploy/gestion/polices/

@@ -46,14 +46,18 @@ if ($action === 'installer') {
                 'nom' => 'VÉRITAS Ndog-passi III', 'court' => 'Ndog-passi III',
                 'adresse' => 'École primaire bilingue Grace land, à côté du Lycée de Nylon Ndogpassi',
                 'tel' => '656720476 / 671469236 / 699073755 / 652967855',
-                'classes' => [['Troisième', '3e'], ['Première', '1ère'], ['Terminale', 'Tle']],
+                // Tarifs de l'affiche 2026-2027 : [nom, niveau, inscription, mensualité].
+                'classes' => [['Troisième', '3e', 2500, 5500], ['Première', '1ère', 2500, 7500], ['Terminale', 'Tle', 2500, 8500]],
+                'option' => [4000, 'avec Mon cahier de français'],
                 'horaires' => [[2, '16:00', '18:00', ''], [3, '14:30', '18:00', ''], [4, '16:00', '18:00', ''], [6, '08:00', '12:00', '']],
             ],
             [
                 'nom' => 'VÉRITAS Ndog-passi II', 'court' => 'Ndog-passi II',
                 'adresse' => 'École primaire Germinal, à côté de l\'école Henri Dumont (derrière le commissariat du 14e)',
                 'tel' => '656720476 / 697637739 / 671469236',
-                'classes' => [['3ème', '3e'], ['Première A4', '1ère'], ['Terminale A4', 'Tle'], ['Première CD', '1ère'], ['Terminale CD', 'Tle']],
+                'classes' => [['3ème', '3e', 2000, 5000], ['Première A4', '1ère', 2000, 6000], ['Terminale A4', 'Tle', 2000, 7000],
+                              ['Première CD', '1ère', 2000, 7000], ['Terminale CD', 'Tle', 2000, 8000]],
+                'option' => [0, ''],
                 'horaires' => [
                     [1, '16:00', '18:00', '1ère,Tle'], [3, '16:00', '18:00', '1ère,Tle'], [5, '16:00', '18:00', '1ère,Tle'],
                     [6, '14:00', '18:00', '1ère,Tle'], [7, '13:00', '17:00', '1ère,Tle'],
@@ -61,13 +65,13 @@ if ($action === 'installer') {
                 ],
             ],
         ];
-        $insC = $pdo->prepare('INSERT INTO g_centres (id, nom, nom_court, adresse, telephones, devise, ordre, rev, maj_le) VALUES (?,?,?,?,?,?,?,?,?)');
-        $insK = $pdo->prepare('INSERT INTO g_classes (id, centre_id, nom, niveau, ordre, rev, maj_le) VALUES (?,?,?,?,?,?,?)');
+        $insC = $pdo->prepare('INSERT INTO g_centres (id, nom, nom_court, adresse, telephones, devise, ordre, inscription_option, inscription_option_libelle, rev, maj_le) VALUES (?,?,?,?,?,?,?,?,?,?,?)');
+        $insK = $pdo->prepare('INSERT INTO g_classes (id, centre_id, nom, niveau, ordre, inscription, mensualite, rev, maj_le) VALUES (?,?,?,?,?,?,?,?,?)');
         $insH = $pdo->prepare('INSERT INTO g_horaires (id, centre_id, jour, debut, fin, niveaux, rev, maj_le) VALUES (?,?,?,?,?,?,?,?)');
         foreach ($centres as $i => $c) {
             $cid = g_id();
-            $insC->execute([$cid, $c['nom'], $c['court'], $c['adresse'], $c['tel'], 'Discipline - Constance - Rigueur - Succès', $i + 1, g_rev(), g_now()]);
-            foreach ($c['classes'] as $j => $k) { $insK->execute([g_id(), $cid, $k[0], $k[1], $j + 1, g_rev(), g_now()]); }
+            $insC->execute([$cid, $c['nom'], $c['court'], $c['adresse'], $c['tel'], 'Discipline - Constance - Rigueur - Succès', $i + 1, $c['option'][0], $c['option'][1], g_rev(), g_now()]);
+            foreach ($c['classes'] as $j => $k) { $insK->execute([g_id(), $cid, $k[0], $k[1], $j + 1, $k[2], $k[3], g_rev(), g_now()]); }
             foreach ($c['horaires'] as $h) { $insH->execute([g_id(), $cid, $h[0], $h[1], $h[2], $h[3], g_rev(), g_now()]); }
         }
         $rapport['centres_crees'] = count($centres);

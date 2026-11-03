@@ -392,6 +392,8 @@ case 'sync/pousser': {
                 $pdo->prepare('UPDATE ' . $r['table'] . ' SET ' . $set . ' WHERE id = ?')->execute([...array_values($maj), $id]);
             } elseif (!$suppr) {
                 if ($r['table'] === 'g_eleves') { $champs = g_completer_eleve($pdo, $champs); }
+                if ($r['table'] === 'g_paiements') { $champs = g_completer_paiement($pdo, $champs, $ctx); }
+                if ($r['table'] === 'g_depenses') { $champs['saisie_par'] = $ctx['uid']; }
                 $ins = ['id' => $id] + $champs + $meta;
                 $pdo->prepare('INSERT INTO ' . $r['table'] . ' (' . implode(', ', array_keys($ins)) . ') VALUES ('
                     . implode(',', array_fill(0, count($ins), '?')) . ')')->execute(array_values($ins));
@@ -520,6 +522,89 @@ function g_valider_appel(PDO $pdo, string $table, string $id, ?array $existant, 
 }
 
 /**
+ * Finances.
+ *  Paiement : création seulement (montant > 0, élève du centre, date ≤ aujourd'hui,
+ *  au plus 2 jours en arrière sauf responsable) ; ensuite une seule écriture
+ *  possible : l'ANNULATION motivée par un responsable — ou la trace d'envoi du reçu.
+ *  Dépense : « en attente » à la saisie ; validée ou refusée par un responsable
+ *  (jamais sa propre dépense) ou l'admin ; figée une fois validée.
+ */
+function g_valider_finances(PDO $pdo, string $table, string $id, ?array $existant, array &$champs): void {
+    $ctx = $GLOBALS['g_ctx'] ?? null;
+    $val = fn(string $c) => array_key_exists($c, $champs) ? $champs[$c] : ($existant[$c] ?? null);
+    $centre = (string) $val('centre_id');
+    $role = $ctx && !$ctx['admin'] ? ($ctx['acces'][$centre] ?? '') : 'admin';
+    $correcteur = in_array($role, ['admin', 'responsable'], true);
+    $modes = ['especes', 'momo', 'om', 'virement', 'autre'];
+
+    if ($table === 'g_paiements') {
+        if ($existant) {
+            $cles = array_keys($champs);
+            if (!array_diff($cles, ['envoye_le'])) {
+                if (!preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} (whatsapp|sms|partage)$/', (string) $champs['envoye_le'])) { throw new DomainException('Trace d\'envoi invalide.'); }
+                return;
+            }
+            if (array_diff($cles, ['annule', 'motif_annulation']) || (int) ($champs['annule'] ?? 0) !== 1) {
+                throw new DomainException('Un versement ne se modifie pas : annulez-le (avec un motif) et saisissez-le à nouveau.');
+            }
+            if ((int) $existant['annule'] === 1) { throw new DomainException('Versement déjà annulé.'); }
+            if (!$correcteur) { throw new DomainException('Seul un responsable peut annuler un versement.'); }
+            if (mb_strlen(trim((string) ($champs['motif_annulation'] ?? ''))) < 5) { throw new DomainException('Indiquez le motif de l\'annulation.'); }
+            $champs['annule_par'] = $ctx['uid'] ?? null;
+            return;
+        }
+        $montant = (int) $val('montant');
+        if ($montant <= 0 || $montant > 10000000) { throw new DomainException('Montant invalide.'); }
+        if (!in_array((string) $val('mode'), $modes, true)) { throw new DomainException('Mode de paiement inconnu.'); }
+        $date = (string) $val('date');
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || $date > date('Y-m-d')) { throw new DomainException('Date de versement invalide.'); }
+        if ($date < date('Y-m-d', strtotime('-2 days')) && !$correcteur) { throw new DomainException('Versement de plus de 2 jours : seul un responsable peut le saisir.'); }
+        $st = $pdo->prepare('SELECT COUNT(*) FROM g_eleves WHERE id = ? AND centre_id = ? AND supprime = 0');
+        $st->execute([(string) $val('eleve_id'), $centre]);
+        if (!(int) $st->fetchColumn()) { throw new DomainException('Élève inconnu dans ce centre.'); }
+        if ((int) ($champs['annule'] ?? 0)) { throw new DomainException('Un versement naît valide.'); }
+        unset($champs['annule'], $champs['motif_annulation'], $champs['envoye_le']);
+        return;
+    }
+
+    // ── Dépense ──
+    $montant = (int) $val('montant');
+    if ($montant <= 0 || $montant > 50000000) { throw new DomainException('Montant invalide.'); }
+    if (trim((string) $val('libelle')) === '') { throw new DomainException('Libellé obligatoire.'); }
+    if (!in_array((string) $val('categorie'), ['loyer', 'salaires', 'fournitures', 'electricite', 'transport', 'communication', 'autre'], true)) { throw new DomainException('Catégorie inconnue.'); }
+    if (!in_array((string) ($val('mode') ?: 'especes'), $modes, true)) { throw new DomainException('Mode de paiement inconnu.'); }
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $val('date')) || $val('date') > date('Y-m-d')) { throw new DomainException('Date invalide.'); }
+    $statut = (string) ($val('statut') ?: 'en_attente');
+    if (!in_array($statut, ['en_attente', 'validee', 'refusee'], true)) { throw new DomainException('Statut inconnu.'); }
+    $avant = $existant ? (string) $existant['statut'] : '';
+    if ($avant === 'validee') { throw new DomainException('Dépense validée : elle ne se modifie plus.'); }
+    if ($statut !== 'en_attente' && $statut !== $avant) {
+        $auteur = $existant ? (string) $existant['saisie_par'] : (string) ($ctx['uid'] ?? '');
+        if ($role !== 'admin' && !($role === 'responsable' && $auteur !== ($ctx['uid'] ?? ''))) {
+            throw new DomainException('La validation revient à un responsable (pas l\'auteur de la dépense) ou à l\'administrateur.');
+        }
+        if ($statut === 'refusee' && trim((string) $val('motif_refus')) === '') { throw new DomainException('Indiquez le motif du refus.'); }
+        $champs['valide_par'] = $ctx['uid'] ?? null;
+        $champs['valide_le'] = g_now();
+    }
+    $champs['statut'] = $statut;
+}
+
+/** Nouveau versement : numéro de reçu « AAAA-NNNN » par centre, encaissé par l'auteur. Appelé DANS la transaction. */
+function g_completer_paiement(PDO $pdo, array $champs, array $ctx): array {
+    $libelle = (string) ($pdo->query("SELECT libelle FROM g_annees WHERE active = 1 AND supprime = 0 ORDER BY debut DESC LIMIT 1")->fetchColumn() ?: '');
+    $prefixe = preg_match('/^\d{2}(\d{2})-\d{2}(\d{2})$/', $libelle, $m) ? $m[1] . $m[2] : date('y') . date('y', strtotime('+1 year'));
+    $st = $pdo->prepare('SELECT numero FROM g_paiements WHERE centre_id = ? AND numero LIKE ?');
+    $st->execute([(string) $champs['centre_id'], $prefixe . '-%']);
+    $max = 0;
+    foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $n) { $max = max($max, (int) substr((string) $n, 5)); }
+    $champs['numero'] = $prefixe . '-' . str_pad((string) ($max + 1), 4, '0', STR_PAD_LEFT);
+    $champs['encaisse_par'] = $ctx['uid'];
+    $champs['annule'] = 0;
+    return $champs;
+}
+
+/**
  * Nouvel élève : matricule « AAAA-NNNN » (année scolaire en cours, séquence par
  * centre), date d'inscription et statut par défaut. Appelé DANS la transaction.
  */
@@ -544,6 +629,8 @@ function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, 
     if ($suppr) {
         // Effacer un pointage ou une feuille d'appel : responsable ou admin seulement
         // (sinon une absence gênante disparaîtrait sans laisser de correction motivée).
+        if ($table === 'g_paiements') { throw new DomainException('Un versement ne se supprime pas : annulez-le avec un motif.'); }
+        if ($table === 'g_depenses' && ($existant['statut'] ?? '') !== 'en_attente') { throw new DomainException('Seule une dépense en attente peut être retirée.'); }
         if ($table === 'g_seances' || $table === 'g_presences') {
             $ctx = $GLOBALS['g_ctx'] ?? null;
             $role = $ctx && !$ctx['admin'] ? ($ctx['acces'][(string) ($existant['centre_id'] ?? '')] ?? '') : 'admin';
@@ -569,6 +656,25 @@ function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, 
             $champs[$c] = $t;
         }
         if (!in_array((string) $val('sexe'), ['', 'F', 'M'], true)) { throw new DomainException('Sexe : F ou M.'); }
+        // Tarif particulier : une remise est une décision du responsable. La secrétaire peut
+        // seulement choisir l'option d'inscription prévue par le centre (ex. 4 000 F avec le cahier).
+        foreach (['inscription_due', 'mensualite_due'] as $c) {
+            if (!array_key_exists($c, $champs) || (int) $champs[$c] === (int) ($existant[$c] ?? 0)) { continue; }
+            $v = (int) $champs[$c];
+            if ($v < 0 || $v > 1000000) { throw new DomainException('Tarif particulier invalide.'); }
+            $ctx = $GLOBALS['g_ctx'] ?? null;
+            $role = $ctx && !$ctx['admin'] ? ($ctx['acces'][(string) $val('centre_id')] ?? '') : 'admin';
+            if (in_array($role, ['admin', 'responsable'], true) || $v === 0) { continue; }
+            $st = $pdo->prepare('SELECT inscription_option FROM g_centres WHERE id = ?');
+            $st->execute([(string) $val('centre_id')]);
+            $option = (int) $st->fetchColumn();
+            if (!($c === 'inscription_due' && $option > 0 && $v === $option)) {
+                throw new DomainException('Une remise ou un tarif particulier se décide par le responsable.');
+            }
+        }
+        if ((string) ($champs['relance_le'] ?? '') !== '' && !preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} (whatsapp|sms)$/', (string) $champs['relance_le'])) {
+            throw new DomainException('Trace de relance invalide.');
+        }
         if (!in_array((string) ($val('statut') ?: 'actif'), ['actif', 'suspendu', 'parti'], true)) { throw new DomainException('Statut inconnu.'); }
         $centre = (string) $val('centre_id');
         if ((string) $val('classe_id') !== '') {
@@ -594,6 +700,18 @@ function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, 
         }
     }
     if ($table === 'g_seances' || $table === 'g_presences') { g_valider_appel($pdo, $table, $id, $existant, $champs); return; }
+    if ($table === 'g_paiements' || $table === 'g_depenses') { g_valider_finances($pdo, $table, $id, $existant, $champs); return; }
+    // Tarifs d'une classe : responsable ou admin (un actionnaire tient l'emploi du temps, pas les prix).
+    if ($table === 'g_classes' && (array_key_exists('inscription', $champs) || array_key_exists('mensualite', $champs))) {
+        $ctx = $GLOBALS['g_ctx'] ?? null;
+        $role = $ctx && !$ctx['admin'] ? ($ctx['acces'][(string) $val('centre_id')] ?? '') : 'admin';
+        $change = !$existant || (int) ($champs['inscription'] ?? $existant['inscription']) !== (int) $existant['inscription']
+            || (int) ($champs['mensualite'] ?? $existant['mensualite']) !== (int) $existant['mensualite'];
+        if ($change && !in_array($role, ['admin', 'responsable'], true)) { throw new DomainException('Seul un responsable fixe les tarifs.'); }
+        foreach (['inscription', 'mensualite'] as $c) {
+            if (array_key_exists($c, $champs) && ((int) $champs[$c] < 0 || (int) $champs[$c] > 1000000)) { throw new DomainException('Tarif invalide.'); }
+        }
+    }
     if ($table === 'g_horaires') {
         $jour = (int) $val('jour');
         $debut = (string) $val('debut');

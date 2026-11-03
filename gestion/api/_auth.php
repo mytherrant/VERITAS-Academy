@@ -19,11 +19,11 @@ const G_ROLES = ['responsable', 'actionnaire', 'secretaire', 'enseignant'];
 /** Capacités par rôle de centre. L'admin global a tout, partout. */
 function g_capacites(): array {
     return [
-        'responsable' => ['centre.voir', 'eleves.gerer', 'appel.faire', 'paiements.encaisser', 'finances.voir',
-                          'depenses.saisir', 'enseignants.gerer', 'comptes.gerer', 'journal.voir', 'stats.voir', 'emploi.gerer'],
+        'responsable' => ['centre.voir', 'eleves.gerer', 'appel.faire', 'paiements.encaisser', 'paiements.voir', 'finances.voir',
+                          'depenses.saisir', 'depenses.voir', 'enseignants.gerer', 'comptes.gerer', 'journal.voir', 'stats.voir', 'emploi.gerer'],
         // Demande de Jacques (02/11/2026) : les actionnaires tiennent l'emploi du temps de leur centre.
-        'actionnaire' => ['centre.voir', 'finances.voir', 'stats.voir', 'emploi.gerer'],
-        'secretaire'  => ['centre.voir', 'eleves.gerer', 'appel.faire', 'paiements.encaisser', 'depenses.saisir'],
+        'actionnaire' => ['centre.voir', 'finances.voir', 'paiements.voir', 'depenses.voir', 'stats.voir', 'emploi.gerer'],
+        'secretaire'  => ['centre.voir', 'eleves.gerer', 'appel.faire', 'paiements.encaisser', 'paiements.voir', 'depenses.saisir', 'depenses.voir'],
         'enseignant'  => ['centre.voir', 'appel.faire'],
     ];
 }

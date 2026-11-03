@@ -30,7 +30,9 @@ function g_schema(): array {
             'ordre' => 'int',
             // Modèles des messages aux parents ({eleve}, {parent}, {classe}, {date}, {horaire},
             // {debut}, {arrivee}, {minutes}, {centre}, {tel_centre}). Vide = modèle par défaut.
-            'msg_absence' => 'text', 'msg_retard' => 'text',
+            'msg_absence' => 'text', 'msg_retard' => 'text', 'msg_relance' => 'text', 'msg_recu' => 'text',
+            // Grace land : « Inscription 2 500 / 4 000 F avec Mon cahier de français » (0 = pas d'option).
+            'inscription_option' => 'int', 'inscription_option_libelle' => 'str:120',
         ] + G_COLS_SYNC, 'index' => [['rev']]],
 
         'g_annees' => ['cols' => [
@@ -74,6 +76,7 @@ function g_schema(): array {
 
         'g_classes' => ['cols' => [
             'id' => 'id', 'centre_id' => 'ref', 'nom' => 'str:60', 'niveau' => 'str:40', 'ordre' => 'int',
+            'inscription' => 'int', 'mensualite' => 'int',      // FCFA ; fixés par le responsable ou l'admin
         ] + G_COLS_SYNC, 'index' => [['centre_id'], ['rev']]],
 
         // Jours et horaires d'ouverture des cours. niveaux vide = tous les niveaux qui
@@ -99,6 +102,9 @@ function g_schema(): array {
             'parent2_nom' => 'str:120', 'parent2_tel' => 'str:20',
             'date_inscription' => 'str:10', 'statut' => 'str:12', 'observations' => 'text',
             'doublon_ok' => 'int',              // homonyme confirmé (frères et sœurs, vrais homonymes)
+            // Tarif particulier (0 = celui de la classe) et suivi des relances.
+            'inscription_due' => 'int', 'mensualite_due' => 'int', 'remise_motif' => 'str:120',
+            'date_depart' => 'str:10', 'relance_le' => 'str:40'
         ] + G_COLS_SYNC, 'index' => [['centre_id'], ['rev'], ['classe_id']]],
 
         // Appel : une feuille par classe et par jour (id déterministe « sa » + AAAAMMJJ + classe,
@@ -116,6 +122,22 @@ function g_schema(): array {
             'statut' => 'str:10', 'arrivee' => 'str:5', 'depart' => 'str:5', 'retard_min' => 'int', 'motif' => 'str:200',
             'notifie' => 'str:40',              // « AAAA-MM-JJ HH:MM:SS whatsapp|sms » : message préparé au parent
         ] + G_COLS_SYNC, 'index' => [['seance_id'], ['eleve_id'], ['centre_id', 'date'], ['rev']], 'unique' => [['seance_id', 'eleve_id']]],
+
+        // Versements : jamais modifiés ni supprimés. Le numéro de reçu est posé par le
+        // SERVEUR (séquence par centre et par année) ; une erreur s'annule, avec un motif.
+        'g_paiements' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'eleve_id' => 'ref', 'numero' => 'str:20', 'montant' => 'int',
+            'date' => 'str:10', 'mode' => 'str:12', 'reference' => 'str:60', 'note' => 'str:200',
+            'encaisse_par' => 'ref', 'annule' => 'int', 'motif_annulation' => 'str:200', 'annule_par' => 'ref',
+            'envoye_le' => 'str:40',            // reçu envoyé au parent (« AAAA-MM-JJ HH:MM:SS canal »)
+        ] + G_COLS_SYNC, 'index' => [['centre_id', 'date'], ['eleve_id'], ['rev']]],
+
+        // Dépenses : saisies par le centre, validées par un responsable (pas le sien) ou l'admin.
+        'g_depenses' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'date' => 'str:10', 'libelle' => 'str:160', 'categorie' => 'str:20',
+            'montant' => 'int', 'mode' => 'str:12', 'beneficiaire' => 'str:120', 'statut' => 'str:12',
+            'saisie_par' => 'ref', 'valide_par' => 'ref', 'valide_le' => 'str:19', 'motif_refus' => 'str:200',
+        ] + G_COLS_SYNC, 'index' => [['centre_id', 'date'], ['rev']]],
 
         // Opérations déjà appliquées : un envoi répété (réseau coupé au mauvais
         // moment) n'est jamais appliqué deux fois.
@@ -137,7 +159,8 @@ function g_registre(): array {
         'centres' => [
             'table' => 'g_centres', 'portee' => 'id', 'lire' => 'centre.voir', 'ecrire' => 'admin',
             'champs' => ['nom', 'nom_court', 'adresse', 'telephones', 'devise', 'tolerance_retard_min',
-                         'alerte_appel_min', 'alerte_direction_min', 'jour_echeance', 'ordre', 'msg_absence', 'msg_retard'],
+                         'alerte_appel_min', 'alerte_direction_min', 'jour_echeance', 'ordre', 'msg_absence', 'msg_retard',
+                         'msg_relance', 'msg_recu', 'inscription_option', 'inscription_option_libelle'],
         ],
         'annees' => [
             'table' => 'g_annees', 'portee' => null, 'lire' => 'tous', 'ecrire' => 'admin',
@@ -149,7 +172,7 @@ function g_registre(): array {
         ],
         'classes' => [
             'table' => 'g_classes', 'portee' => 'centre_id', 'lire' => 'centre.voir', 'ecrire' => 'emploi.gerer',
-            'champs' => ['centre_id', 'nom', 'niveau', 'ordre'],
+            'champs' => ['centre_id', 'nom', 'niveau', 'ordre', 'inscription', 'mensualite'],
         ],
         'horaires' => [
             'table' => 'g_horaires', 'portee' => 'centre_id', 'lire' => 'centre.voir', 'ecrire' => 'emploi.gerer',
@@ -163,7 +186,8 @@ function g_registre(): array {
             'table' => 'g_eleves', 'portee' => 'centre_id', 'lire' => 'centre.voir', 'ecrire' => 'eleves.gerer',
             'champs' => ['centre_id', 'classe_id', 'nom', 'prenoms', 'sexe', 'date_naissance', 'etablissement', 'matieres',
                          'tel_eleve', 'quartier', 'parent_nom', 'parent_lien', 'parent_tel', 'parent_whatsapp', 'parent2_nom',
-                         'parent2_tel', 'date_inscription', 'statut', 'observations', 'doublon_ok'],
+                         'parent2_tel', 'date_inscription', 'statut', 'observations', 'doublon_ok',
+                         'inscription_due', 'mensualite_due', 'remise_motif', 'date_depart', 'relance_le'],
         ],
         'seances' => [
             'table' => 'g_seances', 'portee' => 'centre_id', 'lire' => 'centre.voir', 'ecrire' => 'appel.faire',
@@ -172,6 +196,14 @@ function g_registre(): array {
         'presences' => [
             'table' => 'g_presences', 'portee' => 'centre_id', 'lire' => 'centre.voir', 'ecrire' => 'appel.faire',
             'champs' => ['centre_id', 'seance_id', 'eleve_id', 'date', 'statut', 'arrivee', 'depart', 'motif', 'notifie'],
+        ],
+        'paiements' => [
+            'table' => 'g_paiements', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'paiements.encaisser',
+            'champs' => ['centre_id', 'eleve_id', 'montant', 'date', 'mode', 'reference', 'note', 'annule', 'motif_annulation', 'envoye_le'],
+        ],
+        'depenses' => [
+            'table' => 'g_depenses', 'portee' => 'centre_id', 'lire' => 'depenses.voir', 'ecrire' => 'depenses.saisir',
+            'champs' => ['centre_id', 'date', 'libelle', 'categorie', 'montant', 'mode', 'beneficiaire', 'statut', 'motif_refus'],
         ],
         'actionnaires' => [
             'table' => 'g_actionnaires', 'portee' => 'centre_id', 'lire' => 'finances.voir', 'ecrire' => 'admin',

@@ -319,3 +319,10 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.45; }
 .ligne.message .boutons { gap: 6px; }
 .ligne.message .boutons .btn { min-height: 38px; }
 @media (max-width: 380px) { .ligne.message .boutons { width: 100%; } .ligne.message .boutons .btn { flex: 1; } }
+
+/* ── Caisse ── */
+.echeancier { display: flex; flex-wrap: wrap; gap: 2px; margin: 8px 0 12px; }
+.apercu-recu { margin: 12px 0; border: 1px solid var(--trait); border-radius: var(--rayon); overflow: hidden; background: #fff; }
+.apercu-recu img { display: block; width: 100%; height: auto; }
+.barre-txt { text-decoration: line-through; color: var(--doux) !important; }
+.ligne .badge.danger { white-space: nowrap; }
