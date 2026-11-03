@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.9.2';
+  var VERSION = '0.9.3';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -523,7 +523,7 @@
     var caisse = peutQuelquePart('paiements.voir');
     items.push(caisse ? ['caisse', 'wallet', 'Caisse'] : ['emploi', 'calendar', 'Planning']);
     items.push(['moi', 'list', 'Plus']);
-    var sousPlus = ['admin', 'comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
+    var sousPlus = ['roles', 'admin', 'comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
     return '<nav class="nav-basse" aria-label="Navigation">' + items.map(function (i) {
       var on = i[0] === actif || (i[0] === 'moi' && sousPlus.indexOf(actif) >= 0) || (i[0] === 'appel' && actif === 'pointage');
       return '<a href="#/' + i[0] + '" class="' + (on ? 'actif' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + ico(i[1]) + i[2] + '</a>';
@@ -574,8 +574,9 @@
         var u = E.profil.utilisateur;
         var auj = new Date();
         var h = '<h1>Bonjour ' + esc(String(u.nom).split(' ')[0]) + '</h1><p class="sous-titre">' +
-          esc(auj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })) + ' · ' +
-          (estAdmin() ? 'administrateur' : centresChoisis().map(function (c) { return ROLES[roleDans(c.id)] || ''; }).filter(Boolean).join(', ')) + '</p>';
+          esc(auj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })) + '</p>' +
+          bandeauEspace() + blocMesCours();
+        if (estEnseignantQuelquePart() && centresChoisis().length) h += '<h2>Mes centres</h2>';
 
         var centres = centresChoisis();
         if (!centres.length) {
@@ -755,6 +756,10 @@
       apres: function () { chargerJournal(false); }
     },
 
+    roles: {
+      html: function () { return pageRoles(); }
+    },
+
     moi: {
       html: function () {
         var u = E.profil.utilisateur;
@@ -763,9 +768,8 @@
           return '<span class="badge">' + esc(ROLES[E.profil.acces[cid]]) + ' · ' + esc(c ? c.nom_court || c.nom : 'centre') + '</span>';
         }).join('');
         var h = '<h1>Mon compte</h1><div class="carte"><h3>' + esc(u.nom) + '</h3><p class="doux">Identifiant : ' + esc(u.identifiant) + '</p><p>' +
-          (u.admin ? '<span class="badge or">Administrateur des deux centres</span>' : '') + acces + '</p>' +
-          ((E.profil.restrictions || []).length ? '<p class="doux">Droits réservés à l\'administrateur : ' + esc(E.profil.restrictions.map(function (k) { return (LIB_CAP[k] || k).toLowerCase(); }).join(', ')) + '.</p>' : '') + '</div>';
-        var liens = [['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']];
+          (u.admin ? '<span class="badge or">Administrateur des deux centres</span>' : '') + acces + '</p></div>' + carteMonRole();
+        var liens = [['#/roles', 'info', 'Rôles et droits', 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']];
         if (peutQuelquePart('finances.voir')) liens.push(['#/bilan', 'chart', 'Bilan financier', 'Recettes, dépenses, parts des actionnaires']);
         if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) liens.push(['#/enseignants', 'graduation', 'Enseignants', 'Heures faites, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) liens.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
@@ -2350,6 +2354,168 @@
     return String(liste || '').split(',').filter(Boolean).map(function (m) { return MOIS[(+m - 1)] || m; }).join(', ') || '—';
   }
 
+  // ───────────────────────────── Espaces et rôles ─────────────────────────────
+  // Quatre espaces, un par famille de rôles : chacun a sa couleur, sa mission et
+  // ses chiffres clés. Le serveur reste seul juge des droits (g_capacites).
+  var ESPACES = {
+    admin: { titre: 'Espace administrateur', ico: 'shield', mission: 'Vous pilotez tous les centres : comptes et identifiants, droits des partenaires, réglages, finances consolidées.' },
+    partenaire: { titre: 'Espace partenaire', ico: 'handshake', mission: 'Vous suivez la marche de votre centre : élèves, caisse, bilan et parts, emploi du temps.' },
+    secretariat: { titre: 'Espace secrétariat', ico: 'clipboard', mission: 'Vous tenez l\'accueil : inscriptions, appel, encaissements et reçus, dépenses du jour.' },
+    enseignant: { titre: 'Espace enseignant', ico: 'graduation', mission: 'Vos cours du jour, l\'appel de vos classes, vos heures et votre rémunération.' }
+  };
+  /** Fiches des rôles : ce que chacun fait, et ce qui lui est fermé. */
+  var FICHES_ROLES = [
+    { cle: 'admin', espace: 'admin', nom: 'Administrateur', famille: 'Direction',
+      resume: 'Le propriétaire de l\'application. Voit et règle tout, dans tous les centres.',
+      peut: ['Créer les comptes et transmettre les identifiants', 'Retirer des droits à un partenaire, désactiver un compte', 'Ouvrir un centre, fixer l\'année, les matières, les tarifs', 'Voir les finances consolidées et le journal complet'],
+      pas: [] },
+    { cle: 'responsable', espace: 'partenaire', nom: 'Responsable', famille: 'Partenaire',
+      resume: 'Dirige un centre au quotidien, avec presque tous les pouvoirs sur ce centre.',
+      peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Fixer les tarifs, valider les dépenses', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants'],
+      pas: ['Les réglages des centres et de l\'année', 'Les comptes responsables, actionnaires et admin'] },
+    { cle: 'actionnaire', espace: 'partenaire', nom: 'Actionnaire', famille: 'Partenaire',
+      resume: 'Associé du centre : consulte les chiffres et tient l\'emploi du temps.',
+      peut: ['Voir le bilan, les versements et les dépenses', 'Voir les statistiques et les parts', 'Modifier l\'emploi du temps de son centre'],
+      pas: ['Encaisser ou inscrire', 'Faire l\'appel', 'Créer des comptes'] },
+    { cle: 'secretaire', espace: 'secretariat', nom: 'Secrétaire / surveillant', famille: 'Équipe',
+      resume: 'Tient l\'accueil et la caisse du centre.',
+      peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Saisir les dépenses (avec photo du justificatif)'],
+      pas: ['Voir le bilan', 'Annuler un versement, accorder une remise', 'Valider une dépense', 'Gérer les enseignants'] },
+    { cle: 'enseignant', espace: 'enseignant', nom: 'Enseignant', famille: 'Équipe',
+      resume: 'Fait l\'appel de ses classes et suit ses heures.',
+      peut: ['Faire l\'appel de ses classes, le jour du cours', 'Voir son emploi du temps', 'Voir ses heures, son contrat et ses paies'],
+      pas: ['Les élèves des autres classes', 'La caisse et les finances', 'Les comptes'] }
+  ];
+  function ficheRole(cle) { return FICHES_ROLES.filter(function (f) { return f.cle === cle; })[0]; }
+  var ORDRE_ROLES = ['responsable', 'actionnaire', 'secretaire', 'enseignant'];
+  /** Rôles du compte, du plus large au plus étroit. */
+  function mesRoles() {
+    var acces = (E.profil && E.profil.acces) || {};
+    var vus = {};
+    Object.keys(acces).forEach(function (c) { vus[acces[c]] = 1; });
+    return ORDRE_ROLES.filter(function (r) { return vus[r]; });
+  }
+  function monEspace() {
+    if (estAdmin()) return 'admin';
+    var r = mesRoles()[0];
+    return r ? ficheRole(r).espace : 'enseignant';
+  }
+  function estEnseignantQuelquePart() { return mesRoles().indexOf('enseignant') >= 0; }
+  /** Cours de l'enseignant connecté un jour donné, tous centres confondus. */
+  function mesCoursDu(iso) {
+    var uid = E.profil.utilisateur.id, j = jourDe(iso);
+    return lignes('creneaux').filter(function (c) { return c.enseignant_id === uid && Number(c.jour) === j; })
+      .sort(function (a, b) { return a.debut < b.debut ? -1 : 1; });
+  }
+
+  function bandeauEspace() {
+    var cle = monEspace(), es = ESPACES[cle];
+    var roles = estAdmin() ? ['Administrateur'] : mesRoles().map(function (r) { return ficheRole(r).nom; });
+    var chiffres = chiffresCles(cle);
+    return '<section class="bandeau-espace espace-' + cle + '"><div class="haut"><span class="pastille">' + ico(es.ico, 'g') + '</span><div>' +
+      '<small>' + esc(roles.join(' · ')) + '</small><h2>' + esc(es.titre) + '</h2></div></div><p>' + esc(es.mission) + '</p>' +
+      (chiffres.length ? '<div class="chiffres-cles">' + chiffres.map(function (c) {
+        return (c[2] ? '<a href="' + c[2] + '">' : '<div>') + '<b>' + c[0] + '</b><small>' + esc(c[1]) + '</small>' + (c[2] ? '</a>' : '</div>');
+      }).join('') + '</div>' : '') +
+      '<a class="lien-roles" href="#/roles">' + ico('info', 'p') + ' Rôles et droits</a></section>';
+  }
+  /** [valeur (HTML sûr), libellé, lien?] selon l'espace. */
+  function chiffresCles(cle) {
+    var auj = isoLocal(new Date()), am = auj.slice(0, 7);
+    var centres = centresChoisis();
+    var out = [];
+    if (cle === 'enseignant') {
+      var cours = mesCoursDu(auj);
+      out.push([String(cours.length), cours.length > 1 ? 'cours aujourd\'hui' : 'cours aujourd\'hui', '#/emploi']);
+      var faites = 0, du = 0, contrat = false;
+      lignes('centres').filter(function (c) { return roleDans(c.id) === 'enseignant'; }).forEach(function (c) {
+        var b = bilanEnseignant(E.profil.utilisateur.id, c.id, am);
+        faites += b.faites; du += b.du; if (b.contrat) contrat = true;
+      });
+      out.push([esc(dureeLisible(faites)), 'faites ce mois', '#/mesheures']);
+      if (contrat) out.push([esc(fcfa(du)), 'dû ce mois', '#/mesheures']);
+      return out;
+    }
+    var eleves = 0, appels = 0, prevus = 0, mois = 0, jour = 0, imp = 0, voitCaisse = false;
+    centres.forEach(function (c) {
+      eleves += elevesActifs(c.id).length;
+      if (peut('appel.faire', c.id) || peut('centre.voir', c.id)) {
+        var p = seancesPrevues(c.id, auj);
+        prevus += p.length; appels += p.filter(function (x) { return etatSeance(x).pointes > 0; }).length;
+      }
+      if (peut('paiements.voir', c.id)) {
+        voitCaisse = true;
+        lignes('paiements').forEach(function (p) {
+          if (p.centre_id !== c.id || Number(p.annule)) return;
+          if (p.date === auj) jour += Number(p.montant) || 0;
+          if (String(p.date).slice(0, 7) === am) mois += Number(p.montant) || 0;
+        });
+        imp += impayes(c.id).length;
+      }
+    });
+    out.push([String(eleves), 'élèves inscrits', '#/eleves']);
+    if (prevus) out.push([appels + '/' + prevus, 'appels du jour', '#/appel']);
+    if (voitCaisse) {
+      out.push(cle === 'secretariat' ? [esc(fcfa(jour)), 'encaissé aujourd\'hui', '#/caisse'] : [esc(fcfa(mois)), 'encaissé ce mois', '#/caisse']);
+      out.push([String(imp), imp > 1 ? 'impayés' : 'impayé', '#/caisse']);
+    }
+    return out;
+  }
+
+  /** Accueil de l'enseignant : ses cours du jour, avec l'accès direct à l'appel. */
+  function blocMesCours() {
+    if (!estEnseignantQuelquePart()) return '';
+    var auj = isoLocal(new Date());
+    var cours = mesCoursDu(auj);
+    var h = '<h2>Mes cours aujourd\'hui</h2>';
+    if (!cours.length) return h + '<div class="carte vide">Pas de cours pour vous aujourd\'hui.</div>';
+    return h + '<div class="liste">' + cours.map(function (c) {
+      var x = { id: idSeance(auj, c.classe_id), centre_id: c.centre_id, classe: ligne('classes', c.classe_id) || { id: c.classe_id } };
+      var fait = etatSeance(x).pointes > 0;
+      var centre = ligne('centres', c.centre_id) || {};
+      return '<a class="ligne creneau" href="#/pointage/' + encodeURIComponent(c.classe_id) + '/' + auj + '"><span class="horaire"><b>' + esc(c.debut) + '</b><small>' + esc(c.fin) + '</small></span>' +
+        '<span class="corps"><b>' + esc(nomDe('classes', c.classe_id) + ' · ' + nomDe('matieres', c.matiere_id)) + '</b><small>' + esc(centre.nom_court || centre.nom || '') + '</small></span>' +
+        (fait ? '<span class="badge ok">appel fait</span>' : '<span class="badge alerte">appel à faire</span>') + '</a>';
+    }).join('') + '</div>';
+  }
+
+  /** « Mon rôle » : ce que le compte peut faire, réellement (droits retirés compris). */
+  function carteMonRole() {
+    var cle = monEspace();
+    var h = '<div class="carte mon-role espace-' + cle + '"><h3>' + ico(ESPACES[cle].ico, 'p') + ' ' + esc(ESPACES[cle].titre) + '</h3>';
+    if (estAdmin()) return h + '<p class="doux">Tous les droits, dans tous les centres.</p></div>';
+    var caps = capsDuCompte(E.profil);
+    var retires = E.profil.restrictions || [];
+    h += '<ul class="droits">' + caps.map(function (k) {
+      var non = retires.indexOf(k) >= 0;
+      return '<li class="' + (non ? 'non' : 'oui') + '">' + ico(non ? 'x' : 'check', 'p') + ' ' + esc(LIB_CAP[k] || k) + (non ? ' <small>(réservé à l\'administrateur)</small>' : '') + '</li>';
+    }).join('') + '</ul></div>';
+    return h;
+  }
+
+  function pageRoles() {
+    var h = '<h1>Rôles et droits</h1><p class="sous-titre">Chaque personne a son compte et son rôle, centre par centre. Le serveur refuse ce que le rôle n\'autorise pas.</p>';
+    var moi = estAdmin() ? ['admin'] : mesRoles();
+    h += '<div class="fiches-roles">' + FICHES_ROLES.map(function (f) {
+      return '<article class="fiche-role espace-' + f.espace + (moi.indexOf(f.cle) >= 0 ? ' a-moi' : '') + '"><div class="haut"><span class="pastille">' + ico(ESPACES[f.espace].ico) + '</span><div><small>' + esc(f.famille) + '</small><h3>' + esc(f.nom) + '</h3></div>' +
+        (moi.indexOf(f.cle) >= 0 ? '<span class="badge or">Vous</span>' : '') + '</div><p>' + esc(f.resume) + '</p>' +
+        '<ul class="droits">' + f.peut.map(function (t) { return '<li class="oui">' + ico('check', 'p') + ' ' + esc(t) + '</li>'; }).join('') +
+        f.pas.map(function (t) { return '<li class="non">' + ico('x', 'p') + ' ' + esc(t) + '</li>'; }).join('') + '</ul></article>';
+    }).join('') + '</div>';
+    if (estAdmin() && E.profil.capacites) {
+      h += '<h2>Tableau des droits</h2><p class="sous-titre">Droits par défaut de chaque rôle. Vous pouvez en retirer à un partenaire dans Administration › Partenaires et droits.</p>' +
+        '<div class="tableau-defile"><table class="matrice"><thead><tr><th>Droit</th>' + ORDRE_ROLES.map(function (r) { return '<th><abbr title="' + esc(ficheRole(r).nom) + '">' + esc({ responsable: 'Resp.', actionnaire: 'Action.', secretaire: 'Secr.', enseignant: 'Ens.' }[r]) + '</abbr></th>'; }).join('') + '</tr></thead><tbody>' +
+        Object.keys(LIB_CAP).map(function (k) {
+          return '<tr><td>' + esc(LIB_CAP[k]) + '</td>' + ORDRE_ROLES.map(function (r) {
+            var oui = (E.profil.capacites[r] || []).indexOf(k) >= 0;
+            return '<td class="' + (oui ? 'oui' : 'non') + '">' + (oui ? ico('check', 'p') + '<span class="sr">oui</span>' : '<span aria-label="non">–</span>') + '</td>';
+          }).join('') + '</tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+    if (estAdmin() || peutQuelquePart('comptes.gerer')) h += '<div class="actions"><a class="btn or" href="#/comptes" data-a="ouvrir-comptes">' + ico('users', 'p') + 'Gérer les comptes</a></div>';
+    return h;
+  }
+
   // ───────────────────────────── Écrans en ligne : comptes ─────────────────────────────
   function horsLigne(zone, e) {
     var z = $(zone);
@@ -2454,7 +2620,10 @@
       lignes('matieres').map(function (m) { return '<label class="case"><input type="checkbox" name="matiere" value="' + esc(m.id) + '"' + (siennes.indexOf(m.id) >= 0 ? ' checked' : '') + '> ' + esc(m.nom) + '</label>'; }).join('') + '</div>';
     if (estAdmin()) h += '<label class="case"><input type="checkbox" name="admin_global"' + (u && u.admin_global ? ' checked' : '') + '> Administrateur des deux centres (vue consolidée, finances, tous les réglages)</label>';
     if (u) h += '<label class="case"><input type="checkbox" name="actif"' + (u.actif ? ' checked' : '') + '> Compte actif (décocher coupe immédiatement ses sessions)</label>';
-    h += '<p class="doux">Responsable : tout son centre, sauf les réglages. Actionnaire : consultation des finances et statistiques. Secrétaire : inscriptions, appel, encaissements. Enseignant : l\'appel de ses classes.</p>' +
+    h += '<div class="legende-roles">' + ORDRE_ROLES.map(function (r) {
+      var f = ficheRole(r);
+      return '<div class="espace-' + f.espace + '">' + ico(ESPACES[f.espace].ico, 'p') + '<span><b>' + esc(f.nom) + '</b> ' + esc(f.resume) + '</span></div>';
+    }).join('') + '</div>' +
       '<div class="actions"><button class="btn" type="submit">' + (u ? 'Enregistrer' : 'Créer le compte') + '</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>';
     if (u) {
       h += '<div class="actions"><button class="btn clair petit" type="button" data-a="reinit-mdp" data-id="' + esc(u.id) + '">Nouveau mot de passe</button>' +
@@ -2598,6 +2767,10 @@
     'suppr-actionnaire': function (el) {
       var a = ligne('actionnaires', el.dataset.id);
       if (a) confirmer('Retirer ' + a.nom + ' des actionnaires ?', 'Retirer', function () { muter('actionnaires', a.id, {}, true).then(rendre); });
+    },
+    'ouvrir-comptes': function () {
+      ouvrirPanneauDiscret();
+      if (location.hash === '#/comptes') rendre(); else location.hash = '#/comptes';
     },
     'ouvrir-admin': function () {
       if (!estAdmin()) return;
