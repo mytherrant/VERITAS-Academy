@@ -61,8 +61,9 @@ svg.ico.g { width: 24px; height: 24px; }
   padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
   display: flex; align-items: center; gap: 10px;
 }
-.entete .marque { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--titre); text-decoration: none; flex: none; }
-.entete .marque img { width: 32px; height: 32px; border-radius: 8px; }
+.entete .marque { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--titre); text-decoration: none; flex: none; background: none; border: 0; padding: 4px; margin: -4px; cursor: pointer; font: inherit; font-weight: 600; }
+/* Logo en fond CSS (pas de <img>) : Chrome n'offre ni « Télécharger l'image » ni menu de lien. */
+.entete .marque .logo { width: 32px; height: 32px; border-radius: 8px; background: url(icone-512.png) center / cover no-repeat; flex: none; }
 .entete .espace { flex: 1; }
 .selecteur-centre {
   appearance: none; background: var(--bleu-pale); color: var(--bleu-profond); border: 1px solid transparent;
@@ -77,7 +78,7 @@ svg.ico.g { width: 24px; height: 24px; }
 .puce-sync::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
 .puce-sync.attente::before { background: var(--action-fonce); }
 .puce-sync.horsligne::before { background: var(--danger); }
-@media (max-width: 440px) { .entete .marque span { display: none; } .selecteur-centre { max-width: 52vw; } }
+@media (max-width: 440px) { .entete .marque .nom { display: none; } .selecteur-centre { max-width: 52vw; } }
 
 /* ── Contenu ── */
 main.page { padding: 20px 16px calc(var(--nav-h) + 28px + env(safe-area-inset-bottom)); max-width: 760px; margin: 0 auto; }
@@ -480,4 +481,14 @@ table.matrice { width: 100%; border-collapse: collapse; font-size: 13px; table-l
 
 /* Logo : l'appui long (accès caché à l'administration) ne doit ouvrir ni menu
    du navigateur, ni sélection, ni glisser de l'image. */
-.entete .marque, .entete .marque img { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-user-drag: none; touch-action: manipulation; }
+.entete .marque, .entete .marque * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-user-drag: none; touch-action: manipulation; }
+
+/* Formulaires : un champ date garde une largeur minimale imposée par le navigateur
+   (« jj/mm/aaaa » + icône). Dans une grille à deux colonnes, il débordait et faisait
+   glisser toute la feuille de côté — d'où les libellés coupés à gauche (« ontant »,
+   « atégorie ») sur la fiche dépense. Les colonnes et les champs peuvent rétrécir. */
+.deux { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.deux > *, .champ { min-width: 0; }
+.champ input, .champ select, .champ textarea { min-width: 0; max-width: 100%; }
+input[type="date"], input[type="time"], input[type="month"] { min-width: 0; }
+#feuille .panneau { overflow-x: hidden; }
