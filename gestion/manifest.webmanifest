@@ -1,0 +1,15 @@
+{
+  "name": "VÉRITAS Gestion",
+  "short_name": "VÉRITAS",
+  "description": "Assiduité, ponctualité, inscriptions et paiements des centres VÉRITAS",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0C2A6A",
+  "theme_color": "#1E499B",
+  "icons": [
+    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

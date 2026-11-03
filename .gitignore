@@ -209,3 +209,9 @@ premier_cycle/_sources/
 # Le depot est PUBLIC ; ces .docx ne doivent jamais y entrer, meme par un
 # « git add . » distrait. Ils vivent hors depot et se deposent par FTP.
 /Manuel_*_Etude_Integrale.docx
+
+# VÉRITAS Gestion (gestion.veritas-school.com) : surcharges locales et base SQLite de développement
+/gestion/api/_config.php
+/gestion/api/data/*.sqlite*
+# Photos de justificatifs des dépenses (données privées des centres, jamais dans le dépôt)
+/gestion/api/data/justificatifs/
