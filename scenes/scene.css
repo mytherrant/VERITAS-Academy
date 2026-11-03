@@ -381,3 +381,4 @@ h1,h2,h3,h4{font-family:var(--v-font);font-weight:600;color:var(--v-navy)}
 .sc-trad p{margin:8px 0 0;color:#3A4560}
 .sc-texte[dir=rtl]{text-align:right;font-size:1.15em}
 .sc-prog{font-size:13.5px;color:#3A4560;margin:0 0 10px}
+.sc-mini .ic{width:16px;height:16px;margin-right:6px;flex:none}
