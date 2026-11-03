@@ -574,3 +574,13 @@ input[type="date"], input[type="time"], input[type="month"] { min-width: 0; }
 .ligne.tache.faite b { text-decoration: line-through; color: var(--doux); }
 /* Une date proposée ou un titre de tâche se lit en entier (passe à la ligne au lieu d'être coupé). */
 .option-date .corps b, .ligne.tache .corps b { white-space: normal; overflow: visible; }
+
+/* ── Connexion : œil du mot de passe, aide après un échec, version en retard ── */
+.mdp-ligne { position: relative; display: block; }
+.mdp-ligne input { padding-right: 52px; width: 100%; }
+.oeil { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 44px; height: 40px; border: 0; background: none; color: var(--doux); border-radius: 8px; cursor: pointer; display: grid; place-items: center; }
+.oeil.on { color: var(--bleu); background: var(--bleu-pale); }
+.aide-connexion { font-size: 13px; line-height: 1.5; margin-bottom: 12px; }
+.aide-connexion ul { margin: 6px 0 6px 18px; padding: 0; }
+.note.maj-dispo { display: block; background: var(--alerte-fond); color: var(--alerte); border-radius: var(--rayon); padding: 10px 12px; margin-bottom: 12px; font-size: 13px; }
+.note.maj-dispo .btn { margin-top: 8px; }

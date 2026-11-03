@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.11.0';
+  var VERSION = '0.11.1';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -559,13 +559,44 @@
       else formulaireConnexion(message);
     }, function () { formulaireConnexion(message || (navigator.onLine ? 'Serveur injoignable.' : 'Pas de connexion internet. La première connexion demande du réseau.')); });
   }
-  function formulaireConnexion(message) {
+  function dernierIdentifiant() { try { return localStorage.getItem('vg-ident') || ''; } catch (e) { return ''; } }
+  function formulaireConnexion(message, identifiant, code) {
+    var ident = identifiant != null ? identifiant : dernierIdentifiant();
     $('#zone-connexion').innerHTML = (message ? '<div class="erreur">' + esc(message) + '</div>' : '') +
+      (code === 401 ? '<div class="note info aide-connexion"><b>Vérifiez :</b><ul>' +
+        '<li>l\'<b>identifiant</b> exact reçu par WhatsApp, en minuscules (ex. : <i>jacques</i>, <i>marie.ndogpassi3</i>) — pas votre nom complet ;</li>' +
+        '<li>le <b>mot de passe</b> : majuscules et minuscules comptent ; touchez l\'œil pour le voir ;</li>' +
+        '<li>après 5 essais ratés, attendez 15 minutes.</li></ul>Toujours bloqué ? L\'administrateur crée un nouveau mot de passe (Comptes et accès › votre compte › Nouveau mot de passe).</div>' : '') +
+      '<div id="zone-version"></div>' +
       '<form data-f="connexion" autocomplete="on">' +
-      '<label class="champ"><span>Identifiant</span><input type="text" name="identifiant" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>' +
-      '<label class="champ"><span>Mot de passe</span><input type="password" name="mdp" autocomplete="current-password" required></label>' +
+      '<label class="champ"><span>Identifiant</span><input type="text" name="identifiant" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required value="' + esc(ident) + '"></label>' +
+      '<label class="champ"><span>Mot de passe</span><span class="mdp-ligne"><input type="password" name="mdp" id="champ-mdp" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" required>' +
+      '<button type="button" class="oeil" data-a="voir-mdp" aria-label="Afficher le mot de passe" aria-pressed="false">' + ico('eye') + '</button></span></label>' +
       '<button class="btn plein" type="submit">Se connecter</button></form>' +
       '<p class="pied">v' + VERSION + ' · mot de passe oublié : demandez-le à l\'administrateur</p>';
+    var champ = ident ? $('#champ-mdp') : $('#zone-connexion input[name=identifiant]');
+    if (champ && message) champ.focus();
+    verifierVersion();
+  }
+  /** Compare la version de ce téléphone à celle en ligne ; prévient s'il est en retard. */
+  function verifierVersion() {
+    api('version').then(function (r) {
+      var enLigne = String(r.version || ''), cmp = function (a, b) {
+        var x = a.split('.').map(Number), y = b.split('.').map(Number);
+        for (var i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) - (y[i] || 0); }
+        return 0;
+      };
+      E.cache.versionEnLigne = enLigne && cmp(enLigne, VERSION) > 0 ? enLigne : '';
+      var z = $('#zone-version') || $('#bandeau-version');
+      if (z) z.innerHTML = htmlVersion();
+    }, function () {});
+  }
+  function htmlVersion() {
+    var enLigne = E.cache.versionEnLigne;
+    if (!enLigne) return '';
+    return '<div class="note maj-dispo">' + ico('alert', 'p') + ' <b>Version ' + esc(enLigne) + ' disponible</b> — ce téléphone est en ' + esc(VERSION) + '. ' +
+        (NATIF ? 'Installez la nouvelle application, ou utilisez directement <b>gestion.veritas-school.com</b> dans Chrome : elle y est toujours à jour.'
+          : '<button type="button" class="btn or petit" data-a="mettre-a-jour">Mettre à jour maintenant</button>') + '</div>';
   }
   function formulaireInstallation(etat) {
     $('#zone-connexion').innerHTML = '<div class="note info">Première mise en service : créez le compte administrateur. Le jeton d\'installation se trouve dans <b>api/payment_config.php</b> (G_INSTALL_TOKEN).</div>' +
@@ -596,7 +627,7 @@
         var auj = new Date();
         var h = '<h1>Bonjour ' + esc(String(u.nom).split(' ')[0]) + '</h1><p class="sous-titre">' +
           esc(auj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })) + '</p>' +
-          bandeauEspace() + blocMesCours() + blocProchainsRdv();
+          '<div id="bandeau-version">' + htmlVersion() + '</div>' + bandeauEspace() + blocMesCours() + blocProchainsRdv();
         if (estEnseignantQuelquePart() && centresChoisis().length) h += '<h2>Mes centres</h2>';
 
         var centres = centresChoisis();
@@ -656,7 +687,8 @@
           return '<div class="tuile inactive"><span class="pastille">' + ico(t[0]) + '</span><b>' + t[1] + '</b><small>' + t[2] + ' · étape ' + t[3] + '</small></div>';
         }).join('') + '</div>';
         return h;
-      }
+      },
+      apres: function () { if (!E.cache.versionVue || Date.now() - E.cache.versionVue > 3600000) { E.cache.versionVue = Date.now(); verifierVersion(); } }
     },
 
     centres: {
@@ -3807,6 +3839,18 @@
       });
     },
     'fermer-et-aller': function (el) { fermerFeuille(); if (el.dataset.onglet) CAI.onglet = el.dataset.onglet; if (el.dataset.eq) { EQ.onglet = el.dataset.eq; EQ.centre = el.dataset.centre; } var h = el.getAttribute('href'); if (location.hash === h) rendre(); else location.hash = h; },
+    'voir-mdp': function (el) {
+      var c = $('#champ-mdp'); if (!c) return;
+      var voir = c.type === 'password'; c.type = voir ? 'text' : 'password';
+      el.setAttribute('aria-pressed', voir ? 'true' : 'false'); el.setAttribute('aria-label', voir ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+      el.classList.toggle('on', voir); c.focus();
+    },
+    'mettre-a-jour': function () {
+      // Vide les copies gardées par le téléphone, puis recharge depuis le serveur.
+      var vider = window.caches ? caches.keys().then(function (k) { return Promise.all(k.map(function (x) { return caches.delete(x); })); }) : Promise.resolve();
+      var sw = navigator.serviceWorker ? navigator.serviceWorker.getRegistrations().then(function (l) { return Promise.all(l.map(function (r) { return r.update(); })); }) : Promise.resolve();
+      Promise.all([vider, sw]).catch(function () {}).then(function () { location.reload(); });
+    },
     'aller-accueil': function () { if (location.hash === '#/accueil') rendre(); else location.hash = '#/accueil'; },
     'fermer-panneau': function () { if (panneauOuvert()) basculerPanneau(); },
     'ouvrir-comptes': function () {
@@ -4097,9 +4141,13 @@
     connexion: function (form) {
       var v = valeurs(form);
       occupe(form, true);
-      api('auth/connexion', { identifiant: v.identifiant, mdp: v.mdp, appareil: nomAppareil() }).then(ouvrirSession, function (e) {
+      var ident = String(v.identifiant || '').toLowerCase().replace(/\s+/g, '');
+      api('auth/connexion', { identifiant: ident, mdp: v.mdp, appareil: nomAppareil() }).then(function (r) {
+        try { localStorage.setItem('vg-ident', ident); } catch (e) {}
+        return ouvrirSession(r);
+      }, function (e) {
         occupe(form, false);
-        formulaireConnexion(e.message);
+        formulaireConnexion(e.message, ident, e.code);
       });
     },
     installation: function (form) {

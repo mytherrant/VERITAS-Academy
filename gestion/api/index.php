@@ -58,6 +58,13 @@ function g_peut_gerer_compte(array $ctx, array $accesCible, bool $cibleAdmin): b
 switch ($route) {
 
 // ─────────────────────────────── Connexion ───────────────────────────────
+// Version de l'application en ligne (lue dans index.html) : un téléphone resté sur une vieille
+// version (application Android, copie en cache) le signale à son utilisateur. Sans secret.
+case 'version': {
+    $html = @file_get_contents(dirname(__DIR__) . '/index.html') ?: '';
+    g_ok(['version' => preg_match('/app\.js\?v=([\d.]+)/', $html, $m) ? $m[1] : '']);
+}
+
 case 'auth/connexion': {
     g_exiger_post($methode);
     $ident = mb_strtolower(trim((string) (g_body()['identifiant'] ?? '')));
