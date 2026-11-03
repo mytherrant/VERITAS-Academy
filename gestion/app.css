@@ -531,3 +531,19 @@ input[type="date"], input[type="time"], input[type="month"] { min-width: 0; }
 .actions.empile { flex-direction: column; align-items: stretch; }
 .actions.empile .btn { width: 100%; justify-content: center; }
 @media (max-width: 440px) { .ligne.ev .badge.type { display: none; } }
+
+/* ── Remises au trésorier ── */
+.ligne.remise { align-items: flex-start; flex-wrap: wrap; cursor: default; }
+.ligne.remise .corps small.motif { color: var(--danger); }
+.ligne.remise .boutons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.carte.a-remettre { display: flex; justify-content: space-between; align-items: center; gap: 10px; border-left: 4px solid var(--ok); }
+.carte.a-remettre.du { border-left-color: var(--action-fonce); background: #FFFBEF; }
+.carte.a-remettre b { font-size: 22px; }
+.carte.note-carte { border-left: 4px solid var(--action-fonce); }
+.st-retard { color: var(--alerte); }
+
+.carte.a-remettre span small { display: block; color: var(--doux); font-size: 12px; margin-top: 2px; }
+/* Onglets : sur une ligne, défilables au doigt quand ils sont nombreux (Caisse en a cinq). */
+.onglets { overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.onglets::-webkit-scrollbar { display: none; }
+.onglets button { flex: 1 0 auto; white-space: nowrap; padding-left: 12px; padding-right: 12px; }

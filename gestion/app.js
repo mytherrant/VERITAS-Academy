@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.9.8';
+  var VERSION = '0.9.9';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -1606,6 +1606,8 @@
     if (!cid) return h + '<div class="carte vide">Aucun centre.</div>';
     var imp = impayes(cid);
     var onglets = (encaisse ? [['encaisser', 'Encaisser']] : []).concat([['jour', 'Journal'], ['impayes', 'Impayés' + (imp.length ? ' · ' + imp.length : '')]]);
+    var aConf = (estTresorier(cid) || estAdmin()) ? remisesDu(cid).filter(function (r) { return (r.statut || 'en_attente') === 'en_attente' && r.remis_par !== E.profil.utilisateur.id; }).length : 0;
+    onglets.push(['remises', 'Remises' + (aConf ? ' · ' + aConf : '')]);
     if (peut('depenses.voir', cid)) onglets.push(['depenses', 'Dépenses']);
     h += '<div class="onglets">' + onglets.map(function (o) { return '<button type="button" class="' + (CAI.onglet === o[0] ? 'on' : '') + '" data-a="caisse-onglet" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>';
 
@@ -1623,6 +1625,8 @@
         Object.keys(MODES).filter(function (m) { return parMode[m]; }).map(function (m) { return '<div><b>' + fcfa(parMode[m]) + '</b><small>' + MODES[m] + '</small></div>'; }).join('') + '</div>';
       h += '<a class="ligne carte-lien" href="#/jour"><span class="pastille">' + ico('chart') + '</span><span class="corps"><b>Point du jour</b><small>Entrées, sorties, solde : fiche à envoyer aux actionnaires</small></span><span class="fin">›</span></a>';
       h += du.length ? '<div class="liste">' + du.map(ligneVersement).join('') + '</div>' : '<div class="carte vide">Aucun versement ce jour-là.</div>';
+    } else if (CAI.onglet === 'remises') {
+      h += ongletRemises(cid);
     } else if (CAI.onglet === 'impayes') {
       var total = imp.reduce(function (s, x) { return s + x.ech.impaye; }, 0);
       var c = ligne('centres', cid) || {};
@@ -2094,6 +2098,7 @@
         Object.keys(parCat).map(function (k) { return '<div class="info"><span>Dépenses · ' + CATEGORIES[k] + '</span><b>− ' + fcfa(parCat[k]) + '</b></div>'; }).join('') +
         (totPaies ? '<div class="info"><span>Paies des enseignants</span><b>− ' + fcfa(totPaies) + '</b></div>' : '') +
         (deps.some(function (d) { return d.statut === 'en_attente'; }) ? '<div class="info"><span>Dépenses en attente (non comptées)</span><b>' + fcfa(deps.filter(function (d) { return d.statut === 'en_attente'; }).reduce(function (s, d) { return s + Number(d.montant); }, 0)) + '</b></div>' : '') + '</div>';
+      h += infosFondsBilan(c.id);
       if (acts.length) {
         h += '<h3>Part des actionnaires</h3><div class="liste">' + acts.map(function (a) {
           return '<div class="ligne"><span class="corps"><b>' + esc(a.nom) + '</b><small>' + pourcent(a.part_centiemes) + '</small></span><span class="fin"><b>' + fcfa(Math.round(res * Number(a.part_centiemes) / 10000)) + '</b></span></div>';
@@ -2599,6 +2604,125 @@
     return String(liste || '').split(',').filter(Boolean).map(function (m) { return MOIS[(+m - 1)] || m; }).join(', ') || '—';
   }
 
+  // ───────────────────────────── Remises de fonds au trésorier ─────────────────────────────
+  // Chaque partenaire encaisse selon ses jours au centre et sa proximité avec les parents,
+  // envoie le reçu, puis REMET l'argent au trésorier du centre avant la fin du mois. Le
+  // trésorier confirme la réception (« Reçu ») ou la conteste (« Pas reçu », avec motif).
+  // Ce qu'un partenaire garde en main = ses encaissements − ses dépenses saisies − ses remises.
+  function tresorierDe(cid) { return (ligne('centres', cid) || {}).tresorier_id || ''; }
+  function estTresorier(cid) { return !!E.profil && tresorierDe(cid) === E.profil.utilisateur.id; }
+  function estTresorierQuelquePart() { return lignes('centres').some(function (c) { return estTresorier(c.id); }); }
+  function nomCompte(id) { return id === E.profil.utilisateur.id ? E.profil.utilisateur.nom : (nomPersonne(id) || 'Ancien compte'); }
+  /** « 12 000 F » à remettre, ou « 0 F » quand il a déjà remis plus que ses encaissements enregistrés. */
+  function libReste(x) { return x.reste >= 0 ? fcfa(x.reste) : fcfa(0); }
+  function remisesDu(cid) { return lignes('remises').filter(function (r) { return r.centre_id === cid; }).sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : String(b.maj_le || '').localeCompare(String(a.maj_le || '')); }); }
+  /** Fonds d'un compte dans un centre (cumul), et ce qui reste en main. */
+  function soldeFonds(uid, cid) {
+    var somme = function (l) { return l.reduce(function (s, x) { return s + (Number(x.montant) || 0); }, 0); };
+    var enc = somme(lignes('paiements').filter(function (p) { return p.centre_id === cid && p.encaisse_par === uid && !Number(p.annule); }));
+    var dep = somme(lignes('depenses').filter(function (d) { return d.centre_id === cid && d.saisie_par === uid && d.statut !== 'refusee'; }));
+    var rs = remisesDu(cid).filter(function (r) { return r.remis_par === uid; });
+    var conf = somme(rs.filter(function (r) { return r.statut === 'confirmee'; }));
+    var att = somme(rs.filter(function (r) { return (r.statut || 'en_attente') === 'en_attente'; }));
+    return { encaisse: enc, depenses: dep, confirme: conf, attente: att, reste: enc - dep - conf - att };
+  }
+  /** Comptes qui ont manié de l'argent dans ce centre (encaissé, dépensé ou remis). */
+  function comptesFonds(cid) {
+    var ids = {};
+    lignes('paiements').forEach(function (p) { if (p.centre_id === cid && p.encaisse_par) ids[p.encaisse_par] = 1; });
+    lignes('depenses').forEach(function (d) { if (d.centre_id === cid && d.saisie_par) ids[d.saisie_par] = 1; });
+    remisesDu(cid).forEach(function (r) { if (r.remis_par) ids[r.remis_par] = 1; });
+    return Object.keys(ids);
+  }
+  function finDuMois(iso) { return decalerJour(moisSuivantIso(iso.slice(0, 7)) + '-01', -1); }
+  var LIB_STATUT_REMISE = { en_attente: ['en attente du trésorier', 'alerte'], confirmee: ['reçue par le trésorier', 'ok'], contestee: ['pas reçue', 'danger'] };
+
+  function ligneRemise(r, cid) {
+    var moi = E.profil.utilisateur.id, st = LIB_STATUT_REMISE[r.statut || 'en_attente'];
+    var attente = (r.statut || 'en_attente') === 'en_attente';
+    var tresorier = (estTresorier(cid) || estAdmin()) && attente && r.remis_par !== moi;
+    var auteur = attente && r.remis_par === moi;
+    return '<div class="ligne remise"><span class="avatar">' + esc(initiales(nomCompte(r.remis_par))) + '</span><span class="corps"><b>' + esc(nomCompte(r.remis_par)) + ' · ' + fcfa(r.montant) + '</b>' +
+      '<small>' + esc(dateLisible(r.date, true) + ' · ' + (MODES[r.mode] || r.mode || 'Espèces') + (r.note ? ' · ' + r.note : '')) + '</small>' +
+      (r.statut === 'contestee' && r.motif ? '<small class="motif">Motif : ' + esc(r.motif) + '</small>' : '') +
+      (r.confirme_par && !attente ? '<small>' + (r.statut === 'confirmee' ? 'Confirmée' : 'Contestée') + ' par ' + esc(nomCompte(r.confirme_par)) + (r.confirme_le ? ' le ' + esc(dateLisible(r.confirme_le, true)) : '') + '</small>' : '') +
+      '<span><span class="badge ' + st[1] + '">' + esc(st[0]) + '</span>' + (r._attente ? '<span class="badge">à envoyer</span>' : '') + '</span>' +
+      (tresorier ? '<span class="boutons"><button class="btn or petit" type="button" data-a="remise-recue" data-id="' + esc(r.id) + '">' + ico('check', 'p') + 'Reçu</button><button class="btn danger petit" type="button" data-a="remise-contester" data-id="' + esc(r.id) + '">Pas reçu</button></span>' : '') +
+      (auteur ? '<span class="boutons"><button class="btn clair petit" type="button" data-a="remise-prevenir" data-id="' + esc(r.id) + '">' + ico('message', 'p') + 'Prévenir le trésorier</button><button class="btn clair petit" type="button" data-a="editer-remise" data-id="' + esc(r.id) + '">Modifier</button></span>' : '') +
+      '</span></div>';
+  }
+
+  /** Onglet « Remises » de la caisse. */
+  function ongletRemises(cid) {
+    var moi = E.profil.utilisateur.id, tres = tresorierDe(cid), h = '';
+    var c = ligne('centres', cid) || {};
+    if (!tres) {
+      h += '<div class="carte note-carte">' + ico('alert', 'p') + ' <b>Aucun trésorier désigné</b> pour ' + esc(c.nom_court || c.nom || 'ce centre') + '. ' +
+        (estAdmin() ? 'Choisissez-le dans la fiche du centre.</div><div class="actions"><button class="btn or" type="button" data-a="editer-centre" data-id="' + esc(cid) + '">Choisir le trésorier</button></div>' : 'L\'administrateur doit le choisir.</div>');
+    } else {
+      h += '<p class="sous-titre">Trésorier : <b>' + esc(nomCompte(tres)) + '</b>' + (estTresorier(cid) ? ' (vous)' : '') + ' · fonds à remettre avant le ' + esc(dateLisible(finDuMois(isoLocal(new Date())), true)) + '.</p>';
+    }
+    // Ce que j'ai en main.
+    if (peut('paiements.encaisser', cid) && !estTresorier(cid)) {
+      var s = soldeFonds(moi, cid);
+      h += '<h2>Chez vous</h2><div class="stats petites"><div><b>' + fcfa(s.encaisse) + '</b><small>encaissé</small></div><div><b>' + fcfa(s.depenses) + '</b><small>dépenses saisies</small></div><div><b>' + fcfa(s.confirme + s.attente) + '</b><small>remis' + (s.attente ? ' (dont ' + fcfa(s.attente) + ' à confirmer)' : '') + '</small></div></div>' +
+        '<div class="carte a-remettre' + (s.reste > 0 ? ' du' : '') + '"><span>À remettre au trésorier' + (s.reste < 0 ? '<small>Vous avez remis ' + fcfa(-s.reste) + ' de plus que vos encaissements enregistrés.</small>' : '') + '</span><b>' + libReste(s) + '</b></div>' +
+        (tres ? '<div class="actions"><button class="btn or" type="button" data-a="editer-remise" data-id="" data-montant="' + Math.max(0, s.reste) + '">' + ico('wallet', 'p') + 'Remettre au trésorier</button></div>' : '');
+    }
+    // Le trésorier (ou l'admin) tranche.
+    var aConfirmer = remisesDu(cid).filter(function (r) { return (r.statut || 'en_attente') === 'en_attente' && r.remis_par !== moi; });
+    if (estTresorier(cid) || estAdmin()) {
+      h += '<h2>À confirmer' + (aConfirmer.length ? ' · ' + aConfirmer.length : '') + '</h2>' + (aConfirmer.length ? '<div class="liste">' + aConfirmer.map(function (r) { return ligneRemise(r, cid); }).join('') + '</div>' : '<div class="carte vide">Aucune remise en attente.</div>');
+    }
+    // Vue d'ensemble pour le trésorier et ceux qui voient le bilan.
+    if (estTresorier(cid) || peut('finances.voir', cid)) {
+      var gens = comptesFonds(cid), totMain = 0, totConf = 0;
+      var lignesP = gens.map(function (uid) {
+        var x = soldeFonds(uid, cid);
+        if (uid === tres) { totConf += x.encaisse - x.depenses; return ''; }
+        totMain += Math.max(0, x.reste); totConf += x.confirme;
+        return '<div class="ligne"><span class="avatar">' + esc(initiales(nomCompte(uid))) + '</span><span class="corps"><b>' + esc(nomCompte(uid)) + '</b><small>Encaissé ' + fcfa(x.encaisse) + ' · dépenses ' + fcfa(x.depenses) + ' · remis ' + fcfa(x.confirme) + (x.attente ? ' (+ ' + fcfa(x.attente) + ' à confirmer)' : '') + '</small></span>' +
+          '<span class="fin"><b' + (x.reste > 0 ? ' class="st-retard"' : '') + '>' + libReste(x) + '</b><small>' + (x.reste < 0 ? 'remis en plus : ' + fcfa(-x.reste) : 'en main') + '</small></span></div>';
+      }).join('');
+      h += '<h2>Fonds du centre</h2><div class="stats"><div><b>' + fcfa(totConf) + '</b><small>chez le trésorier (confirmé)</small></div><div><b>' + fcfa(totMain) + '</b><small>encore chez les partenaires</small></div></div>' +
+        (lignesP ? '<div class="liste">' + lignesP + '</div>' : '');
+    }
+    var hist = remisesDu(cid).filter(function (r) { return aConfirmer.indexOf(r) < 0 || !(estTresorier(cid) || estAdmin()); });
+    h += '<h2>Historique des remises</h2>' + (hist.length ? '<div class="liste">' + hist.slice(0, 60).map(function (r) { return ligneRemise(r, cid); }).join('') + '</div>' : '<div class="carte vide">Aucune remise pour l\'instant.</div>');
+    return h;
+  }
+
+  function feuilleRemise(id, cid, montantDefaut) {
+    var r = id ? ligne('remises', id) : null;
+    cid = r ? r.centre_id : cid;
+    var d = r || { montant: montantDefaut || '', date: isoLocal(new Date()), mode: 'especes', note: '' };
+    ouvrirFeuille('<h2>' + (r ? 'Modifier la remise' : 'Remettre au trésorier') + '</h2><p class="doux">' + esc((ligne('centres', cid) || {}).nom || '') + ' · trésorier : ' + esc(nomCompte(tresorierDe(cid))) + '</p>' +
+      '<form data-f="remise" data-id="' + esc(id || '') + '" data-centre="' + esc(cid) + '">' +
+      '<div class="deux"><label class="champ"><span>Montant (FCFA)</span><input type="number" name="montant" min="1" required value="' + esc(d.montant) + '"></label>' +
+      '<label class="champ"><span>Date</span><input type="date" name="date" required max="' + isoLocal(new Date()) + '" value="' + esc(d.date) + '"></label></div>' +
+      '<label class="champ"><span>Remis en</span><select name="mode">' + Object.keys(MODES).map(function (k) { return '<option value="' + k + '"' + (d.mode === k ? ' selected' : '') + '>' + MODES[k] + '</option>'; }).join('') + '</select></label>' +
+      '<label class="champ"><span>Note</span><input type="text" name="note" maxlength="200" value="' + esc(d.note || '') + '" placeholder="ex. : versements de la semaine, réf. MoMo…"></label>' +
+      '<p class="doux">Le trésorier confirmera la réception. Tant qu\'il ne l\'a pas fait, vous pouvez corriger ou retirer la remise.</p>' +
+      '<div class="actions"><button class="btn or" type="submit">' + (r ? 'Enregistrer' : 'Enregistrer la remise') + '</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>' +
+      (r ? '<div class="actions"><button class="btn danger" type="button" data-a="suppr-remise" data-id="' + esc(id) + '">Retirer la remise</button></div>' : ''));
+  }
+  function messageRemise(r) {
+    var c = ligne('centres', r.centre_id) || {};
+    return 'Bonjour ' + nomCompte(tresorierDe(r.centre_id)) + ', je vous ai remis ' + fcfa(r.montant).replace(/ /g, ' ') + ' (' + (MODES[r.mode] || 'espèces') + ') le ' + dateLisible(r.date, true) +
+      ' pour ' + (c.nom || 'le centre') + (r.note ? ' — ' + r.note : '') + '. Merci de confirmer la réception dans VÉRITAS Gestion (Caisse › Remises). ' + E.profil.utilisateur.nom;
+  }
+
+  /** Bilan : où est l'argent du centre. */
+  function infosFondsBilan(cid) {
+    if (!lignes('remises').some(function (r) { return r.centre_id === cid; }) && !tresorierDe(cid)) return '';
+    var tres = tresorierDe(cid), main = 0, chezT = 0;
+    comptesFonds(cid).forEach(function (uid) { var x = soldeFonds(uid, cid); if (uid === tres) chezT += x.encaisse - x.depenses; else { main += Math.max(0, x.reste); chezT += x.confirme; } });
+    var att = remisesDu(cid).filter(function (r) { return (r.statut || 'en_attente') === 'en_attente'; }).reduce(function (s, r) { return s + Number(r.montant); }, 0);
+    return '<div class="infos"><div class="info"><span>Fonds chez le trésorier' + (tres ? ' (' + esc(nomCompte(tres)) + ')' : '') + '</span><b>' + fcfa(chezT) + '</b></div>' +
+      (att ? '<div class="info"><span>Remises à confirmer</span><b>' + fcfa(att) + '</b></div>' : '') +
+      '<div class="info"><span>Encore chez les partenaires</span><b>' + fcfa(main) + '</b></div></div>';
+  }
+
   // ───────────────────────────── Agenda, rappels et notifications ─────────────────────────────
   // Rendez-vous et rencontres saisis par le centre (table « evenements »), plus ce que le
   // téléphone DÉDUIT : l'échéance des mensualités (jour d'échéance du centre, mois facturés),
@@ -2634,6 +2758,15 @@
         if (an && an.debut && an.fin && (d < an.debut || d > an.fin)) continue;
         out.push({ id: 'ech-' + c.id + '-' + am, auto: true, type: 'echeance', titre: 'Échéance des mensualités', date: d, heure: '', lieu: '', rappel_min: 1440, centre_id: c.id, lien: '#/caisse',
           note: 'Les paiements du mois de ' + MOIS[Number(am.slice(5)) - 1] + ' se font au plus tard ce jour.' });
+      }
+    });
+    centresChoisis().forEach(function (c) {
+      if (!tresorierDe(c.id) || !peut('paiements.encaisser', c.id) || estTresorier(c.id)) return;
+      for (var am = debut.slice(0, 7); am <= fin.slice(0, 7); am = moisSuivantIso(am)) {
+        var d = finDuMois(am + '-01');
+        if (d < debut || d > fin) continue;
+        out.push({ id: 'rem-' + c.id + '-' + am, auto: true, type: 'echeance', titre: 'Remise des fonds au trésorier', date: d, heure: '', lieu: '', rappel_min: 2880, centre_id: c.id, lien: '#/caisse',
+          note: 'Remettez à ' + nomCompte(tresorierDe(c.id)) + ' l\'argent encaissé ce mois, pour le bilan.' });
       }
     });
     if (an) [[an.debut, 'Rentrée scolaire ' + an.libelle], [an.fin, 'Fin de l\'année scolaire ' + an.libelle]].forEach(function (x) {
@@ -2779,6 +2912,20 @@
         if (al) out.push({ ico: 'activity', niveau: '', titre: al + ' alerte' + (al > 1 ? 's' : '') + ' d\'assiduité · ' + nom, detail: 'Absences ou retards répétés', lien: '#/assiduite' });
       }
     });
+    lignes('centres').forEach(function (c) {
+      var nom = c.nom_court || c.nom, rs = remisesDu(c.id);
+      if (estTresorier(c.id)) {
+        var ac = rs.filter(function (r) { return (r.statut || 'en_attente') === 'en_attente' && r.remis_par !== moi; });
+        if (ac.length) out.push({ ico: 'wallet', niveau: 'alerte', titre: ac.length + ' remise' + (ac.length > 1 ? 's' : '') + ' à confirmer · ' + nom, detail: fcfa(ac.reduce(function (s, r) { return s + Number(r.montant); }, 0)).replace(/\u00a0/g, ' ') + ' déclarés remis : reçu ou pas ?', lien: '#/caisse', onglet: 'remises' });
+      }
+      rs.filter(function (r) { return r.remis_par === moi && r.statut === 'contestee' && String(r.confirme_le || '').slice(0, 10) >= decalerJour(auj, -30); }).forEach(function (r) {
+        out.push({ ico: 'alert', niveau: 'danger', titre: 'Remise de ' + fcfa(r.montant).replace(/\u00a0/g, ' ') + ' non reçue par le trésorier', detail: r.motif || nom, lien: '#/caisse', onglet: 'remises' });
+      });
+      if (tresorierDe(c.id) && !estTresorier(c.id) && peut('paiements.encaisser', c.id) && auj >= decalerJour(finDuMois(auj), -4)) {
+        var reste = soldeFonds(moi, c.id).reste;
+        if (reste > 0) out.push({ ico: 'wallet', niveau: 'alerte', titre: fcfa(reste).replace(/\u00a0/g, ' ') + ' à remettre au trésorier · ' + nom, detail: 'Avant le ' + dateLisible(finDuMois(auj), true) + ', pour le bilan du mois', lien: '#/caisse', onglet: 'remises' });
+      }
+    });
     if (estEnseignantQuelquePart()) {
       var aFaire = mesCoursDu(auj).filter(function (cr) { return !etatSeance({ id: idSeance(auj, cr.classe_id), centre_id: cr.centre_id, classe: { id: cr.classe_id } }).pointes; }).length;
       if (aFaire) out.push({ ico: 'checkcircle', niveau: 'alerte', titre: aFaire + ' appel' + (aFaire > 1 ? 's' : '') + ' à faire aujourd\'hui', detail: 'Mes cours aujourd\'hui', lien: '#/accueil' });
@@ -2854,15 +3001,15 @@
       pas: [] },
     { cle: 'responsable', espace: 'partenaire', nom: 'Responsable', famille: 'Partenaire',
       resume: 'Dirige un centre au quotidien, avec presque tous les pouvoirs sur ce centre.',
-      peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Fixer les tarifs, valider les dépenses', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants', 'Tenir l\'agenda : rendez-vous, rencontres, réunions'],
+      peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Remettre les fonds au trésorier', 'Fixer les tarifs, valider les dépenses', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants', 'Tenir l\'agenda : rendez-vous, rencontres, réunions'],
       pas: ['Les réglages des centres et de l\'année', 'Les comptes responsables, actionnaires et admin'] },
     { cle: 'actionnaire', espace: 'partenaire', nom: 'Actionnaire', famille: 'Partenaire',
-      resume: 'Associé du centre : consulte les chiffres et tient l\'emploi du temps.',
-      peut: ['Voir le bilan, les versements et les dépenses', 'Voir les statistiques et les parts', 'Modifier l\'emploi du temps de son centre', 'Tenir l\'agenda du centre'],
-      pas: ['Encaisser ou inscrire', 'Faire l\'appel', 'Créer des comptes'] },
+      resume: 'Associé du centre : suit les chiffres, encaisse quand il est présent, tient l\'emploi du temps.',
+      peut: ['Voir le bilan, les versements et les dépenses', 'Encaisser auprès des parents et envoyer le reçu', 'Remettre les fonds au trésorier', 'Voir les statistiques et les parts', 'Modifier l\'emploi du temps de son centre', 'Tenir l\'agenda du centre'],
+      pas: ['Inscrire les élèves', 'Faire l\'appel', 'Créer des comptes'] },
     { cle: 'secretaire', espace: 'secretariat', nom: 'Secrétaire / surveillant', famille: 'Équipe',
       resume: 'Tient l\'accueil et la caisse du centre.',
-      peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Saisir les dépenses (avec photo du justificatif)', 'Noter les rendez-vous dans l\'agenda'],
+      peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Remettre les fonds au trésorier', 'Saisir les dépenses (avec photo du justificatif)', 'Noter les rendez-vous dans l\'agenda'],
       pas: ['Voir le bilan', 'Annuler un versement, accorder une remise', 'Valider une dépense', 'Gérer les enseignants'] },
     { cle: 'enseignant', espace: 'enseignant', nom: 'Enseignant', famille: 'Équipe',
       resume: 'Fait l\'appel de ses classes et suit ses heures.',
@@ -2972,6 +3119,8 @@
     h += '<ul class="droits">' + caps.map(function (k) {
       var non = retires.indexOf(k) >= 0;
       return '<li class="' + (non ? 'non' : 'oui') + '">' + ico(non ? 'x' : 'check', 'p') + ' ' + esc(LIB_CAP[k] || k) + (non ? ' <small>(réservé à l\'administrateur)</small>' : '') + '</li>';
+    }).join('') + lignes('centres').filter(function (c) { return estTresorier(c.id); }).map(function (c) {
+      return '<li class="oui">' + ico('wallet', 'p') + ' <b>Trésorier de ' + esc(c.nom_court || c.nom) + '</b> : vous gardez les fonds et confirmez les remises</li>';
     }).join('') + '</ul></div>';
     return h;
   }
@@ -3123,12 +3272,14 @@
     responsable: ['*Accueil* : élèves, appels du jour, encaissé du mois, impayés de votre centre.', '*Élèves › +* : inscrire un élève (classe, matières, tarif).',
       '*Caisse › Encaisser* : cherchez l\'élève, saisissez le montant, envoyez le reçu au parent par WhatsApp.', '*Caisse › Impayés* : relancez les parents en un geste.',
       '*Caisse › Dépenses* : saisissez les dépenses. Photo du justificatif *obligatoire dès 10 000 F*. Vous validez les dépenses saisies par les autres.',
+      '*Caisse › Remises* : remettez au trésorier l\'argent encaissé, *avant la fin du mois* ; il confirme la réception.',
       '*Plus › Enseignants* : pointage des cours, contrats, paies.', '*Plus › Comptes et accès* : créez les comptes de vos secrétaires et enseignants.', '*Plus › Agenda* : rendez-vous, rencontres, échéances ; la cloche en haut rappelle ce qui approche.'],
     actionnaire: ['*Accueil* : les chiffres clés de votre centre (élèves, appels, encaissé, impayés).', '*Plus › Bilan* : recettes, dépenses, résultat du mois et votre part.',
-      '*Caisse* : versements et dépenses, en consultation.', '*Plus › Planning* : vous tenez l\'emploi du temps du centre (classes, créneaux, enseignants).', '*Plus › Agenda* : rendez-vous et rencontres ; la cloche en haut rappelle ce qui approche.'],
+      '*Caisse › Encaisser* : quand vous êtes au centre ou qu\'un parent vous paie, encaissez et envoyez-lui le reçu par WhatsApp.',
+      '*Caisse › Remises* : remettez cet argent au trésorier *avant la fin du mois* ; il confirme la réception.', '*Plus › Planning* : vous tenez l\'emploi du temps du centre (classes, créneaux, enseignants).', '*Plus › Agenda* : rendez-vous et rencontres ; la cloche en haut rappelle ce qui approche.'],
     secretaire: ['*Appel* : choisissez la classe, touchez chaque élève (présent, retard, absent), au début du cours.', '*Élèves › +* : inscrire un élève.',
       '*Caisse › Encaisser* : un reçu numéroté part au parent par WhatsApp. Un versement ne se modifie pas : en cas d\'erreur, prévenez le responsable.',
-      '*Caisse › Dépenses* : photo du justificatif *obligatoire dès 10 000 F*.', '*Plus › Agenda* : notez les rendez-vous ; la cloche en haut rappelle échéances et rencontres.'],
+      '*Caisse › Dépenses* : photo du justificatif *obligatoire dès 10 000 F*.', '*Caisse › Remises* : remettez l\'argent encaissé au trésorier avant la fin du mois.', '*Plus › Agenda* : notez les rendez-vous ; la cloche en haut rappelle échéances et rencontres.'],
     enseignant: ['*Accueil › Mes cours aujourd\'hui* : touchez votre cours pour faire l\'appel, au début du cours.', '*Planning* : votre emploi du temps de la semaine.',
       '*Plus › Mes heures* : heures faites, montant dû, paies reçues.']
   };
@@ -3143,6 +3294,7 @@
       '3. Plus › *Changer mon mot de passe*, puis Plus › *Code de verrouillage* (4 chiffres).\n\n' +
       '*Votre rôle : ' + (admin ? 'Administrateur' : ou) + '*\n' + GUIDE_ROLE[principal].map(function (l) { return '• ' + l; }).join('\n') + '\n\n' +
       'Sans réseau, tout continue : vos saisies partent dès le retour de la connexion (pastille « À jour » en haut).\n' +
+      'Trésorier du centre : vous confirmez chaque remise dans *Caisse › Remises* (« Reçu » ou « Pas reçu »).\n' +
       'Plus › *Rôles et droits* explique ce que chacun peut faire. Une question : appelez l\'administrateur.';
   }
   function feuilleSecret(titre, nom, identifiant, mdp, acces, admin) {
@@ -3236,6 +3388,13 @@
       '<label class="champ"><span>Nom court</span><input type="text" name="nom_court" required value="' + n('nom_court') + '"><small>Affiché dans le sélecteur, ex. : Ndog-passi III</small></label>' +
       '<label class="champ"><span>Adresse (imprimée sur les reçus)</span><input type="text" name="adresse" value="' + n('adresse') + '"></label>' +
       '<label class="champ"><span>Téléphones</span><input type="text" name="telephones" value="' + n('telephones') + '"></label>' +
+      (id ? (function () {
+        var vus = {}, choix = E.equipe.filter(function (e) { if (e.centre_id !== id || vus[e.id] || e.role === 'enseignant') return false; vus[e.id] = 1; return true; });
+        if (!vus[E.profil.utilisateur.id]) choix.unshift({ id: E.profil.utilisateur.id, nom: E.profil.utilisateur.nom + ' (vous)' });
+        return '<label class="champ"><span>Trésorier du centre</span><select name="tresorier_id"><option value="">— Aucun —</option>' + choix.map(function (e) {
+          return '<option value="' + esc(e.id) + '"' + (c.tresorier_id === e.id ? ' selected' : '') + '>' + esc(e.nom) + (e.role ? ' · ' + esc(e.role === 'admin' ? 'Administrateur' : ROLES[e.role] || e.role) : '') + '</option>';
+        }).join('') + '</select><small>Il garde les fonds et confirme chaque remise des partenaires.</small></label>';
+      })() : '') +
       '<label class="champ"><span>Devise</span><input type="text" name="devise" value="' + n('devise') + '"></label>' +
       '<div class="deux"><label class="champ"><span>Retard au-delà de (min)</span><input type="number" name="tolerance_retard_min" min="0" max="60" required value="' + n('tolerance_retard_min') + '"></label>' +
       '<label class="champ"><span>Échéance : le … du mois</span><input type="number" name="jour_echeance" min="1" max="28" required value="' + n('jour_echeance') + '"></label></div>' +
@@ -3292,6 +3451,33 @@
       if (a) confirmer('Retirer ' + a.nom + ' des actionnaires ?', 'Retirer', function () { muter('actionnaires', a.id, {}, true).then(rendre); });
     },
     // Le logo n'est ni un lien ni une image : l'appui long n'ouvre aucun menu du navigateur.
+    'editer-remise': function (el) {
+      if (!E.enLigne && !el.dataset.id) { /* hors ligne : la remise part au retour du réseau */ }
+      feuilleRemise(el.dataset.id || '', CAI.centre, el.dataset.montant);
+    },
+    'suppr-remise': function (el) {
+      var r = ligne('remises', el.dataset.id);
+      if (r) confirmer('Retirer la remise de ' + fcfa(r.montant) + ' ?', 'Retirer', function () { muter('remises', r.id, {}, true).then(function () { toast('Remise retirée.'); rendre(); }); });
+    },
+    'remise-recue': function (el) {
+      var r = ligne('remises', el.dataset.id);
+      if (r) confirmer('Confirmer avoir reçu ' + fcfa(r.montant) + ' de ' + nomCompte(r.remis_par) + ' ?', 'Oui, reçu', function () {
+        muter('remises', r.id, { statut: 'confirmee' }).then(function () { toast('Réception confirmée.'); rendre(); });
+      });
+    },
+    'remise-contester': function (el) {
+      var r = ligne('remises', el.dataset.id);
+      if (!r) return;
+      ouvrirFeuille('<h2>Remise non reçue</h2><p>' + esc(nomCompte(r.remis_par)) + ' déclare vous avoir remis <b>' + fcfa(r.montant) + '</b> le ' + esc(dateLisible(r.date, true)) + '.</p>' +
+        '<form data-f="contestation" data-id="' + esc(r.id) + '"><label class="champ"><span>Motif</span><input type="text" name="motif" required minlength="4" maxlength="200" placeholder="ex. : rien reçu, montant différent (reçu 20 000 F)"></label>' +
+        '<div class="actions"><button class="btn danger" type="submit">Signaler « pas reçu »</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
+    },
+    'remise-prevenir': function (el) {
+      var r = ligne('remises', el.dataset.id);
+      if (!r) return;
+      var t = messageRemise(r);
+      if (NATIF || navigator.share) partagerTexte(t); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener');
+    },
     'ag-mois': function (el) { AG.mois = decalerMois(AG.mois, +el.dataset.v); AG.jour = ''; rendre(); },
     'ag-jour': function (el) { AG.jour = AG.jour === el.dataset.v ? '' : el.dataset.v; rendre(); },
     'voir-evenement': function (el) { feuilleVoirEvenement(el.dataset.id, el.dataset.date); },
@@ -3629,6 +3815,7 @@
         msg_relance: v.msg_relance, msg_recu: v.msg_recu, inscription_option: Number(v.inscription_option) || 0, inscription_option_libelle: v.inscription_option_libelle,
         alerte_appel_min: +v.alerte_appel_min, alerte_direction_min: +v.alerte_direction_min
       };
+      if (form.querySelector('[name=tresorier_id]')) champs.tresorier_id = v.tresorier_id || '';
       if (!form.dataset.id) champs.ordre = lignes('centres').length + 1;
       if (champs.alerte_direction_min < champs.alerte_appel_min) { toast('L\'alerte administrateur doit venir après celle du responsable.', true); return; }
       fermerFeuille();
@@ -3645,6 +3832,27 @@
       if (active) lignes('annees').forEach(function (a) { if (a.id !== id && Number(a.active)) suite = suite.then(function () { return muter('annees', a.id, { active: 0 }); }); });
       suite.then(function () { return muter('annees', id, { libelle: v.libelle, debut: v.debut, fin: v.fin, mois_factures: mois.join(','), active: active ? 1 : 0 }); })
         .then(function () { toast('Enregistré.'); rendre(); });
+    },
+    remise: function (form) {
+      var v = valeurs(form);
+      var id = form.dataset.id || nouvelId(), cid = form.dataset.centre;
+      var montant = Math.round(Number(v.montant));
+      if (!(montant > 0)) { toast('Montant invalide.', true); return; }
+      fermerFeuille();
+      muter('remises', id, { centre_id: cid, montant: montant, date: v.date, mode: v.mode, note: v.note, statut: 'en_attente' }).then(function () {
+        CAI.onglet = 'remises'; rendre();
+        var r = ligne('remises', id);
+        if (!form.dataset.id && r) confirmer('Remise enregistrée. Prévenir ' + nomCompte(tresorierDe(cid)) + ' pour qu\'il confirme la réception ?', 'Prévenir', function () {
+          var t = messageRemise(r);
+          if (NATIF || navigator.share) partagerTexte(t); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener');
+        });
+        else toast('Remise enregistrée.');
+      });
+    },
+    contestation: function (form) {
+      var v = valeurs(form);
+      fermerFeuille();
+      muter('remises', form.dataset.id, { statut: 'contestee', motif: v.motif }).then(function () { toast('Remise signalée « pas reçue ».'); rendre(); });
     },
     evenement: function (form) {
       var v = valeurs(form);
