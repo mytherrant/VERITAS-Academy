@@ -54,7 +54,8 @@ finances + emploi du temps) · secrétaire/surveillant · enseignant. Voir `g_ca
 ## Mise en service (une fois)
 
 1. **Sous-domaine** — panneau LWS › Domaines › Sous-domaines : créer `gestion.veritas-school.com`
-   pointant vers le dossier **`gestion`** de l'hébergement (là où la CI dépose les fichiers),
+   LWS le fait pointer vers un dossier du **même nom**, `gestion.veritas-school.com/`, à la
+   racine (à côté de `api/`) : c'est là que la CI dépose les fichiers ;
    puis activer le certificat SSL du sous-domaine.
 2. **Jeton d'installation** — ajouter dans `api/payment_config.php` (sur le serveur, gitignoré) :
    `define('G_INSTALL_TOKEN', '<64 caractères aléatoires>');`

@@ -1622,7 +1622,7 @@ jobs:
             echo "  ✓ api/campus/ ($(ls deploy/api/campus/*.php | wc -l) fichiers PHP + schema.sql + verrou)"
           fi
 
-          # ── VÉRITAS Gestion (gestion/ → gestion.veritas-school.com) ──
+          # ── VÉRITAS Gestion (gestion/ → dossier gestion.veritas-school.com/) ──
           # Application des centres : coquille + API. Le sous-domaine pointe
           # sur ce dossier (panneau LWS). _config.php (surcharges locales) et
           # la base SQLite de développement ne partent JAMAIS ; sans les deux
@@ -1632,20 +1632,23 @@ jobs:
               echo "::error title=Gestion sans verrou::gestion/api/.htaccess ou gestion/api/data/.htaccess manquant. Déploiement ANNULÉ."
               exit 1
             fi
-            mkdir -p deploy/gestion/api/data deploy/gestion/polices
+            # LWS fait pointer le sous-domaine sur un dossier du MÊME NOM que lui,
+            # à la racine (à côté de api/ : _boot.php y lit api/payment_config.php).
+            GD=deploy/gestion.veritas-school.com
+            mkdir -p "$GD"/api/data "$GD"/polices
             for f in index.html app.css app.js sw.js manifest.webmanifest icone-512.png logo.png .htaccess; do
-              cp "gestion/$f" deploy/gestion/
+              cp "gestion/$f" "$GD"/
             done
-            cp gestion/polices/*.woff2 deploy/gestion/polices/
+            cp gestion/polices/*.woff2 "$GD"/polices/
             for f in gestion/api/*.php; do
               case "$(basename "$f")" in
                 _config.php) echo "  ↷ gestion/api/_config.php ignoré (poste de développement)" ;;
-                *) cp "$f" deploy/gestion/api/ ;;
+                *) cp "$f" "$GD"/api/ ;;
               esac
             done
-            cp gestion/api/.htaccess deploy/gestion/api/
-            cp gestion/api/data/.htaccess deploy/gestion/api/data/
-            echo "  ✓ gestion/ ($(ls deploy/gestion/api/*.php | wc -l) fichiers PHP, coquille, polices, verrous)"
+            cp gestion/api/.htaccess "$GD"/api/
+            cp gestion/api/data/.htaccess "$GD"/api/data/
+            echo "  ✓ gestion/ ($(ls "$GD"/api/*.php | wc -l) fichiers PHP, coquille, polices, verrous)"
           fi
 
           # ── Atelier de Francais (plateforme/) ────────────────────
