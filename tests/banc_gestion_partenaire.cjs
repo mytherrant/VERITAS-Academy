@@ -88,9 +88,11 @@ const apiDe = (page) => (route, corps) => page.evaluate(async ([route, corps]) =
   // 7. L'actionnaire fait l'appel.
   await pa.goto(B + '#/appel'); await pa.waitForTimeout(400);
   ok('onglet « Appel » dans la barre du bas', await pa.isVisible('.nav-basse a[href="#/appel"]'), '');
-  const seance = await pa.$('a.ligne.creneau');
+  // Une séance du jour qui a des élèves à pointer (d'autres bancs créent des classes vides).
+  const hrefs = await pa.$$eval('a.ligne.creneau', (l) => l.map((a) => a.getAttribute('href')));
+  let seance = null;
+  for (const h of hrefs) { await pa.goto(B + h); await pa.waitForTimeout(300); if (await pa.$('[data-a="pointer"]')) { seance = h; break; } }
   if (seance) {
-    await seance.click(); await pa.waitForSelector('[data-a="pointer"]', { timeout: 8000 }).catch(() => {});
     const b = await pa.$('[data-a="pointer"][data-v="arrive"]') || await pa.$('[data-a="pointer"]');
     if (b) { await b.click(); await pa.waitForTimeout(500); await aJour(pa); }
     ok('l\'actionnaire pointe un élève à l\'appel', !!b && !(await pa.textContent('main')).includes('Consultation seule'), (await pa.textContent('main')).slice(0, 200));

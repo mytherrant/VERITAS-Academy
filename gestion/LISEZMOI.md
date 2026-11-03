@@ -66,6 +66,11 @@ cours, jamais plus que durée faite × taux (à la séance : le taux ; au forfai
 sort de sa caisse (« dépenses et paies » dans Remises), figure dans Caisse › Dépenses, le point du
 jour et le bilan, et l'enseignant la voit dans « Mes heures ». La paie du mois reste au responsable.
 
+**Cahier de textes :** saisi dans la feuille d'appel de chaque séance (« Ce qui a été fait »,
+« Travail donné » → `g_seances.contenu` / `travail`), relu dans Plus › Cahier de textes : par centre et
+par classe, du plus récent au plus ancien, avec l'horaire, la matière et l'enseignant du jour ; exports
+PDF (texte jamais coupé), Excel, WhatsApp. L'enseignant ne voit que ses classes.
+
 **Rapports (Plus › Rapports, ou depuis Caisse › Impayés et le Bilan) :** pour qui voit la caisse.
 Insolvables (classe, échéances impayées, montant dû, téléphone, sous-totaux), paiements par mois et
 par classe (cases du cahier : ce qui couvre chaque échéance, payé, doit), rapport du trésorier pour un
@@ -179,6 +184,7 @@ node tests/banc_gestion_connexion.cjs <dossier>  # connexion : aide après éche
 node tests/banc_gestion_partenaire.cjs <dossier> # actionnaire : inscrit, encaisse, crée et paie un enseignant ; ne voit que son rôle (Playwright)
 node tests/banc_gestion_cloture.cjs <dossier>    # clôture du mois : comptes du serveur, partage, verrou, droits (Playwright)
 node tests/banc_gestion_rapports.cjs <dossier>   # rapports : insolvables, paiements par classe, trésorier, exports (Playwright)
+node tests/banc_gestion_cahier.cjs <dossier>     # cahier de textes : saisie, serveur, relecture par classe, exports (Playwright)
 ```
 
 **Noms fictifs uniquement** dans le code et les bancs : le dépôt est public, les élèves sont mineurs.
