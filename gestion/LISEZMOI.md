@@ -78,6 +78,24 @@ chaque partenaire (le serveur les applique : un droit retiré est refusé même 
 Réinstaller est sans risque : `install.php` est idempotent et ajoute seulement ce qui manque
 (tables, colonnes, index).
 
+## Application Android (APK pour les partenaires)
+
+Projet Capacitor hors dépôt : `Documentseritas-gestion-app` (appId `cm.veritas.gestion`).
+La coquille (HTML, CSS, JS, polices) est **embarquée** dans l'APK : l'appli s'ouvre sans réseau,
+et seules les données passent par `https://gestion.veritas-school.com/api/` (adresse posée
+par `www/config.js`, origine `https://localhost` admise par le CORS de `_boot.php`).
+Partage des reçus et feuilles : modules natifs `@capacitor/share` + `@capacitor/filesystem`
+(la WebView d'Android ne sait ni partager ni télécharger un Blob).
+
+```bash
+node preparer-www.cjs <dépôt>/gestion        # recopie la coquille du dépôt dans www/
+npx cap sync android
+cd android && gradlew assembleDebug          # JAVA_HOME = JDK d'Android Studio (jbr)
+```
+
+Une nouvelle version de `app.js` ne parvient à l'APK qu'en la **reconstruisant** (le web,
+lui, se met à jour seul) : garder l'API compatible avec les APK déjà distribuées.
+
 ## Développement local
 
 ```bash

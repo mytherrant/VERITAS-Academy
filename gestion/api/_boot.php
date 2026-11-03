@@ -44,8 +44,8 @@ header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: no-referrer');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
-$G_ORIGINES = ['https://gestion.veritas-school.com'];
-if (G_DB_DRIVER === 'sqlite') { $G_ORIGINES[] = 'http://localhost:8000'; $G_ORIGINES[] = 'http://127.0.0.1:8000'; }
+$G_ORIGINES = ['https://gestion.veritas-school.com', 'https://localhost'];
+if (G_DB_DRIVER === 'sqlite') { array_push($G_ORIGINES, 'http://localhost:8000', 'http://127.0.0.1:8000', 'http://127.0.0.1:8100'); }
 $g_origine = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($g_origine, $G_ORIGINES, true)) {
     header('Access-Control-Allow-Origin: ' . $g_origine);

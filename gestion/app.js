@@ -14,7 +14,10 @@
   'use strict';
 
   var VERSION = '0.9.0';
-  var API = 'api/index.php';
+  var BASE = window.VERITAS_GESTION_BASE || '';
+  var API = BASE + 'api/index.php';
+  /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
+  var NATIF = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
   var INTERVALLE_SYNC = 25000;
   var VERROU_APRES_MS = 5 * 60 * 1000;
 
@@ -524,7 +527,7 @@
   // ───────────────────────────── Connexion / installation ─────────────────────────────
   function ecranConnexion(app, message) {
     app.innerHTML = '<div class="connexion"><div class="boite"><div class="logo"><img src="icone-512.png" alt=""><div><b>VÉRITAS Gestion</b><small>Centres de répétition</small></div></div><div id="zone-connexion"><p class="doux">Chargement…</p></div></div></div>';
-    fetch('api/install.php', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (etat) {
+    fetch(BASE + 'api/install.php', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (etat) {
       if (!etat.installe || !etat.admin) formulaireInstallation(etat);
       else formulaireConnexion(message);
     }, function () { formulaireConnexion(message || (navigator.onLine ? 'Serveur injoignable.' : 'Pas de connexion internet. La première connexion demande du réseau.')); });
@@ -1359,11 +1362,35 @@
   }
   /** Partage natif (WhatsApp, etc.) si le téléphone sait partager des fichiers ; sinon téléchargement. */
   function partagerFichiers(fichiers, titre) {
+    if (NATIF) return partagerNatif(fichiers, titre);
     if (navigator.canShare && navigator.share && navigator.canShare({ files: fichiers })) {
       return navigator.share({ files: fichiers, title: titre }).catch(function (e) { if (e && e.name !== 'AbortError') telecharger(fichiers); });
     }
     telecharger(fichiers);
     return Promise.resolve();
+  }
+  /** APK : la WebView d'Android ne sait ni partager ni télécharger un Blob. On écrit les
+   *  fichiers dans le cache de l'application, puis on ouvre la feuille de partage d'Android. */
+  function partagerNatif(fichiers, titre) {
+    var P = window.Capacitor.Plugins;
+    return Promise.all(fichiers.map(function (f) {
+      return new Promise(function (ok, ko) {
+        var lr = new FileReader();
+        lr.onload = function () { ok(String(lr.result).split(',')[1]); };
+        lr.onerror = ko;
+        lr.readAsDataURL(f);
+      }).then(function (b64) {
+        return P.Filesystem.writeFile({ path: f.name, data: b64, directory: 'CACHE' });
+      }).then(function (r) { return r.uri; });
+    })).then(function (uris) {
+      return P.Share.share({ title: titre, files: uris, dialogTitle: titre });
+    }).catch(function (e) {
+      if (!/cancel/i.test(String(e && e.message))) toast('Partage impossible : ' + (e && e.message || 'erreur'), 'alerte');
+    });
+  }
+  function partagerTexte(texte) {
+    if (NATIF) return window.Capacitor.Plugins.Share.share({ text: texte }).catch(function () {});
+    return navigator.share({ text: texte }).catch(function () {});
   }
   function telecharger(fichiers) {
     fichiers.forEach(function (f, i) {
@@ -2432,7 +2459,7 @@
     E.cache.messageSecret = message;
     ouvrirFeuille('<h2>' + esc(titre) + '</h2><p>Transmettez ces informations à <b>' + esc(nom) + '</b>. Le mot de passe ne sera <b>plus jamais affiché</b>.</p>' +
       '<p class="doux">Identifiant</p><div class="secret">' + esc(identifiant) + '</div><p class="doux">Mot de passe</p><div class="secret">' + esc(mdp) + '</div>' +
-      '<div class="actions">' + (navigator.share ? '<button class="btn or" type="button" data-a="partager-secret">Envoyer (WhatsApp, SMS…)</button>' : '') +
+      '<div class="actions">' + (NATIF || navigator.share ? '<button class="btn or" type="button" data-a="partager-secret">Envoyer (WhatsApp, SMS…)</button>' : '') +
       '<button class="btn clair" type="button" data-a="copier-secret">Copier</button><button class="btn" type="button" data-a="fermer">J\'ai transmis</button></div>');
   }
 
@@ -2578,7 +2605,7 @@
       api('sessions/revoquer', { id: el.dataset.id }).then(function () { toast('Appareil déconnecté.'); feuilleAppareils(el.dataset.uid); }, function (e) { toast(e.message, true); });
     },
     'copier-secret': function () { copier(E.cache.messageSecret || ''); },
-    'partager-secret': function () { navigator.share({ text: E.cache.messageSecret }).catch(function () {}); },
+    'partager-secret': function () { partagerTexte(E.cache.messageSecret); },
     'journal-suite': function () { chargerJournal(true); },
     'appel-centre': function (el) { APL.centre = el.dataset.v; rendre(); },
     'appel-date': function (el) { APL.date = decalerJour(APL.date, +el.dataset.v); rendre(); },
@@ -2822,7 +2849,7 @@
       var v = valeurs(form);
       occupe(form, true);
       var poster = function (corps) {
-        return fetch('api/install.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corps) })
+        return fetch(BASE + 'api/install.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corps) })
           .then(function (r) { return r.json(); }).then(function (j) { if (!j.ok) throw new Error(j.error); return j; });
       };
       poster({ jeton: v.jeton, action: 'installer' })
@@ -3179,7 +3206,7 @@
     $('#app').innerHTML = '<div class="connexion"><div class="boite"><div class="erreur">Stockage local indisponible (' + esc(e && e.message) + '). Navigation privée ? Ouvrez l\'application dans un onglet normal.</div></div></div>';
   });
 
-  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+  if (!NATIF && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
     navigator.serviceWorker.register('sw.js').catch(function () {});
   }
 })();
