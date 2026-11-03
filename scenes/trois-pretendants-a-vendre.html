@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Je suis donc à vendre ? — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Trois prétendants… un mari de Guillaume Oyônô Mbia : Juliette découvre qu’on a déjà encaissé sa dot.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'trois-pretendants',
+  discipline: 'Français', niveau: '4e',
+  oeuvre: 'Trois prétendants… un mari', auteur: 'Guillaume Oyônô Mbia',
+  titre: 'Je suis donc à vendre ?',
+  decor: 'village', lieu: 'Mvoutessi, devant la maison d’Atangana', moment: 'Acte I',
+  objectif: 'Rire avec la comédie et comprendre sa satire : une famille qui « vend » sa fille au plus offrant, et une jeune fille qui veut choisir elle-même.',
+  jauges: [
+    { id: 'dot', nom: 'Dot encaissée (×10 000 F)', val: 10, couleur: '#D99A00' },
+    { id: 'liberte', nom: 'Liberté de Juliette', val: 20, couleur: '#1E499B' }
+  ],
+  personnages: {
+    juliette:  { nom: 'Juliette', couleur: '#C0397C', look: { metier: 'eleve', peau: 'fonce', cheveux: 'tresses', tenue: 'jupe' } },
+    atangana:  { nom: 'Atangana, son père', couleur: '#8A5A2B', look: { peau: 'fonce', cheveux: 'ras', moustache: true, habit: '#9C6B3A', bas: '#4A3A2A', coiffe: 'chapeau' } },
+    abessolo:  { nom: 'Abessolo, le grand-père', couleur: '#5A4A3A', look: { peau: 'fonce', vieux: true, barbe: true, tenue: 'boubou', habit: '#6B5A3A' } },
+    bella:     { nom: 'Bella, la grand-mère', couleur: '#8A3B6E', look: { peau: 'fonce', vieux: true, coiffe: 'foulard', couleurCoiffe: '#5AA9E6', tenue: 'robe', habit: '#8A3B6E' } },
+    matalina:  { nom: 'Matalina, la cousine', couleur: '#D99A00', look: { peau: 'brun', cheveux: 'chignon', tenue: 'robe', habit: '#E8A413' } },
+    oko:       { nom: 'Oko, lycéen', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court', lunettes: true } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['atangana', 'abessolo', 'bella', 'matalina'], txt: 'Mvoutessi, le village même de l’auteur. Le paysan Ndi a déjà versé cent mille francs pour épouser Juliette. Mais on attend d’autres prétendants, plus riches…', objet: { i: 'pieces', lib: '100 000 F' }, jauges: { dot: 30 } },
+    { t: 'recit', entre: ['juliette'], txt: 'Une auto s’arrête : Juliette arrive de Libamba, joyeuse. Elle annonce qu’elle a réussi son examen ; sa grand-mère pousse le cri de joie traditionnel, l’ôyenga.' },
+    { t: 'dit', qui: 'abessolo', emo: 'joie', txt: 'Tu... tu étudies toujours à Dibamba, n’est-ce pas, ma petite ?', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte I' },
+    { t: 'dit', qui: 'juliette', emo: 'joie', jeu: 'elle éclate de rire', txt: 'À Libamba, Tita ! Dibamba, c’est un fleuve !' },
+    { t: 'dit', qui: 'matalina', emo: 'surpris', jeu: 'sans réfléchir', txt: 'L’an prochain ? Ton mari va donc te laisser repartir au collège, Juliette ?', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte I' },
+    { t: 'dit', qui: 'juliette', emo: 'colere', jeu: 'regardant tout le monde', txt: 'Mon mari ? Quel mari ? On m’a mariée sans me le dire ? Je suis donc à vendre ?', jauges: { liberte: 40 } },
+    { t: 'dit', qui: 'abessolo', emo: 'colere', txt: 'Depuis quand est-ce que les femmes parlent à Mvoutessi ?', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari' },
+    { t: 'question', q: 'Quand Abessolo lance cette phrase, l’auteur est-il d’accord avec lui ?',
+      options: [
+        { txt: 'Non : la pièce rend le grand-père ridicule. C’est la satire.', ok: true, retour: 'Il confond ses souvenirs, dit « Dibamba » pour Libamba, et toute la salle rit de lui. Faire dire une bêtise à un personnage pour que le public la trouve bête : c’est la satire.' },
+        { txt: 'Oui : c’est le message de la pièce.', retour: 'Attention : ce n’est pas l’auteur qui parle, c’est un personnage que la pièce ridiculise.' }
+      ] },
+    { t: 'recit', txt: 'Arrivent d’autres prétendants : Mbia, grand fonctionnaire de Sangmélima, avec ses médailles, puis Tchetgen, le commerçant. Chaque fois, la famille encaisse.', jauges: { dot: 90 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · ce que veut chacun', consigne: 'La pièce range ses personnages par générations. Qui veut l’argent, qui veut la liberté ?',
+      cats: ['L’argent de la dot', 'Le libre choix'],
+      items: [
+        { txt: 'Atangana, le père : la dot la plus élevée possible', cat: 0 },
+        { txt: 'Juliette : choisir elle-même', cat: 1 },
+        { txt: 'Oyono, le frère : de quoi doter sa propre fiancée', cat: 0 },
+        { txt: 'Oko : épouser Juliette, sans un franc', cat: 1 }
+      ],
+      bravo: 'Les vieux décident, les parents encaissent, les jeunes paient : c’est le sujet de la pièce.' },
+    { t: 'choix', qui: 'juliette', entre: ['oko'], q: 'Tu es Juliette. Ta famille a encaissé trois dots et tu aimes Oko, qui n’a pas un franc. Que fais-tu ?',
+      options: [
+        { txt: 'J’obéis et j’épouse le plus riche.', consequence: 'La famille est contente, et ta vie est décidée par d’autres.', jauges: { liberte: -30 } },
+        { txt: 'Avec Oko et son ami Kouma, j’imagine une ruse pour retourner la dot contre ma famille.', consequence: 'Tu entres dans la comédie : c’est l’argent même de la dot qui va servir à doter… Oko !', jauges: { liberte: 50 } },
+        { txt: 'Je m’enfuis seule à Yaoundé.', consequence: 'Tu échappes au mariage, mais la famille doit rembourser et te renie.', jauges: { liberte: 20, dot: -50 } }
+      ],
+      oeuvre: 'Juliette, Oko et Kouma montent un plan. Au dénouement, l’argent des dots a disparu, et Kouma présente un dernier prétendant : « Monsieur Okô… Docteur en Doctorat ! »' },
+    { t: 'remarque', titre: 'Le dénouement', txt: 'Tchetgen renonce : « Cette femme coûte trop cher ! » Puis Kouma présente, le plus sérieusement du monde, le dernier prétendant, Oko, « Docteur en Doctorat », et même « Docteur en Baccalauréat ». La famille, aveuglée par les titres, se laisse prendre à son propre jeu.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · la pièce en cinq actes', consigne: 'Remets les moments dans l’ordre.',
+      items: ['Une dot déjà encaissée : celle de Ndi.', '« Je suis donc à vendre ? » : Juliette découvre tout.', 'Le grand fonctionnaire Mbia et ses médailles.', 'Le sorcier Sanga-Titi est appelé.', 'Docteur en Doctorat : Oko épouse Juliette.'],
+      bravo: 'Une comédie satirique : on rit, et l’on comprend ce qu’on critique.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · le marché de Mvoutessi',
+    intro: 'Règle l’appétit d’argent de la famille, l’autorité des anciens et la ruse des jeunes : qui épousera Juliette ?',
+    persos: ['juliette', 'oko', 'atangana', 'abessolo', 'bella', 'matalina'],
+    curseurs: [
+      { id: 'argent', nom: 'Appétit d’argent de la famille', val: 90, bas: 'désintéressée', haut: 'au plus offrant' },
+      { id: 'anciens', nom: 'Autorité des anciens', val: 80, bas: 'à l’écoute', haut: '« les femmes ne parlent pas »' },
+      { id: 'ruse', nom: 'Ruse des jeunes', val: 85, bas: 'résignés', haut: 'inventifs', lecture: { haut: 'Kouma organise la présentation des prétendants avec des feuilles de palmier.', bas: 'Sans ruse, Juliette n’a que deux choix : obéir ou fuir.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans la pièce', icone: 'livre', valeurs: { argent: 90, anciens: 80, ruse: 85 } },
+      { nom: 'Et si les jeunes se résignaient ?', icone: 'muet', valeurs: { ruse: 10 } },
+      { nom: 'Et si la famille écoutait Juliette ?', icone: 'groupe', valeurs: { argent: 20, anciens: 20 } }
+    ],
+    liens: [
+      { a: 'juliette', b: 'oko', type: 'amour', lib: 'amoureux', base: .7 },
+      { a: 'atangana', b: 'juliette', type: 'domination', lib: 'la dot', base: .1, poids: { argent: .8 } },
+      { a: 'abessolo', b: 'juliette', type: 'conflit', lib: '« les femmes ne parlent pas »', base: .1, poids: { anciens: .8 } },
+      { a: 'bella', b: 'juliette', type: 'confiance', lib: 'fierté', base: .5 },
+      { a: 'matalina', b: 'juliette', type: 'peur', lib: 'jalousie', base: .4 }
+    ],
+    issue: function(v){
+      if(v.argent < 40 && v.anciens < 40){ return { niveau: 'ok', badge: 'Juliette choisit librement', recit: 'La famille écoute Juliette : elle épouse Oko, sans enchères.', apres: 'Plus de comédie : la satire n’aurait plus de cible.', themes: ['liberté'] }; }
+      if(v.ruse < 35){ return { niveau: 'ko', badge: 'Vendue au plus offrant', recit: 'Les jeunes se résignent : Juliette épouse le prétendant le plus riche.', apres: 'La dot devient un marché, et la jeune fille une marchandise.', themes: ['dot', 'mariage forcé'] }; }
+      return { niveau: 'ok', badge: 'Docteur en Doctorat', recit: 'La ruse des jeunes retourne l’argent des dots contre la famille : Oko, présenté en grand docteur, épouse Juliette.', apres: 'On rit de ceux qui se croyaient malins : c’est la force de la comédie satirique.', themes: ['satire', 'dot', 'générations', 'ruse'] };
+    }
+  },
+  quiz: [
+    { q: 'Où se passe la pièce ?', options: [ { txt: 'À Mvoutessi, le village de l’auteur.', ok: true, retour: 'Construit le long de la route.' }, { txt: 'À Kekem.', retour: 'Kekem, c’est N’koum-wam.' } ] },
+    { q: 'Où Juliette fait-elle ses études ?', options: [ { txt: 'Au collège de Libamba.', ok: true, retour: 'Son grand-père dit obstinément « Dibamba », qui est un fleuve.' }, { txt: 'À Sangmélima.', retour: 'Sangmélima, c’est la ville de Mbia, le fonctionnaire.' } ] },
+    { q: 'Qu’est-ce que la satire ?', options: [ { txt: 'Faire dire une bêtise à un personnage pour que le public la trouve bête.', ok: true, retour: 'Abessolo en est la cible.' }, { txt: 'Un éloge des traditions.', retour: 'Non : c’est une critique par le rire.' } ] },
+    { q: 'Qui épouse Juliette à la fin ?', options: [ { txt: 'Oko, le lycéen.', ok: true, retour: 'Présenté en « Docteur en Doctorat ».' }, { txt: 'Mbia, le fonctionnaire.', retour: 'Non : la ruse des jeunes l’emporte.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'La famille encaisse plusieurs dots pour la même fille : la dot devient un marché.',
+      'Juliette veut choisir elle-même : « Je suis donc à vendre ? »',
+      'Abessolo est ridiculisé : c’est la satire, pas l’opinion de l’auteur.',
+      'La ruse des jeunes (Juliette, Oko, Kouma) retourne la situation : Oko, « Docteur en Doctorat ».'
+    ],
+    ecrire: 'Explique (quinze lignes) pourquoi la pièce fait rire de la dot sans rejeter toute la tradition. Appuie-toi sur deux personnages.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

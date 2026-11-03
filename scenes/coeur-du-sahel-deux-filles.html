@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deux filles du même âge — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Cœur du Sahel de Djaïli Amadou Amal : Faydé, quinze ans, part travailler à Maroua ; son amitié avec Leïla.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'coeur-sahel',
+  discipline: 'Français', niveau: '4e',
+  oeuvre: 'Cœur du Sahel', auteur: 'Djaïli Amadou Amal (2022)',
+  titre: 'Deux filles du même âge',
+  decor: 'village', ambiance: 'chaleur', lieu: 'un village de l’Extrême-Nord, puis Maroua', moment: 'Parties I et II',
+  objectif: 'Comprendre pourquoi les jeunes filles partent travailler en ville, et observer une amitié « à sens unique » entre une servante et la fille de la maison : le portrait en contraste.',
+  jauges: [
+    { id: 'besoin', nom: 'Besoin d’argent à la maison', val: 85, couleur: '#E07B39' },
+    { id: 'confiance', nom: 'Confiance de Faydé envers Leïla', val: 20, couleur: '#1E499B' }
+  ],
+  personnages: {
+    fayde:  { nom: 'Faydé, 15 ans', couleur: '#1F6F78', look: { peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#1F6F78', tenue: 'robe', habit: '#2E6B5A' } },
+    kondem: { nom: 'Kondem, sa mère', couleur: '#8A5A2B', look: { peau: 'fonce', vieux: true, coiffe: 'foulard', couleurCoiffe: '#8A5A2B', tenue: 'robe', habit: '#7A5A3A' } },
+    leila:  { nom: 'Leïla', age: 'jeune', couleur: '#C0397C', look: { peau: 'brun', coiffe: 'voile', couleurCoiffe: '#E0548A', tenue: 'robe', habit: '#C0397C' } },
+    biri:   { nom: 'Biri, le jardinier', couleur: '#5A6275', look: { metier: 'paysan', peau: 'fonce', vieux: true, cheveux: 'ras' } },
+    boukar: { nom: 'Boukar', couleur: '#2F5E9E', look: { peau: 'brun', cheveux: 'court', tenue: 'boubou', habit: '#E9EEF5', objet: 'livre' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['fayde', 'kondem'], txt: 'Faydé a quinze ans. Elle a quitté l’école deux ans plus tôt ; elle voulait être médecin. Quatre mois sans pluie derrière, cinq mois sans pluie devant, les greniers vides, et des petits frères à nourrir.' },
+    { t: 'dit', qui: 'fayde', txt: 'Srafata, Danna, Bintou sont toutes parties à Maroua. Elles reviennent en décembre les mains pleines. Laisse-moi partir, Maman.' },
+    { t: 'dit', qui: 'kondem', emo: 'colere', txt: 'Moi aussi, j’ai été domestique à Maroua. Je sais ce que c’est. Je ne veux pas de ça pour toi.', jauges: { besoin: 95 } },
+    { t: 'question', q: 'Pourquoi les filles partent-elles travailler en ville, selon le roman ?',
+      options: [
+        { txt: 'Par nécessité : sécheresse, terre épuisée, greniers vides, trop de bouches à nourrir.', ok: true, retour: 'Le texte donne les raisons une à une : ce ne sont pas des caprices.' },
+        { txt: 'Pour s’amuser en ville.', retour: 'Non : le roman insiste sur la nécessité, pas sur le plaisir.' }
+      ] },
+    { t: 'recit', decor: 'ville', lieu: 'la grande concession, à Maroua', moment: 'Partie II · fin d’après-midi', sort: ['kondem'], entre: ['biri', 'leila'], ambiance: '', txt: 'Faydé travaille désormais dans une grande concession. En fin d’après-midi, quand Biri arrose les plantes, elle s’assoit sous un parterre de fleurs. Leïla, la fille unique de la maison, vient les rejoindre.' },
+    { t: 'dit', qui: 'leila', emo: 'joie', jeu: 'à voix basse', txt: 'Écoute ce qui m’est arrivé aujourd’hui… Ne le répète à personne !' },
+    { t: 'dit', qui: 'fayde', jeu: 'souriante', txt: 'Je t’écoute. Et ne t’inquiète pas : ce n’est pas grave, on va trouver une solution.' },
+    { t: 'recit', txt: 'Si Faydé écoute sa nouvelle amie, elle ne se confie jamais à elle.', cite: 'Djaïli Amadou Amal, Cœur du Sahel' },
+    { t: 'choix', qui: 'fayde', q: 'Tu es Faydé. Leïla te raconte tout. Lui racontes-tu ta pauvreté, ta mère, tes frères ?',
+      options: [
+        { txt: 'Oui, je lui dis tout.', consequence: 'Leïla t’écoute… avec pitié. Le fossé entre vous devient visible, et tu le regrettes.', jauges: { confiance: 30 } },
+        { txt: 'Non, je garde tout pour moi.', consequence: 'L’amitié continue, légère, mais à sens unique.', jauges: { confiance: -5 } }
+      ],
+      oeuvre: 'Faydé se tait : « la pauvreté suscite toujours le mépris ou la pitié, et il est impossible de trouver les mots justes sans avoir l’air de s’apitoyer ».' },
+    { t: 'remarque', titre: 'Une amitié à sens unique', txt: 'L’une raconte tout, l’autre écoute et se tait. C’est le portrait le plus fin du livre, et il ne comporte pas un mot de reproche contre Leïla.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · le portrait en contraste', consigne: 'Classe chaque trait : est-ce Faydé ou Leïla ?',
+      cats: ['Faydé', 'Leïla'],
+      items: [
+        { txt: 'Fille unique, choyée par sa famille', cat: 1 },
+        { txt: 'A quitté l’école ; voulait être médecin', cat: 0 },
+        { txt: 'Fiancée à un homme qui vit à Douala', cat: 1 },
+        { txt: 'Sait écouter et ne juge pas', cat: 0 }
+      ],
+      bravo: 'Même âge, deux destins : le contraste fait le portrait.' },
+    { t: 'recit', entre: ['boukar'], sort: ['leila', 'biri'], moment: 'Partie III · cinq ans plus tard', txt: 'Des années ont passé. Faydé a repris des études : elle est devenue infirmière, et elle a créé une association pour venir en aide aux femmes. Boukar, qui l’avait encouragée, revient la voir.', jauges: { besoin: 30 } },
+    { t: 'dit', qui: 'boukar', txt: 'Hapssi et moi, nous n’avons pas tenu plus de huit mois.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · le parcours de Faydé', consigne: 'Remets le parcours de Faydé dans l’ordre.',
+      items: ['La dispute avec sa mère, qui refuse son départ.', 'La ville rêvée : Maroua.', 'Une journée de travail dans la concession.', 'L’amitié avec Leïla, sous les fleurs.', 'Cinq ans plus tard : infirmière.'],
+      bravo: 'Le roman finit sur une femme qui a repris ses études : l’éducation comme issue.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · le destin de Faydé',
+    intro: 'Règle la pauvreté de la famille, le soutien que reçoit Faydé et les préjugés de la concession : que devient-elle ?',
+    persos: ['fayde', 'kondem', 'leila', 'biri', 'boukar'],
+    curseurs: [
+      { id: 'pauvrete', nom: 'Pauvreté de la famille', val: 85, bas: 'à l’aise', haut: 'greniers vides' },
+      { id: 'soutien', nom: 'Soutien reçu (Boukar, Biri)', val: 70, bas: 'seule', haut: 'encouragée', lecture: { haut: 'Boukar l’encourage ; avec Biri, elle parle vraiment.', bas: 'Seule, elle ne verrait que la servitude.' } },
+      { id: 'prejuges', nom: 'Préjugés dans la concession', val: 70, bas: 'respect', haut: 'mépris', lecture: { haut: 'Hapssi ne lui adresse jamais la parole.', bas: 'Une maison respectueuse lui laisserait le temps d’étudier.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans le roman', icone: 'livre', valeurs: { pauvrete: 85, soutien: 70, prejuges: 70 } },
+      { nom: 'Et si personne ne l’encourageait ?', icone: 'personne', valeurs: { soutien: 10 } },
+      { nom: 'Et s’il avait plu ?', icone: 'nuage', valeurs: { pauvrete: 20 } }
+    ],
+    liens: [
+      { a: 'kondem', b: 'fayde', type: 'amour', lib: 'protège', base: .7 },
+      { a: 'leila', b: 'fayde', type: 'confiance', lib: 'confidences', base: .5, poids: { prejuges: -.2 } },
+      { a: 'boukar', b: 'fayde', type: 'alliance', lib: 'encourage', base: .05, poids: { soutien: .8 } },
+      { a: 'biri', b: 'fayde', type: 'alliance', lib: 'parle vraiment', base: .1, poids: { soutien: .6 } }
+    ],
+    issue: function(v){
+      if(v.pauvrete < 35){ return { niveau: 'ok', badge: 'Elle reste à l’école', recit: 'Les greniers sont pleins : Faydé ne part pas. Elle continue l’école et vise la médecine.', apres: 'Le roman montre ce qu’on perd quand la sécheresse décide à la place des enfants.', themes: ['école'] }; }
+      if(v.soutien < 30){ return { niveau: 'ko', badge: 'Servante pour longtemps', recit: 'Personne ne l’encourage : Faydé reste domestique, envoie l’argent au village et renonce à ses rêves.', apres: 'C’est le destin de beaucoup des amies de Faydé.', themes: ['servitude', 'exode'] }; }
+      return { niveau: 'ok', badge: 'Infirmière, cinq ans plus tard', recit: 'Domestique à Maroua, Faydé garde sa dignité ; encouragée, elle reprend ses études, devient infirmière et fonde une association pour les femmes.', apres: 'Le cœur du Sahel bat chez celles qui partent par nécessité et reviennent debout.', themes: ['condition des femmes', 'éducation', 'amitié et fossé social'] };
+    }
+  },
+  quiz: [
+    { q: 'Quel âge a Faydé au début du roman ?', options: [ { txt: 'Quinze ans.', ok: true, retour: 'Elle a quitté l’école deux ans plus tôt.' }, { txt: 'Vingt-cinq ans.', retour: 'Non : quinze ans.' } ] },
+    { q: 'Pourquoi Kondem refuse-t-elle le départ de sa fille ?', options: [ { txt: 'Parce qu’elle a été domestique à Maroua elle-même.', ok: true, retour: 'Elle sait ce qui attend sa fille.' }, { txt: 'Parce qu’elle déteste la ville.', retour: 'C’est son expérience qui la fait refuser.' } ] },
+    { q: 'Que devient Faydé cinq ans plus tard ?', options: [ { txt: 'Infirmière.', ok: true, retour: 'Elle a aussi créé une association pour les femmes.' }, { txt: 'Commerçante à Douala.', retour: 'Non.' } ] },
+    { q: 'Quel livre de l’autrice a reçu le prix Goncourt des lycéens en 2020 ?', options: [ { txt: 'Les Impatientes.', ok: true, retour: 'C’est écrit sur la couverture de Cœur du Sahel.' }, { txt: 'Ville cruelle.', retour: 'Ville cruelle est d’Eza Boto.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Faydé, quinze ans, part travailler à Maroua par nécessité : sécheresse, greniers vides.',
+      'Sa mère, ancienne domestique, refuse ce destin pour sa fille.',
+      'L’amitié avec Leïla est à sens unique : Faydé écoute et ne se confie jamais.',
+      'Cinq ans plus tard, Faydé est infirmière : l’éducation comme issue.'
+    ],
+    ecrire: 'Fais le portrait en contraste (quinze lignes) de deux personnes du même âge que tout sépare, sans jamais juger l’une ou l’autre.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

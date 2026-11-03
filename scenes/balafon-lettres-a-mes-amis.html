@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lettres à mes amis — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Balafon d’Engelbert Mveng : l’Afrique écrit aux continents ; l’itinéraire du recueil, des lettres à l’offrande.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'balafon-lettres',
+  discipline: 'Français', niveau: '1re',
+  oeuvre: 'Balafon', auteur: 'Engelbert Mveng (1972)',
+  titre: 'Lettres à mes amis',
+  decor: 'monde', lieu: 'le monde, vu d’Afrique', moment: '1956 – 1971',
+  avertissement: 'Rencontre imaginée pour la leçon : les répliques prêtées au poète et à ses destinataires ne sont pas des vers de Mveng. Les titres et les faits cités sont exacts.',
+  objectif: 'Comprendre le geste du recueil : l’Afrique ne se définit pas contre les autres, elle leur écrit. Suivre l’itinéraire du livre, des « Lettres à mes amis » à l’« Offrande », et voir comment Mveng dit le sacré chrétien en images africaines.',
+  jauges: [
+    { id: 'amitie', nom: 'Amitié entre les peuples', val: 40, couleur: '#FFC93C' },
+    { id: 'aube', nom: 'Lumière de l’aube', val: 20, couleur: '#5AA9E6' }
+  ],
+  personnages: {
+    poete:   { nom: 'Le poète', couleur: '#1E499B', look: { tenue: 'boubou', objet: 'lettre', peau: 'fonce', cheveux: 'ras', habit: '#1E1E1E', col: '#FFFFFF' } },
+    afrique: { nom: 'L’Afrique-Mère', couleur: '#8A5A2B', look: { tenue: 'boubou', peau: 'fonce', vieux: true, coiffe: 'foulard', couleurCoiffe: '#E8A413', habit: '#B4793F' } },
+    kong:    { nom: 'Kong-Fu-Tseu', couleur: '#7A2E2E', look: { tenue: 'boubou', peau: 'mat', vieux: true, barbe: true, coiffe: 'toque', couleurCoiffe: '#3A2A1A', habit: '#8A3B2E' } },
+    roland:  { nom: 'Roland-Roger', couleur: '#3B6FCB', look: { peau: 'clair', cheveux: 'court', habit: '#3B4A6B' } },
+    motec:   { nom: 'Moteczuma', couleur: '#2E6B5A', look: { tenue: 'boubou', peau: 'mat', cheveux: 'long', coiffe: 'couronne', habit: '#2E6B5A' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['poete', 'afrique'], txt: '1972. Le Cameroun est indépendant depuis douze ans. Engelbert Mveng, prêtre jésuite, historien et artiste, publie Balafon. Le temps n’est plus à la revendication mais à la question : que dire, maintenant qu’on peut parler ?' },
+    { t: 'dit', qui: 'afrique', emo: 'amour', txt: 'Mon fils, tu as appris l’histoire des autres peuples. Que vas-tu leur dire ?' },
+    { t: 'dit', qui: 'poete', txt: 'Je ne viens pas régler des comptes, Mère. Je vais leur écrire, comme on écrit à des amis.', objet: { i: '✉️', lib: 'Lettres à mes amis' }, jauges: { amitie: 55 } },
+    { t: 'choix', qui: 'poete', q: 'Tu es le poète. Comment l’Afrique doit-elle parler aux autres continents, douze ans après l’indépendance ?',
+      options: [
+        { txt: 'Les accuser : rappeler toutes les blessures de l’histoire.', consequence: 'La voix est juste mais fermée : on parle contre l’autre, pas à l’autre.', jauges: { amitie: -20 } },
+        { txt: 'Leur tendre la main : écrire « à mes amis ».', consequence: 'L’Afrique se pose en égale qui offre son amitié : elle n’a plus besoin de se définir contre quelqu’un.', jauges: { amitie: 25 } },
+        { txt: 'Se taire et se replier sur soi.', consequence: 'Le balafon reste muet : aucun dialogue entre les peuples.', jauges: { amitie: -30, aube: -10 } }
+      ],
+      oeuvre: 'Mveng prolonge la Négritude et la déplace : son Afrique ne se définit pas contre l’Europe, elle écrit « à ses amis » — à la Chine, à l’Europe, à l’Amérique précolombienne.' },
+    { t: 'dit', qui: 'kong', entre: ['kong'], jeu: 'destinataire de « À Kong-Fu-Tseu »', txt: 'Une lettre d’Afrique pour le vieux sage d’Asie ? Entre deux civilisations anciennes, on se salue d’égal à égal.', jauges: { amitie: 65 } },
+    { t: 'dit', qui: 'roland', entre: ['roland'], jeu: 'destinataire de « À Roland-Roger »', txt: 'Et l’Europe ? Tu m’écris aussi, après tout ce qui s’est passé ?' },
+    { t: 'dit', qui: 'poete', txt: 'À toi aussi. Refuser le préjugé, partager le pain : c’est la seule façon de faire un monde commun.', jauges: { amitie: 75 } },
+    { t: 'dit', qui: 'motec', entre: ['motec'], jeu: 'destinataire de « Moteczuma »', txt: 'Et moi, empereur d’un peuple d’Amérique conquis avant le tien, tu te souviens de moi ?', jauges: { amitie: 82 } },
+    { t: 'remarque', titre: 'Des poèmes datés', txt: 'Plusieurs poèmes portent une date et renvoient à des faits réels : « Marcinelle, 1956 », la catastrophe minière belge qui tue des ouvriers, dont beaucoup d’immigrés ; « New York » (1970), au temps des Black Panthers ; « Moscou » (1971), en pleine Guerre froide. Le poème ne commente pas l’actualité : il la fait entrer dans un chant.', sort: ['kong', 'roland', 'motec'] },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · range les poèmes', consigne: 'À quel ensemble du recueil appartient chaque poème ?',
+      cats: ['Lettres', 'Lieux et dates', 'Foi'],
+      items: [
+        { txt: '« À Kong-Fu-Tseu »', cat: 0 },
+        { txt: '« Marcinelle, 1956 »', cat: 1 },
+        { txt: '« Épiphanie » (1962)', cat: 2 },
+        { txt: '« Moteczuma »', cat: 0 },
+        { txt: '« New York » (1970)', cat: 1 },
+        { txt: '« Pentecôte sur l’Afrique » (1964)', cat: 2 }
+      ],
+      bravo: 'Les lettres tendent la main, les poèmes datés font entrer le monde moderne, les poèmes de foi disent le sacré en images africaines.' },
+    { t: 'dit', qui: 'afrique', emo: 'joie', txt: 'Et ta foi, mon fils ? Tu l’as reçue d’ailleurs.', decor: 'monde' },
+    { t: 'dit', qui: 'poete', txt: 'Je la dis avec tes mots, Mère : la croix et le balafon, le calice et la marmite d’argile. Je n’apporte que des mains vides.', objet: { i: '🏺', lib: 'La marmite d’argile' }, jauges: { aube: 60 } },
+    { t: 'question', q: 'Que fait Mveng du christianisme dans ses poèmes ?',
+      options: [
+        { txt: 'Il l’écrit en images africaines, sans le trahir ni s’y dissoudre.', ok: true, retour: 'La croix et le balafon, le calice et la marmite d’argile : un sacré chrétien au visage africain.' },
+        { txt: 'Il le rejette comme une religion étrangère.', retour: 'Mveng est prêtre : il ne rejette pas sa foi, il lui donne des formes africaines.' },
+        { txt: 'Il n’en parle jamais.', retour: 'Au contraire : « Épiphanie », « Pentecôte sur l’Afrique », « Offrande »…' }
+      ] },
+    { t: 'recit', ambiance: 'aube', txt: 'Mveng a dit ce qu’il attend de l’écrivain : qu’il cherche toujours « l’homme qui vient après l’enfant, la vie qui vient après la mort, le jour qui vient après la nuit ».', cite: 'Engelbert Mveng, propos sur l’écrivain, cité dans le cahier VÉRITAS', jauges: { aube: 90 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · l’itinéraire du recueil', consigne: 'Remets dans l’ordre les moments du recueil.',
+      items: [
+        '« Lettres à mes amis » : l’Afrique écrit aux continents.',
+        'Les villes et les dates : Marcinelle, New York, Moscou.',
+        'La terre natale : « Adamawa », « Tu reviendras, Sénégal ! ».',
+        'La foi : « Épiphanie », « Pentecôte sur l’Afrique ».',
+        '« Mère » et « Postface » : le chant devient intime.',
+        '« Offrande » : la marmite de la mère déposée dans les mains de Dieu.'
+      ],
+      bravo: 'Le livre est traversé de souffrances, et il finit toujours par l’aube.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · le ton du poète',
+    intro: 'Règle la revendication, l’ouverture aux autres, la place de la foi et la mémoire des drames : quel poète d’Afrique obtiens-tu en 1972 ?',
+    persos: ['poete', 'afrique', 'kong', 'roland', 'motec'],
+    curseurs: [
+      { id: 'revend', nom: 'Revendication', val: 30, bas: 'apaisée', haut: 'militante',
+        lecture: { haut: 'Le ton de la première Négritude : affirmer la dignité contre l’oppresseur.', bas: 'Mveng ne règle pas de comptes : il tend la main.' } },
+      { id: 'ouverture', nom: 'Ouverture aux autres', val: 90, bas: 'repli', haut: 'universelle',
+        lecture: { haut: '« Fils d’Afrique », il se veut aussi « fils du monde ».', bas: 'Une Afrique repliée n’écrirait à personne.' } },
+      { id: 'foi', nom: 'Place de la foi', val: 80, bas: 'absente', haut: 'centrale',
+        lecture: { haut: 'Le recueil se ferme sur l’« Offrande », dans les mains de Dieu.', bas: 'Sans la foi, le livre perdrait son itinéraire vers l’aube.' } },
+      { id: 'memoire', nom: 'Mémoire des drames', val: 60, bas: 'oubliés', haut: 'présents',
+        lecture: { haut: 'Marcinelle, New York : les souffrances du monde entrent dans le chant.', bas: 'Un chant sans mémoire serait une carte postale.' } }
+    ],
+    scenarios: [
+      { nom: 'Balafon (Mveng)', icone: '📖', valeurs: { revend: 30, ouverture: 90, foi: 80, memoire: 60 } },
+      { nom: 'Négritude militante', icone: '✊', valeurs: { revend: 90, ouverture: 35, foi: 20, memoire: 80 } },
+      { nom: 'Repli identitaire', icone: '🚪', valeurs: { revend: 60, ouverture: 10 } }
+    ],
+    liens: [
+      { a: 'poete', b: 'afrique', type: 'amour', lib: 'fils et mère', base: .7 },
+      { a: 'poete', b: 'kong', type: 'alliance', lib: 'lettre', base: 0, poids: { ouverture: .9, revend: -.2 } },
+      { a: 'poete', b: 'roland', type: 'alliance', lib: 'lettre', base: -.1, poids: { ouverture: .9, revend: -.4 } },
+      { a: 'poete', b: 'motec', type: 'alliance', lib: 'lettre', base: 0, poids: { ouverture: .8, memoire: .2 } },
+      { a: 'afrique', b: 'roland', type: 'conflit', lib: 'mémoire coloniale', base: .1, poids: { revend: .7, memoire: .2 } }
+    ],
+    issue: function(v){
+      if(v.ouverture < 35){ return { niveau: 'ko', badge: 'Le balafon se tait', recit: 'Le poète ne s’adresse qu’aux siens. Pas de lettres, pas de dialogue entre les peuples.', apres: 'C’est l’inverse du geste de Mveng, qui ouvre le recueil par des lettres aux continents.', themes: ['repli'] }; }
+      if(v.revend >= 70){ return { niveau: 'moyen', badge: 'Négritude militante', recit: 'Le poète affirme la dignité noire contre l’oppresseur : la voix de Senghor et de Césaire dans les années 1930-1950.', apres: 'Mveng prolonge ce mouvement mais le déplace : en 1972, l’Afrique peut parler en égale.', themes: ['Négritude', 'revendication'] }; }
+      return { niveau: 'ok', badge: 'Lettres à mes amis', recit: 'Fils d’Afrique et fils du monde, le poète écrit aux continents, fait entrer les drames du siècle dans son chant et dit sa foi en images africaines.', apres: 'Le livre finit par l’« Offrande » : « le jour qui vient après la nuit ».', themes: ['amitié des peuples', 'christianisme africain', 'mémoire', 'aube'] };
+    }
+  },
+  quiz: [
+    { q: 'Comment s’intitule la première partie du recueil ?', options: [
+      { txt: '« Lettres à mes amis ».', ok: true, retour: 'L’Afrique écrit aux continents.' },
+      { txt: '« Cahier d’un retour au pays natal ».', retour: 'C’est le titre d’Aimé Césaire.' } ] },
+    { q: 'À quel fait renvoie « Marcinelle, 1956 » ?', options: [
+      { txt: 'Une catastrophe minière en Belgique.', ok: true, retour: 'Beaucoup de victimes étaient des immigrés.' },
+      { txt: 'L’indépendance du Cameroun.', retour: 'Elle date de 1960.' } ] },
+    { q: 'Sur quel poème se ferme le recueil ?', options: [
+      { txt: '« Offrande ».', ok: true, retour: 'La marmite d’argile de la mère déposée dans les mains de Dieu.' },
+      { txt: '« New York ».', retour: 'C’est l’un des poèmes datés du deuxième moment.' } ] },
+    { q: 'Qui était Engelbert Mveng ?', options: [
+      { txt: 'Un prêtre jésuite, historien, artiste et poète camerounais.', ok: true, retour: 'Auteur d’une Histoire du Cameroun (1963).' },
+      { txt: 'Un homme politique nigérian.', retour: 'Il était camerounais, né près de Yaoundé en 1930.' } ] },
+    { q: 'En quelle année paraît Balafon ?', options: [
+      { txt: '1972', ok: true, retour: 'Douze ans après l’indépendance.' },
+      { txt: '1956', retour: '1956 est la date du poème « Marcinelle ».' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Balafon (1972) s’ouvre sur des « Lettres à mes amis » : l’Afrique écrit aux continents.',
+      'Mveng prolonge la Négritude et la déplace : son Afrique ne se définit pas contre l’Europe.',
+      'Des poèmes datés font entrer le monde dans le chant : Marcinelle (1956), New York (1970), Moscou (1971).',
+      'Le sacré chrétien est dit en images africaines : la croix et le balafon, le calice et la marmite d’argile.',
+      'Le livre finit par l’« Offrande » : l’aube après la nuit.'
+    ],
+    ecrire: 'Écrivez à votre tour une « lettre à un ami » d’un autre continent (quinze lignes) : présentez-lui votre Afrique sans la définir contre personne.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Un, des : nos langues comptent — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de langues nationales (Première) : la vie familiale dans la langue cible, le singulier et le pluriel des noms, les classes nominales.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '1re-langues-pluriel',
+  discipline: 'Langues nationales', niveau: '1re',
+  titre: 'Un, des : nos langues comptent',
+  decor: 'classe', lieu: 'Le cours de langues nationales', moment: 'Premier trimestre',
+  avertissement: 'Dialogue fictif écrit pour la leçon. Les exemples en ewondo et en fulfulde sont des formes courantes données pour illustrer la règle ; l’orthographe varie selon les régions : faites-les vérifier par votre professeur, et cherchez les formes de votre propre langue.',
+  objectif: 'Comprendre comment les langues nationales marquent le singulier et le pluriel : changement de préfixe (classes nominales des langues bantoues, comme l’ewondo) ou de suffixe et de consonne initiale (fulfulde) ; appliquer la démarche à sa propre langue cible.',
+  programme: 'Progression harmonisée 1re · Vie familiale dans la langue cible, leçons 1-3 ; Vie sociale et citoyenneté, leçon 5 (le singulier et le pluriel des noms)',
+  jauges: [
+    { id: 'decouverte', nom: 'Découverte des règles', val: 15, couleur: '#1E499B' },
+    { id: 'fierte', nom: 'Fierté de sa langue', val: 40, couleur: '#D98E04' }
+  ],
+  personnages: {
+    prof:    { nom: 'M. Owona, professeur de langues nationales', couleur: '#1E499B', look: { metier: 'enseignant', peau: 'fonce', cheveux: 'ras', lunettes: true } },
+    ateba:   { nom: 'Ateba (langue cible : ewondo)', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } },
+    hadja:   { nom: 'Hadja (langue cible : fulfulde)', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'brun', coiffe: 'voile', couleurCoiffe: '#C0397C' } },
+    kevin:   { nom: 'Kevin, qui ne parle que français', couleur: '#5A6275', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['prof', 'ateba', 'hadja', 'kevin'], txt: 'Au cours de langues nationales, M. Owona pose une question à toute la classe : « Comment dites-vous un homme, des hommes, dans votre langue ? »', objet: { i: 'groupe', lib: 'Une classe, plusieurs langues' } },
+    { t: 'dit', qui: 'kevin', emo: 'doute', txt: 'En français, c’est facile : on ajoute un s qu’on n’entend même pas.' },
+    { t: 'dit', qui: 'ateba', jeu: 'il écrit au tableau', txt: 'En ewondo, « une personne », c’est mod. « Des personnes », c’est bod. On ne touche pas la fin du mot : on change le début.', jauges: { decouverte: 35 } },
+    { t: 'remarque', titre: 'Les classes nominales', txt: 'Dans les langues bantoues (ewondo, bulu, duala, basaa et beaucoup d’autres), les noms sont rangés en classes. Chaque classe a un préfixe au singulier et un autre au pluriel. On change le préfixe pour passer de l’un à l’autre : c’est le début du mot qui porte le nombre.' },
+    { t: 'dit', qui: 'prof', txt: 'Et ce n’est pas tout : dans ces langues, la classe du nom se répercute souvent sur les mots qui l’accompagnent, comme les adjectifs ou les verbes. On parle d’accord de classe. C’est un peu comme le féminin et le masculin en français, mais avec beaucoup plus de classes.' },
+    { t: 'dit', qui: 'hadja', emo: 'fier', txt: 'Chez nous, en fulfulde, c’est encore autrement. Gorko, un homme ; worɓe, des hommes. Debbo, une femme ; rewɓe, des femmes.', jauges: { decouverte: 55, fierte: 60 } },
+    { t: 'question', q: 'Qu’est-ce qui change, en fulfulde, entre gorko et worɓe ?',
+      options: [
+        { txt: 'La fin du mot (le suffixe) et aussi la première consonne : g devient w, d devient r.', ok: true, retour: 'Le fulfulde, langue non bantoue, marque le nombre par des suffixes de classe et par l’alternance de la consonne initiale.' },
+        { txt: 'Rien : ce sont deux mots sans rapport.', retour: 'Si : gorko / worɓe et debbo / rewɓe suivent une règle régulière.' },
+        { txt: 'Seulement le début, comme en ewondo.', retour: 'Non : la fin change aussi.' }
+      ] },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · où se marque le pluriel ?', consigne: 'Classe chaque paire selon la partie du mot qui change.',
+      cats: ['Le début change (préfixe)', 'La fin change (suffixe)', 'Une lettre muette s’ajoute'],
+      items: [
+        { txt: 'mod → bod (ewondo, personne)', cat: 0 },
+        { txt: 'debbo → rewɓe (fulfulde, femme)', cat: 1 },
+        { txt: 'un livre → des livres (français)', cat: 2 },
+        { txt: 'gorko → worɓe (fulfulde, homme)', cat: 1 }
+      ],
+      bravo: 'Trois langues, trois manières de compter : aucune n’est plus « simple », chacune a sa logique.', jauges: { decouverte: 75 } },
+    { t: 'dit', qui: 'prof', txt: 'Vous voyez : nos langues ne sont pas des « patois » sans grammaire. Elles ont des règles aussi précises que le français ou l’anglais.' },
+    { t: 'choix', qui: 'kevin', q: 'Tu es Kevin. Tu ne parles aucune langue nationale. Que fais-tu ?',
+      options: [
+        { txt: '« Ça ne sert à rien, le français suffit. »', consequence: 'Tu te coupes d’une partie de l’histoire de ta famille et de ton pays.', jauges: { fierte: -15 } },
+        { txt: '« Je vais demander à ma grand-mère comment on dit les noms de la famille au pluriel dans sa langue. »', consequence: 'Tu fais de ta famille ton premier dictionnaire : c’est exactement la démarche du cours.', jauges: { fierte: 25, decouverte: 10 } }
+      ],
+      oeuvre: 'L’enseignement des langues et cultures nationales vise à ce que chaque élève maîtrise au moins une langue nationale, à côté du français et de l’anglais.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · la démarche de l’enquêteur', consigne: 'Remets dans l’ordre la démarche pour découvrir une règle dans sa langue cible.',
+      items: [
+        'Choisir plusieurs noms de la famille (père, mère, enfant, frère).',
+        'Demander à un locuteur le singulier et le pluriel de chacun.',
+        'Comparer les paires et repérer ce qui change.',
+        'Formuler la règle et la vérifier sur de nouveaux mots.'
+      ],
+      bravo: 'Observer, comparer, formuler, vérifier : la démarche d’un linguiste.' },
+    { t: 'dit', qui: 'hadja', emo: 'joie', txt: 'Monsieur, la semaine prochaine, j’apporte la liste des noms de la famille en fulfulde, avec leurs pluriels.', jauges: { fierte: 85 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · une langue qui vit',
+    intro: 'Règle la pratique à la maison, l’enseignement à l’école et l’usage dans les médias : la langue cible se transmet-elle ?',
+    persos: ['prof', 'ateba', 'hadja', 'kevin'],
+    curseurs: [
+      { id: 'maison', nom: 'Pratique à la maison', val: 45, bas: 'jamais', haut: 'tous les jours' },
+      { id: 'ecole', nom: 'Enseignement à l’école', val: 50, bas: 'absent', haut: 'régulier' },
+      { id: 'medias', nom: 'Présence dans les médias', val: 30, bas: 'nulle', haut: 'forte' }
+    ],
+    scenarios: [
+      { nom: 'Aujourd’hui', icone: 'groupe', valeurs: { maison: 45, ecole: 50, medias: 30 } },
+      { nom: 'Seulement le français', icone: 'muet', valeurs: { maison: 5, ecole: 5, medias: 5 } },
+      { nom: 'Une langue vivante', icone: 'fier', valeurs: { maison: 85, ecole: 80, medias: 70 } }
+    ],
+    liens: [
+      { a: 'prof', b: 'kevin', type: 'confiance', lib: 'enseigne', base: .4, poids: { ecole: .4 } },
+      { a: 'ateba', b: 'hadja', type: 'alliance', lib: 'compare', base: .5 },
+      { a: 'hadja', b: 'kevin', type: 'confiance', lib: 'partage', base: .3, poids: { maison: .3 } }
+    ],
+    issue: function(v){
+      if(v.maison < 20 && v.ecole < 20){ return { niveau: 'ko', badge: 'Une langue qui s’éteint', recit: 'Plus personne ne la parle aux enfants, l’école ne l’enseigne pas : en deux générations, elle disparaît.', apres: 'Une langue meurt quand on cesse de la transmettre.', themes: ['transmission', 'langues en danger'] }; }
+      if(v.maison > 65 && v.ecole > 60){ return { niveau: 'ok', badge: 'Une langue vivante', recit: 'Parlée à la maison, étudiée à l’école, entendue à la radio : la langue se transmet et se modernise.', apres: 'Le bilinguisme français-anglais et les langues nationales peuvent coexister.', themes: ['patrimoine linguistique'] }; }
+      return { niveau: 'moyen', badge: 'Une langue fragile', recit: 'Les anciens la parlent, les jeunes la comprennent sans la parler.', apres: 'C’est souvent le premier signe d’un recul.', themes: ['vitalité des langues'] };
+    }
+  },
+  quiz: [
+    { q: 'Dans les langues bantoues, comment marque-t-on souvent le pluriel ?', options: [
+      { txt: 'En changeant le préfixe (le début du mot).', ok: true, retour: 'Selon la classe nominale.' },
+      { txt: 'En ajoutant un s.', retour: 'C’est le cas du français écrit.' } ] },
+    { q: 'Qu’est-ce qu’une classe nominale ?', options: [
+      { txt: 'Un groupe de noms qui partagent les mêmes préfixes au singulier et au pluriel.', ok: true, retour: 'Les langues bantoues en ont plusieurs.' },
+      { txt: 'Une salle de classe.', retour: 'Non.' } ] },
+    { q: 'En fulfulde, « gorko » (un homme) devient au pluriel…', options: [
+      { txt: 'worɓe', ok: true, retour: 'La consonne initiale et le suffixe changent.' },
+      { txt: 'gorkos', retour: 'Non.' } ] },
+    { q: 'Le fulfulde est-il une langue bantoue ?', options: [
+      { txt: 'Non : il appartient à une autre famille de langues.', ok: true, retour: 'D’où une autre manière de former le pluriel.' },
+      { txt: 'Oui.', retour: 'Non.' } ] },
+    { q: 'Quelle est la première étape pour découvrir une règle dans sa langue ?', options: [
+      { txt: 'Recueillir plusieurs paires singulier / pluriel auprès d’un locuteur.', ok: true, retour: 'Puis comparer et formuler la règle.' },
+      { txt: 'Inventer la règle.', retour: 'Non : on observe d’abord.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Les langues nationales ont une grammaire précise, comme le français ou l’anglais.',
+      'Langues bantoues (ewondo, bulu, duala, basaa…) : classes nominales ; le pluriel se marque par un changement de préfixe (mod / bod en ewondo).',
+      'Fulfulde : le pluriel se marque par le suffixe et l’alternance de la consonne initiale (gorko / worɓe, debbo / rewɓe).',
+      'Démarche : recueillir, comparer, formuler, vérifier.'
+    ],
+    ecrire: 'Enquête : recueillez auprès d’un locuteur le singulier et le pluriel de huit noms de la famille dans votre langue cible. Présentez-les dans un tableau, puis formulez la règle en trois lignes.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

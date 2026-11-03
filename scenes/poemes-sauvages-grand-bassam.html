@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le feu qui éclaire — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Poèmes sauvages éclairés au feu de brousse d’Henri N’koumo : deux élèves lisent le poème de Grand-Bassam, du deuil à l’espérance.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'poemes-sauvages',
+  discipline: 'Français', niveau: '2nde',
+  oeuvre: 'Poèmes sauvages éclairés au feu de brousse', auteur: 'Henri N’koumo (2022)',
+  titre: 'Le feu qui éclaire',
+  decor: 'plage', ambiance: 'deuil', lieu: 'Grand-Bassam, Côte d’Ivoire', moment: 'Après le 13 mars 2016',
+  avertissement: 'Rencontre imaginée pour la leçon : Awa, Koffi et leur professeure ne sont pas des personnages du livre. Seuls les passages marqués « Extrait de l’œuvre » sont cités mot pour mot.',
+  objectif: 'Suivre le mouvement d’un long poème né d’un attentat : du deuil privé au deuil commun, de la révolte à l’espérance. Repérer le refrain du prénom, les listes de villes, le passage du « je » au « nous ».',
+  jauges: [
+    { id: 'deuil', nom: 'Deuil', val: 90, couleur: '#8A8FA3' },
+    { id: 'revolte', nom: 'Révolte', val: 20, couleur: '#E85A4A' },
+    { id: 'espoir', nom: 'Espérance', val: 5, couleur: '#FFC93C' }
+  ],
+  personnages: {
+    awa:   { nom: 'Awa, élève à Maroua', couleur: '#B0503A', look: { tenue: 'jupe', peau: 'fonce', coiffe: 'voile', couleurCoiffe: '#5AA9E6', habit: '#2F5E9E' } },
+    prof:  { nom: 'Mme Eyenga, professeure', couleur: '#1E499B', look: { tenue: 'jupe', objet: 'livre', peau: 'fonce', cheveux: 'chignon', lunettes: true, habit: '#1E499B' } },
+    koffi: { nom: 'Koffi, élève à Abidjan', couleur: '#2E6B5A', look: { peau: 'fonce', cheveux: 'ras', habit: '#E9E3CF', col: '#2E6B5A' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['prof', 'awa', 'koffi'], txt: 'Un échange en ligne entre deux classes, l’une à Maroua, au Cameroun, l’autre à Abidjan. Leur professeure présente le livre d’Henri N’koumo, publié en 2022.' },
+    { t: 'dit', qui: 'prof', txt: 'Le 13 mars 2016, la plage de Grand-Bassam est frappée par le premier attentat terroriste de l’histoire de la Côte d’Ivoire. Dix-neuf morts. Parmi eux, Henrike Grohs, directrice du Goethe Institut, une amie du poète.', objet: { i: '🕯️', lib: '13 mars 2016' } },
+    { t: 'dit', qui: 'koffi', emo: 'triste', txt: 'Chez nous, à Abidjan, tout le monde connaît Grand-Bassam. Une plage, des cocotiers, des familles le dimanche…' },
+    { t: 'dit', qui: 'awa', emo: 'triste', txt: 'Et le poème cite aussi Maroua. Ma ville. Les mêmes violences. Ce n’est pas le malheur des autres.', jauges: { revolte: 45 } },
+    { t: 'question', q: 'Pourquoi le poème concerne-t-il directement un élève camerounais ?',
+      options: [
+        { txt: 'Parce qu’il nomme Maroua et Maïduguri, villes frappées par les mêmes violences dans l’Extrême-Nord et au Nigeria voisin.', ok: true, retour: 'Le texte n’est pas le récit d’un malheur étranger : il relie les deuils.' },
+        { txt: 'Parce que l’auteur est camerounais.', retour: 'Henri N’koumo est ivoirien, né à Bingerville en 1965.' },
+        { txt: 'Parce que l’attentat a eu lieu au Cameroun.', retour: 'L’attentat a eu lieu à Grand-Bassam, en Côte d’Ivoire.' }
+      ] },
+    { t: 'dit', qui: 'prof', txt: 'Regardez le prénom d’Henrike : il revient plus de vingt fois, seul sur une ligne. Il coupe le vers et oblige à s’arrêter.' },
+    { t: 'dit', qui: 'koffi', txt: 'Comme un refrain… ou comme une cloche qu’on sonne pour quelqu’un.' },
+    { t: 'dit', qui: 'prof', txt: 'Puis le poème s’élargit. Il reprend le cri des mères de Chibok, au Nigeria, dont les filles ont été enlevées :' },
+    { t: 'vers', qui: 'prof', jeu: 'elle lit', txt: 'bring back our girls', cite: 'Henri N’koumo, Poèmes sauvages éclairés au feu de brousse (2022), deuxième temps', jauges: { revolte: 75, deuil: 75 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · la carte des deuils', consigne: 'Le poème cite des villes de plusieurs continents. Range chacune dans sa zone.',
+      cats: ['Sahel', 'Europe', 'Orient et Afrique de l’Est'],
+      items: [
+        { txt: 'Bamako', cat: 0 }, { txt: 'Maroua', cat: 0 },
+        { txt: 'Paris', cat: 1 }, { txt: 'Bruxelles', cat: 1 },
+        { txt: 'Kaboul', cat: 2 }, { txt: 'Mogadiscio', cat: 2 }
+      ],
+      bravo: 'Le poème met sur le même plan les morts du Nord et ceux du Sud. Cités en rafale, sans virgule, les noms imitent le mitraillage.' },
+    { t: 'choix', qui: 'awa', q: 'Face à la terreur, que doit faire le poème, selon toi ?',
+      options: [
+        { txt: 'Se taire : les mots ne peuvent rien.', consequence: 'Le silence laisse le dernier mot à la violence.', jauges: { espoir: -5 } },
+        { txt: 'Crier vengeance.', consequence: 'La colère est légitime, mais elle répond à la haine par la haine.', jauges: { revolte: 15 } },
+        { txt: 'Transformer la douleur en appel et en espérance.', consequence: 'Le deuil devient promesse : c’est le mouvement même du livre.', jauges: { espoir: 30 } }
+      ],
+      oeuvre: 'Le poème va du constat de l’horreur à la révolte, puis au dépassement : la douleur devient chant d’espérance, de paix et de fraternité.' },
+    { t: 'dit', qui: 'prof', ambiance: 'aube', txt: 'Dans le troisième temps, les futurs remplacent les présents. Le livre ne finit pas sur un constat mais sur un impératif. Écoutez son dernier vers :', jauges: { deuil: 40, revolte: 30 } },
+    { t: 'vers', qui: 'prof', jeu: 'dernier vers du livre', txt: 'car le futur nu est de notre temps ô voyage', cite: 'Henri N’koumo, Poèmes sauvages éclairés au feu de brousse (2022), dernier vers', jauges: { espoir: 85 } },
+    { t: 'dit', qui: 'awa', emo: 'joie', txt: 'Alors le feu du titre… ce n’est pas celui qui brûle. C’est celui qui éclaire.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · le mouvement du poème', consigne: 'Remets dans l’ordre les temps du poème.',
+      items: [
+        '« Comme introduction » : le constat et l’appel, en une centaine de mots.',
+        'Le coup : la mort d’Henrike, la plage, le cortège.',
+        'L’élargissement : toutes les violences commises au nom de la religion.',
+        'Le retournement : le souvenir heureux revient, puis la promesse.',
+        'L’appel : « et nous serons… », puis « viens ».'
+      ],
+      bravo: 'Du « je » qui pleure au « nous » qui promet : le deuil privé devient deuil commun, puis espérance.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · la voix du poème',
+    intro: 'Règle la part du « je » et du « nous », la colère, l’espérance et la mémoire des lieux : quel registre domine ? Compare avec le mouvement du livre.',
+    persos: ['prof', 'awa', 'koffi'],
+    curseurs: [
+      { id: 'nous', nom: 'Du « je » au « nous »', val: 70, bas: 'je', haut: 'nous',
+        lecture: { haut: 'Le « nous » englobe les vivants, les endeuillés, l’humanité entière.', bas: 'Le « je » domine : c’est le premier temps, lyrique et pathétique.' } },
+      { id: 'colere', nom: 'Colère', val: 50, bas: 'apaisée', haut: 'violente',
+        lecture: { haut: 'Le poète accuse : Oussama devient le nom du fanatisme, non d’un seul homme.', bas: 'La colère s’apaise sans disparaître.' } },
+      { id: 'espoir', nom: 'Espérance', val: 80, bas: 'nulle', haut: 'forte',
+        lecture: { haut: 'Les futurs remplacent les présents ; l’oiseau bleu revient.', bas: 'Sans espérance, le livre resterait un constat d’horreur.' } },
+      { id: 'monde', nom: 'Élargissement au monde', val: 75, bas: 'Grand-Bassam', haut: 'tous les continents',
+        lecture: { haut: 'Bamako, Paris, Kaboul… aucun continent n’est épargné.', bas: 'Le poème resterait le deuil d’une plage et d’une amie.' } }
+    ],
+    scenarios: [
+      { nom: 'Le mouvement du livre', icone: '📖', valeurs: { nous: 70, colere: 50, espoir: 80, monde: 75 } },
+      { nom: 'Le premier temps', icone: '🕯️', valeurs: { nous: 20, colere: 40, espoir: 10, monde: 15 } },
+      { nom: 'La colère seule', icone: '🔥', valeurs: { nous: 50, colere: 95, espoir: 10, monde: 70 } }
+    ],
+    liens: [
+      { a: 'awa', b: 'koffi', type: 'alliance', lib: 'deuil partagé', base: .1, poids: { monde: .5, nous: .4 } },
+      { a: 'prof', b: 'awa', type: 'confiance', lib: 'lecture', base: .4, poids: { espoir: .3 } },
+      { a: 'prof', b: 'koffi', type: 'confiance', lib: 'lecture', base: .4, poids: { espoir: .3 } }
+    ],
+    issue: function(v){
+      if(v.espoir < 30 && v.colere >= 70){ return { niveau: 'ko', badge: 'Registre polémique', recit: 'Le poème accuse et dénonce, sans ouvrir d’avenir.', apres: 'C’est le deuxième temps du livre, mais pas sa fin : N’koumo ne laisse pas le dernier mot à la colère.', themes: ['dénonciation', 'fanatisme'] }; }
+      if(v.espoir < 30){ return { niveau: 'moyen', badge: 'Registre lyrique et pathétique', recit: 'Le « je » pleure son amie ; la plage heureuse contraste avec ce qui s’y est passé.', apres: 'C’est le premier temps : le coup. Le livre ira plus loin.', themes: ['deuil', 'lyrisme'] }; }
+      return { niveau: 'ok', badge: 'Du deuil à l’espérance', recit: 'Le « nous » prend le dessus, les villes du monde entier sont nommées, et la douleur devient appel à la fraternité.', apres: 'Le livre se ferme sur une apostrophe et sur le mot « voyage » : un feu qui éclaire au lieu de brûler.', themes: ['deuil commun', 'refus du fanatisme', 'fraternité', 'espérance'] };
+    }
+  },
+  quiz: [
+    { q: 'Quel événement est à l’origine du livre ?', options: [
+      { txt: 'L’attentat de Grand-Bassam, le 13 mars 2016.', ok: true, retour: 'Le premier attentat terroriste de l’histoire de la Côte d’Ivoire.' },
+      { txt: 'L’indépendance de la Côte d’Ivoire.', retour: 'Elle date de 1960.' } ] },
+    { q: 'À qui le livre est-il dédié, notamment ?', options: [
+      { txt: 'À Henrike Grohs, directrice du Goethe Institut, tuée dans l’attentat.', ok: true, retour: 'Son prénom revient plus de vingt fois, seul sur une ligne.' },
+      { txt: 'À Samuel Beckett.', retour: 'Beckett fournit l’épigraphe, pas la dédicace.' } ] },
+    { q: 'Que produit la liste des villes citées « en rafale, sans virgule » ?', options: [
+      { txt: 'Elle imite le mitraillage et montre qu’aucun continent n’est épargné.', ok: true, retour: 'La liste ne sert plus à informer.' },
+      { txt: 'Elle sert de carte touristique.', retour: 'Non : ce sont les villes frappées par la violence.' } ] },
+    { q: 'Quel motif mesure l’espérance du poème d’un bout à l’autre ?', options: [
+      { txt: 'Les oiseaux : fusillés, puis ressuscités.', ok: true, retour: 'Jusqu’à « l’oiseau bleu au roucoulement des nouvelles saisons ».' },
+      { txt: 'Les voitures.', retour: 'Ce sont les oiseaux qui traversent tout le livre.' } ] },
+    { q: 'Sur quel mot se ferme le livre ?', options: [
+      { txt: '« voyage ».', ok: true, retour: '« car le futur nu est de notre temps ô voyage ».' },
+      { txt: '« mort ».', retour: 'Non : le livre se ferme sur un appel, pas sur un constat.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Le livre naît de l’attentat de Grand-Bassam (13 mars 2016) et est dédié à Henrike Grohs.',
+      'Le prénom d’Henrike fonctionne comme un refrain : posé seul, il oblige à s’arrêter.',
+      'Le poème passe du « je » au « nous » : le deuil privé devient deuil commun.',
+      'Les listes de villes, sans virgule, mettent sur le même plan les morts du Nord et du Sud.',
+      'Le mouvement va du constat à la révolte, puis à l’espérance : un feu qui éclaire au lieu de brûler.'
+    ],
+    ecrire: 'Écrivez un court poème en vers libres (dix vers) qui commence par le deuil et finit par un appel, en faisant revenir un même mot comme un refrain.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

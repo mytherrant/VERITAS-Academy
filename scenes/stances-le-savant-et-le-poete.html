@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le savant et le poète — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Stances et Poèmes de Sully Prudhomme : un savant et un poète regardent le soleil se lever ; « Le Vase brisé » et « Le Lever du soleil ».">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'stances-savant-poete',
+  discipline: 'Français', niveau: 'Terminale',
+  oeuvre: 'Stances et Poèmes', auteur: 'Sully Prudhomme (1865)',
+  titre: 'Le savant et le poète',
+  decor: 'aube', ambiance: 'aube', lieu: 'une falaise de Bretagne, avant l’aube', moment: '« Le Lever du soleil » · « Le Vase brisé »',
+  avertissement: 'Rencontre imaginée pour la leçon : le savant, le poète et l’élève ne sont pas des personnages du recueil. Les vers marqués « Extrait de l’œuvre » sont de Sully Prudhomme, cités mot pour mot.',
+  objectif: 'Faire dialoguer deux regards sur le même soleil, comme le fait « Le Lever du soleil » : la science enlève des images, mais donne une autre beauté. Découvrir aussi « Le Vase brisé », où l’intérieur se dit par un objet. Les jauges montrent que le savoir et l’émerveillement peuvent monter ensemble.',
+  jauges: [
+    { id: 'savoir', nom: 'Savoir', val: 20, couleur: '#4C6FBF' },
+    { id: 'emerveil', nom: 'Émerveillement', val: 30, couleur: '#FFC93C' }
+  ],
+  personnages: {
+    savant: { nom: 'L’astronome', couleur: '#2E4A6B', look: { tenue: 'costume', col: '#8E2A3C', peau: 'clair', vieux: true, cheveux: 'court', barbe: true, lunettes: true, habit: '#2B3A55' } },
+    poete:  { nom: 'Le poète', couleur: '#6B3E5A', look: { tenue: 'costume', col: '#F2EEE3', objet: 'livre', peau: 'clair', cheveux: 'court', couleurCheveux: '#4A3A2A', moustache: true, habit: '#3A2E4D', col: '#F2EEE3' } },
+    eleve:  { nom: 'Ngono, élève', couleur: '#2E6B5A', look: { tenue: 'jupe', peau: 'fonce', cheveux: 'tresses', habit: '#2F5E9E' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['eleve', 'savant', 'poete'], txt: 'Imaginons : une élève de Terminale, un astronome et un poète attendent le lever du soleil sur une falaise de Bretagne — cette mer que Sully Prudhomme a chantée dans la section « Mélanges ».' },
+    { t: 'dit', qui: 'eleve', txt: 'Monsieur l’astronome, vous allez tout expliquer, et il ne restera plus rien de beau. La science désenchante le monde, non ?' },
+    { t: 'dit', qui: 'savant', emo: 'joie', txt: 'Le soleil ne se lève pas, mademoiselle. C’est la Terre qui tourne et nous présente à lui. Il ne nous regarde pas, il ne veut rien. Il brûle, seul.', jauges: { savoir: 50, emerveil: 20 } },
+    { t: 'dit', qui: 'poete', txt: 'C’est exactement ce que dit Sully Prudhomme. Écoutez : le titre annonce un lever de soleil, et le poème n’en décrit aucun. Il décrit ce que l’astronomie a fait de cet astre.' },
+    { t: 'vers', qui: 'poete', jeu: 'il récite', txt: 'Flamboyant, invisible à force de splendeur,\nIl est père des blés, qui sont pères des races\u202F;', cite: 'Sully Prudhomme, « Le Lever du soleil », Stances et Poèmes (1865), strophe 3', jauges: { emerveil: 60 } },
+    { t: 'question', q: '« Invisible à force de splendeur » : quelle figure ce vers emploie-t-il ?',
+      options: [
+        { txt: 'Un paradoxe : trop de lumière empêche de voir.', ok: true, retour: 'Le paradoxe est physiquement exact — on ne peut pas regarder le soleil — et poétiquement intact. L’émerveillement est déplacé, pas supprimé.' },
+        { txt: 'Une simple comparaison.', retour: 'Il n’y a pas d’outil de comparaison : c’est une alliance de mots qui se contredisent en apparence.' },
+        { txt: 'Une hyperbole sans rapport avec la réalité.', retour: 'Au contraire : le vers dit une vérité physique.' }
+      ] },
+    { t: 'dit', qui: 'savant', emo: 'surpris', txt: 'Mais alors… votre poète ne se moque pas de nous, les savants ?' },
+    { t: 'dit', qui: 'poete', txt: 'Jamais. Il voulait être ingénieur ; une maladie des yeux l’en a empêché. Il a travaillé au Creusot. Il ne parle pas de la science de loin : il en vient.', jauges: { savoir: 65 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · deux regards sur le soleil', consigne: 'Le poème oppose ce que voyaient les Grecs et ce que nous savons. Classe chaque idée.',
+      cats: ['Les Grecs voyaient', 'Nous savons'],
+      items: [
+        { txt: 'Un dieu sur un char tiré par quatre chevaux', cat: 0 },
+        { txt: 'La Terre tourne sur son axe et suit sa courbe autour du soleil', cat: 1 },
+        { txt: 'Un ciel solide, comme une voûte', cat: 0 },
+        { txt: 'Une loi qui relie la terre au soleil et chaque être à chaque être', cat: 1 }
+      ],
+      bravo: 'La science enlève les dieux et le ciel solide ; elle donne en échange une loi qui relie tout. Le poème garde le vocabulaire du sacré pour dire la nature.', jauges: { savoir: 85 } },
+    { t: 'vers', qui: 'poete', jeu: 'il récite la fin du poème', txt: 'La science a vaincu l’imposture des yeux,\nL’homme a répudié les vaines espérances\u202F;', cite: 'Sully Prudhomme, « Le Lever du soleil », strophe 9' },
+    { t: 'choix', qui: 'eleve', q: 'Tu es Ngono. Alors, la science désenchante-t-elle le monde ?',
+      options: [
+        { txt: 'Oui : sans les dieux, le soleil n’est plus qu’une boule de gaz.', consequence: 'Tu gardes le lieu commun. Mais le poème te répond : « l’univers entier vêt une beauté neuve ».', jauges: { emerveil: -20 } },
+        { txt: 'Non : elle enlève des illusions, mais elle donne une autre beauté.', consequence: 'C’est la thèse du poème : savoir et émerveillement peuvent monter ensemble.', jauges: { emerveil: 30 } }
+      ],
+      oeuvre: 'Le poème refuse l’opposition commode entre science et poésie : il reconnaît ce que le savoir enlève et affirme ce qu’il donne.' },
+    { t: 'recit', ambiance: '', txt: 'Le soleil est haut à présent. Le poète sort un petit livre et lit un autre poème, le plus célèbre du recueil, celui que tout le monde récitait dès 1865.' },
+    { t: 'vers', qui: 'poete', jeu: 'à voix basse', txt: 'Le vase où meurt cette verveine\nD’un coup d’éventail fut fêlé\u202F;\nLe coup dut effleurer à peine\u202F:\nAucun bruit ne l’a révélé.', cite: 'Sully Prudhomme, « Le Vase brisé », Stances et Poèmes (1865), premier quatrain', objet: { i: '🏺', lib: 'Le vase fêlé' } },
+    { t: 'question', q: 'Que représente ce vase fêlé « sans bruit » ?',
+      options: [
+        { txt: 'Le cœur blessé par la main qu’on aime : une blessure invisible qui s’agrandit.', ok: true, retour: 'Le poème dit l’intérieur par un objet. Le vase vaut pour le cœur, et pour tout ce qui se casse sans qu’on le voie.' },
+        { txt: 'Un vase réellement cassé dans le salon du poète.', retour: 'L’objet est réel dans les deux premières strophes, mais le poème bascule ensuite vers le cœur.' },
+        { txt: 'La colère du poète contre une servante maladroite.', retour: 'Rien de tel : le coup est léger, involontaire, et c’est ce qui rend la blessure si triste.' }
+      ] },
+    { t: 'remarque', titre: 'Un « demi-parnassien »', txt: 'Sully Prudhomme est parnassien par la forme — strophe régulière, rime soignée — mais il n’a jamais renoncé à dire son cœur. D’où la formule de « demi-parnassien », à discuter plutôt qu’à réciter. Il reçoit en 1901 le tout premier prix Nobel de littérature.', jauges: { emerveil: 90 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · le mouvement du recueil', consigne: 'Remets dans l’ordre les grands moments du recueil.',
+      items: [
+        '« Au lecteur » : le poète avertit que ses vrais vers ne seront pas lus.',
+        'La Vie intérieure : le temps, la mémoire, « Le Vase brisé ».',
+        'Jeunes filles : l’amour toujours au bord de l’adieu.',
+        'Femmes : la femme comme question posée à l’humanité.',
+        'Mélanges : la mer, le ciel, la forge, « Le Lever du soleil ».',
+        '« Je me croyais poète » : le livre revient à son seuil.'
+      ],
+      bravo: 'Le recueil s’ouvre et se ferme sur la même question : que vaut un poème ?' }
+  ],
+  labo: {
+    titre: 'Laboratoire · fabrique un poète de 1865',
+    intro: 'Dose le savoir, le cœur, la rigueur de la forme et le doute : quel poète obtiens-tu ? Compare avec Sully Prudhomme.',
+    persos: ['poete', 'savant', 'eleve'],
+    curseurs: [
+      { id: 'savoir', nom: 'Part du savoir scientifique', val: 80, bas: 'ignoré', haut: 'central',
+        lecture: { haut: 'Formé aux sciences, le poète ne les méprise pas : « Le Lever du soleil » montre ce qu’elles donnent.', bas: 'Un poète sans science chanterait encore le char du soleil, comme les Grecs.' } },
+      { id: 'coeur', nom: 'Part du cœur', val: 70, bas: 'impassible', haut: 'épanché',
+        lecture: { haut: 'Le poète dit son cœur, mais par un objet : le vase fêlé.', milieu: 'Le sentiment est là, retenu.', bas: 'Impassibilité totale : l’idéal du Parnasse le plus strict.' } },
+      { id: 'forme', nom: 'Rigueur de la forme', val: 85, bas: 'libre', haut: 'ciselée',
+        lecture: { haut: 'Strophe régulière, rime soignée : la forme du Parnasse.', bas: 'Une forme libre éloignerait le poète du Parnasse.' } },
+      { id: 'doute', nom: 'Doute religieux', val: 70, bas: 'croyant', haut: 'sceptique',
+        lecture: { haut: 'Il ne peut plus croire et ne peut pas s’en passer : « Intus » met les deux voix face à face.', bas: 'Une foi tranquille effacerait la tension qui fait le livre.' } }
+    ],
+    scenarios: [
+      { nom: 'Sully Prudhomme', icone: '📖', valeurs: { savoir: 80, coeur: 70, forme: 85, doute: 70 } },
+      { nom: 'Un parnassien strict', icone: '🗿', valeurs: { coeur: 10, forme: 95 } },
+      { nom: 'Un romantique', icone: '🌙', valeurs: { savoir: 40, coeur: 95, forme: 25, doute: 30 } }
+    ],
+    liens: [
+      { a: 'savant', b: 'poete', type: 'alliance', lib: 'deux regards', base: .1, poids: { savoir: .6, coeur: .15 } },
+      { a: 'eleve', b: 'savant', type: 'confiance', lib: 'apprend', base: .1, poids: { savoir: .6 } },
+      { a: 'eleve', b: 'poete', type: 'confiance', lib: 's’émeut', base: .1, poids: { coeur: .6 } }
+    ],
+    issue: function(v){
+      if(v.forme >= 70 && v.coeur < 35){ return { niveau: 'moyen', badge: 'Parnassien strict', recit: 'Belle forme, sujets antiques, aucun épanchement : l’art pour l’art.', apres: 'Leconte de Lisle plutôt que Sully Prudhomme : le cœur a disparu.', themes: ['impassibilité', 'art pour l’art'] }; }
+      if(v.forme < 40 && v.coeur >= 70){ return { niveau: 'moyen', badge: 'Romantique attardé', recit: 'Le moi s’épanche librement, sans souci de la ciselure.', apres: 'En 1865, le grand romantisme appartient déjà au passé : c’est contre ce lyrisme que naît le Parnasse.', themes: ['lyrisme', 'épanchement'] }; }
+      if(v.savoir < 30){ return { niveau: 'moyen', badge: 'Poète d’avant la science', recit: 'Le soleil redevient un dieu sur son char : la question de 1865 n’est plus posée.', apres: 'C’est justement ce que « Le Lever du soleil » refuse : le savoir n’est pas l’ennemi du poème.', themes: ['mythe'] }; }
+      return { niveau: 'ok', badge: 'Demi-parnassien', recit: 'La forme du Parnasse, le cœur en plus ; un savant qui n’oppose pas la science à la poésie ; un doute qui ne se résout pas.', apres: 'C’est le portrait de Sully Prudhomme, premier prix Nobel de littérature (1901) — une formule à discuter plutôt qu’à réciter.', themes: ['science et idéal', 'vie intérieure', 'forme parnassienne', 'doute'] };
+    }
+  },
+  quiz: [
+    { q: 'Que décrit vraiment « Le Lever du soleil » ?', options: [
+      { txt: 'Ce que l’astronomie a fait de cet astre, et ce que ce savoir change au regard des hommes.', ok: true, retour: 'Le titre annonce un lever, le poème n’en décrit aucun.' },
+      { txt: 'Un lever de soleil sur la mer, heure par heure.', retour: 'C’est le piège du titre.' } ] },
+    { q: 'Dans « Le Vase brisé », que représente le vase fêlé ?', options: [
+      { txt: 'Le cœur blessé par la main qu’on aime.', ok: true, retour: 'Le poème dit l’intérieur par un objet.' },
+      { txt: 'Un souvenir de voyage.', retour: 'Non : le vase vaut pour le cœur.' } ] },
+    { q: 'Pourquoi Sully Prudhomme a-t-il renoncé au métier d’ingénieur ?', options: [
+      { txt: 'Une maladie des yeux (ophtalmie).', ok: true, retour: 'Un scientifique à qui la science a été retirée.' },
+      { txt: 'Il détestait les sciences.', retour: 'Au contraire : il n’a jamais écrit contre elles.' } ] },
+    { q: 'Quelle distinction reçoit-il en 1901 ?', options: [
+      { txt: 'Le tout premier prix Nobel de littérature.', ok: true, retour: 'Pour « un idéalisme élevé, une perfection artistique… ».' },
+      { txt: 'Le prix Goncourt.', retour: 'Non : le premier Nobel de littérature.' } ] },
+    { q: 'Pourquoi le dit-on « demi-parnassien » ?', options: [
+      { txt: 'Parnassien par la forme, mais il n’a jamais renoncé à dire son cœur.', ok: true, retour: 'Une formule à discuter : c’est un sujet de dissertation.' },
+      { txt: 'Il n’a écrit que la moitié de ses poèmes en vers.', retour: 'Non : c’est une question de rapport entre forme et sentiment.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      '1865 : l’âge de la science et du positivisme ; une crise de la foi chez les esprits cultivés.',
+      '« Le Lever du soleil » ne décrit aucun lever : il montre ce que la science enlève et ce qu’elle donne.',
+      '« Le Vase brisé » dit l’intérieur par un objet : la fêlure invisible du cœur.',
+      'Sully Prudhomme, « demi-parnassien » : la forme du Parnasse, le cœur en plus.',
+      'Premier prix Nobel de littérature, 1901.'
+    ],
+    ecrire: 'Écrivez un court poème en prose (dix lignes) où un objet ordinaire de votre maison dit un sentiment, à la manière du « Vase brisé ».'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

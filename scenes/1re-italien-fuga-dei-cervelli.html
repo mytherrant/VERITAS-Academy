@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Restare o partire? — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’italien (Première) : les problèmes socioculturels contemporains (émigration, fuite des cerveaux) ; subjonctif après les verbes d’opinion et période hypothétique.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '1re-italien-fuga',
+  discipline: 'Italien', niveau: '1re', langue: 'it-IT',
+  titre: 'Restare o partire?',
+  decor: 'case_nuit', lieu: 'Una famiglia a Yaoundé', moment: 'La sera dei risultati',
+  objectif: 'Débattre en italien de l’émigration et de la fuite des cerveaux ; exprimer une opinion avec le subjonctif (penso che sia…, credo che abbia…) et une hypothèse irréelle (se avessi…, farei…).',
+  programme: 'Progression harmonisée 1re · Leçons 51-53 (problèmes socioculturels : émigration, fuite des cerveaux, mobilité des étudiants), leçon 47 (verbes d’opinion + subjonctif), leçons 71-72 (période hypothétique de l’irréalité)',
+  jauges: [
+    { id: 'partire', nom: 'Envie de partir', val: 60, couleur: '#D98E04' },
+    { id: 'italiano', nom: 'Italiano', val: 25, couleur: '#1E499B' }
+  ],
+  personnages: {
+    flora:  { nom: 'Flora', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses', objet: 'lettre' } },
+    padre:  { nom: 'Il padre di Flora', couleur: '#2B3A55', look: { tenue: 'costume', peau: 'fonce', cheveux: 'ras', habit: '#2B3A55', col: '#F2EEE3', lunettes: true } },
+    fratello:{ nom: 'Il fratello Éric, medico', couleur: '#5AA9C9', look: { metier: 'medecin', peau: 'fonce', cheveux: 'court' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['flora', 'padre'], txt: 'Flora ha ricevuto una lettera: un’università italiana le offre una borsa di studio in ingegneria.', trad: 'Flora a reçu une lettre : une université italienne lui offre une bourse d’études en ingénierie.', objet: { i: 'lettre', lib: 'Borsa di studio' } },
+    { t: 'dit', qui: 'flora', emo: 'joie', txt: 'Papà, penso che sia l’occasione della mia vita!', trad: 'Papa, je pense que c’est l’occasion de ma vie !', jauges: { partire: 75 } },
+    { t: 'remarque', titre: 'Opinion + subjonctif', txt: 'Après les verbes d’opinion, de doute, de crainte ou de volonté (pensare, credere, sperare, temere, volere che…), l’italien emploie le subjonctif : Penso che sia (essere), credo che abbia (avere), spero che tu possa (potere).' },
+    { t: 'dit', qui: 'padre', emo: 'doute', txt: 'Sono fiero di te. Ma temo che tu non torni più. Tanti giovani partono e restano all’estero.', trad: 'Je suis fier de toi. Mais je crains que tu ne reviennes plus. Beaucoup de jeunes partent et restent à l’étranger.' },
+    { t: 'question', q: 'Que craint le père de Flora ?',
+      options: [
+        { txt: 'Qu’elle ne revienne jamais : c’est la « fuite des cerveaux » (fuga dei cervelli).', ok: true, retour: 'Temo che tu non torni più : subjonctif après « temere che ».' },
+        { txt: 'Qu’elle échoue à l’université.', retour: 'Non : il dit « temo che tu non torni più ».' }
+      ] },
+    { t: 'recit', entre: ['fratello'], txt: 'Il fratello Éric, medico, ha studiato in Italia ed è tornato in Camerun.', trad: 'Son frère Éric, médecin, a étudié en Italie et est revenu au Cameroun.' },
+    { t: 'dit', qui: 'fratello', txt: 'Io sono tornato. Qui guadagno meno, ma credo che il mio paese abbia bisogno di medici.', trad: 'Moi, je suis revenu. Ici je gagne moins, mais je crois que mon pays a besoin de médecins.' },
+    { t: 'atelier', mode: 'balance', titre: 'Laboratorio · partire o restare?', consigne: 'Place chaque argument du côté qu’il défend.',
+      cotes: ['Partire', 'Restare / tornare'],
+      args: [
+        { txt: 'Studiare in un’università con più mezzi.', cote: 0, poids: 3 },
+        { txt: 'Il paese ha bisogno di ingegneri e di medici.', cote: 1, poids: 3 },
+        { txt: 'Guadagnare di più all’estero.', cote: 0, poids: 2 },
+        { txt: 'Restare vicino alla famiglia.', cote: 1, poids: 2 },
+        { txt: 'Scoprire un’altra cultura.', cote: 0, poids: 1 }
+      ],
+      bravo: 'Partir pour apprendre n’empêche pas de revenir pour construire : c’est la mobilité des étudiants.', jauges: { italiano: 50 } },
+    { t: 'dit', qui: 'flora', txt: 'Se avessi una buona offerta qui, resterei. Ma studierò in Italia e poi tornerò.', trad: 'Si j’avais une bonne offre ici, je resterais. Mais j’étudierai en Italie et ensuite je reviendrai.' },
+    { t: 'remarque', titre: 'L’hypothèse irréelle', txt: 'Se + subjonctif imparfait, conditionnel présent : Se avessi un buon lavoro, resterei (si j’avais un bon travail, je resterais). Au passé : Se avessi avuto…, sarei rimasto (si j’avais eu…, je serais resté).' },
+    { t: 'atelier', mode: 'tri', titre: 'Laboratorio · subjonctif ou conditionnel ?', consigne: 'Classe chaque forme.',
+      cats: ['Congiuntivo', 'Condizionale'],
+      items: [
+        { txt: 'avessi', cat: 0 },
+        { txt: 'resterei', cat: 1 },
+        { txt: 'sia', cat: 0 },
+        { txt: 'tornerei', cat: 1 },
+        { txt: 'abbia', cat: 0 }
+      ],
+      bravo: 'Se + congiuntivo (avessi), puis condizionale (resterei).', jauges: { italiano: 70 } },
+    { t: 'choix', qui: 'padre', q: 'Tu es le père. Que réponds-tu à Flora ?',
+      options: [
+        { txt: '« Non partirai. » (Tu ne partiras pas.)', consequence: 'Flora renonce, mais t’en veut : elle se sent empêchée de réaliser son projet.', jauges: { partire: -20 } },
+        { txt: '« Vai, studia bene, e spero che tu torni a costruire il tuo paese. » (Va, étudie bien, et j’espère que tu reviendras construire ton pays.)', consequence: 'Tu soutiens son projet tout en lui transmettant tes valeurs.', jauges: { partire: 10, italiano: 10 } }
+      ],
+      oeuvre: 'La mobilité des étudiants est une richesse si elle s’accompagne de retours : on parle alors de « circulation des cerveaux » plutôt que de fuite.' },
+    { t: 'dit', qui: 'flora', emo: 'fier', txt: 'Te lo prometto, papà: tornerò ingegnera.', trad: 'Je te le promets, papa : je reviendrai ingénieure.', jauges: { italiano: 85 } }
+  ],
+  labo: {
+    titre: 'Laboratorio · fuga o circolazione?',
+    intro: 'Règle les opportunités d’emploi au pays, les liens avec la famille et les politiques de retour : les étudiants reviennent-ils ?',
+    persos: ['flora', 'padre', 'fratello'],
+    curseurs: [
+      { id: 'lavoro', nom: 'Emplois qualifiés au pays (lavoro)', val: 35, bas: 'rares', haut: 'nombreux' },
+      { id: 'legami', nom: 'Liens avec le pays (legami)', val: 65, bas: 'faibles', haut: 'forts' },
+      { id: 'ritorno', nom: 'Politiques de retour (ritorno)', val: 30, bas: 'aucune', haut: 'incitatives' }
+    ],
+    scenarios: [
+      { nom: 'Oggi', icone: 'lettre', valeurs: { lavoro: 35, legami: 65, ritorno: 30 } },
+      { nom: 'Fuga dei cervelli', icone: 'course', valeurs: { lavoro: 10, legami: 20, ritorno: 5 } },
+      { nom: 'Circolazione dei cervelli', icone: 'rejouer', valeurs: { lavoro: 75, legami: 80, ritorno: 80 } }
+    ],
+    liens: [
+      { a: 'padre', b: 'flora', type: 'amour', lib: 'padre', base: .7, poids: { legami: .3 } },
+      { a: 'fratello', b: 'flora', type: 'confiance', lib: 'esempio', base: .5, poids: { ritorno: .4 } },
+      { a: 'padre', b: 'flora', type: 'conflit', lib: 'paura', base: .3, poids: { lavoro: -.3 } }
+    ],
+    issue: function(v){
+      if(v.lavoro < 25 && v.ritorno < 25){ return { niveau: 'ko', badge: 'Fuga dei cervelli', recit: 'Les diplômés restent à l’étranger : le pays forme des ingénieurs et des médecins pour les autres.', apres: 'Sans emplois qualifiés ni politique de retour, la mobilité devient une fuite.', themes: ['émigration', 'fuite des cerveaux'] }; }
+      if(v.lavoro > 60 && v.ritorno > 60){ return { niveau: 'ok', badge: 'Circolazione dei cervelli', recit: 'Les étudiants partent, apprennent, et reviennent avec des compétences et des réseaux.', apres: 'La mobilité devient une richesse pour le pays.', themes: ['mobilité étudiante'] }; }
+      return { niveau: 'moyen', badge: 'Alcuni tornano', recit: 'Certains, comme Éric, reviennent ; beaucoup restent à l’étranger.', apres: 'Les liens familiaux poussent au retour ; les emplois le rendent possible.', themes: ['retour'] };
+    }
+  },
+  quiz: [
+    { q: 'Que signifie « la fuga dei cervelli » ?', options: [
+      { txt: 'La fuite des cerveaux.', ok: true, retour: 'Le départ définitif des diplômés.' },
+      { txt: 'Les vacances des étudiants.', retour: 'Non.' } ] },
+    { q: '« Penso che … l’occasione della mia vita » (essere) :', options: [
+      { txt: 'sia', ok: true, retour: 'Subjonctif après « penso che ».' },
+      { txt: 'è', retour: 'Après un verbe d’opinion, on emploie le subjonctif.' } ] },
+    { q: '« Se avessi un buon lavoro, … » :', options: [
+      { txt: 'resterei', ok: true, retour: 'Conditionnel présent.' },
+      { txt: 'resto', retour: 'Hypothèse irréelle : conditionnel.' } ] },
+    { q: 'Que veut dire « temo che tu non torni più » ?', options: [
+      { txt: 'Je crains que tu ne reviennes plus.', ok: true, retour: 'temere che + subjonctif.' },
+      { txt: 'Je sais que tu reviendras.', retour: 'Non.' } ] },
+    { q: 'Qu’est-ce que la « circulation des cerveaux » ?', options: [
+      { txt: 'Partir étudier puis revenir avec des compétences.', ok: true, retour: 'La mobilité devient une richesse.' },
+      { txt: 'Rester toujours à l’étranger.', retour: 'C’est la fuite des cerveaux.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Vocabulaire : l’emigrazione, la fuga dei cervelli, la borsa di studio, l’estero, tornare, restare, la mobilità degli studenti.',
+      'Opinion, crainte, espoir + subjonctif : penso che sia, credo che abbia, temo che tu non torni, spero che tu possa.',
+      'Hypothèse irréelle : se + congiuntivo imperfetto, condizionale presente (se avessi…, resterei).',
+      'Débat : partir pour apprendre, revenir pour construire.'
+    ],
+    ecrire: 'Scrivi un breve testo (huit phrases) : « Se avessi una borsa di studio all’estero… ». Utilise au moins deux subjonctifs et deux conditionnels.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

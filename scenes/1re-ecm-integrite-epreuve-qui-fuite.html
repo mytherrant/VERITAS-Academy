@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L’épreuve qui fuite — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’ECM (Première) : l’intégrité morale en milieu scolaire, la fraude aux examens, la corruption et les institutions qui protègent l’intégrité au Cameroun.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '1re-ecm-integrite',
+  discipline: 'Éducation à la citoyenneté et à la morale', niveau: '1re',
+  titre: 'L’épreuve qui fuite',
+  decor: 'classe', lieu: 'Un lycée, la veille du probatoire', moment: 'Juin',
+  objectif: 'Définir l’intégrité morale (honnêteté, cohérence entre valeurs et actes, refus de la corruption) ; mesurer les conséquences de la fraude pour soi et pour la société ; connaître les institutions de promotion de l’intégrité au Cameroun.',
+  programme: 'Progression harmonisée 1re · Leçon 3 (le concept d’intégrité morale), leçon 4 (les institutions de promotion et de préservation de l’intégrité morale au Cameroun), TD 2 (l’intégrité morale en milieu scolaire)',
+  jauges: [
+    { id: 'integrite', nom: 'Intégrité', val: 60, couleur: '#1F9D5B' },
+    { id: 'tentation', nom: 'Tentation', val: 30, couleur: '#D43F2E' }
+  ],
+  personnages: {
+    ines:     { nom: 'Inès', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    franck:   { nom: 'Franck', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court', objet: 'sac' } },
+    vendeur:  { nom: 'Un vendeur d’« épreuves »', couleur: '#3A3A44', look: { peau: 'fonce', cheveux: 'ras', habit: '#3A3A44', coiffe: 'bonnet', couleurCoiffe: '#1A1A1A' } },
+    proviseur:{ nom: 'Mme Mballa, proviseure', couleur: '#14254A', look: { tenue: 'jupe', peau: 'fonce', cheveux: 'chignon', lunettes: true, habit: '#14254A' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['ines', 'franck'], txt: 'La veille du probatoire. Sur les réseaux sociaux, un message circule : « Sujets de l’épreuve de mathématiques, 5 000 francs. »', objet: { i: 'telephone', lib: 'Le message' } },
+    { t: 'dit', qui: 'franck', emo: 'joie', txt: 'Inès, regarde ! On achète, on apprend les corrigés cette nuit, et c’est gagné.', jauges: { tentation: 60 } },
+    { t: 'dit', qui: 'ines', emo: 'doute', txt: 'Et si c’est faux ? Et si c’est vrai, est-ce que c’est juste pour ceux qui ont travaillé toute l’année ?' },
+    { t: 'recit', entre: ['vendeur'], txt: 'Au portail du lycée, le vendeur attend.' },
+    { t: 'dit', qui: 'vendeur', jeu: 'à voix basse', txt: 'Garanti, c’est l’épreuve officielle. Tout le monde achète. Si tu n’achètes pas, tu seras le seul à échouer.', jauges: { tentation: 75 } },
+    { t: 'question', q: 'Sur quoi joue le vendeur pour convaincre ?',
+      options: [
+        { txt: 'Sur la peur d’échouer et sur l’idée que « tout le monde le fait ».', ok: true, retour: 'Ce que « tout le monde fait » n’est pas pour autant juste. L’intégrité, c’est agir selon ses valeurs même quand les autres font autrement.' },
+        { txt: 'Sur la qualité de ses cours.', retour: 'Il ne vend pas un savoir, il vend une fraude.' }
+      ] },
+    { t: 'remarque', titre: 'L’intégrité morale', txt: 'Être intègre, c’est être honnête, cohérent entre ce qu’on dit et ce qu’on fait, et refuser de tirer un avantage injuste (fraude, corruption, mensonge). C’est une qualité personnelle, mais aussi une condition de la confiance entre citoyens.' },
+    { t: 'choix', qui: 'franck', q: 'Tu es Franck. Que fais-tu ?',
+      options: [
+        { txt: 'J’achète l’« épreuve ».', consequence: 'Le lendemain, le sujet est différent : c’était une arnaque. Tu as perdu ton argent et ta nuit de révision.', jauges: { integrite: -30, tentation: 15 } },
+        { txt: 'Je refuse et je révise avec Inès.', consequence: 'Tu arrives fatigué mais préparé, et fier de toi.', jauges: { integrite: 25, tentation: -40 } },
+        { txt: 'Je refuse et je signale le vendeur à la proviseure.', consequence: 'Tu protèges aussi les autres élèves. Signaler n’est pas trahir : c’est défendre une règle commune.', jauges: { integrite: 35, tentation: -50 } }
+      ],
+      oeuvre: 'La fraude aux examens est sanctionnée : annulation de l’épreuve ou de l’examen, interdiction de se présenter pendant plusieurs années, et poursuites pour les vendeurs.' },
+    { t: 'recit', entre: ['proviseur'], txt: 'Mme Mballa réunit les candidats.' },
+    { t: 'dit', qui: 'proviseur', txt: 'Un diplôme obtenu par la fraude est un mensonge sur ce que vous savez. Demain, c’est un médecin qui ne sait pas soigner, un ingénieur dont le pont s’écroule.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · intègre ou non ?', consigne: 'Classe chaque comportement.',
+      cats: ['Intègre', 'Contraire à l’intégrité'],
+      items: [
+        { txt: 'Rendre la monnaie en trop à une commerçante.', cat: 0 },
+        { txt: 'Payer un agent pour obtenir un document plus vite.', cat: 1 },
+        { txt: 'Avouer à son professeur qu’on a copié un devoir.', cat: 0 },
+        { txt: 'Acheter des notes ou des sujets d’examen.', cat: 1 },
+        { txt: 'Refuser un cadeau offert pour influencer sa décision.', cat: 0 }
+      ],
+      bravo: 'L’intégrité se joue dans les petits gestes autant que dans les grandes décisions.', jauges: { integrite: 80 } },
+    { t: 'dit', qui: 'ines', txt: 'Madame, qui lutte contre la corruption au Cameroun ?' },
+    { t: 'dit', qui: 'proviseur', txt: 'La Commission nationale anti-corruption, la CONAC, créée en 2006 ; les tribunaux, dont le Tribunal criminel spécial pour les grands détournements ; l’Agence nationale d’investigation financière pour l’argent sale. Et à l’école : le règlement intérieur, le conseil de discipline… et vous.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · réagir à une fraude', consigne: 'Remets dans l’ordre la bonne réaction face à une proposition de fraude.',
+      items: [
+        'Reconnaître la proposition comme une fraude.',
+        'Refuser clairement.',
+        'Prévenir un adulte responsable (professeur, proviseur, parent).',
+        'Continuer à se préparer honnêtement.'
+      ],
+      bravo: 'Refuser, signaler, travailler : trois gestes d’intégrité.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · un examen juste',
+    intro: 'Règle la pression des résultats, le contrôle des examens et la culture de l’intégrité : que vaut le diplôme ?',
+    persos: ['ines', 'franck', 'vendeur', 'proviseur'],
+    curseurs: [
+      { id: 'pression', nom: 'Pression des résultats', val: 70, bas: 'faible', haut: 'écrasante' },
+      { id: 'controle', nom: 'Contrôle et sanctions', val: 50, bas: 'laxistes', haut: 'stricts' },
+      { id: 'culture', nom: 'Culture de l’intégrité', val: 50, bas: 'tout se vend', haut: 'valeur partagée' }
+    ],
+    scenarios: [
+      { nom: 'La veille du probatoire', icone: 'telephone', valeurs: { pression: 70, controle: 50, culture: 50 } },
+      { nom: 'Tout se vend', icone: 'pieces', valeurs: { controle: 10, culture: 10 } },
+      { nom: 'Une école intègre', icone: 'diplome', valeurs: { controle: 80, culture: 85, pression: 45 } }
+    ],
+    liens: [
+      { a: 'vendeur', b: 'franck', type: 'domination', lib: 'tente', base: .3, poids: { pression: .4, controle: -.3 } },
+      { a: 'ines', b: 'franck', type: 'alliance', lib: 'révisent', base: .4, poids: { culture: .4 } },
+      { a: 'proviseur', b: 'vendeur', type: 'conflit', lib: 'sanctionne', base: .2, poids: { controle: .7 } }
+    ],
+    issue: function(v){
+      if(v.culture < 30 && v.controle < 30){ return { niveau: 'ko', badge: 'Des diplômes sans valeur', recit: 'Les sujets circulent, tout s’achète : plus personne ne croit aux diplômes, ni les employeurs ni les élèves.', apres: 'La fraude ruine la confiance, bien commun de tous.', themes: ['fraude', 'corruption'] }; }
+      if(v.culture > 65 && v.controle > 60){ return { niveau: 'ok', badge: 'Un diplôme qui vaut', recit: 'Contrôles sérieux et élèves intègres : le diplôme dit vraiment ce que l’on sait.', apres: 'L’intégrité protège celui qui réussit honnêtement.', themes: ['intégrité', 'confiance'] }; }
+      if(v.controle > 60){ return { niveau: 'moyen', badge: 'La peur du gendarme', recit: 'La fraude recule, mais seulement par crainte de la sanction.', apres: 'Le contrôle ne suffit pas : il faut que l’intégrité devienne une valeur partagée.', themes: ['sanction'] }; }
+      return { niveau: 'moyen', badge: 'Une confiance fragile', recit: 'Beaucoup refusent la fraude, d’autres non : on doute de certains résultats.', apres: 'Chaque refus compte.', themes: ['responsabilité'] };
+    }
+  },
+  quiz: [
+    { q: 'Qu’est-ce que l’intégrité morale ?', options: [
+      { txt: 'L’honnêteté et la cohérence entre ses valeurs et ses actes.', ok: true, retour: 'Avec le refus de tout avantage injuste.' },
+      { txt: 'Le fait d’avoir de bonnes notes.', retour: 'Non.' } ] },
+    { q: 'Que signifie le sigle CONAC ?', options: [
+      { txt: 'Commission nationale anti-corruption.', ok: true, retour: 'Créée en 2006.' },
+      { txt: 'Conseil national des communes.', retour: 'Non.' } ] },
+    { q: 'L’argument « tout le monde le fait »…', options: [
+      { txt: 'ne rend pas une action juste.', ok: true, retour: 'L’intégrité ne dépend pas de ce que font les autres.' },
+      { txt: 'justifie la fraude.', retour: 'Non.' } ] },
+    { q: 'Que risque un fraudeur à un examen officiel ?', options: [
+      { txt: 'L’annulation et une interdiction de se présenter pendant plusieurs années.', ok: true, retour: 'Et des poursuites pour les vendeurs.' },
+      { txt: 'Rien.', retour: 'Non.' } ] },
+    { q: 'Signaler une fraude, c’est…', options: [
+      { txt: 'défendre une règle commune qui protège tout le monde.', ok: true, retour: 'Ce n’est pas trahir.' },
+      { txt: 'trahir ses camarades.', retour: 'C’est protéger ceux qui travaillent honnêtement.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Intégrité morale : honnêteté, cohérence entre valeurs et actes, refus de la fraude et de la corruption.',
+      'La fraude scolaire trompe la société sur les compétences et ruine la confiance dans les diplômes.',
+      'Institutions : CONAC (2006), tribunaux dont le Tribunal criminel spécial, ANIF ; à l’école, règlement intérieur et conseil de discipline.',
+      'Face à une fraude : reconnaître, refuser, signaler, continuer honnêtement.'
+    ],
+    ecrire: 'Rédigez un texte argumentatif de quinze lignes : « Pourquoi refuser de tricher, même quand on est sûr de ne pas être pris ? »'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

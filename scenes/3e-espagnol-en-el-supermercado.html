@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>En el supermercado — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’espagnol (3e) : les achats au supermarché et la gestion du budget familial ; les nombres, le gérondif (estar + -ando / -iendo), l’impératif.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '3e-espagnol-super',
+  discipline: 'Espagnol', niveau: '3e', langue: 'es-ES',
+  titre: 'En el supermercado',
+  decor: 'ville', lieu: 'Un supermercado de Douala', moment: 'Fin de mes',
+  objectif: 'Faire des achats en espagnol (¿cuánto cuesta?, los números) ; décrire une action en cours avec le gérondif (estoy comparando, está pagando) ; gérer un budget familial et donner des consignes à l’impératif.',
+  programme: 'Progression harmonisée 3e · Module 4 (activités économiques), leçon 11 (achats dans les magasins et supermarchés : les numéraux, le gérondif), leçon 12 (gestion du budget familial, l’impératif)',
+  jauges: [
+    { id: 'presupuesto', nom: 'Presupuesto (budget restant)', val: 100, couleur: '#1F9D5B' },
+    { id: 'espanol', nom: 'Español', val: 25, couleur: '#1E499B' }
+  ],
+  personnages: {
+    sofia:  { nom: 'Sofía', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses', objet: 'sac' } },
+    papa:   { nom: 'Su padre', couleur: '#2B3A55', look: { tenue: 'costume', peau: 'fonce', cheveux: 'ras', habit: '#2B3A55', col: '#F2EEE3', moustache: true } },
+    cajera: { nom: 'La cajera', couleur: '#1F6F78', look: { metier: 'commercant', tenue: 'robe', peau: 'fonce', cheveux: 'chignon' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['sofia', 'papa'], txt: 'Es fin de mes. Sofía acompaña a su padre al supermercado. Tienen diez mil francos para la semana.', trad: 'C’est la fin du mois. Sofía accompagne son père au supermarché. Ils ont dix mille francs pour la semaine.', objet: { i: 'panier', lib: 'La lista de la compra' } },
+    { t: 'dit', qui: 'papa', txt: 'Sofía, lee la lista: arroz, aceite, jabón y leche. ¡No compres nada más!', trad: 'Sofía, lis la liste : riz, huile, savon et lait. N’achète rien d’autre !' },
+    { t: 'remarque', titre: 'L’impératif', txt: 'Affirmatif (tú) : lee, compra, mira. Négatif : no + subjonctif : ¡No compres! ¡No mires! Avec usted : compre, no compre.' },
+    { t: 'dit', qui: 'sofia', jeu: 'delante de las estanterías', txt: 'Papá, estoy comparando los precios. El arroz de cinco kilos cuesta tres mil quinientos francos, y el de la otra marca, cuatro mil.', trad: 'Papa, je suis en train de comparer les prix. Le riz de cinq kilos coûte trois mille cinq cents francs, et celui de l’autre marque, quatre mille.', jauges: { espanol: 40 } },
+    { t: 'remarque', titre: 'Le gérondif : une action en cours', txt: 'estar + gérondif : estoy comparando (je suis en train de comparer). Formation : -ar → -ando (comparar → comparando), -er / -ir → -iendo (comer → comiendo, escribir → escribiendo).' },
+    { t: 'question', q: 'Quel riz Sofía doit-elle choisir pour respecter le budget ?',
+      options: [
+        { txt: 'El de tres mil quinientos francos (3 500 F), el más barato.', ok: true, retour: 'Comparer les prix, c’est la première règle d’un budget.' },
+        { txt: 'El de cuatro mil francos.', retour: 'Il coûte 500 francs de plus pour la même quantité.' }
+      ] },
+    { t: 'dit', qui: 'papa', txt: 'Bien. Aceite: dos mil francos. Jabón: quinientos. Leche: mil quinientos. ¿Cuánto es en total?', trad: 'Bien. Huile : deux mille francs. Savon : cinq cents. Lait : mille cinq cents. Combien cela fait-il en tout ?' },
+    { t: 'question', q: '3 500 + 2 000 + 500 + 1 500 = ?',
+      options: [
+        { txt: 'Siete mil quinientos francos (7 500 F).', ok: true, retour: 'Il reste 2 500 francs pour la semaine.' },
+        { txt: 'Seis mil francos.', retour: 'Recompte : 3 500 + 2 000 = 5 500 ; + 500 = 6 000 ; + 1 500 = 7 500.' }
+      ] },
+    { t: 'choix', qui: 'sofia', q: 'Tu es Sofía. Près de la caisse, il y a des chocolats à 1 500 francs. Que fais-tu ?',
+      options: [
+        { txt: '¡Lo compro! (Je l’achète !)', consequence: 'Il ne reste plus que 1 000 francs pour toute la semaine : le transport de mercredi posera problème.', jauges: { presupuesto: -40 } },
+        { txt: 'No lo compro: no está en la lista. (Je ne l’achète pas : ce n’est pas sur la liste.)', consequence: 'Ton père est fier : la liste, c’est la discipline d’un budget.', jauges: { presupuesto: 0, espanol: 10 } }
+      ],
+      oeuvre: 'Gérer un budget : faire une liste, comparer les prix, éviter les achats impulsifs, garder une réserve pour l’imprévu.' },
+    { t: 'recit', entre: ['cajera'], txt: 'En la caja.', trad: 'À la caisse.' },
+    { t: 'dit', qui: 'cajera', txt: 'Son siete mil quinientos francos, por favor.', trad: 'Cela fait sept mille cinq cents francs, s’il vous plaît.' },
+    { t: 'atelier', mode: 'monnaie', titre: 'Taller · pagar en la caja', consigne: 'Paie exactement 7 500 FCFA.', cible: 7500, pieces: [5000, 2000, 1000, 500], devise: 'FCFA',
+      bravo: '¡Gracias! — ¡A usted!', jauges: { presupuesto: 25 } },
+    { t: 'atelier', mode: 'tri', titre: 'Taller · ¿gerundio o imperativo?', consigne: 'Classe chaque forme verbale.',
+      cats: ['Gerundio', 'Imperativo'],
+      items: [
+        { txt: 'comparando', cat: 0 },
+        { txt: 'lee', cat: 1 },
+        { txt: 'pagando', cat: 0 },
+        { txt: 'no compres', cat: 1 },
+        { txt: 'comiendo', cat: 0 }
+      ],
+      bravo: 'Gerundio: -ando, -iendo. Imperativo: lee, compra, no compres.', jauges: { espanol: 70 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Taller · construye la frase', consigne: 'Remets les mots dans l’ordre : « Mon père est en train de payer à la caisse. »',
+      items: ['Mi padre', 'está', 'pagando', 'en', 'la caja.'],
+      bravo: 'Mi padre está pagando en la caja : estar + gérondif.', jauges: { espanol: 85 } }
+  ],
+  labo: {
+    titre: 'Laboratorio · el presupuesto familiar',
+    intro: 'Règle la liste de courses, la comparaison des prix et les achats impulsifs : reste-t-il de l’argent à la fin de la semaine ?',
+    persos: ['sofia', 'papa', 'cajera'],
+    curseurs: [
+      { id: 'lista', nom: 'Respect de la liste (lista)', val: 70, bas: 'jamais', haut: 'toujours' },
+      { id: 'comparar', nom: 'Comparaison des prix', val: 60, bas: 'jamais', haut: 'toujours' },
+      { id: 'impulso', nom: 'Achats impulsifs (caprichos)', val: 30, bas: 'aucun', haut: 'beaucoup' }
+    ],
+    scenarios: [
+      { nom: 'Sofía y su padre', icone: 'panier', valeurs: { lista: 70, comparar: 60, impulso: 30 } },
+      { nom: 'Muchos caprichos', icone: 'gateau', valeurs: { lista: 20, impulso: 90 } },
+      { nom: 'Compra inteligente', icone: 'aide', valeurs: { lista: 90, comparar: 90, impulso: 10 } }
+    ],
+    liens: [
+      { a: 'papa', b: 'sofia', type: 'confiance', lib: 'enseña', base: .6, poids: { lista: .3 } },
+      { a: 'cajera', b: 'papa', type: 'alliance', lib: 'cliente', base: .4 }
+    ],
+    issue: function(v){
+      if(v.impulso > 65 && v.lista < 40){ return { niveau: 'ko', badge: 'Sin dinero el martes', recit: 'Chocolats, sodas, gadgets : dès mardi, il ne reste plus rien pour la semaine.', apres: 'Une liste et de la discipline.', themes: ['achats impulsifs'] }; }
+      if(v.lista > 75 && v.comparar > 75){ return { niveau: 'ok', badge: 'Compra inteligente', recit: 'Liste respectée, prix comparés : il reste de l’argent pour l’imprévu.', apres: 'Un bon budget se prépare avant d’entrer au magasin.', themes: ['budget familial'] }; }
+      return { niveau: 'moyen', badge: 'Justo, justo', recit: 'La semaine se termine à zéro franc, mais sans dette.', apres: 'Comparer les prix ferait gagner de quoi épargner.', themes: ['gestion'] };
+    }
+  },
+  quiz: [
+    { q: 'Comment demander un prix ?', options: [
+      { txt: '¿Cuánto cuesta?', ok: true, retour: 'Ou : ¿Cuánto es?' },
+      { txt: '¿Cómo te llamas?', retour: 'Cela veut dire « comment t’appelles-tu ? ».' } ] },
+    { q: 'Gérondif de « comer » :', options: [
+      { txt: 'comiendo', ok: true, retour: '-er → -iendo.' },
+      { txt: 'comando', retour: '-ando est pour les verbes en -ar.' } ] },
+    { q: '« N’achète pas ! » (tú) :', options: [
+      { txt: '¡No compres!', ok: true, retour: 'no + subjonctif.' },
+      { txt: '¡No compra!', retour: 'Il faut le subjonctif au négatif.' } ] },
+    { q: 'Comment dit-on 7 500 en espagnol ?', options: [
+      { txt: 'siete mil quinientos', ok: true, retour: 'quinientos = 500.' },
+      { txt: 'siete mil cincocientos', retour: '500 se dit quinientos.' } ] },
+    { q: 'Quelle est une bonne règle de budget ?', options: [
+      { txt: 'Faire une liste et comparer les prix.', ok: true, retour: 'Et éviter les achats impulsifs.' },
+      { txt: 'Acheter tout ce qui est en promotion.', retour: 'Une promotion inutile reste une dépense.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Vocabulaire : el supermercado, la lista de la compra, el precio, barato, caro, la caja, la cajera, el presupuesto.',
+      'Nombres : quinientos (500), mil (1 000), siete mil quinientos (7 500).',
+      'Gérondif : estar + -ando / -iendo (estoy comparando, está pagando).',
+      'Impératif : lee, compra ; négatif : no compres, no mires.'
+    ],
+    ecrire: 'Escribe la lista de la compra de tu familia para una semana (cinco productos con precios) y calcula el total. Puis écris trois phrases au gérondif.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

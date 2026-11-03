@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Saluer, c’est respecter — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de langues nationales (Première) : la vie sociale et la citoyenneté dans la langue cible, les salutations et le respect des aînés, les compléments circonstanciels.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '1re-langues-salutations',
+  discipline: 'Langues nationales', niveau: '1re',
+  titre: 'Saluer, c’est respecter',
+  decor: 'chefferie', lieu: 'Un village pendant les vacances', moment: 'Le matin',
+  avertissement: 'Dialogue fictif écrit pour la leçon. Les salutations en fulfulde et en ewondo sont des formes courantes données à titre d’exemple ; elles varient selon les régions : faites-les vérifier par votre professeur, et cherchez celles de votre langue cible.',
+  objectif: 'Observer comment les salutations, dans les langues nationales, dépendent du moment de la journée, de l’âge et du statut ; relier la langue aux valeurs de la vie sociale (respect des aînés, hospitalité) ; repérer les compléments circonstanciels de temps, de lieu et de manière.',
+  programme: 'Progression harmonisée 1re · Vie sociale et citoyenneté dans la langue cible, leçon 4 (production orale en contexte de vie sociale), leçon 6 (les compléments circonstanciels)',
+  jauges: [
+    { id: 'respect', nom: 'Respect témoigné', val: 30, couleur: '#1F9D5B' },
+    { id: 'langue', nom: 'Aisance dans la langue', val: 20, couleur: '#1E499B' }
+  ],
+  personnages: {
+    adamou: { nom: 'Adamou, venu de la ville', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'brun', cheveux: 'court' } },
+    baaba:  { nom: 'Baaba Bouba, l’aîné', couleur: '#E9E3CF', look: { tenue: 'boubou', peau: 'brun', vieux: true, coiffe: 'chechia', couleurCoiffe: '#F2EEE3', habit: '#E9E3CF', barbe: true } },
+    mbarga: { nom: 'Mbarga, son ami de Yaoundé', couleur: '#8A5A2B', look: { metier: 'eleve', peau: 'fonce', cheveux: 'ras' } },
+    tante:  { nom: 'Tante Aïssatou', couleur: '#C0397C', look: { tenue: 'robe', peau: 'brun', coiffe: 'voile', couleurCoiffe: '#C0397C', habit: '#C0397C', objet: 'sac' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['adamou', 'mbarga'], txt: 'Adamou passe les vacances au village de son père, près de Garoua. Son ami Mbarga, de Yaoundé, l’accompagne. Le matin, ils croisent Baaba Bouba, l’aîné du quartier.', objet: { i: 'personne', lib: 'L’aîné' } },
+    { t: 'dit', qui: 'mbarga', jeu: 'il lève la main de loin', txt: 'Salut, papa !' },
+    { t: 'recit', entre: ['baaba'], txt: 'Baaba Bouba fronce les sourcils. Adamou s’approche, ralentit, baisse un peu la tête.', jauges: { respect: 20 } },
+    { t: 'dit', qui: 'adamou', jeu: 'en fulfulde', txt: 'Jam waali, Baaba ?', trad: 'As-tu passé la nuit en paix, Baaba ? (salutation du matin)' },
+    { t: 'dit', qui: 'baaba', emo: 'joie', txt: 'Jam tan. Jam waali, ɓiɗɗo am.', trad: 'La paix seulement. As-tu passé la nuit en paix, mon enfant ?', jauges: { respect: 60, langue: 40 } },
+    { t: 'question', q: 'Que demande, littéralement, la salutation du matin en fulfulde « Jam waali ? » ?',
+      options: [
+        { txt: 'Si l’on a passé la nuit en paix.', ok: true, retour: 'Jam = la paix. Beaucoup de salutations africaines s’enquièrent de la paix, de la santé, de la famille.' },
+        { txt: 'Quelle heure il est.', retour: 'Non : on parle de la paix de la nuit.' }
+      ] },
+    { t: 'remarque', titre: 'Une salutation dit le temps, la personne, la relation', txt: 'Dans beaucoup de langues nationales, on ne salue pas de la même manière le matin et le soir, un aîné et un camarade. Saluer longuement un aîné, en prenant des nouvelles de la famille, c’est lui montrer du respect. Chez les Beti, on entend souvent « mbolo ! » pour saluer et « akiba » pour remercier ; en fulfulde, on remercie par « a jaraama ».' },
+    { t: 'dit', qui: 'mbarga', emo: 'doute', jeu: 'tout bas', txt: 'Je ne savais pas. Chez nous, à Yaoundé, on dit juste « bonjour ».' },
+    { t: 'choix', qui: 'mbarga', q: 'Tu es Mbarga. Que fais-tu ?',
+      options: [
+        { txt: 'Je continue mon chemin : je ne parle pas cette langue.', consequence: 'L’aîné se sent ignoré. Au village, on dira que l’ami d’Adamou est mal élevé.', jauges: { respect: -20 } },
+        { txt: 'Je m’approche, je salue en français avec respect, et je demande à Adamou de m’apprendre la salutation.', consequence: 'Baaba Bouba sourit : l’effort compte plus que l’accent.', jauges: { respect: 25, langue: 15 } }
+      ],
+      oeuvre: 'Apprendre à saluer dans la langue de l’autre est un premier geste de vivre-ensemble.' },
+    { t: 'dit', qui: 'tante', entre: ['tante'], jeu: 'elle apporte de la bouillie', txt: 'Entrez, les enfants. Ce matin, dans la cour, sans vous presser, vous mangerez avec nous.' },
+    { t: 'remarque', titre: 'Les compléments circonstanciels', txt: 'Ils précisent les circonstances de l’action : le temps (ce matin, à l’aube), le lieu (dans la cour, au marché), la manière (sans vous presser, respectueusement), la cause, le but. Dans votre langue cible, repérez comment on les exprime et où on les place.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · quel complément ?', consigne: 'Classe chaque complément circonstanciel de la phrase de Tante Aïssatou et d’autres phrases.',
+      cats: ['Temps', 'Lieu', 'Manière'],
+      items: [
+        { txt: 'ce matin', cat: 0 },
+        { txt: 'dans la cour', cat: 1 },
+        { txt: 'sans vous presser', cat: 2 },
+        { txt: 'au marché', cat: 1 },
+        { txt: 'respectueusement', cat: 2 },
+        { txt: 'à la tombée de la nuit', cat: 0 }
+      ],
+      bravo: 'Temps, lieu, manière : trois questions, quand ? où ? comment ?', jauges: { langue: 60 } },
+    { t: 'dit', qui: 'mbarga', emo: 'joie', jeu: 'en partant, à l’aîné', txt: 'A jaraama, Baaba !', trad: 'Merci, Baaba ! (en fulfulde)', jauges: { respect: 85, langue: 80 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · saluer un aîné', consigne: 'Remets dans l’ordre une salutation respectueuse, telle qu’on la pratique dans beaucoup de communautés.',
+      items: [
+        'S’approcher, ralentir, ne pas crier de loin.',
+        'Saluer selon le moment de la journée.',
+        'Prendre des nouvelles de la santé et de la famille.',
+        'Attendre que l’aîné termine avant de parler de son affaire.'
+      ],
+      bravo: 'Une salutation est un petit rituel social.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · la politesse en partage',
+    intro: 'Règle la connaissance de la langue, le respect des codes sociaux et l’ouverture aux autres langues : comment l’ami de la ville est-il accueilli ?',
+    persos: ['adamou', 'mbarga', 'baaba', 'tante'],
+    curseurs: [
+      { id: 'langue', nom: 'Connaissance de la langue locale', val: 30, bas: 'aucune', haut: 'courante' },
+      { id: 'codes', nom: 'Respect des codes (âge, moment)', val: 50, bas: 'ignorés', haut: 'respectés' },
+      { id: 'ouverture', nom: 'Ouverture aux autres langues', val: 60, bas: 'fermeture', haut: 'curiosité' }
+    ],
+    scenarios: [
+      { nom: 'Le matin au village', icone: 'personne', valeurs: { langue: 30, codes: 50, ouverture: 60 } },
+      { nom: 'Ignorer les codes', icone: 'muet', valeurs: { codes: 10, ouverture: 15 } },
+      { nom: 'Apprendre avec respect', icone: 'groupe', valeurs: { langue: 70, codes: 85, ouverture: 90 } }
+    ],
+    liens: [
+      { a: 'adamou', b: 'baaba', type: 'confiance', lib: 'salue', base: .5, poids: { codes: .4 } },
+      { a: 'mbarga', b: 'baaba', type: 'conflit', lib: 'malentendu', base: .4, poids: { codes: -.5 } },
+      { a: 'adamou', b: 'mbarga', type: 'alliance', lib: 'amis', base: .7, poids: { ouverture: .2 } },
+      { a: 'tante', b: 'mbarga', type: 'confiance', lib: 'hospitalité', base: .5 }
+    ],
+    issue: function(v){
+      if(v.codes < 30){ return { niveau: 'ko', badge: 'Un étranger mal élevé', recit: 'On crie de loin, on ne prend pas de nouvelles : les anciens se sentent méprisés.', apres: 'Les codes de politesse sont la grammaire de la vie sociale.', themes: ['respect des aînés'] }; }
+      if(v.codes > 70 && v.ouverture > 70){ return { niveau: 'ok', badge: 'Accueilli comme un fils', recit: 'Mbarga salue avec respect et apprend quelques mots : le village l’adopte.', apres: 'Le vivre-ensemble commence par une salutation.', themes: ['vivre-ensemble', 'hospitalité'] }; }
+      return { niveau: 'moyen', badge: 'Bien reçu', recit: 'Politesse correcte, mais sans un mot de la langue locale.', apres: 'Quelques mots appris font une grande différence.', themes: ['ouverture'] };
+    }
+  },
+  quiz: [
+    { q: 'Que signifie « jam » en fulfulde ?', options: [
+      { txt: 'La paix.', ok: true, retour: 'Jam waali ? Jam tan.' },
+      { txt: 'La nuit.', retour: 'Non.' } ] },
+    { q: 'Comment remercie-t-on en fulfulde ?', options: [
+      { txt: 'A jaraama.', ok: true, retour: 'Merci.' },
+      { txt: 'Jam waali.', retour: 'C’est la salutation du matin.' } ] },
+    { q: 'Pourquoi salue-t-on longuement un aîné ?', options: [
+      { txt: 'Pour lui témoigner du respect.', ok: true, retour: 'En prenant des nouvelles de sa santé et de sa famille.' },
+      { txt: 'Pour gagner du temps.', retour: 'Non.' } ] },
+    { q: '« dans la cour » est un complément circonstanciel de…', options: [
+      { txt: 'lieu.', ok: true, retour: 'Il répond à la question « où ? ».' },
+      { txt: 'temps.', retour: 'Non.' } ] },
+    { q: 'Que faire si l’on ne parle pas la langue locale ?', options: [
+      { txt: 'Saluer avec respect et apprendre quelques mots.', ok: true, retour: 'L’effort compte plus que l’accent.' },
+      { txt: 'Ignorer les gens.', retour: 'Non.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Les salutations dépendent du moment de la journée, de l’âge et du statut des personnes.',
+      'Exemples : en fulfulde, Jam waali ? / Jam tan ; a jaraama (merci) ; chez les Beti, mbolo (salut), akiba (merci).',
+      'Saluer un aîné : s’approcher, saluer selon le moment, prendre des nouvelles, attendre son tour.',
+      'Compléments circonstanciels : temps (quand ?), lieu (où ?), manière (comment ?).'
+    ],
+    ecrire: 'Dans votre langue cible, recueillez les salutations du matin, de midi et du soir, et la manière de saluer un aîné. Présentez-les avec leur traduction et une phrase qui contient un complément de temps, de lieu et de manière.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

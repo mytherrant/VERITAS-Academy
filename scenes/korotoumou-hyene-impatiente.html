@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L’hyène qui ne sait pas attendre — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Les Contes de Korotoumou d’Amadou Koné : la veillée, le lièvre, l’éléphant des génies et l’hyène gloutonne.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'korotoumou-hyene',
+  discipline: 'Français', niveau: '6e',
+  oeuvre: 'Les Contes de Korotoumou', auteur: 'Amadou Koné',
+  titre: 'L’hyène qui ne sait pas attendre',
+  decor: 'chefferie', ambiance: 'nuit', lieu: 'Kongodjan, la veillée', moment: '« Le jeu des congco’ngan »',
+  avertissement: 'Scène imaginée d’après le recueil : les répliques ne sont pas de l’auteur, sauf le passage marqué « Extrait de l’œuvre ».',
+  objectif: 'Vivre une veillée de contes : qui raconte, qui écoute, et ce que chaque animal incarne. Comprendre pourquoi l’hyène, forte et grande, perd toujours.',
+  jauges: [
+    { id: 'faim', nom: 'Faim au village', val: 85, couleur: '#E07B39' },
+    { id: 'glouton', nom: 'Gloutonnerie de l’hyène', val: 40, couleur: '#C0392B' }
+  ],
+  personnages: {
+    narrateur:  { nom: 'Le narrateur', couleur: '#1E499B', look: { peau: 'fonce', cheveux: 'ras', lunettes: true, habit: '#E9E3CF', bas: '#2B3A55' } },
+    korotoumou: { nom: 'Korotoumou, la conteuse', couleur: '#8A5A2B', look: { peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#E8A413', tenue: 'robe', habit: '#B4793F' } },
+    lievre:     { nom: 'Le lièvre', couleur: '#8A8F9C', look: { peau: 'brun', cheveux: 'court', habit: '#8A8F9C', bas: '#5A6275', objet: 'sac' } },
+    elephant:   { nom: 'L’éléphant des génies', couleur: '#6E7385', look: { peau: 'fonce', vieux: true, cheveux: 'aucun', tenue: 'boubou', habit: '#9AA3B2' } },
+    hyene:      { nom: 'L’hyène', couleur: '#7A5A3A', look: { peau: 'brun', cheveux: 'ras', couleurCheveux: '#3A2A1A', habit: '#7A5A3A', bas: '#3A2A1A' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['narrateur', 'korotoumou'], txt: 'Le narrateur revient d’Amérique, où il est professeur. À Kongodjan, la plantation où il a grandi, il demande à sa grande sœur Korotoumou de dire des contes, comme autrefois.' },
+    { t: 'dit', qui: 'narrateur', txt: 'Et si nous disions des contes ce soir ? Là-bas aussi, tu sais, les héros existent toujours et les animaux parlent.' },
+    { t: 'dit', qui: 'korotoumou', emo: 'joie', txt: 'Alors écoute. C’était un temps de sécheresse et de famine. La terre ne donnait plus rien…', jauges: { faim: 95 } },
+    { t: 'question', q: 'Dans le titre « Les Contes de Korotoumou », que désigne le complément « de Korotoumou » ?',
+      options: [
+        { txt: 'Celle qui dit les contes : la grande sœur du narrateur, la conteuse.', ok: true, retour: 'Le titre ne dit pas qui a écrit les contes, mais qui les raconte.' },
+        { txt: 'Le village où se passent les contes.', retour: 'Le village, c’est Kongodjan. Korotoumou est une personne.' }
+      ] },
+    { t: 'recit', entre: ['lievre', 'elephant'], txt: 'Le lièvre, au lieu de travailler, va jouer tous les jours avec l’éléphant. Cet éléphant appartient aux génies : il n’a besoin de rien, il est tout dodu.', objet: { i: 'de', lib: 'Le jeu des congco’ngan' } },
+    { t: 'dit', qui: 'lievre', emo: 'joie', jeu: 'il mélange les pions', txt: 'Éléphant, le jeu est mélangé gnan gnan gnan gnan !', cite: 'Amadou Koné, Les Contes de Korotoumou, « Le jeu des congco’ngan »' },
+    { t: 'recit', txt: 'Ces mots déclenchent chez l’éléphant un fou rire énorme. Et pendant qu’il rit, le lièvre se glisse dans son ventre, coupe adroitement un peu de viande et de graisse, puis ressort et cache tout dans sa gibecière. Personne ne s’aperçoit de rien.' },
+    { t: 'remarque', titre: 'Le lièvre, la ruse', txt: 'Selon les Notes pédagogiques du livre, le lièvre incarne la ruse, la sagesse, l’intelligence. Mais ici, la ruse sert à voler : le conte la montre sans l’excuser.' },
+    { t: 'recit', entre: ['hyene'], txt: 'Mais la femme de l’hyène découvre le pot aux roses. Et l’hyène exige d’accompagner le lièvre.', jauges: { glouton: 70 } },
+    { t: 'choix', qui: 'hyene', q: 'Tu es l’hyène. Tu es dans le ventre de l’éléphant, tout est à portée de tes crocs. Que fais-tu ?',
+      options: [
+        { txt: 'Je prends un petit morceau, comme le lièvre, et je ressors vite.', consequence: 'Tu repars nourrie et personne ne remarque rien. Mais une hyène raisonnable… ce ne serait plus une hyène !', jauges: { glouton: -30 } },
+        { txt: 'Je prends le meilleur morceau : le cœur !', consequence: 'Le cœur coupé, l’éléphant s’effondre. Le jeu est fini pour tout le monde, et les génies vont chercher le coupable.', jauges: { glouton: 30 } }
+      ],
+      oeuvre: 'L’hyène ne sait pas attendre : elle coupe le cœur de l’éléphant. Dans toute l’Afrique de l’Ouest, l’hyène est le personnage du glouton.' },
+    { t: 'question', q: 'Pourquoi l’hyène perd-elle toujours dans les contes ?',
+      options: [
+        { txt: 'Parce qu’elle ne peut pas attendre : sa gloutonnerie la perd.', ok: true, retour: 'Elle est grande et forte, mais elle veut tout, tout de suite.' },
+        { txt: 'Parce qu’elle est trop faible.', retour: 'Non : elle a des mâchoires terribles. C’est son défaut qui la perd.' }
+      ] },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · ce que chaque animal incarne', consigne: 'D’après le livre, chaque animal incarne une valeur ou un défaut. Classe-les.',
+      cats: ['Valeur', 'Défaut'],
+      items: [
+        { txt: 'Le lièvre : la ruse, l’intelligence', cat: 0 },
+        { txt: 'L’hyène : la gloutonnerie, la cupidité', cat: 1 },
+        { txt: 'Le singe : la paresse, l’ingratitude', cat: 1 },
+        { txt: 'L’éléphant et le cafard : la confiance, le partage', cat: 0 }
+      ],
+      bravo: 'Dans un conte, chaque personnage est un programme : il incarne une qualité ou un défaut.' },
+    { t: 'dit', qui: 'korotoumou', jeu: 'pour finir', txt: 'Voilà pourquoi, mon frère, celui qui veut tout aujourd’hui n’aura rien demain.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · la veillée',
+    intro: 'Règle la ruse du lièvre, la gloutonnerie de l’hyène et la vigilance des génies : comment finit le conte ?',
+    persos: ['lievre', 'hyene', 'elephant', 'korotoumou'],
+    curseurs: [
+      { id: 'ruse', nom: 'Ruse du lièvre', val: 85, bas: 'maladroit', haut: 'malin' },
+      { id: 'glouton', nom: 'Gloutonnerie de l’hyène', val: 95, bas: 'mesurée', haut: 'sans limite', lecture: { haut: 'Elle veut « les paniers de demain » : elle ne peut pas attendre.', bas: 'Une hyène mesurée ne serait plus le personnage du glouton.' } },
+      { id: 'genies', nom: 'Vigilance des génies', val: 40, bas: 'distraits', haut: 'attentifs' }
+    ],
+    scenarios: [
+      { nom: 'Comme dans le conte', icone: 'livre', valeurs: { ruse: 85, glouton: 95, genies: 40 } },
+      { nom: 'Et si l’hyène savait attendre ?', icone: 'aide', valeurs: { glouton: 15 } },
+      { nom: 'Et si les génies veillaient ?', icone: 'oeil', valeurs: { genies: 90 } }
+    ],
+    liens: [
+      { a: 'lievre', b: 'elephant', type: 'domination', lib: 'trompe', base: .1, poids: { ruse: .8 } },
+      { a: 'hyene', b: 'elephant', type: 'conflit', lib: 'dévore', base: 0, poids: { glouton: .9 } },
+      { a: 'lievre', b: 'hyene', type: 'alliance', lib: 'complices', base: .3, poids: { glouton: .2 } },
+      { a: 'korotoumou', b: 'lievre', type: 'confiance', lib: 'raconte', base: .5 }
+    ],
+    issue: function(v){
+      if(v.genies >= 70){ return { niveau: 'moyen', badge: 'Pris sur le fait', recit: 'Les génies surveillent leur vache : le lièvre est attrapé à la sortie. Pas de festin, pas de drame.', apres: 'Le conte deviendrait une simple leçon de prudence.', themes: ['vigilance'] }; }
+      if(v.glouton < 40){ return { niveau: 'ok', badge: 'Le secret est gardé', recit: 'L’hyène se contente d’un petit morceau. Chaque soir, les deux compères mangent, et l’éléphant rit.', apres: 'Mais le conte ne nous apprendrait rien sur la gloutonnerie.', themes: ['mesure'] }; }
+      return { niveau: 'ko', badge: 'La gloutonnerie punie', recit: 'L’hyène coupe le cœur de l’éléphant : le jeu s’arrête, et la ruse du lièvre aussi.', apres: 'Morale de la veillée : celui qui ne sait pas attendre perd tout.', themes: ['gloutonnerie', 'ruse', 'morale'] };
+    }
+  },
+  quiz: [
+    { q: 'Qui est Korotoumou ?', options: [ { txt: 'La grande sœur du narrateur, la conteuse.', ok: true, retour: 'C’est elle qui dit les contes.' }, { txt: 'Une hyène.', retour: 'Non !' } ] },
+    { q: 'Que fait le narrateur dans la vie ?', options: [ { txt: 'Il est professeur et revient d’Amérique.', ok: true, retour: 'Comme l’auteur, Amadou Koné, qui enseigne à Georgetown.' }, { txt: 'Il est planteur de café.', retour: 'Il a grandi sur une plantation, mais il vit en Amérique.' } ] },
+    { q: 'Quel défaut incarne l’hyène ?', options: [ { txt: 'La gloutonnerie.', ok: true, retour: 'Elle veut toujours plus, tout de suite.' }, { txt: 'La paresse.', retour: 'La paresse, c’est le singe.' } ] },
+    { q: 'Combien de contes compte le recueil ?', options: [ { txt: 'Quatorze.', ok: true, retour: 'Quatorze contes, trois familles.' }, { txt: 'Sept.', retour: 'Sept, ce sont les nouvelles des Bimanes.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Korotoumou est la conteuse : le titre dit qui raconte, pas qui écrit.',
+      'Chaque animal incarne une valeur ou un défaut : le lièvre la ruse, l’hyène la gloutonnerie.',
+      'L’hyène perd parce qu’elle ne sait pas attendre.',
+      'Amadou Koné, Ivoirien, enseigne la littérature africaine aux États-Unis.'
+    ],
+    ecrire: 'Écris le dialogue (dix répliques) entre le lièvre et l’hyène le soir où elle découvre son secret. Utilise des tirets et des verbes de parole variés.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

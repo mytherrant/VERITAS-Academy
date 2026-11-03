@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deux cents kilos — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Ville cruelle d’Eza Boto : les deux Tanga, la fraude au cacao, et le cacao de Banda saisi au Contrôle.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'ville-cruelle',
+  discipline: 'Français', niveau: '3e',
+  oeuvre: 'Ville cruelle', auteur: 'Eza Boto (Mongo Beti)',
+  titre: 'Deux cents kilos',
+  decor: 'ville', lieu: 'Tanga, la ville coupée en deux', moment: 'Chapitres II et V',
+  objectif: 'Comprendre une ville coupée en deux, et comment le roman accuse sans crier : en décrivant calmement les mécanismes qui écrasent les paysans.',
+  jauges: [
+    { id: 'espoir', nom: 'Espoir de Banda', val: 80, couleur: '#1F9D5B' },
+    { id: 'injustice', nom: 'Injustice subie', val: 20, couleur: '#D43F2E' }
+  ],
+  personnages: {
+    narrateur: { nom: 'Le narrateur', couleur: '#1E499B', look: { peau: 'fonce', cheveux: 'ras', tenue: 'costume', habit: '#2B3A55', col: '#FFC93C' } },
+    banda:     { nom: 'Banda', couleur: '#8A5A2B', look: { metier: 'paysan', peau: 'fonce', cheveux: 'court' } },
+    pallogakis:{ nom: 'M. Pallogakis', couleur: '#5A6275', look: { metier: 'commercant', peau: 'clair', cheveux: 'court', couleurCheveux: '#2A1A12', moustache: true } },
+    controleur:{ nom: 'Un contrôleur', couleur: '#14254A', look: { metier: 'policier', peau: 'fonce', cheveux: 'ras' } },
+    tailleur:  { nom: 'Le tailleur, « oncle »', couleur: '#7A3E6C', look: { peau: 'fonce', vieux: true, cheveux: 'aucun', habit: '#E9E3CF', bas: '#3A3A44', lunettes: true } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['narrateur'], txt: 'Tanga, ville du bois et du cacao. Au sud, le Tanga commerçant et administratif : le fleuve, le pont, les scieries, le centre commercial. Au nord, le Tanga des cases, « plus basses, plus chiches, plus ratatinées ».' },
+    { t: 'dit', qui: 'narrateur', jeu: 'il conclut', txt: 'Deux Tanga… deux mondes… deux destins !', cite: 'Eza Boto, Ville cruelle, chapitre II' },
+    { t: 'question', q: 'Pourquoi peut-on dire que la ville est un personnage du roman ?',
+      options: [
+        { txt: 'Parce qu’elle a deux visages qui décident du destin de ceux qui y vivent.', ok: true, retour: 'Apprends sa géographie, et tu auras compris le livre.' },
+        { txt: 'Parce qu’elle parle aux habitants.', retour: 'Non : c’est sa structure, coupée en deux, qui agit sur les personnages.' }
+      ] },
+    { t: 'recit', entre: ['banda', 'pallogakis'], txt: 'Banda descend en ville vendre son cacao, le travail de toute une année. Au centre commercial — « on aurait tout aussi bien fait de l’appeler le centre grec » — les enseignes rivalisent.', objet: { i: 'pieces', lib: 'Le cours du cacao' } },
+    { t: 'dit', qui: 'pallogakis', emo: 'joie', jeu: 'au début de la journée', txt: 'Ce matin, je paie plus que le prix officiel ! Faites passer le mot !' },
+    { t: 'remarque', titre: 'Comment on trompe un paysan', txt: 'M. Pallogakis commence la journée par un cours supérieur au prix officiel ; le bruit se répand « comme un feu de brousse » ; les paysans accourent ; et plus il y en a, plus il est facile de baisser le taux, progressivement et insensiblement. Décrire calmement un mécanisme : la plus efficace des accusations.', jauges: { injustice: 45 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · le mécanisme de la fraude', consigne: 'Remets dans l’ordre les étapes de l’escroquerie décrite par le roman.',
+      items: ['Le commerçant annonce un prix supérieur au cours officiel.', 'La nouvelle se répand comme un feu de brousse.', 'Les paysans accourent en foule.', 'Le commerçant baisse le prix, progressivement et insensiblement.'],
+      bravo: 'Trois lignes pour expliquer une escroquerie de masse : le roman accuse en décrivant.' },
+    { t: 'recit', entre: ['controleur'], sort: ['pallogakis'], txt: 'Mais au Contrôle, on déclare le cacao de Banda de mauvaise qualité. Il est saisi, puis mis au feu. Banda proteste : quatre hommes le rossent.', jauges: { espoir: 15, injustice: 95 } },
+    { t: 'choix', qui: 'banda', q: 'Tu es Banda. Ton cacao est saisi, on t’a frappé. Que fais-tu ?',
+      options: [
+        { txt: 'Je vais protester auprès du chef du village.', consequence: 'Le tailleur te le dira : les chefs n’ont jamais osé paraître devant le Blanc pour défendre les paysans.', jauges: { espoir: 5 } },
+        { txt: 'Je me tais et je rentre.', consequence: 'L’injustice reste impunie, et une année de travail est perdue.', jauges: { espoir: -5 } },
+        { txt: 'Je raconte tout à quelqu’un que je respecte.', consequence: 'Dire l’injustice, c’est déjà refuser qu’elle soit normale.', jauges: { espoir: 10 } }
+      ],
+      oeuvre: 'Banda se confie à un vieux tailleur, qu’il appelle « oncle », qui reprend les chiffres et refuse de croire ce qu’il entend.' },
+    { t: 'dit', qui: 'tailleur', entre: ['tailleur'], sort: ['controleur'], emo: 'surpris', jeu: 'devant sa machine', txt: 'Deux cents kilos...', cite: 'Eza Boto, Ville cruelle, chapitre V' },
+    { t: 'dit', qui: 'banda', emo: 'triste', txt: '—Deux cents.', cite: 'Eza Boto, Ville cruelle, chapitre V' },
+    { t: 'dit', qui: 'tailleur', emo: 'triste', txt: 'Une année de travail, débrousser la plantation, émonder les cacaoyers chaque matin… pour ça. Comment vas-tu te marier, maintenant ?' },
+    { t: 'remarque', titre: 'Une chronique', txt: 'Le narrateur parle des « événements que relate cette chronique » : il rapporte, il ne commente pas. C’est la répétition des chiffres, dans ce dialogue haché, qui fait sentir l’injustice.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · le marché du cacao',
+    intro: 'Règle l’honnêteté des commerçants, l’arbitraire du Contrôle et le courage des chefs : que devient la récolte de Banda ?',
+    persos: ['banda', 'pallogakis', 'controleur', 'tailleur', 'narrateur'],
+    curseurs: [
+      { id: 'honnete', nom: 'Honnêteté des commerçants', val: 15, bas: 'fraude', haut: 'prix juste' },
+      { id: 'arbitraire', nom: 'Arbitraire du Contrôle', val: 90, bas: 'règles claires', haut: 'arbitraire' },
+      { id: 'chefs', nom: 'Courage des chefs', val: 10, bas: 'silence', haut: 'protestent', lecture: { haut: 'Des chefs qui défendent leurs paysans changeraient le rapport de force.', bas: '« Ils n’ont jamais pu paraître devant le Blanc » : personne ne défend Banda.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans le roman', icone: 'livre', valeurs: { honnete: 15, arbitraire: 90, chefs: 10 } },
+      { nom: 'Et si les chefs protestaient ?', icone: 'porteVoix', valeurs: { chefs: 85 } },
+      { nom: 'Et si le Contrôle était juste ?', icone: 'balance', valeurs: { arbitraire: 15, honnete: 70 } }
+    ],
+    liens: [
+      { a: 'pallogakis', b: 'banda', type: 'domination', lib: 'fraude', base: .9, poids: { honnete: -.8 } },
+      { a: 'controleur', b: 'banda', type: 'conflit', lib: 'saisie', base: 0, poids: { arbitraire: .9 } },
+      { a: 'tailleur', b: 'banda', type: 'alliance', lib: '« oncle »', base: .6 },
+      { a: 'narrateur', b: 'banda', type: 'confiance', lib: 'chronique', base: .4 }
+    ],
+    issue: function(v){
+      if(v.arbitraire < 35 && v.honnete >= 50){ return { niveau: 'ok', badge: 'Une récolte bien vendue', recit: 'Banda vend ses deux cents kilos au juste prix. Il peut penser à son mariage.', apres: 'C’est ce que la ville cruelle refuse aux paysans du Tanga-Nord.', themes: ['justice'] }; }
+      if(v.chefs >= 65){ return { niveau: 'moyen', badge: 'Une protestation collective', recit: 'Les chefs se présentent devant l’administration : la saisie est contestée, le scandale éclate.', apres: 'Le tailleur le regrette : dans le roman, aucun chef n’ose le faire.', themes: ['résistance', 'solidarité'] }; }
+      return { niveau: 'ko', badge: 'Deux cents kilos au feu', recit: 'Le cacao de Banda est saisi et brûlé au Contrôle ; il est rossé. Une année de travail perdue.', apres: 'Le roman accuse en décrivant : une ville coupée en deux, des mécanismes qui écrasent les plus faibles.', themes: ['injustice coloniale', 'ville coupée en deux', 'chronique'] };
+    }
+  },
+  quiz: [
+    { q: 'Qui est Eza Boto ?', options: [ { txt: 'Le premier nom de plume de Mongo Beti.', ok: true, retour: 'Ville cruelle est son premier roman.' }, { txt: 'Un commerçant grec du roman.', retour: 'Non : c’est l’auteur.' } ] },
+    { q: 'Comment le roman décrit-il Tanga ?', options: [ { txt: 'Deux Tanga, deux mondes, deux destins.', ok: true, retour: 'Le Tanga commerçant au sud, le Tanga des cases au nord.' }, { txt: 'Une ville égale pour tous.', retour: 'C’est tout le contraire.' } ] },
+    { q: 'Combien de kilos de cacao Banda a-t-il perdus ?', options: [ { txt: 'Deux cents.', ok: true, retour: 'Saisis puis mis au feu au Contrôle.' }, { txt: 'Vingt.', retour: 'Non : deux cents.' } ] },
+    { q: 'Comment le roman accuse-t-il le plus efficacement ?', options: [ { txt: 'En décrivant calmement les mécanismes de l’injustice.', ok: true, retour: 'Comme la fraude au cacao.' }, { txt: 'Par de longs discours indignés.', retour: 'Non : par la description précise.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Tanga, ville coupée en deux : « Deux Tanga… deux mondes… deux destins ! »',
+      'La fraude au cacao est décrite calmement : décrire un mécanisme, c’est l’accuser.',
+      'Le cacao de Banda est saisi et brûlé : une année de travail perdue.',
+      'Eza Boto est le premier nom de plume de Mongo Beti ; Ville cruelle, son premier roman.'
+    ],
+    ecrire: 'Écris une description (quinze lignes) d’un lieu de ta ville qui, sans un mot de jugement, fasse sentir une injustice.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>احذر الأخبار الكاذبة — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’arabe (Terminale) : attention aux fausses nouvelles ; les particules de négation لا، لم، لن، ليس.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-arabe-fake-news',
+  discipline: 'Arabe', niveau: 'Terminale', langue: 'ar-SA', langueRecit: 'fr-FR',
+  titre: 'Les fausses nouvelles · الأخبار الكاذبة',
+  decor: 'classe', lieu: 'La salle informatique du lycée', moment: 'Un soir de semaine',
+  objectif: 'Comprendre un dialogue sur les fausses nouvelles ; employer les particules de négation : لا (présent), لم (passé), لن (futur), ليس (phrase nominale).',
+  programme: 'Progression harmonisée Tle · Module 5 (média et communication), leçon 49 (attention aux fake news), leçon 50 (arnaques via internet), leçons 51 et 54 (les particules de négation)',
+  jauges: [
+    { id: 'verite', nom: 'Vérité', val: 25, couleur: '#1F9D5B' },
+    { id: 'arabe', nom: 'Arabe (العربية)', val: 20, couleur: '#1E499B' }
+  ],
+  personnages: {
+    ali:    { nom: 'علي (Ali)', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'brun', cheveux: 'court' } },
+    fatima: { nom: 'فاطمة (Fatima)', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'robe', peau: 'brun', coiffe: 'voile', couleurCoiffe: '#C0397C' } },
+    ustadh: { nom: 'الأستاذ موسى (M. Moussa)', couleur: '#2B3A55', look: { metier: 'enseignant', tenue: 'boubou', peau: 'brun', cheveux: 'ras', coiffe: 'chechia', couleurCoiffe: '#F2EEE3', habit: '#E9E3CF', barbe: true } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['ali', 'fatima'], txt: 'Ali reçoit un message sur son téléphone. Il le montre tout de suite à Fatima.', objet: { i: 'telephone', lib: 'رسالة · un message' } },
+    { t: 'dit', qui: 'ali', emo: 'joie', txt: 'انظري! المدرسة مغلقة غدا!', pron: 'unẓurī! al-madrasa mughlaqa ghadan!', trad: 'Regarde ! L’école est fermée demain !' },
+    { t: 'dit', qui: 'fatima', emo: 'doute', txt: 'من كتب هذا الخبر؟', pron: 'man kataba hādhā l-khabar?', trad: 'Qui a écrit cette nouvelle ?' },
+    { t: 'dit', qui: 'ali', txt: 'لا أعرف.', pron: 'lā aʿrif.', trad: 'Je ne sais pas.' },
+    { t: 'remarque', titre: 'لا + présent', txt: 'لا devant un verbe à l’inaccompli (présent) nie le présent : أعرف (je sais) → لا أعرف (je ne sais pas).' },
+    { t: 'dit', qui: 'fatima', txt: 'لا أصدق هذا الخبر. هل قرأت المصدر؟', pron: 'lā uṣaddiqu hādhā l-khabar. hal qaraʾta l-maṣdar?', trad: 'Je ne crois pas cette nouvelle. As-tu lu la source ?', jauges: { verite: 40 } },
+    { t: 'dit', qui: 'ali', txt: 'لم أقرأ المصدر.', pron: 'lam aqraʾ al-maṣdar.', trad: 'Je n’ai pas lu la source.' },
+    { t: 'remarque', titre: 'لم + inaccompli apocopé = passé', txt: 'لم nie le passé, mais elle se construit avec l’inaccompli au mode apocopé (مجزوم) : قرأتُ (j’ai lu) → لم أقرأْ (je n’ai pas lu).' },
+    { t: 'recit', entre: ['ustadh'], txt: 'M. Moussa entre dans la salle informatique.' },
+    { t: 'dit', qui: 'ustadh', txt: 'احذروا الأخبار الكاذبة! هذا الخبر ليس صحيحا: المدرسة مفتوحة غدا.', pron: 'iḥdharū l-akhbāra l-kādhiba! hādhā l-khabaru laysa ṣaḥīḥan: al-madrasa maftūḥa ghadan.', trad: 'Méfiez-vous des fausses nouvelles ! Cette nouvelle n’est pas vraie : l’école est ouverte demain.', jauges: { verite: 75 } },
+    { t: 'remarque', titre: 'ليس : nier une phrase nominale', txt: 'ليس nie une phrase nominale ; son attribut se met à l’accusatif : الخبر صحيح (la nouvelle est vraie) → الخبر ليس صحيحًا (la nouvelle n’est pas vraie).' },
+    { t: 'choix', qui: 'ali', q: 'Tu es Ali. Tu as déjà transféré le message à trois amis. Que fais-tu maintenant ?',
+      options: [
+        { txt: 'Rien : ce n’est pas grave.', consequence: 'Tes amis le transfèrent à leur tour : demain, la moitié de la classe sera absente.', jauges: { verite: -20 } },
+        { txt: 'لن أنشر الخبر بعد اليوم، وأكتب لأصدقائي أنه كاذب. (Je ne partagerai plus la nouvelle, et j’écris à mes amis qu’elle est fausse.)', consequence: 'Tu corriges ton erreur : c’est ce que fait un citoyen responsable.', jauges: { verite: 20, arabe: 15 } }
+      ],
+      oeuvre: 'Corriger une fausse nouvelle qu’on a partagée est aussi important que de ne pas la partager.' },
+    { t: 'dit', qui: 'ali', txt: 'لن أنشر أي خبر قبل أن أتحقق منه.', pron: 'lan anshura ayya khabarin qabla an ataḥaqqaqa minhu.', trad: 'Je ne partagerai aucune nouvelle avant de l’avoir vérifiée.' },
+    { t: 'remarque', titre: 'لن + inaccompli subjonctif = futur', txt: 'لن nie le futur, avec l’inaccompli au subjonctif (منصوب) : سأنشر (je partagerai) → لن أنشرَ (je ne partagerai pas).' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · quelle négation ?', consigne: 'Classe chaque phrase selon ce que nie la particule.',
+      cats: ['Présent (لا)', 'Passé (لم)', 'Futur (لن)', 'Phrase nominale (ليس)'],
+      items: [
+        { txt: 'لا أعرف. (Je ne sais pas.)', cat: 0 },
+        { txt: 'لم أقرأ المصدر. (Je n’ai pas lu la source.)', cat: 1 },
+        { txt: 'لن أنشر الخبر. (Je ne partagerai pas la nouvelle.)', cat: 2 },
+        { txt: 'الخبر ليس صحيحا. (La nouvelle n’est pas vraie.)', cat: 3 },
+        { txt: 'لا أصدق هذا. (Je ne crois pas cela.)', cat: 0 }
+      ],
+      bravo: 'Quatre particules, quatre emplois : لا, لم, لن, ليس.', jauges: { arabe: 75, verite: 90 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · le trajet d’une rumeur',
+    intro: 'Règle la vérification des sources, la vitesse de partage et la correction des erreurs : combien d’élèves croient la fausse nouvelle demain matin ?',
+    persos: ['ali', 'fatima', 'ustadh'],
+    curseurs: [
+      { id: 'verifier', nom: 'Vérification des sources (التحقق)', val: 45, bas: 'jamais', haut: 'toujours' },
+      { id: 'vitesse', nom: 'Vitesse de partage (النشر)', val: 70, bas: 'lente', haut: 'immédiate' },
+      { id: 'corriger', nom: 'Correction des erreurs', val: 40, bas: 'jamais', haut: 'toujours' }
+    ],
+    scenarios: [
+      { nom: 'Ali, ce soir', icone: 'telephone', valeurs: { verifier: 45, vitesse: 70, corriger: 40 } },
+      { nom: 'Tout le monde partage', icone: 'porteVoix', valeurs: { verifier: 10, vitesse: 95, corriger: 5 } },
+      { nom: 'On vérifie d’abord', icone: 'oeil', valeurs: { verifier: 90, vitesse: 30, corriger: 85 } }
+    ],
+    liens: [
+      { a: 'fatima', b: 'ali', type: 'confiance', lib: 'vérifie', base: .4, poids: { verifier: .4 } },
+      { a: 'ustadh', b: 'ali', type: 'confiance', lib: 'corrige', base: .4, poids: { corriger: .4 } },
+      { a: 'ali', b: 'fatima', type: 'conflit', lib: 'rumeur', base: .2, poids: { vitesse: .4, verifier: -.3 } }
+    ],
+    issue: function(v){
+      if(v.verifier < 30 && v.vitesse > 60){ return { niveau: 'ko', badge: 'La rumeur gagne', recit: 'Le message fait le tour du lycée en une heure : le lendemain, la moitié des élèves reste chez elle.', apres: 'Une fausse nouvelle va plus vite que sa correction.', themes: ['désinformation'] }; }
+      if(v.verifier > 65 && v.corriger > 60){ return { niveau: 'ok', badge: 'La vérité gagne', recit: 'On vérifie avant de partager, on corrige ses erreurs : la rumeur meurt dans la soirée.', apres: 'احذروا الأخبار الكاذبة!', themes: ['esprit critique', 'vérification'] }; }
+      return { niveau: 'moyen', badge: 'Une rumeur à moitié', recit: 'Certains vérifient, d’autres non : une partie de la classe est absente.', apres: 'Chaque partage compte.', themes: ['responsabilité'] };
+    }
+  },
+  quiz: [
+    { q: 'Quelle particule nie le passé ?', options: [
+      { txt: 'لم', ok: true, retour: 'Avec l’inaccompli apocopé : لم أقرأ.' },
+      { txt: 'لن', retour: 'لن nie le futur.' } ] },
+    { q: 'Comment dire « Je ne partagerai pas la nouvelle » ?', options: [
+      { txt: 'لن أنشر الخبر', ok: true, retour: 'لن + subjonctif.' },
+      { txt: 'لم أنشر الخبر', retour: 'Cela signifie « je n’ai pas partagé ».' } ] },
+    { q: 'Quelle particule nie une phrase nominale ?', options: [
+      { txt: 'ليس', ok: true, retour: 'Attribut à l’accusatif : ليس صحيحًا.' },
+      { txt: 'لا', retour: 'لا nie surtout le verbe au présent.' } ] },
+    { q: 'Que signifie « الأخبار الكاذبة » ?', options: [
+      { txt: 'Les fausses nouvelles.', ok: true, retour: 'كاذب = mensonger.' },
+      { txt: 'Les nouvelles du jour.', retour: 'Non.' } ] },
+    { q: 'Que signifie « لا أعرف » ?', options: [
+      { txt: 'Je ne sais pas.', ok: true, retour: 'لا + présent.' },
+      { txt: 'Je ne saurai pas.', retour: 'Ce serait لن أعرف.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Vocabulaire : الخبر / الأخبار، كاذب، صحيح، المصدر، نشر، تحقق.',
+      'لا + inaccompli : négation du présent (لا أعرف).',
+      'لم + inaccompli apocopé : négation du passé (لم أقرأ) ; لن + inaccompli subjonctif : négation du futur (لن أنشر).',
+      'ليس : négation de la phrase nominale, attribut à l’accusatif (ليس صحيحًا).'
+    ],
+    ecrire: 'Écris en arabe quatre conseils pour reconnaître une fausse nouvelle, en utilisant une fois chacune des particules لا، لم، لن، ليس.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

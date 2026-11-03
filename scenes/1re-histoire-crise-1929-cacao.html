@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le jeudi noir vu d’Ebolowa — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’histoire (Première) : la crise économique de 1929, de Wall Street aux plantations de cacao du Cameroun ; causes, mécanismes et solutions.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '1re-histoire-1929',
+  discipline: 'Histoire', niveau: '1re',
+  titre: 'Le jeudi noir vu d’Ebolowa',
+  decor: 'ville', lieu: 'New York, puis Ebolowa', moment: 'Octobre 1929 – 1932',
+  objectif: 'Comprendre le mécanisme de la crise de 1929 (spéculation, krach, faillites, chômage), sa propagation au monde et aux colonies (chute des prix des produits agricoles), et les solutions essayées (New Deal, intervention de l’État, repli sur les empires).',
+  programme: 'Progression harmonisée 1re · Leçon 13 (la crise économique de 1929), dossier 3 (la résolution de la crise), leçon 8 (l’exploitation économique des colonies)',
+  jauges: [
+    { id: 'prix', nom: 'Prix du cacao', val: 80, couleur: '#1F9D5B' },
+    { id: 'misere', nom: 'Misère des planteurs', val: 15, couleur: '#D43F2E' }
+  ],
+  personnages: {
+    narrateur:  { nom: 'M. Ondoa, professeur', couleur: '#1E499B', look: { metier: 'enseignant', peau: 'fonce', cheveux: 'ras' } },
+    courtier:   { nom: 'Un courtier de Wall Street', couleur: '#2B2B2B', look: { tenue: 'costume', peau: 'clair', cheveux: 'court', couleurCheveux: '#3A2A1A', habit: '#2B2B2B', col: '#FFFFFF', objet: 'dossier' } },
+    ouvrier:    { nom: 'Un ouvrier américain', couleur: '#5A6275', look: { metier: 'ouvrier', peau: 'clair', cheveux: 'court' } },
+    planteur:   { nom: 'Nkoulou, planteur de cacao', couleur: '#8A5A2B', look: { metier: 'paysan', peau: 'fonce', cheveux: 'ras' } },
+    agent:      { nom: 'L’agent de l’administration', couleur: '#5A6275', look: { tenue: 'costume', peau: 'clair', cheveux: 'court', habit: '#E9E3CF', col: '#2B3A55' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['narrateur', 'courtier'], txt: 'Les années 1920 aux États-Unis : la production explose, on achète à crédit, et l’on achète surtout des actions en Bourse, en empruntant, en espérant les revendre plus cher.', objet: { i: 'pieces', lib: 'Wall Street' } },
+    { t: 'dit', qui: 'courtier', emo: 'joie', txt: 'Achetez ! Les actions montent tous les jours. Empruntez s’il le faut : vous rembourserez avec les bénéfices.' },
+    { t: 'question', q: 'Quel est le danger de ce système ?',
+      options: [
+        { txt: 'La spéculation : le prix des actions monte bien au-delà de la valeur réelle des entreprises ; au premier doute, tout le monde voudra vendre.', ok: true, retour: 'Une bulle spéculative finit toujours par éclater.' },
+        { txt: 'Il n’y a aucun danger tant que la Bourse monte.', retour: 'C’est justement l’illusion qui précède le krach.' }
+      ] },
+    { t: 'recit', txt: 'Jeudi 24 octobre 1929, le « jeudi noir » : des millions d’actions sont mises en vente, les cours s’effondrent. Les jours suivants, la chute continue.', jauges: { prix: 70 } },
+    { t: 'dit', qui: 'courtier', emo: 'peur', txt: 'Vendez ! Vendez à n’importe quel prix ! Je dois rembourser ma banque !' },
+    { t: 'dit', qui: 'ouvrier', entre: ['ouvrier'], emo: 'triste', txt: 'Ma banque a fermé, mes économies ont disparu. L’usine ne vend plus, elle me licencie.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · l’engrenage de la crise', consigne: 'Remets dans l’ordre les étapes de la crise.',
+      items: [
+        'Spéculation : on achète des actions à crédit.',
+        'Krach boursier : les cours s’effondrent (24 octobre 1929).',
+        'Faillite des banques qui avaient prêté.',
+        'Les entreprises, privées de crédit et de clients, ferment.',
+        'Chômage de masse et chute de la consommation.',
+        'Baisse des achats de matières premières dans le monde entier.'
+      ],
+      bravo: 'Une crise financière devient une crise économique, puis sociale, puis mondiale.', jauges: { prix: 45 } },
+    { t: 'recit', sort: ['courtier', 'ouvrier'], entre: ['planteur', 'agent'], txt: 'Au Cameroun, à des milliers de kilomètres, les usines d’Europe et d’Amérique achètent moins de cacao. Les prix s’effondrent.', jauges: { prix: 20, misere: 60 } },
+    { t: 'dit', qui: 'planteur', emo: 'triste', txt: 'L’an dernier, ma récolte payait l’impôt et la dot de mon fils. Cette année, elle ne paie même pas l’impôt.' },
+    { t: 'dit', qui: 'agent', txt: 'L’impôt de capitation reste dû. Et il faudra fournir des journées de travail pour les routes.', jauges: { misere: 85 } },
+    { t: 'choix', qui: 'planteur', q: 'Tu es Nkoulou. Le cacao ne rapporte plus rien. Que fais-tu ?',
+      options: [
+        { txt: 'Je plante davantage de cacao pour compenser.', consequence: 'Si tous les planteurs font de même, l’offre augmente encore et les prix baissent davantage.', jauges: { prix: -5, misere: 5 } },
+        { txt: 'Je replante des cultures vivrières pour nourrir ma famille.', consequence: 'Tu protèges ta famille de la faim, même si tu gagnes moins d’argent.', jauges: { misere: -15 } },
+        { txt: 'Je pars travailler sur les chantiers en ville.', consequence: 'Un salaire maigre, loin des tiens : l’exode commence.', jauges: { misere: -5 } }
+      ],
+      oeuvre: 'Pendant la crise, les colonies subissent la chute des prix tandis que l’administration maintient l’impôt et le travail forcé : la misère des campagnes s’aggrave.' },
+    { t: 'remarque', titre: 'Les solutions', txt: 'Aux États-Unis, à partir de 1933, le président Roosevelt lance le New Deal : grands travaux, aide aux chômeurs, contrôle des banques. L’État intervient dans l’économie. Les puissances coloniales, elles, se replient sur leurs empires : la France développe le commerce avec ses colonies, qui doivent produire davantage pour la métropole.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · la crise vue des deux rives', consigne: 'Classe chaque conséquence : aux États-Unis et en Europe, ou dans les colonies ?',
+      cats: ['États-Unis et Europe', 'Colonies'],
+      items: [
+        { txt: 'Faillites bancaires et chômage de masse dans les usines.', cat: 0 },
+        { txt: 'Chute des prix du cacao, du café et de l’huile de palme.', cat: 1 },
+        { txt: 'Impôt maintenu malgré l’effondrement des revenus.', cat: 1 },
+        { txt: 'Grands travaux du New Deal.', cat: 0 },
+        { txt: 'Exode vers les chantiers et les villes.', cat: 1 }
+      ],
+      bravo: 'La crise est mondiale : les colonies, liées aux marchés des métropoles, en subissent le choc.' },
+    { t: 'dit', qui: 'narrateur', txt: 'Retenez le lien : une bulle à Wall Street a pu vider les greniers d’Ebolowa. C’est déjà la mondialisation, et l’économie coloniale en a payé le prix.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · éteindre la crise',
+    intro: 'Règle la spéculation, l’intervention de l’État et la pression fiscale coloniale : comment se passent les années 1930 ?',
+    persos: ['courtier', 'ouvrier', 'planteur', 'agent', 'narrateur'],
+    curseurs: [
+      { id: 'speculation', nom: 'Spéculation avant la crise', val: 85, bas: 'prudence', haut: 'folie' },
+      { id: 'etat', nom: 'Intervention de l’État', val: 25, bas: 'laisser-faire', haut: 'grands travaux, aides' },
+      { id: 'impot', nom: 'Pression fiscale coloniale', val: 80, bas: 'allégée', haut: 'maintenue' }
+    ],
+    scenarios: [
+      { nom: '1929-1932', icone: 'pieces', valeurs: { speculation: 85, etat: 25, impot: 80 } },
+      { nom: 'Le New Deal', icone: 'balance', valeurs: { etat: 85 } },
+      { nom: 'Et si l’impôt était allégé ?', icone: 'fruit', valeurs: { impot: 15, etat: 60 } }
+    ],
+    liens: [
+      { a: 'courtier', b: 'ouvrier', type: 'domination', lib: 'krach', base: .3, poids: { speculation: .6 } },
+      { a: 'agent', b: 'planteur', type: 'domination', lib: 'impôt', base: .2, poids: { impot: .7 } },
+      { a: 'narrateur', b: 'planteur', type: 'confiance', lib: 'mémoire', base: .4 }
+    ],
+    issue: function(v){
+      if(v.speculation < 30){ return { niveau: 'ok', badge: 'Pas de bulle', recit: 'Sans spéculation folle, pas de krach : la croissance ralentit sans s’effondrer.', apres: 'Les règles sur les banques et la Bourse, adoptées après 1933, visent à empêcher une nouvelle bulle.', themes: ['spéculation'] }; }
+      if(v.etat > 60 && v.impot > 60){ return { niveau: 'moyen', badge: 'Reprise au Nord, misère aux colonies', recit: 'Aux États-Unis, les grands travaux relancent l’emploi ; au Cameroun, l’impôt maintenu continue d’écraser les planteurs.', apres: 'Les remèdes de la crise profitent d’abord aux métropoles.', themes: ['New Deal', 'économie coloniale'] }; }
+      if(v.impot < 35){ return { niveau: 'moyen', badge: 'Des campagnes qui tiennent', recit: 'Les prix restent bas, mais l’impôt allégé permet aux familles de garder leurs vivres et leurs terres.', apres: 'Un scénario que l’administration coloniale n’a pas choisi.', themes: ['fiscalité coloniale'] }; }
+      if(v.impot > 60){ return { niveau: 'ko', badge: 'Des campagnes ruinées', recit: 'Les prix s’effondrent, l’impôt demeure : les planteurs vendent leurs biens, partent ou s’endettent.', apres: 'La crise aggrave l’exploitation coloniale et nourrit les mécontentements.', themes: ['économie coloniale', 'impôt'] }; }
+      if(v.etat > 60){ return { niveau: 'moyen', badge: 'Une lente reprise', recit: 'Grands travaux et aides relancent peu à peu l’emploi et la demande.', apres: 'Le New Deal n’efface pas la crise, mais il en limite les dégâts.', themes: ['New Deal', 'État'] }; }
+      return { niveau: 'ko', badge: 'La grande dépression', recit: 'Chômage, faillites, prix effondrés : la crise s’installe pour des années.', apres: 'Elle favorise aussi la montée des régimes autoritaires en Europe.', themes: ['dépression'] };
+    }
+  },
+  quiz: [
+    { q: 'Quelle est la date du « jeudi noir » ?', options: [
+      { txt: 'Le 24 octobre 1929.', ok: true, retour: 'À la Bourse de New York (Wall Street).' },
+      { txt: 'Le 11 novembre 1918.', retour: 'C’est l’armistice de la Première Guerre mondiale.' } ] },
+    { q: 'Qu’est-ce que la spéculation ?', options: [
+      { txt: 'Acheter pour revendre plus cher en pariant sur la hausse.', ok: true, retour: 'Souvent à crédit.' },
+      { txt: 'Produire des biens.', retour: 'Non.' } ] },
+    { q: 'Comment la crise atteint-elle le Cameroun ?', options: [
+      { txt: 'Par la chute des prix du cacao et des produits agricoles exportés.', ok: true, retour: 'Les métropoles achètent moins.' },
+      { txt: 'Par une guerre.', retour: 'Non.' } ] },
+    { q: 'Qu’est-ce que le New Deal ?', options: [
+      { txt: 'La politique de Roosevelt : grands travaux, aides, contrôle des banques.', ok: true, retour: 'À partir de 1933.' },
+      { txt: 'Un nouveau jeu de cartes.', retour: 'Non.' } ] },
+    { q: 'Pourquoi la misère des planteurs s’aggrave-t-elle ?', options: [
+      { txt: 'Les revenus s’effondrent alors que l’impôt et le travail forcé demeurent.', ok: true, retour: 'Double peine.' },
+      { txt: 'Parce que le cacao disparaît.', retour: 'Il est toujours produit, mais il ne rapporte plus.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Années 1920 : croissance et spéculation boursière à crédit aux États-Unis.',
+      '24 octobre 1929 : krach de Wall Street ; faillites bancaires, fermetures d’usines, chômage.',
+      'La crise devient mondiale : chute des prix des matières premières ; dans les colonies, revenus effondrés et impôt maintenu.',
+      'Solutions : New Deal de Roosevelt (1933), intervention de l’État ; repli des puissances sur leurs empires.'
+    ],
+    ecrire: 'Réalisez un schéma fléché de la crise de 1929, du krach de Wall Street à la misère d’un planteur camerounais, puis commentez-le en dix lignes.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

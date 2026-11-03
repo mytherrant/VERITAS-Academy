@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mi pequeña empresa — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’espagnol (Première) : l’entrepreneuriat et les échanges commerciaux, la consommation responsable ; le futur et l’expression du projet.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '1re-espagnol-empresa',
+  discipline: 'Espagnol', niveau: '1re', langue: 'es-ES',
+  titre: 'Mi pequeña empresa',
+  decor: 'marche', lieu: 'El mercado de Bafoussam', moment: 'Las vacaciones de verano',
+  objectif: 'Présenter un projet d’entreprise en espagnol ; employer le futur simple pour parler de ses projets et « ir a + infinitif » ; aborder la consommation responsable et l’éthique professionnelle.',
+  programme: 'Progression harmonisée 1re · Module 4 (vie économique), leçon 14 (l’entrepreneuriat et les échanges commerciaux), leçons 15-16 (consommation responsable et éthique professionnelle)',
+  jauges: [
+    { id: 'empresa', nom: 'Éxito de la empresa', val: 20, couleur: '#1F9D5B' },
+    { id: 'espanol', nom: 'Español', val: 25, couleur: '#1E499B' }
+  ],
+  personnages: {
+    aline:   { nom: 'Aline, emprendedora', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses', objet: 'dossier' } },
+    tio:     { nom: 'El tío Pierre', couleur: '#8A5A2B', look: { metier: 'commercant', peau: 'fonce', vieux: true, cheveux: 'ras', moustache: true } },
+    cliente: { nom: 'La señora Kamdem, clienta', couleur: '#5E8A3A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#5E8A3A', habit: '#5E8A3A', objet: 'sac' } },
+    banco:   { nom: 'El agente de microcrédito', couleur: '#14254A', look: { tenue: 'costume', peau: 'fonce', cheveux: 'ras', habit: '#14254A', col: '#FFFFFF' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['aline', 'tio'], txt: 'Aline tiene una idea: fabricar zumos naturales de frutas locales (piña, mango, maracuyá) y venderlos en botellas reutilizables.', trad: 'Aline a une idée : fabriquer des jus naturels de fruits locaux (ananas, mangue, fruit de la passion) et les vendre dans des bouteilles réutilisables.', objet: { i: 'fruit', lib: 'Zumo de piña' } },
+    { t: 'dit', qui: 'aline', emo: 'joie', txt: 'Este verano voy a crear mi empresa. Compraré las frutas en el mercado y venderé los zumos delante del instituto.', trad: 'Cet été, je vais créer mon entreprise. J’achèterai les fruits au marché et je vendrai les jus devant le lycée.' },
+    { t: 'remarque', titre: 'Parler de ses projets', txt: '« ir a + infinitif » pour un projet proche et décidé : voy a crear. Le futur simple pour l’avenir : compraré, venderé, tendré (tener), haré (hacer), podré (poder). Les terminaisons s’ajoutent à l’infinitif : -é, -ás, -á, -emos, -éis, -án.' },
+    { t: 'dit', qui: 'tio', emo: 'doute', txt: '¿Y cuánto cuesta producir una botella? ¿A qué precio la venderás?', trad: 'Et combien coûte la fabrication d’une bouteille ? À quel prix la vendras-tu ?' },
+    { t: 'dit', qui: 'aline', txt: 'Las frutas, el azúcar y la botella cuestan doscientos francos. La venderé a quinientos.', trad: 'Les fruits, le sucre et la bouteille coûtent deux cents francs. Je la vendrai cinq cents.' },
+    { t: 'question', q: 'Combien Aline gagne-t-elle sur une bouteille, avant les autres frais ?',
+      options: [
+        { txt: 'Trescientos francos (300 FCFA) : 500 − 200.', ok: true, retour: 'C’est la marge brute (el margen). Il faudra encore payer le transport, la glace, le matériel.' },
+        { txt: 'Quinientos francos.', retour: 'Non : 500 est le prix de vente, il faut retirer le coût de production.' }
+      ] },
+    { t: 'recit', entre: ['banco'], txt: 'Para comprar una licuadora, Aline pide un microcrédito.', trad: 'Pour acheter un mixeur, Aline demande un microcrédit.' },
+    { t: 'dit', qui: 'banco', txt: 'Te prestaremos cincuenta mil francos. Los devolverás en seis meses. ¿Tienes un plan de negocio?', trad: 'Nous te prêterons cinquante mille francs. Tu les rembourseras en six mois. As-tu un plan d’affaires ?', jauges: { empresa: 45 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Taller · el plan de negocio', consigne: 'Remets dans l’ordre les étapes d’un projet d’entreprise.',
+      items: [
+        'Tener una idea y estudiar el mercado.',
+        'Calcular los costes y el precio de venta.',
+        'Buscar financiación (ahorros, microcrédito).',
+        'Producir y vender.',
+        'Evaluar los resultados y mejorar.'
+      ],
+      bravo: 'Idea, estudio, cálculo, financiación, venta, evaluación.', jauges: { espanol: 50, empresa: 55 } },
+    { t: 'dit', qui: 'cliente', entre: ['cliente'], txt: 'Me gusta que uses botellas reutilizables. Si me devuelves la botella, ¿me harás un descuento?', trad: 'J’aime que tu utilises des bouteilles réutilisables. Si je te rends la bouteille, me feras-tu une réduction ?' },
+    { t: 'choix', qui: 'aline', q: 'Tu es Aline. Les fruits sont plus chers cette semaine. Que fais-tu ?',
+      options: [
+        { txt: 'Añadiré agua y más azúcar sin decir nada. (J’ajouterai de l’eau et du sucre sans rien dire.)', consequence: 'Les clients s’en rendent compte : tu perds leur confiance. C’est contraire à l’éthique professionnelle.', jauges: { empresa: -25 } },
+        { txt: 'Subiré un poco el precio y explicaré por qué. (J’augmenterai un peu le prix et j’expliquerai pourquoi.)', consequence: 'Tu restes honnête : la plupart des clients comprennent et restent fidèles.', jauges: { empresa: 20, espanol: 10 } }
+      ],
+      oeuvre: 'Ética profesional : honnêteté sur le produit, respect du client, respect de l’environnement.' },
+    { t: 'atelier', mode: 'tri', titre: 'Taller · ¿responsable o no?', consigne: 'Classe chaque pratique.',
+      cats: ['Consumo y empresa responsables', 'Prácticas irresponsables'],
+      items: [
+        { txt: 'Usar botellas reutilizables.', cat: 0 },
+        { txt: 'Engañar sobre la composición del producto.', cat: 1 },
+        { txt: 'Comprar las frutas a los agricultores locales.', cat: 0 },
+        { txt: 'Tirar las botellas de plástico en la calle.', cat: 1 },
+        { txt: 'Pagar un precio justo a los proveedores.', cat: 0 }
+      ],
+      bravo: 'Una empresa puede ganar dinero y ser responsable al mismo tiempo.' },
+    { t: 'dit', qui: 'aline', emo: 'fier', jeu: 'al final del verano', txt: 'He devuelto el crédito. El año que viene, contrataré a dos amigas.', trad: 'J’ai remboursé le crédit. L’année prochaine, j’embaucherai deux amies.', jauges: { empresa: 85, espanol: 85 } }
+  ],
+  labo: {
+    titre: 'Laboratorio · la empresa de Aline',
+    intro: 'Règle le prix de vente, la qualité du produit et l’honnêteté envers les clients : l’entreprise survit-elle à l’été ?',
+    persos: ['aline', 'tio', 'cliente', 'banco'],
+    curseurs: [
+      { id: 'precio', nom: 'Prix de vente (precio)', val: 50, bas: 'trop bas', haut: 'trop haut' },
+      { id: 'calidad', nom: 'Qualité (calidad)', val: 70, bas: 'mauvaise', haut: 'excellente' },
+      { id: 'etica', nom: 'Honnêteté (ética)', val: 75, bas: 'tromperie', haut: 'transparence' }
+    ],
+    scenarios: [
+      { nom: 'El plan de Aline', icone: 'fruit', valeurs: { precio: 50, calidad: 70, etica: 75 } },
+      { nom: 'Precio demasiado bajo', icone: 'pieces', valeurs: { precio: 10 } },
+      { nom: 'Engañar al cliente', icone: 'colere', valeurs: { etica: 10, calidad: 25 } }
+    ],
+    liens: [
+      { a: 'cliente', b: 'aline', type: 'confiance', lib: 'fiel', base: .3, poids: { calidad: .4, etica: .4 } },
+      { a: 'banco', b: 'aline', type: 'domination', lib: 'crédito', base: .3 },
+      { a: 'tio', b: 'aline', type: 'amour', lib: 'consejos', base: .6 }
+    ],
+    issue: function(v){
+      if(v.etica < 35){ return { niveau: 'ko', badge: 'Clientes perdidos', recit: 'Les clients découvrent la tromperie : ils ne reviennent plus, le crédit ne peut pas être remboursé.', apres: 'La confiance est le premier capital d’une entreprise.', themes: ['éthique professionnelle'] }; }
+      if(v.precio < 25){ return { niveau: 'ko', badge: 'Vender a pérdidas', recit: 'Les jus partent vite… mais chaque bouteille coûte plus qu’elle ne rapporte.', apres: 'Calculer ses coûts avant de fixer son prix.', themes: ['coûts', 'marge'] }; }
+      if(v.precio > 80){ return { niveau: 'moyen', badge: 'Demasiado caro', recit: 'Le produit est bon, mais trop cher pour des élèves : les ventes restent faibles.', apres: 'Le prix doit tenir compte du pouvoir d’achat des clients.', themes: ['étude de marché'] }; }
+      return { niveau: 'ok', badge: '¡Empresa exitosa!', recit: 'Un bon produit, un prix juste, des clients fidèles : le crédit est remboursé.', apres: 'Aline embauchera deux amies l’an prochain.', themes: ['entrepreneuriat'] };
+    }
+  },
+  quiz: [
+    { q: 'Futur de « vender » (yo) :', options: [
+      { txt: 'venderé', ok: true, retour: 'Infinitif + é.' },
+      { txt: 'vendí', retour: 'C’est le passé simple.' } ] },
+    { q: 'Que signifie « voy a crear mi empresa » ?', options: [
+      { txt: 'Je vais créer mon entreprise.', ok: true, retour: 'ir a + infinitif : futur proche.' },
+      { txt: 'J’ai créé mon entreprise.', retour: 'Non.' } ] },
+    { q: 'Que signifie « un microcrédito » ?', options: [
+      { txt: 'Un petit prêt pour démarrer une activité.', ok: true, retour: 'À rembourser.' },
+      { txt: 'Un cadeau de la banque.', retour: 'Non : il faut le rembourser.' } ] },
+    { q: 'Futur irrégulier de « tener » (yo) :', options: [
+      { txt: 'tendré', ok: true, retour: 'Comme pondré, saldré, vendré.' },
+      { txt: 'teneré', retour: 'Tener est irrégulier.' } ] },
+    { q: 'Quelle pratique est responsable ?', options: [
+      { txt: 'Usar botellas reutilizables.', ok: true, retour: 'Moins de déchets.' },
+      { txt: 'Engañar sobre el producto.', retour: 'Contraire à l’éthique.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Vocabulaire : la empresa, el emprendedor, el plan de negocio, el coste, el precio, el margen, el microcrédito, el cliente, la ética profesional.',
+      'Projets : ir a + infinitif (voy a crear) et futur simple (compraré, venderé, tendré, haré).',
+      'Un projet d’entreprise : idée, étude du marché, calcul des coûts, financement, vente, évaluation.',
+      'Consommation et entreprise responsables : honnêteté, produits locaux, réduction des déchets.'
+    ],
+    ecrire: 'Presenta en ocho frases tu propio proyecto de pequeña empresa : idée, coûts, prix, clients. Utilise le futur simple au moins quatre fois.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

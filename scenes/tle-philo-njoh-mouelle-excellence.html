@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>De la médiocrité à l’excellence — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de philosophie (Terminale) : l’essai d’Ébénézer Njoh-Mouelle, la signification humaine du développement, médiocrité et excellence.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-philo-njoh-mouelle',
+  discipline: 'Philosophie', niveau: 'Terminale',
+  oeuvre: 'De la médiocrité à l’excellence', auteur: 'Ébénézer Njoh-Mouelle',
+  titre: 'De la médiocrité à l’excellence',
+  decor: 'agora', lieu: 'Un débat au club de philosophie', moment: 'Deuxième trimestre',
+  avertissement: 'Débat imaginé pour la leçon : les répliques ne sont pas de l’auteur. Elles présentent, en le simplifiant, le problème posé par l’essai.',
+  objectif: 'Dégager la problématique de l’essai de Njoh-Mouelle : le développement est-il seulement une affaire de biens matériels, ou d’abord une affaire d’homme ? Distinguer médiocrité (se contenter, s’installer) et excellence (se dépasser, créer).',
+  programme: 'Progression harmonisée Tle · Chapitre 2, leçons 6-8 (étude de De la médiocrité à l’excellence : éléments biobibliographiques, thématiques et problématiques, critique et valeur de l’œuvre)',
+  jauges: [
+    { id: 'avoir', nom: 'Développement par l’avoir', val: 70, couleur: '#D98E04' },
+    { id: 'etre', nom: 'Développement de l’homme', val: 25, couleur: '#1E499B' }
+  ],
+  personnages: {
+    prof:    { nom: 'M. Nkolo, professeur de philosophie', couleur: '#1E499B', look: { metier: 'enseignant', peau: 'fonce', cheveux: 'ras', lunettes: true, barbe: true } },
+    yannick: { nom: 'Yannick', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } },
+    berthe:  { nom: 'Berthe', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    oncle:   { nom: 'L’oncle de Yannick, commerçant prospère', couleur: '#C2551F', look: { tenue: 'boubou', peau: 'fonce', cheveux: 'ras', habit: '#C2551F', moustache: true } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['prof', 'yannick', 'berthe'], txt: 'Au club de philosophie, M. Nkolo présente l’essai d’Ébénézer Njoh-Mouelle, philosophe camerounais, paru en 1970 : De la médiocrité à l’excellence, avec ce sous-titre : essai sur la signification humaine du développement.', objet: { i: 'livre', lib: 'L’essai de 1970' } },
+    { t: 'dit', qui: 'prof', txt: 'Une question pour commencer : qu’est-ce qu’un pays développé ?' },
+    { t: 'dit', qui: 'yannick', emo: 'fier', txt: 'C’est simple : des routes, des usines, des immeubles, de l’argent. Un pays où l’on consomme beaucoup.', jauges: { avoir: 80 } },
+    { t: 'dit', qui: 'berthe', emo: 'doute', txt: 'Mais si tout le monde a une voiture et que personne ne pense, est-ce encore du développement ?' },
+    { t: 'question', q: 'Quelle est la question que pose l’essai, selon M. Nkolo ?',
+      options: [
+        { txt: 'Le développement se réduit-il à l’accumulation de biens, ou doit-il d’abord être l’épanouissement de l’homme lui-même ?', ok: true, retour: 'C’est le sens du sous-titre : la « signification humaine » du développement.' },
+        { txt: 'Comment construire plus vite des routes ?', retour: 'C’est une question technique, pas la question philosophique de l’essai.' },
+        { txt: 'Faut-il refuser toute richesse matérielle ?', retour: 'L’essai ne condamne pas les biens matériels : il refuse qu’on réduise l’homme à eux.' }
+      ] },
+    { t: 'recit', entre: ['oncle'], txt: 'L’oncle de Yannick est invité à témoigner.' },
+    { t: 'dit', qui: 'oncle', jeu: 'satisfait', txt: 'J’ai trois boutiques, une maison, une voiture. Je ne lis plus, je n’apprends plus rien : à quoi bon ? J’ai réussi.', jauges: { avoir: 85, etre: 20 } },
+    { t: 'remarque', titre: 'La médiocrité', txt: 'Pour l’essai, la médiocrité n’est pas la pauvreté. C’est l’état de celui qui s’installe dans le « moyen », se contente de ce qu’il a et renonce à se dépasser. On peut être riche et médiocre. La médiocrité est une démission.' },
+    { t: 'dit', qui: 'prof', txt: 'Votre oncle a réussi dans l’avoir. Mais a-t-il cessé de grandir dans l’être ? Voilà la distinction.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · médiocrité ou excellence ?', consigne: 'Classe chaque attitude.',
+      cats: ['Médiocrité', 'Excellence'],
+      items: [
+        { txt: 'Se contenter de ce que l’on sait, refuser tout effort nouveau.', cat: 0 },
+        { txt: 'Chercher sans cesse à se dépasser, à créer.', cat: 1 },
+        { txt: 'Imiter les autres pour être comme tout le monde.', cat: 0 },
+        { txt: 'Assumer sa liberté et ses responsabilités.', cat: 1 },
+        { txt: 'Mesurer sa réussite au seul nombre de ses biens.', cat: 0 }
+      ],
+      bravo: 'L’excellence n’est pas un rang : c’est un mouvement de dépassement de soi.', jauges: { etre: 55 } },
+    { t: 'choix', qui: 'yannick', q: 'Tu es Yannick. Ton oncle te propose d’arrêter l’école pour tenir une de ses boutiques : « Tu gagneras de l’argent tout de suite. » Que fais-tu ?',
+      options: [
+        { txt: 'J’accepte : l’argent, c’est le développement.', consequence: 'Tu gagnes vite de l’argent, mais tu renonces à te former et à choisir ta voie. C’est le piège que décrit l’essai.', jauges: { avoir: 10, etre: -15 } },
+        { txt: 'Je refuse : je continue mes études pour devenir capable de créer, pas seulement de posséder.', consequence: 'Tu choisis le chemin le plus long, celui du dépassement de soi.', jauges: { etre: 25 } },
+        { txt: 'Je travaille à la boutique pendant les vacances, sans arrêter l’école.', consequence: 'Une solution qui ne sacrifie ni l’avoir ni l’être.', jauges: { etre: 15, avoir: 5 } }
+      ],
+      oeuvre: 'L’essai ne méprise pas le travail ni la richesse : il refuse que l’homme se laisse définir par ce qu’il possède.' },
+    { t: 'dit', qui: 'berthe', txt: 'Alors un pays se développe quand ses habitants deviennent plus libres, plus créateurs, plus responsables. Les routes viennent avec, mais elles ne suffisent pas.', jauges: { etre: 80 } },
+    { t: 'atelier', mode: 'balance', titre: 'Atelier · critique de l’œuvre', consigne: 'Place chaque argument : soutient-il la thèse de l’essai, ou en marque-t-il une limite ?',
+      cotes: ['Soutient la thèse', 'Limite ou objection'],
+      args: [
+        { txt: 'Un pays riche en biens peut rester pauvre en libertés et en pensée.', cote: 0, poids: 3 },
+        { txt: 'Sans écoles, hôpitaux et routes, l’épanouissement de l’homme reste un vœu.', cote: 1, poids: 3 },
+        { txt: 'La consommation peut détourner l’homme de lui-même.', cote: 0, poids: 2 },
+        { txt: 'L’excellence de quelques-uns ne suffit pas à développer un peuple.', cote: 1, poids: 2 }
+      ],
+      bravo: 'Une bonne critique reconnaît la force d’une thèse avant d’en marquer les limites.' },
+    { t: 'dit', qui: 'prof', emo: 'joie', txt: 'Retenez la valeur didactique de l’œuvre : elle vous demande à vous, élèves, de refuser la médiocrité dans votre propre travail.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · développer un pays',
+    intro: 'Règle la croissance matérielle, l’éducation et la liberté de pensée : quel développement obtiens-tu ?',
+    persos: ['prof', 'yannick', 'berthe', 'oncle'],
+    curseurs: [
+      { id: 'biens', nom: 'Croissance matérielle', val: 60, bas: 'faible', haut: 'forte' },
+      { id: 'education', nom: 'Éducation', val: 45, bas: 'négligée', haut: 'prioritaire' },
+      { id: 'liberte', nom: 'Liberté de pensée et de créer', val: 40, bas: 'étouffée', haut: 'encouragée' }
+    ],
+    scenarios: [
+      { nom: 'L’oncle de Yannick', icone: 'pieces', valeurs: { biens: 85, education: 20, liberte: 20 } },
+      { nom: 'L’idéal de l’essai', icone: 'fier', valeurs: { biens: 60, education: 85, liberte: 85 } },
+      { nom: 'Des idées sans moyens', icone: 'nuage', valeurs: { biens: 10, education: 70, liberte: 70 } }
+    ],
+    liens: [
+      { a: 'oncle', b: 'yannick', type: 'domination', lib: 'l’avoir', base: .3, poids: { biens: .4, education: -.4 } },
+      { a: 'prof', b: 'yannick', type: 'confiance', lib: 'l’être', base: .3, poids: { education: .5 } },
+      { a: 'berthe', b: 'yannick', type: 'alliance', lib: 'débat', base: .5, poids: { liberte: .4 } }
+    ],
+    issue: function(v){
+      if(v.biens > 65 && v.education < 40){ return { niveau: 'ko', badge: 'Riches et médiocres', recit: 'Les boutiques se multiplient, mais on cesse d’apprendre, de chercher, de créer : la croissance s’essouffle.', apres: 'C’est la médiocrité dont parle l’essai : posséder sans grandir.', themes: ['avoir', 'médiocrité'] }; }
+      if(v.biens < 25){ return { niveau: 'moyen', badge: 'L’excellence sans moyens', recit: 'Les esprits sont libres et formés, mais il manque les écoles, les routes et les hôpitaux.', apres: 'L’épanouissement humain a aussi besoin de conditions matérielles.', themes: ['limites de la thèse'] }; }
+      if(v.education > 65 && v.liberte > 65){ return { niveau: 'ok', badge: 'Un développement humain', recit: 'Des citoyens formés, libres et créateurs font grandir le pays, et la richesse avec eux.', apres: 'C’est la « signification humaine » du développement.', themes: ['excellence', 'être'] }; }
+      return { niveau: 'moyen', badge: 'À mi-chemin', recit: 'Le pays progresse, mais sans faire de l’homme le but du développement.', apres: 'La question de l’essai reste posée.', themes: ['développement'] };
+    }
+  },
+  quiz: [
+    { q: 'Qui est l’auteur de De la médiocrité à l’excellence ?', options: [
+      { txt: 'Ébénézer Njoh-Mouelle, philosophe camerounais.', ok: true, retour: 'Essai paru en 1970.' },
+      { txt: 'Marcien Towa.', retour: 'Towa est l’auteur de l’autre œuvre au programme.' } ] },
+    { q: 'Quel est le sous-titre de l’essai ?', options: [
+      { txt: 'Essai sur la signification humaine du développement.', ok: true, retour: 'Il annonce la problématique.' },
+      { txt: 'Essai sur la philosophie africaine.', retour: 'Non.' } ] },
+    { q: 'Selon l’essai, la médiocrité est…', options: [
+      { txt: 'l’attitude de celui qui se contente et renonce à se dépasser.', ok: true, retour: 'On peut être riche et médiocre.' },
+      { txt: 'la pauvreté matérielle.', retour: 'Non : ce n’est pas une question de revenus.' } ] },
+    { q: 'L’excellence, c’est…', options: [
+      { txt: 'un mouvement de dépassement de soi, de création et de liberté.', ok: true, retour: 'Pas un rang, un mouvement.' },
+      { txt: 'être premier de la classe.', retour: 'Ce n’est pas un classement.' } ] },
+    { q: 'Quelle est une limite possible de la thèse ?', options: [
+      { txt: 'L’épanouissement humain suppose aussi des conditions matérielles.', ok: true, retour: 'Écoles, santé, infrastructures.' },
+      { txt: 'Les biens matériels sont inutiles.', retour: 'L’essai ne dit pas cela.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Ébénézer Njoh-Mouelle, De la médiocrité à l’excellence. Essai sur la signification humaine du développement (1970).',
+      'Problème : le développement se réduit-il à l’avoir, ou doit-il être l’épanouissement de l’homme ?',
+      'Médiocrité : se contenter, s’installer, renoncer à se dépasser ; excellence : dépassement de soi, création, liberté.',
+      'Critique : la thèse est forte contre la réduction de l’homme à la consommation ; elle n’exclut pas les conditions matérielles.'
+    ],
+    ecrire: 'Sujet de dissertation : « Être développé, est-ce avoir plus ? » Rédigez l’introduction complète (amorce, problème, plan) en vous appuyant sur l’essai de Njoh-Mouelle.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

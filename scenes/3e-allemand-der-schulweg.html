@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Der Schulweg — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’allemand (3e) : le départ pour l’école, la famille ; les degrés de comparaison (comparatif et superlatif) et les verbes faibles.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '3e-allemand-schulweg',
+  discipline: 'Allemand', niveau: '3e', langue: 'de-DE',
+  titre: 'Der Schulweg',
+  decor: 'rue', lieu: 'Ein Viertel in Yaoundé', moment: 'Montagmorgen, 6 Uhr',
+  objectif: 'Comprendre un dialogue sur le départ pour l’école ; comparer des moyens de transport avec le comparatif (schneller als) et le superlatif (am schnellsten) ; conjuguer des verbes faibles au présent.',
+  programme: 'Progression harmonisée 3e · Vie quotidienne, leçon 1 (le départ pour l’école), leçon 2 (les degrés de comparaison), leçon 3 (les verbes faibles)',
+  jauges: [
+    { id: 'zeit', nom: 'Pünktlich (à l’heure)', val: 40, couleur: '#1F9D5B' },
+    { id: 'deutsch', nom: 'Deutsch', val: 25, couleur: '#1E499B' }
+  ],
+  personnages: {
+    mutter:   { nom: 'Mama', couleur: '#5E8A3A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#5E8A3A', habit: '#5E8A3A' } },
+    bertrand: { nom: 'Bertrand', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } },
+    amina:    { nom: 'Amina, seine Schwester', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['mutter', 'bertrand', 'amina'], txt: 'Montagmorgen, sechs Uhr. Die Familie steht auf.', trad: 'Lundi matin, six heures. La famille se lève.', objet: { i: 'ecole', lib: 'Die Schule' } },
+    { t: 'dit', qui: 'mutter', txt: 'Steh auf, Bertrand! Es ist schon sechs Uhr!', trad: 'Lève-toi, Bertrand ! Il est déjà six heures !' },
+    { t: 'dit', qui: 'bertrand', emo: 'triste', txt: 'Ich bin noch müde, Mama.', trad: 'Je suis encore fatigué, maman.' },
+    { t: 'dit', qui: 'amina', jeu: 'mit ihrer Schultasche', txt: 'Ich gehe zu Fuß zur Schule. Das ist billiger als das Taxi.', trad: 'Je vais à l’école à pied. C’est moins cher que le taxi.', jauges: { deutsch: 40 } },
+    { t: 'dit', qui: 'bertrand', txt: 'Aber das Motorradtaxi ist schneller als der Bus!', trad: 'Mais la moto-taxi est plus rapide que le bus !' },
+    { t: 'remarque', titre: 'Les degrés de comparaison', txt: 'Comparatif : adjectif + -er + als : schnell → schneller als (plus rapide que), billig → billiger als. Superlatif : am + adjectif + -sten : am schnellsten (le plus rapide). Souvent un Umlaut : groß → größer → am größten. Irréguliers : gut → besser → am besten ; viel → mehr → am meisten.' },
+    { t: 'dit', qui: 'mutter', emo: 'colere', txt: 'Das Motorradtaxi ist am gefährlichsten! Der Bus ist langsamer, aber sicherer.', trad: 'La moto-taxi est la plus dangereuse ! Le bus est plus lent, mais plus sûr.' },
+    { t: 'question', q: 'Selon la mère, quel moyen de transport est « am gefährlichsten » ?',
+      options: [
+        { txt: 'Das Motorradtaxi (la moto-taxi).', ok: true, retour: 'am gefährlichsten = le plus dangereux.' },
+        { txt: 'Der Bus.', retour: 'Le bus est « sicherer » : plus sûr.' }
+      ] },
+    { t: 'atelier', mode: 'tri', titre: 'Werkstatt · comparatif ou superlatif ?', consigne: 'Classe chaque forme.',
+      cats: ['Komparativ', 'Superlativ'],
+      items: [
+        { txt: 'schneller als', cat: 0 },
+        { txt: 'am billigsten', cat: 1 },
+        { txt: 'sicherer', cat: 0 },
+        { txt: 'am besten', cat: 1 },
+        { txt: 'größer als', cat: 0 }
+      ],
+      bravo: 'Komparativ : -er (als). Superlativ : am …-sten.', jauges: { deutsch: 55 } },
+    { t: 'choix', qui: 'bertrand', q: 'Tu es Bertrand. Il est 6 h 45, les cours commencent à 7 h 30. Comment vas-tu à l’école ?',
+      options: [
+        { txt: 'Ich nehme ein Motorradtaxi ohne Helm. (Je prends une moto-taxi sans casque.)', consequence: 'Tu arrives vite… mais tu as pris le risque le plus grand.', jauges: { zeit: 30 } },
+        { txt: 'Ich nehme den Bus mit Amina. (Je prends le bus avec Amina.)', consequence: 'Tu arrives à l’heure et en sécurité. Mama est rassurée.', jauges: { zeit: 25, deutsch: 10 } },
+        { txt: 'Ich bleibe im Bett. (Je reste au lit.)', consequence: 'Tu arrives en retard, avec une punition.', jauges: { zeit: -30 } }
+      ],
+      oeuvre: 'Am sichersten : le casque sur la moto, ou le bus. La sécurité passe avant la vitesse.' },
+    { t: 'remarque', titre: 'Les verbes faibles au présent', txt: 'Radical + terminaisons régulières : wohnen → ich wohne, du wohnst, er/sie wohnt, wir wohnen, ihr wohnt, sie wohnen. De même : machen, lernen, spielen, kaufen.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Werkstatt · construis la phrase', consigne: 'Remets les mots dans l’ordre : « Le bus est plus lent que la moto-taxi. »',
+      items: ['Der Bus', 'ist', 'langsamer', 'als', 'das Motorradtaxi.'],
+      bravo: 'Der Bus ist langsamer als das Motorradtaxi.', jauges: { deutsch: 80 } },
+    { t: 'dit', qui: 'amina', emo: 'joie', jeu: 'um 7 Uhr 25 vor der Schule', txt: 'Siehst du? Wir sind pünktlich, und wir leben noch!', trad: 'Tu vois ? Nous sommes à l’heure, et nous sommes toujours vivants !', jauges: { zeit: 90 } }
+  ],
+  labo: {
+    titre: 'Labor · der beste Schulweg',
+    intro: 'Règle la vitesse, la sécurité et le coût du trajet : quel est le meilleur chemin pour aller à l’école ?',
+    persos: ['mutter', 'bertrand', 'amina'],
+    curseurs: [
+      { id: 'tempo', nom: 'Vitesse (schnell)', val: 50, bas: 'langsam', haut: 'sehr schnell' },
+      { id: 'sicherheit', nom: 'Sécurité (sicher)', val: 60, bas: 'gefährlich', haut: 'sehr sicher' },
+      { id: 'kosten', nom: 'Coût (teuer)', val: 40, bas: 'billig', haut: 'teuer' }
+    ],
+    scenarios: [
+      { nom: 'Mit dem Bus', icone: 'groupe', valeurs: { tempo: 45, sicherheit: 75, kosten: 35 } },
+      { nom: 'Motorradtaxi ohne Helm', icone: 'course', valeurs: { tempo: 90, sicherheit: 10, kosten: 50 } },
+      { nom: 'Zu Fuß', icone: 'personne', valeurs: { tempo: 15, sicherheit: 60, kosten: 0 } }
+    ],
+    liens: [
+      { a: 'mutter', b: 'bertrand', type: 'amour', lib: 'Sorge', base: .7, poids: { sicherheit: .2 } },
+      { a: 'amina', b: 'bertrand', type: 'alliance', lib: 'Geschwister', base: .6 }
+    ],
+    issue: function(v){
+      if(v.sicherheit < 30){ return { niveau: 'ko', badge: 'Am gefährlichsten', recit: 'Le trajet le plus rapide est aussi le plus dangereux : un accident est vite arrivé.', apres: 'Die Sicherheit ist am wichtigsten.', themes: ['sécurité routière'] }; }
+      if(v.tempo < 25){ return { niveau: 'moyen', badge: 'Langsam, aber billig', recit: 'À pied, c’est gratuit et assez sûr, mais il faut partir beaucoup plus tôt.', apres: 'Früher aufstehen !', themes: ['ponctualité'] }; }
+      return { niveau: 'ok', badge: 'Der beste Schulweg', recit: 'Ni le plus rapide ni le moins cher, mais le plus sûr pour arriver à l’heure.', apres: 'Sicherer ist besser.', themes: ['comparaison'] };
+    }
+  },
+  quiz: [
+    { q: 'Comparatif de « schnell » :', options: [
+      { txt: 'schneller', ok: true, retour: 'schnell → schneller → am schnellsten.' },
+      { txt: 'mehr schnell', retour: 'En allemand, on ajoute -er.' } ] },
+    { q: 'Superlatif de « gut » :', options: [
+      { txt: 'am besten', ok: true, retour: 'gut → besser → am besten.' },
+      { txt: 'am gutesten', retour: 'Gut est irrégulier.' } ] },
+    { q: 'Que signifie « Steh auf! » ?', options: [
+      { txt: 'Lève-toi !', ok: true, retour: 'aufstehen : se lever.' },
+      { txt: 'Assieds-toi !', retour: 'Assieds-toi = Setz dich !' } ] },
+    { q: '« wohnen » à la 2e personne du singulier :', options: [
+      { txt: 'du wohnst', ok: true, retour: 'Verbe faible : -st.' },
+      { txt: 'du wohnt', retour: '-t, c’est pour er/sie/es et ihr.' } ] },
+    { q: '« plus … que » se dit…', options: [
+      { txt: '…-er als', ok: true, retour: 'Der Bus ist langsamer als das Taxi.' },
+      { txt: '…-er wie', retour: 'On dit « als » pour le comparatif.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Vocabulaire : aufstehen, die Schule, zu Fuß, der Bus, das Motorradtaxi, schnell, langsam, sicher, gefährlich, billig, teuer.',
+      'Comparatif : -er + als (schneller als) ; superlatif : am …-sten (am schnellsten) ; Umlaut fréquent (größer).',
+      'Irréguliers : gut → besser → am besten ; viel → mehr → am meisten.',
+      'Verbes faibles : ich wohne, du wohnst, er wohnt…'
+    ],
+    ecrire: 'Beschreib deinen Schulweg in fünf Sätzen. Utilise au moins deux comparatifs et un superlatif.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

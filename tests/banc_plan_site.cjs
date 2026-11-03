@@ -122,7 +122,7 @@ console.log(`\n${G}③ Aucune zone publiée n'est laissée de côté${R}`);
    plan. Sans lui, publier un nouveau dossier le rendrait invisible — et c'est
    exactement ce qui est arrivé à /livrets/, /outils/ et /evaluations/. */
 const ZONES = ['corriges', 'oeuvres', 'niveaux', 'evaluations', 'livrets',
-  'cours', 'outils', 'parcours', 'decouvrir', 'flash', 'adopter'];
+  'cours', 'outils', 'parcours', 'decouvrir', 'flash', 'adopter', 'scenes'];
 /* Une zone figure au plan de DEUX façons possibles : par un lien vers son
    dossier quand elle a un index (/corriges/ mène à ses sept niveaux, qui
    mènent à leurs 89 pages), ou par ses pages listées UNE À UNE quand elle
@@ -184,7 +184,7 @@ avecIndex.forEach(z => {
 {
   const SERVIS = ['corriges', 'oeuvres', 'niveaux', 'evaluations', 'livrets', 'cours',
     'outils', 'parcours', 'decouvrir', 'flash', 'adopter', 'legal', 'ressources',
-    'eleve', 'enseignant', 'campus', 'plateforme'];
+    'eleve', 'enseignant', 'campus', 'plateforme', 'scenes'];
   const nus = SERVIS.filter((z) => {
     const d = path.join(RACINE, z);
     if (!fs.existsSync(d)) return false;

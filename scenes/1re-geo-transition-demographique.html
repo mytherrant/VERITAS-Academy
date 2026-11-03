@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trois générations, une courbe — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de géographie (Première) : la croissance démographique, la transition démographique, les problèmes démographiques et les politiques de population.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '1re-geo-transition',
+  discipline: 'Géographie', niveau: '1re',
+  titre: 'Trois générations, une courbe',
+  decor: 'case_nuit', lieu: 'Une famille à Bafoussam', moment: 'Une soirée de fête',
+  objectif: 'Comprendre la croissance démographique par la transition démographique (natalité, mortalité, accroissement naturel) ; identifier les problèmes liés à une population jeune et nombreuse ; comparer des politiques démographiques.',
+  programme: 'Progression harmonisée 1re · Leçon 1 (la croissance démographique), TP 1 (inégalités de répartition), leçon 2 (problèmes démographiques dans le monde), dossier 1 (les politiques démographiques)',
+  jauges: [
+    { id: 'natalite', nom: 'Natalité', val: 85, couleur: '#1F9D5B' },
+    { id: 'mortalite', nom: 'Mortalité', val: 75, couleur: '#D43F2E' }
+  ],
+  personnages: {
+    grandpere: { nom: 'Grand-père Kamga', couleur: '#7A2E2E', look: { tenue: 'boubou', peau: 'fonce', vieux: true, cheveux: 'aucun', habit: '#7A2E2E', barbe: true } },
+    mere:      { nom: 'Maman Odile', couleur: '#C0397C', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#C0397C', habit: '#C0397C' } },
+    lycenne:   { nom: 'Raïssa, en Première', couleur: '#1F6F78', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses', objet: 'livre' } },
+    medecin:   { nom: 'Le docteur Fopa, l’oncle', couleur: '#5AA9C9', look: { metier: 'medecin', peau: 'fonce', cheveux: 'ras', lunettes: true } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['grandpere', 'mere', 'lycenne'], txt: 'Fête de famille à Bafoussam. Raïssa doit préparer un exposé sur la croissance démographique. Elle interroge les trois générations.', objet: { i: 'groupe', lib: 'Trois générations' } },
+    { t: 'dit', qui: 'grandpere', txt: 'Ma mère a eu dix enfants. Quatre sont morts avant cinq ans : la rougeole, le paludisme. On faisait beaucoup d’enfants parce qu’on savait qu’on en perdrait.', jauges: { natalite: 90, mortalite: 80 } },
+    { t: 'remarque', titre: 'Phase 1 : l’ancien régime démographique', txt: 'Natalité élevée et mortalité élevée, surtout chez les enfants : la population augmente lentement. L’accroissement naturel est la différence entre les naissances et les décès.' },
+    { t: 'recit', entre: ['medecin'], txt: 'L’oncle Fopa, médecin, se joint à la conversation.' },
+    { t: 'dit', qui: 'medecin', txt: 'Puis sont venus les vaccins, l’eau potable, les dispensaires. La mortalité des enfants a fortement baissé. Mais les familles ont continué, pendant longtemps, à faire beaucoup d’enfants.', jauges: { mortalite: 35 } },
+    { t: 'question', q: 'Que se passe-t-il quand la mortalité baisse alors que la natalité reste forte ?',
+      options: [
+        { txt: 'La population augmente très vite : c’est l’« explosion démographique » de la phase 2 de la transition.', ok: true, retour: 'L’écart entre naissances et décès devient très grand : l’accroissement naturel est maximal.' },
+        { txt: 'La population diminue.', retour: 'Non : moins de décès et autant de naissances, cela fait plus d’habitants.' }
+      ] },
+    { t: 'dit', qui: 'mere', txt: 'Moi, j’ai eu cinq enfants. Je voulais qu’ils aillent tous à l’école, et l’école coûte cher. Mes filles disent qu’elles en auront deux ou trois.', jauges: { natalite: 60 } },
+    { t: 'remarque', titre: 'Phase 3, puis phase 4', txt: 'Avec l’urbanisation, la scolarisation des filles et le coût de l’éducation, la natalité baisse à son tour : la croissance ralentit (phase 3). À la fin de la transition, natalité et mortalité sont basses (phase 4), comme en Europe. Le Cameroun, avec une population très jeune et une fécondité encore élevée, est en pleine transition.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · les phases de la transition', consigne: 'Remets dans l’ordre les phases de la transition démographique.',
+      items: [
+        'Natalité et mortalité élevées : croissance lente.',
+        'La mortalité baisse, la natalité reste élevée : croissance très rapide.',
+        'La natalité baisse à son tour : la croissance ralentit.',
+        'Natalité et mortalité basses : croissance faible.'
+      ],
+      bravo: 'Trois générations de la famille Kamga racontent les trois premières phases.', jauges: { natalite: 45 } },
+    { t: 'dit', qui: 'lycenne', emo: 'doute', txt: 'Une population très jeune, c’est une chance ou un problème ?' },
+    { t: 'atelier', mode: 'balance', titre: 'Atelier · une population jeune et nombreuse', consigne: 'Place chaque argument du côté qu’il défend.',
+      cotes: ['Un atout', 'Un défi'],
+      args: [
+        { txt: 'Une main-d’œuvre abondante pour l’avenir.', cote: 0, poids: 3 },
+        { txt: 'Il faut construire beaucoup d’écoles et créer beaucoup d’emplois.', cote: 1, poids: 3 },
+        { txt: 'Un grand marché intérieur.', cote: 0, poids: 2 },
+        { txt: 'Le chômage des jeunes risque d’augmenter si l’économie ne suit pas.', cote: 1, poids: 2 }
+      ],
+      bravo: 'On parle de « dividende démographique » : la jeunesse devient un atout si elle est formée et employée.' },
+    { t: 'choix', qui: 'lycenne', q: 'Pour la conclusion de ton exposé, quelle politique démographique proposes-tu pour le Cameroun ?',
+      options: [
+        { txt: 'Imposer un enfant par famille, par la loi.', consequence: 'Une politique autoritaire, comme en Chine de 1979 à 2015 : efficace sur les chiffres, mais avec de lourdes conséquences humaines et un vieillissement brutal.', jauges: { natalite: -25 } },
+        { txt: 'Scolariser les filles, rendre la contraception accessible, améliorer la santé maternelle : chacun choisit librement.', consequence: 'Une politique incitative : la natalité baisse plus lentement, mais par le choix des familles.', jauges: { natalite: -15 } },
+        { txt: 'Ne rien faire.', consequence: 'La population continue de croître très vite, et les écoles et emplois ne suivent pas.', jauges: { natalite: 5 } }
+      ],
+      oeuvre: 'Les politiques démographiques peuvent être antinatalistes (freiner les naissances) ou natalistes (les encourager, comme dans certains pays européens vieillissants), autoritaires ou incitatives.' },
+    { t: 'dit', qui: 'grandpere', emo: 'joie', txt: 'De mon temps, on comptait les enfants qu’on perdait. Aujourd’hui, on compte les écoles qu’il faut construire. C’est mieux, petite.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · la courbe de la population',
+    intro: 'Règle l’accès à la santé, la scolarisation des filles et l’accès à la planification familiale : à quelle phase de la transition arrive le pays ?',
+    persos: ['grandpere', 'mere', 'lycenne', 'medecin'],
+    curseurs: [
+      { id: 'sante', nom: 'Accès à la santé (vaccins, eau potable)', val: 65, bas: 'faible', haut: 'général' },
+      { id: 'filles', nom: 'Scolarisation des filles', val: 55, bas: 'rare', haut: 'complète' },
+      { id: 'planning', nom: 'Planification familiale', val: 35, bas: 'inaccessible', haut: 'accessible' }
+    ],
+    scenarios: [
+      { nom: 'Au temps du grand-père', icone: 'personne', valeurs: { sante: 10, filles: 10, planning: 5 } },
+      { nom: 'Aujourd’hui', icone: 'groupe', valeurs: { sante: 65, filles: 55, planning: 35 } },
+      { nom: 'Fin de transition', icone: 'ecole', valeurs: { sante: 90, filles: 90, planning: 85 } }
+    ],
+    liens: [
+      { a: 'medecin', b: 'mere', type: 'confiance', lib: 'soigne', base: .3, poids: { sante: .5 } },
+      { a: 'lycenne', b: 'mere', type: 'amour', lib: 'fille', base: .7 },
+      { a: 'grandpere', b: 'lycenne', type: 'amour', lib: 'transmet', base: .7 }
+    ],
+    issue: function(v){
+      if(v.sante < 35){ return { niveau: 'moyen', badge: 'Phase 1 : l’ancien régime', recit: 'Beaucoup de naissances, beaucoup de décès d’enfants : la population augmente lentement.', apres: 'C’est l’époque de la mère du grand-père Kamga.', themes: ['mortalité infantile'] }; }
+      if(v.filles > 70 && v.planning > 65){ return { niveau: 'ok', badge: 'Fin de la transition', recit: 'Natalité et mortalité basses : la croissance ralentit, la population vieillit peu à peu.', apres: 'Le défi devient alors le financement des retraites.', themes: ['transition achevée'] }; }
+      if(v.planning < 45 || v.filles < 45){ return { niveau: 'ko', badge: 'Phase 2 : l’explosion démographique', recit: 'La mortalité a baissé, la natalité reste forte : la population double en une génération.', apres: 'Écoles, emplois, logements doivent suivre ce rythme.', themes: ['croissance rapide'] }; }
+      return { niveau: 'moyen', badge: 'Phase 3 : le ralentissement', recit: 'La natalité commence à baisser : la croissance ralentit, la population reste très jeune.', apres: 'C’est le moment du « dividende démographique » s’il y a des emplois.', themes: ['transition en cours'] };
+    }
+  },
+  quiz: [
+    { q: 'Qu’est-ce que l’accroissement naturel ?', options: [
+      { txt: 'La différence entre le nombre de naissances et le nombre de décès.', ok: true, retour: 'Sans compter les migrations.' },
+      { txt: 'Le nombre d’arbres plantés.', retour: 'Non.' } ] },
+    { q: 'Quelle est la phase de la croissance la plus rapide ?', options: [
+      { txt: 'La phase 2 : mortalité en baisse, natalité encore forte.', ok: true, retour: 'L’« explosion démographique ».' },
+      { txt: 'La phase 4.', retour: 'En phase 4, la croissance est faible.' } ] },
+    { q: 'Qu’est-ce qui fait baisser la natalité ?', options: [
+      { txt: 'La scolarisation des filles, l’urbanisation, l’accès à la contraception.', ok: true, retour: 'Et le coût de l’éducation.' },
+      { txt: 'La hausse de la mortalité.', retour: 'Non.' } ] },
+    { q: 'Une politique qui cherche à freiner les naissances est…', options: [
+      { txt: 'antinataliste.', ok: true, retour: 'Comme l’ancienne politique de l’enfant unique en Chine.' },
+      { txt: 'nataliste.', retour: 'Nataliste = encourager les naissances.' } ] },
+    { q: 'Quel défi pose une population très jeune ?', options: [
+      { txt: 'Former et employer beaucoup de jeunes.', ok: true, retour: 'Écoles et emplois.' },
+      { txt: 'Payer beaucoup de retraites.', retour: 'C’est le défi des populations vieillissantes.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Transition démographique : passage d’une natalité et d’une mortalité élevées à une natalité et une mortalité basses, en quatre phases.',
+      'La phase 2 (mortalité en baisse, natalité forte) provoque une croissance très rapide.',
+      'Le Cameroun est en pleine transition : population très jeune, fécondité encore élevée mais en baisse.',
+      'Politiques démographiques : antinatalistes ou natalistes, autoritaires ou incitatives ; scolariser les filles est l’un des leviers les plus efficaces.'
+    ],
+    ecrire: 'Construisez un tableau à deux colonnes (atouts / défis) d’une population jeune, puis rédigez un paragraphe de dix lignes : « La jeunesse de la population camerounaise est-elle une chance ? »'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

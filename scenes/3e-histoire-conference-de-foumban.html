@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Foumban, juillet 1961 — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’histoire (3e) : la conférence de Foumban, la réunification et la naissance de l’État fédéral du Cameroun.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '3e-histoire-foumban',
+  discipline: 'Histoire', niveau: '3e',
+  titre: 'Foumban, juillet 1961',
+  decor: 'chefferie', lieu: 'Foumban, au pays bamoun', moment: '17 – 21 juillet 1961',
+  objectif: 'Comprendre comment le Cameroun sous tutelle française devenu indépendant et le Southern Cameroons se réunissent en 1961 : le plébiscite, la conférence de Foumban, l’État fédéral, puis l’évolution vers l’État unitaire.',
+  programme: 'Progression harmonisée 3e · Leçons 16-17 (évolution politique sous tutelle française et anglaise), leçon 18 (de l’État fédéral à nos jours), TD 2 (la conférence de Foumban)',
+  jauges: [
+    { id: 'unite', nom: 'Unité du pays', val: 30, couleur: '#1F9D5B' },
+    { id: 'confiance', nom: 'Confiance entre délégations', val: 40, couleur: '#1E499B' }
+  ],
+  personnages: {
+    narratrice: { nom: 'Mme Ngo Ndjock, professeure', couleur: '#1E499B', look: { metier: 'enseignant', tenue: 'jupe', peau: 'fonce', cheveux: 'chignon' } },
+    ahidjo:     { nom: 'Ahmadou Ahidjo', couleur: '#E9E3CF', look: { tenue: 'boubou', peau: 'brun', cheveux: 'ras', coiffe: 'chechia', couleurCoiffe: '#F2EEE3', habit: '#E9E3CF' } },
+    foncha:     { nom: 'John Ngu Foncha', couleur: '#2B3A55', look: { tenue: 'costume', peau: 'fonce', cheveux: 'ras', habit: '#2B3A55', col: '#FFFFFF', lunettes: true } },
+    delegue:    { nom: 'Un délégué du Southern Cameroons', couleur: '#5E8A3A', look: { tenue: 'boubou', peau: 'fonce', cheveux: 'court', habit: '#5E8A3A', objet: 'dossier' } },
+    eleve:      { nom: 'Bryan, élève de 3e', couleur: '#C0397C', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['narratrice', 'eleve'], txt: 'Après la Première Guerre mondiale, le Kamerun allemand est partagé : une grande partie est confiée à la France, une bande à l’ouest à la Grande-Bretagne. Le 1er janvier 1960, la partie française devient indépendante : c’est la République du Cameroun.', objet: { i: 'document', lib: 'Deux Cameroun' } },
+    { t: 'dit', qui: 'eleve', emo: 'doute', txt: 'Et la partie britannique ?' },
+    { t: 'dit', qui: 'narratrice', txt: 'Le 11 février 1961, l’ONU organise un plébiscite. Le Northern Cameroons choisit le Nigeria. Le Southern Cameroons choisit de rejoindre la République du Cameroun.', jauges: { unite: 50 } },
+    { t: 'question', q: 'Pourquoi faut-il une conférence après le plébiscite ?',
+      options: [
+        { txt: 'Pour décider comment les deux territoires, qui ont vécu quarante ans sous deux administrations différentes, vont vivre dans un même État.', ok: true, retour: 'Langues, lois, écoles, administration : tout est différent. Il faut une constitution commune.' },
+        { txt: 'Pour refaire le plébiscite.', retour: 'Non : le vote a eu lieu, il faut maintenant organiser l’union.' }
+      ] },
+    { t: 'recit', entre: ['ahidjo', 'foncha', 'delegue'], txt: 'Du 17 au 21 juillet 1961, à Foumban, se réunissent la délégation de la République du Cameroun, conduite par le président Ahmadou Ahidjo, et celle du Southern Cameroons, conduite par le Premier ministre John Ngu Foncha.', jauges: { confiance: 50 } },
+    { t: 'dit', qui: 'ahidjo', txt: 'Nous voulons un État uni, fort, qui garde la place de chacun.' },
+    { t: 'dit', qui: 'foncha', txt: 'Nos populations ont leurs institutions, leur langue anglaise, leur système d’écoles et de justice. Elles veulent les garder dans le nouvel État.' },
+    { t: 'dit', qui: 'delegue', emo: 'doute', txt: 'Nous avons eu peu de temps pour préparer nos propositions. Il faut que l’autonomie de notre État soit vraiment protégée.', jauges: { confiance: 40 } },
+    { t: 'choix', qui: 'narratrice', q: 'Imagine que tu animes la conférence. Quelle forme d’État proposes-tu ?',
+      options: [
+        { txt: 'Un État unitaire tout de suite : une seule administration, une seule langue officielle.', consequence: 'Les populations anglophones auraient le sentiment d’être absorbées : la réunification commencerait dans la méfiance.', jauges: { confiance: -20 } },
+        { txt: 'Une fédération de deux États, avec des institutions fédérales communes et deux langues officielles.', consequence: 'C’est le compromis retenu : chacun garde ses institutions locales dans un État commun.', jauges: { confiance: 25, unite: 25 } },
+        { txt: 'Deux pays séparés, avec de simples accords.', consequence: 'Ce serait contraire au vote du plébiscite, qui a choisi la réunification.', jauges: { unite: -30 } }
+      ],
+      oeuvre: 'La Constitution fédérale entre en vigueur le 1er octobre 1961 : la République fédérale du Cameroun réunit l’État fédéré du Cameroun oriental et celui du Cameroun occidental. Le français et l’anglais sont langues officielles.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · de la tutelle à l’État unitaire', consigne: 'Remets ces étapes dans l’ordre.',
+      items: [
+        'Indépendance de la République du Cameroun (1er janvier 1960).',
+        'Plébiscite au Cameroun britannique (11 février 1961).',
+        'Conférence de Foumban (17-21 juillet 1961).',
+        'Naissance de la République fédérale du Cameroun (1er octobre 1961).',
+        'Référendum et État unitaire : République unie du Cameroun (20 mai 1972).'
+      ],
+      bravo: 'Le 20 mai, fête nationale, rappelle le passage à l’État unitaire en 1972.', jauges: { unite: 85 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · fédération ou État unitaire ?', consigne: 'Classe chaque caractéristique.',
+      cats: ['État fédéral (1961-1972)', 'État unitaire (depuis 1972)'],
+      items: [
+        { txt: 'Deux États fédérés avec leurs assemblées.', cat: 0 },
+        { txt: 'Un seul gouvernement et une seule assemblée nationale.', cat: 1 },
+        { txt: 'Cameroun oriental et Cameroun occidental.', cat: 0 },
+        { txt: 'Des régions administrées depuis la capitale.', cat: 1 }
+      ],
+      bravo: 'Dans les deux cas, le français et l’anglais sont langues officielles.' },
+    { t: 'dit', qui: 'eleve', emo: 'fier', txt: 'C’est pour ça que notre pays est bilingue : il est né de la rencontre de deux histoires.' },
+    { t: 'dit', qui: 'narratrice', txt: 'Exactement. Et c’est pourquoi le vivre-ensemble entre francophones et anglophones reste une question importante aujourd’hui.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · réunir deux histoires',
+    intro: 'Règle le temps de préparation, l’autonomie des États fédérés et l’écoute mutuelle : quelle réunification obtiens-tu ?',
+    persos: ['ahidjo', 'foncha', 'delegue', 'narratrice'],
+    curseurs: [
+      { id: 'preparation', nom: 'Temps de préparation', val: 30, bas: 'précipité', haut: 'suffisant' },
+      { id: 'autonomie', nom: 'Autonomie des États fédérés', val: 55, bas: 'faible', haut: 'forte' },
+      { id: 'ecoute', nom: 'Écoute mutuelle', val: 55, bas: 'méfiance', haut: 'confiance' }
+    ],
+    scenarios: [
+      { nom: 'Foumban 1961', icone: 'document', valeurs: { preparation: 30, autonomie: 55, ecoute: 55 } },
+      { nom: 'Absorption', icone: 'poing', valeurs: { autonomie: 5, ecoute: 20 } },
+      { nom: 'Une union préparée', icone: 'groupe', valeurs: { preparation: 85, ecoute: 85, autonomie: 65 } }
+    ],
+    liens: [
+      { a: 'ahidjo', b: 'foncha', type: 'alliance', lib: 'négocient', base: .4, poids: { ecoute: .4 } },
+      { a: 'delegue', b: 'ahidjo', type: 'conflit', lib: 'méfiance', base: .4, poids: { ecoute: -.4, preparation: -.3 } },
+      { a: 'foncha', b: 'delegue', type: 'confiance', lib: 'même délégation', base: .6 }
+    ],
+    issue: function(v){
+      if(v.autonomie < 25 && v.ecoute < 40){ return { niveau: 'ko', badge: 'Une union subie', recit: 'Une partie des populations se sent absorbée : la réunification laisse des rancœurs durables.', apres: 'Une union se construit avec le consentement de tous.', themes: ['vivre-ensemble'] }; }
+      if(v.preparation > 65 && v.ecoute > 65){ return { niveau: 'ok', badge: 'Une union consentie', recit: 'Deux délégations bien préparées, qui s’écoutent : chacun se reconnaît dans le nouvel État.', apres: 'La confiance est la meilleure garantie de l’unité.', themes: ['réunification', 'bilinguisme'] }; }
+      return { niveau: 'moyen', badge: 'Un compromis rapide', recit: 'La fédération naît, mais la préparation trop courte laisse des questions en suspens.', apres: 'Ces questions reviendront dans le débat public.', themes: ['fédéralisme'] };
+    }
+  },
+  quiz: [
+    { q: 'Quand a eu lieu la conférence de Foumban ?', options: [
+      { txt: 'Du 17 au 21 juillet 1961.', ok: true, retour: 'Entre le plébiscite et la fédération.' },
+      { txt: 'Le 20 mai 1972.', retour: 'C’est l’État unitaire.' } ] },
+    { q: 'Qui conduisait la délégation du Southern Cameroons ?', options: [
+      { txt: 'John Ngu Foncha.', ok: true, retour: 'Premier ministre du Southern Cameroons.' },
+      { txt: 'Ruben Um Nyobè.', retour: 'Um Nyobè est mort en 1958.' } ] },
+    { q: 'Que choisit le Northern Cameroons en février 1961 ?', options: [
+      { txt: 'Le rattachement au Nigeria.', ok: true, retour: 'Le Southern Cameroons choisit le Cameroun.' },
+      { txt: 'L’indépendance seule.', retour: 'Ce choix n’était pas proposé.' } ] },
+    { q: 'Quand naît la République fédérale du Cameroun ?', options: [
+      { txt: 'Le 1er octobre 1961.', ok: true, retour: 'Deux États fédérés.' },
+      { txt: 'Le 1er janvier 1960.', retour: 'C’est l’indépendance de la partie française.' } ] },
+    { q: 'Que rappelle la fête nationale du 20 mai ?', options: [
+      { txt: 'Le passage à l’État unitaire en 1972.', ok: true, retour: 'République unie du Cameroun.' },
+      { txt: 'La conférence de Foumban.', retour: 'Non.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      '1er janvier 1960 : indépendance de la République du Cameroun.',
+      '11 février 1961 : plébiscite ; le Southern Cameroons rejoint le Cameroun, le Northern Cameroons le Nigeria.',
+      '17-21 juillet 1961 : conférence de Foumban (Ahidjo, Foncha) ; 1er octobre 1961 : République fédérale.',
+      '20 mai 1972 : État unitaire ; le français et l’anglais sont langues officielles.'
+    ],
+    ecrire: 'Rédigez un paragraphe de dix lignes : « Pourquoi le Cameroun est-il un pays bilingue ? » Utilisez au moins trois dates précises.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

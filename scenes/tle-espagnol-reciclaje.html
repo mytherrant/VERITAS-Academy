@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>¡Sepáralo bien! — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’espagnol (Terminale) : les déchets, leur collecte et leur recyclage ; l’impératif avec ou sans pronoms compléments.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-espagnol-reciclaje',
+  discipline: 'Espagnol', niveau: 'Terminale', langue: 'es-ES',
+  titre: '¡Sepáralo bien!',
+  decor: 'rue', lieu: 'Un barrio de Douala', moment: 'Día de limpieza',
+  objectif: 'Comprendre et produire des consignes sur la collecte et le recyclage des déchets ; employer l’impératif affirmatif et négatif, avec pronoms compléments (sepáralo / no lo tires).',
+  programme: 'Progression harmonisée Tle · Module 2 (environnement, santé et bien-être), leçon 7 (types de déchets, collecte, recyclage), leçon 8 (la phrase impérative avec ou sans pronoms compléments)',
+  jauges: [
+    { id: 'limpio', nom: 'Barrio limpio', val: 20, couleur: '#1F9D5B' },
+    { id: 'espanol', nom: 'Español', val: 25, couleur: '#1E499B' }
+  ],
+  personnages: {
+    lucia:  { nom: 'Lucía, voluntaria', couleur: '#B0503A', look: { tenue: 'jupe', peau: 'mat', cheveux: 'queue', habit: '#E07B39', extra: ['gilet'] } },
+    junior: { nom: 'Junior', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } },
+    mama:   { nom: 'Mamá Ekwalla', couleur: '#5E8A3A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#5E8A3A', habit: '#B4793F', objet: 'sac' } },
+    obrero: { nom: 'El recolector', couleur: '#E07B39', look: { metier: 'ouvrier', peau: 'fonce', cheveux: 'ras' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['lucia', 'junior'], txt: 'Sábado por la mañana. En el barrio, los jóvenes organizan un día de limpieza con una asociación.', trad: 'Samedi matin. Dans le quartier, les jeunes organisent une journée de nettoyage avec une association.', objet: { i: 'panier', lib: 'Bolsas de basura' } },
+    { t: 'dit', qui: 'junior', emo: 'doute', txt: 'Lucía, ¿por qué hay tres bolsas? Toda la basura es igual.', trad: 'Lucía, pourquoi y a-t-il trois sacs ? Tous les déchets sont pareils.' },
+    { t: 'dit', qui: 'lucia', txt: 'No, Junior. Hay residuos orgánicos, como las cáscaras de plátano; hay plástico y latas, que se pueden reciclar; y hay residuos peligrosos, como las pilas.', trad: 'Non, Junior. Il y a des déchets organiques, comme les peaux de banane plantain ; il y a le plastique et les canettes, qu’on peut recycler ; et il y a des déchets dangereux, comme les piles.', jauges: { espanol: 40 } },
+    { t: 'atelier', mode: 'tri', titre: 'Taller · ¿en qué bolsa?', consigne: 'Classe chaque déchet dans le bon sac.',
+      cats: ['Orgánico', 'Reciclable', 'Peligroso'],
+      items: [
+        { txt: 'las cáscaras de plátano', cat: 0 },
+        { txt: 'una botella de plástico', cat: 1 },
+        { txt: 'las pilas usadas', cat: 2 },
+        { txt: 'una lata de refresco', cat: 1 },
+        { txt: 'los restos de comida', cat: 0 },
+        { txt: 'un teléfono roto', cat: 2 }
+      ],
+      bravo: 'Lo orgánico sirve para el compost ; lo reciclable vuelve a la fábrica ; lo peligroso se recoge aparte.', jauges: { limpio: 45 } },
+    { t: 'recit', entre: ['mama'], txt: 'Mamá Ekwalla sale de su casa con un saco lleno.', trad: 'Mamá Ekwalla sort de chez elle avec un sac plein.' },
+    { t: 'dit', qui: 'mama', txt: 'Yo siempre tiro todo al canal. El agua se lo lleva.', trad: 'Moi, je jette toujours tout dans le caniveau. L’eau l’emporte.' },
+    { t: 'dit', qui: 'lucia', emo: 'colere', txt: '¡No lo tire al canal, señora! Cuando llueve, el canal se tapa y el barrio se inunda.', trad: 'Ne le jetez pas dans le caniveau, madame ! Quand il pleut, le caniveau se bouche et le quartier est inondé.' },
+    { t: 'remarque', titre: 'L’impératif et les pronoms', txt: 'Affirmatif : le pronom se colle derrière le verbe (et l’accent écrit apparaît souvent) : ¡Sepáralo! ¡Tíralo a la bolsa! Négatif : le pronom se place devant, et on emploie le subjonctif : ¡No lo tires! (tú), ¡No lo tire! (usted).' },
+    { t: 'question', q: 'Comment dire à un ami « Ne le jette pas ! » ?',
+      options: [
+        { txt: '¡No lo tires!', ok: true, retour: 'Négatif = no + pronom + subjonctif (tú : tires).' },
+        { txt: '¡No tíralo!', retour: 'À la forme négative, le pronom ne se colle pas au verbe.' },
+        { txt: '¡Tíralo no!', retour: 'Non : no se place en tête.' }
+      ] },
+    { t: 'choix', qui: 'junior', q: 'Tu es Junior. Mamá Ekwalla n’est pas convaincue. Que fais-tu ?',
+      options: [
+        { txt: '« ¡Usted es sucia! » (Vous êtes sale !)', consequence: 'Elle se vexe et rentre chez elle. Le sac finira dans le caniveau.', jauges: { limpio: -10 } },
+        { txt: '« Démelo, señora. Yo lo separo y el recolector lo lleva el martes. » (Donnez-le-moi, je le trie et le collecteur l’emporte mardi.)', consequence: 'Tu proposes une solution concrète et polie : elle accepte.', jauges: { limpio: 25, espanol: 15 } }
+      ],
+      oeuvre: 'Convaincre, c’est proposer une solution, pas seulement interdire.' },
+    { t: 'dit', qui: 'obrero', entre: ['obrero'], txt: 'Los martes y los viernes pasa el camión. Saquen la basura por la mañana, no por la noche.', trad: 'Le mardi et le vendredi, le camion passe. Sortez les poubelles le matin, pas le soir.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Taller · construye la frase', consigne: 'Remets les mots dans l’ordre : « Ne jetez pas le plastique dans le caniveau, recyclez-le. »',
+      items: ['No', 'tiren', 'el plástico', 'al canal,', 'recíclenlo.'],
+      bravo: 'No tiren (négatif, ustedes), recíclenlo (affirmatif + pronom collé).', jauges: { espanol: 75 } },
+    { t: 'dit', qui: 'mama', emo: 'joie', jeu: 'el martes siguiente', txt: 'Mira, Junior: ya tengo tres bolsas. ¡Y el canal está limpio!', trad: 'Regarde, Junior : j’ai déjà trois sacs. Et le caniveau est propre !', jauges: { limpio: 90 } }
+  ],
+  labo: {
+    titre: 'Laboratorio · el barrio limpio',
+    intro: 'Règle le tri à la maison, le passage du camion de collecte et la sensibilisation : le quartier est-il propre en saison des pluies ?',
+    persos: ['lucia', 'junior', 'mama', 'obrero'],
+    curseurs: [
+      { id: 'separar', nom: 'Tri à la maison (separar)', val: 35, bas: 'nunca', haut: 'siempre' },
+      { id: 'camion', nom: 'Passage du camion (recogida)', val: 50, bas: 'irregular', haut: 'regular' },
+      { id: 'campana', nom: 'Sensibilisation (campaña)', val: 40, bas: 'ninguna', haut: 'fuerte' }
+    ],
+    scenarios: [
+      { nom: 'El sábado', icone: 'panier', valeurs: { separar: 35, camion: 50, campana: 40 } },
+      { nom: 'Sin camión', icone: 'nuage', valeurs: { camion: 5 } },
+      { nom: 'Todos reciclan', icone: 'rejouer', valeurs: { separar: 85, camion: 80, campana: 80 } }
+    ],
+    liens: [
+      { a: 'lucia', b: 'mama', type: 'confiance', lib: 'convence', base: .2, poids: { campana: .6 } },
+      { a: 'junior', b: 'lucia', type: 'alliance', lib: 'voluntarios', base: .6 },
+      { a: 'obrero', b: 'mama', type: 'confiance', lib: 'recoge', base: .2, poids: { camion: .6 } }
+    ],
+    issue: function(v){
+      if(v.camion < 25){ return { niveau: 'ko', badge: 'Inundación', recit: 'Sans collecte, les déchets finissent dans les caniveaux : à la première pluie, le quartier est inondé.', apres: 'Le tri ne sert à rien si personne ne collecte.', themes: ['recogida', 'inundaciones'] }; }
+      if(v.separar > 65 && v.camion > 60){ return { niveau: 'ok', badge: 'Barrio limpio', recit: 'Tri, collecte régulière, compost : le quartier est propre et les caniveaux coulent.', apres: '¡Sepáralo bien! fonctionne quand chacun s’y met.', themes: ['reciclaje', 'compost'] }; }
+      return { niveau: 'moyen', badge: 'Poco a poco', recit: 'Certaines familles trient, d’autres non : il reste des sacs dans les caniveaux.', apres: 'La sensibilisation fait progresser le tri.', themes: ['campaña'] };
+    }
+  },
+  quiz: [
+    { q: 'Que veut dire « reciclar » ?', options: [
+      { txt: 'Recycler.', ok: true, retour: 'el reciclaje = le recyclage.' },
+      { txt: 'Brûler.', retour: 'Brûler = quemar.' } ] },
+    { q: 'Impératif affirmatif de « separar » + lo (tú) :', options: [
+      { txt: '¡Sepáralo!', ok: true, retour: 'Pronom collé, accent écrit sur « pá ».' },
+      { txt: '¡Lo separa!', retour: 'C’est un présent de l’indicatif.' } ] },
+    { q: '« No lo tire, señora » : à quelle personne ?', options: [
+      { txt: 'usted (vouvoiement)', ok: true, retour: 'tú : no lo tires ; usted : no lo tire.' },
+      { txt: 'tú', retour: 'Avec tú : no lo tires.' } ] },
+    { q: 'Dans quel sac vont les piles ?', options: [
+      { txt: 'Peligroso.', ok: true, retour: 'Elles contiennent des produits toxiques.' },
+      { txt: 'Orgánico.', retour: 'Non.' } ] },
+    { q: 'Que signifie « el canal se tapa » ?', options: [
+      { txt: 'Le caniveau se bouche.', ok: true, retour: 'taparse = se boucher.' },
+      { txt: 'Le caniveau est propre.', retour: 'Propre = limpio.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Vocabulaire : la basura, los residuos (orgánicos, reciclables, peligrosos), reciclar, separar, el recolector, el canal, inundarse.',
+      'Impératif affirmatif + pronom collé : ¡Sepáralo! ¡Recíclenlo!',
+      'Impératif négatif : no + pronom + subjonctif : ¡No lo tires! ¡No lo tire!',
+      'Thème : trier, collecter régulièrement et sensibiliser pour éviter les inondations.'
+    ],
+    ecrire: 'Escribe un cartel de cinco consignas para tu barrio. Utilise l’impératif affirmatif et négatif avec pronoms (sepáralo, no lo tires…).'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

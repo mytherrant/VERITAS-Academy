@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Douala, 27 août 1940 — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’histoire (Terminale) : le ralliement du Cameroun à la France libre en août 1940 et le rôle du Cameroun dans la Deuxième Guerre mondiale.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-histoire-douala-1940',
+  discipline: 'Histoire', niveau: 'Terminale',
+  titre: 'Douala, 27 août 1940',
+  decor: 'port', lieu: 'Le port de Douala', moment: 'Nuit du 26 au 27 août 1940',
+  objectif: 'Comprendre pourquoi le Cameroun rallie la France libre en 1940, et mesurer sa contribution à la guerre : soldats, produits, routes, et ce que ces efforts ont changé dans les esprits.',
+  programme: 'Progression harmonisée Tle · Leçon 1 (la Deuxième Guerre mondiale), TD 1 (l’Afrique dans la guerre), dossier 1 (le rôle du Cameroun)',
+  jauges: [
+    { id: 'ralliement', nom: 'Ralliement à la France libre', val: 10, couleur: '#1E499B' },
+    { id: 'effort', nom: 'Effort de guerre demandé', val: 10, couleur: '#D98E04' }
+  ],
+  personnages: {
+    narrateur: { nom: 'M. Ekwalla, professeur', couleur: '#1E499B', look: { metier: 'enseignant', peau: 'fonce', cheveux: 'ras', habit: '#2B3A55' } },
+    leclerc:   { nom: 'Leclerc', couleur: '#5B6B3A', look: { metier: 'soldat', peau: 'clair', cheveux: 'court', couleurCheveux: '#5A4A3A', moustache: true } },
+    admin:     { nom: 'Un administrateur fidèle à Vichy', couleur: '#5A6275', look: { tenue: 'costume', peau: 'clair', cheveux: 'court', couleurCheveux: '#7A6A5A', vieux: true, habit: '#E9E3CF', col: '#2B3A55' } },
+    tirailleur:{ nom: 'Mbarga, tirailleur', couleur: '#3A4A28', look: { metier: 'soldat', peau: 'tresfonce', cheveux: 'ras' } },
+    commercante:{ nom: 'Ngo Bassong, commerçante', couleur: '#C2551F', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#E8A413', habit: '#C2551F', objet: 'sac' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['narrateur'], txt: 'Juin 1940 : la France est battue par l’Allemagne. Le maréchal Pétain signe l’armistice et installe le régime de Vichy. À Londres, le général de Gaulle appelle à poursuivre le combat. Dans l’Empire, chaque territoire doit choisir son camp.', objet: { i: 'porteVoix', lib: 'L’appel de Londres' } },
+    { t: 'question', q: 'Pourquoi le Cameroun intéresse-t-il particulièrement de Gaulle ?',
+      options: [
+        { txt: 'Il a un grand port, Douala, et une frontière avec le Cameroun britannique : c’est une porte d’entrée pour la France libre en Afrique.', ok: true, retour: 'Avec le Tchad, rallié le 26 août grâce au gouverneur Félix Éboué, le Cameroun offre une base territoriale à la France libre.' },
+        { txt: 'Parce qu’il est déjà indépendant.', retour: 'Non : il est sous mandat de la Société des Nations, administré par la France.' },
+        { txt: 'Parce que l’Allemagne l’occupe.', retour: 'L’Allemagne a perdu le Kamerun en 1916 ; en 1940, elle ne l’occupe pas.' }
+      ] },
+    { t: 'recit', entre: ['leclerc'], txt: 'Nuit du 26 au 27 août 1940. Venu du Cameroun britannique en pirogue, avec une poignée d’hommes, un officier de la France libre débarque à Douala. Il a pris un nom de guerre : Leclerc.', jauges: { ralliement: 35 } },
+    { t: 'dit', qui: 'leclerc', jeu: 'sur le quai, à l’aube', txt: 'Au nom du général de Gaulle, le Cameroun reprend le combat aux côtés des Alliés.' },
+    { t: 'dit', qui: 'admin', entre: ['admin'], emo: 'colere', txt: 'Vous n’avez aucun ordre légal ! Le gouvernement de la France siège à Vichy.', jauges: { ralliement: 40 } },
+    { t: 'choix', qui: 'admin', q: 'Tu es l’administrateur. La ville se rallie autour de toi. Que fais-tu ?',
+      options: [
+        { txt: 'J’appelle les troupes à résister à Leclerc.', consequence: 'Les militaires ne te suivent pas : beaucoup refusent l’armistice. Tu risques l’arrestation.', jauges: { ralliement: 10 } },
+        { txt: 'Je me retire sans combattre.', consequence: 'Le ralliement se fait sans effusion de sang.', jauges: { ralliement: 25 } },
+        { txt: 'Je rallie moi aussi la France libre.', consequence: 'Tu gardes ton poste, au service d’un autre camp.', jauges: { ralliement: 30 } }
+      ],
+      oeuvre: 'Le ralliement de Douala se fait presque sans résistance. Leclerc prend la direction du territoire ; Yaoundé suit.' },
+    { t: 'remarque', titre: 'Un fait qui compte', txt: 'Fin août 1940, le Tchad, le Cameroun puis le Congo rallient la France libre : c’est « l’Afrique française libre ». Pour de Gaulle, c’est le premier territoire, la première légitimité. Brazzaville en devient la capitale.', jauges: { ralliement: 90 } },
+    { t: 'recit', sort: ['admin', 'leclerc'], entre: ['tirailleur', 'commercante'], txt: 'Alors commence l’effort de guerre. On recrute des soldats ; on exige du caoutchouc, du bois, de l’huile de palme, du cacao ; on trace des routes vers le Tchad.', jauges: { effort: 60 } },
+    { t: 'dit', qui: 'tirailleur', jeu: 'il remonte vers le nord', txt: 'Nous partons avec la colonne de Leclerc. On dit qu’on traversera le désert jusqu’en Libye.', objet: { i: 'course', lib: 'Vers Koufra, 1941' } },
+    { t: 'dit', qui: 'commercante', emo: 'triste', txt: 'Et nous, au village, on nous demande toujours plus de caoutchouc, pour un prix fixé par l’administration. Les hommes partent, les femmes portent tout.', jauges: { effort: 85 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · la contribution du Cameroun', consigne: 'Classe chaque élément : contribution humaine, ou contribution matérielle ?',
+      cats: ['Contribution humaine', 'Contribution matérielle'],
+      items: [
+        { txt: 'Tirailleurs engagés dans la colonne de Leclerc.', cat: 0 },
+        { txt: 'Caoutchouc et bois exportés vers les Alliés.', cat: 1 },
+        { txt: 'Travailleurs réquisitionnés pour les routes.', cat: 0 },
+        { txt: 'Huile de palme et cacao.', cat: 1 },
+        { txt: 'Le port de Douala, base de ravitaillement.', cat: 1 }
+      ],
+      bravo: 'Hommes et produits : l’Afrique a nourri et armé la France libre.' },
+    { t: 'dit', qui: 'tirailleur', entre: ['tirailleur'], emo: 'fier', jeu: 'en 1945, au retour', txt: 'J’ai combattu pour la liberté d’un autre pays. Pourquoi n’aurions-nous pas droit à la nôtre ?' },
+    { t: 'question', q: 'Quelle conséquence la guerre a-t-elle sur les esprits au Cameroun ?',
+      options: [
+        { txt: 'Elle nourrit l’éveil du nationalisme : les sacrifices consentis rendent l’ordre colonial plus difficile à accepter.', ok: true, retour: 'Les anciens combattants, la conférence de Brazzaville (1944), la Charte de l’ONU : tout prépare les revendications d’après-guerre.' },
+        { txt: 'Elle fait disparaître toute revendication.', retour: 'C’est l’inverse : la guerre affaiblit le prestige de la puissance coloniale.' }
+      ] },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · la chronologie', consigne: 'Remets ces événements dans l’ordre.',
+      items: [
+        'Armistice et régime de Vichy (juin 1940).',
+        'Ralliement du Tchad, puis du Cameroun (26-27 août 1940).',
+        'Colonne Leclerc à Koufra, en Libye (mars 1941).',
+        'Conférence de Brazzaville (début 1944).',
+        'Fin de la guerre et naissance de l’ONU (1945).'
+      ],
+      bravo: 'De la défaite de 1940 à la tutelle de l’ONU : la guerre ouvre l’ère des décolonisations.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · l’Afrique dans la guerre',
+    intro: 'Règle le poids des réquisitions, la reconnaissance accordée aux combattants et l’écho des idées de liberté : que devient l’après-guerre ?',
+    persos: ['tirailleur', 'commercante', 'leclerc', 'admin', 'narrateur'],
+    curseurs: [
+      { id: 'requisitions', nom: 'Poids des réquisitions', val: 80, bas: 'légères', haut: 'écrasantes', lecture: { haut: 'Travail forcé, prix imposés : les villages s’épuisent.', bas: 'L’effort est demandé, et payé.' } },
+      { id: 'reconnaissance', nom: 'Reconnaissance des combattants', val: 25, bas: 'oubliés', haut: 'honorés', lecture: { haut: 'Pensions égales, droits nouveaux.', bas: 'Pensions inférieures, retour au statut d’indigène.' } },
+      { id: 'liberte', nom: 'Écho des idées de liberté', val: 70, bas: 'faible', haut: 'fort', lecture: { haut: 'La Charte de l’Atlantique et la Charte de l’ONU parlent du droit des peuples.', bas: 'Ces textes ne circulent pas.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans l’histoire', icone: 'livre', valeurs: { requisitions: 80, reconnaissance: 25, liberte: 70 } },
+      { nom: 'Et si les combattants étaient honorés ?', icone: 'diplome', valeurs: { reconnaissance: 85, requisitions: 40 } },
+      { nom: 'Et si les idées ne circulaient pas ?', icone: 'muet', valeurs: { liberte: 10 } }
+    ],
+    liens: [
+      { a: 'leclerc', b: 'tirailleur', type: 'alliance', lib: 'compagnons d’armes', base: .6, poids: { reconnaissance: .3 } },
+      { a: 'admin', b: 'commercante', type: 'domination', lib: 'réquisitions', base: .2, poids: { requisitions: .7 } },
+      { a: 'tirailleur', b: 'commercante', type: 'alliance', lib: 'même peuple', base: .6 },
+      { a: 'narrateur', b: 'tirailleur', type: 'confiance', lib: 'mémoire', base: .4, poids: { liberte: .3 } }
+    ],
+    issue: function(v){
+      if(v.liberte < 30){ return { niveau: 'moyen', badge: 'Un sacrifice sans écho', recit: 'Les sacrifices sont lourds, mais rien ne vient leur donner un sens politique.', apres: 'Les idées de liberté ont joué un grand rôle : sans elles, la colère reste sans projet.', themes: ['effort de guerre'] }; }
+      if(v.requisitions > 60 && v.reconnaissance < 45){ return { niveau: 'ko', badge: 'La colère d’après-guerre', recit: 'Des villages épuisés, des combattants oubliés, des idées de liberté qui circulent : le terrain du nationalisme est prêt.', apres: 'C’est le contexte de la naissance de l’UPC en 1948.', themes: ['éveil nationaliste', 'anciens combattants'] }; }
+      return { niveau: 'ok', badge: 'Des réformes négociées', recit: 'Reconnus et moins écrasés, les Camerounais obtiennent des réformes : citoyenneté, assemblées élues, fin du travail forcé.', apres: 'Certaines réformes ont bien eu lieu (abolition du travail forcé en 1946), sans éteindre la demande d’indépendance.', themes: ['réformes', 'Brazzaville 1944'] };
+    }
+  },
+  quiz: [
+    { q: 'Quand le Cameroun rallie-t-il la France libre ?', options: [
+      { txt: 'Le 27 août 1940.', ok: true, retour: 'Au lendemain du Tchad.' },
+      { txt: 'Le 8 mai 1945.', retour: 'C’est la fin de la guerre en Europe.' } ] },
+    { q: 'Quel gouverneur fait rallier le Tchad ?', options: [
+      { txt: 'Félix Éboué.', ok: true, retour: 'Le 26 août 1940.' },
+      { txt: 'Philippe Pétain.', retour: 'Pétain dirige le régime de Vichy.' } ] },
+    { q: 'Quel est le statut du Cameroun en 1940 ?', options: [
+      { txt: 'Territoire sous mandat de la Société des Nations, administré par la France (et la Grande-Bretagne à l’ouest).', ok: true, retour: 'La tutelle de l’ONU ne vient qu’en 1946.' },
+      { txt: 'Colonie allemande.', retour: 'Plus depuis 1916.' } ] },
+    { q: 'Citez une contribution matérielle du Cameroun.', options: [
+      { txt: 'Le caoutchouc.', ok: true, retour: 'Avec le bois, l’huile de palme, le cacao.' },
+      { txt: 'Le pétrole du Golfe.', retour: 'Non.' } ] },
+    { q: 'Quel effet la guerre a-t-elle sur le nationalisme ?', options: [
+      { txt: 'Elle l’éveille.', ok: true, retour: 'Les sacrifices rendent l’ordre colonial plus contestable.' },
+      { txt: 'Elle l’éteint.', retour: 'C’est l’inverse.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Juin 1940 : armistice et régime de Vichy ; de Gaulle appelle à continuer la guerre.',
+      '26-27 août 1940 : le Tchad (Éboué) puis le Cameroun (Leclerc à Douala) rallient la France libre.',
+      'Le Cameroun fournit des soldats (colonne Leclerc) et des produits (caoutchouc, bois, huile, cacao).',
+      'L’effort de guerre et les idées de liberté nourrissent l’éveil du nationalisme après 1945.'
+    ],
+    ecrire: 'Vous êtes Mbarga, rentré au pays en 1945. Écrivez une lettre de quinze lignes à un camarade resté en France, où vous racontez ce que vous avez fait et ce que vous attendez désormais.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

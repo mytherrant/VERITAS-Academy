@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le champ et le troupeau — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de géographie (3e) : l’agriculture et l’élevage au Cameroun, la transhumance et les conflits agriculteurs-éleveurs ; comment les prévenir.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '3e-geo-agriculteurs-eleveurs',
+  discipline: 'Géographie', niveau: '3e',
+  titre: 'Le champ et le troupeau',
+  decor: 'village', lieu: 'Un village de l’Adamaoua', moment: 'Saison sèche',
+  objectif: 'Décrire l’agriculture et l’élevage dans le Nord du Cameroun ; expliquer la transhumance ; comprendre les causes des conflits entre agriculteurs et éleveurs et les moyens de les prévenir ou de les régler.',
+  programme: 'Progression harmonisée 3e · Chapitre 2 (maîtriser la gestion des ressources), leçon 9 (l’agriculture), leçon 10 (l’élevage), dossier 2 (les conflits agriculteurs-éleveurs)',
+  jauges: [
+    { id: 'tension', nom: 'Tension au village', val: 30, couleur: '#D43F2E' },
+    { id: 'entente', nom: 'Entente entre voisins', val: 50, couleur: '#1F9D5B' }
+  ],
+  personnages: {
+    agricultrice: { nom: 'Mama Dairou, cultivatrice', couleur: '#5E8A3A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#5E8A3A', habit: '#B4793F', objet: 'houe' } },
+    eleveur:      { nom: 'Ardo Bello, éleveur', couleur: '#E9E3CF', look: { tenue: 'boubou', peau: 'brun', cheveux: 'ras', coiffe: 'chapeau', couleurCoiffe: '#C9A15A', habit: '#E9E3CF' } },
+    lamido:       { nom: 'Le lamido', couleur: '#7A2E2E', look: { tenue: 'boubou', peau: 'brun', vieux: true, coiffe: 'chechia', couleurCoiffe: '#F2EEE3', habit: '#F2EEE3', barbe: true } },
+    sousprefet:   { nom: 'Le sous-préfet', couleur: '#14254A', look: { tenue: 'costume', peau: 'fonce', cheveux: 'ras', habit: '#14254A', col: '#FFFFFF', objet: 'dossier' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['agricultrice'], txt: 'Dans l’Adamaoua, plateau d’altitude couvert de savanes, on cultive le maïs, le mil, l’arachide, le manioc ; et l’on élève des bovins, surtout des zébus. C’est l’une des grandes régions d’élevage du pays.', objet: { i: 'panier', lib: 'Le champ de maïs' } },
+    { t: 'recit', entre: ['eleveur'], txt: 'En saison sèche, l’herbe jaunit. Les éleveurs conduisent leurs troupeaux vers des pâturages plus verts et des points d’eau : c’est la transhumance.', jauges: { tension: 40 } },
+    { t: 'question', q: 'Qu’est-ce que la transhumance ?',
+      options: [
+        { txt: 'Le déplacement saisonnier des troupeaux à la recherche d’herbe et d’eau.', ok: true, retour: 'Les éleveurs suivent les saisons et reviennent avec les pluies.' },
+        { txt: 'La culture du maïs en saison sèche.', retour: 'Non : il s’agit des troupeaux.' }
+      ] },
+    { t: 'recit', txt: 'Un matin, Mama Dairou découvre son champ piétiné. Les bœufs d’Ardo Bello sont passés pendant la nuit.', jauges: { tension: 75, entente: 25 } },
+    { t: 'dit', qui: 'agricultrice', emo: 'colere', txt: 'Toute ma récolte de maïs ! Qui va nourrir mes enfants ?' },
+    { t: 'dit', qui: 'eleveur', emo: 'doute', txt: 'Mes bœufs ont toujours emprunté ce passage pour aller à la rivière. Ce champ n’était pas là l’année dernière.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · les causes du conflit', consigne: 'Classe chaque cause.',
+      cats: ['Cause liée aux ressources', 'Cause liée à l’organisation'],
+      items: [
+        { txt: 'Les champs s’étendent sur les anciens couloirs de passage du bétail.', cat: 0 },
+        { txt: 'Les points d’eau sont rares en saison sèche.', cat: 0 },
+        { txt: 'Les couloirs de transhumance ne sont pas balisés.', cat: 1 },
+        { txt: 'La population et les troupeaux augmentent.', cat: 0 },
+        { txt: 'Il n’existe pas de comité pour régler les litiges.', cat: 1 }
+      ],
+      bravo: 'Plus de champs, plus de bêtes, moins d’espace et d’eau : sans organisation, le conflit éclate.' },
+    { t: 'choix', qui: 'agricultrice', q: 'Tu es Mama Dairou. Que fais-tu ?',
+      options: [
+        { txt: 'Avec les jeunes du village, on s’empare des bœufs pour se venger.', consequence: 'Les éleveurs ripostent : le conflit devient violent, il y a des blessés. Tout le monde y perd.', jauges: { tension: 25, entente: -25 } },
+        { txt: 'Je vais voir le lamido pour demander une réparation.', consequence: 'Tu choisis le règlement pacifique : l’autorité traditionnelle convoque les deux parties.', jauges: { tension: -20, entente: 15 } }
+      ],
+      oeuvre: 'Au Cameroun, les litiges agro-pastoraux peuvent être portés devant les autorités traditionnelles et devant des commissions présidées par l’autorité administrative.' },
+    { t: 'recit', entre: ['lamido', 'sousprefet'], txt: 'À la chefferie, le lamido et le sous-préfet réunissent les deux parties.' },
+    { t: 'dit', qui: 'lamido', txt: 'Ardo Bello, tes bêtes ont détruit un champ : tu dois dédommager Mama Dairou. Mama Dairou, ton champ barre un passage connu de tous.' },
+    { t: 'dit', qui: 'sousprefet', txt: 'Nous allons tracer et baliser un couloir de transhumance jusqu’à la rivière, et aménager un point d’eau pour le bétail. Personne ne cultivera dans ce couloir.', jauges: { tension: 20, entente: 70 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · régler un conflit agro-pastoral', consigne: 'Remets dans l’ordre les étapes du règlement.',
+      items: [
+        'Constater les dégâts.',
+        'Saisir l’autorité traditionnelle ou administrative.',
+        'Écouter les deux parties.',
+        'Fixer un dédommagement.',
+        'Prévenir les prochains conflits : couloirs balisés, points d’eau.'
+      ],
+      bravo: 'Régler le conflit d’aujourd’hui, prévenir celui de demain.' },
+    { t: 'dit', qui: 'eleveur', emo: 'joie', txt: 'Mama Dairou, à la prochaine récolte, je t’achèterai du maïs pour mes bêtes. Et toi, tu prendras du fumier pour ton champ.', jauges: { entente: 90 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · partager l’espace',
+    intro: 'Règle l’extension des champs, le balisage des couloirs et l’existence d’instances de dialogue : la saison sèche se passe-t-elle sans conflit ?',
+    persos: ['agricultrice', 'eleveur', 'lamido', 'sousprefet'],
+    curseurs: [
+      { id: 'champs', nom: 'Extension des champs', val: 70, bas: 'limitée', haut: 'partout' },
+      { id: 'couloirs', nom: 'Couloirs de transhumance balisés', val: 20, bas: 'aucun', haut: 'tous' },
+      { id: 'dialogue', nom: 'Comités de dialogue', val: 40, bas: 'absents', haut: 'actifs' }
+    ],
+    scenarios: [
+      { nom: 'La saison sèche', icone: 'panier', valeurs: { champs: 70, couloirs: 20, dialogue: 40 } },
+      { nom: 'Chacun pour soi', icone: 'poing', valeurs: { couloirs: 5, dialogue: 5, champs: 90 } },
+      { nom: 'Espace partagé', icone: 'groupe', valeurs: { couloirs: 85, dialogue: 85, champs: 55 } }
+    ],
+    liens: [
+      { a: 'agricultrice', b: 'eleveur', type: 'conflit', lib: 'champ piétiné', base: .3, poids: { couloirs: -.5, champs: .3 } },
+      { a: 'agricultrice', b: 'eleveur', type: 'alliance', lib: 'fumier contre maïs', base: .1, poids: { dialogue: .5 } },
+      { a: 'lamido', b: 'agricultrice', type: 'confiance', lib: 'arbitre', base: .3, poids: { dialogue: .4 } },
+      { a: 'sousprefet', b: 'eleveur', type: 'confiance', lib: 'couloir', base: .2, poids: { couloirs: .5 } }
+    ],
+    issue: function(v){
+      if(v.couloirs < 25 && v.dialogue < 25){ return { niveau: 'ko', badge: 'Le conflit violent', recit: 'Champs détruits, bœufs abattus, affrontements : les deux communautés s’éloignent.', apres: 'Sans règles ni dialogue, la concurrence pour l’espace dégénère.', themes: ['conflit agro-pastoral'] }; }
+      if(v.couloirs > 65 && v.dialogue > 60){ return { niveau: 'ok', badge: 'Un espace partagé', recit: 'Couloirs balisés, points d’eau, comités actifs : les troupeaux passent, les champs sont protégés, on échange fumier et récoltes.', apres: 'Agriculture et élevage sont complémentaires quand l’espace est organisé.', themes: ['complémentarité', 'gestion des ressources'] }; }
+      return { niveau: 'moyen', badge: 'Des tensions', recit: 'Quelques incidents, réglés tant bien que mal.', apres: 'Organiser l’espace prévient mieux que réparer.', themes: ['prévention'] };
+    }
+  },
+  quiz: [
+    { q: 'Quel animal est le plus élevé dans l’Adamaoua ?', options: [
+      { txt: 'Le zébu (bovin).', ok: true, retour: 'L’Adamaoua est une grande région d’élevage bovin.' },
+      { txt: 'Le porc.', retour: 'Non.' } ] },
+    { q: 'Qu’est-ce qu’un couloir de transhumance ?', options: [
+      { txt: 'Un passage réservé aux troupeaux.', ok: true, retour: 'Il doit être balisé et respecté.' },
+      { txt: 'Un champ de maïs.', retour: 'Non.' } ] },
+    { q: 'Citez une cause des conflits agriculteurs-éleveurs.', options: [
+      { txt: 'L’extension des champs sur les passages du bétail.', ok: true, retour: 'Et la rareté de l’eau en saison sèche.' },
+      { txt: 'Trop de pluie.', retour: 'Non.' } ] },
+    { q: 'Qui peut aider à régler le litige ?', options: [
+      { txt: 'L’autorité traditionnelle et l’autorité administrative.', ok: true, retour: 'Lamido, sous-préfet, commissions.' },
+      { txt: 'Personne.', retour: 'Si.' } ] },
+    { q: 'En quoi agriculture et élevage peuvent-ils être complémentaires ?', options: [
+      { txt: 'Le fumier enrichit les champs ; les résidus de récolte nourrissent le bétail.', ok: true, retour: 'Une association gagnant-gagnant.' },
+      { txt: 'Ils ne le sont jamais.', retour: 'Si.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Le Nord et l’Adamaoua associent cultures (maïs, mil, arachide) et élevage bovin.',
+      'Transhumance : déplacement saisonnier des troupeaux vers l’herbe et l’eau.',
+      'Causes des conflits : extension des champs, rareté de l’eau, couloirs non balisés, absence de dialogue.',
+      'Solutions : couloirs balisés, points d’eau, comités de règlement ; complémentarité fumier / résidus de récolte.'
+    ],
+    ecrire: 'Rédigez un compte rendu (quinze lignes) de la réunion à la chefferie, comme si vous étiez le secrétaire du lamido : les faits, les arguments des deux parties, les décisions prises.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La boisson miracle — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’ECM (Première) : les médias et leur impact sur l’opinion publique, la publicité, et la protection de l’opinion publique au Cameroun.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '1re-ecm-medias',
+  discipline: 'Éducation à la citoyenneté et à la morale', niveau: '1re',
+  titre: 'La boisson miracle',
+  decor: 'ville', lieu: 'Douala, un studio de radio', moment: 'Une semaine de campagne publicitaire',
+  objectif: 'Comprendre comment les médias (radio, télévision, presse, réseaux sociaux) influencent l’opinion publique ; décoder une publicité ; connaître les règles et institutions qui protègent l’opinion publique au Cameroun.',
+  programme: 'Progression harmonisée 1re · Leçon 5 (les médias et leur impact sur l’opinion publique), leçon 6 (la protection de l’opinion publique au Cameroun), TD 3 (la publicité dans les médias)',
+  jauges: [
+    { id: 'influence', nom: 'Influence sur le public', val: 30, couleur: '#D98E04' },
+    { id: 'esprit', nom: 'Esprit critique', val: 30, couleur: '#1E499B' }
+  ],
+  personnages: {
+    animateur:  { nom: 'Didier, animateur radio', couleur: '#5A2E5A', look: { peau: 'fonce', cheveux: 'ras', habit: '#5A2E5A', lunettes: true } },
+    publicitaire:{ nom: 'Mme Nkeng, publicitaire', couleur: '#C2551F', look: { tenue: 'jupe', peau: 'fonce', cheveux: 'chignon', habit: '#C2551F', objet: 'dossier' } },
+    auditrice:  { nom: 'Maman Rose, auditrice', couleur: '#5E8A3A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#5E8A3A', habit: '#B4793F', objet: 'sac' } },
+    eleve:      { nom: 'Yvan, élève de Première', couleur: '#1F6F78', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['animateur', 'publicitaire'], txt: 'Une entreprise lance une nouvelle boisson « énergisante ». Elle achète des spots à la radio, des affiches, et paie des influenceurs sur les réseaux sociaux.', objet: { i: 'porteVoix', lib: 'Le spot radio' } },
+    { t: 'dit', qui: 'publicitaire', emo: 'joie', jeu: 'elle lit le texte du spot', txt: '« Avec Force Max, révise toute la nuit, réussis tous tes examens ! Les champions boivent Force Max ! »', jauges: { influence: 60 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · décoder la publicité', consigne: 'Classe chaque élément du spot : est-ce une information vérifiable, ou un procédé de persuasion ?',
+      cats: ['Information vérifiable', 'Procédé de persuasion'],
+      items: [
+        { txt: 'Le prix de la bouteille : 300 francs.', cat: 0 },
+        { txt: '« Réussis tous tes examens ! »', cat: 1 },
+        { txt: '« Les champions boivent Force Max. »', cat: 1 },
+        { txt: 'La composition imprimée sur l’étiquette.', cat: 0 },
+        { txt: 'Une musique entraînante et une voix enthousiaste.', cat: 1 }
+      ],
+      bravo: 'La publicité vend une émotion et une promesse plus qu’un produit. Le réflexe : chercher l’information vérifiable.' },
+    { t: 'recit', entre: ['auditrice', 'eleve'], txt: 'Au marché, Maman Rose achète déjà la boisson pour son fils Yvan.', jauges: { influence: 75 } },
+    { t: 'dit', qui: 'auditrice', txt: 'Ils l’ont dit à la radio, et je l’ai vu partout sur internet. Si c’était mauvais, on ne le dirait pas à la radio.' },
+    { t: 'question', q: 'Quelle erreur de raisonnement fait Maman Rose ?',
+      options: [
+        { txt: 'Elle croit qu’un message est vrai parce qu’il est diffusé partout et par un média connu.', ok: true, retour: 'La répétition et la notoriété du média donnent une impression de vérité ; mais une publicité est payée par l’annonceur pour vendre.' },
+        { txt: 'Aucune : tout ce qui passe à la radio est vérifié.', retour: 'Les publicités sont des messages payés ; elles doivent respecter la loi, mais elles ne sont pas des informations neutres.' }
+      ] },
+    { t: 'dit', qui: 'eleve', emo: 'doute', txt: 'Maman, l’étiquette dit : beaucoup de sucre et de caféine. Le professeur de SVT dit que ça empêche de bien dormir. Et on apprend mieux quand on dort.', jauges: { esprit: 55 } },
+    { t: 'remarque', titre: 'Les médias et l’opinion publique', txt: 'L’opinion publique, c’est l’ensemble des idées partagées par une population sur un sujet. Les médias l’influencent par le choix des sujets, la répétition, les images, les émotions. Cette influence peut éclairer (informer, débattre) ou manipuler (publicité mensongère, propagande, rumeurs).' },
+    { t: 'choix', qui: 'animateur', q: 'Tu es Didier, l’animateur. Des auditeurs t’appellent : leurs enfants dorment mal depuis qu’ils boivent Force Max. Que fais-tu ?',
+      options: [
+        { txt: 'Je continue de diffuser le spot sans rien dire : l’entreprise paie bien.', consequence: 'La radio perd la confiance de ses auditeurs, et risque une sanction si la publicité est jugée trompeuse.', jauges: { influence: 10, esprit: -10 } },
+        { txt: 'J’organise une émission avec un médecin et l’entreprise, et je donne la parole aux auditeurs.', consequence: 'Tu fais ton travail d’information : le public peut juger en connaissance de cause.', jauges: { esprit: 30 } },
+        { txt: 'J’insulte la marque à l’antenne.', consequence: 'Tu passes de l’information à l’attaque : ce n’est pas plus honnête.', jauges: { esprit: 5 } }
+      ],
+      oeuvre: 'Au Cameroun, le Conseil national de la communication (CNC) régule les médias et peut sanctionner les manquements à la déontologie ; la loi encadre la publicité et protège les consommateurs.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · le réflexe critique', consigne: 'Remets dans l’ordre les questions à se poser devant un message médiatique.',
+      items: [
+        'Qui parle ? (un journaliste, un annonceur, un inconnu ?)',
+        'Dans quel but ? (informer, vendre, convaincre ?)',
+        'Quelles sont les preuves ?',
+        'D’autres sources disent-elles la même chose ?',
+        'Je décide, en connaissance de cause.'
+      ],
+      bravo: 'Cinq questions qui protègent de la manipulation.', jauges: { esprit: 80 } },
+    { t: 'dit', qui: 'auditrice', emo: 'joie', txt: 'La prochaine fois, je lirai l’étiquette avant d’écouter la chanson.', jauges: { influence: 35 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · protéger l’opinion publique', consigne: 'Classe chaque moyen de protection.',
+      cats: ['Institution ou loi', 'Attitude du citoyen'],
+      items: [
+        { txt: 'Le Conseil national de la communication (CNC).', cat: 0 },
+        { txt: 'Vérifier la source d’une information.', cat: 1 },
+        { txt: 'Les règles interdisant la publicité mensongère.', cat: 0 },
+        { txt: 'Comparer plusieurs médias.', cat: 1 }
+      ],
+      bravo: 'Les institutions protègent, mais l’esprit critique de chacun reste la meilleure défense.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · qui façonne l’opinion ?',
+    intro: 'Règle la répétition des messages, l’indépendance des médias et l’éducation aux médias : le public est-il informé ou manipulé ?',
+    persos: ['animateur', 'publicitaire', 'auditrice', 'eleve'],
+    curseurs: [
+      { id: 'repetition', nom: 'Répétition des messages publicitaires', val: 75, bas: 'rare', haut: 'partout' },
+      { id: 'independance', nom: 'Indépendance des médias', val: 45, bas: 'achetés', haut: 'indépendants' },
+      { id: 'education', nom: 'Éducation aux médias', val: 30, bas: 'aucune', haut: 'enseignée' }
+    ],
+    scenarios: [
+      { nom: 'La campagne Force Max', icone: 'porteVoix', valeurs: { repetition: 75, independance: 45, education: 30 } },
+      { nom: 'Des médias achetés', icone: 'pieces', valeurs: { independance: 10, repetition: 90 } },
+      { nom: 'Des citoyens formés', icone: 'ecole', valeurs: { education: 85, independance: 75 } }
+    ],
+    liens: [
+      { a: 'publicitaire', b: 'auditrice', type: 'domination', lib: 'persuade', base: .2, poids: { repetition: .5, education: -.4 } },
+      { a: 'animateur', b: 'publicitaire', type: 'alliance', lib: 'contrat', base: .3, poids: { independance: -.5 } },
+      { a: 'eleve', b: 'auditrice', type: 'confiance', lib: 'esprit critique', base: .3, poids: { education: .5 } }
+    ],
+    issue: function(v){
+      if(v.independance < 30 && v.education < 50){ return { niveau: 'ko', badge: 'Une opinion manipulée', recit: 'Les médias diffusent ce qu’on leur paie, le public n’a pas les outils pour trier : il croit ce qu’il entend le plus.', apres: 'Sans médias indépendants ni esprit critique, l’opinion publique se fabrique.', themes: ['manipulation', 'propagande'] }; }
+      if(v.education > 65){ return { niveau: 'ok', badge: 'Une opinion éclairée', recit: 'Les citoyens savent décoder une publicité et vérifier une information : ils choisissent en connaissance de cause.', apres: 'L’éducation aux médias est la meilleure protection de l’opinion publique.', themes: ['esprit critique', 'éducation aux médias'] }; }
+      return { niveau: 'moyen', badge: 'Une opinion influencée', recit: 'La publicité marche : beaucoup achètent, quelques-uns s’interrogent.', apres: 'L’influence des médias n’est pas forcément manipulation, mais elle doit être reconnue.', themes: ['publicité'] };
+    }
+  },
+  quiz: [
+    { q: 'Qu’est-ce que l’opinion publique ?', options: [
+      { txt: 'L’ensemble des idées partagées par une population sur un sujet.', ok: true, retour: 'Les médias l’influencent.' },
+      { txt: 'L’avis du gouvernement.', retour: 'Non.' } ] },
+    { q: 'Qui paie un spot publicitaire ?', options: [
+      { txt: 'L’annonceur, qui veut vendre.', ok: true, retour: 'Ce n’est pas une information neutre.' },
+      { txt: 'Le journaliste.', retour: 'Non.' } ] },
+    { q: 'Quelle institution régule les médias au Cameroun ?', options: [
+      { txt: 'Le Conseil national de la communication (CNC).', ok: true, retour: 'Il peut sanctionner les manquements.' },
+      { txt: 'La CONAC.', retour: 'La CONAC lutte contre la corruption.' } ] },
+    { q: '« Réussis tous tes examens ! » est…', options: [
+      { txt: 'un procédé de persuasion.', ok: true, retour: 'Une promesse invérifiable.' },
+      { txt: 'une information vérifiable.', retour: 'Non.' } ] },
+    { q: 'Première question à se poser devant un message ?', options: [
+      { txt: 'Qui parle ?', ok: true, retour: 'Puis : dans quel but ? avec quelles preuves ?' },
+      { txt: 'Est-ce que la musique est belle ?', retour: 'Non.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Les médias influencent l’opinion publique par le choix des sujets, la répétition, les images et les émotions.',
+      'La publicité est un message payé par un annonceur pour vendre : elle persuade plus qu’elle n’informe.',
+      'Protection : le CNC, les lois sur la publicité et la protection du consommateur ; et l’esprit critique du citoyen.',
+      'Réflexe critique : qui parle ? dans quel but ? quelles preuves ? d’autres sources ?'
+    ],
+    ecrire: 'Choisissez une publicité vue récemment (affiche, spot, réseaux sociaux). Analysez-la en quinze lignes : produit, cible, promesse, procédés de persuasion, informations vérifiables.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

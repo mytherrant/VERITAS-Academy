@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le retour des vautours — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après L’attachement au sol natal d’Ernest Alima : l’amour du pays et la satire des profiteurs, en vers.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'attachement-sol-natal',
+  discipline: 'Français', niveau: '4e',
+  oeuvre: 'L’attachement au sol natal', auteur: 'Ernest Alima (2024)',
+  titre: 'Le retour des vautours',
+  decor: 'village', ambiance: 'aube', lieu: 'Yaoundé, une rencontre avec le poète', moment: 'Vingt-six poèmes, six sections',
+  avertissement: 'Rencontre imaginée pour la leçon : les échanges avec le poète ne sont pas de l’auteur. Les vers marqués « Extrait de l’œuvre » sont cités mot pour mot.',
+  objectif: 'Reconnaître les voix d’un recueil — le « je » qui aime, le « nous » du citoyen, la voix qui accuse — et les familles d’images qui reviennent d’un poème à l’autre.',
+  jauges: [
+    { id: 'amour', nom: 'Lyrisme (amour du pays)', val: 60, couleur: '#1F9D5B' },
+    { id: 'satire', nom: 'Satire (colère contre les profiteurs)', val: 10, couleur: '#D43F2E' }
+  ],
+  personnages: {
+    poete:  { nom: 'Le poète', couleur: '#1E499B', look: { peau: 'fonce', vieux: true, cheveux: 'ras', lunettes: true, tenue: 'costume', habit: '#2B3A55', col: '#1F9D5B', objet: 'livre' } },
+    eleve:  { nom: 'Nadège, élève de 4e', couleur: '#C0397C', look: { metier: 'eleve', peau: 'fonce', cheveux: 'afro', tenue: 'jupe' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['poete', 'eleve'], txt: 'Imaginons : une élève rend visite au « vieux poète qui a depuis longtemps pris sa retraite et qui vit à Yaoundé », comme le présente le Dossier pédagogique de son recueil.' },
+    { t: 'dit', qui: 'eleve', txt: 'Monsieur, dans votre livre, qui parle ? Il n’y a pas de personnages.' },
+    { t: 'dit', qui: 'poete', emo: 'joie', txt: 'Un roman a des personnages ; une pièce a des rôles. Un recueil de poèmes, lui, a une voix. Écoute d’abord celle qui aime.' },
+    { t: 'vers', qui: 'poete', jeu: 'il lit', txt: 'Cameroun, ma patrie,\nJe suis né en ton sein', cite: 'Ernest Alima, L’attachement au sol natal, « Cameroun, ma patrie »', jauges: { amour: 90 } },
+    { t: 'question', q: 'Quelle figure le poète emploie-t-il en s’adressant directement au Cameroun ?',
+      options: [
+        { txt: 'L’apostrophe : on parle à quelqu’un ou à quelque chose.', ok: true, retour: 'Le « je » s’adresse au pays comme à une personne : une mère, une aimée.' },
+        { txt: 'La comparaison.', retour: 'Il n’y a pas d’outil de comparaison : le poète parle directement au pays.' }
+      ] },
+    { t: 'dit', qui: 'eleve', emo: 'surpris', txt: 'Et ce poème très court, avec des oiseaux ? On dirait que vous êtes en colère.' },
+    { t: 'vers', qui: 'poete', jeu: 'vite, à voix haute', txt: 'Ils sont de retour\nDans nos murs,\nLes vautours\nQu’on a cru\nDisparus\nPour toujours\nDe notre azur.', cite: 'Ernest Alima, L’attachement au sol natal, « Le retour des vautours »', jauges: { satire: 85 } },
+    { t: 'remarque', titre: 'La voix qui accuse', txt: 'Vingt-cinq vers très courts, un seul mouvement, pas un seul nom propre : les profiteurs deviennent des oiseaux de proie qui plongent « toutes serres dehors, / Sur les poules aux œufs d’or ! ». Le rythme rapide fait la moitié du travail.' },
+    { t: 'choix', qui: 'eleve', q: 'Le vautour est un charognard utile : il empêche les maladies. Le poète a-t-il le droit d’en faire le symbole du mal ?',
+      options: [
+        { txt: 'Oui : en poésie, l’animal est une image, pas une fiche de sciences.', consequence: 'Tu défends la liberté du poète : le vautour symbolise le profiteur qui attend la mort des autres.', jauges: { satire: 5 } },
+        { txt: 'Non : c’est injuste pour un oiseau utile.', consequence: 'Tu poses une vraie question de débat : une image peut-elle trahir la réalité ?', jauges: { satire: -10 } }
+      ],
+      oeuvre: 'Le cahier propose justement ce débat : peut-on faire d’un animal utile le symbole du mal ?' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · les familles d’images', consigne: 'Le recueil revient sans cesse à quatre familles d’images. Classe ces expressions.',
+      cats: ['Le pays-mère', 'Les profiteurs'],
+      items: [
+        { txt: '« Je suis né en ton sein »', cat: 0 },
+        { txt: '« Voraces / Rapaces »', cat: 1 },
+        { txt: '« nourri au sein »', cat: 0 },
+        { txt: '« toutes serres dehors »', cat: 1 }
+      ],
+      bravo: 'Le pays est une mère, une aimée, un corps ; les profiteurs sont des oiseaux de proie.' },
+    { t: 'dit', qui: 'poete', txt: 'Tu vois : on peut aimer son pays et accuser ceux qui le pillent. C’est le même amour.', jauges: { amour: 95 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · la voix du poème',
+    intro: 'Règle l’amour du pays, la colère contre les profiteurs et le « nous » civique : quel poème écris-tu ?',
+    persos: ['poete', 'eleve'],
+    curseurs: [
+      { id: 'amour', nom: 'Amour du pays', val: 80, bas: 'distant', haut: 'passionné' },
+      { id: 'colere', nom: 'Colère contre les profiteurs', val: 70, bas: 'apaisée', haut: 'féroce' },
+      { id: 'nous', nom: 'Voix du « nous » citoyen', val: 50, bas: 'je', haut: 'nous' }
+    ],
+    scenarios: [
+      { nom: '« Cameroun, ma patrie »', icone: 'amour', valeurs: { amour: 95, colere: 10, nous: 20 } },
+      { nom: '« Le retour des vautours »', icone: 'colere', valeurs: { amour: 40, colere: 95, nous: 60 } },
+      { nom: '« Patriotisme et démocratie »', icone: 'groupe', valeurs: { amour: 75, colere: 40, nous: 90 } }
+    ],
+    liens: [
+      { a: 'poete', b: 'eleve', type: 'confiance', lib: 'transmet', base: .3, poids: { nous: .5 } }
+    ],
+    issue: function(v){
+      if(v.colere >= 70){ return { niveau: 'ko', badge: 'Registre satirique', recit: 'Vers courts, rimes en rafale, images d’oiseaux de proie : la voix accuse.', apres: 'Comme « Le retour des vautours », le poème le plus féroce du recueil.', themes: ['satire', 'vautours', 'rythme'] }; }
+      if(v.nous >= 70){ return { niveau: 'ok', badge: 'Registre civique', recit: 'Le « nous » du citoyen parle de démocratie et de devoir.', apres: 'Le recueil annonce ce programme dès son liminaire, « Patriotisme et démocratie ».', themes: ['citoyenneté', 'nous'] }; }
+      return { niveau: 'moyen', badge: 'Registre lyrique', recit: 'Le « je » dit son amour pour le pays, comme un amant pour sa belle : apostrophes, images de la mère et du corps.', apres: 'Le Dossier le dit : « son lyrisme est similaire à celui d’un amant qui voue un véritable culte à sa belle ».', themes: ['lyrisme', 'apostrophe', 'pays-mère'] };
+    }
+  },
+  quiz: [
+    { q: 'Qu’est-ce qu’une anaphore ?', options: [ { txt: 'La répétition du même mot au début de plusieurs vers.', ok: true, retour: 'La figure préférée d’Alima.' }, { txt: 'Une rime en fin de vers.', retour: 'Non : c’est au début des vers.' } ] },
+    { q: 'Que symbolisent les vautours dans le recueil ?', options: [ { txt: 'Les profiteurs.', ok: true, retour: 'Ils plongent « sur les poules aux œufs d’or ».' }, { txt: 'Les ancêtres.', retour: 'Non.' } ] },
+    { q: 'Qu’est-ce qu’un vers libre ?', options: [ { txt: 'Un vers qui ne compte pas ses syllabes et n’est pas obligé de rimer.', ok: true, retour: 'Comme beaucoup de vers du recueil.' }, { txt: 'Un vers sans majuscule.', retour: 'Non.' } ] },
+    { q: 'Combien de poèmes compte le recueil ?', options: [ { txt: 'Vingt-six.', ok: true, retour: 'En six sections.' }, { txt: 'Vingt-deux.', retour: 'Vingt-deux, c’est le recueil de Philombe.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Un recueil a une voix : le « je » qui aime, le « nous » du citoyen, la voix qui accuse.',
+      'Le pays est une mère, une aimée, un corps ; les profiteurs sont des vautours.',
+      'L’apostrophe : parler directement au pays (« Cameroun, ma patrie »).',
+      'La satire passe par le rythme rapide et les images animales.'
+    ],
+    ecrire: 'Écris un poème en vers libres (dix vers) sur ton village ou ta ville : commence par une apostrophe et répète un même mot au début de trois vers.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

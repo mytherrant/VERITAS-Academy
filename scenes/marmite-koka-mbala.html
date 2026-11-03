@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Brise cette marmite — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après La marmite de Koka-Mbala de Guy Menga : le roi, la reine Lemba, Bobolo le féticheur et Bitala le banni.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'marmite-koka-mbala',
+  discipline: 'Français', niveau: '3e',
+  oeuvre: 'La marmite de Koka-Mbala', auteur: 'Guy Menga',
+  titre: 'Brise cette marmite',
+  decor: 'chefferie', lieu: 'le palais du roi de Koka-Mbala', moment: 'Actes I et II',
+  objectif: 'Voir s’affronter cinq forces — le roi, la reine, le féticheur, le jeune banni, les notables — et comprendre comment la peur fonde un pouvoir, et comment on le brise.',
+  jauges: [
+    { id: 'peur', nom: 'Peur de la marmite', val: 90, couleur: '#7B5CD6' },
+    { id: 'jeunes', nom: 'Force des jeunes', val: 10, couleur: '#1F9D5B' }
+  ],
+  personnages: {
+    roi:     { nom: 'Le roi Bintsamou', couleur: '#7A2E2E', look: { peau: 'fonce', vieux: true, barbe: true, coiffe: 'couronne', tenue: 'boubou', habit: '#7A2E2E' } },
+    lemba:   { nom: 'Lemba, la reine', couleur: '#C0397C', look: { peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#E8B923', tenue: 'robe', habit: '#C0397C' } },
+    bobolo:  { nom: 'Bobolo, le féticheur', couleur: '#3A2A1A', look: { peau: 'tresfonce', vieux: true, cheveux: 'ras', tenue: 'boubou', habit: '#3A2A1A', objet: 'sac' } },
+    jeune:   { nom: 'Le jeune homme ligoté', couleur: '#5A6275', look: { peau: 'fonce', cheveux: 'court', habit: '#8A8F9C', bas: '#3A3A44' } },
+    bitala:  { nom: 'Bitala, le banni', couleur: '#1F9D5B', look: { peau: 'fonce', cheveux: 'court', moustache: true, habit: '#2E6B5A', bas: '#3A2A1A' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['roi', 'lemba', 'bobolo'], txt: 'Koka-Mbala. Une loi terrible y règne : un jeune homme qui regarde la femme d’un autre peut être condamné à la fosse hérissée de sagaies, où l’on enterre les condamnés vivants. Le roi a fait un rêve qui le trouble.', objet: { i: 'vase', lib: 'La marmite sacrée' } },
+    { t: 'recit', entre: ['jeune'], txt: 'Deux gardes jettent aux pieds du roi un jeune homme ligoté : il aurait regardé la troisième épouse de Bobolo pendant qu’elle se baignait.' },
+    { t: 'dit', qui: 'roi', jeu: 'ironique, aux gardes', txt: 'Et vous aussi vous avez regardé naturellement, n’est-ce pas ?', cite: 'Guy Menga, La marmite de Koka-Mbala, acte I, scène II' },
+    { t: 'dit', qui: 'bobolo', emo: 'colere', txt: 'Depuis quand les femmes se mêlent-elles des affaires du royaume ?', cite: 'Guy Menga, La marmite de Koka-Mbala, acte I, scène II' },
+    { t: 'dit', qui: 'lemba', emo: 'colere', jeu: 'elle ne recule pas', txt: 'J’en conviens, mais il est peut-être temps que nous nous en mêlions. Cet enfant dont tu souhaites la condamnation immédiate n’est-il pas sorti des entrailles d’une mère ?', cite: 'Guy Menga, La marmite de Koka-Mbala, acte I, scène II' },
+    { t: 'question', q: 'Comment Lemba gagne-t-elle le débat contre Bobolo ?',
+      options: [
+        { txt: 'Par des questions qui retournent l’argument : tout condamné est sorti d’une mère, comme Bobolo lui-même.', ok: true, retour: 'Trois questions, dont une insulte polie (« serais-tu venu d’un tronc de palétuvier ? ») : elle a gagné en quatre lignes.' },
+        { txt: 'Par la force de ses gardes.', retour: 'Non : sa seule arme est l’argument. C’est elle qui parle le mieux de toute la pièce.' }
+      ] },
+    { t: 'remarque', titre: 'Cinq forces', txt: 'Le roi veut faire cesser le sang, mais dit lui-même : « Je suis le roi, mais je ne suis pas le conseil ». Lemba a l’argument. Bobolo a la peur — la marmite, qu’il a lui-même fabriquée. Bitala a la franchise, puis le nombre. Les notables ont le silence et l’obéissance.' },
+    { t: 'recit', entre: ['bitala'], sort: ['jeune'], moment: 'Acte II', txt: 'Le banni est revenu : Bitala, que le roi avait épargné, entre dans le palais avec les jeunes du royaume.', jauges: { jeunes: 75 } },
+    { t: 'dit', qui: 'bobolo', emo: 'fier', jeu: 'il saisit la marmite', txt: 'Personne ne doutera plus de ta puissance, marmite sacrée ! Qui ose ?' },
+    { t: 'choix', qui: 'roi', q: 'Tu es le roi. Bobolo brandit la marmite, les notables reculent de peur. Que fais-tu ?',
+      options: [
+        { txt: 'Je cède : on ne défie pas les esprits.', consequence: 'Bobolo garde son pouvoir. Les jeunes continueront de mourir dans la fosse.', jauges: { peur: 10 } },
+        { txt: 'Je fais arrêter Bobolo et j’ordonne qu’on brise la marmite.', consequence: 'Tu prouves que le roi ne craint ni sa puissance ni la mort. La peur se brise avec l’objet.', jauges: { peur: -80 } }
+      ],
+      oeuvre: 'Le roi fait arrêter Bobolo et ordonne à Bitala de briser la marmite. Rien ne se passe : la peur était la seule force de la marmite.' },
+    { t: 'dit', qui: 'roi', emo: 'fier', txt: 'Gardes, arrêtez-moi cet homme. Et pour qu’il sache que le roi ne craint ni sa puissance, ni la mort, Bitala, je t’ordonne de briser cette marmite.', cite: 'Guy Menga, La marmite de Koka-Mbala, acte II', jauges: { peur: 5 } },
+    { t: 'dit', qui: 'bitala', jeu: 'aux notables, après avoir brisé la marmite', txt: 'Ne craignez rien, notables. La rupture de cette marmite ne sera suivie d’aucun effet désastreux ni pour votre santé ni pour celle de tous les vôtres', cite: 'Guy Menga, La marmite de Koka-Mbala, acte II', jauges: { jeunes: 95 } },
+    { t: 'remarque', titre: 'Le N’sanda', txt: 'L’auteur précise qu’on plantait sur la tombe de chaque jeune exécuté un arbre nommé N’sanda, et qu’on en voit encore, « solitaires parmi les arbres de la brousse », dans le sud du Congo. Un monument aux morts sans nom.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · le drame, scène après scène', consigne: 'Remets les moments du drame dans l’ordre.',
+      items: ['Le rêve du roi.', 'Un jeune homme accusé d’avoir regardé une femme.', 'Le roi parle à ses morts.', 'Le banni est revenu.', 'Les jeunes entrent dans le palais.', '« Brise cette marmite ».'],
+      bravo: 'Un drame : le malheur menace, mais la pièce finit par la libération.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · le conseil de Koka-Mbala',
+    intro: 'Règle la peur de la marmite, le courage du roi et la parole de la reine : la loi de la fosse tombe-t-elle ?',
+    persos: ['roi', 'lemba', 'bobolo', 'bitala', 'jeune'],
+    curseurs: [
+      { id: 'peur', nom: 'Peur de la marmite', val: 85, bas: 'personne n’y croit', haut: 'terreur' },
+      { id: 'roi', nom: 'Courage du roi', val: 75, bas: 'soumis au conseil', haut: 'décide seul' },
+      { id: 'lemba', nom: 'Parole de la reine', val: 80, bas: 'se tait', haut: 'convainc' }
+    ],
+    scenarios: [
+      { nom: 'Comme dans la pièce', icone: 'livre', valeurs: { peur: 85, roi: 75, lemba: 80 } },
+      { nom: 'Et si le roi cédait ?', icone: 'muet', valeurs: { roi: 15 } },
+      { nom: 'Et si personne ne craignait la marmite ?', icone: 'vase', valeurs: { peur: 10 } }
+    ],
+    liens: [
+      { a: 'bobolo', b: 'roi', type: 'domination', lib: 'la peur', base: .1, poids: { peur: .8, roi: -.4 } },
+      { a: 'lemba', b: 'bobolo', type: 'conflit', lib: 'l’argument', base: .1, poids: { lemba: .8 } },
+      { a: 'roi', b: 'bitala', type: 'alliance', lib: 'épargné', base: .1, poids: { roi: .7 } },
+      { a: 'bobolo', b: 'jeune', type: 'conflit', lib: 'la fosse', base: .2, poids: { peur: .7 } },
+      { a: 'lemba', b: 'roi', type: 'amour', lib: 'conseille', base: .3, poids: { lemba: .4 } }
+    ],
+    issue: function(v){
+      if(v.peur < 30){ return { niveau: 'ok', badge: 'La loi s’effondre seule', recit: 'Personne ne croit plus à la marmite : le conseil de Bobolo n’a plus aucun pouvoir.', apres: 'La pièce le montre : un pouvoir fondé sur la peur n’a pas d’autre force qu’elle.', themes: ['fin de la peur'] }; }
+      if(v.roi < 40){ return { niveau: 'ko', badge: 'La fosse continue', recit: 'Le roi s’abrite derrière le conseil. Bobolo garde la marmite, et d’autres N’sanda poussent dans la brousse.', apres: '« Je suis le roi, mais je ne suis pas le conseil » : un roi qui n’ose pas décider laisse faire.', themes: ['oppression des jeunes', 'peur'] }; }
+      return { niveau: 'ok', badge: 'La marmite est brisée', recit: 'Encouragé par la reine et soutenu par les jeunes, le roi fait arrêter Bobolo ; Bitala brise la marmite, et rien ne se passe.', apres: 'Bitala demande aussitôt au roi de dissoudre son conseil : la parole passe aux jeunes, que le pouvoir des vieux faisait mourir.', themes: ['pouvoir et peur', 'jeunes et anciens', 'parole des femmes'] };
+    }
+  },
+  quiz: [
+    { q: 'Qui a fabriqué la marmite sacrée ?', options: [ { txt: 'Bobolo lui-même.', ok: true, retour: 'Son arme, c’est la peur qu’elle inspire.' }, { txt: 'Les ancêtres.', retour: 'C’est ce que Bobolo veut faire croire.' } ] },
+    { q: 'Qui parle le mieux de toute la pièce ?', options: [ { txt: 'Lemba, la reine.', ok: true, retour: 'Son arme est l’argument.' }, { txt: 'Le deuxième garde.', retour: 'Non !' } ] },
+    { q: 'Qu’est-ce qu’un drame, selon le cahier ?', options: [ { txt: 'Une pièce sérieuse où le malheur menace, sans obligation de finir mal.', ok: true, retour: 'Contrairement à la tragédie.' }, { txt: 'Une comédie en cinq actes.', retour: 'Non : celle-ci est en deux actes, et sérieuse.' } ] },
+    { q: 'Qu’est-ce que le N’sanda ?', options: [ { txt: 'L’arbre planté sur la tombe de chaque jeune exécuté.', ok: true, retour: 'On en voit encore dans le sud du Congo.' }, { txt: 'Le nom du roi.', retour: 'Le roi s’appelle Bintsamou.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Cinq forces : le roi (l’autorité), Lemba (l’argument), Bobolo (la peur), Bitala (la franchise, puis le nombre), les notables (le silence).',
+      'Lemba gagne le débat par des questions qui retournent l’accusation.',
+      'La marmite n’a d’autre pouvoir que la peur : brisée, rien ne se passe.',
+      'Guy Menga dénonce la domination des vieux sur les jeunes.'
+    ],
+    ecrire: 'Écris un dialogue argumentatif (douze répliques) entre Lemba et Bobolo sur la loi de la fosse. Chacun doit donner au moins deux arguments.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

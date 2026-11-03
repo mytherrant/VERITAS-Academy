@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le dernier mot de Kurtz — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Au cœur des ténèbres de Joseph Conrad : la remontée du fleuve, la mort de Kurtz et le mensonge de Marlow à la Promise.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tenebres-mensonge',
+  discipline: 'Français', niveau: '1re',
+  oeuvre: 'Au cœur des ténèbres', auteur: 'Joseph Conrad (1899)',
+  titre: 'Le dernier mot de Kurtz',
+  decor: 'fleuve', lieu: 'sur le fleuve', moment: 'Chapitres II et III',
+  objectif: 'Remonter le fleuve avec Marlow jusqu’à Kurtz, puis revenir en Europe pour la scène finale : comprendre le récit enchâssé, l’écart entre le discours de la « civilisation » et la réalité, et le choix moral du mensonge. Les jauges suivent le mystère Kurtz, la lucidité de Marlow et la vérité dite.',
+  jauges: [
+    { id: 'mystere', nom: 'Mystère autour de Kurtz', val: 40, couleur: '#5A6275' },
+    { id: 'lucidite', nom: 'Lucidité de Marlow', val: 25, couleur: '#FFC93C' },
+    { id: 'verite', nom: 'Vérité dite', val: 90, couleur: '#4C6FBF' }
+  ],
+  personnages: {
+    marlow:   { nom: 'Marlow', couleur: '#2E4A6B', look: { peau: 'clair', cheveux: 'court', couleurCheveux: '#5A4A3A', barbe: true, habit: '#2B3A55' } },
+    directeur:{ nom: 'Le Directeur', couleur: '#5A6275', look: { objet: 'dossier', peau: 'clair', cheveux: 'court', couleurCheveux: '#7A6A5A', moustache: true, coiffe: 'casque', habit: '#E9E3CF' } },
+    kurtz:    { nom: 'Kurtz', couleur: '#3B3B3B', look: { peau: 'clair', cheveux: 'aucun', vieux: true, habit: '#D8D2C2' } },
+    promise:  { nom: 'La Promise (l’Intended)', couleur: '#3A2E4D', look: { tenue: 'robe', peau: 'clair', cheveux: 'long', couleurCheveux: '#C9A15A', habit: '#141414' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['marlow'], txt: 'Sur la Tamise, à bord de la Nellie, un narrateur rapporte l’histoire que Marlow raconte à ses compagnons : sa remontée d’un grand fleuve africain, au service d’une Compagnie, à la recherche d’un agent nommé Kurtz.' },
+    { t: 'question', q: 'Qui raconte l’histoire de Marlow au lecteur ?',
+      options: [
+        { txt: 'Un des hommes à bord de la Nellie, qui rapporte le récit oral de Marlow.', ok: true, retour: 'C’est un récit enchâssé : un narrateur-cadre transmet le récit de Marlow. Le lecteur entend Marlow à travers un autre.' },
+        { txt: 'Kurtz lui-même, dans son journal.', retour: 'Kurtz ne raconte rien : il est longtemps absent, et c’est ce qui fait son mystère.' },
+        { txt: 'Joseph Conrad, à la première personne.', retour: 'Conrad a vécu un voyage semblable en 1890, mais le récit est confié à des narrateurs fictifs.' }
+      ] },
+    { t: 'dit', qui: 'directeur', entre: ['directeur'], jeu: 'au Poste Central', txt: 'M. Kurtz ? Notre meilleur agent. Il envoie plus d’ivoire que tous les autres réunis. Mais ses méthodes… ne sont pas les nôtres.', objet: { i: '🐘', lib: 'L’ivoire' }, jauges: { mystere: 65 } },
+    { t: 'pense', qui: 'marlow', emo: 'doute', txt: 'On ne parle que de lui. Le comptable, le briquetier, le Directeur… Chacun le prononce comme un nom de légende. Et le Directeur semble souhaiter qu’il ne revienne pas.' },
+    { t: 'remarque', titre: 'Le bosquet de la mort', txt: 'Au premier poste, Marlow a vu des travailleurs épuisés, enchaînés, mourant à l’ombre des arbres. C’est la première fois que la réalité du travail forcé apparaît, loin des discours officiels sur la « civilisation ».', jauges: { lucidite: 45 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · le discours et la réalité', consigne: 'Classe chaque élément : relève-t-il du discours européen sur la colonisation, ou de la réalité que Marlow observe ?',
+      cats: ['Le discours', 'La réalité observée'],
+      items: [
+        { txt: 'Apporter la « civilisation » aux peuples lointains', cat: 0 },
+        { txt: 'Les travailleurs qui meurent dans le bosquet', cat: 1 },
+        { txt: 'Une Compagnie qui se dit « œuvre de progrès »', cat: 0 },
+        { txt: 'L’ivoire arraché par la violence', cat: 1 },
+        { txt: 'Les têtes plantées sur des pieux autour de la maison de Kurtz', cat: 1 }
+      ],
+      bravo: 'Conrad dénonce, par le regard de Marlow, l’écart entre le discours de la civilisation et la rapine observée sur le terrain.' },
+    { t: 'recit', sort: ['directeur'], txt: 'La remontée est lente. Le vapeur est attaqué depuis la rive ; le timonier est tué. Enfin, la Station Intérieure apparaît.', jauges: { mystere: 85 } },
+    { t: 'recit', entre: ['kurtz'], moment: 'Chapitre III', txt: 'Kurtz est là, malade, porté sur une civière. On le ramène à bord. Marlow veille sur lui pendant la descente du fleuve.' },
+    { t: 'dit', qui: 'kurtz', emo: 'peur', jeu: 'dans un souffle, avant de mourir', txt: 'Horreur ! Horreur !', cite: 'Joseph Conrad, Au cœur des ténèbres, chap. III (traduction citée dans le cahier VÉRITAS)', jauges: { mystere: 100, lucidite: 80 } },
+    { t: 'question', q: 'Que peuvent signifier ces derniers mots de Kurtz ?',
+      options: [
+        { txt: 'Un jugement porté sur sa propre vie, et peut-être sur toute l’entreprise coloniale.', ok: true, retour: 'Le texte ne tranche pas : c’est un jugement d’une seule syllabe, que chaque lecteur interprète. C’est ce qui le rend si fort.' },
+        { txt: 'Il a peur de l’orage sur le fleuve.', retour: 'Rien d’aussi simple : ce sont les derniers mots d’une vie, et Marlow les reçoit comme un verdict.' },
+        { txt: 'Il demande qu’on le ramène à la Station.', retour: 'Kurtz est mourant ; ces mots sont un jugement, pas une demande.' }
+      ] },
+    { t: 'recit', sort: ['kurtz'], decor: 'deuil', lieu: 'une ville d’Europe, le salon de la Promise', moment: 'Un an plus tard · au crépuscule', entre: ['promise'], txt: 'De retour en Europe, Marlow rend visite à la fiancée de Kurtz, en deuil depuis un an. Elle l’attendait.' },
+    { t: 'dit', qui: 'promise', emo: 'triste', txt: 'Vous étiez avec lui jusqu’à la fin. Dites-moi… ses dernières paroles. Je veux les entendre, pour pouvoir vivre avec.' },
+    { t: 'choix', qui: 'marlow', q: 'Tu es Marlow. Elle te demande les derniers mots de Kurtz. Que réponds-tu ?',
+      options: [
+        { txt: 'La vérité : « Ses derniers mots furent : Horreur ! Horreur ! »', consequence: 'Tu restes fidèle à ce que tu as vu, mais tu détruis la dernière image qu’elle avait de lui.', jauges: { verite: 10 } },
+        { txt: 'Un mensonge : « Le dernier mot qu’il a prononcé… c’était votre nom. »', consequence: 'Tu la protèges. Mais toi qui détestes le mensonge, tu dois vivre avec celui-là.', jauges: { verite: -60 } }
+      ],
+      oeuvre: 'Marlow ment : il lui dit que Kurtz a prononcé son nom. Le récit se referme sur ce mensonge, une question morale qu’il ne résout pas.' },
+    { t: 'pense', qui: 'marlow', emo: 'doute', txt: 'Je n’ai pas pu. La vérité l’aurait écrasée. Alors, dans ce salon, l’Europe peut continuer à croire à sa propre innocence.' },
+    { t: 'remarque', titre: 'Une fin qui répond au début', txt: 'La situation finale ne se déroule pas sur le pont d’un bateau entre marins, mais dans le salon d’une femme en deuil. Le cercle du voyage se referme, mais sur un silence et un mensonge, non sur un retour à l’innocence.' },
+    { t: 'question', q: 'En 1975, l’écrivain nigérian Chinua Achebe a reproché au roman une chose précise. Laquelle ?',
+      options: [
+        { txt: 'De réduire l’Afrique à un décor et les Africains à une masse sans parole.', ok: true, retour: 'La critique est célèbre et discutée. On ne la tranche pas : on l’éprouve sur le texte, relevés à l’appui. Excellent sujet de débat argumenté.' },
+        { txt: 'D’être trop court.', retour: 'Ce n’est pas une question de longueur, mais de regard porté sur l’Afrique.' },
+        { txt: 'D’avoir été écrit en polonais.', retour: 'Conrad, d’origine polonaise, a écrit en anglais — sa troisième langue.' }
+      ] },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · l’itinéraire du récit', consigne: 'Remets dans l’ordre les lieux traversés par le récit.',
+      items: [
+        'La Tamise, à bord de la Nellie',
+        'Les bureaux de la Compagnie, en Europe',
+        'Le premier poste et le « bosquet de la mort »',
+        'Le Poste Central',
+        'La Station Intérieure, la maison de Kurtz',
+        'Le salon de la Promise, en Europe'
+      ],
+      bravo: 'Le fleuve est à la fois une route et une métaphore : une remontée vers l’origine du mal.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · la remontée du fleuve',
+    intro: 'Règle l’avidité de la Compagnie, l’isolement de Kurtz, la lucidité de Marlow et son courage de dire vrai : le destin de Kurtz et la fin du récit changent.',
+    persos: ['marlow', 'kurtz', 'directeur', 'promise'],
+    curseurs: [
+      { id: 'avidite', nom: 'Avidité de la Compagnie', val: 90, bas: 'mesurée', haut: 'sans limite',
+        lecture: { haut: 'L’ivoire avant tout : la Compagnie récompense l’agent le plus « productif », quels que soient ses moyens.', bas: 'Sans la pression du profit, la machine coloniale perdrait sa violence.' } },
+      { id: 'isolement', nom: 'Isolement de Kurtz', val: 90, bas: 'entouré', haut: 'seul au monde',
+        lecture: { haut: 'Loin de tout contrôle, Kurtz devient un chef de guerre vénéré : plus rien ne le retient.', bas: 'Surveillé, entouré, Kurtz n’aurait peut-être pas franchi les limites.' } },
+      { id: 'lucidite', nom: 'Lucidité de Marlow', val: 75, bas: 'aveugle', haut: 'lucide',
+        lecture: { haut: 'Marlow voit l’écart entre le discours de la civilisation et la rapine : il devient le témoin du récit.', bas: 'Un Marlow aveugle serait un rouage de plus de la Compagnie.' } },
+      { id: 'verite', nom: 'Courage de dire vrai', val: 20, bas: 'ment', haut: 'dit tout',
+        lecture: { haut: 'Marlow dirait à la Promise les vrais derniers mots : l’illusion de l’Europe se briserait.', bas: 'Marlow ment pour protéger la Promise : le récit se referme sur un silence.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans le récit', icone: '📖', valeurs: { avidite: 90, isolement: 90, lucidite: 75, verite: 20 } },
+      { nom: 'Et si Marlow disait la vérité ?', icone: '🗣️', valeurs: { verite: 90 } },
+      { nom: 'Et si Kurtz n’était pas seul ?', icone: '👥', valeurs: { isolement: 15 } },
+      { nom: 'Et si Marlow ne voyait rien ?', icone: '🙈', valeurs: { lucidite: 15 } }
+    ],
+    liens: [
+      { a: 'directeur', b: 'kurtz', type: 'conflit', lib: 'jalousie', base: .45, poids: { avidite: .4 } },
+      { a: 'marlow', b: 'kurtz', type: 'confiance', lib: 'fascination', base: .1, poids: { lucidite: .4, isolement: .3 } },
+      { a: 'marlow', b: 'promise', type: 'alliance', lib: 'mensonge protecteur', base: .8, poids: { verite: -.75 } },
+      { a: 'kurtz', b: 'promise', type: 'amour', lib: 'fiançailles', base: .5 },
+      { a: 'directeur', b: 'marlow', type: 'conflit', lib: 'méfiance', base: .15, poids: { lucidite: .55 } }
+    ],
+    issue: function(v){
+      if(v.avidite < 30){ return { niveau: 'ok', badge: 'Un comptoir ordinaire', recit: 'Sans la course à l’ivoire, Kurtz reste un agent parmi d’autres. Pas de bosquet de la mort, pas de têtes sur des pieux.', apres: 'Le récit perdrait sa cible : Conrad dénonce un système, pas seulement un homme.', themes: ['commerce'] }; }
+      if(v.lucidite < 35){ return { niveau: 'ko', badge: 'Marlow complice', recit: 'Marlow ne voit rien : il ramène l’ivoire, enterre Kurtz et rentre sans un mot.', apres: 'Sans témoin lucide, pas de récit : c’est le regard de Marlow qui fait le livre.', themes: ['complicité', 'aveuglement'] }; }
+      if(v.isolement < 30){ return { niveau: 'moyen', badge: 'Kurtz contenu', recit: 'Entouré et surveillé, Kurtz ne devient pas un chef de guerre vénéré. Mais la Compagnie, elle, continue d’exiger de l’ivoire.', apres: 'Le mal n’est pas qu’affaire d’un homme isolé : il tient au système qui l’a envoyé.', themes: ['système colonial'] }; }
+      if(v.verite >= 65){ return { niveau: 'moyen', badge: 'La vérité dite', recit: 'Marlow répète à la Promise les vrais derniers mots : « Horreur ! Horreur ! » Elle s’effondre ; l’image qu’elle gardait de Kurtz se brise.', apres: 'L’Europe apprend la vérité dans son salon. Mais était-ce à elle de payer pour la Compagnie ?', themes: ['vérité', 'cruauté'] }; }
+      return { niveau: 'moyen', badge: 'Le mensonge final', recit: 'Kurtz meurt en prononçant « Horreur ! Horreur ! ». De retour en Europe, Marlow ment à la Promise : il lui dit que Kurtz a prononcé son nom.', apres: 'Le récit se referme sur un silence et un mensonge : une question morale non résolue, et une Europe qui garde son illusion.', themes: ['civilisation et barbarie', 'vérité et mensonge', 'récit enchâssé', 'colonisation'] };
+    }
+  },
+  quiz: [
+    { q: 'Qui raconte l’histoire au lecteur ?', options: [
+      { txt: 'Un narrateur à bord de la Nellie, qui rapporte le récit oral de Marlow.', ok: true, retour: 'C’est un récit enchâssé.' },
+      { txt: 'Kurtz.', retour: 'Kurtz est longtemps absent : c’est ce qui fait son mystère.' } ] },
+    { q: 'Que découvre Marlow dans le « bosquet de la mort » ?', options: [
+      { txt: 'Des travailleurs épuisés, mourant à l’ombre des arbres.', ok: true, retour: 'La réalité du travail forcé, loin des discours officiels.' },
+      { txt: 'Un trésor d’ivoire caché.', retour: 'Non : la face cachée de la « civilisation ».' } ] },
+    { q: 'Quels sont les derniers mots de Kurtz ?', options: [
+      { txt: '« Horreur ! Horreur ! »', ok: true, retour: 'Un jugement d’une seule syllabe sur sa propre vie.' },
+      { txt: 'Le nom de sa fiancée.', retour: 'C’est ce que Marlow prétend… en mentant.' } ] },
+    { q: 'Quand Conrad remonte-t-il lui-même le fleuve Congo ?', options: [
+      { txt: 'En 1890.', ok: true, retour: 'Six mois, pour le compte d’une société belge ; il en revient gravement malade.' },
+      { txt: 'En 1960.', retour: 'Conrad est mort en 1924.' } ] },
+    { q: 'Que reproche Chinua Achebe au roman en 1975 ?', options: [
+      { txt: 'De réduire l’Afrique à un décor et les Africains à une masse sans parole.', ok: true, retour: 'Une critique célèbre, à éprouver sur le texte.' },
+      { txt: 'D’être trop favorable à Léopold II.', retour: 'Le roman dénonce au contraire la rapine ; la critique d’Achebe porte sur le regard.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Récit enchâssé : un narrateur sur la Tamise rapporte le récit oral de Marlow.',
+      'Conrad commande en 1890 un vapeur sur le Congo de Léopold II ; le récit paraît en 1899.',
+      'Le texte oppose le discours de la « civilisation » à la réalité du travail forcé et de la violence.',
+      'Les derniers mots de Kurtz — « Horreur ! Horreur ! » — sont un jugement que le texte ne tranche pas.',
+      'Marlow ment à la Promise : le récit se referme sur une question morale non résolue. La critique d’Achebe (1975) est un bon sujet de débat.'
+    ],
+    ecrire: 'Imaginez la lettre que Marlow, des années plus tard, écrit à la Promise pour lui dire la vérité — ou pour lui expliquer pourquoi il ne la lui dira jamais (quinze lignes).'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

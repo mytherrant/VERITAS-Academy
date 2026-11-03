@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La mangrove en danger — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de géographie (3e) : la plaine côtière et la mangrove de l’estuaire du Wouri, ses ressources, ses menaces et sa protection.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '3e-geo-mangrove',
+  discipline: 'Géographie', niveau: '3e',
+  titre: 'La mangrove en danger',
+  decor: 'fleuve', lieu: 'L’estuaire du Wouri, près de Douala', moment: 'Marée basse',
+  objectif: 'Situer la plaine côtière et la mangrove ; décrire ses ressources (poissons, crevettes, bois, protection des côtes) ; expliquer les menaces (coupe du bois pour le fumage du poisson, urbanisation, pollution) et les moyens de la préserver.',
+  programme: 'Progression harmonisée 3e · Chapitre 1 (préserver un environnement sain), leçon 6 (la plaine côtière), dossier 1 (la mangrove)',
+  jauges: [
+    { id: 'mangrove', nom: 'État de la mangrove', val: 60, couleur: '#1F9D5B' },
+    { id: 'revenus', nom: 'Revenus des pêcheurs', val: 60, couleur: '#D98E04' }
+  ],
+  personnages: {
+    guide:   { nom: 'Mme Elame, guide d’une ONG', couleur: '#2E6B5A', look: { tenue: 'jupe', peau: 'fonce', cheveux: 'tresses', habit: '#2E6B5A', extra: ['gilet'] } },
+    pecheur: { nom: 'Papa Ebongue, pêcheur', couleur: '#8A5A2B', look: { peau: 'fonce', vieux: true, cheveux: 'ras', habit: '#8A5A2B', coiffe: 'chapeau', couleurCoiffe: '#C9A15A' } },
+    fumeuse: { nom: 'Mama Ngo, fumeuse de poisson', couleur: '#C2551F', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#C2551F', habit: '#C2551F' } },
+    eleve:   { nom: 'Steve, élève de 3e', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['guide', 'eleve'], txt: 'Sortie de classe dans l’estuaire du Wouri. La plaine côtière, basse et humide, borde le golfe de Guinée. Là où l’eau douce du fleuve rencontre l’eau salée de la mer pousse une forêt étrange : la mangrove.', objet: { i: 'bateau', lib: 'En pirogue dans l’estuaire' } },
+    { t: 'dit', qui: 'guide', txt: 'Regardez les palétuviers : leurs racines sortent de l’eau comme des échasses. Ils supportent le sel et la marée. Le Cameroun possède l’une des plus vastes mangroves d’Afrique centrale.' },
+    { t: 'dit', qui: 'eleve', emo: 'doute', txt: 'Mais à quoi ça sert, cette forêt dans la boue ?' },
+    { t: 'dit', qui: 'pecheur', entre: ['pecheur'], jeu: 'il remonte son filet', txt: 'À tout, mon fils ! Les poissons et les crevettes viennent pondre entre ces racines. Sans mangrove, plus de poisson dans mes filets.', jauges: { revenus: 65 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · ce que la mangrove nous donne', consigne: 'Classe chaque rôle de la mangrove.',
+      cats: ['Ressource économique', 'Protection de l’environnement'],
+      items: [
+        { txt: 'Lieu de reproduction des poissons et des crevettes.', cat: 0 },
+        { txt: 'Bois de chauffe et de construction.', cat: 0 },
+        { txt: 'Protection des côtes contre l’érosion et les vagues.', cat: 1 },
+        { txt: 'Filtration des eaux du fleuve.', cat: 1 },
+        { txt: 'Stockage du carbone, contre le réchauffement climatique.', cat: 1 }
+      ],
+      bravo: 'La mangrove nourrit les hommes et protège la côte.' },
+    { t: 'recit', entre: ['fumeuse'], txt: 'Plus loin, des fumoirs : on fume le poisson pour le conserver et le vendre à Douala.', jauges: { mangrove: 45 } },
+    { t: 'dit', qui: 'fumeuse', txt: 'Pour fumer le poisson, il faut du bois, beaucoup de bois. Le bois de palétuvier brûle bien et il est gratuit, juste à côté.' },
+    { t: 'question', q: 'Quelle est la menace décrite par Mama Ngo ?',
+      options: [
+        { txt: 'La coupe du bois de palétuvier pour le fumage du poisson, qui détruit la mangrove.', ok: true, retour: 'C’est l’une des premières causes de destruction de la mangrove au Cameroun.' },
+        { txt: 'Le réchauffement de la mer uniquement.', retour: 'C’est une menace réelle, mais ici il s’agit de la coupe du bois.' }
+      ] },
+    { t: 'dit', qui: 'guide', txt: 'Ajoutez l’extension de la ville de Douala sur les zones humides, les déchets et les eaux usées des quartiers et des usines : la mangrove recule.', jauges: { mangrove: 30 } },
+    { t: 'choix', qui: 'fumeuse', q: 'Tu es Mama Ngo. L’ONG te propose un fumoir amélioré, qui consomme beaucoup moins de bois. Que fais-tu ?',
+      options: [
+        { txt: 'Je refuse : j’ai toujours fait comme ça.', consequence: 'La coupe continue, la mangrove recule, et dans quelques années les poissons se raréfient.', jauges: { mangrove: -15, revenus: -10 } },
+        { txt: 'J’accepte, et je plante des palétuviers avec les autres femmes du village.', consequence: 'Moins de bois coupé, des pépinières de palétuviers : la mangrove repousse et le poisson revient.', jauges: { mangrove: 35, revenus: 10 } }
+      ],
+      oeuvre: 'Des projets associant les communautés (fumoirs améliorés, reboisement de palétuviers) existent sur la côte camerounaise : protéger sans priver les gens de revenus.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · l’engrenage de la destruction', consigne: 'Remets dans l’ordre l’enchaînement qui mène à la raréfaction du poisson.',
+      items: [
+        'On coupe les palétuviers pour fumer le poisson.',
+        'La mangrove recule.',
+        'Les poissons et les crevettes perdent leurs lieux de reproduction.',
+        'Les prises des pêcheurs diminuent.',
+        'Les revenus des familles baissent.'
+      ],
+      bravo: 'Détruire la mangrove, c’est scier la branche sur laquelle on est assis.' },
+    { t: 'dit', qui: 'eleve', emo: 'fier', txt: 'Au collège, on va créer un club environnement et parrainer cent palétuviers.', jauges: { mangrove: 75 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · l’avenir de la mangrove',
+    intro: 'Règle la coupe du bois, l’urbanisation et les actions de reboisement : que devient la mangrove du Wouri dans vingt ans ?',
+    persos: ['guide', 'pecheur', 'fumeuse', 'eleve'],
+    curseurs: [
+      { id: 'coupe', nom: 'Coupe du bois de palétuvier', val: 65, bas: 'faible', haut: 'massive' },
+      { id: 'ville', nom: 'Extension urbaine sur les zones humides', val: 55, bas: 'contrôlée', haut: 'anarchique' },
+      { id: 'reboisement', nom: 'Reboisement et fumoirs améliorés', val: 20, bas: 'aucun', haut: 'généralisé' }
+    ],
+    scenarios: [
+      { nom: 'Aujourd’hui', icone: 'bateau', valeurs: { coupe: 65, ville: 55, reboisement: 20 } },
+      { nom: 'Sans protection', icone: 'flamme', valeurs: { coupe: 95, ville: 90, reboisement: 0 } },
+      { nom: 'Avec les communautés', icone: 'groupe', valeurs: { coupe: 25, ville: 35, reboisement: 85 } }
+    ],
+    liens: [
+      { a: 'fumeuse', b: 'pecheur', type: 'alliance', lib: 'achète le poisson', base: .6 },
+      { a: 'guide', b: 'fumeuse', type: 'confiance', lib: 'fumoir amélioré', base: .2, poids: { reboisement: .6 } },
+      { a: 'fumeuse', b: 'pecheur', type: 'conflit', lib: 'bois coupé', base: .1, poids: { coupe: .5 } },
+      { a: 'eleve', b: 'guide', type: 'alliance', lib: 'club environnement', base: .4, poids: { reboisement: .3 } }
+    ],
+    issue: function(v){
+      if(v.coupe > 75 && v.reboisement < 30){ return { niveau: 'ko', badge: 'La mangrove disparaît', recit: 'Les palétuviers tombent plus vite qu’ils ne repoussent : poissons rares, côte qui s’érode, villages exposés aux vagues.', apres: 'Une ressource gratuite, si on ne la gère pas, finit par disparaître.', themes: ['déforestation', 'érosion côtière'] }; }
+      if(v.reboisement > 65 && v.coupe < 45){ return { niveau: 'ok', badge: 'La mangrove repousse', recit: 'Fumoirs améliorés, pépinières de palétuviers, zones protégées : la forêt revient, le poisson aussi.', apres: 'Protéger avec les habitants, et non contre eux.', themes: ['gestion durable'] }; }
+      return { niveau: 'moyen', badge: 'Une mangrove qui recule', recit: 'Quelques actions de reboisement, mais la ville et la coupe gagnent du terrain.', apres: 'Chaque hectare compte.', themes: ['préservation'] };
+    }
+  },
+  quiz: [
+    { q: 'Où pousse la mangrove ?', options: [
+      { txt: 'Sur les côtes et les estuaires, là où l’eau douce rencontre l’eau salée.', ok: true, retour: 'Comme dans l’estuaire du Wouri.' },
+      { txt: 'Sur les hautes terres de l’Ouest.', retour: 'Non.' } ] },
+    { q: 'Comment s’appellent les arbres de la mangrove ?', options: [
+      { txt: 'Les palétuviers.', ok: true, retour: 'Avec leurs racines-échasses.' },
+      { txt: 'Les baobabs.', retour: 'Non.' } ] },
+    { q: 'Citez un rôle de la mangrove.', options: [
+      { txt: 'Lieu de reproduction des poissons.', ok: true, retour: 'Et protection des côtes.' },
+      { txt: 'Culture du cacao.', retour: 'Non.' } ] },
+    { q: 'Quelle est une grande cause de destruction de la mangrove au Cameroun ?', options: [
+      { txt: 'La coupe du bois pour le fumage du poisson.', ok: true, retour: 'Avec l’urbanisation et la pollution.' },
+      { txt: 'La neige.', retour: 'Non.' } ] },
+    { q: 'Quelle solution associe protection et revenus ?', options: [
+      { txt: 'Les fumoirs améliorés et le reboisement par les communautés.', ok: true, retour: 'Protéger sans priver les gens de revenus.' },
+      { txt: 'Interdire la pêche.', retour: 'Cela priverait les habitants de revenus.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'La plaine côtière borde le golfe de Guinée ; la mangrove pousse dans les estuaires (Wouri, Sanaga, Rio del Rey).',
+      'Rôles : reproduction des poissons et crevettes, bois, protection des côtes, filtration des eaux, stockage du carbone.',
+      'Menaces : coupe du bois (fumage du poisson), urbanisation de Douala, pollution.',
+      'Solutions : fumoirs améliorés, reboisement de palétuviers, aires protégées, implication des communautés.'
+    ],
+    ecrire: 'Réalisez une affiche de sensibilisation sur la mangrove : un titre, trois rôles de la mangrove, deux menaces, trois gestes pour la protéger.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le cercle de chaux — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Le Vieux Nègre et la Médaille de Ferdinand Oyono : la cérémonie, le cercle de chaux, la douleur de Kelara, l’orage.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'vieux-negre-cercle',
+  discipline: 'Français', niveau: 'Terminale',
+  oeuvre: 'Le Vieux Nègre et la Médaille', auteur: 'Ferdinand Oyono (1956)',
+  titre: 'Le cercle de chaux',
+  decor: 'place', ambiance: 'chaleur', lieu: 'la place de Doum', moment: 'Deuxième partie · le jour de la cérémonie',
+  objectif: 'Vivre la cérémonie de l’intérieur et voir comment Oyono en fait une satire : l’honneur proclamé devient une épreuve du corps, et une simple remarque dans la foule révèle le prix de la médaille. Les jauges suivent la fierté de Meka, sa souffrance et l’illusion qui finira par tomber.',
+  jauges: [
+    { id: 'fierte', nom: 'Fierté de Meka', val: 75, couleur: '#FFC93C' },
+    { id: 'corps', nom: 'Souffrance du corps', val: 20, couleur: '#E07B39' },
+    { id: 'illusion', nom: 'Illusion de Meka', val: 90, couleur: '#4C6FBF' }
+  ],
+  personnages: {
+    fouconi:  { nom: 'M. Fouconi', couleur: '#5A6275', look: { objet: 'dossier', peau: 'clair', cheveux: 'court', habit: '#E9E3CF', coiffe: 'casque', moustache: true } },
+    meka:     { nom: 'Meka', couleur: '#8A5A2B', look: { tenue: 'costume', col: '#2B3A55', peau: 'fonce', vieux: true, cheveux: 'ras', habit: '#6B4A2B', moustache: true } },
+    engamba:  { nom: 'Engamba', couleur: '#2E6B5A', look: { peau: 'fonce', vieux: true, cheveux: 'ras', habit: '#2E5A4A' } },
+    kelara:   { nom: 'Kelara', couleur: '#7A3E6C', look: { tenue: 'robe', peau: 'fonce', vieux: true, coiffe: 'foulard', couleurCoiffe: '#C0397C', habit: '#8A3B6E' } },
+    inconnu:  { nom: 'Un homme dans la foule', couleur: '#6B6B6B', look: { peau: 'brun', cheveux: 'court', habit: '#555555' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['meka', 'fouconi'], txt: 'Doum, le jour de la cérémonie. Sur la place, on a tracé un cercle à la chaux. C’est là que Meka, le vieux paysan qu’on va décorer, doit attendre le Chef des Blancs.' },
+    { t: 'dit', qui: 'fouconi', jeu: 'sèchement, sans le regarder', txt: 'Tu restes dans le cercle, Meka. Tu ne bouges pas, tu ne parles pas. Le Chef arrive.' },
+    { t: 'dit', qui: 'meka', emo: 'fier', jeu: 'droit comme un piquet', txt: 'Oui, Monsieur. Je ne bougerai pas.', jauges: { fierte: 90 } },
+    { t: 'recit', txt: 'Le soleil monte. Les minutes passent, puis les heures. Personne ne vient.', jauges: { corps: 45 } },
+    { t: 'pense', qui: 'meka', emo: 'peur', txt: 'Le soleil me tape sur le crâne. Ces chaussures neuves me serrent comme un piège. Et ce besoin qui monte… Mais un homme qu’on va décorer ne se tortille pas devant tout le monde.', jauges: { corps: 75 } },
+    { t: 'choix', qui: 'meka', q: 'Tu es Meka. La douleur et le besoin deviennent insupportables. Que fais-tu ?',
+      options: [
+        { txt: 'Je sors discrètement du cercle pour me soulager.', consequence: 'Fouconi te rappelle à l’ordre devant toute la foule. L’honneur tant attendu se change en honte publique.', jauges: { fierte: -30 } },
+        { txt: 'J’ôte mes chaussures, tant pis pour l’élégance.', consequence: 'Tes pieds respirent, mais tu crains les regards : le décoré pieds nus dans son cercle…', jauges: { corps: -20, fierte: -15 } },
+        { txt: 'Je reste immobile, coûte que coûte.', consequence: 'Tu tiens bon. Ta fierté est intacte, mais ton corps paie le prix de la cérémonie.', jauges: { corps: 15 } }
+      ],
+      oeuvre: 'Meka endure. Le narrateur raconte la cérémonie presque entièrement à travers ses sensations — chaleur, chaussures, besoin — plutôt qu’à travers un sentiment patriotique ou religieux.' },
+    { t: 'question', q: 'Pourquoi la scène s’attarde-t-elle sur la chaleur, les chaussures et le besoin de Meka ?',
+      options: [
+        { txt: 'Pour montrer que Meka est gravement malade.', retour: 'Rien n’indique une maladie. Ce sont des souffrances ordinaires, rendues énormes par la situation.' },
+        { txt: 'Pour opposer la grandeur officielle de la fête à la souffrance très concrète du corps.', ok: true, retour: 'C’est le cœur de la satire : le corps dément le discours officiel.' },
+        { txt: 'Pour décrire le climat de la région de Doum.', retour: 'La chaleur n’est pas là pour informer : elle fait de l’honneur une épreuve.' }
+      ] },
+    { t: 'recit', entre: ['engamba', 'kelara'], txt: 'Dans la foule, la famille est venue de Zourian : Engamba, le beau-frère, et Kelara, l’épouse de Meka.' },
+    { t: 'dit', qui: 'engamba', emo: 'joie', jeu: 'en bombant le torse', txt: 'Regardez bien ! Celui qui est dans le cercle, c’est mon beau-frère ! Le mari de ma sœur !' },
+    { t: 'dit', qui: 'kelara', emo: 'triste', jeu: 'à voix basse', txt: 'Il est debout depuis si longtemps…' },
+    { t: 'recit', txt: 'Le Haut-Commissaire paraît enfin. Il épingle d’abord une médaille sur la poitrine de M. Pipiniakis, le commerçant grec. Puis vient le tour de Meka.', objet: { i: '🏅', lib: 'La médaille' } },
+    { t: 'question', q: 'Que suggère le fait que Pipiniakis, un commerçant, soit décoré avant Meka ?',
+      options: [
+        { txt: 'Que la distinction honore d’abord des intérêts économiques, pas seulement des mérites.', ok: true, retour: 'La présence du commerçant éclaire le sens réel de la cérémonie : l’administration récompense ce qui la sert.' },
+        { txt: 'Que Pipiniakis est le meilleur ami de Meka.', retour: 'Le roman ne crée aucun lien d’amitié entre eux : ils sont simplement décorés le même jour.' },
+        { txt: 'Que la cérémonie suit l’ordre alphabétique.', retour: 'Ce détail n’est pas anodin : il dit qui compte vraiment aux yeux de l’administration.' }
+      ] },
+    { t: 'dit', qui: 'meka', emo: 'fier', jeu: 'rayonnant, la médaille sur la poitrine', txt: 'Engamba ! Tu as vu ? C’est le Chef des Blancs lui-même qui me l’a épinglée !', jauges: { fierte: 100 } },
+    { t: 'dit', qui: 'inconnu', jeu: 'sans méchanceté, à son voisin', txt: 'Une médaille… Deux fils morts à la guerre pour la France, voilà ce qu’elle a coûté.' },
+    { t: 'recit', txt: 'Kelara entend. Au milieu de la fête, elle se met à pleurer.' },
+    { t: 'pense', qui: 'kelara', emo: 'triste', txt: 'Mes deux fils sont partis se battre pour les Blancs, et ils ne sont pas revenus. Aujourd’hui on accroche un morceau de métal sur la poitrine de leur père, et tout le monde applaudit.' },
+    { t: 'atelier', mode: 'balance', titre: 'Atelier · la balance de la médaille', consigne: 'Place chaque élément sur le bon plateau : ce que la médaille promet, ou ce qu’elle a coûté.',
+      cotes: ['Elle promet', 'Elle a coûté'],
+      args: [
+        { txt: 'L’honneur d’être distingué par le Chef des Blancs', cote: 0, poids: 2 },
+        { txt: 'Les deux fils de Meka et Kelara, morts à la guerre', cote: 1, poids: 3 },
+        { txt: 'Les terres que Meka a données à la Mission', cote: 1, poids: 2 },
+        { txt: 'L’admiration de la famille et du village', cote: 0, poids: 1 }
+      ],
+      bravo: 'La balance penche du côté du prix payé : c’est toute l’ironie de la cérémonie.' },
+    { t: 'remarque', txt: 'La cérémonie prétend honorer la famille ; une phrase lancée dans la foule révèle ce qu’elle lui a coûté. Le lecteur comprend ce que Meka, tout à sa fierté, ne voit pas encore.' },
+    { t: 'question', q: 'Quel registre domine cette scène ?',
+      options: [
+        { txt: 'Le registre épique : on célèbre un héros.', retour: 'La célébration est là, mais elle est vidée de l’intérieur : tout la contredit.' },
+        { txt: 'Le registre satirique, porté par l’ironie.', ok: true, retour: 'Oyono ne dénonce pas par de grands discours : il montre l’écart entre ce que la fête dit et ce qu’elle fait.' },
+        { txt: 'Le registre fantastique.', retour: 'Rien de surnaturel : tout est réaliste, et c’est ce réalisme qui rend la satire si forte.' }
+      ] },
+    { t: 'recit', ambiance: 'orage', moment: 'Le soir · troisième partie', sort: ['fouconi', 'inconnu', 'kelara', 'engamba'], txt: 'Le soir, après la réception au Foyer africain, un orage éclate. Meka, perdu dans la nuit, est arrêté comme un rôdeur. Il passe la nuit en cellule.', jauges: { fierte: 30, illusion: 40 } },
+    { t: 'pense', qui: 'meka', emo: 'triste', txt: 'Hier, le Chef des Blancs m’épinglait une médaille. Cette nuit, ses policiers me jettent en prison. Qui suis-je donc pour eux ?', jauges: { illusion: 15 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · les trois parties du roman', consigne: 'Remets dans l’ordre les grands moments du roman.',
+      items: [
+        'Au village, Meka apprend qu’il va être décoré.',
+        'Les préparatifs et le départ pour Doum.',
+        'L’attente dans le cercle de chaux et la décoration.',
+        'L’orage, l’arrestation et la nuit en cellule.',
+        'Le retour au village, le récit exagéré puis le rire collectif.'
+      ],
+      bravo: 'Partie I : le village et l’annonce. Partie II : la cérémonie. Partie III : l’arrestation et le retour.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · Doum, le jour de la médaille',
+    intro: 'Règle la loyauté de Meka, sa lucidité, le mépris de l’administration et la solidarité du village : l’issue du roman et le réseau des relations changent.',
+    persos: ['meka', 'fouconi', 'kelara', 'engamba'],
+    curseurs: [
+      { id: 'loyaute', nom: 'Loyauté de Meka envers les Blancs', val: 85, bas: 'méfiant', haut: 'dévoué',
+        lecture: { haut: 'Meka a donné ses terres et ses fils : il croit à la reconnaissance promise. Plus il y croit, plus la chute sera dure.', bas: 'Un Meka méfiant n’aurait rien attendu de la médaille : il n’y aurait pas de désillusion à raconter.' } },
+      { id: 'lucidite', nom: 'Lucidité de Meka', val: 70, bas: 'aveugle', haut: 'lucide',
+        lecture: { haut: 'La nuit en cellule lui ouvre les yeux : « Je ne suis plus qu’un vieil homme… »', milieu: 'Meka devine, sans le dire, que quelque chose ne tourne pas rond.', bas: 'Meka ne comprend rien : seul le lecteur voit l’ironie. La satire tourne à vide pour le personnage.' } },
+      { id: 'mepris', nom: 'Mépris de l’administration', val: 85, bas: 'respect', haut: 'mépris',
+        lecture: { haut: 'On décore Meka puis on l’arrête comme un rôdeur : la médaille ne protège pas celui qu’elle honore.', bas: 'Une administration respectueuse ôterait toute cible à la satire d’Oyono.' } },
+      { id: 'solidarite', nom: 'Solidarité du village', val: 75, bas: 'isolé', haut: 'soudé',
+        lecture: { haut: 'Le chœur villageois transforme l’humiliation en récit, puis en rire collectif.', bas: 'Seul, Meka n’aurait personne pour dire son humiliation et la mettre à distance.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans le roman', icone: '📖', valeurs: { loyaute: 85, lucidite: 70, mepris: 85, solidarite: 75 } },
+      { nom: 'Et si l’administration le respectait ?', icone: '🤝', valeurs: { mepris: 15 } },
+      { nom: 'Et si Meka ne comprenait jamais ?', icone: '🙈', valeurs: { lucidite: 15 } },
+      { nom: 'Et si le village l’abandonnait ?', icone: '🚪', valeurs: { solidarite: 15 } }
+    ],
+    liens: [
+      { a: 'meka', b: 'fouconi', type: 'confiance', lib: 'loyauté', base: -.05, poids: { loyaute: 1, lucidite: -.5 } },
+      { a: 'fouconi', b: 'engamba', type: 'domination', lib: 'mépris', base: .05, poids: { mepris: .85 } },
+      { a: 'kelara', b: 'fouconi', type: 'conflit', lib: 'deux fils perdus', base: .15, poids: { lucidite: .4, mepris: .3 } },
+      { a: 'meka', b: 'kelara', type: 'amour', lib: 'deuil partagé', base: .25, poids: { lucidite: .6 } },
+      { a: 'meka', b: 'engamba', type: 'alliance', lib: 'solidarité', base: .05, poids: { solidarite: .85 } },
+      { a: 'engamba', b: 'kelara', type: 'alliance', lib: 'famille', base: .3, poids: { solidarite: .5 } }
+    ],
+    issue: function(v){
+      if(v.mepris < 30){ return { niveau: 'ok', badge: 'Un honneur sincère', recit: 'L’administration traite Meka avec égards : pas de cercle humiliant, pas d’arrestation. La médaille dit vrai.', apres: 'Mais alors, plus de roman : la satire d’Oyono vit de l’écart entre l’honneur proclamé et le mépris réel.', themes: ['reconnaissance'] }; }
+      if(v.lucidite < 35){ return { niveau: 'ko', badge: 'Illusion intacte', recit: 'Arrêté, humilié, Meka continue de croire à sa médaille. Seul le lecteur voit l’ironie de sa situation.', apres: 'Le personnage ne grandit pas : sans prise de conscience, l’humiliation se répétera.', themes: ['aliénation', 'ironie'] }; }
+      if(v.solidarite < 30){ return { niveau: 'ko', badge: 'Humiliation solitaire', recit: 'Meka rentre seul au village. Personne ne l’écoute, personne ne rit avec lui : l’humiliation reste entière.', apres: 'On mesure le rôle du chœur villageois : le rire collectif est une façon de survivre.', themes: ['solitude', 'humiliation'] }; }
+      return { niveau: 'moyen', badge: 'Désillusion et rire amer', recit: 'Décoré le matin, arrêté le soir, Meka ouvre les yeux. Au village, son récit tourne au rire collectif, puis il avoue sa lassitude.', apres: 'Le roman se ferme sur un aveu, non sur une révolte : le rire final est-il une victoire, ou le masque le plus fragile de l’humiliation ?', themes: ['satire coloniale', 'désillusion', 'dignité', 'rire'] };
+    }
+  },
+  quiz: [
+    { q: 'Où Meka doit-il attendre le Chef des Blancs ?', options: [
+      { txt: 'Dans un cercle tracé à la chaux.', ok: true, retour: 'Un espace qui l’isole et l’expose aux regards.' },
+      { txt: 'À l’ombre de la tribune.', retour: 'Non : au soleil, dans le cercle de chaux.' } ] },
+    { q: 'Qui est décoré en même temps que Meka ?', options: [
+      { txt: 'Engamba, son beau-frère.', retour: 'Engamba est dans la foule, fier comme s’il était décoré.' },
+      { txt: 'M. Pipiniakis, un commerçant grec.', ok: true, retour: 'Sa présence révèle que la distinction honore d’abord des intérêts économiques.' } ] },
+    { q: 'Qu’est-ce qui fait pleurer Kelara pendant la cérémonie ?', options: [
+      { txt: 'Une remarque sur ses deux fils, « prix » de cette médaille.', ok: true, retour: 'La cérémonie révèle ce qu’elle a coûté à la famille.' },
+      { txt: 'La chaleur.', retour: 'C’est Meka qui souffre de la chaleur ; Kelara pleure ses fils.' } ] },
+    { q: 'Que se passe-t-il le soir de la décoration ?', options: [
+      { txt: 'Meka est arrêté et passe la nuit en cellule.', ok: true, retour: 'La médaille ne le protège pas : la troisième partie renverse tout.' },
+      { txt: 'Meka est invité chez le Haut-Commissaire.', retour: 'Non : après la réception au Foyer africain, c’est l’arrestation.' } ] },
+    { q: 'En quelle année paraît le roman ?', options: [
+      { txt: '1956', ok: true, retour: 'La même année qu’Une vie de boy, quatre ans avant l’indépendance.' },
+      { txt: '1972', retour: 'C’est l’année de Balafon, de Mveng.' },
+      { txt: '1914', retour: 'C’est l’année de la pendaison de Rudolf Duala Manga Bell.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Le cercle de chaux isole Meka et l’expose aux regards : l’honneur devient une épreuve physique.',
+      'La satire passe par le corps — chaleur, chaussures, besoin — plutôt que par des discours.',
+      'La remarque sur les deux fils de Kelara retourne le sens de la cérémonie : la médaille a un prix.',
+      'Roman de 1956, à la veille de l’indépendance : Oyono écrit la désillusion d’un homme loyal envers l’administration coloniale.',
+      'Le roman se ferme sur un aveu de lassitude de Meka : « Je ne suis plus qu’un vieil homme… »'
+    ],
+    ecrire: 'Rédigez le discours que Meka pourrait, des années plus tard, adresser à ses petits-enfants pour leur raconter — et leur expliquer — ce jour de la médaille.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

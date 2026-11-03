@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>New York, décembre 1952 — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’histoire (Terminale) : Ruben Um Nyobè devant la Commission de tutelle de l’ONU, la tutelle, la réunification et l’indépendance du Cameroun.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-histoire-um-nyobe',
+  discipline: 'Histoire', niveau: 'Terminale',
+  titre: 'New York, décembre 1952',
+  decor: 'agora', lieu: 'Siège de l’ONU, Commission de tutelle', moment: '17 décembre 1952',
+  objectif: 'Comprendre ce qu’est un territoire sous tutelle, ce que réclame l’UPC (réunification et indépendance), et comment la marche vers l’indépendance du Cameroun passe à la fois par la tribune de l’ONU et par la répression.',
+  programme: 'Progression harmonisée Tle · Leçon 16 (la tutelle de l’ONU sur le Cameroun), leçon 17 et dossier 6 (le nationalisme camerounais)',
+  jauges: [
+    { id: 'audience', nom: 'Écho de la cause camerounaise', val: 15, couleur: '#1F9D5B' },
+    { id: 'tension', nom: 'Tension avec la puissance administrante', val: 30, couleur: '#D43F2E' }
+  ],
+  personnages: {
+    narratrice: { nom: 'Mme Biyong, professeure', couleur: '#1E499B', look: { metier: 'enseignant', tenue: 'jupe', peau: 'fonce', cheveux: 'chignon', habit: '#1E499B' } },
+    um:         { nom: 'Ruben Um Nyobè', couleur: '#2B3A55', look: { tenue: 'costume', peau: 'fonce', cheveux: 'ras', habit: '#2B3A55', col: '#F2EEE3', lunettes: true, objet: 'dossier' } },
+    president:  { nom: 'Le président de séance', couleur: '#5A6275', look: { tenue: 'costume', peau: 'mat', cheveux: 'court', vieux: true, habit: '#3A3A44', col: '#FFFFFF' } },
+    delegue:    { nom: 'Le délégué de la France', couleur: '#14254A', look: { tenue: 'costume', peau: 'clair', cheveux: 'court', couleurCheveux: '#5A4A3A', habit: '#14254A', col: '#FFFFFF', moustache: true } },
+    etudiant:   { nom: 'Abel, étudiant camerounais', age: 'jeune', couleur: '#8A5A2B', look: { peau: 'fonce', cheveux: 'court', habit: '#8A5A2B', objet: 'livre' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['narratrice'], txt: 'Après 1945, le Cameroun n’est pas une colonie comme les autres. L’ONU l’a placé sous tutelle : la France administre la plus grande partie, la Grande-Bretagne une bande à l’ouest, le long du Nigeria. Les accords de tutelle de 1946 les obligent à conduire le territoire vers l’autonomie ou l’indépendance.', objet: { i: 'document', lib: 'Accords de tutelle, 1946' } },
+    { t: 'question', q: 'Qu’est-ce qui distingue un territoire sous tutelle d’une colonie ?',
+      options: [
+        { txt: 'La puissance qui l’administre doit rendre des comptes à l’ONU et le conduire vers l’autonomie ou l’indépendance.', ok: true, retour: 'C’est l’arme juridique des nationalistes : ils peuvent saisir l’ONU, qui reçoit des pétitions et envoie des missions de visite.' },
+        { txt: 'Il appartient définitivement à la puissance qui l’administre.', retour: 'Justement non : la tutelle est provisoire, et contrôlée par l’ONU.' },
+        { txt: 'Il est gouverné directement par l’ONU.', retour: 'L’ONU contrôle, mais ce sont la France et la Grande-Bretagne qui administrent.' }
+      ] },
+    { t: 'recit', entre: ['um', 'president', 'delegue'], txt: 'Décembre 1952, à New York. Ruben Um Nyobè, secrétaire général de l’Union des populations du Cameroun (l’UPC, fondée à Douala en avril 1948), obtient d’être entendu par la Quatrième Commission de l’Assemblée générale.', jauges: { audience: 35 } },
+    { t: 'dit', qui: 'president', jeu: 'il ouvre la séance', txt: 'La Commission donne la parole au représentant de l’Union des populations du Cameroun.' },
+    { t: 'dit', qui: 'um', jeu: 'calme, dossier ouvert', txt: 'Nous ne demandons pas la charité. Nous demandons que les accords de tutelle soient appliqués : réunifier les deux Cameroun, et fixer une date pour notre indépendance.', jauges: { audience: 55, tension: 55 } },
+    { t: 'remarque', titre: 'Deux revendications, un même peuple', txt: 'La réunification : le Kamerun allemand a été partagé en 1919 entre la France et la Grande-Bretagne ; l’UPC veut réunir ce que la guerre a coupé. L’indépendance : la tutelle doit avoir une fin, et un calendrier. Ces deux mots d’ordre font de l’UPC le premier grand parti nationaliste du pays.' },
+    { t: 'dit', qui: 'delegue', emo: 'doute', jeu: 'il prend la parole à son tour', txt: 'Le territoire n’est pas prêt. La France y construit des routes, des écoles, des hôpitaux. L’UPC ne parle pas au nom de tous les Camerounais.', jauges: { tension: 70 } },
+    { t: 'choix', qui: 'um', q: 'Tu es Um Nyobè. Le délégué conteste ta représentativité. Que réponds-tu ?',
+      options: [
+        { txt: 'Je m’emporte et j’accuse la France de tous les maux.', consequence: 'Le discours perd en crédibilité : la Commission retient la colère, pas les arguments.', jauges: { audience: -10, tension: 15 } },
+        { txt: 'Je m’appuie sur le texte des accords de tutelle et sur les pétitions envoyées par des milliers de Camerounais.', consequence: 'Tu places le débat sur le terrain du droit international : c’est là que ta cause est la plus forte.', jauges: { audience: 20 } },
+        { txt: 'Je renonce à l’indépendance pour obtenir quelques réformes.', consequence: 'Les réformes viendraient peut-être, mais la revendication nationale serait abandonnée.', jauges: { audience: -15, tension: -20 } }
+      ],
+      oeuvre: 'Um Nyobè plaide en juriste : il invoque les obligations de la tutelle et s’appuie sur les pétitions. Il revient devant l’ONU en 1953 et 1954.' },
+    { t: 'dit', qui: 'etudiant', entre: ['etudiant'], emo: 'fier', jeu: 'dans la galerie du public', txt: 'Pour la première fois, un Camerounais parle du Cameroun devant le monde entier.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · la marche vers l’indépendance', consigne: 'Remets ces étapes dans l’ordre chronologique.',
+      items: [
+        'Partage du Kamerun allemand entre la France et la Grande-Bretagne (1919).',
+        'Accords de tutelle de l’ONU (1946).',
+        'Fondation de l’UPC à Douala (1948).',
+        'Um Nyobè devant la Commission de tutelle (1952).',
+        'Dissolution de l’UPC après les émeutes de mai 1955.',
+        'Mort d’Um Nyobè en Sanaga-Maritime (septembre 1958).',
+        'Indépendance du Cameroun sous tutelle française (1er janvier 1960).',
+        'Plébiscite au Cameroun britannique, puis réunification (1961).'
+      ],
+      bravo: 'Entre la tribune de New York et l’indépendance, il y a l’interdiction de l’UPC, le maquis et la répression : l’indépendance de 1960 ne se fait pas avec ceux qui l’avaient réclamée les premiers.', jauges: { audience: 80 } },
+    { t: 'recit', sort: ['president', 'delegue'], txt: 'De retour au pays, l’UPC grandit. En mai 1955, des émeutes éclatent ; l’administration dissout le parti en juillet. Ses dirigeants passent dans la clandestinité. Um Nyobè est tué en septembre 1958, dans la forêt de Sanaga-Maritime.', jauges: { tension: 95 } },
+    { t: 'question', q: 'En février 1961, le plébiscite au Cameroun britannique donne deux résultats. Lesquels ?',
+      options: [
+        { txt: 'Le Southern Cameroons rejoint la République du Cameroun ; le Northern Cameroons rejoint le Nigeria.', ok: true, retour: 'La réunification du 1er octobre 1961 n’est donc que partielle : elle donne naissance à la République fédérale.' },
+        { txt: 'Tout le Cameroun britannique rejoint le Nigeria.', retour: 'Non : le Sud vote pour la réunification.' },
+        { txt: 'Tout le Cameroun britannique devient un État indépendant à part.', retour: 'Cette option n’était pas proposée aux électeurs : il fallait choisir entre le Nigeria et le Cameroun.' }
+      ] },
+    { t: 'dit', qui: 'narratrice', txt: 'Retenez la double leçon : l’ONU a offert une tribune et un droit, mais le droit seul n’a pas suffi. L’histoire du nationalisme camerounais est aussi celle d’un prix payé.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · tutelle ou colonie ?', consigne: 'Classe chaque élément : relève-t-il du régime de tutelle, ou de la colonisation ordinaire ?',
+      cats: ['Tutelle de l’ONU', 'Colonie ordinaire'],
+      items: [
+        { txt: 'Pétitions envoyées à l’ONU par les habitants.', cat: 0 },
+        { txt: 'Missions de visite de l’ONU sur le territoire.', cat: 0 },
+        { txt: 'Aucun compte à rendre à une organisation internationale.', cat: 1 },
+        { txt: 'Objectif écrit : l’autonomie ou l’indépendance.', cat: 0 }
+      ],
+      bravo: 'C’est ce statut qui permet à l’UPC de porter sa cause à New York.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · la route de l’indépendance',
+    intro: 'Règle l’écoute de l’ONU, l’unité des nationalistes et la répression : quelle indépendance obtiens-tu ?',
+    persos: ['um', 'president', 'delegue', 'etudiant', 'narratrice'],
+    curseurs: [
+      { id: 'onu', nom: 'Écoute de l’ONU', val: 55, bas: 'sourde', haut: 'attentive', lecture: { haut: 'Les pétitions sont lues, les missions de visite enquêtent.', bas: 'La Commission se contente de la version de la puissance administrante.' } },
+      { id: 'unite', nom: 'Unité des nationalistes', val: 45, bas: 'divisés', haut: 'unis', lecture: { haut: 'Un front commun parle d’une seule voix.', bas: 'Les rivalités affaiblissent la revendication.' } },
+      { id: 'repression', nom: 'Répression', val: 85, bas: 'faible', haut: 'violente', lecture: { haut: 'Parti interdit, maquis, dirigeants tués : la cause perd ses voix.', bas: 'Le débat reste politique et pacifique.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans l’histoire', icone: 'livre', valeurs: { onu: 55, unite: 45, repression: 85 } },
+      { nom: 'Et si la répression était faible ?', icone: 'balance', valeurs: { repression: 15, unite: 70 } },
+      { nom: 'Et si l’ONU n’écoutait pas ?', icone: 'muet', valeurs: { onu: 10 } }
+    ],
+    liens: [
+      { a: 'um', b: 'president', type: 'confiance', lib: 'tribune', base: .2, poids: { onu: .7 } },
+      { a: 'delegue', b: 'um', type: 'conflit', lib: 'contestation', base: .5, poids: { repression: .5 } },
+      { a: 'etudiant', b: 'um', type: 'alliance', lib: 'soutien', base: .4, poids: { unite: .5 } },
+      { a: 'narratrice', b: 'etudiant', type: 'confiance', lib: 'mémoire', base: .5 }
+    ],
+    issue: function(v){
+      if(v.onu < 30){ return { niveau: 'ko', badge: 'Une cause étouffée', recit: 'Sans tribune internationale, la revendication reste une affaire intérieure, que la puissance administrante règle seule.', apres: 'La tutelle a donné aux Camerounais un recours que les colonies n’avaient pas.', themes: ['tutelle', 'droit international'] }; }
+      if(v.repression > 65){ return { niveau: 'moyen', badge: 'Une indépendance sans ses pionniers', recit: 'L’indépendance arrive, mais l’UPC est interdite et ses chefs ont disparu : le pouvoir revient à d’autres.', apres: 'C’est ce qui s’est passé : le 1er janvier 1960, Ahmadou Ahidjo conduit l’État indépendant.', themes: ['répression', 'maquis', 'indépendance'] }; }
+      if(v.unite < 35){ return { niveau: 'moyen', badge: 'Une voix divisée', recit: 'Les nationalistes se disputent la représentation : la puissance administrante choisit ses interlocuteurs.', apres: 'Diviser pour mieux négocier : une vieille méthode.', themes: ['nationalisme'] }; }
+      return { niveau: 'ok', badge: 'Une indépendance négociée', recit: 'L’ONU écoute, les nationalistes parlent d’une seule voix et le débat reste politique : l’indépendance et la réunification sont négociées avec ceux qui les réclamaient.', apres: 'Un scénario que l’histoire n’a pas suivi : c’est l’intérêt du laboratoire.', themes: ['réunification', 'indépendance'] };
+    }
+  },
+  quiz: [
+    { q: 'Quel parti Um Nyobè dirige-t-il ?', options: [
+      { txt: 'L’Union des populations du Cameroun (UPC).', ok: true, retour: 'Fondée à Douala en avril 1948.' },
+      { txt: 'L’Union camerounaise.', retour: 'C’est le parti d’Ahmadou Ahidjo.' } ] },
+    { q: 'Que réclame l’UPC devant l’ONU ?', options: [
+      { txt: 'La réunification et une date pour l’indépendance.', ok: true, retour: 'Les deux mots d’ordre du nationalisme camerounais.' },
+      { txt: 'Le rattachement à la France.', retour: 'C’est l’inverse.' } ] },
+    { q: 'Pourquoi l’UPC peut-elle s’adresser à l’ONU ?', options: [
+      { txt: 'Parce que le Cameroun est un territoire sous tutelle de l’ONU.', ok: true, retour: 'La puissance administrante doit rendre des comptes.' },
+      { txt: 'Parce que le Cameroun est déjà membre de l’ONU.', retour: 'Il ne le devient qu’après l’indépendance, en 1960.' } ] },
+    { q: 'Que décide l’administration en juillet 1955 ?', options: [
+      { txt: 'La dissolution de l’UPC.', ok: true, retour: 'Le parti passe dans la clandestinité.' },
+      { txt: 'L’indépendance immédiate.', retour: 'Elle ne vient qu’en 1960.' } ] },
+    { q: 'Quand le Cameroun sous tutelle française devient-il indépendant ?', options: [
+      { txt: 'Le 1er janvier 1960.', ok: true, retour: 'La réunification avec le Southern Cameroons suit le 1er octobre 1961.' },
+      { txt: 'Le 20 mai 1972.', retour: 'C’est la date de l’État unitaire.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Après 1945, le Cameroun est un territoire sous tutelle de l’ONU, administré par la France et la Grande-Bretagne (accords de 1946).',
+      'L’UPC, fondée en 1948, réclame la réunification et l’indépendance ; Um Nyobè plaide devant l’ONU à partir de 1952.',
+      'L’UPC est dissoute en 1955 ; Um Nyobè est tué en 1958.',
+      'Indépendance le 1er janvier 1960 ; plébiscite en février 1961 ; réunification partielle le 1er octobre 1961.'
+    ],
+    ecrire: 'Rédigez le paragraphe d’un exposé : « En quoi le régime de tutelle a-t-il servi la cause des nationalistes camerounais, et quelles en ont été les limites ? » Appuyez-vous sur deux dates précises.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>
