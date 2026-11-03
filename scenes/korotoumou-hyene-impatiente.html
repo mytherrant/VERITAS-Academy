@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261103p">
+<link rel="stylesheet" href="scene.css?v=20261103q">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -94,11 +94,13 @@ window.SCENE = {
       return { niveau: 'ko', badge: 'La gloutonnerie punie', recit: 'L’hyène coupe le cœur de l’éléphant : le jeu s’arrête, et la ruse du lièvre aussi.', apres: 'Morale de la veillée : celui qui ne sait pas attendre perd tout.', themes: ['gloutonnerie', 'ruse', 'morale'] };
     }
   },
+  fiche: {"accroche": "L’hyène refuse le panier de poissons d’aujourd’hui pour avoir les deux paniers de demain. Tous les jours. Pendant des mois. Devine qui mange le poisson…", "resume": "Un professeur revenu d’Amérique demande à sa grande sœur Korotoumou de raconter, comme autrefois, les contes de leur enfance. Ce soir-là, la télévision reste éteinte, et la veillée dure plusieurs nuits : quatorze contes malinkés, où l’hyène gloutonne perd toujours contre le lièvre rusé.", "personnages": [{"nom": "Korotoumou", "cle": "korotoumou", "role": "la grande sœur, la conteuse."}, {"nom": "Le narrateur", "cle": "narrateur", "role": "son frère, professeur revenu d’Amérique."}, {"nom": "Le lièvre", "cle": "lievre", "role": "la ruse, la sagesse, l’intelligence."}, {"nom": "L’hyène", "cle": "hyene", "role": "la gloutonnerie : elle ne sait pas attendre."}, {"nom": "L’éléphant", "cle": "elephant", "role": "la confiance de celui qui rit trop fort."}, {"nom": "Gnitorni", "role": "« Dent pourrie » : dans un conte, un nom propre est un programme."}], "aLire": [{"ou": "Le prologue", "pourquoi": "Korotoumou doute : « On oublie les contes quand on ne les dit pas. » La télévision gagnera-t-elle ?"}, {"ou": "« Lièvre et Hyène pêcheurs »", "pourquoi": "Le lièvre plume l’hyène tous les jours, et l’hyène ne comprend jamais."}, {"ou": "« Tchiè Tla Kélé ou Moitié d’homme »", "pourquoi": "Dans la troisième partie, hommes, bêtes et objets se mêlent : le conte dans ce qu’il a de plus étrange."}], "siTuAimes": "les veillées et les histoires qu’on se raconte en famille, lis un conte par soir à tes petits frères, comme Korotoumou.", "reperes": ["Auteur : Amadou Koné (Côte d’Ivoire), professeur à l’université de Georgetown, aux États-Unis", "14 contes en trois parties : animaux entre eux, hommes entre eux, hommes, animaux et objets", "Lieux : Kongodjan, plantation de café et de cacao, et le nouveau village électrifié"], "themes": ["la transmission", "la patience", "la ruse", "tradition et télévision"], "cahier": {"lib": "Le cahier VÉRITAS des œuvres de 6e", "href": "../livrets/oeuvres-6e.html"}},
   quiz: [
     { q: 'Qui est Korotoumou ?', options: [ { txt: 'La grande sœur du narrateur, la conteuse.', ok: true, retour: 'C’est elle qui dit les contes.' }, { txt: 'Une hyène.', retour: 'Non !' } ] },
     { q: 'Que fait le narrateur dans la vie ?', options: [ { txt: 'Il est professeur et revient d’Amérique.', ok: true, retour: 'Comme l’auteur, Amadou Koné, qui enseigne à Georgetown.' }, { txt: 'Il est planteur de café.', retour: 'Il a grandi sur une plantation, mais il vit en Amérique.' } ] },
     { q: 'Quel défaut incarne l’hyène ?', options: [ { txt: 'La gloutonnerie.', ok: true, retour: 'Elle veut toujours plus, tout de suite.' }, { txt: 'La paresse.', retour: 'La paresse, c’est le singe.' } ] },
-    { q: 'Combien de contes compte le recueil ?', options: [ { txt: 'Quatorze.', ok: true, retour: 'Quatorze contes, trois familles.' }, { txt: 'Sept.', retour: 'Sept, ce sont les nouvelles des Bimanes.' } ] }
+    { q: 'Combien de contes compte le recueil ?', options: [ { txt: 'Quatorze.', ok: true, retour: 'Quatorze contes, trois familles.' }, { txt: 'Sept.', retour: 'Sept, ce sont les nouvelles des Bimanes.' } ] },
+    {"q": "Pourquoi l’hyène perd-elle toujours ?", "options": [{"txt": "Parce qu’elle ne sait pas attendre.", "ok": true, "retour": "Elle est grande et forte : c’est son impatience qui la perd."}, {"txt": "Parce qu’elle est faible.", "retour": "Non : elle a des mâchoires terribles. Son défaut, c’est la gloutonnerie."}]}
   ],
   bilan: {
     retenir: [
@@ -111,7 +113,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261103p"></script>
-<script src="scene.js?v=20261103p"></script>
+<script src="decors.js?v=20261103q"></script>
+<script src="scene.js?v=20261103q"></script>
 </body>
 </html>

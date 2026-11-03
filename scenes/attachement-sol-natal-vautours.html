@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261103p">
+<link rel="stylesheet" href="scene.css?v=20261103q">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -57,7 +57,9 @@ window.SCENE = {
         { txt: '« toutes serres dehors »', cat: 1 }
       ],
       bravo: 'Le pays est une mère, une aimée, un corps ; les profiteurs sont des oiseaux de proie.' },
-    { t: 'dit', qui: 'poete', txt: 'Tu vois : on peut aimer son pays et accuser ceux qui le pillent. C’est le même amour.', jauges: { amour: 95 } }
+    { t: 'dit', qui: 'poete', txt: 'Tu vois : on peut aimer son pays et accuser ceux qui le pillent. C’est le même amour.', jauges: { amour: 95 } },
+    {"t": "remarque", "titre": "Une prière en tête du livre", "txt": "Avant le premier poème, Alima recopie une prière de Charles Baudelaire : il demande seulement « la grâce de produire quelques beaux vers ». Ni la gloire ni les prix : une humilité qui autorise chacun à écrire, même sans être sûr que ce soit bon."},
+    {"t": "question", "q": "Dans quelle section le poète chante-t-il son pays depuis l’étranger ?", "options": [{"txt": "Les « Chants d’Exil ».", "ok": true, "retour": "« Pèlerinage aux sources », « L’attachement au sol natal », « Soif du bercail » : le pays aimé de loin."}, {"txt": "Les « Couronnes de lauriers ».", "retour": "Celle-là contient « Appel au travail » et « Bon anniversaire, République Unie »."}]}
   ],
   labo: {
     titre: 'Laboratoire · la voix du poème',
@@ -82,11 +84,13 @@ window.SCENE = {
       return { niveau: 'moyen', badge: 'Registre lyrique', recit: 'Le « je » dit son amour pour le pays, comme un amant pour sa belle : apostrophes, images de la mère et du corps.', apres: 'Le Dossier le dit : « son lyrisme est similaire à celui d’un amant qui voue un véritable culte à sa belle ».', themes: ['lyrisme', 'apostrophe', 'pays-mère'] };
     }
   },
+  fiche: {"accroche": "On peut aimer son pays comme une mère, comme une bien-aimée… et accuser en même temps ceux qui le pillent. Qui sont les « vautours » d’Ernest Alima ?", "resume": "Vingt-six poèmes d’Ernest Alima, en six sections, pour dire l’amour du Cameroun et accuser les profiteurs qui le dévorent. Des vers libres où la rime reste pour sa musique, et où la répétition martèle les idées.", "personnages": [{"nom": "Le poète", "cle": "poete", "role": "la voix du recueil : il aime, il s’adresse au pays, il accuse."}, {"nom": "Le pays", "role": "tour à tour une mère, une bien-aimée et un corps."}, {"nom": "Les vautours", "role": "les profiteurs, oiseaux de proie qui plongent sur « les poules aux œufs d’or »."}, {"nom": "Le citoyen", "role": "le « nous » qui vit « une époque tourmentée »."}], "aLire": [{"ou": "« Patriotisme et démocratie » (liminaire)", "pourquoi": "Le programme du livre en trente vers."}, {"ou": "« Le retour des vautours » (Tripe républicaine)", "pourquoi": "La satire la plus mordante du recueil, en vers très courts."}, {"ou": "Les « Chants d’Exil »", "pourquoi": "Le poète loin de chez lui : « Pèlerinage aux sources », « Soif du bercail »."}], "siTuAimes": "dire les choses fort, lis deux poèmes par jour à voix haute et garde un vers de chacun : à la fin, tu auras ton propre recueil.", "reperes": ["Auteur : Ernest Alima, poète camerounais à la retraite, à Yaoundé", "Éditions Ifrikiya, 2024", "26 poèmes en 6 sections (1, 9, 8, 4, 2 et 2 textes)", "Épigraphe empruntée à Baudelaire"], "themes": ["le patriotisme", "la démocratie", "l’exil", "la satire des profiteurs"], "cahier": {"lib": "Le cahier VÉRITAS des œuvres de 4e", "href": "../livrets/oeuvres-4e.html"}},
   quiz: [
     { q: 'Qu’est-ce qu’une anaphore ?', options: [ { txt: 'La répétition du même mot au début de plusieurs vers.', ok: true, retour: 'La figure préférée d’Alima.' }, { txt: 'Une rime en fin de vers.', retour: 'Non : c’est au début des vers.' } ] },
     { q: 'Que symbolisent les vautours dans le recueil ?', options: [ { txt: 'Les profiteurs.', ok: true, retour: 'Ils plongent « sur les poules aux œufs d’or ».' }, { txt: 'Les ancêtres.', retour: 'Non.' } ] },
     { q: 'Qu’est-ce qu’un vers libre ?', options: [ { txt: 'Un vers qui ne compte pas ses syllabes et n’est pas obligé de rimer.', ok: true, retour: 'Comme beaucoup de vers du recueil.' }, { txt: 'Un vers sans majuscule.', retour: 'Non.' } ] },
-    { q: 'Combien de poèmes compte le recueil ?', options: [ { txt: 'Vingt-six.', ok: true, retour: 'En six sections.' }, { txt: 'Vingt-deux.', retour: 'Vingt-deux, c’est le recueil de Philombe.' } ] }
+    { q: 'Combien de poèmes compte le recueil ?', options: [ { txt: 'Vingt-six.', ok: true, retour: 'En six sections.' }, { txt: 'Vingt-deux.', retour: 'Vingt-deux, c’est le recueil de Philombe.' } ] },
+    {"q": "Quelle est la figure préférée d’Ernest Alima ?", "options": [{"txt": "La répétition, et surtout l’anaphore.", "ok": true, "retour": "Elle « déclenche le poème » et lui donne sa cohérence."}, {"txt": "La métaphore filée sur cent vers.", "retour": "Non : ses poèmes avancent par répétitions."}]}
   ],
   bilan: {
     retenir: [
@@ -99,7 +103,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261103p"></script>
-<script src="scene.js?v=20261103p"></script>
+<script src="decors.js?v=20261103q"></script>
+<script src="scene.js?v=20261103q"></script>
 </body>
 </html>

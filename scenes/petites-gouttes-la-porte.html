@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261103p">
+<link rel="stylesheet" href="scene.css?v=20261103q">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -55,7 +55,11 @@ window.SCENE = {
         { txt: 'Les dormeurs : ceux qui laissent faire', cat: 0 },
         { txt: 'Le tam-tam : tantôt l’oubli, tantôt le réveil', cat: 1 }
       ],
-      bravo: 'Un recueil n’a pas de personnages : il a des figures qui reviennent d’un poème à l’autre.' }
+      bravo: 'Un recueil n’a pas de personnages : il a des figures qui reviennent d’un poème à l’autre.' },
+    {"t": "recit", "txt": "Le recueil compte vingt-deux poèmes. Celui-ci, « L’homme qui te ressemble », est le plus connu. D’autres changent de voix : « Le hibou », « Les dormeurs », « Le tam-tam de l’esclave »."},
+    {"t": "question", "q": "Le hibou est appelé « oiseau des funestes augures ». Que veut dire « augure » ?", "options": [{"txt": "Un présage, un signe qui annonce l’avenir.", "ok": true, "retour": "On accuse le hibou d’annoncer le malheur… alors qu’il rend service la nuit."}, {"txt": "Une plume d’oiseau.", "retour": "Non : un augure est un présage."}]},
+    {"t": "remarque", "titre": "Lire Philombe à voix haute", "txt": "Ses vers n’ont presque pas de ponctuation à la fin : c’est le souffle qui coupe. Lisez le poème de la porte à deux voix, un élève dehors qui frappe, un élève dedans qui hésite."},
+    {"t": "atelier", "mode": "ordre", "titre": "Atelier · le mouvement du poème", "consigne": "Remets dans l’ordre ce que dit celui qui frappe.", "items": ["Il frappe et demande un lit et du feu.", "Il refuse d’être jugé sur son nez, sa bouche, sa peau.", "Il demande qu’on lui ouvre la porte et le cœur.", "Il se dit l’homme de tous les temps et de tous les cieux."], "bravo": "De la demande d’un abri à l’affirmation d’une humanité commune : le poème s’élargit à chaque strophe."}
   ],
   labo: {
     titre: 'Laboratoire · derrière la porte',
@@ -79,11 +83,13 @@ window.SCENE = {
       return { niveau: 'moyen', badge: 'La porte reste fermée', recit: 'L’habitant pose les questions que le poème refuse : la couleur, le pays, les dieux.', apres: 'Le poème laisse la question ouverte, et c’est au lecteur d’y répondre.', themes: ['préjugés', 'refrain', 'humanité'] };
     }
   },
+  fiche: {"accroche": "Un inconnu frappe à ta porte et te demande de lui ouvrir ton cœur. Ouvrirais-tu ? Le poème ne le dit jamais : à toi de répondre.", "resume": "Vingt-deux poèmes de René Philombe, numérotés de I à XXII, suivis d’un long poème, « Les Blancs partis, les Nègres dansent ». Des vers libres, presque sans ponctuation, portés par la répétition, pour « créer l’Homme » : dénoncer la faim, la guerre et la servitude, et ouvrir la porte à l’autre.", "personnages": [{"nom": "Celui qui frappe", "cle": "voyageur", "role": "l’inconnu, l’autre : « l’homme de tous les temps »."}, {"nom": "Celui qui n’ouvre pas", "cle": "habitant", "role": "derrière la porte, il hésite."}, {"nom": "L’Homme", "role": "l’espèce humaine tout entière, d’où la majuscule du titre."}, {"nom": "Le hibou", "role": "accusé par tout un village, utile à tout un village (poème XIV)."}, {"nom": "Les dormeurs", "role": "ceux qui laissent faire (poème XV)."}, {"nom": "L’esclave", "role": "il plie l’échine, « un œil dangereusement ouvert »."}], "aLire": [{"ou": "« L’homme qui te ressemble » (XVI)", "pourquoi": "Le poème de la porte, à lire et à jouer à deux voix."}, {"ou": "« Le hibou » (XIV)", "pourquoi": "Une histoire d’enfance, puis un sonnet : l’oiseau qu’on accuse sans savoir."}, {"ou": "« Dix amours de poète » (XII)", "pourquoi": "Ce que le poète aime… et le dernier amour n’est pas comme les autres."}], "siTuAimes": "les textes qui se disent plus qu’ils ne se lisent : Philombe écrit pour l’oreille, c’est le souffle qui coupe ses vers.", "reperes": ["Auteur : René Philombe (Cameroun) ; prix Mottart de l’Académie française 1966 pour Lettres de ma cambuse", "Ses livres ont été traduits en anglais, en allemand et en russe", "Éditions CLE et Semences africaines", "22 poèmes numérotés et un long poème final"], "themes": ["la fraternité", "l’accueil de l’autre", "l’injustice", "la faim"], "cahier": {"lib": "Le cahier VÉRITAS des œuvres de 3e", "href": "../livrets/oeuvres-3e.html"}},
   quiz: [
     { q: 'Que répète le refrain du poème ?', options: [ { txt: '« Ouvre-moi mon frère ».', ok: true, retour: 'Six fois.' }, { txt: '« Ils sont de retour ».', retour: 'C’est le poème d’Alima.' } ] },
     { q: 'Sait-on si la porte s’ouvre ?', options: [ { txt: 'Non, le poème ne le dit pas.', ok: true, retour: 'C’est au lecteur de répondre.' }, { txt: 'Oui, à la dernière strophe.', retour: 'Non : la dernière strophe est encore un appel.' } ] },
     { q: 'Pourquoi « l’Homme » a-t-il une majuscule dans le titre ?', options: [ { txt: 'Parce qu’il désigne l’espèce humaine entière.', ok: true, retour: 'Philombe fait des majuscules des coups de projecteur.' }, { txt: 'Parce que c’est le nom du poète.', retour: 'Non.' } ] },
-    { q: 'Combien de poèmes compte le recueil ?', options: [ { txt: 'Vingt-deux.', ok: true, retour: 'Publié aux Éditions CLE, à Yaoundé.' }, { txt: 'Vingt-six.', retour: 'Vingt-six, c’est le recueil d’Alima.' } ] }
+    { q: 'Combien de poèmes compte le recueil ?', options: [ { txt: 'Vingt-deux.', ok: true, retour: 'Publié aux Éditions CLE, à Yaoundé.' }, { txt: 'Vingt-six.', retour: 'Vingt-six, c’est le recueil d’Alima.' } ] },
+    {"q": "Quel outil Philombe emploie-t-il dans presque tous ses poèmes ?", "options": [{"txt": "L’anaphore : la même formule répétée en tête de vers.", "ok": true, "retour": "« J’ai frappé… », « Ouvre-moi… » : la répétition fait le rythme."}, {"txt": "La rime riche.", "retour": "La plupart de ses poèmes sont en vers libres, presque sans rimes."}]}
   ],
   bilan: {
     retenir: [
@@ -96,7 +102,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261103p"></script>
-<script src="scene.js?v=20261103p"></script>
+<script src="decors.js?v=20261103q"></script>
+<script src="scene.js?v=20261103q"></script>
 </body>
 </html>
