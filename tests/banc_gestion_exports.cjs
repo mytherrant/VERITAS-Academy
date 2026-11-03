@@ -37,6 +37,7 @@ const dimPng = (b) => ({ l: b.readUInt32BE(16), h: b.readUInt32BE(20), sig: b.sl
   page.setDefaultTimeout(15000);
   const erreurs = [];
   page.on('pageerror', (e) => erreurs.push(e.message));
+  page.on('requestfailed', (r) => erreurs.push('requête coupée : ' + r.method() + ' ' + r.url().replace(B, '') + ' (' + (r.failure() || {}).errorText + ')'));
   page.on('console', (m) => { if (m.type() === 'error') erreurs.push(m.text()); });
   const aJour = () => page.waitForFunction(() => document.getElementById('puce-sync').textContent === 'À jour', null, { timeout: 15000 }).catch(() => {});
   const api = (route, corps) => page.evaluate(async ([route, corps]) => {

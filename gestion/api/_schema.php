@@ -51,6 +51,7 @@ function g_schema(): array {
             'id' => 'id', 'identifiant' => 'str:60', 'nom' => 'str:120', 'tel' => 'str:30',
             'mdp_hash' => 'str:255', 'admin_global' => 'int', 'actif' => 'int:1',
             'matieres' => 'str:500',             // ids de g_matieres enseignées, séparés par des virgules
+            'restrictions' => 'str:500',         // capacités retirées par l'admin (« caisse.corriger,tarifs.fixer »)
             'cree_le' => 'str:19', 'maj_le' => 'str:19',
         ], 'unique' => [['identifiant']]],
 
@@ -130,7 +131,7 @@ function g_schema(): array {
             'date' => 'str:10', 'mode' => 'str:12', 'reference' => 'str:60', 'note' => 'str:200',
             'encaisse_par' => 'ref', 'annule' => 'int', 'motif_annulation' => 'str:200', 'annule_par' => 'ref',
             'envoye_le' => 'str:40',            // reçu envoyé au parent (« AAAA-MM-JJ HH:MM:SS canal »)
-        ] + G_COLS_SYNC, 'index' => [['centre_id', 'date'], ['eleve_id'], ['rev']]],
+        ] + G_COLS_SYNC, 'index' => [['centre_id', 'date'], ['eleve_id'], ['rev']], 'unique' => [['centre_id', 'numero']]],
 
         // Dépenses : saisies par le centre, validées par un responsable (pas le sien) ou l'admin.
         'g_depenses' => ['cols' => [
@@ -168,7 +169,7 @@ function g_schema(): array {
         'g_tranches' => ['cols' => [
             'id' => 'id', 'centre_id' => 'ref', 'utilisateur_id' => 'ref', 'prefixe' => 'str:4',
             'debut' => 'int', 'fin' => 'int', 'cree_le' => 'str:19',
-        ], 'index' => [['centre_id', 'prefixe'], ['utilisateur_id']]],
+        ], 'index' => [['centre_id', 'prefixe'], ['utilisateur_id']], 'unique' => [['centre_id', 'prefixe', 'debut']]],
 
         // Opérations déjà appliquées : un envoi répété (réseau coupé au mauvais
         // moment) n'est jamais appliqué deux fois.

@@ -14,6 +14,11 @@ const ok = (nom, c, d) => { console.log((c ? '  OK    ' : '  ÉCHEC ') + nom + (
   const erreurs = [];
   page.on('pageerror', (e) => erreurs.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') erreurs.push(m.text()); });
+  // Panneau d'administration caché : 4 taps sur le logo (sinon ni comptes, ni journal, ni nouveau centre).
+  const ouvrirPanneau = async () => {
+    for (let i = 0; i < 4; i++) await page.click('.entete .marque');
+    await page.waitForSelector('main h1:text("Administration")');
+  };
   const aJour = () => page.waitForFunction(() => document.getElementById('puce-sync').textContent === 'À jour', null, { timeout: 10000 }).catch(() => {});
 
   await page.goto(B);
@@ -24,6 +29,9 @@ const ok = (nom, c, d) => { console.log((c ? '  OK    ' : '  ÉCHEC ') + nom + (
   await aJour();
 
   // Fiche compte : matières enseignées
+  await page.goto(B + '#/comptes');
+  ok('comptes cachés tant que le panneau est fermé', !(await page.isVisible('#zone-comptes')), 'visibles');
+  await ouvrirPanneau();
   await page.goto(B + '#/comptes');
   await page.waitForSelector('#zone-comptes .ligne');
   await page.click('text=Essomba Paul');

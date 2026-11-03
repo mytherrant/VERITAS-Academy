@@ -405,9 +405,19 @@ verifier("validation tracée (par qui, quand)", dd["statut"] == "validee" and dd
 # ── Tranches de numéros de reçu (reçus numérotés hors ligne) ──
 _, r1 = req("recus/tranche", {"centre": Bc}, secB)
 _, r2 = req("recus/tranche", {"centre": Bc}, secB)
-t1, t2 = r1["tranche"], r2["tranche"]
-verifier("tranche réservée (20 numéros)", t1["fin"] - t1["debut"] == 19, t1)
-verifier("deux tranches ne se chevauchent pas", t2["debut"] == t1["fin"] + 1, (t1, t2))
+verifier("tranches de 20 numéros rendues au téléphone", r1.get("tranches") and all(t["fin"] - t["debut"] == 19 for t in r1["tranches"]), r1)
+verifier("pas d'accaparement : pas de nouvelle tranche tant qu'il reste des numéros libres", len(r2["tranches"]) == len(r1["tranches"]) and r2["libres"] >= 10, (r1.get("libres"), r2.get("libres")))
+_, ra2 = req("recus/tranche", {"centre": Bc}, adm)
+fins_secB = max(t["fin"] for t in r2["tranches"])
+toutes = r2["tranches"] + ra2["tranches"]
+chevauchent = [(a["debut"], a["fin"], b["debut"], b["fin"]) for i, a in enumerate(toutes) for b in toutes[i + 1:] if not (a["fin"] < b["debut"] or b["fin"] < a["debut"])]
+verifier("aucune tranche ne chevauche une autre (deux comptes)", not chevauchent, chevauchent[:3])
+# Numéros libres de la secrétaire (ceux déjà servis aux passages précédents sont écartés).
+_, tt = req("sync/tirer", jeton=adm)
+servis = {p["numero"] for p in tt["lignes"].get("paiements", []) if p["centre_id"] == Bc}
+libres_secB = [t["prefixe"] + "-" + str(n).zfill(4) for t in r2["tranches"] for n in range(t["debut"], t["fin"] + 1) if t["prefixe"] + "-" + str(n).zfill(4) not in servis]
+t1 = {"prefixe": libres_secB[0][:4], "debut": int(libres_secB[0][5:])}
+t2 = {"fin": max(max(x["fin"] for x in r2["tranches"]), max(x["fin"] for x in ra2["tranches"]))}
 c, r = req("recus/tranche", {"centre": A}, secB)
 verifier("pas de tranche dans un centre où l'on n'encaisse pas", c == 403, r)
 num = lambda t, k: t["prefixe"] + "-" + str(t["debut"] + k).zfill(4)
@@ -421,8 +431,20 @@ res = r["resultats"]
 verifier("reçu numéroté hors ligne depuis sa tranche : accepté", res[0]["ok"] is True, res[0])
 verifier("numéro de tranche déjà utilisé : refusé", res[1]["ok"] is False and "déjà utilisé" in res[1].get("erreur", ""), res[1])
 verifier("numéro hors de ses tranches : refusé", res[2]["ok"] is False, res[2])
-_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "paiements", "id": pay(), "champs": {"centre_id": Bc, "eleve_id": el1, "numero": num(t1, 1), "montant": 1000, "date": jj(auj), "mode": "especes"}}]}, adm)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "paiements", "id": pay(), "champs": {"centre_id": Bc, "eleve_id": el1, "numero": libres_secB[1], "montant": 1000, "date": jj(auj), "mode": "especes"}}]}, adm)
 verifier("la tranche d'un autre compte : refusée", r["resultats"][0]["ok"] is False, r)
+c, r = req("recus/tranche", {"centre": "cl-inexistant-centre"}, adm)
+verifier("tranche pour un centre inexistant : refusée", c == 404, (c, r))
+# Lot avec une opération malformée : elle seule est refusée, les autres passent.
+pm = pay()
+_, r = req("sync/pousser", {"ops": [
+    {"op": op(), "t": "eleves", "id": el1, "champs": {"quartier": ["pas", "un", "texte"]}},
+    {"op": op(), "t": "eleves", "id": "EL-MAJUSCULES-1", "champs": {"centre_id": Bc, "nom": "X"}},
+    {"op": op(), "t": "paiements", "id": pm, "champs": {"centre_id": Bc, "eleve_id": el1, "montant": 500, "date": jj(auj), "mode": "especes"}},
+]}, adm)
+res = r["resultats"]
+verifier("valeur non scalaire : refusée sans faire tomber le lot", res[0]["ok"] is False and res[2]["ok"] is True, res)
+verifier("identifiant en majuscules refusé (clés identiques sous MySQL)", res[1]["ok"] is False, res[1])
 ps = pay()
 req("sync/pousser", {"ops": [{"op": op(), "t": "paiements", "id": ps, "champs": {"centre_id": Bc, "eleve_id": el1, "montant": 1000, "date": jj(auj), "mode": "especes"}}]}, adm)
 _, t = req("sync/tirer", jeton=adm)
@@ -527,6 +549,35 @@ verifier("l'enseignant fait l'appel de SA classe du jour", r["resultats"][0]["ok
 verifier("l'enseignant ne pointe pas une classe où il n'a pas cours", r["resultats"][1]["ok"] is False, r["resultats"][1])
 _, r = req("sync/pousser", {"ops": [{"op": op(), "t": "seances", "id": sid(auj, clX) + "x", "champs": {"centre_id": Bc, "classe_id": clX, "date": jj(auj), "debut": "16:00", "fin": "18:00"}}]}, actA)
 verifier("un actionnaire ne fait pas l'appel", r["resultats"][0]["ok"] is False, r)
+
+# ── Pouvoirs de l'admin : droits retirés à un partenaire, appliqués par le serveur ──
+_, lst = req("comptes", jeton=adm)
+ra = next(u for u in lst["comptes"] if u["identifiant"] == "resp.a")
+base = {"id": ra["id"], "identifiant": "resp.a", "nom": ra["nom"], "tel": ra.get("tel") or "", "actif": True,
+        "acces": [{"centre_id": c, "role": r} for c, r in ra["acces"].items()], "matieres": ra.get("matieres", [])}
+c, r = req("comptes/enregistrer", dict(base, restrictions=["tarifs.fixer", "caisse.corriger"]), adm)
+verifier("l'admin retire deux droits à un responsable", c == 200, r)
+_, moi = req("moi", jeton=respA)
+verifier("le partenaire voit ses droits retirés (profil)", sorted(moi.get("restrictions", [])) == ["caisse.corriger", "tarifs.fixer"], moi.get("restrictions"))
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "classes", "id": clA, "champs": {"mensualite": 9000}}]}, respA)
+verifier("droit retiré : le responsable ne fixe plus les tarifs", r["resultats"][0]["ok"] is False, r)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "eleves", "id": "el-" + uuid.uuid4().hex[:12], "champs": {"centre_id": A, "classe_id": clA, "nom": "LIBRE" + suffixe, "prenoms": "Droit"}}]}, respA)
+verifier("… mais garde ses autres droits (inscrire)", r["resultats"][0]["ok"] is True, r)
+c, r = req("comptes/enregistrer", {"id": ra["id"], "identifiant": "resp.a", "nom": ra["nom"], "acces": base["acces"], "restrictions": []}, respA)
+verifier("un partenaire ne se rend pas ses droits lui-même", c == 403, r)
+c, r = req("comptes/enregistrer", dict(base, restrictions=["pouvoir.inventé"]), adm)
+verifier("capacité inconnue refusée", c == 422, r)
+# Lecture seule : tous les droits retirables ôtés → il lit, n'écrit plus rien.
+c, r = req("comptes/enregistrer", dict(base, restrictions=moi["retirables"]), adm)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "eleves", "id": "el-" + uuid.uuid4().hex[:12], "champs": {"centre_id": A, "classe_id": clA, "nom": "BLOQUE" + suffixe, "prenoms": "Lecture"}}]}, respA)
+_, t = req("sync/tirer", jeton=respA)
+verifier("lecture seule : plus aucune écriture", r["resultats"][0]["ok"] is False, r)
+verifier("lecture seule : la lecture du centre reste possible", any(cc["id"] == A for cc in t["lignes"]["centres"]) and not t["lignes"].get("paiements"), "")
+c, r = req("comptes", jeton=respA)
+verifier("lecture seule : plus d'accès aux comptes", c == 403, c)
+req("comptes/enregistrer", dict(base, restrictions=[]), adm)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "classes", "id": clA, "champs": {"mensualite": 7500}}]}, respA)
+verifier("droits rendus : le responsable refixe les tarifs", r["resultats"][0]["ok"] is True, r)
 
 _, j = req("journal", {"limite": 200}, jeton=adm)
 actions = {l["action"] for l in j["lignes"]}

@@ -58,13 +58,22 @@ finances + emploi du temps) · secrétaire/surveillant · enseignant. Voir `g_ca
    puis activer le certificat SSL du sous-domaine.
 2. **Jeton d'installation** — ajouter dans `api/payment_config.php` (sur le serveur, gitignoré) :
    `define('G_INSTALL_TOKEN', '<64 caractères aléatoires>');`
-   (à défaut, `CAMPUS_INSTALL_TOKEN` est accepté). `MYSQL_PASS` y est déjà.
+   Jeton **dédié** (celui de Campus n'est plus accepté : sa fuite ouvrirait la comptabilité
+   des centres). `MYSQL_PASS` y est déjà.
 3. **Déployer** la branche (voir la procédure du dépôt).
 4. Ouvrir `https://gestion.veritas-school.com` : l'écran d'installation demande le jeton,
    crée les tables, les deux centres d'après les affiches 2026-2027 (adresses, téléphones,
    classes, jours et horaires — dont ceux des 3e à Germinal), l'année 2026-2027 (rentrée le
    16 septembre, septembre gratuit), les matières, et le compte administrateur.
 5. Créer les comptes (Comptes et accès) et transmettre les identifiants par WhatsApp.
+
+Une fois l'administrateur créé, l'installation ne peut plus en créer un autre (409). Pour
+le recréer (mot de passe perdu), déposer par FTP un fichier vide `gestion/api/data/.install_ouverte`,
+refaire l'étape 4, puis **supprimer ce fichier**. Cinq jetons faux en 15 min bloquent l'IP.
+
+**Panneau d'administration** : caché. L'admin tape **4 fois sur le logo** (en haut à gauche) ;
+il se referme seul au bout de 15 min. Il y règle, compte par compte, les droits retirés à
+chaque partenaire (le serveur les applique : un droit retiré est refusé même par l'API).
 
 Réinstaller est sans risque : `install.php` est idempotent et ajoute seulement ce qui manque
 (tables, colonnes, index).

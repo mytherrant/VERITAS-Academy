@@ -20,7 +20,9 @@ const G_ROLES = ['responsable', 'actionnaire', 'secretaire', 'enseignant'];
 function g_capacites(): array {
     return [
         'responsable' => ['centre.voir', 'eleves.gerer', 'appel.faire', 'paiements.encaisser', 'paiements.voir', 'finances.voir',
-                          'depenses.saisir', 'depenses.voir', 'enseignants.gerer', 'comptes.gerer', 'journal.voir', 'stats.voir', 'emploi.gerer'],
+                          'depenses.saisir', 'depenses.voir', 'enseignants.gerer', 'comptes.gerer', 'journal.voir', 'stats.voir', 'emploi.gerer',
+                          // Pouvoirs de correction : nommés pour que l'admin puisse les retirer un par un.
+                          'appel.corriger', 'caisse.corriger', 'depenses.valider', 'tarifs.fixer', 'remises.accorder'],
         // Demande de Jacques (02/11/2026) : les actionnaires tiennent l'emploi du temps de leur centre.
         'actionnaire' => ['centre.voir', 'finances.voir', 'paiements.voir', 'depenses.voir', 'stats.voir', 'emploi.gerer'],
         'secretaire'  => ['centre.voir', 'eleves.gerer', 'appel.faire', 'paiements.encaisser', 'paiements.voir', 'depenses.saisir', 'depenses.voir'],
@@ -67,12 +69,14 @@ function g_garde_connexion(string $identifiant): void {
         $depuis = g_now('-' . (int) G_LOGIN_FENETRE_MIN . ' minutes');
         $st = g_pdo()->prepare(
             "SELECT SUM(CASE WHEN ip = ? THEN 1 ELSE 0 END) AS par_ip,
+                    SUM(CASE WHEN ip = ? AND entite_id = ? THEN 1 ELSE 0 END) AS par_couple,
                     SUM(CASE WHEN entite_id = ? THEN 1 ELSE 0 END) AS par_compte
                FROM g_journal WHERE action = 'connexion_echec' AND le > ?"
         );
-        $st->execute([g_ip(), $identifiant, $depuis]);
+        $st->execute([g_ip(), g_ip(), $identifiant, $identifiant, $depuis]);
         $r = $st->fetch() ?: [];
-        if ((int) ($r['par_ip'] ?? 0) >= G_LOGIN_MAX_IP || (int) ($r['par_compte'] ?? 0) >= G_LOGIN_MAX_COMPTE) {
+        if ((int) ($r['par_ip'] ?? 0) >= G_LOGIN_MAX_IP || (int) ($r['par_couple'] ?? 0) >= G_LOGIN_MAX_COMPTE
+            || (int) ($r['par_compte'] ?? 0) >= G_LOGIN_MAX_COMPTE * 6) {
             header('Retry-After: ' . (G_LOGIN_FENETRE_MIN * 60));
             g_fail('Trop de tentatives. Réessayez dans ' . G_LOGIN_FENETRE_MIN . ' minutes.', 429);
         }
@@ -111,12 +115,12 @@ function g_acces_de(string $uid): array {
  * Exige une session valide. Contexte renvoyé :
  *   uid, identifiant, nom, admin (bool), acces [centre_id => rôle], session_id
  */
-function g_exiger_session(): array {
-    $j = g_bearer();
+function g_exiger_session(?string $jetonForce = null): array {
+    $j = $jetonForce ?? g_bearer();
     if ($j === '') { g_fail('Connexion requise.', 401); }
     $pdo = g_pdo();
     $st = $pdo->prepare(
-        'SELECT s.id AS sid, s.expire_le, u.id, u.identifiant, u.nom, u.admin_global, u.actif
+        'SELECT s.id AS sid, s.expire_le, u.id, u.identifiant, u.nom, u.admin_global, u.actif, u.restrictions
            FROM g_sessions s JOIN g_utilisateurs u ON u.id = s.utilisateur_id
           WHERE s.jeton_hash = ?'
     );
@@ -135,6 +139,8 @@ function g_exiger_session(): array {
         'nom'         => (string) $r['nom'],
         'admin'       => (int) $r['admin_global'] === 1,
         'acces'       => g_acces_de((string) $r['id']),
+        // Capacités retirées à ce compte par l'administrateur (tous centres confondus).
+        'restrictions' => array_values(array_filter(explode(',', (string) ($r['restrictions'] ?? '')))),
         'session_id'  => (string) $r['sid'],
     ];
 }
@@ -143,7 +149,21 @@ function g_exiger_session(): array {
 function g_peut(array $ctx, string $cap, ?string $centreId): bool {
     if ($ctx['admin']) { return true; }
     if ($centreId === null || !isset($ctx['acces'][$centreId])) { return false; }
+    if (in_array($cap, $ctx['restrictions'] ?? [], true)) { return false; }
     return in_array($cap, g_capacites()[$ctx['acces'][$centreId]] ?? [], true);
+}
+
+/** g_peut() pour les règles métier appelées pendant sync/pousser (contexte global). */
+function g_ctx_peut(string $cap, string $centreId): bool {
+    $ctx = $GLOBALS['g_ctx'] ?? null;
+    return $ctx !== null && g_peut($ctx, $cap, $centreId);
+}
+
+/** Capacités que l'admin peut retirer à un compte (centre.voir reste : sans lui, plus rien n'a de sens). */
+function g_capacites_retirables(): array {
+    $toutes = [];
+    foreach (g_capacites() as $caps) { $toutes = array_merge($toutes, $caps); }
+    return array_values(array_diff(array_unique($toutes), ['centre.voir']));
 }
 
 function g_exiger(array $ctx, string $cap, ?string $centreId): void {
@@ -160,6 +180,7 @@ function g_centres_avec(array $ctx, string $cap): array {
         return array_map('strval', g_pdo()->query('SELECT id FROM g_centres WHERE supprime = 0')->fetchAll(PDO::FETCH_COLUMN));
     }
     $out = [];
+    if (in_array($cap, $ctx['restrictions'] ?? [], true)) { return $out; }
     foreach ($ctx['acces'] as $cid => $role) {
         if (in_array($cap, g_capacites()[$role] ?? [], true)) { $out[] = (string) $cid; }
     }

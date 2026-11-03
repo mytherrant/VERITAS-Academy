@@ -20,6 +20,7 @@ const sansNbsp = (t) => String(t).replace(/ /g, ' ');
   page.setDefaultTimeout(15000);
   const erreurs = [];
   page.on('pageerror', (e) => erreurs.push(e.message));
+  page.on('requestfailed', (r) => erreurs.push('requête coupée : ' + r.method() + ' ' + r.url().replace(B, '') + ' (' + (r.failure() || {}).errorText + ')'));
   page.on('console', (m) => { if (m.type() === 'error') erreurs.push(m.text()); });
   const aJour = () => page.waitForFunction(() => document.getElementById('puce-sync').textContent === 'À jour', null, { timeout: 15000 }).catch(() => {});
   const api = (route, corps) => page.evaluate(async ([route, corps]) => {
@@ -141,8 +142,19 @@ const sansNbsp = (t) => String(t).replace(/ /g, ' ');
   const rec = nombre('recettes'), dep = nombre('dépenses validées'), res = nombre('résultat');
   ok('bilan : recettes et dépenses du mois comptées', rec >= verse && dep >= 3000, bloc.slice(0, 200));
   ok('bilan : résultat = recettes − dépenses', res === rec - dep, rec + ' − ' + dep + ' ≠ ' + res);
-  const part = bloc.match(/Jacques Miterand TAKOU40 %(-?[\d ]+) F/);
-  ok('bilan : part de l\'actionnaire (40 %) = 40 % du résultat', part && +part[1].replace(/ /g, '') === Math.round(res * 0.4), part ? part[1] : bloc.slice(-300));
+  // Parts des actionnaires, centre par centre : quels que soient les noms et les pourcentages
+  // laissés par les autres bancs, chaque part doit valoir son pourcentage du résultat du centre.
+  const parts = [];
+  bil.split(/(?=VÉRITAS )/).forEach((c) => {
+    const i = c.indexOf('Part des actionnaires');
+    const m = c.match(/(-?[\d ]+) Frésultat/);
+    if (i < 0 || !m) return;
+    const r = +m[1].replace(/ /g, '');
+    for (const p of c.slice(i + 21).matchAll(/([^\d%−-]+?)(\d+(?:,\d+)?) %(-?[\d ]+) F/g)) {
+      parts.push({ nom: p[1], attendu: Math.round(r * parseFloat(p[2].replace(',', '.')) / 100), lu: +p[3].replace(/ /g, '') });
+    }
+  });
+  ok('bilan : chaque part d\'actionnaire = son pourcentage du résultat', parts.length && parts.every((p) => Math.abs(p.lu - p.attendu) <= 1), JSON.stringify(parts) || bil.slice(-300));
   await page.screenshot({ path: OUT + '/g_bilan.png', fullPage: true });
 
   // ── Annulation motivée ──

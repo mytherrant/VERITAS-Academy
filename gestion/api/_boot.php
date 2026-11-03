@@ -27,7 +27,7 @@ if (!defined('G_DB_PASS'))   define('G_DB_PASS', defined('MYSQL_PASS') ? MYSQL_P
 if (!defined('G_SQLITE_FILE')) define('G_SQLITE_FILE', __DIR__ . '/data/gestion.sqlite');
 // Jeton d'installation : FAIL-CLOSED (valeur aléatoire inconnue s'il n'est pas posé).
 if (!defined('G_INSTALL_TOKEN')) {
-    define('G_INSTALL_TOKEN', defined('CAMPUS_INSTALL_TOKEN') ? CAMPUS_INSTALL_TOKEN : bin2hex(random_bytes(32)));
+    define('G_INSTALL_TOKEN', bin2hex(random_bytes(32)));   // fail-closed : jeton dédié obligatoire
 }
 if (!defined('G_SESSION_JOURS'))   define('G_SESSION_JOURS', 30);
 if (!defined('G_BCRYPT_COST'))     define('G_BCRYPT_COST', 12);
@@ -44,11 +44,8 @@ header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: no-referrer');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
-$G_ORIGINES = [
-    'https://gestion.veritas-school.com',
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
-];
+$G_ORIGINES = ['https://gestion.veritas-school.com'];
+if (G_DB_DRIVER === 'sqlite') { $G_ORIGINES[] = 'http://localhost:8000'; $G_ORIGINES[] = 'http://127.0.0.1:8000'; }
 $g_origine = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($g_origine, $G_ORIGINES, true)) {
     header('Access-Control-Allow-Origin: ' . $g_origine);
@@ -80,6 +77,7 @@ set_exception_handler(function (Throwable $e): void {
 });
 set_error_handler(function (int $no, string $str, string $file = '', int $line = 0): bool {
     if (!(error_reporting() & $no)) { return false; }
+    if ($no & (E_DEPRECATED | E_USER_DEPRECATED)) { error_log('[gestion][obsolète] ' . $str . ' @ ' . $file . ':' . $line); return true; }
     throw new ErrorException($str, 0, $no, $file, $line);
 });
 
@@ -169,9 +167,11 @@ function g_pdo(): PDO {
             $pdo->exec('PRAGMA journal_mode = WAL');
         } else {
             if (G_DB_PASS === '') {
-                g_fail('Base indisponible : MYSQL_PASS non défini dans api/payment_config.php.', 503);
+                error_log('[gestion] MYSQL_PASS non défini dans api/payment_config.php');
+                g_fail('Base de données indisponible.', 503);
             }
             $opts[PDO::ATTR_EMULATE_PREPARES] = false;
+            $opts[PDO::ATTR_TIMEOUT] = 5;
             $pdo = new PDO(
                 'mysql:host=' . G_DB_HOST . ';dbname=' . G_DB_NAME . ';charset=utf8mb4',
                 G_DB_USER, G_DB_PASS, $opts

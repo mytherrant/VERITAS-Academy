@@ -28,10 +28,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
     g_ok(['installe' => $installe, 'admin' => $admin]);
 }
 
+// Anti-force-brute du jeton : 5 refus par IP et par quart d'heure.
+try {
+    $st = $pdo->prepare("SELECT COUNT(*) FROM g_journal WHERE action = 'installation_refusee' AND ip = ? AND le > ?");
+    $st->execute([g_ip(), g_now('-15 minutes')]);
+    if ((int) $st->fetchColumn() >= 5) { g_fail('Trop de tentatives. Réessayez plus tard.', 429); }
+} catch (PDOException $e) { /* tables absentes : première installation */ }
 $jeton = (string) (g_body()['jeton'] ?? '');
 if ($jeton === '' || !hash_equals(G_INSTALL_TOKEN, $jeton)) {
     g_journal(null, 'installation_refusee');
-    g_fail('Jeton d\'installation invalide (G_INSTALL_TOKEN dans api/payment_config.php).', 403);
+    g_fail('Jeton d\'installation invalide.', 403);
 }
 
 $action = (string) g_param('action', '');
@@ -97,9 +103,15 @@ if ($action === 'installer') {
 }
 
 if ($action === 'admin') {
-    $ident = mb_strtolower(trim((string) g_param('identifiant', '')));
-    $mdp   = (string) g_param('mdp', '');
-    $nom   = trim((string) g_param('nom', 'Administrateur'));
+    $ident = mb_strtolower(trim((string) (g_body()['identifiant'] ?? '')));
+    $mdp   = (string) (g_body()['mdp'] ?? '');
+    $nom   = mb_substr(trim((string) (g_body()['nom'] ?? 'Administrateur')), 0, 120);
+    // Une fois un admin actif en place, cette porte se ferme : la rouvrir demande de déposer
+    // le fichier témoin data/.install_ouverte sur le serveur (accès FTP = preuve de propriété).
+    $adminActif = (int) $pdo->query('SELECT COUNT(*) FROM g_utilisateurs WHERE admin_global = 1 AND actif = 1')->fetchColumn() > 0;
+    if ($adminActif && !is_file(__DIR__ . '/data/.install_ouverte')) {
+        g_fail('Un administrateur existe déjà. Pour en recréer un, déposez le fichier api/data/.install_ouverte sur le serveur.', 409);
+    }
     if (!preg_match('/^[a-z0-9._-]{3,60}$/', $ident)) { g_fail('Identifiant : 3 à 60 caractères (lettres, chiffres, . _ -).', 422); }
     if (mb_strlen($mdp) < 10) { g_fail('Mot de passe : 10 caractères minimum.', 422); }
     $st = $pdo->prepare('SELECT id FROM g_utilisateurs WHERE identifiant = ?');
