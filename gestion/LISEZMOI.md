@@ -72,9 +72,10 @@ Une fois l'administrateur créé, l'installation ne peut plus en créer un autre
 le recréer (mot de passe perdu), déposer par FTP un fichier vide `gestion/api/data/.install_ouverte`,
 refaire l'étape 4, puis **supprimer ce fichier**. Cinq jetons faux en 15 min bloquent l'IP.
 
-**Administration** : entrée visible pour l'admin (Plus › Administration, et tuile de l'accueil),
-toujours ouverte (l'ancien geste « 4 taps sur le logo » et sa minuterie de 15 min sont retirés ;
-le téléphone reste protégé par le code de verrouillage). L'admin y règle, compte par compte, les droits retirés à
+**Administration** : invisible. L'admin la fait apparaître par un **appui long de 2 s sur le
+logo** (en haut à gauche) ; elle se referme seule au bout de 15 min, par le même appui long ou
+par « Refermer l'administration ». Tant qu'elle est fermée, aucune tuile ni aucun lien ne la
+signale. L'admin y règle, compte par compte, les droits retirés à
 chaque partenaire (le serveur les applique : un droit retiré est refusé même par l'API).
 
 Réinstaller est sans risque : `install.php` est idempotent et ajoute seulement ce qui manque

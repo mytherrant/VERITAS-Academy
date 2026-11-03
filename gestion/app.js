@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.9.6';
+  var VERSION = '0.9.7';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -425,14 +425,43 @@
   }
   var saisiePin = '';
 
-  // Administration : toujours ouverte à l'administrateur, depuis Plus › Administration
-  // ou la tuile de l'accueil (demande de Jacques, 03/11/2026 : le geste caché du logo
-  // et sa minuterie de 15 min déroutaient). L'écran du téléphone reste protégé par le
-  // code de verrouillage ; le serveur reste seul juge des droits.
-  function panneauOuvert() { return estAdmin(); }
-  /** Écrans réservés : l'admin y a toujours accès ; un responsable, selon ses droits. */
-  function accesGestion(cap) { return estAdmin() || peutQuelquePart(cap); }
-  function ouvrirPanneauDiscret() {}
+  // Administration : INVISIBLE (demande de Jacques, 03/11/2026). Elle s'ouvre par un
+  // appui long de 2 s sur le logo — impossible à déclencher en tapotant — et se
+  // referme seule après 15 min, ou par le même appui long. Aucune tuile ni aucun lien
+  // ne la signale tant qu'elle est fermée. (Le serveur reste seul juge des droits.)
+  var PANNEAU_MS = 15 * 60 * 1000, APPUI_LONG_MS = 2000;
+  function panneauOuvert() { return estAdmin() && !!E.panneauJusqua && Date.now() < E.panneauJusqua; }
+  function basculerPanneau() {
+    if (!estAdmin()) return;
+    if (panneauOuvert()) { E.panneauJusqua = 0; toast('Administration refermée.'); location.hash = '#/accueil'; rendre(); return; }
+    E.panneauJusqua = Date.now() + PANNEAU_MS;
+    toast('Administration ouverte.');
+    location.hash = '#/admin';
+    rendre();
+  }
+  /** Écrans réservés : pour l'admin, seulement administration ouverte ; pour un responsable, selon ses droits. */
+  function accesGestion(cap) { return estAdmin() ? panneauOuvert() : peutQuelquePart(cap); }
+  /** Raccourcis de l'admin (« Ajouter un enseignant ») : ouvrent l'administration sans changer d'écran. */
+  function ouvrirPanneauDiscret() { if (estAdmin() && !panneauOuvert()) E.panneauJusqua = Date.now() + PANNEAU_MS; }
+  // Appui long sur le logo : pointeur (doigt ou souris) tenu 2 s sans bouger.
+  (function () {
+    var minuterie = null, x0 = 0, y0 = 0, declenche = false;
+    var annuler = function () { if (minuterie) { clearTimeout(minuterie); minuterie = null; } };
+    document.addEventListener('pointerdown', function (ev) {
+      if (!ev.target.closest || !ev.target.closest('.entete .marque') || !estAdmin()) return;
+      declenche = false; x0 = ev.clientX; y0 = ev.clientY; annuler();
+      minuterie = setTimeout(function () {
+        minuterie = null; declenche = true;
+        if (navigator.vibrate) { try { navigator.vibrate(30); } catch (e) {} }
+        basculerPanneau();
+      }, APPUI_LONG_MS);
+    });
+    document.addEventListener('pointermove', function (ev) { if (minuterie && Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) > 12) annuler(); });
+    ['pointerup', 'pointercancel'].forEach(function (t) { document.addEventListener(t, annuler); });
+    // Après un appui long, le « clic » qui suit ne doit pas ramener à l'accueil ; et pas de menu du navigateur.
+    document.addEventListener('click', function (ev) { if (declenche && ev.target.closest && ev.target.closest('.entete .marque')) { declenche = false; ev.preventDefault(); ev.stopImmediatePropagation(); } }, true);
+    document.addEventListener('contextmenu', function (ev) { if (ev.target.closest && ev.target.closest('.entete .marque')) ev.preventDefault(); });
+  })();
   function peutCreerEnseignant(cid) { return estAdmin() || peut('comptes.gerer', cid); }
   function boutonAjoutEnseignant(cid) {
     return peutCreerEnseignant(cid) ? '<button class="btn or" type="button" data-a="ajouter-enseignant" data-centre="' + esc(cid) + '">' + ico('plus', 'p') + 'Ajouter un enseignant</button>' : '';
@@ -611,7 +640,7 @@
         tuiles.push(['#/assiduite', 'activity', 'Assiduité', 'Taux, retards, alertes']);
         tuiles.push(['#/eleves', 'graduation', 'Élèves', peutQuelquePart('eleves.gerer') ? 'Inscrire, rechercher, importer' : 'Fiches et contacts des parents']);
         tuiles.push(['#/emploi', 'calendar', 'Emploi du temps', peutQuelquePart('emploi.gerer') ? 'Classes, créneaux, enseignants' : 'Les cours de la semaine']);
-        if (estAdmin()) tuiles.push(['#/admin', 'shield', 'Administration', 'Comptes, identifiants, partenaires et droits', 'ouvrir-admin']);
+        if (panneauOuvert()) tuiles.push(['#/admin', 'shield', 'Administration', 'Comptes, identifiants, partenaires et droits']);
         if (peutQuelquePart('finances.voir')) tuiles.push(['#/actionnaires', 'handshake', 'Actionnaires', 'Parts de chaque centre']);
         if (!estAdmin() && accesGestion('comptes.gerer')) tuiles.push(['#/comptes', 'users', 'Comptes et accès', 'Qui peut faire quoi']);
         if (!estAdmin() && accesGestion('journal.voir')) tuiles.push(['#/journal', 'clock', 'Journal', 'Qui a modifié quoi']);
@@ -682,14 +711,16 @@
     admin: {
       droit: panneauOuvert,
       html: function () {
-        return '<h1>Administration</h1><p class="sous-titre">Comptes et identifiants, droits des partenaires, centres et journal.</p>' +
+        var reste = Math.max(1, Math.round((E.panneauJusqua - Date.now()) / 60000));
+        return '<h1>Administration</h1><p class="sous-titre">Comptes et identifiants, droits des partenaires, centres et journal. Se referme seule dans ' + reste + ' min.</p>' +
           '<div class="liste">' +
           [['#/centres', 'building', 'Centres, année et matières', 'Ouvrir un centre, horaires, tarifs, messages'], ['#/comptes', 'users', 'Comptes et accès', 'Créer, désactiver, mots de passe, appareils'],
            ['#/journal', 'clock', 'Journal', 'Qui a modifié quoi, partout']].map(function (l) {
             return '<a class="ligne" href="' + l[0] + '"><span class="pastille">' + ico(l[1]) + '</span><span class="corps"><b>' + l[2] + '</b><small>' + l[3] + '</small></span><span class="fin">›</span></a>';
           }).join('') + '</div>' +
           '<h2>Partenaires et droits</h2><p class="sous-titre">Retirez à un partenaire les pouvoirs que vous voulez garder pour vous. Le serveur les lui refuse aussitôt.</p>' +
-          '<div id="zone-droits"><div class="carte vide">Chargement…</div></div>';
+          '<div id="zone-droits"><div class="carte vide">Chargement…</div></div>' +
+          '<div class="actions"><button class="btn clair" type="button" data-a="fermer-panneau">' + ico('lock', 'p') + 'Refermer l\'administration</button></div>';
       },
       apres: function () { chargerDroits(); }
     },
@@ -766,7 +797,7 @@
         if (peutQuelquePart('finances.voir')) liens.push(['#/bilan', 'trending', 'Bilan financier', 'Recettes, dépenses, parts des actionnaires']);
         if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) liens.push(['#/enseignants', 'presentation', 'Enseignants', 'Heures faites, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) liens.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
-        if (estAdmin()) liens.push(['#/admin', 'shield', 'Administration', 'Comptes et identifiants, partenaires et droits, centres, journal', 'ouvrir-admin']);
+        if (panneauOuvert()) liens.push(['#/admin', 'shield', 'Administration', 'Comptes et identifiants, partenaires et droits, centres, journal']);
         if (!estAdmin() && accesGestion('comptes.gerer')) liens.push(['#/comptes', 'users', 'Comptes et accès', 'Qui peut faire quoi']);
         if (!estAdmin() && accesGestion('journal.voir')) liens.push(['#/journal', 'clock', 'Journal', 'Qui a modifié quoi']);
         if (peutQuelquePart('finances.voir')) liens.push(['#/actionnaires', 'handshake', 'Actionnaires', 'Parts de chaque centre']);
@@ -2721,7 +2752,7 @@
           }).join('') + '</tr>';
         }).join('') + '</tbody></table></div>';
     }
-    if (estAdmin() || peutQuelquePart('comptes.gerer')) h += '<div class="actions"><a class="btn or" href="#/comptes" data-a="ouvrir-comptes">' + ico('users', 'p') + 'Gérer les comptes</a></div>';
+    if (accesGestion('comptes.gerer')) h += '<div class="actions"><a class="btn or" href="#/comptes" data-a="ouvrir-comptes">' + ico('users', 'p') + 'Gérer les comptes</a></div>';
     return h;
   }
 
@@ -3016,6 +3047,7 @@
       var a = ligne('actionnaires', el.dataset.id);
       if (a) confirmer('Retirer ' + a.nom + ' des actionnaires ?', 'Retirer', function () { muter('actionnaires', a.id, {}, true).then(rendre); });
     },
+    'fermer-panneau': function () { if (panneauOuvert()) basculerPanneau(); },
     'ouvrir-comptes': function () {
       ouvrirPanneauDiscret();
       if (location.hash === '#/comptes') rendre(); else location.hash = '#/comptes';
