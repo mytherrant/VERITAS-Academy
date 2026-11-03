@@ -41,6 +41,14 @@ function g_schema(): array {
             'active' => 'int',
         ] + G_COLS_SYNC, 'index' => [['rev']]],
 
+        // Agenda du centre : rencontres, rendez-vous, réunions de parents… Les échéances
+        // de paiement ne sont pas stockées : le téléphone les déduit du jour d'échéance.
+        'g_evenements' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'titre' => 'str:160', 'type' => 'str:20',
+            'date' => 'str:10', 'heure' => 'str:5', 'fin' => 'str:5', 'lieu' => 'str:160',
+            'note' => 'str:400', 'rappel_min' => 'int',
+        ] + G_COLS_SYNC, 'index' => [['centre_id', 'date'], ['rev']]],
+
         'g_actionnaires' => ['cols' => [
             'id' => 'id', 'centre_id' => 'ref', 'nom' => 'str:120', 'tel' => 'str:30',
             'part_centiemes' => 'int',           // 3333 = 33,33 %
@@ -249,6 +257,10 @@ function g_registre(): array {
             'table' => 'g_paies', 'portee' => 'centre_id', 'lire' => 'finances.voir', 'ecrire' => 'enseignants.gerer', 'proprio' => 'enseignant_id',
             'champs' => ['centre_id', 'enseignant_id', 'mois', 'montant', 'date', 'mode', 'note', 'annule', 'motif_annulation'],
         ],
+        'evenements' => [
+            'table' => 'g_evenements', 'portee' => 'centre_id', 'lire' => 'centre.voir', 'ecrire' => 'agenda.gerer',
+            'champs' => ['centre_id', 'titre', 'type', 'date', 'heure', 'fin', 'lieu', 'note', 'rappel_min'],
+        ],
         'actionnaires' => [
             'table' => 'g_actionnaires', 'portee' => 'centre_id', 'lire' => 'finances.voir', 'ecrire' => 'admin',
             'champs' => ['centre_id', 'nom', 'tel', 'part_centiemes', 'utilisateur_id'],
@@ -309,4 +321,25 @@ function g_installer_schema(PDO $pdo): array {
         }
     }
     return $rapport;
+}
+
+/**
+ * Migration automatique : après un déploiement qui ajoute une table ou une colonne,
+ * le premier appel à l'API l'applique (sans relancer install.php). Une empreinte du
+ * schéma, gardée dans data/, évite de recommencer à chaque appel. Rien ne se fait
+ * tant que l'application n'est pas installée (install.php crée aussi les données).
+ */
+function g_schema_a_jour(): void {
+    try {
+        $empreinte = substr(hash('sha256', json_encode(g_schema())), 0, 16);
+        $fichier = __DIR__ . '/data/.schema';
+        if (@file_get_contents($fichier) === $empreinte) { return; }
+        $pdo = g_pdo();
+        try { $pdo->query('SELECT 1 FROM g_utilisateurs LIMIT 1'); } catch (Throwable $e) { return; }
+        $r = g_installer_schema($pdo);
+        if (!$r['erreurs']) { @file_put_contents($fichier, $empreinte, LOCK_EX); }
+        else { error_log('[gestion][schema] ' . implode(' ; ', $r['erreurs'])); }
+    } catch (Throwable $e) {
+        error_log('[gestion][schema] ' . $e->getMessage());
+    }
 }

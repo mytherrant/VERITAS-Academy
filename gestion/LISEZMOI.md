@@ -48,6 +48,18 @@ servie aux seuls comptes qui voient les dépenses du centre.
 faites, dû selon le contrat (heure, séance, forfait avec retenue), paies (annulables, jamais
 modifiées) comptées en charges dans le bilan. L'enseignant voit SES heures, SON contrat, SES paies.
 
+**Agenda :** rendez-vous, rencontres, réunions de parents (table `g_evenements`, droit `agenda.gerer` :
+responsable, actionnaire, secrétaire ; tout le centre les voit). Le téléphone y ajoute ce qu'il déduit :
+l'échéance des mensualités (jour d'échéance du centre, mois facturés), la rentrée et la fin d'année.
+La cloche de l'en-tête rassemble ce qui demande attention (rendez-vous du jour et du lendemain,
+échéance à 3 jours, dépenses à valider, appels en retard, alertes d'assiduité). Rappels du
+téléphone (Notification API) quand l'appli est ouverte ; pour un rappel sûr appli fermée,
+« Ajouter au calendrier du téléphone » exporte un .ics avec alarme.
+
+**Migration automatique :** une table ou une colonne ajoutée à `_schema.php` est créée au premier
+appel de l'API après le déploiement (`g_schema_a_jour`, empreinte dans `api/data/.schema`) ;
+plus besoin de relancer `install.php` pour cela.
+
 **Rôles :** admin global (les deux centres) · responsable · actionnaire (consultation des
 finances + emploi du temps) · secrétaire/surveillant · enseignant. Voir `g_capacites()`.
 
@@ -113,6 +125,7 @@ node tests/banc_gestion_appel.cjs <dossier>      # appel, retards, clôture, ale
 node tests/banc_gestion_exports.cjs <dossier>    # feuille PNG/PDF (structure vérifiée), messages WhatsApp/SMS (Playwright)
 node tests/banc_gestion_caisse.cjs <dossier>     # échéancier, encaissement, reçu, relances, dépenses, bilan (Playwright)
 node tests/banc_gestion_enseignants.cjs <dossier> # enseignants, « Mes heures », reçu hors ligne, photo de justificatif (Playwright)
+node tests/banc_gestion_agenda.cjs <dossier>     # agenda, échéances, .ics, cloche, droits par rôle (Playwright)
 ```
 
 **Noms fictifs uniquement** dans le code et les bancs : le dépôt est public, les élèves sont mineurs.

@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.9.7';
+  var VERSION = '0.9.8';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -290,7 +290,8 @@
     }).then(function () {
       E.syncEnCours = false;
       majPuce();
-      if (change) rendre();
+      if (change) rendre(); else majCloche();
+      verifierRappels();
     });
     return E.syncPromesse;
   }
@@ -532,7 +533,7 @@
       sel = '<span class="doux">' + esc(centres[0].nom_court || centres[0].nom) + '</span>';
     }
     return '<header class="entete"><button type="button" class="marque" data-a="aller-accueil" aria-label="Accueil"><span class="logo" aria-hidden="true"></span><span class="nom">VÉRITAS</span></button>' +
-      '<span class="espace"></span>' + sel + '<button id="puce-sync" class="puce-sync" data-a="sync" type="button">À jour</button></header>';
+      '<span class="espace"></span>' + sel + boutonCloche() + '<button id="puce-sync" class="puce-sync" data-a="sync" type="button">À jour</button></header>';
   }
 
   function navBasse(actif) {
@@ -542,7 +543,7 @@
     var caisse = peutQuelquePart('paiements.voir');
     items.push(caisse ? ['caisse', 'wallet', 'Caisse'] : ['emploi', 'calendar', 'Planning']);
     items.push(['moi', 'list', 'Plus']);
-    var sousPlus = ['roles', 'admin', 'comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
+    var sousPlus = ['agenda', 'roles', 'admin', 'comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
     return '<nav class="nav-basse" aria-label="Navigation">' + items.map(function (i) {
       var on = i[0] === actif || (i[0] === 'moi' && sousPlus.indexOf(actif) >= 0) || (i[0] === 'appel' && actif === 'pointage') || (i[0] === 'caisse' && actif === 'jour');
       return '<a href="#/' + i[0] + '" class="' + (on ? 'actif' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + ico(i[1]) + i[2] + '</a>';
@@ -594,7 +595,7 @@
         var auj = new Date();
         var h = '<h1>Bonjour ' + esc(String(u.nom).split(' ')[0]) + '</h1><p class="sous-titre">' +
           esc(auj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })) + '</p>' +
-          bandeauEspace() + blocMesCours();
+          bandeauEspace() + blocMesCours() + blocProchainsRdv();
         if (estEnseignantQuelquePart() && centresChoisis().length) h += '<h2>Mes centres</h2>';
 
         var centres = centresChoisis();
@@ -639,6 +640,7 @@
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) tuiles.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
         tuiles.push(['#/assiduite', 'activity', 'Assiduité', 'Taux, retards, alertes']);
         tuiles.push(['#/eleves', 'graduation', 'Élèves', peutQuelquePart('eleves.gerer') ? 'Inscrire, rechercher, importer' : 'Fiches et contacts des parents']);
+        tuiles.push(['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances']);
         tuiles.push(['#/emploi', 'calendar', 'Emploi du temps', peutQuelquePart('emploi.gerer') ? 'Classes, créneaux, enseignants' : 'Les cours de la semaine']);
         if (panneauOuvert()) tuiles.push(['#/admin', 'shield', 'Administration', 'Comptes, identifiants, partenaires et droits']);
         if (peutQuelquePart('finances.voir')) tuiles.push(['#/actionnaires', 'handshake', 'Actionnaires', 'Parts de chaque centre']);
@@ -783,6 +785,9 @@
     roles: {
       html: function () { return pageRoles(); }
     },
+    agenda: {
+      html: function () { return pageAgenda(); }
+    },
 
     moi: {
       html: function () {
@@ -793,7 +798,7 @@
         }).join('');
         var h = '<h1>Mon compte</h1><div class="carte"><h3>' + esc(u.nom) + '</h3><p class="doux">Identifiant : ' + esc(u.identifiant) + '</p><p>' +
           (u.admin ? '<span class="badge or">Administrateur des deux centres</span>' : '') + acces + '</p></div>' + carteMonRole();
-        var liens = [['#/roles', 'info', 'Rôles et droits', 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']];
+        var liens = [['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances, rappels'], ['#/roles', 'info', 'Rôles et droits', 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']];
         if (peutQuelquePart('finances.voir')) liens.push(['#/bilan', 'trending', 'Bilan financier', 'Recettes, dépenses, parts des actionnaires']);
         if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) liens.push(['#/enseignants', 'presentation', 'Enseignants', 'Heures faites, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) liens.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
@@ -2594,6 +2599,244 @@
     return String(liste || '').split(',').filter(Boolean).map(function (m) { return MOIS[(+m - 1)] || m; }).join(', ') || '—';
   }
 
+  // ───────────────────────────── Agenda, rappels et notifications ─────────────────────────────
+  // Rendez-vous et rencontres saisis par le centre (table « evenements »), plus ce que le
+  // téléphone DÉDUIT : l'échéance des mensualités (jour d'échéance du centre, mois facturés),
+  // la rentrée et la fin de l'année. La cloche de l'en-tête rassemble ce qui demande
+  // attention ; les rappels du téléphone partent quand l'appli est ouverte, et l'export
+  // « Ajouter au calendrier du téléphone » (.ics avec alarme) rappelle même appli fermée.
+  var TYPES_EV = {
+    rencontre: ['Rencontre', 'handshake'], rendez_vous: ['Rendez-vous', 'clock'], reunion_parents: ['Réunion des parents', 'users'],
+    echeance: ['Échéance', 'wallet'], autre: ['Autre', 'agenda']
+  };
+  var RAPPELS = [[0, 'Aucun rappel'], [15, '15 minutes avant'], [60, '1 heure avant'], [180, '3 heures avant'], [1440, 'La veille'], [2880, '2 jours avant']];
+  var AG = { mois: '', jour: '' };
+  function peutAgenda(cid) { return peut('agenda.gerer', cid); }
+  function centresAgendaGeres() { return lignes('centres').filter(function (c) { return peutAgenda(c.id); }); }
+  function moisSuivantIso(am) { return decalerMois(am, 1); }
+
+  /** Tout ce que l'agenda montre entre deux dates (incluses), pour les centres choisis. */
+  function elementsAgenda(debut, fin) {
+    var ids = centresChoisis().map(function (c) { return c.id; });
+    var out = lignes('evenements').filter(function (e) { return ids.indexOf(e.centre_id) >= 0 && e.date >= debut && e.date <= fin; }).map(function (e) {
+      return { id: e.id, type: e.type || 'rencontre', titre: e.titre, date: e.date, heure: e.heure || '', fin: e.fin || '', lieu: e.lieu || '', note: e.note || '',
+        rappel_min: Number(e.rappel_min) || 0, centre_id: e.centre_id, attente: !!e._attente };
+    });
+    var an = anneeActive();
+    var factures = an ? String(an.mois_factures || '').split(',').filter(Boolean).map(Number) : [];
+    centresChoisis().forEach(function (c) {
+      if (!peut('paiements.voir', c.id)) return;
+      var j = ('0' + (Number(c.jour_echeance) || 10)).slice(-2);
+      for (var am = debut.slice(0, 7); am <= fin.slice(0, 7); am = moisSuivantIso(am)) {
+        var d = am + '-' + j;
+        if (d < debut || d > fin) continue;
+        if (factures.length && factures.indexOf(Number(am.slice(5))) < 0) continue;
+        if (an && an.debut && an.fin && (d < an.debut || d > an.fin)) continue;
+        out.push({ id: 'ech-' + c.id + '-' + am, auto: true, type: 'echeance', titre: 'Échéance des mensualités', date: d, heure: '', lieu: '', rappel_min: 1440, centre_id: c.id, lien: '#/caisse',
+          note: 'Les paiements du mois de ' + MOIS[Number(am.slice(5)) - 1] + ' se font au plus tard ce jour.' });
+      }
+    });
+    if (an) [[an.debut, 'Rentrée scolaire ' + an.libelle], [an.fin, 'Fin de l\'année scolaire ' + an.libelle]].forEach(function (x) {
+      if (x[0] && x[0] >= debut && x[0] <= fin) out.push({ id: 'an-' + x[0], auto: true, type: 'autre', titre: x[1], date: x[0], heure: '', lieu: '', rappel_min: 1440, centre_id: '' });
+    });
+    return out.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : (a.heure || '99') < (b.heure || '99') ? -1 : 1; });
+  }
+  function ligneAgenda(x, avecDate) {
+    var c = ligne('centres', x.centre_id) || {};
+    var quand = (avecDate ? dateLongue(x.date).replace(/^./, function (m) { return m.toUpperCase(); }) + (x.heure ? ' · ' : '') : '') + (x.heure ? heureLisible(x.heure) + (x.fin ? ' – ' + heureLisible(x.fin) : '') : (avecDate ? '' : 'Toute la journée'));
+    var sous = [quand, x.lieu, centresChoisis().length > 1 ? (c.nom_court || c.nom) : ''].filter(Boolean).join(' · ');
+    return '<button class="ligne ev t-' + esc(x.type) + '" type="button" data-a="voir-evenement" data-id="' + esc(x.id) + '" data-date="' + esc(x.date) + '">' +
+      '<span class="pastille">' + ico((TYPES_EV[x.type] || TYPES_EV.autre)[1]) + '</span><span class="corps"><b>' + esc(x.titre) + '</b><small>' + esc(sous) + '</small></span>' +
+      (x.attente ? '<span class="badge alerte">en attente</span>' : '<span class="badge type">' + esc((TYPES_EV[x.type] || TYPES_EV.autre)[0]) + '</span>') + '</button>';
+  }
+
+  function pageAgenda() {
+    var auj = isoLocal(new Date());
+    if (!AG.mois) AG.mois = auj.slice(0, 7);
+    var lib = MOIS[Number(AG.mois.slice(5)) - 1].replace(/^./, function (c) { return c.toUpperCase(); }) + ' ' + AG.mois.slice(0, 4);
+    var h = '<h1>Agenda</h1><p class="sous-titre">Rendez-vous, rencontres, échéances. La cloche en haut vous rappelle ce qui approche.</p>';
+    h += '<div class="nav-date"><button type="button" class="btn clair petit" data-a="ag-mois" data-v="-1" aria-label="Mois précédent">‹</button><b>' + esc(lib) + '</b><button type="button" class="btn clair petit" data-a="ag-mois" data-v="1" aria-label="Mois suivant">›</button></div>';
+    // Grille du mois, semaines du lundi au dimanche.
+    var premier = AG.mois + '-01', decal = jourDe(premier) - 1;
+    var dernier = decalerJour(moisSuivantIso(AG.mois) + '-01', -1);
+    var elts = elementsAgenda(premier, dernier), parJour = {};
+    elts.forEach(function (x) { (parJour[x.date] = parJour[x.date] || []).push(x); });
+    h += '<div class="calendrier" role="grid" aria-label="' + esc(lib) + '"><div class="cal-tete">' + ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(function (j) { return '<span>' + j + '</span>'; }).join('') + '</div><div class="cal-jours">';
+    for (var i = 0; i < decal; i++) h += '<span class="cal-vide"></span>';
+    for (var d = premier; d <= dernier; d = decalerJour(d, 1)) {
+      var l = parJour[d] || [];
+      h += '<button type="button" class="cal-jour' + (d === auj ? ' auj' : '') + (d === AG.jour ? ' choisi' : '') + (l.length ? ' plein' : '') + '" data-a="ag-jour" data-v="' + d + '" aria-label="' + esc(dateLongue(d) + (l.length ? ', ' + l.length + ' rendez-vous' : '')) + '">' +
+        '<b>' + Number(d.slice(8)) + '</b><span class="points">' + l.slice(0, 3).map(function (x) { return '<i class="t-' + esc(x.type) + '"></i>'; }).join('') + '</span></button>';
+    }
+    h += '</div></div><div class="legende-agenda">' + Object.keys(TYPES_EV).map(function (k) { return '<span class="t-' + k + '"><i></i>' + esc(TYPES_EV[k][0]) + '</span>'; }).join('') + '</div>';
+    if (AG.jour) {
+      var duJour = elementsAgenda(AG.jour, AG.jour);
+      h += '<h2>' + esc(dateLongue(AG.jour).replace(/^./, function (c) { return c.toUpperCase(); })) + '</h2>' +
+        (duJour.length ? '<div class="liste">' + duJour.map(function (x) { return ligneAgenda(x, false); }).join('') + '</div>' : '<div class="carte vide">Rien ce jour-là.</div>');
+    }
+    var avenir = elementsAgenda(auj, decalerJour(auj, 45));
+    h += '<h2>À venir</h2>' + (avenir.length ? '<div class="liste">' + avenir.slice(0, 30).map(function (x) { return ligneAgenda(x, true); }).join('') + '</div>' : '<div class="carte vide">Rien de prévu dans les 45 prochains jours.</div>');
+    h += '<div class="actions empile">' + (avenir.length ? '<button class="btn clair" type="button" data-a="ag-ics-tout">' + ico('download', 'p') + 'Tout ajouter au calendrier du téléphone</button>' : '') +
+      '<button class="btn clair" type="button" data-a="notifications">' + ico('bell', 'p') + 'Notifications</button></div>';
+    if (centresAgendaGeres().length) h += '<button class="fab" type="button" data-a="editer-evenement" data-id="" data-date="' + esc(AG.jour || auj) + '">' + ico('plus') + 'Rendez-vous</button>';
+    return h;
+  }
+
+  function feuilleEvenement(id, dateDefaut) {
+    var e = id ? ligne('evenements', id) : null;
+    var geres = centresAgendaGeres();
+    var cidDefaut = e ? e.centre_id : (geres.some(function (c) { return c.id === E.centre; }) ? E.centre : (geres[0] || {}).id);
+    var d = e || { type: 'rencontre', date: dateDefaut || isoLocal(new Date()), heure: '', fin: '', lieu: '', note: '', rappel_min: 60, centre_id: cidDefaut };
+    var opt = function (v, t, cour) { return '<option value="' + esc(v) + '"' + (String(v) === String(cour) ? ' selected' : '') + '>' + esc(t) + '</option>'; };
+    ouvrirFeuille('<h2>' + (e ? 'Modifier le rendez-vous' : 'Nouveau rendez-vous') + '</h2>' +
+      '<form data-f="evenement" data-id="' + esc(id || '') + '">' +
+      '<label class="champ"><span>Titre</span><input type="text" name="titre" required maxlength="160" value="' + esc(d.titre || '') + '" placeholder="ex. : Rencontre avec les parents de 3e"></label>' +
+      '<div class="deux"><label class="champ"><span>Type</span><select name="type">' + Object.keys(TYPES_EV).map(function (k) { return opt(k, TYPES_EV[k][0], d.type); }).join('') + '</select></label>' +
+      '<label class="champ"><span>Centre</span><select name="centre_id">' + geres.map(function (c) { return opt(c.id, c.nom_court || c.nom, d.centre_id); }).join('') + '</select></label></div>' +
+      '<label class="champ"><span>Date</span><input type="date" name="date" required value="' + esc(d.date) + '"></label>' +
+      '<div class="deux"><label class="champ"><span>Début</span><input type="time" name="heure" value="' + esc(d.heure || '') + '"></label>' +
+      '<label class="champ"><span>Fin</span><input type="time" name="fin" value="' + esc(d.fin || '') + '"></label></div>' +
+      '<label class="champ"><span>Lieu</span><input type="text" name="lieu" maxlength="160" value="' + esc(d.lieu || '') + '" placeholder="ex. : salle 2, ou au centre"></label>' +
+      '<label class="champ"><span>Rappel</span><select name="rappel_min">' + RAPPELS.map(function (r) { return opt(r[0], r[1], d.rappel_min); }).join('') + '</select></label>' +
+      '<label class="champ"><span>Note</span><textarea name="note" rows="3" maxlength="400">' + esc(d.note || '') + '</textarea></label>' +
+      '<div class="actions"><button class="btn" type="submit">Enregistrer</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>' +
+      (e ? '<div class="actions"><button class="btn danger" type="button" data-a="suppr-evenement" data-id="' + esc(id) + '">Supprimer</button></div>' : ''));
+  }
+  function feuilleVoirEvenement(id, date) {
+    var x = elementsAgenda(date, date).filter(function (y) { return y.id === id; })[0];
+    if (!x) return;
+    var c = ligne('centres', x.centre_id) || {};
+    var modifiable = !x.auto && peutAgenda(x.centre_id);
+    ouvrirFeuille('<div class="ev-tete t-' + esc(x.type) + '"><span class="pastille">' + ico((TYPES_EV[x.type] || TYPES_EV.autre)[1]) + '</span><div><small>' + esc((TYPES_EV[x.type] || TYPES_EV.autre)[0]) + '</small><h2>' + esc(x.titre) + '</h2></div></div>' +
+      '<div class="infos">' +
+      '<div class="info"><span>Quand</span><b>' + esc(dateLongue(x.date) + ' ' + x.date.slice(0, 4) + (x.heure ? ' · ' + heureLisible(x.heure) + (x.fin ? ' – ' + heureLisible(x.fin) : '') : '')) + '</b></div>' +
+      (x.lieu ? '<div class="info"><span>Lieu</span><b>' + esc(x.lieu) + '</b></div>' : '') +
+      (c.nom ? '<div class="info"><span>Centre</span><b>' + esc(c.nom) + '</b></div>' : '') +
+      '<div class="info"><span>Rappel</span><b>' + esc(((RAPPELS.filter(function (r) { return r[0] === x.rappel_min; })[0]) || [0, x.rappel_min + ' min avant'])[1]) + '</b></div></div>' +
+      (x.note ? '<p>' + esc(x.note) + '</p>' : '') +
+      '<div class="actions"><button class="btn or" type="button" data-a="ag-ics" data-id="' + esc(x.id) + '" data-date="' + esc(x.date) + '">' + ico('download', 'p') + 'Ajouter au calendrier du téléphone</button>' +
+      (x.lien ? '<a class="btn clair" href="' + esc(x.lien) + '" data-a="fermer-et-aller">Ouvrir la caisse</a>' : '') +
+      (modifiable ? '<button class="btn clair" type="button" data-a="editer-evenement" data-id="' + esc(x.id) + '">' + ico('edit', 'p') + 'Modifier</button>' : '') +
+      '<button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
+  }
+
+  // Fichier .ics : le calendrier du téléphone l'importe et sonne au rappel, appli fermée.
+  function icsTexte(elts) {
+    var esc2 = function (t) { return String(t || '').replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n'); };
+    var compact = function (iso, hhmm) { return iso.replace(/-/g, '') + (hhmm ? 'T' + hhmm.replace(':', '') + '00' : ''); };
+    var maintenant = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z');
+    var l = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//VERITAS//Gestion//FR', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
+    elts.forEach(function (x) {
+      var c = ligne('centres', x.centre_id) || {};
+      l.push('BEGIN:VEVENT', 'UID:' + x.id + '@gestion.veritas-school.com', 'DTSTAMP:' + maintenant);
+      if (x.heure) {
+        l.push('DTSTART:' + compact(x.date, x.heure));
+        var fin = x.fin && x.fin > x.heure ? x.fin : ('0' + Math.min(23, Number(x.heure.slice(0, 2)) + 1)).slice(-2) + x.heure.slice(2);
+        l.push('DTEND:' + compact(x.date, fin));
+      } else {
+        l.push('DTSTART;VALUE=DATE:' + compact(x.date), 'DTEND;VALUE=DATE:' + compact(decalerJour(x.date, 1)));
+      }
+      l.push('SUMMARY:' + esc2(x.titre + (c.nom_court ? ' — ' + c.nom_court : '')));
+      if (x.lieu || c.adresse) l.push('LOCATION:' + esc2(x.lieu || c.adresse));
+      if (x.note) l.push('DESCRIPTION:' + esc2(x.note));
+      if (x.rappel_min > 0) l.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc2(x.titre), 'TRIGGER:-PT' + x.rappel_min + 'M', 'END:VALARM');
+      l.push('END:VEVENT');
+    });
+    l.push('END:VCALENDAR');
+    return l.join('\r\n') + '\r\n';
+  }
+  function partagerIcs(elts, nom) {
+    var f = new File([icsTexte(elts)], nom.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9-]+/g, '-').replace(/-+/g, '-') + '.ics', { type: 'text/calendar' });
+    return partagerFichiers([f], 'Agenda VÉRITAS');
+  }
+
+  // ── Notifications : ce qui demande attention, maintenant ──
+  function notificationsDuJour() {
+    var auj = isoLocal(new Date()), demain = decalerJour(auj, 1), out = [];
+    elementsAgenda(auj, decalerJour(auj, 3)).forEach(function (x) {
+      if (x.type === 'echeance') {
+        var n = impayes(x.centre_id).length;
+        out.push({ ico: 'wallet', niveau: x.date === auj ? 'alerte' : '', titre: (x.date === auj ? 'Échéance aujourd\'hui' : 'Échéance ' + (x.date === demain ? 'demain' : 'le ' + dateLisible(x.date, true))) + ' · ' + ((ligne('centres', x.centre_id) || {}).nom_court || ''),
+          detail: n ? n + ' élève' + (n > 1 ? 's' : '') + ' en impayé à relancer' : 'Aucun impayé pour l\'instant', lien: '#/caisse', id: x.id });
+      } else if (x.date <= demain) {
+        out.push({ ico: (TYPES_EV[x.type] || TYPES_EV.autre)[1], niveau: 't-' + x.type, titre: (x.date === auj ? 'Aujourd\'hui' : 'Demain') + (x.heure ? ' à ' + heureLisible(x.heure) : '') + ' · ' + x.titre,
+          detail: [x.lieu, (ligne('centres', x.centre_id) || {}).nom_court].filter(Boolean).join(' · ') || (TYPES_EV[x.type] || TYPES_EV.autre)[0], lien: '#/agenda', id: x.id });
+      }
+    });
+    var moi = E.profil.utilisateur.id;
+    centresChoisis().forEach(function (c) {
+      var nom = c.nom_court || c.nom;
+      if (estAdmin() || peut('depenses.valider', c.id)) {
+        var dv = lignes('depenses').filter(function (d) { return d.centre_id === c.id && d.statut === 'en_attente' && (estAdmin() || d.saisie_par !== moi); }).length;
+        if (dv) out.push({ ico: 'clipboard', niveau: 'alerte', titre: dv + ' dépense' + (dv > 1 ? 's' : '') + ' à valider · ' + nom, detail: 'Caisse › Dépenses', lien: '#/caisse', onglet: 'depenses' });
+      }
+      if (peut('appel.faire', c.id) && !estEnseignantQuelquePart()) {
+        var ret = seancesPrevues(c.id, auj).filter(function (x) { return retardAppel(x, c) > 0; }).length;
+        if (ret) out.push({ ico: 'alert', niveau: 'danger', titre: ret + ' appel' + (ret > 1 ? 's' : '') + ' en retard · ' + nom, detail: 'Faites l\'appel des classes concernées', lien: '#/appel' });
+      }
+      if (peut('eleves.gerer', c.id)) {
+        var al = alertesAssiduite(c.id).length;
+        if (al) out.push({ ico: 'activity', niveau: '', titre: al + ' alerte' + (al > 1 ? 's' : '') + ' d\'assiduité · ' + nom, detail: 'Absences ou retards répétés', lien: '#/assiduite' });
+      }
+    });
+    if (estEnseignantQuelquePart()) {
+      var aFaire = mesCoursDu(auj).filter(function (cr) { return !etatSeance({ id: idSeance(auj, cr.classe_id), centre_id: cr.centre_id, classe: { id: cr.classe_id } }).pointes; }).length;
+      if (aFaire) out.push({ ico: 'checkcircle', niveau: 'alerte', titre: aFaire + ' appel' + (aFaire > 1 ? 's' : '') + ' à faire aujourd\'hui', detail: 'Mes cours aujourd\'hui', lien: '#/accueil' });
+    }
+    return out;
+  }
+  function boutonCloche() {
+    var n = notificationsDuJour().length;
+    return '<button id="cloche" class="cloche" type="button" data-a="notifications" aria-label="Notifications' + (n ? ' : ' + n : '') + '">' + ico('bell') + (n ? '<span class="pastille-n">' + (n > 9 ? '9+' : n) + '</span>' : '') + '</button>';
+  }
+  function majCloche() { var b = $('#cloche'); if (b) b.outerHTML = boutonCloche(); }
+  function notifSystemePossible() { return !NATIF && 'Notification' in window; }
+  function feuilleNotifications() {
+    var l = notificationsDuJour();
+    var h = '<h2>Notifications</h2>' + (l.length ? '<div class="liste">' + l.map(function (x) {
+      return '<a class="ligne notif ' + esc(x.niveau || '') + '" href="' + esc(x.lien) + '" data-a="fermer-et-aller"' + (x.onglet ? ' data-onglet="' + esc(x.onglet) + '"' : '') + '><span class="pastille">' + ico(x.ico) + '</span><span class="corps"><b>' + esc(x.titre) + '</b><small>' + esc(x.detail) + '</small></span><span class="fin">›</span></a>';
+    }).join('') + '</div>' : '<div class="carte vide">Rien à signaler pour le moment.</div>');
+    if (notifSystemePossible()) {
+      h += Notification.permission === 'granted'
+        ? '<p class="doux">' + ico('check', 'p') + ' Les rappels du téléphone sont activés : ils sonnent quand l\'appli est ouverte ou vient de l\'être. Pour un rappel sûr appli fermée, ajoutez le rendez-vous au calendrier du téléphone.</p>'
+        : Notification.permission === 'denied'
+          ? '<p class="doux">Les notifications sont bloquées pour ce site : réautorisez-les dans les réglages du navigateur (cadenas › Notifications).</p>'
+          : '<div class="actions"><button class="btn or" type="button" data-a="activer-notifs">' + ico('bell', 'p') + 'Activer les rappels du téléphone</button></div>';
+    }
+    h += '<div class="actions"><a class="btn clair" href="#/agenda" data-a="fermer-et-aller">' + ico('agenda', 'p') + 'Ouvrir l\'agenda</a><button class="btn clair" type="button" data-a="fermer">Fermer</button></div>';
+    ouvrirFeuille(h);
+  }
+  /** Rappels système : rendez-vous à l'heure de leur rappel, échéance la veille et le jour. Une fois chacun. */
+  function verifierRappels() {
+    if (!E.profil || !notifSystemePossible() || Notification.permission !== 'granted') return;
+    var deja = {};
+    try { deja = JSON.parse(localStorage.getItem('vg-rappels') || '{}'); } catch (e) { deja = {}; }
+    var maintenant = Date.now(), auj = isoLocal(new Date()), envoyes = 0;
+    elementsAgenda(auj, decalerJour(auj, 15)).forEach(function (x) {
+      var debut = new Date(x.date + 'T' + (x.heure || '08:00') + ':00').getTime();
+      var quand = debut - (x.rappel_min || 0) * 60000;
+      var cle = x.id + '@' + x.date + (x.heure || '');
+      if (deja[cle] || maintenant < quand || maintenant > debut + 3600000 || (!x.rappel_min && x.type !== 'echeance')) return;
+      deja[cle] = maintenant; envoyes++;
+      var corps = [x.heure ? dateLongue(x.date) + ' à ' + heureLisible(x.heure) : dateLongue(x.date), x.lieu].filter(Boolean).join(' · ');
+      var ouvrir = { body: corps, icon: 'icone-512.png', badge: 'icone-512.png', tag: cle, data: { url: x.type === 'echeance' ? '#/caisse' : '#/agenda' } };
+      var titre = (x.type === 'echeance' ? 'Échéance des mensualités' : x.titre) + ' — VÉRITAS';
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.ready.then(function (r) { r.showNotification(titre, ouvrir); }).catch(function () {});
+      else { try { new Notification(titre, ouvrir); } catch (e) {} }
+    });
+    if (envoyes) { try { localStorage.setItem('vg-rappels', JSON.stringify(deja)); } catch (e) {} }
+  }
+  setInterval(function () { verifierRappels(); majCloche(); }, 60000);
+
+  /** Accueil : les trois prochains rendez-vous des 14 jours. */
+  function blocProchainsRdv() {
+    var auj = isoLocal(new Date());
+    var l = elementsAgenda(auj, decalerJour(auj, 14)).slice(0, 3);
+    if (!l.length) return '';
+    return '<h2>Prochains rendez-vous</h2><div class="liste">' + l.map(function (x) { return ligneAgenda(x, true); }).join('') + '</div>' +
+      '<p class="lien-suite"><a href="#/agenda">Tout l\'agenda ›</a></p>';
+  }
+
   // ───────────────────────────── Espaces et rôles ─────────────────────────────
   // Quatre espaces, un par famille de rôles : chacun a sa couleur, sa mission et
   // ses chiffres clés. Le serveur reste seul juge des droits (g_capacites).
@@ -2611,19 +2854,19 @@
       pas: [] },
     { cle: 'responsable', espace: 'partenaire', nom: 'Responsable', famille: 'Partenaire',
       resume: 'Dirige un centre au quotidien, avec presque tous les pouvoirs sur ce centre.',
-      peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Fixer les tarifs, valider les dépenses', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants'],
+      peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Fixer les tarifs, valider les dépenses', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants', 'Tenir l\'agenda : rendez-vous, rencontres, réunions'],
       pas: ['Les réglages des centres et de l\'année', 'Les comptes responsables, actionnaires et admin'] },
     { cle: 'actionnaire', espace: 'partenaire', nom: 'Actionnaire', famille: 'Partenaire',
       resume: 'Associé du centre : consulte les chiffres et tient l\'emploi du temps.',
-      peut: ['Voir le bilan, les versements et les dépenses', 'Voir les statistiques et les parts', 'Modifier l\'emploi du temps de son centre'],
+      peut: ['Voir le bilan, les versements et les dépenses', 'Voir les statistiques et les parts', 'Modifier l\'emploi du temps de son centre', 'Tenir l\'agenda du centre'],
       pas: ['Encaisser ou inscrire', 'Faire l\'appel', 'Créer des comptes'] },
     { cle: 'secretaire', espace: 'secretariat', nom: 'Secrétaire / surveillant', famille: 'Équipe',
       resume: 'Tient l\'accueil et la caisse du centre.',
-      peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Saisir les dépenses (avec photo du justificatif)'],
+      peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Saisir les dépenses (avec photo du justificatif)', 'Noter les rendez-vous dans l\'agenda'],
       pas: ['Voir le bilan', 'Annuler un versement, accorder une remise', 'Valider une dépense', 'Gérer les enseignants'] },
     { cle: 'enseignant', espace: 'enseignant', nom: 'Enseignant', famille: 'Équipe',
       resume: 'Fait l\'appel de ses classes et suit ses heures.',
-      peut: ['Faire l\'appel de ses classes, le jour du cours', 'Voir son emploi du temps', 'Voir ses heures, son contrat et ses paies'],
+      peut: ['Faire l\'appel de ses classes, le jour du cours', 'Voir son emploi du temps et l\'agenda du centre', 'Voir ses heures, son contrat et ses paies'],
       pas: ['Les élèves des autres classes', 'La caisse et les finances', 'Les comptes'] }
   ];
   function ficheRole(cle) { return FICHES_ROLES.filter(function (f) { return f.cle === cle; })[0]; }
@@ -2794,10 +3037,11 @@
     'paiements.encaisser': 'Encaisser', 'paiements.voir': 'Voir les versements', 'caisse.corriger': 'Corriger la caisse (annuler, antidater)',
     'finances.voir': 'Voir le bilan', 'depenses.saisir': 'Saisir des dépenses', 'depenses.voir': 'Voir les dépenses', 'depenses.valider': 'Valider les dépenses',
     'enseignants.gerer': 'Contrats et paies des enseignants', 'comptes.gerer': 'Créer des comptes (secrétaires, enseignants)', 'journal.voir': 'Lire le journal',
-    'stats.voir': 'Voir les statistiques', 'emploi.gerer': 'Modifier l\'emploi du temps', 'tarifs.fixer': 'Fixer les tarifs', 'remises.accorder': 'Accorder des remises'
+    'stats.voir': 'Voir les statistiques', 'emploi.gerer': 'Modifier l\'emploi du temps', 'tarifs.fixer': 'Fixer les tarifs', 'remises.accorder': 'Accorder des remises',
+    'agenda.gerer': 'Gérer l\'agenda (rendez-vous, rencontres)'
   };
   var CAP_ECRITURE = ['eleves.gerer', 'appel.faire', 'appel.corriger', 'paiements.encaisser', 'caisse.corriger', 'depenses.saisir', 'depenses.valider',
-    'enseignants.gerer', 'comptes.gerer', 'emploi.gerer', 'tarifs.fixer', 'remises.accorder'];
+    'enseignants.gerer', 'comptes.gerer', 'emploi.gerer', 'tarifs.fixer', 'remises.accorder', 'agenda.gerer'];
   function capsDuCompte(u) {
     var caps = {};
     Object.keys(u.acces || {}).forEach(function (c) { (E.profil.capacites[u.acces[c]] || []).forEach(function (k) { if (k !== 'centre.voir') caps[k] = 1; }); });
@@ -2879,12 +3123,12 @@
     responsable: ['*Accueil* : élèves, appels du jour, encaissé du mois, impayés de votre centre.', '*Élèves › +* : inscrire un élève (classe, matières, tarif).',
       '*Caisse › Encaisser* : cherchez l\'élève, saisissez le montant, envoyez le reçu au parent par WhatsApp.', '*Caisse › Impayés* : relancez les parents en un geste.',
       '*Caisse › Dépenses* : saisissez les dépenses. Photo du justificatif *obligatoire dès 10 000 F*. Vous validez les dépenses saisies par les autres.',
-      '*Plus › Enseignants* : pointage des cours, contrats, paies.', '*Plus › Comptes et accès* : créez les comptes de vos secrétaires et enseignants.'],
+      '*Plus › Enseignants* : pointage des cours, contrats, paies.', '*Plus › Comptes et accès* : créez les comptes de vos secrétaires et enseignants.', '*Plus › Agenda* : rendez-vous, rencontres, échéances ; la cloche en haut rappelle ce qui approche.'],
     actionnaire: ['*Accueil* : les chiffres clés de votre centre (élèves, appels, encaissé, impayés).', '*Plus › Bilan* : recettes, dépenses, résultat du mois et votre part.',
-      '*Caisse* : versements et dépenses, en consultation.', '*Plus › Planning* : vous tenez l\'emploi du temps du centre (classes, créneaux, enseignants).'],
+      '*Caisse* : versements et dépenses, en consultation.', '*Plus › Planning* : vous tenez l\'emploi du temps du centre (classes, créneaux, enseignants).', '*Plus › Agenda* : rendez-vous et rencontres ; la cloche en haut rappelle ce qui approche.'],
     secretaire: ['*Appel* : choisissez la classe, touchez chaque élève (présent, retard, absent), au début du cours.', '*Élèves › +* : inscrire un élève.',
       '*Caisse › Encaisser* : un reçu numéroté part au parent par WhatsApp. Un versement ne se modifie pas : en cas d\'erreur, prévenez le responsable.',
-      '*Caisse › Dépenses* : photo du justificatif *obligatoire dès 10 000 F*.'],
+      '*Caisse › Dépenses* : photo du justificatif *obligatoire dès 10 000 F*.', '*Plus › Agenda* : notez les rendez-vous ; la cloche en haut rappelle échéances et rencontres.'],
     enseignant: ['*Accueil › Mes cours aujourd\'hui* : touchez votre cours pour faire l\'appel, au début du cours.', '*Planning* : votre emploi du temps de la semaine.',
       '*Plus › Mes heures* : heures faites, montant dû, paies reçues.']
   };
@@ -3048,6 +3292,27 @@
       if (a) confirmer('Retirer ' + a.nom + ' des actionnaires ?', 'Retirer', function () { muter('actionnaires', a.id, {}, true).then(rendre); });
     },
     // Le logo n'est ni un lien ni une image : l'appui long n'ouvre aucun menu du navigateur.
+    'ag-mois': function (el) { AG.mois = decalerMois(AG.mois, +el.dataset.v); AG.jour = ''; rendre(); },
+    'ag-jour': function (el) { AG.jour = AG.jour === el.dataset.v ? '' : el.dataset.v; rendre(); },
+    'voir-evenement': function (el) { feuilleVoirEvenement(el.dataset.id, el.dataset.date); },
+    'editer-evenement': function (el) { feuilleEvenement(el.dataset.id || '', el.dataset.date); },
+    'suppr-evenement': function (el) {
+      var e = ligne('evenements', el.dataset.id);
+      if (e) confirmer('Supprimer « ' + e.titre + ' » ?', 'Supprimer', function () { muter('evenements', e.id, {}, true).then(function () { toast('Rendez-vous supprimé.'); rendre(); }); });
+    },
+    'ag-ics': function (el) {
+      var x = elementsAgenda(el.dataset.date, el.dataset.date).filter(function (y) { return y.id === el.dataset.id; })[0];
+      if (x) partagerIcs([x], 'rdv-' + x.date + '-' + x.titre);
+    },
+    'ag-ics-tout': function () { var auj = isoLocal(new Date()); partagerIcs(elementsAgenda(auj, decalerJour(auj, 45)), 'agenda-veritas-' + auj); },
+    notifications: function () { feuilleNotifications(); },
+    'activer-notifs': function () {
+      Notification.requestPermission().then(function (p) {
+        if (p === 'granted') { toast('Rappels activés.'); verifierRappels(); } else toast('Rappels non autorisés.', true);
+        feuilleNotifications();
+      });
+    },
+    'fermer-et-aller': function (el) { fermerFeuille(); if (el.dataset.onglet) CAI.onglet = el.dataset.onglet; var h = el.getAttribute('href'); if (location.hash === h) rendre(); else location.hash = h; },
     'aller-accueil': function () { if (location.hash === '#/accueil') rendre(); else location.hash = '#/accueil'; },
     'fermer-panneau': function () { if (panneauOuvert()) basculerPanneau(); },
     'ouvrir-comptes': function () {
@@ -3380,6 +3645,15 @@
       if (active) lignes('annees').forEach(function (a) { if (a.id !== id && Number(a.active)) suite = suite.then(function () { return muter('annees', a.id, { active: 0 }); }); });
       suite.then(function () { return muter('annees', id, { libelle: v.libelle, debut: v.debut, fin: v.fin, mois_factures: mois.join(','), active: active ? 1 : 0 }); })
         .then(function () { toast('Enregistré.'); rendre(); });
+    },
+    evenement: function (form) {
+      var v = valeurs(form);
+      if (v.fin && v.heure && v.fin <= v.heure) { toast('L\'heure de fin doit suivre l\'heure de début.', true); return; }
+      if (!peutAgenda(v.centre_id)) { toast('Vous ne pouvez pas modifier l\'agenda de ce centre.', true); return; }
+      var id = form.dataset.id || nouvelId();
+      fermerFeuille();
+      muter('evenements', id, { centre_id: v.centre_id, titre: v.titre.trim(), type: v.type, date: v.date, heure: v.heure || '', fin: v.heure ? v.fin || '' : '', lieu: v.lieu.trim(), note: v.note.trim(), rappel_min: Number(v.rappel_min) || 0 })
+        .then(function () { AG.mois = v.date.slice(0, 7); AG.jour = v.date; toast('Rendez-vous enregistré.'); rendre(); });
     },
     actionnaire: function (form) {
       var v = valeurs(form);

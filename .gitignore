@@ -215,3 +215,4 @@ premier_cycle/_sources/
 /gestion/api/data/*.sqlite*
 # Photos de justificatifs des dépenses (données privées des centres, jamais dans le dépôt)
 /gestion/api/data/justificatifs/
+/gestion/api/data/.schema
