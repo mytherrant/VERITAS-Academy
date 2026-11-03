@@ -37,18 +37,19 @@ const ok = (nom, c, d) => { console.log((c ? '  OK    ' : '  ÉCHEC ') + nom + (
   ok('police Poppins chargée en local', await page.evaluate(() => document.fonts.check('600 16px Poppins')), 'absente');
   await page.screenshot({ path: process.argv[2] + '/g_accueil.png', fullPage: true });
 
-  // Administration : entrée visible dans Plus (le geste caché du logo est retiré).
+  // Administration cachée : appui long de 2 s sur le logo.
+  const appuiLong = async () => {
+    const b = await page.locator('.entete .marque').boundingBox();
+    await page.mouse.move(b.x + 10, b.y + 10); await page.mouse.down();
+    await page.waitForTimeout(2300); await page.mouse.up();
+  };
   const ouvrirPanneau = async () => {
-    await page.goto(B + '#/moi');
-    await page.click('a[data-a="ouvrir-admin"]');
+    await appuiLong();
     await page.waitForSelector('main h1:text("Administration")');
   };
   // ── Ouvrir un nouveau centre depuis l'accueil (admin) ──
   await ouvrirPanneau();
-  ok("Plus › Administration : panneau d'administration ouvert", true);
-  const urlAvant = page.url();
-  for (let i = 0; i < 4; i++) await page.click('.entete .marque');
-  ok('le logo ramène à l\'accueil, sans ouvrir de panneau', /#\/accueil$/.test(page.url()) && !(await page.isVisible('text=15 min')), page.url() + ' (avant : ' + urlAvant + ')');
+  ok("appui long sur le logo : administration ouverte", true);
   await page.goto(B + '#/accueil');
   const NOM_CENTRE = 'VÉRITAS Test ' + Date.now().toString(36);
   await page.click('main [data-a="editer-centre"][data-id=""]');

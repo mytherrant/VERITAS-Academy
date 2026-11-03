@@ -14,10 +14,14 @@ const ok = (nom, c, d) => { console.log((c ? '  OK    ' : '  ÉCHEC ') + nom + (
   const erreurs = [];
   page.on('pageerror', (e) => erreurs.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') erreurs.push(m.text()); });
-  // Administration : entrée visible dans Plus (le geste caché du logo est retiré).
+  // Administration cachée : appui long de 2 s sur le logo.
+  const appuiLong = async () => {
+    const b = await page.locator('.entete .marque').boundingBox();
+    await page.mouse.move(b.x + 10, b.y + 10); await page.mouse.down();
+    await page.waitForTimeout(2300); await page.mouse.up();
+  };
   const ouvrirPanneau = async () => {
-    await page.goto(B + '#/moi');
-    await page.click('a[data-a="ouvrir-admin"]');
+    await appuiLong();
     await page.waitForSelector('main h1:text("Administration")');
   };
   const aJour = () => page.waitForFunction(() => document.getElementById('puce-sync').textContent === 'À jour', null, { timeout: 10000 }).catch(() => {});
@@ -31,8 +35,12 @@ const ok = (nom, c, d) => { console.log((c ? '  OK    ' : '  ÉCHEC ') + nom + (
 
   // Fiche compte : matières enseignées
   await page.goto(B + '#/comptes');
-  await page.waitForSelector('#zone-comptes');
-  ok('comptes accessibles à l\'administrateur, sans geste caché', await page.isVisible('#zone-comptes'), 'invisibles');
+  ok('comptes cachés tant que l\'administration est fermée', !(await page.isVisible('#zone-comptes')), 'visibles');
+  await page.goto(B + '#/moi'); await page.waitForTimeout(300);
+  ok('aucune entrée « Administration » visible dans Plus', !(await page.isVisible('main a[href="#/admin"]')), 'visible');
+  for (let i = 0; i < 4; i++) await page.click('.entete .marque');
+  await page.waitForTimeout(300);
+  ok('4 taps sur le logo : rien ne s\'ouvre', !(await page.isVisible('main h1:text("Administration")')), 'ouvert');
   await ouvrirPanneau();
   await page.goto(B + '#/comptes');
   await page.waitForSelector('#zone-comptes .ligne');
