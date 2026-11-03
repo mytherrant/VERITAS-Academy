@@ -531,7 +531,7 @@
     } else if (centres.length === 1) {
       sel = '<span class="doux">' + esc(centres[0].nom_court || centres[0].nom) + '</span>';
     }
-    return '<header class="entete"><a class="marque" href="#/accueil"><img src="icone-512.png" alt=""><span>VÉRITAS</span></a>' +
+    return '<header class="entete"><button type="button" class="marque" data-a="aller-accueil" aria-label="Accueil"><span class="logo" aria-hidden="true"></span><span class="nom">VÉRITAS</span></button>' +
       '<span class="espace"></span>' + sel + '<button id="puce-sync" class="puce-sync" data-a="sync" type="button">À jour</button></header>';
   }
 
@@ -3047,6 +3047,8 @@
       var a = ligne('actionnaires', el.dataset.id);
       if (a) confirmer('Retirer ' + a.nom + ' des actionnaires ?', 'Retirer', function () { muter('actionnaires', a.id, {}, true).then(rendre); });
     },
+    // Le logo n'est ni un lien ni une image : l'appui long n'ouvre aucun menu du navigateur.
+    'aller-accueil': function () { if (location.hash === '#/accueil') rendre(); else location.hash = '#/accueil'; },
     'fermer-panneau': function () { if (panneauOuvert()) basculerPanneau(); },
     'ouvrir-comptes': function () {
       ouvrirPanneauDiscret();
