@@ -48,6 +48,16 @@ servie aux seuls comptes qui voient les dépenses du centre.
 faites, dû selon le contrat (heure, séance, forfait avec retenue), paies (annulables, jamais
 modifiées) comptées en charges dans le bilan. L'enseignant voit SES heures, SON contrat, SES paies.
 
+**Espace Équipe (partenaires) :** réservé à qui voit la caisse (responsable, actionnaire, secrétaire,
+admin) — pas aux enseignants. Discussion du centre et commentaires attachés à une dépense, une
+remise, un point du jour, un bilan, une tâche ou une réunion (table `g_messages`, un « fil » par
+sujet ; l'auteur, posé par le serveur, est seul à pouvoir corriger ou supprimer). Réunions à dates
+proposées (`g_sondages`) : chacun répond Oui / Peut-être / Non (`g_dispos`, une réponse par
+personne, la sienne seulement) ; la date retenue part dans l'agenda. Tâches réparties (`g_taches`) :
+assignée à un partenaire, échéance, À faire → En cours → Fait. La cloche signale les nouveaux
+messages (non-lus par fil, sur le téléphone), les réunions sans réponse et les tâches proches ou
+en retard.
+
 **Paie des enseignants après le cours :** sans contrat particulier, un enseignant est payé
 **1 500 F de l'heure** (`G_TAUX_HORAIRE_DEFAUT` / `TAUX_HORAIRE_DEFAUT`). Dès le cours fini (départ
 pointé ou heure de fin passée), le partenaire présent qui a encaissé touche « Payer » dans
@@ -144,6 +154,7 @@ node tests/banc_gestion_enseignants.cjs <dossier> # enseignants, « Mes heures �
 node tests/banc_gestion_agenda.cjs <dossier>     # agenda, échéances, .ics, cloche, droits par rôle (Playwright)
 node tests/banc_gestion_remises.cjs <dossier>    # remises au trésorier : confirmation, contestation, refus serveur (Playwright)
 node tests/banc_gestion_paie_cours.cjs <dossier> # paie de l'enseignant après le cours : 1 500 F/h, unicité, plafond (Playwright)
+node tests/banc_gestion_equipe.cjs <dossier>     # Équipe : discussion, commentaires, réunions, tâches, refus serveur (Playwright)
 ```
 
 **Noms fictifs uniquement** dans le code et les bancs : le dépôt est public, les élèves sont mineurs.
