@@ -36,6 +36,21 @@
     });
   }
   function $(id){ return document.getElementById(id); }
+  // Sous le personnage, au téléphone, seul le nom tient : « Mme Elame, guide d’une ONG » → « Mme Elame ».
+  // p.court le fixe à la main (noms bilingues) ; le nom complet reste dans la bulle et au survol.
+  function nomCourt(p){
+    if(p.court){ return p.court; }
+    var n = String(p.nom || '').split(/,\s/)[0], m = n.match(/^(.*?)\s*\((.+)\)$/);
+    // « 王老师 (M. Wang) » → « M. Wang » ; « Le père externe (le Ngrafi) » → « Le père externe »
+    if(m){ n = /[A-Za-zÀ-ÿ]/.test(m[1]) ? m[1] : m[2]; }
+    return n.charAt(0).toUpperCase() + n.slice(1);
+  }
+  function estClair(hex){
+    var h = String(hex || '').replace('#', ''); if(h.length === 3){ h = h.replace(/(.)/g, '$1$1'); }
+    var n = parseInt(h, 16); if(isNaN(n)){ return false; }
+    return (0.299 * (n >> 16 & 255) + 0.587 * (n >> 8 & 255) + 0.114 * (n & 255)) > 170;
+  }
+  function couleurLisible(p){ var c = p && p.couleur; return c && !estClair(c) ? c : '#1E499B'; }
   function initiales(nom){
     var m = String(nom).replace(/^(M\.|Mme|Le|La|Les|L’|Père|Madame|Monsieur)\s+/i, '').trim();
     return m.charAt(0).toUpperCase();
@@ -311,7 +326,7 @@
       var p = persos[k]; p._k = k;
       return '<div class="sc-perso absent' + (n >= ordre.length / 2 ? ' face-g' : '') + '" id="p-' + esc(k) + '">'
         + '<div class="sc-avatar" aria-hidden="true">' + (p.look || p.groupe ? iso(p) : '<span class="sc-init" style="background:' + esc(p.couleur || '#1E499B') + '">' + esc(p.init || initiales(p.nom)) + '</span>') + '</div>'
-        + '<div class="sc-nom">' + esc(p.nom) + '</div></div>';
+        + '<div class="sc-nom" title="' + esc(p.nom) + '">' + esc(nomCourt(p)) + '</div></div>';
     }).join('');
     var options = ordre.map(function(k){ return '<option value="' + esc(k) + '">' + esc(persos[k].nom) + '</option>'; }).join('');
     var jg = jauges.map(function(j){
@@ -391,9 +406,11 @@
     $('scriptTxt').innerHTML = etapes.map(function(e){
       if(e.t === 'dit' || e.t === 'pense' || e.t === 'vers'){
         var p = persos[e.qui] || {nom: e.qui || ''};
-        return '<p><b>' + esc(p.nom) + '</b>' + (e.jeu ? ' <i>(' + esc(e.jeu) + ')</i>' : '') + (e.t === 'pense' ? ' <i>(en pensée)</i>' : '') + ' — ' + esc(e.txt) + '</p>';
+        var c = couleurLisible(p);
+        return '<p class="sc-l"><span class="sc-pp" style="background:' + c + '">' + esc(initiales(p.nom)) + '</span><span><b style="color:' + c + '">' + esc(p.nom) + '</b>' + (e.jeu ? ' <i>(' + esc(e.jeu) + ')</i>' : '') + (e.t === 'pense' ? ' <i>(en pensée)</i>' : '') + ' — ' + esc(e.txt) + '</span></p>';
       }
-      if(e.t === 'recit'){ return '<p class="r">' + esc(e.txt) + '</p>'; }
+      if(e.t === 'recit'){ return '<p class="sc-l r"><span class="sc-pp rc">' + ico('livre') + '</span><span>' + esc(e.txt) + '</span></p>'; }
+      if(e.t === 'question' || e.t === 'choix'){ return '<p class="sc-l q"><span class="sc-pp qc">?</span><span>' + esc(e.q) + '</span></p>'; }
       return '';
     }).join('');
   }

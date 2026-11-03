@@ -437,3 +437,15 @@ h1,h2,h3,h4{font-family:var(--v-font);font-weight:600;color:var(--v-navy)}
 .sc-f-themes span:nth-child(6n+4){background:#EEE9F8;color:#5B4FA8}
 .sc-f-themes span:nth-child(6n+5){background:#FBE9F1;color:#B03A6E}
 .sc-f-themes span:nth-child(6n){background:#FFF3E4;color:#A84200}
+
+/* Noms sous les personnages : deux lignes au plus */
+.sc-nom{max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:normal;overflow-wrap:anywhere}
+/* Texte de la scène : pastilles colorées par personnage */
+.sc-script .sc-l{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;margin:0 0 10px;text-align:left;hyphens:auto}
+.sc-script .sc-l > span:last-child{text-align:justify}
+.sc-pp{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:600;margin-top:1px}
+.sc-pp .ic{width:14px;height:14px}
+.sc-pp.rc{background:#fff;color:#A84200;border:2px solid #A84200;box-sizing:border-box}
+.sc-pp.qc{background:#fff;color:#0E7C86;border:2px solid #0E7C86;box-sizing:border-box;font-size:13px}
+.sc-script .sc-l.q{font-weight:500;color:#0E7C86}
+.sc-prog b{display:inline-block;background:#E3F1EE;color:#0E7C86;border-radius:999px;padding:1px 10px;margin-right:4px;font-size:12.5px}
