@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.11.8';
+  var VERSION = '0.11.9';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -2524,11 +2524,20 @@
     var y0 = Number(String(an.libelle).slice(0, 4)) || Number(String(an.debut).slice(0, 4)), m0 = Number(String(an.debut).slice(5, 7)) || 9;
     return String(an.mois_factures || '').split(',').filter(Boolean).map(function (mm) { var m = Number(mm); return (m >= m0 ? y0 : y0 + 1) + '-' + ('0' + m).slice(-2); }).sort();
   }
-  function feuilleImport() {
-    var cid = centreEleves();
+  function feuilleImport(cidChoisi, texte) {
+    // Le centre est choisi ICI, visiblement : une liste ne part jamais dans un autre centre par mégarde.
+    var possibles = lignes('centres').filter(function (c) { return peut('eleves.gerer', c.id); });
+    var cid = cidChoisi || centreEleves();
+    if (!possibles.some(function (c) { return c.id === cid; })) cid = (possibles[0] || {}).id;
     var classes = lignes('classes').filter(function (k) { return k.centre_id === cid; });
-    if (!classes.length) { toast('Créez d\'abord les classes du centre dans « Planning ».', true); return; }
-    ouvrirFeuille('<h2>Importer une liste</h2><p class="doux">Copiez la liste d\'un cahier ou d\'un tableau : un élève par ligne, le nom en capitales puis les prénoms, et si vous l\'avez le téléphone du parent à la fin.</p>' +
+    var choixCentre = '<label class="champ"><span>Centre</span><select name="centre_import" data-change="import-centre">' + possibles.map(function (c) {
+      return '<option value="' + esc(c.id) + '"' + (c.id === cid ? ' selected' : '') + '>' + esc(c.nom) + '</option>'; }).join('') + '</select></label>';
+    if (!classes.length) {
+      ouvrirFeuille('<h2>Importer une liste</h2>' + choixCentre + '<div class="carte note-carte">' + ico('alert', 'p') + ' Ce centre n\'a encore aucune classe : créez-les d\'abord (Planning › Classes), avec leurs tarifs.</div>' +
+        '<div class="actions"><a class="btn or" href="#/emploi" data-a="fermer-et-aller">Créer les classes</a><button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
+      return;
+    }
+    ouvrirFeuille('<h2>Importer une liste</h2>' + choixCentre + '<p class="doux">Copiez la liste d\'un cahier ou d\'un tableau : un élève par ligne, le nom en capitales puis les prénoms, et si vous l\'avez le téléphone du parent à la fin.</p>' +
       '<form data-f="import" data-centre="' + esc(cid) + '"><label class="champ"><span>Classe</span><select name="classe_id">' + classes.map(function (k) { return '<option value="' + esc(k.id) + '"' + (k.id === ELV.classe ? ' selected' : '') + '>' + esc(k.nom) + '</option>'; }).join('') + '</select></label>' +
       '<label class="champ"><span>Liste</span><textarea name="liste" rows="8" data-input="apercu-import" placeholder="NGONO ESSOMBA Marie\nTAMO Paul ; 690 00 00 00\nBELLA Grâce ; 2500 ; 7500\nAMBASSA ; - ; 7500"></textarea>' +
       '<small>Avec les montants du cahier : <b>NOM Prénoms ; inscription ; ' + esc(moisDeLAnnee().slice(0, 2).map(function (am) { return MOIS[Number(am.slice(5)) - 1]; }).join(' ; ')) + ' …</b> — « - » pour une case vide. Chaque montant devient un versement avec son reçu.</small></label>' +
@@ -4648,6 +4657,13 @@
       var f = ev.target.form;
       var s = f.querySelector('#choix-prof');
       s.innerHTML = optionsProfs(enseignantsDu(f.dataset.centre), ev.target.value, s.value);
+      return;
+    }
+    if (ev.target.dataset && ev.target.dataset.change === 'import-centre') {
+      var zone = $('#feuille textarea[name=liste]'), garde = zone ? zone.value : '';
+      ELV.centre = ev.target.value; ELV.classe = '';
+      feuilleImport(ev.target.value);
+      var z2 = $('#feuille textarea[name=liste]'); if (z2 && garde) { z2.value = garde; apercuImport(z2.form); }
       return;
     }
     if (ev.target.dataset && ev.target.dataset.change === 'centre') {
