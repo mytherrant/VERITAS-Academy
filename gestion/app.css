@@ -588,3 +588,13 @@ input[type="date"], input[type="time"], input[type="month"] { min-width: 0; }
 /* Case « Trésorier de … » sous le rôle du centre, dans la fiche d'un compte. */
 .case.tresorier { margin: -6px 0 14px; padding: 8px 10px; background: var(--ok-fond); border-radius: var(--rayon); font-size: 14px; }
 .case.tresorier small { color: var(--doux); }
+/* Relances : le nom de l'élève reste lisible ; sur téléphone, les boutons d'envoi passent dessous. */
+.ligne.message .boutons { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+@media (max-width: 440px) {
+  .ligne.message { flex-wrap: wrap; }
+  .ligne.message > .corps { flex: 1 1 100%; }
+  .ligne.message > .boutons { flex: 1 1 100%; justify-content: flex-start; }
+}
+
+/* Élève qui doit : pastille rouge devant son nom (liste, appel, recherche de la caisse). */
+.marque-doit { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--danger); margin-right: 7px; vertical-align: 1px; box-shadow: 0 0 0 3px var(--danger-fond); flex: none; }

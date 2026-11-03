@@ -26,7 +26,11 @@ function g_capacites(): array {
         // Demande de Jacques (02/11/2026) : les actionnaires tiennent l'emploi du temps de leur centre.
         // Demande de Jacques (03/11/2026) : chaque partenaire, selon ses jours au centre et sa
         // proximité avec les parents, peut encaisser et envoyer le reçu, puis remettre l'argent au trésorier.
-        'actionnaire' => ['centre.voir', 'finances.voir', 'paiements.voir', 'paiements.encaisser', 'depenses.voir', 'stats.voir', 'emploi.gerer', 'agenda.gerer'],
+        // Demande de Jacques (03/11/2026, suite) : le partenaire présent fait l'appel, relance les parents, inscrit les élèves, encaisse
+        // inscriptions et mensualités, crée les comptes des enseignants, fixe leur contrat et les paie.
+        // L'admin peut retirer chacun de ces droits à un partenaire (Administration › Partenaires et droits).
+        'actionnaire' => ['centre.voir', 'finances.voir', 'paiements.voir', 'paiements.encaisser', 'depenses.voir', 'depenses.saisir', 'stats.voir',
+                          'emploi.gerer', 'agenda.gerer', 'eleves.gerer', 'comptes.gerer', 'enseignants.gerer', 'appel.faire'],
         'secretaire'  => ['centre.voir', 'eleves.gerer', 'appel.faire', 'paiements.encaisser', 'paiements.voir', 'depenses.saisir', 'depenses.voir', 'agenda.gerer'],
         'enseignant'  => ['centre.voir', 'appel.faire'],
     ];

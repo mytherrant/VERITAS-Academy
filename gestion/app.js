@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.11.3';
+  var VERSION = '0.11.8';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -836,7 +836,7 @@
         }).join('');
         var h = '<h1>Mon compte</h1><div class="carte"><h3>' + esc(u.nom) + '</h3><p class="doux">Identifiant : ' + esc(u.identifiant) + '</p><p>' +
           (u.admin ? '<span class="badge or">Administrateur des deux centres</span>' : '') + acces + '</p></div>' + carteMonRole();
-        var liens = [['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances, rappels']].concat(peutEquipeQuelquePart() ? [['#/equipe', 'message', 'Équipe', 'Messages entre partenaires, commentaires, réunions, tâches']] : []).concat([ ['#/roles', 'info', 'Rôles et droits', 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']]);
+        var liens = [['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances, rappels']].concat(peutEquipeQuelquePart() ? [['#/equipe', 'message', 'Équipe', 'Messages entre partenaires, commentaires, réunions, tâches']] : []).concat([ ['#/roles', 'info', estAdmin() ? 'Rôles et droits' : 'Mon rôle', estAdmin() ? 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants' : 'Ce que votre compte permet'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']]);
         if (peutQuelquePart('finances.voir')) liens.push(['#/bilan', 'trending', 'Bilan financier', 'Recettes, dépenses, parts des actionnaires']);
         if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) liens.push(['#/enseignants', 'presentation', 'Enseignants', 'Heures faites, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) liens.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
@@ -1252,7 +1252,7 @@
         boutons += '<button type="button" class="btn clair petit" data-a="detail-presence" data-seance="' + esc(x.id) + '" data-eleve="' + esc(el.id) + '">Justifier</button>';
       }
       var impaye = peut('paiements.voir', cid) ? echeancier(el).impaye : 0;
-      return '<div class="ligne' + (p ? ' pt-' + p.statut : '') + '"><button type="button" class="corps nom-eleve" data-a="detail-presence" data-seance="' + esc(x.id) + '" data-eleve="' + esc(el.id) + '"' + (modifiable || (justifiable && p) ? '' : ' disabled') + '><b>' + esc(nomComplet(el)) + (impaye ? ' <span class="badge danger" title="Impayé échu">impayé ' + fcfa(impaye) + '</span>' : '') + '</b>' + etat + '</button>' +
+      return '<div class="ligne' + (p ? ' pt-' + p.statut : '') + '"><button type="button" class="corps nom-eleve" data-a="detail-presence" data-seance="' + esc(x.id) + '" data-eleve="' + esc(el.id) + '"' + (modifiable || (justifiable && p) ? '' : ' disabled') + '><b>' + (impaye ? '<i class="marque-doit" title="Doit ' + esc(fcfa(impaye)) + '"></i>' : '') + esc(nomComplet(el)) + (impaye ? ' <span class="badge danger" title="Impayé échu">doit ' + fcfa(impaye) + '</span>' : '') + '</b>' + etat + '</button>' +
         (p && p._attente ? '<span class="badge alerte">en attente</span>' : '') + '<span class="boutons">' + boutons + '</span></div>';
     }).join('') + '</div>';
     if (modifiable && eleves.length && !close) h += '<div class="actions"><button class="btn" type="button" data-a="clore-appel" data-seance="' + esc(x.id) + '">' + ico('checkcircle', 'p') + 'Clore l\'appel</button></div>';
@@ -1628,6 +1628,56 @@
       .sort(function (a, b) { return b.ech.impaye - a.ech.impaye; });
   }
 
+  /** Où en est un élève : ce qu'il doit (échu, non payé) ou son avance (versé au-delà de ce qui est échu).
+   *  Les versements s'imputent du plus ancien dû au plus récent : un trop-versé avance le mois suivant. */
+  function soldeEleve(e) {
+    if (!e || !peut('paiements.voir', e.centre_id)) return null;
+    var ech = echeancier(e), auj = isoLocal(new Date());
+    var echu = ech.items.filter(function (it) { return it.echeance < auj; }).reduce(function (s, it) { return s + it.montant; }, 0);
+    return { doit: ech.impaye, avance: Math.max(0, ech.paye - echu) };
+  }
+  /** Pastille rouge devant le nom quand l'élève doit ; rien sinon (affiché seulement à qui voit la caisse). */
+  function marqueDevantNom(e) {
+    var s = soldeEleve(e);
+    return s && s.doit > 0 ? '<i class="marque-doit" title="Doit ' + esc(fcfa(s.doit)) + '" aria-label="Doit ' + esc(fcfa(s.doit)) + '"></i>' : '';
+  }
+  /** « doit 2 500 F » en rouge, ou « avance 1 500 F » en vert, à droite de la ligne. */
+  function badgeSolde(e) {
+    var s = soldeEleve(e);
+    if (!s) return '';
+    if (s.doit > 0) return '<span class="badge danger">doit ' + fcfa(s.doit) + '</span>';
+    if (s.avance > 0) return '<span class="badge ok">avance ' + fcfa(s.avance) + '</span>';
+    return '';
+  }
+
+  /** Échéances des prochains jours pas encore payées : à rappeler AVANT qu'elles tombent. */
+  var JOURS_RAPPEL = 5;
+  function aEchoir(cid) {
+    var auj = isoLocal(new Date()), lim = decalerJour(auj, JOURS_RAPPEL);
+    return lignes('eleves').filter(function (e) { return e.centre_id === cid && (e.statut || 'actif') === 'actif'; }).map(function (e) {
+      var ech = echeancier(e);
+      var its = ech.items.filter(function (it) { return it.echeance >= auj && it.echeance <= lim && it.paye < it.montant; });
+      return its.length ? { e: e, ech: ech, items: its, montant: its.reduce(function (s, it) { return s + it.montant - it.paye; }, 0) } : null;
+    }).filter(Boolean).sort(function (a, b) { return a.items[0].echeance < b.items[0].echeance ? -1 : 1; });
+  }
+  function messageRappelEcheance(e, x, pourEleve) {
+    var c = ligne('centres', e.centre_id) || {};
+    var it = x.items[0];
+    return 'Bonjour ' + (pourEleve ? (e.prenoms || nomComplet(e)) : (e.parent_nom || 'cher parent')) + ', petit rappel du centre ' + (c.nom || 'VÉRITAS') + ' : ' +
+      fcfa(x.montant).replace(/\u00a0/g, ' ') + ' sont à régler ' + (pourEleve ? '' : 'pour ' + nomComplet(e) + ' ') + 'au plus tard le ' + dateLisible(it.echeance, true) + ' (' +
+      x.items.map(function (i) { return i.libelle.toLowerCase(); }).join(', ') + '). Merci ! Contact : ' + telLisible(String(c.telephones || '').split('/')[0].replace(/\D+/g, '')) + '.';
+  }
+  /** Boutons d'envoi : parent (WhatsApp, SMS) et, si son numéro est connu, l'élève lui-même. */
+  function boutonsEnvoi(e, txtParent, txtEleve) {
+    var tel = e.parent_whatsapp || e.parent_tel, sms = e.parent_tel || e.parent_whatsapp, el = e.tel_eleve;
+    var lien = function (canal, num, txt, lib, cls) {
+      return '<a class="btn ' + (cls || 'clair') + ' petit" ' + (canal === 'whatsapp' ? 'target="_blank" rel="noopener" ' : '') + 'data-a="relancer" data-canal="' + canal + '" data-id="' + esc(e.id) + '" href="' +
+        (canal === 'whatsapp' ? 'https://wa.me/237' + esc(num) + '?text=' : 'sms:+237' + esc(num) + '?body=') + encodeURIComponent(txt) + '">' + lib + '</a>';
+    };
+    return (tel ? lien('whatsapp', tel, txtParent, ico('message', 'p') + 'Parent') : '') + (sms ? lien('sms', sms, txtParent, 'SMS parent') : '') +
+      (el ? lien('whatsapp', el, txtEleve || txtParent, ico('user', 'p') + 'Élève') : '') + (!tel && !sms && !el ? '<span class="doux">pas de numéro</span>' : '');
+  }
+
   /** Nombre en toutes lettres (règles de 1990 : traits d'union partout), pour la ligne « Somme de ». */
   function enLettres(n) {
     n = Math.floor(Number(n) || 0);
@@ -1695,13 +1745,18 @@
       var total = imp.reduce(function (s, x) { return s + x.ech.impaye; }, 0);
       var c = ligne('centres', cid) || {};
       h += '<p class="sous-titre">Échéance le ' + esc(c.jour_echeance || 10) + ' du mois · <b>' + imp.length + '</b> élève' + (imp.length > 1 ? 's' : '') + ' · <b>' + fcfa(total) + '</b> à recouvrer</p>';
+      var proche = aEchoir(cid);
+      if (proche.length) h += '<h2>Échéance proche · ' + proche.length + '</h2><p class="sous-titre">À régler dans les ' + JOURS_RAPPEL + ' jours : un rappel aimable, avant le retard.</p><div class="liste">' + proche.map(function (x) {
+        var e = x.e, trace = e.relance_le ? '<small class="st-present">' + ico('check', 'p') + ' prévenu le ' + esc(dateLisible(e.relance_le)) + '</small>' : '';
+        return '<div class="ligne message"><button type="button" class="corps nom-eleve" data-a="voir-eleve" data-id="' + esc(e.id) + '"><b>' + esc(nomComplet(e)) + '</b><small>' + esc(nomDe('classes', e.classe_id) + ' · ' + fcfa(x.montant) + ' pour le ' + dateLisible(x.items[0].echeance, true)) + '</small>' + trace + '</button>' +
+          '<span class="boutons">' + boutonsEnvoi(e, messageRappelEcheance(e, x, false), messageRappelEcheance(e, x, true)) + '</span></div>';
+      }).join('') + '</div><h2>Échus, à relancer · ' + imp.length + '</h2>';
       h += imp.length ? '<div class="liste">' + imp.map(function (x) {
         var e = x.e, tel = e.parent_whatsapp || e.parent_tel, sms = e.parent_tel || e.parent_whatsapp;
         var txt = messageRelance(e, x.ech);
         var trace = e.relance_le ? '<small class="st-present">' + ico('check', 'p') + ' relancé le ' + esc(dateLisible(e.relance_le)) + '</small>' : '';
         return '<div class="ligne message"><button type="button" class="corps nom-eleve" data-a="voir-eleve" data-id="' + esc(e.id) + '"><b>' + esc(nomComplet(e)) + (e.statut === 'parti' ? ' <span class="badge">parti</span>' : '') + '</b><small>' + esc(nomDe('classes', e.classe_id)) + ' · ' + esc(x.ech.moisImpayes.map(function (it) { return it.court; }).join(', ')) + '</small><small class="st-absent"><b class="st-absent">' + fcfa(x.ech.impaye) + '</b></small>' + trace + '</button>' +
-          '<span class="boutons">' + (tel ? '<a class="btn clair petit" target="_blank" rel="noopener" data-a="relancer" data-canal="whatsapp" data-id="' + esc(e.id) + '" href="https://wa.me/237' + esc(tel) + '?text=' + encodeURIComponent(txt) + '">' + ico('message', 'p') + 'Relancer</a>' : '') +
-          (sms ? '<a class="btn clair petit" data-a="relancer" data-canal="sms" data-id="' + esc(e.id) + '" href="sms:+237' + esc(sms) + '?body=' + encodeURIComponent(txt) + '">SMS</a>' : '') + (!tel && !sms ? '<span class="doux">pas de numéro</span>' : '') + '</span></div>';
+          '<span class="boutons">' + boutonsEnvoi(e, txt, txt.replace(/^Bonjour [^,]*,/, 'Bonjour ' + (e.prenoms || nomComplet(e)) + ',')) + '</span></div>';
       }).join('') + '</div>' : '<div class="carte vide">Aucun impayé échu. </div>';
     } else {
       var deps = lignes('depenses').filter(function (d) { return d.centre_id === cid; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
@@ -1746,7 +1801,7 @@
     if (!l.length) { z.innerHTML = '<div class="carte vide">Aucun élève.</div>'; return; }
     z.innerHTML = '<div class="liste">' + l.slice(0, 60).map(function (x) {
       var etat = x.ech.impaye ? '<span class="badge danger">' + fcfa(x.ech.impaye) + ' en retard</span>' : x.ech.resteAcejour ? '<span class="badge alerte">' + fcfa(x.ech.resteAcejour) + ' à payer</span>' : '<span class="badge ok">à jour</span>';
-      return '<button class="ligne" type="button" data-a="encaisser" data-id="' + esc(x.e.id) + '"><span class="avatar' + (x.e.sexe === 'F' ? ' f' : '') + '">' + esc(initiales(nomComplet(x.e))) + '</span><span class="corps"><b>' + esc(nomComplet(x.e)) + '</b><small>' + esc(nomDe('classes', x.e.classe_id) + ' · mensualité ' + fcfa(x.ech.mensualite)) + '</small></span>' + etat + '</button>';
+      return '<button class="ligne" type="button" data-a="encaisser" data-id="' + esc(x.e.id) + '"><span class="avatar' + (x.e.sexe === 'F' ? ' f' : '') + '">' + esc(initiales(nomComplet(x.e))) + '</span><span class="corps"><b>' + marqueDevantNom(x.e) + esc(nomComplet(x.e)) + '</b><small>' + esc(nomDe('classes', x.e.classe_id) + ' · mensualité ' + fcfa(x.ech.mensualite)) + '</small></span>' + etat + '</button>';
     }).join('') + '</div>';
   }
 
@@ -2335,8 +2390,8 @@
     z.innerHTML = '<div class="liste">' + liste.map(function (e) {
       var statut = (e.statut || 'actif') !== 'actif' ? ' <span class="badge danger">' + esc(e.statut) + '</span>' : '';
       return '<button class="ligne" type="button" data-a="voir-eleve" data-id="' + esc(e.id) + '"><span class="avatar' + (e.sexe === 'F' ? ' f' : '') + '">' + esc(initiales(nomComplet(e))) + '</span>' +
-        '<span class="corps"><b>' + esc(nomComplet(e)) + statut + '</b><small>' + esc([nomDe('classes', e.classe_id), e.matricule || 'matricule à la synchro', telLisible(e.parent_tel)].filter(Boolean).join(' · ')) + '</small></span>' +
-        (e._attente ? '<span class="badge alerte">en attente</span>' : '') + '</button>';
+        '<span class="corps"><b>' + marqueDevantNom(e) + esc(nomComplet(e)) + statut + '</b><small>' + esc([nomDe('classes', e.classe_id), e.matricule || 'matricule à la synchro', telLisible(e.parent_tel)].filter(Boolean).join(' · ')) + '</small></span>' +
+        badgeSolde(e) + (e._attente ? '<span class="badge alerte">en attente</span>' : '') + '</button>';
     }).join('') + '</div><p class="doux">' + liste.length + ' affiché' + (liste.length > 1 ? 's' : '') + '</p>';
   }
 
@@ -2428,7 +2483,29 @@
   }
 
   /** « NOM Prénoms ; 697 63 77 39 » ou « NOM Prénoms » — les mots en capitales de tête forment le nom. */
+  /** Montant écrit dans un cahier : « 2500 », « 7 500 », « 10.000 », « 10 000 F ». Vide ou « - » : rien. */
+  function lireMontant(t) {
+    t = String(t || '').replace(/f(cfa)?\.?$/i, '').replace(/[\s.\u00a0]/g, '').trim();
+    return /^\d{3,6}$/.test(t) ? Number(t) : null;
+  }
+  /** Ligne d'import « NOM Prénoms ; inscription ; octobre ; novembre … » (montants facultatifs, « - » pour vide). */
   function lireLigneImport(l) {
+    var morceaux = String(l).split(/\s*[;|\t]\s*/);
+    if (morceaux.length > 1) {
+      var e = lireLigneImportNom(morceaux[0]);
+      if (!e) return null;
+      e.montants = [];
+      morceaux.slice(1).forEach(function (x) {
+        var tel = telNormal(String(x).replace(/\D/g, '').replace(/^237/, ''));
+        if (/^\s*\+?(237)?[\s.]*[26](?:[\s.]*\d){8}\s*$/.test(x) && tel) { e.parent_tel = tel; return; }
+        e.montants.push(lireMontant(x));
+      });
+      while (e.montants.length && e.montants[e.montants.length - 1] == null) e.montants.pop();
+      return e;
+    }
+    return lireLigneImportNom(l);
+  }
+  function lireLigneImportNom(l) {
     var tel = '';
     var m = l.match(/(?:\+?237)?[\s.]*([26](?:[\s.]*\d){8})\s*$/);
     if (m) { tel = telNormal(m[1]) || ''; l = l.slice(0, m.index); }
@@ -2441,13 +2518,27 @@
     return { nom: mots.slice(0, n).join(' ').toUpperCase(), prenoms: mots.slice(n).join(' '), parent_tel: tel };
   }
 
+  /** Mois facturés de l'année active, dans l'ordre (« 2026-10 », « 2026-11 », …). */
+  function moisDeLAnnee() {
+    var an = anneeActive(); if (!an) return [];
+    var y0 = Number(String(an.libelle).slice(0, 4)) || Number(String(an.debut).slice(0, 4)), m0 = Number(String(an.debut).slice(5, 7)) || 9;
+    return String(an.mois_factures || '').split(',').filter(Boolean).map(function (mm) { var m = Number(mm); return (m >= m0 ? y0 : y0 + 1) + '-' + ('0' + m).slice(-2); }).sort();
+  }
   function feuilleImport() {
     var cid = centreEleves();
     var classes = lignes('classes').filter(function (k) { return k.centre_id === cid; });
     if (!classes.length) { toast('Créez d\'abord les classes du centre dans « Planning ».', true); return; }
     ouvrirFeuille('<h2>Importer une liste</h2><p class="doux">Copiez la liste d\'un cahier ou d\'un tableau : un élève par ligne, le nom en capitales puis les prénoms, et si vous l\'avez le téléphone du parent à la fin.</p>' +
       '<form data-f="import" data-centre="' + esc(cid) + '"><label class="champ"><span>Classe</span><select name="classe_id">' + classes.map(function (k) { return '<option value="' + esc(k.id) + '"' + (k.id === ELV.classe ? ' selected' : '') + '>' + esc(k.nom) + '</option>'; }).join('') + '</select></label>' +
-      '<label class="champ"><span>Liste</span><textarea name="liste" rows="8" data-input="apercu-import" placeholder="NGONO ESSOMBA Marie\nTAMO Paul ; 690 00 00 00\nBELLA Grâce"></textarea></label>' +
+      '<label class="champ"><span>Liste</span><textarea name="liste" rows="8" data-input="apercu-import" placeholder="NGONO ESSOMBA Marie\nTAMO Paul ; 690 00 00 00\nBELLA Grâce ; 2500 ; 7500\nAMBASSA ; - ; 7500"></textarea>' +
+      '<small>Avec les montants du cahier : <b>NOM Prénoms ; inscription ; ' + esc(moisDeLAnnee().slice(0, 2).map(function (am) { return MOIS[Number(am.slice(5)) - 1]; }).join(' ; ')) + ' …</b> — « - » pour une case vide. Chaque montant devient un versement avec son reçu.</small></label>' +
+      (function () {
+        var an = anneeActive(), deb = an && an.debut ? an.debut : isoLocal(new Date());
+        return '<div class="deux"><label class="champ"><span>Inscrits depuis le</span><input type="date" name="date_inscription" value="' + esc(deb) + '"><small>La rentrée : les mois depuis la rentrée sont dus.</small></label>' +
+          '<label class="champ"><span>Date des versements repris</span><select name="date_versements"><option value="auj">Aujourd\'hui</option>' +
+          (peut('caisse.corriger', cid) ? '<option value="mois" selected>Le mois concerné (inscription : date d\'inscription)</option>' : '') + '</select>' +
+          (peut('caisse.corriger', cid) ? '' : '<small>Dater dans le passé est réservé au responsable.</small>') + '</label></div>';
+      })() +
       '<div id="apercu-import" class="doux">Rien à importer pour l\'instant.</div>' +
       '<div class="actions"><button class="btn or" type="submit">Inscrire ces élèves</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
   }
@@ -2469,9 +2560,12 @@
     if (!z) return;
     if (!l.length) { z.innerHTML = 'Rien à importer pour l\'instant.'; return; }
     var ok = l.filter(function (e) { return !e.motif; });
-    z.innerHTML = '<p><b>' + ok.length + '</b> élève' + (ok.length > 1 ? 's' : '') + ' à inscrire' + (l.length > ok.length ? ', <b>' + (l.length - ok.length) + '</b> écarté' + (l.length - ok.length > 1 ? 's' : '') : '') + '</p><div class="liste">' +
+    var totVers = ok.reduce(function (s, e) { return s + (e.montants || []).reduce(function (a, v) { return a + (v || 0); }, 0); }, 0);
+    var nbVers = ok.reduce(function (s, e) { return s + (e.montants || []).filter(Boolean).length; }, 0);
+    z.innerHTML = '<p><b>' + ok.length + '</b> élève' + (ok.length > 1 ? 's' : '') + ' à inscrire' + (nbVers ? ' · <b>' + nbVers + '</b> versement' + (nbVers > 1 ? 's' : '') + ' (' + fcfa(totVers) + ')' : '') + (l.length > ok.length ? ', <b>' + (l.length - ok.length) + '</b> écarté' + (l.length - ok.length > 1 ? 's' : '') : '') + '</p><div class="liste">' +
       l.slice(0, 60).map(function (e) {
-        return '<div class="ligne"><span class="corps"><b>' + esc(nomComplet(e)) + '</b><small>' + esc(e.parent_tel ? telLisible(e.parent_tel) : 'sans téléphone') + '</small></span>' +
+        var mois = moisDeLAnnee(), m = (e.montants || []).map(function (v, i) { return v ? (i === 0 ? 'Insc.' : MOIS_COURTS[Number((mois[i - 1] || '0000-01').slice(5)) - 1]) + ' ' + fcfa(v) : ''; }).filter(Boolean);
+        return '<div class="ligne"><span class="corps"><b>' + esc(nomComplet(e)) + '</b><small>' + esc((e.parent_tel ? telLisible(e.parent_tel) : 'sans téléphone') + (m.length ? ' · ' + m.join(' · ') : '')) + '</small></span>' +
           (e.motif ? '<span class="badge alerte">' + esc(e.motif) + '</span>' : '<span class="badge ok">nouveau</span>') + '</div>';
       }).join('') + '</div>';
   }
@@ -3281,9 +3375,12 @@
       peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Remettre les fonds au trésorier', 'Fixer les tarifs, valider les dépenses', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants', 'Tenir l\'agenda : rendez-vous, rencontres, réunions', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
       pas: ['Les réglages des centres et de l\'année', 'Les comptes responsables, actionnaires et admin'] },
     { cle: 'actionnaire', espace: 'partenaire', nom: 'Actionnaire', famille: 'Partenaire',
-      resume: 'Associé du centre : suit les chiffres, encaisse quand il est présent, tient l\'emploi du temps.',
-      peut: ['Voir le bilan, les versements et les dépenses', 'Encaisser auprès des parents et envoyer le reçu', 'Payer l\'enseignant juste après son cours (1 500 F/h)', 'Remettre les fonds au trésorier', 'Voir les statistiques et les parts', 'Modifier l\'emploi du temps de son centre', 'Tenir l\'agenda du centre', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
-      pas: ['Inscrire les élèves', 'Faire l\'appel', 'Créer des comptes'] },
+      resume: 'Associé du centre : quand il est présent, il fait l\'appel, relance, inscrit, encaisse, gère et paie les enseignants ; il suit les chiffres.',
+      peut: ['Faire l\'appel des classes, prévenir les parents des absences et retards', 'Rappeler les échéances et relancer les impayés (parents ou élèves)',
+        'Inscrire les élèves et modifier leurs fiches', 'Encaisser inscriptions et mensualités, envoyer le reçu', 'Créer les comptes des enseignants, fixer leur contrat',
+        'Payer l\'enseignant après son cours, verser la paie du mois', 'Saisir les dépenses', 'Remettre les fonds au trésorier', 'Voir le bilan, les statistiques et les parts',
+        'Modifier l\'emploi du temps, tenir l\'agenda', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
+      pas: ['Fixer les tarifs, accorder une remise', 'Valider une dépense'] },
     { cle: 'secretaire', espace: 'secretariat', nom: 'Secrétaire / surveillant', famille: 'Équipe',
       resume: 'Tient l\'accueil et la caisse du centre.',
       peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Payer l\'enseignant juste après son cours (1 500 F/h)', 'Remettre les fonds au trésorier', 'Saisir les dépenses (avec photo du justificatif)', 'Noter les rendez-vous dans l\'agenda', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
@@ -3324,7 +3421,7 @@
       (chiffres.length ? '<div class="chiffres-cles">' + chiffres.map(function (c) {
         return (c[2] ? '<a href="' + c[2] + '">' : '<div>') + '<b>' + c[0] + '</b><small>' + esc(c[1]) + '</small>' + (c[2] ? '</a>' : '</div>');
       }).join('') + '</div>' : '') +
-      '<a class="lien-roles" href="#/roles">' + ico('info', 'p') + ' Rôles et droits</a></section>';
+      '<a class="lien-roles" href="#/roles">' + ico('info', 'p') + (estAdmin() ? ' Rôles et droits' : ' Mon rôle et mes droits') + '</a></section>';
   }
   /** [valeur (HTML sûr), libellé, lien?] selon l'espace. */
   function chiffresCles(cle) {
@@ -3403,9 +3500,11 @@
   }
 
   function pageRoles() {
-    var h = '<h1>Rôles et droits</h1><p class="sous-titre">Chaque personne a son compte et son rôle, centre par centre. Le serveur refuse ce que le rôle n\'autorise pas.</p>';
+    // Chacun ne voit que SON rôle ; l'administrateur voit tous les rôles pour les attribuer.
+    var h = estAdmin() ? '<h1>Rôles et droits</h1><p class="sous-titre">Chaque personne a son compte et son rôle, centre par centre. Le serveur refuse ce que le rôle n\'autorise pas.</p>'
+      : '<h1>Mon rôle</h1><p class="sous-titre">Ce que votre compte permet, centre par centre. Une question : demandez à l\'administrateur.</p>';
     var moi = estAdmin() ? ['admin'] : mesRoles();
-    h += '<div class="fiches-roles">' + FICHES_ROLES.map(function (f) {
+    h += '<div class="fiches-roles">' + FICHES_ROLES.filter(function (f) { return estAdmin() || moi.indexOf(f.cle) >= 0; }).map(function (f) {
       return '<article class="fiche-role espace-' + f.espace + (moi.indexOf(f.cle) >= 0 ? ' a-moi' : '') + '"><div class="haut"><span class="pastille">' + ico(ESPACES[f.espace].ico) + '</span><div><small>' + esc(f.famille) + '</small><h3>' + esc(f.nom) + '</h3></div>' +
         (moi.indexOf(f.cle) >= 0 ? '<span class="badge or">Vous</span>' : '') + '</div><p>' + esc(f.resume) + '</p>' +
         '<ul class="droits">' + f.peut.map(function (t) { return '<li class="oui">' + ico('check', 'p') + ' ' + esc(t) + '</li>'; }).join('') +
@@ -3536,7 +3635,7 @@
     if (estAdmin()) h += '<label class="case"><input type="checkbox" name="admin_global"' + (u && u.admin_global ? ' checked' : '') + '> Administrateur des deux centres (vue consolidée, finances, tous les réglages)</label>';
     if (u) h += '<label class="case"><input type="checkbox" name="actif"' + (u.actif ? ' checked' : '') + '> Compte actif (décocher coupe immédiatement ses sessions)</label>';
     h += (estAdmin() ? '<p class="doux">' + ico('wallet', 'p') + ' <b>Trésorier</b> : cochez la case sous le centre. Il garde les fonds du centre et confirme chaque remise des partenaires.</p>' : '') +
-      '<div class="legende-roles">' + ORDRE_ROLES.map(function (r) {
+      '<div class="legende-roles">' + ORDRE_ROLES.filter(function (r) { return estAdmin() || centres.some(function (c) { return rolesPermis(c.id).indexOf(r) >= 0; }); }).map(function (r) {
       var f = ficheRole(r);
       return '<div class="espace-' + f.espace + '">' + ico(ESPACES[f.espace].ico, 'p') + '<span><b>' + esc(f.nom) + '</b> ' + esc(f.resume) + '</span></div>';
     }).join('') + '</div>' +
@@ -3559,7 +3658,11 @@
       '*Caisse › Remises* : remettez au trésorier l\'argent encaissé, *avant la fin du mois* ; il confirme la réception.',
       '*Plus › Enseignants* : pointage des cours, contrats, paies.', '*Plus › Comptes et accès* : créez les comptes de vos secrétaires et enseignants.', '*Plus › Agenda* : rendez-vous, rencontres, échéances ; la cloche en haut rappelle ce qui approche.', '*Plus › Équipe* : messages entre partenaires, commentaires, dates de réunion, tâches.'],
     actionnaire: ['*Accueil* : les chiffres clés de votre centre (élèves, appels, encaissé, impayés).', '*Plus › Bilan* : recettes, dépenses, résultat du mois et votre part.',
-      '*Caisse › Encaisser* : quand vous êtes au centre ou qu\'un parent vous paie, encaissez et envoyez-lui le reçu par WhatsApp.',
+      '*Appel* : choisissez la classe, touchez chaque élève (présent, retard, absent) ; prévenez les parents des absences.',
+      '*Caisse › Impayés* : « Échéance proche » pour un rappel avant la date, puis les impayés à relancer — au parent ou à l\'élève.',
+      '*Élèves › +* : inscrivez un élève (classe, matières, tarif de la classe).',
+      '*Caisse › Encaisser* : quand vous êtes au centre ou qu\'un parent vous paie, encaissez inscription ou mensualité et envoyez-lui le reçu par WhatsApp.',
+      '*Plus › Enseignants* : « Ajouter un enseignant », son contrat, sa paie du mois.',
       '*Appel › Enseignants du jour* : si vous êtes présent, payez l\'enseignant juste après son cours (*Payer*, 1 500 F de l\'heure).',
       '*Caisse › Remises* : remettez cet argent au trésorier *avant la fin du mois* ; il confirme la réception.', '*Plus › Planning* : vous tenez l\'emploi du temps du centre (classes, créneaux, enseignants).', '*Plus › Agenda* : rendez-vous et rencontres ; la cloche en haut rappelle ce qui approche.', '*Plus › Équipe* : messages entre partenaires, commentaires, dates de réunion, tâches.'],
     secretaire: ['*Appel* : choisissez la classe, touchez chaque élève (présent, retard, absent), au début du cours.', '*Élèves › +* : inscrire un élève.',
@@ -3580,7 +3683,7 @@
       '*Votre rôle : ' + (admin ? 'Administrateur' : ou) + '*\n' + GUIDE_ROLE[principal].map(function (l) { return '• ' + l; }).join('\n') + '\n\n' +
       'Sans réseau, tout continue : vos saisies partent dès le retour de la connexion (pastille « À jour » en haut).\n' +
       'Trésorier du centre : vous confirmez chaque remise dans *Caisse › Remises* (« Reçu » ou « Pas reçu »).\n' +
-      'Plus › *Rôles et droits* explique ce que chacun peut faire. Une question : appelez l\'administrateur.';
+      'Plus › *Mon rôle* explique ce que votre compte permet. Une question : appelez l\'administrateur.';
   }
   function feuilleSecret(titre, nom, identifiant, mdp, acces, admin) {
     var guide = modeEmploi(nom, acces, admin);
@@ -4335,15 +4438,31 @@
       var l = analyseImport(form).filter(function (e) { return !e.motif; });
       if (!l.length) { toast('Aucun nouvel élève à inscrire.', true); return; }
       var classe = form.querySelector('[name=classe_id]').value;
-      var auj = new Date().toISOString().slice(0, 10);
+      var auj = isoLocal(new Date());
+      var dInsc = (form.querySelector('[name=date_inscription]') || {}).value || auj;
+      var parMois = (form.querySelector('[name=date_versements]') || {}).value === 'mois';
+      var mois = moisDeLAnnee(), cid = form.dataset.centre, jourEch = ('0' + (Number((ligne('centres', cid) || {}).jour_echeance) || 10)).slice(-2);
+      var peutEnc = peut('paiements.encaisser', cid), nbVers = 0;
       fermerFeuille();
       var suite = Promise.resolve();
       l.forEach(function (e) {
+        var eid = nouvelId();
         suite = suite.then(function () {
-          return muter('eleves', nouvelId(), { centre_id: e.centre_id, classe_id: classe, nom: e.nom, prenoms: e.prenoms, parent_tel: e.parent_tel, date_inscription: auj });
+          return muter('eleves', eid, { centre_id: e.centre_id, classe_id: classe, nom: e.nom, prenoms: e.prenoms, parent_tel: e.parent_tel, date_inscription: dInsc > auj ? auj : dInsc });
+        });
+        if (!peutEnc) return;
+        (e.montants || []).forEach(function (v, i) {
+          if (!v) return;
+          var quoi = i === 0 ? 'inscription' : MOIS[Number((mois[i - 1] || auj.slice(0, 7)).slice(5)) - 1];
+          var date = !parMois ? auj : i === 0 ? dInsc : (mois[i - 1] || auj.slice(0, 7)) + '-' + jourEch;
+          if (date > auj) date = auj;
+          nbVers++;
+          suite = suite.then(function () {
+            return muter('paiements', 'pa' + nouvelId(), { centre_id: e.centre_id, eleve_id: eid, montant: v, date: date, mode: 'especes', reference: '', note: 'Repris du cahier : ' + quoi });
+          });
         });
       });
-      suite.then(function () { ELV.classe = classe; toast(l.length + ' élève' + (l.length > 1 ? 's' : '') + ' inscrit' + (l.length > 1 ? 's' : '') + '.'); rendre(); });
+      suite.then(function () { ELV.classe = classe; toast(l.length + ' élève' + (l.length > 1 ? 's' : '') + ' inscrit' + (l.length > 1 ? 's' : '') + (nbVers ? ', ' + nbVers + ' versement' + (nbVers > 1 ? 's' : '') + ' repris' : '') + '.'); rendre(); });
     },
     paiement: function (form) {
       var v = valeurs(form);
