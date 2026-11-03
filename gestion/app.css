@@ -410,3 +410,70 @@ table.matrice { width: 100%; border-collapse: collapse; font-size: 13px; table-l
 .pj-solde small, .pj-solde span { color: #C9D6F2; } .pj-solde b { color: #fff; font-size: 26px; }
 .pj-solde.negatif b { color: #FFB4AB; }
 .export-jour { flex-wrap: wrap; }
+
+
+/* ════════════════════════════════════════════════════════════════════════
+   Habillage veritas-school.com (demande de Jacques, 03/11/2026) : la même
+   identité que le site. Médaillons ronds à fond blanc cerclés d'un anneau de
+   couleur (bleu, sarcelle, rose, orange, violet, en alternance comme le menu
+   du site), titre de la tuile à la couleur de son anneau, cartes arrondies à
+   14 px avec une ombre légère, bouton d'action jaune en pilule.
+   Remplace la règle « aplats, pas d'ombre » de l'en-tête de cette feuille.
+   ════════════════════════════════════════════════════════════════════════ */
+:root { --rayon-carte: 14px; --ombre: 0 4px 14px rgba(0, 17, 54, .06); --ombre-haute: 0 12px 26px rgba(0, 17, 54, .10); --vt: #1E499B; --vf: #EEF3FC; }
+
+/* Médaillon : cercle blanc, anneau de couleur, icône bleu nuit. */
+.pastille { border-radius: 50%; background: #fff; border: 3px solid var(--vt); color: #001136; box-sizing: border-box; }
+.pastille svg.ico { stroke-width: 2; }
+
+/* Cartes, listes, tuiles : coins du site, ombre douce. */
+.carte, .liste, .tuile, .fiche-role, .tableau-defile, .stats div, .infos { border-radius: var(--rayon-carte); border-color: #E4E9F2; box-shadow: var(--ombre); }
+.liste .ligne { border-color: #EEF1F6; }
+
+/* Tuiles de l'accueil : vignettes centrées, médaillon en tête, titre coloré. */
+.grille { gap: 14px; }
+.tuile { text-align: center; justify-items: center; align-content: start; padding: 18px 12px 16px; transition: transform .18s ease, box-shadow .18s ease; }
+.tuile .pastille { width: 56px; height: 56px; margin-bottom: 4px; transition: transform .18s ease; }
+.tuile .pastille svg.ico { width: 24px; height: 24px; }
+.tuile b { color: var(--vt); font-size: 15px; }
+.tuile:hover { transform: translateY(-4px); box-shadow: var(--ombre-haute); border-color: #E4E9F2; }
+.tuile:hover .pastille { transform: scale(1.08) rotate(-3deg); }
+.grille > .tuile:nth-child(5n+1) { --vt: #1E499B; --vf: #EEF3FC; }
+.grille > .tuile:nth-child(5n+2) { --vt: #0E7C86; --vf: #E9F5F3; }
+.grille > .tuile:nth-child(5n+3) { --vt: #B03A6E; --vf: #FBEEF3; }
+.grille > .tuile:nth-child(5n+4) { --vt: #A84200; --vf: #FFF4E8; }
+.grille > .tuile:nth-child(5n+5) { --vt: #5B4FA8; --vf: #F1EEF9; }
+.tuile.inactive .pastille { border-color: #CDD4E2; background: #fff; }
+.tuile.inactive b { color: var(--doux); }
+@media (prefers-reduced-motion: reduce) { .tuile, .tuile .pastille { transition: none; } .tuile:hover, .tuile:hover .pastille { transform: none; } }
+
+/* Lignes de liste (Plus, Administration…) : même médaillon, couleurs alternées. */
+.liste > .ligne:nth-child(5n+2) .pastille { --vt: #0E7C86; }
+.liste > .ligne:nth-child(5n+3) .pastille { --vt: #B03A6E; }
+.liste > .ligne:nth-child(5n+4) .pastille { --vt: #A84200; }
+.liste > .ligne:nth-child(5n+5) .pastille { --vt: #5B4FA8; }
+.carte.centre .pastille { width: 46px; height: 46px; }
+
+/* Boutons : l'action jaune en pilule, comme « Créer mon compte partenaire ». */
+.btn { border-radius: 12px; font-weight: 600; }
+.btn.or, .fab { border-radius: 999px; }
+.btn.or { padding-left: 24px; padding-right: 24px; }
+.fab { box-shadow: 0 8px 20px rgba(0, 17, 54, .18); }
+.btn.clair { border-color: #D5DCEA; }
+
+/* Espaces par rôle : teintes du site. */
+.espace-secretariat { --role: #0E7C86; --role-pale: #E9F5F3; }
+.espace-enseignant { --role: #5B4FA8; --role-pale: #F1EEF9; }
+.bandeau-espace { border-radius: var(--rayon-carte); background: linear-gradient(135deg, var(--role) 0%, var(--role) 55%, color-mix(in srgb, var(--role) 70%, #0E7C86) 100%); }
+.bandeau-espace .pastille { border: 3px solid rgba(255, 255, 255, .85); background: rgba(255, 255, 255, .12); color: #fff; }
+.fiche-role .pastille { border-color: var(--role); background: #fff; color: var(--role); }
+
+/* Barre du bas : l'onglet actif porte le jaune de l'action sous son icône. */
+.nav-basse a.actif { color: var(--bleu-profond); }
+.nav-basse a.actif .ico { color: var(--bleu); }
+.nav-basse a { position: relative; }
+.nav-basse a.actif::after { content: ""; position: absolute; top: 0; left: 30%; right: 30%; height: 3px; border-radius: 0 0 3px 3px; background: var(--action); }
+/* Ligne « Appels du jour : 6 / 36 · 9 en retard » : elle passe à la ligne entre ses
+   morceaux, jamais au milieu d'un chiffre ou d'un badge. */
+.lien-appel { flex-wrap: wrap; row-gap: 2px; }
+.lien-appel b, .lien-appel .badge { white-space: nowrap; }

@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.9.5';
+  var VERSION = '0.9.6';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -425,24 +425,14 @@
   }
   var saisiePin = '';
 
-  // Panneau d'administration : invisible tant que l'admin ne tape pas 4 fois sur le
-  // logo ; il se referme seul après 15 min. Un écran posé sur la table ne montre donc
-  // ni les comptes, ni les droits, ni le journal. (Le serveur reste seul juge des droits.)
-  var PANNEAU_MS = 15 * 60 * 1000;
-  var tapsLogo = [];
-  function panneauOuvert() { return estAdmin() && E.panneauJusqua && Date.now() < E.panneauJusqua; }
-  function basculerPanneau() {
-    if (!estAdmin()) return;
-    if (panneauOuvert()) { E.panneauJusqua = 0; toast('Panneau d\'administration refermé.'); location.hash = '#/accueil'; rendre(); return; }
-    E.panneauJusqua = Date.now() + PANNEAU_MS;
-    toast('Panneau d\'administration ouvert (15 min).');
-    location.hash = '#/admin';
-    rendre();
-  }
-  /** Écrans réservés : pour l'admin, seulement panneau ouvert ; pour un responsable, selon ses droits. */
-  function accesGestion(cap) { return estAdmin() ? panneauOuvert() : peutQuelquePart(cap); }
-  /** Ouvre le panneau sans changer d'écran (bouton visible, en plus des 4 taps sur le logo). */
-  function ouvrirPanneauDiscret() { if (estAdmin() && !panneauOuvert()) E.panneauJusqua = Date.now() + PANNEAU_MS; }
+  // Administration : toujours ouverte à l'administrateur, depuis Plus › Administration
+  // ou la tuile de l'accueil (demande de Jacques, 03/11/2026 : le geste caché du logo
+  // et sa minuterie de 15 min déroutaient). L'écran du téléphone reste protégé par le
+  // code de verrouillage ; le serveur reste seul juge des droits.
+  function panneauOuvert() { return estAdmin(); }
+  /** Écrans réservés : l'admin y a toujours accès ; un responsable, selon ses droits. */
+  function accesGestion(cap) { return estAdmin() || peutQuelquePart(cap); }
+  function ouvrirPanneauDiscret() {}
   function peutCreerEnseignant(cid) { return estAdmin() || peut('comptes.gerer', cid); }
   function boutonAjoutEnseignant(cid) {
     return peutCreerEnseignant(cid) ? '<button class="btn or" type="button" data-a="ajouter-enseignant" data-centre="' + esc(cid) + '">' + ico('plus', 'p') + 'Ajouter un enseignant</button>' : '';
@@ -613,10 +603,10 @@
 
         var tuiles = [];
         if (peutQuelquePart('appel.faire')) tuiles.push(['#/appel', 'checkcircle', 'Appel du jour', 'Arrivées, départs, retards']);
-        if (peutQuelquePart('paiements.voir')) tuiles.push(['#/caisse', 'wallet', 'Caisse', 'Encaisser, reçus, impayés, dépenses']);
+        if (peutQuelquePart('paiements.voir')) tuiles.push(['#/caisse', 'coins', 'Caisse', 'Encaisser, reçus, impayés, dépenses']);
         if (peutQuelquePart('paiements.voir')) tuiles.push(['#/jour', 'clipboard', 'Point du jour', 'Entrées, sorties, solde à partager']);
-        if (peutQuelquePart('finances.voir')) tuiles.push(['#/bilan', 'chart', 'Bilan', 'Recettes, dépenses, parts']);
-        if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) tuiles.push(['#/enseignants', 'graduation', 'Enseignants', 'Heures, dû, paies']);
+        if (peutQuelquePart('finances.voir')) tuiles.push(['#/bilan', 'trending', 'Bilan', 'Recettes, dépenses, parts']);
+        if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) tuiles.push(['#/enseignants', 'presentation', 'Enseignants', 'Heures, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) tuiles.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
         tuiles.push(['#/assiduite', 'activity', 'Assiduité', 'Taux, retards, alertes']);
         tuiles.push(['#/eleves', 'graduation', 'Élèves', peutQuelquePart('eleves.gerer') ? 'Inscrire, rechercher, importer' : 'Fiches et contacts des parents']);
@@ -692,16 +682,14 @@
     admin: {
       droit: panneauOuvert,
       html: function () {
-        var reste = Math.max(1, Math.round((E.panneauJusqua - Date.now()) / 60000));
-        return '<h1>Administration</h1><p class="sous-titre">Ouvert depuis Plus › Administration (ou 4 taps sur le logo). Se referme seul dans ' + reste + ' min.</p>' +
+        return '<h1>Administration</h1><p class="sous-titre">Comptes et identifiants, droits des partenaires, centres et journal.</p>' +
           '<div class="liste">' +
           [['#/centres', 'building', 'Centres, année et matières', 'Ouvrir un centre, horaires, tarifs, messages'], ['#/comptes', 'users', 'Comptes et accès', 'Créer, désactiver, mots de passe, appareils'],
            ['#/journal', 'clock', 'Journal', 'Qui a modifié quoi, partout']].map(function (l) {
             return '<a class="ligne" href="' + l[0] + '"><span class="pastille">' + ico(l[1]) + '</span><span class="corps"><b>' + l[2] + '</b><small>' + l[3] + '</small></span><span class="fin">›</span></a>';
           }).join('') + '</div>' +
           '<h2>Partenaires et droits</h2><p class="sous-titre">Retirez à un partenaire les pouvoirs que vous voulez garder pour vous. Le serveur les lui refuse aussitôt.</p>' +
-          '<div id="zone-droits"><div class="carte vide">Chargement…</div></div>' +
-          '<div class="actions"><button class="btn clair" type="button" data-a="fermer-panneau">' + ico('lock', 'p') + 'Refermer le panneau</button></div>';
+          '<div id="zone-droits"><div class="carte vide">Chargement…</div></div>';
       },
       apres: function () { chargerDroits(); }
     },
@@ -775,8 +763,8 @@
         var h = '<h1>Mon compte</h1><div class="carte"><h3>' + esc(u.nom) + '</h3><p class="doux">Identifiant : ' + esc(u.identifiant) + '</p><p>' +
           (u.admin ? '<span class="badge or">Administrateur des deux centres</span>' : '') + acces + '</p></div>' + carteMonRole();
         var liens = [['#/roles', 'info', 'Rôles et droits', 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']];
-        if (peutQuelquePart('finances.voir')) liens.push(['#/bilan', 'chart', 'Bilan financier', 'Recettes, dépenses, parts des actionnaires']);
-        if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) liens.push(['#/enseignants', 'graduation', 'Enseignants', 'Heures faites, dû, paies']);
+        if (peutQuelquePart('finances.voir')) liens.push(['#/bilan', 'trending', 'Bilan financier', 'Recettes, dépenses, parts des actionnaires']);
+        if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) liens.push(['#/enseignants', 'presentation', 'Enseignants', 'Heures faites, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) liens.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
         if (estAdmin()) liens.push(['#/admin', 'shield', 'Administration', 'Comptes et identifiants, partenaires et droits, centres, journal', 'ouvrir-admin']);
         if (!estAdmin() && accesGestion('comptes.gerer')) liens.push(['#/comptes', 'users', 'Comptes et accès', 'Qui peut faire quoi']);
@@ -3079,7 +3067,6 @@
         : { statut: 'absent', motif: '' };
       pointer(x, el.dataset.eleve, champs).then(rendre);
     },
-    'fermer-panneau': function () { basculerPanneau(); },
     droits: function (el) { feuilleDroits(el.dataset.id); },
     'droits-preset': function (el) {
       Array.prototype.forEach.call(document.querySelectorAll('#feuille input[name=cap]'), function (i) { i.checked = el.dataset.v === 'tout' || !i.dataset.ecriture; });
@@ -3611,12 +3598,6 @@
 
   // ───────────────────────────── Branchements ─────────────────────────────
   document.addEventListener('click', function (ev) {
-    if (ev.target.closest && ev.target.closest('.entete .marque') && estAdmin()) {
-      var t = Date.now();
-      tapsLogo = tapsLogo.filter(function (x) { return t - x < 1500; });
-      tapsLogo.push(t);
-      if (tapsLogo.length >= 4) { tapsLogo = []; ev.preventDefault(); basculerPanneau(); return; }
-    }
     var el = ev.target.closest('[data-a]');
     if (el && !el.disabled && ACTIONS[el.dataset.a]) { ev.preventDefault(); ACTIONS[el.dataset.a](el, ev); return; }
     if (ev.target.id === 'feuille') fermerFeuille();
