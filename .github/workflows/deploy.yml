@@ -1965,7 +1965,11 @@ jobs:
               sed -i -E "s/\.(css|js)\?v=[0-9.]+/.\1?v=$VER/g" "$f"
               n=$((n+1))
             fi
-          done < <(find deploy -type f \( -name '*.html' -o -name '*.php' \) -not -path 'deploy/plateforme/*')
+          # deploy/gestion.veritas-school.com/ est EXCLU aussi : VÉRITAS Gestion a sa propre
+          # version (0.9.0…) que son sw.js pré-copie. Renuméroter sa page en 1.20.x faisait
+          # demander app.js?v=1.20.x à une page dont le service worker gardait app.js?v=0.9.0 :
+          # au premier lancement sans réseau, la coquille manquait (constaté le 03/11/2026).
+          done < <(find deploy -type f \( -name '*.html' -o -name '*.php' \) -not -path 'deploy/plateforme/*' -not -path 'deploy/gestion.veritas-school.com/*')
           # L'Atelier porte AUSSI l'habillage de la vitrine (barre, pied :
           # /assets/veritas-habillage.css, /assets/vitrine.js). Ces liens-là
           # suivent la version du site — sinon un visiteur qui a déjà chargé
@@ -2045,7 +2049,7 @@ jobs:
           # contenu, pas la version du site. Les compter comme « residuels »
           # ferait crier l'etape a chaque deploiement, et une alerte qui crie
           # toujours ne se lit plus.
-          reste=$(grep -rhoE '\.(css|js)\?v=[0-9.]+' deploy --include='*.html' --include='*.php' --exclude-dir=plateforme | grep -v "v=$VER" | sort -u | tr '\n' ' ')
+          reste=$(grep -rhoE '\.(css|js)\?v=[0-9.]+' deploy --include='*.html' --include='*.php' --exclude-dir=plateforme --exclude-dir=gestion.veritas-school.com | grep -v "v=$VER" | sort -u | tr '\n' ' ')
           if [ -n "$reste" ]; then
             echo "::warning title=Versions résiduelles::$reste"
           else

@@ -37,14 +37,19 @@ const ok = (nom, c, d) => { console.log((c ? '  OK    ' : '  ÉCHEC ') + nom + (
   ok('police Poppins chargée en local', await page.evaluate(() => document.fonts.check('600 16px Poppins')), 'absente');
   await page.screenshot({ path: process.argv[2] + '/g_accueil.png', fullPage: true });
 
-  // Panneau d'administration caché : 4 taps sur le logo (sinon ni comptes, ni journal, ni nouveau centre).
+  // Administration cachée : appui long de 2 s sur le logo.
+  const appuiLong = async () => {
+    const b = await page.locator('.entete .marque').boundingBox();
+    await page.mouse.move(b.x + 10, b.y + 10); await page.mouse.down();
+    await page.waitForTimeout(2300); await page.mouse.up();
+  };
   const ouvrirPanneau = async () => {
-    for (let i = 0; i < 4; i++) await page.click('.entete .marque');
+    await appuiLong();
     await page.waitForSelector('main h1:text("Administration")');
   };
   // ── Ouvrir un nouveau centre depuis l'accueil (admin) ──
   await ouvrirPanneau();
-  ok("4 taps sur le logo : panneau d'administration ouvert", true);
+  ok("appui long sur le logo : administration ouverte", true);
   await page.goto(B + '#/accueil');
   const NOM_CENTRE = 'VÉRITAS Test ' + Date.now().toString(36);
   await page.click('main [data-a="editer-centre"][data-id=""]');

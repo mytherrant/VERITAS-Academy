@@ -48,8 +48,64 @@ servie aux seuls comptes qui voient les dépenses du centre.
 faites, dû selon le contrat (heure, séance, forfait avec retenue), paies (annulables, jamais
 modifiées) comptées en charges dans le bilan. L'enseignant voit SES heures, SON contrat, SES paies.
 
-**Rôles :** admin global (les deux centres) · responsable · actionnaire (consultation des
-finances + emploi du temps) · secrétaire/surveillant · enseignant. Voir `g_capacites()`.
+**Espace Équipe (partenaires) :** réservé à qui voit la caisse (responsable, actionnaire, secrétaire,
+admin) — pas aux enseignants. Discussion du centre et commentaires attachés à une dépense, une
+remise, un point du jour, un bilan, une tâche ou une réunion (table `g_messages`, un « fil » par
+sujet ; l'auteur, posé par le serveur, est seul à pouvoir corriger ou supprimer). Réunions à dates
+proposées (`g_sondages`) : chacun répond Oui / Peut-être / Non (`g_dispos`, une réponse par
+personne, la sienne seulement) ; la date retenue part dans l'agenda. Tâches réparties (`g_taches`) :
+assignée à un partenaire, échéance, À faire → En cours → Fait. La cloche signale les nouveaux
+messages (non-lus par fil, sur le téléphone), les réunions sans réponse et les tâches proches ou
+en retard.
+
+**Paie des enseignants après le cours :** sans contrat particulier, un enseignant est payé
+**1 500 F de l'heure** (`G_TAUX_HORAIRE_DEFAUT` / `TAUX_HORAIRE_DEFAUT`). Dès le cours fini (départ
+pointé ou heure de fin passée), le partenaire présent qui a encaissé touche « Payer » dans
+Appel › Enseignants du jour : une paie rattachée au pointage (`g_paies.presence_id`), une seule par
+cours, jamais plus que durée faite × taux (à la séance : le taux ; au forfait : paie du mois). Elle
+sort de sa caisse (« dépenses et paies » dans Remises), figure dans Caisse › Dépenses, le point du
+jour et le bilan, et l'enseignant la voit dans « Mes heures ». La paie du mois reste au responsable.
+
+**Rapports (Plus › Rapports, ou depuis Caisse › Impayés et le Bilan) :** pour qui voit la caisse.
+Insolvables (classe, échéances impayées, montant dû, téléphone, sous-totaux), paiements par mois et
+par classe (cases du cahier : ce qui couvre chaque échéance, payé, doit), rapport du trésorier pour un
+mois (par partenaire : encaissé, dépenses et paies, remis reçu, à confirmer, pas reçu, non versé ;
+fonds chez le trésorier ; détail des remises). Exports : PDF A4 (paysage pour les tableaux larges,
+paginé entre deux lignes), Excel (CSV « ; » avec BOM), image, texte WhatsApp.
+
+**Cycle mensuel et clôture :** chaque mois est un cycle. Les compteurs des partenaires (encaissé,
+dépenses et paies, remis, à remettre) et les fonds du centre portent sur le mois en cours. Le 30 ou
+le 31, un responsable ou l'admin clôture le mois dans le Bilan (`g_clotures`, id
+`clo-<centre>-<AAAA-MM>`) : le serveur recalcule recettes, dépenses validées, paies et résultat, et
+la part de chaque actionnaire ; les comptes partent par WhatsApp. Le mois est alors verrouillé : plus
+aucun versement, dépense, paie ou remise ne peut y être daté ou modifié (seule exception : le
+trésorier tranche encore une remise). Seul l'admin rouvre un mois. Rappels : agenda (dernier jour)
+et cloche (veille de fin de mois, mois précédent non clôturé).
+
+**Remises au trésorier :** chaque centre a un trésorier (fiche du centre, choisi par l'admin parmi
+les comptes du centre). Tout partenaire qui encaisse (responsable, secrétaire, et désormais
+actionnaire, selon ses jours au centre et sa proximité avec les parents) envoie le reçu puis
+remet l'argent au trésorier avant la fin du mois (table `g_remises`). En main = encaissements −
+dépenses saisies − remises. Seul le trésorier du centre (ou l'admin) confirme « Reçu » ou
+conteste « Pas reçu » (motif obligatoire) ; jamais l'auteur ; une remise tranchée est figée.
+Le bilan montre les fonds chez le trésorier et ceux encore chez les partenaires.
+
+**Agenda :** rendez-vous, rencontres, réunions de parents (table `g_evenements`, droit `agenda.gerer` :
+responsable, actionnaire, secrétaire ; tout le centre les voit). Le téléphone y ajoute ce qu'il déduit :
+l'échéance des mensualités (jour d'échéance du centre, mois facturés), la rentrée et la fin d'année.
+La cloche de l'en-tête rassemble ce qui demande attention (rendez-vous du jour et du lendemain,
+échéance à 3 jours, dépenses à valider, appels en retard, alertes d'assiduité). Rappels du
+téléphone (Notification API) quand l'appli est ouverte ; pour un rappel sûr appli fermée,
+« Ajouter au calendrier du téléphone » exporte un .ics avec alarme.
+
+**Migration automatique :** une table ou une colonne ajoutée à `_schema.php` est créée au premier
+appel de l'API après le déploiement (`g_schema_a_jour`, empreinte dans `api/data/.schema`) ;
+plus besoin de relancer `install.php` pour cela.
+
+**Rôles :** admin global (les deux centres) · responsable · actionnaire (partenaire : inscrit,
+encaisse, crée les comptes enseignants, fixe leur contrat et les paie, saisit les dépenses, suit
+les chiffres ; ni appel, ni tarifs, ni remises, ni validation) · secrétaire/surveillant · enseignant.
+Voir `g_capacites()`. Chacun ne voit que son rôle (« Mon rôle ») ; l'admin les voit tous.
 
 ## Mise en service (une fois)
 
@@ -72,8 +128,10 @@ Une fois l'administrateur créé, l'installation ne peut plus en créer un autre
 le recréer (mot de passe perdu), déposer par FTP un fichier vide `gestion/api/data/.install_ouverte`,
 refaire l'étape 4, puis **supprimer ce fichier**. Cinq jetons faux en 15 min bloquent l'IP.
 
-**Panneau d'administration** : caché. L'admin tape **4 fois sur le logo** (en haut à gauche) ;
-il se referme seul au bout de 15 min. Il y règle, compte par compte, les droits retirés à
+**Administration** : invisible. L'admin la fait apparaître par un **appui long de 2 s sur le
+logo** (en haut à gauche) ; elle se referme seule au bout de 15 min, par le même appui long ou
+par « Refermer l'administration ». Tant qu'elle est fermée, aucune tuile ni aucun lien ne la
+signale. L'admin y règle, compte par compte, les droits retirés à
 chaque partenaire (le serveur les applique : un droit retiré est refusé même par l'API).
 
 Réinstaller est sans risque : `install.php` est idempotent et ajoute seulement ce qui manque
@@ -94,6 +152,8 @@ npx cap sync android
 cd android && gradlew assembleDebug          # JAVA_HOME = JDK d'Android Studio (jbr)
 ```
 
+La route publique `?r=version` donne la version en ligne : un téléphone en retard (APK, copie en cache) affiche « Version X disponible » à la connexion et sur l'accueil.
+
 Une nouvelle version de `app.js` ne parvient à l'APK qu'en la **reconstruisant** (le web,
 lui, se met à jour seul) : garder l'API compatible avec les APK déjà distribuées.
 
@@ -111,6 +171,14 @@ node tests/banc_gestion_appel.cjs <dossier>      # appel, retards, clôture, ale
 node tests/banc_gestion_exports.cjs <dossier>    # feuille PNG/PDF (structure vérifiée), messages WhatsApp/SMS (Playwright)
 node tests/banc_gestion_caisse.cjs <dossier>     # échéancier, encaissement, reçu, relances, dépenses, bilan (Playwright)
 node tests/banc_gestion_enseignants.cjs <dossier> # enseignants, « Mes heures », reçu hors ligne, photo de justificatif (Playwright)
+node tests/banc_gestion_agenda.cjs <dossier>     # agenda, échéances, .ics, cloche, droits par rôle (Playwright)
+node tests/banc_gestion_remises.cjs <dossier>    # remises au trésorier : confirmation, contestation, refus serveur (Playwright)
+node tests/banc_gestion_paie_cours.cjs <dossier> # paie de l'enseignant après le cours : 1 500 F/h, unicité, plafond (Playwright)
+node tests/banc_gestion_equipe.cjs <dossier>     # Équipe : discussion, commentaires, réunions, tâches, refus serveur (Playwright)
+node tests/banc_gestion_connexion.cjs <dossier>  # connexion : aide après échec, œil, identifiant toléré, version en retard (Playwright)
+node tests/banc_gestion_partenaire.cjs <dossier> # actionnaire : inscrit, encaisse, crée et paie un enseignant ; ne voit que son rôle (Playwright)
+node tests/banc_gestion_cloture.cjs <dossier>    # clôture du mois : comptes du serveur, partage, verrou, droits (Playwright)
+node tests/banc_gestion_rapports.cjs <dossier>   # rapports : insolvables, paiements par classe, trésorier, exports (Playwright)
 ```
 
 **Noms fictifs uniquement** dans le code et les bancs : le dépôt est public, les élèves sont mineurs.
