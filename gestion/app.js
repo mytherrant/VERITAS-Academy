@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.9.4';
+  var VERSION = '0.9.5';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -525,7 +525,7 @@
     items.push(['moi', 'list', 'Plus']);
     var sousPlus = ['roles', 'admin', 'comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
     return '<nav class="nav-basse" aria-label="Navigation">' + items.map(function (i) {
-      var on = i[0] === actif || (i[0] === 'moi' && sousPlus.indexOf(actif) >= 0) || (i[0] === 'appel' && actif === 'pointage');
+      var on = i[0] === actif || (i[0] === 'moi' && sousPlus.indexOf(actif) >= 0) || (i[0] === 'appel' && actif === 'pointage') || (i[0] === 'caisse' && actif === 'jour');
       return '<a href="#/' + i[0] + '" class="' + (on ? 'actif' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + ico(i[1]) + i[2] + '</a>';
     }).join('') + '</nav>';
   }
@@ -614,6 +614,7 @@
         var tuiles = [];
         if (peutQuelquePart('appel.faire')) tuiles.push(['#/appel', 'checkcircle', 'Appel du jour', 'Arrivées, départs, retards']);
         if (peutQuelquePart('paiements.voir')) tuiles.push(['#/caisse', 'wallet', 'Caisse', 'Encaisser, reçus, impayés, dépenses']);
+        if (peutQuelquePart('paiements.voir')) tuiles.push(['#/jour', 'clipboard', 'Point du jour', 'Entrées, sorties, solde à partager']);
         if (peutQuelquePart('finances.voir')) tuiles.push(['#/bilan', 'chart', 'Bilan', 'Recettes, dépenses, parts']);
         if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) tuiles.push(['#/enseignants', 'graduation', 'Enseignants', 'Heures, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) tuiles.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
@@ -719,6 +720,10 @@
       droit: function () { return peutQuelquePart('paiements.voir'); },
       html: function () { return pageCaisse(); },
       apres: function () { if (CAI.onglet === 'encaisser') dessinerRechercheCaisse(); }
+    },
+    jour: {
+      droit: function () { return peutQuelquePart('paiements.voir'); },
+      html: function () { return pageJour(); }
     },
     bilan: {
       droit: function () { return peutQuelquePart('finances.voir'); },
@@ -1592,6 +1597,7 @@
       h += '<div class="nav-date"><button type="button" class="btn clair petit" data-a="caisse-date" data-v="-1" aria-label="Jour précédent">‹</button><b>' + esc(CAI.date === auj ? 'Aujourd\'hui' : dateLongue(CAI.date)) + '</b><button type="button" class="btn clair petit" data-a="caisse-date" data-v="1"' + (CAI.date >= auj ? ' disabled' : '') + ' aria-label="Jour suivant">›</button></div>';
       h += '<div class="stats"><div><b>' + fcfa(valides.reduce(function (s, p) { return s + Number(p.montant); }, 0)) + '</b><small>' + valides.length + ' versement' + (valides.length > 1 ? 's' : '') + '</small></div>' +
         Object.keys(MODES).filter(function (m) { return parMode[m]; }).map(function (m) { return '<div><b>' + fcfa(parMode[m]) + '</b><small>' + MODES[m] + '</small></div>'; }).join('') + '</div>';
+      h += '<a class="ligne carte-lien" href="#/jour"><span class="pastille">' + ico('chart') + '</span><span class="corps"><b>Point du jour</b><small>Entrées, sorties, solde : fiche à envoyer aux actionnaires</small></span><span class="fin">›</span></a>';
       h += du.length ? '<div class="liste">' + du.map(ligneVersement).join('') + '</div>' : '<div class="carte vide">Aucun versement ce jour-là.</div>';
     } else if (CAI.onglet === 'impayes') {
       var total = imp.reduce(function (s, x) { return s + x.ech.impaye; }, 0);
@@ -1821,6 +1827,211 @@
     });
   }
 
+  // ───────────────────────────── Point de caisse du jour ─────────────────────────────
+  // Entrées (versements), sorties (dépenses non refusées, paies des enseignants), solde,
+  // espèces à remettre, cumul du mois. À l'écran, puis en image (WhatsApp), PDF A4 ou texte
+  // pour les actionnaires. Même centre et même jour que l'onglet Journal de la caisse.
+  function pointDuJour(cid, iso) {
+    var somme = function (l) { return l.reduce(function (s, x) { return s + (Number(x.montant) || 0); }, 0); };
+    var voitDep = peut('depenses.voir', cid), voitPaies = peut('finances.voir', cid);
+    var pay = lignes('paiements').filter(function (p) { return p.centre_id === cid && p.date === iso; })
+      .sort(function (a, b) { return String(a.numero || 'zz').localeCompare(String(b.numero || 'zz')); });
+    var entrees = pay.filter(function (p) { return !Number(p.annule); });
+    var annules = pay.filter(function (p) { return Number(p.annule); });
+    var deps = voitDep ? lignes('depenses').filter(function (d) { return d.centre_id === cid && d.date === iso && d.statut !== 'refusee'; }) : [];
+    var paies = voitPaies ? lignes('paies').filter(function (p) { return p.centre_id === cid && p.date === iso && !Number(p.annule); }) : [];
+    var sorties = deps.map(function (d) {
+      return { lib: d.libelle, detail: [CATEGORIES[d.categorie] || d.categorie, d.beneficiaire].filter(Boolean).join(' · '), mode: d.mode || 'especes', montant: Number(d.montant) || 0, attente: d.statut === 'en_attente' };
+    }).concat(paies.map(function (p) {
+      return { lib: 'Paie · ' + (nomPersonne(p.enseignant_id) || 'enseignant'), detail: 'Enseignant' + (p.mois ? ' · ' + MOIS[Number(p.mois.slice(5)) - 1] : ''), mode: p.mode || 'especes', montant: Number(p.montant) || 0 };
+    }));
+    var parMode = {}, sortiesParMode = {};
+    entrees.forEach(function (p) { parMode[p.mode] = (parMode[p.mode] || 0) + Number(p.montant); });
+    sorties.forEach(function (s) { sortiesParMode[s.mode] = (sortiesParMode[s.mode] || 0) + s.montant; });
+    var debutMois = iso.slice(0, 8) + '01';
+    var dansMois = function (d) { return d >= debutMois && d <= iso; };
+    var moisE = somme(lignes('paiements').filter(function (p) { return p.centre_id === cid && !Number(p.annule) && dansMois(p.date); }));
+    var moisS = (voitDep ? somme(lignes('depenses').filter(function (d) { return d.centre_id === cid && d.statut !== 'refusee' && dansMois(d.date); })) : 0) +
+      (voitPaies ? somme(lignes('paies').filter(function (p) { return p.centre_id === cid && !Number(p.annule) && dansMois(p.date); })) : 0);
+    var totE = somme(entrees), totS = somme(sorties);
+    return {
+      centre: ligne('centres', cid) || {}, date: iso, entrees: entrees, annules: annules, sorties: sorties, voitDep: voitDep,
+      parMode: parMode, totE: totE, totS: totS, solde: totE - totS, attente: sorties.filter(function (s) { return s.attente; }).length,
+      especes: (parMode.especes || 0) - (sortiesParMode.especes || 0), mois: { e: moisE, s: moisS }
+    };
+  }
+  function libMois(iso) { return MOIS[Number(iso.slice(5, 7)) - 1]; }
+  /** « Espèces à remettre : X » ou, si la caisse a plus payé en espèces qu'elle n'a reçu, le manque. */
+  function libEspeces(j) { return j.especes >= 0 ? ['Espèces à remettre', fcfa(j.especes)] : ['Espèces sorties en plus des entrées', '− ' + fcfa(-j.especes)]; }
+
+  function pageJour() {
+    var cc = centreCaisse(), cid = cc.cid;
+    var auj = isoLocal(new Date());
+    CAI.date = CAI.date || auj;
+    var h = '<p class="retour"><a href="#/caisse">‹ Caisse</a></p><h1>Point du jour</h1><p class="sous-titre">Entrées, sorties et solde de la journée, à envoyer aux actionnaires.</p>';
+    if (cc.dispo.length > 1) h += '<div class="puces">' + cc.dispo.map(function (c) { return '<button type="button" class="puce' + (c.id === cid ? ' on' : '') + '" data-a="caisse-centre" data-v="' + esc(c.id) + '">' + esc(c.nom_court || c.nom) + '</button>'; }).join('') + '</div>';
+    if (!cid) return h + '<div class="carte vide">Aucun centre.</div>';
+    h += '<div class="nav-date"><button type="button" class="btn clair petit" data-a="caisse-date" data-v="-1" aria-label="Jour précédent">‹</button><b>' + esc(CAI.date === auj ? 'Aujourd\'hui' : dateLongue(CAI.date)) + '</b><button type="button" class="btn clair petit" data-a="caisse-date" data-v="1"' + (CAI.date >= auj ? ' disabled' : '') + ' aria-label="Jour suivant">›</button></div>';
+    var j = pointDuJour(cid, CAI.date);
+    h += '<div class="point-jour"><div class="pj-entrees"><small>Entrées</small><b>' + fcfa(j.totE) + '</b><span>' + j.entrees.length + ' versement' + (j.entrees.length > 1 ? 's' : '') + '</span></div>' +
+      '<div class="pj-sorties"><small>Sorties</small><b>' + fcfa(j.totS) + '</b><span>' + j.sorties.length + ' dépense' + (j.sorties.length > 1 ? 's' : '') + '</span></div>' +
+      '<div class="pj-solde' + (j.solde < 0 ? ' negatif' : '') + '"><small>Solde du jour</small><b>' + fcfa(j.solde) + '</b><span>' + libEspeces(j)[0] + ' : ' + libEspeces(j)[1] + '</span></div></div>';
+    h += '<div class="actions export-jour"><button class="btn or" type="button" data-a="export-caisse-jour" data-v="png">' + ico('camera', 'p') + 'Image (WhatsApp)</button>' +
+      '<button class="btn clair" type="button" data-a="export-caisse-jour" data-v="pdf">' + ico('doc', 'p') + 'PDF</button><button class="btn clair" type="button" data-a="export-caisse-jour" data-v="texte">' + ico('message', 'p') + 'Résumé texte</button></div>';
+    h += '<h2>Entrées</h2>' + (j.entrees.length || j.annules.length ? '<div class="liste">' + j.entrees.concat(j.annules).map(ligneVersement).join('') + '</div>' : '<div class="carte vide">Aucun versement ce jour-là.</div>');
+    if (Object.keys(j.parMode).length) h += '<div class="infos">' + Object.keys(MODES).filter(function (m) { return j.parMode[m]; }).map(function (m) { return '<div class="info"><span>' + MODES[m] + '</span><b>' + fcfa(j.parMode[m]) + '</b></div>'; }).join('') + '</div>';
+    if (j.voitDep) {
+      h += '<h2>Sorties</h2>' + (j.sorties.length ? '<div class="liste">' + j.sorties.map(function (s) {
+        return '<div class="ligne"><span class="corps"><b>' + esc(s.lib) + (s.attente ? ' <span class="badge alerte">en attente</span>' : '') + '</b><small>' + esc(s.detail + ' · ' + (MODES[s.mode] || s.mode)) + '</small></span><span class="fin"><b>− ' + fcfa(s.montant) + '</b></span></div>';
+      }).join('') + '</div>' : '<div class="carte vide">Aucune sortie ce jour-là.</div>');
+    }
+    h += '<div class="infos"><div class="info"><span>Depuis le 1er ' + esc(libMois(CAI.date)) + ' · entrées</span><b>' + fcfa(j.mois.e) + '</b></div><div class="info"><span>Sorties</span><b>− ' + fcfa(j.mois.s) + '</b></div><div class="info"><span>Solde du mois</span><b>' + fcfa(j.mois.e - j.mois.s) + '</b></div></div>';
+    if (j.attente) h += '<p class="doux">Les dépenses « en attente » sont comptées dans les sorties (l\'argent est sorti) ; le bilan officiel ne compte que les dépenses validées.</p>';
+    return h;
+  }
+
+  function texteJour(j) {
+    var c = j.centre;
+    var l = ['*Point de caisse — ' + (c.nom || 'VÉRITAS') + '*', dateLongue(j.date).replace(/^./, function (x) { return x.toUpperCase(); }) + ' ' + j.date.slice(0, 4), '',
+      '*Entrées : ' + fcfa(j.totE) + '* (' + j.entrees.length + ' versement' + (j.entrees.length > 1 ? 's' : '') + ')'];
+    Object.keys(MODES).forEach(function (m) { if (j.parMode[m]) l.push('• ' + MODES[m] + ' : ' + fcfa(j.parMode[m])); });
+    if (j.annules.length) l.push('• Annulés (non comptés) : ' + j.annules.length);
+    if (j.voitDep) {
+      l.push('', '*Sorties : ' + fcfa(j.totS) + '*');
+      j.sorties.forEach(function (s) { l.push('• ' + s.lib + ' : ' + fcfa(s.montant) + (s.attente ? ' (en attente de validation)' : '')); });
+      if (!j.sorties.length) l.push('• Aucune');
+    }
+    l.push('', '*Solde du jour : ' + fcfa(j.solde) + '*', libEspeces(j)[0] + ' : ' + libEspeces(j)[1], '',
+      'Depuis le 1er ' + libMois(j.date) + ' : entrées ' + fcfa(j.mois.e) + ' · sorties ' + fcfa(j.mois.s) + ' · solde ' + fcfa(j.mois.e - j.mois.s),
+      '— ' + E.profil.utilisateur.nom + ', VÉRITAS Gestion');
+    return l.join('\n').replace(/ /g, ' ');
+  }
+
+  /** Dessine la fiche sur une grande toile, puis la recadre à sa hauteur réelle. coupures : y sûrs pour paginer. */
+  function dessinerFicheJour(j, logo, filigrane) {
+    var L = 1240, M = 70, H0 = 8000;
+    var cv = document.createElement('canvas'); cv.width = L; cv.height = H0;
+    var g = cv.getContext('2d');
+    var c = j.centre, coupures = [];
+    g.fillStyle = '#fff'; g.fillRect(0, 0, L, H0);
+    g.fillStyle = '#0C2A6A'; g.fillRect(0, 0, L, 170);
+    if (logo) g.drawImage(logo, M, 30, 110, 110);
+    g.fillStyle = '#fff'; g.font = '600 40px Poppins, sans-serif'; g.fillText(texteCoupe(g, c.nom || 'VÉRITAS', L - 2 * M - 140), M + 135, 90);
+    g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#C9D6F2'; g.fillText(texteCoupe(g, c.adresse || '', L - 2 * M - 140), M + 135, 130);
+    g.fillStyle = '#FFC93C'; g.fillRect(0, 170, L, 6);
+    g.fillStyle = '#001136'; g.font = '600 42px Poppins, sans-serif'; g.fillText('Point de caisse du jour', M, 252);
+    g.font = '400 26px Poppins, sans-serif'; g.fillStyle = '#4D5163';
+    g.fillText(dateLongue(j.date).replace(/^./, function (x) { return x.toUpperCase(); }) + ' ' + j.date.slice(0, 4), M, 296);
+    var now = new Date();
+    g.textAlign = 'right'; g.font = '400 20px Poppins, sans-serif'; g.fillStyle = '#6B7185';
+    g.fillText('Établi par ' + texteCoupe(g, E.profil.utilisateur.nom, 360), L - M, 252);
+    g.fillText('le ' + now.toLocaleDateString('fr-FR') + ' à ' + ('0' + now.getHours()).slice(-2) + ' h ' + ('0' + now.getMinutes()).slice(-2), L - M, 284);
+    g.textAlign = 'left';
+    if (filigrane) { var lf = 560; g.save(); g.globalAlpha = 0.05; g.drawImage(filigrane, L / 2 - lf / 2, 520, lf, Math.round(lf * filigrane.naturalHeight / filigrane.naturalWidth)); g.restore(); }
+
+    // Trois cases : entrées, sorties, solde.
+    var y = 340, lc = (L - 2 * M - 40) / 3;
+    [['ENTRÉES', j.totE, '#17803D', '#E7F5EC', j.entrees.length + ' versement' + (j.entrees.length > 1 ? 's' : '')],
+     ['SORTIES', j.totS, '#B42318', '#FDECEA', j.sorties.length + ' dépense' + (j.sorties.length > 1 ? 's' : '')],
+     ['SOLDE DU JOUR', j.solde, j.solde < 0 ? '#B42318' : '#1E499B', '#EEF3FC', 'Espèces : ' + (j.especes < 0 ? '− ' + fcfa(-j.especes) : fcfa(j.especes))]].forEach(function (b, i) {
+      var x = M + i * (lc + 20);
+      g.fillStyle = b[3]; g.fillRect(x, y, lc, 150);
+      g.fillStyle = b[2]; g.fillRect(x, y, 6, 150);
+      g.font = '600 19px Poppins, sans-serif'; g.fillText(b[0], x + 26, y + 40);
+      g.font = '600 38px Poppins, sans-serif'; g.fillStyle = '#001136'; g.fillText(texteCoupe(g, fcfa(b[1]), lc - 40), x + 26, y + 92);
+      g.font = '400 19px Poppins, sans-serif'; g.fillStyle = '#4D5163'; g.fillText(texteCoupe(g, b[4], lc - 40), x + 26, y + 128);
+    });
+    y += 210; coupures.push(y - 30);
+
+    var titre = function (t, coul) {
+      g.fillStyle = coul; g.fillRect(M, y - 26, 6, 32);
+      g.font = '600 28px Poppins, sans-serif'; g.fillStyle = '#001136'; g.fillText(t, M + 20, y);
+      y += 24; g.fillStyle = '#E1E6F0'; g.fillRect(M, y, L - 2 * M, 2); y += 44;
+    };
+    var rangee = function (gauche, sous, milieu, droite, opts) {
+      opts = opts || {};
+      g.font = '500 24px Poppins, sans-serif'; g.fillStyle = opts.gris ? '#9AA0B1' : '#001136';
+      g.fillText(texteCoupe(g, gauche, 640), M, y);
+      if (opts.gris) { var lw = Math.min(g.measureText(texteCoupe(g, gauche, 640)).width, 640); g.fillRect(M, y - 8, lw, 2); }
+      g.font = '400 20px Poppins, sans-serif'; g.fillStyle = '#6B7185';
+      if (sous) g.fillText(texteCoupe(g, sous, 640), M, y + 30);
+      g.fillText(texteCoupe(g, milieu, 220), M + 680, y);
+      g.textAlign = 'right'; g.font = '600 24px Poppins, sans-serif'; g.fillStyle = opts.gris ? '#9AA0B1' : opts.coul || '#001136';
+      g.fillText(droite, L - M, y); g.textAlign = 'left';
+      y += sous ? 52 : 34;
+      g.fillStyle = '#EEF1F6'; g.fillRect(M, y - 14, L - 2 * M, 1);
+      y += 22; coupures.push(y - 30);
+    };
+    var total = function (lib, val, coul) {
+      g.font = '600 24px Poppins, sans-serif'; g.fillStyle = '#4D5163'; g.fillText(lib, M, y);
+      g.textAlign = 'right'; g.fillStyle = coul; g.fillText(val, L - M, y); g.textAlign = 'left'; y += 56; coupures.push(y - 30);
+    };
+
+    titre('Entrées', '#17803D');
+    if (!j.entrees.length && !j.annules.length) { g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#6B7185'; g.fillText('Aucun versement ce jour-là.', M, y); y += 56; }
+    j.entrees.concat(j.annules).forEach(function (p) {
+      var e = ligne('eleves', p.eleve_id) || {};
+      var annule = Number(p.annule);
+      rangee(nomComplet(e) || 'Élève', (p.numero ? 'Reçu n° ' + p.numero : 'Reçu en attente de numéro') + ' · ' + nomDe('classes', e.classe_id) + (annule ? ' · ANNULÉ' : ''), MODES[p.mode] || p.mode, fcfa(p.montant), { gris: annule });
+    });
+    Object.keys(MODES).forEach(function (m) { if (j.parMode[m]) total('  dont ' + MODES[m], fcfa(j.parMode[m]), '#4D5163'); });
+    total('Total des entrées', fcfa(j.totE), '#17803D');
+    y += 20;
+
+    if (j.voitDep) {
+      titre('Sorties', '#B42318');
+      if (!j.sorties.length) { g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#6B7185'; g.fillText('Aucune sortie ce jour-là.', M, y); y += 56; }
+      j.sorties.forEach(function (s) { rangee(s.lib, s.detail + (s.attente ? ' · en attente de validation' : ''), MODES[s.mode] || s.mode, '− ' + fcfa(s.montant), { coul: '#B42318' }); });
+      total('Total des sorties', '− ' + fcfa(j.totS), '#B42318');
+      y += 20;
+    }
+
+    // Bandeau de synthèse.
+    g.fillStyle = '#0C2A6A'; g.fillRect(M, y, L - 2 * M, 170);
+    g.fillStyle = '#FFC93C'; g.fillRect(M, y, 8, 170);
+    g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#C9D6F2'; g.fillText('Solde du jour (entrées − sorties)', M + 36, y + 52);
+    g.fillText(libEspeces(j)[0], M + 36, y + 120);
+    g.textAlign = 'right'; g.font = '600 40px Poppins, sans-serif'; g.fillStyle = '#fff';
+    g.fillText(fcfa(j.solde), L - M - 30, y + 60);
+    g.font = '600 30px Poppins, sans-serif'; g.fillText(libEspeces(j)[1], L - M - 30, y + 124); g.textAlign = 'left';
+    y += 230; coupures.push(y - 40);
+
+    g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#4D5163';
+    g.fillText('Depuis le 1er ' + libMois(j.date) + ' : entrées ' + fcfa(j.mois.e) + ' · sorties ' + fcfa(j.mois.s) + ' · solde ' + fcfa(j.mois.e - j.mois.s), M, y);
+    y += 40;
+    if (j.attente) { g.font = '400 19px Poppins, sans-serif'; g.fillStyle = '#9A5B00'; g.fillText('Les dépenses en attente sont comptées (argent sorti) ; le bilan officiel ne compte que les dépenses validées.', M, y); y += 34; }
+    y += 70; coupures.push(y - 50);
+    g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#6B7185';
+    g.fillText('La caisse', M, y); g.textAlign = 'right'; g.fillText('Le responsable', L - M, y); g.textAlign = 'left';
+    y += 120;
+    g.font = '400 18px Poppins, sans-serif'; g.fillText('VÉRITAS Gestion · document interne destiné aux actionnaires', M, y);
+    y += 40;
+    var fin = document.createElement('canvas'); fin.width = L; fin.height = y;
+    fin.getContext('2d').drawImage(cv, 0, 0);
+    return { cv: fin, coupures: coupures };
+  }
+  function nomFichierJour(j, ext) {
+    return ('point-caisse-' + (j.centre.nom_court || j.centre.nom || 'centre') + '-' + j.date).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9-]+/g, '-').replace(/-+/g, '-') + '.' + ext;
+  }
+  function fichierJour(j, format) {
+    return Promise.all([chargerLogo(), chargerLogoDetoure(), document.fonts ? document.fonts.load('600 24px Poppins') : null]).then(function (r) {
+      var d = dessinerFicheJour(j, r[0], r[1]);
+      if (format === 'png') return versBlob(d.cv, 'image/png').then(function (b) { return new File([b], nomFichierJour(j, 'png'), { type: 'image/png' }); });
+      // PDF A4 : pages de 1240 × 1754, coupées entre deux lignes.
+      var HP = 1754, pages = [], haut = 0;
+      while (haut < d.cv.height) {
+        var bas = haut + HP;
+        if (bas < d.cv.height) { var sures = d.coupures.filter(function (y) { return y > haut + 400 && y <= bas; }); if (sures.length) bas = sures[sures.length - 1]; }
+        var pg = document.createElement('canvas'); pg.width = 1240; pg.height = HP;
+        var gp = pg.getContext('2d'); gp.fillStyle = '#fff'; gp.fillRect(0, 0, 1240, HP);
+        gp.drawImage(d.cv, 0, haut, 1240, Math.min(bas, d.cv.height) - haut, 0, 0, 1240, Math.min(bas, d.cv.height) - haut);
+        pages.push(pg); haut = bas;
+      }
+      return Promise.all(pages.map(function (cv) { return versBlob(cv, 'image/jpeg', 0.9).then(function (b) { return b.arrayBuffer(); }).then(function (a) { return { cv: cv, jpeg: new Uint8Array(a) }; }); }))
+        .then(function (p) { return new File([pdfDepuisJpeg(p, 595.28, 841.89)], nomFichierJour(j, 'pdf'), { type: 'application/pdf' }); });
+    });
+  }
+
   var BIL = { mois: '' };
   function pageBilan() {
     var auj = isoLocal(new Date());
@@ -1833,6 +2044,7 @@
     var h = '<h1>Bilan financier</h1><div class="nav-date"><button type="button" class="btn clair petit" data-a="bilan-mois" data-v="-1"' + (annee ? ' disabled' : '') + ' aria-label="Mois précédent">‹</button><b>' + esc(lib) + '</b>' +
       '<button type="button" class="btn clair petit" data-a="bilan-mois" data-v="1"' + (annee || BIL.mois >= auj.slice(0, 7) ? ' disabled' : '') + ' aria-label="Mois suivant">›</button></div>' +
       '<div class="onglets"><button type="button" class="' + (annee ? '' : 'on') + '" data-a="bilan-mois" data-v="mois">Mois</button><button type="button" class="' + (annee ? 'on' : '') + '" data-a="bilan-mois" data-v="annee">Année scolaire</button></div>';
+    h += '<a class="ligne carte-lien" href="#/jour"><span class="pastille">' + ico('clipboard') + '</span><span class="corps"><b>Point du jour</b><small>Entrées et sorties d\'une journée, en image ou PDF</small></span><span class="fin">›</span></a>';
     var tot = { rec: 0, dep: 0 };
     centres.forEach(function (c) {
       var pay = lignes('paiements').filter(function (p) { return p.centre_id === c.id && !Number(p.annule) && dans(p.date); });
@@ -2901,6 +3113,19 @@
     encaisser: function (el) { feuillePaiement(el.dataset.id); },
     'montant-rapide': function (el) { var i = $('#montant-paiement'); if (i) { i.value = el.dataset.v; i.focus(); } },
     'voir-recu': function (el) { feuilleRecu(el.dataset.id); },
+    'export-caisse-jour': function (el) {
+      var j = pointDuJour(CAI.centre, CAI.date || isoLocal(new Date()));
+      var titre = 'Point de caisse du ' + dateLisible(j.date, true);
+      if (el.dataset.v === 'texte') {
+        var t = texteJour(j);
+        if (NATIF || navigator.share) partagerTexte(t); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener');
+        return;
+      }
+      el.disabled = true;
+      fichierJour(j, el.dataset.v).then(function (f) { E.cache.dernierExport = f; return partagerFichiers([f], titre); })
+        .catch(function (e) { toast('Export impossible : ' + (e && e.message), true); })
+        .then(function () { el.disabled = false; });
+    },
     'partager-recu': function (el) {
       var p = ligne('paiements', el.dataset.id);
       fichierRecu(p, el.dataset.v).then(function (f) {

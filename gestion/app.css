@@ -396,3 +396,17 @@ table.matrice { width: 100%; border-collapse: collapse; font-size: 13px; table-l
 .apercu-guide { margin: 14px 0 4px; border: 1px solid var(--trait); border-radius: var(--rayon); background: var(--fond); }
 .apercu-guide summary { cursor: pointer; padding: 10px 12px; font-size: 14px; color: var(--bleu); font-weight: 500; }
 .apercu-guide pre { margin: 0; padding: 0 12px 12px; white-space: pre-wrap; word-break: break-word; font: inherit; font-size: 13px; line-height: 1.5; color: var(--texte); }
+
+/* ── Point du jour ── */
+.ligne.carte-lien { background: var(--carte); border: 1px solid var(--trait); border-radius: var(--rayon); margin: 0 0 14px; text-decoration: none; }
+.point-jour { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 4px 0 6px; }
+.point-jour > div { border-radius: var(--rayon); padding: 12px 14px; display: grid; gap: 2px; border-left: 4px solid; }
+.point-jour small { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.point-jour b { font-size: 22px; color: var(--titre); }
+.point-jour span { font-size: 13px; color: var(--texte); }
+.pj-entrees { background: var(--ok-fond); border-color: var(--ok) !important; } .pj-entrees small { color: var(--ok); }
+.pj-sorties { background: var(--danger-fond); border-color: var(--danger) !important; } .pj-sorties small { color: var(--danger); }
+.pj-solde { grid-column: 1 / -1; background: var(--bleu-profond); border-color: var(--action) !important; }
+.pj-solde small, .pj-solde span { color: #C9D6F2; } .pj-solde b { color: #fff; font-size: 26px; }
+.pj-solde.negatif b { color: #FFB4AB; }
+.export-jour { flex-wrap: wrap; }
