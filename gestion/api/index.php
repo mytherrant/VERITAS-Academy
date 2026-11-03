@@ -722,6 +722,9 @@ function g_valider_finances(PDO $pdo, string $table, string $id, ?array $existan
             throw new DomainException('La validation revient à un responsable (pas l\'auteur de la dépense) ou à l\'administrateur.');
         }
         if ($statut === 'refusee' && trim((string) $val('motif_refus')) === '') { throw new DomainException('Indiquez le motif du refus.'); }
+        if ($statut === 'validee' && $montant >= G_SEUIL_JUSTIFICATIF && empty($existant['justificatif'])) {
+            throw new DomainException('Justificatif obligatoire à partir de ' . number_format(G_SEUIL_JUSTIFICATIF, 0, ',', ' ') . ' F : ajoutez la photo avant de valider.');
+        }
         $champs['valide_par'] = $ctx['uid'] ?? null;
         $champs['valide_le'] = g_now();
     }

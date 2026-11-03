@@ -391,3 +391,8 @@ table.matrice { width: 100%; border-collapse: collapse; font-size: 13px; table-l
 .legende-roles > div { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; padding: 8px 10px; border-radius: var(--rayon); background: var(--role-pale); color: var(--texte); }
 .legende-roles svg { color: var(--role); margin-top: 2px; }
 .legende-roles b { color: var(--role); }
+
+/* Aperçu du message d'identifiants + mode d'emploi */
+.apercu-guide { margin: 14px 0 4px; border: 1px solid var(--trait); border-radius: var(--rayon); background: var(--fond); }
+.apercu-guide summary { cursor: pointer; padding: 10px 12px; font-size: 14px; color: var(--bleu); font-weight: 500; }
+.apercu-guide pre { margin: 0; padding: 0 12px 12px; white-space: pre-wrap; word-break: break-word; font: inherit; font-size: 13px; line-height: 1.5; color: var(--texte); }

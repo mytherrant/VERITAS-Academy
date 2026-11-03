@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.9.3';
+  var VERSION = '0.9.4';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -1612,7 +1612,7 @@
       h += '<p class="sous-titre">' + (att.length ? '<b>' + att.length + '</b> en attente de validation · ' : '') + 'Une dépense validée ne se modifie plus.</p>';
       h += deps.length ? '<div class="liste">' + deps.slice(0, 80).map(function (d) {
         var st = d.statut === 'validee' ? '<span class="badge ok">validée</span>' : d.statut === 'refusee' ? '<span class="badge danger">refusée</span>' : '<span class="badge alerte">en attente</span>';
-        var sansJ = !d.justificatif && !(E.cache.photosEnAttente || {})[d.id] ? ' <span class="badge alerte">sans justificatif</span>' : '';
+        var sansJ = justificatifExige(d) && !d.justificatif && !(E.cache.photosEnAttente || {})[d.id] ? ' <span class="badge alerte">justificatif manquant</span>' : '';
         return '<button class="ligne" type="button" data-a="voir-depense" data-id="' + esc(d.id) + '"><span class="corps"><b>' + esc(d.libelle) + sansJ + '</b><small>' + esc(dateLisible(d.date, true) + ' · ' + (CATEGORIES[d.categorie] || d.categorie) + (d.beneficiaire ? ' · ' + d.beneficiaire : '') + ' · saisie par ' + (nomPersonne(d.saisie_par) || (d.saisie_par === E.profil.utilisateur.id ? 'vous' : '—'))) + '</small></span><span class="fin"><b>' + fcfa(d.montant) + '</b>' + st + '</span></button>';
       }).join('') + '</div>' : '<div class="carte vide">Aucune dépense.</div>';
       if (peut('depenses.saisir', cid)) h += '<button class="fab" type="button" data-a="editer-depense" data-id="">' + ico('plus') + 'Dépense</button>';
@@ -1770,6 +1770,10 @@
     });
   }
 
+  // Justificatif (photo de la facture ou du reçu) : facultatif en dessous du seuil,
+  // obligatoire à partir du seuil pour VALIDER la dépense (le serveur l'exige aussi).
+  var SEUIL_JUSTIFICATIF = 10000;
+  function justificatifExige(d) { return (Number(d && d.montant) || 0) >= SEUIL_JUSTIFICATIF; }
   function feuilleDepense(id) {
     var cid = id ? ligne('depenses', id).centre_id : CAI.centre;
     var d = id ? ligne('depenses', id) : { date: isoLocal(new Date()), categorie: 'fournitures', mode: 'especes', statut: 'en_attente' };
@@ -1787,7 +1791,7 @@
       '<label class="champ"><span>Payé en</span><select name="mode"' + dis + '>' + Object.keys(MODES).map(function (k) { return '<option value="' + k + '"' + (d.mode === k ? ' selected' : '') + '>' + MODES[k] + '</option>'; }).join('') + '</select></label></div>' +
       '<label class="champ"><span>Bénéficiaire</span><input type="text" name="beneficiaire" value="' + esc(d.beneficiaire || '') + '"' + dis + '></label>' +
       '<div id="zone-justificatif" class="justificatif"></div>' +
-      (modifiable ? '<label class="champ"><span>' + (d.justificatif ? 'Remplacer la photo du justificatif' : 'Photo du justificatif (facture, reçu)') + '</span><input type="file" name="photo" accept="image/*" capture="environment"></label>' : '') +
+      (modifiable ? '<label class="champ"><span>' + (d.justificatif ? 'Remplacer la photo du justificatif' : 'Photo du justificatif (facture, reçu)') + '</span><small>Obligatoire à partir de ' + fcfa(SEUIL_JUSTIFICATIF) + ', facultative en dessous.</small><input type="file" name="photo" accept="image/*" capture="environment"></label>' : '') +
       (modifiable ? '<div class="actions"><button class="btn" type="submit">Enregistrer</button></div>' : '') + '</form>' +
       (valideur ? '<div class="actions"><button class="btn or" type="button" data-a="valider-depense" data-id="' + esc(id) + '">' + ico('check', 'p') + 'Valider</button><button class="btn danger" type="button" data-a="refuser-depense" data-id="' + esc(id) + '">Refuser</button></div>' : '') +
       '<div class="actions">' + (id && modifiable ? '<button class="btn danger" type="button" data-a="suppr-depense" data-id="' + esc(id) + '">Retirer</button>' : '') + '<button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
@@ -1803,7 +1807,12 @@
     };
     promesse(magasin('fichiers').get(id)).then(function (f) {
       if (f) return montrer('data:image/jpeg;base64,' + f.jpeg, 'Justificatif pris sur ce téléphone · envoi au retour du réseau');
-      if (!d.justificatif) { z.innerHTML = '<p class="note">' + ico('alert', 'p') + ' Sans justificatif' + (valideur ? ' : demandez la photo avant de valider.' : '.') + '</p>'; return; }
+      if (!d.justificatif) {
+        z.innerHTML = justificatifExige(d)
+          ? '<p class="note">' + ico('alert', 'p') + ' Justificatif obligatoire à partir de ' + fcfa(SEUIL_JUSTIFICATIF) + (valideur ? ' : demandez la photo, la dépense ne peut pas être validée sans elle.' : ' : ajoutez la photo de la facture ou du reçu.') + '</p>'
+          : '<p class="doux">Sans justificatif (facultatif en dessous de ' + fcfa(SEUIL_JUSTIFICATIF) + ').</p>';
+        return;
+      }
       z.innerHTML = '<p class="doux">Chargement du justificatif…</p>';
       fetch(API + '?r=justificatif/lire&id=' + encodeURIComponent(id), { headers: { Authorization: 'Bearer ' + E.jeton } })
         .then(function (rep) { if (!rep.ok) throw new Error(); return rep.blob(); })
@@ -2627,18 +2636,57 @@
       '<div class="actions"><button class="btn" type="submit">' + (u ? 'Enregistrer' : 'Créer le compte') + '</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>';
     if (u) {
       h += '<div class="actions"><button class="btn clair petit" type="button" data-a="reinit-mdp" data-id="' + esc(u.id) + '">Nouveau mot de passe</button>' +
+        '<button class="btn clair petit" type="button" data-a="envoyer-guide" data-id="' + esc(u.id) + '">Renvoyer le mode d\'emploi</button>' +
         '<button class="btn clair petit" type="button" data-a="appareils" data-id="' + esc(u.id) + '">Appareils connectés</button></div>';
     }
     ouvrirFeuille(h);
   }
 
-  function feuilleSecret(titre, nom, identifiant, mdp) {
-    var message = 'VÉRITAS Gestion — ' + nom + '\nAdresse : https://gestion.veritas-school.com\nIdentifiant : ' + identifiant + '\nMot de passe : ' + mdp + '\nChangez-le dès la première connexion (Plus › Changer mon mot de passe).';
+  // ── Mode d'emploi envoyé avec les identifiants (texte WhatsApp : *gras*) ──
+  var GUIDE_ROLE = {
+    admin: ['Accueil : les chiffres clés de tous les centres.', 'Plus › Administration : comptes et identifiants, droits des partenaires, centres, journal.', 'Plus › Rôles et droits : qui peut faire quoi.'],
+    responsable: ['*Accueil* : élèves, appels du jour, encaissé du mois, impayés de votre centre.', '*Élèves › +* : inscrire un élève (classe, matières, tarif).',
+      '*Caisse › Encaisser* : cherchez l\'élève, saisissez le montant, envoyez le reçu au parent par WhatsApp.', '*Caisse › Impayés* : relancez les parents en un geste.',
+      '*Caisse › Dépenses* : saisissez les dépenses. Photo du justificatif *obligatoire dès 10 000 F*. Vous validez les dépenses saisies par les autres.',
+      '*Plus › Enseignants* : pointage des cours, contrats, paies.', '*Plus › Comptes et accès* : créez les comptes de vos secrétaires et enseignants.'],
+    actionnaire: ['*Accueil* : les chiffres clés de votre centre (élèves, appels, encaissé, impayés).', '*Plus › Bilan* : recettes, dépenses, résultat du mois et votre part.',
+      '*Caisse* : versements et dépenses, en consultation.', '*Plus › Planning* : vous tenez l\'emploi du temps du centre (classes, créneaux, enseignants).'],
+    secretaire: ['*Appel* : choisissez la classe, touchez chaque élève (présent, retard, absent), au début du cours.', '*Élèves › +* : inscrire un élève.',
+      '*Caisse › Encaisser* : un reçu numéroté part au parent par WhatsApp. Un versement ne se modifie pas : en cas d\'erreur, prévenez le responsable.',
+      '*Caisse › Dépenses* : photo du justificatif *obligatoire dès 10 000 F*.'],
+    enseignant: ['*Accueil › Mes cours aujourd\'hui* : touchez votre cours pour faire l\'appel, au début du cours.', '*Planning* : votre emploi du temps de la semaine.',
+      '*Plus › Mes heures* : heures faites, montant dû, paies reçues.']
+  };
+  /** acces : { centre_id: rôle } ; renvoie le texte du mode d'emploi pour ce compte. */
+  function modeEmploi(nom, acces, admin) {
+    var roles = Object.keys(acces || {}).map(function (c) { return acces[c]; });
+    var principal = admin ? 'admin' : ORDRE_ROLES.filter(function (r) { return roles.indexOf(r) >= 0; })[0] || 'enseignant';
+    var ou = admin ? 'tous les centres' : Object.keys(acces || {}).map(function (c) { var k = ligne('centres', c) || {}; return (ROLES[acces[c]] || acces[c]) + ' · ' + (k.nom_court || k.nom || 'centre'); }).join(', ');
+    return '*Mode d\'emploi*\n' +
+      '1. Ouvrez l\'adresse dans Chrome et connectez-vous.\n' +
+      '2. Menu ⋮ › « Ajouter à l\'écran d\'accueil » : l\'appli s\'ouvre comme une application, même sans réseau.\n' +
+      '3. Plus › *Changer mon mot de passe*, puis Plus › *Code de verrouillage* (4 chiffres).\n\n' +
+      '*Votre rôle : ' + (admin ? 'Administrateur' : ou) + '*\n' + GUIDE_ROLE[principal].map(function (l) { return '• ' + l; }).join('\n') + '\n\n' +
+      'Sans réseau, tout continue : vos saisies partent dès le retour de la connexion (pastille « À jour » en haut).\n' +
+      'Plus › *Rôles et droits* explique ce que chacun peut faire. Une question : appelez l\'administrateur.';
+  }
+  function feuilleSecret(titre, nom, identifiant, mdp, acces, admin) {
+    var guide = modeEmploi(nom, acces, admin);
+    var message = '*VÉRITAS Gestion* — Bienvenue ' + nom + ' !\nAdresse : https://gestion.veritas-school.com\nIdentifiant : ' + identifiant + '\nMot de passe : ' + mdp +
+      '\n(changez-le dès la première connexion)\n\n' + guide;
     E.cache.messageSecret = message;
-    ouvrirFeuille('<h2>' + esc(titre) + '</h2><p>Transmettez ces informations à <b>' + esc(nom) + '</b>. Le mot de passe ne sera <b>plus jamais affiché</b>.</p>' +
+    ouvrirFeuille('<h2>' + esc(titre) + '</h2><p>Transmettez ces informations à <b>' + esc(nom) + '</b>, avec son mode d\'emploi. Le mot de passe ne sera <b>plus jamais affiché</b>.</p>' +
       '<p class="doux">Identifiant</p><div class="secret">' + esc(identifiant) + '</div><p class="doux">Mot de passe</p><div class="secret">' + esc(mdp) + '</div>' +
-      '<div class="actions">' + (NATIF || navigator.share ? '<button class="btn or" type="button" data-a="partager-secret">Envoyer (WhatsApp, SMS…)</button>' : '') +
+      '<details class="apercu-guide"><summary>Voir le message envoyé (identifiants + mode d\'emploi)</summary><pre>' + esc(message) + '</pre></details>' +
+      '<div class="actions">' + (NATIF || navigator.share ? '<button class="btn or" type="button" data-a="partager-secret">Envoyer (WhatsApp, SMS…)</button>' :
+        '<a class="btn or" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(message) + '">Envoyer par WhatsApp</a>') +
       '<button class="btn clair" type="button" data-a="copier-secret">Copier</button><button class="btn" type="button" data-a="fermer">J\'ai transmis</button></div>');
+  }
+  /** Renvoyer le mode d'emploi seul (sans mot de passe) à un compte existant. */
+  function envoyerGuide(u) {
+    var message = '*VÉRITAS Gestion* — ' + u.nom + '\nAdresse : https://gestion.veritas-school.com\nIdentifiant : ' + u.identifiant + '\n\n' + modeEmploi(u.nom, u.acces, u.admin_global);
+    if (NATIF || navigator.share) partagerTexte(message);
+    else window.open('https://wa.me/?text=' + encodeURIComponent(message), '_blank', 'noopener');
   }
 
   function feuilleAppareils(uid) {
@@ -2791,12 +2839,16 @@
     'reinit-mdp': function (el) {
       var u = (E.cache.comptes || []).filter(function (x) { return x.id === el.dataset.id; })[0];
       if (!u) return;
-      confirmer('Créer un nouveau mot de passe pour ' + u.nom + ' ? Ses appareils seront déconnectés.', 'Créer', function () { api('comptes/mdp', { id: u.id }).then(function (r) { feuilleSecret('Nouveau mot de passe', u.nom, u.identifiant, r.mdp); }, function (e) { toast(e.message, true); }); });
+      confirmer('Créer un nouveau mot de passe pour ' + u.nom + ' ? Ses appareils seront déconnectés.', 'Créer', function () { api('comptes/mdp', { id: u.id }).then(function (r) { feuilleSecret('Nouveau mot de passe', u.nom, u.identifiant, r.mdp, u.acces, u.admin_global); }, function (e) { toast(e.message, true); }); });
     },
     appareils: function (el) { feuilleAppareils(el.dataset.id); },
     'mes-appareils': function () { feuilleAppareils(''); },
     revoquer: function (el) {
       api('sessions/revoquer', { id: el.dataset.id }).then(function () { toast('Appareil déconnecté.'); feuilleAppareils(el.dataset.uid); }, function (e) { toast(e.message, true); });
+    },
+    'envoyer-guide': function (el) {
+      var u = (E.cache.comptes || []).filter(function (x) { return x.id === el.dataset.id; })[0];
+      if (u) envoyerGuide(u);
     },
     'copier-secret': function () { copier(E.cache.messageSecret || ''); },
     'partager-secret': function () { partagerTexte(E.cache.messageSecret); },
@@ -2873,7 +2925,13 @@
     },
     'voir-depense': function (el) { feuilleDepense(el.dataset.id); },
     'editer-depense': function (el) { feuilleDepense(el.dataset.id); },
-    'valider-depense': function (el) { fermerFeuille(); muter('depenses', el.dataset.id, { statut: 'validee' }).then(function () { toast('Dépense validée.'); rendre(); }); },
+    'valider-depense': function (el) {
+      var d = ligne('depenses', el.dataset.id);
+      if (d && justificatifExige(d) && !d.justificatif) {
+        toast((E.cache.photosEnAttente || {})[d.id] ? 'La photo du justificatif n\'est pas encore arrivée au serveur : validez après la synchronisation.' : 'Justificatif obligatoire à partir de ' + fcfa(SEUIL_JUSTIFICATIF) + ' : demandez la photo avant de valider.', true);
+        return;
+      }
+      fermerFeuille(); muter('depenses', el.dataset.id, { statut: 'validee' }).then(function () { toast('Dépense validée.'); rendre(); }); },
     'refuser-depense': function (el) {
       ouvrirFeuille('<h2>Refuser la dépense</h2><form data-f="refus" data-id="' + esc(el.dataset.id) + '"><label class="champ"><span>Motif</span><input type="text" name="motif" required></label>' +
         '<div class="actions"><button class="btn danger" type="submit">Refuser</button><button class="btn clair" type="button" data-a="fermer">Retour</button></div></form>');
@@ -3108,7 +3166,9 @@
         chargerComptes();
         // L'équipe (enseignants de chaque centre) arrive avec la synchro : écran Enseignants à jour.
         synchroniser();
-        if (r.mdp) feuilleSecret('Compte créé', corps.nom, corps.identifiant, r.mdp);
+        var accesMap = {};
+        corps.acces.forEach(function (a) { accesMap[a.centre_id] = a.role; });
+        if (r.mdp) feuilleSecret('Compte créé', corps.nom, corps.identifiant, r.mdp, accesMap, corps.admin_global);
         else { fermerFeuille(); toast('Compte enregistré.'); }
       }, function (e) { occupe(form, false); toast(e.message, true); });
     },
