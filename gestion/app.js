@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.11.6';
+  var VERSION = '0.11.7';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -2461,7 +2461,29 @@
   }
 
   /** « NOM Prénoms ; 697 63 77 39 » ou « NOM Prénoms » — les mots en capitales de tête forment le nom. */
+  /** Montant écrit dans un cahier : « 2500 », « 7 500 », « 10.000 », « 10 000 F ». Vide ou « - » : rien. */
+  function lireMontant(t) {
+    t = String(t || '').replace(/f(cfa)?\.?$/i, '').replace(/[\s.\u00a0]/g, '').trim();
+    return /^\d{3,6}$/.test(t) ? Number(t) : null;
+  }
+  /** Ligne d'import « NOM Prénoms ; inscription ; octobre ; novembre … » (montants facultatifs, « - » pour vide). */
   function lireLigneImport(l) {
+    var morceaux = String(l).split(/\s*[;|\t]\s*/);
+    if (morceaux.length > 1) {
+      var e = lireLigneImportNom(morceaux[0]);
+      if (!e) return null;
+      e.montants = [];
+      morceaux.slice(1).forEach(function (x) {
+        var tel = telNormal(String(x).replace(/\D/g, '').replace(/^237/, ''));
+        if (/^\s*\+?(237)?[\s.]*[26](?:[\s.]*\d){8}\s*$/.test(x) && tel) { e.parent_tel = tel; return; }
+        e.montants.push(lireMontant(x));
+      });
+      while (e.montants.length && e.montants[e.montants.length - 1] == null) e.montants.pop();
+      return e;
+    }
+    return lireLigneImportNom(l);
+  }
+  function lireLigneImportNom(l) {
     var tel = '';
     var m = l.match(/(?:\+?237)?[\s.]*([26](?:[\s.]*\d){8})\s*$/);
     if (m) { tel = telNormal(m[1]) || ''; l = l.slice(0, m.index); }
@@ -2474,13 +2496,27 @@
     return { nom: mots.slice(0, n).join(' ').toUpperCase(), prenoms: mots.slice(n).join(' '), parent_tel: tel };
   }
 
+  /** Mois facturés de l'année active, dans l'ordre (« 2026-10 », « 2026-11 », …). */
+  function moisDeLAnnee() {
+    var an = anneeActive(); if (!an) return [];
+    var y0 = Number(String(an.libelle).slice(0, 4)) || Number(String(an.debut).slice(0, 4)), m0 = Number(String(an.debut).slice(5, 7)) || 9;
+    return String(an.mois_factures || '').split(',').filter(Boolean).map(function (mm) { var m = Number(mm); return (m >= m0 ? y0 : y0 + 1) + '-' + ('0' + m).slice(-2); }).sort();
+  }
   function feuilleImport() {
     var cid = centreEleves();
     var classes = lignes('classes').filter(function (k) { return k.centre_id === cid; });
     if (!classes.length) { toast('Créez d\'abord les classes du centre dans « Planning ».', true); return; }
     ouvrirFeuille('<h2>Importer une liste</h2><p class="doux">Copiez la liste d\'un cahier ou d\'un tableau : un élève par ligne, le nom en capitales puis les prénoms, et si vous l\'avez le téléphone du parent à la fin.</p>' +
       '<form data-f="import" data-centre="' + esc(cid) + '"><label class="champ"><span>Classe</span><select name="classe_id">' + classes.map(function (k) { return '<option value="' + esc(k.id) + '"' + (k.id === ELV.classe ? ' selected' : '') + '>' + esc(k.nom) + '</option>'; }).join('') + '</select></label>' +
-      '<label class="champ"><span>Liste</span><textarea name="liste" rows="8" data-input="apercu-import" placeholder="NGONO ESSOMBA Marie\nTAMO Paul ; 690 00 00 00\nBELLA Grâce"></textarea></label>' +
+      '<label class="champ"><span>Liste</span><textarea name="liste" rows="8" data-input="apercu-import" placeholder="NGONO ESSOMBA Marie\nTAMO Paul ; 690 00 00 00\nBELLA Grâce ; 2500 ; 7500\nAMBASSA ; - ; 7500"></textarea>' +
+      '<small>Avec les montants du cahier : <b>NOM Prénoms ; inscription ; ' + esc(moisDeLAnnee().slice(0, 2).map(function (am) { return MOIS[Number(am.slice(5)) - 1]; }).join(' ; ')) + ' …</b> — « - » pour une case vide. Chaque montant devient un versement avec son reçu.</small></label>' +
+      (function () {
+        var an = anneeActive(), deb = an && an.debut ? an.debut : isoLocal(new Date());
+        return '<div class="deux"><label class="champ"><span>Inscrits depuis le</span><input type="date" name="date_inscription" value="' + esc(deb) + '"><small>La rentrée : les mois depuis la rentrée sont dus.</small></label>' +
+          '<label class="champ"><span>Date des versements repris</span><select name="date_versements"><option value="auj">Aujourd\'hui</option>' +
+          (peut('caisse.corriger', cid) ? '<option value="mois" selected>Le mois concerné (inscription : date d\'inscription)</option>' : '') + '</select>' +
+          (peut('caisse.corriger', cid) ? '' : '<small>Dater dans le passé est réservé au responsable.</small>') + '</label></div>';
+      })() +
       '<div id="apercu-import" class="doux">Rien à importer pour l\'instant.</div>' +
       '<div class="actions"><button class="btn or" type="submit">Inscrire ces élèves</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
   }
@@ -2502,9 +2538,12 @@
     if (!z) return;
     if (!l.length) { z.innerHTML = 'Rien à importer pour l\'instant.'; return; }
     var ok = l.filter(function (e) { return !e.motif; });
-    z.innerHTML = '<p><b>' + ok.length + '</b> élève' + (ok.length > 1 ? 's' : '') + ' à inscrire' + (l.length > ok.length ? ', <b>' + (l.length - ok.length) + '</b> écarté' + (l.length - ok.length > 1 ? 's' : '') : '') + '</p><div class="liste">' +
+    var totVers = ok.reduce(function (s, e) { return s + (e.montants || []).reduce(function (a, v) { return a + (v || 0); }, 0); }, 0);
+    var nbVers = ok.reduce(function (s, e) { return s + (e.montants || []).filter(Boolean).length; }, 0);
+    z.innerHTML = '<p><b>' + ok.length + '</b> élève' + (ok.length > 1 ? 's' : '') + ' à inscrire' + (nbVers ? ' · <b>' + nbVers + '</b> versement' + (nbVers > 1 ? 's' : '') + ' (' + fcfa(totVers) + ')' : '') + (l.length > ok.length ? ', <b>' + (l.length - ok.length) + '</b> écarté' + (l.length - ok.length > 1 ? 's' : '') : '') + '</p><div class="liste">' +
       l.slice(0, 60).map(function (e) {
-        return '<div class="ligne"><span class="corps"><b>' + esc(nomComplet(e)) + '</b><small>' + esc(e.parent_tel ? telLisible(e.parent_tel) : 'sans téléphone') + '</small></span>' +
+        var mois = moisDeLAnnee(), m = (e.montants || []).map(function (v, i) { return v ? (i === 0 ? 'Insc.' : MOIS_COURTS[Number((mois[i - 1] || '0000-01').slice(5)) - 1]) + ' ' + fcfa(v) : ''; }).filter(Boolean);
+        return '<div class="ligne"><span class="corps"><b>' + esc(nomComplet(e)) + '</b><small>' + esc((e.parent_tel ? telLisible(e.parent_tel) : 'sans téléphone') + (m.length ? ' · ' + m.join(' · ') : '')) + '</small></span>' +
           (e.motif ? '<span class="badge alerte">' + esc(e.motif) + '</span>' : '<span class="badge ok">nouveau</span>') + '</div>';
       }).join('') + '</div>';
   }
@@ -4377,15 +4416,31 @@
       var l = analyseImport(form).filter(function (e) { return !e.motif; });
       if (!l.length) { toast('Aucun nouvel élève à inscrire.', true); return; }
       var classe = form.querySelector('[name=classe_id]').value;
-      var auj = new Date().toISOString().slice(0, 10);
+      var auj = isoLocal(new Date());
+      var dInsc = (form.querySelector('[name=date_inscription]') || {}).value || auj;
+      var parMois = (form.querySelector('[name=date_versements]') || {}).value === 'mois';
+      var mois = moisDeLAnnee(), cid = form.dataset.centre, jourEch = ('0' + (Number((ligne('centres', cid) || {}).jour_echeance) || 10)).slice(-2);
+      var peutEnc = peut('paiements.encaisser', cid), nbVers = 0;
       fermerFeuille();
       var suite = Promise.resolve();
       l.forEach(function (e) {
+        var eid = nouvelId();
         suite = suite.then(function () {
-          return muter('eleves', nouvelId(), { centre_id: e.centre_id, classe_id: classe, nom: e.nom, prenoms: e.prenoms, parent_tel: e.parent_tel, date_inscription: auj });
+          return muter('eleves', eid, { centre_id: e.centre_id, classe_id: classe, nom: e.nom, prenoms: e.prenoms, parent_tel: e.parent_tel, date_inscription: dInsc > auj ? auj : dInsc });
+        });
+        if (!peutEnc) return;
+        (e.montants || []).forEach(function (v, i) {
+          if (!v) return;
+          var quoi = i === 0 ? 'inscription' : MOIS[Number((mois[i - 1] || auj.slice(0, 7)).slice(5)) - 1];
+          var date = !parMois ? auj : i === 0 ? dInsc : (mois[i - 1] || auj.slice(0, 7)) + '-' + jourEch;
+          if (date > auj) date = auj;
+          nbVers++;
+          suite = suite.then(function () {
+            return muter('paiements', 'pa' + nouvelId(), { centre_id: e.centre_id, eleve_id: eid, montant: v, date: date, mode: 'especes', reference: '', note: 'Repris du cahier : ' + quoi });
+          });
         });
       });
-      suite.then(function () { ELV.classe = classe; toast(l.length + ' élève' + (l.length > 1 ? 's' : '') + ' inscrit' + (l.length > 1 ? 's' : '') + '.'); rendre(); });
+      suite.then(function () { ELV.classe = classe; toast(l.length + ' élève' + (l.length > 1 ? 's' : '') + ' inscrit' + (l.length > 1 ? 's' : '') + (nbVers ? ', ' + nbVers + ' versement' + (nbVers > 1 ? 's' : '') + ' repris' : '') + '.'); rendre(); });
     },
     paiement: function (form) {
       var v = valeurs(form);

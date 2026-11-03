@@ -117,6 +117,18 @@ const apiDe = (page) => (route, corps) => page.evaluate(async ([route, corps]) =
   }
   await api('sync/pousser', { ops: [{ op: opId(), t: 'centres', id: cid, champs: { jour_echeance: Number(centreAvant.jour_echeance) || 10 } }] });
 
+  // 9. Import d'une liste de cahier avec les montants (inscription ; octobre ; …), noms fictifs.
+  await pa.goto(B + '#/accueil'); await pa.goto(B + '#/eleves'); await pa.click('[data-a="importer-eleves"]'); await pa.waitForSelector('#feuille form[data-f="import"]');
+  await pa.selectOption('#feuille select[name=classe_id]', el.classe_id);
+  await pa.fill('#feuille textarea[name=liste]', `ALPHA${SUF} Test ; 2500 ; 7500\nBETA${SUF} ; - ; 5000\nGAMMA${SUF} Essai ; 2000`);
+  await pa.dispatchEvent('#feuille textarea[name=liste]', 'input'); await pa.waitForTimeout(300);
+  ok('aperçu : 3 élèves, 4 versements (17 000 F)', /3\s*élèves à inscrire · 4\s*versements \(17\s000\sF\)/.test(await pa.textContent('#apercu-import')), await pa.textContent('#apercu-import'));
+  await pa.click('#feuille form[data-f="import"] button[type=submit]'); await pa.waitForTimeout(2500); await aJour(pa); await pa.waitForTimeout(800);
+  const Li = (await apiA('sync/tirer&depuis=0')).lignes;
+  const imp = Li.eleves.filter((e) => e.nom.endsWith(SUF) && /^(ALPHA|BETA|GAMMA)/.test(e.nom));
+  const vers = Li.paiements.filter((p) => imp.some((e) => e.id === p.eleve_id));
+  ok('import : 3 élèves et 4 versements numérotés, 17 000 F', imp.length === 3 && vers.length === 4 && vers.every((p) => p.numero) && vers.reduce((s, p) => s + Number(p.montant), 0) === 17000, imp.length + ' / ' + vers.length);
+
   // 6. Chacun ne voit que son rôle ; l'administrateur les voit tous.
   await pa.goto(B + '#/roles'); await pa.waitForSelector('.fiche-role');
   const fichesA = await pa.$$eval('.fiche-role h3', (l) => l.map((x) => x.textContent));
