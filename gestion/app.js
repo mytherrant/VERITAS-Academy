@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.11.0';
+  var VERSION = '0.11.3';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -559,21 +559,52 @@
       else formulaireConnexion(message);
     }, function () { formulaireConnexion(message || (navigator.onLine ? 'Serveur injoignable.' : 'Pas de connexion internet. La première connexion demande du réseau.')); });
   }
-  function formulaireConnexion(message) {
+  function dernierIdentifiant() { try { return localStorage.getItem('vg-ident') || ''; } catch (e) { return ''; } }
+  function formulaireConnexion(message, identifiant, code) {
+    var ident = identifiant != null ? identifiant : dernierIdentifiant();
     $('#zone-connexion').innerHTML = (message ? '<div class="erreur">' + esc(message) + '</div>' : '') +
+      (code === 401 ? '<div class="note info aide-connexion"><b>Vérifiez :</b><ul>' +
+        '<li>l\'<b>identifiant</b> exact reçu par WhatsApp, en minuscules (ex. : <i>jacques</i>, <i>marie.ndogpassi3</i>) — pas votre nom complet ;</li>' +
+        '<li>le <b>mot de passe</b> : majuscules et minuscules comptent ; touchez l\'œil pour le voir ;</li>' +
+        '<li>après 5 essais ratés, attendez 15 minutes.</li></ul>Toujours bloqué ? L\'administrateur crée un nouveau mot de passe (Comptes et accès › votre compte › Nouveau mot de passe).</div>' : '') +
+      '<div id="zone-version"></div>' +
       '<form data-f="connexion" autocomplete="on">' +
-      '<label class="champ"><span>Identifiant</span><input type="text" name="identifiant" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>' +
-      '<label class="champ"><span>Mot de passe</span><input type="password" name="mdp" autocomplete="current-password" required></label>' +
+      '<label class="champ"><span>Identifiant</span><input type="text" name="identifiant" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required value="' + esc(ident) + '"></label>' +
+      '<label class="champ"><span>Mot de passe</span><span class="mdp-ligne"><input type="password" name="mdp" id="champ-mdp" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" required>' +
+      '<button type="button" class="oeil" data-a="voir-mdp" aria-label="Afficher le mot de passe" aria-pressed="false">' + ico('eye') + '</button></span></label>' +
       '<button class="btn plein" type="submit">Se connecter</button></form>' +
       '<p class="pied">v' + VERSION + ' · mot de passe oublié : demandez-le à l\'administrateur</p>';
+    var champ = ident ? $('#champ-mdp') : $('#zone-connexion input[name=identifiant]');
+    if (champ && message) champ.focus();
+    verifierVersion();
+  }
+  /** Compare la version de ce téléphone à celle en ligne ; prévient s'il est en retard. */
+  function verifierVersion() {
+    api('version').then(function (r) {
+      var enLigne = String(r.version || ''), cmp = function (a, b) {
+        var x = a.split('.').map(Number), y = b.split('.').map(Number);
+        for (var i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) - (y[i] || 0); }
+        return 0;
+      };
+      E.cache.versionEnLigne = enLigne && cmp(enLigne, VERSION) > 0 ? enLigne : '';
+      var z = $('#zone-version') || $('#bandeau-version');
+      if (z) z.innerHTML = htmlVersion();
+    }, function () {});
+  }
+  function htmlVersion() {
+    var enLigne = E.cache.versionEnLigne;
+    if (!enLigne) return '';
+    return '<div class="note maj-dispo">' + ico('alert', 'p') + ' <b>Version ' + esc(enLigne) + ' disponible</b> — ce téléphone est en ' + esc(VERSION) + '. ' +
+        (NATIF ? 'Installez la nouvelle application, ou utilisez directement <b>gestion.veritas-school.com</b> dans Chrome : elle y est toujours à jour.'
+          : '<button type="button" class="btn or petit" data-a="mettre-a-jour">Mettre à jour maintenant</button>') + '</div>';
   }
   function formulaireInstallation(etat) {
     $('#zone-connexion').innerHTML = '<div class="note info">Première mise en service : créez le compte administrateur. Le jeton d\'installation se trouve dans <b>api/payment_config.php</b> (G_INSTALL_TOKEN).</div>' +
       '<form data-f="installation" data-installe="' + (etat.installe ? '1' : '0') + '">' +
-      '<label class="champ"><span>Jeton d\'installation</span><input type="password" name="jeton" required autocomplete="off"></label>' +
+      '<label class="champ"><span>Jeton d\'installation</span><span class="mdp-ligne"><input type="password" name="jeton" required autocomplete="off"><button type="button" class="oeil" data-a="voir-mdp" aria-label="Afficher le mot de passe" aria-pressed="false">' + ico('eye') + '</button></span></label>' +
       '<label class="champ"><span>Votre nom</span><input type="text" name="nom" required value="Jacques Miterand TAKOU"></label>' +
       '<label class="champ"><span>Identifiant</span><input type="text" name="identifiant" required autocapitalize="none" spellcheck="false" placeholder="jacques"></label>' +
-      '<label class="champ"><span>Mot de passe</span><input type="password" name="mdp" required minlength="10" autocomplete="new-password"><small>10 caractères minimum.</small></label>' +
+      '<label class="champ"><span>Mot de passe</span><span class="mdp-ligne"><input type="password" name="mdp" required minlength="10" autocomplete="new-password"><button type="button" class="oeil" data-a="voir-mdp" aria-label="Afficher le mot de passe" aria-pressed="false">' + ico('eye') + '</button></span><small>10 caractères minimum.</small></label>' +
       '<button class="btn plein" type="submit">Installer et me connecter</button></form>';
   }
 
@@ -596,7 +627,7 @@
         var auj = new Date();
         var h = '<h1>Bonjour ' + esc(String(u.nom).split(' ')[0]) + '</h1><p class="sous-titre">' +
           esc(auj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })) + '</p>' +
-          bandeauEspace() + blocMesCours() + blocProchainsRdv();
+          '<div id="bandeau-version">' + htmlVersion() + '</div>' + bandeauEspace() + blocMesCours() + blocProchainsRdv();
         if (estEnseignantQuelquePart() && centresChoisis().length) h += '<h2>Mes centres</h2>';
 
         var centres = centresChoisis();
@@ -656,7 +687,8 @@
           return '<div class="tuile inactive"><span class="pastille">' + ico(t[0]) + '</span><b>' + t[1] + '</b><small>' + t[2] + ' · étape ' + t[3] + '</small></div>';
         }).join('') + '</div>';
         return h;
-      }
+      },
+      apres: function () { if (!E.cache.versionVue || Date.now() - E.cache.versionVue > 3600000) { E.cache.versionVue = Date.now(); verifierVersion(); } }
     },
 
     centres: {
@@ -3413,7 +3445,9 @@
     });
     if (!liste.length) { z.innerHTML = '<div class="carte vide">Aucun compte pour ce centre.</div>'; return; }
     z.innerHTML = '<div class="liste">' + liste.map(function (u) {
-      var badges = (u.admin_global ? '<span class="badge or">Administrateur</span>' : '') + Object.keys(u.acces).map(function (cid) {
+      var badges = (u.admin_global ? '<span class="badge or">Administrateur</span>' : '') + lignes('centres').filter(function (c) { return tresorierDe(c.id) === u.id; }).map(function (c) {
+        return '<span class="badge ok">Trésorier' + (lignes('centres').length > 1 ? ' · ' + esc(c.nom_court || c.nom) : '') + '</span>';
+      }).join('') + Object.keys(u.acces).map(function (cid) {
         var c = ligne('centres', cid);
         return '<span class="badge">' + esc(ROLES[u.acces[cid]] || u.acces[cid]) + (lignes('centres').length > 1 && c ? ' · ' + esc(c.nom_court || c.nom) : '') + '</span>';
       }).join('');
@@ -3491,14 +3525,18 @@
       h += '<label class="champ"><span>' + esc(c.nom) + '</span><select name="role_' + esc(c.id) + '"' + (permis.length ? '' : ' disabled') + '><option value="">Aucun accès</option>' +
         Object.keys(ROLES).filter(function (r) { return permis.indexOf(r) >= 0 || r === actuel; }).map(function (r) {
           return '<option value="' + r + '"' + (r === actuel ? ' selected' : '') + '>' + esc(ROLES[r]) + '</option>';
-        }).join('') + '</select></label>';
+        }).join('') + '</select></label>' +
+        // Trésorier : désigné par l'admin, un par centre (il garde les fonds et confirme les remises).
+        (estAdmin() ? '<label class="case tresorier"><input type="checkbox" name="tresorier_' + esc(c.id) + '"' + (u && tresorierDe(c.id) === u.id ? ' checked' : '') + '> ' + ico('wallet', 'p') +
+          ' Trésorier de ' + esc(c.nom_court || c.nom) + (tresorierDe(c.id) && (!u || tresorierDe(c.id) !== u.id) ? ' <small>(remplace ' + esc(nomCompte(tresorierDe(c.id))) + ')</small>' : '') + '</label>' : '');
     });
     var siennes = u ? u.matieres || [] : [];
     h += '<h3>Matières enseignées</h3><p class="doux">Pour les enseignants : elles les proposent en premier dans l\'emploi du temps.</p><div class="deux">' +
       lignes('matieres').map(function (m) { return '<label class="case"><input type="checkbox" name="matiere" value="' + esc(m.id) + '"' + (siennes.indexOf(m.id) >= 0 ? ' checked' : '') + '> ' + esc(m.nom) + '</label>'; }).join('') + '</div>';
     if (estAdmin()) h += '<label class="case"><input type="checkbox" name="admin_global"' + (u && u.admin_global ? ' checked' : '') + '> Administrateur des deux centres (vue consolidée, finances, tous les réglages)</label>';
     if (u) h += '<label class="case"><input type="checkbox" name="actif"' + (u.actif ? ' checked' : '') + '> Compte actif (décocher coupe immédiatement ses sessions)</label>';
-    h += '<div class="legende-roles">' + ORDRE_ROLES.map(function (r) {
+    h += (estAdmin() ? '<p class="doux">' + ico('wallet', 'p') + ' <b>Trésorier</b> : cochez la case sous le centre. Il garde les fonds du centre et confirme chaque remise des partenaires.</p>' : '') +
+      '<div class="legende-roles">' + ORDRE_ROLES.map(function (r) {
       var f = ficheRole(r);
       return '<div class="espace-' + f.espace + '">' + ico(ESPACES[f.espace].ico, 'p') + '<span><b>' + esc(f.nom) + '</b> ' + esc(f.resume) + '</span></div>';
     }).join('') + '</div>' +
@@ -3807,6 +3845,19 @@
       });
     },
     'fermer-et-aller': function (el) { fermerFeuille(); if (el.dataset.onglet) CAI.onglet = el.dataset.onglet; if (el.dataset.eq) { EQ.onglet = el.dataset.eq; EQ.centre = el.dataset.centre; } var h = el.getAttribute('href'); if (location.hash === h) rendre(); else location.hash = h; },
+    'voir-mdp': function (el) {
+      // Chaque champ secret (mot de passe, jeton, code) a son œil : il bascule le champ voisin.
+      var c = el.closest('.mdp-ligne') && el.closest('.mdp-ligne').querySelector('input'); if (!c) return;
+      var voir = c.type === 'password'; c.type = voir ? 'text' : 'password';
+      el.setAttribute('aria-pressed', voir ? 'true' : 'false'); el.setAttribute('aria-label', voir ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+      el.classList.toggle('on', voir); c.focus();
+    },
+    'mettre-a-jour': function () {
+      // Vide les copies gardées par le téléphone, puis recharge depuis le serveur.
+      var vider = window.caches ? caches.keys().then(function (k) { return Promise.all(k.map(function (x) { return caches.delete(x); })); }) : Promise.resolve();
+      var sw = navigator.serviceWorker ? navigator.serviceWorker.getRegistrations().then(function (l) { return Promise.all(l.map(function (r) { return r.update(); })); }) : Promise.resolve();
+      Promise.all([vider, sw]).catch(function () {}).then(function () { location.reload(); });
+    },
     'aller-accueil': function () { if (location.hash === '#/accueil') rendre(); else location.hash = '#/accueil'; },
     'fermer-panneau': function () { if (panneauOuvert()) basculerPanneau(); },
     'ouvrir-comptes': function () {
@@ -4046,15 +4097,15 @@
     },
     'changer-mdp': function () {
       ouvrirFeuille('<h2>Changer mon mot de passe</h2><form data-f="mdp">' +
-        '<label class="champ"><span>Mot de passe actuel</span><input type="password" name="ancien" required autocomplete="current-password"></label>' +
-        '<label class="champ"><span>Nouveau mot de passe</span><input type="password" name="nouveau" required minlength="8" autocomplete="new-password"><small>8 caractères minimum.</small></label>' +
-        '<label class="champ"><span>Confirmer</span><input type="password" name="confirme" required minlength="8" autocomplete="new-password"></label>' +
+        '<label class="champ"><span>Mot de passe actuel</span><span class="mdp-ligne"><input type="password" name="ancien" required autocomplete="current-password"><button type="button" class="oeil" data-a="voir-mdp" aria-label="Afficher le mot de passe" aria-pressed="false">' + ico('eye') + '</button></span></label>' +
+        '<label class="champ"><span>Nouveau mot de passe</span><span class="mdp-ligne"><input type="password" name="nouveau" required minlength="8" autocomplete="new-password"><button type="button" class="oeil" data-a="voir-mdp" aria-label="Afficher le mot de passe" aria-pressed="false">' + ico('eye') + '</button></span><small>8 caractères minimum.</small></label>' +
+        '<label class="champ"><span>Confirmer</span><span class="mdp-ligne"><input type="password" name="confirme" required minlength="8" autocomplete="new-password"><button type="button" class="oeil" data-a="voir-mdp" aria-label="Afficher le mot de passe" aria-pressed="false">' + ico('eye') + '</button></span></label>' +
         '<div class="actions"><button class="btn" type="submit">Changer</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
     },
     'code-pin': function () {
       metaLire('pin').then(function (p) {
         ouvrirFeuille('<h2>Code de verrouillage</h2><p class="doux">Après 5 minutes hors de l\'application, ce code est demandé avant d\'afficher les données. Il reste sur ce téléphone.</p>' +
-          '<form data-f="pin"><label class="champ"><span>Nouveau code (4 chiffres)</span><input type="password" name="pin" inputmode="numeric" pattern="\\d{4}" maxlength="4" required autocomplete="off"></label>' +
+          '<form data-f="pin"><label class="champ"><span>Nouveau code (4 chiffres)</span><span class="mdp-ligne"><input type="password" name="pin" inputmode="numeric" pattern="\\d{4}" maxlength="4" required autocomplete="off"><button type="button" class="oeil" data-a="voir-mdp" aria-label="Afficher le mot de passe" aria-pressed="false">' + ico('eye') + '</button></span></label>' +
           '<div class="actions"><button class="btn" type="submit">' + (p ? 'Changer le code' : 'Activer') + '</button>' + (p ? '<button class="btn danger" type="button" data-a="pin-retirer">Désactiver</button>' : '') +
           '<button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
       });
@@ -4097,9 +4148,13 @@
     connexion: function (form) {
       var v = valeurs(form);
       occupe(form, true);
-      api('auth/connexion', { identifiant: v.identifiant, mdp: v.mdp, appareil: nomAppareil() }).then(ouvrirSession, function (e) {
+      var ident = String(v.identifiant || '').toLowerCase().replace(/\s+/g, '');
+      api('auth/connexion', { identifiant: ident, mdp: v.mdp, appareil: nomAppareil() }).then(function (r) {
+        try { localStorage.setItem('vg-ident', ident); } catch (e) {}
+        return ouvrirSession(r);
+      }, function (e) {
         occupe(form, false);
-        formulaireConnexion(e.message);
+        formulaireConnexion(e.message, ident, e.code);
       });
     },
     installation: function (form) {
@@ -4226,6 +4281,14 @@
       if (!corps.admin_global && !acces.length) { toast('Choisissez au moins un rôle dans un centre.', true); return; }
       occupe(form, true);
       api('comptes/enregistrer', corps).then(function (r) {
+        // Trésorier coché / décoché : la fiche du centre suit (l'admin seul écrit les centres).
+        var uidC = r.id || id;
+        if (estAdmin() && uidC) lignes('centres').forEach(function (c) {
+          var caseT = form.querySelector('[name="tresorier_' + c.id + '"]');
+          if (!caseT) return;
+          if (caseT.checked && tresorierDe(c.id) !== uidC) muter('centres', c.id, { tresorier_id: uidC });
+          else if (!caseT.checked && tresorierDe(c.id) === uidC) muter('centres', c.id, { tresorier_id: '' });
+        });
         chargerComptes();
         // L'équipe (enseignants de chaque centre) arrive avec la synchro : écran Enseignants à jour.
         synchroniser();

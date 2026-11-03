@@ -134,6 +134,8 @@ npx cap sync android
 cd android && gradlew assembleDebug          # JAVA_HOME = JDK d'Android Studio (jbr)
 ```
 
+La route publique `?r=version` donne la version en ligne : un téléphone en retard (APK, copie en cache) affiche « Version X disponible » à la connexion et sur l'accueil.
+
 Une nouvelle version de `app.js` ne parvient à l'APK qu'en la **reconstruisant** (le web,
 lui, se met à jour seul) : garder l'API compatible avec les APK déjà distribuées.
 
@@ -155,6 +157,7 @@ node tests/banc_gestion_agenda.cjs <dossier>     # agenda, échéances, .ics, cl
 node tests/banc_gestion_remises.cjs <dossier>    # remises au trésorier : confirmation, contestation, refus serveur (Playwright)
 node tests/banc_gestion_paie_cours.cjs <dossier> # paie de l'enseignant après le cours : 1 500 F/h, unicité, plafond (Playwright)
 node tests/banc_gestion_equipe.cjs <dossier>     # Équipe : discussion, commentaires, réunions, tâches, refus serveur (Playwright)
+node tests/banc_gestion_connexion.cjs <dossier>  # connexion : aide après échec, œil, identifiant toléré, version en retard (Playwright)
 ```
 
 **Noms fictifs uniquement** dans le code et les bancs : le dépôt est public, les élèves sont mineurs.

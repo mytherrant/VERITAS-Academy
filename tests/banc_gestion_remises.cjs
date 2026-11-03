@@ -110,6 +110,26 @@ const allerRemises = async (p) => { await p.goto(B + '#/accueil'); await p.goto(
   await adm.goto(B + '#/bilan'); await adm.waitForTimeout(400);
   ok('bilan : « Fonds chez le trésorier » et « Encore chez les partenaires »', /Fonds chez le trésorier/.test(await adm.textContent('main')) && /Encore chez les partenaires/.test(await adm.textContent('main')), '');
 
+  // Le trésorier se voit et se règle aussi dans la fiche du compte (Comptes et accès).
+  const ouvrirCompte = async () => {
+    await adm.goto(B + '#/accueil');
+    const bb = await adm.locator('.entete .marque').boundingBox();
+    if (!(await adm.isVisible('a.tuile[href="#/admin"]'))) { await adm.mouse.move(bb.x + 10, bb.y + 10); await adm.mouse.down(); await adm.waitForTimeout(2300); await adm.mouse.up(); }
+    await adm.goto(B + '#/comptes'); await adm.waitForSelector('#zone-comptes .ligne');
+    ok('liste des comptes : badge « Trésorier »', (await adm.textContent(`#zone-comptes .ligne[data-a="editer-compte"][data-id="${act.id}"]`)).includes('Trésorier'), '');
+    await adm.click(`#zone-comptes .ligne[data-a="editer-compte"][data-id="${act.id}"]`); await adm.waitForSelector(`#feuille [name="tresorier_${cid}"]`);
+  };
+  await ouvrirCompte();
+  ok('fiche du compte : case « Trésorier de … » cochée', await adm.isChecked(`#feuille [name="tresorier_${cid}"]`), '');
+  await adm.uncheck(`#feuille [name="tresorier_${cid}"]`); await adm.click('#feuille button[type=submit]'); await aJour(adm); await adm.waitForTimeout(600);
+  let tc = (await api('sync/tirer&depuis=0')).lignes.centres.find((c) => c.id === cid);
+  ok('case décochée : plus de trésorier pour le centre', !tc.tresorier_id, JSON.stringify(tc.tresorier_id));
+  await adm.goto(B + '#/comptes'); await adm.waitForSelector('#zone-comptes .ligne');
+  await adm.click(`#zone-comptes .ligne[data-a="editer-compte"][data-id="${act.id}"]`); await adm.waitForSelector(`#feuille [name="tresorier_${cid}"]`);
+  await adm.check(`#feuille [name="tresorier_${cid}"]`); await adm.click('#feuille button[type=submit]'); await aJour(adm); await adm.waitForTimeout(600);
+  tc = (await api('sync/tirer&depuis=0')).lignes.centres.find((c) => c.id === cid);
+  ok('case cochée : l\'actionnaire redevient trésorier', tc.tresorier_id === act.id, JSON.stringify(tc.tresorier_id));
+
   for (const [n, p] of [['admin', adm], ['secrétaire', ps], ['trésorier', pa]]) ok(n + ' : aucune erreur JavaScript', p.err.length === 0, p.err.join(' / '));
   await nav.close();
   console.log(echecs.length ? `\n${echecs.length} échec(s)` : '\nTout est vert.');
