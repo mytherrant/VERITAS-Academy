@@ -33,6 +33,8 @@ if (!defined('G_SESSION_JOURS'))   define('G_SESSION_JOURS', 30);
 if (!defined('G_BCRYPT_COST'))     define('G_BCRYPT_COST', 12);
 // Dépenses : photo du justificatif exigée pour valider à partir de ce montant (FCFA).
 if (!defined('G_SEUIL_JUSTIFICATIF')) define('G_SEUIL_JUSTIFICATIF', 10000);
+// Enseignants : taux horaire appliqué sans contrat particulier (FCFA / heure).
+if (!defined('G_TAUX_HORAIRE_DEFAUT')) define('G_TAUX_HORAIRE_DEFAUT', 1500);
 if (!defined('G_LOGIN_FENETRE_MIN')) define('G_LOGIN_FENETRE_MIN', 15);
 if (!defined('G_LOGIN_MAX_IP'))      define('G_LOGIN_MAX_IP', 10);
 if (!defined('G_LOGIN_MAX_COMPTE'))  define('G_LOGIN_MAX_COMPTE', 5);

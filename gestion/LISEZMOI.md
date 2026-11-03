@@ -48,6 +48,14 @@ servie aux seuls comptes qui voient les dépenses du centre.
 faites, dû selon le contrat (heure, séance, forfait avec retenue), paies (annulables, jamais
 modifiées) comptées en charges dans le bilan. L'enseignant voit SES heures, SON contrat, SES paies.
 
+**Paie des enseignants après le cours :** sans contrat particulier, un enseignant est payé
+**1 500 F de l'heure** (`G_TAUX_HORAIRE_DEFAUT` / `TAUX_HORAIRE_DEFAUT`). Dès le cours fini (départ
+pointé ou heure de fin passée), le partenaire présent qui a encaissé touche « Payer » dans
+Appel › Enseignants du jour : une paie rattachée au pointage (`g_paies.presence_id`), une seule par
+cours, jamais plus que durée faite × taux (à la séance : le taux ; au forfait : paie du mois). Elle
+sort de sa caisse (« dépenses et paies » dans Remises), figure dans Caisse › Dépenses, le point du
+jour et le bilan, et l'enseignant la voit dans « Mes heures ». La paie du mois reste au responsable.
+
 **Remises au trésorier :** chaque centre a un trésorier (fiche du centre, choisi par l'admin parmi
 les comptes du centre). Tout partenaire qui encaisse (responsable, secrétaire, et désormais
 actionnaire, selon ses jours au centre et sa proximité avec les parents) envoie le reçu puis
@@ -135,6 +143,7 @@ node tests/banc_gestion_caisse.cjs <dossier>     # échéancier, encaissement, r
 node tests/banc_gestion_enseignants.cjs <dossier> # enseignants, « Mes heures », reçu hors ligne, photo de justificatif (Playwright)
 node tests/banc_gestion_agenda.cjs <dossier>     # agenda, échéances, .ics, cloche, droits par rôle (Playwright)
 node tests/banc_gestion_remises.cjs <dossier>    # remises au trésorier : confirmation, contestation, refus serveur (Playwright)
+node tests/banc_gestion_paie_cours.cjs <dossier> # paie de l'enseignant après le cours : 1 500 F/h, unicité, plafond (Playwright)
 ```
 
 **Noms fictifs uniquement** dans le code et les bancs : le dépôt est public, les élèves sont mineurs.

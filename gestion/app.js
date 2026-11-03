@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.9.9';
+  var VERSION = '0.10.0';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -954,8 +954,15 @@
         else if (!p.depart) b += '<button type="button" class="rond" data-a="pointer-ens" data-v="depart" data-cr="' + esc(c.id) + '" aria-label="Parti maintenant">' + ico('download') + '</button>';
         if (!p || p.statut !== 'absent') b += '<button type="button" class="rond abs" data-a="pointer-ens" data-v="absent" data-cr="' + esc(c.id) + '" aria-label="Absent">' + ico('x') + '</button>';
       }
+      // Payer l'enseignant juste après le cours : départ pointé, ou fin du cours passée.
+      var mc = montantCours(p), fini = p && (p.depart || iso < isoLocal(new Date()) || heureMaintenant() >= c.fin), payer = '';
+      if (mc && fini && peut('paiements.encaisser', cid)) {
+        var paie = paieDuCours(p.id);
+        if (paie) etat += '<small class="st-present">' + ico('check', 'p') + ' Payé ' + fcfa(paie.montant) + ' par ' + esc(nomCompte(paie.paye_par)) + '</small>';
+        else payer = '<button type="button" class="btn or petit payer" data-a="payer-cours" data-pe="' + esc(p.id) + '" data-cr="' + esc(c.id) + '">' + ico('wallet', 'p') + 'Payer ' + fcfa(mc.montant) + '</button>';
+      }
       return '<div class="ligne' + (p ? ' pt-' + (p.statut === 'remplace' ? 'justifie' : p.statut) : '') + '"><button type="button" class="corps nom-eleve" data-a="detail-ens" data-cr="' + esc(c.id) + '"' + (modifiable && c.enseignant_id ? '' : ' disabled') + '><b>' + esc(qui) + '</b><small>' + esc(heureLisible(c.debut) + ' – ' + heureLisible(c.fin) + ' · ' + nomDe('classes', c.classe_id) + ' · ' + nomDe('matieres', c.matiere_id)) + '</small>' + etat + '</button>' +
-        (p && p._attente ? '<span class="badge alerte">en attente</span>' : '') + '<span class="boutons">' + b + '</span></div>';
+        (p && p._attente ? '<span class="badge alerte">en attente</span>' : '') + '<span class="boutons">' + payer + b + '</span></div>';
     }).join('') + '</div>';
   }
   function minutesEns(c, arrivee, depart) {
@@ -1018,7 +1025,7 @@
       faites += Number(p.minutes) || 0; seances++;
       if (p.statut === 'retard') { retards++; minRetard += Number(p.retard_min) || 0; }
     });
-    var contrat = lignes('contrats').filter(function (c) { return c.centre_id === cid && c.utilisateur_id === uid && Number(c.actif); })[0] || null;
+    var contrat = contratDe(uid, cid);
     var du = 0;
     if (contrat) {
       var t = Number(contrat.taux) || 0;
@@ -1030,6 +1037,24 @@
       remplacements: remplacements, contrat: contrat, du: du, verse: verse, reste: Math.max(0, du - verse), paies: paies, pres: pres, crs: crs };
   }
   var LIB_MODE_REM = { heure: 'à l\'heure', seance: 'à la séance', forfait: 'au forfait mensuel' };
+  // Sans contrat particulier, un enseignant est payé 1 500 F de l'heure (même valeur côté serveur).
+  var TAUX_HORAIRE_DEFAUT = 1500;
+  function contratDe(uid, cid) {
+    return lignes('contrats').filter(function (c) { return c.centre_id === cid && c.utilisateur_id === uid && Number(c.actif); })[0] ||
+      { mode: 'heure', taux: TAUX_HORAIRE_DEFAUT, defaut: true };
+  }
+  function idPaieCours(presenceId) { return 'pp' + presenceId; }
+  function paieDuCours(presenceId) { return lignes('paies').filter(function (x) { return x.presence_id === presenceId && !Number(x.annule); })[0] || null; }
+  /** Ce que rapporte un cours pointé : à qui, combien, selon quel calcul. null s'il n'y a rien à payer. */
+  function montantCours(p) {
+    if (!p || ['present', 'retard', 'remplace'].indexOf(p.statut) < 0 || !(Number(p.minutes) > 0)) return null;
+    var prof = p.statut === 'remplace' ? p.remplacant_id : p.enseignant_id;
+    var k = contratDe(prof, p.centre_id);
+    if (k.mode === 'forfait') return null;
+    var t = Number(k.taux) || 0;
+    var m = k.mode === 'seance' ? t : Math.round(Number(p.minutes) / 60 * t);
+    return { prof: prof, montant: m, calcul: k.mode === 'seance' ? 'séance · ' + fcfa(t) : dureeLisible(Number(p.minutes)) + ' × ' + fcfa(t) + '/h' };
+  }
   function enteteMois(etat, action) {
     var auj = isoLocal(new Date()).slice(0, 7);
     if (!etat.mois) etat.mois = auj;
@@ -1057,7 +1082,8 @@
       var mats = String(t.matieres || '').split(',').filter(Boolean).map(function (m) { return nomDe('matieres', m); }).filter(Boolean);
       return '<button class="ligne" type="button" data-a="voir-ens" data-id="' + esc(t.id) + '"><span class="avatar">' + esc(initiales(t.nom)) + '</span><span class="corps"><b>' + esc(t.nom) + '</b>' +
         '<small>' + esc([mats.join(', '), Object.keys(classes).join(', ')].filter(Boolean).join(' · ') || 'aucun cours') + '</small>' +
-        '<small>' + dureeLisible(b.faites) + ' faites / ' + dureeLisible(b.prevues) + ' prévues' + (b.absences ? ' · ' + b.absences + ' abs.' : '') + (b.retards ? ' · ' + b.retards + ' retard' + (b.retards > 1 ? 's' : '') : '') + '</small></span>' +
+        '<small>' + dureeLisible(b.faites) + ' faites / ' + dureeLisible(b.prevues) + ' prévues' + (b.absences ? ' · ' + b.absences + ' abs.' : '') + (b.retards ? ' · ' + b.retards + ' retard' + (b.retards > 1 ? 's' : '') : '') + '</small>' +
+        (b.contrat.defaut ? '<small>' + fcfa(TAUX_HORAIRE_DEFAUT) + '/h · taux par défaut</small>' : '') + '</span>' +
         '<span class="fin">' + (b.contrat ? '<b>' + fcfa(b.du) + '</b>' + (b.reste ? '<span class="badge alerte">reste ' + fcfa(b.reste) + '</span>' : b.du ? '<span class="badge ok">payé</span>' : '') : '<span class="badge">sans contrat</span>') + '</span></button>';
     });
     h += '<div class="stats"><div><b>' + fcfa(tot.du) + '</b><small>dû ce mois</small></div><div><b>' + fcfa(tot.verse) + '</b><small>versé</small></div></div><div class="liste">' + rows.join('') + '</div>';
@@ -1068,11 +1094,11 @@
     var t = enseignantsDu(cid).filter(function (e) { return e.id === uid; })[0] || { nom: '' };
     var b = bilanEnseignant(uid, cid, ENS.mois);
     var gere = peut('enseignants.gerer', cid);
-    var c = b.contrat || { mode: 'heure', taux: '', retenue_absence: '' };
+    var c = b.contrat;
     ouvrirFeuille('<h2>' + esc(t.nom) + '</h2><p class="doux">' + esc((ligne('centres', cid) || {}).nom || '') + ' · ' + esc(MOIS[Number(ENS.mois.slice(5)) - 1] + ' ' + ENS.mois.slice(0, 4)) + '</p>' +
       '<div class="stats petites"><div><b>' + dureeLisible(b.faites) + '</b><small>faites (' + b.seances + ' séance' + (b.seances > 1 ? 's' : '') + ')</small></div><div><b>' + dureeLisible(b.prevues) + '</b><small>prévues</small></div><div><b>' + b.absences + '</b><small>absences</small></div></div>' +
       '<div class="infos"><div class="info"><span>Retards</span><b>' + b.retards + (b.minRetard ? ' (' + b.minRetard + ' min)' : '') + '</b></div>' + (b.remplacements ? '<div class="info"><span>Remplacements assurés</span><b>' + b.remplacements + '</b></div>' : '') +
-      '<div class="info"><span>Rémunération</span><b>' + (b.contrat ? esc(LIB_MODE_REM[b.contrat.mode]) + ' · ' + fcfa(b.contrat.taux) : 'pas de contrat') + '</b></div>' +
+      '<div class="info"><span>Rémunération</span><b>' + esc(LIB_MODE_REM[b.contrat.mode]) + ' · ' + fcfa(b.contrat.taux) + (b.contrat.defaut ? ' (taux par défaut)' : '') + '</b></div>' +
       '<div class="info"><span>Dû ce mois</span><b>' + fcfa(b.du) + '</b></div><div class="info"><span>Versé</span><b>' + fcfa(b.verse) + '</b></div><div class="info"><span>Reste</span><b class="' + (b.reste ? 'st-absent' : 'st-present') + '">' + fcfa(b.reste) + '</b></div></div>' +
       (b.paies.length ? '<h3>Paies du mois</h3><div class="liste">' + b.paies.map(function (p) {
         return '<div class="ligne"><span class="corps"><b' + (Number(p.annule) ? ' class="barre-txt"' : '') + '>' + fcfa(p.montant) + '</b><small>' + esc(dateLisible(p.date, true) + ' · ' + MODES[p.mode] + (Number(p.annule) ? ' · annulée : ' + (p.motif_annulation || '') : '')) + '</small></span>' +
@@ -1081,7 +1107,7 @@
       (gere ? '<form data-f="paie" data-ens="' + esc(uid) + '"><h3>Verser la paie</h3><div class="deux"><label class="champ"><span>Montant (F)</span><input type="number" name="montant" min="1" value="' + (b.reste || '') + '" required></label>' +
         '<label class="champ"><span>Mode</span><select name="mode">' + Object.keys(MODES).map(function (m) { return '<option value="' + m + '">' + MODES[m] + '</option>'; }).join('') + '</select></label></div>' +
         '<div class="actions"><button class="btn or" type="submit">' + ico('wallet', 'p') + 'Verser</button></div></form>' +
-        '<form data-f="contrat" data-ens="' + esc(uid) + '" data-id="' + esc(b.contrat ? b.contrat.id : '') + '"><h3>Contrat</h3><div class="deux"><label class="champ"><span>Rémunéré</span><select name="mode">' +
+        '<form data-f="contrat" data-ens="' + esc(uid) + '" data-id="' + esc(b.contrat.defaut ? '' : b.contrat.id) + '"><h3>Contrat</h3><div class="deux"><label class="champ"><span>Rémunéré</span><select name="mode">' +
         Object.keys(LIB_MODE_REM).map(function (m) { return '<option value="' + m + '"' + (c.mode === m ? ' selected' : '') + '>' + LIB_MODE_REM[m] + '</option>'; }).join('') + '</select></label>' +
         '<label class="champ"><span>Taux (F)</span><input type="number" name="taux" min="0" required value="' + esc(c.taux) + '"></label></div>' +
         '<label class="champ"><span>Retenue par absence (forfait)</span><input type="number" name="retenue_absence" min="0" value="' + esc(c.retenue_absence || '') + '"></label>' +
@@ -1145,7 +1171,7 @@
       h += l.length ? '<div class="liste">' + l.map(function (p) {
         var cr = ligne('creneaux', p.creneau_id) || {};
         var lui = p.statut === 'remplace' ? (p.remplacant_id === u.id ? 'Remplacement assuré' : 'Remplacé') : LIB_ENS[p.statut];
-        return '<div class="ligne"><span class="corps"><b>' + esc(dateLisible(p.date, true) + ' · ' + nomDe('classes', cr.classe_id)) + '</b><small>' + esc(lui + (p.arrivee ? ' · ' + p.arrivee : '') + (p.depart ? ' → ' + p.depart : '') + (Number(p.retard_min) ? ' (+' + p.retard_min + ' min)' : '')) + '</small></span><span class="fin"><b>' + dureeLisible(Number(p.minutes) || 0) + '</b></span></div>';
+        return '<div class="ligne"><span class="corps"><b>' + esc(dateLisible(p.date, true) + ' · ' + nomDe('classes', cr.classe_id)) + '</b><small>' + esc(lui + (p.arrivee ? ' · ' + p.arrivee : '') + (p.depart ? ' → ' + p.depart : '') + (Number(p.retard_min) ? ' (+' + p.retard_min + ' min)' : '')) + '</small>' + (function () { var pc = paieDuCours(p.id); return pc ? '<span class="badge ok">payé ' + fcfa(pc.montant) + ' le ' + esc(dateLisible(pc.date, true)) + '</span>' : ''; })() + '</span><span class="fin"><b>' + dureeLisible(Number(p.minutes) || 0) + '</b></span></div>';
       }).join('') + '</div>' : '<div class="carte vide">Aucun cours pointé ce mois-ci.</div>';
     });
     return h;
@@ -1644,6 +1670,15 @@
       if (!E.cache.photosEnAttente) idbTout('fichiers').then(function (f) { E.cache.photosEnAttente = {}; f.forEach(function (x) { E.cache.photosEnAttente[x.id] = 1; }); if (f.length) rendre(); });
       var att = deps.filter(function (d) { return d.statut === 'en_attente'; });
       h += '<p class="sous-titre">' + (att.length ? '<b>' + att.length + '</b> en attente de validation · ' : '') + 'Une dépense validée ne se modifie plus.</p>';
+      var paiesC = peut('paiements.voir', cid) ? lignes('paies').filter(function (x) { return x.centre_id === cid; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; }) : [];
+      if (paiesC.length) {
+        var moisCourant = isoLocal(new Date()).slice(0, 7);
+        var totP = paiesC.filter(function (x) { return !Number(x.annule) && String(x.date).slice(0, 7) === moisCourant; }).reduce(function (s, x) { return s + Number(x.montant); }, 0);
+        h += '<h2>Paies des enseignants</h2><p class="sous-titre">' + fcfa(totP) + ' ce mois · 1 500 F de l\'heure sauf contrat particulier.</p><div class="liste">' + paiesC.slice(0, 40).map(function (x) {
+          return '<div class="ligne"><span class="pastille">' + ico('presentation') + '</span><span class="corps"><b' + (Number(x.annule) ? ' class="barre-txt"' : '') + '>' + esc(nomPersonne(x.enseignant_id) || 'Enseignant') + '</b><small>' +
+            esc(dateLisible(x.date, true) + ' · ' + (x.note || 'Paie du mois') + ' · payé par ' + nomCompte(x.paye_par) + (Number(x.annule) ? ' · annulée' : '')) + '</small></span><span class="fin"><b>− ' + fcfa(x.montant) + '</b></span></div>';
+        }).join('') + '</div><h2>Autres dépenses</h2>';
+      }
       h += deps.length ? '<div class="liste">' + deps.slice(0, 80).map(function (d) {
         var st = d.statut === 'validee' ? '<span class="badge ok">validée</span>' : d.statut === 'refusee' ? '<span class="badge danger">refusée</span>' : '<span class="badge alerte">en attente</span>';
         var sansJ = justificatifExige(d) && !d.justificatif && !(E.cache.photosEnAttente || {})[d.id] ? ' <span class="badge alerte">justificatif manquant</span>' : '';
@@ -1861,7 +1896,7 @@
   // pour les actionnaires. Même centre et même jour que l'onglet Journal de la caisse.
   function pointDuJour(cid, iso) {
     var somme = function (l) { return l.reduce(function (s, x) { return s + (Number(x.montant) || 0); }, 0); };
-    var voitDep = peut('depenses.voir', cid), voitPaies = peut('finances.voir', cid);
+    var voitDep = peut('depenses.voir', cid), voitPaies = peut('depenses.voir', cid);
     var pay = lignes('paiements').filter(function (p) { return p.centre_id === cid && p.date === iso; })
       .sort(function (a, b) { return String(a.numero || 'zz').localeCompare(String(b.numero || 'zz')); });
     var entrees = pay.filter(function (p) { return !Number(p.annule); });
@@ -2620,7 +2655,8 @@
   function soldeFonds(uid, cid) {
     var somme = function (l) { return l.reduce(function (s, x) { return s + (Number(x.montant) || 0); }, 0); };
     var enc = somme(lignes('paiements').filter(function (p) { return p.centre_id === cid && p.encaisse_par === uid && !Number(p.annule); }));
-    var dep = somme(lignes('depenses').filter(function (d) { return d.centre_id === cid && d.saisie_par === uid && d.statut !== 'refusee'; }));
+    var dep = somme(lignes('depenses').filter(function (d) { return d.centre_id === cid && d.saisie_par === uid && d.statut !== 'refusee'; })) +
+      somme(lignes('paies').filter(function (x) { return x.centre_id === cid && x.paye_par === uid && !Number(x.annule); }));
     var rs = remisesDu(cid).filter(function (r) { return r.remis_par === uid; });
     var conf = somme(rs.filter(function (r) { return r.statut === 'confirmee'; }));
     var att = somme(rs.filter(function (r) { return (r.statut || 'en_attente') === 'en_attente'; }));
@@ -2631,6 +2667,7 @@
     var ids = {};
     lignes('paiements').forEach(function (p) { if (p.centre_id === cid && p.encaisse_par) ids[p.encaisse_par] = 1; });
     lignes('depenses').forEach(function (d) { if (d.centre_id === cid && d.saisie_par) ids[d.saisie_par] = 1; });
+    lignes('paies').forEach(function (x) { if (x.centre_id === cid && x.paye_par && !Number(x.annule)) ids[x.paye_par] = 1; });
     remisesDu(cid).forEach(function (r) { if (r.remis_par) ids[r.remis_par] = 1; });
     return Object.keys(ids);
   }
@@ -2665,7 +2702,7 @@
     // Ce que j'ai en main.
     if (peut('paiements.encaisser', cid) && !estTresorier(cid)) {
       var s = soldeFonds(moi, cid);
-      h += '<h2>Chez vous</h2><div class="stats petites"><div><b>' + fcfa(s.encaisse) + '</b><small>encaissé</small></div><div><b>' + fcfa(s.depenses) + '</b><small>dépenses saisies</small></div><div><b>' + fcfa(s.confirme + s.attente) + '</b><small>remis' + (s.attente ? ' (dont ' + fcfa(s.attente) + ' à confirmer)' : '') + '</small></div></div>' +
+      h += '<h2>Chez vous</h2><div class="stats petites"><div><b>' + fcfa(s.encaisse) + '</b><small>encaissé</small></div><div><b>' + fcfa(s.depenses) + '</b><small>dépenses et paies</small></div><div><b>' + fcfa(s.confirme + s.attente) + '</b><small>remis' + (s.attente ? ' (dont ' + fcfa(s.attente) + ' à confirmer)' : '') + '</small></div></div>' +
         '<div class="carte a-remettre' + (s.reste > 0 ? ' du' : '') + '"><span>À remettre au trésorier' + (s.reste < 0 ? '<small>Vous avez remis ' + fcfa(-s.reste) + ' de plus que vos encaissements enregistrés.</small>' : '') + '</span><b>' + libReste(s) + '</b></div>' +
         (tres ? '<div class="actions"><button class="btn or" type="button" data-a="editer-remise" data-id="" data-montant="' + Math.max(0, s.reste) + '">' + ico('wallet', 'p') + 'Remettre au trésorier</button></div>' : '');
     }
@@ -2681,7 +2718,7 @@
         var x = soldeFonds(uid, cid);
         if (uid === tres) { totConf += x.encaisse - x.depenses; return ''; }
         totMain += Math.max(0, x.reste); totConf += x.confirme;
-        return '<div class="ligne"><span class="avatar">' + esc(initiales(nomCompte(uid))) + '</span><span class="corps"><b>' + esc(nomCompte(uid)) + '</b><small>Encaissé ' + fcfa(x.encaisse) + ' · dépenses ' + fcfa(x.depenses) + ' · remis ' + fcfa(x.confirme) + (x.attente ? ' (+ ' + fcfa(x.attente) + ' à confirmer)' : '') + '</small></span>' +
+        return '<div class="ligne"><span class="avatar">' + esc(initiales(nomCompte(uid))) + '</span><span class="corps"><b>' + esc(nomCompte(uid)) + '</b><small>Encaissé ' + fcfa(x.encaisse) + ' · dépenses et paies ' + fcfa(x.depenses) + ' · remis ' + fcfa(x.confirme) + (x.attente ? ' (+ ' + fcfa(x.attente) + ' à confirmer)' : '') + '</small></span>' +
           '<span class="fin"><b' + (x.reste > 0 ? ' class="st-retard"' : '') + '>' + libReste(x) + '</b><small>' + (x.reste < 0 ? 'remis en plus : ' + fcfa(-x.reste) : 'en main') + '</small></span></div>';
       }).join('');
       h += '<h2>Fonds du centre</h2><div class="stats"><div><b>' + fcfa(totConf) + '</b><small>chez le trésorier (confirmé)</small></div><div><b>' + fcfa(totMain) + '</b><small>encore chez les partenaires</small></div></div>' +
@@ -3005,11 +3042,11 @@
       pas: ['Les réglages des centres et de l\'année', 'Les comptes responsables, actionnaires et admin'] },
     { cle: 'actionnaire', espace: 'partenaire', nom: 'Actionnaire', famille: 'Partenaire',
       resume: 'Associé du centre : suit les chiffres, encaisse quand il est présent, tient l\'emploi du temps.',
-      peut: ['Voir le bilan, les versements et les dépenses', 'Encaisser auprès des parents et envoyer le reçu', 'Remettre les fonds au trésorier', 'Voir les statistiques et les parts', 'Modifier l\'emploi du temps de son centre', 'Tenir l\'agenda du centre'],
+      peut: ['Voir le bilan, les versements et les dépenses', 'Encaisser auprès des parents et envoyer le reçu', 'Payer l\'enseignant juste après son cours (1 500 F/h)', 'Remettre les fonds au trésorier', 'Voir les statistiques et les parts', 'Modifier l\'emploi du temps de son centre', 'Tenir l\'agenda du centre'],
       pas: ['Inscrire les élèves', 'Faire l\'appel', 'Créer des comptes'] },
     { cle: 'secretaire', espace: 'secretariat', nom: 'Secrétaire / surveillant', famille: 'Équipe',
       resume: 'Tient l\'accueil et la caisse du centre.',
-      peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Remettre les fonds au trésorier', 'Saisir les dépenses (avec photo du justificatif)', 'Noter les rendez-vous dans l\'agenda'],
+      peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Payer l\'enseignant juste après son cours (1 500 F/h)', 'Remettre les fonds au trésorier', 'Saisir les dépenses (avec photo du justificatif)', 'Noter les rendez-vous dans l\'agenda'],
       pas: ['Voir le bilan', 'Annuler un versement, accorder une remise', 'Valider une dépense', 'Gérer les enseignants'] },
     { cle: 'enseignant', espace: 'enseignant', nom: 'Enseignant', famille: 'Équipe',
       resume: 'Fait l\'appel de ses classes et suit ses heures.',
@@ -3272,16 +3309,18 @@
     responsable: ['*Accueil* : élèves, appels du jour, encaissé du mois, impayés de votre centre.', '*Élèves › +* : inscrire un élève (classe, matières, tarif).',
       '*Caisse › Encaisser* : cherchez l\'élève, saisissez le montant, envoyez le reçu au parent par WhatsApp.', '*Caisse › Impayés* : relancez les parents en un geste.',
       '*Caisse › Dépenses* : saisissez les dépenses. Photo du justificatif *obligatoire dès 10 000 F*. Vous validez les dépenses saisies par les autres.',
+      '*Appel › Enseignants du jour* : après le cours, touchez *Payer* (1 500 F de l\'heure sauf contrat) ; l\'argent sort de votre caisse.',
       '*Caisse › Remises* : remettez au trésorier l\'argent encaissé, *avant la fin du mois* ; il confirme la réception.',
       '*Plus › Enseignants* : pointage des cours, contrats, paies.', '*Plus › Comptes et accès* : créez les comptes de vos secrétaires et enseignants.', '*Plus › Agenda* : rendez-vous, rencontres, échéances ; la cloche en haut rappelle ce qui approche.'],
     actionnaire: ['*Accueil* : les chiffres clés de votre centre (élèves, appels, encaissé, impayés).', '*Plus › Bilan* : recettes, dépenses, résultat du mois et votre part.',
       '*Caisse › Encaisser* : quand vous êtes au centre ou qu\'un parent vous paie, encaissez et envoyez-lui le reçu par WhatsApp.',
+      '*Appel › Enseignants du jour* : si vous êtes présent, payez l\'enseignant juste après son cours (*Payer*, 1 500 F de l\'heure).',
       '*Caisse › Remises* : remettez cet argent au trésorier *avant la fin du mois* ; il confirme la réception.', '*Plus › Planning* : vous tenez l\'emploi du temps du centre (classes, créneaux, enseignants).', '*Plus › Agenda* : rendez-vous et rencontres ; la cloche en haut rappelle ce qui approche.'],
     secretaire: ['*Appel* : choisissez la classe, touchez chaque élève (présent, retard, absent), au début du cours.', '*Élèves › +* : inscrire un élève.',
       '*Caisse › Encaisser* : un reçu numéroté part au parent par WhatsApp. Un versement ne se modifie pas : en cas d\'erreur, prévenez le responsable.',
-      '*Caisse › Dépenses* : photo du justificatif *obligatoire dès 10 000 F*.', '*Caisse › Remises* : remettez l\'argent encaissé au trésorier avant la fin du mois.', '*Plus › Agenda* : notez les rendez-vous ; la cloche en haut rappelle échéances et rencontres.'],
+      '*Caisse › Dépenses* : photo du justificatif *obligatoire dès 10 000 F*.', '*Appel › Enseignants du jour* : après le cours, touchez *Payer* (1 500 F de l\'heure).', '*Caisse › Remises* : remettez l\'argent encaissé au trésorier avant la fin du mois.', '*Plus › Agenda* : notez les rendez-vous ; la cloche en haut rappelle échéances et rencontres.'],
     enseignant: ['*Accueil › Mes cours aujourd\'hui* : touchez votre cours pour faire l\'appel, au début du cours.', '*Planning* : votre emploi du temps de la semaine.',
-      '*Plus › Mes heures* : heures faites, montant dû, paies reçues.']
+      '*Paie* : 1 500 F de l\'heure (sauf contrat), versés juste après le cours par le partenaire présent.', '*Plus › Mes heures* : heures faites, montant dû, paies reçues.']
   };
   /** acces : { centre_id: rôle } ; renvoie le texte du mode d'emploi pour ce compte. */
   function modeEmploi(nom, acces, admin) {
@@ -3451,6 +3490,25 @@
       if (a) confirmer('Retirer ' + a.nom + ' des actionnaires ?', 'Retirer', function () { muter('actionnaires', a.id, {}, true).then(rendre); });
     },
     // Le logo n'est ni un lien ni une image : l'appui long n'ouvre aucun menu du navigateur.
+    'payer-cours': function (el) {
+      var p = ligne('presences_ens', el.dataset.pe), c = ligne('creneaux', el.dataset.cr);
+      var mc = montantCours(p);
+      if (!p || !c || !mc) return;
+      if (paieDuCours(p.id)) { toast('Ce cours est déjà payé.', true); return; }
+      var nom = nomPersonne(mc.prof) || 'l\'enseignant';
+      confirmer('Payer ' + fcfa(mc.montant) + ' à ' + nom + ' pour le cours de ' + nomDe('classes', c.classe_id) + ' (' + mc.calcul + ') ? L\'argent sort de votre caisse.', 'Payer', function () {
+        var auj = isoLocal(new Date());
+        muter('paies', idPaieCours(p.id), { centre_id: p.centre_id, enseignant_id: mc.prof, mois: p.date.slice(0, 7), montant: mc.montant, date: auj < p.date ? p.date : auj, mode: 'especes',
+          note: 'Cours du ' + dateLisible(p.date, true) + ' · ' + nomDe('classes', c.classe_id) + ' · ' + mc.calcul, presence_id: p.id }).then(function () {
+          rendre();
+          var t = 'Bonjour ' + nom + ', vous avez reçu ' + fcfa(mc.montant).replace(/\u00a0/g, ' ') + ' pour le cours de ' + nomDe('classes', c.classe_id) + ' du ' + dateLisible(p.date, true) + ' (' + mc.calcul.replace(/\u00a0/g, ' ') + '). ' +
+            ((ligne('centres', p.centre_id) || {}).nom || 'VÉRITAS') + ' — ' + E.profil.utilisateur.nom;
+          confirmer('Paie enregistrée. Envoyer le reçu à ' + nom + ' ?', 'Envoyer', function () {
+            if (NATIF || navigator.share) partagerTexte(t); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener');
+          });
+        });
+      });
+    },
     'editer-remise': function (el) {
       if (!E.enLigne && !el.dataset.id) { /* hors ligne : la remise part au retour du réseau */ }
       feuilleRemise(el.dataset.id || '', CAI.centre, el.dataset.montant);

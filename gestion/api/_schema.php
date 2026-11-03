@@ -179,7 +179,8 @@ function g_schema(): array {
             'id' => 'id', 'centre_id' => 'ref', 'enseignant_id' => 'ref', 'mois' => 'str:7', 'montant' => 'int',
             'date' => 'str:10', 'mode' => 'str:12', 'note' => 'str:200', 'paye_par' => 'ref',
             'annule' => 'int', 'motif_annulation' => 'str:200',
-        ] + G_COLS_SYNC, 'index' => [['centre_id', 'mois'], ['enseignant_id'], ['rev']]],
+            'presence_id' => 'str:40',          // cours payé juste après (pointage de l'enseignant) ; vide = paie du mois
+        ] + G_COLS_SYNC, 'index' => [['centre_id', 'mois'], ['enseignant_id'], ['presence_id'], ['rev']]],
 
         // Tranches de numéros de reçu réservées par un compte : le téléphone numérote ses
         // reçus HORS LIGNE sans collision avec un autre appareil.
@@ -255,7 +256,8 @@ function g_registre(): array {
             'champs' => ['centre_id', 'date', 'libelle', 'categorie', 'montant', 'mode', 'beneficiaire', 'statut', 'motif_refus'],
         ],
         'contrats' => [
-            'table' => 'g_contrats', 'portee' => 'centre_id', 'lire' => 'finances.voir', 'ecrire' => 'enseignants.gerer', 'proprio' => 'utilisateur_id',
+            // Lus aussi par qui tient la caisse : il paie l'enseignant après le cours, au taux du contrat.
+            'table' => 'g_contrats', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'enseignants.gerer', 'proprio' => 'utilisateur_id',
             'champs' => ['centre_id', 'utilisateur_id', 'mode', 'taux', 'retenue_absence', 'actif'],
         ],
         'presences_ens' => [
@@ -263,8 +265,10 @@ function g_registre(): array {
             'champs' => ['centre_id', 'creneau_id', 'enseignant_id', 'remplacant_id', 'date', 'statut', 'arrivee', 'depart', 'note'],
         ],
         'paies' => [
-            'table' => 'g_paies', 'portee' => 'centre_id', 'lire' => 'finances.voir', 'ecrire' => 'enseignants.gerer', 'proprio' => 'enseignant_id',
-            'champs' => ['centre_id', 'enseignant_id', 'mois', 'montant', 'date', 'mode', 'note', 'annule', 'motif_annulation'],
+            // Lues par qui voit la caisse (elles en sortent) ; écrites par qui encaisse : le partenaire présent
+            // paie l'enseignant juste après le cours. Les paies du mois restent au responsable (voir g_valider_enseignants).
+            'table' => 'g_paies', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'paiements.encaisser', 'proprio' => 'enseignant_id',
+            'champs' => ['centre_id', 'enseignant_id', 'mois', 'montant', 'date', 'mode', 'note', 'annule', 'motif_annulation', 'presence_id'],
         ],
         'remises' => [
             'table' => 'g_remises', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'paiements.voir',

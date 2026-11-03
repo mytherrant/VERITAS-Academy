@@ -547,3 +547,7 @@ input[type="date"], input[type="time"], input[type="month"] { min-width: 0; }
 .onglets { overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 .onglets::-webkit-scrollbar { display: none; }
 .onglets button { flex: 1 0 auto; white-space: nowrap; padding-left: 12px; padding-right: 12px; }
+
+/* Bouton « Payer » de l'enseignant, à côté des boutons ronds du pointage. */
+.pointage .boutons .btn.payer { white-space: nowrap; }
+@media (max-width: 440px) { .liste.pointage > .ligne { flex-wrap: wrap; } .liste.pointage .boutons { margin-left: auto; } }

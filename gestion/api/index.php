@@ -822,12 +822,24 @@ function g_valider_enseignants(PDO $pdo, string $table, string $id, ?array $exis
     }
 
     if ($table === 'g_paies') {
+        $gerant = g_ctx_peut('enseignants.gerer', $centre);
         if ($existant) {
             if (array_diff(array_keys($champs), ['annule', 'motif_annulation']) || (int) ($champs['annule'] ?? 0) !== 1) { throw new DomainException('Une paie ne se modifie pas : annulez-la et saisissez-la à nouveau.'); }
             if ((int) $existant['annule']) { throw new DomainException('Paie déjà annulée.'); }
+            // Le responsable annule ; celui qui a payé un cours peut corriger son erreur le jour même.
+            $auteurDuJour = (string) $existant['paye_par'] === (string) ($ctx['uid'] ?? '') && (string) $existant['date'] === date('Y-m-d');
+            if (!$gerant && !$auteurDuJour) { throw new DomainException('Seul un responsable annule une paie.'); }
             if (mb_strlen(trim((string) ($champs['motif_annulation'] ?? ''))) < 5) { throw new DomainException('Indiquez le motif de l\'annulation.'); }
             return;
         }
+        if ((string) $val('presence_id') !== '') {
+            g_valider_paie_cours($pdo, $centre, $champs, $val);
+            $champs['paye_par'] = $ctx['uid'] ?? null;
+            $champs['annule'] = 0;
+            unset($champs['motif_annulation']);
+            return;
+        }
+        if (!$gerant) { throw new DomainException('La paie du mois revient au responsable ; après un cours, utilisez « Payer » dans l\'appel.'); }
         if (!$estEnseignant((string) $val('enseignant_id'))) { throw new DomainException('Cette personne n\'est pas enseignant dans ce centre.'); }
         if (!preg_match('/^\d{4}-\d{2}$/', (string) $val('mois'))) { throw new DomainException('Mois invalide.'); }
         if ((int) $val('montant') <= 0 || (int) $val('montant') > 10000000) { throw new DomainException('Montant invalide.'); }
@@ -1142,4 +1154,39 @@ function g_valider_remise(PDO $pdo, ?array $existant, array &$champs): void {
     }
     $champs['confirme_par'] = $uid;
     $champs['confirme_le'] = g_now();
+}
+
+/** Taux horaire et mode d'un enseignant dans un centre : son contrat actif, sinon 1 500 F de l'heure. */
+function g_remuneration(PDO $pdo, string $centre, string $uid): array {
+    $st = $pdo->prepare('SELECT mode, taux FROM g_contrats WHERE centre_id = ? AND utilisateur_id = ? AND actif = 1 AND supprime = 0 LIMIT 1');
+    $st->execute([$centre, $uid]);
+    $c = $st->fetch();
+    return $c ? ['mode' => (string) $c['mode'], 'taux' => (int) $c['taux']] : ['mode' => 'heure', 'taux' => (int) G_TAUX_HORAIRE_DEFAUT];
+}
+
+/**
+ * Paie d'un cours, juste après, par le partenaire présent qui a encaissé : rattachée au pointage
+ * de l'enseignant (présent, en retard ou remplaçant), une seule par cours, et jamais plus que
+ * la durée faite × le taux (à la séance : le taux ; au forfait : rien ici, c'est la paie du mois).
+ */
+function g_valider_paie_cours(PDO $pdo, string $centre, array &$champs, callable $val): void {
+    $st = $pdo->prepare('SELECT * FROM g_presences_ens WHERE id = ? AND centre_id = ? AND supprime = 0');
+    $st->execute([(string) $val('presence_id'), $centre]);
+    $p = $st->fetch();
+    if (!$p) { throw new DomainException('Cours introuvable : pointez d\'abord l\'enseignant.'); }
+    if (!in_array((string) $p['statut'], ['present', 'retard', 'remplace'], true) || (int) $p['minutes'] <= 0) { throw new DomainException('Ce cours n\'a pas été fait : rien à payer.'); }
+    $prof = (string) $p['statut'] === 'remplace' ? (string) $p['remplacant_id'] : (string) $p['enseignant_id'];
+    if ((string) $val('enseignant_id') !== $prof) { throw new DomainException('La paie va à l\'enseignant qui a fait le cours.'); }
+    $r = g_remuneration($pdo, $centre, $prof);
+    if ($r['mode'] === 'forfait') { throw new DomainException('Enseignant au forfait : il est payé au mois, pas après chaque cours.'); }
+    $max = $r['mode'] === 'seance' ? $r['taux'] : (int) round(((int) $p['minutes']) / 60 * $r['taux']);
+    $montant = (int) $val('montant');
+    if ($montant <= 0 || $montant > $max) { throw new DomainException('Montant du cours : au plus ' . number_format($max, 0, ',', ' ') . ' F.'); }
+    $st = $pdo->prepare('SELECT COUNT(*) FROM g_paies WHERE presence_id = ? AND annule = 0 AND supprime = 0');
+    $st->execute([(string) $p['id']]);
+    if ((int) $st->fetchColumn()) { throw new DomainException('Ce cours est déjà payé.'); }
+    if (!in_array((string) ($val('mode') ?: 'especes'), ['especes', 'momo', 'om', 'virement', 'autre'], true)) { throw new DomainException('Mode de paiement inconnu.'); }
+    $date = (string) $val('date');
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || $date > date('Y-m-d') || $date < (string) $p['date']) { throw new DomainException('Date de paie invalide.'); }
+    $champs['mois'] = substr((string) $p['date'], 0, 7);
 }
