@@ -129,6 +129,10 @@ const apiDe = (page) => (route, corps) => page.evaluate(async ([route, corps]) =
   const vers = Li.paiements.filter((p) => imp.some((e) => e.id === p.eleve_id));
   ok('import : 3 élèves et 4 versements numérotés, 17 000 F', imp.length === 3 && vers.length === 4 && vers.every((p) => p.numero) && vers.reduce((s, p) => s + Number(p.montant), 0) === 17000, imp.length + ' / ' + vers.length);
 
+  // 10. L'élève qui doit est marqué en rouge devant son nom (GAMMA : 2 000 F sur 2 500 F d'inscription).
+  await pa.goto(B + '#/accueil'); await pa.goto(B + '#/eleves'); await pa.fill('input[type=search]', 'GAMMA' + SUF); await pa.waitForTimeout(500);
+  ok('élève qui doit : pastille rouge et « doit … » dans la liste', (await pa.$$('.ligne .marque-doit')).length === 1 && /doit\s[\d\s ]+F/.test(await pa.textContent('main')), (await pa.textContent('main')).slice(0, 200));
+
   // 6. Chacun ne voit que son rôle ; l'administrateur les voit tous.
   await pa.goto(B + '#/roles'); await pa.waitForSelector('.fiche-role');
   const fichesA = await pa.$$eval('.fiche-role h3', (l) => l.map((x) => x.textContent));

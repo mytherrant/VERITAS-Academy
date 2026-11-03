@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.11.7';
+  var VERSION = '0.11.8';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -1252,7 +1252,7 @@
         boutons += '<button type="button" class="btn clair petit" data-a="detail-presence" data-seance="' + esc(x.id) + '" data-eleve="' + esc(el.id) + '">Justifier</button>';
       }
       var impaye = peut('paiements.voir', cid) ? echeancier(el).impaye : 0;
-      return '<div class="ligne' + (p ? ' pt-' + p.statut : '') + '"><button type="button" class="corps nom-eleve" data-a="detail-presence" data-seance="' + esc(x.id) + '" data-eleve="' + esc(el.id) + '"' + (modifiable || (justifiable && p) ? '' : ' disabled') + '><b>' + esc(nomComplet(el)) + (impaye ? ' <span class="badge danger" title="Impayé échu">impayé ' + fcfa(impaye) + '</span>' : '') + '</b>' + etat + '</button>' +
+      return '<div class="ligne' + (p ? ' pt-' + p.statut : '') + '"><button type="button" class="corps nom-eleve" data-a="detail-presence" data-seance="' + esc(x.id) + '" data-eleve="' + esc(el.id) + '"' + (modifiable || (justifiable && p) ? '' : ' disabled') + '><b>' + (impaye ? '<i class="marque-doit" title="Doit ' + esc(fcfa(impaye)) + '"></i>' : '') + esc(nomComplet(el)) + (impaye ? ' <span class="badge danger" title="Impayé échu">doit ' + fcfa(impaye) + '</span>' : '') + '</b>' + etat + '</button>' +
         (p && p._attente ? '<span class="badge alerte">en attente</span>' : '') + '<span class="boutons">' + boutons + '</span></div>';
     }).join('') + '</div>';
     if (modifiable && eleves.length && !close) h += '<div class="actions"><button class="btn" type="button" data-a="clore-appel" data-seance="' + esc(x.id) + '">' + ico('checkcircle', 'p') + 'Clore l\'appel</button></div>';
@@ -1628,6 +1628,28 @@
       .sort(function (a, b) { return b.ech.impaye - a.ech.impaye; });
   }
 
+  /** Où en est un élève : ce qu'il doit (échu, non payé) ou son avance (versé au-delà de ce qui est échu).
+   *  Les versements s'imputent du plus ancien dû au plus récent : un trop-versé avance le mois suivant. */
+  function soldeEleve(e) {
+    if (!e || !peut('paiements.voir', e.centre_id)) return null;
+    var ech = echeancier(e), auj = isoLocal(new Date());
+    var echu = ech.items.filter(function (it) { return it.echeance < auj; }).reduce(function (s, it) { return s + it.montant; }, 0);
+    return { doit: ech.impaye, avance: Math.max(0, ech.paye - echu) };
+  }
+  /** Pastille rouge devant le nom quand l'élève doit ; rien sinon (affiché seulement à qui voit la caisse). */
+  function marqueDevantNom(e) {
+    var s = soldeEleve(e);
+    return s && s.doit > 0 ? '<i class="marque-doit" title="Doit ' + esc(fcfa(s.doit)) + '" aria-label="Doit ' + esc(fcfa(s.doit)) + '"></i>' : '';
+  }
+  /** « doit 2 500 F » en rouge, ou « avance 1 500 F » en vert, à droite de la ligne. */
+  function badgeSolde(e) {
+    var s = soldeEleve(e);
+    if (!s) return '';
+    if (s.doit > 0) return '<span class="badge danger">doit ' + fcfa(s.doit) + '</span>';
+    if (s.avance > 0) return '<span class="badge ok">avance ' + fcfa(s.avance) + '</span>';
+    return '';
+  }
+
   /** Échéances des prochains jours pas encore payées : à rappeler AVANT qu'elles tombent. */
   var JOURS_RAPPEL = 5;
   function aEchoir(cid) {
@@ -1779,7 +1801,7 @@
     if (!l.length) { z.innerHTML = '<div class="carte vide">Aucun élève.</div>'; return; }
     z.innerHTML = '<div class="liste">' + l.slice(0, 60).map(function (x) {
       var etat = x.ech.impaye ? '<span class="badge danger">' + fcfa(x.ech.impaye) + ' en retard</span>' : x.ech.resteAcejour ? '<span class="badge alerte">' + fcfa(x.ech.resteAcejour) + ' à payer</span>' : '<span class="badge ok">à jour</span>';
-      return '<button class="ligne" type="button" data-a="encaisser" data-id="' + esc(x.e.id) + '"><span class="avatar' + (x.e.sexe === 'F' ? ' f' : '') + '">' + esc(initiales(nomComplet(x.e))) + '</span><span class="corps"><b>' + esc(nomComplet(x.e)) + '</b><small>' + esc(nomDe('classes', x.e.classe_id) + ' · mensualité ' + fcfa(x.ech.mensualite)) + '</small></span>' + etat + '</button>';
+      return '<button class="ligne" type="button" data-a="encaisser" data-id="' + esc(x.e.id) + '"><span class="avatar' + (x.e.sexe === 'F' ? ' f' : '') + '">' + esc(initiales(nomComplet(x.e))) + '</span><span class="corps"><b>' + marqueDevantNom(x.e) + esc(nomComplet(x.e)) + '</b><small>' + esc(nomDe('classes', x.e.classe_id) + ' · mensualité ' + fcfa(x.ech.mensualite)) + '</small></span>' + etat + '</button>';
     }).join('') + '</div>';
   }
 
@@ -2368,8 +2390,8 @@
     z.innerHTML = '<div class="liste">' + liste.map(function (e) {
       var statut = (e.statut || 'actif') !== 'actif' ? ' <span class="badge danger">' + esc(e.statut) + '</span>' : '';
       return '<button class="ligne" type="button" data-a="voir-eleve" data-id="' + esc(e.id) + '"><span class="avatar' + (e.sexe === 'F' ? ' f' : '') + '">' + esc(initiales(nomComplet(e))) + '</span>' +
-        '<span class="corps"><b>' + esc(nomComplet(e)) + statut + '</b><small>' + esc([nomDe('classes', e.classe_id), e.matricule || 'matricule à la synchro', telLisible(e.parent_tel)].filter(Boolean).join(' · ')) + '</small></span>' +
-        (e._attente ? '<span class="badge alerte">en attente</span>' : '') + '</button>';
+        '<span class="corps"><b>' + marqueDevantNom(e) + esc(nomComplet(e)) + statut + '</b><small>' + esc([nomDe('classes', e.classe_id), e.matricule || 'matricule à la synchro', telLisible(e.parent_tel)].filter(Boolean).join(' · ')) + '</small></span>' +
+        badgeSolde(e) + (e._attente ? '<span class="badge alerte">en attente</span>' : '') + '</button>';
     }).join('') + '</div><p class="doux">' + liste.length + ' affiché' + (liste.length > 1 ? 's' : '') + '</p>';
   }
 
