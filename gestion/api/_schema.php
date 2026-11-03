@@ -71,6 +71,14 @@ function g_schema(): array {
             'echeance' => 'str:10', 'statut' => 'str:10', 'auteur' => 'ref', 'cree_le' => 'str:19', 'fait_le' => 'str:19',
         ] + G_COLS_SYNC, 'index' => [['centre_id', 'statut'], ['rev']]],
 
+        // Clôture mensuelle : le 30 ou le 31, on arrête les comptes du mois et le partage entre
+        // actionnaires ; le mois est ensuite verrouillé et un nouveau cycle commence. Totaux
+        // recalculés par le serveur à la clôture (id « clo-<centre>-<AAAA-MM> »).
+        'g_clotures' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'mois' => 'str:7', 'recettes' => 'int', 'depenses' => 'int', 'paies' => 'int',
+            'resultat' => 'int', 'parts' => 'str:2000', 'note' => 'str:400', 'clos_par' => 'ref', 'clos_le' => 'str:19',
+        ] + G_COLS_SYNC, 'index' => [['centre_id', 'mois'], ['rev']]],
+
         // Agenda du centre : rencontres, rendez-vous, réunions de parents… Les échéances
         // de paiement ne sont pas stockées : le téléphone les déduit du jour d'échéance.
         'g_evenements' => ['cols' => [
@@ -311,6 +319,10 @@ function g_registre(): array {
         'taches' => [
             'table' => 'g_taches', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'paiements.voir',
             'champs' => ['centre_id', 'titre', 'note', 'assigne_a', 'echeance', 'statut'],
+        ],
+        'clotures' => [
+            'table' => 'g_clotures', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'caisse.corriger',
+            'champs' => ['centre_id', 'mois', 'parts', 'note'],
         ],
         'evenements' => [
             'table' => 'g_evenements', 'portee' => 'centre_id', 'lire' => 'centre.voir', 'ecrire' => 'agenda.gerer',

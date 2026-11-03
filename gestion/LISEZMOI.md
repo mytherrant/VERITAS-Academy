@@ -66,6 +66,15 @@ cours, jamais plus que durée faite × taux (à la séance : le taux ; au forfai
 sort de sa caisse (« dépenses et paies » dans Remises), figure dans Caisse › Dépenses, le point du
 jour et le bilan, et l'enseignant la voit dans « Mes heures ». La paie du mois reste au responsable.
 
+**Cycle mensuel et clôture :** chaque mois est un cycle. Les compteurs des partenaires (encaissé,
+dépenses et paies, remis, à remettre) et les fonds du centre portent sur le mois en cours. Le 30 ou
+le 31, un responsable ou l'admin clôture le mois dans le Bilan (`g_clotures`, id
+`clo-<centre>-<AAAA-MM>`) : le serveur recalcule recettes, dépenses validées, paies et résultat, et
+la part de chaque actionnaire ; les comptes partent par WhatsApp. Le mois est alors verrouillé : plus
+aucun versement, dépense, paie ou remise ne peut y être daté ou modifié (seule exception : le
+trésorier tranche encore une remise). Seul l'admin rouvre un mois. Rappels : agenda (dernier jour)
+et cloche (veille de fin de mois, mois précédent non clôturé).
+
 **Remises au trésorier :** chaque centre a un trésorier (fiche du centre, choisi par l'admin parmi
 les comptes du centre). Tout partenaire qui encaisse (responsable, secrétaire, et désormais
 actionnaire, selon ses jours au centre et sa proximité avec les parents) envoie le reçu puis
@@ -161,6 +170,7 @@ node tests/banc_gestion_paie_cours.cjs <dossier> # paie de l'enseignant après l
 node tests/banc_gestion_equipe.cjs <dossier>     # Équipe : discussion, commentaires, réunions, tâches, refus serveur (Playwright)
 node tests/banc_gestion_connexion.cjs <dossier>  # connexion : aide après échec, œil, identifiant toléré, version en retard (Playwright)
 node tests/banc_gestion_partenaire.cjs <dossier> # actionnaire : inscrit, encaisse, crée et paie un enseignant ; ne voit que son rôle (Playwright)
+node tests/banc_gestion_cloture.cjs <dossier>    # clôture du mois : comptes du serveur, partage, verrou, droits (Playwright)
 ```
 
 **Noms fictifs uniquement** dans le code et les bancs : le dépôt est public, les élèves sont mineurs.

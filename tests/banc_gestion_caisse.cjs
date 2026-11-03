@@ -144,15 +144,24 @@ const sansNbsp = (t) => String(t).replace(/ /g, ' ');
   ok('bilan : résultat = recettes − dépenses', res === rec - dep, rec + ' − ' + dep + ' ≠ ' + res);
   // Parts des actionnaires, centre par centre : quels que soient les noms et les pourcentages
   // laissés par les autres bancs, chaque part doit valoir son pourcentage du résultat du centre.
-  const parts = [];
-  bil.split(/(?=VÉRITAS )/).forEach((c) => {
-    const i = c.indexOf('Part des actionnaires');
-    const m = c.match(/(-?[\d ]+) Frésultat/);
-    if (i < 0 || !m) return;
-    const r = +m[1].replace(/ /g, '');
-    for (const p of c.slice(i + 21).matchAll(/([^\d%−-]+?)(\d+(?:,\d+)?) %(-?[\d ]+) F/g)) {
-      parts.push({ nom: p[1], attendu: Math.round(r * parseFloat(p[2].replace(',', '.')) / 100), lu: +p[3].replace(/ /g, '') });
-    }
+  // Lu dans la structure de la page (nom, pourcentage, montant sont des éléments distincts) :
+  // un nom qui finit par un chiffre (« Associé mw0t2x04 ») ne se colle plus au pourcentage.
+  const parts = await page.evaluate(() => {
+    const out = [], nb = (t) => +String(t).replace(/[^\d-]/g, '');
+    document.querySelectorAll('main h3').forEach((h3) => {
+      if (!/Part des actionnaires/.test(h3.textContent)) return;
+      let el = h3, res = null;
+      while ((el = el.previousElementSibling) && !(el.tagName === 'H2')) {
+        if (el.classList.contains('stats')) el.querySelectorAll('div').forEach((d) => { if (/^résultat$/.test((d.querySelector('small') || {}).textContent || '')) res = nb(d.querySelector('b').textContent); });
+      }
+      const liste = h3.nextElementSibling;
+      if (res === null || !liste) return;
+      liste.querySelectorAll('.ligne').forEach((l) => {
+        const pct = parseFloat(((l.querySelector('.corps small') || {}).textContent || '').replace(',', '.'));
+        out.push({ nom: (l.querySelector('.corps b') || {}).textContent, attendu: Math.round(res * pct / 100), lu: nb((l.querySelector('.fin b') || {}).textContent) });
+      });
+    });
+    return out;
   });
   ok('bilan : chaque part d\'actionnaire = son pourcentage du résultat', parts.length && parts.every((p) => Math.abs(p.lu - p.attendu) <= 1), JSON.stringify(parts) || bil.slice(-300));
   await page.screenshot({ path: OUT + '/g_bilan.png', fullPage: true });

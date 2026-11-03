@@ -598,3 +598,8 @@ input[type="date"], input[type="time"], input[type="month"] { min-width: 0; }
 
 /* Élève qui doit : pastille rouge devant son nom (liste, appel, recherche de la caisse). */
 .marque-doit { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--danger); margin-right: 7px; vertical-align: 1px; box-shadow: 0 0 0 3px var(--danger-fond); flex: none; }
+
+/* Clôture mensuelle (Bilan) */
+.carte.cloture { border-left: 4px solid var(--action-fonce); }
+.carte.cloture.faite { border-left-color: var(--ok); background: #F6FBF7; }
+.carte.cloture h3 { display: flex; align-items: center; gap: 6px; }
