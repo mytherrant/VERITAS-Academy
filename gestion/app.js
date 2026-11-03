@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.12.0';
+  var VERSION = '0.12.1';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -544,7 +544,7 @@
     var caisse = peutQuelquePart('paiements.voir');
     items.push(caisse ? ['caisse', 'wallet', 'Caisse'] : ['emploi', 'calendar', 'Planning']);
     items.push(['moi', 'list', 'Plus']);
-    var sousPlus = ['equipe', 'agenda', 'roles', 'admin', 'comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
+    var sousPlus = ['rapports', 'equipe', 'agenda', 'roles', 'admin', 'comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
     return '<nav class="nav-basse" aria-label="Navigation">' + items.map(function (i) {
       var on = i[0] === actif || (i[0] === 'moi' && sousPlus.indexOf(actif) >= 0) || (i[0] === 'appel' && actif === 'pointage') || (i[0] === 'caisse' && actif === 'jour');
       return '<a href="#/' + i[0] + '" class="' + (on ? 'actif' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + ico(i[1]) + i[2] + '</a>';
@@ -668,6 +668,7 @@
         if (peutQuelquePart('paiements.voir')) tuiles.push(['#/caisse', 'coins', 'Caisse', 'Encaisser, reçus, impayés, dépenses']);
         if (peutQuelquePart('paiements.voir')) tuiles.push(['#/jour', 'clipboard', 'Point du jour', 'Entrées, sorties, solde à partager']);
         if (peutQuelquePart('finances.voir')) tuiles.push(['#/bilan', 'trending', 'Bilan', 'Recettes, dépenses, parts']);
+        if (peutQuelquePart('paiements.voir')) tuiles.push(['#/rapports', 'doc', 'Rapports', 'Insolvables, paiements par classe, trésorier']);
         if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) tuiles.push(['#/enseignants', 'presentation', 'Enseignants', 'Heures, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) tuiles.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
         tuiles.push(['#/assiduite', 'activity', 'Assiduité', 'Taux, retards, alertes']);
@@ -822,6 +823,10 @@
     agenda: {
       html: function () { return pageAgenda(); }
     },
+    rapports: {
+      droit: function () { return peutQuelquePart('paiements.voir'); },
+      html: function () { return pageRapports(); }
+    },
     equipe: {
       droit: function () { return peutEquipeQuelquePart(); },
       html: function () { return pageEquipe(); }
@@ -836,7 +841,7 @@
         }).join('');
         var h = '<h1>Mon compte</h1><div class="carte"><h3>' + esc(u.nom) + '</h3><p class="doux">Identifiant : ' + esc(u.identifiant) + '</p><p>' +
           (u.admin ? '<span class="badge or">Administrateur des deux centres</span>' : '') + acces + '</p></div>' + carteMonRole();
-        var liens = [['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances, rappels']].concat(peutEquipeQuelquePart() ? [['#/equipe', 'message', 'Équipe', 'Messages entre partenaires, commentaires, réunions, tâches']] : []).concat([ ['#/roles', 'info', estAdmin() ? 'Rôles et droits' : 'Mon rôle', estAdmin() ? 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants' : 'Ce que votre compte permet'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']]);
+        var liens = [['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances, rappels']].concat(peutQuelquePart('paiements.voir') ? [['#/rapports', 'doc', 'Rapports', 'Insolvables, paiements par mois et classe, trésorier — PDF, Excel']] : []).concat(peutEquipeQuelquePart() ? [['#/equipe', 'message', 'Équipe', 'Messages entre partenaires, commentaires, réunions, tâches']] : []).concat([ ['#/roles', 'info', estAdmin() ? 'Rôles et droits' : 'Mon rôle', estAdmin() ? 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants' : 'Ce que votre compte permet'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']]);
         if (peutQuelquePart('finances.voir')) liens.push(['#/bilan', 'trending', 'Bilan financier', 'Recettes, dépenses, parts des actionnaires']);
         if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) liens.push(['#/enseignants', 'presentation', 'Enseignants', 'Heures faites, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) liens.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
@@ -1744,7 +1749,8 @@
     } else if (CAI.onglet === 'impayes') {
       var total = imp.reduce(function (s, x) { return s + x.ech.impaye; }, 0);
       var c = ligne('centres', cid) || {};
-      h += '<p class="sous-titre">Échéance le ' + esc(c.jour_echeance || 10) + ' du mois · <b>' + imp.length + '</b> élève' + (imp.length > 1 ? 's' : '') + ' · <b>' + fcfa(total) + '</b> à recouvrer</p>';
+      h += '<p class="sous-titre">Échéance le ' + esc(c.jour_echeance || 10) + ' du mois · <b>' + imp.length + '</b> élève' + (imp.length > 1 ? 's' : '') + ' · <b>' + fcfa(total) + '</b> à recouvrer</p>' +
+        '<div class="actions"><a class="btn clair petit" href="#/rapports" data-a="aller-rapport" data-v="insolvables" data-centre="' + esc(cid) + '">' + ico('doc', 'p') + 'Exporter la liste des insolvables</a></div>';
       var proche = aEchoir(cid);
       if (proche.length) h += '<h2>Échéance proche · ' + proche.length + '</h2><p class="sous-titre">À régler dans les ' + JOURS_RAPPEL + ' jours : un rappel aimable, avant le retard.</p><div class="liste">' + proche.map(function (x) {
         var e = x.e, trace = e.relance_le ? '<small class="st-present">' + ico('check', 'p') + ' prévenu le ' + esc(dateLisible(e.relance_le)) + '</small>' : '';
@@ -2202,6 +2208,7 @@
     var h = '<h1>Bilan financier</h1><div class="nav-date"><button type="button" class="btn clair petit" data-a="bilan-mois" data-v="-1"' + (annee ? ' disabled' : '') + ' aria-label="Mois précédent">‹</button><b>' + esc(lib) + '</b>' +
       '<button type="button" class="btn clair petit" data-a="bilan-mois" data-v="1"' + (annee || BIL.mois >= auj.slice(0, 7) ? ' disabled' : '') + ' aria-label="Mois suivant">›</button></div>' +
       '<div class="onglets"><button type="button" class="' + (annee ? '' : 'on') + '" data-a="bilan-mois" data-v="mois">Mois</button><button type="button" class="' + (annee ? 'on' : '') + '" data-a="bilan-mois" data-v="annee">Année scolaire</button></div>';
+    h += '<a class="ligne carte-lien" href="#/rapports" data-a="aller-rapport" data-v="tresorier"><span class="pastille">' + ico('doc') + '</span><span class="corps"><b>Rapports</b><small>Insolvables, paiements par classe, rapport du trésorier — PDF, Excel</small></span><span class="fin">›</span></a>';
     h += '<a class="ligne carte-lien" href="#/jour"><span class="pastille">' + ico('clipboard') + '</span><span class="corps"><b>Point du jour</b><small>Entrées et sorties d\'une journée, en image ou PDF</small></span><span class="fin">›</span></a>';
     var tot = { rec: 0, dep: 0 };
     centres.forEach(function (c) {
@@ -3136,6 +3143,206 @@
         : '<p class="doux">La clôture revient au responsable ou à l\'administrateur.</p>') + '</div>';
   }
 
+  // ───────────────────────────── Rapports exportables ─────────────────────────────
+  // Trois rapports, chacun à l'écran puis en PDF (A4, paginé entre deux lignes), en Excel (CSV
+  // « ; » lisible par Excel et LibreOffice) ou en texte WhatsApp : insolvables, paiements par
+  // mois et par classe (comme le cahier), rapport du trésorier (sommes perçues des partenaires,
+  // sommes non versées). Un rapport = { titre, sous, colonnes, lignes, totaux, notes, paysage }.
+  var RAP = { onglet: 'insolvables', centre: '', mois: '' };
+  function centreRapports() {
+    var dispo = centresChoisis().filter(function (c) { return peut('paiements.voir', c.id); });
+    if (!dispo.some(function (c) { return c.id === RAP.centre; })) RAP.centre = dispo.length ? dispo[0].id : '';
+    return { cid: RAP.centre, dispo: dispo };
+  }
+  function peutRapportTresorier(cid) { return estAdmin() || estTresorier(cid) || peut('finances.voir', cid); }
+
+  function rapportInsolvables(cid) {
+    var c = ligne('centres', cid) || {}, l = impayes(cid).slice().sort(function (a, b) {
+      return nomDe('classes', a.e.classe_id).localeCompare(nomDe('classes', b.e.classe_id), 'fr') || b.ech.impaye - a.ech.impaye; });
+    var lignesR = [], classeCour = null, sousTot = 0, total = 0;
+    var fermer = function () { if (classeCour !== null) lignesR.push({ total: true, cellules: ['Sous-total ' + classeCour, '', '', fcfa(sousTot), ''] }); };
+    l.forEach(function (x) {
+      var k = nomDe('classes', x.e.classe_id) || '—';
+      if (k !== classeCour) { fermer(); classeCour = k; sousTot = 0; lignesR.push({ groupe: k }); }
+      sousTot += x.ech.impaye; total += x.ech.impaye;
+      lignesR.push({ cellules: [nomComplet(x.e), k, x.ech.moisImpayes.map(function (it) { return it.court + (it.paye ? ' (reste ' + fcfa(it.montant - it.paye) + ')' : ''); }).join(', '),
+        fcfa(x.ech.impaye), telLisible(x.e.parent_whatsapp || x.e.parent_tel) || '—'], danger: true });
+    });
+    fermer();
+    return { cle: 'insolvables', titre: 'Liste des insolvables', sous: (c.nom || '') + ' · au ' + dateLisible(isoLocal(new Date()), true), paysage: false,
+      colonnes: [{ lib: 'Élève', l: 30 }, { lib: 'Classe', l: 14 }, { lib: 'Échéances impayées', l: 28 }, { lib: 'Montant dû', l: 13, d: true }, { lib: 'Téléphone', l: 15 }],
+      lignes: lignesR, totaux: ['Total · ' + l.length + ' élève' + (l.length > 1 ? 's' : ''), '', '', fcfa(total), ''],
+      notes: ['Impayé = échéances passées non couvertes. Les versements s\'imputent du plus ancien dû au plus récent : un trop-versé avance le mois suivant.'] };
+  }
+
+  function rapportPaiementsClasses(cid) {
+    var c = ligne('centres', cid) || {}, mois = moisDeLAnnee();
+    var cols = [{ lib: 'Élève', l: 22 }, { lib: 'Insc.', l: 7, d: true }].concat(mois.map(function (am) { return { lib: MOIS_COURTS[Number(am.slice(5)) - 1].replace('.', ''), l: 6.5, d: true }; }))
+      .concat([{ lib: 'Payé', l: 9, d: true }, { lib: 'Doit', l: 8, d: true }]);
+    var lignesR = [], totG = { paye: 0, doit: 0, cols: [] };
+    lignes('classes').filter(function (k) { return k.centre_id === cid; }).sort(function (a, b) { return String(a.nom).localeCompare(String(b.nom), 'fr'); }).forEach(function (k) {
+      var els = elevesActifs(cid).filter(function (e) { return e.classe_id === k.id; }).sort(function (a, b) { return nomComplet(a).localeCompare(nomComplet(b), 'fr'); });
+      if (!els.length) return;
+      lignesR.push({ groupe: k.nom + ' · ' + els.length + ' élève' + (els.length > 1 ? 's' : '') + (k.mensualite ? ' · ' + fcfa(k.mensualite) + '/mois' : '') });
+      var totC = { paye: 0, doit: 0, cols: [] };
+      els.forEach(function (e) {
+        var ech = echeancier(e), parCle = {};
+        ech.items.forEach(function (it) { parCle[it.cle] = it; });
+        var cells = ['insc'].concat(mois).map(function (cle, i) {
+          var it = parCle[cle]; var v = it ? it.paye : 0;
+          totC.cols[i] = (totC.cols[i] || 0) + v; totG.cols[i] = (totG.cols[i] || 0) + v;
+          return !it ? '' : v ? fcfa(v).replace(/ F$/, '') : (it.echeance < isoLocal(new Date()) ? '0' : '');
+        });
+        totC.paye += ech.paye; totC.doit += ech.impaye; totG.paye += ech.paye; totG.doit += ech.impaye;
+        lignesR.push({ cellules: [nomComplet(e)].concat(cells).concat([fcfa(ech.paye).replace(/ F$/, ''), ech.impaye ? fcfa(ech.impaye).replace(/ F$/, '') : '']), danger: ech.impaye > 0 });
+      });
+      lignesR.push({ total: true, cellules: ['Total ' + k.nom].concat(totC.cols.map(function (v) { return v ? fcfa(v).replace(/ F$/, '') : ''; })).concat([fcfa(totC.paye).replace(/ F$/, ''), totC.doit ? fcfa(totC.doit).replace(/ F$/, '') : '']) });
+    });
+    return { cle: 'paiements', titre: 'Paiements par mois et par classe', sous: (c.nom || '') + ' · année ' + ((anneeActive() || {}).libelle || '') + ' · montants en F CFA', paysage: true,
+      colonnes: cols, lignes: lignesR,
+      totaux: ['Total du centre'].concat(totG.cols.map(function (v) { return v ? fcfa(v).replace(/ F$/, '') : ''; })).concat([fcfa(totG.paye).replace(/ F$/, ''), fcfa(totG.doit).replace(/ F$/, '')]),
+      notes: ['Chaque case montre ce qui couvre l\'échéance (inscription, puis chaque mois, dans l\'ordre). « 0 » : échéance passée, rien de payé. Vide : pas encore due. En rouge : l\'élève doit.'] };
+  }
+
+  function rapportTresorier(cid, am) {
+    var c = ligne('centres', cid) || {}, tres = tresorierDe(cid), lignesR = [], t = { enc: 0, dep: 0, conf: 0, att: 0, cont: 0, reste: 0 };
+    comptesFonds(cid, am).forEach(function (uid) {
+      var x = soldeFonds(uid, cid, am), estT = uid === tres;
+      var cont = remisesDu(cid).filter(function (r) { return r.remis_par === uid && r.statut === 'contestee' && dansMois(r, am); }).reduce(function (s, r) { return s + Number(r.montant); }, 0);
+      t.enc += x.encaisse; t.dep += x.depenses;
+      if (!estT) { t.conf += x.confirme; t.att += x.attente; t.cont += cont; t.reste += Math.max(0, x.reste); }
+      lignesR.push({ cellules: [nomCompte(uid) + (estT ? ' (trésorier)' : ''), fcfa(x.encaisse), fcfa(x.depenses), estT ? '—' : fcfa(x.confirme), estT ? '—' : (x.attente ? fcfa(x.attente) : ''), estT ? '—' : (cont ? fcfa(cont) : ''),
+        estT ? 'garde ' + fcfa(x.encaisse - x.depenses) : fcfa(Math.max(0, x.reste))], danger: !estT && x.reste > 0 });
+    });
+    var chezT = t.conf + (tres ? (function () { var x = soldeFonds(tres, cid, am); return x.encaisse - x.depenses; })() : 0);
+    var detail = remisesDu(cid).filter(function (r) { return dansMois(r, am); }).map(function (r) {
+      return { cellules: [nomCompte(r.remis_par), dateLisible(r.date, true), (MODES[r.mode] || r.mode || '') + (r.note ? ' · ' + r.note : ''), fcfa(r.montant), '', '', (LIB_STATUT_REMISE[r.statut || 'en_attente'] || ['?'])[0] + (r.motif ? ' : ' + r.motif : '')], danger: r.statut === 'contestee' };
+    });
+    if (detail.length) lignesR = lignesR.concat([{ groupe: 'Détail des remises du mois' }]).concat(detail);
+    var k = clotureDe(cid, am);
+    return { cle: 'tresorier', titre: 'Rapport du trésorier · ' + libMoisAnnee(am), sous: (c.nom || '') + ' · trésorier : ' + (tres ? nomCompte(tres) : 'non désigné') + (k ? ' · mois clôturé' : ' · mois en cours'), paysage: true,
+      colonnes: [{ lib: 'Partenaire', l: 22 }, { lib: 'Encaissé', l: 12, d: true }, { lib: 'Dépenses et paies', l: 13, d: true }, { lib: 'Remis (reçu)', l: 12, d: true }, { lib: 'À confirmer', l: 12, d: true }, { lib: 'Pas reçu', l: 11, d: true }, { lib: 'Non versé', l: 18, d: true }],
+      lignes: lignesR, totaux: ['Total', fcfa(t.enc), fcfa(t.dep), fcfa(t.conf), fcfa(t.att), fcfa(t.cont), fcfa(t.reste)],
+      notes: ['Fonds chez le trésorier : ' + fcfa(chezT) + ' (remises reçues + ses propres encaissements nets).', 'Encore chez les partenaires (non versé) : ' + fcfa(t.reste) + (t.att ? ' · remises en attente de confirmation : ' + fcfa(t.att) : '') + '.',
+        'Non versé = encaissé − dépenses et paies − remises (reçues ou à confirmer), pour le mois.'] };
+  }
+
+  /** Tableau HTML d'un rapport (écran). */
+  function htmlRapport(r) {
+    return '<div class="tableau-defile"><table class="rapport"><thead><tr>' + r.colonnes.map(function (c) { return '<th' + (c.d ? ' class="d"' : '') + '>' + esc(c.lib) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      (r.lignes.length ? r.lignes.map(function (l) {
+        if (l.groupe) return '<tr class="groupe"><td colspan="' + r.colonnes.length + '">' + esc(l.groupe) + '</td></tr>';
+        return '<tr class="' + (l.total ? 'sous-total' : '') + (l.danger ? ' doit' : '') + '">' + l.cellules.map(function (v, i) { return '<td' + (r.colonnes[i] && r.colonnes[i].d ? ' class="d"' : '') + '>' + esc(v) + '</td>'; }).join('') + '</tr>';
+      }).join('') : '<tr><td colspan="' + r.colonnes.length + '" class="vide">Rien à signaler.</td></tr>') +
+      '</tbody><tfoot><tr>' + r.totaux.map(function (v, i) { return '<td' + (r.colonnes[i] && r.colonnes[i].d ? ' class="d"' : '') + '>' + esc(v) + '</td>'; }).join('') + '</tr></tfoot></table></div>' +
+      (r.notes || []).map(function (n) { return '<p class="doux">' + esc(n) + '</p>'; }).join('');
+  }
+
+  /** Dessin du rapport sur toile (même habillage que les reçus) ; coupures = lignes où paginer. */
+  function dessinerRapport(r, logo) {
+    var L = r.paysage ? 1754 : 1240, M = 56, H0 = 200 + 52 * (r.lignes.length + 8) + 60 * (r.notes || []).length + 200;
+    var cv = document.createElement('canvas'); cv.width = L; cv.height = H0;
+    var g = cv.getContext('2d'), c = ligne('centres', RAP.centre) || {}, coupures = [];
+    g.fillStyle = '#fff'; g.fillRect(0, 0, L, H0);
+    g.fillStyle = '#0C2A6A'; g.fillRect(0, 0, L, 150);
+    if (logo) g.drawImage(logo, M, 25, 100, 100);
+    g.fillStyle = '#fff'; g.font = '600 38px Poppins, sans-serif'; g.fillText(texteCoupe(g, r.titre, L - 2 * M - 130), M + 125, 72);
+    g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#C9D6F2'; g.fillText(texteCoupe(g, r.sous, L - 2 * M - 130), M + 125, 112);
+    g.fillStyle = '#FFC93C'; g.fillRect(0, 150, L, 6);
+    var total = r.colonnes.reduce(function (s, x) { return s + x.l; }, 0), xs = [], x = M, largeurs = r.colonnes.map(function (col) { return (L - 2 * M) * col.l / total; });
+    largeurs.forEach(function (w) { xs.push(x); x += w; });
+    var y = 200, fs = r.paysage ? 19 : 20;
+    var rangee = function (cells, style) {
+      if (style.fond) { g.fillStyle = style.fond; g.fillRect(M, y - 32, L - 2 * M, 46); }
+      g.font = (style.gras ? '600 ' : '400 ') + fs + 'px Poppins, sans-serif';
+      cells.forEach(function (v, i) {
+        g.fillStyle = style.coul || (style.danger && i === 0 ? '#B42318' : '#001136');
+        var w = largeurs[i] - 12, t = texteCoupe(g, String(v == null ? '' : v), w);
+        if (r.colonnes[i] && r.colonnes[i].d) { g.textAlign = 'right'; g.fillText(t, xs[i] + largeurs[i] - 6, y); g.textAlign = 'left'; } else g.fillText(t, xs[i] + 6, y);
+      });
+      g.fillStyle = '#E1E6F0'; g.fillRect(M, y + 14, L - 2 * M, 1);
+      y += 46; coupures.push(y - 34);
+    };
+    rangee(r.colonnes.map(function (c2) { return c2.lib; }), { gras: true, fond: '#EEF3FC', coul: '#0C2A6A' });
+    var zebre = false;
+    r.lignes.forEach(function (l) {
+      if (l.groupe) { g.fillStyle = '#0C2A6A'; g.font = '600 ' + (fs + 2) + 'px Poppins, sans-serif'; y += 10; g.fillText(texteCoupe(g, l.groupe, L - 2 * M), M + 6, y); y += 40; coupures.push(y - 34); zebre = false; return; }
+      rangee(l.cellules, { gras: l.total, fond: l.total ? '#FFF6DA' : (zebre ? '#F7F9FC' : null), danger: l.danger });
+      zebre = !zebre;
+    });
+    rangee(r.totaux, { gras: true, fond: '#0C2A6A', coul: '#fff' });
+    y += 20;
+    g.font = '400 18px Poppins, sans-serif'; g.fillStyle = '#4D5163';
+    (r.notes || []).forEach(function (n) { g.fillText(texteCoupe(g, n, L - 2 * M), M, y); y += 34; coupures.push(y - 20); });
+    y += 30; g.fillStyle = '#6B7185'; g.font = '400 17px Poppins, sans-serif';
+    g.fillText('VÉRITAS Gestion · ' + (c.nom || '') + ' · édité le ' + new Date().toLocaleDateString('fr-FR') + ' par ' + E.profil.utilisateur.nom, M, y); y += 30;
+    var fin = document.createElement('canvas'); fin.width = L; fin.height = Math.min(y, H0);
+    fin.getContext('2d').drawImage(cv, 0, 0);
+    return { cv: fin, coupures: coupures };
+  }
+  function nomFichierRapport(r, ext) {
+    var c = ligne('centres', RAP.centre) || {};
+    return (r.cle + '-' + (c.nom_court || c.nom || 'centre') + '-' + isoLocal(new Date())).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9-]+/g, '-').replace(/-+/g, '-') + '.' + ext;
+  }
+  function fichierRapport(r, format) {
+    if (format === 'csv') {
+      var q = function (v) { v = String(v == null ? '' : v).replace(/ /g, ' '); return /[;"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+      var lignesCsv = [[r.titre], [r.sous], [], r.colonnes.map(function (c) { return c.lib; })]
+        .concat(r.lignes.map(function (l) { return l.groupe ? [l.groupe] : l.cellules; })).concat([r.totaux, []]).concat((r.notes || []).map(function (n) { return [n]; }));
+      var txt = '﻿' + lignesCsv.map(function (l) { return l.map(q).join(';'); }).join('\r\n');
+      return Promise.resolve(new File([txt], nomFichierRapport(r, 'csv'), { type: 'text/csv' }));
+    }
+    return Promise.all([chargerLogo(), document.fonts ? document.fonts.load('600 24px Poppins') : null]).then(function (res) {
+      var d = dessinerRapport(r, res[0]);
+      if (format === 'png') return versBlob(d.cv, 'image/png').then(function (b) { return new File([b], nomFichierRapport(r, 'png'), { type: 'image/png' }); });
+      var LP = d.cv.width, HP = r.paysage ? 1240 : 1754, pages = [], haut = 0;
+      while (haut < d.cv.height) {
+        var bas = haut + HP;
+        if (bas < d.cv.height) { var sures = d.coupures.filter(function (y) { return y > haut + 300 && y <= bas; }); if (sures.length) bas = sures[sures.length - 1]; }
+        var pg = document.createElement('canvas'); pg.width = LP; pg.height = HP;
+        var gp = pg.getContext('2d'); gp.fillStyle = '#fff'; gp.fillRect(0, 0, LP, HP);
+        var h = Math.min(bas, d.cv.height) - haut;
+        gp.drawImage(d.cv, 0, haut, LP, h, 0, 0, LP, h);
+        pages.push(pg); haut = bas;
+      }
+      return Promise.all(pages.map(function (cv) { return versBlob(cv, 'image/jpeg', 0.9).then(function (b) { return b.arrayBuffer(); }).then(function (a) { return { cv: cv, jpeg: new Uint8Array(a) }; }); }))
+        .then(function (p) { return new File([pdfDepuisJpeg(p, r.paysage ? 841.89 : 595.28, r.paysage ? 595.28 : 841.89)], nomFichierRapport(r, 'pdf'), { type: 'application/pdf' }); });
+    });
+  }
+  function texteRapport(r) {
+    var l = ['*' + r.titre + '*', r.sous, ''];
+    r.lignes.forEach(function (x) { if (x.groupe) l.push('', '*' + x.groupe + '*'); else l.push('• ' + x.cellules.filter(function (v) { return v !== '' && v !== '—'; }).join(' · ')); });
+    l.push('', '*' + r.totaux.filter(Boolean).join(' · ') + '*');
+    return l.join('\n').replace(/ /g, ' ');
+  }
+  function rapportCourant(cid) {
+    if (RAP.onglet === 'paiements') return rapportPaiementsClasses(cid);
+    if (RAP.onglet === 'tresorier') return rapportTresorier(cid, RAP.mois || moisCycle());
+    return rapportInsolvables(cid);
+  }
+
+  function pageRapports() {
+    var cc = centreRapports(), cid = cc.cid;
+    var h = '<h1>Rapports</h1><p class="sous-titre">À l\'écran, puis en PDF, en Excel ou par WhatsApp.</p>';
+    if (cc.dispo.length > 1) h += '<div class="puces">' + cc.dispo.map(function (c) { return '<button type="button" class="puce' + (c.id === cid ? ' on' : '') + '" data-a="rap-centre" data-v="' + esc(c.id) + '">' + esc(c.nom_court || c.nom) + '</button>'; }).join('') + '</div>';
+    if (!cid) return h + '<div class="carte vide">Aucun centre.</div>';
+    var onglets = [['insolvables', 'Insolvables'], ['paiements', 'Par mois et classe']];
+    if (peutRapportTresorier(cid)) onglets.push(['tresorier', 'Trésorier']);
+    if (!onglets.some(function (o) { return o[0] === RAP.onglet; })) RAP.onglet = 'insolvables';
+    h += '<div class="onglets">' + onglets.map(function (o) { return '<button type="button" class="' + (RAP.onglet === o[0] ? 'on' : '') + '" data-a="rap-onglet" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>';
+    if (RAP.onglet === 'tresorier') {
+      RAP.mois = RAP.mois || moisCycle();
+      h += '<div class="nav-date"><button type="button" class="btn clair petit" data-a="rap-mois" data-v="-1" aria-label="Mois précédent">‹</button><b>' + esc(libMoisAnnee(RAP.mois).replace(/^./, function (x) { return x.toUpperCase(); })) + '</b>' +
+        '<button type="button" class="btn clair petit" data-a="rap-mois" data-v="1"' + (RAP.mois >= moisCycle() ? ' disabled' : '') + ' aria-label="Mois suivant">›</button></div>';
+    }
+    var r = rapportCourant(cid);
+    h += '<div class="actions export-rapport"><button class="btn or" type="button" data-a="export-rapport" data-v="pdf">' + ico('doc', 'p') + 'PDF</button>' +
+      '<button class="btn clair" type="button" data-a="export-rapport" data-v="csv">' + ico('download', 'p') + 'Excel</button>' +
+      '<button class="btn clair" type="button" data-a="export-rapport" data-v="png">' + ico('camera', 'p') + 'Image</button>' +
+      '<button class="btn clair" type="button" data-a="export-rapport" data-v="texte">' + ico('message', 'p') + 'WhatsApp</button></div>';
+    return h + '<h2>' + esc(r.titre) + '</h2><p class="doux">' + esc(r.sous) + '</p>' + htmlRapport(r);
+  }
+
   // ───────────────────────────── Agenda, rappels et notifications ─────────────────────────────
   // Rendez-vous et rencontres saisis par le centre (table « evenements »), plus ce que le
   // téléphone DÉDUIT : l'échéance des mensualités (jour d'échéance du centre, mois facturés),
@@ -3903,6 +4110,17 @@
       if (a) confirmer('Retirer ' + a.nom + ' des actionnaires ?', 'Retirer', function () { muter('actionnaires', a.id, {}, true).then(rendre); });
     },
     // Le logo n'est ni un lien ni une image : l'appui long n'ouvre aucun menu du navigateur.
+    'rap-centre': function (el) { RAP.centre = el.dataset.v; rendre(); },
+    'rap-onglet': function (el) { RAP.onglet = el.dataset.v; rendre(); },
+    'rap-mois': function (el) { RAP.mois = decalerMois(RAP.mois || moisCycle(), +el.dataset.v); rendre(); },
+    'aller-rapport': function (el) { RAP.onglet = el.dataset.v; if (el.dataset.centre) RAP.centre = el.dataset.centre; if (location.hash === '#/rapports') rendre(); else location.hash = '#/rapports'; },
+    'export-rapport': function (el) {
+      var r = rapportCourant(RAP.centre);
+      if (el.dataset.v === 'texte') { var t = texteRapport(r); if (NATIF || navigator.share) partagerTexte(t); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener'); return; }
+      el.disabled = true;
+      fichierRapport(r, el.dataset.v).then(function (f) { E.cache.dernierExport = f; return partagerFichiers([f], r.titre); })
+        .catch(function (e) { toast('Export impossible : ' + (e && e.message), true); }).then(function () { el.disabled = false; });
+    },
     'cloturer-mois': function (el) {
       var cid = el.dataset.centre, am = el.dataset.mois, c = ligne('centres', cid) || {};
       confirmer('Clôturer ' + libMoisAnnee(am) + ' pour ' + (c.nom_court || c.nom) + ' ? Les comptes et le partage sont arrêtés ; plus rien ne pourra être daté de ce mois. Un nouveau cycle commence.', 'Clôturer', function () {

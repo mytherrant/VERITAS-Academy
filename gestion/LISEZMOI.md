@@ -66,6 +66,13 @@ cours, jamais plus que durée faite × taux (à la séance : le taux ; au forfai
 sort de sa caisse (« dépenses et paies » dans Remises), figure dans Caisse › Dépenses, le point du
 jour et le bilan, et l'enseignant la voit dans « Mes heures ». La paie du mois reste au responsable.
 
+**Rapports (Plus › Rapports, ou depuis Caisse › Impayés et le Bilan) :** pour qui voit la caisse.
+Insolvables (classe, échéances impayées, montant dû, téléphone, sous-totaux), paiements par mois et
+par classe (cases du cahier : ce qui couvre chaque échéance, payé, doit), rapport du trésorier pour un
+mois (par partenaire : encaissé, dépenses et paies, remis reçu, à confirmer, pas reçu, non versé ;
+fonds chez le trésorier ; détail des remises). Exports : PDF A4 (paysage pour les tableaux larges,
+paginé entre deux lignes), Excel (CSV « ; » avec BOM), image, texte WhatsApp.
+
 **Cycle mensuel et clôture :** chaque mois est un cycle. Les compteurs des partenaires (encaissé,
 dépenses et paies, remis, à remettre) et les fonds du centre portent sur le mois en cours. Le 30 ou
 le 31, un responsable ou l'admin clôture le mois dans le Bilan (`g_clotures`, id
@@ -171,6 +178,7 @@ node tests/banc_gestion_equipe.cjs <dossier>     # Équipe : discussion, comment
 node tests/banc_gestion_connexion.cjs <dossier>  # connexion : aide après échec, œil, identifiant toléré, version en retard (Playwright)
 node tests/banc_gestion_partenaire.cjs <dossier> # actionnaire : inscrit, encaisse, crée et paie un enseignant ; ne voit que son rôle (Playwright)
 node tests/banc_gestion_cloture.cjs <dossier>    # clôture du mois : comptes du serveur, partage, verrou, droits (Playwright)
+node tests/banc_gestion_rapports.cjs <dossier>   # rapports : insolvables, paiements par classe, trésorier, exports (Playwright)
 ```
 
 **Noms fictifs uniquement** dans le code et les bancs : le dépôt est public, les élèves sont mineurs.
