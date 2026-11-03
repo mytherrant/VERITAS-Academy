@@ -329,10 +329,12 @@
       + '<nav class="sc-onglets" role="tablist">'
       +   '<button class="sc-onglet on" role="tab" aria-selected="true" data-vue="scene">' + ico('scene') + 'La scène</button>'
       +   (S.labo ? '<button class="sc-onglet" role="tab" aria-selected="false" data-vue="labo">' + ico('labo') + 'Laboratoire</button>' : '')
+      +   (S.fiche ? '<button class="sc-onglet" role="tab" aria-selected="false" data-vue="oeuvre">' + ico('livre') + 'L’œuvre</button>' : '')
       +   '<button class="sc-onglet" data-modal="quiz">' + ico('quiz') + 'Quiz</button>'
       +   '<button class="sc-onglet" data-modal="guide">' + ico('aide') + 'Guide</button>'
       + '</nav>'
       + '<section id="vueLabo" class="sc-labo" hidden></section>'
+      + (S.fiche ? '<section id="vueOeuvre" class="sc-fiche" hidden></section>' : '')
       + '<div id="vueScene">'
       + '<section class="sc-scene" aria-label="Scène">'
       +   '<div class="sc-plateau"><div class="sc-decor" id="decor"></div><div class="sc-amb" id="amb"></div>'
@@ -364,7 +366,9 @@
         document.querySelectorAll('.sc-onglet[data-vue]').forEach(function(o){ var on = o === b; o.classList.toggle('on', on); o.setAttribute('aria-selected', on ? 'true' : 'false'); });
         $('vueScene').hidden = v !== 'scene';
         $('vueLabo').hidden = v !== 'labo';
+        if($('vueOeuvre')){ $('vueOeuvre').hidden = v !== 'oeuvre'; }
         if(v === 'labo'){ taire(); clearTimeout(minuterie); LABO.ouvrir(); }
+        if(v === 'oeuvre'){ taire(); clearTimeout(minuterie); ficheOeuvre(); }
       };
     });
     $('modalX').onclick = fermerModal;
@@ -840,7 +844,9 @@
     var B = S.bilan || {};
     var h = '<h2>Bilan de la scène</h2>'
       + (notes.length ? '<div class="sc-medaille"><div class="rond">' + pct + '%</div><p><b>' + titre + '</b><br>' + bons + ' réussite' + (bons > 1 ? 's' : '') + ' du premier coup sur ' + notes.length + ' arrêts sur image et ateliers.</p></div>' : '')
-      + (B.retenir && B.retenir.length ? '<h3 class="sc-h3">À retenir</h3><ul>' + B.retenir.map(function(r){ return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>' : '')
+      + (B.retenir && B.retenir.length ? '<h3 class="sc-h3">À retenir</h3><ul class="sc-puces-c">' + B.retenir.map(function(r){ return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>' : '')
+      + (S.fiche && S.fiche.accroche ? '<div class="sc-suite"><h3 class="sc-h3">La suite est dans le livre</h3><p>' + esc(S.fiche.accroche) + '</p>'
+          + '<button class="sc-btn" id="bVersOeuvre">' + ico('livre') + 'Découvrir l’œuvre</button></div>' : '')
       + (B.ecrire ? '<h3 class="sc-h3">À toi d’écrire</h3><p class="sc-objectif">' + esc(B.ecrire) + '</p>'
           + '<textarea id="redac" placeholder="Écris ici. Ton texte reste sur cet appareil."></textarea><div class="sc-note-enr" id="noteEnr"></div>' : '')
       + '<div class="sc-cmd" style="margin-top:12px"><button class="sc-btn" id="bRejouer">' + ico('rejouer') + 'Rejouer</button>'
@@ -848,6 +854,7 @@
     var bl = $('bilan');
     bl.innerHTML = h; bl.hidden = false;
     bl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if($('bVersOeuvre')){ $('bVersOeuvre').onclick = function(){ var o = document.querySelector('.sc-onglet[data-vue=oeuvre]'); if(o){ o.click(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }; }
     $('bRejouer').onclick = function(){ reponses = {}; etapes.forEach(function(e){ delete e._essai; }); presentsAvant = {}; aller(0); window.scrollTo({ top: 0, behavior: 'smooth' }); };
     var ta = $('redac');
     if(ta){
@@ -866,6 +873,29 @@
    *   liens:[{a, b, type, lib, base, poids:{id: coef}}],
    *   issue: function(v) → {niveau:'ok'|'moyen'|'ko', badge, recit, apres, themes:[…]} } */
   var COUL_LIEN = { confiance:'#D99A00', amour:'#D6336C', conflit:'#D43F2E', domination:'#7B5CD6', alliance:'#1F9D5B', peur:'#E07B39' };
+  /* ---------- Onglet « L’œuvre » ----------
+     S.fiche = { resume, personnages: [{ nom, role, cle? }], reperes: [..], themes: [..], cahier: { lib, href } }
+     Un personnage qui porte « cle » reprend l’avatar de la distribution de la scène. */
+  function ficheOeuvre(){
+    var F = S.fiche, z = $('vueOeuvre');
+    if(!F || z.getAttribute('data-fait')){ return; }
+    var gens = (F.personnages || []).map(function(g, k){
+      var p = g.cle && persos[g.cle];
+      var vis = p && (p.look || p.groupe) ? iso(Object.assign({}, p, { _k: 'f' + k })) : '<span class="sc-init" style="background:' + esc((p && p.couleur) || '#1E499B') + '">' + esc(initiales(g.nom)) + '</span>';
+      return '<li class="sc-f-perso"><div class="sc-f-av" aria-hidden="true">' + vis + '</div><div><b>' + esc(g.nom) + '</b><span>' + esc(g.role) + '</span></div></li>';
+    }).join('');
+    z.innerHTML = '<h2 class="sc-f-titre">' + esc(S.oeuvre || S.titre) + (S.auteur ? ' <small>' + esc(S.auteur) + '</small>' : '') + '</h2>'
+      + (F.accroche ? '<p class="sc-f-accroche">' + ico('aide') + '<span>' + esc(F.accroche) + '</span></p>' : '')
+      + (F.resume ? '<h3 class="sc-h3">En quelques mots</h3><p class="sc-objectif">' + esc(F.resume) + '</p>' : '')
+      + (gens ? '<h3 class="sc-h3">Les personnages</h3><ul class="sc-f-gens">' + gens + '</ul>' : '')
+      + (F.aLire && F.aLire.length ? '<h3 class="sc-h3">À ne pas manquer en lisant</h3><ul class="sc-f-alire">' + F.aLire.map(function(a){ return '<li><b>' + esc(a.ou) + '</b><span>' + esc(a.pourquoi) + '</span></li>'; }).join('') + '</ul>' : '')
+      + (F.siTuAimes ? '<p class="sc-f-aimes"><b>Si tu aimes…</b> ' + esc(F.siTuAimes) + '</p>' : '')
+      + (F.reperes && F.reperes.length ? '<h3 class="sc-h3">Repères</h3><ul class="sc-f-liste sc-puces-c">' + F.reperes.map(function(r){ return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>' : '')
+      + (F.themes && F.themes.length ? '<h3 class="sc-h3">Thèmes</h3><div class="sc-f-themes">' + F.themes.map(function(t){ return '<span>' + esc(t) + '</span>'; }).join('') + '</div>' : '')
+      + (F.cahier ? '<a class="sc-btn principal sc-f-cahier" href="' + esc(F.cahier.href) + '">' + ico('livre') + esc(F.cahier.lib) + '</a>' : '');
+    z.setAttribute('data-fait', '1');
+  }
+
   var LABO = {
     v: null, cote: false, pret: false,
     ouvrir: function(){

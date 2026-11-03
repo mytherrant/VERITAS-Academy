@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261103p">
+<link rel="stylesheet" href="scene.css?v=20261103q">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -71,6 +71,30 @@ window.SCENE = {
     { t: 'dit', qui: 'samuel', emo: 'joie', txt: 'Me llamo Samuel. ¡De nada! Bienvenida al colegio.' },
     { t: 'remarque', titre: 'La politesse', txt: '« Perdona » (pardon, au tutoiement) pour aborder quelqu’un, « por favor » pour demander, « muchas gracias » pour remercier, « de nada » pour répondre.' }
   ],
+  labo: {
+    titre: 'Laboratorio · ¿dónde está?',
+    intro: 'Règle la clarté des indications, l’attention de celle qui écoute et la connaissance du vocabulaire : Lucía arrive-t-elle à la bibliothèque ?',
+    persos: ['lucia', 'samuel'],
+    curseurs: [
+      { id: 'claridad', nom: 'Clarté des indications (claridad)', val: 75, bas: 'confuses', haut: 'précises' },
+      { id: 'atencion', nom: 'Attention de Lucía (atención)', val: 65, bas: 'distraite', haut: 'attentive' },
+      { id: 'vocabulario', nom: 'Vocabulaire connu (vocabulario)', val: 55, bas: 'aucun', haut: 'derecha, izquierda, recto…' }
+    ],
+    scenarios: [
+      { nom: 'Como en la escena', icone: 'ecole', valeurs: { claridad: 75, atencion: 65, vocabulario: 55 } },
+      { nom: 'Indicaciones confusas', icone: 'nuage', valeurs: { claridad: 10 } },
+      { nom: 'Sin vocabulario', icone: 'muet', valeurs: { vocabulario: 5 } }
+    ],
+    liens: [
+      { a: 'samuel', b: 'lucia', type: 'confiance', lib: 'indica', base: .3, poids: { claridad: .5 } },
+      { a: 'lucia', b: 'samuel', type: 'alliance', lib: 'compañeros', base: .4, poids: { atencion: .3 } }
+    ],
+    issue: function(v){
+      if(v.vocabulario < 25){ return { niveau: 'ko', badge: 'Perdida', recit: 'Lucía ne comprend ni « derecha » ni « izquierda » : elle se retrouve en salle d’informatique.', apres: 'Les mots de direction sont les premiers à apprendre dans une langue.', themes: ['vocabulaire'] }; }
+      if(v.claridad < 30){ return { niveau: 'moyen', badge: 'Vuelta larga', recit: 'Les indications sont floues : Lucía fait trois fois le tour du couloir avant de trouver.', apres: 'Une bonne indication donne un repère et une direction à chaque étape.', themes: ['indications'] }; }
+      return { niveau: 'ok', badge: '¡En la biblioteca!', recit: 'Indications claires, écoute attentive : Lucía arrive en deux minutes.', apres: '¡Muchas gracias, Samuel!', themes: ['itinéraire', 'estar'] };
+    }
+  },
   quiz: [
     { q: '« A la derecha » signifie :', options: [
       { txt: 'À droite.', ok: true, retour: 'derecha = droite.' },
@@ -100,7 +124,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261103p"></script>
-<script src="scene.js?v=20261103p"></script>
+<script src="decors.js?v=20261103q"></script>
+<script src="scene.js?v=20261103q"></script>
 </body>
 </html>
