@@ -615,3 +615,12 @@ table.rapport { width: 100%; border-collapse: collapse; font-size: 13px; min-wid
 .rapport tfoot td { background: var(--bleu-profond); color: #fff; font-weight: 600; }
 .rapport td.vide { text-align: center; color: var(--doux); padding: 20px; }
 .export-rapport { flex-wrap: wrap; }
+
+/* ── Cahier de textes ── */
+.cahier { display: grid; gap: 10px; }
+.carte.entree-cahier { display: block; text-decoration: none; color: inherit; margin: 0; }
+.entree-cahier .haut { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.entree-cahier small { color: var(--doux); display: block; margin: 2px 0 6px; }
+.entree-cahier p { margin: 6px 0 0; color: var(--titre); }
+.etiquette { display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; background: var(--bleu-pale); color: var(--bleu-profond); border-radius: 6px; padding: 1px 6px; margin-right: 6px; }
+.etiquette.travail { background: var(--alerte-fond); color: var(--alerte); }

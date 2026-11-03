@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.12.1';
+  var VERSION = '0.12.2';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -544,7 +544,7 @@
     var caisse = peutQuelquePart('paiements.voir');
     items.push(caisse ? ['caisse', 'wallet', 'Caisse'] : ['emploi', 'calendar', 'Planning']);
     items.push(['moi', 'list', 'Plus']);
-    var sousPlus = ['rapports', 'equipe', 'agenda', 'roles', 'admin', 'comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
+    var sousPlus = ['cahier', 'rapports', 'equipe', 'agenda', 'roles', 'admin', 'comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
     return '<nav class="nav-basse" aria-label="Navigation">' + items.map(function (i) {
       var on = i[0] === actif || (i[0] === 'moi' && sousPlus.indexOf(actif) >= 0) || (i[0] === 'appel' && actif === 'pointage') || (i[0] === 'caisse' && actif === 'jour');
       return '<a href="#/' + i[0] + '" class="' + (on ? 'actif' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + ico(i[1]) + i[2] + '</a>';
@@ -674,6 +674,7 @@
         tuiles.push(['#/assiduite', 'activity', 'Assiduité', 'Taux, retards, alertes']);
         tuiles.push(['#/eleves', 'graduation', 'Élèves', peutQuelquePart('eleves.gerer') ? 'Inscrire, rechercher, importer' : 'Fiches et contacts des parents']);
         tuiles.push(['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances']);
+        tuiles.push(['#/cahier', 'bookopen', 'Cahier de textes', 'Ce qui a été fait, travail donné']);
         if (peutEquipeQuelquePart()) tuiles.push(['#/equipe', 'message', 'Équipe', 'Messages, réunions, tâches']);
         tuiles.push(['#/emploi', 'calendar', 'Emploi du temps', peutQuelquePart('emploi.gerer') ? 'Classes, créneaux, enseignants' : 'Les cours de la semaine']);
         if (panneauOuvert()) tuiles.push(['#/admin', 'shield', 'Administration', 'Comptes, identifiants, partenaires et droits']);
@@ -823,6 +824,9 @@
     agenda: {
       html: function () { return pageAgenda(); }
     },
+    cahier: {
+      html: function () { return pageCahier(); }
+    },
     rapports: {
       droit: function () { return peutQuelquePart('paiements.voir'); },
       html: function () { return pageRapports(); }
@@ -841,7 +845,7 @@
         }).join('');
         var h = '<h1>Mon compte</h1><div class="carte"><h3>' + esc(u.nom) + '</h3><p class="doux">Identifiant : ' + esc(u.identifiant) + '</p><p>' +
           (u.admin ? '<span class="badge or">Administrateur des deux centres</span>' : '') + acces + '</p></div>' + carteMonRole();
-        var liens = [['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances, rappels']].concat(peutQuelquePart('paiements.voir') ? [['#/rapports', 'doc', 'Rapports', 'Insolvables, paiements par mois et classe, trésorier — PDF, Excel']] : []).concat(peutEquipeQuelquePart() ? [['#/equipe', 'message', 'Équipe', 'Messages entre partenaires, commentaires, réunions, tâches']] : []).concat([ ['#/roles', 'info', estAdmin() ? 'Rôles et droits' : 'Mon rôle', estAdmin() ? 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants' : 'Ce que votre compte permet'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']]);
+        var liens = [['#/cahier', 'bookopen', 'Cahier de textes', 'Ce qui a été fait et le travail donné, par classe'], ['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances, rappels']].concat(peutQuelquePart('paiements.voir') ? [['#/rapports', 'doc', 'Rapports', 'Insolvables, paiements par mois et classe, trésorier — PDF, Excel']] : []).concat(peutEquipeQuelquePart() ? [['#/equipe', 'message', 'Équipe', 'Messages entre partenaires, commentaires, réunions, tâches']] : []).concat([ ['#/roles', 'info', estAdmin() ? 'Rôles et droits' : 'Mon rôle', estAdmin() ? 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants' : 'Ce que votre compte permet'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']]);
         if (peutQuelquePart('finances.voir')) liens.push(['#/bilan', 'trending', 'Bilan financier', 'Recettes, dépenses, parts des actionnaires']);
         if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) liens.push(['#/enseignants', 'presentation', 'Enseignants', 'Heures faites, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) liens.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
@@ -3343,6 +3347,105 @@
     return h + '<h2>' + esc(r.titre) + '</h2><p class="doux">' + esc(r.sous) + '</p>' + htmlRapport(r);
   }
 
+  // ───────────────────────────── Cahier de textes (consultation) ─────────────────────────────
+  // Ce qui a été fait et le travail donné sont saisis dans la feuille d'appel de chaque séance
+  // (table « seances » : contenu, travail). Ici on les relit, classe par classe, du plus récent au
+  // plus ancien, et on les exporte (PDF paginé, Excel, WhatsApp). L'enseignant ne voit que ses classes.
+  var CDT = { centre: '', classe: '' };
+  function classesVisiblesCahier(cid) {
+    var l = lignes('classes').filter(function (k) { return k.centre_id === cid; });
+    if (!estAdmin() && roleDans(cid) === 'enseignant') {
+      var moi = E.profil.utilisateur.id;
+      l = l.filter(function (k) { return lignes('creneaux').some(function (c) { return c.classe_id === k.id && c.enseignant_id === moi; }); });
+    }
+    return l.sort(function (a, b) { return String(a.nom).localeCompare(String(b.nom), 'fr'); });
+  }
+  function entreesCahier(cid, classeId) {
+    var ids = classesVisiblesCahier(cid).map(function (k) { return k.id; });
+    return lignes('seances').filter(function (s) {
+      return s.centre_id === cid && ids.indexOf(s.classe_id) >= 0 && (!classeId || s.classe_id === classeId) && (String(s.contenu || '').trim() || String(s.travail || '').trim());
+    }).sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : String(a.debut || '').localeCompare(String(b.debut || '')); }).map(function (s) {
+      var crs = lignes('creneaux').filter(function (c) { return c.classe_id === s.classe_id && Number(c.jour) === jourDe(s.date); });
+      return { s: s, classe: nomDe('classes', s.classe_id), matieres: crs.map(function (c) { return nomDe('matieres', c.matiere_id); }).filter(Boolean).join(', '),
+        profs: crs.map(function (c) { return nomPersonne(c.enseignant_id); }).filter(Boolean).filter(function (v, i, t) { return t.indexOf(v) === i; }).join(', ') };
+    });
+  }
+  function pageCahier() {
+    var dispo = centresChoisis();
+    if (!dispo.some(function (c) { return c.id === CDT.centre; })) CDT.centre = dispo.length ? dispo[0].id : '';
+    var cid = CDT.centre;
+    var h = '<h1>Cahier de textes</h1><p class="sous-titre">Ce qui a été fait et le travail donné, séance par séance. Saisie : dans la feuille d\'appel de la séance.</p>';
+    if (dispo.length > 1) h += '<div class="puces">' + dispo.map(function (c) { return '<button type="button" class="puce' + (c.id === cid ? ' on' : '') + '" data-a="cdt-centre" data-v="' + esc(c.id) + '">' + esc(c.nom_court || c.nom) + '</button>'; }).join('') + '</div>';
+    if (!cid) return h + '<div class="carte vide">Aucun centre.</div>';
+    var classes = classesVisiblesCahier(cid);
+    if (CDT.classe && !classes.some(function (k) { return k.id === CDT.classe; })) CDT.classe = '';
+    // Seules les classes qui ont déjà une séance écrite (et celle choisie) : pas de rangée de « · 0 ».
+    h += '<div class="puces">' + [['', 'Toutes']].concat(classes.map(function (k) { return [k.id, k.nom]; })).map(function (k) {
+      var n = entreesCahier(cid, k[0]).length;
+      if (k[0] && !n && CDT.classe !== k[0]) return '';
+      return '<button type="button" class="puce' + (CDT.classe === k[0] ? ' on' : '') + '" data-a="cdt-classe" data-v="' + esc(k[0]) + '">' + esc(k[1]) + ' · ' + n + '</button>';
+    }).join('') + '</div>';
+    var l = entreesCahier(cid, CDT.classe);
+    if (l.length) h += '<div class="actions export-rapport"><button class="btn or" type="button" data-a="export-cahier" data-v="pdf">' + ico('doc', 'p') + 'PDF</button>' +
+      '<button class="btn clair" type="button" data-a="export-cahier" data-v="csv">' + ico('download', 'p') + 'Excel</button>' +
+      '<button class="btn clair" type="button" data-a="export-cahier" data-v="texte">' + ico('message', 'p') + 'WhatsApp</button></div>';
+    h += l.length ? '<div class="cahier">' + l.map(function (x) {
+      return '<a class="carte entree-cahier" href="#/pointage/' + encodeURIComponent(x.s.classe_id) + '/' + esc(x.s.date) + '">' +
+        '<div class="haut"><b>' + esc(dateLongue(x.s.date).replace(/^./, function (c) { return c.toUpperCase(); }) + ' ' + x.s.date.slice(0, 4)) + '</b><span class="badge">' + esc(x.classe) + '</span></div>' +
+        '<small>' + esc([x.s.debut && x.s.fin ? heureLisible(x.s.debut) + ' – ' + heureLisible(x.s.fin) : '', x.matieres, x.profs].filter(Boolean).join(' · ')) + '</small>' +
+        (x.s.contenu ? '<p><span class="etiquette">Fait</span>' + esc(x.s.contenu).replace(/\n/g, '<br>') + '</p>' : '') +
+        (x.s.travail ? '<p><span class="etiquette travail">Travail</span>' + esc(x.s.travail).replace(/\n/g, '<br>') + '</p>' : '') + '</a>';
+    }).join('') + '</div>' : '<div class="carte vide">Rien d\'écrit pour l\'instant. Ouvrez la feuille d\'appel d\'une séance (Appel) : en bas, « Cahier de textes ».</div>';
+    return h;
+  }
+  function texteCahier(l, titre) {
+    return ['*' + titre + '*'].concat(l.map(function (x) {
+      return '\n*' + dateLisible(x.s.date, true) + ' · ' + x.classe + (x.matieres ? ' · ' + x.matieres : '') + '*' + (x.s.contenu ? '\nFait : ' + x.s.contenu : '') + (x.s.travail ? '\nTravail : ' + x.s.travail : '');
+    })).join('\n');
+  }
+  /** PDF A4 : paragraphes avec retour à la ligne (le texte n'est jamais coupé). */
+  function pdfCahier(l, titre, sous) {
+    return Promise.all([chargerLogo(), document.fonts ? document.fonts.load('600 24px Poppins') : null]).then(function (res) {
+      var L = 1240, HP = 1754, M = 70, larg = L - 2 * M, pages = [], cv, g, y;
+      var nouvelle = function (premiere) {
+        cv = document.createElement('canvas'); cv.width = L; cv.height = HP; g = cv.getContext('2d');
+        g.fillStyle = '#fff'; g.fillRect(0, 0, L, HP);
+        if (premiere) {
+          g.fillStyle = '#0C2A6A'; g.fillRect(0, 0, L, 150); if (res[0]) g.drawImage(res[0], M, 25, 100, 100);
+          g.fillStyle = '#fff'; g.font = '600 38px Poppins, sans-serif'; g.fillText(texteCoupe(g, titre, larg - 130), M + 125, 72);
+          g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#C9D6F2'; g.fillText(texteCoupe(g, sous, larg - 130), M + 125, 112);
+          g.fillStyle = '#FFC93C'; g.fillRect(0, 150, L, 6); y = 210;
+        } else y = 80;
+        pages.push(cv);
+      };
+      var lignesDe = function (t, police) {
+        g.font = police; var out = [];
+        String(t || '').split(/\n/).forEach(function (par) {
+          var mots = par.split(' '), cour = '';
+          mots.forEach(function (m) { var essai = cour ? cour + ' ' + m : m; if (g.measureText(essai).width > larg - 20 && cour) { out.push(cour); cour = m; } else cour = essai; });
+          out.push(cour);
+        });
+        return out;
+      };
+      nouvelle(true);
+      l.forEach(function (x) {
+        var tete = dateLisible(x.s.date, true) + ' · ' + x.classe + (x.matieres ? ' · ' + x.matieres : '') + (x.profs ? ' · ' + x.profs : '');
+        var fait = x.s.contenu ? lignesDe('Fait : ' + x.s.contenu, '400 22px Poppins, sans-serif') : [];
+        var trav = x.s.travail ? lignesDe('Travail : ' + x.s.travail, '400 22px Poppins, sans-serif') : [];
+        var haut = 44 + 32 * (fait.length + trav.length) + 30;
+        if (y + haut > HP - 60) nouvelle(false);
+        g.fillStyle = '#EEF3FC'; g.fillRect(M, y - 30, larg, 42);
+        g.fillStyle = '#0C2A6A'; g.font = '600 22px Poppins, sans-serif'; g.fillText(texteCoupe(g, tete, larg - 20), M + 10, y); y += 44;
+        g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#001136';
+        fait.forEach(function (t) { g.fillText(t, M + 10, y); y += 32; });
+        g.fillStyle = '#9A5B00'; trav.forEach(function (t) { g.fillText(t, M + 10, y); y += 32; });
+        y += 30;
+      });
+      pages.forEach(function (p, i) { var gp = p.getContext('2d'); gp.font = '400 16px Poppins, sans-serif'; gp.fillStyle = '#6B7185'; gp.fillText('VÉRITAS Gestion · cahier de textes · page ' + (i + 1) + '/' + pages.length, M, HP - 30); });
+      return Promise.all(pages.map(function (c) { return versBlob(c, 'image/jpeg', 0.9).then(function (b) { return b.arrayBuffer(); }).then(function (a) { return { cv: c, jpeg: new Uint8Array(a) }; }); }));
+    }).then(function (p) { return new File([pdfDepuisJpeg(p, 595.28, 841.89)], 'cahier-de-textes-' + isoLocal(new Date()) + '.pdf', { type: 'application/pdf' }); });
+  }
+
   // ───────────────────────────── Agenda, rappels et notifications ─────────────────────────────
   // Rendez-vous et rencontres saisis par le centre (table « evenements »), plus ce que le
   // téléphone DÉDUIT : l'échéance des mensualités (jour d'échéance du centre, mois facturés),
@@ -4110,6 +4213,18 @@
       if (a) confirmer('Retirer ' + a.nom + ' des actionnaires ?', 'Retirer', function () { muter('actionnaires', a.id, {}, true).then(rendre); });
     },
     // Le logo n'est ni un lien ni une image : l'appui long n'ouvre aucun menu du navigateur.
+    'cdt-centre': function (el) { CDT.centre = el.dataset.v; CDT.classe = ''; rendre(); },
+    'cdt-classe': function (el) { CDT.classe = el.dataset.v; rendre(); },
+    'export-cahier': function (el) {
+      var l = entreesCahier(CDT.centre, CDT.classe), c = ligne('centres', CDT.centre) || {};
+      var titre = 'Cahier de textes' + (CDT.classe ? ' · ' + nomDe('classes', CDT.classe) : ''), sous = (c.nom || '') + ' · au ' + dateLisible(isoLocal(new Date()), true);
+      if (el.dataset.v === 'texte') { var t = texteCahier(l, titre); if (NATIF || navigator.share) partagerTexte(t); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener'); return; }
+      el.disabled = true;
+      var f = el.dataset.v === 'csv' ? fichierRapport({ cle: 'cahier-de-textes', titre: titre, sous: sous, colonnes: [{ lib: 'Date' }, { lib: 'Classe' }, { lib: 'Horaire' }, { lib: 'Matière' }, { lib: 'Enseignant' }, { lib: 'Ce qui a été fait' }, { lib: 'Travail donné' }],
+          lignes: l.map(function (x) { return { cellules: [dateLisible(x.s.date, true), x.classe, (x.s.debut || '') + (x.s.fin ? '–' + x.s.fin : ''), x.matieres, x.profs, x.s.contenu || '', x.s.travail || ''] }; }), totaux: [l.length + ' séance(s)'], notes: [] }, 'csv')
+        : pdfCahier(l, titre, sous);
+      f.then(function (fi) { return partagerFichiers([fi], titre); }).catch(function (e) { toast('Export impossible : ' + (e && e.message), true); }).then(function () { el.disabled = false; });
+    },
     'rap-centre': function (el) { RAP.centre = el.dataset.v; rendre(); },
     'rap-onglet': function (el) { RAP.onglet = el.dataset.v; rendre(); },
     'rap-mois': function (el) { RAP.mois = decalerMois(RAP.mois || moisCycle(), +el.dataset.v); rendre(); },
@@ -4863,7 +4978,7 @@
     cahier: function (form) {
       var x = E.cache.pointage;
       var v = valeurs(form);
-      assurerSeance(x).then(function () { return muter('seances', x.id, { contenu: v.contenu, travail: v.travail }); }).then(function () { toast('Cahier de textes enregistré.'); rendre(); });
+      assurerSeance(x).then(function () { return muter('seances', x.id, { contenu: v.contenu, travail: v.travail }); }).then(function () { toast('Cahier de textes enregistré — à relire dans Plus › Cahier de textes.'); rendre(); });
     },
     creneau: function (form) {
       var v = valeurs(form);
