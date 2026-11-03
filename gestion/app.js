@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.11.5';
+  var VERSION = '0.11.6';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -1628,6 +1628,34 @@
       .sort(function (a, b) { return b.ech.impaye - a.ech.impaye; });
   }
 
+  /** Échéances des prochains jours pas encore payées : à rappeler AVANT qu'elles tombent. */
+  var JOURS_RAPPEL = 5;
+  function aEchoir(cid) {
+    var auj = isoLocal(new Date()), lim = decalerJour(auj, JOURS_RAPPEL);
+    return lignes('eleves').filter(function (e) { return e.centre_id === cid && (e.statut || 'actif') === 'actif'; }).map(function (e) {
+      var ech = echeancier(e);
+      var its = ech.items.filter(function (it) { return it.echeance >= auj && it.echeance <= lim && it.paye < it.montant; });
+      return its.length ? { e: e, ech: ech, items: its, montant: its.reduce(function (s, it) { return s + it.montant - it.paye; }, 0) } : null;
+    }).filter(Boolean).sort(function (a, b) { return a.items[0].echeance < b.items[0].echeance ? -1 : 1; });
+  }
+  function messageRappelEcheance(e, x, pourEleve) {
+    var c = ligne('centres', e.centre_id) || {};
+    var it = x.items[0];
+    return 'Bonjour ' + (pourEleve ? (e.prenoms || nomComplet(e)) : (e.parent_nom || 'cher parent')) + ', petit rappel du centre ' + (c.nom || 'VÉRITAS') + ' : ' +
+      fcfa(x.montant).replace(/\u00a0/g, ' ') + ' sont à régler ' + (pourEleve ? '' : 'pour ' + nomComplet(e) + ' ') + 'au plus tard le ' + dateLisible(it.echeance, true) + ' (' +
+      x.items.map(function (i) { return i.libelle.toLowerCase(); }).join(', ') + '). Merci ! Contact : ' + telLisible(String(c.telephones || '').split('/')[0].replace(/\D+/g, '')) + '.';
+  }
+  /** Boutons d'envoi : parent (WhatsApp, SMS) et, si son numéro est connu, l'élève lui-même. */
+  function boutonsEnvoi(e, txtParent, txtEleve) {
+    var tel = e.parent_whatsapp || e.parent_tel, sms = e.parent_tel || e.parent_whatsapp, el = e.tel_eleve;
+    var lien = function (canal, num, txt, lib, cls) {
+      return '<a class="btn ' + (cls || 'clair') + ' petit" ' + (canal === 'whatsapp' ? 'target="_blank" rel="noopener" ' : '') + 'data-a="relancer" data-canal="' + canal + '" data-id="' + esc(e.id) + '" href="' +
+        (canal === 'whatsapp' ? 'https://wa.me/237' + esc(num) + '?text=' : 'sms:+237' + esc(num) + '?body=') + encodeURIComponent(txt) + '">' + lib + '</a>';
+    };
+    return (tel ? lien('whatsapp', tel, txtParent, ico('message', 'p') + 'Parent') : '') + (sms ? lien('sms', sms, txtParent, 'SMS parent') : '') +
+      (el ? lien('whatsapp', el, txtEleve || txtParent, ico('user', 'p') + 'Élève') : '') + (!tel && !sms && !el ? '<span class="doux">pas de numéro</span>' : '');
+  }
+
   /** Nombre en toutes lettres (règles de 1990 : traits d'union partout), pour la ligne « Somme de ». */
   function enLettres(n) {
     n = Math.floor(Number(n) || 0);
@@ -1695,13 +1723,18 @@
       var total = imp.reduce(function (s, x) { return s + x.ech.impaye; }, 0);
       var c = ligne('centres', cid) || {};
       h += '<p class="sous-titre">Échéance le ' + esc(c.jour_echeance || 10) + ' du mois · <b>' + imp.length + '</b> élève' + (imp.length > 1 ? 's' : '') + ' · <b>' + fcfa(total) + '</b> à recouvrer</p>';
+      var proche = aEchoir(cid);
+      if (proche.length) h += '<h2>Échéance proche · ' + proche.length + '</h2><p class="sous-titre">À régler dans les ' + JOURS_RAPPEL + ' jours : un rappel aimable, avant le retard.</p><div class="liste">' + proche.map(function (x) {
+        var e = x.e, trace = e.relance_le ? '<small class="st-present">' + ico('check', 'p') + ' prévenu le ' + esc(dateLisible(e.relance_le)) + '</small>' : '';
+        return '<div class="ligne message"><button type="button" class="corps nom-eleve" data-a="voir-eleve" data-id="' + esc(e.id) + '"><b>' + esc(nomComplet(e)) + '</b><small>' + esc(nomDe('classes', e.classe_id) + ' · ' + fcfa(x.montant) + ' pour le ' + dateLisible(x.items[0].echeance, true)) + '</small>' + trace + '</button>' +
+          '<span class="boutons">' + boutonsEnvoi(e, messageRappelEcheance(e, x, false), messageRappelEcheance(e, x, true)) + '</span></div>';
+      }).join('') + '</div><h2>Échus, à relancer · ' + imp.length + '</h2>';
       h += imp.length ? '<div class="liste">' + imp.map(function (x) {
         var e = x.e, tel = e.parent_whatsapp || e.parent_tel, sms = e.parent_tel || e.parent_whatsapp;
         var txt = messageRelance(e, x.ech);
         var trace = e.relance_le ? '<small class="st-present">' + ico('check', 'p') + ' relancé le ' + esc(dateLisible(e.relance_le)) + '</small>' : '';
         return '<div class="ligne message"><button type="button" class="corps nom-eleve" data-a="voir-eleve" data-id="' + esc(e.id) + '"><b>' + esc(nomComplet(e)) + (e.statut === 'parti' ? ' <span class="badge">parti</span>' : '') + '</b><small>' + esc(nomDe('classes', e.classe_id)) + ' · ' + esc(x.ech.moisImpayes.map(function (it) { return it.court; }).join(', ')) + '</small><small class="st-absent"><b class="st-absent">' + fcfa(x.ech.impaye) + '</b></small>' + trace + '</button>' +
-          '<span class="boutons">' + (tel ? '<a class="btn clair petit" target="_blank" rel="noopener" data-a="relancer" data-canal="whatsapp" data-id="' + esc(e.id) + '" href="https://wa.me/237' + esc(tel) + '?text=' + encodeURIComponent(txt) + '">' + ico('message', 'p') + 'Relancer</a>' : '') +
-          (sms ? '<a class="btn clair petit" data-a="relancer" data-canal="sms" data-id="' + esc(e.id) + '" href="sms:+237' + esc(sms) + '?body=' + encodeURIComponent(txt) + '">SMS</a>' : '') + (!tel && !sms ? '<span class="doux">pas de numéro</span>' : '') + '</span></div>';
+          '<span class="boutons">' + boutonsEnvoi(e, txt, txt.replace(/^Bonjour [^,]*,/, 'Bonjour ' + (e.prenoms || nomComplet(e)) + ',')) + '</span></div>';
       }).join('') + '</div>' : '<div class="carte vide">Aucun impayé échu. </div>';
     } else {
       var deps = lignes('depenses').filter(function (d) { return d.centre_id === cid; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
@@ -3281,11 +3314,12 @@
       peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Remettre les fonds au trésorier', 'Fixer les tarifs, valider les dépenses', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants', 'Tenir l\'agenda : rendez-vous, rencontres, réunions', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
       pas: ['Les réglages des centres et de l\'année', 'Les comptes responsables, actionnaires et admin'] },
     { cle: 'actionnaire', espace: 'partenaire', nom: 'Actionnaire', famille: 'Partenaire',
-      resume: 'Associé du centre : quand il est présent, il inscrit, encaisse, gère et paie les enseignants ; il suit les chiffres.',
-      peut: ['Inscrire les élèves et modifier leurs fiches', 'Encaisser inscriptions et mensualités, envoyer le reçu', 'Créer les comptes des enseignants, fixer leur contrat',
+      resume: 'Associé du centre : quand il est présent, il fait l\'appel, relance, inscrit, encaisse, gère et paie les enseignants ; il suit les chiffres.',
+      peut: ['Faire l\'appel des classes, prévenir les parents des absences et retards', 'Rappeler les échéances et relancer les impayés (parents ou élèves)',
+        'Inscrire les élèves et modifier leurs fiches', 'Encaisser inscriptions et mensualités, envoyer le reçu', 'Créer les comptes des enseignants, fixer leur contrat',
         'Payer l\'enseignant après son cours, verser la paie du mois', 'Saisir les dépenses', 'Remettre les fonds au trésorier', 'Voir le bilan, les statistiques et les parts',
         'Modifier l\'emploi du temps, tenir l\'agenda', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
-      pas: ['Faire l\'appel', 'Fixer les tarifs, accorder une remise', 'Valider une dépense'] },
+      pas: ['Fixer les tarifs, accorder une remise', 'Valider une dépense'] },
     { cle: 'secretaire', espace: 'secretariat', nom: 'Secrétaire / surveillant', famille: 'Équipe',
       resume: 'Tient l\'accueil et la caisse du centre.',
       peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Payer l\'enseignant juste après son cours (1 500 F/h)', 'Remettre les fonds au trésorier', 'Saisir les dépenses (avec photo du justificatif)', 'Noter les rendez-vous dans l\'agenda', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
@@ -3563,6 +3597,8 @@
       '*Caisse › Remises* : remettez au trésorier l\'argent encaissé, *avant la fin du mois* ; il confirme la réception.',
       '*Plus › Enseignants* : pointage des cours, contrats, paies.', '*Plus › Comptes et accès* : créez les comptes de vos secrétaires et enseignants.', '*Plus › Agenda* : rendez-vous, rencontres, échéances ; la cloche en haut rappelle ce qui approche.', '*Plus › Équipe* : messages entre partenaires, commentaires, dates de réunion, tâches.'],
     actionnaire: ['*Accueil* : les chiffres clés de votre centre (élèves, appels, encaissé, impayés).', '*Plus › Bilan* : recettes, dépenses, résultat du mois et votre part.',
+      '*Appel* : choisissez la classe, touchez chaque élève (présent, retard, absent) ; prévenez les parents des absences.',
+      '*Caisse › Impayés* : « Échéance proche » pour un rappel avant la date, puis les impayés à relancer — au parent ou à l\'élève.',
       '*Élèves › +* : inscrivez un élève (classe, matières, tarif de la classe).',
       '*Caisse › Encaisser* : quand vous êtes au centre ou qu\'un parent vous paie, encaissez inscription ou mensualité et envoyez-lui le reçu par WhatsApp.',
       '*Plus › Enseignants* : « Ajouter un enseignant », son contrat, sa paie du mois.',

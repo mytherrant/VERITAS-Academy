@@ -219,7 +219,7 @@ verifier("le matricule ne se modifie pas depuis le téléphone", e1["matricule"]
 _, t = req("sync/tirer", jeton=respA)
 verifier("le responsable A ne voit pas les élèves de B", all(e["centre_id"] == A for e in t["lignes"].get("eleves", [])))
 # Demande de Jacques (03/11/2026) : chaque partenaire inscrit, encaisse et gère les enseignants de SON centre.
-_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "eleves", "id": "el-" + uuid.uuid4().hex[:12], "champs": fiche(A, clA, "Partenaire", "Inscrit")}]}, actA)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "eleves", "id": "el-" + uuid.uuid4().hex[:12], "champs": fiche(A, clA, "Partenaire" + uuid.uuid4().hex[:4].upper(), "Inscrit")}]}, actA)
 verifier("un actionnaire inscrit un élève dans SON centre", r["resultats"][0]["ok"] is True, r)
 _, r = req("sync/pousser", {"ops": [{"op": op(), "t": "eleves", "id": "el-" + uuid.uuid4().hex[:12], "champs": fiche(Bc, clB, "Intrus", "Act")}]}, actA)
 verifier("un actionnaire n'inscrit pas d'élève dans l'autre centre", r["resultats"][0]["ok"] is False, r)
@@ -551,7 +551,9 @@ _, r = req("sync/pousser", {"ops": [
 verifier("l'enseignant fait l'appel de SA classe du jour", r["resultats"][0]["ok"] is True, r["resultats"][0])
 verifier("l'enseignant ne pointe pas une classe où il n'a pas cours", r["resultats"][1]["ok"] is False, r["resultats"][1])
 _, r = req("sync/pousser", {"ops": [{"op": op(), "t": "seances", "id": sid(auj, clX) + "x", "champs": {"centre_id": Bc, "classe_id": clX, "date": jj(auj), "debut": "16:00", "fin": "18:00"}}]}, actA)
-verifier("un actionnaire ne fait pas l'appel", r["resultats"][0]["ok"] is False, r)
+verifier("un actionnaire ne fait pas l'appel dans l'autre centre", r["resultats"][0]["ok"] is False, r)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "seances", "id": sid(auj, clU), "champs": {"centre_id": A, "classe_id": clU, "date": jj(auj), "debut": "16:00", "fin": "18:00"}}]}, actA)
+verifier("un actionnaire fait l'appel dans SON centre", r["resultats"][0]["ok"] is True, r)
 
 # ── Pouvoirs de l'admin : droits retirés à un partenaire, appliqués par le serveur ──
 _, lst = req("comptes", jeton=adm)

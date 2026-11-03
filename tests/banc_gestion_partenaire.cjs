@@ -8,6 +8,7 @@ const echecs = [];
 const ok = (n, c, d) => { console.log((c ? '  OK    ' : '  ÉCHEC ') + n + (c ? '' : '  → ' + d)); if (!c) echecs.push(n); };
 const aJour = (p) => p.waitForFunction(() => document.getElementById('puce-sync').textContent === 'À jour', null, { timeout: 15000 }).catch(() => {});
 const SUF = Date.now().toString(36).slice(-4).toUpperCase();
+const opId = () => 'op' + Math.random().toString(16).slice(2, 14) + Date.now().toString(16);
 async function login(nav, id, mdp) {
   const ctx = await nav.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
   await ctx.addInitScript(() => { try { Object.defineProperty(navigator, 'share', { value: undefined }); Object.defineProperty(navigator, 'canShare', { value: undefined }); } catch (e) {} });
@@ -81,9 +82,41 @@ const apiDe = (page) => (route, corps) => page.evaluate(async ([route, corps]) =
   // 5. Toujours rien dans l'autre centre
   const autre = (await api('sync/tirer&depuis=0')).lignes.centres.find((c) => c.id !== cid);
   if (autre) {
-    const r = await apiA('sync/pousser', { ops: [{ op: 'o' + SUF + Math.random(), t: 'eleves', id: 'el' + SUF + 'x', champs: { centre_id: autre.id, nom: 'INTRUS', prenoms: 'X', classe_id: '' } }] });
+    const r = await apiA('sync/pousser', { ops: [{ op: opId(), t: 'eleves', id: 'el' + SUF + 'x', champs: { centre_id: autre.id, nom: 'INTRUS', prenoms: 'X', classe_id: '' } }] });
     ok('pas d\'inscription dans un centre où il n\'est pas', r.resultats && r.resultats[0].ok === false, JSON.stringify(r).slice(0, 160));
   }
+  // 7. L'actionnaire fait l'appel.
+  await pa.goto(B + '#/appel'); await pa.waitForTimeout(400);
+  ok('onglet « Appel » dans la barre du bas', await pa.isVisible('.nav-basse a[href="#/appel"]'), '');
+  const seance = await pa.$('a.ligne.creneau');
+  if (seance) {
+    await seance.click(); await pa.waitForSelector('[data-a="pointer"]', { timeout: 8000 }).catch(() => {});
+    const b = await pa.$('[data-a="pointer"][data-v="arrive"]') || await pa.$('[data-a="pointer"]');
+    if (b) { await b.click(); await pa.waitForTimeout(500); await aJour(pa); }
+    ok('l\'actionnaire pointe un élève à l\'appel', !!b && !(await pa.textContent('main')).includes('Consultation seule'), (await pa.textContent('main')).slice(0, 200));
+  } else ok('une classe a cours aujourd\'hui pour tester l\'appel', false, 'aucune séance');
+
+  // 8. Rappel d'échéance (avant la date) au parent et à l'élève.
+  const auj = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  const jourEch = Math.min(28, Number(auj.slice(8)) + 2);
+  const centreAvant = (await api('sync/tirer&depuis=0')).lignes.centres.find((c) => c.id === cid);
+  await api('sync/pousser', { ops: [{ op: opId(), t: 'centres', id: cid, champs: { jour_echeance: jourEch } }] });
+  const elR = 'elr' + SUF.toLowerCase() + Date.now().toString(36);
+  const r7 = await api('sync/pousser', { ops: [{ op: opId(), t: 'eleves', id: elR, champs: { centre_id: cid, classe_id: el.classe_id, nom: 'RAPPEL' + SUF, prenoms: 'Junior', date_inscription: auj, parent_nom: 'Mme Rappel', parent_tel: '690000001', tel_eleve: '690000002', mensualite_due: 10000 } }] });
+  ok('élève avec mensualité et numéros parent / élève', r7.resultats && r7.resultats[0].ok, JSON.stringify(r7).slice(0, 200));
+  await pa.click('#puce-sync'); await aJour(pa); await pa.waitForTimeout(500);
+  await pa.goto(B + '#/accueil'); await pa.goto(B + '#/caisse'); await pa.click('[data-a="caisse-onglet"][data-v="impayes"]'); await pa.waitForTimeout(400);
+  const ligneR = pa.locator(`.ligne.message:has-text("RAPPEL${SUF}")`).first();
+  ok('« Échéance proche » liste l\'élève avant la date', (await pa.textContent('main')).includes('Échéance proche') && (await ligneR.count()) > 0, (await pa.textContent('main')).slice(0, 300));
+  if (await ligneR.count()) {
+    const hrefs = await ligneR.locator('[data-a="relancer"]').evaluateAll((l) => l.map((a) => a.getAttribute('href')));
+    ok('rappel au parent (WhatsApp et SMS) et à l\'élève (WhatsApp)', hrefs.some((h) => h.startsWith('https://wa.me/237690000001')) && hrefs.some((h) => h.startsWith('sms:+237690000001')) && hrefs.some((h) => h.startsWith('https://wa.me/237690000002')), hrefs.join(' | '));
+    const txtEleve = decodeURIComponent((hrefs.find((h) => h.includes('690000002')) || '').split('text=')[1] || '');
+    ok('message à l\'élève : « Bonjour Junior … au plus tard le … »', /^Bonjour Junior, petit rappel/.test(txtEleve) && /au plus tard le/.test(txtEleve), txtEleve);
+    await pa.screenshot({ path: OUT + '/partenaire_rappels.png', fullPage: true });
+  }
+  await api('sync/pousser', { ops: [{ op: opId(), t: 'centres', id: cid, champs: { jour_echeance: Number(centreAvant.jour_echeance) || 10 } }] });
+
   // 6. Chacun ne voit que son rôle ; l'administrateur les voit tous.
   await pa.goto(B + '#/roles'); await pa.waitForSelector('.fiche-role');
   const fichesA = await pa.$$eval('.fiche-role h3', (l) => l.map((x) => x.textContent));
