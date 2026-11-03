@@ -492,3 +492,42 @@ table.matrice { width: 100%; border-collapse: collapse; font-size: 13px; table-l
 .champ input, .champ select, .champ textarea { min-width: 0; max-width: 100%; }
 input[type="date"], input[type="time"], input[type="month"] { min-width: 0; }
 #feuille .panneau { overflow-x: hidden; }
+
+/* ── Agenda ── couleurs par type, reprises de la charte du site */
+.t-rencontre { --vt: #1E499B; } .t-rendez_vous { --vt: #0E7C86; } .t-reunion_parents { --vt: #B03A6E; } .t-echeance { --vt: #A84200; } .t-autre { --vt: #5B4FA8; }
+.calendrier { background: var(--carte); border: 1px solid #E4E9F2; border-radius: var(--rayon-carte); box-shadow: var(--ombre); padding: 10px 8px 8px; }
+.cal-tete, .cal-jours { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.cal-tete span { text-align: center; font-size: 12px; font-weight: 600; color: var(--doux); padding-bottom: 6px; }
+.cal-jour { min-height: 46px; border: 1px solid transparent; border-radius: 10px; background: none; display: grid; justify-items: center; align-content: center; gap: 3px; cursor: pointer; padding: 4px 0; color: var(--titre); }
+.cal-jour b { font-size: 14px; font-weight: 500; }
+.cal-jour.plein b { font-weight: 600; }
+.cal-jour:hover { background: var(--fond); }
+.cal-jour.auj b { background: var(--action); color: var(--action-txt); border-radius: 999px; min-width: 26px; height: 26px; display: grid; place-items: center; font-weight: 600; }
+.cal-jour.choisi { border-color: var(--bleu); background: var(--bleu-pale); }
+.cal-jour .points { display: flex; gap: 3px; min-height: 6px; }
+.cal-jour .points i, .legende-agenda i { width: 6px; height: 6px; border-radius: 50%; background: var(--vt); display: inline-block; }
+.legende-agenda { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 2px 0; font-size: 12px; color: var(--doux); }
+.legende-agenda span { display: inline-flex; align-items: center; gap: 6px; }
+.liste > .ligne.ev:nth-child(n) .pastille, .ev-tete .pastille { --vt: inherit; }
+.badge.type { background: #F3F5FA; color: var(--vt); }
+.ev-tete { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.ev-tete small { color: var(--vt); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.ev-tete h2 { margin: 0; }
+.lien-suite { text-align: right; margin: 8px 2px 0; font-size: 14px; }
+
+/* ── Cloche des notifications (en-tête) ── */
+.cloche { position: relative; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--trait); background: #fff; color: var(--bleu-profond); display: grid; place-items: center; cursor: pointer; flex: none; padding: 0; }
+.cloche .pastille-n { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 11px; font-weight: 600; display: grid; place-items: center; border: 2px solid #fff; }
+.ligne.notif.alerte .pastille { --vt: #A84200; border-color: #A84200; }
+.ligne.notif.danger .pastille { --vt: #B42318; border-color: #B42318; }
+.ligne.notif.ok .pastille { --vt: #17803D; border-color: #17803D; }
+@media (max-width: 440px) {
+  .entete { gap: 8px; }
+  .selecteur-centre { max-width: none; flex: 0 1 auto; min-width: 0; text-overflow: ellipsis; }
+  .puce-sync { padding: 6px 8px; }
+}
+
+.ligne.notif[class*="t-"] .pastille { --vt: inherit; }
+.actions.empile { flex-direction: column; align-items: stretch; }
+.actions.empile .btn { width: 100%; justify-content: center; }
+@media (max-width: 440px) { .ligne.ev .badge.type { display: none; } }

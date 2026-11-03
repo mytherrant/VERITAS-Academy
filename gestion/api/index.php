@@ -21,6 +21,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/_boot.php';
 require_once __DIR__ . '/_auth.php';
 require_once __DIR__ . '/_schema.php';
+g_schema_a_jour();
 
 $route   = trim((string) ($_GET['r'] ?? ''), '/');
 $methode = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -917,6 +918,17 @@ function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, 
     if ($table === 'g_centres') {
         $j = (int) $val('jour_echeance');
         if ($j < 1 || $j > 28) { throw new DomainException('Jour d\'échéance : entre 1 et 28.'); }
+    }
+    if ($table === 'g_evenements') {
+        if (trim((string) $val('titre')) === '') { throw new DomainException('Donnez un titre au rendez-vous.'); }
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $val('date'))) { throw new DomainException('Date du rendez-vous invalide.'); }
+        foreach (['heure', 'fin'] as $c) {
+            $h = (string) $val($c);
+            if ($h !== '' && !preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $h)) { throw new DomainException('Heure invalide (HH:MM).'); }
+        }
+        if (!in_array((string) ($val('type') ?: 'rencontre'), ['rencontre', 'rendez_vous', 'reunion_parents', 'echeance', 'autre'], true)) { throw new DomainException('Type de rendez-vous inconnu.'); }
+        $r = (int) $val('rappel_min');
+        if ($r < 0 || $r > 20160) { throw new DomainException('Rappel : entre 0 et 14 jours.'); }
     }
     if ($table === 'g_annees' && !preg_match('/^\d{4}-\d{4}$/', (string) $val('libelle'))) {
         throw new DomainException('Année : format 2026-2027.');
