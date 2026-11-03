@@ -21,16 +21,18 @@ const pages = w.SCENES_CATALOGUE.map(s => s.f).filter(f => f !== 'espagnol-donde
     const r = await pg.evaluate(() => window.__bancScene());
     const extra = await pg.evaluate(() => {
       const suite = !!document.getElementById('bVersOeuvre');
+      // « Pour aller plus loin » : une ressource gratuite ET une payante, au bilan
+      const res = [].map.call(document.querySelectorAll('#bilan .sc-res'), a => (a.classList.contains('payant') ? 'P' : 'G') + (a.getAttribute('href') ? '' : '?')).join('');
       const o = document.querySelector('.sc-onglet[data-vue=oeuvre]');
       if(o){ o.click(); }
-      return { suite, fiche: o ? document.querySelectorAll('.sc-f-perso').length : -1 };
+      return { suite, res, fiche: o ? document.querySelectorAll('.sc-f-perso').length : -1 };
     });
     if(extra.suite){ suites++; }
     if(extra.fiche > 0){ fiches++; }
     const q = (r.quiz || '').split('/').map(x => x.trim());
     const e = r.erreurs.concat(errs);
-    if(!r.bilan || r.score !== '100%' || q.length < 2 || q[0] !== q[1] || q[1] !== '5' || e.length || extra.fiche === 0){
-      ko.push(f + ' → ' + r.score + ' · quiz ' + r.quiz + ' · fiche ' + extra.fiche + (e.length ? ' · ' + e.join(' ; ') : ''));
+    if(!r.bilan || r.score !== '100%' || q.length < 2 || q[0] !== q[1] || q[1] !== '5' || e.length || extra.fiche === 0 || extra.res !== 'GP'){
+      ko.push(f + ' → ' + r.score + ' · quiz ' + r.quiz + ' · fiche ' + extra.fiche + ' · plus loin ' + extra.res + (e.length ? ' · ' + e.join(' ; ') : ''));
     }
     await pg.close();
   }

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le sorcier Sanga-Titi — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Trois prétendants… un mari de Guillaume Oyônô Mbia : la nuit, autour du feu, Sanga-Titi le sorcier arrive au son du mvet. Atangana est pressé.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103s">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'trois-pretendants-sorcier',
+  discipline: 'Français', niveau: '4e',
+  oeuvre: 'Trois prétendants… un mari', auteur: 'Guillaume Oyônô Mbia',
+  titre: 'Le sorcier Sanga-Titi',
+  decor: 'village', ambiance: 'nuit', lieu: 'Mvoutessi, autour d’un grand feu', moment: 'Acte IV',
+  avertissement: 'Scène imaginée d’après la pièce : les répliques suivies de la référence du livre sont de l’auteur, les autres sont jouées par nos comédiens.',
+  objectif: 'Lire une didascalie comme un mode d’emploi du spectacle. Repérer la satire : la pièce se moque du sorcier… et de ceux qui le croient.',
+  jauges: [
+    { id: 'foi', nom: 'Le village y croit', val: 60, couleur: '#7B5CD6' },
+    { id: 'prix', nom: 'Ce que coûte le sorcier', val: 0, couleur: '#C0392B' }
+  ],
+  personnages: {
+    sangatiti: { nom: 'Sanga-Titi, le sorcier', court: 'Sanga-Titi', couleur: '#5A3A1A', look: { peau: 'tresfonce', vieux: true, cheveux: 'aucun', coiffe: 'couronne', couleurCoiffe: '#C0392B', tenue: 'boubou', habit: '#E9E3CF' } },
+    moboula:   { nom: 'Mô-Boula, sa femme', court: 'Mô-Boula', couleur: '#8A3B6E', look: { peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#E8A413', tenue: 'robe', habit: '#8A3B6E' } },
+    aide:      { nom: 'L’Aide-Sorcier', court: 'L’Aide', couleur: '#5A6275', look: { peau: 'fonce', cheveux: 'ras', habit: '#8A7A5A', bas: '#3A2A1A', objet: 'sac' } },
+    atangana:  { nom: 'Atangana', couleur: '#8A5A2B', look: { peau: 'fonce', cheveux: 'ras', moustache: true, habit: '#9C6B3A', bas: '#4A3A2A', coiffe: 'chapeau' } },
+    mbarga:    { nom: 'Mbarga', couleur: '#2E6B5A', look: { peau: 'fonce', vieux: true, barbe: true, tenue: 'boubou', habit: '#2E6B5A' } },
+    juliette:  { nom: 'Juliette', couleur: '#C0397C', look: { metier: 'eleve', peau: 'fonce', cheveux: 'tresses', tenue: 'jupe' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['juliette', 'atangana', 'mbarga'], txt: 'Il fait déjà nuit. La scène est éclairée par un grand feu autour duquel tous les villageois sont installés en demi-cercle.', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte IV (didascalie)', objet: { i: 'flamme', lib: 'Le grand feu' } },
+    { t: 'recit', entre: ['sangatiti', 'moboula', 'aide'], txt: 'Entre Sanga-Titi : peaux de chats sauvages et de singes autour des reins, plumes de coq et de toucan sur la tête, clochettes aux pieds. Et, dit la didascalie : « Son torse nu est badigeonné au kaolin. »', jauges: { foi: 80 } },
+    { t: 'recit', txt: 'Il chante en s’accompagnant de sa harpe mvet. Sa femme reprend le refrain « pour donner aux villageois le temps de l’apprendre ». Les tam-tams attaquent le rythme du nyeng : tout le monde danse.' },
+    { t: 'question', q: 'Ces lignes ne sont pas dites par un personnage. Qu’est-ce que c’est ?',
+      options: [
+        { txt: 'Des didascalies : les indications de l’auteur pour jouer la scène.', ok: true, retour: 'Décor, costumes, musique, gestes : un vrai mode d’emploi du spectacle.' },
+        { txt: 'Des répliques du sorcier.', retour: 'Personne ne les prononce : ce sont des indications.' },
+        { txt: 'Un monologue.', retour: 'Un monologue est dit par un personnage seul en scène.' }
+      ] },
+    { t: 'dit', qui: 'atangana', emo: 'peur', jeu: 'empressé', txt: 'Assieds-toi donc, ô Sorcier ! Je t’ai invité à venir chez moi parce que...', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte IV' },
+    { t: 'dit', qui: 'sangatiti', emo: 'fier', jeu: 'il l’interrompt sèchement', txt: 'Fie-toi à ma science ! Je sais déjà ce que tu veux me dire !', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte IV', jauges: { foi: 95 } },
+    { t: 'recit', txt: 'Les villageois murmurent, épatés.' },
+    { t: 'dit', qui: 'mbarga', emo: 'fier', jeu: 'il se tourne vers le public', txt: 'Vous voyez ? Il faut des gens comme moi pour trouver de si grands sorciers !', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte IV' },
+    { t: 'question', q: 'Mbarga parle « vers le public ». Quel effet cela produit-il ?',
+      options: [
+        { txt: 'Il nous prend à témoin de sa vanité : c’est comique.', ok: true, retour: 'Il se vante d’avoir trouvé le sorcier, comme si le mérite lui revenait.' },
+        { txt: 'Il nous avertit d’un danger.', retour: 'Pas du tout : il se félicite lui-même.' }
+      ] },
+    { t: 'dit', qui: 'atangana', emo: 'peur', jeu: 'ravi, puis inquiet', txt: 'Tant mieux... tant mieux, mais fais vite ! Il me semble déjà voir ces commissaires de Zoétele et de Sangmélima qui doivent venir m’arrêter.', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte IV' },
+    { t: 'dit', qui: 'sangatiti', jeu: 'il s’assoit, imperturbable', txt: 'Tu sais comme nos ancêtres disaient : « Les fantômes ne parlent jamais avant que la pluie ne soit tombée ! »', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte IV' },
+    { t: 'dit', qui: 'atangana', jeu: 'il comprend aussitôt', txt: 'Ah Oyônô ! Va m’attraper le bélier que nous avons gardé pour le sorcier !', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte IV', jauges: { prix: 60 } },
+    { t: 'dit', qui: 'sangatiti', emo: 'joie', txt: 'Tu es vraiment sage !', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte IV', jauges: { prix: 80 } },
+    { t: 'question', q: 'Le sorcier refuse de parler, puis félicite Atangana dès qu’il promet le bélier. Que veut montrer l’auteur ?',
+      options: [
+        { txt: 'Que le sorcier se fait d’abord payer : sa « science » a un prix.', ok: true, retour: 'Le proverbe sur la pluie veut dire : pas de révélation sans cadeau. C’est la satire.' },
+        { txt: 'Que le sorcier aime les animaux.', retour: 'Il aime surtout ce qu’on lui donne.' },
+        { txt: 'Qu’Atangana est très généreux.', retour: 'Il est surtout pressé et effrayé.' }
+      ] },
+    { t: 'pense', qui: 'juliette', emo: 'doute', txt: 'Un bélier pour deviner ce que tout le village sait déjà… Je me demande qui sera le plus berné ce soir.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · didascalie ou réplique ?', consigne: 'Classe chaque phrase de la pièce.',
+      cats: ['Didascalie', 'Réplique'],
+      items: [
+        { txt: 'Il fait déjà nuit.', cat: 0 },
+        { txt: 'Fie-toi à ma science !', cat: 1 },
+        { txt: 'Les villageois murmurent, épatés.', cat: 0 },
+        { txt: 'Tu es vraiment sage !', cat: 1 },
+        { txt: 'Il s’assoit, imperturbable.', cat: 0 }
+      ],
+      bravo: 'Les répliques se disent ; les didascalies se jouent.' },
+    { t: 'remarque', titre: 'Le mvet', txt: 'Le mvet est à la fois une harpe-cithare, tendue sur une tige de raphia et des calebasses, et un genre : la grande épopée chantée du Sud-Cameroun et du Gabon. Oyônô Mbia l’invite sur scène pour faire du théâtre une fête de village.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · la nuit du sorcier',
+    intro: 'Règle la crédulité du village, le spectacle du sorcier et la peur d’Atangana : qui sort gagnant de la nuit ?',
+    persos: ['sangatiti', 'atangana', 'mbarga', 'juliette'],
+    curseurs: [
+      { id: 'credule', nom: 'Crédulité du village', val: 85, bas: 'sceptique', haut: 'épaté', lecture: { haut: '« Les villageois murmurent, épatés. »', bas: 'Un village qui doute regarde les mains du sorcier.' } },
+      { id: 'spectacle', nom: 'Spectacle du sorcier', val: 90, bas: 'raté', haut: 'éblouissant', lecture: { haut: 'Plumes, kaolin, mvet, tam-tams : il éclipse tout le monde.', bas: 'Sans costume ni musique, il ne reste qu’un homme qui réclame un bélier.' } },
+      { id: 'peur', nom: 'Peur d’Atangana', val: 90, bas: 'serein', haut: 'affolé', lecture: { haut: 'Il voit déjà les commissaires venir l’arrêter.', bas: 'Un homme serein marchande.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans la pièce', icone: 'livre', valeurs: { credule: 85, spectacle: 90, peur: 90 } },
+      { nom: 'Et si le village doutait ?', icone: 'oeil', valeurs: { credule: 15 } },
+      { nom: 'Et si le spectacle ratait ?', icone: 'muet', valeurs: { spectacle: 15 } }
+    ],
+    liens: [
+      { a: 'atangana', b: 'sangatiti', type: 'peur', lib: 'il s’en remet', base: .3, poids: { peur: .6 } },
+      { a: 'sangatiti', b: 'atangana', type: 'domination', lib: 'le bélier', base: .4, poids: { credule: .4 } },
+      { a: 'mbarga', b: 'sangatiti', type: 'alliance', lib: 'il l’a trouvé', base: .6 },
+      { a: 'juliette', b: 'sangatiti', type: 'conflit', lib: 'elle doute', base: .5 }
+    ],
+    issue: function(v){
+      if(v.credule < 35){ return { niveau: 'ok', badge: 'Le village démasque le sorcier', recit: 'Les villageois rient sous cape : « Il sait déjà ce que tu veux lui dire ? Tout Mvoutessi le sait ! »', apres: 'Sans crédulité, le sorcier n’a plus de pouvoir : c’est ce que la satire veut nous apprendre.', themes: ['esprit critique', 'satire'] }; }
+      if(v.spectacle < 35){ return { niveau: 'moyen', badge: 'Le spectacle tombe à plat', recit: 'Pas de musique, pas de danse : le sorcier ne fait plus peur à personne, et Atangana hésite à donner son bélier.', apres: 'Le pouvoir du sorcier tient beaucoup à sa mise en scène.', themes: ['théâtre', 'apparence'] }; }
+      return { niveau: 'ko', badge: 'Le sorcier encaisse', recit: 'Le village est conquis, Atangana affolé : le bélier change de main avant même la première révélation.', apres: 'C’est l’acte IV : la pièce rit du sorcier, et plus encore de ceux qui le paient.', themes: ['satire', 'crédulité', 'argent'] };
+    }
+  },
+  fiche: {"accroche": "Trois prétendants, des billets comptés à voix haute, un sorcier consulté la nuit autour du feu… et une collégienne qui demande : « Je suis donc à vendre ? » Comment Juliette va-t-elle déjouer toute sa famille ?", "resume": "À Mvoutessi, Juliette rentre du collège et apprend qu’elle est promise à Ndi, qui a versé cent mille francs, et qu’un grand fonctionnaire va offrir davantage. Toute la famille compte la dot à voix haute. Mais Juliette et ses amis préparent autre chose. Une comédie écrite, dit l’auteur, pour divertir et non pour moraliser.", "personnages": [{"nom": "Juliette", "cle": "juliette", "role": "collégienne à Libamba, qui veut choisir elle-même."}, {"nom": "Atangana", "cle": "atangana", "role": "son père, qui veut la dot la plus élevée possible."}, {"nom": "Abessolo", "cle": "abessolo", "role": "le grand-père : « Depuis quand est-ce que les femmes parlent à Mvoutessi ? »"}, {"nom": "Bella", "cle": "bella", "role": "la grand-mère, qui rêve d’« un vrai blanc » pour sa petite-fille."}, {"nom": "Matalina", "cle": "matalina", "role": "la cousine, qui voudrait être à sa place."}, {"nom": "Oko", "cle": "oko", "role": "lycéen au Lycée Leclerc, à Yaoundé, sans un franc."}, {"nom": "Mbia", "role": "le grand fonctionnaire de Sangmélima, ses médailles et ses billets."}], "aLire": [{"ou": "La préface", "pourquoi": "L’anecdote vraie du car de Mbalmayo, où une passagère proclame l’auteur « champion de l’émancipation de la femme africaine »… à son grand embarras."}, {"ou": "L’acte II", "pourquoi": "L’arrivée de Mbia, avec chauffeur, médailles et billets : le village est ébloui."}, {"ou": "L’acte IV", "pourquoi": "La consultation de Sanga-Titi le Sorcier, la nuit, autour d’un grand feu."}], "siTuAimes": "rire en famille : l’auteur veut que la pièce se joue en plein air, et que le public chante et danse avec les acteurs.", "reperes": ["Auteur : Guillaume Oyônô Mbia, né en 1939 à Mvoutessi, le village de la pièce", "Pièce imaginée en 1959, en classe de seconde, pour amuser ses camarades de Libamba", "Comédie en cinq actes"], "themes": ["la dot", "le mariage forcé", "la satire", "les générations"], "cahier": {"lib": "Le cahier VÉRITAS des œuvres de 4e", "href": "../livrets/oeuvres-4e.html"}},
+  quiz: [
+    { q: 'Comment la scène de l’acte IV est-elle éclairée ?', options: [ { txt: 'Par un grand feu.', ok: true, retour: 'Les villageois sont assis en demi-cercle autour.' }, { txt: 'Par des lampes-tempête.', retour: 'Non : par un grand feu.' } ] },
+    { q: 'De quel instrument joue Sanga-Titi ?', options: [ { txt: 'Du mvet, une harpe-cithare.', ok: true, retour: 'Instrument et genre épique à la fois.' }, { txt: 'Du balafon.', retour: 'Non : du mvet.' } ] },
+    { q: 'Pourquoi Mô-Boula chante-t-elle le refrain une ou deux fois ?', options: [ { txt: 'Pour laisser aux villageois le temps de l’apprendre.', ok: true, retour: 'Et tout le monde se met à chanter en claquant des mains.' }, { txt: 'Parce que le sorcier a oublié les paroles.', retour: 'Non : pour que le village l’apprenne.' } ] },
+    { q: 'Que réclame en somme le proverbe « Les fantômes ne parlent jamais avant que la pluie ne soit tombée » ?', options: [ { txt: 'Un paiement avant toute révélation.', ok: true, retour: 'Atangana comprend aussitôt et fait chercher le bélier.' }, { txt: 'D’attendre la saison des pluies.', retour: 'C’est une image : il veut être payé d’abord.' } ] },
+    { q: 'Qu’est-ce qu’une satire ?', options: [ { txt: 'Une œuvre qui se moque des défauts d’une société pour les corriger.', ok: true, retour: 'Ici : la crédulité, l’argent, la vanité.' }, { txt: 'Une pièce triste qui finit mal.', retour: 'Ça, c’est plutôt une tragédie.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Les didascalies sont les indications de l’auteur : décor, costumes, gestes, musique.',
+      'Sanga-Titi impressionne par son spectacle : kaolin, plumes, mvet, tam-tams.',
+      'Il ne « révèle » rien avant d’être payé : le bélier d’abord.',
+      'La satire se moque du sorcier et de la crédulité de ceux qui le paient.'
+    ],
+    ecrire: 'Écris une courte didascalie (dix lignes) pour l’entrée d’un personnage de ton choix : costume, lumière, musique, gestes. Ton lecteur doit pouvoir la jouer.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103s"></script>
+<script src="scene.js?v=20261103s"></script>
+</body>
+</html>
