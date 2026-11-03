@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.11.1';
+  var VERSION = '0.11.2';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -601,10 +601,10 @@
   function formulaireInstallation(etat) {
     $('#zone-connexion').innerHTML = '<div class="note info">Première mise en service : créez le compte administrateur. Le jeton d\'installation se trouve dans <b>api/payment_config.php</b> (G_INSTALL_TOKEN).</div>' +
       '<form data-f="installation" data-installe="' + (etat.installe ? '1' : '0') + '">' +
-      '<label class="champ"><span>Jeton d\'installation</span><input type="password" name="jeton" required autocomplete="off"></label>' +
+      '<label class="champ"><span>Jeton d\'installation</span><span class="mdp-ligne"><input type="password" name="jeton" required autocomplete="off"><button type="button" class="oeil" data-a="voir-mdp" aria-label="Afficher le mot de passe" aria-pressed="false">' + ico('eye') + '</button></span></label>' +
       '<label class="champ"><span>Votre nom</span><input type="text" name="nom" required value="Jacques Miterand TAKOU"></label>' +
       '<label class="champ"><span>Identifiant</span><input type="text" name="identifiant" required autocapitalize="none" spellcheck="false" placeholder="jacques"></label>' +
-      '<label class="champ"><span>Mot de passe</span><input type="password" name="mdp" required minlength="10" autocomplete="new-password"><small>10 caractères minimum.</small></label>' +
+      '<label class="champ"><span>Mot de passe</span><span class="mdp-ligne"><input type="password" name="mdp" required minlength="10" autocomplete="new-password"><button type="button" class="oeil" data-a="voir-mdp" aria-label="Afficher le mot de passe" aria-pressed="false">' + ico('eye') + '</button></span><small>10 caractères minimum.</small></label>' +
       '<button class="btn plein" type="submit">Installer et me connecter</button></form>';
   }
 
@@ -3840,7 +3840,8 @@
     },
     'fermer-et-aller': function (el) { fermerFeuille(); if (el.dataset.onglet) CAI.onglet = el.dataset.onglet; if (el.dataset.eq) { EQ.onglet = el.dataset.eq; EQ.centre = el.dataset.centre; } var h = el.getAttribute('href'); if (location.hash === h) rendre(); else location.hash = h; },
     'voir-mdp': function (el) {
-      var c = $('#champ-mdp'); if (!c) return;
+      // Chaque champ secret (mot de passe, jeton, code) a son œil : il bascule le champ voisin.
+      var c = el.closest('.mdp-ligne') && el.closest('.mdp-ligne').querySelector('input'); if (!c) return;
       var voir = c.type === 'password'; c.type = voir ? 'text' : 'password';
       el.setAttribute('aria-pressed', voir ? 'true' : 'false'); el.setAttribute('aria-label', voir ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
       el.classList.toggle('on', voir); c.focus();
@@ -4090,15 +4091,15 @@
     },
     'changer-mdp': function () {
       ouvrirFeuille('<h2>Changer mon mot de passe</h2><form data-f="mdp">' +
-        '<label class="champ"><span>Mot de passe actuel</span><input type="password" name="ancien" required autocomplete="current-password"></label>' +
-        '<label class="champ"><span>Nouveau mot de passe</span><input type="password" name="nouveau" required minlength="8" autocomplete="new-password"><small>8 caractères minimum.</small></label>' +
-        '<label class="champ"><span>Confirmer</span><input type="password" name="confirme" required minlength="8" autocomplete="new-password"></label>' +
+        '<label class="champ"><span>Mot de passe actuel</span><span class="mdp-ligne"><input type="password" name="ancien" required autocomplete="current-password"><button type="button" class="oeil" data-a="voir-mdp" aria-label="Afficher le mot de passe" aria-pressed="false">' + ico('eye') + '</button></span></label>' +
+        '<label class="champ"><span>Nouveau mot de passe</span><span class="mdp-ligne"><input type="password" name="nouveau" required minlength="8" autocomplete="new-password"><button type="button" class="oeil" data-a="voir-mdp" aria-label="Afficher le mot de passe" aria-pressed="false">' + ico('eye') + '</button></span><small>8 caractères minimum.</small></label>' +
+        '<label class="champ"><span>Confirmer</span><span class="mdp-ligne"><input type="password" name="confirme" required minlength="8" autocomplete="new-password"><button type="button" class="oeil" data-a="voir-mdp" aria-label="Afficher le mot de passe" aria-pressed="false">' + ico('eye') + '</button></span></label>' +
         '<div class="actions"><button class="btn" type="submit">Changer</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
     },
     'code-pin': function () {
       metaLire('pin').then(function (p) {
         ouvrirFeuille('<h2>Code de verrouillage</h2><p class="doux">Après 5 minutes hors de l\'application, ce code est demandé avant d\'afficher les données. Il reste sur ce téléphone.</p>' +
-          '<form data-f="pin"><label class="champ"><span>Nouveau code (4 chiffres)</span><input type="password" name="pin" inputmode="numeric" pattern="\\d{4}" maxlength="4" required autocomplete="off"></label>' +
+          '<form data-f="pin"><label class="champ"><span>Nouveau code (4 chiffres)</span><span class="mdp-ligne"><input type="password" name="pin" inputmode="numeric" pattern="\\d{4}" maxlength="4" required autocomplete="off"><button type="button" class="oeil" data-a="voir-mdp" aria-label="Afficher le mot de passe" aria-pressed="false">' + ico('eye') + '</button></span></label>' +
           '<div class="actions"><button class="btn" type="submit">' + (p ? 'Changer le code' : 'Activer') + '</button>' + (p ? '<button class="btn danger" type="button" data-a="pin-retirer">Désactiver</button>' : '') +
           '<button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
       });

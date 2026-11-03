@@ -32,7 +32,19 @@ const ok = (n, c, d) => { console.log((c ? '  OK    ' : '  ÉCHEC ') + n + (c ? 
   await page.fill('input[name=identifiant]', ' Jacques '); await page.fill('#champ-mdp', 'MotDePasse-Test-2026');
   await page.click('button[type=submit]'); await page.waitForSelector('text=Bonjour');
   ok('« Jacques » avec majuscule et espaces : connexion réussie', true, '');
-  await page.click('[data-a="sync"]').catch(() => {});
+  // Tous les champs secrets ont leur œil : « Changer mon mot de passe » (3 champs indépendants), code.
+  await page.goto(B + '#/moi'); await page.click('[data-a="changer-mdp"]'); await page.waitForSelector('#feuille input[name=ancien]');
+  const yeux = await page.$$('#feuille [data-a="voir-mdp"]');
+  ok('« Changer mon mot de passe » : un œil par champ (3)', yeux.length === 3, yeux.length);
+  await yeux[1].click();
+  const types = await page.$$eval('#feuille .mdp-ligne input', (l) => l.map((i) => i.type).join(','));
+  ok('l\'œil du nouveau mot de passe n\'affiche que ce champ', types === 'password,text,password', types);
+  await page.click('#feuille [data-a="fermer"]').catch(() => {});
+  await page.goto(B + '#/moi'); await page.click('[data-a="code-pin"]'); await page.waitForSelector('#feuille input[name=pin]');
+  ok('code de verrouillage : œil présent', await page.isVisible('#feuille [data-a="voir-mdp"]'), '');
+  await page.click('#feuille [data-a="voir-mdp"]');
+  ok('…qui affiche le code', (await page.getAttribute('#feuille input[name=pin]', 'type')) === 'text', '');
+  await page.click('#feuille [data-a="fermer"]').catch(() => {});
 
   // Téléphone en retard : la route renvoie une version plus récente.
   await page.route('**/api/index.php?r=version*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, version: '9.9.9' }) }));
