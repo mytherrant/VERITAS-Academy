@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La fiesta de Kevin — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’espagnol (Première) : les comportements à risque chez les jeunes (alcool, drogue, réseaux), la prévention ; donner un conseil avec le subjonctif.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '1re-espagnol-riesgo',
+  discipline: 'Espagnol', niveau: '1re', langue: 'es-ES',
+  titre: 'La fiesta de Kevin',
+  decor: 'bar', lieu: 'Una fiesta de cumpleaños', moment: 'Sábado por la noche',
+  objectif: 'Identifier les comportements à risque chez les jeunes (alcool, drogue, conduite dangereuse, réseaux) et les messages de prévention ; donner un conseil ou exprimer une crainte avec le subjonctif (te aconsejo que…, tengo miedo de que…).',
+  programme: 'Progression harmonisée 1re · Module 1, leçons 3-4 (les comportements à risque chez les jeunes : identifier, sensibiliser)',
+  jauges: [
+    { id: 'riesgo', nom: 'Riesgo', val: 20, couleur: '#D43F2E' },
+    { id: 'espanol', nom: 'Español', val: 25, couleur: '#1E499B' }
+  ],
+  personnages: {
+    kevin:  { nom: 'Kevin', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } },
+    marta:  { nom: 'Marta', couleur: '#B0503A', look: { metier: 'eleve', tenue: 'jupe', peau: 'mat', cheveux: 'queue' } },
+    hugo:   { nom: 'Hugo', couleur: '#3A3A44', look: { peau: 'fonce', cheveux: 'ras', habit: '#3A3A44', objet: 'sac' } },
+    madre:  { nom: 'La madre de Kevin', couleur: '#5E8A3A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#5E8A3A', habit: '#5E8A3A' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['kevin', 'marta'], txt: 'Kevin cumple dieciocho años. Organiza una fiesta con sus compañeros de clase.', trad: 'Kevin a dix-huit ans. Il organise une fête avec ses camarades de classe.', objet: { i: 'gateau', lib: '¡Feliz cumpleaños!' } },
+    { t: 'dit', qui: 'kevin', emo: 'joie', txt: '¡Esta noche es mi noche! Música, baile, y todos mis amigos.', trad: 'Ce soir, c’est ma soirée ! Musique, danse, et tous mes amis.' },
+    { t: 'recit', entre: ['hugo'], txt: 'Hugo llega con una bolsa.', trad: 'Hugo arrive avec un sac.', jauges: { riesgo: 45 } },
+    { t: 'dit', qui: 'hugo', jeu: 'en voz baja', txt: 'Mira lo que traigo: whisky en sobres y unos cigarrillos especiales. Para que la fiesta sea de verdad.', trad: 'Regarde ce que j’apporte : du whisky en sachets et des cigarettes « spéciales ». Pour que la fête soit une vraie fête.' },
+    { t: 'question', q: 'Quels comportements à risque Hugo propose-t-il ?',
+      options: [
+        { txt: 'La consommation d’alcool fort et probablement de drogue.', ok: true, retour: 'Les « cigarettes spéciales » désignent souvent du cannabis. Alcool et drogue : deux comportements à risque majeurs chez les jeunes.' },
+        { txt: 'Aucun : il apporte des boissons sucrées.', retour: 'Non : « whisky en sobres » = du whisky en sachets.' }
+      ] },
+    { t: 'dit', qui: 'marta', emo: 'colere', txt: 'Hugo, te aconsejo que te lleves eso. No quiero que nadie se ponga enfermo.', trad: 'Hugo, je te conseille de remporter ça. Je ne veux pas que quelqu’un tombe malade.' },
+    { t: 'remarque', titre: 'Conseiller, craindre : le subjonctif', txt: 'Après un verbe de conseil, de volonté ou de crainte suivi de « que » et d’un autre sujet, on emploie le subjonctif : Te aconsejo que no bebas. No quiero que nadie se ponga enfermo. Tengo miedo de que tengas un accidente.' },
+    { t: 'atelier', mode: 'tri', titre: 'Taller · ¿riesgo o prevención?', consigne: 'Classe chaque phrase.',
+      cats: ['Conducta de riesgo', 'Prevención'],
+      items: [
+        { txt: 'Conducir una moto después de beber.', cat: 0 },
+        { txt: 'Hablar con un adulto de confianza.', cat: 1 },
+        { txt: 'Probar una droga para « ser como los demás ».', cat: 0 },
+        { txt: 'Saber decir « no » sin vergüenza.', cat: 1 },
+        { txt: 'Publicar fotos íntimas en las redes.', cat: 0 },
+        { txt: 'Volver a casa con un amigo sobrio.', cat: 1 }
+      ],
+      bravo: 'Reconocer el riesgo es el primer paso para protegerse.', jauges: { espanol: 50 } },
+    { t: 'choix', qui: 'kevin', q: 'Tu es Kevin. C’est ta fête, Hugo insiste. Que fais-tu ?',
+      options: [
+        { txt: '« Vale, solo un poco. » (D’accord, juste un peu.)', consequence: 'À minuit, deux amis sont malades et un autre veut rentrer en moto. La fête tourne mal.', jauges: { riesgo: 40 } },
+        { txt: '« No, gracias. En mi fiesta, sin alcohol ni drogas. Quédate y baila con nosotros. » (Non, merci. À ma fête, ni alcool ni drogue. Reste et danse avec nous.)', consequence: 'Tu refuses sans exclure Hugo. Quelques-uns grognent, puis tout le monde danse.', jauges: { riesgo: -30, espanol: 15 } }
+      ],
+      oeuvre: 'Savoir dire non à la pression du groupe est une compétence qui s’apprend : refuser clairement, proposer autre chose.' },
+    { t: 'dit', qui: 'madre', entre: ['madre'], jeu: 'a medianoche', txt: 'Kevin, tengo miedo de que alguien vuelva solo en moto. Llamad a un taxi o quedaos aquí.', trad: 'Kevin, j’ai peur que quelqu’un rentre seul en moto. Appelez un taxi ou restez dormir ici.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Taller · construye la frase', consigne: 'Remets les mots dans l’ordre : « Je te conseille de ne pas boire d’alcool. »',
+      items: ['Te', 'aconsejo', 'que', 'no', 'bebas', 'alcohol.'],
+      bravo: 'Te aconsejo que no bebas alcohol : subjonctif après « aconsejo que ».', jauges: { espanol: 75 } },
+    { t: 'dit', qui: 'marta', emo: 'joie', txt: '¡La mejor fiesta del año! Y todos en casa sanos y salvos.', trad: 'La meilleure fête de l’année ! Et tout le monde rentré sain et sauf.', jauges: { riesgo: 5, espanol: 85 } }
+  ],
+  labo: {
+    titre: 'Laboratorio · la presión del grupo',
+    intro: 'Règle la pression du groupe, l’information sur les risques et la présence d’adultes de confiance : comment finit la soirée ?',
+    persos: ['kevin', 'marta', 'hugo', 'madre'],
+    curseurs: [
+      { id: 'presion', nom: 'Pression du groupe (presión)', val: 60, bas: 'faible', haut: 'forte' },
+      { id: 'informacion', nom: 'Information sur les risques', val: 50, bas: 'aucune', haut: 'complète' },
+      { id: 'adultos', nom: 'Adultes de confiance (adultos)', val: 50, bas: 'absents', haut: 'présents et à l’écoute' }
+    ],
+    scenarios: [
+      { nom: 'La fiesta de Kevin', icone: 'gateau', valeurs: { presion: 60, informacion: 50, adultos: 50 } },
+      { nom: 'Todos beben', icone: 'groupe', valeurs: { presion: 95, informacion: 10, adultos: 10 } },
+      { nom: 'Saber decir no', icone: 'muet', valeurs: { presion: 30, informacion: 85, adultos: 80 } }
+    ],
+    liens: [
+      { a: 'hugo', b: 'kevin', type: 'domination', lib: 'presión', base: .3, poids: { presion: .6 } },
+      { a: 'marta', b: 'kevin', type: 'alliance', lib: 'amiga', base: .5, poids: { informacion: .3 } },
+      { a: 'madre', b: 'kevin', type: 'amour', lib: 'madre', base: .6, poids: { adultos: .3 } }
+    ],
+    issue: function(v){
+      if(v.presion > 75 && v.informacion < 40){ return { niveau: 'ko', badge: 'Noche en el hospital', recit: 'Tout le monde boit pour faire comme les autres : intoxication, bagarre, accident de moto.', apres: 'La pression du groupe est plus forte quand on ignore les risques.', themes: ['alcool', 'pression du groupe'] }; }
+      if(v.informacion > 65 && v.adultos > 60){ return { niveau: 'ok', badge: 'Sanos y salvos', recit: 'Les jeunes connaissent les risques, osent dire non et savent à qui parler : la fête est réussie.', apres: 'La prévention marche quand elle s’appuie sur l’information et la confiance.', themes: ['prévention'] }; }
+      return { niveau: 'moyen', badge: 'Un susto', recit: 'Quelques-uns boivent trop ; un adulte intervient à temps.', apres: 'Une peur qui aurait pu être évitée.', themes: ['vigilance'] };
+    }
+  },
+  quiz: [
+    { q: 'Que signifie « una conducta de riesgo » ?', options: [
+      { txt: 'Un comportement à risque.', ok: true, retour: 'Alcool, drogue, conduite dangereuse…' },
+      { txt: 'Une bonne conduite.', retour: 'Non.' } ] },
+    { q: 'Complète : « Te aconsejo que no … » (beber)', options: [
+      { txt: 'bebas', ok: true, retour: 'Subjonctif après « aconsejo que ».' },
+      { txt: 'bebes', retour: 'C’est l’indicatif.' } ] },
+    { q: 'Que veut dire « tengo miedo de que… » ?', options: [
+      { txt: 'J’ai peur que…', ok: true, retour: 'Suivi du subjonctif.' },
+      { txt: 'J’ai envie de…', retour: 'Non.' } ] },
+    { q: 'Quelle attitude relève de la prévention ?', options: [
+      { txt: 'Saber decir « no ».', ok: true, retour: 'Savoir refuser.' },
+      { txt: 'Conducir después de beber.', retour: 'C’est un comportement à risque.' } ] },
+    { q: 'Que signifie « sanos y salvos » ?', options: [
+      { txt: 'Sains et saufs.', ok: true, retour: 'Tout le monde est rentré sans accident.' },
+      { txt: 'Fatigués et tristes.', retour: 'Non.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Vocabulaire : la conducta de riesgo, el alcohol, la droga, la presión del grupo, la prevención, decir que no, sano y salvo.',
+      'Subjonctif après un verbe de conseil, de volonté ou de crainte : te aconsejo que no bebas, no quiero que…, tengo miedo de que…',
+      'Prévenir : s’informer, savoir refuser, parler à un adulte de confiance, ne pas conduire après avoir bu.'
+    ],
+    ecrire: 'Escribe un cartel de prevención (cinq phrases) para tu instituto. Utilise au moins trois fois le subjonctif (te aconsejamos que…, es importante que…).'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

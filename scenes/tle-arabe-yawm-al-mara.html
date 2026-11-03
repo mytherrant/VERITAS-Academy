@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>اليوم العالمي للمرأة — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’arabe (Terminale) : le 8 mars, les femmes et les métiers ; la phrase nominale (mubtada’ et khabar), les types de khabar, le féminin des noms de métiers.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-arabe-8-mars',
+  discipline: 'Arabe', niveau: 'Terminale', langue: 'ar-SA', langueRecit: 'fr-FR',
+  titre: 'Le 8 mars · اليوم العالمي للمرأة',
+  decor: 'classe', lieu: 'Un lycée de Maroua', moment: 'Le 8 mars',
+  objectif: 'Comprendre un dialogue sur la Journée internationale de la femme et les métiers ; analyser la phrase nominale (المبتدأ والخبر) et les types de khabar ; former le féminin des noms de métiers avec ة.',
+  programme: 'Progression harmonisée Tle · Module 1 (vie familiale et socioculturelle), leçon 1 (femmes et métiers), leçon 2 (le 8 mars), leçon 3 (les types d’attribut)',
+  jauges: [
+    { id: 'egalite', nom: 'Égalité des chances', val: 35, couleur: '#1F9D5B' },
+    { id: 'arabe', nom: 'Arabe (العربية)', val: 20, couleur: '#1E499B' }
+  ],
+  personnages: {
+    ustadh: { nom: 'الأستاذ موسى (M. Moussa)', couleur: '#2B3A55', look: { metier: 'enseignant', tenue: 'boubou', peau: 'brun', cheveux: 'ras', coiffe: 'chechia', couleurCoiffe: '#F2EEE3', habit: '#E9E3CF', barbe: true } },
+    fatima: { nom: 'فاطمة (Fatima)', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'robe', peau: 'brun', coiffe: 'voile', couleurCoiffe: '#C0397C' } },
+    ali:    { nom: 'علي (Ali)', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'brun', cheveux: 'court' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['ustadh', 'fatima', 'ali'], txt: 'C’est le 8 mars. Au lycée de Maroua, M. Moussa commence le cours d’arabe par une question.', objet: { i: 'fier', lib: 'Le 8 mars' } },
+    { t: 'dit', qui: 'ustadh', txt: 'اليوم هو الثامن من مارس، اليوم العالمي للمرأة.', pron: 'al-yawm huwa th-thāmin min māris, al-yawm al-ʿālamī lil-marʾa.', trad: 'Aujourd’hui, c’est le 8 mars, la Journée internationale de la femme.' },
+    { t: 'dit', qui: 'ali', emo: 'doute', txt: 'لماذا نحتفل بهذا اليوم؟', pron: 'limādhā naḥtafilu bi-hādhā l-yawm?', trad: 'Pourquoi célèbre-t-on cette journée ?' },
+    { t: 'dit', qui: 'ustadh', txt: 'نحتفل بحقوق المرأة وبعملها في المجتمع.', pron: 'naḥtafilu bi-ḥuqūqi l-marʾa wa-bi-ʿamalihā fī l-mujtamaʿ.', trad: 'Nous célébrons les droits de la femme et son travail dans la société.', jauges: { arabe: 35 } },
+    { t: 'dit', qui: 'fatima', emo: 'fier', txt: 'أمي طبيبة في المستشفى.', pron: 'ummī ṭabība fī l-mustashfā.', trad: 'Ma mère est médecin à l’hôpital.' },
+    { t: 'remarque', titre: 'La phrase nominale : المبتدأ والخبر', txt: 'Une phrase nominale (جملة اسمية) commence par un nom : le sujet, المبتدأ (al-mubtadaʾ), puis l’attribut, الخبر (al-khabar). Dans « أمي طبيبة », أمي est le mubtadaʾ, طبيبة est le khabar. Pas de verbe « être » au présent.' },
+    { t: 'remarque', titre: 'Les types de khabar', txt: 'Le khabar peut être : un mot (مفرد) : أمي طبيبة ; une phrase (جملة) : أمي تعمل في المستشفى (ma mère travaille à l’hôpital) ; un groupe prépositionnel (شبه جملة) : أمي في المستشفى (ma mère est à l’hôpital).' },
+    { t: 'question', q: 'Dans « أمي في المستشفى » (ma mère est à l’hôpital), de quel type est le khabar ?',
+      options: [
+        { txt: 'Un groupe prépositionnel (شبه جملة) : في المستشفى.', ok: true, retour: 'في + nom : c’est une « quasi-phrase ».' },
+        { txt: 'Un mot seul (مفرد).', retour: 'Le mot seul, ce serait طبيبة.' },
+        { txt: 'Une phrase verbale (جملة).', retour: 'Il n’y a pas de verbe ici.' }
+      ] },
+    { t: 'dit', qui: 'ali', txt: 'وأختي مهندسة.', pron: 'wa-ukhtī muhandisa.', trad: 'Et ma sœur est ingénieure.', jauges: { egalite: 50 } },
+    { t: 'remarque', titre: 'Le féminin des métiers', txt: 'On ajoute souvent ة (tāʾ marbūṭa) : طبيب → طبيبة (médecin), مهندس → مهندسة (ingénieur), معلم → معلمة (enseignant), ممرض → ممرضة (infirmier).' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · masculin ou féminin ?', consigne: 'Classe chaque nom de métier.',
+      cats: ['Masculin (مذكر)', 'Féminin (مؤنث)'],
+      items: [
+        { txt: 'طبيبة (ṭabība)', cat: 1 },
+        { txt: 'مهندس (muhandis)', cat: 0 },
+        { txt: 'معلمة (muʿallima)', cat: 1 },
+        { txt: 'ممرض (mumarriḍ)', cat: 0 },
+        { txt: 'مهندسة (muhandisa)', cat: 1 }
+      ],
+      bravo: 'La ة finale marque très souvent le féminin.', jauges: { arabe: 60 } },
+    { t: 'dit', qui: 'ali', emo: 'doute', jeu: 'il hésite', txt: 'لكن بعض الناس يقولون: العمل للرجال فقط.', pron: 'lākin baʿḍu n-nās yaqūlūn: al-ʿamalu lir-rijāli faqaṭ.', trad: 'Mais certaines personnes disent : le travail, c’est seulement pour les hommes.' },
+    { t: 'choix', qui: 'fatima', q: 'Tu es Fatima. Que réponds-tu à Ali ?',
+      options: [
+        { txt: 'Je me tais.', consequence: 'L’idée reçue reste sans réponse.', jauges: { egalite: -10 } },
+        { txt: 'أريد أن أصبح مهندسة. (urīdu an uṣbiḥa muhandisa — je veux devenir ingénieure.)', consequence: 'Tu réponds par ton projet : c’est l’argument le plus fort.', jauges: { egalite: 25, arabe: 15 } }
+      ],
+      oeuvre: 'Le 8 mars rappelle que les femmes ont droit à l’éducation et au travail, dans tous les métiers.' },
+    { t: 'dit', qui: 'ustadh', emo: 'joie', txt: 'المرأة تستطيع أن تعمل في كل المهن.', pron: 'al-marʾa tastaṭīʿu an taʿmala fī kulli l-mihan.', trad: 'La femme peut travailler dans tous les métiers.', jauges: { egalite: 85, arabe: 80 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · les métiers des femmes',
+    intro: 'Règle la scolarisation des filles, les préjugés et l’exemple des femmes de la famille : combien de filles de la classe réalisent leur projet ?',
+    persos: ['fatima', 'ali', 'ustadh'],
+    curseurs: [
+      { id: 'ecole', nom: 'Scolarisation des filles', val: 60, bas: 'faible', haut: 'complète' },
+      { id: 'prejuges', nom: 'Préjugés', val: 55, bas: 'rares', haut: 'forts' },
+      { id: 'modeles', nom: 'Modèles féminins (mère, sœur)', val: 60, bas: 'absents', haut: 'nombreux' }
+    ],
+    scenarios: [
+      { nom: 'Le 8 mars en classe', icone: 'ecole', valeurs: { ecole: 60, prejuges: 55, modeles: 60 } },
+      { nom: 'Préjugés forts', icone: 'muet', valeurs: { prejuges: 90, modeles: 20 } },
+      { nom: 'Égalité des chances', icone: 'balance', valeurs: { ecole: 95, prejuges: 15, modeles: 85 } }
+    ],
+    liens: [
+      { a: 'ustadh', b: 'fatima', type: 'confiance', lib: 'encourage', base: .5 },
+      { a: 'ali', b: 'fatima', type: 'conflit', lib: 'préjugé', base: .1, poids: { prejuges: .6 } },
+      { a: 'ali', b: 'fatima', type: 'alliance', lib: 'camarade', base: .4, poids: { prejuges: -.4 } }
+    ],
+    issue: function(v){
+      if(v.ecole < 35){ return { niveau: 'ko', badge: 'Des projets perdus', recit: 'Beaucoup de filles quittent l’école avant le bac : leurs projets s’arrêtent là.', apres: 'Sans école, pas de choix de métier.', themes: ['scolarisation'] }; }
+      if(v.prejuges > 70){ return { niveau: 'moyen', badge: 'Le poids des préjugés', recit: 'Les filles réussissent à l’école, mais on les décourage de certains métiers.', apres: 'Les modèles féminins aident à dépasser les préjugés.', themes: ['préjugés'] }; }
+      if(v.prejuges > 40){ return { niveau: 'moyen', badge: 'Sur le chemin', recit: 'Les filles étudient et visent tous les métiers, mais elles doivent encore répondre aux remarques comme celle d’Ali.', apres: 'Chaque exemple de femme ingénieure ou médecin fait reculer le préjugé.', themes: ['égalité', 'préjugés'] }; }
+      return { niveau: 'ok', badge: 'Toutes les portes ouvertes', recit: 'Médecins, ingénieures, enseignantes : les filles de la classe choisissent leur métier.', apres: 'المرأة تستطيع أن تعمل في كل المهن.', themes: ['égalité', 'métiers'] };
+    }
+  },
+  quiz: [
+    { q: 'Que signifie « اليوم العالمي للمرأة » ?', options: [
+      { txt: 'La Journée internationale de la femme.', ok: true, retour: 'Le 8 mars.' },
+      { txt: 'La fête des mères.', retour: 'Non.' } ] },
+    { q: 'Dans « أمي طبيبة », quel mot est le khabar ?', options: [
+      { txt: 'طبيبة', ok: true, retour: 'Le mubtadaʾ est أمي.' },
+      { txt: 'أمي', retour: 'أمي est le mubtadaʾ (sujet).' } ] },
+    { q: 'Féminin de « مهندس » (ingénieur) :', options: [
+      { txt: 'مهندسة', ok: true, retour: 'Avec ة.' },
+      { txt: 'مهندسون', retour: 'C’est un pluriel masculin.' } ] },
+    { q: 'Dans « أمي تعمل في المستشفى », le khabar est…', options: [
+      { txt: 'une phrase (جملة) : تعمل في المستشفى.', ok: true, retour: 'Une phrase verbale sert d’attribut.' },
+      { txt: 'un mot seul.', retour: 'Non : il y a un verbe.' } ] },
+    { q: 'Que signifie « أريد أن أصبح مهندسة » ?', options: [
+      { txt: 'Je veux devenir ingénieure.', ok: true, retour: 'أريد = je veux ; أصبح = devenir.' },
+      { txt: 'Ma sœur est ingénieure.', retour: 'Ce serait : أختي مهندسة.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Vocabulaire : اليوم العالمي للمرأة، حقوق، عمل، مجتمع، مهنة / مهن.',
+      'Phrase nominale : المبتدأ (sujet) + الخبر (attribut), sans verbe « être » au présent.',
+      'Types de khabar : مفرد (mot), جملة (phrase), شبه جملة (groupe prépositionnel).',
+      'Féminin des métiers avec ة : طبيبة، مهندسة، معلمة، ممرضة.'
+    ],
+    ecrire: 'Écris cinq phrases nominales en arabe sur des femmes de ta famille et leur métier (exemple : خالتي معلمة). Souligne le mubtadaʾ et le khabar.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

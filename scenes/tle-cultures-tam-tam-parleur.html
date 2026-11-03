@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le tam-tam qui parle — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de cultures nationales (Terminale) : les médias traditionnels (tam-tam d’appel, crieur, messager) et les codes de communication non verbaux, comparés aux médias d’aujourd’hui.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-cultures-tam-tam',
+  discipline: 'Cultures nationales', niveau: 'Terminale',
+  titre: 'Le tam-tam qui parle',
+  decor: 'village', lieu: 'Un village du Centre', moment: 'À la tombée du jour',
+  objectif: 'Décrire les médias traditionnels de communication (tam-tam d’appel, crieur, messager) et des codes non verbaux, puis établir le lien avec la vie moderne : ce qui disparaît, ce qui se transforme, ce qui mérite d’être transmis.',
+  programme: 'Progression harmonisée Tle · Leçons 16 à 18 (médias traditionnels, codes de communication non conventionnels, lien avec la vie moderne)',
+  avertissement: 'Dialogue fictif écrit pour la leçon. Les exemples viennent de communautés du Centre et des Grassfields ; chaque élève les transpose dans sa propre communauté.',
+  jauges: [
+    { id: 'message', nom: 'Le message est-il compris ?', val: 20, couleur: '#1E499B' },
+    { id: 'transmission', nom: 'Transmission du savoir', val: 30, couleur: '#D98E04' }
+  ],
+  personnages: {
+    batteur:  { nom: 'Ta’a Mbida, joueur de tam-tam', couleur: '#8A5A2B', look: { tenue: 'boubou', peau: 'fonce', vieux: true, cheveux: 'aucun', habit: '#B4793F', barbe: true } },
+    petite:   { nom: 'Nnomo, sa petite-fille', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses', objet: 'sac' } },
+    chef:     { nom: 'Le chef de village', couleur: '#7A2E2E', look: { tenue: 'boubou', peau: 'fonce', vieux: true, coiffe: 'chechia', couleurCoiffe: '#7A2E2E', habit: '#5A2E2E' } },
+    crieur:   { nom: 'Le crieur', couleur: '#2E6B5A', look: { peau: 'fonce', cheveux: 'ras', habit: '#2E6B5A' } },
+    cousin:   { nom: 'Serge, le cousin de la ville', couleur: '#2F5E9E', look: { peau: 'fonce', cheveux: 'court', habit: '#2F5E9E' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['batteur', 'petite'], txt: 'Devant la case, un grand tambour à fente, taillé dans un tronc évidé. Chez les Beti, on l’appelle le nkul. Frappé de deux baguettes, il porte des messages d’un village à l’autre.', objet: { i: 'porteVoix', lib: 'Le tambour à fente' } },
+    { t: 'dit', qui: 'petite', emo: 'doute', txt: 'Grand-père, comment un tambour peut-il parler ? Il ne fait que « tok, tok ».' },
+    { t: 'dit', qui: 'batteur', emo: 'joie', txt: 'Notre langue chante : chaque syllabe a sa hauteur. Le nkul a deux lèvres, une aiguë et une grave. Je joue la mélodie des mots, pas les mots eux-mêmes. Ceux qui connaissent la langue entendent la phrase.', jauges: { message: 40 } },
+    { t: 'question', q: 'Sur quelle caractéristique des langues repose le « tambour parleur » ?',
+      options: [
+        { txt: 'Ce sont des langues à tons : la hauteur de la voix change le sens, et le tambour reproduit ces hauteurs.', ok: true, retour: 'Une même suite de sons peut avoir plusieurs sens selon les tons : le tambour transmet le profil mélodique de la phrase.' },
+        { txt: 'Le tambour joue des lettres, comme un alphabet.', retour: 'Non : il n’y a pas de lettres, mais des tons et des rythmes.' },
+        { txt: 'Le tambour joue au hasard, chacun interprète comme il veut.', retour: 'Non : c’est un code précis, appris pendant des années.' }
+      ] },
+    { t: 'recit', entre: ['chef'], txt: 'Le chef arrive. Un notable est mort au village voisin.' },
+    { t: 'dit', qui: 'chef', emo: 'triste', txt: 'Ta’a, annonce le deuil. Et que les femmes et les hommes se réunissent demain à la chefferie.' },
+    { t: 'recit', entre: ['crieur'], txt: 'Le tam-tam résonne. Dans le village, le crieur fait le tour des concessions et répète l’annonce à voix haute.', jauges: { message: 70 } },
+    { t: 'dit', qui: 'crieur', jeu: 'il frappe sur sa cloche de fer', txt: 'Écoutez, écoutez ! Demain, au chant du coq, réunion à la chefferie !' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · médias et codes traditionnels', consigne: 'Classe chaque moyen de communication : média sonore, ou code visuel / gestuel ?',
+      cats: ['Média sonore', 'Code visuel ou gestuel'],
+      items: [
+        { txt: 'Le tambour à fente qui annonce un deuil.', cat: 0 },
+        { txt: 'La cloche du crieur public.', cat: 0 },
+        { txt: 'Une plante de paix (le dracaena, nkeng dans les Grassfields) déposée à l’entrée d’un lieu.', cat: 1 },
+        { txt: 'Des feuilles nouées sur un sentier pour signaler un interdit.', cat: 1 },
+        { txt: 'Le chant de la corne qui appelle au rassemblement.', cat: 0 }
+      ],
+      bravo: 'Sons, objets, gestes : une communauté communique sans écrire, par des codes que tous ses membres apprennent.' },
+    { t: 'recit', entre: ['cousin'], txt: 'Le téléphone de Nnomo vibre. Serge, le cousin de Yaoundé, a déjà reçu la nouvelle par un groupe de discussion.' },
+    { t: 'dit', qui: 'cousin', jeu: 'au téléphone, haut-parleur', txt: 'On a vu le faire-part sur le groupe de la famille ! On cotise pour le transport, j’arrive samedi.', jauges: { message: 90 } },
+    { t: 'dit', qui: 'batteur', emo: 'triste', txt: 'Ton appareil va plus loin que mon tambour. Mais qui, demain, saura encore lire le nkul ?', jauges: { transmission: 20 } },
+    { t: 'choix', qui: 'petite', q: 'Tu es Nnomo. Que réponds-tu à ton grand-père ?',
+      options: [
+        { txt: 'Le tambour, c’est fini : le téléphone suffit.', consequence: 'Un savoir de plusieurs siècles disparaît avec ceux qui le possèdent. Les deux auraient pu cohabiter.', jauges: { transmission: -15 } },
+        { txt: 'Apprends-moi : je filmerai tes rythmes et je les expliquerai au club culturel du lycée.', consequence: 'Le média moderne sert à transmettre le média ancien : la tradition se transforme sans disparaître.', jauges: { transmission: 55 } },
+        { txt: 'Je ne sais pas.', consequence: 'Le silence aussi est une réponse : celle de l’oubli.', jauges: { transmission: -5 } }
+      ],
+      oeuvre: 'Partout, des associations et des chercheurs enregistrent les langages tambourinés pour les sauvegarder et les enseigner.' },
+    { t: 'atelier', mode: 'balance', titre: 'Atelier · tradition et vie moderne', consigne: 'Place chaque argument : qu’apporte le média traditionnel, et qu’apporte le média moderne ?',
+      cotes: ['Média traditionnel', 'Média moderne'],
+      args: [
+        { txt: 'Il rassemble la communauté au même moment, au même lieu.', cote: 0, poids: 3 },
+        { txt: 'Il porte le message à la famille dispersée dans le monde.', cote: 1, poids: 3 },
+        { txt: 'Il exprime une identité et une langue.', cote: 0, poids: 2 },
+        { txt: 'Il permet de répondre, d’envoyer une photo, de cotiser.', cote: 1, poids: 2 }
+      ],
+      bravo: 'Les deux ne s’opposent pas : ils remplissent des fonctions différentes.' },
+    { t: 'dit', qui: 'batteur', emo: 'fier', txt: 'Alors écoute bien. Ceci, c’est ton nom, joué sur le nkul.', jauges: { transmission: 80 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · que deviendra le tambour ?',
+    intro: 'Règle la transmission entre générations, la place de la langue maternelle et l’usage du numérique : le langage tambouriné survit-il ?',
+    persos: ['batteur', 'petite', 'chef', 'crieur', 'cousin'],
+    curseurs: [
+      { id: 'transmission', nom: 'Transmission entre générations', val: 30, bas: 'rompue', haut: 'vivante' },
+      { id: 'langue', nom: 'Pratique de la langue maternelle', val: 45, bas: 'oubliée', haut: 'parlée par les jeunes', lecture: { haut: 'Les jeunes parlent la langue : ils peuvent « entendre » le tambour.', bas: 'Sans la langue, le tambour devient un simple bruit.' } },
+      { id: 'numerique', nom: 'Usage du numérique pour transmettre', val: 20, bas: 'nul', haut: 'archives, vidéos, cours' }
+    ],
+    scenarios: [
+      { nom: 'Aujourd’hui', icone: 'porteVoix', valeurs: { transmission: 30, langue: 45, numerique: 20 } },
+      { nom: 'Le club du lycée', icone: 'ecole', valeurs: { transmission: 75, numerique: 80 } },
+      { nom: 'Plus personne ne parle la langue', icone: 'muet', valeurs: { langue: 10 } }
+    ],
+    liens: [
+      { a: 'batteur', b: 'petite', type: 'amour', lib: 'transmet', base: .3, poids: { transmission: .7 } },
+      { a: 'chef', b: 'batteur', type: 'confiance', lib: 'commande l’annonce', base: .7 },
+      { a: 'cousin', b: 'petite', type: 'alliance', lib: 'téléphone', base: .5, poids: { numerique: .4 } },
+      { a: 'crieur', b: 'chef', type: 'confiance', lib: 'relaie', base: .6 }
+    ],
+    issue: function(v){
+      if(v.langue < 30){ return { niveau: 'ko', badge: 'Un tambour muet', recit: 'Même joué, le tambour ne dit plus rien : personne ne connaît plus la langue qu’il imite.', apres: 'Sauver un média traditionnel, c’est d’abord sauver la langue qui le porte.', themes: ['langues maternelles'] }; }
+      if(v.transmission > 60 && v.numerique > 55){ return { niveau: 'ok', badge: 'Une tradition qui se transforme', recit: 'Les anciens enseignent, les jeunes enregistrent et partagent : le langage tambouriné entre au lycée et sur les écrans.', apres: 'La modernité devient un moyen de transmettre la tradition.', themes: ['patrimoine immatériel', 'transmission'] }; }
+      if(v.transmission < 35){ return { niveau: 'moyen', badge: 'Le dernier joueur', recit: 'Le tambour résonne encore aux grands deuils, mais un seul vieil homme sait encore le jouer.', apres: 'Un savoir non transmis meurt avec son dernier dépositaire.', themes: ['oubli'] }; }
+      return { niveau: 'moyen', badge: 'Une tradition qui tient', recit: 'Le tambour annonce encore les grands événements ; le téléphone fait le reste.', apres: 'Les deux médias cohabitent, chacun dans son rôle.', themes: ['cohabitation'] };
+    }
+  },
+  quiz: [
+    { q: 'Comment appelle-t-on le tambour à fente chez les Beti ?', options: [
+      { txt: 'Le nkul.', ok: true, retour: 'Un tronc évidé, fendu, à deux lèvres.' },
+      { txt: 'Le balafon.', retour: 'Le balafon est un instrument à lames.' } ] },
+    { q: 'Pourquoi le tambour peut-il « parler » ?', options: [
+      { txt: 'Il reproduit les tons de la langue.', ok: true, retour: 'Les langues du Cameroun sont pour la plupart des langues à tons.' },
+      { txt: 'Il épelle les lettres.', retour: 'Non.' } ] },
+    { q: 'Citez un code de communication non verbal.', options: [
+      { txt: 'Une plante de paix déposée à l’entrée d’un lieu.', ok: true, retour: 'Comme le dracaena dans les Grassfields.' },
+      { txt: 'Un SMS.', retour: 'C’est un message écrit, moderne.' } ] },
+    { q: 'Quel est le rôle du crieur public ?', options: [
+      { txt: 'Répéter à voix haute les annonces de la chefferie dans le village.', ok: true, retour: 'Un média humain.' },
+      { txt: 'Jouer de la musique aux mariages.', retour: 'Non.' } ] },
+    { q: 'Quel lien entre média traditionnel et vie moderne la scène propose-t-elle ?', options: [
+      { txt: 'Utiliser le numérique pour enregistrer et transmettre le savoir traditionnel.', ok: true, retour: 'La tradition se transforme sans disparaître.' },
+      { txt: 'Remplacer définitivement le tambour par le téléphone.', retour: 'C’est le risque, pas la solution.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Médias traditionnels : tambour à fente (nkul chez les Beti), cloche et voix du crieur, corne, messager.',
+      'Le tambour « parle » parce qu’il reproduit les tons de langues à tons.',
+      'Codes non verbaux : plantes de paix, feuilles nouées, objets déposés, gestes.',
+      'Lien avec la vie moderne : les médias numériques vont plus loin, mais le savoir traditionnel doit être transmis, et le numérique peut y aider.'
+    ],
+    ecrire: 'Enquête : interrogez un ancien de votre communauté sur un média ou un code de communication traditionnel. Décrivez-le (forme, usage, occasions), puis expliquez en dix lignes ce qu’il devient aujourd’hui.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

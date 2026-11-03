@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ouvre-moi mon frère — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Petites gouttes de chant pour créer l’Homme de René Philombe : « L’homme qui te ressemble », le poème de la porte.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'petites-gouttes-porte',
+  discipline: 'Français', niveau: '3e',
+  oeuvre: 'Petites gouttes de chant pour créer l’Homme', auteur: 'René Philombe',
+  titre: 'Ouvre-moi mon frère',
+  decor: 'case_nuit', lieu: 'devant une porte, la nuit', moment: 'Poème XVI, « L’homme qui te ressemble »',
+  avertissement: 'Mise en scène imaginée pour la leçon : le voyageur et l’habitant donnent corps au poème. Les vers marqués « Extrait de l’œuvre » sont de René Philombe, cités mot pour mot.',
+  objectif: 'Jouer le poème le plus connu de Philombe : comprendre comment la répétition fait retenir un message, et ce que le poème refuse — juger un homme sur sa couleur, son pays ou ses dieux.',
+  jauges: [
+    { id: 'mefiance', nom: 'Méfiance de l’habitant', val: 90, couleur: '#D43F2E' },
+    { id: 'fraternite', nom: 'Fraternité', val: 10, couleur: '#1F9D5B' }
+  ],
+  personnages: {
+    voyageur: { nom: 'Celui qui frappe', couleur: '#8A5A2B', look: { peau: 'mat', cheveux: 'court', barbe: true, habit: '#6B5A3A', bas: '#3A2A1A', objet: 'sac' } },
+    habitant: { nom: 'Celui qui n’ouvre pas', couleur: '#2F5E9E', look: { peau: 'fonce', cheveux: 'ras', habit: '#2F5E9E', bas: '#1E2A44' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['voyageur', 'habitant'], txt: 'La nuit. Quelqu’un frappe à une porte. Il parle pendant tout le poème. On ne saura jamais si on lui a ouvert.' },
+    { t: 'vers', qui: 'voyageur', jeu: 'il frappe', txt: 'J’ai frappé à ta porte\nJ’ai frappé à ton cœur\nPour avoir bon lit\nPour avoir bon feu...\nPourquoi me repousser ?\nOuvre-moi mon frère.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XVI' },
+    { t: 'pense', qui: 'habitant', emo: 'peur', txt: 'Qui est-il ? D’où vient-il ? Il ne me ressemble pas…' },
+    { t: 'vers', qui: 'voyageur', txt: 'Pourquoi me demander\nla longueur de mon nez\nl’épaisseur de ma bouche\nla couleur de ma peau\net le nom de mes Dieux ?\nOuvre-moi mon frère.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XVI', jauges: { mefiance: 70 } },
+    { t: 'question', q: 'Quel procédé fait retenir ce poème par cœur ?',
+      options: [
+        { txt: 'Le refrain « Ouvre-moi mon frère » et les répétitions en début de vers.', ok: true, retour: 'Ce qui se retient est ce qui se répète. C’est pour cela qu’on le récite dans les écoles de plusieurs pays d’Afrique.' },
+        { txt: 'Des rimes riches et régulières.', retour: 'Non : c’est un poème en vers libres. Sa force est la répétition.' }
+      ] },
+    { t: 'choix', qui: 'habitant', q: 'Tu es derrière la porte. Que fais-tu ?',
+      options: [
+        { txt: 'Je demande d’abord d’où il vient et quelle est sa religion.', consequence: 'Ce sont exactement les questions que le poème refuse : on juge l’homme avant de le connaître.', jauges: { mefiance: 10 } },
+        { txt: 'J’ouvre : c’est un homme qui a froid et qui cherche un lit.', consequence: 'Tu réponds à l’appel du poème : l’homme « qui te ressemble ».', jauges: { mefiance: -70, fraternite: 80 } }
+      ],
+      oeuvre: 'Le poème ne dit jamais si la porte s’ouvre : c’est au lecteur de répondre.' },
+    { t: 'vers', qui: 'voyageur', jeu: 'dernière strophe', txt: 'Ouvre-moi ta porte\nouvre-moi ton cœur\ncar je suis un homme\nl’homme de tous les temps\nl’homme de tous les cieux\nl’homme qui te ressemble.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XVI', jauges: { fraternite: 90 } },
+    { t: 'remarque', titre: 'Créer l’Homme', txt: 'Dans le titre du recueil, « l’Homme » prend une majuscule : non pas un homme, mais l’espèce humaine entière. La porte est la figure de ce qu’on ouvre ou qu’on n’ouvre pas à un inconnu.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · les figures du recueil', consigne: 'Associe chaque figure à ce qu’elle veut dire dans le recueil.',
+      cats: ['Ce qui écrase', 'Ce qui libère ou rassemble'],
+      items: [
+        { txt: 'Le ventre : l’avidité de celui qui s’en met plein', cat: 0 },
+        { txt: 'L’Homme : l’espèce entière, qu’il s’agit de « créer »', cat: 1 },
+        { txt: 'Les dormeurs : ceux qui laissent faire', cat: 0 },
+        { txt: 'Le tam-tam : tantôt l’oubli, tantôt le réveil', cat: 1 }
+      ],
+      bravo: 'Un recueil n’a pas de personnages : il a des figures qui reviennent d’un poème à l’autre.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · derrière la porte',
+    intro: 'Règle la peur de l’étranger, l’écoute et l’hospitalité : la porte s’ouvre-t-elle ?',
+    persos: ['voyageur', 'habitant'],
+    curseurs: [
+      { id: 'peur', nom: 'Peur de l’étranger', val: 80, bas: 'confiance', haut: 'méfiance' },
+      { id: 'ecoute', nom: 'Écoute du poème', val: 40, bas: 'sourd', haut: 'attentif' },
+      { id: 'hospitalite', nom: 'Hospitalité', val: 50, bas: 'repli', haut: 'accueil' }
+    ],
+    scenarios: [
+      { nom: 'Le poème, porte fermée', icone: 'porte', valeurs: { peur: 80, ecoute: 40, hospitalite: 50 } },
+      { nom: 'Et si l’habitant écoutait ?', icone: 'amour', valeurs: { peur: 30, ecoute: 90, hospitalite: 85 } }
+    ],
+    liens: [
+      { a: 'voyageur', b: 'habitant', type: 'alliance', lib: 'appel', base: .5 },
+      { a: 'habitant', b: 'voyageur', type: 'peur', lib: 'méfiance', base: .1, poids: { peur: .8, ecoute: -.4 } }
+    ],
+    issue: function(v){
+      if(v.peur < 45 && (v.ecoute + v.hospitalite) >= 120){ return { niveau: 'ok', badge: 'La porte s’ouvre', recit: 'L’habitant ouvre : il reconnaît « l’homme qui te ressemble ».', apres: 'C’est la réponse que le poème espère, sans jamais l’écrire.', themes: ['fraternité', 'hospitalité'] }; }
+      return { niveau: 'moyen', badge: 'La porte reste fermée', recit: 'L’habitant pose les questions que le poème refuse : la couleur, le pays, les dieux.', apres: 'Le poème laisse la question ouverte, et c’est au lecteur d’y répondre.', themes: ['préjugés', 'refrain', 'humanité'] };
+    }
+  },
+  quiz: [
+    { q: 'Que répète le refrain du poème ?', options: [ { txt: '« Ouvre-moi mon frère ».', ok: true, retour: 'Six fois.' }, { txt: '« Ils sont de retour ».', retour: 'C’est le poème d’Alima.' } ] },
+    { q: 'Sait-on si la porte s’ouvre ?', options: [ { txt: 'Non, le poème ne le dit pas.', ok: true, retour: 'C’est au lecteur de répondre.' }, { txt: 'Oui, à la dernière strophe.', retour: 'Non : la dernière strophe est encore un appel.' } ] },
+    { q: 'Pourquoi « l’Homme » a-t-il une majuscule dans le titre ?', options: [ { txt: 'Parce qu’il désigne l’espèce humaine entière.', ok: true, retour: 'Philombe fait des majuscules des coups de projecteur.' }, { txt: 'Parce que c’est le nom du poète.', retour: 'Non.' } ] },
+    { q: 'Combien de poèmes compte le recueil ?', options: [ { txt: 'Vingt-deux.', ok: true, retour: 'Publié aux Éditions CLE, à Yaoundé.' }, { txt: 'Vingt-six.', retour: 'Vingt-six, c’est le recueil d’Alima.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Quelqu’un frappe à une porte et parle pendant tout le poème ; on ne sait pas si on lui ouvre.',
+      'Le refrain « Ouvre-moi mon frère » et les répétitions font retenir le message.',
+      'Le poème refuse de juger un homme sur sa couleur, son pays ou ses dieux.',
+      '« L’Homme » avec majuscule : l’humanité entière qu’il s’agit de « créer ».'
+    ],
+    ecrire: 'Écris huit vers commençant tous par « J’ai frappé à ta porte » ou « Ouvre-moi ». Choisis toi-même qui frappe : un élève nouveau, quelqu’un qui vient d’ailleurs, un camarade qu’on ne veut pas dans l’équipe.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

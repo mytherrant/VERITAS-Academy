@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bakassi, la paix par le droit — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’ECM (Terminale) : le différend de Bakassi entre le Cameroun et le Nigeria, l’arrêt de la Cour internationale de Justice et les principes de la diplomatie camerounaise.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-ecm-bakassi',
+  discipline: 'Éducation à la citoyenneté et à la morale', niveau: 'Terminale',
+  titre: 'Bakassi, la paix par le droit',
+  decor: 'tribunal', lieu: 'La Haye, puis la presqu’île de Bakassi', moment: '1994 – 2008',
+  objectif: 'Comprendre, à travers l’affaire de Bakassi, les principes de la diplomatie camerounaise : règlement pacifique des différends, respect du droit international, intangibilité des frontières, coopération.',
+  programme: 'Progression harmonisée Tle · Leçon 3 (les principes de la diplomatie camerounaise), leçons 4 et 10-11 (le Cameroun à l’ONU, dans l’UA et dans sa sous-région)',
+  jauges: [
+    { id: 'tension', nom: 'Risque de guerre', val: 70, couleur: '#D43F2E' },
+    { id: 'droit', nom: 'Place du droit', val: 20, couleur: '#1E499B' }
+  ],
+  personnages: {
+    eleve:      { nom: 'Fanta, élève de Terminale', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    diplomate:  { nom: 'Le diplomate camerounais', couleur: '#14254A', look: { tenue: 'costume', peau: 'fonce', cheveux: 'ras', habit: '#14254A', col: '#FFFFFF', lunettes: true, objet: 'dossier' } },
+    juge:       { nom: 'Le président de la Cour', couleur: '#121212', look: { metier: 'juge', peau: 'clair', cheveux: 'court', vieux: true, lunettes: true } },
+    pecheur:    { nom: 'Effiong, pêcheur de Bakassi', couleur: '#2E6B5A', look: { peau: 'fonce', cheveux: 'court', habit: '#2E6B5A', coiffe: 'bonnet', couleurCoiffe: '#D98E04' } },
+    avocat:     { nom: 'L’avocat du Nigeria', couleur: '#1F6F2E', look: { tenue: 'costume', peau: 'fonce', cheveux: 'court', habit: '#1F3A2E', col: '#FFFFFF', moustache: true, objet: 'dossier' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['eleve'], txt: 'Bakassi : une presqu’île de mangroves et de criques au fond du golfe de Guinée, riche en poissons et, dit-on, en pétrole. Dans les années 1990, le Cameroun et le Nigeria se la disputent ; des affrontements armés éclatent.', objet: { i: 'vagues', lib: 'Golfe de Guinée' } },
+    { t: 'dit', qui: 'eleve', emo: 'doute', txt: 'Quand deux pays se disputent un territoire, il n’y a pas d’autre issue que la guerre ?', jauges: { tension: 75 } },
+    { t: 'recit', entre: ['diplomate'], txt: 'Le 29 mars 1994, le Cameroun choisit une autre voie : il saisit la Cour internationale de Justice, la juridiction de l’ONU, à La Haye.', jauges: { droit: 45, tension: 60 } },
+    { t: 'dit', qui: 'diplomate', jeu: 'devant la Cour', txt: 'Notre frontière n’est pas une affaire de force. Elle est fixée par des traités, notamment l’accord anglo-allemand du 11 mars 1913. Nous demandons à la Cour de dire le droit.' },
+    { t: 'dit', qui: 'avocat', entre: ['avocat'], txt: 'Des Nigérians vivent à Bakassi depuis des générations. L’histoire et la présence des populations comptent aussi.' },
+    { t: 'question', q: 'Sur quel principe le Cameroun appuie-t-il sa demande ?',
+      options: [
+        { txt: 'L’intangibilité des frontières héritées de la colonisation, fixées par des traités.', ok: true, retour: 'Principe adopté par l’OUA en 1964 : on ne redessine pas par la force les frontières héritées, pour éviter des guerres sans fin.' },
+        { txt: 'Le droit du plus fort.', retour: 'C’est justement ce que le recours au juge écarte.' },
+        { txt: 'Le nombre d’habitants de chaque pays.', retour: 'La population n’est pas le critère de la frontière en droit international.' }
+      ] },
+    { t: 'recit', sort: ['avocat'], entre: ['juge'], txt: 'Le 10 octobre 2002, la Cour rend son arrêt.', jauges: { droit: 75 } },
+    { t: 'dit', qui: 'juge', jeu: 'il lit le dispositif de l’arrêt', txt: 'La souveraineté sur la presqu’île de Bakassi appartient au Cameroun. Le Nigeria doit retirer son administration et ses forces.' },
+    { t: 'choix', qui: 'diplomate', q: 'L’arrêt est rendu, mais le Nigeria tarde à l’appliquer. Que fait le Cameroun ?',
+      options: [
+        { txt: 'Il envoie l’armée reprendre Bakassi par la force.', consequence: 'Le droit gagné à La Haye se perdrait dans une guerre : morts, réfugiés, et une victoire contestée.', jauges: { tension: 30, droit: -30 } },
+        { txt: 'Il négocie, avec la médiation du secrétaire général de l’ONU, les conditions du retrait.', consequence: 'La négociation est longue, mais elle prépare une paix durable et acceptée.', jauges: { tension: -30, droit: 15 } },
+        { txt: 'Il renonce à Bakassi pour garder de bonnes relations.', consequence: 'La paix immédiate, au prix de l’abandon d’un droit reconnu.', jauges: { tension: -20, droit: -25 } }
+      ],
+      oeuvre: 'Le 12 juin 2006, à Greentree, près de New York, les présidents Paul Biya et Olusegun Obasanjo signent un accord, sous l’égide de Kofi Annan. Le transfert définitif a lieu le 14 août 2008.' },
+    { t: 'dit', qui: 'pecheur', entre: ['pecheur'], emo: 'doute', jeu: 'sur sa pirogue', txt: 'Et nous, les pêcheurs ? Nos familles sont ici. Allons-nous devoir partir ?' },
+    { t: 'dit', qui: 'diplomate', txt: 'L’accord protège les habitants : ils peuvent rester, garder leurs biens, pêcher et pratiquer leur culture. La frontière change de côté, pas les gens.', jauges: { tension: 15 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · de la crise à la paix', consigne: 'Remets dans l’ordre les étapes du règlement du différend.',
+      items: [
+        'Affrontements armés dans la presqu’île.',
+        'Le Cameroun saisit la Cour internationale de Justice (1994).',
+        'Arrêt de la Cour en faveur du Cameroun (2002).',
+        'Accord de Greentree, sous l’égide de l’ONU (2006).',
+        'Transfert définitif de souveraineté (2008).'
+      ],
+      bravo: 'Quatorze ans de procédure et de négociation : la paix par le droit est lente, mais elle tient.', jauges: { droit: 95, tension: 5 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · les principes de la diplomatie camerounaise', consigne: 'Classe chaque action : est-elle conforme aux principes de la diplomatie camerounaise, ou contraire ?',
+      cats: ['Conforme', 'Contraire'],
+      items: [
+        { txt: 'Saisir un juge international pour régler un différend.', cat: 0 },
+        { txt: 'Intervenir militairement dans les affaires intérieures d’un voisin.', cat: 1 },
+        { txt: 'Respecter les frontières héritées de la colonisation.', cat: 0 },
+        { txt: 'Coopérer avec tous les pays qui respectent sa souveraineté.', cat: 0 },
+        { txt: 'Annexer un territoire par la force.', cat: 1 }
+      ],
+      bravo: 'Paix, non-ingérence, respect du droit, coopération : la ligne constante de la diplomatie camerounaise.' },
+    { t: 'dit', qui: 'eleve', emo: 'fier', txt: 'Donc on peut gagner sans tirer un coup de feu. Le droit est une arme, mais une arme qui ne tue pas.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · force ou droit ?',
+    intro: 'Règle la confiance dans la justice internationale, la volonté de négocier et la pression militaire : comment finit l’affaire ?',
+    persos: ['diplomate', 'avocat', 'juge', 'pecheur', 'eleve'],
+    curseurs: [
+      { id: 'justice', nom: 'Confiance dans la justice internationale', val: 80, bas: 'nulle', haut: 'forte' },
+      { id: 'negociation', nom: 'Volonté de négocier', val: 75, bas: 'refus', haut: 'dialogue' },
+      { id: 'force', nom: 'Pression militaire', val: 20, bas: 'faible', haut: 'forte', lecture: { haut: 'Les troupes se font face : un incident peut tout embraser.', bas: 'Les armes se taisent, la parole passe au juge.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans l’histoire', icone: 'balance', valeurs: { justice: 80, negociation: 75, force: 20 } },
+      { nom: 'Le choix des armes', icone: 'poing', valeurs: { force: 90, justice: 20, negociation: 20 } },
+      { nom: 'Un arrêt jamais appliqué', icone: 'document', valeurs: { negociation: 10 } }
+    ],
+    liens: [
+      { a: 'diplomate', b: 'juge', type: 'confiance', lib: 'saisine', base: .1, poids: { justice: .8 } },
+      { a: 'avocat', b: 'juge', type: 'confiance', lib: 'plaide', base: .1, poids: { justice: .6 } },
+      { a: 'diplomate', b: 'avocat', type: 'conflit', lib: 'différend', base: .3, poids: { force: .7, negociation: -.3 } },
+      { a: 'pecheur', b: 'diplomate', type: 'confiance', lib: 'protection', base: .2, poids: { negociation: .5 } }
+    ],
+    issue: function(v){
+      if(v.force > 65){ return { niveau: 'ko', badge: 'La guerre de Bakassi', recit: 'Les armes parlent : villages détruits, pêcheurs réfugiés, deux pays voisins ennemis pour longtemps.', apres: 'Même gagnée, une guerre laisse une frontière contestée.', themes: ['conflit armé'] }; }
+      if(v.negociation < 30){ return { niveau: 'moyen', badge: 'Un droit sans paix', recit: 'L’arrêt est rendu, mais rien ne bouge sur le terrain : le différend s’éternise.', apres: 'Un jugement a besoin d’une volonté politique pour s’appliquer.', themes: ['application du droit'] }; }
+      if(v.justice < 35){ return { niveau: 'moyen', badge: 'Des négociations sans arbitre', recit: 'Sans juge, chacun campe sur sa version de l’histoire.', apres: 'Le juge dit qui a raison ; la négociation organise l’après.', themes: ['médiation'] }; }
+      return { niveau: 'ok', badge: 'La paix par le droit', recit: 'Le juge tranche, les présidents négocient, les populations sont protégées : la frontière est fixée sans guerre.', apres: 'L’affaire de Bakassi est souvent citée comme un modèle de règlement pacifique en Afrique.', themes: ['règlement pacifique', 'CIJ', 'intangibilité des frontières'] };
+    }
+  },
+  quiz: [
+    { q: 'Quelle juridiction le Cameroun a-t-il saisie en 1994 ?', options: [
+      { txt: 'La Cour internationale de Justice, à La Haye.', ok: true, retour: 'L’organe judiciaire de l’ONU.' },
+      { txt: 'La Cour suprême du Cameroun.', retour: 'Un différend entre États relève d’un juge international.' } ] },
+    { q: 'Quand la Cour a-t-elle rendu son arrêt ?', options: [
+      { txt: 'Le 10 octobre 2002.', ok: true, retour: 'En faveur de la souveraineté du Cameroun.' },
+      { txt: 'Le 1er janvier 1960.', retour: 'C’est la date de l’indépendance.' } ] },
+    { q: 'Où l’accord de 2006 a-t-il été signé ?', options: [
+      { txt: 'À Greentree, près de New York.', ok: true, retour: 'Sous l’égide de Kofi Annan, secrétaire général de l’ONU.' },
+      { txt: 'À Abuja.', retour: 'Non.' } ] },
+    { q: 'Qu’est-ce que l’intangibilité des frontières ?', options: [
+      { txt: 'Le principe selon lequel on respecte les frontières héritées de la colonisation.', ok: true, retour: 'Adopté par l’OUA en 1964.' },
+      { txt: 'L’interdiction de traverser une frontière.', retour: 'Non : il s’agit de ne pas modifier les frontières.' } ] },
+    { q: 'Quel principe la diplomatie camerounaise applique-t-elle dans cette affaire ?', options: [
+      { txt: 'Le règlement pacifique des différends.', ok: true, retour: 'Avec le respect du droit international.' },
+      { txt: 'L’ingérence dans les affaires des voisins.', retour: 'C’est l’inverse : non-ingérence.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Le Cameroun a saisi la Cour internationale de Justice au sujet de Bakassi le 29 mars 1994.',
+      'Arrêt du 10 octobre 2002 : la souveraineté sur Bakassi revient au Cameroun.',
+      'Accord de Greentree le 12 juin 2006, transfert définitif le 14 août 2008 ; les habitants sont protégés.',
+      'Principes de la diplomatie camerounaise : règlement pacifique des différends, respect du droit international, intangibilité des frontières, non-ingérence, coopération.'
+    ],
+    ecrire: 'Rédigez un argumentaire de quinze lignes : « Pourquoi le recours au droit international est-il préférable à la force pour régler un différend frontalier ? » Appuyez-vous sur l’exemple de Bakassi.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

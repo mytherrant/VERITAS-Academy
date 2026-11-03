@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sous la table — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Tartuffe ou l’Imposteur de Molière : Elmire cache Orgon sous la table et fait parler Tartuffe. Jauges, décisions et ateliers.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tartuffe-table',
+  discipline: 'Français', niveau: '2nde',
+  oeuvre: 'Tartuffe ou l’Imposteur', auteur: 'Molière (1669)',
+  titre: 'Sous la table',
+  decor: 'salon17', lieu: 'la maison d’Orgon, à Paris', moment: 'Acte IV',
+  avertissement: 'Scène réécrite en prose d’aujourd’hui d’après l’acte IV : ce ne sont pas les vers de Molière. Seule la réplique marquée « Extrait de l’œuvre » est citée mot pour mot.',
+  objectif: 'Vivre le point culminant de la pièce : Elmire n’argumente plus, elle fait voir. Suivre sur les jauges l’aveuglement d’Orgon qui tombe et le masque de Tartuffe qui glisse ; comprendre pourquoi la table est une véritable machine de théâtre.',
+  jauges: [
+    { id: 'aveugle', nom: 'Aveuglement d’Orgon', val: 95, couleur: '#8E2A3C' },
+    { id: 'masque', nom: 'Masque de Tartuffe', val: 90, couleur: '#5A6275' },
+    { id: 'danger', nom: 'Danger pour la famille', val: 70, couleur: '#FFC93C' }
+  ],
+  personnages: {
+    orgon:    { nom: 'Orgon', couleur: '#5A4A8A', look: { tenue: 'costume', col: '#F2EEE3', peau: 'clair', cheveux: 'perruque', couleurCheveux: '#7A5230', habit: '#3A2E5C', col: '#F2EEE3', moustache: true } },
+    elmire:   { nom: 'Elmire', couleur: '#1F6F78', look: { tenue: 'robe', peau: 'clair', cheveux: 'chignon', couleurCheveux: '#4A2F1B', habit: '#9C2F4A', col: '#F2EEE3' } },
+    dorine:   { nom: 'Dorine, servante', couleur: '#7B6A2E', look: { tenue: 'robe', peau: 'clair', coiffe: 'bonnet', couleurCoiffe: '#F2EEE3', habit: '#6B5A3A' } },
+    tartuffe: { nom: 'Tartuffe', couleur: '#3B3B3B', look: { tenue: 'boubou', peau: 'clair', cheveux: 'long', couleurCheveux: '#2A2420', habit: '#1A1A1A', col: '#F2EEE3' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['orgon', 'elmire', 'dorine'], txt: 'Acte IV. Orgon a chassé son fils Damis, qui accusait Tartuffe, et il a signé une donation : tous ses biens iront au faux dévot. Elmire, sa femme, décide d’agir.', objet: { i: '📜', lib: 'La donation' }, jauges: { danger: 80 } },
+    { t: 'dit', qui: 'orgon', emo: 'colere', jeu: 'buté', txt: 'Je ne veux plus rien entendre contre lui. Damis a menti, et vous tous avec lui.' },
+    { t: 'dit', qui: 'dorine', emo: 'surpris', jeu: 'à part, au public', txt: 'Il lui donnerait sa chemise, et sa femme avec, si l’autre la demandait poliment !' },
+    { t: 'choix', qui: 'elmire', q: 'Tu es Elmire. Ton mari ne croit plus personne. Comment le convaincre ?',
+      options: [
+        { txt: 'Lui faire un long discours sur la vraie et la fausse dévotion.', consequence: 'Orgon hausse les épaules : Cléante a déjà essayé, en vain. Les discours glissent sur lui.', jauges: { aveugle: 0 } },
+        { txt: 'Rappeler Damis pour qu’il répète ses accusations.', consequence: 'Orgon se met encore plus en colère : il a déjà chassé son fils pour cela. La famille s’enfonce.', jauges: { danger: 5 } },
+        { txt: 'Le cacher pour qu’il voie et entende Tartuffe de lui-même.', consequence: 'Orgon accepte, par défi, persuadé qu’il ne verra rien. Le piège est tendu.', jauges: { aveugle: -10 } }
+      ],
+      oeuvre: 'Elmire choisit de faire voir plutôt que de convaincre. C’est le personnage le plus efficace de la pièce : elle agit au lieu de parler.' },
+    { t: 'dit', qui: 'elmire', jeu: 'calme', txt: 'Je ne vous demande pas de me croire. Je vous demande de voir. Cachez-vous sous cette table, et écoutez.' },
+    { t: 'dit', qui: 'orgon', emo: 'joie', jeu: 'il rit', txt: 'Sous la table ? Vous perdrez votre peine. Cet homme est un saint.' },
+    { t: 'recit', txt: 'Orgon a toujours réagi ainsi. Au premier acte, quand Dorine lui racontait qu’Elmire avait été malade pendant que Tartuffe mangeait et dormait fort bien, il n’avait qu’un mot à la bouche :' },
+    { t: 'dit', qui: 'orgon', jeu: 'souvenir de l’acte I', txt: 'Le pauvre homme !', cite: 'Molière, Tartuffe, acte I, scène 4' },
+    { t: 'question', q: 'Que révèle cette réplique, répétée par Orgon à l’acte I ?',
+      options: [
+        { txt: 'Son avarice : il ne pense qu’à son argent.', retour: 'L’avarice est le défaut d’un autre personnage de Molière, Harpagon. Ici, il s’agit d’autre chose.' },
+        { txt: 'Son aveuglement : il n’entend que ce qui concerne Tartuffe.', ok: true, retour: 'Orgon n’est pas bête, il est aveugle : il aime Tartuffe comme on aime une idée. La répétition mécanique produit le comique.' },
+        { txt: 'Sa pitié sincère pour les pauvres de la ville.', retour: 'Sa pitié ne va qu’à Tartuffe, qui n’a rien d’un pauvre : c’est ce décalage qui fait rire.' }
+      ] },
+    { t: 'dit', qui: 'elmire', txt: 'Quand je tousserai, ce sera pour vous appeler. N’attendez pas trop longtemps pour sortir.' },
+    { t: 'recit', sort: ['dorine'], entre: ['tartuffe'], txt: 'Dorine se retire. Orgon se glisse sous la table, caché par le tapis. Tartuffe entre.' },
+    { t: 'dit', qui: 'tartuffe', emo: 'amour', jeu: 'doucereux, les yeux baissés', txt: 'On m’a dit que vous vouliez me parler seule à seul, Madame. Le Ciel me comble.' },
+    { t: 'dit', qui: 'elmire', txt: 'J’ai été trop froide avec vous l’autre jour. Mais comment croire à vos sentiments, si vous épousez ma belle-fille Mariane ?' },
+    { t: 'dit', qui: 'tartuffe', jeu: 'il s’approche', txt: 'Alors, plus de belles paroles. Il me faut des preuves de votre bonté.', jauges: { masque: 55 } },
+    { t: 'dit', qui: 'elmire', emo: 'peur', jeu: 'elle tousse', txt: 'Mais… et le Ciel, que vous servez si bien ?' },
+    { t: 'dit', qui: 'tartuffe', jeu: 'souriant', txt: 'Le Ciel ? Je sais m’arranger avec lui. Ce qui se fait en secret n’offense personne : le péché, c’est le scandale.', jauges: { masque: 15, aveugle: 50 } },
+    { t: 'pense', qui: 'orgon', emo: 'surpris', jeu: 'sous la table', txt: 'Est-ce bien lui ? Est-ce bien mon Tartuffe qui parle ainsi ?' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · les deux langages de Tartuffe', consigne: 'Tartuffe change de langage selon son interlocuteur. Classe chaque phrase (reformulée) : à qui parle-t-il ?',
+      cats: ['À Orgon (le dévot)', 'À Elmire (le galant)'],
+      items: [
+        { txt: '« Mon frère, je ne vis que pour le Ciel et pour vous servir. »', cat: 0 },
+        { txt: '« Votre beauté m’a fait oublier toute prudence. »', cat: 1 },
+        { txt: '« Chassez-moi, je le mérite : je suis le plus grand des pécheurs. »', cat: 0 },
+        { txt: '« Personne n’en saura rien : le secret efface la faute. »', cat: 1 }
+      ],
+      bravo: 'Dévot avec Orgon, galant avec Elmire, humble quand on l’accuse, menaçant quand il est le plus fort : Tartuffe n’a pas de visage fixe.' },
+    { t: 'question', q: 'Pourquoi dit-on que la table est une « machine de théâtre » ?',
+      options: [
+        { txt: 'Parce qu’Orgon y entend tout sans rien voir — comme il a vécu toute la pièce.', ok: true, retour: 'Un meuble ordinaire devient le symbole de l’aveuglement d’Orgon. Et le public, qui sait qu’il écoute, savoure chaque mot : c’est la double énonciation.' },
+        { txt: 'Parce qu’elle cache un mécanisme secret.', retour: 'Aucun mécanisme : c’est la situation qui fait de la table une machine dramatique.' },
+        { txt: 'Parce qu’on y sert le repas de Tartuffe.', retour: 'Le repas appartient au récit de Dorine à l’acte I. Ici, la table sert de cachette.' }
+      ] },
+    { t: 'recit', sort: ['tartuffe'], txt: 'Elmire envoie Tartuffe vérifier que son mari n’est pas dans la galerie voisine. À peine est-il sorti qu’Orgon quitte sa cachette.' },
+    { t: 'dit', qui: 'orgon', emo: 'colere', jeu: 'en sortant de sous la table', txt: 'C’est un monstre ! Et moi qui lui ai tout donné… ma fille, ma maison, ma confiance.', jauges: { aveugle: 5, masque: 0 } },
+    { t: 'dit', qui: 'elmire', txt: 'Vous l’avez vu de vos yeux. Vous m’avez laissée tousser bien longtemps.' },
+    { t: 'remarque', titre: 'Et ensuite ?', txt: 'Trop tard : Tartuffe possède la maison par la donation, et la cassette aux papiers compromettants. À l’acte V, il fait expulser la famille et dénonce Orgon au roi. Mais l’Exempt l’arrête au nom du roi : tout finit bien.', objet: { i: '🗝️', lib: 'La cassette' }, jauges: { danger: 95 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · le schéma dramatique', consigne: 'Remets les grandes étapes de la pièce dans l’ordre.',
+      items: [
+        'Tartuffe vit chez Orgon ; la famille le déteste, Orgon l’adore.',
+        'Orgon décide de marier sa fille Mariane à Tartuffe.',
+        'Tartuffe courtise Elmire ; Damis l’accuse ; Orgon chasse son fils.',
+        'Elmire cache Orgon sous la table et fait parler Tartuffe.',
+        'Tartuffe expulse la famille et dénonce Orgon au roi.',
+        'L’Exempt arrête Tartuffe au nom du roi.'
+      ],
+      bravo: 'Situation de départ, élément perturbateur (acte II), péripéties (acte III), point culminant (IV, 5), chute (V), dénouement.', jauges: { danger: 0 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · la maison d’Orgon',
+    intro: 'Règle les traits des personnages : le réseau des relations et l’issue de la pièce changent en direct. Qui sauve la famille, et à quelles conditions ?',
+    persos: ['orgon', 'tartuffe', 'elmire', 'dorine'],
+    curseurs: [
+      { id: 'credulite', nom: 'Crédulité d’Orgon', val: 95, bas: 'lucide', haut: 'aveugle',
+        lecture: { haut: 'Orgon aime Tartuffe comme on aime une idée : aucun argument ne l’atteint. Il faut lui faire voir.', milieu: 'Orgon doute par moments ; un témoignage pourrait l’ébranler.', bas: 'Orgon voit clair : Tartuffe n’aurait jamais pu s’installer chez lui. Il n’y aurait pas de pièce !' } },
+      { id: 'habilete', nom: 'Habileté de Tartuffe', val: 85, bas: 'maladroit', haut: 'redoutable',
+        lecture: { haut: 'Tartuffe change de langage selon son interlocuteur : dévot, galant, humble, menaçant.', bas: 'Un imposteur maladroit se trahirait dès l’acte I : c’est son art du masque qui fait durer la comédie.' } },
+      { id: 'audace', nom: 'Audace d’Elmire', val: 80, bas: 'se tait', haut: 'tend un piège',
+        lecture: { haut: 'Elmire agit au lieu de parler : elle fait voir. C’est le personnage le plus efficace.', bas: 'Sans le piège de la table, personne ne peut ouvrir les yeux d’Orgon.' } },
+      { id: 'roi', nom: 'Clairvoyance du roi', val: 90, bas: 'trompé', haut: 'voit tout',
+        lecture: { haut: 'Le roi a percé Tartuffe à jour : l’Exempt l’arrête. Le dénouement vient d’en haut.', bas: 'Si le roi se laissait tromper, la donation jouerait jusqu’au bout contre la famille.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans la pièce', icone: '📖', valeurs: { credulite: 95, habilete: 85, audace: 80, roi: 90 } },
+      { nom: 'Et si Orgon doutait ?', icone: '🤔', valeurs: { credulite: 25, habilete: 85, audace: 60, roi: 90 } },
+      { nom: 'Et si Elmire se taisait ?', icone: '🤐', valeurs: { credulite: 95, habilete: 85, audace: 10, roi: 90 } },
+      { nom: 'Et si le roi était trompé ?', icone: '👑', valeurs: { credulite: 95, habilete: 95, audace: 80, roi: 15 } }
+    ],
+    liens: [
+      { a: 'orgon', b: 'tartuffe', type: 'confiance', lib: 'admiration', base: -.1, poids: { credulite: 1.1 } },
+      { a: 'tartuffe', b: 'elmire', type: 'domination', lib: 'convoitise', base: .05, poids: { habilete: .7 } },
+      { a: 'elmire', b: 'orgon', type: 'alliance', lib: 'fait voir', base: .25, poids: { audace: .75, credulite: -.35 } },
+      { a: 'dorine', b: 'tartuffe', type: 'conflit', lib: 'démasque', base: .6, poids: { habilete: .2 } },
+      { a: 'dorine', b: 'orgon', type: 'conflit', lib: 'franc-parler', base: .1, poids: { credulite: .6 } },
+      { a: 'elmire', b: 'dorine', type: 'alliance', lib: 'complices', base: .35, poids: { audace: .4 } }
+    ],
+    issue: function(v){
+      if(v.credulite < 40){ return { niveau: 'ok', badge: 'Imposteur chassé à temps', recit: 'Orgon doute avant de signer la donation. Tartuffe, démasqué tôt, doit quitter la maison les mains vides : pas besoin du roi.', apres: 'La comédie s’arrête presque avant de commencer : sans un Orgon aveugle, Molière n’avait plus de sujet.', themes: ['lucidité', 'famille préservée'] }; }
+      if(v.audace < 40){ return { niveau: 'ko', badge: 'Famille ruinée', recit: 'Personne ne fait voir à Orgon ce qu’il refuse d’entendre. Tartuffe épouse Mariane, garde la maison et la cassette.', apres: 'La famille est dispersée. C’est la preuve que le piège d’Elmire est le pivot de toute la pièce.', themes: ['hypocrisie triomphante', 'aveuglement'] }; }
+      if(v.roi < 50){ return { niveau: 'ko', badge: 'Démasqué… mais vainqueur', recit: 'Orgon a vu clair grâce à Elmire, mais trop tard : la donation est signée et Tartuffe dénonce Orgon. Sans le roi, la loi est du côté de l’imposteur.', apres: 'On mesure ici le rôle du dénouement : seule une autorité supérieure pouvait défaire ce qu’Orgon avait signé.', themes: ['injustice', 'pouvoir de l’écrit'] }; }
+      if(v.habilete > 92 && v.audace < 70){ return { niveau: 'moyen', badge: 'Duel serré', recit: 'Tartuffe flaire le piège et se méfie. Elmire doit redoubler d’adresse pour le faire parler.', apres: 'Plus l’imposteur est fort, plus la ruse qui le démasque doit être audacieuse.', themes: ['ruse contre ruse'] }; }
+      return { niveau: 'moyen', badge: 'Démasqué trop tard, sauvé par le roi', recit: 'Elmire fait voir ; Orgon comprend sous la table. Mais la donation est signée : il faut l’Exempt, au nom du roi, pour arrêter Tartuffe.', apres: 'C’est le dénouement de Molière : un roi clairvoyant rétablit l’ordre. Il fallait aussi rassurer le pouvoir après cinq ans d’interdiction.', themes: ['hypocrisie', 'aveuglement', 'ruse d’Elmire', 'autorité royale'] };
+    }
+  },
+  quiz: [
+    { q: 'À quel acte Tartuffe paraît-il enfin sur scène ?', options: [
+      { txt: 'Acte I', retour: 'À l’acte I, on parle beaucoup de lui, mais il n’apparaît pas.' },
+      { txt: 'Acte III', ok: true, retour: 'Son entrée est préparée pendant deux actes : le spectateur le connaît avant de le voir.' },
+      { txt: 'Acte V', retour: 'À l’acte V, il triomphe puis est arrêté, mais il est entré bien avant.' } ] },
+    { q: 'Qui démasque Tartuffe ?', options: [
+      { txt: 'Damis, en l’accusant devant Orgon.', retour: 'Damis accuse trop tôt, sans preuve : Orgon le chasse.' },
+      { txt: 'Elmire, en cachant Orgon sous la table.', ok: true, retour: 'Elle ne discute pas : elle fait voir.' },
+      { txt: 'Cléante, par ses discours.', retour: 'Cléante a toujours raison et n’obtient jamais rien.' } ] },
+    { q: 'Pourquoi Elmire tousse-t-elle pendant la scène de la table ?', options: [
+      { txt: 'Pour avertir Orgon qu’il est temps de sortir.', ok: true, retour: 'Orgon tarde, et la toux devient comique.' },
+      { txt: 'Parce qu’elle est malade.', retour: 'C’est un signal convenu avec son mari.' } ] },
+    { q: 'Que vise Molière dans Tartuffe ?', options: [
+      { txt: 'La religion elle-même.', retour: 'C’est l’accusation des dévots, que Molière réfute.' },
+      { txt: 'Les faux dévots, qui se servent de la religion pour tromper.', ok: true, retour: 'D’où les longs discours de Cléante sur la vraie et la fausse dévotion.' } ] },
+    { q: 'Combien de temps la pièce a-t-elle été interdite ?', options: [
+      { txt: 'Cinq ans, de 1664 à 1669.', ok: true, retour: 'Trois placets au roi, deux versions remaniées : le texte de 1669 n’est pas celui de 1664.' },
+      { txt: 'Un mois.', retour: 'Bien plus : cinq ans.' },
+      { txt: 'Elle n’a jamais été interdite.', retour: 'Si : la Compagnie du Saint-Sacrement s’y est opposée.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Acte IV : le point culminant. Elmire cache Orgon sous la table et fait parler Tartuffe.',
+      'La table est une machine de théâtre : Orgon entend sans voir, comme il a vécu toute la pièce.',
+      'Double énonciation : le public sait qu’Orgon écoute, Tartuffe l’ignore.',
+      'Tartuffe change de langage selon son interlocuteur ; Molière vise les faux dévots, pas la foi.',
+      'La pièce, jouée en 1664, n’est autorisée qu’en 1669, après cinq ans d’interdiction.'
+    ],
+    ecrire: 'Écrivez en dix lignes le monologue intérieur d’Orgon sous la table : ce qu’il entend, ce qu’il comprend peu à peu, ce qu’il ressent.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

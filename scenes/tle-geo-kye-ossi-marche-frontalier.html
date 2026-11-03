@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le marché des trois frontières — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de géographie (Terminale) : le marché frontalier de Kyé-Ossi, entre Cameroun, Gabon et Guinée équatoriale, et les échanges du Cameroun avec l’extérieur.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-geo-kye-ossi',
+  discipline: 'Géographie', niveau: 'Terminale',
+  titre: 'Le marché des trois frontières',
+  decor: 'marche', lieu: 'Kyé-Ossi, région du Sud', moment: 'Un jour de grand marché',
+  objectif: 'Comprendre le rôle d’un marché frontalier : ce que le Cameroun vend à ses voisins, pourquoi les acheteurs viennent, et ce qui freine ces échanges (routes, tracasseries, contrebande).',
+  programme: 'Progression harmonisée Tle · Leçon 9 (échanges inter-régionaux), leçon 16 (échanges du Cameroun avec l’extérieur), dossier 5 (les marchés frontaliers)',
+  jauges: [
+    { id: 'echanges', nom: 'Volume des échanges', val: 40, couleur: '#1F9D5B' },
+    { id: 'freins', nom: 'Freins aux échanges', val: 30, couleur: '#D43F2E' }
+  ],
+  personnages: {
+    geographe:  { nom: 'Mme Ondoa, géographe', couleur: '#1E499B', look: { tenue: 'jupe', peau: 'fonce', cheveux: 'tresses', habit: '#1E499B', lunettes: true, objet: 'dossier' } },
+    vendeuse:   { nom: 'Mama Ada, vendeuse de vivres', couleur: '#5E8A3A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#5E8A3A', habit: '#B4793F', objet: 'sac' } },
+    gabonais:   { nom: 'Rodrigue, acheteur de Libreville', couleur: '#2E6B5A', look: { peau: 'fonce', cheveux: 'ras', habit: '#2E6B5A', objet: 'sac' } },
+    guineenne:  { nom: 'Doña Pilar, commerçante de Bata', couleur: '#C0397C', look: { tenue: 'jupe', peau: 'brun', cheveux: 'chignon', habit: '#C0397C' } },
+    douanier:   { nom: 'Le douanier', couleur: '#14254A', look: { metier: 'policier', peau: 'fonce', cheveux: 'ras' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['geographe'], txt: 'Kyé-Ossi, dans la Vallée-du-Ntem, au point où se touchent trois pays : le Cameroun, le Gabon et la Guinée équatoriale. Chaque semaine, des camions arrivent des campagnes du Sud et du Centre ; des acheteurs traversent la frontière.', objet: { i: 'panier', lib: 'Plantain, manioc, macabo' } },
+    { t: 'dit', qui: 'geographe', txt: 'Un marché frontalier vit d’une différence. Regardons laquelle.' },
+    { t: 'dit', qui: 'vendeuse', entre: ['vendeuse'], emo: 'joie', jeu: 'derrière ses régimes de plantain', txt: 'Chez nous, la terre donne beaucoup. Plantain, manioc, arachide, tomates, piment… Ici je vends plus cher qu’au village, et en grande quantité.' },
+    { t: 'dit', qui: 'gabonais', entre: ['gabonais'], txt: 'Chez nous, on produit peu de vivres, et ce qui vient de loin coûte cher. Le samedi, je remplis ma voiture ici, puis je revends à Libreville.', jauges: { echanges: 60 } },
+    { t: 'question', q: 'Sur quelle différence repose ce marché ?',
+      options: [
+        { txt: 'Le Cameroun produit des vivres en abondance ; ses voisins, riches en pétrole mais moins agricoles, en manquent : les prix sont plus élevés de l’autre côté.', ok: true, retour: 'Complémentarité : le Cameroun est le grenier de la sous-région CEMAC.' },
+        { txt: 'Les trois pays ont des monnaies différentes.', retour: 'Non : tous trois utilisent le franc CFA d’Afrique centrale (XAF). C’est d’ailleurs un avantage.' },
+        { txt: 'Le Gabon interdit l’agriculture.', retour: 'Non, mais sa population est surtout urbaine et son économie tournée vers le pétrole et le bois.' }
+      ] },
+    { t: 'atelier', mode: 'monnaie', titre: 'Atelier · payer au marché', consigne: 'Rodrigue achète deux régimes de plantain à 3 500 FCFA et un sac de manioc à 4 000 FCFA. Paie exactement 11 000 FCFA.', cible: 11000, pieces: [10000, 5000, 2000, 1000, 500], devise: 'FCFA',
+      bravo: 'Même monnaie de part et d’autre : pas de change, pas de perte. La zone CEMAC facilite le commerce.' },
+    { t: 'dit', qui: 'guineenne', entre: ['guineenne'], jeu: 'en espagnol, puis en français', txt: 'Buenos días! Moi, j’achète des oignons, du savon, des pagnes, et je vends ce qui arrive par le port de Bata.', jauges: { echanges: 75 } },
+    { t: 'recit', entre: ['douanier'], txt: 'Mais à la frontière, la file des véhicules s’allonge.', jauges: { freins: 55 } },
+    { t: 'dit', qui: 'douanier', emo: 'doute', txt: 'Papiers du véhicule, carte d’identité, déclaration des marchandises. Et vous, madame, que transportez-vous dans ces cartons ?' },
+    { t: 'choix', qui: 'gabonais', q: 'Tu es Rodrigue. Au poste, on te demande « un petit quelque chose » pour passer plus vite. Que fais-tu ?',
+      options: [
+        { txt: 'Je paie : je n’ai pas le temps.', consequence: 'Tu passes, mais la pratique s’installe : chaque voyage coûtera plus cher, et ce coût se retrouve dans le prix des vivres.', jauges: { freins: 20 } },
+        { txt: 'Je refuse et je demande le reçu officiel des droits à payer.', consequence: 'Tu attends plus longtemps, mais tu ne paies que ce qui est dû.', jauges: { freins: -10 } },
+        { txt: 'Je passe par la brousse pour éviter le poste.', consequence: 'C’est de la contrebande : marchandise saisie si tu es pris, et l’État perd ses recettes.', jauges: { freins: 25, echanges: -10 } }
+      ],
+      oeuvre: 'Les tracasseries aux frontières sont l’un des principaux freins au commerce dans la sous-région. La libre circulation des personnes dans la CEMAC est pourtant décidée.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · atouts et freins', consigne: 'Classe chaque élément : atout, ou frein pour les échanges frontaliers ?',
+      cats: ['Atout', 'Frein'],
+      items: [
+        { txt: 'Une monnaie commune, le franc CFA (XAF).', cat: 0 },
+        { txt: 'Des campagnes qui produisent des vivres en abondance.', cat: 0 },
+        { txt: 'Des contrôles abusifs et des pots-de-vin.', cat: 1 },
+        { txt: 'Des pistes dégradées en saison des pluies.', cat: 1 },
+        { txt: 'La libre circulation décidée dans la CEMAC.', cat: 0 },
+        { txt: 'La contrebande qui échappe aux droits de douane.', cat: 1 }
+      ],
+      bravo: 'Un marché frontalier prospère quand la route est bonne et la frontière fluide.' },
+    { t: 'dit', qui: 'geographe', txt: 'Kyé-Ossi montre une chose : le Cameroun commerce d’abord avec le monde, par le port de Douala, mais il commerce aussi, chaque jour, avec ses voisins.' },
+    { t: 'question', q: 'Que gagne la ville de Kyé-Ossi à ce marché ?',
+      options: [
+        { txt: 'Des emplois (transport, manutention, restauration, hébergement), une croissance de la ville et des débouchés pour les producteurs de toute la région.', ok: true, retour: 'Une petite ville devient un carrefour : c’est un pôle d’échanges.' },
+        { txt: 'Rien : tout l’argent part à l’étranger.', retour: 'Non : vendeurs, transporteurs et hôteliers vivent de ce commerce.' }
+      ] }
+  ],
+  labo: {
+    titre: 'Laboratoire · la frontière ouverte',
+    intro: 'Règle l’état des routes, la fluidité de la frontière et la production agricole : combien de camions passent ?',
+    persos: ['vendeuse', 'gabonais', 'guineenne', 'douanier', 'geographe'],
+    curseurs: [
+      { id: 'routes', nom: 'État des routes', val: 55, bas: 'pistes', haut: 'route bitumée' },
+      { id: 'frontiere', nom: 'Fluidité de la frontière', val: 35, bas: 'tracasseries', haut: 'passage fluide', lecture: { haut: 'Contrôles rapides, droits clairs et payés.', bas: 'Files d’attente et pots-de-vin.' } },
+      { id: 'production', nom: 'Production agricole', val: 70, bas: 'faible', haut: 'abondante' }
+    ],
+    scenarios: [
+      { nom: 'Aujourd’hui', icone: 'panier', valeurs: { routes: 55, frontiere: 35, production: 70 } },
+      { nom: 'Et si la frontière était fluide ?', icone: 'porte', valeurs: { frontiere: 85 } },
+      { nom: 'Et si la récolte était mauvaise ?', icone: 'nuage', valeurs: { production: 15 } }
+    ],
+    liens: [
+      { a: 'vendeuse', b: 'gabonais', type: 'alliance', lib: 'vente', base: .3, poids: { production: .4, routes: .3 } },
+      { a: 'vendeuse', b: 'guineenne', type: 'alliance', lib: 'échange', base: .3, poids: { routes: .3 } },
+      { a: 'douanier', b: 'gabonais', type: 'conflit', lib: 'contrôle', base: .7, poids: { frontiere: -.7 } },
+      { a: 'geographe', b: 'vendeuse', type: 'confiance', lib: 'enquête', base: .4 }
+    ],
+    issue: function(v){
+      if(v.production < 30){ return { niveau: 'ko', badge: 'Marché vide', recit: 'Sans récolte, rien à vendre : les acheteurs repartent les mains vides et les prix flambent des deux côtés.', apres: 'Le marché frontalier dépend d’abord des campagnes qui l’alimentent.', themes: ['production vivrière'] }; }
+      var s = (v.routes + v.frontiere + v.production) / 3;
+      if(v.frontiere < 40){ return { niveau: 'moyen', badge: 'Un commerce freiné', recit: 'Les vivres sont là, mais chaque passage coûte du temps et de l’argent : une partie du commerce passe en contrebande.', apres: 'Réduire les tracasseries rapporterait plus que n’importe quelle taxe nouvelle.', themes: ['tracasseries', 'contrebande'] }; }
+      if(s > 65){ return { niveau: 'ok', badge: 'Un carrefour sous-régional', recit: 'Route, frontière fluide, récoltes abondantes : Kyé-Ossi devient un grand pôle d’échanges de la CEMAC.', apres: 'C’est l’objectif de l’intégration régionale : un marché commun réel, pas seulement sur le papier.', themes: ['intégration CEMAC'] }; }
+      return { niveau: 'moyen', badge: 'Un marché qui tient', recit: 'Les échanges continuent, à un rythme modeste.', apres: 'Chaque amélioration de la route se voit dans le nombre de camions.', themes: ['échanges frontaliers'] };
+    }
+  },
+  quiz: [
+    { q: 'Avec quels pays Kyé-Ossi est-il frontalier ?', options: [
+      { txt: 'Le Gabon et la Guinée équatoriale.', ok: true, retour: 'C’est le marché des trois frontières.' },
+      { txt: 'Le Nigeria et le Tchad.', retour: 'Ceux-là sont au nord et à l’ouest.' } ] },
+    { q: 'Quelle monnaie circule des deux côtés de la frontière ?', options: [
+      { txt: 'Le franc CFA d’Afrique centrale (XAF).', ok: true, retour: 'Une monnaie commune de la CEMAC.' },
+      { txt: 'Le naira.', retour: 'C’est la monnaie du Nigeria.' } ] },
+    { q: 'Que vend surtout le Cameroun à ce marché ?', options: [
+      { txt: 'Des produits vivriers.', ok: true, retour: 'Plantain, manioc, macabo, légumes.' },
+      { txt: 'Du pétrole brut.', retour: 'Non : le Gabon et la Guinée équatoriale en produisent eux-mêmes.' } ] },
+    { q: 'Citez un frein aux échanges frontaliers.', options: [
+      { txt: 'Les tracasseries aux postes de contrôle.', ok: true, retour: 'Avec les routes dégradées et la contrebande.' },
+      { txt: 'La monnaie commune.', retour: 'C’est un atout.' } ] },
+    { q: 'À quelle organisation sous-régionale appartiennent ces trois pays ?', options: [
+      { txt: 'La CEMAC.', ok: true, retour: 'Communauté économique et monétaire de l’Afrique centrale.' },
+      { txt: 'La CEDEAO.', retour: 'C’est l’Afrique de l’Ouest.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Un marché frontalier vit d’une complémentarité : le Cameroun produit des vivres que ses voisins achètent.',
+      'Kyé-Ossi relie le Cameroun, le Gabon et la Guinée équatoriale, trois pays de la CEMAC qui partagent le franc CFA.',
+      'Atouts : monnaie commune, production abondante, libre circulation décidée. Freins : routes, tracasseries, contrebande.',
+      'Ces échanges font vivre la ville et les campagnes qui l’alimentent.'
+    ],
+    ecrire: 'Réalisez un croquis simple de la zone de Kyé-Ossi (trois pays, la route vers Ebolowa, les flux de vivres et de produits manufacturés), puis rédigez une légende organisée en deux parties : les flux, les freins.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

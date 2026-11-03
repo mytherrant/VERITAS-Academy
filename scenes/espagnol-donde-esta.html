@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>¿Dónde está la biblioteca? — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Simulation d’espagnol : demander son chemin, comprendre les indications et les suivre sur le plan du collège.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'espagnol-donde',
+  discipline: 'Espagnol', niveau: '4e',
+  titre: '¿Dónde está la biblioteca?',
+  decor: 'couloir', lieu: 'el pasillo del colegio', moment: 'Por la mañana',
+  langue: 'es-ES', langueRecit: 'fr-FR', debit: 0.85,
+  avertissement: 'Dialogue imaginé pour la leçon. Active « Lire » pour entendre la prononciation espagnole.',
+  objectif: 'Demander son chemin poliment, comprendre les indications (todo recto, a la derecha, a la izquierda) et les suivre sur un plan ; distinguer « estar » (situer) de « ser ».',
+  jauges: [
+    { id: 'orient', nom: 'Orientación', val: 10, couleur: '#FFC93C' }
+  ],
+  personnages: {
+    lucia: { nom: 'Lucía', couleur: '#B0503A', look: { objet: 'sac', peau: 'mat', cheveux: 'long', habit: '#B0503A' } },
+    samuel:{ nom: 'Samuel', couleur: '#2F5E9E', look: { peau: 'fonce', cheveux: 'court', habit: '#2F5E9E' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['lucia', 'samuel'], txt: 'Lucía est nouvelle dans l’établissement. Elle cherche la bibliothèque.' },
+    { t: 'dit', qui: 'lucia', emo: 'doute', txt: 'Perdona, ¿dónde está la biblioteca, por favor?' },
+    { t: 'dit', qui: 'samuel', emo: 'joie', txt: '¡Hola! Sigue todo recto hasta el final del pasillo. Luego gira a la derecha.' },
+    { t: 'dit', qui: 'lucia', txt: '¿Y después?' },
+    { t: 'dit', qui: 'samuel', txt: 'Sigue todo recto otra vez y, al final, gira a la izquierda. La biblioteca está allí, al lado de la sala de informática.', jauges: { orient: 30 } },
+    { t: 'question', q: 'Que signifie « gira a la izquierda » ?',
+      options: [
+        { txt: 'Tourne à gauche.', ok: true, retour: 'izquierda = gauche ; derecha = droite ; todo recto = tout droit.' },
+        { txt: 'Tourne à droite.', retour: 'À droite se dit « a la derecha ».' },
+        { txt: 'Monte l’escalier.', retour: 'Monter l’escalier, c’est « sube las escaleras ».' }
+      ] },
+    { t: 'atelier', mode: 'chemin', titre: 'Taller · sigue el camino', consigne: 'Guide Lucía (le rond orange, flèche vers le haut) jusqu’à la bibliothèque en suivant les indications de Samuel. « Todo recto » fait avancer d’une case.',
+      plan: [
+        '#AAAIB#',
+        '#.....#',
+        '#.###.#',
+        '#.#####',
+        '#D#####'
+      ],
+      etiquettes: { A: 'AULA 3', I: 'INFO', B: 'BIBLIO', D: '' },
+      commandes: [ { lib: '⬆ todo recto', act: 'avance' }, { lib: '⬅ a la izquierda', act: 'gauche' }, { lib: 'a la derecha ➡', act: 'droite' } ],
+      mur: '¡Cuidado, una pared! (Attention, un mur !)', bravo: '¡Muy bien! Has llegado a la biblioteca.', jauges: { orient: 90 } },
+    { t: 'dit', qui: 'lucia', txt: '¿Está lejos?' },
+    { t: 'dit', qui: 'samuel', txt: 'No, está muy cerca. Dos minutos.' },
+    { t: 'question', q: 'Pourquoi emploie-t-on « está » (verbe estar) dans « la biblioteca está allí » ?',
+      options: [
+        { txt: 'Parce qu’on situe un lieu dans l’espace : pour la localisation, on emploie « estar ».', ok: true, retour: '« Estar » sert à situer et à exprimer un état ; « ser » sert à définir : « Es una biblioteca grande ».' },
+        { txt: 'Parce que « ser » n’existe pas au présent.', retour: '« Ser » existe bien : soy, eres, es… Mais il ne sert pas à situer.' }
+      ] },
+    { t: 'atelier', mode: 'tri', titre: 'Taller · ¿ser o estar?', consigne: 'Choisis le verbe qui convient.',
+      cats: ['es (ser)', 'está (estar)'],
+      items: [
+        { txt: 'La biblioteca … al lado de la sala de informática.', cat: 1 },
+        { txt: 'La biblioteca … muy grande.', cat: 0 },
+        { txt: 'Samuel … simpático.', cat: 0 },
+        { txt: 'El aula 3 … en el pasillo.', cat: 1 }
+      ],
+      bravo: 'estar pour situer (où ?), ser pour définir (comment est-ce ? qui est-ce ?).' },
+    { t: 'dit', qui: 'lucia', emo: 'joie', txt: '¡Muchas gracias! Me llamo Lucía. ¿Y tú?' },
+    { t: 'dit', qui: 'samuel', emo: 'joie', txt: 'Me llamo Samuel. ¡De nada! Bienvenida al colegio.' },
+    { t: 'remarque', titre: 'La politesse', txt: '« Perdona » (pardon, au tutoiement) pour aborder quelqu’un, « por favor » pour demander, « muchas gracias » pour remercier, « de nada » pour répondre.' }
+  ],
+  quiz: [
+    { q: '« A la derecha » signifie :', options: [
+      { txt: 'À droite.', ok: true, retour: 'derecha = droite.' },
+      { txt: 'À gauche.', retour: 'À gauche : a la izquierda.' } ] },
+    { q: '« Todo recto » signifie :', options: [
+      { txt: 'Tout droit.', ok: true, retour: 'Sigue todo recto : continue tout droit.' },
+      { txt: 'Tourne.', retour: 'Tourner : girar.' } ] },
+    { q: 'La biblioteca … al lado del aula.', options: [
+      { txt: 'está', ok: true, retour: 'On situe : estar.' },
+      { txt: 'es', retour: 'Ser définit ; pour situer, c’est estar.' } ] },
+    { q: 'Comment remercie-t-on ?', options: [
+      { txt: '¡Muchas gracias!', ok: true, retour: 'Réponse : ¡De nada!' },
+      { txt: '¡Por favor!', retour: 'Por favor = s’il te plaît.' } ] },
+    { q: 'Le contraire de « cerca » est :', options: [
+      { txt: 'lejos', ok: true, retour: 'cerca = près ; lejos = loin.' },
+      { txt: 'al lado', retour: 'al lado = à côté.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Demander son chemin : ¿Dónde está…, por favor?',
+      'Indications : todo recto (tout droit) · a la derecha (à droite) · a la izquierda (à gauche) · al lado de (à côté de).',
+      'Estar pour situer : la biblioteca está allí. Ser pour définir : es una biblioteca grande.',
+      'Cerca (près) ≠ lejos (loin).',
+      'Politesse : perdona, por favor, muchas gracias, de nada.'
+    ],
+    ecrire: 'Escribe un diálogo de 6 líneas: un alumno nuevo pregunta dónde está la cantina (o la enfermería) de tu colegio.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Personnages isométriques | VÉRITAS</title>
+<meta name="description" content="Galerie des personnages en 3D isométrique des Scènes vivantes, et mode d’emploi pour les intégrer dans une page du site.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+<style>
+  .gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:16px 0}
+  .gal figure{margin:0;background:var(--v-bleu2);border-radius:var(--v-r);padding:14px 8px 10px;text-align:center;color:#fff}
+  .gal .sc-perso{width:100%;opacity:1;transform:none}
+  .gal .sc-avatar{width:100px;height:250px;margin:0 auto}
+  .gal figcaption{font-size:13px;font-weight:500;margin-top:4px}
+  .code{background:var(--v-blanc);border-radius:var(--v-r);padding:16px;font:13px/1.6 ui-monospace,Consolas,monospace;color:var(--v-navy);white-space:pre-wrap;overflow:auto}
+</style>
+</head>
+<body>
+<div class="sc-marque"><div class="sc-marque-in"><a href="index.html"><img src="../assets/veritas-logo.png" alt="" width="36" height="36"><b>VÉRITAS</b></a><i class="sc-sep"></i><span>Personnages</span></div></div>
+<main class="sc-wrap">
+  <h1 class="sc-titre">Personnages en 3D isométrique</h1>
+  <p class="sc-avert">Dessinés en SVG par <code>scene.js</code>, sans image ni bibliothèque : une fiche de quelques mots suffit. Survolez un personnage pour le faire parler.</p>
+  <div class="gal" id="gal"></div>
+  <h2>Intégrer un personnage dans une page du site</h2>
+  <div class="code">&lt;link rel="stylesheet" href="/scenes/scene.css"&gt;
+&lt;script src="/scenes/scene.js"&gt;&lt;/script&gt;
+&lt;div class="sc-perso"&gt;&lt;div class="sc-avatar" id="meka"&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;script&gt;
+  document.getElementById('meka').innerHTML = VRT_PERSO.iso({
+    _k: 'meka', couleur: '#8A5A2B',
+    look: { peau: 'fonce', vieux: true, cheveux: 'ras', habit: '#6B4A2B', moustache: true }
+  });
+&lt;/script&gt;
+
+peau : tresfonce · fonce · brun · mat · clair · pale
+metier : medecin · infirmier · policier · soldat · enseignant · pretre · juge · paysan · commercant · cuisinier · eleve · ouvrier
+cheveux : court · ras · long · tresses · chignon · afro · queue · carre · perruque · aucun
+tenue : pantalon · robe · jupe · costume · boubou · blouse   ·   objet : dossier · livre · sac · lettre · houe
+coiffe : couronne · casque · foulard · bonnet · chechia · toque · kepi · voile · beret · calot · toque_chef · casque_chantier · chapeau
+options : barbe · moustache · lunettes · vieux · col · medaille · couleurCheveux · couleurCoiffe
+Ajouter la classe « parle » sur .sc-perso fait hocher la tête et bouger la bouche.</div>
+</main>
+<script src="scene.js?v=20261103n"></script>
+<script>
+(function(){
+  var P = [
+    ['Médecin', '#1E499B', { metier: 'medecin', peau: 'tresfonce', cheveux: 'ras' }],
+    ['Infirmière', '#4B93B2', { metier: 'infirmier', peau: 'pale', cheveux: 'queue', couleurCheveux: '#C9A15A' }],
+    ['Policier', '#14254A', { metier: 'policier', peau: 'fonce', cheveux: 'ras' }],
+    ['Soldat', '#4A5830', { metier: 'soldat', peau: 'brun', cheveux: 'ras', moustache: true }],
+    ['Enseignante', '#2F5E9E', { metier: 'enseignant', peau: 'fonce', cheveux: 'afro', tenue: 'jupe', habit: '#2F5E9E', bas: '#1E2A44', lunettes: true }],
+    ['Prêtre', '#1A1A1A', { metier: 'pretre', peau: 'mat', cheveux: 'court', couleurCheveux: '#3A2A1A' }],
+    ['Juge', '#121212', { metier: 'juge', peau: 'clair', cheveux: 'court', couleurCheveux: '#8A8A8A', lunettes: true }],
+    ['Paysanne', '#8A5A2B', { metier: 'paysan', peau: 'fonce', cheveux: 'tresses', tenue: 'robe', habit: '#2E6B5A' }],
+    ['Commerçante', '#C2551F', { metier: 'commercant', peau: 'tresfonce', coiffe: 'foulard', couleurCoiffe: '#E8A413', tenue: 'robe' }],
+    ['Cuisinier', '#5A6275', { metier: 'cuisinier', peau: 'clair', cheveux: 'court', moustache: true }],
+    ['Élève', '#1E499B', { metier: 'eleve', peau: 'brun', cheveux: 'court', tenue: 'jupe' }],
+    ['Ouvrier', '#E07B39', { metier: 'ouvrier', peau: 'mat', barbe: true, cheveux: 'court' }],
+    ['Kelara', '#7A3E6C', { tenue: 'robe', peau: 'fonce', vieux: true, coiffe: 'foulard', couleurCoiffe: '#C0397C', habit: '#8A3B6E' }],
+    ['M. Fouconi', '#5A6275', { peau: 'pale', cheveux: 'court', habit: '#E9E3CF', coiffe: 'casque', moustache: true, objet: 'dossier' }],
+    ['Orgon', '#5A4A8A', { tenue: 'costume', peau: 'clair', cheveux: 'perruque', couleurCheveux: '#7A5230', habit: '#3A2E5C', col: '#F2EEE3', moustache: true }],
+    ['Baroka', '#7A2E2E', { tenue: 'boubou', peau: 'fonce', vieux: true, barbe: true, coiffe: 'couronne', habit: '#7A2E2E' }],
+    ['Aïcha', '#B0503A', { tenue: 'jupe', peau: 'brun', coiffe: 'voile', habit: '#2F5E9E' }],
+    ['Lucía', '#B0503A', { peau: 'mat', cheveux: 'long', habit: '#B0503A', objet: 'sac' }]
+  ];
+  document.getElementById('gal').innerHTML = P.map(function(p, k){
+    return '<figure><div class="sc-perso present' + (k % 2 ? ' face-g' : '') + '"><div class="sc-avatar">' + VRT_PERSO.iso({ _k: 'g' + k, couleur: p[1], look: p[2] }) + '</div></div><figcaption>' + p[0] + '</figcaption></figure>';
+  }).join('');
+  document.querySelectorAll('.gal .sc-perso').forEach(function(el){
+    el.onmouseenter = function(){ el.classList.add('parle'); };
+    el.onmouseleave = function(){ el.classList.remove('parle'); };
+  });
+})();
+</script>
+</body>
+</html>

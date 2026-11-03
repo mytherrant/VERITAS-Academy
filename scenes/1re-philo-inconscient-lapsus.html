@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le lapsus de Christian — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de philosophie (Première) : la conscience et l’inconscient ; la découverte freudienne (lapsus, actes manqués, rêves), la seconde topique et sa critique.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '1re-philo-inconscient',
+  discipline: 'Philosophie', niveau: '1re',
+  titre: 'Le lapsus de Christian',
+  decor: 'classe', lieu: 'La salle de classe', moment: 'Un discours de délégué',
+  objectif: 'Définir la conscience et ses limites ; comprendre la découverte freudienne de l’inconscient (lapsus, actes manqués, rêves, refoulement) et la seconde topique (ça, moi, surmoi) ; discuter la thèse de l’inconscient (liberté, responsabilité, mauvaise foi).',
+  programme: 'Progression harmonisée 1re · Chapitre 4, leçon 8 (la conscience : types, caractéristiques, valeur et limites), leçon 9 (l’inconscient : découverte, types, théorie freudienne et sa critique)',
+  jauges: [
+    { id: 'conscience', nom: 'Ce que Christian croit savoir de lui', val: 85, couleur: '#1E499B' },
+    { id: 'inconscient', nom: 'Ce qui lui échappe', val: 15, couleur: '#5A2E5A' }
+  ],
+  personnages: {
+    christian: { nom: 'Christian, candidat délégué', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } },
+    sandrine:  { nom: 'Sandrine, sa rivale', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    prof:      { nom: 'M. Abanda, professeur de philosophie', couleur: '#1E499B', look: { metier: 'enseignant', peau: 'fonce', cheveux: 'ras', lunettes: true, barbe: true } },
+    freud:     { nom: 'Sigmund Freud (en rêve)', couleur: '#3A3A44', look: { tenue: 'costume', peau: 'clair', vieux: true, cheveux: 'court', barbe: true, lunettes: true, habit: '#3A3A44', col: '#FFFFFF' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['christian', 'sandrine'], txt: 'Élection du délégué de classe. Christian et Sandrine sont candidats. Christian prépare un discours généreux pour sa rivale.', objet: { i: 'porteVoix', lib: 'Le discours' } },
+    { t: 'dit', qui: 'christian', jeu: 'devant la classe', txt: 'Je tiens à saluer ma camarade Sandrine, qui serait… qui ne serait pas… pardon ! Qui serait une excellente déléguée.', jauges: { inconscient: 50 } },
+    { t: 'dit', qui: 'sandrine', emo: 'colere', txt: 'Merci du compliment, Christian. J’ai très bien entendu ce que tu voulais dire.' },
+    { t: 'recit', entre: ['prof'], txt: 'Toute la classe rit. M. Abanda saisit l’occasion.' },
+    { t: 'dit', qui: 'prof', txt: 'Christian a fait ce qu’on appelle un lapsus : il a dit autre chose que ce qu’il voulait dire. Simple erreur de langue, ou parole de quelque chose en lui ?' },
+    { t: 'dit', qui: 'christian', emo: 'doute', txt: 'Mais je suis sincère ! Je le sais, moi, ce que je pense. Je suis conscient de tout ce qui se passe dans ma tête.', jauges: { conscience: 85 } },
+    { t: 'remarque', titre: 'La conscience', txt: 'La conscience est la connaissance que l’esprit a de lui-même et de ses actes. Depuis Descartes, on la tient souvent pour transparente : je sais ce que je pense. Mais cette transparence a des limites : distraction, habitudes, illusions, et peut-être un inconscient.' },
+    { t: 'recit', sort: ['sandrine', 'prof'], entre: ['freud'], txt: 'La nuit suivante, Christian rêve. Un vieil homme barbu, cigare à la main, lui parle.' },
+    { t: 'dit', qui: 'freud', jeu: 'calmement', txt: 'Les lapsus, les oublis, les actes manqués et les rêves ne sont pas des accidents. Ils ont un sens. Ce sont des désirs que ta conscience repousse, mais qui trouvent un chemin détourné pour s’exprimer.', jauges: { inconscient: 75, conscience: 55 } },
+    { t: 'remarque', titre: 'La découverte freudienne', txt: 'Sigmund Freud (1856-1939), médecin viennois, fonde la psychanalyse. Dans Psychopathologie de la vie quotidienne (1901), il analyse les lapsus et actes manqués ; dans L’Interprétation des rêves (1900), les rêves comme réalisation déguisée d’un désir. Le refoulement repousse hors de la conscience des désirs inacceptables, qui restent actifs.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · les instances du psychisme', consigne: 'Associe chaque description à l’instance de la seconde topique de Freud (1923).',
+      cats: ['Le ça', 'Le moi', 'Le surmoi'],
+      items: [
+        { txt: 'Réservoir des pulsions, qui veut une satisfaction immédiate.', cat: 0 },
+        { txt: 'Intériorisation des interdits des parents et de la société.', cat: 2 },
+        { txt: 'Médiateur qui cherche un compromis avec la réalité.', cat: 1 },
+        { txt: 'La voix qui dit : « Tu dois être généreux avec ta rivale. »', cat: 2 },
+        { txt: 'Le désir caché que Sandrine perde l’élection.', cat: 0 }
+      ],
+      bravo: 'Le lapsus de Christian : un désir du ça échappe à la censure du surmoi, malgré le moi.' },
+    { t: 'question', q: 'Selon la théorie freudienne, que révèle le lapsus de Christian ?',
+      options: [
+        { txt: 'Un désir refoulé : il ne souhaite pas vraiment que Sandrine soit une bonne déléguée, même s’il croit le contraire.', ok: true, retour: 'Le lapsus est un compromis : le désir refoulé passe dans la phrase, déguisé en erreur.' },
+        { txt: 'Rien du tout : c’est une simple fatigue.', retour: 'C’est l’explication du sens commun, que Freud refuse : pour lui, ces « accidents » ont un sens.' }
+      ] },
+    { t: 'choix', qui: 'christian', q: 'Tu es Christian, au réveil. Que fais-tu de cette idée d’inconscient ?',
+      options: [
+        { txt: '« Ce n’est pas ma faute, c’est mon inconscient ! »', consequence: 'Tu te sers de l’inconscient comme d’une excuse. Sartre dirait : mauvaise foi. Se cacher derrière l’inconscient, c’est fuir sa responsabilité.', jauges: { conscience: -10 } },
+        { txt: '« Freud dit n’importe quoi : je suis transparent à moi-même. »', consequence: 'Tu refuses l’hypothèse sans l’examiner : la conscience se croit maîtresse, mais elle se trompe parfois sur elle-même.', jauges: { inconscient: -10 } },
+        { txt: '« Je ne sais pas tout de moi. Je peux chercher à me connaître mieux, et je reste responsable de ce que je fais. »', consequence: 'Tu prends l’inconscient comme une invitation à mieux se connaître, pas comme une excuse.', jauges: { conscience: 20, inconscient: 10 } }
+      ],
+      oeuvre: 'Critiques de la psychanalyse : Alain y voit une mythologie ; Sartre parle de mauvaise foi ; Karl Popper juge la théorie impossible à réfuter. Mais elle a profondément changé notre manière de nous comprendre.' },
+    { t: 'atelier', mode: 'balance', titre: 'Atelier · faut-il croire à l’inconscient ?', consigne: 'Place chaque argument du côté qu’il défend.',
+      cotes: ['Pour l’inconscient', 'Contre ou limite'],
+      args: [
+        { txt: 'Les lapsus et les rêves semblent avoir un sens caché.', cote: 0, poids: 3 },
+        { txt: 'L’hypothèse peut servir d’excuse pour échapper à sa responsabilité.', cote: 1, poids: 3 },
+        { txt: 'La psychanalyse a soigné des patients en leur faisant prendre conscience de leurs conflits.', cote: 0, poids: 2 },
+        { txt: 'On ne peut ni prouver ni réfuter une interprétation de l’inconscient.', cote: 1, poids: 2 }
+      ],
+      bravo: 'La question reste ouverte : c’est un excellent sujet de dissertation.' },
+    { t: 'dit', qui: 'christian', emo: 'joie', jeu: 'à Sandrine, le lendemain', txt: 'Sandrine, je te dois des excuses. Et cette fois, je le pense vraiment… je crois.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · qui commande en moi ?',
+    intro: 'Règle la force des désirs, la sévérité des interdits et la lucidité du moi : que devient le discours de Christian ?',
+    persos: ['christian', 'freud', 'prof', 'sandrine'],
+    curseurs: [
+      { id: 'ca', nom: 'Force des désirs (le ça)', val: 70, bas: 'faibles', haut: 'pressants' },
+      { id: 'surmoi', nom: 'Sévérité des interdits (le surmoi)', val: 70, bas: 'souple', haut: 'implacable' },
+      { id: 'moi', nom: 'Lucidité du moi', val: 35, bas: 'aveugle', haut: 'lucide' }
+    ],
+    scenarios: [
+      { nom: 'Le discours de Christian', icone: 'porteVoix', valeurs: { ca: 70, surmoi: 70, moi: 35 } },
+      { nom: 'Un surmoi tout-puissant', icone: 'balance', valeurs: { surmoi: 95, ca: 85, moi: 20 } },
+      { nom: 'Un moi lucide', icone: 'oeil', valeurs: { moi: 85 } }
+    ],
+    liens: [
+      { a: 'freud', b: 'christian', type: 'confiance', lib: 'interprète', base: .3, poids: { moi: .3 } },
+      { a: 'christian', b: 'sandrine', type: 'conflit', lib: 'rivalité', base: .3, poids: { ca: .5 } },
+      { a: 'prof', b: 'christian', type: 'confiance', lib: 'fait réfléchir', base: .5 }
+    ],
+    issue: function(v){
+      if(v.moi > 65){ return { niveau: 'ok', badge: 'Se connaître', recit: 'Christian reconnaît sa jalousie, la nomme et choisit d’en faire de l’émulation loyale : il reste maître de ses actes.', apres: 'Freud : « Là où était le ça, le moi doit advenir. »', themes: ['connaissance de soi', 'responsabilité'] }; }
+      if(v.ca > 60 && v.surmoi > 85){ return { niveau: 'ko', badge: 'Le conflit intérieur', recit: 'Désirs pressants et interdits implacables : le moi, écrasé, laisse échapper symptômes et angoisses.', apres: 'Pour Freud, c’est l’origine des névroses.', themes: ['refoulement', 'névrose'] }; }
+      if(v.ca > 60 && v.surmoi > 55){ return { niveau: 'moyen', badge: 'Le lapsus', recit: 'Le désir refoulé passe la censure, déguisé en erreur de langue.', apres: 'Un compromis entre le désir et l’interdit.', themes: ['lapsus', 'acte manqué'] }; }
+      return { niveau: 'moyen', badge: 'Un équilibre', recit: 'Désirs et interdits s’accordent à peu près : peu de conflits visibles.', apres: 'L’inconscient n’en est pas absent pour autant.', themes: ['équilibre psychique'] };
+    }
+  },
+  quiz: [
+    { q: 'Qu’est-ce qu’un lapsus ?', options: [
+      { txt: 'Dire ou écrire autre chose que ce qu’on voulait dire.', ok: true, retour: 'Pour Freud, il a un sens.' },
+      { txt: 'Un rêve récurrent.', retour: 'Non.' } ] },
+    { q: 'Quelles sont les trois instances de la seconde topique ?', options: [
+      { txt: 'Le ça, le moi, le surmoi.', ok: true, retour: 'Freud, 1923.' },
+      { txt: 'L’âme, le corps, l’esprit.', retour: 'Non.' } ] },
+    { q: 'Qu’est-ce que le refoulement ?', options: [
+      { txt: 'Le processus qui repousse hors de la conscience des désirs inacceptables.', ok: true, retour: 'Ils restent actifs et cherchent à s’exprimer.' },
+      { txt: 'L’oubli d’une leçon.', retour: 'Pas seulement : c’est un mécanisme inconscient.' } ] },
+    { q: 'Quelle critique Sartre adresse-t-il ?', options: [
+      { txt: 'L’inconscient peut servir de mauvaise foi pour fuir sa responsabilité.', ok: true, retour: 'Nous sommes responsables de ce que nous faisons.' },
+      { txt: 'L’inconscient est trop simple.', retour: 'Non.' } ] },
+    { q: 'Quel livre de Freud analyse les rêves ?', options: [
+      { txt: 'L’Interprétation des rêves (1900).', ok: true, retour: 'Le rêve, réalisation déguisée d’un désir.' },
+      { txt: 'Le Discours de la méthode.', retour: 'C’est Descartes.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'La conscience : connaissance que l’esprit a de lui-même ; transparente pour Descartes, mais limitée.',
+      'Freud : lapsus, actes manqués et rêves expriment des désirs refoulés ; seconde topique (1923) : ça, moi, surmoi.',
+      'Le lapsus est un compromis entre le désir et l’interdit.',
+      'Critiques : mauvaise foi (Sartre), mythologie (Alain), théorie irréfutable (Popper) ; l’inconscient n’abolit pas la responsabilité.'
+    ],
+    ecrire: 'Sujet : « Peut-on se connaître soi-même ? » Rédigez le plan détaillé d’une dissertation en utilisant au moins deux références de la leçon.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

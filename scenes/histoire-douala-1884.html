@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Douala, juillet 1884 — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’histoire : le traité germano-douala du 12 juillet 1884, le refus de Lock Priso, et ce qu’il en reste en 1914.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'histoire-douala-1884',
+  discipline: 'Histoire', niveau: '4e – 3e',
+  titre: 'Douala, juillet 1884 : un traité et ses malentendus',
+  decor: 'port', lieu: 'les rives du Wouri, à Douala', moment: 'Juillet 1884',
+  avertissement: 'Dialogue imaginé pour la leçon : Ebanda, le jeune interprète, est un personnage inventé. Les dates, les lieux et les faits rapportés sont exacts.',
+  objectif: 'Comprendre comment le Cameroun devient un protectorat allemand en 1884 : ce que les chefs douala croient négocier, ce que l’Allemagne obtient, et pourquoi ce traité porte en germe les conflits à venir. Les jauges suivent la souveraineté des Duala et la valeur réelle du traité.',
+  jauges: [
+    { id: 'souv', nom: 'Souveraineté des Duala', val: 90, couleur: '#FFC93C' },
+    { id: 'traite', nom: 'Respect du traité', val: 0, couleur: '#4C6FBF' }
+  ],
+  personnages: {
+    ebanda:  { nom: 'Ebanda, interprète', couleur: '#2E6B5A', look: { objet: 'lettre', peau: 'fonce', cheveux: 'court', habit: '#F2EEE3' } },
+    bell:    { nom: 'Le roi Ndumbe Lobe Bell', couleur: '#8A5A2B', look: { tenue: 'costume', col: '#F2EEE3', peau: 'fonce', cheveux: 'ras', barbe: true, coiffe: 'toque', habit: '#1E1E1E', col: '#F2EEE3' } },
+    schmidt: { nom: 'Eduard Schmidt, maison Woermann', couleur: '#5A6275', look: { objet: 'dossier', peau: 'clair', cheveux: 'court', moustache: true, coiffe: 'casque', habit: '#E9E3CF' } },
+    priso:   { nom: 'Lock Priso, chef de Hickory Town', couleur: '#7A3E6C', look: { tenue: 'boubou', peau: 'fonce', barbe: true, coiffe: 'bonnet', couleurCoiffe: '#7B2D26', habit: '#7A3E6C' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['ebanda'], txt: 'Juillet 1884. Depuis des décennies, les Duala servent d’intermédiaires entre les marchands européens, installés sur l’estuaire du Wouri, et les peuples de l’intérieur. Les Britanniques, les Allemands et les Français se disputent ce commerce.' },
+    { t: 'dit', qui: 'ebanda', txt: 'Je traduis pour les chefs depuis trois jours. Les marchands allemands veulent un papier signé. Les nôtres veulent des garanties. Tout le monde croit avoir compris l’autre.' },
+    { t: 'dit', qui: 'schmidt', entre: ['schmidt'], emo: 'joie', txt: 'Si vous signez, l’Empire allemand vous protégera. Vous garderez vos coutumes et votre commerce.' },
+    { t: 'dit', qui: 'bell', entre: ['bell'], txt: 'Nous voulons des conditions écrites : nos terres restent à nous, et le commerce avec l’intérieur reste entre nos mains.', jauges: { traite: 60 } },
+    { t: 'question', q: 'Pourquoi les chefs duala tiennent-ils tant à garder le commerce avec l’intérieur ?',
+      options: [
+        { txt: 'Parce que leur richesse et leur pouvoir reposent sur ce rôle d’intermédiaires.', ok: true, retour: 'Les Duala achètent aux peuples de l’intérieur et revendent aux Européens : perdre ce monopole, c’est perdre leur puissance.' },
+        { txt: 'Parce qu’ils veulent fermer le pays aux Européens.', retour: 'Non : ils commercent avec les Européens depuis longtemps. Ils veulent garder leur place dans ce commerce.' },
+        { txt: 'Parce que l’intérieur du pays est inhabité.', retour: 'L’intérieur est peuplé : c’est de là que viennent l’huile de palme, l’ivoire et d’autres produits.' }
+      ] },
+    { t: 'choix', qui: 'bell', q: 'Tu es le roi Bell. Les Allemands attendent ta signature. Que fais-tu ?',
+      options: [
+        { txt: 'Je signe, avec nos conditions écrites dans le traité.', consequence: 'Tu crois protéger tes terres par l’écrit. Mais un papier ne vaut que si le plus fort le respecte.', jauges: { souv: -40 } },
+        { txt: 'Je refuse et j’attends la réponse des Britanniques.', consequence: 'Les Allemands traitent avec d’autres chefs. Tu restes libre un temps, mais isolé face à la course des Européens.', jauges: { souv: -10 } }
+      ],
+      oeuvre: 'Le 12 juillet 1884, les rois Bell et Akwa signent avec les maisons de commerce allemandes Woermann et Jantzen & Thormählen. Le traité cède la souveraineté en échange de garanties.' },
+    { t: 'recit', objet: { i: '✍️', lib: '12 juillet 1884' }, txt: 'Le 12 juillet 1884, les rois Bell et Akwa signent avec les représentants des maisons de commerce allemandes Woermann et Jantzen & Thormählen un traité qui cède la souveraineté sur leur territoire, en échange de garanties.', jauges: { souv: 40 } },
+    { t: 'recit', decor: 'port_drapeau', txt: 'Le 14 juillet 1884, l’envoyé de l’Empire, Gustav Nachtigal, hisse le drapeau allemand. Quelques jours plus tard, le consul britannique arrive : trop tard. Le Kamerun est allemand.', jauges: { souv: 25 } },
+    { t: 'dit', qui: 'priso', entre: ['priso'], emo: 'colere', jeu: 'de l’autre rive, à Hickory Town (Bonabéri)', txt: 'Je n’ai rien signé. On ne vend pas la terre de ses ancêtres à des marchands. Mon drapeau ne sera pas le leur.' },
+    { t: 'remarque', txt: 'Tous les chefs n’ont pas accepté. Lock Priso (Kum’a Mbape), de Hickory Town, refuse le traité. En décembre 1884, des combats éclatent : la « protection » commence par la force.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · deux lectures du traité', consigne: 'Classe chaque idée : ce que les chefs douala espéraient, ou ce que l’Allemagne a obtenu.',
+      cats: ['Espoir des Duala', 'Gain de l’Allemagne'],
+      items: [
+        { txt: 'Garder la propriété de leurs terres', cat: 0 },
+        { txt: 'La souveraineté sur le territoire', cat: 1 },
+        { txt: 'Rester les intermédiaires du commerce', cat: 0 },
+        { txt: 'Un titre à faire valoir face aux Britanniques', cat: 1 },
+        { txt: 'Conserver leurs coutumes', cat: 0 }
+      ],
+      bravo: 'Le même papier, deux lectures : c’est la source du malentendu, puis du conflit.' },
+    { t: 'question', q: 'Au même moment, à Berlin, que se prépare-t-il ?',
+      options: [
+        { txt: 'La conférence de Berlin (novembre 1884 – février 1885), qui fixe les règles du partage de l’Afrique entre puissances européennes.', ok: true, retour: 'Les Africains n’y sont pas invités. Le traité de Douala permet à l’Allemagne d’y faire valoir ses droits sur le Kamerun.' },
+        { txt: 'L’indépendance du Cameroun.', retour: 'Elle n’interviendra qu’en 1960.' },
+        { txt: 'La Première Guerre mondiale.', retour: 'Elle commence trente ans plus tard, en 1914.' }
+      ] },
+    { t: 'dit', qui: 'ebanda', emo: 'triste', jeu: 'trente ans plus tard', moment: '1910 – 1914', sort: ['schmidt', 'priso'], txt: 'Le papier disait que nos terres resteraient à nous. Trente ans après, l’administration a voulu chasser les Duala du plateau Joss pour y bâtir une ville européenne.', jauges: { traite: 10 } },
+    { t: 'recit', ambiance: 'deuil', txt: 'Rudolf Duala Manga Bell, petit-fils du roi Ndumbe Lobe Bell, s’y oppose en invoquant le traité de 1884. Il est pendu à Douala le 8 août 1914, avec Ngoso Din.', jauges: { souv: 5 } },
+    { t: 'remarque', titre: 'Lien avec la littérature', txt: 'Cette résistance est le sujet de Ngum a Jemea, l’œuvre au programme de Terminale : « le droit contre la force ». Le traité de 1884 en est l’arrière-plan.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · la frise chronologique', consigne: 'Remets ces événements dans l’ordre chronologique.',
+      items: [
+        '12 juillet 1884 — Traité germano-douala.',
+        '14 juillet 1884 — Nachtigal hisse le drapeau allemand.',
+        'Novembre 1884 — Ouverture de la conférence de Berlin.',
+        'Décembre 1884 — Combats contre Lock Priso.',
+        '1910 — Plan d’expropriation du plateau Joss.',
+        '8 août 1914 — Pendaison de Rudolf Duala Manga Bell et de Ngoso Din.'
+      ],
+      bravo: 'Trente ans séparent la signature du traité et la mort de celui qui en réclamait le respect.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · la négociation de 1884',
+    intro: 'Règle l’unité des chefs, la précision des garanties, la rivalité entre Européens et la force militaire allemande : que devient l’estuaire du Wouri ?',
+    persos: ['bell', 'priso', 'schmidt', 'ebanda'],
+    curseurs: [
+      { id: 'unite', nom: 'Unité des chefs douala', val: 35, bas: 'divisés', haut: 'unis',
+        lecture: { haut: 'Unis, les chefs pourraient imposer leurs conditions… ou refuser ensemble.', bas: 'Bell et Akwa signent, Lock Priso refuse : la division affaiblit tout le monde.' } },
+      { id: 'garanties', nom: 'Garanties écrites', val: 60, bas: 'vagues', haut: 'précises',
+        lecture: { haut: 'Les terres et le commerce sont garantis par écrit : c’est sur ce texte que Rudolf Duala Manga Bell plaidera en 1914.', bas: 'Sans garanties écrites, la cession serait totale.' } },
+      { id: 'rivalite', nom: 'Rivalité entre Européens', val: 80, bas: 'faible', haut: 'vive',
+        lecture: { haut: 'Allemands et Britanniques se disputent l’estuaire : une marge de négociation pour les Duala.', bas: 'Sans rivalité, une seule puissance dicterait ses conditions.' } },
+      { id: 'force', nom: 'Force militaire allemande', val: 80, bas: 'faible', haut: 'écrasante',
+        lecture: { haut: 'Le papier ne vaut que si le plus fort le respecte : la « protection » commence par les combats de décembre 1884.', bas: 'Une puissance faible devrait tenir parole.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme en 1884', icone: '📜', valeurs: { unite: 35, garanties: 60, rivalite: 80, force: 80 } },
+      { nom: 'Et si tous les chefs s’unissaient ?', icone: '🤝', valeurs: { unite: 90 } },
+      { nom: 'Et s’il n’y avait aucune garantie ?', icone: '✍️', valeurs: { garanties: 10 } },
+      { nom: 'Et si l’Allemagne était faible ?', icone: '⚖️', valeurs: { force: 15 } }
+    ],
+    liens: [
+      { a: 'bell', b: 'schmidt', type: 'alliance', lib: 'traité', base: .2, poids: { garanties: .5, unite: -.2 } },
+      { a: 'priso', b: 'schmidt', type: 'conflit', lib: 'refus', base: .4, poids: { force: .4 } },
+      { a: 'bell', b: 'priso', type: 'conflit', lib: 'division', base: .9, poids: { unite: -.9 } },
+      { a: 'schmidt', b: 'ebanda', type: 'domination', lib: 'impose ses mots', base: .2, poids: { force: .6 } },
+      { a: 'ebanda', b: 'bell', type: 'confiance', lib: 'traduit', base: .6 }
+    ],
+    issue: function(v){
+      if(v.force < 30){ return { niveau: 'ok', badge: 'Le traité tient', recit: 'L’Allemagne n’a pas les moyens d’imposer sa loi : elle respecte les garanties, les Duala gardent terres et commerce.', apres: 'En 1914, il n’y aurait pas d’expropriation du plateau Joss… ni de pendaison.', themes: ['droit respecté'] }; }
+      if(v.unite >= 70 && v.rivalite >= 60){ return { niveau: 'moyen', badge: 'Les chefs font monter les enchères', recit: 'Unis, les chefs jouent les Britanniques contre les Allemands et obtiennent des garanties plus fortes.', apres: 'Un rapport de force meilleur, mais la conférence de Berlin (1884-1885) partage l’Afrique sans les Africains.', themes: ['diplomatie', 'unité'] }; }
+      if(v.garanties < 30){ return { niveau: 'ko', badge: 'Cession sans condition', recit: 'Les chefs signent un texte vague : l’Allemagne obtient tout, sans contrepartie écrite.', apres: 'En 1914, Rudolf Duala Manga Bell n’aurait même pas de traité à invoquer.', themes: ['dépossession'] }; }
+      return { niveau: 'ko', badge: 'Protectorat allemand', recit: 'Bell et Akwa signent le 12 juillet ; Nachtigal hisse le drapeau le 14 ; Lock Priso refuse et l’on se bat en décembre. Les garanties écrites ne pèseront pas lourd face à la force.', apres: 'Trente ans plus tard, le plan d’expropriation du plateau Joss et la pendaison de Rudolf Duala Manga Bell (8 août 1914).', themes: ['colonisation', 'malentendu', 'résistance', 'droit contre force'] };
+    }
+  },
+  quiz: [
+    { q: 'Quand le traité germano-douala est-il signé ?', options: [
+      { txt: 'Le 12 juillet 1884.', ok: true, retour: 'Par les rois Bell et Akwa avec les maisons Woermann et Jantzen & Thormählen.' },
+      { txt: 'Le 1er janvier 1960.', retour: 'C’est l’indépendance du Cameroun oriental.' } ] },
+    { q: 'Qui hisse le drapeau allemand le 14 juillet 1884 ?', options: [
+      { txt: 'Gustav Nachtigal.', ok: true, retour: 'Le consul britannique arrive quelques jours trop tard.' },
+      { txt: 'Le roi Bell.', retour: 'Le roi a signé ; c’est l’envoyé de l’Empire qui hisse le drapeau.' } ] },
+    { q: 'Quel chef refuse le traité ?', options: [
+      { txt: 'Lock Priso (Kum’a Mbape), de Hickory Town.', ok: true, retour: 'Des combats éclatent en décembre 1884.' },
+      { txt: 'Le roi Akwa.', retour: 'Akwa a signé, comme Bell.' } ] },
+    { q: 'Que décide la conférence de Berlin (1884-1885) ?', options: [
+      { txt: 'Les règles du partage de l’Afrique entre puissances européennes.', ok: true, retour: 'Sans les Africains.' },
+      { txt: 'L’indépendance des colonies.', retour: 'C’est tout l’inverse.' } ] },
+    { q: 'Pourquoi Rudolf Duala Manga Bell est-il pendu en 1914 ?', options: [
+      { txt: 'Pour s’être opposé, au nom du traité de 1884, à l’expropriation des Duala.', ok: true, retour: 'Le 8 août 1914, avec Ngoso Din.' },
+      { txt: 'Pour avoir signé le traité.', retour: 'Il en réclamait au contraire le respect.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      '12 juillet 1884 : traité germano-douala signé par les rois Bell et Akwa avec les maisons Woermann et Jantzen & Thormählen.',
+      '14 juillet 1884 : Gustav Nachtigal hisse le drapeau allemand ; le Kamerun devient un protectorat.',
+      'Lock Priso (Kum’a Mbape), de Hickory Town, refuse le traité ; combats en décembre 1884.',
+      'Novembre 1884 – février 1885 : conférence de Berlin, partage de l’Afrique sans les Africains.',
+      '8 août 1914 : Rudolf Duala Manga Bell et Ngoso Din sont pendus pour s’être opposés à l’expropriation du plateau Joss.'
+    ],
+    ecrire: 'Vous êtes Ebanda, l’interprète. Écrivez une lettre de quinze lignes à vos petits-enfants pour leur expliquer ce que les chefs croyaient signer en 1884 et ce que le traité est devenu.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

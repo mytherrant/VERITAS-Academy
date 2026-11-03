@@ -54,6 +54,7 @@ on:
       - 'campus/**'
       - 'gestion/**'
       - 'plateforme/**'
+      - 'scenes/**'
       # NOTE : les corpus (corpus_minesec.json, citations_minesec.json) ne
       # figurent PAS ici. Ils sont gitignores — 1040 textes et 137 citations,
       # c'est la marchandise, et ce depot est PUBLIC. Ils n'arrivent donc
@@ -146,7 +147,7 @@ jobs:
           fi
           js_fail=0
           echo "→ Lint JS (node --check) sur app.js, sw.js, assets/*.js et chunks/*.js"
-          for j in app.js sw.js gestion/app.js gestion/sw.js $(ls assets/*.js 2>/dev/null) $(ls chunks/*.js 2>/dev/null); do
+          for j in app.js sw.js gestion/app.js gestion/sw.js $(ls assets/*.js 2>/dev/null) $(ls chunks/*.js 2>/dev/null) $(ls scenes/*.js 2>/dev/null); do
             [ -f "$j" ] || continue
             if ! node --check "$j"; then js_fail=1; fi
           done
@@ -1457,6 +1458,22 @@ jobs:
           for d in eleve enseignant flash parcours adopter; do
             if [ -d "$d" ]; then cp -r "$d" deploy/; echo "  ✓ $d/"; fi
           done
+          # ── Scènes vivantes (scenes/, 03/11/2026) ─────────────────────────
+          #    Pages statiques autonomes (moteur scene.js + decors.js +
+          #    catalogue.js, généré par scenes/_catalogue.js). Les fichiers en
+          #    « _ » sont les bancs et le générateur : ils restent dans le dépôt.
+          #    ÉCHEC BRUYANT si le moteur manque : 80 pages le chargent.
+          if [ -d scenes ]; then
+            for f in scene.js decors.js scene.css catalogue.js index.html; do
+              if [ ! -f "scenes/$f" ]; then
+                echo "::error title=Scènes vivantes incomplètes::scenes/$f manque. Déploiement ANNULÉ."
+                exit 1
+              fi
+            done
+            mkdir -p deploy/scenes
+            find scenes -maxdepth 1 -type f ! -name '_*' -exec cp {} deploy/scenes/ \;
+            echo "  ✓ scenes/ ($(ls deploy/scenes | wc -l) fichiers)"
+          fi
 
           # ── VÉRITAS Campus (SaaS multi-établissement) ───────────
           # Front : campus/*.html + campus.js + config.js.

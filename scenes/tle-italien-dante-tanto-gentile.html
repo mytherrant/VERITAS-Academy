@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tanto gentile — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’italien (Terminale) : le sonnet de Dante « Tanto gentile e tanto onesta pare », le Dolce Stil Novo, l’endecasillabo et le schéma des rimes.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-italien-dante',
+  discipline: 'Italien', niveau: 'Terminale', langue: 'it-IT',
+  oeuvre: 'Vita Nuova (sonnet « Tanto gentile »)', auteur: 'Dante Alighieri',
+  titre: 'Tanto gentile',
+  decor: 'rue', lieu: 'Una strada di Firenze', moment: 'Fine del Duecento',
+  objectif: 'Lire le sonnet « Tanto gentile e tanto onesta pare » : reconnaître la forme du sonnet (deux quatrains, deux tercets, endecasillabi, schéma ABBA ABBA CDE EDC) et les thèmes du Dolce Stil Novo (la donna angelicata, l’amour qui élève).',
+  programme: 'Progression harmonisée Tle · Éducation littéraire, la poésie : leçons 63-66 (endecasillabo, rime, sonnet, terzina), leçons 68-70 (Dolce Stil Novo, Cavalcanti, Dante)',
+  jauges: [
+    { id: 'emozione', nom: 'Emozione', val: 20, couleur: '#C0397C' },
+    { id: 'analisi', nom: 'Analisi', val: 15, couleur: '#1E499B' }
+  ],
+  personnages: {
+    prof:    { nom: 'La professoressa Rossi', couleur: '#1E499B', look: { metier: 'enseignant', tenue: 'jupe', peau: 'clair', cheveux: 'chignon', couleurCheveux: '#4A2F1B', habit: '#1E499B' } },
+    dante:   { nom: 'Dante', couleur: '#8B1A1A', look: { tenue: 'boubou', peau: 'clair', cheveux: 'court', coiffe: 'bonnet', couleurCoiffe: '#8B1A1A', habit: '#8B1A1A', objet: 'livre' } },
+    beatrice:{ nom: 'Beatrice', couleur: '#F2EEE3', look: { tenue: 'robe', peau: 'pale', cheveux: 'long', couleurCheveux: '#C9A15A', habit: '#F2EEE3' } },
+    guido:   { nom: 'Guido Cavalcanti, l’amico', couleur: '#2E4A6B', look: { tenue: 'boubou', peau: 'clair', cheveux: 'court', couleurCheveux: '#2A1A12', habit: '#2E4A6B' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['prof'], txt: 'Firenze, fine del Duecento. Dante raccoglie nella Vita Nuova le poesie scritte per Beatrice, con un commento in prosa.', trad: 'Florence, fin du XIIIe siècle. Dante rassemble dans la Vita Nuova les poèmes écrits pour Béatrice, avec un commentaire en prose.', objet: { i: 'livre', lib: 'Vita Nuova' } },
+    { t: 'recit', entre: ['dante', 'beatrice', 'guido'], txt: 'Beatrice passa per la strada e saluta. I passanti si fermano.', trad: 'Béatrice passe dans la rue et salue. Les passants s’arrêtent.', jauges: { emozione: 45 } },
+    { t: 'vers', qui: 'dante', txt: 'Tanto gentile e tanto onesta pare\nla donna mia quand’ella altrui saluta,\nch’ogne lingua deven tremando muta,\ne li occhi no l’ardiscon di guardare.', cite: 'Dante, Vita Nuova, sonnet « Tanto gentile », v. 1-4', trad: 'Si noble et si digne paraît / ma dame quand elle salue quelqu’un, / que toute langue, tremblante, devient muette, / et que les yeux n’osent pas la regarder.' },
+    { t: 'question', q: 'Que fait le salut de la dame à ceux qui la voient ?',
+      options: [
+        { txt: 'Ils deviennent muets et n’osent pas la regarder : sa présence les bouleverse.', ok: true, retour: '« ogne lingua deven tremando muta » : la langue tremble et se tait.' },
+        { txt: 'Ils la saluent bruyamment.', retour: 'C’est l’inverse : le silence et le tremblement.' }
+      ] },
+    { t: 'vers', qui: 'dante', txt: 'Ella si va, sentendosi laudare,\nbenignamente d’umiltà vestuta;\ne par che sia una cosa venuta\nda cielo in terra a miracol mostrare.', cite: 'Dante, Vita Nuova, sonnet « Tanto gentile », v. 5-8', trad: 'Elle s’en va, s’entendant louer, / avec bienveillance, vêtue d’humilité ; / et elle semble être une chose venue / du ciel sur la terre pour montrer un miracle.', jauges: { emozione: 65 } },
+    { t: 'remarque', titre: 'La donna angelicata', txt: 'Pour le Dolce Stil Novo, la femme aimée est un être presque divin, « venue du ciel sur la terre » : elle ne se possède pas, elle élève l’âme de celui qui la contemple. L’amour devient un chemin vers la vertu et vers Dieu.' },
+    { t: 'dit', qui: 'guido', jeu: 'all’amico', txt: 'Dante, la tua lingua è nuova e dolce: parli d’amore come di una luce.', trad: 'Dante, ta langue est nouvelle et douce : tu parles de l’amour comme d’une lumière.' },
+    { t: 'vers', qui: 'dante', txt: 'Mostrasi sì piacente a chi la mira,\nche dà per li occhi una dolcezza al core,\nche ’ntender no la può chi no la prova:', cite: 'Dante, Vita Nuova, sonnet « Tanto gentile », v. 9-11', trad: 'Elle se montre si plaisante à qui la regarde, / qu’elle donne par les yeux une douceur au cœur, / que ne peut comprendre celui qui ne l’éprouve pas :' },
+    { t: 'vers', qui: 'dante', txt: 'e par che de la sua labbia si mova\nun spirito soave pien d’amore,\nche va dicendo a l’anima: Sospira.', cite: 'Dante, Vita Nuova, sonnet « Tanto gentile », v. 12-14', trad: 'et il semble que de ses lèvres s’élève / un esprit suave plein d’amour, / qui va disant à l’âme : Soupire.', jauges: { emozione: 90 } },
+    { t: 'remarque', titre: 'La forme du sonnet', txt: 'Quatorze vers : deux quatrains (quartine) et deux tercets (terzine). Chaque vers est un endecasillabo (onze syllabes, accent principal sur la dixième). Rimes : pare / saluta / muta / guardare = ABBA ; laudare / vestuta / venuta / mostrare = ABBA ; mira / core / prova, puis mova / amore / Sospira = CDE EDC.', jauges: { analisi: 50 } },
+    { t: 'atelier', mode: 'tri', titre: 'Laboratorio · lo schema delle rime', consigne: 'Associe chaque mot à la rime qu’il porte.',
+      cats: ['A (-are)', 'B (-uta)', 'C (-ira)', 'D (-ore)', 'E (-ova)'],
+      items: [
+        { txt: 'pare', cat: 0 },
+        { txt: 'saluta', cat: 1 },
+        { txt: 'mostrare', cat: 0 },
+        { txt: 'vestuta', cat: 1 },
+        { txt: 'mira', cat: 2 },
+        { txt: 'core', cat: 3 },
+        { txt: 'prova', cat: 4 },
+        { txt: 'Sospira', cat: 2 }
+      ],
+      bravo: 'ABBA ABBA CDE EDC : des quatrains à rimes embrassées, des tercets en miroir.', jauges: { analisi: 75 } },
+    { t: 'question', q: 'Quel est le dernier mot du sonnet, et pourquoi est-il fort ?',
+      options: [
+        { txt: '« Sospira » (soupire) : tout le poème aboutit à un soupir de l’âme, une émotion qui dépasse les mots.', ok: true, retour: 'Le poème commence par le silence des langues et finit par un soupir : la parole s’efface devant l’émotion.' },
+        { txt: '« donna » : c’est le sujet du poème.', retour: '« donna » est au vers 2. Le dernier mot est « Sospira ».' }
+      ] },
+    { t: 'atelier', mode: 'ordre', titre: 'Laboratorio · la struttura', consigne: 'Remets dans l’ordre le mouvement du poème.',
+      items: [
+        'Le salut de la dame rend muets ceux qui la voient.',
+        'Elle passe, humble, comme un miracle venu du ciel.',
+        'Sa vue donne au cœur une douceur indicible.',
+        'Un esprit d’amour dit à l’âme : soupire.'
+      ],
+      bravo: 'De l’effet sur les autres à l’effet dans l’âme : un mouvement vers l’intérieur.' }
+  ],
+  labo: {
+    titre: 'Laboratorio · due modi di amare',
+    intro: 'Compare la conception de l’amour du Dolce Stil Novo avec d’autres : règle la distance avec la dame, sa dimension spirituelle et la souffrance de l’amant.',
+    persos: ['dante', 'beatrice', 'guido', 'prof'],
+    curseurs: [
+      { id: 'distanza', nom: 'Distance avec la dame', val: 80, bas: 'proche', haut: 'contemplée de loin' },
+      { id: 'spirito', nom: 'Dimension spirituelle', val: 85, bas: 'terrestre', haut: 'divine' },
+      { id: 'dolore', nom: 'Souffrance de l’amant', val: 30, bas: 'paix', haut: 'tourment', lecture: { haut: 'L’amour blesse et effraie : c’est plutôt la vision de Cavalcanti.', bas: 'L’amour apaise et élève.' } }
+    ],
+    scenarios: [
+      { nom: 'Dante, Vita Nuova', icone: 'livre', valeurs: { distanza: 80, spirito: 85, dolore: 30 } },
+      { nom: 'Cavalcanti', icone: 'flamme', valeurs: { dolore: 85, spirito: 50 } },
+      { nom: 'Un amour terrestre', icone: 'amour', valeurs: { distanza: 15, spirito: 15 } }
+    ],
+    liens: [
+      { a: 'dante', b: 'beatrice', type: 'amour', lib: 'contempla', base: .7, poids: { spirito: .3 } },
+      { a: 'guido', b: 'dante', type: 'alliance', lib: 'primo amico', base: .7 },
+      { a: 'prof', b: 'dante', type: 'confiance', lib: 'legge', base: .5 }
+    ],
+    issue: function(v){
+      if(v.dolore > 65){ return { niveau: 'moyen', badge: 'Amore che ferisce', recit: 'L’amour est une force qui trouble et blesse l’amant.', apres: 'Une vision plus sombre, proche de celle de Guido Cavalcanti.', themes: ['Cavalcanti'] }; }
+      if(v.spirito < 35){ return { niveau: 'moyen', badge: 'Amore terreno', recit: 'La dame est une femme de chair, désirée et proche : on sort du Dolce Stil Novo.', apres: 'Pétrarque, plus tard, mêlera amour spirituel et amour humain.', themes: ['Petrarca'] }; }
+      return { niveau: 'ok', badge: 'Dolce Stil Novo', recit: 'La dame, contemplée de loin, est un miracle venu du ciel ; l’amour élève l’âme.', apres: 'Beatrice reviendra guider Dante au Paradis, dans la Divine Comédie.', themes: ['donna angelicata', 'Dolce Stil Novo'] };
+    }
+  },
+  quiz: [
+    { q: 'Combien de vers compte un sonnet ?', options: [
+      { txt: 'Quatorze.', ok: true, retour: 'Deux quatrains et deux tercets.' },
+      { txt: 'Douze.', retour: 'Non.' } ] },
+    { q: 'Qu’est-ce qu’un endecasillabo ?', options: [
+      { txt: 'Un vers de onze syllabes.', ok: true, retour: 'Le grand vers de la poésie italienne.' },
+      { txt: 'Un vers de dix syllabes.', retour: 'Non : onze.' } ] },
+    { q: 'Quel est le schéma des quatrains de « Tanto gentile » ?', options: [
+      { txt: 'ABBA ABBA', ok: true, retour: 'Rimes embrassées.' },
+      { txt: 'ABAB ABAB', retour: 'Non : pare / saluta / muta / guardare.' } ] },
+    { q: 'Que signifie « donna angelicata » ?', options: [
+      { txt: 'La femme-ange, presque divine.', ok: true, retour: 'Thème central du Dolce Stil Novo.' },
+      { txt: 'La femme en colère.', retour: 'Non.' } ] },
+    { q: 'Dans quel recueil se trouve ce sonnet ?', options: [
+      { txt: 'La Vita Nuova.', ok: true, retour: 'Poèmes et prose consacrés à Béatrice.' },
+      { txt: 'Le Decameron.', retour: 'Le Decameron est de Boccace.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Sonnet : 14 endecasillabi, 2 quartine + 2 terzine ; ici ABBA ABBA CDE EDC.',
+      'Dolce Stil Novo (fin XIIIe s., Florence) : la donna angelicata, l’amour qui élève l’âme ; Guinizzelli, Cavalcanti, Dante.',
+      '« Tanto gentile » (Vita Nuova) : le salut de Béatrice rend muet, elle paraît un miracle venu du ciel, l’âme soupire.',
+      'Mouvement du poème : de l’effet sur les autres à l’émotion intérieure.'
+    ],
+    ecrire: 'Rédigez un commentaire de quinze lignes du premier quatrain : relevez le champ lexical du silence et de la crainte, et montrez comment Dante fait de Béatrice un être surnaturel.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

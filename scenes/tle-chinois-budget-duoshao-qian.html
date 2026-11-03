@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>这个多少钱？ — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de chinois (Terminale) : la gestion du budget, l’argent de poche, les nombres, l’addition et la soustraction en chinois, le yuan et le franc CFA.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-chinois-budget',
+  discipline: 'Chinois', niveau: 'Terminale', langue: 'zh-CN', langueRecit: 'fr-FR',
+  titre: '这个多少钱？',
+  decor: 'marche', lieu: 'Une papeterie, quartier chinois de Yaoundé', moment: 'Rentrée scolaire',
+  objectif: 'Demander un prix, marchander et payer en chinois ; compter, additionner (加) et soustraire (减) ; comparer le yuan (人民币) et le franc CFA (中非法郎) ; gérer son argent de poche (零花钱).',
+  programme: 'Progression harmonisée Tle · Module 4 (activités économiques), leçons 25-29 (gestion du budget, addition et soustraction, monnaies, argent de poche, monnaie chinoise et camerounaise)',
+  jauges: [
+    { id: 'budget', nom: 'Argent de poche restant', val: 100, couleur: '#1F9D5B' },
+    { id: 'zhongwen', nom: 'Chinois (中文)', val: 20, couleur: '#1E499B' }
+  ],
+  personnages: {
+    ngono: { nom: 'Ngono', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    laoban:{ nom: '老板 (le patron)', couleur: '#C2551F', look: { metier: 'commercant', peau: 'clair', cheveux: 'court', couleurCheveux: '#1A1A1A' } },
+    li:    { nom: '李老师 (Mme Li)', couleur: '#1E499B', look: { metier: 'enseignant', tenue: 'jupe', peau: 'clair', cheveux: 'chignon', couleurCheveux: '#1A1A1A', lunettes: true } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['ngono', 'li'], txt: 'C’est la rentrée. Mme Li emmène ses élèves dans une papeterie tenue par un commerçant chinois, pour pratiquer.', objet: { i: 'pieces', lib: '零花钱 · argent de poche' } },
+    { t: 'dit', qui: 'li', txt: '同学们，今天我们用中文买东西。', pron: 'Tóngxuémen, jīntiān wǒmen yòng Zhōngwén mǎi dōngxi.', trad: 'Chers élèves, aujourd’hui nous faisons des achats en chinois.' },
+    { t: 'recit', entre: ['laoban'], txt: 'Ngono s’approche du comptoir.' },
+    { t: 'dit', qui: 'ngono', txt: '老板，这个本子多少钱？', pron: 'Lǎobǎn, zhège běnzi duōshao qián?', trad: 'Patron, combien coûte ce cahier ?' },
+    { t: 'dit', qui: 'laoban', txt: '十五块。', pron: 'Shíwǔ kuài.', trad: 'Quinze yuans.' },
+    { t: 'remarque', titre: '块 et 元', txt: 'À l’écrit, l’unité du yuan est 元 (yuán) ; à l’oral, on dit 块 (kuài). 十五块 = 15 yuans. Pour demander un prix : … 多少钱？(duōshao qián ?).' },
+    { t: 'dit', qui: 'ngono', emo: 'doute', txt: '太贵了！便宜一点儿吧。', pron: 'Tài guì le! Piányi yìdiǎnr ba.', trad: 'C’est trop cher ! Faites un petit prix.', jauges: { zhongwen: 40 } },
+    { t: 'dit', qui: 'laoban', emo: 'joie', txt: '好吧，十二块。', pron: 'Hǎo ba, shí’èr kuài.', trad: 'D’accord, douze yuans.' },
+    { t: 'dit', qui: 'ngono', txt: '我买两个本子和一支笔。笔多少钱？', pron: 'Wǒ mǎi liǎng ge běnzi hé yì zhī bǐ. Bǐ duōshao qián?', trad: 'J’achète deux cahiers et un stylo. Combien coûte le stylo ?' },
+    { t: 'dit', qui: 'laoban', txt: '笔六块。一共三十块。', pron: 'Bǐ liù kuài. Yígòng sānshí kuài.', trad: 'Le stylo, six yuans. En tout, trente yuans.' },
+    { t: 'question', q: 'Le patron dit « 一共三十块 ». Le compte est-il juste ?',
+      options: [
+        { txt: 'Oui : 十二加十二加六等于三十 (12 + 12 + 6 = 30).', ok: true, retour: '加 (jiā) = plus ; 等于 (děngyú) = égale. Shí’èr jiā shí’èr jiā liù děngyú sānshí.' },
+        { txt: 'Non, cela fait trente-six.', retour: 'Il a baissé le cahier à 12 : 2 × 12 + 6 = 30.' }
+      ] },
+    { t: 'atelier', mode: 'monnaie', titre: 'Atelier · payer en yuans', consigne: 'Paie exactement 30 块.', cible: 30, pieces: [20, 10, 5, 1], devise: '块',
+      bravo: '二十块加十块等于三十块。', jauges: { zhongwen: 60, budget: 70 } },
+    { t: 'dit', qui: 'laoban', txt: '你给我五十块，我找你二十块。', pron: 'Nǐ gěi wǒ wǔshí kuài, wǒ zhǎo nǐ èrshí kuài.', trad: 'Si tu me donnes cinquante yuans, je te rends vingt yuans.' },
+    { t: 'remarque', titre: 'Soustraire : 减', txt: '五十减三十等于二十 (wǔshí jiǎn sānshí děngyú èrshí) : 50 − 30 = 20. 找 (zhǎo) : rendre la monnaie.' },
+    { t: 'dit', qui: 'ngono', txt: '李老师，一块人民币等于多少中非法郎？', pron: 'Lǐ lǎoshī, yí kuài rénmínbì děngyú duōshao Zhōngfēi fǎláng?', trad: 'Madame Li, un yuan vaut combien de francs CFA ?' },
+    { t: 'dit', qui: 'li', txt: '大概八十多中非法郎。汇率每天都会变。', pron: 'Dàgài bāshí duō Zhōngfēi fǎláng. Huìlǜ měi tiān dōu huì biàn.', trad: 'Environ quatre-vingts et quelques francs CFA. Le taux de change varie chaque jour.' },
+    { t: 'choix', qui: 'ngono', q: 'Tu es Ngono. Il te reste un peu d’argent de poche pour la semaine. Que fais-tu ?',
+      options: [
+        { txt: '我都花了！(Wǒ dōu huā le — je dépense tout !)', consequence: 'Plus rien jusqu’à la semaine prochaine, même pour le taxi.', jauges: { budget: -60 } },
+        { txt: '我存一半。(Wǒ cún yíbàn — j’en mets la moitié de côté.)', consequence: 'Un bon réflexe de gestion : 存钱 (cún qián), épargner.', jauges: { budget: -10 } }
+      ],
+      oeuvre: 'Gérer son budget, c’est prévoir : noter ses dépenses, garder une part pour l’imprévu.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · construis la phrase', consigne: 'Remets les mots dans l’ordre : « Combien coûte ce stylo ? »',
+      items: ['这支', '笔', '多少', '钱？'],
+      bravo: '这支笔多少钱？ Zhè zhī bǐ duōshao qián ? 支 est le classificateur des stylos.', jauges: { zhongwen: 85 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · mon argent de poche',
+    intro: 'Règle la part dépensée en friandises, la part épargnée et le marchandage : combien reste-t-il à Ngono à la fin du mois ?',
+    persos: ['ngono', 'laoban', 'li'],
+    curseurs: [
+      { id: 'friandises', nom: 'Dépenses de friandises (零食)', val: 50, bas: 'rares', haut: 'tous les jours' },
+      { id: 'epargne', nom: 'Épargne (存钱)', val: 40, bas: 'rien', haut: 'la moitié' },
+      { id: 'marchandage', nom: 'Marchandage (讲价)', val: 50, bas: 'jamais', haut: 'toujours' }
+    ],
+    scenarios: [
+      { nom: 'Ngono', icone: 'bourse', valeurs: { friandises: 50, epargne: 40, marchandage: 50 } },
+      { nom: '我都花了', icone: 'gateau', valeurs: { friandises: 95, epargne: 0 } },
+      { nom: '存钱', icone: 'cle', valeurs: { friandises: 20, epargne: 85, marchandage: 70 } }
+    ],
+    liens: [
+      { a: 'ngono', b: 'laoban', type: 'conflit', lib: '讲价', base: .2, poids: { marchandage: .5 } },
+      { a: 'li', b: 'ngono', type: 'confiance', lib: '老师', base: .6 },
+      { a: 'laoban', b: 'ngono', type: 'alliance', lib: '顾客', base: .4, poids: { marchandage: -.2 } }
+    ],
+    issue: function(v){
+      if(v.friandises > 75 && v.epargne < 30){ return { niveau: 'ko', badge: '没钱了 · Plus d’argent', recit: 'Dès le milieu du mois, plus un franc : Ngono ne peut même pas payer son taxi.', apres: 'Méiyǒu qián le : il n’y a plus d’argent.', themes: ['budget'] }; }
+      if(v.epargne > 60){ return { niveau: 'ok', badge: '存钱 · Bien géré', recit: 'Ngono dépense avec mesure et met de côté : à la fin du mois, elle s’offre un dictionnaire de chinois.', apres: 'Épargner, c’est se donner des choix.', themes: ['épargne', '零花钱'] }; }
+      return { niveau: 'moyen', badge: '还可以 · Ça va', recit: 'Le mois se termine sans dette, mais sans économies.', apres: 'Hái kěyǐ : ça peut aller.', themes: ['gestion'] };
+    }
+  },
+  quiz: [
+    { q: 'Comment demande-t-on un prix ?', options: [
+      { txt: '多少钱？(duōshao qián)', ok: true, retour: 'Combien d’argent ?' },
+      { txt: '你好吗？(nǐ hǎo ma)', retour: 'Cela veut dire « comment vas-tu ? ».' } ] },
+    { q: 'Que signifie 太贵了 (tài guì le) ?', options: [
+      { txt: 'C’est trop cher.', ok: true, retour: 'Le contraire : 便宜 (piányi), bon marché.' },
+      { txt: 'C’est très beau.', retour: 'Non.' } ] },
+    { q: '十二加六等于多少？', options: [
+      { txt: '十八 (shíbā, 18)', ok: true, retour: '12 + 6 = 18.' },
+      { txt: '六 (liù, 6)', retour: 'C’est 12 − 6.' } ] },
+    { q: 'Comment dit-on le franc CFA en chinois ?', options: [
+      { txt: '中非法郎 (Zhōngfēi fǎláng)', ok: true, retour: 'Littéralement « franc d’Afrique centrale ».' },
+      { txt: '人民币 (rénmínbì)', retour: 'C’est la monnaie chinoise.' } ] },
+    { q: 'Que signifie 零花钱 (línghuāqián) ?', options: [
+      { txt: 'L’argent de poche.', ok: true, retour: 'À gérer avec soin.' },
+      { txt: 'Le salaire.', retour: 'Le salaire = 工资 (gōngzī).' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Demander un prix : 这个多少钱？ Marchander : 太贵了！便宜一点儿吧。',
+      'À l’oral 块 (kuài), à l’écrit 元 (yuán) ; 一共 (yígòng) = en tout ; 找 (zhǎo) = rendre la monnaie.',
+      'Calculer : 加 (plus), 减 (moins), 等于 (égale).',
+      'Monnaies : 人民币 (yuan) et 中非法郎 (franc CFA) ; 汇率 (huìlǜ) = taux de change ; 存钱 = épargner.'
+    ],
+    ecrire: 'Écris en caractères et en pinyin un dialogue de six répliques dans un magasin : demande un prix, marchande, calcule le total avec 加 et paie.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

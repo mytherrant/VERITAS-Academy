@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The job interview — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’anglais (Terminale) : undergoing a job interview, the present perfect continuous, question tags and job-related vocabulary.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-anglais-interview',
+  discipline: 'Anglais', niveau: 'Terminale', langue: 'en-GB', langueConsignes: 'en-GB',
+  titre: 'The job interview',
+  decor: 'couloir', lieu: 'A hotel in Limbe', moment: 'Monday, 9 a.m.',
+  objectif: 'Understand and use the language of a job interview; use the present perfect continuous (I have been working…) and question tags (…, isn’t it?) in context.',
+  programme: 'Progression harmonisée Tle · Family and social life, lessons 1-3 (undergoing a job interview), lesson 5 (present perfect continuous), lesson 8 (question tags)',
+  jauges: [
+    { id: 'impression', nom: 'Good impression', val: 40, couleur: '#1F9D5B' },
+    { id: 'english', nom: 'Fluency', val: 30, couleur: '#1E499B' }
+  ],
+  personnages: {
+    manager: { nom: 'Mrs Ndive, hotel manager', couleur: '#5A2E5A', look: { tenue: 'jupe', peau: 'fonce', cheveux: 'chignon', lunettes: true, habit: '#5A2E5A', objet: 'dossier' } },
+    eric:    { nom: 'Eric, applicant', couleur: '#2B3A55', look: { tenue: 'costume', peau: 'fonce', cheveux: 'ras', habit: '#2B3A55', col: '#FFFFFF' } },
+    clerk:   { nom: 'The receptionist', couleur: '#1F6F78', look: { tenue: 'robe', peau: 'brun', cheveux: 'tresses', habit: '#1F6F78' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['clerk', 'eric'], txt: 'A big hotel in Limbe is looking for a receptionist who speaks English and French. Eric has an interview this morning.', trad: 'Un grand hôtel de Limbe cherche un réceptionniste parlant anglais et français. Eric a un entretien ce matin.', objet: { i: 'document', lib: 'Job offer: receptionist' } },
+    { t: 'dit', qui: 'clerk', txt: 'Good morning. You’re here for the interview, aren’t you?', trad: 'Bonjour. Vous êtes là pour l’entretien, n’est-ce pas ?' },
+    { t: 'dit', qui: 'eric', txt: 'Yes, I am. My name is Eric Ngwa. I have an appointment with Mrs Ndive at nine.', trad: 'Oui. Je m’appelle Eric Ngwa. J’ai rendez-vous avec Mme Ndive à neuf heures.' },
+    { t: 'question', q: 'In “You’re here for the interview, aren’t you?”, what is “aren’t you?”',
+      options: [
+        { txt: 'A question tag: a short question added to check information.', ok: true, retour: 'Positive statement → negative tag: You are…, aren’t you? Negative statement → positive tag: You aren’t…, are you?' },
+        { txt: 'A mistake: it should be “are you?”.', retour: 'No: after a positive statement, the tag is negative.' }
+      ] },
+    { t: 'recit', sort: ['clerk'], entre: ['manager'], txt: 'Mrs Ndive invites Eric into her office.' },
+    { t: 'dit', qui: 'manager', txt: 'Please sit down. Tell me about yourself.', trad: 'Asseyez-vous, je vous prie. Parlez-moi de vous.' },
+    { t: 'dit', qui: 'eric', txt: 'I hold a BTS in tourism. I have been working part-time in a restaurant in Buea for two years, so I have been dealing with customers every day.', trad: 'J’ai un BTS en tourisme. Je travaille à temps partiel dans un restaurant de Buea depuis deux ans ; je m’occupe donc de clients tous les jours.', jauges: { impression: 60, english: 50 } },
+    { t: 'remarque', titre: 'Present perfect continuous', txt: 'have / has + been + verb-ing. It describes an action that started in the past and is still going on: “I have been working here for two years” (j’y travaille depuis deux ans). With “for” + a duration, with “since” + a starting point: “since 2024”.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Workshop · build the sentence', consigne: 'Put the words in order: « J’apprends l’allemand depuis septembre. »',
+      items: ['I', 'have', 'been', 'learning', 'German', 'since', 'September.'],
+      bravo: 'I have been learning German since September. Since + a starting point.', jauges: { english: 65 } },
+    { t: 'dit', qui: 'manager', txt: 'Why do you want to work here?', trad: 'Pourquoi voulez-vous travailler ici ?' },
+    { t: 'choix', qui: 'eric', q: 'You are Eric. How do you answer?',
+      options: [
+        { txt: '“Because I need money.”', consequence: 'Honest, but it says nothing about the job or the hotel. The manager is not impressed.', jauges: { impression: -15 } },
+        { txt: '“Because your hotel welcomes visitors from all over the world, and I enjoy helping people in both English and French.”', consequence: 'You link your skills to the job: a strong answer.', jauges: { impression: 25, english: 10 } },
+        { txt: '“I don’t know, my uncle told me to come.”', consequence: 'You show no motivation at all.', jauges: { impression: -25 } }
+      ],
+      oeuvre: 'A good answer connects three things: the company, the job, and your own skills.' },
+    { t: 'dit', qui: 'manager', emo: 'joie', txt: 'Good. You speak French too, don’t you?', trad: 'Bien. Vous parlez aussi français, n’est-ce pas ?' },
+    { t: 'dit', qui: 'eric', emo: 'joie', txt: 'Yes, I do. I grew up in Douala, so I am fully bilingual.', trad: 'Oui. J’ai grandi à Douala, je suis donc parfaitement bilingue.', jauges: { impression: 85, english: 80 } },
+    { t: 'atelier', mode: 'tri', titre: 'Workshop · the right tag', consigne: 'Choose the correct question tag for each sentence.',
+      cats: ['…, isn’t it?', '…, doesn’t she?', '…, haven’t you?'],
+      items: [
+        { txt: 'It is a good hotel, …', cat: 0 },
+        { txt: 'She speaks English, …', cat: 1 },
+        { txt: 'You have worked in Buea, …', cat: 2 },
+        { txt: 'The salary is fair, …', cat: 0 }
+      ],
+      bravo: 'The tag repeats the auxiliary (is, does, have) and the subject pronoun.' },
+    { t: 'dit', qui: 'manager', txt: 'Thank you, Mr Ngwa. We will call you by Friday.', trad: 'Merci, monsieur Ngwa. Nous vous appellerons d’ici vendredi.' }
+  ],
+  labo: {
+    titre: 'Laboratory · the perfect interview',
+    intro: 'Adjust preparation, fluency and politeness: what does the manager decide?',
+    persos: ['eric', 'manager', 'clerk'],
+    curseurs: [
+      { id: 'preparation', nom: 'Preparation', val: 70, bas: 'none', haut: 'serious' },
+      { id: 'fluency', nom: 'Fluency in English', val: 65, bas: 'hesitant', haut: 'fluent' },
+      { id: 'politeness', nom: 'Politeness', val: 80, bas: 'rude', haut: 'polite' }
+    ],
+    scenarios: [
+      { nom: 'Eric’s interview', icone: 'personne', valeurs: { preparation: 70, fluency: 65, politeness: 80 } },
+      { nom: 'No preparation', icone: 'nuage', valeurs: { preparation: 10 } },
+      { nom: 'Rude applicant', icone: 'colere', valeurs: { politeness: 10 } }
+    ],
+    liens: [
+      { a: 'manager', b: 'eric', type: 'confiance', lib: 'interviews', base: .3, poids: { preparation: .4, fluency: .3 } },
+      { a: 'clerk', b: 'eric', type: 'alliance', lib: 'welcomes', base: .3, poids: { politeness: .5 } }
+    ],
+    issue: function(v){
+      if(v.politeness < 30){ return { niveau: 'ko', badge: 'Not hired', recit: 'A receptionist must be polite with every guest. The manager ends the interview early.', apres: 'Politeness is a professional skill.', themes: ['politeness'] }; }
+      if(v.preparation < 35){ return { niveau: 'ko', badge: 'Unprepared', recit: 'Eric knows nothing about the hotel and cannot explain why he applied.', apres: 'Always research the company before an interview.', themes: ['preparation'] }; }
+      if(v.fluency < 40){ return { niveau: 'moyen', badge: 'Second interview', recit: 'The manager likes Eric but asks for a second interview to check his English.', apres: 'Practise speaking every day.', themes: ['fluency'] }; }
+      return { niveau: 'ok', badge: 'Hired!', recit: 'Prepared, fluent and polite: Eric gets the job.', apres: 'He starts next Monday.', themes: ['job interview', 'present perfect continuous'] };
+    }
+  },
+  quiz: [
+    { q: 'Complete: “I have been … here for two years.”', options: [
+      { txt: 'working', ok: true, retour: 'have been + verb-ing.' },
+      { txt: 'work', retour: 'After “been”, use the -ing form.' } ] },
+    { q: '“since” or “for”? “… 2024”', options: [
+      { txt: 'since', ok: true, retour: 'Since + a starting point.' },
+      { txt: 'for', retour: 'For + a duration (for two years).' } ] },
+    { q: 'Choose the right tag: “She is the manager, …?”', options: [
+      { txt: 'isn’t she', ok: true, retour: 'Positive statement → negative tag.' },
+      { txt: 'is she', retour: 'Only after a negative statement.' } ] },
+    { q: 'What does “applicant” mean?', options: [
+      { txt: 'Candidat', ok: true, retour: 'To apply for a job: postuler.' },
+      { txt: 'Employeur', retour: 'Employeur = employer.' } ] },
+    { q: 'The best answer to “Why do you want to work here?” connects…', options: [
+      { txt: 'the company, the job and your skills.', ok: true, retour: 'That is what the manager wants to hear.' },
+      { txt: 'your personal problems.', retour: 'No.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Present perfect continuous: have / has + been + verb-ing, for an action that started in the past and continues.',
+      'For + duration (for two years); since + starting point (since 2024).',
+      'Question tags: positive statement → negative tag (isn’t it?), negative statement → positive tag (is it?).',
+      'Interview vocabulary: applicant, appointment, skills, experience, to apply for, to hire.'
+    ],
+    ecrire: 'Write a dialogue of ten lines between a manager and an applicant for a job in a bank. Use the present perfect continuous at least twice and two question tags.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

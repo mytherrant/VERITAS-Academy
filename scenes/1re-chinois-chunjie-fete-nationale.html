@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>春节和国庆节 — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de chinois (Première) : la vie culturelle au Cameroun et en Chine, la fête du Printemps et la fête nationale du 20 mai ; la structure …的时候.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '1re-chinois-fetes',
+  discipline: 'Chinois', niveau: '1re', langue: 'zh-CN', langueRecit: 'fr-FR',
+  titre: '春节和国庆节 · Deux fêtes',
+  decor: 'place', lieu: 'L’Institut Confucius de Yaoundé', moment: 'Avant le Nouvel An chinois',
+  objectif: 'Présenter la fête du Printemps chinoise et la fête nationale camerounaise ; décrire des coutumes avec …的时候 (quand, au moment de) ; comparer deux cultures.',
+  programme: 'Progression harmonisée 1re · Module 3 (citoyenneté et ouverture au monde), leçons 19-22 (vie culturelle au Cameroun et en Chine, expression orale, travail de groupe sur les cultures chinoise et camerounaise)',
+  jauges: [
+    { id: 'culture', nom: 'Cultures découvertes', val: 20, couleur: '#C0392B' },
+    { id: 'zhongwen', nom: 'Chinois (中文)', val: 20, couleur: '#1E499B' }
+  ],
+  personnages: {
+    wang:  { nom: '王老师 (Mme Wang)', couleur: '#C0392B', look: { metier: 'enseignant', tenue: 'robe', peau: 'clair', cheveux: 'chignon', couleurCheveux: '#1A1A1A', habit: '#C0392B' } },
+    ngono: { nom: 'Ngono', couleur: '#1F9D5B', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    paul:  { nom: 'Paul', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['wang', 'ngono', 'paul'], txt: 'À l’Institut Confucius, Mme Wang prépare avec ses élèves une exposition : « Fêtes de Chine, fêtes du Cameroun ».', objet: { i: 'lune', lib: '农历新年 · Nouvel An lunaire' } },
+    { t: 'dit', qui: 'wang', txt: '春节是中国最重要的节日。', pron: 'Chūnjié shì Zhōngguó zuì zhòngyào de jiérì.', trad: 'La fête du Printemps est la fête la plus importante de Chine.' },
+    { t: 'dit', qui: 'wang', txt: '春节的时候，人们贴春联、吃饺子、放鞭炮。孩子们收红包。', pron: 'Chūnjié de shíhou, rénmen tiē chūnlián, chī jiǎozi, fàng biānpào. Háizimen shōu hóngbāo.', trad: 'Pendant la fête du Printemps, on colle des sentences parallèles, on mange des raviolis, on fait éclater des pétards. Les enfants reçoivent des enveloppes rouges.', jauges: { culture: 45 } },
+    { t: 'remarque', titre: '…的时候', txt: 'X 的时候 = au moment de X, quand X : 春节的时候 (pendant la fête du Printemps), 吃饭的时候 (pendant le repas). La structure se place en tête de phrase.' },
+    { t: 'question', q: 'Que reçoivent les enfants pendant la fête du Printemps ?',
+      options: [
+        { txt: '红包 (hóngbāo) : des enveloppes rouges contenant de l’argent.', ok: true, retour: 'Le rouge porte bonheur en Chine.' },
+        { txt: '饺子 (jiǎozi) : des raviolis.', retour: 'Tout le monde mange des raviolis ; les enfants reçoivent en plus des 红包.' }
+      ] },
+    { t: 'dit', qui: 'paul', txt: '王老师，春节在几月？', pron: 'Wáng lǎoshī, Chūnjié zài jǐ yuè?', trad: 'Madame Wang, en quel mois est la fête du Printemps ?' },
+    { t: 'dit', qui: 'wang', txt: '春节一般在一月或者二月，因为它按农历算。', pron: 'Chūnjié yìbān zài yī yuè huòzhě èr yuè, yīnwèi tā àn nónglì suàn.', trad: 'La fête du Printemps tombe en général en janvier ou en février, parce qu’elle suit le calendrier lunaire.' },
+    { t: 'dit', qui: 'ngono', emo: 'fier', txt: '在喀麦隆，五月二十日是国庆节。', pron: 'Zài Kāmàilóng, wǔ yuè èrshí rì shì guóqìngjié.', trad: 'Au Cameroun, le 20 mai, c’est la fête nationale.' },
+    { t: 'dit', qui: 'paul', txt: '国庆节的时候，我们看游行，穿漂亮的衣服，和家人一起吃饭。', pron: 'Guóqìngjié de shíhou, wǒmen kàn yóuxíng, chuān piàoliang de yīfu, hé jiārén yìqǐ chīfàn.', trad: 'Pendant la fête nationale, nous regardons le défilé, nous mettons de beaux habits et nous mangeons en famille.', jauges: { culture: 65, zhongwen: 45 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · quelle fête ?', consigne: 'Classe chaque coutume.',
+      cats: ['春节 (Chine)', '国庆节 (Cameroun, 20 mai)'],
+      items: [
+        { txt: '贴春联 (coller des sentences parallèles)', cat: 0 },
+        { txt: '看游行 (regarder le défilé)', cat: 1 },
+        { txt: '收红包 (recevoir des enveloppes rouges)', cat: 0 },
+        { txt: '吃饺子 (manger des raviolis)', cat: 0 },
+        { txt: '五月二十日 (le 20 mai)', cat: 1 }
+      ],
+      bravo: '两个节日都很热闹！(Les deux fêtes sont très animées !)', jauges: { zhongwen: 60 } },
+    { t: 'choix', qui: 'ngono', q: 'Pour l’exposition, que propose Ngono ?',
+      options: [
+        { txt: 'Seulement des photos de Chine.', consequence: 'Une belle exposition, mais les visiteurs ne voient qu’un seul pays.', jauges: { culture: -10 } },
+        { txt: '一半中国，一半喀麦隆。(Moitié Chine, moitié Cameroun.) Avec des raviolis ET du ndolè !', consequence: 'Les visiteurs comparent, goûtent et posent des questions : un vrai échange culturel.', jauges: { culture: 25, zhongwen: 10 } }
+      ],
+      oeuvre: 'L’ouverture au monde ne signifie pas oublier sa culture : elle consiste à la faire connaître et à découvrir celle des autres.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · construis la phrase', consigne: 'Remets les mots dans l’ordre : « Pendant la fête du Printemps, on mange des raviolis. »',
+      items: ['春节', '的时候，', '人们', '吃', '饺子。'],
+      bravo: '春节的时候，人们吃饺子。', jauges: { zhongwen: 80 } },
+    { t: 'dit', qui: 'wang', emo: 'joie', txt: '春节快乐！国庆节快乐！', pron: 'Chūnjié kuàilè! Guóqìngjié kuàilè!', trad: 'Bonne fête du Printemps ! Bonne fête nationale !', jauges: { culture: 90 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · l’échange culturel',
+    intro: 'Règle la connaissance de sa propre culture, la curiosité pour l’autre et la pratique de la langue : l’exposition est-elle un vrai échange ?',
+    persos: ['wang', 'ngono', 'paul'],
+    curseurs: [
+      { id: 'soi', nom: 'Connaissance de sa culture', val: 60, bas: 'faible', haut: 'solide' },
+      { id: 'curiosite', nom: 'Curiosité pour l’autre (好奇心)', val: 55, bas: 'nulle', haut: 'grande' },
+      { id: 'langue', nom: 'Pratique du chinois', val: 45, bas: 'rare', haut: 'quotidienne' }
+    ],
+    scenarios: [
+      { nom: 'L’exposition', icone: 'lune', valeurs: { soi: 60, curiosite: 55, langue: 45 } },
+      { nom: 'Seulement la Chine', icone: 'livre', valeurs: { soi: 15, curiosite: 80 } },
+      { nom: 'Vrai échange', icone: 'groupe', valeurs: { soi: 85, curiosite: 85, langue: 75 } }
+    ],
+    liens: [
+      { a: 'wang', b: 'ngono', type: 'confiance', lib: '老师', base: .5, poids: { langue: .3 } },
+      { a: 'ngono', b: 'paul', type: 'alliance', lib: '同学', base: .6, poids: { soi: .3 } }
+    ],
+    issue: function(v){
+      if(v.soi < 30){ return { niveau: 'moyen', badge: 'Un miroir sans reflet', recit: 'Les élèves connaissent bien la Chine, mais ne savent pas présenter leurs propres fêtes.', apres: 'L’échange suppose d’avoir quelque chose à offrir.', themes: ['identité culturelle'] }; }
+      if(v.curiosite < 30){ return { niveau: 'moyen', badge: 'Chacun chez soi', recit: 'Chacun présente sa culture sans s’intéresser à l’autre.', apres: 'Sans curiosité, il n’y a pas d’échange.', themes: ['ouverture'] }; }
+      if(v.soi > 70 && v.curiosite > 70 && v.langue > 60){ return { niveau: 'ok', badge: '文化交流 · Un vrai échange', recit: 'Les élèves présentent leurs fêtes en chinois et découvrent celles de la Chine : les visiteurs repartent ravis.', apres: '文化交流 (wénhuà jiāoliú) : échange culturel.', themes: ['interculturalité'] }; }
+      return { niveau: 'moyen', badge: '不错 · Pas mal', recit: 'L’exposition plaît, la langue reste hésitante.', apres: 'Pratiquer le chinois chaque jour.', themes: ['pratique'] };
+    }
+  },
+  quiz: [
+    { q: 'Que signifie 春节 (Chūnjié) ?', options: [
+      { txt: 'La fête du Printemps (Nouvel An chinois).', ok: true, retour: 'La plus grande fête chinoise.' },
+      { txt: 'La fête nationale.', retour: 'La fête nationale = 国庆节.' } ] },
+    { q: 'Comment dit-on « Cameroun » en chinois ?', options: [
+      { txt: '喀麦隆 (Kāmàilóng)', ok: true, retour: '在喀麦隆 : au Cameroun.' },
+      { txt: '中国 (Zhōngguó)', retour: 'C’est la Chine.' } ] },
+    { q: 'Que signifie 春节的时候 ?', options: [
+      { txt: 'Pendant la fête du Printemps.', ok: true, retour: 'X 的时候 = au moment de X.' },
+      { txt: 'Après la fête du Printemps.', retour: 'Après = 以后.' } ] },
+    { q: 'Quelle est la date de la fête nationale du Cameroun ?', options: [
+      { txt: '五月二十日 (le 20 mai)', ok: true, retour: 'Wǔ yuè èrshí rì.' },
+      { txt: '一月一日 (le 1er janvier)', retour: 'Non.' } ] },
+    { q: 'Pourquoi la date du 春节 change-t-elle chaque année ?', options: [
+      { txt: 'Elle suit le calendrier lunaire (农历).', ok: true, retour: 'Janvier ou février.' },
+      { txt: 'Elle est tirée au sort.', retour: 'Non.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Vocabulaire : 春节, 国庆节, 节日, 贴春联, 吃饺子, 放鞭炮, 红包, 游行, 喀麦隆.',
+      'X 的时候 = au moment de X (春节的时候…).',
+      'Le 春节 suit le calendrier lunaire (janvier-février) ; la fête nationale du Cameroun est le 20 mai.',
+      '文化交流 : connaître sa culture et s’ouvrir à celle des autres.'
+    ],
+    ecrire: 'Écris en caractères et en pinyin cinq phrases pour présenter une fête de ton pays à un correspondant chinois, avec au moins deux fois …的时候.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

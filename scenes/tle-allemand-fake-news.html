@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fake News und Cybermobbing — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’allemand (Terminale) : la cybercriminalité, les fausses nouvelles et le harcèlement numérique ; les verbes de modalité.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-allemand-fake-news',
+  discipline: 'Allemand', niveau: 'Terminale', langue: 'de-DE',
+  titre: 'Fake News und Cybermobbing',
+  decor: 'classe', lieu: 'Im Klassenzimmer', moment: 'Montagmorgen',
+  objectif: 'Comprendre un dialogue sur les fausses nouvelles et le harcèlement en ligne ; employer les verbes de modalité (müssen, dürfen, sollen, können) pour donner des règles et des conseils.',
+  programme: 'Progression harmonisée Tle · Média et communication, leçons 17-18 (cybercriminalité : fake news, harcèlement numérique), leçon 21 (textes injonctifs)',
+  jauges: [
+    { id: 'wahrheit', nom: 'Wahrheit (vérité)', val: 30, couleur: '#1F9D5B' },
+    { id: 'schaden', nom: 'Schaden (dommage)', val: 20, couleur: '#D43F2E' }
+  ],
+  personnages: {
+    kevin: { nom: 'Kevin', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } },
+    lena:  { nom: 'Lena', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    frau:  { nom: 'Frau Bauer, Lehrerin', couleur: '#5A6275', look: { metier: 'enseignant', tenue: 'jupe', peau: 'clair', cheveux: 'chignon', couleurCheveux: '#C9A15A', lunettes: true, habit: '#5A6275' } },
+    sara:  { nom: 'Sara', couleur: '#1F6F78', look: { metier: 'eleve', tenue: 'jupe', peau: 'brun', cheveux: 'queue' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['kevin', 'lena'], txt: 'Montagmorgen. Kevin zeigt Lena sein Handy.', trad: 'Lundi matin. Kevin montre son téléphone à Lena.', objet: { i: 'telephone', lib: 'Das Handy' } },
+    { t: 'dit', qui: 'kevin', emo: 'joie', txt: 'Schau mal! Auf WhatsApp steht: Morgen ist die Schule geschlossen!', trad: 'Regarde ! Sur WhatsApp, c’est écrit : demain, l’école est fermée !', jauges: { wahrheit: 20 } },
+    { t: 'dit', qui: 'lena', emo: 'doute', txt: 'Wer hat das geschrieben? Gibt es eine Quelle?', trad: 'Qui a écrit ça ? Y a-t-il une source ?' },
+    { t: 'dit', qui: 'kevin', txt: 'Keine Ahnung. Aber alle teilen es.', trad: 'Aucune idée. Mais tout le monde le partage.' },
+    { t: 'question', q: 'Pourquoi Lena se méfie-t-elle du message ?',
+      options: [
+        { txt: 'Le message n’a ni auteur ni source : c’est peut-être une fausse nouvelle (eine Falschmeldung).', ok: true, retour: 'Qu’un message soit partagé par tous ne prouve pas qu’il est vrai.' },
+        { txt: 'Parce qu’elle n’aime pas WhatsApp.', retour: 'Non : elle demande « wer ? » et « eine Quelle ? ».' }
+      ] },
+    { t: 'recit', entre: ['frau'], txt: 'Frau Bauer kommt herein.', trad: 'Mme Bauer entre.' },
+    { t: 'dit', qui: 'frau', txt: 'Ihr müsst eine Information immer prüfen. Wer ist der Autor? Was ist die Quelle? Berichten auch andere Medien darüber?', trad: 'Vous devez toujours vérifier une information. Qui est l’auteur ? Quelle est la source ? D’autres médias en parlent-ils ?', jauges: { wahrheit: 60 } },
+    { t: 'remarque', titre: 'Les verbes de modalité', txt: 'müssen = devoir (obligation), dürfen = avoir le droit, nicht dürfen = interdiction, sollen = devoir (conseil, règle venue d’un autre), können = pouvoir. Le verbe à l’infinitif va à la fin : Ihr müsst die Information prüfen.' },
+    { t: 'recit', entre: ['sara'], txt: 'In der Pause weint Sara. Jemand hat ein Foto von ihr mit gemeinen Kommentaren geteilt.', trad: 'À la récréation, Sara pleure. Quelqu’un a partagé une photo d’elle avec des commentaires méchants.', jauges: { schaden: 70 } },
+    { t: 'dit', qui: 'sara', emo: 'triste', txt: 'Ich habe das Foto nicht erlaubt. Jetzt lachen alle über mich.', trad: 'Je n’ai pas autorisé la photo. Maintenant, tout le monde se moque de moi.' },
+    { t: 'choix', qui: 'kevin', q: 'Tu es Kevin. La photo est arrivée sur ton téléphone. Que fais-tu ?',
+      options: [
+        { txt: 'Ich teile das Foto weiter. (Je la partage.)', consequence: 'Tu participes au harcèlement : chaque partage multiplie la souffrance de Sara.', jauges: { schaden: 20 } },
+        { txt: 'Ich lösche das Foto und informiere Frau Bauer. (Je supprime la photo et je préviens Mme Bauer.)', consequence: 'Tu arrêtes la chaîne et tu protèges Sara.', jauges: { schaden: -40 } },
+        { txt: 'Ich mache nichts. (Je ne fais rien.)', consequence: 'Le silence laisse le harcèlement continuer.', jauges: { schaden: 5 } }
+      ],
+      oeuvre: 'Le harcèlement numérique est puni par la loi au Cameroun, comme dans beaucoup de pays. Celui qui partage est aussi responsable.' },
+    { t: 'atelier', mode: 'tri', titre: 'Werkstatt · obligation, interdiction, possibilité', consigne: 'Classe chaque phrase selon ce qu’elle exprime.',
+      cats: ['Obligation (müssen)', 'Interdiction (nicht dürfen)', 'Possibilité (können)'],
+      items: [
+        { txt: 'Man muss die Quelle prüfen.', cat: 0 },
+        { txt: 'Man darf keine Fotos ohne Erlaubnis teilen.', cat: 1 },
+        { txt: 'Man kann einen Lehrer um Hilfe bitten.', cat: 2 },
+        { txt: 'Man darf andere nicht beleidigen.', cat: 1 },
+        { txt: 'Man muss Cybermobbing melden.', cat: 0 }
+      ],
+      bravo: 'Avec « man » (on), les verbes de modalité donnent des règles générales.', jauges: { wahrheit: 80 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Werkstatt · construis la phrase', consigne: 'Remets les mots dans l’ordre : « Nous devons vérifier l’information. »',
+      items: ['Wir', 'müssen', 'die Information', 'prüfen.'],
+      bravo: 'Wir müssen die Information prüfen. Le modal en 2e position, l’infinitif à la fin.' },
+    { t: 'dit', qui: 'frau', emo: 'joie', jeu: 'am Ende der Stunde', txt: 'Erst denken, dann teilen. Das ist unsere Regel.', trad: 'D’abord réfléchir, ensuite partager. C’est notre règle.', jauges: { schaden: 10, wahrheit: 90 } }
+  ],
+  labo: {
+    titre: 'Labor · erst denken, dann teilen',
+    intro: 'Règle la vérification des informations, le respect des autres et la réaction des témoins : que devient le climat de la classe ?',
+    persos: ['kevin', 'lena', 'frau', 'sara'],
+    curseurs: [
+      { id: 'pruefen', nom: 'Vérification (prüfen)', val: 50, bas: 'jamais', haut: 'toujours' },
+      { id: 'respekt', nom: 'Respect (Respekt)', val: 50, bas: 'moqueries', haut: 'respect' },
+      { id: 'zeugen', nom: 'Réaction des témoins', val: 40, bas: 'silence', haut: 'ils alertent' }
+    ],
+    scenarios: [
+      { nom: 'Montagmorgen', icone: 'telephone', valeurs: { pruefen: 50, respekt: 50, zeugen: 40 } },
+      { nom: 'Alle teilen alles', icone: 'groupe', valeurs: { pruefen: 10, respekt: 20, zeugen: 10 } },
+      { nom: 'Erst denken, dann teilen', icone: 'aide', valeurs: { pruefen: 90, respekt: 85, zeugen: 80 } }
+    ],
+    liens: [
+      { a: 'lena', b: 'kevin', type: 'confiance', lib: 'prüft', base: .4, poids: { pruefen: .4 } },
+      { a: 'kevin', b: 'sara', type: 'conflit', lib: 'Foto', base: .3, poids: { respekt: -.5 } },
+      { a: 'frau', b: 'sara', type: 'alliance', lib: 'schützt', base: .2, poids: { zeugen: .7 } }
+    ],
+    issue: function(v){
+      if(v.respekt < 35 && v.zeugen < 35){ return { niveau: 'ko', badge: 'Cybermobbing', recit: 'Les photos circulent, personne ne réagit : Sara ne veut plus venir à l’école.', apres: 'Le harcèlement prospère dans le silence des témoins.', themes: ['harcèlement'] }; }
+      if(v.pruefen < 35){ return { niveau: 'moyen', badge: 'Falschmeldungen', recit: 'Les fausses nouvelles circulent : la moitié de la classe reste chez elle pour rien.', apres: 'Vérifier l’auteur, la source, et les autres médias.', themes: ['fake news'] }; }
+      if(v.pruefen > 65 && v.respekt > 65 && v.zeugen > 60){ return { niveau: 'ok', badge: 'Eine sichere Klasse', recit: 'On vérifie avant de partager, on respecte les autres, on alerte un adulte quand il faut.', apres: 'Erst denken, dann teilen.', themes: ['citoyenneté numérique'] }; }
+      return { niveau: 'moyen', badge: 'Noch nicht sicher', recit: 'Certains vérifient et protègent, d’autres non.', apres: 'Une règle n’est efficace que si tous l’appliquent.', themes: ['règles communes'] };
+    }
+  },
+  quiz: [
+    { q: 'Que signifie « eine Falschmeldung » ?', options: [
+      { txt: 'Une fausse nouvelle.', ok: true, retour: 'On dit aussi « Fake News ».' },
+      { txt: 'Un faux numéro.', retour: 'Non.' } ] },
+    { q: '« Man darf keine Fotos ohne Erlaubnis teilen » exprime…', options: [
+      { txt: 'une interdiction.', ok: true, retour: 'nicht dürfen / kein… dürfen = interdiction.' },
+      { txt: 'une obligation.', retour: 'L’obligation, c’est müssen.' } ] },
+    { q: 'Où se place l’infinitif après un verbe de modalité ?', options: [
+      { txt: 'À la fin de la phrase.', ok: true, retour: 'Wir müssen die Information prüfen.' },
+      { txt: 'Juste après le sujet.', retour: 'Non.' } ] },
+    { q: 'Que signifie « prüfen » ?', options: [
+      { txt: 'Vérifier.', ok: true, retour: 'die Information prüfen.' },
+      { txt: 'Partager.', retour: 'Partager = teilen.' } ] },
+    { q: 'Que faire si on reçoit une photo humiliante d’un camarade ?', options: [
+      { txt: 'La supprimer et prévenir un adulte.', ok: true, retour: 'Ne pas la partager.' },
+      { txt: 'La partager pour en rire.', retour: 'C’est participer au harcèlement.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Vocabulaire : die Falschmeldung, die Quelle, prüfen, teilen, löschen, melden, das Cybermobbing, die Erlaubnis.',
+      'Verbes de modalité : müssen (obligation), nicht dürfen (interdiction), sollen (conseil, règle), können (possibilité) ; infinitif à la fin.',
+      'Avant de partager : qui est l’auteur ? quelle est la source ? d’autres médias en parlent-ils ?',
+      'Harcèlement numérique : ne pas partager, supprimer, alerter un adulte.'
+    ],
+    ecrire: 'Schreib fünf Regeln für das Internet in deiner Schule. Utilise müssen, dürfen et können. Exemple : Man muss die Quelle prüfen.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

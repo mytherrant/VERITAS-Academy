@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Erste Begegnung — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Simulation d’allemand : se saluer, se présenter, dire son âge ; choisir entre du et Sie ; construire ses phrases.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'allemand-begegnung',
+  discipline: 'Allemand', niveau: '4e',
+  titre: 'Erste Begegnung',
+  decor: 'classe', tableau: ['Deutsch', 'Erste Begegnung'], lieu: 'das Klassenzimmer', moment: 'Der erste Schultag',
+  langue: 'de-DE', langueRecit: 'fr-FR', debit: 0.85,
+  avertissement: 'Dialogue imaginé pour la leçon. Active « Lire » pour entendre la prononciation allemande.',
+  objectif: 'Se saluer, se présenter, dire son âge et sa ville en allemand ; choisir entre « du » (tutoiement) et « Sie » (vouvoiement) ; construire une phrase dans le bon ordre.',
+  jauges: [
+    { id: 'hoeflich', nom: 'Höflichkeit (politesse)', val: 50, couleur: '#FFC93C' },
+    { id: 'wort', nom: 'Wortschatz (vocabulaire)', val: 10, couleur: '#4C6FBF' }
+  ],
+  personnages: {
+    paul:  { nom: 'Paul', couleur: '#2F5E9E', look: { peau: 'fonce', cheveux: 'court', habit: '#2F5E9E' } },
+    mbali: { nom: 'Mbali', couleur: '#B0503A', look: { tenue: 'jupe', peau: 'fonce', cheveux: 'chignon', habit: '#B0503A' } },
+    frau:  { nom: 'Frau Weber', couleur: '#5A6275', look: { tenue: 'jupe', objet: 'livre', peau: 'clair', cheveux: 'chignon', couleurCheveux: '#C9A15A', lunettes: true, habit: '#5A6275' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['paul', 'mbali'], txt: 'Premier jour du cours d’allemand. Paul aborde une nouvelle élève avant la sonnerie.' },
+    { t: 'dit', qui: 'paul', emo: 'joie', txt: 'Hallo! Ich heiße Paul. Wie heißt du?', jauges: { wort: 25 } },
+    { t: 'dit', qui: 'mbali', txt: 'Hallo, Paul! Ich heiße Mbali.' },
+    { t: 'dit', qui: 'paul', txt: 'Woher kommst du, Mbali?' },
+    { t: 'dit', qui: 'mbali', txt: 'Ich komme aus Bafoussam. Und du?', jauges: { wort: 40 } },
+    { t: 'dit', qui: 'paul', txt: 'Ich komme aus Douala. Wie alt bist du?' },
+    { t: 'dit', qui: 'mbali', txt: 'Ich bin dreizehn Jahre alt.', objet: { i: '🎂', lib: '13' }, jauges: { wort: 55 } },
+    { t: 'question', q: 'Que signifie « Wie alt bist du? » ?',
+      options: [
+        { txt: 'Quel âge as-tu ?', ok: true, retour: 'Littéralement « Comment vieux es-tu ? ». On répond : Ich bin … Jahre alt.' },
+        { txt: 'Où habites-tu ?', retour: 'Où habites-tu se dit « Wo wohnst du? ». Ici, « alt » veut dire « vieux, âgé ».' },
+        { txt: 'Comment vas-tu ?', retour: 'Comment vas-tu se dit « Wie geht’s? ».' }
+      ] },
+    { t: 'atelier', mode: 'ordre', titre: 'Werkstatt · construis la phrase', consigne: 'Remets les mots dans l’ordre pour dire : « J’ai treize ans. »',
+      items: ['Ich', 'bin', 'dreizehn', 'Jahre', 'alt.'],
+      bravo: 'Ich bin dreizehn Jahre alt. En allemand, le verbe conjugué est en deuxième position.', jauges: { wort: 65 } },
+    { t: 'recit', entre: ['frau'], txt: 'La professeure arrive.' },
+    { t: 'choix', qui: 'mbali', q: 'Tu es Mbali. Comment salues-tu la professeure ?',
+      options: [
+        { txt: '« Hallo, Frau Weber! Wie geht’s dir? »', consequence: 'Frau Weber sourit, un peu surprise : on ne tutoie pas un professeur.', jauges: { hoeflich: -20 } },
+        { txt: '« Guten Morgen, Frau Weber! Wie geht es Ihnen? »', consequence: 'Parfait : salutation polie et vouvoiement. Frau Weber est ravie.', jauges: { hoeflich: 40 } }
+      ],
+      oeuvre: 'À un adulte, à un professeur : « Guten Morgen » et « Sie / Ihnen ». Entre camarades : « Hallo » et « du / dir ».' },
+    { t: 'dit', qui: 'frau', emo: 'joie', txt: 'Guten Morgen! Ich bin Frau Weber, eure Deutschlehrerin.' },
+    { t: 'dit', qui: 'mbali', txt: 'Guten Morgen, Frau Weber! Wie geht es Ihnen?' },
+    { t: 'dit', qui: 'frau', txt: 'Danke, gut! Und dir?' },
+    { t: 'atelier', mode: 'tri', titre: 'Werkstatt · du oder Sie?', consigne: 'À qui parles-tu ? Choisis « du » (tutoiement) ou « Sie » (vouvoiement).',
+      cats: ['du', 'Sie'],
+      items: [
+        { txt: 'À ton camarade de classe', cat: 0 },
+        { txt: 'Au directeur du collège', cat: 1 },
+        { txt: 'À ta petite sœur', cat: 0 },
+        { txt: 'À une dame que tu ne connais pas, dans la rue', cat: 1 }
+      ],
+      bravo: 'du : famille, amis, enfants. Sie : adultes inconnus, professeurs, situations officielles.' },
+    { t: 'dit', qui: 'mbali', emo: 'joie', txt: 'Auch gut, danke!' },
+    { t: 'dit', qui: 'frau', txt: 'Schön! Kommt, der Unterricht beginnt gleich.', jauges: { wort: 80 } }
+  ],
+  labo: {
+    titre: 'Sprachlabor · du oder Sie?',
+    intro: 'Règle l’âge de la personne, ton degré de familiarité avec elle et le cadre de la rencontre : le laboratoire choisit la bonne façon de saluer et de demander « comment ça va ? ».',
+    persos: ['mbali', 'paul', 'frau'],
+    curseurs: [
+      { id: 'age', nom: 'Âge de la personne', val: 70, bas: 'enfant', haut: 'adulte',
+        lecture: { haut: 'À un adulte qu’on ne connaît pas bien, on dit « Sie ».', bas: 'À un enfant, on dit toujours « du ».' } },
+      { id: 'proche', nom: 'Familiarité', val: 20, bas: 'inconnu', haut: 'ami, famille',
+        lecture: { haut: 'Amis et famille : « du », « Hallo », « Wie geht’s? ».', bas: 'Inconnu : prudence, on vouvoie.' } },
+      { id: 'cadre', nom: 'Cadre', val: 70, bas: 'cour, fête', haut: 'officiel, classe',
+        lecture: { haut: 'Cadre officiel : « Guten Morgen », « Guten Tag ».', bas: 'Entre jeunes, à la récréation : « Hallo ! ».' } }
+    ],
+    scenarios: [
+      { nom: 'Frau Weber', icone: '👩‍🏫', valeurs: { age: 85, proche: 15, cadre: 85 } },
+      { nom: 'Paul, un camarade', icone: '🧒', valeurs: { age: 15, proche: 70, cadre: 20 } },
+      { nom: 'Le directeur', icone: '🎓', valeurs: { age: 90, proche: 5, cadre: 95 } }
+    ],
+    liens: [
+      { a: 'mbali', b: 'paul', type: 'alliance', lib: 'du', base: .3, poids: { proche: .6, age: -.2 } },
+      { a: 'mbali', b: 'frau', type: 'confiance', lib: 'Sie', base: .2, poids: { age: .4, cadre: .3, proche: -.3 } }
+    ],
+    issue: function(v){
+      var sie = (v.age >= 50 && v.proche < 60) || (v.cadre >= 75 && v.proche < 40);
+      var salut = v.cadre >= 50 ? 'Guten Morgen! / Guten Tag!' : 'Hallo!';
+      return sie
+        ? { niveau: 'ok', badge: 'Sie', recit: salut + ' Wie geht es Ihnen?', apres: 'On vouvoie : verbe à la 3e personne du pluriel (Sie sind), pronom avec majuscule.', themes: ['Sie', 'Ihnen', salut] }
+        : { niveau: 'moyen', badge: 'du', recit: salut + ' Wie geht’s? / Wie geht es dir?', apres: 'On tutoie : du bist, dir. Tschüss pour prendre congé.', themes: ['du', 'dir', salut] };
+    }
+  },
+  quiz: [
+    { q: 'Comment dit-on « Je m’appelle Mbali » ?', options: [
+      { txt: 'Ich heiße Mbali.', ok: true, retour: 'heißen = s’appeler.' },
+      { txt: 'Ich bin heiße Mbali.', retour: 'Un seul verbe : Ich heiße…' } ] },
+    { q: 'Que signifie « Woher kommst du? » ?', options: [
+      { txt: 'D’où viens-tu ?', ok: true, retour: 'On répond : Ich komme aus…' },
+      { txt: 'Où vas-tu ?', retour: 'Où vas-tu : « Wohin gehst du? »' } ] },
+    { q: 'À un professeur, on demande :', options: [
+      { txt: 'Wie geht es Ihnen?', ok: true, retour: 'Forme de politesse.' },
+      { txt: 'Wie geht’s dir?', retour: 'Trop familier pour un professeur.' } ] },
+    { q: '« Ich bin dreizehn Jahre alt » veut dire :', options: [
+      { txt: 'J’ai treize ans.', ok: true, retour: 'En allemand, on « est » âgé de… : Ich bin … Jahre alt.' },
+      { txt: 'Je suis en troisième année.', retour: 'Il s’agit de l’âge.' } ] },
+    { q: 'Où se place le verbe conjugué dans une phrase déclarative ?', options: [
+      { txt: 'En deuxième position.', ok: true, retour: 'Ich BIN dreizehn Jahre alt.' },
+      { txt: 'À la fin.', retour: 'C’est le cas dans les subordonnées, pas ici.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Se présenter : Ich heiße … · Ich komme aus … · Ich bin … Jahre alt.',
+      'Questions : Wie heißt du? · Woher kommst du? · Wie alt bist du?',
+      'Saluer : Hallo (familier) · Guten Morgen / Guten Tag (poli). Prendre congé : Tschüss · Bis gleich.',
+      'du = tutoiement ; Sie = vouvoiement. Wie geht es dir? / Wie geht es Ihnen?',
+      'Le verbe conjugué est en deuxième position ; tous les noms prennent une majuscule.'
+    ],
+    ecrire: 'Schreib deine Vorstellung (5 Sätze): Name, Alter, Stadt, Schule, Hobby. Exemple : Ich heiße … Ich bin … Jahre alt.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

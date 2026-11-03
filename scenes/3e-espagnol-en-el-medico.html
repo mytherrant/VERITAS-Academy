@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>En el médico — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’espagnol (3e) : la consultation médicale, dire où l’on a mal avec le verbe doler, la courtoisie, les conseils du médecin.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '3e-espagnol-medico',
+  discipline: 'Espagnol', niveau: '3e', langue: 'es-ES',
+  titre: 'En el médico',
+  decor: 'couloir', lieu: 'El centro de salud del barrio', moment: 'Un lunes por la mañana',
+  objectif: 'Décrire ses symptômes en espagnol lors d’une consultation : me duele la cabeza / me duelen los ojos (verbe doler), tengo fiebre ; comprendre les conseils du médecin ; employer les formules de courtoisie (usted).',
+  programme: 'Progression harmonisée 3e · Module 2 (environnement, santé et bien-être), leçon 5 (consultations médicales : superlatif absolu, courtoisie, conjugaison de doler), leçon 6 (hygiène de vie)',
+  jauges: [
+    { id: 'salud', nom: 'Salud', val: 30, couleur: '#1F9D5B' },
+    { id: 'espanol', nom: 'Español', val: 25, couleur: '#1E499B' }
+  ],
+  personnages: {
+    medica:  { nom: 'La doctora Ruiz', couleur: '#5AA9C9', look: { metier: 'medecin', tenue: 'jupe', peau: 'mat', cheveux: 'chignon', couleurCheveux: '#2A1A12' } },
+    daniel:  { nom: 'Daniel', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } },
+    madre:   { nom: 'La madre de Daniel', couleur: '#5E8A3A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#5E8A3A', habit: '#5E8A3A', objet: 'sac' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['daniel', 'madre'], txt: 'Daniel no se siente bien desde el sábado. Su madre lo lleva al centro de salud.', trad: 'Daniel ne se sent pas bien depuis samedi. Sa mère l’emmène au centre de santé.', objet: { i: 'personne', lib: 'La consulta' } },
+    { t: 'recit', entre: ['medica'], txt: 'La doctora los recibe.', trad: 'La doctoresse les reçoit.' },
+    { t: 'dit', qui: 'medica', txt: 'Buenos días. Siéntese, por favor. ¿Qué le pasa al joven?', trad: 'Bonjour. Asseyez-vous, je vous prie. Qu’est-ce qui ne va pas chez ce jeune homme ?' },
+    { t: 'dit', qui: 'daniel', emo: 'triste', txt: 'Me duele mucho la cabeza y tengo fiebre. También me duelen las piernas.', trad: 'J’ai très mal à la tête et j’ai de la fièvre. J’ai aussi mal aux jambes.', jauges: { espanol: 40 } },
+    { t: 'remarque', titre: 'Le verbe doler', txt: 'Doler se construit comme gustar : me duele + nom singulier (me duele la cabeza), me duelen + nom pluriel (me duelen las piernas). On emploie l’article, pas le possessif : me duele la cabeza (et non mi cabeza).' },
+    { t: 'question', q: 'Comment Daniel dit-il « J’ai mal aux yeux » ?',
+      options: [
+        { txt: 'Me duelen los ojos.', ok: true, retour: 'Ojos est pluriel : duelen.' },
+        { txt: 'Me duele los ojos.', retour: 'Avec un nom pluriel, le verbe s’accorde : duelen.' },
+        { txt: 'Me duelen mis ojos.', retour: 'On emploie l’article (los), pas le possessif.' }
+      ] },
+    { t: 'dit', qui: 'medica', jeu: 'ella le toma la temperatura', txt: 'Treinta y nueve grados. ¿Duermes bajo un mosquitero?', trad: 'Trente-neuf degrés. Dors-tu sous une moustiquaire ?' },
+    { t: 'dit', qui: 'madre', emo: 'doute', txt: 'No siempre, doctora. Hace mucho calor.', trad: 'Pas toujours, docteur. Il fait très chaud.' },
+    { t: 'dit', qui: 'medica', txt: 'Puede ser paludismo. Vamos a hacer un análisis de sangre ahora mismo.', trad: 'C’est peut-être le paludisme. Nous allons faire une analyse de sang tout de suite.', jauges: { salud: 50 } },
+    { t: 'atelier', mode: 'tri', titre: 'Taller · ¿me duele o me duelen?', consigne: 'Classe chaque partie du corps selon la forme du verbe.',
+      cats: ['Me duele…', 'Me duelen…'],
+      items: [
+        { txt: '… la cabeza', cat: 0 },
+        { txt: '… las piernas', cat: 1 },
+        { txt: '… el estómago', cat: 0 },
+        { txt: '… los ojos', cat: 1 },
+        { txt: '… la garganta', cat: 0 },
+        { txt: '… los pies', cat: 1 }
+      ],
+      bravo: 'Singular: duele. Plural: duelen.', jauges: { espanol: 60 } },
+    { t: 'dit', qui: 'medica', txt: 'Es paludismo. Toma estas pastillas tres días, bebe mucha agua y duerme siempre bajo el mosquitero.', trad: 'C’est le paludisme. Prends ces comprimés pendant trois jours, bois beaucoup d’eau et dors toujours sous la moustiquaire.' },
+    { t: 'choix', qui: 'daniel', q: 'Tu es Daniel. Au bout de deux jours, tu te sens mieux. Que fais-tu ?',
+      options: [
+        { txt: 'Dejo las pastillas: ya estoy bien. (J’arrête les comprimés : je vais bien.)', consequence: 'Le traitement n’est pas terminé : la fièvre revient quelques jours plus tard.', jauges: { salud: -25 } },
+        { txt: 'Termino el tratamiento, como dijo la doctora. (Je termine le traitement.)', consequence: 'Tu guéris complètement. Un traitement se prend jusqu’au bout.', jauges: { salud: 35, espanol: 10 } }
+      ],
+      oeuvre: 'Un traitement antipaludique se prend en entier, même quand on se sent mieux ; la moustiquaire imprégnée reste la meilleure prévention.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Taller · construye la frase', consigne: 'Remets les mots dans l’ordre : « J’ai très mal à la gorge. »',
+      items: ['Me', 'duele', 'muchísimo', 'la', 'garganta.'],
+      bravo: 'Me duele muchísimo la garganta. Muchísimo : superlatif absolu de mucho.', jauges: { espanol: 80 } },
+    { t: 'dit', qui: 'daniel', emo: 'joie', jeu: 'una semana después', txt: '¡Muchas gracias, doctora! Ya no me duele nada.', trad: 'Merci beaucoup, docteur ! Je n’ai plus mal nulle part.', jauges: { salud: 95 } }
+  ],
+  labo: {
+    titre: 'Laboratorio · contra el paludismo',
+    intro: 'Règle l’usage de la moustiquaire, la rapidité de la consultation et le suivi du traitement : Daniel guérit-il vite ?',
+    persos: ['daniel', 'madre', 'medica'],
+    curseurs: [
+      { id: 'mosquitero', nom: 'Moustiquaire (mosquitero)', val: 40, bas: 'jamais', haut: 'toutes les nuits' },
+      { id: 'consulta', nom: 'Rapidité de la consultation', val: 60, bas: 'très tard', haut: 'dès la fièvre' },
+      { id: 'tratamiento', nom: 'Suivi du traitement (tratamiento)', val: 70, bas: 'arrêté', haut: 'complet' }
+    ],
+    scenarios: [
+      { nom: 'Daniel', icone: 'personne', valeurs: { mosquitero: 40, consulta: 60, tratamiento: 70 } },
+      { nom: 'Demasiado tarde', icone: 'nuage', valeurs: { consulta: 5, tratamiento: 30 } },
+      { nom: 'Prevención', icone: 'porte', valeurs: { mosquitero: 95, consulta: 85, tratamiento: 90 } }
+    ],
+    liens: [
+      { a: 'medica', b: 'daniel', type: 'confiance', lib: 'cura', base: .4, poids: { consulta: .4 } },
+      { a: 'madre', b: 'daniel', type: 'amour', lib: 'madre', base: .8 }
+    ],
+    issue: function(v){
+      if(v.consulta < 25){ return { niveau: 'ko', badge: 'Paludismo grave', recit: 'Consulter trop tard : la fièvre monte, Daniel doit être hospitalisé.', apres: 'Dès la fièvre, on consulte.', themes: ['paludisme grave'] }; }
+      if(v.tratamiento < 40){ return { niveau: 'moyen', badge: 'La fiebre vuelve', recit: 'Traitement arrêté trop tôt : la fièvre revient.', apres: 'Un traitement se prend jusqu’au bout.', themes: ['traitement'] }; }
+      if(v.mosquitero > 75){ return { niveau: 'ok', badge: 'Sano y protegido', recit: 'Guéri, et protégé la nuit par la moustiquaire : pas de nouvelle crise.', apres: 'Mieux vaut prévenir que guérir.', themes: ['prévention'] }; }
+      return { niveau: 'ok', badge: 'Curado', recit: 'Consultation rapide, traitement complet : Daniel guérit en une semaine.', apres: 'Reste à dormir sous la moustiquaire.', themes: ['consultation'] };
+    }
+  },
+  quiz: [
+    { q: '« J’ai mal à la tête » :', options: [
+      { txt: 'Me duele la cabeza.', ok: true, retour: 'doler comme gustar.' },
+      { txt: 'Tengo mal la cabeza.', retour: 'On emploie doler.' } ] },
+    { q: '« Me … las piernas » :', options: [
+      { txt: 'duelen', ok: true, retour: 'Nom pluriel : duelen.' },
+      { txt: 'duele', retour: 'Avec un pluriel, duelen.' } ] },
+    { q: 'Que signifie « tengo fiebre » ?', options: [
+      { txt: 'J’ai de la fièvre.', ok: true, retour: 'la fiebre = la fièvre.' },
+      { txt: 'J’ai faim.', retour: 'J’ai faim = tengo hambre.' } ] },
+    { q: 'Que signifie « el mosquitero » ?', options: [
+      { txt: 'La moustiquaire.', ok: true, retour: 'Contre les moustiques qui transmettent le paludisme.' },
+      { txt: 'Le moustique.', retour: 'Le moustique = el mosquito.' } ] },
+    { q: 'Superlatif absolu de « mucho » :', options: [
+      { txt: 'muchísimo', ok: true, retour: '-ísimo : très, extrêmement.' },
+      { txt: 'más mucho', retour: 'Non.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Vocabulaire : el médico, la consulta, la fiebre, el paludismo, las pastillas, el mosquitero, la cabeza, la garganta, el estómago, las piernas.',
+      'Doler comme gustar : me duele + singulier, me duelen + pluriel ; article, pas possessif.',
+      'Courtoisie : usted (siéntese, por favor) ; superlatif absolu : muchísimo, rapidísimo.',
+      'Santé : consulter dès la fièvre, terminer le traitement, dormir sous une moustiquaire.'
+    ],
+    ecrire: 'Escribe un diálogo de seis réplicas entre un médico y un paciente. Utilise « me duele » et « me duelen » au moins deux fois chacun.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La querelle de la dot — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Le Lion et la Perle de Wole Soyinka : Sidi, Lakounlé, la dot et le livre d’images de l’étranger.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'lion-perle-dot',
+  discipline: 'Français', niveau: '1re',
+  oeuvre: 'Le Lion et la Perle', auteur: 'Wole Soyinka (1959)',
+  titre: 'La querelle de la dot',
+  decor: 'village', lieu: 'Iloujinlé, la clairière du marché', moment: 'Acte I · au matin',
+  objectif: 'Vivre le conflit de départ — tradition et modernité — à travers la dispute de Sidi et de Lakounlé ; repérer ce qui rend l’instituteur comique ; voir comment le livre d’images de l’étranger change les rapports de force.',
+  jauges: [
+    { id: 'vanite', nom: 'Assurance de Sidi', val: 45, couleur: '#FFC93C' },
+    { id: 'lak', nom: 'Crédit de Lakounlé', val: 60, couleur: '#4C6FBF' }
+  ],
+  personnages: {
+    sidi:      { nom: 'Sidi', couleur: '#B0503A', look: { tenue: 'robe', peau: 'fonce', cheveux: 'tresses', habit: '#C2551F' } },
+    lakounle:  { nom: 'Lakounlé', couleur: '#2F5E9E', look: { objet: 'livre', peau: 'fonce', cheveux: 'court', habit: '#F2EEE3', col: '#2F5E9E' } },
+    baroka:    { nom: 'Baroka, le Balé', couleur: '#7A2E2E', look: { tenue: 'boubou', peau: 'fonce', vieux: true, barbe: true, coiffe: 'couronne', habit: '#7A2E2E' } },
+    filles:    { nom: 'Les jeunes filles', couleur: '#7B6A2E', groupe: true, look: { tenue: 'robe', peau: 'fonce', cheveux: 'tresses', habit: '#D98E04' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['lakounle'], txt: 'Iloujinlé, un village yorouba, à la fin des années 1950. Le matin. Par la fenêtre de l’école de brousse, Lakounlé, l’instituteur, voit passer Sidi, un seau d’eau sur la tête.' },
+    { t: 'dit', qui: 'lakounle', emo: 'colere', jeu: 'il sort en hâte de l’école', txt: 'Sidi ! Pose ce seau ! Combien de fois faudra-t-il te le dire ? Une femme moderne ne porte pas de fardeaux sur la tête !' },
+    { t: 'dit', qui: 'sidi', emo: 'joie', jeu: 'moqueuse', txt: 'Et qui le portera pour moi ? Toi, avec tes livres ?', jauges: { lak: 50 } },
+    { t: 'dit', qui: 'lakounle', emo: 'amour', txt: 'Écoute-moi enfin. Je veux t’épouser. Tu seras ma compagne, mon égale, pas ma servante.' },
+    { t: 'dit', qui: 'sidi', txt: 'Alors paie la dot, comme tout le monde. Sinon, on dira au village que Sidi ne valait rien, puisque personne n’a payé pour elle.' },
+    { t: 'dit', qui: 'lakounle', emo: 'colere', jeu: 'il s’enflamme', txt: 'La dot ! Une coutume sauvage, barbare, démodée, rejetée, dénoncée, archaïque, dégradante ! Je ne t’achèterai pas comme une chèvre au marché !', objet: { i: '🐐', lib: 'La dot' } },
+    { t: 'question', q: 'Quel effet produit cette longue liste d’adjectifs dans la bouche de Lakounlé ?',
+      options: [
+        { txt: 'Un effet comique : l’accumulation rend son indignation excessive et un peu ridicule.', ok: true, retour: 'L’instituteur parle comme un livre. Plus il empile les mots savants, plus il paraît coupé du village qu’il prétend éclairer.' },
+        { txt: 'Un effet tragique : on comprend qu’il va mourir.', retour: 'Rien de tragique ici : c’est une comédie, et Lakounlé est d’abord un personnage comique.' },
+        { txt: 'Aucun effet : c’est une simple liste.', retour: 'Une accumulation n’est jamais neutre au théâtre. Demande-toi ce qu’elle dit de celui qui parle.' }
+      ] },
+    { t: 'choix', qui: 'sidi', q: 'Tu es Sidi. Lakounlé refuse de payer la dot mais veut t’épouser. Que réponds-tu ?',
+      options: [
+        { txt: 'J’accepte : l’amour vaut plus que la coutume.', consequence: 'Le village se moque : « Sidi s’est donnée pour rien. » Lakounlé triomphe, toi tu perds la face.', jauges: { vanite: -25, lak: 20 } },
+        { txt: 'Je refuse tant que la dot n’est pas payée.', consequence: 'Tu gardes ton rang et ton honneur devant le village ; Lakounlé repart en grommelant ses grands mots.', jauges: { vanite: 15, lak: -15 } },
+        { txt: 'Je ris et je change de sujet.', consequence: 'Lakounlé s’agace, la querelle reste ouverte… et c’est alors qu’arrivent les jeunes filles.', jauges: { lak: -5 } }
+      ],
+      oeuvre: 'Sidi refuse : sans dot, pas de mariage. La querelle reste sans issue, et c’est l’arrivée du livre d’images qui va tout bouleverser.' },
+    { t: 'question', q: 'Lakounlé refuse la dot au nom de la modernité. Son refus est-il aussi cohérent qu’il le prétend ?',
+      options: [
+        { txt: 'Oui, totalement : il rejette toute la tradition, sans exception.', retour: 'Pas si vite : la pièce montre qu’il envie en secret les épouses nombreuses du chef Baroka.' },
+        { txt: 'Non : il rejette la tradition en paroles, mais la désire en secret — et son refus l’arrange, puisqu’il n’a rien à payer.', ok: true, retour: 'C’est le ressort de son personnage : ses principes servent parfois ses intérêts. Le spectateur rit de cet écart.' }
+      ] },
+    { t: 'recit', entre: ['filles'], txt: 'Des jeunes filles accourent, essoufflées et ravies.' },
+    { t: 'dit', qui: 'filles', emo: 'joie', txt: 'Sidi ! Sidi ! L’étranger est revenu, celui qui prenait des photos ! Il a rapporté son livre d’images… et tu es dedans !', objet: { i: '📖', lib: 'Le livre d’images' } },
+    { t: 'dit', qui: 'sidi', emo: 'surpris', jeu: 'éblouie', txt: 'Moi ? Dans le livre de l’étranger ? Montrez-moi !', jauges: { vanite: 80 } },
+    { t: 'dit', qui: 'sidi', emo: 'fier', jeu: 'elle tourne les pages', txt: 'Regardez-moi ! Une page entière ! Je suis plus grande ici que le chef lui-même !', jauges: { vanite: 95, lak: 30 } },
+    { t: 'remarque', txt: 'Ce livre d’images bouleverse tout. Sidi découvre sa propre beauté reproduite et admirée au loin : elle se sent désormais au-dessus de tout le village, et même du chef Baroka. Le rapport de force change avant même que le Lion entre en scène.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · tradition ou modernité ?', consigne: 'Classe chaque élément de la pièce du côté qu’il représente.',
+      cats: ['Tradition', 'Modernité'],
+      items: [
+        { txt: 'La dot réclamée par Sidi', cat: 0 },
+        { txt: 'L’école de brousse de Lakounlé', cat: 1 },
+        { txt: 'Le chemin de fer que les topographes veulent tracer', cat: 1 },
+        { txt: 'Le Balé Baroka et ses nombreuses épouses', cat: 0 },
+        { txt: 'Le livre de photographies de l’étranger', cat: 1 },
+        { txt: 'Les danses et les mimes du village', cat: 0 }
+      ],
+      bravo: 'Mais attention : la pièce brouille ces cases. Le moderne Lakounlé envie Baroka, et le traditionnel Baroka sait très bien manier la modernité.' },
+    { t: 'question', q: 'Dans le titre, qui est « la perle » ?',
+      options: [
+        { txt: 'Sidi, la Beauté du village.', ok: true, retour: 'Et le Lion, c’est Baroka. Mais un lion est un prédateur et une perle un objet : le titre distribue déjà les rôles. Le dénouement les confirme-t-il ou les défait-il ?' },
+        { txt: 'Le livre de photographies.', retour: 'Le livre révèle la perle, mais il ne l’est pas.' },
+        { txt: 'Sadikou, la première épouse du chef.', retour: 'Sadikou négocie au nom de Baroka ; ce n’est pas elle que l’on convoite.' }
+      ] },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · le schéma de la pièce', consigne: 'Remets les étapes de la pièce dans l’ordre.',
+      items: [
+        'Sidi et Lakounlé se disputent au sujet de la dot.',
+        'Le livre d’images de l’étranger révèle la beauté de Sidi.',
+        'Baroka fait demander la main de Sidi par Sadikou ; Sidi refuse.',
+        'Baroka fait croire à son impuissance ; Sidi part se moquer de lui.',
+        'Sidi choisit d’épouser Baroka ; la fête conclut la pièce.'
+      ],
+      bravo: 'Le dénouement déjoue l’attente : ni triomphe simple de la tradition, ni victoire de la modernité.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · Iloujinlé',
+    intro: 'Règle la vanité de Sidi, la cohérence de Lakounlé, la ruse de Baroka et l’attrait de la modernité : qui Sidi épousera-t-elle ?',
+    persos: ['sidi', 'lakounle', 'filles', 'baroka'],
+    curseurs: [
+      { id: 'vanite', nom: 'Vanité de Sidi', val: 85, bas: 'modeste', haut: 'grisée',
+        lecture: { haut: 'Grisée par sa photo, Sidi se croit au-dessus de tous : c’est cette assurance que Baroka saura retourner.', bas: 'Une Sidi modeste ne serait pas allée se moquer du Lion : le piège ne se refermerait pas.' } },
+      { id: 'coherence', nom: 'Cohérence de Lakounlé', val: 20, bas: 'contradictoire', haut: 'cohérent',
+        lecture: { haut: 'Un Lakounlé qui paierait la dot et vivrait ses idées deviendrait un prétendant sérieux.', bas: 'Il rejette la tradition en paroles et la désire en secret : il est comique, et il perd.' } },
+      { id: 'ruse', nom: 'Ruse de Baroka', val: 90, bas: 'naïf', haut: 'renard',
+        lecture: { haut: 'Le Lion est aussi le Renard : par deux fois, il se fait passer pour vaincu avant de gagner.', bas: 'Un Baroka sans ruse laisserait passer le chemin de fer… et la perle.' } },
+      { id: 'modernite', nom: 'Attrait de la modernité', val: 50, bas: 'faible', haut: 'fort',
+        lecture: { haut: 'Le village rêve de livres, de photos et de rails : Lakounlé a un public.', bas: 'Le village tient à ses usages : les grands mots de l’instituteur ne portent pas.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans la pièce', icone: '📖', valeurs: { vanite: 85, coherence: 20, ruse: 90, modernite: 50 } },
+      { nom: 'Et si Lakounlé payait la dot ?', icone: '🐐', valeurs: { coherence: 85, modernite: 70 } },
+      { nom: 'Et si Baroka était naïf ?', icone: '🦁', valeurs: { ruse: 15 } },
+      { nom: 'Et si Sidi restait modeste ?', icone: '🙏', valeurs: { vanite: 15 } }
+    ],
+    liens: [
+      { a: 'sidi', b: 'lakounle', type: 'conflit', lib: 'la dot', base: .7, poids: { coherence: -.6 } },
+      { a: 'baroka', b: 'sidi', type: 'domination', lib: 'convoitise', base: .1, poids: { ruse: .5, vanite: .35 } },
+      { a: 'baroka', b: 'lakounle', type: 'conflit', lib: 'rivalité', base: .2, poids: { ruse: .4, modernite: .3 } },
+      { a: 'filles', b: 'sidi', type: 'confiance', lib: 'admiration', base: .1, poids: { vanite: .8 } },
+      { a: 'filles', b: 'lakounle', type: 'conflit', lib: 'moquerie', base: .5, poids: { coherence: -.4, modernite: -.2 } }
+    ],
+    issue: function(v){
+      if(v.coherence >= 65 && v.ruse < 60){ return { niveau: 'ok', badge: 'Sidi épouse Lakounlé', recit: 'L’instituteur paie la dot et tient parole ; le chef ne trouve aucune ruse. La modernité l’emporte.', apres: 'Une autre pièce, plus didactique : on y perdrait le comique de Lakounlé et l’ambiguïté du dénouement.', themes: ['modernité', 'cohérence'] }; }
+      if(v.coherence >= 65){ return { niveau: 'moyen', badge: 'Duel de prétendants', recit: 'Lakounlé devient sérieux, mais le Renard veille : Sidi hésite entre deux hommes également déterminés.', apres: 'Le choix final dépendrait alors de Sidi seule : tradition ou modernité, sans que l’un des deux soit ridicule.', themes: ['choix', 'tradition et modernité'] }; }
+      if(v.vanite < 35 || v.ruse < 35){ return { niveau: 'moyen', badge: 'Rien ne bouge', recit: 'Sans vanité à retourner ou sans ruse pour la retourner, le piège ne se referme pas. Sidi reste libre… et seule.', apres: 'La comédie s’essouffle : il lui fallait l’orgueil de la perle et la patience du lion.', themes: ['statu quo'] }; }
+      return { niveau: 'moyen', badge: 'Sidi choisit Baroka', recit: 'Grisée par son image, Sidi va se moquer du Lion et tombe dans son piège. Puis, contre toute attente, elle choisit librement de l’épouser.', apres: 'Ni triomphe de la tradition, ni victoire de la modernité : Sidi transforme sa défaite en choix assumé. Le dénouement reste ouvert au débat.', themes: ['tradition et modernité', 'ruse', 'vanité', 'liberté de choix'] };
+    }
+  },
+  quiz: [
+    { q: 'Que réclame Sidi pour épouser Lakounlé ?', options: [
+      { txt: 'La dot.', ok: true, retour: 'Sans dot, on dirait au village qu’elle ne valait rien.' },
+      { txt: 'Un voyage à Lagos.', retour: 'Non : c’est la dot qui est au cœur de la querelle.' } ] },
+    { q: 'Qu’est-ce qui bouleverse l’équilibre du village à l’acte I ?', options: [
+      { txt: 'Le livre de photographies de l’étranger.', ok: true, retour: 'Sidi s’y découvre « la perle » : son assurance change tout.' },
+      { txt: 'La mort de Baroka.', retour: 'Baroka est bien vivant… et rusé.' } ] },
+    { q: 'Comment Baroka a-t-il empêché autrefois le passage du chemin de fer ?', options: [
+      { txt: 'Par une ruse : il a fait croire qu’il cédait, puis a détourné le projet.', ok: true, retour: 'Cette anecdote prépare le spectateur à ne pas sous-estimer le Lion à l’acte III.' },
+      { txt: 'Par la guerre.', retour: 'Non : par la ruse, comme toujours chez lui.' } ] },
+    { q: 'Qui négocie le mariage au nom de Baroka ?', options: [
+      { txt: 'Sadikou, sa première épouse.', ok: true, retour: 'Elle-même sera trompée par la prétendue impuissance de son mari.' },
+      { txt: 'Lakounlé.', retour: 'Lakounlé est le rival de Baroka !' } ] },
+    { q: 'En quelle année Soyinka reçoit-il le prix Nobel de littérature ?', options: [
+      { txt: '1986', ok: true, retour: 'Le premier prix Nobel attribué à un écrivain africain.' },
+      { txt: '1959', retour: '1959 est l’année de la création de la pièce.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Acte I : la querelle de la dot expose le conflit entre tradition et modernité.',
+      'Lakounlé est comique par ses contradictions : il rejette la tradition en paroles, la désire en secret.',
+      'Le livre d’images de l’étranger change le rapport de force : Sidi se découvre « la perle ».',
+      'Pièce créée en 1959, un an avant l’indépendance du Nigeria : Lakounlé et Baroka sont deux réponses politiques.',
+      'Soyinka reçoit le prix Nobel de littérature en 1986, le premier attribué à un écrivain africain.'
+    ],
+    ecrire: 'Imaginez le reportage que l’étranger photographe aurait pu publier sur Iloujinlé, tel que les villageois l’auraient lu : légendes de photos et petits commentaires, en restant cohérent avec ce que la pièce dit du livre.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

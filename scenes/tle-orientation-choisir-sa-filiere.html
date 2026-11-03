@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Après le bac, quoi ? — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’orientation-conseil (Terminale) : les étapes de la prise de décision, le système LMD, les universités d’État et les grandes écoles, le projet académique et professionnel.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-orientation-filiere',
+  discipline: 'Orientation-conseil', niveau: 'Terminale',
+  titre: 'Après le bac, quoi ?',
+  decor: 'classe', lieu: 'Le bureau du conseiller d’orientation', moment: 'Deuxième trimestre',
+  objectif: 'Appliquer les étapes de la prise de décision à un choix d’études ; connaître le système LMD, les universités d’État et les grandes écoles à concours ; construire un projet académique et professionnel réaliste.',
+  programme: 'Progression harmonisée Tle · SF 721 (prise de décision, leçons 7-9), SF 731-732 (universités, grandes écoles, système LMD, leçons 13-16), SF 733 (projet académique et professionnel)',
+  jauges: [
+    { id: 'clarte', nom: 'Clarté du projet', val: 15, couleur: '#1E499B' },
+    { id: 'stress', nom: 'Stress d’Ingrid', val: 70, couleur: '#D43F2E' }
+  ],
+  personnages: {
+    ingrid:     { nom: 'Ingrid, Terminale A', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    conseiller: { nom: 'M. Tchinda, conseiller d’orientation', couleur: '#2B3A55', look: { tenue: 'costume', peau: 'fonce', cheveux: 'ras', lunettes: true, habit: '#2B3A55', col: '#F2EEE3', objet: 'dossier' } },
+    mere:       { nom: 'La mère d’Ingrid', couleur: '#5E8A3A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#5E8A3A', habit: '#5E8A3A' } },
+    junior:     { nom: 'Junior, étudiant en Licence 2', couleur: '#2F5E9E', look: { peau: 'fonce', cheveux: 'court', habit: '#2F5E9E', objet: 'livre' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['ingrid', 'conseiller'], txt: 'Ingrid est en Terminale A. Le bac approche, et tout le monde lui pose la même question : « Tu feras quoi après ? »', objet: { i: 'diplome', lib: 'Le baccalauréat' } },
+    { t: 'dit', qui: 'ingrid', emo: 'peur', txt: 'Je ne sais pas. Ma mère veut que je fasse médecine, mes amies vont en droit, et moi j’aime écrire et parler aux gens.' },
+    { t: 'dit', qui: 'conseiller', txt: 'Une décision importante ne se prend pas au hasard, ni pour faire plaisir. Il y a une méthode. Commençons par définir le problème.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · les étapes de la prise de décision', consigne: 'Remets dans l’ordre les étapes d’une bonne décision.',
+      items: [
+        'Définir clairement le problème à résoudre.',
+        'Rassembler des informations (sur soi, sur les filières, sur les métiers).',
+        'Lister toutes les options possibles.',
+        'Peser les avantages et les inconvénients de chacune.',
+        'Choisir et agir.',
+        'Évaluer le résultat et ajuster si nécessaire.'
+      ],
+      bravo: 'Cette méthode vaut pour l’orientation, mais aussi pour toutes les décisions importantes de la vie.', jauges: { clarte: 30, stress: 55 } },
+    { t: 'dit', qui: 'conseiller', txt: 'Première information : toi. Tes matières fortes, tes goûts, tes valeurs, tes moyens.' },
+    { t: 'dit', qui: 'ingrid', txt: 'Je suis bonne en français, en anglais et en histoire. Je suis faible en mathématiques et en sciences.', jauges: { clarte: 45 } },
+    { t: 'question', q: 'Pour une élève de Terminale A, faible en sciences, que penser du projet « médecine » ?',
+      options: [
+        { txt: 'Il est très difficile : les facultés de médecine recrutent par concours sur des épreuves scientifiques, après un bac scientifique en général.', ok: true, retour: 'Ce n’est pas un jugement sur Ingrid : c’est une information sur les conditions d’accès. Un bon projet tient compte de la réalité.' },
+        { txt: 'C’est le meilleur choix, puisque les médecins gagnent bien leur vie.', retour: 'Le salaire est une information, mais pas la seule : les conditions d’accès et les goûts comptent aussi.' }
+      ] },
+    { t: 'recit', entre: ['junior'], txt: 'Le conseiller a invité Junior, un ancien élève du lycée, aujourd’hui à l’université.' },
+    { t: 'dit', qui: 'junior', txt: 'À l’université, on est dans le système LMD : Licence en trois ans, Master en deux ans, Doctorat en trois ans. On valide des crédits par semestre. Personne ne te suit comme au lycée : il faut s’organiser seul.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · université ou grande école ?', consigne: 'Classe chaque caractéristique.',
+      cats: ['Université d’État', 'Grande école'],
+      items: [
+        { txt: 'Inscription ouverte aux bacheliers, dans la plupart des filières.', cat: 0 },
+        { txt: 'Entrée sur concours, avec un nombre de places limité.', cat: 1 },
+        { txt: 'Parcours Licence, Master, Doctorat.', cat: 0 },
+        { txt: 'Formation à un métier précis (enseignant, ingénieur, journaliste…).', cat: 1 }
+      ],
+      bravo: 'Certaines formations combinent les deux : on peut passer un concours après une licence.' },
+    { t: 'dit', qui: 'conseiller', txt: 'Toi qui aimes écrire et parler aux gens : as-tu pensé au journalisme et à la communication, aux langues, au droit, à l’enseignement des lettres ?', jauges: { clarte: 65 } },
+    { t: 'recit', entre: ['mere'], txt: 'La mère d’Ingrid entre.' },
+    { t: 'dit', qui: 'mere', emo: 'colere', txt: 'Journaliste ? Ce n’est pas un vrai métier. Je veux que ma fille soit docteur.', jauges: { stress: 80 } },
+    { t: 'choix', qui: 'ingrid', q: 'Tu es Ingrid. Que réponds-tu à ta mère ?',
+      options: [
+        { txt: 'D’accord, maman, je ferai médecine.', consequence: 'Tu évites le conflit aujourd’hui, mais tu choisis une voie où tu risques l’échec et le découragement.', jauges: { clarte: -25, stress: 10 } },
+        { txt: 'Je lui présente les informations : mes notes, les conditions d’accès, les débouchés du journalisme et du droit, et je lui demande de m’accompagner.', consequence: 'Tu t’affirmes sans manquer de respect. Ta mère n’est pas convaincue tout de suite, mais elle écoute.', jauges: { clarte: 20, stress: -35 } },
+        { txt: 'Je claque la porte : c’est ma vie.', consequence: 'Tu as peut-être raison sur le fond, mais tu perds l’appui de ta famille, dont tu auras besoin.', jauges: { stress: 10 } }
+      ],
+      oeuvre: 'Le projet tient compte du statut socio-économique de la famille et de son avis ; mais la décision revient d’abord à celle ou celui qui fera les études.' },
+    { t: 'dit', qui: 'mere', emo: 'doute', jeu: 'après un long silence', txt: 'Montre-moi ces débouchés. Si c’est sérieux, je t’aiderai.' },
+    { t: 'dit', qui: 'ingrid', emo: 'joie', txt: 'Option 1 : une licence de lettres ou de langues, puis un concours. Option 2 : le concours d’une école de journalisme. Option 3, de secours : le droit.', jauges: { clarte: 90, stress: 25 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · un projet solide',
+    intro: 'Règle la connaissance de soi, l’information sur les filières et la pression de l’entourage : quel projet Ingrid construit-elle ?',
+    persos: ['ingrid', 'conseiller', 'mere', 'junior'],
+    curseurs: [
+      { id: 'soi', nom: 'Connaissance de soi', val: 70, bas: 'floue', haut: 'précise' },
+      { id: 'info', nom: 'Information sur les filières', val: 60, bas: 'rumeurs', haut: 'sources fiables', lecture: { haut: 'Conditions d’accès, durées, débouchés : tout est vérifié.', bas: 'Elle choisit d’après ce que disent les autres.' } },
+      { id: 'pression', nom: 'Pression de l’entourage', val: 55, bas: 'soutien', haut: 'imposition' }
+    ],
+    scenarios: [
+      { nom: 'Comme dans la scène', icone: 'diplome', valeurs: { soi: 70, info: 60, pression: 55 } },
+      { nom: 'On choisit pour elle', icone: 'personne', valeurs: { pression: 95, soi: 30 } },
+      { nom: 'Choisir sur des rumeurs', icone: 'nuage', valeurs: { info: 10 } }
+    ],
+    liens: [
+      { a: 'conseiller', b: 'ingrid', type: 'confiance', lib: 'conseille', base: .4, poids: { info: .5 } },
+      { a: 'mere', b: 'ingrid', type: 'domination', lib: 'impose', base: .1, poids: { pression: .8 } },
+      { a: 'mere', b: 'ingrid', type: 'amour', lib: 'soutient', base: .7, poids: { pression: -.5 } },
+      { a: 'junior', b: 'ingrid', type: 'alliance', lib: 'témoigne', base: .4, poids: { info: .3 } }
+    ],
+    issue: function(v){
+      if(v.pression > 80){ return { niveau: 'ko', badge: 'Le projet d’un autre', recit: 'Ingrid s’inscrit là où on l’envoie : démotivée, elle redouble et finit par abandonner.', apres: 'Le soutien des parents est précieux ; l’imposition est un risque.', themes: ['affirmation de soi'] }; }
+      if(v.info < 30){ return { niveau: 'ko', badge: 'Un choix sur des rumeurs', recit: 'Elle découvre trop tard les conditions d’accès et les débouchés réels de la filière.', apres: 'S’informer à des sources fiables : la deuxième étape de toute décision.', themes: ['information'] }; }
+      if(v.soi < 35){ return { niveau: 'moyen', badge: 'Un choix au hasard', recit: 'Elle suit ses amies : le choix est possible, mais il ne lui ressemble pas.', apres: 'Se connaître : intérêts, aptitudes, valeurs.', themes: ['connaissance de soi'] }; }
+      return { niveau: 'ok', badge: 'Un projet réaliste', recit: 'Un projet qui part de ses goûts, de ses résultats et d’informations vérifiées, avec une solution de secours et l’appui de sa famille.', apres: 'Un bon projet s’évalue et s’ajuste chaque année.', themes: ['projet académique', 'prise de décision'] };
+    }
+  },
+  quiz: [
+    { q: 'Quelle est la première étape d’une prise de décision ?', options: [
+      { txt: 'Définir le problème.', ok: true, retour: 'Puis s’informer, lister les options, peser, choisir, évaluer.' },
+      { txt: 'Choisir au plus vite.', retour: 'Non.' } ] },
+    { q: 'Que signifie LMD ?', options: [
+      { txt: 'Licence, Master, Doctorat.', ok: true, retour: '3 ans, 2 ans, 3 ans.' },
+      { txt: 'Lycée, Maîtrise, Diplôme.', retour: 'Non.' } ] },
+    { q: 'Combien d’années dure une licence ?', options: [
+      { txt: 'Trois ans (six semestres).', ok: true, retour: 'Validés par des crédits.' },
+      { txt: 'Cinq ans.', retour: 'C’est licence + master.' } ] },
+    { q: 'Comment entre-t-on en général dans une grande école ?', options: [
+      { txt: 'Par concours.', ok: true, retour: 'Le nombre de places est limité.' },
+      { txt: 'Par simple inscription.', retour: 'C’est le cas de la plupart des filières universitaires.' } ] },
+    { q: 'Que faire face à un parent qui impose un choix ?', options: [
+      { txt: 'S’affirmer avec respect, en présentant des informations.', ok: true, retour: 'Ni soumission, ni rupture.' },
+      { txt: 'Toujours obéir.', retour: 'Le projet doit d’abord être celui de l’élève.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Prise de décision : définir le problème, s’informer, lister les options, peser, choisir et agir, évaluer.',
+      'Système LMD : Licence (3 ans), Master (2 ans), Doctorat (3 ans), par semestres et crédits.',
+      'Universités d’État : accès ouvert dans la plupart des filières ; grandes écoles : concours.',
+      'Un projet académique et professionnel repose sur la connaissance de soi, des filières et des débouchés, et prévoit une solution de secours.'
+    ],
+    ecrire: 'Rédigez votre propre fiche de projet : vos trois matières fortes, deux métiers qui vous attirent, la filière qui y mène (conditions d’accès, durée), et une solution de secours.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>

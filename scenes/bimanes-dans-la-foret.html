@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le bachelier et sa cravate — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Les Bimanes de Séverin Cécile Abega : Dany, bachelier en cravate, arrive au village de sa grand-mère.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261103n">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'bimanes-foret',
+  discipline: 'Français', niveau: '6e',
+  oeuvre: 'Les Bimanes', auteur: 'Séverin Cécile Abega',
+  titre: 'Le bachelier et sa cravate',
+  decor: 'village', ambiance: 'chaleur', lieu: 'le village de la grand-mère', moment: '« Dans la forêt » · seize heures',
+  objectif: 'Rire du héros qui se croit supérieur, et comprendre comment la nouvelle le remet à sa place : le portrait moqueur, l’ironie, et la leçon d’humilité.',
+  jauges: [
+    { id: 'orgueil', nom: 'Orgueil de Dany', val: 90, couleur: '#E07B39' },
+    { id: 'chaleur', nom: 'Souffrance sous la cravate', val: 30, couleur: '#C0392B' }
+  ],
+  personnages: {
+    dany:    { nom: 'Dany, bachelier', couleur: '#2F5E9E', look: { peau: 'fonce', cheveux: 'court', tenue: 'costume', habit: '#2B3A55', col: '#C0392B', objet: 'dossier' } },
+    mere:    { nom: 'Epképké, la grand-mère', couleur: '#8A5A2B', look: { peau: 'fonce', vieux: true, coiffe: 'foulard', couleurCoiffe: '#5A2E4A', tenue: 'robe', habit: '#8A3B6E', objet: 'houe' } },
+    ambombo: { nom: 'Ambombo', couleur: '#1F6F78', look: { peau: 'fonce', cheveux: 'tresses', lunettes: true, habit: '#F4F6FA', bas: '#1E499B' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['dany'], txt: 'Dany vient d’obtenir son baccalauréat. Sa mère a dû le harceler des semaines pour qu’il aille voir sa grand-mère au village : il n’y était pas venu depuis cinq ans. Il arrive à seize heures, en veste et cravate, après deux heures de marche au soleil.' },
+    { t: 'recit', txt: 'Du haut de son baccalauréat, Dany toisa le village', cite: 'Séverin Cécile Abega, Les Bimanes, « Dans la forêt »' },
+    { t: 'pense', qui: 'dany', emo: 'fier', txt: 'Ils feront des yeux ronds quand je leur dirai mon titre : bachelier ! Ici, personne n’a jamais vu ça.', jauges: { orgueil: 100 } },
+    { t: 'pense', qui: 'dany', emo: 'peur', txt: 'Mais ce soleil… Mes souliers me mâchent les orteils, je cuis dans ma veste, cette cravate m’étrangle. Un bâton m’aiderait… non, ma dignité me l’interdit.', jauges: { chaleur: 85 } },
+    { t: 'question', q: 'Que montre ce contraste entre la fierté de Dany et sa souffrance ?',
+      options: [
+        { txt: 'Que son orgueil le rend ridicule : il souffre pour une apparence que personne ne regarde.', ok: true, retour: 'À seize heures, tout le monde est aux champs. Il « gaspille » sa douleur. C’est l’ironie de la nouvelle.' },
+        { txt: 'Qu’il est très courageux.', retour: 'Le texte ne l’admire pas : il se moque de lui.' }
+      ] },
+    { t: 'dit', qui: 'mere', entre: ['mere'], emo: 'joie', jeu: 'revenant du champ', txt: 'C’est toi, Mebara ? Comme tu as grandi ! Viens, il y a de l’eau fraîche dans la case.' },
+    { t: 'dit', qui: 'dany', emo: 'colere', txt: 'Ne m’appelle pas Mebara, grand-mère. Je m’appelle Dany. Et je suis bachelier.' },
+    { t: 'remarque', titre: 'Le nom le plus cruel', txt: 'Comme fils aîné, Dany a hérité du nom de son grand-père : Mebara, « lésion-cutanée-due-au-pian ». Sa grand-mère s’appelle Epképké I – Ndeck, « la vieille calebasse vide ». Voilà une des raisons pour lesquelles il ne voulait pas venir au village.' },
+    { t: 'dit', qui: 'mere', txt: 'Bachelier… Tout le village parle d’Ambombo, l’écolier. Lui aussi a fait de grandes études.' },
+    { t: 'dit', qui: 'dany', emo: 'fier', txt: 'Un écolier de village ? Je vais lui montrer ce que c’est, un vrai diplôme.' },
+    { t: 'dit', qui: 'ambombo', entre: ['ambombo'], emo: 'joie', txt: 'Bonjour ! Tu es le petit-fils d’Epképké ? Moi, c’est Ambombo. Je suis rentrée de l’école d’ingénieurs pour les vacances.', jauges: { orgueil: 30 } },
+    { t: 'pense', qui: 'dany', emo: 'surpris', txt: 'L’« écolier » dont tout le monde parle… c’est une fille, avec des lunettes. Et elle est ingénieur.' },
+    { t: 'question', q: 'Quel est le « revirement » de la nouvelle ?',
+      options: [
+        { txt: 'Le fameux « écolier » est une fille ingénieur : Dany, qui se croyait au sommet, se découvre petit.', ok: true, retour: 'Une nouvelle repose sur un retournement : ici, l’orgueil du héros s’effondre d’un coup.' },
+        { txt: 'Dany devient chef du village.', retour: 'Rien de tel : il apprend plutôt l’humilité.' }
+      ] },
+    { t: 'recit', sort: ['mere'], txt: 'La grand-mère prend sa houe et repart au champ, laissant le bachelier sans réponse.', jauges: { orgueil: 10 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · le portrait moqueur', consigne: 'Classe chaque détail : montre-t-il l’orgueil de Dany, ou sa souffrance ridicule ?',
+      cats: ['Orgueil', 'Souffrance ridicule'],
+      items: [
+        { txt: 'Il toise le village « du haut de son baccalauréat ».', cat: 0 },
+        { txt: 'Ses souliers lui « mâchent » les orteils.', cat: 1 },
+        { txt: 'Il veut « assommer » les villageois de son titre.', cat: 0 },
+        { txt: 'Sa cravate l’étrangle en vain.', cat: 1 }
+      ],
+      bravo: 'Le portrait moqueur grossit les détails pour faire rire du personnage.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · le bachelier au village',
+    intro: 'Règle l’orgueil de Dany, son respect pour sa grand-mère et sa curiosité : comment se passe son séjour ?',
+    persos: ['dany', 'mere', 'ambombo'],
+    curseurs: [
+      { id: 'orgueil', nom: 'Orgueil de Dany', val: 90, bas: 'humble', haut: 'hautain', lecture: { haut: 'Il méprise le village et se juche sur sa cravate.', bas: 'Un Dany humble poserait sa veste et irait aider aux champs.' } },
+      { id: 'respect', nom: 'Respect pour la grand-mère', val: 20, bas: 'aucun', haut: 'profond', lecture: { haut: 'Il écouterait la vieille femme et apprendrait d’elle.', bas: 'Il rejette jusqu’au nom qu’il a hérité.' } },
+      { id: 'curiosite', nom: 'Curiosité', val: 30, bas: 'fermé', haut: 'ouvert', lecture: { haut: 'Il découvrirait que le village a aussi ses savants.', bas: 'Il ne voit que des « nids de margouillats ».' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans la nouvelle', icone: 'livre', valeurs: { orgueil: 90, respect: 20, curiosite: 30 } },
+      { nom: 'Et si Dany était humble ?', icone: 'amour', valeurs: { orgueil: 15, respect: 80, curiosite: 80 } }
+    ],
+    liens: [
+      { a: 'dany', b: 'mere', type: 'conflit', lib: 'mépris', base: .2, poids: { orgueil: .7, respect: -.5 } },
+      { a: 'mere', b: 'dany', type: 'amour', lib: 'tendresse', base: .7 },
+      { a: 'dany', b: 'ambombo', type: 'confiance', lib: 'admiration', base: .1, poids: { curiosite: .7, orgueil: -.3 } }
+    ],
+    issue: function(v){
+      if(v.orgueil < 40 && v.respect >= 60){ return { niveau: 'ok', badge: 'Un séjour réussi', recit: 'Dany pose sa cravate, suit sa grand-mère au champ et fait connaissance avec Ambombo, sans jalousie.', apres: 'Plus de moquerie : la nouvelle perdrait son ironie, mais Dany gagnerait une famille.', themes: ['humilité', 'respect'] }; }
+      return { niveau: 'moyen', badge: 'L’orgueil puni', recit: 'Dany parade, souffre sous sa cravate, puis découvre que l’« écolier » est une fille ingénieur. La grand-mère repart au champ sans lui répondre.', apres: 'Abega défend ceux qu’on n’écoute pas : le village a ses savants, et le diplôme ne donne pas le droit de mépriser.', themes: ['orgueil', 'ville et village', 'ironie'] };
+    }
+  },
+  quiz: [
+    { q: 'Comment Dany arrive-t-il au village ?', options: [ { txt: 'En veste et cravate, après deux heures de marche au soleil.', ok: true, retour: 'Tout le ridicule de la scène est là.' }, { txt: 'En voiture climatisée.', retour: 'Non : à pied, sous un soleil de plomb.' } ] },
+    { q: 'Qui est Ambombo ?', options: [ { txt: 'Une jeune femme ingénieur, « l’écolier » dont on parle.', ok: true, retour: 'C’est le retournement de la nouvelle.' }, { txt: 'Un vieux sorcier.', retour: 'Non : une fille à lunettes, ingénieur.' } ] },
+    { q: 'D’où vient le titre « Les Bimanes » ?', options: [ { txt: 'C’est un mot qu’Abega fabrique et explique lui-même dans sa présentation, en classant l’humanité sur une échelle.', ok: true, retour: 'Relis la Présentation du livre : il construit son titre sous tes yeux.' }, { txt: 'C’est le nom d’un village du Sud-Cameroun.', retour: 'Non : c’est un mot inventé par l’auteur.' } ] },
+    { q: 'Combien de nouvelles contient le recueil ?', options: [ { txt: 'Sept.', ok: true, retour: 'Sept nouvelles qui défendent ceux qu’on n’écoute pas.' }, { txt: 'Dix-huit.', retour: 'Dix-huit, ce sont les contes d’Anya Noa.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Dany, bachelier, méprise le village ; la nouvelle se moque de son orgueil.',
+      'Le portrait moqueur grossit les détails : cravate qui étrangle, souliers qui mâchent les orteils.',
+      'Le revirement : l’« écolier » admiré est une jeune femme ingénieur.',
+      'Séverin Cécile Abega, écrivain et peintre, défend ceux qu’on n’écoute pas.'
+    ],
+    ecrire: 'Fais le portrait moqueur (dix lignes) d’un personnage qui se croit supérieur, en grossissant trois détails de son allure.'
+  }
+};
+</script>
+<script src="decors.js?v=20261103n"></script>
+<script src="scene.js?v=20261103n"></script>
+</body>
+</html>
