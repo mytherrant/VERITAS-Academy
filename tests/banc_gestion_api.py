@@ -218,8 +218,11 @@ verifier("modifier une fiche ne redéclenche pas le contrôle de doublon", r["re
 verifier("le matricule ne se modifie pas depuis le téléphone", e1["matricule"] != "PIRATE", e1["matricule"])
 _, t = req("sync/tirer", jeton=respA)
 verifier("le responsable A ne voit pas les élèves de B", all(e["centre_id"] == A for e in t["lignes"].get("eleves", [])))
-_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "eleves", "id": "el-" + uuid.uuid4().hex[:12], "champs": fiche(A, clA, "Intrus", "Act")}]}, actA)
-verifier("un actionnaire n'inscrit pas d'élève", r["resultats"][0]["ok"] is False, r)
+# Demande de Jacques (03/11/2026) : chaque partenaire inscrit, encaisse et gère les enseignants de SON centre.
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "eleves", "id": "el-" + uuid.uuid4().hex[:12], "champs": fiche(A, clA, "Partenaire", "Inscrit")}]}, actA)
+verifier("un actionnaire inscrit un élève dans SON centre", r["resultats"][0]["ok"] is True, r)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "eleves", "id": "el-" + uuid.uuid4().hex[:12], "champs": fiche(Bc, clB, "Intrus", "Act")}]}, actA)
+verifier("un actionnaire n'inscrit pas d'élève dans l'autre centre", r["resultats"][0]["ok"] is False, r)
 
 # ── Jours et horaires des cours ──
 hA = "ho-" + uuid.uuid4().hex[:12]
@@ -498,8 +501,8 @@ res = r["resultats"]
 verifier("le responsable fixe le contrat d'un enseignant", res[0]["ok"] is True, res[0])
 verifier("un seul contrat actif par enseignant et centre", res[1]["ok"] is False, res[1])
 verifier("pas de contrat pour un non-enseignant", res[2]["ok"] is False, res[2])
-_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "contrats", "id": co1, "champs": {"taux": 99999}}]}, actA)
-verifier("un actionnaire ne fixe pas la rémunération", r["resultats"][0]["ok"] is False, r)
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "contrats", "id": co1, "champs": {"centre_id": Bc, "taux": 99999}}]}, actA)
+verifier("un actionnaire ne fixe pas la rémunération dans l'autre centre", r["resultats"][0]["ok"] is False, r)
 
 pe = "pe" + auj.strftime("%Y%m%d") + crE
 _, r = req("sync/pousser", {"ops": [{"op": op(), "t": "presences_ens", "id": pe, "champs": {"centre_id": A, "creneau_id": crE, "date": jj(auj), "statut": "present", "arrivee": "22:00"}}]}, prof)

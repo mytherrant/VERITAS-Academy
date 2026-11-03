@@ -1,0 +1,98 @@
+// Banc navigateur (local : php -S 127.0.0.1:8000 -t gestion, puis node tests/banc_gestion_partenaire.cjs <dossier captures>)
+// Un actionnaire (partenaire) travaille seul au centre : il inscrit un élève, encaisse son inscription,
+// crée le compte d'un enseignant, fixe son contrat et lui verse sa paie. Noms fictifs.
+const { chromium } = require('playwright');
+const B = 'http://127.0.0.1:8000/';
+const OUT = process.argv[2] || '.';
+const echecs = [];
+const ok = (n, c, d) => { console.log((c ? '  OK    ' : '  ÉCHEC ') + n + (c ? '' : '  → ' + d)); if (!c) echecs.push(n); };
+const aJour = (p) => p.waitForFunction(() => document.getElementById('puce-sync').textContent === 'À jour', null, { timeout: 15000 }).catch(() => {});
+const SUF = Date.now().toString(36).slice(-4).toUpperCase();
+async function login(nav, id, mdp) {
+  const ctx = await nav.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  await ctx.addInitScript(() => { try { Object.defineProperty(navigator, 'share', { value: undefined }); Object.defineProperty(navigator, 'canShare', { value: undefined }); } catch (e) {} });
+  const page = await ctx.newPage(); page.setDefaultTimeout(15000); page.err = [];
+  page.on('pageerror', (e) => page.err.push(e.message));
+  await page.goto(B); await page.fill('input[name=identifiant]', id); await page.fill('input[name=mdp]', mdp);
+  await page.click('button[type=submit]'); await page.waitForSelector('text=Bonjour'); await aJour(page);
+  return page;
+}
+const apiDe = (page) => (route, corps) => page.evaluate(async ([route, corps]) => {
+  const m = await new Promise((ok) => { const r = indexedDB.open('veritas-gestion'); r.onsuccess = () => ok(r.result); });
+  const jeton = await new Promise((ok) => { const g = m.transaction('meta').objectStore('meta').get('jeton'); g.onsuccess = () => ok(g.result.v); });
+  const rep = await fetch('api/index.php?r=' + route, { method: corps ? 'POST' : 'GET', headers: { Authorization: 'Bearer ' + jeton, 'Content-Type': 'application/json' }, body: corps ? JSON.stringify(corps) : undefined });
+  return rep.json();
+}, [route, corps]);
+
+(async () => {
+  const nav = await chromium.launch();
+  const adm = await login(nav, 'jacques', 'MotDePasse-Test-2026');
+  const api = apiDe(adm);
+  const act = (await api('comptes')).comptes.find((u) => !u.admin_global && u.actif && Object.values(u.acces).includes('actionnaire'));
+  const cid = Object.keys(act.acces).find((c) => act.acces[c] === 'actionnaire');
+  const pa = await login(nav, act.identifiant, (await api('comptes/mdp', { id: act.id })).mdp);
+  const apiA = apiDe(pa);
+
+  // 1. Inscrire un élève
+  await pa.goto(B + '#/eleves'); await pa.waitForTimeout(300);
+  ok('Élèves : bouton « Inscrire » visible pour l\'actionnaire', await pa.isVisible('.fab[data-a="editer-eleve"]'), '');
+  await pa.screenshot({ path: OUT + '/partenaire_eleves.png' });
+  await pa.click('.fab[data-a="editer-eleve"]'); await pa.waitForSelector('#feuille form[data-f="eleve"]');
+  await pa.fill('#feuille input[name=nom]', 'NGONO' + SUF); await pa.fill('#feuille input[name=prenoms]', 'Clarisse');
+  await pa.click('#feuille form[data-f="eleve"] button[type=submit]');
+  await pa.waitForTimeout(800); await aJour(pa);
+  const el = (await apiA('sync/tirer&depuis=0')).lignes.eleves.find((e) => e.nom === 'NGONO' + SUF);
+  ok('élève inscrit au serveur, matricule attribué', el && el.centre_id === cid && !!el.matricule, JSON.stringify(el || {}).slice(0, 160));
+
+  // 2. Encaisser son inscription
+  await pa.goto(B + '#/caisse'); await pa.click('[data-a="caisse-onglet"][data-v="encaisser"]');
+  await pa.fill('[data-input="recherche-caisse"]', 'NGONO' + SUF); await pa.waitForSelector(`[data-a="encaisser"][data-id="${el.id}"]`);
+  await pa.click(`[data-a="encaisser"][data-id="${el.id}"]`); await pa.waitForSelector('#feuille form[data-f="paiement"]');
+  await pa.fill('#montant-paiement', '5000');
+  await pa.click('#feuille form[data-f="paiement"] button[type=submit]');
+  await pa.waitForTimeout(1500); await aJour(pa);
+  const pay = (await apiA('sync/tirer&depuis=0')).lignes.paiements.filter((p) => p.eleve_id === el.id);
+  ok('versement de 5 000 F enregistré, reçu numéroté, encaissé par l\'actionnaire', pay.length === 1 && Number(pay[0].montant) === 5000 && !!pay[0].numero && pay[0].encaisse_par === act.id, JSON.stringify(pay).slice(0, 200));
+  await pa.click('#feuille [data-a="fermer"]').catch(() => {});
+
+  // 3. Ajouter un enseignant
+  await pa.goto(B + '#/enseignants'); await pa.waitForSelector('[data-a="ajouter-enseignant"]');
+  ok('Enseignants : « Ajouter un enseignant » visible', true, '');
+  await pa.click('[data-a="ajouter-enseignant"]'); await pa.waitForSelector('#feuille form[data-f="compte"]');
+  await pa.fill('#feuille input[name=nom]', 'Prof Partenaire ' + SUF); await pa.fill('#feuille input[name=identifiant]', 'prof.part' + SUF.toLowerCase());
+  await pa.click('#feuille form[data-f="compte"] button[type=submit]'); await pa.waitForSelector('text=Compte créé');
+  await pa.click('#feuille [data-a="fermer"]'); await pa.click('#puce-sync'); await aJour(pa); await pa.waitForTimeout(600);
+  const prof = (await api('comptes')).comptes.find((u) => u.identifiant === 'prof.part' + SUF.toLowerCase());
+  ok('compte enseignant créé par l\'actionnaire', prof && prof.acces[cid] === 'enseignant', JSON.stringify(prof || {}).slice(0, 160));
+
+  // 4. Contrat et paie du mois
+  await pa.goto(B + '#/accueil'); await pa.goto(B + '#/enseignants'); await pa.waitForSelector(`[data-a="voir-ens"][data-id="${prof.id}"]`);
+  await pa.click(`[data-a="voir-ens"][data-id="${prof.id}"]`); await pa.waitForSelector('#feuille form[data-f="contrat"]');
+  await pa.fill('#feuille form[data-f="contrat"] input[name=taux]', '2000');
+  await pa.click('#feuille form[data-f="contrat"] button[type=submit]'); await pa.waitForTimeout(800); await aJour(pa);
+  let L = (await apiA('sync/tirer&depuis=0')).lignes;
+  ok('contrat fixé par l\'actionnaire (2 000 F/h)', (L.contrats || []).some((k) => k.utilisateur_id === prof.id && Number(k.taux) === 2000 && Number(k.actif)), '');
+  await pa.goto(B + '#/accueil'); await pa.goto(B + '#/enseignants'); await pa.click(`[data-a="voir-ens"][data-id="${prof.id}"]`); await pa.waitForSelector('#feuille form[data-f="paie"]');
+  await pa.fill('#feuille form[data-f="paie"] input[name=montant]', '4000');
+  await pa.click('#feuille form[data-f="paie"] button[type=submit]'); await pa.waitForTimeout(800); await aJour(pa);
+  L = (await apiA('sync/tirer&depuis=0')).lignes;
+  ok('paie du mois de 4 000 F versée par l\'actionnaire', (L.paies || []).some((x) => x.enseignant_id === prof.id && Number(x.montant) === 4000 && x.paye_par === act.id), JSON.stringify((L.paies || []).filter((x) => x.enseignant_id === prof.id)));
+
+  // 5. Toujours rien dans l'autre centre
+  const autre = (await api('sync/tirer&depuis=0')).lignes.centres.find((c) => c.id !== cid);
+  if (autre) {
+    const r = await apiA('sync/pousser', { ops: [{ op: 'o' + SUF + Math.random(), t: 'eleves', id: 'el' + SUF + 'x', champs: { centre_id: autre.id, nom: 'INTRUS', prenoms: 'X', classe_id: '' } }] });
+    ok('pas d\'inscription dans un centre où il n\'est pas', r.resultats && r.resultats[0].ok === false, JSON.stringify(r).slice(0, 160));
+  }
+  // 6. Chacun ne voit que son rôle ; l'administrateur les voit tous.
+  await pa.goto(B + '#/roles'); await pa.waitForSelector('.fiche-role');
+  const fichesA = await pa.$$eval('.fiche-role h3', (l) => l.map((x) => x.textContent));
+  ok('actionnaire : « Mon rôle » ne montre que sa fiche', fichesA.length === 1 && fichesA[0] === 'Actionnaire' && /Mon rôle/.test(await pa.textContent('h1')), fichesA.join(', '));
+  ok('actionnaire : pas de tableau des droits des autres rôles', !(await pa.isVisible('.matrice')), '');
+  await adm.goto(B + '#/roles'); await adm.waitForSelector('.fiche-role');
+  ok('administrateur : les cinq rôles et le tableau des droits', (await adm.$$('.fiche-role')).length === 5 && (await adm.isVisible('.matrice')), '');
+  ok('aucune erreur JavaScript', pa.err.length === 0, pa.err.join(' / '));
+  await nav.close();
+  console.log(echecs.length ? `\n${echecs.length} échec(s)` : '\nTout est vert.');
+  process.exit(echecs.length ? 1 : 0);
+})();

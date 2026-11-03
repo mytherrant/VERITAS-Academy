@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.11.3';
+  var VERSION = '0.11.5';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -836,7 +836,7 @@
         }).join('');
         var h = '<h1>Mon compte</h1><div class="carte"><h3>' + esc(u.nom) + '</h3><p class="doux">Identifiant : ' + esc(u.identifiant) + '</p><p>' +
           (u.admin ? '<span class="badge or">Administrateur des deux centres</span>' : '') + acces + '</p></div>' + carteMonRole();
-        var liens = [['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances, rappels']].concat(peutEquipeQuelquePart() ? [['#/equipe', 'message', 'Équipe', 'Messages entre partenaires, commentaires, réunions, tâches']] : []).concat([ ['#/roles', 'info', 'Rôles et droits', 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']]);
+        var liens = [['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances, rappels']].concat(peutEquipeQuelquePart() ? [['#/equipe', 'message', 'Équipe', 'Messages entre partenaires, commentaires, réunions, tâches']] : []).concat([ ['#/roles', 'info', estAdmin() ? 'Rôles et droits' : 'Mon rôle', estAdmin() ? 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants' : 'Ce que votre compte permet'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']]);
         if (peutQuelquePart('finances.voir')) liens.push(['#/bilan', 'trending', 'Bilan financier', 'Recettes, dépenses, parts des actionnaires']);
         if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) liens.push(['#/enseignants', 'presentation', 'Enseignants', 'Heures faites, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) liens.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
@@ -3281,9 +3281,11 @@
       peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Remettre les fonds au trésorier', 'Fixer les tarifs, valider les dépenses', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants', 'Tenir l\'agenda : rendez-vous, rencontres, réunions', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
       pas: ['Les réglages des centres et de l\'année', 'Les comptes responsables, actionnaires et admin'] },
     { cle: 'actionnaire', espace: 'partenaire', nom: 'Actionnaire', famille: 'Partenaire',
-      resume: 'Associé du centre : suit les chiffres, encaisse quand il est présent, tient l\'emploi du temps.',
-      peut: ['Voir le bilan, les versements et les dépenses', 'Encaisser auprès des parents et envoyer le reçu', 'Payer l\'enseignant juste après son cours (1 500 F/h)', 'Remettre les fonds au trésorier', 'Voir les statistiques et les parts', 'Modifier l\'emploi du temps de son centre', 'Tenir l\'agenda du centre', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
-      pas: ['Inscrire les élèves', 'Faire l\'appel', 'Créer des comptes'] },
+      resume: 'Associé du centre : quand il est présent, il inscrit, encaisse, gère et paie les enseignants ; il suit les chiffres.',
+      peut: ['Inscrire les élèves et modifier leurs fiches', 'Encaisser inscriptions et mensualités, envoyer le reçu', 'Créer les comptes des enseignants, fixer leur contrat',
+        'Payer l\'enseignant après son cours, verser la paie du mois', 'Saisir les dépenses', 'Remettre les fonds au trésorier', 'Voir le bilan, les statistiques et les parts',
+        'Modifier l\'emploi du temps, tenir l\'agenda', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
+      pas: ['Faire l\'appel', 'Fixer les tarifs, accorder une remise', 'Valider une dépense'] },
     { cle: 'secretaire', espace: 'secretariat', nom: 'Secrétaire / surveillant', famille: 'Équipe',
       resume: 'Tient l\'accueil et la caisse du centre.',
       peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Payer l\'enseignant juste après son cours (1 500 F/h)', 'Remettre les fonds au trésorier', 'Saisir les dépenses (avec photo du justificatif)', 'Noter les rendez-vous dans l\'agenda', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
@@ -3324,7 +3326,7 @@
       (chiffres.length ? '<div class="chiffres-cles">' + chiffres.map(function (c) {
         return (c[2] ? '<a href="' + c[2] + '">' : '<div>') + '<b>' + c[0] + '</b><small>' + esc(c[1]) + '</small>' + (c[2] ? '</a>' : '</div>');
       }).join('') + '</div>' : '') +
-      '<a class="lien-roles" href="#/roles">' + ico('info', 'p') + ' Rôles et droits</a></section>';
+      '<a class="lien-roles" href="#/roles">' + ico('info', 'p') + (estAdmin() ? ' Rôles et droits' : ' Mon rôle et mes droits') + '</a></section>';
   }
   /** [valeur (HTML sûr), libellé, lien?] selon l'espace. */
   function chiffresCles(cle) {
@@ -3403,9 +3405,11 @@
   }
 
   function pageRoles() {
-    var h = '<h1>Rôles et droits</h1><p class="sous-titre">Chaque personne a son compte et son rôle, centre par centre. Le serveur refuse ce que le rôle n\'autorise pas.</p>';
+    // Chacun ne voit que SON rôle ; l'administrateur voit tous les rôles pour les attribuer.
+    var h = estAdmin() ? '<h1>Rôles et droits</h1><p class="sous-titre">Chaque personne a son compte et son rôle, centre par centre. Le serveur refuse ce que le rôle n\'autorise pas.</p>'
+      : '<h1>Mon rôle</h1><p class="sous-titre">Ce que votre compte permet, centre par centre. Une question : demandez à l\'administrateur.</p>';
     var moi = estAdmin() ? ['admin'] : mesRoles();
-    h += '<div class="fiches-roles">' + FICHES_ROLES.map(function (f) {
+    h += '<div class="fiches-roles">' + FICHES_ROLES.filter(function (f) { return estAdmin() || moi.indexOf(f.cle) >= 0; }).map(function (f) {
       return '<article class="fiche-role espace-' + f.espace + (moi.indexOf(f.cle) >= 0 ? ' a-moi' : '') + '"><div class="haut"><span class="pastille">' + ico(ESPACES[f.espace].ico) + '</span><div><small>' + esc(f.famille) + '</small><h3>' + esc(f.nom) + '</h3></div>' +
         (moi.indexOf(f.cle) >= 0 ? '<span class="badge or">Vous</span>' : '') + '</div><p>' + esc(f.resume) + '</p>' +
         '<ul class="droits">' + f.peut.map(function (t) { return '<li class="oui">' + ico('check', 'p') + ' ' + esc(t) + '</li>'; }).join('') +
@@ -3536,7 +3540,7 @@
     if (estAdmin()) h += '<label class="case"><input type="checkbox" name="admin_global"' + (u && u.admin_global ? ' checked' : '') + '> Administrateur des deux centres (vue consolidée, finances, tous les réglages)</label>';
     if (u) h += '<label class="case"><input type="checkbox" name="actif"' + (u.actif ? ' checked' : '') + '> Compte actif (décocher coupe immédiatement ses sessions)</label>';
     h += (estAdmin() ? '<p class="doux">' + ico('wallet', 'p') + ' <b>Trésorier</b> : cochez la case sous le centre. Il garde les fonds du centre et confirme chaque remise des partenaires.</p>' : '') +
-      '<div class="legende-roles">' + ORDRE_ROLES.map(function (r) {
+      '<div class="legende-roles">' + ORDRE_ROLES.filter(function (r) { return estAdmin() || centres.some(function (c) { return rolesPermis(c.id).indexOf(r) >= 0; }); }).map(function (r) {
       var f = ficheRole(r);
       return '<div class="espace-' + f.espace + '">' + ico(ESPACES[f.espace].ico, 'p') + '<span><b>' + esc(f.nom) + '</b> ' + esc(f.resume) + '</span></div>';
     }).join('') + '</div>' +
@@ -3559,7 +3563,9 @@
       '*Caisse › Remises* : remettez au trésorier l\'argent encaissé, *avant la fin du mois* ; il confirme la réception.',
       '*Plus › Enseignants* : pointage des cours, contrats, paies.', '*Plus › Comptes et accès* : créez les comptes de vos secrétaires et enseignants.', '*Plus › Agenda* : rendez-vous, rencontres, échéances ; la cloche en haut rappelle ce qui approche.', '*Plus › Équipe* : messages entre partenaires, commentaires, dates de réunion, tâches.'],
     actionnaire: ['*Accueil* : les chiffres clés de votre centre (élèves, appels, encaissé, impayés).', '*Plus › Bilan* : recettes, dépenses, résultat du mois et votre part.',
-      '*Caisse › Encaisser* : quand vous êtes au centre ou qu\'un parent vous paie, encaissez et envoyez-lui le reçu par WhatsApp.',
+      '*Élèves › +* : inscrivez un élève (classe, matières, tarif de la classe).',
+      '*Caisse › Encaisser* : quand vous êtes au centre ou qu\'un parent vous paie, encaissez inscription ou mensualité et envoyez-lui le reçu par WhatsApp.',
+      '*Plus › Enseignants* : « Ajouter un enseignant », son contrat, sa paie du mois.',
       '*Appel › Enseignants du jour* : si vous êtes présent, payez l\'enseignant juste après son cours (*Payer*, 1 500 F de l\'heure).',
       '*Caisse › Remises* : remettez cet argent au trésorier *avant la fin du mois* ; il confirme la réception.', '*Plus › Planning* : vous tenez l\'emploi du temps du centre (classes, créneaux, enseignants).', '*Plus › Agenda* : rendez-vous et rencontres ; la cloche en haut rappelle ce qui approche.', '*Plus › Équipe* : messages entre partenaires, commentaires, dates de réunion, tâches.'],
     secretaire: ['*Appel* : choisissez la classe, touchez chaque élève (présent, retard, absent), au début du cours.', '*Élèves › +* : inscrire un élève.',
@@ -3580,7 +3586,7 @@
       '*Votre rôle : ' + (admin ? 'Administrateur' : ou) + '*\n' + GUIDE_ROLE[principal].map(function (l) { return '• ' + l; }).join('\n') + '\n\n' +
       'Sans réseau, tout continue : vos saisies partent dès le retour de la connexion (pastille « À jour » en haut).\n' +
       'Trésorier du centre : vous confirmez chaque remise dans *Caisse › Remises* (« Reçu » ou « Pas reçu »).\n' +
-      'Plus › *Rôles et droits* explique ce que chacun peut faire. Une question : appelez l\'administrateur.';
+      'Plus › *Mon rôle* explique ce que votre compte permet. Une question : appelez l\'administrateur.';
   }
   function feuilleSecret(titre, nom, identifiant, mdp, acces, admin) {
     var guide = modeEmploi(nom, acces, admin);

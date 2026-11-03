@@ -86,8 +86,10 @@ téléphone (Notification API) quand l'appli est ouverte ; pour un rappel sûr a
 appel de l'API après le déploiement (`g_schema_a_jour`, empreinte dans `api/data/.schema`) ;
 plus besoin de relancer `install.php` pour cela.
 
-**Rôles :** admin global (les deux centres) · responsable · actionnaire (consultation des
-finances + emploi du temps) · secrétaire/surveillant · enseignant. Voir `g_capacites()`.
+**Rôles :** admin global (les deux centres) · responsable · actionnaire (partenaire : inscrit,
+encaisse, crée les comptes enseignants, fixe leur contrat et les paie, saisit les dépenses, suit
+les chiffres ; ni appel, ni tarifs, ni remises, ni validation) · secrétaire/surveillant · enseignant.
+Voir `g_capacites()`. Chacun ne voit que son rôle (« Mon rôle ») ; l'admin les voit tous.
 
 ## Mise en service (une fois)
 
@@ -158,6 +160,7 @@ node tests/banc_gestion_remises.cjs <dossier>    # remises au trésorier : confi
 node tests/banc_gestion_paie_cours.cjs <dossier> # paie de l'enseignant après le cours : 1 500 F/h, unicité, plafond (Playwright)
 node tests/banc_gestion_equipe.cjs <dossier>     # Équipe : discussion, commentaires, réunions, tâches, refus serveur (Playwright)
 node tests/banc_gestion_connexion.cjs <dossier>  # connexion : aide après échec, œil, identifiant toléré, version en retard (Playwright)
+node tests/banc_gestion_partenaire.cjs <dossier> # actionnaire : inscrit, encaisse, crée et paie un enseignant ; ne voit que son rôle (Playwright)
 ```
 
 **Noms fictifs uniquement** dans le code et les bancs : le dépôt est public, les élèves sont mineurs.
