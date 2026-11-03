@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.9.1';
+  var VERSION = '0.9.5';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -441,6 +441,12 @@
   }
   /** Écrans réservés : pour l'admin, seulement panneau ouvert ; pour un responsable, selon ses droits. */
   function accesGestion(cap) { return estAdmin() ? panneauOuvert() : peutQuelquePart(cap); }
+  /** Ouvre le panneau sans changer d'écran (bouton visible, en plus des 4 taps sur le logo). */
+  function ouvrirPanneauDiscret() { if (estAdmin() && !panneauOuvert()) E.panneauJusqua = Date.now() + PANNEAU_MS; }
+  function peutCreerEnseignant(cid) { return estAdmin() || peut('comptes.gerer', cid); }
+  function boutonAjoutEnseignant(cid) {
+    return peutCreerEnseignant(cid) ? '<button class="btn or" type="button" data-a="ajouter-enseignant" data-centre="' + esc(cid) + '">' + ico('plus', 'p') + 'Ajouter un enseignant</button>' : '';
+  }
   var masqueLe = 0;
 
   // ───────────────────────────── Feuille (modale) ─────────────────────────────
@@ -517,9 +523,9 @@
     var caisse = peutQuelquePart('paiements.voir');
     items.push(caisse ? ['caisse', 'wallet', 'Caisse'] : ['emploi', 'calendar', 'Planning']);
     items.push(['moi', 'list', 'Plus']);
-    var sousPlus = ['admin', 'comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
+    var sousPlus = ['roles', 'admin', 'comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
     return '<nav class="nav-basse" aria-label="Navigation">' + items.map(function (i) {
-      var on = i[0] === actif || (i[0] === 'moi' && sousPlus.indexOf(actif) >= 0) || (i[0] === 'appel' && actif === 'pointage');
+      var on = i[0] === actif || (i[0] === 'moi' && sousPlus.indexOf(actif) >= 0) || (i[0] === 'appel' && actif === 'pointage') || (i[0] === 'caisse' && actif === 'jour');
       return '<a href="#/' + i[0] + '" class="' + (on ? 'actif' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + ico(i[1]) + i[2] + '</a>';
     }).join('') + '</nav>';
   }
@@ -568,8 +574,9 @@
         var u = E.profil.utilisateur;
         var auj = new Date();
         var h = '<h1>Bonjour ' + esc(String(u.nom).split(' ')[0]) + '</h1><p class="sous-titre">' +
-          esc(auj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })) + ' · ' +
-          (estAdmin() ? 'administrateur' : centresChoisis().map(function (c) { return ROLES[roleDans(c.id)] || ''; }).filter(Boolean).join(', ')) + '</p>';
+          esc(auj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })) + '</p>' +
+          bandeauEspace() + blocMesCours();
+        if (estEnseignantQuelquePart() && centresChoisis().length) h += '<h2>Mes centres</h2>';
 
         var centres = centresChoisis();
         if (!centres.length) {
@@ -607,18 +614,19 @@
         var tuiles = [];
         if (peutQuelquePart('appel.faire')) tuiles.push(['#/appel', 'checkcircle', 'Appel du jour', 'Arrivées, départs, retards']);
         if (peutQuelquePart('paiements.voir')) tuiles.push(['#/caisse', 'wallet', 'Caisse', 'Encaisser, reçus, impayés, dépenses']);
+        if (peutQuelquePart('paiements.voir')) tuiles.push(['#/jour', 'clipboard', 'Point du jour', 'Entrées, sorties, solde à partager']);
         if (peutQuelquePart('finances.voir')) tuiles.push(['#/bilan', 'chart', 'Bilan', 'Recettes, dépenses, parts']);
         if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) tuiles.push(['#/enseignants', 'graduation', 'Enseignants', 'Heures, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) tuiles.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
         tuiles.push(['#/assiduite', 'activity', 'Assiduité', 'Taux, retards, alertes']);
         tuiles.push(['#/eleves', 'graduation', 'Élèves', peutQuelquePart('eleves.gerer') ? 'Inscrire, rechercher, importer' : 'Fiches et contacts des parents']);
         tuiles.push(['#/emploi', 'calendar', 'Emploi du temps', peutQuelquePart('emploi.gerer') ? 'Classes, créneaux, enseignants' : 'Les cours de la semaine']);
-        if (panneauOuvert()) tuiles.push(['#/admin', 'shield', 'Administration', 'Partenaires et droits, centres, journal']);
+        if (estAdmin()) tuiles.push(['#/admin', 'shield', 'Administration', 'Comptes, identifiants, partenaires et droits', 'ouvrir-admin']);
         if (peutQuelquePart('finances.voir')) tuiles.push(['#/actionnaires', 'handshake', 'Actionnaires', 'Parts de chaque centre']);
         if (!estAdmin() && accesGestion('comptes.gerer')) tuiles.push(['#/comptes', 'users', 'Comptes et accès', 'Qui peut faire quoi']);
         if (!estAdmin() && accesGestion('journal.voir')) tuiles.push(['#/journal', 'clock', 'Journal', 'Qui a modifié quoi']);
         h += '<h2>Disponible</h2><div class="grille">' + tuiles.map(function (t) {
-          return '<a class="tuile" href="' + t[0] + '"><span class="pastille">' + ico(t[1]) + '</span><b>' + t[2] + '</b><small>' + t[3] + '</small></a>';
+          return '<a class="tuile" href="' + t[0] + '"' + (t[4] ? ' data-a="' + t[4] + '"' : '') + '><span class="pastille">' + ico(t[1]) + '</span><b>' + t[2] + '</b><small>' + t[3] + '</small></a>';
         }).join('') + '<a class="tuile" href="#/moi"><span class="pastille">' + ico('lock') + '</span><b>Mon compte</b><small>Mot de passe, code, appareils</small></a></div>';
 
         if (A_VENIR.length) h += '<h2>En construction</h2><div class="grille">' + A_VENIR.map(function (t) {
@@ -685,7 +693,7 @@
       droit: panneauOuvert,
       html: function () {
         var reste = Math.max(1, Math.round((E.panneauJusqua - Date.now()) / 60000));
-        return '<h1>Administration</h1><p class="sous-titre">Accès caché : 4 taps sur le logo. Se referme seul dans ' + reste + ' min.</p>' +
+        return '<h1>Administration</h1><p class="sous-titre">Ouvert depuis Plus › Administration (ou 4 taps sur le logo). Se referme seul dans ' + reste + ' min.</p>' +
           '<div class="liste">' +
           [['#/centres', 'building', 'Centres, année et matières', 'Ouvrir un centre, horaires, tarifs, messages'], ['#/comptes', 'users', 'Comptes et accès', 'Créer, désactiver, mots de passe, appareils'],
            ['#/journal', 'clock', 'Journal', 'Qui a modifié quoi, partout']].map(function (l) {
@@ -712,6 +720,10 @@
       droit: function () { return peutQuelquePart('paiements.voir'); },
       html: function () { return pageCaisse(); },
       apres: function () { if (CAI.onglet === 'encaisser') dessinerRechercheCaisse(); }
+    },
+    jour: {
+      droit: function () { return peutQuelquePart('paiements.voir'); },
+      html: function () { return pageJour(); }
     },
     bilan: {
       droit: function () { return peutQuelquePart('finances.voir'); },
@@ -749,6 +761,10 @@
       apres: function () { chargerJournal(false); }
     },
 
+    roles: {
+      html: function () { return pageRoles(); }
+    },
+
     moi: {
       html: function () {
         var u = E.profil.utilisateur;
@@ -757,19 +773,18 @@
           return '<span class="badge">' + esc(ROLES[E.profil.acces[cid]]) + ' · ' + esc(c ? c.nom_court || c.nom : 'centre') + '</span>';
         }).join('');
         var h = '<h1>Mon compte</h1><div class="carte"><h3>' + esc(u.nom) + '</h3><p class="doux">Identifiant : ' + esc(u.identifiant) + '</p><p>' +
-          (u.admin ? '<span class="badge or">Administrateur des deux centres</span>' : '') + acces + '</p>' +
-          ((E.profil.restrictions || []).length ? '<p class="doux">Droits réservés à l\'administrateur : ' + esc(E.profil.restrictions.map(function (k) { return (LIB_CAP[k] || k).toLowerCase(); }).join(', ')) + '.</p>' : '') + '</div>';
-        var liens = [['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']];
+          (u.admin ? '<span class="badge or">Administrateur des deux centres</span>' : '') + acces + '</p></div>' + carteMonRole();
+        var liens = [['#/roles', 'info', 'Rôles et droits', 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']];
         if (peutQuelquePart('finances.voir')) liens.push(['#/bilan', 'chart', 'Bilan financier', 'Recettes, dépenses, parts des actionnaires']);
         if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) liens.push(['#/enseignants', 'graduation', 'Enseignants', 'Heures faites, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) liens.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
-        if (panneauOuvert()) liens.push(['#/admin', 'shield', 'Panneau d\'administration', 'Partenaires et droits, centres, journal']);
+        if (estAdmin()) liens.push(['#/admin', 'shield', 'Administration', 'Comptes et identifiants, partenaires et droits, centres, journal', 'ouvrir-admin']);
         if (!estAdmin() && accesGestion('comptes.gerer')) liens.push(['#/comptes', 'users', 'Comptes et accès', 'Qui peut faire quoi']);
         if (!estAdmin() && accesGestion('journal.voir')) liens.push(['#/journal', 'clock', 'Journal', 'Qui a modifié quoi']);
         if (peutQuelquePart('finances.voir')) liens.push(['#/actionnaires', 'handshake', 'Actionnaires', 'Parts de chaque centre']);
         if (liens.length) {
           h += '<h2>Gestion</h2><div class="liste">' + liens.map(function (l) {
-            return '<a class="ligne" href="' + l[0] + '"><span class="pastille">' + ico(l[1]) + '</span><span class="corps"><b>' + l[2] + '</b><small>' + l[3] + '</small></span><span class="fin">›</span></a>';
+            return '<a class="ligne" href="' + l[0] + '"' + (l[4] ? ' data-a="' + l[4] + '"' : '') + '><span class="pastille">' + ico(l[1]) + '</span><span class="corps"><b>' + l[2] + '</b><small>' + l[3] + '</small></span><span class="fin">›</span></a>';
           }).join('') + '</div><h2>Mon compte</h2>';
         }
         h += '<div class="liste">' +
@@ -1007,7 +1022,9 @@
     if (dispo.length > 1) h += '<div class="puces">' + dispo.map(function (c) { return '<button type="button" class="puce' + (c.id === cid ? ' on' : '') + '" data-a="ens-centre" data-v="' + esc(c.id) + '">' + esc(c.nom_court || c.nom) + '</button>'; }).join('') + '</div>';
     if (!cid) return h + '<div class="carte vide">Aucun centre.</div>';
     var profs = enseignantsDu(cid);
-    if (!profs.length) return h + '<div class="carte vide">Aucun enseignant : donnez le rôle « Enseignant » dans Comptes et accès.</div>';
+    if (!profs.length) return h + '<div class="carte vide">Aucun enseignant dans ce centre pour l\'instant.' + (peutCreerEnseignant(cid) ? '' : ' Demandez à l\'administrateur de créer leurs comptes.') + '</div>' +
+      '<div class="actions">' + boutonAjoutEnseignant(cid) + '</div>';
+    h += '<div class="actions">' + boutonAjoutEnseignant(cid) + '</div>';
     var tot = { du: 0, verse: 0 };
     var rows = profs.map(function (t) {
       var b = bilanEnseignant(t.id, cid, ENS.mois);
@@ -1580,6 +1597,7 @@
       h += '<div class="nav-date"><button type="button" class="btn clair petit" data-a="caisse-date" data-v="-1" aria-label="Jour précédent">‹</button><b>' + esc(CAI.date === auj ? 'Aujourd\'hui' : dateLongue(CAI.date)) + '</b><button type="button" class="btn clair petit" data-a="caisse-date" data-v="1"' + (CAI.date >= auj ? ' disabled' : '') + ' aria-label="Jour suivant">›</button></div>';
       h += '<div class="stats"><div><b>' + fcfa(valides.reduce(function (s, p) { return s + Number(p.montant); }, 0)) + '</b><small>' + valides.length + ' versement' + (valides.length > 1 ? 's' : '') + '</small></div>' +
         Object.keys(MODES).filter(function (m) { return parMode[m]; }).map(function (m) { return '<div><b>' + fcfa(parMode[m]) + '</b><small>' + MODES[m] + '</small></div>'; }).join('') + '</div>';
+      h += '<a class="ligne carte-lien" href="#/jour"><span class="pastille">' + ico('chart') + '</span><span class="corps"><b>Point du jour</b><small>Entrées, sorties, solde : fiche à envoyer aux actionnaires</small></span><span class="fin">›</span></a>';
       h += du.length ? '<div class="liste">' + du.map(ligneVersement).join('') + '</div>' : '<div class="carte vide">Aucun versement ce jour-là.</div>';
     } else if (CAI.onglet === 'impayes') {
       var total = imp.reduce(function (s, x) { return s + x.ech.impaye; }, 0);
@@ -1600,7 +1618,7 @@
       h += '<p class="sous-titre">' + (att.length ? '<b>' + att.length + '</b> en attente de validation · ' : '') + 'Une dépense validée ne se modifie plus.</p>';
       h += deps.length ? '<div class="liste">' + deps.slice(0, 80).map(function (d) {
         var st = d.statut === 'validee' ? '<span class="badge ok">validée</span>' : d.statut === 'refusee' ? '<span class="badge danger">refusée</span>' : '<span class="badge alerte">en attente</span>';
-        var sansJ = !d.justificatif && !(E.cache.photosEnAttente || {})[d.id] ? ' <span class="badge alerte">sans justificatif</span>' : '';
+        var sansJ = justificatifExige(d) && !d.justificatif && !(E.cache.photosEnAttente || {})[d.id] ? ' <span class="badge alerte">justificatif manquant</span>' : '';
         return '<button class="ligne" type="button" data-a="voir-depense" data-id="' + esc(d.id) + '"><span class="corps"><b>' + esc(d.libelle) + sansJ + '</b><small>' + esc(dateLisible(d.date, true) + ' · ' + (CATEGORIES[d.categorie] || d.categorie) + (d.beneficiaire ? ' · ' + d.beneficiaire : '') + ' · saisie par ' + (nomPersonne(d.saisie_par) || (d.saisie_par === E.profil.utilisateur.id ? 'vous' : '—'))) + '</small></span><span class="fin"><b>' + fcfa(d.montant) + '</b>' + st + '</span></button>';
       }).join('') + '</div>' : '<div class="carte vide">Aucune dépense.</div>';
       if (peut('depenses.saisir', cid)) h += '<button class="fab" type="button" data-a="editer-depense" data-id="">' + ico('plus') + 'Dépense</button>';
@@ -1758,6 +1776,10 @@
     });
   }
 
+  // Justificatif (photo de la facture ou du reçu) : facultatif en dessous du seuil,
+  // obligatoire à partir du seuil pour VALIDER la dépense (le serveur l'exige aussi).
+  var SEUIL_JUSTIFICATIF = 10000;
+  function justificatifExige(d) { return (Number(d && d.montant) || 0) >= SEUIL_JUSTIFICATIF; }
   function feuilleDepense(id) {
     var cid = id ? ligne('depenses', id).centre_id : CAI.centre;
     var d = id ? ligne('depenses', id) : { date: isoLocal(new Date()), categorie: 'fournitures', mode: 'especes', statut: 'en_attente' };
@@ -1775,7 +1797,7 @@
       '<label class="champ"><span>Payé en</span><select name="mode"' + dis + '>' + Object.keys(MODES).map(function (k) { return '<option value="' + k + '"' + (d.mode === k ? ' selected' : '') + '>' + MODES[k] + '</option>'; }).join('') + '</select></label></div>' +
       '<label class="champ"><span>Bénéficiaire</span><input type="text" name="beneficiaire" value="' + esc(d.beneficiaire || '') + '"' + dis + '></label>' +
       '<div id="zone-justificatif" class="justificatif"></div>' +
-      (modifiable ? '<label class="champ"><span>' + (d.justificatif ? 'Remplacer la photo du justificatif' : 'Photo du justificatif (facture, reçu)') + '</span><input type="file" name="photo" accept="image/*" capture="environment"></label>' : '') +
+      (modifiable ? '<label class="champ"><span>' + (d.justificatif ? 'Remplacer la photo du justificatif' : 'Photo du justificatif (facture, reçu)') + '</span><small>Obligatoire à partir de ' + fcfa(SEUIL_JUSTIFICATIF) + ', facultative en dessous.</small><input type="file" name="photo" accept="image/*" capture="environment"></label>' : '') +
       (modifiable ? '<div class="actions"><button class="btn" type="submit">Enregistrer</button></div>' : '') + '</form>' +
       (valideur ? '<div class="actions"><button class="btn or" type="button" data-a="valider-depense" data-id="' + esc(id) + '">' + ico('check', 'p') + 'Valider</button><button class="btn danger" type="button" data-a="refuser-depense" data-id="' + esc(id) + '">Refuser</button></div>' : '') +
       '<div class="actions">' + (id && modifiable ? '<button class="btn danger" type="button" data-a="suppr-depense" data-id="' + esc(id) + '">Retirer</button>' : '') + '<button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
@@ -1791,12 +1813,222 @@
     };
     promesse(magasin('fichiers').get(id)).then(function (f) {
       if (f) return montrer('data:image/jpeg;base64,' + f.jpeg, 'Justificatif pris sur ce téléphone · envoi au retour du réseau');
-      if (!d.justificatif) { z.innerHTML = '<p class="note">' + ico('alert', 'p') + ' Sans justificatif' + (valideur ? ' : demandez la photo avant de valider.' : '.') + '</p>'; return; }
+      if (!d.justificatif) {
+        z.innerHTML = justificatifExige(d)
+          ? '<p class="note">' + ico('alert', 'p') + ' Justificatif obligatoire à partir de ' + fcfa(SEUIL_JUSTIFICATIF) + (valideur ? ' : demandez la photo, la dépense ne peut pas être validée sans elle.' : ' : ajoutez la photo de la facture ou du reçu.') + '</p>'
+          : '<p class="doux">Sans justificatif (facultatif en dessous de ' + fcfa(SEUIL_JUSTIFICATIF) + ').</p>';
+        return;
+      }
       z.innerHTML = '<p class="doux">Chargement du justificatif…</p>';
       fetch(API + '?r=justificatif/lire&id=' + encodeURIComponent(id), { headers: { Authorization: 'Bearer ' + E.jeton } })
         .then(function (rep) { if (!rep.ok) throw new Error(); return rep.blob(); })
         .then(function (b) { montrer(URL.createObjectURL(b), 'Justificatif déposé le ' + dateLisible(d.justificatif)); })
         .catch(function () { z.innerHTML = '<p class="doux">Justificatif déposé (consultable en ligne).</p>'; });
+    });
+  }
+
+  // ───────────────────────────── Point de caisse du jour ─────────────────────────────
+  // Entrées (versements), sorties (dépenses non refusées, paies des enseignants), solde,
+  // espèces à remettre, cumul du mois. À l'écran, puis en image (WhatsApp), PDF A4 ou texte
+  // pour les actionnaires. Même centre et même jour que l'onglet Journal de la caisse.
+  function pointDuJour(cid, iso) {
+    var somme = function (l) { return l.reduce(function (s, x) { return s + (Number(x.montant) || 0); }, 0); };
+    var voitDep = peut('depenses.voir', cid), voitPaies = peut('finances.voir', cid);
+    var pay = lignes('paiements').filter(function (p) { return p.centre_id === cid && p.date === iso; })
+      .sort(function (a, b) { return String(a.numero || 'zz').localeCompare(String(b.numero || 'zz')); });
+    var entrees = pay.filter(function (p) { return !Number(p.annule); });
+    var annules = pay.filter(function (p) { return Number(p.annule); });
+    var deps = voitDep ? lignes('depenses').filter(function (d) { return d.centre_id === cid && d.date === iso && d.statut !== 'refusee'; }) : [];
+    var paies = voitPaies ? lignes('paies').filter(function (p) { return p.centre_id === cid && p.date === iso && !Number(p.annule); }) : [];
+    var sorties = deps.map(function (d) {
+      return { lib: d.libelle, detail: [CATEGORIES[d.categorie] || d.categorie, d.beneficiaire].filter(Boolean).join(' · '), mode: d.mode || 'especes', montant: Number(d.montant) || 0, attente: d.statut === 'en_attente' };
+    }).concat(paies.map(function (p) {
+      return { lib: 'Paie · ' + (nomPersonne(p.enseignant_id) || 'enseignant'), detail: 'Enseignant' + (p.mois ? ' · ' + MOIS[Number(p.mois.slice(5)) - 1] : ''), mode: p.mode || 'especes', montant: Number(p.montant) || 0 };
+    }));
+    var parMode = {}, sortiesParMode = {};
+    entrees.forEach(function (p) { parMode[p.mode] = (parMode[p.mode] || 0) + Number(p.montant); });
+    sorties.forEach(function (s) { sortiesParMode[s.mode] = (sortiesParMode[s.mode] || 0) + s.montant; });
+    var debutMois = iso.slice(0, 8) + '01';
+    var dansMois = function (d) { return d >= debutMois && d <= iso; };
+    var moisE = somme(lignes('paiements').filter(function (p) { return p.centre_id === cid && !Number(p.annule) && dansMois(p.date); }));
+    var moisS = (voitDep ? somme(lignes('depenses').filter(function (d) { return d.centre_id === cid && d.statut !== 'refusee' && dansMois(d.date); })) : 0) +
+      (voitPaies ? somme(lignes('paies').filter(function (p) { return p.centre_id === cid && !Number(p.annule) && dansMois(p.date); })) : 0);
+    var totE = somme(entrees), totS = somme(sorties);
+    return {
+      centre: ligne('centres', cid) || {}, date: iso, entrees: entrees, annules: annules, sorties: sorties, voitDep: voitDep,
+      parMode: parMode, totE: totE, totS: totS, solde: totE - totS, attente: sorties.filter(function (s) { return s.attente; }).length,
+      especes: (parMode.especes || 0) - (sortiesParMode.especes || 0), mois: { e: moisE, s: moisS }
+    };
+  }
+  function libMois(iso) { return MOIS[Number(iso.slice(5, 7)) - 1]; }
+  /** « Espèces à remettre : X » ou, si la caisse a plus payé en espèces qu'elle n'a reçu, le manque. */
+  function libEspeces(j) { return j.especes >= 0 ? ['Espèces à remettre', fcfa(j.especes)] : ['Espèces sorties en plus des entrées', '− ' + fcfa(-j.especes)]; }
+
+  function pageJour() {
+    var cc = centreCaisse(), cid = cc.cid;
+    var auj = isoLocal(new Date());
+    CAI.date = CAI.date || auj;
+    var h = '<p class="retour"><a href="#/caisse">‹ Caisse</a></p><h1>Point du jour</h1><p class="sous-titre">Entrées, sorties et solde de la journée, à envoyer aux actionnaires.</p>';
+    if (cc.dispo.length > 1) h += '<div class="puces">' + cc.dispo.map(function (c) { return '<button type="button" class="puce' + (c.id === cid ? ' on' : '') + '" data-a="caisse-centre" data-v="' + esc(c.id) + '">' + esc(c.nom_court || c.nom) + '</button>'; }).join('') + '</div>';
+    if (!cid) return h + '<div class="carte vide">Aucun centre.</div>';
+    h += '<div class="nav-date"><button type="button" class="btn clair petit" data-a="caisse-date" data-v="-1" aria-label="Jour précédent">‹</button><b>' + esc(CAI.date === auj ? 'Aujourd\'hui' : dateLongue(CAI.date)) + '</b><button type="button" class="btn clair petit" data-a="caisse-date" data-v="1"' + (CAI.date >= auj ? ' disabled' : '') + ' aria-label="Jour suivant">›</button></div>';
+    var j = pointDuJour(cid, CAI.date);
+    h += '<div class="point-jour"><div class="pj-entrees"><small>Entrées</small><b>' + fcfa(j.totE) + '</b><span>' + j.entrees.length + ' versement' + (j.entrees.length > 1 ? 's' : '') + '</span></div>' +
+      '<div class="pj-sorties"><small>Sorties</small><b>' + fcfa(j.totS) + '</b><span>' + j.sorties.length + ' dépense' + (j.sorties.length > 1 ? 's' : '') + '</span></div>' +
+      '<div class="pj-solde' + (j.solde < 0 ? ' negatif' : '') + '"><small>Solde du jour</small><b>' + fcfa(j.solde) + '</b><span>' + libEspeces(j)[0] + ' : ' + libEspeces(j)[1] + '</span></div></div>';
+    h += '<div class="actions export-jour"><button class="btn or" type="button" data-a="export-caisse-jour" data-v="png">' + ico('camera', 'p') + 'Image (WhatsApp)</button>' +
+      '<button class="btn clair" type="button" data-a="export-caisse-jour" data-v="pdf">' + ico('doc', 'p') + 'PDF</button><button class="btn clair" type="button" data-a="export-caisse-jour" data-v="texte">' + ico('message', 'p') + 'Résumé texte</button></div>';
+    h += '<h2>Entrées</h2>' + (j.entrees.length || j.annules.length ? '<div class="liste">' + j.entrees.concat(j.annules).map(ligneVersement).join('') + '</div>' : '<div class="carte vide">Aucun versement ce jour-là.</div>');
+    if (Object.keys(j.parMode).length) h += '<div class="infos">' + Object.keys(MODES).filter(function (m) { return j.parMode[m]; }).map(function (m) { return '<div class="info"><span>' + MODES[m] + '</span><b>' + fcfa(j.parMode[m]) + '</b></div>'; }).join('') + '</div>';
+    if (j.voitDep) {
+      h += '<h2>Sorties</h2>' + (j.sorties.length ? '<div class="liste">' + j.sorties.map(function (s) {
+        return '<div class="ligne"><span class="corps"><b>' + esc(s.lib) + (s.attente ? ' <span class="badge alerte">en attente</span>' : '') + '</b><small>' + esc(s.detail + ' · ' + (MODES[s.mode] || s.mode)) + '</small></span><span class="fin"><b>− ' + fcfa(s.montant) + '</b></span></div>';
+      }).join('') + '</div>' : '<div class="carte vide">Aucune sortie ce jour-là.</div>');
+    }
+    h += '<div class="infos"><div class="info"><span>Depuis le 1er ' + esc(libMois(CAI.date)) + ' · entrées</span><b>' + fcfa(j.mois.e) + '</b></div><div class="info"><span>Sorties</span><b>− ' + fcfa(j.mois.s) + '</b></div><div class="info"><span>Solde du mois</span><b>' + fcfa(j.mois.e - j.mois.s) + '</b></div></div>';
+    if (j.attente) h += '<p class="doux">Les dépenses « en attente » sont comptées dans les sorties (l\'argent est sorti) ; le bilan officiel ne compte que les dépenses validées.</p>';
+    return h;
+  }
+
+  function texteJour(j) {
+    var c = j.centre;
+    var l = ['*Point de caisse — ' + (c.nom || 'VÉRITAS') + '*', dateLongue(j.date).replace(/^./, function (x) { return x.toUpperCase(); }) + ' ' + j.date.slice(0, 4), '',
+      '*Entrées : ' + fcfa(j.totE) + '* (' + j.entrees.length + ' versement' + (j.entrees.length > 1 ? 's' : '') + ')'];
+    Object.keys(MODES).forEach(function (m) { if (j.parMode[m]) l.push('• ' + MODES[m] + ' : ' + fcfa(j.parMode[m])); });
+    if (j.annules.length) l.push('• Annulés (non comptés) : ' + j.annules.length);
+    if (j.voitDep) {
+      l.push('', '*Sorties : ' + fcfa(j.totS) + '*');
+      j.sorties.forEach(function (s) { l.push('• ' + s.lib + ' : ' + fcfa(s.montant) + (s.attente ? ' (en attente de validation)' : '')); });
+      if (!j.sorties.length) l.push('• Aucune');
+    }
+    l.push('', '*Solde du jour : ' + fcfa(j.solde) + '*', libEspeces(j)[0] + ' : ' + libEspeces(j)[1], '',
+      'Depuis le 1er ' + libMois(j.date) + ' : entrées ' + fcfa(j.mois.e) + ' · sorties ' + fcfa(j.mois.s) + ' · solde ' + fcfa(j.mois.e - j.mois.s),
+      '— ' + E.profil.utilisateur.nom + ', VÉRITAS Gestion');
+    return l.join('\n').replace(/ /g, ' ');
+  }
+
+  /** Dessine la fiche sur une grande toile, puis la recadre à sa hauteur réelle. coupures : y sûrs pour paginer. */
+  function dessinerFicheJour(j, logo, filigrane) {
+    var L = 1240, M = 70, H0 = 8000;
+    var cv = document.createElement('canvas'); cv.width = L; cv.height = H0;
+    var g = cv.getContext('2d');
+    var c = j.centre, coupures = [];
+    g.fillStyle = '#fff'; g.fillRect(0, 0, L, H0);
+    g.fillStyle = '#0C2A6A'; g.fillRect(0, 0, L, 170);
+    if (logo) g.drawImage(logo, M, 30, 110, 110);
+    g.fillStyle = '#fff'; g.font = '600 40px Poppins, sans-serif'; g.fillText(texteCoupe(g, c.nom || 'VÉRITAS', L - 2 * M - 140), M + 135, 90);
+    g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#C9D6F2'; g.fillText(texteCoupe(g, c.adresse || '', L - 2 * M - 140), M + 135, 130);
+    g.fillStyle = '#FFC93C'; g.fillRect(0, 170, L, 6);
+    g.fillStyle = '#001136'; g.font = '600 42px Poppins, sans-serif'; g.fillText('Point de caisse du jour', M, 252);
+    g.font = '400 26px Poppins, sans-serif'; g.fillStyle = '#4D5163';
+    g.fillText(dateLongue(j.date).replace(/^./, function (x) { return x.toUpperCase(); }) + ' ' + j.date.slice(0, 4), M, 296);
+    var now = new Date();
+    g.textAlign = 'right'; g.font = '400 20px Poppins, sans-serif'; g.fillStyle = '#6B7185';
+    g.fillText('Établi par ' + texteCoupe(g, E.profil.utilisateur.nom, 360), L - M, 252);
+    g.fillText('le ' + now.toLocaleDateString('fr-FR') + ' à ' + ('0' + now.getHours()).slice(-2) + ' h ' + ('0' + now.getMinutes()).slice(-2), L - M, 284);
+    g.textAlign = 'left';
+    if (filigrane) { var lf = 560; g.save(); g.globalAlpha = 0.05; g.drawImage(filigrane, L / 2 - lf / 2, 520, lf, Math.round(lf * filigrane.naturalHeight / filigrane.naturalWidth)); g.restore(); }
+
+    // Trois cases : entrées, sorties, solde.
+    var y = 340, lc = (L - 2 * M - 40) / 3;
+    [['ENTRÉES', j.totE, '#17803D', '#E7F5EC', j.entrees.length + ' versement' + (j.entrees.length > 1 ? 's' : '')],
+     ['SORTIES', j.totS, '#B42318', '#FDECEA', j.sorties.length + ' dépense' + (j.sorties.length > 1 ? 's' : '')],
+     ['SOLDE DU JOUR', j.solde, j.solde < 0 ? '#B42318' : '#1E499B', '#EEF3FC', 'Espèces : ' + (j.especes < 0 ? '− ' + fcfa(-j.especes) : fcfa(j.especes))]].forEach(function (b, i) {
+      var x = M + i * (lc + 20);
+      g.fillStyle = b[3]; g.fillRect(x, y, lc, 150);
+      g.fillStyle = b[2]; g.fillRect(x, y, 6, 150);
+      g.font = '600 19px Poppins, sans-serif'; g.fillText(b[0], x + 26, y + 40);
+      g.font = '600 38px Poppins, sans-serif'; g.fillStyle = '#001136'; g.fillText(texteCoupe(g, fcfa(b[1]), lc - 40), x + 26, y + 92);
+      g.font = '400 19px Poppins, sans-serif'; g.fillStyle = '#4D5163'; g.fillText(texteCoupe(g, b[4], lc - 40), x + 26, y + 128);
+    });
+    y += 210; coupures.push(y - 30);
+
+    var titre = function (t, coul) {
+      g.fillStyle = coul; g.fillRect(M, y - 26, 6, 32);
+      g.font = '600 28px Poppins, sans-serif'; g.fillStyle = '#001136'; g.fillText(t, M + 20, y);
+      y += 24; g.fillStyle = '#E1E6F0'; g.fillRect(M, y, L - 2 * M, 2); y += 44;
+    };
+    var rangee = function (gauche, sous, milieu, droite, opts) {
+      opts = opts || {};
+      g.font = '500 24px Poppins, sans-serif'; g.fillStyle = opts.gris ? '#9AA0B1' : '#001136';
+      g.fillText(texteCoupe(g, gauche, 640), M, y);
+      if (opts.gris) { var lw = Math.min(g.measureText(texteCoupe(g, gauche, 640)).width, 640); g.fillRect(M, y - 8, lw, 2); }
+      g.font = '400 20px Poppins, sans-serif'; g.fillStyle = '#6B7185';
+      if (sous) g.fillText(texteCoupe(g, sous, 640), M, y + 30);
+      g.fillText(texteCoupe(g, milieu, 220), M + 680, y);
+      g.textAlign = 'right'; g.font = '600 24px Poppins, sans-serif'; g.fillStyle = opts.gris ? '#9AA0B1' : opts.coul || '#001136';
+      g.fillText(droite, L - M, y); g.textAlign = 'left';
+      y += sous ? 52 : 34;
+      g.fillStyle = '#EEF1F6'; g.fillRect(M, y - 14, L - 2 * M, 1);
+      y += 22; coupures.push(y - 30);
+    };
+    var total = function (lib, val, coul) {
+      g.font = '600 24px Poppins, sans-serif'; g.fillStyle = '#4D5163'; g.fillText(lib, M, y);
+      g.textAlign = 'right'; g.fillStyle = coul; g.fillText(val, L - M, y); g.textAlign = 'left'; y += 56; coupures.push(y - 30);
+    };
+
+    titre('Entrées', '#17803D');
+    if (!j.entrees.length && !j.annules.length) { g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#6B7185'; g.fillText('Aucun versement ce jour-là.', M, y); y += 56; }
+    j.entrees.concat(j.annules).forEach(function (p) {
+      var e = ligne('eleves', p.eleve_id) || {};
+      var annule = Number(p.annule);
+      rangee(nomComplet(e) || 'Élève', (p.numero ? 'Reçu n° ' + p.numero : 'Reçu en attente de numéro') + ' · ' + nomDe('classes', e.classe_id) + (annule ? ' · ANNULÉ' : ''), MODES[p.mode] || p.mode, fcfa(p.montant), { gris: annule });
+    });
+    Object.keys(MODES).forEach(function (m) { if (j.parMode[m]) total('  dont ' + MODES[m], fcfa(j.parMode[m]), '#4D5163'); });
+    total('Total des entrées', fcfa(j.totE), '#17803D');
+    y += 20;
+
+    if (j.voitDep) {
+      titre('Sorties', '#B42318');
+      if (!j.sorties.length) { g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#6B7185'; g.fillText('Aucune sortie ce jour-là.', M, y); y += 56; }
+      j.sorties.forEach(function (s) { rangee(s.lib, s.detail + (s.attente ? ' · en attente de validation' : ''), MODES[s.mode] || s.mode, '− ' + fcfa(s.montant), { coul: '#B42318' }); });
+      total('Total des sorties', '− ' + fcfa(j.totS), '#B42318');
+      y += 20;
+    }
+
+    // Bandeau de synthèse.
+    g.fillStyle = '#0C2A6A'; g.fillRect(M, y, L - 2 * M, 170);
+    g.fillStyle = '#FFC93C'; g.fillRect(M, y, 8, 170);
+    g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#C9D6F2'; g.fillText('Solde du jour (entrées − sorties)', M + 36, y + 52);
+    g.fillText(libEspeces(j)[0], M + 36, y + 120);
+    g.textAlign = 'right'; g.font = '600 40px Poppins, sans-serif'; g.fillStyle = '#fff';
+    g.fillText(fcfa(j.solde), L - M - 30, y + 60);
+    g.font = '600 30px Poppins, sans-serif'; g.fillText(libEspeces(j)[1], L - M - 30, y + 124); g.textAlign = 'left';
+    y += 230; coupures.push(y - 40);
+
+    g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#4D5163';
+    g.fillText('Depuis le 1er ' + libMois(j.date) + ' : entrées ' + fcfa(j.mois.e) + ' · sorties ' + fcfa(j.mois.s) + ' · solde ' + fcfa(j.mois.e - j.mois.s), M, y);
+    y += 40;
+    if (j.attente) { g.font = '400 19px Poppins, sans-serif'; g.fillStyle = '#9A5B00'; g.fillText('Les dépenses en attente sont comptées (argent sorti) ; le bilan officiel ne compte que les dépenses validées.', M, y); y += 34; }
+    y += 70; coupures.push(y - 50);
+    g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#6B7185';
+    g.fillText('La caisse', M, y); g.textAlign = 'right'; g.fillText('Le responsable', L - M, y); g.textAlign = 'left';
+    y += 120;
+    g.font = '400 18px Poppins, sans-serif'; g.fillText('VÉRITAS Gestion · document interne destiné aux actionnaires', M, y);
+    y += 40;
+    var fin = document.createElement('canvas'); fin.width = L; fin.height = y;
+    fin.getContext('2d').drawImage(cv, 0, 0);
+    return { cv: fin, coupures: coupures };
+  }
+  function nomFichierJour(j, ext) {
+    return ('point-caisse-' + (j.centre.nom_court || j.centre.nom || 'centre') + '-' + j.date).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9-]+/g, '-').replace(/-+/g, '-') + '.' + ext;
+  }
+  function fichierJour(j, format) {
+    return Promise.all([chargerLogo(), chargerLogoDetoure(), document.fonts ? document.fonts.load('600 24px Poppins') : null]).then(function (r) {
+      var d = dessinerFicheJour(j, r[0], r[1]);
+      if (format === 'png') return versBlob(d.cv, 'image/png').then(function (b) { return new File([b], nomFichierJour(j, 'png'), { type: 'image/png' }); });
+      // PDF A4 : pages de 1240 × 1754, coupées entre deux lignes.
+      var HP = 1754, pages = [], haut = 0;
+      while (haut < d.cv.height) {
+        var bas = haut + HP;
+        if (bas < d.cv.height) { var sures = d.coupures.filter(function (y) { return y > haut + 400 && y <= bas; }); if (sures.length) bas = sures[sures.length - 1]; }
+        var pg = document.createElement('canvas'); pg.width = 1240; pg.height = HP;
+        var gp = pg.getContext('2d'); gp.fillStyle = '#fff'; gp.fillRect(0, 0, 1240, HP);
+        gp.drawImage(d.cv, 0, haut, 1240, Math.min(bas, d.cv.height) - haut, 0, 0, 1240, Math.min(bas, d.cv.height) - haut);
+        pages.push(pg); haut = bas;
+      }
+      return Promise.all(pages.map(function (cv) { return versBlob(cv, 'image/jpeg', 0.9).then(function (b) { return b.arrayBuffer(); }).then(function (a) { return { cv: cv, jpeg: new Uint8Array(a) }; }); }))
+        .then(function (p) { return new File([pdfDepuisJpeg(p, 595.28, 841.89)], nomFichierJour(j, 'pdf'), { type: 'application/pdf' }); });
     });
   }
 
@@ -1812,6 +2044,7 @@
     var h = '<h1>Bilan financier</h1><div class="nav-date"><button type="button" class="btn clair petit" data-a="bilan-mois" data-v="-1"' + (annee ? ' disabled' : '') + ' aria-label="Mois précédent">‹</button><b>' + esc(lib) + '</b>' +
       '<button type="button" class="btn clair petit" data-a="bilan-mois" data-v="1"' + (annee || BIL.mois >= auj.slice(0, 7) ? ' disabled' : '') + ' aria-label="Mois suivant">›</button></div>' +
       '<div class="onglets"><button type="button" class="' + (annee ? '' : 'on') + '" data-a="bilan-mois" data-v="mois">Mois</button><button type="button" class="' + (annee ? 'on' : '') + '" data-a="bilan-mois" data-v="annee">Année scolaire</button></div>';
+    h += '<a class="ligne carte-lien" href="#/jour"><span class="pastille">' + ico('clipboard') + '</span><span class="corps"><b>Point du jour</b><small>Entrées et sorties d\'une journée, en image ou PDF</small></span><span class="fin">›</span></a>';
     var tot = { rec: 0, dep: 0 };
     centres.forEach(function (c) {
       var pay = lignes('paiements').filter(function (p) { return p.centre_id === c.id && !Number(p.annule) && dans(p.date); });
@@ -2232,7 +2465,7 @@
       // Un enseignant voit aussi ses cours dans l'autre centre : son vrai emploi du temps.
       var source = EMP.mode === 'enseignant' ? lignes('creneaux') : crs;
       var siens = source.filter(function (c) { return c[cle] === EMP.filtre; }).sort(function (a, b) { return a.jour - b.jour || (a.debut < b.debut ? -1 : 1); });
-      if (!choix.length) h += '<div class="carte vide">' + (EMP.mode === 'classe' ? 'Aucune classe : créez-en une ci-dessous.' : 'Aucun enseignant dans ce centre : donnez le rôle « Enseignant » dans Comptes et accès.') + '</div>';
+      if (!choix.length) h += '<div class="carte vide">' + (EMP.mode === 'classe' ? 'Aucune classe : créez-en une ci-dessous.' : 'Aucun enseignant dans ce centre.') + '</div>' + (EMP.mode === 'classe' ? '' : '<div class="actions">' + boutonAjoutEnseignant(cid) + '</div>');
       else if (!siens.length) h += '<div class="carte vide">Aucun cours.</div>';
       var total = 0;
       [1, 2, 3, 4, 5, 6, 7].forEach(function (j) {
@@ -2342,6 +2575,168 @@
     return String(liste || '').split(',').filter(Boolean).map(function (m) { return MOIS[(+m - 1)] || m; }).join(', ') || '—';
   }
 
+  // ───────────────────────────── Espaces et rôles ─────────────────────────────
+  // Quatre espaces, un par famille de rôles : chacun a sa couleur, sa mission et
+  // ses chiffres clés. Le serveur reste seul juge des droits (g_capacites).
+  var ESPACES = {
+    admin: { titre: 'Espace administrateur', ico: 'shield', mission: 'Vous pilotez tous les centres : comptes et identifiants, droits des partenaires, réglages, finances consolidées.' },
+    partenaire: { titre: 'Espace partenaire', ico: 'handshake', mission: 'Vous suivez la marche de votre centre : élèves, caisse, bilan et parts, emploi du temps.' },
+    secretariat: { titre: 'Espace secrétariat', ico: 'clipboard', mission: 'Vous tenez l\'accueil : inscriptions, appel, encaissements et reçus, dépenses du jour.' },
+    enseignant: { titre: 'Espace enseignant', ico: 'graduation', mission: 'Vos cours du jour, l\'appel de vos classes, vos heures et votre rémunération.' }
+  };
+  /** Fiches des rôles : ce que chacun fait, et ce qui lui est fermé. */
+  var FICHES_ROLES = [
+    { cle: 'admin', espace: 'admin', nom: 'Administrateur', famille: 'Direction',
+      resume: 'Le propriétaire de l\'application. Voit et règle tout, dans tous les centres.',
+      peut: ['Créer les comptes et transmettre les identifiants', 'Retirer des droits à un partenaire, désactiver un compte', 'Ouvrir un centre, fixer l\'année, les matières, les tarifs', 'Voir les finances consolidées et le journal complet'],
+      pas: [] },
+    { cle: 'responsable', espace: 'partenaire', nom: 'Responsable', famille: 'Partenaire',
+      resume: 'Dirige un centre au quotidien, avec presque tous les pouvoirs sur ce centre.',
+      peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Fixer les tarifs, valider les dépenses', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants'],
+      pas: ['Les réglages des centres et de l\'année', 'Les comptes responsables, actionnaires et admin'] },
+    { cle: 'actionnaire', espace: 'partenaire', nom: 'Actionnaire', famille: 'Partenaire',
+      resume: 'Associé du centre : consulte les chiffres et tient l\'emploi du temps.',
+      peut: ['Voir le bilan, les versements et les dépenses', 'Voir les statistiques et les parts', 'Modifier l\'emploi du temps de son centre'],
+      pas: ['Encaisser ou inscrire', 'Faire l\'appel', 'Créer des comptes'] },
+    { cle: 'secretaire', espace: 'secretariat', nom: 'Secrétaire / surveillant', famille: 'Équipe',
+      resume: 'Tient l\'accueil et la caisse du centre.',
+      peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Saisir les dépenses (avec photo du justificatif)'],
+      pas: ['Voir le bilan', 'Annuler un versement, accorder une remise', 'Valider une dépense', 'Gérer les enseignants'] },
+    { cle: 'enseignant', espace: 'enseignant', nom: 'Enseignant', famille: 'Équipe',
+      resume: 'Fait l\'appel de ses classes et suit ses heures.',
+      peut: ['Faire l\'appel de ses classes, le jour du cours', 'Voir son emploi du temps', 'Voir ses heures, son contrat et ses paies'],
+      pas: ['Les élèves des autres classes', 'La caisse et les finances', 'Les comptes'] }
+  ];
+  function ficheRole(cle) { return FICHES_ROLES.filter(function (f) { return f.cle === cle; })[0]; }
+  var ORDRE_ROLES = ['responsable', 'actionnaire', 'secretaire', 'enseignant'];
+  /** Rôles du compte, du plus large au plus étroit. */
+  function mesRoles() {
+    var acces = (E.profil && E.profil.acces) || {};
+    var vus = {};
+    Object.keys(acces).forEach(function (c) { vus[acces[c]] = 1; });
+    return ORDRE_ROLES.filter(function (r) { return vus[r]; });
+  }
+  function monEspace() {
+    if (estAdmin()) return 'admin';
+    var r = mesRoles()[0];
+    return r ? ficheRole(r).espace : 'enseignant';
+  }
+  function estEnseignantQuelquePart() { return mesRoles().indexOf('enseignant') >= 0; }
+  /** Cours de l'enseignant connecté un jour donné, tous centres confondus. */
+  function mesCoursDu(iso) {
+    var uid = E.profil.utilisateur.id, j = jourDe(iso);
+    return lignes('creneaux').filter(function (c) { return c.enseignant_id === uid && Number(c.jour) === j; })
+      .sort(function (a, b) { return a.debut < b.debut ? -1 : 1; });
+  }
+
+  function bandeauEspace() {
+    var cle = monEspace(), es = ESPACES[cle];
+    var roles = estAdmin() ? ['Administrateur'] : mesRoles().map(function (r) { return ficheRole(r).nom; });
+    var chiffres = chiffresCles(cle);
+    return '<section class="bandeau-espace espace-' + cle + '"><div class="haut"><span class="pastille">' + ico(es.ico, 'g') + '</span><div>' +
+      '<small>' + esc(roles.join(' · ')) + '</small><h2>' + esc(es.titre) + '</h2></div></div><p>' + esc(es.mission) + '</p>' +
+      (chiffres.length ? '<div class="chiffres-cles">' + chiffres.map(function (c) {
+        return (c[2] ? '<a href="' + c[2] + '">' : '<div>') + '<b>' + c[0] + '</b><small>' + esc(c[1]) + '</small>' + (c[2] ? '</a>' : '</div>');
+      }).join('') + '</div>' : '') +
+      '<a class="lien-roles" href="#/roles">' + ico('info', 'p') + ' Rôles et droits</a></section>';
+  }
+  /** [valeur (HTML sûr), libellé, lien?] selon l'espace. */
+  function chiffresCles(cle) {
+    var auj = isoLocal(new Date()), am = auj.slice(0, 7);
+    var centres = centresChoisis();
+    var out = [];
+    if (cle === 'enseignant') {
+      var cours = mesCoursDu(auj);
+      out.push([String(cours.length), cours.length > 1 ? 'cours aujourd\'hui' : 'cours aujourd\'hui', '#/emploi']);
+      var faites = 0, du = 0, contrat = false;
+      lignes('centres').filter(function (c) { return roleDans(c.id) === 'enseignant'; }).forEach(function (c) {
+        var b = bilanEnseignant(E.profil.utilisateur.id, c.id, am);
+        faites += b.faites; du += b.du; if (b.contrat) contrat = true;
+      });
+      out.push([esc(dureeLisible(faites)), 'faites ce mois', '#/mesheures']);
+      if (contrat) out.push([esc(fcfa(du)), 'dû ce mois', '#/mesheures']);
+      return out;
+    }
+    var eleves = 0, appels = 0, prevus = 0, mois = 0, jour = 0, imp = 0, voitCaisse = false;
+    centres.forEach(function (c) {
+      eleves += elevesActifs(c.id).length;
+      if (peut('appel.faire', c.id) || peut('centre.voir', c.id)) {
+        var p = seancesPrevues(c.id, auj);
+        prevus += p.length; appels += p.filter(function (x) { return etatSeance(x).pointes > 0; }).length;
+      }
+      if (peut('paiements.voir', c.id)) {
+        voitCaisse = true;
+        lignes('paiements').forEach(function (p) {
+          if (p.centre_id !== c.id || Number(p.annule)) return;
+          if (p.date === auj) jour += Number(p.montant) || 0;
+          if (String(p.date).slice(0, 7) === am) mois += Number(p.montant) || 0;
+        });
+        imp += impayes(c.id).length;
+      }
+    });
+    out.push([String(eleves), 'élèves inscrits', '#/eleves']);
+    if (prevus) out.push([appels + '/' + prevus, 'appels du jour', '#/appel']);
+    if (voitCaisse) {
+      out.push(cle === 'secretariat' ? [esc(fcfa(jour)), 'encaissé aujourd\'hui', '#/caisse'] : [esc(fcfa(mois)), 'encaissé ce mois', '#/caisse']);
+      out.push([String(imp), imp > 1 ? 'impayés' : 'impayé', '#/caisse']);
+    }
+    return out;
+  }
+
+  /** Accueil de l'enseignant : ses cours du jour, avec l'accès direct à l'appel. */
+  function blocMesCours() {
+    if (!estEnseignantQuelquePart()) return '';
+    var auj = isoLocal(new Date());
+    var cours = mesCoursDu(auj);
+    var h = '<h2>Mes cours aujourd\'hui</h2>';
+    if (!cours.length) return h + '<div class="carte vide">Pas de cours pour vous aujourd\'hui.</div>';
+    return h + '<div class="liste">' + cours.map(function (c) {
+      var x = { id: idSeance(auj, c.classe_id), centre_id: c.centre_id, classe: ligne('classes', c.classe_id) || { id: c.classe_id } };
+      var fait = etatSeance(x).pointes > 0;
+      var centre = ligne('centres', c.centre_id) || {};
+      return '<a class="ligne creneau" href="#/pointage/' + encodeURIComponent(c.classe_id) + '/' + auj + '"><span class="horaire"><b>' + esc(c.debut) + '</b><small>' + esc(c.fin) + '</small></span>' +
+        '<span class="corps"><b>' + esc(nomDe('classes', c.classe_id) + ' · ' + nomDe('matieres', c.matiere_id)) + '</b><small>' + esc(centre.nom_court || centre.nom || '') + '</small></span>' +
+        (fait ? '<span class="badge ok">appel fait</span>' : '<span class="badge alerte">appel à faire</span>') + '</a>';
+    }).join('') + '</div>';
+  }
+
+  /** « Mon rôle » : ce que le compte peut faire, réellement (droits retirés compris). */
+  function carteMonRole() {
+    var cle = monEspace();
+    var h = '<div class="carte mon-role espace-' + cle + '"><h3>' + ico(ESPACES[cle].ico, 'p') + ' ' + esc(ESPACES[cle].titre) + '</h3>';
+    if (estAdmin()) return h + '<p class="doux">Tous les droits, dans tous les centres.</p></div>';
+    var caps = capsDuCompte(E.profil);
+    var retires = E.profil.restrictions || [];
+    h += '<ul class="droits">' + caps.map(function (k) {
+      var non = retires.indexOf(k) >= 0;
+      return '<li class="' + (non ? 'non' : 'oui') + '">' + ico(non ? 'x' : 'check', 'p') + ' ' + esc(LIB_CAP[k] || k) + (non ? ' <small>(réservé à l\'administrateur)</small>' : '') + '</li>';
+    }).join('') + '</ul></div>';
+    return h;
+  }
+
+  function pageRoles() {
+    var h = '<h1>Rôles et droits</h1><p class="sous-titre">Chaque personne a son compte et son rôle, centre par centre. Le serveur refuse ce que le rôle n\'autorise pas.</p>';
+    var moi = estAdmin() ? ['admin'] : mesRoles();
+    h += '<div class="fiches-roles">' + FICHES_ROLES.map(function (f) {
+      return '<article class="fiche-role espace-' + f.espace + (moi.indexOf(f.cle) >= 0 ? ' a-moi' : '') + '"><div class="haut"><span class="pastille">' + ico(ESPACES[f.espace].ico) + '</span><div><small>' + esc(f.famille) + '</small><h3>' + esc(f.nom) + '</h3></div>' +
+        (moi.indexOf(f.cle) >= 0 ? '<span class="badge or">Vous</span>' : '') + '</div><p>' + esc(f.resume) + '</p>' +
+        '<ul class="droits">' + f.peut.map(function (t) { return '<li class="oui">' + ico('check', 'p') + ' ' + esc(t) + '</li>'; }).join('') +
+        f.pas.map(function (t) { return '<li class="non">' + ico('x', 'p') + ' ' + esc(t) + '</li>'; }).join('') + '</ul></article>';
+    }).join('') + '</div>';
+    if (estAdmin() && E.profil.capacites) {
+      h += '<h2>Tableau des droits</h2><p class="sous-titre">Droits par défaut de chaque rôle. Vous pouvez en retirer à un partenaire dans Administration › Partenaires et droits.</p>' +
+        '<div class="tableau-defile"><table class="matrice"><thead><tr><th>Droit</th>' + ORDRE_ROLES.map(function (r) { return '<th><abbr title="' + esc(ficheRole(r).nom) + '">' + esc({ responsable: 'Resp.', actionnaire: 'Action.', secretaire: 'Secr.', enseignant: 'Ens.' }[r]) + '</abbr></th>'; }).join('') + '</tr></thead><tbody>' +
+        Object.keys(LIB_CAP).map(function (k) {
+          return '<tr><td>' + esc(LIB_CAP[k]) + '</td>' + ORDRE_ROLES.map(function (r) {
+            var oui = (E.profil.capacites[r] || []).indexOf(k) >= 0;
+            return '<td class="' + (oui ? 'oui' : 'non') + '">' + (oui ? ico('check', 'p') + '<span class="sr">oui</span>' : '<span aria-label="non">–</span>') + '</td>';
+          }).join('') + '</tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+    if (estAdmin() || peutQuelquePart('comptes.gerer')) h += '<div class="actions"><a class="btn or" href="#/comptes" data-a="ouvrir-comptes">' + ico('users', 'p') + 'Gérer les comptes</a></div>';
+    return h;
+  }
+
   // ───────────────────────────── Écrans en ligne : comptes ─────────────────────────────
   function horsLigne(zone, e) {
     var z = $(zone);
@@ -2419,21 +2814,22 @@
       '<div class="actions"><button class="btn" type="submit">Enregistrer les droits</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
   }
 
-  function feuilleCompte(id) {
+  function feuilleCompte(id, preset) {
     var u = id ? (E.cache.comptes || []).filter(function (x) { return x.id === id; })[0] : null;
     var centres = lignes('centres');
     var rolesPermis = function (cid) {
       if (estAdmin()) return Object.keys(ROLES);
       return peut('comptes.gerer', cid) ? ['secretaire', 'enseignant'] : [];
     };
-    var h = '<h2>' + (u ? 'Modifier le compte' : 'Nouveau compte') + '</h2><form data-f="compte" data-id="' + esc(id || '') + '">' +
+    var h = '<h2>' + (u ? 'Modifier le compte' : preset && preset.role === 'enseignant' ? 'Nouvel enseignant' : 'Nouveau compte') + '</h2>' +
+      (u ? '' : '<p class="doux">Un mot de passe sera créé et affiché une seule fois, à transmettre par WhatsApp.</p>') + '<form data-f="compte" data-id="' + esc(id || '') + '">' +
       '<label class="champ"><span>Nom et prénom</span><input type="text" name="nom" required value="' + esc(u ? u.nom : '') + '"></label>' +
       '<div class="deux"><label class="champ"><span>Identifiant</span><input type="text" name="identifiant" required autocapitalize="none" spellcheck="false" pattern="[a-z0-9._\\-]{3,60}" value="' + esc(u ? u.identifiant : '') + '"><small>ex. : marie.ndogpassi3</small></label>' +
       '<label class="champ"><span>Téléphone</span><input type="tel" name="tel" value="' + esc(u ? u.tel || '' : '') + '"></label></div>' +
       '<h3>Rôle dans chaque centre</h3>';
     centres.forEach(function (c) {
       var permis = rolesPermis(c.id);
-      var actuel = u ? u.acces[c.id] || '' : '';
+      var actuel = u ? u.acces[c.id] || '' : (preset && preset.centre === c.id && permis.indexOf(preset.role) >= 0 ? preset.role : '');
       if (!permis.length && !actuel) return;
       h += '<label class="champ"><span>' + esc(c.nom) + '</span><select name="role_' + esc(c.id) + '"' + (permis.length ? '' : ' disabled') + '><option value="">Aucun accès</option>' +
         Object.keys(ROLES).filter(function (r) { return permis.indexOf(r) >= 0 || r === actuel; }).map(function (r) {
@@ -2445,22 +2841,64 @@
       lignes('matieres').map(function (m) { return '<label class="case"><input type="checkbox" name="matiere" value="' + esc(m.id) + '"' + (siennes.indexOf(m.id) >= 0 ? ' checked' : '') + '> ' + esc(m.nom) + '</label>'; }).join('') + '</div>';
     if (estAdmin()) h += '<label class="case"><input type="checkbox" name="admin_global"' + (u && u.admin_global ? ' checked' : '') + '> Administrateur des deux centres (vue consolidée, finances, tous les réglages)</label>';
     if (u) h += '<label class="case"><input type="checkbox" name="actif"' + (u.actif ? ' checked' : '') + '> Compte actif (décocher coupe immédiatement ses sessions)</label>';
-    h += '<p class="doux">Responsable : tout son centre, sauf les réglages. Actionnaire : consultation des finances et statistiques. Secrétaire : inscriptions, appel, encaissements. Enseignant : l\'appel de ses classes.</p>' +
+    h += '<div class="legende-roles">' + ORDRE_ROLES.map(function (r) {
+      var f = ficheRole(r);
+      return '<div class="espace-' + f.espace + '">' + ico(ESPACES[f.espace].ico, 'p') + '<span><b>' + esc(f.nom) + '</b> ' + esc(f.resume) + '</span></div>';
+    }).join('') + '</div>' +
       '<div class="actions"><button class="btn" type="submit">' + (u ? 'Enregistrer' : 'Créer le compte') + '</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>';
     if (u) {
       h += '<div class="actions"><button class="btn clair petit" type="button" data-a="reinit-mdp" data-id="' + esc(u.id) + '">Nouveau mot de passe</button>' +
+        '<button class="btn clair petit" type="button" data-a="envoyer-guide" data-id="' + esc(u.id) + '">Renvoyer le mode d\'emploi</button>' +
         '<button class="btn clair petit" type="button" data-a="appareils" data-id="' + esc(u.id) + '">Appareils connectés</button></div>';
     }
     ouvrirFeuille(h);
   }
 
-  function feuilleSecret(titre, nom, identifiant, mdp) {
-    var message = 'VÉRITAS Gestion — ' + nom + '\nAdresse : https://gestion.veritas-school.com\nIdentifiant : ' + identifiant + '\nMot de passe : ' + mdp + '\nChangez-le dès la première connexion (Plus › Changer mon mot de passe).';
+  // ── Mode d'emploi envoyé avec les identifiants (texte WhatsApp : *gras*) ──
+  var GUIDE_ROLE = {
+    admin: ['Accueil : les chiffres clés de tous les centres.', 'Plus › Administration : comptes et identifiants, droits des partenaires, centres, journal.', 'Plus › Rôles et droits : qui peut faire quoi.'],
+    responsable: ['*Accueil* : élèves, appels du jour, encaissé du mois, impayés de votre centre.', '*Élèves › +* : inscrire un élève (classe, matières, tarif).',
+      '*Caisse › Encaisser* : cherchez l\'élève, saisissez le montant, envoyez le reçu au parent par WhatsApp.', '*Caisse › Impayés* : relancez les parents en un geste.',
+      '*Caisse › Dépenses* : saisissez les dépenses. Photo du justificatif *obligatoire dès 10 000 F*. Vous validez les dépenses saisies par les autres.',
+      '*Plus › Enseignants* : pointage des cours, contrats, paies.', '*Plus › Comptes et accès* : créez les comptes de vos secrétaires et enseignants.'],
+    actionnaire: ['*Accueil* : les chiffres clés de votre centre (élèves, appels, encaissé, impayés).', '*Plus › Bilan* : recettes, dépenses, résultat du mois et votre part.',
+      '*Caisse* : versements et dépenses, en consultation.', '*Plus › Planning* : vous tenez l\'emploi du temps du centre (classes, créneaux, enseignants).'],
+    secretaire: ['*Appel* : choisissez la classe, touchez chaque élève (présent, retard, absent), au début du cours.', '*Élèves › +* : inscrire un élève.',
+      '*Caisse › Encaisser* : un reçu numéroté part au parent par WhatsApp. Un versement ne se modifie pas : en cas d\'erreur, prévenez le responsable.',
+      '*Caisse › Dépenses* : photo du justificatif *obligatoire dès 10 000 F*.'],
+    enseignant: ['*Accueil › Mes cours aujourd\'hui* : touchez votre cours pour faire l\'appel, au début du cours.', '*Planning* : votre emploi du temps de la semaine.',
+      '*Plus › Mes heures* : heures faites, montant dû, paies reçues.']
+  };
+  /** acces : { centre_id: rôle } ; renvoie le texte du mode d'emploi pour ce compte. */
+  function modeEmploi(nom, acces, admin) {
+    var roles = Object.keys(acces || {}).map(function (c) { return acces[c]; });
+    var principal = admin ? 'admin' : ORDRE_ROLES.filter(function (r) { return roles.indexOf(r) >= 0; })[0] || 'enseignant';
+    var ou = admin ? 'tous les centres' : Object.keys(acces || {}).map(function (c) { var k = ligne('centres', c) || {}; return (ROLES[acces[c]] || acces[c]) + ' · ' + (k.nom_court || k.nom || 'centre'); }).join(', ');
+    return '*Mode d\'emploi*\n' +
+      '1. Ouvrez l\'adresse dans Chrome et connectez-vous.\n' +
+      '2. Menu ⋮ › « Ajouter à l\'écran d\'accueil » : l\'appli s\'ouvre comme une application, même sans réseau.\n' +
+      '3. Plus › *Changer mon mot de passe*, puis Plus › *Code de verrouillage* (4 chiffres).\n\n' +
+      '*Votre rôle : ' + (admin ? 'Administrateur' : ou) + '*\n' + GUIDE_ROLE[principal].map(function (l) { return '• ' + l; }).join('\n') + '\n\n' +
+      'Sans réseau, tout continue : vos saisies partent dès le retour de la connexion (pastille « À jour » en haut).\n' +
+      'Plus › *Rôles et droits* explique ce que chacun peut faire. Une question : appelez l\'administrateur.';
+  }
+  function feuilleSecret(titre, nom, identifiant, mdp, acces, admin) {
+    var guide = modeEmploi(nom, acces, admin);
+    var message = '*VÉRITAS Gestion* — Bienvenue ' + nom + ' !\nAdresse : https://gestion.veritas-school.com\nIdentifiant : ' + identifiant + '\nMot de passe : ' + mdp +
+      '\n(changez-le dès la première connexion)\n\n' + guide;
     E.cache.messageSecret = message;
-    ouvrirFeuille('<h2>' + esc(titre) + '</h2><p>Transmettez ces informations à <b>' + esc(nom) + '</b>. Le mot de passe ne sera <b>plus jamais affiché</b>.</p>' +
+    ouvrirFeuille('<h2>' + esc(titre) + '</h2><p>Transmettez ces informations à <b>' + esc(nom) + '</b>, avec son mode d\'emploi. Le mot de passe ne sera <b>plus jamais affiché</b>.</p>' +
       '<p class="doux">Identifiant</p><div class="secret">' + esc(identifiant) + '</div><p class="doux">Mot de passe</p><div class="secret">' + esc(mdp) + '</div>' +
-      '<div class="actions">' + (NATIF || navigator.share ? '<button class="btn or" type="button" data-a="partager-secret">Envoyer (WhatsApp, SMS…)</button>' : '') +
+      '<details class="apercu-guide"><summary>Voir le message envoyé (identifiants + mode d\'emploi)</summary><pre>' + esc(message) + '</pre></details>' +
+      '<div class="actions">' + (NATIF || navigator.share ? '<button class="btn or" type="button" data-a="partager-secret">Envoyer (WhatsApp, SMS…)</button>' :
+        '<a class="btn or" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(message) + '">Envoyer par WhatsApp</a>') +
       '<button class="btn clair" type="button" data-a="copier-secret">Copier</button><button class="btn" type="button" data-a="fermer">J\'ai transmis</button></div>');
+  }
+  /** Renvoyer le mode d'emploi seul (sans mot de passe) à un compte existant. */
+  function envoyerGuide(u) {
+    var message = '*VÉRITAS Gestion* — ' + u.nom + '\nAdresse : https://gestion.veritas-school.com\nIdentifiant : ' + u.identifiant + '\n\n' + modeEmploi(u.nom, u.acces, u.admin_global);
+    if (NATIF || navigator.share) partagerTexte(message);
+    else window.open('https://wa.me/?text=' + encodeURIComponent(message), '_blank', 'noopener');
   }
 
   function feuilleAppareils(uid) {
@@ -2590,6 +3028,22 @@
       var a = ligne('actionnaires', el.dataset.id);
       if (a) confirmer('Retirer ' + a.nom + ' des actionnaires ?', 'Retirer', function () { muter('actionnaires', a.id, {}, true).then(rendre); });
     },
+    'ouvrir-comptes': function () {
+      ouvrirPanneauDiscret();
+      if (location.hash === '#/comptes') rendre(); else location.hash = '#/comptes';
+    },
+    'ouvrir-admin': function () {
+      if (!estAdmin()) return;
+      ouvrirPanneauDiscret();
+      if (location.hash === '#/admin') rendre(); else location.hash = '#/admin';
+    },
+    'ajouter-enseignant': function (el) {
+      var cid = el.dataset.centre;
+      if (!peutCreerEnseignant(cid)) return;
+      if (!E.enLigne) { toast('Créer un compte demande une connexion internet.', true); return; }
+      ouvrirPanneauDiscret();
+      feuilleCompte('', { role: 'enseignant', centre: cid });
+    },
     'editer-compte': function (el) {
       if (!E.enLigne) { toast('La gestion des comptes demande une connexion internet.', true); return; }
       feuilleCompte(el.dataset.id);
@@ -2597,12 +3051,16 @@
     'reinit-mdp': function (el) {
       var u = (E.cache.comptes || []).filter(function (x) { return x.id === el.dataset.id; })[0];
       if (!u) return;
-      confirmer('Créer un nouveau mot de passe pour ' + u.nom + ' ? Ses appareils seront déconnectés.', 'Créer', function () { api('comptes/mdp', { id: u.id }).then(function (r) { feuilleSecret('Nouveau mot de passe', u.nom, u.identifiant, r.mdp); }, function (e) { toast(e.message, true); }); });
+      confirmer('Créer un nouveau mot de passe pour ' + u.nom + ' ? Ses appareils seront déconnectés.', 'Créer', function () { api('comptes/mdp', { id: u.id }).then(function (r) { feuilleSecret('Nouveau mot de passe', u.nom, u.identifiant, r.mdp, u.acces, u.admin_global); }, function (e) { toast(e.message, true); }); });
     },
     appareils: function (el) { feuilleAppareils(el.dataset.id); },
     'mes-appareils': function () { feuilleAppareils(''); },
     revoquer: function (el) {
       api('sessions/revoquer', { id: el.dataset.id }).then(function () { toast('Appareil déconnecté.'); feuilleAppareils(el.dataset.uid); }, function (e) { toast(e.message, true); });
+    },
+    'envoyer-guide': function (el) {
+      var u = (E.cache.comptes || []).filter(function (x) { return x.id === el.dataset.id; })[0];
+      if (u) envoyerGuide(u);
     },
     'copier-secret': function () { copier(E.cache.messageSecret || ''); },
     'partager-secret': function () { partagerTexte(E.cache.messageSecret); },
@@ -2655,6 +3113,19 @@
     encaisser: function (el) { feuillePaiement(el.dataset.id); },
     'montant-rapide': function (el) { var i = $('#montant-paiement'); if (i) { i.value = el.dataset.v; i.focus(); } },
     'voir-recu': function (el) { feuilleRecu(el.dataset.id); },
+    'export-caisse-jour': function (el) {
+      var j = pointDuJour(CAI.centre, CAI.date || isoLocal(new Date()));
+      var titre = 'Point de caisse du ' + dateLisible(j.date, true);
+      if (el.dataset.v === 'texte') {
+        var t = texteJour(j);
+        if (NATIF || navigator.share) partagerTexte(t); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener');
+        return;
+      }
+      el.disabled = true;
+      fichierJour(j, el.dataset.v).then(function (f) { E.cache.dernierExport = f; return partagerFichiers([f], titre); })
+        .catch(function (e) { toast('Export impossible : ' + (e && e.message), true); })
+        .then(function () { el.disabled = false; });
+    },
     'partager-recu': function (el) {
       var p = ligne('paiements', el.dataset.id);
       fichierRecu(p, el.dataset.v).then(function (f) {
@@ -2679,7 +3150,13 @@
     },
     'voir-depense': function (el) { feuilleDepense(el.dataset.id); },
     'editer-depense': function (el) { feuilleDepense(el.dataset.id); },
-    'valider-depense': function (el) { fermerFeuille(); muter('depenses', el.dataset.id, { statut: 'validee' }).then(function () { toast('Dépense validée.'); rendre(); }); },
+    'valider-depense': function (el) {
+      var d = ligne('depenses', el.dataset.id);
+      if (d && justificatifExige(d) && !d.justificatif) {
+        toast((E.cache.photosEnAttente || {})[d.id] ? 'La photo du justificatif n\'est pas encore arrivée au serveur : validez après la synchronisation.' : 'Justificatif obligatoire à partir de ' + fcfa(SEUIL_JUSTIFICATIF) + ' : demandez la photo avant de valider.', true);
+        return;
+      }
+      fermerFeuille(); muter('depenses', el.dataset.id, { statut: 'validee' }).then(function () { toast('Dépense validée.'); rendre(); }); },
     'refuser-depense': function (el) {
       ouvrirFeuille('<h2>Refuser la dépense</h2><form data-f="refus" data-id="' + esc(el.dataset.id) + '"><label class="champ"><span>Motif</span><input type="text" name="motif" required></label>' +
         '<div class="actions"><button class="btn danger" type="submit">Refuser</button><button class="btn clair" type="button" data-a="fermer">Retour</button></div></form>');
@@ -2912,7 +3389,11 @@
       occupe(form, true);
       api('comptes/enregistrer', corps).then(function (r) {
         chargerComptes();
-        if (r.mdp) feuilleSecret('Compte créé', corps.nom, corps.identifiant, r.mdp);
+        // L'équipe (enseignants de chaque centre) arrive avec la synchro : écran Enseignants à jour.
+        synchroniser();
+        var accesMap = {};
+        corps.acces.forEach(function (a) { accesMap[a.centre_id] = a.role; });
+        if (r.mdp) feuilleSecret('Compte créé', corps.nom, corps.identifiant, r.mdp, accesMap, corps.admin_global);
         else { fermerFeuille(); toast('Compte enregistré.'); }
       }, function (e) { occupe(form, false); toast(e.message, true); });
     },

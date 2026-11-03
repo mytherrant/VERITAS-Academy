@@ -333,3 +333,80 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.45; }
 /* ── Justificatif ── */
 .justificatif img { display: block; max-width: 100%; max-height: 360px; border: 1px solid var(--trait); border-radius: var(--rayon); margin: 6px 0 12px; }
 input[type=file] { width: 100%; padding: 10px; border: 1px dashed #CDD4E2; border-radius: var(--rayon); background: #fff; }
+
+/* ── Espaces par rôle : une couleur d'identité par famille (aplats, pas d'ombre).
+   L'or reste réservé à l'action. ── */
+.espace-admin { --role: #0C2A6A; --role-pale: #E6EBF5; }
+.espace-partenaire { --role: #1E499B; --role-pale: #EEF3FC; }
+.espace-secretariat { --role: #0E6E6E; --role-pale: #E3F3F2; }
+.espace-enseignant { --role: #5B3FA8; --role-pale: #EFEBFA; }
+
+.bandeau-espace { position: relative; overflow: hidden; background: var(--role); color: #fff; border-radius: var(--rayon); padding: 18px 16px 14px; margin: 0 0 18px; }
+.bandeau-espace::after { content: ""; position: absolute; right: -60px; top: -60px; width: 180px; height: 180px; border-radius: 50%; border: 28px solid rgba(255, 255, 255, .07); pointer-events: none; }
+.bandeau-espace .haut { display: flex; align-items: center; gap: 12px; }
+.bandeau-espace .pastille { width: 46px; height: 46px; background: rgba(255, 255, 255, .14); color: #fff; }
+.bandeau-espace small { display: block; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; opacity: .78; }
+.bandeau-espace h2 { color: #fff; margin: 0; font-size: 18px; }
+.bandeau-espace > p { margin: 10px 0 14px; font-size: 14px; color: rgba(255, 255, 255, .88); }
+.chiffres-cles { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; position: relative; z-index: 1; }
+.chiffres-cles > * { background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .16); border-radius: var(--rayon); padding: 10px 12px; color: #fff; text-decoration: none; display: grid; gap: 2px; }
+.chiffres-cles a:hover { background: rgba(255, 255, 255, .18); }
+.chiffres-cles b { color: #fff; font-size: 20px; line-height: 1.2; }
+.chiffres-cles small { text-transform: none; letter-spacing: 0; font-size: 12px; }
+.bandeau-espace .lien-roles { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; color: #fff; opacity: .85; font-size: 13px; position: relative; z-index: 1; }
+
+.mon-role { border-left: 4px solid var(--role); }
+.mon-role h3 { display: flex; align-items: center; gap: 6px; color: var(--role); }
+ul.droits { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+ul.droits li { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 1.45; }
+ul.droits li svg { margin-top: 2px; }
+ul.droits li.oui svg { color: var(--ok); }
+ul.droits li.non { color: var(--doux); }
+ul.droits li.non svg { color: var(--danger); }
+ul.droits small { color: var(--doux); }
+
+.fiches-roles { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.fiche-role { background: var(--carte); border: 1px solid var(--trait); border-top: 4px solid var(--role); border-radius: var(--rayon); padding: 16px; }
+.fiche-role.a-moi { border-color: var(--role); border-top-width: 4px; }
+.fiche-role .haut { display: flex; align-items: center; gap: 12px; }
+.fiche-role .haut > div { flex: 1; }
+.fiche-role .pastille { background: var(--role-pale); color: var(--role); }
+.fiche-role small { color: var(--role); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; }
+.fiche-role h3 { margin: 0; }
+.fiche-role > p { margin: 10px 0 4px; font-size: 14px; }
+
+.tableau-defile { max-width: 100%; overflow-x: auto; background: var(--carte); border: 1px solid var(--trait); border-radius: var(--rayon); }
+table.matrice { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+.matrice abbr { text-decoration: none; }
+.matrice th:not(:first-child) { width: 17%; font-size: 12px; }
+.matrice th, .matrice td { padding: 9px 10px; border-bottom: 1px solid var(--trait); text-align: center; }
+.matrice th { color: var(--titre); font-weight: 600; background: var(--fond); }
+.matrice th:first-child, .matrice td:first-child { text-align: left; }
+.matrice th, .matrice td { padding-left: 6px; padding-right: 6px; }
+.matrice tr:last-child td { border-bottom: 0; }
+.matrice td.oui { color: var(--ok); }
+.matrice td.non { color: var(--trait); }
+
+.legende-roles { display: grid; gap: 6px; margin: 12px 0; }
+.legende-roles > div { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; padding: 8px 10px; border-radius: var(--rayon); background: var(--role-pale); color: var(--texte); }
+.legende-roles svg { color: var(--role); margin-top: 2px; }
+.legende-roles b { color: var(--role); }
+
+/* Aperçu du message d'identifiants + mode d'emploi */
+.apercu-guide { margin: 14px 0 4px; border: 1px solid var(--trait); border-radius: var(--rayon); background: var(--fond); }
+.apercu-guide summary { cursor: pointer; padding: 10px 12px; font-size: 14px; color: var(--bleu); font-weight: 500; }
+.apercu-guide pre { margin: 0; padding: 0 12px 12px; white-space: pre-wrap; word-break: break-word; font: inherit; font-size: 13px; line-height: 1.5; color: var(--texte); }
+
+/* ── Point du jour ── */
+.ligne.carte-lien { background: var(--carte); border: 1px solid var(--trait); border-radius: var(--rayon); margin: 0 0 14px; text-decoration: none; }
+.point-jour { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 4px 0 6px; }
+.point-jour > div { border-radius: var(--rayon); padding: 12px 14px; display: grid; gap: 2px; border-left: 4px solid; }
+.point-jour small { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.point-jour b { font-size: 22px; color: var(--titre); }
+.point-jour span { font-size: 13px; color: var(--texte); }
+.pj-entrees { background: var(--ok-fond); border-color: var(--ok) !important; } .pj-entrees small { color: var(--ok); }
+.pj-sorties { background: var(--danger-fond); border-color: var(--danger) !important; } .pj-sorties small { color: var(--danger); }
+.pj-solde { grid-column: 1 / -1; background: var(--bleu-profond); border-color: var(--action) !important; }
+.pj-solde small, .pj-solde span { color: #C9D6F2; } .pj-solde b { color: #fff; font-size: 26px; }
+.pj-solde.negatif b { color: #FFB4AB; }
+.export-jour { flex-wrap: wrap; }

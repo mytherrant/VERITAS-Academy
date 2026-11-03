@@ -157,13 +157,26 @@ async function session(nav, ident, mdp) {
   const img = await page.waitForSelector('#zone-justificatif img', { timeout: 10000 }).then(() => page.evaluate(() => { const i = document.querySelector('#zone-justificatif img'); return i.complete ? i.naturalWidth : -1; })).catch(() => 0);
   ok('le justificatif s\'affiche dans la dépense (JPEG ≤ 1 280 px)', img > 0 && img <= 1280, img);
   await page.click('#feuille [data-a="fermer"]');
-  await api('sync/pousser', { ops: [{ op: id('op'), t: 'depenses', id: id('de'), champs: { centre_id: A, date: auj, libelle: 'Sans photo ' + SUF, categorie: 'autre', montant: 1000 } }] });
+  // Seuil du justificatif : obligatoire dès 10 000 F, facultatif en dessous.
+  const grosse = id('de');
+  await api('sync/pousser', { ops: [
+    { op: id('op'), t: 'depenses', id: grosse, champs: { centre_id: A, date: auj, libelle: 'Sans photo ' + SUF, categorie: 'autre', montant: 15000 } },
+    { op: id('op'), t: 'depenses', id: id('de'), champs: { centre_id: A, date: auj, libelle: 'Petite ' + SUF, categorie: 'autre', montant: 1000 } }] });
   await page.click('#puce-sync'); await aJour();
   await page.goto(B + '#/accueil'); await page.goto(B + '#/caisse');
   await page.click('[data-a="caisse-onglet"][data-v="depenses"]');
   const lSans = await page.textContent(`.ligne:has-text("Sans photo ${SUF}")`);
+  const lPetite = await page.textContent(`.ligne:has-text("Petite ${SUF}")`);
   const lAvec = await page.textContent(`.ligne:has-text("Ampoules ${SUF}")`);
-  ok('dépense sans photo : signalée « sans justificatif »', /sans justificatif/.test(lSans) && !/sans justificatif/.test(lAvec), lSans + ' / ' + lAvec);
+  ok('15 000 F sans photo : « justificatif manquant »', /justificatif manquant/.test(lSans), lSans);
+  ok('1 000 F sans photo et dépense avec photo : pas d\'alerte', !/justificatif manquant/.test(lPetite) && !/justificatif manquant/.test(lAvec), lPetite + ' / ' + lAvec);
+  const refus = await api('sync/pousser', { ops: [{ op: id('op'), t: 'depenses', id: grosse, champs: { statut: 'validee' } }] });
+  ok('serveur : validation refusée sans photo dès 10 000 F', /Justificatif obligatoire/.test(JSON.stringify(refus)), JSON.stringify(refus).slice(0, 200));
+  await page.click(`.ligne:has-text("Sans photo ${SUF}")`);
+  await page.waitForSelector('#zone-justificatif p', { timeout: 5000 }).catch(() => {});
+  const note = await page.textContent('#zone-justificatif');
+  ok('fiche : « Justificatif obligatoire à partir de 10 000 F »', /obligatoire/.test(note), note);
+  await page.click('#feuille [data-a="fermer"]');
 
   ok('aucune erreur JavaScript', page.erreurs.length === 0, page.erreurs.join(' / '));
   console.log(echecs.length ? `\n${echecs.length} échec(s)` : '\nTout est vert.');

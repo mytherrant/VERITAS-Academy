@@ -31,6 +31,8 @@ if (!defined('G_INSTALL_TOKEN')) {
 }
 if (!defined('G_SESSION_JOURS'))   define('G_SESSION_JOURS', 30);
 if (!defined('G_BCRYPT_COST'))     define('G_BCRYPT_COST', 12);
+// Dépenses : photo du justificatif exigée pour valider à partir de ce montant (FCFA).
+if (!defined('G_SEUIL_JUSTIFICATIF')) define('G_SEUIL_JUSTIFICATIF', 10000);
 if (!defined('G_LOGIN_FENETRE_MIN')) define('G_LOGIN_FENETRE_MIN', 15);
 if (!defined('G_LOGIN_MAX_IP'))      define('G_LOGIN_MAX_IP', 10);
 if (!defined('G_LOGIN_MAX_COMPTE'))  define('G_LOGIN_MAX_COMPTE', 5);
