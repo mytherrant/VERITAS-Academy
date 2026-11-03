@@ -27,6 +27,7 @@ function g_schema(): array {
             'alerte_appel_min'     => 'int:15',  // appel non fait → responsable
             'alerte_direction_min' => 'int:30',  // appel toujours pas fait → admin
             'jour_echeance'        => 'int:10',  // « les paiements se font au plus tard le 10 du mois »
+            'tresorier_id'         => 'ref',     // compte qui garde les fonds du centre et confirme les remises
             'ordre' => 'int',
             // Modèles des messages aux parents ({eleve}, {parent}, {classe}, {date}, {horaire},
             // {debut}, {arrivee}, {minutes}, {centre}, {tel_centre}). Vide = modèle par défaut.
@@ -40,6 +41,22 @@ function g_schema(): array {
             'mois_factures' => 'str:120',        // ex. « 10,11,12,1,2,3,4,5 »
             'active' => 'int',
         ] + G_COLS_SYNC, 'index' => [['rev']]],
+
+        // Remise de fonds au trésorier : le partenaire qui a encaissé (chez lui, près des
+        // parents) remet l'argent ; le trésorier confirme l'avoir reçu, ou le conteste.
+        'g_remises' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'montant' => 'int', 'date' => 'str:10', 'mode' => 'str:12',
+            'note' => 'str:200', 'remis_par' => 'ref', 'statut' => 'str:12',   // en_attente | confirmee | contestee
+            'confirme_par' => 'ref', 'confirme_le' => 'str:19', 'motif' => 'str:200',
+        ] + G_COLS_SYNC, 'index' => [['centre_id', 'date'], ['remis_par'], ['rev']]],
+
+        // Agenda du centre : rencontres, rendez-vous, réunions de parents… Les échéances
+        // de paiement ne sont pas stockées : le téléphone les déduit du jour d'échéance.
+        'g_evenements' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'titre' => 'str:160', 'type' => 'str:20',
+            'date' => 'str:10', 'heure' => 'str:5', 'fin' => 'str:5', 'lieu' => 'str:160',
+            'note' => 'str:400', 'rappel_min' => 'int',
+        ] + G_COLS_SYNC, 'index' => [['centre_id', 'date'], ['rev']]],
 
         'g_actionnaires' => ['cols' => [
             'id' => 'id', 'centre_id' => 'ref', 'nom' => 'str:120', 'tel' => 'str:30',
@@ -162,7 +179,8 @@ function g_schema(): array {
             'id' => 'id', 'centre_id' => 'ref', 'enseignant_id' => 'ref', 'mois' => 'str:7', 'montant' => 'int',
             'date' => 'str:10', 'mode' => 'str:12', 'note' => 'str:200', 'paye_par' => 'ref',
             'annule' => 'int', 'motif_annulation' => 'str:200',
-        ] + G_COLS_SYNC, 'index' => [['centre_id', 'mois'], ['enseignant_id'], ['rev']]],
+            'presence_id' => 'str:40',          // cours payé juste après (pointage de l'enseignant) ; vide = paie du mois
+        ] + G_COLS_SYNC, 'index' => [['centre_id', 'mois'], ['enseignant_id'], ['presence_id'], ['rev']]],
 
         // Tranches de numéros de reçu réservées par un compte : le téléphone numérote ses
         // reçus HORS LIGNE sans collision avec un autre appareil.
@@ -192,7 +210,7 @@ function g_registre(): array {
             'table' => 'g_centres', 'portee' => 'id', 'lire' => 'centre.voir', 'ecrire' => 'admin',
             'champs' => ['nom', 'nom_court', 'adresse', 'telephones', 'devise', 'tolerance_retard_min',
                          'alerte_appel_min', 'alerte_direction_min', 'jour_echeance', 'ordre', 'msg_absence', 'msg_retard',
-                         'msg_relance', 'msg_recu', 'inscription_option', 'inscription_option_libelle'],
+                         'msg_relance', 'msg_recu', 'inscription_option', 'inscription_option_libelle', 'tresorier_id'],
         ],
         'annees' => [
             'table' => 'g_annees', 'portee' => null, 'lire' => 'tous', 'ecrire' => 'admin',
@@ -238,7 +256,8 @@ function g_registre(): array {
             'champs' => ['centre_id', 'date', 'libelle', 'categorie', 'montant', 'mode', 'beneficiaire', 'statut', 'motif_refus'],
         ],
         'contrats' => [
-            'table' => 'g_contrats', 'portee' => 'centre_id', 'lire' => 'finances.voir', 'ecrire' => 'enseignants.gerer', 'proprio' => 'utilisateur_id',
+            // Lus aussi par qui tient la caisse : il paie l'enseignant après le cours, au taux du contrat.
+            'table' => 'g_contrats', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'enseignants.gerer', 'proprio' => 'utilisateur_id',
             'champs' => ['centre_id', 'utilisateur_id', 'mode', 'taux', 'retenue_absence', 'actif'],
         ],
         'presences_ens' => [
@@ -246,8 +265,18 @@ function g_registre(): array {
             'champs' => ['centre_id', 'creneau_id', 'enseignant_id', 'remplacant_id', 'date', 'statut', 'arrivee', 'depart', 'note'],
         ],
         'paies' => [
-            'table' => 'g_paies', 'portee' => 'centre_id', 'lire' => 'finances.voir', 'ecrire' => 'enseignants.gerer', 'proprio' => 'enseignant_id',
-            'champs' => ['centre_id', 'enseignant_id', 'mois', 'montant', 'date', 'mode', 'note', 'annule', 'motif_annulation'],
+            // Lues par qui voit la caisse (elles en sortent) ; écrites par qui encaisse : le partenaire présent
+            // paie l'enseignant juste après le cours. Les paies du mois restent au responsable (voir g_valider_enseignants).
+            'table' => 'g_paies', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'paiements.encaisser', 'proprio' => 'enseignant_id',
+            'champs' => ['centre_id', 'enseignant_id', 'mois', 'montant', 'date', 'mode', 'note', 'annule', 'motif_annulation', 'presence_id'],
+        ],
+        'remises' => [
+            'table' => 'g_remises', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'paiements.voir',
+            'champs' => ['centre_id', 'montant', 'date', 'mode', 'note', 'statut', 'motif'],
+        ],
+        'evenements' => [
+            'table' => 'g_evenements', 'portee' => 'centre_id', 'lire' => 'centre.voir', 'ecrire' => 'agenda.gerer',
+            'champs' => ['centre_id', 'titre', 'type', 'date', 'heure', 'fin', 'lieu', 'note', 'rappel_min'],
         ],
         'actionnaires' => [
             'table' => 'g_actionnaires', 'portee' => 'centre_id', 'lire' => 'finances.voir', 'ecrire' => 'admin',
@@ -309,4 +338,25 @@ function g_installer_schema(PDO $pdo): array {
         }
     }
     return $rapport;
+}
+
+/**
+ * Migration automatique : après un déploiement qui ajoute une table ou une colonne,
+ * le premier appel à l'API l'applique (sans relancer install.php). Une empreinte du
+ * schéma, gardée dans data/, évite de recommencer à chaque appel. Rien ne se fait
+ * tant que l'application n'est pas installée (install.php crée aussi les données).
+ */
+function g_schema_a_jour(): void {
+    try {
+        $empreinte = substr(hash('sha256', json_encode(g_schema())), 0, 16);
+        $fichier = __DIR__ . '/data/.schema';
+        if (@file_get_contents($fichier) === $empreinte) { return; }
+        $pdo = g_pdo();
+        try { $pdo->query('SELECT 1 FROM g_utilisateurs LIMIT 1'); } catch (Throwable $e) { return; }
+        $r = g_installer_schema($pdo);
+        if (!$r['erreurs']) { @file_put_contents($fichier, $empreinte, LOCK_EX); }
+        else { error_log('[gestion][schema] ' . implode(' ; ', $r['erreurs'])); }
+    } catch (Throwable $e) {
+        error_log('[gestion][schema] ' . $e->getMessage());
+    }
 }

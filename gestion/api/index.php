@@ -21,6 +21,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/_boot.php';
 require_once __DIR__ . '/_auth.php';
 require_once __DIR__ . '/_schema.php';
+g_schema_a_jour();
 
 $route   = trim((string) ($_GET['r'] ?? ''), '/');
 $methode = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -452,6 +453,14 @@ case 'sync/tirer': {
                               WHERE u.actif = 1 AND a.centre_id IN (' . implode(',', array_fill(0, count($centresEquipe), '?')) . ') ORDER BY u.nom');
         $st->execute($centresEquipe);
         $equipe = $st->fetchAll();
+        // L'administrateur n'a pas de ligne d'accès : son NOM suffit (auteur d'un encaissement,
+        // d'une dépense, d'une remise, trésorier). Rôle « admin ».
+        // Rattaché à chaque centre déjà visible : l'équipe reste celle des centres du compte.
+        foreach ($pdo->query('SELECT id, nom FROM g_utilisateurs WHERE admin_global = 1 AND actif = 1')->fetchAll() as $a) {
+            foreach ($centresEquipe as $cidEq) {
+                $equipe[] = ['id' => $a['id'], 'nom' => $a['nom'], 'matieres' => '', 'centre_id' => (string) $cidEq, 'role' => 'admin'];
+            }
+        }
     }
     g_ok(['rev' => $debut, 'lignes' => $out, 'equipe' => $equipe]);
 }
@@ -813,12 +822,24 @@ function g_valider_enseignants(PDO $pdo, string $table, string $id, ?array $exis
     }
 
     if ($table === 'g_paies') {
+        $gerant = g_ctx_peut('enseignants.gerer', $centre);
         if ($existant) {
             if (array_diff(array_keys($champs), ['annule', 'motif_annulation']) || (int) ($champs['annule'] ?? 0) !== 1) { throw new DomainException('Une paie ne se modifie pas : annulez-la et saisissez-la à nouveau.'); }
             if ((int) $existant['annule']) { throw new DomainException('Paie déjà annulée.'); }
+            // Le responsable annule ; celui qui a payé un cours peut corriger son erreur le jour même.
+            $auteurDuJour = (string) $existant['paye_par'] === (string) ($ctx['uid'] ?? '') && (string) $existant['date'] === date('Y-m-d');
+            if (!$gerant && !$auteurDuJour) { throw new DomainException('Seul un responsable annule une paie.'); }
             if (mb_strlen(trim((string) ($champs['motif_annulation'] ?? ''))) < 5) { throw new DomainException('Indiquez le motif de l\'annulation.'); }
             return;
         }
+        if ((string) $val('presence_id') !== '') {
+            g_valider_paie_cours($pdo, $centre, $champs, $val);
+            $champs['paye_par'] = $ctx['uid'] ?? null;
+            $champs['annule'] = 0;
+            unset($champs['motif_annulation']);
+            return;
+        }
+        if (!$gerant) { throw new DomainException('La paie du mois revient au responsable ; après un cours, utilisez « Payer » dans l\'appel.'); }
         if (!$estEnseignant((string) $val('enseignant_id'))) { throw new DomainException('Cette personne n\'est pas enseignant dans ce centre.'); }
         if (!preg_match('/^\d{4}-\d{2}$/', (string) $val('mois'))) { throw new DomainException('Mois invalide.'); }
         if ((int) $val('montant') <= 0 || (int) $val('montant') > 10000000) { throw new DomainException('Montant invalide.'); }
@@ -905,6 +926,11 @@ function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, 
             if (!g_ctx_peut('appel.corriger', (string) ($existant['centre_id'] ?? ''))) { throw new DomainException('Seul un responsable peut effacer un pointage d\'enseignant.'); }
         }
         if ($table === 'g_depenses' && ($existant['statut'] ?? '') !== 'en_attente') { throw new DomainException('Seule une dépense en attente peut être retirée.'); }
+        if ($table === 'g_remises') {
+            $ctx = $GLOBALS['g_ctx'] ?? [];
+            if (($existant['statut'] ?? '') !== 'en_attente') { throw new DomainException('Une remise confirmée ou contestée ne se retire pas.'); }
+            if (empty($ctx['admin']) && (string) ($existant['remis_par'] ?? '') !== (string) ($ctx['uid'] ?? '')) { throw new DomainException('Seul l\'auteur de la remise peut la retirer.'); }
+        }
         if ($table === 'g_seances' || $table === 'g_presences') {
             $ctx = $GLOBALS['g_ctx'] ?? null;
             $role = $ctx && !$ctx['admin'] ? ($ctx['acces'][(string) ($existant['centre_id'] ?? '')] ?? '') : 'admin';
@@ -917,6 +943,25 @@ function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, 
     if ($table === 'g_centres') {
         $j = (int) $val('jour_echeance');
         if ($j < 1 || $j > 28) { throw new DomainException('Jour d\'échéance : entre 1 et 28.'); }
+    }
+    if ($table === 'g_centres' && array_key_exists('tresorier_id', $champs) && (string) $champs['tresorier_id'] !== '') {
+        $st = $pdo->prepare('SELECT COUNT(*) FROM g_acces a JOIN g_utilisateurs u ON u.id = a.utilisateur_id WHERE a.utilisateur_id = ? AND a.centre_id = ? AND u.actif = 1');
+        $st->execute([(string) $champs['tresorier_id'], $id]);
+        $admin = $pdo->prepare('SELECT COUNT(*) FROM g_utilisateurs WHERE id = ? AND admin_global = 1 AND actif = 1');
+        $admin->execute([(string) $champs['tresorier_id']]);
+        if (!(int) $st->fetchColumn() && !(int) $admin->fetchColumn()) { throw new DomainException('Le trésorier doit avoir un compte actif dans ce centre.'); }
+    }
+    if ($table === 'g_remises') { g_valider_remise($pdo, $existant, $champs); return; }
+    if ($table === 'g_evenements') {
+        if (trim((string) $val('titre')) === '') { throw new DomainException('Donnez un titre au rendez-vous.'); }
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $val('date'))) { throw new DomainException('Date du rendez-vous invalide.'); }
+        foreach (['heure', 'fin'] as $c) {
+            $h = (string) $val($c);
+            if ($h !== '' && !preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $h)) { throw new DomainException('Heure invalide (HH:MM).'); }
+        }
+        if (!in_array((string) ($val('type') ?: 'rencontre'), ['rencontre', 'rendez_vous', 'reunion_parents', 'echeance', 'autre'], true)) { throw new DomainException('Type de rendez-vous inconnu.'); }
+        $r = (int) $val('rappel_min');
+        if ($r < 0 || $r > 20160) { throw new DomainException('Rappel : entre 0 et 14 jours.'); }
     }
     if ($table === 'g_annees' && !preg_match('/^\d{4}-\d{4}$/', (string) $val('libelle'))) {
         throw new DomainException('Année : format 2026-2027.');
@@ -1056,4 +1101,92 @@ function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, 
         $st->execute([(string) $val('centre_id'), $id]);
         if ((int) $st->fetchColumn() + $part > 10000) { throw new DomainException('Le total des parts du centre dépasserait 100 %.'); }
     }
+}
+
+/**
+ * Remise de fonds au trésorier.
+ *  - Créée par celui qui remet l'argent (remis_par = lui), toujours « en attente ».
+ *  - Tant qu'elle attend, son auteur peut corriger montant, date, mode, note.
+ *  - Seul le trésorier du centre (ou l'admin) la confirme (« reçu ») ou la conteste (« pas reçu »,
+ *    avec un motif) ; ni l'auteur ni un autre partenaire ne le peut. Une fois tranchée, elle est figée.
+ */
+function g_valider_remise(PDO $pdo, ?array $existant, array &$champs): void {
+    $ctx = $GLOBALS['g_ctx'] ?? [];
+    $uid = (string) ($ctx['uid'] ?? '');
+    $val = fn(string $c) => array_key_exists($c, $champs) ? $champs[$c] : ($existant[$c] ?? null);
+    $centre = (string) $val('centre_id');
+    $avant = $existant ? (string) $existant['statut'] : '';
+    $statut = (string) ($val('statut') ?: 'en_attente');
+    if (!in_array($statut, ['en_attente', 'confirmee', 'contestee'], true)) { throw new DomainException('Statut de remise inconnu.'); }
+    if ($avant === 'confirmee' || $avant === 'contestee') { throw new DomainException('Remise déjà tranchée par le trésorier : elle ne se modifie plus.'); }
+    $montant = (int) $val('montant');
+    if ($montant <= 0 || $montant > 50000000) { throw new DomainException('Montant de remise invalide.'); }
+    if (!in_array((string) ($val('mode') ?: 'especes'), ['especes', 'momo', 'om', 'virement', 'autre'], true)) { throw new DomainException('Mode de remise inconnu.'); }
+    $date = (string) $val('date');
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || $date > date('Y-m-d')) { throw new DomainException('Date de remise invalide.'); }
+
+    $st = $pdo->prepare('SELECT tresorier_id FROM g_centres WHERE id = ?');
+    $st->execute([$centre]);
+    $tresorier = (string) ($st->fetchColumn() ?: '');
+
+    if (!$existant) {
+        if ($statut !== 'en_attente') { throw new DomainException('Une remise naît « en attente » : le trésorier la confirme.'); }
+        if (!g_ctx_peut('paiements.encaisser', $centre)) { throw new DomainException('Seul un compte qui encaisse peut remettre des fonds.'); }
+        if ($tresorier === '') { throw new DomainException('Aucun trésorier désigné pour ce centre : l\'administrateur le choisit dans Centres.'); }
+        $champs['remis_par'] = $uid;
+        $champs['statut'] = 'en_attente';
+        unset($champs['motif']);
+        return;
+    }
+    $auteur = (string) $existant['remis_par'];
+    if ($statut === 'en_attente') {
+        if ($uid !== $auteur && empty($ctx['admin'])) { throw new DomainException('Seul l\'auteur peut corriger sa remise.'); }
+        if ((string) $val('centre_id') !== (string) $existant['centre_id']) { throw new DomainException('Une remise ne change pas de centre.'); }
+        unset($champs['motif']);
+        return;
+    }
+    // Confirmation ou contestation : le trésorier du centre, ou l'admin ; jamais l'auteur lui-même.
+    if (empty($ctx['admin']) && ($tresorier === '' || $uid !== $tresorier)) { throw new DomainException('Seul le trésorier du centre confirme la réception des fonds.'); }
+    if ($uid === $auteur && empty($ctx['admin'])) { throw new DomainException('On ne confirme pas sa propre remise.'); }
+    if ($statut === 'contestee' && trim((string) $val('motif')) === '') { throw new DomainException('Indiquez pourquoi la remise n\'est pas reçue.'); }
+    foreach (['montant', 'date', 'mode', 'note', 'centre_id'] as $c) {
+        if (array_key_exists($c, $champs) && (string) $champs[$c] !== (string) $existant[$c]) { throw new DomainException('Le trésorier confirme ou conteste, sans modifier la remise.'); }
+    }
+    $champs['confirme_par'] = $uid;
+    $champs['confirme_le'] = g_now();
+}
+
+/** Taux horaire et mode d'un enseignant dans un centre : son contrat actif, sinon 1 500 F de l'heure. */
+function g_remuneration(PDO $pdo, string $centre, string $uid): array {
+    $st = $pdo->prepare('SELECT mode, taux FROM g_contrats WHERE centre_id = ? AND utilisateur_id = ? AND actif = 1 AND supprime = 0 LIMIT 1');
+    $st->execute([$centre, $uid]);
+    $c = $st->fetch();
+    return $c ? ['mode' => (string) $c['mode'], 'taux' => (int) $c['taux']] : ['mode' => 'heure', 'taux' => (int) G_TAUX_HORAIRE_DEFAUT];
+}
+
+/**
+ * Paie d'un cours, juste après, par le partenaire présent qui a encaissé : rattachée au pointage
+ * de l'enseignant (présent, en retard ou remplaçant), une seule par cours, et jamais plus que
+ * la durée faite × le taux (à la séance : le taux ; au forfait : rien ici, c'est la paie du mois).
+ */
+function g_valider_paie_cours(PDO $pdo, string $centre, array &$champs, callable $val): void {
+    $st = $pdo->prepare('SELECT * FROM g_presences_ens WHERE id = ? AND centre_id = ? AND supprime = 0');
+    $st->execute([(string) $val('presence_id'), $centre]);
+    $p = $st->fetch();
+    if (!$p) { throw new DomainException('Cours introuvable : pointez d\'abord l\'enseignant.'); }
+    if (!in_array((string) $p['statut'], ['present', 'retard', 'remplace'], true) || (int) $p['minutes'] <= 0) { throw new DomainException('Ce cours n\'a pas été fait : rien à payer.'); }
+    $prof = (string) $p['statut'] === 'remplace' ? (string) $p['remplacant_id'] : (string) $p['enseignant_id'];
+    if ((string) $val('enseignant_id') !== $prof) { throw new DomainException('La paie va à l\'enseignant qui a fait le cours.'); }
+    $r = g_remuneration($pdo, $centre, $prof);
+    if ($r['mode'] === 'forfait') { throw new DomainException('Enseignant au forfait : il est payé au mois, pas après chaque cours.'); }
+    $max = $r['mode'] === 'seance' ? $r['taux'] : (int) round(((int) $p['minutes']) / 60 * $r['taux']);
+    $montant = (int) $val('montant');
+    if ($montant <= 0 || $montant > $max) { throw new DomainException('Montant du cours : au plus ' . number_format($max, 0, ',', ' ') . ' F.'); }
+    $st = $pdo->prepare('SELECT COUNT(*) FROM g_paies WHERE presence_id = ? AND annule = 0 AND supprime = 0');
+    $st->execute([(string) $p['id']]);
+    if ((int) $st->fetchColumn()) { throw new DomainException('Ce cours est déjà payé.'); }
+    if (!in_array((string) ($val('mode') ?: 'especes'), ['especes', 'momo', 'om', 'virement', 'autre'], true)) { throw new DomainException('Mode de paiement inconnu.'); }
+    $date = (string) $val('date');
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || $date > date('Y-m-d') || $date < (string) $p['date']) { throw new DomainException('Date de paie invalide.'); }
+    $champs['mois'] = substr((string) $p['date'], 0, 7);
 }

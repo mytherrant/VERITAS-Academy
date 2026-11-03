@@ -4,8 +4,8 @@
  * La pré-copie force cache:'reload' : elle ne doit pas recopier une vieille
  * version gardée par le cache HTTP du navigateur.
  */
-var VERSION = 'vg-0.9.7';
-var COQUILLE = ['./', 'index.html', 'app.css?v=0.9.7', 'app.js?v=0.9.7', 'manifest.webmanifest', 'icone-512.png', 'logo.png', 'polices/poppins-400.woff2', 'polices/poppins-500.woff2', 'polices/poppins-600.woff2'];
+var VERSION = 'vg-0.10.0';
+var COQUILLE = ['./', 'index.html', 'app.css?v=0.10.0', 'app.js?v=0.10.0', 'manifest.webmanifest', 'icone-512.png', 'logo.png', 'polices/poppins-400.woff2', 'polices/poppins-500.woff2', 'polices/poppins-600.woff2'];
 
 self.addEventListener('install', function (ev) {
   ev.waitUntil(caches.open(VERSION).then(function (c) {
@@ -31,5 +31,15 @@ self.addEventListener('fetch', function (ev) {
     return caches.match(ev.request).then(function (r) {
       return r || (ev.request.mode === 'navigate' ? caches.match('index.html') : Response.error());
     });
+  }));
+});
+
+// Rappels de l'agenda : toucher la notification ouvre (ou ramène) l'application sur le bon écran.
+self.addEventListener('notificationclick', function (ev) {
+  ev.notification.close();
+  var cible = new URL('./' + ((ev.notification.data && ev.notification.data.url) || ''), self.registration.scope).href;
+  ev.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (l) {
+    for (var i = 0; i < l.length; i++) { if (l[i].url.indexOf(self.registration.scope) === 0) { l[i].navigate(cible).catch(function () {}); return l[i].focus(); } }
+    return self.clients.openWindow(cible);
   }));
 });

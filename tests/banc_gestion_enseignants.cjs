@@ -76,7 +76,7 @@ async function session(nav, ident, mdp) {
   await page.goto(B + '#/enseignants');
   await page.click('.puces .puce:has-text("Ndog-passi III")').catch(() => {});
   const rangee = page.locator(`.ligne:has-text("MBALLA ${SUF}")`);
-  ok('enseignant listé, « sans contrat »', /sans contrat/.test(await rangee.textContent()), await rangee.textContent());
+  ok('enseignant listé, sans contrat : « 1 500 F/h · taux par défaut »', /1\s500\sF\/h · taux par défaut/.test(await rangee.textContent()), await rangee.textContent());
   await rangee.click();
   await page.selectOption('#feuille form[data-f="contrat"] select[name=mode]', 'heure');
   await page.fill('#feuille form[data-f="contrat"] input[name=taux]', '2000');

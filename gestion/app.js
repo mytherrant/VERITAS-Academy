@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.9.7';
+  var VERSION = '0.10.0';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -290,7 +290,8 @@
     }).then(function () {
       E.syncEnCours = false;
       majPuce();
-      if (change) rendre();
+      if (change) rendre(); else majCloche();
+      verifierRappels();
     });
     return E.syncPromesse;
   }
@@ -531,8 +532,8 @@
     } else if (centres.length === 1) {
       sel = '<span class="doux">' + esc(centres[0].nom_court || centres[0].nom) + '</span>';
     }
-    return '<header class="entete"><a class="marque" href="#/accueil"><img src="icone-512.png" alt=""><span>VÉRITAS</span></a>' +
-      '<span class="espace"></span>' + sel + '<button id="puce-sync" class="puce-sync" data-a="sync" type="button">À jour</button></header>';
+    return '<header class="entete"><button type="button" class="marque" data-a="aller-accueil" aria-label="Accueil"><span class="logo" aria-hidden="true"></span><span class="nom">VÉRITAS</span></button>' +
+      '<span class="espace"></span>' + sel + boutonCloche() + '<button id="puce-sync" class="puce-sync" data-a="sync" type="button">À jour</button></header>';
   }
 
   function navBasse(actif) {
@@ -542,7 +543,7 @@
     var caisse = peutQuelquePart('paiements.voir');
     items.push(caisse ? ['caisse', 'wallet', 'Caisse'] : ['emploi', 'calendar', 'Planning']);
     items.push(['moi', 'list', 'Plus']);
-    var sousPlus = ['roles', 'admin', 'comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
+    var sousPlus = ['agenda', 'roles', 'admin', 'comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
     return '<nav class="nav-basse" aria-label="Navigation">' + items.map(function (i) {
       var on = i[0] === actif || (i[0] === 'moi' && sousPlus.indexOf(actif) >= 0) || (i[0] === 'appel' && actif === 'pointage') || (i[0] === 'caisse' && actif === 'jour');
       return '<a href="#/' + i[0] + '" class="' + (on ? 'actif' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + ico(i[1]) + i[2] + '</a>';
@@ -594,7 +595,7 @@
         var auj = new Date();
         var h = '<h1>Bonjour ' + esc(String(u.nom).split(' ')[0]) + '</h1><p class="sous-titre">' +
           esc(auj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })) + '</p>' +
-          bandeauEspace() + blocMesCours();
+          bandeauEspace() + blocMesCours() + blocProchainsRdv();
         if (estEnseignantQuelquePart() && centresChoisis().length) h += '<h2>Mes centres</h2>';
 
         var centres = centresChoisis();
@@ -639,6 +640,7 @@
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) tuiles.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
         tuiles.push(['#/assiduite', 'activity', 'Assiduité', 'Taux, retards, alertes']);
         tuiles.push(['#/eleves', 'graduation', 'Élèves', peutQuelquePart('eleves.gerer') ? 'Inscrire, rechercher, importer' : 'Fiches et contacts des parents']);
+        tuiles.push(['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances']);
         tuiles.push(['#/emploi', 'calendar', 'Emploi du temps', peutQuelquePart('emploi.gerer') ? 'Classes, créneaux, enseignants' : 'Les cours de la semaine']);
         if (panneauOuvert()) tuiles.push(['#/admin', 'shield', 'Administration', 'Comptes, identifiants, partenaires et droits']);
         if (peutQuelquePart('finances.voir')) tuiles.push(['#/actionnaires', 'handshake', 'Actionnaires', 'Parts de chaque centre']);
@@ -783,6 +785,9 @@
     roles: {
       html: function () { return pageRoles(); }
     },
+    agenda: {
+      html: function () { return pageAgenda(); }
+    },
 
     moi: {
       html: function () {
@@ -793,7 +798,7 @@
         }).join('');
         var h = '<h1>Mon compte</h1><div class="carte"><h3>' + esc(u.nom) + '</h3><p class="doux">Identifiant : ' + esc(u.identifiant) + '</p><p>' +
           (u.admin ? '<span class="badge or">Administrateur des deux centres</span>' : '') + acces + '</p></div>' + carteMonRole();
-        var liens = [['#/roles', 'info', 'Rôles et droits', 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']];
+        var liens = [['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances, rappels'], ['#/roles', 'info', 'Rôles et droits', 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']];
         if (peutQuelquePart('finances.voir')) liens.push(['#/bilan', 'trending', 'Bilan financier', 'Recettes, dépenses, parts des actionnaires']);
         if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) liens.push(['#/enseignants', 'presentation', 'Enseignants', 'Heures faites, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) liens.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
@@ -949,8 +954,15 @@
         else if (!p.depart) b += '<button type="button" class="rond" data-a="pointer-ens" data-v="depart" data-cr="' + esc(c.id) + '" aria-label="Parti maintenant">' + ico('download') + '</button>';
         if (!p || p.statut !== 'absent') b += '<button type="button" class="rond abs" data-a="pointer-ens" data-v="absent" data-cr="' + esc(c.id) + '" aria-label="Absent">' + ico('x') + '</button>';
       }
+      // Payer l'enseignant juste après le cours : départ pointé, ou fin du cours passée.
+      var mc = montantCours(p), fini = p && (p.depart || iso < isoLocal(new Date()) || heureMaintenant() >= c.fin), payer = '';
+      if (mc && fini && peut('paiements.encaisser', cid)) {
+        var paie = paieDuCours(p.id);
+        if (paie) etat += '<small class="st-present">' + ico('check', 'p') + ' Payé ' + fcfa(paie.montant) + ' par ' + esc(nomCompte(paie.paye_par)) + '</small>';
+        else payer = '<button type="button" class="btn or petit payer" data-a="payer-cours" data-pe="' + esc(p.id) + '" data-cr="' + esc(c.id) + '">' + ico('wallet', 'p') + 'Payer ' + fcfa(mc.montant) + '</button>';
+      }
       return '<div class="ligne' + (p ? ' pt-' + (p.statut === 'remplace' ? 'justifie' : p.statut) : '') + '"><button type="button" class="corps nom-eleve" data-a="detail-ens" data-cr="' + esc(c.id) + '"' + (modifiable && c.enseignant_id ? '' : ' disabled') + '><b>' + esc(qui) + '</b><small>' + esc(heureLisible(c.debut) + ' – ' + heureLisible(c.fin) + ' · ' + nomDe('classes', c.classe_id) + ' · ' + nomDe('matieres', c.matiere_id)) + '</small>' + etat + '</button>' +
-        (p && p._attente ? '<span class="badge alerte">en attente</span>' : '') + '<span class="boutons">' + b + '</span></div>';
+        (p && p._attente ? '<span class="badge alerte">en attente</span>' : '') + '<span class="boutons">' + payer + b + '</span></div>';
     }).join('') + '</div>';
   }
   function minutesEns(c, arrivee, depart) {
@@ -1013,7 +1025,7 @@
       faites += Number(p.minutes) || 0; seances++;
       if (p.statut === 'retard') { retards++; minRetard += Number(p.retard_min) || 0; }
     });
-    var contrat = lignes('contrats').filter(function (c) { return c.centre_id === cid && c.utilisateur_id === uid && Number(c.actif); })[0] || null;
+    var contrat = contratDe(uid, cid);
     var du = 0;
     if (contrat) {
       var t = Number(contrat.taux) || 0;
@@ -1025,6 +1037,24 @@
       remplacements: remplacements, contrat: contrat, du: du, verse: verse, reste: Math.max(0, du - verse), paies: paies, pres: pres, crs: crs };
   }
   var LIB_MODE_REM = { heure: 'à l\'heure', seance: 'à la séance', forfait: 'au forfait mensuel' };
+  // Sans contrat particulier, un enseignant est payé 1 500 F de l'heure (même valeur côté serveur).
+  var TAUX_HORAIRE_DEFAUT = 1500;
+  function contratDe(uid, cid) {
+    return lignes('contrats').filter(function (c) { return c.centre_id === cid && c.utilisateur_id === uid && Number(c.actif); })[0] ||
+      { mode: 'heure', taux: TAUX_HORAIRE_DEFAUT, defaut: true };
+  }
+  function idPaieCours(presenceId) { return 'pp' + presenceId; }
+  function paieDuCours(presenceId) { return lignes('paies').filter(function (x) { return x.presence_id === presenceId && !Number(x.annule); })[0] || null; }
+  /** Ce que rapporte un cours pointé : à qui, combien, selon quel calcul. null s'il n'y a rien à payer. */
+  function montantCours(p) {
+    if (!p || ['present', 'retard', 'remplace'].indexOf(p.statut) < 0 || !(Number(p.minutes) > 0)) return null;
+    var prof = p.statut === 'remplace' ? p.remplacant_id : p.enseignant_id;
+    var k = contratDe(prof, p.centre_id);
+    if (k.mode === 'forfait') return null;
+    var t = Number(k.taux) || 0;
+    var m = k.mode === 'seance' ? t : Math.round(Number(p.minutes) / 60 * t);
+    return { prof: prof, montant: m, calcul: k.mode === 'seance' ? 'séance · ' + fcfa(t) : dureeLisible(Number(p.minutes)) + ' × ' + fcfa(t) + '/h' };
+  }
   function enteteMois(etat, action) {
     var auj = isoLocal(new Date()).slice(0, 7);
     if (!etat.mois) etat.mois = auj;
@@ -1052,7 +1082,8 @@
       var mats = String(t.matieres || '').split(',').filter(Boolean).map(function (m) { return nomDe('matieres', m); }).filter(Boolean);
       return '<button class="ligne" type="button" data-a="voir-ens" data-id="' + esc(t.id) + '"><span class="avatar">' + esc(initiales(t.nom)) + '</span><span class="corps"><b>' + esc(t.nom) + '</b>' +
         '<small>' + esc([mats.join(', '), Object.keys(classes).join(', ')].filter(Boolean).join(' · ') || 'aucun cours') + '</small>' +
-        '<small>' + dureeLisible(b.faites) + ' faites / ' + dureeLisible(b.prevues) + ' prévues' + (b.absences ? ' · ' + b.absences + ' abs.' : '') + (b.retards ? ' · ' + b.retards + ' retard' + (b.retards > 1 ? 's' : '') : '') + '</small></span>' +
+        '<small>' + dureeLisible(b.faites) + ' faites / ' + dureeLisible(b.prevues) + ' prévues' + (b.absences ? ' · ' + b.absences + ' abs.' : '') + (b.retards ? ' · ' + b.retards + ' retard' + (b.retards > 1 ? 's' : '') : '') + '</small>' +
+        (b.contrat.defaut ? '<small>' + fcfa(TAUX_HORAIRE_DEFAUT) + '/h · taux par défaut</small>' : '') + '</span>' +
         '<span class="fin">' + (b.contrat ? '<b>' + fcfa(b.du) + '</b>' + (b.reste ? '<span class="badge alerte">reste ' + fcfa(b.reste) + '</span>' : b.du ? '<span class="badge ok">payé</span>' : '') : '<span class="badge">sans contrat</span>') + '</span></button>';
     });
     h += '<div class="stats"><div><b>' + fcfa(tot.du) + '</b><small>dû ce mois</small></div><div><b>' + fcfa(tot.verse) + '</b><small>versé</small></div></div><div class="liste">' + rows.join('') + '</div>';
@@ -1063,11 +1094,11 @@
     var t = enseignantsDu(cid).filter(function (e) { return e.id === uid; })[0] || { nom: '' };
     var b = bilanEnseignant(uid, cid, ENS.mois);
     var gere = peut('enseignants.gerer', cid);
-    var c = b.contrat || { mode: 'heure', taux: '', retenue_absence: '' };
+    var c = b.contrat;
     ouvrirFeuille('<h2>' + esc(t.nom) + '</h2><p class="doux">' + esc((ligne('centres', cid) || {}).nom || '') + ' · ' + esc(MOIS[Number(ENS.mois.slice(5)) - 1] + ' ' + ENS.mois.slice(0, 4)) + '</p>' +
       '<div class="stats petites"><div><b>' + dureeLisible(b.faites) + '</b><small>faites (' + b.seances + ' séance' + (b.seances > 1 ? 's' : '') + ')</small></div><div><b>' + dureeLisible(b.prevues) + '</b><small>prévues</small></div><div><b>' + b.absences + '</b><small>absences</small></div></div>' +
       '<div class="infos"><div class="info"><span>Retards</span><b>' + b.retards + (b.minRetard ? ' (' + b.minRetard + ' min)' : '') + '</b></div>' + (b.remplacements ? '<div class="info"><span>Remplacements assurés</span><b>' + b.remplacements + '</b></div>' : '') +
-      '<div class="info"><span>Rémunération</span><b>' + (b.contrat ? esc(LIB_MODE_REM[b.contrat.mode]) + ' · ' + fcfa(b.contrat.taux) : 'pas de contrat') + '</b></div>' +
+      '<div class="info"><span>Rémunération</span><b>' + esc(LIB_MODE_REM[b.contrat.mode]) + ' · ' + fcfa(b.contrat.taux) + (b.contrat.defaut ? ' (taux par défaut)' : '') + '</b></div>' +
       '<div class="info"><span>Dû ce mois</span><b>' + fcfa(b.du) + '</b></div><div class="info"><span>Versé</span><b>' + fcfa(b.verse) + '</b></div><div class="info"><span>Reste</span><b class="' + (b.reste ? 'st-absent' : 'st-present') + '">' + fcfa(b.reste) + '</b></div></div>' +
       (b.paies.length ? '<h3>Paies du mois</h3><div class="liste">' + b.paies.map(function (p) {
         return '<div class="ligne"><span class="corps"><b' + (Number(p.annule) ? ' class="barre-txt"' : '') + '>' + fcfa(p.montant) + '</b><small>' + esc(dateLisible(p.date, true) + ' · ' + MODES[p.mode] + (Number(p.annule) ? ' · annulée : ' + (p.motif_annulation || '') : '')) + '</small></span>' +
@@ -1076,7 +1107,7 @@
       (gere ? '<form data-f="paie" data-ens="' + esc(uid) + '"><h3>Verser la paie</h3><div class="deux"><label class="champ"><span>Montant (F)</span><input type="number" name="montant" min="1" value="' + (b.reste || '') + '" required></label>' +
         '<label class="champ"><span>Mode</span><select name="mode">' + Object.keys(MODES).map(function (m) { return '<option value="' + m + '">' + MODES[m] + '</option>'; }).join('') + '</select></label></div>' +
         '<div class="actions"><button class="btn or" type="submit">' + ico('wallet', 'p') + 'Verser</button></div></form>' +
-        '<form data-f="contrat" data-ens="' + esc(uid) + '" data-id="' + esc(b.contrat ? b.contrat.id : '') + '"><h3>Contrat</h3><div class="deux"><label class="champ"><span>Rémunéré</span><select name="mode">' +
+        '<form data-f="contrat" data-ens="' + esc(uid) + '" data-id="' + esc(b.contrat.defaut ? '' : b.contrat.id) + '"><h3>Contrat</h3><div class="deux"><label class="champ"><span>Rémunéré</span><select name="mode">' +
         Object.keys(LIB_MODE_REM).map(function (m) { return '<option value="' + m + '"' + (c.mode === m ? ' selected' : '') + '>' + LIB_MODE_REM[m] + '</option>'; }).join('') + '</select></label>' +
         '<label class="champ"><span>Taux (F)</span><input type="number" name="taux" min="0" required value="' + esc(c.taux) + '"></label></div>' +
         '<label class="champ"><span>Retenue par absence (forfait)</span><input type="number" name="retenue_absence" min="0" value="' + esc(c.retenue_absence || '') + '"></label>' +
@@ -1140,7 +1171,7 @@
       h += l.length ? '<div class="liste">' + l.map(function (p) {
         var cr = ligne('creneaux', p.creneau_id) || {};
         var lui = p.statut === 'remplace' ? (p.remplacant_id === u.id ? 'Remplacement assuré' : 'Remplacé') : LIB_ENS[p.statut];
-        return '<div class="ligne"><span class="corps"><b>' + esc(dateLisible(p.date, true) + ' · ' + nomDe('classes', cr.classe_id)) + '</b><small>' + esc(lui + (p.arrivee ? ' · ' + p.arrivee : '') + (p.depart ? ' → ' + p.depart : '') + (Number(p.retard_min) ? ' (+' + p.retard_min + ' min)' : '')) + '</small></span><span class="fin"><b>' + dureeLisible(Number(p.minutes) || 0) + '</b></span></div>';
+        return '<div class="ligne"><span class="corps"><b>' + esc(dateLisible(p.date, true) + ' · ' + nomDe('classes', cr.classe_id)) + '</b><small>' + esc(lui + (p.arrivee ? ' · ' + p.arrivee : '') + (p.depart ? ' → ' + p.depart : '') + (Number(p.retard_min) ? ' (+' + p.retard_min + ' min)' : '')) + '</small>' + (function () { var pc = paieDuCours(p.id); return pc ? '<span class="badge ok">payé ' + fcfa(pc.montant) + ' le ' + esc(dateLisible(pc.date, true)) + '</span>' : ''; })() + '</span><span class="fin"><b>' + dureeLisible(Number(p.minutes) || 0) + '</b></span></div>';
       }).join('') + '</div>' : '<div class="carte vide">Aucun cours pointé ce mois-ci.</div>';
     });
     return h;
@@ -1601,6 +1632,8 @@
     if (!cid) return h + '<div class="carte vide">Aucun centre.</div>';
     var imp = impayes(cid);
     var onglets = (encaisse ? [['encaisser', 'Encaisser']] : []).concat([['jour', 'Journal'], ['impayes', 'Impayés' + (imp.length ? ' · ' + imp.length : '')]]);
+    var aConf = (estTresorier(cid) || estAdmin()) ? remisesDu(cid).filter(function (r) { return (r.statut || 'en_attente') === 'en_attente' && r.remis_par !== E.profil.utilisateur.id; }).length : 0;
+    onglets.push(['remises', 'Remises' + (aConf ? ' · ' + aConf : '')]);
     if (peut('depenses.voir', cid)) onglets.push(['depenses', 'Dépenses']);
     h += '<div class="onglets">' + onglets.map(function (o) { return '<button type="button" class="' + (CAI.onglet === o[0] ? 'on' : '') + '" data-a="caisse-onglet" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>';
 
@@ -1618,6 +1651,8 @@
         Object.keys(MODES).filter(function (m) { return parMode[m]; }).map(function (m) { return '<div><b>' + fcfa(parMode[m]) + '</b><small>' + MODES[m] + '</small></div>'; }).join('') + '</div>';
       h += '<a class="ligne carte-lien" href="#/jour"><span class="pastille">' + ico('chart') + '</span><span class="corps"><b>Point du jour</b><small>Entrées, sorties, solde : fiche à envoyer aux actionnaires</small></span><span class="fin">›</span></a>';
       h += du.length ? '<div class="liste">' + du.map(ligneVersement).join('') + '</div>' : '<div class="carte vide">Aucun versement ce jour-là.</div>';
+    } else if (CAI.onglet === 'remises') {
+      h += ongletRemises(cid);
     } else if (CAI.onglet === 'impayes') {
       var total = imp.reduce(function (s, x) { return s + x.ech.impaye; }, 0);
       var c = ligne('centres', cid) || {};
@@ -1635,6 +1670,15 @@
       if (!E.cache.photosEnAttente) idbTout('fichiers').then(function (f) { E.cache.photosEnAttente = {}; f.forEach(function (x) { E.cache.photosEnAttente[x.id] = 1; }); if (f.length) rendre(); });
       var att = deps.filter(function (d) { return d.statut === 'en_attente'; });
       h += '<p class="sous-titre">' + (att.length ? '<b>' + att.length + '</b> en attente de validation · ' : '') + 'Une dépense validée ne se modifie plus.</p>';
+      var paiesC = peut('paiements.voir', cid) ? lignes('paies').filter(function (x) { return x.centre_id === cid; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; }) : [];
+      if (paiesC.length) {
+        var moisCourant = isoLocal(new Date()).slice(0, 7);
+        var totP = paiesC.filter(function (x) { return !Number(x.annule) && String(x.date).slice(0, 7) === moisCourant; }).reduce(function (s, x) { return s + Number(x.montant); }, 0);
+        h += '<h2>Paies des enseignants</h2><p class="sous-titre">' + fcfa(totP) + ' ce mois · 1 500 F de l\'heure sauf contrat particulier.</p><div class="liste">' + paiesC.slice(0, 40).map(function (x) {
+          return '<div class="ligne"><span class="pastille">' + ico('presentation') + '</span><span class="corps"><b' + (Number(x.annule) ? ' class="barre-txt"' : '') + '>' + esc(nomPersonne(x.enseignant_id) || 'Enseignant') + '</b><small>' +
+            esc(dateLisible(x.date, true) + ' · ' + (x.note || 'Paie du mois') + ' · payé par ' + nomCompte(x.paye_par) + (Number(x.annule) ? ' · annulée' : '')) + '</small></span><span class="fin"><b>− ' + fcfa(x.montant) + '</b></span></div>';
+        }).join('') + '</div><h2>Autres dépenses</h2>';
+      }
       h += deps.length ? '<div class="liste">' + deps.slice(0, 80).map(function (d) {
         var st = d.statut === 'validee' ? '<span class="badge ok">validée</span>' : d.statut === 'refusee' ? '<span class="badge danger">refusée</span>' : '<span class="badge alerte">en attente</span>';
         var sansJ = justificatifExige(d) && !d.justificatif && !(E.cache.photosEnAttente || {})[d.id] ? ' <span class="badge alerte">justificatif manquant</span>' : '';
@@ -1852,7 +1896,7 @@
   // pour les actionnaires. Même centre et même jour que l'onglet Journal de la caisse.
   function pointDuJour(cid, iso) {
     var somme = function (l) { return l.reduce(function (s, x) { return s + (Number(x.montant) || 0); }, 0); };
-    var voitDep = peut('depenses.voir', cid), voitPaies = peut('finances.voir', cid);
+    var voitDep = peut('depenses.voir', cid), voitPaies = peut('depenses.voir', cid);
     var pay = lignes('paiements').filter(function (p) { return p.centre_id === cid && p.date === iso; })
       .sort(function (a, b) { return String(a.numero || 'zz').localeCompare(String(b.numero || 'zz')); });
     var entrees = pay.filter(function (p) { return !Number(p.annule); });
@@ -2089,6 +2133,7 @@
         Object.keys(parCat).map(function (k) { return '<div class="info"><span>Dépenses · ' + CATEGORIES[k] + '</span><b>− ' + fcfa(parCat[k]) + '</b></div>'; }).join('') +
         (totPaies ? '<div class="info"><span>Paies des enseignants</span><b>− ' + fcfa(totPaies) + '</b></div>' : '') +
         (deps.some(function (d) { return d.statut === 'en_attente'; }) ? '<div class="info"><span>Dépenses en attente (non comptées)</span><b>' + fcfa(deps.filter(function (d) { return d.statut === 'en_attente'; }).reduce(function (s, d) { return s + Number(d.montant); }, 0)) + '</b></div>' : '') + '</div>';
+      h += infosFondsBilan(c.id);
       if (acts.length) {
         h += '<h3>Part des actionnaires</h3><div class="liste">' + acts.map(function (a) {
           return '<div class="ligne"><span class="corps"><b>' + esc(a.nom) + '</b><small>' + pourcent(a.part_centiemes) + '</small></span><span class="fin"><b>' + fcfa(Math.round(res * Number(a.part_centiemes) / 10000)) + '</b></span></div>';
@@ -2594,6 +2639,388 @@
     return String(liste || '').split(',').filter(Boolean).map(function (m) { return MOIS[(+m - 1)] || m; }).join(', ') || '—';
   }
 
+  // ───────────────────────────── Remises de fonds au trésorier ─────────────────────────────
+  // Chaque partenaire encaisse selon ses jours au centre et sa proximité avec les parents,
+  // envoie le reçu, puis REMET l'argent au trésorier du centre avant la fin du mois. Le
+  // trésorier confirme la réception (« Reçu ») ou la conteste (« Pas reçu », avec motif).
+  // Ce qu'un partenaire garde en main = ses encaissements − ses dépenses saisies − ses remises.
+  function tresorierDe(cid) { return (ligne('centres', cid) || {}).tresorier_id || ''; }
+  function estTresorier(cid) { return !!E.profil && tresorierDe(cid) === E.profil.utilisateur.id; }
+  function estTresorierQuelquePart() { return lignes('centres').some(function (c) { return estTresorier(c.id); }); }
+  function nomCompte(id) { return id === E.profil.utilisateur.id ? E.profil.utilisateur.nom : (nomPersonne(id) || 'Ancien compte'); }
+  /** « 12 000 F » à remettre, ou « 0 F » quand il a déjà remis plus que ses encaissements enregistrés. */
+  function libReste(x) { return x.reste >= 0 ? fcfa(x.reste) : fcfa(0); }
+  function remisesDu(cid) { return lignes('remises').filter(function (r) { return r.centre_id === cid; }).sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : String(b.maj_le || '').localeCompare(String(a.maj_le || '')); }); }
+  /** Fonds d'un compte dans un centre (cumul), et ce qui reste en main. */
+  function soldeFonds(uid, cid) {
+    var somme = function (l) { return l.reduce(function (s, x) { return s + (Number(x.montant) || 0); }, 0); };
+    var enc = somme(lignes('paiements').filter(function (p) { return p.centre_id === cid && p.encaisse_par === uid && !Number(p.annule); }));
+    var dep = somme(lignes('depenses').filter(function (d) { return d.centre_id === cid && d.saisie_par === uid && d.statut !== 'refusee'; })) +
+      somme(lignes('paies').filter(function (x) { return x.centre_id === cid && x.paye_par === uid && !Number(x.annule); }));
+    var rs = remisesDu(cid).filter(function (r) { return r.remis_par === uid; });
+    var conf = somme(rs.filter(function (r) { return r.statut === 'confirmee'; }));
+    var att = somme(rs.filter(function (r) { return (r.statut || 'en_attente') === 'en_attente'; }));
+    return { encaisse: enc, depenses: dep, confirme: conf, attente: att, reste: enc - dep - conf - att };
+  }
+  /** Comptes qui ont manié de l'argent dans ce centre (encaissé, dépensé ou remis). */
+  function comptesFonds(cid) {
+    var ids = {};
+    lignes('paiements').forEach(function (p) { if (p.centre_id === cid && p.encaisse_par) ids[p.encaisse_par] = 1; });
+    lignes('depenses').forEach(function (d) { if (d.centre_id === cid && d.saisie_par) ids[d.saisie_par] = 1; });
+    lignes('paies').forEach(function (x) { if (x.centre_id === cid && x.paye_par && !Number(x.annule)) ids[x.paye_par] = 1; });
+    remisesDu(cid).forEach(function (r) { if (r.remis_par) ids[r.remis_par] = 1; });
+    return Object.keys(ids);
+  }
+  function finDuMois(iso) { return decalerJour(moisSuivantIso(iso.slice(0, 7)) + '-01', -1); }
+  var LIB_STATUT_REMISE = { en_attente: ['en attente du trésorier', 'alerte'], confirmee: ['reçue par le trésorier', 'ok'], contestee: ['pas reçue', 'danger'] };
+
+  function ligneRemise(r, cid) {
+    var moi = E.profil.utilisateur.id, st = LIB_STATUT_REMISE[r.statut || 'en_attente'];
+    var attente = (r.statut || 'en_attente') === 'en_attente';
+    var tresorier = (estTresorier(cid) || estAdmin()) && attente && r.remis_par !== moi;
+    var auteur = attente && r.remis_par === moi;
+    return '<div class="ligne remise"><span class="avatar">' + esc(initiales(nomCompte(r.remis_par))) + '</span><span class="corps"><b>' + esc(nomCompte(r.remis_par)) + ' · ' + fcfa(r.montant) + '</b>' +
+      '<small>' + esc(dateLisible(r.date, true) + ' · ' + (MODES[r.mode] || r.mode || 'Espèces') + (r.note ? ' · ' + r.note : '')) + '</small>' +
+      (r.statut === 'contestee' && r.motif ? '<small class="motif">Motif : ' + esc(r.motif) + '</small>' : '') +
+      (r.confirme_par && !attente ? '<small>' + (r.statut === 'confirmee' ? 'Confirmée' : 'Contestée') + ' par ' + esc(nomCompte(r.confirme_par)) + (r.confirme_le ? ' le ' + esc(dateLisible(r.confirme_le, true)) : '') + '</small>' : '') +
+      '<span><span class="badge ' + st[1] + '">' + esc(st[0]) + '</span>' + (r._attente ? '<span class="badge">à envoyer</span>' : '') + '</span>' +
+      (tresorier ? '<span class="boutons"><button class="btn or petit" type="button" data-a="remise-recue" data-id="' + esc(r.id) + '">' + ico('check', 'p') + 'Reçu</button><button class="btn danger petit" type="button" data-a="remise-contester" data-id="' + esc(r.id) + '">Pas reçu</button></span>' : '') +
+      (auteur ? '<span class="boutons"><button class="btn clair petit" type="button" data-a="remise-prevenir" data-id="' + esc(r.id) + '">' + ico('message', 'p') + 'Prévenir le trésorier</button><button class="btn clair petit" type="button" data-a="editer-remise" data-id="' + esc(r.id) + '">Modifier</button></span>' : '') +
+      '</span></div>';
+  }
+
+  /** Onglet « Remises » de la caisse. */
+  function ongletRemises(cid) {
+    var moi = E.profil.utilisateur.id, tres = tresorierDe(cid), h = '';
+    var c = ligne('centres', cid) || {};
+    if (!tres) {
+      h += '<div class="carte note-carte">' + ico('alert', 'p') + ' <b>Aucun trésorier désigné</b> pour ' + esc(c.nom_court || c.nom || 'ce centre') + '. ' +
+        (estAdmin() ? 'Choisissez-le dans la fiche du centre.</div><div class="actions"><button class="btn or" type="button" data-a="editer-centre" data-id="' + esc(cid) + '">Choisir le trésorier</button></div>' : 'L\'administrateur doit le choisir.</div>');
+    } else {
+      h += '<p class="sous-titre">Trésorier : <b>' + esc(nomCompte(tres)) + '</b>' + (estTresorier(cid) ? ' (vous)' : '') + ' · fonds à remettre avant le ' + esc(dateLisible(finDuMois(isoLocal(new Date())), true)) + '.</p>';
+    }
+    // Ce que j'ai en main.
+    if (peut('paiements.encaisser', cid) && !estTresorier(cid)) {
+      var s = soldeFonds(moi, cid);
+      h += '<h2>Chez vous</h2><div class="stats petites"><div><b>' + fcfa(s.encaisse) + '</b><small>encaissé</small></div><div><b>' + fcfa(s.depenses) + '</b><small>dépenses et paies</small></div><div><b>' + fcfa(s.confirme + s.attente) + '</b><small>remis' + (s.attente ? ' (dont ' + fcfa(s.attente) + ' à confirmer)' : '') + '</small></div></div>' +
+        '<div class="carte a-remettre' + (s.reste > 0 ? ' du' : '') + '"><span>À remettre au trésorier' + (s.reste < 0 ? '<small>Vous avez remis ' + fcfa(-s.reste) + ' de plus que vos encaissements enregistrés.</small>' : '') + '</span><b>' + libReste(s) + '</b></div>' +
+        (tres ? '<div class="actions"><button class="btn or" type="button" data-a="editer-remise" data-id="" data-montant="' + Math.max(0, s.reste) + '">' + ico('wallet', 'p') + 'Remettre au trésorier</button></div>' : '');
+    }
+    // Le trésorier (ou l'admin) tranche.
+    var aConfirmer = remisesDu(cid).filter(function (r) { return (r.statut || 'en_attente') === 'en_attente' && r.remis_par !== moi; });
+    if (estTresorier(cid) || estAdmin()) {
+      h += '<h2>À confirmer' + (aConfirmer.length ? ' · ' + aConfirmer.length : '') + '</h2>' + (aConfirmer.length ? '<div class="liste">' + aConfirmer.map(function (r) { return ligneRemise(r, cid); }).join('') + '</div>' : '<div class="carte vide">Aucune remise en attente.</div>');
+    }
+    // Vue d'ensemble pour le trésorier et ceux qui voient le bilan.
+    if (estTresorier(cid) || peut('finances.voir', cid)) {
+      var gens = comptesFonds(cid), totMain = 0, totConf = 0;
+      var lignesP = gens.map(function (uid) {
+        var x = soldeFonds(uid, cid);
+        if (uid === tres) { totConf += x.encaisse - x.depenses; return ''; }
+        totMain += Math.max(0, x.reste); totConf += x.confirme;
+        return '<div class="ligne"><span class="avatar">' + esc(initiales(nomCompte(uid))) + '</span><span class="corps"><b>' + esc(nomCompte(uid)) + '</b><small>Encaissé ' + fcfa(x.encaisse) + ' · dépenses et paies ' + fcfa(x.depenses) + ' · remis ' + fcfa(x.confirme) + (x.attente ? ' (+ ' + fcfa(x.attente) + ' à confirmer)' : '') + '</small></span>' +
+          '<span class="fin"><b' + (x.reste > 0 ? ' class="st-retard"' : '') + '>' + libReste(x) + '</b><small>' + (x.reste < 0 ? 'remis en plus : ' + fcfa(-x.reste) : 'en main') + '</small></span></div>';
+      }).join('');
+      h += '<h2>Fonds du centre</h2><div class="stats"><div><b>' + fcfa(totConf) + '</b><small>chez le trésorier (confirmé)</small></div><div><b>' + fcfa(totMain) + '</b><small>encore chez les partenaires</small></div></div>' +
+        (lignesP ? '<div class="liste">' + lignesP + '</div>' : '');
+    }
+    var hist = remisesDu(cid).filter(function (r) { return aConfirmer.indexOf(r) < 0 || !(estTresorier(cid) || estAdmin()); });
+    h += '<h2>Historique des remises</h2>' + (hist.length ? '<div class="liste">' + hist.slice(0, 60).map(function (r) { return ligneRemise(r, cid); }).join('') + '</div>' : '<div class="carte vide">Aucune remise pour l\'instant.</div>');
+    return h;
+  }
+
+  function feuilleRemise(id, cid, montantDefaut) {
+    var r = id ? ligne('remises', id) : null;
+    cid = r ? r.centre_id : cid;
+    var d = r || { montant: montantDefaut || '', date: isoLocal(new Date()), mode: 'especes', note: '' };
+    ouvrirFeuille('<h2>' + (r ? 'Modifier la remise' : 'Remettre au trésorier') + '</h2><p class="doux">' + esc((ligne('centres', cid) || {}).nom || '') + ' · trésorier : ' + esc(nomCompte(tresorierDe(cid))) + '</p>' +
+      '<form data-f="remise" data-id="' + esc(id || '') + '" data-centre="' + esc(cid) + '">' +
+      '<div class="deux"><label class="champ"><span>Montant (FCFA)</span><input type="number" name="montant" min="1" required value="' + esc(d.montant) + '"></label>' +
+      '<label class="champ"><span>Date</span><input type="date" name="date" required max="' + isoLocal(new Date()) + '" value="' + esc(d.date) + '"></label></div>' +
+      '<label class="champ"><span>Remis en</span><select name="mode">' + Object.keys(MODES).map(function (k) { return '<option value="' + k + '"' + (d.mode === k ? ' selected' : '') + '>' + MODES[k] + '</option>'; }).join('') + '</select></label>' +
+      '<label class="champ"><span>Note</span><input type="text" name="note" maxlength="200" value="' + esc(d.note || '') + '" placeholder="ex. : versements de la semaine, réf. MoMo…"></label>' +
+      '<p class="doux">Le trésorier confirmera la réception. Tant qu\'il ne l\'a pas fait, vous pouvez corriger ou retirer la remise.</p>' +
+      '<div class="actions"><button class="btn or" type="submit">' + (r ? 'Enregistrer' : 'Enregistrer la remise') + '</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>' +
+      (r ? '<div class="actions"><button class="btn danger" type="button" data-a="suppr-remise" data-id="' + esc(id) + '">Retirer la remise</button></div>' : ''));
+  }
+  function messageRemise(r) {
+    var c = ligne('centres', r.centre_id) || {};
+    return 'Bonjour ' + nomCompte(tresorierDe(r.centre_id)) + ', je vous ai remis ' + fcfa(r.montant).replace(/ /g, ' ') + ' (' + (MODES[r.mode] || 'espèces') + ') le ' + dateLisible(r.date, true) +
+      ' pour ' + (c.nom || 'le centre') + (r.note ? ' — ' + r.note : '') + '. Merci de confirmer la réception dans VÉRITAS Gestion (Caisse › Remises). ' + E.profil.utilisateur.nom;
+  }
+
+  /** Bilan : où est l'argent du centre. */
+  function infosFondsBilan(cid) {
+    if (!lignes('remises').some(function (r) { return r.centre_id === cid; }) && !tresorierDe(cid)) return '';
+    var tres = tresorierDe(cid), main = 0, chezT = 0;
+    comptesFonds(cid).forEach(function (uid) { var x = soldeFonds(uid, cid); if (uid === tres) chezT += x.encaisse - x.depenses; else { main += Math.max(0, x.reste); chezT += x.confirme; } });
+    var att = remisesDu(cid).filter(function (r) { return (r.statut || 'en_attente') === 'en_attente'; }).reduce(function (s, r) { return s + Number(r.montant); }, 0);
+    return '<div class="infos"><div class="info"><span>Fonds chez le trésorier' + (tres ? ' (' + esc(nomCompte(tres)) + ')' : '') + '</span><b>' + fcfa(chezT) + '</b></div>' +
+      (att ? '<div class="info"><span>Remises à confirmer</span><b>' + fcfa(att) + '</b></div>' : '') +
+      '<div class="info"><span>Encore chez les partenaires</span><b>' + fcfa(main) + '</b></div></div>';
+  }
+
+  // ───────────────────────────── Agenda, rappels et notifications ─────────────────────────────
+  // Rendez-vous et rencontres saisis par le centre (table « evenements »), plus ce que le
+  // téléphone DÉDUIT : l'échéance des mensualités (jour d'échéance du centre, mois facturés),
+  // la rentrée et la fin de l'année. La cloche de l'en-tête rassemble ce qui demande
+  // attention ; les rappels du téléphone partent quand l'appli est ouverte, et l'export
+  // « Ajouter au calendrier du téléphone » (.ics avec alarme) rappelle même appli fermée.
+  var TYPES_EV = {
+    rencontre: ['Rencontre', 'handshake'], rendez_vous: ['Rendez-vous', 'clock'], reunion_parents: ['Réunion des parents', 'users'],
+    echeance: ['Échéance', 'wallet'], autre: ['Autre', 'agenda']
+  };
+  var RAPPELS = [[0, 'Aucun rappel'], [15, '15 minutes avant'], [60, '1 heure avant'], [180, '3 heures avant'], [1440, 'La veille'], [2880, '2 jours avant']];
+  var AG = { mois: '', jour: '' };
+  function peutAgenda(cid) { return peut('agenda.gerer', cid); }
+  function centresAgendaGeres() { return lignes('centres').filter(function (c) { return peutAgenda(c.id); }); }
+  function moisSuivantIso(am) { return decalerMois(am, 1); }
+
+  /** Tout ce que l'agenda montre entre deux dates (incluses), pour les centres choisis. */
+  function elementsAgenda(debut, fin) {
+    var ids = centresChoisis().map(function (c) { return c.id; });
+    var out = lignes('evenements').filter(function (e) { return ids.indexOf(e.centre_id) >= 0 && e.date >= debut && e.date <= fin; }).map(function (e) {
+      return { id: e.id, type: e.type || 'rencontre', titre: e.titre, date: e.date, heure: e.heure || '', fin: e.fin || '', lieu: e.lieu || '', note: e.note || '',
+        rappel_min: Number(e.rappel_min) || 0, centre_id: e.centre_id, attente: !!e._attente };
+    });
+    var an = anneeActive();
+    var factures = an ? String(an.mois_factures || '').split(',').filter(Boolean).map(Number) : [];
+    centresChoisis().forEach(function (c) {
+      if (!peut('paiements.voir', c.id)) return;
+      var j = ('0' + (Number(c.jour_echeance) || 10)).slice(-2);
+      for (var am = debut.slice(0, 7); am <= fin.slice(0, 7); am = moisSuivantIso(am)) {
+        var d = am + '-' + j;
+        if (d < debut || d > fin) continue;
+        if (factures.length && factures.indexOf(Number(am.slice(5))) < 0) continue;
+        if (an && an.debut && an.fin && (d < an.debut || d > an.fin)) continue;
+        out.push({ id: 'ech-' + c.id + '-' + am, auto: true, type: 'echeance', titre: 'Échéance des mensualités', date: d, heure: '', lieu: '', rappel_min: 1440, centre_id: c.id, lien: '#/caisse',
+          note: 'Les paiements du mois de ' + MOIS[Number(am.slice(5)) - 1] + ' se font au plus tard ce jour.' });
+      }
+    });
+    centresChoisis().forEach(function (c) {
+      if (!tresorierDe(c.id) || !peut('paiements.encaisser', c.id) || estTresorier(c.id)) return;
+      for (var am = debut.slice(0, 7); am <= fin.slice(0, 7); am = moisSuivantIso(am)) {
+        var d = finDuMois(am + '-01');
+        if (d < debut || d > fin) continue;
+        out.push({ id: 'rem-' + c.id + '-' + am, auto: true, type: 'echeance', titre: 'Remise des fonds au trésorier', date: d, heure: '', lieu: '', rappel_min: 2880, centre_id: c.id, lien: '#/caisse',
+          note: 'Remettez à ' + nomCompte(tresorierDe(c.id)) + ' l\'argent encaissé ce mois, pour le bilan.' });
+      }
+    });
+    if (an) [[an.debut, 'Rentrée scolaire ' + an.libelle], [an.fin, 'Fin de l\'année scolaire ' + an.libelle]].forEach(function (x) {
+      if (x[0] && x[0] >= debut && x[0] <= fin) out.push({ id: 'an-' + x[0], auto: true, type: 'autre', titre: x[1], date: x[0], heure: '', lieu: '', rappel_min: 1440, centre_id: '' });
+    });
+    return out.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : (a.heure || '99') < (b.heure || '99') ? -1 : 1; });
+  }
+  function ligneAgenda(x, avecDate) {
+    var c = ligne('centres', x.centre_id) || {};
+    var quand = (avecDate ? dateLongue(x.date).replace(/^./, function (m) { return m.toUpperCase(); }) + (x.heure ? ' · ' : '') : '') + (x.heure ? heureLisible(x.heure) + (x.fin ? ' – ' + heureLisible(x.fin) : '') : (avecDate ? '' : 'Toute la journée'));
+    var sous = [quand, x.lieu, centresChoisis().length > 1 ? (c.nom_court || c.nom) : ''].filter(Boolean).join(' · ');
+    return '<button class="ligne ev t-' + esc(x.type) + '" type="button" data-a="voir-evenement" data-id="' + esc(x.id) + '" data-date="' + esc(x.date) + '">' +
+      '<span class="pastille">' + ico((TYPES_EV[x.type] || TYPES_EV.autre)[1]) + '</span><span class="corps"><b>' + esc(x.titre) + '</b><small>' + esc(sous) + '</small></span>' +
+      (x.attente ? '<span class="badge alerte">en attente</span>' : '<span class="badge type">' + esc((TYPES_EV[x.type] || TYPES_EV.autre)[0]) + '</span>') + '</button>';
+  }
+
+  function pageAgenda() {
+    var auj = isoLocal(new Date());
+    if (!AG.mois) AG.mois = auj.slice(0, 7);
+    var lib = MOIS[Number(AG.mois.slice(5)) - 1].replace(/^./, function (c) { return c.toUpperCase(); }) + ' ' + AG.mois.slice(0, 4);
+    var h = '<h1>Agenda</h1><p class="sous-titre">Rendez-vous, rencontres, échéances. La cloche en haut vous rappelle ce qui approche.</p>';
+    h += '<div class="nav-date"><button type="button" class="btn clair petit" data-a="ag-mois" data-v="-1" aria-label="Mois précédent">‹</button><b>' + esc(lib) + '</b><button type="button" class="btn clair petit" data-a="ag-mois" data-v="1" aria-label="Mois suivant">›</button></div>';
+    // Grille du mois, semaines du lundi au dimanche.
+    var premier = AG.mois + '-01', decal = jourDe(premier) - 1;
+    var dernier = decalerJour(moisSuivantIso(AG.mois) + '-01', -1);
+    var elts = elementsAgenda(premier, dernier), parJour = {};
+    elts.forEach(function (x) { (parJour[x.date] = parJour[x.date] || []).push(x); });
+    h += '<div class="calendrier" role="grid" aria-label="' + esc(lib) + '"><div class="cal-tete">' + ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(function (j) { return '<span>' + j + '</span>'; }).join('') + '</div><div class="cal-jours">';
+    for (var i = 0; i < decal; i++) h += '<span class="cal-vide"></span>';
+    for (var d = premier; d <= dernier; d = decalerJour(d, 1)) {
+      var l = parJour[d] || [];
+      h += '<button type="button" class="cal-jour' + (d === auj ? ' auj' : '') + (d === AG.jour ? ' choisi' : '') + (l.length ? ' plein' : '') + '" data-a="ag-jour" data-v="' + d + '" aria-label="' + esc(dateLongue(d) + (l.length ? ', ' + l.length + ' rendez-vous' : '')) + '">' +
+        '<b>' + Number(d.slice(8)) + '</b><span class="points">' + l.slice(0, 3).map(function (x) { return '<i class="t-' + esc(x.type) + '"></i>'; }).join('') + '</span></button>';
+    }
+    h += '</div></div><div class="legende-agenda">' + Object.keys(TYPES_EV).map(function (k) { return '<span class="t-' + k + '"><i></i>' + esc(TYPES_EV[k][0]) + '</span>'; }).join('') + '</div>';
+    if (AG.jour) {
+      var duJour = elementsAgenda(AG.jour, AG.jour);
+      h += '<h2>' + esc(dateLongue(AG.jour).replace(/^./, function (c) { return c.toUpperCase(); })) + '</h2>' +
+        (duJour.length ? '<div class="liste">' + duJour.map(function (x) { return ligneAgenda(x, false); }).join('') + '</div>' : '<div class="carte vide">Rien ce jour-là.</div>');
+    }
+    var avenir = elementsAgenda(auj, decalerJour(auj, 45));
+    h += '<h2>À venir</h2>' + (avenir.length ? '<div class="liste">' + avenir.slice(0, 30).map(function (x) { return ligneAgenda(x, true); }).join('') + '</div>' : '<div class="carte vide">Rien de prévu dans les 45 prochains jours.</div>');
+    h += '<div class="actions empile">' + (avenir.length ? '<button class="btn clair" type="button" data-a="ag-ics-tout">' + ico('download', 'p') + 'Tout ajouter au calendrier du téléphone</button>' : '') +
+      '<button class="btn clair" type="button" data-a="notifications">' + ico('bell', 'p') + 'Notifications</button></div>';
+    if (centresAgendaGeres().length) h += '<button class="fab" type="button" data-a="editer-evenement" data-id="" data-date="' + esc(AG.jour || auj) + '">' + ico('plus') + 'Rendez-vous</button>';
+    return h;
+  }
+
+  function feuilleEvenement(id, dateDefaut) {
+    var e = id ? ligne('evenements', id) : null;
+    var geres = centresAgendaGeres();
+    var cidDefaut = e ? e.centre_id : (geres.some(function (c) { return c.id === E.centre; }) ? E.centre : (geres[0] || {}).id);
+    var d = e || { type: 'rencontre', date: dateDefaut || isoLocal(new Date()), heure: '', fin: '', lieu: '', note: '', rappel_min: 60, centre_id: cidDefaut };
+    var opt = function (v, t, cour) { return '<option value="' + esc(v) + '"' + (String(v) === String(cour) ? ' selected' : '') + '>' + esc(t) + '</option>'; };
+    ouvrirFeuille('<h2>' + (e ? 'Modifier le rendez-vous' : 'Nouveau rendez-vous') + '</h2>' +
+      '<form data-f="evenement" data-id="' + esc(id || '') + '">' +
+      '<label class="champ"><span>Titre</span><input type="text" name="titre" required maxlength="160" value="' + esc(d.titre || '') + '" placeholder="ex. : Rencontre avec les parents de 3e"></label>' +
+      '<div class="deux"><label class="champ"><span>Type</span><select name="type">' + Object.keys(TYPES_EV).map(function (k) { return opt(k, TYPES_EV[k][0], d.type); }).join('') + '</select></label>' +
+      '<label class="champ"><span>Centre</span><select name="centre_id">' + geres.map(function (c) { return opt(c.id, c.nom_court || c.nom, d.centre_id); }).join('') + '</select></label></div>' +
+      '<label class="champ"><span>Date</span><input type="date" name="date" required value="' + esc(d.date) + '"></label>' +
+      '<div class="deux"><label class="champ"><span>Début</span><input type="time" name="heure" value="' + esc(d.heure || '') + '"></label>' +
+      '<label class="champ"><span>Fin</span><input type="time" name="fin" value="' + esc(d.fin || '') + '"></label></div>' +
+      '<label class="champ"><span>Lieu</span><input type="text" name="lieu" maxlength="160" value="' + esc(d.lieu || '') + '" placeholder="ex. : salle 2, ou au centre"></label>' +
+      '<label class="champ"><span>Rappel</span><select name="rappel_min">' + RAPPELS.map(function (r) { return opt(r[0], r[1], d.rappel_min); }).join('') + '</select></label>' +
+      '<label class="champ"><span>Note</span><textarea name="note" rows="3" maxlength="400">' + esc(d.note || '') + '</textarea></label>' +
+      '<div class="actions"><button class="btn" type="submit">Enregistrer</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>' +
+      (e ? '<div class="actions"><button class="btn danger" type="button" data-a="suppr-evenement" data-id="' + esc(id) + '">Supprimer</button></div>' : ''));
+  }
+  function feuilleVoirEvenement(id, date) {
+    var x = elementsAgenda(date, date).filter(function (y) { return y.id === id; })[0];
+    if (!x) return;
+    var c = ligne('centres', x.centre_id) || {};
+    var modifiable = !x.auto && peutAgenda(x.centre_id);
+    ouvrirFeuille('<div class="ev-tete t-' + esc(x.type) + '"><span class="pastille">' + ico((TYPES_EV[x.type] || TYPES_EV.autre)[1]) + '</span><div><small>' + esc((TYPES_EV[x.type] || TYPES_EV.autre)[0]) + '</small><h2>' + esc(x.titre) + '</h2></div></div>' +
+      '<div class="infos">' +
+      '<div class="info"><span>Quand</span><b>' + esc(dateLongue(x.date) + ' ' + x.date.slice(0, 4) + (x.heure ? ' · ' + heureLisible(x.heure) + (x.fin ? ' – ' + heureLisible(x.fin) : '') : '')) + '</b></div>' +
+      (x.lieu ? '<div class="info"><span>Lieu</span><b>' + esc(x.lieu) + '</b></div>' : '') +
+      (c.nom ? '<div class="info"><span>Centre</span><b>' + esc(c.nom) + '</b></div>' : '') +
+      '<div class="info"><span>Rappel</span><b>' + esc(((RAPPELS.filter(function (r) { return r[0] === x.rappel_min; })[0]) || [0, x.rappel_min + ' min avant'])[1]) + '</b></div></div>' +
+      (x.note ? '<p>' + esc(x.note) + '</p>' : '') +
+      '<div class="actions"><button class="btn or" type="button" data-a="ag-ics" data-id="' + esc(x.id) + '" data-date="' + esc(x.date) + '">' + ico('download', 'p') + 'Ajouter au calendrier du téléphone</button>' +
+      (x.lien ? '<a class="btn clair" href="' + esc(x.lien) + '" data-a="fermer-et-aller">Ouvrir la caisse</a>' : '') +
+      (modifiable ? '<button class="btn clair" type="button" data-a="editer-evenement" data-id="' + esc(x.id) + '">' + ico('edit', 'p') + 'Modifier</button>' : '') +
+      '<button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
+  }
+
+  // Fichier .ics : le calendrier du téléphone l'importe et sonne au rappel, appli fermée.
+  function icsTexte(elts) {
+    var esc2 = function (t) { return String(t || '').replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n'); };
+    var compact = function (iso, hhmm) { return iso.replace(/-/g, '') + (hhmm ? 'T' + hhmm.replace(':', '') + '00' : ''); };
+    var maintenant = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z');
+    var l = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//VERITAS//Gestion//FR', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
+    elts.forEach(function (x) {
+      var c = ligne('centres', x.centre_id) || {};
+      l.push('BEGIN:VEVENT', 'UID:' + x.id + '@gestion.veritas-school.com', 'DTSTAMP:' + maintenant);
+      if (x.heure) {
+        l.push('DTSTART:' + compact(x.date, x.heure));
+        var fin = x.fin && x.fin > x.heure ? x.fin : ('0' + Math.min(23, Number(x.heure.slice(0, 2)) + 1)).slice(-2) + x.heure.slice(2);
+        l.push('DTEND:' + compact(x.date, fin));
+      } else {
+        l.push('DTSTART;VALUE=DATE:' + compact(x.date), 'DTEND;VALUE=DATE:' + compact(decalerJour(x.date, 1)));
+      }
+      l.push('SUMMARY:' + esc2(x.titre + (c.nom_court ? ' — ' + c.nom_court : '')));
+      if (x.lieu || c.adresse) l.push('LOCATION:' + esc2(x.lieu || c.adresse));
+      if (x.note) l.push('DESCRIPTION:' + esc2(x.note));
+      if (x.rappel_min > 0) l.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc2(x.titre), 'TRIGGER:-PT' + x.rappel_min + 'M', 'END:VALARM');
+      l.push('END:VEVENT');
+    });
+    l.push('END:VCALENDAR');
+    return l.join('\r\n') + '\r\n';
+  }
+  function partagerIcs(elts, nom) {
+    var f = new File([icsTexte(elts)], nom.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9-]+/g, '-').replace(/-+/g, '-') + '.ics', { type: 'text/calendar' });
+    return partagerFichiers([f], 'Agenda VÉRITAS');
+  }
+
+  // ── Notifications : ce qui demande attention, maintenant ──
+  function notificationsDuJour() {
+    var auj = isoLocal(new Date()), demain = decalerJour(auj, 1), out = [];
+    elementsAgenda(auj, decalerJour(auj, 3)).forEach(function (x) {
+      if (x.type === 'echeance') {
+        var n = impayes(x.centre_id).length;
+        out.push({ ico: 'wallet', niveau: x.date === auj ? 'alerte' : '', titre: (x.date === auj ? 'Échéance aujourd\'hui' : 'Échéance ' + (x.date === demain ? 'demain' : 'le ' + dateLisible(x.date, true))) + ' · ' + ((ligne('centres', x.centre_id) || {}).nom_court || ''),
+          detail: n ? n + ' élève' + (n > 1 ? 's' : '') + ' en impayé à relancer' : 'Aucun impayé pour l\'instant', lien: '#/caisse', id: x.id });
+      } else if (x.date <= demain) {
+        out.push({ ico: (TYPES_EV[x.type] || TYPES_EV.autre)[1], niveau: 't-' + x.type, titre: (x.date === auj ? 'Aujourd\'hui' : 'Demain') + (x.heure ? ' à ' + heureLisible(x.heure) : '') + ' · ' + x.titre,
+          detail: [x.lieu, (ligne('centres', x.centre_id) || {}).nom_court].filter(Boolean).join(' · ') || (TYPES_EV[x.type] || TYPES_EV.autre)[0], lien: '#/agenda', id: x.id });
+      }
+    });
+    var moi = E.profil.utilisateur.id;
+    centresChoisis().forEach(function (c) {
+      var nom = c.nom_court || c.nom;
+      if (estAdmin() || peut('depenses.valider', c.id)) {
+        var dv = lignes('depenses').filter(function (d) { return d.centre_id === c.id && d.statut === 'en_attente' && (estAdmin() || d.saisie_par !== moi); }).length;
+        if (dv) out.push({ ico: 'clipboard', niveau: 'alerte', titre: dv + ' dépense' + (dv > 1 ? 's' : '') + ' à valider · ' + nom, detail: 'Caisse › Dépenses', lien: '#/caisse', onglet: 'depenses' });
+      }
+      if (peut('appel.faire', c.id) && !estEnseignantQuelquePart()) {
+        var ret = seancesPrevues(c.id, auj).filter(function (x) { return retardAppel(x, c) > 0; }).length;
+        if (ret) out.push({ ico: 'alert', niveau: 'danger', titre: ret + ' appel' + (ret > 1 ? 's' : '') + ' en retard · ' + nom, detail: 'Faites l\'appel des classes concernées', lien: '#/appel' });
+      }
+      if (peut('eleves.gerer', c.id)) {
+        var al = alertesAssiduite(c.id).length;
+        if (al) out.push({ ico: 'activity', niveau: '', titre: al + ' alerte' + (al > 1 ? 's' : '') + ' d\'assiduité · ' + nom, detail: 'Absences ou retards répétés', lien: '#/assiduite' });
+      }
+    });
+    lignes('centres').forEach(function (c) {
+      var nom = c.nom_court || c.nom, rs = remisesDu(c.id);
+      if (estTresorier(c.id)) {
+        var ac = rs.filter(function (r) { return (r.statut || 'en_attente') === 'en_attente' && r.remis_par !== moi; });
+        if (ac.length) out.push({ ico: 'wallet', niveau: 'alerte', titre: ac.length + ' remise' + (ac.length > 1 ? 's' : '') + ' à confirmer · ' + nom, detail: fcfa(ac.reduce(function (s, r) { return s + Number(r.montant); }, 0)).replace(/\u00a0/g, ' ') + ' déclarés remis : reçu ou pas ?', lien: '#/caisse', onglet: 'remises' });
+      }
+      rs.filter(function (r) { return r.remis_par === moi && r.statut === 'contestee' && String(r.confirme_le || '').slice(0, 10) >= decalerJour(auj, -30); }).forEach(function (r) {
+        out.push({ ico: 'alert', niveau: 'danger', titre: 'Remise de ' + fcfa(r.montant).replace(/\u00a0/g, ' ') + ' non reçue par le trésorier', detail: r.motif || nom, lien: '#/caisse', onglet: 'remises' });
+      });
+      if (tresorierDe(c.id) && !estTresorier(c.id) && peut('paiements.encaisser', c.id) && auj >= decalerJour(finDuMois(auj), -4)) {
+        var reste = soldeFonds(moi, c.id).reste;
+        if (reste > 0) out.push({ ico: 'wallet', niveau: 'alerte', titre: fcfa(reste).replace(/\u00a0/g, ' ') + ' à remettre au trésorier · ' + nom, detail: 'Avant le ' + dateLisible(finDuMois(auj), true) + ', pour le bilan du mois', lien: '#/caisse', onglet: 'remises' });
+      }
+    });
+    if (estEnseignantQuelquePart()) {
+      var aFaire = mesCoursDu(auj).filter(function (cr) { return !etatSeance({ id: idSeance(auj, cr.classe_id), centre_id: cr.centre_id, classe: { id: cr.classe_id } }).pointes; }).length;
+      if (aFaire) out.push({ ico: 'checkcircle', niveau: 'alerte', titre: aFaire + ' appel' + (aFaire > 1 ? 's' : '') + ' à faire aujourd\'hui', detail: 'Mes cours aujourd\'hui', lien: '#/accueil' });
+    }
+    return out;
+  }
+  function boutonCloche() {
+    var n = notificationsDuJour().length;
+    return '<button id="cloche" class="cloche" type="button" data-a="notifications" aria-label="Notifications' + (n ? ' : ' + n : '') + '">' + ico('bell') + (n ? '<span class="pastille-n">' + (n > 9 ? '9+' : n) + '</span>' : '') + '</button>';
+  }
+  function majCloche() { var b = $('#cloche'); if (b) b.outerHTML = boutonCloche(); }
+  function notifSystemePossible() { return !NATIF && 'Notification' in window; }
+  function feuilleNotifications() {
+    var l = notificationsDuJour();
+    var h = '<h2>Notifications</h2>' + (l.length ? '<div class="liste">' + l.map(function (x) {
+      return '<a class="ligne notif ' + esc(x.niveau || '') + '" href="' + esc(x.lien) + '" data-a="fermer-et-aller"' + (x.onglet ? ' data-onglet="' + esc(x.onglet) + '"' : '') + '><span class="pastille">' + ico(x.ico) + '</span><span class="corps"><b>' + esc(x.titre) + '</b><small>' + esc(x.detail) + '</small></span><span class="fin">›</span></a>';
+    }).join('') + '</div>' : '<div class="carte vide">Rien à signaler pour le moment.</div>');
+    if (notifSystemePossible()) {
+      h += Notification.permission === 'granted'
+        ? '<p class="doux">' + ico('check', 'p') + ' Les rappels du téléphone sont activés : ils sonnent quand l\'appli est ouverte ou vient de l\'être. Pour un rappel sûr appli fermée, ajoutez le rendez-vous au calendrier du téléphone.</p>'
+        : Notification.permission === 'denied'
+          ? '<p class="doux">Les notifications sont bloquées pour ce site : réautorisez-les dans les réglages du navigateur (cadenas › Notifications).</p>'
+          : '<div class="actions"><button class="btn or" type="button" data-a="activer-notifs">' + ico('bell', 'p') + 'Activer les rappels du téléphone</button></div>';
+    }
+    h += '<div class="actions"><a class="btn clair" href="#/agenda" data-a="fermer-et-aller">' + ico('agenda', 'p') + 'Ouvrir l\'agenda</a><button class="btn clair" type="button" data-a="fermer">Fermer</button></div>';
+    ouvrirFeuille(h);
+  }
+  /** Rappels système : rendez-vous à l'heure de leur rappel, échéance la veille et le jour. Une fois chacun. */
+  function verifierRappels() {
+    if (!E.profil || !notifSystemePossible() || Notification.permission !== 'granted') return;
+    var deja = {};
+    try { deja = JSON.parse(localStorage.getItem('vg-rappels') || '{}'); } catch (e) { deja = {}; }
+    var maintenant = Date.now(), auj = isoLocal(new Date()), envoyes = 0;
+    elementsAgenda(auj, decalerJour(auj, 15)).forEach(function (x) {
+      var debut = new Date(x.date + 'T' + (x.heure || '08:00') + ':00').getTime();
+      var quand = debut - (x.rappel_min || 0) * 60000;
+      var cle = x.id + '@' + x.date + (x.heure || '');
+      if (deja[cle] || maintenant < quand || maintenant > debut + 3600000 || (!x.rappel_min && x.type !== 'echeance')) return;
+      deja[cle] = maintenant; envoyes++;
+      var corps = [x.heure ? dateLongue(x.date) + ' à ' + heureLisible(x.heure) : dateLongue(x.date), x.lieu].filter(Boolean).join(' · ');
+      var ouvrir = { body: corps, icon: 'icone-512.png', badge: 'icone-512.png', tag: cle, data: { url: x.type === 'echeance' ? '#/caisse' : '#/agenda' } };
+      var titre = (x.type === 'echeance' ? 'Échéance des mensualités' : x.titre) + ' — VÉRITAS';
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.ready.then(function (r) { r.showNotification(titre, ouvrir); }).catch(function () {});
+      else { try { new Notification(titre, ouvrir); } catch (e) {} }
+    });
+    if (envoyes) { try { localStorage.setItem('vg-rappels', JSON.stringify(deja)); } catch (e) {} }
+  }
+  setInterval(function () { verifierRappels(); majCloche(); }, 60000);
+
+  /** Accueil : les trois prochains rendez-vous des 14 jours. */
+  function blocProchainsRdv() {
+    var auj = isoLocal(new Date());
+    var l = elementsAgenda(auj, decalerJour(auj, 14)).slice(0, 3);
+    if (!l.length) return '';
+    return '<h2>Prochains rendez-vous</h2><div class="liste">' + l.map(function (x) { return ligneAgenda(x, true); }).join('') + '</div>' +
+      '<p class="lien-suite"><a href="#/agenda">Tout l\'agenda ›</a></p>';
+  }
+
   // ───────────────────────────── Espaces et rôles ─────────────────────────────
   // Quatre espaces, un par famille de rôles : chacun a sa couleur, sa mission et
   // ses chiffres clés. Le serveur reste seul juge des droits (g_capacites).
@@ -2611,19 +3038,19 @@
       pas: [] },
     { cle: 'responsable', espace: 'partenaire', nom: 'Responsable', famille: 'Partenaire',
       resume: 'Dirige un centre au quotidien, avec presque tous les pouvoirs sur ce centre.',
-      peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Fixer les tarifs, valider les dépenses', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants'],
+      peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Remettre les fonds au trésorier', 'Fixer les tarifs, valider les dépenses', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants', 'Tenir l\'agenda : rendez-vous, rencontres, réunions'],
       pas: ['Les réglages des centres et de l\'année', 'Les comptes responsables, actionnaires et admin'] },
     { cle: 'actionnaire', espace: 'partenaire', nom: 'Actionnaire', famille: 'Partenaire',
-      resume: 'Associé du centre : consulte les chiffres et tient l\'emploi du temps.',
-      peut: ['Voir le bilan, les versements et les dépenses', 'Voir les statistiques et les parts', 'Modifier l\'emploi du temps de son centre'],
-      pas: ['Encaisser ou inscrire', 'Faire l\'appel', 'Créer des comptes'] },
+      resume: 'Associé du centre : suit les chiffres, encaisse quand il est présent, tient l\'emploi du temps.',
+      peut: ['Voir le bilan, les versements et les dépenses', 'Encaisser auprès des parents et envoyer le reçu', 'Payer l\'enseignant juste après son cours (1 500 F/h)', 'Remettre les fonds au trésorier', 'Voir les statistiques et les parts', 'Modifier l\'emploi du temps de son centre', 'Tenir l\'agenda du centre'],
+      pas: ['Inscrire les élèves', 'Faire l\'appel', 'Créer des comptes'] },
     { cle: 'secretaire', espace: 'secretariat', nom: 'Secrétaire / surveillant', famille: 'Équipe',
       resume: 'Tient l\'accueil et la caisse du centre.',
-      peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Saisir les dépenses (avec photo du justificatif)'],
+      peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Payer l\'enseignant juste après son cours (1 500 F/h)', 'Remettre les fonds au trésorier', 'Saisir les dépenses (avec photo du justificatif)', 'Noter les rendez-vous dans l\'agenda'],
       pas: ['Voir le bilan', 'Annuler un versement, accorder une remise', 'Valider une dépense', 'Gérer les enseignants'] },
     { cle: 'enseignant', espace: 'enseignant', nom: 'Enseignant', famille: 'Équipe',
       resume: 'Fait l\'appel de ses classes et suit ses heures.',
-      peut: ['Faire l\'appel de ses classes, le jour du cours', 'Voir son emploi du temps', 'Voir ses heures, son contrat et ses paies'],
+      peut: ['Faire l\'appel de ses classes, le jour du cours', 'Voir son emploi du temps et l\'agenda du centre', 'Voir ses heures, son contrat et ses paies'],
       pas: ['Les élèves des autres classes', 'La caisse et les finances', 'Les comptes'] }
   ];
   function ficheRole(cle) { return FICHES_ROLES.filter(function (f) { return f.cle === cle; })[0]; }
@@ -2729,6 +3156,8 @@
     h += '<ul class="droits">' + caps.map(function (k) {
       var non = retires.indexOf(k) >= 0;
       return '<li class="' + (non ? 'non' : 'oui') + '">' + ico(non ? 'x' : 'check', 'p') + ' ' + esc(LIB_CAP[k] || k) + (non ? ' <small>(réservé à l\'administrateur)</small>' : '') + '</li>';
+    }).join('') + lignes('centres').filter(function (c) { return estTresorier(c.id); }).map(function (c) {
+      return '<li class="oui">' + ico('wallet', 'p') + ' <b>Trésorier de ' + esc(c.nom_court || c.nom) + '</b> : vous gardez les fonds et confirmez les remises</li>';
     }).join('') + '</ul></div>';
     return h;
   }
@@ -2794,10 +3223,11 @@
     'paiements.encaisser': 'Encaisser', 'paiements.voir': 'Voir les versements', 'caisse.corriger': 'Corriger la caisse (annuler, antidater)',
     'finances.voir': 'Voir le bilan', 'depenses.saisir': 'Saisir des dépenses', 'depenses.voir': 'Voir les dépenses', 'depenses.valider': 'Valider les dépenses',
     'enseignants.gerer': 'Contrats et paies des enseignants', 'comptes.gerer': 'Créer des comptes (secrétaires, enseignants)', 'journal.voir': 'Lire le journal',
-    'stats.voir': 'Voir les statistiques', 'emploi.gerer': 'Modifier l\'emploi du temps', 'tarifs.fixer': 'Fixer les tarifs', 'remises.accorder': 'Accorder des remises'
+    'stats.voir': 'Voir les statistiques', 'emploi.gerer': 'Modifier l\'emploi du temps', 'tarifs.fixer': 'Fixer les tarifs', 'remises.accorder': 'Accorder des remises',
+    'agenda.gerer': 'Gérer l\'agenda (rendez-vous, rencontres)'
   };
   var CAP_ECRITURE = ['eleves.gerer', 'appel.faire', 'appel.corriger', 'paiements.encaisser', 'caisse.corriger', 'depenses.saisir', 'depenses.valider',
-    'enseignants.gerer', 'comptes.gerer', 'emploi.gerer', 'tarifs.fixer', 'remises.accorder'];
+    'enseignants.gerer', 'comptes.gerer', 'emploi.gerer', 'tarifs.fixer', 'remises.accorder', 'agenda.gerer'];
   function capsDuCompte(u) {
     var caps = {};
     Object.keys(u.acces || {}).forEach(function (c) { (E.profil.capacites[u.acces[c]] || []).forEach(function (k) { if (k !== 'centre.voir') caps[k] = 1; }); });
@@ -2879,14 +3309,18 @@
     responsable: ['*Accueil* : élèves, appels du jour, encaissé du mois, impayés de votre centre.', '*Élèves › +* : inscrire un élève (classe, matières, tarif).',
       '*Caisse › Encaisser* : cherchez l\'élève, saisissez le montant, envoyez le reçu au parent par WhatsApp.', '*Caisse › Impayés* : relancez les parents en un geste.',
       '*Caisse › Dépenses* : saisissez les dépenses. Photo du justificatif *obligatoire dès 10 000 F*. Vous validez les dépenses saisies par les autres.',
-      '*Plus › Enseignants* : pointage des cours, contrats, paies.', '*Plus › Comptes et accès* : créez les comptes de vos secrétaires et enseignants.'],
+      '*Appel › Enseignants du jour* : après le cours, touchez *Payer* (1 500 F de l\'heure sauf contrat) ; l\'argent sort de votre caisse.',
+      '*Caisse › Remises* : remettez au trésorier l\'argent encaissé, *avant la fin du mois* ; il confirme la réception.',
+      '*Plus › Enseignants* : pointage des cours, contrats, paies.', '*Plus › Comptes et accès* : créez les comptes de vos secrétaires et enseignants.', '*Plus › Agenda* : rendez-vous, rencontres, échéances ; la cloche en haut rappelle ce qui approche.'],
     actionnaire: ['*Accueil* : les chiffres clés de votre centre (élèves, appels, encaissé, impayés).', '*Plus › Bilan* : recettes, dépenses, résultat du mois et votre part.',
-      '*Caisse* : versements et dépenses, en consultation.', '*Plus › Planning* : vous tenez l\'emploi du temps du centre (classes, créneaux, enseignants).'],
+      '*Caisse › Encaisser* : quand vous êtes au centre ou qu\'un parent vous paie, encaissez et envoyez-lui le reçu par WhatsApp.',
+      '*Appel › Enseignants du jour* : si vous êtes présent, payez l\'enseignant juste après son cours (*Payer*, 1 500 F de l\'heure).',
+      '*Caisse › Remises* : remettez cet argent au trésorier *avant la fin du mois* ; il confirme la réception.', '*Plus › Planning* : vous tenez l\'emploi du temps du centre (classes, créneaux, enseignants).', '*Plus › Agenda* : rendez-vous et rencontres ; la cloche en haut rappelle ce qui approche.'],
     secretaire: ['*Appel* : choisissez la classe, touchez chaque élève (présent, retard, absent), au début du cours.', '*Élèves › +* : inscrire un élève.',
       '*Caisse › Encaisser* : un reçu numéroté part au parent par WhatsApp. Un versement ne se modifie pas : en cas d\'erreur, prévenez le responsable.',
-      '*Caisse › Dépenses* : photo du justificatif *obligatoire dès 10 000 F*.'],
+      '*Caisse › Dépenses* : photo du justificatif *obligatoire dès 10 000 F*.', '*Appel › Enseignants du jour* : après le cours, touchez *Payer* (1 500 F de l\'heure).', '*Caisse › Remises* : remettez l\'argent encaissé au trésorier avant la fin du mois.', '*Plus › Agenda* : notez les rendez-vous ; la cloche en haut rappelle échéances et rencontres.'],
     enseignant: ['*Accueil › Mes cours aujourd\'hui* : touchez votre cours pour faire l\'appel, au début du cours.', '*Planning* : votre emploi du temps de la semaine.',
-      '*Plus › Mes heures* : heures faites, montant dû, paies reçues.']
+      '*Paie* : 1 500 F de l\'heure (sauf contrat), versés juste après le cours par le partenaire présent.', '*Plus › Mes heures* : heures faites, montant dû, paies reçues.']
   };
   /** acces : { centre_id: rôle } ; renvoie le texte du mode d'emploi pour ce compte. */
   function modeEmploi(nom, acces, admin) {
@@ -2899,6 +3333,7 @@
       '3. Plus › *Changer mon mot de passe*, puis Plus › *Code de verrouillage* (4 chiffres).\n\n' +
       '*Votre rôle : ' + (admin ? 'Administrateur' : ou) + '*\n' + GUIDE_ROLE[principal].map(function (l) { return '• ' + l; }).join('\n') + '\n\n' +
       'Sans réseau, tout continue : vos saisies partent dès le retour de la connexion (pastille « À jour » en haut).\n' +
+      'Trésorier du centre : vous confirmez chaque remise dans *Caisse › Remises* (« Reçu » ou « Pas reçu »).\n' +
       'Plus › *Rôles et droits* explique ce que chacun peut faire. Une question : appelez l\'administrateur.';
   }
   function feuilleSecret(titre, nom, identifiant, mdp, acces, admin) {
@@ -2992,6 +3427,13 @@
       '<label class="champ"><span>Nom court</span><input type="text" name="nom_court" required value="' + n('nom_court') + '"><small>Affiché dans le sélecteur, ex. : Ndog-passi III</small></label>' +
       '<label class="champ"><span>Adresse (imprimée sur les reçus)</span><input type="text" name="adresse" value="' + n('adresse') + '"></label>' +
       '<label class="champ"><span>Téléphones</span><input type="text" name="telephones" value="' + n('telephones') + '"></label>' +
+      (id ? (function () {
+        var vus = {}, choix = E.equipe.filter(function (e) { if (e.centre_id !== id || vus[e.id] || e.role === 'enseignant') return false; vus[e.id] = 1; return true; });
+        if (!vus[E.profil.utilisateur.id]) choix.unshift({ id: E.profil.utilisateur.id, nom: E.profil.utilisateur.nom + ' (vous)' });
+        return '<label class="champ"><span>Trésorier du centre</span><select name="tresorier_id"><option value="">— Aucun —</option>' + choix.map(function (e) {
+          return '<option value="' + esc(e.id) + '"' + (c.tresorier_id === e.id ? ' selected' : '') + '>' + esc(e.nom) + (e.role ? ' · ' + esc(e.role === 'admin' ? 'Administrateur' : ROLES[e.role] || e.role) : '') + '</option>';
+        }).join('') + '</select><small>Il garde les fonds et confirme chaque remise des partenaires.</small></label>';
+      })() : '') +
       '<label class="champ"><span>Devise</span><input type="text" name="devise" value="' + n('devise') + '"></label>' +
       '<div class="deux"><label class="champ"><span>Retard au-delà de (min)</span><input type="number" name="tolerance_retard_min" min="0" max="60" required value="' + n('tolerance_retard_min') + '"></label>' +
       '<label class="champ"><span>Échéance : le … du mois</span><input type="number" name="jour_echeance" min="1" max="28" required value="' + n('jour_echeance') + '"></label></div>' +
@@ -3047,6 +3489,75 @@
       var a = ligne('actionnaires', el.dataset.id);
       if (a) confirmer('Retirer ' + a.nom + ' des actionnaires ?', 'Retirer', function () { muter('actionnaires', a.id, {}, true).then(rendre); });
     },
+    // Le logo n'est ni un lien ni une image : l'appui long n'ouvre aucun menu du navigateur.
+    'payer-cours': function (el) {
+      var p = ligne('presences_ens', el.dataset.pe), c = ligne('creneaux', el.dataset.cr);
+      var mc = montantCours(p);
+      if (!p || !c || !mc) return;
+      if (paieDuCours(p.id)) { toast('Ce cours est déjà payé.', true); return; }
+      var nom = nomPersonne(mc.prof) || 'l\'enseignant';
+      confirmer('Payer ' + fcfa(mc.montant) + ' à ' + nom + ' pour le cours de ' + nomDe('classes', c.classe_id) + ' (' + mc.calcul + ') ? L\'argent sort de votre caisse.', 'Payer', function () {
+        var auj = isoLocal(new Date());
+        muter('paies', idPaieCours(p.id), { centre_id: p.centre_id, enseignant_id: mc.prof, mois: p.date.slice(0, 7), montant: mc.montant, date: auj < p.date ? p.date : auj, mode: 'especes',
+          note: 'Cours du ' + dateLisible(p.date, true) + ' · ' + nomDe('classes', c.classe_id) + ' · ' + mc.calcul, presence_id: p.id }).then(function () {
+          rendre();
+          var t = 'Bonjour ' + nom + ', vous avez reçu ' + fcfa(mc.montant).replace(/\u00a0/g, ' ') + ' pour le cours de ' + nomDe('classes', c.classe_id) + ' du ' + dateLisible(p.date, true) + ' (' + mc.calcul.replace(/\u00a0/g, ' ') + '). ' +
+            ((ligne('centres', p.centre_id) || {}).nom || 'VÉRITAS') + ' — ' + E.profil.utilisateur.nom;
+          confirmer('Paie enregistrée. Envoyer le reçu à ' + nom + ' ?', 'Envoyer', function () {
+            if (NATIF || navigator.share) partagerTexte(t); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener');
+          });
+        });
+      });
+    },
+    'editer-remise': function (el) {
+      if (!E.enLigne && !el.dataset.id) { /* hors ligne : la remise part au retour du réseau */ }
+      feuilleRemise(el.dataset.id || '', CAI.centre, el.dataset.montant);
+    },
+    'suppr-remise': function (el) {
+      var r = ligne('remises', el.dataset.id);
+      if (r) confirmer('Retirer la remise de ' + fcfa(r.montant) + ' ?', 'Retirer', function () { muter('remises', r.id, {}, true).then(function () { toast('Remise retirée.'); rendre(); }); });
+    },
+    'remise-recue': function (el) {
+      var r = ligne('remises', el.dataset.id);
+      if (r) confirmer('Confirmer avoir reçu ' + fcfa(r.montant) + ' de ' + nomCompte(r.remis_par) + ' ?', 'Oui, reçu', function () {
+        muter('remises', r.id, { statut: 'confirmee' }).then(function () { toast('Réception confirmée.'); rendre(); });
+      });
+    },
+    'remise-contester': function (el) {
+      var r = ligne('remises', el.dataset.id);
+      if (!r) return;
+      ouvrirFeuille('<h2>Remise non reçue</h2><p>' + esc(nomCompte(r.remis_par)) + ' déclare vous avoir remis <b>' + fcfa(r.montant) + '</b> le ' + esc(dateLisible(r.date, true)) + '.</p>' +
+        '<form data-f="contestation" data-id="' + esc(r.id) + '"><label class="champ"><span>Motif</span><input type="text" name="motif" required minlength="4" maxlength="200" placeholder="ex. : rien reçu, montant différent (reçu 20 000 F)"></label>' +
+        '<div class="actions"><button class="btn danger" type="submit">Signaler « pas reçu »</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
+    },
+    'remise-prevenir': function (el) {
+      var r = ligne('remises', el.dataset.id);
+      if (!r) return;
+      var t = messageRemise(r);
+      if (NATIF || navigator.share) partagerTexte(t); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener');
+    },
+    'ag-mois': function (el) { AG.mois = decalerMois(AG.mois, +el.dataset.v); AG.jour = ''; rendre(); },
+    'ag-jour': function (el) { AG.jour = AG.jour === el.dataset.v ? '' : el.dataset.v; rendre(); },
+    'voir-evenement': function (el) { feuilleVoirEvenement(el.dataset.id, el.dataset.date); },
+    'editer-evenement': function (el) { feuilleEvenement(el.dataset.id || '', el.dataset.date); },
+    'suppr-evenement': function (el) {
+      var e = ligne('evenements', el.dataset.id);
+      if (e) confirmer('Supprimer « ' + e.titre + ' » ?', 'Supprimer', function () { muter('evenements', e.id, {}, true).then(function () { toast('Rendez-vous supprimé.'); rendre(); }); });
+    },
+    'ag-ics': function (el) {
+      var x = elementsAgenda(el.dataset.date, el.dataset.date).filter(function (y) { return y.id === el.dataset.id; })[0];
+      if (x) partagerIcs([x], 'rdv-' + x.date + '-' + x.titre);
+    },
+    'ag-ics-tout': function () { var auj = isoLocal(new Date()); partagerIcs(elementsAgenda(auj, decalerJour(auj, 45)), 'agenda-veritas-' + auj); },
+    notifications: function () { feuilleNotifications(); },
+    'activer-notifs': function () {
+      Notification.requestPermission().then(function (p) {
+        if (p === 'granted') { toast('Rappels activés.'); verifierRappels(); } else toast('Rappels non autorisés.', true);
+        feuilleNotifications();
+      });
+    },
+    'fermer-et-aller': function (el) { fermerFeuille(); if (el.dataset.onglet) CAI.onglet = el.dataset.onglet; var h = el.getAttribute('href'); if (location.hash === h) rendre(); else location.hash = h; },
+    'aller-accueil': function () { if (location.hash === '#/accueil') rendre(); else location.hash = '#/accueil'; },
     'fermer-panneau': function () { if (panneauOuvert()) basculerPanneau(); },
     'ouvrir-comptes': function () {
       ouvrirPanneauDiscret();
@@ -3362,6 +3873,7 @@
         msg_relance: v.msg_relance, msg_recu: v.msg_recu, inscription_option: Number(v.inscription_option) || 0, inscription_option_libelle: v.inscription_option_libelle,
         alerte_appel_min: +v.alerte_appel_min, alerte_direction_min: +v.alerte_direction_min
       };
+      if (form.querySelector('[name=tresorier_id]')) champs.tresorier_id = v.tresorier_id || '';
       if (!form.dataset.id) champs.ordre = lignes('centres').length + 1;
       if (champs.alerte_direction_min < champs.alerte_appel_min) { toast('L\'alerte administrateur doit venir après celle du responsable.', true); return; }
       fermerFeuille();
@@ -3378,6 +3890,36 @@
       if (active) lignes('annees').forEach(function (a) { if (a.id !== id && Number(a.active)) suite = suite.then(function () { return muter('annees', a.id, { active: 0 }); }); });
       suite.then(function () { return muter('annees', id, { libelle: v.libelle, debut: v.debut, fin: v.fin, mois_factures: mois.join(','), active: active ? 1 : 0 }); })
         .then(function () { toast('Enregistré.'); rendre(); });
+    },
+    remise: function (form) {
+      var v = valeurs(form);
+      var id = form.dataset.id || nouvelId(), cid = form.dataset.centre;
+      var montant = Math.round(Number(v.montant));
+      if (!(montant > 0)) { toast('Montant invalide.', true); return; }
+      fermerFeuille();
+      muter('remises', id, { centre_id: cid, montant: montant, date: v.date, mode: v.mode, note: v.note, statut: 'en_attente' }).then(function () {
+        CAI.onglet = 'remises'; rendre();
+        var r = ligne('remises', id);
+        if (!form.dataset.id && r) confirmer('Remise enregistrée. Prévenir ' + nomCompte(tresorierDe(cid)) + ' pour qu\'il confirme la réception ?', 'Prévenir', function () {
+          var t = messageRemise(r);
+          if (NATIF || navigator.share) partagerTexte(t); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener');
+        });
+        else toast('Remise enregistrée.');
+      });
+    },
+    contestation: function (form) {
+      var v = valeurs(form);
+      fermerFeuille();
+      muter('remises', form.dataset.id, { statut: 'contestee', motif: v.motif }).then(function () { toast('Remise signalée « pas reçue ».'); rendre(); });
+    },
+    evenement: function (form) {
+      var v = valeurs(form);
+      if (v.fin && v.heure && v.fin <= v.heure) { toast('L\'heure de fin doit suivre l\'heure de début.', true); return; }
+      if (!peutAgenda(v.centre_id)) { toast('Vous ne pouvez pas modifier l\'agenda de ce centre.', true); return; }
+      var id = form.dataset.id || nouvelId();
+      fermerFeuille();
+      muter('evenements', id, { centre_id: v.centre_id, titre: v.titre.trim(), type: v.type, date: v.date, heure: v.heure || '', fin: v.heure ? v.fin || '' : '', lieu: v.lieu.trim(), note: v.note.trim(), rappel_min: Number(v.rappel_min) || 0 })
+        .then(function () { AG.mois = v.date.slice(0, 7); AG.jour = v.date; toast('Rendez-vous enregistré.'); rendre(); });
     },
     actionnaire: function (form) {
       var v = valeurs(form);
