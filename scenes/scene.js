@@ -100,6 +100,7 @@
     lecture: '<polygon points="6 3 20 12 6 21 6 3"/>',
     gauche: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
     droite: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+    haut: '<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',
     rejouer: '<path d="M3 12a9 9 0 1 0 9-9 9.8 9.8 0 0 0-6.7 2.7L3 8"/><path d="M3 3v5h5"/>',
     comparer: '<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>',
     colere: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
@@ -656,6 +657,7 @@
     },
     // Suivre un itinéraire : e.plan (lignes de texte : # mur, . couloir, B but, D départ, lettres = salles)
     chemin: function(e, z){
+      function libCommande(t){ return String(t).replace(/[\u2190-\u21FF\u2794-\u27BF\u2B00-\u2BFF]\uFE0F?/g, '').trim(); }
       var P = e.plan, H = P.length, W = P[0].length, C = 40, x, y, dir = e.dir || 0; // 0 N, 1 E, 2 S, 3 O
       var bx, by, DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0];
       P.forEach(function(l, r){ for(var c = 0; c < W; c++){ if(l[c] === 'D'){ x = c; y = r; } if(l[c] === 'B'){ bx = c; by = r; } } });
@@ -683,7 +685,7 @@
         return s;
       }
       function rendre(){
-        z.innerHTML = dessin() + (fini(e) ? '' : '<div class="sc-actions">' + e.commandes.map(function(c, k){ return '<button class="sc-mini' + (k === 0 ? ' or' : '') + '" data-a="' + c.act + '">' + esc(c.lib) + '</button>'; }).join('') + '<button class="sc-mini" id="aVider">' + ico('rejouer') + 'Départ</button></div>');
+        z.innerHTML = dessin() + (fini(e) ? '' : '<div class="sc-actions">' + e.commandes.map(function(c, k){ return '<button class="sc-mini' + (k === 0 ? ' or' : '') + '" data-a="' + c.act + '">' + ico({ avance: 'haut', gauche: 'gauche', droite: 'droite' }[c.act]) + esc(libCommande(c.lib)) + '</button>'; }).join('') + '<button class="sc-mini" id="aVider">' + ico('rejouer') + 'Départ</button></div>');
         z.querySelectorAll('[data-a]').forEach(function(b){ b.onclick = function(){ agir(b.getAttribute('data-a')); }; });
         var vd = $('aVider'); if(vd){ vd.onclick = function(){ x = x0; y = y0; dir = d0; e._essai = true; rendre(); }; }
       }
