@@ -326,3 +326,7 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.45; }
 .apercu-recu img { display: block; width: 100%; height: auto; }
 .barre-txt { text-decoration: line-through; color: var(--doux) !important; }
 .ligne .badge.danger { white-space: nowrap; }
+
+/* ── Justificatif ── */
+.justificatif img { display: block; max-width: 100%; max-height: 360px; border: 1px solid var(--trait); border-radius: var(--rayon); margin: 6px 0 12px; }
+input[type=file] { width: 100%; padding: 10px; border: 1px dashed #CDD4E2; border-radius: var(--rayon); background: #fff; }

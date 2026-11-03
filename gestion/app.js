@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.7.1';
+  var VERSION = '0.8.0';
   var API = 'api/index.php';
   var INTERVALLE_SYNC = 25000;
   var VERROU_APRES_MS = 5 * 60 * 1000;
@@ -91,13 +91,17 @@
   var idb = null;
   function ouvrirIdb() {
     return new Promise(function (ok, ko) {
-      var r = indexedDB.open('veritas-gestion', 1);
+      var r = indexedDB.open('veritas-gestion', 2);
       r.onupgradeneeded = function () {
         var db = r.result;
-        var l = db.createObjectStore('lignes', { keyPath: 'k' });
-        l.createIndex('t', 't');
-        db.createObjectStore('sortie', { keyPath: 'op' });
-        db.createObjectStore('meta', { keyPath: 'cle' });
+        if (!db.objectStoreNames.contains('lignes')) {
+          var l = db.createObjectStore('lignes', { keyPath: 'k' });
+          l.createIndex('t', 't');
+        }
+        if (!db.objectStoreNames.contains('sortie')) db.createObjectStore('sortie', { keyPath: 'op' });
+        if (!db.objectStoreNames.contains('meta')) db.createObjectStore('meta', { keyPath: 'cle' });
+        // v2 : photos de justificatifs prises hors ligne, envoyées au retour du réseau.
+        if (!db.objectStoreNames.contains('fichiers')) db.createObjectStore('fichiers', { keyPath: 'id' });
       };
       r.onsuccess = function () { idb = r.result; ok(); };
       r.onerror = function () { ko(r.error); };
@@ -272,7 +276,7 @@
       });
     }
 
-    E.syncPromesse = pousser().then(tirer).then(function () {
+    E.syncPromesse = pousser().then(tirer).then(envoyerJustificatifs).then(reserverTranches).then(function () {
       E.enLigne = true;
       E.derniereSync = Date.now();
     }, function (e) {
@@ -284,6 +288,73 @@
       if (change) rendre();
     });
     return E.syncPromesse;
+  }
+
+  // ── Tranches de numéros de reçu : réservées en ligne, consommées hors ligne ──
+  function prefixeAnnee() {
+    var an = anneeActive();
+    var m = an && String(an.libelle).match(/^\d{2}(\d{2})-\d{2}(\d{2})$/);
+    return m ? m[1] + m[2] : '';
+  }
+  function numerosLibres(cid) {
+    var pre = prefixeAnnee();
+    var pris = {};
+    lignes('paiements').forEach(function (p) { if (p.numero) pris[p.numero] = 1; });
+    var libres = [];
+    ((E.tranches || {})[cid] || []).forEach(function (t) {
+      if (t.prefixe !== pre) return;
+      for (var n = t.debut; n <= t.fin; n++) { var num = t.prefixe + '-' + ('000' + n).slice(-4); if (!pris[num]) libres.push(num); }
+    });
+    return libres;
+  }
+  function reserverTranches() {
+    if (!E.profil) return Promise.resolve();
+    var centres = lignes('centres').filter(function (c) { return peut('paiements.encaisser', c.id) && numerosLibres(c.id).length < 5; });
+    return centres.reduce(function (suite, c) {
+      return suite.then(function () {
+        return api('recus/tranche', { centre: c.id }).then(function (r) {
+          E.tranches = E.tranches || {};
+          (E.tranches[c.id] = E.tranches[c.id] || []).push(r.tranche);
+          return metaEcrire('tranches', E.tranches);
+        }, function () {});
+      });
+    }, Promise.resolve());
+  }
+
+  // ── Photos de justificatifs : gardées sur le téléphone jusqu'à l'envoi ──
+  function envoyerJustificatifs() {
+    return idbTout('fichiers').then(function (fichiers) {
+      return fichiers.reduce(function (suite, f) {
+        return suite.then(function () {
+          // La dépense doit d'abord exister au serveur.
+          if (E.sortie.some(function (o) { return o.t === 'depenses' && o.id === f.id; })) return;
+          return api('justificatif/deposer', { id: f.id, jpeg: f.jpeg }).then(function (r) {
+            var d = ligne('depenses', f.id);
+            if (d) { d.justificatif = r.justificatif; poserLigne('depenses', d); }
+            return idbSuppr('fichiers', f.id);
+          }, function (e) {
+            if (e.code === 409 || e.code === 422 || e.code === 403) { toast('Justificatif non envoyé : ' + e.message, true); return idbSuppr('fichiers', f.id); }
+          });
+        });
+      }, Promise.resolve());
+    });
+  }
+  /** Photo → JPEG d'au plus 1 280 px (≈ 150 Ko), en base64. */
+  function compresserPhoto(fichier) {
+    return new Promise(function (ok, ko) {
+      var url = URL.createObjectURL(fichier);
+      var img = new Image();
+      img.onload = function () {
+        var k = Math.min(1, 1280 / Math.max(img.naturalWidth, img.naturalHeight));
+        var cv = document.createElement('canvas');
+        cv.width = Math.round(img.naturalWidth * k); cv.height = Math.round(img.naturalHeight * k);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        URL.revokeObjectURL(url);
+        ok(cv.toDataURL('image/jpeg', 0.75).split(',')[1]);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); ko(new Error('Image illisible.')); };
+      img.src = url;
+    });
   }
 
   function majPuce() {
@@ -329,7 +400,7 @@
     var n = E.sortie.length;
     var fin = function () {
       E.jeton = null; E.profil = null; E.donnees = {}; E.sortie = []; E.rejets = []; E.rev = 0; E.cache = {};
-      Promise.all([idbVider('lignes'), idbVider('sortie'), idbVider('meta')]).then(function () { rendre(); });
+      Promise.all([idbVider('lignes'), idbVider('sortie'), idbVider('meta'), idbVider('fichiers')]).then(function () { rendre(); });
     };
     var sortir = function () { api('auth/deconnexion', {}).then(fin, fin); };
     if (n) confirmer(n + ' modification(s) pas encore envoyée(s) seront perdues. Se déconnecter quand même ?', 'Se déconnecter', sortir);
@@ -424,7 +495,7 @@
     var caisse = peutQuelquePart('paiements.voir');
     items.push(caisse ? ['caisse', 'wallet', 'Caisse'] : ['emploi', 'calendar', 'Planning']);
     items.push(['moi', 'list', 'Plus']);
-    var sousPlus = ['comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan'].concat(caisse ? ['emploi'] : []);
+    var sousPlus = ['comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
     return '<nav class="nav-basse" aria-label="Navigation">' + items.map(function (i) {
       var on = i[0] === actif || (i[0] === 'moi' && sousPlus.indexOf(actif) >= 0) || (i[0] === 'appel' && actif === 'pointage');
       return '<a href="#/' + i[0] + '" class="' + (on ? 'actif' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + ico(i[1]) + i[2] + '</a>';
@@ -466,10 +537,8 @@
   }
 
   // ───────────────────────────── Pages ─────────────────────────────
-  var A_VENIR = [
-    ['download', 'Feuille du jour', 'PDF, image, WhatsApp aux parents', 4],
-    ['graduation', 'Enseignants', 'Heures, rémunération', 6]
-  ];
+  // Modules encore à venir (vide : les 6 étapes sont livrées).
+  var A_VENIR = [];
 
   var PAGES = {
     accueil: {
@@ -517,6 +586,8 @@
         if (peutQuelquePart('appel.faire')) tuiles.push(['#/appel', 'checkcircle', 'Appel du jour', 'Arrivées, départs, retards']);
         if (peutQuelquePart('paiements.voir')) tuiles.push(['#/caisse', 'wallet', 'Caisse', 'Encaisser, reçus, impayés, dépenses']);
         if (peutQuelquePart('finances.voir')) tuiles.push(['#/bilan', 'chart', 'Bilan', 'Recettes, dépenses, parts']);
+        if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) tuiles.push(['#/enseignants', 'graduation', 'Enseignants', 'Heures, dû, paies']);
+        if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) tuiles.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
         tuiles.push(['#/assiduite', 'activity', 'Assiduité', 'Taux, retards, alertes']);
         tuiles.push(['#/eleves', 'graduation', 'Élèves', peutQuelquePart('eleves.gerer') ? 'Inscrire, rechercher, importer' : 'Fiches et contacts des parents']);
         tuiles.push(['#/emploi', 'calendar', 'Emploi du temps', peutQuelquePart('emploi.gerer') ? 'Classes, créneaux, enseignants' : 'Les cours de la semaine']);
@@ -528,7 +599,7 @@
           return '<a class="tuile" href="' + t[0] + '"><span class="pastille">' + ico(t[1]) + '</span><b>' + t[2] + '</b><small>' + t[3] + '</small></a>';
         }).join('') + '<a class="tuile" href="#/moi"><span class="pastille">' + ico('lock') + '</span><b>Mon compte</b><small>Mot de passe, code, appareils</small></a></div>';
 
-        h += '<h2>En construction</h2><div class="grille">' + A_VENIR.map(function (t) {
+        if (A_VENIR.length) h += '<h2>En construction</h2><div class="grille">' + A_VENIR.map(function (t) {
           return '<div class="tuile inactive"><span class="pastille">' + ico(t[0]) + '</span><b>' + t[1] + '</b><small>' + t[2] + ' · étape ' + t[3] + '</small></div>';
         }).join('') + '</div>';
         return h;
@@ -608,6 +679,14 @@
       droit: function () { return peutQuelquePart('finances.voir'); },
       html: function () { return pageBilan(); }
     },
+    enseignants: {
+      droit: function () { return peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer'); },
+      html: function () { return pageEnseignants(); }
+    },
+    mesheures: {
+      droit: function () { return Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; }); },
+      html: function () { return pageMesHeures(); }
+    },
 
     eleves: {
       html: function () { return pageEleves(); },
@@ -643,6 +722,8 @@
           (u.admin ? '<span class="badge or">Administrateur des deux centres</span>' : '') + acces + '</p></div>';
         var liens = [['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']];
         if (peutQuelquePart('finances.voir')) liens.push(['#/bilan', 'chart', 'Bilan financier', 'Recettes, dépenses, parts des actionnaires']);
+        if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) liens.push(['#/enseignants', 'graduation', 'Enseignants', 'Heures faites, dû, paies']);
+        if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) liens.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
         if (peutQuelquePart('comptes.gerer')) liens.push(['#/comptes', 'users', 'Comptes et accès', 'Qui peut faire quoi']);
         if (peutQuelquePart('journal.voir')) liens.push(['#/journal', 'clock', 'Journal', 'Qui a modifié quoi']);
         if (estAdmin()) liens.push(['#/centres', 'building', 'Centres, année et matières', 'Ouvrir un centre, mois facturés']);
@@ -755,6 +836,7 @@
     if (!liste.length) {
       return h + '<div class="carte vide">Pas de cours prévu ' + (APL.date === auj ? 'aujourd\'hui' : 'ce jour-là') + '.<br><small>Les cours viennent de l\'emploi du temps ou des horaires du centre (Planning).</small></div>';
     }
+    E.cache.blocEnseignants = blocEnseignantsDuJour(cid, APL.date);
     var manquants = liste.filter(function (x) { return retardAppel(x, centre) > 0; });
     if (manquants.length) {
       h += '<div class="carte alerte-appel"><b>' + ico('alert', 'p') + ' Appels non faits</b><p class="doux">au-delà de ' + esc(centre.alerte_appel_min) + ' min après le début du cours</p>' +
@@ -771,6 +853,221 @@
       return '<a class="ligne creneau" href="#/pointage/' + encodeURIComponent(x.classe.id) + '/' + x.date + '"><span class="horaire"><b>' + esc(x.debut) + '</b><small>' + esc(x.fin) + '</small></span>' +
         '<span class="corps"><b>' + esc(x.classe.nom) + '</b><small>' + (e.pointes ? e.present + ' présents · ' + e.retard + ' retards · ' + (e.absent + e.justifie) + ' absents' : e.inscrits + ' inscrits') + (profs ? ' · ' + esc(profs) : '') + '</small></span>' + etat + '</a>';
     }).join('') + '</div>';
+    return h + E.cache.blocEnseignants;
+  }
+
+  // Présence des enseignants : un créneau = une ligne ; le centre pointe, pas l'enseignant.
+  function idPresenceEns(iso, creneauId) { return 'pe' + iso.replace(/-/g, '') + creneauId; }
+  var LIB_ENS = { present: 'Présent', retard: 'En retard', absent: 'Absent', remplace: 'Remplacé' };
+  function blocEnseignantsDuJour(cid, iso) {
+    if (!peut('appel.faire', cid) || (!estAdmin() && roleDans(cid) === 'enseignant')) return '';
+    var crs = lignes('creneaux').filter(function (c) { return c.centre_id === cid && Number(c.jour) === jourDe(iso); })
+      .sort(function (a, b) { return a.debut < b.debut ? -1 : 1; });
+    if (!crs.length) return '';
+    var modifiable = !trop_ancien(iso) || correcteur(cid);
+    return '<h2>Enseignants du jour</h2><div class="liste pointage">' + crs.map(function (c) {
+      var p = ligne('presences_ens', idPresenceEns(iso, c.id));
+      var qui = nomPersonne(c.enseignant_id) || 'à désigner';
+      var etat = !p ? '<small class="a-pointer">à pointer</small>' : '<small class="st-' + (p.statut === 'remplace' ? 'justifie' : p.statut) + '">' + LIB_ENS[p.statut] +
+        (p.statut === 'remplace' ? ' par ' + esc(nomPersonne(p.remplacant_id)) : '') + (p.arrivee ? ' · ' + p.arrivee : '') + (Number(p.retard_min) ? ' (+' + p.retard_min + ' min)' : '') + (p.depart ? ' → ' + p.depart : '') + '</small>';
+      var b = '';
+      if (modifiable && c.enseignant_id) {
+        if (!p || p.statut === 'absent') b += '<button type="button" class="rond ok" data-a="pointer-ens" data-v="arrive" data-cr="' + esc(c.id) + '" aria-label="Arrivé maintenant">' + ico('check') + '</button>';
+        else if (!p.depart) b += '<button type="button" class="rond" data-a="pointer-ens" data-v="depart" data-cr="' + esc(c.id) + '" aria-label="Parti maintenant">' + ico('download') + '</button>';
+        if (!p || p.statut !== 'absent') b += '<button type="button" class="rond abs" data-a="pointer-ens" data-v="absent" data-cr="' + esc(c.id) + '" aria-label="Absent">' + ico('x') + '</button>';
+      }
+      return '<div class="ligne' + (p ? ' pt-' + (p.statut === 'remplace' ? 'justifie' : p.statut) : '') + '"><button type="button" class="corps nom-eleve" data-a="detail-ens" data-cr="' + esc(c.id) + '"' + (modifiable && c.enseignant_id ? '' : ' disabled') + '><b>' + esc(qui) + '</b><small>' + esc(heureLisible(c.debut) + ' – ' + heureLisible(c.fin) + ' · ' + nomDe('classes', c.classe_id) + ' · ' + nomDe('matieres', c.matiere_id)) + '</small>' + etat + '</button>' +
+        (p && p._attente ? '<span class="badge alerte">en attente</span>' : '') + '<span class="boutons">' + b + '</span></div>';
+    }).join('') + '</div>';
+  }
+  function minutesEns(c, arrivee, depart) {
+    var a = Math.max(minutes(arrivee || c.debut), minutes(c.debut));
+    return Math.max(0, minutes(depart || c.fin) - a);
+  }
+  function pointerEns(c, iso, champs) {
+    var id = idPresenceEns(iso, c.id);
+    var avant = ligne('presences_ens', id);
+    var x = Object.assign({ centre_id: c.centre_id, creneau_id: c.id, date: iso, enseignant_id: c.enseignant_id }, champs);
+    if (x.statut === 'absent') { x.arrivee = ''; x.depart = ''; x.retard_min = 0; x.minutes = 0; }
+    else {
+      var tol = Number((ligne('centres', c.centre_id) || {}).tolerance_retard_min) || 0;
+      var r = Math.max(0, minutes(x.arrivee || c.debut) - minutes(c.debut));
+      if (x.statut !== 'remplace') x.statut = r > tol ? 'retard' : 'present';
+      x.retard_min = r > tol ? r : 0;
+      x.minutes = minutesEns(c, x.arrivee, x.depart);
+    }
+    if (avant) { delete x.centre_id; delete x.creneau_id; delete x.date; }
+    return muter('presences_ens', id, x);
+  }
+  function feuilleEns(creneauId) {
+    var c = ligne('creneaux', creneauId);
+    var iso = APL.date || isoLocal(new Date());
+    var p = ligne('presences_ens', idPresenceEns(iso, c.id)) || {};
+    var autres = enseignantsDu(c.centre_id).filter(function (e) { return e.id !== c.enseignant_id; });
+    ouvrirFeuille('<h2>' + esc(nomPersonne(c.enseignant_id)) + '</h2><p class="doux">' + esc(dateLongue(iso) + ' · ' + heureLisible(c.debut) + ' – ' + heureLisible(c.fin) + ' · ' + nomDe('classes', c.classe_id)) + '</p>' +
+      '<form data-f="presence-ens" data-cr="' + esc(c.id) + '"><label class="champ"><span>Statut</span><select name="statut" data-change="statut-ens">' +
+      ['present', 'absent', 'remplace'].map(function (o) { return '<option value="' + o + '"' + ((p.statut === 'retard' ? 'present' : p.statut || 'present') === o ? ' selected' : '') + '>' + (o === 'present' ? 'Présent (retard calculé)' : LIB_ENS[o]) + '</option>'; }).join('') + '</select></label>' +
+      '<label class="champ" id="champ-remplacant"' + (p.statut === 'remplace' ? '' : ' hidden') + '><span>Remplaçant</span><select name="remplacant_id"><option value="">—</option>' + autres.map(function (e) { return '<option value="' + esc(e.id) + '"' + (p.remplacant_id === e.id ? ' selected' : '') + '>' + esc(e.nom) + '</option>'; }).join('') + '</select></label>' +
+      '<div class="deux"><label class="champ"><span>Arrivée</span><input type="time" name="arrivee" value="' + esc(p.arrivee || heureMaintenant()) + '"></label><label class="champ"><span>Départ</span><input type="time" name="depart" value="' + esc(p.depart || '') + '"></label></div>' +
+      '<label class="champ"><span>Note</span><input type="text" name="note" value="' + esc(p.note || '') + '"></label>' +
+      '<div class="actions"><button class="btn" type="submit">Enregistrer</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
+  }
+
+  // ───────────── Enseignants : heures, dû, paies ─────────────
+  var ENS = { centre: '', mois: '' };
+  function bornesMois(am) {
+    var a = am + '-01';
+    var d = new Date(a + 'T12:00:00'); d.setMonth(d.getMonth() + 1); d.setDate(0);
+    return [a, isoLocal(d)];
+  }
+  /** Heures d'un enseignant dans un centre pour un mois : prévues (créneaux), faites (pointages), dû selon son contrat. */
+  function bilanEnseignant(uid, cid, am) {
+    var b = bornesMois(am);
+    var fin = b[1] < isoLocal(new Date()) ? b[1] : isoLocal(new Date());
+    var crs = lignes('creneaux').filter(function (c) { return c.centre_id === cid && c.enseignant_id === uid; });
+    var prevues = 0, seancesPrevues = 0;
+    for (var d = b[0]; d <= fin; d = decalerJour(d, 1)) {
+      crs.forEach(function (c) { if (Number(c.jour) === jourDe(d)) { prevues += minutes(c.fin) - minutes(c.debut); seancesPrevues++; } });
+    }
+    var pres = lignes('presences_ens').filter(function (p) { return p.centre_id === cid && p.date >= b[0] && p.date <= b[1] && (p.enseignant_id === uid || p.remplacant_id === uid); });
+    var faites = 0, seances = 0, absences = 0, retards = 0, minRetard = 0, remplacements = 0;
+    pres.forEach(function (p) {
+      var pourLui = p.statut === 'remplace' ? p.remplacant_id === uid : p.enseignant_id === uid;
+      if (p.statut === 'absent' && p.enseignant_id === uid) { absences++; return; }
+      if (p.statut === 'remplace' && p.enseignant_id === uid) { absences++; return; }
+      if (!pourLui) return;
+      if (p.statut === 'remplace') remplacements++;
+      faites += Number(p.minutes) || 0; seances++;
+      if (p.statut === 'retard') { retards++; minRetard += Number(p.retard_min) || 0; }
+    });
+    var contrat = lignes('contrats').filter(function (c) { return c.centre_id === cid && c.utilisateur_id === uid && Number(c.actif); })[0] || null;
+    var du = 0;
+    if (contrat) {
+      var t = Number(contrat.taux) || 0;
+      du = contrat.mode === 'heure' ? Math.round(faites / 60 * t) : contrat.mode === 'seance' ? seances * t : Math.max(0, t - absences * (Number(contrat.retenue_absence) || 0));
+    }
+    var paies = lignes('paies').filter(function (p) { return p.centre_id === cid && p.enseignant_id === uid && p.mois === am; });
+    var verse = paies.filter(function (p) { return !Number(p.annule); }).reduce(function (s, p) { return s + Number(p.montant); }, 0);
+    return { prevues: prevues, seancesPrevues: seancesPrevues, faites: faites, seances: seances, absences: absences, retards: retards, minRetard: minRetard,
+      remplacements: remplacements, contrat: contrat, du: du, verse: verse, reste: Math.max(0, du - verse), paies: paies, pres: pres, crs: crs };
+  }
+  var LIB_MODE_REM = { heure: 'à l\'heure', seance: 'à la séance', forfait: 'au forfait mensuel' };
+  function enteteMois(etat, action) {
+    var auj = isoLocal(new Date()).slice(0, 7);
+    if (!etat.mois) etat.mois = auj;
+    var lib = MOIS[Number(etat.mois.slice(5, 7)) - 1].replace(/^./, function (c) { return c.toUpperCase(); }) + ' ' + etat.mois.slice(0, 4);
+    return '<div class="nav-date"><button type="button" class="btn clair petit" data-a="' + action + '" data-v="-1" aria-label="Mois précédent">‹</button><b>' + esc(lib) + '</b>' +
+      '<button type="button" class="btn clair petit" data-a="' + action + '" data-v="1"' + (etat.mois >= auj ? ' disabled' : '') + ' aria-label="Mois suivant">›</button></div>';
+  }
+  function decalerMois(am, n) { var d = new Date(am + '-15T12:00:00'); d.setMonth(d.getMonth() + n); return isoLocal(d).slice(0, 7); }
+  function pageEnseignants() {
+    var dispo = centresChoisis().filter(function (c) { return peut('finances.voir', c.id) || peut('enseignants.gerer', c.id); });
+    if (!dispo.some(function (c) { return c.id === ENS.centre; })) ENS.centre = dispo.length ? dispo[0].id : '';
+    var cid = ENS.centre;
+    var h = '<h1>Enseignants</h1>' + enteteMois(ENS, 'ens-mois');
+    if (dispo.length > 1) h += '<div class="puces">' + dispo.map(function (c) { return '<button type="button" class="puce' + (c.id === cid ? ' on' : '') + '" data-a="ens-centre" data-v="' + esc(c.id) + '">' + esc(c.nom_court || c.nom) + '</button>'; }).join('') + '</div>';
+    if (!cid) return h + '<div class="carte vide">Aucun centre.</div>';
+    var profs = enseignantsDu(cid);
+    if (!profs.length) return h + '<div class="carte vide">Aucun enseignant : donnez le rôle « Enseignant » dans Comptes et accès.</div>';
+    var tot = { du: 0, verse: 0 };
+    var rows = profs.map(function (t) {
+      var b = bilanEnseignant(t.id, cid, ENS.mois);
+      tot.du += b.du; tot.verse += b.verse;
+      var classes = {}; b.crs.forEach(function (c) { classes[nomDe('classes', c.classe_id)] = 1; });
+      var mats = String(t.matieres || '').split(',').filter(Boolean).map(function (m) { return nomDe('matieres', m); }).filter(Boolean);
+      return '<button class="ligne" type="button" data-a="voir-ens" data-id="' + esc(t.id) + '"><span class="avatar">' + esc(initiales(t.nom)) + '</span><span class="corps"><b>' + esc(t.nom) + '</b>' +
+        '<small>' + esc([mats.join(', '), Object.keys(classes).join(', ')].filter(Boolean).join(' · ') || 'aucun cours') + '</small>' +
+        '<small>' + dureeLisible(b.faites) + ' faites / ' + dureeLisible(b.prevues) + ' prévues' + (b.absences ? ' · ' + b.absences + ' abs.' : '') + (b.retards ? ' · ' + b.retards + ' retard' + (b.retards > 1 ? 's' : '') : '') + '</small></span>' +
+        '<span class="fin">' + (b.contrat ? '<b>' + fcfa(b.du) + '</b>' + (b.reste ? '<span class="badge alerte">reste ' + fcfa(b.reste) + '</span>' : b.du ? '<span class="badge ok">payé</span>' : '') : '<span class="badge">sans contrat</span>') + '</span></button>';
+    });
+    h += '<div class="stats"><div><b>' + fcfa(tot.du) + '</b><small>dû ce mois</small></div><div><b>' + fcfa(tot.verse) + '</b><small>versé</small></div></div><div class="liste">' + rows.join('') + '</div>';
+    return h;
+  }
+  function feuilleEnseignant(uid) {
+    var cid = ENS.centre;
+    var t = enseignantsDu(cid).filter(function (e) { return e.id === uid; })[0] || { nom: '' };
+    var b = bilanEnseignant(uid, cid, ENS.mois);
+    var gere = peut('enseignants.gerer', cid);
+    var c = b.contrat || { mode: 'heure', taux: '', retenue_absence: '' };
+    ouvrirFeuille('<h2>' + esc(t.nom) + '</h2><p class="doux">' + esc((ligne('centres', cid) || {}).nom || '') + ' · ' + esc(MOIS[Number(ENS.mois.slice(5)) - 1] + ' ' + ENS.mois.slice(0, 4)) + '</p>' +
+      '<div class="stats petites"><div><b>' + dureeLisible(b.faites) + '</b><small>faites (' + b.seances + ' séance' + (b.seances > 1 ? 's' : '') + ')</small></div><div><b>' + dureeLisible(b.prevues) + '</b><small>prévues</small></div><div><b>' + b.absences + '</b><small>absences</small></div></div>' +
+      '<div class="infos"><div class="info"><span>Retards</span><b>' + b.retards + (b.minRetard ? ' (' + b.minRetard + ' min)' : '') + '</b></div>' + (b.remplacements ? '<div class="info"><span>Remplacements assurés</span><b>' + b.remplacements + '</b></div>' : '') +
+      '<div class="info"><span>Rémunération</span><b>' + (b.contrat ? esc(LIB_MODE_REM[b.contrat.mode]) + ' · ' + fcfa(b.contrat.taux) : 'pas de contrat') + '</b></div>' +
+      '<div class="info"><span>Dû ce mois</span><b>' + fcfa(b.du) + '</b></div><div class="info"><span>Versé</span><b>' + fcfa(b.verse) + '</b></div><div class="info"><span>Reste</span><b class="' + (b.reste ? 'st-absent' : 'st-present') + '">' + fcfa(b.reste) + '</b></div></div>' +
+      (b.paies.length ? '<h3>Paies du mois</h3><div class="liste">' + b.paies.map(function (p) {
+        return '<div class="ligne"><span class="corps"><b' + (Number(p.annule) ? ' class="barre-txt"' : '') + '>' + fcfa(p.montant) + '</b><small>' + esc(dateLisible(p.date, true) + ' · ' + MODES[p.mode] + (Number(p.annule) ? ' · annulée : ' + (p.motif_annulation || '') : '')) + '</small></span>' +
+          (gere && !Number(p.annule) ? '<button class="btn clair petit" type="button" data-a="annuler-paie" data-id="' + esc(p.id) + '">Annuler</button>' : '') + '</div>';
+      }).join('') + '</div>' : '') +
+      (gere ? '<form data-f="paie" data-ens="' + esc(uid) + '"><h3>Verser la paie</h3><div class="deux"><label class="champ"><span>Montant (F)</span><input type="number" name="montant" min="1" value="' + (b.reste || '') + '" required></label>' +
+        '<label class="champ"><span>Mode</span><select name="mode">' + Object.keys(MODES).map(function (m) { return '<option value="' + m + '">' + MODES[m] + '</option>'; }).join('') + '</select></label></div>' +
+        '<div class="actions"><button class="btn or" type="submit">' + ico('wallet', 'p') + 'Verser</button></div></form>' +
+        '<form data-f="contrat" data-ens="' + esc(uid) + '" data-id="' + esc(b.contrat ? b.contrat.id : '') + '"><h3>Contrat</h3><div class="deux"><label class="champ"><span>Rémunéré</span><select name="mode">' +
+        Object.keys(LIB_MODE_REM).map(function (m) { return '<option value="' + m + '"' + (c.mode === m ? ' selected' : '') + '>' + LIB_MODE_REM[m] + '</option>'; }).join('') + '</select></label>' +
+        '<label class="champ"><span>Taux (F)</span><input type="number" name="taux" min="0" required value="' + esc(c.taux) + '"></label></div>' +
+        '<label class="champ"><span>Retenue par absence (forfait)</span><input type="number" name="retenue_absence" min="0" value="' + esc(c.retenue_absence || '') + '"></label>' +
+        '<div class="actions"><button class="btn clair" type="submit">Enregistrer le contrat</button></div></form>' : '') +
+      '<div class="actions"><button class="btn clair" type="button" data-a="bulletin-ens" data-id="' + esc(uid) + '">' + ico('camera', 'p') + 'Bulletin du mois</button><button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
+  }
+  /** Bulletin de rémunération (image) : à remettre ou à envoyer à l'enseignant. */
+  function bulletinEnseignant(uid, cid, am) {
+    return Promise.all([chargerLogo(), document.fonts ? document.fonts.load('600 24px Poppins') : null, chargerLogoDetoure()]).then(function (r) {
+      var b = bilanEnseignant(uid, cid, am);
+      var t = enseignantsDu(cid).filter(function (e) { return e.id === uid; })[0] || { nom: '' };
+      var c = ligne('centres', cid) || {};
+      var L = 1240, H = 1240, M = 70;
+      var cv = document.createElement('canvas'); cv.width = L; cv.height = H;
+      var g = cv.getContext('2d');
+      g.fillStyle = '#fff'; g.fillRect(0, 0, L, H);
+      g.fillStyle = '#0C2A6A'; g.fillRect(0, 0, L, 170);
+      if (r[0]) g.drawImage(r[0], M, 30, 110, 110);
+      g.fillStyle = '#fff'; g.font = '600 40px Poppins, sans-serif'; g.fillText(texteCoupe(g, c.nom || 'VÉRITAS', L - 2 * M - 140), M + 135, 90);
+      g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#C9D6F2'; g.fillText(texteCoupe(g, c.adresse || '', L - 2 * M - 140), M + 135, 130);
+      g.fillStyle = '#FFC93C'; g.fillRect(0, 170, L, 6);
+      g.fillStyle = '#001136'; g.font = '600 40px Poppins, sans-serif'; g.fillText('Bulletin de rémunération', M, 250);
+      g.font = '400 26px Poppins, sans-serif'; g.fillStyle = '#4D5163'; g.fillText(MOIS[Number(am.slice(5)) - 1].replace(/^./, function (x) { return x.toUpperCase(); }) + ' ' + am.slice(0, 4), M, 292);
+      if (r[2]) { var lf = 520; g.save(); g.globalAlpha = 0.06; g.drawImage(r[2], L / 2 - lf / 2, 360, lf, Math.round(lf * r[2].naturalHeight / r[2].naturalWidth)); g.restore(); }
+      var y = 370;
+      var ligneB = function (lib, val, gras) {
+        g.font = '400 25px Poppins, sans-serif'; g.fillStyle = '#6B7185'; g.fillText(lib, M, y);
+        g.font = (gras ? '600' : '500') + ' 27px Poppins, sans-serif'; g.fillStyle = '#001136'; g.fillText(texteCoupe(g, val, L - 2 * M - 420), M + 420, y);
+        g.fillStyle = '#E1E6F0'; g.fillRect(M, y + 18, L - 2 * M, 1); y += 62;
+      };
+      ligneB('Enseignant', t.nom, true);
+      ligneB('Heures faites', dureeLisible(b.faites) + ' (' + b.seances + ' séance' + (b.seances > 1 ? 's' : '') + ') sur ' + dureeLisible(b.prevues) + ' prévues');
+      ligneB('Absences · retards', b.absences + ' · ' + b.retards + (b.minRetard ? ' (' + b.minRetard + ' min)' : ''));
+      ligneB('Rémunération', b.contrat ? LIB_MODE_REM[b.contrat.mode] + ' · ' + fcfa(b.contrat.taux) : '—');
+      ligneB('Montant dû', fcfa(b.du) + ' (' + enLettres(b.du) + ' francs CFA)', true);
+      ligneB('Déjà versé', fcfa(b.verse));
+      ligneB('Reste à verser', fcfa(b.reste), true);
+      y += 60;
+      g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#6B7185';
+      g.fillText('Signature de l\'enseignant', M, y); g.textAlign = 'right'; g.fillText('La Direction', L - M, y); g.textAlign = 'left';
+      g.font = '400 18px Poppins, sans-serif'; g.fillText('VÉRITAS Gestion · édité le ' + new Date().toLocaleDateString('fr-FR'), M, H - 40);
+      return versBlob(cv, 'image/png').then(function (bl) {
+        var nom = ('bulletin-' + am + '-' + t.nom).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9-]+/g, '-');
+        return new File([bl], nom + '.png', { type: 'image/png' });
+      });
+    });
+  }
+
+  // « Mes heures » : l'enseignant voit ses cours, ses heures, son dû et ses paies.
+  var MES = { mois: '' };
+  function pageMesHeures() {
+    var u = E.profil.utilisateur;
+    var h = '<h1>Mes heures</h1>' + enteteMois(MES, 'mes-mois');
+    var centres = lignes('centres').filter(function (c) { return roleDans(c.id) === 'enseignant'; });
+    if (!centres.length) return h + '<div class="carte vide">Aucun centre où vous enseignez.</div>';
+    centres.forEach(function (c) {
+      var b = bilanEnseignant(u.id, c.id, MES.mois);
+      h += '<h2>' + esc(c.nom) + '</h2><div class="stats"><div><b>' + dureeLisible(b.faites) + '</b><small>faites · ' + b.seances + ' séance' + (b.seances > 1 ? 's' : '') + '</small></div><div><b>' + dureeLisible(b.prevues) + '</b><small>prévues</small></div>' +
+        (b.contrat ? '<div><b>' + fcfa(b.du) + '</b><small>dû (' + esc(LIB_MODE_REM[b.contrat.mode]) + ')</small></div><div><b>' + fcfa(b.verse) + '</b><small>reçu</small></div>' : '') + '</div>';
+      var l = b.pres.slice().sort(function (a, z) { return a.date < z.date ? 1 : -1; });
+      h += l.length ? '<div class="liste">' + l.map(function (p) {
+        var cr = ligne('creneaux', p.creneau_id) || {};
+        var lui = p.statut === 'remplace' ? (p.remplacant_id === u.id ? 'Remplacement assuré' : 'Remplacé') : LIB_ENS[p.statut];
+        return '<div class="ligne"><span class="corps"><b>' + esc(dateLisible(p.date, true) + ' · ' + nomDe('classes', cr.classe_id)) + '</b><small>' + esc(lui + (p.arrivee ? ' · ' + p.arrivee : '') + (p.depart ? ' → ' + p.depart : '') + (Number(p.retard_min) ? ' (+' + p.retard_min + ' min)' : '')) + '</small></span><span class="fin"><b>' + dureeLisible(Number(p.minutes) || 0) + '</b></span></div>';
+      }).join('') + '</div>' : '<div class="carte vide">Aucun cours pointé ce mois-ci.</div>';
+    });
     return h;
   }
 
@@ -1235,11 +1532,13 @@
       }).join('') + '</div>' : '<div class="carte vide">Aucun impayé échu. </div>';
     } else {
       var deps = lignes('depenses').filter(function (d) { return d.centre_id === cid; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+      if (!E.cache.photosEnAttente) idbTout('fichiers').then(function (f) { E.cache.photosEnAttente = {}; f.forEach(function (x) { E.cache.photosEnAttente[x.id] = 1; }); if (f.length) rendre(); });
       var att = deps.filter(function (d) { return d.statut === 'en_attente'; });
       h += '<p class="sous-titre">' + (att.length ? '<b>' + att.length + '</b> en attente de validation · ' : '') + 'Une dépense validée ne se modifie plus.</p>';
       h += deps.length ? '<div class="liste">' + deps.slice(0, 80).map(function (d) {
         var st = d.statut === 'validee' ? '<span class="badge ok">validée</span>' : d.statut === 'refusee' ? '<span class="badge danger">refusée</span>' : '<span class="badge alerte">en attente</span>';
-        return '<button class="ligne" type="button" data-a="voir-depense" data-id="' + esc(d.id) + '"><span class="corps"><b>' + esc(d.libelle) + '</b><small>' + esc(dateLisible(d.date, true) + ' · ' + (CATEGORIES[d.categorie] || d.categorie) + (d.beneficiaire ? ' · ' + d.beneficiaire : '') + ' · saisie par ' + (nomPersonne(d.saisie_par) || (d.saisie_par === E.profil.utilisateur.id ? 'vous' : '—'))) + '</small></span><span class="fin"><b>' + fcfa(d.montant) + '</b>' + st + '</span></button>';
+        var sansJ = !d.justificatif && !(E.cache.photosEnAttente || {})[d.id] ? ' <span class="badge alerte">sans justificatif</span>' : '';
+        return '<button class="ligne" type="button" data-a="voir-depense" data-id="' + esc(d.id) + '"><span class="corps"><b>' + esc(d.libelle) + sansJ + '</b><small>' + esc(dateLisible(d.date, true) + ' · ' + (CATEGORIES[d.categorie] || d.categorie) + (d.beneficiaire ? ' · ' + d.beneficiaire : '') + ' · saisie par ' + (nomPersonne(d.saisie_par) || (d.saisie_par === E.profil.utilisateur.id ? 'vous' : '—'))) + '</small></span><span class="fin"><b>' + fcfa(d.montant) + '</b>' + st + '</span></button>';
       }).join('') + '</div>' : '<div class="carte vide">Aucune dépense.</div>';
       if (peut('depenses.saisir', cid)) h += '<button class="fab" type="button" data-a="editer-depense" data-id="">' + ico('plus') + 'Dépense</button>';
     }
@@ -1412,9 +1711,30 @@
       '<div class="deux"><label class="champ"><span>Catégorie</span><select name="categorie"' + dis + '>' + Object.keys(CATEGORIES).map(function (k) { return '<option value="' + k + '"' + (d.categorie === k ? ' selected' : '') + '>' + CATEGORIES[k] + '</option>'; }).join('') + '</select></label>' +
       '<label class="champ"><span>Payé en</span><select name="mode"' + dis + '>' + Object.keys(MODES).map(function (k) { return '<option value="' + k + '"' + (d.mode === k ? ' selected' : '') + '>' + MODES[k] + '</option>'; }).join('') + '</select></label></div>' +
       '<label class="champ"><span>Bénéficiaire</span><input type="text" name="beneficiaire" value="' + esc(d.beneficiaire || '') + '"' + dis + '></label>' +
+      '<div id="zone-justificatif" class="justificatif"></div>' +
+      (modifiable ? '<label class="champ"><span>' + (d.justificatif ? 'Remplacer la photo du justificatif' : 'Photo du justificatif (facture, reçu)') + '</span><input type="file" name="photo" accept="image/*" capture="environment"></label>' : '') +
       (modifiable ? '<div class="actions"><button class="btn" type="submit">Enregistrer</button></div>' : '') + '</form>' +
       (valideur ? '<div class="actions"><button class="btn or" type="button" data-a="valider-depense" data-id="' + esc(id) + '">' + ico('check', 'p') + 'Valider</button><button class="btn danger" type="button" data-a="refuser-depense" data-id="' + esc(id) + '">Refuser</button></div>' : '') +
       '<div class="actions">' + (id && modifiable ? '<button class="btn danger" type="button" data-a="suppr-depense" data-id="' + esc(id) + '">Retirer</button>' : '') + '<button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
+    if (id) afficherJustificatif(id, valideur);
+  }
+  function afficherJustificatif(id, valideur) {
+    var z = $('#zone-justificatif');
+    var d = ligne('depenses', id);
+    if (!z || !d) return;
+    var montrer = function (src, legende) {
+      z.innerHTML = '<p class="doux">' + esc(legende) + '</p>';
+      var img = new Image(); img.alt = 'Justificatif'; img.src = src; z.appendChild(img);
+    };
+    promesse(magasin('fichiers').get(id)).then(function (f) {
+      if (f) return montrer('data:image/jpeg;base64,' + f.jpeg, 'Justificatif pris sur ce téléphone · envoi au retour du réseau');
+      if (!d.justificatif) { z.innerHTML = '<p class="note">' + ico('alert', 'p') + ' Sans justificatif' + (valideur ? ' : demandez la photo avant de valider.' : '.') + '</p>'; return; }
+      z.innerHTML = '<p class="doux">Chargement du justificatif…</p>';
+      fetch(API + '?r=justificatif/lire&id=' + encodeURIComponent(id), { headers: { Authorization: 'Bearer ' + E.jeton } })
+        .then(function (rep) { if (!rep.ok) throw new Error(); return rep.blob(); })
+        .then(function (b) { montrer(URL.createObjectURL(b), 'Justificatif déposé le ' + dateLisible(d.justificatif)); })
+        .catch(function () { z.innerHTML = '<p class="doux">Justificatif déposé (consultable en ligne).</p>'; });
+    });
   }
 
   var BIL = { mois: '' };
@@ -1435,7 +1755,9 @@
       var deps = lignes('depenses').filter(function (d) { return d.centre_id === c.id && dans(d.date); });
       var depV = deps.filter(function (d) { return d.statut === 'validee'; });
       var rec = pay.reduce(function (s, p) { return s + Number(p.montant); }, 0);
-      var dep = depV.reduce(function (s, d) { return s + Number(d.montant); }, 0);
+      var paiesP = lignes('paies').filter(function (p) { return p.centre_id === c.id && !Number(p.annule) && dans(p.date); });
+      var totPaies = paiesP.reduce(function (s, p) { return s + Number(p.montant); }, 0);
+      var dep = depV.reduce(function (s, d) { return s + Number(d.montant); }, 0) + totPaies;
       tot.rec += rec; tot.dep += dep;
       var res = rec - dep;
       // Attendu de la période : échéances des élèves tombant dans la période.
@@ -1450,6 +1772,7 @@
         '<div><b class="' + (res < 0 ? 'st-absent' : 'st-present') + '">' + fcfa(res) + '</b><small>résultat</small></div><div><b>' + (attendu ? Math.round(100 * rec / attendu) + ' %' : '—') + '</b><small>recouvrement (' + fcfa(attendu) + ' attendus)</small></div></div>';
       h += '<div class="infos">' + Object.keys(parMode).map(function (m) { return '<div class="info"><span>' + MODES[m] + '</span><b>' + fcfa(parMode[m]) + '</b></div>'; }).join('') +
         Object.keys(parCat).map(function (k) { return '<div class="info"><span>Dépenses · ' + CATEGORIES[k] + '</span><b>− ' + fcfa(parCat[k]) + '</b></div>'; }).join('') +
+        (totPaies ? '<div class="info"><span>Paies des enseignants</span><b>− ' + fcfa(totPaies) + '</b></div>' : '') +
         (deps.some(function (d) { return d.statut === 'en_attente'; }) ? '<div class="info"><span>Dépenses en attente (non comptées)</span><b>' + fcfa(deps.filter(function (d) { return d.statut === 'en_attente'; }).reduce(function (s, d) { return s + Number(d.montant); }, 0)) + '</b></div>' : '') + '</div>';
       if (acts.length) {
         h += '<h3>Part des actionnaires</h3><div class="liste">' + acts.map(function (a) {
@@ -2190,6 +2513,29 @@
         : { statut: 'absent', motif: '' };
       pointer(x, el.dataset.eleve, champs).then(rendre);
     },
+    'pointer-ens': function (el) {
+      var c = ligne('creneaux', el.dataset.cr);
+      var iso = APL.date || isoLocal(new Date());
+      var p = ligne('presences_ens', idPresenceEns(iso, c.id));
+      var v = el.dataset.v;
+      var champs = v === 'arrive' ? { statut: 'present', arrivee: heureMaintenant(), depart: '', remplacant_id: '' }
+        : v === 'depart' ? { statut: p.statut, arrivee: p.arrivee, depart: heureMaintenant(), remplacant_id: p.remplacant_id || '' }
+        : { statut: 'absent', remplacant_id: '' };
+      pointerEns(c, iso, champs).then(rendre);
+    },
+    'detail-ens': function (el) { feuilleEns(el.dataset.cr); },
+    'ens-centre': function (el) { ENS.centre = el.dataset.v; rendre(); },
+    'ens-mois': function (el) { ENS.mois = decalerMois(ENS.mois, +el.dataset.v); rendre(); },
+    'mes-mois': function (el) { MES.mois = decalerMois(MES.mois, +el.dataset.v); rendre(); },
+    'voir-ens': function (el) { feuilleEnseignant(el.dataset.id); },
+    'bulletin-ens': function (el) {
+      bulletinEnseignant(el.dataset.id, ENS.centre, ENS.mois).then(function (f) { E.cache.dernierExport = f; return partagerFichiers([f], 'Bulletin de rémunération'); })
+        .catch(function (e) { toast('Export impossible : ' + (e && e.message), true); });
+    },
+    'annuler-paie': function (el) {
+      ouvrirFeuille('<h2>Annuler la paie</h2><form data-f="annul-paie" data-id="' + esc(el.dataset.id) + '"><label class="champ"><span>Motif</span><input type="text" name="motif" required minlength="5"></label>' +
+        '<div class="actions"><button class="btn danger" type="submit">Annuler la paie</button><button class="btn clair" type="button" data-a="fermer">Retour</button></div></form>');
+    },
     'caisse-centre': function (el) { CAI.centre = el.dataset.v; rendre(); },
     'caisse-onglet': function (el) { CAI.onglet = el.dataset.v; if (location.hash !== '#/caisse') location.hash = '#/caisse'; else rendre(); },
     'caisse-date': function (el) { CAI.date = decalerJour(CAI.date, +el.dataset.v); rendre(); },
@@ -2510,10 +2856,45 @@
       if (!(montant > 0)) { toast('Montant invalide.', true); return; }
       var e = ligne('eleves', form.dataset.eleve);
       var id = 'pa' + nouvelId();
+      var champs = { centre_id: e.centre_id, eleve_id: e.id, montant: montant, date: v.date || isoLocal(new Date()), mode: v.mode, reference: v.reference || '', note: v.note || '' };
+      var numero = numerosLibres(e.centre_id)[0];
+      if (numero) champs.numero = numero;
       fermerFeuille();
-      muter('paiements', id, { centre_id: e.centre_id, eleve_id: e.id, montant: montant, date: v.date || isoLocal(new Date()), mode: v.mode, reference: v.reference || '', note: v.note || '' })
-        .then(function () { toast(fcfa(montant) + ' encaissés.'); rendre(); return synchroniser(); })
-        .then(function () { feuilleRecu(id); });
+      muter('paiements', id, champs)
+        .then(function () {
+          toast(fcfa(montant) + ' encaissés.');
+          rendre();
+          // Numéro déjà connu : le reçu s'ouvre tout de suite, réseau ou pas.
+          if (numero) { feuilleRecu(id); return synchroniser(); }
+          return synchroniser().then(function () { feuilleRecu(id); });
+        });
+    },
+    'presence-ens': function (form) {
+      var v = valeurs(form);
+      var c = ligne('creneaux', form.dataset.cr);
+      if (v.statut === 'remplace' && !v.remplacant_id) { toast('Choisissez le remplaçant.', true); return; }
+      if (v.depart && v.arrivee && v.depart < v.arrivee) { toast('Le départ ne peut pas précéder l\'arrivée.', true); return; }
+      fermerFeuille();
+      pointerEns(c, APL.date || isoLocal(new Date()), { statut: v.statut, arrivee: v.statut === 'absent' ? '' : v.arrivee, depart: v.statut === 'absent' ? '' : v.depart, remplacant_id: v.statut === 'remplace' ? v.remplacant_id : '', note: v.note }).then(rendre);
+    },
+    paie: function (form) {
+      var v = valeurs(form);
+      var montant = Math.round(Number(v.montant));
+      if (!(montant > 0)) { toast('Montant invalide.', true); return; }
+      fermerFeuille();
+      muter('paies', 'py' + nouvelId(), { centre_id: ENS.centre, enseignant_id: form.dataset.ens, mois: ENS.mois, montant: montant, date: isoLocal(new Date()), mode: v.mode })
+        .then(function () { toast('Paie de ' + fcfa(montant) + ' enregistrée.'); rendre(); });
+    },
+    contrat: function (form) {
+      var v = valeurs(form);
+      fermerFeuille();
+      muter('contrats', form.dataset.id || 'co' + nouvelId(), { centre_id: ENS.centre, utilisateur_id: form.dataset.ens, mode: v.mode, taux: Math.round(Number(v.taux)) || 0, retenue_absence: Math.round(Number(v.retenue_absence)) || 0, actif: 1 })
+        .then(function () { toast('Contrat enregistré.'); rendre(); });
+    },
+    'annul-paie': function (form) {
+      var v = valeurs(form);
+      fermerFeuille();
+      muter('paies', form.dataset.id, { annule: 1, motif_annulation: v.motif }).then(function () { toast('Paie annulée.'); rendre(); });
     },
     annulation: function (form) {
       var v = valeurs(form);
@@ -2525,8 +2906,13 @@
       var id = form.dataset.id || 'de' + nouvelId();
       var champs = { centre_id: form.dataset.centre, libelle: v.libelle, montant: Math.round(Number(v.montant)), date: v.date, categorie: v.categorie, mode: v.mode, beneficiaire: v.beneficiaire };
       if (!form.dataset.id) champs.statut = 'en_attente';
-      fermerFeuille();
-      muter('depenses', id, champs).then(function () { toast('Dépense enregistrée : en attente de validation.'); rendre(); });
+      var photo = form.querySelector('input[name=photo]');
+      var fichier = photo && photo.files && photo.files[0];
+      occupe(form, true);
+      (fichier ? compresserPhoto(fichier).then(function (jpeg) { return idbMettre('fichiers', { id: id, jpeg: jpeg, ajoute: maintenantSql() }); }) : Promise.resolve())
+        .then(function () { fermerFeuille(); return muter('depenses', id, champs); })
+        .then(function () { toast('Dépense enregistrée' + (fichier ? ' avec sa photo' : '') + ' : en attente de validation.'); rendre(); })
+        .catch(function (e) { occupe(form, false); toast(e.message, true); });
     },
     refus: function (form) {
       var v = valeurs(form);
@@ -2629,6 +3015,7 @@
     if (f && FORMULAIRES[f.dataset.f]) { ev.preventDefault(); FORMULAIRES[f.dataset.f](f); }
   });
   document.addEventListener('change', function (ev) {
+    if (ev.target.dataset && ev.target.dataset.change === 'statut-ens') { var cr = $('#champ-remplacant'); if (cr) cr.hidden = ev.target.value !== 'remplace'; return; }
     if (ev.target.dataset && ev.target.dataset.change === 'mode-paiement') { var c = $('#champ-reference'); if (c) c.hidden = !/^(momo|om|virement)$/.test(ev.target.value); return; }
     if (ev.target.dataset && ev.target.dataset.change === 'eleves-tous') { ELV.tous = ev.target.checked; dessinerListeEleves(); return; }
     if (ev.target.dataset && ev.target.dataset.change === 'emploi-filtre') { EMP.filtre = ev.target.value; rendre(); return; }
@@ -2666,9 +3053,9 @@
 
   // ───────────────────────────── Démarrage ─────────────────────────────
   ouvrirIdb().then(function () {
-    return Promise.all([metaLire('jeton'), metaLire('profil'), metaLire('rev'), metaLire('centre'), metaLire('pin'), metaLire('equipe')]);
+    return Promise.all([metaLire('jeton'), metaLire('profil'), metaLire('rev'), metaLire('centre'), metaLire('pin'), metaLire('equipe'), metaLire('tranches')]);
   }).then(function (m) {
-    E.jeton = m[0]; E.profil = m[1]; E.rev = m[2] || 0; E.centre = m[3] || ''; E.equipe = m[5] || [];
+    E.jeton = m[0]; E.profil = m[1]; E.rev = m[2] || 0; E.centre = m[3] || ''; E.equipe = m[5] || []; E.tranches = m[6] || {};
     if (E.jeton && !E.profil) E.jeton = null;
     if (E.jeton && m[4]) E.verrouille = true;
     return chargerLocal();

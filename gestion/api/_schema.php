@@ -137,7 +137,38 @@ function g_schema(): array {
             'id' => 'id', 'centre_id' => 'ref', 'date' => 'str:10', 'libelle' => 'str:160', 'categorie' => 'str:20',
             'montant' => 'int', 'mode' => 'str:12', 'beneficiaire' => 'str:120', 'statut' => 'str:12',
             'saisie_par' => 'ref', 'valide_par' => 'ref', 'valide_le' => 'str:19', 'motif_refus' => 'str:200',
+            'justificatif' => 'str:40',          // « AAAA-MM-JJ HH:MM:SS » du dépôt de la photo ; vide = aucun
         ] + G_COLS_SYNC, 'index' => [['centre_id', 'date'], ['rev']]],
+
+        // Contrat d'un enseignant dans un centre : à l'heure, à la séance ou au forfait mensuel
+        // (retenue par absence pour le forfait). Un enseignant des deux centres a deux contrats.
+        'g_contrats' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'utilisateur_id' => 'ref', 'mode' => 'str:10', 'taux' => 'int',
+            'retenue_absence' => 'int', 'actif' => 'int:1',
+        ] + G_COLS_SYNC, 'index' => [['centre_id'], ['utilisateur_id'], ['rev']]],
+
+        // Présence d'un enseignant à un créneau, un jour donné (id « pe » + AAAAMMJJ + créneau).
+        // minutes et retard_min recalculés par le serveur ; un remplaçant touche les heures.
+        'g_presences_ens' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'creneau_id' => 'ref', 'enseignant_id' => 'ref', 'remplacant_id' => 'ref',
+            'date' => 'str:10', 'statut' => 'str:10', 'arrivee' => 'str:5', 'depart' => 'str:5',
+            'retard_min' => 'int', 'minutes' => 'int', 'note' => 'str:200',
+        ] + G_COLS_SYNC, 'index' => [['centre_id', 'date'], ['enseignant_id'], ['remplacant_id'], ['rev']]],
+
+        // Paies versées aux enseignants : comme les versements des élèves, jamais modifiées ;
+        // une erreur s'annule avec un motif.
+        'g_paies' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'enseignant_id' => 'ref', 'mois' => 'str:7', 'montant' => 'int',
+            'date' => 'str:10', 'mode' => 'str:12', 'note' => 'str:200', 'paye_par' => 'ref',
+            'annule' => 'int', 'motif_annulation' => 'str:200',
+        ] + G_COLS_SYNC, 'index' => [['centre_id', 'mois'], ['enseignant_id'], ['rev']]],
+
+        // Tranches de numéros de reçu réservées par un compte : le téléphone numérote ses
+        // reçus HORS LIGNE sans collision avec un autre appareil.
+        'g_tranches' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'utilisateur_id' => 'ref', 'prefixe' => 'str:4',
+            'debut' => 'int', 'fin' => 'int', 'cree_le' => 'str:19',
+        ], 'index' => [['centre_id', 'prefixe'], ['utilisateur_id']]],
 
         // Opérations déjà appliquées : un envoi répété (réseau coupé au mauvais
         // moment) n'est jamais appliqué deux fois.
@@ -199,11 +230,23 @@ function g_registre(): array {
         ],
         'paiements' => [
             'table' => 'g_paiements', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'paiements.encaisser',
-            'champs' => ['centre_id', 'eleve_id', 'montant', 'date', 'mode', 'reference', 'note', 'annule', 'motif_annulation', 'envoye_le'],
+            'champs' => ['centre_id', 'eleve_id', 'numero', 'montant', 'date', 'mode', 'reference', 'note', 'annule', 'motif_annulation', 'envoye_le'],
         ],
         'depenses' => [
             'table' => 'g_depenses', 'portee' => 'centre_id', 'lire' => 'depenses.voir', 'ecrire' => 'depenses.saisir',
             'champs' => ['centre_id', 'date', 'libelle', 'categorie', 'montant', 'mode', 'beneficiaire', 'statut', 'motif_refus'],
+        ],
+        'contrats' => [
+            'table' => 'g_contrats', 'portee' => 'centre_id', 'lire' => 'finances.voir', 'ecrire' => 'enseignants.gerer', 'proprio' => 'utilisateur_id',
+            'champs' => ['centre_id', 'utilisateur_id', 'mode', 'taux', 'retenue_absence', 'actif'],
+        ],
+        'presences_ens' => [
+            'table' => 'g_presences_ens', 'portee' => 'centre_id', 'lire' => 'centre.voir', 'ecrire' => 'appel.faire',
+            'champs' => ['centre_id', 'creneau_id', 'enseignant_id', 'remplacant_id', 'date', 'statut', 'arrivee', 'depart', 'note'],
+        ],
+        'paies' => [
+            'table' => 'g_paies', 'portee' => 'centre_id', 'lire' => 'finances.voir', 'ecrire' => 'enseignants.gerer', 'proprio' => 'enseignant_id',
+            'champs' => ['centre_id', 'enseignant_id', 'mois', 'montant', 'date', 'mode', 'note', 'annule', 'motif_annulation'],
         ],
         'actionnaires' => [
             'table' => 'g_actionnaires', 'portee' => 'centre_id', 'lire' => 'finances.voir', 'ecrire' => 'admin',

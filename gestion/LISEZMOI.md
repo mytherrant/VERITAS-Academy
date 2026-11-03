@@ -1,7 +1,7 @@
 # VÉRITAS Gestion — gestion.veritas-school.com
 
 Application des centres de répétition (Ndog-passi III, Ndog-passi II, et ceux qu'on ouvrira) :
-rôles par centre, emploi du temps et jours/horaires, inscriptions, appel et assiduité, feuille du jour (image/PDF) et messages aux parents, caisse et bilan ; puis enseignants.
+rôles par centre, emploi du temps et jours/horaires, inscriptions, appel et assiduité, feuille du jour (image/PDF) et messages aux parents, caisse et bilan, enseignants (heures, paie) : les six étapes.
 
 > Ce fichier n'est pas déployé (la CI copie une liste fermée de fichiers).
 
@@ -35,6 +35,18 @@ facturé dès le mois d'inscription, échue le N du mois ; versements imputés d
 récent). Le serveur garde les règles d'argent : numéro de reçu séquentiel par centre, versement
 jamais modifié ni supprimé (annulation motivée par un responsable), remise réservée au responsable,
 tarifs des classes fixés par le responsable, dépense validée par un autre que son auteur.
+
+**Reçus hors ligne :** chaque téléphone réserve en ligne des tranches de 20 numéros (`recus/tranche`) ;
+hors ligne, le reçu prend le suivant de sa tranche, définitif. Le serveur vérifie la propriété et
+l'unicité ; sa propre numérotation saute les tranches réservées.
+
+**Justificatifs :** photo compressée sur le téléphone (JPEG ≤ 1 280 px), gardée en IndexedDB jusqu'à
+l'envoi (`justificatif/deposer`), stockée dans `api/data/justificatifs/` (verrouillé, gitignoré),
+servie aux seuls comptes qui voient les dépenses du centre.
+
+**Enseignants :** le centre pointe l'enseignant de chaque créneau (présent, absent, remplacé) ; heures
+faites, dû selon le contrat (heure, séance, forfait avec retenue), paies (annulables, jamais
+modifiées) comptées en charges dans le bilan. L'enseignant voit SES heures, SON contrat, SES paies.
 
 **Rôles :** admin global (les deux centres) · responsable · actionnaire (consultation des
 finances + emploi du temps) · secrétaire/surveillant · enseignant. Voir `g_capacites()`.
@@ -70,6 +82,7 @@ node tests/banc_gestion_eleves.cjs <dossier>     # inscriptions, homonymes, impo
 node tests/banc_gestion_appel.cjs <dossier>      # appel, retards, clôture, alertes, hors ligne (Playwright)
 node tests/banc_gestion_exports.cjs <dossier>    # feuille PNG/PDF (structure vérifiée), messages WhatsApp/SMS (Playwright)
 node tests/banc_gestion_caisse.cjs <dossier>     # échéancier, encaissement, reçu, relances, dépenses, bilan (Playwright)
+node tests/banc_gestion_enseignants.cjs <dossier> # enseignants, « Mes heures », reçu hors ligne, photo de justificatif (Playwright)
 ```
 
 **Noms fictifs uniquement** dans le code et les bancs : le dépôt est public, les élèves sont mineurs.

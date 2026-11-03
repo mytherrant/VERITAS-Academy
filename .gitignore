@@ -213,3 +213,5 @@ premier_cycle/_sources/
 # VÉRITAS Gestion (gestion.veritas-school.com) : surcharges locales et base SQLite de développement
 /gestion/api/_config.php
 /gestion/api/data/*.sqlite*
+# Photos de justificatifs des dépenses (données privées des centres, jamais dans le dépôt)
+/gestion/api/data/justificatifs/

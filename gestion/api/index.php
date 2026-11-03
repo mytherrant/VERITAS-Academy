@@ -272,6 +272,74 @@ case 'comptes/mdp': {
     g_ok(['mdp' => $mdp]);
 }
 
+// ─────────────────────────────── Tranches de numéros de reçu ───────────────────────────────
+case 'recus/tranche': {
+    g_exiger_post($methode);
+    $ctx = g_exiger_session();
+    $centre = (string) g_param('centre', '');
+    g_exiger($ctx, 'paiements.encaisser', $centre);
+    $prefixe = g_prefixe_annee($pdo);
+    $taille = 20;
+    $pdo->beginTransaction();
+    try {
+        $st = $pdo->prepare('SELECT numero FROM g_paiements WHERE centre_id = ? AND numero LIKE ?');
+        $st->execute([$centre, $prefixe . '-%']);
+        $max = 0;
+        foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $n) { $max = max($max, (int) substr((string) $n, 5)); }
+        $max = max($max, g_max_tranche($pdo, $centre, $prefixe));
+        if ($max + $taille > 9999) { throw new RuntimeException('Plus de numéros disponibles cette année.'); }
+        $t = ['id' => g_id(), 'centre_id' => $centre, 'utilisateur_id' => $ctx['uid'], 'prefixe' => $prefixe, 'debut' => $max + 1, 'fin' => $max + $taille, 'cree_le' => g_now()];
+        $pdo->prepare('INSERT INTO g_tranches (id, centre_id, utilisateur_id, prefixe, debut, fin, cree_le) VALUES (?,?,?,?,?,?,?)')->execute(array_values($t));
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
+    g_journal($ctx, 'tranche_reservee', 'g_tranches', $t['id'], null, ['debut' => $t['debut'], 'fin' => $t['fin']], $centre);
+    g_ok(['tranche' => $t]);
+}
+
+// ─────────────────────────────── Justificatifs (photos) ───────────────────────────────
+// Stockés hors de la base, dans data/justificatifs/ (verrouillé par .htaccess), servis
+// seulement aux comptes qui voient les dépenses du centre.
+case 'justificatif/deposer': {
+    g_exiger_post($methode);
+    $ctx = g_exiger_session();
+    $st = $pdo->prepare('SELECT * FROM g_depenses WHERE id = ? AND supprime = 0');
+    $st->execute([(string) g_param('id', '')]);
+    $d = $st->fetch();
+    if (!$d) { g_fail('Dépense introuvable (pas encore synchronisée ?).', 404); }
+    g_exiger($ctx, 'depenses.saisir', (string) $d['centre_id']);
+    if ($d['statut'] === 'validee') { g_fail('Dépense validée : son justificatif ne change plus.', 409); }
+    $bin = base64_decode((string) g_param('jpeg', ''), true);
+    if ($bin === false || strlen($bin) < 1000 || strlen($bin) > 3 * 1024 * 1024 || substr($bin, 0, 3) !== "\xFF\xD8\xFF") {
+        g_fail('Photo invalide (JPEG de 3 Mo au plus).', 422);
+    }
+    $dir = __DIR__ . '/data/justificatifs';
+    if (!is_dir($dir)) { @mkdir($dir, 0700, true); }
+    if (file_put_contents($dir . '/' . preg_replace('/[^a-zA-Z0-9-]/', '', (string) $d['id']) . '.jpg', $bin, LOCK_EX) === false) { g_fail('Écriture impossible sur le serveur.', 500); }
+    $quand = g_now();
+    $pdo->prepare('UPDATE g_depenses SET justificatif = ?, rev = ?, maj_par = ?, maj_le = ? WHERE id = ?')->execute([$quand, g_rev(), $ctx['uid'], $quand, $d['id']]);
+    g_journal($ctx, 'justificatif_depose', 'g_depenses', (string) $d['id'], null, ['taille' => strlen($bin)], (string) $d['centre_id']);
+    g_ok(['justificatif' => $quand]);
+}
+
+case 'justificatif/lire': {
+    $ctx = g_exiger_session();
+    $st = $pdo->prepare('SELECT id, centre_id, justificatif FROM g_depenses WHERE id = ?');
+    $st->execute([(string) g_param('id', '')]);
+    $d = $st->fetch();
+    if (!$d || !$d['justificatif']) { g_fail('Aucun justificatif.', 404); }
+    g_exiger($ctx, 'depenses.voir', (string) $d['centre_id']);
+    $f = __DIR__ . '/data/justificatifs/' . preg_replace('/[^a-zA-Z0-9-]/', '', (string) $d['id']) . '.jpg';
+    if (!is_file($f)) { g_fail('Fichier absent du serveur.', 404); }
+    header('Content-Type: image/jpeg');
+    header('Content-Length: ' . filesize($f));
+    header('Cache-Control: private, max-age=86400');
+    readfile($f);
+    exit;
+}
+
 // ─────────────────────────────── Journal ───────────────────────────────
 case 'journal': {
     $ctx = g_exiger_session();
@@ -308,9 +376,15 @@ case 'sync/tirer': {
         $where = 'rev > ?'; $args = [$depuis];
         if ($r['portee'] !== null && !$ctx['admin']) {
             $centres = $r['lire'] === 'tous' ? array_keys($ctx['acces']) : g_centres_avec($ctx, $r['lire']);
-            if (!$centres) { continue; }
-            $where .= ' AND ' . $r['portee'] . ' IN (' . implode(',', array_fill(0, count($centres), '?')) . ')';
-            $args = array_merge($args, $centres);
+            $conds = [];
+            if ($centres) {
+                $conds[] = $r['portee'] . ' IN (' . implode(',', array_fill(0, count($centres), '?')) . ')';
+                $args = array_merge($args, $centres);
+            }
+            // Le propriétaire lit ses propres lignes (un enseignant : son contrat, ses paies).
+            if (!empty($r['proprio'])) { $conds[] = $r['proprio'] . ' = ?'; $args[] = $ctx['uid']; }
+            if (!$conds) { continue; }
+            $where .= ' AND (' . implode(' OR ', $conds) . ')';
         }
         $st = $pdo->prepare('SELECT * FROM ' . $r['table'] . ' WHERE ' . $where);
         $st->execute($args);
@@ -592,16 +666,135 @@ function g_valider_finances(PDO $pdo, string $table, string $id, ?array $existan
 
 /** Nouveau versement : numéro de reçu « AAAA-NNNN » par centre, encaissé par l'auteur. Appelé DANS la transaction. */
 function g_completer_paiement(PDO $pdo, array $champs, array $ctx): array {
-    $libelle = (string) ($pdo->query("SELECT libelle FROM g_annees WHERE active = 1 AND supprime = 0 ORDER BY debut DESC LIMIT 1")->fetchColumn() ?: '');
-    $prefixe = preg_match('/^\d{2}(\d{2})-\d{2}(\d{2})$/', $libelle, $m) ? $m[1] . $m[2] : date('y') . date('y', strtotime('+1 year'));
+    $propose = (string) ($champs['numero'] ?? '');
+    if ($propose !== '') {
+        // Numéro pris par le téléphone dans SA tranche : il doit lui appartenir et n'avoir jamais servi.
+        if (!preg_match('/^(\d{4})-(\d{4})$/', $propose, $m)) { throw new DomainException('Numéro de reçu invalide.'); }
+        $st = $pdo->prepare('SELECT COUNT(*) FROM g_tranches WHERE centre_id = ? AND utilisateur_id = ? AND prefixe = ? AND debut <= ? AND fin >= ?');
+        $st->execute([(string) $champs['centre_id'], $ctx['uid'], $m[1], (int) $m[2], (int) $m[2]]);
+        if (!(int) $st->fetchColumn()) { throw new DomainException('Ce numéro de reçu n\'appartient pas à vos tranches.'); }
+        $st = $pdo->prepare('SELECT COUNT(*) FROM g_paiements WHERE centre_id = ? AND numero = ?');
+        $st->execute([(string) $champs['centre_id'], $propose]);
+        if ((int) $st->fetchColumn()) { throw new DomainException('Numéro de reçu déjà utilisé.'); }
+        $champs['encaisse_par'] = $ctx['uid'];
+        $champs['annule'] = 0;
+        return $champs;
+    }
+    $prefixe = g_prefixe_annee($pdo);
     $st = $pdo->prepare('SELECT numero FROM g_paiements WHERE centre_id = ? AND numero LIKE ?');
     $st->execute([(string) $champs['centre_id'], $prefixe . '-%']);
     $max = 0;
     foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $n) { $max = max($max, (int) substr((string) $n, 5)); }
+    $max = max($max, g_max_tranche($pdo, (string) $champs['centre_id'], $prefixe));
     $champs['numero'] = $prefixe . '-' . str_pad((string) ($max + 1), 4, '0', STR_PAD_LEFT);
     $champs['encaisse_par'] = $ctx['uid'];
     $champs['annule'] = 0;
     return $champs;
+}
+
+function g_max_tranche(PDO $pdo, string $centre, string $prefixe): int {
+    $st = $pdo->prepare('SELECT COALESCE(MAX(fin), 0) FROM g_tranches WHERE centre_id = ? AND prefixe = ?');
+    $st->execute([$centre, $prefixe]);
+    return (int) $st->fetchColumn();
+}
+
+/** Préfixe des numéros (reçus, matricules) : « 2627 » pour l'année 2026-2027. */
+function g_prefixe_annee(PDO $pdo): string {
+    $libelle = (string) ($pdo->query("SELECT libelle FROM g_annees WHERE active = 1 AND supprime = 0 ORDER BY debut DESC LIMIT 1")->fetchColumn() ?: '');
+    return preg_match('/^\d{2}(\d{2})-\d{2}(\d{2})$/', $libelle, $m) ? $m[1] . $m[2] : date('y') . date('y', strtotime('+1 year'));
+}
+
+/**
+ * Enseignants.
+ *  Contrat : mode heure|seance|forfait, taux ≥ 0 ; un seul contrat actif par enseignant et centre.
+ *  Présence : créneau du centre, jour de la semaine conforme, pas de date future ; l'enseignant
+ *  ne se pointe pas lui-même ; un remplaçant doit être enseignant du centre ; retard et minutes
+ *  recalculés ; au-delà de 2 jours, responsable seulement.
+ *  Paie : création, puis seulement l'annulation motivée (responsable).
+ */
+function g_valider_enseignants(PDO $pdo, string $table, string $id, ?array $existant, array &$champs): void {
+    $ctx = $GLOBALS['g_ctx'] ?? null;
+    $val = fn(string $c) => array_key_exists($c, $champs) ? $champs[$c] : ($existant[$c] ?? null);
+    $centre = (string) $val('centre_id');
+    $role = $ctx && !$ctx['admin'] ? ($ctx['acces'][$centre] ?? '') : 'admin';
+    $correcteur = in_array($role, ['admin', 'responsable'], true);
+    $estEnseignant = function (string $uid) use ($pdo, $centre): bool {
+        $st = $pdo->prepare("SELECT COUNT(*) FROM g_acces WHERE utilisateur_id = ? AND centre_id = ? AND role = 'enseignant'");
+        $st->execute([$uid, $centre]);
+        return (int) $st->fetchColumn() > 0;
+    };
+
+    if ($table === 'g_contrats') {
+        if (!$estEnseignant((string) $val('utilisateur_id'))) { throw new DomainException('Cette personne n\'est pas enseignant dans ce centre.'); }
+        if (!in_array((string) $val('mode'), ['heure', 'seance', 'forfait'], true)) { throw new DomainException('Mode de rémunération inconnu.'); }
+        if ((int) $val('taux') < 0 || (int) $val('taux') > 5000000 || (int) $val('retenue_absence') < 0) { throw new DomainException('Montant invalide.'); }
+        if ((int) ($val('actif') ?? 1)) {
+            $st = $pdo->prepare('SELECT COUNT(*) FROM g_contrats WHERE centre_id = ? AND utilisateur_id = ? AND actif = 1 AND supprime = 0 AND id <> ?');
+            $st->execute([$centre, (string) $val('utilisateur_id'), $id]);
+            if ((int) $st->fetchColumn()) { throw new DomainException('Cet enseignant a déjà un contrat actif dans ce centre.'); }
+        }
+        return;
+    }
+
+    if ($table === 'g_paies') {
+        if ($existant) {
+            if (array_diff(array_keys($champs), ['annule', 'motif_annulation']) || (int) ($champs['annule'] ?? 0) !== 1) { throw new DomainException('Une paie ne se modifie pas : annulez-la et saisissez-la à nouveau.'); }
+            if ((int) $existant['annule']) { throw new DomainException('Paie déjà annulée.'); }
+            if (mb_strlen(trim((string) ($champs['motif_annulation'] ?? ''))) < 5) { throw new DomainException('Indiquez le motif de l\'annulation.'); }
+            return;
+        }
+        if (!$estEnseignant((string) $val('enseignant_id'))) { throw new DomainException('Cette personne n\'est pas enseignant dans ce centre.'); }
+        if (!preg_match('/^\d{4}-\d{2}$/', (string) $val('mois'))) { throw new DomainException('Mois invalide.'); }
+        if ((int) $val('montant') <= 0 || (int) $val('montant') > 10000000) { throw new DomainException('Montant invalide.'); }
+        if (!in_array((string) $val('mode'), ['especes', 'momo', 'om', 'virement', 'autre'], true)) { throw new DomainException('Mode de paiement inconnu.'); }
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $val('date')) || $val('date') > date('Y-m-d')) { throw new DomainException('Date invalide.'); }
+        $champs['paye_par'] = $ctx['uid'] ?? null;
+        $champs['annule'] = 0;
+        unset($champs['motif_annulation']);
+        return;
+    }
+
+    // ── Présence d'un enseignant ──
+    if ($role === 'enseignant') { throw new DomainException('La présence d\'un enseignant est pointée par le centre, pas par lui-même.'); }
+    $st = $pdo->prepare('SELECT * FROM g_creneaux WHERE id = ? AND centre_id = ? AND supprime = 0');
+    $st->execute([(string) $val('creneau_id'), $centre]);
+    $cr = $st->fetch();
+    if (!$cr) { throw new DomainException('Créneau introuvable dans ce centre.'); }
+    $date = (string) $val('date');
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || $date > date('Y-m-d')) { throw new DomainException('Date invalide.'); }
+    if ((int) date('N', strtotime($date)) !== (int) $cr['jour']) { throw new DomainException('Ce créneau n\'a pas lieu ce jour-là.'); }
+    if ($date < date('Y-m-d', strtotime('-2 days')) && !$correcteur) { throw new DomainException('Pointage de plus de 2 jours : seul un responsable peut le corriger.'); }
+    $statut = (string) $val('statut');
+    if (!in_array($statut, ['present', 'retard', 'absent', 'remplace'], true)) { throw new DomainException('Statut inconnu.'); }
+    $champs['enseignant_id'] = (string) $cr['enseignant_id'];
+    if ($statut === 'remplace') {
+        $remp = (string) $val('remplacant_id');
+        if ($remp === '' || $remp === (string) $cr['enseignant_id'] || !$estEnseignant($remp)) { throw new DomainException('Choisissez un remplaçant parmi les enseignants du centre.'); }
+    } else {
+        $champs['remplacant_id'] = '';
+    }
+    $heure = '/^([01]\d|2[0-3]):[0-5]\d$/';
+    foreach (['arrivee', 'depart'] as $c) {
+        if ((string) $val($c) !== '' && !preg_match($heure, (string) $val($c))) { throw new DomainException('Heure invalide (HH:MM).'); }
+    }
+    $mn = fn(string $h) => ((int) substr($h, 0, 2)) * 60 + (int) substr($h, 3, 2);
+    if ($statut === 'absent') {
+        $champs['arrivee'] = ''; $champs['depart'] = ''; $champs['retard_min'] = 0; $champs['minutes'] = 0;
+        return;
+    }
+    $arrivee = (string) $val('arrivee') ?: (string) $cr['debut'];
+    $depart = (string) $val('depart');
+    if ($depart !== '' && $depart < $arrivee) { throw new DomainException('Le départ ne peut pas précéder l\'arrivée.'); }
+    $st = $pdo->prepare('SELECT tolerance_retard_min FROM g_centres WHERE id = ?');
+    $st->execute([$centre]);
+    $tol = (int) $st->fetchColumn();
+    $retard = max(0, $mn($arrivee) - $mn((string) $cr['debut']));
+    $champs['arrivee'] = $arrivee;
+    $champs['retard_min'] = $retard > $tol ? $retard : 0;
+    if ($statut !== 'remplace') { $champs['statut'] = $retard > $tol ? 'retard' : 'present'; }
+    // Durée faite : de l'arrivée (au plus tôt le début) au départ (sinon la fin prévue).
+    $fin = $depart !== '' ? $depart : (string) $cr['fin'];
+    $champs['minutes'] = max(0, $mn($fin) - max($mn($arrivee), $mn((string) $cr['debut'])));
 }
 
 /**
@@ -609,8 +802,7 @@ function g_completer_paiement(PDO $pdo, array $champs, array $ctx): array {
  * centre), date d'inscription et statut par défaut. Appelé DANS la transaction.
  */
 function g_completer_eleve(PDO $pdo, array $champs): array {
-    $libelle = (string) ($pdo->query("SELECT libelle FROM g_annees WHERE active = 1 AND supprime = 0 ORDER BY debut DESC LIMIT 1")->fetchColumn() ?: '');
-    $prefixe = preg_match('/^\d{2}(\d{2})-\d{2}(\d{2})$/', $libelle, $m) ? $m[1] . $m[2] : date('y') . date('y', strtotime('+1 year'));
+    $prefixe = g_prefixe_annee($pdo);
     $st = $pdo->prepare('SELECT matricule FROM g_eleves WHERE centre_id = ? AND matricule LIKE ?');
     $st->execute([(string) $champs['centre_id'], $prefixe . '-%']);
     $max = 0;
@@ -630,6 +822,12 @@ function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, 
         // Effacer un pointage ou une feuille d'appel : responsable ou admin seulement
         // (sinon une absence gênante disparaîtrait sans laisser de correction motivée).
         if ($table === 'g_paiements') { throw new DomainException('Un versement ne se supprime pas : annulez-le avec un motif.'); }
+        if ($table === 'g_paies') { throw new DomainException('Une paie ne se supprime pas : annulez-la avec un motif.'); }
+        if ($table === 'g_presences_ens') {
+            $ctx = $GLOBALS['g_ctx'] ?? null;
+            $role = $ctx && !$ctx['admin'] ? ($ctx['acces'][(string) ($existant['centre_id'] ?? '')] ?? '') : 'admin';
+            if (!in_array($role, ['admin', 'responsable'], true)) { throw new DomainException('Seul un responsable peut effacer un pointage d\'enseignant.'); }
+        }
         if ($table === 'g_depenses' && ($existant['statut'] ?? '') !== 'en_attente') { throw new DomainException('Seule une dépense en attente peut être retirée.'); }
         if ($table === 'g_seances' || $table === 'g_presences') {
             $ctx = $GLOBALS['g_ctx'] ?? null;
@@ -701,6 +899,7 @@ function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, 
     }
     if ($table === 'g_seances' || $table === 'g_presences') { g_valider_appel($pdo, $table, $id, $existant, $champs); return; }
     if ($table === 'g_paiements' || $table === 'g_depenses') { g_valider_finances($pdo, $table, $id, $existant, $champs); return; }
+    if (in_array($table, ['g_contrats', 'g_presences_ens', 'g_paies'], true)) { g_valider_enseignants($pdo, $table, $id, $existant, $champs); return; }
     // Tarifs d'une classe : responsable ou admin (un actionnaire tient l'emploi du temps, pas les prix).
     if ($table === 'g_classes' && (array_key_exists('inscription', $champs) || array_key_exists('mensualite', $champs))) {
         $ctx = $GLOBALS['g_ctx'] ?? null;
