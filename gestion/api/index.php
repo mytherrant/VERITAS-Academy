@@ -926,6 +926,11 @@ function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, 
             if (!g_ctx_peut('appel.corriger', (string) ($existant['centre_id'] ?? ''))) { throw new DomainException('Seul un responsable peut effacer un pointage d\'enseignant.'); }
         }
         if ($table === 'g_depenses' && ($existant['statut'] ?? '') !== 'en_attente') { throw new DomainException('Seule une dépense en attente peut être retirée.'); }
+        if (in_array($table, ['g_messages', 'g_sondages', 'g_taches'], true)) {
+            $ctx = $GLOBALS['g_ctx'] ?? [];
+            if (empty($ctx['admin']) && (string) ($existant['auteur'] ?? '') !== (string) ($ctx['uid'] ?? '')) { throw new DomainException('Seul son auteur peut le supprimer.'); }
+        }
+        if ($table === 'g_dispos') { throw new DomainException('Une disponibilité se modifie, elle ne se supprime pas.'); }
         if ($table === 'g_remises') {
             $ctx = $GLOBALS['g_ctx'] ?? [];
             if (($existant['statut'] ?? '') !== 'en_attente') { throw new DomainException('Une remise confirmée ou contestée ne se retire pas.'); }
@@ -952,6 +957,7 @@ function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, 
         if (!(int) $st->fetchColumn() && !(int) $admin->fetchColumn()) { throw new DomainException('Le trésorier doit avoir un compte actif dans ce centre.'); }
     }
     if ($table === 'g_remises') { g_valider_remise($pdo, $existant, $champs); return; }
+    if (in_array($table, ['g_messages', 'g_sondages', 'g_dispos', 'g_taches'], true)) { g_valider_equipe($pdo, $table, $existant, $champs); return; }
     if ($table === 'g_evenements') {
         if (trim((string) $val('titre')) === '') { throw new DomainException('Donnez un titre au rendez-vous.'); }
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $val('date'))) { throw new DomainException('Date du rendez-vous invalide.'); }
@@ -1189,4 +1195,85 @@ function g_valider_paie_cours(PDO $pdo, string $centre, array &$champs, callable
     $date = (string) $val('date');
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || $date > date('Y-m-d') || $date < (string) $p['date']) { throw new DomainException('Date de paie invalide.'); }
     $champs['mois'] = substr((string) $p['date'], 0, 7);
+}
+
+/** Comptes partenaires d'un centre (ou admin) : pour assigner une tâche. */
+function g_est_partenaire(PDO $pdo, string $uid, string $centre): bool {
+    $st = $pdo->prepare("SELECT COUNT(*) FROM g_acces a JOIN g_utilisateurs u ON u.id = a.utilisateur_id WHERE a.utilisateur_id = ? AND a.centre_id = ? AND a.role <> 'enseignant' AND u.actif = 1");
+    $st->execute([$uid, $centre]);
+    if ((int) $st->fetchColumn()) { return true; }
+    $st = $pdo->prepare('SELECT COUNT(*) FROM g_utilisateurs WHERE id = ? AND admin_global = 1 AND actif = 1');
+    $st->execute([$uid]);
+    return (int) $st->fetchColumn() > 0;
+}
+
+/**
+ * Espace « Équipe » : l'auteur est toujours celui qui écrit (posé par le serveur) ; un message
+ * se corrige par son auteur seul ; une réunion se tranche par son auteur, un responsable de
+ * l'agenda ou l'admin ; une disponibilité n'appartient qu'à celui qui l'a donnée ; une tâche
+ * est collaborative (chaque partenaire peut l'avancer).
+ */
+function g_valider_equipe(PDO $pdo, string $table, ?array $existant, array &$champs): void {
+    $ctx = $GLOBALS['g_ctx'] ?? [];
+    $uid = (string) ($ctx['uid'] ?? '');
+    $admin = !empty($ctx['admin']);
+    $val = fn(string $c) => array_key_exists($c, $champs) ? $champs[$c] : ($existant[$c] ?? null);
+    $centre = (string) $val('centre_id');
+    if ($existant && array_key_exists('centre_id', $champs) && (string) $champs['centre_id'] !== (string) $existant['centre_id']) { throw new DomainException('Ne change pas de centre.'); }
+    $date = '/^\d{4}-\d{2}-\d{2}( ([01]\d|2[0-3]):[0-5]\d)?$/';
+
+    if ($table === 'g_messages') {
+        $t = trim((string) $val('texte'));
+        if ($t === '' || mb_strlen($t) > 1000) { throw new DomainException('Message vide ou trop long (1 000 caractères au plus).'); }
+        if (!preg_match('/^[a-z]+(:[A-Za-z0-9-]{1,40})?$/', (string) $val('fil'))) { throw new DomainException('Fil de discussion invalide.'); }
+        if ($existant) {
+            if (!$admin && (string) $existant['auteur'] !== $uid) { throw new DomainException('Seul son auteur peut modifier un message.'); }
+            if (array_key_exists('fil', $champs) && (string) $champs['fil'] !== (string) $existant['fil']) { throw new DomainException('Un message ne change pas de fil.'); }
+            return;
+        }
+        $champs['auteur'] = $uid; $champs['cree_le'] = g_now();
+        return;
+    }
+    if ($table === 'g_sondages') {
+        if (trim((string) $val('titre')) === '') { throw new DomainException('Donnez un objet à la réunion.'); }
+        $opts = json_decode((string) $val('options'), true);
+        if (!is_array($opts) || count($opts) < 1 || count($opts) > 12) { throw new DomainException('Proposez entre 1 et 12 dates.'); }
+        foreach ($opts as $o) { if (!is_string($o) || !preg_match($date, $o)) { throw new DomainException('Date proposée invalide.'); } }
+        $statut = (string) ($val('statut') ?: 'ouvert');
+        if (!in_array($statut, ['ouvert', 'clos'], true)) { throw new DomainException('Statut de réunion inconnu.'); }
+        if ($statut === 'clos' && !in_array((string) $val('choix'), $opts, true)) { throw new DomainException('Retenez une des dates proposées.'); }
+        if (!$existant) {
+            if ($statut !== 'ouvert') { throw new DomainException('Une réunion naît ouverte aux réponses.'); }
+            $champs['auteur'] = $uid; $champs['cree_le'] = g_now();
+            return;
+        }
+        if ((string) $existant['statut'] === 'clos' && $statut === 'clos' && array_diff(array_keys($champs), ['evenement_id'])) { throw new DomainException('Réunion déjà fixée.'); }
+        if (!$admin && (string) $existant['auteur'] !== $uid && !g_ctx_peut('agenda.gerer', $centre)) { throw new DomainException('Seul celui qui a proposé la réunion la modifie ou la fixe.'); }
+        return;
+    }
+    if ($table === 'g_dispos') {
+        $st = $pdo->prepare('SELECT * FROM g_sondages WHERE id = ? AND supprime = 0');
+        $st->execute([(string) $val('sondage_id')]);
+        $sd = $st->fetch();
+        if (!$sd || (string) $sd['centre_id'] !== $centre) { throw new DomainException('Réunion introuvable.'); }
+        if ((string) $sd['statut'] !== 'ouvert') { throw new DomainException('La date de cette réunion est déjà fixée.'); }
+        if ($existant && (string) $existant['utilisateur_id'] !== $uid) { throw new DomainException('Chacun ne donne que ses propres disponibilités.'); }
+        $opts = json_decode((string) $sd['options'], true) ?: [];
+        $rep = json_decode((string) $val('reponses'), true);
+        if (!is_array($rep)) { throw new DomainException('Réponses invalides.'); }
+        foreach ($rep as $o => $v) { if (!in_array($o, $opts, true) || !in_array($v, ['oui', 'peut', 'non'], true)) { throw new DomainException('Réponse invalide.'); } }
+        $champs['utilisateur_id'] = $uid;
+        return;
+    }
+    // Tâches
+    if (trim((string) $val('titre')) === '') { throw new DomainException('Donnez un titre à la tâche.'); }
+    $statut = (string) ($val('statut') ?: 'a_faire');
+    if (!in_array($statut, ['a_faire', 'en_cours', 'fait'], true)) { throw new DomainException('Statut de tâche inconnu.'); }
+    $ech = (string) $val('echeance');
+    if ($ech !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $ech)) { throw new DomainException('Échéance invalide.'); }
+    $qui = (string) $val('assigne_a');
+    if ($qui !== '' && !g_est_partenaire($pdo, $qui, $centre)) { throw new DomainException('Assignez la tâche à un partenaire du centre.'); }
+    if (!$existant) { $champs['auteur'] = $uid; $champs['cree_le'] = g_now(); }
+    if ($statut === 'fait' && (!$existant || (string) $existant['statut'] !== 'fait')) { $champs['fait_le'] = g_now(); }
+    if ($statut !== 'fait') { $champs['fait_le'] = ''; }
 }

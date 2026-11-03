@@ -50,6 +50,27 @@ function g_schema(): array {
             'confirme_par' => 'ref', 'confirme_le' => 'str:19', 'motif' => 'str:200',
         ] + G_COLS_SYNC, 'index' => [['centre_id', 'date'], ['remis_par'], ['rev']]],
 
+        // Espace « Équipe » des partenaires : messages (fil général ou commentaire attaché à une
+        // dépense, une remise, une journée, un bilan, une tâche, une réunion), réunions à dates
+        // proposées et disponibilités de chacun, tâches réparties.
+        'g_messages' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'fil' => 'str:60', 'texte' => 'str:1000',
+            'auteur' => 'ref', 'cree_le' => 'str:19',
+        ] + G_COLS_SYNC, 'index' => [['centre_id', 'fil'], ['rev']]],
+        'g_sondages' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'titre' => 'str:160', 'note' => 'str:400', 'lieu' => 'str:160',
+            'options' => 'str:1000',   // JSON : ["2026-11-12 16:00", "2026-11-13", …]
+            'statut' => 'str:10', 'choix' => 'str:20', 'evenement_id' => 'str:40', 'auteur' => 'ref', 'cree_le' => 'str:19',
+        ] + G_COLS_SYNC, 'index' => [['centre_id'], ['rev']]],
+        'g_dispos' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'sondage_id' => 'str:40', 'utilisateur_id' => 'ref',
+            'reponses' => 'str:1000',  // JSON : {"2026-11-12 16:00": "oui" | "peut" | "non"}
+        ] + G_COLS_SYNC, 'index' => [['sondage_id'], ['rev']]],
+        'g_taches' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'titre' => 'str:160', 'note' => 'str:400', 'assigne_a' => 'ref',
+            'echeance' => 'str:10', 'statut' => 'str:10', 'auteur' => 'ref', 'cree_le' => 'str:19', 'fait_le' => 'str:19',
+        ] + G_COLS_SYNC, 'index' => [['centre_id', 'statut'], ['rev']]],
+
         // Agenda du centre : rencontres, rendez-vous, réunions de parents… Les échéances
         // de paiement ne sont pas stockées : le téléphone les déduit du jour d'échéance.
         'g_evenements' => ['cols' => [
@@ -273,6 +294,23 @@ function g_registre(): array {
         'remises' => [
             'table' => 'g_remises', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'paiements.voir',
             'champs' => ['centre_id', 'montant', 'date', 'mode', 'note', 'statut', 'motif'],
+        ],
+        // Réservé aux partenaires (qui voient la caisse) : les enseignants n'y ont pas accès.
+        'messages' => [
+            'table' => 'g_messages', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'paiements.voir',
+            'champs' => ['centre_id', 'fil', 'texte'],
+        ],
+        'sondages' => [
+            'table' => 'g_sondages', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'paiements.voir',
+            'champs' => ['centre_id', 'titre', 'note', 'lieu', 'options', 'statut', 'choix', 'evenement_id'],
+        ],
+        'dispos' => [
+            'table' => 'g_dispos', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'paiements.voir',
+            'champs' => ['centre_id', 'sondage_id', 'reponses'],
+        ],
+        'taches' => [
+            'table' => 'g_taches', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'paiements.voir',
+            'champs' => ['centre_id', 'titre', 'note', 'assigne_a', 'echeance', 'statut'],
         ],
         'evenements' => [
             'table' => 'g_evenements', 'portee' => 'centre_id', 'lire' => 'centre.voir', 'ecrire' => 'agenda.gerer',

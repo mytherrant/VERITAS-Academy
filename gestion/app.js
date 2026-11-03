@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.10.0';
+  var VERSION = '0.11.0';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -291,6 +291,7 @@
       E.syncEnCours = false;
       majPuce();
       if (change) rendre(); else majCloche();
+      if (change && E.cache.filOuvert && $('#zone-fil')) { var fo = E.cache.filOuvert; $('#zone-fil').innerHTML = bullesFil(fo.cid, fo.fil); marquerLu(fo.cid, fo.fil); }
       verifierRappels();
     });
     return E.syncPromesse;
@@ -543,7 +544,7 @@
     var caisse = peutQuelquePart('paiements.voir');
     items.push(caisse ? ['caisse', 'wallet', 'Caisse'] : ['emploi', 'calendar', 'Planning']);
     items.push(['moi', 'list', 'Plus']);
-    var sousPlus = ['agenda', 'roles', 'admin', 'comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
+    var sousPlus = ['equipe', 'agenda', 'roles', 'admin', 'comptes', 'compte', 'journal', 'centres', 'actionnaires', 'assiduite', 'bilan', 'enseignants', 'mesheures'].concat(caisse ? ['emploi'] : []);
     return '<nav class="nav-basse" aria-label="Navigation">' + items.map(function (i) {
       var on = i[0] === actif || (i[0] === 'moi' && sousPlus.indexOf(actif) >= 0) || (i[0] === 'appel' && actif === 'pointage') || (i[0] === 'caisse' && actif === 'jour');
       return '<a href="#/' + i[0] + '" class="' + (on ? 'actif' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + ico(i[1]) + i[2] + '</a>';
@@ -641,6 +642,7 @@
         tuiles.push(['#/assiduite', 'activity', 'Assiduité', 'Taux, retards, alertes']);
         tuiles.push(['#/eleves', 'graduation', 'Élèves', peutQuelquePart('eleves.gerer') ? 'Inscrire, rechercher, importer' : 'Fiches et contacts des parents']);
         tuiles.push(['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances']);
+        if (peutEquipeQuelquePart()) tuiles.push(['#/equipe', 'message', 'Équipe', 'Messages, réunions, tâches']);
         tuiles.push(['#/emploi', 'calendar', 'Emploi du temps', peutQuelquePart('emploi.gerer') ? 'Classes, créneaux, enseignants' : 'Les cours de la semaine']);
         if (panneauOuvert()) tuiles.push(['#/admin', 'shield', 'Administration', 'Comptes, identifiants, partenaires et droits']);
         if (peutQuelquePart('finances.voir')) tuiles.push(['#/actionnaires', 'handshake', 'Actionnaires', 'Parts de chaque centre']);
@@ -788,6 +790,10 @@
     agenda: {
       html: function () { return pageAgenda(); }
     },
+    equipe: {
+      droit: function () { return peutEquipeQuelquePart(); },
+      html: function () { return pageEquipe(); }
+    },
 
     moi: {
       html: function () {
@@ -798,7 +804,7 @@
         }).join('');
         var h = '<h1>Mon compte</h1><div class="carte"><h3>' + esc(u.nom) + '</h3><p class="doux">Identifiant : ' + esc(u.identifiant) + '</p><p>' +
           (u.admin ? '<span class="badge or">Administrateur des deux centres</span>' : '') + acces + '</p></div>' + carteMonRole();
-        var liens = [['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances, rappels'], ['#/roles', 'info', 'Rôles et droits', 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']];
+        var liens = [['#/agenda', 'agenda', 'Agenda', 'Rendez-vous, rencontres, échéances, rappels']].concat(peutEquipeQuelquePart() ? [['#/equipe', 'message', 'Équipe', 'Messages entre partenaires, commentaires, réunions, tâches']] : []).concat([ ['#/roles', 'info', 'Rôles et droits', 'Qui fait quoi : administrateur, partenaires, secrétariat, enseignants'], ['#/emploi', 'calendar', 'Planning', 'Emploi du temps, horaires, classes'], ['#/assiduite', 'activity', 'Assiduité et ponctualité', 'Taux, retards, classement, alertes']]);
         if (peutQuelquePart('finances.voir')) liens.push(['#/bilan', 'trending', 'Bilan financier', 'Recettes, dépenses, parts des actionnaires']);
         if (peutQuelquePart('finances.voir') || peutQuelquePart('enseignants.gerer')) liens.push(['#/enseignants', 'presentation', 'Enseignants', 'Heures faites, dû, paies']);
         if (Object.keys(E.profil.acces || {}).some(function (c) { return E.profil.acces[c] === 'enseignant'; })) liens.push(['#/mesheures', 'clock', 'Mes heures', 'Cours faits, rémunération']);
@@ -1864,6 +1870,7 @@
       (modifiable ? '<div class="actions"><button class="btn" type="submit">Enregistrer</button></div>' : '') + '</form>' +
       (valideur ? '<div class="actions"><button class="btn or" type="button" data-a="valider-depense" data-id="' + esc(id) + '">' + ico('check', 'p') + 'Valider</button><button class="btn danger" type="button" data-a="refuser-depense" data-id="' + esc(id) + '">Refuser</button></div>' : '') +
       '<div class="actions">' + (id && modifiable ? '<button class="btn danger" type="button" data-a="suppr-depense" data-id="' + esc(id) + '">Retirer</button>' : '') + '<button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
+    if (id && peutEquipe(cid)) { var zc = document.createElement('div'); zc.className = 'actions'; zc.innerHTML = boutonCommentaires(cid, 'depense:' + id, 'Dépense · ' + d.libelle); var pf = $('#feuille .panneau'); if (pf) pf.appendChild(zc); }
     if (id) afficherJustificatif(id, valideur);
   }
   function afficherJustificatif(id, valideur) {
@@ -1949,6 +1956,7 @@
       }).join('') + '</div>' : '<div class="carte vide">Aucune sortie ce jour-là.</div>');
     }
     h += '<div class="infos"><div class="info"><span>Depuis le 1er ' + esc(libMois(CAI.date)) + ' · entrées</span><b>' + fcfa(j.mois.e) + '</b></div><div class="info"><span>Sorties</span><b>− ' + fcfa(j.mois.s) + '</b></div><div class="info"><span>Solde du mois</span><b>' + fcfa(j.mois.e - j.mois.s) + '</b></div></div>';
+    h += '<div class="actions">' + boutonCommentaires(cid, 'jour:' + CAI.date.replace(/-/g, ''), 'Point du jour · ' + dateLisible(CAI.date, true)) + '</div>';
     if (j.attente) h += '<p class="doux">Les dépenses « en attente » sont comptées dans les sorties (l\'argent est sorti) ; le bilan officiel ne compte que les dépenses validées.</p>';
     return h;
   }
@@ -2134,6 +2142,7 @@
         (totPaies ? '<div class="info"><span>Paies des enseignants</span><b>− ' + fcfa(totPaies) + '</b></div>' : '') +
         (deps.some(function (d) { return d.statut === 'en_attente'; }) ? '<div class="info"><span>Dépenses en attente (non comptées)</span><b>' + fcfa(deps.filter(function (d) { return d.statut === 'en_attente'; }).reduce(function (s, d) { return s + Number(d.montant); }, 0)) + '</b></div>' : '') + '</div>';
       h += infosFondsBilan(c.id);
+      if (!annee) h += '<div class="actions">' + boutonCommentaires(c.id, 'bilan:' + BIL.mois.replace('-', ''), 'Bilan · ' + lib + ' · ' + (c.nom_court || c.nom)) + '</div>';
       if (acts.length) {
         h += '<h3>Part des actionnaires</h3><div class="liste">' + acts.map(function (a) {
           return '<div class="ligne"><span class="corps"><b>' + esc(a.nom) + '</b><small>' + pourcent(a.part_centiemes) + '</small></span><span class="fin"><b>' + fcfa(Math.round(res * Number(a.part_centiemes) / 10000)) + '</b></span></div>';
@@ -2639,6 +2648,197 @@
     return String(liste || '').split(',').filter(Boolean).map(function (m) { return MOIS[(+m - 1)] || m; }).join(', ') || '—';
   }
 
+  // ───────────────────────────── Équipe : messages, commentaires, réunions, tâches ─────────────────────────────
+  // Réservé aux partenaires (qui voient la caisse). Un « fil » regroupe des messages : « general »
+  // (la discussion du centre) ou un commentaire attaché à une dépense, une remise, une journée,
+  // un bilan, une tâche, une réunion. Les non-lus se comptent par fil (dernière lecture gardée sur
+  // ce téléphone). Les réunions se fixent en proposant des dates : chacun répond, la date retenue
+  // part dans l'agenda. Les tâches sont réparties et avancées par chacun.
+  var EQ = { onglet: 'discussion' };
+  var LIB_TACHE = { a_faire: ['À faire', 'alerte'], en_cours: ['En cours', ''], fait: ['Fait', 'ok'] };
+  var LIB_DISPO = { oui: ['Oui', 'ok'], peut: ['Peut-être', 'alerte'], non: ['Non', 'danger'] };
+  function peutEquipe(cid) { return peut('paiements.voir', cid); }
+  function peutEquipeQuelquePart() { return peutQuelquePart('paiements.voir'); }
+  function centreEquipe() {
+    var dispo = centresChoisis().filter(function (c) { return peutEquipe(c.id); });
+    if (!dispo.some(function (c) { return c.id === EQ.centre; })) EQ.centre = dispo.length ? dispo[0].id : '';
+    return { cid: EQ.centre, dispo: dispo };
+  }
+  function messagesDu(cid, fil) {
+    return lignes('messages').filter(function (m) { return m.centre_id === cid && m.fil === fil; })
+      .sort(function (a, b) { return String(a.cree_le || a.maj_le || '').localeCompare(String(b.cree_le || b.maj_le || '')); });
+  }
+  function luLe() { try { return JSON.parse(localStorage.getItem('vg-lu') || '{}'); } catch (e) { return {}; } }
+  function marquerLu(cid, fil) { var l = luLe(); l[cid + '|' + fil] = maintenantSql(); try { localStorage.setItem('vg-lu', JSON.stringify(l)); } catch (e) {} }
+  function nonLus(cid, fil) {
+    var l = luLe(), moi = E.profil.utilisateur.id;
+    return lignes('messages').filter(function (m) {
+      return m.centre_id === cid && (!fil || m.fil === fil) && m.auteur && m.auteur !== moi && String(m.cree_le || m.maj_le || '') > (l[cid + '|' + m.fil] || '');
+    });
+  }
+  /** Bouton « Commentaires (n) » à poser sous une dépense, une remise, une journée, un bilan… */
+  function boutonCommentaires(cid, fil, titre) {
+    if (!peutEquipe(cid)) return '';
+    var n = messagesDu(cid, fil).length, nl = nonLus(cid, fil).length;
+    return '<button class="btn clair petit commentaires" type="button" data-a="ouvrir-fil" data-centre="' + esc(cid) + '" data-fil="' + esc(fil) + '" data-titre="' + esc(titre) + '">' +
+      ico('message', 'p') + (n ? n + ' commentaire' + (n > 1 ? 's' : '') : 'Commenter') + (nl ? ' <span class="pastille-n">' + nl + '</span>' : '') + '</button>';
+  }
+  function bullesFil(cid, fil) {
+    var moi = E.profil.utilisateur.id, l = messagesDu(cid, fil);
+    if (!l.length) return '<div class="carte vide">Aucun message pour l\'instant.</div>';
+    return '<div class="fil">' + l.map(function (m) {
+      var mien = m.auteur === moi || (!m.auteur && m._attente);
+      return '<div class="bulle' + (mien ? ' mienne' : '') + '"><small>' + esc(mien ? 'Vous' : nomCompte(m.auteur)) + ' · ' + esc(dateLisible(m.cree_le || m.maj_le)) + (m._attente ? ' · en attente' : '') + '</small>' +
+        '<p>' + esc(m.texte).replace(/\n/g, '<br>') + '</p>' + (mien ? '<button class="lien-discret" type="button" data-a="suppr-message" data-id="' + esc(m.id) + '">Supprimer</button>' : '') + '</div>';
+    }).join('') + '</div>';
+  }
+  function formMessage(cid, fil) {
+    return '<form data-f="message" data-centre="' + esc(cid) + '" data-fil="' + esc(fil) + '" class="form-message"><label class="sr" for="msg-' + esc(fil) + '">Message</label>' +
+      '<textarea id="msg-' + esc(fil) + '" name="texte" rows="2" maxlength="1000" required placeholder="Votre message…"></textarea><button class="btn or" type="submit">' + ico('message', 'p') + 'Envoyer</button></form>';
+  }
+  function feuilleFil(cid, fil, titre) {
+    E.cache.filOuvert = { cid: cid, fil: fil, titre: titre };
+    marquerLu(cid, fil);
+    ouvrirFeuille('<h2>' + esc(titre || 'Commentaires') + '</h2><p class="doux">' + esc((ligne('centres', cid) || {}).nom || '') + ' · visible des partenaires du centre</p>' +
+      '<div id="zone-fil">' + bullesFil(cid, fil) + '</div>' + formMessage(cid, fil) +
+      '<div class="actions"><button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
+    var z = $('#zone-fil .fil'); if (z) z.scrollTop = z.scrollHeight;
+  }
+
+  // ── Page Équipe ──
+  function pageEquipe() {
+    var cc = centreEquipe(), cid = cc.cid;
+    var h = '<h1>Équipe</h1><p class="sous-titre">Entre partenaires : messages, commentaires, dates de réunion, tâches.</p>';
+    if (cc.dispo.length > 1) h += '<div class="puces">' + cc.dispo.map(function (c) { return '<button type="button" class="puce' + (c.id === cid ? ' on' : '') + '" data-a="eq-centre" data-v="' + esc(c.id) + '">' + esc(c.nom_court || c.nom) + '</button>'; }).join('') + '</div>';
+    if (!cid) return h + '<div class="carte vide">Aucun centre.</div>';
+    var nl = nonLus(cid).length, ouverts = sondagesOuvertsSansReponse(cid).length, mesT = mesTachesUrgentes(cid).length;
+    h += '<div class="onglets">' + [['discussion', 'Discussion' + (nl ? ' · ' + nl : '')], ['reunions', 'Réunions' + (ouverts ? ' · ' + ouverts : '')], ['taches', 'Tâches' + (mesT ? ' · ' + mesT : '')]].map(function (o) {
+      return '<button type="button" class="' + (EQ.onglet === o[0] ? 'on' : '') + '" data-a="eq-onglet" data-v="' + o[0] + '">' + o[1] + '</button>';
+    }).join('') + '</div>';
+    if (EQ.onglet === 'reunions') return h + ongletReunions(cid);
+    if (EQ.onglet === 'taches') return h + ongletTaches(cid);
+    // Discussion générale + commentaires récents ailleurs.
+    marquerLu(cid, 'general');
+    h += bullesFil(cid, 'general') + formMessage(cid, 'general');
+    var autres = {};
+    lignes('messages').forEach(function (m) { if (m.centre_id === cid && m.fil !== 'general') { var a = autres[m.fil]; if (!a || String(m.cree_le || '') > String(a.cree_le || '')) autres[m.fil] = m; } });
+    var fils = Object.keys(autres).sort(function (a, b) { return String(autres[b].cree_le || '').localeCompare(String(autres[a].cree_le || '')); }).slice(0, 15);
+    if (fils.length) h += '<h2>Commentaires récents</h2><div class="liste">' + fils.map(function (f) {
+      var m = autres[f], n = nonLus(cid, f).length, t = titreFil(cid, f);
+      return '<button class="ligne" type="button" data-a="ouvrir-fil" data-centre="' + esc(cid) + '" data-fil="' + esc(f) + '" data-titre="' + esc(t) + '"><span class="pastille">' + ico('message') + '</span><span class="corps"><b>' + esc(t) + '</b><small>' +
+        esc(nomCompte(m.auteur) + ' : ' + String(m.texte).slice(0, 80)) + '</small></span>' + (n ? '<span class="badge alerte">' + n + ' nouveau' + (n > 1 ? 'x' : '') + '</span>' : '') + '</button>';
+    }).join('') + '</div>';
+    return h;
+  }
+  function titreFil(cid, f) {
+    var k = f.split(':'), x = k[1] || '';
+    if (k[0] === 'depense') { var d = ligne('depenses', x); return 'Dépense · ' + (d ? d.libelle + ' (' + fcfa(d.montant) + ')' : '—'); }
+    if (k[0] === 'remise') { var r = ligne('remises', x); return 'Remise · ' + (r ? nomCompte(r.remis_par) + ' ' + fcfa(r.montant) : '—'); }
+    if (k[0] === 'paie') { var p = ligne('paies', x); return 'Paie · ' + (p ? (nomPersonne(p.enseignant_id) || 'enseignant') + ' ' + fcfa(p.montant) : '—'); }
+    if (k[0] === 'jour') return 'Point du jour · ' + dateLisible(x.slice(0, 4) + '-' + x.slice(4, 6) + '-' + x.slice(6, 8), true);
+    if (k[0] === 'bilan') return 'Bilan · ' + MOIS[Number(x.slice(4, 6)) - 1] + ' ' + x.slice(0, 4);
+    if (k[0] === 'tache') { var t = ligne('taches', x); return 'Tâche · ' + (t ? t.titre : '—'); }
+    if (k[0] === 'reunion') { var s = ligne('sondages', x); return 'Réunion · ' + (s ? s.titre : '—'); }
+    return 'Discussion';
+  }
+
+  // ── Réunions : dates proposées, disponibilités ──
+  function optionsSondage(s) { try { var o = JSON.parse(s.options || '[]'); return Array.isArray(o) ? o : []; } catch (e) { return []; } }
+  function dispoDe(s, uid) { return lignes('dispos').filter(function (d) { return d.sondage_id === s.id && d.utilisateur_id === uid; })[0] || null; }
+  function reponsesDe(d) { try { return JSON.parse(d && d.reponses || '{}') || {}; } catch (e) { return {}; } }
+  function libOption(o) { var d = o.slice(0, 10), h = o.slice(11); return dateLongue(d).replace(/^./, function (c) { return c.toUpperCase(); }) + (h ? ' à ' + heureLisible(h) : ''); }
+  function sondagesDu(cid) { return lignes('sondages').filter(function (s) { return s.centre_id === cid; }).sort(function (a, b) { return a.statut === b.statut ? String(b.cree_le || '').localeCompare(String(a.cree_le || '')) : a.statut === 'ouvert' ? -1 : 1; }); }
+  function sondagesOuvertsSansReponse(cid) { var moi = E.profil.utilisateur.id; return sondagesDu(cid).filter(function (s) { return s.statut === 'ouvert' && !dispoDe(s, moi); }); }
+  function decompte(s, o) {
+    var c = { oui: [], peut: [], non: [] };
+    lignes('dispos').filter(function (d) { return d.sondage_id === s.id; }).forEach(function (d) { var v = reponsesDe(d)[o]; if (c[v]) c[v].push(nomCompte(d.utilisateur_id)); });
+    return c;
+  }
+  function ongletReunions(cid) {
+    var l = sondagesDu(cid), moi = E.profil.utilisateur.id;
+    var h = l.length ? '<div class="liste">' + l.map(function (s) {
+      var opts = optionsSondage(s), repondu = !!dispoDe(s, moi);
+      var meilleure = opts.map(function (o) { return [o, decompte(s, o).oui.length]; }).sort(function (a, b) { return b[1] - a[1]; })[0];
+      return '<button class="ligne" type="button" data-a="voir-sondage" data-id="' + esc(s.id) + '"><span class="pastille">' + ico('agenda') + '</span><span class="corps"><b>' + esc(s.titre) + '</b><small>' +
+        esc(s.statut === 'clos' ? 'Fixée : ' + libOption(s.choix) : opts.length + ' date' + (opts.length > 1 ? 's' : '') + ' proposée' + (opts.length > 1 ? 's' : '') + (meilleure && meilleure[1] ? ' · en tête : ' + libOption(meilleure[0]) + ' (' + meilleure[1] + ' oui)' : '')) + '</small></span>' +
+        (s.statut === 'clos' ? '<span class="badge ok">fixée</span>' : repondu ? '<span class="badge">répondu</span>' : '<span class="badge alerte">à répondre</span>') + '</button>';
+    }).join('') + '</div>' : '<div class="carte vide">Aucune réunion en préparation. Proposez des dates : chacun dit s\'il est disponible.</div>';
+    return h + '<button class="fab" type="button" data-a="nouveau-sondage">' + ico('plus') + 'Proposer des dates</button>';
+  }
+  function feuilleNouveauSondage() {
+    var demain = decalerJour(isoLocal(new Date()), 1);
+    var ligneDate = function (i) { return '<div class="deux"><label class="champ"><span>Date ' + (i + 1) + '</span><input type="date" name="d' + i + '"' + (i === 0 ? ' required value="' + demain + '"' : '') + '></label><label class="champ"><span>Heure</span><input type="time" name="h' + i + '"' + (i === 0 ? ' value="16:00"' : '') + '></label></div>'; };
+    ouvrirFeuille('<h2>Proposer des dates</h2><p class="doux">Chaque partenaire indique ses disponibilités ; vous retenez ensuite la meilleure date, qui part dans l\'agenda.</p>' +
+      '<form data-f="sondage"><label class="champ"><span>Objet</span><input type="text" name="titre" required maxlength="160" placeholder="ex. : Réunion des partenaires, bilan d\'octobre"></label>' +
+      '<label class="champ"><span>Lieu</span><input type="text" name="lieu" maxlength="160" placeholder="ex. : au centre, ou en ligne"></label>' +
+      [0, 1, 2, 3].map(ligneDate).join('') +
+      '<label class="champ"><span>Note</span><textarea name="note" rows="2" maxlength="400"></textarea></label>' +
+      '<div class="actions"><button class="btn or" type="submit">Envoyer la proposition</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>');
+  }
+  function feuilleSondage(id) {
+    var s = ligne('sondages', id); if (!s) return;
+    var moi = E.profil.utilisateur.id, mes = reponsesDe(dispoDe(s, moi)), ouvert = s.statut === 'ouvert';
+    var decideur = s.auteur === moi || estAdmin() || peut('agenda.gerer', s.centre_id);
+    var h = '<h2>' + esc(s.titre) + '</h2><p class="doux">Proposée par ' + esc(nomCompte(s.auteur)) + (s.lieu ? ' · ' + esc(s.lieu) : '') + '</p>' + (s.note ? '<p>' + esc(s.note) + '</p>' : '');
+    if (!ouvert) h += '<div class="carte a-remettre"><span>Date retenue</span><b>' + esc(libOption(s.choix)) + '</b></div>';
+    h += '<div class="liste">' + optionsSondage(s).map(function (o) {
+      var c = decompte(s, o), moiV = mes[o] || '';
+      return '<div class="ligne option-date' + (s.choix === o ? ' retenue' : '') + '"><span class="corps"><b>' + esc(libOption(o)) + '</b><small>' +
+        ['oui', 'peut', 'non'].filter(function (k) { return c[k].length; }).map(function (k) { return LIB_DISPO[k][0] + ' : ' + esc(c[k].join(', ')); }).join(' · ') + '</small>' +
+        (ouvert ? '<span class="choix-dispo">' + ['oui', 'peut', 'non'].map(function (k) {
+          return '<button type="button" class="puce' + (moiV === k ? ' on ' + LIB_DISPO[k][1] : '') + '" data-a="dispo" data-id="' + esc(s.id) + '" data-o="' + esc(o) + '" data-v="' + k + '">' + LIB_DISPO[k][0] + '</button>';
+        }).join('') + '</span>' : '') + '</span><span class="fin"><b>' + c.oui.length + '</b><small>oui</small></span>' +
+        (ouvert && decideur ? '<button class="btn clair petit" type="button" data-a="fixer-sondage" data-id="' + esc(s.id) + '" data-o="' + esc(o) + '">Retenir</button>' : '') + '</div>';
+    }).join('') + '</div>';
+    h += '<div class="actions">' + boutonCommentaires(s.centre_id, 'reunion:' + s.id, 'Réunion · ' + s.titre) +
+      (!ouvert && s.evenement_id ? '<a class="btn clair petit" href="#/agenda" data-a="fermer-et-aller">' + ico('agenda', 'p') + 'Voir dans l\'agenda</a>' : '') + '</div>';
+    if (s.auteur === moi || estAdmin()) h += '<div class="actions"><button class="btn danger petit" type="button" data-a="suppr-sondage" data-id="' + esc(s.id) + '">Supprimer la réunion</button></div>';
+    ouvrirFeuille(h + '<div class="actions"><button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
+  }
+
+  // ── Tâches ──
+  function partenairesDu(cid) {
+    var vus = {};
+    return E.equipe.filter(function (e) { if (e.centre_id !== cid || e.role === 'enseignant' || vus[e.id]) return false; vus[e.id] = 1; return true; });
+  }
+  function tachesDu(cid) { return lignes('taches').filter(function (t) { return t.centre_id === cid; }); }
+  function mesTachesUrgentes(cid) {
+    var moi = E.profil.utilisateur.id, limite = decalerJour(isoLocal(new Date()), 2);
+    return tachesDu(cid).filter(function (t) { return t.assigne_a === moi && t.statut !== 'fait' && (!t.echeance || t.echeance <= limite); });
+  }
+  function ligneTache(t) {
+    var auj = isoLocal(new Date()), retard = t.statut !== 'fait' && t.echeance && t.echeance < auj, st = LIB_TACHE[t.statut || 'a_faire'];
+    var suivant = t.statut === 'a_faire' ? 'en_cours' : t.statut === 'en_cours' ? 'fait' : '';
+    var n = messagesDu(t.centre_id, 'tache:' + t.id).length;
+    return '<div class="ligne tache' + (t.statut === 'fait' ? ' faite' : '') + '"><button class="corps" type="button" data-a="editer-tache" data-id="' + esc(t.id) + '"><b>' + esc(t.titre) + '</b><small>' +
+      esc([t.assigne_a ? nomCompte(t.assigne_a) : 'Personne', t.echeance ? 'pour le ' + dateLisible(t.echeance, true) : ''].filter(Boolean).join(' · ')) + (n ? ' · ' + n + ' commentaire' + (n > 1 ? 's' : '') : '') + '</small>' +
+      '<span><span class="badge ' + st[1] + '">' + st[0] + '</span>' + (retard ? '<span class="badge danger">en retard</span>' : '') + '</span></button>' +
+      (suivant ? '<button class="btn clair petit" type="button" data-a="avancer-tache" data-id="' + esc(t.id) + '" data-v="' + suivant + '">' + (suivant === 'fait' ? ico('check', 'p') + 'Fait' : 'Commencer') + '</button>' : '') + '</div>';
+  }
+  function ongletTaches(cid) {
+    var l = tachesDu(cid).sort(function (a, b) { return (a.echeance || '9999') < (b.echeance || '9999') ? -1 : 1; });
+    var h = '';
+    ['a_faire', 'en_cours', 'fait'].forEach(function (k) {
+      var g = l.filter(function (t) { return (t.statut || 'a_faire') === k; });
+      if (k === 'fait') g = g.sort(function (a, b) { return String(b.fait_le || '').localeCompare(String(a.fait_le || '')); }).slice(0, 15);
+      h += '<h2>' + LIB_TACHE[k][0] + ' · ' + g.length + '</h2>' + (g.length ? '<div class="liste">' + g.map(ligneTache).join('') + '</div>' : '<div class="carte vide">Rien ici.</div>');
+    });
+    return h + '<button class="fab" type="button" data-a="editer-tache" data-id="">' + ico('plus') + 'Tâche</button>';
+  }
+  function feuilleTache(id) {
+    var cid = EQ.centre, t = id ? ligne('taches', id) : null;
+    var d = t || { titre: '', note: '', assigne_a: '', echeance: '', statut: 'a_faire' };
+    ouvrirFeuille('<h2>' + (t ? 'Tâche' : 'Nouvelle tâche') + '</h2>' + (t ? '<p class="doux">Créée par ' + esc(nomCompte(t.auteur)) + (t.fait_le ? ' · faite le ' + esc(dateLisible(t.fait_le, true)) : '') + '</p>' : '') +
+      '<form data-f="tache" data-id="' + esc(id || '') + '" data-centre="' + esc(t ? t.centre_id : cid) + '"><label class="champ"><span>Tâche</span><input type="text" name="titre" required maxlength="160" value="' + esc(d.titre) + '" placeholder="ex. : Relancer les impayés de 3e"></label>' +
+      '<div class="deux"><label class="champ"><span>Qui s\'en charge</span><select name="assigne_a"><option value="">— Personne —</option>' + partenairesDu(t ? t.centre_id : cid).map(function (e) {
+        return '<option value="' + esc(e.id) + '"' + (d.assigne_a === e.id ? ' selected' : '') + '>' + esc(e.id === E.profil.utilisateur.id ? e.nom + ' (vous)' : e.nom) + '</option>';
+      }).join('') + '</select></label><label class="champ"><span>Pour le</span><input type="date" name="echeance" value="' + esc(d.echeance || '') + '"></label></div>' +
+      '<label class="champ"><span>Statut</span><select name="statut">' + Object.keys(LIB_TACHE).map(function (k) { return '<option value="' + k + '"' + ((d.statut || 'a_faire') === k ? ' selected' : '') + '>' + LIB_TACHE[k][0] + '</option>'; }).join('') + '</select></label>' +
+      '<label class="champ"><span>Détails</span><textarea name="note" rows="3" maxlength="400">' + esc(d.note || '') + '</textarea></label>' +
+      '<div class="actions"><button class="btn or" type="submit">Enregistrer</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>' +
+      (t ? '<div class="actions">' + boutonCommentaires(t.centre_id, 'tache:' + t.id, 'Tâche · ' + t.titre) + (t.auteur === E.profil.utilisateur.id || estAdmin() ? '<button class="btn danger petit" type="button" data-a="suppr-tache" data-id="' + esc(t.id) + '">Supprimer</button>' : '') + '</div>' : ''));
+  }
+
   // ───────────────────────────── Remises de fonds au trésorier ─────────────────────────────
   // Chaque partenaire encaisse selon ses jours au centre et sa proximité avec les parents,
   // envoie le reçu, puis REMET l'argent au trésorier du centre avant la fin du mois. Le
@@ -2684,6 +2884,7 @@
       (r.statut === 'contestee' && r.motif ? '<small class="motif">Motif : ' + esc(r.motif) + '</small>' : '') +
       (r.confirme_par && !attente ? '<small>' + (r.statut === 'confirmee' ? 'Confirmée' : 'Contestée') + ' par ' + esc(nomCompte(r.confirme_par)) + (r.confirme_le ? ' le ' + esc(dateLisible(r.confirme_le, true)) : '') + '</small>' : '') +
       '<span><span class="badge ' + st[1] + '">' + esc(st[0]) + '</span>' + (r._attente ? '<span class="badge">à envoyer</span>' : '') + '</span>' +
+      '<span class="boutons">' + boutonCommentaires(cid, 'remise:' + r.id, 'Remise · ' + nomCompte(r.remis_par) + ' ' + fcfa(r.montant)) + '</span>' +
       (tresorier ? '<span class="boutons"><button class="btn or petit" type="button" data-a="remise-recue" data-id="' + esc(r.id) + '">' + ico('check', 'p') + 'Reçu</button><button class="btn danger petit" type="button" data-a="remise-contester" data-id="' + esc(r.id) + '">Pas reçu</button></span>' : '') +
       (auteur ? '<span class="boutons"><button class="btn clair petit" type="button" data-a="remise-prevenir" data-id="' + esc(r.id) + '">' + ico('message', 'p') + 'Prévenir le trésorier</button><button class="btn clair petit" type="button" data-a="editer-remise" data-id="' + esc(r.id) + '">Modifier</button></span>' : '') +
       '</span></div>';
@@ -2963,6 +3164,13 @@
         if (reste > 0) out.push({ ico: 'wallet', niveau: 'alerte', titre: fcfa(reste).replace(/\u00a0/g, ' ') + ' à remettre au trésorier · ' + nom, detail: 'Avant le ' + dateLisible(finDuMois(auj), true) + ', pour le bilan du mois', lien: '#/caisse', onglet: 'remises' });
       }
     });
+    lignes('centres').forEach(function (c) {
+      if (!peutEquipe(c.id)) return;
+      var nom = c.nom_court || c.nom, nl = nonLus(c.id).length, so = sondagesOuvertsSansReponse(c.id), mt = mesTachesUrgentes(c.id);
+      if (nl) out.push({ ico: 'message', niveau: 'ok', titre: nl + ' nouveau' + (nl > 1 ? 'x' : '') + ' message' + (nl > 1 ? 's' : '') + ' · ' + nom, detail: 'Discussion et commentaires des partenaires', lien: '#/equipe', eq: 'discussion', centre: c.id });
+      so.forEach(function (x) { out.push({ ico: 'agenda', niveau: 'alerte', titre: 'Réunion : ' + x.titre, detail: 'Donnez vos disponibilités (' + nomCompte(x.auteur) + ' propose des dates)', lien: '#/equipe', eq: 'reunions', centre: c.id }); });
+      mt.forEach(function (t) { var r = t.echeance && t.echeance < auj; out.push({ ico: 'clipboard', niveau: r ? 'danger' : 'alerte', titre: (r ? 'Tâche en retard : ' : 'Tâche : ') + t.titre, detail: t.echeance ? 'Pour le ' + dateLisible(t.echeance, true) : 'Sans échéance', lien: '#/equipe', eq: 'taches', centre: c.id }); });
+    });
     if (estEnseignantQuelquePart()) {
       var aFaire = mesCoursDu(auj).filter(function (cr) { return !etatSeance({ id: idSeance(auj, cr.classe_id), centre_id: cr.centre_id, classe: { id: cr.classe_id } }).pointes; }).length;
       if (aFaire) out.push({ ico: 'checkcircle', niveau: 'alerte', titre: aFaire + ' appel' + (aFaire > 1 ? 's' : '') + ' à faire aujourd\'hui', detail: 'Mes cours aujourd\'hui', lien: '#/accueil' });
@@ -2978,7 +3186,7 @@
   function feuilleNotifications() {
     var l = notificationsDuJour();
     var h = '<h2>Notifications</h2>' + (l.length ? '<div class="liste">' + l.map(function (x) {
-      return '<a class="ligne notif ' + esc(x.niveau || '') + '" href="' + esc(x.lien) + '" data-a="fermer-et-aller"' + (x.onglet ? ' data-onglet="' + esc(x.onglet) + '"' : '') + '><span class="pastille">' + ico(x.ico) + '</span><span class="corps"><b>' + esc(x.titre) + '</b><small>' + esc(x.detail) + '</small></span><span class="fin">›</span></a>';
+      return '<a class="ligne notif ' + esc(x.niveau || '') + '" href="' + esc(x.lien) + '" data-a="fermer-et-aller"' + (x.onglet ? ' data-onglet="' + esc(x.onglet) + '"' : '') + (x.eq ? ' data-eq="' + esc(x.eq) + '" data-centre="' + esc(x.centre) + '"' : '') + '><span class="pastille">' + ico(x.ico) + '</span><span class="corps"><b>' + esc(x.titre) + '</b><small>' + esc(x.detail) + '</small></span><span class="fin">›</span></a>';
     }).join('') + '</div>' : '<div class="carte vide">Rien à signaler pour le moment.</div>');
     if (notifSystemePossible()) {
       h += Notification.permission === 'granted'
@@ -3038,20 +3246,20 @@
       pas: [] },
     { cle: 'responsable', espace: 'partenaire', nom: 'Responsable', famille: 'Partenaire',
       resume: 'Dirige un centre au quotidien, avec presque tous les pouvoirs sur ce centre.',
-      peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Remettre les fonds au trésorier', 'Fixer les tarifs, valider les dépenses', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants', 'Tenir l\'agenda : rendez-vous, rencontres, réunions'],
+      peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Remettre les fonds au trésorier', 'Fixer les tarifs, valider les dépenses', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants', 'Tenir l\'agenda : rendez-vous, rencontres, réunions', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
       pas: ['Les réglages des centres et de l\'année', 'Les comptes responsables, actionnaires et admin'] },
     { cle: 'actionnaire', espace: 'partenaire', nom: 'Actionnaire', famille: 'Partenaire',
       resume: 'Associé du centre : suit les chiffres, encaisse quand il est présent, tient l\'emploi du temps.',
-      peut: ['Voir le bilan, les versements et les dépenses', 'Encaisser auprès des parents et envoyer le reçu', 'Payer l\'enseignant juste après son cours (1 500 F/h)', 'Remettre les fonds au trésorier', 'Voir les statistiques et les parts', 'Modifier l\'emploi du temps de son centre', 'Tenir l\'agenda du centre'],
+      peut: ['Voir le bilan, les versements et les dépenses', 'Encaisser auprès des parents et envoyer le reçu', 'Payer l\'enseignant juste après son cours (1 500 F/h)', 'Remettre les fonds au trésorier', 'Voir les statistiques et les parts', 'Modifier l\'emploi du temps de son centre', 'Tenir l\'agenda du centre', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
       pas: ['Inscrire les élèves', 'Faire l\'appel', 'Créer des comptes'] },
     { cle: 'secretaire', espace: 'secretariat', nom: 'Secrétaire / surveillant', famille: 'Équipe',
       resume: 'Tient l\'accueil et la caisse du centre.',
-      peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Payer l\'enseignant juste après son cours (1 500 F/h)', 'Remettre les fonds au trésorier', 'Saisir les dépenses (avec photo du justificatif)', 'Noter les rendez-vous dans l\'agenda'],
+      peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Payer l\'enseignant juste après son cours (1 500 F/h)', 'Remettre les fonds au trésorier', 'Saisir les dépenses (avec photo du justificatif)', 'Noter les rendez-vous dans l\'agenda', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
       pas: ['Voir le bilan', 'Annuler un versement, accorder une remise', 'Valider une dépense', 'Gérer les enseignants'] },
     { cle: 'enseignant', espace: 'enseignant', nom: 'Enseignant', famille: 'Équipe',
       resume: 'Fait l\'appel de ses classes et suit ses heures.',
       peut: ['Faire l\'appel de ses classes, le jour du cours', 'Voir son emploi du temps et l\'agenda du centre', 'Voir ses heures, son contrat et ses paies'],
-      pas: ['Les élèves des autres classes', 'La caisse et les finances', 'Les comptes'] }
+      pas: ['Les élèves des autres classes', 'La caisse et les finances', 'Les comptes', 'L\'espace Équipe des partenaires'] }
   ];
   function ficheRole(cle) { return FICHES_ROLES.filter(function (f) { return f.cle === cle; })[0]; }
   var ORDRE_ROLES = ['responsable', 'actionnaire', 'secretaire', 'enseignant'];
@@ -3311,14 +3519,14 @@
       '*Caisse › Dépenses* : saisissez les dépenses. Photo du justificatif *obligatoire dès 10 000 F*. Vous validez les dépenses saisies par les autres.',
       '*Appel › Enseignants du jour* : après le cours, touchez *Payer* (1 500 F de l\'heure sauf contrat) ; l\'argent sort de votre caisse.',
       '*Caisse › Remises* : remettez au trésorier l\'argent encaissé, *avant la fin du mois* ; il confirme la réception.',
-      '*Plus › Enseignants* : pointage des cours, contrats, paies.', '*Plus › Comptes et accès* : créez les comptes de vos secrétaires et enseignants.', '*Plus › Agenda* : rendez-vous, rencontres, échéances ; la cloche en haut rappelle ce qui approche.'],
+      '*Plus › Enseignants* : pointage des cours, contrats, paies.', '*Plus › Comptes et accès* : créez les comptes de vos secrétaires et enseignants.', '*Plus › Agenda* : rendez-vous, rencontres, échéances ; la cloche en haut rappelle ce qui approche.', '*Plus › Équipe* : messages entre partenaires, commentaires, dates de réunion, tâches.'],
     actionnaire: ['*Accueil* : les chiffres clés de votre centre (élèves, appels, encaissé, impayés).', '*Plus › Bilan* : recettes, dépenses, résultat du mois et votre part.',
       '*Caisse › Encaisser* : quand vous êtes au centre ou qu\'un parent vous paie, encaissez et envoyez-lui le reçu par WhatsApp.',
       '*Appel › Enseignants du jour* : si vous êtes présent, payez l\'enseignant juste après son cours (*Payer*, 1 500 F de l\'heure).',
-      '*Caisse › Remises* : remettez cet argent au trésorier *avant la fin du mois* ; il confirme la réception.', '*Plus › Planning* : vous tenez l\'emploi du temps du centre (classes, créneaux, enseignants).', '*Plus › Agenda* : rendez-vous et rencontres ; la cloche en haut rappelle ce qui approche.'],
+      '*Caisse › Remises* : remettez cet argent au trésorier *avant la fin du mois* ; il confirme la réception.', '*Plus › Planning* : vous tenez l\'emploi du temps du centre (classes, créneaux, enseignants).', '*Plus › Agenda* : rendez-vous et rencontres ; la cloche en haut rappelle ce qui approche.', '*Plus › Équipe* : messages entre partenaires, commentaires, dates de réunion, tâches.'],
     secretaire: ['*Appel* : choisissez la classe, touchez chaque élève (présent, retard, absent), au début du cours.', '*Élèves › +* : inscrire un élève.',
       '*Caisse › Encaisser* : un reçu numéroté part au parent par WhatsApp. Un versement ne se modifie pas : en cas d\'erreur, prévenez le responsable.',
-      '*Caisse › Dépenses* : photo du justificatif *obligatoire dès 10 000 F*.', '*Appel › Enseignants du jour* : après le cours, touchez *Payer* (1 500 F de l\'heure).', '*Caisse › Remises* : remettez l\'argent encaissé au trésorier avant la fin du mois.', '*Plus › Agenda* : notez les rendez-vous ; la cloche en haut rappelle échéances et rencontres.'],
+      '*Caisse › Dépenses* : photo du justificatif *obligatoire dès 10 000 F*.', '*Appel › Enseignants du jour* : après le cours, touchez *Payer* (1 500 F de l\'heure).', '*Caisse › Remises* : remettez l\'argent encaissé au trésorier avant la fin du mois.', '*Plus › Agenda* : notez les rendez-vous ; la cloche en haut rappelle échéances et rencontres.', '*Plus › Équipe* : messages entre partenaires, commentaires, réunions, tâches.'],
     enseignant: ['*Accueil › Mes cours aujourd\'hui* : touchez votre cours pour faire l\'appel, au début du cours.', '*Planning* : votre emploi du temps de la semaine.',
       '*Paie* : 1 500 F de l\'heure (sauf contrat), versés juste après le cours par le partenaire présent.', '*Plus › Mes heures* : heures faites, montant dû, paies reçues.']
   };
@@ -3490,6 +3698,48 @@
       if (a) confirmer('Retirer ' + a.nom + ' des actionnaires ?', 'Retirer', function () { muter('actionnaires', a.id, {}, true).then(rendre); });
     },
     // Le logo n'est ni un lien ni une image : l'appui long n'ouvre aucun menu du navigateur.
+    'eq-centre': function (el) { EQ.centre = el.dataset.v; rendre(); },
+    'eq-onglet': function (el) { EQ.onglet = el.dataset.v; rendre(); },
+    'ouvrir-fil': function (el) { feuilleFil(el.dataset.centre, el.dataset.fil, el.dataset.titre); },
+    'suppr-message': function (el) {
+      var m = ligne('messages', el.dataset.id);
+      if (m) confirmer('Supprimer ce message ?', 'Supprimer', function () {
+        muter('messages', m.id, {}, true).then(function () { var fo = E.cache.filOuvert; if (fo && $('#zone-fil')) $('#zone-fil').innerHTML = bullesFil(fo.cid, fo.fil); else rendre(); });
+      });
+    },
+    'nouveau-sondage': function () { feuilleNouveauSondage(); },
+    'voir-sondage': function (el) { feuilleSondage(el.dataset.id); },
+    dispo: function (el) {
+      var s = ligne('sondages', el.dataset.id); if (!s || s.statut !== 'ouvert') return;
+      var moi = E.profil.utilisateur.id, d = dispoDe(s, moi), r = reponsesDe(d);
+      r[el.dataset.o] = el.dataset.v;
+      muter('dispos', d ? d.id : nouvelId(), { centre_id: s.centre_id, sondage_id: s.id, reponses: JSON.stringify(r), utilisateur_id: moi }).then(function () { feuilleSondage(s.id); majCloche(); });
+    },
+    'fixer-sondage': function (el) {
+      var s = ligne('sondages', el.dataset.id), o = el.dataset.o; if (!s) return;
+      confirmer('Retenir ' + libOption(o) + ' pour « ' + s.titre + ' » ? La réunion part dans l\'agenda du centre.', 'Retenir', function () {
+        var suite = Promise.resolve(''), evId = '';
+        if (peutAgenda(s.centre_id)) {
+          evId = nouvelId();
+          suite = muter('evenements', evId, { centre_id: s.centre_id, titre: s.titre, type: 'rencontre', date: o.slice(0, 10), heure: o.slice(11, 16), fin: '', lieu: s.lieu || '', note: s.note || '', rappel_min: 1440 });
+        }
+        suite.then(function () { return muter('sondages', s.id, { statut: 'clos', choix: o, evenement_id: evId }); })
+          .then(function () { fermerFeuille(); toast('Réunion fixée' + (evId ? ' et ajoutée à l\'agenda.' : '.')); rendre(); });
+      });
+    },
+    'suppr-sondage': function (el) {
+      var s = ligne('sondages', el.dataset.id);
+      if (s) confirmer('Supprimer la réunion « ' + s.titre + ' » ?', 'Supprimer', function () { muter('sondages', s.id, {}, true).then(function () { fermerFeuille(); rendre(); }); });
+    },
+    'editer-tache': function (el) { feuilleTache(el.dataset.id); },
+    'avancer-tache': function (el) {
+      var t = ligne('taches', el.dataset.id);
+      if (t) muter('taches', t.id, { statut: el.dataset.v }).then(function () { toast(el.dataset.v === 'fait' ? 'Tâche faite.' : 'Tâche commencée.'); rendre(); });
+    },
+    'suppr-tache': function (el) {
+      var t = ligne('taches', el.dataset.id);
+      if (t) confirmer('Supprimer la tâche « ' + t.titre + ' » ?', 'Supprimer', function () { muter('taches', t.id, {}, true).then(function () { fermerFeuille(); rendre(); }); });
+    },
     'payer-cours': function (el) {
       var p = ligne('presences_ens', el.dataset.pe), c = ligne('creneaux', el.dataset.cr);
       var mc = montantCours(p);
@@ -3556,7 +3806,7 @@
         feuilleNotifications();
       });
     },
-    'fermer-et-aller': function (el) { fermerFeuille(); if (el.dataset.onglet) CAI.onglet = el.dataset.onglet; var h = el.getAttribute('href'); if (location.hash === h) rendre(); else location.hash = h; },
+    'fermer-et-aller': function (el) { fermerFeuille(); if (el.dataset.onglet) CAI.onglet = el.dataset.onglet; if (el.dataset.eq) { EQ.onglet = el.dataset.eq; EQ.centre = el.dataset.centre; } var h = el.getAttribute('href'); if (location.hash === h) rendre(); else location.hash = h; },
     'aller-accueil': function () { if (location.hash === '#/accueil') rendre(); else location.hash = '#/accueil'; },
     'fermer-panneau': function () { if (panneauOuvert()) basculerPanneau(); },
     'ouvrir-comptes': function () {
@@ -3890,6 +4140,33 @@
       if (active) lignes('annees').forEach(function (a) { if (a.id !== id && Number(a.active)) suite = suite.then(function () { return muter('annees', a.id, { active: 0 }); }); });
       suite.then(function () { return muter('annees', id, { libelle: v.libelle, debut: v.debut, fin: v.fin, mois_factures: mois.join(','), active: active ? 1 : 0 }); })
         .then(function () { toast('Enregistré.'); rendre(); });
+    },
+    message: function (form) {
+      var v = valeurs(form), cid = form.dataset.centre, fil = form.dataset.fil;
+      if (!v.texte) return;
+      muter('messages', nouvelId(), { centre_id: cid, fil: fil, texte: v.texte, auteur: E.profil.utilisateur.id, cree_le: maintenantSql() }).then(function () {
+        marquerLu(cid, fil);
+        var fo = E.cache.filOuvert;
+        if (fo && fo.fil === fil && $('#zone-fil')) { $('#zone-fil').innerHTML = bullesFil(cid, fil); form.reset(); var z = $('#zone-fil .fil'); if (z) z.scrollTop = z.scrollHeight; }
+        else rendre();
+      });
+    },
+    sondage: function (form) {
+      var v = valeurs(form), opts = [];
+      [0, 1, 2, 3].forEach(function (i) { if (v['d' + i]) { var o = v['d' + i] + (v['h' + i] ? ' ' + v['h' + i] : ''); if (opts.indexOf(o) < 0) opts.push(o); } });
+      if (!opts.length) { toast('Proposez au moins une date.', true); return; }
+      opts.sort();
+      var id = nouvelId();
+      fermerFeuille();
+      muter('sondages', id, { centre_id: EQ.centre, titre: v.titre, lieu: v.lieu, note: v.note, options: JSON.stringify(opts), statut: 'ouvert', choix: '', auteur: E.profil.utilisateur.id, cree_le: maintenantSql() })
+        .then(function () { EQ.onglet = 'reunions'; rendre(); feuilleSondage(id); toast('Proposition envoyée aux partenaires.'); });
+    },
+    tache: function (form) {
+      var v = valeurs(form), id = form.dataset.id || nouvelId();
+      var champs = { centre_id: form.dataset.centre, titre: v.titre, note: v.note, assigne_a: v.assigne_a || '', echeance: v.echeance || '', statut: v.statut || 'a_faire' };
+      if (!form.dataset.id) { champs.auteur = E.profil.utilisateur.id; champs.cree_le = maintenantSql(); }
+      fermerFeuille();
+      muter('taches', id, champs).then(function () { EQ.onglet = 'taches'; toast('Tâche enregistrée.'); rendre(); });
     },
     remise: function (form) {
       var v = valeurs(form);
