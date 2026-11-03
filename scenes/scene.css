@@ -449,3 +449,19 @@ h1,h2,h3,h4{font-family:var(--v-font);font-weight:600;color:var(--v-navy)}
 .sc-pp.qc{background:#fff;color:#0E7C86;border:2px solid #0E7C86;box-sizing:border-box;font-size:13px}
 .sc-script .sc-l.q{font-weight:500;color:#0E7C86}
 .sc-prog b{display:inline-block;background:#E3F1EE;color:#0E7C86;border-radius:999px;padding:1px 10px;margin-right:4px;font-size:12.5px}
+
+/* Pour aller plus loin : une ressource gratuite, une payante */
+.sc-plus{margin:18px 0 6px}
+.sc-plus-acc{margin:0 0 12px;font-size:15px;color:var(--v-texte)}
+.sc-res-paire{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.sc-res{display:flex;flex-direction:column;gap:6px;padding:16px;border-radius:var(--v-r);background:var(--v-vert);border:2px solid transparent;color:var(--v-navy);text-decoration:none;transition:transform .15s,border-color .15s}
+.sc-res:hover,.sc-res:focus-visible{transform:translateY(-2px);border-color:var(--v-ok)}
+.sc-res b{font-weight:600;font-size:16px}
+.sc-res > span:not(.sc-res-badge){font-size:14.5px;color:var(--v-texte)}
+.sc-res em{font-style:normal;font-weight:600;display:inline-flex;align-items:center;gap:6px;margin-top:auto;color:var(--v-ok)}
+.sc-res-badge{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;background:var(--v-ok);color:#fff;font-size:12.5px;font-weight:600}
+.sc-res .ic,.sc-res-badge .ic{width:15px;height:15px}
+.sc-res.payant{background:#FFF6DB}
+.sc-res.payant:hover,.sc-res.payant:focus-visible{border-color:var(--v-or2)}
+.sc-res.payant .sc-res-badge{background:var(--v-or);color:var(--v-or-txt)}
+.sc-res.payant em{color:var(--v-bleu)}

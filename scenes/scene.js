@@ -864,6 +864,7 @@
       + (B.retenir && B.retenir.length ? '<h3 class="sc-h3">À retenir</h3><ul class="sc-puces-c">' + B.retenir.map(function(r){ return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>' : '')
       + (S.fiche && S.fiche.accroche ? '<div class="sc-suite"><h3 class="sc-h3">La suite est dans le livre</h3><p>' + esc(S.fiche.accroche) + '</p>'
           + '<button class="sc-btn" id="bVersOeuvre">' + ico('livre') + 'Découvrir l’œuvre</button></div>' : '')
+      + suitePaire()
       + (B.ecrire ? '<h3 class="sc-h3">À toi d’écrire</h3><p class="sc-objectif">' + esc(B.ecrire) + '</p>'
           + '<textarea id="redac" placeholder="Écris ici. Ton texte reste sur cet appareil."></textarea><div class="sc-note-enr" id="noteEnr"></div>' : '')
       + '<div class="sc-cmd" style="margin-top:12px"><button class="sc-btn" id="bRejouer">' + ico('rejouer') + 'Rejouer</button>'
@@ -871,6 +872,7 @@
     var bl = $('bilan');
     bl.innerHTML = h; bl.hidden = false;
     bl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    afficherPrix();
     if($('bVersOeuvre')){ $('bVersOeuvre').onclick = function(){ var o = document.querySelector('.sc-onglet[data-vue=oeuvre]'); if(o){ o.click(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }; }
     $('bRejouer').onclick = function(){ reponses = {}; etapes.forEach(function(e){ delete e._essai; }); presentsAvant = {}; aller(0); window.scrollTo({ top: 0, behavior: 'smooth' }); };
     var ta = $('redac');
@@ -890,6 +892,44 @@
    *   liens:[{a, b, type, lib, base, poids:{id: coef}}],
    *   issue: function(v) → {niveau:'ok'|'moyen'|'ko', badge, recit, apres, themes:[…]} } */
   var COUL_LIEN = { confiance:'#D99A00', amour:'#D6336C', conflit:'#D43F2E', domination:'#7B5CD6', alliance:'#1F9D5B', peur:'#E07B39' };
+
+  /* ---------- « Pour aller plus loin » : une ressource gratuite, une payante ----------
+     S.suite = { gratuit: { lib, txt, href }, payant: { lib, txt, href } } (facultatif).
+     Par défaut : œuvre → corrigés en accès libre + cahier de l'œuvre ; autre matière → parcours + abonnement.
+     Le prix n'est jamais écrit ici : il est lu au catalogue du serveur, celui que l'encaissement applique. */
+  function suitePaire(){
+    var su = S.suite || {}, F = S.fiche || {};
+    var g = su.gratuit || (S.oeuvre
+      ? { lib: 'Les corrigés des cahiers', txt: 'Des milliers d’exercices de français corrigés, séquence par séquence.', href: '../corriges/' }
+      : { lib: 'Mon parcours', txt: 'Calcule ta moyenne et prépare ton orientation, du BEPC au BAC.', href: '../parcours/' });
+    var p = su.payant || (F.cahier
+      ? { lib: F.cahier.lib, txt: 'Toute l’œuvre étudiée : lectures suivies, exercices, cartes mentales. Tu écris dedans, ton enseignant lit ta copie.', href: F.cahier.href }
+      : { lib: 'L’abonnement VÉRITAS', txt: 'Épreuves corrigées de ta classe et Prof. Ambassa, l’IA qui explique chaque erreur.', href: '../app.html#abonnement' });
+    function carte(r, payant){
+      return '<a class="sc-res' + (payant ? ' payant' : '') + '" href="' + esc(r.href) + '">'
+        + '<span class="sc-res-badge">' + (payant ? ico('cle') + '<span class="sc-res-prix">Payant</span>' : ico('porte') + 'Gratuit') + '</span>'
+        + '<b>' + esc(r.lib) + '</b><span>' + esc(r.txt) + '</span>'
+        + '<em>' + (payant ? 'Débloquer' : 'Ouvrir') + ico('droite') + '</em></a>';
+    }
+    return '<div class="sc-plus"><h3 class="sc-h3">Pour aller plus loin</h3>'
+      + '<p class="sc-plus-acc">Cette scène est offerte. La suite se joue dans l’application : une ressource libre pour t’entraîner, une autre pour aller jusqu’au bout.</p>'
+      + '<div class="sc-res-paire">' + carte(g, false) + carte(p, true) + '</div></div>';
+  }
+  var prixLu = null;
+  function afficherPrix(){
+    var lien = document.querySelector('.sc-res.payant'), m = lien && lien.getAttribute('href').match(/livrets\/(oeuvres?-[a-z0-9-]+)\.html/);
+    if(!m){ return; }
+    var poser = function(px){ document.querySelectorAll('.sc-res.payant .sc-res-prix').forEach(function(s){ s.textContent = px.toLocaleString('fr-FR') + ' F'; }); };
+    if(prixLu){ return poser(prixLu); }
+    fetch('/api/livret.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"action":"catalogue"}', cache: 'no-store' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){
+        var o = j && j.ok && Array.isArray(j.ouvrages) && j.ouvrages.filter(function(x){ return String(x.slug) === m[1]; })[0];
+        var px = o && parseInt(o.prix, 10);
+        if(px > 0){ prixLu = px; poser(px); }
+      })
+      .catch(function(){});
+  }
   /* ---------- Onglet « L’œuvre » ----------
      S.fiche = { resume, personnages: [{ nom, role, cle? }], reperes: [..], themes: [..], cahier: { lib, href } }
      Un personnage qui porte « cle » reprend l’avatar de la distribution de la scène. */
@@ -909,8 +949,9 @@
       + (F.siTuAimes ? '<p class="sc-f-aimes"><b>Si tu aimes…</b> ' + esc(F.siTuAimes) + '</p>' : '')
       + (F.reperes && F.reperes.length ? '<h3 class="sc-h3">Repères</h3><ul class="sc-f-liste sc-puces-c">' + F.reperes.map(function(r){ return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>' : '')
       + (F.themes && F.themes.length ? '<h3 class="sc-h3">Thèmes</h3><div class="sc-f-themes">' + F.themes.map(function(t){ return '<span>' + esc(t) + '</span>'; }).join('') + '</div>' : '')
-      + (F.cahier ? '<a class="sc-btn principal sc-f-cahier" href="' + esc(F.cahier.href) + '">' + ico('livre') + esc(F.cahier.lib) + '</a>' : '');
+      + suitePaire();
     z.setAttribute('data-fait', '1');
+    afficherPrix();
   }
 
   var LABO = {
