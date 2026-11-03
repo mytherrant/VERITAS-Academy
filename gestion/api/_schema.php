@@ -27,6 +27,7 @@ function g_schema(): array {
             'alerte_appel_min'     => 'int:15',  // appel non fait → responsable
             'alerte_direction_min' => 'int:30',  // appel toujours pas fait → admin
             'jour_echeance'        => 'int:10',  // « les paiements se font au plus tard le 10 du mois »
+            'tresorier_id'         => 'ref',     // compte qui garde les fonds du centre et confirme les remises
             'ordre' => 'int',
             // Modèles des messages aux parents ({eleve}, {parent}, {classe}, {date}, {horaire},
             // {debut}, {arrivee}, {minutes}, {centre}, {tel_centre}). Vide = modèle par défaut.
@@ -40,6 +41,14 @@ function g_schema(): array {
             'mois_factures' => 'str:120',        // ex. « 10,11,12,1,2,3,4,5 »
             'active' => 'int',
         ] + G_COLS_SYNC, 'index' => [['rev']]],
+
+        // Remise de fonds au trésorier : le partenaire qui a encaissé (chez lui, près des
+        // parents) remet l'argent ; le trésorier confirme l'avoir reçu, ou le conteste.
+        'g_remises' => ['cols' => [
+            'id' => 'id', 'centre_id' => 'ref', 'montant' => 'int', 'date' => 'str:10', 'mode' => 'str:12',
+            'note' => 'str:200', 'remis_par' => 'ref', 'statut' => 'str:12',   // en_attente | confirmee | contestee
+            'confirme_par' => 'ref', 'confirme_le' => 'str:19', 'motif' => 'str:200',
+        ] + G_COLS_SYNC, 'index' => [['centre_id', 'date'], ['remis_par'], ['rev']]],
 
         // Agenda du centre : rencontres, rendez-vous, réunions de parents… Les échéances
         // de paiement ne sont pas stockées : le téléphone les déduit du jour d'échéance.
@@ -200,7 +209,7 @@ function g_registre(): array {
             'table' => 'g_centres', 'portee' => 'id', 'lire' => 'centre.voir', 'ecrire' => 'admin',
             'champs' => ['nom', 'nom_court', 'adresse', 'telephones', 'devise', 'tolerance_retard_min',
                          'alerte_appel_min', 'alerte_direction_min', 'jour_echeance', 'ordre', 'msg_absence', 'msg_retard',
-                         'msg_relance', 'msg_recu', 'inscription_option', 'inscription_option_libelle'],
+                         'msg_relance', 'msg_recu', 'inscription_option', 'inscription_option_libelle', 'tresorier_id'],
         ],
         'annees' => [
             'table' => 'g_annees', 'portee' => null, 'lire' => 'tous', 'ecrire' => 'admin',
@@ -256,6 +265,10 @@ function g_registre(): array {
         'paies' => [
             'table' => 'g_paies', 'portee' => 'centre_id', 'lire' => 'finances.voir', 'ecrire' => 'enseignants.gerer', 'proprio' => 'enseignant_id',
             'champs' => ['centre_id', 'enseignant_id', 'mois', 'montant', 'date', 'mode', 'note', 'annule', 'motif_annulation'],
+        ],
+        'remises' => [
+            'table' => 'g_remises', 'portee' => 'centre_id', 'lire' => 'paiements.voir', 'ecrire' => 'paiements.voir',
+            'champs' => ['centre_id', 'montant', 'date', 'mode', 'note', 'statut', 'motif'],
         ],
         'evenements' => [
             'table' => 'g_evenements', 'portee' => 'centre_id', 'lire' => 'centre.voir', 'ecrire' => 'agenda.gerer',

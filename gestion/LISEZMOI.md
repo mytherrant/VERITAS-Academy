@@ -48,6 +48,14 @@ servie aux seuls comptes qui voient les dépenses du centre.
 faites, dû selon le contrat (heure, séance, forfait avec retenue), paies (annulables, jamais
 modifiées) comptées en charges dans le bilan. L'enseignant voit SES heures, SON contrat, SES paies.
 
+**Remises au trésorier :** chaque centre a un trésorier (fiche du centre, choisi par l'admin parmi
+les comptes du centre). Tout partenaire qui encaisse (responsable, secrétaire, et désormais
+actionnaire, selon ses jours au centre et sa proximité avec les parents) envoie le reçu puis
+remet l'argent au trésorier avant la fin du mois (table `g_remises`). En main = encaissements −
+dépenses saisies − remises. Seul le trésorier du centre (ou l'admin) confirme « Reçu » ou
+conteste « Pas reçu » (motif obligatoire) ; jamais l'auteur ; une remise tranchée est figée.
+Le bilan montre les fonds chez le trésorier et ceux encore chez les partenaires.
+
 **Agenda :** rendez-vous, rencontres, réunions de parents (table `g_evenements`, droit `agenda.gerer` :
 responsable, actionnaire, secrétaire ; tout le centre les voit). Le téléphone y ajoute ce qu'il déduit :
 l'échéance des mensualités (jour d'échéance du centre, mois facturés), la rentrée et la fin d'année.
@@ -126,6 +134,7 @@ node tests/banc_gestion_exports.cjs <dossier>    # feuille PNG/PDF (structure v�
 node tests/banc_gestion_caisse.cjs <dossier>     # échéancier, encaissement, reçu, relances, dépenses, bilan (Playwright)
 node tests/banc_gestion_enseignants.cjs <dossier> # enseignants, « Mes heures », reçu hors ligne, photo de justificatif (Playwright)
 node tests/banc_gestion_agenda.cjs <dossier>     # agenda, échéances, .ics, cloche, droits par rôle (Playwright)
+node tests/banc_gestion_remises.cjs <dossier>    # remises au trésorier : confirmation, contestation, refus serveur (Playwright)
 ```
 
 **Noms fictifs uniquement** dans le code et les bancs : le dépôt est public, les élèves sont mineurs.
