@@ -4,8 +4,8 @@
  * La pré-copie force cache:'reload' : elle ne doit pas recopier une vieille
  * version gardée par le cache HTTP du navigateur.
  */
-var VERSION = 'vg-0.12.7';
-var COQUILLE = ['./', 'index.html', 'app.css?v=0.12.7', 'app.js?v=0.12.7', 'manifest.webmanifest', 'icone-512.png', 'logo.png', 'polices/poppins-400.woff2', 'polices/poppins-500.woff2', 'polices/poppins-600.woff2'];
+var VERSION = 'vg-0.12.8';
+var COQUILLE = ['./', 'index.html', 'app.css?v=0.12.8', 'app.js?v=0.12.8', 'manifest.webmanifest', 'icone-512.png', 'logo.png', 'polices/poppins-400.woff2', 'polices/poppins-500.woff2', 'polices/poppins-600.woff2'];
 
 self.addEventListener('install', function (ev) {
   ev.waitUntil(caches.open(VERSION).then(function (c) {
