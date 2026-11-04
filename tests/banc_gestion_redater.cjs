@@ -81,6 +81,12 @@ const apiDe = (page) => (route, corps) => page.evaluate(async ([route, corps]) =
   r = await api('sync/pousser', { ops: [{ op: hex(), t: 'paiements', id: ids[2], champs: { date: finPrec, montant: 1 } }] });
   ok('admin : la date seule, pas le montant', r.resultats[0].ok === false, JSON.stringify(r).slice(0, 200));
 
+  // Accueil du partenaire : encaissé, sorties (profs, craie, loyer…) et solde restant du mois.
+  await pa.goto(B + '#/accueil'); await pa.waitForTimeout(400);
+  const acc = (await pa.textContent('.chiffres-cles')).replace(/\u00a0|\u202f/g, ' ');
+  const nb = (lib) => { const m = acc.match(new RegExp('(−\\s)?([\\d ]+) F\\s*' + lib)); return m ? (m[1] ? -1 : 1) * Number(m[2].replace(/ /g, '')) : NaN; };
+  const enc = nb('encaissé ce mois'), sor = nb('sorties ce mois'), sol = nb('solde restant ce mois');
+  ok('accueil : encaissé − sorties = solde restant', !isNaN(enc) && !isNaN(sor) && enc - sor === sol, acc);
   for (const [n, p] of [['admin', adm], ['actionnaire', pa]]) ok(n + ' : aucune erreur JavaScript', p.err.length === 0, p.err.join(' / '));
   await nav.close();
   console.log(echecs.length ? `\n${echecs.length} échec(s)` : '\nTout est vert.');
