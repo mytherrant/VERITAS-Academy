@@ -86,6 +86,11 @@ enregistrés et servent seulement à calculer ce que chaque élève doit encore 
 refuse toute écriture datée d'avant (sauf l'admin qui corrige) et toute clôture d'un mois d'avant. Réglage :
 Bilan › mois passé › « Retirer <mois> des comptes », ou fiche du centre › « Début des comptes » (vide = tout compte).
 
+**Versements saisis en retard :** Bilan › mois en cours › « Versements saisis en retard ? » (admin). Les
+versements du mois sont cochés, groupés par jour ; on décoche ceux vraiment encaissés ce mois-ci, puis on les
+rattache au dernier jour du mois passé (date modifiable). Le serveur n'accepte ce changement que de l'admin et
+pour la seule date : montant, reçu, élève et encaisseur restent les mêmes.
+
 **Centres indépendants :** un compte (hors administrateur) n'a accès qu'à **un seul centre** ; le serveur
 refuse le reste (`comptes/enregistrer`, 422). Une personne présente dans les deux centres a deux comptes
 (identifiants différents : le second reçoit le suffixe du centre, ex. `paul.essomba.ndogpassi2`). La fiche
@@ -207,6 +212,7 @@ node tests/banc_gestion_cloture.cjs <dossier>    # clôture du mois : comptes du
 node tests/banc_gestion_rapports.cjs <dossier>   # rapports : insolvables, paiements par classe, trésorier, exports (Playwright)
 node tests/banc_gestion_cahier.cjs <dossier>     # cahier de textes : saisie, serveur, relecture par classe, exports (Playwright)
 node tests/banc_gestion_debut_comptes.cjs <dossier> # repartir de zéro : mois retiré des comptes, dettes des élèves gardées (Playwright)
+node tests/banc_gestion_redater.cjs <dossier>    # versements saisis en retard rattachés au mois passé (Playwright)
 node tests/banc_gestion_centres.cjs <dossier>    # centres indépendants : un compte = un centre, compte séparé pour l'autre (Playwright)
 ```
 

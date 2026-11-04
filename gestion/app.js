@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.12.6';
+  var VERSION = '0.12.7';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -2264,6 +2264,7 @@
       h += infosFondsBilan(c.id, annee ? moisCycle() : BIL.mois);
       if (!annee) h += blocCloture(c, BIL.mois);
       if (!annee) h += blocRepartirZero(c, BIL.mois);
+      if (!annee) h += blocRedater(c, BIL.mois);
       if (!annee) h += '<div class="actions">' + boutonCommentaires(c.id, 'bilan:' + BIL.mois.replace('-', ''), 'Bilan · ' + lib + ' · ' + (c.nom_court || c.nom)) + '</div>';
       if (acts.length) {
         h += '<h3>Part des actionnaires</h3><div class="liste">' + acts.map(function (a) {
@@ -3182,6 +3183,44 @@
     return '<div class="carte repartir-zero"><h3>' + ico('refresh', 'p') + ' Repartir de zéro</h3><p class="doux">Si les comptes de ' + esc(libMoisAnnee(am)) + ' n\'ont pas été tenus (tout le monde encaissait sans verser au trésorier), ' +
       'retirez ce mois et ceux d\'avant des comptes des partenaires. Tout repart de zéro le ' + esc(dateLisible(dep, true)) + '. Les dettes des élèves (reliquats, insolvables) restent dues.</p>' +
       '<div class="actions"><button class="btn clair" type="button" data-a="repartir-zero" data-centre="' + esc(c.id) + '" data-v="' + esc(dep) + '">Retirer ' + esc(libMoisAnnee(am)) + ' des comptes</button></div></div>';
+  }
+
+  /** Admin : versements saisis en retard (cahier du mois passé entré ce mois-ci) → rattachés au mois passé. */
+  function versementsRedatables(cid, am) {
+    return lignes('paiements').filter(function (p) { return p.centre_id === cid && !Number(p.annule) && String(p.date || '').slice(0, 7) === am; })
+      .sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : String(a.numero || '').localeCompare(String(b.numero || '')); });
+  }
+  function blocRedater(c, am) {
+    if (!estAdmin() || am !== moisCycle() || !versementsRedatables(c.id, am).length) return '';
+    var prec = decalerMois(am, -1);
+    if (clotureDe(c.id, prec)) return '';
+    return '<div class="carte redater"><h3>' + ico('calendar', 'p') + ' Versements saisis en retard ?</h3><p class="doux">Si des versements de ' + esc(libMoisAnnee(prec)) +
+      ' ont été saisis ce mois-ci (cahier recopié en retard), rattachez-les à ' + esc(libMoisAnnee(prec)) + '. Vous décochez ceux qui sont vraiment de ' + esc(libMoisAnnee(am)) + '.</p>' +
+      '<div class="actions"><button class="btn clair" type="button" data-a="redater-versements" data-centre="' + esc(c.id) + '">Choisir les versements</button></div></div>';
+  }
+  function feuilleRedater(cid) {
+    var am = moisCycle(), prec = decalerMois(am, -1), cible = finDuMois(prec + '-01');
+    var l = versementsRedatables(cid, am), parJour = {};
+    l.forEach(function (p) { (parJour[p.date] = parJour[p.date] || []).push(p); });
+    var h = '<h2>Rattacher à ' + esc(libMoisAnnee(prec)) + '</h2><p class="doux">' + esc((ligne('centres', cid) || {}).nom || '') + ' · cochés : les versements de ' + esc(libMoisAnnee(prec)) +
+      ' saisis en retard. <b>Décochez</b> ceux encaissés en ' + esc(libMoisAnnee(am)) + '. Rien d\'autre ne change (montant, reçu, élève) : ce que l\'élève doit reste exact.</p>' +
+      '<form data-f="redater" data-centre="' + esc(cid) + '"><label class="champ"><span>Nouvelle date</span><input type="date" name="date" required min="' + esc(prec) + '-01" max="' + esc(cible) + '" value="' + esc(cible) + '"></label>' +
+      '<p class="actions"><button class="btn clair petit" type="button" data-a="redater-tout" data-v="1">Tout cocher</button><button class="btn clair petit" type="button" data-a="redater-tout" data-v="0">Tout décocher</button></p>';
+    Object.keys(parJour).sort().forEach(function (j) {
+      h += '<h3>' + esc(dateLisible(j, true)) + '</h3><div class="liste">' + parJour[j].map(function (p) {
+        var e = ligne('eleves', p.eleve_id);
+        return '<label class="case ligne-redater"><input type="checkbox" name="pa" value="' + esc(p.id) + '" data-montant="' + esc(p.montant) + '" checked data-input="redater-total"> <span><b>' + esc(e ? nomComplet(e) : 'Élève') + '</b> · ' +
+          fcfa(p.montant) + (p.numero ? ' <small>reçu ' + esc(p.numero) + '</small>' : '') + '</span></label>';
+      }).join('') + '</div>';
+    });
+    h += '<div class="actions"><button class="btn or" type="submit" id="redater-ok">Rattacher</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>';
+    ouvrirFeuille(h);
+    majTotalRedater();
+  }
+  function majTotalRedater() {
+    var cases = Array.prototype.filter.call(document.querySelectorAll('#feuille input[name=pa]'), function (i) { return i.checked; });
+    var tot = cases.reduce(function (s, i) { return s + Number(i.dataset.montant); }, 0), b = $('#redater-ok');
+    if (b) b.textContent = 'Rattacher ' + cases.length + ' versement' + (cases.length > 1 ? 's' : '') + ' (' + fcfa(tot) + ')';
   }
 
   // ───────────────────────────── Rapports exportables ─────────────────────────────
@@ -4502,6 +4541,8 @@
       var r = (u.acces || {})[el.dataset.v] || u.acces[Object.keys(u.acces || {})[0]] || 'enseignant';
       feuilleCompte('', { centre: el.dataset.v, role: r, nom: u.nom, tel: u.tel, matieres: u.matieres || [] });
     },
+    'redater-versements': function (el) { if (estAdmin()) feuilleRedater(el.dataset.centre); },
+    'redater-tout': function (el) { Array.prototype.forEach.call(document.querySelectorAll('#feuille input[name=pa]'), function (i) { i.checked = el.dataset.v === '1'; }); majTotalRedater(); },
     'repartir-zero': function (el) {
       var cid = el.dataset.centre, dep = el.dataset.v, c = ligne('centres', cid) || {};
       if (!estAdmin()) return;
@@ -4801,6 +4842,15 @@
         .then(function () { return poster({ jeton: v.jeton, action: 'admin', identifiant: v.identifiant, mdp: v.mdp, nom: v.nom }); })
         .then(function () { return api('auth/connexion', { identifiant: v.identifiant, mdp: v.mdp, appareil: nomAppareil() }); })
         .then(ouvrirSession, function (e) { occupe(form, false); toast(e.message, true); });
+    },
+    redater: function (form) {
+      var date = valeurs(form).date, ids = Array.prototype.filter.call(form.querySelectorAll('input[name=pa]'), function (i) { return i.checked; }).map(function (i) { return i.value; });
+      if (!ids.length) { toast('Cochez au moins un versement.', true); return; }
+      if (!date) { toast('Choisissez la date.', true); return; }
+      fermerFeuille();
+      ids.reduce(function (pr, id) { return pr.then(function () { return muter('paiements', id, { date: date }); }); }, Promise.resolve()).then(function () {
+        toast(ids.length + ' versement' + (ids.length > 1 ? 's' : '') + ' rattaché' + (ids.length > 1 ? 's' : '') + ' au ' + dateLisible(date, true) + '.'); rendre();
+      });
     },
     centre: function (form) {
       var v = valeurs(form);
@@ -5195,6 +5245,7 @@
     var k = ev.target.dataset && ev.target.dataset.input;
     if (k === 'recherche-eleve') { ELV.q = ev.target.value; dessinerListeEleves(); }
     if (k === 'apercu-import') apercuImport(ev.target.form);
+    if (k === 'redater-total') majTotalRedater();
     if (k === 'apercu-ident') { var a = $('#apercu-ident'); if (a) a.textContent = identifiantDepuisNom(ev.target.value) || 'à partir du nom'; }
     if (k === 'recherche-caisse') { CAI.q = ev.target.value; dessinerRechercheCaisse(); }
   });
