@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.12.8';
+  var VERSION = '0.12.9';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -3941,7 +3941,7 @@
       if (contrat) out.push([esc(fcfa(du)), 'dû ce mois', '#/mesheures']);
       return out;
     }
-    var eleves = 0, appels = 0, prevus = 0, mois = 0, jour = 0, imp = 0, voitCaisse = false;
+    var eleves = 0, appels = 0, prevus = 0, mois = 0, jour = 0, imp = 0, voitCaisse = false, voitSorties = false, sorties = 0, attente = 0;
     centres.forEach(function (c) {
       eleves += elevesActifs(c.id).length;
       if (peut('appel.faire', c.id) || peut('centre.voir', c.id)) {
@@ -3957,11 +3957,28 @@
         });
         imp += impayes(c.id).length;
       }
+      // Sorties du mois (paies des enseignants, craie, loyer…) : comme le Bilan, dépenses validées + paies.
+      if (peut('depenses.voir', c.id)) {
+        voitSorties = true;
+        var duMois = function (x) { return x.centre_id === c.id && String(x.date).slice(0, 7) === am && enCompte(x); };
+        lignes('depenses').forEach(function (d) {
+          if (!duMois(d)) return;
+          if (d.statut === 'validee') sorties += Number(d.montant) || 0;
+          else if ((d.statut || 'en_attente') === 'en_attente') attente += Number(d.montant) || 0;
+        });
+        lignes('paies').forEach(function (x) { if (duMois(x) && !Number(x.annule)) sorties += Number(x.montant) || 0; });
+      }
     });
     out.push([String(eleves), 'élèves inscrits', '#/eleves']);
     if (prevus) out.push([appels + '/' + prevus, 'appels du jour', '#/appel']);
     if (voitCaisse) {
       out.push(cle === 'secretariat' ? [esc(fcfa(jour)), 'encaissé aujourd\'hui', '#/caisse'] : [esc(fcfa(mois)), 'encaissé ce mois', '#/caisse']);
+      if (voitSorties && cle !== 'secretariat') {
+        var lienB = peutQuelquePart('finances.voir') ? '#/bilan' : '#/caisse';
+        out.push([esc(fcfa(sorties)), 'sorties ce mois (profs, craie, loyer…)', lienB]);
+        out.push([(mois - sorties < 0 ? '− ' : '') + esc(fcfa(Math.abs(mois - sorties))), 'solde restant ce mois', lienB]);
+        if (attente) out.push([esc(fcfa(attente)), 'dépenses à valider (non comptées)', '#/caisse']);
+      }
       out.push([String(imp), imp > 1 ? 'impayés' : 'impayé', '#/caisse']);
     }
     return out;
