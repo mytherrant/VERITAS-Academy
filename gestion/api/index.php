@@ -691,7 +691,8 @@ function g_valider_appel(PDO $pdo, string $table, string $id, ?array $existant, 
  * Finances.
  *  Paiement : création seulement (montant > 0, élève du centre, date ≤ aujourd'hui,
  *  au plus 2 jours en arrière sauf responsable) ; ensuite une seule écriture
- *  possible : l'ANNULATION motivée par un responsable — ou la trace d'envoi du reçu.
+ *  possible : l'ANNULATION motivée par un responsable — ou la trace d'envoi du reçu —
+ *  ou, pour l'admin seul, la DATE (versement saisi en retard, rattaché au bon mois).
  *  Dépense : « en attente » à la saisie ; validée ou refusée par un responsable
  *  (jamais sa propre dépense) ou l'admin ; figée une fois validée.
  */
@@ -708,6 +709,13 @@ function g_valider_finances(PDO $pdo, string $table, string $id, ?array $existan
             $cles = array_keys($champs);
             if ($cles && !array_diff($cles, ['envoye_le'])) {
                 if (!preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} (whatsapp|sms|partage)$/', (string) $champs['envoye_le'])) { throw new DomainException('Trace d\'envoi invalide.'); }
+                return;
+            }
+            // L'admin redate un versement saisi en retard (ex. cahier d'octobre entré en novembre) : rien d'autre ne change.
+            if ($cles === ['date'] && !empty($ctx['admin'])) {
+                $date = (string) $champs['date'];
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || $date > date('Y-m-d')) { throw new DomainException('Date de versement invalide.'); }
+                if ((int) $existant['annule'] === 1) { throw new DomainException('Versement annulé : il ne se redate pas.'); }
                 return;
             }
             if (array_diff($cles, ['annule', 'motif_annulation']) || (int) ($champs['annule'] ?? 0) !== 1) {
