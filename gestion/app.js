@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.12.9';
+  var VERSION = '0.13.0';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -1791,18 +1791,29 @@
         var moisCourant = isoLocal(new Date()).slice(0, 7);
         var totP = paiesC.filter(function (x) { return !Number(x.annule) && String(x.date).slice(0, 7) === moisCourant; }).reduce(function (s, x) { return s + Number(x.montant); }, 0);
         h += '<h2>Paies des enseignants</h2><p class="sous-titre">' + fcfa(totP) + ' ce mois · 1 500 F de l\'heure sauf contrat particulier.</p><div class="liste">' + paiesC.slice(0, 40).map(function (x) {
-          return '<div class="ligne"><span class="pastille">' + ico('presentation') + '</span><span class="corps"><b' + (Number(x.annule) ? ' class="barre-txt"' : '') + '>' + esc(nomPersonne(x.enseignant_id) || 'Enseignant') + '</b><small>' +
-            esc(dateLisible(x.date, true) + ' · ' + (x.note || 'Paie du mois') + ' · payé par ' + nomCompte(x.paye_par) + (Number(x.annule) ? ' · annulée' : '')) + '</small></span><span class="fin"><b>− ' + fcfa(x.montant) + '</b></span></div>';
+          return lignePaie(x);
         }).join('') + '</div><h2>Autres dépenses</h2>';
       }
       h += deps.length ? '<div class="liste">' + deps.slice(0, 80).map(function (d) {
-        var st = d.statut === 'validee' ? '<span class="badge ok">validée</span>' : d.statut === 'refusee' ? '<span class="badge danger">refusée</span>' : '<span class="badge alerte">en attente</span>';
-        var sansJ = justificatifExige(d) && !d.justificatif && !(E.cache.photosEnAttente || {})[d.id] ? ' <span class="badge alerte">justificatif manquant</span>' : '';
-        return '<button class="ligne" type="button" data-a="voir-depense" data-id="' + esc(d.id) + '"><span class="corps"><b>' + esc(d.libelle) + sansJ + '</b><small>' + esc(dateLisible(d.date, true) + ' · ' + (CATEGORIES[d.categorie] || d.categorie) + (d.beneficiaire ? ' · ' + d.beneficiaire : '') + ' · saisie par ' + (nomPersonne(d.saisie_par) || (d.saisie_par === E.profil.utilisateur.id ? 'vous' : '—'))) + '</small></span><span class="fin"><b>' + fcfa(d.montant) + '</b>' + st + '</span></button>';
+        return ligneDepense(d);
       }).join('') + '</div>' : '<div class="carte vide">Aucune dépense.</div>';
       if (peut('depenses.saisir', cid)) h += '<button class="fab" type="button" data-a="editer-depense" data-id="">' + ico('plus') + 'Dépense</button>';
     }
     return h;
+  }
+  /** Une dépense (Caisse, Bilan) : touchée, elle s'ouvre (voir, valider, refuser, annuler). */
+  function ligneDepense(d) {
+    var st = d.statut === 'validee' ? '<span class="badge ok">validée</span>' : d.statut === 'refusee' ? '<span class="badge danger">refusée</span>' : '<span class="badge alerte">en attente</span>';
+    var sansJ = justificatifExige(d) && !d.justificatif && !(E.cache.photosEnAttente || {})[d.id] ? ' <span class="badge alerte">justificatif manquant</span>' : '';
+    return '<button class="ligne" type="button" data-a="voir-depense" data-id="' + esc(d.id) + '"><span class="corps"><b>' + esc(d.libelle) + sansJ + '</b><small>' + esc(dateLisible(d.date, true) + ' · ' + (CATEGORIES[d.categorie] || d.categorie) + (d.beneficiaire ? ' · ' + d.beneficiaire : '') + ' · saisie par ' + (nomPersonne(d.saisie_par) || (d.saisie_par === E.profil.utilisateur.id ? 'vous' : '—'))) + '</small></span><span class="fin"><b>' + fcfa(d.montant) + '</b>' + st + '</span></button>';
+  }
+  /** Une paie d'enseignant ; « Annuler » pour qui gère les enseignants. */
+  function lignePaie(x) {
+    var gere = peut('enseignants.gerer', x.centre_id) && !Number(x.annule);
+    return '<div class="ligne"><span class="pastille">' + ico('presentation') + '</span><span class="corps"><b' + (Number(x.annule) ? ' class="barre-txt"' : '') + '>' + esc(nomPersonne(x.enseignant_id) || 'Enseignant') + '</b><small>' +
+      esc(dateLisible(x.date, true) + ' · ' + (x.note || 'Paie du mois') + ' · payé par ' + nomCompte(x.paye_par) + (Number(x.annule) ? ' · annulée' : '')) + '</small>' +
+      (gere ? '<span class="boutons"><button class="btn clair petit" type="button" data-a="annuler-paie" data-id="' + esc(x.id) + '">Annuler cette paie</button></span>' : '') +
+      '</span><span class="fin"><b>− ' + fcfa(x.montant) + '</b></span></div>';
   }
   function ligneVersement(p) {
     var e = ligne('eleves', p.eleve_id) || {};
@@ -1982,6 +1993,8 @@
       (modifiable ? '<label class="champ"><span>' + (d.justificatif ? 'Remplacer la photo du justificatif' : 'Photo du justificatif (facture, reçu)') + '</span><small>Obligatoire à partir de ' + fcfa(SEUIL_JUSTIFICATIF) + ', facultative en dessous.</small><input type="file" name="photo" accept="image/*" capture="environment"></label>' : '') +
       (modifiable ? '<div class="actions"><button class="btn" type="submit">Enregistrer</button></div>' : '') + '</form>' +
       (valideur ? '<div class="actions"><button class="btn or" type="button" data-a="valider-depense" data-id="' + esc(id) + '">' + ico('check', 'p') + 'Valider</button><button class="btn danger" type="button" data-a="refuser-depense" data-id="' + esc(id) + '">Refuser</button></div>' : '') +
+      (id && estAdmin() && d.statut === 'validee' ? '<div class="actions"><button class="btn danger" type="button" data-a="refuser-depense" data-v="annuler" data-id="' + esc(id) + '">Annuler cette dépense</button></div>' +
+        '<p class="doux">Annuler (doublon, erreur) : elle reste visible, barrée, avec le motif, et ne compte plus dans le bilan.</p>' : '') +
       '<div class="actions">' + (id && modifiable ? '<button class="btn danger" type="button" data-a="suppr-depense" data-id="' + esc(id) + '">Retirer</button>' : '') + '<button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
     if (id && peutEquipe(cid)) { var zc = document.createElement('div'); zc.className = 'actions'; zc.innerHTML = boutonCommentaires(cid, 'depense:' + id, 'Dépense · ' + d.libelle); var pf = $('#feuille .panneau'); if (pf) pf.appendChild(zc); }
     if (id) afficherJustificatif(id, valideur);
@@ -2263,6 +2276,15 @@
         Object.keys(parCat).map(function (k) { return '<div class="info"><span>Dépenses · ' + CATEGORIES[k] + '</span><b>− ' + fcfa(parCat[k]) + '</b></div>'; }).join('') +
         (totPaies ? '<div class="info"><span>Paies des enseignants</span><b>− ' + fcfa(totPaies) + '</b></div>' : '') +
         (deps.some(function (d) { return d.statut === 'en_attente'; }) ? '<div class="info"><span>Dépenses en attente (non comptées)</span><b>' + fcfa(deps.filter(function (d) { return d.statut === 'en_attente'; }).reduce(function (s, d) { return s + Number(d.montant); }, 0)) + '</b></div>' : '') + '</div>';
+      // Détail des sorties : d'où vient chaque montant ; toucher une dépense l'ouvre (valider, refuser, annuler).
+      if (peut('depenses.voir', c.id)) {
+        var depsD = deps.filter(function (d) { return d.statut !== 'refusee'; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+        var paiesD = paiesP.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+        if (depsD.length || paiesD.length) {
+          h += '<h3>Détail des sorties</h3><div class="liste">' + paiesD.map(lignePaie).join('') + depsD.map(ligneDepense).join('') + '</div>' +
+            '<p class="doux">Touchez une dépense pour voir qui l\'a saisie et le justificatif, puis la valider, la refuser' + (estAdmin() ? ' ou l\'annuler' : '') + '.</p>';
+        }
+      }
       if (deb && (annee || BIL.mois === deb.slice(0, 7))) h += '<p class="doux">' + ico('info', 'p') + ' Comptes repartis de zéro le ' + esc(dateLisible(deb, true)) + ' : rien d\'avant n\'est compté ici.</p>';
       h += infosFondsBilan(c.id, annee ? moisCycle() : BIL.mois);
       if (!annee) h += blocCloture(c, BIL.mois);
@@ -4695,8 +4717,10 @@
       }
       fermerFeuille(); muter('depenses', el.dataset.id, { statut: 'validee' }).then(function () { toast('Dépense validée.'); rendre(); }); },
     'refuser-depense': function (el) {
-      ouvrirFeuille('<h2>Refuser la dépense</h2><form data-f="refus" data-id="' + esc(el.dataset.id) + '"><label class="champ"><span>Motif</span><input type="text" name="motif" required></label>' +
-        '<div class="actions"><button class="btn danger" type="submit">Refuser</button><button class="btn clair" type="button" data-a="fermer">Retour</button></div></form>');
+      var annul = el.dataset.v === 'annuler';
+      ouvrirFeuille('<h2>' + (annul ? 'Annuler la dépense' : 'Refuser la dépense') + '</h2><form data-f="refus" data-id="' + esc(el.dataset.id) + '"><label class="champ"><span>Motif</span><input type="text" name="motif" required' +
+        (annul ? ' placeholder="ex. : doublon de la paie de M. …"' : '') + '></label>' +
+        '<div class="actions"><button class="btn danger" type="submit">' + (annul ? 'Annuler la dépense' : 'Refuser') + '</button><button class="btn clair" type="button" data-a="fermer">Retour</button></div></form>');
     },
     'suppr-depense': function (el) { confirmer('Retirer cette dépense ?', 'Retirer', function () { muter('depenses', el.dataset.id, {}, true).then(rendre); }); },
     'bilan-mois': function (el) {
@@ -5161,7 +5185,8 @@
     refus: function (form) {
       var v = valeurs(form);
       fermerFeuille();
-      muter('depenses', form.dataset.id, { statut: 'refusee', motif_refus: v.motif }).then(function () { toast('Dépense refusée.'); rendre(); });
+      var avant = ligne('depenses', form.dataset.id) || {};
+      muter('depenses', form.dataset.id, { statut: 'refusee', motif_refus: v.motif }).then(function () { toast(avant.statut === 'validee' ? 'Dépense annulée.' : 'Dépense refusée.'); rendre(); });
     },
     presence: function (form) {
       var x = E.cache.pointage;

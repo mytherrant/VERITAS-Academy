@@ -93,6 +93,11 @@ pour la seule date : montant, reçu, élève et encaisseur restent les mêmes. L
 rappelle « Restent en <mois> » (aussi dans la confirmation). Un versement rattaché par erreur se corrige depuis son
 reçu (Caisse ou fiche de l'élève) : « Changer la date » (admin).
 
+**Détail des sorties (Bilan) :** sous les totaux de chaque centre, la liste des paies et des dépenses du mois,
+avec qui les a saisies. Une dépense touchée s'ouvre : valider, refuser (en attente) ou, pour l'admin seul,
+**annuler une dépense validée** (doublon, erreur) avec un motif ; le serveur n'accepte que statut « refusée » +
+motif. Une paie s'annule avec « Annuler cette paie » (qui gère les enseignants).
+
 **Centres indépendants :** un compte (hors administrateur) n'a accès qu'à **un seul centre** ; le serveur
 refuse le reste (`comptes/enregistrer`, 422). Une personne présente dans les deux centres a deux comptes
 (identifiants différents : le second reçoit le suffixe du centre, ex. `paul.essomba.ndogpassi2`). La fiche
@@ -215,6 +220,7 @@ node tests/banc_gestion_rapports.cjs <dossier>   # rapports : insolvables, paiem
 node tests/banc_gestion_cahier.cjs <dossier>     # cahier de textes : saisie, serveur, relecture par classe, exports (Playwright)
 node tests/banc_gestion_debut_comptes.cjs <dossier> # repartir de zéro : mois retiré des comptes, dettes des élèves gardées (Playwright)
 node tests/banc_gestion_redater.cjs <dossier>    # versements saisis en retard rattachés au mois passé (Playwright)
+node tests/banc_gestion_detail_sorties.cjs <dossier> # Bilan : détail des sorties, annulation d'une dépense validée par l'admin (Playwright)
 node tests/banc_gestion_centres.cjs <dossier>    # centres indépendants : un compte = un centre, compte séparé pour l'autre (Playwright)
 ```
 
