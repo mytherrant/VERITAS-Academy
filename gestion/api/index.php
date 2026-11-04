@@ -751,7 +751,12 @@ function g_valider_finances(PDO $pdo, string $table, string $id, ?array $existan
     $statut = (string) ($val('statut') ?: 'en_attente');
     if (!in_array($statut, ['en_attente', 'validee', 'refusee'], true)) { throw new DomainException('Statut inconnu.'); }
     $avant = $existant ? (string) $existant['statut'] : '';
-    if ($avant === 'validee') { throw new DomainException('Dépense validée : elle ne se modifie plus.'); }
+    // Validée : figée. Seul l'admin l'annule (doublon, erreur) : statut « refusée » + motif, rien d'autre.
+    if ($avant === 'validee') {
+        if (empty($ctx['admin']) || $statut !== 'refusee' || array_diff(array_keys($champs), ['statut', 'motif_refus'])) {
+            throw new DomainException('Dépense validée : elle ne se modifie plus (seul l\'administrateur peut l\'annuler, avec un motif).');
+        }
+    }
     if ($statut !== 'en_attente' && $statut !== $avant) {
         $auteur = $existant ? (string) $existant['saisie_par'] : (string) ($ctx['uid'] ?? '');
         if ($role !== 'admin' && !(g_ctx_peut('depenses.valider', $centre) && $auteur !== ($ctx['uid'] ?? ''))) {
