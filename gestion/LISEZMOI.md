@@ -79,6 +79,13 @@ tête de liste), même sans emploi du temps rempli, dans la même limite de 2 jo
 **Création d'un compte :** l'identifiant se déduit du nom (« ESSOMBA Paul » → `paul.essomba`, unique,
 `g_identifiant_libre`) ; on peut le choisir soi-même (« Choisir l'identifiant moi-même »).
 
+**Repartir de zéro (début des comptes) :** `g_centres.debut_comptes` (AAAA-MM-JJ, admin). Ce qui a été
+encaissé, dépensé, payé ou remis avant cette date ne compte plus pour les partenaires : caisse « chez vous »,
+remises au trésorier, bilan, clôture et partage, rapport du trésorier. Les versements d'avant restent
+enregistrés et servent seulement à calculer ce que chaque élève doit encore (reliquats, insolvables). Le serveur
+refuse toute écriture datée d'avant (sauf l'admin qui corrige) et toute clôture d'un mois d'avant. Réglage :
+Bilan › mois passé › « Retirer <mois> des comptes », ou fiche du centre › « Début des comptes » (vide = tout compte).
+
 **Centres indépendants :** un compte (hors administrateur) n'a accès qu'à **un seul centre** ; le serveur
 refuse le reste (`comptes/enregistrer`, 422). Une personne présente dans les deux centres a deux comptes
 (identifiants différents : le second reçoit le suffixe du centre, ex. `paul.essomba.ndogpassi2`). La fiche
@@ -199,6 +206,7 @@ node tests/banc_gestion_partenaire.cjs <dossier> # actionnaire : inscrit, encais
 node tests/banc_gestion_cloture.cjs <dossier>    # clôture du mois : comptes du serveur, partage, verrou, droits (Playwright)
 node tests/banc_gestion_rapports.cjs <dossier>   # rapports : insolvables, paiements par classe, trésorier, exports (Playwright)
 node tests/banc_gestion_cahier.cjs <dossier>     # cahier de textes : saisie, serveur, relecture par classe, exports (Playwright)
+node tests/banc_gestion_debut_comptes.cjs <dossier> # repartir de zéro : mois retiré des comptes, dettes des élèves gardées (Playwright)
 node tests/banc_gestion_centres.cjs <dossier>    # centres indépendants : un compte = un centre, compte séparé pour l'autre (Playwright)
 ```
 

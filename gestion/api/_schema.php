@@ -28,6 +28,9 @@ function g_schema(): array {
             'alerte_direction_min' => 'int:30',  // appel toujours pas fait → admin
             'jour_echeance'        => 'int:10',  // « les paiements se font au plus tard le 10 du mois »
             'tresorier_id'         => 'ref',     // compte qui garde les fonds du centre et confirme les remises
+            // Début des comptes (AAAA-MM-JJ) : l'argent d'avant (encaissé, dépensé, remis) ne compte plus pour les
+            // partenaires ni pour la clôture ; il sert seulement à calculer ce que chaque élève doit encore. Vide = tout compte.
+            'debut_comptes'        => 'str:10',
             'ordre' => 'int',
             // Modèles des messages aux parents ({eleve}, {parent}, {classe}, {date}, {horaire},
             // {debut}, {arrivee}, {minutes}, {centre}, {tel_centre}). Vide = modèle par défaut.
@@ -239,7 +242,7 @@ function g_registre(): array {
             'table' => 'g_centres', 'portee' => 'id', 'lire' => 'centre.voir', 'ecrire' => 'admin',
             'champs' => ['nom', 'nom_court', 'adresse', 'telephones', 'devise', 'tolerance_retard_min',
                          'alerte_appel_min', 'alerte_direction_min', 'jour_echeance', 'ordre', 'msg_absence', 'msg_retard',
-                         'msg_relance', 'msg_recu', 'inscription_option', 'inscription_option_libelle', 'tresorier_id'],
+                         'msg_relance', 'msg_recu', 'inscription_option', 'inscription_option_libelle', 'tresorier_id', 'debut_comptes'],
         ],
         'annees' => [
             'table' => 'g_annees', 'portee' => null, 'lire' => 'tous', 'ecrire' => 'admin',
