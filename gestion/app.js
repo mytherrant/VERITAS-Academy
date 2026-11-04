@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.12.5';
+  var VERSION = '0.12.6';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -2030,9 +2030,9 @@
     sorties.forEach(function (s) { sortiesParMode[s.mode] = (sortiesParMode[s.mode] || 0) + s.montant; });
     var debutMois = iso.slice(0, 8) + '01';
     var dansMois = function (d) { return d >= debutMois && d <= iso; };
-    var moisE = somme(lignes('paiements').filter(function (p) { return p.centre_id === cid && !Number(p.annule) && dansMois(p.date); }));
-    var moisS = (voitDep ? somme(lignes('depenses').filter(function (d) { return d.centre_id === cid && d.statut !== 'refusee' && dansMois(d.date); })) : 0) +
-      (voitPaies ? somme(lignes('paies').filter(function (p) { return p.centre_id === cid && !Number(p.annule) && dansMois(p.date); })) : 0);
+    var moisE = somme(lignes('paiements').filter(function (p) { return p.centre_id === cid && !Number(p.annule) && dansMois(p.date) && enCompte(p); }));
+    var moisS = (voitDep ? somme(lignes('depenses').filter(function (d) { return d.centre_id === cid && d.statut !== 'refusee' && dansMois(d.date) && enCompte(d); })) : 0) +
+      (voitPaies ? somme(lignes('paies').filter(function (p) { return p.centre_id === cid && !Number(p.annule) && dansMois(p.date) && enCompte(p); })) : 0);
     var totE = somme(entrees), totS = somme(sorties);
     return {
       centre: ligne('centres', cid) || {}, date: iso, entrees: entrees, annules: annules, sorties: sorties, voitDep: voitDep,
@@ -2229,11 +2229,19 @@
     h += '<a class="ligne carte-lien" href="#/jour"><span class="pastille">' + ico('clipboard') + '</span><span class="corps"><b>Point du jour</b><small>Entrées et sorties d\'une journée, en image ou PDF</small></span><span class="fin">›</span></a>';
     var tot = { rec: 0, dep: 0 };
     centres.forEach(function (c) {
-      var pay = lignes('paiements').filter(function (p) { return p.centre_id === c.id && !Number(p.annule) && dans(p.date); });
-      var deps = lignes('depenses').filter(function (d) { return d.centre_id === c.id && dans(d.date); });
+      var deb = debutComptes(c.id);
+      if (!annee && avantComptes(c.id, BIL.mois)) {
+        h += '<h2>' + esc(c.nom) + '</h2><div class="carte note-carte hors-comptes">' + ico('lock', 'p') + ' <b>' + esc(lib) + ' ne compte plus.</b> Les comptes de ce centre repartent de zéro le ' + esc(dateLisible(deb, true)) + '. ' +
+          'Ce qui a été encaissé, dépensé ou remis avant n\'entre ni dans la caisse des partenaires, ni dans les remises au trésorier, ni dans le partage. ' +
+          'Il sert seulement à calculer ce que chaque élève doit encore : les reliquats et les insolvables restent dus.</div>' +
+          '<a class="ligne carte-lien" href="#/rapports" data-a="aller-rapport" data-v="insolvables"><span class="pastille">' + ico('alert') + '</span><span class="corps"><b>Insolvables et reliquats</b><small>Ce qui reste dû, avec les montants</small></span></a>';
+        return;
+      }
+      var pay = lignes('paiements').filter(function (p) { return p.centre_id === c.id && !Number(p.annule) && dans(p.date) && enCompte(p); });
+      var deps = lignes('depenses').filter(function (d) { return d.centre_id === c.id && dans(d.date) && enCompte(d); });
       var depV = deps.filter(function (d) { return d.statut === 'validee'; });
       var rec = pay.reduce(function (s, p) { return s + Number(p.montant); }, 0);
-      var paiesP = lignes('paies').filter(function (p) { return p.centre_id === c.id && !Number(p.annule) && dans(p.date); });
+      var paiesP = lignes('paies').filter(function (p) { return p.centre_id === c.id && !Number(p.annule) && dans(p.date) && enCompte(p); });
       var totPaies = paiesP.reduce(function (s, p) { return s + Number(p.montant); }, 0);
       var dep = depV.reduce(function (s, d) { return s + Number(d.montant); }, 0) + totPaies;
       tot.rec += rec; tot.dep += dep;
@@ -2241,7 +2249,7 @@
       // Attendu de la période : échéances des élèves tombant dans la période.
       var attendu = 0;
       lignes('eleves').filter(function (e) { return e.centre_id === c.id; }).forEach(function (e) {
-        echeancier(e).items.forEach(function (it) { if (dans(it.mois ? it.mois + '-01' : it.echeance)) attendu += it.montant; });
+        echeancier(e).items.forEach(function (it) { var d = it.mois ? it.mois + '-01' : it.echeance; if (dans(d) && (!deb || d >= deb.slice(0, 8) + '01')) attendu += it.montant; });
       });
       var parMode = {}; pay.forEach(function (p) { parMode[p.mode] = (parMode[p.mode] || 0) + Number(p.montant); });
       var parCat = {}; depV.forEach(function (d) { parCat[d.categorie] = (parCat[d.categorie] || 0) + Number(d.montant); });
@@ -2252,8 +2260,10 @@
         Object.keys(parCat).map(function (k) { return '<div class="info"><span>Dépenses · ' + CATEGORIES[k] + '</span><b>− ' + fcfa(parCat[k]) + '</b></div>'; }).join('') +
         (totPaies ? '<div class="info"><span>Paies des enseignants</span><b>− ' + fcfa(totPaies) + '</b></div>' : '') +
         (deps.some(function (d) { return d.statut === 'en_attente'; }) ? '<div class="info"><span>Dépenses en attente (non comptées)</span><b>' + fcfa(deps.filter(function (d) { return d.statut === 'en_attente'; }).reduce(function (s, d) { return s + Number(d.montant); }, 0)) + '</b></div>' : '') + '</div>';
+      if (deb && (annee || BIL.mois === deb.slice(0, 7))) h += '<p class="doux">' + ico('info', 'p') + ' Comptes repartis de zéro le ' + esc(dateLisible(deb, true)) + ' : rien d\'avant n\'est compté ici.</p>';
       h += infosFondsBilan(c.id, annee ? moisCycle() : BIL.mois);
       if (!annee) h += blocCloture(c, BIL.mois);
+      if (!annee) h += blocRepartirZero(c, BIL.mois);
       if (!annee) h += '<div class="actions">' + boutonCommentaires(c.id, 'bilan:' + BIL.mois.replace('-', ''), 'Bilan · ' + lib + ' · ' + (c.nom_court || c.nom)) + '</div>';
       if (acts.length) {
         h += '<h3>Part des actionnaires</h3><div class="liste">' + acts.map(function (a) {
@@ -3014,7 +3024,11 @@
   /** Fonds d'un compte dans un centre (cumul), et ce qui reste en main. */
   /** Chaque mois est un cycle : comptes et partage le 30 ou le 31, puis tout repart de zéro. */
   function moisCycle() { return isoLocal(new Date()).slice(0, 7); }
-  function dansMois(x, am) { return String(x.date || '').slice(0, 7) === am; }
+  /** Début des comptes du centre : l'argent d'avant ne compte plus pour les partenaires (il sert seulement aux reliquats des élèves). */
+  function debutComptes(cid) { var c = ligne('centres', cid); return (c && c.debut_comptes) || ''; }
+  function enCompte(x, cid) { var d = debutComptes(cid || x.centre_id); return !d || String(x.date || '') >= d; }
+  function avantComptes(cid, am) { var d = debutComptes(cid); return !!d && am < d.slice(0, 7); }
+  function dansMois(x, am) { return String(x.date || '').slice(0, 7) === am && enCompte(x); }
   function soldeFonds(uid, cid, am) {
     am = am || moisCycle();
     var somme = function (l) { return l.reduce(function (s, x) { return s + (Number(x.montant) || 0); }, 0); };
@@ -3160,6 +3174,16 @@
         : '<p class="doux">La clôture revient au responsable ou à l\'administrateur.</p>') + '</div>';
   }
 
+  /** Admin : retirer un mois passé des comptes (ex. octobre mal tenu) ; tout repart de zéro le 1er du mois suivant. */
+  function blocRepartirZero(c, am) {
+    if (!estAdmin() || am >= moisCycle() || clotureDe(c.id, am)) return '';
+    var dep = moisSuivantIso(am) + '-01';
+    if (debutComptes(c.id) >= dep) return '';
+    return '<div class="carte repartir-zero"><h3>' + ico('refresh', 'p') + ' Repartir de zéro</h3><p class="doux">Si les comptes de ' + esc(libMoisAnnee(am)) + ' n\'ont pas été tenus (tout le monde encaissait sans verser au trésorier), ' +
+      'retirez ce mois et ceux d\'avant des comptes des partenaires. Tout repart de zéro le ' + esc(dateLisible(dep, true)) + '. Les dettes des élèves (reliquats, insolvables) restent dues.</p>' +
+      '<div class="actions"><button class="btn clair" type="button" data-a="repartir-zero" data-centre="' + esc(c.id) + '" data-v="' + esc(dep) + '">Retirer ' + esc(libMoisAnnee(am)) + ' des comptes</button></div></div>';
+  }
+
   // ───────────────────────────── Rapports exportables ─────────────────────────────
   // Trois rapports, chacun à l'écran puis en PDF (A4, paginé entre deux lignes), en Excel (CSV
   // « ; » lisible par Excel et LibreOffice) ou en texte WhatsApp : insolvables, paiements par
@@ -3218,7 +3242,8 @@
     return { cle: 'paiements', titre: 'Paiements par mois et par classe', sous: (c.nom || '') + ' · année ' + ((anneeActive() || {}).libelle || '') + ' · montants en F CFA', paysage: true,
       colonnes: cols, lignes: lignesR,
       totaux: ['Total du centre'].concat(totG.cols.map(function (v) { return v ? fcfa(v).replace(/ F$/, '') : ''; })).concat([fcfa(totG.paye).replace(/ F$/, ''), fcfa(totG.doit).replace(/ F$/, '')]),
-      notes: ['Chaque case montre ce qui couvre l\'échéance (inscription, puis chaque mois, dans l\'ordre). « 0 » : échéance passée, rien de payé. Vide : pas encore due. En rouge : l\'élève doit.'] };
+      notes: ['Chaque case montre ce qui couvre l\'échéance (inscription, puis chaque mois, dans l\'ordre). « 0 » : échéance passée, rien de payé. Vide : pas encore due. En rouge : l\'élève doit.'].concat(debutComptes(cid) ? ['Les comptes des partenaires repartent de zéro le ' + dateLisible(debutComptes(cid), true) +
+        ' : les versements d\'avant ne servent ici qu\'à calculer ce que chaque élève doit encore.'] : []) };
   }
 
   function rapportTresorier(cid, am) {
@@ -3241,7 +3266,8 @@
       colonnes: [{ lib: 'Partenaire', l: 22 }, { lib: 'Encaissé', l: 12, d: true }, { lib: 'Dépenses et paies', l: 13, d: true }, { lib: 'Remis (reçu)', l: 12, d: true }, { lib: 'À confirmer', l: 12, d: true }, { lib: 'Pas reçu', l: 11, d: true }, { lib: 'Non versé', l: 18, d: true }],
       lignes: lignesR, totaux: ['Total', fcfa(t.enc), fcfa(t.dep), fcfa(t.conf), fcfa(t.att), fcfa(t.cont), fcfa(t.reste)],
       notes: ['Fonds chez le trésorier : ' + fcfa(chezT) + ' (remises reçues + ses propres encaissements nets).', 'Encore chez les partenaires (non versé) : ' + fcfa(t.reste) + (t.att ? ' · remises en attente de confirmation : ' + fcfa(t.att) : '') + '.',
-        'Non versé = encaissé − dépenses et paies − remises (reçues ou à confirmer), pour le mois.'] };
+        'Non versé = encaissé − dépenses et paies − remises (reçues ou à confirmer), pour le mois.'].concat(debutComptes(cid) && am <= debutComptes(cid).slice(0, 7)
+        ? ['Les comptes repartent de zéro le ' + dateLisible(debutComptes(cid), true) + ' : rien d\'avant n\'est compté.'] : []) };
   }
 
   /** Tableau HTML d'un rapport (écran). */
@@ -3873,7 +3899,7 @@
         lignes('paiements').forEach(function (p) {
           if (p.centre_id !== c.id || Number(p.annule)) return;
           if (p.date === auj) jour += Number(p.montant) || 0;
-          if (String(p.date).slice(0, 7) === am) mois += Number(p.montant) || 0;
+          if (String(p.date).slice(0, 7) === am && enCompte(p)) mois += Number(p.montant) || 0;
         });
         imp += impayes(c.id).length;
       }
@@ -4219,6 +4245,8 @@
           return '<option value="' + esc(e.id) + '"' + (c.tresorier_id === e.id ? ' selected' : '') + '>' + esc(e.nom) + (e.role ? ' · ' + esc(e.role === 'admin' ? 'Administrateur' : ROLES[e.role] || e.role) : '') + '</option>';
         }).join('') + '</select><small>Il garde les fonds et confirme chaque remise des partenaires.</small></label>';
       })() : '') +
+      (id && estAdmin() ? '<label class="champ"><span>Début des comptes</span><input type="date" name="debut_comptes" value="' + n('debut_comptes') + '"><small>Ce qui a été encaissé, dépensé ou remis avant cette date ne compte plus pour les partenaires (caisse, remises, partage). ' +
+        'Les dettes des élèves restent dues. Vide : tout compte.</small></label>' : '') +
       '<label class="champ"><span>Devise</span><input type="text" name="devise" value="' + n('devise') + '"></label>' +
       '<div class="deux"><label class="champ"><span>Retard au-delà de (min)</span><input type="number" name="tolerance_retard_min" min="0" max="60" required value="' + n('tolerance_retard_min') + '"></label>' +
       '<label class="champ"><span>Échéance : le … du mois</span><input type="number" name="jour_echeance" min="1" max="28" required value="' + n('jour_echeance') + '"></label></div>' +
@@ -4473,6 +4501,13 @@
       if (!u) return;
       var r = (u.acces || {})[el.dataset.v] || u.acces[Object.keys(u.acces || {})[0]] || 'enseignant';
       feuilleCompte('', { centre: el.dataset.v, role: r, nom: u.nom, tel: u.tel, matieres: u.matieres || [] });
+    },
+    'repartir-zero': function (el) {
+      var cid = el.dataset.centre, dep = el.dataset.v, c = ligne('centres', cid) || {};
+      if (!estAdmin()) return;
+      if (!confirm('Retirer des comptes de ' + (c.nom_court || c.nom) + ' tout ce qui précède le ' + dateLisible(dep, true) + ' ?\n\nLes partenaires repartent de zéro (caisse, remises, partage). Les dettes des élèves restent dues. ' +
+        'Vous pourrez revenir en arrière dans la fiche du centre (Début des comptes).')) return;
+      muter('centres', cid, { debut_comptes: dep }).then(function () { toast('Les comptes repartent de zéro le ' + dateLisible(dep, true) + '.'); rendre(); });
     },
     'editer-compte': function (el) {
       if (!E.enLigne) { toast('La gestion des comptes demande une connexion internet.', true); return; }
@@ -4777,6 +4812,7 @@
         alerte_appel_min: +v.alerte_appel_min, alerte_direction_min: +v.alerte_direction_min
       };
       if (form.querySelector('[name=tresorier_id]')) champs.tresorier_id = v.tresorier_id || '';
+      if (form.querySelector('[name=debut_comptes]')) champs.debut_comptes = v.debut_comptes || '';
       if (!form.dataset.id) champs.ordre = lignes('centres').length + 1;
       if (champs.alerte_direction_min < champs.alerte_appel_min) { toast('L\'alerte administrateur doit venir après celle du responsable.', true); return; }
       fermerFeuille();

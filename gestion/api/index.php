@@ -944,7 +944,17 @@ function g_valider_ligne(PDO $pdo, string $table, string $id, ?array $existant, 
                 if ($d && ($m = g_mois_clos($pdo, $centreL, (string) $d))) {
                     throw new DomainException('Le mois de ' . $m . ' est clôturé (comptes et partage faits) : rien ne peut plus y être enregistré ni modifié.');
                 }
+                // Avant le début des comptes : seul l'administrateur corrige encore (ex. reçu d'un élève mal saisi).
+                if ($d && empty($GLOBALS['g_ctx']['admin']) && ($deb = g_debut_comptes($pdo, $centreL)) !== '' && substr((string) $d, 0, 10) < $deb) {
+                    throw new DomainException('Les comptes du centre repartent de zéro le ' . g_date_fr($deb) . ' : rien ne s\'enregistre avant. Datez-le d\'aujourd\'hui.');
+                }
             }
+        }
+    }
+    if ($table === 'g_centres' && array_key_exists('debut_comptes', $champs)) {
+        $deb = (string) $champs['debut_comptes'];
+        if ($deb !== '' && (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $deb) || !checkdate((int) substr($deb, 5, 2), (int) substr($deb, 8, 2), (int) substr($deb, 0, 4)))) {
+            throw new DomainException('Date de début des comptes invalide.');
         }
     }
     if ($table === 'g_clotures') { g_valider_cloture($pdo, $id, $existant, $champs, $suppr); return; }
@@ -1311,6 +1321,21 @@ function g_valider_equipe(PDO $pdo, string $table, ?array $existant, array &$cha
     if ($statut !== 'fait') { $champs['fait_le'] = ''; }
 }
 
+/** Début des comptes du centre (AAAA-MM-JJ) ou chaîne vide : rien n'est retiré. */
+function g_debut_comptes(PDO $pdo, string $centre): string {
+    if ($centre === '') { return ''; }
+    try {
+        $st = $pdo->prepare('SELECT debut_comptes FROM g_centres WHERE id = ?');
+        $st->execute([$centre]);
+        return (string) $st->fetchColumn();
+    } catch (Throwable $e) { return ''; }   // colonne pas encore créée
+}
+function g_date_fr(string $iso): string {
+    $mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    $j = (int) substr($iso, 8, 2);
+    return ($j === 1 ? '1er' : (string) $j) . ' ' . $mois[(int) substr($iso, 5, 2) - 1] . ' ' . substr($iso, 0, 4);
+}
+
 /** Libellé du mois si la date tombe dans un mois clôturé pour ce centre, sinon chaîne vide. */
 function g_mois_clos(PDO $pdo, string $centre, string $date): string {
     if ($centre === '' || !preg_match('/^(\d{4}-\d{2})/', $date, $m)) { return ''; }
@@ -1344,14 +1369,18 @@ function g_valider_cloture(PDO $pdo, string $id, ?array $existant, array &$champ
     if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $mois)) { throw new DomainException('Mois invalide.'); }
     if ($mois > date('Y-m')) { throw new DomainException('On ne clôture pas un mois à venir.'); }
     if ($id !== 'clo-' . $centre . '-' . $mois) { throw new DomainException('Identifiant de clôture invalide.'); }
-    $somme = function (string $sql) use ($pdo, $centre, $mois): int {
+    $debut = g_debut_comptes($pdo, $centre);
+    if ($debut !== '' && $mois < substr($debut, 0, 7)) {
+        throw new DomainException('Ce mois est avant le début des comptes (' . g_date_fr($debut) . ') : pas de clôture ni de partage.');
+    }
+    $somme = function (string $sql) use ($pdo, $centre, $mois, $debut): int {
         $st = $pdo->prepare($sql);
-        $st->execute([$centre, $mois . '%']);
+        $st->execute([$centre, $mois . '%', $debut]);
         return (int) $st->fetchColumn();
     };
-    $r = $somme('SELECT COALESCE(SUM(montant),0) FROM g_paiements WHERE centre_id = ? AND date LIKE ? AND annule = 0 AND supprime = 0');
-    $d = $somme("SELECT COALESCE(SUM(montant),0) FROM g_depenses WHERE centre_id = ? AND date LIKE ? AND statut = 'validee' AND supprime = 0");
-    $p = $somme('SELECT COALESCE(SUM(montant),0) FROM g_paies WHERE centre_id = ? AND date LIKE ? AND annule = 0 AND supprime = 0');
+    $r = $somme('SELECT COALESCE(SUM(montant),0) FROM g_paiements WHERE centre_id = ? AND date LIKE ? AND date >= ? AND annule = 0 AND supprime = 0');
+    $d = $somme("SELECT COALESCE(SUM(montant),0) FROM g_depenses WHERE centre_id = ? AND date LIKE ? AND date >= ? AND statut = 'validee' AND supprime = 0");
+    $p = $somme('SELECT COALESCE(SUM(montant),0) FROM g_paies WHERE centre_id = ? AND date LIKE ? AND date >= ? AND annule = 0 AND supprime = 0');
     $champs['recettes'] = $r; $champs['depenses'] = $d; $champs['paies'] = $p; $champs['resultat'] = $r - $d - $p;
     $parts = json_decode((string) ($champs['parts'] ?? '[]'), true);
     if (!is_array($parts)) { $parts = []; }
