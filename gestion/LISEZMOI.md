@@ -89,7 +89,9 @@ Bilan › mois passé › « Retirer <mois> des comptes », ou fiche du centre �
 **Versements saisis en retard :** Bilan › mois en cours › « Versements saisis en retard ? » (admin). Les
 versements du mois sont cochés, groupés par jour ; on décoche ceux vraiment encaissés ce mois-ci, puis on les
 rattache au dernier jour du mois passé (date modifiable). Le serveur n'accepte ce changement que de l'admin et
-pour la seule date : montant, reçu, élève et encaisseur restent les mêmes.
+pour la seule date : montant, reçu, élève et encaisseur restent les mêmes. La feuille a une recherche par nom et
+rappelle « Restent en <mois> » (aussi dans la confirmation). Un versement rattaché par erreur se corrige depuis son
+reçu (Caisse ou fiche de l'élève) : « Changer la date » (admin).
 
 **Centres indépendants :** un compte (hors administrateur) n'a accès qu'à **un seul centre** ; le serveur
 refuse le reste (`comptes/enregistrer`, 422). Une personne présente dans les deux centres a deux comptes

@@ -12,6 +12,7 @@ async function login(nav, id, mdp) {
   const ctx = await nav.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
   const page = await ctx.newPage(); page.setDefaultTimeout(15000); page.err = [];
   page.on('pageerror', (e) => page.err.push(e.message));
+  page.dialogues = []; page.on('dialog', (d) => { page.dialogues.push(d.message()); d.accept(); });
   await page.goto(B); await page.fill('input[name=identifiant]', id); await page.fill('input[name=mdp]', mdp);
   await page.click('button[type=submit]'); await page.waitForSelector('text=Bonjour'); await aJour(page);
   return page;
@@ -50,13 +51,28 @@ const apiDe = (page) => (route, corps) => page.evaluate(async ([route, corps]) =
   ok('feuille : date proposée = dernier jour du mois passé', await adm.inputValue('#feuille input[name=date]') === finPrec, await adm.inputValue('#feuille input[name=date]'));
   await adm.click('#feuille [data-a="redater-tout"][data-v="0"]');
   await adm.check(`#feuille input[value="${ids[0]}"]`); await adm.check(`#feuille input[value="${ids[1]}"]`);
+  // Recherche par nom : seules les lignes de cet élève restent visibles.
+  const nom3 = (els[2].nom + ' ' + els[2].prenoms).toLowerCase();
+  await adm.fill('#feuille input[data-input="redater-filtre"]', els[2].nom.toLowerCase());
+  ok('recherche : la ligne de l\'élève reste visible', await adm.isVisible(`#feuille label:has(input[value="${ids[2]}"])`), nom3);
+  await adm.fill('#feuille input[data-input="redater-filtre"]', '');
+  ok('récapitulatif « Restent en … » avec l\'élève décoché', (await adm.textContent('#restent')).includes(els[2].nom.toUpperCase()), await adm.textContent('#restent'));
   ok('le bouton annonce le nombre et le total', /2 versements \(2\s201\sF\)/.test((await adm.textContent('#redater-ok')).replace(/ | /g, ' ')), await adm.textContent('#redater-ok'));
   await adm.screenshot({ path: OUT + '/redater.png', fullPage: true });
   await adm.click('#redater-ok'); await aJour(adm); await adm.waitForTimeout(800);
+  ok('confirmation : elle nomme ce qui reste dans le mois', adm.dialogues.some((m) => m.includes('Restent en') && m.includes(els[2].nom.toUpperCase())), adm.dialogues.join(' | '));
   L = (await api('sync/tirer&depuis=0')).lignes;
   const P = (id) => L.paiements.find((p) => p.id === id) || {};
   ok('serveur : les deux cochés passent au mois passé', P(ids[0]).date === finPrec && P(ids[1]).date === finPrec, JSON.stringify([P(ids[0]).date, P(ids[1]).date]));
   ok('le décoché reste du jour ; montants et reçus inchangés', P(ids[2]).date === auj && Number(P(ids[0]).montant) === 1100 && P(ids[0]).numero, JSON.stringify(P(ids[0])).slice(0, 160));
+
+  // Un versement rattaché par erreur : l'admin le remet depuis son reçu (« Changer la date »).
+  await adm.goto(B + '#/accueil'); await adm.evaluate((id) => { const b = document.createElement('button'); b.dataset.a = 'voir-recu'; b.dataset.id = id; b.id = 'ouvre-recu'; document.body.appendChild(b); }, ids[0]);
+  await adm.dispatchEvent('#ouvre-recu', 'click'); await adm.waitForSelector('#feuille form[data-f="date-versement"]');
+  await adm.fill('#feuille form[data-f="date-versement"] input[name=date]', auj);
+  await adm.click('#feuille form[data-f="date-versement"] button[type=submit]'); await aJour(adm); await adm.waitForTimeout(800);
+  L = (await api('sync/tirer&depuis=0')).lignes;
+  ok('reçu : « Changer la date » remet le versement au jour', P(ids[0]).date === auj, P(ids[0]).date);
 
   // Un partenaire ne redate pas ; l'admin ne touche pas au montant par ce biais.
   const pa = await login(nav, act.identifiant, (await api('comptes/mdp', { id: act.id })).mdp);

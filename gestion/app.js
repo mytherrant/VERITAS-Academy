@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.12.7';
+  var VERSION = '0.12.8';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -1938,12 +1938,15 @@
     var tel = e.parent_whatsapp || e.parent_tel;
     var pret = !!p.numero;
     ouvrirFeuille('<h2>Reçu ' + (p.numero ? 'n° ' + esc(p.numero) : '') + (Number(p.annule) ? ' <span class="badge danger">annulé</span>' : '') + '</h2>' +
-      '<p class="doux">' + esc(nomComplet(e)) + ' · ' + fcfa(p.montant) + ' · ' + esc(MODES[p.mode]) + (p.envoye_le ? ' · envoyé le ' + esc(dateLisible(p.envoye_le)) : '') + '</p>' +
+      '<p class="doux">' + esc(nomComplet(e)) + ' · ' + fcfa(p.montant) + ' · ' + esc(MODES[p.mode]) + ' · ' + esc(dateLisible(p.date, true)) + (p.envoye_le ? ' · envoyé le ' + esc(dateLisible(p.envoye_le)) : '') + '</p>' +
       (Number(p.annule) ? '<p class="note">Annulé : ' + esc(p.motif_annulation || '') + '</p>' : '') +
       (pret ? '' : '<p class="note">Le numéro du reçu est attribué par le serveur dès la synchronisation (il faut du réseau).</p>') +
       '<div id="apercu-recu" class="apercu-recu"><p class="doux">Préparation de l\'aperçu…</p></div>' +
       '<div class="actions">' + (tel && pret && !Number(p.annule) ? '<a class="btn or" target="_blank" rel="noopener" data-a="envoyer-recu" data-canal="whatsapp" data-id="' + esc(p.id) + '" href="https://wa.me/237' + esc(tel) + '?text=' + encodeURIComponent(messageRecu(p)) + '">' + ico('message', 'p') + 'Message au parent</a>' : '') +
       (pret ? '<button class="btn clair" type="button" data-a="partager-recu" data-v="png" data-id="' + esc(p.id) + '">' + ico('camera', 'p') + 'Image du reçu</button><button class="btn clair" type="button" data-a="partager-recu" data-v="pdf" data-id="' + esc(p.id) + '">' + ico('doc', 'p') + 'PDF</button>' : '') + '</div>' +
+      // Admin : date d'un versement saisi en retard (ou rattaché par erreur au mauvais mois) ; rien d'autre ne change.
+      (estAdmin() && pret && !Number(p.annule) ? '<form data-f="date-versement" data-id="' + esc(p.id) + '" class="date-versement"><label class="champ"><span>Date du versement</span>' +
+        '<input type="date" name="date" required max="' + isoLocal(new Date()) + '" value="' + esc(p.date) + '"></label><button class="btn clair" type="submit">' + ico('calendar', 'p') + 'Changer la date</button></form>' : '') +
       '<div class="actions">' + (peut('caisse.corriger', p.centre_id) && !Number(p.annule) ? '<button class="btn danger" type="button" data-a="annuler-versement" data-id="' + esc(p.id) + '">Annuler ce versement</button>' : '') + '<button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
     Promise.all([chargerLogo(), document.fonts ? document.fonts.load('600 24px Poppins') : null, chargerLogoDetoure()]).then(function (r) {
       var z = $('#apercu-recu');
@@ -3195,7 +3198,8 @@
     var prec = decalerMois(am, -1);
     if (clotureDe(c.id, prec)) return '';
     return '<div class="carte redater"><h3>' + ico('calendar', 'p') + ' Versements saisis en retard ?</h3><p class="doux">Si des versements de ' + esc(libMoisAnnee(prec)) +
-      ' ont été saisis ce mois-ci (cahier recopié en retard), rattachez-les à ' + esc(libMoisAnnee(prec)) + '. Vous décochez ceux qui sont vraiment de ' + esc(libMoisAnnee(am)) + '.</p>' +
+      ' ont été saisis ce mois-ci (cahier recopié en retard), rattachez-les à ' + esc(libMoisAnnee(prec)) + '. Vous décochez ceux qui sont vraiment de ' + esc(libMoisAnnee(am)) + '. ' +
+      'Un versement rattaché par erreur : ouvrez son reçu (Caisse, ou fiche de l\'élève) et « Changer la date ».</p>' +
       '<div class="actions"><button class="btn clair" type="button" data-a="redater-versements" data-centre="' + esc(c.id) + '">Choisir les versements</button></div></div>';
   }
   function feuilleRedater(cid) {
@@ -3205,15 +3209,16 @@
     var h = '<h2>Rattacher à ' + esc(libMoisAnnee(prec)) + '</h2><p class="doux">' + esc((ligne('centres', cid) || {}).nom || '') + ' · cochés : les versements de ' + esc(libMoisAnnee(prec)) +
       ' saisis en retard. <b>Décochez</b> ceux encaissés en ' + esc(libMoisAnnee(am)) + '. Rien d\'autre ne change (montant, reçu, élève) : ce que l\'élève doit reste exact.</p>' +
       '<form data-f="redater" data-centre="' + esc(cid) + '"><label class="champ"><span>Nouvelle date</span><input type="date" name="date" required min="' + esc(prec) + '-01" max="' + esc(cible) + '" value="' + esc(cible) + '"></label>' +
+      '<label class="recherche"><span class="sr">Chercher un élève</span>' + ico('search') + '<input type="search" data-input="redater-filtre" placeholder="Chercher un élève (ex. : EWE)"></label>' +
       '<p class="actions"><button class="btn clair petit" type="button" data-a="redater-tout" data-v="1">Tout cocher</button><button class="btn clair petit" type="button" data-a="redater-tout" data-v="0">Tout décocher</button></p>';
     Object.keys(parJour).sort().forEach(function (j) {
       h += '<h3>' + esc(dateLisible(j, true)) + '</h3><div class="liste">' + parJour[j].map(function (p) {
         var e = ligne('eleves', p.eleve_id);
-        return '<label class="case ligne-redater"><input type="checkbox" name="pa" value="' + esc(p.id) + '" data-montant="' + esc(p.montant) + '" checked data-input="redater-total"> <span><b>' + esc(e ? nomComplet(e) : 'Élève') + '</b> · ' +
+        return '<label class="case ligne-redater" data-nom="' + esc((e ? nomComplet(e) : '').toLowerCase()) + '"><input type="checkbox" name="pa" value="' + esc(p.id) + '" data-montant="' + esc(p.montant) + '" checked data-input="redater-total"> <span><b>' + esc(e ? nomComplet(e) : 'Élève') + '</b> · ' +
           fcfa(p.montant) + (p.numero ? ' <small>reçu ' + esc(p.numero) + '</small>' : '') + '</span></label>';
       }).join('') + '</div>';
     });
-    h += '<div class="actions"><button class="btn or" type="submit" id="redater-ok">Rattacher</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>';
+    h += '<div class="carte note-carte" id="restent"></div><div class="actions"><button class="btn or" type="submit" id="redater-ok">Rattacher</button><button class="btn clair" type="button" data-a="fermer">Annuler</button></div></form>';
     ouvrirFeuille(h);
     majTotalRedater();
   }
@@ -3221,6 +3226,16 @@
     var cases = Array.prototype.filter.call(document.querySelectorAll('#feuille input[name=pa]'), function (i) { return i.checked; });
     var tot = cases.reduce(function (s, i) { return s + Number(i.dataset.montant); }, 0), b = $('#redater-ok');
     if (b) b.textContent = 'Rattacher ' + cases.length + ' versement' + (cases.length > 1 ? 's' : '') + ' (' + fcfa(tot) + ')';
+    var r = $('#restent');
+    if (r) {
+      var restent = restentRedater();
+      r.innerHTML = '<b>Restent en ' + esc(libMoisAnnee(moisCycle())) + ' (' + restent.length + ')</b>' + (restent.length ? ' : ' + restent.map(function (x) { return esc(x.nom) + ' ' + fcfa(x.montant); }).join(', ') : ' : aucun. Décochez les versements vraiment encaissés ce mois-ci.');
+    }
+  }
+  function restentRedater() {
+    return Array.prototype.filter.call(document.querySelectorAll('#feuille input[name=pa]'), function (i) { return !i.checked; }).map(function (i) {
+      var l = i.closest('label'); return { nom: l.querySelector('b').textContent, montant: Number(i.dataset.montant) };
+    });
   }
 
   // ───────────────────────────── Rapports exportables ─────────────────────────────
@@ -4843,10 +4858,19 @@
         .then(function () { return api('auth/connexion', { identifiant: v.identifiant, mdp: v.mdp, appareil: nomAppareil() }); })
         .then(ouvrirSession, function (e) { occupe(form, false); toast(e.message, true); });
     },
+    'date-versement': function (form) {
+      var p = ligne('paiements', form.dataset.id), date = valeurs(form).date;
+      if (!p || !date || date === p.date) { fermerFeuille(); return; }
+      fermerFeuille();
+      muter('paiements', p.id, { date: date }).then(function () { toast('Versement daté du ' + dateLisible(date, true) + '.'); rendre(); });
+    },
     redater: function (form) {
       var date = valeurs(form).date, ids = Array.prototype.filter.call(form.querySelectorAll('input[name=pa]'), function (i) { return i.checked; }).map(function (i) { return i.value; });
       if (!ids.length) { toast('Cochez au moins un versement.', true); return; }
       if (!date) { toast('Choisissez la date.', true); return; }
+      var restent = restentRedater();
+      if (!confirm(ids.length + ' versement(s) passent au ' + dateLisible(date, true) + '.\n\nRestent en ' + libMoisAnnee(moisCycle()) + ' : ' +
+        (restent.length ? restent.map(function (x) { return x.nom + ' ' + fcfa(x.montant).replace(/\u00a0|\u202f/g, ' '); }).join(', ') : 'aucun') + '.\n\nC\'est bien ça ?')) return;
       fermerFeuille();
       ids.reduce(function (pr, id) { return pr.then(function () { return muter('paiements', id, { date: date }); }); }, Promise.resolve()).then(function () {
         toast(ids.length + ' versement' + (ids.length > 1 ? 's' : '') + ' rattaché' + (ids.length > 1 ? 's' : '') + ' au ' + dateLisible(date, true) + '.'); rendre();
@@ -5246,6 +5270,10 @@
     if (k === 'recherche-eleve') { ELV.q = ev.target.value; dessinerListeEleves(); }
     if (k === 'apercu-import') apercuImport(ev.target.form);
     if (k === 'redater-total') majTotalRedater();
+    if (k === 'redater-filtre') {
+      var q = ev.target.value.trim().toLowerCase();
+      Array.prototype.forEach.call(document.querySelectorAll('#feuille .ligne-redater'), function (l) { l.hidden = !!q && l.dataset.nom.indexOf(q) < 0; });
+    }
     if (k === 'apercu-ident') { var a = $('#apercu-ident'); if (a) a.textContent = identifiantDepuisNom(ev.target.value) || 'à partir du nom'; }
     if (k === 'recherche-caisse') { CAI.q = ev.target.value; dessinerRechercheCaisse(); }
   });
