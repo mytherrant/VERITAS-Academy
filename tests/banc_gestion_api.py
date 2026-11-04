@@ -126,9 +126,23 @@ _, lst = req("comptes", jeton=adm)
 exist = {c["identifiant"]: c["id"] for c in lst["comptes"]}
 ens_id = exist.get("prof.maths", "")
 c, r = req("comptes/enregistrer", {"id": ens_id, "identifiant": "prof.maths", "nom": "Essomba Paul", "matieres": [mat["Mathématiques"], mat["Physique"]],
-                                   "acces": [{"centre_id": A, "role": "enseignant"}, {"centre_id": Bc, "role": "enseignant"}]}, adm)
+                                   "acces": [{"centre_id": A, "role": "enseignant"}]}, adm)
 verifier("compte enseignant avec matières", c == 200, r)
 ens_id = ens_id or r["id"]
+# Centres indépendants : un compte = un centre. Deux centres sur un compte → refus (même pour l'admin qui le crée).
+c, r = req("comptes/enregistrer", {"id": ens_id, "identifiant": "prof.maths", "nom": "Essomba Paul",
+                                   "acces": [{"centre_id": A, "role": "enseignant"}, {"centre_id": Bc, "role": "enseignant"}]}, adm)
+verifier("un compte dans les deux centres est refusé (centres indépendants)", c == 422 and "indépendants" in r.get("error", ""), r)
+# La même personne à B : un compte séparé. Sans identifiant, il se déduit du nom ; déjà pris → suffixe du centre.
+ens_b = exist.get("prof.maths.b", "")
+c, r = req("comptes/enregistrer", {"id": ens_b, "identifiant": "prof.maths.b", "nom": "Essomba Paul", "acces": [{"centre_id": Bc, "role": "enseignant"}]}, adm)
+verifier("même enseignant à B : compte séparé", c == 200, r)
+ens_b = ens_b or r["id"]
+nom_x = "ZOGO" + uuid.uuid4().hex[:5].upper() + " Luc"
+c, r1 = req("comptes/enregistrer", {"nom": nom_x, "acces": [{"centre_id": A, "role": "enseignant"}]}, adm)
+c2, r2 = req("comptes/enregistrer", {"nom": nom_x, "acces": [{"centre_id": Bc, "role": "enseignant"}]}, adm)
+verifier("identifiants distincts, le second porte le centre", c == 200 and c2 == 200 and r1["identifiant"] != r2["identifiant"]
+         and r2["identifiant"].startswith(r1["identifiant"] + "."), (r1, r2))
 c, r = req("comptes/enregistrer", {"identifiant": "prof.x" + uuid.uuid4().hex[:4], "nom": "X", "matieres": ["inexistante"],
                                    "acces": [{"centre_id": A, "role": "enseignant"}]}, adm)
 verifier("matière inconnue refusée", c == 422, r)
@@ -151,7 +165,7 @@ verifier("une secrétaire ne modifie pas l'emploi du temps", r["resultats"][0]["
 # Départ propre : on retire les créneaux laissés par les passages précédents (enseignant et classes du banc).
 _, t = req("sync/tirer", jeton=adm)
 vieux = [{"op": op(), "t": "creneaux", "id": c["id"], "suppr": True} for c in t["lignes"].get("creneaux", [])
-         if not int(c["supprime"]) and c["enseignant_id"] == ens_id]
+         if not int(c["supprime"]) and c["enseignant_id"] in (ens_id, ens_b)]
 if vieux: req("sync/pousser", {"ops": vieux}, adm)
 # Un jour et une heure tirés au hasard : le banc se rejoue sans heurter ses propres créneaux.
 jour = 1 + int(uuid.uuid4().hex[:2], 16) % 7
@@ -164,20 +178,22 @@ def cr(cid, cl, debut, fin, ens):
 _, r = req("sync/pousser", {"ops": [
     cr(A, clA, h(base), h(base + 2), ens_id),           # 0 accepté
     cr(A, clA, h(base + 1), h(base + 3), ""),           # 1 même classe, chevauchement → refus
-    cr(Bc, clB, h(base + 1), h(base + 2), ens_id),      # 2 même enseignant dans l'AUTRE centre → refus
-    cr(Bc, clB, h(base + 2), h(base + 4), ens_id),      # 3 bout à bout → accepté
+    cr(Bc, clB, h(base + 1), h(base + 2), ens_id),      # 2 compte du centre A dans B → refus
+    cr(Bc, clB, h(base + 2), h(base + 4), ens_b),       # 3 son compte de B, même heure qu'à A : comptes séparés → accepté
     cr(A, clA, h(base + 5), h(base + 4), ""),           # 4 fin avant début → refus
     cr(A, clB, h(base + 6), h(base + 7), ""),           # 5 classe d'un autre centre → refus
     cr(A, clA, h(base + 6), h(base + 7), idB),          # 6 pas enseignant → refus
+    cr(A, clA, h(base + 2), h(base + 3), ens_id),       # 7 bout à bout → accepté
 ]}, adm)
 res = r["resultats"]
 verifier("créneau valide accepté", res[0]["ok"] is True, res[0])
 verifier("classe déjà en cours : refus explicite", res[1]["ok"] is False and "déjà cours" in res[1].get("erreur", ""), res[1])
-verifier("enseignant déjà pris dans l'AUTRE centre : refus", res[2]["ok"] is False and "déjà pris" in res[2].get("erreur", ""), res[2])
-verifier("créneaux bout à bout acceptés", res[3]["ok"] is True, res[3])
+verifier("le compte du centre A ne reçoit pas de cours à B", res[2]["ok"] is False, res[2])
+verifier("son compte de B reçoit son cours de B (centres indépendants)", res[3]["ok"] is True, res[3])
 verifier("heures à l'envers refusées", res[4]["ok"] is False, res[4])
 verifier("classe d'un autre centre refusée", res[5]["ok"] is False, res[5])
 verifier("non-enseignant refusé comme enseignant", res[6]["ok"] is False, res[6])
+verifier("créneaux bout à bout acceptés", res[7]["ok"] is True, res[7])
 _, r = req("sync/pousser", {"ops": [cr(A, clA, h(base + 8), h(base + 9), ens_id)]}, actA)
 verifier("un actionnaire pose un créneau dans son centre", r["resultats"][0]["ok"] is True, r)
 
@@ -551,7 +567,7 @@ _, r = req("sync/pousser", {"ops": [
 verifier("l'enseignant fait l'appel de SA classe du jour", r["resultats"][0]["ok"] is True, r["resultats"][0])
 # Demande de Jacques (04/11/2026) : l'enseignant fait l'appel de toute classe de SON centre.
 verifier("l'enseignant fait aussi l'appel d'une autre classe de son centre", r["resultats"][1]["ok"] is True, r["resultats"][1])
-# Un enseignant du seul centre A ne fait pas l'appel dans B (prof.maths, lui, enseigne dans les deux).
+# Un enseignant du seul centre A ne fait pas l'appel dans B.
 _, rc = req("comptes/enregistrer", {"id": exist.get("prof.a.seul", ""), "identifiant": "prof.a.seul", "nom": "Prof A Seul", "acces": [{"centre_id": A, "role": "enseignant"}]}, adm)
 profA = connexion("prof.a.seul", req("comptes/mdp", {"id": exist.get("prof.a.seul", "") or rc["id"]}, adm)[1]["mdp"])
 _, r = req("sync/pousser", {"ops": [{"op": op(), "t": "seances", "id": sid(auj, clX) + "p", "champs": {"centre_id": Bc, "classe_id": clX, "date": jj(auj), "debut": "16:00", "fin": "18:00"}}]}, profA)

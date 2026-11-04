@@ -203,7 +203,20 @@ case 'comptes/enregistrer': {
     }
     if ($nom === '') { g_fail('Le nom est obligatoire.', 422); }
     // Nouveau compte sans identifiant : il se déduit du nom (« ESSOMBA Paul » → paul.essomba), unique.
-    if ($ident === '' && $id === '') { $ident = g_identifiant_libre($pdo, $nom); }
+    // Centres indépendants : un compte (hors administrateur) = un seul centre. Une personne présente
+    // dans les deux centres a deux comptes distincts ; rien n'est mélangé (caisse, paie, appel, messages).
+    if (!$admin && count($accesDemandes) > 1) {
+        g_fail('Les centres sont indépendants : un compte n\'a accès qu\'à un seul centre. Créez un compte séparé pour l\'autre centre.', 422);
+    }
+    if ($ident === '' && $id === '') {
+        $suffixe = '';
+        if ($accesDemandes) {
+            $st = $pdo->prepare('SELECT COALESCE(NULLIF(nom_court, \'\'), nom) FROM g_centres WHERE id = ?');
+            $st->execute([array_key_first($accesDemandes)]);
+            $suffixe = (string) $st->fetchColumn();
+        }
+        $ident = g_identifiant_libre($pdo, $nom, $suffixe);
+    }
     if (!preg_match('/^[a-z0-9._-]{3,60}$/', $ident)) { g_fail('Identifiant : 3 à 60 caractères (lettres, chiffres, . _ -).', 422); }
     $matieres = array_values(array_unique(array_filter(array_map('strval', (array) g_param('matieres', [])))));
     if ($matieres) {
@@ -1351,7 +1364,7 @@ function g_valider_cloture(PDO $pdo, string $id, ?array $existant, array &$champ
 }
 
 /** Identifiant tiré du nom : prénom.nom en minuscules sans accents (NOM en capitales = nom de famille), unique. */
-function g_identifiant_libre(PDO $pdo, string $nom): string {
+function g_identifiant_libre(PDO $pdo, string $nom, string $centre = ''): string {
     $mots = preg_split('/\s+/u', trim($nom)) ?: [];
     $famille = []; $prenoms = [];
     foreach ($mots as $m) {
@@ -1369,6 +1382,12 @@ function g_identifiant_libre(PDO $pdo, string $nom): string {
     if (strlen($base) < 3) { $base = 'compte' . $base; }
     $base = substr($base, 0, 50);
     $st = $pdo->prepare('SELECT COUNT(*) FROM g_utilisateurs WHERE identifiant = ?');
+    // Déjà pris (souvent : la même personne dans l'autre centre) → on ajoute le centre : paul.essomba.ndogpassi3.
+    $c = $ascii(preg_replace_callback('/\\b(IV|III|II|I)\\b/u', function ($m) { return (string) ['I' => 1, 'II' => 2, 'III' => 3, 'IV' => 4][$m[1]]; }, $centre));
+    if ($c !== '') {
+        $st->execute([$base]);
+        if ((int) $st->fetchColumn()) { $base = substr($base, 0, 59 - min(10, strlen($c))) . '.' . substr($c, 0, 10); }
+    }
     for ($i = 1; $i < 1000; $i++) {
         $essai = $i === 1 ? $base : $base . $i;
         $st->execute([$essai]);

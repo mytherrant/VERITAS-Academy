@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.12.4';
+  var VERSION = '0.12.5';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -3970,7 +3970,7 @@
       }).join('') + Object.keys(u.acces).map(function (cid) {
         var c = ligne('centres', cid);
         return '<span class="badge">' + esc(ROLES[u.acces[cid]] || u.acces[cid]) + (lignes('centres').length > 1 && c ? ' · ' + esc(c.nom_court || c.nom) : '') + '</span>';
-      }).join('');
+      }).join('') + (!u.admin_global && Object.keys(u.acces).length > 1 ? '<span class="badge danger">2 centres : à séparer</span>' : '');
       return '<button class="ligne" type="button" data-a="editer-compte" data-id="' + esc(u.id) + '"' + (u.gerable ? '' : ' disabled') + '><span class="avatar">' + esc(initiales(u.nom)) + '</span>' +
         '<span class="corps"><b>' + esc(u.nom) + (u.actif ? '' : ' <span class="badge danger">désactivé</span>') + '</b><small>' + esc(u.identifiant) + ' · ' +
         (u.vu_le ? 'vu le ' + dateLisible(u.vu_le) : 'jamais connecté') + '</small>' +
@@ -4034,27 +4034,34 @@
     };
     var h = '<h2>' + (u ? 'Modifier le compte' : preset && preset.role === 'enseignant' ? 'Nouvel enseignant' : 'Nouveau compte') + '</h2>' +
       (u ? '' : '<p class="doux">Un mot de passe sera créé et affiché une seule fois, à transmettre par WhatsApp.</p>') + '<form data-f="compte" data-id="' + esc(id || '') + '">' +
-      '<label class="champ"><span>Nom et prénom</span><input type="text" name="nom" required value="' + esc(u ? u.nom : '') + '"' + (u ? '' : ' data-input="apercu-ident" placeholder="ex. : ESSOMBA Paul"') + '></label>' +
+      '<label class="champ"><span>Nom et prénom</span><input type="text" name="nom" required value="' + esc(u ? u.nom : (preset && preset.nom) || '') + '"' + (u ? '' : ' data-input="apercu-ident" placeholder="ex. : ESSOMBA Paul"') + '></label>' +
       (u ? '<div class="deux"><label class="champ"><span>Identifiant</span><input type="text" name="identifiant" required autocapitalize="none" spellcheck="false" pattern="[a-z0-9._\\-]{3,60}" value="' + esc(u.identifiant) + '"><small>ex. : marie.ndogpassi3</small></label>' +
           '<label class="champ"><span>Téléphone</span><input type="tel" name="tel" value="' + esc(u.tel || '') + '"></label></div>'
         // Nouveau compte : l'identifiant se fait tout seul à partir du nom ; on peut le choisir si on veut.
-        : '<label class="champ"><span>Téléphone</span><input type="tel" name="tel" inputmode="tel"></label>' +
+        : '<label class="champ"><span>Téléphone</span><input type="tel" name="tel" inputmode="tel" value="' + esc((preset && preset.tel) || '') + '"></label>' +
           '<p class="doux ident-auto">' + ico('user', 'p') + ' Identifiant créé automatiquement : <b id="apercu-ident">à partir du nom</b></p>' +
           '<details class="ident-perso"><summary>Choisir l\'identifiant moi-même</summary><label class="champ"><span>Identifiant</span><input type="text" name="identifiant" autocapitalize="none" spellcheck="false" pattern="[a-z0-9._\\-]{3,60}" placeholder="ex. : marie.ndogpassi3"></label></details>') +
-      '<h3>Rôle dans chaque centre</h3>';
-    centres.forEach(function (c) {
-      var permis = rolesPermis(c.id);
-      var actuel = u ? u.acces[c.id] || '' : (preset && preset.centre === c.id && permis.indexOf(preset.role) >= 0 ? preset.role : '');
-      if (!permis.length && !actuel) return;
-      h += '<label class="champ"><span>' + esc(c.nom) + '</span><select name="role_' + esc(c.id) + '"' + (permis.length ? '' : ' disabled') + '><option value="">Aucun accès</option>' +
-        Object.keys(ROLES).filter(function (r) { return permis.indexOf(r) >= 0 || r === actuel; }).map(function (r) {
-          return '<option value="' + r + '"' + (r === actuel ? ' selected' : '') + '>' + esc(ROLES[r]) + '</option>';
-        }).join('') + '</select></label>' +
-        // Trésorier : désigné par l'admin, un par centre (il garde les fonds et confirme les remises).
-        (estAdmin() ? '<label class="case tresorier"><input type="checkbox" name="tresorier_' + esc(c.id) + '"' + (u && tresorierDe(c.id) === u.id ? ' checked' : '') + '> ' + ico('wallet', 'p') +
-          ' Trésorier de ' + esc(c.nom_court || c.nom) + (tresorierDe(c.id) && (!u || tresorierDe(c.id) !== u.id) ? ' <small>(remplace ' + esc(nomCompte(tresorierDe(c.id))) + ')</small>' : '') + '</label>' : '');
-    });
-    var siennes = u ? u.matieres || [] : [];
+      '<h3>Centre et rôle</h3><p class="doux">' + ico('building', 'p') + ' Les centres sont <b>indépendants</b> : un compte ne travaille que dans un centre. ' +
+      'Une personne présente dans les deux centres a <b>un compte dans chacun</b> (identifiants différents) : rien n\'est mélangé.</p>';
+    var accesU = u ? Object.keys(u.acces || {}) : [];
+    var centresVus = centres.filter(function (c) { return rolesPermis(c.id).length || accesU.indexOf(c.id) >= 0; });
+    var centreActuel = accesU[0] || (preset && preset.centre) || (centresVus[0] || {}).id || '';
+    if (accesU.length > 1) {
+      h += '<div class="carte note-carte">' + ico('alert', 'p') + ' Ce compte a encore accès à plusieurs centres (ancien réglage). En enregistrant, il ne garde que le centre choisi ci-dessous. ' +
+        'Pour l\'autre centre, créez son compte séparé avec le bouton plus bas.</div>';
+    }
+    var roleActuel = u ? (u.acces || {})[centreActuel] || '' : (preset && preset.role) || '';
+    var rolesVus = Object.keys(ROLES).filter(function (r) { return r === roleActuel || centresVus.some(function (c) { return rolesPermis(c.id).indexOf(r) >= 0; }); });
+    h += '<div class="deux"><label class="champ"><span>Centre</span><select name="centre_id">' +
+      (estAdmin() ? '<option value=""' + (u && !accesU.length ? ' selected' : '') + '>Aucun (administrateur seulement)</option>' : '') +
+      centresVus.map(function (c) { return '<option value="' + esc(c.id) + '"' + (c.id === centreActuel && !(u && !accesU.length) ? ' selected' : '') + '>' + esc(c.nom) + '</option>'; }).join('') + '</select></label>' +
+      '<label class="champ"><span>Rôle</span><select name="role">' + rolesVus.map(function (r) {
+        return '<option value="' + r + '"' + (r === (roleActuel || 'enseignant') ? ' selected' : '') + '>' + esc(ROLES[r]) + '</option>';
+      }).join('') + '</select></label></div>' +
+      // Trésorier : désigné par l'admin, un par centre (il garde les fonds et confirme les remises).
+      (estAdmin() ? '<label class="case tresorier"><input type="checkbox" name="tresorier"' + (u && accesU.some(function (cid) { return tresorierDe(cid) === u.id; }) ? ' checked' : '') + '> ' +
+        ico('wallet', 'p') + ' Trésorier de ce centre <small>(remplace le trésorier actuel s\'il y en a un)</small></label>' : '');
+    var siennes = u ? u.matieres || [] : (preset && preset.matieres) || [];
     h += '<h3>Matières enseignées</h3><p class="doux">Pour les enseignants : elles les proposent en premier dans l\'emploi du temps.</p><div class="deux">' +
       lignes('matieres').map(function (m) { return '<label class="case"><input type="checkbox" name="matiere" value="' + esc(m.id) + '"' + (siennes.indexOf(m.id) >= 0 ? ' checked' : '') + '> ' + esc(m.nom) + '</label>'; }).join('') + '</div>';
     if (estAdmin()) h += '<label class="case"><input type="checkbox" name="admin_global"' + (u && u.admin_global ? ' checked' : '') + '> Administrateur des deux centres (vue consolidée, finances, tous les réglages)</label>';
@@ -4068,7 +4075,11 @@
     if (u) {
       h += '<div class="actions"><button class="btn clair petit" type="button" data-a="reinit-mdp" data-id="' + esc(u.id) + '">Nouveau mot de passe</button>' +
         '<button class="btn clair petit" type="button" data-a="envoyer-guide" data-id="' + esc(u.id) + '">Renvoyer le mode d\'emploi</button>' +
-        '<button class="btn clair petit" type="button" data-a="appareils" data-id="' + esc(u.id) + '">Appareils connectés</button></div>';
+        '<button class="btn clair petit" type="button" data-a="appareils" data-id="' + esc(u.id) + '">Appareils connectés</button>' +
+        // La même personne dans l'autre centre : un compte séparé, pré-rempli.
+        centresVus.filter(function (c) { return c.id !== centreActuel; }).map(function (c) {
+          return '<button class="btn clair petit" type="button" data-a="compte-autre-centre" data-id="' + esc(u.id) + '" data-v="' + esc(c.id) + '">' + ico('plus', 'p') + ' Son compte pour ' + esc(c.nom_court || c.nom) + '</button>';
+        }).join('') + '</div>';
     }
     ouvrirFeuille(h);
   }
@@ -4455,6 +4466,13 @@
       if (!E.enLigne) { toast('Créer un compte demande une connexion internet.', true); return; }
       ouvrirPanneauDiscret();
       feuilleCompte('', { role: 'enseignant', centre: cid });
+    },
+    // Même personne dans l'autre centre : compte séparé, pré-rempli (nom, téléphone, rôle, matières).
+    'compte-autre-centre': function (el) {
+      var u = (E.cache.comptes || []).filter(function (x) { return x.id === el.dataset.id; })[0];
+      if (!u) return;
+      var r = (u.acces || {})[el.dataset.v] || u.acces[Object.keys(u.acces || {})[0]] || 'enseignant';
+      feuilleCompte('', { centre: el.dataset.v, role: r, nom: u.nom, tel: u.tel, matieres: u.matieres || [] });
     },
     'editer-compte': function (el) {
       if (!E.enLigne) { toast('La gestion des comptes demande une connexion internet.', true); return; }
@@ -4848,26 +4866,23 @@
     compte: function (form) {
       var v = valeurs(form);
       var id = form.dataset.id;
-      var acces = [];
-      lignes('centres').forEach(function (c) {
-        var s = form.querySelector('[name="role_' + c.id + '"]');
-        if (s && s.value) acces.push({ centre_id: c.id, role: s.value });
-      });
+      // Un compte = un centre (centres indépendants).
+      var acces = v.centre_id && v.role ? [{ centre_id: v.centre_id, role: v.role }] : [];
       var adminCase = form.querySelector('[name=admin_global]');
       var actifCase = form.querySelector('[name=actif]');
       var matieres = Array.prototype.map.call(form.querySelectorAll('input[name=matiere]:checked'), function (i) { return i.value; });
       var corps = { id: id || '', identifiant: String(v.identifiant || '').toLowerCase().replace(/\s+/g, ''), nom: v.nom, tel: v.tel, acces: acces, matieres: matieres,
         admin_global: adminCase ? adminCase.checked : false, actif: actifCase ? actifCase.checked : true };
-      if (!corps.admin_global && !acces.length) { toast('Choisissez au moins un rôle dans un centre.', true); return; }
+      if (!corps.admin_global && !acces.length) { toast('Choisissez le centre et le rôle.', true); return; }
       occupe(form, true);
       api('comptes/enregistrer', corps).then(function (r) {
         // Trésorier coché / décoché : la fiche du centre suit (l'admin seul écrit les centres).
         var uidC = r.id || id;
-        if (estAdmin() && uidC) lignes('centres').forEach(function (c) {
-          var caseT = form.querySelector('[name="tresorier_' + c.id + '"]');
-          if (!caseT) return;
-          if (caseT.checked && tresorierDe(c.id) !== uidC) muter('centres', c.id, { tresorier_id: uidC });
-          else if (!caseT.checked && tresorierDe(c.id) === uidC) muter('centres', c.id, { tresorier_id: '' });
+        var caseT = form.querySelector('[name=tresorier]');
+        if (estAdmin() && uidC && caseT) lignes('centres').forEach(function (c) {
+          var veut = caseT.checked && c.id === v.centre_id;
+          if (veut && tresorierDe(c.id) !== uidC) muter('centres', c.id, { tresorier_id: uidC });
+          else if (!veut && tresorierDe(c.id) === uidC) muter('centres', c.id, { tresorier_id: '' });
         });
         chargerComptes();
         // L'équipe (enseignants de chaque centre) arrive avec la synchro : écran Enseignants à jour.

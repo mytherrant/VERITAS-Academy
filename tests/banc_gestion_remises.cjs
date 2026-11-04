@@ -117,16 +117,16 @@ const allerRemises = async (p) => { await p.goto(B + '#/accueil'); await p.goto(
     if (!(await adm.isVisible('a.tuile[href="#/admin"]'))) { await adm.mouse.move(bb.x + 10, bb.y + 10); await adm.mouse.down(); await adm.waitForTimeout(2300); await adm.mouse.up(); }
     await adm.goto(B + '#/comptes'); await adm.waitForSelector('#zone-comptes .ligne');
     ok('liste des comptes : badge « Trésorier »', (await adm.textContent(`#zone-comptes .ligne[data-a="editer-compte"][data-id="${act.id}"]`)).includes('Trésorier'), '');
-    await adm.click(`#zone-comptes .ligne[data-a="editer-compte"][data-id="${act.id}"]`); await adm.waitForSelector(`#feuille [name="tresorier_${cid}"]`);
+    await adm.click(`#zone-comptes .ligne[data-a="editer-compte"][data-id="${act.id}"]`); await adm.waitForSelector(`#feuille [name="tresorier"]`);
   };
   await ouvrirCompte();
-  ok('fiche du compte : case « Trésorier de … » cochée', await adm.isChecked(`#feuille [name="tresorier_${cid}"]`), '');
-  await adm.uncheck(`#feuille [name="tresorier_${cid}"]`); await adm.click('#feuille button[type=submit]'); await aJour(adm); await adm.waitForTimeout(600);
+  ok('fiche du compte : case « Trésorier de … » cochée', await adm.isChecked(`#feuille [name="tresorier"]`), '');
+  await adm.uncheck(`#feuille [name="tresorier"]`); await adm.click('#feuille button[type=submit]'); await aJour(adm); await adm.waitForTimeout(600);
   let tc = (await api('sync/tirer&depuis=0')).lignes.centres.find((c) => c.id === cid);
   ok('case décochée : plus de trésorier pour le centre', !tc.tresorier_id, JSON.stringify(tc.tresorier_id));
   await adm.goto(B + '#/comptes'); await adm.waitForSelector('#zone-comptes .ligne');
-  await adm.click(`#zone-comptes .ligne[data-a="editer-compte"][data-id="${act.id}"]`); await adm.waitForSelector(`#feuille [name="tresorier_${cid}"]`);
-  await adm.check(`#feuille [name="tresorier_${cid}"]`); await adm.click('#feuille button[type=submit]'); await aJour(adm); await adm.waitForTimeout(600);
+  await adm.click(`#zone-comptes .ligne[data-a="editer-compte"][data-id="${act.id}"]`); await adm.waitForSelector(`#feuille [name="tresorier"]`);
+  await adm.check(`#feuille [name="tresorier"]`); await adm.click('#feuille button[type=submit]'); await aJour(adm); await adm.waitForTimeout(600);
   tc = (await api('sync/tirer&depuis=0')).lignes.centres.find((c) => c.id === cid);
   ok('case cochée : l\'actionnaire redevient trésorier', tc.tresorier_id === act.id, JSON.stringify(tc.tresorier_id));
 

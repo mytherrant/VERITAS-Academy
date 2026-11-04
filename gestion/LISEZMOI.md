@@ -79,6 +79,12 @@ tête de liste), même sans emploi du temps rempli, dans la même limite de 2 jo
 **Création d'un compte :** l'identifiant se déduit du nom (« ESSOMBA Paul » → `paul.essomba`, unique,
 `g_identifiant_libre`) ; on peut le choisir soi-même (« Choisir l'identifiant moi-même »).
 
+**Centres indépendants :** un compte (hors administrateur) n'a accès qu'à **un seul centre** ; le serveur
+refuse le reste (`comptes/enregistrer`, 422). Une personne présente dans les deux centres a deux comptes
+(identifiants différents : le second reçoit le suffixe du centre, ex. `paul.essomba.ndogpassi2`). La fiche
+d'un compte propose « Son compte pour <autre centre> », pré-rempli. Les anciens comptes à deux centres
+portent le badge « 2 centres : à séparer » et ne gardent que le centre choisi au prochain enregistrement.
+
 **Rapports (Plus › Rapports, ou depuis Caisse › Impayés et le Bilan) :** pour qui voit la caisse.
 Insolvables (classe, échéances impayées, montant dû, téléphone, sous-totaux), paiements par mois et
 par classe (cases du cahier : ce qui couvre chaque échéance, payé, doit), rapport du trésorier pour un
@@ -193,6 +199,7 @@ node tests/banc_gestion_partenaire.cjs <dossier> # actionnaire : inscrit, encais
 node tests/banc_gestion_cloture.cjs <dossier>    # clôture du mois : comptes du serveur, partage, verrou, droits (Playwright)
 node tests/banc_gestion_rapports.cjs <dossier>   # rapports : insolvables, paiements par classe, trésorier, exports (Playwright)
 node tests/banc_gestion_cahier.cjs <dossier>     # cahier de textes : saisie, serveur, relecture par classe, exports (Playwright)
+node tests/banc_gestion_centres.cjs <dossier>    # centres indépendants : un compte = un centre, compte séparé pour l'autre (Playwright)
 ```
 
 **Noms fictifs uniquement** dans le code et les bancs : le dépôt est public, les élèves sont mineurs.
