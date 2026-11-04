@@ -68,12 +68,43 @@ const apiDe = (page) => (route, corps) => page.evaluate(async ([route, corps]) =
   const csv = (await exporter('csv')).toString('utf8');
   ok('export Excel du cahier (fait et travail en clair)', csv.includes('Ce qui a été fait') && csv.includes('Exercices 4 et 5 page 82 ' + SUF), csv.slice(0, 200));
 
-  // L'enseignant ne voit que ses classes.
+  // Progression d'un enseignant (vue « Par enseignant ») et « À reprendre ».
+  await adm.goto(B + '#/accueil'); await adm.goto(B + '#/cahier'); await adm.click('[data-a="cdt-mode"][data-v="enseignant"]');
+  await adm.click(`[data-a="cdt-enseignant"][data-v="${prof.id}"]`); await adm.waitForTimeout(300);
+  const tProg = await adm.textContent('main');
+  ok('progression de l\'enseignant : ses séances écrites', tProg.includes('Progression de') && tProg.includes('Fonctions dérivées ' + SUF) && !tProg.includes('Classe B ' + SUF), tProg.slice(0, 300));
+  ok('« À reprendre » : dernier cours et dernier travail donné', (await adm.textContent('.a-reprendre')).includes('Exercices 4 et 5 page 82 ' + SUF), await adm.textContent('.a-reprendre').catch(() => ''));
+  await adm.screenshot({ path: OUT + '/cahier_progression.png', fullPage: true });
+
+  // L'enseignant ne voit que ses classes ; il fait l'appel (et le cahier) d'une classe hors de son emploi du temps.
   const pp = await login(nav, prof.identifiant, (await api('comptes/mdp', { id: prof.id })).mdp);
   await pp.goto(B + '#/cahier'); await pp.waitForTimeout(400);
   await pp.click(`[data-a="cdt-centre"][data-v="${III.id}"]`).catch(() => {});
   const tp = await pp.textContent('main');
-  ok('enseignant : voit sa classe, pas l\'autre', tp.includes('Fonctions dérivées ' + SUF) && !tp.includes('Classe B ' + SUF), tp.slice(0, 200));
+  ok('enseignant : « Ma progression », sa classe, pas l\'autre', /Ma progression/.test(tp) && tp.includes('Fonctions dérivées ' + SUF) && !tp.includes('Classe B ' + SUF), tp.slice(0, 200));
+  const k3 = hex();
+  await api('sync/pousser', { ops: [{ op: hex(), t: 'classes', id: k3, champs: { centre_id: III.id, nom: 'Cahier C ' + SUF, niveau: '1ere' } }] });
+  await pp.click('#puce-sync'); await aJour(pp); await pp.waitForTimeout(400);
+  await pp.goto(B + '#/pointage/' + k3 + '/' + auj); await pp.waitForSelector('form[data-f="cahier"]');
+  ok('enseignant : la feuille d\'une classe hors emploi du temps est modifiable', !(await pp.textContent('main')).includes('Consultation seule'), '');
+  await pp.fill('form[data-f="cahier"] textarea[name=contenu]', 'Remplacement en C ' + SUF);
+  await pp.fill('form[data-f="cahier"] textarea[name=travail]', 'Lire le chapitre 2 ' + SUF);
+  await pp.click('form[data-f="cahier"] button[type=submit]'); await aJour(pp); await pp.waitForTimeout(600);
+  const seC = (await api('sync/tirer&depuis=0')).lignes.seances.find((s) => s.classe_id === k3 && s.date === auj);
+  ok('serveur : l\'enseignant a fait l\'appel et le cahier de la classe C', seC && seC.contenu.includes(SUF) && seC.ouverte_par === prof.id, JSON.stringify(seC || {}).slice(0, 200));
+  await pp.goto(B + '#/accueil'); await pp.goto(B + '#/cahier'); await pp.waitForTimeout(400);
+  ok('…et la retrouve dans « Ma progression »', (await pp.textContent('main')).includes('Remplacement en C ' + SUF), '');
+
+  // Création d'un enseignant : l'identifiant se fait tout seul.
+  await adm.goto(B + '#/enseignants'); await adm.click('[data-a="ajouter-enseignant"]'); await adm.waitForSelector('#feuille form[data-f="compte"]');
+  await adm.fill('#feuille input[name=nom]', 'ESSOMBA' + SUF + ' Paul');
+  await adm.dispatchEvent('#feuille input[name=nom]', 'input');
+  const apercu = await adm.textContent('#apercu-ident');
+  ok('identifiant proposé à partir du nom (prénom.nom)', apercu === ('paul.essomba' + SUF.toLowerCase()), apercu);
+  await adm.click('#feuille form[data-f="compte"] button[type=submit]'); await adm.waitForSelector('text=Compte créé');
+  const secret = await adm.textContent('#feuille');
+  ok('compte créé sans saisir d\'identifiant ; le message donne l\'identifiant', secret.includes('paul.essomba' + SUF.toLowerCase()), secret.slice(0, 200));
+  await adm.click('#feuille [data-a="fermer"]');
   for (const [n, p] of [['admin', adm], ['enseignant', pp]]) ok(n + ' : aucune erreur JavaScript', p.err.length === 0, p.err.join(' / '));
   await nav.close();
   console.log(echecs.length ? `\n${echecs.length} échec(s)` : '\nTout est vert.');

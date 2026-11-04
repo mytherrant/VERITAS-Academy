@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.12.2';
+  var VERSION = '0.12.5';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -559,6 +559,18 @@
       else formulaireConnexion(message);
     }, function () { formulaireConnexion(message || (navigator.onLine ? 'Serveur injoignable.' : 'Pas de connexion internet. La première connexion demande du réseau.')); });
   }
+  /** Même règle que le serveur : prénom.nom, minuscules sans accents (NOM en capitales = nom de famille). */
+  function identifiantDepuisNom(nom) {
+    var mots = String(nom || '').trim().split(/\s+/).filter(Boolean), fam = [], pre = [];
+    mots.forEach(function (m) { if (m === m.toUpperCase() && /[A-Za-zÀ-ÿ]/.test(m)) fam.push(m); else pre.push(m); });
+    var ordre = pre.length && fam.length ? [pre[0], fam[0]] : mots.slice(0, 2);
+    var b = ordre.map(function (m) { return m.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/[^a-z0-9]+/g, ''); }).filter(Boolean).join('.');
+    if (!b) return '';
+    if (b.length < 3) b = 'compte' + b;
+    var pris = (E.cache.comptes || []).map(function (u) { return u.identifiant; }), essai = b.slice(0, 50), i = 1;
+    while (pris.indexOf(essai) >= 0) { i++; essai = b.slice(0, 50) + i; }
+    return essai;
+  }
   function dernierIdentifiant() { try { return localStorage.getItem('vg-ident') || ''; } catch (e) { return ''; } }
   function formulaireConnexion(message, identifiant, code) {
     var ident = identifiant != null ? identifiant : dernierIdentifiant();
@@ -933,10 +945,7 @@
   }
   function peutPointer(cid, classeId, iso) {
     if (!peut('appel.faire', cid)) return false;
-    if (!estAdmin() && roleDans(cid) === 'enseignant') {
-      var u = E.profil.utilisateur.id;
-      if (!lignes('creneaux').some(function (c) { return c.enseignant_id === u && c.classe_id === classeId && Number(c.jour) === jourDe(iso); })) return false;
-    }
+    // L'enseignant fait l'appel de toute classe de son centre (ses cours restent en tête de liste).
     return true;
   }
   function correcteur(cid) { return peut('appel.corriger', cid); }
@@ -958,6 +967,10 @@
     }
     if (!cid) return h + '<div class="carte vide">Aucun centre.</div>';
     var liste = seancesPrevues(cid, APL.date).filter(function (x) { return peutPointer(cid, x.classe.id, APL.date) || estAdmin(); });
+    if (!estAdmin() && roleDans(cid) === 'enseignant') {
+      var moiE = E.profil.utilisateur.id, sien = function (x) { return x.creneaux.some(function (c) { return c.enseignant_id === moiE; }) ? 0 : 1; };
+      liste = liste.slice().sort(function (a, b) { return sien(a) - sien(b) || (a.debut < b.debut ? -1 : 1); });
+    }
     if (!liste.length) {
       return h + '<div class="carte vide">Pas de cours prévu ' + (APL.date === auj ? 'aujourd\'hui' : 'ce jour-là') + '.<br><small>Les cours viennent de l\'emploi du temps ou des horaires du centre (Planning).</small></div>';
     }
@@ -1159,7 +1172,7 @@
         '<label class="champ"><span>Taux (F)</span><input type="number" name="taux" min="0" required value="' + esc(c.taux) + '"></label></div>' +
         '<label class="champ"><span>Retenue par absence (forfait)</span><input type="number" name="retenue_absence" min="0" value="' + esc(c.retenue_absence || '') + '"></label>' +
         '<div class="actions"><button class="btn clair" type="submit">Enregistrer le contrat</button></div></form>' : '') +
-      '<div class="actions"><button class="btn clair" type="button" data-a="bulletin-ens" data-id="' + esc(uid) + '">' + ico('camera', 'p') + 'Bulletin du mois</button><button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
+      '<div class="actions"><button class="btn clair" type="button" data-a="progression-ens" data-id="' + esc(uid) + '">' + ico('bookopen', 'p') + 'Sa progression</button><button class="btn clair" type="button" data-a="bulletin-ens" data-id="' + esc(uid) + '">' + ico('camera', 'p') + 'Bulletin du mois</button><button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
   }
   /** Bulletin de rémunération (image) : à remettre ou à envoyer à l'enseignant. */
   function bulletinEnseignant(uid, cid, am) {
@@ -3351,12 +3364,12 @@
   // Ce qui a été fait et le travail donné sont saisis dans la feuille d'appel de chaque séance
   // (table « seances » : contenu, travail). Ici on les relit, classe par classe, du plus récent au
   // plus ancien, et on les exporte (PDF paginé, Excel, WhatsApp). L'enseignant ne voit que ses classes.
-  var CDT = { centre: '', classe: '' };
+  var CDT = { centre: '', classe: '', mode: 'classe', enseignant: '' };
   function classesVisiblesCahier(cid) {
     var l = lignes('classes').filter(function (k) { return k.centre_id === cid; });
     if (!estAdmin() && roleDans(cid) === 'enseignant') {
       var moi = E.profil.utilisateur.id;
-      l = l.filter(function (k) { return lignes('creneaux').some(function (c) { return c.classe_id === k.id && c.enseignant_id === moi; }); });
+      l = l.filter(function (k) { return lignes('creneaux').some(function (c) { return c.classe_id === k.id && c.enseignant_id === moi; }) || lignes('seances').some(function (se) { return se.classe_id === k.id && se.ouverte_par === moi; }); });
     }
     return l.sort(function (a, b) { return String(a.nom).localeCompare(String(b.nom), 'fr'); });
   }
@@ -3366,9 +3379,27 @@
       return s.centre_id === cid && ids.indexOf(s.classe_id) >= 0 && (!classeId || s.classe_id === classeId) && (String(s.contenu || '').trim() || String(s.travail || '').trim());
     }).sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : String(a.debut || '').localeCompare(String(b.debut || '')); }).map(function (s) {
       var crs = lignes('creneaux').filter(function (c) { return c.classe_id === s.classe_id && Number(c.jour) === jourDe(s.date); });
-      return { s: s, classe: nomDe('classes', s.classe_id), matieres: crs.map(function (c) { return nomDe('matieres', c.matiere_id); }).filter(Boolean).join(', '),
+      var ens = {};
+      crs.forEach(function (c) {
+        var pe = ligne('presences_ens', idPresenceEns(s.date, c.id));
+        if (pe && pe.statut === 'remplace' && pe.remplacant_id) ens[pe.remplacant_id] = 1; else if (c.enseignant_id) ens[c.enseignant_id] = 1;
+      });
+      // Celui qui a ouvert la séance, s'il est enseignant du centre (appel hors emploi du temps).
+      if (s.ouverte_par && enseignantsDu(s.centre_id).some(function (e) { return e.id === s.ouverte_par; })) ens[s.ouverte_par] = 1;
+      return { s: s, ens: Object.keys(ens), classe: nomDe('classes', s.classe_id), matieres: crs.map(function (c) { return nomDe('matieres', c.matiere_id); }).filter(Boolean).join(', '),
         profs: crs.map(function (c) { return nomPersonne(c.enseignant_id); }).filter(Boolean).filter(function (v, i, t) { return t.indexOf(v) === i; }).join(', ') };
     });
+  }
+  /** Progression d'un enseignant : ses séances écrites (cours du jour ou remplacement), récentes d'abord. */
+  function entreesEnseignant(cid, uid) { return entreesCahier(cid, '').filter(function (x) { return x.ens.indexOf(uid) >= 0; }); }
+  /** « À reprendre » : la dernière séance écrite (fait + travail donné), pour la continuité. */
+  function blocAReprendre(l, quoi) {
+    if (!l.length) return '';
+    var d = l[0], dt = l.filter(function (x) { return String(x.s.travail || '').trim(); })[0];
+    return '<div class="carte a-reprendre"><h3>' + ico('bookopen', 'p') + ' À reprendre' + (quoi ? ' · ' + esc(quoi) : '') + '</h3>' +
+      '<p><span class="etiquette">Dernier cours</span>' + esc(dateLisible(d.s.date, true) + ' · ' + d.classe + (d.matieres ? ' · ' + d.matieres : '')) + '</p>' +
+      (d.s.contenu ? '<p class="doux">' + esc(d.s.contenu) + '</p>' : '') +
+      (dt ? '<p><span class="etiquette travail">Travail donné</span>' + esc(dateLisible(dt.s.date, true) + ' · ' + dt.classe) + '</p><p class="doux">' + esc(dt.s.travail) + '</p>' : '<p class="doux">Aucun travail donné noté.</p>') + '</div>';
   }
   function pageCahier() {
     var dispo = centresChoisis();
@@ -3379,6 +3410,20 @@
     if (!cid) return h + '<div class="carte vide">Aucun centre.</div>';
     var classes = classesVisiblesCahier(cid);
     if (CDT.classe && !classes.some(function (k) { return k.id === CDT.classe; })) CDT.classe = '';
+    var estProf = !estAdmin() && roleDans(cid) === 'enseignant';
+    if (!estProf) h += '<div class="onglets"><button type="button" class="' + (CDT.mode !== 'enseignant' ? 'on' : '') + '" data-a="cdt-mode" data-v="classe">Par classe</button><button type="button" class="' + (CDT.mode === 'enseignant' ? 'on' : '') + '" data-a="cdt-mode" data-v="enseignant">Par enseignant</button></div>';
+    if (estProf || CDT.mode === 'enseignant') {
+      var profsC = estProf ? [{ id: E.profil.utilisateur.id, nom: E.profil.utilisateur.nom }] : enseignantsDu(cid);
+      if (!profsC.some(function (e) { return e.id === CDT.enseignant; })) CDT.enseignant = profsC.length ? profsC[0].id : '';
+      if (!estProf) h += '<div class="puces">' + profsC.map(function (e) {
+        return '<button type="button" class="puce' + (CDT.enseignant === e.id ? ' on' : '') + '" data-a="cdt-enseignant" data-v="' + esc(e.id) + '">' + esc(e.nom) + ' · ' + entreesEnseignant(cid, e.id).length + '</button>';
+      }).join('') + '</div>';
+      if (!CDT.enseignant) return h + '<div class="carte vide">Aucun enseignant dans ce centre.</div>';
+      var le = entreesEnseignant(cid, CDT.enseignant), nomE = estProf ? 'Ma progression' : 'Progression de ' + (nomPersonne(CDT.enseignant) || 'l\'enseignant');
+      h += '<h2>' + esc(nomE) + ' · ' + le.length + ' séance' + (le.length > 1 ? 's' : '') + ' écrite' + (le.length > 1 ? 's' : '') + '</h2>' + blocAReprendre(le, '');
+      if (le.length) h += '<div class="actions export-rapport"><button class="btn or" type="button" data-a="export-cahier" data-v="pdf">' + ico('doc', 'p') + 'PDF</button><button class="btn clair" type="button" data-a="export-cahier" data-v="csv">' + ico('download', 'p') + 'Excel</button><button class="btn clair" type="button" data-a="export-cahier" data-v="texte">' + ico('message', 'p') + 'WhatsApp</button></div>';
+      return h + (le.length ? '<div class="cahier">' + le.map(carteCahier).join('') + '</div>' : '<div class="carte vide">Rien d\'écrit pour cet enseignant. Le cahier se remplit dans la feuille d\'appel de ses cours.</div>');
+    }
     // Seules les classes qui ont déjà une séance écrite (et celle choisie) : pas de rangée de « · 0 ».
     h += '<div class="puces">' + [['', 'Toutes']].concat(classes.map(function (k) { return [k.id, k.nom]; })).map(function (k) {
       var n = entreesCahier(cid, k[0]).length;
@@ -3386,17 +3431,19 @@
       return '<button type="button" class="puce' + (CDT.classe === k[0] ? ' on' : '') + '" data-a="cdt-classe" data-v="' + esc(k[0]) + '">' + esc(k[1]) + ' · ' + n + '</button>';
     }).join('') + '</div>';
     var l = entreesCahier(cid, CDT.classe);
+    if (CDT.classe) h += blocAReprendre(l, nomDe('classes', CDT.classe));
     if (l.length) h += '<div class="actions export-rapport"><button class="btn or" type="button" data-a="export-cahier" data-v="pdf">' + ico('doc', 'p') + 'PDF</button>' +
       '<button class="btn clair" type="button" data-a="export-cahier" data-v="csv">' + ico('download', 'p') + 'Excel</button>' +
       '<button class="btn clair" type="button" data-a="export-cahier" data-v="texte">' + ico('message', 'p') + 'WhatsApp</button></div>';
-    h += l.length ? '<div class="cahier">' + l.map(function (x) {
-      return '<a class="carte entree-cahier" href="#/pointage/' + encodeURIComponent(x.s.classe_id) + '/' + esc(x.s.date) + '">' +
-        '<div class="haut"><b>' + esc(dateLongue(x.s.date).replace(/^./, function (c) { return c.toUpperCase(); }) + ' ' + x.s.date.slice(0, 4)) + '</b><span class="badge">' + esc(x.classe) + '</span></div>' +
-        '<small>' + esc([x.s.debut && x.s.fin ? heureLisible(x.s.debut) + ' – ' + heureLisible(x.s.fin) : '', x.matieres, x.profs].filter(Boolean).join(' · ')) + '</small>' +
-        (x.s.contenu ? '<p><span class="etiquette">Fait</span>' + esc(x.s.contenu).replace(/\n/g, '<br>') + '</p>' : '') +
-        (x.s.travail ? '<p><span class="etiquette travail">Travail</span>' + esc(x.s.travail).replace(/\n/g, '<br>') + '</p>' : '') + '</a>';
-    }).join('') + '</div>' : '<div class="carte vide">Rien d\'écrit pour l\'instant. Ouvrez la feuille d\'appel d\'une séance (Appel) : en bas, « Cahier de textes ».</div>';
+    h += l.length ? '<div class="cahier">' + l.map(carteCahier).join('') + '</div>' : '<div class="carte vide">Rien d\'écrit pour l\'instant. Ouvrez la feuille d\'appel d\'une séance (Appel) : en bas, « Cahier de textes ».</div>';
     return h;
+  }
+  function carteCahier(x) {
+    return '<a class="carte entree-cahier" href="#/pointage/' + encodeURIComponent(x.s.classe_id) + '/' + esc(x.s.date) + '">' +
+      '<div class="haut"><b>' + esc(dateLongue(x.s.date).replace(/^./, function (c) { return c.toUpperCase(); }) + ' ' + x.s.date.slice(0, 4)) + '</b><span class="badge">' + esc(x.classe) + '</span></div>' +
+      '<small>' + esc([x.s.debut && x.s.fin ? heureLisible(x.s.debut) + ' – ' + heureLisible(x.s.fin) : '', x.matieres, x.profs].filter(Boolean).join(' · ')) + '</small>' +
+      (x.s.contenu ? '<p><span class="etiquette">Fait</span>' + esc(x.s.contenu).replace(/\n/g, '<br>') + '</p>' : '') +
+      (x.s.travail ? '<p><span class="etiquette travail">Travail</span>' + esc(x.s.travail).replace(/\n/g, '<br>') + '</p>' : '') + '</a>';
   }
   function texteCahier(l, titre) {
     return ['*' + titre + '*'].concat(l.map(function (x) {
@@ -3923,7 +3970,7 @@
       }).join('') + Object.keys(u.acces).map(function (cid) {
         var c = ligne('centres', cid);
         return '<span class="badge">' + esc(ROLES[u.acces[cid]] || u.acces[cid]) + (lignes('centres').length > 1 && c ? ' · ' + esc(c.nom_court || c.nom) : '') + '</span>';
-      }).join('');
+      }).join('') + (!u.admin_global && Object.keys(u.acces).length > 1 ? '<span class="badge danger">2 centres : à séparer</span>' : '');
       return '<button class="ligne" type="button" data-a="editer-compte" data-id="' + esc(u.id) + '"' + (u.gerable ? '' : ' disabled') + '><span class="avatar">' + esc(initiales(u.nom)) + '</span>' +
         '<span class="corps"><b>' + esc(u.nom) + (u.actif ? '' : ' <span class="badge danger">désactivé</span>') + '</b><small>' + esc(u.identifiant) + ' · ' +
         (u.vu_le ? 'vu le ' + dateLisible(u.vu_le) : 'jamais connecté') + '</small>' +
@@ -3987,23 +4034,34 @@
     };
     var h = '<h2>' + (u ? 'Modifier le compte' : preset && preset.role === 'enseignant' ? 'Nouvel enseignant' : 'Nouveau compte') + '</h2>' +
       (u ? '' : '<p class="doux">Un mot de passe sera créé et affiché une seule fois, à transmettre par WhatsApp.</p>') + '<form data-f="compte" data-id="' + esc(id || '') + '">' +
-      '<label class="champ"><span>Nom et prénom</span><input type="text" name="nom" required value="' + esc(u ? u.nom : '') + '"></label>' +
-      '<div class="deux"><label class="champ"><span>Identifiant</span><input type="text" name="identifiant" required autocapitalize="none" spellcheck="false" pattern="[a-z0-9._\\-]{3,60}" value="' + esc(u ? u.identifiant : '') + '"><small>ex. : marie.ndogpassi3</small></label>' +
-      '<label class="champ"><span>Téléphone</span><input type="tel" name="tel" value="' + esc(u ? u.tel || '' : '') + '"></label></div>' +
-      '<h3>Rôle dans chaque centre</h3>';
-    centres.forEach(function (c) {
-      var permis = rolesPermis(c.id);
-      var actuel = u ? u.acces[c.id] || '' : (preset && preset.centre === c.id && permis.indexOf(preset.role) >= 0 ? preset.role : '');
-      if (!permis.length && !actuel) return;
-      h += '<label class="champ"><span>' + esc(c.nom) + '</span><select name="role_' + esc(c.id) + '"' + (permis.length ? '' : ' disabled') + '><option value="">Aucun accès</option>' +
-        Object.keys(ROLES).filter(function (r) { return permis.indexOf(r) >= 0 || r === actuel; }).map(function (r) {
-          return '<option value="' + r + '"' + (r === actuel ? ' selected' : '') + '>' + esc(ROLES[r]) + '</option>';
-        }).join('') + '</select></label>' +
-        // Trésorier : désigné par l'admin, un par centre (il garde les fonds et confirme les remises).
-        (estAdmin() ? '<label class="case tresorier"><input type="checkbox" name="tresorier_' + esc(c.id) + '"' + (u && tresorierDe(c.id) === u.id ? ' checked' : '') + '> ' + ico('wallet', 'p') +
-          ' Trésorier de ' + esc(c.nom_court || c.nom) + (tresorierDe(c.id) && (!u || tresorierDe(c.id) !== u.id) ? ' <small>(remplace ' + esc(nomCompte(tresorierDe(c.id))) + ')</small>' : '') + '</label>' : '');
-    });
-    var siennes = u ? u.matieres || [] : [];
+      '<label class="champ"><span>Nom et prénom</span><input type="text" name="nom" required value="' + esc(u ? u.nom : (preset && preset.nom) || '') + '"' + (u ? '' : ' data-input="apercu-ident" placeholder="ex. : ESSOMBA Paul"') + '></label>' +
+      (u ? '<div class="deux"><label class="champ"><span>Identifiant</span><input type="text" name="identifiant" required autocapitalize="none" spellcheck="false" pattern="[a-z0-9._\\-]{3,60}" value="' + esc(u.identifiant) + '"><small>ex. : marie.ndogpassi3</small></label>' +
+          '<label class="champ"><span>Téléphone</span><input type="tel" name="tel" value="' + esc(u.tel || '') + '"></label></div>'
+        // Nouveau compte : l'identifiant se fait tout seul à partir du nom ; on peut le choisir si on veut.
+        : '<label class="champ"><span>Téléphone</span><input type="tel" name="tel" inputmode="tel" value="' + esc((preset && preset.tel) || '') + '"></label>' +
+          '<p class="doux ident-auto">' + ico('user', 'p') + ' Identifiant créé automatiquement : <b id="apercu-ident">à partir du nom</b></p>' +
+          '<details class="ident-perso"><summary>Choisir l\'identifiant moi-même</summary><label class="champ"><span>Identifiant</span><input type="text" name="identifiant" autocapitalize="none" spellcheck="false" pattern="[a-z0-9._\\-]{3,60}" placeholder="ex. : marie.ndogpassi3"></label></details>') +
+      '<h3>Centre et rôle</h3><p class="doux">' + ico('building', 'p') + ' Les centres sont <b>indépendants</b> : un compte ne travaille que dans un centre. ' +
+      'Une personne présente dans les deux centres a <b>un compte dans chacun</b> (identifiants différents) : rien n\'est mélangé.</p>';
+    var accesU = u ? Object.keys(u.acces || {}) : [];
+    var centresVus = centres.filter(function (c) { return rolesPermis(c.id).length || accesU.indexOf(c.id) >= 0; });
+    var centreActuel = accesU[0] || (preset && preset.centre) || (centresVus[0] || {}).id || '';
+    if (accesU.length > 1) {
+      h += '<div class="carte note-carte">' + ico('alert', 'p') + ' Ce compte a encore accès à plusieurs centres (ancien réglage). En enregistrant, il ne garde que le centre choisi ci-dessous. ' +
+        'Pour l\'autre centre, créez son compte séparé avec le bouton plus bas.</div>';
+    }
+    var roleActuel = u ? (u.acces || {})[centreActuel] || '' : (preset && preset.role) || '';
+    var rolesVus = Object.keys(ROLES).filter(function (r) { return r === roleActuel || centresVus.some(function (c) { return rolesPermis(c.id).indexOf(r) >= 0; }); });
+    h += '<div class="deux"><label class="champ"><span>Centre</span><select name="centre_id">' +
+      (estAdmin() ? '<option value=""' + (u && !accesU.length ? ' selected' : '') + '>Aucun (administrateur seulement)</option>' : '') +
+      centresVus.map(function (c) { return '<option value="' + esc(c.id) + '"' + (c.id === centreActuel && !(u && !accesU.length) ? ' selected' : '') + '>' + esc(c.nom) + '</option>'; }).join('') + '</select></label>' +
+      '<label class="champ"><span>Rôle</span><select name="role">' + rolesVus.map(function (r) {
+        return '<option value="' + r + '"' + (r === (roleActuel || 'enseignant') ? ' selected' : '') + '>' + esc(ROLES[r]) + '</option>';
+      }).join('') + '</select></label></div>' +
+      // Trésorier : désigné par l'admin, un par centre (il garde les fonds et confirme les remises).
+      (estAdmin() ? '<label class="case tresorier"><input type="checkbox" name="tresorier"' + (u && accesU.some(function (cid) { return tresorierDe(cid) === u.id; }) ? ' checked' : '') + '> ' +
+        ico('wallet', 'p') + ' Trésorier de ce centre <small>(remplace le trésorier actuel s\'il y en a un)</small></label>' : '');
+    var siennes = u ? u.matieres || [] : (preset && preset.matieres) || [];
     h += '<h3>Matières enseignées</h3><p class="doux">Pour les enseignants : elles les proposent en premier dans l\'emploi du temps.</p><div class="deux">' +
       lignes('matieres').map(function (m) { return '<label class="case"><input type="checkbox" name="matiere" value="' + esc(m.id) + '"' + (siennes.indexOf(m.id) >= 0 ? ' checked' : '') + '> ' + esc(m.nom) + '</label>'; }).join('') + '</div>';
     if (estAdmin()) h += '<label class="case"><input type="checkbox" name="admin_global"' + (u && u.admin_global ? ' checked' : '') + '> Administrateur des deux centres (vue consolidée, finances, tous les réglages)</label>';
@@ -4017,7 +4075,11 @@
     if (u) {
       h += '<div class="actions"><button class="btn clair petit" type="button" data-a="reinit-mdp" data-id="' + esc(u.id) + '">Nouveau mot de passe</button>' +
         '<button class="btn clair petit" type="button" data-a="envoyer-guide" data-id="' + esc(u.id) + '">Renvoyer le mode d\'emploi</button>' +
-        '<button class="btn clair petit" type="button" data-a="appareils" data-id="' + esc(u.id) + '">Appareils connectés</button></div>';
+        '<button class="btn clair petit" type="button" data-a="appareils" data-id="' + esc(u.id) + '">Appareils connectés</button>' +
+        // La même personne dans l'autre centre : un compte séparé, pré-rempli.
+        centresVus.filter(function (c) { return c.id !== centreActuel; }).map(function (c) {
+          return '<button class="btn clair petit" type="button" data-a="compte-autre-centre" data-id="' + esc(u.id) + '" data-v="' + esc(c.id) + '">' + ico('plus', 'p') + ' Son compte pour ' + esc(c.nom_court || c.nom) + '</button>';
+        }).join('') + '</div>';
     }
     ouvrirFeuille(h);
   }
@@ -4215,9 +4277,13 @@
     // Le logo n'est ni un lien ni une image : l'appui long n'ouvre aucun menu du navigateur.
     'cdt-centre': function (el) { CDT.centre = el.dataset.v; CDT.classe = ''; rendre(); },
     'cdt-classe': function (el) { CDT.classe = el.dataset.v; rendre(); },
+    'cdt-mode': function (el) { CDT.mode = el.dataset.v; rendre(); },
+    'cdt-enseignant': function (el) { CDT.enseignant = el.dataset.v; rendre(); },
+    'progression-ens': function (el) { fermerFeuille(); CDT.centre = ENS.centre; CDT.mode = 'enseignant'; CDT.enseignant = el.dataset.id; location.hash = '#/cahier'; },
     'export-cahier': function (el) {
-      var l = entreesCahier(CDT.centre, CDT.classe), c = ligne('centres', CDT.centre) || {};
-      var titre = 'Cahier de textes' + (CDT.classe ? ' · ' + nomDe('classes', CDT.classe) : ''), sous = (c.nom || '') + ' · au ' + dateLisible(isoLocal(new Date()), true);
+      var parProf = CDT.enseignant && (CDT.mode === 'enseignant' || (!estAdmin() && roleDans(CDT.centre) === 'enseignant'));
+      var l = parProf ? entreesEnseignant(CDT.centre, CDT.enseignant) : entreesCahier(CDT.centre, CDT.classe), c = ligne('centres', CDT.centre) || {};
+      var titre = parProf ? 'Progression · ' + (nomPersonne(CDT.enseignant) || E.profil.utilisateur.nom) : 'Cahier de textes' + (CDT.classe ? ' · ' + nomDe('classes', CDT.classe) : ''), sous = (c.nom || '') + ' · au ' + dateLisible(isoLocal(new Date()), true);
       if (el.dataset.v === 'texte') { var t = texteCahier(l, titre); if (NATIF || navigator.share) partagerTexte(t); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener'); return; }
       el.disabled = true;
       var f = el.dataset.v === 'csv' ? fichierRapport({ cle: 'cahier-de-textes', titre: titre, sous: sous, colonnes: [{ lib: 'Date' }, { lib: 'Classe' }, { lib: 'Horaire' }, { lib: 'Matière' }, { lib: 'Enseignant' }, { lib: 'Ce qui a été fait' }, { lib: 'Travail donné' }],
@@ -4400,6 +4466,13 @@
       if (!E.enLigne) { toast('Créer un compte demande une connexion internet.', true); return; }
       ouvrirPanneauDiscret();
       feuilleCompte('', { role: 'enseignant', centre: cid });
+    },
+    // Même personne dans l'autre centre : compte séparé, pré-rempli (nom, téléphone, rôle, matières).
+    'compte-autre-centre': function (el) {
+      var u = (E.cache.comptes || []).filter(function (x) { return x.id === el.dataset.id; })[0];
+      if (!u) return;
+      var r = (u.acces || {})[el.dataset.v] || u.acces[Object.keys(u.acces || {})[0]] || 'enseignant';
+      feuilleCompte('', { centre: el.dataset.v, role: r, nom: u.nom, tel: u.tel, matieres: u.matieres || [] });
     },
     'editer-compte': function (el) {
       if (!E.enLigne) { toast('La gestion des comptes demande une connexion internet.', true); return; }
@@ -4793,33 +4866,30 @@
     compte: function (form) {
       var v = valeurs(form);
       var id = form.dataset.id;
-      var acces = [];
-      lignes('centres').forEach(function (c) {
-        var s = form.querySelector('[name="role_' + c.id + '"]');
-        if (s && s.value) acces.push({ centre_id: c.id, role: s.value });
-      });
+      // Un compte = un centre (centres indépendants).
+      var acces = v.centre_id && v.role ? [{ centre_id: v.centre_id, role: v.role }] : [];
       var adminCase = form.querySelector('[name=admin_global]');
       var actifCase = form.querySelector('[name=actif]');
       var matieres = Array.prototype.map.call(form.querySelectorAll('input[name=matiere]:checked'), function (i) { return i.value; });
-      var corps = { id: id || '', identifiant: v.identifiant.toLowerCase(), nom: v.nom, tel: v.tel, acces: acces, matieres: matieres,
+      var corps = { id: id || '', identifiant: String(v.identifiant || '').toLowerCase().replace(/\s+/g, ''), nom: v.nom, tel: v.tel, acces: acces, matieres: matieres,
         admin_global: adminCase ? adminCase.checked : false, actif: actifCase ? actifCase.checked : true };
-      if (!corps.admin_global && !acces.length) { toast('Choisissez au moins un rôle dans un centre.', true); return; }
+      if (!corps.admin_global && !acces.length) { toast('Choisissez le centre et le rôle.', true); return; }
       occupe(form, true);
       api('comptes/enregistrer', corps).then(function (r) {
         // Trésorier coché / décoché : la fiche du centre suit (l'admin seul écrit les centres).
         var uidC = r.id || id;
-        if (estAdmin() && uidC) lignes('centres').forEach(function (c) {
-          var caseT = form.querySelector('[name="tresorier_' + c.id + '"]');
-          if (!caseT) return;
-          if (caseT.checked && tresorierDe(c.id) !== uidC) muter('centres', c.id, { tresorier_id: uidC });
-          else if (!caseT.checked && tresorierDe(c.id) === uidC) muter('centres', c.id, { tresorier_id: '' });
+        var caseT = form.querySelector('[name=tresorier]');
+        if (estAdmin() && uidC && caseT) lignes('centres').forEach(function (c) {
+          var veut = caseT.checked && c.id === v.centre_id;
+          if (veut && tresorierDe(c.id) !== uidC) muter('centres', c.id, { tresorier_id: uidC });
+          else if (!veut && tresorierDe(c.id) === uidC) muter('centres', c.id, { tresorier_id: '' });
         });
         chargerComptes();
         // L'équipe (enseignants de chaque centre) arrive avec la synchro : écran Enseignants à jour.
         synchroniser();
         var accesMap = {};
         corps.acces.forEach(function (a) { accesMap[a.centre_id] = a.role; });
-        if (r.mdp) feuilleSecret('Compte créé', corps.nom, corps.identifiant, r.mdp, accesMap, corps.admin_global);
+        if (r.mdp) feuilleSecret('Compte créé', corps.nom, r.identifiant || corps.identifiant, r.mdp, accesMap, corps.admin_global);
         else { fermerFeuille(); toast('Compte enregistré.'); }
       }, function (e) { occupe(form, false); toast(e.message, true); });
     },
@@ -5089,6 +5159,7 @@
     var k = ev.target.dataset && ev.target.dataset.input;
     if (k === 'recherche-eleve') { ELV.q = ev.target.value; dessinerListeEleves(); }
     if (k === 'apercu-import') apercuImport(ev.target.form);
+    if (k === 'apercu-ident') { var a = $('#apercu-ident'); if (a) a.textContent = identifiantDepuisNom(ev.target.value) || 'à partir du nom'; }
     if (k === 'recherche-caisse') { CAI.q = ev.target.value; dessinerRechercheCaisse(); }
   });
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !$('#feuille').hidden) fermerFeuille(); });

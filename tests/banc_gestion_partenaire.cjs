@@ -60,7 +60,7 @@ const apiDe = (page) => (route, corps) => page.evaluate(async ([route, corps]) =
   await pa.goto(B + '#/enseignants'); await pa.waitForSelector('[data-a="ajouter-enseignant"]');
   ok('Enseignants : « Ajouter un enseignant » visible', true, '');
   await pa.click('[data-a="ajouter-enseignant"]'); await pa.waitForSelector('#feuille form[data-f="compte"]');
-  await pa.fill('#feuille input[name=nom]', 'Prof Partenaire ' + SUF); await pa.fill('#feuille input[name=identifiant]', 'prof.part' + SUF.toLowerCase());
+  await pa.fill('#feuille input[name=nom]', 'Prof Partenaire ' + SUF); await pa.click('#feuille details.ident-perso summary'); await pa.fill('#feuille input[name=identifiant]', 'prof.part' + SUF.toLowerCase());
   await pa.click('#feuille form[data-f="compte"] button[type=submit]'); await pa.waitForSelector('text=Compte créé');
   await pa.click('#feuille [data-a="fermer"]'); await pa.click('#puce-sync'); await aJour(pa); await pa.waitForTimeout(600);
   const prof = (await api('comptes')).comptes.find((u) => u.identifiant === 'prof.part' + SUF.toLowerCase());

@@ -69,7 +69,21 @@ jour et le bilan, et l'enseignant la voit dans « Mes heures ». La paie du mois
 **Cahier de textes :** saisi dans la feuille d'appel de chaque séance (« Ce qui a été fait »,
 « Travail donné » → `g_seances.contenu` / `travail`), relu dans Plus › Cahier de textes : par centre et
 par classe, du plus récent au plus ancien, avec l'horaire, la matière et l'enseignant du jour ; exports
-PDF (texte jamais coupé), Excel, WhatsApp. L'enseignant ne voit que ses classes.
+PDF (texte jamais coupé), Excel, WhatsApp. L'enseignant ne voit que ses classes. Vue « Par enseignant » : la
+progression d'un enseignant (ses cours du jour, ses remplacements, les séances qu'il a ouvertes) et
+« À reprendre » (dernier cours, dernier travail donné) pour la continuité.
+
+**Appel par les enseignants :** un enseignant fait l'appel de toute classe de son centre (ses cours en
+tête de liste), même sans emploi du temps rempli, dans la même limite de 2 jours que les autres.
+
+**Création d'un compte :** l'identifiant se déduit du nom (« ESSOMBA Paul » → `paul.essomba`, unique,
+`g_identifiant_libre`) ; on peut le choisir soi-même (« Choisir l'identifiant moi-même »).
+
+**Centres indépendants :** un compte (hors administrateur) n'a accès qu'à **un seul centre** ; le serveur
+refuse le reste (`comptes/enregistrer`, 422). Une personne présente dans les deux centres a deux comptes
+(identifiants différents : le second reçoit le suffixe du centre, ex. `paul.essomba.ndogpassi2`). La fiche
+d'un compte propose « Son compte pour <autre centre> », pré-rempli. Les anciens comptes à deux centres
+portent le badge « 2 centres : à séparer » et ne gardent que le centre choisi au prochain enregistrement.
 
 **Rapports (Plus › Rapports, ou depuis Caisse › Impayés et le Bilan) :** pour qui voit la caisse.
 Insolvables (classe, échéances impayées, montant dû, téléphone, sous-totaux), paiements par mois et
@@ -185,6 +199,7 @@ node tests/banc_gestion_partenaire.cjs <dossier> # actionnaire : inscrit, encais
 node tests/banc_gestion_cloture.cjs <dossier>    # clôture du mois : comptes du serveur, partage, verrou, droits (Playwright)
 node tests/banc_gestion_rapports.cjs <dossier>   # rapports : insolvables, paiements par classe, trésorier, exports (Playwright)
 node tests/banc_gestion_cahier.cjs <dossier>     # cahier de textes : saisie, serveur, relecture par classe, exports (Playwright)
+node tests/banc_gestion_centres.cjs <dossier>    # centres indépendants : un compte = un centre, compte séparé pour l'autre (Playwright)
 ```
 
 **Noms fictifs uniquement** dans le code et les bancs : le dépôt est public, les élèves sont mineurs.
