@@ -67,6 +67,8 @@ const apiDe = (page) => (route, corps) => page.evaluate(async ([route, corps]) =
   ok('partenaire : rien ne s\'enregistre avant le début des comptes', r.resultats[0].ok === false && /repartent de zéro/.test(r.resultats[0].erreur || ''), JSON.stringify(r).slice(0, 200));
   r = await api('sync/pousser', { ops: [{ op: hex(), t: 'paiements', id: paPrec, champs: { annule: 1, motif_annulation: 'erreur de saisie (banc)' } }] });
   ok('admin : corrige encore un versement d\'avant', r.resultats[0].ok === true, JSON.stringify(r).slice(0, 200));
+  r = await api('sync/pousser', { ops: [{ op: hex(), t: 'paiements', id: 'pa' + hex(), champs: { centre_id: cid, eleve_id: eleve.id, montant: 2500, date: prec + '-20', mode: 'especes' } }] });
+  ok('admin : encaisse encore dans le mois retiré (contrôle sur tout)', r.resultats[0].ok === true, JSON.stringify(r).slice(0, 200));
 
   // Le mois en cours le rappelle ; le partenaire part de zéro.
   await adm.click('[data-a="bilan-mois"][data-v="1"]'); await adm.waitForTimeout(300);
