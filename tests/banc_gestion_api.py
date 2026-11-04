@@ -549,7 +549,13 @@ _, r = req("sync/pousser", {"ops": [
     {"op": op(), "t": "seances", "id": sid(auj, clU), "champs": {"centre_id": A, "classe_id": clU, "date": jj(auj), "debut": "16:00", "fin": "18:00"}},
 ]}, prof)
 verifier("l'enseignant fait l'appel de SA classe du jour", r["resultats"][0]["ok"] is True, r["resultats"][0])
-verifier("l'enseignant ne pointe pas une classe où il n'a pas cours", r["resultats"][1]["ok"] is False, r["resultats"][1])
+# Demande de Jacques (04/11/2026) : l'enseignant fait l'appel de toute classe de SON centre.
+verifier("l'enseignant fait aussi l'appel d'une autre classe de son centre", r["resultats"][1]["ok"] is True, r["resultats"][1])
+# Un enseignant du seul centre A ne fait pas l'appel dans B (prof.maths, lui, enseigne dans les deux).
+_, rc = req("comptes/enregistrer", {"id": exist.get("prof.a.seul", ""), "identifiant": "prof.a.seul", "nom": "Prof A Seul", "acces": [{"centre_id": A, "role": "enseignant"}]}, adm)
+profA = connexion("prof.a.seul", req("comptes/mdp", {"id": exist.get("prof.a.seul", "") or rc["id"]}, adm)[1]["mdp"])
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "seances", "id": sid(auj, clX) + "p", "champs": {"centre_id": Bc, "classe_id": clX, "date": jj(auj), "debut": "16:00", "fin": "18:00"}}]}, profA)
+verifier("un enseignant du seul centre A ne fait pas l'appel dans B", r["resultats"][0]["ok"] is False, r["resultats"][0])
 _, r = req("sync/pousser", {"ops": [{"op": op(), "t": "seances", "id": sid(auj, clX) + "x", "champs": {"centre_id": Bc, "classe_id": clX, "date": jj(auj), "debut": "16:00", "fin": "18:00"}}]}, actA)
 verifier("un actionnaire ne fait pas l'appel dans l'autre centre", r["resultats"][0]["ok"] is False, r)
 _, r = req("sync/pousser", {"ops": [{"op": op(), "t": "seances", "id": sid(auj, clU), "champs": {"centre_id": A, "classe_id": clU, "date": jj(auj), "debut": "16:00", "fin": "18:00"}}]}, actA)

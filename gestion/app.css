@@ -624,3 +624,14 @@ table.rapport { width: 100%; border-collapse: collapse; font-size: 13px; min-wid
 .entree-cahier p { margin: 6px 0 0; color: var(--titre); }
 .etiquette { display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; background: var(--bleu-pale); color: var(--bleu-profond); border-radius: 6px; padding: 1px 6px; margin-right: 6px; }
 .etiquette.travail { background: var(--alerte-fond); color: var(--alerte); }
+
+/* Création d'un compte : identifiant automatique, personnalisable. */
+.ident-auto { display: flex; align-items: center; gap: 6px; margin: -4px 0 6px; }
+.ident-auto b { color: var(--bleu-profond); }
+.ident-perso { margin: 0 0 12px; }
+.ident-perso summary { cursor: pointer; color: var(--bleu); font-size: 14px; margin-bottom: 8px; }
+
+/* « À reprendre » : dernier cours et dernier travail donné, pour la continuité. */
+.carte.a-reprendre { border-left: 4px solid var(--bleu); background: #F7FAFF; }
+.carte.a-reprendre h3 { display: flex; align-items: center; gap: 6px; color: var(--bleu-profond); }
+.carte.a-reprendre p { margin: 6px 0 0; }

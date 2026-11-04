@@ -201,8 +201,10 @@ case 'comptes/enregistrer': {
         $cid = (string) ($a['centre_id'] ?? ''); $role = (string) ($a['role'] ?? '');
         if ($cid !== '' && in_array($role, G_ROLES, true)) { $accesDemandes[$cid] = $role; }
     }
-    if (!preg_match('/^[a-z0-9._-]{3,60}$/', $ident)) { g_fail('Identifiant : 3 à 60 caractères (lettres, chiffres, . _ -).', 422); }
     if ($nom === '') { g_fail('Le nom est obligatoire.', 422); }
+    // Nouveau compte sans identifiant : il se déduit du nom (« ESSOMBA Paul » → paul.essomba), unique.
+    if ($ident === '' && $id === '') { $ident = g_identifiant_libre($pdo, $nom); }
+    if (!preg_match('/^[a-z0-9._-]{3,60}$/', $ident)) { g_fail('Identifiant : 3 à 60 caractères (lettres, chiffres, . _ -).', 422); }
     $matieres = array_values(array_unique(array_filter(array_map('strval', (array) g_param('matieres', [])))));
     if ($matieres) {
         $ph = implode(',', array_fill(0, count($matieres), '?'));
@@ -286,7 +288,7 @@ case 'comptes/enregistrer': {
     if (!$accesDemandes && !($avant['acces'] ?? [])) {
         g_journal($ctx, $avant ? 'compte_modifie' : 'compte_cree', 'utilisateur', $id, $avant, $apres);
     }
-    g_ok(['id' => $id, 'mdp' => $mdpClair]);
+    g_ok(['id' => $id, 'mdp' => $mdpClair, 'identifiant' => $ident]);
 }
 
 case 'comptes/mdp': {
@@ -612,12 +614,9 @@ function g_valider_appel(PDO $pdo, string $table, string $id, ?array $existant, 
     if ($date > date('Y-m-d')) { throw new DomainException('On ne fait pas l\'appel d\'un jour à venir.'); }
 
     $role = $ctx && !$ctx['admin'] ? ($ctx['acces'][$centre] ?? '') : 'admin';
-    if ($role === 'enseignant') {
-        $jour = (int) date('N', strtotime($date));
-        $st = $pdo->prepare('SELECT COUNT(*) FROM g_creneaux WHERE enseignant_id = ? AND classe_id = ? AND jour = ? AND supprime = 0');
-        $st->execute([$ctx['uid'], $classe, $jour]);
-        if (!(int) $st->fetchColumn()) { throw new DomainException('Vous n\'avez pas cours avec cette classe ce jour-là.'); }
-    }
+    // L'enseignant fait l'appel de toute classe de SON centre (le centre est vérifié plus bas et
+    // par la portée du registre), dans la même limite de 2 jours que les autres ; même sans
+    // emploi du temps rempli. Demande de Jacques (04/11/2026).
     $ancien = $date < date('Y-m-d', strtotime('-2 days'));
     $correcteur = g_ctx_peut('appel.corriger', $centre);
 
@@ -1349,4 +1348,31 @@ function g_valider_cloture(PDO $pdo, string $id, ?array $existant, array &$champ
     $champs['parts'] = json_encode(array_map(fn($a) => ['nom' => $a['nom'], 'part' => (int) $a['part_centiemes'], 'montant' => (int) round(($r - $d - $p) * (int) $a['part_centiemes'] / 10000)], $st->fetchAll()), JSON_UNESCAPED_UNICODE);
     $champs['clos_par'] = $ctx['uid'] ?? null;
     $champs['clos_le'] = g_now();
+}
+
+/** Identifiant tiré du nom : prénom.nom en minuscules sans accents (NOM en capitales = nom de famille), unique. */
+function g_identifiant_libre(PDO $pdo, string $nom): string {
+    $mots = preg_split('/\s+/u', trim($nom)) ?: [];
+    $famille = []; $prenoms = [];
+    foreach ($mots as $m) {
+        if ($m === '') { continue; }
+        if (mb_strtoupper($m) === $m && preg_match('/\p{L}/u', $m)) { $famille[] = $m; } else { $prenoms[] = $m; }
+    }
+    $ordre = $prenoms && $famille ? array_merge(array_slice($prenoms, 0, 1), array_slice($famille, 0, 1)) : array_slice($mots, 0, 2);
+    $ascii = function (string $t): string {
+        $t = mb_strtolower($t);
+        $t = strtr($t, ['à' => 'a', 'â' => 'a', 'ä' => 'a', 'á' => 'a', 'ç' => 'c', 'é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e', 'î' => 'i', 'ï' => 'i', 'í' => 'i',
+                        'ô' => 'o', 'ö' => 'o', 'ó' => 'o', 'ù' => 'u', 'û' => 'u', 'ü' => 'u', 'ú' => 'u', 'ÿ' => 'y', 'ñ' => 'n', 'œ' => 'oe', 'æ' => 'ae']);
+        return preg_replace('/[^a-z0-9]+/', '', $t);
+    };
+    $base = implode('.', array_filter(array_map($ascii, $ordre)));
+    if (strlen($base) < 3) { $base = 'compte' . $base; }
+    $base = substr($base, 0, 50);
+    $st = $pdo->prepare('SELECT COUNT(*) FROM g_utilisateurs WHERE identifiant = ?');
+    for ($i = 1; $i < 1000; $i++) {
+        $essai = $i === 1 ? $base : $base . $i;
+        $st->execute([$essai]);
+        if (!(int) $st->fetchColumn()) { return $essai; }
+    }
+    return $base . substr(bin2hex(random_bytes(3)), 0, 5);
 }
