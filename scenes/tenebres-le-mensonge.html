@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261105a">
+<link rel="stylesheet" href="scene.css?v=20261105b">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -63,12 +63,11 @@ window.SCENE = {
       ] },
     { t: 'recit', sort: ['kurtz'], decor: 'deuil', lieu: 'une ville d’Europe, le salon de la Promise', moment: 'Un an plus tard · au crépuscule', entre: ['promise'], txt: 'De retour en Europe, Marlow rend visite à la fiancée de Kurtz, en deuil depuis un an. Elle l’attendait.' },
     { t: 'dit', qui: 'promise', emo: 'triste', txt: 'Vous étiez avec lui jusqu’à la fin. Dites-moi… ses dernières paroles. Je veux les entendre, pour pouvoir vivre avec.' },
-    { t: 'choix', qui: 'marlow', q: 'Tu es Marlow. Elle te demande les derniers mots de Kurtz. Que réponds-tu ?',
-      options: [
-        { txt: 'La vérité : « Ses derniers mots furent : Horreur ! Horreur ! »', consequence: 'Tu restes fidèle à ce que tu as vu, mais tu détruis la dernière image qu’elle avait de lui.', jauges: { verite: 10 } },
-        { txt: 'Un mensonge : « Le dernier mot qu’il a prononcé… c’était votre nom. »', consequence: 'Tu la protèges. Mais toi qui détestes le mensonge, tu dois vivre avec celui-là.', jauges: { verite: -60 } }
-      ],
-      oeuvre: 'Marlow ment : il lui dit que Kurtz a prononcé son nom. Le récit se referme sur ce mensonge, une question morale qu’il ne résout pas.' },
+    { t: 'dit', qui: 'promise', emo: 'triste', jeu: 'd’un ton brisé', txt: 'Répétez-les. Je veux — je veux — quelque chose — quelque chose — avec quoi vivre.', cite: 'Joseph Conrad, Au cœur des ténèbres, chapitre III (trad. française)' },
+    { t: 'dit', qui: 'promise', emo: 'amour', txt: 'Son dernier mot — pour vivre avec. Ne comprenez-vous pas que je l’aimais — je l’aimais — je l’aimais !', cite: 'Joseph Conrad, Au cœur des ténèbres, chapitre III (trad. française)' },
+    { t: 'dit', qui: 'marlow', jeu: 'il se ressaisit et parle lentement', txt: 'Le dernier mot qu’il ait prononcé, c’est… votre nom.', cite: 'Joseph Conrad, Au cœur des ténèbres, chapitre III (trad. française)' },
+    { t: 'dit', qui: 'promise', emo: 'joie', jeu: 'un cri d’inconcevable triomphe et d’indicible douleur', txt: 'Je le savais — j’étais sûre !…', cite: 'Joseph Conrad, Au cœur des ténèbres, chapitre III (trad. française)' },
+    { t: 'recit', txt: 'Mais rien n’arriva. Le ciel ne tombe pas pour de pareilles broutilles. […] Mais je ne pouvais pas. Je ne pouvais pas lui dire. Cela aurait été trop ténébreux — absolument trop ténébreux.', cite: 'Joseph Conrad, Au cœur des ténèbres, chapitre III (trad. française)' },
     { t: 'pense', qui: 'marlow', emo: 'doute', txt: 'Je n’ai pas pu. La vérité l’aurait écrasée. Alors, dans ce salon, l’Europe peut continuer à croire à sa propre innocence.' },
     { t: 'remarque', titre: 'Une fin qui répond au début', txt: 'La situation finale ne se déroule pas sur le pont d’un bateau entre marins, mais dans le salon d’une femme en deuil. Le cercle du voyage se referme, mais sur un silence et un mensonge, non sur un retour à l’innocence.' },
     { t: 'question', q: 'En 1975, l’écrivain nigérian Chinua Achebe a reproché au roman une chose précise. Laquelle ?',
@@ -153,7 +152,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261105a"></script>
-<script src="scene.js?v=20261105a"></script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
 </body>
 </html>

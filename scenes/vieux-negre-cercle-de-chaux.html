@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261105a">
+<link rel="stylesheet" href="scene.css?v=20261105b">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -34,6 +34,10 @@ window.SCENE = {
   },
   etapes: [
     { t: 'recit', entre: ['meka', 'fouconi'], txt: 'Doum, le jour de la cérémonie. Sur la place, on a tracé un cercle à la chaux. C’est là que Meka, le vieux paysan qu’on va décorer, doit attendre le Chef des Blancs.' },
+    { t: 'recit', txt: 'Tête nue, les bras collés au corps, Meka se tenait immobile dans le cercle dessiné à la chaux où on l’avait placé pour attendre l’arrivée du Chef des Blancs.', cite: 'Ferdinand Oyono, Le vieux nègre et la médaille, deuxième partie' },
+    { t: 'recit', txt: 'Il réalisa qu’il était dans une situation étrange. Ni son grand-père, ni son père, ni aucun membre de son immense famille ne s’étaient trouvés placés, comme lui, dans un cercle de chaux, entre deux mondes, le sien et celui de ceux qu’on avait d’abord appelés les « fantômes » quand ils étaient arrivés au pays. Lui, il ne se trouvait ni avec les siens ni avec les autres.', cite: 'Ferdinand Oyono, Le vieux nègre et la médaille, deuxième partie' },
+    { t: 'recit', txt: 'Maintenant qu’il sentait son cœur battre dans ses pieds, il commença à se demander avec appréhension s’il tiendrait dans son cercle jusqu’à l’arrivée du grand Chef des Blancs.', cite: 'Ferdinand Oyono, Le vieux nègre et la médaille, deuxième partie' },
+    { t: 'question', q: '« entre deux mondes » : que représente le cercle de chaux ?', options: [ { txt: 'La place de Meka : ni avec les siens ni avec les Blancs, seul au milieu.', ok: true, retour: 'Un simple trait de chaux, et tout le système colonial est dessiné.' }, { txt: 'Une marque d’honneur réservée aux chefs.', retour: 'Les chefs ont leurs écussons ; Meka, lui, est mis à part.' } ] },
     { t: 'dit', qui: 'fouconi', jeu: 'sèchement, sans le regarder', txt: 'Tu restes dans le cercle, Meka. Tu ne bouges pas, tu ne parles pas. Le Chef arrive.' },
     { t: 'dit', qui: 'meka', emo: 'fier', jeu: 'droit comme un piquet', txt: 'Oui, Monsieur. Je ne bougerai pas.', jauges: { fierte: 90 } },
     { t: 'recit', txt: 'Le soleil monte. Les minutes passent, puis les heures. Personne ne vient.', jauges: { corps: 45 } },
@@ -159,7 +163,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261105a"></script>
-<script src="scene.js?v=20261105a"></script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
 </body>
 </html>

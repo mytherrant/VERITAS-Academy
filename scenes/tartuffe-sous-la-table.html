@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261105a">
+<link rel="stylesheet" href="scene.css?v=20261105b">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -80,6 +80,12 @@ window.SCENE = {
     { t: 'dit', qui: 'orgon', emo: 'colere', jeu: 'en sortant de sous la table', txt: 'C’est un monstre ! Et moi qui lui ai tout donné… ma fille, ma maison, ma confiance.', jauges: { aveugle: 5, masque: 0 } },
     { t: 'dit', qui: 'elmire', txt: 'Vous l’avez vu de vos yeux. Vous m’avez laissée tousser bien longtemps.' },
     { t: 'remarque', titre: 'Et ensuite ?', txt: 'Trop tard : Tartuffe possède la maison par la donation, et la cassette aux papiers compromettants. À l’acte V, il fait expulser la famille et dénonce Orgon au roi. Mais l’Exempt l’arrête au nom du roi : tout finit bien.', objet: { i: '🗝️', lib: 'La cassette' }, jauges: { danger: 95 } },
+    { t: 'recit', txt: 'Relis maintenant la scène dans les vers de Molière : Tartuffe explique à Elmire comment on « s’arrange » avec le ciel.' },
+    { t: 'vers', qui: 'tartuffe', jeu: 'doucereux', txt: 'Le ciel défend, de vrai, certains contentements ;\nMais on trouve avec lui des accommodements.\nSelon divers besoins, il est une science\nD’étendre les liens de notre conscience,\nEt de rectifier le mal de l’action\nAvec la pureté de notre intention.', cite: 'Molière, Tartuffe ou l’Imposteur, acte IV, scène 5' },
+    { t: 'dit', qui: 'tartuffe', txt: 'Vous toussez fort, madame.', cite: 'Molière, Tartuffe ou l’Imposteur, acte IV, scène 5' },
+    { t: 'dit', qui: 'elmire', jeu: 'elle tousse pour avertir Orgon, sous la table', txt: 'Oui, je suis au supplice.', cite: 'Molière, Tartuffe ou l’Imposteur, acte IV, scène 5' },
+    { t: 'vers', qui: 'tartuffe', txt: 'Le scandale du monde est ce qui fait l’offense,\nEt ce n’est pas pécher que pécher en silence.', cite: 'Molière, Tartuffe ou l’Imposteur, acte IV, scène 5' },
+    { t: 'question', q: '« Ce n’est pas pécher que pécher en silence » : que révèle cette maxime ?', options: [ { txt: 'Pour Tartuffe, seul compte ce qui se voit : c’est la morale de l’hypocrite.', ok: true, retour: 'Molière a même ajouté en note, plus haut : « C’est un scélérat qui parle. »' }, { txt: 'Que Tartuffe est un homme très pieux.', retour: 'Il « s’arrange » avec le ciel : c’est tout le contraire de la piété.' } ] },
     { t: 'atelier', mode: 'ordre', titre: 'Atelier · le schéma dramatique', consigne: 'Remets les grandes étapes de la pièce dans l’ordre.',
       items: [
         'Tartuffe vit chez Orgon ; la famille le déteste, Orgon l’adore.',
@@ -160,7 +166,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261105a"></script>
-<script src="scene.js?v=20261105a"></script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
 </body>
 </html>

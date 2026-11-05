@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261105a">
+<link rel="stylesheet" href="scene.css?v=20261105b">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -33,6 +33,7 @@ window.SCENE = {
   },
   etapes: [
     { t: 'recit', entre: ['lanta'], txt: 'Abomey, l’ancienne capitale du Dahomey. Paul Lanta, commis d’administration, « moderne jusqu’au bout des ongles », doit percer une rue. Un iroko sacré, presque trois fois centenaire, barre le tracé.' },
+    { t: 'recit', txt: 'Dans l’histoire de la civilisation négro-africaine, le nom d’Abomey, capitale historique du Dahomey, a une résonance particulière. […] Cependant, dans le secret des couvents des divinités vaudou et dans la tête des vieux alourdie de sagesse, la force mystérieuse qui soutint l’ardeur des rois demeure vivace.', cite: 'Jean Pliya, L’Arbre fétiche (ouverture)' },
     { t: 'dit', qui: 'lanta', emo: 'colere', jeu: 'aux prisonniers', txt: 'Cet arbre doit tomber. Vous n’avez que des coupe-coupe ? Les haches arriveront demain.' },
     { t: 'dit', qui: 'mehou', entre: ['mehou'], jeu: 'tête baissée, les doigts noués dans le dos', txt: 'Chef, répondit Mèhou en se tenant respectueusement à distance, tête baissée, les doigts noués au dos pour se donner une contenance, il ne s’agit pas d’une fable. Je suis né à Abomey avant que le roi Gbêhanzin se rendît et ne fût déporté dans le pays des Blancs.', cite: 'Jean Pliya, L’Arbre fétiche' },
     { t: 'dit', qui: 'mehou', txt: 'Le roi Tegbessou aurait été sauvé plusieurs fois par un oiseau qui habitait cet arbre et lui signalait les ruses de ses ennemis. En mémoire de ces services, l’iroko a toujours été respecté.', jauges: { tradition: 85 } },
@@ -53,6 +54,10 @@ window.SCENE = {
       ],
       oeuvre: 'Dossou livre combat contre l’arbre, pendant l’orage. À la fin, sa « jambe éclopée ne suivit pas l’élan de tout l’être » : c’est sa jambe qui le tuera.' },
     { t: 'recit', ambiance: 'orage', txt: 'Les coups de hache résonnent. L’orage éclate. L’iroko vacille… et s’abat. Dossou veut bondir de côté, mais sa jambe éclopée ne suit pas.', objet: { i: 'flamme', lib: 'La hache et l’orage' }, jauges: { presage: 100, tradition: 95 } },
+    { t: 'recit', txt: 'Relis le combat de Dossou contre l’arbre, dans le texte de Jean Pliya.' },
+    { t: 'recit', txt: 'Dès que le bûcheron arriva sur le chantier, il se dirigea vers l’iroko. Il toisa longuement son puissant adversaire calé sur de larges contreforts pareils à des carènes de navire. Le tronc gris cendré, lisse par endroits, se desquamait en d’autres, ou se gerçait comme une peau de caïman.', cite: 'Jean Pliya, L’Arbre fétiche' },
+    { t: 'recit', txt: 'Et la cognée entra en danse. Aux premiers coups qui entamèrent les contreforts, les tisserins qui nidifiaient dans un palmier voisin s’envolèrent en une nuée piaillante. Des fourmis rouges se répandirent sur les prisonniers qui s’éloignèrent prudemment. Toute la charpente du géant violé et en proie à la cognée frissonna.', cite: 'Jean Pliya, L’Arbre fétiche' },
+    { t: 'question', q: '« son puissant adversaire », « le géant violé » : comment Pliya présente-t-il l’iroko ?', options: [ { txt: 'Comme un être vivant, un adversaire de lutte : c’est une personnification.', ok: true, retour: 'L’arbre « frissonne » sous la cognée : le combat devient un sacrilège.' }, { txt: 'Comme un simple tas de bois.', retour: 'Relis : l’arbre a une « peau », une « chair », il « frissonne ».' } ] },
     { t: 'atelier', mode: 'ordre', titre: 'Atelier · préparer une fin sans la dire', consigne: 'Remets dans l’ordre les indices que la nouvelle sème avant la mort de Dossou.',
       items: ['Mèhou raconte l’histoire sacrée de l’iroko.', 'Dossou se propose comme bûcheron.', 'En chemin, il croise un homme : mauvais présage.', 'Cossi a peur et se tait.', 'L’orage éclate pendant le combat contre l’arbre.', 'La jambe éclopée de Dossou ne suit pas son élan.'],
       bravo: 'Une bonne nouvelle prépare sa fin par des indices, sans jamais l’annoncer.' }
@@ -102,7 +107,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261105a"></script>
-<script src="scene.js?v=20261105a"></script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
 </body>
 </html>

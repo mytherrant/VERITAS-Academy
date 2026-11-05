@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261105a">
+<link rel="stylesheet" href="scene.css?v=20261105b">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -32,8 +32,10 @@ window.SCENE = {
   etapes: [
     { t: 'recit', entre: ['voyageur', 'habitant'], txt: 'La nuit. Quelqu’un frappe à une porte. Il parle pendant tout le poème. On ne saura jamais si on lui a ouvert.' },
     { t: 'vers', qui: 'voyageur', jeu: 'il frappe', txt: 'J’ai frappé à ta porte\nJ’ai frappé à ton cœur\nPour avoir bon lit\nPour avoir bon feu...\nPourquoi me repousser ?\nOuvre-moi mon frère.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XVI' },
+    { t: 'vers', qui: 'voyageur', txt: 'Pourquoi me demander\nsi je suis d’Afrique\nsi je suis d’Amérique\nsi je suis d’Asie\nsi je suis d’Europe ?\nOuvre-moi mon frère.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XVI' },
     { t: 'pense', qui: 'habitant', emo: 'peur', txt: 'Qui est-il ? D’où vient-il ? Il ne me ressemble pas…' },
     { t: 'vers', qui: 'voyageur', txt: 'Pourquoi me demander\nla longueur de mon nez\nl’épaisseur de ma bouche\nla couleur de ma peau\net le nom de mes Dieux ?\nOuvre-moi mon frère.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XVI', jauges: { mefiance: 70 } },
+    { t: 'vers', qui: 'voyageur', emo: 'fier', txt: 'Je ne suis pas un noir\nje ne suis pas un rouge\nje ne suis pas un jaune\nje ne suis pas un blanc\nje ne suis qu’un homme\nOuvre-moi mon frère.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XVI' },
     { t: 'question', q: 'Quel procédé fait retenir ce poème par cœur ?',
       options: [
         { txt: 'Le refrain « Ouvre-moi mon frère » et les répétitions en début de vers.', ok: true, retour: 'Ce qui se retient est ce qui se répète. C’est pour cela qu’on le récite dans les écoles de plusieurs pays d’Afrique.' },
@@ -102,7 +104,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261105a"></script>
-<script src="scene.js?v=20261105a"></script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
 </body>
 </html>

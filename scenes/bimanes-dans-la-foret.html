@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261105a">
+<link rel="stylesheet" href="scene.css?v=20261105b">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -31,6 +31,9 @@ window.SCENE = {
   },
   etapes: [
     { t: 'recit', entre: ['dany'], txt: 'Dany vient d’obtenir son baccalauréat. Sa mère a dû le harceler des semaines pour qu’il aille voir sa grand-mère au village : il n’y était pas venu depuis cinq ans. Il arrive à seize heures, en veste et cravate, après deux heures de marche au soleil.' },
+    { t: 'recit', txt: 'Du haut de son baccalauréat, Dany toisa le village : une armature de piquets mal équarris et reliés par des lianes, couverte de boue séchée et abritée sous quelques nattes de raphia. […] C’était là le village !', cite: 'Séverin Cécile Abega, Les Bimanes, « Dans la forêt »' },
+    { t: 'recit', txt: 'Actuellement, il défilait sous l’œil indifférent des quelques rares poulets qui ne dormaient pas. Les cabris ne bêlèrent même pas à son passage. Tous ruminaient placidement leur petit déjeuner. Un margouillat à la poursuite d’un cancrelat hocha trois fois sa tête rouge et grise, puis, continua sa chasse. Ce fut le seul témoignage d’intérêt que son arrivée obtint.', cite: 'Séverin Cécile Abega, Les Bimanes, « Dans la forêt »' },
+    { t: 'question', q: 'Qui salue l’arrivée du bachelier dans le village ?', options: [ { txt: 'Un margouillat qui hoche la tête… en poursuivant un cancrelat.', ok: true, retour: 'Toute l’ironie de l’auteur : le grand titre de Dany n’intéresse qu’un lézard.' }, { txt: 'Tout le village, en fête.', retour: 'Relis : les poulets dorment, les cabris ne bêlent même pas.' } ] },
     { t: 'recit', txt: 'Du haut de son baccalauréat, Dany toisa le village', cite: 'Séverin Cécile Abega, Les Bimanes, « Dans la forêt »' },
     { t: 'pense', qui: 'dany', emo: 'fier', txt: 'Ils feront des yeux ronds quand je leur dirai mon titre : bachelier ! Ici, personne n’a jamais vu ça.', jauges: { orgueil: 100 } },
     { t: 'pense', qui: 'dany', emo: 'peur', txt: 'Mais ce soleil… Mes souliers me mâchent les orteils, je cuis dans ma veste, cette cravate m’étrangle. Un bâton m’aiderait… non, ma dignité me l’interdit.', jauges: { chaleur: 85 } },
@@ -104,7 +107,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261105a"></script>
-<script src="scene.js?v=20261105a"></script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
 </body>
 </html>
