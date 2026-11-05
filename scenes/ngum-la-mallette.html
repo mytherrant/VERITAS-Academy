@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La mallette — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Ngum a Jemea de David Mbanga Eyombwan : Von Roehm ne discute plus, il achète. Trois offres, 300 000 Marks, et la réponse de King Bell.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105a">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'ngum-mallette',
+  discipline: 'Français', niveau: 'Terminale',
+  oeuvre: 'Ngum a Jemea', auteur: 'David Mbanga Eyombwan',
+  titre: 'La mallette',
+  decor: 'chefferie', lieu: 'Douala, 1913, chez le chef supérieur', moment: 'Acte II, scène I (fin)',
+  avertissement: 'Toutes les répliques sont celles de la pièce, recopiées telles quelles.',
+  objectif: 'Étudier une tentative de corruption en trois offres et le refus qui lui répond, en mesurant ce que ce refus va coûter.',
+  jauges: [
+    { id: 'pression', nom: 'Pression de Von Roehm', val: 40, couleur: '#7B5CD6' },
+    { id: 'honneur', nom: 'Honneur de Dualla Manga', val: 90, couleur: '#1F9D5B' }
+  ],
+  personnages: {
+    vonroehm: { nom: 'Von Roehm, chef de Région', court: 'Von Roehm', couleur: '#3A3A4A', look: { objet: 'dossier', peau: 'clair', cheveux: 'court', couleurCheveux: '#C9A15A', moustache: true, coiffe: 'casque', habit: '#E9E3CF' } },
+    dualla:   { nom: 'Dualla Manga, King Bell', court: 'Dualla Manga', couleur: '#8A5A2B', look: { tenue: 'costume', peau: 'fonce', cheveux: 'court', moustache: true, habit: '#1E2A44', col: '#FFFFFF' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['vonroehm', 'dualla'], txt: 'L’Allemagne veut chasser les Duala de leurs terres du plateau Joss pour y bâtir une ville européenne. L’argumentation juridique n’a rien donné. Von Roehm change de méthode : il ne discute plus, il achète.' },
+    { t: 'dit', qui: 'vonroehm', txt: 'Tout est prévu pour que vous n’ayez aucun désagrément : nous aménagerons des embarcadères, dans vos nouveaux quartiers, nous y construirons des routes, des écoles et des églises.', cite: 'David Mbanga Eyombwan, Ngum a Jemea, acte II, scène I' },
+    { t: 'dit', qui: 'vonroehm', jeu: 'sur le ton de la confidence', txt: 'Il faut coopérer au succès de notre projet, vous en tirerez beaucoup d’avantages. En premier lieu, vous et votre famille ne serez pas déplacés. Nul n’en sera d’ailleurs scandalisé, car vous avez grandi en Allemagne, vous avez nos manières et nos habitudes ; bien que votre peau soit noire, vous êtes un Blanc, un vrai Blanc.', cite: 'David Mbanga Eyombwan, Ngum a Jemea, acte II, scène I', jauges: { pression: 55 } },
+    { t: 'question', q: '« vous êtes un Blanc, un vrai Blanc » : que cherche Von Roehm avec cette phrase ?',
+      options: [
+        { txt: 'Séparer Dualla Manga de son peuple en le flattant : il ne serait plus vraiment des leurs.', ok: true, retour: 'La première offre n’est pas de l’argent : c’est une place à part, contre les siens.' },
+        { txt: 'Lui faire un vrai compliment.', retour: 'C’est un compliment empoisonné, et raciste.' }
+      ] },
+    { t: 'dit', qui: 'vonroehm', jeu: 'il ouvre la mallette', txt: 'Deuxièmement, nous allons faire de vous un homme extrêmement riche : voici une mallette pour vous. Elle contient 300 000 Marks en espèces.', cite: 'David Mbanga Eyombwan, Ngum a Jemea, acte II, scène I', objet: { i: 'bourse', lib: '300 000 Marks' }, jauges: { pression: 70 } },
+    { t: 'dit', qui: 'vonroehm', txt: 'N’ayez aucun doute, vous n’êtes pas au beau milieu d’un rêve doré, c’est la vérité vraie. Enfin, tous vos enfants iront rejoindre leur frère aîné Alexandre Ndumb’a Dualla Manga Bell en Allemagne, dans la cour impériale où ils recevront une éducation princière. Reconnaissez que nous avons fait pour vous le maximum de ce qui est possible.', cite: 'David Mbanga Eyombwan, Ngum a Jemea, acte II, scène I', jauges: { pression: 85 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · les trois offres', consigne: 'Remets les offres de Von Roehm dans l’ordre.',
+      items: ['Votre famille ne sera pas déplacée.', 'Une mallette de 300 000 Marks.', 'Une éducation princière en Allemagne pour vos enfants.'],
+      bravo: 'Le statut, l’argent, les enfants : chaque offre vise plus profond que la précédente.' },
+    { t: 'dit', qui: 'dualla', emo: 'colere', txt: 'Tete Ndumbe nde na kanno ! Quoi ? Vous avez l’audace de me proposer de vous vendre mon pays ? Une telle demande est une insulte à mon honneur !', cite: 'David Mbanga Eyombwan, Ngum a Jemea, acte II, scène I', jauges: { honneur: 100 } },
+    { t: 'dit', qui: 'vonroehm', jeu: 'feignant de n’avoir pas entendu', txt: 'C’est la grande affaire de votre vie. Vous voulez refuser des propositions pareilles ? Il serait ridicule de votre part de ne pas profiter d’une pareille aubaine.', cite: 'David Mbanga Eyombwan, Ngum a Jemea, acte II, scène I' },
+    { t: 'dit', qui: 'dualla', emo: 'fier', txt: 'Je ne suis nullement séduit par les propositions que vous me faites. C’est ignominieux et infamant, j’en suis dégoûté ! Le vrai héritage que je dois laisser à mes enfants c’est le sens du devoir et l’amour de la patrie. Cela vaut plus que tous les profits mirobolants que vous me faites miroiter.', cite: 'David Mbanga Eyombwan, Ngum a Jemea, acte II, scène I' },
+    { t: 'question', q: 'À l’offre faite pour ses enfants, que répond Dualla Manga ?',
+      options: [
+        { txt: 'Que le vrai héritage à leur laisser est le sens du devoir et l’amour de la patrie.', ok: true, retour: 'Il retourne la troisième offre : l’héritage n’est pas une école princière, c’est un exemple.' },
+        { txt: 'Qu’il accepte pour eux seulement.', retour: 'Il refuse tout, y compris pour eux.' }
+      ] },
+    { t: 'dit', qui: 'vonroehm', emo: 'colere', txt: 'Bien ! Vous êtes libre d’accepter ou de refuser toutes les largesses que nous sommes prêts à vous accorder ; cela ne modifiera pas d’un iota le plan du Reichstag concernant cette ville.', cite: 'David Mbanga Eyombwan, Ngum a Jemea, acte II, scène I' },
+    { t: 'dit', qui: 'vonroehm', txt: 'Je vous somme donc de choisir une fois pour toutes entre tout gagner en vous ralliant à nos vues ou tout perdre en vous obstinant à défendre la cause de votre peuple.', cite: 'David Mbanga Eyombwan, Ngum a Jemea, acte II, scène I', jauges: { pression: 100 } },
+    { t: 'choix', qui: 'dualla', q: 'Tu es Dualla Manga. « Tout gagner » ou « tout perdre ». Que réponds-tu ?',
+      options: [
+        { txt: 'Prendre la mallette et sauver ma famille.', consequence: 'Tu sauves les tiens… et tu vends ton pays. Ton nom serait sali pour toujours.', jauges: { honneur: 10 } },
+        { txt: 'Refuser, et consulter les chefs de tous les cantons.', consequence: 'C’est la réponse de King Bell : il ne vogue pas avec le torrent.', jauges: { honneur: 100 } },
+        { txt: 'Demander du temps pour réfléchir.', consequence: 'Von Roehm a dit : « une fois pour toutes ». Il n’y aura pas de temps.', jauges: { honneur: 60 } }
+      ],
+      oeuvre: 'Dualla Manga refuse : « J’ai juré une fois pour toutes de ne jamais salir mon nom quoi qu’il advienne. »' },
+    { t: 'dit', qui: 'dualla', txt: 'Vous connaissez d’avance ma position : je ne vogue pas avec le torrent. J’ai juré une fois pour toutes de ne jamais salir mon nom quoi qu’il advienne. Je n’y faillirai pas.', cite: 'David Mbanga Eyombwan, Ngum a Jemea, acte II, scène I' },
+    { t: 'dit', qui: 'vonroehm', txt: 'D’accord ! D’accord ! Mais sachez que cette affaire vous concerne au premier chef, car les travaux vont démarrer sur le plateau Joss. Bonaku et Bonebela attendront. Et mettez-vous bien en tête que la force prime le droit.', cite: 'David Mbanga Eyombwan, Ngum a Jemea, acte II, scène I' },
+    { t: 'dit', qui: 'dualla', emo: 'fier', txt: 'À chacun le sien… Si petite soit-elle, la fourmi possède des entrailles et ce qui lui appartient ne s’arrache pas.', cite: 'David Mbanga Eyombwan, Ngum a Jemea, acte II, scène I' },
+    { t: 'question', q: '« la fourmi possède des entrailles » : que veut dire ce proverbe dans la bouche de Dualla Manga ?',
+      options: [
+        { txt: 'Même le plus faible a une dignité et des droits qu’on ne peut lui arracher.', ok: true, retour: 'Face à « la force prime le droit », le proverbe répond : le droit du petit existe.' },
+        { txt: 'Que les fourmis sont dangereuses.', retour: 'C’est une image : la fourmi, c’est le peuple duala.' }
+      ] },
+    { t: 'recit', sort: ['dualla'], txt: 'Ils se serrent froidement la main et Dualla Manga sort.', cite: 'David Mbanga Eyombwan, Ngum a Jemea, acte II, scène I' + ' (didascalie)' },
+    { t: 'remarque', titre: 'Ce que coûtera ce refus', txt: 'Ce passage est le sommet de l’acte II. Le refus de Rudolf Duala Manga Bell le conduira à l’arrestation, au procès et à la potence, le 8 août 1914. Ngum a Jemea : la force de la patience.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · la mallette',
+    intro: 'Règle le montant offert, l’attachement au peuple et la menace de la force : que décide King Bell ?',
+    persos: ['dualla', 'vonroehm'],
+    curseurs: [
+      { id: 'argent', nom: 'Somme offerte', val: 80, bas: 'rien', haut: '300 000 Marks', lecture: { haut: '« voici une mallette pour vous »', bas: 'Rien à refuser.' } },
+      { id: 'peuple', nom: 'Attachement au peuple', val: 95, bas: 'faible', haut: 'absolu', lecture: { haut: '« l’amour de la patrie »', bas: 'Sa famille d’abord.' } },
+      { id: 'force', nom: 'Menace de la force', val: 85, bas: 'aucune', haut: '« la force prime le droit »', lecture: { haut: 'Les travaux démarreront quoi qu’il dise.', bas: 'L’Allemagne respecterait le traité.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans la pièce', icone: 'livre', valeurs: { argent: 80, peuple: 95, force: 85 } },
+      { nom: 'Et s’il tenait moins à son peuple ?', icone: 'bourse', valeurs: { peuple: 15 } },
+      { nom: 'Et si le droit l’emportait ?', icone: 'balance', valeurs: { force: 10 } }
+    ],
+    liens: [
+      { a: 'vonroehm', b: 'dualla', type: 'domination', lib: 'la mallette', base: .4, poids: { argent: .3, force: .3 } },
+      { a: 'dualla', b: 'vonroehm', type: 'conflit', lib: 'le refus', base: .3, poids: { peuple: .6 } }
+    ],
+    issue: function(v){
+      if(v.peuple < 35){ return { niveau: 'ko', badge: 'Le pays vendu', recit: 'King Bell prend la mallette. Sa famille reste ; son peuple est chassé du plateau Joss.', apres: 'Il garde sa vie et perd son nom : c’est exactement ce qu’il refuse dans la pièce.', themes: ['corruption', 'trahison'] }; }
+      if(v.force < 35){ return { niveau: 'ok', badge: 'Le droit respecté', recit: 'Le traité de 1884 est honoré : personne n’est exproprié, et la mallette repart fermée.', apres: 'C’est ce que Dualla Manga réclame depuis le début : le droit, pas la force.', themes: ['droit', 'justice'] }; }
+      return { niveau: 'moyen', badge: 'L’honneur contre la force', recit: 'Dualla Manga refuse tout. Von Roehm range sa mallette : « la force prime le droit ».', apres: 'C’est l’acte II : un refus qui grandit l’homme et le conduira à la potence.', themes: ['honneur', 'résistance', 'colonisation'] };
+    }
+  },
+  fiche: {"accroche": "La veille de son exécution, on lui propose de fuir. Pourquoi Rudolf Dualla Manga Bell, roi des Duala, choisit-il de rester ?", "resume": "De l’intronisation de Rudolf Dualla Manga Bell en 1910 à sa pendaison par l’autorité coloniale allemande le 8 août 1914 : une pièce qui fait revivre l’un des premiers actes de résistance anticoloniale documentés en Afrique centrale, contre l’expropriation des terres duala. Écrite près d’un siècle après les faits, elle est authentifiée par une postface d’un descendant du roi.", "personnages": [{"nom": "Rudolf Dualla Manga Bell", "role": "roi des Duala, personnage historique.", "cle": "dualla"}, {"nom": "Emma Engome", "role": "son épouse.", "cle": "emma"}, {"nom": "Le juge Niedermeyer", "role": "il prononce le verdict.", "cle": "niedermeyer"}, {"nom": "Von Roehm", "role": "chef de Région allemand.", "cle": "vonroehm"}, {"nom": "Ngos’ a Din", "role": "son compagnon, avec qui il échange le cri « Jemea ! »."}, {"nom": "Le Chœur", "role": "la voix du peuple.", "cle": "choeur"}], "aLire": [{"ou": "La postface", "pourquoi": "Signée du Prince René Douala Manga Bell : la famille royale elle-même valide le récit."}, {"ou": "Acte IV, scène III", "pourquoi": "Avant le verdict, le cri « Jemea ! » échangé entre les deux compagnons."}, {"ou": "Le début de la pièce", "pourquoi": "L’intronisation de 1910 : tout commence par une fête."}], "siTuAimes": "l’histoire du Cameroun racontée par ceux qui l’ont vécue, cette pièce est une mémoire à jouer.", "reperes": ["Auteur : David Mbanga Eyombwan (1944-2008)", "Texte daté de Douala, 16 juillet 2005", "Événements de 1910 à 1914", "Exécution historique le 8 août 1914"], "themes": ["la résistance", "la fidélité", "la terre", "la mémoire"], "cahier": {"lib": "Le cahier VÉRITAS de cette œuvre", "href": "../livrets/oeuvre-ngum.html"}},
+  quiz: [
+    { q: 'Combien contient la mallette ?', options: [ { txt: '300 000 Marks en espèces.', ok: true, retour: 'Von Roehm l’ouvre pour montrer les liasses.' }, { txt: '3 000 Marks.', retour: 'Beaucoup plus : 300 000.' } ] },
+    { q: 'Quelle est la troisième offre de Von Roehm ?', options: [ { txt: 'Une éducation princière en Allemagne pour tous ses enfants.', ok: true, retour: 'Dans la cour impériale, avec leur frère aîné.' }, { txt: 'Un château.', retour: 'Non : l’éducation des enfants.' } ] },
+    { q: 'Quel héritage Dualla Manga veut-il laisser à ses enfants ?', options: [ { txt: 'Le sens du devoir et l’amour de la patrie.', ok: true, retour: '« Cela vaut plus que tous les profits mirobolants ».' }, { txt: 'La mallette.', retour: 'Il la refuse.' } ] },
+    { q: 'Quelle phrase résume la position de Von Roehm ?', options: [ { txt: '« la force prime le droit ».', ok: true, retour: 'Face au droit, la force.' }, { txt: '« À chacun le sien ».', retour: 'Ça, c’est Dualla Manga.' } ] },
+    { q: 'Que signifie « ignominieux » ?', options: [ { txt: 'Qui couvre de honte.', ok: true, retour: '« C’est ignominieux et infamant ».' }, { txt: 'Inconnu.', retour: 'Non : honteux.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Von Roehm fait trois offres : un statut à part, 300 000 Marks, l’éducation des enfants.',
+      'Dualla Manga refuse : son héritage, c’est le devoir et l’amour de la patrie.',
+      '« la force prime le droit » s’oppose au proverbe de la fourmi qui possède des entrailles.',
+      'Ce refus conduira King Bell à la potence en 1914.'
+    ],
+    ecrire: 'Écris la lettre (vingt lignes) que Dualla Manga adresse aux chefs des cantons après cette entrevue : ce qu’on lui a proposé, ce qu’il a répondu, ce qu’il leur demande.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105a"></script>
+<script src="scene.js?v=20261105a"></script>
+</body>
+</html>

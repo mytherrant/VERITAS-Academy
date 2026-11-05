@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Marcinelle, 1956 — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Balafon d’Engelbert Mveng : un oratorio à plusieurs voix pour les mineurs morts à Marcinelle. Un chœur qui pourrait accuser Dieu, et qui ne le fait pas.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105a">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'balafon-marcinelle',
+  discipline: 'Français', niveau: '1re',
+  oeuvre: 'Balafon', auteur: 'Engelbert Mveng (1972)',
+  titre: 'Marcinelle, 1956',
+  decor: 'deuil', lieu: 'Marcinelle, Belgique, devant la mine du Bois du Cazier', moment: '« Marcinelle, 1956 » · oratorio',
+  avertissement: 'Les vers sont ceux du poème, recopiés tels quels et distribués entre les voix comme le poète l’indique (Prélude, Chœur, Chœurs et tam-tams).',
+  objectif: 'Lire un poème à plusieurs voix et comprendre pourquoi un texte sur une catastrophe peut refuser d’accuser.',
+  jauges: [
+    { id: 'colere', nom: 'Tentation d’accuser', val: 30, couleur: '#C0392B' },
+    { id: 'paix', nom: 'Prière pour la paix', val: 20, couleur: '#1E499B' }
+  ],
+  personnages: {
+    soliste: { nom: 'Le soliste', couleur: '#1E499B', look: { tenue: 'boubou', peau: 'fonce', cheveux: 'ras', habit: '#1E1E1E', col: '#FFFFFF' } },
+    choeur:  { nom: 'Le chœur', couleur: '#5A6275', groupe: true, look: { tenue: 'boubou', peau: 'fonce', cheveux: 'ras', habit: '#3A3A44' } },
+    mineur:  { nom: 'Un mineur', couleur: '#7A5A3A', look: { metier: 'ouvrier', peau: 'mat', cheveux: 'court', coiffe: 'casque', couleurCoiffe: '#E8A413' } },
+    eleve:   { nom: 'Ebanga, élève de 1re', court: 'Ebanga', couleur: '#2E6B5A', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court', lunettes: true } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['eleve', 'mineur'], txt: 'Le 8 août 1956, un incendie éclate dans la mine du Bois du Cazier, à Marcinelle, en Belgique. Des centaines d’ouvriers meurent, pour beaucoup des immigrés. Mveng en fait un oratorio : une œuvre à plusieurs voix.' },
+    { t: 'dit', qui: 'eleve', emo: 'doute', txt: 'Un poète camerounais qui écrit pour des mineurs morts en Belgique ?' },
+    { t: 'vers', qui: 'soliste', entre: ['soliste'], jeu: 'Prélude', txt: 'Non !\nRequiescant in Pace', cite: 'Engelbert Mveng, Balafon, « Marcinelle, 1956 »' },
+    { t: 'question', q: 'Le premier mot du poème est « Non ! ». Que refuse-t-il ?',
+      options: [
+        { txt: 'De troubler le repos des morts : il demande la permission de parler.', ok: true, retour: '« Requiescant in pace » : qu’ils reposent en paix. Le premier geste du texte est un refus.' },
+        { txt: 'De croire à la catastrophe.', retour: 'Il ne nie pas la mort : il refuse de troubler le silence.' }
+      ] },
+    { t: 'vers', qui: 'choeur', entre: ['choeur'], jeu: 'Chœur', txt: 'Que nulle voix, dans le sanctuaire de vos nuits\nNe trouble ce silence plus saint que ma prière !', cite: 'Engelbert Mveng, Balafon, « Marcinelle, 1956 »' },
+    { t: 'vers', qui: 'choeur', jeu: 'Chœur', txt: 'Paix ! Seigneur Dieu, sur les seuils défoncés,\nEt les foyers éteints,\nEt les cœurs troués comme des cibles,\nSur ceux qui furent fils\nEt ceux qui furent pères,\nEt ceux qui furent femmes,\nEt ceux qui furent mères,', cite: 'Engelbert Mveng, Balafon, « Marcinelle, 1956 »', jauges: { paix: 45 } },
+    { t: 'vers', qui: 'soliste', txt: 'Aux mineurs Basuto, à ceux du Katanga,\nAux peuples de fourmis creusant les Cordillères...\nA ceux du monde entier,\nLa voix claire du coq chante l’aurore.', cite: 'Engelbert Mveng, Balafon, « Marcinelle, 1956 »' },
+    { t: 'dit', qui: 'eleve', emo: 'surpris', txt: 'Le Katanga, au Congo ; les Basuto, en Afrique australe ; les Cordillères, en Amérique : il parle de tous les mineurs du monde.' },
+    { t: 'vers', qui: 'choeur', emo: 'colere', jeu: 'Chœur', txt: 'Seigneur Dieu,\nAllons-nous T’accuser au tribunal des hommes ?', cite: 'Engelbert Mveng, Balafon, « Marcinelle, 1956 »', jauges: { colere: 70 } },
+    { t: 'vers', qui: 'choeur', emo: 'colere', txt: 'Pourquoi\nDe ce paradis fis-tu le caveau glouton des innocents ?', cite: 'Engelbert Mveng, Balafon, « Marcinelle, 1956 »', jauges: { colere: 85 } },
+    { t: 'vers', qui: 'mineur', jeu: 'de la mine', txt: 'Des gouvernements,\nDes parlements,\nDes finances,\nDes économies,\nDes techniques et des machines,', cite: 'Engelbert Mveng, Balafon, « Marcinelle, 1956 »' },
+    { t: 'question', q: 'Le chœur aligne une longue série de « Pourquoi ». Que fait-il ensuite ?',
+      options: [
+        { txt: 'Il dit « Non ! » et renonce à accuser : il ne proférera que le silence.', ok: true, retour: 'Le procès est envisagé, puis refusé. C’est tout le sens du poème.' },
+        { txt: 'Il condamne Dieu.', retour: 'Relis : « Non !- Nous ne proférerons que ce silence ».' }
+      ] },
+    { t: 'vers', qui: 'choeur', jeu: 'plus bas', txt: 'Non !- Nous ne proférerons que ce silence parmi le flamboiement de nos nuits sans étoiles.', cite: 'Engelbert Mveng, Balafon, « Marcinelle, 1956 »', jauges: { colere: 20, paix: 70 } },
+    { t: 'vers', qui: 'choeur', jeu: 'Chœur', txt: 'Car il faut bien\nQue le feu brûle encore dans les foyers du monde,', cite: 'Engelbert Mveng, Balafon, « Marcinelle, 1956 »' },
+    { t: 'vers', qui: 'soliste', txt: 'Il faut\nQue germent les moissons,\nQue le pain cuise,\nQue le vin fasse fleurir les lèvres desséchées,', cite: 'Engelbert Mveng, Balafon, « Marcinelle, 1956 »' },
+    { t: 'vers', qui: 'choeur', jeu: 'Chœurs et tam-tams', txt: 'Nous demandons seulement,\nPour ceux qui seront - et pour leurs enfants, -\nUn toit moins branlant,\nUn chemin plus sûr,', cite: 'Engelbert Mveng, Balafon, « Marcinelle, 1956 »' },
+    { t: 'vers', qui: 'choeur', jeu: 'tous ensemble', txt: 'POUR QUE DESCENDE TA PAIX SUR LA TERRE DES HOMMES !', cite: 'Engelbert Mveng, Balafon, « Marcinelle, 1956 »', jauges: { paix: 85 } },
+    { t: 'vers', qui: 'choeur', jeu: 'la dernière fois', txt: 'Voici l’arc-en-ciel de notre ultime regard\nPOUR QUE REPOSE EN PAIX\nCETTE TERRE DES HOMMES.', cite: 'Engelbert Mveng, Balafon, « Marcinelle, 1956 »', jauges: { paix: 100 } },
+    { t: 'question', q: 'Comment le refrain se transforme-t-il à la fin ?',
+      options: [
+        { txt: '« Que descende ta paix sur la terre » devient « Que repose en paix cette terre » : la terre elle-même est pleurée.', ok: true, retour: 'La formule des funérailles s’étend à toute la terre des hommes.' },
+        { txt: 'Il ne change pas.', retour: 'Compare les deux : le verbe et le sujet changent.' }
+      ] },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · le mouvement de l’oratorio', consigne: 'Remets les mouvements du poème dans l’ordre.',
+      items: ['Le prélude : « Non ! Requiescant in Pace ».', 'Le chœur demande la paix pour les foyers éteints.', 'Le procès envisagé : « Allons-nous T’accuser ? »', 'Le procès refusé : « Nous ne proférerons que ce silence ».', 'L’espérance : « Il faut que germent les moissons ».', 'La clôture : « Que repose en paix cette terre des hommes ».'],
+      bravo: 'Un poème qui distribue la parole et qui, au lieu d’accuser, prie.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · le chœur de Marcinelle',
+    intro: 'Règle la colère, la foi et la solidarité avec les mineurs du monde : quelle prière monte du chœur ?',
+    persos: ['choeur', 'soliste', 'mineur', 'eleve'],
+    curseurs: [
+      { id: 'colere', nom: 'Colère', val: 30, bas: 'apaisée', haut: 'accusatrice', lecture: { haut: '« Allons-nous T’accuser au tribunal des hommes ? »', bas: 'Le chœur garde le silence.' } },
+      { id: 'foi', nom: 'Foi', val: 85, bas: 'perdue', haut: 'ardente', lecture: { haut: '« Au pied de ton Calvaire »', bas: 'Plus personne à qui parler.' } },
+      { id: 'monde', nom: 'Solidarité mondiale', val: 85, bas: 'Marcinelle seule', haut: 'tous les mineurs', lecture: { haut: 'Basuto, Katanga, Cordillères…', bas: 'Un drame belge, rien de plus.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans le poème', icone: 'livre', valeurs: { colere: 30, foi: 85, monde: 85 } },
+      { nom: 'Et si le chœur accusait ?', icone: 'colere', valeurs: { colere: 90 } },
+      { nom: 'Et sans la foi ?', icone: 'nuage', valeurs: { foi: 10, colere: 40 } }
+    ],
+    liens: [
+      { a: 'choeur', b: 'mineur', type: 'amour', lib: 'le deuil', base: .7 },
+      { a: 'soliste', b: 'choeur', type: 'alliance', lib: 'les voix', base: .7 },
+      { a: 'choeur', b: 'soliste', type: 'conflit', lib: 'la question', base: .1, poids: { colere: .6 } }
+    ],
+    issue: function(v){
+      if(v.colere >= 70){ return { niveau: 'moyen', badge: 'Le procès de Dieu', recit: 'Le chœur dresse son tribunal : « Pourquoi ? Pourquoi ? » Les morts ne reposent plus en paix.', apres: 'Le poème envisage ce procès… et le refuse.', themes: ['révolte', 'question du mal'] }; }
+      if(v.foi < 35){ return { niveau: 'ko', badge: 'Le silence vide', recit: 'Plus de prière, plus de chœur : seulement des noms sur un monument.', apres: 'Chez Mveng, le silence est une prière ; sans foi, il n’est que vide.', themes: ['deuil', 'absence'] }; }
+      return { niveau: 'ok', badge: 'La paix sur la terre des hommes', recit: 'Le chœur se tait, prie, puis espère : que germent les moissons, que le pain cuise, qu’un chemin soit plus sûr.', apres: 'Un poème sur une catastrophe qui refuse d’accuser, et demande seulement un toit moins branlant.', themes: ['paix', 'solidarité', 'espérance'] };
+    }
+  },
+  fiche: {"accroche": "L’Afrique prend la plume et écrit à la Chine, à l’Europe, à l’Amérique précolombienne, aux mineurs de Marcinelle. Que leur dit-elle, douze ans après les indépendances ?", "resume": "Le grand recueil poétique du père Engelbert Mveng, jésuite, historien et artiste. Au lieu de régler des comptes, l’Afrique tend la main : elle écrit « à ses amis » sur tous les continents, chante des lieux et des dates réels, et dit la foi chrétienne en images africaines, la croix et le balafon, le calice et la marmite d’argile.", "personnages": [{"nom": "Le poète", "role": "fils d’Afrique, et « fils du monde ».", "cle": "poete"}, {"nom": "L’Afrique-Mère", "role": "celle qui écrit, et celle qu’on chante.", "cle": "afrique"}, {"nom": "Kong-Fu-Tseu", "role": "Confucius : l’Asie à qui l’Afrique écrit.", "cle": "kong"}, {"nom": "Roland-Roger", "role": "l’ami d’Europe.", "cle": "roland"}, {"nom": "Moteczuma", "role": "l’Amérique précolombienne.", "cle": "motec"}], "aLire": [{"ou": "« Lettres à mes amis »", "pourquoi": "La première partie : l’Afrique écrit aux continents."}, {"ou": "« Marcinelle, 1956 »", "pourquoi": "Une catastrophe minière en Belgique, des ouvriers immigrés : l’actualité entre dans un chant."}, {"ou": "« Mère » (1964)", "pourquoi": "Le plus long poème du recueil, et le plus intime."}], "siTuAimes": "les poèmes qui ouvrent sur le monde entier, lis une lettre par soir, comme une correspondance.", "reperes": ["Auteur : Engelbert Mveng (1930-1995), jésuite, historien, théologien, archéologue et artiste camerounais", "Auteur d’une Histoire du Cameroun (1963)", "Balafon : 1972"], "themes": ["la fraternité universelle", "la foi", "l’Afrique et le monde", "la mémoire"], "cahier": {"lib": "Le cahier VÉRITAS de cette œuvre", "href": "../livrets/oeuvre-balafon.html"}},
+  quiz: [
+    { q: 'Quel événement le poème évoque-t-il ?', options: [ { txt: 'L’incendie de la mine du Bois du Cazier, à Marcinelle, le 8 août 1956.', ok: true, retour: 'Des centaines de morts, beaucoup d’immigrés.' }, { txt: 'Une guerre en Afrique.', retour: 'Non : une catastrophe minière en Belgique.' } ] },
+    { q: 'Que signifie « Requiescant in pace » ?', options: [ { txt: '« Qu’ils reposent en paix ».', ok: true, retour: 'Formule latine des funérailles.' }, { txt: '« Gloire à Dieu ».', retour: 'Non : qu’ils reposent en paix.' } ] },
+    { q: 'Qu’est-ce qu’un oratorio ?', options: [ { txt: 'Une œuvre à plusieurs voix, avec des chœurs.', ok: true, retour: 'D’où les indications Prélude, Chœur, Chœurs et tam-tams.' }, { txt: 'Un poème d’amour.', retour: 'Non : une œuvre à plusieurs voix.' } ] },
+    { q: 'Le chœur accuse-t-il finalement Dieu ?', options: [ { txt: 'Non : il envisage le procès puis le refuse.', ok: true, retour: '« Nous ne proférerons que ce silence ».' }, { txt: 'Oui, au tribunal des hommes.', retour: 'Il pose la question, puis dit « Non ! ».' } ] },
+    { q: 'Que demande seulement le chœur pour les générations futures ?', options: [ { txt: 'Un toit moins branlant, un chemin plus sûr.', ok: true, retour: 'Une demande modeste, et concrète.' }, { txt: 'La richesse.', retour: 'Non : la sécurité.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      '« Marcinelle, 1956 » est un oratorio : le poème distribue la parole entre prélude, chœurs et tam-tams.',
+      'Il s’ouvre sur un refus : ne pas troubler le repos des morts.',
+      'Le chœur envisage d’accuser Dieu, puis refuse : il ne proférera que le silence.',
+      'Le refrain final étend la paix des morts à « cette terre des hommes ».'
+    ],
+    ecrire: 'Écris un court poème à deux voix (un soliste, un chœur) en hommage aux victimes d’un drame que tu connais. Le chœur doit reprendre un refrain.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105a"></script>
+<script src="scene.js?v=20261105a"></script>
+</body>
+</html>

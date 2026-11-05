@@ -25,14 +25,17 @@ const pages = w.SCENES_CATALOGUE.map(s => s.f).filter(f => f !== 'espagnol-donde
       const res = [].map.call(document.querySelectorAll('#bilan .sc-res'), a => (a.classList.contains('payant') ? 'P' : 'G') + (a.getAttribute('href') ? '' : '?')).join('');
       const o = document.querySelector('.sc-onglet[data-vue=oeuvre]');
       if(o){ o.click(); }
-      return { suite, res, fiche: o ? document.querySelectorAll('.sc-f-perso').length : -1 };
+      // la bonne réponse ne doit pas être toujours en tête
+      const pos = (window.SCENE.etapes || []).filter(e => e.t === 'question').concat(window.SCENE.quiz || []).map(q => q.options.findIndex(o => o.ok));
+      const tete = pos.length > 2 && pos.every(p => p === 0);
+      return { suite, res, tete, fiche: o ? document.querySelectorAll('.sc-f-perso').length : -1 };
     });
     if(extra.suite){ suites++; }
     if(extra.fiche > 0){ fiches++; }
     const q = (r.quiz || '').split('/').map(x => x.trim());
     const e = r.erreurs.concat(errs);
-    if(!r.bilan || r.score !== '100%' || q.length < 2 || q[0] !== q[1] || q[1] !== '5' || e.length || extra.fiche === 0 || extra.res !== 'GP'){
-      ko.push(f + ' → ' + r.score + ' · quiz ' + r.quiz + ' · fiche ' + extra.fiche + ' · plus loin ' + extra.res + (e.length ? ' · ' + e.join(' ; ') : ''));
+    if(!r.bilan || r.score !== '100%' || q.length < 2 || q[0] !== q[1] || q[1] !== '5' || e.length || extra.fiche === 0 || extra.res !== 'GP' || extra.tete){
+      ko.push(f + ' → ' + r.score + ' · quiz ' + r.quiz + ' · fiche ' + extra.fiche + ' · plus loin ' + extra.res + (extra.tete ? ' · bonne réponse toujours en tête' : '') + (e.length ? ' · ' + e.join(' ; ') : ''));
     }
     await pg.close();
   }

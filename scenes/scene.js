@@ -23,6 +23,18 @@
   var EMO = { colere:'colere', joie:'joie', triste:'triste', peur:'peur', surpris:'aide', fier:'fier', amour:'amour', doute:'doute' };
 
   var etapes = S.etapes || [];
+  // Les pages écrivent la bonne réponse en tête : on la fait tourner d'une question à l'autre
+  // (2e place, puis 3e, puis 1re…), toujours au même endroit d'un chargement à l'autre.
+  (function(){
+    var n = 1;
+    etapes.filter(function(e){ return e.t === 'question'; }).concat(S.quiz || []).forEach(function(q){
+      var o = q.options || [], k = o.findIndex(function(x){ return x.ok; });
+      if(k < 0 || o.length < 2 || q._place){ return; }
+      var bon = o.splice(k, 1)[0];
+      o.splice(n++ % (o.length + 1), 0, bon);
+      q._place = true;
+    });
+  })();
   var persos = S.personnages || {};
   var ordre = Object.keys(persos);
   var jauges = S.jauges || [];
