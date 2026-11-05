@@ -34,13 +34,18 @@ const op = (t, i, champs) => ({ op: id(), t, id: i, champs });
   const cid = Object.keys(sec.acces).find((c) => sec.acces[c] === 'secretaire');
   const prof = comptes.find((u) => !u.admin_global && u.actif && u.acces[cid] === 'enseignant');
   const lignes = (await api('sync/tirer&depuis=0')).lignes;
-  const classe = lignes.classes.find((k) => k.centre_id === cid && !Number(k.supprime));
+  // Une classe à lui : aucun autre banc n'y a de cours à la même heure.
+  const classe = { id: id() };
+  await api('sync/pousser', { ops: [op('classes', classe.id, { centre_id: cid, nom: 'Paie cours ' + classe.id.slice(-5), niveau: '1ere' })] });
   const matiere = lignes.matieres[0];
   // Pas de contrat actif : le taux par défaut s'applique.
   for (const k of (lignes.contrats || []).filter((k) => k.centre_id === cid && k.utilisateur_id === prof.id && Number(k.actif))) await api('sync/pousser', { ops: [op('contrats', k.id, { actif: 0 })] });
   const now = new Date(Date.now() - new Date().getTimezoneOffset() * 60000);
   const auj = now.toISOString().slice(0, 10);
   const jour = ((new Date().getDay() + 6) % 7) + 1;
+  // Départ propre : les créneaux de nuit laissés par un passage précédent (même enseignant, même jour) sont retirés.
+  const vieux = (lignes.creneaux || []).filter((k) => !Number(k.supprime) && k.enseignant_id === prof.id && Number(k.jour) === jour && k.debut < '03:00');
+  if (vieux.length) await api('sync/pousser', { ops: vieux.map((k) => ({ op: id(), t: 'creneaux', id: k.id, suppr: true, champs: {} })) });
   const cr = id(), cr2 = id();
   await api('sync/pousser', { ops: [
     op('creneaux', cr, { centre_id: cid, classe_id: classe.id, matiere_id: matiere.id, enseignant_id: prof.id, jour, debut: '00:00', fin: '00:01' }),
@@ -63,7 +68,7 @@ const op = (t, i, champs) => ({ op: id(), t, id: i, champs });
   await ps.click(`[data-a="payer-cours"][data-pe="${pe}"]`);
   ok('confirmation détaille le calcul', /2 h × 1\s500\sF\/h/.test(await ps.textContent('#feuille')), await ps.textContent('#feuille'));
   await ps.click('#feuille button.btn:has-text("Payer")');
-  await ps.waitForSelector('#feuille:has-text("Envoyer le reçu")'); await ps.click('#feuille [data-a="fermer"]').catch(() => {});
+  await ps.waitForSelector('#feuille:has-text("Reçu de paiement")'); await ps.click('#feuille [data-a="fermer"]').catch(() => {});
   await aJour(ps); await ps.waitForTimeout(500);
   const paies = (await api('sync/tirer&depuis=0')).lignes.paies.filter((x) => x.presence_id === pe);
   ok('paie au serveur : 3 000 F, rattachée au cours, payée par la secrétaire', paies.length === 1 && Number(paies[0].montant) === 3000 && paies[0].paye_par === sec.id && paies[0].mois === auj.slice(0, 7), JSON.stringify(paies));

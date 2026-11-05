@@ -102,15 +102,15 @@ const sansNbsp = (t) => String(t).replace(/ /g, ' ');
 
   // ── Impayés et relance ──
   await page.click('[data-a="caisse-onglet"][data-v="impayes"]');
-  const imp = page.locator(`.ligne.message:has-text("EBODE${SUF}")`);
+  const imp = page.locator(`.ligne.message.echu:has-text("EBODE${SUF}")`);
   ok('impayés : l\'élève qui n\'a pas réglé son inscription', sansNbsp(await imp.textContent()).includes(sansNbsp(F(2500))), await imp.textContent().catch(() => 'absent'));
-  ok('impayés : l\'élève à jour n\'y figure plus', await page.locator(`.ligne.message:has-text("NJOYA${SUF}")`).count() === 0, 'présent');
+  ok('impayés : l\'élève à jour n\'y figure plus', await page.locator(`.ligne.message.echu:has-text("NJOYA${SUF}")`).count() === 0, 'présent');
   const rel = await imp.locator('a[data-canal="whatsapp"]').getAttribute('href');
   ok('relance pré-rédigée (montant, inscription, échéance)', /il reste 2.500.F à régler pour EBODE/.test(decodeURIComponent(rel)) && decodeURIComponent(rel).includes('au plus tard le'), decodeURIComponent(rel));
   const popup = page.waitForEvent('popup');
   await imp.locator('a[data-canal="whatsapp"]').click();
   (await popup).close().catch(() => {});
-  await page.waitForSelector(`.ligne.message:has-text("EBODE${SUF}") small:has-text("relancé le")`);
+  await page.waitForSelector(`.ligne.message.echu:has-text("EBODE${SUF}") small:has-text("relancé le")`);
   ok('trace de relance affichée', true);
 
   // ── Badge « impayé » dans l'appel ──

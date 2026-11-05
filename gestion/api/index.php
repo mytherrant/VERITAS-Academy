@@ -748,6 +748,11 @@ function g_valider_finances(PDO $pdo, string $table, string $id, ?array $existan
     if (!in_array((string) $val('categorie'), ['loyer', 'salaires', 'fournitures', 'electricite', 'transport', 'communication', 'autre'], true)) { throw new DomainException('Catégorie inconnue.'); }
     if (!in_array((string) ($val('mode') ?: 'especes'), $modes, true)) { throw new DomainException('Mode de paiement inconnu.'); }
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $val('date')) || $val('date') > date('Y-m-d')) { throw new DomainException('Date invalide.'); }
+    // Salaires : réservés à qui gère les enseignants (sinon la paie passe par « Payer » après le cours ou la paie du mois,
+    // plafonnée et rattachée à l'enseignant ; une dépense « Salaires » en plus ferait un doublon).
+    if ((string) $val('categorie') === 'salaires' && (!$existant || array_key_exists('categorie', $champs)) && !g_ctx_peut('enseignants.gerer', $centre)) {
+        throw new DomainException('Une paie d\'enseignant se fait par « Payer » après le cours (ou la paie du mois), pas par une dépense « Salaires ».');
+    }
     $statut = (string) ($val('statut') ?: 'en_attente');
     if (!in_array($statut, ['en_attente', 'validee', 'refusee'], true)) { throw new DomainException('Statut inconnu.'); }
     $avant = $existant ? (string) $existant['statut'] : '';
