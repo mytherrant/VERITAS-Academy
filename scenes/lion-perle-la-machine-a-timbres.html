@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La machine à timbres — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Le Lion et la Perle de Wole Soyinka : le soir, chez le Balé, Sidi découvre une machine secrète. Baroka a une idée pour les timbres.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105a">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'lion-perle-timbres',
+  discipline: 'Français', niveau: '1re',
+  oeuvre: 'Le Lion et la Perle', auteur: 'Wole Soyinka (1959)',
+  titre: 'La machine à timbres',
+  decor: 'chefferie', ambiance: 'nuit', lieu: 'Iloujinlé, la chambre de Baroka', moment: 'Acte III · le soir',
+  avertissement: 'Les répliques suivies de la référence du livre sont celles de la pièce (traduction française), recopiées telles quelles.',
+  objectif: 'Étudier une séduction par le discours : comment Baroka désarme Sidi avec une machine, une image et une philosophie du progrès.',
+  jauges: [
+    { id: 'garde', nom: 'Méfiance de Sidi', val: 80, couleur: '#1F9D5B' },
+    { id: 'charme', nom: 'Charme de Baroka', val: 30, couleur: '#7B5CD6' }
+  ],
+  personnages: {
+    sidi:   { nom: 'Sidi', couleur: '#B0503A', look: { tenue: 'robe', peau: 'fonce', cheveux: 'tresses', habit: '#C2551F' } },
+    baroka: { nom: 'Baroka, le Balé', court: 'Baroka', couleur: '#7A2E2E', look: { tenue: 'boubou', peau: 'fonce', vieux: true, barbe: true, coiffe: 'couronne', habit: '#7A2E2E' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['sidi', 'baroka'], txt: 'Croyant le Balé impuissant, Sidi est venue chez lui pour se moquer de lui : c’est exactement ce que Baroka avait prévu. Il l’a d’abord laissée triompher.' },
+    { t: 'dit', qui: 'baroka', jeu: 'visiblement désappointé', txt: 'Hum ! Lakounlé ! Mais on en reparlera. Sais-tu ce que cela signifie, cette petite babiole ?', cite: 'Wole Soyinka, Le lion et la perle, acte III (trad. française)' },
+    { t: 'dit', qui: 'sidi', emo: 'fier', jeu: 'très fière d’elle', txt: 'Oui, je sais même ça. N’est-ce pas une taxe sur l’habitude de parler avec le papier ?', cite: 'Wole Soyinka, Le lion et la perle, acte III (trad. française)' },
+    { t: 'dit', qui: 'baroka', jeu: 'il manœuvre le levier de l’étrange machine', txt: 'Oh, oh ! Je vois que tu as plongé la main dans les poches du maître d’école, et que tu l’en as retirée pleine de savoir. Mais cette machine, l’instituteur lui-même ne pourrait pas dire quelle magie elle produit. Viens plus près, ça ne mord pas.', cite: 'Wole Soyinka, Le lion et la perle, acte III (trad. française)', objet: { i: 'document', lib: 'La machine' }, jauges: { charme: 45 } },
+    { t: 'question', q: '« Tu as plongé la main dans les poches du maître d’école » : que fait Baroka ?',
+      options: [
+        { txt: 'Il présente le savoir de Sidi comme emprunté, et rabaisse Lakounlé, son rival.', ok: true, retour: 'En deux répliques, l’instituteur passe du côté de l’ignorance.' },
+        { txt: 'Il accuse Sidi de vol.', retour: 'C’est une image : le savoir est « emprunté », pas volé.' }
+      ] },
+    { t: 'dit', qui: 'sidi', emo: 'surpris', txt: 'Je n’ai jamais rien vu de tel.', cite: 'Wole Soyinka, Le lion et la perle, acte III (trad. française)' },
+    { t: 'dit', qui: 'baroka', emo: 'fier', txt: 'Ouvrage des forgerons du palais, ma chère, exécuté dans le plus grand secret. Tout n’y marche pas bien encore, mais j’en découvrirai la cause, et alors Iloujinlé pourra s’enorgueillir de percevoir elle-même sa taxe sur le papier, grâce à des timbres comme celui-ci. J’y songeais depuis longtemps, et maintenant ça y est, femme de mes rêves.', cite: 'Wole Soyinka, Le lion et la perle, acte III (trad. française)', jauges: { garde: 60 } },
+    { t: 'dit', qui: 'sidi', jeu: 'émerveillée', txt: 'Vous voulez dire… que cela fonctionnera un jour ?', cite: 'Wole Soyinka, Le lion et la perle, acte III (trad. française)' },
+    { t: 'dit', qui: 'baroka', txt: 'Ogoun l’a décrété. Et maintenant, ma fille, que dis-tu de cette image sur le timbre ? de cette toile d’araignée en fer, en bois et en ciment ?', cite: 'Wole Soyinka, Le lion et la perle, acte III (trad. française)' },
+    { t: 'dit', qui: 'sidi', txt: 'N’est-ce pas un pont ?', cite: 'Wole Soyinka, Le lion et la perle, acte III (trad. française)' },
+    { t: 'dit', qui: 'baroka', txt: 'C’en est un. Le plus long, dit-on, de tout le pays. […] Voici donc des milliers et des milliers de lettres courant par route, par voie ferrée, par air, d’un bout de l’univers à l’autre, et parmi elles, pas une seule tête humaine, pas un seul timbre avec une belle figure !', cite: 'Wole Soyinka, Le lion et la perle, acte III (trad. française)' },
+    { t: 'dit', qui: 'sidi', txt: 'J’ai vu pourtant une fois une tête de bronze sur une lettre de Lakounlé.', cite: 'Wole Soyinka, Le lion et la perle, acte III (trad. française)' },
+    { t: 'dit', qui: 'baroka', emo: 'amour', txt: 'Une tête fabriquée, mon enfant, une œuvre d’art sans vie, avec des trous à la place des yeux, et le froid remplaçant cette chaleur de la vie et de l’amour qui anime des joues fraîches comme les tiennes, ma fille.', cite: 'Wole Soyinka, Le lion et la perle, acte III (trad. française)', jauges: { charme: 70 } },
+    { t: 'dit', qui: 'baroka', jeu: 'il brandit le magazine', txt: 'Imagines-tu cela, Sidi, des dizaines de milliers de cette vignette ravissante ? « La déesse du village tendant les bras vers son amant, le soleil ! » Imagines-tu cela, ma fille ?', cite: 'Wole Soyinka, Le lion et la perle, acte III (trad. française)', jauges: { garde: 30 } },
+    { t: 'question', q: '« ma chère », « femme de mes rêves », « ma fille », « mon enfant » : pourquoi Baroka alterne-t-il ces mots ?',
+      options: [
+        { txt: 'Il passe du registre amoureux au registre paternel : Sidi ne sait plus si elle est courtisée ou protégée.', ok: true, retour: 'Cette oscillation désarme. C’est une séduction par le langage.' },
+        { txt: 'Il a oublié son prénom.', retour: 'Il l’appelle aussi « Sidi » : tout est calculé.' }
+      ] },
+    { t: 'dit', qui: 'baroka', jeu: 'il se rapproche peu à peu', txt: 'Je ne déteste pas le progrès, mais seulement sa nature qui rend pareils tous les toits et tous les visages.', cite: 'Wole Soyinka, Le lion et la perle, acte III (trad. française)' },
+    { t: 'dit', qui: 'baroka', jeu: 'assis à côté d’elle', txt: 'Mais les oripeaux du progrès ne font que dissimuler, à l’insu de tous, la bête fauve de l’uniformité… L’uniformité, est-ce que cela ne hérisse pas tout ton être, ma fille ?', cite: 'Wole Soyinka, Le lion et la perle, acte III (trad. française)', jauges: { charme: 90, garde: 15 } },
+    { t: 'choix', qui: 'sidi', q: 'Tu es Sidi. Le vieux Balé te parle de progrès et de ton visage sur des milliers de timbres. Que fais-tu ?',
+      options: [
+        { txt: 'Me lever et partir : je suis venue pour me moquer de lui.', consequence: 'Tu gardes la tête froide. Mais la curiosité…', jauges: { garde: 80 } },
+        { txt: 'L’écouter encore, éblouie.', consequence: 'Sidi, ébahie, n’est plus capable que d’un lent signe d’approbation.', jauges: { garde: 5 } },
+        { txt: 'Lui demander ce qu’en penserait Lakounlé.', consequence: 'Il balaierait la question : l’instituteur ne sait même pas ce que fait la machine.', jauges: { garde: 40 } }
+      ],
+      oeuvre: 'Sidi, ébahie, n’est capable que d’un lent signe d’approbation. La suite de la scène décidera de toute la pièce.' },
+    { t: 'dit', qui: 'baroka', emo: 'joie', txt: 'Je découvre que mon âme est, comme la tienne, vraiment sensible, bien qu’il y ait une génération, — pas plus d’une, je crois — entre toi et moi. Nos pensées voguent allègrement parmi les airs, pour fusionner dans la pureté. Et le premier fruit de notre union, c’est la production de ce timbre.', cite: 'Wole Soyinka, Le lion et la perle, acte III (trad. française)' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · les armes de Baroka', consigne: 'Remets dans l’ordre les étapes de la séduction.',
+      items: ['Il rabaisse le savoir de Lakounlé.', 'Il montre la machine secrète des forgerons.', 'Il fait miroiter le visage de Sidi sur des milliers de timbres.', 'Il expose sa philosophie contre l’uniformité.', 'Il parle d’« union » et de « fruit ».'],
+      bravo: 'Ni la force ni la richesse : le discours. Le lion chasse avec des mots.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · le lion et la perle',
+    intro: 'Règle l’orgueil de Sidi, l’habileté de Baroka et le souvenir de Lakounlé : qui l’emporte ce soir-là ?',
+    persos: ['sidi', 'baroka'],
+    curseurs: [
+      { id: 'orgueil', nom: 'Orgueil de Sidi', val: 85, bas: 'modeste', haut: 'flattée', lecture: { haut: 'Son visage sur des milliers de timbres !', bas: 'Elle ne se laisse pas prendre aux compliments.' } },
+      { id: 'habile', nom: 'Habileté de Baroka', val: 90, bas: 'maladroit', haut: 'le lion', lecture: { haut: 'Machine, image, philosophie : tout est préparé.', bas: 'Un vieillard qui radote.' } },
+      { id: 'lakounle', nom: 'Souvenir de Lakounlé', val: 20, bas: 'oublié', haut: 'présent', lecture: { haut: 'Sidi pense à son instituteur.', bas: '« Hum ! Lakounlé ! Mais on en reparlera. »' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans la pièce', icone: 'livre', valeurs: { orgueil: 85, habile: 90, lakounle: 20 } },
+      { nom: 'Et si Sidi restait modeste ?', icone: 'oeil', valeurs: { orgueil: 15 } },
+      { nom: 'Et si Baroka était maladroit ?', icone: 'nuage', valeurs: { habile: 15 } }
+    ],
+    liens: [
+      { a: 'baroka', b: 'sidi', type: 'domination', lib: 'la séduction', base: .3, poids: { habile: .6 } },
+      { a: 'sidi', b: 'baroka', type: 'confiance', lib: 'éblouie', base: .1, poids: { orgueil: .5, lakounle: -.3 } }
+    ],
+    issue: function(v){
+      if(v.habile < 35){ return { niveau: 'ok', badge: 'Sidi rit et s’en va', recit: 'La machine coince, le discours s’embrouille : Sidi repart, plus moqueuse que jamais.', apres: 'Sans l’art de la parole, le lion n’est qu’un vieillard.', themes: ['moquerie', 'jeunesse'] }; }
+      if(v.orgueil < 35){ return { niveau: 'moyen', badge: 'Sidi garde la tête froide', recit: 'Les compliments glissent sur elle. Elle écoute, mais reste sur ses gardes.', apres: 'La séduction de Baroka s’appuie sur l’orgueil de Sidi.', themes: ['lucidité'] }; }
+      return { niveau: 'ko', badge: 'Le lion tient sa proie', recit: 'Éblouie par son visage sur des milliers de timbres, Sidi n’est plus capable que d’un lent signe d’approbation.', apres: 'C’est l’acte III : la perle est prise au piège des mots. La suite décidera de toute la pièce.', themes: ['séduction', 'ruse', 'tradition et progrès'] };
+    }
+  },
+  fiche: {"accroche": "Qui, de l’instituteur épris d’Europe ou du vieux chef rusé surnommé le Lion, épousera Sidi, la perle d’Iloujinlé ? Tout se joue en une seule journée : matin, midi, soir.", "resume": "Dans un village yorouba, Sidi, la plus belle fille, a vu sa photo dans un magazine étranger. Lakounlé, l’instituteur, veut l’épouser sans dot, « à l’européenne ». Baroka, le vieux Balé, la veut aussi. Une comédie écrite à la veille de l’indépendance du Nigeria, où se joue une vraie question : que garder de la tradition, que prendre du monde moderne ?", "personnages": [{"nom": "Sidi", "role": "« la Beauté du village », convoitée par les deux hommes.", "cle": "sidi"}, {"nom": "Lakounlé", "role": "l’instituteur, 23 ans, épris de modernité occidentale.", "cle": "lakounle"}, {"nom": "Baroka", "role": "le Balé, chef d’Iloujinlé, surnommé le Lion, ou le Renard.", "cle": "baroka"}, {"nom": "Sadikou", "role": "la femme principale de Baroka, qui négocie en son nom."}, {"nom": "Le topographe", "role": "l’agent colonial venu tracer le chemin de fer."}], "aLire": [{"ou": "Acte I, « Au matin »", "pourquoi": "La querelle de la dot entre Sidi et Lakounlé, et l’annonce du livre d’images."}, {"ou": "Acte II, « À midi »", "pourquoi": "La demande de Baroka, et l’histoire du chemin de fer détourné."}, {"ou": "Acte III, « Le soir »", "pourquoi": "Une ruse se referme. Ne lis pas le résumé avant : c’est tout le plaisir de la pièce."}], "siTuAimes": "les comédies où les plus malins ne sont pas ceux qu’on croit, Soyinka t’attend.", "reperes": ["Auteur : Wole Soyinka (Nigeria), né en 1934, prix Nobel de littérature 1986", "Créée à Ibadan en 1959, un an avant l’indépendance", "Trois actes : Au matin, À midi, Le soir"], "themes": ["tradition et modernité", "la dot", "la ruse", "la vanité"], "cahier": {"lib": "Le cahier VÉRITAS de cette œuvre", "href": "../livrets/oeuvre-lionperle.html"}},
+  quiz: [
+    { q: 'Qu’est-ce que la machine des forgerons du palais ?', options: [ { txt: 'Une machine à fabriquer des timbres.', ok: true, retour: 'Pour qu’Iloujinlé perçoive elle-même sa taxe sur le papier.' }, { txt: 'Une machine à coudre.', retour: 'Non : à timbres.' } ] },
+    { q: 'Que représente l’image du timbre que montre Baroka ?', options: [ { txt: 'Un pont, le plus long du pays.', ok: true, retour: '« cette toile d’araignée en fer, en bois et en ciment ».' }, { txt: 'Le visage de Sidi.', retour: 'Pas encore : c’est ce qu’il propose.' } ] },
+    { q: 'Que reproche Baroka au progrès ?', options: [ { txt: 'De rendre pareils tous les toits et tous les visages.', ok: true, retour: '« la bête fauve de l’uniformité ».' }, { txt: 'D’être trop cher.', retour: 'Non : l’uniformité.' } ] },
+    { q: 'Que signifie « oripeaux » ?', options: [ { txt: 'Des ornements brillants qui cachent la pauvreté de ce qu’ils couvrent.', ok: true, retour: '« les oripeaux du progrès ».' }, { txt: 'Des outils.', retour: 'Non : des parures trompeuses.' } ] },
+    { q: 'Quel mot fait « tout le travail » à la fin de la tirade ?', options: [ { txt: '« fruit » : « le premier fruit de notre union ».', ok: true, retour: 'Un mot à double sens, qui annonce la suite.' }, { txt: '« timbre ».', retour: 'C’est le mot « fruit » qui trouble.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Baroka séduit Sidi par le discours, ni par la force ni par la richesse.',
+      'Il rabaisse le savoir de Lakounlé, son rival.',
+      'Il alterne registre amoureux et registre paternel pour désarmer Sidi.',
+      'Il se dit pour le progrès mais contre « la bête fauve de l’uniformité ».'
+    ],
+    ecrire: 'Sidi raconte cette soirée à ses amies (vingt lignes). Elle comprend après coup comment Baroka l’a menée. Fais-la parler avec ses mots.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105a"></script>
+<script src="scene.js?v=20261105a"></script>
+</body>
+</html>

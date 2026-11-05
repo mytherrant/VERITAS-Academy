@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Six candidats — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après N’koum-wam, le huitième notable de David Massoma Pandong : six candidats remarquables, et une promesse qui change tout.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105a">
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'nkoum-wam-candidats',
+  discipline: 'Français', niveau: '5e',
+  oeuvre: 'N’koum-wam, le huitième notable', auteur: 'David Massoma Pandong (2024)',
+  titre: 'Six candidats',
+  decor: 'chefferie', lieu: 'la chefferie de Kekem, après le repas', moment: 'Acte III',
+  avertissement: 'Les répliques suivies de la référence du livre sont celles de la pièce, recopiées telles quelles. Les autres sont jouées par nos comédiens.',
+  objectif: 'Lire la scène où l’on choisit le huitième notable : repérer comment un discours poli peut cacher un marchandage.',
+  jauges: [
+    { id: 'merite', nom: 'Poids du mérite', val: 70, couleur: '#1F9D5B' },
+    { id: 'interet', nom: 'Poids de l’intérêt', val: 10, couleur: '#C0392B' }
+  ],
+  personnages: {
+    sambo:   { nom: 'Sambo Maya, chef de Kekem', court: 'Sambo Maya', couleur: '#7A2E2E', look: { peau: 'fonce', vieux: true, barbe: true, coiffe: 'chechia', couleurCoiffe: '#7A2E2E', tenue: 'boubou', habit: '#5A2E2E' } },
+    ekah:    { nom: 'N’koum Ekah, porte-parole', court: 'Ekah', couleur: '#2E6B5A', look: { peau: 'fonce', cheveux: 'ras', moustache: true, tenue: 'boubou', habit: '#2E6B5A' } },
+    epanlo:  { nom: 'N’koum Epanlo', court: 'Epanlo', couleur: '#B4793F', look: { peau: 'fonce', vieux: true, cheveux: 'ras', tenue: 'boubou', habit: '#D9A440', lunettes: true } },
+    same:    { nom: 'N’koum Samè', court: 'Samè', couleur: '#1E499B', look: { peau: 'tresfonce', vieux: true, barbe: true, tenue: 'boubou', habit: '#1E499B' } },
+    notables:{ nom: 'Les notables', couleur: '#5A6275', groupe: true, look: { peau: 'fonce', vieux: true, cheveux: 'ras', tenue: 'boubou', habit: '#6E7385' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['sambo', 'notables', 'ekah'], txt: 'Le repas est terminé. Il ne reste à chacun qu’une calebasse entre les jambes et quelques kolas dans un panier. Le chef demande à son porte-parole de résumer les candidatures au siège du huitième notable.', objet: { i: 'panier', lib: 'Les kolas' } },
+    { t: 'dit', qui: 'ekah', jeu: 'avec une petite pointe d’amertume', txt: 'Comme il te plaira, A ’Sambo. Nous avons reçu sept candidatures dont tu as estimé six recevables. Je m’en tiendrai évidemment à ces six, sans aucune forme de polémique.', cite: 'David Massoma Pandong, N’koum-wam, le huitième notable, acte III' },
+    { t: 'dit', qui: 'notables', txt: 'Pas de polémique ! Parle !', cite: 'David Massoma Pandong, N’koum-wam, le huitième notable, acte III' },
+    { t: 'dit', qui: 'ekah', txt: 'On a reçu la candidature d’Eyango, l’artiste musicien. C’est le candidat présenté par N’koum Essoua. C’est l’homme qui popularise nos sonorités locales et porte la voix de notre peuple au loin.', cite: 'David Massoma Pandong, N’koum-wam, le huitième notable, acte III' },
+    { t: 'dit', qui: 'notables', jeu: 'en chœur', txt: 'Un !', cite: 'David Massoma Pandong, N’koum-wam, le huitième notable, acte III' },
+    { t: 'dit', qui: 'ekah', txt: 'Ndéma, le médecin, est le candidat proposé par N’koum Ngalé. C’est un véritable bienfaiteur, à l’actif de qui il convient de mettre l’amélioration de l’espérance de vie de nos populations villageoises.', cite: 'David Massoma Pandong, N’koum-wam, le huitième notable, acte III' },
+    { t: 'dit', qui: 'ekah', txt: 'Essokè, l’enseignant, est le candidat adoubé par N’koum Elong. C’est le plus long crayon de ce village ; il promet d’écrire notre histoire pour l’enseigner aux générations futures.', cite: 'David Massoma Pandong, N’koum-wam, le huitième notable, acte III', jauges: { merite: 95 } },
+    { t: 'recit', txt: 'Les notables comptent jusqu’à six : le musicien, le riche planteur, l’ingénieur agronome, le médecin, l’administrateur Etamè, l’enseignant. Puis Ekah ajoute une phrase de trop.' },
+    { t: 'dit', qui: 'ekah', emo: 'colere', txt: 'Je m’interdis toutefois de mentionner le septième candidat, l’unique ayant été recalé d’entrée, qui n’a trouvé grâce ni aux yeux de Sambo ni à ceux de ses sages notables. Voilà ! J’en ai terminé.', cite: 'David Massoma Pandong, N’koum-wam, le huitième notable, acte III' },
+    { t: 'question', q: 'Pourquoi Ekah parle-t-il du septième candidat qu’il prétend ne pas mentionner ?',
+      options: [
+        { txt: 'Il n’a pas digéré d’avoir été jugé : sa phrase est une pique.', ok: true, retour: 'Dire qu’on « s’interdit » d’en parler, c’est justement en parler : c’est une prétérition, et une vengeance polie.' },
+        { txt: 'Il a oublié le nom du candidat.', retour: 'Il sait très bien de qui il parle.' }
+      ] },
+    { t: 'dit', qui: 'sambo', jeu: 'sur un ton apaisé', txt: 'Pourquoi cette polémique à la fin d’un si brillant exposé ? Tu as pourtant fait un formidable travail de synthèse. Oublions ce qui nous divise et concentrons-nous sur ce qui nous unit, du moins, ce qui emporte l’adhésion de la majorité d’entre nous.', cite: 'David Massoma Pandong, N’koum-wam, le huitième notable, acte III' },
+    { t: 'dit', qui: 'epanlo', entre: ['epanlo'], jeu: 'astucieux', txt: 'A’ Sambo Maya. Il est vrai que les candidatures sont toutes alléchantes. Je parle des six, bien sûr ! Mais... Mais... Avons-nous intérêt à fâcher un partenaire stratégique et allié indéfectible, surtout dans un contexte aussi sensible ?', cite: 'David Massoma Pandong, N’koum-wam, le huitième notable, acte III' },
+    { t: 'dit', qui: 'notables', jeu: 'suspicieux', txt: 'Va droit au but !', cite: 'David Massoma Pandong, N’koum-wam, le huitième notable, acte III' },
+    { t: 'dit', qui: 'epanlo', emo: 'fier', jeu: 'il se dévoile', txt: 'Je parle de l’administrateur Etamè, ardent défenseur de notre chefferie. N’a-t-il pas promis de peser de tout son poids pour que toi, Sambo Maya, tu deviennes le prochain maire de Kekem et que tu le demeures tant que tu vivras ? Le réalisme commande qu’on lui soit reconnaissant, et qu’on laisse tomber les autres candidatures, aussi prometteuses soient-elles !', cite: 'David Massoma Pandong, N’koum-wam, le huitième notable, acte III', jauges: { interet: 85, merite: 40 } },
+    { t: 'question', q: 'Que propose vraiment Epanlo ?',
+      options: [
+        { txt: 'Choisir Etamè non pour son mérite, mais pour ce qu’il a promis au chef.', ok: true, retour: 'C’est un marchandage : une place contre une mairie à vie. La pièce ne dit jamais « corruption », elle le montre.' },
+        { txt: 'Choisir le meilleur candidat pour le village.', retour: 'Il demande justement de « laisser tomber » les autres, « aussi prometteuses soient-elles ».' }
+      ] },
+    { t: 'dit', qui: 'same', entre: ['same'], jeu: 'qui entend répliquer', txt: 'Le réalisme ? Je veux bien ! Mais y a-t-il chef sans peuple ? Est-ce vertueux pour un chef de mettre en avant ses intérêts au détriment de ceux de son peuple ?', cite: 'David Massoma Pandong, N’koum-wam, le huitième notable, acte III', jauges: { merite: 70 } },
+    { t: 'dit', qui: 'notables', jeu: 'polémiques', txt: 'Tu accuses le chef ?', cite: 'David Massoma Pandong, N’koum-wam, le huitième notable, acte III' },
+    { t: 'dit', qui: 'same', jeu: 'doctoral', txt: 'Je m’interroge juste à haute voix. La grandeur d’un chef, il me semble, se mesure à sa capacité à toujours placer son peuple au centre de son action.', cite: 'David Massoma Pandong, N’koum-wam, le huitième notable, acte III' },
+    { t: 'dit', qui: 'notables', jeu: 'méfiants', txt: 'Hmmm...', cite: 'David Massoma Pandong, N’koum-wam, le huitième notable, acte III' },
+    { t: 'choix', qui: 'notables', q: 'Tu es l’un des notables. Pour qui lèves-tu la main ?',
+      options: [
+        { txt: 'Pour Etamè : il ne faut pas fâcher un allié puissant.', consequence: 'Tu choisis l’intérêt du chef. Le village perd un médecin, un enseignant, un musicien…', jauges: { interet: 100 } },
+        { txt: 'Pour le candidat le plus utile au village.', consequence: 'Tu suis Samè : le peuple au centre.', jauges: { merite: 90 } },
+        { txt: 'Je ne dis rien et j’attends de voir.', consequence: 'Les notables aussi disent « Hmmm… ». Le silence laisse gagner le plus fort.', jauges: { interet: 70 } }
+      ],
+      oeuvre: 'La pièce laisse la question en suspens : il faut attendre l’acte V pour savoir qui sera le huitième notable.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · l’intérêt de qui ?', consigne: 'Chaque argument sert-il le village ou le chef ?',
+      cats: ['Le village', 'Le chef'],
+      items: [
+        { txt: 'Un médecin qui allonge l’espérance de vie', cat: 0 },
+        { txt: 'Une mairie « tant que tu vivras » pour Sambo', cat: 1 },
+        { txt: 'Un enseignant qui écrira notre histoire', cat: 0 },
+        { txt: 'Ne pas fâcher un « partenaire stratégique »', cat: 1 },
+        { txt: 'Un musicien qui porte notre voix au loin', cat: 0 }
+      ],
+      bravo: 'Six mérites d’un côté, une promesse de l’autre : voilà tout le conflit de l’acte III.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · le conseil des notables',
+    intro: 'Règle le poids de la promesse d’Etamè, la voix de Samè et la peur des notables : qui sera le huitième notable ?',
+    persos: ['sambo', 'epanlo', 'same', 'notables'],
+    curseurs: [
+      { id: 'promesse', nom: 'Poids de la promesse', val: 80, bas: 'aucune', haut: 'une mairie à vie', lecture: { haut: '« tant que tu vivras »', bas: 'Sans promesse, chaque candidat est jugé sur ce qu’il apporte.' } },
+      { id: 'vertu', nom: 'Voix de Samè', val: 50, bas: 'il se tait', haut: 'tous l’écoutent', lecture: { haut: '« La grandeur d’un chef… placer son peuple au centre. »', bas: 'Personne pour rappeler le peuple.' } },
+      { id: 'peur', nom: 'Peur des notables', val: 60, bas: 'libres', haut: 'craintifs', lecture: { haut: '« Tu accuses le chef ? »', bas: 'Ils oseraient voter selon leur conscience.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans la pièce', icone: 'livre', valeurs: { promesse: 80, vertu: 50, peur: 60 } },
+      { nom: 'Et si Samè se taisait ?', icone: 'muet', valeurs: { vertu: 10 } },
+      { nom: 'Et si tous écoutaient Samè ?', icone: 'groupe', valeurs: { vertu: 90, peur: 20 } }
+    ],
+    liens: [
+      { a: 'epanlo', b: 'sambo', type: 'alliance', lib: 'la promesse', base: .3, poids: { promesse: .6 } },
+      { a: 'same', b: 'sambo', type: 'conflit', lib: 'la question', base: .2, poids: { vertu: .6 } },
+      { a: 'notables', b: 'sambo', type: 'peur', lib: 'la crainte', base: .2, poids: { peur: .6 } },
+      { a: 'ekah', b: 'sambo', type: 'conflit', lib: 'la pique', base: .4 }
+    ],
+    issue: function(v){
+      if(v.vertu < 35){ return { niveau: 'ko', badge: 'Le marchandage l’emporte', recit: 'Personne ne s’oppose : Etamè est choisi pour sa promesse, et les six autres rentrent chez eux.', apres: 'Une assemblée qui se tait se laisse acheter.', themes: ['corruption', 'silence'] }; }
+      if(v.vertu >= 70 && v.peur < 40){ return { niveau: 'ok', badge: 'Le peuple au centre', recit: 'Les notables pèsent les mérites : le choix se fera pour le village, pas pour la mairie du chef.', apres: 'C’est ce que demande Samè : la grandeur d’un chef se mesure à son peuple.', themes: ['bien commun', 'courage'] }; }
+      return { niveau: 'moyen', badge: 'L’assemblée hésite', recit: 'Samè a semé le doute, Epanlo a planté sa promesse. Les notables murmurent « Hmmm… » et rien n’est décidé.', apres: 'C’est l’acte III : le marchandage est sur la table. La suite, à l’acte V.', themes: ['débat', 'intérêt', 'pouvoir'] };
+    }
+  },
+  fiche: {"accroche": "Comment un jeune homme sans le sou peut-il prétendre à la charge la plus convoitée de Kekem, celle qui oblige à épouser une princesse ? Le dénouement de l’acte V retourne toute la pièce.", "resume": "À Kekem, chez les Mbo, le huitième notable est mort : qui sera le nouveau grand conseiller du chef Sambo Maya ? Six notables proposent un musicien célèbre, un riche planteur, un agronome, un médecin, un administrateur, un enseignant. Le porte-parole du chef, lui, propose un jeune désœuvré. Une comédie en cinq actes.", "personnages": [{"nom": "Sambo Maya", "cle": "sambo", "role": "chef de Kekem, toujours pédagogue."}, {"nom": "N’koum Ekah", "cle": "ekah", "role": "le porte-parole du chef : pragmatique, combatif, puis triomphant."}, {"nom": "N’koum Ekango", "cle": "ekango", "role": "il raisonne par proverbes."}, {"nom": "Douma", "cle": "douma", "role": "le coursier, qui note les dons dans un cahier."}, {"nom": "Kwangué", "role": "le jeune désœuvré, candidat d’Ekah."}, {"nom": "Ehob-Gnama", "role": "le mystérieux marabout de Sanzo."}], "aLire": [{"ou": "La première page", "pourquoi": "Le chef explique la règle : la charge du huitième ne s’hérite pas, et elle impose d’épouser une fille de sang royal. Toute l’intrigue est là."}, {"ou": "La liste des candidats", "pourquoi": "Six candidats prestigieux… et un jeune désœuvré : le scandale de la pièce."}, {"ou": "L’acte V", "pourquoi": "Le dénouement retourne tout ce que tu as cru comprendre."}], "siTuAimes": "les intrigues où l’on se demande qui manipule qui, distribuez les rôles et jouez les séances des notables, kola et vin de palme compris.", "reperes": ["Auteur : David Massoma Pandong (Cameroun)", "Afrédit, Yaoundé, 2024", "Comédie en cinq actes, avec un glossaire", "Lieu : Kekem, chez les Mbo"], "themes": ["le pouvoir et la succession", "la ruse", "la tradition", "le mariage"], "cahier": {"lib": "Le cahier VÉRITAS des œuvres de 5e", "href": "../livrets/oeuvres-5e.html"}},
+  quiz: [
+    { q: 'Combien de candidatures ont été reçues ?', options: [ { txt: 'Sept, dont six jugées recevables.', ok: true, retour: 'Le septième a été « recalé d’entrée ».' }, { txt: 'Six.', retour: 'Six recevables, mais sept reçues.' } ] },
+    { q: 'Qui est Essokè ?', options: [ { txt: 'L’enseignant, « le plus long crayon de ce village ».', ok: true, retour: 'Il promet d’écrire l’histoire du village.' }, { txt: 'Le médecin.', retour: 'Le médecin, c’est Ndéma.' } ] },
+    { q: 'Qu’a promis l’administrateur Etamè, selon Epanlo ?', options: [ { txt: 'Que Sambo Maya deviendrait maire de Kekem, et le resterait toute sa vie.', ok: true, retour: 'Une promesse personnelle, faite au chef.' }, { txt: 'De construire une école.', retour: 'Non : une mairie à vie pour le chef.' } ] },
+    { q: 'Selon Samè, à quoi se mesure la grandeur d’un chef ?', options: [ { txt: 'À sa capacité à placer son peuple au centre de son action.', ok: true, retour: 'Le bien commun avant l’intérêt personnel.' }, { txt: 'À sa richesse.', retour: 'Non : au service de son peuple.' } ] },
+    { q: 'Que signifie « indéfectible » ?', options: [ { txt: 'Absolument fidèle, qui ne peut pas faiblir.', ok: true, retour: '« Un allié indéfectible ».' }, { txt: 'Qui a des défauts.', retour: 'C’est le contraire.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Ekah présente six candidats par leur utilité au village.',
+      'Epanlo propose de choisir Etamè à cause d’une promesse faite au chef : c’est un marchandage.',
+      'Samè rappelle que la grandeur d’un chef se mesure à son peuple.',
+      'La pièce montre la corruption sans jamais prononcer le mot.'
+    ],
+    ecrire: 'Tu es N’koum Samè. Écris le discours (quinze lignes) que tu prononces devant les notables pour défendre le candidat le plus utile au village.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105a"></script>
+<script src="scene.js?v=20261105a"></script>
+</body>
+</html>
