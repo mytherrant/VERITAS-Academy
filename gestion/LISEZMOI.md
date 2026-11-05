@@ -98,6 +98,14 @@ avec qui les a saisies. Une dépense touchée s'ouvre : valider, refuser (en att
 **annuler une dépense validée** (doublon, erreur) avec un motif ; le serveur n'accepte que statut « refusée » +
 motif. Une paie s'annule avec « Annuler cette paie » (qui gère les enseignants).
 
+**Pièces de caisse des sorties :** reçu de paie d'un enseignant (« Reçu de paiement · enseignant », réf. PA-…)
+et bon de sortie d'une dépense (« Bon de sortie de caisse », réf. DE-…), avec la somme en lettres, qui a payé ou
+saisi, qui a validé, et deux cadres de signature (le bénéficiaire, la Direction). « ANNULÉ » ou « À VALIDER » en
+filigrane selon l'état. Image, PDF, WhatsApp. Le reçu s'ouvre tout seul après « Payer » (cours) ou la paie du mois ;
+le bouton « Reçu » est sur chaque paie (Caisse, Bilan, fiche enseignant), « Bon de sortie » sur chaque dépense.
+L'enseignant voit « Mes paies » et leurs reçus dans « Mes heures ». La catégorie de dépense « Salaires » est réservée
+à qui gère les enseignants (serveur et formulaire) : sinon la paie passe par « Payer », plafonnée et sans doublon.
+
 **Centres indépendants :** un compte (hors administrateur) n'a accès qu'à **un seul centre** ; le serveur
 refuse le reste (`comptes/enregistrer`, 422). Une personne présente dans les deux centres a deux comptes
 (identifiants différents : le second reçoit le suffixe du centre, ex. `paul.essomba.ndogpassi2`). La fiche
@@ -221,6 +229,7 @@ node tests/banc_gestion_cahier.cjs <dossier>     # cahier de textes : saisie, se
 node tests/banc_gestion_debut_comptes.cjs <dossier> # repartir de zéro : mois retiré des comptes, dettes des élèves gardées (Playwright)
 node tests/banc_gestion_redater.cjs <dossier>    # versements saisis en retard rattachés au mois passé (Playwright)
 node tests/banc_gestion_detail_sorties.cjs <dossier> # Bilan : détail des sorties, annulation d'une dépense validée par l'admin (Playwright)
+node tests/banc_gestion_recus_sorties.cjs <dossier> # reçu de paie, bon de sortie, « Mes paies », « Salaires » réservé (Playwright)
 node tests/banc_gestion_centres.cjs <dossier>    # centres indépendants : un compte = un centre, compte séparé pour l'autre (Playwright)
 ```
 

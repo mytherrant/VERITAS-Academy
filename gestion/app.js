@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.13.0';
+  var VERSION = '0.13.1';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -1227,8 +1227,9 @@
       var b = bilanEnseignant(u.id, c.id, MES.mois);
       h += '<h2>' + esc(c.nom) + '</h2><div class="stats"><div><b>' + dureeLisible(b.faites) + '</b><small>faites · ' + b.seances + ' séance' + (b.seances > 1 ? 's' : '') + '</small></div><div><b>' + dureeLisible(b.prevues) + '</b><small>prévues</small></div>' +
         (b.contrat ? '<div><b>' + fcfa(b.du) + '</b><small>dû (' + esc(LIB_MODE_REM[b.contrat.mode]) + ')</small></div><div><b>' + fcfa(b.verse) + '</b><small>reçu</small></div>' : '') + '</div>';
+      if (b.paies.length) h += '<h3>Mes paies</h3><div class="liste">' + b.paies.slice().sort(function (a, z) { return a.date < z.date ? 1 : -1; }).map(lignePaie).join('') + '</div>';
       var l = b.pres.slice().sort(function (a, z) { return a.date < z.date ? 1 : -1; });
-      h += l.length ? '<div class="liste">' + l.map(function (p) {
+      h += l.length ? '<h3>Mes cours</h3><div class="liste">' + l.map(function (p) {
         var cr = ligne('creneaux', p.creneau_id) || {};
         var lui = p.statut === 'remplace' ? (p.remplacant_id === u.id ? 'Remplacement assuré' : 'Remplacé') : LIB_ENS[p.statut];
         return '<div class="ligne"><span class="corps"><b>' + esc(dateLisible(p.date, true) + ' · ' + nomDe('classes', cr.classe_id)) + '</b><small>' + esc(lui + (p.arrivee ? ' · ' + p.arrivee : '') + (p.depart ? ' → ' + p.depart : '') + (Number(p.retard_min) ? ' (+' + p.retard_min + ' min)' : '')) + '</small>' + (function () { var pc = paieDuCours(p.id); return pc ? '<span class="badge ok">payé ' + fcfa(pc.montant) + ' le ' + esc(dateLisible(pc.date, true)) + '</span>' : ''; })() + '</span><span class="fin"><b>' + dureeLisible(Number(p.minutes) || 0) + '</b></span></div>';
@@ -1771,14 +1772,14 @@
       var proche = aEchoir(cid);
       if (proche.length) h += '<h2>Échéance proche · ' + proche.length + '</h2><p class="sous-titre">À régler dans les ' + JOURS_RAPPEL + ' jours : un rappel aimable, avant le retard.</p><div class="liste">' + proche.map(function (x) {
         var e = x.e, trace = e.relance_le ? '<small class="st-present">' + ico('check', 'p') + ' prévenu le ' + esc(dateLisible(e.relance_le)) + '</small>' : '';
-        return '<div class="ligne message"><button type="button" class="corps nom-eleve" data-a="voir-eleve" data-id="' + esc(e.id) + '"><b>' + esc(nomComplet(e)) + '</b><small>' + esc(nomDe('classes', e.classe_id) + ' · ' + fcfa(x.montant) + ' pour le ' + dateLisible(x.items[0].echeance, true)) + '</small>' + trace + '</button>' +
+        return '<div class="ligne message proche"><button type="button" class="corps nom-eleve" data-a="voir-eleve" data-id="' + esc(e.id) + '"><b>' + esc(nomComplet(e)) + '</b><small>' + esc(nomDe('classes', e.classe_id) + ' · ' + fcfa(x.montant) + ' pour le ' + dateLisible(x.items[0].echeance, true)) + '</small>' + trace + '</button>' +
           '<span class="boutons">' + boutonsEnvoi(e, messageRappelEcheance(e, x, false), messageRappelEcheance(e, x, true)) + '</span></div>';
       }).join('') + '</div><h2>Échus, à relancer · ' + imp.length + '</h2>';
       h += imp.length ? '<div class="liste">' + imp.map(function (x) {
         var e = x.e, tel = e.parent_whatsapp || e.parent_tel, sms = e.parent_tel || e.parent_whatsapp;
         var txt = messageRelance(e, x.ech);
         var trace = e.relance_le ? '<small class="st-present">' + ico('check', 'p') + ' relancé le ' + esc(dateLisible(e.relance_le)) + '</small>' : '';
-        return '<div class="ligne message"><button type="button" class="corps nom-eleve" data-a="voir-eleve" data-id="' + esc(e.id) + '"><b>' + esc(nomComplet(e)) + (e.statut === 'parti' ? ' <span class="badge">parti</span>' : '') + '</b><small>' + esc(nomDe('classes', e.classe_id)) + ' · ' + esc(x.ech.moisImpayes.map(function (it) { return it.court; }).join(', ')) + '</small><small class="st-absent"><b class="st-absent">' + fcfa(x.ech.impaye) + '</b></small>' + trace + '</button>' +
+        return '<div class="ligne message echu"><button type="button" class="corps nom-eleve" data-a="voir-eleve" data-id="' + esc(e.id) + '"><b>' + esc(nomComplet(e)) + (e.statut === 'parti' ? ' <span class="badge">parti</span>' : '') + '</b><small>' + esc(nomDe('classes', e.classe_id)) + ' · ' + esc(x.ech.moisImpayes.map(function (it) { return it.court; }).join(', ')) + '</small><small class="st-absent"><b class="st-absent">' + fcfa(x.ech.impaye) + '</b></small>' + trace + '</button>' +
           '<span class="boutons">' + boutonsEnvoi(e, txt, txt.replace(/^Bonjour [^,]*,/, 'Bonjour ' + (e.prenoms || nomComplet(e)) + ',')) + '</span></div>';
       }).join('') + '</div>' : '<div class="carte vide">Aucun impayé échu. </div>';
     } else {
@@ -1812,7 +1813,8 @@
     var gere = peut('enseignants.gerer', x.centre_id) && !Number(x.annule);
     return '<div class="ligne"><span class="pastille">' + ico('presentation') + '</span><span class="corps"><b' + (Number(x.annule) ? ' class="barre-txt"' : '') + '>' + esc(nomPersonne(x.enseignant_id) || 'Enseignant') + '</b><small>' +
       esc(dateLisible(x.date, true) + ' · ' + (x.note || 'Paie du mois') + ' · payé par ' + nomCompte(x.paye_par) + (Number(x.annule) ? ' · annulée' : '')) + '</small>' +
-      (gere ? '<span class="boutons"><button class="btn clair petit" type="button" data-a="annuler-paie" data-id="' + esc(x.id) + '">Annuler cette paie</button></span>' : '') +
+      '<span class="boutons"><button class="btn clair petit" type="button" data-a="voir-bon" data-t="paie" data-id="' + esc(x.id) + '">' + ico('doc', 'p') + 'Reçu</button>' +
+      (gere ? '<button class="btn clair petit" type="button" data-a="annuler-paie" data-id="' + esc(x.id) + '">Annuler cette paie</button>' : '') + '</span>' +
       '</span><span class="fin"><b>− ' + fcfa(x.montant) + '</b></span></div>';
   }
   function ligneVersement(p) {
@@ -1916,6 +1918,101 @@
     }
     return cvs;
   }
+  // ── Pièce de caisse d'une sortie : reçu de paie d'un enseignant, bon de sortie d'une dépense ──
+  // Même habillage que le reçu des élèves ; le bénéficiaire signe (argent reçu), la Direction aussi.
+  function infosBon(type, x) {
+    if (type === 'paie') {
+      return { titre: 'Reçu de paiement · enseignant', ref: 'PA-' + String(x.id).slice(-6).toUpperCase(), benef: nomPersonne(x.enseignant_id) || 'Enseignant',
+        objet: x.note || ('Paie de ' + (x.mois ? libMoisAnnee(x.mois) : 'mois')), par: nomCompte(x.paye_par), valide: '',
+        etat: Number(x.annule) ? 'ANNULÉ' : '', motif: Number(x.annule) ? (x.motif_annulation || '') : '' };
+    }
+    return { titre: 'Bon de sortie de caisse', ref: 'DE-' + String(x.id).slice(-6).toUpperCase(), benef: x.beneficiaire || '—',
+      objet: (x.libelle || '') + ' · ' + (CATEGORIES[x.categorie] || x.categorie || ''), par: nomPersonne(x.saisie_par) || nomCompte(x.saisie_par),
+      valide: x.statut === 'validee' && x.valide_par ? nomCompte(x.valide_par) : '',
+      etat: x.statut === 'refusee' ? 'ANNULÉ' : x.statut === 'validee' ? '' : 'À VALIDER', motif: x.statut === 'refusee' ? (x.motif_refus || '') : '' };
+  }
+  function dessinerBon(type, x, logo, filigraneLogo) {
+    var L = 1240, H = 1240, M = 70, c = ligne('centres', x.centre_id) || {}, b = infosBon(type, x);
+    var cvs = document.createElement('canvas'); cvs.width = L; cvs.height = H;
+    var g = cvs.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, L, H);
+    g.fillStyle = '#0C2A6A'; g.fillRect(0, 0, L, 170);
+    if (logo) g.drawImage(logo, M, 30, 110, 110);
+    g.fillStyle = '#fff'; g.font = '600 40px Poppins, sans-serif'; g.fillText(texteCoupe(g, c.nom || 'VÉRITAS', L - M * 2 - 140), M + 135, 78);
+    g.font = '400 22px Poppins, sans-serif'; g.fillStyle = '#C9D6F2';
+    g.fillText(texteCoupe(g, c.devise || '', L - M * 2 - 140), M + 135, 112);
+    var tels = String(c.telephones || '').split('/').map(function (t) { return telLisible(t.replace(/\D+/g, '')); }).filter(Boolean).join(' / ');
+    g.fillText(texteCoupe(g, [c.adresse, tels].filter(Boolean).join(' · '), L - M * 2 - 140), M + 135, 144);
+    g.fillStyle = '#FFC93C'; g.fillRect(0, 170, L, 6);
+    g.fillStyle = '#001136'; g.font = '600 40px Poppins, sans-serif'; g.fillText(texteCoupe(g, b.titre, L - 2 * M - 300), M, 250);
+    g.textAlign = 'right'; g.font = '500 26px Poppins, sans-serif'; g.fillStyle = '#4D5163'; g.fillText('Réf. ' + b.ref, L - M, 250); g.textAlign = 'left';
+    var y = 330;
+    var champ = function (lib, val, gras) {
+      g.font = '400 25px Poppins, sans-serif'; g.fillStyle = '#6B7185'; g.fillText(lib, M, y);
+      g.font = (gras ? '600' : '500') + ' 27px Poppins, sans-serif'; g.fillStyle = '#001136'; g.fillText(texteCoupe(g, val, L - M * 2 - 300), M + 300, y);
+      g.fillStyle = '#E1E6F0'; g.fillRect(M, y + 18, L - 2 * M, 1);
+      y += 66;
+    };
+    champ('Bénéficiaire', b.benef, true);
+    champ('Objet', b.objet);
+    champ('Somme de', fcfa(x.montant) + ' (' + enLettres(Number(x.montant) || 0) + ' francs CFA)', true);
+    champ('Mode', MODES[x.mode || 'especes'] || x.mode);
+    champ(type === 'paie' ? 'Payé par' : 'Saisi par', b.par);
+    if (b.valide) champ('Validé par', b.valide);
+    champ('Fait à Douala le', dateLisible(x.date, true));
+    if (b.motif) champ('Motif d\'annulation', b.motif);
+    // Signatures : le bénéficiaire reconnaît avoir reçu la somme.
+    var ys = H - 250;
+    g.font = '500 24px Poppins, sans-serif'; g.fillStyle = '#4D5163';
+    g.fillText('Le bénéficiaire', M, ys); g.textAlign = 'right'; g.fillText('La Direction', L - M, ys); g.textAlign = 'left';
+    g.strokeStyle = '#C3CADB'; g.setLineDash([8, 8]); g.lineWidth = 2;
+    g.strokeRect(M, ys + 20, 420, 120); g.strokeRect(L - M - 420, ys + 20, 420, 120); g.setLineDash([]);
+    g.font = '400 18px Poppins, sans-serif'; g.fillStyle = '#6B7185'; g.fillText('VÉRITAS Gestion · pièce de caisse éditée le ' + new Date().toLocaleDateString('fr-FR'), M, H - 40);
+    if (b.etat) {
+      g.save(); g.globalAlpha = 0.18; g.fillStyle = b.etat === 'ANNULÉ' ? '#B42318' : '#B54708'; g.font = '600 ' + (b.etat === 'ANNULÉ' ? 200 : 150) + 'px Poppins, sans-serif'; g.textAlign = 'center';
+      g.translate(L / 2, H / 2); g.rotate(-Math.PI / 7); g.fillText(b.etat, 0, 0); g.restore();
+    } else if (filigraneLogo) {
+      var lf = 560, hf = Math.round(lf * filigraneLogo.naturalHeight / filigraneLogo.naturalWidth);
+      g.save(); g.globalAlpha = 0.07; g.drawImage(filigraneLogo, L / 2 - lf / 2, 340 + (560 - hf) / 2, lf, hf); g.restore();
+    }
+    return cvs;
+  }
+  function fichierBon(type, x, format) {
+    return Promise.all([chargerLogo(), document.fonts ? document.fonts.load('600 24px Poppins') : null, chargerLogoDetoure()]).then(function (r) {
+      var cv = dessinerBon(type, x, r[0], r[2]), b = infosBon(type, x);
+      var base = (b.ref + '-' + b.benef).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9-]+/g, '-');
+      if (format !== 'pdf') return versBlob(cv, 'image/png').then(function (bl) { return new File([bl], base + '.png', { type: 'image/png' }); });
+      return versBlob(cv, 'image/jpeg', 0.92).then(function (bl) { return bl.arrayBuffer(); }).then(function (a) { return new File([pdfDepuisJpeg([{ cv: cv, jpeg: new Uint8Array(a) }], 595.28, 595.28)], base + '.pdf', { type: 'application/pdf' }); });
+    });
+  }
+  function messageBon(type, x) {
+    var b = infosBon(type, x), c = ligne('centres', x.centre_id) || {};
+    return ('Bonjour ' + (b.benef !== '—' ? b.benef : '') + ', ' + (type === 'paie' ? 'reçu de votre paie' : 'pièce de caisse') + ' ' + (c.nom || 'VÉRITAS') + ' : ' + fcfa(x.montant) +
+      ' (' + (MODES[x.mode || 'especes'] || 'espèces').toLowerCase() + ') le ' + dateLisible(x.date, true) + ' — ' + b.objet + '. Réf. ' + b.ref + (b.etat ? ' [' + b.etat + ']' : '') + '. Merci !').replace(/ | /g, ' ');
+  }
+  function telBeneficiaire(type, x) {
+    if (type !== 'paie') return '';
+    var u = (E.cache.comptes || []).filter(function (k) { return k.id === x.enseignant_id; })[0];
+    return u && u.tel ? String(u.tel).replace(/\D+/g, '').slice(-9) : '';
+  }
+  function feuilleBon(type, id) {
+    var x = ligne(type === 'paie' ? 'paies' : 'depenses', id);
+    if (!x) return;
+    var b = infosBon(type, x), tel = telBeneficiaire(type, x);
+    ouvrirFeuille('<h2>' + esc(b.titre) + '</h2><p class="doux">' + esc(b.benef) + ' · ' + fcfa(x.montant) + ' · ' + esc(dateLisible(x.date, true)) + ' · réf. ' + esc(b.ref) + '</p>' +
+      (b.etat === 'À VALIDER' ? '<p class="note">Dépense pas encore validée : la pièce porte « À VALIDER ».</p>' : '') +
+      '<div id="apercu-bon" class="apercu-recu"><p class="doux">Préparation de l\'aperçu…</p></div>' +
+      '<div class="actions"><a class="btn or" target="_blank" rel="noopener" data-a="envoyer-bon" href="https://wa.me/' + (tel ? '237' + esc(tel) : '') + '?text=' + encodeURIComponent(messageBon(type, x)) + '">' + ico('message', 'p') + 'WhatsApp</a>' +
+      '<button class="btn clair" type="button" data-a="partager-bon" data-t="' + type + '" data-v="png" data-id="' + esc(id) + '">' + ico('camera', 'p') + 'Image</button>' +
+      '<button class="btn clair" type="button" data-a="partager-bon" data-t="' + type + '" data-v="pdf" data-id="' + esc(id) + '">' + ico('doc', 'p') + 'PDF</button></div>' +
+      '<div class="actions"><button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
+    Promise.all([chargerLogo(), document.fonts ? document.fonts.load('600 24px Poppins') : null, chargerLogoDetoure()]).then(function (r) {
+      var z = $('#apercu-bon');
+      if (!z) return;
+      var img = new Image(); img.alt = 'Aperçu de la pièce de caisse'; img.src = dessinerBon(type, x, r[0], r[2]).toDataURL('image/png');
+      z.innerHTML = ''; z.appendChild(img);
+    });
+  }
   function fichierRecu(p, format) {
     return Promise.all([chargerLogo(), document.fonts ? document.fonts.load('600 24px Poppins') : null, chargerLogoDetoure()]).then(function (r) {
       var cv = dessinerRecu(p, r[0], r[2]);
@@ -1986,13 +2083,16 @@
       '<label class="champ"><span>Libellé</span><input type="text" name="libelle" required value="' + esc(d.libelle || '') + '"' + dis + ' placeholder="ex. : Loyer de novembre"></label>' +
       '<div class="deux"><label class="champ"><span>Montant (FCFA)</span><input type="number" name="montant" min="1" required value="' + esc(d.montant || '') + '"' + dis + '></label>' +
       '<label class="champ"><span>Date</span><input type="date" name="date" max="' + isoLocal(new Date()) + '" value="' + esc(d.date) + '"' + dis + '></label></div>' +
-      '<div class="deux"><label class="champ"><span>Catégorie</span><select name="categorie"' + dis + '>' + Object.keys(CATEGORIES).map(function (k) { return '<option value="' + k + '"' + (d.categorie === k ? ' selected' : '') + '>' + CATEGORIES[k] + '</option>'; }).join('') + '</select></label>' +
+      '<div class="deux"><label class="champ"><span>Catégorie</span><select name="categorie"' + dis + '>' + Object.keys(CATEGORIES).filter(function (k) { return k !== 'salaires' || d.categorie === k || peut('enseignants.gerer', cid); }).map(function (k) { return '<option value="' + k + '"' + (d.categorie === k ? ' selected' : '') + '>' + CATEGORIES[k] + '</option>'; }).join('') + '</select></label>' +
       '<label class="champ"><span>Payé en</span><select name="mode"' + dis + '>' + Object.keys(MODES).map(function (k) { return '<option value="' + k + '"' + (d.mode === k ? ' selected' : '') + '>' + MODES[k] + '</option>'; }).join('') + '</select></label></div>' +
       '<label class="champ"><span>Bénéficiaire</span><input type="text" name="beneficiaire" value="' + esc(d.beneficiaire || '') + '"' + dis + '></label>' +
+      (modifiable ? '<p class="doux">' + ico('info', 'p') + ' Pour payer un enseignant, utilisez plutôt « Payer » dans l\'appel (après le cours) ou la paie du mois (Enseignants) : le reçu de paie est fait tout seul et le cours n\'est pas payé deux fois.' +
+        (peut('enseignants.gerer', cid) ? '' : ' La catégorie « Salaires » est réservée à qui gère les enseignants.') + '</p>' : '') +
       '<div id="zone-justificatif" class="justificatif"></div>' +
       (modifiable ? '<label class="champ"><span>' + (d.justificatif ? 'Remplacer la photo du justificatif' : 'Photo du justificatif (facture, reçu)') + '</span><small>Obligatoire à partir de ' + fcfa(SEUIL_JUSTIFICATIF) + ', facultative en dessous.</small><input type="file" name="photo" accept="image/*" capture="environment"></label>' : '') +
       (modifiable ? '<div class="actions"><button class="btn" type="submit">Enregistrer</button></div>' : '') + '</form>' +
       (valideur ? '<div class="actions"><button class="btn or" type="button" data-a="valider-depense" data-id="' + esc(id) + '">' + ico('check', 'p') + 'Valider</button><button class="btn danger" type="button" data-a="refuser-depense" data-id="' + esc(id) + '">Refuser</button></div>' : '') +
+      (id ? '<div class="actions"><button class="btn clair" type="button" data-a="voir-bon" data-t="depense" data-id="' + esc(id) + '">' + ico('doc', 'p') + 'Bon de sortie (image, PDF, WhatsApp)</button></div>' : '') +
       (id && estAdmin() && d.statut === 'validee' ? '<div class="actions"><button class="btn danger" type="button" data-a="refuser-depense" data-v="annuler" data-id="' + esc(id) + '">Annuler cette dépense</button></div>' +
         '<p class="doux">Annuler (doublon, erreur) : elle reste visible, barrée, avec le motif, et ne compte plus dans le bilan.</p>' : '') +
       '<div class="actions">' + (id && modifiable ? '<button class="btn danger" type="button" data-a="suppr-depense" data-id="' + esc(id) + '">Retirer</button>' : '') + '<button class="btn clair" type="button" data-a="fermer">Fermer</button></div>');
@@ -3891,27 +3991,30 @@
   var FICHES_ROLES = [
     { cle: 'admin', espace: 'admin', nom: 'Administrateur', famille: 'Direction',
       resume: 'Le propriétaire de l\'application. Voit et règle tout, dans tous les centres.',
-      peut: ['Créer les comptes et transmettre les identifiants', 'Retirer des droits à un partenaire, désactiver un compte', 'Ouvrir un centre, fixer l\'année, les matières, les tarifs', 'Voir les finances consolidées et le journal complet'],
+      peut: ['Créer les comptes et transmettre les identifiants', 'Retirer des droits à un partenaire, désactiver un compte', 'Ouvrir un centre, fixer l\'année, les matières, les tarifs', 'Voir les finances consolidées et le journal complet',
+        'Annuler une dépense validée, redater un versement, retirer un mois des comptes', 'Éditer les reçus de paie et les bons de sortie'],
       pas: [] },
     { cle: 'responsable', espace: 'partenaire', nom: 'Responsable', famille: 'Partenaire',
       resume: 'Dirige un centre au quotidien, avec presque tous les pouvoirs sur ce centre.',
       peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Remettre les fonds au trésorier', 'Fixer les tarifs, valider les dépenses', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants', 'Tenir l\'agenda : rendez-vous, rencontres, réunions', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
-      pas: ['Les réglages des centres et de l\'année', 'Les comptes responsables, actionnaires et admin'] },
+      pas: ['Les réglages des centres et de l\'année', 'Les comptes responsables, actionnaires et admin', 'Annuler une dépense déjà validée, changer la date d\'un versement (administrateur seul)'] },
     { cle: 'actionnaire', espace: 'partenaire', nom: 'Actionnaire', famille: 'Partenaire',
       resume: 'Associé du centre : quand il est présent, il fait l\'appel, relance, inscrit, encaisse, gère et paie les enseignants ; il suit les chiffres.',
       peut: ['Faire l\'appel des classes, prévenir les parents des absences et retards', 'Rappeler les échéances et relancer les impayés (parents ou élèves)',
         'Inscrire les élèves et modifier leurs fiches', 'Encaisser inscriptions et mensualités, envoyer le reçu', 'Créer les comptes des enseignants, fixer leur contrat',
-        'Payer l\'enseignant après son cours, verser la paie du mois', 'Saisir les dépenses', 'Remettre les fonds au trésorier', 'Voir le bilan, les statistiques et les parts',
+        'Payer l\'enseignant après son cours, verser la paie du mois, lui envoyer son reçu', 'Saisir les dépenses, éditer le bon de sortie', 'Remettre les fonds au trésorier', 'Voir le bilan, les statistiques et les parts',
         'Modifier l\'emploi du temps, tenir l\'agenda', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
-      pas: ['Fixer les tarifs, accorder une remise', 'Valider une dépense'] },
+      pas: ['Fixer les tarifs, accorder une remise', 'Valider ou annuler une dépense', 'Clôturer le mois'] },
     { cle: 'secretaire', espace: 'secretariat', nom: 'Secrétaire / surveillant', famille: 'Équipe',
       resume: 'Tient l\'accueil et la caisse du centre.',
-      peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Payer l\'enseignant juste après son cours (1 500 F/h)', 'Remettre les fonds au trésorier', 'Saisir les dépenses (avec photo du justificatif)', 'Noter les rendez-vous dans l\'agenda', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
-      pas: ['Voir le bilan', 'Annuler un versement, accorder une remise', 'Valider une dépense', 'Gérer les enseignants'] },
+      peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Payer l\'enseignant juste après son cours (1 500 F/h) et lui envoyer son reçu', 'Remettre les fonds au trésorier', 'Saisir les dépenses (avec photo du justificatif)', 'Noter les rendez-vous dans l\'agenda', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
+      pas: ['Voir le bilan', 'Annuler un versement, accorder une remise', 'Valider une dépense', 'Gérer les enseignants, verser la paie du mois',
+        'Saisir une dépense « Salaires » (la paie passe par « Payer » après le cours)'] },
     { cle: 'enseignant', espace: 'enseignant', nom: 'Enseignant', famille: 'Équipe',
-      resume: 'Fait l\'appel de ses classes et suit ses heures.',
-      peut: ['Faire l\'appel de ses classes, le jour du cours', 'Voir son emploi du temps et l\'agenda du centre', 'Voir ses heures, son contrat et ses paies'],
-      pas: ['Les élèves des autres classes', 'La caisse et les finances', 'Les comptes', 'L\'espace Équipe des partenaires'] }
+      resume: 'Fait l\'appel, tient le cahier de textes et suit ses heures et ses paies.',
+      peut: ['Faire l\'appel des classes de son centre (ses cours en premier), dans les 2 jours', 'Écrire le cahier de textes : ce qui a été fait, le travail donné',
+        'Voir son emploi du temps, sa progression et l\'agenda du centre', 'Voir ses heures, son contrat, ses paies et leurs reçus'],
+      pas: ['La caisse et les finances', 'Les paies des autres enseignants', 'Les comptes', 'L\'espace Équipe des partenaires', 'Un autre centre que le sien'] }
   ];
   function ficheRole(cle) { return FICHES_ROLES.filter(function (f) { return f.cle === cle; })[0]; }
   var ORDRE_ROLES = ['responsable', 'actionnaire', 'secretaire', 'enseignant'];
@@ -4501,11 +4604,8 @@
         muter('paies', idPaieCours(p.id), { centre_id: p.centre_id, enseignant_id: mc.prof, mois: p.date.slice(0, 7), montant: mc.montant, date: auj < p.date ? p.date : auj, mode: 'especes',
           note: 'Cours du ' + dateLisible(p.date, true) + ' · ' + nomDe('classes', c.classe_id) + ' · ' + mc.calcul, presence_id: p.id }).then(function () {
           rendre();
-          var t = 'Bonjour ' + nom + ', vous avez reçu ' + fcfa(mc.montant).replace(/\u00a0/g, ' ') + ' pour le cours de ' + nomDe('classes', c.classe_id) + ' du ' + dateLisible(p.date, true) + ' (' + mc.calcul.replace(/\u00a0/g, ' ') + '). ' +
-            ((ligne('centres', p.centre_id) || {}).nom || 'VÉRITAS') + ' — ' + E.profil.utilisateur.nom;
-          confirmer('Paie enregistrée. Envoyer le reçu à ' + nom + ' ?', 'Envoyer', function () {
-            if (NATIF || navigator.share) partagerTexte(t); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener');
-          });
+          // Le reçu de paie, prêt à envoyer (WhatsApp, image, PDF) : l'enseignant signe qu'il a reçu la somme.
+          feuilleBon('paie', idPaieCours(p.id));
         });
       });
     },
@@ -4672,6 +4772,15 @@
     encaisser: function (el) { feuillePaiement(el.dataset.id); },
     'montant-rapide': function (el) { var i = $('#montant-paiement'); if (i) { i.value = el.dataset.v; i.focus(); } },
     'voir-recu': function (el) { feuilleRecu(el.dataset.id); },
+    'voir-bon': function (el) { feuilleBon(el.dataset.t, el.dataset.id); },
+    'envoyer-bon': function (el) { window.open(el.getAttribute('href'), '_blank', 'noopener'); },
+    'partager-bon': function (el) {
+      var t = el.dataset.t, x = ligne(t === 'paie' ? 'paies' : 'depenses', el.dataset.id);
+      if (!x) return;
+      el.disabled = true;
+      fichierBon(t, x, el.dataset.v).then(function (f) { E.cache.dernierExport = f; return partagerFichiers([f], infosBon(t, x).titre); })
+        .catch(function (e) { toast('Export impossible : ' + (e && e.message), true); }).then(function () { el.disabled = false; });
+    },
     'export-caisse-jour': function (el) {
       var j = pointDuJour(CAI.centre, CAI.date || isoLocal(new Date()));
       var titre = 'Point de caisse du ' + dateLisible(j.date, true);
@@ -5150,8 +5259,9 @@
       var montant = Math.round(Number(v.montant));
       if (!(montant > 0)) { toast('Montant invalide.', true); return; }
       fermerFeuille();
-      muter('paies', 'py' + nouvelId(), { centre_id: ENS.centre, enseignant_id: form.dataset.ens, mois: ENS.mois, montant: montant, date: isoLocal(new Date()), mode: v.mode })
-        .then(function () { toast('Paie de ' + fcfa(montant) + ' enregistrée.'); rendre(); });
+      var idP = 'py' + nouvelId();
+      muter('paies', idP, { centre_id: ENS.centre, enseignant_id: form.dataset.ens, mois: ENS.mois, montant: montant, date: isoLocal(new Date()), mode: v.mode })
+        .then(function () { toast('Paie de ' + fcfa(montant) + ' enregistrée.'); rendre(); feuilleBon('paie', idP); });
     },
     contrat: function (form) {
       var v = valeurs(form);

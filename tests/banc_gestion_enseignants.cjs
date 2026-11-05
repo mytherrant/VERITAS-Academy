@@ -87,6 +87,8 @@ async function session(nav, ident, mdp) {
   ok('1 h faite à 2 000 F/h : 2 000 F dus', /1 h faites/.test(r1) && /2 000 F/.test(r1) && /reste 2 000 F/.test(r1), r1);
   await rangee.click();
   await page.click('#feuille form[data-f="paie"] button[type=submit]');
+  // Le reçu de paie s'ouvre aussitôt (image, PDF, WhatsApp) : on le ferme.
+  await page.waitForSelector('#feuille:has-text("Reçu de paiement")'); await page.click('#feuille [data-a="fermer"]');
   await aJour();
   await page.waitForFunction((s) => [...document.querySelectorAll('.ligne')].some((l) => l.textContent.includes('MBALLA ' + s) && /payé/.test(l.textContent)), SUF, { timeout: 10000 }).catch(() => {});
   ok('paie versée : « payé »', /payé/.test(await rangee.textContent()), await rangee.textContent());
