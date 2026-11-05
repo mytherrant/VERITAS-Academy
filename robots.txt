@@ -1,165 +1,49 @@
 # Centre VÉRITAS — robots.txt
 # https://veritas-school.com/
 # © 2026 Mythe Errant — Tous droits réservés
-# Ce site et son contenu sont protégés. Reproduction interdite sans autorisation écrite.
+
+# ════════════════════════════════════════════════════════════════════
+# 🔎 VISIBILITÉ MAXIMALE (05/11/2026, décision de Jacques : « ouvre tout »)
+# Moteurs de recherche ET intelligences artificielles (ChatGPT, Claude,
+# Gemini, Perplexity, Copilot, Meta AI, Apple Intelligence, Le Chat…) sont
+# admis sur TOUTES les pages publiques : c'est par eux que les parents et
+# les élèves trouvent aujourd'hui un centre, une œuvre ou une méthode.
+#
+# Restent fermés, pour tout le monde :
+#   · /api/ et /data/        — la base, les comptes, les paiements ;
+#   · /uploads/private/ et /uploads/protected/ — les contenus achetés ;
+#   · les URL d'administration et de jeton.
+#
+# ⚠️ Un robot ne lit QUE la section qui le nomme : les règles de
+# « User-agent: * » ne s'y ajoutent pas. Aucune section nommée n'existe
+# donc ici, hormis les aspirateurs SEO plus bas (refus total).
+# ════════════════════════════════════════════════════════════════════
 
 User-agent: *
 Allow: /
-Allow: /index.html
-Allow: /app.html
-
-# ── Bloquer les zones admin / API / uploads privés ──
 Disallow: /api/
-Disallow: /uploads/private/
 Disallow: /data/
+Disallow: /uploads/private/
+Disallow: /uploads/protected/
 Disallow: /*?admin
 Disallow: /*?token=
 Disallow: /*?secret=
 
-# ════════════════════════════════════════════════════════════════════
-# 🛡️ ANTI-IA — Interdiction d'utilisation pour entraînement de modèles
-# Conformément à la loi camerounaise n° 2000/011 du 19 décembre 2000
-# relative au droit d'auteur et aux droits voisins.
-# ════════════════════════════════════════════════════════════════════
-
-# OpenAI (ChatGPT, GPT-4, etc.)
-User-agent: GPTBot
-Disallow: /
-# Recherche et consultation à la demande (28/10/2026, décision de Jacques) :
-# admis sur les pages publiques pour figurer dans les réponses de ChatGPT.
-# Ils n'entraînent pas de modèle ; GPTBot, lui, reste bloqué ci-dessus.
-User-agent: ChatGPT-User
-User-agent: OAI-SearchBot
-Allow: /
-Disallow: /api/
-Disallow: /uploads/private/
-Disallow: /data/
-Disallow: /*?admin
-Disallow: /*?token=
-Disallow: /*?secret=
-
-# Anthropic (Claude)
-User-agent: ClaudeBot
-Disallow: /
-User-agent: anthropic-ai
-Disallow: /
-User-agent: Claude-Web
-Disallow: /
-User-agent: Claude-User
-Disallow: /
-
-# Google AI (Gemini, Bard, Vertex)
-User-agent: Google-Extended
-Disallow: /
-User-agent: GoogleOther
-Disallow: /
-
-# Microsoft / Bing AI
-User-agent: Bingbot-AI
-Disallow: /
-User-agent: msnbot-AI
-Disallow: /
-
-# Meta (LLaMA training)
-User-agent: FacebookBot
-Disallow: /
-User-agent: Meta-ExternalAgent
-Disallow: /
-
-# Amazon
-User-agent: Amazonbot
-Disallow: /
-
-# ByteDance / TikTok
-User-agent: Bytespider
-Disallow: /
-
-# Perplexity AI
-User-agent: PerplexityBot
-Disallow: /
-
-# Common Crawl (utilisé pour entraîner de nombreux LLM)
-User-agent: CCBot
-Disallow: /
-
-# Cohere
-User-agent: cohere-ai
-Disallow: /
-User-agent: cohere-training-data-crawler
-Disallow: /
-
-# Diffbot
-User-agent: Diffbot
-Disallow: /
-
-# Apple
-User-agent: Applebot-Extended
-Disallow: /
-
-# Mistral
-User-agent: MistralAI-User
-Disallow: /
-
-# YouSearch / You.com
-User-agent: YouBot
-Disallow: /
-
-# Webz / Omgili
-User-agent: Omgilibot
-Disallow: /
-User-agent: Omgili
-Disallow: /
-
-# Image generators
-User-agent: ImagesiftBot
-Disallow: /
-
-# ── Bots SEO agressifs (gardés bloqués) ──
+# ── Aspirateurs SEO commerciaux : ils revendent l'analyse du site et
+#    consomment la bande passante du mutualisé, sans apporter un visiteur.
 User-agent: SemrushBot
-Disallow: /
 User-agent: AhrefsBot
-Disallow: /
 User-agent: DotBot
-Disallow: /
 User-agent: MJ12bot
-Disallow: /
 User-agent: PetalBot
-Disallow: /
 User-agent: DataForSeoBot
-Disallow: /
 User-agent: SerpstatBot
-Disallow: /
 User-agent: BLEXBot
 Disallow: /
 
-# ── Autoriser uniquement les moteurs de recherche légitimes ──
-User-agent: Googlebot
-Allow: /
-Disallow: /api/
-
-User-agent: Bingbot
-Allow: /
-Disallow: /api/
-
-# ⚠️ Un robot ne lit QUE la section qui le nomme : les règles de
-# « User-agent: * » ne s'y ajoutent pas. Tout ce qui doit rester fermé
-# doit donc être répété dans chaque section, sinon elle passe outre.
-# C'était le cas ici : ces deux-là n'avaient aucun Disallow.
-User-agent: DuckDuckBot
-Allow: /
-Disallow: /api/
-
-User-agent: Slurp
-Allow: /
-Disallow: /api/
-
-User-agent: YandexBot
-Allow: /
-Disallow: /api/
-
-# ── Sitemap ──
+# ── Sitemaps ──
+Sitemap: https://veritas-school.com/sitemap-index.xml
 Sitemap: https://veritas-school.com/sitemap.xml
-Sitemap: https://veritas-school.com/seo/sitemap.xml
 Sitemap: https://veritas-school.com/oeuvres/sitemap-oeuvres.xml
 Sitemap: https://veritas-school.com/ressources/sitemap-ressources.xml
 Sitemap: https://veritas-school.com/decouvrir/sitemap-decouvrir.xml
@@ -167,15 +51,10 @@ Sitemap: https://veritas-school.com/niveaux/sitemap-niveaux.xml
 Sitemap: https://veritas-school.com/outils/sitemap-outils.xml
 Sitemap: https://veritas-school.com/corriges/sitemap-corriges.xml
 Sitemap: https://veritas-school.com/livrets/sitemap-livrets.xml
-Sitemap: https://veritas-school.com/sitemap-index.xml
 
-# ════════════════════════════════════════════════════════════════════
-# AVERTISSEMENT LÉGAL
-# ════════════════════════════════════════════════════════════════════
-# Le contenu de ce site (texte, code, design, méthodes pédagogiques) est
-# la propriété intellectuelle de Mythe Errant / Jacques Miterand TAKOU.
-# Toute reproduction, indexation à des fins d'entraînement de modèles d'IA,
-# ou clonage automatisé est STRICTEMENT INTERDIT et constitue une violation
-# du droit d'auteur (articles L335-2 et L335-3 du Code de la propriété
-# intellectuelle français, adoption Cameroun via ADPIC/OMPI).
-# Contact : contact@veritas-school.com
+# Résumé du site destiné aux assistants IA (standard llms.txt)
+# https://veritas-school.com/llms.txt
+
+# Le contenu reste protégé par le droit d'auteur (loi camerounaise
+# n° 2000/011 du 19 décembre 2000) : le citer avec un lien, oui ; le
+# republier, non. Contact : contact@veritas-school.com
