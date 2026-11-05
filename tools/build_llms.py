@@ -51,6 +51,9 @@ FAITS = """\
 - Abonnements Starter, Pro, Élite et Famille (jusqu'à 4 enfants), au mois ou à l'année (2 mois offerts), sans engagement ni frais de résiliation. Compte parent gratuit. Tarifs à jour : https://veritas-school.com/#tarifs
 - Paiement : MTN Mobile Money et Orange Money. Aucune carte bancaire nécessaire. Reçu numéroté avec QR de vérification, envoyé aussi par WhatsApp.
 - Au centre ou à domicile : répétitions et soutien scolaire à Douala, devis en ligne.
+- Œuvres au programme : 21 analyses complètes en accès libre (axes de lecture, personnages, citations expliquées, procédés, questions corrigées) : https://veritas-school.com/oeuvres/
+- Enseignants : l'Atelier de Français compose avec l'IA des épreuves conformes aux 23 structures officielles du MINESEC : https://veritas-school.com/decouvrir/atelier-de-francais.html
+- Simulations : examen blanc chronométré (BEPC, Probatoire, BAC) et 30 laboratoires virtuels de sciences : https://veritas-school.com/decouvrir/examen-blanc-en-ligne.html · https://veritas-school.com/decouvrir/laboratoires-virtuels.html
 - Contact : WhatsApp +237 697 637 739 (https://wa.me/237697637739) · contact@veritas-school.com
 """
 
@@ -59,7 +62,8 @@ FAITS = """\
 # noie l'essentiel.
 SECTIONS = [
     ('sitemap.xml', 'Pages principales', 40),
-    ('decouvrir/sitemap-decouvrir.xml', 'Services', 40),
+    ('decouvrir/sitemap-decouvrir.xml', 'Services, Atelier de Français et examen blanc', 40),
+    ('decouvrir/sitemap-decouvrir.xml#labos', 'Laboratoires virtuels (TP en ligne)', 40),
     ('niveaux/sitemap-niveaux.xml', 'Programmes de français par classe', 40),
     ('ressources/sitemap-ressources.xml', 'Méthodes et examens', 40),
     ('oeuvres/sitemap-oeuvres.xml', 'Œuvres au programme', 40),
@@ -104,6 +108,19 @@ def fiche(url):
 
 
 def urls(sitemap):
+    # « fichier.xml#labos » : seulement les adresses qui contiennent /labos/ ;
+    # le même sitemap sans suffixe les exclut. Les 30 TP ont ainsi leur
+    # propre rubrique au lieu de noyer les services.
+    sitemap, _, filtre = sitemap.partition('#')
+    tout = _urls(sitemap)
+    if filtre:
+        return [u for u in tout if '/%s/' % filtre in u]
+    if sitemap.startswith('decouvrir/'):
+        return [u for u in tout if '/labos/' not in u]
+    return tout
+
+
+def _urls(sitemap):
     chemin = os.path.join(RACINE, sitemap)
     if not os.path.isfile(chemin):
         return []
@@ -140,8 +157,9 @@ def construire():
         if lignes:
             sortie.append('## %s\n\n%s\n' % (titre_section, '\n'.join(lignes)))
     sortie.append('## Utilisation\n\n'
-                  "Citation avec lien vers la page source : bienvenue. Entraînement de modèles, "
-                  "fine-tuning et copie du contenu : interdits (voir https://veritas-school.com/ai.txt). "
+                  "Lecture, indexation et citation par les assistants IA : bienvenues, avec un lien "
+                  "vers la page source. Republier le contenu ailleurs : interdit "
+                  "(voir https://veritas-school.com/ai.txt). "
                   "© Mythe Errant — VERITAS EDUCATION SARL.\n")
     return '\n'.join(sortie)
 

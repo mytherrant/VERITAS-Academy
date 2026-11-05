@@ -1,3 +1,17 @@
+## Visibilité maximale : site ouvert aux IA, œuvres, Atelier et simulations en HTML statique (05/11/2026, 2e passe)
+
+Demande de Jacques : « Oui ouvre tout, il faut que le site soit le plus visible possible, surtout sur les œuvres littéraires, l'Atelier de français, les simulations… »
+
+- **Tous les robots d'IA admis** sur les pages publiques (robots.txt réécrit, `User-agent: *` seul ; .htaccess ne bloque plus que les aspirateurs SEO Ahrefs/Semrush/…; X-Robots-Tag « all » sans noai ; balises noindex par robot retirées de VERITAS_v1.2.html ; ai.txt réécrit). Restent fermés à tous : /api/, /data/, /uploads/private/, /uploads/protected/. `api/_sentinel.php` inchangé : l'API reste interdite aux moissonneuses (ce n'est pas une page).
+- **Œuvres** (`tools/oeuvres_statiques.js`) : les 21 pages d'œuvres portaient ~1 000 caractères lisibles ; elles portent désormais, en HTML, l'analyse de `chunks/litt-oeuvres.js` (fiche d'identité, axes, personnages, style, contexte, analyse, citations expliquées, procédés, questions corrigées) + JSON-LD LearningResource et FAQPage. Ville cruelle : 1 980 → 11 709 caractères. Bloc `<!-- oeuvre-statique -->`. Le quiz et la carte mentale restent dans l'application. `5e_nkum_wam` n'a pas de page (même œuvre que 2nde-nkoumwam).
+- **Atelier, examen blanc, laboratoires** (`tools/pages_decouverte.js`, gabarit des pages Découvrir) :
+  - `decouvrir/atelier-de-francais.html` : présentation + les 23 structures d'épreuves de `plateforme/minesec.js` (durée, coefficient, parties, barème, texte support, source) ;
+  - `decouvrir/examen-blanc-en-ligne.html` : les 43 sujets du simulateur (filtre de `_simEpreuves`, durées de `_dureeEpreuve`) ;
+  - `decouvrir/laboratoires-virtuels.html` + 30 pages `decouvrir/labos/*.html` (`chunks/labo.js`) : labos gratuits publiés en entier, labos payants limités à la présentation et à la théorie.
+  - Sitemap Découvrir : bloc `<!-- pages-decouverte -->`. Tuiles ajoutées sur `decouvrir/`. Lien mort `/seo/` corrigé.
+- llms.txt : 146 liens, rubrique Laboratoires. CI : `oeuvres_statiques.js --controle` et `pages_decouverte.js --controle`. Empreinte d'index.php : 2026-11-05b.
+- ⚠️ Ordre de génération : `oeuvres_statiques.js` puis `habiller_pages.py` (l'habillage replace son bloc de tête en dernier ; les deux restent ensuite stables).
+
 ## GEO : visibilité dans les moteurs de réponse IA (05/11/2026)
 
 Demande de Jacques : « il faut non seulement du SEO mais aussi du GEO, vérifie et applique ».

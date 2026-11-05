@@ -107,32 +107,26 @@ DirectoryIndex index.php index.html
   Header always set Cross-Origin-Opener-Policy "same-origin"
   Header always set Cross-Origin-Resource-Policy "same-site"
 
-  # ═══ v2.5 : ANTI-IA / ANTI-SCRAPING ═══
-  # « all » AUTORISE l'indexation : c'est voulu. La vitrine, les pages de
-  # corriges et d'oeuvres vivent de leur referencement, et l'Atelier doit
-  # rester trouvable par un enseignant qui le cherche.
-  Header always set X-Robots-Tag "noai, noimageai, noml, all"
-  # ... sauf sur l'API, qui sert le corpus. `Header set` ECRASE la valeur
-  # precedente : la ligne ci-dessus reste la regle generale, celle-ci ne
-  # vaut que la ou VRT_PRIVE est pose. C'est le seul verrou qui porte sur
-  # une reponse non-HTML, ou l'on ne peut ecrire aucune balise <meta>.
-  Header always set X-Robots-Tag "noindex, nofollow, noarchive, nosnippet, noimageindex, noai, noimageai, noml" env=VRT_PRIVE
-  Header always set X-AI-Usage "denied"
-  Header always set X-Content-Restrictions "no-training, no-fine-tuning, no-rag, no-generation"
-  Header always set X-Copyright "© 2026 Mythe Errant — Reproduction et utilisation IA interdites"
+  # ═══ VISIBILITÉ (05/11/2026) ═══
+  # Pages publiques : indexables par les moteurs ET par les IA (décision de
+  # Jacques, « ouvre tout »). Plus aucune directive noai / noml.
+  Header always set X-Robots-Tag "all"
+  # ... sauf l'API, qui sert le corpus et les comptes. `Header set` ECRASE la
+  # valeur precedente la ou VRT_PRIVE est pose : c'est le seul verrou qui
+  # porte sur une reponse non-HTML, ou l'on ne peut ecrire aucune balise <meta>.
+  Header always set X-Robots-Tag "noindex, nofollow, noarchive, nosnippet, noimageindex" env=VRT_PRIVE
+  Header always set X-Copyright "© 2026 Mythe Errant — Citation avec lien bienvenue, reproduction interdite"
 </IfModule>
 
 # ─────────────────────────────────────────────────────────
-# 2bis. Bloquer les bots IA au niveau serveur (avant même PHP)
+# 2bis. Aspirateurs SEO commerciaux (avant même PHP)
 # ─────────────────────────────────────────────────────────
-# Seuls les robots d'ENTRAÎNEMENT sont refusés ici. Les moteurs de réponse
-# (ChatGPT-User, OAI-SearchBot, Claude-SearchBot, Claude-User, PerplexityBot,
-# Perplexity-User, MistralAI-User) lisent les pages publiques pour citer
-# VÉRITAS dans leurs réponses : ils sont admis (GEO, 05/11/2026), comme dans
-# robots.txt. ⚠️ « ClaudeBot » ne correspond PAS à « Claude-SearchBot ».
-# L'API reste fermée à tous par api/_sentinel.php.
+# Les robots d'IA ne sont PLUS bloqués ici (05/11/2026) : ChatGPT, Claude,
+# Gemini, Perplexity, Meta AI… lisent les pages publiques pour recommander
+# VÉRITAS. Restent refusés les aspirateurs qui revendent l'analyse du site
+# sans amener un visiteur. L'API reste gardée par api/_sentinel.php.
 <IfModule mod_rewrite.c>
-  RewriteCond %{HTTP_USER_AGENT} (GPTBot|ClaudeBot|anthropic-ai|Claude-Web|Google-Extended|GoogleOther|Bytespider|CCBot|cohere-ai|FacebookBot|Meta-ExternalAgent|Amazonbot|Applebot-Extended|YouBot|Diffbot|Omgili|ImagesiftBot|DataForSeoBot|SerpstatBot) [NC]
+  RewriteCond %{HTTP_USER_AGENT} (AhrefsBot|SemrushBot|MJ12bot|DotBot|BLEXBot|DataForSeoBot|SerpstatBot|PetalBot) [NC]
   RewriteRule .* - [F,L]
 </IfModule>
 

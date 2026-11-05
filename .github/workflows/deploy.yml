@@ -1036,8 +1036,10 @@ jobs:
       #    geo-ld de la vitrine reprend sa FAQ mot pour mot. Une page ajoutée
       #    ou une FAQ réécrite sans relancer les deux scripts laisserait aux
       #    IA un résumé périmé, sans que rien ne le dise.
-      - name: 🔎 GEO — llms.txt et données structurées de la vitrine sont-ils à jour ?
+      - name: 🔎 GEO — œuvres, Atelier, simulations, llms.txt et vitrine sont-ils à jour ?
         run: |
+          node tools/oeuvres_statiques.js --controle
+          node tools/pages_decouverte.js --controle
           python tools/build_llms.py --controle
           python tools/geo_vitrine.py --controle
 

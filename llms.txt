@@ -13,6 +13,9 @@
 - Abonnements Starter, Pro, Élite et Famille (jusqu'à 4 enfants), au mois ou à l'année (2 mois offerts), sans engagement ni frais de résiliation. Compte parent gratuit. Tarifs à jour : https://veritas-school.com/#tarifs
 - Paiement : MTN Mobile Money et Orange Money. Aucune carte bancaire nécessaire. Reçu numéroté avec QR de vérification, envoyé aussi par WhatsApp.
 - Au centre ou à domicile : répétitions et soutien scolaire à Douala, devis en ligne.
+- Œuvres au programme : 21 analyses complètes en accès libre (axes de lecture, personnages, citations expliquées, procédés, questions corrigées) : https://veritas-school.com/oeuvres/
+- Enseignants : l'Atelier de Français compose avec l'IA des épreuves conformes aux 23 structures officielles du MINESEC : https://veritas-school.com/decouvrir/atelier-de-francais.html
+- Simulations : examen blanc chronométré (BEPC, Probatoire, BAC) et 30 laboratoires virtuels de sciences : https://veritas-school.com/decouvrir/examen-blanc-en-ligne.html · https://veritas-school.com/decouvrir/laboratoires-virtuels.html
 - Contact : WhatsApp +237 697 637 739 (https://wa.me/237697637739) · contact@veritas-school.com
 
 ## Pages principales
@@ -49,7 +52,7 @@
 - [Politique de confidentialité — Centre VÉRITAS](https://veritas-school.com/legal/confidentialite.html): Quelles données le Centre VÉRITAS collecte, pourquoi, combien de temps, à qui elles sont transmises, et comment demander leur suppression. Cas particulier des élèves mineurs.
 - [Mentions légales — Centre VÉRITAS](https://veritas-school.com/legal/mentions-legales.html): Éditeur, hébergeur, propriété intellectuelle et contact du site veritas-school.com — Centre VÉRITAS, Douala, Cameroun.
 
-## Services
+## Services, Atelier de Français et examen blanc
 
 - [Découvrir VÉRITAS : soutien scolaire, cours en ligne, IA &…](https://veritas-school.com/decouvrir/): Découvrez le Centre VÉRITAS : soutien scolaire à Douala, cours en ligne au Cameroun (MINESEC), assistant IA Prof. Ambassa gratuit, jeux éducatifs et…
 - [Soutien scolaire & répétitions à Douala — Centre VÉRITAS](https://veritas-school.com/decouvrir/soutien-scolaire-douala.html): Centre de répétitions VÉRITAS à Douala : soutien scolaire de la 6ᵉ à la Terminale (sous-systèmes francophone et anglophone GCE), toutes matières, en…
@@ -59,6 +62,42 @@
 - [Prof. Ambassa : l'assistant IA pédagogique gratuit…](https://veritas-school.com/decouvrir/ia-pedagogique-prof-ambassa.html): Prof. Ambassa est l'assistant IA pédagogique gratuit de VÉRITAS : il explique les leçons, corrige, donne la méthode et aide aux devoirs, adapté au…
 - [Jeux éducatifs gratuits (collège & lycée)](https://veritas-school.com/decouvrir/jeux-educatifs-en-ligne.html): Jeux éducatifs gratuits pour le collège et le lycée : verbes anglais, capitales d'Afrique, histoire du Cameroun, formules de physique, équations…
 - [Annales & épreuves corrigées (BEPC, Probatoire, BAC, GCE)…](https://veritas-school.com/decouvrir/annales-epreuves-corrigees.html): Annales et sujets corrigés du Cameroun (MINESEC) : épreuves de français, maths, physique-chimie, SVT, histoire-géo, anglais et GCE, du BEPC au BAC.…
+- [Atelier de Français : épreuves conformes MINESEC, structures BEPC, Probatoire, BAC](https://veritas-school.com/decouvrir/atelier-de-francais.html): Composer une épreuve de français conforme au MINESEC : l’IA Ambassa rédige texte, questions, barème et corrigé. Les 23 structures officielles (BEPC, Probatoire, BAC, technique) : durée, coefficient, parties.
+- [Examen blanc en ligne : BEPC, Probatoire, BAC — sujets et chronomètre](https://veritas-school.com/decouvrir/examen-blanc-en-ligne.html): Simulateur d’examen VÉRITAS : 43 sujets BEPC, Probatoire, BAC et épreuves de séquence (6ᵉ-Tˡᵉ), chronomètre à la durée officielle, brouillon et corrigés. Programme MINESEC.
+- [Laboratoires virtuels : 30 TP en ligne (physique, chimie, SVT, maths)](https://veritas-school.com/decouvrir/laboratoires-virtuels.html): 30 travaux pratiques virtuels conformes au programme camerounais : circuits électriques, acide-base, mitose, optique, probabilités, GCE… Théorie, protocole et quiz corrigé.
+
+## Laboratoires virtuels (TP en ligne)
+
+- [Circuit Électrique Interactif — TP virtuel Physique (4ème-3ème-2nde)](https://veritas-school.com/decouvrir/labos/circuit-electrique-interactif.html): Construis et teste des circuits en série et parallèle. Calcule tension, intensité, résistance et puissance. Laboratoire virtuel VÉRITAS, 4ème-3ème-2nde.
+- [Les Forces et le Mouvement — TP virtuel Physique (2nde-1ère)](https://veritas-school.com/decouvrir/labos/les-forces-et-le-mouvement.html): Lois de Newton, poids, chute libre, énergie mécanique et forces de frottement. Programme 2nde–1ère. Laboratoire virtuel VÉRITAS, 2nde-1ère.
+- [Optique & Propagation de la Lumière — TP virtuel Physique (2nde-1ère-Tle)](https://veritas-school.com/decouvrir/labos/optique-propagation-de-la-lumiere.html): Réflexion, réfraction, lentilles convergentes/divergentes, formation d'images et applications. Laboratoire virtuel VÉRITAS, 2nde-1ère-Tle.
+- [Thermodynamique & Calorimétrie — TP virtuel Physique (1ère-Tle)](https://veritas-school.com/decouvrir/labos/thermodynamique-calorimetrie.html): Transferts de chaleur, capacité calorifique, changements d'état et lois des gaz parfaits. Laboratoire virtuel VÉRITAS, 1ère-Tle.
+- [Réactions Acide-Base — TP virtuel Physique-Chimie (2nde-1ère-Tle C)](https://veritas-school.com/decouvrir/labos/reactions-acide-base.html): pH, indicateurs colorés, neutralisations, dosage acido-basique et calculs de concentration. Laboratoire virtuel VÉRITAS, 2nde-1ère-Tle C.
+- [Oxydoréduction & Combustion — TP virtuel Chimie (Tle C/D)](https://veritas-school.com/decouvrir/labos/oxydoreduction-combustion.html): Réactions redox, nombres d'oxydation, piles électrochimiques, corrosion et combustions. Laboratoire virtuel VÉRITAS, Tle C/D.
+- [La Mitose — Division Cellulaire — TP virtuel SVT (1ère D-Tle D)](https://veritas-school.com/decouvrir/labos/la-mitose-division-cellulaire.html): Visualise les 4 phases de la mitose. Comprends la réplication, la division et la différence avec la méiose. Laboratoire virtuel VÉRITAS, 1ère D-Tle D.
+- [La Nutrition chez les Plantes — TP virtuel SVT (5ème-4ème)](https://veritas-school.com/decouvrir/labos/la-nutrition-chez-les-plantes.html): Photosynthèse, absorption des sels minéraux, circulation de la sève et rôle des stomates. Laboratoire virtuel VÉRITAS, 5ème-4ème.
+- [La Digestion Humaine — TP virtuel SVT (5ème-4ème)](https://veritas-school.com/decouvrir/labos/la-digestion-humaine.html): Trajet des aliments, enzymes digestives, absorption des nutriments et rôle du foie. Laboratoire virtuel VÉRITAS, 5ème-4ème.
+- [Circulation Sanguine & Respiration — TP virtuel SVT (4ème-3ème)](https://veritas-school.com/decouvrir/labos/circulation-sanguine-respiration.html): Le cœur, la grande et petite circulation, échanges gazeux dans les poumons et rôle de l'hémoglobine. Laboratoire virtuel VÉRITAS, 4ème-3ème.
+- [Génétique & Hérédité — TP virtuel SVT (Tle D)](https://veritas-school.com/decouvrir/labos/genetique-heredite.html): Lois de Mendel, croisements, dominance, codominance et génétique des groupes sanguins. Laboratoire virtuel VÉRITAS, Tle D.
+- [Géométrie dans l'Espace — TP virtuel Maths (2nde-1ère-Tle)](https://veritas-school.com/decouvrir/labos/geometrie-dans-l-espace.html): Volumes, aires et diagonales des solides : cube, sphère, cylindre, pyramide, cône. Laboratoire virtuel VÉRITAS, 2nde-1ère-Tle.
+- [Probabilités & Statistiques — TP virtuel Maths (1ère-Tle)](https://veritas-school.com/decouvrir/labos/probabilites-statistiques.html): Probabilités classiques et conditionnelles, statistiques descriptives. 1ère : loi binomiale. Laboratoire virtuel VÉRITAS, 1ère-Tle.
+- [Fonctions & Dérivées — TP virtuel Maths (1ère-Tle)](https://veritas-school.com/decouvrir/labos/fonctions-derivees.html): Fonctions usuelles, calcul de dérivées, tableaux de variations et optimisation. Laboratoire virtuel VÉRITAS, 1ère-Tle.
+- [Trigonométrie & Cercle Unité — TP virtuel Maths (2nde-1ère)](https://veritas-school.com/decouvrir/labos/trigonometrie-cercle-unite.html): sin, cos, tan, valeurs remarquables, cercle trigonométrique et équations trigonométriques. Laboratoire virtuel VÉRITAS, 2nde-1ère.
+- [La Mondialisation — TP virtuel Géographie (Tle)](https://veritas-school.com/decouvrir/labos/la-mondialisation.html): Flux mondiaux, acteurs, inégalités, IDH et place du Cameroun dans la mondialisation. Laboratoire virtuel VÉRITAS, Tle.
+- [Algorithmes & Programmation — TP virtuel Info/Maths (3ème-Tle)](https://veritas-school.com/decouvrir/labos/algorithmes-programmation.html): Algorithmique, structures de contrôle, fonctions, récursivité et initiation Python. Laboratoire virtuel VÉRITAS, 3ème-Tle.
+- [Le Système Immunitaire & Vaccination — TP virtuel SVT (Tle D)](https://veritas-school.com/decouvrir/labos/le-systeme-immunitaire-vaccination.html): Comprendre comment notre corps se défend contre les infections : anticorps, lymphocytes, vaccins. Programme Tle. Laboratoire virtuel VÉRITAS, Tle D.
+- [ADN, Gènes & Hérédité — TP virtuel SVT (1ère D-Tle D)](https://veritas-school.com/decouvrir/labos/adn-genes-heredite.html): Structure de l'ADN, code génétique, transmission des caractères et lois de Mendel. Programme 1ère-Tle. Laboratoire virtuel VÉRITAS, 1ère D-Tle D.
+- [Probabilités Conditionnelles & Bayes — TP virtuel Maths (Tle C-Tle D)](https://veritas-school.com/decouvrir/labos/probabilites-conditionnelles-bayes.html): Probabilités conditionnelles, indépendance, formule de Bayes et arbres pondérés. Programme Tle. Laboratoire virtuel VÉRITAS, Tle C-Tle D.
+- [Énergie Nucléaire : Fission & Fusion — TP virtuel Physique (Tle C-Tle D)](https://veritas-school.com/decouvrir/labos/energie-nucleaire-fission-fusion.html): Radioactivité, désintégration, fission (centrales), fusion (étoiles, bombe H). Programme Tle. Laboratoire virtuel VÉRITAS, Tle C-Tle D.
+- [Chimie Organique : Synthèse d'Ester — TP virtuel Chimie (1ère D-Tle D)](https://veritas-school.com/decouvrir/labos/chimie-organique-synthese-d-ester.html): Estérification, hydrolyse, parfums et arômes. Mécanismes et déplacement d'équilibre. Programme 1ère-Tle. Laboratoire virtuel VÉRITAS, 1ère D-Tle D.
+- [Climat Mondial & Changement Climatique — TP virtuel Géographie (2nde-1ère)](https://veritas-school.com/decouvrir/labos/climat-mondial-changement-climatique.html): Climats, biomes, effet de serre, réchauffement, conséquences. Programme 2nde-1ère. Laboratoire virtuel VÉRITAS, 2nde-1ère.
+- [Algorithmes : Tri & Complexité — TP virtuel Informatique (1ère-Tle TI)](https://veritas-school.com/decouvrir/labos/algorithmes-tri-complexite.html): Tri à bulles, tri par sélection, complexité O(n²), tri rapide O(n log n). Programme TI. Laboratoire virtuel VÉRITAS, 1ère-Tle TI.
+- [Electric Circuits Lab (GCE Physics) — TP virtuel Physics (Form 3-5)](https://veritas-school.com/decouvrir/labos/electric-circuits-lab-gce-physics.html): Build series and parallel circuits. Apply Ohm's Law, measure current, voltage and power. GCE O Level Physics (0580). Laboratoire virtuel VÉRITAS, Form 3-5.
+- [Titration Lab — Acids & Bases (GCE Chemistry) — TP virtuel Chemistry (Form 4-5 · Lower Sixth)](https://veritas-school.com/decouvrir/labos/titration-lab-acids-bases-gce-chemistry.html): Neutralise an acid with a base using an indicator. Calculate concentration from titre values. GCE Chemistry (0515/0715). Laboratoire virtuel VÉRITAS, Form 4-5 · Lower Sixth.
+- [Cell Division — Mitosis & Meiosis (GCE Biology) — TP virtuel Biology (Form 5 · Sixth Form)](https://veritas-school.com/decouvrir/labos/cell-division-mitosis-meiosis-gce-biology.html): Observe the stages of mitosis and meiosis, compare both processes and link them to growth and reproduction. GCE Biology (0510/0710). Laboratoire virtuel VÉRITAS, Form 5 · Sixth Form.
+- [Compta OHADA : du Journal au Bilan — TP virtuel Comptabilité (2nde-Tle CG/G2 · STT)](https://veritas-school.com/decouvrir/labos/compta-ohada-du-journal-au-bilan.html): Enregistre les opérations d'une PME de Douala, monte la balance et établis le bilan OHADA. Série CG/G2, Probatoire et BAC STT. Laboratoire virtuel VÉRITAS, 2nde-Tle CG/G2 · STT.
+- [Câblage Industriel : Démarrage Étoile-Triangle (F3) — TP virtuel Électrotechnique (1ère-Tle F3)](https://veritas-school.com/decouvrir/labos/cablage-industriel-demarrage-etoile-triangle-f3.html): Câble le circuit de puissance et de commande d'un démarrage étoile-triangle d'un moteur asynchrone triphasé. Série F3, BAC industriel. Laboratoire virtuel VÉRITAS, 1ère-Tle F3.
+- [Dessin Technique : Projections Orthogonales — TP virtuel Dessin Technique (1ère-4e année · 2nde-Tle F)](https://veritas-school.com/decouvrir/labos/dessin-technique-projections-orthogonales.html): Représente une pièce mécanique en vues de face, dessus et gauche (méthode européenne). Toutes séries industrielles, CAP et BAC technique. Laboratoire virtuel VÉRITAS, 1ère-4e année · 2nde-Tle F.
 
 ## Programmes de français par classe
 
@@ -154,4 +193,4 @@
 
 ## Utilisation
 
-Citation avec lien vers la page source : bienvenue. Entraînement de modèles, fine-tuning et copie du contenu : interdits (voir https://veritas-school.com/ai.txt). © Mythe Errant — VERITAS EDUCATION SARL.
+Lecture, indexation et citation par les assistants IA : bienvenues, avec un lien vers la page source. Republier le contenu ailleurs : interdit (voir https://veritas-school.com/ai.txt). © Mythe Errant — VERITAS EDUCATION SARL.
