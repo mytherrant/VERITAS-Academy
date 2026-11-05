@@ -2635,7 +2635,11 @@ ${metaBrut}
   // L'adresse publique du centre est contact@veritas-school.com (index.php,
   // pages statiques). La maquette exposait le Gmail personnel de Jacques dans
   // les données structurées, donc dans les résultats de recherche.
-  .replace(/"jacquesmytheerrant@gmail\.com"/, '"contact@veritas-school.com"')}</script>
+  .replace(/"jacquesmytheerrant@gmail\.com"/, '"contact@veritas-school.com"')
+  // highPrice 7 500 ne correspond à AUCUNE grille (Famille : 10 000 puis
+  // 12 000 F/mois). Un prix faux dans le JSON-LD est repris tel quel par les
+  // moteurs de réponse IA : on le retire plutôt que d'en deviner un (05/11).
+  .replace(/,"highPrice":"[^"]*"/, '')}</script>
 <style>
 ${styleBlock}
 ${cssBascule}

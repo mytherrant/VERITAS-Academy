@@ -22,14 +22,23 @@ Disallow: /*?secret=
 # relative au droit d'auteur et aux droits voisins.
 # ════════════════════════════════════════════════════════════════════
 
-# OpenAI (ChatGPT, GPT-4, etc.)
-User-agent: GPTBot
-Disallow: /
-# Recherche et consultation à la demande (28/10/2026, décision de Jacques) :
-# admis sur les pages publiques pour figurer dans les réponses de ChatGPT.
-# Ils n'entraînent pas de modèle ; GPTBot, lui, reste bloqué ci-dessus.
+# ════════════════════════════════════════════════════════════════════
+# 🔎 GEO — MOTEURS DE RÉPONSE IA ADMIS (05/11/2026)
+# Une ligne de partage, la même que celle tranchée le 28/10 pour ChatGPT :
+#   · ENTRAÎNEMENT d'un modèle  → refusé (GPTBot, ClaudeBot, CCBot…, plus bas) ;
+#   · RECHERCHE / CITATION      → admis sur les pages publiques.
+# Les agents ci-dessous ne nourrissent aucun modèle : ils lisent une page
+# pour répondre à une personne réelle (« soutien scolaire Douala », « corrigé
+# BEPC français ») et CITENT la source avec un lien. Les bloquer, c'est
+# disparaître de ChatGPT, Claude, Perplexity et Le Chat.
+# ════════════════════════════════════════════════════════════════════
 User-agent: ChatGPT-User
 User-agent: OAI-SearchBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: MistralAI-User
 Allow: /
 Disallow: /api/
 Disallow: /uploads/private/
@@ -38,6 +47,10 @@ Disallow: /*?admin
 Disallow: /*?token=
 Disallow: /*?secret=
 
+# OpenAI — entraînement (GPT)
+User-agent: GPTBot
+Disallow: /
+
 # Anthropic (Claude)
 User-agent: ClaudeBot
 Disallow: /
@@ -45,10 +58,11 @@ User-agent: anthropic-ai
 Disallow: /
 User-agent: Claude-Web
 Disallow: /
-User-agent: Claude-User
-Disallow: /
 
-# Google AI (Gemini, Bard, Vertex)
+# Google AI — entraînement Gemini / Vertex. N'a AUCUN effet sur Google
+# Search ni sur les « Aperçus IA » de Google : ceux-là passent par Googlebot,
+# admis plus bas. (Bloquer Google-Extended retire en revanche les pages des
+# réponses ancrées de l'application Gemini — choix assumé.)
 User-agent: Google-Extended
 Disallow: /
 User-agent: GoogleOther
@@ -74,10 +88,6 @@ Disallow: /
 User-agent: Bytespider
 Disallow: /
 
-# Perplexity AI
-User-agent: PerplexityBot
-Disallow: /
-
 # Common Crawl (utilisé pour entraîner de nombreux LLM)
 User-agent: CCBot
 Disallow: /
@@ -94,10 +104,6 @@ Disallow: /
 
 # Apple
 User-agent: Applebot-Extended
-Disallow: /
-
-# Mistral
-User-agent: MistralAI-User
 Disallow: /
 
 # YouSearch / You.com
@@ -159,7 +165,6 @@ Disallow: /api/
 
 # ── Sitemap ──
 Sitemap: https://veritas-school.com/sitemap.xml
-Sitemap: https://veritas-school.com/seo/sitemap.xml
 Sitemap: https://veritas-school.com/oeuvres/sitemap-oeuvres.xml
 Sitemap: https://veritas-school.com/ressources/sitemap-ressources.xml
 Sitemap: https://veritas-school.com/decouvrir/sitemap-decouvrir.xml
@@ -168,6 +173,9 @@ Sitemap: https://veritas-school.com/outils/sitemap-outils.xml
 Sitemap: https://veritas-school.com/corriges/sitemap-corriges.xml
 Sitemap: https://veritas-school.com/livrets/sitemap-livrets.xml
 Sitemap: https://veritas-school.com/sitemap-index.xml
+
+# Résumé du site destiné aux assistants IA (standard llms.txt)
+# https://veritas-school.com/llms.txt
 
 # ════════════════════════════════════════════════════════════════════
 # AVERTISSEMENT LÉGAL

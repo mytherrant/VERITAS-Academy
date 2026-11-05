@@ -82,6 +82,7 @@ on:
       - 'manifest.webmanifest'
       - 'sw.js'
       - 'ai.txt'
+      - 'llms.txt'
       - 'indexnow.txt'
 
   # Lancement manuel depuis GitHub → Actions → Run workflow
@@ -1030,6 +1031,16 @@ jobs:
       #    publiques, y compris les payantes. Une régression y est invisible
       #    dans les deux sens : soit les portes s'ouvrent, soit les élèves
       #    restent dehors — et personne ne s'en aperçoit avant les plaintes.
+      # ── 🔎 GEO (05/11/2026) — ce que lisent ChatGPT, Claude, Perplexity.
+      #    llms.txt est tiré des sitemaps et des balises des pages ; le bloc
+      #    geo-ld de la vitrine reprend sa FAQ mot pour mot. Une page ajoutée
+      #    ou une FAQ réécrite sans relancer les deux scripts laisserait aux
+      #    IA un résumé périmé, sans que rien ne le dise.
+      - name: 🔎 GEO — llms.txt et données structurées de la vitrine sont-ils à jour ?
+        run: |
+          python tools/build_llms.py --controle
+          python tools/geo_vitrine.py --controle
+
       - name: 🛡️ Le bouclier tient-il (robots, IA, débit, laissez-passer) ?
         run: |
           if command -v php >/dev/null 2>&1; then
@@ -1217,7 +1228,7 @@ jobs:
           fi
 
           # ── SEO + PWA (sitemap, robots, manifest) ───────────────
-          for f in sitemap.xml sitemap-index.xml robots.txt manifest.webmanifest sw.js ai.txt indexnow.txt; do
+          for f in sitemap.xml sitemap-index.xml robots.txt manifest.webmanifest sw.js ai.txt llms.txt indexnow.txt; do
             [ -f "$f" ] && cp "$f" deploy/ && echo "  ✓ $f"
           done
 

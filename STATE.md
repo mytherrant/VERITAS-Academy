@@ -1,3 +1,15 @@
+## GEO : visibilité dans les moteurs de réponse IA (05/11/2026)
+
+Demande de Jacques : « il faut non seulement du SEO mais aussi du GEO, vérifie et applique ».
+
+- **robots.txt / .htaccess** : même ligne de partage que la décision du 28/10. Les robots qui lisent une page pour RÉPONDRE et CITER sont admis sur les pages publiques : ChatGPT-User, OAI-SearchBot, **Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, MistralAI-User**. Les robots d'ENTRAÎNEMENT restent refusés (GPTBot, ClaudeBot, CCBot, Google-Extended, Applebot-Extended, Meta, Bytespider…). L'API reste fermée à tous (`api/_sentinel.php` inchangé).
+- **llms.txt** (nouveau, `tools/build_llms.py`) : résumé du centre + 113 liens tirés des sitemaps et des balises description. Sans prix (grille en transition).
+- **vitrine.html** : bloc `<!-- geo-ld -->` (`tools/geo_vitrine.py`) : WebSite, centre en EducationalOrganization + LocalBusiness (adresse complète, WhatsApp, MTN MoMo / Orange Money), FAQPage tirée mot pour mot des 7 questions affichées. À relancer après `build_vitrine.js`.
+- `highPrice: 7500` retiré du JSON-LD (ne correspondait à aucune grille) ; `seo/sitemap.xml`, inexistant, retiré de robots.txt et sitemap-index.xml ; ai.txt précise que la citation est admise.
+- CI : `build_llms.py --controle` et `geo_vitrine.py --controle` ; llms.txt déployé. Empreinte d'index.php : 2026-11-05a.
+
+**Reste à faire (Jacques)** : la vitrine affiche encore 1 000 F (cartes) ET 1 200 F (textes, balises description) pour le même plan Starter — voir l'entrée du 29/10. Tant que la grille n'est pas enregistrée, les IA liront deux prix.
+
 ## Harmonisation du design : vitrine, pages statiques et application (29/10/2026)
 
 Demande de Jacques : audit design en prod, puis « corrige 4, 5, 6, 8, 9 (dégradé maillé), 10, 11, 12 », « toutes les icônes doivent apparaître dans Plus, dans le cercle coloré, inspire-toi de lws.fr », « vérifie que toutes les pages sont harmonisées, corrige le conflit entre vitrine et app, surtout au niveau du design ».

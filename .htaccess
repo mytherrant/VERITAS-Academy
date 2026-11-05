@@ -125,8 +125,14 @@ DirectoryIndex index.php index.html
 # ─────────────────────────────────────────────────────────
 # 2bis. Bloquer les bots IA au niveau serveur (avant même PHP)
 # ─────────────────────────────────────────────────────────
+# Seuls les robots d'ENTRAÎNEMENT sont refusés ici. Les moteurs de réponse
+# (ChatGPT-User, OAI-SearchBot, Claude-SearchBot, Claude-User, PerplexityBot,
+# Perplexity-User, MistralAI-User) lisent les pages publiques pour citer
+# VÉRITAS dans leurs réponses : ils sont admis (GEO, 05/11/2026), comme dans
+# robots.txt. ⚠️ « ClaudeBot » ne correspond PAS à « Claude-SearchBot ».
+# L'API reste fermée à tous par api/_sentinel.php.
 <IfModule mod_rewrite.c>
-  RewriteCond %{HTTP_USER_AGENT} (GPTBot|ClaudeBot|anthropic-ai|Claude-Web|Claude-User|Google-Extended|GoogleOther|Bytespider|CCBot|PerplexityBot|cohere-ai|FacebookBot|Meta-ExternalAgent|Amazonbot|Applebot-Extended|MistralAI-User|YouBot|Diffbot|Omgili|ImagesiftBot|DataForSeoBot|SerpstatBot) [NC]
+  RewriteCond %{HTTP_USER_AGENT} (GPTBot|ClaudeBot|anthropic-ai|Claude-Web|Google-Extended|GoogleOther|Bytespider|CCBot|cohere-ai|FacebookBot|Meta-ExternalAgent|Amazonbot|Applebot-Extended|YouBot|Diffbot|Omgili|ImagesiftBot|DataForSeoBot|SerpstatBot) [NC]
   RewriteRule .* - [F,L]
 </IfModule>
 

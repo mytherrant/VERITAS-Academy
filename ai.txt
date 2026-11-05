@@ -1,7 +1,7 @@
 # ════════════════════════════════════════════════════════════════════
 # Centre VÉRITAS — ai.txt
 # Standard proposé : https://spawning.ai/ai-txt
-# Date : 2026-05-26
+# Date : 2026-05-26 · révisé le 2026-11-05 (moteurs de réponse IA)
 # ════════════════════════════════════════════════════════════════════
 
 # Politique d'utilisation par les IA et systèmes automatisés
@@ -40,6 +40,11 @@ Website: https://veritas-school.com
 # ─── EXCEPTIONS LÉGITIMES ───
 # Sont autorisés :
 #   ✅ Moteurs de recherche pour indexation publique (Google, Bing, DuckDuckGo)
+#   ✅ Moteurs de réponse IA qui CITENT la source avec un lien, sans
+#      entraîner de modèle (05/11/2026) : ChatGPT-User, OAI-SearchBot,
+#      Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User,
+#      MistralAI-User — pages publiques uniquement, jamais /api/.
+#      Résumé du site à leur intention : https://veritas-school.com/llms.txt
 #   ✅ Archives à but documentaire (Wayback Machine, archive.org)
 #   ✅ Consultation humaine via navigateur standard
 
