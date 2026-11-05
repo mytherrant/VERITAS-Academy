@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261105a">
+<link rel="stylesheet" href="scene.css?v=20261105b">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -34,11 +34,16 @@ window.SCENE = {
   },
   etapes: [
     { t: 'recit', entre: ['atangana', 'abessolo', 'bella', 'matalina'], txt: 'Mvoutessi, le village même de l’auteur. Le paysan Ndi a déjà versé cent mille francs pour épouser Juliette. Mais on attend d’autres prétendants, plus riches…', objet: { i: 'pieces', lib: '100 000 F' }, jauges: { dot: 30 } },
+    { t: 'dit', qui: 'abessolo', emo: 'fier', jeu: 'de l’air du sage qui voit se réaliser ses prophéties', txt: 'Les hommes de votre génération se conduisent tous comme des insensés ! De mon temps, quand j’étais encore Abessôlô, et... et que ma femme Bella était encore femme, vous croyez que j’aurais toléré des histoires pareilles ?', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte I' },
+    { t: 'dit', qui: 'bella', emo: 'surpris', txt: 'Qu’est-ce qu’il y a encore dans ce monde d’aujourd’hui, mon pauvre mari ? Je vois les femmes manger même des vipères, des sangliers, des...', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte I' },
     { t: 'recit', entre: ['juliette'], txt: 'Une auto s’arrête : Juliette arrive de Libamba, joyeuse. Elle annonce qu’elle a réussi son examen ; sa grand-mère pousse le cri de joie traditionnel, l’ôyenga.' },
     { t: 'dit', qui: 'abessolo', emo: 'joie', txt: 'Tu... tu étudies toujours à Dibamba, n’est-ce pas, ma petite ?', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte I' },
     { t: 'dit', qui: 'juliette', emo: 'joie', jeu: 'elle éclate de rire', txt: 'À Libamba, Tita ! Dibamba, c’est un fleuve !' },
     { t: 'dit', qui: 'matalina', emo: 'surpris', jeu: 'sans réfléchir', txt: 'L’an prochain ? Ton mari va donc te laisser repartir au collège, Juliette ?', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte I' },
-    { t: 'dit', qui: 'juliette', emo: 'colere', jeu: 'regardant tout le monde', txt: 'Mon mari ? Quel mari ? On m’a mariée sans me le dire ? Je suis donc à vendre ?', jauges: { liberte: 40 } },
+    { t: 'dit', qui: 'juliette', emo: 'surpris', jeu: 'regardant tout le monde', txt: 'Mon mari ? Quel mari ? Est-ce que j’ai un mari ?', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte I' },
+    { t: 'dit', qui: 'bella', emo: 'joie', jeu: 'qui ne remarque pas la gêne', txt: 'Un mari, Juliette ? Mais tu en as déjà deux, mon enfant !', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte I' },
+    { t: 'dit', qui: 'atangana', jeu: 'il se gratte la tête', txt: 'Bon... euh... je vais t’expliquer la situation, mon enfant. Il y a cinq semaines, nous avons reçu la visite d’un jeune homme qui est venu demander ta main. Evidemment, à cause de ton instruction et de ta valeur, nous avons décidé de prendre les cent mille francs qu’il a versés...', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte I' },
+    { t: 'dit', qui: 'juliette', emo: 'colere', jeu: 'indignée', txt: 'Quoi ? Je suis donc à vendre ?', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari, acte I', jauges: { liberte: 40 } },
     { t: 'dit', qui: 'abessolo', emo: 'colere', txt: 'Depuis quand est-ce que les femmes parlent à Mvoutessi ?', cite: 'Guillaume Oyônô Mbia, Trois prétendants… un mari' },
     { t: 'question', q: 'Quand Abessolo lance cette phrase, l’auteur est-il d’accord avec lui ?',
       options: [
@@ -113,7 +118,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261105a"></script>
-<script src="scene.js?v=20261105a"></script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
 </body>
 </html>

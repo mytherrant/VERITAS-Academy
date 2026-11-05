@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261105a">
+<link rel="stylesheet" href="scene.css?v=20261105b">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -33,6 +33,8 @@ window.SCENE = {
   },
   etapes: [
     { t: 'recit', entre: ['fayde', 'kondem'], txt: 'Faydé a quinze ans. Elle a quitté l’école deux ans plus tôt ; elle voulait être médecin. Quatre mois sans pluie derrière, cinq mois sans pluie devant, les greniers vides, et des petits frères à nourrir.' },
+    { t: 'recit', txt: 'Kondem a le visage fermé. Les plis qui se dessinent sur son front sombre laissent deviner une humeur morose. En silence, elle arrache les dernières gousses de haricots niébé, passant sa colère sur la terre desséchée.', cite: 'Djaïli Amadou Amal, Cœur du Sahel, partie I' },
+    { t: 'recit', txt: 'Depuis que sa fille lui a fait part de son intention d’aller travailler comme domestique à Maroua, la métropole régionale distante d’une cinquantaine de kilomètres, après un instant d’effarement Kondem a plongé dans le désespoir, puis cédé à la colère, sans que l’adolescente renonce à son projet.', cite: 'Djaïli Amadou Amal, Cœur du Sahel, partie I' },
     { t: 'dit', qui: 'fayde', txt: 'Srafata, Danna, Bintou sont toutes parties à Maroua. Elles reviennent en décembre les mains pleines. Laisse-moi partir, Maman.' },
     { t: 'dit', qui: 'kondem', emo: 'colere', txt: 'Moi aussi, j’ai été domestique à Maroua. Je sais ce que c’est. Je ne veux pas de ça pour toi.', jauges: { besoin: 95 } },
     { t: 'question', q: 'Pourquoi les filles partent-elles travailler en ville, selon le roman ?',
@@ -62,6 +64,10 @@ window.SCENE = {
       bravo: 'Même âge, deux destins : le contraste fait le portrait.' },
     { t: 'recit', entre: ['boukar'], sort: ['leila', 'biri'], moment: 'Partie III · cinq ans plus tard', txt: 'Des années ont passé. Faydé a repris des études : elle est devenue infirmière, et elle a créé une association pour venir en aide aux femmes. Boukar, qui l’avait encouragée, revient la voir.', jauges: { besoin: 30 } },
     { t: 'dit', qui: 'boukar', txt: 'Hapssi et moi, nous n’avons pas tenu plus de huit mois.' },
+    { t: 'recit', txt: 'Faydé et Leïla, dans le texte de Djaïli Amadou Amal.' },
+    { t: 'dit', qui: 'leila', emo: 'joie', jeu: 'son téléphone à la main', txt: 'Mohamadou m’a écrit. Il m’a appelée aujourd’hui.', cite: 'Djaïli Amadou Amal, Cœur du Sahel, partie II' },
+    { t: 'recit', txt: 'Entre elle et Faydé est née une amitié, bien qu’un fossé les sépare. […] Si Faydé écoute sa nouvelle amie, elle ne se confie jamais à elle. Car la pauvreté suscite toujours le mépris ou la pitié, et il est impossible de trouver les mots justes sans avoir l’air de s’apitoyer.', cite: 'Djaïli Amadou Amal, Cœur du Sahel, partie II' },
+    { t: 'question', q: 'Pourquoi Faydé ne se confie-t-elle jamais à Leïla ?', options: [ { txt: 'Parce que la pauvreté suscite le mépris ou la pitié, et qu’elle refuse l’un comme l’autre.', ok: true, retour: 'Une amitié réelle, mais un « fossé » qui ne se franchit pas.' }, { txt: 'Parce qu’elle n’a rien à raconter.', retour: 'Elle a tout à raconter, et elle se tait.' } ] },
     { t: 'atelier', mode: 'ordre', titre: 'Atelier · le parcours de Faydé', consigne: 'Remets le parcours de Faydé dans l’ordre.',
       items: ['La dispute avec sa mère, qui refuse son départ.', 'La ville rêvée : Maroua.', 'Une journée de travail dans la concession.', 'L’amitié avec Leïla, sous les fleurs.', 'Cinq ans plus tard : infirmière.'],
       bravo: 'Le roman finit sur une femme qui a repris ses études : l’éducation comme issue.' }
@@ -111,7 +117,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261105a"></script>
-<script src="scene.js?v=20261105a"></script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
 </body>
 </html>

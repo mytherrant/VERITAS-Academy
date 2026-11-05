@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261105a">
+<link rel="stylesheet" href="scene.css?v=20261105b">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -33,6 +33,11 @@ window.SCENE = {
   },
   etapes: [
     { t: 'recit', entre: ['roi', 'lemba', 'bobolo'], txt: 'Koka-Mbala. Une loi terrible y règne : un jeune homme qui regarde la femme d’un autre peut être condamné à la fosse hérissée de sagaies, où l’on enterre les condamnés vivants. Le roi a fait un rêve qui le trouble.', objet: { i: 'vase', lib: 'La marmite sacrée' } },
+    { t: 'dit', qui: 'lemba', txt: 'Mais qu’est-ce qui trouble le cœur de sa majesté ?', cite: 'Guy Menga, La marmite de Koka-Mbala, acte I, scène I' },
+    { t: 'dit', qui: 'roi', emo: 'peur', txt: 'La nuit dernière j’ai fait un rêve épouvantable. j’ai vu le sang de tous les jeunes que mon conseil a condamné à mort emplir tout mon palais, et tous les ustensiles de cuisine contenus dans ce palais. Ce sang est même entré dans la marmite sacrée où reposent tous les esprits de Koka-Mbala. Et à un moment donné tout s’est mis à bouillonner dans cette marmite.', cite: 'Guy Menga, La marmite de Koka-Mbala, acte I, scène I' },
+    { t: 'dit', qui: 'roi', txt: 'Il m’a dit : nos morts ont assez du sang de nos enfants.', cite: 'Guy Menga, La marmite de Koka-Mbala, acte I, scène I' },
+    { t: 'dit', qui: 'lemba', txt: 'Quelle réponse terrible et profonde, Majesté. Elle devrait t’inciter à un peu de clémence et même de prudence.', cite: 'Guy Menga, La marmite de Koka-Mbala, acte I, scène I' },
+    { t: 'dit', qui: 'roi', txt: 'Je suis le roi, mais je ne suis pas le conseil, Lemba.', cite: 'Guy Menga, La marmite de Koka-Mbala, acte I, scène I' },
     { t: 'recit', entre: ['jeune'], txt: 'Deux gardes jettent aux pieds du roi un jeune homme ligoté : il aurait regardé la troisième épouse de Bobolo pendant qu’elle se baignait.' },
     { t: 'dit', qui: 'roi', jeu: 'ironique, aux gardes', txt: 'Et vous aussi vous avez regardé naturellement, n’est-ce pas ?', cite: 'Guy Menga, La marmite de Koka-Mbala, acte I, scène II' },
     { t: 'dit', qui: 'bobolo', emo: 'colere', txt: 'Depuis quand les femmes se mêlent-elles des affaires du royaume ?', cite: 'Guy Menga, La marmite de Koka-Mbala, acte I, scène II' },
@@ -52,7 +57,9 @@ window.SCENE = {
       ],
       oeuvre: 'Le roi fait arrêter Bobolo et ordonne à Bitala de briser la marmite. Rien ne se passe : la peur était la seule force de la marmite.' },
     { t: 'dit', qui: 'roi', emo: 'fier', txt: 'Gardes, arrêtez-moi cet homme. Et pour qu’il sache que le roi ne craint ni sa puissance, ni la mort, Bitala, je t’ordonne de briser cette marmite.', cite: 'Guy Menga, La marmite de Koka-Mbala, acte II', jauges: { peur: 5 } },
+    { t: 'dit', qui: 'bobolo', emo: 'colere', jeu: 'maintenu par deux jeunes', txt: 'Misérables, les esprits vous confondront tous, tous sans exception !... La foudre vous réduira en cendres, vous qui livrez le pays à l’ivraie.', cite: 'Guy Menga, La marmite de Koka-Mbala, acte II' },
     { t: 'dit', qui: 'bitala', jeu: 'aux notables, après avoir brisé la marmite', txt: 'Ne craignez rien, notables. La rupture de cette marmite ne sera suivie d’aucun effet désastreux ni pour votre santé ni pour celle de tous les vôtres', cite: 'Guy Menga, La marmite de Koka-Mbala, acte II', jauges: { jeunes: 95 } },
+    { t: 'dit', qui: 'roi', emo: 'fier', txt: 'Aujourd’hui c’est la jeunesse qui se libère du joug de l’oppression des anciens, demain il faudra que cette même jeunesse puisse aider la femme à briser la gangue où notre société se complaît à la maintenir prisonnière.', cite: 'Guy Menga, La marmite de Koka-Mbala, acte II' },
     { t: 'remarque', titre: 'Le N’sanda', txt: 'L’auteur précise qu’on plantait sur la tombe de chaque jeune exécuté un arbre nommé N’sanda, et qu’on en voit encore, « solitaires parmi les arbres de la brousse », dans le sud du Congo. Un monument aux morts sans nom.' },
     { t: 'atelier', mode: 'ordre', titre: 'Atelier · le drame, scène après scène', consigne: 'Remets les moments du drame dans l’ordre.',
       items: ['Le rêve du roi.', 'Un jeune homme accusé d’avoir regardé une femme.', 'Le roi parle à ses morts.', 'Le banni est revenu.', 'Les jeunes entrent dans le palais.', '« Brise cette marmite ».'],
@@ -104,7 +111,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261105a"></script>
-<script src="scene.js?v=20261105a"></script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
 </body>
 </html>

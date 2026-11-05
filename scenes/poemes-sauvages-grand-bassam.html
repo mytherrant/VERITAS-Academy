@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261105a">
+<link rel="stylesheet" href="scene.css?v=20261105b">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -33,6 +33,9 @@ window.SCENE = {
   },
   etapes: [
     { t: 'recit', entre: ['prof', 'awa', 'koffi'], txt: 'Un échange en ligne entre deux classes, l’une à Maroua, au Cameroun, l’autre à Abidjan. Leur professeure présente le livre d’Henri N’koumo, publié en 2022.' },
+    { t: 'recit', txt: 'il fait si froid dans le soleil si froid dans mes mots car tu es partie un samedi de plage et de rires sous les cocotiers', cite: 'Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, pages 9-10' },
+    { t: 'recit', txt: 'dans le ciel, à la place des oiseaux, il y avait des balles habillées d’ailes sombres d’ailes furieuses', cite: 'Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, pages 9-10' },
+    { t: 'question', q: '« il fait si froid dans le soleil » : quelle figure ouvre le poème ?', options: [ { txt: 'Un paradoxe, presque un oxymore : le froid du deuil dans le soleil d’une plage.', ok: true, retour: 'Le soleil de Grand-Bassam n’a plus de chaleur : la mort de l’amie a tout glacé.' }, { txt: 'Une simple description de la météo.', retour: 'Le froid est celui de la peine, pas du temps qu’il fait.' } ] },
     { t: 'dit', qui: 'prof', txt: 'Le 13 mars 2016, la plage de Grand-Bassam est frappée par le premier attentat terroriste de l’histoire de la Côte d’Ivoire. Dix-neuf morts. Parmi eux, Henrike Grohs, directrice du Goethe Institut, une amie du poète.', objet: { i: '🕯️', lib: '13 mars 2016' } },
     { t: 'dit', qui: 'koffi', emo: 'triste', txt: 'Chez nous, à Abidjan, tout le monde connaît Grand-Bassam. Une plage, des cocotiers, des familles le dimanche…' },
     { t: 'dit', qui: 'awa', emo: 'triste', txt: 'Et le poème cite aussi Maroua. Ma ville. Les mêmes violences. Ce n’est pas le malheur des autres.', jauges: { revolte: 45 } },
@@ -134,7 +137,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261105a"></script>
-<script src="scene.js?v=20261105a"></script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
 </body>
 </html>

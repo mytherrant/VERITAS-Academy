@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261105a">
+<link rel="stylesheet" href="scene.css?v=20261105b">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -35,6 +35,8 @@ window.SCENE = {
     { t: 'dit', qui: 'eleve', txt: 'Monsieur l’astronome, vous allez tout expliquer, et il ne restera plus rien de beau. La science désenchante le monde, non ?' },
     { t: 'dit', qui: 'savant', emo: 'joie', txt: 'Le soleil ne se lève pas, mademoiselle. C’est la Terre qui tourne et nous présente à lui. Il ne nous regarde pas, il ne veut rien. Il brûle, seul.', jauges: { savoir: 50, emerveil: 20 } },
     { t: 'dit', qui: 'poete', txt: 'C’est exactement ce que dit Sully Prudhomme. Écoutez : le titre annonce un lever de soleil, et le poème n’en décrit aucun. Il décrit ce que l’astronomie a fait de cet astre.' },
+    { t: 'vers', qui: 'poete', jeu: 'il récite le début', txt: 'Le grand soleil, plongé dans un royal ennui,\nBrûle au désert des cieux. Sous les traits qu’en silence\nIl disperse et rappelle incessamment à lui,\nLe chœur grave et lointain des sphères se balance.', cite: 'Sully Prudhomme, Stances et Poèmes, « Le Lever du soleil »' },
+    { t: 'vers', qui: 'poete', txt: 'Suspendu dans l’abîme il n’est ni haut ni bas ;\nIl ne prend d’aucun feu le feu qu’il communique ;\nSon regard ne s’élève et ne s’abaisse pas ;\nMais l’univers se dore à sa jeunesse antique.', cite: 'Sully Prudhomme, Stances et Poèmes, « Le Lever du soleil »' },
     { t: 'vers', qui: 'poete', jeu: 'il récite', txt: 'Flamboyant, invisible à force de splendeur,\nIl est père des blés, qui sont pères des races\u202F;', cite: 'Sully Prudhomme, « Le Lever du soleil », Stances et Poèmes (1865), strophe 3', jauges: { emerveil: 60 } },
     { t: 'question', q: '« Invisible à force de splendeur » : quelle figure ce vers emploie-t-il ?',
       options: [
@@ -53,6 +55,9 @@ window.SCENE = {
         { txt: 'Une loi qui relie la terre au soleil et chaque être à chaque être', cat: 1 }
       ],
       bravo: 'La science enlève les dieux et le ciel solide ; elle donne en échange une loi qui relie tout. Le poème garde le vocabulaire du sacré pour dire la nature.', jauges: { savoir: 85 } },
+    { t: 'vers', qui: 'poete', txt: 'Ah ! les fils de l’Hellade, avec des yeux nouveaux\nAdmirant cette gloire à l’Orient éclose,\nCriaient : Salut au dieu dont les quatre chevaux\nFrappent d’un pied d’argent le ciel solide et rose !', cite: 'Sully Prudhomme, Stances et Poèmes, « Le Lever du soleil »' },
+    { t: 'vers', qui: 'poete', emo: 'fier', txt: 'Nous autres nous crions : Salut à l’Infini !\nAu grand Tout, à la fois idole, temple et prêtre,\nQui tient fatalement l’homme à la terre uni,\nEt la terre au soleil, et chaque être à chaque être !', cite: 'Sully Prudhomme, Stances et Poèmes, « Le Lever du soleil »' },
+    { t: 'question', q: 'Les Grecs saluaient un dieu sur un char. Que salue le poète moderne ?', options: [ { txt: 'L’Infini, le grand Tout qui relie chaque être à chaque être.', ok: true, retour: 'La science a chassé le char d’Apollon, mais elle offre une autre grandeur.' }, { txt: 'Le même dieu que les Grecs.', retour: 'Il oppose « les fils de l’Hellade » à « nous autres ».' } ] },
     { t: 'vers', qui: 'poete', jeu: 'il récite la fin du poème', txt: 'La science a vaincu l’imposture des yeux,\nL’homme a répudié les vaines espérances\u202F;', cite: 'Sully Prudhomme, « Le Lever du soleil », strophe 9' },
     { t: 'choix', qui: 'eleve', q: 'Tu es Ngono. Alors, la science désenchante-t-elle le monde ?',
       options: [
@@ -141,7 +146,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261105a"></script>
-<script src="scene.js?v=20261105a"></script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
 </body>
 </html>

@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261105a">
+<link rel="stylesheet" href="scene.css?v=20261105b">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -33,6 +33,9 @@ window.SCENE = {
   },
   etapes: [
     { t: 'recit', entre: ['narratrice'], txt: 'Tout le livre est écrit avec le mot « je ». Celle qui parle est une fille ; elle raconte, des années plus tard, son enfance. Elle a deux « pères ».' },
+    { t: 'recit', txt: 'Le père externe, si je puis ainsi le nommer pour le distinguer du père interne, était nettement plus affable que son compère. Il s’occupait beaucoup de Frérot et de moi. Il arrivait chaque soir, à la même heure, chargé de bonbons et de friandises qu’il nous distribuait.', cite: 'Pabé Mongo, Père inconnu, chapitre I' },
+    { t: 'recit', txt: 'Mais la différence la plus marquée entre les deux papas, c’était leur langue. Le papa interne parlait la langue de notre mère, notre langue, tandis que le papa externe s’exprimait plutôt en français, langue qu’utilisait aussi ma mère pour lui répondre.', cite: 'Pabé Mongo, Père inconnu, chapitre I' },
+    { t: 'pense', qui: 'narratrice', emo: 'doute', txt: 'Je me demandais même, dans ma logique d’enfant, si ces deux pères ne correspondaient pas plutôt à nous deux, Frérot et moi, chacun ayant un père. Mais cette idée me paraissait drôle, car cela aurait signifié que ma mère avait deux maris, ce qui est impensable.', cite: 'Pabé Mongo, Père inconnu, chapitre I' },
     { t: 'dit', qui: 'narratrice', entre: ['interne', 'externe'], txt: 'Le père interne dort dans la case, sur le deuxième lit. Il fainéantise dans la cour, une pipe entre les dents. Le père externe dort derrière sa boutique ; il vend de tout, des allumettes aux chaussures.' },
     { t: 'dit', qui: 'narratrice', entre: ['frerot'], emo: 'doute', txt: 'Le père externe préfère Frérot : les plus beaux cadeaux, les genoux… Peut-être parce que c’est un garçon ? Ou parce qu’il est plus petit que moi ? Je leur trouve un vague air de ressemblance.', jauges: { comprend: 30 } },
     { t: 'question', q: 'La narratrice remarque une ressemblance sans l’expliquer. Que comprend le lecteur, lui ?',
@@ -54,6 +57,9 @@ window.SCENE = {
     { t: 'vers', qui: 'narratrice', jeu: 'ce qu’on lui crie', txt: 'Tais-toi, enfant sans père !', cite: 'Pabé Mongo, Père inconnu', emo: 'triste', jauges: { chagrin: 90 } },
     { t: 'remarque', titre: 'Le mot qui blesse', txt: 'Une insulte qui vise ce que quelqu’un ne peut pas changer — sa famille, son corps, son argent — n’est pas une moquerie : c’est une blessure. La dédicace du livre s’adresse aux enfants délaissés, et aux futurs papas et futures mamans.' },
     { t: 'recit', sort: ['interne'], txt: 'Les deux pères se bâtissent chacun une case avec une autre femme. Il y a des démarches, puis un tribunal. Au verdict, Frérot est conduit chez le Ngrafi, son père, où il doit désormais vivre.', jauges: { comprend: 75 } },
+    { t: 'recit', txt: 'Le chapitre IV, dans le texte de Pabé Mongo : le père externe revient de voyage.' },
+    { t: 'recit', txt: 'Ces quelques jours durèrent des mois, car les fêtes de Noël et de la Saint Sylvestre se passèrent pour nous sans jouets. Et quand il revint, grand Dieu, il était accompagné d’une femme ! Il construisit une case comme l’autre père, s’y installa avec sa femme, et nous oublia.', cite: 'Pabé Mongo, Père inconnu, chapitre IV' },
+    { t: 'pense', qui: 'narratrice', emo: 'colere', txt: 'Et les filles alors, me demandais-je n’ont-elles pas besoin de père ? Moi qui aurais pu jurer que j’avais plus besoin de mon père que Frérot', cite: 'Pabé Mongo, Père inconnu, chapitre IV' },
     { t: 'atelier', mode: 'tri', titre: 'Atelier · le « je » de l’enfant', consigne: 'Ce que le récit à la première personne permet, et ce qu’il interdit.',
       cats: ['Il permet', 'Il interdit'],
       items: [
@@ -109,7 +115,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261105a"></script>
-<script src="scene.js?v=20261105a"></script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
 </body>
 </html>

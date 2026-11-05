@@ -8,7 +8,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="scene.css?v=20261105a">
+<link rel="stylesheet" href="scene.css?v=20261105b">
 </head>
 <body>
 <noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
@@ -34,8 +34,13 @@ window.SCENE = {
     { t: 'recit', entre: ['lakounle'], txt: 'Iloujinlé, un village yorouba, à la fin des années 1950. Le matin. Par la fenêtre de l’école de brousse, Lakounlé, l’instituteur, voit passer Sidi, un seau d’eau sur la tête.' },
     { t: 'dit', qui: 'lakounle', emo: 'colere', jeu: 'il sort en hâte de l’école', txt: 'Sidi ! Pose ce seau ! Combien de fois faudra-t-il te le dire ? Une femme moderne ne porte pas de fardeaux sur la tête !' },
     { t: 'dit', qui: 'sidi', emo: 'joie', jeu: 'moqueuse', txt: 'Et qui le portera pour moi ? Toi, avec tes livres ?', jauges: { lak: 50 } },
-    { t: 'dit', qui: 'lakounle', emo: 'amour', txt: 'Écoute-moi enfin. Je veux t’épouser. Tu seras ma compagne, mon égale, pas ma servante.' },
-    { t: 'dit', qui: 'sidi', txt: 'Alors paie la dot, comme tout le monde. Sinon, on dira au village que Sidi ne valait rien, puisque personne n’a payé pour elle.' },
+    { t: 'dit', qui: 'lakounle', emo: 'amour', jeu: 'sur un ton de prédicateur', txt: 'Ô Sidi, je désire me marier par amour. Je cherche une compagne pour la vie.', cite: 'Wole Soyinka, Le lion et la perle, acte I (trad. française)' },
+    { t: 'dit', qui: 'sidi', txt: 'Je te l’ai dit et je te le répète : je t’épouse aujourd’hui, la semaine qui vient, ou n’importe quand tu voudras. Mais il faut d’abord que ma dot soit versée.', cite: 'Wole Soyinka, Le lion et la perle, acte I (trad. française)' },
+    { t: 'dit', qui: 'lakounle', emo: 'colere', txt: 'Coutume sauvage, barbare, démodée, rejetée, dénoncée, maudite, excommuniée, archaïque, dégradante, humiliante, innommable, inutile, rétrograde, aberrante, imbuvable !', cite: 'Wole Soyinka, Le lion et la perle, acte I (trad. française)' },
+    { t: 'dit', qui: 'sidi', emo: 'joie', txt: 'As-tu vidé ton sac ? Pourquoi t’arrêtes-tu ?', cite: 'Wole Soyinka, Le lion et la perle, acte I (trad. française)' },
+    { t: 'dit', qui: 'lakounle', txt: 'Pour le moment je n’ai que le Petit Larousse de poche. Mais j’ai commandé le Grand. Attends et tu verras.', cite: 'Wole Soyinka, Le lion et la perle, acte I (trad. française)' },
+    { t: 'dit', qui: 'sidi', txt: 'Paye seulement la dot.', cite: 'Wole Soyinka, Le lion et la perle, acte I (trad. française)' },
+    { t: 'question', q: 'Quinze adjectifs à la suite, puis « Pour le moment je n’ai que le Petit Larousse de poche » : quel effet ?', options: [ { txt: 'Une accumulation comique : Lakounlé récite le dictionnaire au lieu de convaincre.', ok: true, retour: 'Sidi le ramène sur terre en trois mots : « Paye seulement la dot. »' }, { txt: 'Lakounlé gagne la dispute grâce à son vocabulaire.', retour: 'Sidi ne cède pas d’un pouce.' } ] },
     { t: 'dit', qui: 'lakounle', emo: 'colere', jeu: 'il s’enflamme', txt: 'La dot ! Une coutume sauvage, barbare, démodée, rejetée, dénoncée, archaïque, dégradante ! Je ne t’achèterai pas comme une chèvre au marché !', objet: { i: '🐐', lib: 'La dot' } },
     { t: 'question', q: 'Quel effet produit cette longue liste d’adjectifs dans la bouche de Lakounlé ?',
       options: [
@@ -151,7 +156,7 @@ window.SCENE = {
   }
 };
 </script>
-<script src="decors.js?v=20261105a"></script>
-<script src="scene.js?v=20261105a"></script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
 </body>
 </html>
