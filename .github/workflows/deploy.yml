@@ -2385,6 +2385,18 @@ jobs:
               print("::warning title=Boutique vide::l'API répond, mais aucun ouvrage n'est publiable — la vitrine masquera la boutique.")
           PY
 
+      # ── 📣 IndexNow (06/11/2026) — Bing (donc la recherche de ChatGPT,
+      #    Copilot, DuckDuckGo), Yandex et Seznam apprennent en quelques
+      #    minutes qu'une page est neuve ou modifiée, au lieu d'attendre le
+      #    passage de leur robot. Seules les pages touchées par ce push sont
+      #    signalées (lues dans l'événement GitHub, recoupées avec les sitemaps
+      #    servis). Un moteur indisponible ne doit JAMAIS faire échouer un
+      #    déploiement déjà en ligne : d'où continue-on-error.
+      - name: 📣 Signaler les pages neuves aux moteurs (IndexNow)
+        if: success()
+        continue-on-error: true
+        run: python tools/indexnow.py --evenement "$GITHUB_EVENT_PATH"
+
       - name: 🔁 Rappel — version du Service Worker
         if: always()
         run: |
