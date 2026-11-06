@@ -44,7 +44,7 @@
 <script defer src="./exercices.js?v=4cde4eaa"></script>
 <script defer src="./generateur.js?v=355c6046"></script>
 <script defer src="./texte.js?v=43fa1e84"></script>
-<script defer src="./docx.js?v=221641f0"></script>
+<script defer src="./docx.js?v=857dffca"></script>
 <script defer src="./lecteur-textes.js?v=4153b09f"></script>
 <script defer src="./progressions.js?v=6fedeb24"></script>
 <script defer src="./support.js?v=9c859a28"></script>
@@ -120,7 +120,7 @@
 }
 </style>
 <!--vrt-habillage:tete-->
-<link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.62.34">
+<link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.63.34">
 <script>window.VRT_DATA=window.VRT_DATA||{"citations":[{"t":"Le génie, c’est un pour cent d’inspiration et quatre-vingt-dix-neuf pour cent de transpiration.","a":"Thomas Edison"},{"t":"Ce n’est pas parce que les choses sont difficiles que nous n’osons pas ; c’est parce que nous n’osons pas qu’elles sont difficiles.","a":"Sénèque"},{"t":"L’éducation est l’arme la plus puissante pour changer le monde.","a":"Nelson Mandela"},{"t":"Un peu chaque jour vaut mieux que beaucoup un seul jour.","a":"Proverbe"},{"t":"La chance sourit à l’esprit préparé.","a":"Louis Pasteur"},{"t":"Tomber sept fois, se relever huit.","a":"Proverbe japonais"}],"themeSombre":"\n      body{background:#0A1428!important}\n      [style*=\"background:#fff\"],[style*=\"background:#FAFBFE\"],[style*=\"background:#FCFDFE\"],[style*=\"background:#F7F9FD\"]{background:#132241!important}\n      [style*=\"background:#F4F5F8\"],[style*=\"background:#F4F6FB\"],[style*=\"background:#EFF2F7\"],[style*=\"background:#F5F9FF\"]{background:#0F1B33!important}\n      [style*=\"background:rgba(255,255,255,.96)\"]{background:rgba(13,25,48,.96)!important}\n      [style*=\"radial-gradient(1100px\"],[style*=\"radial-gradient(900px\"]{background:#0C1730!important}\n      [style*=\"linear-gradient(180deg,#FBF8F1\"]{background:#0C1730!important}\n      [style*=\"color:#001136\"]{color:#EEF3FC!important}\n      [style*=\"color:#0C2A6A\"]{color:#DCE6F8!important}\n      [style*=\"color:#4D5163\"],[style*=\"color:#6B5A42\"]{color:#B6C2D8!important}\n      [style*=\"color:#6E7385\"],[style*=\"color:#9BA6BE\"]{color:#8D9AB4!important}\n      [style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"]{border-color:#24334F!important}\n      [style*=\"\"],[style*=\"\"]{border-bottom-color:#24334F!important}\n      [style*=\"\"]{border-top-color:#24334F!important}\n      [style*=\"border-left:4px solid\"]{border-left-color:#FFC93C!important}\n      input,input::placeholder{color:#C7D2E6!important}\n    "};</script>
 <style>footer[data-noprint="1"]:not(.vrt-hab){display:none!important}.sc-host,div:has(>.sc-host){height:auto!important;min-height:100vh}</style>
 <!--/vrt-habillage:tete-->
@@ -2113,6 +2113,26 @@
       <div style="{{ friseStyle }}">
         <sc-for list="{{ frise }}" as="fz" hint-placeholder-count="4"><span style="{{ fz.trait }}"></span><span style="{{ fz.dot }}"></span><span style="{{ fz.lab }}">{{ fz.label }}</span></sc-for>
       </div>
+      <!-- CALENDRIER DE L'ÉPREUVE (lot M, 02/11/2026) — les cinq échéances du
+           workflow de Tchouskou ; une fois appliquées, chacune devient un
+           rappel dans la cloche et dans « À faire ». -->
+      <div style="{{ jlBlocStyle }}">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+          <span style="font-family:Poppins;font-size:13.5px;font-weight:700;color:var(--c14375f,#14375f)">Calendrier de l’épreuve</span>
+          <span style="font-size:11.5px;color:var(--c8b97a8,#8b97a8)">{{ jlSous }}</span>
+          <span style="{{ jlDemande }}">{{ jlDemandeTexte }}</span>
+          <button onClick="{{ jlAppliquer }}" style="{{ jlAppliquerStyle }}">{{ jlAppliquerLabel }}</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
+          <sc-for list="{{ jalons }}" as="jl" hint-placeholder-count="5">
+            <div style="{{ jl.carte }}">
+              <div style="font-size:11.5px;font-weight:700;font-family:Poppins;color:var(--c22303f,#22303f)">{{ jl.lib }} <span style="font-weight:400;color:var(--c8b97a8,#8b97a8)">· {{ jl.aide }}</span></div>
+              <input type="date" value="{{ jl.date }}" onChange="{{ jl.set }}" disabled="{{ jl.fige }}" aria-label="{{ jl.lib }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:7px;padding:5px 7px;font-size:12px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);width:100%;box-sizing:border-box;margin:6px 0">
+              <div style="display:flex;align-items:center;gap:6px;justify-content:space-between;flex-wrap:wrap"><span style="{{ jl.chip }}">{{ jl.etat }}</span><button onClick="{{ jl.basculer }}" style="{{ jl.basculerStyle }}">{{ jl.basculerLabel }}</button></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
       <!-- Ce rappel dit comment démarrer une épreuve. Il sert la première
            fois, sur une épreuve encore vide ; il ne sert plus du tout quand
            on relit son travail, et il coûte alors 54 px — un tiers d'écran
@@ -2592,6 +2612,10 @@
               </div>
             </section>
             </sc-if>
+            <!-- Ajouter un sujet SANS passer par Ambassa (02/11/2026) : le seul bouton
+                 vivait dans le panneau replié « Composer avec Ambassa » — qui composait
+                 à la main ne trouvait aucun moyen d'ajouter sa production écrite. -->
+            <button onClick="{{ ajouterSujet }}" style="{{ sujetAjoutStyle }}" title="Production écrite, situation d’intégration, dissertation, texte fautif…">{{ sujetAjoutLabel }}</button>
             <!-- Panneau de génération (20/10/2026) : carte de la vitrine — fond
                  blanc, la couleur dans l'anneau et le bouton (« la couleur
                  qualifie, elle n'inonde pas »). Un quota inconnu ne s'affiche
@@ -3331,10 +3355,12 @@
         </div>
         <select value="{{ suiviClasse }}" onChange="{{ setSuiviClasse }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;padding:7px 10px;font-size:12.5px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)"><option value="">Toutes mes classes</option><sc-for list="{{ suiviClasses }}" as="c" hint-placeholder-count="2"><option value="{{ c.id }}">{{ c.label }}</option></sc-for></select>
         <button onClick="{{ suiviRetardsBasculer }}" style="{{ suiviRetardsStyle }}">Retards seulement</button>
-        <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-left:auto">
+        <div style="display:flex;flex-wrap:wrap;max-width:100%;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-left:auto">
           <button onClick="{{ suiviVueListe }}" style="{{ suiviVueListeStyle }}">Échéances</button>
           <button onClick="{{ suiviVueMois }}" style="{{ suiviVueMoisStyle }}">Mois</button>
           <button onClick="{{ suiviVueAnnee }}" style="{{ suiviVueAnneeStyle }}">Calendrier annuel</button>
+          <button onClick="{{ suiviVueCouv }}" style="{{ suiviVueCouvStyle }}" title="Séquences évaluées, sujets validés, ou restées sans évaluation">Couverture</button>
+          <button onClick="{{ suiviVueDem }}" style="{{ suiviVueDemStyle }}" title="Sujets demandés à un collègue, ou reçus">Demandes<span style="{{ demBadge }}">{{ demRecuesN }}</span></button>
         </div>
       </div>
 
@@ -3400,6 +3426,59 @@
             </sc-for>
           </div>
         </div>
+      </sc-if>
+      <!-- Couverture du programme (lot L, 02/11/2026) — d'après « Couverture
+           du programme » et « Contenus non évalués » de Tchouskou : pour
+           chaque séquence de mes classes, son sujet est-il prêt, validé, ou
+           son évaluation est-elle passée sans épreuve ? -->
+      <sc-if value="{{ suiviEnCouv }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ couvGroupes }}" as="cg" hint-placeholder-count="1">
+          <section style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:12px 16px;margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap"><span style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ cg.titre }}</span><span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ cg.sous }}</span><span style="{{ cg.jaugeStyle }}"><span style="{{ cg.jaugeBarre }}"></span></span></div>
+            <sc-for list="{{ cg.lignes }}" as="cl" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;padding:9px 2px;border-top:1px solid var(--ceef2f7,#eef2f7);flex-wrap:wrap">
+                <div style="min-width:104px"><div style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--c22303f,#22303f)">Séquence {{ cl.num }}</div><div style="font-size:11px;color:var(--c8b97a8,#8b97a8);margin-top:1px">{{ cl.date }}</div></div>
+                <div style="flex:1;min-width:200px"><div style="font-size:13px;font-weight:700;color:var(--c22303f,#22303f)">{{ cl.titre }}</div><div style="{{ cl.sousStyle }}">{{ cl.sous }}</div></div>
+                <span style="{{ cl.chip }}">{{ cl.etat }}</span>
+                <button onClick="{{ cl.agir }}" style="{{ cl.agirStyle }}">{{ cl.agirLabel }}</button>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+      </sc-if>
+      <!-- DEMANDES DE SUJET (lot N, 02/11/2026) — d'après Tchouskou : demander
+           un sujet à un collègue, avec ses dates ; suivre celles reçues et
+           envoyées. -->
+      <sc-if value="{{ suiviEnDem }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ demOkStyle }}">{{ demOk }}</div>
+        <section style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:12px 16px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c14375f,#14375f)">Demander un sujet à un collègue</span><span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">Il le retrouve dans ses épreuves et dans « À faire », avec ses rappels.</span><button onClick="{{ demBasculer }}" style="{{ demBasculerStyle }}">{{ demBasculerLabel }}</button></div>
+          <div style="{{ demSansCollegueStyle }}">Personne d’autre dans l’équipe pour l’instant : invitez un collègue depuis « Équipe ».</div>
+          <div style="{{ demFormStyle }}">
+            <label style="{{ fieldLbl }}">Collègue<select value="{{ demA }}" onChange="{{ setDemA }}" style="{{ fieldIn }}"><option value="">— Choisir —</option><sc-for list="{{ demCollegues }}" as="u" hint-placeholder-count="3"><option value="{{ u.id }}">{{ u.label }}</option></sc-for></select></label>
+            <label style="{{ fieldLbl }}">Classe<select value="{{ demClasse }}" onChange="{{ setDemClasse }}" style="{{ fieldIn }}"><option value="">— Choisir —</option><sc-for list="{{ demClasses }}" as="c" hint-placeholder-count="8"><option value="{{ c }}">{{ c }}</option></sc-for></select></label>
+            <label style="{{ fieldLbl }}">Évaluation<input value="{{ demType }}" onChange="{{ setDemType }}" placeholder="Devoir surveillé n°2" style="{{ fieldIn }}"></label>
+            <label style="{{ fieldLbl }}">Date de l’épreuve<input type="date" value="{{ demDate }}" onChange="{{ setDemDate }}" style="{{ fieldIn }}"></label>
+            <label style="{{ fieldLbl }}">Sujet attendu le<input type="date" value="{{ demAttendu }}" onChange="{{ setDemAttendu }}" style="{{ fieldIn }}"></label>
+            <label style="{{ fieldLbl }};grid-column:1/-1">Consignes<textarea value="{{ demConsignes }}" onChange="{{ setDemConsignes }}" rows="3" placeholder="Séquence, notions à évaluer, nature de l’épreuve, texte imposé…" style="{{ fieldIn }};resize:vertical"></textarea></label>
+            <div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button onClick="{{ demEnvoyer }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:8px 14px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">Envoyer la demande</button><span style="{{ demMsgStyle }}">{{ demMsg }}</span></div>
+          </div>
+        </section>
+        <sc-for list="{{ demListes }}" as="dl2" hint-placeholder-count="2">
+          <section style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:12px 16px;margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ dl2.titre }}</span><span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ dl2.sous }}</span></div>
+            <div style="{{ dl2.videStyle }}">{{ dl2.vide }}</div>
+            <sc-for list="{{ dl2.lignes }}" as="dm" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:12px;padding:9px 2px;border-top:1px solid var(--ceef2f7,#eef2f7);flex-wrap:wrap">
+                <div style="min-width:118px"><div style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--c22303f,#22303f)">{{ dm.date }}</div><div style="{{ dm.relStyle }}">{{ dm.rel }}</div></div>
+                <div style="flex:1;min-width:200px"><div style="font-size:13px;font-weight:700;color:var(--c22303f,#22303f)">{{ dm.titre }}</div><div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin-top:2px;line-height:1.45">{{ dm.sous }}</div></div>
+                <span style="{{ dm.chip }}">{{ dm.etat }}</span>
+                <button onClick="{{ dm.refuser }}" style="{{ dm.refuserStyle }}">{{ dm.refuserLabel }}</button>
+                <button onClick="{{ dm.ouvrir }}" style="background:var(--cffffff,#fff);color:var(--c14375f,#14375f);border:1px solid var(--ce2eaf3,#e2eaf3);padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">{{ dm.ouvrirLabel }}</button>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
       </sc-if>
     </div>
   </main>
@@ -4368,6 +4447,7 @@
     <div onClick="{{ stop }}" style="background:var(--cffffff,#fff);border-radius:16px;box-shadow:0 24px 70px rgba(14,46,77,.4);width:100%;max-width:460px;overflow:hidden;animation:popIn .28s ease both">
       <sc-if value="{{ payFormShown }}" hint-placeholder-val="{{ true }}">
         <div style="padding:22px 26px;border-bottom:1px solid var(--ceef2f7,#eef2f7)"><h2 style="font-family:Poppins;font-size:18px;font-weight:700;color:var(--c14375f,#14375f);margin:0">Paiement — plan {{ payPlanName }}</h2><p style="font-size:12.5px;color:var(--c8b97a8,#8b97a8);margin:5px 0 0"><sc-if value="{{ payRemiseShown }}" hint-placeholder-val="{{ false }}"><span style="text-decoration:line-through;margin-right:7px">{{ payPrixAvant }}</span></sc-if>{{ payPlanPrice }} · renouvellement mensuel</p></div>
+        <div role="status" style="{{ payMotifStyle }}">{{ payMotif }}</div>
         <div style="padding:22px 26px">
           <div style="{{ payBannerStyle }}">{{ payBanner }}</div>
           <div style="display:flex;gap:8px;margin:14px 0 18px">
@@ -6445,11 +6525,18 @@ class Component extends DCLogic {
      donnait « a cote » pour s'en debarrasser tombait sur une carte de gabarit
      -- qui cree un brouillon. Le clic exterieur ferme donc le menu ET s'arrete
      la : il n'atteint pas ce qu'il y a dessous. */
+  /* Ferme la fenêtre de paiement — bouton Annuler, clic au-dehors, Échap.
+     Pas pendant une demande en cours : la réponse de l'opérateur doit
+     trouver la fenêtre où l'afficher. */
+  _fermerPaiement(){if(this.state.payBusy)return;
+    this.setState({payOpen:false,payDone:false,payCode:'',payCodeMsg:'',payMotif:'',
+      payCodeOk:false,payRemise:0,payMontant:0,payBase:0});}
   _installerFermetureCreer(){
     if(this._fermCreerInstalle)return;
     this._fermCreerInstalle=true;
     window.addEventListener('keydown',(e)=>{
       if(e.key==='Escape'&&this.state.createOpen)this.setState({createOpen:false});
+      else if(e.key==='Escape'&&this.state.payOpen)this._fermerPaiement();
     });
     document.addEventListener('click',(e)=>{
       if(!this.state.createOpen)return;
@@ -7774,12 +7861,12 @@ class Component extends DCLogic {
         blocs.push({titre:choix?('Sujet 1 — '+this._titreSujet(stru.parties&&stru.parties[0]&&stru.parties[0].titre||'Contraction de texte et discussion'))
                               :('Texte '+(ti+1)+' — '+t),
           lignes:qs.map((q,i)=>(choix?R[k2++]+'. ':(i+1)+'. ')+q
-          +(pp[i]!=null&&pp[i]!==''?' ('+pp[i]+' point'+((parseFloat(pp[i])||0)>1?'s':'')+')':'')
+          +(pp[i]!=null&&pp[i]!==''?' ('+this._ptFr(pp[i])+' point'+((parseFloat(pp[i])||0)>1?'s':'')+')':'')
           +'\n   → '+this._sansMarkdown(c[i]||'à compléter'))});});});
     (a.sujets||[]).forEach(s=>{if(!s||!s.corrige)return;
       if(choix&&s.genre==='presentation')return;
       const t=choix?('Sujet '+(++nSujet)+' — '+this._titreSujet(s.titre)):(s.titre||'Sujet');
-      blocs.push({titre:t+(s.pts?' ('+s.pts+' points)':''),lignes:[this._sansMarkdown(s.corrige)]});});
+      blocs.push({titre:t+(s.pts?' ('+this._ptFr(s.pts)+' points)':''),lignes:[this._sansMarkdown(s.corrige)]});});
     if((a.grilleIA||[]).length)blocs.push({titre:'Grille de correction',
       lignes:a.grilleIA.map(g=>'• '+this._sansMarkdown(g.critere)+(g.points!=null?' — '+g.points+' pts':'')+(g.indicateurs?' : '+this._sansMarkdown(g.indicateurs):''))});
     if(stru&&stru.formulesCorrige&&stru.formulesCorrige.length)blocs.push({titre:'À rappeler aux correcteurs',lignes:stru.formulesCorrige});
@@ -8177,11 +8264,14 @@ class Component extends DCLogic {
        minute. Le message du serveur (retenu au premier 402 reel) reste
        prioritaire quand on l'a. */
     var n=(this.all||[]).filter(function(x){return x&&x.src!=='libre';}).length;
-    this._avis(this._msgAbo
+    /* Le motif s'affiche DANS la fenêtre de paiement (02/11/2026) : en
+       bandeau flottant (_avis), il se posait sur le titre de la fenêtre et
+       les deux devenaient illisibles. */
+    const motif=this._msgAbo
       || ('Ce texte fait partie du répertoire complet. Abonnez-vous pour ouvrir '
          +(n>0?('les '+n.toLocaleString('fr-FR')+' textes'):'tout le répertoire')
-         +', leurs questions et leurs faits de langue.'),'attention');
-    this.setState({payOpen:true,paySelected:'ens',payDone:false,
+         +', leurs questions et leurs faits de langue.');
+    this.setState({payOpen:true,paySelected:'ens',payDone:false,payMotif:motif,
       payCode:this._codeAmiRetenu(),payCodeMsg:'',payCodeOk:false,
       payRemise:0,payMontant:0,payBase:0},()=>{if(this.state.payCode)this._verifierCodeAmi();});
   }
@@ -8688,7 +8778,7 @@ class Component extends DCLogic {
      `revue` vit sur l'épreuve : {tour, requis, echeance, decisions:[{uid,
      nom, verdict, portee, motif, ts, tour}]}. Les décisions des tours
      précédents restent : c'est l'historique de ce qui a été demandé. */
-  _delais(){const d=((this.state.admin||{}).delais)||{};return{validation:+d.validation||5,remplacement:+d.remplacement||3};}
+  _delais(){const d=((this.state.admin||{}).delais)||{};return{validation:+d.validation||5,remplacement:+d.remplacement||3,sujet:+d.sujet||10,copies:+d.copies||7,corrige:+d.corrige||10};}
   _revueDe(e){const r=(e&&e.revue)||{};return{tour:r.tour||1,requis:Math.max(1,+r.requis||1),echeance:r.echeance||0,decisions:Array.isArray(r.decisions)?r.decisions:[]};}
   _statutRevue(r){
     const cur=r.decisions.filter(d=>d.tour===r.tour);
@@ -8886,10 +8976,35 @@ class Component extends DCLogic {
     const items=[];(a.textIds||[]).forEach(n=>{const f=this.all.find(x=>x.n===n);if(!f)return;
       ['comp','expl'].forEach(k=>{this._qList(f,k).forEach((q,i)=>items.push([n,k,i]));});});
     if(!items.length){return;}
-    const part=Math.floor((cible/items.length)*10)/10;
-    const pts={};items.forEach(([n,k,i],idx)=>{pts[n]=pts[n]||{};pts[n][k]=pts[n][k]||[];
-      pts[n][k][i]=(idx===items.length-1)?Math.round((cible-part*(items.length-1))*100)/100:part;});
-    this._updateActive({pts},'a appliqué le barème type ('+cible+' points)');}
+    /* PAR PARTIE (02/11/2026). Le barème était étalé à parts égales sur
+       toutes les questions : une Étude de texte « I. Compréhension /10 ·
+       II. Langue /10 » à deux questions de compréhension et une de langue
+       donnait 13,2 / 6,8 — démenti par le garde-fou affiché juste à côté.
+       Chaque partie de la structure va désormais à SES questions
+       (compréhension → comp, langue/exploitation → expl) ; une partie de
+       production va aux sujets. Sans correspondance, on garde l'étalement. */
+    const genreDe=t=>/compr[ée]hension/i.test(t)?'comp':/langue|exploitation|vocabul|grammaire|maniement/i.test(t)?'expl':'sujet';
+    const parts=((st&&st.parties)||[]).map(p=>({g:genreDe(p.titre||''),pts:parseFloat(p.points)||0})).filter(p=>p.pts>0);
+    const parGenre={comp:0,expl:0,sujet:0};parts.forEach(p=>{parGenre[p.g]+=p.pts;});
+    const repartir=(liste,total,poser)=>{if(!liste.length||!(total>0))return;const part=Math.floor((total/liste.length)*10)/10;
+      liste.forEach((x,idx)=>poser(x,(idx===liste.length-1)?Math.round((total-part*(liste.length-1))*100)/100:part));};
+    const pts={};const poserQ=([n,k,i],v)=>{pts[n]=pts[n]||{};pts[n][k]=pts[n][k]||[];pts[n][k][i]=v;};
+    const comp=items.filter(x=>x[1]==='comp'),expl=items.filter(x=>x[1]==='expl');
+    const parPartie=(parGenre.comp>0||parGenre.expl>0)&&(!comp.length||parGenre.comp>0)&&(!expl.length||parGenre.expl>0);
+    const patch={};
+    if(parPartie){
+      repartir(comp,parGenre.comp,poserQ);repartir(expl,parGenre.expl,poserQ);
+      /* Partie de production : aux sujets imposés (répartie), et chaque sujet
+         au choix la vaut entière — l'élève n'en traite qu'un. */
+      const sj=(a.sujets||[]).filter(s=>s&&s.genre!=='presentation');
+      if(parGenre.sujet>0&&sj.length){const imposes=sj.filter(s=>!s.auChoix);const vals={};
+        repartir(imposes,parGenre.sujet,(s,v)=>{vals[s.id]=v;});
+        patch.sujets=(a.sujets||[]).map(s=>!s||s.genre==='presentation'?s:{...s,pts:s.auChoix?parGenre.sujet:(vals[s.id]!=null?vals[s.id]:s.pts)});}
+    }else repartir(items,cible,poserQ);
+    patch.pts=pts;
+    this._updateActive(patch,'a appliqué le barème type ('+cible+' points'+(parPartie?', par partie':'')+')');}
+  /* Les points s'impriment à la française : « 6,5 pts », pas « 6.5 pts ». */
+  _ptFr(v){return String(v).replace('.',',');}
   /* _qList lisait TOUJOURS l'épreuve active : calculer l'avancement d'une
      autre épreuve lui prêtait les questions de celle qui est ouverte. */
   /* QUESTIONS DU CORPUS PAR DÉFAUT (20/10/2026, signalé par Jacques :
@@ -9043,6 +9158,58 @@ class Component extends DCLogic {
     }));
     return out.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
   }
+  /* ── Calendrier de l'épreuve (lot M, 02/11/2026) ─────────────────────
+     D'après le workflow d'échéances de Tchouskou : sujet remis → sujet
+     validé → épreuve → copies corrigées → corrigé aux élèves. Les dates se
+     PROPOSENT depuis la date de l'épreuve et les délais du Pilotage ; elles
+     ne deviennent des rappels qu'une fois appliquées (`ep.jalons`) : rien ne
+     surgit en retard sur les épreuves d'avant. */
+  _jalonsDe(e){
+    if(!e)return[];
+    const D=this._delais(),J=e.jalons||{},F=e.jalonsFaits||{},ep=e.echeance||'',auj=this._isoAuj();
+    const plus=n=>ep?this._isoPlus(ep,n):'';
+    const rv=e.revue&&e.revue.echeance?this._isoDe(new Date(e.revue.echeance)):'';
+    const st=e.status||'brouillon',valide=st==='valide';
+    return[
+      {k:'sujet',lib:'Sujet remis',aide:'envoi en relecture',date:J.sujet||plus(-D.sujet),fait:st!=='brouillon'},
+      {k:'validation',lib:'Sujet validé',aide:'relecture close',date:J.validation||rv||plus(-Math.max(1,D.sujet-D.validation)),fait:valide},
+      {k:'epreuve',lib:'Épreuve',aide:'passation',date:ep,fait:!!(valide&&ep&&ep<=auj)},
+      {k:'copies',lib:'Copies corrigées',aide:'remises aux élèves',date:J.copies||plus(D.copies),fait:!!F.copies,manuel:true},
+      {k:'corrige',lib:'Corrigé aux élèves',aide:'diffusé en classe',date:J.corrige||plus(D.corrige),fait:!!F.corrige,manuel:true}];
+  }
+  _majJalon(k,iso){const a=this._active();if(!a)return;
+    if(k==='epreuve'){this._updateActive({echeance:iso||''},iso?'a daté l’épreuve du '+this._fmtIso(iso,{day:'numeric',month:'long'}):'a retiré la date de l’épreuve');return;}
+    const lib={sujet:'la remise du sujet',validation:'la validation',copies:'la remise des copies',corrige:'le corrigé aux élèves'}[k]||k;
+    this._updateActive({jalons:{...(a.jalons||{}),[k]:iso||''}},'a fixé '+lib+(iso?' au '+this._fmtIso(iso,{day:'numeric',month:'long'}):' (date retirée)'));}
+  _appliquerJalons(){const a=this._active();if(!a)return;const J={};
+    this._jalonsDe(a).forEach(j=>{if(j.k!=='epreuve'&&j.date)J[j.k]=j.date;});
+    this._updateActive({jalons:{...J,...Object.fromEntries(Object.entries(a.jalons||{}).filter(([,v])=>v))}},'a appliqué le calendrier de l’épreuve');}
+  _basculerJalon(k){const a=this._active();if(!a)return;const F={...(a.jalonsFaits||{})};
+    if(F[k])delete F[k];else F[k]=Date.now();
+    this._updateActive({jalonsFaits:F},(F[k]?'a marqué fait : ':'a rouvert : ')+({copies:'copies corrigées remises',corrige:'corrigé remis aux élèves'}[k]||k));}
+  /* ── Demandes de sujet (lot N, 02/11/2026) ───────────────────────────
+     Comme « Demandes de sujet » de Tchouskou : on demande un sujet à un
+     collègue, avec la date de l'épreuve et la date où le sujet est attendu.
+     La demande EST une épreuve (brouillon au nom du collègue) : elle voyage
+     avec les épreuves de l'équipe, et ses dates deviennent ses rappels. */
+  _envoyerDemande(){const st=this.state,me=this._me();
+    const a=st.users.find(u=>u.id===st.demA);
+    if(!a){this.setState({demMsg:'Choisissez le collègue à qui demander le sujet.'});return;}
+    if(!st.demAttendu){this.setState({demMsg:'Indiquez la date où le sujet est attendu.'});return;}
+    if(st.demDate&&st.demAttendu>st.demDate){this.setState({demMsg:'Le sujet doit être attendu AVANT la date de l’épreuve.'});return;}
+    const id='e'+Date.now(),type=(st.demType||'').trim()||'Évaluation',now=Date.now();
+    const ep={id,groupeId:this._groupeActif(),title:type+(st.demClasse?' — '+st.demClasse:''),etab:'',classe:st.demClasse||'',duree:'2 h',coeff:'',date:'',
+      consigne:'Lis attentivement le(s) texte(s) puis réponds aux questions.',textIds:[],status:'brouillon',ownerId:a.id,editorIds:[],inLibrary:false,updatedAt:now,comments:[],
+      echeance:st.demDate||'',jalons:{sujet:st.demAttendu},
+      demande:{par:me.id,le:now,consignes:(st.demConsignes||'').trim().slice(0,1200),etat:'attente'},
+      activity:[{userId:me.id,text:'a demandé ce sujet à '+a.name+', attendu le '+this._fmtIso(st.demAttendu,{day:'numeric',month:'long'}),ts:now}]};
+    if(ep.demande.consignes)ep.comments=[{id:'c'+now,userId:me.id,text:'Consignes de la demande : '+ep.demande.consignes,ts:now,reactions:{}}];
+    this.setState(s2=>({epreuves:[ep,...s2.epreuves],demA:'',demType:'',demClasse:'',demDate:'',demAttendu:'',demConsignes:'',demMsg:'',demOuvert:false,
+      demOk:'Demande envoyée à '+a.name+'.'}),()=>this._persist());}
+  _repondreDemande(id,etat){const me=this._me();
+    this.setState(s2=>({epreuves:s2.epreuves.map(e=>{if(!e||e.id!==id||!e.demande)return e;
+      return{...e,demande:{...e.demande,etat,repLe:Date.now()},updatedAt:Date.now(),
+        activity:[...(e.activity||[]),{userId:me.id,text:etat==='refusee'?'a décliné la demande de sujet':'a accepté la demande de sujet',ts:Date.now()}]};}),demRefus:''}),()=>this._persist());}
   _contenusSeq(sq,jusqua){const out=[];(sq&&sq.semaines||[]).filter(w=>w.n<=(jusqua||3)).forEach(w=>(w.contenus||[]).forEach(c=>{if(c&&out.indexOf(c)<0)out.push(c);}));return out;}
   /* Évaluation d'une séquence : épreuve NEUVE, datée de la semaine
      d'évaluation (S5), classe et assistant déjà réglés. */
@@ -9161,8 +9328,23 @@ class Component extends DCLogic {
         genre:genre, date:d, jours:j, urgence:u,
         fini:(o.status === 'valide')});
     };
-    (st.epreuves||[]).forEach(e => ajouter(e, 'epreuve'));
+    /* Une demande de sujet DÉCLINÉE n'a plus d'échéance pour personne. */
+    (st.epreuves||[]).forEach(e => { if (!(e && e.demande && e.demande.etat==='refusee')) ajouter(e, 'epreuve'); });
     (st.cours||[]).forEach(c => ajouter(c, 'cours'));
+    /* Jalons du calendrier de l'épreuve (lot M) : seulement ceux APPLIQUÉS,
+       et pour qui y travaille (auteur, co-auteurs). L'épreuve elle-même a
+       déjà sa ligne ci-dessus (`echeance`). */
+    const moi = st.currentUserId;
+    (st.epreuves||[]).forEach(e => {
+      if (!e || !e.jalons || !(e.ownerId===moi || (e.editorIds||[]).indexOf(moi)>=0)) return;
+      if (e.demande && e.demande.etat==='refusee') return;
+      this._jalonsDe(e).forEach(j => {
+        if (j.k==='epreuve' || j.fait || !e.jalons[j.k]) return;
+        const d = this._parseDate(j.date); if (!d) return;
+        const jr = this._joursAvant(d);
+        out.push({id:e.id, jalon:j.k, titre:j.lib+' — '+(e.title||'Épreuve'), genre:'epreuve', date:d, jours:jr, urgence:this._urgence(jr), fini:false});
+      });
+    });
     /* Ce qui est VALIDE n'a plus d'echeance : le signaler « en retard »
        reprocherait a l'enseignant un travail qu'il a fini. */
     return out.filter(x => !x.fini)
@@ -9787,7 +9969,7 @@ class Component extends DCLogic {
        visite guidee, avant toute connexion. */
     const accountSwitch=(st.compteId?[]:st.users).map(u=>({name:u.name,initials:this._initials(u.name),avatar:this._av(u,36),role:u.role,current:u.id===me.id,currentChip:u.id===me.id?'font-size:11px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:3px 10px;border-radius:999px':hidden,rowStyle:'display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid '+(u.id===me.id?'var(--cbcd9f2,#bcd9f2)':'var(--ceef2f7,#eef2f7)')+';border-radius:11px;background:'+(u.id===me.id?'var(--cf5faff,#f5faff)':'var(--cffffff,#fff)')+';cursor:pointer;text-align:left',select:()=>this.setState({currentUserId:u.id,screen:'accueil'},()=>{this._persist();window.scrollTo(0,0);})}));
 
-    const mkPrintQ=(f,kind)=>this._qList(f,kind).map((t,qi)=>{const p=this._qPts(f.n,kind,qi);return{text:t,pts:(p===null?'':'('+p+' pt'+((parseFloat(p)||0)>1?'s':'')+')'),ptsStyle:(p===null?'display:none':'font-weight:700;color:var(--c14375f,#14375f);white-space:nowrap;margin-left:6px')};});
+    const mkPrintQ=(f,kind)=>this._qList(f,kind).map((t,qi)=>{const p=this._qPts(f.n,kind,qi);return{text:t,pts:(p===null?'':'('+this._ptFr(p)+' pt'+((parseFloat(p)||0)>1?'s':'')+')'),ptsStyle:(p===null?'display:none':'font-weight:700;color:var(--c14375f,#14375f);white-space:nowrap;margin-left:6px')};});
     const printFiches=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean).map((f,i)=>({pos:i+1,
       qBlocStyle:(this._qList(f,'comp').length||this._qList(f,'expl').length)?'font-size:13px;color:var(--c22303f,#22303f)':'display:none',type:f.type,words:f.words,text:f.text||'',reference:f.reference||'',compList:this._qList(f,'comp'),explList:this._qList(f,'expl'),compQ:mkPrintQ(f,'comp'),explQ:mkPrintQ(f,'expl'),
       compBloc:this._qList(f,'comp').length?'':'display:none',explBloc:this._qList(f,'expl').length?'':'display:none',
@@ -10284,7 +10466,7 @@ class Component extends DCLogic {
       pilFiltreLabel:pilF?('Filtre : '+((pilDefs.find(x=>x[0]===pilF)||[])[1]||'')+' \u00b7 '+pilFiltrees.length):(pilEps.length+' \u00e9preuve(s)'),
       pilToutes:()=>this.setState({pilFiltre:''}),
       pilToutesStyle:pilF?'margin-left:auto;background:none;border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
-      pilDelais:[['validation','Relecture','D\u00e9lai laiss\u00e9 aux relecteurs apr\u00e8s la soumission.'],['remplacement','Version corrig\u00e9e','D\u00e9lai laiss\u00e9 \u00e0 l\u2019auteur apr\u00e8s un ajustement ou un rejet.']]
+      pilDelais:[['validation','Relecture','D\u00e9lai laiss\u00e9 aux relecteurs apr\u00e8s la soumission.'],['remplacement','Version corrig\u00e9e','D\u00e9lai laiss\u00e9 \u00e0 l\u2019auteur apr\u00e8s un ajustement ou un rejet.'],['sujet','Sujet \u00e0 remettre','Jours AVANT l\u2019\u00e9preuve o\u00f9 le sujet doit partir en relecture.'],['copies','Copies corrig\u00e9es','Jours APR\u00c8S l\u2019\u00e9preuve pour rendre les copies.'],['corrige','Corrig\u00e9 aux \u00e9l\u00e8ves','Jours APR\u00c8S l\u2019\u00e9preuve pour remettre le corrig\u00e9.']]
         .map(([k,l,a2])=>({label:l,aide:a2,valeur:String(pilDel[k]),
           set:e=>{const v=Math.max(1,Math.min(60,parseInt(val(e),10)||0));if(!v)return;majAdmin({delais:{...(ADM.delais||{}),[k]:v}});}})),
       pilMois:pilMoisL};
@@ -10459,6 +10641,14 @@ class Component extends DCLogic {
       chipLabel:'\u00c9ch\u00e9ance',
       open:()=>this.setState(x.genre==='cours'?{activeCoursId:x.id,screen:'cours'}:{activeId:x.id,screen:'composeur'},
         ()=>{this._persist();window.scrollTo(0,0);})}));
+    st.epreuves.filter(e=>e&&e.demande&&e.demande.etat==='attente'&&e.ownerId===me.id&&e.status==='brouillon').forEach(e=>{
+      const u=st.users.find(x=>x.id===e.demande.par)||{name:'Un collègue'};const att=(e.jalons||{}).sujet;
+      gTraiter.push({avatar:this._av(u,32),initials:this._initials(u.name),
+        textEl:this._mentionEl(u.name+' vous demande un sujet : « '+(e.title||'Épreuve')+' »'+(att?', attendu le '+this._fmtIso(att,{day:'numeric',month:'long'}):'')),
+        ago:this._ago(e.demande.le||0),
+        chip:'font-size:10.5px;font-weight:700;font-family:Poppins;color:var(--cffffff,#fff);background:var(--c7c3aed,#7c3aed);padding:3px 10px;border-radius:999px;flex:none',
+        chipLabel:'Demande',
+        open:()=>this.setState({activeId:e.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);})});});
     st.epreuves.filter(e=>e.status==='relecture').forEach(e=>gTraiter.push({
       avatar:this._av(st.users.find(u=>u.id===e.ownerId)||{name:'?'},32),
       initials:this._initials((st.users.find(u=>u.id===e.ownerId)||{name:'?'}).name),
@@ -10539,7 +10729,7 @@ class Component extends DCLogic {
        de l'écran Activité, et les échéances urgentes pas encore vues (une
        échéance qui passe de « demain » à « en retard » revient). */
     const notifVu=st.notifVu||{ts:0,ech:[]};
-    const cleEch=x=>x.genre+':'+x.id+':'+x.urgence.cle;
+    const cleEch=x=>x.genre+':'+x.id+(x.jalon?'#'+x.jalon:'')+':'+x.urgence.cle;
     const nbNotif=acts.filter(a=>a.userId!==me.id&&(a.ts||0)>(notifVu.ts||0)).length
       +echeancesUrgentes.filter(x=>(notifVu.ech||[]).indexOf(cleEch(x))<0).length;
     /* LA CARTE JUMELLE DE L'ACCUEIL (contre-expertise du 27/10/2026). Le
@@ -10725,7 +10915,7 @@ class Component extends DCLogic {
       {a:'var(--c7b52c7,#7b52c7)',t:'var(--cefe8fa,#efe8fa)'}];
     const plansView=this.plans.map((p,ip)=>{const isCur=p.name===curPlanName;const th=THEMES_PLAN[ip%THEMES_PLAN.length];return{name:p.name,price:p.price,period:p.period,seats:p.seats,
       carte:'background:linear-gradient(180deg,'+th.t+' 0,var(--cffffff,#fff) 170px);border:2px solid '+(isCur?th.a:'var(--ce2eaf3,#e2eaf3)')+';border-top:5px solid '+th.a+';border-radius:16px;padding:24px 22px;display:flex;flex-direction:column;box-shadow:0 3px 12px rgba(20,55,95,.06);animation:popIn .34s ease both',
-      titleColor:th.a,currentChip:isCur?'font-size:10px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,features:p.features.map(f=>({label:f,icon:this._icon('check','var(--cffffff,#fff)',12),check:'display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:'+th.a+';flex:none;margin-top:1px'})),cta:isCur?'Plan actuel':'Choisir ce plan',btn:isCur?'background:var(--ceef2f7,#eef2f7);color:var(--c8b97a8,#8b97a8);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:default;font-family:Poppins':'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;font-family:Poppins',btnHover:isCur?'':'background:var(--c135a96,#135a96)',choose:()=>{if(!isCur)this.setState({payOpen:true,paySelected:p.id,payDone:false,payCode:this._codeAmiRetenu(),payCodeMsg:'',payCodeOk:false,payRemise:0,payMontant:0,payBase:0},()=>{if(this.state.payCode)this._verifierCodeAmi();});}};});
+      titleColor:th.a,currentChip:isCur?'font-size:10px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,features:p.features.map(f=>({label:f,icon:this._icon('check','var(--cffffff,#fff)',12),check:'display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:'+th.a+';flex:none;margin-top:1px'})),cta:isCur?'Plan actuel':'Choisir ce plan',btn:isCur?'background:var(--ceef2f7,#eef2f7);color:var(--c8b97a8,#8b97a8);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:default;font-family:Poppins':'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;font-family:Poppins',btnHover:isCur?'':'background:var(--c135a96,#135a96)',choose:()=>{if(!isCur)this.setState({payOpen:true,paySelected:p.id,payDone:false,payMotif:'',payCode:this._codeAmiRetenu(),payCodeMsg:'',payCodeOk:false,payRemise:0,payMontant:0,payBase:0},()=>{if(this.state.payCode)this._verifierCodeAmi();});}};});
     const payPlan=this.plans.find(p=>p.id===st.paySelected)||this.plans[1];
     /* CODE AMI — la remise ne vaut que pour le plan sur lequel le serveur l'a
        accordee. Changer de plan dans la meme fenetre la rend caduque : sans ce
@@ -11053,8 +11243,9 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       payCheckIcon:this._icon('check','var(--c1f9d55,#1f9d55)',30),
       /* On referme AVEC la remise : la garder ferait rouvrir la fenetre sur un
          prix remise que plus rien n'a valide cote serveur. */
-      closePay:()=>this.setState({payOpen:false,payDone:false,payCode:'',payCodeMsg:'',
-        payCodeOk:false,payRemise:0,payMontant:0,payBase:0}),
+      closePay:()=>this._fermerPaiement(),
+      payMotif:st.payMotif||'',
+      payMotifStyle:st.payMotif?'margin:0;padding:12px 26px;font-size:12.5px;line-height:1.5;font-weight:600;color:var(--c8a5a00,#8a5a00);background:var(--cfff7e6,#fff7e6);border-bottom:1px solid var(--cf0d9b0,#f0d9b0)':'display:none',
       confirmPay:()=>this._payerCamerpay(),
       epreuveSeries:this.epreuveSeries.map(s=>({code:s.code,cycle:s.cycle,name:s.name,structure:s.structure,duree:s.duree,coeff:s.coeff,create:()=>{const me=this._me();const id='e'+Date.now();const ep={id,groupeId:grpActif.id,title:s.name,etab:'',classe:(s.classes&&s.classes[0])||'',duree:s.duree,coeff:s.coeff==='—'?'':s.coeff,date:'',epreuveCode:s.code,consigne:'Lis attentivement le(s) texte(s) puis réponds aux questions.',textIds:[],status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),comments:[],activity:[{userId:me.id,text:'a créé une épreuve à partir du gabarit '+s.code,ts:Date.now()}]};this.setState(st2=>({epreuves:[ep,...st2.epreuves],activeId:id,screen:'composeur'}),()=>{this._persist();window.scrollTo(0,0);});}})),
       setCoTitle:e=>{if(cActive&&!cLocked)this._updateCours({title:val(e)});},
@@ -11064,7 +11255,13 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       coUnlock:()=>this._updateCours({status:'brouillon',inLibrary:false},'a déverrouillé le cours'),
       stats:this.stats||{total:0,authors:0,corpus:0,evalC:0},cycleCards,recentEpreuves,libraryCount:st.epreuves.filter(e=>e.inLibrary).length,
       liveStrip:(()=>{const other=st.users.find(u=>u.id!==me.id&&u.role!=='Élève (lecture seule)');const rel=st.epreuves.find(e=>e.status==='relecture');return (other?other.name.replace(/^(M\.|Mme|Mlle)\s+/,''):'Un collègue')+(rel?' travaille sur « '+rel.title+' »':' est en ligne')+' · '+st.users.filter(u=>u.id!==me.id).length+' collègues actifs';})(),
-      todos:(()=>{const t=[];st.epreuves.filter(e=>(e.status==='ajustement'||e.status==='rejete')&&e.ownerId===me.id).forEach(e=>{const d=this._revueDe(e).decisions.filter(x=>x.verdict!=='valide').slice(-1)[0];t.push({dot:e.status==='rejete'?'var(--cc0392b,#c0392b)':'var(--cc26a12,#c26a12)',textEl:this._mentionEl((e.status==='rejete'?'Rejetée':'Ajustement demandé')+' : « '+e.title+' »'+(d&&d.motif?' \u2014 '+d.motif.slice(0,90):'')),ago:this._ago(e.updatedAt)});});st.epreuves.filter(e=>e.status==='relecture').forEach(e=>t.push({dot:'var(--cf39200,#f39200)',textEl:this._mentionEl('À relire : « '+e.title+' » attend une validation'),ago:this._ago(e.updatedAt)}));st.cours.filter(c=>c.status==='relecture').forEach(c=>t.push({dot:'var(--c7b52c7,#7b52c7)',textEl:this._mentionEl('Cours en relecture : « '+(c.title||'sans titre')+' »'),ago:this._ago(c.updatedAt)}));if(!t.length)t.push({dot:'var(--c1f9d55,#1f9d55)',textEl:this._mentionEl('Rien à traiter pour le moment. Tout est à jour.'),ago:''});return t.slice(0,4);})(),
+      todos:(()=>{const t=[];
+        /* Demandes de sujet reçues (lot N) et jalons du calendrier en retard
+           ou imminents (lot M) : c'est ce qu'il faut faire d'abord. */
+        st.epreuves.filter(e=>e&&e.demande&&e.demande.etat==='attente'&&e.ownerId===me.id&&e.status==='brouillon').forEach(e=>{const u=st.users.find(x=>x.id===e.demande.par)||{name:'Un collègue'};const att=(e.jalons||{}).sujet;
+          t.push({dot:'var(--c7c3aed,#7c3aed)',textEl:this._mentionEl(u.name+' vous demande un sujet : « '+(e.title||'Épreuve')+' »'+(att?', attendu le '+this._fmtIso(att,{day:'numeric',month:'long'}):'')),ago:this._ago(e.demande.le||0)});});
+        this._echeances().filter(x=>x.jalon&&x.urgence&&x.urgence.poids<=2).slice(0,3).forEach(x=>t.push({dot:x.urgence.couleur,textEl:this._mentionEl(x.titre+' — '+x.urgence.libelle),ago:''}));
+        st.epreuves.filter(e=>(e.status==='ajustement'||e.status==='rejete')&&e.ownerId===me.id).forEach(e=>{const d=this._revueDe(e).decisions.filter(x=>x.verdict!=='valide').slice(-1)[0];t.push({dot:e.status==='rejete'?'var(--cc0392b,#c0392b)':'var(--cc26a12,#c26a12)',textEl:this._mentionEl((e.status==='rejete'?'Rejetée':'Ajustement demandé')+' : « '+e.title+' »'+(d&&d.motif?' \u2014 '+d.motif.slice(0,90):'')),ago:this._ago(e.updatedAt)});});st.epreuves.filter(e=>e.status==='relecture').forEach(e=>t.push({dot:'var(--cf39200,#f39200)',textEl:this._mentionEl('À relire : « '+e.title+' » attend une validation'),ago:this._ago(e.updatedAt)}));st.cours.filter(c=>c.status==='relecture').forEach(c=>t.push({dot:'var(--c7b52c7,#7b52c7)',textEl:this._mentionEl('Cours en relecture : « '+(c.title||'sans titre')+' »'),ago:this._ago(c.updatedAt)}));if(!t.length)t.push({dot:'var(--c1f9d55,#1f9d55)',textEl:this._mentionEl('Rien à traiter pour le moment. Tout est à jour.'),ago:''});return t.slice(0,4);})(),
       dashActivity:notifications.slice(0,4),
       newDraft:()=>{this._creerEpreuve(id=>this.setState({activeId:id,screen:'composeur'},()=>window.scrollTo(0,0)));},
       /* Base vide et filtres trop etroits sont deux pannes differentes : le
@@ -11583,6 +11780,8 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       genBtnSec:'background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c14375f,#14375f);padding:8px 13px;font-size:12px;font-weight:600;font-family:Poppins;border-radius:999px;cursor:pointer',
       genBtnSecEdit:perm.edit?'background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);color:var(--c5a6678,#5a6678);padding:8px 13px;font-size:12px;font-weight:600;font-family:Poppins;border-radius:999px;cursor:pointer':hidden,
       ajouterSujet:()=>{if(perm.edit)this._ensureDraft(()=>this._ajouterSujet());},
+      sujetAjoutLabel:(active&&(active.sujets||[]).some(x=>x&&x.genre!=='presentation'))?'＋ Ajouter un autre sujet':'＋ Ajouter un sujet (production écrite, dissertation…)',
+      sujetAjoutStyle:(perm.edit&&active)?'display:block;width:100%;margin:0 0 22px;background:var(--cffffff,#fff);border:1.5px dashed var(--ccdd9e6,#cdd9e6);color:var(--c1f9d55,#1f9d55);padding:11px 14px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:12px;cursor:pointer;text-align:center':'display:none',
       genToggleCorrige:()=>this.setState({genCorrigeVisible:!st.genCorrigeVisible}),
       genCorrigeLabel:st.genCorrigeVisible?'Masquer le corrigé':'Afficher le corrigé',
       genToggleWord:()=>this.setState({genCorrigeWord:st.genCorrigeWord===false}),
@@ -12382,7 +12581,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           accSemaineBouton:cls0?'Voir le suivi':'Choisir mes classes',
           accSemaineAller:()=>this._go(cls0?'suivi':'progressions')});
         if(!(ready&&st.screen==='suivi'))return Object.assign(vals,{suiviVideStyle:hidden,suiviCorpsStyle:hidden,suiviTuiles:[],suiviHorizons:[],suiviClasses:[],suiviClasse:'',setSuiviClasse:()=>{},suiviRetardsBasculer:()=>{},suiviRetardsStyle:hidden,
-          suiviVueListe:()=>{},suiviVueMois:()=>{},suiviVueListeStyle:hidden,suiviVueMoisStyle:hidden,suiviEnListe:false,suiviEnMois:false,suiviAucuneStyle:hidden,suiviGroupes:[],moisPrec:()=>{},moisSuiv:()=>{},moisTitre:'',moisEntetes:[],moisJours:[],
+          suiviVueListe:()=>{},suiviVueMois:()=>{},suiviVueListeStyle:hidden,suiviVueMoisStyle:hidden,suiviEnListe:false,suiviEnMois:false,suiviVueCouv:()=>{},suiviVueCouvStyle:hidden,suiviEnCouv:false,couvGroupes:[],suiviVueDem:()=>{},suiviVueDemStyle:hidden,suiviEnDem:false,suiviAucuneStyle:hidden,suiviGroupes:[],moisPrec:()=>{},moisSuiv:()=>{},moisTitre:'',moisEntetes:[],moisJours:[],
           suiviVueAnnee:()=>{},suiviVueAnneeStyle:hidden,suiviEnAnnee:false,anMois:[],moisEntetesCourts:[]});
         const hz=+(st.suiviHorizon||60);
         const fin=this._isoPlus(auj,hz>=365?400:hz);
@@ -12416,9 +12615,30 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
             style:'min-height:64px;border-radius:8px;padding:4px 5px;overflow:hidden;border:1px solid '+(iso===auj?'var(--cf39200,#f39200)':'var(--ceef2f7,#eef2f7)')+';background:'+(!dans?'transparent':vac?'var(--cf2f6fb,#f2f6fb)':we?'var(--cfbfcfe,#fbfcfe)':'var(--cffffff,#fff)')+(dans?'':';opacity:.45'),
             numStyle:'font-size:11.5px;font-weight:700;font-family:Poppins;color:'+(fer.length?'var(--cc0392b,#c0392b)':iso===auj?'var(--cf39200,#f39200)':'var(--c22303f,#22303f)')});}
         const decaler=n=>()=>{const d=new Date(moisIso+'-01T00:00:00');d.setMonth(d.getMonth()+n);this.setState({suiviMois:this._isoDe(d).slice(0,7)});};
+        /* Couverture (lot L) : une ligne par séquence de mes classes. */
+        const couvGroupes=vue!=='couv'?[]:mes.map(id=>this._progClasse(id)).filter(c=>c&&(!filtreC||c.id===filtreC)).map(cls=>{
+          let passees=0,evaluees=0;
+          const lignes=cls.sequences.map(sq=>{
+            const w5=(sq.semaines||[]).find(w=>w.n===5)||{};
+            const ep=(st.epreuves||[]).find(e=>e&&e.assistant&&e.assistant.progId===cls.id&&String(e.assistant.progSeq)===String(sq.num))||null;
+            const passee=!!(w5.debut&&w5.debut<=auj);
+            if(passee){passees++;if(ep)evaluees++;}
+            const valide=!!(ep&&ep.status==='valide');const c=valide?['var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)',ep.inLibrary?'sujet diffusé':'sujet validé']:ep?['var(--cc26a12,#c26a12)','var(--cfdefdb,#fdefdb)',passee?'évaluée · sujet non validé':({brouillon:'en préparation',relecture:'en relecture',ajustement:'ajustement demandé',rejete:'rejeté'}[ep.status]||'en préparation')]:passee?['var(--cc0392b,#c0392b)','var(--cfdecea,#fdecea)','non évaluée']:['var(--c5a6678,#5a6678)','var(--cf2f6fb,#f2f6fb)','à venir'];
+            const contenus=(!ep&&passee)?this._contenusSeq(sq,3).slice(0,4):[];
+            const agirLabel=ep?'Ouvrir':(passee?'Évaluer':'Préparer');
+            return{num:sq.num,date:w5.debut?'évaluation '+fmtL(w5.debut):'',titre:sq.module||('Séquence '+sq.num),
+              sous:ep?('« '+(ep.title||'Épreuve')+' »'):contenus.length?'Contenus non évalués : '+contenus.join(' · '):'Aucune épreuve pour cette séquence',
+              sousStyle:'font-size:11.5px;margin-top:2px;line-height:1.45;color:'+(contenus.length?'var(--cc0392b,#c0392b)':'var(--c8b97a8,#8b97a8)'),
+              etat:c[2],chip:'font-size:11px;font-weight:700;font-family:Poppins;padding:3px 10px;border-radius:999px;white-space:nowrap;color:'+c[0]+';background:'+c[1],
+              agir:()=>{if(ep)this.setState({activeId:ep.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);});else this._composerSequence(cls,sq);},
+              agirLabel,agirStyle:(ep||perm.creer)?'background:'+(ep?'var(--cffffff,#fff)':'var(--c1a72bb,#1a72bb)')+';color:'+(ep?'var(--c14375f,#14375f)':'var(--cffffff,#fff)')+';border:1px solid '+(ep?'var(--ce2eaf3,#e2eaf3)':'var(--c1a72bb,#1a72bb)')+';padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden};});
+          const pc=passees?Math.round(evaluees/passees*100):0;
+          return{titre:cls.libelle,sous:passees?(evaluees+' séquence(s) évaluée(s) sur '+passees+' passée(s) · '+pc+' %'):'Aucune évaluation encore passée',
+            jaugeStyle:passees?'margin-left:auto;width:120px;height:8px;border-radius:999px;background:var(--ceef2f7,#eef2f7);overflow:hidden;display:inline-block':hidden,
+            jaugeBarre:'display:block;height:100%;width:'+pc+'%;background:'+(pc>=80?'var(--c188047,#188047)':pc>=50?'var(--cc26a12,#c26a12)':'var(--cc0392b,#c0392b)'),lignes};});
         return Object.assign(vals,{
-          suiviVideStyle:(P&&!mes.length)?'background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);border-radius:12px;padding:18px 20px;margin-bottom:12px':hidden,
-          suiviCorpsStyle:(P&&mes.length)?'':hidden,
+          suiviVideStyle:(P&&!mes.length&&vue!=='dem')?'background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);border-radius:12px;padding:18px 20px;margin-bottom:12px':hidden,
+          suiviCorpsStyle:(P&&(mes.length||vue==='dem'))?'':hidden,
           suiviTuiles:[tuile(parC.filter(x=>x.retard).length,'en retard','var(--cc0392b,#c0392b)'),
             tuile(parC.filter(x=>!x.fait&&x.date>=auj&&x.date<=this._isoPlus(auj,7)).length,'dans les 7 jours','var(--cc26a12,#c26a12)'),
             tuile(parC.filter(x=>!x.fait&&x.date>auj&&x.date<=fin).length,'à venir ('+(hz>=365?'année':hz+' j')+')','var(--c1a72bb,#1a72bb)'),
@@ -12431,6 +12651,8 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           suiviVueListe:()=>this.setState({suiviVue:'liste'}),suiviVueMois:()=>this.setState({suiviVue:'mois'}),
           suiviVueListeStyle:ong(vue==='liste'),suiviVueMoisStyle:ong(vue==='mois'),
           suiviEnListe:vue==='liste',suiviEnMois:vue==='mois',
+          suiviVueCouv:()=>this.setState({suiviVue:'couv'}),suiviVueCouvStyle:ong(vue==='couv'),suiviEnCouv:vue==='couv',couvGroupes,
+          suiviVueDem:()=>this.setState({suiviVue:'dem',demOk:''}),suiviVueDemStyle:ong(vue==='dem'),suiviEnDem:vue==='dem',
           suiviVueAnnee:()=>this.setState({suiviVue:'annee'}),suiviVueAnneeStyle:ong(vue==='annee'),suiviEnAnnee:vue==='annee',
           moisEntetesCourts:['L','M','M','J','V','S','D'],
           anMois:vue!=='annee'?[]:(()=>{
@@ -12479,6 +12701,74 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           moisTitre:d0.toLocaleDateString('fr-FR',{month:'long',year:'numeric'}),
           moisEntetes:['lun','mar','mer','jeu','ven','sam','dim'],
           moisJours:jours});
+      })(),
+      ...(()=>{
+        /* ── Calendrier de l'épreuve (lot M) et demandes de sujet (lot N) ── */
+        const auj=this._isoAuj();
+        const joursDe=iso=>Math.round((new Date(iso+'T00:00:00')-new Date(auj+'T00:00:00'))/86400000);
+        const rel=iso=>{const j=joursDe(iso);return j===0?'aujourd’hui':j===1?'demain':j===-1?'hier':j>0?'dans '+j+' j':'il y a '+(-j)+' j';};
+        const chip=(c,f)=>'font-size:10.5px;font-weight:700;font-family:Poppins;padding:2px 9px;border-radius:999px;white-space:nowrap;color:'+c+';background:'+f;
+        const recues=(st.epreuves||[]).filter(e=>e&&e.demande&&e.ownerId===me.id);
+        const envoyees=(st.epreuves||[]).filter(e=>e&&e.demande&&e.demande.par===me.id&&e.ownerId!==me.id);
+        const nAtt=recues.filter(e=>e.demande.etat==='attente'&&e.status==='brouillon').length;
+        const out={demRecuesN:nAtt||'',demBadge:nAtt?'margin-left:6px;display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 5px;border-radius:999px;background:var(--c7c3aed,#7c3aed);color:var(--cffffff,#fff);font-size:10px;font-weight:700':hidden};
+        /* Calendrier de l'épreuve active */
+        const a=active;
+        if(a&&st.screen==='composeur'){
+          const J=this._jalonsDe(a),applique=!!a.jalons,edit=perm.edit;
+          const dem=a.demande,parU=dem?(st.users.find(u=>u.id===dem.par)||{name:'un collègue'}):null;
+          Object.assign(out,{
+            jlBlocStyle:'background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:14px;padding:12px 16px;margin:0 0 14px',
+            jlSous:applique?'chaque date est un rappel (cloche et « À faire »)':(a.echeance?'dates proposées d’après la date de l’épreuve et les délais de l’établissement':'datez l’épreuve : les autres échéances se proposent seules'),
+            jlDemande:dem?chip(dem.etat==='refusee'?'var(--cc0392b,#c0392b)':'var(--c7c3aed,#7c3aed)',dem.etat==='refusee'?'var(--cfdecea,#fdecea)':'var(--cf1ebfe,#f1ebfe)'):hidden,
+            jlDemandeTexte:dem?(dem.etat==='refusee'?'Demande déclinée':'Demandé par '+parU.name):'',
+            jlAppliquer:()=>{if(edit)this._appliquerJalons();},
+            jlAppliquerLabel:applique?'Recalculer les dates vides':'Appliquer ces dates',
+            jlAppliquerStyle:(edit&&J.some(j=>j.k!=='epreuve'&&j.date&&!(a.jalons||{})[j.k]))?'margin-left:auto;background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
+            jalons:J.map(j=>{const propose=j.k!=='epreuve'&&!(a.jalons||{})[j.k]&&!!j.date;const jr=j.date?joursDe(j.date):null;
+              const c=j.fait?['var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)','fait']:!j.date?['var(--c8b97a8,#8b97a8)','var(--cf2f6fb,#f2f6fb)','sans date']
+                :jr<0?['var(--cc0392b,#c0392b)','var(--cfdecea,#fdecea)','en retard · '+rel(j.date)]:jr<=3?['var(--cc26a12,#c26a12)','var(--cfdefdb,#fdefdb)',rel(j.date)]:['var(--c1a72bb,#1a72bb)','var(--ce7f1fb,#e7f1fb)',rel(j.date)];
+              return{lib:j.lib,aide:j.aide,date:j.date||'',fige:!edit,set:e=>this._majJalon(j.k,val(e)),
+                carte:'border:1px '+(propose?'dashed':'solid')+' '+(j.fait?'var(--cbfe3cc,#bfe3cc)':'var(--ce6ecf3,#e6ecf3)')+';border-radius:10px;padding:8px 10px;background:'+(j.fait?'var(--cf4fbf6,#f4fbf6)':'var(--cfbfcfe,#fbfcfe)'),
+                etat:propose?'proposé · '+c[2]:c[2],chip:chip(c[0],c[1]),
+                basculer:()=>{if(edit&&j.manuel)this._basculerJalon(j.k);},
+                basculerLabel:j.fait?'Rouvrir':'Fait',
+                basculerStyle:(edit&&j.manuel&&j.date)?'background:none;border:1px solid var(--ce2eaf3,#e2eaf3);color:'+(j.fait?'var(--c5a6678,#5a6678)':'var(--c188047,#188047)')+';padding:2px 8px;font-size:11px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer':hidden};})});
+        }else Object.assign(out,{jlBlocStyle:hidden,jlSous:'',jlDemande:hidden,jlDemandeTexte:'',jlAppliquer:()=>{},jlAppliquerLabel:'',jlAppliquerStyle:hidden,jalons:[]});
+        /* Demandes (onglet du Suivi) */
+        const enDem=ready&&st.screen==='suivi'&&st.suiviVue==='dem';
+        const coll=(st.users||[]).filter(u=>u&&u.id!==me.id);
+        const etatDe=e=>{const d=e.demande;if(d.etat==='refusee')return['déclinée','var(--cc0392b,#c0392b)','var(--cfdecea,#fdecea)'];
+          if(e.status==='valide')return[e.inLibrary?'sujet diffusé':'sujet validé','var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)'];
+          if(e.status==='relecture'||e.status==='ajustement')return[e.status==='ajustement'?'ajustement demandé':'en relecture','var(--cc26a12,#c26a12)','var(--cfdefdb,#fdefdb)'];
+          return[(e.textIds||[]).length?'en préparation':'en attente','var(--c7c3aed,#7c3aed)','var(--cf1ebfe,#f1ebfe)'];};
+        const ligne=(e,recue)=>{const d=e.demande,att=(e.jalons||{}).sujet||'',x=etatDe(e);const autre=st.users.find(u=>u.id===(recue?d.par:e.ownerId))||{name:'?'};
+          const enRetard=att&&att<auj&&e.status==='brouillon'&&d.etat!=='refusee';const conf=st.demRefus===e.id;
+          return{date:att?'attendu '+this._fmtIso(att,{day:'numeric',month:'short'}):'sans date',rel:att?rel(att):'',
+            relStyle:'font-size:11px;margin-top:1px;color:'+(enRetard?'var(--cc0392b,#c0392b)':'var(--c8b97a8,#8b97a8)')+';font-weight:'+(enRetard?'700':'400'),
+            titre:e.title||'Épreuve',sous:(recue?'demandé par ':'demandé à ')+autre.name+(e.echeance?' · épreuve le '+this._fmtIso(e.echeance,{day:'numeric',month:'long'}):'')+(d.consignes?' · « '+d.consignes.slice(0,120)+(d.consignes.length>120?'…':'')+' »':''),
+            etat:(enRetard?'en retard · ':'')+x[0],chip:chip(enRetard?'var(--cc0392b,#c0392b)':x[1],enRetard?'var(--cfdecea,#fdecea)':x[2]),
+            ouvrir:()=>this.setState({activeId:e.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);}),
+            ouvrirLabel:recue&&d.etat!=='refusee'&&e.status==='brouillon'?'Composer':'Ouvrir',
+            refuser:()=>{if(!conf){this.setState({demRefus:e.id});return;}this._repondreDemande(e.id,'refusee');},
+            refuserLabel:conf?'Confirmer : décliner':'Décliner',
+            refuserStyle:(recue&&d.etat==='attente'&&e.status==='brouillon')?'background:'+(conf?'var(--cc0392b,#c0392b)':'var(--cffffff,#fff)')+';color:'+(conf?'var(--cffffff,#fff)':'var(--cc0392b,#c0392b)')+';border:1px solid var(--cecc4bf,#ecc4bf);padding:6px 11px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden};};
+        const tri=(x,y)=>(((x.jalons||{}).sujet||'9')<((y.jalons||{}).sujet||'9')?-1:1);
+        const sel=f=>e=>this.setState({[f]:val(e),demMsg:''});
+        return Object.assign(out,{
+          demOk:st.demOk||'',demOkStyle:enDem&&st.demOk?'font-size:12.5px;font-weight:700;color:var(--c188047,#188047);background:var(--ce6f5ec,#e6f5ec);border-radius:9px;padding:8px 12px;margin-bottom:10px':hidden,
+          demBasculer:()=>this.setState({demOuvert:!st.demOuvert,demOk:''}),demBasculerLabel:st.demOuvert?'Fermer':'Nouvelle demande',
+          demBasculerStyle:coll.length&&perm.edit?'margin-left:auto;background:'+(st.demOuvert?'var(--cffffff,#fff)':'var(--c1a72bb,#1a72bb)')+';color:'+(st.demOuvert?'var(--c14375f,#14375f)':'var(--cffffff,#fff)')+';border:1px solid '+(st.demOuvert?'var(--ce2eaf3,#e2eaf3)':'var(--c1a72bb,#1a72bb)')+';padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
+          demSansCollegueStyle:coll.length?hidden:'font-size:12.5px;color:var(--c5a6678,#5a6678);margin-top:8px',
+          demFormStyle:enDem&&st.demOuvert&&coll.length?'display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px':hidden,
+          demCollegues:coll.map(u=>({id:u.id,label:u.name+(u.role?' — '+u.role:'')})),demClasses:classeOptions,
+          demA:st.demA||'',setDemA:sel('demA'),demClasse:st.demClasse||'',setDemClasse:sel('demClasse'),
+          demType:st.demType||'',setDemType:sel('demType'),demDate:st.demDate||'',setDemDate:sel('demDate'),
+          demAttendu:st.demAttendu||'',setDemAttendu:sel('demAttendu'),demConsignes:st.demConsignes||'',setDemConsignes:sel('demConsignes'),
+          demEnvoyer:()=>this._envoyerDemande(),demMsg:st.demMsg||'',demMsgStyle:st.demMsg?'font-size:12px;font-weight:700;color:var(--cc0392b,#c0392b)':hidden,
+          demListes:!enDem?[]:[
+            {titre:'Reçues',sous:recues.length?recues.length+' demande(s)'+(nAtt?' · '+nAtt+' à traiter':''):'',vide:'Aucune demande reçue.',videStyle:recues.length?hidden:'font-size:12.5px;color:var(--c8b97a8,#8b97a8);padding:6px 2px',lignes:recues.slice().sort(tri).map(e=>ligne(e,true))},
+            {titre:'Envoyées',sous:envoyees.length?envoyees.length+' demande(s)':'',vide:'Aucune demande envoyée.',videStyle:envoyees.length?hidden:'font-size:12.5px;color:var(--c8b97a8,#8b97a8);padding:6px 2px',lignes:envoyees.slice().sort(tri).map(e=>ligne(e,false))}]});
       })(),
       ...(()=>{
         const P=this._progs();
@@ -12783,8 +13073,8 @@ window.VRT_PDFV = (function () {
       </div>
     </div>
   </footer>
-<script src="/assets/veritas-harmonie.js?v=1.20.62.34" defer></script>
-<script src="/assets/vitrine.js?v=1.20.62.34" defer></script>
+<script src="/assets/veritas-harmonie.js?v=1.20.63.34" defer></script>
+<script src="/assets/vitrine.js?v=1.20.63.34" defer></script>
 <!--/vrt-habillage:pied-->
 </body>
 </html>

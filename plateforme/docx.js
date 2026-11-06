@@ -207,7 +207,7 @@
 
     var ROMAINS = ['I', 'II', 'III', 'IV', 'V', 'VI'];
     function pointsDe(v) {
-      return (v == null || v === '') ? '' : '   (' + v + ' point' + (parseFloat(v) > 1 ? 's' : '') + ')';
+      return (v == null || v === '') ? '' : '   (' + String(v).replace('.', ',') + ' point' + (parseFloat(v) > 1 ? 's' : '') + ')';
     }
     /* Un texte support : son en-tête (« TEXTE 1 · 391 mots » par défaut, ou
        l'intitulé d'un SUJET quand l'épreuve se compose de sujets au choix),
@@ -248,11 +248,11 @@
        du sujet (commentaire composé) DANS le sujet, avant sa consigne. */
     (ep.sujets || []).forEach(function (s) {
       if (s.genre === 'presentation') {
-        corps.push(p('Présentation de la copie' + (s.pts ? ' : ' + s.pts + ' pts' : ''),
+        corps.push(p('Présentation de la copie' + (s.pts ? ' : ' + String(s.pts).replace('.', ',') + ' pts' : ''),
           { italique: true, taille: 20, couleur: '5A6678', espaceAvant: 160, espaceApres: 60 }));
         return;
       }
-      var entete = s.entete || ((s.auChoix ? 'SUJET AU CHOIX — ' : '') + String(s.titre || 'Sujet').toUpperCase() + (s.pts ? '  ·  ' + s.pts + ' pts' : ''));
+      var entete = s.entete || ((s.auChoix ? 'SUJET AU CHOIX — ' : '') + String(s.titre || 'Sujet').toUpperCase() + (s.pts ? '  ·  ' + String(s.pts).replace('.', ',') + ' pts' : ''));
       if (s.support) {
         blocTexte(entete, s.support);
         corps.push(p(s.texte || '', { taille: 22, align: 'both', espaceApres: 120 }));
