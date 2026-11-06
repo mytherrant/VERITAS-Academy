@@ -30,6 +30,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.request
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -39,6 +40,14 @@ POINT = 'https://api.indexnow.org/indexnow'
 
 
 def lire(url):
+    # Requête FRAÎCHE (06/11/2026). Sans Accept-Encoding, urllib lit la
+    # variante « identity » du cache edge de LWS — que nul navigateur ne
+    # demande — et elle peut dater de la veille : le sitemap-index lu juste
+    # après le déploiement de la #208 ne connaissait pas encore les 101
+    # scènes, qui n'ont pas été signalées. Une query non vide contourne le
+    # cache et lit le disque.
+    sep = '&' if '?' in url else '?'
+    url = '%s%sfrais=%d' % (url, sep, int(time.time()))
     req = urllib.request.Request(url, headers={'User-Agent': 'VeritasIndexNow/1.0'})
     with urllib.request.urlopen(req, timeout=30) as r:
         return r.read().decode('utf-8', 'replace')
