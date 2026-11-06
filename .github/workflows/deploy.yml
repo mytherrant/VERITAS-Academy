@@ -1039,6 +1039,7 @@ jobs:
       - name: 🔎 GEO — œuvres, Atelier, simulations, llms.txt et vitrine sont-ils à jour ?
         run: |
           node tools/oeuvres_statiques.js --controle
+          node tools/scenes_statiques.js --controle
           node tools/pages_decouverte.js --controle
           python tools/build_llms.py --controle
           python tools/geo_vitrine.py --controle

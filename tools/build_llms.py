@@ -53,6 +53,7 @@ FAITS = """\
 - Au centre ou à domicile : répétitions et soutien scolaire à Douala, devis en ligne.
 - Œuvres au programme : 21 analyses complètes en accès libre (axes de lecture, personnages, citations expliquées, procédés, questions corrigées) : https://veritas-school.com/oeuvres/
 - Enseignants : l'Atelier de Français compose avec l'IA des épreuves conformes aux 23 structures officielles du MINESEC : https://veritas-school.com/decouvrir/atelier-de-francais.html
+- Scènes vivantes : 101 scènes animées gratuites de la 6e à la Terminale (œuvres au programme avec extraits, histoire, géographie, ECM, philosophie, langues), avec ateliers et quiz : https://veritas-school.com/scenes/
 - Simulations : examen blanc chronométré (BEPC, Probatoire, BAC) et 30 laboratoires virtuels de sciences : https://veritas-school.com/decouvrir/examen-blanc-en-ligne.html · https://veritas-school.com/decouvrir/laboratoires-virtuels.html
 - Contact : WhatsApp +237 697 637 739 (https://wa.me/237697637739) · contact@veritas-school.com
 """
@@ -67,6 +68,7 @@ SECTIONS = [
     ('niveaux/sitemap-niveaux.xml', 'Programmes de français par classe', 40),
     ('ressources/sitemap-ressources.xml', 'Méthodes et examens', 40),
     ('oeuvres/sitemap-oeuvres.xml', 'Œuvres au programme', 40),
+    ('scenes/sitemap-scenes.xml', 'Scènes vivantes (simulations animées, gratuites)', 120),
     ('outils/sitemap-outils.xml', 'Outils gratuits', 40),
     ('livrets/sitemap-livrets.xml', 'Cahiers en ligne', 15),
     ('corriges/sitemap-corriges.xml', 'Corrigés', 15),
