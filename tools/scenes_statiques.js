@@ -71,7 +71,7 @@ function texteBloc(S, fichier) {
   p('<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">');
   p('<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>');
   p('<article lang="' + esc(S.langueRecit || 'fr') + '">');
-  p('<h2>' + esc(S.titre) + '</h2>');
+  p('<h1>' + esc(S.titre) + '</h1>');
   const sur = [S.discipline, niveau(S.niveau), S.oeuvre ? S.oeuvre + (S.auteur ? ' · ' + S.auteur : '') : ''].filter(Boolean).join(' · ');
   p('<p><b>' + esc(sur) + '</b></p>');
   p('<p><i>' + esc(S.avertissement || (S.oeuvre ? AVERT_OEUVRE : AVERT_LIBRE)) + '</i></p>');

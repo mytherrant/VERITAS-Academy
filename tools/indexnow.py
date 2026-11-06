@@ -76,14 +76,31 @@ def fichiers_du_push(chemin):
             ev = json.load(f)
     except (OSError, ValueError):
         return None
-    commits = ev.get('commits')
-    if not commits:
+    if not ev.get('commits'):
         return None
-    vus = set()
-    for c in commits:
-        for cle in ('added', 'modified'):
-            vus.update(c.get(cle) or [])
-    return sorted(vus)
+    # Les commits de l'événement « push » ne listent PAS leurs fichiers dans
+    # GitHub Actions (added/modified absents) : le premier envoi automatique,
+    # le 06/11/2026, a lu « 0 fichier » pour un push qui en touchait 115. On
+    # demande donc la liste à l'API « compare » entre l'avant et l'après.
+    avant, apres = ev.get('before') or '', ev.get('after') or ''
+    depot = (ev.get('repository') or {}).get('full_name') or ''
+    jeton = os.environ.get('GITHUB_TOKEN', '')
+    if not (avant.strip('0') and apres and depot):
+        return None
+    url = 'https://api.github.com/repos/%s/compare/%s...%s' % (depot, avant, apres)
+    entetes = {'Accept': 'application/vnd.github+json', 'User-Agent': 'VeritasIndexNow/1.0'}
+    if jeton:
+        entetes['Authorization'] = 'Bearer ' + jeton
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=entetes), timeout=30) as r:
+            comp = json.loads(r.read().decode('utf-8'))
+    except Exception as e:  # API indisponible : on signale tout le site plutôt que rien
+        print('indexnow : comparaison GitHub impossible (%s) — tout le site sera signalé.' % e)
+        return None
+    fichiers = comp.get('files') or []
+    if len(fichiers) >= 300:  # l'API tronque la liste à 300 : on ne sait pas tout, on signale tout
+        return None
+    return sorted(f['filename'] for f in fichiers if f.get('status') in ('added', 'modified', 'renamed', 'copied'))
 
 
 def main():

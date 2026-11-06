@@ -162,9 +162,16 @@ DirectoryIndex index.php index.html
 # 5. Cache Control intelligent
 # ─────────────────────────────────────────────────────────
 <IfModule mod_headers.c>
-  # HTML : jamais mis en cache
+  # HTML : toujours REVALIDÉ, jamais servi périmé (06/11/2026).
+  # « no-cache » et non plus « no-store » : le navigateur garde une copie,
+  # la revalide à chaque visite (304 vide si rien n'a changé) et peut
+  # rouvrir la page précédente instantanément (cache « page précédente »,
+  # que no-store désactive). index.php demandait déjà no-cache ; ce bloc y
+  # ajoutait no-store et annulait le gain. Le cache SERVEUR reste coupé
+  # (X-LiteSpeed-Cache-Control, Surrogate-Control) : aucune version
+  # périmée ne peut être servie. Même choix que plateforme/.htaccess.
   <FilesMatch "\.(html|htm)$">
-    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Cache-Control "no-cache, must-revalidate, max-age=0"
     Header set Pragma "no-cache"
     Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
     Header set Surrogate-Control "no-store"
@@ -179,7 +186,7 @@ DirectoryIndex index.php index.html
   # rendaient le nouveau bandeau, « / » l'ancien. Le visiteur, lui, n'ouvre
   # que « / ».
   <FilesMatch "^index\.php$">
-    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Cache-Control "no-cache, must-revalidate, max-age=0"
     Header set Pragma "no-cache"
     Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
     Header set X-LiteSpeed-Cache-Control "no-cache"
@@ -197,9 +204,12 @@ DirectoryIndex index.php index.html
     Header set Pragma "no-cache"
   </FilesMatch>
 
-  # Sitemap/robots : cache 1 jour
+  # Sitemap/robots/llms.txt : cache 1 heure (06/11/2026 ; 1 jour avant).
+  # Le cache edge de LWS respecte ce max-age : avec 86400, un sitemap ou un
+  # robots.txt neuf restait invisible aux moteurs jusqu'au lendemain du
+  # déploiement (constaté le 06/11 : robots.txt de la veille, HIT).
   <FilesMatch "\.(xml|txt)$">
-    Header set Cache-Control "public, max-age=86400"
+    Header set Cache-Control "public, max-age=3600"
   </FilesMatch>
 </IfModule>
 

@@ -2397,6 +2397,8 @@ jobs:
         if: success()
         continue-on-error: true
         run: python tools/indexnow.py --evenement "$GITHUB_EVENT_PATH"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: 🔁 Rappel — version du Service Worker
         if: always()
