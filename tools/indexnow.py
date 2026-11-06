@@ -13,9 +13,18 @@ le moteur la relit pour vérifier que l'envoi vient bien du propriétaire.
 
     python tools/indexnow.py            # envoie toutes les adresses des sitemaps EN PRODUCTION
     python tools/indexnow.py --essai    # liste ce qui serait envoyé, n'envoie rien
+    python tools/indexnow.py --evenement "$GITHUB_EVENT_PATH"
+                                        # seulement les pages touchées par ce push
 
-N'est PAS lancé par la CI : un envoi doit suivre un déploiement réussi, et
-l'adresse de la clé doit déjà répondre en production.
+LANCÉ PAR LA CI DEPUIS LE 06/11/2026, APRÈS un déploiement réussi (deploy.yml,
+étape « 📣 Signaler les pages neuves »). Jacques devait le lancer à la main
+depuis son PC, et ne pouvait pas le faire depuis une session cloud (pas
+d'accès au site) : chaque page publiée attendait donc le passage spontané
+de Bing. Avec --evenement, on lit dans l'événement « push » de GitHub les
+fichiers ajoutés ou modifiés, on les traduit en adresses, et on ne garde que
+celles qui figurent dans les sitemaps EN PRODUCTION : IndexNow demande de
+signaler ce qui a changé, pas tout le site à chaque fois. Sans liste de
+commits (lancement manuel du workflow), tout le site est signalé.
 """
 import json
 import os
@@ -46,12 +55,53 @@ def adresses():
     return urls
 
 
+def url_du_fichier(rel):
+    """Chemin du dépôt → adresse publique. vitrine.html est servie sur « / »
+    (index.php) ; un index.html, sur son dossier."""
+    rel = rel.replace('\\', '/').lstrip('./')
+    if rel == 'vitrine.html':
+        return BASE
+    if not rel.endswith('.html'):
+        return None
+    if rel == 'index.html' or rel.endswith('/index.html'):
+        rel = rel[:-len('index.html')]
+    return BASE + rel
+
+
+def fichiers_du_push(chemin):
+    """Fichiers ajoutés ou modifiés par les commits de l'événement « push ».
+    None quand l'événement n'en porte pas (lancement manuel) : tout le site."""
+    try:
+        with open(chemin, encoding='utf-8') as f:
+            ev = json.load(f)
+    except (OSError, ValueError):
+        return None
+    commits = ev.get('commits')
+    if not commits:
+        return None
+    vus = set()
+    for c in commits:
+        for cle in ('added', 'modified'):
+            vus.update(c.get(cle) or [])
+    return sorted(vus)
+
+
 def main():
     cle = open(os.path.join(RACINE, 'indexnow.txt'), encoding='utf-8').read().strip()
     en_ligne = lire(BASE + 'indexnow.txt').strip()
     if en_ligne != cle:
         sys.exit("indexnow : la clé servie en production ne correspond pas à indexnow.txt — déployer d'abord.")
     urls = adresses()
+    if '--evenement' in sys.argv:
+        i = sys.argv.index('--evenement')
+        fichiers = fichiers_du_push(sys.argv[i + 1]) if i + 1 < len(sys.argv) else None
+        if fichiers is not None:
+            touchees = {url_du_fichier(f) for f in fichiers} - {None}
+            urls = [u for u in urls if u in touchees]
+            print('indexnow : %d fichier(s) dans ce push, %d page(s) publique(s) concernée(s)' % (len(fichiers), len(urls)))
+            if not urls:
+                print('indexnow : aucune page publique touchée — rien à signaler.')
+                return
     print('indexnow : %d adresse(s) à signaler' % len(urls))
     if '--essai' in sys.argv:
         for u in urls[:10]:
