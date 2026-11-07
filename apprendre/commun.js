@@ -188,8 +188,8 @@
       if (f.querySelector(".btn-img")) return;
       var svg = f.querySelector("svg:not(.pic)"); if (!svg) return;
       var cap = f.querySelector("figcaption"), titre = (cap && cap.textContent) || (f.querySelector(".anim-t") || {}).textContent || document.title.split(" | ")[0];
-      var b = document.createElement("button"); b.type = "button"; b.className = "btn-img"; b.innerHTML = pic("importer", 15) + " Enregistrer l'image";
-      b.title = "Image PNG avec filigrane VÉRITAS";
+      var b = document.createElement("button"); b.type = "button"; b.className = "btn-img"; b.innerHTML = pic("importer", 12) + "Image";
+      b.title = "Enregistrer l'image (PNG avec filigrane VÉRITAS)"; b.setAttribute("aria-label", "Enregistrer l'image");
       b.addEventListener("click", function () { var s = f.querySelector("svg:not(.pic)"); if (s) exporterImage(s, titre); });
       (f.classList.contains("anim") ? f.querySelector(".anim-c") || f : f).appendChild(b);
     });

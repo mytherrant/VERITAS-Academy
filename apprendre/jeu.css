@@ -11,9 +11,13 @@
   body{padding-bottom:28px}
   .btn-img,.kalao-bulle,.jeu-toasts,.niveau-chip,.quiz-barre,.objectif-z,.progression{display:none!important}
 }
-.btn-img{display:inline-flex;align-items:center;gap:6px;margin:10px auto 0;border:1px solid #E6EAF2;background:#fff;color:#1E499B;border-radius:999px;padding:6px 12px;font:500 12.5px var(--sans);cursor:pointer}
-figure.illus .btn-img{display:flex}
-.btn-img:hover{border-color:#9FBEEA;background:#EDF2FB}
+/* bouton discret : petite pastille dans le coin du schéma, estompée jusqu'au survol */
+figure.illus,.anim-c{position:relative}
+.btn-img{position:absolute;top:8px;right:8px;z-index:2;display:inline-flex;align-items:center;gap:4px;margin:0;border:1px solid #E6EAF2;background:rgba(255,255,255,.92);color:#6B7287;border-radius:999px;padding:3px 9px 3px 7px;font:500 11px/1 var(--sans);cursor:pointer;opacity:.55;transition:opacity .15s,color .15s,border-color .15s}
+.btn-img .pic,figure.illus .btn-img svg,.anim .btn-img svg{width:12px!important;height:12px!important;max-height:none;flex:0 0 12px}
+figure.illus:hover .btn-img,.anim:hover .btn-img,.btn-img:focus-visible{opacity:1}
+.btn-img:hover{color:#1E499B;border-color:#9FBEEA}
+@media (hover:none){.btn-img{opacity:.85}}
 
 /* ════════ Pastille de niveau (barre du haut) ════════ */
 .niveau-chip{display:inline-flex;align-items:center;gap:8px;text-decoration:none;background:#fff;border:1px solid #E6EAF2;border-radius:999px;padding:3px 12px 3px 3px;color:#001136;transition:border-color .15s}
