@@ -1,0 +1,1833 @@
+/* VÉRITAS — Apprendre : registre des leçons rédigées (fichier généré : ne pas éditer lecons.js à la main,
+   éditer apprendre/_src/*.js puis reconstruire avec tools/build_apprendre.sh). */
+window.VRT_LECONS = {};
+function VRT_L(id, o) { o.ordre = Object.keys(window.VRT_LECONS).length; window.VRT_LECONS[id] = o; }
+/* Animation / schéma manipulable rattaché à la partie i d'une leçon. fn(el) dessine dans el. */
+function VRT_A(id, i, titre, fn) { var L = window.VRT_LECONS[id]; if (L && L.parties[i]) { L.parties[i].anim = fn; L.parties[i].animT = titre; } }
+
+/* Leçons rédigées VÉRITAS — sciences (maths, PCT, SVT, informatique).
+   cle = morceau du titre officiel de la progression MINESEC 2026-2027 (rattachement automatique). */
+VRT_L("3e-maths-thales", {
+  c: "3e", m: "maths", cle: "Propriété directe de Thalès", titre: "La propriété de Thalès dans le triangle", duree: 20,
+  accroche: "Mesurer la hauteur d'un arbre sans y grimper : c'est Thalès.",
+  intro: "Comment mesurer la hauteur d'un manguier de la cour sans grimper dedans ? Avec un bâton, son ombre et la propriété de Thalès.",
+  objectifs: ["reconnaître une configuration de Thalès", "écrire l'égalité des trois rapports", "calculer une longueur inconnue"],
+  parties: [
+    { t: "La configuration de Thalès", html:
+      "<p>On a un triangle <strong>ABC</strong>. Un point <strong>M</strong> est sur le côté [AB], un point <strong>N</strong> sur le côté [AC], et la droite (MN) est <strong>parallèle</strong> à (BC).</p>" +
+      "<div class='attention'><b>Condition indispensable</b>Sans le parallélisme de (MN) et (BC), on n'a pas le droit d'utiliser la propriété.</div>",
+      illus: { legende: "(MN) est parallèle à (BC) : le petit triangle AMN est une « réduction » du grand triangle ABC.", svg:
+      "<svg viewBox='0 0 420 250' role='img' aria-label='Triangle ABC coupé par la droite MN parallèle à BC'><path d='M60 220 L360 220 L150 30 Z' fill='#DBE8FE' stroke='#142554' stroke-width='2.5' stroke-linejoin='round'/><path d='M150 30 L96 138 L246 138 Z' fill='#FFC93C' fill-opacity='.45'/><line x1='60' y1='138' x2='330' y2='138' stroke='#1E499B' stroke-width='2.5' stroke-dasharray='7 6'/><g fill='#142554' font-size='18' font-weight='700'><text x='142' y='22'>A</text><text x='40' y='238'>B</text><text x='366' y='238'>C</text><text x='74' y='134'>M</text><text x='252' y='134'>N</text></g><g fill='#142554'><circle cx='96' cy='138' r='4'/><circle cx='246' cy='138' r='4'/></g><text x='334' y='133' fill='#1E499B' font-size='14'>(MN) // (BC)</text></svg>" } ,
+      retenir: "Deux points sur deux côtés + une parallèle au troisième côté : c'est la configuration de Thalès." },
+    { t: "La propriété directe", html:
+      "<div class='def'><b>Propriété</b>Si M ∈ [AB], N ∈ [AC] et (MN) // (BC), alors les longueurs des côtés des triangles AMN et ABC sont proportionnelles :</div>" +
+      "<p class='formule'>AM / AB = AN / AC = MN / BC</p>" +
+      "<div class='astuce'><b>Astuce</b>On écrit toujours le <strong>petit triangle en haut</strong> et le <strong>grand triangle en bas</strong>, en partant du sommet commun A.</div>" + "<div class='savais'><b>Le savais-tu ?</b>On raconte que Thalès de Milet, mathématicien grec du VIᵉ siècle avant J.-C., aurait mesuré la hauteur d'une pyramide d'Égypte grâce à son ombre.</div>",
+      retenir: "Petit triangle sur grand triangle, sommet commun en premier." },
+    { t: "Calculer une longueur", html:
+      "<div class='ex'><b>Exemple</b>AM = 3 cm, AB = 5 cm, BC = 8 cm et (MN) // (BC). Calculer MN.</div>" +
+      "<ol><li>On vérifie la configuration : M ∈ [AB], N ∈ [AC], (MN) // (BC).</li><li>On écrit l'égalité utile : AM / AB = MN / BC, soit 3 / 5 = MN / 8.</li><li>Produit en croix : MN = 3 × 8 ÷ 5 = <strong>4,8 cm</strong>.</li></ol>" +
+      "<h3>L'arbre et son ombre</h3><p>Un bâton de 1,5 m projette une ombre de 2 m ; au même moment, l'ombre du manguier mesure 12 m. Les rayons du soleil sont parallèles, donc : hauteur du manguier = 1,5 × 12 ÷ 2 = <strong>9 m</strong>.</p>",
+      retenir: "On n'écrit que les deux rapports qui contiennent la longueur cherchée et deux longueurs connues." }
+  ],
+  revision: ["Configuration : M sur [AB], N sur [AC], <strong>(MN) // (BC)</strong>.", "Égalité : <strong>AM/AB = AN/AC = MN/BC</strong>.", "Petit triangle en haut, grand en bas.", "On termine par un produit en croix.", "La réciproque sert à <strong>prouver</strong> que deux droites sont parallèles."],
+  exo: "<p>Dans un triangle EFG, R ∈ [EF] et S ∈ [EG] avec (RS) // (FG). ER = 4 cm, EF = 10 cm, EG = 15 cm. Calcule ES. <em>(Réponse : 6 cm.)</em></p>",
+  quiz: [
+    { q: "Quelle condition est obligatoire pour appliquer Thalès dans ABC avec M ∈ [AB] et N ∈ [AC] ?", r: ["AM = AN", "(MN) parallèle à (BC)", "ABC rectangle"], b: 1, e: "Sans parallélisme, les rapports ne sont pas égaux." },
+    { q: "AM = 2, AB = 6, BC = 9. Combien vaut MN ?", r: ["3", "4,5", "27"], b: 0, e: "2/6 = MN/9, donc MN = 9 × 2 ÷ 6 = 3." },
+    { q: "Quelle égalité est juste ?", r: ["AM/AB = AN/AC", "AM/AN = AB/BC", "AB/AM = AC/MN"], b: 0, e: "On compare les côtés correspondants : petit triangle sur grand triangle." },
+    { q: "Un bâton de 1 m fait une ombre de 0,5 m ; un poteau fait une ombre de 4 m. Sa hauteur ?", r: ["2 m", "8 m", "4,5 m"], b: 1, e: "1/0,5 = h/4, donc h = 8 m." }
+  ],
+  examen: { t: "Thalès au BEPC : sujets corrigés", href: "/corriges/" }
+});
+
+VRT_L("3e-maths-racines", {
+  c: "3e", m: "maths", cle: "Racines carrées d", titre: "Racine carrée d'un nombre positif", duree: 15,
+  accroche: "Quel côté pour un champ carré de 49 m² ? La racine carrée répond.",
+  intro: "Un terrain carré mesure 49 m². Quelle est la longueur de son côté ? Il faut trouver le nombre qui, multiplié par lui-même, donne 49 : c'est sa racine carrée.",
+  objectifs: ["définir la racine carrée d'un nombre positif", "connaître les carrés parfaits usuels", "appliquer √(a×b) = √a × √b"],
+  parties: [
+    { t: "Définition", html:
+      "<div class='def'><b>Définition</b>a est un nombre positif. La racine carrée de a, notée √a, est le nombre <strong>positif</strong> dont le carré est égal à a.</div>" +
+      "<p class='formule'>(√a)² = a   et   √a ≥ 0</p><p>Exemples : √49 = 7 car 7² = 49 ; √0 = 0 ; √1 = 1.</p>" +
+      "<div class='attention'><b>Attention</b>√(−4) n'existe pas dans les nombres réels : aucun carré n'est négatif.</div>",
+      illus: { legende: "Un carré d'aire 49 a un côté de √49 = 7.", svg:
+      "<svg viewBox='0 0 420 200' role='img' aria-label='Carré d aire 49 et de côté 7'><rect x='60' y='20' width='160' height='160' rx='4' fill='#DBE8FE' stroke='#142554' stroke-width='2.5'/><g stroke='#8FB0EE' stroke-width='1'><path d='M82.9 20v160M105.7 20v160M128.6 20v160M151.4 20v160M174.3 20v160M197.1 20v160M60 42.9h160M60 65.7h160M60 88.6h160M60 111.4h160M60 134.3h160M60 157.1h160'/></g><text x='140' y='108' text-anchor='middle' font-size='30' font-weight='700' fill='#142554'>49 m²</text><text x='140' y='198' text-anchor='middle' font-size='16' fill='#1E499B'>côté = √49 = 7 m</text><text x='260' y='70' font-size='18' fill='#142554'>7 × 7 = 49</text><text x='260' y='105' font-size='18' fill='#142554'>donc √49 = 7</text><rect x='256' y='124' width='130' height='4' rx='2' fill='#FFC93C'/></svg>" },
+      retenir: "Une racine carrée est toujours positive ou nulle." },
+    { t: "Les carrés parfaits à connaître", html:
+      "<div class='tab-scroll'><table><thead><tr><th>n</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td></tr></thead><tbody><tr><th>n²</th><td>1</td><td>4</td><td>9</td><td>16</td><td>25</td><td>36</td><td>49</td><td>64</td><td>81</td><td>100</td><td>121</td><td>144</td></tr></tbody></table></div>" +
+      "<div class='astuce'><b>Astuce</b>Un carré parfait se termine toujours par 0, 1, 4, 5, 6 ou 9 : un nombre qui finit par 2, 3, 7 ou 8 n'est jamais un carré parfait.</div><p>Lis le tableau dans l'autre sens : √81 = 9, √144 = 12. Pour un nombre qui n'est pas un carré parfait, on encadre : 36 &lt; 40 &lt; 49 donc 6 &lt; √40 &lt; 7.</p>",
+      retenir: "Connaître les carrés de 1 à 12 fait gagner un temps précieux à l'examen." },
+    { t: "Règles de calcul", html:
+      "<p class='formule'>√(a × b) = √a × √b    √(a / b) = √a / √b  (b ≠ 0)</p>" +
+      "<div class='ex'><b>Simplifier √50</b>50 = 25 × 2, donc √50 = √25 × √2 = <strong>5√2</strong>.</div>" +
+      "<div class='attention'><b>Piège classique</b>√(a + b) n'est PAS égal à √a + √b. Exemple : √(9 + 16) = √25 = 5, alors que √9 + √16 = 3 + 4 = 7.</div>",
+      retenir: "La racine se « partage » dans un produit, jamais dans une somme." }
+  ],
+  revision: ["√a existe seulement si a ≥ 0, et √a ≥ 0.", "(√a)² = a.", "Carrés parfaits de 1 à 144.", "√(ab) = √a × √b ; √(a/b) = √a / √b.", "√(a + b) ≠ √a + √b."],
+  exo: "<p>Écris sous la forme a√b : √12 ; √75 ; √200. <em>(2√3 ; 5√3 ; 10√2.)</em></p>",
+  quiz: [
+    { q: "Combien vaut √121 ?", r: ["11", "12", "60,5"], b: 0, e: "11 × 11 = 121." },
+    { q: "√18 s'écrit aussi…", r: ["9√2", "3√2", "2√3"], b: 1, e: "18 = 9 × 2, donc √18 = 3√2." },
+    { q: "√(16 + 9) vaut…", r: ["7", "5", "25"], b: 1, e: "On calcule d'abord 16 + 9 = 25, puis √25 = 5." },
+    { q: "Entre quels entiers se trouve √30 ?", r: ["4 et 5", "5 et 6", "6 et 7"], b: 1, e: "25 < 30 < 36." }
+  ]
+});
+
+VRT_L("3e-pct-atome", {
+  c: "3e", m: "pct", cle: "Séance 1 : Atome", titre: "L'atome", duree: 15,
+  accroche: "Tout ce qui t'entoure est fait de grains minuscules : les atomes.",
+  intro: "La table, l'eau du seau, l'air que tu respires : tout est fait d'atomes. Un seul grain de sel en contient des milliards de milliards.",
+  objectifs: ["décrire la structure d'un atome", "expliquer pourquoi l'atome est électriquement neutre", "lire un symbole chimique"],
+  parties: [
+    { t: "Un noyau et des électrons", html:
+      "<p>Un atome est formé :</p><ul><li>d'un <strong>noyau</strong> central, très petit, chargé positivement ; il contient des <strong>protons</strong> (charge +) et des <strong>neutrons</strong> (neutres) ;</li><li>d'<strong>électrons</strong> (charge −) qui se déplacent autour du noyau, dans un espace presque vide appelé <strong>nuage électronique</strong>.</li></ul>",
+      illus: { legende: "Modèle simplifié de l'atome de lithium : 3 protons, 4 neutrons, 3 électrons.", svg:
+      "<svg viewBox='0 0 420 260' role='img' aria-label='Schéma d un atome avec noyau et électrons'><circle cx='170' cy='130' r='110' fill='#DBE8FE' fill-opacity='.5' stroke='#8FB0EE' stroke-dasharray='5 6'/><circle cx='170' cy='130' r='62' fill='none' stroke='#8FB0EE' stroke-dasharray='5 6'/><g><circle cx='162' cy='124' r='9' fill='#D9472B'/><circle cx='178' cy='124' r='9' fill='#8C9BC0'/><circle cx='170' cy='138' r='9' fill='#D9472B'/><circle cx='155' cy='139' r='9' fill='#8C9BC0'/><circle cx='185' cy='139' r='9' fill='#D9472B'/><circle cx='170' cy='112' r='9' fill='#8C9BC0'/><circle cx='170' cy='150' r='9' fill='#8C9BC0'/></g><g fill='#FFC93C' stroke='#142554' stroke-width='1.5'><circle cx='232' cy='130' r='8'/><circle cx='99' cy='80' r='8'/><circle cx='118' cy='225' r='8'/></g><g font-size='14' fill='#142554'><text x='300' y='80'>● proton (+)</text><text x='300' y='108'>● neutron</text><text x='300' y='136'>● électron (−)</text></g><circle cx='296' cy='75' r='5' fill='#D9472B'/><circle cx='296' cy='103' r='5' fill='#8C9BC0'/><circle cx='296' cy='131' r='5' fill='#FFC93C' stroke='#142554'/><text x='300' y='190' font-size='13' fill='#636A80'>Proportions non respectées :</text><text x='300' y='208' font-size='13' fill='#636A80'>le noyau est 100 000 fois</text><text x='300' y='226' font-size='13' fill='#636A80'>plus petit que l'atome.</text></svg>" },
+      retenir: "Atome = noyau (protons + neutrons) + électrons autour." },
+    { t: "Un atome est neutre", html:
+      "<p>Dans un atome, il y a <strong>autant de protons que d'électrons</strong>. Les charges + et − se compensent : l'atome est électriquement neutre.</p><p>Le nombre de protons s'appelle le <strong>numéro atomique Z</strong>. C'est la carte d'identité de l'élément : Z = 1 hydrogène, Z = 6 carbone, Z = 8 oxygène.</p>",
+      retenir: "Nombre de protons = nombre d'électrons = Z." },
+    { t: "Symboles chimiques", html:
+      "<p>Chaque élément a un symbole : une majuscule, parfois suivie d'une minuscule.</p><table><thead><tr><th>Élément</th><th>Symbole</th><th>Z</th></tr></thead><tbody><tr><td>Hydrogène</td><td>H</td><td>1</td></tr><tr><td>Carbone</td><td>C</td><td>6</td></tr><tr><td>Azote</td><td>N</td><td>7</td></tr><tr><td>Oxygène</td><td>O</td><td>8</td></tr><tr><td>Sodium</td><td>Na</td><td>11</td></tr><tr><td>Fer</td><td>Fe</td><td>26</td></tr></tbody></table>",
+      retenir: "Un symbole commence toujours par une majuscule : Na, et non NA ou na."  }
+  ],
+  revision: ["Noyau positif : protons (+) et neutrons (0).", "Électrons (−) autour du noyau.", "Atome neutre : autant de protons que d'électrons.", "Z = numéro atomique = nombre de protons.", "Symboles : H, C, N, O, Na, Fe…"],
+  exo: "<p>L'atome d'aluminium a Z = 13. Combien a-t-il d'électrons ? Pourquoi ? <em>(13, car il est neutre.)</em></p>",
+  quiz: [
+    { q: "Quelles particules se trouvent dans le noyau ?", r: ["Protons et électrons", "Protons et neutrons", "Électrons seulement"], b: 1, e: "Les électrons tournent autour du noyau." },
+    { q: "Un atome a 8 protons. Combien a-t-il d'électrons ?", r: ["8", "16", "4"], b: 0, e: "L'atome est neutre." },
+    { q: "Quel est le symbole du sodium ?", r: ["So", "Na", "S"], b: 1, e: "Du latin natrium." },
+    { q: "Pourquoi un atome est-il neutre ?", r: ["Il n'a pas de charge du tout", "Les charges + et − se compensent", "Les neutrons annulent tout"], b: 1, e: "Autant de protons (+) que d'électrons (−)." }
+  ]
+});
+
+VRT_L("3e-pct-ph", {
+  c: "3e", m: "pct", cle: "concentration molaire et de pH", titre: "Concentration molaire et pH d'une solution", duree: 20,
+  accroche: "Jus de citron, eau savonneuse : le pH dit qui est acide.",
+  intro: "Le jus de citron pique la langue, l'eau savonneuse glisse entre les doigts. Ces deux liquides n'ont pas le même pH. Apprends à le mesurer et à calculer une concentration.",
+  objectifs: ["calculer une concentration molaire", "classer une solution acide, neutre ou basique", "mesurer un pH en sécurité"],
+  parties: [
+    { t: "La concentration molaire", html:
+      "<p>Une solution est obtenue en dissolvant un <strong>soluté</strong> dans un <strong>solvant</strong> (souvent l'eau). La concentration molaire indique la quantité de soluté par litre de solution.</p><p class='formule'>C = n / V</p><ul><li>C : concentration molaire en mol/L</li><li>n : quantité de matière du soluté en mol</li><li>V : volume de la solution en L</li></ul>" +
+      "<div class='ex'><b>Exemple</b>On dissout 0,2 mol de sel dans de l'eau pour obtenir 0,5 L de solution : C = 0,2 ÷ 0,5 = <strong>0,4 mol/L</strong>.</div>",
+      retenir: "Le volume doit être en litres : 250 mL = 0,25 L." },
+    { t: "L'échelle de pH", html:
+      "<p>Le pH est un nombre, en général entre 0 et 14 :</p><ul><li>pH &lt; 7 : solution <strong>acide</strong> (jus de citron, vinaigre) ;</li><li>pH = 7 : solution <strong>neutre</strong> (eau pure) ;</li><li>pH &gt; 7 : solution <strong>basique</strong> (eau savonneuse, eau de javel).</li></ul>",
+      illus: { legende: "Plus le pH est petit, plus la solution est acide ; plus il est grand, plus elle est basique.", svg:
+      "<svg viewBox='0 0 440 150' role='img' aria-label='Échelle de pH de 0 à 14'><defs><linearGradient id='phg' x1='0' x2='1'><stop offset='0' stop-color='#D9472B'/><stop offset='.35' stop-color='#FFC93C'/><stop offset='.5' stop-color='#7FCB8C'/><stop offset='.75' stop-color='#8FB0EE'/><stop offset='1' stop-color='#5B4FA8'/></linearGradient></defs><rect x='20' y='50' width='400' height='28' rx='14' fill='url(#phg)'/><g font-size='12' fill='#142554' text-anchor='middle'><text x='20' y='96'>0</text><text x='220' y='96'>7</text><text x='420' y='96'>14</text></g><line x1='220' y1='42' x2='220' y2='86' stroke='#142554' stroke-width='2'/><g font-size='13' fill='#142554' font-weight='700' text-anchor='middle'><text x='90' y='36'>ACIDE</text><text x='220' y='36'>NEUTRE</text><text x='350' y='36'>BASIQUE</text></g><g font-size='12' fill='#636A80' text-anchor='middle'><text x='54' y='122'>citron ≈ 2</text><text x='128' y='140'>vinaigre ≈ 3</text><text x='220' y='122'>eau pure 7</text><text x='320' y='140'>savon ≈ 10</text><text x='392' y='122'>javel ≈ 12</text></g></svg>" },
+      retenir: "Acide sous 7, neutre à 7, basique au-dessus de 7." },
+    { t: "Mesurer le pH sans danger", html:
+      "<p>On utilise le <strong>papier pH</strong> : on dépose une goutte de solution avec un agitateur, puis on compare la couleur obtenue à l'échelle de la boîte. Le <strong>pH-mètre</strong> donne une mesure plus précise.</p><div class='attention'><b>Sécurité</b>Blouse, lunettes, gants. On ne goûte jamais une solution au laboratoire. On verse toujours l'acide dans l'eau, jamais l'inverse.</div>",
+      retenir: "Une goutte sur le papier pH, jamais le papier dans le flacon." }
+  ],
+  revision: ["C = n / V (mol/L).", "Volume toujours en litres.", "pH < 7 acide ; = 7 neutre ; > 7 basique.", "Papier pH : goutte déposée avec un agitateur.", "Sécurité : blouse, lunettes, gants."],
+  exo: "<p>On dissout 0,05 mol de soude dans 250 mL d'eau. Calcule la concentration. <em>(0,2 mol/L.)</em></p>",
+  quiz: [
+    { q: "Une solution a un pH de 3. Elle est…", r: ["basique", "neutre", "acide"], b: 2, e: "pH < 7 : acide." },
+    { q: "0,1 mol dans 0,5 L : quelle concentration ?", r: ["0,05 mol/L", "0,2 mol/L", "5 mol/L"], b: 1, e: "C = 0,1 ÷ 0,5 = 0,2 mol/L." },
+    { q: "Quel liquide est basique ?", r: ["Jus de citron", "Eau savonneuse", "Vinaigre"], b: 1, e: "Le savon a un pH vers 10." },
+    { q: "Pour diluer un acide, on verse…", r: ["l'eau dans l'acide", "l'acide dans l'eau", "les deux en même temps"], b: 1, e: "Cela évite les projections dangereuses." }
+  ]
+});
+
+VRT_L("3e-svt-adn", {
+  c: "3e", m: "svt", cle: "notions de chromosome et d", titre: "Chromosomes et ADN : le support de l'hérédité", duree: 20,
+  accroche: "Pourquoi as-tu les yeux de ta mère ? Réponse dans tes chromosomes.",
+  intro: "Tu ressembles à tes parents sans être leur copie. L'information qui se transmet de génération en génération est écrite dans une molécule : l'ADN.",
+  objectifs: ["situer l'information génétique dans la cellule", "décrire un chromosome", "relier chromosome, ADN et gène"],
+  parties: [
+    { t: "L'information génétique est dans le noyau", html:
+      "<p>Des expériences de transfert de noyau l'ont montré : quand on remplace le noyau d'une cellule par celui d'une autre, la cellule prend les caractères de l'individu qui a donné le noyau. L'information génétique est donc <strong>dans le noyau</strong>.</p>",
+      retenir: "Le noyau commande les caractères héréditaires." },
+    { t: "Les chromosomes", html:
+      "<p>Au moment où la cellule se divise, on voit dans le noyau des petits bâtonnets : les <strong>chromosomes</strong>. Chez l'être humain, chaque cellule (sauf les cellules reproductrices) en contient <strong>46</strong>, soit <strong>23 paires</strong>.</p><ul><li>22 paires sont identiques chez la fille et le garçon ;</li><li>la 23ᵉ paire, celle des <strong>chromosomes sexuels</strong>, est XX chez la fille et XY chez le garçon.</li></ul>",
+      illus: { legende: "Du noyau à l'ADN : le chromosome est un long filament d'ADN très enroulé ; un gène en est un petit segment.", svg:
+      "<svg viewBox='0 0 460 200' role='img' aria-label='Cellule, noyau, chromosome, ADN, gène'><circle cx='70' cy='100' r='58' fill='#E0F5E5' stroke='#00520B' stroke-width='2'/><circle cx='78' cy='96' r='24' fill='#7FCB8C' stroke='#00520B' stroke-width='2'/><path d='M70 86l14 20M86 86l-14 20' stroke='#00520B' stroke-width='3' stroke-linecap='round'/><text x='70' y='180' text-anchor='middle' font-size='13' fill='#142554'>cellule et noyau</text><path d='M134 100h30' stroke='#636A80' stroke-width='2' marker-end='url(#fl)'/><defs><marker id='fl' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='7' markerHeight='7' orient='auto'><path d='M0 0l10 5-10 5z' fill='#636A80'/></marker></defs><g stroke='#007E11' stroke-width='14' stroke-linecap='round'><path d='M190 50 L230 150'/><path d='M230 50 L190 150'/></g><circle cx='210' cy='100' r='6' fill='#00520B'/><text x='210' y='180' text-anchor='middle' font-size='13' fill='#142554'>chromosome</text><path d='M252 100h30' stroke='#636A80' stroke-width='2' marker-end='url(#fl)'/><path d='M300 60 C320 80 340 40 360 60 S400 80 420 60' fill='none' stroke='#1E499B' stroke-width='3'/><path d='M300 140 C320 120 340 160 360 140 S400 120 420 140' fill='none' stroke='#1E499B' stroke-width='3'/><g stroke='#8FB0EE' stroke-width='2'><path d='M310 68v64M325 64v72M340 58v84M355 62v76M370 70v60M385 66v68M400 62v76M413 64v72'/></g><rect x='336' y='52' width='38' height='96' rx='6' fill='#FFC93C' fill-opacity='.35' stroke='#9A6F00'/><text x='355' y='170' text-anchor='middle' font-size='13' fill='#9A6F00' font-weight='700'>un gène</text><text x='360' y='190' text-anchor='middle' font-size='13' fill='#142554'>molécule d'ADN</text></svg>" },
+      retenir: "46 chromosomes, soit 23 paires ; XX chez la fille, XY chez le garçon." },
+    { t: "ADN et gènes", html:
+      "<p>Chaque chromosome est formé d'une très longue molécule d'<strong>ADN</strong> (acide désoxyribonucléique), en forme de double hélice. Un <strong>gène</strong> est un petit morceau d'ADN qui porte l'information d'un caractère (par exemple le groupe sanguin).</p><p>Un même gène peut exister sous plusieurs versions, appelées <strong>allèles</strong> : c'est pourquoi les individus d'une même espèce ne sont pas identiques.</p>",
+      retenir: "Chromosome → ADN → gène → caractère." }
+  ],
+  revision: ["L'information génétique est dans le noyau.", "Homme : 46 chromosomes (23 paires).", "Chromosomes sexuels : XX (fille), XY (garçon).", "Chromosome = ADN enroulé ; gène = segment d'ADN.", "Allèles : versions différentes d'un même gène."],
+  exo: "<p>Explique en trois lignes pourquoi deux frères n'ont pas exactement les mêmes caractères. Utilise les mots : chromosome, gène, allèle.</p>",
+  quiz: [
+    { q: "Combien de chromosomes dans une cellule humaine ordinaire ?", r: ["23", "46", "92"], b: 1, e: "23 paires, soit 46." },
+    { q: "Un garçon possède la paire sexuelle…", r: ["XX", "XY", "YY"], b: 1, e: "XX chez la fille, XY chez le garçon." },
+    { q: "Un gène est…", r: ["une cellule", "un segment d'ADN", "un chromosome entier"], b: 1, e: "Le gène est une portion de la molécule d'ADN." },
+    { q: "Où se trouve l'information génétique ?", r: ["Dans le noyau", "Dans la membrane", "Dans le sang seulement"], b: 0, e: "Les transferts de noyau le prouvent." }
+  ]
+});
+
+VRT_L("3e-svt-ressemblances", {
+  c: "3e", m: "svt", cle: "Ressemblances entre les individus", titre: "Ressemblances entre les individus : les caractères de l'espèce humaine", duree: 15,
+  accroche: "Nous sommes tous différents… et pourtant tous humains.",
+  intro: "Au marché de Mokolo, aucun visage n'est identique. Pourtant, tous ces gens partagent des caractères qui font d'eux des êtres humains.",
+  objectifs: ["distinguer caractères de l'espèce et caractères individuels", "définir l'espèce", "donner des exemples précis"],
+  parties: [
+    { t: "Les caractères de l'espèce", html:
+      "<p>Tous les êtres humains marchent sur deux pieds, ont un pouce opposable, un grand cerveau, la parole articulée. Ces traits communs sont les <strong>caractères de l'espèce humaine</strong>.</p><div class='def'><b>Définition</b>Une espèce est un ensemble d'individus qui se ressemblent et qui peuvent se reproduire entre eux en donnant des descendants eux-mêmes féconds.</div>",
+      retenir: "Caractères de l'espèce = traits partagés par tous les humains." },
+    { t: "Les caractères individuels", html:
+      "<p>À l'intérieur de l'espèce, chacun a ses propres variations : couleur des yeux, forme du lobe de l'oreille, groupe sanguin, taille… Ce sont les <strong>caractères individuels</strong>.</p>",
+      illus: { legende: "Le même caractère (le lobe de l'oreille) existe sous deux formes : libre ou attaché.", svg:
+      "<svg viewBox='0 0 420 190' role='img' aria-label='Lobe d oreille libre et lobe attaché'><g fill='#E0F5E5' stroke='#00520B' stroke-width='2.5' stroke-linejoin='round'><path d='M90 30c40 0 62 30 58 66-3 26-22 38-26 56-4 18-30 24-38 6-6-14 10-12 4-28' /><path d='M290 30c40 0 62 30 58 66-3 26-14 40-28 56-8 8-20 4-24-6'/></g><path d='M88 130c-10 8-12 24 2 30 10 4 18-2 18-10' fill='#FFC93C' fill-opacity='.5' stroke='#9A6F00' stroke-width='2'/><path d='M296 146c-8 4-10 10-6 12' fill='none' stroke='#9A6F00' stroke-width='3'/><g font-size='15' font-weight='700' fill='#142554' text-anchor='middle'><text x='110' y='186'>lobe libre</text><text x='310' y='186'>lobe attaché</text></g></svg>" },
+      retenir: "Caractères individuels = ce qui rend chaque personne unique." },
+    { t: "Héréditaire ou acquis ?", html:
+      "<p>Certains caractères viennent des parents : ils sont <strong>héréditaires</strong> (groupe sanguin, couleur naturelle des yeux). D'autres sont modifiés par le milieu ou le mode de vie : la peau qui fonce au soleil, les muscles qui grossissent avec le sport.</p>",
+      retenir: "Hérédité + environnement façonnent chaque individu." }
+  ],
+  revision: ["Espèce : individus semblables, interféconds, à descendance féconde.", "Caractères de l'espèce : communs à tous.", "Caractères individuels : variables d'une personne à l'autre.", "Certains sont héréditaires, d'autres modifiés par le milieu."],
+  exo: "<p>Classe : groupe sanguin, bronzage, bipédie, couleur des yeux, cicatrice. <em>(Espèce : bipédie. Individuels héréditaires : groupe sanguin, yeux. Acquis : bronzage, cicatrice.)</em></p>",
+  quiz: [
+    { q: "La bipédie est un caractère…", r: ["de l'espèce", "individuel", "acquis"], b: 0, e: "Tous les humains marchent sur deux pieds." },
+    { q: "Le groupe sanguin est…", r: ["acquis", "héréditaire", "inexistant"], b: 1, e: "Il est transmis par les parents." },
+    { q: "Le bronzage est un caractère…", r: ["héréditaire", "modifié par le milieu", "de l'espèce"], b: 1, e: "Il dépend de l'exposition au soleil." }
+  ]
+});
+
+VRT_L("6e-info-ia", {
+  c: "6e", m: "info", cle: "Généralités sur l", titre: "L'intelligence artificielle, c'est quoi ?", duree: 15,
+  accroche: "Un téléphone qui reconnaît ta voix : c'est de l'IA.",
+  intro: "Ton téléphone reconnaît ta voix, une application traduit une phrase en anglais, un correcteur souligne tes fautes : derrière tout cela, il y a souvent de l'intelligence artificielle.",
+  objectifs: ["définir l'intelligence artificielle", "citer des exemples de la vie courante", "comprendre comment une IA apprend"],
+  parties: [
+    { t: "Définition", html:
+      "<div class='def'><b>Définition</b>L'intelligence artificielle (IA) est l'ensemble des techniques qui permettent à une machine d'imiter certaines capacités humaines : reconnaître, comprendre, décider, produire un texte ou une image.</div><p>Une IA n'est ni vivante ni consciente : c'est un <strong>programme</strong> qui calcule très vite.</p>",
+      retenir: "L'IA imite l'intelligence, elle ne pense pas comme nous." },
+    { t: "Comment une IA apprend", html:
+      "<p>On montre à l'IA des milliers d'<strong>exemples</strong> (des photos de mangues et d'avocats, par exemple). Elle repère des régularités puis devine la réponse pour un exemple nouveau.</p>",
+      illus: { legende: "Les trois étapes : des exemples, un entraînement, une prédiction.", svg:
+      "<svg viewBox='0 0 460 170' role='img' aria-label='Exemples puis entraînement puis prédiction'><defs><marker id='fi' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='7' markerHeight='7' orient='auto'><path d='M0 0l10 5-10 5z' fill='#142554'/></marker></defs><rect x='14' y='30' width='120' height='100' rx='14' fill='#E4E9F2' stroke='#0C2A6A' stroke-width='2'/><g><ellipse cx='48' cy='66' rx='16' ry='12' fill='#FFC93C'/><ellipse cx='96' cy='66' rx='16' ry='12' fill='#FFC93C'/><ellipse cx='48' cy='102' rx='12' ry='16' fill='#7FCB8C'/><ellipse cx='96' cy='102' rx='12' ry='16' fill='#7FCB8C'/></g><text x='74' y='152' text-anchor='middle' font-size='13' fill='#142554'>1. des exemples</text><path d='M140 80h40' stroke='#142554' stroke-width='2' marker-end='url(#fi)'/><rect x='186' y='30' width='100' height='100' rx='14' fill='#0C2A6A'/><g stroke='#FFC93C' stroke-width='2'><circle cx='212' cy='60' r='6' fill='none'/><circle cx='212' cy='100' r='6' fill='none'/><circle cx='260' cy='80' r='6' fill='none'/><path d='M218 60l36 18M218 100l36-18'/></g><text x='236' y='152' text-anchor='middle' font-size='13' fill='#142554'>2. l'entraînement</text><path d='M292 80h40' stroke='#142554' stroke-width='2' marker-end='url(#fi)'/><rect x='338' y='30' width='110' height='100' rx='14' fill='#E0F5E5' stroke='#00520B' stroke-width='2'/><ellipse cx='370' cy='80' rx='16' ry='12' fill='#FFC93C'/><text x='398' y='76' font-size='13' fill='#00520B' font-weight='700'>mangue</text><text x='398' y='94' font-size='12' fill='#00520B'>à 97 %</text><text x='393' y='152' text-anchor='middle' font-size='13' fill='#142554'>3. la prédiction</text></svg>" },
+      retenir: "Pas d'exemples, pas d'apprentissage : l'IA dépend de ses données." },
+    { t: "L'IA autour de toi", html:
+      "<ul><li><strong>Assistants vocaux</strong> qui comprennent une question posée à l'oral ;</li><li><strong>traduction automatique</strong> d'un texte ;</li><li><strong>reconnaissance de visage</strong> pour déverrouiller un téléphone ;</li><li><strong>recommandations</strong> de vidéos ou de musiques ;</li><li><strong>assistants pédagogiques</strong>, comme Prof. Ambassa sur VÉRITAS.</li></ul><div class='attention'><b>Garde l'esprit critique</b>Une IA peut se tromper avec assurance. Vérifie toujours une information importante dans ton cours ou auprès d'un enseignant.</div>",
+      retenir: "L'IA est un outil : utile, rapide, mais faillible." }
+  ],
+  revision: ["IA : techniques qui imitent des capacités humaines.", "Elle apprend à partir de nombreux exemples.", "Exemples : traduction, reconnaissance vocale, recommandations.", "Elle n'est pas consciente et peut se tromper."],
+  exo: "<p>Cite trois objets ou applications de ton quotidien qui utilisent l'IA, et dis ce qu'ils « reconnaissent ».</p>",
+  quiz: [
+    { q: "Une IA est…", r: ["un être vivant", "un programme informatique", "un robot toujours humanoïde"], b: 1, e: "Ce sont des calculs, pas une conscience." },
+    { q: "Pour apprendre, une IA a surtout besoin…", r: ["d'exemples", "de sommeil", "d'électricité solaire"], b: 0, e: "Elle repère des régularités dans les données." },
+    { q: "Une réponse donnée par une IA est…", r: ["toujours juste", "à vérifier", "interdite à l'école"], b: 1, e: "Une IA peut se tromper : on vérifie." }
+  ]
+});
+
+VRT_L("6e-info-composants", {
+  c: "6e", m: "info", cle: "Rôles des composants de base", titre: "Les composants de base d'un micro-ordinateur", duree: 15,
+  accroche: "Écran, clavier, unité centrale : qui fait quoi ?",
+  intro: "Devant un ordinateur de la salle informatique, tu vois un écran, un clavier, une souris et une boîte. Chacun a un rôle précis.",
+  objectifs: ["nommer les composants de base", "distinguer périphériques d'entrée et de sortie", "expliquer le rôle de l'unité centrale"],
+  parties: [
+    { t: "L'unité centrale, le cerveau", html:
+      "<p>L'<strong>unité centrale</strong> contient le processeur (qui calcule), la mémoire vive (qui garde les données pendant le travail) et le disque de stockage (qui conserve les fichiers). Sur un ordinateur portable, tout est rangé sous le clavier.</p>",
+      retenir: "L'unité centrale traite l'information." },
+    { t: "Entrée, sortie", html:
+      "<p>Les <strong>périphériques</strong> se branchent à l'unité centrale :</p><ul><li><strong>d'entrée</strong> : ils envoient des informations à l'ordinateur (clavier, souris, micro, scanner) ;</li><li><strong>de sortie</strong> : ils reçoivent des informations de l'ordinateur (écran, imprimante, haut-parleurs).</li></ul>",
+      illus: { legende: "Les informations entrent par le clavier et la souris, sont traitées, puis sortent par l'écran et l'imprimante.", svg:
+      "<svg viewBox='0 0 460 200' role='img' aria-label='Périphériques d entrée, unité centrale, périphériques de sortie'><defs><marker id='fc' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='7' markerHeight='7' orient='auto'><path d='M0 0l10 5-10 5z' fill='#0C2A6A'/></marker></defs><rect x='14' y='120' width='110' height='34' rx='6' fill='#E4E9F2' stroke='#0C2A6A' stroke-width='2'/><g fill='#8C9BC0'><rect x='22' y='127' width='12' height='8' rx='2'/><rect x='38' y='127' width='12' height='8' rx='2'/><rect x='54' y='127' width='12' height='8' rx='2'/><rect x='70' y='127' width='12' height='8' rx='2'/><rect x='86' y='127' width='12' height='8' rx='2'/><rect x='102' y='127' width='12' height='8' rx='2'/><rect x='30' y='140' width='76' height='8' rx='2'/></g><rect x='50' y='54' width='34' height='50' rx='17' fill='#E4E9F2' stroke='#0C2A6A' stroke-width='2'/><path d='M67 54v16' stroke='#0C2A6A' stroke-width='2'/><text x='69' y='182' text-anchor='middle' font-size='13' fill='#142554' font-weight='700'>ENTRÉE</text><path d='M132 104h40' stroke='#0C2A6A' stroke-width='2.5' marker-end='url(#fc)'/><rect x='182' y='40' width='92' height='130' rx='10' fill='#0C2A6A'/><rect x='196' y='56' width='64' height='10' rx='3' fill='#FFC93C'/><rect x='196' y='74' width='64' height='6' rx='3' fill='#8C9BC0'/><circle cx='228' cy='146' r='8' fill='none' stroke='#FFC93C' stroke-width='2'/><text x='228' y='190' text-anchor='middle' font-size='13' fill='#142554' font-weight='700'>UNITÉ CENTRALE</text><path d='M282 104h40' stroke='#0C2A6A' stroke-width='2.5' marker-end='url(#fc)'/><rect x='332' y='34' width='116' height='76' rx='8' fill='#E4E9F2' stroke='#0C2A6A' stroke-width='2'/><rect x='342' y='44' width='96' height='56' rx='4' fill='#DBE8FE'/><path d='M380 110v12h20v-12' fill='#8C9BC0'/><rect x='346' y='130' width='86' height='30' rx='6' fill='#E4E9F2' stroke='#0C2A6A' stroke-width='2'/><rect x='360' y='124' width='58' height='10' fill='#fff' stroke='#0C2A6A'/><text x='390' y='182' text-anchor='middle' font-size='13' fill='#142554' font-weight='700'>SORTIE</text></svg>" },
+      retenir: "Entrée : vers l'ordinateur. Sortie : depuis l'ordinateur." },
+    { t: "Prendre soin du matériel", html:
+      "<ul><li>Éteindre l'ordinateur par le menu, pas en coupant le courant.</li><li>Pas de boisson ni de nourriture près du clavier.</li><li>Protéger le poste avec un onduleur ou un régulateur lors des coupures de courant.</li></ul>",
+      retenir: "Un matériel bien traité dure plus longtemps." }
+  ],
+  revision: ["Unité centrale : processeur, mémoire vive, stockage.", "Entrée : clavier, souris, micro, scanner.", "Sortie : écran, imprimante, haut-parleurs.", "Éteindre proprement ; protéger des coupures."],
+  exo: "<p>Classe : webcam, écran, clavier, imprimante, micro, haut-parleur. <em>(Entrée : webcam, clavier, micro. Sortie : écran, imprimante, haut-parleur.)</em></p>",
+  quiz: [
+    { q: "La souris est un périphérique…", r: ["d'entrée", "de sortie", "de stockage"], b: 0, e: "Elle envoie des informations à l'ordinateur." },
+    { q: "Quel élément calcule dans l'unité centrale ?", r: ["L'écran", "Le processeur", "Le câble"], b: 1, e: "Le processeur exécute les instructions." },
+    { q: "L'imprimante est un périphérique…", r: ["d'entrée", "de sortie", "central"], b: 1, e: "Elle reçoit les informations de l'ordinateur." }
+  ]
+});
+
+/* Leçons rédigées VÉRITAS — français, histoire, géographie, ECM, philosophie. */
+VRT_L("3e-fr-relative", {
+  c: "3e", m: "francais", cle: "La subordonnée relative", titre: "La proposition subordonnée relative", duree: 20,
+  accroche: "« Le livre que tu m'as prêté… » : la relative précise sans alourdir.",
+  intro: "« Le taxi qui m'a déposé roulait vite. » Sans la partie soulignée, on ne saurait pas de quel taxi il s'agit. Cette partie est une proposition subordonnée relative.",
+  objectifs: ["repérer une subordonnée relative et son antécédent", "choisir le bon pronom relatif", "distinguer relative déterminative et relative explicative"],
+  parties: [
+    { t: "Reconnaître la relative", html:
+      "<p>La subordonnée relative :</p><ul><li>commence par un <strong>pronom relatif</strong> : qui, que, quoi, dont, où, lequel, auquel, duquel… ;</li><li>complète un nom ou un pronom placé avant elle, appelé <strong>antécédent</strong> ;</li><li>joue le rôle d'un adjectif : elle est <strong>complément de l'antécédent</strong>.</li></ul>" +
+      "<div class='ex'><b>Exemple</b>Banda vend le cacao <u>que sa mère a récolté</u>. — Antécédent : <em>le cacao</em> ; pronom relatif : <em>que</em>.</div>",
+      illus: { legende: "La relative s'accroche à son antécédent comme un wagon à la locomotive.", svg:
+      "<svg viewBox='0 0 460 150' role='img' aria-label='Schéma : antécédent, pronom relatif, subordonnée'><rect x='10' y='40' width='130' height='50' rx='12' fill='#DBE8FE' stroke='#142554' stroke-width='2'/><text x='75' y='71' text-anchor='middle' font-size='16' font-weight='700' fill='#142554'>le cacao</text><text x='75' y='112' text-anchor='middle' font-size='12' fill='#636A80'>antécédent</text><path d='M140 65h30' stroke='#9A6F00' stroke-width='3'/><rect x='170' y='40' width='60' height='50' rx='12' fill='#FFC93C'/><text x='200' y='71' text-anchor='middle' font-size='16' font-weight='700' fill='#142554'>que</text><text x='200' y='112' text-anchor='middle' font-size='12' fill='#636A80'>pronom relatif</text><path d='M230 65h20' stroke='#9A6F00' stroke-width='3'/><rect x='250' y='40' width='200' height='50' rx='12' fill='#fff' stroke='#1E499B' stroke-width='2' stroke-dasharray='6 4'/><text x='350' y='71' text-anchor='middle' font-size='15' fill='#142554'>sa mère a récolté</text><text x='350' y='112' text-anchor='middle' font-size='12' fill='#636A80'>suite de la subordonnée</text><circle cx='60' cy='130' r='0'/></svg>" },
+      retenir: "Pas d'antécédent, pas de relative : on cherche d'abord le nom complété." },
+    { t: "Choisir le pronom relatif", html:
+      "<div class='tab-scroll'><table><thead><tr><th>Pronom</th><th>Fonction dans la relative</th><th>Exemple</th></tr></thead><tbody>" +
+      "<tr><th>qui</th><td>sujet</td><td>l'élève <u>qui</u> parle</td></tr><tr><th>que</th><td>COD</td><td>le livre <u>que</u> je lis</td></tr>" +
+      "<tr><th>dont</th><td>complément introduit par « de »</td><td>l'ami <u>dont</u> je parle (parler <em>de</em>)</td></tr><tr><th>où</th><td>complément de lieu ou de temps</td><td>la ville <u>où</u> je suis né ; le jour <u>où</u> il est venu</td></tr>" +
+      "<tr><th>lequel, auquel…</th><td>après une préposition</td><td>la table <u>sur laquelle</u> j'écris</td></tr></tbody></table></div>" +
+      "<div class='attention'><b>Fautes fréquentes</b>« L'ami <s>que</s> je t'ai parlé » → l'ami <strong>dont</strong> je t'ai parlé. « La ville <s>que</s> j'habite dedans » → la ville <strong>où</strong> j'habite.</div>",
+      retenir: "Le pronom dépend de sa fonction DANS la relative : qui sujet, que COD, dont = « de »." },
+    { t: "Déterminative ou explicative ?", html:
+      "<ul><li><strong>Déterminative</strong> : indispensable, elle identifie l'antécédent. Pas de virgule. <em>Les élèves qui ont fini peuvent sortir.</em> (seulement ceux-là)</li><li><strong>Explicative</strong> : on peut la supprimer ; elle ajoute une précision. Entre virgules. <em>Les élèves, qui ont fini, peuvent sortir.</em> (tous ont fini)</li></ul>",
+      retenir: "La virgule change le sens : elle transforme une sélection en simple explication." }
+  ],
+  revision: ["La relative complète un antécédent (nom ou pronom).", "Elle commence par un pronom relatif.", "qui = sujet ; que = COD ; dont = complément en « de » ; où = lieu/temps.", "lequel, auquel, duquel après une préposition.", "Déterminative sans virgule ; explicative entre virgules."],
+  exo: "<p>Complète avec le bon pronom : 1. Voici la case ___ je suis né. 2. C'est un roman ___ tout le monde parle. 3. Le cacao ___ Banda transporte est lourd. <em>(où ; dont ; que)</em></p>",
+  quiz: [
+    { q: "« L'homme ___ je te parle est mon oncle. »", r: ["que", "dont", "qui"], b: 1, e: "On parle DE quelqu'un : dont." },
+    { q: "Dans « la route qui mène à Tanga », qui est…", r: ["sujet de mène", "COD de mène", "antécédent"], b: 0, e: "Qui mène ? la route : qui est sujet." },
+    { q: "Quelle relative est explicative ?", r: ["Les fruits qui sont mûrs tombent.", "Les fruits, qui sont mûrs, tombent.", "Les fruits que je cueille."], b: 1, e: "Entre virgules, elle peut être supprimée." },
+    { q: "« La table sur ___ je pose mon cahier. »", r: ["que", "laquelle", "dont"], b: 1, e: "Après une préposition : lequel, laquelle…" }
+  ],
+  examen: { t: "Grammaire au BEPC : sujets corrigés", href: "/corriges/" }
+});
+
+VRT_L("3e-fr-ville-cruelle", {
+  c: "3e", m: "francais", cle: "Ville Cruelle d", titre: "Lecture suivie : Ville cruelle d'Eza Boto", duree: 25,
+  scenes: ["ville-cruelle-deux-cents-kilos"],
+  accroche: "Une journée à Tanga, deux cents kilos de cacao, une ville qui broie les faibles.",
+  intro: "Un jeune paysan porte le cacao de toute une année à la ville pour gagner de quoi se marier. En une journée, Tanga va tout lui prendre… ou presque. Voici les repères pour suivre l'œuvre en classe.",
+  objectifs: ["situer l'auteur et l'œuvre", "suivre la structure du récit", "dégager les grands thèmes"],
+  parties: [
+    { t: "L'auteur et l'œuvre", html:
+      "<p><strong>Eza Boto</strong> est le premier pseudonyme d'<strong>Alexandre Biyidi Awala</strong>, plus connu sous le nom de <strong>Mongo Beti</strong> (1932-2001), écrivain camerounais né près de Mbalmayo. <em>Ville cruelle</em>, son premier roman, paraît en 1954 aux éditions Présence Africaine.</p><p>Le roman se compose de <strong>treize chapitres et d'un épilogue</strong>. L'action se passe « un matin de février 193… », pendant la période coloniale.</p>",
+      retenir: "Eza Boto = Mongo Beti ; Ville cruelle, 1954, 13 chapitres + épilogue." },
+    { t: "Les lieux et les personnages", html:
+      "<p><strong>Tanga</strong> est une ville coupée en deux : <strong>Tanga-Sud</strong>, le quartier des commerçants et de l'administration coloniale, et <strong>Tanga-Nord</strong>, où vivent les Africains, dans des quartiers comme Moko. Le village de Banda s'appelle <strong>Bamila</strong>.</p>" +
+      "<ul><li><strong>Banda</strong> : jeune paysan orgueilleux et révolté, fils unique d'une mère malade ;</li><li><strong>la mère de Banda</strong> : son seul lien avec le village, elle veut le voir marié avant de mourir ;</li><li><strong>Odilia</strong> et son frère <strong>Koumé</strong> : avec d'autres ouvriers, Koumé a malmené son patron blanc qui refusait de les payer ; il est en fuite ;</li><li><strong>les Grecs</strong> (commerçants qui achètent le cacao), <strong>les contrôleurs</strong> et <strong>les gardes régionaux</strong> : le système colonial et ses relais ;</li><li><strong>Tonga</strong>, vieillard de Bamila, et l'oncle tailleur de Tanga.</li></ul>",
+      illus: { legende: "Schéma du parcours de Banda : de Bamila à Tanga, puis le retour.", svg:
+      "<svg viewBox='0 0 460 190' role='img' aria-label='Parcours de Banda entre Bamila et Tanga'><rect x='10' y='20' width='130' height='120' rx='16' fill='#E0F5E5' stroke='#00520B' stroke-width='2'/><text x='75' y='50' text-anchor='middle' font-size='16' font-weight='700' fill='#00520B'>BAMILA</text><text x='75' y='72' text-anchor='middle' font-size='12' fill='#142554'>le village</text><text x='75' y='90' text-anchor='middle' font-size='12' fill='#142554'>la mère, Tonga</text><text x='75' y='108' text-anchor='middle' font-size='12' fill='#142554'>la plantation</text><rect x='300' y='20' width='150' height='56' rx='12' fill='#E4E9F2' stroke='#0C2A6A' stroke-width='2'/><text x='375' y='44' text-anchor='middle' font-size='15' font-weight='700' fill='#0C2A6A'>TANGA-SUD</text><text x='375' y='64' text-anchor='middle' font-size='12' fill='#142554'>Grecs, Contrôle, Blancs</text><rect x='300' y='86' width='150' height='56' rx='12' fill='#FFF3E4' stroke='#A84200' stroke-width='2'/><text x='375' y='110' text-anchor='middle' font-size='15' font-weight='700' fill='#A84200'>TANGA-NORD</text><text x='375' y='130' text-anchor='middle' font-size='12' fill='#142554'>Moko, Odilia, Koumé</text><path d='M140 60 C200 30 250 30 296 46' fill='none' stroke='#142554' stroke-width='2.5' stroke-dasharray='7 5'/><path d='M296 120 C250 160 190 160 140 110' fill='none' stroke='#9A6F00' stroke-width='2.5' stroke-dasharray='7 5'/><text x='218' y='28' text-anchor='middle' font-size='12' fill='#142554'>l'aller : 200 kg de cacao</text><text x='218' y='176' text-anchor='middle' font-size='12' fill='#9A6F00'>le retour, de nuit, avec Odilia</text></svg>" },
+      retenir: "Ville coupée en deux : la géographie de Tanga montre déjà l'injustice." },
+    { t: "L'intrigue en quatre temps", html:
+      "<ol><li><strong>L'humiliation</strong> : au Contrôle, son cacao est déclaré « mauvais » et jeté au feu ; Banda s'en prend aux hommes du contrôleur, les gardes régionaux le frappent et le conduisent au commissariat. Il repart sans argent, l'œil poché.</li><li><strong>La rencontre</strong> : dans la nuit, il croise Odilia, qui cherche son frère Koumé, poursuivi après la révolte des ouvriers contre leur patron.</li><li><strong>La mort de Koumé</strong> : Koumé meurt ; Banda remet à Odilia l'argent trouvé sur son frère et la conduit chez sa mère, à Bamila.</li><li><strong>Le dénouement</strong> : Banda retrouve dans une rigole la petite valise perdue par un couple de commerçants grecs ; il la rend et reçoit dix billets de mille francs. Dans l'épilogue, après la mort de sa mère, il annonce qu'il ira s'installer à Fort-Nègre.</li></ol>",
+      retenir: "Une seule journée suffit pour que la ville broie Banda… et le transforme." },
+    { t: "Les grands thèmes", html:
+      "<ul><li><strong>L'injustice coloniale</strong> : contrôle arbitraire du cacao, violence des gardes, exploitation par les commerçants.</li><li><strong>La ville et le village</strong> : Tanga attire et détruit ; Bamila protège mais étouffe (le poids des vieillards).</li><li><strong>La révolte individuelle</strong> : Banda et Koumé refusent de se soumettre.</li><li><strong>La mère</strong> : figure de l'attachement et du devoir.</li></ul>",
+      retenir: "Pour une rédaction : un thème = une idée + un épisode précis du roman." }
+  ],
+  revision: ["Eza Boto, pseudonyme de Mongo Beti ; roman paru en 1954.", "Tanga-Sud (colons, commerce) / Tanga-Nord (Africains) ; village : Bamila.", "Banda perd son cacao au Contrôle, rencontre Odilia, rend la valise perdue par des Grecs.", "Épilogue : mort de la mère, départ pour Fort-Nègre.", "Thèmes : injustice coloniale, ville/village, révolte, la mère."],
+  exo: "<p>En cinq lignes, explique pourquoi le titre <em>Ville cruelle</em> convient au roman. Appuie-toi sur deux épisodes précis.</p>",
+  quiz: [
+    { q: "Qui se cache derrière le pseudonyme Eza Boto ?", r: ["Ferdinand Oyono", "Mongo Beti", "Guillaume Oyono Mbia"], b: 1, e: "Alexandre Biyidi Awala, dit Mongo Beti." },
+    { q: "Pourquoi Banda va-t-il à Tanga ?", r: ["Pour étudier", "Pour vendre son cacao", "Pour chercher Koumé"], b: 1, e: "Il veut gagner l'argent de son mariage." },
+    { q: "Dans quel quartier vivent les Africains ?", r: ["Tanga-Sud", "Tanga-Nord", "Bamila"], b: 1, e: "Tanga-Sud est le quartier des commerçants et des colons." },
+    { q: "Où Banda part-il vivre à la fin ?", r: ["À Tanga", "À Fort-Nègre", "Il reste à Bamila"], b: 1, e: "C'est l'épilogue, après la mort de sa mère." }
+  ]
+});
+
+VRT_L("3e-hist-partage", {
+  c: "3e", m: "histoire", cle: "Conquête et partage de l", titre: "La conquête et le partage de l'Afrique", duree: 20,
+  scenes: ["1re-histoire-conference-de-berlin", "histoire-douala-1884"],
+  accroche: "1884 : autour d'une table à Berlin, l'Europe se partage un continent.",
+  intro: "En 1880, les Européens ne contrôlent que des côtes africaines. En 1914, seuls deux États africains restent indépendants. Que s'est-il passé en trente ans ?",
+  objectifs: ["expliquer les causes de la conquête", "présenter la conférence de Berlin", "décrire le partage du continent"],
+  parties: [
+    { t: "Pourquoi conquérir l'Afrique ?", html:
+      "<ul><li><strong>Causes économiques</strong> : l'industrie européenne a besoin de matières premières (caoutchouc, huile de palme, cacao, minerais) et de nouveaux marchés.</li><li><strong>Causes politiques</strong> : puissance et prestige des nations ; rivalités entre la France, la Grande-Bretagne et l'Allemagne.</li><li><strong>Causes idéologiques et religieuses</strong> : prétendue « mission civilisatrice », action des missionnaires.</li><li><strong>Moyens</strong> : explorations, armes modernes, médicaments contre le paludisme (quinine), bateaux à vapeur.</li></ul>",
+      retenir: "Économie, puissance, idéologie : trois familles de causes." },
+    { t: "La conférence de Berlin (1884-1885)", html:
+      "<p>Réunie à Berlin du <strong>15 novembre 1884 au 26 février 1885</strong> à l'initiative du chancelier allemand <strong>Bismarck</strong>, elle rassemble les puissances européennes et les États-Unis. <strong>Aucun Africain n'y est invité.</strong></p><ul><li>Liberté de navigation sur les fleuves <strong>Congo</strong> et <strong>Niger</strong>.</li><li>Règle de l'<strong>occupation effective</strong> : pour revendiquer un territoire, il faut l'occuper réellement.</li><li>Obligation de <strong>notifier</strong> aux autres puissances toute nouvelle prise de possession.</li></ul>",
+      illus: { legende: "Frise : du traité germano-douala à la Première Guerre mondiale.", svg:
+      "<svg viewBox='0 0 460 150' role='img' aria-label='Frise chronologique 1884 à 1914'><line x1='20' y1='70' x2='440' y2='70' stroke='#142554' stroke-width='3'/><g fill='#FFC93C' stroke='#142554' stroke-width='2'><circle cx='40' cy='70' r='8'/><circle cx='70' cy='70' r='8'/><circle cx='250' cy='70' r='8'/><circle cx='420' cy='70' r='8'/></g><g font-size='13' font-weight='700' fill='#142554' text-anchor='middle'><text x='40' y='50'>1884</text><text x='88' y='104'>1884-85</text><text x='250' y='50'>1896</text><text x='420' y='50'>1914</text></g><g font-size='11.5' fill='#636A80' text-anchor='middle'><text x='40' y='30'>traité de Douala</text><text x='88' y='120'>conférence de Berlin</text><text x='250' y='30'>Adoua : l'Éthiopie résiste</text><text x='408' y='104'>seuls l'Éthiopie et</text><text x='408' y='120'>le Libéria indépendants</text></g></svg>" },
+      retenir: "Berlin ne partage pas l'Afrique sur une carte : il fixe les RÈGLES du partage." },
+    { t: "Le partage du continent", html:
+      "<p>Après Berlin, c'est la « course au clocher » : traités signés avec des chefs, expéditions militaires, frontières tracées souvent en lignes droites, sans tenir compte des peuples. La France et la Grande-Bretagne obtiennent les plus grands ensembles ; l'Allemagne prend le Kamerun, le Togo, le Sud-Ouest africain et l'Afrique orientale allemande.</p><p>Les Africains résistent (Samory Touré, Béhanzin, Menelik II…). En 1914, seuls l'<strong>Éthiopie</strong> et le <strong>Libéria</strong> restent indépendants.</p>",
+      retenir: "Des frontières tracées par d'autres : un héritage encore visible aujourd'hui." }
+  ],
+  revision: ["Causes : économiques, politiques, idéologiques.", "Conférence de Berlin : 15 nov. 1884 – 26 fév. 1885, convoquée par Bismarck.", "Règles : occupation effective, notification, libre navigation Congo-Niger.", "Aucun Africain présent.", "1914 : seuls l'Éthiopie et le Libéria indépendants."],
+  exo: "<p>Rédige un paragraphe argumenté (8 lignes) : « La conférence de Berlin a-t-elle partagé l'Afrique ? »</p>",
+  quiz: [
+    { q: "Qui convoque la conférence de Berlin ?", r: ["Napoléon III", "Bismarck", "La reine Victoria"], b: 1, e: "Le chancelier allemand Otto von Bismarck." },
+    { q: "Que signifie l'occupation effective ?", r: ["Occuper réellement le territoire revendiqué", "Acheter le territoire", "Le visiter une fois"], b: 0, e: "Une simple revendication ne suffit plus." },
+    { q: "Combien d'Africains participent à la conférence ?", r: ["Aucun", "Dix", "Un par royaume"], b: 0, e: "Le continent est partagé sans ses peuples." },
+    { q: "Quels pays restent indépendants en 1914 ?", r: ["Égypte et Maroc", "Éthiopie et Libéria", "Cameroun et Togo"], b: 1, e: "L'Éthiopie a vaincu l'Italie à Adoua en 1896." }
+  ],
+  examen: { t: "Histoire au BEPC : sujets corrigés", href: "/corriges/" }
+});
+
+VRT_L("3e-hist-kamerun", {
+  c: "3e", m: "histoire", cle: "Le Cameroun allemand", titre: "Le Cameroun allemand (1884-1916)", duree: 20,
+  scenes: ["histoire-douala-1884", "3e-histoire-conference-de-foumban"],
+  accroche: "12 juillet 1884 : un traité signé à Douala fait naître le Kamerun.",
+  intro: "Pendant trente-deux ans, le Cameroun est une colonie allemande : le Kamerun. Cette période laisse des routes, des plantations, des chemins de fer… et le souvenir de résistances héroïques.",
+  objectifs: ["dater et expliquer la naissance du protectorat", "décrire l'exploitation allemande", "présenter les résistances et la fin de la colonie"],
+  parties: [
+    { t: "La naissance du Kamerun", html:
+      "<p>Le <strong>12 juillet 1884</strong>, les rois douala <strong>Ndumbé Lobé Bell</strong> et <strong>Ngando Akwa</strong> signent un traité avec des représentants de maisons de commerce allemandes. Le <strong>14 juillet 1884</strong>, l'explorateur <strong>Gustav Nachtigal</strong> hisse le drapeau allemand : c'est le début du protectorat.</p><p>Les Douala avaient posé des conditions (garder leurs terres et leur rôle d'intermédiaires du commerce) ; elles ne seront pas respectées.</p>",
+      retenir: "12 juillet 1884 : traité germano-douala." },
+    { t: "Exploiter le territoire", html:
+      "<ul><li><strong>Plantations</strong> autour du mont Cameroun (cacao, banane, hévéa), avec un travail forcé très dur.</li><li><strong>Voies de communication</strong> : chemin de fer du Nord (Douala-Nkongsamba) et du Centre (vers Eséka), routes, wharfs.</li><li><strong>Administration</strong> : capitale à Buea, puis à Douala ; gouverneurs comme Jesko von Puttkamer.</li><li>En 1911, l'accord franco-allemand agrandit la colonie vers l'est et le sud (le « Neukamerun »).</li></ul>",
+      illus: { legende: "Repères du Kamerun : naissance, expansion, résistances, fin.", svg:
+      "<svg viewBox='0 0 460 150' role='img' aria-label='Frise du Cameroun allemand'><line x1='20' y1='72' x2='440' y2='72' stroke='#A84200' stroke-width='4'/><g fill='#FFC93C' stroke='#6B2A00' stroke-width='2'><circle cx='30' cy='72' r='8'/><circle cx='280' cy='72' r='8'/><circle cx='355' cy='72' r='8'/><circle cx='430' cy='72' r='8'/></g><g font-size='13' font-weight='700' fill='#142554' text-anchor='middle'><text x='36' y='52'>1884</text><text x='280' y='52'>1911</text><text x='355' y='104'>1914</text><text x='424' y='52'>1916</text></g><g font-size='11.5' fill='#636A80' text-anchor='middle'><text x='60' y='32'>traité germano-douala</text><text x='280' y='32'>Neukamerun</text><text x='355' y='122'>Rudolf Duala Manga Bell</text><text x='355' y='138'>et Martin-Paul Samba exécutés</text><text x='410' y='32'>départ des Allemands</text></g></svg>" },
+      retenir: "Infrastructures réelles, mais construites par le travail forcé." },
+    { t: "Résister, puis tourner la page", html:
+      "<p>Plusieurs peuples résistent par les armes ou par le droit. En <strong>1914</strong>, <strong>Rudolf Duala Manga Bell</strong>, qui contestait l'expropriation des terres douala, est pendu ; <strong>Martin-Paul Samba</strong> est fusillé. Pendant la Première Guerre mondiale, les troupes franco-britanniques chassent les Allemands : la colonie disparaît en <strong>1916</strong>, puis le territoire est partagé entre la France et la Grande-Bretagne.</p>",
+      retenir: "1916 : fin du Kamerun ; Manga Bell et Samba, héros nationaux." }
+  ],
+  revision: ["12 juillet 1884 : traité germano-douala ; 14 juillet : drapeau hissé par Nachtigal.", "Plantations, chemins de fer, travail forcé.", "1911 : Neukamerun.", "1914 : exécution de Rudolf Duala Manga Bell et Martin-Paul Samba.", "1916 : fin de la présence allemande."],
+  exo: "<p>Présente en dix lignes l'œuvre allemande au Cameroun : ce qu'elle a construit et ce qu'elle a coûté aux populations.</p>",
+  quiz: [
+    { q: "Quand est signé le traité germano-douala ?", r: ["12 juillet 1884", "1er janvier 1960", "1916"], b: 0, e: "Deux jours avant que Nachtigal hisse le drapeau." },
+    { q: "Rudolf Duala Manga Bell s'opposait…", r: ["à l'expropriation des terres douala", "à la construction des écoles", "aux missionnaires seulement"], b: 0, e: "Il fut pendu en 1914." },
+    { q: "Quand les Allemands quittent-ils le Cameroun ?", r: ["1884", "1916", "1945"], b: 1, e: "Chassés pendant la Première Guerre mondiale." }
+  ]
+});
+
+VRT_L("3e-geo-cameroun", {
+  c: "3e", m: "geo", cle: "Présentation générale du Cameroun", titre: "Présentation générale du Cameroun", duree: 15,
+  accroche: "Mer, forêt, montagnes, savane, Sahel : l'Afrique en miniature.",
+  intro: "On surnomme le Cameroun « l'Afrique en miniature » : on y trouve presque tous les paysages du continent, de la mer au désert. Découvre sa carte d'identité.",
+  objectifs: ["situer le Cameroun", "donner ses chiffres clés", "nommer les grandes régions naturelles"],
+  parties: [
+    { t: "Situation et limites", html:
+      "<p>Le Cameroun est situé en Afrique centrale, au fond du <strong>golfe de Guinée</strong>, entre environ 2° et 13° de latitude Nord. Il partage ses frontières avec le <strong>Nigeria</strong> à l'ouest, le <strong>Tchad</strong> au nord-est, la <strong>République centrafricaine</strong> à l'est, le <strong>Congo</strong>, le <strong>Gabon</strong> et la <strong>Guinée équatoriale</strong> au sud. Il s'ouvre sur l'océan Atlantique au sud-ouest.</p>",
+      retenir: "Six voisins et une façade maritime sur l'Atlantique." },
+    { t: "Chiffres clés", html:
+      "<ul><li>Superficie : environ <strong>475 650 km²</strong>.</li><li><strong>10 régions</strong> ; capitale politique <strong>Yaoundé</strong>, capitale économique <strong>Douala</strong>.</li><li>Deux langues officielles : le <strong>français</strong> et l'<strong>anglais</strong> ; plus de 250 langues nationales.</li><li>Une population jeune, en forte croissance.</li></ul>",
+      retenir: "Deux langues officielles, dix régions, deux grandes métropoles." },
+    { t: "Les grandes régions naturelles", html:
+      "<p>Du sud au nord, on traverse :</p><ol><li>la <strong>plaine côtière</strong> (mangroves, Douala) ;</li><li>le <strong>plateau sud-camerounais</strong>, couvert de forêt dense ;</li><li>les <strong>hautes terres de l'Ouest</strong> (volcans, mont Cameroun, sols fertiles) ;</li><li>le <strong>plateau de l'Adamaoua</strong>, château d'eau du pays ;</li><li>les <strong>basses terres du Nord</strong> et les <strong>monts Mandara</strong>, jusqu'au lac Tchad.</li></ol>",
+      illus: { legende: "Coupe simplifiée du sud au nord (échelles non respectées).", svg:
+      "<svg viewBox='0 0 460 190' role='img' aria-label='Coupe schématique du relief camerounais du sud au nord'><path d='M10 160 L60 158 L90 150 L150 120 L180 70 L200 90 L240 96 L270 80 L320 82 L350 120 L400 140 L420 110 L440 150 L450 160 Z' fill='#E0F5E5' stroke='#00520B' stroke-width='2'/><path d='M10 160 h40' stroke='#1E499B' stroke-width='6'/><g font-size='11' fill='#142554' text-anchor='middle'><text x='40' y='182'>plaine côtière</text><text x='120' y='182'>plateau sud</text><text x='190' y='60'>hautes terres de l'Ouest</text><text x='295' y='70'>Adamaoua</text><text x='370' y='182'>basses terres</text><text x='420' y='100'>Mandara</text></g><text x='10' y='20' font-size='12' fill='#636A80'>SUD</text><text x='420' y='20' font-size='12' fill='#636A80'>NORD</text><path d='M40 24 H410' stroke='#636A80' stroke-dasharray='4 5'/></svg>" },
+      retenir: "Cinq grands ensembles naturels, une diversité qui fait la richesse du pays." }
+  ],
+  revision: ["Afrique centrale, fond du golfe de Guinée.", "Six pays voisins + l'Atlantique.", "Environ 475 650 km², 10 régions.", "Yaoundé (politique), Douala (économique).", "Plaine côtière, plateau sud, hautes terres de l'Ouest, Adamaoua, basses terres du Nord."],
+  exo: "<p>Sur une carte muette, place les six pays voisins, Yaoundé, Douala et le lac Tchad.</p>",
+  quiz: [
+    { q: "Quelle est la capitale économique ?", r: ["Yaoundé", "Douala", "Garoua"], b: 1, e: "Yaoundé est la capitale politique." },
+    { q: "Combien de régions compte le Cameroun ?", r: ["8", "10", "12"], b: 1, e: "Dix régions administratives." },
+    { q: "Quel plateau est appelé « château d'eau » ?", r: ["L'Adamaoua", "Le plateau sud", "La plaine côtière"], b: 0, e: "De nombreux fleuves y prennent leur source." }
+  ]
+});
+
+VRT_L("3e-geo-mangrove", {
+  c: "3e", m: "geo", cle: "La mangrove", titre: "Dossier : la mangrove", duree: 15,
+  scenes: ["3e-geo-mangrove-douala"],
+  accroche: "Des arbres les pieds dans l'eau salée, une nurserie pour les poissons.",
+  intro: "Le long de la côte, autour de Douala, des forêts poussent les pieds dans l'eau salée. Cette mangrove est précieuse… et menacée.",
+  objectifs: ["décrire la mangrove", "expliquer son utilité", "proposer des solutions pour la protéger"],
+  parties: [
+    { t: "Une forêt entre terre et mer", html:
+      "<p>La <strong>mangrove</strong> est une forêt qui pousse dans les zones de balancement des marées, là où l'eau douce des fleuves rencontre l'eau salée. Ses arbres, les <strong>palétuviers</strong>, tiennent sur des <strong>racines-échasses</strong> et respirent grâce à des racines qui sortent de la vase.</p><p>Au Cameroun, on la trouve surtout dans l'estuaire du Wouri (Douala-Edéa) et vers Rio del Rey.</p>",
+      illus: { legende: "Les racines-échasses retiennent la vase et abritent les jeunes poissons.", svg:
+      "<svg viewBox='0 0 460 200' role='img' aria-label='Coupe d une mangrove'><rect x='0' y='120' width='460' height='80' fill='#DBE8FE'/><path d='M0 120 Q115 112 230 120 T460 120' fill='none' stroke='#1E499B' stroke-width='2'/><rect x='0' y='175' width='460' height='25' fill='#C9A97A'/><g fill='#7FCB8C' stroke='#00520B' stroke-width='2'><ellipse cx='120' cy='50' rx='70' ry='34'/><ellipse cx='320' cy='56' rx='80' ry='36'/></g><g stroke='#6B2A00' stroke-width='4' fill='none' stroke-linecap='round'><path d='M120 70v50'/><path d='M120 100 Q90 130 80 178M120 100 Q150 130 160 178M120 110 Q105 145 102 178M120 110 Q135 145 140 178'/><path d='M320 76v44'/><path d='M320 100 Q285 135 276 178M320 100 Q355 135 366 178M320 112 Q305 150 302 178M320 112 Q338 150 342 178'/></g><g fill='#FFC93C'><path d='M200 150 l12 -5 v10 z'/><ellipse cx='194' cy='150' rx='9' ry='4'/><path d='M240 160 l10 -4 v8 z'/><ellipse cx='235' cy='160' rx='7' ry='3'/></g><text x='12' y='140' font-size='12' fill='#1E499B'>eau saumâtre (marée)</text><text x='12' y='192' font-size='12' fill='#6B2A00'>vase</text><text x='170' y='110' font-size='12' fill='#00520B'>racines-échasses</text></svg>" },
+      retenir: "Palétuviers + racines-échasses + eau saumâtre = mangrove." },
+    { t: "Pourquoi la mangrove est précieuse", html:
+      "<ul><li><strong>Frayère</strong> : poissons, crevettes et crabes s'y reproduisent.</li><li><strong>Protection</strong> du littoral contre l'érosion et les tempêtes.</li><li><strong>Ressources</strong> pour les riverains : pêche, bois, plantes médicinales.</li><li>Elle stocke beaucoup de <strong>carbone</strong> et aide à lutter contre le réchauffement climatique.</li></ul>",
+      retenir: "Sans mangrove, moins de poissons et une côte plus fragile." },
+    { t: "Menaces et solutions", html:
+      "<p><strong>Menaces</strong> : coupe du bois pour fumer le poisson, extension de la ville de Douala, déchets plastiques, pollution industrielle et pétrolière.</p><p><strong>Solutions</strong> : reboisement de palétuviers, fumoirs améliorés qui consomment moins de bois, aires protégées, ramassage des déchets, sensibilisation des riverains.</p>",
+      retenir: "Protéger la mangrove, c'est protéger la pêche et les familles qui en vivent." }
+  ],
+  revision: ["Forêt littorale des zones de marée, eau saumâtre.", "Palétuviers à racines-échasses.", "Rôles : frayère, protection de la côte, ressources, carbone.", "Menaces : bois de fumage, urbanisation, pollution.", "Solutions : reboisement, fumoirs améliorés, aires protégées."],
+  exo: "<p>Rédige une affiche de sensibilisation (5 phrases) destinée aux pêcheurs de l'estuaire du Wouri.</p>",
+  quiz: [
+    { q: "Comment s'appellent les arbres de la mangrove ?", r: ["Palétuviers", "Baobabs", "Fromagers"], b: 0, e: "Ils supportent l'eau salée." },
+    { q: "Quel rôle joue la mangrove pour les poissons ?", r: ["Frayère", "Désert", "Barrage"], b: 0, e: "Les jeunes poissons y grandissent à l'abri." },
+    { q: "Une menace directe de la mangrove au Cameroun :", r: ["La coupe de bois pour le fumage", "La neige", "Le tourisme spatial"], b: 0, e: "Le fumage du poisson consomme beaucoup de bois." }
+  ]
+});
+
+VRT_L("3e-ecm-democratie", {
+  c: "3e", m: "ecm", cle: "Les Fondements de la Démocratie", titre: "Les fondements de la démocratie", duree: 15,
+  accroche: "Qui décide ? Le peuple. Comment ? C'est tout l'enjeu.",
+  intro: "Élire un délégué de classe, voter une loi, critiquer un dirigeant sans aller en prison : tout cela repose sur les fondements de la démocratie.",
+  objectifs: ["définir la démocratie", "citer ses principes fondamentaux", "distinguer ses formes"],
+  parties: [
+    { t: "Définition", html:
+      "<p>Le mot vient du grec <em>dêmos</em> (le peuple) et <em>kratos</em> (le pouvoir). Le président américain Abraham Lincoln l'a résumée ainsi : « le gouvernement du peuple, par le peuple, pour le peuple ».</p>",
+      retenir: "En démocratie, le pouvoir appartient au peuple." },
+    { t: "Les piliers de la démocratie", html:
+      "<ul><li><strong>La souveraineté du peuple</strong>, exprimée par des élections libres, régulières et transparentes.</li><li><strong>La séparation des pouvoirs</strong> (législatif, exécutif, judiciaire), théorisée par Montesquieu.</li><li><strong>L'État de droit</strong> : gouvernants et gouvernés obéissent aux mêmes lois.</li><li><strong>Les libertés fondamentales</strong> : expression, presse, réunion, association.</li><li><strong>Le pluralisme</strong> : plusieurs partis et opinions peuvent exister.</li></ul>",
+      illus: { legende: "Les trois pouvoirs séparés se contrôlent mutuellement.", svg:
+      "<svg viewBox='0 0 460 200' role='img' aria-label='Les trois pouvoirs'><path d='M230 18 L430 70 H30 Z' fill='#FFF6DA' stroke='#6B4E00' stroke-width='2'/><text x='230' y='60' text-anchor='middle' font-size='15' font-weight='700' fill='#6B4E00'>LE PEUPLE SOUVERAIN</text><g fill='#FFC93C' stroke='#6B4E00' stroke-width='2'><rect x='50' y='78' width='26' height='92'/><rect x='217' y='78' width='26' height='92'/><rect x='384' y='78' width='26' height='92'/></g><rect x='20' y='170' width='420' height='14' fill='#D9A21B'/><g font-size='13' font-weight='700' fill='#142554' text-anchor='middle'><text x='63' y='198'>LÉGISLATIF</text><text x='230' y='198'>EXÉCUTIF</text><text x='397' y='198'>JUDICIAIRE</text></g><g font-size='11' fill='#636A80' text-anchor='middle'><text x='130' y='120'>vote les lois</text><text x='300' y='120'>applique les lois</text><text x='330' y='150'>juge</text></g></svg>" },
+      retenir: "Élections, séparation des pouvoirs, État de droit, libertés, pluralisme." },
+    { t: "Les formes de démocratie", html:
+      "<ul><li><strong>Directe</strong> : les citoyens votent eux-mêmes les décisions (Athènes antique).</li><li><strong>Représentative</strong> : ils élisent des représentants (députés, sénateurs, conseillers municipaux).</li><li><strong>Semi-directe</strong> : représentation + référendum.</li></ul><p>Au Cameroun, la Constitution organise une démocratie représentative, avec la possibilité du référendum.</p>",
+      retenir: "Aujourd'hui, la plupart des démocraties sont représentatives." }
+  ],
+  revision: ["Démocratie : pouvoir du peuple (dêmos + kratos).", "Formule de Lincoln.", "Piliers : élections, séparation des pouvoirs, État de droit, libertés, pluralisme.", "Formes : directe, représentative, semi-directe."],
+  exo: "<p>Montre, à partir de l'élection du délégué de ta classe, trois principes démocratiques respectés (ou non).</p>",
+  quiz: [
+    { q: "Que signifie « kratos » ?", r: ["le peuple", "le pouvoir", "la loi"], b: 1, e: "Dêmos = peuple ; kratos = pouvoir." },
+    { q: "Qui a théorisé la séparation des pouvoirs ?", r: ["Montesquieu", "Lincoln", "Bismarck"], b: 0, e: "Dans De l'esprit des lois (1748)." },
+    { q: "Élire des députés relève de la démocratie…", r: ["directe", "représentative", "monarchique"], b: 1, e: "On confie le pouvoir à des représentants." }
+  ]
+});
+
+VRT_L("3e-ecm-sieges", {
+  c: "3e", m: "ecm", cle: "Calcul des sièges", titre: "TP : calculer les sièges au scrutin proportionnel", duree: 20,
+  scenes: ["3e-ecm-election-proportionnelle"],
+  accroche: "4 listes, 7 sièges, 12 000 voix : à toi de répartir.",
+  intro: "Dans un scrutin proportionnel, chaque liste obtient un nombre de sièges proportionnel à ses voix. Mais comment faire quand la division ne tombe pas juste ? Voici une méthode.",
+  objectifs: ["calculer un quotient électoral", "attribuer les sièges au quotient", "répartir les sièges restants"],
+  parties: [
+    { t: "Le quotient électoral", html:
+      "<p class='formule'>quotient électoral = suffrages exprimés ÷ nombre de sièges</p><div class='ex'><b>Exemple</b>12 000 suffrages exprimés, 6 sièges : quotient = 12 000 ÷ 6 = <strong>2 000</strong> voix pour un siège.</div>",
+      retenir: "On compte les suffrages exprimés : bulletins nuls et blancs exclus." },
+    { t: "Répartir les sièges", html:
+      "<ol><li>Chaque liste reçoit autant de sièges que de fois le quotient dans ses voix (partie entière).</li><li>Les sièges restants vont aux listes qui ont les <strong>plus forts restes</strong>.</li></ol><div class='tab-scroll'><table><thead><tr><th>Liste</th><th>Voix</th><th>Sièges au quotient</th><th>Reste</th><th>Total</th></tr></thead><tbody><tr><th>A</th><td>5 300</td><td>2</td><td>1 300</td><td><b>3</b></td></tr><tr><th>B</th><td>3 900</td><td>1</td><td>1 900</td><td><b>2</b></td></tr><tr><th>C</th><td>1 800</td><td>0</td><td>1 800</td><td><b>1</b></td></tr><tr><th>D</th><td>1 000</td><td>0</td><td>1 000</td><td>0</td></tr></tbody></table></div><p>3 sièges sont attribués au quotient ; les 3 restants vont aux plus forts restes : B (1 900), C (1 800), A (1 300).</p>",
+      retenir: "Quotient d'abord, plus forts restes ensuite." },
+    { t: "Et au Cameroun ?", html:
+      "<p>Le Code électoral camerounais (loi de 2012) combine, pour les législatives et les municipales, le scrutin <strong>majoritaire</strong> et la <strong>représentation proportionnelle</strong>, avec des règles particulières (prime à la liste arrivée en tête, seuil de voix). Ton enseignant précisera les règles en vigueur ; la méthode du quotient reste la base du calcul.</p>",
+      retenir: "Toujours lire le texte de loi avant de calculer : les règles varient." }
+  ],
+  revision: ["Quotient = suffrages exprimés ÷ sièges.", "Sièges au quotient = partie entière de voix ÷ quotient.", "Sièges restants aux plus forts restes.", "Au Cameroun : système mixte (majoritaire + proportionnel)."],
+  exo: "<p>5 sièges ; 10 000 exprimés ; A 4 700, B 3 100, C 2 200. Répartis les sièges. <em>(Quotient 2 000 ; A 2, B 1, C 1 au quotient ; reste : 1 siège pour le plus fort reste, B (1 100) → A 2, B 2, C 1.)</em></p>",
+  quiz: [
+    { q: "9 000 suffrages exprimés, 3 sièges : quotient ?", r: ["3 000", "9 000", "300"], b: 0, e: "9 000 ÷ 3 = 3 000." },
+    { q: "Les bulletins blancs comptent-ils dans les suffrages exprimés ?", r: ["Oui", "Non"], b: 1, e: "Seuls les bulletins valables pour une liste comptent." },
+    { q: "Après le quotient, les sièges restants vont…", r: ["au hasard", "aux plus forts restes", "toujours à la première liste"], b: 1, e: "C'est la méthode des plus forts restes." }
+  ]
+});
+
+VRT_L("tle-philo-passions", {
+  c: "Tle A", m: "philo", cle: "Les passions : définition", titre: "Les passions : définition et manifestations", duree: 25,
+  scenes: ["tle-philo-passion-raison"],
+  accroche: "La passion fait-elle notre grandeur ou notre esclavage ?",
+  intro: "On dit d'un footballeur qu'il est « passionné », d'un jaloux qu'il est « aveuglé par la passion ». Le même mot désigne-t-il une force ou une faiblesse ?",
+  objectifs: ["définir la passion et la distinguer de l'émotion", "décrire ses manifestations", "poser le problème philosophique de la passion"],
+  parties: [
+    { t: "Définir la passion", html:
+      "<p>Le mot vient du latin <em>pati</em> : <strong>subir</strong>, souffrir. Étymologiquement, la passion est ce que l'âme subit, par opposition à l'action.</p><div class='def'><b>Définition</b>La passion est une inclination exclusive et durable qui oriente toute la vie affective et mentale d'une personne vers un objet unique.</div><ul><li>L'<strong>émotion</strong> est brusque et brève (la peur devant un serpent).</li><li>La <strong>passion</strong> est durable et organise la vie autour de son objet (l'ambition, l'amour, la jalousie, le jeu).</li></ul>",
+      retenir: "Émotion : un choc passager. Passion : une orientation durable de toute la vie." },
+    { t: "Les manifestations de la passion", html:
+      "<ul><li><strong>Exclusivité</strong> : l'objet de la passion envahit la pensée ; le reste perd de l'importance.</li><li><strong>Cristallisation</strong> : le passionné embellit son objet et ne voit plus ses défauts.</li><li><strong>Logique propre</strong> : il raisonne beaucoup, mais au service de sa passion.</li><li><strong>Énergie</strong> : la passion mobilise des forces considérables.</li></ul>",
+      illus: { legende: "Le problème : la passion, moteur ou maîtresse de la raison ?", svg:
+      "<svg viewBox='0 0 460 180' role='img' aria-label='Balance entre passion et raison'><path d='M230 30v120' stroke='#352C72' stroke-width='4'/><path d='M120 60 L340 40' stroke='#352C72' stroke-width='4' stroke-linecap='round'/><path d='M190 160h80' stroke='#352C72' stroke-width='6' stroke-linecap='round'/><g stroke='#352C72' stroke-width='2'><path d='M120 60 L90 110 M120 60 L150 110'/><path d='M340 40 L310 90 M340 40 L370 90'/></g><path d='M80 110 h80 a40 16 0 0 1 -80 0z' fill='#F5B57A' stroke='#6B2A00' stroke-width='2'/><path d='M300 90 h80 a40 16 0 0 1 -80 0z' fill='#ADA4DE' stroke='#352C72' stroke-width='2'/><g font-size='15' font-weight='700' text-anchor='middle'><text x='120' y='150' fill='#6B2A00'>PASSION</text><text x='340' y='130' fill='#352C72'>RAISON</text></g><g font-size='11' fill='#636A80' text-anchor='middle'><text x='120' y='168'>force, énergie, élan</text><text x='340' y='148'>mesure, jugement</text></g></svg>" },
+      retenir: "La passion voit tout à travers son objet." },
+    { t: "Le problème : grandeur ou servitude ?", html:
+      "<h3>La passion asservit</h3><p>Pour une longue tradition (les stoïciens, Spinoza), la passion est une <strong>servitude</strong> : l'homme passionné n'est plus maître de lui ; elle le pousse au crime (jalousie, vengeance).</p><h3>La passion grandit</h3><p>Pour Hegel, « rien de grand ne s'est accompli dans le monde sans passion » : les grands bâtisseurs, inventeurs, libérateurs étaient passionnés. Descartes, dans <em>Les Passions de l'âme</em> (1649), juge que les passions sont « toutes bonnes de leur nature » si la raison les gouverne.</p>",
+      retenir: "Problème à poser en dissertation : la passion est-elle un obstacle ou un moteur pour l'homme ?" }
+  ],
+  revision: ["Étymologie : pati, subir.", "Passion ≠ émotion : durable, exclusive.", "Manifestations : exclusivité, cristallisation, logique propre, énergie.", "Thèse 1 : la passion asservit (stoïciens, Spinoza).", "Thèse 2 : la passion grandit (Hegel) ; la régler par la raison (Descartes)."],
+  exo: "<p>Sujet : « Faut-il se méfier de ses passions ? » Rédige l'introduction : amorce, problématique, annonce du plan.</p>",
+  quiz: [
+    { q: "Que signifie le latin pati ?", r: ["agir", "subir", "aimer"], b: 1, e: "La passion est d'abord ce que l'on subit." },
+    { q: "Qu'est-ce qui distingue la passion de l'émotion ?", r: ["Sa durée et son exclusivité", "Son intensité seulement", "Rien"], b: 0, e: "L'émotion est brève ; la passion organise la vie." },
+    { q: "Quel philosophe valorise la passion comme moteur de l'histoire ?", r: ["Hegel", "Épictète", "Spinoza"], b: 0, e: "« Rien de grand… sans passion »." },
+    { q: "Qui a écrit Les Passions de l'âme ?", r: ["Kant", "Descartes", "Platon"], b: 1, e: "Publié en 1649." }
+  ],
+  examen: { t: "Dissertations de philosophie corrigées", href: "/corriges/" }
+});
+
+VRT_L("tle-philo-liberte", {
+  c: "Tle A", m: "philo", cle: "La liberté comme fondement de la responsabilité", titre: "La liberté, fondement de la responsabilité", duree: 25,
+  scenes: ["philo-socrate-courage"],
+  accroche: "Peut-on être coupable de ce qu'on n'a pas choisi ?",
+  intro: "Un élève qui a recopié la copie de son voisin dira : « Ce n'est pas ma faute, il m'a laissé faire. » Mais si l'on est libre, on doit répondre de ses actes.",
+  objectifs: ["définir liberté et responsabilité", "montrer le lien entre les deux", "examiner les limites de la responsabilité"],
+  parties: [
+    { t: "Deux notions liées", html:
+      "<div class='def'><b>Liberté</b>Pouvoir de se déterminer soi-même, de choisir et d'agir sans contrainte.</div><div class='def'><b>Responsabilité</b>Obligation de répondre de ses actes et d'en assumer les conséquences (du latin <em>respondere</em>, répondre).</div>",
+      retenir: "Être responsable, c'est devoir « répondre » de ce que l'on a choisi." },
+    { t: "Pas de responsabilité sans liberté", html:
+      "<p>On ne punit pas un fou, ni celui qui a agi sous la menace d'une arme : sans liberté, il n'y a pas de faute. Kant fonde la morale sur l'<strong>autonomie</strong> de la volonté : parce que l'homme peut se donner sa propre loi, il est responsable. Pour Sartre, l'homme est « condamné à être libre » : il ne peut se cacher derrière sa nature, son milieu ou les autres ; il porte le poids de ses choix.</p>",
+      illus: { legende: "Chaîne de la responsabilité : sans choix libre, la chaîne se rompt.", svg:
+      "<svg viewBox='0 0 460 120' role='img' aria-label='Liberté, choix, acte, responsabilité'><g font-size='13' font-weight='700' text-anchor='middle'><rect x='10' y='36' width='96' height='46' rx='23' fill='#ADA4DE'/><text x='58' y='64' fill='#352C72'>liberté</text><rect x='126' y='36' width='96' height='46' rx='23' fill='#EAE7F7' stroke='#5B4FA8'/><text x='174' y='64' fill='#352C72'>choix</text><rect x='242' y='36' width='96' height='46' rx='23' fill='#EAE7F7' stroke='#5B4FA8'/><text x='290' y='64' fill='#352C72'>acte</text><rect x='358' y='36' width='96' height='46' rx='23' fill='#FFC93C'/><text x='406' y='64' fill='#142554'>répondre</text></g><g stroke='#5B4FA8' stroke-width='3'><path d='M106 59h20M222 59h20M338 59h20'/></g></svg>" },
+      retenir: "La responsabilité suppose la liberté : on n'accuse pas une pierre qui tombe." },
+    { t: "Les limites", html:
+      "<ul><li><strong>Les déterminismes</strong> (sociaux, biologiques, psychologiques) diminuent-ils notre responsabilité ? Le droit reconnaît des circonstances atténuantes.</li><li><strong>L'inconscient</strong> (Freud) : certains actes échappent à la conscience.</li><li>Mais connaître ces déterminismes permet justement de mieux s'en libérer : la liberté est aussi une <strong>conquête</strong>.</li></ul>",
+      retenir: "Plus je comprends ce qui me détermine, plus je peux en répondre." }
+  ],
+  revision: ["Liberté : pouvoir de se déterminer soi-même.", "Responsabilité : répondre de ses actes.", "Sans liberté, pas de faute (folie, contrainte).", "Kant : autonomie ; Sartre : condamné à être libre.", "Limites : déterminismes, inconscient ; la liberté se conquiert."],
+  exo: "<p>Sujet : « Suis-je responsable de ce que je suis ? » Propose un plan dialectique en trois parties.</p>",
+  quiz: [
+    { q: "Respondere signifie…", r: ["répondre", "respecter", "reposer"], b: 0, e: "Être responsable, c'est répondre de ses actes." },
+    { q: "Pourquoi ne condamne-t-on pas un fou de la même façon ?", r: ["Il n'est pas libre de ses actes", "Il est trop pauvre", "Il est absent"], b: 0, e: "Sans discernement, pas de liberté réelle." },
+    { q: "Qui a dit que l'homme est « condamné à être libre » ?", r: ["Sartre", "Descartes", "Platon"], b: 0, e: "Dans L'existentialisme est un humanisme." }
+  ]
+});
+
+/* Leçons rédigées VÉRITAS — langues vivantes, langues et cultures nationales, orientation-conseil. */
+VRT_L("3e-en-articles", {
+  c: "3e", m: "anglais", cle: "Definite and indefinite articles", titre: "Definite and indefinite articles: a, an, the", duree: 15,
+  accroche: "A mango, an orange, the market: three little words, many rules.",
+  intro: "« I bought <em>a</em> mango at <em>the</em> market. » In English, small words called articles tell us if we are speaking about something new or something we already know.",
+  objectifs: ["use a / an correctly", "use the for known or unique things", "know when to use no article"],
+  parties: [
+    { t: "A or an?", html:
+      "<p>We use <strong>a / an</strong> with a singular countable noun mentioned for the first time.</p><ul><li><strong>a</strong> before a consonant <em>sound</em>: a book, a university (« you »), a European.</li><li><strong>an</strong> before a vowel <em>sound</em>: an apple, an hour (the h is silent), an honest man.</li></ul>",
+      retenir: "Listen to the SOUND, not the letter: a uniform, an hour." },
+    { t: "The", html:
+      "<p>We use <strong>the</strong> when the listener knows which thing we mean:</p><ul><li>it was mentioned before: <em>I saw a taxi. The taxi was yellow.</em></li><li>it is unique: <em>the sun, the moon, the President of the Republic</em> ;</li><li>with superlatives: <em>the tallest girl in the class</em> ;</li><li>with rivers, oceans, some countries: <em>the Wouri, the Atlantic, the United States</em>.</li></ul>",
+      illus: { legende: "First mention: a. Second mention: the.", svg:
+      "<svg viewBox='0 0 460 150' role='img' aria-label='First mention a, second mention the'><rect x='10' y='20' width='200' height='110' rx='16' fill='#FBE4EE' stroke='#6E1F43' stroke-width='2'/><text x='110' y='56' text-anchor='middle' font-size='17' fill='#142554'>I saw <tspan font-weight='700' fill='#B03A6E'>a</tspan> taxi.</text><text x='110' y='92' text-anchor='middle' font-size='13' fill='#636A80'>new information</text><path d='M216 75h28' stroke='#142554' stroke-width='3'/><rect x='250' y='20' width='200' height='110' rx='16' fill='#FFF6DA' stroke='#6B4E00' stroke-width='2'/><text x='350' y='56' text-anchor='middle' font-size='17' fill='#142554'><tspan font-weight='700' fill='#9A6F00'>The</tspan> taxi was yellow.</text><text x='350' y='92' text-anchor='middle' font-size='13' fill='#636A80'>known information</text></svg>" },
+      retenir: "New → a / an. Known or unique → the." },
+    { t: "No article", html:
+      "<p>No article with plural or uncountable nouns used in general, with most countries, cities, languages and school subjects:</p><ul><li><em>Children like sweets.</em> <em>Water is important.</em></li><li><em>Cameroon, Douala, English, mathematics.</em></li></ul><div class='attention'><b>French speakers, watch out!</b>« J'aime <u>les</u> mangues » = I like mangoes (no article).</div>",
+      retenir: "General statements in the plural: no article." }
+  ],
+  revision: ["a + consonant sound, an + vowel sound.", "the: already mentioned, unique, superlative.", "the + rivers and oceans: the Wouri, the Atlantic.", "No article for general plurals, countries, languages, subjects."],
+  exo: "<p>Fill in with a, an, the or Ø: 1. ___ elephant is ___ biggest land animal. 2. I like ___ football. 3. She is ___ honest girl. <em>(An / the ; Ø ; an)</em></p>",
+  quiz: [
+    { q: "___ hour ago.", r: ["A", "An", "The"], b: 1, e: "The h is silent: vowel sound." },
+    { q: "___ Wouri is a river in Douala.", r: ["A", "The", "Ø"], b: 1, e: "Rivers take the." },
+    { q: "I like ___ mangoes.", r: ["the", "a", "Ø"], b: 2, e: "General statement in the plural: no article." }
+  ]
+});
+
+VRT_L("3e-en-present", {
+  c: "3e", m: "anglais", cle: "Revise the present tenses", titre: "Revise the present tenses: simple and continuous", duree: 15,
+  accroche: "Every day I walk to school; right now I am writing. Two presents, two uses.",
+  intro: "English has two present tenses. One talks about habits and facts, the other about what is happening now.",
+  objectifs: ["form the simple present and the present continuous", "choose the right tense", "recognise time markers"],
+  parties: [
+    { t: "The simple present", html:
+      "<p>For <strong>habits, routines and general truths</strong>.</p><p class='formule'>I / you / we / they play — he / she / it plays</p><ul><li>Negative: <em>She does not (doesn't) play.</em></li><li>Question: <em>Does she play?</em></li><li>Markers: every day, always, usually, often, sometimes, never.</li></ul>",
+      retenir: "He, she, it: add -s! (He goes, she watches, it flies.)" },
+    { t: "The present continuous", html:
+      "<p>For <strong>actions happening now</strong> or temporary situations.</p><p class='formule'>am / is / are + verb-ing</p><ul><li><em>I am reading. They are playing.</em></li><li>Markers: now, right now, at the moment, look!, listen!</li></ul>",
+      illus: { legende: "Habit (always) or now (at this moment)?", svg:
+      "<svg viewBox='0 0 460 140' role='img' aria-label='Timeline simple present and present continuous'><line x1='20' y1='80' x2='440' y2='80' stroke='#142554' stroke-width='2'/><g fill='#E79BBE'><circle cx='60' cy='80' r='7'/><circle cx='120' cy='80' r='7'/><circle cx='180' cy='80' r='7'/><circle cx='280' cy='80' r='7'/><circle cx='340' cy='80' r='7'/><circle cx='400' cy='80' r='7'/></g><rect x='212' y='58' width='36' height='44' rx='8' fill='#FFC93C'/><text x='230' y='120' text-anchor='middle' font-size='13' font-weight='700' fill='#9A6F00'>NOW</text><text x='120' y='40' text-anchor='middle' font-size='13' fill='#B03A6E'>I walk to school every day.</text><text x='330' y='40' text-anchor='middle' font-size='13' fill='#9A6F00'>I am writing now.</text></svg>" },
+      retenir: "Habit → simple present. Now → present continuous." },
+    { t: "Verbs that don't like -ing", html:
+      "<p>State verbs are usually not used in the continuous: <em>know, like, love, want, need, understand, believe</em>.</p><div class='attention'><b>Wrong / Right</b><s>I am knowing</s> → I know. <s>She is wanting rice</s> → She wants rice.</div>",
+      retenir: "Feelings and thoughts: simple present." }
+  ],
+  revision: ["Simple present: habits, facts; -s with he/she/it.", "do/does for negatives and questions.", "Present continuous: am/is/are + -ing, for now.", "State verbs (know, like, want…) stay simple."],
+  exo: "<p>Put the verbs in the correct tense: 1. Look! The baby (sleep). 2. My father (work) in Garoua. 3. I (not understand) this word. <em>(is sleeping ; works ; don't understand)</em></p>",
+  quiz: [
+    { q: "She ___ to church every Sunday.", r: ["go", "goes", "is going"], b: 1, e: "Habit + she: goes." },
+    { q: "Listen! Somebody ___ .", r: ["sings", "is singing", "sing"], b: 1, e: "Listen! = happening now." },
+    { q: "I ___ the answer.", r: ["know", "am knowing", "knowing"], b: 0, e: "Know is a state verb." }
+  ]
+});
+
+VRT_L("3e-de-verbes", {
+  c: "3e", m: "allemand", cle: "Conjuguer les verbes faibles", titre: "Les verbes faibles (réguliers) au présent", duree: 15,
+  accroche: "spielen, lernen, kaufen : un seul modèle pour des centaines de verbes.",
+  intro: "En allemand, la plupart des verbes sont « faibles » : ils se conjuguent tous sur le même modèle. Une fois le modèle connu, tu peux en conjuguer des centaines.",
+  objectifs: ["conjuguer un verbe faible au présent", "connaître les cas particuliers en -t, -d, -n", "utiliser les verbes dans une phrase"],
+  parties: [
+    { t: "Le modèle", html:
+      "<p>On enlève <strong>-en</strong> de l'infinitif pour obtenir le radical (<em>spielen</em> → <em>spiel-</em>), puis on ajoute les terminaisons.</p><div class='tab-scroll'><table><thead><tr><th>Pronom</th><th>Terminaison</th><th>spielen (jouer)</th></tr></thead><tbody><tr><th>ich</th><td>-e</td><td>ich spiel<b>e</b></td></tr><tr><th>du</th><td>-st</td><td>du spiel<b>st</b></td></tr><tr><th>er / sie / es</th><td>-t</td><td>er spiel<b>t</b></td></tr><tr><th>wir</th><td>-en</td><td>wir spiel<b>en</b></td></tr><tr><th>ihr</th><td>-t</td><td>ihr spiel<b>t</b></td></tr><tr><th>sie / Sie</th><td>-en</td><td>sie spiel<b>en</b></td></tr></tbody></table></div>",
+      retenir: "e – st – t – en – t – en : la chanson des terminaisons." },
+    { t: "Les cas particuliers", html:
+      "<ul><li>Radical en <strong>-t</strong> ou <strong>-d</strong> : on ajoute un <strong>e</strong> pour prononcer : du arbeit<b>e</b>st, er arbeit<b>e</b>t, ihr find<b>e</b>t.</li><li>Infinitif en <strong>-eln</strong> / <strong>-ern</strong> : wir/sie prennent seulement <strong>-n</strong> : wir wander<b>n</b>, sie sammel<b>n</b>.</li></ul>",
+      retenir: "arbeiten → du arbeitest : le e rend la prononciation possible." },
+    { t: "En situation", html:
+      "<div class='ex'><b>Beispiele</b><em>Ich lerne Deutsch. — Du kaufst Bananen auf dem Markt. — Wir spielen Fußball nach der Schule.</em></div><p>Verbes faibles utiles : lernen (apprendre), kaufen (acheter), wohnen (habiter), machen (faire), sagen (dire), fragen (demander), hören (écouter), kochen (cuisiner).</p>",
+      retenir: "Le verbe conjugué est toujours en 2ᵉ position dans la phrase déclarative." }
+  ],
+  revision: ["Radical = infinitif sans -en.", "Terminaisons : -e, -st, -t, -en, -t, -en.", "Radical en -t/-d : du arbeitest, er arbeitet.", "Verbe conjugué en 2ᵉ position."],
+  exo: "<p>Conjugue au présent : 1. du (wohnen) in Yaoundé. 2. er (arbeiten) viel. 3. wir (kaufen) Brot. <em>(wohnst ; arbeitet ; kaufen)</em></p>",
+  quiz: [
+    { q: "du ___ (lernen)", r: ["lernt", "lernst", "lernen"], b: 1, e: "du → -st." },
+    { q: "er ___ (arbeiten)", r: ["arbeitt", "arbeitet", "arbeiten"], b: 1, e: "Radical en -t : on ajoute -e-." },
+    { q: "Quelle est la terminaison de « ich » ?", r: ["-e", "-t", "-en"], b: 0, e: "ich spiele, ich lerne." }
+  ]
+});
+
+VRT_L("3e-de-prepositions", {
+  c: "3e", m: "allemand", cle: "prépositions exprimant la direction et la position", titre: "Wo? Wohin? Les prépositions de position et de direction", duree: 20,
+  accroche: "Das Buch liegt auf dem Tisch… Ich lege das Buch auf den Tisch.",
+  intro: "« Où est le livre ? » et « Où vas-tu le mettre ? » ne se disent pas de la même façon en allemand. Neuf prépositions changent de cas selon la question.",
+  objectifs: ["connaître les prépositions mixtes", "choisir entre datif et accusatif", "décrire une pièce ou un trajet"],
+  parties: [
+    { t: "Les neuf prépositions mixtes", html:
+      "<p><strong>in</strong> (dans), <strong>an</strong> (contre, au bord de), <strong>auf</strong> (sur), <strong>über</strong> (au-dessus de), <strong>unter</strong> (sous), <strong>vor</strong> (devant), <strong>hinter</strong> (derrière), <strong>neben</strong> (à côté de), <strong>zwischen</strong> (entre).</p>",
+      illus: { legende: "Position du ballon par rapport à la boîte.", svg:
+      "<svg viewBox='0 0 460 190' role='img' aria-label='Prépositions de lieu autour d une boîte'><rect x='170' y='70' width='120' height='80' rx='6' fill='#FBE4EE' stroke='#6E1F43' stroke-width='2.5'/><g fill='#FFC93C' stroke='#9A6F00' stroke-width='2'><circle cx='230' cy='112' r='11'/><circle cx='230' cy='58' r='11'/><circle cx='230' cy='20' r='11'/><circle cx='230' cy='170' r='11'/><circle cx='140' cy='120' r='11'/><circle cx='320' cy='120' r='11'/></g><g font-size='13' font-weight='700' fill='#142554'><text x='246' y='116'>in</text><text x='246' y='62'>auf</text><text x='246' y='24'>über</text><text x='246' y='174'>unter</text><text x='70' y='124'>neben</text><text x='338' y='124'>neben</text></g><text x='20' y='182' font-size='12' fill='#636A80'>(vor = devant, hinter = derrière, zwischen = entre)</text></svg>" },
+      retenir: "Neuf prépositions : in, an, auf, über, unter, vor, hinter, neben, zwischen." },
+    { t: "Wo? → datif ; Wohin? → accusatif", html:
+      "<ul><li><strong>Wo?</strong> (où ? position, pas de déplacement) → <strong>datif</strong> : <em>Das Heft liegt auf <b>dem</b> Tisch.</em></li><li><strong>Wohin?</strong> (où vas-tu ? direction, déplacement) → <strong>accusatif</strong> : <em>Ich lege das Heft auf <b>den</b> Tisch.</em></li></ul><div class='tab-scroll'><table><thead><tr><th></th><th>masculin</th><th>féminin</th><th>neutre</th><th>pluriel</th></tr></thead><tbody><tr><th>datif (wo?)</th><td>dem</td><td>der</td><td>dem</td><td>den …n</td></tr><tr><th>accusatif (wohin?)</th><td>den</td><td>die</td><td>das</td><td>die</td></tr></tbody></table></div>",
+      retenir: "Mouvement vers un lieu = accusatif ; on est déjà là = datif." },
+    { t: "Les contractions", html:
+      "<p>in + dem = <strong>im</strong> ; an + dem = <strong>am</strong> ; in + das = <strong>ins</strong> ; an + das = <strong>ans</strong>.</p><div class='ex'><b>Beispiele</b><em>Ich bin im Klassenzimmer. — Ich gehe ins Klassenzimmer. — Wir sind am Strand von Kribi.</em></div>",
+      retenir: "im / ins : je suis dans / je vais dans." }
+  ],
+  revision: ["in, an, auf, über, unter, vor, hinter, neben, zwischen.", "Wo? → datif (dem, der, dem, den).", "Wohin? → accusatif (den, die, das, die).", "im, am, ins, ans."],
+  exo: "<p>Complète : 1. Die Katze schläft unter ___ Bett (n). 2. Ich stelle die Flasche auf ___ Tisch (m). 3. Er geht ___ Kino. <em>(dem ; den ; ins)</em></p>",
+  quiz: [
+    { q: "Ich gehe ___ Schule (f). (wohin?)", r: ["in die", "in der", "im"], b: 0, e: "Direction : accusatif féminin die." },
+    { q: "Das Buch liegt auf ___ Tisch (m).", r: ["den", "dem", "der"], b: 1, e: "Position : datif masculin dem." },
+    { q: "in + das = ?", r: ["im", "ins", "ans"], b: 1, e: "ins = in das." }
+  ]
+});
+
+VRT_L("3e-es-familia", {
+  c: "3e", m: "espagnol", cle: "Arbre généalogique", titre: "Mi familia : présenter sa famille", duree: 15,
+  accroche: "Mi abuela, mis primos, mi tía : toute la famille en espagnol.",
+  intro: "Présenter sa famille est l'un des premiers actes de communication. Apprends le vocabulaire, les possessifs et les verbes pour parler des tiens.",
+  objectifs: ["nommer les membres de la famille", "utiliser les adjectifs possessifs", "présenter sa famille à l'oral"],
+  parties: [
+    { t: "El vocabulario", html:
+      "<div class='tab-scroll'><table><thead><tr><th>Español</th><th>Français</th><th>Español</th><th>Français</th></tr></thead><tbody><tr><td>el padre / la madre</td><td>le père / la mère</td><td>el abuelo / la abuela</td><td>le grand-père / la grand-mère</td></tr><tr><td>el hermano / la hermana</td><td>le frère / la sœur</td><td>el tío / la tía</td><td>l'oncle / la tante</td></tr><tr><td>el hijo / la hija</td><td>le fils / la fille</td><td>el primo / la prima</td><td>le cousin / la cousine</td></tr><tr><td>los padres</td><td>les parents</td><td>el sobrino</td><td>le neveu</td></tr></tbody></table></div>",
+      illus: { legende: "Un arbre généalogique sur trois générations.", svg:
+      "<svg viewBox='0 0 460 200' role='img' aria-label='Arbre généalogique'><g stroke='#6E1F43' stroke-width='2' fill='none'><path d='M160 40h140M230 40v40M120 80h220M120 80v30M340 80v30M120 140v20M80 160h80M80 160v10M160 160v10'/></g><g font-size='12' text-anchor='middle'><rect x='100' y='22' width='70' height='28' rx='14' fill='#FBE4EE'/><text x='135' y='41' fill='#142554'>el abuelo</text><rect x='290' y='22' width='72' height='28' rx='14' fill='#FBE4EE'/><text x='326' y='41' fill='#142554'>la abuela</text><rect x='80' y='108' width='80' height='28' rx='14' fill='#FFF6DA'/><text x='120' y='127' fill='#142554'>mi padre</text><rect x='298' y='108' width='84' height='28' rx='14' fill='#FFF6DA'/><text x='340' y='127' fill='#142554'>mi tía</text><rect x='40' y='170' width='80' height='26' rx='13' fill='#B03A6E'/><text x='80' y='188' fill='#fff' font-weight='700'>yo</text><rect x='126' y='170' width='80' height='26' rx='13' fill='#E79BBE'/><text x='166' y='188' fill='#142554'>mi hermana</text><rect x='300' y='150' width='80' height='26' rx='13' fill='#E79BBE'/><text x='340' y='168' fill='#142554'>mi primo</text></g><path d='M340 136v14' stroke='#6E1F43' stroke-width='2'/></svg>" },
+      retenir: "Le masculin pluriel désigne le groupe : los padres = le père et la mère." },
+    { t: "Los posesivos", html:
+      "<p><strong>mi / mis</strong> (mon, ma / mes), <strong>tu / tus</strong> (ton, ta / tes), <strong>su / sus</strong> (son, sa, leur / ses, leurs), <strong>nuestro, -a, -os, -as</strong> (notre / nos), <strong>vuestro…</strong> (votre / vos).</p><div class='ex'><b>Ejemplos</b><em>Mi madre se llama Ngono. Mis hermanos viven en Bafoussam. Nuestra casa es grande.</em></div>",
+      retenir: "mi hermano, mis hermanos : le possessif s'accorde avec ce qui est possédé." },
+    { t: "Presentar a su familia", html:
+      "<p>Phrases utiles : <em>Somos cinco en casa. — Tengo dos hermanos y una hermana. — Mi padre es profesor y mi madre es comerciante. — Mi abuela vive en el pueblo.</em></p><div class='attention'><b>Attention</b>Avec les personnes, on met <strong>a</strong> devant le COD : <em>Quiero mucho <b>a</b> mi abuela.</em></div>",
+      retenir: "tener (tengo, tienes, tiene…) pour dire combien de frères et sœurs on a." }
+  ],
+  revision: ["padre, madre, hermano, abuelo, tío, primo…", "mi/mis, tu/tus, su/sus, nuestro…", "Tengo dos hermanos.", "a devant un COD de personne."],
+  exo: "<p>Présente ta famille en six phrases en espagnol (nombre, noms, métiers, lieu de vie).</p>",
+  quiz: [
+    { q: "« Mes cousins » se dit…", r: ["mi primos", "mis primos", "su primos"], b: 1, e: "mis + pluriel." },
+    { q: "La hermana de mi padre es mi…", r: ["abuela", "tía", "prima"], b: 1, e: "La sœur du père : la tante." },
+    { q: "Tengo dos ___ (frères).", r: ["hermanas", "hermanos", "hijos"], b: 1, e: "hermanos = frères (ou frères et sœurs)." }
+  ]
+});
+
+VRT_L("3e-es-medico", {
+  c: "3e", m: "espagnol", cle: "Consultations médicales", titre: "En el médico : la consultation et le superlatif", duree: 15,
+  accroche: "Me duele la cabeza… ¡Es la peor gripe del año!",
+  intro: "Chez le médecin, il faut savoir dire où on a mal. Et pour décrire, le superlatif est bien utile.",
+  objectifs: ["nommer les parties du corps", "dire où l'on a mal avec doler", "former le superlatif"],
+  parties: [
+    { t: "¿Qué te duele?", html:
+      "<p>Le verbe <strong>doler</strong> se construit comme <em>gustar</em> : <em>me duele</em> + singulier, <em>me duelen</em> + pluriel.</p><ul><li><em>Me duele la cabeza.</em> (la tête)</li><li><em>Me duele el estómago.</em> (le ventre)</li><li><em>Me duelen los pies.</em> (les pieds)</li><li><em>Tengo fiebre / tos / gripe.</em> (fièvre, toux, grippe)</li></ul>",
+      illus: { legende: "El cuerpo : quelques parties du corps.", svg:
+      "<svg viewBox='0 0 460 220' role='img' aria-label='Silhouette avec parties du corps en espagnol'><g fill='#FBE4EE' stroke='#6E1F43' stroke-width='2'><circle cx='230' cy='40' r='24'/><rect x='200' y='66' width='60' height='80' rx='16'/><rect x='168' y='70' width='22' height='74' rx='11'/><rect x='270' y='70' width='22' height='74' rx='11'/><rect x='204' y='146' width='22' height='64' rx='11'/><rect x='234' y='146' width='22' height='64' rx='11'/></g><g font-size='13' fill='#142554'><text x='290' y='38'>la cabeza</text><text x='60' y='100'>el brazo</text><text x='296' y='112'>el estómago</text><text x='290' y='200'>la pierna</text><text x='70' y='210'>el pie</text></g><g stroke='#B03A6E' stroke-width='1.5'><path d='M254 40h32M120 104h50M260 108h34M258 196h30M118 206h86'/></g></svg>" },
+      retenir: "me duele la cabeza / me duelen los ojos." },
+    { t: "En la consulta", html:
+      "<div class='ex'><b>Diálogo</b><em>— Buenos días, doctor. — Buenos días, ¿qué le pasa? — Me duele la garganta y tengo fiebre. — ¿Desde cuándo? — Desde ayer. — Tome este jarabe tres veces al día y descanse.</em></div>",
+      retenir: "« Desde cuándo » = depuis quand." },
+    { t: "El superlativo", html:
+      "<ul><li>Relatif : <strong>el / la / los / las más</strong> + adjectif + <strong>de</strong> : <em>Es el hospital más grande de la ciudad.</em></li><li>Absolu : adjectif + <strong>-ísimo</strong> : <em>cansado → cansadísimo, grande → grandísimo</em>.</li><li>Irréguliers : <em>bueno → el mejor ; malo → el peor</em>.</li></ul>",
+      retenir: "el más… de ; -ísimo ; el mejor / el peor." }
+  ],
+  revision: ["me duele + singulier ; me duelen + pluriel.", "tengo fiebre, tos, gripe.", "el más grande de… ; grandísimo.", "el mejor / el peor."],
+  exo: "<p>Écris un dialogue de six répliques entre un médecin et un élève qui a mal au ventre.</p>",
+  quiz: [
+    { q: "« J'ai mal aux pieds »", r: ["Me duele los pies", "Me duelen los pies", "Tengo los pies"], b: 1, e: "Pluriel : duelen." },
+    { q: "Superlatif absolu de « cansado » :", r: ["cansadísimo", "más cansado", "el cansado"], b: 0, e: "-ísimo." },
+    { q: "« Le meilleur élève de la classe »", r: ["el más bueno alumno", "el mejor alumno de la clase", "el bueno alumno"], b: 1, e: "bueno → mejor." }
+  ]
+});
+
+VRT_L("1re-it-avverbi", {
+  c: "1re A", m: "italien", cle: "La formation des adverbes en -mente", titre: "Gli avverbi in -mente", duree: 15,
+  accroche: "lento → lentamente, facile → facilmente : la recette des adverbes.",
+  intro: "Comme le français ajoute « -ment » (lentement), l'italien forme beaucoup d'adverbes avec <strong>-mente</strong>. Quelques règles suffisent.",
+  objectifs: ["former un adverbe en -mente", "appliquer les règles de -le / -re", "connaître les adverbes irréguliers"],
+  parties: [
+    { t: "La règle", html:
+      "<ul><li>Adjectif en <strong>-o</strong> : on part du féminin en -a : <em>lento → lenta → lentamente ; sicuro → sicuramente</em>.</li><li>Adjectif en <strong>-e</strong> : on ajoute -mente : <em>veloce → velocemente ; forte → fortemente</em>.</li><li>Adjectif en <strong>-le</strong> ou <strong>-re</strong> : le e tombe : <em>facile → facilmente ; regolare → regolarmente</em>.</li></ul>",
+      illus: { legende: "Trois chemins pour un adverbe.", svg:
+      "<svg viewBox='0 0 460 160' role='img' aria-label='Formation des adverbes'><g font-size='14' fill='#142554'><rect x='10' y='14' width='440' height='38' rx='10' fill='#FBE4EE'/><text x='24' y='38'>lent<tspan font-weight='700'>o</tspan> → lent<tspan fill='#B03A6E' font-weight='700'>a</tspan> → lenta<tspan fill='#B03A6E' font-weight='700'>mente</tspan></text><rect x='10' y='62' width='440' height='38' rx='10' fill='#FFF6DA'/><text x='24' y='86'>veloc<tspan font-weight='700'>e</tspan> → veloce<tspan fill='#9A6F00' font-weight='700'>mente</tspan></text><rect x='10' y='110' width='440' height='38' rx='10' fill='#DDF2F4'/><text x='24' y='134'>facil<tspan font-weight='700' text-decoration='line-through'>e</tspan> → facil<tspan fill='#0E7C86' font-weight='700'>mente</tspan></text></g></svg>" },
+      retenir: "-o → -amente ; -e → -emente ; -le/-re → -lmente / -rmente." },
+    { t: "Les irréguliers", html:
+      "<p><strong>buono → bene</strong>, <strong>cattivo → male</strong>, <strong>migliore → meglio</strong>, <strong>peggiore → peggio</strong>.</p><div class='ex'><b>Esempi</b><em>Parla bene l'italiano. — Oggi sto meglio. — Ha giocato male.</em></div>",
+      retenir: "bene, male, meglio, peggio : à apprendre par cœur." },
+    { t: "En contexte", html:
+      "<p><em>I giovani devono rispettare <b>sinceramente</b> i genitori. — Il dialogo tra generazioni si costruisce <b>pazientemente</b>.</em></p>",
+      retenir: "L'adverbe se place souvent juste après le verbe." }
+  ],
+  revision: ["lento → lentamente.", "veloce → velocemente.", "facile → facilmente.", "bene, male, meglio, peggio."],
+  exo: "<p>Forme l'adverbe : rapido, gentile, particolare, triste. <em>(rapidamente, gentilmente, particolarmente, tristemente)</em></p>",
+  quiz: [
+    { q: "regolare → ?", r: ["regolaremente", "regolarmente", "regolaramente"], b: 1, e: "-re : le e tombe." },
+    { q: "buono → ?", r: ["buonamente", "bene", "meglio"], b: 1, e: "Irrégulier." },
+    { q: "sicuro → ?", r: ["sicuramente", "sicuromente", "sicurmente"], b: 0, e: "Féminin sicura + mente." }
+  ]
+});
+
+VRT_L("1re-it-accordo", {
+  c: "1re A", m: "italien", cle: "Exprimer l'accord et le désaccord", titre: "Esprimere accordo e disaccordo", duree: 15,
+  accroche: "Sono d'accordo… oppure no ! Débattre poliment en italien.",
+  intro: "Dans un débat sur la délinquance juvénile ou les conflits de générations, il faut savoir approuver, nuancer et contredire poliment.",
+  objectifs: ["exprimer l'accord", "exprimer le désaccord et la nuance", "donner son opinion"],
+  parties: [
+    { t: "Dire son accord", html:
+      "<ul><li><em>Sono d'accordo con te / con Lei.</em></li><li><em>Hai ragione.</em> (tu as raison)</li><li><em>Certo ! / Esatto ! / Proprio così.</em></li></ul>",
+      retenir: "essere d'accordo con qualcuno." },
+    { t: "Dire son désaccord, nuancer", html:
+      "<ul><li><em>Non sono d'accordo. — Non è vero. — Hai torto.</em></li><li>Nuancer : <em>Sì, però… — Da una parte…, dall'altra… — Dipende.</em></li></ul>",
+      illus: { legende: "Du plein accord au désaccord total.", svg:
+      "<svg viewBox='0 0 460 120' role='img' aria-label='Échelle de l accord au désaccord'><rect x='20' y='50' width='420' height='16' rx='8' fill='#FBE4EE'/><g fill='#B03A6E'><circle cx='30' cy='58' r='9'/><circle cx='230' cy='58' r='9' fill='#FFC93C'/><circle cx='430' cy='58' r='9' fill='#6E1F43'/></g><g font-size='13' text-anchor='middle' fill='#142554'><text x='60' y='36'>Sono d'accordo!</text><text x='230' y='36'>Sì, però… / Dipende</text><text x='400' y='36'>Non sono d'accordo</text><text x='60' y='96' fill='#636A80'>accord</text><text x='230' y='96' fill='#636A80'>nuance</text><text x='400' y='96' fill='#636A80'>désaccord</text></g></svg>" },
+      retenir: "« Sì, però… » : la nuance est souvent plus convaincante." },
+    { t: "Donner son opinion", html:
+      "<p><em>Secondo me… — Per me… — Penso che + subjonctif : Penso che i genitori <b>abbiano</b> un ruolo importante.</em></p>",
+      retenir: "Penso che, credo che + congiuntivo." }
+  ],
+  revision: ["Sono d'accordo / Non sono d'accordo.", "Hai ragione / Hai torto.", "Sì, però… ; Dipende.", "Secondo me ; Penso che + subjonctif."],
+  exo: "<p>Réagis en italien (3 phrases) : « I giovani di oggi non rispettano più gli anziani. »</p>",
+  quiz: [
+    { q: "« Tu as raison »", r: ["Hai torto", "Hai ragione", "Sei d'accordo"], b: 1, e: "ragione = raison." },
+    { q: "Pour nuancer, on dit…", r: ["Certo!", "Sì, però…", "Esatto!"], b: 1, e: "Oui, mais…" },
+    { q: "« Penso che » est suivi…", r: ["de l'indicatif", "du subjonctif", "de l'infinitif"], b: 1, e: "Opinion : congiuntivo." }
+  ]
+});
+
+VRT_L("1re-zh-budan", {
+  c: "1re A", m: "chinois", cle: "不但……而且", titre: "不但……而且 et 第一……第二 : enchaîner ses idées", duree: 15,
+  accroche: "Non seulement… mais aussi… : deux structures pour bien argumenter en chinois.",
+  intro: "Pour parler de la solidarité familiale, il faut enchaîner les idées. Deux structures très utiles : 不但……而且…… et 第一……第二…….",
+  objectifs: ["employer 不但……而且……", "ordonner des idées avec 第一、第二", "les utiliser à l'oral et à l'écrit"],
+  parties: [
+    { t: "不但……而且……", html:
+      "<p><strong>不但</strong> (bùdàn) … <strong>而且</strong> (érqiě) … = « non seulement… mais aussi… ».</p><div class='ex'><b>例子</b>他<b>不但</b>会说汉语，<b>而且</b>会说英语。<br><em>Tā bùdàn huì shuō Hànyǔ, érqiě huì shuō Yīngyǔ.</em><br>Il parle non seulement chinois, mais aussi anglais.</div>",
+      illus: { legende: "Deux idées reliées : la seconde renforce la première.", svg:
+      "<svg viewBox='0 0 460 120' role='img' aria-label='Structure budan erqie'><rect x='10' y='30' width='90' height='50' rx='12' fill='#B03A6E'/><text x='55' y='62' text-anchor='middle' font-size='20' fill='#fff' font-weight='700'>不但</text><rect x='106' y='30' width='110' height='50' rx='12' fill='#FBE4EE'/><text x='161' y='61' text-anchor='middle' font-size='14' fill='#142554'>idée 1</text><rect x='232' y='30' width='90' height='50' rx='12' fill='#FFC93C'/><text x='277' y='62' text-anchor='middle' font-size='20' fill='#142554' font-weight='700'>而且</text><rect x='328' y='30' width='122' height='50' rx='12' fill='#FFF6DA'/><text x='389' y='61' text-anchor='middle' font-size='14' fill='#142554'>idée 2 (plus forte)</text></svg>" },
+      retenir: "不但 A，而且 B : B ajoute quelque chose à A." },
+    { t: "第一……第二……", html:
+      "<p><strong>第一</strong> (dì yī, premièrement), <strong>第二</strong> (dì èr, deuxièmement), <strong>第三</strong> (dì sān)… : le préfixe 第 transforme un nombre en ordinal.</p><div class='ex'><b>例子</b><b>第一</b>，家人要互相帮助；<b>第二</b>，孩子要尊重父母。<br><em>Dì yī, jiārén yào hùxiāng bāngzhù ; dì èr, háizi yào zūnzhòng fùmǔ.</em><br>Premièrement, la famille doit s'entraider ; deuxièmement, les enfants doivent respecter leurs parents.</div>",
+      retenir: "第 + nombre = ordinal : 第一, 第二, 第三." },
+    { t: "Vocabulaire de la famille", html:
+      "<p>家 jiā (famille, maison) — 爸爸 bàba — 妈妈 māma — 哥哥 gēge (grand frère) — 姐姐 jiějie (grande sœur) — 帮助 bāngzhù (aider) — 尊重 zūnzhòng (respecter).</p>",
+      retenir: "Toujours noter le pinyin avec les tons." }
+  ],
+  revision: ["不但 A，而且 B = non seulement A mais aussi B.", "第一、第二、第三 = premièrement, deuxièmement…", "家 jiā, 帮助 bāngzhù, 尊重 zūnzhòng."],
+  exo: "<p>Écris deux phrases avec 不但……而且…… sur ta famille ou ton école.</p>",
+  quiz: [
+    { q: "不但……而且…… signifie…", r: ["si… alors…", "non seulement… mais aussi…", "parce que… donc…"], b: 1, e: "bùdàn… érqiě…" },
+    { q: "« Deuxièmement » se dit…", r: ["二第", "第二", "第一"], b: 1, e: "第 + 二." },
+    { q: "帮助 (bāngzhù) signifie…", r: ["aider", "respecter", "famille"], b: 0, e: "尊重 = respecter." }
+  ]
+});
+
+VRT_L("1re-zh-ruguo", {
+  c: "1re A", m: "chinois", cle: "如果", titre: "如果……那么/就…… : exprimer la condition", duree: 15,
+  accroche: "如果你努力，就会成功 : si tu travailles, tu réussiras.",
+  intro: "Pour donner un conseil ou parler des conséquences d'un acte (par exemple la délinquance juvénile), on utilise la condition.",
+  objectifs: ["construire une phrase conditionnelle", "choisir entre 那么 et 就", "donner un conseil"],
+  parties: [
+    { t: "La structure", html:
+      "<p><strong>如果</strong> (rúguǒ, si) + condition，(<strong>那么</strong> nàme) + sujet + <strong>就</strong> (jiù) + conséquence.</p><div class='ex'><b>例子</b><b>如果</b>明天下雨，我们<b>就</b>不去。<br><em>Rúguǒ míngtiān xià yǔ, wǒmen jiù bú qù.</em><br>S'il pleut demain, nous n'irons pas.</div>",
+      illus: { legende: "Condition → conséquence.", svg:
+      "<svg viewBox='0 0 460 110' role='img' aria-label='Si condition alors conséquence'><rect x='10' y='30' width='80' height='46' rx='12' fill='#B03A6E'/><text x='50' y='60' text-anchor='middle' font-size='20' fill='#fff' font-weight='700'>如果</text><rect x='96' y='30' width='130' height='46' rx='12' fill='#FBE4EE'/><text x='161' y='58' text-anchor='middle' font-size='14' fill='#142554'>condition</text><path d='M232 53h30' stroke='#142554' stroke-width='3'/><rect x='268' y='30' width='60' height='46' rx='12' fill='#FFC93C'/><text x='298' y='60' text-anchor='middle' font-size='20' fill='#142554' font-weight='700'>就</text><rect x='334' y='30' width='116' height='46' rx='12' fill='#FFF6DA'/><text x='392' y='58' text-anchor='middle' font-size='14' fill='#142554'>conséquence</text></svg>" },
+      retenir: "就 se place APRÈS le sujet de la seconde proposition." },
+    { t: "Donner un conseil", html:
+      "<p><em>如果你有问题，就问老师。</em> Rúguǒ nǐ yǒu wèntí, jiù wèn lǎoshī. — Si tu as un problème, demande au professeur.</p>",
+      retenir: "如果 + 有问题 : très utile en classe !" },
+    { t: "Les nombres et 有的……有的……", html:
+      "<p><strong>有的</strong>……<strong>有的</strong>…… = « certains… d'autres… » : <em>学生有的喜欢看书，有的喜欢运动。</em> Certains élèves aiment lire, d'autres le sport.</p>",
+      retenir: "有的 A，有的 B : pour décrire un groupe varié." }
+  ],
+  revision: ["如果 + condition，(那么) + sujet + 就 + conséquence.", "就 après le sujet.", "有的……有的…… = certains… d'autres…"],
+  exo: "<p>Donne trois conseils à un camarade avec 如果……就…….</p>",
+  quiz: [
+    { q: "如果 signifie…", r: ["si", "mais", "parce que"], b: 0, e: "rúguǒ = si." },
+    { q: "Où se place 就 ?", r: ["Avant le sujet", "Après le sujet de la conséquence", "En fin de phrase"], b: 1, e: "我们就不去." },
+    { q: "有的……有的…… veut dire…", r: ["tous…", "certains… d'autres…", "aucun…"], b: 1, e: "Pour un groupe varié." }
+  ]
+});
+
+VRT_L("tle-ar-khabar", {
+  c: "Tle A", m: "arabe", cle: "Les types d", titre: "Les types d'attribut (أنواع الخبر)", duree: 15,
+  accroche: "الطالبُ مجتهدٌ : la phrase nominale et ses attributs.",
+  intro: "En arabe, la phrase nominale (الجملة الاسمية) se compose d'un sujet (المبتدأ) et d'un attribut (الخبر). Cet attribut peut prendre trois formes.",
+  objectifs: ["reconnaître المبتدأ et الخبر", "distinguer les trois types de خبر", "construire des phrases nominales"],
+  parties: [
+    { t: "La phrase nominale", html:
+      "<p dir='rtl' lang='ar' class='formule'>الطالبُ مجتهدٌ</p><p>« L'élève est travailleur. » <strong>الطالبُ</strong> est le sujet (المبتدأ), <strong>مجتهدٌ</strong> est l'attribut (الخبر). Les deux sont au cas sujet (مرفوع).</p>",
+      retenir: "مبتدأ + خبر = phrase nominale ; tous deux مرفوع." },
+    { t: "Les trois types de خبر", html:
+      "<div class='tab-scroll'><table><thead><tr><th>Type</th><th>Exemple</th><th>Sens</th></tr></thead><tbody>" +
+      "<tr><th>خبر مفرد (un mot)</th><td dir='rtl' lang='ar'>الجوُّ جميلٌ</td><td>Le temps est beau.</td></tr>" +
+      "<tr><th>خبر جملة (une phrase)</th><td dir='rtl' lang='ar'>الطالبُ يقرأُ الدرسَ</td><td>L'élève lit la leçon. (phrase verbale)</td></tr>" +
+      "<tr><th></th><td dir='rtl' lang='ar'>الطالبُ أبوه طبيبٌ</td><td>L'élève, son père est médecin. (phrase nominale)</td></tr>" +
+      "<tr><th>خبر شبه جملة</th><td dir='rtl' lang='ar'>الكتابُ على الطاولةِ</td><td>Le livre est sur la table. (préposition + nom)</td></tr>" +
+      "<tr><th></th><td dir='rtl' lang='ar'>المعلّمُ أمامَ السبّورةِ</td><td>Le maître est devant le tableau. (adverbe de lieu)</td></tr></tbody></table></div>",
+      illus: { legende: "Un sujet, trois façons de le compléter.", svg:
+      "<svg viewBox='0 0 460 170' role='img' aria-label='Types de khabar'><rect x='330' y='62' width='120' height='46' rx='12' fill='#B03A6E'/><text x='390' y='92' text-anchor='middle' font-size='18' fill='#fff' font-weight='700'>المبتدأ</text><g stroke='#6E1F43' stroke-width='2'><path d='M330 85 L230 30M330 85 L230 85M330 85 L230 140'/></g><g font-size='14' text-anchor='middle' fill='#142554'><rect x='20' y='12' width='210' height='36' rx='10' fill='#FBE4EE'/><text x='125' y='35'>خبر مفرد — un mot</text><rect x='20' y='67' width='210' height='36' rx='10' fill='#FFF6DA'/><text x='125' y='90'>خبر جملة — une phrase</text><rect x='20' y='122' width='210' height='36' rx='10' fill='#DDF2F4'/><text x='125' y='145'>خبر شبه جملة</text></g></svg>" },
+      retenir: "مفرد, جملة (اسمية أو فعلية), شبه جملة." },
+    { t: "Le lien avec le sujet", html:
+      "<p>Quand le خبر est une phrase, elle contient un pronom qui renvoie au sujet (الرابط) : dans <span dir='rtl' lang='ar'>الطالبُ أبوه طبيبٌ</span>, le pronom <span dir='rtl' lang='ar'>ـه</span> (« son ») renvoie à الطالب.</p>",
+      retenir: "Phrase-attribut = pronom de rappel obligatoire." }
+  ],
+  revision: ["Phrase nominale = مبتدأ + خبر.", "خبر مفرد : un mot.", "خبر جملة : phrase verbale ou nominale, avec pronom de rappel.", "خبر شبه جملة : préposition + nom ou adverbe de lieu/temps."],
+  exo: "<p>Donne le type de خبر : <span dir='rtl' lang='ar'>البيتُ كبيرٌ — الأمُّ تطبخُ — القلمُ في الحقيبةِ</span>. <em>(مفرد ; جملة فعلية ; شبه جملة)</em></p>",
+  quiz: [
+    { q: "Dans الجوُّ جميلٌ, le خبر est…", r: ["مفرد", "جملة", "شبه جملة"], b: 0, e: "Un seul mot : جميلٌ." },
+    { q: "الكتابُ على الطاولةِ : quel type ?", r: ["مفرد", "شبه جملة", "جملة فعلية"], b: 1, e: "Préposition + nom." },
+    { q: "Le cas du مبتدأ est…", r: ["منصوب", "مرفوع", "مجرور"], b: 1, e: "Le sujet est au nominatif." }
+  ]
+});
+
+VRT_L("tle-ar-verbes", {
+  c: "Tle A", m: "arabe", cle: "Les verbes intransitifs et transitifs", titre: "Verbes intransitifs et transitifs (اللازم والمتعدي)", duree: 15,
+  accroche: "جلسَ الولدُ / كتبَ الطالبُ الدرسَ : avec ou sans complément.",
+  intro: "Certains verbes se suffisent à eux-mêmes, d'autres demandent un complément d'objet direct (المفعول به).",
+  objectifs: ["distinguer الفعل اللازم et الفعل المتعدي", "repérer المفعول به", "rendre un verbe transitif"],
+  parties: [
+    { t: "Le verbe intransitif (اللازم)", html:
+      "<p>Il n'a pas de complément d'objet : <span dir='rtl' lang='ar'>جلسَ الولدُ</span> (l'enfant s'est assis), <span dir='rtl' lang='ar'>نامَ الطفلُ</span> (le bébé a dormi).</p>",
+      retenir: "اللازم : le sens est complet avec le sujet." },
+    { t: "Le verbe transitif (المتعدي)", html:
+      "<p>Il a un complément d'objet direct, au cas direct (منصوب) : <span dir='rtl' lang='ar'>كتبَ الطالبُ الدرسَ</span> (l'élève a écrit la leçon). Certains en ont deux : <span dir='rtl' lang='ar'>أعطى الأبُ الولدَ كتاباً</span> (le père a donné un livre à l'enfant).</p>",
+      illus: { legende: "Verbe + sujet (+ complément).", svg:
+      "<svg viewBox='0 0 460 140' role='img' aria-label='Verbe intransitif et transitif'><g font-size='18' text-anchor='middle' font-weight='700'><rect x='300' y='14' width='140' height='42' rx='12' fill='#B03A6E'/><text x='370' y='42' fill='#fff'>جلسَ الولدُ</text><rect x='300' y='80' width='140' height='42' rx='12' fill='#B03A6E'/><text x='370' y='108' fill='#fff'>كتبَ الطالبُ</text><rect x='150' y='80' width='120' height='42' rx='12' fill='#FFC93C'/><text x='210' y='108' fill='#142554'>الدرسَ</text></g><g font-size='13' fill='#636A80'><text x='20' y='40'>لازم : pas de complément</text><text x='20' y='106'>متعدٍّ → مفعول به</text></g></svg>" },
+      retenir: "المفعول به est منصوب (fatha)." },
+    { t: "Rendre un verbe transitif", html:
+      "<p>On peut rendre transitif un verbe intransitif avec la forme IV (أفعل) ou la forme II (فعّل) : <span dir='rtl' lang='ar'>جلسَ</span> → <span dir='rtl' lang='ar'>أجلسَ الأبُ الولدَ</span> (le père a fait asseoir l'enfant).</p>",
+      retenir: "Forme IV ou II : « faire faire »." }
+  ],
+  revision: ["اللازم : sans complément.", "المتعدي : avec مفعول به منصوب.", "Certains verbes ont deux compléments (أعطى).", "Formes II et IV pour rendre transitif."],
+  exo: "<p>Classe : <span dir='rtl' lang='ar'>ذهبَ — قرأَ — ضحكَ — فتحَ</span>. <em>(لازم : ذهب، ضحك ; متعدٍّ : قرأ، فتح)</em></p>",
+  quiz: [
+    { q: "نامَ الطفلُ : le verbe est…", r: ["لازم", "متعدٍّ"], b: 0, e: "Pas de complément." },
+    { q: "Le مفعول به est au cas…", r: ["مرفوع", "منصوب", "مجرور"], b: 1, e: "Cas direct." },
+    { q: "أجلسَ est la forme…", r: ["I", "IV", "X"], b: 1, e: "Forme IV : أفعل." }
+  ]
+});
+
+VRT_L("6e-ln-carte", {
+  c: "6e", m: "ln", cle: "La carte linguistique du Cameroun", titre: "La carte linguistique du Cameroun", duree: 15,
+  scenes: ["1re-langues-nationales-salutations-aines"],
+  accroche: "Plus de 250 langues dans un seul pays : un trésor à connaître.",
+  intro: "Le Cameroun compte plus de 250 langues nationales. Elles ne sont pas réparties au hasard : elles appartiennent à de grandes familles.",
+  objectifs: ["connaître le nombre approximatif de langues", "nommer les grandes familles", "situer quelques langues"],
+  parties: [
+    { t: "Une grande diversité", html:
+      "<p>Les linguistes recensent <strong>plus de 250 langues</strong> au Cameroun. À côté des deux langues officielles (français et anglais), ces langues nationales sont parlées en famille, au marché, dans les cérémonies. Certaines servent de langue véhiculaire dans une région (le fulfulde au Nord, l'ewondo autour de Yaoundé, le duala sur la côte).</p>",
+      retenir: "Plus de 250 langues nationales + 2 langues officielles." },
+    { t: "Les grandes familles", html:
+      "<ul><li><strong>Langues bantoues</strong> : au Sud et au Centre (ewondo, bulu, duala, basaa…).</li><li><strong>Langues des Grassfields</strong> (semi-bantoues) : à l'Ouest et au Nord-Ouest (ghomálá', medumba, fe'efe'e, lamnso'…).</li><li><strong>Langues adamawa-oubanguiennes</strong> : dans l'Adamaoua et l'Est (mbum, gbaya…).</li><li><strong>Langues tchadiques</strong> : dans l'Extrême-Nord (mafa, giziga…).</li><li>Le <strong>fulfulde</strong> (famille atlantique) et l'<strong>arabe choa</strong> au Nord ; le <strong>kanuri</strong> près du lac Tchad.</li></ul>",
+      illus: { legende: "Schéma simplifié : les familles de langues du sud au nord (zones approximatives).", svg:
+      "<svg viewBox='0 0 300 300' role='img' aria-label='Schéma des familles de langues du Cameroun'><path d='M150 10 L175 30 L170 80 L210 120 L240 170 L250 250 L200 290 L60 290 L40 240 L70 200 L90 160 L120 120 L135 70 Z' fill='#FFF3E4' stroke='#6B2A00' stroke-width='2'/><path d='M150 10 L175 30 L170 80 L135 70 Z' fill='#F5B57A'/><path d='M135 70 L170 80 L210 120 L120 120 Z' fill='#FFC93C' fill-opacity='.7'/><path d='M120 120 L210 120 L240 170 L90 160 Z' fill='#7CCCD3' fill-opacity='.7'/><path d='M90 160 L70 200 L110 200 L130 165 Z' fill='#ADA4DE'/><path d='M130 165 L240 170 L250 250 L200 290 L60 290 L40 240 L70 200 L110 200 Z' fill='#7FCB8C' fill-opacity='.7'/><g font-size='11' fill='#142554' font-weight='700'><text x='138' y='55'>tchadiques</text><text x='138' y='103'>fulfulde</text><text x='120' y='148'>adamawa-oub.</text><text x='42' y='190'>Grassfields</text><text x='130' y='240'>bantoues</text></g></svg>" },
+      retenir: "Bantou au Sud, Grassfields à l'Ouest, tchadique à l'Extrême-Nord." },
+    { t: "Écrire nos langues", html:
+      "<p>Pour écrire toutes ces langues avec les mêmes règles, des linguistes camerounais ont adopté en 1979 l'<strong>Alphabet général des langues camerounaises (AGLC)</strong>. Il note les voyelles, les consonnes et les <strong>tons</strong>.</p>",
+      retenir: "AGLC : un alphabet commun pour toutes nos langues." }
+  ],
+  revision: ["Plus de 250 langues nationales.", "Familles : bantoue, Grassfields, adamawa-oubanguienne, tchadique, fulfulde, arabe choa, kanuri.", "Langues véhiculaires régionales.", "AGLC (1979) pour les écrire."],
+  exo: "<p>Interroge tes parents : quelle langue parlent-ils ? À quelle famille appartient-elle ? Dans quelle région est-elle parlée ?</p>",
+  quiz: [
+    { q: "Combien de langues nationales environ ?", r: ["Une vingtaine", "Plus de 250", "Exactement 10"], b: 1, e: "Une des plus grandes diversités d'Afrique." },
+    { q: "L'ewondo est une langue…", r: ["bantoue", "tchadique", "européenne"], b: 0, e: "Comme le bulu et le duala." },
+    { q: "Que signifie AGLC ?", r: ["Association générale des lycées camerounais", "Alphabet général des langues camerounaises", "Atlas géographique"], b: 1, e: "Adopté en 1979." }
+  ]
+});
+
+VRT_L("4e-ln-tons", {
+  c: "4e", m: "ln", cle: "Les tons de la langue", titre: "Les tons de nos langues", duree: 15,
+  scenes: ["1re-langues-nationales-singulier-pluriel"],
+  accroche: "Même syllabe, autre hauteur, autre sens : bienvenue dans les langues à tons.",
+  intro: "Dans la plupart des langues camerounaises, la hauteur de la voix sur une syllabe peut changer le sens d'un mot. C'est le <strong>ton</strong>.",
+  objectifs: ["définir le ton", "reconnaître les tons de base", "les noter selon l'AGLC"],
+  parties: [
+    { t: "Qu'est-ce qu'un ton ?", html:
+      "<p>Le ton est la <strong>hauteur musicale</strong> d'une syllabe. Dans une langue à tons, deux mots peuvent avoir les mêmes voyelles et les mêmes consonnes et ne différer que par le ton. Ton enseignant te donnera des exemples dans la langue étudiée en classe.</p>",
+      retenir: "Changer le ton peut changer le mot." },
+    { t: "Les tons et leur notation (AGLC)", html:
+      "<div class='tab-scroll'><table><thead><tr><th>Ton</th><th>Signe</th><th>Exemple</th></tr></thead><tbody><tr><th>haut</th><td>accent aigu</td><td>á</td></tr><tr><th>bas</th><td>accent grave</td><td>à</td></tr><tr><th>moyen</th><td>trait (macron)</td><td>ā</td></tr><tr><th>montant (bas → haut)</th><td>caron</td><td>ǎ</td></tr><tr><th>descendant (haut → bas)</th><td>accent circonflexe</td><td>â</td></tr></tbody></table></div>",
+      illus: { legende: "La hauteur de la voix sur la syllabe « ba ».", svg:
+      "<svg viewBox='0 0 460 170' role='img' aria-label='Courbes des tons'><g stroke='#E6E0D4'><path d='M20 40h420M20 80h420M20 120h420'/></g><g font-size='12' fill='#636A80'><text x='22' y='36'>haut</text><text x='22' y='76'>moyen</text><text x='22' y='116'>bas</text></g><g stroke-width='5' stroke-linecap='round' fill='none'><path d='M70 40h50' stroke='#A84200'/><path d='M150 120h50' stroke='#A84200'/><path d='M230 80h50' stroke='#A84200'/><path d='M310 120 L360 40' stroke='#0E7C86'/><path d='M390 40 L440 120' stroke='#0E7C86'/></g><g font-size='18' text-anchor='middle' font-weight='700' fill='#142554'><text x='95' y='160'>bá</text><text x='175' y='160'>bà</text><text x='255' y='160'>bā</text><text x='335' y='160'>bǎ</text><text x='415' y='160'>bâ</text></g></svg>" },
+      retenir: "Haut ´, bas `, moyen ¯, montant ˇ, descendant ˆ." },
+    { t: "S'entraîner", html:
+      "<ol><li>Écoute un mot prononcé par ton enseignant.</li><li>Fredonne-le sur « la-la » pour entendre la mélodie.</li><li>Trace la courbe avec la main (haut, bas, montée, descente).</li><li>Note le ton avec le bon signe.</li></ol>",
+      retenir: "Fredonner la mélodie aide à entendre les tons." }
+  ],
+  revision: ["Ton = hauteur d'une syllabe.", "Il peut changer le sens d'un mot.", "AGLC : á haut, à bas, ā moyen, ǎ montant, â descendant."],
+  exo: "<p>Avec ton enseignant, trouve dans la langue étudiée deux mots qui ne diffèrent que par le ton, et note-les.</p>",
+  quiz: [
+    { q: "Le ton haut se note…", r: ["à", "á", "ā"], b: 1, e: "Accent aigu." },
+    { q: "Un ton montant va…", r: ["du haut vers le bas", "du bas vers le haut", "reste plat"], b: 1, e: "Noté ǎ (caron)." },
+    { q: "Dans une langue à tons, le ton peut…", r: ["changer le sens du mot", "ne rien changer", "remplacer les voyelles"], b: 0, e: "D'où l'importance de bien le noter." }
+  ]
+});
+
+VRT_L("tle-cult-naissance", {
+  c: "Tle A", m: "cultures", cle: "en rapport avec la naissance et la vie moderne", titre: "Naissance : pratiques traditionnelles et vie moderne", duree: 15,
+  accroche: "Nom, rites, maternité : comment la tradition accueille un enfant aujourd'hui.",
+  intro: "Dans les communautés camerounaises, la naissance n'est pas qu'un événement médical : elle fait entrer un enfant dans une famille et une lignée. Comment ces pratiques vivent-elles avec la vie moderne ?",
+  objectifs: ["décrire des pratiques liées à la naissance", "analyser leurs rapports avec la vie moderne", "adopter une attitude critique et respectueuse"],
+  parties: [
+    { t: "Les pratiques traditionnelles", html:
+      "<ul><li><strong>La protection de la femme enceinte</strong> : interdits alimentaires ou de comportement, conseils des aînées.</li><li><strong>L'accueil de l'enfant</strong> : présentation à la famille, au lignage ou aux ancêtres selon les communautés.</li><li><strong>Le nom</strong> : souvent choisi pour honorer un parent, rappeler une circonstance ou exprimer un vœu.</li><li><strong>La solidarité</strong> : la jeune mère est entourée et aidée pendant plusieurs semaines.</li></ul><p>Ces pratiques varient beaucoup d'une communauté à l'autre : on les étudie à partir de la communauté cible choisie en classe.</p>",
+      retenir: "La naissance est un événement familial et communautaire." },
+    { t: "La rencontre avec la vie moderne", html:
+      "<ul><li>Les consultations prénatales et l'accouchement à l'hôpital réduisent la mortalité des mères et des enfants.</li><li>L'<strong>acte de naissance</strong> donne à l'enfant une existence juridique : sans lui, pas d'inscription aux examens officiels.</li><li>Certaines pratiques se maintiennent en s'adaptant : présentation de l'enfant à la famille après la sortie de la maternité, fête de nomination.</li></ul>",
+      illus: { legende: "Tradition et modernité se complètent souvent.", svg:
+      "<svg viewBox='0 0 460 150' role='img' aria-label='Tradition et modernité autour de la naissance'><circle cx='150' cy='75' r='62' fill='#FFF3E4' stroke='#A84200' stroke-width='2'/><circle cx='310' cy='75' r='62' fill='#DDF2F4' stroke='#0E7C86' stroke-width='2'/><g font-size='12' fill='#142554' text-anchor='middle'><text x='120' y='60'>présentation</text><text x='120' y='76'>à la famille</text><text x='120' y='96'>nomination</text><text x='340' y='60'>consultations</text><text x='340' y='76'>prénatales</text><text x='340' y='96'>acte de naissance</text><text x='230' y='70' font-weight='700'>solidarité</text><text x='230' y='86' font-weight='700'>familiale</text></g></svg>" },
+      retenir: "Hôpital et acte de naissance : des droits pour l'enfant." },
+    { t: "Garder un regard critique", html:
+      "<p>On valorise ce qui protège et rassemble (la solidarité, la transmission du nom et de la langue) ; on questionne ce qui met la santé en danger (refus des soins, interdits nuisibles). Le dialogue avec les aînés permet de faire évoluer les pratiques sans les mépriser.</p>",
+      retenir: "Respecter la tradition n'empêche pas de la faire évoluer." }
+  ],
+  revision: ["Naissance : événement familial et communautaire.", "Pratiques : protection de la mère, accueil, nom, solidarité.", "Modernité : soins, acte de naissance.", "Attitude : respect et esprit critique."],
+  exo: "<p>Interroge une aînée de ta communauté sur les pratiques liées à la naissance ; présente-les en dix lignes et dis ce qui a changé.</p>",
+  quiz: [
+    { q: "À quoi sert l'acte de naissance ?", r: ["À rien", "À donner une existence juridique à l'enfant", "À choisir son prénom"], b: 1, e: "Indispensable pour l'école et les examens." },
+    { q: "Une pratique traditionnelle fréquente :", r: ["la nomination de l'enfant", "le vote", "l'exportation"], b: 0, e: "Le nom honore souvent un parent." },
+    { q: "Quelle attitude adopter ?", r: ["Tout rejeter", "Respect et esprit critique", "Tout accepter sans réfléchir"], b: 1, e: "Valoriser ce qui protège, questionner ce qui nuit." }
+  ]
+});
+
+VRT_L("tle-cult-mort", {
+  c: "Tle A", m: "cultures", cle: "en rapport avec la mort et la vie moderne", titre: "Funérailles : tradition et vie moderne", duree: 15,
+  scenes: ["tle-cultures-funerailles-tradition-modernite", "tle-cultures-tam-tam-parleur"],
+  accroche: "Deuil, veillée, funérailles : honorer les morts sans ruiner les vivants ?",
+  intro: "Au Cameroun, les funérailles sont un moment majeur de la vie sociale. Elles honorent le défunt et rassemblent la communauté. Mais elles évoluent, et soulèvent des débats.",
+  objectifs: ["décrire les étapes des rites funéraires", "identifier les changements liés à la vie moderne", "débattre de leurs coûts et de leur sens"],
+  parties: [
+    { t: "Les étapes", html:
+      "<ol><li><strong>L'annonce du décès</strong> : autrefois par le tam-tam ou des messagers, aujourd'hui aussi par la radio, le téléphone et les réseaux sociaux.</li><li><strong>La veillée</strong> : chants, prières, témoignages.</li><li><strong>L'inhumation</strong>, souvent au village d'origine.</li><li><strong>Le deuil</strong> : comportements particuliers de la famille proche pendant une période.</li><li><strong>Les funérailles</strong> proprement dites, parfois des mois ou des années plus tard, selon les communautés.</li></ol>",
+      retenir: "Les rites accompagnent le défunt et consolent les vivants." },
+    { t: "Ce qui change", html:
+      "<ul><li><strong>La morgue</strong> permet d'attendre le retour de la famille dispersée.</li><li><strong>Les cérémonies</strong> mêlent rites traditionnels et religieux.</li><li><strong>Le coût</strong> augmente : transport, réception, tenues, location de chaises et de bâches.</li></ul>",
+      illus: { legende: "Le tam-tam d'annonce et le téléphone : deux messagers du deuil.", svg:
+      "<svg viewBox='0 0 460 150' role='img' aria-label='Tam-tam et téléphone'><g transform='translate(100 20)'><ellipse cx='40' cy='12' rx='40' ry='12' fill='#F5B57A' stroke='#6B2A00' stroke-width='2'/><path d='M0 12c0 30 10 50 22 66l-4 30h44l-4-30c12-16 22-36 22-66' fill='#A84200' stroke='#6B2A00' stroke-width='2'/></g><path d='M230 40 c20 10 20 50 0 60M250 30 c30 15 30 65 0 80' fill='none' stroke='#9A6F00' stroke-width='3' stroke-linecap='round'/><rect x='300' y='20' width='60' height='110' rx='12' fill='#0C2A6A'/><rect x='308' y='32' width='44' height='76' rx='4' fill='#DDF2F4'/><circle cx='330' cy='118' r='5' fill='#FFC93C'/></svg>" },
+      retenir: "Les moyens changent, le besoin de rassembler demeure." },
+    { t: "Le débat", html:
+      "<p>Faut-il limiter les dépenses des funérailles ? Pour les uns, elles sont une dette d'honneur envers le défunt et un ciment social. Pour les autres, elles appauvrissent les familles au détriment des vivants (scolarité, santé). De nombreuses communautés réfléchissent à des règles pour en réduire le coût.</p>",
+      retenir: "Honorer les morts sans sacrifier les vivants : un équilibre à trouver." }
+  ],
+  revision: ["Étapes : annonce, veillée, inhumation, deuil, funérailles.", "Changements : morgue, religion, réseaux sociaux.", "Débat : sens et coût des funérailles."],
+  exo: "<p>Prépare un exposé de deux minutes : « Les funérailles dans ma communauté hier et aujourd'hui ».</p>",
+  quiz: [
+    { q: "Moyen traditionnel d'annoncer un décès :", r: ["le tam-tam", "la télévision", "la poste"], b: 0, e: "Le tam-tam parleur transmettait les messages." },
+    { q: "Pourquoi la morgue a-t-elle changé les funérailles ?", r: ["Elle permet d'attendre la famille dispersée", "Elle les a interdites", "Elle ne change rien"], b: 0, e: "Les familles vivent souvent loin du village." },
+    { q: "Une critique fréquente des funérailles actuelles :", r: ["leur coût élevé", "leur brièveté", "leur absence"], b: 0, e: "Elles peuvent appauvrir les familles." }
+  ]
+});
+
+VRT_L("tle-orient-temps", {
+  c: "Tle A", m: "orientation", cle: "La gestion du temps", titre: "Gérer son temps en classe d'examen", duree: 15,
+  scenes: ["tle-orientation-choisir-sa-filiere"],
+  accroche: "24 heures, 7 matières, 1 bac : un emploi du temps qui marche.",
+  intro: "L'année du baccalauréat passe vite. Ceux qui réussissent ne travaillent pas forcément plus : ils organisent mieux leur temps.",
+  objectifs: ["faire le bilan de son emploi du temps", "construire un planning réaliste", "lutter contre la procrastination"],
+  parties: [
+    { t: "Faire le bilan", html:
+      "<p>Pendant une semaine, note ce que tu fais heure par heure : cours, trajets, travaux domestiques, téléphone, sommeil, révisions. Tu découvriras souvent des « heures perdues » (réseaux sociaux, attentes).</p>",
+      retenir: "On ne gère bien que ce que l'on mesure." },
+    { t: "Construire un planning", html:
+      "<ul><li>Bloque d'abord le <strong>sommeil</strong> (7 à 8 h) et les cours.</li><li>Prévois des séances courtes (40 à 50 min) suivies de pauses.</li><li>Donne plus de temps aux matières à <strong>fort coefficient</strong> et à celles où tu es faible.</li><li>Garde un temps libre pour le repos, le sport, la famille.</li></ul>",
+      illus: { legende: "Exemple d'une soirée bien découpée.", svg:
+      "<svg viewBox='0 0 460 120' role='img' aria-label='Planning d une soirée'><g font-size='11' text-anchor='middle'><rect x='10' y='40' width='80' height='40' rx='8' fill='#DDF2F4'/><text x='50' y='64' fill='#0A4F55'>16h-17h repos</text><rect x='94' y='40' width='100' height='40' rx='8' fill='#0E7C86'/><text x='144' y='64' fill='#fff'>17h-18h philo</text><rect x='198' y='40' width='30' height='40' rx='8' fill='#FFC93C'/><text x='213' y='64' fill='#142554'>pause</text><rect x='232' y='40' width='100' height='40' rx='8' fill='#0E7C86'/><text x='282' y='64' fill='#fff'>18h15 français</text><rect x='336' y='40' width='114' height='40' rx='8' fill='#E4E9F2'/><text x='393' y='64' fill='#0C2A6A'>dîner, famille</text></g><text x='10' y='104' font-size='12' fill='#636A80'>Séances de 45 à 50 min, pauses courtes, matières fortes en premier.</text></svg>" },
+      retenir: "Un planning réaliste vaut mieux qu'un planning parfait jamais suivi." },
+    { t: "Vaincre la procrastination", html:
+      "<ul><li>Commence par une tâche de 5 minutes : le plus dur est de commencer.</li><li>Téléphone en mode silencieux et hors de portée pendant la séance.</li><li>Coche ce qui est fait : voir ses progrès motive.</li></ul>",
+      retenir: "Commencer petit, mais commencer aujourd'hui." }
+  ],
+  revision: ["Bilan d'une semaine heure par heure.", "Sommeil et cours d'abord.", "Séances de 40 à 50 min + pauses.", "Priorité aux forts coefficients et aux faiblesses.", "Téléphone éloigné pendant le travail."],
+  exo: "<p>Construis ton planning de la semaine prochaine (soirées et week-end) et affiche-le chez toi.</p>",
+  quiz: [
+    { q: "Combien d'heures de sommeil viser ?", r: ["4 à 5 h", "7 à 8 h", "12 h"], b: 1, e: "Le sommeil fixe les apprentissages." },
+    { q: "Durée conseillée d'une séance de travail :", r: ["40 à 50 min", "4 heures sans pause", "10 min"], b: 0, e: "Suivie d'une pause courte." },
+    { q: "Contre la procrastination :", r: ["attendre l'inspiration", "commencer par une tâche de 5 min", "tout faire la veille"], b: 1, e: "Le plus dur est de commencer." }
+  ]
+});
+
+VRT_L("tle-orient-bac", {
+  c: "Tle A", m: "orientation", cle: "La préparation à long terme", titre: "Préparer le baccalauréat à long terme", duree: 15,
+  scenes: ["tle-orientation-entretien-affirmation"],
+  accroche: "Le bac se gagne en octobre, pas la veille de l'examen.",
+  intro: "Réussir le baccalauréat est un marathon. La préparation commence dès la rentrée, avec une méthode et des objectifs.",
+  objectifs: ["se fixer des objectifs", "organiser les révisions sur l'année", "prendre soin de sa santé"],
+  parties: [
+    { t: "Se fixer des objectifs", html:
+      "<p>Calcule la moyenne visée et fixe un objectif par matière, en tenant compte des <strong>coefficients</strong> de ta série. Un objectif doit être précis, mesurable et daté : « passer de 8 à 11 en philosophie au deuxième trimestre ».</p>",
+      retenir: "Un objectif flou ne guide pas ; un objectif chiffré, oui." },
+    { t: "Organiser l'année", html:
+      "<ul><li><strong>Au fil des cours</strong> : relire chaque leçon le jour même, faire des fiches.</li><li><strong>Chaque mois</strong> : traiter un sujet d'examen par matière (annales corrigées).</li><li><strong>Aux congés</strong> : réviser les chapitres passés, combler les lacunes.</li><li><strong>Les deux derniers mois</strong> : sujets en conditions réelles, chronométrés.</li></ul>",
+      illus: { legende: "Une montée progressive vers l'examen.", svg:
+      "<svg viewBox='0 0 460 150' role='img' aria-label='Préparation progressive du baccalauréat'><path d='M20 130 L120 110 L220 85 L320 55 L430 20' fill='none' stroke='#0E7C86' stroke-width='4' stroke-linecap='round'/><g fill='#FFC93C' stroke='#0A4F55' stroke-width='2'><circle cx='20' cy='130' r='7'/><circle cx='120' cy='110' r='7'/><circle cx='220' cy='85' r='7'/><circle cx='320' cy='55' r='7'/><circle cx='430' cy='20' r='9'/></g><g font-size='11' fill='#142554'><text x='24' y='148'>rentrée : fiches</text><text x='110' y='132'>annales chaque mois</text><text x='190' y='108'>congés : lacunes</text><text x='270' y='78'>sujets chronométrés</text><text x='392' y='44' font-weight='700'>BAC</text></g></svg>" },
+      retenir: "Régularité + annales = confiance le jour J." },
+    { t: "Prendre soin de soi", html:
+      "<p>Sommeil, alimentation équilibrée, activité physique, moments de détente : un corps en forme apprend mieux. En cas de stress, parle à un conseiller d'orientation, un enseignant ou un parent.</p>",
+      retenir: "La santé fait partie de la préparation." }
+  ],
+  revision: ["Objectifs précis, chiffrés, datés.", "Relire chaque jour, faire des fiches.", "Une annale par mois et par matière.", "Sujets chronométrés en fin d'année.", "Santé et soutien : conseiller d'orientation."],
+  exo: "<p>Écris tes trois objectifs du trimestre (matière, note visée, moyen d'y arriver).</p>",
+  quiz: [
+    { q: "Quand commence la préparation du bac ?", r: ["La veille", "Dès la rentrée", "Après les résultats"], b: 1, e: "C'est un marathon." },
+    { q: "Un bon objectif est…", r: ["« faire mieux »", "chiffré et daté", "secret"], b: 1, e: "On peut alors mesurer ses progrès." },
+    { q: "En fin d'année, on privilégie…", r: ["les sujets chronométrés", "les nouvelles leçons", "le repos complet"], b: 0, e: "Pour s'habituer au temps de l'épreuve." }
+  ]
+});
+
+/* Leçons rédigées VÉRITAS — latin, grec, sciences (séries A), EPS, arts, travail manuel, ESF. */
+VRT_L("6e-la-origine", {
+  c: "6e", m: "latin", cle: "Origine et importance du latin", titre: "Origine et importance du latin", duree: 15,
+  accroche: "Tu parles déjà un peu latin sans le savoir.",
+  intro: "Agenda, bonus, curriculum vitae, et cetera… Ces mots sont latins. Le français lui-même descend du latin. D'où vient cette langue et pourquoi l'étudier aujourd'hui ?",
+  objectifs: ["situer l'origine du latin", "nommer les langues romanes", "repérer le latin dans notre vie quotidienne"],
+  parties: [
+    { t: "La langue de Rome", html:
+      "<p>Le latin était la langue du <strong>Latium</strong>, une région d'Italie centrale où se trouve <strong>Rome</strong>. Selon la tradition, Rome est fondée en <strong>753 avant J.-C.</strong> En conquérant un immense empire, autour de la Méditerranée, les Romains ont répandu leur langue jusqu'en Gaule (la France actuelle), en Espagne et en Afrique du Nord.</p>",
+      illus: { legende: "Du Latium à l'Empire : le latin voyage avec les Romains.", svg:
+      "<svg viewBox='0 0 460 190' role='img' aria-label='Expansion du latin depuis Rome'><rect x='0' y='0' width='460' height='190' rx='14' fill='#DBE8FE'/><path d='M40 40 Q120 20 200 40 L230 70 Q260 60 300 70 L380 60 Q430 80 420 120 L330 150 Q260 170 180 150 L90 160 Q30 130 40 40Z' fill='#E4E9F2' stroke='#8C9BC0' stroke-width='2'/><circle cx='240' cy='95' r='9' fill='#FFC93C' stroke='#071A45' stroke-width='2'/><text x='254' y='92' font-size='13' font-weight='700' fill='#071A45'>ROME</text><g stroke='#0C2A6A' stroke-width='2' stroke-dasharray='5 4' fill='none'><path d='M235 90 Q180 60 120 60'/><path d='M235 100 Q160 120 100 140'/><path d='M248 102 Q300 140 360 140'/><path d='M248 88 Q310 60 370 80'/></g><g font-size='11' fill='#0C2A6A'><text x='86' y='54'>Gaule</text><text x='60' y='150'>Hispanie</text><text x='340' y='160'>Afrique</text><text x='360' y='72'>Orient</text></g><text x='18' y='180' font-size='11' fill='#636A80'>Schéma simplifié, sans échelle.</text></svg>" },
+      retenir: "Latin = langue de Rome, répandue par la conquête romaine." },
+    { t: "Une langue mère", html:
+      "<p>En se transformant pendant des siècles dans les différentes régions, le latin parlé a donné naissance aux <strong>langues romanes</strong> : le <strong>français</strong>, l'<strong>italien</strong>, l'<strong>espagnol</strong>, le <strong>portugais</strong> et le <strong>roumain</strong>.</p><div class='ex'><b>Exemple : un mot, cinq langues</b>Du latin <em>noctem</em> (la nuit) viennent nuit, notte, noche, noite, noapte.</div>",
+      retenir: "Le français est une langue romane : il descend du latin." },
+    { t: "Le latin aujourd'hui", html:
+      "<ul><li>Dans le <strong>vocabulaire</strong> : aquarium, maximum, alibi, ex aequo, a priori.</li><li>Dans les <strong>sciences</strong> : les êtres vivants ont un nom latin (<em>Homo sapiens</em>, l'être humain).</li><li>Dans le <strong>droit</strong>, la <strong>médecine</strong> et les <strong>devises</strong>.</li></ul><div class='astuce'><b>Astuce</b>Connaître la racine latine aide à deviner le sens d'un mot français : <em>aqua</em> (l'eau) → aquatique, aquarium, aqueduc.</div>",
+      retenir: "Étudier le latin, c'est mieux comprendre le français." }
+  ],
+  revision: ["Latin : langue du Latium et de Rome (fondée en 753 av. J.-C. selon la tradition).", "Répandu par l'Empire romain.", "Langues romanes : français, italien, espagnol, portugais, roumain.", "Présent dans le vocabulaire, les sciences, le droit."],
+  exo: "<p>Trouve trois mots français formés sur <em>terra</em> (la terre) et trois sur <em>manus</em> (la main).</p>",
+  quiz: [
+    { q: "Le latin était la langue…", r: ["d'Athènes", "de Rome", "de Carthage"], b: 1, e: "Rome se trouve dans le Latium." },
+    { q: "Laquelle n'est pas une langue romane ?", r: ["L'espagnol", "Le roumain", "L'anglais"], b: 2, e: "L'anglais est une langue germanique, même s'il a beaucoup emprunté au latin." },
+    { q: "« aqua » signifie…", r: ["l'air", "l'eau", "le feu"], b: 1, e: "D'où aquarium, aquatique." }
+  ]
+});
+
+VRT_L("6e-la-jours", {
+  c: "6e", m: "latin", cle: "Les jours de la semaine en latin", titre: "Les jours de la semaine et les mois en latin", duree: 15,
+  accroche: "Lundi, c'est le jour de la Lune ; mardi, celui de Mars.",
+  intro: "Les noms de nos jours et de nos mois viennent tout droit du latin. Derrière chacun se cache un astre ou un dieu romain.",
+  objectifs: ["connaître les jours en latin", "expliquer l'origine des noms des mois", "comprendre pourquoi septembre n'est pas le 7ᵉ mois"],
+  parties: [
+    { t: "Les jours : des astres et des dieux", html:
+      "<div class='tab-scroll'><table><thead><tr><th>Latin</th><th>Sens</th><th>Français</th></tr></thead><tbody><tr><td>dies Lunae</td><td>jour de la Lune</td><td>lundi</td></tr><tr><td>dies Martis</td><td>jour de Mars</td><td>mardi</td></tr><tr><td>dies Mercurii</td><td>jour de Mercure</td><td>mercredi</td></tr><tr><td>dies Iovis</td><td>jour de Jupiter</td><td>jeudi</td></tr><tr><td>dies Veneris</td><td>jour de Vénus</td><td>vendredi</td></tr><tr><td>dies Saturni</td><td>jour de Saturne</td><td>samedi (nom d'origine différente)</td></tr><tr><td>dies Solis, puis dies Dominica</td><td>jour du Soleil, puis jour du Seigneur</td><td>dimanche</td></tr></tbody></table></div>",
+      retenir: "-di vient de dies : le jour." },
+    { t: "Les mois", html:
+      "<p>L'ancien calendrier romain commençait en <strong>mars</strong>. Voilà pourquoi :</p><ul><li><strong>September</strong> vient de <em>septem</em> (7), <strong>October</strong> de <em>octo</em> (8), <strong>November</strong> de <em>novem</em> (9), <strong>December</strong> de <em>decem</em> (10) ;</li><li><strong>Iulius</strong> (juillet) honore Jules César, <strong>Augustus</strong> (août) l'empereur Auguste ;</li><li><strong>Ianuarius</strong> (janvier) est le mois de Janus, dieu des portes et des commencements.</li></ul>",
+      illus: { legende: "Le calendrier romain primitif commençait en mars : septembre était le 7ᵉ mois.", svg:
+      "<svg viewBox='0 0 460 200' role='img' aria-label='Roue des mois romains'><circle cx='130' cy='100' r='86' fill='#E4E9F2' stroke='#071A45' stroke-width='2'/><g font-size='11' text-anchor='middle' fill='#0C2A6A'><text x='130' y='28' font-weight='700'>1 Martius</text><text x='196' y='54'>2 Aprilis</text><text x='212' y='104'>3 Maius</text><text x='196' y='152'>4 Iunius</text><text x='130' y='182'>5 Quintilis</text><text x='64' y='152'>6 Sextilis</text><text x='48' y='104' font-weight='700' fill='#9A6F00'>7 September</text><text x='64' y='54' font-weight='700' fill='#9A6F00'>8 October</text></g><circle cx='130' cy='100' r='22' fill='#FFC93C'/><text x='130' y='104' text-anchor='middle' font-size='11' font-weight='700' fill='#071A45'>Rome</text><g font-size='13' fill='#142554'><text x='250' y='60'>septem = 7 → septembre</text><text x='250' y='88'>octo = 8 → octobre</text><text x='250' y='116'>novem = 9 → novembre</text><text x='250' y='144'>decem = 10 → décembre</text></g></svg>" },
+      retenir: "Septembre = 7ᵉ mois… d'une année qui commençait en mars." },
+    { t: "Le latin au calendrier", html:
+      "<div class='savais'><b>Le savais-tu ?</b>Juillet s'appelait d'abord <em>Quintilis</em> (le 5ᵉ) et août <em>Sextilis</em> (le 6ᵉ), avant d'être renommés en l'honneur de Jules César et d'Auguste.</div>",
+      retenir: "Chaque nom de mois raconte un peu d'histoire romaine." }
+  ],
+  revision: ["dies = jour.", "Lune, Mars, Mercure, Jupiter, Vénus, Saturne, Soleil.", "Calendrier romain primitif : début en mars.", "September (7), October (8), November (9), December (10).", "Iulius (César), Augustus (Auguste), Ianuarius (Janus)."],
+  exo: "<p>Écris la date d'aujourd'hui avec le nom latin du jour et du mois.</p>",
+  quiz: [
+    { q: "« dies Martis » donne…", r: ["mercredi", "mardi", "lundi"], b: 1, e: "Le jour du dieu Mars." },
+    { q: "Pourquoi « septembre » contient-il « sept » ?", r: ["C'était le 7ᵉ mois", "Il a 7 semaines", "Par hasard"], b: 0, e: "L'année romaine commençait en mars." },
+    { q: "Janvier vient du dieu…", r: ["Janus", "Jupiter", "Mars"], b: 0, e: "Dieu des portes et des débuts." }
+  ]
+});
+
+VRT_L("4e-gr-alphabet", {
+  c: "4e", m: "grec", cle: "Alphabet grec : écriture et prononciation", titre: "L'alphabet grec : écriture et prononciation", duree: 20,
+  accroche: "Alpha + bêta = alphabet : 24 lettres à apprivoiser.",
+  intro: "Le mot « alphabet » vient des deux premières lettres grecques : alpha et bêta. Apprends à lire et à écrire les 24 lettres de l'alphabet grec.",
+  objectifs: ["connaître les 24 lettres et leur nom", "prononcer et transcrire chaque lettre", "reconnaître des mots français d'origine grecque"],
+  parties: [
+    { t: "D'où vient l'alphabet grec ?", html:
+      "<p>Vers le VIIIᵉ siècle avant J.-C., les Grecs adaptent l'alphabet des <strong>Phéniciens</strong>, qui ne notait que les consonnes. Les Grecs y ajoutent les <strong>voyelles</strong>. C'est de cet alphabet que viennent l'alphabet latin, puis le nôtre.</p>",
+      retenir: "Les Grecs ont été les premiers à noter régulièrement les voyelles." },
+    { t: "Les 24 lettres", html:
+      "<div class='tab-scroll'><table><thead><tr><th>Lettre</th><th>Nom</th><th>Son</th><th>Lettre</th><th>Nom</th><th>Son</th></tr></thead><tbody>" +
+      "<tr><td>Α α</td><td>alpha</td><td>a</td><td>Ν ν</td><td>nu</td><td>n</td></tr><tr><td>Β β</td><td>bêta</td><td>b</td><td>Ξ ξ</td><td>xi</td><td>ks</td></tr><tr><td>Γ γ</td><td>gamma</td><td>g (dur)</td><td>Ο ο</td><td>omicron</td><td>o bref</td></tr><tr><td>Δ δ</td><td>delta</td><td>d</td><td>Π π</td><td>pi</td><td>p</td></tr><tr><td>Ε ε</td><td>epsilon</td><td>e bref</td><td>Ρ ρ</td><td>rhô</td><td>r</td></tr><tr><td>Ζ ζ</td><td>zêta</td><td>dz</td><td>Σ σ ς</td><td>sigma</td><td>s</td></tr><tr><td>Η η</td><td>êta</td><td>ê long</td><td>Τ τ</td><td>tau</td><td>t</td></tr><tr><td>Θ θ</td><td>thêta</td><td>th</td><td>Υ υ</td><td>upsilon</td><td>u (ü)</td></tr><tr><td>Ι ι</td><td>iota</td><td>i</td><td>Φ φ</td><td>phi</td><td>ph</td></tr><tr><td>Κ κ</td><td>kappa</td><td>k</td><td>Χ χ</td><td>khi</td><td>kh</td></tr><tr><td>Λ λ</td><td>lambda</td><td>l</td><td>Ψ ψ</td><td>psi</td><td>ps</td></tr><tr><td>Μ μ</td><td>mu</td><td>m</td><td>Ω ω</td><td>oméga</td><td>ô long</td></tr></tbody></table></div>" +
+      "<div class='attention'><b>Attention aux faux amis</b>Η se lit « ê » (et non « h ») ; Ρ se lit « r » ; Χ se lit « kh ». Le sigma s'écrit ς en fin de mot : λόγος.</div>",
+      retenir: "24 lettres ; σ devient ς à la fin d'un mot." },
+    { t: "Le grec dans nos mots", html:
+      "<ul><li><strong>φίλος</strong> (philos, ami) + <strong>σοφία</strong> (sophia, sagesse) → philosophie.</li><li><strong>γῆ</strong> (gê, terre) + <strong>γράφω</strong> (graphô, écrire) → géographie.</li><li><strong>βίος</strong> (bios, vie) + <strong>λόγος</strong> (logos, discours, étude) → biologie.</li></ul>",
+      retenir: "Beaucoup de mots savants du français sont faits de racines grecques." }
+  ],
+  revision: ["Alphabet adapté du phénicien, avec ajout des voyelles.", "24 lettres, d'alpha à oméga.", "η = ê, ρ = r, χ = kh, ψ = ps, φ = ph.", "Sigma final : ς.", "Racines grecques : philo-, -sophie, géo-, -graphie, bio-, -logie."],
+  exo: "<p>Transcris en lettres latines : Ἑλλάς, Ὅμηρος, φιλοσοφία. <em>(Hellas, Homêros, philosophia)</em></p>",
+  quiz: [
+    { q: "Combien de lettres compte l'alphabet grec ?", r: ["24", "26", "22"], b: 0, e: "D'alpha à oméga." },
+    { q: "La lettre η se prononce…", r: ["h", "ê", "n"], b: 1, e: "C'est l'êta, un e long." },
+    { q: "« Philosophie » signifie…", r: ["amour de la sagesse", "étude de la Terre", "écriture de la vie"], b: 0, e: "philos (ami) + sophia (sagesse)." }
+  ]
+});
+
+VRT_L("3e-gr-esope-homere", {
+  c: "3e", m: "grec", cle: "Esope, Homère et leurs genres littéraires", titre: "Ésope, Homère et leurs genres littéraires", duree: 15,
+  accroche: "L'épopée des héros, la fable des animaux : deux trésors grecs.",
+  intro: "Deux auteurs grecs ont traversé les siècles : Homère, le poète des héros, et Ésope, le conteur des animaux. Ils ont fondé deux genres encore vivants : l'épopée et la fable.",
+  objectifs: ["présenter Homère et Ésope", "caractériser l'épopée et la fable", "mesurer leur influence"],
+  parties: [
+    { t: "Homère et l'épopée", html:
+      "<p>Selon la tradition, <strong>Homère</strong> est un poète aveugle du VIIIᵉ siècle avant J.-C. On lui attribue deux grandes épopées :</p><ul><li>l'<strong>Iliade</strong> : un épisode de la guerre de Troie, autour de la colère d'Achille ;</li><li>l'<strong>Odyssée</strong> : le long retour d'Ulysse vers son île d'Ithaque.</li></ul><div class='def'><b>Définition</b>L'épopée est un long poème qui raconte les exploits de héros, souvent avec l'intervention des dieux. Elle était récitée par des aèdes.</div>",
+      retenir: "Homère : Iliade et Odyssée, modèles de l'épopée." },
+    { t: "Ésope et la fable", html:
+      "<p><strong>Ésope</strong> (VIᵉ siècle avant J.-C.) est, selon la tradition, un esclave devenu célèbre pour ses <strong>fables</strong> : de courts récits, souvent avec des animaux, qui se terminent par une <strong>morale</strong>.</p><div class='savais'><b>Le savais-tu ?</b>Au XVIIᵉ siècle, le Français Jean de La Fontaine a repris et réécrit en vers de nombreuses fables d'Ésope.</div>",
+      illus: { legende: "Deux genres, deux formes.", svg:
+      "<svg viewBox='0 0 460 170' role='img' aria-label='Comparaison épopée et fable'><rect x='10' y='14' width='210' height='142' rx='16' fill='#E4E9F2' stroke='#071A45' stroke-width='2'/><text x='115' y='42' text-anchor='middle' font-size='16' font-weight='700' fill='#0C2A6A'>ÉPOPÉE · Homère</text><g font-size='12' fill='#142554'><text x='26' y='70'>• long poème</text><text x='26' y='92'>• héros, dieux, combats</text><text x='26' y='114'>• récité par l'aède</text><text x='26' y='136'>• Iliade, Odyssée</text></g><rect x='240' y='14' width='210' height='142' rx='16' fill='#FFF6DA' stroke='#6B4E00' stroke-width='2'/><text x='345' y='42' text-anchor='middle' font-size='16' font-weight='700' fill='#6B4E00'>FABLE · Ésope</text><g font-size='12' fill='#142554'><text x='256' y='70'>• récit court</text><text x='256' y='92'>• animaux qui parlent</text><text x='256' y='114'>• une morale</text><text x='256' y='136'>• reprise par La Fontaine</text></g></svg>" },
+      retenir: "Fable = récit court + morale." },
+    { t: "Leur héritage", html:
+      "<p>Des expressions viennent d'eux : « une odyssée » (un long voyage plein d'aventures), « le talon d'Achille » (le point faible). Les conteurs africains utilisent aussi des animaux pour transmettre une leçon de vie : la fable est un genre universel.</p>",
+      retenir: "Épopée et fable vivent encore dans nos expressions et nos contes." }
+  ],
+  revision: ["Homère (VIIIᵉ s. av. J.-C.) : Iliade, Odyssée.", "Épopée : long poème héroïque.", "Ésope (VIᵉ s. av. J.-C.) : fables avec morale.", "La Fontaine a repris Ésope.", "Expressions : une odyssée, le talon d'Achille."],
+  exo: "<p>Invente une courte fable (dix lignes) avec deux animaux de chez nous et termine-la par une morale.</p>",
+  quiz: [
+    { q: "Qui est le héros de l'Odyssée ?", r: ["Achille", "Ulysse", "Hector"], b: 1, e: "Son retour vers Ithaque." },
+    { q: "Une fable se termine par…", r: ["une morale", "une bataille", "un chant"], b: 0, e: "C'est la leçon à retenir." },
+    { q: "« Le talon d'Achille » désigne…", r: ["une force", "un point faible", "une chaussure"], b: 1, e: "Le seul endroit où Achille était vulnérable." }
+  ]
+});
+
+VRT_L("tle-sc-microscopie", {
+  c: "Tle A", m: "sciences", cle: "Cellule en microscopie optique", titre: "La cellule en microscopie optique", duree: 20,
+  accroche: "Un oignon, une goutte d'eau, un microscope : la vie apparaît en petites cases.",
+  intro: "Tous les êtres vivants sont faits de cellules. Au microscope optique, un simple épiderme d'oignon révèle des centaines de petites « cases » : ce sont des cellules.",
+  objectifs: ["énoncer la théorie cellulaire", "calculer un grossissement", "comparer cellule animale et cellule végétale"],
+  parties: [
+    { t: "La cellule, unité du vivant", html:
+      "<div class='def'><b>Théorie cellulaire</b>Tout être vivant est formé d'une ou de plusieurs cellules ; la cellule est l'unité de structure et de fonctionnement du vivant ; toute cellule provient d'une autre cellule.</div><p>Elle a été formulée au XIXᵉ siècle (Schleiden, Schwann, puis Virchow), grâce aux progrès du microscope.</p>",
+      retenir: "Pas de vie sans cellule." },
+    { t: "Utiliser le microscope optique", html:
+      "<p class='formule'>grossissement = grossissement de l'objectif × grossissement de l'oculaire</p><div class='ex'><b>Exemple</b>Objectif ×40 et oculaire ×10 : grossissement total ×400.</div><ol><li>Poser la lame sur la platine, objectif le plus faible.</li><li>Mettre au point avec la vis macrométrique, puis micrométrique.</li><li>Passer ensuite aux objectifs plus forts.</li></ol>",
+      retenir: "Toujours commencer par le plus faible grossissement." },
+    { t: "Cellule animale, cellule végétale", html:
+      "<p>Les deux possèdent une <strong>membrane plasmique</strong>, un <strong>cytoplasme</strong> et un <strong>noyau</strong>. La cellule végétale a en plus une <strong>paroi</strong> rigide, une grande <strong>vacuole</strong> et souvent des <strong>chloroplastes</strong>.</p>",
+      illus: { legende: "Cellule animale (à gauche) et cellule végétale (à droite).", svg:
+      "<svg viewBox='0 0 460 200' role='img' aria-label='Cellule animale et cellule végétale'><ellipse cx='110' cy='100' rx='90' ry='70' fill='#E0F5E5' stroke='#00520B' stroke-width='2.5'/><circle cx='125' cy='95' r='24' fill='#7FCB8C' stroke='#00520B' stroke-width='2'/><circle cx='130' cy='92' r='6' fill='#00520B'/><g font-size='11' fill='#142554'><text x='30' y='190'>membrane · cytoplasme · noyau</text></g><rect x='250' y='30' width='190' height='140' rx='8' fill='#C9E7CF' stroke='#00520B' stroke-width='5'/><rect x='258' y='38' width='174' height='124' rx='5' fill='#E0F5E5' stroke='#00520B' stroke-width='1.5'/><rect x='290' y='52' width='120' height='90' rx='30' fill='#DBE8FE' stroke='#1E499B' stroke-width='1.5'/><circle cx='272' cy='60' r='12' fill='#7FCB8C' stroke='#00520B' stroke-width='1.5'/><g fill='#007E11'><ellipse cx='275' cy='130' rx='9' ry='5'/><ellipse cx='420' cy='60' rx='9' ry='5'/><ellipse cx='418' cy='140' rx='9' ry='5'/></g><g font-size='11' fill='#142554'><text x='318' y='100'>vacuole</text><text x='252' y='190'>+ paroi, vacuole, chloroplastes</text></g></svg>" },
+      retenir: "Végétale = animale + paroi + vacuole + chloroplastes." }
+  ],
+  revision: ["Théorie cellulaire : la cellule est l'unité du vivant.", "Grossissement = objectif × oculaire.", "Commencer au plus faible grossissement.", "Membrane, cytoplasme, noyau : communs.", "Paroi, vacuole, chloroplastes : végétale."],
+  exo: "<p>Un élève observe avec un objectif ×10 et un oculaire ×15. Quel est le grossissement ? <em>(×150)</em></p>",
+  quiz: [
+    { q: "Objectif ×40, oculaire ×10 : grossissement ?", r: ["×50", "×400", "×4"], b: 1, e: "On multiplie." },
+    { q: "Quel élément est propre à la cellule végétale ?", r: ["Le noyau", "La paroi", "La membrane"], b: 1, e: "Elle donne sa rigidité à la cellule." },
+    { q: "Toute cellule provient…", r: ["de la matière inerte", "d'une autre cellule", "de l'eau"], b: 1, e: "Troisième principe de la théorie cellulaire." }
+  ]
+});
+
+VRT_L("tle-sc-organites", {
+  c: "Tle A", m: "sciences", cle: "Organisation de la cellule en microscopie électronique", titre: "La cellule en microscopie électronique : les organites", duree: 20,
+  accroche: "Mille fois plus près : la cellule devient une usine.",
+  intro: "Le microscope électronique grossit des centaines de milliers de fois. Il révèle, dans la cellule, de petites structures spécialisées : les organites.",
+  objectifs: ["citer les principaux organites", "associer chaque organite à son rôle", "comparer les deux microscopes"],
+  parties: [
+    { t: "Pourquoi le microscope électronique ?", html:
+      "<p>Le microscope optique utilise la lumière et ne distingue pas des détails plus petits qu'environ 0,2 micromètre. Le microscope électronique utilise un faisceau d'électrons : il montre l'<strong>ultrastructure</strong> de la cellule.</p>",
+      retenir: "Électrons au lieu de lumière : bien plus de détails." },
+    { t: "Les organites et leurs rôles", html:
+      "<ul><li><strong>Noyau</strong> (enveloppe percée de pores, nucléole) : contient l'ADN, dirige la cellule.</li><li><strong>Mitochondrie</strong> : respiration cellulaire, produit l'énergie.</li><li><strong>Chloroplaste</strong> (végétaux) : photosynthèse.</li><li><strong>Ribosomes</strong> : fabriquent les protéines.</li><li><strong>Réticulum endoplasmique</strong> : synthèse et transport de molécules.</li><li><strong>Appareil de Golgi</strong> : modifie, emballe et expédie les protéines.</li><li><strong>Lysosomes</strong> : digestion intracellulaire.</li></ul>",
+      retenir: "Chaque organite a un métier : la cellule est une usine organisée." },
+    { t: "Une cellule, deux regards", html:
+      "<div class='tab-scroll'><table><thead><tr><th></th><th>Optique</th><th>Électronique</th></tr></thead><tbody><tr><th>Rayonnement</th><td>lumière</td><td>électrons</td></tr><tr><th>Grossissement</th><td>jusqu'à environ ×1 500</td><td>plusieurs centaines de milliers</td></tr><tr><th>Échantillon</th><td>peut être vivant</td><td>préparé, mort</td></tr></tbody></table></div>",
+      retenir: "L'optique montre la cellule ; l'électronique montre ses organites." }
+  ],
+  revision: ["Microscope électronique : faisceau d'électrons, ultrastructure.", "Noyau : ADN, direction.", "Mitochondrie : énergie ; chloroplaste : photosynthèse.", "Ribosomes : protéines ; Golgi : emballage ; lysosomes : digestion."],
+  exo: "<p>Compare la cellule à une usine : associe chaque organite à un service (direction, centrale électrique, atelier, expédition…).</p>",
+  quiz: [
+    { q: "Quel organite produit l'énergie ?", r: ["La mitochondrie", "Le lysosome", "La vacuole"], b: 0, e: "Siège de la respiration cellulaire." },
+    { q: "Les protéines sont fabriquées par…", r: ["les ribosomes", "la paroi", "les pores"], b: 0, e: "Sur le réticulum ou libres dans le cytoplasme." },
+    { q: "Le microscope électronique utilise…", r: ["la lumière", "des électrons", "des ultrasons"], b: 1, e: "D'où son pouvoir de séparation." }
+  ]
+});
+
+VRT_L("6e-eps-piste", {
+  c: "6e", m: "eps", cle: "Le vocabulaire spécifique d", titre: "La piste d'athlétisme et son vocabulaire", duree: 15,
+  accroche: "Couloir, corde, décalage : parle comme un athlète.",
+  intro: "Avant de courir sur une piste, il faut en connaître les parties et les règles. Elles sont les mêmes au stade de ton lycée et aux Jeux olympiques.",
+  objectifs: ["nommer les parties d'une piste", "comprendre le sens de course et les couloirs", "expliquer les départs décalés"],
+  parties: [
+    { t: "Une piste de 400 mètres", html:
+      "<p>La piste réglementaire mesure <strong>400 m</strong> dans le premier couloir. Elle comprend <strong>deux lignes droites</strong> et <strong>deux virages</strong>. Elle compte en général <strong>8 couloirs</strong>, numérotés de l'intérieur vers l'extérieur. Le bord intérieur s'appelle la <strong>corde</strong>.</p>",
+      retenir: "400 m au couloir 1 ; couloir 1 = le plus proche de la corde." },
+    { t: "Le sens et les départs", html:
+      "<ul><li>On court dans le <strong>sens inverse des aiguilles d'une montre</strong> : la corde est à gauche du coureur.</li><li>La <strong>ligne d'arrivée</strong> est commune à toutes les courses.</li><li>Dans les courses avec virages en couloirs (200 m, 400 m), les départs sont <strong>décalés</strong> : le couloir extérieur, plus long dans le virage, part devant.</li></ul>",
+      retenir: "Départs décalés = même distance pour tous les couloirs." },
+    { t: "Le vocabulaire", html:
+      "<div class='tab-scroll'><table><tbody><tr><th>Couloir</th><td>bande où le coureur doit rester</td></tr><tr><th>Corde</th><td>bord intérieur de la piste</td></tr><tr><th>Ligne de départ / d'arrivée</th><td>lignes blanches transversales</td></tr><tr><th>Zone de transmission</th><td>espace où se passe le témoin au relais</td></tr><tr><th>Faux départ</th><td>départ avant le signal</td></tr></tbody></table></div>",
+      retenir: "Respecter son couloir, c'est respecter la règle et les autres." }
+  ],
+  revision: ["Piste de 400 m au couloir 1, 8 couloirs.", "2 lignes droites, 2 virages ; corde = bord intérieur.", "Sens inverse des aiguilles d'une montre.", "Départs décalés au 200 m et au 400 m."],
+  exo: "<p>Dessine une piste, place les couloirs, la ligne d'arrivée et le sens de course.</p>",
+  quiz: [
+    { q: "Combien mesure un tour de piste au couloir 1 ?", r: ["200 m", "400 m", "1 000 m"], b: 1, e: "Deux droites et deux virages." },
+    { q: "Pourquoi les départs du 400 m sont-ils décalés ?", r: ["Pour l'égalité des distances", "Par tirage au sort", "Pour gagner du temps"], b: 0, e: "Les couloirs extérieurs sont plus longs dans les virages." },
+    { q: "La corde est…", r: ["le bord extérieur", "le bord intérieur", "la ligne d'arrivée"], b: 1, e: "Le couloir 1 la longe." }
+  ]
+});
+
+VRT_L("6e-eps-bras-jambes", {
+  c: "6e", m: "eps", cle: "Synchronisation bras-jambes dans les déplacements : les courses", titre: "Courir mieux : la coordination bras-jambes", duree: 15,
+  accroche: "Bras gauche avec jambe droite : le secret d'une course fluide.",
+  intro: "Courir vite, ce n'est pas seulement bouger les jambes. Les bras donnent le rythme et l'équilibre.",
+  objectifs: ["décrire la coordination croisée", "adopter une bonne posture", "s'échauffer avant de courir"],
+  parties: [
+    { t: "La coordination croisée", html:
+      "<p>Quand la <strong>jambe droite</strong> avance, c'est le <strong>bras gauche</strong> qui avance, et inversement. Ce mouvement croisé équilibre le corps et évite qu'il tourne sur lui-même.</p>",
+      retenir: "Bras et jambe opposés avancent ensemble." },
+    { t: "La bonne posture", html:
+      "<ul><li>Regard loin devant, tête dans l'axe du corps.</li><li>Bras pliés à environ 90°, épaules relâchées.</li><li>Les mains vont d'avant en arrière, sans traverser devant la poitrine.</li><li>Appuis sur l'avant du pied, genoux qui montent.</li></ul><div class='astuce'><b>Astuce</b>Pour accélérer, accélère d'abord les bras : les jambes suivent le rythme.</div>",
+      retenir: "Coudes à 90°, épaules relâchées, regard devant." },
+    { t: "S'échauffer et récupérer", html:
+      "<p>Avant l'effort : footing léger, rotations des articulations, montées de genoux, talons-fesses. Après : marche, étirements doux, boire de l'eau.</p>",
+      retenir: "Un corps échauffé se blesse moins." }
+  ],
+  revision: ["Coordination croisée : bras opposé à la jambe.", "Coudes à 90°, épaules relâchées.", "Appuis sur l'avant du pied.", "Échauffement avant, récupération après."],
+  exo: "<p>Filme ou observe un camarade qui court : sa coordination bras-jambes est-elle croisée ? Ses bras traversent-ils devant la poitrine ?</p>",
+  quiz: [
+    { q: "Quand la jambe droite avance, quel bras avance ?", r: ["Le droit", "Le gauche", "Aucun"], b: 1, e: "Coordination croisée." },
+    { q: "Angle conseillé des coudes :", r: ["environ 90°", "bras tendus", "45°"], b: 0, e: "Les bras pliés donnent le rythme." },
+    { q: "Pour accélérer, on peut…", r: ["accélérer les bras", "regarder ses pieds", "serrer les épaules"], b: 0, e: "Les jambes suivent le rythme des bras." }
+  ]
+});
+
+VRT_L("6e-arts-branches", {
+  c: "6e", m: "arts", cle: "Les différentes branches des arts", titre: "Les différentes branches des arts", duree: 15,
+  accroche: "Peindre, sculpter, chanter, jouer : toutes les façons de créer.",
+  intro: "Un masque sculpté, un chant de veillée, une pièce de théâtre, un pagne tissé : l'art prend mille formes. On les range en grandes familles.",
+  objectifs: ["distinguer arts plastiques, musicaux et scéniques", "citer des exemples de chaque branche", "reconnaître des formes d'art camerounaises"],
+  parties: [
+    { t: "Les arts plastiques", html:
+      "<p>Ils créent des œuvres qu'on <strong>regarde</strong> et parfois qu'on touche : <strong>dessin, peinture, sculpture, gravure, céramique</strong> (poterie), <strong>architecture</strong>, <strong>photographie</strong>, arts textiles.</p>",
+      retenir: "Arts plastiques : on façonne la matière et les formes." },
+    { t: "Les arts musicaux et scéniques", html:
+      "<ul><li><strong>Arts musicaux</strong> : chant, musique instrumentale (balafon, tam-tam, mvet, guitare…).</li><li><strong>Arts scéniques</strong> (ou arts du spectacle) : théâtre, danse, conte, marionnettes, mime.</li></ul>",
+      illus: { legende: "Trois grandes familles d'arts.", svg:
+      "<svg viewBox='0 0 460 170' role='img' aria-label='Trois familles d arts'><g text-anchor='middle'><circle cx='80' cy='80' r='62' fill='#EAE7F7' stroke='#352C72' stroke-width='2'/><text x='80' y='72' font-size='14' font-weight='700' fill='#352C72'>PLASTIQUES</text><text x='80' y='92' font-size='11' fill='#142554'>dessin, peinture</text><text x='80' y='108' font-size='11' fill='#142554'>sculpture, poterie</text><circle cx='230' cy='80' r='62' fill='#FFF6DA' stroke='#6B4E00' stroke-width='2'/><text x='230' y='72' font-size='14' font-weight='700' fill='#6B4E00'>MUSICAUX</text><text x='230' y='92' font-size='11' fill='#142554'>chant, balafon</text><text x='230' y='108' font-size='11' fill='#142554'>tam-tam, mvet</text><circle cx='380' cy='80' r='62' fill='#FBE4EE' stroke='#6E1F43' stroke-width='2'/><text x='380' y='72' font-size='14' font-weight='700' fill='#6E1F43'>SCÉNIQUES</text><text x='380' y='92' font-size='11' fill='#142554'>théâtre, danse</text><text x='380' y='108' font-size='11' fill='#142554'>conte, mime</text></g><text x='230' y='162' text-anchor='middle' font-size='12' fill='#636A80'>regarder · écouter · assister</text></svg>" },
+      retenir: "Plastiques (voir), musicaux (entendre), scéniques (voir et entendre un spectacle)." },
+    { t: "Des arts camerounais", html:
+      "<div class='savais'><b>Le savais-tu ?</b>Foumban est célèbre pour ses artisans du bronze et du bois sculpté ; les Grassfields pour leurs masques et leurs perles ; le mvet accompagne les grands récits épiques du Sud.</div>",
+      retenir: "Le patrimoine artistique camerounais est immense et varié." }
+  ],
+  revision: ["Arts plastiques : dessin, peinture, sculpture, gravure, céramique, architecture, photographie.", "Arts musicaux : chant, musique instrumentale.", "Arts scéniques : théâtre, danse, conte, mime.", "Patrimoine camerounais : bronze et bois de Foumban, masques, mvet."],
+  exo: "<p>Classe : tissage, danse, balafon, poterie, conte, photographie. <em>(Plastiques : tissage, poterie, photographie ; musicaux : balafon ; scéniques : danse, conte.)</em></p>",
+  quiz: [
+    { q: "La sculpture appartient aux arts…", r: ["plastiques", "musicaux", "scéniques"], b: 0, e: "On façonne la matière." },
+    { q: "Le conte est un art…", r: ["plastique", "scénique", "musical seulement"], b: 1, e: "Il se joue devant un public." },
+    { q: "Le mvet est…", r: ["une danse", "un instrument et un art du récit", "une sculpture"], b: 1, e: "Il accompagne les récits épiques." }
+  ]
+});
+
+VRT_L("3e-arts-ombre", {
+  c: "3e", m: "arts", cle: "L’ombre portée et l'ombre propre", titre: "L'ombre et la lumière : ombre propre et ombre portée", duree: 15,
+  accroche: "Une source de lumière, un objet, deux ombres : dessine le volume.",
+  intro: "Pour qu'un dessin donne l'impression du relief, il faut savoir où tombe la lumière et où naissent les ombres.",
+  objectifs: ["distinguer ombre propre et ombre portée", "placer les ombres selon la source de lumière", "ombrer un volume simple"],
+  parties: [
+    { t: "Deux sortes d'ombres", html:
+      "<div class='def'><b>Ombre propre</b>Partie de l'objet qui ne reçoit pas la lumière.</div><div class='def'><b>Ombre portée</b>Ombre que l'objet projette sur une surface (le sol, un mur), du côté opposé à la lumière.</div>",
+      retenir: "Propre : SUR l'objet. Portée : À CÔTÉ de l'objet." },
+    { t: "Lumière, pénombre, ombre", html:
+      "<p>Sur une sphère éclairée, on distingue la <strong>zone éclairée</strong> (avec un point très clair, le <strong>reflet</strong>), une zone de <strong>pénombre</strong> qui passe progressivement au sombre, puis l'<strong>ombre propre</strong>. Plus la source est basse, plus l'ombre portée est longue.</p>",
+      retenir: "Le passage de la lumière à l'ombre doit être progressif." },
+    { t: "Ombrer au crayon", html:
+      "<ol><li>Repère la source de lumière et dessine une flèche.</li><li>Trace la limite entre lumière et ombre propre.</li><li>Ombre par hachures ou estompe, du plus clair au plus foncé.</li><li>Dessine l'ombre portée, opposée à la lumière.</li></ol><div class='astuce'><b>Astuce</b>Un crayon tendre (2B, 4B) donne des noirs profonds ; un crayon dur (H) des gris légers.</div>",
+      retenir: "Toujours partir de la position de la lumière." }
+  ],
+  revision: ["Ombre propre : sur l'objet.", "Ombre portée : projetée, à l'opposé de la lumière.", "Lumière → pénombre → ombre, de façon progressive.", "Source basse = ombre portée longue."],
+  exo: "<p>Dessine un cube et une sphère éclairés par la gauche ; ombre-les au crayon.</p>",
+  quiz: [
+    { q: "L'ombre portée se trouve…", r: ["sur l'objet", "du côté opposé à la lumière, sur une surface", "toujours derrière le dessinateur"], b: 1, e: "C'est l'ombre projetée." },
+    { q: "Si la lampe descend, l'ombre portée…", r: ["raccourcit", "s'allonge", "disparaît"], b: 1, e: "Comme les ombres du soir." },
+    { q: "Pour des noirs profonds, on prend un crayon…", r: ["H", "4B", "HB"], b: 1, e: "B = tendre et foncé." }
+  ]
+});
+
+VRT_L("6e-tm-materiel-dessin", {
+  c: "6e", m: "tm", cle: "Le matériel de dessin : définition", titre: "Le matériel de dessin", duree: 15,
+  accroche: "Le bon outil pour le bon trait.",
+  intro: "Avant de dessiner le kiosque du projet de l'année, il faut connaître ses outils et savoir s'en servir.",
+  objectifs: ["nommer le matériel de dessin", "choisir l'outil adapté", "entretenir son matériel"],
+  parties: [
+    { t: "Pour tracer", html:
+      "<ul><li><strong>Crayons graphite</strong> : H (dur, trait clair), HB (moyen), B (tendre, trait foncé).</li><li><strong>Règle graduée</strong> : tracer et mesurer des droites.</li><li><strong>Équerre</strong> : tracer des angles droits et des perpendiculaires.</li><li><strong>Compas</strong> : tracer des cercles et des arcs.</li><li><strong>Rapporteur</strong> : mesurer et tracer des angles.</li></ul>",
+      illus: { legende: "Les instruments de base du dessin technique.", svg:
+      "<svg viewBox='0 0 460 160' role='img' aria-label='Règle, équerre, compas, crayon'><rect x='10' y='110' width='200' height='26' rx='3' fill='#FFF6DA' stroke='#6B4E00' stroke-width='2'/><g stroke='#6B4E00'><path d='M20 110v10M40 110v6M60 110v10M80 110v6M100 110v10M120 110v6M140 110v10M160 110v6M180 110v10M200 110v6'/></g><path d='M230 136 L330 136 L230 36 Z' fill='#DDF2F4' stroke='#0A4F55' stroke-width='2'/><path d='M244 122 L290 122 L244 76 Z' fill='#fff' stroke='#0A4F55'/><g stroke='#071A45' stroke-width='3' stroke-linecap='round'><path d='M390 20 L360 130'/><path d='M390 20 L420 130'/></g><circle cx='390' cy='20' r='6' fill='#0C2A6A'/><path d='M60 30 L170 80' stroke='#FFC93C' stroke-width='12' stroke-linecap='round'/><path d='M170 80 L186 87' stroke='#C9A97A' stroke-width='8'/><path d='M186 87 L192 90' stroke='#142554' stroke-width='3'/><g font-size='12' fill='#142554'><text x='80' y='154'>règle</text><text x='264' y='154'>équerre</text><text x='374' y='150'>compas</text><text x='70' y='22'>crayon</text></g></svg>" },
+      retenir: "H = dur et clair ; B = tendre et foncé." },
+    { t: "Pour corriger et colorier", html:
+      "<p><strong>Gomme</strong>, <strong>taille-crayon</strong>, <strong>crayons de couleur</strong>, <strong>feutres</strong>. Le <strong>papier</strong> est choisi selon le travail (papier à dessin, papier calque).</p>",
+      retenir: "Un trait léger se gomme facilement : appuie peu au début." },
+    { t: "Entretenir son matériel", html:
+      "<ul><li>Garder une mine bien taillée pour des traits précis.</li><li>Nettoyer la règle et l'équerre (la mine salit la feuille).</li><li>Ranger le compas pointe protégée : c'est un outil piquant.</li></ul>",
+      retenir: "Un outil propre fait un dessin propre." }
+  ],
+  revision: ["Crayons H, HB, B.", "Règle, équerre, compas, rapporteur.", "Gomme, taille-crayon, couleurs, papier adapté.", "Entretien et sécurité du matériel."],
+  exo: "<p>Prépare ta trousse de dessin et vérifie qu'il ne manque rien de la liste.</p>",
+  quiz: [
+    { q: "Pour tracer un cercle, on utilise…", r: ["l'équerre", "le compas", "le rapporteur"], b: 1, e: "Le compas trace cercles et arcs." },
+    { q: "Un crayon 4B donne un trait…", r: ["clair et dur", "foncé et tendre", "coloré"], b: 1, e: "B = black, tendre." },
+    { q: "Pour un angle droit, on utilise…", r: ["l'équerre", "la gomme", "le calque"], b: 0, e: "Elle a un angle de 90°." }
+  ]
+});
+
+VRT_L("6e-tm-site-pepiniere", {
+  c: "6e", m: "tm", cle: "Choix du site", titre: "Choisir le site d'une pépinière", duree: 15,
+  accroche: "Une bonne pépinière commence par un bon emplacement.",
+  intro: "Une pépinière produit de jeunes plants (cacaoyers, arbres fruitiers, légumes) avant leur repiquage. Le choix du terrain conditionne la réussite.",
+  objectifs: ["définir une pépinière", "énumérer les critères de choix du site", "justifier un choix sur le terrain"],
+  parties: [
+    { t: "Qu'est-ce qu'une pépinière ?", html:
+      "<div class='def'><b>Définition</b>Une pépinière est un lieu aménagé où l'on fait germer et grandir de jeunes plants, protégés, avant de les planter à leur emplacement définitif.</div>",
+      retenir: "Pépinière = berceau des jeunes plants." },
+    { t: "Les critères du bon site", html:
+      "<ul><li><strong>Eau</strong> : un point d'eau proche et permanent pour l'arrosage.</li><li><strong>Sol</strong> : meuble, fertile, bien drainé (pas de zone inondable).</li><li><strong>Relief</strong> : terrain plat ou en légère pente.</li><li><strong>Lumière</strong> : bon ensoleillement, avec possibilité d'ombrager les jeunes plants.</li><li><strong>Accès</strong> : facile pour le travail et le transport des plants.</li><li><strong>Protection</strong> : à l'abri des animaux en divagation et des vents forts.</li></ul>",
+      illus: { legende: "Un site bien choisi : eau, sol plat, ombrage, clôture, accès.", svg:
+      "<svg viewBox='0 0 460 190' role='img' aria-label='Site de pépinière'><rect x='0' y='120' width='460' height='70' fill='#E0F5E5'/><path d='M0 120 Q230 110 460 120' fill='none' stroke='#00520B' stroke-width='2'/><path d='M320 130 Q380 120 440 140 Q400 165 330 155 Z' fill='#DBE8FE' stroke='#1E499B' stroke-width='2'/><text x='360' y='178' font-size='11' fill='#1E499B'>point d'eau</text><rect x='70' y='95' width='180' height='12' fill='#8C9BC0'/><g stroke='#6B4E00' stroke-width='2'><path d='M80 107v24M240 107v24M160 107v24'/></g><text x='96' y='90' font-size='11' fill='#142554'>ombrière</text><g fill='#7FCB8C' stroke='#00520B'><circle cx='100' cy='136' r='6'/><circle cx='125' cy='136' r='6'/><circle cx='150' cy='136' r='6'/><circle cx='175' cy='136' r='6'/><circle cx='200' cy='136' r='6'/><circle cx='225' cy='136' r='6'/></g><g stroke='#6B4E00' stroke-width='2'><path d='M50 150V112M270 150V112M50 118h220M50 134h220'/></g><text x='60' y='170' font-size='11' fill='#142554'>clôture</text><circle cx='60' cy='36' r='18' fill='#FFC93C'/><path d='M0 160 L40 190' stroke='#C9A97A' stroke-width='10'/><text x='4' y='186' font-size='10' fill='#6B4E00'>piste</text></svg>" },
+      retenir: "Eau, sol, relief, lumière, accès, protection." },
+    { t: "Sur le terrain", html:
+      "<p>Visite deux terrains possibles, note chaque critère de 0 à 2, additionne : le terrain qui obtient le meilleur total est retenu. Cette méthode permet de justifier son choix.</p><div class='astuce'><b>Astuce</b>Évite le pied d'un grand arbre : ses racines prennent l'eau et ses feuilles portent parfois des maladies.</div>",
+      retenir: "Un choix se justifie par des critères notés." }
+  ],
+  revision: ["Pépinière : lieu de production de jeunes plants.", "Critères : eau, sol, relief, lumière, accès, protection.", "Éviter les zones inondables.", "Comparer les terrains avec une grille notée."],
+  exo: "<p>Construis une grille de choix (6 critères) et compare deux terrains autour de ton établissement.</p>",
+  quiz: [
+    { q: "Le critère le plus important pour arroser :", r: ["un point d'eau proche", "un grand arbre", "une route goudronnée"], b: 0, e: "Les jeunes plants ont besoin d'arrosage régulier." },
+    { q: "Une zone inondable est…", r: ["idéale", "à éviter", "obligatoire"], b: 1, e: "Les racines pourrissent dans l'eau stagnante." },
+    { q: "Pourquoi une clôture ?", r: ["Pour décorer", "Pour protéger des animaux", "Pour faire de l'ombre"], b: 1, e: "Les chèvres adorent les jeunes plants !" }
+  ]
+});
+
+VRT_L("1re-esf-notions", {
+  c: "1re A", m: "esf", cle: "Notions sur l'économie sociale et familiale", titre: "Notions sur l'économie sociale et familiale", duree: 15,
+  accroche: "Bien gérer le foyer : un savoir qui s'apprend.",
+  intro: "Budget, alimentation, santé, logement, soin des enfants et des aînés : la vie d'un foyer demande des compétences. C'est l'objet de l'économie sociale et familiale.",
+  objectifs: ["définir les mots économie, sociale et familiale", "décrire les domaines de l'ESF", "mesurer son impact sur la vie du foyer"],
+  parties: [
+    { t: "Trois mots", html:
+      "<ul><li><strong>Économie</strong> : du grec <em>oikos</em> (maison) et <em>nomos</em> (règle) ; la bonne gestion des ressources.</li><li><strong>Sociale</strong> : qui concerne la vie en société et la solidarité.</li><li><strong>Familiale</strong> : qui concerne la famille et le foyer.</li></ul><div class='def'><b>Définition</b>L'économie sociale et familiale est la discipline qui apprend à gérer au mieux les ressources du foyer (argent, temps, énergie, aliments) pour le bien-être de chacun.</div>",
+      retenir: "Économie = « règle de la maison »." },
+    { t: "Ses domaines", html:
+      "<ul><li><strong>Budget</strong> : prévoir recettes et dépenses, épargner.</li><li><strong>Alimentation</strong> : repas équilibrés, hygiène, conservation des aliments.</li><li><strong>Santé</strong> : puériculture, gérontologie, prévention.</li><li><strong>Habitat</strong> et <strong>vêtement</strong> : entretien, décoration, couture.</li></ul>",
+      illus: { legende: "Le foyer au centre des domaines de l'ESF.", svg:
+      "<svg viewBox='0 0 460 190' role='img' aria-label='Domaines de l économie sociale et familiale'><circle cx='230' cy='95' r='42' fill='#B03A6E'/><text x='230' y='92' text-anchor='middle' font-size='14' font-weight='700' fill='#fff'>LE</text><text x='230' y='110' text-anchor='middle' font-size='14' font-weight='700' fill='#fff'>FOYER</text><g stroke='#6E1F43' stroke-width='2'><path d='M200 70 L130 34M260 70 L330 34M200 120 L130 156M260 120 L330 156'/></g><g font-size='13' text-anchor='middle' fill='#142554'><rect x='50' y='14' width='130' height='36' rx='18' fill='#FBE4EE'/><text x='115' y='37'>budget</text><rect x='280' y='14' width='130' height='36' rx='18' fill='#FBE4EE'/><text x='345' y='37'>alimentation</text><rect x='50' y='140' width='130' height='36' rx='18' fill='#FBE4EE'/><text x='115' y='163'>santé, enfants, aînés</text><rect x='280' y='140' width='130' height='36' rx='18' fill='#FBE4EE'/><text x='345' y='163'>habitat, vêtement</text></g></svg>" },
+      retenir: "Budget, alimentation, santé, habitat, vêtement." },
+    { t: "Un impact concret", html:
+      "<p>Un foyer bien géré dépense moins, mange mieux, tombe moins malade et peut épargner pour la scolarité des enfants. L'ESF prépare aussi à des métiers : conseiller en économie familiale, restauration, puériculture, couture.</p>",
+      retenir: "L'ESF améliore la vie quotidienne et ouvre des métiers." }
+  ],
+  revision: ["oikos + nomos = règle de la maison.", "ESF : gérer les ressources du foyer pour le bien-être.", "Domaines : budget, alimentation, santé, habitat, vêtement.", "Débouchés professionnels."],
+  exo: "<p>Établis le budget d'un repas familial pour six personnes avec les prix du marché de ton quartier.</p>",
+  quiz: [
+    { q: "« Oikos » signifie…", r: ["la maison", "l'argent", "le marché"], b: 0, e: "Économie = règle de la maison." },
+    { q: "Lequel n'est pas un domaine de l'ESF ?", r: ["Budget", "Alimentation", "Astronomie"], b: 2, e: "L'ESF concerne la vie du foyer." },
+    { q: "Épargner pour la scolarité relève…", r: ["du budget", "du vêtement", "de la décoration"], b: 0, e: "Prévoir recettes, dépenses et épargne." }
+  ]
+});
+
+VRT_L("1re-esf-alarme", {
+  c: "1re A", m: "esf", cle: "Les signes d'alarme", titre: "Les signes d'alarme chez le nourrisson", duree: 15,
+  accroche: "Savoir reconnaître l'urgence peut sauver un bébé.",
+  intro: "Un nourrisson ne peut pas dire qu'il va mal. Il faut savoir reconnaître un bébé bien portant… et les signes qui imposent d'aller au centre de santé sans attendre.",
+  objectifs: ["décrire un bébé bien portant", "reconnaître les signes de danger", "réagir rapidement"],
+  parties: [
+    { t: "Un bébé bien portant", html:
+      "<ul><li>Il tète ou boit bien et prend régulièrement du poids (courbe du carnet de santé).</li><li>Il est éveillé, réagit aux voix et aux sons.</li><li>Il respire calmement, sa peau est rose et chaude.</li><li>Ses selles et ses urines sont régulières.</li></ul>",
+      retenir: "Bonne prise de poids, éveil, respiration calme." },
+    { t: "Les signes de danger", html:
+      "<div class='attention'><b>Consulter immédiatement si le bébé :</b>ne peut plus téter ni boire ; vomit tout ce qu'il prend ; a des convulsions ; est anormalement mou, somnolent ou difficile à réveiller ; respire très vite ou avec un creusement sous les côtes ; a une forte fièvre ou, au contraire, est froid ; a une diarrhée avec yeux enfoncés et pli de la peau qui reste.</div>",
+      illus: { legende: "Repères rapides : signes rassurants et signes d'alarme.", svg:
+      "<svg viewBox='0 0 460 180' role='img' aria-label='Signes rassurants et signes d alarme'><rect x='10' y='10' width='210' height='160' rx='16' fill='#E0F5E5' stroke='#00520B' stroke-width='2'/><circle cx='62' cy='33' r='9' fill='#007E11'/><path d='m57.5 33 3 3 5-5.5' fill='none' stroke='#fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/><text x='122' y='38' text-anchor='middle' font-size='14' font-weight='600' fill='#00520B'>RASSURANT</text><g font-size='12' fill='#142554'><text x='26' y='66'>• tète bien</text><text x='26' y='90'>• prend du poids</text><text x='26' y='114'>• éveillé, réactif</text><text x='26' y='138'>• respiration calme</text></g><rect x='240' y='10' width='210' height='160' rx='16' fill='#FCEFEC' stroke='#B4321E' stroke-width='2'/><path d='M290 41 299 25l9 16z' fill='#B4321E'/><path d='M299 31v4M299 38v.4' stroke='#fff' stroke-width='2' stroke-linecap='round'/><text x='352' y='38' text-anchor='middle' font-size='14' font-weight='600' fill='#B4321E'>URGENCE</text><g font-size='12' fill='#142554'><text x='256' y='66'>• ne tète plus</text><text x='256' y='90'>• vomit tout</text><text x='256' y='114'>• convulsions</text><text x='256' y='138'>• mou, somnolent</text><text x='256' y='162'>• respire très vite</text></g></svg>" },
+      retenir: "Un seul signe de danger suffit pour consulter d'urgence." },
+    { t: "Que faire ?", html:
+      "<ol><li>Aller sans attendre au centre de santé le plus proche, avec le carnet de santé.</li><li>Continuer à proposer le sein ou à faire boire pendant le trajet si l'enfant peut avaler.</li><li>Ne pas donner de médicament ni de décoction sans avis d'un agent de santé.</li></ol>",
+      retenir: "Agir vite, avec le carnet de santé." }
+  ],
+  revision: ["Bébé bien portant : tète, grossit, éveillé, respire calmement.", "Danger : ne tète plus, vomit tout, convulsions, somnolence, respiration rapide, déshydratation.", "Consulter immédiatement, avec le carnet.", "Pas d'automédication."],
+  exo: "<p>Réalise une affiche des signes d'alarme du nourrisson destinée aux jeunes parents de ton quartier.</p>",
+  quiz: [
+    { q: "Un nourrisson qui vomit tout ce qu'il prend…", r: ["peut attendre demain", "doit consulter d'urgence", "doit boire une décoction"], b: 1, e: "C'est un signe de danger." },
+    { q: "Signe de bonne santé :", r: ["prise de poids régulière", "somnolence permanente", "respiration très rapide"], b: 0, e: "La courbe du carnet le montre." },
+    { q: "Que prendre en allant au centre de santé ?", r: ["Le carnet de santé", "Rien", "Des médicaments achetés au marché"], b: 0, e: "Il contient l'historique de l'enfant." }
+  ]
+});
+
+/* Leçons rédigées VÉRITAS — sciences, lot 2 (6e, 5e, 4e, Tle C, Tle D). Animations : 91-animations-2.js */
+VRT_L("6e-maths-divisibilite", {
+  c: "6e", m: "maths", cle: "Critères de divisibilité par 10, 100, 1000", titre: "Les critères de divisibilité", duree: 15,
+  accroche: "Savoir si un nombre se divise par 3 sans poser la division ? C'est possible.",
+  intro: "Partager 126 mangues entre 9 élèves sans reste, est-ce possible ? Les critères de divisibilité répondent en quelques secondes, sans poser la division.",
+  objectifs: ["appliquer les critères par 2, 5, 10, 100, 1 000", "appliquer les critères par 3 et par 9", "justifier une réponse"],
+  parties: [
+    { t: "Le vocabulaire", html: "<div class='def'><b>Définition</b>Un nombre entier est <strong>divisible</strong> par un autre si le reste de la division est 0. On dit aussi qu'il en est un <strong>multiple</strong>.</div><div class='ex'><b>Exemple</b>126 ÷ 9 = 14 reste 0 : 126 est divisible par 9 ; 126 est un multiple de 9.</div>", retenir: "Divisible = reste nul." },
+    { t: "Les critères", html: "<div class='tab-scroll'><table><thead><tr><th>Par</th><th>Un nombre est divisible s'il…</th><th>Exemple</th></tr></thead><tbody><tr><th>2</th><td>se termine par 0, 2, 4, 6 ou 8</td><td>358</td></tr><tr><th>5</th><td>se termine par 0 ou 5</td><td>1 235</td></tr><tr><th>10 / 100 / 1 000</th><td>se termine par 0 / 00 / 000</td><td>4 500</td></tr><tr><th>3</th><td>a une somme des chiffres divisible par 3</td><td>213 → 2+1+3 = 6</td></tr><tr><th>9</th><td>a une somme des chiffres divisible par 9</td><td>126 → 1+2+6 = 9</td></tr></tbody></table></div><div class='astuce'><b>Astuce</b>Si la somme des chiffres est encore grande, recommence : 98 766 → 36 → 3+6 = 9, donc divisible par 9 (et par 3).</div>", retenir: "2, 5, 10 : regarder le dernier chiffre. 3 et 9 : additionner les chiffres." },
+    { t: "Justifier", html: "<div class='ex'><b>Exemple de rédaction</b>« 2 745 est divisible par 5 car il se termine par 5. Il est divisible par 9 car 2 + 7 + 4 + 5 = 18 et 18 est divisible par 9. »</div><div class='attention'><b>Attention</b>Divisible par 9 entraîne divisible par 3, mais pas l'inverse : 12 est divisible par 3 et pas par 9.</div>", retenir: "Toujours écrire « car… » avec le critère utilisé." }
+  ],
+  revision: ["Divisible = reste nul.", "Par 2 : chiffre des unités pair ; par 5 : 0 ou 5 ; par 10 : 0.", "Par 3 / par 9 : somme des chiffres divisible par 3 / par 9.", "Divisible par 9 ⇒ divisible par 3."],
+  exo: "<p>Parmi 120, 315, 1 008, 2 222, lesquels sont divisibles par 2 ? par 3 ? par 5 ? par 9 ?</p>",
+  quiz: [
+    { q: "4 572 est-il divisible par 3 ?", r: ["Oui", "Non"], b: 0, e: "4+5+7+2 = 18, divisible par 3." },
+    { q: "Quel nombre est divisible par 5 ?", r: ["2 352", "1 405", "777"], b: 1, e: "Il se termine par 5." },
+    { q: "12 est divisible par 3. Est-il divisible par 9 ?", r: ["Oui", "Non"], b: 1, e: "1+2 = 3, pas un multiple de 9." }
+  ]
+});
+
+VRT_L("5e-maths-pgcd", {
+  c: "5e", m: "maths", cle: "PGCD de deux entiers naturels", titre: "Le PGCD de deux entiers naturels", duree: 20,
+  accroche: "Faire des lots identiques avec 24 cahiers et 36 stylos : le PGCD décide.",
+  intro: "Une association veut répartir 24 cahiers et 36 stylos en lots identiques, sans rien laisser. Combien de lots, au maximum ? La réponse est le PGCD de 24 et 36.",
+  objectifs: ["lister les diviseurs d'un nombre", "trouver les diviseurs communs", "déterminer le PGCD et l'utiliser"],
+  parties: [
+    { t: "Diviseurs communs", html: "<p>Diviseurs de 24 : 1, 2, 3, 4, 6, 8, 12, 24.<br>Diviseurs de 36 : 1, 2, 3, 4, 6, 9, 12, 18, 36.</p><p>Diviseurs <strong>communs</strong> : 1, 2, 3, 4, 6, 12.</p>", retenir: "On cherche les diviseurs par paires : 24 = 1×24 = 2×12 = 3×8 = 4×6." },
+    { t: "Le PGCD", html: "<div class='def'><b>Définition</b>Le PGCD de deux entiers est leur <strong>Plus Grand Commun Diviseur</strong>.</div><p class='formule'>PGCD(24 ; 36) = 12</p><p>Retour au problème : on peut faire <strong>12 lots</strong>, chacun de 2 cahiers et 3 stylos.</p>", retenir: "PGCD = le plus grand des diviseurs communs." },
+    { t: "Deux nombres premiers entre eux", html: "<p>Si PGCD(a ; b) = 1, on dit que a et b sont <strong>premiers entre eux</strong> : 8 et 15, par exemple.</p><div class='astuce'><b>Astuce</b>Pour simplifier une fraction au maximum, on divise numérateur et dénominateur par leur PGCD : 24/36 = 2/3.</div>", retenir: "PGCD = 1 : premiers entre eux, fraction irréductible." }
+  ],
+  revision: ["Lister les diviseurs par paires.", "Diviseurs communs = présents dans les deux listes.", "PGCD = le plus grand d'entre eux.", "PGCD = 1 : premiers entre eux.", "Fraction irréductible : diviser par le PGCD."],
+  exo: "<p>Un fleuriste a 48 roses et 60 tulipes. Combien de bouquets identiques au maximum ? Composition de chacun ? <em>(PGCD = 12 : 12 bouquets de 4 roses et 5 tulipes.)</em></p>",
+  quiz: [
+    { q: "PGCD(18 ; 24) = ?", r: ["3", "6", "72"], b: 1, e: "Diviseurs communs : 1, 2, 3, 6." },
+    { q: "8 et 15 sont…", r: ["premiers entre eux", "multiples", "égaux"], b: 0, e: "PGCD(8 ; 15) = 1." },
+    { q: "Simplifier 24/36 :", r: ["12/18", "2/3", "4/6"], b: 1, e: "On divise par le PGCD 12." }
+  ]
+});
+
+VRT_L("4e-pct-aimants", {
+  c: "4e", m: "pct", cle: "Les aimants et les pôles d", titre: "Les aimants et leurs pôles", duree: 15,
+  accroche: "Une boussole qui tourne toute seule : c'est le magnétisme.",
+  intro: "Un aimant attire les trombones, fait tourner l'aiguille d'une boussole et repousse parfois un autre aimant. Découvre ses deux pôles et leurs règles.",
+  objectifs: ["nommer les pôles d'un aimant", "énoncer les règles d'attraction et de répulsion", "citer les matériaux attirés"],
+  parties: [
+    { t: "Deux pôles", html: "<p>Tout aimant possède deux <strong>pôles</strong>, appelés <strong>pôle Nord</strong> et <strong>pôle Sud</strong>. C'est près des pôles que l'action de l'aimant est la plus forte. Si on casse un aimant, chaque morceau a à nouveau un pôle Nord et un pôle Sud.</p>", retenir: "Un aimant a toujours deux pôles, même cassé." },
+    { t: "Attraction et répulsion", html: "<ul><li>Deux pôles de <strong>même nom</strong> se <strong>repoussent</strong> (Nord-Nord, Sud-Sud).</li><li>Deux pôles de <strong>noms différents</strong> s'<strong>attirent</strong> (Nord-Sud).</li></ul><p>L'aiguille d'une boussole est un petit aimant : elle s'oriente selon le champ magnétique autour d'un aimant, ou celui de la Terre.</p>", retenir: "Contraires s'attirent, semblables se repoussent." },
+    { t: "Ce que l'aimant attire", html: "<p>Un aimant attire le <strong>fer</strong>, l'<strong>acier</strong>, le <strong>nickel</strong> et le <strong>cobalt</strong>. Il n'attire ni le cuivre, ni l'aluminium, ni le bois, ni le plastique.</p><div class='savais'><b>Le savais-tu ?</b>On utilise des électroaimants pour trier la ferraille et dans les haut-parleurs de ton téléphone.</div>", retenir: "Fer, acier, nickel, cobalt : attirés." }
+  ],
+  revision: ["Deux pôles : Nord et Sud.", "Même nom : répulsion ; noms différents : attraction.", "Boussole = petit aimant mobile.", "Attirés : fer, acier, nickel, cobalt."],
+  exo: "<p>Comment reconnaître le pôle Nord d'un aimant dont les marques sont effacées, à l'aide d'une boussole ? Explique.</p>",
+  quiz: [
+    { q: "Deux pôles Sud face à face…", r: ["s'attirent", "se repoussent", "ne font rien"], b: 1, e: "Même nom : répulsion." },
+    { q: "Lequel est attiré par un aimant ?", r: ["Une canette en aluminium", "Un clou en fer", "Une pièce en cuivre"], b: 1, e: "Le fer est attiré." },
+    { q: "On casse un aimant en deux. Chaque morceau a…", r: ["un seul pôle", "deux pôles", "aucun pôle"], b: 1, e: "On obtient deux aimants complets." }
+  ]
+});
+
+VRT_L("4e-svt-photosynthese", {
+  c: "4e", m: "svt", cle: "La production de la matière végétale", titre: "La production de la matière végétale", duree: 20,
+  accroche: "La plante fabrique sa nourriture avec de la lumière, de l'air et de l'eau.",
+  intro: "Un manguier grandit chaque année de plusieurs kilogrammes. D'où vient cette matière ? Pas du sol seulement : surtout de l'air, grâce à la lumière.",
+  objectifs: ["nommer les besoins d'un végétal chlorophyllien", "décrire la photosynthèse", "interpréter une expérience"],
+  parties: [
+    { t: "Ce dont la plante a besoin", html: "<p>Un végétal chlorophyllien prélève :</p><ul><li>de l'<strong>eau</strong> et des <strong>sels minéraux</strong> dans le sol, par ses racines ;</li><li>du <strong>dioxyde de carbone</strong> dans l'air, par ses feuilles ;</li><li>de l'<strong>énergie lumineuse</strong>, captée par la <strong>chlorophylle</strong> (pigment vert).</li></ul>", retenir: "Eau + sels minéraux + CO₂ + lumière." },
+    { t: "La photosynthèse", html: "<div class='def'><b>Définition</b>La photosynthèse est la fabrication de matière organique (sucres, amidon) par les parties vertes de la plante, à partir d'eau et de dioxyde de carbone, grâce à la lumière. Elle rejette du dioxygène.</div><p class='formule'>eau + dioxyde de carbone → (lumière, chlorophylle) → matière organique + dioxygène</p>", retenir: "La photosynthèse produit de la matière et rejette du dioxygène." },
+    { t: "L'expérience de l'élodée", html: "<p>Une plante aquatique, l'élodée, est placée sous une lampe. Des bulles de <strong>dioxygène</strong> se dégagent. Plus la lumière est forte, plus les bulles sont nombreuses ; dans l'obscurité, elles cessent.</p><div class='astuce'><b>Astuce</b>Pour prouver la fabrication d'amidon, on dépose de l'eau iodée sur une feuille décolorée : elle devient bleu-noir là où la feuille était éclairée.</div>", retenir: "Pas de lumière, pas de photosynthèse." }
+  ],
+  revision: ["Besoins : eau, sels minéraux, CO₂, lumière.", "Chlorophylle : capte la lumière.", "Photosynthèse : matière organique + dioxygène.", "Élodée : plus de lumière, plus de bulles.", "Eau iodée : bleu-noir en présence d'amidon."],
+  exo: "<p>Explique pourquoi un plant de maïs placé dans un placard pendant une semaine jaunit et ne grandit plus.</p>",
+  quiz: [
+    { q: "Quel gaz la plante rejette-t-elle à la lumière ?", r: ["Dioxyde de carbone", "Dioxygène", "Azote"], b: 1, e: "Ce sont les bulles de l'élodée." },
+    { q: "Quel pigment capte la lumière ?", r: ["L'hémoglobine", "La chlorophylle", "La mélanine"], b: 1, e: "Il donne la couleur verte." },
+    { q: "Dans l'obscurité, les bulles de l'élodée…", r: ["augmentent", "cessent", "changent de couleur"], b: 1, e: "Sans lumière, pas de photosynthèse." }
+  ]
+});
+
+VRT_L("tle-maths-binaire", {
+  c: "Tle C", m: "maths", cle: "Numération binaire et numération décimale", titre: "Numération binaire et numération décimale", duree: 20,
+  accroche: "Ton téléphone ne compte qu'avec 0 et 1. Apprends sa langue.",
+  intro: "Tous les ordinateurs représentent les nombres avec deux chiffres seulement : 0 et 1. C'est la numération binaire, ou en base 2.",
+  objectifs: ["écrire un entier en base 2", "convertir de la base 2 vers la base 10", "comprendre l'unicité de l'écriture"],
+  parties: [
+    { t: "Le principe", html: "<p>En base 10, chaque rang vaut 10 fois le précédent : unités, dizaines, centaines… En base 2, chaque rang vaut <strong>2 fois</strong> le précédent : 1, 2, 4, 8, 16, 32…</p><p class='formule'>1101₂ = 1×2³ + 1×2² + 0×2¹ + 1×2⁰ = 8 + 4 + 0 + 1 = 13</p>", retenir: "En base 2, les rangs sont les puissances de 2." },
+    { t: "De la base 10 à la base 2", html: "<p>On divise successivement par 2 et on lit les restes <strong>de bas en haut</strong> :</p><div class='ex'><b>Exemple : 45</b>45 = 2×22 + <b>1</b> ; 22 = 2×11 + <b>0</b> ; 11 = 2×5 + <b>1</b> ; 5 = 2×2 + <b>1</b> ; 2 = 2×1 + <b>0</b> ; 1 = 2×0 + <b>1</b>. Donc 45 = 101101₂.</div>", retenir: "Divisions successives par 2, restes lus de bas en haut." },
+    { t: "Pourquoi l'écriture est unique", html: "<p>Tout entier naturel non nul s'écrit de façon <strong>unique</strong> sous la forme Σ aᵢ 2ⁱ avec aᵢ ∈ {0 ; 1} et le premier chiffre égal à 1. Cela découle de l'unicité du quotient et du reste dans la division euclidienne par 2.</p><div class='savais'><b>Le savais-tu ?</b>Un octet (8 chiffres binaires) code les entiers de 0 à 255, car 11111111₂ = 2⁸ − 1.</div>", retenir: "Écriture binaire unique, conséquence de la division euclidienne." }
+  ],
+  revision: ["Base 2 : chiffres 0 et 1, rangs = puissances de 2.", "Base 2 → base 10 : somme des puissances de 2 où le chiffre vaut 1.", "Base 10 → base 2 : divisions par 2, restes de bas en haut.", "Unicité : division euclidienne.", "Un octet : 0 à 255."],
+  exo: "<p>Convertis 100 en base 2, puis 1011011₂ en base 10. <em>(1100100₂ ; 91)</em></p>",
+  quiz: [
+    { q: "1010₂ vaut…", r: ["10", "5", "12"], b: 0, e: "8 + 2 = 10." },
+    { q: "13 en base 2 :", r: ["1101", "1011", "1110"], b: 0, e: "8 + 4 + 1." },
+    { q: "Le plus grand entier sur 8 bits :", r: ["256", "255", "128"], b: 1, e: "2⁸ − 1." }
+  ],
+  examen: { t: "Annales du BAC C : arithmétique", href: "/corriges/" }
+});
+
+VRT_L("tle-svt-osmose", {
+  c: "Tle D", m: "svt", cle: "Échanges d’eau", titre: "Les échanges d'eau entre la cellule et son milieu", duree: 20,
+  accroche: "Un globule rouge qui gonfle ou se ratatine : c'est l'osmose.",
+  intro: "Plongés dans l'eau pure, les globules rouges éclatent ; dans de l'eau très salée, ils se ratatinent. Pourquoi ? Parce que l'eau traverse la membrane selon les concentrations.",
+  objectifs: ["définir l'osmose", "prévoir le comportement d'une cellule selon le milieu", "décrire turgescence et plasmolyse"],
+  parties: [
+    { t: "L'osmose", html: "<div class='def'><b>Définition</b>L'osmose est le passage de l'eau à travers une membrane semi-perméable, du milieu le <strong>moins concentré</strong> en substances dissoutes vers le milieu le <strong>plus concentré</strong>.</div><ul><li>Milieu <strong>hypotonique</strong> : moins concentré que la cellule → l'eau entre.</li><li>Milieu <strong>isotonique</strong> : même concentration → pas de mouvement net.</li><li>Milieu <strong>hypertonique</strong> : plus concentré → l'eau sort.</li></ul>", retenir: "L'eau va vers le milieu le plus concentré." },
+    { t: "La cellule animale", html: "<p>Le globule rouge est en équilibre dans une solution de chlorure de sodium à environ <strong>9 g/L</strong> (isotonique au plasma). En milieu hypotonique, il gonfle puis éclate : c'est l'<strong>hémolyse</strong>. En milieu hypertonique, il perd de l'eau et se <strong>ratatine</strong>.</p>", retenir: "9 g/L de NaCl : le globule rouge reste intact." },
+    { t: "La cellule végétale", html: "<p>La paroi empêche la cellule végétale d'éclater. En milieu hypotonique, la vacuole se remplit : la cellule est <strong>turgescente</strong>. En milieu hypertonique, la vacuole se vide et la membrane se décolle de la paroi : c'est la <strong>plasmolyse</strong>.</p><div class='savais'><b>Le savais-tu ?</b>Une salade arrosée redevient croquante grâce à la turgescence de ses cellules.</div>", retenir: "Turgescence en milieu hypotonique, plasmolyse en milieu hypertonique." }
+  ],
+  revision: ["Osmose : l'eau va du moins concentré au plus concentré.", "Hypo / iso / hypertonique.", "Globule rouge : hémolyse (hypo), ratatinement (hyper), intact à 9 g/L.", "Cellule végétale : turgescence (hypo), plasmolyse (hyper)."],
+  exo: "<p>On place des cellules d'épiderme d'oignon rouge dans une solution de saccharose concentrée. Décris et explique ce qu'on observe au microscope.</p>",
+  quiz: [
+    { q: "Dans de l'eau pure, un globule rouge…", r: ["se ratatine", "éclate", "ne change pas"], b: 1, e: "Milieu hypotonique : l'eau entre, hémolyse." },
+    { q: "La plasmolyse s'observe en milieu…", r: ["hypotonique", "isotonique", "hypertonique"], b: 2, e: "La vacuole perd son eau." },
+    { q: "L'eau se déplace vers le milieu…", r: ["le moins concentré", "le plus concentré", "le plus chaud"], b: 1, e: "C'est la définition de l'osmose." }
+  ]
+});
+
+/* Schémas animés et manipulables — sciences. Chaque fonction reçoit le conteneur et y dessine.
+   Règles : transform/opacity uniquement pour les boucles ; tout reste lisible sans animation. */
+(function () {
+  var NS = "http://www.w3.org/2000/svg";
+  function curseur(lab, min, max, pas, val, unite) {
+    return "<label class='an-cur'><span>" + lab + " <b data-v>" + val + "</b>" + (unite || "") + "</span><input type='range' min='" + min + "' max='" + max + "' step='" + pas + "' value='" + val + "'></label>";
+  }
+  function f(x, d) { return (Math.round(x * Math.pow(10, d || 2)) / Math.pow(10, d || 2)).toString().replace(".", ","); }
+
+  /* ---------- Thalès : la parallèle glisse, les rapports restent égaux ---------- */
+  VRT_A("3e-maths-thales", 1, "Fais glisser la parallèle (MN)", function (el) {
+    el.innerHTML = "<svg viewBox='0 0 420 240' class='an-svg'><path d='M60 220 L360 220 L150 25 Z' fill='#DBE8FE' stroke='#142554' stroke-width='2.5' stroke-linejoin='round'/><path data-p fill='#FFC93C' fill-opacity='.45'/><line data-l stroke='#1E499B' stroke-width='3'/><circle data-m r='5' fill='#142554'/><circle data-n r='5' fill='#142554'/><text data-tm font-size='17' font-weight='700' fill='#142554'>M</text><text data-tn font-size='17' font-weight='700' fill='#142554'>N</text><g font-size='17' font-weight='700' fill='#142554'><text x='143' y='18'>A</text><text x='40' y='238'>B</text><text x='366' y='238'>C</text></g></svg>" +
+      curseur("Position de M sur [AB] : AM/AB =", 0.15, 0.95, 0.01, 0.5) +
+      "<div class='an-res'><span>AM/AB = <b data-r1></b></span><span>AN/AC = <b data-r2></b></span><span>MN/BC = <b data-r3></b></span></div><p class='an-note'>Les trois rapports restent égaux tant que (MN) est parallèle à (BC).</p>";
+    var A = [150, 25], B = [60, 220], C = [360, 220], r = el.querySelector("input");
+    function maj() {
+      var k = +r.value, M = [A[0] + k * (B[0] - A[0]), A[1] + k * (B[1] - A[1])], N = [A[0] + k * (C[0] - A[0]), A[1] + k * (C[1] - A[1])];
+      var q = function (s) { return el.querySelector("[" + s + "]"); };
+      q("data-l").setAttribute("x1", M[0] - 30); q("data-l").setAttribute("y1", M[1]); q("data-l").setAttribute("x2", N[0] + 30); q("data-l").setAttribute("y2", N[1]);
+      q("data-p").setAttribute("d", "M" + A + " L" + M + " L" + N + " Z");
+      q("data-m").setAttribute("cx", M[0]); q("data-m").setAttribute("cy", M[1]); q("data-n").setAttribute("cx", N[0]); q("data-n").setAttribute("cy", N[1]);
+      q("data-tm").setAttribute("x", M[0] - 22); q("data-tm").setAttribute("y", M[1] - 6); q("data-tn").setAttribute("x", N[0] + 8); q("data-tn").setAttribute("y", N[1] - 6);
+      ["data-r1", "data-r2", "data-r3"].forEach(function (s) { q(s).textContent = f(k); });
+      q("data-v").textContent = f(k);
+    }
+    r.addEventListener("input", maj); maj();
+  });
+
+  /* ---------- Racine carrée : l'aire change, le côté suit ---------- */
+  VRT_A("3e-maths-racines", 0, "Choisis l'aire du carré", function (el) {
+    el.innerHTML = "<svg viewBox='0 0 420 220' class='an-svg'><rect data-c x='40' y='20' fill='#DBE8FE' stroke='#142554' stroke-width='2.5' rx='3' style='transition:width .25s,height .25s'/><text data-a x='0' y='0' text-anchor='middle' font-size='22' font-weight='700' fill='#142554'></text><text x='250' y='80' font-size='17' fill='#142554'>côté = √aire</text><text data-s x='250' y='116' font-size='26' font-weight='700' fill='#1E499B'></text><text data-e x='250' y='150' font-size='14' fill='#636A80'></text></svg>" + curseur("Aire :", 1, 144, 1, 49, " m²");
+    var r = el.querySelector("input");
+    function maj() {
+      var a = +r.value, s = Math.sqrt(a), px = 16 + s * 14.5, c = el.querySelector("[data-c]");
+      c.setAttribute("width", px); c.setAttribute("height", px);
+      var t = el.querySelector("[data-a]"); t.setAttribute("x", 40 + px / 2); t.setAttribute("y", 20 + px / 2 + 8); t.textContent = px > 60 ? a : "";
+      el.querySelector("[data-s]").textContent = "√" + a + " = " + (Number.isInteger(s) ? s : "≈ " + f(s));
+      el.querySelector("[data-e]").textContent = Number.isInteger(s) ? a + " est un carré parfait (" + s + " × " + s + ")" : "entre " + Math.floor(s) + " et " + Math.ceil(s);
+      el.querySelector("[data-v]").textContent = a;
+    }
+    r.addEventListener("input", maj); maj();
+  });
+
+  /* ---------- Atome : électrons en orbite, Z réglable (couches K et L) ---------- */
+  var ELEM = ["", "H Hydrogène", "He Hélium", "Li Lithium", "Be Béryllium", "B Bore", "C Carbone", "N Azote", "O Oxygène", "F Fluor", "Ne Néon", "Na Sodium"];
+  VRT_A("3e-pct-atome", 0, "Choisis un élément et regarde ses électrons", function (el) {
+    el.innerHTML = "<div class='an-atome'><svg viewBox='0 0 300 300' class='an-svg' style='max-width:320px;margin:auto'><circle cx='150' cy='150' r='62' fill='none' stroke='#8FB0EE' stroke-dasharray='4 6'/><circle cx='150' cy='150' r='104' fill='none' stroke='#8FB0EE' stroke-dasharray='4 6'/><circle cx='150' cy='150' r='138' fill='none' stroke='#8FB0EE' stroke-dasharray='4 6'/><g data-noyau></g><g class='an-orb an-k' data-k></g><g class='an-orb an-l' data-l></g><g class='an-orb an-m' data-mm></g></svg>" +
+      "<div class='an-res'><span><b data-nom></b></span><span>Z = <b data-z></b></span><span>Couches : <b data-c></b></span></div></div>" + curseur("Numéro atomique Z :", 1, 11, 1, 3);
+    var r = el.querySelector("input");
+    function pts(g, n, rad) {
+      g.innerHTML = ""; for (var i = 0; i < n; i++) { var a = 2 * Math.PI * i / n, c = document.createElementNS(NS, "circle");
+        c.setAttribute("cx", 150 + rad * Math.cos(a)); c.setAttribute("cy", 150 + rad * Math.sin(a)); c.setAttribute("r", 8); c.setAttribute("fill", "#FFC93C"); c.setAttribute("stroke", "#142554"); c.setAttribute("stroke-width", "1.5"); g.appendChild(c); }
+    }
+    function maj() {
+      var z = +r.value, k = Math.min(z, 2), l = Math.min(Math.max(z - 2, 0), 8), m = Math.max(z - 10, 0), no = el.querySelector("[data-noyau]");
+      no.innerHTML = ""; var n = z * 2, s = 0;
+      for (var i = 0; i < n; i++) { var a = i * 2.4, rr = 5 * Math.sqrt(i), c = document.createElementNS(NS, "circle");
+        c.setAttribute("cx", 150 + rr * Math.cos(a)); c.setAttribute("cy", 150 + rr * Math.sin(a)); c.setAttribute("r", 6); c.setAttribute("fill", i % 2 ? "#8C9BC0" : "#D9472B"); no.appendChild(c); s++; }
+      pts(el.querySelector("[data-k]"), k, 62); pts(el.querySelector("[data-l]"), l, 104); pts(el.querySelector("[data-mm]"), m, 138);
+      el.querySelector("[data-nom]").textContent = ELEM[z]; el.querySelector("[data-z]").textContent = z + " protons, " + z + " électrons";
+      el.querySelector("[data-c]").textContent = "K" + k + (l ? " L" + l : "") + (m ? " M" + m : ""); el.querySelector("[data-v]").textContent = z;
+    }
+    r.addEventListener("input", maj); maj();
+  });
+
+  /* ---------- pH : choisir une solution, l'aiguille et le papier réagissent ---------- */
+  var SOL = [["Jus de citron", 2], ["Vinaigre", 3], ["Jus d'orange", 4], ["Eau de pluie", 6], ["Eau pure", 7], ["Sang", 7.4], ["Eau de mer", 8], ["Bicarbonate", 9], ["Eau savonneuse", 10], ["Eau de javel", 12]];
+  VRT_A("3e-pct-ph", 1, "Teste une solution au papier pH", function (el) {
+    el.innerHTML = "<div class='an-choix'>" + SOL.map(function (s, i) { return "<button type='button' data-i='" + i + "'>" + s[0] + "</button>"; }).join("") + "</div>" +
+      "<svg viewBox='0 0 440 150' class='an-svg'><defs><linearGradient id='phg2' x1='0' x2='1'><stop offset='0' stop-color='#D9472B'/><stop offset='.35' stop-color='#FFC93C'/><stop offset='.5' stop-color='#7FCB8C'/><stop offset='.75' stop-color='#8FB0EE'/><stop offset='1' stop-color='#5B4FA8'/></linearGradient></defs><rect x='20' y='60' width='400' height='26' rx='13' fill='url(#phg2)'/><g font-size='12' fill='#142554' text-anchor='middle'><text x='20' y='104'>0</text><text x='220' y='104'>7</text><text x='420' y='104'>14</text></g><g data-aig style='transition:transform .6s cubic-bezier(.2,.8,.2,1)'><path d='M0 30 L-9 50 L9 50 Z' fill='#142554'/></g><rect data-pap x='170' y='116' width='100' height='26' rx='4' stroke='#142554' style='transition:fill .6s'/><text x='280' y='134' font-size='13' fill='#636A80'>papier pH</text></svg><div class='an-res'><span>pH ≈ <b data-ph>?</b></span><span><b data-nat>Choisis une solution</b></span></div>";
+    function couleur(p) { var c = ["#D9472B", "#E8713A", "#F29A3A", "#FFC93C", "#D6D24A", "#A9CF5E", "#7FCB8C", "#6FBF9A", "#7DB2C8", "#8FB0EE", "#8C8FD8", "#7B6FC4", "#6A5CB6", "#5B4FA8", "#4A3F94"]; return c[Math.round(p)]; }
+    el.querySelectorAll(".an-choix button").forEach(function (b) {
+      b.addEventListener("click", function () {
+        el.querySelectorAll(".an-choix button").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
+        var s = SOL[+b.dataset.i], p = s[1];
+        el.querySelector("[data-aig]").style.transform = "translateX(" + (20 + p / 14 * 400) + "px)";
+        el.querySelector("[data-pap]").setAttribute("fill", couleur(p));
+        el.querySelector("[data-ph]").textContent = f(p, 1);
+        el.querySelector("[data-nat]").textContent = p < 7 ? "acide" : p === 7 ? "neutre" : "basique";
+      });
+    });
+    el.querySelector("[data-aig]").style.transform = "translateX(220px)"; el.querySelector("[data-pap]").setAttribute("fill", "#F3F0EA");
+  });
+
+  /* ---------- ADN : zoom en 4 étapes + double hélice qui tourne ---------- */
+  VRT_A("3e-svt-adn", 2, "Zoome de la cellule jusqu'au gène", function (el) {
+    var ET = [
+      ["Cellule", "Une cellule du corps : au centre, le noyau.", "<circle cx='210' cy='110' r='90' fill='#E0F5E5' stroke='#00520B' stroke-width='2.5'/><circle cx='222' cy='104' r='36' fill='#7FCB8C' stroke='#00520B' stroke-width='2.5'/><circle cx='150' cy='150' r='8' fill='#C7E8CE'/><circle cx='270' cy='160' r='6' fill='#C7E8CE'/>"],
+      ["Noyau", "Dans le noyau, au moment de la division : 46 chromosomes.", "<circle cx='210' cy='110' r='96' fill='#7FCB8C' fill-opacity='.4' stroke='#00520B' stroke-width='2.5'/>" + (function () { var s = ""; for (var i = 0; i < 18; i++) { var a = i * 0.9, r = 18 + i * 3.6, x = 210 + r * Math.cos(a), y = 110 + r * Math.sin(a) * .8; s += "<g transform='translate(" + x + " " + y + ") rotate(" + (i * 37) + ")'><path d='M-4 -12 L4 12 M4 -12 L-4 12' stroke='#007E11' stroke-width='5' stroke-linecap='round'/></g>"; } return s; })()],
+      ["Chromosome", "Un chromosome : deux chromatides reliées au centre.", "<g stroke='#007E11' stroke-width='26' stroke-linecap='round'><path d='M170 30 L250 190'/><path d='M250 30 L170 190'/></g><circle cx='210' cy='110' r='12' fill='#00520B'/>"],
+      ["ADN et gène", "Déroulé, le chromosome est une double hélice d'ADN ; un gène en est un segment.", "<g class='an-helice'>" + (function () { var s = ""; for (var i = 0; i <= 24; i++) { var x = 40 + i * 14.5, y1 = 110 + 50 * Math.sin(i * 0.52), y2 = 110 - 50 * Math.sin(i * 0.52); s += "<line x1='" + x + "' y1='" + y1 + "' x2='" + x + "' y2='" + y2 + "' stroke='" + (i > 9 && i < 15 ? "#FFC93C" : "#8FB0EE") + "' stroke-width='3'/><circle cx='" + x + "' cy='" + y1 + "' r='4' fill='#1E499B'/><circle cx='" + x + "' cy='" + y2 + "' r='4' fill='#007E11'/>"; } return s; })() + "</g><text x='225' y='210' text-anchor='middle' font-size='14' font-weight='700' fill='#9A6F00'>un gène</text>"]
+    ], cur = 0;
+    el.innerHTML = "<div class='an-etapes'>" + ET.map(function (e, i) { return "<button type='button' data-i='" + i + "'>" + (i + 1) + ". " + e[0] + "</button>"; }).join("") + "</div><svg viewBox='0 0 420 220' class='an-svg an-zoom' data-sv></svg><p class='an-note' data-t></p>";
+    function aff(i) {
+      cur = i; var sv = el.querySelector("[data-sv]"); sv.classList.remove("an-in"); void sv.getBBox; sv.innerHTML = ET[i][2];
+      requestAnimationFrame(function () { sv.classList.add("an-in"); });
+      el.querySelector("[data-t]").textContent = ET[i][1];
+      el.querySelectorAll(".an-etapes button").forEach(function (b, k) { b.setAttribute("aria-pressed", k === i); });
+    }
+    el.querySelectorAll(".an-etapes button").forEach(function (b) { b.addEventListener("click", function () { aff(+b.dataset.i); }); });
+    aff(0);
+  });
+
+  /* ---------- Ressemblances : choisir les allèles, le caractère change ---------- */
+  VRT_A("3e-svt-ressemblances", 1, "Combine les caractères d'un visage", function (el) {
+    el.innerHTML = "<div class='an-choix' data-g='lobe'><span>Lobe :</span><button type='button' aria-pressed='true' data-v='libre'>libre</button><button type='button' data-v='attache'>attaché</button></div>" +
+      "<div class='an-choix' data-g='yeux'><span>Yeux :</span><button type='button' aria-pressed='true' data-v='#5A3A1E'>marron foncé</button><button type='button' data-v='#8A5A2B'>marron clair</button><button type='button' data-v='#3B6B4A'>verts</button></div>" +
+      "<div class='an-choix' data-g='cheveux'><span>Cheveux :</span><button type='button' aria-pressed='true' data-v='crepus'>crépus</button><button type='button' data-v='lisses'>lisses</button></div>" +
+      "<svg viewBox='0 0 300 230' class='an-svg' style='max-width:300px;margin:auto'><g data-ch></g><ellipse cx='150' cy='125' rx='70' ry='85' fill='#B9824F'/><g data-or></g><circle data-y1 cx='124' cy='112' r='7'/><circle data-y2 cx='176' cy='112' r='7'/><path d='M130 160 Q150 175 170 160' stroke='#5E2F0E' stroke-width='4' fill='none' stroke-linecap='round'/></svg>" +
+      "<p class='an-note'>Tous ces visages sont humains (caractères de l'espèce) mais chacun est unique (caractères individuels).</p>";
+    var etat = { lobe: "libre", yeux: "#5A3A1E", cheveux: "crepus" };
+    function dess() {
+      el.querySelector("[data-y1]").setAttribute("fill", etat.yeux); el.querySelector("[data-y2]").setAttribute("fill", etat.yeux);
+      el.querySelector("[data-or]").innerHTML = "<path d='M80 110 q-24 4 -18 34 q6 22 " + (etat.lobe === "libre" ? "18 24 q10 4 8 -10" : "18 16") + "' fill='#A8723F' stroke='#5E2F0E' stroke-width='2'/><path d='M220 110 q24 4 18 34 q-6 22 " + (etat.lobe === "libre" ? "-18 24 q-10 4 -8 -10" : "-18 16") + "' fill='#A8723F' stroke='#5E2F0E' stroke-width='2'/>";
+      var ch = ""; if (etat.cheveux === "crepus") { for (var i = 0; i < 26; i++) { var a = Math.PI + i / 25 * Math.PI; ch += "<circle cx='" + (150 + 76 * Math.cos(a)) + "' cy='" + (110 + 86 * Math.sin(a) * .9) + "' r='14' fill='#1E1A17'/>"; } }
+      else ch = "<path d='M78 120 Q80 30 150 32 Q220 30 222 120 L210 80 Q150 50 90 80 Z' fill='#1E1A17'/>";
+      el.querySelector("[data-ch]").innerHTML = ch;
+    }
+    el.querySelectorAll(".an-choix").forEach(function (g) { g.querySelectorAll("button").forEach(function (b) { b.addEventListener("click", function () { g.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b); }); etat[g.dataset.g] = b.dataset.v; dess(); }); }); });
+    dess();
+  });
+
+  /* ---------- IA : l'élève entraîne une mini-IA (mangue ou avocat) ---------- */
+  VRT_A("6e-info-ia", 1, "Entraîne ta propre mini-IA", function (el) {
+    var ex = [], test = null;
+    el.innerHTML = "<p class='an-note' style='margin-top:0'>Montre-lui des fruits et dis ce que c'est. Elle compare ensuite un fruit inconnu à ceux qu'elle a vus (couleur et forme).</p><div class='an-choix'><button type='button' data-f='m'>+ une mangue</button><button type='button' data-f='a'>+ un avocat</button><button type='button' data-t>Tester un fruit inconnu</button><button type='button' data-z>Tout effacer</button></div><svg viewBox='0 0 420 200' class='an-svg' data-sv><text x='14' y='20' font-size='12' fill='#636A80'>jaune ←  couleur  → vert</text><text x='14' y='194' font-size='12' fill='#636A80'>rond ↑ forme ↓ allongé</text></svg><div class='an-res'><span>Exemples : <b data-n>0</b></span><span data-r>Ajoute au moins 2 exemples de chaque fruit.</span></div>";
+    var sv = el.querySelector("[data-sv]");
+    function point(x, y, f, test) { var g = document.createElementNS(NS, "g"); g.setAttribute("transform", "translate(" + x + " " + y + ")"); g.innerHTML = test ? "<circle r='13' fill='#fff' stroke='#142554' stroke-width='2' stroke-dasharray='3 3'/><text y='5' text-anchor='middle' font-size='14' font-weight='700' fill='#142554'>?</text>" : (f === "m" ? "<ellipse rx='14' ry='10' fill='#FFC93C' stroke='#9A6F00'/>" : "<ellipse rx='9' ry='13' fill='#7FCB8C' stroke='#00520B'/>"); g.setAttribute("class", "an-pop"); sv.appendChild(g); return g; }
+    function hasard(f) { return f === "m" ? [60 + Math.random() * 150, 40 + Math.random() * 70] : [210 + Math.random() * 180, 100 + Math.random() * 80]; }
+    el.querySelectorAll("[data-f]").forEach(function (b) { b.addEventListener("click", function () { var p = hasard(b.dataset.f); ex.push([p[0], p[1], b.dataset.f]); point(p[0], p[1], b.dataset.f); el.querySelector("[data-n]").textContent = ex.length; }); });
+    el.querySelector("[data-t]").addEventListener("click", function () {
+      var nm = ex.filter(function (e) { return e[2] === "m"; }).length, na = ex.length - nm, r = el.querySelector("[data-r]");
+      if (nm < 2 || na < 2) { r.textContent = "Pas assez d'exemples : une IA sans données ne sait rien."; return; }
+      if (test) test.remove(); var p = [40 + Math.random() * 360, 40 + Math.random() * 140]; test = point(p[0], p[1], "", true);
+      var d = ex.map(function (e) { return [Math.hypot(e[0] - p[0], e[1] - p[1]), e[2]]; }).sort(function (a, b) { return a[0] - b[0]; }).slice(0, 3);
+      var m = d.filter(function (x) { return x[1] === "m"; }).length; r.innerHTML = "Prédiction : <b>" + (m >= 2 ? "mangue" : "avocat") + "</b> (" + Math.round(Math.max(m, 3 - m) / 3 * 100) + " % de ses 3 voisins les plus proches)";
+    });
+    el.querySelector("[data-z]").addEventListener("click", function () { ex = []; test = null; sv.querySelectorAll("g").forEach(function (g) { g.remove(); }); el.querySelector("[data-n]").textContent = 0; el.querySelector("[data-r]").textContent = "Ajoute au moins 2 exemples de chaque fruit."; });
+  });
+
+  /* ---------- Ordinateur : cliquer un composant pour voir son rôle ---------- */
+  VRT_A("6e-info-composants", 1, "Clique sur un élément de l'ordinateur", function (el) {
+    var R = { clavier: ["Clavier", "Entrée", "Tu tapes du texte et des commandes."], souris: ["Souris", "Entrée", "Tu pointes, tu cliques, tu fais glisser."], uc: ["Unité centrale", "Traitement", "Le processeur calcule, la mémoire vive garde le travail en cours, le disque conserve les fichiers."], ecran: ["Écran", "Sortie", "Il affiche ce que l'ordinateur produit."], imprimante: ["Imprimante", "Sortie", "Elle met sur papier un document."], hp: ["Haut-parleurs", "Sortie", "Ils diffusent le son."] };
+    el.innerHTML = "<svg viewBox='0 0 460 220' class='an-svg an-pc'><g data-k='ecran' tabindex='0' role='button' aria-label='Écran'><rect x='150' y='16' width='170' height='110' rx='8' fill='#E4E9F2' stroke='#0C2A6A' stroke-width='2.5'/><rect x='162' y='28' width='146' height='86' rx='4' fill='#DBE8FE'/><path d='M222 126v14h26v-14' fill='#8C9BC0'/></g><g data-k='uc' tabindex='0' role='button' aria-label='Unité centrale'><rect x='26' y='30' width='90' height='150' rx='8' fill='#0C2A6A'/><rect x='40' y='46' width='62' height='10' rx='3' fill='#FFC93C'/><circle cx='71' cy='156' r='9' fill='none' stroke='#FFC93C' stroke-width='2'/></g><g data-k='clavier' tabindex='0' role='button' aria-label='Clavier'><rect x='140' y='160' width='190' height='40' rx='6' fill='#E4E9F2' stroke='#0C2A6A' stroke-width='2.5'/><path d='M152 172h166M152 182h166M170 192h130' stroke='#8C9BC0' stroke-width='5' stroke-dasharray='10 4'/></g><g data-k='souris' tabindex='0' role='button' aria-label='Souris'><rect x='346' y='160' width='30' height='44' rx='15' fill='#E4E9F2' stroke='#0C2A6A' stroke-width='2.5'/><path d='M361 160v14' stroke='#0C2A6A' stroke-width='2'/></g><g data-k='imprimante' tabindex='0' role='button' aria-label='Imprimante'><rect x='350' y='60' width='96' height='50' rx='8' fill='#E4E9F2' stroke='#0C2A6A' stroke-width='2.5'/><rect x='368' y='44' width='60' height='18' fill='#fff' stroke='#0C2A6A' stroke-width='2'/><rect x='368' y='100' width='60' height='22' fill='#fff' stroke='#0C2A6A' stroke-width='2'/></g><g data-k='hp' tabindex='0' role='button' aria-label='Haut-parleurs'><rect x='122' y='70' width='22' height='44' rx='6' fill='#8C9BC0' stroke='#0C2A6A' stroke-width='2'/><circle cx='133' cy='100' r='6' fill='#0C2A6A'/></g></svg><div class='an-fiche' data-f><b>Clique sur un élément</b><span>Écran, clavier, souris, unité centrale, imprimante ou haut-parleurs.</span></div>";
+    el.querySelectorAll("[data-k]").forEach(function (g) {
+      function choisir() { el.querySelectorAll("[data-k]").forEach(function (x) { x.classList.toggle("an-sel", x === g); }); var r = R[g.dataset.k]; el.querySelector("[data-f]").innerHTML = "<b>" + r[0] + "</b><em class='an-tag an-" + (r[1] === "Entrée" ? "in" : r[1] === "Sortie" ? "out" : "uc") + "'>" + r[1] + "</em><span>" + r[2] + "</span>"; }
+      g.addEventListener("click", choisir); g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); choisir(); } });
+    });
+  });
+})();
+
+/* Schémas animés et manipulables — lot 2. Mêmes règles : transform/opacity, lisible sans animation. */
+(function () {
+  var NS = "http://www.w3.org/2000/svg";
+  function cur(lab, min, max, pas, val, u) { return "<label class='an-cur'><span>" + lab + " <b data-v>" + val + "</b>" + (u || "") + "</span><input type='range' min='" + min + "' max='" + max + "' step='" + pas + "' value='" + val + "'></label>"; }
+  function q(el, s) { return el.querySelector(s); }
+
+  /* ---------- 6e : testeur de divisibilité ---------- */
+  VRT_A("6e-maths-divisibilite", 1, "Tape un nombre : les critères se vérifient tout seuls", function (el) {
+    el.innerHTML = "<label class='an-cur'><span>Ton nombre</span><input type='number' min='0' max='99999999' value='2745' style='width:100%;font:600 22px Poppins,sans-serif;padding:8px 12px;border:1px solid #E6EAF2;border-radius:10px'></label><div class='an-grille' data-g></div><p class='an-note' data-s></p>";
+    var inp = q(el, "input");
+    function maj() {
+      var n = Math.max(0, Math.floor(+inp.value || 0)), s = String(n), som = s.split("").reduce(function (a, c) { return a + +c; }, 0), u = s.slice(-1);
+      var T = [["2", n % 2 === 0, "dernier chiffre " + u + (n % 2 === 0 ? " pair" : " impair")], ["5", n % 5 === 0, "se termine par " + u], ["10", n % 10 === 0, "se termine par " + u], ["3", n % 3 === 0, "somme des chiffres " + som], ["9", n % 9 === 0, "somme des chiffres " + som]];
+      q(el, "[data-g]").innerHTML = T.map(function (t) { return "<div class='an-carte " + (t[1] ? "an-oui" : "an-non") + "'><b>÷ " + t[0] + "</b><span>" + (t[1] ? VRT.app.pic("coche", 16) + " oui" : VRT.app.pic("croix", 16) + " non") + "</span><small>" + t[2] + "</small></div>"; }).join("");
+      q(el, "[data-s]").textContent = s.length > 1 ? "Somme des chiffres : " + s.split("").join(" + ") + " = " + som : "";
+    }
+    inp.addEventListener("input", maj); maj();
+  });
+
+  /* ---------- 5e : PGCD, diviseurs qui s'allument ---------- */
+  VRT_A("5e-maths-pgcd", 1, "Choisis deux nombres : leurs diviseurs communs s'allument", function (el) {
+    el.innerHTML = cur("a =", 2, 60, 1, 24) + cur("b =", 2, 60, 1, 36).replace("data-v", "data-w") + "<div data-l></div><div class='an-res'><span>PGCD = <b data-p></b></span><span data-r></span></div>";
+    var r = el.querySelectorAll("input");
+    function div(n) { var d = []; for (var i = 1; i <= n; i++) if (n % i === 0) d.push(i); return d; }
+    function maj() {
+      var a = +r[0].value, b = +r[1].value, da = div(a), db = div(b), co = da.filter(function (x) { return db.indexOf(x) >= 0; }), p = co[co.length - 1];
+      q(el, "[data-v]").textContent = a; q(el, "[data-w]").textContent = b;
+      function ligne(n, d) { return "<p style='margin:8px 0 4px;font-size:13px;color:#4D5163'>Diviseurs de " + n + "</p><div class='an-chips'>" + d.map(function (x) { return "<span class='" + (x === p ? "an-pg" : co.indexOf(x) >= 0 ? "an-co" : "") + "'>" + x + "</span>"; }).join("") + "</div>"; }
+      q(el, "[data-l]").innerHTML = ligne(a, da) + ligne(b, db);
+      q(el, "[data-p]").textContent = p; q(el, "[data-r]").textContent = p === 1 ? a + " et " + b + " sont premiers entre eux" : a + "/" + b + " = " + (a / p) + "/" + (b / p) + " (fraction irréductible)";
+    }
+    r[0].addEventListener("input", maj); r[1].addEventListener("input", maj); maj();
+  });
+
+  /* ---------- 4e : boussoles autour d'un aimant (champ de dipôle) ---------- */
+  VRT_A("4e-pct-aimants", 1, "Déplace l'aimant : les boussoles s'orientent", function (el) {
+    el.innerHTML = "<svg viewBox='0 0 460 260' class='an-svg' data-sv style='touch-action:none;cursor:grab'></svg><p class='an-note'>Fais glisser l'aimant (ou utilise les flèches du clavier). L'aiguille rouge indique le Nord de chaque boussole : elle pointe vers le pôle Sud de l'aimant.</p>";
+    var sv = q(el, "[data-sv]"), ax = 230, ay = 130, boussoles = [];
+    for (var i = 0; i < 7; i++) for (var j = 0; j < 4; j++) {
+      var g = document.createElementNS(NS, "g"), x = 40 + i * 63, y = 35 + j * 63;
+      g.innerHTML = "<circle r='15' fill='#fff' stroke='#C9CFDD' stroke-width='1.5'/><g data-a style='transition:transform .25s'><path d='M0 -12 L4 0 L-4 0Z' fill='#D9472B'/><path d='M0 12 L4 0 L-4 0Z' fill='#8C9BC0'/></g>";
+      g.setAttribute("transform", "translate(" + x + " " + y + ")"); sv.appendChild(g); boussoles.push([x, y, g.querySelector("[data-a]")]);
+    }
+    var aim = document.createElementNS(NS, "g"); aim.setAttribute("tabindex", "0"); aim.setAttribute("role", "slider"); aim.setAttribute("aria-label", "Aimant, déplaçable");
+    aim.innerHTML = "<rect x='-50' y='-14' width='50' height='28' rx='4' fill='#D9472B'/><rect x='0' y='-14' width='50' height='28' rx='4' fill='#1E499B'/><text x='-25' y='5' text-anchor='middle' font-size='14' font-weight='600' fill='#fff'>N</text><text x='25' y='5' text-anchor='middle' font-size='14' font-weight='600' fill='#fff'>S</text>";
+    sv.appendChild(aim);
+    function champ(px, py) { /* pôle N (+) à gauche, pôle S (−) à droite */
+      var bx = 0, by = 0;[[ax - 40, ay, 1], [ax + 40, ay, -1]].forEach(function (p) { var dx = px - p[0], dy = py - p[1], d = Math.pow(dx * dx + dy * dy, 1.5) + 1; bx += p[2] * dx / d; by += p[2] * dy / d; });
+      return Math.atan2(by, bx) * 180 / Math.PI + 90;
+    }
+    function maj() { aim.setAttribute("transform", "translate(" + ax + " " + ay + ")"); boussoles.forEach(function (b) { b[2].style.transform = "rotate(" + champ(b[0], b[1]) + "deg)"; }); }
+    function pt(e) { var r = sv.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * 460, (e.clientY - r.top) / r.height * 260]; }
+    var drag = false;
+    aim.addEventListener("pointerdown", function (e) { drag = true; aim.setPointerCapture(e.pointerId); });
+    aim.addEventListener("pointermove", function (e) { if (!drag) return; var p = pt(e); ax = Math.max(55, Math.min(405, p[0])); ay = Math.max(20, Math.min(240, p[1])); maj(); });
+    aim.addEventListener("pointerup", function () { drag = false; });
+    aim.addEventListener("keydown", function (e) { var d = { ArrowLeft: [-15, 0], ArrowRight: [15, 0], ArrowUp: [0, -15], ArrowDown: [0, 15] }[e.key]; if (d) { e.preventDefault(); ax = Math.max(55, Math.min(405, ax + d[0])); ay = Math.max(20, Math.min(240, ay + d[1])); maj(); } });
+    maj();
+  });
+
+  /* ---------- 4e : élodée, bulles selon la lumière ---------- */
+  VRT_A("4e-svt-photosynthese", 2, "Règle la lampe et compte les bulles", function (el) {
+    el.innerHTML = "<svg viewBox='0 0 460 240' class='an-svg'><circle data-lampe cx='70' cy='60' r='26' fill='#FFC93C'/><g data-rayons stroke='#FFC93C' stroke-width='3' stroke-linecap='round'><path d='M110 60h40M100 90l30 22M100 30l30-22'/></g><rect x='190' y='40' width='200' height='190' rx='12' fill='#EDF2FB' stroke='#9FBEEA' stroke-width='2'/><rect x='190' y='60' width='200' height='170' fill='#DBE8FE' opacity='.7'/><path d='M290 228 C285 190 300 160 290 120 C282 95 295 80 290 70' stroke='#007E11' stroke-width='5' fill='none'/><g fill='#86D094'><ellipse cx='278' cy='200' rx='12' ry='4'/><ellipse cx='303' cy='175' rx='12' ry='4'/><ellipse cx='279' cy='150' rx='12' ry='4'/><ellipse cx='302' cy='122' rx='12' ry='4'/><ellipse cx='281' cy='96' rx='12' ry='4'/></g><g data-b></g></svg>" + cur("Intensité lumineuse :", 0, 10, 1, 6) + "<div class='an-res'><span>Bulles de dioxygène : <b data-n>0</b> par minute</span></div>";
+    var r = q(el, "input"), gb = q(el, "[data-b]"), t = null;
+    function bulle() {
+      var c = document.createElementNS(NS, "circle"); c.setAttribute("cx", 286 + Math.random() * 10); c.setAttribute("cy", 72); c.setAttribute("r", 3 + Math.random() * 2); c.setAttribute("fill", "#fff"); c.setAttribute("stroke", "#1E499B"); c.setAttribute("class", "an-bulle"); gb.appendChild(c); setTimeout(function () { c.remove(); }, 1600);
+    }
+    function maj() {
+      var v = +r.value; q(el, "[data-v]").textContent = v; q(el, "[data-n]").textContent = v * 6;
+      q(el, "[data-lampe]").setAttribute("opacity", 0.25 + v / 13); q(el, "[data-rayons]").setAttribute("opacity", v / 10);
+      clearInterval(t); if (v > 0 && !matchMedia("(prefers-reduced-motion: reduce)").matches) t = setInterval(bulle, 1100 - v * 95);
+    }
+    r.addEventListener("input", maj); maj();
+  });
+
+  /* ---------- Tle C : 8 bits cliquables ---------- */
+  VRT_A("tle-maths-binaire", 0, "Allume les bits : le nombre décimal se calcule", function (el) {
+    el.innerHTML = "<div class='an-bits' data-b></div><div class='an-res'><span>Écriture binaire : <b data-bin></b></span><span>Valeur décimale : <b data-dec></b></span></div><p class='an-note' data-s></p>";
+    var bits = [0, 0, 0, 0, 1, 1, 0, 1];
+    function rendre() {
+      q(el, "[data-b]").innerHTML = bits.map(function (b, i) { var p = 7 - i; return "<button type='button' aria-pressed='" + !!b + "' data-i='" + i + "'><b>" + b + "</b><small>2<sup>" + p + "</sup> = " + Math.pow(2, p) + "</small></button>"; }).join("");
+      var dec = bits.reduce(function (a, b, i) { return a + b * Math.pow(2, 7 - i); }, 0), termes = bits.map(function (b, i) { return b ? Math.pow(2, 7 - i) : 0; }).filter(Boolean);
+      q(el, "[data-bin]").textContent = (bits.join("").replace(/^0+(?=.)/, "")) + "₂"; q(el, "[data-dec]").textContent = dec;
+      q(el, "[data-s]").textContent = termes.length ? termes.join(" + ") + " = " + dec : "Tous les bits sont éteints : 0.";
+      el.querySelectorAll("[data-i]").forEach(function (b) { b.addEventListener("click", function () { bits[+b.dataset.i] ^= 1; rendre(); }); });
+    }
+    rendre();
+  });
+
+  /* ---------- Tle D : globule rouge et cellule végétale selon la concentration ---------- */
+  VRT_A("tle-svt-osmose", 1, "Change la concentration du milieu", function (el) {
+    el.innerHTML = "<svg viewBox='0 0 460 200' class='an-svg'><g transform='translate(115 95)'><ellipse data-gr rx='60' ry='60' fill='#F2A595' stroke='#B4321E' stroke-width='3' style='transition:all .5s'/><ellipse data-gr2 rx='30' ry='14' fill='#E8806C' opacity='.6' style='transition:all .5s'/></g><text x='115' y='190' text-anchor='middle' font-size='13' fill='#001136'>globule rouge</text><g transform='translate(340 95)'><rect x='-75' y='-65' width='150' height='130' rx='6' fill='#E0F5E5' stroke='#004A0A' stroke-width='4'/><rect data-cyto x='-68' y='-58' width='136' height='116' rx='10' fill='#C9E7CF' stroke='#007E11' stroke-width='1.5' style='transition:all .5s'/><rect data-vac x='-50' y='-42' width='100' height='84' rx='26' fill='#DBE8FE' stroke='#1E499B' style='transition:all .5s'/></g><text x='340' y='190' text-anchor='middle' font-size='13' fill='#001136'>cellule végétale</text></svg>" + cur("NaCl dans le milieu :", 0, 30, 1, 9, " g/L") + "<div class='an-res'><span>Milieu <b data-m></b></span><span data-e></span></div>";
+    var r = q(el, "input");
+    function maj() {
+      var c = +r.value, k = Math.max(-1, Math.min(1, (9 - c) / 9)); /* + : hypotonique, − : hypertonique */
+      q(el, "[data-v]").textContent = c;
+      var gr = q(el, "[data-gr]"), eclate = c <= 2;
+      gr.setAttribute("rx", eclate ? 0 : 60 + k * 14); gr.setAttribute("ry", eclate ? 0 : (k >= 0 ? 60 + k * 14 : 60 + k * 26)); gr.setAttribute("stroke-dasharray", k < -.3 ? "6 4" : "none");
+      q(el, "[data-gr2]").setAttribute("opacity", eclate ? 0 : .6);
+      var s = k >= 0 ? 1 : 1 + k * .45, cy = q(el, "[data-cyto]"), va = q(el, "[data-vac]");
+      cy.setAttribute("width", 136 * s); cy.setAttribute("height", 116 * s); cy.setAttribute("x", -68 * s); cy.setAttribute("y", -58 * s);
+      var sv = k >= 0 ? 1 + k * .25 : 1 + k * .7; va.setAttribute("width", 100 * sv); va.setAttribute("height", 84 * sv); va.setAttribute("x", -50 * sv); va.setAttribute("y", -42 * sv);
+      q(el, "[data-m]").textContent = c < 8 ? "hypotonique" : c > 10 ? "hypertonique" : "isotonique";
+      q(el, "[data-e]").textContent = c <= 2 ? "Hémolyse : le globule éclate ; la cellule végétale est turgescente." : c < 8 ? "L'eau entre : le globule gonfle, la vacuole se remplit." : c > 10 ? "L'eau sort : le globule se ratatine, plasmolyse de la cellule végétale." : "Équilibre : pas de mouvement net d'eau.";
+    }
+    r.addEventListener("input", maj); maj();
+  });
+
+  /* ---------- 4e grec : alphabet cliquable ---------- */
+  var GR = [["Α α", "alpha", "a", "alphabet"], ["Β β", "bêta", "b", "biologie (βίος)"], ["Γ γ", "gamma", "g", "géographie (γῆ)"], ["Δ δ", "delta", "d", "démocratie (δῆμος)"], ["Ε ε", "epsilon", "e bref", "écologie"], ["Ζ ζ", "zêta", "dz", "zoologie (ζῷον)"], ["Η η", "êta", "ê long", "hémisphère"], ["Θ θ", "thêta", "th", "théâtre (θέατρον)"], ["Ι ι", "iota", "i", "idée"], ["Κ κ", "kappa", "k", "cinéma (κίνημα)"], ["Λ λ", "lambda", "l", "logique (λόγος)"], ["Μ μ", "mu", "m", "musique (μουσική)"], ["Ν ν", "nu", "n", "nautique (ναῦς)"], ["Ξ ξ", "xi", "ks", "xénophobe (ξένος)"], ["Ο ο", "omicron", "o bref", "orthographe"], ["Π π", "pi", "p", "politique (πόλις)"], ["Ρ ρ", "rhô", "r", "rhétorique"], ["Σ σ ς", "sigma", "s", "symphonie"], ["Τ τ", "tau", "t", "téléphone (τῆλε)"], ["Υ υ", "upsilon", "u (ü)", "hydraulique (ὕδωρ)"], ["Φ φ", "phi", "ph", "philosophie (φίλος)"], ["Χ χ", "khi", "kh", "chronologie (χρόνος)"], ["Ψ ψ", "psi", "ps", "psychologie (ψυχή)"], ["Ω ω", "oméga", "ô long", "horoscope (ὥρα)"]];
+  VRT_A("4e-gr-alphabet", 1, "Clique une lettre : nom, son et un mot français", function (el) {
+    el.innerHTML = "<div class='an-grec'>" + GR.map(function (g, i) { return "<button type='button' data-i='" + i + "'>" + g[0].split(" ")[1] + "</button>"; }).join("") + "</div><div class='an-fiche' data-f><b>Choisis une lettre</b><span>Les 24 lettres, de l'alpha à l'oméga.</span></div>";
+    el.querySelectorAll("[data-i]").forEach(function (b) { b.addEventListener("click", function () {
+      el.querySelectorAll("[data-i]").forEach(function (x) { x.setAttribute("aria-pressed", x === b); }); var g = GR[+b.dataset.i];
+      q(el, "[data-f]").innerHTML = "<b style='font-size:28px'>" + g[0] + "</b><span><strong>" + g[1] + "</strong> · se prononce « " + g[2] + " »</span><span>Dans un mot français : <em>" + g[3] + "</em></span>";
+    }); });
+  });
+
+  /* ---------- 3e arts : la lampe tourne, l'ombre suit ---------- */
+  VRT_A("3e-arts-ombre", 0, "Déplace la lampe autour de la sphère", function (el) {
+    el.innerHTML = "<svg viewBox='0 0 460 260' class='an-svg'><defs><radialGradient id='sph' data-g cx='35%' cy='35%' r='75%'><stop offset='0' stop-color='#fff'/><stop offset='.35' stop-color='#C9CFDD'/><stop offset='.8' stop-color='#4D5163'/><stop offset='1' stop-color='#1E2333'/></radialGradient></defs><rect x='0' y='190' width='460' height='70' fill='#F5F7FB'/><ellipse data-ombre cx='270' cy='205' rx='70' ry='14' fill='#001136' opacity='.35'/><circle cx='230' cy='140' r='60' fill='url(#sph)'/><g data-lampe><circle r='16' fill='#FFC93C' stroke='#9A6F00' stroke-width='2'/><path d='M0 -26v-8M18 -18l6-6M-18 -18l-6-6' stroke='#FFC93C' stroke-width='3' stroke-linecap='round'/></g><text data-t1 font-size='12' fill='#C24E00'>ombre propre</text><text data-t2 font-size='12' fill='#001136'>ombre portée</text></svg>" + cur("Position de la lampe :", 10, 170, 1, 45, "°");
+    var r = q(el, "input");
+    function maj() {
+      var a = +r.value * Math.PI / 180, lx = 230 - Math.cos(a) * 170, ly = 140 - Math.sin(a) * 120;
+      q(el, "[data-v]").textContent = r.value;
+      q(el, "[data-lampe]").setAttribute("transform", "translate(" + lx + " " + ly + ")");
+      var g = q(el, "[data-g]"); g.setAttribute("cx", (50 - Math.cos(a) * 25) + "%"); g.setAttribute("cy", (50 - Math.sin(a) * 25) + "%");
+      var hauteur = Math.max(0.15, Math.sin(a)), long = 60 / hauteur, dir = Math.cos(a) >= 0 ? 1 : -1;
+      var om = q(el, "[data-ombre]"); om.setAttribute("rx", Math.min(220, 40 + long * .6)); om.setAttribute("cx", 230 + dir * Math.min(200, long * .7));
+      var t1 = q(el, "[data-t1]"); t1.setAttribute("x", 230 + dir * 30); t1.setAttribute("y", 150 + 10);
+      var t2 = q(el, "[data-t2]"); t2.setAttribute("x", Math.max(10, Math.min(380, 230 + dir * Math.min(200, long * .7) - 30))); t2.setAttribute("y", 240);
+    }
+    r.addEventListener("input", maj); maj();
+  });
+
+  /* ---------- 6e EPS : la piste, cliquer les éléments ---------- */
+  VRT_A("6e-eps-piste", 0, "Clique sur la piste pour nommer ses parties", function (el) {
+    var R = { corde: ["La corde", "Bord intérieur de la piste ; le couloir 1 la longe."], couloir: ["Un couloir", "Bande de 1,22 m environ ; le coureur doit y rester."], droite: ["Ligne droite", "Deux lignes droites sur un tour."], virage: ["Virage", "Deux virages ; plus long dans les couloirs extérieurs."], arrivee: ["Ligne d'arrivée", "Commune à toutes les courses."], sens: ["Sens de course", "Inverse des aiguilles d'une montre : la corde est à gauche."] };
+    el.innerHTML = "<svg viewBox='0 0 460 240' class='an-svg an-pc'><g data-k='couloir' tabindex='0' role='button' aria-label='Couloir'><rect x='30' y='20' width='400' height='200' rx='100' fill='#E8806C'/></g><g stroke='#fff' stroke-width='1.2' fill='none'>" + [0, 1, 2, 3, 4, 5, 6, 7].map(function (i) { var d = 12 * i; return "<rect x='" + (30 + d * .5) + "' y='" + (20 + d * .5) + "' width='" + (400 - d) + "' height='" + (200 - d) + "' rx='" + (100 - d * .5) + "'/>"; }).join("") + "</g><g data-k='corde' tabindex='0' role='button' aria-label='Corde'><rect x='78' y='68' width='304' height='104' rx='52' fill='#86D094' stroke='#fff' stroke-width='4'/></g><g data-k='droite' tabindex='0' role='button' aria-label='Ligne droite'><rect x='140' y='22' width='180' height='44' fill='transparent'/></g><g data-k='virage' tabindex='0' role='button' aria-label='Virage'><rect x='32' y='60' width='50' height='120' fill='transparent'/></g><g data-k='arrivee' tabindex='0' role='button' aria-label='Ligne d arrivée'><rect x='318' y='172' width='8' height='48' fill='#fff' stroke='#001136'/></g><g data-k='sens' tabindex='0' role='button' aria-label='Sens de course'><path d='M200 120 a30 30 0 1 0 60 0' fill='none' stroke='#001136' stroke-width='4' marker-end='url(#fs)'/></g><defs><marker id='fs' viewBox='0 0 10 10' refX='6' refY='5' markerWidth='6' markerHeight='6' orient='auto'><path d='M0 0l10 5-10 5z' fill='#001136'/></marker></defs></svg><div class='an-fiche' data-f><b>Clique sur un élément</b><span>Corde, couloir, ligne droite, virage, ligne d'arrivée, sens de course.</span></div>";
+    el.querySelectorAll("[data-k]").forEach(function (g) { function f() { el.querySelectorAll("[data-k]").forEach(function (x) { x.classList.toggle("an-sel", x === g); }); var r = R[g.dataset.k]; q(el, "[data-f]").innerHTML = "<b>" + r[0] + "</b><span>" + r[1] + "</span>"; } g.addEventListener("click", f); g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); f(); } }); });
+  });
+
+  /* ---------- 6e EPS : coureur en coordination croisée ---------- */
+  VRT_A("6e-eps-bras-jambes", 0, "Observe la coordination croisée", function (el) {
+    el.innerHTML = "<svg viewBox='0 0 300 240' class='an-svg' style='max-width:320px;margin:auto'><g transform='translate(150 40)' stroke-linecap='round' stroke-width='9' fill='none'><circle cx='0' cy='0' r='16' fill='#F5B57A' stroke='none'/><path d='M0 18 L4 92' stroke='#0C2A6A'/><g class='an-membre an-bd'><path d='M2 30 L-22 60 L-6 84' stroke='#1E499B'/></g><g class='an-membre an-bg'><path d='M2 30 L26 58 L44 44' stroke='#D9472B'/></g><g class='an-membre an-jd'><path d='M4 92 L-18 140 L-40 170' stroke='#D9472B'/></g><g class='an-membre an-jg'><path d='M4 92 L30 136 L22 182' stroke='#1E499B'/></g></g><text x='20' y='230' font-size='12' fill='#1E499B'>■ bras gauche + jambe droite</text><text x='170' y='230' font-size='12' fill='#D9472B'>■ bras droit + jambe gauche</text></svg><p class='an-note'>Même couleur = membres qui avancent ensemble : un bras et la jambe opposée.</p>";
+  });
+
+  /* ---------- Tle A sciences : zoom du microscope ---------- */
+  VRT_A("tle-sc-microscopie", 1, "Change d'objectif : ×4, ×10, ×40", function (el) {
+    el.innerHTML = "<div class='an-choix'><span>Objectif :</span><button type='button' data-z='4'>×4</button><button type='button' data-z='10' aria-pressed='true'>×10</button><button type='button' data-z='40'>×40</button><span style='margin-left:8px'>Oculaire ×10</span></div><div class='an-oculaire'><svg viewBox='0 0 300 300' data-sv><g data-champ style='transition:transform .5s;transform-origin:150px 150px'>" + (function () { var s = ""; for (var i = 0; i < 9; i++) for (var j = 0; j < 7; j++) { var x = i * 40 - 30 + (j % 2) * 20, y = j * 52 - 30; s += "<rect x='" + x + "' y='" + y + "' width='40' height='52' fill='#F4E6EE' stroke='#9C5B7C' stroke-width='1.5'/><ellipse cx='" + (x + 24) + "' cy='" + (y + 20) + "' rx='5' ry='4' fill='#9C5B7C' opacity='.8'/>"; } return s; })() + "</g></svg></div><div class='an-res'><span>Grossissement total : <b data-g>×100</b></span><span data-t></span></div>";
+    function z(v) {
+      el.querySelectorAll("[data-z]").forEach(function (b) { b.setAttribute("aria-pressed", +b.dataset.z === v); });
+      q(el, "[data-champ]").style.transform = "scale(" + ({ 4: .45, 10: 1, 40: 3.2 }[v]) + ")";
+      q(el, "[data-g]").textContent = "×" + v * 10;
+      q(el, "[data-t]").textContent = { 4: "On repère la zone à observer.", 10: "On distingue les cellules et leurs parois.", 40: "On voit le noyau de chaque cellule." }[v];
+    }
+    el.querySelectorAll("[data-z]").forEach(function (b) { b.addEventListener("click", function () { z(+b.dataset.z); }); }); z(10);
+  });
+
+  /* ---------- Tle A sciences : organites cliquables ---------- */
+  VRT_A("tle-sc-organites", 1, "Clique sur un organite", function (el) {
+    var R = { noyau: ["Noyau", "Contient l'ADN et dirige la cellule ; enveloppe percée de pores."], mito: ["Mitochondrie", "Respiration cellulaire : produit l'énergie."], golgi: ["Appareil de Golgi", "Modifie, emballe et expédie les protéines."], ret: ["Réticulum endoplasmique", "Synthèse et transport des molécules ; porte des ribosomes."], lyso: ["Lysosome", "Digestion à l'intérieur de la cellule."], memb: ["Membrane plasmique", "Limite la cellule et contrôle les échanges."] };
+    el.innerHTML = "<svg viewBox='0 0 460 260' class='an-svg an-pc'><g data-k='memb' tabindex='0' role='button' aria-label='Membrane'><ellipse cx='230' cy='130' rx='215' ry='118' fill='#FBEFF4' stroke='#B03A6E' stroke-width='4'/></g><g data-k='noyau' tabindex='0' role='button' aria-label='Noyau'><circle cx='220' cy='125' r='52' fill='#ECE8F8' stroke='#5B4FA8' stroke-width='3' stroke-dasharray='10 3'/><circle cx='230' cy='118' r='16' fill='#5B4FA8'/></g><g data-k='mito' tabindex='0' role='button' aria-label='Mitochondrie'><ellipse cx='95' cy='90' rx='38' ry='17' fill='#FDEBDD' stroke='#C24E00' stroke-width='2.5'/><path d='M66 90 q8 -12 14 0 t14 0 t14 0 t14 0' fill='none' stroke='#C24E00' stroke-width='2'/><ellipse cx='350' cy='190' rx='34' ry='15' fill='#FDEBDD' stroke='#C24E00' stroke-width='2.5'/></g><g data-k='golgi' tabindex='0' role='button' aria-label='Appareil de Golgi'><g fill='none' stroke='#0E7C86' stroke-width='5' stroke-linecap='round'><path d='M320 70 q30 12 60 0'/><path d='M318 84 q32 12 64 0'/><path d='M322 98 q28 12 56 0'/></g></g><g data-k='ret' tabindex='0' role='button' aria-label='Réticulum'><path d='M150 200 q20 -18 40 0 t40 0 t40 0' fill='none' stroke='#1E499B' stroke-width='5'/><g fill='#1E499B'><circle cx='160' cy='195' r='3'/><circle cx='200' cy='205' r='3'/><circle cx='240' cy='195' r='3'/></g></g><g data-k='lyso' tabindex='0' role='button' aria-label='Lysosome'><circle cx='110' cy='180' r='13' fill='#E0F5E5' stroke='#007E11' stroke-width='2.5'/><circle cx='380' cy='130' r='11' fill='#E0F5E5' stroke='#007E11' stroke-width='2.5'/></g></svg><div class='an-fiche' data-f><b>Clique sur un organite</b><span>Noyau, mitochondrie, appareil de Golgi, réticulum, lysosome, membrane.</span></div>";
+    el.querySelectorAll("[data-k]").forEach(function (g) { function f(e) { if (e) e.stopPropagation(); el.querySelectorAll("[data-k]").forEach(function (x) { x.classList.toggle("an-sel", x === g); }); var r = R[g.dataset.k]; q(el, "[data-f]").innerHTML = "<b>" + r[0] + "</b><span>" + r[1] + "</span>"; } g.addEventListener("click", f); g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); f(e); } }); });
+  });
+})();
