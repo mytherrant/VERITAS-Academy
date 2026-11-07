@@ -9,7 +9,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261107n">
+<link rel="stylesheet" href="apprendre.css?v=20261107s">
+<link rel="stylesheet" href="jeu.css?v=20261107s">
 <style>
 /* ── Page matière (refonte 07/11) : en-tête teinté, filtres en pastilles, chapitres en cartes colorées ── */
 .mpage{max-width:900px;margin:0 auto}
@@ -54,15 +55,16 @@ a.lg:hover{background:var(--kp)}
 <header class="top">
   <a class="logo" href="/">VÉRI<b>TAS</b></a>
   <nav class="top-nav" aria-label="Apprendre"><a href="index.html">Apprendre</a><a href="/scenes/">Scènes vivantes</a><a href="/corriges/">Corrigés</a></nav>
-  <div class="top-d"><span class="serie" id="serie" hidden></span></div>
+  <div class="top-d"><a class="niveau-chip" data-niveau href="index.html#progression" aria-label="Mon niveau et mes badges"></a><span class="serie" id="serie" hidden></span></div>
 </header>
 <nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
 <main class="page"><div class="lim" id="zone"></div></main>
 
-<script src="scenes.js?v=20261107n"></script>
-<script src="progressions.js?v=20261107n"></script>
-<script src="lecons.js?v=20261107n"></script>
-<script src="commun.js?v=20261107n"></script>
+<script src="scenes.js?v=20261107s"></script>
+<script src="progressions.js?v=20261107s"></script>
+<script src="lecons.js?v=20261107s"></script>
+<script src="commun.js?v=20261107s"></script>
+<script src="jeu.js?v=20261107s"></script>
 <script>
 (function(){
   "use strict";

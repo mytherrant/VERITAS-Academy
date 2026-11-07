@@ -9,7 +9,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261107n">
+<link rel="stylesheet" href="apprendre.css?v=20261107s">
+<link rel="stylesheet" href="jeu.css?v=20261107s">
 <style>
 /* ── Manuel collaboratif : colonne de navigation + document ── */
 .mn{display:grid;grid-template-columns:290px minmax(0,1fr);min-height:calc(100vh - 60px)}
@@ -104,10 +105,11 @@ dialog .dlg h3{margin:0 0 10px;font:600 19px var(--sans);color:#001136}
 
 <dialog id="dlg"><button type="button" class="fermer" aria-label="Fermer" onclick="this.closest('dialog').close()">×</button><div class="dlg" id="dlgC"></div></dialog>
 
-<script src="scenes.js?v=20261107n"></script>
-<script src="progressions.js?v=20261107n"></script>
-<script src="lecons.js?v=20261107n"></script>
-<script src="commun.js?v=20261107n"></script>
+<script src="scenes.js?v=20261107s"></script>
+<script src="progressions.js?v=20261107s"></script>
+<script src="lecons.js?v=20261107s"></script>
+<script src="commun.js?v=20261107s"></script>
+<script src="jeu.js?v=20261107s"></script>
 <script>
 (function(){
   "use strict";
@@ -211,6 +213,7 @@ dialog .dlg h3{margin:0 0 10px;font:600 19px var(--sans);color:#001136}
     $$(".mn-doc").forEach(function(b){b.addEventListener("click",function(){ cour=b.dataset.doc; history.replaceState(null,"","?id="+M.id+"&d="+cour); rendre(); window.scrollTo(0,0); })});
     $$(".question .voir").forEach(function(b){b.addEventListener("click",function(){ b.nextElementSibling.hidden=false; b.remove(); })});
     $$("[data-anim]").forEach(function(el){ try{ var p=el.dataset.anim.split("#"), x=VRT_LECONS[p[0]].parties[+p[1]]; x.anim(el) }catch(e){ el.closest(".anim").hidden=true } });
+    A.boutonsImage(app);   /* « Enregistrer l'image » : PNG avec filigrane VÉRITAS */
     var pt=$("#bPartager"); if(pt) pt.addEventListener("click",partager);
     if(!editable) return;
     $$("[data-chap]").forEach(function(inp){inp.addEventListener("change",function(){ M.doc.chapitres[+inp.dataset.chap].titre=inp.value.slice(0,160); sauver(); })});

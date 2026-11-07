@@ -127,7 +127,79 @@
     });
   })();
 
+  /* ════════ FILIGRANE VÉRITAS sur tout export (07/11/2026) ════════
+     Même langage que app.js (applyWatermark) : « VÉRITAS » en diagonale très léger +
+     bandeau bas bleu nuit « © VÉRITAS · veritas-school.com » et la date d'export.
+     1) Impression / PDF : calque fixe (répété sur chaque page imprimée), invisible à l'écran.
+     2) Images : le schéma est rendu dans un canvas, filigrané, puis enregistré en PNG. */
+  var SITE = "veritas-school.com";
+  function dateExport() { var d = new Date(); return d.toLocaleDateString("fr-FR") + " à " + d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }); }
+
+  function filigraneImpression() {
+    if (document.getElementById("vrtFiligrane")) return;
+    var f = document.createElement("div"); f.id = "vrtFiligrane"; f.className = "vrt-filigrane"; f.setAttribute("aria-hidden", "true");
+    f.innerHTML = '<svg width="100%" height="100%"><defs><pattern id="vrtFil" width="300" height="190" patternUnits="userSpaceOnUse" patternTransform="rotate(-28)">' +
+      '<text x="10" y="70" font-family="Poppins,Arial,sans-serif" font-size="30" font-weight="600" fill="#1E499B" fill-opacity=".07">VÉRITAS</text>' +
+      '<text x="160" y="160" font-family="Poppins,Arial,sans-serif" font-size="13" fill="#1E499B" fill-opacity=".07">' + SITE + '</text></pattern></defs>' +
+      '<rect width="100%" height="100%" fill="url(#vrtFil)"/></svg>';
+    var p = document.createElement("div"); p.id = "vrtPiedImpr"; p.className = "vrt-pied-impr"; p.setAttribute("aria-hidden", "true");
+    document.body.appendChild(f); document.body.appendChild(p);
+    function maj() { p.innerHTML = "<b>© VÉRITAS</b> · " + SITE + " · " + esc(document.title.split(" | ")[0]) + " · imprimé le " + dateExport() + " · reproduction interdite"; }
+    maj(); W.addEventListener("beforeprint", maj);
+  }
+
+  function filigraneCanvas(ctx, Wd, H) {
+    ctx.save(); ctx.globalAlpha = .06; ctx.fillStyle = "#1E499B"; ctx.font = "600 30px Poppins,Arial,sans-serif";
+    ctx.translate(Wd / 2, H / 2); ctx.rotate(-Math.PI / 7);
+    for (var y = -H * 1.3; y < H * 1.3; y += 150) for (var x = -Wd * 1.3; x < Wd * 1.3; x += 280) ctx.fillText("VÉRITAS", x + ((y / 150) % 2 ? 140 : 0), y);
+    ctx.restore();
+    var bH = 46; ctx.save(); ctx.fillStyle = "#0C2A6A"; ctx.fillRect(0, H - bH, Wd, bH);
+    ctx.fillStyle = "#FFC93C"; ctx.font = "600 17px Poppins,Arial,sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = "left"; ctx.fillText("© VÉRITAS · " + SITE, 20, H - bH / 2);
+    ctx.fillStyle = "rgba(255,255,255,.8)"; ctx.font = "14px Poppins,Arial,sans-serif"; ctx.textAlign = "right"; ctx.fillText("Exporté le " + dateExport(), Wd - 20, H - bH / 2);
+    ctx.restore();
+  }
+
+  /* Enregistre un schéma SVG en PNG filigrané (2× pour la netteté). */
+  function exporterImage(svg, titre) {
+    var r = svg.getBoundingClientRect(), vb = svg.viewBox && svg.viewBox.baseVal, w0 = vb && vb.width ? vb.width : r.width, h0 = vb && vb.height ? vb.height : r.height;
+    var k = Math.max(2, 900 / w0), Wd = Math.round(w0 * k), Hs = Math.round(h0 * k), haut = 70, bas = 46, marge = 30, H = Hs + haut + bas + marge;
+    var clone = svg.cloneNode(true); clone.setAttribute("xmlns", "http://www.w3.org/2000/svg"); clone.setAttribute("width", Wd); clone.setAttribute("height", Hs);
+    clone.querySelectorAll("text").forEach(function (t) { if (!t.getAttribute("font-family")) t.setAttribute("font-family", "Poppins,Arial,sans-serif"); });
+    var url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(clone));
+    var img = new Image();
+    img.onload = function () {
+      var c = document.createElement("canvas"); c.width = Wd; c.height = H; var ctx = c.getContext("2d");
+      ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, Wd, H);
+      ctx.fillStyle = "#001136"; ctx.font = "600 24px Poppins,Arial,sans-serif"; ctx.textBaseline = "middle";
+      var t = String(titre || "Schéma VÉRITAS").trim(), max = Wd - 48;   /* titre trop long : points de suspension à la largeur */
+      if (ctx.measureText(t).width > max) { while (t.length > 4 && ctx.measureText(t + "…").width > max) t = t.slice(0, -1); t = t.replace(/[\s,;:]+$/, "") + "…"; }
+      ctx.fillText(t, 24, haut / 2 + 4);
+      ctx.fillStyle = "#FFC93C"; ctx.fillRect(24, haut - 10, 60, 4);
+      ctx.drawImage(img, 0, haut, Wd, Hs);
+      filigraneCanvas(ctx, Wd, H);
+      c.toBlob(function (b) { if (!b) return; var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "veritas-" + (slug(titre) || "schema").slice(0, 50) + ".png"; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }, "image/png");
+    };
+    img.onerror = function () { if (W.VRT.jeu) W.VRT.jeu.toast("<b>Image indisponible</b><span>Ce schéma ne peut pas être exporté.</span>"); };
+    img.src = url;
+  }
+  /* Ajoute « Enregistrer l'image » sous chaque illustration et chaque schéma animé d'un conteneur. */
+  function boutonsImage(racine) {
+    (racine || document).querySelectorAll("figure.illus, .anim").forEach(function (f) {
+      if (f.querySelector(".btn-img")) return;
+      var svg = f.querySelector("svg:not(.pic)"); if (!svg) return;
+      var cap = f.querySelector("figcaption"), titre = (cap && cap.textContent) || (f.querySelector(".anim-t") || {}).textContent || document.title.split(" | ")[0];
+      var b = document.createElement("button"); b.type = "button"; b.className = "btn-img"; b.innerHTML = pic("importer", 15) + " Enregistrer l'image";
+      b.title = "Image PNG avec filigrane VÉRITAS";
+      b.addEventListener("click", function () { var s = f.querySelector("svg:not(.pic)"); if (s) exporterImage(s, titre); });
+      (f.classList.contains("anim") ? f.querySelector(".anim-c") || f : f).appendChild(b);
+    });
+  }
+  if (typeof document !== "undefined") {   /* hors navigateur (bancs Node) : pas de filigrane à poser */
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", filigraneImpression); else filigraneImpression();
+  }
+
   W.VRT = W.VRT || {};
   W.VRT.app = { MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
-    marquerLu: marquerLu, noterQuiz: noterQuiz, teinter: teinter, ico: ico, icoM: icoM, pic: pic, etoiles: etoiles, esc: esc, slug: slug, rail: rail, chiffreSerie: chiffreSerie, scenesPour: scenesPour, jour: jour };
+    marquerLu: marquerLu, noterQuiz: noterQuiz, teinter: teinter, ico: ico, icoM: icoM, pic: pic, etoiles: etoiles, esc: esc, slug: slug, rail: rail, chiffreSerie: chiffreSerie, scenesPour: scenesPour, jour: jour,
+    exporterImage: exporterImage, boutonsImage: boutonsImage, filigraneCanvas: filigraneCanvas };
 })(window);

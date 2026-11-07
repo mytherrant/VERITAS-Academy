@@ -9,7 +9,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261107n">
+<link rel="stylesheet" href="apprendre.css?v=20261107s">
+<link rel="stylesheet" href="jeu.css?v=20261107s">
 <style>
 .hero{background:linear-gradient(90deg,#EDF2FB,#F7F9FE 70%);color:#001136;border:1px solid #DCE5F5;border-radius:10px;padding:34px 34px 28px;position:relative;overflow:hidden;margin-bottom:26px}
 .hero::before{display:none}
@@ -76,7 +77,7 @@
 <header class="top">
   <a class="logo" href="/">VÉRI<b>TAS</b></a>
   <nav class="top-nav" aria-label="Apprendre"><a href="index.html" aria-current="page">Apprendre</a><a href="/scenes/">Scènes vivantes</a><a href="/corriges/">Corrigés</a></nav>
-  <div class="top-d"><span class="serie" id="serie" hidden></span></div>
+  <div class="top-d"><a class="niveau-chip" data-niveau href="#progression" aria-label="Mon niveau et mes badges"></a><span class="serie" id="serie" hidden></span></div>
 </header>
 <nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
 
@@ -92,6 +93,7 @@
     <div class="mosaique" aria-hidden="true" id="mosaique"></div>
   </section>
 
+  <div class="objectif-z"><div class="objectif" id="objectifJour"></div><div class="kalao-accueil" id="kalaoAccueil"></div></div>
   <div class="blocs" id="blocs"></div>
 
   <div class="sec-t"><h2 id="matsT">Mes matières</h2><a href="#defi">Défi express ›</a></div>
@@ -108,6 +110,14 @@
     <div class="scenes" id="scenes"></div>
   </section>
 
+  <section class="progression" id="progression">
+    <div class="sec-t"><h2>Ma progression</h2><span class="lu">Gardée dans ce navigateur</span></div>
+    <div class="prog-g">
+      <div class="prog-niv" id="progNiv"></div>
+      <div class="prog-badges"><p class="prog-t" id="progBadgesT">Mes badges</p><div class="badges" id="progBadges"></div></div>
+    </div>
+  </section>
+
   <section class="profils-z">
     <h2>Faisons connaissance</h2>
     <div class="profils">
@@ -119,10 +129,11 @@
   </section>
 </div></main>
 
-<script src="scenes.js?v=20261107n"></script>
-<script src="progressions.js?v=20261107n"></script>
-<script src="lecons.js?v=20261107n"></script>
-<script src="commun.js?v=20261107n"></script>
+<script src="scenes.js?v=20261107s"></script>
+<script src="progressions.js?v=20261107s"></script>
+<script src="lecons.js?v=20261107s"></script>
+<script src="commun.js?v=20261107s"></script>
+<script src="jeu.js?v=20261107s"></script>
 <script>
 (function(){
   "use strict";
@@ -171,7 +182,7 @@
     $("#defi").hidden=!pool.length; var faits=0,bons=0;
     function question(){ if(!pool.length) return; var t=pool[Math.floor(Math.random()*pool.length)],x=t[1],L=LE[t[0]];
       $("#defiQ").innerHTML='<div class="q" data-bonne="'+x.b+'"><p>'+x.q+'</p>'+x.r.map(function(r){return '<button type="button">'+r+'</button>'}).join("")+'<div class="expl" hidden>'+(x.e||"")+' <a href="lecon.html?id='+t[0]+'">Revoir la leçon « '+esc(L.titre)+' »</a></div></div>';
-      $$("#defiQ button").forEach(function(btn,k){btn.addEventListener("click",function(){var qq=$("#defiQ .q");if(qq.dataset.fait)return;qq.dataset.fait=1;faits++;if(k===x.b){btn.classList.add("ok");bons++}else{btn.classList.add("ko");$$("#defiQ button")[x.b].classList.add("ok")}$("#defiQ .expl").hidden=false;$("#defiS").textContent=bons+" bonne"+(bons>1?"s":"")+" réponse"+(bons>1?"s":"")+" sur "+faits+(faits>=3?(bons===faits?" · Sans faute !":" · Continue !"):"");if(faits===3&&bons===3)A.noterJour()})});
+      $$("#defiQ button").forEach(function(btn,k){btn.addEventListener("click",function(){var qq=$("#defiQ .q");if(qq.dataset.fait)return;qq.dataset.fait=1;faits++;if(k===x.b){btn.classList.add("ok");bons++;if(VRT.jeu)VRT.jeu.defiReussi()}else{btn.classList.add("ko");$$("#defiQ button")[x.b].classList.add("ok");qq.classList.add("secoue")}$("#defiQ .expl").hidden=false;$("#defiS").textContent=bons+" bonne"+(bons>1?"s":"")+" réponse"+(bons>1?"s":"")+" sur "+faits+(faits>=3?(bons===faits?" · Sans faute !":" · Continue !"):"");if(faits===3&&bons===3)A.noterJour()})});
       $("#defiS").textContent=faits?$("#defiS").textContent:"D'après « "+L.titre+" » ("+A.PAR_ID[L.m].nom+")."; }
     $("#defiN").onclick=question; question();
 
@@ -180,6 +191,24 @@
     var sc=(window.VRT_SCENES||[]).filter(function(s){return pre?s.indexOf(pre+"-")===0:!/^(3e|1re|tle)-/.test(s)}).slice(0,6);
     $("#scZone").hidden=!sc.length;
     $("#scenes").innerHTML=sc.map(function(s){return '<a class="scene" href="/scenes/'+s+'.html"><span class="pl">'+A.pic("masques",30)+'</span><span><small>Scène vivante</small><strong>'+esc(VRT_SCENES_TITRES[s]||s)+'</strong></span></a>'}).join("");
+    progression();
+  }
+
+  /* ── couche ludique : niveau, badges, objectif du jour, mot de Kalao ── */
+  function progression(){
+    var J=VRT.jeu; if(!J) return;
+    var n=J.niveau(A.lire("xp",0)), b=A.lire("badges",{}), nb=Object.keys(b).length, o=J.objectif();
+    $("#progNiv").innerHTML='<div class="prog-anneau">'+J.anneau(n.pct,132,"#1E499B")+'<div><b>'+n.rang+'</b><small>niveau</small></div></div>'+
+      '<h3>'+esc(n.nom)+'</h3><p><b>'+n.xp+'</b> points'+(n.suivant?' · encore <b>'+(n.haut-n.xp)+'</b> pour « '+esc(n.suivant)+' »':' · niveau maximal')+'</p>'+
+      '<ul class="bareme"><li><span>'+A.pic("livre",16)+'</span>Leçon lue jusqu\'au bout <b>+20</b></li><li><span>'+A.pic("etoile",16)+'</span>Chaque étoile au quiz <b>+10</b></li><li><span>'+A.pic("coche",16)+'</span>Bonne réponse au défi <b>+5</b></li><li><span>'+A.pic("flamme",16)+'</span>Jour de suite <b>+5</b></li></ul>';
+    $("#progBadgesT").innerHTML='Mes badges <span class="cpt">'+nb+' / '+J.BADGES.length+'</span>';
+    $("#progBadges").innerHTML=J.BADGES.map(function(x){var ok=!!b[x[0]];return '<div class="badge-c'+(ok?' acquis':'')+'" title="'+esc(x[2])+'">'+J.medaille(x,ok,56)+'<b>'+esc(x[1])+'</b><small>'+esc(x[2])+'</small></div>'}).join("");
+    var s=A.serie(), msg = o.fait ? "Objectif du jour rempli. Bravo ! Une leçon de plus pour prendre de l'avance ?"
+      : o.lecon ? "Belle lecture ! Il te reste un quiz pour remplir l'objectif du jour."
+      : s>1 ? "Déjà <b>"+s+" jours de suite</b> ! Ne casse pas ta série : une leçon aujourd'hui."
+      : "Salut ! Une leçon et un quiz par jour, et tu verras tes notes grimper.";
+    J.bulle($("#kalaoAccueil"), msg, o.fait?"bravo":"salut");
+    J.majChips();
   }
   tout();
 })();

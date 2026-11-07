@@ -9,13 +9,15 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261107n">
+<link rel="stylesheet" href="apprendre.css?v=20261107s">
+<link rel="stylesheet" href="jeu.css?v=20261107s">
 </head>
 <body class="eleve">
 <header class="top">
   <a class="logo" href="/">VÉRI<b>TAS</b></a>
   <nav class="top-nav" aria-label="Apprendre"><a href="index.html">Apprendre</a><a href="/scenes/">Scènes vivantes</a><a href="/corriges/">Corrigés</a></nav>
   <div class="top-d">
+    <a class="niveau-chip" data-niveau href="index.html#progression" aria-label="Mon niveau et mes badges"></a>
     <span class="serie" id="serie" hidden></span>
     <div class="vue" role="group" aria-label="Choisir la vue">
       <button type="button" data-vue="prof" aria-pressed="false">Enseignant</button>
@@ -35,10 +37,11 @@
   </div>
 </dialog>
 
-<script src="scenes.js?v=20261107n"></script>
-<script src="progressions.js?v=20261107n"></script>
-<script src="lecons.js?v=20261107n"></script>
-<script src="commun.js?v=20261107n"></script>
+<script src="scenes.js?v=20261107s"></script>
+<script src="progressions.js?v=20261107s"></script>
+<script src="lecons.js?v=20261107s"></script>
+<script src="commun.js?v=20261107s"></script>
+<script src="jeu.js?v=20261107s"></script>
 <script>
 (function(){
   "use strict";
@@ -78,6 +81,7 @@
    '</div>'+
    '<section class="grille" data-panneau="cours"><aside class="sommaire" aria-label="Sommaire"><p>Sommaire</p><ol>'+L.parties.map(function(p,k){return '<li><a href="#p'+(k+1)+'">'+(k+1)+'. '+esc(p.t)+'</a></li>'}).join("")+'</ol><div class="lu"><span id="luTxt">Lecture : 0 %</span><div class="barre-p"><i id="luBar" style="width:0"></i></div></div></aside>'+
      '<article class="carte"><div class="outils-pdf"><button type="button" class="btn-l" onclick="print()">⤓ PDF</button></div>'+
+     '<div id="kalaoCours"></div>'+
      (L.intro?'<p class="info">'+L.intro+'</p>':'')+
      (L.objectifs?'<div class="objectifs"><b>À la fin de la leçon, tu sauras :</b><ul>'+L.objectifs.map(function(o){return '<li>'+o+'</li>'}).join("")+'</ul></div>':'')+
      parties+scenesHtml+appel+nav+'</article></section>'+
@@ -85,11 +89,17 @@
      '<div class="partie"><h2><span class="num">'+A.pic("coche",20)+'</span><span class="txt">Ce que tu dois retenir</span></h2><ul>'+L.revision.map(function(r){return '<li>'+r+'</li>'}).join("")+'</ul></div>'+
      (L.exo?'<div class="partie"><h2><span class="num">'+A.pic("crayon",18)+'</span><span class="txt">À toi de jouer</span></h2>'+L.exo+'</div>':'')+
      scenesHtml+'</article></section>'+
-   '<section class="grille" data-panneau="quiz" hidden><aside class="sommaire"><p>'+L.quiz.length+' questions</p><p id="score" class="lu"></p></aside><article class="carte" id="quiz">'+
+   '<section class="grille" data-panneau="quiz" hidden><aside class="sommaire"><p>'+L.quiz.length+' questions</p><p id="score" class="lu"></p></aside><article class="carte" id="quiz"><div class="quiz-barre" id="quizBarre" aria-hidden="true"><i></i></div>'+
      L.quiz.map(function(q,k){return '<div class="q" data-bonne="'+q.b+'"><p>'+(k+1)+'. '+q.q+'</p>'+q.r.map(function(r){return '<button type="button">'+r+'</button>'}).join("")+'<div class="expl" hidden>'+(q.e||"")+'</div></div>'}).join("")+
      '<div class="bilan" id="bilan" hidden></div></article></section>';
 
   A.noterJour(); A.chiffreSerie($("#serie"));
+
+  /* Kalao, la mascotte : un mot d'accueil adapté (déjà lue ? quiz déjà réussi ?) */
+  if(VRT.jeu){ var dejaLu=A.lire("lus",{})[id], qq=A.lire("quiz",{})[id];
+    VRT.jeu.bulle($("#kalaoCours"), qq&&qq[0]===qq[1] ? "Te revoilà ! Tu as déjà réussi ce quiz sans faute. Une petite révision pour graver tout ça ?"
+      : dejaLu ? "Content de te revoir. Après la lecture, tente le quiz : chaque étoile vaut 10 points."
+      : "Salut, moi c'est Kalao ! Lis la leçon jusqu'au bout pour gagner <b>20 points</b>, puis décroche les 3 étoiles du quiz.", "salut"); }
 
   /* apparition douce des parties (désactivée si « réduire les animations ») */
   if("IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches){
@@ -101,6 +111,7 @@
 
   /* schémas animés : chacun isolé, une erreur n'empêche pas la leçon de s'afficher */
   $$("[data-anim]").forEach(function(el){ var p=L.parties[+el.getAttribute("data-anim")]; try{ p.anim(el) }catch(e){ el.closest(".anim").hidden=true; if(window.console) console.warn("Animation", id, e) } });
+  A.boutonsImage(document.getElementById("lecon"));   /* « Enregistrer l'image » : PNG avec filigrane VÉRITAS */
 
   /* onglets */
   var SUR={cours:"Cours",revision:"Fiche de révision",quiz:"Quiz"};
@@ -119,17 +130,21 @@
   }
   var art=$('[data-panneau=cours] .carte');
   function lecture(){ var r=art.getBoundingClientRect(), h=r.height-innerHeight*.6; var p=Math.max(0,Math.min(100,Math.round((-r.top+innerHeight*.2)/Math.max(h,1)*100)));
-    $("#luBar").style.width=p+"%"; $("#luTxt").textContent=p>=95?"Leçon lue":"Lecture : "+p+" %"; if(p>=95&&!fait){fait=true;A.marquerLu(id)} }
+    $("#luBar").style.width=p+"%"; $("#luTxt").textContent=p>=95?"Leçon lue":"Lecture : "+p+" %"; if(p>=95&&!fait){fait=true;A.marquerLu(id);if(VRT.jeu)VRT.jeu.leconLue(id)} }
   addEventListener("scroll",lecture,{passive:true}); lecture();
 
   /* quiz */
-  var bons=0,faits=0,n=L.quiz.length;
+  var bons=0,faits=0,n=L.quiz.length,combo=0,J=VRT.jeu;
   $$(".q").forEach(function(q){var b=+q.getAttribute("data-bonne");$$("button",q).forEach(function(btn,k){btn.addEventListener("click",function(){
     if(q.dataset.fait) return; q.dataset.fait="1"; faits++;
-    if(k===b){btn.classList.add("ok");bons++}else{btn.classList.add("ko");$$("button",q)[b].classList.add("ok")}
+    if(k===b){btn.classList.add("ok");bons++;combo++; if(combo>=2&&J) J.toast('<b>Série de '+combo+'</b><span>bonnes réponses d\'affilée</span>',"combo");}
+    else{btn.classList.add("ko");$$("button",q)[b].classList.add("ok");combo=0;q.classList.remove("secoue");void q.offsetWidth;q.classList.add("secoue")}
     $(".expl",q).hidden=false; $("#score").textContent=bons+" / "+faits;
+    var bq=$("#quizBarre i"); if(bq) bq.style.transform="scaleX("+(faits/n)+")";
     if(faits===n){ A.noterQuiz(id,bons,n); var et=bons===n?3:bons>=Math.ceil(n*.6)?2:bons>0?1:0;
-      var bl=$("#bilan"); bl.hidden=false; bl.innerHTML=A.etoiles(et)+'<b>'+bons+' / '+n+'</b>'+(bons===n?'Parfait ! Tu maîtrises cette leçon.':bons>=n/2?'Bien joué. Relis la partie qui t\'a piégé.':'Relis le cours, puis retente ta chance.')+'<p style="margin:12px 0 0"><button type="button" class="btn-l" onclick="location.hash=\'quiz\';location.reload()">Recommencer</button> '+(suiv?'<a class="btn-l" href="lecon.html?id='+suiv+'">Leçon suivante ›</a>':'')+'</p>'; bl.scrollIntoView({behavior:"smooth",block:"center"}); }
+      var hum=bons===n?"bravo":"salut", msg=bons===n?'Parfait ! Tu maîtrises cette leçon.':bons>=n/2?'Bien joué. Relis la partie qui t\'a piégé.':'Relis le cours, puis retente ta chance : tu vas y arriver.';
+      var bl=$("#bilan"); bl.hidden=false; bl.innerHTML=(J?J.mascotte(hum,96):'')+A.etoiles(et)+'<b>'+bons+' / '+n+'</b>'+msg+'<p style="margin:12px 0 0"><button type="button" class="btn-l" onclick="location.hash=\'quiz\';location.reload()">Recommencer</button> '+(suiv?'<a class="btn-l" href="lecon.html?id='+suiv+'">Leçon suivante ›</a>':'')+'</p>'; bl.scrollIntoView({behavior:"smooth",block:"center"});
+      if(J) J.quizFini(id,bons,n); }
   })})});
 
   /* vue enseignant : barre d'outils + publier (démonstration, local) */

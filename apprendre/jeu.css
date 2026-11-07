@@ -1,0 +1,120 @@
+/* VÉRITAS — Apprendre : filigrane des exports + couche ludique (07/11/2026).
+   Animations : transform / opacity, déclenchées par un événement, coupées par prefers-reduced-motion. */
+
+/* ════════ FILIGRANE des exports (impression / PDF) — invisible à l'écran ════════ */
+.vrt-filigrane,.vrt-pied-impr{display:none}
+@media print{
+  .vrt-filigrane{display:block;position:fixed;inset:0;z-index:9999;pointer-events:none}
+  .vrt-filigrane svg{width:100%;height:100%}
+  .vrt-pied-impr{display:block;position:fixed;left:0;right:0;bottom:0;z-index:9999;padding:4px 10px;border-top:1px solid #9FBEEA;background:#fff;font:9pt Poppins,Arial,sans-serif;color:#0C2A6A;text-align:center}
+  .vrt-pied-impr b{color:#C24E00}
+  body{padding-bottom:28px}
+  .btn-img,.kalao-bulle,.jeu-toasts,.niveau-chip,.quiz-barre,.objectif-z,.progression{display:none!important}
+}
+.btn-img{display:inline-flex;align-items:center;gap:6px;margin:10px auto 0;border:1px solid #E6EAF2;background:#fff;color:#1E499B;border-radius:999px;padding:6px 12px;font:500 12.5px var(--sans);cursor:pointer}
+figure.illus .btn-img{display:flex}
+.btn-img:hover{border-color:#9FBEEA;background:#EDF2FB}
+
+/* ════════ Pastille de niveau (barre du haut) ════════ */
+.niveau-chip{display:inline-flex;align-items:center;gap:8px;text-decoration:none;background:#fff;border:1px solid #E6EAF2;border-radius:999px;padding:3px 12px 3px 3px;color:#001136;transition:border-color .15s}
+.niveau-chip:hover{border-color:#9FBEEA}
+.niv-anneau{position:relative;width:30px;height:30px;display:grid;place-items:center}
+.niv-anneau svg{position:absolute;inset:0}
+.niv-anneau b{font:600 12px var(--sans);color:#1E499B}
+.niv-txt{display:flex;flex-direction:column;line-height:1.1}
+.niv-txt b{font:600 12.5px var(--sans)}
+.niv-txt small{font-size:11px;color:#6B7287}
+@media (max-width:640px){.niv-txt{display:none}.niveau-chip{padding:3px}}
+
+/* ════════ Toasts de points ════════ */
+.jeu-toasts{position:fixed;right:16px;bottom:80px;z-index:200;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none}
+.jeu-toast{display:flex;flex-direction:column;background:#fff;border:1px solid #DCE5F5;border-radius:14px;padding:10px 16px;box-shadow:0 12px 30px -12px rgba(12,42,106,.35);animation:jeu-entre .35s cubic-bezier(.2,.9,.3,1.3) both}
+.jeu-toast b{font:600 16px var(--sans);color:#1E499B}
+.jeu-toast span{font-size:12.5px;color:#4D5163}
+.jeu-toast.combo b{color:#C24E00}
+.jeu-toast.sort{animation:jeu-sort .35s ease forwards}
+@keyframes jeu-entre{from{opacity:0;transform:translateY(16px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes jeu-sort{to{opacity:0;transform:translateX(30px)}}
+
+/* ════════ Célébration (niveau, badge) ════════ */
+.jeu-fete{position:fixed;inset:0;z-index:300;background:rgba(0,17,54,.35);display:grid;place-items:center;padding:16px;animation:jeu-fond .25s ease both}
+.jeu-fete.sort{animation:jeu-fond .25s ease reverse forwards}
+.jeu-fete-c{background:#fff;border-radius:20px;padding:26px 28px 22px;max-width:360px;text-align:center;box-shadow:0 30px 60px -20px rgba(0,17,54,.5);animation:jeu-pop .45s cubic-bezier(.2,.9,.3,1.35) both}
+.jeu-fete-c svg{margin:0 auto 8px;display:block}
+.jeu-fete-c h3{font:600 20px/1.3 var(--sans);color:#001136;margin:0 0 6px}
+.jeu-fete-c p{margin:0 0 16px;color:#4D5163;font-size:14.5px}
+.jeu-fete-c button{background:#FFC93C;color:#001136;border:0;border-radius:10px;padding:10px 26px;font:600 15px var(--sans);cursor:pointer}
+@keyframes jeu-fond{from{opacity:0}to{opacity:1}}
+@keyframes jeu-pop{from{opacity:0;transform:scale(.7) rotate(-4deg)}to{opacity:1;transform:none}}
+
+/* ════════ Confettis ════════ */
+.jeu-confettis{position:fixed;inset:0;z-index:400;pointer-events:none;overflow:hidden}
+.jeu-confettis i{position:absolute;top:-14px;width:9px;height:14px;border-radius:2px;animation-name:jeu-tombe;animation-timing-function:cubic-bezier(.25,.6,.4,1);animation-fill-mode:forwards}
+@keyframes jeu-tombe{to{transform:translate3d(var(--dx),110vh,0) rotate(var(--r));opacity:.2}}
+
+/* ════════ Mascotte Kalao ════════ */
+.kalao-bulle{display:flex;gap:14px;align-items:center;margin:0 0 20px}
+.kalao-bulle svg{flex:0 0 auto}
+.kalao-bulle p{position:relative;margin:0;background:#EDF2FB;border:1px solid #DCE5F5;border-radius:16px;padding:12px 16px;color:#001136;font-size:14.5px;line-height:1.5;text-align:left!important}
+.kalao-bulle p::before{content:"";position:absolute;left:-8px;top:50%;width:14px;height:14px;background:#EDF2FB;border-left:1px solid #DCE5F5;border-bottom:1px solid #DCE5F5;transform:translateY(-50%) rotate(45deg)}
+.kalao{animation:kalao-arrive .6s cubic-bezier(.2,.9,.3,1.4) both}
+.kalao-bravo{animation:kalao-saute .7s cubic-bezier(.2,.9,.3,1.3) both}
+.kalao .kalao-aile{transform-box:view-box;transform-origin:27px 60px;animation:kalao-salue 1s ease-in-out .5s 2}
+@keyframes kalao-arrive{from{opacity:0;transform:translateY(12px) scale(.85)}to{opacity:1;transform:none}}
+@keyframes kalao-saute{0%{transform:translateY(0)}35%{transform:translateY(-14px) rotate(-6deg)}60%{transform:translateY(0)}80%{transform:translateY(-5px)}100%{transform:none}}
+@keyframes kalao-salue{50%{transform:rotate(-22deg)}}
+
+/* ════════ Objectif du jour + mot de Kalao (accueil) ════════ */
+.objectif-z{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;margin:0 0 22px}
+.objectif{display:flex;gap:14px;align-items:center;background:#fff;border:1px solid #E6EAF2;border-radius:14px;padding:14px 18px}
+.obj-anneau{position:relative;width:64px;height:64px;display:grid;place-items:center;flex:0 0 auto}
+.obj-anneau svg{position:absolute;inset:0}
+.obj-anneau b{font:600 15px var(--sans);color:#001136}
+.objectif small{font:600 12px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:#C24E00}
+.objectif p{margin:4px 0 0;display:flex;flex-direction:column;gap:3px;font-size:14px;color:#4D5163}
+.objectif p span{display:flex;align-items:center;gap:6px}
+.objectif p span.ok{color:#007E11;text-decoration:line-through;text-decoration-color:rgba(0,126,17,.4)}
+.kalao-accueil .kalao-bulle{margin:0}
+@media (max-width:760px){.objectif-z{grid-template-columns:1fr}}
+
+/* ════════ Ma progression ════════ */
+.progression{margin:8px 0 38px}
+.prog-g{display:grid;grid-template-columns:280px 1fr;gap:18px}
+.prog-niv{border:1px solid #DCE5F5;border-radius:14px;padding:20px;text-align:center;background:linear-gradient(170deg,#EDF2FB,#fff 60%)}
+.prog-anneau{position:relative;width:132px;height:132px;margin:0 auto 6px;display:grid;place-items:center}
+.prog-anneau svg{position:absolute;inset:0}
+.prog-anneau b{display:block;font:600 40px/1 var(--sans);color:#1E499B}
+.prog-anneau small{font-size:12px;color:#6B7287}
+.prog-niv h3{margin:4px 0 2px;font:600 20px var(--sans);color:#001136}
+.prog-niv>p{margin:0 0 12px;font-size:13.5px;color:#4D5163}
+.prog-niv>p b{color:#C24E00}
+.bareme{list-style:none;margin:0;padding:0;text-align:left;font-size:13px;color:#4D5163}
+.bareme li{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px dashed #E6EAF2}
+.bareme li span{width:26px;height:26px;border-radius:8px;background:#fff;border:1px solid #E6EAF2;display:grid;place-items:center;color:#1E499B}
+.bareme li b{margin-left:auto;color:#007E11}
+.prog-badges{border:1px solid #E6EAF2;border-radius:14px;padding:18px 20px}
+.prog-t{margin:0 0 12px;font:600 15px var(--sans);color:#001136;display:flex;align-items:center;gap:8px}
+.prog-t .cpt{font:600 12px var(--sans);background:#FFF3CC;color:#9A6F00;border-radius:999px;padding:2px 10px}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:12px}
+.badge-c{text-align:center;padding:10px 6px;border-radius:12px;transition:transform .2s}
+.badge-c svg{display:block;margin:0 auto 6px}
+.badge-c b{display:block;font:600 12.5px/1.25 var(--sans);color:#9AA3B5}
+.badge-c small{display:block;font-size:11px;line-height:1.3;color:#B0B7C6;margin-top:2px}
+.badge-c.acquis{background:#FFFBEF}
+.badge-c.acquis b{color:#001136}
+.badge-c.acquis small{color:#6B7287}
+.badge-c.acquis:hover{transform:translateY(-3px) rotate(-2deg)}
+@media (max-width:760px){.prog-g{grid-template-columns:1fr}}
+
+/* ════════ Quiz vivant ════════ */
+.quiz-barre{height:8px;border-radius:8px;background:#EDF2FB;overflow:hidden;margin:0 0 18px}
+.quiz-barre i{display:block;height:100%;background:linear-gradient(90deg,#1E499B,#0E7C86);transform-origin:left;transform:scaleX(0);transition:transform .4s cubic-bezier(.2,.9,.3,1)}
+.secoue{animation:jeu-secoue .45s ease}
+@keyframes jeu-secoue{20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(2px)}}
+.q button.ok{animation:jeu-ok .4s cubic-bezier(.2,.9,.3,1.4)}
+@keyframes jeu-ok{50%{transform:scale(1.03)}}
+.bilan svg.kalao{display:block;margin:0 auto 4px}
+
+@media (prefers-reduced-motion:reduce){
+  .jeu-toast,.jeu-fete,.jeu-fete-c,.kalao,.kalao .kalao-aile,.secoue,.q button.ok,.badge-c,.quiz-barre i{animation:none!important;transition:none!important}
+}
