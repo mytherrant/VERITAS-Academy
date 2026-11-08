@@ -15,7 +15,7 @@ P = {  # clair, moyen, base, trait
     "vert": ("#E0F5E5", "#86D094", "#007E11", "#004A0A"), "orange": ("#FDEBDD", "#F5B57A", "#C24E00", "#5E2600"),
     "violet": ("#ECE8F8", "#ADA4DE", "#5B4FA8", "#2C2466"), "marine": ("#E4E9F2", "#8C9BC0", "#0C2A6A", "#061638"),
 }
-T = 'stroke="{S}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"'
+T = 'stroke="{S}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"'
 ICONES = {
  "m-francais": ("bleu", '<path d="M3 5.5c2.7-.9 5.6-.6 8.2 1v13c-2.6-1.6-5.5-1.9-8.2-1z" fill="{L}" {T}/><path d="M21 5.5c-2.7-.9-5.6-.6-8.2 1v13c2.6-1.6 5.5-1.9 8.2-1z" fill="{M}" {T}/><path d="M5.6 9.6h3M5.6 12.6h3" {T} stroke="{B}"/><path d="M15.6 7.4v4.6l1.4-1 1.4 1V7" fill="{B}" {T}/>'),
  "m-anglais": ("rose", '<path d="M4 4.5h16a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5h-9.5L6 20v-3.5H4A1.5 1.5 0 0 1 2.5 15V6A1.5 1.5 0 0 1 4 4.5z" fill="{L}" {T}/><path d="M7 9h10M7 12.5h6" {T} stroke="{B}" stroke-width="2"/>'),
@@ -39,6 +39,9 @@ ICONES = {
 
 def rendu(cle, pal, corps):
     L, M, B, S = P[pal]
+    # 08/11/2026 : style « trait » (aspect naturel, sans aplats pastel) — les deux tons d'aplat
+    # disparaissent, le trait et l'accent prennent la teinte de base de la matière.
+    L, M, S = "none", "none", B
     c = corps.replace("{T}", T)
     c = c.replace("{L}", L).replace("{M}", M).replace("{B}", B).replace("{S}", S)
     # attribut répété (trait de base puis surcharge) : sur chaque élément, la DERNIÈRE valeur gagne
@@ -53,8 +56,8 @@ def rendu(cle, pal, corps):
 s = open(F, encoding="utf-8").read()
 profils = s[s.index("<!-- ===== Profils"):s.rindex("</svg>")]
 entete = ('<svg xmlns="http://www.w3.org/2000/svg" style="display:none">\n'
-          '<!-- VÉRITAS — icônes de MATIÈRES, style « pur » (07/11/2026), générées par tools/icones_matieres.py.\n'
-          '     Grille 24, trait unique 1,6 px, deux tons d\'aplat + teinte de base ; palette du menu « Plus » (charte LWS).\n'
+          '<!-- VÉRITAS — icônes de MATIÈRES, style « trait » (08/11/2026), générées par tools/icones_matieres.py.\n'
+          '     Grille 24, trait unique 1,7 px dans la teinte de la matière, sans aplat ; palette du menu « Plus » (charte LWS).\n'
           '     Usage : <svg width="24" height="24"><use href="/assets/veritas-matieres.svg#m-francais"/></svg> -->\n')
 corps = "\n".join(rendu(k, p, c) for k, (p, c) in ICONES.items())
 open(F, "w", encoding="utf-8").write(entete + corps + "\n\n" + profils + "</svg>\n")
