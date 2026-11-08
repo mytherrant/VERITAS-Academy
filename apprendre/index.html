@@ -9,8 +9,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261108b">
-<link rel="stylesheet" href="jeu.css?v=20261108b">
+<link rel="stylesheet" href="apprendre.css?v=20261108c">
+<link rel="stylesheet" href="jeu.css?v=20261108c">
 <style>
 .hero{background:linear-gradient(90deg,#EDF2FB,#F7F9FE 70%);color:#001136;border:1px solid #DCE5F5;border-radius:10px;padding:34px 34px 28px;position:relative;overflow:hidden;margin-bottom:26px}
 .hero::before{display:none}
@@ -118,6 +118,8 @@
     </div>
   </section>
 
+  <div id="offreAccueil"></div>
+
   <section class="profils-z">
     <h2>Faisons connaissance</h2>
     <div class="profils">
@@ -129,11 +131,11 @@
   </section>
 </div></main>
 
-<script src="scenes.js?v=20261108b"></script>
-<script src="progressions.js?v=20261108b"></script>
-<script src="lecons.js?v=20261108b"></script>
-<script src="commun.js?v=20261108b"></script>
-<script src="jeu.js?v=20261108b"></script>
+<script src="scenes.js?v=20261108c"></script>
+<script src="progressions.js?v=20261108c"></script>
+<script src="lecons.js?v=20261108c"></script>
+<script src="commun.js?v=20261108c"></script>
+<script src="jeu.js?v=20261108c"></script>
 <script>
 (function(){
   "use strict";
@@ -157,7 +159,7 @@
     A.rail($("#rail"),classe,null); A.chiffreSerie($("#serie"));
     var lus=A.lire("lus",{}), qz=A.lire("quiz",{}), nl=Object.keys(lus).length, nq=Object.keys(qz).filter(function(k){return qz[k][0]>=Math.ceil(qz[k][1]*.6)}).length, s=A.serie();
     var st=[]; if(s) st.push('<span>'+A.pic("flamme",18)+' <b>'+s+'</b> jour'+(s>1?'s':'')+' de suite</span>'); if(nl) st.push('<span><b>'+nl+'</b> leçon'+(nl>1?'s':'')+' lue'+(nl>1?'s':'')+'</span>'); if(nq) st.push('<span><b>'+nq+'</b> quiz réussi'+(nq>1?'s':'')+'</span>');
-    $("#stats").innerHTML=st.join(""); $("#stats").hidden=!st.length;
+    $("#stats").innerHTML=st.join(""); $("#stats").hidden=!st.length; $("#offreAccueil").innerHTML=A.offre(classe,"","accueil");
 
     /* reprendre + leçon du jour */
     var b=[], der=A.lire("derniere",""), ids=lecs(classe); if(!ids.length) ids=lecs();
@@ -181,7 +183,7 @@
     var pool=[]; lecs(classe).concat(lecs(classe).length?[]:lecs()).forEach(function(k){LE[k].quiz.forEach(function(x){pool.push([k,x])})});
     $("#defi").hidden=!pool.length; var faits=0,bons=0;
     function question(){ if(!pool.length) return; var t=pool[Math.floor(Math.random()*pool.length)],x=t[1],L=LE[t[0]];
-      $("#defiQ").innerHTML='<div class="q" data-bonne="'+x.b+'"><p>'+x.q+'</p>'+x.r.map(function(r){return '<button type="button">'+r+'</button>'}).join("")+'<div class="expl" hidden>'+(x.e||"")+' <a href="lecon.html?id='+t[0]+'">Revoir la leçon « '+esc(L.titre)+' »</a></div></div>';
+      var xm=A.melanger(x); $("#defiQ").innerHTML='<div class="q" data-bonne="'+xm.b+'"><p>'+x.q+'</p>'+xm.r.map(function(r){return '<button type="button">'+r+'</button>'}).join("")+'<div class="expl" hidden>'+(x.e||"")+' <a href="lecon.html?id='+t[0]+'">Revoir la leçon « '+esc(L.titre)+' »</a></div></div>';
       $$("#defiQ button").forEach(function(btn,k){btn.addEventListener("click",function(){var qq=$("#defiQ .q");if(qq.dataset.fait)return;qq.dataset.fait=1;faits++;if(k===x.b){btn.classList.add("ok");bons++;if(VRT.jeu)VRT.jeu.defiReussi()}else{btn.classList.add("ko");$$("#defiQ button")[x.b].classList.add("ok");qq.classList.add("secoue")}$("#defiQ .expl").hidden=false;$("#defiS").textContent=bons+" bonne"+(bons>1?"s":"")+" réponse"+(bons>1?"s":"")+" sur "+faits+(faits>=3?(bons===faits?" · Sans faute !":" · Continue !"):"");if(faits===3&&bons===3)A.noterJour()})});
       $("#defiS").textContent=faits?$("#defiS").textContent:"D'après « "+L.titre+" » ("+A.PAR_ID[L.m].nom+")."; }
     $("#defiN").onclick=question; question();

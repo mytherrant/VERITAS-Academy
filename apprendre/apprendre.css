@@ -151,7 +151,7 @@ figure.illus figcaption{font-size:13px;color:var(--gris);text-align:center;margi
 .prof .partie{position:relative;outline:1px dashed transparent;outline-offset:6px;border-radius:12px}
 .prof .partie:hover{outline-color:var(--m-moy)}
 .prof .barre{display:flex}
-.barre .mod{background:var(--m);color:#fff;border:0;border-radius:999px;padding:6px 12px;font:600 13px var(--sans);cursor:pointer}
+.barre .mod{background:var(--m);color:#fff;border:0;border-radius:999px;padding:6px 12px;font:600 13px var(--sans);cursor:pointer;text-decoration:none;white-space:nowrap}
 .barre .ic{border:0;background:none;width:30px;height:30px;border-radius:8px;cursor:pointer;color:var(--titre);display:grid;place-items:center}
 .barre .ic:hover{background:var(--m-pale)}
 .pub{display:flex;align-items:center;gap:8px;background:#EAF7EF;border-radius:999px;padding:4px 6px 4px 12px;font:600 13px var(--sans);color:#14522E;cursor:pointer}
@@ -560,3 +560,20 @@ h2 .num .pic{vertical-align:middle}
 .jour .med, .blocs .med{ background:none !important; border:0 !important; box-shadow:none !important; width:auto !important; height:auto !important; }
 .jour .med svg, .blocs .med svg{ width:40px !important; height:40px !important; }
 .scene .pl, .sc .pl, span.pl{ background:none !important; }
+.barre a.mod, .barre a.mod:hover{ text-decoration:none !important; }
+
+/* ── Offres (08/11/2026) : cahier de la classe et formules d'abonnement ── */
+.offre{margin:28px 0 8px;padding:20px 0 4px;border-top:1px solid #E6EAF2}
+.offre-t{font:600 13px var(--sans);letter-spacing:1.4px;text-transform:uppercase;color:#C24E00;margin:0 0 12px}
+.offre-l{display:flex;align-items:center;gap:14px;padding:14px 16px;margin:0 0 10px;border-radius:12px;background:#fff;text-decoration:none;color:#001136;box-shadow:0 1px 3px rgba(0,17,54,.07),0 6px 18px rgba(0,17,54,.05);transition:transform .2s ease,box-shadow .2s ease}
+.offre-l:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,17,54,.10)}
+.offre-l>svg{flex:0 0 auto;color:#1E499B}
+.offre-l.or>svg{color:#C24E00}
+.offre-l b{display:block;font:600 16px/1.35 var(--sans);color:#001136}
+.offre-l small{display:block;font:400 14px/1.5 var(--sans);color:#4D5163;margin-top:2px}
+.offre-l .chev{margin-left:auto;font:600 22px var(--sans);color:#1E499B}
+.offre-l.or .chev{color:#C24E00}
+.offre-n{font:400 13.5px var(--sans);color:#6B7280;margin:4px 0 0}
+.offre-accueil,.offre-matiere{max-width:760px}
+.bilan .offre{text-align:left}
+@media print{.offre{display:none!important}}
