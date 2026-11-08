@@ -6157,22 +6157,22 @@ function vShowSec(sec,btn,_boot){
       h+='<div style="text-align:center"><div style="font-family:Libre Baskerville,Georgia,serif;font-size:28px;font-weight:700;color:#FDE68A;line-height:1">'+_nbGratuits+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Gratuites</div></div>';
       h+='</div>';
       // v1.4.2 : bouton PROFIL — l'apprenant déclare section/enseignement/classe
-      h+='<div style="margin-top:14px"><button onclick="mLearnerProfile()" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,201,60,.45);border-radius:24px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif">🎯 '+(_lpEl&&_lpEl.cls?('Mon parcours : '+_esc(_lpEl.cls)+(_lpEl.sys==='en'?' · Anglophone':'')+(_lpEl.ens==='tech'?' · Technique':'')):'Personnaliser mon parcours')+'</button></div>';
+      h+='<div style="margin-top:14px"><button onclick="mLearnerProfile()" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,201,60,.45);border-radius:24px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif;display:inline-flex;align-items:center;gap:7px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><use href="#lc-target"/></svg>'+(_lpEl&&_lpEl.cls?('Mon parcours : '+_esc(_lpEl.cls)+(_lpEl.sys==='en'?' · Anglophone':'')+(_lpEl.ens==='tech'?' · Technique':'')):'Personnaliser mon parcours')+'</button></div>';
       h+='</div></div>';
       
 
       // ── MINESEC RESSOURCES OFFICIELLES ── (v1.3.1 épure : carte CLAIRE — la page
       // empilait 3 panneaux bleu nuit ; on ne garde qu'UN point focal sombre, le hero)
       h+='<div style="background:#fff;border:1px solid rgba(20,37,84,.08);border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 1px 2px rgba(16,30,69,.04),0 8px 24px rgba(16,30,69,.06)">';
-      h+='<div style="font-size:11px;font-weight:800;color:#B8860B;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px">🎓 Ressources officielles MINESEC</div>';
+      h+='<div style="font:600 12px Poppins,sans-serif;color:#C24E00;letter-spacing:1.6px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><use href="#lc-graduation"/></svg>Ressources officielles MINESEC</div>';
       h+='<div style="font-family:Georgia,serif;font-size:13px;color:#6B7A99;margin-bottom:16px">Épreuves officielles, laboratoires virtuels et cours vidéo du Ministère des Enseignements Secondaires du Cameroun</div>';
       h+='<div style="display:flex;gap:10px;flex-wrap:wrap">';
-      h+='<button onclick="showEpreuves()" style="background:#142554;color:#FFC93C;border:none;border-radius:24px;padding:10px 22px;font-size:12px;font-weight:800;cursor:pointer;font-family:Montserrat,sans-serif;box-shadow:0 4px 12px rgba(20,37,84,.22);transition:transform .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'">📝 Épreuves officielles</button>';
-      h+='<button onclick="showLabosVirtuels()" style="background:#EEF2FF;color:#1E3A8A;border:1px solid #C7D2FE;border-radius:24px;padding:10px 22px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif;transition:transform .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'">🔬 Labos virtuels</button>';
-      h+='<a href="https://minesec-distancelearning.cm" target="_blank" rel="noopener" style="background:#F6F8FC;color:#475882;border:1px solid #E4E8F0;border-radius:24px;padding:10px 22px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px">🌐 Cours MINESEC officiels</a>';
+      h+='<button onclick="showEpreuves()" style="background:#1E499B;color:#fff;border:1px solid #1E499B;display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 20px;font:600 14px Poppins,sans-serif;cursor:pointer;text-decoration:none;transition:transform .18s ease,background-color .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><use href="#lc-doc"/></svg>Épreuves officielles</button>';
+      h+='<button onclick="showLabosVirtuels()" style="background:#fff;color:#1E499B;border:1px solid #CFDBF0;display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 20px;font:600 14px Poppins,sans-serif;cursor:pointer;text-decoration:none;transition:transform .18s ease,background-color .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><use href="#lc-flask"/></svg>Labos virtuels</button>';
+      h+='<a href="https://minesec-distancelearning.cm" target="_blank" rel="noopener" style="background:#fff;color:#001136;border:1px solid #E4E7EF;display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 20px;font:600 14px Poppins,sans-serif;cursor:pointer;text-decoration:none;transition:transform .18s ease,background-color .18s ease"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><use href="#lc-globe"/></svg>Cours MINESEC officiels</a>';
       h+='</div></div>';
       // ── CATEGORIES — TUILES PREMIUM v2 (pictos 3D + couleurs vibrantes + anim) ──
-      h+='<div style="font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:#142554;margin-bottom:14px;display:flex;align-items:center;gap:8px">📂 Choisissez une catégorie<span style="font-size:11px;color:#94A3B8;font-weight:500">Cliquez pour explorer</span></div>';
+      h+='<div class="lx-cattitre" style="font:600 20px/1.3 Poppins,sans-serif;color:#001136;margin:6px 0 16px;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px"><span>Choisissez une catégorie</span><span style="font:400 14px Poppins,sans-serif;color:#6B7280">Cliquez pour explorer</span></div>';
       // Animation d'entrée : déclenche la classe .entering pour stagger
       setTimeout(function(){
         var g=document.querySelector('.velearn-grid');
@@ -6201,7 +6201,7 @@ function vShowSec(sec,btn,_boot){
       // v1.4.4 (étude vidéo Sharesub) : cartes à BANDEAU — en-tête navy sobre
       // (icône + nom blancs), corps blanc épuré, CTA pilule bleu vif. Entrée en
       // CASCADE au scroll (classe lx-catcard, délais nth-child en CSS).
-      h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px" class="v-reveal lx-catgrid">';
+      h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr));gap:18px" class="v-reveal lx-catgrid">';
       // Les catégories VIDES menaient à « Aucune ressource » : 7 tuiles sur 18
       // étaient des impasses. Elles passent en fin de grille, marquées
       // « Bientôt », et ne s'ouvrent plus pour le visiteur (l'admin, lui,
@@ -6217,7 +6217,7 @@ function vShowSec(sec,btn,_boot){
         var ouvrable=cnt||iA();
         h+='<div class="lx-catcard'+(cnt?'':' lx-catcard-vide')+'"'+(ouvrable
             ?' role="button" tabindex="0" onkeydown="if(event.key===\'Enter\')this.click()" onclick="window._elCat=\''+_esc(cat.id)+'\';vShowSec(\'elearning\',null)"'
-            :' aria-disabled="true" title="Bientôt disponible" style="opacity:.62;cursor:default"')+'>';
+            :' aria-disabled="true" title="Bientôt disponible" style="cursor:default"')+'>';
         // Bandeau navy
         h+='<div class="lx-catcard-head">';
         h+='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-'+theme.ic+'"/></svg>';
@@ -6228,8 +6228,8 @@ function vShowSec(sec,btn,_boot){
         h+='<div class="lx-catcard-body">';
         h+='<div class="lx-catcard-desc">'+_esc((cat.desc||'').slice(0,64))+'</div>';
         h+='<div class="lx-catcard-foot">'+(cnt
-            ?'<span class="lx-catcard-count">'+cnt+' ressource'+(cnt>1?'s':'')+'</span><span class="lx-catcard-cta">Explorer →</span>'
-            :'<span class="lx-catcard-count">Bientôt disponible</span>'+(iA()?'<span class="lx-catcard-cta">Remplir →</span>':''))+'</div>';
+            ?'<span class="lx-catcard-count">'+cnt+' ressource'+(cnt>1?'s':'')+'</span><span class="lx-catcard-cta">Explorer<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"/></svg></span>'
+            :'<span class="lx-catcard-count">Bientôt disponible</span>'+(iA()?'<span class="lx-catcard-cta">Remplir</span>':''))+'</div>';
         h+='</div>';
         h+='</div>';
       });
@@ -25141,7 +25141,7 @@ function showLabosVirtuels(){
   })();
   // v1.4.2 : + catégories Anglophone (GCE) et Enseignement technique
   var cats=["tous","physique","chimie","svt","maths","english","technique","geo","histoire","info","langues"];
-  var catLabels={"tous":"Tous","physique":"⚡ Physique","chimie":"⚗️ Chimie","svt":"🧬 SVT","maths":"📐 Maths","english":"🇬🇧 English (GCE)","technique":"🔧 Technique","geo":"🗺️ Géo","histoire":"🏛️ Histoire","info":"💻 Info","langues":"✍️ Langues"};
+  var catLabels={"tous":"Tous","physique":"Physique","chimie":"Chimie","svt":"SVT","maths":"Maths","english":"English (GCE)","technique":"Technique","geo":"Géo","histoire":"Histoire","info":"Info","langues":"Langues"};
   // Une base synchronisée peut porter ces listes sous une autre forme :
   // indexOf sur un objet levait une TypeError et vidait la page des labos.
   var _hiddenLV=Array.isArray(DB.hiddenLabos)?DB.hiddenLabos:[];
@@ -25150,74 +25150,67 @@ function showLabosVirtuels(){
   var list=_visibleLabo.filter(function(l){return cat==="tous"||l.cat===cat;});
   var gratuits=list.filter(function(l){return l.gratuit;}).length;
 
-  var h="<div class='vsec'>";
-  h+="<div class='vsec-title vsec-title-hero'>🔬 Laboratoires Virtuels</div>";
-  h+="<div class='vsec-sub'>"+_visibleLabo.length+" expériences interactives basées sur le programme MINESEC — Sans risque, sans matériel</div>";
+  // 08/11/2026 : la page reprend la charte de la vitrine (fond blanc, filet fin,
+  // icônes SVG de couleur tournante, liens légers) — styles .lvx-* dans theme-lws.css.
+  // Les émoji des fiches (lv.ico) ne sont plus affichés : une icône par matière.
+  var _sv=function(id,cl){return "<svg class='"+(cl||"")+"' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#"+id+"'/></svg>";};
+  var _lvIco={physique:"lc-zap",chimie:"lc-flask",svt:"lc-sprout",maths:"lc-ruler",english:"lc-globe",technique:"lc-tool",geo:"lc-map",histoire:"lc-university",info:"lc-laptop",langues:"lc-pencil"};
+  var h="<div class='vsec lvx'>";
+  h+="<div class='vsec-title vsec-title-hero'>Laboratoires virtuels</div>";
+  h+="<div class='vsec-sub'>"+_visibleLabo.length+" expériences interactives basées sur le programme MINESEC — sans risque, sans matériel</div>";
 
-  // Bandeau stats
-  h+="<div style='display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px'>";
-  [{n:_visibleLabo.length,l:"Expériences",c:"#142554",i:"🔬"},{n:gratuits,l:"Gratuites",c:"#059669",i:"✅"},{n:_visibleLabo.filter(function(l){return !l.gratuit;}).length,l:"Premium",c:"#6C56A6",i:"⭐"}].forEach(function(s){
-    h+="<div style='background:"+s.c+"0f;border:0;border-radius:16px;padding:16px 12px;text-align:center;box-shadow:0 8px 22px -15px rgba(20,37,84,.22)'>";
-    h+="<div style='font-size:22px;margin-bottom:4px'>"+s.i+"</div>";
-    h+="<div style='font-family:Montserrat,sans-serif;font-size:24px;font-weight:900;color:"+s.c+";line-height:1'>"+s.n+"</div>";
-    h+="<div style='font-size:11px;color:#6B7A99;margin-top:3px;font-weight:600'>"+s.l+"</div>";
-    h+="</div>";
+  // Chiffres
+  h+="<div class='lvx-stats'>";
+  [{n:_visibleLabo.length,l:"Expériences",i:"lc-flask",c:"c1"},{n:gratuits,l:"Gratuites",i:"lc-checkcircle",c:"c3"},{n:_visibleLabo.filter(function(l){return !l.gratuit;}).length,l:"Premium",i:"lc-star",c:"c4"}].forEach(function(s){
+    h+="<div class='lvx-stat "+s.c+"'>"+_sv(s.i)+"<b>"+s.n+"</b><span>"+s.l+"</span></div>";
   });
   h+="</div>";
 
-  // Filtres catégories
-  h+="<div class='fl2 g6 mb16' style='flex-wrap:wrap'>";
+  // Filtres
+  h+="<div class='lvx-filtres' role='group' aria-label='Filtrer par matière'>";
   cats.forEach(function(c){
-    h+="<button onclick=\"window._laboCat='"+c+"';showLabosVirtuels()\" style='padding:7px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:.2s;background:"+(cat===c?"#142554":"#F0F4FF")+";color:"+(cat===c?"#fff":"#142554")+"'>"+(catLabels[c]||c)+"</button>";
+    h+="<button type='button' class='lvx-f"+(cat===c?" on":"")+"' aria-pressed='"+(cat===c)+"' onclick=\"window._laboCat='"+c+"';showLabosVirtuels()\">"+(catLabels[c]||c)+"</button>";
   });
   h+="</div>";
 
-  // Grille de labos
-  // v2.0 FIX débordement mobile : minmax(min(270px,100%),1fr) → la colonne se réduit
-  // à 100% sous 270px au lieu de forcer 270px (qui poussait la carte + son badge
-  // « GRATUIT » hors écran et créait un défilement horizontal). + overflow-x clos.
-  h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(min(270px,100%),1fr));gap:16px;margin-bottom:28px;max-width:100%'>";
-  list.forEach(function(lv){
+  // Grille des labos
+  h+="<div class='lvx-grid'>";
+  list.forEach(function(lv,k){
     var locked=!lv.gratuit&&!SES;
-    h+="<div onclick='lancerLabo(\""+lv.id+"\")' style='background:#fff;border-radius:18px;border:0;--vcol:"+lv.color+";overflow:hidden;cursor:pointer;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;box-shadow:0 10px 26px -16px rgba(20,37,84,.16)' onmouseover=\"this.style.transform='translateY(-5px)';this.style.boxShadow='0 20px 40px -18px "+lv.color+"55'\" onmouseout=\"this.style.transform='';this.style.boxShadow='0 10px 26px -16px rgba(20,37,84,.16)'\">";
-    h+="<div style='background:linear-gradient(135deg,"+lv.color+"1f,"+lv.color+"08);padding:18px 18px 16px;position:relative'>";
-    h+="<div style='position:absolute;top:10px;right:10px;background:"+(lv.gratuit?"#059669":"#6C56A6")+";color:#fff;font-size:9px;font-weight:800;padding:3px 9px;border-radius:10px'>"+(lv.gratuit?"GRATUIT":lv.plan||"PREMIUM")+"</div>";
-    h+="<div style='width:52px;height:52px;border-radius:14px;background:"+lv.color+"26;display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:10px'>"+lv.ico+"</div>";
-    h+="<div style='font-family:var(--ds-font-display,Montserrat),sans-serif;font-size:14px;font-weight:800;color:#142554'>"+lv.titre+"</div>";
-    h+="<div style='font-size:11px;color:#6B7A99;margin-top:3px;font-weight:600'>"+lv.matiere+" · "+lv.classe+"</div>";
+    h+="<div class='lvx-card c"+(k%5+1)+"' role='button' tabindex='0' onkeydown=\"if(event.key==='Enter')this.click()\" onclick='lancerLabo(\""+lv.id+"\")'>";
+    h+="<span class='lvx-badge"+(lv.gratuit?"":" prem")+"'>"+(lv.gratuit?"Gratuit":_esc(lv.plan||"Premium"))+"</span>";
+    h+=_sv(_lvIco[lv.cat]||"lc-flask","lvx-ico");
+    h+="<div class='lvx-titre'>"+_esc(lv.titre)+"</div>";
+    h+="<div class='lvx-mat'>"+_esc(lv.matiere)+" · "+_esc(lv.classe)+"</div>";
+    h+="<div class='lvx-desc'>"+_esc(lv.desc)+"</div>";
+    h+="<div class='lvx-foot'><span class='lvx-meta'>"+lv.experience.length+" étapes · "+lv.quiz.length+" quiz</span>";
+    h+="<span class='lvx-go"+(locked?" prem":"")+"'>"+(locked?_sv("lc-lock")+"Premium":"Lancer"+_sv("lc-arrow-right"))+"</span></div>";
     h+="</div>";
-    h+="<div style='padding:14px'>";
-    h+="<div style='font-size:12px;color:#6B7A99;line-height:1.6;margin-bottom:10px'>"+lv.desc+"</div>";
-    h+="<div class='fl2 fic fsb'>";
-    h+="<div style='font-size:11px;color:#9CA3AF'>"+lv.experience.length+" étapes · "+lv.quiz.length+" quiz</div>";
-    h+="<button style='background:"+lv.color+";color:#fff;border:none;border-radius:10px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer'>"+(locked?"🔒 Premium":"▶ Lancer")+"</button>";
-    h+="</div></div></div>";
   });
   h+="</div>";
 
-  // Section Packs d'abonnement
-  h+="<div style='background:linear-gradient(135deg,#0F172A,#1E3A8A);border-radius:20px;padding:28px;margin-bottom:20px'>";
-  h+="<div style='font-size:11px;font-weight:800;color:#FFC93C;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px'>⭐ Abonnements Labos</div>";
-  h+="<div style='font-family:Georgia,serif;font-size:15px;color:rgba(255,255,255,.8);margin-bottom:20px'>Accède à tous les labos, quiz et fiches de révision</div>";
-  h+="<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:14px'>";
+  // Abonnements
+  h+="<div class='lvx-packs'>";
+  h+="<div class='lvx-kick'>"+_sv("lc-star")+"Abonnements labos</div>";
+  h+="<div class='lvx-packs-sub'>Accède à tous les labos, quiz et fiches de révision</div>";
+  h+="<div class='lvx-packs-grid'>";
   LABO_PACKS.forEach(function(pk){
-    h+="<div style='background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,."+(pk.populaire?"3":"15")+");border-radius:16px;padding:18px;position:relative'>";
-    if(pk.populaire) h+="<div style='position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#FFC93C;color:#0F172A;font-size:9px;font-weight:800;padding:3px 12px;border-radius:10px;white-space:nowrap'>⭐ PLUS POPULAIRE</div>";
-    h+="<div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#fff;margin-bottom:6px'>"+pk.nom+"</div>";
-    h+="<div style='font-family:Georgia,serif;font-size:20px;font-weight:700;color:#FFC93C;margin-bottom:12px'>"+(pk.prix===0?"Gratuit":pk.badge)+"</div>";
-    h+=pk.avantages.map(function(a){return "<div style='font-size:12px;color:rgba(255,255,255,.7);margin-bottom:5px;display:flex;align-items:center;gap:6px'><span style='color:#FFC93C'>✓</span>"+a+"</div>";}).join("");
-    h+="<button onclick=\"vShowSec('contact',null)\" style='width:100%;margin-top:12px;background:"+(pk.populaire?"#FFC93C":"rgba(255,255,255,.15)")+";color:"+(pk.populaire?"#0F172A":"#fff")+";border:none;border-radius:12px;padding:10px;font-size:12px;font-weight:700;cursor:pointer'>"+(pk.prix===0?"Commencer gratuitement":"S'abonner")+"</button>";
+    h+="<div class='lvx-pack"+(pk.populaire?" pop":"")+"'>";
+    if(pk.populaire) h+="<span class='lvx-pop'>Plus populaire</span>";
+    h+="<div class='lvx-pack-nom'>"+_esc(pk.nom)+"</div>";
+    h+="<div class='lvx-pack-prix'>"+(pk.prix===0?"Gratuit":_esc(pk.badge))+"</div>";
+    h+=pk.avantages.map(function(a){return "<div class='lvx-av'>"+_sv("lc-check")+"<span>"+_esc(a)+"</span></div>";}).join("");
+    h+="<button type='button' class='lvx-pack-btn' onclick=\"vShowSec('contact',null)\">"+(pk.prix===0?"Commencer gratuitement":"S'abonner")+"</button>";
     h+="</div>";
   });
   h+="</div></div>";
 
   // Lien MINESEC
-  h+="<div class='vcard' style='background:linear-gradient(135deg,#EFF6FF,#EDE9FE);border:1px solid #C7D2FE'>";
-  h+="<div class='fl2 fic g12'><span style='font-size:32px'>🌐</span><div>";
-  h+="<div style='font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;color:#142554;margin-bottom:4px'>Cours vidéo officiels MINESEC</div>";
-  h+="<div style='font-size:12px;color:#6B7A99;margin-bottom:10px'>La plateforme officielle propose des vidéos pour toutes les matières de la 6ème à la Terminale.</div>";
-  h+="<a href='https://minesec-distancelearning.cm' target='_blank' rel='noopener' style='background:#142554;color:#fff;border-radius:12px;padding:9px 18px;font-size:12px;font-weight:700;text-decoration:none;display:inline-block'>🎬 Accéder aux cours officiels</a>";
-  h+="</div></div></div>";
+  h+="<div class='lvx-minesec'>"+_sv("lc-globe","lvx-ico")+"<div>";
+  h+="<div class='lvx-titre'>Cours vidéo officiels MINESEC</div>";
+  h+="<div class='lvx-desc'>La plateforme officielle propose des vidéos pour toutes les matières de la 6ème à la Terminale.</div>";
+  h+="<a class='lvx-lien' href='https://minesec-distancelearning.cm' target='_blank' rel='noopener'>Accéder aux cours"+_sv("lc-arrow-right")+"</a>";
+  h+="</div></div>";
   h+="</div>";
   _vc(h);
 }
