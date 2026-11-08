@@ -2267,6 +2267,18 @@ for (const bal of ['ul', 'ol', 'li']) {
     rebranches++;
   }
 
+  /* ── « LANCER UN QUIZ », CINQUIÈME ENDROIT (08/11/2026) ────────────────
+     La section « Apprendre en jouant » promet quiz, séries et badges ; son
+     bouton sortait de la maquette avec `{{ goElearning }}` et menait au
+     catalogue d'abonnements. Les quiz, séries et badges vivent dans
+     /apprendre/ : on le rebranche sur `goApprendre`. */
+  const lancerQuiz = /<button type="button" onclick="VRT\.act\('goElearning',this,event\)"([^>]*)>Lancer un quiz</;
+  if (lancerQuiz.test(corps)) {
+    corps = corps.replace(lancerQuiz,
+      '<button type="button" onclick="VRT.act(\'goApprendre\',this,event)"$1>Lancer un quiz<');
+    rebranches++;
+  }
+
   /* ── LE MENU DU TÉLÉPHONE, QUATRIÈME ENDROIT ───────────────────────────
      Sous 1 000 px, la barre disparaît au profit du menu burger. Ses trois
      entrées de public sortent du gabarit avec `mm__aller`, qui lit
