@@ -9,8 +9,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261108a">
-<link rel="stylesheet" href="jeu.css?v=20261108a">
+<link rel="stylesheet" href="apprendre.css?v=20261108c">
+<link rel="stylesheet" href="jeu.css?v=20261108c">
 </head>
 <body class="eleve">
 <header class="top">
@@ -37,11 +37,11 @@
   </div>
 </dialog>
 
-<script src="scenes.js?v=20261108a"></script>
-<script src="progressions.js?v=20261108a"></script>
-<script src="lecons.js?v=20261108a"></script>
-<script src="commun.js?v=20261108a"></script>
-<script src="jeu.js?v=20261108a"></script>
+<script src="scenes.js?v=20261108c"></script>
+<script src="progressions.js?v=20261108c"></script>
+<script src="lecons.js?v=20261108c"></script>
+<script src="commun.js?v=20261108c"></script>
+<script src="jeu.js?v=20261108c"></script>
 <script>
 (function(){
   "use strict";
@@ -84,13 +84,13 @@
      '<div id="kalaoCours"></div>'+
      (L.intro?'<p class="info">'+L.intro+'</p>':'')+
      (L.objectifs?'<div class="objectifs"><b>À la fin de la leçon, tu sauras :</b><ul>'+L.objectifs.map(function(o){return '<li>'+o+'</li>'}).join("")+'</ul></div>':'')+
-     parties+scenesHtml+appel+nav+'</article></section>'+
+     parties+scenesHtml+appel+A.offre(L.c,L.m,'lecon')+nav+'</article></section>'+
    '<section class="grille" data-panneau="revision" hidden><aside class="sommaire"><p>L\'essentiel</p></aside><article class="carte">'+
      '<div class="partie"><h2><span class="num">'+A.pic("coche",20)+'</span><span class="txt">Ce que tu dois retenir</span></h2><ul>'+L.revision.map(function(r){return '<li>'+r+'</li>'}).join("")+'</ul></div>'+
      (L.exo?'<div class="partie"><h2><span class="num">'+A.pic("crayon",18)+'</span><span class="txt">À toi de jouer</span></h2>'+L.exo+'</div>':'')+
      scenesHtml+'</article></section>'+
    '<section class="grille" data-panneau="quiz" hidden><aside class="sommaire"><p>'+L.quiz.length+' questions</p><p id="score" class="lu"></p></aside><article class="carte" id="quiz"><div class="quiz-barre" id="quizBarre" aria-hidden="true"><i></i></div>'+
-     L.quiz.map(function(q,k){return '<div class="q" data-bonne="'+q.b+'"><p>'+(k+1)+'. '+q.q+'</p>'+q.r.map(function(r){return '<button type="button">'+r+'</button>'}).join("")+'<div class="expl" hidden>'+(q.e||"")+'</div></div>'}).join("")+
+     L.quiz.map(function(q0,k){var q=A.melanger(q0);q.q=q0.q;q.e=q0.e;return '<div class="q" data-bonne="'+q.b+'"><p>'+(k+1)+'. '+q.q+'</p>'+q.r.map(function(r){return '<button type="button">'+r+'</button>'}).join("")+'<div class="expl" hidden>'+(q.e||"")+'</div></div>'}).join("")+
      '<div class="bilan" id="bilan" hidden></div></article></section>';
 
   A.noterJour(); A.chiffreSerie($("#serie"));
@@ -143,19 +143,19 @@
     var bq=$("#quizBarre i"); if(bq) bq.style.transform="scaleX("+(faits/n)+")";
     if(faits===n){ A.noterQuiz(id,bons,n); var et=bons===n?3:bons>=Math.ceil(n*.6)?2:bons>0?1:0;
       var hum=bons===n?"bravo":"salut", msg=bons===n?'Parfait ! Tu maîtrises cette leçon.':bons>=n/2?'Bien joué. Relis la partie qui t\'a piégé.':'Relis le cours, puis retente ta chance : tu vas y arriver.';
-      var bl=$("#bilan"); bl.hidden=false; bl.innerHTML=(J?J.mascotte(hum,96):'')+A.etoiles(et)+'<b>'+bons+' / '+n+'</b>'+msg+'<p style="margin:12px 0 0"><button type="button" class="btn-l" onclick="location.hash=\'quiz\';location.reload()">Recommencer</button> '+(suiv?'<a class="btn-l" href="lecon.html?id='+suiv+'">Leçon suivante ›</a>':'')+'</p>'; bl.scrollIntoView({behavior:"smooth",block:"center"});
+      var bl=$("#bilan"); bl.hidden=false; bl.innerHTML=(J?J.mascotte(hum,96):'')+A.etoiles(et)+'<b>'+bons+' / '+n+'</b>'+msg+'<p style="margin:12px 0 0"><button type="button" class="btn-l" onclick="location.hash=\'quiz\';location.reload()">Recommencer</button> '+(suiv?'<a class="btn-l" href="lecon.html?id='+suiv+'">Leçon suivante ›</a>':'')+'</p>'+A.offre(L.c,L.m,'quiz'); bl.scrollIntoView({behavior:"smooth",block:"center"});
       if(J) J.quizFini(id,bons,n); }
   })})});
 
-  /* vue enseignant : barre d'outils + publier (démonstration, local) */
-  var ICO={copie:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/>',lien:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',pdf:'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'};
+  /* vue enseignant (08/11/2026) : la barre ne « publie » plus rien en local — ce masquage ne
+     changeait l'écran d'aucun élève. « Ajouter à mon manuel » envoie la partie dans le manuel de
+     classe (enregistré sur le serveur) ; les élèves la lisent avec le lien élèves du manuel. */
+  var ICO={lien:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',pdf:'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'};
   function ic(k,t,a){return '<button type="button" class="ic" title="'+t+'" data-a="'+a+'"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICO[k]+'</svg><span class="vsr">'+t+'</span></button>'}
-  var masques=A.lire("masques_"+id,[]);
-  $$('[data-panneau=cours] .partie').forEach(function(p){
+  $$('[data-panneau=cours] .partie').forEach(function(p,k){
     var d=document.createElement("div"); d.className="barre";
-    d.innerHTML='<button type="button" class="mod" title="Bientôt : éditer cette partie">Modifier</button>'+ic("copie","Dupliquer","copie")+ic("lien","Copier le lien","lien")+ic("pdf","Imprimer","pdf")+'<label class="pub">Publier à mes élèves <input type="checkbox"'+(masques.indexOf(p.id)<0?' checked':'')+'></label>';
-    p.insertBefore(d,p.firstChild); if(masques.indexOf(p.id)>=0) p.classList.add("masque");
-    $("input",d).addEventListener("change",function(){ p.classList.toggle("masque",!this.checked); masques=masques.filter(function(x){return x!==p.id}); if(!this.checked) masques.push(p.id); A.ecrire("masques_"+id,masques) });
+    d.innerHTML='<a class="mod" href="manuel.html?ajouter='+encodeURIComponent(id+"~"+k)+'" title="Envoyer cette partie dans le manuel de votre classe">Ajouter à mon manuel</a>'+ic("lien","Copier le lien","lien")+ic("pdf","Imprimer","pdf");
+    p.insertBefore(d,p.firstChild);
     $('[data-a=lien]',d).addEventListener("click",function(){ var u=location.href.split("#")[0]+"#"+p.id; try{navigator.clipboard.writeText(u)}catch(e){} this.title="Lien copié"; });
     $('[data-a=pdf]',d).addEventListener("click",function(){print()});
   });
@@ -166,7 +166,7 @@
 
   /* accueil en étapes */
   var ET=[{t:"Choisissez la leçon",s:"Classe, matière, chapitre",i:"p-eleve",l:["Le rail de gauche range les matières de la classe","Chaque leçon suit la progression harmonisée du MINESEC"]},
-    {t:"Adaptez-la",s:"Chaque partie a sa barre d'outils",i:"p-enseignant",l:["« Publier à mes élèves » masque ou montre une partie","« Copier le lien » pointe vers la partie exacte"]},
+    {t:"Adaptez-la",s:"Chaque partie a sa barre d'outils",i:"p-enseignant",l:["« Ajouter à mon manuel » range la partie dans le manuel de votre classe","Vos élèves la lisent avec le lien élèves du manuel"]},
     {t:"Faites pratiquer",s:"Révision, quiz, scène vivante",i:"m-francais",l:["La fiche de révision tient en une page","Le quiz corrige et explique chaque réponse"]},
     {t:"Imprimez si besoin",s:"PDF propre, sans menus",i:"p-parent",l:["Le bouton PDF imprime le cours seul","Pratique pour une salle sans connexion"]}],cur=0,dlg=$("#visite");
   $(".etapes").innerHTML=ET.map(function(e,k){return '<li data-i="'+k+'"><span class="n">'+(k+1)+'</span><div><b>Étape '+(k+1)+'</b><span>'+e.s+'</span></div></li>'}).join("");

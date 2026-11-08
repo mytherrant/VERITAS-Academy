@@ -3,7 +3,7 @@
    rien n'est envoyé. Toute lecture/écriture est protégée (navigation privée, stockage bloqué). */
 (function (W) {
   "use strict";
-  var ICO = "../assets/veritas-matieres.svg?v=20261107i"; /* versionné : un ancien sprite en cache n'a pas les nouvelles icônes */
+  var ICO = "../assets/veritas-matieres.svg?v=20261108c"; /* versionné : un ancien sprite en cache n'a pas les nouvelles icônes */
 
   // id, nom affiché, icône, teinte (m, pale, moyen, foncé), noms MINESEC, préfixes de scènes vivantes
   var MATIERES = [
@@ -198,8 +198,50 @@
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", filigraneImpression); else filigraneImpression();
   }
 
+  /* ── Offres (08/11/2026) : Apprendre ne menait à AUCUN abonnement ni cahier. Les libellés
+     reprennent ceux de l'écran « Abonnements » de la vitrine (/#tarifs) : ne rien y promettre
+     qu'il ne promet pas. Prix des cahiers : ceux des pages livrets/. ── */
+  function examen(c) { return /^(3e|1re|Tle)/.test(c || ""); }
+  function cahierPour(c, m) {
+    c = c || ""; var col = { "6e": "6e", "5e": "5e", "4e": "4e", "3e": "3e" }[c];
+    if (m === "francais") {
+      if (col) return { h: "/livrets/" + col + ".html", t: "Mon cahier de français " + c, d: "Le cahier interactif de l'année, leçon par leçon : 1 500 F l'année." };
+      var st = /C|D/.test(c.split(" ")[1] || "");
+      var niv = /^2nde/.test(c) ? "2nde" : /^1re/.test(c) ? "1ere" : /^Tle/.test(c) ? "tle" : "";
+      if (niv) return { h: "/livrets/" + (st ? "est-" : "") + niv + ".html", t: "Mon cahier de français " + c, d: "Le cahier interactif de l'année, leçon par leçon : 1 500 F l'année." };
+    }
+    if (m === "philo") {
+      if (/^Tle/.test(c)) return { h: "/livrets/cahier-philo-tle.html", t: "Mon livret de philosophie, Terminale", d: "Cours, textes et sujets de dissertation de l'année : 1 500 F l'année." };
+      if (/^1re/.test(c)) return { h: "/livrets/cahier-philo-1ere.html", t: "Mon livret de philosophie, Première", d: "Cours, textes et sujets de l'année : 1 500 F l'année." };
+    }
+    return null;
+  }
+  var PICTO_LIVRE = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>';
+  var PICTO_CLE = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l3 6.5 7 .8-5.2 4.7 1.5 6.9L12 17.4 5.7 20.9l1.5-6.9L2 9.3l7-.8z"/></svg>';
+  function lienOffre(h, t, d, picto, cl) {
+    return '<a class="offre-l' + (cl ? " " + cl : "") + '" href="' + h + '">' + picto + '<span><b>' + esc(t) + '</b><small>' + esc(d) + '</small></span><span class="chev" aria-hidden="true">›</span></a>';
+  }
+  /* ctx : "lecon" (fin du cours), "quiz" (sous le bilan), "matiere", "accueil" */
+  function offre(c, m, ctx) {
+    var cah = cahierPour(c, m), ex = examen(c);
+    var abo = ex
+      ? lienOffre("/#tarifs", "Formule Pro : l'année d'examen", "2 000 F par mois : tous les cours de la classe, épreuves et annales corrigées, labos virtuels, bulletins blancs, 30 questions par jour au tuteur.", PICTO_CLE, "or")
+      : lienOffre("/#tarifs", "Formule Starter : dès 1 000 F par mois", "Tous les cours de la classe, les œuvres au programme, épreuves et annales corrigées, 5 questions par jour au tuteur.", PICTO_CLE, "or");
+    var titre = { lecon: "Pour aller plus loin", quiz: "Continue sur ta lancée", matiere: "En attendant les prochaines leçons", accueil: "Aller plus loin avec VÉRITAS" }[ctx] || "Pour aller plus loin";
+    return '<aside class="offre offre-' + ctx + '" aria-label="' + titre + '"><p class="offre-t">' + titre + '</p>' +
+      (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE) : "") + abo +
+      '<p class="offre-n">Payée d\'un coup, l\'année revient à dix mois : deux mois offerts.</p></aside>';
+  }
+  /* Les bonnes réponses étaient rangées en 1ʳᵉ ou 2ᵉ position (3ᵉ : 5 fois sur 177) :
+     on mélange l'ordre à l'affichage, l'indice de la bonne réponse suit. */
+  function melanger(q) {
+    var ordre = q.r.map(function (_, k) { return k; });
+    for (var i = ordre.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = ordre[i]; ordre[i] = ordre[j]; ordre[j] = t; }
+    return { r: ordre.map(function (k) { return q.r[k]; }), b: ordre.indexOf(q.b) };
+  }
+
   W.VRT = W.VRT || {};
   W.VRT.app = { MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
     marquerLu: marquerLu, noterQuiz: noterQuiz, teinter: teinter, ico: ico, icoM: icoM, pic: pic, etoiles: etoiles, esc: esc, slug: slug, rail: rail, chiffreSerie: chiffreSerie, scenesPour: scenesPour, jour: jour,
-    exporterImage: exporterImage, boutonsImage: boutonsImage, filigraneCanvas: filigraneCanvas };
+    exporterImage: exporterImage, offre: offre, cahierPour: cahierPour, melanger: melanger, boutonsImage: boutonsImage, filigraneCanvas: filigraneCanvas };
 })(window);

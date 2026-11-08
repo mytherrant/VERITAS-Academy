@@ -9,8 +9,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261108a">
-<link rel="stylesheet" href="jeu.css?v=20261108a">
+<link rel="stylesheet" href="apprendre.css?v=20261108c">
+<link rel="stylesheet" href="jeu.css?v=20261108c">
 <style>
 /* ── Manuel collaboratif : colonne de navigation + document ── */
 .mn{display:grid;grid-template-columns:290px minmax(0,1fr);min-height:calc(100vh - 60px)}
@@ -82,6 +82,7 @@
 .pas3 .n{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#EDF2FB;color:#1E499B;font-weight:600}
 dialog .dlg{padding:22px;max-width:640px}
 dialog .dlg h3{margin:0 0 10px;font:600 19px var(--sans);color:#001136}
+.aj-info{margin:0 0 16px;padding:12px 16px;border-radius:12px;background:#EEF3FB;color:#001136;font:14px/1.5 var(--sans)}.aj-info.err{background:#FDEBDD;color:#5E2600}
 .lien{display:flex;gap:6px;margin:6px 0 14px}.lien input{flex:1;border:1px solid #E6EAF2;border-radius:10px;padding:8px 10px;font:13px var(--sans)}
 .choix-l{max-height:340px;overflow:auto;border:1px solid #E6EAF2;border-radius:10px}
 .choix-l label{display:flex;gap:10px;padding:10px 12px;border-top:1px solid #E6EAF2;cursor:pointer;font-size:14px}
@@ -105,11 +106,11 @@ dialog .dlg h3{margin:0 0 10px;font:600 19px var(--sans);color:#001136}
 
 <dialog id="dlg"><button type="button" class="fermer" aria-label="Fermer" onclick="this.closest('dialog').close()">×</button><div class="dlg" id="dlgC"></div></dialog>
 
-<script src="scenes.js?v=20261108a"></script>
-<script src="progressions.js?v=20261108a"></script>
-<script src="lecons.js?v=20261108a"></script>
-<script src="commun.js?v=20261108a"></script>
-<script src="jeu.js?v=20261108a"></script>
+<script src="scenes.js?v=20261108c"></script>
+<script src="progressions.js?v=20261108c"></script>
+<script src="lecons.js?v=20261108c"></script>
+<script src="commun.js?v=20261108c"></script>
+<script src="jeu.js?v=20261108c"></script>
 <script>
 (function(){
   "use strict";
@@ -146,21 +147,27 @@ dialog .dlg h3{margin:0 0 10px;font:600 19px var(--sans);color:#001136}
     var m=mes(), ids=Object.keys(m);
     var opts=A.MATIERES.map(function(x){return '<option value="'+x.id+'">'+esc(x.nom)+'</option>'}).join("");
     app.innerHTML='<div class="mes"><p class="ariane"><a href="index.html">Apprendre</a><span>›</span>Manuels collaboratifs</p>'+
+      (AJ?'<p class="aj-info"><b>Ajouter « '+esc(AJ.titre)+' »</b> ('+esc(AJ.L.titre)+') — '+(ids.length?'choisissez le manuel qui la recevra, ou créez-en un.':'créez d\'abord le manuel de votre classe : la partie y sera rangée aussitôt.')+'</p>':'')+
       '<h1>Le manuel de votre classe, à plusieurs mains</h1><p style="color:var(--gris);max-width:640px">Partez des leçons VÉRITAS, ajoutez vos propres blocs, invitez vos collègues à éditer avec vous, puis publiez à vos élèves ce que vous voulez qu\'ils voient.</p>'+
       '<div class="pas3"><div><span class="n">1</span><b>Composez</b>Chapitres, documents, leçons VÉRITAS importées et blocs à vous.</div><div><span class="n">2</span><b>Éditez ensemble</b>Un lien d\'édition pour vos collègues ; chaque enregistrement est daté et protégé des écrasements.</div><div><span class="n">3</span><b>Publiez</b>Un interrupteur par document et par bloc ; les élèves ne voient que ce qui est publié.</div></div>'+
-      (ids.length?'<h2 style="font:600 20px var(--sans);color:#001136">Mes manuels</h2><div class="mes-l">'+ids.map(function(id){var x=m[id];return '<a href="manuel.html?id='+id+'"><b>'+esc(x.titre||"Manuel")+'</b><small>'+esc(x.classe||"")+' · '+esc((A.PAR_ID[x.matiere]||{}).nom||"")+'</small></a>'}).join("")+'</div>':'')+
+      (ids.length?'<h2 style="font:600 20px var(--sans);color:#001136">Mes manuels</h2><div class="mes-l">'+ids.map(function(id){var x=m[id];return '<a href="manuel.html?id='+id+(AJ?AJ.q:'')+'"><b>'+esc(x.titre||"Manuel")+'</b><small>'+esc(x.classe||"")+' · '+esc((A.PAR_ID[x.matiere]||{}).nom||"")+'</small></a>'}).join("")+'</div>':'')+
       '<h2 style="font:600 20px var(--sans);color:#001136">Créer un manuel</h2><form class="form" id="fCreer"><label>Titre<input name="titre" required maxlength="120" placeholder="Ex. : Histoire 3ᵉ — Lycée de Mokolo"></label><label>Classe<select name="classe">'+A.CLASSES.map(function(c){return '<option>'+c+'</option>'}).join("")+'</select></label><label>Matière<select name="matiere">'+opts+'</select></label><button class="btn-or" type="submit">Créer</button></form><p id="fMsg" class="lu"></p></div>';
+    if(AJ){ var fc=$("#fCreer"); if(fc.classe) fc.classe.value=AJ.L.c; if(fc.matiere) fc.matiere.value=AJ.L.m; } /* la leçon donne classe et matière */
     $("#fCreer").addEventListener("submit",async function(e){
       e.preventDefault(); var f=new FormData(this), msg=$("#fMsg"); msg.textContent="Création…";
       try{ var r=await api("POST",{action:"creer"},{titre:f.get("titre"),classe:f.get("classe"),matiere:f.get("matiere")});
         if(r.statut!==201){ msg.textContent=r.j.erreur||"Création impossible."; return; }
-        garder(r.j.id,{cle:r.j.cle,titre:r.j.titre,classe:r.j.classe,matiere:r.j.matiere}); location.href="manuel.html?id="+r.j.id;
+        garder(r.j.id,{cle:r.j.cle,titre:r.j.titre,classe:r.j.classe,matiere:r.j.matiere}); location.href="manuel.html?id="+r.j.id+(AJ?AJ.q:"");
       }catch(err){ msg.textContent="Le serveur ne répond pas : les manuels collaboratifs demandent une connexion."; }
     });
   }
 
   /* ════════════ Éditeur / lecteur ════════════ */
   var M=null, cle=null, cour=null, minuterie=null, enCours=false, aRefaire=false;
+  /* ?ajouter=<leçon>~<n° de partie> : envoyé par le bouton « Ajouter à mon manuel » d'une leçon */
+  var AJ=(function(){ var v=new URLSearchParams(location.search).get("ajouter")||"", x=v.match(/^([a-z0-9-]{3,60})~(\d{1,2})$/);
+    if(!x) return null; var L=(window.VRT_LECONS||{})[x[1]], i=+x[2];
+    return (L&&L.parties[i])?{lecon:x[1],i:i,L:L,ref:x[1]+"#"+i,titre:L.parties[i].t,q:"&ajouter="+encodeURIComponent(v)}:null; })();
   async function ouvrir(id){
     var h=location.hash.match(/cle=([a-f0-9]{48})/); if(h){ garder(id,{cle:h[1]}); history.replaceState(null,"",location.pathname+location.search); }
     cle=(mes()[id]||{}).cle||null;
@@ -171,8 +178,26 @@ dialog .dlg h3{margin:0 0 10px;font:600 19px var(--sans);color:#001136}
     $("#vueSel").hidden=!cle; document.body.className=cle?"prof":"eleve";
     var p=A.PAR_ID[M.matiere]; if(p) A.teinter(p);
     var premier=null; M.doc.chapitres.some(function(c){ if(c.docs[0]){premier=c.docs[0].id;return true} });
-    cour=new URLSearchParams(location.search).get("d")||premier; rendre();
+    cour=new URLSearchParams(location.search).get("d")||premier;
+    var msgAj=null;
+    if(AJ){
+      history.replaceState(null,"",location.pathname+"?id="+id);
+      if(!cle){ msgAj=["Ce manuel n'est pas modifiable depuis ce navigateur : ouvrez-le avec votre lien co-enseignant.","err"]; }
+      else{
+        var dAj=null; M.doc.chapitres.forEach(function(c){c.docs.forEach(function(x){ if(!dAj&&x.blocs.some(function(y){return y.type==="partie"&&String(y.ref).indexOf(AJ.lecon+"#")===0})) dAj=x; })}); /* le serveur ne garde que id, titre, pub, blocs : on reconnaît le document de la leçon à ses blocs */
+        if(!dAj){ dAj={id:uid(),titre:AJ.L.titre,pub:false,blocs:[]}; (M.doc.chapitres[M.doc.chapitres.length-1]||M.doc.chapitres[0]).docs.push(dAj); }
+        var deja=dAj.blocs.some(function(x){return x.type==="partie"&&x.ref===AJ.ref});
+        if(!deja){ var pos=dAj.blocs.length; dAj.blocs.some(function(y,k){ var r=String(y.ref||""); if(y.type==="partie"&&r.indexOf(AJ.lecon+"#")===0&&+r.split("#")[1]>AJ.i){pos=k;return true} }); dAj.blocs.splice(pos,0,{id:uid(),type:"partie",ref:AJ.ref,pub:true}); } /* dans l ordre de la leçon */
+        cour=dAj.id;
+        msgAj=deja?["Cette partie est déjà dans ce document.","ok"]
+                  :["Partie ajoutée."+(dAj.pub?" Vos élèves la voient avec le lien élèves.":" Publiez le document pour que vos élèves la voient."),"ok"];
+        if(!deja){ rendre(); sauver(); }
+      }
+    }
+    rendre();
+    if(msgAj) annoncer(msgAj[0],msgAj[1]);
   }
+  function annoncer(t,cl){ var n=document.createElement("p"); n.className="aj-info "+(cl||""); n.setAttribute("role","status"); n.textContent=t; app.insertBefore(n,app.firstChild); setTimeout(function(){ if(n.parentNode) n.remove(); },9000); }
   function trouverDoc(id){ var t=null; M.doc.chapitres.forEach(function(c){c.docs.forEach(function(d){if(d.id===id)t=d})}); return t; }
   function prof(){ return !!cle && document.body.className==="prof"; }
 

@@ -151,7 +151,7 @@ figure.illus figcaption{font-size:13px;color:var(--gris);text-align:center;margi
 .prof .partie{position:relative;outline:1px dashed transparent;outline-offset:6px;border-radius:12px}
 .prof .partie:hover{outline-color:var(--m-moy)}
 .prof .barre{display:flex}
-.barre .mod{background:var(--m);color:#fff;border:0;border-radius:999px;padding:6px 12px;font:600 13px var(--sans);cursor:pointer}
+.barre .mod{background:var(--m);color:#fff;border:0;border-radius:999px;padding:6px 12px;font:600 13px var(--sans);cursor:pointer;text-decoration:none;white-space:nowrap}
 .barre .ic{border:0;background:none;width:30px;height:30px;border-radius:8px;cursor:pointer;color:var(--titre);display:grid;place-items:center}
 .barre .ic:hover{background:var(--m-pale)}
 .pub{display:flex;align-items:center;gap:8px;background:#EAF7EF;border-radius:999px;padding:4px 6px 4px 12px;font:600 13px var(--sans);color:#14522E;cursor:pointer}
@@ -500,3 +500,80 @@ h2 .num .pic{vertical-align:middle}
 .bandeau .medaille svg{width:88px!important;height:88px!important}
 .mat .badge{border:0;background:#fff}
 .mat .etiq,.mtete .etiq,.medaille .etiq{border-color:transparent}
+
+/* ═════════════════════════════════════════════════════════════════════
+   ÉPURE ÉDITORIALE (08/11/2026) — retirer « l'effet IA »
+   Les en-têtes deviennent du texte sur la page blanche, fermés par un
+   filet ; plus de panneaux en dégradé, de disques décoratifs, de tuiles
+   d'icônes ni de mosaïque pastel. Les pastilles redeviennent du texte
+   courant. Les icônes passent au trait (assets/veritas-matieres.svg).
+   Bloc placé en DERNIER et en !important : les pages portent leur propre
+   <style> chargé après cette feuille.
+   ═════════════════════════════════════════════════════════════════════ */
+.hero, .bandeau, .mtete{
+  background:none !important; border:0 !important; border-radius:0 !important;
+  box-shadow:none !important; overflow:visible !important;
+  padding-left:0 !important; padding-right:0 !important;
+}
+.bandeau, .mtete{
+  border-bottom:1px solid #E6EAF2 !important;
+  padding-top:4px !important; padding-bottom:22px !important; margin-bottom:24px !important;
+}
+.hero{ grid-template-columns:1fr !important; padding-top:8px !important; padding-bottom:6px !important; }
+.hero::before, .hero::after, .bandeau::before, .bandeau::after, .mtete::after, .scene::after{ display:none !important; }
+.mosaique{ display:none !important; }
+
+/* l'icône de la matière : posée telle quelle, sans tuile, sans rotation */
+.bandeau .medaille, .mtete .pas{
+  width:auto !important; height:auto !important; flex:0 0 auto !important;
+  background:none !important; border:0 !important; box-shadow:none !important;
+  border-radius:0 !important; transform:none !important; animation:none !important;
+}
+.bandeau .medaille svg, .mtete .pas svg{ width:46px !important; height:46px !important; }
+.bandeau{ grid-template-columns:auto 1fr !important; gap:18px !important; align-items:start !important; }
+.mtete{ gap:18px !important; align-items:flex-start !important; }
+
+/* pastilles → texte courant séparé par des points médians */
+.bandeau .puces, .hero .stats, .mtete .chiffres{ gap:2px 0 !important; }
+.bandeau .puces span, .hero .stats span, .mtete .chiffres span{
+  background:none !important; border:0 !important; border-radius:0 !important;
+  padding:0 !important; box-shadow:none !important;
+  font:500 14px var(--sans, Poppins, sans-serif) !important; color:#4D5163 !important;
+}
+.bandeau .puces span + span::before, .hero .stats span + span::before, .mtete .chiffres span + span::before{
+  content:"·"; margin:0 10px; color:#9AA3B5;
+}
+
+/* cartes de matière : blanches, sans dégradé ni liseré coloré */
+.mat{
+  background:#fff !important; border:0 !important;
+  box-shadow:0 1px 3px rgba(0,17,54,.06), 0 6px 18px rgba(0,17,54,.04) !important;
+}
+.mat:hover{ box-shadow:0 10px 26px rgba(0,17,54,.09) !important; }
+
+/* numéros : un chiffre de couleur, pas une bulle teintée */
+.partie h2 .num, .lg .n{ background:none !important; }
+.lg.r .n{ background:none !important; color:var(--k) !important; border:2px solid var(--k) !important; }
+
+/* derniers dégradés décoratifs */
+.anim, .prog-niv, .chap-t{ background:#fff !important; background-image:none !important; }
+.jour .med, .blocs .med{ background:none !important; border:0 !important; box-shadow:none !important; width:auto !important; height:auto !important; }
+.jour .med svg, .blocs .med svg{ width:40px !important; height:40px !important; }
+.scene .pl, .sc .pl, span.pl{ background:none !important; }
+.barre a.mod, .barre a.mod:hover{ text-decoration:none !important; }
+
+/* ── Offres (08/11/2026) : cahier de la classe et formules d'abonnement ── */
+.offre{margin:28px 0 8px;padding:20px 0 4px;border-top:1px solid #E6EAF2}
+.offre-t{font:600 13px var(--sans);letter-spacing:1.4px;text-transform:uppercase;color:#C24E00;margin:0 0 12px}
+.offre-l{display:flex;align-items:center;gap:14px;padding:14px 16px;margin:0 0 10px;border-radius:12px;background:#fff;text-decoration:none;color:#001136;box-shadow:0 1px 3px rgba(0,17,54,.07),0 6px 18px rgba(0,17,54,.05);transition:transform .2s ease,box-shadow .2s ease}
+.offre-l:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,17,54,.10)}
+.offre-l>svg{flex:0 0 auto;color:#1E499B}
+.offre-l.or>svg{color:#C24E00}
+.offre-l b{display:block;font:600 16px/1.35 var(--sans);color:#001136}
+.offre-l small{display:block;font:400 14px/1.5 var(--sans);color:#4D5163;margin-top:2px}
+.offre-l .chev{margin-left:auto;font:600 22px var(--sans);color:#1E499B}
+.offre-l.or .chev{color:#C24E00}
+.offre-n{font:400 13.5px var(--sans);color:#6B7280;margin:4px 0 0}
+.offre-accueil,.offre-matiere{max-width:760px}
+.bilan .offre{text-align:left}
+@media print{.offre{display:none!important}}
