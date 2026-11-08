@@ -560,6 +560,8 @@
     goParents: function () { location.href = '/plan.html#parent'; },
     goEnseignants: function () { location.href = '/plan.html#enseignant'; },
     goPartenaires: function () { location.href = '/plan.html#partenaire'; },
+    /* « Lancer un quiz » (section Apprendre en jouant) : quiz, séries et badges sont dans /apprendre/. */
+    goApprendre: function () { location.href = '/apprendre/'; },
     goTarifs: function () { aller('tarifs'); },
     goBoutique: function () { aller('boutique'); },
     /* `commanderVedette` a été retiré avec le bloc « livre mis en avant » :
