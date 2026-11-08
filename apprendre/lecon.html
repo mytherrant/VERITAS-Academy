@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leçon | VÉRITAS</title>
+<meta name="description" content="Cours rédigé, fiche de révision et quiz, d'après la progression harmonisée du MINESEC.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="apprendre.css?v=20261108a">
+<link rel="stylesheet" href="jeu.css?v=20261108a">
+</head>
+<body class="eleve">
+<header class="top">
+  <a class="logo" href="/">VÉRI<b>TAS</b></a>
+  <nav class="top-nav" aria-label="Apprendre"><a href="index.html">Apprendre</a><a href="/scenes/">Scènes vivantes</a><a href="/corriges/">Corrigés</a></nav>
+  <div class="top-d">
+    <a class="niveau-chip" data-niveau href="index.html#progression" aria-label="Mon niveau et mes badges"></a>
+    <span class="serie" id="serie" hidden></span>
+    <div class="vue" role="group" aria-label="Choisir la vue">
+      <button type="button" data-vue="prof" aria-pressed="false">Enseignant</button>
+      <button type="button" data-vue="eleve" aria-pressed="true">Élève</button>
+    </div>
+  </div>
+</header>
+<nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
+
+<main class="page" id="page"><div class="lim" id="lecon"><p class="vide">Chargement de la leçon…</p></div></main>
+
+<dialog id="visite" aria-labelledby="visiteT">
+  <button type="button" class="fermer" aria-label="Fermer">×</button>
+  <div class="acc">
+    <div class="acc-g"><h2 id="visiteT">Bienvenue&nbsp;!</h2><p>L'essentiel en quatre étapes.</p><ol class="etapes"></ol></div>
+    <div class="acc-d"><div class="vig"><svg viewBox="0 0 48 48" aria-hidden="true"><use id="visiteIco" href="../assets/veritas-matieres.svg#p-enseignant"/></svg></div><h3 id="visiteH"></h3><ul id="visiteL"></ul><button type="button" class="suiv" id="visiteS">Suivant</button></div>
+  </div>
+</dialog>
+
+<script src="scenes.js?v=20261108a"></script>
+<script src="progressions.js?v=20261108a"></script>
+<script src="lecons.js?v=20261108a"></script>
+<script src="commun.js?v=20261108a"></script>
+<script src="jeu.js?v=20261108a"></script>
+<script>
+(function(){
+  "use strict";
+  var A=VRT.app, $=function(s,c){return (c||document).querySelector(s)}, $$=function(s,c){return [].slice.call((c||document).querySelectorAll(s))}, esc=A.esc;
+  var id=new URLSearchParams(location.search).get("id")||"";
+  var L=(window.VRT_LECONS||{})[id], boite=$("#lecon");
+  if(!L){ boite.innerHTML='<p class="vide">Cette leçon n\'existe pas encore. <a href="index.html">Retour aux cours</a>.</p>'; return; }
+  var M=A.PAR_ID[L.m]||A.MATIERES[0];
+  A.teinter(M); A.rail($("#rail"),L.c,L.m); A.chiffreSerie($("#serie"));
+  document.title=L.titre+" · "+L.c+" · "+M.nom+" | VÉRITAS";
+  var md=document.querySelector('meta[name=description]'); if(md) md.content=(L.intro||"").slice(0,155);
+
+  /* leçons voisines de la même matière et classe */
+  var soeurs=Object.keys(VRT_LECONS).filter(function(k){var x=VRT_LECONS[k];return x.m===L.m&&x.c===L.c}).sort(function(a,b){return VRT_LECONS[a].n-VRT_LECONS[b].n});
+  var i=soeurs.indexOf(id), prec=soeurs[i-1], suiv=soeurs[i+1];
+  var sc=A.scenesPour(L), nomScene=function(s){return (window.VRT_SCENES_TITRES||{})[s]||s.replace(/^(3e|1re|tle)-[a-z\-]+?-/,"").replace(/-/g," ")};
+
+  var parties=L.parties.map(function(p,k){
+    return '<div class="partie" id="p'+(k+1)+'"><h2><span class="num">'+(k+1)+'</span><span class="txt">'+esc(p.t)+'</span></h2>'+p.html+
+      (p.illus?'<figure class="illus">'+p.illus.svg+'<figcaption>'+esc(p.illus.legende||"")+'</figcaption></figure>':'')+
+      (p.anim?'<div class="anim"><div class="anim-t"><span class="anim-p" aria-hidden="true">'+A.pic("lecture",14)+'</span>'+esc(p.animT||"À toi de manipuler")+'</div><div class="anim-c" data-anim="'+k+'"></div></div>':'')+
+      (p.retenir?'<p class="retenir">'+p.retenir+'</p>':'')+'</div>';
+  }).join("");
+  var scenesHtml=sc.map(function(s){return '<a class="scene" href="/scenes/'+s+'.html"><span class="pl">'+A.pic("masques",30)+'</span><span><small>Scène vivante</small><strong>'+esc(nomScene(s))+'</strong></span><span class="jouer">'+A.pic("lecture",30)+'</span></a>'}).join("");
+  var appel=L.examen?'<a class="appel" href="'+esc(L.examen.href)+'">'+A.ico("p-parent",40)+'<div><strong>'+esc(L.examen.t)+'</strong><span>'+esc(L.examen.d||"Des sujets réels, corrigés pas à pas.")+'</span></div><span class="chev" aria-hidden="true">›</span></a>':'';
+  var nav='<nav class="suite" aria-label="Leçons voisines">'+(prec?'<a href="lecon.html?id='+prec+'"><small>‹ Leçon précédente</small>'+esc(VRT_LECONS[prec].titre)+'</a>':'<span></span>')+(suiv?'<a href="lecon.html?id='+suiv+'"><small>Leçon suivante ›</small>'+esc(VRT_LECONS[suiv].titre)+'</a>':'<a href="matiere.html?c='+encodeURIComponent(L.c)+'&m='+L.m+'"><small>Tout le programme ›</small>'+esc(M.nom)+' · '+esc(L.c)+'</a>')+'</nav>';
+
+  boite.innerHTML=
+   '<p class="ariane"><a href="index.html">Apprendre</a><span>›</span><a href="index.html?c='+encodeURIComponent(L.c)+'">'+esc(L.c)+'</a><span>›</span><a href="matiere.html?c='+encodeURIComponent(L.c)+'&m='+L.m+'">'+esc(M.nom)+'</a><span>›</span>'+esc(L.titre)+'</p>'+
+   '<header class="bandeau"><span class="medaille" style="background:'+M.t[1]+'">'+A.icoM(M,62)+'</span><div><div class="sur" id="sur">Cours</div><h1>'+esc(L.titre)+'</h1><div class="meta"><span><b>'+esc(M.nom)+'</b> · '+esc(L.c)+'</span>'+(L.chap?'<span>'+esc(L.chap)+'</span>':'')+(L.n<900?'<span>Leçon '+L.n+' de la progression MINESEC</span>':'')+'</div>'+
+     (L.accroche?'<p class="accroche">'+esc(L.accroche)+'</p>':'')+
+     '<div class="puces"><span>'+A.pic("horloge",14)+' '+(L.duree||15)+' min</span><span>'+L.parties.length+' parties</span>'+(L.parties.some(function(p){return p.anim})?'<span>'+A.pic("lecture",14)+' schéma animé</span>':'')+'<span>'+A.pic("coche",14)+' quiz de '+L.quiz.length+' questions</span>'+(A.scenesPour(L).length?'<span>'+A.pic("masques",16)+' scène vivante</span>':'')+'</div></div></header>'+
+   '<div class="formats" role="tablist" aria-label="Formats de la leçon">'+
+     '<button type="button" role="tab" aria-selected="true" data-f="cours"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>Cours</button>'+
+     '<button type="button" role="tab" aria-selected="false" data-f="revision"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Révision</button>'+
+     '<button type="button" role="tab" aria-selected="false" data-f="quiz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5h.01"/></svg>Quiz</button>'+
+   '</div>'+
+   '<section class="grille" data-panneau="cours"><aside class="sommaire" aria-label="Sommaire"><p>Sommaire</p><ol>'+L.parties.map(function(p,k){return '<li><a href="#p'+(k+1)+'">'+(k+1)+'. '+esc(p.t)+'</a></li>'}).join("")+'</ol><div class="lu"><span id="luTxt">Lecture : 0 %</span><div class="barre-p"><i id="luBar" style="width:0"></i></div></div></aside>'+
+     '<article class="carte"><div class="outils-pdf"><button type="button" class="btn-l" onclick="print()">⤓ PDF</button></div>'+
+     '<div id="kalaoCours"></div>'+
+     (L.intro?'<p class="info">'+L.intro+'</p>':'')+
+     (L.objectifs?'<div class="objectifs"><b>À la fin de la leçon, tu sauras :</b><ul>'+L.objectifs.map(function(o){return '<li>'+o+'</li>'}).join("")+'</ul></div>':'')+
+     parties+scenesHtml+appel+nav+'</article></section>'+
+   '<section class="grille" data-panneau="revision" hidden><aside class="sommaire"><p>L\'essentiel</p></aside><article class="carte">'+
+     '<div class="partie"><h2><span class="num">'+A.pic("coche",20)+'</span><span class="txt">Ce que tu dois retenir</span></h2><ul>'+L.revision.map(function(r){return '<li>'+r+'</li>'}).join("")+'</ul></div>'+
+     (L.exo?'<div class="partie"><h2><span class="num">'+A.pic("crayon",18)+'</span><span class="txt">À toi de jouer</span></h2>'+L.exo+'</div>':'')+
+     scenesHtml+'</article></section>'+
+   '<section class="grille" data-panneau="quiz" hidden><aside class="sommaire"><p>'+L.quiz.length+' questions</p><p id="score" class="lu"></p></aside><article class="carte" id="quiz"><div class="quiz-barre" id="quizBarre" aria-hidden="true"><i></i></div>'+
+     L.quiz.map(function(q,k){return '<div class="q" data-bonne="'+q.b+'"><p>'+(k+1)+'. '+q.q+'</p>'+q.r.map(function(r){return '<button type="button">'+r+'</button>'}).join("")+'<div class="expl" hidden>'+(q.e||"")+'</div></div>'}).join("")+
+     '<div class="bilan" id="bilan" hidden></div></article></section>';
+
+  A.noterJour(); A.chiffreSerie($("#serie"));
+
+  /* Kalao, la mascotte : un mot d'accueil adapté (déjà lue ? quiz déjà réussi ?) */
+  if(VRT.jeu){ var dejaLu=A.lire("lus",{})[id], qq=A.lire("quiz",{})[id];
+    VRT.jeu.bulle($("#kalaoCours"), qq&&qq[0]===qq[1] ? "Te revoilà ! Tu as déjà réussi ce quiz sans faute. Une petite révision pour graver tout ça ?"
+      : dejaLu ? "Content de te revoir. Après la lecture, tente le quiz : chaque étoile vaut 10 points."
+      : "Salut, moi c'est Kalao ! Lis la leçon jusqu'au bout pour gagner <b>20 points</b>, puis décroche les 3 étoiles du quiz.", "salut"); }
+
+  /* apparition douce des parties (désactivée si « réduire les animations ») */
+  if("IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches){
+    document.documentElement.classList.add("js");
+    var rv=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("apparu");rv.unobserve(e.target)}})},{rootMargin:"0px 0px -8% 0px"});
+    $$(".partie").forEach(function(p){rv.observe(p)});
+    setTimeout(function(){$$(".partie").forEach(function(p){p.classList.add("apparu")})},4000); /* filet : jamais de texte caché */
+  }
+
+  /* schémas animés : chacun isolé, une erreur n'empêche pas la leçon de s'afficher */
+  $$("[data-anim]").forEach(function(el){ var p=L.parties[+el.getAttribute("data-anim")]; try{ p.anim(el) }catch(e){ el.closest(".anim").hidden=true; if(window.console) console.warn("Animation", id, e) } });
+  A.boutonsImage(document.getElementById("lecon"));   /* « Enregistrer l'image » : PNG avec filigrane VÉRITAS */
+
+  /* onglets */
+  var SUR={cours:"Cours",revision:"Fiche de révision",quiz:"Quiz"};
+  $$(".formats button").forEach(function(b){b.addEventListener("click",function(){
+    $$(".formats button").forEach(function(x){x.setAttribute("aria-selected",x===b?"true":"false")});
+    $$("[data-panneau]").forEach(function(p){p.hidden=p.getAttribute("data-panneau")!==b.getAttribute("data-f")});
+    $("#sur").textContent=SUR[b.getAttribute("data-f")]; window.scrollTo({top:0});
+  })});
+  if(location.hash==="#quiz") $('[data-f=quiz]').click();
+
+  /* sommaire actif + lecture */
+  var liens=$$('[data-panneau=cours] .sommaire a'), fait=false;
+  if("IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting) liens.forEach(function(a){a.classList.toggle("actif",a.getAttribute("href")==="#"+e.target.id)})})},{rootMargin:"-30% 0px -60% 0px"});
+    $$('[data-panneau=cours] .partie').forEach(function(p){io.observe(p)});
+  }
+  var art=$('[data-panneau=cours] .carte');
+  function lecture(){ var r=art.getBoundingClientRect(), h=r.height-innerHeight*.6; var p=Math.max(0,Math.min(100,Math.round((-r.top+innerHeight*.2)/Math.max(h,1)*100)));
+    $("#luBar").style.width=p+"%"; $("#luTxt").textContent=p>=95?"Leçon lue":"Lecture : "+p+" %"; if(p>=95&&!fait){fait=true;A.marquerLu(id);if(VRT.jeu)VRT.jeu.leconLue(id)} }
+  addEventListener("scroll",lecture,{passive:true}); lecture();
+
+  /* quiz */
+  var bons=0,faits=0,n=L.quiz.length,combo=0,J=VRT.jeu;
+  $$(".q").forEach(function(q){var b=+q.getAttribute("data-bonne");$$("button",q).forEach(function(btn,k){btn.addEventListener("click",function(){
+    if(q.dataset.fait) return; q.dataset.fait="1"; faits++;
+    if(k===b){btn.classList.add("ok");bons++;combo++; if(combo>=2&&J) J.toast('<b>Série de '+combo+'</b><span>bonnes réponses d\'affilée</span>',"combo");}
+    else{btn.classList.add("ko");$$("button",q)[b].classList.add("ok");combo=0;q.classList.remove("secoue");void q.offsetWidth;q.classList.add("secoue")}
+    $(".expl",q).hidden=false; $("#score").textContent=bons+" / "+faits;
+    var bq=$("#quizBarre i"); if(bq) bq.style.transform="scaleX("+(faits/n)+")";
+    if(faits===n){ A.noterQuiz(id,bons,n); var et=bons===n?3:bons>=Math.ceil(n*.6)?2:bons>0?1:0;
+      var hum=bons===n?"bravo":"salut", msg=bons===n?'Parfait ! Tu maîtrises cette leçon.':bons>=n/2?'Bien joué. Relis la partie qui t\'a piégé.':'Relis le cours, puis retente ta chance : tu vas y arriver.';
+      var bl=$("#bilan"); bl.hidden=false; bl.innerHTML=(J?J.mascotte(hum,96):'')+A.etoiles(et)+'<b>'+bons+' / '+n+'</b>'+msg+'<p style="margin:12px 0 0"><button type="button" class="btn-l" onclick="location.hash=\'quiz\';location.reload()">Recommencer</button> '+(suiv?'<a class="btn-l" href="lecon.html?id='+suiv+'">Leçon suivante ›</a>':'')+'</p>'; bl.scrollIntoView({behavior:"smooth",block:"center"});
+      if(J) J.quizFini(id,bons,n); }
+  })})});
+
+  /* vue enseignant : barre d'outils + publier (démonstration, local) */
+  var ICO={copie:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/>',lien:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',pdf:'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'};
+  function ic(k,t,a){return '<button type="button" class="ic" title="'+t+'" data-a="'+a+'"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICO[k]+'</svg><span class="vsr">'+t+'</span></button>'}
+  var masques=A.lire("masques_"+id,[]);
+  $$('[data-panneau=cours] .partie').forEach(function(p){
+    var d=document.createElement("div"); d.className="barre";
+    d.innerHTML='<button type="button" class="mod" title="Bientôt : éditer cette partie">Modifier</button>'+ic("copie","Dupliquer","copie")+ic("lien","Copier le lien","lien")+ic("pdf","Imprimer","pdf")+'<label class="pub">Publier à mes élèves <input type="checkbox"'+(masques.indexOf(p.id)<0?' checked':'')+'></label>';
+    p.insertBefore(d,p.firstChild); if(masques.indexOf(p.id)>=0) p.classList.add("masque");
+    $("input",d).addEventListener("change",function(){ p.classList.toggle("masque",!this.checked); masques=masques.filter(function(x){return x!==p.id}); if(!this.checked) masques.push(p.id); A.ecrire("masques_"+id,masques) });
+    $('[data-a=lien]',d).addEventListener("click",function(){ var u=location.href.split("#")[0]+"#"+p.id; try{navigator.clipboard.writeText(u)}catch(e){} this.title="Lien copié"; });
+    $('[data-a=pdf]',d).addEventListener("click",function(){print()});
+  });
+  $$(".vue button").forEach(function(b){b.addEventListener("click",function(){
+    var v=b.getAttribute("data-vue"); $$(".vue button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false")}); document.body.className=v;
+    if(v==="prof"&&!A.lire("visite_prof",0)){ouvrir();A.ecrire("visite_prof",1)}
+  })});
+
+  /* accueil en étapes */
+  var ET=[{t:"Choisissez la leçon",s:"Classe, matière, chapitre",i:"p-eleve",l:["Le rail de gauche range les matières de la classe","Chaque leçon suit la progression harmonisée du MINESEC"]},
+    {t:"Adaptez-la",s:"Chaque partie a sa barre d'outils",i:"p-enseignant",l:["« Publier à mes élèves » masque ou montre une partie","« Copier le lien » pointe vers la partie exacte"]},
+    {t:"Faites pratiquer",s:"Révision, quiz, scène vivante",i:"m-francais",l:["La fiche de révision tient en une page","Le quiz corrige et explique chaque réponse"]},
+    {t:"Imprimez si besoin",s:"PDF propre, sans menus",i:"p-parent",l:["Le bouton PDF imprime le cours seul","Pratique pour une salle sans connexion"]}],cur=0,dlg=$("#visite");
+  $(".etapes").innerHTML=ET.map(function(e,k){return '<li data-i="'+k+'"><span class="n">'+(k+1)+'</span><div><b>Étape '+(k+1)+'</b><span>'+e.s+'</span></div></li>'}).join("");
+  function rendre(){var e=ET[cur];$$(".etapes li").forEach(function(li,k){if(k===cur)li.setAttribute("aria-current","step");else li.removeAttribute("aria-current")});$("#visiteH").textContent=e.t;$("#visiteIco").setAttribute("href","../assets/veritas-matieres.svg#"+e.i);$("#visiteL").innerHTML=e.l.map(function(x){return "<li>"+x+"</li>"}).join("");$("#visiteS").textContent=cur===ET.length-1?"Commencer":"Suivant"}
+  function ouvrir(){cur=0;rendre();if(dlg.showModal)dlg.showModal();else dlg.setAttribute("open","")}
+  $$(".etapes li").forEach(function(li){li.addEventListener("click",function(){cur=+li.getAttribute("data-i");rendre()})});
+  $("#visiteS").addEventListener("click",function(){if(cur<ET.length-1){cur++;rendre()}else dlg.close()});
+  $(".fermer").addEventListener("click",function(){dlg.close()});
+})();
+</script>
+</body>
+</html>

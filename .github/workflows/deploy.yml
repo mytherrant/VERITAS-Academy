@@ -55,6 +55,7 @@ on:
       - 'gestion/**'
       - 'plateforme/**'
       - 'scenes/**'
+      - 'apprendre/**'
       # NOTE : les corpus (corpus_minesec.json, citations_minesec.json) ne
       # figurent PAS ici. Ils sont gitignores — 1040 textes et 137 citations,
       # c'est la marchandise, et ce depot est PUBLIC. Ils n'arrivent donc
@@ -148,7 +149,7 @@ jobs:
           fi
           js_fail=0
           echo "→ Lint JS (node --check) sur app.js, sw.js, assets/*.js et chunks/*.js"
-          for j in app.js sw.js gestion/app.js gestion/sw.js $(ls assets/*.js 2>/dev/null) $(ls chunks/*.js 2>/dev/null) $(ls scenes/*.js 2>/dev/null); do
+          for j in app.js sw.js gestion/app.js gestion/sw.js $(ls assets/*.js 2>/dev/null) $(ls chunks/*.js 2>/dev/null) $(ls scenes/*.js 2>/dev/null) $(ls apprendre/*.js 2>/dev/null); do
             [ -f "$j" ] || continue
             if ! node --check "$j"; then js_fail=1; fi
           done
@@ -1489,6 +1490,28 @@ jobs:
             echo "  ✓ scenes/ ($(ls deploy/scenes | wc -l) fichiers)"
           fi
 
+          # ── Apprendre (apprendre/, 07/11/2026) ────────────────────────────
+          #    Cours par classe et matière (progressions MINESEC 2026-27), leçons
+          #    rédigées, schémas animés, manuels collaboratifs (api/manuels.php).
+          #    lecons.js et progressions.js sont GÉNÉRÉS par tools/build_apprendre.py
+          #    depuis apprendre/_src/ : les sources restent dans le dépôt, hors ligne.
+          #    ÉCHEC BRUYANT si un fichier manque : les quatre pages les chargent tous.
+          if [ -d apprendre ]; then
+            for f in index.html matiere.html lecon.html manuel.html apprendre.css jeu.css commun.js jeu.js lecons.js progressions.js scenes.js; do
+              if [ ! -f "apprendre/$f" ]; then
+                echo "::error title=Apprendre incomplet::apprendre/$f manque (régénérez avec 'python tools/build_apprendre.py'). Déploiement ANNULÉ."
+                exit 1
+              fi
+            done
+            if [ ! -f assets/veritas-matieres.svg ]; then
+              echo "::error title=Icônes des matières absentes::assets/veritas-matieres.svg manque : toutes les cartes de matières seraient vides. Déploiement ANNULÉ."
+              exit 1
+            fi
+            mkdir -p deploy/apprendre
+            find apprendre -maxdepth 1 -type f ! -name '_*' -exec cp {} deploy/apprendre/ \;
+            echo "  ✓ apprendre/ ($(ls deploy/apprendre | wc -l) fichiers)"
+          fi
+
           # ── VÉRITAS Campus (SaaS multi-établissement) ───────────
           # Front : campus/*.html + campus.js + config.js.
           # ⚠️ config.js porte le MODE d'hébergement ; il part tel quel, c'est
@@ -1590,6 +1613,7 @@ jobs:
             api/_sentinel.php \
             api/challenge.php \
             api/demandes.php \
+            api/manuels.php \
             api/plateforme.php \
             api/compte.php; do
             # ⚠️ ÉCHEC BRUYANT, et pas un « [ -f ] && cp » silencieux.
