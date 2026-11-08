@@ -3170,16 +3170,7 @@
       + '</label>'
       + '<button type="submit">Chercher</button>';
 
-    var sug = document.createElement('div');
-    sug.className = 'vrt-rech-sug';
-    sug.innerHTML = '<span>Souvent cherché :</span>';
-    SUGGESTIONS.forEach(function (s) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = s;
-      b.addEventListener('click', function () { lancer(s); });
-      sug.appendChild(b);
-    });
+    /* « Souvent cherché » retiré le 08/11/2026 (demande de Jacques) : la barre de recherche suffit. */
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -3187,7 +3178,6 @@
       lancer(el ? el.value : '');
     });
 
-    apres.parentNode.insertBefore(sug, apres.nextSibling);
     apres.parentNode.insertBefore(form, apres.nextSibling);
   }
 

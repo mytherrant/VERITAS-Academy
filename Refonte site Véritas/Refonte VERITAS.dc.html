@@ -696,50 +696,6 @@
       </div>
     </section>
 
-    <!-- SÉQUENCE ANIMÉE — écosystème VÉRITAS -->
-    <section style="position:relative;margin-top:56px;background:linear-gradient(160deg,#0C2A6A 0%,#1E499B 58%,#2E2470 100%);overflow:hidden;padding:60px 0 56px">
-      <span aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(700px 420px at 20% 14%,rgba(255,201,60,.16),rgba(0,0,0,0) 68%),radial-gradient(620px 380px at 82% 86%,rgba(123,209,206,.14),rgba(0,0,0,0) 68%);pointer-events:none"></span>
-      <div style="position:relative;max-width:1170px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 380px;gap:44px;align-items:center">
-
-        <div>
-          <span style="display:inline-flex;align-items:center;gap:9px;background:#E3F1EE;border:1px solid #BFE0DA;border-radius:100px;padding:7px 15px;font:600 11px Poppins,sans-serif;color:#0B6B74;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:18px"><span style="width:7px;height:7px;border-radius:50%;background:#FFC93C;animation:vpulse 2.4s ease-out infinite"></span>VÉRITAS en 15 secondes</span>
-          <h2 style="font:600 33px/43px Poppins,sans-serif;color:#fff;margin:0 0 12px;text-wrap:pretty">Un centre à Douala, une plateforme dans sa poche</h2>
-          <p style="margin:0 0 26px;font:400 15.5px/1.75 Poppins,sans-serif;color:rgba(255,255,255,.76);max-width:52ch;text-wrap:pretty">Le programme officiel, les corrigés, le tuteur et le suivi des parents — un seul abonnement, quatre acteurs reliés.</p>
-
-          <div style="position:relative;height:132px">
-            <sc-for list="{{ sequence }}" as="sq" hint-placeholder-count="4">
-              <div style="position:absolute;inset:0;display:flex;align-items:center;gap:18px;opacity:0;animation:vseq 12s ease-in-out infinite;animation-delay:{{ sq.retard }};animation-fill-mode:both">
-                <span style="position:relative;width:62px;height:62px;border-radius:50%;background:#fff;border:3px solid {{ sq.teinte }};color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto">
-                  <span aria-hidden="true" style="position:absolute;inset:-3px;border-radius:50%;border:2px solid {{ sq.teinte }};animation:vringGrow 2.6s ease-out infinite"></span>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="{{ sq.ico }}"></use></svg></span>
-                <span style="display:flex;flex-direction:column;gap:5px;min-width:0">
-                  <b style="font:600 22px/29px Poppins,sans-serif;color:#fff">{{ sq.titre }}</b>
-                  <span style="font:400 14.5px/1.6 Poppins,sans-serif;color:rgba(255,255,255,.72);text-wrap:pretty">{{ sq.desc }}</span>
-                </span>
-              </div>
-            </sc-for>
-          </div>
-        </div>
-
-        <div style="position:relative;height:380px;display:flex;align-items:center;justify-content:center">
-          <span aria-hidden="true" style="position:absolute;width:300px;height:300px;border-radius:50%;border:1px dashed rgba(255,255,255,.18)"></span>
-          <span aria-hidden="true" style="position:absolute;width:214px;height:214px;border-radius:50%;border:1px dashed rgba(255,255,255,.14)"></span>
-
-          <span aria-hidden="true" style="position:absolute;width:300px;height:300px;animation:vorbit 22s linear infinite">
-            <sc-for list="{{ orbite }}" as="ob" hint-placeholder-count="4">
-              <span style="position:absolute;left:{{ ob.x }};top:{{ ob.y }};transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:#fff;border:3px solid {{ ob.teinte }};color:#001136;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(0,0,0,.28)">
-                <span style="animation:vorbitInv 22s linear infinite;display:flex"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="{{ ob.ico }}"></use></svg></span>
-              </span>
-            </sc-for>
-          </span>
-
-          <span style="position:relative;width:150px;height:150px;border-radius:38px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;box-shadow:0 22px 50px rgba(0,0,0,.34);animation:vbob 9s ease-in-out infinite">
-            <img src="assets/veritas-logo.png" alt="" style="width:62px;height:62px;object-fit:contain">
-            <b style="font:600 14px Poppins,sans-serif;color:#0C2A6A;letter-spacing:1.6px">VÉRITAS</b>
-          </span>
-        </div>
-      </div>
-    </section>
 
     <!-- TÉMOIGNAGE VIDÉO -->
     <section style="padding:56px 0 0">
