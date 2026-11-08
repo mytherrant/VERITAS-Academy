@@ -562,6 +562,24 @@
     goPartenaires: function () { location.href = '/plan.html#partenaire'; },
     /* « Lancer un quiz » (section Apprendre en jouant) : quiz, séries et badges sont dans /apprendre/. */
     goApprendre: function () { location.href = '/apprendre/'; },
+    /* « Étude intégrale » (panneau bleu de l'œuvre du jour, 08/11/2026) : menait au catalogue
+       d'abonnements. Il ouvre la fiche de l'œuvre du jour quand VÉRITAS en publie une, sinon la
+       liste des œuvres au programme. Clés : fragments du titre, en minuscules et sans accents. */
+    goEtudeOeuvre: function () {
+      var ETUDES = {
+        'balafon': '1ere-balafon', 'coeur des tenebres': '1ere-coeur-tenebres', 'lion et la perle': '1ere-lion-perle',
+        'koum-wam': '2nde-nkoumwam', 'koum wam': '2nde-nkoumwam', 'poemes sauvages': '2nde-poemes-sauvages', 'tartuffe': '2nde-tartuffe',
+        'tribus de capitoline': '2nde-tribus-capitoline', 'marmite de koka': '3e-marmite-koka', 'petites gouttes': '3e-petites-gouttes',
+        'ville cruelle': '3e-ville-cruelle', 'attachement au sol natal': '4e-attachement-sol', 'coeur du sahel': '4e-coeur-sahel',
+        'trois pretendants': '4e-trois-pretendants', 'arbre fetiche': '5e-arbre-fetiche', 'pere inconnu': '5e-pere-inconnu',
+        'bimanes': '6e-bimanes', 'chants de la foret': '6e-chants-foret', 'korotoumou': '6e-contes-korotoumou',
+        'ngum a jemea': 'tle-ngum-jemea', 'stances et poemes': 'tle-stances-poemes', 'vieux negre': 'tle-vieux-negro'
+      };
+      var t = String((typeof PDJ === 'object' && PDJ && PDJ.titre) || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[’']/g, "'");
+      var page = null;
+      Object.keys(ETUDES).some(function (k) { if (t.indexOf(k) >= 0) { page = ETUDES[k]; return true; } return false; });
+      location.href = page ? '/oeuvres/' + page + '.html' : '/oeuvres/';
+    },
     goTarifs: function () { aller('tarifs'); },
     goBoutique: function () { aller('boutique'); },
     /* `commanderVedette` a été retiré avec le bloc « livre mis en avant » :

@@ -2279,6 +2279,17 @@ for (const bal of ['ul', 'ol', 'li']) {
     rebranches++;
   }
 
+  /* ── « ÉTUDE INTÉGRALE », SIXIÈME ENDROIT (08/11/2026) ─────────────────
+     Bouton pleine largeur du panneau bleu de l'œuvre du jour : il menait au
+     catalogue d'abonnements. goEtudeOeuvre ouvre la fiche de l'œuvre du jour
+     (oeuvres/), ou la liste des œuvres quand VÉRITAS n'en publie pas. */
+  const etudeIntegrale = /<button type="button" onclick="VRT\.act\('goElearning',this,event\)"(?: data-go="elearning")?( style="position:relative;width:100%;flex:0 0 auto[^"]*")/;
+  if (etudeIntegrale.test(corps)) {
+    corps = corps.replace(etudeIntegrale,
+      '<button type="button" onclick="VRT.act(\'goEtudeOeuvre\',this,event)"$1');
+    rebranches++;
+  }
+
   /* ── LE MENU DU TÉLÉPHONE, QUATRIÈME ENDROIT ───────────────────────────
      Sous 1 000 px, la barre disparaît au profit du menu burger. Ses trois
      entrées de public sortent du gabarit avec `mm__aller`, qui lit
