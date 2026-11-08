@@ -127,6 +127,7 @@ ZONES = [
     ('flash',       'Flash — accès par QR',      'Le code imprimé dans un cahier ouvre directement sa correction.',                             ['eleve', 'enseignant'],                  'lc-qr',           'rose'),
     ('adopter',     'Adopter les cahiers',       'Pour un établissement qui veut équiper ses classes.',                                        ['enseignant', 'partenaire'],             'lc-university',   'bleu'),
     ('scenes',      'Scènes vivantes',           "Les œuvres, l’histoire et les langues mises en scène : personnages, ateliers, laboratoire et quiz.",     ['eleve', 'enseignant'],                  'lc-game',         'rose'),
+    ('apprendre',   'Apprendre',                 "Toutes les matières de la 6ᵉ à la Terminale, leçon par leçon selon la progression MINESEC : cours illustrés, quiz, badges, et manuels de classe à composer entre collègues.", ['eleve', 'enseignant', 'parent'], 'lc-graduation', 'bleu'),
 ]
 
 # ── Les destinations qui ne sont pas des dossiers de pages ─────────────────
