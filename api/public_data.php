@@ -299,7 +299,10 @@ foreach ($__pd_contenus_src as $c) {
         // Accroches : volontairement tronquées, la carte n'en montre pas plus
         'apercu'  => isset($c['apercu']) ? vrt_pd_coupe($c['apercu'], 240) : '',
         'desc'    => isset($c['desc'])   ? vrt_pd_coupe($c['desc'], 240) : '',
+        // Un document est-il réellement déposé ? Booléen seul : l'adresse du fichier reste privée.
+        'dispo'   => !empty($c['fichierUrl']) || !empty($c['fichierProtege']) || !empty($c['fichierData']) || !empty($c['resPedago']),
     ];
+    if (!empty($c['resPedago'])) $row['resPedago'] = (string)$c['resPedago'];
     if (!empty($c['ico'])) $row['ico'] = vrt_pd_coupe($c['ico'], 8);
     $ft = vrt_pd_filetype($c);
     if ($ft !== '') $row['fileType'] = $ft;

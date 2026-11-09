@@ -37,8 +37,7 @@ PAGES = [
     ('evaluations/BEPC_blanc_3e_etude_de_texte.html', '0.7', 'monthly', None),
     # BEPC_blanc_3e_expression_ecrite.html : « Document enseignant — Ne pas distribuer
     # aux élèves » — volontairement HORS du sitemap.
-    ('evaluations/epreuve_1ere_enfant_noir_2026.html', '0.7', 'monthly', None),
-    ('evaluations/epreuve_2nde_lion_perle_2026.html', '0.7', 'monthly', None),
+    ('evaluations/epreuve_1ere_lion_perle_2026.html', '0.7', 'monthly', None),
     ('evaluations/epreuve_3e_ville_cruelle_2026.html', '0.7', 'monthly', None),
     ('evaluations/epreuve_bac_vieux_negre_2026.html', '0.7', 'monthly', None),
     ('evaluations/evaluation_bac_anglais.html', '0.7', 'monthly', None),
