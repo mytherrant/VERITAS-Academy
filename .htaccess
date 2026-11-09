@@ -57,9 +57,9 @@ RewriteCond %{REQUEST_URI} !/$
 RewriteRule ^(.+)$ https://%{HTTP_HOST}/$1/ [R=301,L]
 
 # Audit du 09/11/2026 : œuvre remise dans sa classe, épreuves déplacées.
-RewriteRule ^oeuvres/2nde-nkoumwam\.html$ /oeuvres/5e-nkum-wam.html [R=301,L]
-RewriteRule ^evaluations/epreuve_2nde_lion_perle_2026\.html$ /evaluations/epreuve_1ere_lion_perle_2026.html [R=301,L]
-RewriteRule ^evaluations/epreuve_1ere_enfant_noir_2026\.html$ /evaluations/ [R=301,L]
+RewriteRule ^oeuvres/2nde-nkoumwam\.html$ https://%{HTTP_HOST}/oeuvres/5e-nkum-wam.html [R=301,L]
+RewriteRule ^evaluations/epreuve_2nde_lion_perle_2026\.html$ https://%{HTTP_HOST}/evaluations/epreuve_1ere_lion_perle_2026.html [R=301,L]
+RewriteRule ^evaluations/epreuve_1ere_enfant_noir_2026\.html$ https://%{HTTP_HOST}/evaluations/ [R=301,L]
 
 # ─────────────────────────────────────────────────────────
 # 1bis. Transmettre l'en-tête Authorization à PHP (CORRECTIF SYNCHRO)

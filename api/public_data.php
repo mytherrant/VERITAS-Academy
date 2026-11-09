@@ -278,6 +278,24 @@ $__pd_supprimes = (isset($db['deletedDefaults']) && is_array($db['deletedDefault
 $__pd_paywall   = (isset($db['paywall']) && is_array($db['paywall'])) ? $db['paywall'] : null;
 $__pd_offertes  = vrt_pd_offertes($__pd_contenus_src, $__pd_paywall);
 
+// Fiches dont le contenu vit dans le code ou sur une page du site, et non dans un fichier déposé.
+$__pd_en_code = [
+    'res_bac_ang' => ['resPedago' => 'ang'],
+    'res_bac_fra' => ['resPedago' => 'fra'],
+    'res_bac_lit' => ['resPedago' => 'lit'],
+    'res_cours_cc' => ['resPedago' => 'cc'],
+    'res_cours_mod1' => ['resPedago' => 'mod1'],
+    'bac_eval_anglais' => ['externalUrl' => 'https://veritas-school.com/evaluations/evaluation_bac_anglais.html'],
+    'bac_eval_francais' => ['externalUrl' => 'https://veritas-school.com/evaluations/evaluation_bac_langue_francaise.html'],
+    'bac_eval_litterature' => ['externalUrl' => 'https://veritas-school.com/evaluations/evaluation_bac_litterature.html'],
+    'demo_maths3' => [],
+    'demo_pc2nde' => [],
+    'demo_bac_tle_c' => [],
+    'cours_commentaire_compose' => ['externalUrl' => 'https://veritas-school.com/cours/commentaire_compose_analyse.html'],
+    'cours_module1_tleA' => ['externalUrl' => 'https://veritas-school.com/cours/module_1_tle_A.html'],
+    'cours_registres_langue_5e' => ['externalUrl' => 'https://veritas-school.com/cours/registres_de_langue_5e.html'],
+];
+
 $__pd_contenus = [];
 foreach ($__pd_contenus_src as $c) {
     if (!is_array($c) || !isset($c['id'])) continue;
@@ -300,9 +318,11 @@ foreach ($__pd_contenus_src as $c) {
         'apercu'  => isset($c['apercu']) ? vrt_pd_coupe($c['apercu'], 240) : '',
         'desc'    => isset($c['desc'])   ? vrt_pd_coupe($c['desc'], 240) : '',
         // Un document est-il réellement déposé ? Booléen seul : l'adresse du fichier reste privée.
-        'dispo'   => !empty($c['fichierUrl']) || !empty($c['fichierProtege']) || !empty($c['fichierData']) || !empty($c['resPedago']),
+        'dispo'   => !empty($c['fichierUrl']) || !empty($c['fichierProtege']) || !empty($c['fichierData']) || !empty($c['resPedago'])
+                     || !empty($c['externalUrl']) || !empty($c['htmlContent']) || isset($__pd_en_code[$id]),
     ];
     if (!empty($c['resPedago'])) $row['resPedago'] = (string)$c['resPedago'];
+    if (isset($__pd_en_code[$id])) $row = array_merge($row, $__pd_en_code[$id]);
     if (!empty($c['ico'])) $row['ico'] = vrt_pd_coupe($c['ico'], 8);
     $ft = vrt_pd_filetype($c);
     if ($ft !== '') $row['fileType'] = $ft;
