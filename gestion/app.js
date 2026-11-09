@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.13.1';
+  var VERSION = '0.13.2';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -338,9 +338,13 @@
           return api('justificatif/deposer', { id: f.id, jpeg: f.jpeg }).then(function (r) {
             var d = ligne('depenses', f.id);
             if (d) { d.justificatif = r.justificatif; poserLigne('depenses', d); }
+            if (E.cache.erreurPhoto) delete E.cache.erreurPhoto[f.id];
+            if (E.cache.photosEnAttente) delete E.cache.photosEnAttente[f.id];
             return idbSuppr('fichiers', f.id);
           }, function (e) {
             if (e.code === 409 || e.code === 422 || e.code === 403) { toast('Justificatif non envoyé : ' + e.message, true); return idbSuppr('fichiers', f.id); }
+            // Autre échec (serveur, dépense pas encore arrivée…) : on réessaiera, mais on le dit dans la fiche de la dépense.
+            (E.cache.erreurPhoto = E.cache.erreurPhoto || {})[f.id] = (e && e.message) || 'envoi impossible pour l\'instant';
           });
         });
       }, Promise.resolve());
@@ -2108,10 +2112,16 @@
       var img = new Image(); img.alt = 'Justificatif'; img.src = src; z.appendChild(img);
     };
     promesse(magasin('fichiers').get(id)).then(function (f) {
-      if (f) return montrer('data:image/jpeg;base64,' + f.jpeg, 'Justificatif pris sur ce téléphone · envoi au retour du réseau');
+      if (f) {
+        montrer('data:image/jpeg;base64,' + f.jpeg, 'Justificatif pris sur ce téléphone · envoi au retour du réseau');
+        var err = (E.cache.erreurPhoto || {})[id];
+        if (err) z.insertAdjacentHTML('beforeend', '<p class="note">' + ico('alert', 'p') + ' La photo n\'arrive pas au serveur : ' + esc(err) + '. Elle reste sur ce téléphone et repart à la prochaine synchronisation.</p>');
+        return;
+      }
       if (!d.justificatif) {
         z.innerHTML = justificatifExige(d)
-          ? '<p class="note">' + ico('alert', 'p') + ' Justificatif obligatoire à partir de ' + fcfa(SEUIL_JUSTIFICATIF) + (valideur ? ' : demandez la photo, la dépense ne peut pas être validée sans elle.' : ' : ajoutez la photo de la facture ou du reçu.') + '</p>'
+          ? '<p class="note">' + ico('alert', 'p') + ' Justificatif obligatoire à partir de ' + fcfa(SEUIL_JUSTIFICATIF) + (valideur && estAdmin() ? ' : ajoutez la photo ci-dessous (« Enregistrer »), ou validez quand même : en tant qu\'administrateur, « Valider » vous demandera confirmation.'
+            : valideur ? ' : demandez la photo, la dépense ne peut pas être validée sans elle.' : ' : ajoutez la photo de la facture ou du reçu.') + '</p>'
           : '<p class="doux">Sans justificatif (facultatif en dessous de ' + fcfa(SEUIL_JUSTIFICATIF) + ').</p>';
         return;
       }
@@ -4820,6 +4830,12 @@
     'editer-depense': function (el) { feuilleDepense(el.dataset.id); },
     'valider-depense': function (el) {
       var d = ligne('depenses', el.dataset.id);
+      if (d && justificatifExige(d) && !d.justificatif && estAdmin()) {
+        confirmer('Cette dépense de ' + fcfa(d.montant) + ' n\'a pas de justificatif' + ((E.cache.photosEnAttente || {})[d.id] ? ' arrivé au serveur' : '') + '. La valider quand même ? (vous seul, administrateur, le pouvez ; votre nom reste comme valideur)', 'Valider sans justificatif', function () {
+          fermerFeuille(); muter('depenses', d.id, { statut: 'validee' }).then(function () { toast('Dépense validée.'); rendre(); });
+        });
+        return;
+      }
       if (d && justificatifExige(d) && !d.justificatif) {
         toast((E.cache.photosEnAttente || {})[d.id] ? 'La photo du justificatif n\'est pas encore arrivée au serveur : validez après la synchronisation.' : 'Justificatif obligatoire à partir de ' + fcfa(SEUIL_JUSTIFICATIF) + ' : demandez la photo avant de valider.', true);
         return;

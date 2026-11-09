@@ -106,6 +106,10 @@ le bouton « Reçu » est sur chaque paie (Caisse, Bilan, fiche enseignant), « 
 L'enseignant voit « Mes paies » et leurs reçus dans « Mes heures ». La catégorie de dépense « Salaires » est réservée
 à qui gère les enseignants (serveur et formulaire) : sinon la paie passe par « Payer », plafonnée et sans doublon.
 
+**Justificatif et validation :** à partir de 10 000 F, une dépense ne se valide qu'avec la photo du justificatif,
+sauf par l'**administrateur**, après confirmation (« Valider sans justificatif »), son nom restant comme valideur.
+Si la photo n'arrive pas au serveur (erreur réseau ou serveur), la fiche de la dépense le dit sur le téléphone qui l'a prise.
+
 **Centres indépendants :** un compte (hors administrateur) n'a accès qu'à **un seul centre** ; le serveur
 refuse le reste (`comptes/enregistrer`, 422). Une personne présente dans les deux centres a deux comptes
 (identifiants différents : le second reçoit le suffixe du centre, ex. `paul.essomba.ndogpassi2`). La fiche
