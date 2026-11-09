@@ -568,7 +568,7 @@
     goEtudeOeuvre: function () {
       var ETUDES = {
         'balafon': '1ere-balafon', 'coeur des tenebres': '1ere-coeur-tenebres', 'lion et la perle': '1ere-lion-perle',
-        'koum-wam': '2nde-nkoumwam', 'koum wam': '2nde-nkoumwam', 'poemes sauvages': '2nde-poemes-sauvages', 'tartuffe': '2nde-tartuffe',
+        'koum-wam': '5e-nkum-wam', 'koum wam': '5e-nkum-wam', 'poemes sauvages': '2nde-poemes-sauvages', 'tartuffe': '2nde-tartuffe',
         'tribus de capitoline': '2nde-tribus-capitoline', 'marmite de koka': '3e-marmite-koka', 'petites gouttes': '3e-petites-gouttes',
         'ville cruelle': '3e-ville-cruelle', 'attachement au sol natal': '4e-attachement-sol', 'coeur du sahel': '4e-coeur-sahel',
         'trois pretendants': '4e-trois-pretendants', 'arbre fetiche': '5e-arbre-fetiche', 'pere inconnu': '5e-pere-inconnu',

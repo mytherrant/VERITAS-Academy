@@ -9,8 +9,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261108c">
-<link rel="stylesheet" href="jeu.css?v=20261108c">
+<link rel="stylesheet" href="apprendre.css?v=20261109b">
+<link rel="stylesheet" href="jeu.css?v=20261109b">
 <style>
 /* ── Page matière (refonte 07/11) : en-tête teinté, filtres en pastilles, chapitres en cartes colorées ── */
 .mpage{max-width:900px;margin:0 auto}
@@ -54,17 +54,18 @@ a.lg:hover{background:var(--kp)}
 <body class="eleve">
 <header class="top">
   <a class="logo" href="/">VÉRI<b>TAS</b></a>
-  <nav class="top-nav" aria-label="Apprendre"><a href="index.html">Apprendre</a><a href="/scenes/">Scènes vivantes</a><a href="/corriges/">Corrigés</a></nav>
+  <nav class="top-nav" aria-label="Apprendre"><a href="index.html">Apprendre</a><a href="ressources.html">Tout pour progresser</a><a href="notes.html">Mes notes</a><a href="/scenes/">Scènes vivantes</a><a href="/corriges/">Corrigés</a></nav>
   <div class="top-d"><a class="niveau-chip" data-niveau href="index.html#progression" aria-label="Mon niveau et mes badges"></a><span class="serie" id="serie" hidden></span></div>
 </header>
 <nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
 <main class="page"><div class="lim" id="zone"></div></main>
 
-<script src="scenes.js?v=20261108c"></script>
-<script src="progressions.js?v=20261108c"></script>
-<script src="lecons.js?v=20261108c"></script>
-<script src="commun.js?v=20261108c"></script>
-<script src="jeu.js?v=20261108c"></script>
+<script src="scenes.js?v=20261109b"></script>
+<script src="progressions.js?v=20261109b"></script>
+<script src="lecons.js?v=20261109b"></script>
+<script src="ressources.js?v=20261109b"></script>
+<script src="commun.js?v=20261109b"></script>
+<script src="jeu.js?v=20261109b"></script>
 <script>
 (function(){
   "use strict";
@@ -88,8 +89,9 @@ a.lg:hover{background:var(--kp)}
   function teinte(p){return '--k:'+p[0]+';--kp:'+p[1]}
   var chev='<span class="chev" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>';
   function ligne(l){var k=red[l[0]]; var et=k?(lus[k]?'<span class="et lu">'+(qz[k]?'Quiz '+qz[k][0]+'/'+qz[k][1]:'Lue')+'</span>':'<span class="et red">Cours rédigé</span>'):'<span class="et av">Bientôt</span>';
+    var rs=A.resLecon(c,M.id,l[0]); if(!k&&rs.length) et='';
     var corps='<span class="n">'+(l[0]||"")+'</span><span class="t">'+esc(l[1])+'</span>'+et;
-    return k?'<a class="lg r" href="lecon.html?id='+k+'">'+corps+chev+'</a>':'<div class="lg">'+corps+'</div>'}
+    return '<div class="lgw" id="l'+l[0]+'">'+(k?'<a class="lg r" href="lecon.html?id='+k+'">'+corps+chev+'</a>':'<div class="lg">'+corps+'</div>')+A.pastilles(rs)+'</div>'}
   function rendu(filtre){
     var n=0;
     $("#liste").innerHTML=chaps.map(function(ch,i){
@@ -110,9 +112,12 @@ a.lg:hover{background:var(--kp)}
       (nred?'<button type="button" aria-pressed="false" data-f="red" style="--k:#9A6F00;--kp:#FFF3CC">Cours rédigés<span class="cpt">'+nred+'</span></button>':'')+
       trims.map(function(t){return '<button type="button" aria-pressed="false" data-f="'+esc(t)+'" style="'+teinte(TRIM[t]||PAL[3])+'">'+esc(t)+'</button>'}).join("")+
     '</nav>'+
+    (function(){var ids=A.resDeMatiere(c,M.id);if(!ids.length)return "";var n=ids.length,dir=ids.filter(function(i){return VRT_RES.items[i].t==="direct"||VRT_RES.items[i].t==="labo"}).slice(0,3);return '<section class="res-mat"><div class="sec-t" style="margin-top:0"><h2>Pour cette matière</h2><a href="ressources.html?c='+encodeURIComponent(c)+'&m='+M.id+'">Voir les '+n+' ressources ›</a></div>'+(dir.length?'<div class="res-g">'+dir.map(A.carteRes).join("")+'</div>':'')+'</section>'})()+
     (sc.length?'<div class="scenes-m">'+sc.map(function(s){return '<a class="scene" href="/scenes/'+s+'.html"><span class="pl">'+A.pic("masques",30)+'</span><span><small>Scène vivante</small><strong>'+esc((window.VRT_SCENES_TITRES||{})[s]||s)+'</strong></span><span class="jouer">'+A.pic("lecture",30)+'</span></a>'}).join("")+'</div>':'')+
     '<div id="liste"></div></div>';
   rendu("");
+  /* arrivée sur une leçon précise : le filtre a pu masquer l'ancre, on attend le rendu */
+  if(/^#l\d+$/.test(location.hash)){var cib=document.querySelector(location.hash);if(cib){cib.classList.add("lgw-v");cib.scrollIntoView({block:"center"})}}
   $$(".filtres button").forEach(function(b){b.addEventListener("click",function(){$$(".filtres button").forEach(function(x){x.setAttribute("aria-pressed",x===b)});rendu(b.getAttribute("data-f"))})});
 })();
 </script>

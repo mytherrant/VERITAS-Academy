@@ -6381,7 +6381,9 @@ function vShowSec(sec,btn,_boot){
             }
             h+='<div style="display:flex;align-items:center;gap:6px">';
             if(item.apercu||item.desc) h+='<button class="btn" style="background:'+catColor+'18;color:'+catColor+';font-size:10px;padding:5px 10px;border-radius:10px;border:1px solid '+catColor+'33" onclick="event.stopPropagation();previewElContent(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Aperçu</button>';
-            if(hasPlanAccess||iA()){
+            if(item.dispo===false){
+              h+='<span style="font-size:11px;font-weight:600;color:#6B7287;padding:6px 10px">Bientôt disponible</span>';
+            } else if(hasPlanAccess||iA()){
               h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="consulterGratuit(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Consulter</button>';
             } else {
               h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="commanderContenu(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-card"/></svg>Payer</button>';
@@ -10872,6 +10874,7 @@ function consulterGratuit(itemId){
   var el=DB.elearning||defaultDB().elearning;
   var item=(el.contenus||[]).find(function(c){return c.id===itemId;});
   if(!item){toast('Ressource introuvable','warn');return;}
+  if(item.dispo===false){toast('Ce document n\'est pas encore disponible.','warn');return;}
 
   // Ressources pédagogiques interactives (HTML embarqué)
   if(item.resPedago && typeof window._RESSOURCES_PEDAGO!=='undefined' && window._RESSOURCES_PEDAGO[item.resPedago]){
@@ -11400,6 +11403,8 @@ function commanderContenu(itemId){
   var el=DB.elearning||{contenus:[]};
   var item=el.contenus.find(function(c){return c.id===itemId;});
   if(!item) return;
+  /* 09/11/2026 : le serveur annonce dispo:false quand aucun document n'est déposé. */
+  if(item.dispo===false){ toast('Ce document n\'est pas encore disponible : rien ne vous a été facturé.','warn'); return; }
   var cat=(el.categories||[]).find(function(c){return c.id===item.cat;})||{nom:'Autre'};
   /* Écran intermédiaire court-circuité (v1.15.8) : il ne demandait que nom et
      WhatsApp, soit exactement l'étape ① du modal de paiement. Un contenu
@@ -20627,11 +20632,18 @@ function _buildOrientationHtml(niveau,serie,maths,fr,sci,interests){
       ecoles.push("ENAM — École Nationale d'Administration et de Magistrature (concours très sélectif)");
       conseils.push("L'ENAM forme les hauts fonctionnaires camerounais");
     }
-  }else if(niveau==="3eme"||niveau==="2nde"){
-    recs.push("📚 Orientation en 2nde / 1ere");
-    if(maths>=13&&sci>=12){recs.push("Série C ou D recommandee");conseils.push("Focus: Maths, Physique-Chimie, SVT");}
-    else if(fr>=13&&maths<12){recs.push("Série A recommandee");conseils.push("Focus: Français, Histoire-Geo, Philosophie");}
-    else{recs.push("Renforcer toutes les matieres");}
+  }else if(niveau==="3eme"){
+    /* 09/11/2026 — la série D commence en 1ère (arrêté 92/22, progressions 2026-27) :
+       en sortie de 3ème, le choix est 2nde A ou 2nde C. */
+    recs.push("📚 Orientation en 2nde");
+    if(maths>=13&&sci>=12){recs.push("2nde C recommandée (C et D se séparent en 1ère)");conseils.push("Priorité : Mathématiques, Physique, Chimie, SVT");}
+    else if(fr>=13&&maths<12){recs.push("2nde A recommandée");conseils.push("Priorité : Français, Anglais, Histoire-Géographie");}
+    else{recs.push("Renforcer toutes les matières avant de choisir");}
+  }else if(niveau==="2nde"){
+    recs.push("📚 Orientation en 1ère");
+    if(maths>=13&&sci>=12){recs.push(maths>=sci?"Série C recommandée (Mathématiques coefficient 6)":"Série D recommandée (SVTEEHB coefficient 6)");conseils.push("Priorité : Mathématiques, Physique, Chimie, SVT");}
+    else if(fr>=13&&maths<12){recs.push("Série A recommandée");conseils.push("Priorité : Littérature, Anglais, Langue vivante II, Philosophie");}
+    else{recs.push("Renforcer toutes les matières avant de choisir");}
   }
   if(!recs.length)recs.push("Remplissez tous les champs pour une orientation precise");
   if(!ecoles.length)ecoles.push("Précisez vos notes et intérêts pour des recommandations d'écoles");
@@ -23853,6 +23865,10 @@ function showEpreuves(){
   // 2. Librairie e-learning (cat1=épreuves, cat4=corpus, cat6=annales)
   var libEpreuves=(DB.elearningLibrary||[]).filter(function(e){
     return (e.cat==="cat1"||e.cat==="cat4"||e.cat==="cat6")&&_isVisibleEp(e.id);
+  }).map(function(e){
+    /* La copie serveur garde les anciens intitulés : le code fait foi pour le libellé. */
+    var _b=(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB:[]).find(function(x){return x.id===e.id;});
+    return _b?Object.assign({},e,{titre:_b.titre,desc:_b.desc}):e;
   });
   // 3. Épreuves créées par l'admin (filtrées des purgées)
   var customEpreuves=(DB.customEpreuves||[]).filter(function(e){return _isVisibleEp(e.id);});
@@ -29702,10 +29718,10 @@ setTimeout(function(){
 if(typeof EPREUVES_DB==='undefined'){
   window.EPREUVES_DB=[
     // ── MATHS ──
-    {id:"ep_m1",titre:"Épreuve Maths BEPC 2024 — Séq. 5",matiere:"Mathématiques",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
-     desc:"Épreuve officielle BEPC 2024, séquence 5. Couvre : Théorème de Pythagore, Thalès, calcul littéral, statistiques.",
+    {id:"ep_m1",titre:"Épreuve Maths 3ème, type BEPC — Séq. 5",matiere:"Mathématiques",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
+     desc:"Épreuve de préparation au BEPC, séquence 5. Couvre : Théorème de Pythagore, Thalès, calcul littéral, statistiques.",
      apercu:"Exercice 1 (4 pts) — Calculer : A = √(49) + 3² − 5  ;  B = (2x−3)(x+4)  développer et réduire.\nExercice 2 (5 pts) — ABC est un triangle rectangle en A tel que AB = 6 cm et AC = 8 cm. 1) Calculer BC. 2) M est le milieu de [BC], montrer que AM = BC/2.\nExercice 3 (5 pts) — Statistiques : 25 élèves ont obtenu les notes suivantes : 08, 10, 12, 14, 09, 11, 13, 15, 07, 10, 12, 11, 14, 16, 08, 09, 13, 10, 11, 12, 15, 07, 14, 10, 13. Calculer la moyenne, la médiane et l'étendue.\nProblème (6 pts) — Dans un repère, A(1;2), B(4;6), C(7;2). Montrer que le triangle ABC est isocèle."},
-    {id:"ep_m2",titre:"Épreuve Maths BEPC 2023 — Séq. 6",matiere:"Mathématiques",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
+    {id:"ep_m2",titre:"Épreuve Maths 3ème, type BEPC — Séq. 6",matiere:"Mathématiques",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
      desc:"Épreuve BEPC 2023, examen blanc. Thèmes : équations, géométrie, proportionnalité.",
      apercu:"Exercice 1 — Résoudre : 3x − 7 = 2(x + 1). Exercice 2 — Deux droites parallèles coupées par deux sécantes. D'après Thalès, calculer les longueurs manquantes. Problème — Un terrain rectangulaire a un périmètre de 120 m. Sa longueur est le double de sa largeur. Déterminer ses dimensions et son aire."},
     {id:"ep_m3",titre:"Épreuve Maths Probatoire C 2024",matiere:"Mathématiques",classe:"1ère C",seq:"Probatoire",cat:"cat1",gratuit:false,prix:1500,
@@ -29716,7 +29732,7 @@ if(typeof EPREUVES_DB==='undefined'){
      apercu:"Partie A — Étude de la fonction f(x) = (x² − 1)eˣ. Dresser le tableau de variation et tracer la courbe. Partie B — Dans une urne, 3 boules rouges et 5 boules blanches. On tire 2 boules sans remise. Calculer P(2 rouges), P(1 rouge et 1 blanche)."},
 
     // ── FRANÇAIS ──
-    {id:"ep_f1",titre:"Épreuve Français BEPC 2024",matiere:"Français",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
+    {id:"ep_f1",titre:"Épreuve Français 3ème, type BEPC — Séq. 6",matiere:"Français",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
      desc:"Épreuve officielle de Français BEPC 2024. Compréhension, grammaire, expression écrite.",
      apercu:"Texte : Extrait de « Une vie de boy » de Ferdinand Oyono.\nCompréhension (8 pts) : 1) Qui est le narrateur ? 2) Quel sentiment domine dans ce passage ? 3) Relevez deux figures de style et expliquez-les.\nGrammaire (6 pts) : 4) Analysez la phrase soulignée (nature et fonction). 5) Conjuguez « prendre » au plus-que-parfait.\nExpression écrite (6 pts) : Sujet au choix : a) Essai argumentatif sur l'éducation ; b) Récit d'une expérience marquante."},
     {id:"ep_f2",titre:"Épreuve Français BAC A 2024",matiere:"Français",classe:"Tle A",seq:"BAC",cat:"cat1",gratuit:false,prix:2000,
@@ -29724,7 +29740,7 @@ if(typeof EPREUVES_DB==='undefined'){
      apercu:"Sujet 1 — Dissertation : « La littérature africaine doit-elle se limiter à dénoncer les injustices sociales ? » Discutez.\nSujet 2 — Commentaire composé d'un extrait de « Les Soleils des Indépendances » d'Ahmadou Kourouma."},
 
     // ── PHYSIQUE-CHIMIE ──
-    {id:"ep_pc1",titre:"Épreuve Physique-Chimie BEPC 2024",matiere:"Physique-Chimie",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
+    {id:"ep_pc1",titre:"Épreuve Physique-Chimie 3ème, type BEPC — Séq. 5",matiere:"Physique-Chimie",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
      desc:"Épreuve officielle Physique-Chimie BEPC 2024. Électricité, mécanique, chimie.",
      apercu:"Chimie (8 pts) : 1) Équilibrer : Fe + O₂ → Fe₂O₃. 2) Calculer la masse molaire de H₂SO₄. 3) Quels sont les produits de la combustion complète du méthane ?\nPhysique (12 pts) : 4) Un mobile parcourt 300 m en 25 s. Calculer sa vitesse en m/s et km/h. 5) Circuit série : U = 12V, R₁ = 100Ω, R₂ = 200Ω. Calculer I et la tension aux bornes de chaque résistance."},
     {id:"ep_pc2",titre:"Épreuve Physique BAC C 2024",matiere:"Physique",classe:"Tle C",seq:"BAC",cat:"cat1",gratuit:false,prix:2000,
@@ -29732,17 +29748,17 @@ if(typeof EPREUVES_DB==='undefined'){
      apercu:"Exercice 1 — Chute libre avec frottements. Un objet de masse 0,5 kg est lâché d'une hauteur de 10 m. 1) Sans frottement : calculer v à l'impact. 2) Avec force de frottement f = 0,2v² : établir l'équation différentielle du mouvement."},
 
     // ── SVT ──
-    {id:"ep_svt1",titre:"Épreuve SVT BEPC 2024",matiere:"SVT",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
+    {id:"ep_svt1",titre:"Épreuve SVT 3ème, type BEPC — Séq. 6",matiere:"SVT",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
      desc:"Épreuve officielle SVT BEPC 2024. Reproduction, écologie, hérédité.",
      apercu:"Partie I — Restitution des connaissances (8 pts) : 1) Schéma annoté de l'appareil reproducteur féminin. 2) Définir : fécondation, nidation, placenta.\nPartie II — Exploitation de documents (12 pts) : Document montrant l'évolution de la température et du CO₂ atmosphérique. 1) Décrire l'évolution. 2) Proposer une explication. 3) Quelles conséquences sur la biodiversité ?"},
 
     // ── HISTOIRE-GÉO ──
-    {id:"ep_hg1",titre:"Épreuve Histoire-Géo BEPC 2024",matiere:"Histoire-Géographie",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
+    {id:"ep_hg1",titre:"Épreuve Histoire-Géo 3ème, type BEPC — Séq. 5",matiere:"Histoire-Géographie",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
      desc:"Épreuve officielle Histoire-Géographie BEPC 2024.",
      apercu:"Histoire (10 pts) : 1) Les causes de la décolonisation en Afrique. 2) Le rôle de l'ONU dans la décolonisation. 3) Citez 3 leaders africains et leur pays.\nGéographie (10 pts) : 4) Les 10 régions du Cameroun et leurs chefs-lieux. 5) Les principaux défis du développement du Cameroun (3 défis argumentés)."},
 
     // ── ANGLAIS ──
-    {id:"ep_en1",titre:"Épreuve Anglais BEPC 2024",matiere:"Anglais",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
+    {id:"ep_en1",titre:"Épreuve Anglais 3ème, type BEPC — Séq. 6",matiere:"Anglais",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
      desc:"Épreuve officielle Anglais BEPC 2024. Reading comprehension, grammar, essay writing.",
      apercu:"Section A — Reading Comprehension (10 marks): Read the passage about education in Cameroon and answer questions.\nSection B — Grammar (5 marks): Fill in the blanks with correct tenses. Rewrite using reported speech.\nSection C — Essay Writing (5 marks): Write a composition on: 'The importance of bilingualism in Cameroon.'"},
 
@@ -29831,7 +29847,7 @@ if(typeof EPREUVES_DB==='undefined'){
      apercu:"Exercice 1 — Analyse de phrase (5 pts)\nAnalysez la phrase suivante (nature et fonction de chaque groupe) : 'Hier, dans le petit village où mes grands-parents vivaient, nous avons assisté à une cérémonie traditionnelle qui m'a profondément ému.'\n\nExercice 2 — Valeurs des temps (4 pts)\nIndiquez la valeur de chaque temps souligné :\n• 'Quand il PLEUVAIT, j'ai fermé les fenêtres.' (imparfait : ?)\n• 'Il SERAIT venu si tu l'avais invité.' (conditionnel : ?)\n• 'Demain, je PRENDRAI le train.' (futur : ?)\n• 'L'eau BOUT à 100°C.' (présent : ?)\n\nExercice 3 — Transformations (5 pts)\n• Passive : 'Le maire a inauguré l'école.' → ?\n• Discours indirect : Il a dit : 'Je viendrai demain.' → ?\n• Négative complète : 'Quelqu'un a apporté quelque chose.' → ?\n\nExercice 4 — Lexique BEPC (6 pts)\nDonnez le sens de : éphémère, perspicace, pugnace, indolent, intrépide, exaspérer."},
 
     // ── BEPC Blanc — Histoire-Géo ──
-    {id:"ep_hg3",titre:"BEPC Blanc — Histoire-Géo 3ème (Cameroun + Mondialisation)",matiere:"Histoire-Géographie",classe:"3ème",seq:"BEPC",cat:"cat1",gratuit:true,
+    {id:"ep_hg3_bepc",titre:"BEPC Blanc — Histoire-Géo 3ème (Cameroun + Mondialisation)",matiere:"Histoire-Géographie",classe:"3ème",seq:"BEPC",cat:"cat1",gratuit:true,
      desc:"Sujet blanc BEPC HG : histoire du Cameroun indépendant + mondialisation économique. 20 points.",
      apercu:"DOSSIER HISTOIRE (10 pts) — Le Cameroun depuis 1960\nDocument 1 : Discours d'Ahidjo au 1er janvier 1960. Document 2 : Carte du Cameroun fédéral (1961-1972). Document 3 : Photo de Paul Biya prêtant serment 1982.\n\n1) Présentez les 3 documents (3 pts).\n2) Quelles sont les 2 grandes étapes politiques entre 1960 et 1972 ? (3 pts)\n3) Comment Paul Biya succède-t-il à Ahidjo ? (2 pts)\n4) Citez 2 défis politiques du Cameroun aujourd'hui (2 pts).\n\nDOSSIER GÉO (10 pts) — La mondialisation\nDocument 4 : Carte des flux commerciaux mondiaux. Document 5 : Photo de Douala (port).\n\n1) Définissez : mondialisation, FTN, IDH (3 pts).\n2) Quels sont les 3 grands pôles mondiaux ? (2 pts)\n3) Quel est le rôle du port de Douala dans l'intégration du Cameroun aux échanges mondiaux ? (3 pts)\n4) Citez 2 conséquences positives et 2 négatives de la mondialisation pour le Cameroun (2 pts)."},
 
@@ -48125,7 +48141,10 @@ function _cagCreer(eleveId){
                     badges:'mAchievements', jeux:'showJeuxEdu', battles:'mBattles',
                     groupe:'mStudyRoom', 'orientation-ia':'mAIOrientation',
                     ambassa:'mAgentAmbassa',
-                    simulateur:'mChoisirSimulation', 'oeuvres-interactives':'mChoisirOeuvre' };
+                    simulateur:'mChoisirSimulation', 'oeuvres-interactives':'mChoisirOeuvre',
+                    /* 09/11/2026 : modules sans adresse, reliés depuis Apprendre. */
+                    classes:'showClasseVirtuelle', coaching:'mCoaching', 'sujet-du-jour':'mSujetDuJour',
+                    erreurs:'mErreursARevoir', 'mes-evaluations':'showMesEvaluations', 'correction-ia':'mAICorrection' };
 
   function sectionDuHash(){
     var h = (window.location.hash || '').replace(/^#/, '');
@@ -48137,6 +48156,7 @@ function _cagCreer(eleveId){
     if(sec === 'abonnement') return 'abonnement';   // bouton « Choisir » d'une formule : #abonnement?plan=…
     if(sec === 'matiere') return 'matiere';         // carte de matière de la vitrine : #matiere?m=…
     if(sec === 'oeuvre') return 'oeuvre';           // bandeau d'une page /oeuvres/ : #oeuvre?k=…
+    if(sec === 'labo' || sec === 'jeu' || sec === 'fiche') return sec; // Apprendre : un labo, un jeu, une fiche précise
     // Programmes de partenariat : « partenariat-parent », « partenariat-sponsor »…
     if(sec.indexOf('partenariat-') === 0) return sec;
     if(sec.indexOf('pour-') === 0) return sec;          // hubs par public (v1.14)
@@ -48181,6 +48201,38 @@ function _cagCreer(eleveId){
       return;
     }
 
+    /* Fiche du catalogue : les données publiques arrivent après le chargement. */
+    if(sec === 'fiche'){
+      var qf = (window.location.hash || '').split('?')[1] || '', idF = '';
+      qf.split('&').forEach(function(kv){ var p = kv.split('='); if(decodeURIComponent(p[0] || '') === 'id') idF = decodeURIComponent(p[1] || ''); });
+      if(!/^[A-Za-z0-9_-]+$/.test(idF)) return;
+      window._vCurrentSec = 'fiche:' + idF;
+      try{ if(typeof _vFondNeutre === 'function') _vFondNeutre(); }catch(e){}
+      var essais = 0;
+      (function attend(){
+        var ok = DB && DB.elearning && (DB.elearning.contenus || []).some(function(c){ return c.id === idF; });
+        if(ok){ try{ previewElContenu(idF); }catch(e){} return; }
+        if(++essais < 16) setTimeout(attend, 500); else toast('Fiche introuvable', 'warn');
+      })();
+      return;
+    }
+
+    /* Apprendre (09/11/2026) : ouvrir UN laboratoire (#labo?id=lv10) ou UN jeu
+       (#jeu?id=j5). Les cadenas restent ceux de lancerLabo() et vLaunchJeu() :
+       un contenu payant demande toujours un essai ou un abonnement. */
+    if(sec === 'labo' || sec === 'jeu'){
+      var qr = (window.location.hash || '').split('?')[1] || '', cleRes = '';
+      qr.split('&').forEach(function(kv){
+        var p = kv.split('=');
+        if(decodeURIComponent(p[0] || '') === 'id') cleRes = decodeURIComponent(p[1] || '');
+      });
+      if(!/^[A-Za-z0-9_-]+$/.test(cleRes) || window._vCurrentSec === sec + ':' + cleRes) return;
+      window._vCurrentSec = sec + ':' + cleRes;
+      try{ if(typeof _vFondNeutre === 'function') _vFondNeutre(); }catch(e){}
+      try{ if(sec === 'labo') lancerLabo(cleRes); else vLaunchJeu(cleRes); }catch(e){}
+      return;
+    }
+
     /* Bandeau « Analyse complète, carte mentale… » des pages /oeuvres/ :
        #oeuvre?k=tle_stances_poemes (30/10/2026). Il menait à l'accueil du
        site : le lecteur cherchait l'œuvre, ne la trouvait pas. On ouvre le
@@ -48192,6 +48244,7 @@ function _cagCreer(eleveId){
         var p = kv.split('=');
         if(decodeURIComponent(p[0] || '') === 'k') cleOe = decodeURIComponent(p[1] || '');
       });
+      if(cleOe === '2nde_nkoumwam') cleOe = '5e_nkum_wam';     // ancien lien : l'œuvre est au programme de 5e
       if(!/^[a-z0-9_]+$/.test(cleOe) || window._vCurrentSec === 'oeuvre:' + cleOe) return;
       window._vCurrentSec = 'oeuvre:' + cleOe;
       Promise.all([_lazyChunk('litt-oeuvres'), _lazyChunk('jeux')])
@@ -48281,7 +48334,7 @@ function _cagCreer(eleveId){
          une vraie page, plus jamais un vide. */
       var _MODALE_FN = { recherche:1, calendrier:1, connexion:1, compte:1, inscription:1, partenaire:1,
                          positionnement:1, progression:1, badges:1, battles:1, groupe:1, 'orientation-ia':1, ambassa:1,
-                         simulateur:1, 'oeuvres-interactives':1 };
+                         simulateur:1, 'oeuvres-interactives':1, coaching:1, 'sujet-du-jour':1, erreurs:1, 'correction-ia':1 };
       if(_MODALE_FN[sec]){
         try{
           var _vcBg = document.getElementById('vContent');
@@ -48311,6 +48364,24 @@ function _cagCreer(eleveId){
           });
         }catch(e){}
         try{ window[fn](_q); }catch(e){}
+        return;
+      }
+      /* Apprendre (09/11/2026) : #epreuves?classe=3ème&matiere=Anglais pose les
+         filtres ; #evaluations?id=eval_en1 ouvre l'évaluation demandée. */
+      if(sec === 'epreuves' || sec === 'evaluations'){
+        var _qp = {};
+        ((window.location.hash || '').split('?')[1] || '').split('&').forEach(function(kv){
+          var p = kv.split('=');
+          if(p[0]) _qp[decodeURIComponent(p[0])] = decodeURIComponent((p[1] || '').replace(/\+/g, ' '));
+        });
+        if(sec === 'epreuves'){
+          if(_qp.classe){ window._epClasse = _qp.classe; window._epGrp = ''; }
+          if(_qp.matiere) window._epMat = _qp.matiere;
+        }
+        try{ window[fn](); }catch(e){}
+        if(sec === 'evaluations' && /^[A-Za-z0-9_-]+$/.test(_qp.id || '')){
+          try{ if(typeof SES !== 'undefined' && SES) lancerEvaluation(_qp.id); else apercuEvaluation(_qp.id); }catch(e){}
+        }
         return;
       }
       try{ window[fn](); }catch(e){}

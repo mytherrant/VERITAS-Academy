@@ -9,8 +9,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261108c">
-<link rel="stylesheet" href="jeu.css?v=20261108c">
+<link rel="stylesheet" href="apprendre.css?v=20261109b">
+<link rel="stylesheet" href="jeu.css?v=20261109b">
 <style>
 .hero{background:linear-gradient(90deg,#EDF2FB,#F7F9FE 70%);color:#001136;border:1px solid #DCE5F5;border-radius:10px;padding:34px 34px 28px;position:relative;overflow:hidden;margin-bottom:26px}
 .hero::before{display:none}
@@ -99,6 +99,8 @@
   <div class="sec-t"><h2 id="matsT">Mes matières</h2><a href="#defi">Défi express ›</a></div>
   <div class="mats" id="mats"></div>
 
+  <section class="tp"><div class="sec-t"><h2 id="tpT">Tout pour progresser</h2><a id="tpL" href="ressources.html">Tout voir ›</a></div><div class="tp-g" id="tp"></div></section>
+
   <section id="defi" class="defi" hidden>
     <div class="sec-t" style="margin-top:0"><h2>Défi express</h2><span class="badge">3 questions</span></div>
     <div id="defiQ"></div>
@@ -131,11 +133,12 @@
   </section>
 </div></main>
 
-<script src="scenes.js?v=20261108c"></script>
-<script src="progressions.js?v=20261108c"></script>
-<script src="lecons.js?v=20261108c"></script>
-<script src="commun.js?v=20261108c"></script>
-<script src="jeu.js?v=20261108c"></script>
+<script src="scenes.js?v=20261109b"></script>
+<script src="progressions.js?v=20261109b"></script>
+<script src="lecons.js?v=20261109b"></script>
+<script src="ressources.js?v=20261109b"></script>
+<script src="commun.js?v=20261109b"></script>
+<script src="jeu.js?v=20261109b"></script>
 <script>
 (function(){
   "use strict";
@@ -178,6 +181,11 @@
       return '<a class="mat" style="--c:'+m.t[0]+';--cp:'+m.t[1]+';--cm:'+m.t[2]+'" href="matiere.html?c='+encodeURIComponent(classe)+'&m='+m.id+'"><div class="h"><span class="pas">'+A.icoM(m,30)+'</span><div><b>'+esc(m.nom)+'</b><br><span>'+(tot?tot+' leçons au programme':'Programme à venir')+'</span></div></div>'+
         (red.length?'<span><span class="badge">'+red.length+' rédigée'+(red.length>1?'s':'')+'</span>'+(lu?' · '+lu+' lue'+(lu>1?'s':''):'')+'</span><div class="barre-p" aria-hidden="true"><i style="width:'+Math.round(lu/red.length*100)+'%"></i></div>':'')+'</a>';
     }).join("") || '<p class="vide">La progression de cette classe arrive bientôt.</p>';
+
+    /* tout ce que le site offre à cette classe, par usage */
+    var tous=A.resClasse(classe), parT={}; tous.forEach(function(i){var t=VRT_RES.items[i].t;parT[t]=(parT[t]||0)+1});
+    $("#tpT").textContent="Tout pour progresser en "+classe; $("#tpL").href="ressources.html?c="+encodeURIComponent(classe);
+    $("#tp").innerHTML=A.FAMILLES.filter(function(f){return parT[f[0]]}).map(function(f){return '<a class="tp-c" href="ressources.html?c='+encodeURIComponent(classe)+'&f='+f[0]+'"><span class="res-p">'+A.pic(f[2],22)+'</span><b>'+esc(f[1])+'</b><small>'+parT[f[0]]+' ressource'+(parT[f[0]]>1?'s':'')+'</small></a>'}).join("");
 
     /* défi express */
     var pool=[]; lecs(classe).concat(lecs(classe).length?[]:lecs()).forEach(function(k){LE[k].quiz.forEach(function(x){pool.push([k,x])})});

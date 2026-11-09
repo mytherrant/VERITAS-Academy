@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mes notes et mes coefficients | VÉRITAS</title>
+<meta name="description" content="Calcule ta moyenne avec les coefficients officiels de ta classe, vois quelle matière pèse le plus et compare les séries.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="apprendre.css?v=20261109b">
+<link rel="stylesheet" href="jeu.css?v=20261109b">
+</head>
+<body class="eleve">
+<header class="top">
+  <a class="logo" href="/">VÉRI<b>TAS</b></a>
+  <nav class="top-nav" aria-label="Apprendre"><a href="index.html">Apprendre</a><a href="ressources.html">Tout pour progresser</a><a href="notes.html" aria-current="page">Mes notes</a><a href="/scenes/">Scènes vivantes</a><a href="/corriges/">Corrigés</a></nav>
+  <div class="top-d"><a class="niveau-chip" data-niveau href="index.html#progression" aria-label="Mon niveau et mes badges"></a><span class="serie" id="serie" hidden></span></div>
+</header>
+<nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
+<main class="page"><div class="lim res-page" id="zone"></div></main>
+
+<script src="progressions.js?v=20261109b"></script>
+<script src="lecons.js?v=20261109b"></script>
+<script src="ressources.js?v=20261109b"></script>
+<script src="commun.js?v=20261109b"></script>
+<script src="jeu.js?v=20261109b"></script>
+<script>
+(function(){
+  "use strict";
+  var A=VRT.app,$=function(s,c){return (c||document).querySelector(s)},$$=function(s,c){return [].slice.call((c||document).querySelectorAll(s))},esc=A.esc;
+  var u=new URLSearchParams(location.search), c=u.get("c")||A.lire("classe","3e"); if(A.CLASSES.indexOf(c)<0) c="3e";
+  A.ecrire("classe",c); A.rail($("#rail"),c,null); A.chiffreSerie($("#serie"));
+  var COEF=VRT_RES.coefs;
+  /* classe → série et niveau de l'arrêté n° 92/22/MINESEC du 17 mars 2022 (null = hors de l'arrêté : collège) */
+  var SERIE={"2nde A":["A4","seconde"],"1re A":["A4","premiere"],"Tle A":["A4","terminale"],"2nde C":["C","seconde"],"1re C":["C","premiere"],"Tle C":["C","terminale"],"1re D":["D","premiere"],"Tle D":["D","terminale"]};
+  /* nom sur le bulletin → matière d'Apprendre */
+  var VERS={"Littérature":"francais","Langue française":"francais","Français":"francais","Philosophie":"philo","Anglais":"anglais","Géographie":"geo","Histoire":"histoire","ECM":"ecm","Informatique":"info","EPS":"eps","Mathématiques":"maths","Sciences":"sciences","Langues nationales":"ln","Cultures nationales":"cultures","Éducation artistique":"arts","Travail manuel":"tm","Physique":"physique","Chimie":"chimie","SVTEEHB":"svt","SVT":"svt","Physique-Chimie-Technologie":"pct"};
+  function bareme(cl,ser){var s=SERIE[cl];if(ser)s=ser;if(!s) return COEF.college.any.map(function(x){return [x[0],1]});var t=COEF[s[0]];return t[s[1]]||t.seconde}
+  var officiel=!!SERIE[c], cle="notes_"+c, D=A.lire(cle,{}), mats=bareme(c);
+  mats.forEach(function(m){D[m[0]]=D[m[0]]||{c:m[1],s:["","","","","",""]}});
+  var tri=0, TRI=["1er trimestre","2e trimestre","3e trimestre"];
+  function nb(v){var x=parseFloat(String(v).replace(",","."));return isFinite(x)&&x>=0&&x<=20?x:null}
+  function f2(x){return x==null?"—":x.toFixed(2).replace(".",",")}
+  function moy(a){var v=a.filter(function(x){return x!=null});return v.length?v.reduce(function(p,x){return p+x},0)/v.length:null}
+  function moyT(m,t){var s=D[m].s;return moy([nb(s[t*2]),nb(s[t*2+1])])}
+  function moyA(m){return moy([0,1,2].map(function(t){return moyT(m,t)}))}
+  function general(fn){var so=0,co=0;mats.forEach(function(m){var v=fn(m[0]),k=+D[m[0]].c||0;if(v!=null&&k>0){so+=v*k;co+=k}});return co?so/co:null}
+  function total(){return mats.reduce(function(p,m){return p+(+D[m[0]].c||0)},0)}
+  function sauver(){A.ecrire(cle,D)}
+
+  $("#zone").innerHTML='<p class="ariane"><a href="index.html">Apprendre</a><span>›</span><a href="ressources.html?c='+encodeURIComponent(c)+'">Tout pour progresser</a><span>›</span>Mes notes</p>'+
+    '<h1 class="res-h1">Mes notes et mes coefficients <span>· '+esc(c)+'</span></h1>'+
+    '<p class="res-chapo">Note de séquence, moyenne du trimestre, moyenne générale, moyenne annuelle : le calcul se fait pendant que tu tapes. Tes notes restent sur cet appareil.</p>'+
+    '<div class="classes res-classes" role="group" aria-label="Ma classe">'+A.CLASSES.map(function(x){return '<a href="?c='+encodeURIComponent(x)+'"'+(x===c?' aria-current="page"':'')+'>'+esc(x)+'</a>'}).join("")+'</div>'+
+    '<p class="nt-src">'+(officiel?'Coefficients de l\'arrêté n° 92/22/MINESEC du 17 mars 2022, série '+SERIE[c][0]+'. Modifie-les si ton bulletin diffère.':'L\'arrêté de 2022 ne fixe pas les coefficients du collège : chaque matière part à 1. Reporte ceux de ton bulletin.')+'</p>'+
+    '<div class="filtres" id="trim" role="tablist" aria-label="Trimestre">'+TRI.map(function(t,i){return '<button type="button" aria-pressed="'+(i===0)+'" data-t="'+i+'">'+t+'</button>'}).join("")+'</div>'+
+    '<div class="nt-grille"><div class="nt-table" role="table" aria-label="Notes par matière"><div class="nt-l nt-e" role="row"><span>Matière</span><span id="s1">Séq. 1</span><span id="s2">Séq. 2</span><span>Coef.</span><span>Moy.</span></div><div id="lignes"></div></div>'+
+    '<aside class="nt-bilan"><p class="nt-k">Moyenne du trimestre</p><p class="nt-g" id="mg">—</p><p class="nt-k">Moyenne annuelle</p><p class="nt-g2" id="ma">—</p><p class="nt-k">Total des coefficients : <b id="tc"></b></p></aside></div>'+
+    '<section class="res-fam"><h2>'+A.pic("cible",22)+'Ce qui pèse le plus sur ta moyenne</h2><p class="res-int">Écart à 10, multiplié par le coefficient : ce qu\'une matière ajoute ou retire à ton total.</p><div id="poids"></div></section>'+
+    '<section class="res-fam" id="series"><h2>'+A.pic("boussole",22)+'Et selon la série ?</h2><div id="cmp"></div></section>'+
+    '<section class="res-fam"><h2>'+A.pic("fleche",22)+'Pour aller plus loin</h2><div class="res-g">'+["o_cible","o_planning","o_parcours","o_orient"].map(A.carteRes).join("")+'</div></section>';
+
+  function ligne(m){var d=D[m[0]],s=d.s;return '<div class="nt-l" role="row" data-m="'+esc(m[0])+'"><span class="nt-m">'+esc(m[0])+'</span><input inputmode="decimal" data-i="'+(tri*2)+'" value="'+esc(s[tri*2])+'" aria-label="'+esc(m[0])+', séquence '+(tri*2+1)+'"><input inputmode="decimal" data-i="'+(tri*2+1)+'" value="'+esc(s[tri*2+1])+'" aria-label="'+esc(m[0])+', séquence '+(tri*2+2)+'"><input class="nt-c" inputmode="numeric" data-c="1" value="'+esc(d.c)+'" aria-label="Coefficient de '+esc(m[0])+'"><b class="nt-mo">—</b></div>'}
+  function tableau(){
+    $("#s1").textContent="Séq. "+(tri*2+1); $("#s2").textContent="Séq. "+(tri*2+2);
+    $("#lignes").innerHTML=mats.map(ligne).join("");
+    $$("#lignes input").forEach(function(i){i.oninput=function(){var m=i.closest(".nt-l").getAttribute("data-m");if(i.dataset.c) D[m].c=i.value; else D[m].s[+i.dataset.i]=i.value; i.classList.toggle("nt-err",!i.dataset.c&&i.value!==""&&nb(i.value)==null); sauver(); maj()}});
+    maj();
+  }
+  function comparer(){
+    var suites={"3e":[["2nde A",["A4","seconde"]],["2nde C",["C","seconde"]]],"2nde A":[["1re A",["A4","premiere"]]],"2nde C":[["1re C",["C","premiere"]],["1re D",["D","premiere"]]]}[c];
+    var el=$("#cmp");
+    if(!suites){$("#series").hidden=!/^(1re|Tle)/.test(c);el.innerHTML='<p class="res-int">Ta série est choisie. Pour la suite des études :</p><div class="res-g">'+["o_apres","o_orient"].map(A.carteRes).join("")+'</div>';return}
+    /* notes annuelles rapprochées des matières de la série ; ce que l'élève n'a pas encore (philosophie, langue vivante II…) reste hors du calcul, et on le dit. */
+    function noteDe(nom){if(/^(Littérature|Langue française)$/.test(nom)) nom=D["Français"]?"Français":nom; if(/^(Physique|Chimie)$/.test(nom)&&D["Physique-Chimie-Technologie"]) nom="Physique-Chimie-Technologie"; if(nom==="SVTEEHB"&&D["SVT"]) nom="SVT"; if(!D[nom]) return null; var v=moyA(nom); return v==null?moy([0,1,2].map(function(t){return moyT(nom,t)})):v}
+    var lignes=suites.map(function(sx){var so=0,co=0,hors=[];bareme(sx[0],sx[1]).forEach(function(m){var v=noteDe(m[0]);if(v==null){hors.push(m[0]);return}so+=v*m[1];co+=m[1]});return {n:sx[0],v:co?so/co:null,hors:hors}});
+    var aDesNotes=lignes.some(function(l){return l.v!=null});
+    el.innerHTML=aDesNotes?'<p class="res-int">Avec tes notes actuelles et les coefficients officiels de chaque série. C\'est un repère, pas une décision : parles-en à ton conseiller d\'orientation.</p><div class="nt-cmp">'+lignes.map(function(l){return '<div><b>'+esc(l.n)+'</b><span class="nt-g2">'+f2(l.v)+'</span>'+(l.hors.length?'<small>Sans : '+l.hors.map(esc).join(", ")+'</small>':'')+'</div>'}).join("")+'</div>':'<p class="res-int">Saisis quelques notes pour comparer les séries possibles après ta classe.</p>';
+  }
+  function maj(){
+    $$("#lignes .nt-l").forEach(function(l){l.querySelector(".nt-mo").textContent=f2(moyT(l.getAttribute("data-m"),tri))});
+    $("#mg").textContent=f2(general(function(m){return moyT(m,tri)}));
+    $("#ma").textContent=f2(general(moyA));
+    $("#tc").textContent=total();
+    var P=mats.map(function(m){var v=moyT(m[0],tri),k=+D[m[0]].c||0;return {n:m[0],e:v==null?null:(v-10)*k,v:v}}).filter(function(x){return x.e!=null}).sort(function(a,b){return a.e-b.e});
+    var el=$("#poids");
+    if(!P.length) el.innerHTML='<p class="res-int">Saisis tes notes pour le voir apparaître.</p>';
+    else{var max=Math.max.apply(null,P.map(function(x){return Math.abs(x.e)}))||1;
+      el.innerHTML=P.map(function(x){var id=VERS[x.n],lien=id&&A.PAR_ID[id]&&x.e<0?' <a href="matiere.html?c='+encodeURIComponent(c)+'&m='+id+'">Revoir</a>':'';return '<div class="nt-p"><span>'+esc(x.n)+lien+'</span><i><b class="'+(x.e<0?'moins':'plus')+'" style="width:'+Math.max(3,Math.abs(x.e)/max*100)+'%"></b></i><em>'+(x.e>0?'+':'')+x.e.toFixed(1).replace(".",",")+'</em></div>'}).join("")}
+    comparer();
+  }
+  $$("#trim button").forEach(function(b){b.onclick=function(){tri=+b.getAttribute("data-t");$$("#trim button").forEach(function(x){x.setAttribute("aria-pressed",x===b)});tableau()}});
+  tableau();
+  if(location.hash==="#series") setTimeout(function(){var s=$("#series");if(s)s.scrollIntoView()},60);
+})();
+</script>
+</body>
+</html>

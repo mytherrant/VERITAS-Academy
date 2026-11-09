@@ -3,7 +3,7 @@
    rien n'est envoyé. Toute lecture/écriture est protégée (navigation privée, stockage bloqué). */
 (function (W) {
   "use strict";
-  var ICO = "../assets/veritas-matieres.svg?v=20261108c"; /* versionné : un ancien sprite en cache n'a pas les nouvelles icônes */
+  var ICO = "../assets/veritas-matieres.svg?v=20261109b"; /* versionné : un ancien sprite en cache n'a pas les nouvelles icônes */
 
   // id, nom affiché, icône, teinte (m, pale, moyen, foncé), noms MINESEC, préfixes de scènes vivantes
   var MATIERES = [
@@ -11,12 +11,14 @@
     ["anglais", "Anglais", "m-anglais", ["#B03A6E", "#FBE4EE", "#E79BBE", "#6E1F43"], ["Anglais"], ["anglais"]],
     ["maths", "Mathématiques", "m-maths", ["#0E7C86", "#DDF2F4", "#7CCCD3", "#0A4F55"], ["Mathématiques"], []],
     ["pct", "Physique-chimie-techno", "m-pct", ["#007E11", "#E0F5E5", "#7FCB8C", "#00520B"], ["PCT"], []],
+    ["physique", "Physique", "m-pct", ["#007E11", "#E0F5E5", "#7FCB8C", "#00520B"], ["Physique"], []],
+    ["chimie", "Chimie", "m-pct", ["#0E7C86", "#DDF2F4", "#7CCCD3", "#0A4F55"], ["Chimie"], []],
     ["svt", "SVT", "m-svt", ["#007E11", "#E0F5E5", "#7FCB8C", "#00520B"], ["SVTEEHB", "SVT"], []],
     ["histoire", "Histoire", "m-histoire", ["#A84200", "#FFF3E4", "#F5B57A", "#6B2A00"], ["Histoire"], ["histoire"]],
     ["geo", "Géographie", "m-geo", ["#1E499B", "#DBE8FE", "#8FB0EE", "#142554"], ["Géographie"], ["geo"]],
     ["ecm", "ECM", "m-ecm", ["#9A6F00", "#FFF6DA", "#FFC93C", "#6B4E00"], ["ECM"], ["ecm"]],
     ["philo", "Philosophie", "m-philo", ["#5B4FA8", "#EAE7F7", "#ADA4DE", "#352C72"], ["Philosophie"], ["philo"]],
-    ["info", "Informatique", "m-info", ["#0C2A6A", "#E4E9F2", "#8C9BC0", "#071A45"], ["Informatique", "Informatique TIC"], []],
+    ["info", "Informatique", "m-info", ["#0C2A6A", "#E4E9F2", "#8C9BC0", "#071A45"], ["Informatique", "Informatique TIC", "Informatique Fondamentale"], []],
     ["allemand", "Allemand", "m-langues", ["#B03A6E", "#FBE4EE", "#E79BBE", "#6E1F43"], ["Allemand"], ["allemand"]],
     ["espagnol", "Espagnol", "m-langues", ["#B03A6E", "#FBE4EE", "#E79BBE", "#6E1F43"], ["Espagnol"], ["espagnol"]],
     ["italien", "Italien", "m-langues", ["#B03A6E", "#FBE4EE", "#E79BBE", "#6E1F43"], ["Italien"], ["italien"]],
@@ -65,6 +67,19 @@
   function ico(id, taille) { taille = taille || 26; return '<svg width="' + taille + '" height="' + taille + '" aria-hidden="true"><use href="' + ICO + '#' + id + '"/></svg>'; }
   /* Pictogrammes d'interface (pas d'émoji) : SVG au trait, couleur = currentColor. */
   var PIC = {
+    fiole: '<path d="M9 3h6M10 3v6.2L4.8 18a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 9.2V3"/><path d="M7.5 15h9"/>',
+    manette: '<rect x="3" y="7" width="18" height="11" rx="4"/><path d="M8 11v3M6.5 12.5h3M15.5 12h.01M18 14h.01"/>',
+    epees: '<path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M9.5 6.5 11 5l-1-2h-3M5 14l-2 2 1 1M8 17l-1 1 3 3 1-1"/>',
+    chrono: '<circle cx="12" cy="14" r="7"/><path d="M12 10v4l2.5 2M9.5 3h5M12 3v4"/>',
+    boussole: '<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
+    calcul: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/>',
+    cible: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+    doc: '<path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"/>',
+    plume: '<path d="M20 4c-7 0-13 4-13 11v2l-3 3M7 17h4c5 0 9-5 9-13M10 13l5-5"/>',
+    coche2: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8 12 3 3 5-6"/>',
+    aide: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5v.4M12 17h.01"/>',
+    fleche: '<path d="M4 12h15M13 6l6 6-6 6"/>',
+    cadenas: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
     flamme: '<path d="M12 21c-3.9 0-6.5-2.6-6.5-6.2 0-3.6 2.7-5.6 3.9-9.3.2-.6.9-.7 1.3-.2C13.4 8.8 18.5 10.8 18.5 15c0 3.5-2.7 6-6.5 6z" fill="#FFC93C" stroke="#C24E00"/><path d="M12 21c-1.6 0-2.8-1.1-2.8-2.7 0-1.8 1.6-2.6 2.3-4.4 1.4 1.4 3.3 2.4 3.3 4.4 0 1.6-1.2 2.7-2.8 2.7z" fill="#C24E00" stroke="none"/>',
     horloge: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
     masques: '<path d="M3.5 5.5c3-1.4 6.2-1.4 9.2 0v5.2c0 3.2-2 5.6-4.6 5.6S3.5 13.9 3.5 10.7z" fill="#E4ECFA"/><path d="M6 9.4h1.2M9.4 9.4h1.2M6.2 12.6c1 .9 3.2.9 4.2 0"/><path d="M11.8 9.2c3-1.2 6-1 8.7.6v4.9c0 3.1-1.9 5.5-4.4 5.5-1.9 0-3.4-1.3-4.1-3.2" fill="#FFF3CC"/><path d="M14.3 13.1h1.1M17.5 13.6h1.1M14.6 17.2c.9-.8 2.9-.6 3.8.3"/>',
@@ -240,8 +255,81 @@
     return { r: ordre.map(function (k) { return q.r[k]; }), b: ordre.indexOf(q.b) };
   }
 
+  /* ---------- ressources du site reliées à la progression (ressources.js) ---------- */
+  var FAMILLES = [
+    ["notes", "Notes et coefficients", "calcul", "Savoir où tu en es et ce qui compte vraiment."],
+    ["orientation", "Orientation", "boussole", "Choisir sa série, sa filière, son école."],
+    ["direct", "Compositions en direct", "chrono", "Chronométrées, corrigées dès la remise."],
+    ["defis", "Battles et défis", "epees", "Se mesurer aux élèves de son cycle, travailler à plusieurs."],
+    ["jeu", "Jeux", "manette", "Réviser en jouant, sur les notions de ta classe."],
+    ["labo", "Laboratoires", "fiole", "Manipuler, observer, conclure : l'expérience reliée à ta leçon."],
+    ["cours", "Cours rédigés", "livre", "Les leçons complètes déjà disponibles pour ta classe."],
+    ["methode", "Méthodes et examens", "plume", "Les méthodes attendues le jour de l'épreuve."],
+    ["oeuvre", "Œuvres au programme", "livre", "Analyse, résumé et fiche de lecture."],
+    ["corrige", "Corrigés du cahier", "coche2", "Séquence par séquence, exercice par exercice."],
+    ["epreuve", "Épreuves et annales", "doc", "BEPC, Probatoire, BAC : t'entraîner sur de vrais sujets."],
+    ["fichier", "Cours et fiches du catalogue", "doc", "Les documents réellement déposés par le centre, pour ta classe."],
+    ["scene", "Scènes vivantes", "masques", "Une situation courte où tu choisis la bonne réponse."],
+    ["cahier", "Mon cahier", "livre", "Le cahier interactif de l'année."],
+    ["aide", "Aide et repères", "aide", "Pour poser une question ou situer ce que tu apprends."]
+  ];
+  var LIB_F = {}; FAMILLES.forEach(function (f) { LIB_F[f[0]] = f; });
+  function RES() { return W.VRT_RES || { items: {}, lec: {}, mat: {}, cl: {} }; }
+  function resLecon(c, m, n) { return RES().lec[c + "|" + m + "|" + n] || []; }
+  function resDeMatiere(c, m) {
+    var R0 = RES(), o = (R0.mat[c + "|" + m] || []).slice(), p = c + "|" + m + "|";
+    Object.keys(R0.lec).forEach(function (k) { if (k.indexOf(p) === 0) R0.lec[k].forEach(function (i) { if (o.indexOf(i) < 0) o.push(i); }); });
+    return o;
+  }
+  function resClasse(c) {
+    var R0 = RES(), o = (R0.cl[c] || []).slice(), p = c + "|";
+    Object.keys(R0.mat).concat(Object.keys(R0.lec)).forEach(function (k) { if (k.indexOf(p) === 0) (R0.mat[k] || R0.lec[k]).forEach(function (i) { if (o.indexOf(i) < 0) o.push(i); }); });
+    return o;
+  }
+  function leconsDeRes(id) {
+    var R0 = RES(), o = [];
+    Object.keys(R0.lec).forEach(function (k) {
+      if (R0.lec[k].indexOf(id) < 0) return;
+      var p = k.split("|"), c = p[0], m = p[1], n = +p[2], t = "";
+      (PAR_ID[m] ? PAR_ID[m].minesec : []).forEach(function (s) { (((W.VRT_PROG || {})[c] || {})[s] || []).forEach(function (ch) { ch[1].forEach(function (l) { if (l[0] === n) t = l[1]; }); }); });
+      o.push({ c: c, m: m, n: n, t: t });
+    });
+    return o;
+  }
+  /* Fiches du catalogue : seul le serveur sait si un document existe. Lecture à chaque visite ;
+     si le serveur ne répond pas, la section n'apparaît pas. */
+  var CL_CAT = { "6ème": ["6e"], "5ème": ["5e"], "4ème": ["4e"], "3ème": ["3e"], "2nde": ["2nde A", "2nde C"], "1ère": ["1re A", "1re C", "1re D"], "1ère A": ["1re A"], "1ère C": ["1re C"], "1ère D": ["1re D"], "Terminale": ["Tle A", "Tle C", "Tle D"], "Tle A": ["Tle A"], "Tle C": ["Tle C"], "Tle D": ["Tle D"] };
+  var MAT_CAT = { "Mathématiques": ["maths"], "Français": ["francais"], "Littérature": ["francais"], "Anglais": ["anglais"], "SVT": ["svt"], "Physique-Chimie": ["pct", "physique", "chimie"], "Histoire-Géo": ["histoire", "geo"], "Histoire-Géographie": ["histoire", "geo"], "Philosophie": ["philo"], "Informatique": ["info"] };
+  function chargerCatalogue(fin) {
+    if (!W.fetch) return;
+    W.fetch("/api/public_data.php", { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      var R0 = RES(), n = 0; ((j && j.elearning_contenus) || []).forEach(function (x) {
+        if (x.dispo !== true) return;
+        var id = "cat_" + x.id, cs = CL_CAT[x.classe] || [], ms = MAT_CAT[x.matiere] || [];
+        if (!cs.length || !ms.length) return;
+        R0.items[id] = { t: "fichier", ti: x.titre, d: x.apercu || x.desc || "", u: "/app.html#fiche?id=" + encodeURIComponent(x.id), ab: x.gratuit ? 0 : 1 };
+        cs.forEach(function (c) { ms.forEach(function (m) { var k = c + "|" + m; if (leconsExiste(c, m)) { (R0.mat[k] = R0.mat[k] || []); if (R0.mat[k].indexOf(id) < 0) R0.mat[k].push(id); n++; } }); });
+      });
+      if (n && fin) fin();
+    }).catch(function () { });
+  }
+  function leconsExiste(c, m) { var p = (W.VRT_PROG || {})[c] || {}; return PAR_ID[m] && PAR_ID[m].minesec.some(function (s) { return p[s]; }); }
+  function marque(it) { return it.ab ? '<span class="res-tag ab">' + pic("cadenas", 12) + 'Abonnement</span>' : it.compte ? '<span class="res-tag">Compte gratuit</span>' : ''; }
+  function carteRes(id) {
+    var it = RES().items[id]; if (!it) return "";
+    var f = LIB_F[it.t] || LIB_F.aide;
+    return '<a class="res-c" href="' + esc(it.u) + '"><span class="res-p">' + pic(f[2], 20) + '</span><span class="res-x"><strong>' + esc(it.ti) + '</strong>' + (it.d ? '<small>' + esc(it.d) + '</small>' : '') + marque(it) + '</span></a>';
+  }
+  function pastilles(ids) {
+    return ids.length ? '<div class="res-pa">' + ids.map(function (id) {
+      var it = RES().items[id]; if (!it) return ""; var f = LIB_F[it.t] || LIB_F.aide;
+      return '<a href="' + esc(it.u) + '" title="' + esc(it.ti) + '">' + pic(f[2], 14) + '<span>' + esc(COURT[it.t] || f[1]) + '</span>' + (it.ab ? pic("cadenas", 11) : '') + '</a>';
+    }).join("") + '</div>' : "";
+  }
+  var COURT = { labo: "Labo", jeu: "Jeu", cours: "Cours", methode: "Méthode", oeuvre: "Œuvre", epreuve: "Épreuve", direct: "En direct" };
+
   W.VRT = W.VRT || {};
-  W.VRT.app = { MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
+  W.VRT.app = { chargerCatalogue: chargerCatalogue, FAMILLES: FAMILLES, resLecon: resLecon, resDeMatiere: resDeMatiere, resClasse: resClasse, leconsDeRes: leconsDeRes, carteRes: carteRes, pastilles: pastilles, MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
     marquerLu: marquerLu, noterQuiz: noterQuiz, teinter: teinter, ico: ico, icoM: icoM, pic: pic, etoiles: etoiles, esc: esc, slug: slug, rail: rail, chiffreSerie: chiffreSerie, scenesPour: scenesPour, jour: jour,
     exporterImage: exporterImage, offre: offre, cahierPour: cahierPour, melanger: melanger, boutonsImage: boutonsImage, filigraneCanvas: filigraneCanvas };
 })(window);

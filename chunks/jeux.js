@@ -18,10 +18,10 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
   {id:"j5",titre:"Conjugaison Express",emoji:"📝",matiere:"Francais",niveau:"6eme-Tle",
    desc:"Conjuguez rapidement les verbes irreguliers et les temps composes",gratuit:false,plan:"Premium",
    action:"lancerConjugaison"},
-  {id:"j6",titre:"Figures de Rhetorique",emoji:"📖",matiere:"Litterature",niveau:"2nde-Tle",
+  {id:"j6",titre:"Figures de Rhetorique",emoji:"📖",matiere:"Litterature",niveau:"3eme-1ere",
    desc:"Identifiez metaphores, allegories et autres figures de style",gratuit:false,plan:"Premium",
    action:"lancerFigures"},
-  {id:"j7",titre:"Tableau Periodique",emoji:"⚗️",matiere:"Physique-Chimie",niveau:"2nde-Tle",
+  {id:"j7",titre:"Tableau Periodique",emoji:"⚗️",matiere:"Physique-Chimie",niveau:"3eme-2nde",
    desc:"Retrouvez les elements chimiques par leur symbole et numero atomique",gratuit:true,
    action:"lancerTableauPeriodique"},
   {id:"j8",titre:"Mots Caches Scientifiques",emoji:"🔬",matiere:"SVT",niveau:"4eme-1ere",
@@ -51,7 +51,7 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
     {mot:"TRADITION",ind:"Valeur défendue face à la modernité"},
     {mot:"PARIS",ind:"Destination finale du narrateur"},
    ]},
-  {id:"j_3e_vieux_negre_qcm",titre:"Le Vieux Nègre et la Médaille — Quiz 3ème",emoji:"🏅",matiere:"Litterature",niveau:"3eme",
+  {id:"j_3e_vieux_negre_qcm",titre:"Le Vieux Nègre et la Médaille — Quiz Tle",emoji:"🏅",matiere:"Litterature",niveau:"Terminale",
    desc:"QCM sur l'œuvre de Ferdinand Oyono",gratuit:true,type:"qcm",action:"lancerJLitL3e_vieux_negre",
    questions:[
     {q:"Qui est l'auteur du 'Vieux Nègre et la Médaille' ?",opts:["Camara Laye","Mongo Beti","Ferdinand Oyono","Cheikh Hamidou Kane"],ans:2,exp:"Ferdinand Oyono (1929-2010), écrivain camerounais né à Ebolowa. Roman publié en 1956, satire du colonialisme."},
@@ -132,7 +132,7 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
     {q:"Quel personnage représente la jeunesse tiraillée entre tradition et modernité ?",opts:["Bakayoko","N'Deye Touti","Ramatoulaye","Lahbib"],ans:1,exp:"N'Deye Touti est instruite, admiratrice de la culture française, mais finit par rejoindre la lutte collective."},
     {q:"Comment se termine la grève ?",opts:["Par un échec total","Par une victoire partielle des grévistes","Par l'arrestation de tous les leaders","Par une répression militaire définitive"],ans:1,exp:"Les cheminots obtiennent des avancées (alignement des salaires) — victoire symbolique qui préfigure l'indépendance."},
    ]},
-  {id:"j_tle_ville_cruelle_qcm",titre:"Ville Cruelle (Mongo Beti) — Quiz Tle",emoji:"🌆",matiere:"Litterature",niveau:"Terminale",
+  {id:"j_tle_ville_cruelle_qcm",titre:"Ville Cruelle (Mongo Beti) — Quiz 3ème",emoji:"🌆",matiere:"Litterature",niveau:"3eme",
    desc:"QCM sur Ville Cruelle de Mongo Beti au programme Terminale",gratuit:true,type:"qcm",action:"lancerJLitLTle_ville_cruelle",
    questions:[
     {q:"Quel est le vrai nom de Mongo Beti ?",opts:["Ferdinand Oyono","Alexandre Biyidi-Awala","Rene Philombe","Patrice Ndedi Penda"],ans:1,exp:"Alexandre Biyidi-Awala, né à Mbalmayo (Cameroun) en 1932. Mongo Beti est son pseudonyme littéraire."},
@@ -212,7 +212,7 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
     {q:"Formule de la force de gravitation universelle ?",opts:["F = G × m × m'","F = G × (m × m') / r²","F = m × g","F = G / r²"],ans:1,exp:"F = G × m × m' / r² (loi de Newton). G = 6,67×10⁻¹¹ N·m²/kg²."},
     {q:"Quantité de mouvement ?",opts:["p = m × v","p = m × a","p = (1/2) × m × v²","p = F × t"],ans:0,exp:"p = mv (vecteur). En mécanique relativiste : p = γmv."},
    ]},
-  {id:"j_equations",titre:"Équations du 2nd degré",emoji:"📐",matiere:"Maths",niveau:"1ere-Tle",
+  {id:"j_equations",titre:"Équations du 2nd degré",emoji:"📐",matiere:"Maths",niveau:"2nde-1ere",
    desc:"Résolvez des équations du second degré ax² + bx + c = 0",gratuit:true,type:"qcm",action:"lancerJEquations",
    questions:[
     {q:"Solutions de x² - 5x + 6 = 0 ?",opts:["x = 1 ou x = 6","x = 2 ou x = 3","x = -2 ou x = -3","x = 0 ou x = 5"],ans:1,exp:"Δ = 25 - 24 = 1. x = (5±1)/2 donc x=3 ou x=2. Vérification : 2×3=6 et 2+3=5 ✓"},
@@ -235,7 +235,7 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
     {q:"Quelle partie du cerveau contrôle l'équilibre ?",opts:["Le cortex","Le cervelet","Le bulbe rachidien","L'hypothalamus"],ans:1,exp:"Le cervelet coordonne les mouvements et l'équilibre. Situé à l'arrière du crâne, sous le cortex."},
     {q:"Combien de globules rouges produit-on par seconde ?",opts:["~2 000","~200 000","~2 000 000","~20 000 000"],ans:2,exp:"~2 millions par seconde (moelle osseuse). Ils vivent ~120 jours avant destruction dans la rate."},
    ]},
-  {id:"j_participe_passe",titre:"Accord du Participe Passé",emoji:"✏️",matiere:"Francais",niveau:"3eme-Tle",
+  {id:"j_participe_passe",titre:"Accord du Participe Passé",emoji:"✏️",matiere:"Francais",niveau:"5eme-3eme",
    desc:"Règles d'accord du participe passé avec avoir et être",gratuit:true,type:"qcm",action:"lancerJParticipePasse",
    questions:[
     {q:"'Les pommes que j'ai ___ sont mûres.' (manger)",opts:["mangé","mangés","mangées","manger"],ans:2,exp:"mangées. Avec 'avoir' : accord avec le COD s'il est placé avant. 'que' = COD féminin pluriel (les pommes)."},
@@ -293,7 +293,7 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
       {q:'Formule de la chaleur reçue (calorimétrie)',opts:['Q = m × c × ΔT','Q = m / c × ΔT','Q = m × c / ΔT','Q = c × ΔT²'],ans:0,exp:'Q = m × c × ΔT. m : masse (kg), c : capacité thermique massique, ΔT : variation de température.'},
       {q:'Qu\'est-ce que la période T d\'un phénomène périodique ?',opts:['La durée d\'un cycle','La fréquence en Hz','L\'amplitude','La longueur d\'onde'],ans:0,exp:'La période T est la durée d\'un cycle complet, exprimée en secondes.'}
     ]},
-  {id:'j_regions_cmr',titre:'Régions du Cameroun',emoji:'🗺️',matiere:'Géographie',niveau:'6ème-Tle',type:'qcm',acces:1,
+  {id:'j_regions_cmr',titre:'Régions du Cameroun',emoji:'🗺️',matiere:'Géographie',niveau:'3ème-Tle',type:'qcm',acces:1,
     questions:[
       {q:'Combien de régions compte le Cameroun ?',opts:['10','8','12','9'],ans:0,exp:'Le Cameroun est divisé en 10 régions depuis la réforme administrative.'},
       {q:'Quelle est la capitale de la région du Centre ?',opts:['Yaoundé','Bertoua','Bafoussam','Ngaoundéré'],ans:0,exp:'Yaoundé est la capitale politique du Cameroun et le chef-lieu de la région du Centre.'},

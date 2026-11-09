@@ -51,10 +51,7 @@ CONTENU = {
     'evaluations/BEPC_blanc_3e_expression_ecrite.html': (
         "BEPC blanc de 3e : expression écrite, un sujet au choix (texte argumentatif sur l'abandon scolaire ou récit d'une cérémonie traditionnelle), avec grilles d'évaluation. Programme MINESEC.",
         'Épreuve blanche', '3e'),
-    'evaluations/epreuve_1ere_enfant_noir_2026.html': (
-        "Épreuve de français de 1re sur L'Enfant noir de Camara Laye : extrait, questions et corrigé en ligne, conformes au programme MINESEC.",
-        "Épreuve d'examen", '1re'),
-    'evaluations/epreuve_2nde_lion_perle_2026.html': (
+    'evaluations/epreuve_1ere_lion_perle_2026.html': (
         "Épreuve de français de 2nde sur Le Lion et la Perle de Wole Soyinka : extrait, questions et corrigé en ligne, programme MINESEC.",
         "Épreuve d'examen", '2nde'),
     'evaluations/epreuve_3e_ville_cruelle_2026.html': (

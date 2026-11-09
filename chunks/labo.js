@@ -5,7 +5,7 @@
 window.LABO_DB=[
   // ─ PHYSIQUE ─
   {id:"lv1",titre:"Circuit Électrique Interactif",matiere:"Physique",cat:"physique",
-   classe:"4ème-3ème-2nde",ico:"⚡",color:"#0891B2",gratuit:true,
+   classe:"4ème-3ème-2nde C",ico:"⚡",color:"#0891B2",gratuit:true,
    desc:"Construis et teste des circuits en série et parallèle. Calcule tension, intensité, résistance et puissance.",
    theorie:"⚡ Loi d'Ohm : U = R × I (U=Volts, R=Ohms, I=Ampères).\n\n🔴 Série : I identique partout. U_total = U₁+U₂. R_eq = R₁+R₂.\n🔵 Parallèle : U identique partout. I_total = I₁+I₂. 1/R_eq = 1/R₁+1/R₂.\n\n⚙️ Puissance : P = U×I = R×I² = U²/R (Watts).\nÉnergie : E = P×t (Joules). 1 kWh = 3 600 000 J.\n\nLois de Kirchhoff : ΣU = 0 dans une maille ; ΣI = 0 dans un nœud.",
    experience:[
@@ -28,8 +28,8 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv2",titre:"Les Forces et le Mouvement",matiere:"Physique",cat:"physique",
-   classe:"2nde-1ère",ico:"🚀",color:"#1E3A8A",gratuit:true,
-   desc:"Lois de Newton, poids, chute libre, énergie mécanique et forces de frottement. Programme 2nde–1ère.",
+   classe:"4ème-2nde C-1ère C/D-Tle C/D",ico:"🚀",color:"#1E3A8A",gratuit:true,
+   desc:"Lois de Newton, poids, chute libre, énergie mécanique et forces de frottement.",
    theorie:"📌 1ère loi (inertie) : si les forces se compensent, l'objet est immobile ou en MRU.\n📌 2ème loi : ΣF = m×a (F en Newtons, m en kg, a en m/s²).\n📌 3ème loi : action = réaction (forces égales et opposées sur deux corps différents).\n\n⬇️ Chute libre (sans frottement) : h = ½gt² ; v = gt (g = 10 m/s² en 2nde).\n🔴 Poids : P = mg. ATTENTION : masse (kg) ≠ poids (Newton) !\n\n2nde : identifier les forces, calculer résultante, MRU/MRUV.\n1ère : énergie cinétique Ec = ½mv² ; énergie potentielle Ep = mgh ; conservation Ec+Ep = cste (sans frottement).\nConservation : Ec + Ep = constante (sans frottement).",
    experience:[
      "1️⃣ Bilan des forces sur un objet posé sur une table : Poids P = mg vers le bas ; Réaction N vers le haut. Résultante = 0 (immobile).",
@@ -44,14 +44,14 @@ window.LABO_DB=[
      {q:"Un objet de 4kg soumis à F=20N. Son accélération :",opts:["0,2 m/s²","5 m/s²","80 m/s²","16 m/s²"],ans:1,exp:"a = F/m = 20/4 = 5 m/s². 2ème loi de Newton : ΣF = ma."},
      {q:"Poids d'un objet de 5kg (g=10) :",opts:["5 N","10 N","50 N","500 N"],ans:2,exp:"P = mg = 5×10 = 50 N. La masse est en kg, le poids en Newtons."},
      {q:"Chute libre h=45m (g=10). Durée :",opts:["2 s","3 s","4 s","9 s"],ans:1,exp:"h = ½gt² → t² = 2h/g = 90/10 = 9 → t = 3 s."},
-     {q:"La 3ème loi de Newton (action-réaction) :",opts:["S'applique uniquement aux corps en mouvement","Les forces s'exercent sur le même corps","Deux corps exercent sur l'autre des forces égales et opposées","N'est valable qu'en chute libre"],ans:2,exp:"Si A exerce F sur B, alors B exerce -F sur A. Forces égales, opposées, corps différents."},
+     {q:"La 3ème loi de Newton (action-réaction) :",opts:["S'applique uniquement aux corps en mouvement","Les forces s'exercent sur le même corps","Deux corps exercent l'un sur l'autre des forces égales et opposées","N'est valable qu'en chute libre"],ans:2,exp:"Si A exerce F sur B, alors B exerce -F sur A. Forces égales, opposées, corps différents."},
      {q:"Objet en MRU (mouvement rectiligne uniforme). La résultante des forces est :",opts:["Maximale","Égale à ma","Nulle","Vers le bas"],ans:2,exp:"1ère loi : résultante nulle → immobile ou MRU. Pas de force nette = pas d'accélération."},
      {q:"Énergie cinétique d'un objet 2kg à 6 m/s :",opts:["12 J","24 J","36 J","72 J"],ans:2,exp:"Ec = ½mv² = ½×2×36 = 36 J."},
    ],
    ressource:"https://minesec-distancelearning.cm",pack:"Premium"},
 
   {id:"lv9",titre:"Optique & Propagation de la Lumière",matiere:"Physique",cat:"physique",
-   classe:"2nde-1ère-Tle",ico:"🔭",color:"#0E7490",gratuit:true,
+   classe:"2nde C-1ère C/D",ico:"🔭",color:"#0E7490",gratuit:true,
    desc:"Réflexion, réfraction, lentilles convergentes/divergentes, formation d'images et applications.",
    theorie:"🌟 Lumière : se propage en ligne droite à c = 3×10⁸ m/s dans le vide.\n\n🪞 Réflexion : angle incidence = angle réflexion (loi de Descartes).\n\n🔎 Réfraction : n₁×sin(i₁) = n₂×sin(i₂). Milieu plus dense → rayon se rapproche de la normale. n_eau≈1,33 ; n_verre≈1,5.\n\n🔬 Lentille convergente : f'>0. Vergence V=1/f' (dioptries).\nRelation conjugaison : 1/OA' - 1/OA = 1/f'.\nGrandissement : γ = OA'/OA.",
    experience:[
@@ -74,9 +74,9 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv10",titre:"Thermodynamique & Calorimétrie",matiere:"Physique",cat:"physique",
-   classe:"1ère-Tle",ico:"🌡️",color:"#AE5353",gratuit:false,plan:"Sciences",
+   classe:"1ère C/D",ico:"🌡️",color:"#AE5353",gratuit:false,plan:"Sciences",
    desc:"Transferts de chaleur, capacité calorifique, changements d'état et lois des gaz parfaits.",
-   theorie:"🌡️ Q = m×c×ΔT (Q en J, m en kg, c = capacité thermique massique).\nc_eau = 4180 J/kg·K ; c_fer = 450 J/kg·K.\n\n🧊 Changement d'état : Q = m×L (L = chaleur latente). L_fusion_glace = 334 kJ/kg.\n\n⚖️ Mélange : Q_cédée + Q_reçue = 0 (système isolé).\n\n⚗️ Gaz parfaits : PV = nRT (R = 8,314 J/mol·K ; T en Kelvin = °C + 273).\nBoyle : PV = cste (T fixe). Gay-Lussac : P/T = cste (V fixe).",
+   theorie:"🌡️ Q = m×c×ΔT (Q en J, m en kg, c = capacité thermique massique).\nc_eau = 4180 J/kg·K ; c_fer = 450 J/kg·K.\n\n🧊 Changement d'état : Q = m×L (L = chaleur latente). L_fusion_glace = 334 kJ/kg.\n\n⚖️ Mélange : Q_cédée + Q_reçue = 0 (système isolé).\n\n⚗️ Gaz parfaits : PV = nRT (R = 8,314 J/mol·K ; T en Kelvin = °C + 273).\nBoyle-Mariotte : PV = cste (T fixe). Charles : P/T = cste (V fixe). Gay-Lussac : V/T = cste (P fixe).",
    experience:[
      "1️⃣ CALORIMÈTRE — MESURE DE C : verse 200g d'eau à 20°C dans un calorimètre. Chauffe un bloc de métal à 100°C, plonge-le dans l'eau. Mesure la température finale T_éq. Applique : m_métal×c_métal×(100-T_éq) = m_eau×4180×(T_éq-20). Déduis c_métal.",
      "2️⃣ CHANGEMENT D'ÉTAT — PALIER : mets des glaçons dans un bécher. Chauffe à puissance constante. Relève T toutes les minutes. Trace la courbe. Observe : pendant la fonte (0°C), T ne change pas malgré le chauffage → énergie absorbée = chaleur latente L.",
@@ -97,7 +97,7 @@ window.LABO_DB=[
 
   // ─ CHIMIE ─
   {id:"lv3",titre:"Réactions Acide-Base",matiere:"Physique-Chimie",cat:"chimie",
-   classe:"2nde-1ère-Tle C",ico:"⚗️",color:"#6C56A6",gratuit:true,
+   classe:"3ème-2nde C-Tle C/D",ico:"⚗️",color:"#6C56A6",gratuit:true,
    desc:"pH, indicateurs colorés, neutralisations, dosage acido-basique et calculs de concentration.",
    theorie:"⚗️ Acide : libère H⁺ (H₃O⁺). Base : libère OH⁻.\npH < 7 = acide ; pH = 7 = neutre ; pH > 7 = basique.\n\n⚖️ Neutralisation : Acide + Base → Sel + Eau. Ex: HCl + NaOH → NaCl + H₂O.\n\nIndicateurs : phénolphtaléine (incolore/acide → rose/basique) ; BBT (jaune/acide, vert/neutre, bleu/basique).\n\n📈 Titrage : à l'équivalence Ca×Va = Cb×Vb (monoprotique).",
    experience:[
@@ -120,9 +120,9 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv11",titre:"Oxydoréduction & Combustion",matiere:"Chimie",cat:"chimie",
-   classe:"Tle C/D",ico:"🔥",color:"#EA580C",gratuit:false,plan:"Sciences",
+   classe:"1ère C/D-Tle C/D",ico:"🔥",color:"#EA580C",gratuit:false,plan:"Sciences",
    desc:"Réactions redox, nombres d'oxydation, piles électrochimiques, corrosion et combustions.",
-   theorie:"🔥 OIL RIG : Oxidation Is Loss (d'électrons) ; Reduction Is Gain.\nCouple redox : forme oxydée / forme réduite. Ex: Cu²⁺/Cu ; Zn²⁺/Zn.\n\n🔋 Pile : réaction redox spontanée → courant. Anode = oxydation ; Cathode = réduction.\n\n⚙️ Électrolyse : courant forcé → réaction non-spontanée.\n\n🔥 Combustion complète du méthane : CH₄ + 2O₂ → CO₂ + 2H₂O.\nIncomplète : CH₄ + 3/2 O₂ → CO + 2H₂O (CO = dangereux !).",
+   theorie:"🔥 Oxydation = perte d'électrons ; réduction = gain d'électrons.\nCouple redox : forme oxydée / forme réduite. Ex: Cu²⁺/Cu ; Zn²⁺/Zn.\n\n🔋 Pile : réaction redox spontanée → courant. Anode = oxydation ; Cathode = réduction.\n\n⚙️ Électrolyse : courant forcé → réaction non-spontanée.\n\n🔥 Combustion complète du méthane : CH₄ + 2O₂ → CO₂ + 2H₂O.\nIncomplète : CH₄ + 3/2 O₂ → CO + 2H₂O (CO = dangereux !).",
    experience:[
      "1️⃣ RÉACTION Zn/CuSO₄ : plonge une lame de zinc dans une solution bleue de sulfate de cuivre (CuSO₄). Observe sur 5 minutes : dépôt rougeâtre sur la lame (cuivre métallique) et décoloration progressive de la solution.",
      "2️⃣ RÉACTION Cu/ZnSO₄ : plonge une lame de cuivre dans une solution de sulfate de zinc (ZnSO₄). Observe : aucune réaction. Conclusion : Zn est meilleur réducteur que Cu. Ordre de réactivité.",
@@ -143,7 +143,7 @@ window.LABO_DB=[
 
   // ─ SVT ─
   {id:"lv4",titre:"La Mitose — Division Cellulaire",matiere:"SVT",cat:"svt",
-   classe:"1ère D-Tle D",ico:"🧬",color:"#059669",gratuit:true,
+   classe:"2nde C-1ère D",ico:"🧬",color:"#059669",gratuit:true,
    desc:"Visualise les 4 phases de la mitose. Comprends la réplication, la division et la différence avec la méiose.",
    theorie:"🔬 Mitose : division cellulaire → 2 cellules filles IDENTIQUES à la mère (même 2n chromosomes).\n\n4 phases — PMAT :\n📌 Prophase : chromosomes se condensent, fuseau se forme.\n📌 Métaphase : chromosomes alignés sur la plaque équatoriale.\n📌 Anaphase : chromatides sœurs séparées, migrent aux pôles.\n📌 Télophase : 2 noyaux formés, cytocinèse → 2 cellules.\n\nInterphase (avant mitose) : réplication ADN (phase S). 46 chromosomes chez l'homme.",
    experience:[
@@ -166,7 +166,7 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv5",titre:"La Nutrition chez les Plantes",matiere:"SVT",cat:"svt",
-   classe:"5ème-4ème",ico:"🌱",color:"#16A34A",gratuit:true,
+   classe:"4ème-2nde C-1ère D",ico:"🌱",color:"#16A34A",gratuit:true,
    desc:"Photosynthèse, absorption des sels minéraux, circulation de la sève et rôle des stomates.",
    theorie:"🌿 Photosynthèse : 6CO₂ + 6H₂O + lumière → C₆H₁₂O₆ + 6O₂.\nLieu : CHLOROPLASTES (grains verts dans les cellules des feuilles). Nécessite : lumière + CO₂ + eau.\n\n🔬 3 conditions indispensables à la photosynthèse :\n• Lumière (vérifiable avec une cloche noire)\n• CO₂ (vérifiable avec de la chaux sodée ou du KOH)\n• Eau (vérifiable par déshydratation)\n\n💧 Sève brute : eau + sels minéraux (racines → poils absorbants → XYLÈME → feuilles).\n🍃 Transpiration : les stomates (pores) libèrent la vapeur d'eau.\n🍬 Sève élaborée : glucose fabriqué dans feuilles → PHLOÈME → toute la plante.",
    experience:[
@@ -188,7 +188,7 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv12",titre:"La Digestion Humaine",matiere:"SVT",cat:"svt",
-   classe:"5ème-4ème",ico:"🍽️",color:"#B04E64",gratuit:true,
+   classe:"4ème-1ère C",ico:"🍽️",color:"#B04E64",gratuit:true,
    desc:"Trajet des aliments, enzymes digestives, absorption des nutriments et rôle du foie.",
    theorie:"🍽️ Tube digestif : bouche → œsophage → estomac → intestin grêle → gros intestin → anus.\n\n⚗️ Enzymes :\n• Bouche : amylase salivaire (amidon → maltose)\n• Estomac : pepsine + HCl (pH≈2) (protéines → peptides)\n• Intestin grêle : lipase, protéases, amylase pancréatique ; bile du foie (émulsification graisses)\n\n🩸 Absorption : villosités intestinales (≈200 m² de surface). Glucose, acides aminés → sang. Lipides → lymphe.\nFoie : stockage glycogène, filtration, production bile.",
    experience:[
@@ -211,7 +211,7 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv13",titre:"Circulation Sanguine & Respiration",matiere:"SVT",cat:"svt",
-   classe:"4ème-3ème",ico:"❤️",color:"#AE5353",gratuit:true,
+   classe:"3ème-2nde C",ico:"❤️",color:"#AE5353",gratuit:true,
    desc:"Le cœur, la grande et petite circulation, échanges gazeux dans les poumons et rôle de l'hémoglobine.",
    theorie:"❤️ Cœur = pompe double à 4 cavités : 2 oreillettes + 2 ventricules.\n\n🔴 Grande circulation : cœur gauche → aorte → organes → veines caves → oreillette droite.\n🔵 Petite circulation : cœur droit → artères pulmonaires → poumons → veines pulmonaires → oreillette gauche.\n\n🫁 Hématose (alvéoles) : O₂ passe dans le sang par diffusion ; CO₂ en sort. Surface ≈ 70 m².\n\nHémoglobine (globules rouges) : fixe 4 O₂ → oxyhémoglobine (rouge vif) ; libère O₂ aux tissus.",
    experience:[
@@ -233,7 +233,7 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv14",titre:"Génétique & Hérédité",matiere:"SVT",cat:"svt",
-   classe:"Tle D",ico:"🔬",color:"#6C56A6",gratuit:false,plan:"Sciences",
+   classe:"Tle C/D",ico:"🔬",color:"#6C56A6",gratuit:false,plan:"Sciences",
    desc:"Lois de Mendel, croisements, dominance, codominance et génétique des groupes sanguins.",
    theorie:"🧬 Gène : portion d'ADN. Allèles : différentes formes d'un gène.\nGénotype (AA, Aa, aa) → Phénotype (caractère observable).\n\n📌 1ère loi Mendel : uniformité F1 (AA × aa → 100% Aa).\n📌 2ème loi : F1×F1 → ratio 3:1 phénotypique, 1:2:1 génotypique.\n📌 3ème loi : assortiment indépendant des gènes de chromosomes différents.\n\nGroupes ABO : IA et IB codominants ; i récessif.\nDaltonisme : lié à X (garçons surtout touchés).\nDrépanocytose : HbS/HbS = malade ; HbA/HbS = porteur sain.",
    experience:[
@@ -256,7 +256,7 @@ window.LABO_DB=[
 
   // ─ MATHS ─
   {id:"lv6",titre:"Géométrie dans l'Espace",matiere:"Maths",cat:"maths",
-   classe:"2nde-1ère-Tle",ico:"📐",color:"#AE5353",gratuit:true,
+   classe:"5ème-4ème-3ème-2nde C-1ère C",ico:"📐",color:"#AE5353",gratuit:true,
    desc:"Volumes, aires et diagonales des solides : cube, sphère, cylindre, pyramide, cône.",
    theorie:"📦 Cube : V=a³ ; Aire=6a² ; Diagonale=a√3.\n🔵 Sphère : V=(4/3)πr³ ; Aire=4πr².\n🥫 Cylindre : V=πr²h ; Aire totale=2πr(h+r).\n🔺 Pyramide : V=(B×h)/3 (B=aire base).\n🍦 Cône : V=(πr²h)/3 ; Apothème l=√(r²+h²).\n\nDistance 3D : AB=√[(x₂-x₁)²+(y₂-y₁)²+(z₂-z₁)²].\nSection d'un cube par plan diagonal → rectangle.",
    experience:[
@@ -279,9 +279,9 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv15",titre:"Probabilités & Statistiques",matiere:"Maths",cat:"maths",
-   classe:"1ère-Tle",ico:"🎲",color:"#D97706",gratuit:true,
-   desc:"Probabilités classiques et conditionnelles, statistiques descriptives. 1ère : loi binomiale.",
-   theorie:"🎲 P(A) = cas favorables / cas totaux. 0 ≤ P(A) ≤ 1.\nP(Ā) = 1-P(A) ; P(A∪B) = P(A)+P(B)-P(A∩B).\nIndépendants : P(A∩B) = P(A)×P(B).\n\n📊 Statistiques :\n• Moyenne : μ = Σ(xi×ni)/N\n• Médiane : valeur centrale de la série ordonnée\n• Mode : valeur la plus fréquente\n• Étendue = valeur max − valeur min\n• Écart interquartile = Q3 − Q1\n\n📐 1ère (Tle) — Loi binomiale B(n,p) :\nP(X=k) = C(n,k)×pᵏ×(1-p)ⁿ⁻ᵏ ; E(X)=np ; σ=√[np(1-p)].",
+   classe:"3ème-1ère A-Tle A/C/D",ico:"🎲",color:"#D97706",gratuit:true,
+   desc:"Probabilités classiques et conditionnelles, statistiques descriptives. Tle C/D : loi binomiale.",
+   theorie:"🎲 P(A) = cas favorables / cas totaux. 0 ≤ P(A) ≤ 1.\nP(Ā) = 1-P(A) ; P(A∪B) = P(A)+P(B)-P(A∩B).\nIndépendants : P(A∩B) = P(A)×P(B).\n\n📊 Statistiques :\n• Moyenne : μ = Σ(xi×ni)/N\n• Médiane : valeur centrale de la série ordonnée\n• Mode : valeur la plus fréquente\n• Étendue = valeur max − valeur min\n• Écart interquartile = Q3 − Q1\n\n📐 Tle C/D — Loi binomiale B(n,p) :\nP(X=k) = C(n,k)×pᵏ×(1-p)ⁿ⁻ᵏ ; E(X)=np ; σ=√[np(1-p)].",
    experience:[
      "1️⃣ EXPÉRIENCE CONCRÈTE : lance un dé 30 fois. Note le résultat de chaque lancer dans un tableau. Calcule la fréquence de chaque face. Compare avec la probabilité théorique 1/6 ≈ 0,167.",
      "2️⃣ TABLEAU DE DONNÉES : relève les notes de contrôle de ta classe (ou utilise : 5, 7, 8, 9, 10, 10, 12, 13, 14, 15, 16, 18). Organise-les dans l'ordre croissant.",
@@ -296,13 +296,13 @@ window.LABO_DB=[
      {q:"Moyenne de la série {4, 6, 8, 10, 12} :",opts:["6","8","10","40"],ans:1,exp:"μ = (4+6+8+10+12)/5 = 40/5 = 8."},
      {q:"P(A)=0,5, P(B)=0,4, P(A∩B)=0,2. P(A∪B) = ?",opts:["0,9","0,7","1,1","0,3"],ans:1,exp:"P(A∪B) = P(A)+P(B)−P(A∩B) = 0,5+0,4−0,2 = 0,7."},
      {q:"La médiane d'une série ordonnée est :",opts:["La valeur la plus fréquente","La moyenne","La valeur qui partage la série en deux moitiés égales","La valeur minimale"],ans:2,exp:"Médiane : série ordonnée → valeur du milieu (ou moyenne des deux valeurs centrales si n pair)."},
-     {q:"A et B indépendants, P(A)=0,3, P(B)=0,4. P(A∩B) = ?",opts:["0,7","0,12","0,1","0,7"],ans:1,exp:"Indépendants → P(A∩B) = P(A)×P(B) = 0,3×0,4 = 0,12."},
+     {q:"A et B indépendants, P(A)=0,3, P(B)=0,4. P(A∩B) = ?",opts:["0,7","0,12","0,1","0,35"],ans:1,exp:"Indépendants → P(A∩B) = P(A)×P(B) = 0,3×0,4 = 0,12."},
      {q:"L'écart-type σ mesure :",opts:["La valeur centrale","La dispersion des données autour de la moyenne","La valeur maximale","Le nombre total d'observations"],ans:1,exp:"σ élevé = données très dispersées. σ faible = données concentrées autour de μ."},
    ],
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv16",titre:"Fonctions & Dérivées",matiere:"Maths",cat:"maths",
-   classe:"1ère-Tle",ico:"📈",color:"#BE185D",gratuit:false,plan:"Sciences",
+   classe:"1ère A/C/D-Tle A/C/D",ico:"📈",color:"#BE185D",gratuit:false,plan:"Sciences",
    desc:"Fonctions usuelles, calcul de dérivées, tableaux de variations et optimisation.",
    theorie:"📐 Dérivée = taux de variation instantané = pente de la tangente.\n(xⁿ)'=nxⁿ⁻¹ ; (√x)'=1/(2√x) ; (eˣ)'=eˣ ; (ln x)'=1/x.\n(sin x)'=cos x ; (cos x)'=-sin x.\n(uv)'=u'v+uv' ; (u/v)'=(u'v-uv')/v².\n\n📊 Tableau de variations : f'>0 → croissante ; f'<0 → décroissante ; f'=0 → extremum.\n\n∫xⁿ dx = xⁿ⁺¹/(n+1)+C. Aire sous courbe = ∫ₐᵇ f(x)dx.",
    experience:[
@@ -325,9 +325,9 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:"Sciences"},
 
   {id:"lv17",titre:"Trigonométrie & Cercle Unité",matiere:"Maths",cat:"maths",
-   classe:"2nde-1ère",ico:"📏",color:"#0891B2",gratuit:true,
+   classe:"3ème-2nde C-1ère C/D",ico:"📏",color:"#0891B2",gratuit:true,
    desc:"sin, cos, tan, valeurs remarquables, cercle trigonométrique et équations trigonométriques.",
-   theorie:"📐 Triangle rectangle : sin=opp/hyp ; cos=adj/hyp ; tan=opp/adj (SOH-CAH-TOA).\n\n🔵 Cercle unité : M(cos θ, sin θ).\nValeurs : 0°(0,1) ; 30°(1/2,√3/2) ; 45°(√2/2,√2/2) ; 60°(√3/2,1/2) ; 90°(1,0).\n\nIdentité : sin²+cos²=1 ; sin(2x)=2sin x cos x ; cos(2x)=cos²x-sin²x.\n\nConversion : degrés×π/180 = radians. 90°=π/2 ; 180°=π ; 360°=2π.",
+   theorie:"📐 Triangle rectangle : sin=opp/hyp ; cos=adj/hyp ; tan=opp/adj (SOH-CAH-TOA).\n\n🔵 Cercle unité : M(cos θ, sin θ).\nValeurs (cos ; sin) : 0°(1 ; 0) ; 30°(√3/2 ; 1/2) ; 45°(√2/2 ; √2/2) ; 60°(1/2 ; √3/2) ; 90°(0 ; 1).\n\nIdentité : sin²+cos²=1 ; sin(2x)=2sin x cos x ; cos(2x)=cos²x-sin²x.\n\nConversion : degrés×π/180 = radians. 90°=π/2 ; 180°=π ; 360°=2π.",
    experience:[
      "1️⃣ CONSTRUCTION DU TRIANGLE : sur papier quadrillé, dessine un triangle rectangle. Mesure l'hypoténuse (c), le côté adjacent (a) et le côté opposé (b) à l'angle α. Calcule sin(α)=b/c, cos(α)=a/c, tan(α)=b/a.",
      "2️⃣ TABLE DES VALEURS REMARQUABLES : complète ce tableau à mémoriser — | α | 0° | 30° | 45° | 60° | 90° | sin | 0 | 1/2 | √2/2 | √3/2 | 1 | cos | 1 | √3/2 | √2/2 | 1/2 | 0 |",
@@ -349,7 +349,7 @@ window.LABO_DB=[
 
   // ─ GÉOGRAPHIE & HISTOIRE ─
   {id:"lv18",titre:"La Mondialisation",matiere:"Géographie",cat:"geo",
-   classe:"Tle",ico:"🌐",color:"#059669",gratuit:false,plan:"Complet",
+   classe:"3ème-Tle",ico:"🌐",color:"#059669",gratuit:false,plan:"Complet",
    desc:"Flux mondiaux, acteurs, inégalités, IDH et place du Cameroun dans la mondialisation.",
    theorie:"🌐 Mondialisation = mise en relation croissante des économies, sociétés et espaces mondiaux.\n\n📦 Flux : marchandises (OMC) ; capitaux (IDE) ; personnes (migrations) ; informations (internet).\n\n🏭 Acteurs : FMN ; États ; OMC/FMI/BM ; ONG ; villes mondiales.\n\n🗺️ Triade (USA-Europe-Japon) + BRICS (Brésil, Russie, Inde, Chine, Afrique du Sud).\n\n📊 IDH : Indice Développement Humain (revenus + santé + éducation). De 0 à 1.\n\n🇨🇲 Cameroun : exportations (cacao, café, bois, pétrole) ; port Douala = hub régional ; IDE chinois.",
    experience:[
@@ -372,9 +372,9 @@ window.LABO_DB=[
 
   // ─ INFO & LANGUES ─
   {id:"lv19",titre:"Algorithmes & Programmation",matiere:"Info/Maths",cat:"info",
-   classe:"3ème-Tle",ico:"💻",color:"#1E3A8A",gratuit:true,
+   classe:"4ème-3ème-2nde-1ère",ico:"💻",color:"#1E3A8A",gratuit:true,
    desc:"Algorithmique, structures de contrôle, fonctions, récursivité et initiation Python.",
-   theorie:"💻 Algorithme : suite d'instructions ordonnées pour résoudre un problème.\n\nStructures :\n• Séquence : instructions dans l'ordre\n• Condition : SI ... ALORS ... SINON\n• Boucle : POUR (n fois) ou TANTQUE (condition)\n• Fonction : bloc réutilisable, paramètres + retour\n\nComplexité : O(n) linéaire ; O(n²) quadratique ; O(log n) logarithmique.\n\nPython : indentation obligatoire pour les blocs. Types : int, float, str, bool, list, dict.",
+   theorie:"💻 Algorithme : suite d'instructions ordonnées pour résoudre un problème.\n\nStructures :\n• Séquence : instructions dans l'ordre\n• Condition : SI ... ALORS ... SINON\n• Boucle : POUR (n fois) ou TANTQUE (condition)\n• Fonction : bloc réutilisable, paramètres + retour\n\nComplexité : O(n) linéaire ; O(n²) quadratique ; O(log n) logarithmique.\n\nAu programme : langage C (2nde C, Tle C/D) et JavaScript (1ère C/D). Python, cité ici en exemple : indentation obligatoire pour les blocs. Types : int, float, str, bool, list, dict.",
    experience:[
      "1️⃣ Factorielle : f=1 ; POUR i de 1 à n : f=f×i. Résultat : 5!=120 ; 10!=3 628 800.",
      "2️⃣ Maximum dans [5,3,8,2,9,1] : max=tab[0] ; POUR x dans tab : SI x>max : max=x → max=9.",
@@ -395,8 +395,8 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv27",titre:"Le Système Immunitaire & Vaccination",matiere:"SVT",cat:"svt",
-   classe:"Tle D",ico:"🛡️",color:"#16A34A",gratuit:true,
-   desc:"Comprendre comment notre corps se défend contre les infections : anticorps, lymphocytes, vaccins. Programme Tle.",
+   classe:"3ème-1ère C/D-Tle C/D",ico:"🛡️",color:"#16A34A",gratuit:true,
+   desc:"Comprendre comment notre corps se défend contre les infections : anticorps, lymphocytes, vaccins.",
    theorie:"🛡️ IMMUNITÉ INNÉE (1ère ligne) : peau, muqueuses, phagocytose par macrophages. Rapide, non-spécifique.\n\n⚔️ IMMUNITÉ ADAPTATIVE (lente, spécifique) :\n• Lymphocytes B → produisent anticorps (Ig) qui neutralisent l'antigène.\n• Lymphocytes T cytotoxiques → tuent les cellules infectées.\n• Lymphocytes T auxiliaires (CD4) → coordonnent la réponse.\n\n💉 VACCINATION : injection d'antigène atténué ou inactivé → mémoire immunitaire.\nÀ la 2ème exposition, réponse rapide et forte (lymphocytes mémoire). C'est le principe.\n\n🦠 VIH : détruit les LT4 (CD4) → effondrement immunité → SIDA.",
    experience:[
      "1️⃣ OBSERVATION : Une coupure cicatrise. Étape 1 : rougeur + chaleur (vasodilatation). Étape 2 : pus (macrophages morts + bactéries). Étape 3 : croûte (fibrine). Étape 4 : peau neuve.",
@@ -418,8 +418,8 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv28",titre:"ADN, Gènes & Hérédité",matiere:"SVT",cat:"svt",
-   classe:"1ère D-Tle D",ico:"🧬",color:"#6C56A6",gratuit:true,
-   desc:"Structure de l'ADN, code génétique, transmission des caractères et lois de Mendel. Programme 1ère-Tle.",
+   classe:"3ème-1ère D-Tle C",ico:"🧬",color:"#6C56A6",gratuit:true,
+   desc:"Structure de l'ADN, code génétique, transmission des caractères et lois de Mendel.",
    theorie:"🧬 ADN = double hélice (Watson & Crick 1953) faite de 4 bases : A-T et G-C (complémentaires).\n\n📐 STRUCTURE : 2 brins anti-parallèles enroulés. Sucre (désoxyribose) + phosphate = squelette. Bases à l'intérieur.\n\n⛓️ ARN messager : copie d'un gène (transcription dans noyau). Sort vers ribosome.\n\n🔬 CODE GÉNÉTIQUE : par triplets (codons) de 3 bases → 1 acide aminé. 64 codons → 20 acides aminés (redondance).\n\n👶 LOIS DE MENDEL :\n• 1ère loi : uniformité des hybrides F1.\n• 2ème loi : ségrégation 3:1 dans F2 (dominant : récessif).\n• Sexe humain : XX (♀), XY (♂).",
    experience:[
      "1️⃣ EXTRACTION ADN MAISON : écraser banane, mélanger avec eau salée + savon liquide. Filtrer. Ajouter alcool froid à 90° doucement. Observer : filaments blancs visqueux = ADN ! Vrai expérience accessible.",
@@ -442,7 +442,7 @@ window.LABO_DB=[
 
   {id:"lv29",titre:"Probabilités Conditionnelles & Bayes",matiere:"Maths",cat:"maths",
    classe:"Tle C-Tle D",ico:"🎲",color:"#F59E0B",gratuit:true,
-   desc:"Probabilités conditionnelles, indépendance, formule de Bayes et arbres pondérés. Programme Tle.",
+   desc:"Probabilités conditionnelles, indépendance, formule de Bayes et arbres pondérés.",
    theorie:"🎲 P(A|B) = P(A∩B)/P(B) — probabilité de A SACHANT B.\n\n🌳 ARBRE PONDÉRÉ : branches = événements, poids = probabilités. P(chemin) = produit des poids.\n\n🔄 INDÉPENDANCE : A et B indépendants ⇔ P(A∩B) = P(A)×P(B) ⇔ P(A|B) = P(A).\n\n🧠 FORMULE DE BAYES : P(A|B) = P(B|A)×P(A) / P(B).\nApplication clé : test médical. P(malade|test+) ≠ P(test+|malade).",
    experience:[
      "1️⃣ TIRAGE DE BOULES : Urne = 5 rouges + 3 vertes. 2 tirages SANS remise. P(2 rouges) = (5/8)×(4/7) = 20/56 ≈ 0,357. Sans remise = dépendant.",
@@ -459,14 +459,14 @@ window.LABO_DB=[
      {q:"Sur 100 personnes : 30 fument, 20 ont cancer, 15 fument ET ont cancer. P(cancer|fume) =",opts:["0,2","0,5","0,75","0,15"],ans:1,exp:"P(C|F) = P(C∩F)/P(F) = 15/30 = 0,5. Parmi les fumeurs, 50% ont cancer."},
      {q:"Lancer de 2 dés. P(somme = 7) =",opts:["1/36","1/12","1/6","5/36"],ans:2,exp:"Issues : (1,6)(6,1)(2,5)(5,2)(3,4)(4,3) = 6 sur 36 = 1/6."},
      {q:"Pour A et B indépendants, P(A|B) =",opts:["P(B)","P(A)×P(B)","P(A)","0"],ans:2,exp:"Indépendance : la connaissance de B ne change pas P(A). Donc P(A|B) = P(A)."},
-     {q:"Test détecte 95% malades. 1% pop malade. Pos test → vraiment malade ?",opts:["≈ 95%","≈ 50%","≈ 16% (paradoxe Bayes)","100%"],ans:2,exp:"P(malade|+) ≈ 0,95×0,01 / (0,95×0,01 + 0,05×0,99) ≈ 16%. La rareté du cas + faux+ fausse l'intuition."},
+     {q:"Test : détecte 95% des malades, 5% de faux positifs. 1% de la population malade. Pos test → vraiment malade ?",opts:["≈ 95%","≈ 50%","≈ 16% (paradoxe Bayes)","100%"],ans:2,exp:"P(malade|+) ≈ 0,95×0,01 / (0,95×0,01 + 0,05×0,99) ≈ 16%. La rareté du cas + faux+ fausse l'intuition."},
    ],
    ressource:"https://minesec-distancelearning.cm",pack:"Premium"},
 
   {id:"lv30",titre:"Énergie Nucléaire : Fission & Fusion",matiere:"Physique",cat:"physique",
    classe:"Tle C-Tle D",ico:"☢️",color:"#AE5353",gratuit:false,plan:"Sciences",
-   desc:"Radioactivité, désintégration, fission (centrales), fusion (étoiles, bombe H). Programme Tle.",
-   theorie:"⚛️ NOYAU : Z protons + N neutrons. A=Z+N (nombre de masse). Notation : ^A_Z X.\n\n☢️ RADIOACTIVITÉ :\n• α : émission ^4_2 He (noyau hélium). Z↓2, A↓4.\n• β⁻ : neutron→proton + électron. Z↑1, A=cst.\n• γ : photon haute énergie. Z et A inchangés.\n\n⏱️ DEMI-VIE T : temps après lequel 50% des noyaux ont désintégré. N(t) = N₀ × (1/2)^(t/T).\n\n💥 FISSION : noyau lourd (U-235) absorbe neutron → se brise en 2 + 3 neutrons + énergie. Réaction en chaîne. Centrales nucléaires.\n\n☀️ FUSION : 2 noyaux légers (H) → noyau plus lourd (He) + énergie. Source du Soleil. Bombe H.",
+   desc:"Radioactivité, désintégration, fission (centrales), fusion (étoiles, bombe H).",
+   theorie:"⚛️ NOYAU : Z protons + N neutrons. A=Z+N (nombre de masse). Notation : ^A_Z X.\n\n☢️ RADIOACTIVITÉ :\n• α : émission ^4_2 He (noyau hélium). Z↓2, A↓4.\n• β⁻ : neutron→proton + électron. Z↑1, A=cst.\n• γ : photon haute énergie. Z et A inchangés.\n\n⏱️ DEMI-VIE T : temps après lequel 50% des noyaux ont désintégré. N(t) = N₀ × (1/2)^(t/T).\n\n💥 FISSION : noyau lourd (U-235) absorbe neutron → se brise en 2 noyaux + 2 ou 3 neutrons + énergie. Réaction en chaîne. Centrales nucléaires.\n\n☀️ FUSION : 2 noyaux légers (H) → noyau plus lourd (He) + énergie. Source du Soleil. Bombe H.",
    experience:[
      "1️⃣ COMPOSITION U-235 : Z=92 protons, A=235 → N=143 neutrons. Symbole : ^235_92 U. Très instable, fissile.",
      "2️⃣ DÉSINTÉGRATION α : ^238_92 U → ^234_90 Th + ^4_2 He. Vérifier : Z: 92=90+2 ✓ ; A: 238=234+4 ✓.",
@@ -487,9 +487,9 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:"Sciences"},
 
   {id:"lv31",titre:"Chimie Organique : Synthèse d'Ester",matiere:"Chimie",cat:"chimie",
-   classe:"1ère D-Tle D",ico:"⚗️",color:"#C07D4F",gratuit:true,
-   desc:"Estérification, hydrolyse, parfums et arômes. Mécanismes et déplacement d'équilibre. Programme 1ère-Tle.",
-   theorie:"⚗️ ESTÉRIFICATION : Acide carboxylique + Alcool ⇌ Ester + Eau.\nR-COOH + R'-OH ⇌ R-CO-O-R' + H₂O\n\n⚖️ Équilibre LIMITÉ (~67% acide-alcool primaires, 50% secondaires). Lente.\n\n🚀 CATALYSEUR : H₂SO₄ concentré accélère SANS modifier l'équilibre.\n\n⬆️ DÉPLACER vers la droite (Le Chatelier) :\n• Excès d'un réactif (généralement alcool)\n• Élimination de l'eau formée (distillation Dean-Stark)\n\n🌸 ESTERS = PARFUMS : éthanoate d'éthyle = colle nail, éthanoate de pentyle = banane, butanoate d'éthyle = ananas.",
+   classe:"Tle C/D",ico:"⚗️",color:"#C07D4F",gratuit:true,
+   desc:"Estérification, hydrolyse, parfums et arômes. Mécanismes et déplacement d'équilibre.",
+   theorie:"⚗️ ESTÉRIFICATION : Acide carboxylique + Alcool ⇌ Ester + Eau.\nR-COOH + R'-OH ⇌ R-CO-O-R' + H₂O\n\n⚖️ Équilibre LIMITÉ (~67% avec un alcool primaire, 60% secondaire, 5% tertiaire). Lente.\n\n🚀 CATALYSEUR : H₂SO₄ concentré accélère SANS modifier l'équilibre.\n\n⬆️ DÉPLACER vers la droite (Le Chatelier) :\n• Excès d'un réactif (généralement alcool)\n• Élimination de l'eau formée (distillation Dean-Stark)\n\n🌸 ESTERS = PARFUMS : éthanoate d'éthyle = solvant des colles et vernis à ongles, éthanoate de pentyle = banane, butanoate d'éthyle = ananas.",
    experience:[
      "1️⃣ SYNTHÈSE BANANE : mélanger 10mL acide éthanoïque + 10mL alcool isopentylique + 2mL H₂SO₄. Chauffer 1h à reflux. Refroidir, laver à l'eau. Odeur intense de banane = éthanoate d'isopentyle.",
      "2️⃣ MONTAGE À REFLUX : ballon + colonne de Vigreux + réfrigérant à eau. La vapeur monte, condense, redescend. Évite la perte de réactifs. Sécurité : pierre ponce contre l'ébullition.",
@@ -510,8 +510,8 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv32",titre:"Climat Mondial & Changement Climatique",matiere:"Géographie",cat:"geo",
-   classe:"2nde-1ère",ico:"🌍",color:"#0EA5E9",gratuit:true,
-   desc:"Climats, biomes, effet de serre, réchauffement, conséquences. Programme 2nde-1ère.",
+   classe:"6ème-2nde A",ico:"🌍",color:"#0EA5E9",gratuit:true,
+   desc:"Climats, biomes, effet de serre, réchauffement, conséquences.",
    theorie:"🌍 5 GRANDS CLIMATS :\n• Équatorial (chaud humide toute l'année — forêt) — Cameroun sud, Amazonie\n• Tropical (saisons sèche/humide — savane) — Cameroun nord, Sahel\n• Désertique (sec extrême) — Sahara, Atacama\n• Tempéré (4 saisons) — Europe, Amérique du nord\n• Polaire (froid extrême) — Arctique, Antarctique\n\n🌡️ EFFET DE SERRE : gaz (CO₂, CH₄, vapeur eau) piègent rayonnement infrarouge → réchauffement. NATUREL : +33°C sinon Terre = -18°C en moyenne.\n\n📈 CHANGEMENT CLIMATIQUE : +1,1°C depuis 1880 dû activité humaine (combustion fossiles, déforestation).\n\n⚠️ CONSÉQUENCES : fonte glaces, montée océans, sécheresses Sahel, événements extrêmes, biodiversité.",
    experience:[
      "1️⃣ MESURE LOCALE : relever T et pluies mensuelles à Yaoundé (1 an). Tracer climogramme. Identifier saisons : grande saison sèche (déc-fév), petite saison pluies (mars-mai), petite saison sèche (juin-août), grande saison pluies (sept-nov).",
