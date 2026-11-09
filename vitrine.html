@@ -47,7 +47,7 @@
      n'était déclaré que par app.html, où plus personne n'arrive d'abord. -->
 <link rel="manifest" href="/manifest.webmanifest">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"EducationalOrganization","name":"Centre VÉRITAS","legalName":"VERITAS EDUCATION SARL","alternateName":"VÉRITAS School","url":"https://veritas-school.com/","logo":"https://veritas-school.com/assets/veritas-logo.png","description":"Centre d'Excellence Scolaire : cours, corrigés, annales et tuteur IA conformes au programme MINESEC, de la 6ᵉ à la Terminale.","address":{"@type":"PostalAddress","addressLocality":"Douala","addressCountry":"CM"},"areaServed":"CM","email":"contact@veritas-school.com","telephone":"+237697637739","sameAs":[],"offers":{"@type":"AggregateOffer","priceCurrency":"XAF","lowPrice":"0","highPrice":"7500","offerCount":"4"}}
+{"@context":"https://schema.org","@type":"EducationalOrganization","name":"Centre VÉRITAS","legalName":"VERITAS EDUCATION SARL","alternateName":"VÉRITAS School","url":"https://veritas-school.com/","logo":"https://veritas-school.com/assets/veritas-logo.png","description":"Centre d'Excellence Scolaire : cours, corrigés, annales et tuteur IA conformes au programme MINESEC, de la 6ᵉ à la Terminale.","address":{"@type":"PostalAddress","addressLocality":"Douala","addressCountry":"CM"},"areaServed":"CM","email":"contact@veritas-school.com","telephone":"+237697637739","sameAs":["https://www.facebook.com/people/Veritas-school/61595419216054/","https://whatsapp.com/channel/0029VbEH1hg1nozF1qBGnx2O","https://wa.me/237697637739"],"offers":{"@type":"AggregateOffer","priceCurrency":"XAF","lowPrice":"0","offerCount":"4"}}
 </script>
 <style>
 
@@ -1422,6 +1422,9 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
 [data-vp] :is(h1,h2)[style*="font:600"]{font-weight:800!important}[data-vp] :is(h3,h4)[style*="font:600"]{font-weight:700!important}
 @media (max-width:600px){[data-vp] div:has(> [data-vrt-item="champsPaiement"]){grid-template-columns:1fr!important}[data-vp] [data-vrt-item="champsPaiement"]{grid-column:1/-1!important}}
 </style>
+<!-- geo-ld -->
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://veritas-school.com/#site","url":"https://veritas-school.com/","name":"VÉRITAS","inLanguage":"fr-CM","publisher":{"@id":"https://veritas-school.com/#centre"}},{"@type":["EducationalOrganization","LocalBusiness"],"@id":"https://veritas-school.com/#centre","name":"Centre VÉRITAS","legalName":"VERITAS EDUCATION SARL","url":"https://veritas-school.com/","logo":"https://veritas-school.com/assets/veritas-logo.png","image":"https://veritas-school.com/og-image.jpg","description":"Centre d'excellence scolaire à Douala : répétitions au centre et à domicile, cours en ligne, exercices corrigés, annales BEPC, Probatoire, BAC et GCE, conformes au programme MINESEC, de la 6ᵉ à la Terminale.","address":{"@type":"PostalAddress","streetAddress":"Ndogpassi 14e, lieu-dit Carrefour Mbouda","addressLocality":"Douala","addressRegion":"Littoral","addressCountry":"CM"},"areaServed":[{"@type":"City","name":"Douala"},{"@type":"Country","name":"Cameroun"}],"telephone":"+237697637739","email":"contact@veritas-school.com","contactPoint":[{"@type":"ContactPoint","contactType":"customer service","telephone":"+237697637739","url":"https://wa.me/237697637739","availableLanguage":["fr","en"]}],"currenciesAccepted":"XAF","paymentAccepted":"MTN Mobile Money, Orange Money","knowsAbout":["Programme MINESEC","BEPC","Probatoire","Baccalauréat","GCE O Level","GCE A Level","Soutien scolaire","Répétitions à domicile","Dissertation littéraire","Commentaire composé"]},{"@type":"FAQPage","@id":"https://veritas-school.com/#faq","inLanguage":"fr-CM","mainEntity":[{"@type":"Question","name":"Faut-il une carte bancaire pour s’abonner ?","acceptedAnswer":{"@type":"Answer","text":"Non. MTN MoMo et Orange Money suffisent. Un proche à l’étranger peut aussi payer sur votre numéro MoMo ou Orange Money."}},{"@type":"Question","name":"L’abonnement est-il engageant ?","acceptedAnswer":{"@type":"Answer","text":"Non. Au mois, il s’arrête quand vous cessez de renouveler. À l’année, vous payez dix mois pour douze. Aucun frais de résiliation."}},{"@type":"Question","name":"Un ami m’a donné un code : à quoi sert-il ?","acceptedAnswer":{"@type":"Answer","text":"Saisissez-le à l’inscription ou au paiement : vous payez 10 % de moins sur vos abonnements et achats dans l’application, sans limite de durée. Et votre propre code, partagé à votre tour, vous rapporte 10 % de ce que paient vos amis."}},{"@type":"Question","name":"Un abonnement couvre combien d’enfants ?","acceptedAnswer":{"@type":"Answer","text":"Starter, Pro et Élite couvrent un élève. La formule Famille couvre jusqu’à quatre enfants pour un seul paiement. Le compte parent, lui, est gratuit."}},{"@type":"Question","name":"Que se passe-t-il si je ne renouvelle pas ?","acceptedAnswer":{"@type":"Answer","text":"Le compte reste ouvert et les ressources gratuites restent accessibles. Les contenus premium se referment jusqu’au prochain paiement."}},{"@type":"Question","name":"Les corrigés gratuits vont-ils devenir payants ?","acceptedAnswer":{"@type":"Answer","text":"Non. Les corrigés des cahiers imprimés restent en accès libre : ils accompagnent un cahier déjà acheté."}},{"@type":"Question","name":"Comment obtenir un reçu ?","acceptedAnswer":{"@type":"Answer","text":"Chaque paiement génère un reçu numéroté, imprimable, avec un QR de vérification. Il arrive aussi par WhatsApp."}}]}]}</script>
+<!-- /geo-ld -->
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true"><defs>
@@ -1590,10 +1593,11 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
   <div style="background:linear-gradient(90deg,#0C2A6A,#1E499B 45%,#0E7C86);color:#fff">
     <div style="max-width:1170px;margin:0 auto;padding:13px 24px;display:flex;align-items:center;justify-content:center;gap:10px 18px;flex-wrap:wrap;text-align:center;font-size:15px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-sparkles"></use></svg>
-      <span>VÉRITAS accompagne et suit les apprenants <b style="font-weight:600;color:#FFC93C">au centre, en ligne et à domicile</b>. Pour les enseignants : de quoi préparer tous ses cours et ses épreuves.</span>
+      <span>VÉRITAS accompagne et suit les apprenants <b style="font-weight:600;color:#FFC93C">au centre, en ligne et à domicile</b>. Pour les enseignants : de quoi préparer tous ses cours et ses épreuves. <b style="font-weight:600;color:#FFC93C">Nouveau</b> : toutes les matières leçon par leçon, avec quiz, badges et schémas animés, de la 6ᵉ à la Terminale.</span>
       <a href="corriges/" style="display:inline-flex;align-items:center;gap:6px;padding:6px 18px;border-radius:100px;border:1px solid rgba(255,255,255,.55);color:#fff;font:600 13px Poppins,sans-serif;letter-spacing:.4px;text-transform:uppercase;transition:background .18s,color .18s" class="vh11">Corrigés gratuits</a>
       <a href="#boutique" style="display:inline-flex;align-items:center;gap:7px;padding:6px 18px;border-radius:100px;background:#FFC93C;color:#001136;font:600 13px Poppins,sans-serif;letter-spacing:.4px;text-transform:uppercase;transition:background .18s,box-shadow .18s" class="vh12"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-shop"></use></svg>Boutique</a>
       <a href="plateforme/" style="display:inline-flex;align-items:center;gap:7px;padding:6px 18px;border-radius:100px;border:1px solid rgba(255,255,255,.55);color:#fff;font:600 13px Poppins,sans-serif;letter-spacing:.4px;text-transform:uppercase;transition:background .18s,color .18s" class="vh11"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-presentation"></use></svg>Atelier de français</a>
+      <a href="apprendre/" title="Toutes les matières de la 6ᵉ à la Terminale, leçon par leçon : cours illustrés, quiz, badges et schémas animés" style="display:inline-flex;align-items:center;gap:7px;padding:6px 16px 6px 6px;border-radius:100px;border:1px solid #FFC93C;color:#fff;font:600 13px Poppins,sans-serif;letter-spacing:.4px;text-transform:uppercase;transition:background .18s,color .18s" class="vh11"><span style="background:#FFC93C;color:#001136;border-radius:100px;padding:2px 8px;font-size:11px;letter-spacing:.6px">Nouveau</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"></use></svg>Apprendre</a>
     </div>
   </div>
 
@@ -1988,63 +1992,6 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
       </div>
     </section>
 
-    <!-- APPRENDRE EN JOUANT -->
-    <section style="position:relative;margin-top:60px;background:linear-gradient(135deg,#0C2A6A 0%,#1E499B 52%,#5B4FA8 100%);overflow:hidden;padding:56px 0">
-      <span aria-hidden="true" style="position:absolute;left:6%;top:-70px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(255,201,60,.24),rgba(255,201,60,0) 68%);animation:vorb 19s ease-in-out infinite;pointer-events:none"></span>
-      <span aria-hidden="true" style="position:absolute;right:-60px;bottom:-90px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(255,255,255,.14),rgba(255,255,255,0) 68%);animation:vorb 23s ease-in-out infinite reverse;pointer-events:none"></span>
-      <div style="position:relative;max-width:1170px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center">
-        <div>
-          <span style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#FFC93C;border-radius:100px;padding:7px 15px;font:600 12px Poppins,sans-serif;letter-spacing:.8px;text-transform:uppercase;margin-bottom:18px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-game"></use></svg>Apprendre en jouant</span>
-          <h2 style="font:600 32px/42px Poppins,sans-serif;color:#fff;margin:0 0 14px;text-wrap:pretty">Réviser devient un défi qu'on a envie de gagner</h2>
-          <p style="margin:0 0 24px;font:400 17px/1.75 Poppins,sans-serif;color:rgba(255,255,255,.85);text-wrap:pretty">Quiz chronométrés, séries de bonnes réponses, badges à débloquer et battles hebdomadaires entre élèves du général, du technique et de l'anglophone. La révision se joue, la progression se voit.</p>
-          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:26px">
-            
-              <span style="display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:100px;padding:9px 16px;font:500 13px Poppins,sans-serif;color:#fff;transition:background .18s,transform .18s" class="vh23">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clock"></use></svg>Quiz chronométrés
-              </span>
-            
-              <span style="display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:100px;padding:9px 16px;font:500 13px Poppins,sans-serif;color:#fff;transition:background .18s,transform .18s" class="vh23">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flame"></use></svg>Séries de bonnes réponses
-              </span>
-            
-              <span style="display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:100px;padding:9px 16px;font:500 13px Poppins,sans-serif;color:#fff;transition:background .18s,transform .18s" class="vh23">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"></use></svg>Badges à débloquer
-              </span>
-            
-              <span style="display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:100px;padding:9px 16px;font:500 13px Poppins,sans-serif;color:#fff;transition:background .18s,transform .18s" class="vh23">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-swords"></use></svg>Battles entre classes
-              </span>
-            
-          </div>
-          <button type="button" onclick="VRT.act('goElearning',this,event)" data-go="elearning" style="display:inline-flex;align-items:center;gap:9px;padding:14px 28px;border-radius:100px;background:#FFC93C;color:#001136;border:0;font:600 16px Poppins,sans-serif;cursor:pointer;box-shadow:0 2px 4px rgba(0,17,54,.08),0 8px 20px rgba(0,17,54,.10);transition:transform .18s,box-shadow .18s" class="vh24">Lancer un quiz<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></button>
-        </div>
-
-        <div style="position:relative;display:flex;flex-direction:column;gap:14px">
-          <div style="background:#fff;border-radius:14px;padding:24px 26px;box-shadow:0 18px 40px rgba(0,17,54,.12)">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px">
-              <span style="display:flex;align-items:center;gap:12px">
-                <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #fff;color:#001136;display:flex;align-items:center;justify-content:center;animation:vflame 2.6s ease-in-out infinite"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flame"></use></svg></span>
-                <span style="display:flex;flex-direction:column;line-height:1.3"><b style="font:600 17px Poppins,sans-serif;color:#001136">Ta série de révision</b><small style="font-size:13px;color:#6E7385">Elle démarre à ton premier quiz</small></span>
-              </span>
-              <span style="font:600 13px Poppins,sans-serif;color:#A84200;background:#FFF3E4;border-radius:100px;padding:6px 13px">À gagner</span>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;font:500 13px Poppins,sans-serif;color:#4D5163;margin-bottom:8px"><span>Ta progression</span><span style="color:#6E7385">dès le 1ᵉʳ quiz</span></div>
-            <div style="height:12px;border-radius:100px;background:#EFF2F7;overflow:hidden">
-              <div style="width:0%;height:100%;border-radius:100px;background:linear-gradient(90deg,#1E499B,#0E7C86 60%,#7BD99C);animation:vgrow 1.6s cubic-bezier(.22,1,.36,1)"></div>
-            </div>
-          </div>
-
-          <div class="vpod-carte" style="background:#fff;border-radius:14px;padding:22px 24px;box-shadow:0 18px 40px rgba(0,17,54,.12);animation:vfloat 7.5s ease-in-out infinite">
-            <div id="vrtPodium" hidden><div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-              <span style="width:42px;height:42px;border-radius:14px;background:#FDF0E2;color:#A84200;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-swords"></use></svg></span>
-              <span style="display:flex;flex-direction:column;line-height:1.3"><b style="font:600 16px Poppins,sans-serif;color:#001136">Battle de la semaine</b><small style="display:block;font:400 12px Poppins,sans-serif;color:#6E7385">Le classement s'affiche dès les premiers points</small><b style="display:none"></b><small style="font-size:12px;color:#6E7385">10 QCM · abonnement &amp; manuel à gagner</small></span>
-            <ol class="vpod-list"></ol></div></div>
-            
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- PASSAGE DU JOUR -->
     <section style="position:relative;margin-top:64px;background:linear-gradient(180deg,#FBF8F1 0%,#F7F3EA 100%);border-top:1px solid #EFE7D6;border-bottom:1px solid #EFE7D6;overflow:hidden;padding:56px 0 52px">
       <span aria-hidden="true" style="position:absolute;left:-70px;top:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(194,78,0,.10),rgba(194,78,0,0) 70%);animation:vorb 22s ease-in-out infinite;pointer-events:none"></span>
@@ -2058,7 +2005,7 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
         </div>
 
         <div data-reveal style="background:#fff;border-radius:14px;box-shadow:0 18px 40px rgba(60,40,10,.14);overflow:hidden;display:grid;grid-template-columns:238px 1fr">
-          <aside style="background:linear-gradient(160deg,#0C2A6A,#1E499B 70%,#2E2470);padding:26px 22px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:20px;text-align:center;position:relative;overflow:hidden">
+          <aside style="background:linear-gradient(160deg,#0C2A6A,#1E499B 70%,#2E2470);padding:26px 22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;position:relative;overflow:hidden">
             <span aria-hidden="true" style="position:absolute;right:-50px;top:-50px;width:180px;height:180px;border-radius:50%;background:rgba(255,201,60,.14)"></span>
             <span aria-hidden="true" style="position:absolute;left:-60px;bottom:-40px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.06)"></span>
             <span style="position:relative;display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:100px;padding:7px 13px;font:500 12px Poppins,sans-serif;color:#FFC93C;white-space:nowrap;flex:0 0 auto"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-graduation"></use></svg>3ᵉ → Tˡᵉ · au programme</span>
@@ -2093,7 +2040,7 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
               
             </div>
 
-            <button type="button" onclick="VRT.act('goElearning',this,event)" data-go="elearning" style="position:relative;width:100%;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 14px;border-radius:14px;background:#fff;color:#0C2A6A;border:0;font:600 14px Poppins,sans-serif;cursor:pointer;transition:transform .18s,box-shadow .18s" class="vh25">Étude intégrale<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></button>
+            <button type="button" onclick="VRT.act('goEtudeOeuvre',this,event)" style="position:relative;width:100%;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 14px;border-radius:14px;background:#fff;color:#0C2A6A;border:0;font:600 14px Poppins,sans-serif;cursor:pointer;transition:transform .18s,box-shadow .18s" class="vh25">Étude intégrale<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></button>
           </aside>
 
           <div style="padding:28px 30px 24px;display:flex;flex-direction:column;background:#fff">
@@ -2206,92 +2153,6 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
       </div>
     </section>
 
-    <!-- SÉQUENCE ANIMÉE — écosystème VÉRITAS -->
-    <section style="position:relative;margin-top:56px;background:linear-gradient(160deg,#0C2A6A 0%,#1E499B 58%,#2E2470 100%);overflow:hidden;padding:60px 0 56px">
-      <span aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(700px 420px at 20% 14%,rgba(255,201,60,.16),rgba(0,0,0,0) 68%),radial-gradient(620px 380px at 82% 86%,rgba(123,209,206,.14),rgba(0,0,0,0) 68%);pointer-events:none"></span>
-      <div style="position:relative;max-width:1170px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 380px;gap:44px;align-items:center">
-
-        <div>
-          <span style="display:inline-flex;align-items:center;gap:9px;background:#E3F1EE;border:1px solid #BFE0DA;border-radius:100px;padding:7px 15px;font:600 11px Poppins,sans-serif;color:#0B6B74;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:18px"><span style="width:7px;height:7px;border-radius:50%;background:#FFC93C;animation:vpulse 2.4s ease-out infinite"></span>VÉRITAS en 15 secondes</span>
-          <h2 style="font:600 33px/43px Poppins,sans-serif;color:#fff;margin:0 0 12px;text-wrap:pretty">Un centre à Douala, une plateforme dans sa poche</h2>
-          <p style="margin:0 0 26px;font:400 15px/1.75 Poppins,sans-serif;color:rgba(255,255,255,.76);max-width:52ch;text-wrap:pretty">Le programme officiel, les corrigés, le tuteur et le suivi des parents — un seul abonnement, quatre acteurs reliés.</p>
-
-          <div style="position:relative;height:132px">
-            
-              <div style="position:absolute;inset:0;display:flex;align-items:center;gap:18px;opacity:0;animation:vseq 12s ease-in-out infinite;animation-delay:0s;animation-fill-mode:both">
-                <span style="position:relative;width:62px;height:62px;border-radius:50%;background:#fff;border:3px solid #5B8AD9;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto">
-                  <span aria-hidden="true" style="position:absolute;inset:-3px;border-radius:50%;border:2px solid #5B8AD9;animation:vringGrow 2.6s ease-out infinite"></span>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"></use></svg></span>
-                <span style="display:flex;flex-direction:column;gap:5px;min-width:0">
-                  <b style="font:600 22px/29px Poppins,sans-serif;color:#fff">Le programme officiel</b>
-                  <span style="font:400 14px/1.6 Poppins,sans-serif;color:rgba(255,255,255,.72);text-wrap:pretty">Séquence par séquence, conforme au MINESEC — général, technique et GCE.</span>
-                </span>
-              </div>
-            
-              <div style="position:absolute;inset:0;display:flex;align-items:center;gap:18px;opacity:0;animation:vseq 12s ease-in-out infinite;animation-delay:3s;animation-fill-mode:both">
-                <span style="position:relative;width:62px;height:62px;border-radius:50%;background:#fff;border:3px solid #FFC93C;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto">
-                  <span aria-hidden="true" style="position:absolute;inset:-3px;border-radius:50%;border:2px solid #FFC93C;animation:vringGrow 2.6s ease-out infinite"></span>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"></use></svg></span>
-                <span style="display:flex;flex-direction:column;gap:5px;min-width:0">
-                  <b style="font:600 22px/29px Poppins,sans-serif;color:#fff">14 049 exercices corrigés</b>
-                  <span style="font:400 14px/1.6 Poppins,sans-serif;color:rgba(255,255,255,.72);text-wrap:pretty">Chaque énoncé avec sa démarche détaillée, pas seulement la réponse.</span>
-                </span>
-              </div>
-            
-              <div style="position:absolute;inset:0;display:flex;align-items:center;gap:18px;opacity:0;animation:vseq 12s ease-in-out infinite;animation-delay:6s;animation-fill-mode:both">
-                <span style="position:relative;width:62px;height:62px;border-radius:50%;background:#fff;border:3px solid #B3A6E8;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto">
-                  <span aria-hidden="true" style="position:absolute;inset:-3px;border-radius:50%;border:2px solid #B3A6E8;animation:vringGrow 2.6s ease-out infinite"></span>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"></use></svg></span>
-                <span style="display:flex;flex-direction:column;gap:5px;min-width:0">
-                  <b style="font:600 22px/29px Poppins,sans-serif;color:#fff">Le tuteur qui explique</b>
-                  <span style="font:400 14px/1.6 Poppins,sans-serif;color:rgba(255,255,255,.72);text-wrap:pretty">Professeur Ambassa répond à toute heure, en français comme en anglais.</span>
-                </span>
-              </div>
-            
-              <div style="position:absolute;inset:0;display:flex;align-items:center;gap:18px;opacity:0;animation:vseq 12s ease-in-out infinite;animation-delay:9s;animation-fill-mode:both">
-                <span style="position:relative;width:62px;height:62px;border-radius:50%;background:#fff;border:3px solid #7BD1CE;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto">
-                  <span aria-hidden="true" style="position:absolute;inset:-3px;border-radius:50%;border:2px solid #7BD1CE;animation:vringGrow 2.6s ease-out infinite"></span>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"></use></svg></span>
-                <span style="display:flex;flex-direction:column;gap:5px;min-width:0">
-                  <b style="font:600 22px/29px Poppins,sans-serif;color:#fff">Les parents suivent</b>
-                  <span style="font:400 14px/1.6 Poppins,sans-serif;color:rgba(255,255,255,.72);text-wrap:pretty">Notes, absences et tranches réglées — visibles le jour même.</span>
-                </span>
-              </div>
-            
-          </div>
-        </div>
-
-        <div style="position:relative;height:380px;display:flex;align-items:center;justify-content:center">
-          <span aria-hidden="true" style="position:absolute;width:300px;height:300px;border-radius:50%;border:1px dashed rgba(255,255,255,.18)"></span>
-          <span aria-hidden="true" style="position:absolute;width:214px;height:214px;border-radius:50%;border:1px dashed rgba(255,255,255,.14)"></span>
-
-          <span aria-hidden="true" style="position:absolute;width:300px;height:300px;animation:vorbit 22s linear infinite">
-            
-              <span style="position:absolute;left:50%;top:0%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:#fff;border:3px solid #FFC93C;color:#001136;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(0,0,0,.28)">
-                <span style="animation:vorbitInv 22s linear infinite;display:flex"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"></use></svg></span>
-              </span>
-            
-              <span style="position:absolute;left:100%;top:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:#fff;border:3px solid #7BD1CE;color:#001136;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(0,0,0,.28)">
-                <span style="animation:vorbitInv 22s linear infinite;display:flex"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"></use></svg></span>
-              </span>
-            
-              <span style="position:absolute;left:50%;top:100%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:#fff;border:3px solid #5B8AD9;color:#001136;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(0,0,0,.28)">
-                <span style="animation:vorbitInv 22s linear infinite;display:flex"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-presentation"></use></svg></span>
-              </span>
-            
-              <span style="position:absolute;left:0%;top:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:#fff;border:3px solid #B3A6E8;color:#001136;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(0,0,0,.28)">
-                <span style="animation:vorbitInv 22s linear infinite;display:flex"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"></use></svg></span>
-              </span>
-            
-          </span>
-
-          <span style="position:relative;width:150px;height:150px;border-radius:38px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;box-shadow:0 22px 50px rgba(0,0,0,.34);animation:vbob 9s ease-in-out infinite">
-            <img loading="lazy" decoding="async" width="344" height="347" src="assets/veritas-logo.png" alt="" style="width:62px;height:62px;object-fit:contain">
-            <b style="font:600 14px Poppins,sans-serif;color:#0C2A6A;letter-spacing:1.6px">VÉRITAS</b>
-          </span>
-        </div>
-      </div>
-    </section>
     <!-- LES DEUX PHOTOS -->
     <section class="vphotos" aria-label="Le centre et la plateforme en images">
       <div class="vphotos-in">
@@ -2461,6 +2322,61 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
 
     <!-- TRAVAILLER AVEC VÉRITAS -->
     
+
+    <!-- APPRENDRE EN JOUANT -->
+    <section style="position:relative;margin-top:56px;background:linear-gradient(180deg,#F7F9FE 0%,#FFFFFF 100%);border-top:1px solid #E6EAF2;border-bottom:1px solid #E6EAF2;overflow:hidden;padding:44px 0">
+      <div style="position:relative;max-width:1170px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center">
+        <div>
+          <span style="display:inline-flex;align-items:center;gap:8px;background:#FFF3E4;border:1px solid #F5D9BC;color:#C24E00;border-radius:100px;padding:7px 15px;font:600 12px Poppins,sans-serif;letter-spacing:.8px;text-transform:uppercase;margin-bottom:18px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-game"></use></svg>Apprendre en jouant</span>
+          <h2 style="font:600 30px/40px Poppins,sans-serif;color:#001136;margin:0 0 12px;text-wrap:pretty">Réviser devient un défi qu'on a envie de gagner</h2>
+          <p style="margin:0 0 24px;font:400 16px/1.7 Poppins,sans-serif;color:#4D5163;text-wrap:pretty">Quiz chronométrés, séries de bonnes réponses, badges à débloquer et battles hebdomadaires entre élèves du général, du technique et de l'anglophone. La révision se joue, la progression se voit.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:26px">
+            
+              <span style="display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid #E6EAF2;border-radius:100px;padding:8px 15px;font:500 13px Poppins,sans-serif;color:#001136;transition:background .18s,transform .18s" class="vh23">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clock"></use></svg>Quiz chronométrés
+              </span>
+            
+              <span style="display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid #E6EAF2;border-radius:100px;padding:8px 15px;font:500 13px Poppins,sans-serif;color:#001136;transition:background .18s,transform .18s" class="vh23">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flame"></use></svg>Séries de bonnes réponses
+              </span>
+            
+              <span style="display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid #E6EAF2;border-radius:100px;padding:8px 15px;font:500 13px Poppins,sans-serif;color:#001136;transition:background .18s,transform .18s" class="vh23">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"></use></svg>Badges à débloquer
+              </span>
+            
+              <span style="display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid #E6EAF2;border-radius:100px;padding:8px 15px;font:500 13px Poppins,sans-serif;color:#001136;transition:background .18s,transform .18s" class="vh23">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-swords"></use></svg>Battles entre classes
+              </span>
+            
+          </div>
+          <button type="button" onclick="VRT.act('goApprendre',this,event)" data-go="elearning" style="display:inline-flex;align-items:center;gap:9px;padding:14px 28px;border-radius:100px;background:#FFC93C;color:#001136;border:0;font:600 16px Poppins,sans-serif;cursor:pointer;box-shadow:0 2px 4px rgba(0,17,54,.08),0 8px 20px rgba(0,17,54,.10);transition:transform .18s,box-shadow .18s" class="vh24">Lancer un quiz<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></button>
+        </div>
+
+        <div style="position:relative;display:flex;flex-direction:column;gap:14px">
+          <div style="background:#fff;border:1px solid #E6EAF2;border-radius:14px;padding:22px 24px;box-shadow:0 8px 24px rgba(0,17,54,.06)">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px">
+              <span style="display:flex;align-items:center;gap:12px">
+                <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #FDF0E2;color:#C24E00;display:flex;align-items:center;justify-content:center;animation:vflame 2.6s ease-in-out infinite"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flame"></use></svg></span>
+                <span style="display:flex;flex-direction:column;line-height:1.3"><b style="font:600 17px Poppins,sans-serif;color:#001136">Ta série de révision</b><small style="font-size:13px;color:#6E7385">Elle démarre à ton premier quiz</small></span>
+              </span>
+              <span style="font:600 13px Poppins,sans-serif;color:#A84200;background:#FFF3E4;border-radius:100px;padding:6px 13px">À gagner</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font:500 13px Poppins,sans-serif;color:#4D5163;margin-bottom:8px"><span>Ta progression</span><span style="color:#6E7385">dès le 1ᵉʳ quiz</span></div>
+            <div style="height:12px;border-radius:100px;background:#EFF2F7;overflow:hidden">
+              <div style="width:0%;height:100%;border-radius:100px;background:linear-gradient(90deg,#1E499B,#0E7C86 60%,#7BD99C);animation:vgrow 1.6s cubic-bezier(.22,1,.36,1)"></div>
+            </div>
+          </div>
+
+          <div class="vpod-carte" style="background:#fff;border:1px solid #E6EAF2;border-radius:14px;padding:22px 24px;box-shadow:0 8px 24px rgba(0,17,54,.06);animation:vfloat 7.5s ease-in-out infinite">
+            <div id="vrtPodium" hidden><div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+              <span style="width:42px;height:42px;border-radius:14px;background:#FDF0E2;color:#A84200;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-swords"></use></svg></span>
+              <span style="display:flex;flex-direction:column;line-height:1.3"><b style="font:600 16px Poppins,sans-serif;color:#001136">Battle de la semaine</b><small style="display:block;font:400 12px Poppins,sans-serif;color:#6E7385">Le classement s'affiche dès les premiers points</small><b style="display:none"></b><small style="font-size:12px;color:#6E7385">10 QCM · abonnement &amp; manuel à gagner</small></span>
+            <ol class="vpod-list"></ol></div></div>
+            
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- CTA FINAL -->
     <section style="margin-top:60px;background:linear-gradient(135deg,#0C2A6A,#1E499B)">

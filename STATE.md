@@ -1,3 +1,29 @@
+## Visibilité maximale : site ouvert aux IA, œuvres, Atelier et simulations en HTML statique (05/11/2026, 2e passe)
+
+Demande de Jacques : « Oui ouvre tout, il faut que le site soit le plus visible possible, surtout sur les œuvres littéraires, l'Atelier de français, les simulations… »
+
+- **Tous les robots d'IA admis** sur les pages publiques (robots.txt réécrit, `User-agent: *` seul ; .htaccess ne bloque plus que les aspirateurs SEO Ahrefs/Semrush/…; X-Robots-Tag « all » sans noai ; balises noindex par robot retirées de VERITAS_v1.2.html ; ai.txt réécrit). Restent fermés à tous : /api/, /data/, /uploads/private/, /uploads/protected/. `api/_sentinel.php` inchangé : l'API reste interdite aux moissonneuses (ce n'est pas une page).
+- **Œuvres** (`tools/oeuvres_statiques.js`) : les 21 pages d'œuvres portaient ~1 000 caractères lisibles ; elles portent désormais, en HTML, l'analyse de `chunks/litt-oeuvres.js` (fiche d'identité, axes, personnages, style, contexte, analyse, citations expliquées, procédés, questions corrigées) + JSON-LD LearningResource et FAQPage. Ville cruelle : 1 980 → 11 709 caractères. Bloc `<!-- oeuvre-statique -->`. Le quiz et la carte mentale restent dans l'application. `5e_nkum_wam` n'a pas de page (même œuvre que 2nde-nkoumwam).
+- **Atelier, examen blanc, laboratoires** (`tools/pages_decouverte.js`, gabarit des pages Découvrir) :
+  - `decouvrir/atelier-de-francais.html` : présentation + les 23 structures d'épreuves de `plateforme/minesec.js` (durée, coefficient, parties, barème, texte support, source) ;
+  - `decouvrir/examen-blanc-en-ligne.html` : les 43 sujets du simulateur (filtre de `_simEpreuves`, durées de `_dureeEpreuve`) ;
+  - `decouvrir/laboratoires-virtuels.html` + 30 pages `decouvrir/labos/*.html` (`chunks/labo.js`) : labos gratuits publiés en entier, labos payants limités à la présentation et à la théorie.
+  - Sitemap Découvrir : bloc `<!-- pages-decouverte -->`. Tuiles ajoutées sur `decouvrir/`. Lien mort `/seo/` corrigé.
+- llms.txt : 146 liens, rubrique Laboratoires. CI : `oeuvres_statiques.js --controle` et `pages_decouverte.js --controle`. Empreinte d'index.php : 2026-11-05b.
+- ⚠️ Ordre de génération : `oeuvres_statiques.js` puis `habiller_pages.py` (l'habillage replace son bloc de tête en dernier ; les deux restent ensuite stables).
+
+## GEO : visibilité dans les moteurs de réponse IA (05/11/2026)
+
+Demande de Jacques : « il faut non seulement du SEO mais aussi du GEO, vérifie et applique ».
+
+- **robots.txt / .htaccess** : même ligne de partage que la décision du 28/10. Les robots qui lisent une page pour RÉPONDRE et CITER sont admis sur les pages publiques : ChatGPT-User, OAI-SearchBot, **Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, MistralAI-User**. Les robots d'ENTRAÎNEMENT restent refusés (GPTBot, ClaudeBot, CCBot, Google-Extended, Applebot-Extended, Meta, Bytespider…). L'API reste fermée à tous (`api/_sentinel.php` inchangé).
+- **llms.txt** (nouveau, `tools/build_llms.py`) : résumé du centre + 113 liens tirés des sitemaps et des balises description. Sans prix (grille en transition).
+- **vitrine.html** : bloc `<!-- geo-ld -->` (`tools/geo_vitrine.py`) : WebSite, centre en EducationalOrganization + LocalBusiness (adresse complète, WhatsApp, MTN MoMo / Orange Money), FAQPage tirée mot pour mot des 7 questions affichées. À relancer après `build_vitrine.js`.
+- `highPrice: 7500` retiré du JSON-LD (ne correspondait à aucune grille) ; `seo/sitemap.xml`, inexistant, retiré de robots.txt et sitemap-index.xml ; ai.txt précise que la citation est admise.
+- CI : `build_llms.py --controle` et `geo_vitrine.py --controle` ; llms.txt déployé. Empreinte d'index.php : 2026-11-05a.
+
+**Reste à faire (Jacques)** : la vitrine affiche encore 1 000 F (cartes) ET 1 200 F (textes, balises description) pour le même plan Starter — voir l'entrée du 29/10. Tant que la grille n'est pas enregistrée, les IA liront deux prix.
+
 ## Harmonisation du design : vitrine, pages statiques et application (29/10/2026)
 
 Demande de Jacques : audit design en prod, puis « corrige 4, 5, 6, 8, 9 (dégradé maillé), 10, 11, 12 », « toutes les icônes doivent apparaître dans Plus, dans le cercle coloré, inspire-toi de lws.fr », « vérifie que toutes les pages sont harmonisées, corrige le conflit entre vitrine et app, surtout au niveau du design ».

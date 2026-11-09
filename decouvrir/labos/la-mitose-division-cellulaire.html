@@ -1,56 +1,40 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Épreuve 1ère — L'Enfant noir — Centre VÉRITAS</title>
-  <link rel="icon" href="/assets/veritas-logo.png">
+<!DOCTYPE html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La Mitose — Division Cellulaire — TP virtuel SVT (2nde C-1ère D) | VÉRITAS</title>
+<meta name="description" content="Visualise les 4 phases de la mitose. Comprends la réplication, la division et la différence avec la méiose. Laboratoire virtuel VÉRITAS, 2nde C-1ère D.">
+<meta name="keywords" content="La Mitose — Division Cellulaire, TP virtuel SVT, laboratoire virtuel Cameroun, SVT 2nde C-1ère D, expérience en ligne">
+<link rel="canonical" href="https://veritas-school.com/decouvrir/labos/la-mitose-division-cellulaire.html">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="website"><meta property="og:title" content="La Mitose — Division Cellulaire — TP virtuel SVT (2nde C-1ère D)">
+<meta property="og:description" content="Visualise les 4 phases de la mitose. Comprends la réplication, la division et la différence avec la méiose. Laboratoire virtuel VÉRITAS, 2nde C-1ère D."><meta property="og:url" content="https://veritas-school.com/decouvrir/labos/la-mitose-division-cellulaire.html">
+<meta property="og:site_name" content="Centre VÉRITAS"><meta property="og:locale" content="fr_FR">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","name":"La Mitose — Division Cellulaire","description":"Visualise les 4 phases de la mitose. Comprends la réplication, la division et la différence avec la méiose.","learningResourceType":"Laboratoire virtuel","educationalLevel":"2nde C-1ère D","about":"SVT","inLanguage":"fr","isAccessibleForFree":true,"url":"https://veritas-school.com/decouvrir/labos/la-mitose-division-cellulaire.html","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/","address":{"@type":"PostalAddress","addressLocality":"Douala","addressCountry":"CM"}},"educationalAlignment":{"@type":"AlignmentObject","alignmentType":"educationalSubject","educationalFramework":"Programme MINESEC (Cameroun)","targetName":"SVT"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"La mitose produit combien de cellules filles identiques ?","acceptedAnswer":{"@type":"Answer","text":"Réponse : 2. Mitose → 2 cellules filles génétiquement identiques à la mère (2n chromosomes)."}},{"@type":"Question","name":"À quelle phase les chromosomes s'alignent-ils au centre ?","acceptedAnswer":{"@type":"Answer","text":"Réponse : Métaphase. MÉTAPHASE : alignement sur la plaque équatoriale. PMAT → M = aligneMent au Milieu."}},{"@type":"Question","name":"Qu'est-ce qu'une chromatide ?","acceptedAnswer":{"@type":"Answer","text":"Réponse : La moitié d'un chromosome répliqué. Après réplication, chaque chromosome = 2 chromatides sœurs identiques reliées au centromère."}},{"@type":"Question","name":"La mitose est précédée de :","acceptedAnswer":{"@type":"Answer","text":"Réponse : L'interphase (réplication ADN). L'interphase (G1+S+G2) précède la mitose. La phase S = réplication de l'ADN."}},{"@type":"Question","name":"Différence principale mitose vs méiose :","acceptedAnswer":{"@type":"Answer","text":"Réponse : Méiose produit 4 cellules haploïdes (n). Méiose → 4 cellules haploïdes (n) = gamètes. Mitose → 2 cellules diploïdes (2n) identiques."}},{"@type":"Question","name":"Un humain a 2n=46. Après mitose, chaque cellule fille a :","acceptedAnswer":{"@type":"Answer","text":"Réponse : 46. La mitose conserve 2n→2n. Chaque cellule fille a bien 46 chromosomes."}}]}]}</script>
 <style>
-:root{--navy:#142554;--gold:#FFC93C;--cream:#faf8f3;--ink:#1a1a2e}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Times New Roman',serif;background:var(--cream);color:var(--ink);max-width:21cm;margin:0 auto;padding:1.5cm;font-size:12pt}
-.bande{background:var(--gold);height:7px;width:100%}
-.entete{border:2px solid var(--navy);padding:12px 16px;display:flex;justify-content:space-between;align-items:flex-start;margin:10px 0;gap:10px}
-.entete-g{font-size:11pt;line-height:1.6}
-.ep-titre{display:inline;font:inherit;font-weight:700;margin:0;color:inherit}
-.entete-d{text-align:right;font-size:11pt;line-height:1.6}
-.titre-section{background:var(--navy);color:#fff;padding:5px 12px;font-weight:bold;font-size:11pt;margin:18px 0 8px}
-.pts{float:right;background:var(--gold);color:var(--navy);padding:1px 8px;border-radius:10px;font-size:10pt}
-.texte-support{padding:10px 14px;background:#fff;font-style:italic;line-height:1.9;margin:12px 0}
-.source{font-size:10pt;font-style:normal;text-align:right;color:var(--navy);margin-top:6px;border-top:1px solid #ccc;padding-top:4px}
-.questions{margin:8px 0 0 0;padding-left:18px}
-.questions li{margin:6px 0;line-height:1.7}
-.sous-titre{font-weight:bold;color:var(--navy);margin:10px 0 4px}
-.filigrane{position:fixed;font-size:110px;color:var(--navy);opacity:.04;top:38%;left:12%;transform:rotate(-28deg);pointer-events:none;z-index:0;font-family:serif}
-.footer{border-top:3px double var(--gold);margin-top:24px;padding-top:6px;font-size:9pt;color:var(--navy);text-align:center}
-.corrige-wrap{display:none;border:2px dashed var(--navy);padding:16px;margin-top:24px;background:#f0f4ff}
-.corrige-wrap h2{color:var(--navy);font-size:13pt;border-bottom:2px solid var(--gold);padding-bottom:4px;margin-bottom:12px}
-.rep{margin:6px 0;line-height:1.7}
-.toggle-btn{display:block;margin:16px auto 0;padding:8px 20px;background:var(--navy);color:#fff;border:none;cursor:pointer;font-size:11pt;border-radius:4px}
-.toggle-btn:hover{background:#1e3a7a}
-@media print{.toggle-btn,.corrige-wrap{display:none !important}}
-</style>
-<!-- seo-tete -->
-<link rel="canonical" href="https://veritas-school.com/evaluations/epreuve_1ere_enfant_noir_2026.html">
-<meta name="description" content="Épreuve de français de 1re sur L&#x27;Enfant noir de Camara Laye : extrait, questions et corrigé en ligne, conformes au programme MINESEC.">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Centre VÉRITAS">
-<meta property="og:locale" content="fr_CM">
-<meta property="og:title" content="Épreuve 1ère — L&#x27;Enfant noir">
-<meta property="og:description" content="Épreuve de français de 1re sur L&#x27;Enfant noir de Camara Laye : extrait, questions et corrigé en ligne, conformes au programme MINESEC.">
-<meta property="og:url" content="https://veritas-school.com/evaluations/epreuve_1ere_enfant_noir_2026.html">
+:root{--navy:#142554;--gold:#FFC93C;--ink:#1f2d4d;--mut:#5b6b85;--bg:#f7f9fc}
+*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.7}
+header{background:linear-gradient(135deg,#0f1b3d,#142554 55%,#1e3a8a);color:#fff;padding:14px 20px}
+header a{color:var(--gold);font-weight:800;text-decoration:none;font-size:18px}
+.wrap{max-width:820px;margin:0 auto;padding:26px 20px}
+.card{background:#fff;border:1px solid #e6eaf2;border-radius:16px;padding:26px;box-shadow:0 10px 30px rgba(20,37,84,.06);margin-bottom:20px}
+.badge{display:inline-block;background:rgba(255,201,60,.18);color:#9a7b1c;font-weight:800;font-size:12px;padding:4px 12px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px}
+h1{font-size:27px;color:var(--navy);margin:12px 0 8px;line-height:1.25;text-wrap:balance}
+h2{color:var(--navy);font-size:19px;margin:22px 0 8px;border-bottom:2px solid #eef1f7;padding-bottom:5px}
+ul,ol{padding-left:22px}li{margin:4px 0}
+a{color:#2563eb}
+.cta{display:block;text-align:center;background:linear-gradient(135deg,#142554,#1e3a8a);color:#fff;text-decoration:none;font-weight:800;padding:16px;border-radius:14px;margin-top:16px}
+.cta small{display:block;font-weight:500;opacity:.85;font-size:12px;margin-top:3px}
+.rel{font-size:14px;color:var(--mut)}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:24px}
+</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"><link rel="stylesheet" href="/assets/veritas-tokens.css?v=1.19.25">
+<link rel="stylesheet" href="/assets/veritas-refonte.css?v=1.19.25"><!-- seo-tete -->
 <meta property="og:image" content="https://veritas-school.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","name":"Épreuve 1ère — L'Enfant noir","description":"Épreuve de français de 1re sur L'Enfant noir de Camara Laye : extrait, questions et corrigé en ligne, conformes au programme MINESEC.","url":"https://veritas-school.com/evaluations/epreuve_1ere_enfant_noir_2026.html","inLanguage":"fr","learningResourceType":"Épreuve d'examen","educationalLevel":"1re","isAccessibleForFree":true,"provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"publisher":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://veritas-school.com/"},{"@type":"ListItem","position":2,"name":"Sujets d'examen","item":"https://veritas-school.com/evaluations/"},{"@type":"ListItem","position":3,"name":"Épreuve 1ère — L'Enfant noir","item":"https://veritas-school.com/evaluations/epreuve_1ere_enfant_noir_2026.html"}]}]}</script>
 <!-- /seo-tete -->
 <!--vrt-habillage:tete-->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.63.34" data-vrt-epreuve>
+<link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.19.25.34">
 <script>window.VRT_DATA=window.VRT_DATA||{"citations":[{"t":"Le génie, c’est un pour cent d’inspiration et quatre-vingt-dix-neuf pour cent de transpiration.","a":"Thomas Edison"},{"t":"Ce n’est pas parce que les choses sont difficiles que nous n’osons pas ; c’est parce que nous n’osons pas qu’elles sont difficiles.","a":"Sénèque"},{"t":"L’éducation est l’arme la plus puissante pour changer le monde.","a":"Nelson Mandela"},{"t":"Un peu chaque jour vaut mieux que beaucoup un seul jour.","a":"Proverbe"},{"t":"La chance sourit à l’esprit préparé.","a":"Louis Pasteur"},{"t":"Tomber sept fois, se relever huit.","a":"Proverbe japonais"}],"themeSombre":"\n      body{background:#0A1428!important}\n      [style*=\"background:#fff\"],[style*=\"background:#FAFBFE\"],[style*=\"background:#FCFDFE\"],[style*=\"background:#F7F9FD\"]{background:#132241!important}\n      [style*=\"background:#F4F5F8\"],[style*=\"background:#F4F6FB\"],[style*=\"background:#EFF2F7\"],[style*=\"background:#F5F9FF\"]{background:#0F1B33!important}\n      [style*=\"background:rgba(255,255,255,.96)\"]{background:rgba(13,25,48,.96)!important}\n      [style*=\"radial-gradient(1100px\"],[style*=\"radial-gradient(900px\"]{background:#0C1730!important}\n      [style*=\"linear-gradient(180deg,#FBF8F1\"]{background:#0C1730!important}\n      [style*=\"color:#001136\"]{color:#EEF3FC!important}\n      [style*=\"color:#0C2A6A\"]{color:#DCE6F8!important}\n      [style*=\"color:#4D5163\"],[style*=\"color:#6B5A42\"]{color:#B6C2D8!important}\n      [style*=\"color:#6E7385\"],[style*=\"color:#9BA6BE\"]{color:#8D9AB4!important}\n      [style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"]{border-color:#24334F!important}\n      [style*=\"\"],[style*=\"\"]{border-bottom-color:#24334F!important}\n      [style*=\"\"]{border-top-color:#24334F!important}\n      [style*=\"border-left:4px solid\"]{border-left-color:#FFC93C!important}\n      input,input::placeholder{color:#C7D2E6!important}\n    "};</script>
-<style>body{padding-top:0!important}body>.vrt-hab:not([style*="position:fixed"]){margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw)}body>div.vrt-hab:not([style*="position:fixed"]){margin-bottom:24px}body>footer.vrt-hab{margin-bottom:-24px}</style>
 <!--/vrt-habillage:tete-->
-</head>
-<body><!--vrt-habillage:barre-->
+</head><body><svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false"><symbol id="lc-graduation" viewBox="0 0 24 24"><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/></symbol><symbol id="lc-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></symbol></svg><!--vrt-habillage:barre-->
   <nav id="vrtNav" style="position:sticky;top:0;z-index:60;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);height:76px;display:flex;align-items:center;transition:box-shadow .18s ease" class="vrt-hab">
     <div style="max-width:1170px;margin:0 auto;padding:0 24px;display:flex;align-items:center;width:100%;height:100%;gap:8px">
       <button type="button" onclick="VRT.act('goAccueil',this,event)" data-go="accueil" style="display:flex;align-items:center;gap:11px;background:none;border:0;cursor:pointer;padding:0;margin-right:18px;flex-shrink:0;text-align:left" aria-label="Accueil VÉRITAS">
@@ -128,154 +112,33 @@ body{font-family:'Times New Roman',serif;background:var(--cream);color:var(--ink
   <div style="background:linear-gradient(90deg,#0C2A6A,#1E499B 45%,#0E7C86);color:#fff" class="vrt-hab">
     <div style="max-width:1170px;margin:0 auto;padding:13px 24px;display:flex;align-items:center;justify-content:center;gap:10px 18px;flex-wrap:wrap;text-align:center;font-size:15px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-sparkles"></use></svg>
-      <span>VÉRITAS accompagne et suit les apprenants <b style="font-weight:600;color:#FFC93C">au centre, en ligne et à domicile</b>. Pour les enseignants : de quoi préparer tous ses cours et ses épreuves.</span>
+      <span>VÉRITAS accompagne et suit les apprenants <b style="font-weight:600;color:#FFC93C">au centre, en ligne et à domicile</b>. Pour les enseignants : de quoi préparer tous ses cours et ses épreuves. <b style="font-weight:600;color:#FFC93C">Nouveau</b> : toutes les matières leçon par leçon, avec quiz, badges et schémas animés, de la 6ᵉ à la Terminale.</span>
       <a href="/corriges/" style="display:inline-flex;align-items:center;gap:6px;padding:6px 18px;border-radius:100px;border:1px solid rgba(255,255,255,.55);color:#fff;font:600 13px Poppins,sans-serif;letter-spacing:.4px;text-transform:uppercase;transition:background .18s,color .18s" class="vh11">Corrigés gratuits</a>
       <a href="/#boutique" style="display:inline-flex;align-items:center;gap:7px;padding:6px 18px;border-radius:100px;background:#FFC93C;color:#001136;font:600 13px Poppins,sans-serif;letter-spacing:.4px;text-transform:uppercase;transition:background .18s,box-shadow .18s" class="vh12"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shop"></use></svg>Boutique</a>
       <a href="/plateforme/" style="display:inline-flex;align-items:center;gap:7px;padding:6px 18px;border-radius:100px;border:1px solid rgba(255,255,255,.55);color:#fff;font:600 13px Poppins,sans-serif;letter-spacing:.4px;text-transform:uppercase;transition:background .18s,color .18s" class="vh11"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"></use></svg>Atelier de français</a>
+      <a href="/apprendre/" title="Toutes les matières de la 6ᵉ à la Terminale, leçon par leçon : cours illustrés, quiz, badges et schémas animés" style="display:inline-flex;align-items:center;gap:7px;padding:6px 16px 6px 6px;border-radius:100px;border:1px solid #FFC93C;color:#fff;font:600 13px Poppins,sans-serif;letter-spacing:.4px;text-transform:uppercase;transition:background .18s,color .18s" class="vh11"><span style="background:#FFC93C;color:#001136;border-radius:100px;padding:2px 8px;font-size:11px;letter-spacing:.6px">Nouveau</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-graduation"></use></svg>Apprendre</a>
     </div>
   </div>
 <!--/vrt-habillage:barre-->
 
-<div class="filigrane">VÉRITAS</div>
-<div class="bande"></div>
 
-<div class="entete">
-  <div class="entete-g">
-    <strong>RÉPUBLIQUE DU CAMEROUN</strong><br>
-    Paix – Travail – Patrie<br>
-    Ministère des Enseignements Secondaires<br>
-    <strong>Centre VÉRITAS — Douala</strong>
-  </div>
-  <div class="entete-d">
-    <h1 class="ep-titre">ÉPREUVE DE FRANÇAIS</h1><br>
-    Classe : 1<sup>ère</sup> Littéraire<br>
-    Durée : 2h00 · Coefficient : 3<br>
-    Note : _______ / 20
-  </div>
+<div class="wrap"><article class="card">
+<span class="badge">Laboratoire virtuel · SVT · 2nde C-1ère D</span>
+<h1>La Mitose — Division Cellulaire — TP virtuel (2nde C-1ère D)</h1>
+<p>Visualise les 4 phases de la mitose. Comprends la réplication, la division et la différence avec la méiose.</p><h2>Ce qu’il faut savoir</h2><p>Mitose : division cellulaire → 2 cellules filles IDENTIQUES à la mère (même 2n chromosomes).</p><p>phases — PMAT :</p><p>Prophase : chromosomes se condensent, fuseau se forme.</p><p>Métaphase : chromosomes alignés sur la plaque équatoriale.</p><p>Anaphase : chromatides sœurs séparées, migrent aux pôles.</p><p>Télophase : 2 noyaux formés, cytocinèse → 2 cellules.</p><p>Interphase (avant mitose) : réplication ADN (phase S). 46 chromosomes chez l&#x27;homme.</p><h2>Le protocole, étape par étape</h2><ol><li>PRÉPARATION DE LA LAME : coupe 2-3 mm d&#x27;une racine d&#x27;oignon (méristème = zone de croissance en pointe). Étale sur lame, ajoute colorant carmin acéto-orcéine ou violet de gentiane. Pose la lamelle, écrase légèrement.</li><li>OBSERVATION AU MICROSCOPE (objectif ×10 puis ×40) : cherche des cellules dont le noyau est visible et coloré. Repère des cellules avec des chromosomes visibles (distinctes des cellules en interphase).</li><li>IDENTIFIER LA PROPHASE : cherche une cellule dont les chromosomes sont condensés en bâtonnets épais mais encore désorganisés. L&#x27;enveloppe nucléaire disparaît.</li><li>IDENTIFIER LA MÉTAPHASE : cherche une cellule dont les chromosomes sont alignés EN FILE au centre (plaque équatoriale). C&#x27;est la phase la plus facile à observer.</li><li>IDENTIFIER L&#x27;ANAPHASE : cherche une cellule dont les chromosomes se séparent vers les deux pôles (forme en V ou Y). Les deux groupes de chromatides migrent en sens opposé.</li><li>IDENTIFIER LA TÉLOPHASE : cherche deux masses de chromosomes aux pôles. La cellule commence à se diviser en deux (étranglement visible = cytocinèse).</li><li>SCHÉMA BILAN : dessine les 4 phases en ordre (PMAT) avec une légende : chromosomes, fuseau, plaque équatoriale, noyau. Note que la mitose conserve 2n=46 chromosomes dans chaque cellule fille.</li></ol><h2>Testez-vous : questions corrigées</h2><h3>La mitose produit combien de cellules filles identiques ?</h3><p>Réponse : 2. Mitose → 2 cellules filles génétiquement identiques à la mère (2n chromosomes).</p>
+<h3>À quelle phase les chromosomes s&#x27;alignent-ils au centre ?</h3><p>Réponse : Métaphase. MÉTAPHASE : alignement sur la plaque équatoriale. PMAT → M = aligneMent au Milieu.</p>
+<h3>Qu&#x27;est-ce qu&#x27;une chromatide ?</h3><p>Réponse : La moitié d&#x27;un chromosome répliqué. Après réplication, chaque chromosome = 2 chromatides sœurs identiques reliées au centromère.</p>
+<h3>La mitose est précédée de :</h3><p>Réponse : L&#x27;interphase (réplication ADN). L&#x27;interphase (G1+S+G2) précède la mitose. La phase S = réplication de l&#x27;ADN.</p>
+<h3>Différence principale mitose vs méiose :</h3><p>Réponse : Méiose produit 4 cellules haploïdes (n). Méiose → 4 cellules haploïdes (n) = gamètes. Mitose → 2 cellules diploïdes (2n) identiques.</p>
+<h3>Un humain a 2n=46. Après mitose, chaque cellule fille a :</h3><p>Réponse : 46. La mitose conserve 2n→2n. Chaque cellule fille a bien 46 chromosomes.</p>
+<a class="cta" href="https://veritas-school.com/app.html#labos">Faire l’expérience en ligne<small>Laboratoire virtuel VÉRITAS — SVT, programme MINESEC</small></a>
+</article>
+<p class="rel"><a href="/decouvrir/laboratoires-virtuels.html">← Tous les laboratoires virtuels</a> · <a href="/decouvrir/examen-blanc-en-ligne.html">Examen blanc</a> · <a href="/decouvrir/">Découvrir VÉRITAS</a></p>
 </div>
 
-<h2 style="text-align:center;color:var(--navy);margin:14px 0 6px;font-size:13pt">TEXTE SUPPORT</h2>
-
-<div class="texte-support">
-  <p>Mon père était forgeron et orfèvre. Il avait la réputation d'être le meilleur orfèvre de notre région, voire de tout le pays de Guinée ; et cette réputation était bien méritée. Toujours, de très bonne heure, avant que le soleil se levât, des femmes venaient de partout lui apporter de l'or, sous forme de poudre ou de pépites, pour qu'il le travaillât.</p>
-
-  <p style="margin-top:10px">Un jour — je devais avoir dix ans — une femme vint nous trouver. Elle apportait un lingot d'or, de quoi faire sans doute un bijou important. Elle s'assit et attendit. Mon père la regarda longuement, tournant et retournant le lingot entre ses doigts. Puis il prit ses outils, fit aviver le feu dans le foyer, et commença de souffler dans le tuyau.</p>
-
-  <p style="margin-top:10px">C'est alors que j'aperçus le serpent. Il était venu sans bruit par le soupirail, comme à son habitude, et il se balançait doucement à deux pas du fourneau. Je voulus crier pour avertir mon père, mais ma gorge se serra. Autour de moi, personne ne paraissait effrayé. Les apprentis continuaient leur travail. Mon père lui-même ne se retournait pas.</p>
-
-  <p style="margin-top:10px">Comme il m'arrive de le revoir, ce père, comme il me revient nettement en mémoire ! Il travaillait l'or ce jour-là avec une attention, une piété dont je n'ai jamais vu l'égale. Sa main gauche ouverte tenait la coupelle, sa main droite tenait la tige de métal avec laquelle il fouillait le creuset. Son visage penché sur l'or rougeoyant était grave, tendu, comme en prière.</p>
-
-  <p style="margin-top:10px">[…]</p>
-
-  <p style="margin-top:10px">Plus tard, mon père m'expliqua : ce serpent noir était son génie protecteur, l'esprit de ses ancêtres. Il venait, à chaque travail important, témoigner de sa présence et lui insuffler la force nécessaire. « Ne t'effraie pas, mon fils, me dit-il. Ce serpent ne fait de mal à personne. C'est notre allié. »</p>
-
-  <div class="source">Camara LAYE, <em>L'Enfant noir</em>, Éditions Plon, Paris, 1953 ; réed. Pocket, chap. II, pp. 20-26.</div>
-</div>
-
-<div class="titre-section">PARTIE I — COMPRÉHENSION DU TEXTE <span class="pts">6 pts</span></div>
-<ol class="questions">
-  <li>Quelle est la double activité du père du narrateur ? Pourquoi jouit-il d'une grande réputation ? <em>(1,5 pt)</em></li>
-  <li>Pourquoi le narrateur voulait-il crier ? Qu'est-ce qui l'en a empêché ? <em>(1,5 pt)</em></li>
-  <li>Relevez dans le quatrième paragraphe les mots et expressions qui montrent que le père accomplit son travail comme un acte sacré. <em>(2 pts)</em></li>
-  <li>Quelle explication le père donne-t-il à son fils sur la présence du serpent ? Que révèle cette explication sur les croyances de la famille ? <em>(1 pt)</em></li>
-</ol>
-
-<div class="titre-section">PARTIE II — ÉTUDE DU VOCABULAIRE <span class="pts">4 pts</span></div>
-<ol class="questions">
-  <li>« Son visage était grave, tendu, comme <u>en prière</u>. »
-    <ol type="a" style="margin-top:4px;margin-left:18px">
-      <li>Identifiez et nommez la figure de style employée. <em>(0,5 pt)</em></li>
-      <li>Quelle dimension cela confère-t-il au geste de l'orfèvre ? <em>(1 pt)</em></li>
-    </ol>
-  </li>
-  <li>« Mon père était forgeron et <u>orfèvre</u>. » — Donnez la définition précise d'<em>orfèvre</em>. En quoi ce métier est-il différent de celui de forgeron ? <em>(1,5 pt)</em></li>
-  <li>« Des femmes venaient lui apporter de l'or sous forme de <u>poudre</u> ou de <u>pépites</u>. » — Expliquez ces deux formes de l'or. <em>(1 pt)</em></li>
-</ol>
-
-<div class="titre-section">PARTIE III — ÉTUDE GRAMMATICALE <span class="pts">4 pts</span></div>
-<ol class="questions">
-  <li>« Mon père était forgeron et orfèvre. »
-    <ol type="a" style="margin-top:4px;margin-left:18px">
-      <li>Donnez la nature et la fonction de « forgeron et orfèvre ». <em>(1 pt)</em></li>
-      <li>Quelle est la valeur de l'imparfait « était » dans ce contexte ? <em>(0,5 pt)</em></li>
-    </ol>
-  </li>
-  <li>« Je voulus crier pour avertir mon père, mais ma gorge se serra. »
-    <ol type="a" style="margin-top:4px;margin-left:18px">
-      <li>Identifiez le temps des verbes <em>voulus</em> et <em>serra</em>. Justifiez leur emploi. <em>(1 pt)</em></li>
-      <li>Quelle relation logique la conjonction <em>mais</em> exprime-t-elle ici ? <em>(0,5 pt)</em></li>
-    </ol>
-  </li>
-  <li>Transformez la phrase suivante à la <strong>voix passive</strong> (attention à tous les accords) : <em>« Des femmes apportaient de l'or à mon père. »</em> <em>(1 pt)</em></li>
-</ol>
-
-<div class="titre-section">PARTIE IV — EXPRESSION ÉCRITE <span class="pts">6 pts</span></div>
-<p style="margin:8px 0 10px"><strong>Traitez l'un des deux sujets suivants au choix.</strong></p>
-
-<div class="sous-titre">Sujet A — Commentaire guidé</div>
-<p>Montrez que ce texte est à la fois un récit autobiographique et une célébration de la culture africaine. Vous développerez votre réponse en deux axes clairement distingués, en vous appuyant sur des éléments précis du texte. <em>(25 lignes environ)</em></p>
-
-<div class="sous-titre" style="margin-top:12px">Sujet B — Production personnelle</div>
-<p>Décrivez un artisan ou un artiste de votre entourage en mettant en valeur son talent, la précision de ses gestes, et le rapport particulier qu'il entretient avec son art ou son métier. Votre texte sera vivant, précis, et comportera au moins une comparaison et une métaphore. <em>(20 à 25 lignes)</em></p>
-
-<div class="footer">
-  Centre VÉRITAS — Douala, Cameroun · Épreuve de séquence · Classe de 1<sup>ère</sup> · © Mythe Errant 2026
-  <div class="bande" style="margin-top:6px"></div>
-</div>
-
-<button class="toggle-btn" onclick="toggleCorrige(this)">🔓 Afficher le corrigé enseignant</button>
-
-<div class="corrige-wrap" id="corrige">
-  <h2>📋 CORRIGÉ — DOCUMENT RÉSERVÉ À L'ENSEIGNANT</h2>
-
-  <div class="titre-section">PARTIE I — Corrigé Compréhension</div>
-  <ol class="questions">
-    <li class="rep"><b>Double activité :</b> forgeron (travail des métaux, outils) et orfèvre (travail de l'or, bijoux). Sa réputation vient de son excellence reconnue dans toute la région de Guinée.</li>
-    <li class="rep"><b>Il voulait crier</b> parce qu'il avait peur pour son père en voyant le serpent. <b>Ce qui l'en a empêché :</b> sa gorge s'est serrée (la peur l'a paralysé) et il a réalisé que personne d'autre ne semblait inquiet.</li>
-    <li class="rep"><b>Mots du sacré :</b> « attention », « piété », « grave », « tendu », « comme en prière », « fouillait le creuset », « visage penché », « rougeoyant ». Le père est dans un état de recueillement quasi religieux.</li>
-    <li class="rep"><b>Explication du père :</b> le serpent est son génie protecteur, l'esprit des ancêtres. Cela révèle des croyances animistes : les ancêtres veillent sur les vivants sous des formes animales ; la forge est un espace spirituel, pas seulement technique.</li>
-  </ol>
-
-  <div class="titre-section">PARTIE II — Corrigé Vocabulaire</div>
-  <ol class="questions">
-    <li class="rep">
-      <b>a. Figure de style :</b> comparaison (outil : <em>comme</em>).<br>
-      <b>b. Dimension conférée :</b> le geste devient un acte de foi, de dévotion ; l'orfèvre est assimilé à un officiant religieux, ce qui élève le travail artisanal au rang de cérémonie sacrée.
-    </li>
-    <li class="rep"><b>Orfèvre :</b> artisan qui travaille les métaux précieux (or, argent) pour en faire des bijoux ou des objets d'art. Différence avec forgeron : le forgeron travaille les métaux bruts (fer, acier) pour des outils ou des armes — travail de force ; l'orfèvre travaille la précision et l'esthétique.</li>
-    <li class="rep"><b>Poudre d'or :</b> or réduit en fines particules, souvent issu du lavage des rivières. <b>Pépites :</b> petits blocs naturels d'or pur trouvés dans la nature.</li>
-  </ol>
-
-  <div class="titre-section">PARTIE III — Corrigé Grammaire</div>
-  <ol class="questions">
-    <li class="rep">
-      <b>a.</b> « forgeron et orfèvre » : groupe nominal (deux noms communs coordonnés), <em>attribut du sujet</em> « mon père ».<br>
-      <b>b.</b> Imparfait de <em>caractérisation / description</em> : présente un état permanent, une qualité durable du père.
-    </li>
-    <li class="rep">
-      <b>a.</b> <em>Voulus</em> et <em>serra</em> : passé simple. Ils expriment des actions ponctuelles et successives dans le récit au passé — actions de premier plan dans la narration.<br>
-      <b>b.</b> <em>Mais</em> exprime une <em>opposition / restriction</em> : l'intention (vouloir crier) est contrariée par une réalité physique (la gorge se serre).
-    </li>
-    <li class="rep"><b>Voix passive :</b> De l'or était apporté à mon père par des femmes.</li>
-  </ol>
-
-  <div class="titre-section">PARTIE IV — Grille d'évaluation 1ère</div>
-  <table style="width:100%;border-collapse:collapse;font-size:11pt">
-    <tr style="background:var(--navy);color:#fff"><th style="padding:6px;text-align:left">Critère</th><th style="padding:6px">Points</th><th style="padding:6px">Indicateurs</th></tr>
-    <tr style="background:#f5f5ff"><td style="padding:6px;border:1px solid #ccc">Fond &amp; axes de lecture</td><td style="padding:6px;text-align:center;border:1px solid #ccc">2</td><td style="padding:6px;border:1px solid #ccc">Sujet A : 2 axes distincts et illustrés. Sujet B : portrait vivant, figures de style effectives</td></tr>
-    <tr><td style="padding:6px;border:1px solid #ccc">Forme &amp; organisation</td><td style="padding:6px;text-align:center;border:1px solid #ccc">2</td><td style="padding:6px;border:1px solid #ccc">Intro + développement organisé + conclusion, transitions claires</td></tr>
-    <tr style="background:#f5f5ff"><td style="padding:6px;border:1px solid #ccc">Langue</td><td style="padding:6px;text-align:center;border:1px solid #ccc">2</td><td style="padding:6px;border:1px solid #ccc">Richesse lexicale, syntaxe variée. ≤ 3 fautes = 2 pts</td></tr>
-  </table>
-  <p style="font-size:10pt;color:#555;margin-top:8px"><em>Note : pour le Sujet A, les deux axes attendus sont (1) la dimension autobiographique (narrateur enfant, mémoire affective, ton nostalgique) et (2) la valorisation de la culture Malinké/africaine (orfèvrerie, animisme, sagesse du père).</em></p>
-</div>
-
-<script>
-function toggleCorrige(btn){
-  var c=document.getElementById('corrige');
-  if(c.style.display==='none'||!c.style.display){c.style.display='block';btn.textContent='🔒 Masquer le corrigé';c.scrollIntoView({behavior:'smooth'});}
-  else{c.style.display='none';btn.textContent='🔓 Afficher le corrigé enseignant';}
-}
-</script>
+  <script src="/assets/veritas-convert.js?v=1.18.1" defer></script>
+<script src="/assets/ambassa.js?v=1.19.44" defer></script>
+<script src="/assets/veritas-medaillons.js?v=1.19.47" defer></script>
 <!--vrt-habillage:pied-->
 <footer style="background:#001136;color:rgba(255,255,255,.72);margin-top:48px" class="vrt-hab">
     <div>
@@ -402,9 +265,7 @@ function toggleCorrige(btn){
         <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-brain"></use></svg></button>
     </div>
   </div>
-<script src="/assets/veritas-medaillons.js?v=1.20.63" defer></script>
-<script src="/assets/veritas-harmonie.js?v=1.20.63.34" defer></script>
-<script src="/assets/vitrine.js?v=1.20.63.34" defer></script>
+<script src="/assets/veritas-harmonie.js?v=1.19.25.34" defer></script>
+<script src="/assets/vitrine.js?v=1.19.25.34" defer></script>
 <!--/vrt-habillage:pied-->
-</body>
-</html>
+</body></html>

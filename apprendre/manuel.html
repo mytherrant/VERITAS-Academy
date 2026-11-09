@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manuels collaboratifs | VÉRITAS</title>
+<meta name="description" content="Composez le manuel de votre classe avec les leçons VÉRITAS, éditez-le avec vos collègues, publiez-le à vos élèves.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="apprendre.css?v=20261109b">
+<link rel="stylesheet" href="jeu.css?v=20261109b">
+<style>
+/* ── Manuel collaboratif : colonne de navigation + document ── */
+.mn{display:grid;grid-template-columns:290px minmax(0,1fr);min-height:calc(100vh - 60px)}
+.mn-side{background:#F5F7FB;color:#001136;border-right:1px solid #E6EAF2;padding:18px 14px 30px;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto}
+.mn-side h2{font:600 17px/1.3 var(--sans);margin:4px 6px 2px}
+.mn-side .sous{font-size:12px;color:#6B7287;margin:0 6px 14px}
+.mn-chap{margin:14px 0 4px;display:flex;align-items:center;gap:6px}
+.mn-chap b{flex:1;font:600 12px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:#C24E00;padding:0 6px}
+.mn-chap input{flex:1;background:#fff;border:1px solid #DCE5F5;color:#001136;border-radius:8px;padding:5px 8px;font:600 12px var(--sans)}
+.mn-doc{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:1px solid transparent;background:#fff;color:#001136;border:1px solid #E6EAF2;border-radius:10px;padding:10px 12px;margin:5px 0;font:500 14px var(--sans);cursor:pointer}
+.mn-doc:hover{border-color:#9FBEEA}
+.mn-doc[aria-current]{background:#EDF2FB;color:#1E499B;border-color:#9FBEEA;box-shadow:inset 3px 0 0 #1E499B}
+.mn-doc .pt{flex:0 0 8px;height:8px;border-radius:50%;background:#7FCB8C}
+.mn-doc .pt.off{background:#C9CFDD}
+.mn-doc[aria-current] .pt.off{background:#C9CFDD}
+.mn-plus{display:block;width:100%;margin-top:6px;border:1px dashed #9FBEEA;background:none;color:#1E499B;border-radius:10px;padding:8px;font:500 13px var(--sans);cursor:pointer}
+.mn-plus:hover{background:#EDF2FB}
+.mn-main{padding:22px 28px 90px;background:#fff}
+.mn-barre{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 auto 18px;max-width:820px}
+.mn-etat{font-size:13px;color:var(--gris);margin-right:auto}
+.mn-etat.ok::before{content:"● ";color:#2E9E5B}.mn-etat.att::before{content:"● ";color:#D9A21B}.mn-etat.ko::before{content:"● ";color:#B4321E}
+.btn-or{background:#FFC93C;color:#001136;border:0;border-radius:10px;padding:9px 16px;font:600 14px var(--sans);cursor:pointer}
+.btn-bl{background:#1E499B;color:#fff;border:0;border-radius:10px;padding:9px 16px;font:600 14px var(--sans);cursor:pointer}
+.doc{max-width:820px;margin:0 auto}
+.doc-titre{font:600 clamp(22px,3vw,30px)/1.25 var(--sans);color:#001136;margin:0 0 6px;outline:none;border-radius:8px}
+.prof .doc-titre:hover,.prof .doc-titre:focus{background:#F5F7FB}
+.doc-meta{display:flex;gap:10px;align-items:center;margin-bottom:20px;font-size:13px;color:var(--gris)}
+.bl{position:relative;border:1px solid transparent;border-radius:10px;padding:10px 12px;margin:4px 0}
+.prof .bl:hover{border-color:#E6EAF2}
+.prof .bl.masque{opacity:.5}
+.bl .bl-outils{display:none;position:absolute;top:-16px;right:8px;background:#fff;border:1px solid #E6EAF2;border-radius:999px;padding:3px 5px;gap:2px;align-items:center;box-shadow:0 6px 18px rgba(12,42,106,.08);z-index:4}
+.prof .bl:hover .bl-outils,.prof .bl:focus-within .bl-outils{display:flex}
+.bl-outils button{border:0;background:none;width:28px;height:28px;border-radius:8px;cursor:pointer;color:#001136;font:600 13px var(--sans)}
+.bl-outils button:hover{background:#EDF2FB}
+.bl-outils .mod{width:auto;padding:0 10px;background:#1E499B;color:#fff;border-radius:999px}
+.bl-outils label{display:flex;align-items:center;gap:6px;font:600 12px var(--sans);color:#14522E;background:#EAF7EF;border-radius:999px;padding:3px 4px 3px 10px;margin-left:4px;cursor:pointer}
+.bl-outils input{appearance:none;width:32px;height:18px;border-radius:999px;background:#C9CFDD;position:relative;margin:0;cursor:pointer}
+.bl-outils input::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s}
+.bl-outils input:checked{background:#2E9E5B}.bl-outils input:checked::after{transform:translateX(14px)}
+.bl [contenteditable="true"]{outline:2px solid #9FBEEA;outline-offset:4px;border-radius:6px;background:#FAFBFE}
+.bl .bt{font:600 17px var(--sans);color:#001136;margin:0 0 6px}
+.bl-type{position:absolute;left:-2px;top:-9px;font:600 10px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:#6B7287;background:#fff;padding:0 6px;display:none}
+.prof .bl:hover .bl-type{display:block}
+.inser{display:none;text-align:center;margin:2px 0}
+.prof .inser{display:block}
+.inser>button{border:1px dashed #C9CFDD;background:#fff;color:#6B7287;border-radius:999px;padding:3px 12px;font:500 12px var(--sans);cursor:pointer;opacity:.35;transition:opacity .15s}
+.inser>button:hover,.inser.ouvert>button{opacity:1;color:#1E499B;border-color:#1E499B}
+.palette{display:none;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0}
+.inser.ouvert .palette{display:flex}
+.palette button{border:1px solid #E6EAF2;background:#fff;border-radius:10px;padding:7px 11px;font:500 13px var(--sans);color:#001136;cursor:pointer}
+.palette button:hover{border-color:#1E499B;background:#EDF2FB}
+.question .rep{margin-top:8px;background:#E9F5F6;border-radius:10px;padding:10px 12px}
+.question .voir{border:1px solid #E6EAF2;background:#fff;border-radius:999px;padding:5px 12px;font:600 13px var(--sans);color:#0E7C86;cursor:pointer}
+.partie-ref{background:#FAFBFE;border:1px solid #E6EAF2;border-radius:10px;padding:12px 16px}
+.partie-ref .src{font-size:12px;color:#6B7287;margin-bottom:6px}
+/* accueil « mes manuels » */
+.mes{max-width:900px;margin:0 auto;padding:30px 22px 80px}
+.mes h1{text-align:left;margin:0 0 6px}
+.mes-l{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin:22px 0}
+.mes-l a{display:block;border:1px solid #E6EAF2;border-radius:10px;padding:16px;text-decoration:none;color:#001136}
+.mes-l a:hover{border-color:#9FBEEA}
+.mes-l small{display:block;color:var(--gris)}
+.form{border:1px solid #E6EAF2;border-radius:10px;padding:18px;display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end}
+.form label{font-size:13px;color:var(--gris);display:flex;flex-direction:column;gap:4px}
+.form input,.form select{border:1px solid #E6EAF2;border-radius:10px;padding:9px 10px;font:14px var(--sans);color:#001136}
+.pas3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:26px 0}
+.pas3 div{border:1px solid #E6EAF2;border-radius:10px;padding:16px}
+.pas3 b{display:block;color:#001136;margin:6px 0 4px}
+.pas3 .n{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#EDF2FB;color:#1E499B;font-weight:600}
+dialog .dlg{padding:22px;max-width:640px}
+dialog .dlg h3{margin:0 0 10px;font:600 19px var(--sans);color:#001136}
+.aj-info{margin:0 0 16px;padding:12px 16px;border-radius:12px;background:#EEF3FB;color:#001136;font:14px/1.5 var(--sans)}.aj-info.err{background:#FDEBDD;color:#5E2600}
+.lien{display:flex;gap:6px;margin:6px 0 14px}.lien input{flex:1;border:1px solid #E6EAF2;border-radius:10px;padding:8px 10px;font:13px var(--sans)}
+.choix-l{max-height:340px;overflow:auto;border:1px solid #E6EAF2;border-radius:10px}
+.choix-l label{display:flex;gap:10px;padding:10px 12px;border-top:1px solid #E6EAF2;cursor:pointer;font-size:14px}
+.choix-l label:first-child{border-top:0}
+@media (max-width:900px){.mn{grid-template-columns:1fr}.mn-side{position:static;height:auto}.form,.pas3{grid-template-columns:1fr}}
+@media (max-width:640px){.mn-main{padding:18px 16px 90px}}
+</style>
+</head>
+<body class="eleve">
+<header class="top">
+  <a class="logo" href="/">VÉRI<b>TAS</b></a>
+  <nav class="top-nav" aria-label="Apprendre"><a href="index.html">Apprendre</a><a href="manuel.html" aria-current="page">Manuels</a><a href="/scenes/">Scènes vivantes</a></nav>
+  <div class="top-d">
+    <div class="vue" role="group" aria-label="Choisir la vue" id="vueSel" hidden>
+      <button type="button" data-vue="prof" aria-pressed="true">Enseignant</button>
+      <button type="button" data-vue="eleve" aria-pressed="false">Élève</button>
+    </div>
+  </div>
+</header>
+<main id="app"><p class="vide" style="padding:30px">Chargement…</p></main>
+
+<dialog id="dlg"><button type="button" class="fermer" aria-label="Fermer" onclick="this.closest('dialog').close()">×</button><div class="dlg" id="dlgC"></div></dialog>
+
+<script src="scenes.js?v=20261109b"></script>
+<script src="progressions.js?v=20261109b"></script>
+<script src="lecons.js?v=20261109b"></script>
+<script src="commun.js?v=20261109b"></script>
+<script src="jeu.js?v=20261109b"></script>
+<script>
+(function(){
+  "use strict";
+  var A=VRT.app, esc=A.esc, $=function(s,c){return (c||document).querySelector(s)}, $$=function(s,c){return [].slice.call((c||document).querySelectorAll(s))};
+  var API="/api/manuels.php", app=$("#app");
+  var TYPES={texte:"Texte",def:"Définition",ex:"Exemple",astuce:"Astuce",attention:"Attention",savais:"Le savais-tu ?",question:"Question",partie:"Partie de leçon VÉRITAS"};
+  function uid(){return Math.random().toString(36).slice(2,12)}
+
+  /* clés d'édition : gardées dans CE navigateur (liste « mes manuels »). Un lien #cle=… les apporte. */
+  function mes(){return A.lire("manuels",{})}
+  function garder(id,info){var m=mes();m[id]=Object.assign(m[id]||{},info);A.ecrire("manuels",m)}
+
+  /* nettoyage côté client (le serveur nettoie aussi) : balises de forme, sans attributs */
+  function propre(html){
+    var t=document.createElement("template"); t.innerHTML=String(html||"");
+    var OK={B:1,I:1,U:1,STRONG:1,EM:1,BR:1,P:1,UL:1,OL:1,LI:1,SUB:1,SUP:1};
+    (function net(n){[].slice.call(n.childNodes).forEach(function(c){
+      if(c.nodeType===1){ if(!OK[c.tagName]){ var txt=document.createTextNode(c.textContent); c.replaceWith(txt); return; }
+        [].slice.call(c.attributes).forEach(function(a){c.removeAttribute(a.name)}); net(c); }
+      else if(c.nodeType!==3) c.remove();
+    })})(t.content);
+    return t.innerHTML;
+  }
+
+  async function api(methode,params,corps,cle){
+    var h={"Content-Type":"application/json"}; if(cle) h["X-Manuel-Cle"]=cle;
+    var r=await fetch(API+"?"+new URLSearchParams(params),{method:methode,headers:h,body:corps?JSON.stringify(corps):undefined,cache:"no-store"});
+    var j={}; try{j=await r.json()}catch(e){}
+    return {statut:r.status,j:j};
+  }
+
+  /* ════════════ Accueil : mes manuels + créer ════════════ */
+  function accueil(){
+    var m=mes(), ids=Object.keys(m);
+    var opts=A.MATIERES.map(function(x){return '<option value="'+x.id+'">'+esc(x.nom)+'</option>'}).join("");
+    app.innerHTML='<div class="mes"><p class="ariane"><a href="index.html">Apprendre</a><span>›</span>Manuels collaboratifs</p>'+
+      (AJ?'<p class="aj-info"><b>Ajouter « '+esc(AJ.titre)+' »</b> ('+esc(AJ.L.titre)+') — '+(ids.length?'choisissez le manuel qui la recevra, ou créez-en un.':'créez d\'abord le manuel de votre classe : la partie y sera rangée aussitôt.')+'</p>':'')+
+      '<h1>Le manuel de votre classe, à plusieurs mains</h1><p style="color:var(--gris);max-width:640px">Partez des leçons VÉRITAS, ajoutez vos propres blocs, invitez vos collègues à éditer avec vous, puis publiez à vos élèves ce que vous voulez qu\'ils voient.</p>'+
+      '<div class="pas3"><div><span class="n">1</span><b>Composez</b>Chapitres, documents, leçons VÉRITAS importées et blocs à vous.</div><div><span class="n">2</span><b>Éditez ensemble</b>Un lien d\'édition pour vos collègues ; chaque enregistrement est daté et protégé des écrasements.</div><div><span class="n">3</span><b>Publiez</b>Un interrupteur par document et par bloc ; les élèves ne voient que ce qui est publié.</div></div>'+
+      (ids.length?'<h2 style="font:600 20px var(--sans);color:#001136">Mes manuels</h2><div class="mes-l">'+ids.map(function(id){var x=m[id];return '<a href="manuel.html?id='+id+(AJ?AJ.q:'')+'"><b>'+esc(x.titre||"Manuel")+'</b><small>'+esc(x.classe||"")+' · '+esc((A.PAR_ID[x.matiere]||{}).nom||"")+'</small></a>'}).join("")+'</div>':'')+
+      '<h2 style="font:600 20px var(--sans);color:#001136">Créer un manuel</h2><form class="form" id="fCreer"><label>Titre<input name="titre" required maxlength="120" placeholder="Ex. : Histoire 3ᵉ — Lycée de Mokolo"></label><label>Classe<select name="classe">'+A.CLASSES.map(function(c){return '<option>'+c+'</option>'}).join("")+'</select></label><label>Matière<select name="matiere">'+opts+'</select></label><button class="btn-or" type="submit">Créer</button></form><p id="fMsg" class="lu"></p></div>';
+    if(AJ){ var fc=$("#fCreer"); if(fc.classe) fc.classe.value=AJ.L.c; if(fc.matiere) fc.matiere.value=AJ.L.m; } /* la leçon donne classe et matière */
+    $("#fCreer").addEventListener("submit",async function(e){
+      e.preventDefault(); var f=new FormData(this), msg=$("#fMsg"); msg.textContent="Création…";
+      try{ var r=await api("POST",{action:"creer"},{titre:f.get("titre"),classe:f.get("classe"),matiere:f.get("matiere")});
+        if(r.statut!==201){ msg.textContent=r.j.erreur||"Création impossible."; return; }
+        garder(r.j.id,{cle:r.j.cle,titre:r.j.titre,classe:r.j.classe,matiere:r.j.matiere}); location.href="manuel.html?id="+r.j.id+(AJ?AJ.q:"");
+      }catch(err){ msg.textContent="Le serveur ne répond pas : les manuels collaboratifs demandent une connexion."; }
+    });
+  }
+
+  /* ════════════ Éditeur / lecteur ════════════ */
+  var M=null, cle=null, cour=null, minuterie=null, enCours=false, aRefaire=false;
+  /* ?ajouter=<leçon>~<n° de partie> : envoyé par le bouton « Ajouter à mon manuel » d'une leçon */
+  var AJ=(function(){ var v=new URLSearchParams(location.search).get("ajouter")||"", x=v.match(/^([a-z0-9-]{3,60})~(\d{1,2})$/);
+    if(!x) return null; var L=(window.VRT_LECONS||{})[x[1]], i=+x[2];
+    return (L&&L.parties[i])?{lecon:x[1],i:i,L:L,ref:x[1]+"#"+i,titre:L.parties[i].t,q:"&ajouter="+encodeURIComponent(v)}:null; })();
+  async function ouvrir(id){
+    var h=location.hash.match(/cle=([a-f0-9]{48})/); if(h){ garder(id,{cle:h[1]}); history.replaceState(null,"",location.pathname+location.search); }
+    cle=(mes()[id]||{}).cle||null;
+    var r; try{ r=await api("GET",{id:id},null,cle) }catch(e){ app.innerHTML='<p class="vide" style="padding:30px">Le serveur ne répond pas.</p>'; return; }
+    if(r.statut!==200){ app.innerHTML='<p class="vide" style="padding:30px">'+esc(r.j.erreur||"Manuel introuvable.")+' <a href="manuel.html">Mes manuels</a></p>'; return; }
+    M=r.j; if(!M.editeur) cle=null; else garder(id,{titre:M.titre,classe:M.classe,matiere:M.matiere});
+    document.title=M.titre+" | Manuels VÉRITAS";
+    $("#vueSel").hidden=!cle; document.body.className=cle?"prof":"eleve";
+    var p=A.PAR_ID[M.matiere]; if(p) A.teinter(p);
+    var premier=null; M.doc.chapitres.some(function(c){ if(c.docs[0]){premier=c.docs[0].id;return true} });
+    cour=new URLSearchParams(location.search).get("d")||premier;
+    var msgAj=null;
+    if(AJ){
+      history.replaceState(null,"",location.pathname+"?id="+id);
+      if(!cle){ msgAj=["Ce manuel n'est pas modifiable depuis ce navigateur : ouvrez-le avec votre lien co-enseignant.","err"]; }
+      else{
+        var dAj=null; M.doc.chapitres.forEach(function(c){c.docs.forEach(function(x){ if(!dAj&&x.blocs.some(function(y){return y.type==="partie"&&String(y.ref).indexOf(AJ.lecon+"#")===0})) dAj=x; })}); /* le serveur ne garde que id, titre, pub, blocs : on reconnaît le document de la leçon à ses blocs */
+        if(!dAj){ dAj={id:uid(),titre:AJ.L.titre,pub:false,blocs:[]}; (M.doc.chapitres[M.doc.chapitres.length-1]||M.doc.chapitres[0]).docs.push(dAj); }
+        var deja=dAj.blocs.some(function(x){return x.type==="partie"&&x.ref===AJ.ref});
+        if(!deja){ var pos=dAj.blocs.length; dAj.blocs.some(function(y,k){ var r=String(y.ref||""); if(y.type==="partie"&&r.indexOf(AJ.lecon+"#")===0&&+r.split("#")[1]>AJ.i){pos=k;return true} }); dAj.blocs.splice(pos,0,{id:uid(),type:"partie",ref:AJ.ref,pub:true}); } /* dans l ordre de la leçon */
+        cour=dAj.id;
+        msgAj=deja?["Cette partie est déjà dans ce document.","ok"]
+                  :["Partie ajoutée."+(dAj.pub?" Vos élèves la voient avec le lien élèves.":" Publiez le document pour que vos élèves la voient."),"ok"];
+        if(!deja){ rendre(); sauver(); }
+      }
+    }
+    rendre();
+    if(msgAj) annoncer(msgAj[0],msgAj[1]);
+  }
+  function annoncer(t,cl){ var n=document.createElement("p"); n.className="aj-info "+(cl||""); n.setAttribute("role","status"); n.textContent=t; app.insertBefore(n,app.firstChild); setTimeout(function(){ if(n.parentNode) n.remove(); },9000); }
+  function trouverDoc(id){ var t=null; M.doc.chapitres.forEach(function(c){c.docs.forEach(function(d){if(d.id===id)t=d})}); return t; }
+  function prof(){ return !!cle && document.body.className==="prof"; }
+
+  function rendre(){
+    var d=trouverDoc(cour), editable=prof();
+    var side='<aside class="mn-side"><a href="manuel.html" style="color:#1E499B;font-size:13px;text-decoration:none">‹ Mes manuels</a><h2>'+esc(M.titre)+'</h2><p class="sous">'+esc(M.classe)+' · '+esc((A.PAR_ID[M.matiere]||{}).nom||"")+'</p>'+
+      M.doc.chapitres.map(function(c,ci){return '<div class="mn-chap">'+(editable?'<input value="'+esc(c.titre)+'" data-chap="'+ci+'" aria-label="Titre du chapitre">':'<b>'+esc(c.titre)+'</b>')+'</div>'+
+        c.docs.map(function(x){return '<button type="button" class="mn-doc" data-doc="'+x.id+'"'+(x.id===cour?' aria-current="page"':'')+'>'+(editable?'<span class="pt'+(x.pub?'':' off')+'" title="'+(x.pub?'Publié':'Non publié')+'"></span>':'')+esc(x.titre)+'</button>'}).join("")+
+        (editable?'<button type="button" class="mn-plus" data-nouveau="'+ci+'">+ Nouveau document</button>':'')}).join("")+
+      (editable?'<button type="button" class="mn-plus" data-chapitre style="margin-top:16px">+ Nouveau chapitre</button><button type="button" class="mn-plus" data-importer>'+A.pic("importer",15)+' Importer une leçon VÉRITAS</button>':'')+'</aside>';
+    var barre='<div class="mn-barre"><span class="mn-etat ok" id="etat">'+(editable?'Enregistré · version '+M.version:'Lecture')+'</span>'+(cle?'<button type="button" class="btn-bl" id="bPartager">Partager</button>':'')+(d&&editable?'<label class="pub" style="cursor:pointer">Publier ce document <input type="checkbox" id="pubDoc"'+(d.pub?' checked':'')+'></label>':'')+'</div>';
+    var corps=d?('<article class="doc carte" style="border:0;padding:0"><h1 class="doc-titre" id="docTitre"'+(editable?' contenteditable="true"':'')+'>'+esc(d.titre)+'</h1><div class="doc-meta">'+(editable?(d.blocs.filter(function(b){return b.pub}).length+' bloc(s) publié(s) sur '+d.blocs.length):'')+'</div>'+
+      inser(0,editable)+d.blocs.map(function(b,i){return bloc(b,i,editable)+inser(i+1,editable)}).join("")+
+      (d.blocs.length?'':'<p class="vide">'+(editable?'Document vide : ajoutez un premier bloc, ou importez une leçon VÉRITAS.':'Ce document est encore vide.')+'</p>')+'</article>')
+      :'<p class="vide">'+(editable?'Créez un document dans la colonne de gauche.':'Aucun document publié pour le moment.')+'</p>';
+    app.innerHTML='<div class="mn">'+side+'<section class="mn-main">'+barre+corps+'</section></div>';
+    brancher(d,editable);
+  }
+
+  function partieHtml(ref){
+    var p=ref.split("#"), L=Object.prototype.hasOwnProperty.call(VRT_LECONS,p[0])?VRT_LECONS[p[0]]:null, k=+p[1]; if(!L||!L.parties||!L.parties[k]) return '<p class="vide">Partie de leçon introuvable.</p>';
+    var x=L.parties[k];
+    return '<div class="partie-ref"><div class="src">Leçon VÉRITAS · <a href="lecon.html?id='+p[0]+'">'+esc(L.titre)+'</a></div><div class="partie"><h2><span class="num">'+(k+1)+'</span><span class="txt">'+esc(x.t)+'</span></h2>'+x.html+(x.illus?'<figure class="illus">'+x.illus.svg+'<figcaption>'+esc(x.illus.legende||"")+'</figcaption></figure>':'')+(x.anim?'<div class="anim"><div class="anim-t"><span class="anim-p" aria-hidden="true">'+A.pic("lecture",14)+'</span>'+esc(x.animT||"")+'</div><div class="anim-c" data-anim="'+esc(ref)+'"></div></div>':'')+(x.retenir?'<p class="retenir">'+x.retenir+'</p>':'')+'</div></div>';
+  }
+  function bloc(b,i,editable){
+    var cls={def:"def",ex:"ex",astuce:"astuce",attention:"attention",savais:"savais"}[b.type];
+    var inner;
+    if(b.type==="partie") inner=partieHtml(b.ref);
+    else if(b.type==="question") inner='<div class="question"><p class="bt"'+(editable?' data-champ="titre"':'')+'>'+esc(b.titre||"Question")+'</p><div data-champ="html">'+propre(b.html)+'</div>'+(editable?'<div class="rep"><small>Réponse (l\'élève la découvre en cliquant sur « Voir la réponse »)</small><div data-champ="rep">'+propre(b.rep)+'</div></div>':'<button type="button" class="voir">Voir la réponse</button><div class="rep" hidden>'+propre(b.rep)+'</div>')+'</div>';
+    else if(cls) inner='<div class="'+cls+'"><b data-champ="titre">'+esc(b.titre||TYPES[b.type])+'</b><div data-champ="html">'+propre(b.html)+'</div></div>';
+    else inner=(b.titre||editable?'<p class="bt" data-champ="titre">'+esc(b.titre||"")+'</p>':'')+'<div data-champ="html">'+propre(b.html)+'</div>';
+    var outils=editable?'<div class="bl-outils">'+(b.type!=="partie"?'<button type="button" class="mod" data-a="mod">Modifier</button>':'')+'<button type="button" data-a="haut" title="Monter">'+A.pic("haut",16)+'</button><button type="button" data-a="bas" title="Descendre">'+A.pic("bas",16)+'</button><button type="button" data-a="dup" title="Dupliquer">'+A.pic("dupliquer",16)+'</button><button type="button" data-a="lien" title="Copier le lien">'+A.pic("lien",16)+'</button><button type="button" data-a="sup" title="Supprimer">'+A.pic("corbeille",16)+'</button><label>Publier <input type="checkbox" data-a="pub"'+(b.pub?' checked':'')+'></label></div>':'';
+    return '<div class="bl carte'+(b.pub?'':' masque')+'" id="b-'+b.id+'" data-i="'+i+'" style="border-width:'+(editable?1:0)+'px;border-color:transparent;padding:'+(editable?'10px 12px':'4px 0')+'"><span class="bl-type">'+TYPES[b.type]+'</span>'+outils+inner+'</div>';
+  }
+  function inser(i,editable){ if(!editable) return ''; return '<div class="inser" data-pos="'+i+'"><button type="button">+ Ajouter un bloc</button><div class="palette">'+Object.keys(TYPES).filter(function(t){return t!=="partie"}).map(function(t){return '<button type="button" data-t="'+t+'">'+TYPES[t]+'</button>'}).join("")+'<button type="button" data-t="partie">Partie de leçon VÉRITAS…</button></div></div>'; }
+
+  function brancher(d,editable){
+    $$(".mn-doc").forEach(function(b){b.addEventListener("click",function(){ cour=b.dataset.doc; history.replaceState(null,"","?id="+M.id+"&d="+cour); rendre(); window.scrollTo(0,0); })});
+    $$(".question .voir").forEach(function(b){b.addEventListener("click",function(){ b.nextElementSibling.hidden=false; b.remove(); })});
+    $$("[data-anim]").forEach(function(el){ try{ var p=el.dataset.anim.split("#"), x=VRT_LECONS[p[0]].parties[+p[1]]; x.anim(el) }catch(e){ el.closest(".anim").hidden=true } });
+    A.boutonsImage(app);   /* « Enregistrer l'image » : PNG avec filigrane VÉRITAS */
+    var pt=$("#bPartager"); if(pt) pt.addEventListener("click",partager);
+    if(!editable) return;
+    $$("[data-chap]").forEach(function(inp){inp.addEventListener("change",function(){ M.doc.chapitres[+inp.dataset.chap].titre=inp.value.slice(0,160); sauver(); })});
+    $$("[data-nouveau]").forEach(function(b){b.addEventListener("click",function(){ var c=M.doc.chapitres[+b.dataset.nouveau], x={id:uid(),titre:"Nouveau document",pub:false,blocs:[]}; c.docs.push(x); cour=x.id; sauver(); rendre(); })});
+    var nc=$("[data-chapitre]"); if(nc) nc.addEventListener("click",function(){ M.doc.chapitres.push({id:uid(),titre:"Chapitre "+(M.doc.chapitres.length+1),docs:[]}); sauver(); rendre(); });
+    var im=$("[data-importer]"); if(im) im.addEventListener("click",importer);
+    if(!d) return;
+    var pd=$("#pubDoc"); if(pd) pd.addEventListener("change",function(){ d.pub=pd.checked; sauver(); rendre(); });
+    var dt=$("#docTitre"); dt.addEventListener("blur",function(){ d.titre=dt.textContent.trim().slice(0,160)||"Document"; sauver(); $$('.mn-doc[aria-current]').forEach(function(b){b.lastChild.textContent=d.titre}) });
+    dt.addEventListener("keydown",function(e){ if(e.key==="Enter"){e.preventDefault();dt.blur()} });
+    $$(".inser").forEach(function(z){
+      $("button",z).addEventListener("click",function(){ $$(".inser.ouvert").forEach(function(o){if(o!==z)o.classList.remove("ouvert")}); z.classList.toggle("ouvert"); });
+      $$(".palette button",z).forEach(function(b){b.addEventListener("click",function(){
+        var pos=+z.dataset.pos;
+        if(b.dataset.t==="partie"){ choisirPartie(function(ref){ d.blocs.splice(pos,0,{id:uid(),type:"partie",ref:ref,pub:true}); sauver(); rendre(); }); return; }
+        var nb={id:uid(),type:b.dataset.t,titre:b.dataset.t==="texte"?"":TYPES[b.dataset.t],html:"",pub:true}; if(nb.type==="question") nb.rep="";
+        d.blocs.splice(pos,0,nb); sauver(); rendre(); var el=$("#b-"+nb.id); if(el) editer(el,d.blocs[pos]);
+      })});
+    });
+    $$(".bl").forEach(function(el){
+      var i=+el.dataset.i, b=d.blocs[i];
+      $$("[data-a]",el).forEach(function(c){
+        var a=c.dataset.a;
+        c.addEventListener(a==="pub"?"change":"click",function(){
+          if(a==="mod") return editer(el,b);
+          if(a==="pub"){ b.pub=c.checked; el.classList.toggle("masque",!b.pub); sauver(); return; }
+          if(a==="haut"&&i>0){ d.blocs.splice(i-1,0,d.blocs.splice(i,1)[0]); }
+          if(a==="bas"&&i<d.blocs.length-1){ d.blocs.splice(i+1,0,d.blocs.splice(i,1)[0]); }
+          if(a==="dup"){ var cp=JSON.parse(JSON.stringify(b)); cp.id=uid(); d.blocs.splice(i+1,0,cp); }
+          if(a==="sup"){ if(!confirmerSuppr(el)) return; d.blocs.splice(i,1); }
+          if(a==="lien"){ var u=location.origin+location.pathname+"?id="+M.id+"&d="+d.id+"#b-"+b.id; try{navigator.clipboard.writeText(u)}catch(e){} c.innerHTML=A.pic("coche",16); return; }
+          sauver(); rendre();
+        });
+      });
+    });
+  }
+  /* suppression en deux temps, sans window.confirm (qui fige Chrome dans l'Atelier) */
+  function confirmerSuppr(el){ if(el.dataset.sup==="1") return true; el.dataset.sup="1"; var b=$('[data-a="sup"]',el); b.textContent="Sûr ?"; b.style.width="auto"; b.style.padding="0 8px"; setTimeout(function(){ if(el.isConnected){ el.dataset.sup=""; b.innerHTML=A.pic("corbeille",16); b.style.width=""; b.style.padding=""; } },3000); return false; }
+
+  function editer(el,b){
+    var champs=$$("[data-champ]",el); if(!champs.length) return;
+    var on=champs[0].getAttribute("contenteditable")!=="true";
+    champs.forEach(function(c){ c.setAttribute("contenteditable",on?"true":"false"); });
+    var m=$('[data-a="mod"]',el); if(m) m.textContent=on?"Terminer":"Modifier";
+    if(on){ champs[champs.length>1?1:0].focus(); }
+    else{ champs.forEach(function(c){ var k=c.dataset.champ; b[k]=k==="titre"?c.textContent.trim().slice(0,160):propre(c.innerHTML); }); sauver(); rendre(); /* réaffiche la version NETTOYÉE */ }
+  }
+  /* coller = texte brut seulement : aucune balise ni attribut ne passe par le presse-papiers */
+  document.addEventListener("paste",function(e){
+    var t=e.target.closest&&e.target.closest('[contenteditable="true"]'); if(!t) return;
+    e.preventDefault(); var txt=(e.clipboardData||window.clipboardData).getData("text/plain");
+    if(document.execCommand) document.execCommand("insertText",false,txt); else t.textContent+=txt;
+  });
+
+  /* sauvegarde différée, une à la fois ; conflit = on ne perd rien, on demande */
+  function etat(t,cl){ var e=$("#etat"); if(e){ e.textContent=t; e.className="mn-etat "+cl; } }
+  function sauver(){ etat("Modifications en attente…","att"); clearTimeout(minuterie); minuterie=setTimeout(envoyer,1200); }
+  async function envoyer(){
+    if(enCours){ aRefaire=true; return; } enCours=true; etat("Enregistrement…","att");
+    try{
+      var r=await api("POST",{action:"enregistrer",id:M.id},{version:M.version,titre:M.titre,doc:M.doc},cle);
+      if(r.statut===200){ M.version=r.j.version; etat("Enregistré · version "+M.version,"ok"); }
+      else if(r.statut===409){ etat("Conflit : un collègue a enregistré","ko"); conflit(r.j); }
+      else etat(r.j.erreur||"Échec de l'enregistrement","ko");
+    }catch(e){ etat("Hors ligne : modifications non envoyées","ko"); }
+    enCours=false; if(aRefaire){ aRefaire=false; envoyer(); }
+  }
+  function conflit(serv){
+    $("#dlgC").innerHTML='<h3>Un collègue a modifié ce manuel</h3><p>Sa version ('+serv.version+') a été enregistrée pendant que vous travailliez. Que faire ?</p><p style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn-bl" id="cGarder">Voir sa version</button><button type="button" class="btn-l" id="cEcraser">Garder la mienne et l\'enregistrer</button></p>';
+    var dl=$("#dlg"); dl.showModal();
+    $("#cGarder").onclick=function(){ dl.close(); M.doc=serv.doc; M.version=serv.version; rendre(); };
+    $("#cEcraser").onclick=function(){ dl.close(); M.version=serv.version; envoyer(); };
+  }
+
+  function partager(){
+    var base=location.origin+location.pathname+"?id="+M.id;
+    $("#dlgC").innerHTML='<h3>Partager ce manuel</h3><p><b>Lien élèves</b> — lecture seule, uniquement ce qui est publié :</p><div class="lien"><input readonly value="'+base+'"><button type="button" class="btn-l" data-c>Copier</button></div>'+
+      '<p><b>Lien co-enseignant</b> — permet de MODIFIER le manuel. À ne donner qu\'à vos collègues :</p><div class="lien"><input readonly value="'+base+'#cle='+cle+'"><button type="button" class="btn-l" data-c>Copier</button></div><p class="lu">Ce lien d\'édition est aussi gardé dans ce navigateur, dans « Mes manuels ».</p>';
+    $$("#dlgC [data-c]").forEach(function(b){b.onclick=function(){ var i=b.previousElementSibling; i.select(); try{navigator.clipboard.writeText(i.value)}catch(e){} b.textContent="Copié"; }});
+    $("#dlg").showModal();
+  }
+
+  function lecsMatiere(){ return Object.keys(VRT_LECONS).filter(function(k){return VRT_LECONS[k].m===M.matiere}).concat(Object.keys(VRT_LECONS).filter(function(k){return VRT_LECONS[k].m!==M.matiere})); }
+  function choisirPartie(fn){
+    $("#dlgC").innerHTML='<h3>Insérer une partie de leçon VÉRITAS</h3><div class="choix-l">'+lecsMatiere().map(function(k){var L=VRT_LECONS[k];return L.parties.map(function(p,i){return '<label><input type="radio" name="pp" value="'+k+'#'+i+'"><span><b>'+esc(p.t)+'</b><br><small>'+esc(L.titre)+' · '+esc(L.c)+'</small></span></label>'}).join("")}).join("")+'</div><p style="margin-top:12px"><button type="button" class="btn-or" id="ppOk">Insérer</button></p>';
+    var dl=$("#dlg"); dl.showModal(); $("#ppOk").onclick=function(){ var v=$('input[name=pp]:checked'); if(v){ dl.close(); fn(v.value); } };
+  }
+  function importer(){
+    $("#dlgC").innerHTML='<h3>Importer une leçon VÉRITAS</h3><p class="lu">La leçon devient un document de votre manuel : chaque partie est un bloc que vous pouvez masquer, déplacer, compléter.</p><div class="choix-l">'+lecsMatiere().map(function(k){var L=VRT_LECONS[k];return '<label><input type="radio" name="li" value="'+k+'"><span><b>'+esc(L.titre)+'</b><br><small>'+esc((A.PAR_ID[L.m]||{}).nom||"")+' · '+esc(L.c)+'</small></span></label>'}).join("")+'</div><p style="margin-top:12px"><button type="button" class="btn-or" id="liOk">Importer</button></p>';
+    var dl=$("#dlg"); dl.showModal();
+    $("#liOk").onclick=function(){ var v=$('input[name=li]:checked'); if(!v) return; dl.close(); var L=VRT_LECONS[v.value];
+      var x={id:uid(),titre:L.titre,pub:false,blocs:L.parties.map(function(p,i){return {id:uid(),type:"partie",ref:v.value+"#"+i,pub:true}})};
+      if(L.quiz&&L.quiz[0]) x.blocs.push({id:uid(),type:"question",titre:"Question",html:L.quiz[0].q,rep:L.quiz[0].r[L.quiz[0].b]+(L.quiz[0].e?" — "+L.quiz[0].e:""),pub:true});
+      (M.doc.chapitres[M.doc.chapitres.length-1]||M.doc.chapitres[0]).docs.push(x); cour=x.id; sauver(); rendre(); };
+  }
+
+  $$("#vueSel button").forEach(function(b){b.addEventListener("click",function(){ $$("#vueSel button").forEach(function(x){x.setAttribute("aria-pressed",x===b)}); document.body.className=b.dataset.vue; rendre(); })});
+  var id=new URLSearchParams(location.search).get("id");
+  if(id&&/^[a-z0-9]{10}$/.test(id)) ouvrir(id); else accueil();
+})();
+</script>
+</body>
+</html>

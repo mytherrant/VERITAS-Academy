@@ -110,8 +110,10 @@ dire(ancresInconnues.length === 0,
 console.log(`\n${G}③ Aucun service publié n'est laissé sans annonce${R}`);
 {
   const suivis = execFileSync('git', ['ls-files'], { cwd: RACINE, encoding: 'utf8' }).split('\n');
-  /* Un « sommaire » = l'index d'un dossier public de premier niveau. */
-  const HORS = new Set(['tests', 'tools', 'legal', 'api', 'chunks', 'assets', 'data', 'uploads', 'd']);
+  /* Un « sommaire » = l'index d'un dossier public de premier niveau.
+     gestion/ n'est pas public : c'est l'application interne des centres
+     (gestion.veritas-school.com, noindex, connexion obligatoire). */
+  const HORS = new Set(['tests', 'tools', 'legal', 'api', 'chunks', 'assets', 'data', 'uploads', 'd', 'gestion']);
   const hubs = [...new Set(suivis
     .filter(p => p.endsWith('/index.html') && p.split('/').length === 2)
     .map(p => p.split('/')[0]))].filter(d => !HORS.has(d));

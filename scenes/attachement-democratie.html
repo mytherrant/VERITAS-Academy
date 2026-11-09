@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le mot qui manquait — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après L’attachement au sol natal d’Ernest Alima : le poème « Démocratie I », l’histoire d’un mot longtemps interdit.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/attachement-democratie.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Le mot qui manquait — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’après L’attachement au sol natal d’Ernest Alima : le poème « Démocratie I », l’histoire d’un mot longtemps interdit.">
+<meta property="og:url" content="https://veritas-school.com/scenes/attachement-democratie.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Le mot qui manquait","description":"Scène animée d’après L’attachement au sol natal d’Ernest Alima : le poème « Démocratie I », l’histoire d’un mot longtemps interdit.","url":"https://veritas-school.com/scenes/attachement-democratie.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"4ᵉ","about":"Français","teaches":"Lire un poème engagé en entier : repérer l’apostrophe, l’anaphore et l’image finale de la machine.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"},"isBasedOn":{"@type":"Book","name":"L’attachement au sol natal","author":{"@type":"Person","name":"Ernest Alima (2024)"}}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'attachement-democratie',
+  discipline: 'Français', niveau: '4e',
+  oeuvre: 'L’attachement au sol natal', auteur: 'Ernest Alima (2024)',
+  titre: 'Le mot qui manquait',
+  decor: 'rue', lieu: 'une rue de Yaoundé, devant un mur couvert de graffitis', moment: 'Section « Tripe républicaine » · « Démocratie I »',
+  avertissement: 'Les vers sont ceux du poème, recopiés tels quels (poème entier). Les répliques autour sont jouées par nos comédiens.',
+  objectif: 'Lire un poème engagé en entier : repérer l’apostrophe, l’anaphore et l’image finale de la machine.',
+  jauges: [
+    { id: 'parole', nom: 'Liberté de parole', val: 20, couleur: '#1F9D5B' },
+    { id: 'appel', nom: 'Force de l’appel', val: 10, couleur: '#E07B39' }
+  ],
+  personnages: {
+    poete:  { nom: 'Le poète', couleur: '#1E499B', look: { peau: 'fonce', vieux: true, cheveux: 'ras', lunettes: true, tenue: 'costume', habit: '#2B3A55', col: '#1F9D5B', objet: 'livre' } },
+    eleve:  { nom: 'Nadège, élève de 4e', court: 'Nadège', couleur: '#C0397C', look: { metier: 'eleve', peau: 'fonce', cheveux: 'afro', tenue: 'jupe' } },
+    militant: { nom: 'Un militant', couleur: '#D9822B', look: { peau: 'fonce', cheveux: 'court', habit: '#D9822B', bas: '#3A2A1A', objet: 'dossier' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['poete', 'eleve'], txt: 'Nouvelle section du recueil : « Tripe républicaine », la partie politique. Le ton change du tout au tout. Ce poème raconte l’histoire d’un mot.' },
+    { t: 'dit', qui: 'eleve', emo: 'doute', txt: 'Monsieur, un poème sur la politique ? Je croyais que la poésie parlait d’amour et de fleurs.' },
+    { t: 'dit', qui: 'poete', emo: 'joie', txt: 'Elle parle aussi de liberté. Un discours s’oublie ; quatre vers qui riment restent. Écoute.' },
+    { t: 'vers', qui: 'poete', jeu: 'il lève la main', txt: 'Démocratie !\nDémocratie !\nÔ vocable hier encore absent\nDu lexique des politiques !\nÔ vocable hier encore interdit d’usage\nDans les motions de soutien\nDu parti monolithique !', cite: 'Ernest Alima, L’attachement au sol natal, « Démocratie I »', jauges: { parole: 35 } },
+    { t: 'question', q: '« Ô vocable… » : à qui le poète s’adresse-t-il ?',
+      options: [
+        { txt: 'Au mot « démocratie » lui-même, comme à une personne.', ok: true, retour: 'C’est une apostrophe : il tutoie une idée.' },
+        { txt: 'Aux hommes politiques.', retour: 'Il parle d’eux, mais c’est au mot qu’il s’adresse.' }
+      ] },
+    { t: 'remarque', titre: 'Monolithique', txt: 'Mono = un, lithos = pierre : d’un seul bloc. Un parti monolithique, c’est un parti unique, où aucune autre voix n’existe. Dans un tel parti, le mot « démocratie » était « interdit d’usage ».' },
+    { t: 'vers', qui: 'poete', txt: 'Depuis qu’à La Baule,\nLe pape de la gauche de l’Hexagone\nA consacré ton usage\nDans son message\nAux princes de la francophonie,\nTu es devenu le sel des discours,\nTu es devenu la fleur en honneur\nDans la rhétorique politique,\nLa fleur à fréquentes occurrences\nDans l’éloquence politique !', cite: 'Ernest Alima, L’attachement au sol natal, « Démocratie I »' },
+    { t: 'question', q: 'Que s’est-il passé à La Baule, en juin 1990 ?',
+      options: [
+        { txt: 'Un président français a lié l’aide au développement aux progrès de la démocratie.', ok: true, retour: 'Le poète l’appelle, avec ironie, « le pape de la gauche de l’Hexagone ».' },
+        { txt: 'Une Coupe d’Afrique de football.', retour: 'Non : un discours politique célèbre.' }
+      ] },
+    { t: 'vers', qui: 'poete', emo: 'joie', txt: 'La fleur qui fleure l’espérance,\nL’espérance des choix et libertés,\nL’espérance de la sépulture\nDe la censure,\nL’espérance d’ôter le bâillon\nDe la bouche de l’opinion !...', cite: 'Ernest Alima, L’attachement au sol natal, « Démocratie I »', jauges: { parole: 70 } },
+    { t: 'dit', qui: 'eleve', emo: 'surpris', txt: '« La sépulture de la censure » : on enterre la censure ! Et le bâillon, c’est ce qu’on met sur la bouche pour empêcher de parler.' },
+    { t: 'dit', qui: 'militant', entre: ['militant'], emo: 'fier', jeu: 'il brandit une pancarte', txt: 'Démocratie ! Nous la voulons dans la rue, sur nos murs, dans nos urnes !' },
+    { t: 'vers', qui: 'poete', jeu: 'de plus en plus fort', txt: 'Démocratie !\nDémocratie !\nL’Afrique du continent\nEt l’Afrique de la diaspora appellent à l’unisson à la rescousse !\nLes militants des partis\nT’appellent à l’unisson à la rescousse !\nLes pancartes de la rue\nT’appellent à l’unisson à la rescousse !\nLes graffitis des palissades\nEt des façades\nT’appellent à l’unisson à la rescousse !', cite: 'Ernest Alima, L’attachement au sol natal, « Démocratie I »', jauges: { appel: 95 } },
+    { t: 'question', q: 'Comment s’appelle la répétition de « T’appellent à l’unisson à la rescousse ! » ?',
+      options: [
+        { txt: 'Une anaphore (ici, une reprise martelée en fin de vers).', ok: true, retour: 'Le refrain grossit à chaque fois : tout le peuple appelle d’une seule voix.' },
+        { txt: 'Une comparaison.', retour: 'Il n’y a pas de « comme » : c’est une répétition.' }
+      ] },
+    { t: 'vers', qui: 'poete', txt: 'Pour que ton règne vienne instaurer\nTon régime et lubrifier\nLes rouages grippés de la machine politique\nDe la République !', cite: 'Ernest Alima, L’attachement au sol natal, « Démocratie I »' },
+    { t: 'question', q: 'Les derniers vers comparent la République à quoi ?',
+      options: [
+        { txt: 'À une machine aux rouages grippés, qu’il faut huiler.', ok: true, retour: 'Une image de garage : irrespectueuse, et très efficace.' },
+        { txt: 'À une fleur.', retour: 'La fleur, c’était le mot ; la République, c’est une machine.' }
+      ] },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · les outils du poème', consigne: 'Associe chaque passage à son procédé.',
+      cats: ['Apostrophe', 'Anaphore', 'Métaphore'],
+      items: [
+        { txt: 'Ô vocable hier encore absent', cat: 0 },
+        { txt: 'T’appellent à l’unisson à la rescousse ! (quatre fois)', cat: 1 },
+        { txt: 'Les rouages grippés de la machine politique', cat: 2 },
+        { txt: 'Démocratie ! Démocratie !', cat: 0 },
+        { txt: 'Tu es devenu la fleur en honneur', cat: 2 }
+      ],
+      bravo: 'Le poème parle à une idée, martèle un appel et finit sur une image mécanique.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · la machine politique',
+    intro: 'Règle la liberté de parole, la force de l’appel populaire et l’état des rouages : la démocratie viendra-t-elle ?',
+    persos: ['poete', 'militant', 'eleve'],
+    curseurs: [
+      { id: 'parole', nom: 'Liberté de parole', val: 70, bas: 'bâillon', haut: 'libre', lecture: { haut: '« ôter le bâillon de la bouche de l’opinion »', bas: 'Le mot reste « interdit d’usage ».' } },
+      { id: 'appel', nom: 'Appel du peuple', val: 90, bas: 'silence', haut: 'à l’unisson', lecture: { haut: 'Militants, pancartes, graffitis : tous appellent.', bas: 'Personne ne réclame rien.' } },
+      { id: 'grippe', nom: 'Rouages grippés', val: 70, bas: 'huilés', haut: 'bloqués', lecture: { haut: 'La machine ne tourne plus.', bas: 'Les institutions fonctionnent.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans le poème', icone: 'livre', valeurs: { parole: 70, appel: 90, grippe: 70 } },
+      { nom: 'Au temps du parti unique', icone: 'muet', valeurs: { parole: 10, appel: 15 } },
+      { nom: 'Et si les rouages étaient huilés ?', icone: 'fier', valeurs: { grippe: 15 } }
+    ],
+    liens: [
+      { a: 'militant', b: 'poete', type: 'alliance', lib: 'l’appel', base: .4, poids: { appel: .5 } },
+      { a: 'poete', b: 'eleve', type: 'confiance', lib: 'il lui lit', base: .7 },
+      { a: 'eleve', b: 'militant', type: 'confiance', lib: 'elle écoute', base: .2, poids: { parole: .4 } }
+    ],
+    issue: function(v){
+      if(v.parole < 30){ return { niveau: 'ko', badge: 'Le mot interdit', recit: 'Le bâillon reste en place : « démocratie » est absent du lexique, interdit dans les motions de soutien.', apres: 'C’est le passé que le poème rappelle, pour qu’on ne l’oublie pas.', themes: ['censure', 'parti unique'] }; }
+      if(v.grippe < 40){ return { niveau: 'ok', badge: 'La machine tourne', recit: 'La parole est libre, le peuple appelle, et les rouages de la République tournent enfin.', apres: 'C’est le vœu du poème : que le règne de la démocratie « vienne instaurer son régime ».', themes: ['démocratie', 'espérance'] }; }
+      return { niveau: 'moyen', badge: 'L’appel à la rescousse', recit: 'Le mot est permis, tout le monde le crie… mais la machine politique reste grippée.', apres: 'C’est le poème : le mot est devenu le « sel des discours », il reste à le faire vivre.', themes: ['engagement', 'citoyenneté'] };
+    }
+  },
+  fiche: {"accroche": "On peut aimer son pays comme une mère, comme une bien-aimée… et accuser en même temps ceux qui le pillent. Qui sont les « vautours » d’Ernest Alima ?", "resume": "Vingt-six poèmes d’Ernest Alima, en six sections, pour dire l’amour du Cameroun et accuser les profiteurs qui le dévorent. Des vers libres où la rime reste pour sa musique, et où la répétition martèle les idées.", "personnages": [{"nom": "Le poète", "cle": "poete", "role": "la voix du recueil : il aime, il s’adresse au pays, il accuse."}, {"nom": "Le pays", "role": "tour à tour une mère, une bien-aimée et un corps."}, {"nom": "Les vautours", "role": "les profiteurs, oiseaux de proie qui plongent sur « les poules aux œufs d’or »."}, {"nom": "Le citoyen", "role": "le « nous » qui vit « une époque tourmentée »."}], "aLire": [{"ou": "« Patriotisme et démocratie » (liminaire)", "pourquoi": "Le programme du livre en trente vers."}, {"ou": "« Le retour des vautours » (Tripe républicaine)", "pourquoi": "La satire la plus mordante du recueil, en vers très courts."}, {"ou": "Les « Chants d’Exil »", "pourquoi": "Le poète loin de chez lui : « Pèlerinage aux sources », « Soif du bercail »."}], "siTuAimes": "dire les choses fort, lis deux poèmes par jour à voix haute et garde un vers de chacun : à la fin, tu auras ton propre recueil.", "reperes": ["Auteur : Ernest Alima, poète camerounais à la retraite, à Yaoundé", "Éditions Ifrikiya, 2024", "26 poèmes en 6 sections (1, 9, 8, 4, 2 et 2 textes)", "Épigraphe empruntée à Baudelaire"], "themes": ["le patriotisme", "la démocratie", "l’exil", "la satire des profiteurs"], "cahier": {"lib": "Le cahier VÉRITAS des œuvres de 4e", "href": "../livrets/oeuvres-4e.html"}},
+  quiz: [
+    { q: 'Dans quelle section du recueil se trouve « Démocratie I » ?', options: [ { txt: '« Tripe républicaine », la partie politique.', ok: true, retour: 'Huit poèmes, et le ton change.' }, { txt: 'La section des poèmes d’amour.', retour: 'Non : la section politique.' } ] },
+    { q: 'Que signifie « vocable » ?', options: [ { txt: 'Un mot.', ok: true, retour: 'Terme savant pour « mot ».' }, { txt: 'Une voix.', retour: 'Non : un mot.' } ] },
+    { q: 'Qu’est-ce qu’un parti « monolithique » ?', options: [ { txt: 'Un parti unique, d’un seul bloc.', ok: true, retour: 'Mono = un, lithos = pierre.' }, { txt: 'Un parti très ancien.', retour: 'Non : d’un seul bloc, sans autre voix.' } ] },
+    { q: 'Qui appelle la démocratie « à l’unisson à la rescousse » ?', options: [ { txt: 'Les militants, les pancartes, les graffitis, l’Afrique du continent et de la diaspora.', ok: true, retour: 'Tout un peuple, d’une seule voix.' }, { txt: 'Seulement le poète.', retour: 'Non : tous ensemble.' } ] },
+    { q: 'Qu’est-ce qu’un écrivain engagé ?', options: [ { txt: 'Un écrivain qui met son art au service d’une cause.', ok: true, retour: 'Comme Alima, Philombe ou Césaire.' }, { txt: 'Un écrivain qui a signé un contrat.', retour: 'Non : au service d’une cause.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      '« Démocratie I » raconte l’histoire d’un mot autrefois interdit.',
+      'Le poète tutoie la démocratie : c’est une apostrophe.',
+      'L’anaphore « T’appellent à l’unisson à la rescousse ! » fait entendre tout un peuple.',
+      'L’image finale compare la République à une machine grippée.'
+    ],
+    ecrire: 'Écris un poème de dix vers qui s’adresse à un mot important pour toi (Liberté, Paix, Justice…). Utilise une apostrophe et une anaphore.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Le mot qui manquait</h1>
+<p><b>Français · 4ᵉ · L’attachement au sol natal · Ernest Alima (2024)</b></p>
+<p><i>Les vers sont ceux du poème, recopiés tels quels (poème entier). Les répliques autour sont jouées par nos comédiens.</i></p>
+<h3>Objectif</h3><p>Lire un poème engagé en entier : repérer l’apostrophe, l’anaphore et l’image finale de la machine.</p>
+<p>Lieu : une rue de Yaoundé, devant un mur couvert de graffitis · Section « Tripe républicaine » · « Démocratie I »</p>
+<h3>Personnages</h3><ul><li>Le poète</li><li>Nadège, élève de 4e</li><li>Un militant</li></ul>
+<h3>L’œuvre</h3>
+<p>On peut aimer son pays comme une mère, comme une bien-aimée… et accuser en même temps ceux qui le pillent. Qui sont les « vautours » d’Ernest Alima ?</p>
+<p>Vingt-six poèmes d’Ernest Alima, en six sections, pour dire l’amour du Cameroun et accuser les profiteurs qui le dévorent. Des vers libres où la rime reste pour sa musique, et où la répétition martèle les idées.</p>
+<ul><li><b>Le poète</b> — la voix du recueil : il aime, il s’adresse au pays, il accuse.</li><li><b>Le pays</b> — tour à tour une mère, une bien-aimée et un corps.</li><li><b>Les vautours</b> — les profiteurs, oiseaux de proie qui plongent sur « les poules aux œufs d’or ».</li><li><b>Le citoyen</b> — le « nous » qui vit « une époque tourmentée ».</li></ul>
+<p>Thèmes : le patriotisme, la démocratie, l’exil, la satire des profiteurs</p>
+<h3>La scène</h3>
+<p>Nouvelle section du recueil : « Tripe républicaine », la partie politique. Le ton change du tout au tout. Ce poème raconte l’histoire d’un mot.</p>
+<p><b>Nadège, élève de 4e</b> : Monsieur, un poème sur la politique ? Je croyais que la poésie parlait d’amour et de fleurs.</p>
+<p><b>Le poète</b> : Elle parle aussi de liberté. Un discours s’oublie ; quatre vers qui riment restent. Écoute.</p>
+<blockquote><p><b>Le poète</b> <i>(il lève la main)</i> :<br>Démocratie !<br>Démocratie !<br>Ô vocable hier encore absent<br>Du lexique des politiques !<br>Ô vocable hier encore interdit d’usage<br>Dans les motions de soutien<br>Du parti monolithique !<br><small>Extrait de l’œuvre — Ernest Alima, L’attachement au sol natal, « Démocratie I »</small></p></blockquote>
+<p><b>Question :</b> « Ô vocable… » : à qui le poète s’adresse-t-il ?</p><ul><li>Au mot « démocratie » lui-même, comme à une personne. <b>(bonne réponse)</b></li><li>Aux hommes politiques.</li></ul><p>C’est une apostrophe : il tutoie une idée.</p>
+<h4>Monolithique</h4><p>Mono = un, lithos = pierre : d’un seul bloc. Un parti monolithique, c’est un parti unique, où aucune autre voix n’existe. Dans un tel parti, le mot « démocratie » était « interdit d’usage ».</p>
+<blockquote><p><b>Le poète</b> :<br>Depuis qu’à La Baule,<br>Le pape de la gauche de l’Hexagone<br>A consacré ton usage<br>Dans son message<br>Aux princes de la francophonie,<br>Tu es devenu le sel des discours,<br>Tu es devenu la fleur en honneur<br>Dans la rhétorique politique,<br>La fleur à fréquentes occurrences<br>Dans l’éloquence politique !<br><small>Extrait de l’œuvre — Ernest Alima, L’attachement au sol natal, « Démocratie I »</small></p></blockquote>
+<p><b>Question :</b> Que s’est-il passé à La Baule, en juin 1990 ?</p><ul><li>Un président français a lié l’aide au développement aux progrès de la démocratie. <b>(bonne réponse)</b></li><li>Une Coupe d’Afrique de football.</li></ul><p>Le poète l’appelle, avec ironie, « le pape de la gauche de l’Hexagone ».</p>
+<blockquote><p><b>Le poète</b> :<br>La fleur qui fleure l’espérance,<br>L’espérance des choix et libertés,<br>L’espérance de la sépulture<br>De la censure,<br>L’espérance d’ôter le bâillon<br>De la bouche de l’opinion !...<br><small>Extrait de l’œuvre — Ernest Alima, L’attachement au sol natal, « Démocratie I »</small></p></blockquote>
+<p><b>Nadège, élève de 4e</b> : « La sépulture de la censure » : on enterre la censure ! Et le bâillon, c’est ce qu’on met sur la bouche pour empêcher de parler.</p>
+<p><b>Un militant</b> <i>(il brandit une pancarte)</i> : Démocratie ! Nous la voulons dans la rue, sur nos murs, dans nos urnes !</p>
+<blockquote><p><b>Le poète</b> <i>(de plus en plus fort)</i> :<br>Démocratie !<br>Démocratie !<br>L’Afrique du continent<br>Et l’Afrique de la diaspora appellent à l’unisson à la rescousse !<br>Les militants des partis<br>T’appellent à l’unisson à la rescousse !<br>Les pancartes de la rue<br>T’appellent à l’unisson à la rescousse !<br>Les graffitis des palissades<br>Et des façades<br>T’appellent à l’unisson à la rescousse !<br><small>Extrait de l’œuvre — Ernest Alima, L’attachement au sol natal, « Démocratie I »</small></p></blockquote>
+<p><b>Question :</b> Comment s’appelle la répétition de « T’appellent à l’unisson à la rescousse ! » ?</p><ul><li>Une anaphore (ici, une reprise martelée en fin de vers). <b>(bonne réponse)</b></li><li>Une comparaison.</li></ul><p>Le refrain grossit à chaque fois : tout le peuple appelle d’une seule voix.</p>
+<blockquote><p><b>Le poète</b> :<br>Pour que ton règne vienne instaurer<br>Ton régime et lubrifier<br>Les rouages grippés de la machine politique<br>De la République !<br><small>Extrait de l’œuvre — Ernest Alima, L’attachement au sol natal, « Démocratie I »</small></p></blockquote>
+<p><b>Question :</b> Les derniers vers comparent la République à quoi ?</p><ul><li>À une machine aux rouages grippés, qu’il faut huiler. <b>(bonne réponse)</b></li><li>À une fleur.</li></ul><p>Une image de garage : irrespectueuse, et très efficace.</p>
+<h4>Atelier · les outils du poème</h4><p>Associe chaque passage à son procédé.</p>
+<ul><li><b>Apostrophe</b> : Ô vocable hier encore absent ; Démocratie ! Démocratie !</li><li><b>Anaphore</b> : T’appellent à l’unisson à la rescousse ! (quatre fois)</li><li><b>Métaphore</b> : Les rouages grippés de la machine politique ; Tu es devenu la fleur en honneur</li></ul>
+<p>Le poème parle à une idée, martèle un appel et finit sur une image mécanique.</p>
+<h3>Quiz</h3><ol><li>Dans quelle section du recueil se trouve « Démocratie I » ? — <b>« Tripe républicaine », la partie politique.</b> Huit poèmes, et le ton change.</li><li>Que signifie « vocable » ? — <b>Un mot.</b> Terme savant pour « mot ».</li><li>Qu’est-ce qu’un parti « monolithique » ? — <b>Un parti unique, d’un seul bloc.</b> Mono = un, lithos = pierre.</li><li>Qui appelle la démocratie « à l’unisson à la rescousse » ? — <b>Les militants, les pancartes, les graffitis, l’Afrique du continent et de la diaspora.</b> Tout un peuple, d’une seule voix.</li><li>Qu’est-ce qu’un écrivain engagé ? — <b>Un écrivain qui met son art au service d’une cause.</b> Comme Alima, Philombe ou Césaire.</li></ol>
+<h3>À retenir</h3><ul><li>« Démocratie I » raconte l’histoire d’un mot autrefois interdit.</li><li>Le poète tutoie la démocratie : c’est une apostrophe.</li><li>L’anaphore « T’appellent à l’unisson à la rescousse ! » fait entendre tout un peuple.</li><li>L’image finale compare la République à une machine grippée.</li></ul>
+<h3>À écrire</h3><p>Écris un poème de dix vers qui s’adresse à un mot important pour toi (Liberté, Paix, Justice…). Utilise une apostrophe et une anaphore.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="attachement-democratie.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

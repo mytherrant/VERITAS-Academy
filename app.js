@@ -6157,22 +6157,22 @@ function vShowSec(sec,btn,_boot){
       h+='<div style="text-align:center"><div style="font-family:Libre Baskerville,Georgia,serif;font-size:28px;font-weight:700;color:#FDE68A;line-height:1">'+_nbGratuits+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Gratuites</div></div>';
       h+='</div>';
       // v1.4.2 : bouton PROFIL — l'apprenant déclare section/enseignement/classe
-      h+='<div style="margin-top:14px"><button onclick="mLearnerProfile()" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,201,60,.45);border-radius:24px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif">🎯 '+(_lpEl&&_lpEl.cls?('Mon parcours : '+_esc(_lpEl.cls)+(_lpEl.sys==='en'?' · Anglophone':'')+(_lpEl.ens==='tech'?' · Technique':'')):'Personnaliser mon parcours')+'</button></div>';
+      h+='<div style="margin-top:14px"><button onclick="mLearnerProfile()" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,201,60,.45);border-radius:24px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif;display:inline-flex;align-items:center;gap:7px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><use href="#lc-target"/></svg>'+(_lpEl&&_lpEl.cls?('Mon parcours : '+_esc(_lpEl.cls)+(_lpEl.sys==='en'?' · Anglophone':'')+(_lpEl.ens==='tech'?' · Technique':'')):'Personnaliser mon parcours')+'</button></div>';
       h+='</div></div>';
       
 
       // ── MINESEC RESSOURCES OFFICIELLES ── (v1.3.1 épure : carte CLAIRE — la page
       // empilait 3 panneaux bleu nuit ; on ne garde qu'UN point focal sombre, le hero)
       h+='<div style="background:#fff;border:1px solid rgba(20,37,84,.08);border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 1px 2px rgba(16,30,69,.04),0 8px 24px rgba(16,30,69,.06)">';
-      h+='<div style="font-size:11px;font-weight:800;color:#B8860B;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px">🎓 Ressources officielles MINESEC</div>';
+      h+='<div style="font:600 12px Poppins,sans-serif;color:#C24E00;letter-spacing:1.6px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><use href="#lc-graduation"/></svg>Ressources officielles MINESEC</div>';
       h+='<div style="font-family:Georgia,serif;font-size:13px;color:#6B7A99;margin-bottom:16px">Épreuves officielles, laboratoires virtuels et cours vidéo du Ministère des Enseignements Secondaires du Cameroun</div>';
       h+='<div style="display:flex;gap:10px;flex-wrap:wrap">';
-      h+='<button onclick="showEpreuves()" style="background:#142554;color:#FFC93C;border:none;border-radius:24px;padding:10px 22px;font-size:12px;font-weight:800;cursor:pointer;font-family:Montserrat,sans-serif;box-shadow:0 4px 12px rgba(20,37,84,.22);transition:transform .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'">📝 Épreuves officielles</button>';
-      h+='<button onclick="showLabosVirtuels()" style="background:#EEF2FF;color:#1E3A8A;border:1px solid #C7D2FE;border-radius:24px;padding:10px 22px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif;transition:transform .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'">🔬 Labos virtuels</button>';
-      h+='<a href="https://minesec-distancelearning.cm" target="_blank" rel="noopener" style="background:#F6F8FC;color:#475882;border:1px solid #E4E8F0;border-radius:24px;padding:10px 22px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px">🌐 Cours MINESEC officiels</a>';
+      h+='<button onclick="showEpreuves()" style="background:#1E499B;color:#fff;border:1px solid #1E499B;display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 20px;font:600 14px Poppins,sans-serif;cursor:pointer;text-decoration:none;transition:transform .18s ease,background-color .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><use href="#lc-doc"/></svg>Épreuves officielles</button>';
+      h+='<button onclick="showLabosVirtuels()" style="background:#fff;color:#1E499B;border:1px solid #CFDBF0;display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 20px;font:600 14px Poppins,sans-serif;cursor:pointer;text-decoration:none;transition:transform .18s ease,background-color .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><use href="#lc-flask"/></svg>Labos virtuels</button>';
+      h+='<a href="https://minesec-distancelearning.cm" target="_blank" rel="noopener" style="background:#fff;color:#001136;border:1px solid #E4E7EF;display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 20px;font:600 14px Poppins,sans-serif;cursor:pointer;text-decoration:none;transition:transform .18s ease,background-color .18s ease"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><use href="#lc-globe"/></svg>Cours MINESEC officiels</a>';
       h+='</div></div>';
       // ── CATEGORIES — TUILES PREMIUM v2 (pictos 3D + couleurs vibrantes + anim) ──
-      h+='<div style="font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:#142554;margin-bottom:14px;display:flex;align-items:center;gap:8px">📂 Choisissez une catégorie<span style="font-size:11px;color:#94A3B8;font-weight:500">Cliquez pour explorer</span></div>';
+      h+='<div class="lx-cattitre" style="font:600 20px/1.3 Poppins,sans-serif;color:#001136;margin:6px 0 16px;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px"><span>Choisissez une catégorie</span><span style="font:400 14px Poppins,sans-serif;color:#6B7280">Cliquez pour explorer</span></div>';
       // Animation d'entrée : déclenche la classe .entering pour stagger
       setTimeout(function(){
         var g=document.querySelector('.velearn-grid');
@@ -6201,7 +6201,7 @@ function vShowSec(sec,btn,_boot){
       // v1.4.4 (étude vidéo Sharesub) : cartes à BANDEAU — en-tête navy sobre
       // (icône + nom blancs), corps blanc épuré, CTA pilule bleu vif. Entrée en
       // CASCADE au scroll (classe lx-catcard, délais nth-child en CSS).
-      h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px" class="v-reveal lx-catgrid">';
+      h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr));gap:18px" class="v-reveal lx-catgrid">';
       // Les catégories VIDES menaient à « Aucune ressource » : 7 tuiles sur 18
       // étaient des impasses. Elles passent en fin de grille, marquées
       // « Bientôt », et ne s'ouvrent plus pour le visiteur (l'admin, lui,
@@ -6217,7 +6217,7 @@ function vShowSec(sec,btn,_boot){
         var ouvrable=cnt||iA();
         h+='<div class="lx-catcard'+(cnt?'':' lx-catcard-vide')+'"'+(ouvrable
             ?' role="button" tabindex="0" onkeydown="if(event.key===\'Enter\')this.click()" onclick="window._elCat=\''+_esc(cat.id)+'\';vShowSec(\'elearning\',null)"'
-            :' aria-disabled="true" title="Bientôt disponible" style="opacity:.62;cursor:default"')+'>';
+            :' aria-disabled="true" title="Bientôt disponible" style="cursor:default"')+'>';
         // Bandeau navy
         h+='<div class="lx-catcard-head">';
         h+='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-'+theme.ic+'"/></svg>';
@@ -6228,8 +6228,8 @@ function vShowSec(sec,btn,_boot){
         h+='<div class="lx-catcard-body">';
         h+='<div class="lx-catcard-desc">'+_esc((cat.desc||'').slice(0,64))+'</div>';
         h+='<div class="lx-catcard-foot">'+(cnt
-            ?'<span class="lx-catcard-count">'+cnt+' ressource'+(cnt>1?'s':'')+'</span><span class="lx-catcard-cta">Explorer →</span>'
-            :'<span class="lx-catcard-count">Bientôt disponible</span>'+(iA()?'<span class="lx-catcard-cta">Remplir →</span>':''))+'</div>';
+            ?'<span class="lx-catcard-count">'+cnt+' ressource'+(cnt>1?'s':'')+'</span><span class="lx-catcard-cta">Explorer<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"/></svg></span>'
+            :'<span class="lx-catcard-count">Bientôt disponible</span>'+(iA()?'<span class="lx-catcard-cta">Remplir</span>':''))+'</div>';
         h+='</div>';
         h+='</div>';
       });
@@ -6381,7 +6381,9 @@ function vShowSec(sec,btn,_boot){
             }
             h+='<div style="display:flex;align-items:center;gap:6px">';
             if(item.apercu||item.desc) h+='<button class="btn" style="background:'+catColor+'18;color:'+catColor+';font-size:10px;padding:5px 10px;border-radius:10px;border:1px solid '+catColor+'33" onclick="event.stopPropagation();previewElContent(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Aperçu</button>';
-            if(hasPlanAccess||iA()){
+            if(item.dispo===false){
+              h+='<span style="font-size:11px;font-weight:600;color:#6B7287;padding:6px 10px">Bientôt disponible</span>';
+            } else if(hasPlanAccess||iA()){
               h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="consulterGratuit(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Consulter</button>';
             } else {
               h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="commanderContenu(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-card"/></svg>Payer</button>';
@@ -10872,6 +10874,7 @@ function consulterGratuit(itemId){
   var el=DB.elearning||defaultDB().elearning;
   var item=(el.contenus||[]).find(function(c){return c.id===itemId;});
   if(!item){toast('Ressource introuvable','warn');return;}
+  if(item.dispo===false){toast('Ce document n\'est pas encore disponible.','warn');return;}
 
   // Ressources pédagogiques interactives (HTML embarqué)
   if(item.resPedago && typeof window._RESSOURCES_PEDAGO!=='undefined' && window._RESSOURCES_PEDAGO[item.resPedago]){
@@ -11400,6 +11403,8 @@ function commanderContenu(itemId){
   var el=DB.elearning||{contenus:[]};
   var item=el.contenus.find(function(c){return c.id===itemId;});
   if(!item) return;
+  /* 09/11/2026 : le serveur annonce dispo:false quand aucun document n'est déposé. */
+  if(item.dispo===false){ toast('Ce document n\'est pas encore disponible : rien ne vous a été facturé.','warn'); return; }
   var cat=(el.categories||[]).find(function(c){return c.id===item.cat;})||{nom:'Autre'};
   /* Écran intermédiaire court-circuité (v1.15.8) : il ne demandait que nom et
      WhatsApp, soit exactement l'étape ① du modal de paiement. Un contenu
@@ -20874,11 +20879,18 @@ function _buildOrientationHtml(niveau,serie,maths,fr,sci,interests){
       ecoles.push("ENAM — École Nationale d'Administration et de Magistrature (concours très sélectif)");
       conseils.push("L'ENAM forme les hauts fonctionnaires camerounais");
     }
-  }else if(niveau==="3eme"||niveau==="2nde"){
-    recs.push("📚 Orientation en 2nde / 1ere");
-    if(maths>=13&&sci>=12){recs.push("Série C ou D recommandee");conseils.push("Focus: Maths, Physique-Chimie, SVT");}
-    else if(fr>=13&&maths<12){recs.push("Série A recommandee");conseils.push("Focus: Français, Histoire-Geo, Philosophie");}
-    else{recs.push("Renforcer toutes les matieres");}
+  }else if(niveau==="3eme"){
+    /* 09/11/2026 — la série D commence en 1ère (arrêté 92/22, progressions 2026-27) :
+       en sortie de 3ème, le choix est 2nde A ou 2nde C. */
+    recs.push("📚 Orientation en 2nde");
+    if(maths>=13&&sci>=12){recs.push("2nde C recommandée (C et D se séparent en 1ère)");conseils.push("Priorité : Mathématiques, Physique, Chimie, SVT");}
+    else if(fr>=13&&maths<12){recs.push("2nde A recommandée");conseils.push("Priorité : Français, Anglais, Histoire-Géographie");}
+    else{recs.push("Renforcer toutes les matières avant de choisir");}
+  }else if(niveau==="2nde"){
+    recs.push("📚 Orientation en 1ère");
+    if(maths>=13&&sci>=12){recs.push(maths>=sci?"Série C recommandée (Mathématiques coefficient 6)":"Série D recommandée (SVTEEHB coefficient 6)");conseils.push("Priorité : Mathématiques, Physique, Chimie, SVT");}
+    else if(fr>=13&&maths<12){recs.push("Série A recommandée");conseils.push("Priorité : Littérature, Anglais, Langue vivante II, Philosophie");}
+    else{recs.push("Renforcer toutes les matières avant de choisir");}
   }
   if(!recs.length)recs.push("Remplissez tous les champs pour une orientation precise");
   if(!ecoles.length)ecoles.push("Précisez vos notes et intérêts pour des recommandations d'écoles");
@@ -24100,6 +24112,10 @@ function showEpreuves(){
   // 2. Librairie e-learning (cat1=épreuves, cat4=corpus, cat6=annales)
   var libEpreuves=(DB.elearningLibrary||[]).filter(function(e){
     return (e.cat==="cat1"||e.cat==="cat4"||e.cat==="cat6")&&_isVisibleEp(e.id);
+  }).map(function(e){
+    /* La copie serveur garde les anciens intitulés : le code fait foi pour le libellé. */
+    var _b=(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB:[]).find(function(x){return x.id===e.id;});
+    return _b?Object.assign({},e,{titre:_b.titre,desc:_b.desc}):e;
   });
   // 3. Épreuves créées par l'admin (filtrées des purgées)
   var customEpreuves=(DB.customEpreuves||[]).filter(function(e){return _isVisibleEp(e.id);});
@@ -25388,7 +25404,7 @@ function showLabosVirtuels(){
   })();
   // v1.4.2 : + catégories Anglophone (GCE) et Enseignement technique
   var cats=["tous","physique","chimie","svt","maths","english","technique","geo","histoire","info","langues"];
-  var catLabels={"tous":"Tous","physique":"⚡ Physique","chimie":"⚗️ Chimie","svt":"🧬 SVT","maths":"📐 Maths","english":"🇬🇧 English (GCE)","technique":"🔧 Technique","geo":"🗺️ Géo","histoire":"🏛️ Histoire","info":"💻 Info","langues":"✍️ Langues"};
+  var catLabels={"tous":"Tous","physique":"Physique","chimie":"Chimie","svt":"SVT","maths":"Maths","english":"English (GCE)","technique":"Technique","geo":"Géo","histoire":"Histoire","info":"Info","langues":"Langues"};
   // Une base synchronisée peut porter ces listes sous une autre forme :
   // indexOf sur un objet levait une TypeError et vidait la page des labos.
   var _hiddenLV=Array.isArray(DB.hiddenLabos)?DB.hiddenLabos:[];
@@ -25397,74 +25413,67 @@ function showLabosVirtuels(){
   var list=_visibleLabo.filter(function(l){return cat==="tous"||l.cat===cat;});
   var gratuits=list.filter(function(l){return l.gratuit;}).length;
 
-  var h="<div class='vsec'>";
-  h+="<div class='vsec-title vsec-title-hero'>🔬 Laboratoires Virtuels</div>";
-  h+="<div class='vsec-sub'>"+_visibleLabo.length+" expériences interactives basées sur le programme MINESEC — Sans risque, sans matériel</div>";
+  // 08/11/2026 : la page reprend la charte de la vitrine (fond blanc, filet fin,
+  // icônes SVG de couleur tournante, liens légers) — styles .lvx-* dans theme-lws.css.
+  // Les émoji des fiches (lv.ico) ne sont plus affichés : une icône par matière.
+  var _sv=function(id,cl){return "<svg class='"+(cl||"")+"' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#"+id+"'/></svg>";};
+  var _lvIco={physique:"lc-zap",chimie:"lc-flask",svt:"lc-sprout",maths:"lc-ruler",english:"lc-globe",technique:"lc-tool",geo:"lc-map",histoire:"lc-university",info:"lc-laptop",langues:"lc-pencil"};
+  var h="<div class='vsec lvx'>";
+  h+="<div class='vsec-title vsec-title-hero'>Laboratoires virtuels</div>";
+  h+="<div class='vsec-sub'>"+_visibleLabo.length+" expériences interactives basées sur le programme MINESEC — sans risque, sans matériel</div>";
 
-  // Bandeau stats
-  h+="<div style='display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px'>";
-  [{n:_visibleLabo.length,l:"Expériences",c:"#142554",i:"🔬"},{n:gratuits,l:"Gratuites",c:"#059669",i:"✅"},{n:_visibleLabo.filter(function(l){return !l.gratuit;}).length,l:"Premium",c:"#6C56A6",i:"⭐"}].forEach(function(s){
-    h+="<div style='background:"+s.c+"0f;border:0;border-radius:16px;padding:16px 12px;text-align:center;box-shadow:0 8px 22px -15px rgba(20,37,84,.22)'>";
-    h+="<div style='font-size:22px;margin-bottom:4px'>"+s.i+"</div>";
-    h+="<div style='font-family:Montserrat,sans-serif;font-size:24px;font-weight:900;color:"+s.c+";line-height:1'>"+s.n+"</div>";
-    h+="<div style='font-size:11px;color:#6B7A99;margin-top:3px;font-weight:600'>"+s.l+"</div>";
-    h+="</div>";
+  // Chiffres
+  h+="<div class='lvx-stats'>";
+  [{n:_visibleLabo.length,l:"Expériences",i:"lc-flask",c:"c1"},{n:gratuits,l:"Gratuites",i:"lc-checkcircle",c:"c3"},{n:_visibleLabo.filter(function(l){return !l.gratuit;}).length,l:"Premium",i:"lc-star",c:"c4"}].forEach(function(s){
+    h+="<div class='lvx-stat "+s.c+"'>"+_sv(s.i)+"<b>"+s.n+"</b><span>"+s.l+"</span></div>";
   });
   h+="</div>";
 
-  // Filtres catégories
-  h+="<div class='fl2 g6 mb16' style='flex-wrap:wrap'>";
+  // Filtres
+  h+="<div class='lvx-filtres' role='group' aria-label='Filtrer par matière'>";
   cats.forEach(function(c){
-    h+="<button onclick=\"window._laboCat='"+c+"';showLabosVirtuels()\" style='padding:7px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:.2s;background:"+(cat===c?"#142554":"#F0F4FF")+";color:"+(cat===c?"#fff":"#142554")+"'>"+(catLabels[c]||c)+"</button>";
+    h+="<button type='button' class='lvx-f"+(cat===c?" on":"")+"' aria-pressed='"+(cat===c)+"' onclick=\"window._laboCat='"+c+"';showLabosVirtuels()\">"+(catLabels[c]||c)+"</button>";
   });
   h+="</div>";
 
-  // Grille de labos
-  // v2.0 FIX débordement mobile : minmax(min(270px,100%),1fr) → la colonne se réduit
-  // à 100% sous 270px au lieu de forcer 270px (qui poussait la carte + son badge
-  // « GRATUIT » hors écran et créait un défilement horizontal). + overflow-x clos.
-  h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(min(270px,100%),1fr));gap:16px;margin-bottom:28px;max-width:100%'>";
-  list.forEach(function(lv){
+  // Grille des labos
+  h+="<div class='lvx-grid'>";
+  list.forEach(function(lv,k){
     var locked=!lv.gratuit&&!SES;
-    h+="<div onclick='lancerLabo(\""+lv.id+"\")' style='background:#fff;border-radius:18px;border:0;--vcol:"+lv.color+";overflow:hidden;cursor:pointer;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;box-shadow:0 10px 26px -16px rgba(20,37,84,.16)' onmouseover=\"this.style.transform='translateY(-5px)';this.style.boxShadow='0 20px 40px -18px "+lv.color+"55'\" onmouseout=\"this.style.transform='';this.style.boxShadow='0 10px 26px -16px rgba(20,37,84,.16)'\">";
-    h+="<div style='background:linear-gradient(135deg,"+lv.color+"1f,"+lv.color+"08);padding:18px 18px 16px;position:relative'>";
-    h+="<div style='position:absolute;top:10px;right:10px;background:"+(lv.gratuit?"#059669":"#6C56A6")+";color:#fff;font-size:9px;font-weight:800;padding:3px 9px;border-radius:10px'>"+(lv.gratuit?"GRATUIT":lv.plan||"PREMIUM")+"</div>";
-    h+="<div style='width:52px;height:52px;border-radius:14px;background:"+lv.color+"26;display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:10px'>"+lv.ico+"</div>";
-    h+="<div style='font-family:var(--ds-font-display,Montserrat),sans-serif;font-size:14px;font-weight:800;color:#142554'>"+lv.titre+"</div>";
-    h+="<div style='font-size:11px;color:#6B7A99;margin-top:3px;font-weight:600'>"+lv.matiere+" · "+lv.classe+"</div>";
+    h+="<div class='lvx-card c"+(k%5+1)+"' role='button' tabindex='0' onkeydown=\"if(event.key==='Enter')this.click()\" onclick='lancerLabo(\""+lv.id+"\")'>";
+    h+="<span class='lvx-badge"+(lv.gratuit?"":" prem")+"'>"+(lv.gratuit?"Gratuit":_esc(lv.plan||"Premium"))+"</span>";
+    h+=_sv(_lvIco[lv.cat]||"lc-flask","lvx-ico");
+    h+="<div class='lvx-titre'>"+_esc(lv.titre)+"</div>";
+    h+="<div class='lvx-mat'>"+_esc(lv.matiere)+" · "+_esc(lv.classe)+"</div>";
+    h+="<div class='lvx-desc'>"+_esc(lv.desc)+"</div>";
+    h+="<div class='lvx-foot'><span class='lvx-meta'>"+lv.experience.length+" étapes · "+lv.quiz.length+" quiz</span>";
+    h+="<span class='lvx-go"+(locked?" prem":"")+"'>"+(locked?_sv("lc-lock")+"Premium":"Lancer"+_sv("lc-arrow-right"))+"</span></div>";
     h+="</div>";
-    h+="<div style='padding:14px'>";
-    h+="<div style='font-size:12px;color:#6B7A99;line-height:1.6;margin-bottom:10px'>"+lv.desc+"</div>";
-    h+="<div class='fl2 fic fsb'>";
-    h+="<div style='font-size:11px;color:#9CA3AF'>"+lv.experience.length+" étapes · "+lv.quiz.length+" quiz</div>";
-    h+="<button style='background:"+lv.color+";color:#fff;border:none;border-radius:10px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer'>"+(locked?"🔒 Premium":"▶ Lancer")+"</button>";
-    h+="</div></div></div>";
   });
   h+="</div>";
 
-  // Section Packs d'abonnement
-  h+="<div style='background:linear-gradient(135deg,#0F172A,#1E3A8A);border-radius:20px;padding:28px;margin-bottom:20px'>";
-  h+="<div style='font-size:11px;font-weight:800;color:#FFC93C;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px'>⭐ Abonnements Labos</div>";
-  h+="<div style='font-family:Georgia,serif;font-size:15px;color:rgba(255,255,255,.8);margin-bottom:20px'>Accède à tous les labos, quiz et fiches de révision</div>";
-  h+="<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:14px'>";
+  // Abonnements
+  h+="<div class='lvx-packs'>";
+  h+="<div class='lvx-kick'>"+_sv("lc-star")+"Abonnements labos</div>";
+  h+="<div class='lvx-packs-sub'>Accède à tous les labos, quiz et fiches de révision</div>";
+  h+="<div class='lvx-packs-grid'>";
   LABO_PACKS.forEach(function(pk){
-    h+="<div style='background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,."+(pk.populaire?"3":"15")+");border-radius:16px;padding:18px;position:relative'>";
-    if(pk.populaire) h+="<div style='position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#FFC93C;color:#0F172A;font-size:9px;font-weight:800;padding:3px 12px;border-radius:10px;white-space:nowrap'>⭐ PLUS POPULAIRE</div>";
-    h+="<div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#fff;margin-bottom:6px'>"+pk.nom+"</div>";
-    h+="<div style='font-family:Georgia,serif;font-size:20px;font-weight:700;color:#FFC93C;margin-bottom:12px'>"+(pk.prix===0?"Gratuit":pk.badge)+"</div>";
-    h+=pk.avantages.map(function(a){return "<div style='font-size:12px;color:rgba(255,255,255,.7);margin-bottom:5px;display:flex;align-items:center;gap:6px'><span style='color:#FFC93C'>✓</span>"+a+"</div>";}).join("");
-    h+="<button onclick=\"vShowSec('contact',null)\" style='width:100%;margin-top:12px;background:"+(pk.populaire?"#FFC93C":"rgba(255,255,255,.15)")+";color:"+(pk.populaire?"#0F172A":"#fff")+";border:none;border-radius:12px;padding:10px;font-size:12px;font-weight:700;cursor:pointer'>"+(pk.prix===0?"Commencer gratuitement":"S'abonner")+"</button>";
+    h+="<div class='lvx-pack"+(pk.populaire?" pop":"")+"'>";
+    if(pk.populaire) h+="<span class='lvx-pop'>Plus populaire</span>";
+    h+="<div class='lvx-pack-nom'>"+_esc(pk.nom)+"</div>";
+    h+="<div class='lvx-pack-prix'>"+(pk.prix===0?"Gratuit":_esc(pk.badge))+"</div>";
+    h+=pk.avantages.map(function(a){return "<div class='lvx-av'>"+_sv("lc-check")+"<span>"+_esc(a)+"</span></div>";}).join("");
+    h+="<button type='button' class='lvx-pack-btn' onclick=\"vShowSec('contact',null)\">"+(pk.prix===0?"Commencer gratuitement":"S'abonner")+"</button>";
     h+="</div>";
   });
   h+="</div></div>";
 
   // Lien MINESEC
-  h+="<div class='vcard' style='background:linear-gradient(135deg,#EFF6FF,#EDE9FE);border:1px solid #C7D2FE'>";
-  h+="<div class='fl2 fic g12'><span style='font-size:32px'>🌐</span><div>";
-  h+="<div style='font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;color:#142554;margin-bottom:4px'>Cours vidéo officiels MINESEC</div>";
-  h+="<div style='font-size:12px;color:#6B7A99;margin-bottom:10px'>La plateforme officielle propose des vidéos pour toutes les matières de la 6ème à la Terminale.</div>";
-  h+="<a href='https://minesec-distancelearning.cm' target='_blank' rel='noopener' style='background:#142554;color:#fff;border-radius:12px;padding:9px 18px;font-size:12px;font-weight:700;text-decoration:none;display:inline-block'>🎬 Accéder aux cours officiels</a>";
-  h+="</div></div></div>";
+  h+="<div class='lvx-minesec'>"+_sv("lc-globe","lvx-ico")+"<div>";
+  h+="<div class='lvx-titre'>Cours vidéo officiels MINESEC</div>";
+  h+="<div class='lvx-desc'>La plateforme officielle propose des vidéos pour toutes les matières de la 6ème à la Terminale.</div>";
+  h+="<a class='lvx-lien' href='https://minesec-distancelearning.cm' target='_blank' rel='noopener'>Accéder aux cours"+_sv("lc-arrow-right")+"</a>";
+  h+="</div></div>";
   h+="</div>";
   _vc(h);
 }
@@ -29956,10 +29965,10 @@ setTimeout(function(){
 if(typeof EPREUVES_DB==='undefined'){
   window.EPREUVES_DB=[
     // ── MATHS ──
-    {id:"ep_m1",titre:"Épreuve Maths BEPC 2024 — Séq. 5",matiere:"Mathématiques",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
-     desc:"Épreuve officielle BEPC 2024, séquence 5. Couvre : Théorème de Pythagore, Thalès, calcul littéral, statistiques.",
+    {id:"ep_m1",titre:"Épreuve Maths 3ème, type BEPC — Séq. 5",matiere:"Mathématiques",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
+     desc:"Épreuve de préparation au BEPC, séquence 5. Couvre : Théorème de Pythagore, Thalès, calcul littéral, statistiques.",
      apercu:"Exercice 1 (4 pts) — Calculer : A = √(49) + 3² − 5  ;  B = (2x−3)(x+4)  développer et réduire.\nExercice 2 (5 pts) — ABC est un triangle rectangle en A tel que AB = 6 cm et AC = 8 cm. 1) Calculer BC. 2) M est le milieu de [BC], montrer que AM = BC/2.\nExercice 3 (5 pts) — Statistiques : 25 élèves ont obtenu les notes suivantes : 08, 10, 12, 14, 09, 11, 13, 15, 07, 10, 12, 11, 14, 16, 08, 09, 13, 10, 11, 12, 15, 07, 14, 10, 13. Calculer la moyenne, la médiane et l'étendue.\nProblème (6 pts) — Dans un repère, A(1;2), B(4;6), C(7;2). Montrer que le triangle ABC est isocèle."},
-    {id:"ep_m2",titre:"Épreuve Maths BEPC 2023 — Séq. 6",matiere:"Mathématiques",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
+    {id:"ep_m2",titre:"Épreuve Maths 3ème, type BEPC — Séq. 6",matiere:"Mathématiques",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
      desc:"Épreuve BEPC 2023, examen blanc. Thèmes : équations, géométrie, proportionnalité.",
      apercu:"Exercice 1 — Résoudre : 3x − 7 = 2(x + 1). Exercice 2 — Deux droites parallèles coupées par deux sécantes. D'après Thalès, calculer les longueurs manquantes. Problème — Un terrain rectangulaire a un périmètre de 120 m. Sa longueur est le double de sa largeur. Déterminer ses dimensions et son aire."},
     {id:"ep_m3",titre:"Épreuve Maths Probatoire C 2024",matiere:"Mathématiques",classe:"1ère C",seq:"Probatoire",cat:"cat1",gratuit:false,prix:1500,
@@ -29970,7 +29979,7 @@ if(typeof EPREUVES_DB==='undefined'){
      apercu:"Partie A — Étude de la fonction f(x) = (x² − 1)eˣ. Dresser le tableau de variation et tracer la courbe. Partie B — Dans une urne, 3 boules rouges et 5 boules blanches. On tire 2 boules sans remise. Calculer P(2 rouges), P(1 rouge et 1 blanche)."},
 
     // ── FRANÇAIS ──
-    {id:"ep_f1",titre:"Épreuve Français BEPC 2024",matiere:"Français",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
+    {id:"ep_f1",titre:"Épreuve Français 3ème, type BEPC — Séq. 6",matiere:"Français",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
      desc:"Épreuve officielle de Français BEPC 2024. Compréhension, grammaire, expression écrite.",
      apercu:"Texte : Extrait de « Une vie de boy » de Ferdinand Oyono.\nCompréhension (8 pts) : 1) Qui est le narrateur ? 2) Quel sentiment domine dans ce passage ? 3) Relevez deux figures de style et expliquez-les.\nGrammaire (6 pts) : 4) Analysez la phrase soulignée (nature et fonction). 5) Conjuguez « prendre » au plus-que-parfait.\nExpression écrite (6 pts) : Sujet au choix : a) Essai argumentatif sur l'éducation ; b) Récit d'une expérience marquante."},
     {id:"ep_f2",titre:"Épreuve Français BAC A 2024",matiere:"Français",classe:"Tle A",seq:"BAC",cat:"cat1",gratuit:false,prix:2000,
@@ -29978,7 +29987,7 @@ if(typeof EPREUVES_DB==='undefined'){
      apercu:"Sujet 1 — Dissertation : « La littérature africaine doit-elle se limiter à dénoncer les injustices sociales ? » Discutez.\nSujet 2 — Commentaire composé d'un extrait de « Les Soleils des Indépendances » d'Ahmadou Kourouma."},
 
     // ── PHYSIQUE-CHIMIE ──
-    {id:"ep_pc1",titre:"Épreuve Physique-Chimie BEPC 2024",matiere:"Physique-Chimie",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
+    {id:"ep_pc1",titre:"Épreuve Physique-Chimie 3ème, type BEPC — Séq. 5",matiere:"Physique-Chimie",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
      desc:"Épreuve officielle Physique-Chimie BEPC 2024. Électricité, mécanique, chimie.",
      apercu:"Chimie (8 pts) : 1) Équilibrer : Fe + O₂ → Fe₂O₃. 2) Calculer la masse molaire de H₂SO₄. 3) Quels sont les produits de la combustion complète du méthane ?\nPhysique (12 pts) : 4) Un mobile parcourt 300 m en 25 s. Calculer sa vitesse en m/s et km/h. 5) Circuit série : U = 12V, R₁ = 100Ω, R₂ = 200Ω. Calculer I et la tension aux bornes de chaque résistance."},
     {id:"ep_pc2",titre:"Épreuve Physique BAC C 2024",matiere:"Physique",classe:"Tle C",seq:"BAC",cat:"cat1",gratuit:false,prix:2000,
@@ -29986,17 +29995,17 @@ if(typeof EPREUVES_DB==='undefined'){
      apercu:"Exercice 1 — Chute libre avec frottements. Un objet de masse 0,5 kg est lâché d'une hauteur de 10 m. 1) Sans frottement : calculer v à l'impact. 2) Avec force de frottement f = 0,2v² : établir l'équation différentielle du mouvement."},
 
     // ── SVT ──
-    {id:"ep_svt1",titre:"Épreuve SVT BEPC 2024",matiere:"SVT",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
+    {id:"ep_svt1",titre:"Épreuve SVT 3ème, type BEPC — Séq. 6",matiere:"SVT",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
      desc:"Épreuve officielle SVT BEPC 2024. Reproduction, écologie, hérédité.",
      apercu:"Partie I — Restitution des connaissances (8 pts) : 1) Schéma annoté de l'appareil reproducteur féminin. 2) Définir : fécondation, nidation, placenta.\nPartie II — Exploitation de documents (12 pts) : Document montrant l'évolution de la température et du CO₂ atmosphérique. 1) Décrire l'évolution. 2) Proposer une explication. 3) Quelles conséquences sur la biodiversité ?"},
 
     // ── HISTOIRE-GÉO ──
-    {id:"ep_hg1",titre:"Épreuve Histoire-Géo BEPC 2024",matiere:"Histoire-Géographie",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
+    {id:"ep_hg1",titre:"Épreuve Histoire-Géo 3ème, type BEPC — Séq. 5",matiere:"Histoire-Géographie",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
      desc:"Épreuve officielle Histoire-Géographie BEPC 2024.",
      apercu:"Histoire (10 pts) : 1) Les causes de la décolonisation en Afrique. 2) Le rôle de l'ONU dans la décolonisation. 3) Citez 3 leaders africains et leur pays.\nGéographie (10 pts) : 4) Les 10 régions du Cameroun et leurs chefs-lieux. 5) Les principaux défis du développement du Cameroun (3 défis argumentés)."},
 
     // ── ANGLAIS ──
-    {id:"ep_en1",titre:"Épreuve Anglais BEPC 2024",matiere:"Anglais",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
+    {id:"ep_en1",titre:"Épreuve Anglais 3ème, type BEPC — Séq. 6",matiere:"Anglais",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
      desc:"Épreuve officielle Anglais BEPC 2024. Reading comprehension, grammar, essay writing.",
      apercu:"Section A — Reading Comprehension (10 marks): Read the passage about education in Cameroon and answer questions.\nSection B — Grammar (5 marks): Fill in the blanks with correct tenses. Rewrite using reported speech.\nSection C — Essay Writing (5 marks): Write a composition on: 'The importance of bilingualism in Cameroon.'"},
 
@@ -30085,7 +30094,7 @@ if(typeof EPREUVES_DB==='undefined'){
      apercu:"Exercice 1 — Analyse de phrase (5 pts)\nAnalysez la phrase suivante (nature et fonction de chaque groupe) : 'Hier, dans le petit village où mes grands-parents vivaient, nous avons assisté à une cérémonie traditionnelle qui m'a profondément ému.'\n\nExercice 2 — Valeurs des temps (4 pts)\nIndiquez la valeur de chaque temps souligné :\n• 'Quand il PLEUVAIT, j'ai fermé les fenêtres.' (imparfait : ?)\n• 'Il SERAIT venu si tu l'avais invité.' (conditionnel : ?)\n• 'Demain, je PRENDRAI le train.' (futur : ?)\n• 'L'eau BOUT à 100°C.' (présent : ?)\n\nExercice 3 — Transformations (5 pts)\n• Passive : 'Le maire a inauguré l'école.' → ?\n• Discours indirect : Il a dit : 'Je viendrai demain.' → ?\n• Négative complète : 'Quelqu'un a apporté quelque chose.' → ?\n\nExercice 4 — Lexique BEPC (6 pts)\nDonnez le sens de : éphémère, perspicace, pugnace, indolent, intrépide, exaspérer."},
 
     // ── BEPC Blanc — Histoire-Géo ──
-    {id:"ep_hg3",titre:"BEPC Blanc — Histoire-Géo 3ème (Cameroun + Mondialisation)",matiere:"Histoire-Géographie",classe:"3ème",seq:"BEPC",cat:"cat1",gratuit:true,
+    {id:"ep_hg3_bepc",titre:"BEPC Blanc — Histoire-Géo 3ème (Cameroun + Mondialisation)",matiere:"Histoire-Géographie",classe:"3ème",seq:"BEPC",cat:"cat1",gratuit:true,
      desc:"Sujet blanc BEPC HG : histoire du Cameroun indépendant + mondialisation économique. 20 points.",
      apercu:"DOSSIER HISTOIRE (10 pts) — Le Cameroun depuis 1960\nDocument 1 : Discours d'Ahidjo au 1er janvier 1960. Document 2 : Carte du Cameroun fédéral (1961-1972). Document 3 : Photo de Paul Biya prêtant serment 1982.\n\n1) Présentez les 3 documents (3 pts).\n2) Quelles sont les 2 grandes étapes politiques entre 1960 et 1972 ? (3 pts)\n3) Comment Paul Biya succède-t-il à Ahidjo ? (2 pts)\n4) Citez 2 défis politiques du Cameroun aujourd'hui (2 pts).\n\nDOSSIER GÉO (10 pts) — La mondialisation\nDocument 4 : Carte des flux commerciaux mondiaux. Document 5 : Photo de Douala (port).\n\n1) Définissez : mondialisation, FTN, IDH (3 pts).\n2) Quels sont les 3 grands pôles mondiaux ? (2 pts)\n3) Quel est le rôle du port de Douala dans l'intégration du Cameroun aux échanges mondiaux ? (3 pts)\n4) Citez 2 conséquences positives et 2 négatives de la mondialisation pour le Cameroun (2 pts)."},
 
@@ -48379,7 +48388,10 @@ function _cagCreer(eleveId){
                     badges:'mAchievements', jeux:'showJeuxEdu', battles:'mBattles',
                     groupe:'mStudyRoom', 'orientation-ia':'mAIOrientation',
                     ambassa:'mAgentAmbassa',
-                    simulateur:'mChoisirSimulation', 'oeuvres-interactives':'mChoisirOeuvre' };
+                    simulateur:'mChoisirSimulation', 'oeuvres-interactives':'mChoisirOeuvre',
+                    /* 09/11/2026 : modules sans adresse, reliés depuis Apprendre. */
+                    classes:'showClasseVirtuelle', coaching:'mCoaching', 'sujet-du-jour':'mSujetDuJour',
+                    erreurs:'mErreursARevoir', 'mes-evaluations':'showMesEvaluations', 'correction-ia':'mAICorrection' };
 
   function sectionDuHash(){
     var h = (window.location.hash || '').replace(/^#/, '');
@@ -48391,6 +48403,7 @@ function _cagCreer(eleveId){
     if(sec === 'abonnement') return 'abonnement';   // bouton « Choisir » d'une formule : #abonnement?plan=…
     if(sec === 'matiere') return 'matiere';         // carte de matière de la vitrine : #matiere?m=…
     if(sec === 'oeuvre') return 'oeuvre';           // bandeau d'une page /oeuvres/ : #oeuvre?k=…
+    if(sec === 'labo' || sec === 'jeu' || sec === 'fiche') return sec; // Apprendre : un labo, un jeu, une fiche précise
     // Programmes de partenariat : « partenariat-parent », « partenariat-sponsor »…
     if(sec.indexOf('partenariat-') === 0) return sec;
     if(sec.indexOf('pour-') === 0) return sec;          // hubs par public (v1.14)
@@ -48435,6 +48448,38 @@ function _cagCreer(eleveId){
       return;
     }
 
+    /* Fiche du catalogue : les données publiques arrivent après le chargement. */
+    if(sec === 'fiche'){
+      var qf = (window.location.hash || '').split('?')[1] || '', idF = '';
+      qf.split('&').forEach(function(kv){ var p = kv.split('='); if(decodeURIComponent(p[0] || '') === 'id') idF = decodeURIComponent(p[1] || ''); });
+      if(!/^[A-Za-z0-9_-]+$/.test(idF)) return;
+      window._vCurrentSec = 'fiche:' + idF;
+      try{ if(typeof _vFondNeutre === 'function') _vFondNeutre(); }catch(e){}
+      var essais = 0;
+      (function attend(){
+        var ok = DB && DB.elearning && (DB.elearning.contenus || []).some(function(c){ return c.id === idF; });
+        if(ok){ try{ previewElContenu(idF); }catch(e){} return; }
+        if(++essais < 16) setTimeout(attend, 500); else toast('Fiche introuvable', 'warn');
+      })();
+      return;
+    }
+
+    /* Apprendre (09/11/2026) : ouvrir UN laboratoire (#labo?id=lv10) ou UN jeu
+       (#jeu?id=j5). Les cadenas restent ceux de lancerLabo() et vLaunchJeu() :
+       un contenu payant demande toujours un essai ou un abonnement. */
+    if(sec === 'labo' || sec === 'jeu'){
+      var qr = (window.location.hash || '').split('?')[1] || '', cleRes = '';
+      qr.split('&').forEach(function(kv){
+        var p = kv.split('=');
+        if(decodeURIComponent(p[0] || '') === 'id') cleRes = decodeURIComponent(p[1] || '');
+      });
+      if(!/^[A-Za-z0-9_-]+$/.test(cleRes) || window._vCurrentSec === sec + ':' + cleRes) return;
+      window._vCurrentSec = sec + ':' + cleRes;
+      try{ if(typeof _vFondNeutre === 'function') _vFondNeutre(); }catch(e){}
+      try{ if(sec === 'labo') lancerLabo(cleRes); else vLaunchJeu(cleRes); }catch(e){}
+      return;
+    }
+
     /* Bandeau « Analyse complète, carte mentale… » des pages /oeuvres/ :
        #oeuvre?k=tle_stances_poemes (30/10/2026). Il menait à l'accueil du
        site : le lecteur cherchait l'œuvre, ne la trouvait pas. On ouvre le
@@ -48446,6 +48491,7 @@ function _cagCreer(eleveId){
         var p = kv.split('=');
         if(decodeURIComponent(p[0] || '') === 'k') cleOe = decodeURIComponent(p[1] || '');
       });
+      if(cleOe === '2nde_nkoumwam') cleOe = '5e_nkum_wam';     // ancien lien : l'œuvre est au programme de 5e
       if(!/^[a-z0-9_]+$/.test(cleOe) || window._vCurrentSec === 'oeuvre:' + cleOe) return;
       window._vCurrentSec = 'oeuvre:' + cleOe;
       Promise.all([_lazyChunk('litt-oeuvres'), _lazyChunk('jeux')])
@@ -48535,7 +48581,7 @@ function _cagCreer(eleveId){
          une vraie page, plus jamais un vide. */
       var _MODALE_FN = { recherche:1, calendrier:1, connexion:1, compte:1, inscription:1, partenaire:1,
                          positionnement:1, progression:1, badges:1, battles:1, groupe:1, 'orientation-ia':1, ambassa:1,
-                         simulateur:1, 'oeuvres-interactives':1 };
+                         simulateur:1, 'oeuvres-interactives':1, coaching:1, 'sujet-du-jour':1, erreurs:1, 'correction-ia':1 };
       if(_MODALE_FN[sec]){
         try{
           var _vcBg = document.getElementById('vContent');
@@ -48565,6 +48611,24 @@ function _cagCreer(eleveId){
           });
         }catch(e){}
         try{ window[fn](_q); }catch(e){}
+        return;
+      }
+      /* Apprendre (09/11/2026) : #epreuves?classe=3ème&matiere=Anglais pose les
+         filtres ; #evaluations?id=eval_en1 ouvre l'évaluation demandée. */
+      if(sec === 'epreuves' || sec === 'evaluations'){
+        var _qp = {};
+        ((window.location.hash || '').split('?')[1] || '').split('&').forEach(function(kv){
+          var p = kv.split('=');
+          if(p[0]) _qp[decodeURIComponent(p[0])] = decodeURIComponent((p[1] || '').replace(/\+/g, ' '));
+        });
+        if(sec === 'epreuves'){
+          if(_qp.classe){ window._epClasse = _qp.classe; window._epGrp = ''; }
+          if(_qp.matiere) window._epMat = _qp.matiere;
+        }
+        try{ window[fn](); }catch(e){}
+        if(sec === 'evaluations' && /^[A-Za-z0-9_-]+$/.test(_qp.id || '')){
+          try{ if(typeof SES !== 'undefined' && SES) lancerEvaluation(_qp.id); else apercuEvaluation(_qp.id); }catch(e){}
+        }
         return;
       }
       try{ window[fn](); }catch(e){}

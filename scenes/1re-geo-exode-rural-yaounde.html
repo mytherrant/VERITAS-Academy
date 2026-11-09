@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Partir pour Yaoundé — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de géographie (Première) : les migrations et l’exode rural, la croissance urbaine et les problèmes des villes ; relations villes-campagnes.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/1re-geo-exode-rural-yaounde.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Partir pour Yaoundé — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée de géographie (Première) : les migrations et l’exode rural, la croissance urbaine et les problèmes des villes ; relations villes-campagnes.">
+<meta property="og:url" content="https://veritas-school.com/scenes/1re-geo-exode-rural-yaounde.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Partir pour Yaoundé","description":"Scène animée de géographie (Première) : les migrations et l’exode rural, la croissance urbaine et les problèmes des villes ; relations villes-campagnes.","url":"https://veritas-school.com/scenes/1re-geo-exode-rural-yaounde.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"Première","about":"Géographie","teaches":"Expliquer l’exode rural par les facteurs répulsifs (campagnes) et attractifs (villes) ; décrire les problèmes urbains qu’il entraîne et les relations entre villes et campagnes ; envisager des solutions.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '1re-geo-exode-rural',
+  discipline: 'Géographie', niveau: '1re',
+  titre: 'Partir pour Yaoundé',
+  decor: 'village', lieu: 'Un village de la Lékié, puis Yaoundé', moment: 'Après le probatoire',
+  objectif: 'Expliquer l’exode rural par les facteurs répulsifs (campagnes) et attractifs (villes) ; décrire les problèmes urbains qu’il entraîne et les relations entre villes et campagnes ; envisager des solutions.',
+  programme: 'Progression harmonisée 1re · Leçons 3-5 (les migrations, leurs incidences, leurs tentatives de règlement), leçons 6-7 (la ville, l’expansion urbaine, les problèmes urbains), dossier 2 (relations villes-campagnes)',
+  jauges: [
+    { id: 'attrait', nom: 'Attrait de la ville', val: 60, couleur: '#1E499B' },
+    { id: 'difficultes', nom: 'Difficultés urbaines', val: 20, couleur: '#D43F2E' }
+  ],
+  personnages: {
+    serge:  { nom: 'Serge, 19 ans', couleur: '#2F5E9E', look: { peau: 'fonce', cheveux: 'court', habit: '#2F5E9E', objet: 'sac' } },
+    mere:   { nom: 'Sa mère, cultivatrice', couleur: '#5E8A3A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#5E8A3A', habit: '#B4793F', objet: 'houe' } },
+    cousin: { nom: 'Le cousin Hervé, moto-taximan', couleur: '#D98E04', look: { peau: 'fonce', cheveux: 'ras', habit: '#D98E04', coiffe: 'casque', couleurCoiffe: '#1A1A1A' } },
+    urbaniste:{ nom: 'Mme Bella, urbaniste', couleur: '#1E499B', look: { tenue: 'jupe', peau: 'fonce', cheveux: 'chignon', lunettes: true, habit: '#1E499B', objet: 'dossier' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['serge', 'mere'], txt: 'Dans un village de la Lékié, Serge a obtenu son probatoire. Il veut partir à Yaoundé, comme beaucoup de jeunes du village avant lui.', objet: { i: 'course', lib: 'Vers la ville' } },
+    { t: 'dit', qui: 'serge', txt: 'Ici, il n’y a rien : pas de lycée pour la Terminale, pas de travail payé, pas de courant le soir. En ville, il y a tout.', jauges: { attrait: 75 } },
+    { t: 'dit', qui: 'mere', emo: 'triste', txt: 'Qui m’aidera au champ ? Tous les jeunes partent. Il ne reste que les vieux et les enfants.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · pourquoi partir ?', consigne: 'Classe chaque facteur : facteur répulsif (qui pousse à quitter la campagne) ou attractif (qui attire vers la ville) ?',
+      cats: ['Répulsif (campagne)', 'Attractif (ville)'],
+      items: [
+        { txt: 'Manque d’écoles et de centres de santé.', cat: 0 },
+        { txt: 'Espoir d’un emploi salarié.', cat: 1 },
+        { txt: 'Travail agricole pénible et peu rémunéré.', cat: 0 },
+        { txt: 'Électricité, loisirs, réseaux sociaux.', cat: 1 },
+        { txt: 'Universités et grandes écoles.', cat: 1 },
+        { txt: 'Manque de terres pour les jeunes.', cat: 0 }
+      ],
+      bravo: 'L’exode rural est un mouvement poussé par les manques des campagnes et tiré par les promesses des villes.' },
+    { t: 'recit', sort: ['mere'], entre: ['cousin'], txt: 'Yaoundé. Le cousin Hervé accueille Serge dans une chambre d’un quartier construit sur la pente d’une colline, sans plan d’urbanisme.', jauges: { difficultes: 50 } },
+    { t: 'dit', qui: 'cousin', txt: 'Bienvenue en ville ! Ici, l’eau, on la cherche au forage. Quand il pleut, la route devient une rivière. Et le travail… moi je fais la moto, faute de mieux.', jauges: { attrait: 50 } },
+    { t: 'question', q: 'Comment appelle-t-on ces quartiers construits sans autorisation ni équipements ?',
+      options: [
+        { txt: 'Des quartiers spontanés (ou d’habitat précaire).', ok: true, retour: 'La ville grandit plus vite que les équipements : routes, eau, assainissement ne suivent pas.' },
+        { txt: 'Des quartiers résidentiels planifiés.', retour: 'C’est l’inverse.' },
+        { txt: 'Des zones industrielles.', retour: 'Non : ce sont des zones d’habitat.' }
+      ] },
+    { t: 'recit', entre: ['urbaniste'], txt: 'Mme Bella, urbaniste à la mairie, fait une enquête dans le quartier.' },
+    { t: 'dit', qui: 'urbaniste', txt: 'La ville accueille chaque année des dizaines de milliers de nouveaux habitants. Il faudrait construire des logements, des routes, des réseaux d’eau, des écoles, au même rythme. Nous n’y arrivons pas.', jauges: { difficultes: 75 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · l’enchaînement', consigne: 'Remets dans l’ordre l’enchaînement qui crée les problèmes urbains.',
+      items: [
+        'Les jeunes quittent les campagnes en grand nombre.',
+        'La population urbaine augmente très vite.',
+        'Les logements et les équipements manquent.',
+        'Des quartiers spontanés s’étendent sur les pentes et les bas-fonds.',
+        'Inondations, insalubrité, embouteillages, chômage.'
+      ],
+      bravo: 'Croissance démographique plus rapide que l’aménagement : c’est le cœur des problèmes urbains.' },
+    { t: 'choix', qui: 'serge', q: 'Tu es Serge. Après six mois en ville, que fais-tu ?',
+      options: [
+        { txt: 'Je reste et je cherche n’importe quel petit travail.', consequence: 'Tu survis dans le secteur informel, sans sécurité. Comme beaucoup.', jauges: { difficultes: 10 } },
+        { txt: 'Je m’inscris à l’université et je fais des petits travaux le week-end.', consequence: 'Tu investis dans ta formation : la ville tient sa promesse, lentement.', jauges: { attrait: 10 } },
+        { txt: 'Je retourne au village avec un projet agricole moderne (porcherie, maraîchage) et je vends en ville.', consequence: 'Tu transformes la relation ville-campagne : la ville devient ton marché.', jauges: { difficultes: -15, attrait: -10 } }
+      ],
+      oeuvre: 'Villes et campagnes sont liées : la ville se nourrit des produits des campagnes, les campagnes vivent de l’argent envoyé par les citadins.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · des solutions', consigne: 'Classe chaque solution selon l’espace où elle agit.',
+      cats: ['Retenir les jeunes à la campagne', 'Mieux aménager la ville'],
+      items: [
+        { txt: 'Électrifier les villages et y construire des lycées.', cat: 0 },
+        { txt: 'Financer des projets agricoles pour les jeunes.', cat: 0 },
+        { txt: 'Tracer des routes et des drains avant de lotir.', cat: 1 },
+        { txt: 'Construire des logements sociaux.', cat: 1 }
+      ],
+      bravo: 'Agir des deux côtés : rendre les campagnes vivables et les villes aménagées.' },
+    { t: 'dit', qui: 'urbaniste', txt: 'La ville n’est pas l’ennemie de la campagne. Le problème, c’est qu’une seule direction de départ vide l’une et étouffe l’autre.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · l’équilibre villes-campagnes',
+    intro: 'Règle les équipements des villages, l’aménagement de la ville et l’emploi urbain : où vit la jeunesse dans dix ans, et comment ?',
+    persos: ['serge', 'mere', 'cousin', 'urbaniste'],
+    curseurs: [
+      { id: 'village', nom: 'Équipements des villages', val: 25, bas: 'aucun', haut: 'écoles, courant, santé' },
+      { id: 'amenagement', nom: 'Aménagement urbain', val: 30, bas: 'anarchique', haut: 'planifié' },
+      { id: 'emploi', nom: 'Emplois en ville', val: 35, bas: 'rares', haut: 'nombreux' }
+    ],
+    scenarios: [
+      { nom: 'Aujourd’hui', icone: 'course', valeurs: { village: 25, amenagement: 30, emploi: 35 } },
+      { nom: 'Des villages équipés', icone: 'panier', valeurs: { village: 85 } },
+      { nom: 'Une ville planifiée', icone: 'document', valeurs: { amenagement: 85, emploi: 65 } }
+    ],
+    liens: [
+      { a: 'serge', b: 'mere', type: 'amour', lib: 'famille', base: .7 },
+      { a: 'cousin', b: 'serge', type: 'alliance', lib: 'accueil', base: .6 },
+      { a: 'urbaniste', b: 'cousin', type: 'confiance', lib: 'aménage', base: .1, poids: { amenagement: .6 } },
+      { a: 'serge', b: 'mere', type: 'conflit', lib: 'départ', base: .3, poids: { village: -.4 } }
+    ],
+    issue: function(v){
+      if(v.village > 65){ return { niveau: 'ok', badge: 'Des campagnes vivantes', recit: 'Lycées, courant et projets agricoles : beaucoup de jeunes restent ou reviennent, la ville respire.', apres: 'Un développement équilibré du territoire limite l’exode.', themes: ['développement rural'] }; }
+      if(v.amenagement > 65 && v.emploi > 50){ return { niveau: 'moyen', badge: 'Une ville qui suit', recit: 'La ville grandit encore, mais les routes, l’eau et les emplois suivent mieux.', apres: 'Les campagnes, elles, continuent de se vider.', themes: ['urbanisme'] }; }
+      return { niveau: 'ko', badge: 'Des villages vides, une ville saturée', recit: 'Les villages vieillissent, les quartiers spontanés s’étendent, le chômage des jeunes grandit.', apres: 'C’est le scénario à éviter.', themes: ['exode rural', 'problèmes urbains'] };
+    }
+  },
+  quiz: [
+    { q: 'Qu’est-ce que l’exode rural ?', options: [
+      { txt: 'Le départ massif des habitants des campagnes vers les villes.', ok: true, retour: 'Surtout des jeunes.' },
+      { txt: 'Le départ des citadins vers les villages.', retour: 'C’est l’exode urbain, plus rare.' } ] },
+    { q: 'Citez un facteur répulsif.', options: [
+      { txt: 'Le manque d’écoles et d’emplois dans les campagnes.', ok: true, retour: 'Il pousse au départ.' },
+      { txt: 'Les universités en ville.', retour: 'C’est un facteur attractif.' } ] },
+    { q: 'Qu’est-ce qu’un quartier spontané ?', options: [
+      { txt: 'Un quartier construit sans plan ni équipements.', ok: true, retour: 'Souvent sur des pentes ou des bas-fonds.' },
+      { txt: 'Un quartier d’affaires.', retour: 'Non.' } ] },
+    { q: 'Quel lien existe entre villes et campagnes ?', options: [
+      { txt: 'Les campagnes nourrissent les villes ; les citadins envoient de l’argent aux villages.', ok: true, retour: 'Des échanges dans les deux sens.' },
+      { txt: 'Aucun.', retour: 'Ils sont étroitement liés.' } ] },
+    { q: 'Quelle solution agit sur les campagnes ?', options: [
+      { txt: 'Électrifier les villages et y construire des lycées.', ok: true, retour: 'Pour retenir les jeunes.' },
+      { txt: 'Construire des logements sociaux en ville.', retour: 'Cela agit sur la ville.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'L’exode rural s’explique par des facteurs répulsifs (manques des campagnes) et attractifs (promesses des villes).',
+      'La croissance urbaine trop rapide crée des problèmes : quartiers spontanés, manque d’eau et d’assainissement, inondations, embouteillages, chômage.',
+      'Villes et campagnes sont liées par des flux de personnes, de produits et d’argent.',
+      'Solutions : équiper les campagnes, planifier l’aménagement urbain, créer des emplois.'
+    ],
+    ecrire: 'Rédigez une courte étude de cas (quinze lignes) sur un jeune de votre entourage parti du village vers la ville : causes du départ, conditions de vie en ville, liens gardés avec le village.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Partir pour Yaoundé</h1>
+<p><b>Géographie · Première</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Expliquer l’exode rural par les facteurs répulsifs (campagnes) et attractifs (villes) ; décrire les problèmes urbains qu’il entraîne et les relations entre villes et campagnes ; envisager des solutions.</p>
+<p>Programme : Progression harmonisée 1re · Leçons 3-5 (les migrations, leurs incidences, leurs tentatives de règlement), leçons 6-7 (la ville, l’expansion urbaine, les problèmes urbains), dossier 2 (relations villes-campagnes)</p>
+<p>Lieu : Un village de la Lékié, puis Yaoundé · Après le probatoire</p>
+<h3>Personnages</h3><ul><li>Serge, 19 ans</li><li>Sa mère, cultivatrice</li><li>Le cousin Hervé, moto-taximan</li><li>Mme Bella, urbaniste</li></ul>
+<h3>La scène</h3>
+<p>Dans un village de la Lékié, Serge a obtenu son probatoire. Il veut partir à Yaoundé, comme beaucoup de jeunes du village avant lui.</p>
+<p><b>Serge, 19 ans</b> : Ici, il n’y a rien : pas de lycée pour la Terminale, pas de travail payé, pas de courant le soir. En ville, il y a tout.</p>
+<p><b>Sa mère, cultivatrice</b> : Qui m’aidera au champ ? Tous les jeunes partent. Il ne reste que les vieux et les enfants.</p>
+<h4>Atelier · pourquoi partir ?</h4><p>Classe chaque facteur : facteur répulsif (qui pousse à quitter la campagne) ou attractif (qui attire vers la ville) ?</p>
+<ul><li><b>Répulsif (campagne)</b> : Manque d’écoles et de centres de santé. ; Travail agricole pénible et peu rémunéré. ; Manque de terres pour les jeunes.</li><li><b>Attractif (ville)</b> : Espoir d’un emploi salarié. ; Électricité, loisirs, réseaux sociaux. ; Universités et grandes écoles.</li></ul>
+<p>L’exode rural est un mouvement poussé par les manques des campagnes et tiré par les promesses des villes.</p>
+<p>Yaoundé. Le cousin Hervé accueille Serge dans une chambre d’un quartier construit sur la pente d’une colline, sans plan d’urbanisme.</p>
+<p><b>Le cousin Hervé, moto-taximan</b> : Bienvenue en ville ! Ici, l’eau, on la cherche au forage. Quand il pleut, la route devient une rivière. Et le travail… moi je fais la moto, faute de mieux.</p>
+<p><b>Question :</b> Comment appelle-t-on ces quartiers construits sans autorisation ni équipements ?</p><ul><li>Des quartiers spontanés (ou d’habitat précaire). <b>(bonne réponse)</b></li><li>Des quartiers résidentiels planifiés.</li><li>Des zones industrielles.</li></ul><p>La ville grandit plus vite que les équipements : routes, eau, assainissement ne suivent pas.</p>
+<p>Mme Bella, urbaniste à la mairie, fait une enquête dans le quartier.</p>
+<p><b>Mme Bella, urbaniste</b> : La ville accueille chaque année des dizaines de milliers de nouveaux habitants. Il faudrait construire des logements, des routes, des réseaux d’eau, des écoles, au même rythme. Nous n’y arrivons pas.</p>
+<h4>Atelier · l’enchaînement</h4><p>Remets dans l’ordre l’enchaînement qui crée les problèmes urbains.</p>
+<ol><li>Les jeunes quittent les campagnes en grand nombre.</li><li>La population urbaine augmente très vite.</li><li>Les logements et les équipements manquent.</li><li>Des quartiers spontanés s’étendent sur les pentes et les bas-fonds.</li><li>Inondations, insalubrité, embouteillages, chômage.</li></ol>
+<p>Croissance démographique plus rapide que l’aménagement : c’est le cœur des problèmes urbains.</p>
+<p><b>À toi de décider :</b> Tu es Serge. Après six mois en ville, que fais-tu ?</p><ul><li>Je reste et je cherche n’importe quel petit travail. — Tu survis dans le secteur informel, sans sécurité. Comme beaucoup.</li><li>Je m’inscris à l’université et je fais des petits travaux le week-end. — Tu investis dans ta formation : la ville tient sa promesse, lentement.</li><li>Je retourne au village avec un projet agricole moderne (porcherie, maraîchage) et je vends en ville. — Tu transformes la relation ville-campagne : la ville devient ton marché.</li></ul>
+<h4>Atelier · des solutions</h4><p>Classe chaque solution selon l’espace où elle agit.</p>
+<ul><li><b>Retenir les jeunes à la campagne</b> : Électrifier les villages et y construire des lycées. ; Financer des projets agricoles pour les jeunes.</li><li><b>Mieux aménager la ville</b> : Tracer des routes et des drains avant de lotir. ; Construire des logements sociaux.</li></ul>
+<p>Agir des deux côtés : rendre les campagnes vivables et les villes aménagées.</p>
+<p><b>Mme Bella, urbaniste</b> : La ville n’est pas l’ennemie de la campagne. Le problème, c’est qu’une seule direction de départ vide l’une et étouffe l’autre.</p>
+<h3>Quiz</h3><ol><li>Qu’est-ce que l’exode rural ? — <b>Le départ massif des habitants des campagnes vers les villes.</b> Surtout des jeunes.</li><li>Citez un facteur répulsif. — <b>Le manque d’écoles et d’emplois dans les campagnes.</b> Il pousse au départ.</li><li>Qu’est-ce qu’un quartier spontané ? — <b>Un quartier construit sans plan ni équipements.</b> Souvent sur des pentes ou des bas-fonds.</li><li>Quel lien existe entre villes et campagnes ? — <b>Les campagnes nourrissent les villes ; les citadins envoient de l’argent aux villages.</b> Des échanges dans les deux sens.</li><li>Quelle solution agit sur les campagnes ? — <b>Électrifier les villages et y construire des lycées.</b> Pour retenir les jeunes.</li></ol>
+<h3>À retenir</h3><ul><li>L’exode rural s’explique par des facteurs répulsifs (manques des campagnes) et attractifs (promesses des villes).</li><li>La croissance urbaine trop rapide crée des problèmes : quartiers spontanés, manque d’eau et d’assainissement, inondations, embouteillages, chômage.</li><li>Villes et campagnes sont liées par des flux de personnes, de produits et d’argent.</li><li>Solutions : équiper les campagnes, planifier l’aménagement urbain, créer des emplois.</li></ul>
+<h3>À écrire</h3><p>Rédigez une courte étude de cas (quinze lignes) sur un jeune de votre entourage parti du village vers la ville : causes du départ, conditions de vie en ville, liens gardés avec le village.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="1re-geo-exode-rural-yaounde.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Des scènes animées à jouer en classe ou seul, de la 6e à la Terminale : œuvres au programme, histoire, géographie, ECM, philosophie, orientation, cultures nationales et langues vivantes. Personnages, laboratoires, ateliers et quiz.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<style>
+  .hub-tete{border-radius:var(--v-r);padding:28px 22px;color:#fff;margin-bottom:22px;background:var(--v-bleu2);display:grid;grid-template-columns:1fr auto;gap:16px;align-items:end}
+  .hub-tete h1{margin:4px 0 10px;color:#fff;font-size:clamp(26px,6vw,38px);line-height:1.15}
+  .hub-tete p{margin:0;max-width:62ch;color:rgba(255,255,255,.85)}
+  .hub-tete .sc-sur{color:var(--v-or)}
+  .hub-troupe{display:flex;align-items:flex-end}
+  .hub-troupe .sc-perso{width:70px;opacity:1;transform:none}
+  .hub-troupe .sc-avatar{width:70px;height:175px}
+  .hub-mode{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:0 0 26px}
+  .hub-mode div{background:#F7F9FD;border-radius:14px;padding:20px 16px 18px;text-align:center}
+  .hub-rond{width:52px;height:52px;border-radius:50%;border:2px solid var(--tc);background:#fff;color:var(--tc);display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+  .hub-rond .ic{width:24px;height:24px;stroke-width:1.9}
+  .hub-mode b{display:block;color:#001136;font-weight:600;font-size:16px;margin-bottom:6px}
+  .hub-mode p{margin:0;font-size:14px;line-height:1.6;color:#4D5163;text-wrap:pretty}
+  .hub-groupe{margin:0 0 26px}
+  .hub-groupe h2{font-size:19px;margin:0 0 12px}
+  .hub-liste{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+  .hub-carte{display:flex;flex-direction:column;align-items:center;text-align:center;text-decoration:none;background:#F7F9FD;border-radius:14px;padding:22px 18px 18px;transition:background-color .2s,transform .2s,box-shadow .2s}
+  .hub-carte:hover{background:#fff;transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,17,54,.08)}
+  .hub-carte:focus-visible{outline:2px solid var(--v-cyan);outline-offset:2px}
+  .hub-medaillon{width:58px;height:58px;border-radius:50%;border:2px solid var(--tc);background:#fff;overflow:hidden;display:block;position:relative;margin-bottom:12px;flex:none}
+  .hub-medaillon svg{position:absolute;left:50%;top:3px;width:46px;height:115px;transform:translateX(-50%)}
+  .hub-carte b{display:block;font-size:16px;line-height:1.3;font-weight:600;color:#001136;margin-bottom:4px;text-wrap:balance}
+  .hub-carte .hub-sous{font-size:12.5px;font-weight:500;color:var(--tc);margin-bottom:8px;text-wrap:balance}
+  .hub-carte em{display:block;font-style:normal;font-size:14px;line-height:1.6;color:#4D5163;flex:1;text-wrap:pretty}
+  .hub-jouer{display:inline-flex;align-items:center;gap:4px;margin-top:14px;font-size:13.5px;font-weight:600;color:var(--tc)}
+  .hub-jouer .ic{width:15px;height:15px}
+  .hub-carte:hover .hub-jouer{text-decoration:underline}
+  .hub-groupe h2 small{font-size:13px;font-weight:500;color:var(--v-bleu);margin-left:6px}
+  .hub-disc{display:flex;align-items:center;gap:12px;font-size:17px;font-weight:600;color:var(--v-bleu);margin:20px 0 12px}
+  .hub-pastille{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;flex:none;background:#fff!important;border:2px solid currentColor}
+  .hub-pastille .ic{width:22px;height:22px}
+  .hub-filtres{background:var(--v-blanc);border-radius:var(--v-r);padding:14px 16px;margin:0 0 22px;position:sticky;top:0;z-index:5}
+  .hub-puces{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  .hub-puces button{font:inherit;font-size:14px;font-weight:500;border:0;border-radius:999px;padding:7px 14px;background:var(--v-teinte);color:var(--v-navy);cursor:pointer}
+  .hub-puces button[aria-pressed=true]{background:var(--v-bleu);color:#fff}
+  .hub-puces button:focus-visible,.hub-outils select:focus-visible,.hub-outils input:focus-visible{outline:2px solid var(--v-cyan);outline-offset:2px}
+  .hub-outils{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;font-size:14px;font-weight:500;color:var(--v-navy)}
+  .hub-outils label{display:flex;align-items:center;gap:8px;max-width:100%;min-width:0}
+  .hub-outils select{flex:1 1 auto;max-width:100%;text-overflow:ellipsis}
+  .hub-outils select,.hub-outils input{font:inherit;font-size:14px;border:0;border-radius:8px;background:var(--v-teinte);padding:7px 10px;color:var(--v-navy);min-width:0}
+  .hub-cherche{flex:1 1 220px}
+  .hub-cherche input{flex:1;min-width:0}
+  .hub-compte{color:var(--v-bleu);font-weight:500}
+  .hub-vide{background:var(--v-blanc);border-radius:var(--v-r);padding:18px}
+  @media (max-width:640px){ .hub-filtres{position:static} }
+  .hub-pied{font-size:13.5px}
+  .hub-pied a{color:var(--v-bleu);font-weight:500}
+  @media (max-width:640px){ .hub-tete{grid-template-columns:1fr} .hub-troupe{justify-content:center} }
+  .hub-offre{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:0 0 26px}
+  .hub-offre a{display:flex;gap:14px;align-items:flex-start;text-decoration:none;border-radius:14px;padding:18px;background:#E5F5E8;color:#001136;border:2px solid transparent;transition:border-color .2s,transform .2s}
+  .hub-offre a:hover,.hub-offre a:focus-visible{border-color:#007E11;transform:translateY(-2px)}
+  .hub-offre a.payant{background:#FFF6DB}
+  .hub-offre a.payant:hover,.hub-offre a.payant:focus-visible{border-color:#F0B71E}
+  .hub-offre .hub-rond{margin:0;flex:none;--tc:#007E11}
+  .hub-offre a.payant .hub-rond{--tc:#B07A00}
+  .hub-offre b{display:block;font-weight:600;font-size:16px;margin-bottom:4px}
+  .hub-offre small{display:inline-block;font-size:12px;font-weight:600;border-radius:99px;padding:2px 9px;margin-bottom:6px;background:#007E11;color:#fff}
+  .hub-offre a.payant small{background:#FFC93C;color:#001136}
+  .hub-offre a > span:last-child{min-width:0}
+  .hub-offre a > span:last-child > span{display:block;font-size:14px;line-height:1.6;color:#4D5163}
+</style>
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Des scènes animées à jouer en classe ou seul, de la 6e à la Terminale : œuvres au programme, histoire, géographie, ECM, philosophie, orientation, cultures nationales et langues vivantes. Personnages, laboratoires, ateliers et quiz.">
+<meta property="og:url" content="https://veritas-school.com/scenes/">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/","description":"Des scènes animées à jouer en classe ou seul, de la 6e à la Terminale : œuvres au programme, histoire, géographie, ECM, philosophie, orientation, cultures nationales et langues vivantes. Personnages, laboratoires, ateliers et quiz.","inLanguage":"fr","isAccessibleForFree":true,"provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"mainEntity":{"@type":"ItemList","numberOfItems":101,"itemListElement":[{"@type":"ListItem","position":1,"url":"https://veritas-school.com/scenes/1re-allemand-ngondo-fest.html"},{"@type":"ListItem","position":2,"url":"https://veritas-school.com/scenes/1re-allemand-oekotourismus-kribi.html"},{"@type":"ListItem","position":3,"url":"https://veritas-school.com/scenes/1re-chinois-chunjie-fete-nationale.html"},{"@type":"ListItem","position":4,"url":"https://veritas-school.com/scenes/1re-chinois-yundong-bi.html"},{"@type":"ListItem","position":5,"url":"https://veritas-school.com/scenes/1re-ecm-integrite-epreuve-qui-fuite.html"},{"@type":"ListItem","position":6,"url":"https://veritas-school.com/scenes/1re-ecm-medias-opinion-publicite.html"},{"@type":"ListItem","position":7,"url":"https://veritas-school.com/scenes/1re-espagnol-conductas-de-riesgo.html"},{"@type":"ListItem","position":8,"url":"https://veritas-school.com/scenes/1re-espagnol-emprendimiento.html"},{"@type":"ListItem","position":9,"url":"https://veritas-school.com/scenes/1re-geo-exode-rural-yaounde.html"},{"@type":"ListItem","position":10,"url":"https://veritas-school.com/scenes/1re-geo-transition-demographique.html"},{"@type":"ListItem","position":11,"url":"https://veritas-school.com/scenes/1re-histoire-conference-de-berlin.html"},{"@type":"ListItem","position":12,"url":"https://veritas-school.com/scenes/1re-histoire-crise-1929-cacao.html"},{"@type":"ListItem","position":13,"url":"https://veritas-school.com/scenes/1re-italien-alla-stazione.html"},{"@type":"ListItem","position":14,"url":"https://veritas-school.com/scenes/1re-italien-fuga-dei-cervelli.html"},{"@type":"ListItem","position":15,"url":"https://veritas-school.com/scenes/1re-langues-nationales-salutations-aines.html"},{"@type":"ListItem","position":16,"url":"https://veritas-school.com/scenes/1re-langues-nationales-singulier-pluriel.html"},{"@type":"ListItem","position":17,"url":"https://veritas-school.com/scenes/1re-philo-inconscient-lapsus.html"},{"@type":"ListItem","position":18,"url":"https://veritas-school.com/scenes/1re-philo-philosophie-africaine.html"},{"@type":"ListItem","position":19,"url":"https://veritas-school.com/scenes/3e-allemand-auf-dem-markt.html"},{"@type":"ListItem","position":20,"url":"https://veritas-school.com/scenes/3e-allemand-der-schulweg.html"},{"@type":"ListItem","position":21,"url":"https://veritas-school.com/scenes/3e-anglais-at-the-restaurant.html"},{"@type":"ListItem","position":22,"url":"https://veritas-school.com/scenes/3e-anglais-school-prefect-election.html"},{"@type":"ListItem","position":23,"url":"https://veritas-school.com/scenes/3e-ecm-election-proportionnelle.html"},{"@type":"ListItem","position":24,"url":"https://veritas-school.com/scenes/3e-ecm-tontine-et-cooperative.html"},{"@type":"ListItem","position":25,"url":"https://veritas-school.com/scenes/3e-espagnol-en-el-medico.html"},{"@type":"ListItem","position":26,"url":"https://veritas-school.com/scenes/3e-espagnol-en-el-supermercado.html"},{"@type":"ListItem","position":27,"url":"https://veritas-school.com/scenes/3e-geo-agriculteurs-eleveurs.html"},{"@type":"ListItem","position":28,"url":"https://veritas-school.com/scenes/3e-geo-mangrove-douala.html"},{"@type":"ListItem","position":29,"url":"https://veritas-school.com/scenes/3e-histoire-conference-de-foumban.html"},{"@type":"ListItem","position":30,"url":"https://veritas-school.com/scenes/allemand-erste-begegnung.html"},{"@type":"ListItem","position":31,"url":"https://veritas-school.com/scenes/anglais-at-the-market.html"},{"@type":"ListItem","position":32,"url":"https://veritas-school.com/scenes/arbre-fetiche-iroko.html"},{"@type":"ListItem","position":33,"url":"https://veritas-school.com/scenes/arbre-fetiche-la-toupie.html"},{"@type":"ListItem","position":34,"url":"https://veritas-school.com/scenes/attachement-democratie.html"},{"@type":"ListItem","position":35,"url":"https://veritas-school.com/scenes/attachement-sol-natal-vautours.html"},{"@type":"ListItem","position":36,"url":"https://veritas-school.com/scenes/balafon-lettres-a-mes-amis.html"},{"@type":"ListItem","position":37,"url":"https://veritas-school.com/scenes/balafon-marcinelle.html"},{"@type":"ListItem","position":38,"url":"https://veritas-school.com/scenes/bimanes-dans-la-foret.html"},{"@type":"ListItem","position":39,"url":"https://veritas-school.com/scenes/bimanes-le-savon.html"},{"@type":"ListItem","position":40,"url":"https://veritas-school.com/scenes/capitoline-l-enterrement.html"},{"@type":"ListItem","position":41,"url":"https://veritas-school.com/scenes/capitoline-la-lettre.html"},{"@type":"ListItem","position":42,"url":"https://veritas-school.com/scenes/chants-foret-course-truquee.html"},{"@type":"ListItem","position":43,"url":"https://veritas-school.com/scenes/chants-foret-poutre-d-eau.html"},{"@type":"ListItem","position":44,"url":"https://veritas-school.com/scenes/coeur-du-sahel-deux-filles.html"},{"@type":"ListItem","position":45,"url":"https://veritas-school.com/scenes/coeur-du-sahel-une-journee.html"},{"@type":"ListItem","position":46,"url":"https://veritas-school.com/scenes/ecm-conseil-des-delegues.html"},{"@type":"ListItem","position":47,"url":"https://veritas-school.com/scenes/espagnol-donde-esta.html"},{"@type":"ListItem","position":48,"url":"https://veritas-school.com/scenes/histoire-douala-1884.html"},{"@type":"ListItem","position":49,"url":"https://veritas-school.com/scenes/korotoumou-hyene-impatiente.html"},{"@type":"ListItem","position":50,"url":"https://veritas-school.com/scenes/korotoumou-le-miel.html"},{"@type":"ListItem","position":51,"url":"https://veritas-school.com/scenes/lion-perle-la-dot.html"},{"@type":"ListItem","position":52,"url":"https://veritas-school.com/scenes/lion-perle-la-machine-a-timbres.html"},{"@type":"ListItem","position":53,"url":"https://veritas-school.com/scenes/marmite-koka-mbala.html"},{"@type":"ListItem","position":54,"url":"https://veritas-school.com/scenes/marmite-le-roi-et-ses-morts.html"},{"@type":"ListItem","position":55,"url":"https://veritas-school.com/scenes/ngum-la-mallette.html"},{"@type":"ListItem","position":56,"url":"https://veritas-school.com/scenes/ngum-le-refus-de-fuir.html"},{"@type":"ListItem","position":57,"url":"https://veritas-school.com/scenes/nkoum-wam-huitieme-notable.html"},{"@type":"ListItem","position":58,"url":"https://veritas-school.com/scenes/nkoum-wam-six-candidats.html"},{"@type":"ListItem","position":59,"url":"https://veritas-school.com/scenes/pere-inconnu-deux-papas.html"},{"@type":"ListItem","position":60,"url":"https://veritas-school.com/scenes/pere-inconnu-je-suis-ton-pere.html"},{"@type":"ListItem","position":61,"url":"https://veritas-school.com/scenes/petites-gouttes-la-porte.html"},{"@type":"ListItem","position":62,"url":"https://veritas-school.com/scenes/petites-gouttes-le-hibou.html"},{"@type":"ListItem","position":63,"url":"https://veritas-school.com/scenes/philo-socrate-courage.html"},{"@type":"ListItem","position":64,"url":"https://veritas-school.com/scenes/poemes-sauvages-grand-bassam.html"},{"@type":"ListItem","position":65,"url":"https://veritas-school.com/scenes/poemes-sauvages-la-mosquee-bleue.html"},{"@type":"ListItem","position":66,"url":"https://veritas-school.com/scenes/stances-je-me-croyais-poete.html"},{"@type":"ListItem","position":67,"url":"https://veritas-school.com/scenes/stances-le-savant-et-le-poete.html"},{"@type":"ListItem","position":68,"url":"https://veritas-school.com/scenes/tartuffe-le-pauvre-homme.html"},{"@type":"ListItem","position":69,"url":"https://veritas-school.com/scenes/tartuffe-sous-la-table.html"},{"@type":"ListItem","position":70,"url":"https://veritas-school.com/scenes/tenebres-le-mensonge.html"},{"@type":"ListItem","position":71,"url":"https://veritas-school.com/scenes/tenebres-les-tricoteuses.html"},{"@type":"ListItem","position":72,"url":"https://veritas-school.com/scenes/tle-allemand-fake-news.html"},{"@type":"ListItem","position":73,"url":"https://veritas-school.com/scenes/tle-allemand-frauen-stadt-dorf.html"},{"@type":"ListItem","position":74,"url":"https://veritas-school.com/scenes/tle-anglais-at-the-bank.html"},{"@type":"ListItem","position":75,"url":"https://veritas-school.com/scenes/tle-anglais-job-interview.html"},{"@type":"ListItem","position":76,"url":"https://veritas-school.com/scenes/tle-arabe-akhbar-kadhiba.html"},{"@type":"ListItem","position":77,"url":"https://veritas-school.com/scenes/tle-arabe-yawm-al-mara.html"},{"@type":"ListItem","position":78,"url":"https://veritas-school.com/scenes/tle-chinois-budget-duoshao-qian.html"},{"@type":"ListItem","position":79,"url":"https://veritas-school.com/scenes/tle-chinois-laji-fenlei.html"},{"@type":"ListItem","position":80,"url":"https://veritas-school.com/scenes/tle-cultures-funerailles-tradition-modernite.html"},{"@type":"ListItem","position":81,"url":"https://veritas-school.com/scenes/tle-cultures-tam-tam-parleur.html"},{"@type":"ListItem","position":82,"url":"https://veritas-school.com/scenes/tle-ecm-bakassi-paix-par-le-droit.html"},{"@type":"ListItem","position":83,"url":"https://veritas-school.com/scenes/tle-ecm-casques-bleus-humanitaire.html"},{"@type":"ListItem","position":84,"url":"https://veritas-school.com/scenes/tle-espagnol-libertad-de-prensa.html"},{"@type":"ListItem","position":85,"url":"https://veritas-school.com/scenes/tle-espagnol-reciclaje.html"},{"@type":"ListItem","position":86,"url":"https://veritas-school.com/scenes/tle-geo-cacao-commerce-equitable.html"},{"@type":"ListItem","position":87,"url":"https://veritas-school.com/scenes/tle-geo-kye-ossi-marche-frontalier.html"},{"@type":"ListItem","position":88,"url":"https://veritas-school.com/scenes/tle-histoire-douala-aout-1940.html"},{"@type":"ListItem","position":89,"url":"https://veritas-school.com/scenes/tle-histoire-um-nyobe-onu.html"},{"@type":"ListItem","position":90,"url":"https://veritas-school.com/scenes/tle-italien-arlecchino-quiproquo.html"},{"@type":"ListItem","position":91,"url":"https://veritas-school.com/scenes/tle-italien-dante-tanto-gentile.html"},{"@type":"ListItem","position":92,"url":"https://veritas-school.com/scenes/tle-orientation-choisir-sa-filiere.html"},{"@type":"ListItem","position":93,"url":"https://veritas-school.com/scenes/tle-orientation-entretien-affirmation.html"},{"@type":"ListItem","position":94,"url":"https://veritas-school.com/scenes/tle-philo-njoh-mouelle-excellence.html"},{"@type":"ListItem","position":95,"url":"https://veritas-school.com/scenes/tle-philo-passion-raison.html"},{"@type":"ListItem","position":96,"url":"https://veritas-school.com/scenes/trois-pretendants-a-vendre.html"},{"@type":"ListItem","position":97,"url":"https://veritas-school.com/scenes/trois-pretendants-le-sorcier.html"},{"@type":"ListItem","position":98,"url":"https://veritas-school.com/scenes/vieux-negre-cercle-de-chaux.html"},{"@type":"ListItem","position":99,"url":"https://veritas-school.com/scenes/vieux-negre-la-nuit-en-cellule.html"},{"@type":"ListItem","position":100,"url":"https://veritas-school.com/scenes/ville-cruelle-deux-cents-kilos.html"},{"@type":"ListItem","position":101,"url":"https://veritas-school.com/scenes/ville-cruelle-koume-odilia.html"}]}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<div class="sc-marque"><div class="sc-marque-in"><a href="../"><img src="../assets/veritas-logo.png" alt="" width="36" height="36"><b>VÉRITAS</b></a><i class="sc-sep"></i><span>Scènes vivantes</span></div></div>
+<main class="sc-wrap">
+  <header class="hub-tete">
+    <div>
+      <div class="sc-sur">Lettres et sciences humaines</div>
+      <h1>Scènes vivantes</h1>
+      <p>Les œuvres au programme, l’histoire, la géographie, la citoyenneté, la philosophie, l’orientation, les cultures nationales et sept langues, de la 6e à la Terminale, d’après les progressions harmonisées du MINESEC. Chaque scène se joue réplique après réplique, avec des ateliers à manipuler, un laboratoire où l’on change le cours de l’histoire, et un quiz.</p>
+    </div>
+    <div class="hub-troupe" id="troupe" aria-hidden="true"></div>
+  </header>
+
+  <div class="hub-mode" id="modes"></div>
+  <div class="hub-offre" id="offre">
+    <a href="../corriges/"><span class="hub-rond" data-ic="porte"></span><span><small>Gratuit</small><b>Les scènes et les corrigés</b><span>Toutes les scènes sont offertes, comme les exercices corrigés des cahiers de français, séquence par séquence.</span></span></a>
+    <a class="payant" href="../app.html#abonnement"><span class="hub-rond" data-ic="cle"></span><span><small>Avec l’abonnement</small><b>Aller jusqu’au bout</b><span>Les cahiers d’œuvres complets, les épreuves corrigées de ta classe et Prof. Ambassa, l’IA qui explique chaque erreur.</span></span></a>
+  </div>
+  <div class="hub-filtres" id="filtres"></div>
+  <div id="groupes"><!--catalogue--><ul class="hub-plan"><li><a href="1re-allemand-ngondo-fest.html">Das Ngondo-Fest</a> — 1re · Allemand</li><li><a href="1re-allemand-oekotourismus-kribi.html">Ökotourismus in Kribi</a> — 1re · Allemand</li><li><a href="1re-chinois-chunjie-fete-nationale.html">春节和国庆节 · Deux fêtes</a> — 1re · Chinois</li><li><a href="1re-chinois-yundong-bi.html">运动 · Le sport</a> — 1re · Chinois</li><li><a href="1re-ecm-integrite-epreuve-qui-fuite.html">L’épreuve qui fuite</a> — 1re · Éducation à la citoyenneté et à la morale</li><li><a href="1re-ecm-medias-opinion-publicite.html">La boisson miracle</a> — 1re · Éducation à la citoyenneté et à la morale</li><li><a href="1re-espagnol-conductas-de-riesgo.html">La fiesta de Kevin</a> — 1re · Espagnol</li><li><a href="1re-espagnol-emprendimiento.html">Mi pequeña empresa</a> — 1re · Espagnol</li><li><a href="1re-geo-exode-rural-yaounde.html">Partir pour Yaoundé</a> — 1re · Géographie</li><li><a href="1re-geo-transition-demographique.html">Trois générations, une courbe</a> — 1re · Géographie</li><li><a href="1re-histoire-conference-de-berlin.html">Berlin, hiver 1884</a> — 1re · Histoire</li><li><a href="1re-histoire-crise-1929-cacao.html">Le jeudi noir vu d’Ebolowa</a> — 1re · Histoire</li><li><a href="1re-italien-alla-stazione.html">Un biglietto per Firenze</a> — 1re · Italien</li><li><a href="1re-italien-fuga-dei-cervelli.html">Restare o partire?</a> — 1re · Italien</li><li><a href="1re-langues-nationales-salutations-aines.html">Saluer, c’est respecter</a> — 1re · Langues nationales</li><li><a href="1re-langues-nationales-singulier-pluriel.html">Un, des : nos langues comptent</a> — 1re · Langues nationales</li><li><a href="1re-philo-inconscient-lapsus.html">Le lapsus de Christian</a> — 1re · Philosophie</li><li><a href="1re-philo-philosophie-africaine.html">Existe-t-il une philosophie africaine ?</a> — 1re · Philosophie</li><li><a href="3e-allemand-auf-dem-markt.html">Auf dem Markt</a> — 3e · Allemand</li><li><a href="3e-allemand-der-schulweg.html">Der Schulweg</a> — 3e · Allemand</li><li><a href="3e-anglais-at-the-restaurant.html">At the restaurant</a> — 3e · Anglais</li><li><a href="3e-anglais-school-prefect-election.html">Vote for me!</a> — 3e · Anglais</li><li><a href="3e-ecm-election-proportionnelle.html">Dix sièges à partager</a> — 3e · Éducation à la citoyenneté et à la morale</li><li><a href="3e-ecm-tontine-et-cooperative.html">La tontine des mamans</a> — 3e · Éducation à la citoyenneté et à la morale</li><li><a href="3e-espagnol-en-el-medico.html">En el médico</a> — 3e · Espagnol</li><li><a href="3e-espagnol-en-el-supermercado.html">En el supermercado</a> — 3e · Espagnol</li><li><a href="3e-geo-agriculteurs-eleveurs.html">Le champ et le troupeau</a> — 3e · Géographie</li><li><a href="3e-geo-mangrove-douala.html">La mangrove en danger</a> — 3e · Géographie</li><li><a href="3e-histoire-conference-de-foumban.html">Foumban, juillet 1961</a> — 3e · Histoire</li><li><a href="allemand-erste-begegnung.html">Erste Begegnung</a> — 4e · Allemand</li><li><a href="anglais-at-the-market.html">At the market</a> — 6e – 5e · Anglais</li><li><a href="arbre-fetiche-iroko.html">L’iroko d’Abomey</a> — 5e · Français</li><li><a href="arbre-fetiche-la-toupie.html">La toupie volée</a> — 5e · Français</li><li><a href="attachement-democratie.html">Le mot qui manquait</a> — 4e · Français</li><li><a href="attachement-sol-natal-vautours.html">Le retour des vautours</a> — 4e · Français</li><li><a href="balafon-lettres-a-mes-amis.html">Lettres à mes amis</a> — 1re · Français</li><li><a href="balafon-marcinelle.html">Marcinelle, 1956</a> — 1re · Français</li><li><a href="bimanes-dans-la-foret.html">Le bachelier et sa cravate</a> — 6e · Français</li><li><a href="bimanes-le-savon.html">La leçon du savon</a> — 6e · Français</li><li><a href="capitoline-l-enterrement.html">L’enterrement refusé</a> — 2nde · Français</li><li><a href="capitoline-la-lettre.html">La lettre et la peur</a> — 2nde · Français</li><li><a href="chants-foret-course-truquee.html">La course truquée</a> — 6e · Français</li><li><a href="chants-foret-poutre-d-eau.html">La poutre d’eau</a> — 6e · Français</li><li><a href="coeur-du-sahel-deux-filles.html">Deux filles du même âge</a> — 4e · Français</li><li><a href="coeur-du-sahel-une-journee.html">Une journée de travail</a> — 4e · Français</li><li><a href="ecm-conseil-des-delegues.html">Le conseil des délégués</a> — 5e – 4e · Éducation à la citoyenneté et à la morale</li><li><a href="espagnol-donde-esta.html">¿Dónde está la biblioteca?</a> — 4e · Espagnol</li><li><a href="histoire-douala-1884.html">Douala, juillet 1884 : un traité et ses malentendus</a> — 4e – 3e · Histoire</li><li><a href="korotoumou-hyene-impatiente.html">L’hyène qui ne sait pas attendre</a> — 6e · Français</li><li><a href="korotoumou-le-miel.html">La file du miel</a> — 6e · Français</li><li><a href="lion-perle-la-dot.html">La querelle de la dot</a> — 1re · Français</li><li><a href="lion-perle-la-machine-a-timbres.html">La machine à timbres</a> — 1re · Français</li><li><a href="marmite-koka-mbala.html">Brise cette marmite</a> — 3e · Français</li><li><a href="marmite-le-roi-et-ses-morts.html">Le roi parle à ses morts</a> — 3e · Français</li><li><a href="ngum-la-mallette.html">La mallette</a> — Terminale · Français</li><li><a href="ngum-le-refus-de-fuir.html">Le refus de fuir</a> — Terminale · Français</li><li><a href="nkoum-wam-huitieme-notable.html">Le siège vide</a> — 5e · Français</li><li><a href="nkoum-wam-six-candidats.html">Six candidats</a> — 5e · Français</li><li><a href="pere-inconnu-deux-papas.html">Deux papas, aucun père</a> — 5e · Français</li><li><a href="pere-inconnu-je-suis-ton-pere.html">« Je suis ton père ! »</a> — 5e · Français</li><li><a href="petites-gouttes-la-porte.html">Ouvre-moi mon frère</a> — 3e · Français</li><li><a href="petites-gouttes-le-hibou.html">L’oiseau qu’on brûle</a> — 3e · Français</li><li><a href="philo-socrate-courage.html">Socrate et le courage</a> — Terminale · Philosophie</li><li><a href="poemes-sauvages-grand-bassam.html">Le feu qui éclaire</a> — 2nde · Français</li><li><a href="poemes-sauvages-la-mosquee-bleue.html">La mosquée bleue</a> — 2nde · Français</li><li><a href="stances-je-me-croyais-poete.html">« Je me croyais poète »</a> — Terminale · Français</li><li><a href="stances-le-savant-et-le-poete.html">Le savant et le poète</a> — Terminale · Français</li><li><a href="tartuffe-le-pauvre-homme.html">« Le pauvre homme ! »</a> — 2nde · Français</li><li><a href="tartuffe-sous-la-table.html">Sous la table</a> — 2nde · Français</li><li><a href="tenebres-le-mensonge.html">Le dernier mot de Kurtz</a> — 1re · Français</li><li><a href="tenebres-les-tricoteuses.html">Les deux tricoteuses</a> — 1re · Français</li><li><a href="tle-allemand-fake-news.html">Fake News und Cybermobbing</a> — Terminale · Allemand</li><li><a href="tle-allemand-frauen-stadt-dorf.html">Frauen in Stadt und Dorf</a> — Terminale · Allemand</li><li><a href="tle-anglais-at-the-bank.html">At the bank</a> — Terminale · Anglais</li><li><a href="tle-anglais-job-interview.html">The job interview</a> — Terminale · Anglais</li><li><a href="tle-arabe-akhbar-kadhiba.html">Les fausses nouvelles · الأخبار الكاذبة</a> — Terminale · Arabe</li><li><a href="tle-arabe-yawm-al-mara.html">Le 8 mars · اليوم العالمي للمرأة</a> — Terminale · Arabe</li><li><a href="tle-chinois-budget-duoshao-qian.html">这个多少钱？</a> — Terminale · Chinois</li><li><a href="tle-chinois-laji-fenlei.html">垃圾分类 · Trier les déchets</a> — Terminale · Chinois</li><li><a href="tle-cultures-funerailles-tradition-modernite.html">Les funérailles de grand-père</a> — Terminale · Cultures nationales</li><li><a href="tle-cultures-tam-tam-parleur.html">Le tam-tam qui parle</a> — Terminale · Cultures nationales</li><li><a href="tle-ecm-bakassi-paix-par-le-droit.html">Bakassi, la paix par le droit</a> — Terminale · Éducation à la citoyenneté et à la morale</li><li><a href="tle-ecm-casques-bleus-humanitaire.html">Casques bleus et humanitaires</a> — Terminale · Éducation à la citoyenneté et à la morale</li><li><a href="tle-espagnol-libertad-de-prensa.html">La libertad de prensa</a> — Terminale · Espagnol</li><li><a href="tle-espagnol-reciclaje.html">¡Sepáralo bien!</a> — Terminale · Espagnol</li><li><a href="tle-geo-cacao-commerce-equitable.html">Le voyage d’une fève</a> — Terminale · Géographie</li><li><a href="tle-geo-kye-ossi-marche-frontalier.html">Le marché des trois frontières</a> — Terminale · Géographie</li><li><a href="tle-histoire-douala-aout-1940.html">Douala, 27 août 1940</a> — Terminale · Histoire</li><li><a href="tle-histoire-um-nyobe-onu.html">New York, décembre 1952</a> — Terminale · Histoire</li><li><a href="tle-italien-arlecchino-quiproquo.html">Arlecchino e le due lettere</a> — Terminale · Italien</li><li><a href="tle-italien-dante-tanto-gentile.html">Tanto gentile</a> — Terminale · Italien</li><li><a href="tle-orientation-choisir-sa-filiere.html">Après le bac, quoi ?</a> — Terminale · Orientation-conseil</li><li><a href="tle-orientation-entretien-affirmation.html">L’entretien d’embauche</a> — Terminale · Orientation-conseil</li><li><a href="tle-philo-njoh-mouelle-excellence.html">De la médiocrité à l’excellence</a> — Terminale · Philosophie</li><li><a href="tle-philo-passion-raison.html">La passion et la raison</a> — Terminale · Philosophie</li><li><a href="trois-pretendants-a-vendre.html">Je suis donc à vendre ?</a> — 4e · Français</li><li><a href="trois-pretendants-le-sorcier.html">Le sorcier Sanga-Titi</a> — 4e · Français</li><li><a href="vieux-negre-cercle-de-chaux.html">Le cercle de chaux</a> — Terminale · Français</li><li><a href="vieux-negre-la-nuit-en-cellule.html">La nuit en cellule</a> — Terminale · Français</li><li><a href="ville-cruelle-deux-cents-kilos.html">Deux cents kilos</a> — 3e · Français</li><li><a href="ville-cruelle-koume-odilia.html">Le songe d’Odilia</a> — 3e · Français</li></ul><!--/catalogue--></div>
+  <p class="hub-pied">Pour intégrer un personnage dans une autre page du site : <a href="personnages.html">la galerie des personnages et son mode d’emploi</a>.</p>
+</main>
+<script src="scene.js?v=20261105b"></script>
+<script src="catalogue.js?v=20261105b"></script>
+<script>
+(function(){
+  var I = VRT_PERSO.icone;
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); }
+  // Le catalogue (catalogue.js) est généré à partir des scènes par _catalogue.js
+  var CAT = window.SCENES_CATALOGUE || [];
+  var NIVEAUX = ['Terminale', '1re', '2nde', '3e', '4e', '5e', '6e'];
+  var NOMS = { 'Terminale': 'Terminale', '1re': 'Première', '2nde': 'Seconde', '3e': 'Troisième', '4e': 'Quatrième', '5e': 'Cinquième', '6e': 'Sixième' };
+  function niveaux(s){ return NIVEAUX.filter(function(nv){ return (' ' + s.niveau.replace(/[–-]/g, ' ') + ' ').indexOf(' ' + nv + ' ') >= 0; }); }
+  var disciplines = [];
+  CAT.forEach(function(s){ if(disciplines.indexOf(s.discipline) < 0){ disciplines.push(s.discipline); } });
+  disciplines.sort(function(a, b){ return a === 'Français' ? -1 : b === 'Français' ? 1 : a.localeCompare(b, 'fr'); });
+  var n = 0, choix = { niveau: '', discipline: '', q: '' };
+  try{ var m = JSON.parse(localStorage.getItem('vrt_scenes_filtre') || '{}'); choix.niveau = m.niveau || ''; choix.discipline = m.discipline || ''; }catch(e){}
+  function perso(couleur, look){ n++; return '<div class="sc-perso present"><div class="sc-avatar">' + VRT_PERSO.iso({ _k: 'h' + n, couleur: couleur, look: look }) + '</div></div>'; }
+  // Chaque matière a sa teinte (palette du plan du site), attribuée à tour de rôle dans l’ordre des matières,
+  // et son icône dans une pastille : on la reconnaît d’une classe à l’autre.
+  var TEINTES = [['#DBE8FE', '#1E499B'], ['#E3F1EE', '#0E7C86'], ['#E7F7EC', '#007E11'], ['#EEE9F8', '#5B4FA8'], ['#FBE9F1', '#B03A6E'], ['#FFF3E4', '#A84200']];
+  var ICONES = { 'Français': 'plume', 'Philosophie': 'aide', 'Histoire': 'document', 'Géographie': 'vagues', 'Éducation à la citoyenneté et à la morale': 'balance',
+    'Cultures nationales': 'porteVoix', 'Langues nationales': 'groupe', 'Orientation-conseil': 'diplome' };
+  function teinte(d){ return TEINTES[Math.max(0, disciplines.indexOf(d)) % TEINTES.length]; }
+  function titreDisc(d){
+    var t = teinte(d);
+    return '<h3 class="hub-disc" style="color:' + t[1] + '"><span class="hub-pastille" style="background:' + t[0] + ';color:' + t[1] + '">' + I(ICONES[d] || 'voix') + '</span>' + esc(d) + '</h3>';
+  }
+  function carte(s){
+    // Carte au style de la vitrine : le personnage en médaillon cerclé de la couleur de la matière, texte centré, lien coloré
+    var t = teinte(s.discipline); n++;
+    return '<a class="hub-carte" href="' + esc(s.f) + '" style="--tc:' + t[1] + ';--tf:' + t[0] + '">'
+      + '<span class="hub-medaillon" aria-hidden="true">' + VRT_PERSO.iso({ _k: 'h' + n, couleur: s.couleur, look: s.look }) + '</span>'
+      + '<b>' + esc(s.titre) + '</b><span class="hub-sous">' + esc(s.oeuvre || s.discipline) + '</span><em>' + esc(s.desc) + '</em>'
+      + '<span class="hub-jouer">Jouer la scène ' + I('droite') + '</span></a>';
+  }
+  function sansAccent(t){ return String(t).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function rendre(){
+    // une scène commune à deux classes (« 4e – 3e ») figure dans les deux sections, mais ne compte qu’une fois
+    var q = sansAccent(choix.q.trim()), vus = {}, total = 0;
+    var h = NIVEAUX.filter(function(nv){ return !choix.niveau || choix.niveau === nv; }).map(function(nv){
+      var liste = CAT.filter(function(s){
+        return niveaux(s).indexOf(nv) >= 0 && (!choix.discipline || s.discipline === choix.discipline)
+          && (!q || sansAccent(s.titre + ' ' + s.discipline + ' ' + s.oeuvre + ' ' + s.desc).indexOf(q) >= 0);
+      });
+      if(!liste.length){ return ''; }
+      liste.forEach(function(s){ if(!vus[s.f]){ vus[s.f] = 1; total++; } });
+      var parDisc = disciplines.filter(function(d){ return liste.some(function(s){ return s.discipline === d; }); });
+      return '<section class="hub-groupe"><h2>' + esc(NOMS[nv]) + ' <small>' + liste.length + ' scène' + (liste.length > 1 ? 's' : '') + '</small></h2>'
+        + parDisc.map(function(d){
+            return titreDisc(d) + '<div class="hub-liste">' + liste.filter(function(s){ return s.discipline === d; }).map(carte).join('') + '</div>';
+          }).join('') + '</section>';
+    }).join('');
+    document.getElementById('groupes').innerHTML = h || '<p class="hub-vide">Aucune scène ne correspond à ces critères.</p>';
+    document.getElementById('compte').textContent = total + ' scène' + (total > 1 ? 's' : '');
+    try{ localStorage.setItem('vrt_scenes_filtre', JSON.stringify({ niveau: choix.niveau, discipline: choix.discipline })); }catch(e){}
+  }
+  var puces = [['', 'Toutes les classes']].concat(NIVEAUX.filter(function(nv){ return CAT.some(function(s){ return niveaux(s).indexOf(nv) >= 0; }); }).map(function(nv){ return [nv, NOMS[nv]]; }));
+  document.getElementById('filtres').innerHTML =
+      '<div class="hub-puces" role="group" aria-label="Classe">' + puces.map(function(p){ return '<button type="button" data-nv="' + p[0] + '" aria-pressed="' + (choix.niveau === p[0]) + '">' + esc(p[1]) + '</button>'; }).join('') + '</div>'
+    + '<div class="hub-outils"><label>Matière <select id="fDisc"><option value="">Toutes</option>' + disciplines.map(function(d){ return '<option' + (choix.discipline === d ? ' selected' : '') + '>' + esc(d) + '</option>'; }).join('') + '</select></label>'
+    + '<label class="hub-cherche">Chercher <input id="fQ" type="search" placeholder="œuvre, thème, personnage…"></label><span id="compte" class="hub-compte"></span></div>';
+  document.querySelectorAll('.hub-puces button').forEach(function(b){
+    b.onclick = function(){ choix.niveau = b.getAttribute('data-nv'); document.querySelectorAll('.hub-puces button').forEach(function(o){ o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); }); rendre(); };
+  });
+  document.getElementById('fDisc').onchange = function(){ choix.discipline = this.value; rendre(); };
+  document.getElementById('fQ').oninput = function(){ choix.q = this.value; rendre(); };
+  rendre();
+  // Les cinq façons d'utiliser une scène, au style des cartes de la vitrine : grande icône dans un rond cerclé, couleurs en alternance
+  var MODES = [
+    ['scene', 'La scène', 'Les personnages entrent, parlent, réagissent ; des jauges suivent l’histoire.', '#1E499B'],
+    ['labo', 'Le laboratoire', 'Change les traits des personnages : l’issue de l’œuvre change en direct.', '#0E7C86'],
+    ['quiz', 'Ateliers et quiz', 'Remettre en ordre, classer, peser, voter ; cinq questions pour finir.', '#007E11'],
+    ['livre', 'L’œuvre', 'Pour chaque livre : une accroche, les personnages, les passages à ne pas manquer.', '#A84200'],
+    ['groupe', 'En classe', 'Distribue les rôles : chaque élève lit les répliques de son personnage.', '#5B4FA8']];
+  document.getElementById('modes').innerHTML = MODES.map(function(m){
+    return '<div style="--tc:' + m[3] + '"><span class="hub-rond">' + I(m[0]) + '</span><b>' + esc(m[1]) + '</b><p>' + esc(m[2]) + '</p></div>';
+  }).join('');
+  [].forEach.call(document.querySelectorAll('#offre [data-ic]'), function(r){ r.innerHTML = I(r.getAttribute('data-ic')); });
+  var T = [['#9C2F4A', { peau: 'clair', cheveux: 'chignon', couleurCheveux: '#4A2F1B', habit: '#9C2F4A' }], ['#6B4A2B', { peau: 'fonce', vieux: true, cheveux: 'ras', habit: '#6B4A2B', moustache: true }], ['#C2551F', { peau: 'fonce', cheveux: 'tresses', habit: '#C2551F' }]];
+  document.getElementById('troupe').innerHTML = T.map(function(t, k){
+    n++; return '<div class="sc-perso present' + (k === 2 ? ' face-g' : '') + (k === 1 ? ' parle' : '') + '"><div class="sc-avatar">' + VRT_PERSO.iso({ _k: 't' + n, couleur: t[0], look: t[1] }) + '</div></div>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

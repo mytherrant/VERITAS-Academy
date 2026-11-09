@@ -2267,6 +2267,29 @@ for (const bal of ['ul', 'ol', 'li']) {
     rebranches++;
   }
 
+  /* ── « LANCER UN QUIZ », CINQUIÈME ENDROIT (08/11/2026) ────────────────
+     La section « Apprendre en jouant » promet quiz, séries et badges ; son
+     bouton sortait de la maquette avec `{{ goElearning }}` et menait au
+     catalogue d'abonnements. Les quiz, séries et badges vivent dans
+     /apprendre/ : on le rebranche sur `goApprendre`. */
+  const lancerQuiz = /<button type="button" onclick="VRT\.act\('goElearning',this,event\)"([^>]*)>Lancer un quiz</;
+  if (lancerQuiz.test(corps)) {
+    corps = corps.replace(lancerQuiz,
+      '<button type="button" onclick="VRT.act(\'goApprendre\',this,event)"$1>Lancer un quiz<');
+    rebranches++;
+  }
+
+  /* ── « ÉTUDE INTÉGRALE », SIXIÈME ENDROIT (08/11/2026) ─────────────────
+     Bouton pleine largeur du panneau bleu de l'œuvre du jour : il menait au
+     catalogue d'abonnements. goEtudeOeuvre ouvre la fiche de l'œuvre du jour
+     (oeuvres/), ou la liste des œuvres quand VÉRITAS n'en publie pas. */
+  const etudeIntegrale = /<button type="button" onclick="VRT\.act\('goElearning',this,event\)"(?: data-go="elearning")?( style="position:relative;width:100%;flex:0 0 auto[^"]*")/;
+  if (etudeIntegrale.test(corps)) {
+    corps = corps.replace(etudeIntegrale,
+      '<button type="button" onclick="VRT.act(\'goEtudeOeuvre\',this,event)"$1');
+    rebranches++;
+  }
+
   /* ── LE MENU DU TÉLÉPHONE, QUATRIÈME ENDROIT ───────────────────────────
      Sous 1 000 px, la barre disparaît au profit du menu burger. Ses trois
      entrées de public sortent du gabarit avec `mm__aller`, qui lit
@@ -2635,7 +2658,11 @@ ${metaBrut}
   // L'adresse publique du centre est contact@veritas-school.com (index.php,
   // pages statiques). La maquette exposait le Gmail personnel de Jacques dans
   // les données structurées, donc dans les résultats de recherche.
-  .replace(/"jacquesmytheerrant@gmail\.com"/, '"contact@veritas-school.com"')}</script>
+  .replace(/"jacquesmytheerrant@gmail\.com"/, '"contact@veritas-school.com"')
+  // highPrice 7 500 ne correspond à AUCUNE grille (Famille : 10 000 puis
+  // 12 000 F/mois). Un prix faux dans le JSON-LD est repris tel quel par les
+  // moteurs de réponse IA : on le retire plutôt que d'en deviner un (05/11).
+  .replace(/,"highPrice":"[^"]*"/, '')}</script>
 <style>
 ${styleBlock}
 ${cssBascule}

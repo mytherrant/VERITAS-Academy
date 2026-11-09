@@ -83,22 +83,14 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 
 <!-- ════════════════════════════════════════════════════════════════
-     🛡️ ANTI-IA — Interdire entraînement / scraping IA (v2.5)
+     🔎 IA — visibilité dans les moteurs de réponse (05/11/2026)
      ════════════════════════════════════════════════════════════════ -->
 <!-- v1.2.2 : opt-out IA fusionne dans la balise robots/googlebot unique plus bas
      (evite deux directives robots contradictoires : noindex vs index/follow). -->
-<meta name="anthropic-ai" content="noindex, nofollow">
-<meta name="GPTBot" content="noindex, nofollow">
-<meta name="ChatGPT-User" content="noindex, nofollow">
-<meta name="ClaudeBot" content="noindex, nofollow">
-<meta name="CCBot" content="noindex, nofollow">
-<meta name="Google-Extended" content="noindex, nofollow">
-<meta name="PerplexityBot" content="noindex, nofollow">
-<meta name="Applebot-Extended" content="noindex, nofollow">
-<meta name="copyright" content="© 2026 Centre VÉRITAS — Tous droits réservés. Reproduction interdite. Utilisation pour entraînement IA strictement prohibée.">
-<meta name="rights" content="Copyrighted. Do not use for AI training, model fine-tuning, or any commercial scraping.">
-<meta name="usage-terms" content="© Mythe Errant 2026 — Protected work. AI ingestion forbidden under article L335-2 du Code de la propriété intellectuelle.">
-<meta name="DC.rights" content="© 2026 Mythe Errant · Centre VÉRITAS. All rights reserved. AI training prohibited.">
+<!-- 05/11/2026 : les balises « noindex » par robot d'IA (GPTBot, ClaudeBot,
+     PerplexityBot, Google-Extended…) sont retirées : VÉRITAS veut être
+     trouvé et cité par les IA (décision de Jacques, « ouvre tout »). -->
+<meta name="copyright" content="© 2026 Centre VÉRITAS — Tous droits réservés. Citation avec lien bienvenue, reproduction interdite.">
 <meta name="format-detection" content="telephone=yes,email=yes,address=yes">
 <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), interest-cohort=()">
 
@@ -109,8 +101,8 @@
 <meta name="description" content="Centre VÉRITAS — Établissement d'excellence et de soutien scolaire à Douala (Cameroun). Cours de la 6ème à la Terminale, préparation BEPC & BAC, e-learning, classes virtuelles, boutique de manuels. Programmes MINESEC, enseignants qualifiés, suivi personnalisé.">
 <meta name="keywords" content="soutien scolaire Douala, centre d'excellence scolaire Cameroun, cours de soutien Douala, BEPC Cameroun, Probatoire, BAC Cameroun, GCE, MINESEC, cours en ligne Cameroun, e-learning lycée, classes virtuelles, manuels scolaires Cameroun">
 <meta name="author" content="Centre VÉRITAS">
-<meta name="robots" content="index, follow, noai, noimageai, max-image-preview:large, max-snippet:-1">
-<meta name="googlebot" content="index, follow, noai, noimageai">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="googlebot" content="index, follow">
 <meta name="bingbot" content="index,follow">
 <meta name="language" content="French">
 <meta name="geo.region" content="CM-LT">
@@ -162,8 +154,6 @@
      🐦 TWITTER CARDS
      ════════════════════════════════════════════════════════════ -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@VeritasAcademyCM">
-<meta name="twitter:creator" content="@VeritasAcademyCM">
 <meta name="twitter:title" content="Centre VÉRITAS — Excellence scolaire à Douala">
 <meta name="twitter:description" content="Préparation BEPC & BAC, e-learning, classes virtuelles. Programmes MINESEC, du collège à la Terminale.">
 <meta name="twitter:image" content="https://veritas-school.com/og-image.jpg">
@@ -210,8 +200,8 @@
     "closes": "18:00"
   }],
   "sameAs": [
-    "https://www.facebook.com/VeritasAcademyCM",
-    "https://www.instagram.com/veritas.academy.cm",
+    "https://www.facebook.com/people/Veritas-school/61595419216054/",
+    "https://whatsapp.com/channel/0029VbEH1hg1nozF1qBGnx2O",
     "https://wa.me/237697637739"
   ],
   "areaServed": [
@@ -770,15 +760,15 @@ if('MutationObserver' in window){
 <link rel="stylesheet" href="/assets/veritas-tokens.css?v=1.19.29">
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.20.63">
+<link rel="preload" as="script" href="/app.js?v=1.20.66">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.20.63" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.20.63"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.20.66" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.20.66"></noscript>
 <!-- Panneaux, onglets flottants et mouvement. Couche autonome, chargée APRÈS
      app.css (elle en reprend quelques surfaces) et sans bloquer le rendu. -->
 <link rel="preload" as="style" href="/assets/veritas-motion.css?v=1.19.29" onload="this.onload=null;this.rel='stylesheet'">
@@ -792,8 +782,8 @@ if('MutationObserver' in window){
      (halos, dégradés de titre, cartes qui décollent).
      ⚠️ ORDRE CRITIQUE : doit rester le DERNIER <link> CSS de la page.
      Chargée en preload+bascule comme les autres → aucun blocage du rendu. -->
-<link rel="preload" as="style" href="/assets/theme-lws.css?v=1.20.2" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/assets/theme-lws.css?v=1.20.2"></noscript>
+<link rel="preload" as="style" href="/assets/theme-lws.css?v=1.20.3" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/theme-lws.css?v=1.20.3"></noscript>
 <!-- ⚠️ DERNIÈRE feuille de la page, et cela compte : elle porte la charte de
      la refonte d'août 2026 dans l'espace visiteur de l'application (tout ce
      qu'ouvre le menu « Plus » de la vitrine) et sur l'écran de connexion.
@@ -801,8 +791,8 @@ if('MutationObserver' in window){
      que la vitrine tenait 15 à 16,5 px — c'est l'écart que l'on décrivait
      comme « l'ancienne page qui revient ». Elle bat app.css et theme-lws.css
      par un identifiant doublé ; la déplacer plus haut la rendrait inopérante. -->
-<link rel="preload" as="style" href="/assets/veritas-refonte-app.css?v=1.20.63" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/assets/veritas-refonte-app.css?v=1.20.63"></noscript>
+<link rel="preload" as="style" href="/assets/veritas-refonte-app.css?v=1.20.66" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/veritas-refonte-app.css?v=1.20.66"></noscript>
 <!-- Compagnon indispensable de la feuille ci-dessus : elle éteint TOUS les
      dégradés, y compris ceux que le JS de rendu pose en style en ligne —
      lesquels se retrouveraient alors sans aucun fond (texte blanc sur
@@ -1136,10 +1126,11 @@ if('MutationObserver' in window){
   <div style="background:linear-gradient(90deg,#0C2A6A,#1E499B 45%,#0E7C86);color:#fff" class="vrt-hab">
     <div style="max-width:1170px;margin:0 auto;padding:13px 24px;display:flex;align-items:center;justify-content:center;gap:10px 18px;flex-wrap:wrap;text-align:center;font-size:15px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-sparkles"></use></svg>
-      <span>VÉRITAS accompagne et suit les apprenants <b style="font-weight:600;color:#FFC93C">au centre, en ligne et à domicile</b>. Pour les enseignants : de quoi préparer tous ses cours et ses épreuves.</span>
+      <span>VÉRITAS accompagne et suit les apprenants <b style="font-weight:600;color:#FFC93C">au centre, en ligne et à domicile</b>. Pour les enseignants : de quoi préparer tous ses cours et ses épreuves. <b style="font-weight:600;color:#FFC93C">Nouveau</b> : toutes les matières leçon par leçon, avec quiz, badges et schémas animés, de la 6ᵉ à la Terminale.</span>
       <a href="/corriges/" style="display:inline-flex;align-items:center;gap:6px;padding:6px 18px;border-radius:100px;border:1px solid rgba(255,255,255,.55);color:#fff;font:600 13px Poppins,sans-serif;letter-spacing:.4px;text-transform:uppercase;transition:background .18s,color .18s" class="vh11">Corrigés gratuits</a>
       <a href="/#boutique" style="display:inline-flex;align-items:center;gap:7px;padding:6px 18px;border-radius:100px;background:#FFC93C;color:#001136;font:600 13px Poppins,sans-serif;letter-spacing:.4px;text-transform:uppercase;transition:background .18s,box-shadow .18s" class="vh12"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shop"></use></svg>Boutique</a>
       <a href="/plateforme/" style="display:inline-flex;align-items:center;gap:7px;padding:6px 18px;border-radius:100px;border:1px solid rgba(255,255,255,.55);color:#fff;font:600 13px Poppins,sans-serif;letter-spacing:.4px;text-transform:uppercase;transition:background .18s,color .18s" class="vh11"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"></use></svg>Atelier de français</a>
+      <a href="/apprendre/" title="Toutes les matières de la 6ᵉ à la Terminale, leçon par leçon : cours illustrés, quiz, badges et schémas animés" style="display:inline-flex;align-items:center;gap:7px;padding:6px 16px 6px 6px;border-radius:100px;border:1px solid #FFC93C;color:#fff;font:600 13px Poppins,sans-serif;letter-spacing:.4px;text-transform:uppercase;transition:background .18s,color .18s" class="vh11"><span style="background:#FFC93C;color:#001136;border-radius:100px;padding:2px 8px;font-size:11px;letter-spacing:.6px">Nouveau</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-graduation"></use></svg>Apprendre</a>
     </div>
   </div>
 <!--/vrt-habillage:barre-->
@@ -1913,7 +1904,7 @@ setTimeout(_vAmbassaFab,3000);
    restaient en cache après déploiement. Repli sur la valeur figée si le
    sélecteur ne trouve rien. */
 window._VRT_ASSET_VER=(function(){try{var e=document.querySelector('link[href*="app.js?v="],script[src*="app.js?v="]');var m=e&&String(e.href||e.src||'').match(/app\.js\?v=([0-9.]+)/);return m?m[1]:'1.15.9';}catch(x){return '1.15.9';}})();</script>
-<script defer src="/app.js?v=1.20.63"></script>
+<script defer src="/app.js?v=1.20.66"></script>
 <!-- Promotion des barres de filtres en onglets flottants. `defer` la place
      après app.js : elle habille un DOM qui existe déjà. Amélioration
      progressive — son absence ne retire aucune fonctionnalité. -->

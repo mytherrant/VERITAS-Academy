@@ -5015,3 +5015,182 @@ body > [id^="_"]:not(script), body > [id^="_"]:not(script) *:not([class*="materi
   #APP#APP#APP .sb #sbSchoolSlogan{ display:none !important; }
   #APP#APP#APP .sb .sbft > div:last-child{ display:none !important; }
 }
+
+/* ═════════════════════════════════════════════════════════════════════
+   31 · CARTES À LA MANIÈRE DE LA VITRINE (08/11/2026)
+   Catégories (page matière, e-learning) et laboratoires virtuels :
+   fond blanc, filet fin, ombre douce, icône SVG d'une couleur de la
+   charte qui tourne d'une carte à l'autre, lien léger au lieu d'un
+   bouton plein. Le bandeau teinté disparaît ; le bouton « Explorer »
+   ne déborde plus de la carte.
+   ═════════════════════════════════════════════════════════════════════ */
+#VISITOR :is(.lx-catcard, .lvx-card, .lvx-stat):nth-child(5n+1), #VISITOR .c1{ --c:#1E499B; }
+#VISITOR :is(.lx-catcard, .lvx-card, .lvx-stat):nth-child(5n+2), #VISITOR .c2{ --c:#C24E00; }
+#VISITOR :is(.lx-catcard, .lvx-card, .lvx-stat):nth-child(5n+3), #VISITOR .c3{ --c:#1F7A4D; }
+#VISITOR :is(.lx-catcard, .lvx-card, .lvx-stat):nth-child(5n+4), #VISITOR .c4{ --c:#5B4FA8; }
+#VISITOR :is(.lx-catcard, .lvx-card, .lvx-stat):nth-child(5n+5), #VISITOR .c5{ --c:#0E7490; }
+
+/* ── Catégories ── */
+#VISITOR#VISITOR .lx-catcard{
+  display:flex !important; flex-direction:column !important;
+  border:1px solid var(--lws-line, #E4E7EF) !important;
+  box-shadow:0 6px 20px rgba(0,17,54,.05) !important;
+}
+#VISITOR#VISITOR .lx-catcard:hover{
+  transform:translateY(-4px) !important;
+  border-color:color-mix(in srgb, var(--c) 35%, #fff) !important;
+  box-shadow:0 14px 32px rgba(0,17,54,.09) !important;
+}
+#VISITOR#VISITOR .lx-catcard-head{
+  background:transparent !important;
+  padding:20px 20px 4px !important; gap:12px !important;
+  align-items:flex-start !important;
+  font-size:17px !important; font-weight:600 !important;
+}
+#VISITOR#VISITOR .lx-catcard-head > span{ color:#001136 !important; }
+#VISITOR#VISITOR .lx-catcard-head{ flex-wrap:wrap !important; }
+#VISITOR#VISITOR .lx-catcard-head > span{ flex:1 1 110px !important; min-width:0; overflow-wrap:anywhere; }
+#VISITOR#VISITOR .lx-catcard-head > .lx-chip{ margin-left:auto !important; flex:0 0 auto; }
+#VISITOR#VISITOR .lx-catcard-head > svg{
+  width:26px !important; height:26px !important; stroke:var(--c) !important; margin-top:-1px;
+}
+#VISITOR#VISITOR .lx-catcard-body{
+  padding:6px 20px 18px !important; flex:1 1 auto;
+  display:flex !important; flex-direction:column !important;
+}
+#VISITOR#VISITOR .lx-catcard-desc{ flex:1 1 auto; margin-bottom:16px !important; }
+#VISITOR#VISITOR .lx-catcard-foot{ flex-wrap:wrap !important; gap:6px 12px !important; }
+#VISITOR#VISITOR .lx-catcard-count{
+  color:#6B7280 !important; font-weight:500 !important; font-size:14px !important;
+}
+#VISITOR#VISITOR .lx-catcard-cta{
+  background:transparent !important; color:var(--c) !important;
+  padding:0 !important; border-radius:0 !important;
+  display:inline-flex !important; align-items:center; gap:6px;
+  font-weight:600 !important; font-size:15px !important;
+}
+#VISITOR#VISITOR .lx-catcard:hover .lx-catcard-cta{ background:transparent !important; transform:translateX(3px); }
+#VISITOR#VISITOR .lx-catcard-vide .lx-catcard-head > svg{ stroke:#9AA3B5 !important; }
+#VISITOR#VISITOR .lx-catcard-vide .lx-catcard-count{ color:#9AA3B5 !important; font-style:italic; }
+#VISITOR#VISITOR .lx-catcard-vide:hover{ transform:none !important; border-color:var(--lws-line, #E4E7EF) !important; box-shadow:0 6px 20px rgba(0,17,54,.05) !important; }
+
+/* ── Laboratoires virtuels ── */
+#VISITOR .lvx svg{ width:18px; height:18px; flex:0 0 auto; }
+#VISITOR .lvx-stats{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:0 0 22px; }
+#VISITOR .lvx-stat{
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  background:#fff; border:1px solid var(--lws-line, #E4E7EF); border-radius:14px; padding:16px 10px;
+  color:var(--c);
+}
+#VISITOR .lvx-stat svg{ width:24px; height:24px; }
+#VISITOR .lvx-stat b{ font:700 26px/1.1 Poppins,sans-serif; color:var(--c); }
+#VISITOR .lvx-stat span{ font:500 13.5px Poppins,sans-serif; color:#4D5163; }
+#VISITOR .lvx-filtres{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 22px; }
+#VISITOR .lvx-f{
+  background:#fff; color:#001136; border:1px solid var(--lws-line, #E4E7EF); border-radius:999px;
+  padding:8px 16px; font:500 14px Poppins,sans-serif; cursor:pointer;
+  transition:border-color .18s ease, color .18s ease, background-color .18s ease;
+}
+#VISITOR .lvx-f:hover{ border-color:#1E499B; color:#1E499B; }
+#VISITOR .lvx-f.on{ background:#1E499B; border-color:#1E499B; color:#fff; }
+#VISITOR .lvx-grid{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));
+  gap:18px; margin:0 0 32px; max-width:100%;
+}
+#VISITOR .lvx-card{
+  position:relative; display:flex; flex-direction:column;
+  background:#fff; border:1px solid var(--lws-line, #E4E7EF); border-radius:14px;
+  padding:20px 20px 18px; cursor:pointer;
+  box-shadow:0 6px 20px rgba(0,17,54,.05);
+  transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+#VISITOR .lvx-card:hover, #VISITOR .lvx-card:focus-visible{
+  transform:translateY(-4px); border-color:color-mix(in srgb, var(--c) 35%, #fff);
+  box-shadow:0 14px 32px rgba(0,17,54,.09); outline:none;
+}
+#VISITOR .lvx-card .lvx-ico{ width:30px; height:30px; color:var(--c); margin-bottom:14px; }
+#VISITOR .lvx-badge{
+  position:absolute; top:18px; right:18px;
+  font:600 12px/1 Poppins,sans-serif; letter-spacing:.2px;
+  color:#1F7A4D; border:1px solid #BFE0CC; border-radius:999px; padding:5px 10px;
+}
+#VISITOR .lvx-badge.prem{ color:#5B4FA8; border-color:#D6D1EE; }
+#VISITOR .lvx-titre{ font:600 17px/1.35 Poppins,sans-serif; color:#001136; }
+#VISITOR .lvx-mat{ font:500 14px Poppins,sans-serif; color:var(--c); margin-top:4px; }
+#VISITOR .lvx-desc{ font:400 15px/1.6 Poppins,sans-serif; color:#4D5163; margin:12px 0 16px; flex:1 1 auto; }
+#VISITOR .lvx-foot{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px 12px; }
+#VISITOR .lvx-meta{ font:400 13.5px Poppins,sans-serif; color:#6B7280; }
+#VISITOR .lvx-go{ display:inline-flex; align-items:center; gap:6px; font:600 15px Poppins,sans-serif; color:var(--c); transition:transform .18s ease; }
+#VISITOR .lvx-go.prem{ color:#5B4FA8; }
+#VISITOR .lvx-card:hover .lvx-go{ transform:translateX(3px); }
+#VISITOR .lvx-packs{
+  background:linear-gradient(180deg,#F7F9FE 0%,#FFFFFF 100%);
+  border:1px solid var(--lws-line, #E4E7EF); border-radius:18px; padding:28px; margin:0 0 20px;
+}
+#VISITOR .lvx-kick{
+  display:flex; align-items:center; gap:8px; margin-bottom:8px;
+  font:600 12px Poppins,sans-serif; letter-spacing:1.6px; text-transform:uppercase; color:#C24E00;
+}
+#VISITOR .lvx-packs-sub{ font:400 16px/1.6 Poppins,sans-serif; color:#4D5163; margin-bottom:22px; }
+#VISITOR .lvx-packs-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr)); gap:16px; }
+#VISITOR .lvx-pack{
+  position:relative; display:flex; flex-direction:column;
+  background:#fff; border:1px solid var(--lws-line, #E4E7EF); border-radius:14px; padding:20px;
+  box-shadow:0 6px 20px rgba(0,17,54,.05);
+}
+#VISITOR .lvx-pack.pop{ border-color:#F0C9A6; box-shadow:0 12px 28px rgba(194,78,0,.10); }
+#VISITOR .lvx-pop{
+  position:absolute; top:-11px; left:50%; transform:translateX(-50%); white-space:nowrap;
+  background:#C24E00; color:#fff; font:600 11.5px Poppins,sans-serif; letter-spacing:.3px;
+  padding:4px 12px; border-radius:999px;
+}
+#VISITOR .lvx-pack-nom{ font:600 17px Poppins,sans-serif; color:#001136; margin-bottom:4px; }
+#VISITOR .lvx-pack-prix{ font:700 22px Poppins,sans-serif; color:#1E499B; margin-bottom:14px; }
+#VISITOR .lvx-av{ display:flex; align-items:flex-start; gap:8px; font:400 14px/1.5 Poppins,sans-serif; color:#4D5163; margin-bottom:7px; }
+#VISITOR .lvx-av svg{ width:16px; height:16px; color:#1F7A4D; margin-top:3px; }
+#VISITOR .lvx-pack-btn{
+  margin-top:auto; width:100%; cursor:pointer; border-radius:999px; padding:11px 14px;
+  font:600 14.5px Poppins,sans-serif;
+  background:#fff; color:#1E499B; border:1px solid #1E499B;
+  transition:background-color .18s ease, color .18s ease;
+}
+#VISITOR .lvx-av:last-of-type{ margin-bottom:16px; }
+#VISITOR .lvx-pack-btn:hover{ background:#1E499B; color:#fff; }
+#VISITOR .lvx-pack.pop .lvx-pack-btn{ background:#C24E00; border-color:#C24E00; color:#fff; }
+#VISITOR .lvx-pack.pop .lvx-pack-btn:hover{ background:#A34100; }
+#VISITOR .lvx-minesec{
+  display:flex; gap:16px; align-items:flex-start;
+  background:#fff; border:1px solid var(--lws-line, #E4E7EF); border-radius:14px; padding:22px;
+}
+#VISITOR .lvx-minesec .lvx-ico{ width:30px; height:30px; color:#1E499B; }
+#VISITOR .lvx-minesec .lvx-desc{ margin:6px 0 12px; }
+#VISITOR .lvx-lien{ display:inline-flex; align-items:center; gap:6px; font:600 15px Poppins,sans-serif; color:#1E499B; text-decoration:none; }
+#VISITOR .lvx-lien:hover{ text-decoration:underline; text-underline-offset:3px; }
+@media (max-width:560px){
+  #VISITOR .lvx-stats{ gap:8px; }
+  #VISITOR .lvx-stat{ padding:12px 6px; }
+  #VISITOR .lvx-stat b{ font-size:22px; }
+  #VISITOR .lvx-packs{ padding:20px 16px; }
+}
+/* Le thème retire bordures, dégradés et ombres de TOUT élément visiteur
+   (`#VISITOR#VISITOR#VISITOR *` … !important, « pas d'encadrés »). Les cartes
+   ci-dessus suivent cette règle : pas de filet, une ombre douce comme les
+   autres cartes (section 30) ; les contours utiles (bouton, étiquette) sont
+   tracés en ombre intérieure, que la remise à zéro ne touche pas. */
+#VISITOR#VISITOR#VISITOR :is(.lvx-card, .lvx-stat, .lvx-pack, .lvx-minesec){
+  box-shadow:var(--lws-elev, 0 6px 20px rgba(0,17,54,.07)) !important;
+}
+#VISITOR#VISITOR#VISITOR :is(.lvx-card, .lvx-pack):hover{
+  box-shadow:var(--lws-elev-fort, 0 14px 32px rgba(0,17,54,.12)) !important;
+}
+#VISITOR#VISITOR#VISITOR .lvx-pack.pop{
+  box-shadow:inset 0 0 0 1.5px #F0C9A6, 0 12px 28px rgba(194,78,0,.12) !important;
+}
+#VISITOR#VISITOR#VISITOR .lvx-packs{ background-color:#F5F8FD !important; }
+#VISITOR#VISITOR#VISITOR .lvx-pack-btn{ box-shadow:inset 0 0 0 1.5px #1E499B !important; }
+#VISITOR#VISITOR#VISITOR .lvx-pack.pop .lvx-pack-btn{ box-shadow:none !important; }
+#VISITOR#VISITOR#VISITOR .lvx-badge{ box-shadow:inset 0 0 0 1px #BFE0CC !important; }
+#VISITOR#VISITOR#VISITOR .lvx-badge.prem{ box-shadow:inset 0 0 0 1px #D6D1EE !important; }
+#VISITOR#VISITOR#VISITOR .lvx-f{ box-shadow:inset 0 0 0 1px #DDE3EE !important; }
+#VISITOR#VISITOR#VISITOR .lvx-f:hover{ box-shadow:inset 0 0 0 1px #1E499B !important; }
+#VISITOR#VISITOR#VISITOR .lvx-f.on{ box-shadow:none !important; }

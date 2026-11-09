@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratoire virtuel | VÉRITAS</title>
+<meta name="description" content="Un laboratoire virtuel relié au programme de ta classe : théorie, simulation, protocole et quiz.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="apprendre.css?v=20261109b">
+<link rel="stylesheet" href="jeu.css?v=20261109b">
+</head>
+<body class="eleve">
+<header class="top">
+  <a class="logo" href="/">VÉRI<b>TAS</b></a>
+  <nav class="top-nav" aria-label="Apprendre"><a href="index.html">Apprendre</a><a href="ressources.html">Tout pour progresser</a><a href="notes.html">Mes notes</a><a href="/scenes/">Scènes vivantes</a><a href="/corriges/">Corrigés</a></nav>
+  <div class="top-d"><a class="niveau-chip" data-niveau href="index.html#progression" aria-label="Mon niveau et mes badges"></a><span class="serie" id="serie" hidden></span></div>
+</header>
+<nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
+<main class="page"><div class="lim res-page" id="zone"></div></main>
+
+<script src="progressions.js?v=20261109b"></script>
+<script src="lecons.js?v=20261109b"></script>
+<script src="ressources.js?v=20261109b"></script>
+<script src="commun.js?v=20261109b"></script>
+<script src="jeu.js?v=20261109b"></script>
+<script>
+/* Moteur de simulation : les quatre fonctions qu'attend chunks/labo.js (mêmes qu'app.js). */
+window._sim={running:true,raf:0,t:0,params:{}};
+function _simToggle(){window._sim.running=!window._sim.running;var b=document.getElementById('simPlayBtn');if(b)b.textContent=window._sim.running?'Pause':'Lecture';if(window._sim.running&&window._sim._draw)_simLoop();}
+function _simReset(){window._sim.t=0;window._sim.params=Object.assign({},window._sim.defaults||{});_simUpdateControls();if(window._sim._draw)window._sim._draw();}
+var _EMO=/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{20E3}]/gu;
+function _simNet(id){var e=document.getElementById(id);if(e&&e.innerHTML.search(_EMO)>=0&&!e.contains(document.activeElement))e.innerHTML=e.innerHTML.replace(_EMO,'');}
+function _simLoop(){if(!window._sim.running)return;window._sim.t+=0.016;if(window._sim._draw)window._sim._draw();_simNet('simValues');_simNet('simControls');window._sim.raf=requestAnimationFrame(_simLoop);}
+function _simUpdateControls(){var cw=document.getElementById('simControls');if(!cw||!window._sim.controlsDef)return;var a=document.activeElement;if(a&&cw.contains(a))return;var h=window._sim.controlsDef();if(window._sim._lastCtrlHtml===h)return;window._sim._lastCtrlHtml=h;cw.innerHTML=h;}
+if(typeof CanvasRenderingContext2D!=='undefined'&&!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){r=typeof r==='number'?r:5;this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.quadraticCurveTo(x+w,y,x+w,y+r);this.lineTo(x+w,y+h-r);this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);this.lineTo(x+r,y+h);this.quadraticCurveTo(x,y+h,x,y+h-r);this.lineTo(x,y+r);this.quadraticCurveTo(x,y,x+r,y);return this;};}
+</script>
+<script src="../chunks/labo.js?v=20261109b"></script>
+<script>
+(function(){
+  "use strict";
+  var A=VRT.app,$=function(s,c){return (c||document).querySelector(s)},$$=function(s,c){return [].slice.call((c||document).querySelectorAll(s))},esc=A.esc;
+  var id=new URLSearchParams(location.search).get("id")||"", zone=$("#zone");
+  var classe=A.lire("classe","3e"); A.rail($("#rail"),classe,null); A.chiffreSerie($("#serie"));
+  var lv=(window.LABO_DB||[]).filter(function(x){return x.id===id})[0];
+  if(!lv){zone.innerHTML='<p class="vide">Ce laboratoire n\'existe pas. <a href="ressources.html?f=labo">Tous les laboratoires</a>.</p>';return}
+  /* Un labo payant garde son cadenas : il s'ouvre dans l'application, jamais ici. */
+  if(!lv.gratuit){location.replace("/app.html#labo?id="+encodeURIComponent(id));return}
+  document.title=lv.titre+" · laboratoire | VÉRITAS";
+  /* Apprendre n'affiche aucun émoji : on les retire du texte d'origine, sans toucher au reste. */
+  function net(s){return String(s).replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{20E3}]/gu,"").replace(/^[ \t]+/gm,"").trim()}
+  var liens=A.leconsDeRes(id), ici=liens.filter(function(x){return x.c===classe}), autres=liens.filter(function(x){return x.c!==classe});
+  function ligneProg(x){return '<li><a href="matiere.html?c='+encodeURIComponent(x.c)+'&m='+x.m+'#l'+x.n+'">'+esc(x.c)+' · '+esc(A.PAR_ID[x.m].nom)+' : '+esc(x.t)+'</a></li>'}
+  var classes={}; liens.forEach(function(x){classes[x.c]=1});
+  zone.innerHTML='<p class="ariane"><a href="index.html">Apprendre</a><span>›</span><a href="ressources.html?c='+encodeURIComponent(classe)+'&f=labo">Laboratoires</a><span>›</span>'+esc(lv.titre)+'</p>'+
+    '<h1 class="res-h1">'+esc(lv.titre)+'</h1><p class="res-chapo">'+esc(net(lv.desc))+'</p>'+
+    '<p class="labo-cl">Au programme en : '+Object.keys(classes).map(esc).join(", ")+'</p>'+
+    '<div class="formats" role="tablist" aria-label="Étapes du laboratoire">'+[["theorie","Théorie"],["experience","Expérience"],["quiz","Quiz"],["carnet","Mon carnet"]].map(function(t,i){return '<button type="button" role="tab" aria-selected="'+(i===0)+'" data-t="'+t[0]+'">'+t[1]+'</button>'}).join("")+'</div>'+
+    '<article class="carte labo-c" id="panneau"></article>'+
+    (liens.length?'<section class="res-fam"><h2>'+A.pic("livre",22)+'Dans le programme</h2>'+(ici.length?'<p class="res-int">Dans ta classe ('+esc(classe)+')</p><ul class="labo-prog">'+ici.map(ligneProg).join("")+'</ul>':'')+
+      (autres.length?'<details class="labo-d"><summary>Autres classes ('+autres.length+')</summary><ul class="labo-prog">'+autres.map(ligneProg).join("")+'</ul></details>':'')+'</section>':'');
+  var P=$("#panneau");
+  function stop(){window._sim.running=false;if(window._sim.raf)cancelAnimationFrame(window._sim.raf)}
+  function para(s){return net(s).split(/\n{2,}/).map(function(b){return '<p>'+esc(b).replace(/\n/g,'<br>')+'</p>'}).join("")}
+  function theorie(){stop();P.innerHTML=para(lv.theorie)}
+  function experience(){
+    P.innerHTML='<div class="labo-sim"><div class="labo-sim-b"><span>Simulation</span><span><button type="button" id="simPlayBtn">Pause</button> <button type="button" id="simRaz">Recommencer</button></span></div><canvas id="laboCnv" width="680" height="340"></canvas><div id="simValues"></div></div><div id="simControls"></div>'+
+      '<h2 class="labo-h2">Protocole</h2><ol class="labo-ol">'+lv.experience.map(function(e){return '<li>'+esc(net(e).replace(/^\d+[.)]?\s*/,""))+'</li>'}).join("")+'</ol>';
+    $("#simPlayBtn").onclick=_simToggle; $("#simRaz").onclick=_simReset;
+    window._sim.running=true; window._sim._lastCtrlHtml=null;
+    if(window._initLaboSim) window._initLaboSim(lv);
+  }
+  function quiz(){
+    stop(); var qi=0, bons=0, qs=lv.quiz.map(function(q){return A.melanger({q:q.q,r:q.opts,b:q.ans})});
+    function q(){
+      if(qi>=qs.length){
+        var m=A.lire("labos",{}); if(!m[id]||bons>=m[id][0]) m[id]=[bons,qs.length]; A.ecrire("labos",m);
+        P.innerHTML='<div class="bilan"><p class="labo-score">'+bons+' / '+qs.length+'</p><p>'+(bons/qs.length>=.8?'Tu maîtrises cette expérience.':bons/qs.length>=.5?'C\'est en bonne voie : relis la théorie et recommence.':'Reprends la théorie, puis refais le protocole.')+'</p><button type="button" class="btn-l" id="rq">Recommencer le quiz</button></div>';
+        $("#rq").onclick=quiz; return;
+      }
+      var x=lv.quiz[qi], y=qs[qi];
+      P.innerHTML='<p class="labo-n">Question '+(qi+1)+' sur '+qs.length+'</p><div class="q" data-bonne="'+y.b+'"><p>'+esc(net(x.q))+'</p>'+y.r.map(function(r){return '<button type="button">'+esc(net(r))+'</button>'}).join("")+'</div><p class="labo-suite"><button type="button" class="btn-l" id="sv" hidden>Question suivante</button></p>';
+      $$(".q button",P).forEach(function(b,k){b.onclick=function(){if($(".q",P).dataset.fait)return;$(".q",P).dataset.fait=1;$$(".q button",P)[y.b].classList.add("ok");if(k===y.b)bons++;else b.classList.add("ko");$("#sv").hidden=false}});
+      $("#sv").onclick=function(){qi++;q()};
+    }
+    q();
+  }
+  function carnet(){
+    stop(); var n=A.lire("labo_notes",{})[id]||{};
+    P.innerHTML=[["h","Mon hypothèse"],["o","Mes observations"],["c","Ma conclusion"]].map(function(c){return '<label class="labo-l">'+c[1]+'<textarea data-k="'+c[0]+'" rows="3">'+esc(n[c[0]]||"")+'</textarea></label>'}).join("")+'<p class="labo-n">Ton carnet reste sur cet appareil.</p>';
+    $$("textarea",P).forEach(function(t){t.oninput=function(){var m=A.lire("labo_notes",{});m[id]=m[id]||{};m[id][t.getAttribute("data-k")]=t.value;A.ecrire("labo_notes",m)}});
+  }
+  var V={theorie:theorie,experience:experience,quiz:quiz,carnet:carnet};
+  $$(".formats button").forEach(function(b){b.onclick=function(){$$(".formats button").forEach(function(x){x.setAttribute("aria-selected",x===b)});V[b.getAttribute("data-t")]()}});
+  theorie();
+})();
+</script>
+</body>
+</html>

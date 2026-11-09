@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le songe d’Odilia — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Ville cruelle d’Eza Boto : Koumé enfile sa combinaison de mécanicien. Sa sœur Odilia l’observe : elle a fait un songe, et elle a peur.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/ville-cruelle-koume-odilia.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Le songe d’Odilia — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’après Ville cruelle d’Eza Boto : Koumé enfile sa combinaison de mécanicien. Sa sœur Odilia l’observe : elle a fait un songe, et elle a peur.">
+<meta property="og:url" content="https://veritas-school.com/scenes/ville-cruelle-koume-odilia.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Le songe d’Odilia","description":"Scène animée d’après Ville cruelle d’Eza Boto : Koumé enfile sa combinaison de mécanicien. Sa sœur Odilia l’observe : elle a fait un songe, et elle a peur.","url":"https://veritas-school.com/scenes/ville-cruelle-koume-odilia.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"3ᵉ","about":"Français","teaches":"Comprendre ce que les personnages se cachent l’un à l’autre. Repérer comment un détail (un chapeau, une étoffe) peint toute une ville.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"},"isBasedOn":{"@type":"Book","name":"Ville cruelle","author":{"@type":"Person","name":"Eza Boto (Mongo Beti)"}}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'ville-cruelle-odilia',
+  discipline: 'Français', niveau: '3e',
+  oeuvre: 'Ville cruelle', auteur: 'Eza Boto (Mongo Beti)',
+  titre: 'Le songe d’Odilia',
+  decor: 'ville', lieu: 'Tanga, chez Koumé et Odilia', moment: 'Chapitre III',
+  avertissement: 'Scène imaginée d’après le roman : les répliques suivies de la référence du livre sont de l’auteur, les autres sont jouées par nos comédiens.',
+  objectif: 'Comprendre ce que les personnages se cachent l’un à l’autre. Repérer comment un détail (un chapeau, une étoffe) peint toute une ville.',
+  jauges: [
+    { id: 'inquietude', nom: 'Inquiétude d’Odilia', val: 50, couleur: '#7B5CD6' },
+    { id: 'revolte', nom: 'Révolte de Koumé', val: 40, couleur: '#C0392B' }
+  ],
+  personnages: {
+    koume:    { nom: 'Koumé', couleur: '#3A3A44', look: { metier: 'ouvrier', peau: 'fonce', cheveux: 'court', coiffe: 'chapeau', couleurCoiffe: '#5A4A3A' } },
+    odilia:   { nom: 'Odilia, sa sœur', court: 'Odilia', couleur: '#C0397C', look: { peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#C0397C', tenue: 'robe', habit: '#8A3B6E' } },
+    passante: { nom: '« Popeline bleue »', couleur: '#1E499B', look: { peau: 'fonce', cheveux: 'tresses', tenue: 'robe', habit: '#3B6FCB', objet: 'sac' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['koume', 'odilia'], txt: 'Koumé enfile sa combinaison de mécanicien, « autrefois kaki, aujourd’hui huileuse, crasseuse et noire ». Il s’accoude à la petite fenêtre, et tourne le dos à sa sœur.' },
+    { t: 'recit', entre: ['passante'], txt: 'Il siffle. Les femmes passent vers le marché, par groupes bavards. Il en interpelle une, toujours une belle, en l’appelant par la couleur de l’étoffe de sa robe.' },
+    { t: 'dit', qui: 'koume', emo: 'joie', jeu: 'penché à la fenêtre', txt: 'Popeline bleue !', cite: 'Eza Boto, Ville cruelle, chapitre III' },
+    { t: 'dit', qui: 'passante', emo: 'joie', jeu: 'sans s’arrêter', txt: 'Toi, va donc réparer tes moteurs avant de réparer les cœurs !', sort: ['passante'] },
+    { t: 'question', q: 'Pourquoi Koumé appelle-t-il la passante « Popeline bleue » ?',
+      options: [
+        { txt: 'Par la couleur et le tissu de sa robe : c’est un jeu de rue.', ok: true, retour: 'La popeline est un coton courant et peu cher. La femme répond par une « réplique de convention » : tout le monde connaît le jeu.' },
+        { txt: 'C’est son vrai prénom.', retour: 'Il ne la connaît pas : il la nomme par sa robe.' }
+      ] },
+    { t: 'recit', txt: 'Parfois, il cesse de plaisanter, et son regard se perd dans le lointain. Mais pas longtemps : il se reprend aussitôt, « sachant que sa sœur l’épiait ».', jauges: { inquietude: 65 } },
+    { t: 'recit', txt: 'Une sirène jaillit au loin. Nonchalamment, Koumé se retourne vers la petite table : le repas est servi.', objet: { i: 'telephone', lib: 'La sirène de l’usine' } },
+    { t: 'dit', qui: 'koume', emo: 'joie', jeu: 'il rit de toutes ses dents', txt: 'Voilà des siècles que nous n’avons plus d’argent et nous mangeons toujours. Comment peux-tu faire, dis, petite sœur', cite: 'Eza Boto, Ville cruelle, chapitre III' },
+    { t: 'dit', qui: 'odilia', jeu: 'évasive à dessein', txt: 'Les villages des environs sont pleins de braves gens.', cite: 'Eza Boto, Ville cruelle, chapitre III' },
+    { t: 'question', q: 'Odilia répond « évasive à dessein ». Qu’est-ce que cela veut dire ?',
+      options: [
+        { txt: 'Elle répond à côté exprès, pour ne pas tout dire.', ok: true, retour: 'Chacun cache quelque chose à l’autre : elle, d’où vient la nourriture ; lui, ce qui le préoccupe.' },
+        { txt: 'Elle n’a pas entendu la question.', retour: '« À dessein » : c’est volontaire.' }
+      ] },
+    { t: 'pense', qui: 'odilia', emo: 'peur', txt: 'Ce songe ! Est-ce qu’il avait vraiment l’air de devoir mourir aujourd’hui ?', cite: 'Eza Boto, Ville cruelle, chapitre III', jauges: { inquietude: 90 } },
+    { t: 'question', q: 'Qu’est-ce qui inquiète Odilia depuis la nuit ?',
+      options: [
+        { txt: 'Un songe où elle pleurait son frère, comme s’il allait mourir.', ok: true, retour: 'Elle essaie de le chasser de son esprit… et son esprit y revient quand même.' },
+        { txt: 'Le manque d’argent pour le marché.', retour: 'Elle s’en arrange : ce qui la ronge, c’est le songe.' }
+      ] },
+    { t: 'dit', qui: 'koume', jeu: 'la bouche pleine', txt: 'Je trouverai bientôt du travail chez un meilleur type que ce T... Mais je ne peux pas le quitter comme ça.', cite: 'Eza Boto, Ville cruelle, chapitre III' },
+    { t: 'dit', qui: 'odilia', emo: 'triste', jeu: 'des larmes dans la voix', txt: 'Et pourquoi pas ?', cite: 'Eza Boto, Ville cruelle, chapitre III' },
+    { t: 'dit', qui: 'koume', emo: 'colere', jeu: 'il frappe du poing sur la table', txt: 'Non ! Jamais ! Si les gens se mettent à vous payer seulement quand il leur plaît et s’il leur plaît, alors, comment fera-t-on pour vivre, c’est moi qui te le demande ?', cite: 'Eza Boto, Ville cruelle, chapitre III', jauges: { revolte: 85 } },
+    { t: 'dit', qui: 'odilia', emo: 'peur', jeu: 'adossée au mur, face à lui', txt: 'Prends garde, Koumé. Tu n’as jamais été prudent, toi. […] Fais attention ! Ton Monsieur T... il est bien avec le commissaire de police...', cite: 'Eza Boto, Ville cruelle, chapitre III' },
+    { t: 'choix', qui: 'odilia', q: 'Tu es Odilia. Ton frère refuse de quitter le patron qui ne le paie pas. Que fais-tu ?',
+      options: [
+        { txt: 'Lui raconter mon songe pour qu’il prenne peur.', consequence: 'Il rirait peut-être : il ne croit pas aux songes. Mais tu aurais tout dit.', jauges: { inquietude: 95 } },
+        { txt: 'Le laisser partir en me taisant.', consequence: 'Tu gardes ta peur pour toi, et elle grandit.', jauges: { inquietude: 100 } },
+        { txt: 'Lui rappeler que le patron a la police avec lui.', consequence: 'C’est ce qu’elle fait. Il répond qu’il a ses copains.', jauges: { inquietude: 90 } }
+      ],
+      oeuvre: 'Odilia le met en garde contre Monsieur T..., ami du commissaire. Koumé répond : « Et moi, je suis très bien avec mes copains, ne l’oublie jamais. »' },
+    { t: 'dit', qui: 'koume', emo: 'fier', jeu: 'il met son vieux chapeau', txt: 'Ma petite Odilia, sache bien ceci : nous avons le nombre et le droit...', cite: 'Eza Boto, Ville cruelle, chapitre III', jauges: { revolte: 100 } },
+    { t: 'remarque', titre: 'Un chapeau pour des millions', txt: 'Koumé met « son vieux chapeau qui le rendait impersonnel, semblable à des millions de ses compatriotes ». Un seul objet, et Koumé devient tous les travailleurs qu’on ne paie pas. Comme « Popeline bleue » peignait toute une rue.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · ce que chacun cache', consigne: 'Qui cache quoi ? Classe chaque secret.',
+      cats: ['Odilia le cache', 'Koumé le cache'],
+      items: [
+        { txt: 'D’où vient la nourriture de la maison', cat: 0 },
+        { txt: 'Le songe de la nuit', cat: 0 },
+        { txt: 'Ce que son patron lui doit', cat: 1 },
+        { txt: 'Ce qu’il compte faire avec ses copains', cat: 1 }
+      ],
+      bravo: 'Deux personnages qui s’aiment et se taisent : c’est la tension de tout le chapitre.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · Koumé et Monsieur T...',
+    intro: 'Règle la colère de Koumé, sa prudence et le soutien de ses copains : comment Koumé affronte-t-il son patron ?',
+    persos: ['koume', 'odilia', 'passante'],
+    curseurs: [
+      { id: 'colere', nom: 'Colère de Koumé', val: 90, bas: 'résigné', haut: 'il frappe la table', lecture: { haut: '« Non ! Jamais ! »', bas: 'Il attendrait sans rien dire.' } },
+      { id: 'prudence', nom: 'Prudence', val: 15, bas: 'téméraire', haut: 'prudent', lecture: { haut: 'Il écouterait Odilia et attendrait son heure.', bas: '« Tu n’as jamais été prudent, toi. »' } },
+      { id: 'copains', nom: 'Soutien des copains', val: 75, bas: 'seul', haut: 'nombreux', lecture: { haut: '« Nous avons le nombre et le droit. »', bas: 'Seul, un ouvrier ne pèse rien face au patron et au commissaire.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans le roman', icone: 'livre', valeurs: { colere: 90, prudence: 15, copains: 75 } },
+      { nom: 'Et s’il écoutait Odilia ?', icone: 'aide', valeurs: { prudence: 85 } },
+      { nom: 'Et s’il était seul ?', icone: 'personne', valeurs: { copains: 10 } }
+    ],
+    liens: [
+      { a: 'odilia', b: 'koume', type: 'amour', lib: 'elle veille', base: .8 },
+      { a: 'odilia', b: 'koume', type: 'peur', lib: 'le songe', base: .3, poids: { colere: .4, prudence: -.3 } },
+      { a: 'koume', b: 'odilia', type: 'confiance', lib: '« ma petite Odilia »', base: .6 },
+      { a: 'koume', b: 'passante', type: 'alliance', lib: 'le jeu de la rue', base: .3 }
+    ],
+    issue: function(v){
+      if(v.prudence >= 65){ return { niveau: 'ok', badge: 'Koumé attend son heure', recit: 'Koumé ravale sa colère, cherche un autre patron et garde ses copains pour plus tard. Odilia respire.', apres: 'Plus sûr… mais Monsieur T... ne paiera toujours pas. La prudence a aussi son prix.', themes: ['prudence', 'injustice'] }; }
+      if(v.copains < 35){ return { niveau: 'ko', badge: 'Seul contre le patron', recit: 'Koumé part réclamer son dû, seul. Face au patron et au commissaire, il ne pèse rien.', apres: 'Sans « le nombre », le droit ne suffit pas.', themes: ['solitude', 'pouvoir', 'police'] }; }
+      return { niveau: 'moyen', badge: 'La révolte en marche', recit: 'Koumé coiffe son vieux chapeau et part rejoindre ses copains. Derrière lui, Odilia reste seule avec son songe.', apres: 'C’est le chapitre III : la colère est juste, le danger est réel. Et Odilia ? La suite est dans le livre.', themes: ['révolte', 'justice', 'colonisation'] };
+    }
+  },
+  fiche: {"accroche": "Son cacao brûlé, Banda croise Koumé, un jeune mécanicien recherché par la police, et sa sœur Odilia. En deux jours, Tanga va changer sa vie. Jusqu’où ?", "resume": "Tanga, ville coupée en deux par une colline : au sud, le commerce, l’administration et les comptoirs grecs ; au nord, les cases. Banda, jeune paysan de Bamila, descend vendre deux cents kilos de cacao pour pouvoir se marier avant la mort de sa mère. En deux jours, la ville va lui prendre presque tout.", "personnages": [{"nom": "Banda", "cle": "banda", "role": "jeune paysan de Bamila, qui descend vendre son cacao."}, {"nom": "M. Pallogakis", "cle": "pallogakis", "role": "commerçant grec du centre commercial."}, {"nom": "Les agents du Contrôle", "cle": "controleur", "role": "ils décident si un cacao se vend ou se brûle."}, {"nom": "Koumé", "role": "jeune mécanicien, « le meneur », recherché par la police."}, {"nom": "Odilia", "role": "sa sœur."}, {"nom": "La mère de Banda", "role": "malade, mourante, à Bamila."}], "aLire": [{"ou": "Le chapitre II", "pourquoi": "Aucune action : la description de Tanga. Le plus beau morceau du livre, et tout ce qui suit s’y explique."}, {"ou": "Le fleuve, vu du pont", "pourquoi": "Les cases-pirogues, les radeaux de billes, et l’autogrue, « un vrai monstre »."}, {"ou": "La dernière page", "pourquoi": "Une décision qui ouvre sur une autre ville, et une autre vie."}], "siTuAimes": "les histoires de révolte contre l’injustice : l’action tient en deux jours, les chapitres sont courts, et l’ironie mord.", "reperes": ["Auteur : Eza Boto, premier nom de plume de Mongo Beti (Cameroun)", "Son premier roman, publié chez Présence Africaine, à Paris", "Lieux : Tanga-Sud, Tanga-Nord, Bamila"], "themes": ["l’injustice coloniale", "la ville et la campagne", "l’exploitation des paysans", "la révolte"], "cahier": {"lib": "Le cahier VÉRITAS des œuvres de 3e", "href": "../livrets/oeuvres-3e.html"}},
+  quiz: [
+    { q: 'Quel est le métier de Koumé ?', options: [ { txt: 'Mécanicien.', ok: true, retour: 'Sa combinaison, autrefois kaki, est devenue noire de cambouis.' }, { txt: 'Tailleur.', retour: 'Non : mécanicien.' } ] },
+    { q: 'Comment Koumé appelle-t-il les passantes ?', options: [ { txt: 'Par la couleur de l’étoffe de leur robe.', ok: true, retour: '« Popeline bleue ».' }, { txt: 'Par leur prénom.', retour: 'Il ne les connaît pas.' } ] },
+    { q: 'Pourquoi Koumé ne veut-il pas quitter Monsieur T... ?', options: [ { txt: 'Parce que Monsieur T... lui doit son salaire.', ok: true, retour: '« Oh ! il nous paiera. Il faudra bien qu’il y vienne. »' }, { txt: 'Parce qu’il aime beaucoup son patron.', retour: 'Au contraire : il lui en veut.' } ] },
+    { q: 'Pourquoi Odilia met-elle son frère en garde contre Monsieur T... ?', options: [ { txt: 'Il est bien avec le commissaire de police.', ok: true, retour: 'Le patron a la police de son côté.' }, { txt: 'Il est malade.', retour: 'Non : il a la police avec lui.' } ] },
+    { q: 'Que veut dire « nonchalamment » ?', options: [ { txt: 'Avec une lenteur indifférente.', ok: true, retour: 'Koumé fait comme si de rien n’était.' }, { txt: 'Avec colère.', retour: 'C’est presque le contraire.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Koumé, mécanicien, n’est pas payé par son patron, Monsieur T...',
+      'Odilia cache d’où vient la nourriture et le songe qui l’effraie.',
+      'Le patron est « bien avec le commissaire » : le pouvoir protège le pouvoir.',
+      'Un détail (l’étoffe, le vieux chapeau) peint toute une ville et tout un peuple.'
+    ],
+    ecrire: 'Odilia écrit dans un cahier, le soir, ce qu’elle n’a pas osé dire à son frère (quinze lignes) : le songe, sa peur, ce qu’elle espère.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Le songe d’Odilia</h1>
+<p><b>Français · 3ᵉ · Ville cruelle · Eza Boto (Mongo Beti)</b></p>
+<p><i>Scène imaginée d’après le roman : les répliques suivies de la référence du livre sont de l’auteur, les autres sont jouées par nos comédiens.</i></p>
+<h3>Objectif</h3><p>Comprendre ce que les personnages se cachent l’un à l’autre. Repérer comment un détail (un chapeau, une étoffe) peint toute une ville.</p>
+<p>Lieu : Tanga, chez Koumé et Odilia · Chapitre III</p>
+<h3>Personnages</h3><ul><li>Koumé</li><li>Odilia, sa sœur</li><li>« Popeline bleue »</li></ul>
+<h3>L’œuvre</h3>
+<p>Son cacao brûlé, Banda croise Koumé, un jeune mécanicien recherché par la police, et sa sœur Odilia. En deux jours, Tanga va changer sa vie. Jusqu’où ?</p>
+<p>Tanga, ville coupée en deux par une colline : au sud, le commerce, l’administration et les comptoirs grecs ; au nord, les cases. Banda, jeune paysan de Bamila, descend vendre deux cents kilos de cacao pour pouvoir se marier avant la mort de sa mère. En deux jours, la ville va lui prendre presque tout.</p>
+<ul><li><b>Banda</b> — jeune paysan de Bamila, qui descend vendre son cacao.</li><li><b>M. Pallogakis</b> — commerçant grec du centre commercial.</li><li><b>Les agents du Contrôle</b> — ils décident si un cacao se vend ou se brûle.</li><li><b>Koumé</b> — jeune mécanicien, « le meneur », recherché par la police.</li><li><b>Odilia</b> — sa sœur.</li><li><b>La mère de Banda</b> — malade, mourante, à Bamila.</li></ul>
+<p>Thèmes : l’injustice coloniale, la ville et la campagne, l’exploitation des paysans, la révolte</p>
+<h3>La scène</h3>
+<p>Koumé enfile sa combinaison de mécanicien, « autrefois kaki, aujourd’hui huileuse, crasseuse et noire ». Il s’accoude à la petite fenêtre, et tourne le dos à sa sœur.</p>
+<p>Il siffle. Les femmes passent vers le marché, par groupes bavards. Il en interpelle une, toujours une belle, en l’appelant par la couleur de l’étoffe de sa robe.</p>
+<blockquote><p><b>Koumé</b> <i>(penché à la fenêtre)</i> :<br>Popeline bleue !<br><small>Extrait de l’œuvre — Eza Boto, Ville cruelle, chapitre III</small></p></blockquote>
+<p><b>« Popeline bleue »</b> <i>(sans s’arrêter)</i> : Toi, va donc réparer tes moteurs avant de réparer les cœurs !</p>
+<p><b>Question :</b> Pourquoi Koumé appelle-t-il la passante « Popeline bleue » ?</p><ul><li>Par la couleur et le tissu de sa robe : c’est un jeu de rue. <b>(bonne réponse)</b></li><li>C’est son vrai prénom.</li></ul><p>La popeline est un coton courant et peu cher. La femme répond par une « réplique de convention » : tout le monde connaît le jeu.</p>
+<p>Parfois, il cesse de plaisanter, et son regard se perd dans le lointain. Mais pas longtemps : il se reprend aussitôt, « sachant que sa sœur l’épiait ».</p>
+<p>Une sirène jaillit au loin. Nonchalamment, Koumé se retourne vers la petite table : le repas est servi.</p>
+<blockquote><p><b>Koumé</b> <i>(il rit de toutes ses dents)</i> :<br>Voilà des siècles que nous n’avons plus d’argent et nous mangeons toujours. Comment peux-tu faire, dis, petite sœur<br><small>Extrait de l’œuvre — Eza Boto, Ville cruelle, chapitre III</small></p></blockquote>
+<blockquote><p><b>Odilia, sa sœur</b> <i>(évasive à dessein)</i> :<br>Les villages des environs sont pleins de braves gens.<br><small>Extrait de l’œuvre — Eza Boto, Ville cruelle, chapitre III</small></p></blockquote>
+<p><b>Question :</b> Odilia répond « évasive à dessein ». Qu’est-ce que cela veut dire ?</p><ul><li>Elle répond à côté exprès, pour ne pas tout dire. <b>(bonne réponse)</b></li><li>Elle n’a pas entendu la question.</li></ul><p>Chacun cache quelque chose à l’autre : elle, d’où vient la nourriture ; lui, ce qui le préoccupe.</p>
+<blockquote><p><b>Odilia, sa sœur</b> (en pensée) :<br>Ce songe ! Est-ce qu’il avait vraiment l’air de devoir mourir aujourd’hui ?<br><small>Extrait de l’œuvre — Eza Boto, Ville cruelle, chapitre III</small></p></blockquote>
+<p><b>Question :</b> Qu’est-ce qui inquiète Odilia depuis la nuit ?</p><ul><li>Un songe où elle pleurait son frère, comme s’il allait mourir. <b>(bonne réponse)</b></li><li>Le manque d’argent pour le marché.</li></ul><p>Elle essaie de le chasser de son esprit… et son esprit y revient quand même.</p>
+<blockquote><p><b>Koumé</b> <i>(la bouche pleine)</i> :<br>Je trouverai bientôt du travail chez un meilleur type que ce T... Mais je ne peux pas le quitter comme ça.<br><small>Extrait de l’œuvre — Eza Boto, Ville cruelle, chapitre III</small></p></blockquote>
+<blockquote><p><b>Odilia, sa sœur</b> <i>(des larmes dans la voix)</i> :<br>Et pourquoi pas ?<br><small>Extrait de l’œuvre — Eza Boto, Ville cruelle, chapitre III</small></p></blockquote>
+<blockquote><p><b>Koumé</b> <i>(il frappe du poing sur la table)</i> :<br>Non ! Jamais ! Si les gens se mettent à vous payer seulement quand il leur plaît et s’il leur plaît, alors, comment fera-t-on pour vivre, c’est moi qui te le demande ?<br><small>Extrait de l’œuvre — Eza Boto, Ville cruelle, chapitre III</small></p></blockquote>
+<blockquote><p><b>Odilia, sa sœur</b> <i>(adossée au mur, face à lui)</i> :<br>Prends garde, Koumé. Tu n’as jamais été prudent, toi. […] Fais attention ! Ton Monsieur T... il est bien avec le commissaire de police...<br><small>Extrait de l’œuvre — Eza Boto, Ville cruelle, chapitre III</small></p></blockquote>
+<p><b>À toi de décider :</b> Tu es Odilia. Ton frère refuse de quitter le patron qui ne le paie pas. Que fais-tu ?</p><ul><li>Lui raconter mon songe pour qu’il prenne peur. — Il rirait peut-être : il ne croit pas aux songes. Mais tu aurais tout dit.</li><li>Le laisser partir en me taisant. — Tu gardes ta peur pour toi, et elle grandit.</li><li>Lui rappeler que le patron a la police avec lui. — C’est ce qu’elle fait. Il répond qu’il a ses copains.</li></ul>
+<blockquote><p><b>Koumé</b> <i>(il met son vieux chapeau)</i> :<br>Ma petite Odilia, sache bien ceci : nous avons le nombre et le droit...<br><small>Extrait de l’œuvre — Eza Boto, Ville cruelle, chapitre III</small></p></blockquote>
+<h4>Un chapeau pour des millions</h4><p>Koumé met « son vieux chapeau qui le rendait impersonnel, semblable à des millions de ses compatriotes ». Un seul objet, et Koumé devient tous les travailleurs qu’on ne paie pas. Comme « Popeline bleue » peignait toute une rue.</p>
+<h4>Atelier · ce que chacun cache</h4><p>Qui cache quoi ? Classe chaque secret.</p>
+<ul><li><b>Odilia le cache</b> : D’où vient la nourriture de la maison ; Le songe de la nuit</li><li><b>Koumé le cache</b> : Ce que son patron lui doit ; Ce qu’il compte faire avec ses copains</li></ul>
+<p>Deux personnages qui s’aiment et se taisent : c’est la tension de tout le chapitre.</p>
+<h3>Quiz</h3><ol><li>Quel est le métier de Koumé ? — <b>Mécanicien.</b> Sa combinaison, autrefois kaki, est devenue noire de cambouis.</li><li>Comment Koumé appelle-t-il les passantes ? — <b>Par la couleur de l’étoffe de leur robe.</b> « Popeline bleue ».</li><li>Pourquoi Koumé ne veut-il pas quitter Monsieur T... ? — <b>Parce que Monsieur T... lui doit son salaire.</b> « Oh ! il nous paiera. Il faudra bien qu’il y vienne. »</li><li>Pourquoi Odilia met-elle son frère en garde contre Monsieur T... ? — <b>Il est bien avec le commissaire de police.</b> Le patron a la police de son côté.</li><li>Que veut dire « nonchalamment » ? — <b>Avec une lenteur indifférente.</b> Koumé fait comme si de rien n’était.</li></ol>
+<h3>À retenir</h3><ul><li>Koumé, mécanicien, n’est pas payé par son patron, Monsieur T...</li><li>Odilia cache d’où vient la nourriture et le songe qui l’effraie.</li><li>Le patron est « bien avec le commissaire » : le pouvoir protège le pouvoir.</li><li>Un détail (l’étoffe, le vieux chapeau) peint toute une ville et tout un peuple.</li></ul>
+<h3>À écrire</h3><p>Odilia écrit dans un cahier, le soir, ce qu’elle n’a pas osé dire à son frère (quinze lignes) : le songe, sa peur, ce qu’elle espère.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="ville-cruelle-koume-odilia.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

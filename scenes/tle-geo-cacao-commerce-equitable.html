@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le voyage d’une fève — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de géographie (Terminale) : la filière cacao, du planteur camerounais à la tablette de chocolat ; fonctionnement de la mondialisation et commerce équitable.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/tle-geo-cacao-commerce-equitable.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Le voyage d’une fève — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée de géographie (Terminale) : la filière cacao, du planteur camerounais à la tablette de chocolat ; fonctionnement de la mondialisation et commerce équitable.">
+<meta property="og:url" content="https://veritas-school.com/scenes/tle-geo-cacao-commerce-equitable.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Le voyage d’une fève","description":"Scène animée de géographie (Terminale) : la filière cacao, du planteur camerounais à la tablette de chocolat ; fonctionnement de la mondialisation et commerce équitable.","url":"https://veritas-school.com/scenes/tle-geo-cacao-commerce-equitable.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"Terminale","about":"Géographie","teaches":"Suivre une fève de cacao à travers la mondialisation : qui la produit, qui la transporte, qui la transforme, et qui gagne le plus. Comprendre ce que propose le commerce équitable, et ses limites.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-geo-cacao',
+  discipline: 'Géographie', niveau: 'Terminale',
+  titre: 'Le voyage d’une fève',
+  decor: 'foret', lieu: 'Une cacaoyère du Centre, puis le port de Kribi', moment: 'Saison de la récolte',
+  objectif: 'Suivre une fève de cacao à travers la mondialisation : qui la produit, qui la transporte, qui la transforme, et qui gagne le plus. Comprendre ce que propose le commerce équitable, et ses limites.',
+  programme: 'Progression harmonisée Tle · Leçons 11-12 (facteurs et fonctionnement de la mondialisation), dossiers 3-4 (commerce équitable, problèmes de la mondialisation)',
+  jauges: [
+    { id: 'part', nom: 'Part du prix qui revient au planteur', val: 10, couleur: '#1F9D5B' },
+    { id: 'valeur', nom: 'Valeur ajoutée de la fève', val: 5, couleur: '#D98E04' }
+  ],
+  personnages: {
+    planteur:  { nom: 'Pa’a Essomba, planteur', couleur: '#8A5A2B', look: { metier: 'paysan', peau: 'fonce', vieux: true, cheveux: 'ras' } },
+    fille:     { nom: 'Ewodo, sa fille, lycéenne', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    acheteur:  { nom: 'Un acheteur-collecteur', couleur: '#5A6275', look: { metier: 'commercant', peau: 'brun', cheveux: 'court', objet: 'sac' } },
+    cooperative:{ nom: 'Mme Abomo, présidente de coopérative', couleur: '#2E6B5A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#2E6B5A', habit: '#2E6B5A', objet: 'dossier' } },
+    chocolatier:{ nom: 'M. Janssen, chocolatier européen', couleur: '#5A3A2A', look: { metier: 'cuisinier', peau: 'pale', cheveux: 'court', couleurCheveux: '#C9A15A' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['planteur', 'fille'], txt: 'Sous l’ombre des grands arbres, Pa’a Essomba ouvre les cabosses à la machette. Les fèves vont fermenter, puis sécher au soleil. Le Cameroun est l’un des principaux producteurs de cacao d’Afrique, derrière la Côte d’Ivoire et le Ghana.', objet: { i: 'fruit', lib: 'Une cabosse' } },
+    { t: 'dit', qui: 'fille', jeu: 'elle tient une tablette de chocolat achetée en ville', txt: 'Papa, cette tablette coûte presque autant qu’un kilo de tes fèves. Et pourtant il n’y a que quelques grammes de cacao dedans.' },
+    { t: 'dit', qui: 'planteur', emo: 'triste', txt: 'Je vends des fèves. D’autres vendent du chocolat. Ce n’est pas le même métier, ni le même argent.', jauges: { part: 10 } },
+    { t: 'recit', entre: ['acheteur'], txt: 'L’acheteur arrive avec sa balance et son camion.', jauges: { valeur: 15 } },
+    { t: 'dit', qui: 'acheteur', jeu: 'pressé', txt: 'Le prix a baissé à Londres cette semaine. Je prends tout, mais à ce prix-là.' },
+    { t: 'question', q: 'Pourquoi le prix payé au planteur dépend-il d’un marché lointain ?',
+      options: [
+        { txt: 'Le cacao est une matière première dont le prix se fixe sur les marchés mondiaux (Londres, New York), selon l’offre et la demande.', ok: true, retour: 'C’est un effet de la mondialisation : un planteur du Centre dépend de cours fixés à des milliers de kilomètres.' },
+        { txt: 'Parce que l’acheteur le décide seul.', retour: 'Il en profite parfois, mais le cours de référence est mondial.' }
+      ] },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · la chaîne du cacao', consigne: 'Remets dans l’ordre le voyage de la fève jusqu’à la tablette.',
+      items: [
+        'Récolte des cabosses, fermentation et séchage des fèves.',
+        'Achat par un collecteur ou une coopérative.',
+        'Exportation par le port de Douala ou de Kribi.',
+        'Traversée en conteneur vers l’Europe.',
+        'Broyage : pâte, beurre et poudre de cacao.',
+        'Fabrication et vente des tablettes de chocolat.'
+      ],
+      bravo: 'Plus on avance dans la chaîne, plus la valeur ajoutée est grande, et plus on s’éloigne du planteur.', jauges: { valeur: 90 } },
+    { t: 'dit', qui: 'chocolatier', entre: ['chocolatier'], jeu: 'dans son atelier, en Europe', txt: 'Le transport, le broyage, la marque, la publicité, la distribution : voilà ce qui fait le prix de ma tablette.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · amont ou aval ?', consigne: 'Classe chaque activité : en amont de la filière (près du planteur), ou en aval (près du consommateur) ?',
+      cats: ['Amont', 'Aval'],
+      items: [
+        { txt: 'Écabossage et séchage.', cat: 0 },
+        { txt: 'Publicité pour une marque de chocolat.', cat: 1 },
+        { txt: 'Collecte des sacs dans les villages.', cat: 0 },
+        { txt: 'Vente en supermarché.', cat: 1 },
+        { txt: 'Fabrication des tablettes.', cat: 1 }
+      ],
+      bravo: 'L’aval, où se crée l’essentiel de la valeur, se trouve surtout dans les pays du Nord.' },
+    { t: 'recit', sort: ['acheteur', 'chocolatier'], entre: ['cooperative'], txt: 'Au village, Mme Abomo réunit les planteurs de la coopérative.' },
+    { t: 'dit', qui: 'cooperative', txt: 'Avec le commerce équitable, nos acheteurs garantissent un prix minimum, même quand les cours baissent, et versent une prime pour la coopérative : un puits, une école, du matériel.', jauges: { part: 35 } },
+    { t: 'choix', qui: 'planteur', q: 'Tu es Pa’a Essomba. Rejoins-tu la coopérative certifiée ?',
+      options: [
+        { txt: 'Oui : un prix minimum me protège quand les cours s’effondrent.', consequence: 'Tu gagnes en sécurité, mais tu dois respecter un cahier des charges (traçabilité, pas de travail des enfants, qualité).', jauges: { part: 10 } },
+        { txt: 'Non : je préfère vendre à qui paie le plus le jour même.', consequence: 'Les bonnes années, tu gagnes parfois plus ; les mauvaises, tu subis seul la baisse.', jauges: { part: -5 } },
+        { txt: 'Oui, et je propose à la coopérative de transformer une partie des fèves sur place.', consequence: 'C’est l’idée la plus ambitieuse : garder une partie de la valeur ajoutée au Cameroun.', jauges: { part: 20, valeur: 5 } }
+      ],
+      oeuvre: 'Le commerce équitable améliore le revenu de certains planteurs, mais il ne concerne qu’une petite part du cacao mondial. La transformation locale reste un enjeu majeur.' },
+    { t: 'atelier', mode: 'balance', titre: 'Atelier · le commerce équitable en débat', consigne: 'Place chaque argument : en faveur du commerce équitable, ou contre / sur ses limites ?',
+      cotes: ['Pour', 'Limites'],
+      args: [
+        { txt: 'Un prix minimum garanti protège des chutes des cours.', cote: 0, poids: 3 },
+        { txt: 'La prime finance des projets collectifs.', cote: 0, poids: 2 },
+        { txt: 'Il ne concerne qu’une petite partie du marché.', cote: 1, poids: 3 },
+        { txt: 'La certification coûte cher aux petits producteurs.', cote: 1, poids: 2 },
+        { txt: 'Il encourage l’organisation en coopératives.', cote: 0, poids: 2 }
+      ],
+      bravo: 'Le commerce équitable corrige certains effets de la mondialisation sans en changer les règles.' },
+    { t: 'dit', qui: 'fille', emo: 'fier', txt: 'Un jour, j’ouvrirai une chocolaterie ici. Nos fèves, notre chocolat.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · qui gagne quoi ?',
+    intro: 'Règle le cours mondial, la transformation sur place et l’organisation des planteurs : que reste-t-il au village ?',
+    persos: ['planteur', 'fille', 'acheteur', 'cooperative', 'chocolatier'],
+    curseurs: [
+      { id: 'cours', nom: 'Cours mondial du cacao', val: 50, bas: 'effondré', haut: 'élevé' },
+      { id: 'transformation', nom: 'Transformation locale', val: 15, bas: 'fèves brutes', haut: 'chocolat produit sur place', lecture: { haut: 'Le Cameroun exporte de la pâte, du beurre, du chocolat.', bas: 'Le Cameroun exporte des fèves, la valeur se crée ailleurs.' } },
+      { id: 'organisation', nom: 'Organisation des planteurs', val: 30, bas: 'chacun seul', haut: 'coopératives fortes' }
+    ],
+    scenarios: [
+      { nom: 'Aujourd’hui', icone: 'fruit', valeurs: { cours: 50, transformation: 15, organisation: 30 } },
+      { nom: 'Chute des cours', icone: 'nuage', valeurs: { cours: 10 } },
+      { nom: 'Nos fèves, notre chocolat', icone: 'fier', valeurs: { transformation: 80, organisation: 75 } }
+    ],
+    liens: [
+      { a: 'acheteur', b: 'planteur', type: 'domination', lib: 'fixe le prix', base: .8, poids: { organisation: -.7 } },
+      { a: 'cooperative', b: 'planteur', type: 'alliance', lib: 'prix minimum', base: .1, poids: { organisation: .8 } },
+      { a: 'chocolatier', b: 'acheteur', type: 'confiance', lib: 'achète', base: .5, poids: { transformation: -.4 } },
+      { a: 'fille', b: 'planteur', type: 'amour', lib: 'famille', base: .8 }
+    ],
+    issue: function(v){
+      if(v.transformation > 60){ return { niveau: 'ok', badge: 'La valeur reste au pays', recit: 'Pâte, beurre et chocolat sortent d’usines camerounaises : emplois, revenus et savoir-faire restent sur place.', apres: 'C’est le grand défi des pays producteurs : remonter la chaîne de valeur.', themes: ['valeur ajoutée', 'industrialisation'] }; }
+      if(v.cours < 25 && v.organisation < 50){ return { niveau: 'ko', badge: 'Le planteur paie la crise', recit: 'Les cours s’effondrent, chacun vend seul : les revenus s’écroulent, les jeunes quittent les plantations.', apres: 'Une économie qui dépend d’une seule matière première brute est vulnérable.', themes: ['dépendance', 'cours mondiaux'] }; }
+      if(v.organisation > 60){ return { niveau: 'moyen', badge: 'Des planteurs mieux armés', recit: 'Les coopératives négocient, garantissent un prix minimum et partagent les primes.', apres: 'Mieux organisés, les planteurs pèsent davantage, sans pour autant transformer le cacao.', themes: ['coopératives', 'commerce équitable'] }; }
+      return { niveau: 'moyen', badge: 'La fève voyage, la valeur aussi', recit: 'Le planteur vend des fèves brutes au cours du jour ; l’essentiel de la valeur se crée en Europe.', apres: 'C’est la situation la plus fréquente.', themes: ['mondialisation', 'échange inégal'] };
+    }
+  },
+  quiz: [
+    { q: 'Où se fixe le prix mondial du cacao ?', options: [
+      { txt: 'Sur les marchés de matières premières (Londres, New York).', ok: true, retour: 'Selon l’offre et la demande mondiales.' },
+      { txt: 'Au marché de Mfoundi.', retour: 'Les prix locaux dépendent du cours mondial.' } ] },
+    { q: 'Qu’est-ce que la valeur ajoutée ?', options: [
+      { txt: 'La richesse créée en transformant un produit.', ok: true, retour: 'La fève devient pâte, beurre, chocolat.' },
+      { txt: 'Le poids du cacao.', retour: 'Non.' } ] },
+    { q: 'Que garantit le commerce équitable ?', options: [
+      { txt: 'Un prix minimum et une prime collective.', ok: true, retour: 'En échange d’un cahier des charges.' },
+      { txt: 'Le prix le plus élevé du marché tous les jours.', retour: 'Non : un plancher, pas un plafond.' } ] },
+    { q: 'Quel est le premier producteur mondial de cacao ?', options: [
+      { txt: 'La Côte d’Ivoire.', ok: true, retour: 'Devant le Ghana.' },
+      { txt: 'La Suisse.', retour: 'La Suisse fabrique du chocolat, mais ne produit pas de cacao.' } ] },
+    { q: 'Quel facteur de la mondialisation permet le voyage de la fève ?', options: [
+      { txt: 'Le transport maritime par conteneurs.', ok: true, retour: 'Avec les télécommunications qui relient les marchés.' },
+      { txt: 'La disparition des frontières.', retour: 'Les frontières existent toujours.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Le cacao camerounais est vendu surtout sous forme de fèves brutes, à un prix fixé sur les marchés mondiaux.',
+      'L’essentiel de la valeur ajoutée (broyage, fabrication, marque, distribution) se crée dans les pays du Nord.',
+      'Le commerce équitable garantit un prix minimum et une prime, mais ne touche qu’une petite part du marché.',
+      'Transformer localement et s’organiser en coopératives : deux moyens de mieux profiter de la mondialisation.'
+    ],
+    ecrire: 'Rédigez un paragraphe argumenté : « La mondialisation profite-t-elle aux planteurs de cacao du Cameroun ? » Utilisez au moins trois mots du vocabulaire de la leçon (valeur ajoutée, cours mondial, filière, commerce équitable).'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Le voyage d’une fève</h1>
+<p><b>Géographie · Terminale</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Suivre une fève de cacao à travers la mondialisation : qui la produit, qui la transporte, qui la transforme, et qui gagne le plus. Comprendre ce que propose le commerce équitable, et ses limites.</p>
+<p>Programme : Progression harmonisée Tle · Leçons 11-12 (facteurs et fonctionnement de la mondialisation), dossiers 3-4 (commerce équitable, problèmes de la mondialisation)</p>
+<p>Lieu : Une cacaoyère du Centre, puis le port de Kribi · Saison de la récolte</p>
+<h3>Personnages</h3><ul><li>Pa’a Essomba, planteur</li><li>Ewodo, sa fille, lycéenne</li><li>Un acheteur-collecteur</li><li>Mme Abomo, présidente de coopérative</li><li>M. Janssen, chocolatier européen</li></ul>
+<h3>La scène</h3>
+<p>Sous l’ombre des grands arbres, Pa’a Essomba ouvre les cabosses à la machette. Les fèves vont fermenter, puis sécher au soleil. Le Cameroun est l’un des principaux producteurs de cacao d’Afrique, derrière la Côte d’Ivoire et le Ghana.</p>
+<p><b>Ewodo, sa fille, lycéenne</b> <i>(elle tient une tablette de chocolat achetée en ville)</i> : Papa, cette tablette coûte presque autant qu’un kilo de tes fèves. Et pourtant il n’y a que quelques grammes de cacao dedans.</p>
+<p><b>Pa’a Essomba, planteur</b> : Je vends des fèves. D’autres vendent du chocolat. Ce n’est pas le même métier, ni le même argent.</p>
+<p>L’acheteur arrive avec sa balance et son camion.</p>
+<p><b>Un acheteur-collecteur</b> <i>(pressé)</i> : Le prix a baissé à Londres cette semaine. Je prends tout, mais à ce prix-là.</p>
+<p><b>Question :</b> Pourquoi le prix payé au planteur dépend-il d’un marché lointain ?</p><ul><li>Le cacao est une matière première dont le prix se fixe sur les marchés mondiaux (Londres, New York), selon l’offre et la demande. <b>(bonne réponse)</b></li><li>Parce que l’acheteur le décide seul.</li></ul><p>C’est un effet de la mondialisation : un planteur du Centre dépend de cours fixés à des milliers de kilomètres.</p>
+<h4>Atelier · la chaîne du cacao</h4><p>Remets dans l’ordre le voyage de la fève jusqu’à la tablette.</p>
+<ol><li>Récolte des cabosses, fermentation et séchage des fèves.</li><li>Achat par un collecteur ou une coopérative.</li><li>Exportation par le port de Douala ou de Kribi.</li><li>Traversée en conteneur vers l’Europe.</li><li>Broyage : pâte, beurre et poudre de cacao.</li><li>Fabrication et vente des tablettes de chocolat.</li></ol>
+<p>Plus on avance dans la chaîne, plus la valeur ajoutée est grande, et plus on s’éloigne du planteur.</p>
+<p><b>M. Janssen, chocolatier européen</b> <i>(dans son atelier, en Europe)</i> : Le transport, le broyage, la marque, la publicité, la distribution : voilà ce qui fait le prix de ma tablette.</p>
+<h4>Atelier · amont ou aval ?</h4><p>Classe chaque activité : en amont de la filière (près du planteur), ou en aval (près du consommateur) ?</p>
+<ul><li><b>Amont</b> : Écabossage et séchage. ; Collecte des sacs dans les villages.</li><li><b>Aval</b> : Publicité pour une marque de chocolat. ; Vente en supermarché. ; Fabrication des tablettes.</li></ul>
+<p>L’aval, où se crée l’essentiel de la valeur, se trouve surtout dans les pays du Nord.</p>
+<p>Au village, Mme Abomo réunit les planteurs de la coopérative.</p>
+<p><b>Mme Abomo, présidente de coopérative</b> : Avec le commerce équitable, nos acheteurs garantissent un prix minimum, même quand les cours baissent, et versent une prime pour la coopérative : un puits, une école, du matériel.</p>
+<p><b>À toi de décider :</b> Tu es Pa’a Essomba. Rejoins-tu la coopérative certifiée ?</p><ul><li>Oui : un prix minimum me protège quand les cours s’effondrent. — Tu gagnes en sécurité, mais tu dois respecter un cahier des charges (traçabilité, pas de travail des enfants, qualité).</li><li>Non : je préfère vendre à qui paie le plus le jour même. — Les bonnes années, tu gagnes parfois plus ; les mauvaises, tu subis seul la baisse.</li><li>Oui, et je propose à la coopérative de transformer une partie des fèves sur place. — C’est l’idée la plus ambitieuse : garder une partie de la valeur ajoutée au Cameroun.</li></ul>
+<h4>Atelier · le commerce équitable en débat</h4><p>Place chaque argument : en faveur du commerce équitable, ou contre / sur ses limites ?</p>
+<p>Le commerce équitable corrige certains effets de la mondialisation sans en changer les règles.</p>
+<p><b>Ewodo, sa fille, lycéenne</b> : Un jour, j’ouvrirai une chocolaterie ici. Nos fèves, notre chocolat.</p>
+<h3>Quiz</h3><ol><li>Où se fixe le prix mondial du cacao ? — <b>Sur les marchés de matières premières (Londres, New York).</b> Selon l’offre et la demande mondiales.</li><li>Qu’est-ce que la valeur ajoutée ? — <b>La richesse créée en transformant un produit.</b> La fève devient pâte, beurre, chocolat.</li><li>Que garantit le commerce équitable ? — <b>Un prix minimum et une prime collective.</b> En échange d’un cahier des charges.</li><li>Quel est le premier producteur mondial de cacao ? — <b>La Côte d’Ivoire.</b> Devant le Ghana.</li><li>Quel facteur de la mondialisation permet le voyage de la fève ? — <b>Le transport maritime par conteneurs.</b> Avec les télécommunications qui relient les marchés.</li></ol>
+<h3>À retenir</h3><ul><li>Le cacao camerounais est vendu surtout sous forme de fèves brutes, à un prix fixé sur les marchés mondiaux.</li><li>L’essentiel de la valeur ajoutée (broyage, fabrication, marque, distribution) se crée dans les pays du Nord.</li><li>Le commerce équitable garantit un prix minimum et une prime, mais ne touche qu’une petite part du marché.</li><li>Transformer localement et s’organiser en coopératives : deux moyens de mieux profiter de la mondialisation.</li></ul>
+<h3>À écrire</h3><p>Rédigez un paragraphe argumenté : « La mondialisation profite-t-elle aux planteurs de cacao du Cameroun ? » Utilisez au moins trois mots du vocabulaire de la leçon (valeur ajoutée, cours mondial, filière, commerce équitable).</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="tle-geo-cacao-commerce-equitable.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

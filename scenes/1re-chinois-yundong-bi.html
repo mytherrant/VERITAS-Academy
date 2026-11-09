@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>运动 · Le sport — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de chinois (Première) : l’importance de la pratique du sport ; la phrase comparative avec 比 et 没有.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/1re-chinois-yundong-bi.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="运动 · Le sport — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée de chinois (Première) : l’importance de la pratique du sport ; la phrase comparative avec 比 et 没有.">
+<meta property="og:url" content="https://veritas-school.com/scenes/1re-chinois-yundong-bi.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"运动 · Le sport","description":"Scène animée de chinois (Première) : l’importance de la pratique du sport ; la phrase comparative avec 比 et 没有.","url":"https://veritas-school.com/scenes/1re-chinois-yundong-bi.html","inLanguage":"zh-CN","learningResourceType":"Simulation interactive","educationalLevel":"Première","about":"Chinois","teaches":"Parler de ses sports préférés et de l’importance du sport pour la santé ; comparer avec 比 (A 比 B + adjectif) et 没有 (A 没有 B + adjectif) ; utiliser 得 pour décrire une action (跑得快).","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '1re-chinois-sport',
+  discipline: 'Chinois', niveau: '1re', langue: 'zh-CN', langueRecit: 'fr-FR',
+  titre: '运动 · Le sport',
+  decor: 'place', lieu: 'Le terrain de sport du lycée', moment: 'Cours d’EPS',
+  objectif: 'Parler de ses sports préférés et de l’importance du sport pour la santé ; comparer avec 比 (A 比 B + adjectif) et 没有 (A 没有 B + adjectif) ; utiliser 得 pour décrire une action (跑得快).',
+  programme: 'Progression harmonisée 1re · Module 2 (environnement et santé), leçon 9 (importance de la pratique du sport), leçon 10 (phrases comparatives), leçons 11-12 (expression orale et écrite)',
+  jauges: [
+    { id: 'sante', nom: 'Santé (健康)', val: 40, couleur: '#1F9D5B' },
+    { id: 'zhongwen', nom: 'Chinois (中文)', val: 20, couleur: '#1E499B' }
+  ],
+  personnages: {
+    zhang: { nom: '张老师 (M. Zhang)', couleur: '#1E499B', look: { metier: 'enseignant', peau: 'clair', cheveux: 'court', couleurCheveux: '#1A1A1A' } },
+    ali:   { nom: 'Ali', couleur: '#1F9D5B', look: { metier: 'eleve', peau: 'fonce', cheveux: 'ras', habit: '#1F9D5B' } },
+    mei:   { nom: 'Mireille', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'queue' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['zhang', 'ali', 'mei'], txt: 'Le professeur de chinois accompagne la classe au terrain de sport. Il veut qu’on parle chinois en bougeant.', objet: { i: 'course', lib: '运动场 · le terrain' } },
+    { t: 'dit', qui: 'zhang', txt: '你们喜欢什么运动？', pron: 'Nǐmen xǐhuan shénme yùndòng?', trad: 'Quels sports aimez-vous ?' },
+    { t: 'dit', qui: 'ali', emo: 'joie', txt: '我喜欢踢足球。', pron: 'Wǒ xǐhuan tī zúqiú.', trad: 'J’aime jouer au football.' },
+    { t: 'dit', qui: 'mei', txt: '我喜欢跑步。', pron: 'Wǒ xǐhuan pǎobù.', trad: 'J’aime courir.', jauges: { zhongwen: 35 } },
+    { t: 'dit', qui: 'ali', jeu: 'fier', txt: '足球比跑步有意思！', pron: 'Zúqiú bǐ pǎobù yǒu yìsi!', trad: 'Le football est plus intéressant que la course !' },
+    { t: 'remarque', titre: 'Comparer avec 比', txt: 'A 比 B + adjectif : 足球比跑步有意思 (le football est plus intéressant que la course). Attention : on ne met PAS 很 devant l’adjectif : on dit 他比我高, jamais 他比我很高. Négation : A 没有 B + adjectif : 跑步没有足球有意思 (la course n’est pas aussi intéressante que le football).' },
+    { t: 'question', q: 'Quelle phrase est correcte pour dire « Mireille est plus rapide qu’Ali » ?',
+      options: [
+        { txt: '米蕾比阿里快。', ok: true, retour: 'Mǐlěi bǐ Ālǐ kuài. A 比 B + adjectif, sans 很.' },
+        { txt: '米蕾比阿里很快。', retour: 'On ne met pas 很 dans une comparaison avec 比.' },
+        { txt: '阿里比米蕾快。', retour: 'Cette phrase dit le contraire : Ali est plus rapide que Mireille.' }
+      ] },
+    { t: 'dit', qui: 'mei', emo: 'fier', jeu: 'après la course', txt: '我比阿里跑得快！', pron: 'Wǒ bǐ Ālǐ pǎo de kuài!', trad: 'Je cours plus vite qu’Ali !', jauges: { sante: 55 } },
+    { t: 'remarque', titre: 'Décrire une action : V + 得 + adjectif', txt: '跑得快 (courir vite), 踢得好 (bien jouer au foot). Avec 比 : A 比 B + V + 得 + adjectif : 我比阿里跑得快.' },
+    { t: 'dit', qui: 'zhang', txt: '运动对身体很好。每天运动三十分钟，身体更健康。', pron: 'Yùndòng duì shēntǐ hěn hǎo. Měi tiān yùndòng sānshí fēnzhōng, shēntǐ gèng jiànkāng.', trad: 'Le sport est bon pour le corps. Avec trente minutes de sport par jour, on est en meilleure santé.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · bien pour la santé ?', consigne: 'Classe chaque habitude.',
+      cats: ['对身体好 (bon pour le corps)', '对身体不好 (mauvais pour le corps)'],
+      items: [
+        { txt: '每天跑步 (courir chaque jour)', cat: 0 },
+        { txt: '整天玩手机 (jouer au téléphone toute la journée)', cat: 1 },
+        { txt: '多喝水 (boire beaucoup d’eau)', cat: 0 },
+        { txt: '常常喝可乐 (boire souvent du soda)', cat: 1 },
+        { txt: '踢足球 (jouer au football)', cat: 0 }
+      ],
+      bravo: '运动对身体很好！', jauges: { sante: 75, zhongwen: 55 } },
+    { t: 'choix', qui: 'ali', q: 'Tu es Ali. Après les cours, que fais-tu ?',
+      options: [
+        { txt: '我在家玩手机。(Je joue au téléphone à la maison.)', consequence: 'Ton corps ne bouge pas de la journée : fatigue et manque de forme.', jauges: { sante: -20 } },
+        { txt: '我跟朋友们踢足球。(Je joue au football avec mes amis.)', consequence: 'Sport, amitié et bonne humeur : 一举三得 (un geste, trois gains) !', jauges: { sante: 20, zhongwen: 10 } }
+      ],
+      oeuvre: '跟 (gēn) … 一起 : avec quelqu’un. 我跟朋友们一起踢足球 = je joue au foot avec mes amis.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · construis la phrase', consigne: 'Remets les mots dans l’ordre : « Je cours plus vite que mon grand frère. »',
+      items: ['我', '比', '我哥哥', '跑得', '快。'],
+      bravo: '我比我哥哥跑得快。Wǒ bǐ wǒ gēge pǎo de kuài.', jauges: { zhongwen: 80 } },
+    { t: 'dit', qui: 'zhang', emo: 'joie', txt: '你们都很棒！明天再来！', pron: 'Nǐmen dōu hěn bàng! Míngtiān zài lái!', trad: 'Vous êtes tous formidables ! Revenez demain !', jauges: { sante: 85 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · une classe en forme',
+    intro: 'Règle le temps de sport, le temps d’écran et l’alimentation : la classe est-elle en forme à la fin du trimestre ?',
+    persos: ['zhang', 'ali', 'mei'],
+    curseurs: [
+      { id: 'sport', nom: 'Sport par jour (运动)', val: 40, bas: '0 minute', haut: '1 heure' },
+      { id: 'ecran', nom: 'Temps d’écran (手机)', val: 60, bas: 'peu', haut: 'toute la journée' },
+      { id: 'nourriture', nom: 'Alimentation (饮食)', val: 50, bas: 'sodas et fritures', haut: 'équilibrée' }
+    ],
+    scenarios: [
+      { nom: 'Aujourd’hui', icone: 'course', valeurs: { sport: 40, ecran: 60, nourriture: 50 } },
+      { nom: '整天玩手机', icone: 'telephone', valeurs: { sport: 5, ecran: 95, nourriture: 25 } },
+      { nom: '健康生活', icone: 'fier', valeurs: { sport: 85, ecran: 25, nourriture: 85 } }
+    ],
+    liens: [
+      { a: 'zhang', b: 'ali', type: 'confiance', lib: '老师', base: .5, poids: { sport: .3 } },
+      { a: 'ali', b: 'mei', type: 'alliance', lib: '朋友', base: .5, poids: { sport: .3 } },
+      { a: 'ali', b: 'mei', type: 'conflit', lib: '比赛', base: .3 }
+    ],
+    issue: function(v){
+      if(v.sport < 20 && v.ecran > 70){ return { niveau: 'ko', badge: '不健康 · En mauvaise forme', recit: 'Peu de mouvement, beaucoup d’écran : fatigue, prise de poids, difficultés de concentration.', apres: '运动对身体很好 : il est temps de bouger.', themes: ['sédentarité'] }; }
+      if(v.sport > 65 && v.nourriture > 65){ return { niveau: 'ok', badge: '很健康 · En pleine forme', recit: 'Sport quotidien et alimentation équilibrée : la classe est en forme et plus concentrée.', apres: '身体更健康，学习更好。', themes: ['santé', 'sport'] }; }
+      return { niveau: 'moyen', badge: '还可以 · Pas mal', recit: 'Un peu de sport, mais encore trop d’écran ou de sodas.', apres: 'Un petit effort de plus chaque jour.', themes: ['habitudes'] };
+    }
+  },
+  quiz: [
+    { q: 'Que signifie 运动 (yùndòng) ?', options: [
+      { txt: 'Le sport.', ok: true, retour: '运动对身体很好.' },
+      { txt: 'La musique.', retour: 'La musique = 音乐 (yīnyuè).' } ] },
+    { q: 'Où place-t-on 比 ?', options: [
+      { txt: 'Entre les deux éléments comparés : A 比 B + adjectif.', ok: true, retour: '他比我高.' },
+      { txt: 'À la fin de la phrase.', retour: 'Non.' } ] },
+    { q: 'Peut-on dire 他比我很高 ?', options: [
+      { txt: 'Non, on ne met pas 很 avec 比.', ok: true, retour: 'On dit 他比我高.' },
+      { txt: 'Oui.', retour: 'C’est une faute fréquente.' } ] },
+    { q: 'Que signifie 跑得快 ?', options: [
+      { txt: 'Courir vite.', ok: true, retour: 'V + 得 + adjectif.' },
+      { txt: 'Aimer courir.', retour: 'Aimer courir = 喜欢跑步.' } ] },
+    { q: 'Comment dit-on « la course n’est pas aussi intéressante que le foot » ?', options: [
+      { txt: '跑步没有足球有意思。', ok: true, retour: 'A 没有 B + adjectif.' },
+      { txt: '跑步不比足球。', retour: 'Phrase incomplète.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Vocabulaire : 运动, 踢足球, 跑步, 身体, 健康, 每天, 分钟.',
+      'Comparatif : A 比 B + adjectif (sans 很) ; négation : A 没有 B + adjectif.',
+      'Description d’une action : V + 得 + adjectif (跑得快) ; avec 比 : A 比 B + V + 得 + adjectif.',
+      '运动对身体很好 : trente minutes de sport par jour.'
+    ],
+    ecrire: 'Écris en caractères et en pinyin cinq phrases qui comparent deux sports ou deux camarades, avec 比 et 没有.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr-FR">
+<h1>运动 · Le sport</h1>
+<p><b>Chinois · Première</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Parler de ses sports préférés et de l’importance du sport pour la santé ; comparer avec 比 (A 比 B + adjectif) et 没有 (A 没有 B + adjectif) ; utiliser 得 pour décrire une action (跑得快).</p>
+<p>Programme : Progression harmonisée 1re · Module 2 (environnement et santé), leçon 9 (importance de la pratique du sport), leçon 10 (phrases comparatives), leçons 11-12 (expression orale et écrite)</p>
+<p>Lieu : Le terrain de sport du lycée · Cours d’EPS</p>
+<h3>Personnages</h3><ul><li>张老师 (M. Zhang)</li><li>Ali</li><li>Mireille</li></ul>
+<h3>La scène</h3>
+<p>Le professeur de chinois accompagne la classe au terrain de sport. Il veut qu’on parle chinois en bougeant.</p>
+<p><b>张老师 (M. Zhang)</b> : 你们喜欢什么运动？ <i>(Nǐmen xǐhuan shénme yùndòng?)</i> — <i>Quels sports aimez-vous ?</i></p>
+<p><b>Ali</b> : 我喜欢踢足球。 <i>(Wǒ xǐhuan tī zúqiú.)</i> — <i>J’aime jouer au football.</i></p>
+<p><b>Mireille</b> : 我喜欢跑步。 <i>(Wǒ xǐhuan pǎobù.)</i> — <i>J’aime courir.</i></p>
+<p><b>Ali</b> <i>(fier)</i> : 足球比跑步有意思！ <i>(Zúqiú bǐ pǎobù yǒu yìsi!)</i> — <i>Le football est plus intéressant que la course !</i></p>
+<h4>Comparer avec 比</h4><p>A 比 B + adjectif : 足球比跑步有意思 (le football est plus intéressant que la course). Attention : on ne met PAS 很 devant l’adjectif : on dit 他比我高, jamais 他比我很高. Négation : A 没有 B + adjectif : 跑步没有足球有意思 (la course n’est pas aussi intéressante que le football).</p>
+<p><b>Question :</b> Quelle phrase est correcte pour dire « Mireille est plus rapide qu’Ali » ?</p><ul><li>米蕾比阿里快。 <b>(bonne réponse)</b></li><li>米蕾比阿里很快。</li><li>阿里比米蕾快。</li></ul><p>Mǐlěi bǐ Ālǐ kuài. A 比 B + adjectif, sans 很.</p>
+<p><b>Mireille</b> <i>(après la course)</i> : 我比阿里跑得快！ <i>(Wǒ bǐ Ālǐ pǎo de kuài!)</i> — <i>Je cours plus vite qu’Ali !</i></p>
+<h4>Décrire une action : V + 得 + adjectif</h4><p>跑得快 (courir vite), 踢得好 (bien jouer au foot). Avec 比 : A 比 B + V + 得 + adjectif : 我比阿里跑得快.</p>
+<p><b>张老师 (M. Zhang)</b> : 运动对身体很好。每天运动三十分钟，身体更健康。 <i>(Yùndòng duì shēntǐ hěn hǎo. Měi tiān yùndòng sānshí fēnzhōng, shēntǐ gèng jiànkāng.)</i> — <i>Le sport est bon pour le corps. Avec trente minutes de sport par jour, on est en meilleure santé.</i></p>
+<h4>Atelier · bien pour la santé ?</h4><p>Classe chaque habitude.</p>
+<ul><li><b>对身体好 (bon pour le corps)</b> : 每天跑步 (courir chaque jour) ; 多喝水 (boire beaucoup d’eau) ; 踢足球 (jouer au football)</li><li><b>对身体不好 (mauvais pour le corps)</b> : 整天玩手机 (jouer au téléphone toute la journée) ; 常常喝可乐 (boire souvent du soda)</li></ul>
+<p>运动对身体很好！</p>
+<p><b>À toi de décider :</b> Tu es Ali. Après les cours, que fais-tu ?</p><ul><li>我在家玩手机。(Je joue au téléphone à la maison.) — Ton corps ne bouge pas de la journée : fatigue et manque de forme.</li><li>我跟朋友们踢足球。(Je joue au football avec mes amis.) — Sport, amitié et bonne humeur : 一举三得 (un geste, trois gains) !</li></ul>
+<h4>Atelier · construis la phrase</h4><p>Remets les mots dans l’ordre : « Je cours plus vite que mon grand frère. »</p>
+<ol><li>我</li><li>比</li><li>我哥哥</li><li>跑得</li><li>快。</li></ol>
+<p>我比我哥哥跑得快。Wǒ bǐ wǒ gēge pǎo de kuài.</p>
+<p><b>张老师 (M. Zhang)</b> : 你们都很棒！明天再来！ <i>(Nǐmen dōu hěn bàng! Míngtiān zài lái!)</i> — <i>Vous êtes tous formidables ! Revenez demain !</i></p>
+<h3>Quiz</h3><ol><li>Que signifie 运动 (yùndòng) ? — <b>Le sport.</b> 运动对身体很好.</li><li>Où place-t-on 比 ? — <b>Entre les deux éléments comparés : A 比 B + adjectif.</b> 他比我高.</li><li>Peut-on dire 他比我很高 ? — <b>Non, on ne met pas 很 avec 比.</b> On dit 他比我高.</li><li>Que signifie 跑得快 ? — <b>Courir vite.</b> V + 得 + adjectif.</li><li>Comment dit-on « la course n’est pas aussi intéressante que le foot » ? — <b>跑步没有足球有意思。</b> A 没有 B + adjectif.</li></ol>
+<h3>À retenir</h3><ul><li>Vocabulaire : 运动, 踢足球, 跑步, 身体, 健康, 每天, 分钟.</li><li>Comparatif : A 比 B + adjectif (sans 很) ; négation : A 没有 B + adjectif.</li><li>Description d’une action : V + 得 + adjectif (跑得快) ; avec 比 : A 比 B + V + 得 + adjectif.</li><li>运动对身体很好 : trente minutes de sport par jour.</li></ul>
+<h3>À écrire</h3><p>Écris en caractères et en pinyin cinq phrases qui comparent deux sports ou deux camarades, avec 比 et 没有.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="1re-chinois-yundong-bi.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

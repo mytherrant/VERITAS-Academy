@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap><loc>https://veritas-school.com/sitemap.xml</loc></sitemap>
-  <sitemap><loc>https://veritas-school.com/seo/sitemap.xml</loc></sitemap>
   <sitemap><loc>https://veritas-school.com/oeuvres/sitemap-oeuvres.xml</loc></sitemap>
   <sitemap><loc>https://veritas-school.com/ressources/sitemap-ressources.xml</loc></sitemap>
   <sitemap><loc>https://veritas-school.com/decouvrir/sitemap-decouvrir.xml</loc></sitemap>
@@ -9,4 +8,5 @@
   <sitemap><loc>https://veritas-school.com/outils/sitemap-outils.xml</loc></sitemap>
   <sitemap><loc>https://veritas-school.com/corriges/sitemap-corriges.xml</loc></sitemap>
   <sitemap><loc>https://veritas-school.com/livrets/sitemap-livrets.xml</loc></sitemap>
+  <sitemap><loc>https://veritas-school.com/scenes/sitemap-scenes.xml</loc></sitemap>
 </sitemapindex>

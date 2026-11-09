@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La mosquée bleue — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Poèmes sauvages éclairés au feu de brousse d’Henri N’koumo : après la colère, un souvenir heureux revient. Un balcon, une amie, une mosquée si bleue.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/poemes-sauvages-la-mosquee-bleue.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="La mosquée bleue — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’après Poèmes sauvages éclairés au feu de brousse d’Henri N’koumo : après la colère, un souvenir heureux revient. Un balcon, une amie, une mosquée si bleue.">
+<meta property="og:url" content="https://veritas-school.com/scenes/poemes-sauvages-la-mosquee-bleue.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"La mosquée bleue","description":"Scène animée d’après Poèmes sauvages éclairés au feu de brousse d’Henri N’koumo : après la colère, un souvenir heureux revient. Un balcon, une amie, une mosquée si bleue.","url":"https://veritas-school.com/scenes/poemes-sauvages-la-mosquee-bleue.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"Seconde","about":"Français","teaches":"Comprendre pourquoi un souvenir ordinaire constitue la réponse la plus forte du livre à ceux qui ont tué.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"},"isBasedOn":{"@type":"Book","name":"Poèmes sauvages éclairés au feu de brousse","author":{"@type":"Person","name":"Henri N’koumo (2022)"}}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'poemes-mosquee',
+  discipline: 'Français', niveau: '2nde',
+  oeuvre: 'Poèmes sauvages éclairés au feu de brousse', auteur: 'Henri N’koumo (2022)',
+  titre: 'La mosquée bleue',
+  decor: 'ville', lieu: 'Abidjan, un balcon au-dessus du Plateau', moment: 'Aux deux tiers du poème',
+  avertissement: 'Les passages suivis de la référence du livre sont ceux du poème, recopiés tels quels. Les élèves et la professeure sont joués par nos comédiens.',
+  objectif: 'Comprendre pourquoi un souvenir ordinaire constitue la réponse la plus forte du livre à ceux qui ont tué.',
+  jauges: [
+    { id: 'colere', nom: 'Colère', val: 80, couleur: '#C0392B' },
+    { id: 'memoire', nom: 'Le souvenir vivant', val: 10, couleur: '#1E499B' }
+  ],
+  personnages: {
+    prof:  { nom: 'Mme Eyenga, professeure', court: 'Mme Eyenga', couleur: '#1E499B', look: { tenue: 'jupe', objet: 'livre', peau: 'fonce', cheveux: 'chignon', lunettes: true, habit: '#1E499B' } },
+    awa:   { nom: 'Awa, élève à Maroua', court: 'Awa', couleur: '#B0503A', look: { tenue: 'jupe', peau: 'fonce', coiffe: 'voile', couleurCoiffe: '#5AA9E6', habit: '#2F5E9E' } },
+    koffi: { nom: 'Koffi, élève à Abidjan', court: 'Koffi', couleur: '#2E6B5A', look: { peau: 'fonce', cheveux: 'ras', habit: '#E9E3CF', col: '#2E6B5A' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['prof', 'awa', 'koffi'], txt: 'Le 13 mars 2016, à Grand-Bassam, des terroristes ont tiré sur la plage. Parmi les victimes : Henrike Grohs, qui dirigeait le Goethe Institut d’Abidjan, et qui était l’amie du poète.' },
+    { t: 'dit', qui: 'prof', txt: 'Le poème a dit sa colère. Écoutez maintenant comment il parle de lui-même.' },
+    { t: 'recit', txt: 'et mon poème enflera de morves tous les grands arbres de la terre il s’enfoncera aux chemins rompus dans le sol comme dans l’eau navrée qui m’emplit de nuits et de mer enfiévrées', cite: 'Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, page 63' },
+    { t: 'question', q: 'Le verbe « s’enfoncer » revient plusieurs fois. Vers où va le poème ?',
+      options: [
+        { txt: 'Vers le bas, vers l’intérieur : le contraire d’une explosion.', ok: true, retour: 'Une bombe projette vers le haut et vers l’extérieur ; le poème descend et rentre.' },
+        { txt: 'Vers le ciel.', retour: 'Relis : « dans le sol », « au plus profond de moi ».' }
+      ] },
+    { t: 'recit', txt: 'et la mort fait foule au passage des bombes dans l’aube clouée dans la chaleur nue des amandes', cite: 'Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, page 63', jauges: { colere: 95 } },
+    { t: 'recit', ambiance: 'aube', txt: 'et tu me regardes, Henrike depuis les lumières amères et tu me parles du dernier spectacle au Goethe Institut et tu m’ouvres à ton appartement et tu me montres ton balcon', cite: 'Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, page 63', jauges: { memoire: 50, colere: 60 } },
+    { t: 'dit', qui: 'koffi', emo: 'surpris', txt: 'D’un coup, plus de bombes. Juste deux amis qui parlent d’un spectacle.' },
+    { t: 'recit', txt: 'et ce balcon d’immeuble surplombe la mosquée du Plateau et tes mots superbes dansent pour cette mosquée si belle et si bleue et tes mots sont si rapides pour cette mosquée si toi et si bleue', cite: 'Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, page 63', jauges: { memoire: 80 } },
+    { t: 'question', q: '« si belle et si bleue », puis « si toi et si bleue » : que se passe-t-il ?',
+      options: [
+        { txt: 'Henrike et la mosquée se fondent en un seul objet d’admiration.', ok: true, retour: 'Une Allemande qui admire une mosquée d’Abidjan, tuée au nom de l’islam. Le poème ne commente pas : le fait suffit.' },
+        { txt: 'Le poète se trompe de mot.', retour: 'C’est voulu : « toi » remplace « belle ».' }
+      ] },
+    { t: 'dit', qui: 'awa', emo: 'triste', jeu: 'doucement', txt: 'Elle admirait la mosquée. Et ceux qui l’ont tuée prétendaient le faire au nom de ma religion.' },
+    { t: 'recit', txt: 'et tu m’offres ton rire sans frein et je tiens toujours ta main d’amie et j’entends ton rire si long sur le sable si fin', cite: 'Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, page 63' },
+    { t: 'recit', txt: 'et tu sais que je suis bien en toi Henrike pour rallumer les bougies de tes yeux', cite: 'Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, page 63', jauges: { memoire: 95 } },
+    { t: 'choix', qui: 'awa', q: 'Le poète a deux armes : la colère ou le souvenir. Laquelle répond le mieux aux tueurs ?',
+      options: [
+        { txt: 'La colère, pour ne jamais pardonner.', consequence: 'Elle est dans le poème… mais elle ressemble à ce qu’elle combat.', jauges: { colere: 100 } },
+        { txt: 'Le souvenir heureux, qui garde la morte vivante.', consequence: 'C’est la réponse du poème : un rire, un balcon, une mosquée bleue.', jauges: { memoire: 100 } },
+        { txt: 'Le silence.', consequence: 'Le silence laisserait le dernier mot aux bombes.', jauges: { memoire: 40 } }
+      ],
+      oeuvre: 'Le poème choisit le souvenir : « je suis en toi » est une présence gagnée sur la mort.' },
+    { t: 'recit', txt: 'offre donc tes yeux aux hurlements non corrompus et à tous les souffles réconciliateurs du monde', cite: 'Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, page 63', jauges: { colere: 30 } },
+    { t: 'question', q: 'Que demande le poète à son amie morte, à la fin ?',
+      options: [
+        { txt: 'De tourner ses yeux vers les cris restés purs et vers tout ce qui réconcilie.', ok: true, retour: 'Un impératif adressé à une morte : le poème finit sur la réconciliation, pas sur la vengeance.' },
+        { txt: 'De le venger.', retour: 'Non : « souffles réconciliateurs ».' }
+      ] },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · deux mouvements', consigne: 'Classe chaque passage : la violence, ou le souvenir heureux ?',
+      cats: ['La violence', 'Le souvenir heureux'],
+      items: [
+        { txt: 'la mort fait foule au passage des bombes', cat: 0 },
+        { txt: 'tu me parles du dernier spectacle au Goethe Institut', cat: 1 },
+        { txt: 'la colère des dynamites', cat: 0 },
+        { txt: 'ton rire si long sur le sable si fin', cat: 1 },
+        { txt: 'cette mosquée si belle et si bleue', cat: 1 }
+      ],
+      bravo: 'La banalité du souvenir rend le passage insoutenable, et c’est elle qui répond aux tueurs.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · la réponse du poème',
+    intro: 'Règle la colère, la mémoire et le désir de réconciliation : quelle réponse le poème donne-t-il à la violence ?',
+    persos: ['prof', 'awa', 'koffi'],
+    curseurs: [
+      { id: 'colere', nom: 'Colère', val: 50, bas: 'apaisée', haut: 'brûlante', lecture: { haut: '« la colère des dynamites »', bas: 'La colère s’est dite ; elle peut se taire.' } },
+      { id: 'memoire', nom: 'Mémoire heureuse', val: 90, bas: 'effacée', haut: 'vivante', lecture: { haut: '« je suis en toi »', bas: 'On ne se souvient que de la mort.' } },
+      { id: 'paix', nom: 'Réconciliation', val: 80, bas: 'vengeance', haut: 'souffles réconciliateurs', lecture: { haut: '« tous les souffles réconciliateurs du monde »', bas: 'La haine répond à la haine.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans le poème', icone: 'livre', valeurs: { colere: 50, memoire: 90, paix: 80 } },
+      { nom: 'Et si seule la colère parlait ?', icone: 'colere', valeurs: { colere: 95, memoire: 15, paix: 15 } },
+      { nom: 'Et si l’on oubliait ?', icone: 'nuage', valeurs: { memoire: 10, colere: 20 } }
+    ],
+    liens: [
+      { a: 'prof', b: 'awa', type: 'confiance', lib: 'elle explique', base: .6 },
+      { a: 'awa', b: 'koffi', type: 'alliance', lib: 'deux pays', base: .5, poids: { paix: .3 } },
+      { a: 'koffi', b: 'prof', type: 'confiance', lib: 'il écoute', base: .5 }
+    ],
+    issue: function(v){
+      if(v.memoire < 30 && v.colere < 50){ return { niveau: 'ko', badge: 'L’oubli', recit: 'On ne parle plus d’Henrike : ni colère, ni souvenir. Les tueurs ont effacé une vie.', apres: 'Le poème existe contre cet oubli.', themes: ['oubli', 'silence'] }; }
+      if(v.colere >= 80 && v.paix < 40){ return { niveau: 'moyen', badge: 'La colère seule', recit: 'Le poème hurle, mais ne fait revivre personne.', apres: 'La colère est juste ; elle ne suffit pas à répondre.', themes: ['colère', 'violence'] }; }
+      return { niveau: 'ok', badge: 'Le souvenir qui répond', recit: 'Un balcon, un rire, une mosquée si bleue : Henrike est là, et le poème se tourne vers la réconciliation.', apres: 'C’est la réponse la plus forte du livre à ceux qui ont tué.', themes: ['mémoire', 'amitié', 'réconciliation'] };
+    }
+  },
+  fiche: {"accroche": "Un seul poème, sans titre ni chapitre, écrit après le premier attentat de l’histoire de la Côte d’Ivoire, et qui nomme Maroua. Comment la douleur devient-elle, page après page, un chant d’espérance ?", "resume": "Le 13 mars 2016, un attentat frappe la plage de Grand-Bassam : dix-neuf morts, dont Henrike Grohs, directrice du Goethe Institut, à qui le livre est dédié. Henri N’koumo répond par un long poème en trois temps : le constat de l’horreur, l’élargissement à toutes les violences commises au nom de la religion, puis le dépassement, où la douleur devient chant de paix et de fraternité.", "personnages": [{"nom": "La voix du poète", "role": "elle crie, elle hèle, puis elle appelle au réveil."}, {"nom": "Henrike Grohs", "role": "directrice du Goethe Institut, tuée à Grand-Bassam ; elle « ressuscite » dans le poème."}, {"nom": "Le « nous »", "role": "tous ceux qui pleurent et doivent se relever."}, {"nom": "Awa et Koffi", "role": "deux élèves de la scène, de Maroua et d’Abidjan.", "cle": "awa"}], "aLire": [{"ou": "« Comme introduction », page 7", "pourquoi": "Un exorde de cent mots où tout le livre tient : le constat, puis l’appel."}, {"ou": "L’épigraphe de Beckett", "pourquoi": "« Nous naissons tous fous. Quelques-uns le demeurent. » : la clé pour lire le livre."}, {"ou": "Le troisième temps, vers la page 63", "pourquoi": "Là où la douleur se change en chant."}], "siTuAimes": "la poésie qui se dit fort, lis ce livre à voix haute : ces poèmes, dit l’auteur, « gueulent » en écho aux bombes.", "reperes": ["Auteur : Henri N’koumo (Côte d’Ivoire), né en 1965 à Bingerville", "Prix Jean-Marie Adiaffi 2025", "Publié en 2022", "Un seul poème, en trois temps"], "themes": ["le terrorisme", "le deuil", "la fraternité", "l’espérance"], "cahier": {"lib": "Le cahier VÉRITAS de cette œuvre", "href": "../livrets/oeuvre-poemes.html"}},
+  quiz: [
+    { q: 'Qui était Henrike Grohs ?', options: [ { txt: 'La directrice du Goethe Institut d’Abidjan, amie du poète.', ok: true, retour: 'Tuée à Grand-Bassam le 13 mars 2016.' }, { txt: 'Une poétesse ivoirienne.', retour: 'Non : une Allemande qui dirigeait un centre culturel.' } ] },
+    { q: 'Que voit-on depuis son balcon ?', options: [ { txt: 'La mosquée du Plateau.', ok: true, retour: '« si belle et si bleue ».' }, { txt: 'La lagune.', retour: 'Non : la mosquée.' } ] },
+    { q: 'Qu’est-ce que le Plateau ?', options: [ { txt: 'Le quartier des affaires d’Abidjan.', ok: true, retour: 'Où se trouve une grande mosquée.' }, { txt: 'Une montagne.', retour: 'Non : un quartier d’Abidjan.' } ] },
+    { q: 'Que signifie « réconciliateur » ?', options: [ { txt: 'Qui remet en paix ceux qui étaient ennemis.', ok: true, retour: '« les souffles réconciliateurs du monde ».' }, { txt: 'Qui accuse.', retour: 'C’est le contraire.' } ] },
+    { q: 'Pourquoi ce souvenir ordinaire est-il si fort ?', options: [ { txt: 'Sa banalité rend la perte insoutenable et répond aux tueurs.', ok: true, retour: 'Une amie qui admire une mosquée : aucun commentaire n’est nécessaire.' }, { txt: 'Parce qu’il est très long.', retour: 'Non : parce qu’il est simple et vrai.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Le poème « s’enfonce » au lieu d’exploser : son mouvement s’oppose à celui des bombes.',
+      'Le souvenir revient : un balcon, un spectacle, un rire, une mosquée bleue.',
+      '« si belle et si bleue », puis « si toi et si bleue » : l’amie et la mosquée se fondent.',
+      'Le poème se termine sur la réconciliation, pas sur la vengeance.'
+    ],
+    ecrire: 'Écris un poème en vers libres (douze lignes) qui fait revivre un moment ordinaire passé avec quelqu’un que tu aimes. Commence chaque ligne par « et ».'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>La mosquée bleue</h1>
+<p><b>Français · Seconde · Poèmes sauvages éclairés au feu de brousse · Henri N’koumo (2022)</b></p>
+<p><i>Les passages suivis de la référence du livre sont ceux du poème, recopiés tels quels. Les élèves et la professeure sont joués par nos comédiens.</i></p>
+<h3>Objectif</h3><p>Comprendre pourquoi un souvenir ordinaire constitue la réponse la plus forte du livre à ceux qui ont tué.</p>
+<p>Lieu : Abidjan, un balcon au-dessus du Plateau · Aux deux tiers du poème</p>
+<h3>Personnages</h3><ul><li>Mme Eyenga, professeure</li><li>Awa, élève à Maroua</li><li>Koffi, élève à Abidjan</li></ul>
+<h3>L’œuvre</h3>
+<p>Un seul poème, sans titre ni chapitre, écrit après le premier attentat de l’histoire de la Côte d’Ivoire, et qui nomme Maroua. Comment la douleur devient-elle, page après page, un chant d’espérance ?</p>
+<p>Le 13 mars 2016, un attentat frappe la plage de Grand-Bassam : dix-neuf morts, dont Henrike Grohs, directrice du Goethe Institut, à qui le livre est dédié. Henri N’koumo répond par un long poème en trois temps : le constat de l’horreur, l’élargissement à toutes les violences commises au nom de la religion, puis le dépassement, où la douleur devient chant de paix et de fraternité.</p>
+<ul><li><b>La voix du poète</b> — elle crie, elle hèle, puis elle appelle au réveil.</li><li><b>Henrike Grohs</b> — directrice du Goethe Institut, tuée à Grand-Bassam ; elle « ressuscite » dans le poème.</li><li><b>Le « nous »</b> — tous ceux qui pleurent et doivent se relever.</li><li><b>Awa et Koffi</b> — deux élèves de la scène, de Maroua et d’Abidjan.</li></ul>
+<p>Thèmes : le terrorisme, le deuil, la fraternité, l’espérance</p>
+<h3>La scène</h3>
+<p>Le 13 mars 2016, à Grand-Bassam, des terroristes ont tiré sur la plage. Parmi les victimes : Henrike Grohs, qui dirigeait le Goethe Institut d’Abidjan, et qui était l’amie du poète.</p>
+<p><b>Mme Eyenga, professeure</b> : Le poème a dit sa colère. Écoutez maintenant comment il parle de lui-même.</p>
+<blockquote><p>et mon poème enflera de morves tous les grands arbres de la terre il s’enfoncera aux chemins rompus dans le sol comme dans l’eau navrée qui m’emplit de nuits et de mer enfiévrées<br><small>Extrait de l’œuvre — Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, page 63</small></p></blockquote>
+<p><b>Question :</b> Le verbe « s’enfoncer » revient plusieurs fois. Vers où va le poème ?</p><ul><li>Vers le bas, vers l’intérieur : le contraire d’une explosion. <b>(bonne réponse)</b></li><li>Vers le ciel.</li></ul><p>Une bombe projette vers le haut et vers l’extérieur ; le poème descend et rentre.</p>
+<blockquote><p>et la mort fait foule au passage des bombes dans l’aube clouée dans la chaleur nue des amandes<br><small>Extrait de l’œuvre — Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, page 63</small></p></blockquote>
+<blockquote><p>et tu me regardes, Henrike depuis les lumières amères et tu me parles du dernier spectacle au Goethe Institut et tu m’ouvres à ton appartement et tu me montres ton balcon<br><small>Extrait de l’œuvre — Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, page 63</small></p></blockquote>
+<p><b>Koffi, élève à Abidjan</b> : D’un coup, plus de bombes. Juste deux amis qui parlent d’un spectacle.</p>
+<blockquote><p>et ce balcon d’immeuble surplombe la mosquée du Plateau et tes mots superbes dansent pour cette mosquée si belle et si bleue et tes mots sont si rapides pour cette mosquée si toi et si bleue<br><small>Extrait de l’œuvre — Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, page 63</small></p></blockquote>
+<p><b>Question :</b> « si belle et si bleue », puis « si toi et si bleue » : que se passe-t-il ?</p><ul><li>Henrike et la mosquée se fondent en un seul objet d’admiration. <b>(bonne réponse)</b></li><li>Le poète se trompe de mot.</li></ul><p>Une Allemande qui admire une mosquée d’Abidjan, tuée au nom de l’islam. Le poème ne commente pas : le fait suffit.</p>
+<p><b>Awa, élève à Maroua</b> <i>(doucement)</i> : Elle admirait la mosquée. Et ceux qui l’ont tuée prétendaient le faire au nom de ma religion.</p>
+<blockquote><p>et tu m’offres ton rire sans frein et je tiens toujours ta main d’amie et j’entends ton rire si long sur le sable si fin<br><small>Extrait de l’œuvre — Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, page 63</small></p></blockquote>
+<blockquote><p>et tu sais que je suis bien en toi Henrike pour rallumer les bougies de tes yeux<br><small>Extrait de l’œuvre — Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, page 63</small></p></blockquote>
+<p><b>À toi de décider :</b> Le poète a deux armes : la colère ou le souvenir. Laquelle répond le mieux aux tueurs ?</p><ul><li>La colère, pour ne jamais pardonner. — Elle est dans le poème… mais elle ressemble à ce qu’elle combat.</li><li>Le souvenir heureux, qui garde la morte vivante. — C’est la réponse du poème : un rire, un balcon, une mosquée bleue.</li><li>Le silence. — Le silence laisserait le dernier mot aux bombes.</li></ul>
+<blockquote><p>offre donc tes yeux aux hurlements non corrompus et à tous les souffles réconciliateurs du monde<br><small>Extrait de l’œuvre — Henri N’koumo, Poèmes sauvages éclairés au feu de brousse, page 63</small></p></blockquote>
+<p><b>Question :</b> Que demande le poète à son amie morte, à la fin ?</p><ul><li>De tourner ses yeux vers les cris restés purs et vers tout ce qui réconcilie. <b>(bonne réponse)</b></li><li>De le venger.</li></ul><p>Un impératif adressé à une morte : le poème finit sur la réconciliation, pas sur la vengeance.</p>
+<h4>Atelier · deux mouvements</h4><p>Classe chaque passage : la violence, ou le souvenir heureux ?</p>
+<ul><li><b>La violence</b> : la mort fait foule au passage des bombes ; la colère des dynamites</li><li><b>Le souvenir heureux</b> : tu me parles du dernier spectacle au Goethe Institut ; ton rire si long sur le sable si fin ; cette mosquée si belle et si bleue</li></ul>
+<p>La banalité du souvenir rend le passage insoutenable, et c’est elle qui répond aux tueurs.</p>
+<h3>Quiz</h3><ol><li>Qui était Henrike Grohs ? — <b>La directrice du Goethe Institut d’Abidjan, amie du poète.</b> Tuée à Grand-Bassam le 13 mars 2016.</li><li>Que voit-on depuis son balcon ? — <b>La mosquée du Plateau.</b> « si belle et si bleue ».</li><li>Qu’est-ce que le Plateau ? — <b>Le quartier des affaires d’Abidjan.</b> Où se trouve une grande mosquée.</li><li>Que signifie « réconciliateur » ? — <b>Qui remet en paix ceux qui étaient ennemis.</b> « les souffles réconciliateurs du monde ».</li><li>Pourquoi ce souvenir ordinaire est-il si fort ? — <b>Sa banalité rend la perte insoutenable et répond aux tueurs.</b> Une amie qui admire une mosquée : aucun commentaire n’est nécessaire.</li></ol>
+<h3>À retenir</h3><ul><li>Le poème « s’enfonce » au lieu d’exploser : son mouvement s’oppose à celui des bombes.</li><li>Le souvenir revient : un balcon, un spectacle, un rire, une mosquée bleue.</li><li>« si belle et si bleue », puis « si toi et si bleue » : l’amie et la mosquée se fondent.</li><li>Le poème se termine sur la réconciliation, pas sur la vengeance.</li></ul>
+<h3>À écrire</h3><p>Écris un poème en vers libres (douze lignes) qui fait revivre un moment ordinaire passé avec quelqu’un que tu aimes. Commence chaque ligne par « et ».</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="poemes-sauvages-la-mosquee-bleue.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

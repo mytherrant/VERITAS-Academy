@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Socrate et le courage — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Dialogue philosophique animé à la manière de Platon : Socrate interroge une élève de Terminale sur la définition du courage.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/philo-socrate-courage.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Socrate et le courage — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Dialogue philosophique animé à la manière de Platon : Socrate interroge une élève de Terminale sur la définition du courage.">
+<meta property="og:url" content="https://veritas-school.com/scenes/philo-socrate-courage.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Socrate et le courage","description":"Dialogue philosophique animé à la manière de Platon : Socrate interroge une élève de Terminale sur la définition du courage.","url":"https://veritas-school.com/scenes/philo-socrate-courage.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"Terminale","about":"Philosophie","teaches":"Découvrir la méthode socratique en la vivant : distinguer un exemple d’une définition, éprouver une définition par le contre-exemple, et comprendre pourquoi un dialogue qui s’achève sans réponse (aporie) n’est pas un échec. Les jauges montrent la certitude qui baisse et la lucidité qui monte.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'philo-courage',
+  discipline: 'Philosophie', niveau: 'Terminale',
+  titre: 'Socrate et le courage',
+  decor: 'agora', lieu: 'une cour de lycée… qui ressemble à l’agora', moment: 'À la manière du Lachès de Platon',
+  avertissement: 'Dialogue imaginé pour la leçon, à la manière de Platon. Il reprend la démarche du Lachès sans en citer le texte.',
+  objectif: 'Découvrir la méthode socratique en la vivant : distinguer un exemple d’une définition, éprouver une définition par le contre-exemple, et comprendre pourquoi un dialogue qui s’achève sans réponse (aporie) n’est pas un échec. Les jauges montrent la certitude qui baisse et la lucidité qui monte.',
+  jauges: [
+    { id: 'certitude', nom: 'Certitude de Ngo', val: 90, couleur: '#E07B39' },
+    { id: 'lucidite', nom: 'Lucidité', val: 10, couleur: '#FFC93C' }
+  ],
+  personnages: {
+    socrate: { nom: 'Socrate', couleur: '#6B5B3E', look: { tenue: 'boubou', peau: 'mat', vieux: true, cheveux: 'aucun', barbe: true, habit: '#E9E3CF' } },
+    soldat:  { nom: 'L’acteur jugé', couleur: '#7A2E2E', look: { peau: 'brun', cheveux: 'court', habit: '#5A4A3A' } },
+    ngo:     { nom: 'Ngo Mbock, élève', couleur: '#2E6B5A', look: { tenue: 'jupe', objet: 'livre', peau: 'fonce', cheveux: 'tresses', habit: '#2F5E9E', col: '#FFFFFF' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['socrate', 'ngo'], txt: 'Imaginons que Socrate, le philosophe athénien du Ve siècle avant notre ère, traverse le temps et s’assoie dans une cour de lycée. Ngo Mbock, élève de Terminale, prépare une dissertation sur le courage.' },
+    { t: 'dit', qui: 'socrate', emo: 'surpris', txt: 'On me dit que tu écris sur le courage. Tu sais donc ce qu’il est. Apprends-le-moi : moi, je l’ignore.' },
+    { t: 'dit', qui: 'ngo', emo: 'fier', jeu: 'sûre d’elle', txt: 'C’est facile. Le courage, c’est le soldat qui reste à son poste face à l’ennemi, sans s’enfuir.' },
+    { t: 'dit', qui: 'socrate', txt: 'Voilà un bel exemple de courage. Mais je ne t’ai pas demandé un exemple : je t’ai demandé ce qu’est le courage lui-même. Celui qui sauve un enfant de la noyade, n’est-il pas courageux ? Et le malade qui supporte sa douleur ?', jauges: { certitude: 70, lucidite: 25 } },
+    { t: 'question', q: 'Quelle erreur Socrate relève-t-il dans la première réponse ?',
+      options: [
+        { txt: 'Elle donne un exemple au lieu d’une définition.', ok: true, retour: 'Un exemple montre un cas ; une définition dit ce qu’ont en commun tous les cas. C’est la première exigence socratique.' },
+        { txt: 'Elle est fausse : le soldat n’est pas courageux.', retour: 'Socrate ne nie pas que le soldat soit courageux. Il dit que ce cas ne suffit pas à définir le courage.' },
+        { txt: 'Elle est trop longue.', retour: 'La longueur n’est pas en cause : c’est la nature de la réponse.' }
+      ] },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · exemple ou définition ?', consigne: 'Classe chaque réponse : donne-t-elle un exemple, ou cherche-t-elle une définition ?',
+      cats: ['Exemple', 'Définition'],
+      items: [
+        { txt: 'Le courage, c’est un pompier qui entre dans une maison en feu.', cat: 0 },
+        { txt: 'Le courage est la disposition à affronter un danger en connaissance de cause.', cat: 1 },
+        { txt: 'Le courage, c’est ma grand-mère qui a élevé seule six enfants.', cat: 0 },
+        { txt: 'Le courage est une fermeté de l’âme face à ce qui fait peur.', cat: 1 }
+      ],
+      bravo: 'Une définition vaut pour tous les cas ; un exemple n’en montre qu’un.' },
+    { t: 'dit', qui: 'socrate', txt: 'Et puis, certains guerriers combattent en reculant, puis se retournent pour frapper. Ils ne restent pas à leur poste. Sont-ils lâches ?' },
+    { t: 'dit', qui: 'ngo', emo: 'doute', jeu: 'elle réfléchit', txt: 'Non… Alors disons que le courage, c’est une fermeté de l’âme, une force qui ne cède pas.' },
+    { t: 'dit', qui: 'socrate', txt: 'Mieux : tu cherches ce qui est commun à tous les cas. Mais dis-moi : celui qui s’obstine sans réfléchir, qui plonge dans un fleuve en crue sans savoir nager, a-t-il une âme ferme ?' },
+    { t: 'dit', qui: 'ngo', emo: 'surpris', txt: 'Oui, mais c’est de la folie, pas du courage.', jauges: { certitude: 45, lucidite: 45 } },
+    { t: 'choix', qui: 'ngo', q: 'Tu es Ngo. Socrate vient de réfuter ta deuxième définition. Que fais-tu ?',
+      options: [
+        { txt: 'Je m’énerve : « Tu joues avec les mots, Socrate ! »', consequence: 'La discussion s’arrête là. Tu gardes ton opinion, mais tu n’as rien appris.', jauges: { lucidite: -15, certitude: 15 } },
+        { txt: 'Je cherche une troisième définition qui tienne compte de l’objection.', consequence: 'Tu avances : l’objection devient un outil. La recherche continue.', jauges: { lucidite: 15 } },
+        { txt: 'J’abandonne : on ne peut rien définir.', consequence: 'Tu renonces trop tôt. Dire « tout se vaut » est encore une façon de ne pas chercher.', jauges: { lucidite: -5 } }
+      ],
+      oeuvre: 'Dans le Lachès, les interlocuteurs de Socrate reprennent la recherche après chaque réfutation : c’est l’objection qui fait avancer la pensée.' },
+    { t: 'dit', qui: 'socrate', txt: 'Le courage est pourtant une belle chose, et la folie une chose mauvaise. La fermeté seule ne suffit donc pas. Il lui faut…' },
+    { t: 'question', q: 'Quel procédé Socrate emploie-t-il pour faire tomber la deuxième définition ?',
+      options: [
+        { txt: 'L’argument d’autorité : « Je suis Socrate, j’ai raison. »', retour: 'C’est l’inverse : Socrate prétend ne rien savoir. C’est l’ironie socratique.' },
+        { txt: 'Le contre-exemple : un cas de fermeté qui n’est pas du courage.', ok: true, retour: 'Une définition doit convenir à tout le défini et à lui seul. Un seul contre-exemple suffit à la réfuter.' },
+        { txt: 'La moquerie, pour décourager l’élève.', retour: 'Socrate ne cherche pas à humilier : il aide les esprits à « accoucher ». C’est la maïeutique.' }
+      ] },
+    { t: 'dit', qui: 'ngo', emo: 'joie', txt: '…de l’intelligence ! Le courage, c’est savoir ce qui est vraiment à craindre et ce qui ne l’est pas, et agir en conséquence.' },
+    { t: 'dit', qui: 'socrate', emo: 'joie', jeu: 'souriant', txt: 'Voilà qui est profond. Mais si le courage est un savoir du bien et du mal à venir, en quoi diffère-t-il de la vertu tout entière ? Nous cherchions une partie, et nous trouvons le tout.' },
+    { t: 'dit', qui: 'ngo', emo: 'doute', jeu: 'déroutée', txt: 'Alors… je ne sais plus ce qu’est le courage.', jauges: { certitude: 10 } },
+    { t: 'dit', qui: 'socrate', txt: 'Moi non plus. Mais à présent, nous savons que nous ne le savons pas. C’est déjà plus que tout à l’heure.', jauges: { lucidite: 90 } },
+    { t: 'remarque', titre: 'L’aporie', txt: 'Le dialogue s’achève sans définition : c’est une aporie, une impasse. Elle n’est pas un échec : on a écarté de fausses certitudes et l’on sait mieux ce qu’il faut chercher. Dans le Lachès, Platon fait se terminer la discussion sur le courage de la même manière.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · la marche du dialogue', consigne: 'Remets dans l’ordre les étapes de la recherche, telles que tu viens de les vivre.',
+      items: [
+        'Socrate feint l’ignorance et demande une définition.',
+        'Ngo répond par un exemple : le soldat à son poste.',
+        'Socrate montre que l’exemple ne suffit pas.',
+        'Ngo propose une définition : la fermeté de l’âme.',
+        'Un contre-exemple la réfute : l’obstination folle.',
+        'Une troisième définition mène à l’aporie.'
+      ],
+      bravo: 'Ironie, réfutation, maïeutique, aporie : tu peux reprendre cette marche pour construire une dissertation.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · le tribunal des actes',
+    intro: 'Décris un acte avec les curseurs : peur ressentie, connaissance du danger, valeur du but, décision d’affronter ou non. Le tribunal dit s’il s’agit de courage, de témérité, de lâcheté ou de prudence.',
+    persos: ['socrate', 'ngo', 'soldat'],
+    curseurs: [
+      { id: 'peur', nom: 'Peur ressentie', val: 70, bas: 'aucune', haut: 'intense',
+        lecture: { haut: 'Avoir peur n’empêche pas d’être courageux : le courage n’est pas l’absence de peur.', bas: 'Sans aucune peur, est-ce encore du courage, ou de l’inconscience ?' } },
+      { id: 'savoir', nom: 'Connaissance du danger', val: 80, bas: 'ignore', haut: 'mesure',
+        lecture: { haut: 'Savoir ce qui est vraiment à craindre : c’était la troisième définition de Ngo.', bas: 'Celui qui ignore le danger ne le surmonte pas : il ne le voit pas.' } },
+      { id: 'but', nom: 'Valeur du but', val: 80, bas: 'futile', haut: 'noble',
+        lecture: { haut: 'Risquer sa vie pour sauver un enfant : le but justifie le risque.', bas: 'Risquer sa vie pour un pari stupide n’a rien d’admirable.' } },
+      { id: 'agit', nom: 'Décision', val: 80, bas: 'fuit', haut: 'affronte',
+        lecture: { haut: 'L’acte est accompli : reste à savoir ce qui le guide.', bas: 'Reculer peut être lâche… ou sage, selon le but et le danger.' } }
+    ],
+    scenarios: [
+      { nom: 'Le sauveteur', icone: '🛟', valeurs: { peur: 70, savoir: 80, but: 90, agit: 85 } },
+      { nom: 'Le plongeur sans savoir nager', icone: '🌊', valeurs: { peur: 10, savoir: 10, but: 60, agit: 90 } },
+      { nom: 'Le défi stupide', icone: '🎲', valeurs: { peur: 40, savoir: 70, but: 10, agit: 90 } },
+      { nom: 'Celui qui fuit', icone: '🏃', valeurs: { peur: 90, savoir: 70, but: 90, agit: 10 } }
+    ],
+    liens: [
+      { a: 'socrate', b: 'ngo', type: 'alliance', lib: 'dialogue', base: .3, poids: { savoir: .5 } },
+      { a: 'ngo', b: 'soldat', type: 'confiance', lib: 'admiration', base: 0, poids: { agit: .5, but: .4, savoir: .1 } },
+      { a: 'socrate', b: 'soldat', type: 'conflit', lib: 'examen', base: .2, poids: { savoir: -.3, agit: .3 } }
+    ],
+    issue: function(v){
+      if(v.agit >= 60 && v.savoir < 35){ return { niveau: 'ko', badge: 'Témérité', recit: 'Il affronte un danger qu’il ne mesure pas : c’est l’obstination folle que Socrate opposait à Ngo.', apres: 'Aristote dira que le courage est un juste milieu entre la lâcheté et la témérité.', themes: ['témérité', 'contre-exemple'] }; }
+      if(v.agit >= 60 && v.but < 35){ return { niveau: 'ko', badge: 'Audace vaine', recit: 'Il sait le danger et l’affronte… pour rien. Le risque n’est pas justifié par le but.', apres: 'Le courage n’est pas seulement une force : il dépend de ce pour quoi l’on se bat.', themes: ['fin et moyens'] }; }
+      if(v.agit < 40 && v.but >= 60 && v.savoir >= 50){ return { niveau: 'ko', badge: 'Lâcheté', recit: 'Il sait ce qui est en jeu, le but est noble, et pourtant il fuit : la peur l’emporte.', apres: 'La lâcheté n’est pas d’avoir peur, mais de laisser la peur décider.', themes: ['lâcheté'] }; }
+      if(v.agit < 40){ return { niveau: 'moyen', badge: 'Prudence', recit: 'Il recule devant un danger dont l’enjeu ne vaut pas le risque : c’est de la sagesse.', apres: 'Rappel du Lachès : certains guerriers reculent pour mieux frapper. Reculer n’est pas toujours fuir.', themes: ['prudence'] }; }
+      return { niveau: 'ok', badge: 'Courage', recit: 'Il connaît le danger, il a peur, le but est noble, et il agit : la peur est surmontée en connaissance de cause.', apres: 'Mais attention à l’aporie du Lachès : si le courage est un savoir du bien et du mal, se distingue-t-il encore de la vertu entière ?', themes: ['courage', 'savoir', 'vertu'] };
+    }
+  },
+  quiz: [
+    { q: 'Quelle est la première erreur de Ngo ?', options: [
+      { txt: 'Donner un exemple au lieu d’une définition.', ok: true, retour: 'Le soldat à son poste est un cas, pas une définition.' },
+      { txt: 'Dire que le soldat est lâche.', retour: 'Elle dit au contraire qu’il est courageux.' } ] },
+    { q: 'Comment appelle-t-on l’art de Socrate d’« accoucher » les esprits ?', options: [
+      { txt: 'La maïeutique.', ok: true, retour: 'Du grec « art de la sage-femme ».' },
+      { txt: 'La rhétorique.', retour: 'La rhétorique est l’art de persuader ; Socrate cherche la vérité.' } ] },
+    { q: 'Qu’est-ce qu’une aporie ?', options: [
+      { txt: 'Une impasse : le dialogue s’achève sans réponse définitive.', ok: true, retour: 'Elle détruit les fausses certitudes.' },
+      { txt: 'Une conclusion certaine.', retour: 'C’est l’inverse.' } ] },
+    { q: 'Combien de contre-exemples suffisent pour réfuter une définition ?', options: [
+      { txt: 'Un seul.', ok: true, retour: 'Une définition doit valoir pour tous les cas.' },
+      { txt: 'Au moins trois.', retour: 'Un seul cas contraire suffit.' } ] },
+    { q: 'Dans quel dialogue de Platon Socrate cherche-t-il la définition du courage ?', options: [
+      { txt: 'Le Lachès.', ok: true, retour: 'Il s’achève, comme notre scène, sur une aporie.' },
+      { txt: 'La République.', retour: 'La République porte sur la justice et la cité idéale.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Un exemple n’est pas une définition : définir, c’est dire ce qu’ont en commun tous les cas.',
+      'Un seul contre-exemple suffit à réfuter une définition.',
+      'Ironie socratique : feindre l’ignorance pour faire chercher l’autre. Maïeutique : l’aider à « accoucher » de ses idées.',
+      'Aporie : impasse finale qui n’est pas un échec, puisqu’elle détruit les fausses certitudes.',
+      'Source : Platon, Lachès, dialogue sur le courage.'
+    ],
+    ecrire: 'Rédigez l’introduction d’une dissertation sur le sujet : « Le courage n’est-il qu’une absence de peur ? » (amorce, problème, annonce du plan).'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Socrate et le courage</h1>
+<p><b>Philosophie · Terminale</b></p>
+<p><i>Dialogue imaginé pour la leçon, à la manière de Platon. Il reprend la démarche du Lachès sans en citer le texte.</i></p>
+<h3>Objectif</h3><p>Découvrir la méthode socratique en la vivant : distinguer un exemple d’une définition, éprouver une définition par le contre-exemple, et comprendre pourquoi un dialogue qui s’achève sans réponse (aporie) n’est pas un échec. Les jauges montrent la certitude qui baisse et la lucidité qui monte.</p>
+<p>Lieu : une cour de lycée… qui ressemble à l’agora · À la manière du Lachès de Platon</p>
+<h3>Personnages</h3><ul><li>Socrate</li><li>L’acteur jugé</li><li>Ngo Mbock, élève</li></ul>
+<h3>La scène</h3>
+<p>Imaginons que Socrate, le philosophe athénien du Ve siècle avant notre ère, traverse le temps et s’assoie dans une cour de lycée. Ngo Mbock, élève de Terminale, prépare une dissertation sur le courage.</p>
+<p><b>Socrate</b> : On me dit que tu écris sur le courage. Tu sais donc ce qu’il est. Apprends-le-moi : moi, je l’ignore.</p>
+<p><b>Ngo Mbock, élève</b> <i>(sûre d’elle)</i> : C’est facile. Le courage, c’est le soldat qui reste à son poste face à l’ennemi, sans s’enfuir.</p>
+<p><b>Socrate</b> : Voilà un bel exemple de courage. Mais je ne t’ai pas demandé un exemple : je t’ai demandé ce qu’est le courage lui-même. Celui qui sauve un enfant de la noyade, n’est-il pas courageux ? Et le malade qui supporte sa douleur ?</p>
+<p><b>Question :</b> Quelle erreur Socrate relève-t-il dans la première réponse ?</p><ul><li>Elle donne un exemple au lieu d’une définition. <b>(bonne réponse)</b></li><li>Elle est fausse : le soldat n’est pas courageux.</li><li>Elle est trop longue.</li></ul><p>Un exemple montre un cas ; une définition dit ce qu’ont en commun tous les cas. C’est la première exigence socratique.</p>
+<h4>Atelier · exemple ou définition ?</h4><p>Classe chaque réponse : donne-t-elle un exemple, ou cherche-t-elle une définition ?</p>
+<ul><li><b>Exemple</b> : Le courage, c’est un pompier qui entre dans une maison en feu. ; Le courage, c’est ma grand-mère qui a élevé seule six enfants.</li><li><b>Définition</b> : Le courage est la disposition à affronter un danger en connaissance de cause. ; Le courage est une fermeté de l’âme face à ce qui fait peur.</li></ul>
+<p>Une définition vaut pour tous les cas ; un exemple n’en montre qu’un.</p>
+<p><b>Socrate</b> : Et puis, certains guerriers combattent en reculant, puis se retournent pour frapper. Ils ne restent pas à leur poste. Sont-ils lâches ?</p>
+<p><b>Ngo Mbock, élève</b> <i>(elle réfléchit)</i> : Non… Alors disons que le courage, c’est une fermeté de l’âme, une force qui ne cède pas.</p>
+<p><b>Socrate</b> : Mieux : tu cherches ce qui est commun à tous les cas. Mais dis-moi : celui qui s’obstine sans réfléchir, qui plonge dans un fleuve en crue sans savoir nager, a-t-il une âme ferme ?</p>
+<p><b>Ngo Mbock, élève</b> : Oui, mais c’est de la folie, pas du courage.</p>
+<p><b>À toi de décider :</b> Tu es Ngo. Socrate vient de réfuter ta deuxième définition. Que fais-tu ?</p><ul><li>Je m’énerve : « Tu joues avec les mots, Socrate ! » — La discussion s’arrête là. Tu gardes ton opinion, mais tu n’as rien appris.</li><li>Je cherche une troisième définition qui tienne compte de l’objection. — Tu avances : l’objection devient un outil. La recherche continue.</li><li>J’abandonne : on ne peut rien définir. — Tu renonces trop tôt. Dire « tout se vaut » est encore une façon de ne pas chercher.</li></ul>
+<p><b>Socrate</b> : Le courage est pourtant une belle chose, et la folie une chose mauvaise. La fermeté seule ne suffit donc pas. Il lui faut…</p>
+<p><b>Question :</b> Quel procédé Socrate emploie-t-il pour faire tomber la deuxième définition ?</p><ul><li>L’argument d’autorité : « Je suis Socrate, j’ai raison. »</li><li>Le contre-exemple : un cas de fermeté qui n’est pas du courage. <b>(bonne réponse)</b></li><li>La moquerie, pour décourager l’élève.</li></ul><p>Une définition doit convenir à tout le défini et à lui seul. Un seul contre-exemple suffit à la réfuter.</p>
+<p><b>Ngo Mbock, élève</b> : …de l’intelligence ! Le courage, c’est savoir ce qui est vraiment à craindre et ce qui ne l’est pas, et agir en conséquence.</p>
+<p><b>Socrate</b> <i>(souriant)</i> : Voilà qui est profond. Mais si le courage est un savoir du bien et du mal à venir, en quoi diffère-t-il de la vertu tout entière ? Nous cherchions une partie, et nous trouvons le tout.</p>
+<p><b>Ngo Mbock, élève</b> <i>(déroutée)</i> : Alors… je ne sais plus ce qu’est le courage.</p>
+<p><b>Socrate</b> : Moi non plus. Mais à présent, nous savons que nous ne le savons pas. C’est déjà plus que tout à l’heure.</p>
+<h4>L’aporie</h4><p>Le dialogue s’achève sans définition : c’est une aporie, une impasse. Elle n’est pas un échec : on a écarté de fausses certitudes et l’on sait mieux ce qu’il faut chercher. Dans le Lachès, Platon fait se terminer la discussion sur le courage de la même manière.</p>
+<h4>Atelier · la marche du dialogue</h4><p>Remets dans l’ordre les étapes de la recherche, telles que tu viens de les vivre.</p>
+<ol><li>Socrate feint l’ignorance et demande une définition.</li><li>Ngo répond par un exemple : le soldat à son poste.</li><li>Socrate montre que l’exemple ne suffit pas.</li><li>Ngo propose une définition : la fermeté de l’âme.</li><li>Un contre-exemple la réfute : l’obstination folle.</li><li>Une troisième définition mène à l’aporie.</li></ol>
+<p>Ironie, réfutation, maïeutique, aporie : tu peux reprendre cette marche pour construire une dissertation.</p>
+<h3>Quiz</h3><ol><li>Quelle est la première erreur de Ngo ? — <b>Donner un exemple au lieu d’une définition.</b> Le soldat à son poste est un cas, pas une définition.</li><li>Comment appelle-t-on l’art de Socrate d’« accoucher » les esprits ? — <b>La maïeutique.</b> Du grec « art de la sage-femme ».</li><li>Qu’est-ce qu’une aporie ? — <b>Une impasse : le dialogue s’achève sans réponse définitive.</b> Elle détruit les fausses certitudes.</li><li>Combien de contre-exemples suffisent pour réfuter une définition ? — <b>Un seul.</b> Une définition doit valoir pour tous les cas.</li><li>Dans quel dialogue de Platon Socrate cherche-t-il la définition du courage ? — <b>Le Lachès.</b> Il s’achève, comme notre scène, sur une aporie.</li></ol>
+<h3>À retenir</h3><ul><li>Un exemple n’est pas une définition : définir, c’est dire ce qu’ont en commun tous les cas.</li><li>Un seul contre-exemple suffit à réfuter une définition.</li><li>Ironie socratique : feindre l’ignorance pour faire chercher l’autre. Maïeutique : l’aider à « accoucher » de ses idées.</li><li>Aporie : impasse finale qui n’est pas un échec, puisqu’elle détruit les fausses certitudes.</li><li>Source : Platon, Lachès, dialogue sur le courage.</li></ul>
+<h3>À écrire</h3><p>Rédigez l’introduction d’une dissertation sur le sujet : « Le courage n’est-il qu’une absence de peur ? » (amorce, problème, annonce du plan).</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="philo-socrate-courage.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>
