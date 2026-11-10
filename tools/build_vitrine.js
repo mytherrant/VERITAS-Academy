@@ -812,8 +812,12 @@ function blocCalendrier() {
     throw new Error('Retrait NIVEAUX : marqueurs introuvables — la maquette a changé, vérifier AVANT de déployer.');
   }
   const avantN = corps.length;
-  corps = corps.slice(0, dN) + blocCalendrier() + '\n    ' + corps.slice(fN);
-  console.log('niveaux     : section retirée (' + (fN - dN) + ' octets) → calendrier + actualités');
+  /* 10/11/2026 — Calendrier et actualités quittent l'accueil : ils vivent
+     désormais dans Apprendre, réglés sur la classe de l'élève (compte à
+     rebours, actualités de son examen, classe virtuelle). blocCalendrier()
+     reste disponible mais n'est plus inséré. */
+  corps = corps.slice(0, dN) + corps.slice(fN);
+  console.log('niveaux     : section retirée (' + (fN - dN) + ' octets)');
 
   // ── Retrait 2 : la grille comparative des plans
   const ancre = corps.indexOf('Ce que chaque plan');
