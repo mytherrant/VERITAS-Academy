@@ -733,3 +733,15 @@ h2 .num .pic{vertical-align:middle}
 .res-pa a{background:#fff;border:1px solid var(--kp,#EDF2FB);font-size:13px}
 .res-pa a:hover{background:var(--kp,#EDF2FB);text-decoration:none}
 .lg .et{font-size:12px}
+
+/* ── Accessibilité (10/11/2026) ── */
+/* l'anneau doré seul n'atteignait pas 3:1 sur fond blanc : bleu VÉRITAS, liseré or */
+:focus-visible{outline:3px solid #1E499B!important;outline-offset:2px;box-shadow:0 0 0 6px rgba(255,201,60,.55)}
+.saut{position:absolute;left:12px;top:-60px;z-index:100;background:#1E499B;color:#fff;padding:10px 16px;border-radius:10px;font:600 14px var(--sans);text-decoration:none}
+.saut:focus{top:12px}
+@media (max-width:640px){
+  .res-pa a{min-height:36px;padding:6px 12px}
+  .sec-t a{display:inline-block;padding:8px 0}
+  .top-d{gap:6px;min-width:0}
+  .top-d .vue button{padding:6px 9px}
+}

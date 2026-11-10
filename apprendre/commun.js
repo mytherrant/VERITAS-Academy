@@ -3,7 +3,7 @@
    rien n'est envoyé. Toute lecture/écriture est protégée (navigation privée, stockage bloqué). */
 (function (W) {
   "use strict";
-  var ICO = "../assets/veritas-matieres.svg?v=20261110f"; /* versionné : un ancien sprite en cache n'a pas les nouvelles icônes */
+  var ICO = "../assets/veritas-matieres.svg?v=20261110g"; /* versionné : un ancien sprite en cache n'a pas les nouvelles icônes */
 
   // id, nom affiché, icône, teinte (m, pale, moyen, foncé), noms MINESEC, préfixes de scènes vivantes
   var MATIERES = [
@@ -326,8 +326,10 @@
   /* « -Mouvement… - Mouvement… », « n Langue… », « 39 : Langue… », « 0rthographe », « Titres des leçons » :
      scories de la fiche source. Les rangs ne changent pas ; une ligne d'en-tête renvoie "" et n'est pas affichée. */
   function titreL(t) {
-    t = String(t || "").trim();
-    if (/^(titres? des le[çc]ons|chapitres?)$/i.test(t)) return "";
+    t = String(t || "").replace(/\s+/g, " ").replace(/\s+([,.;:!?])\s*$/, "").replace(/\s+,/g, ",").trim();
+    if (/^(titres? des le[çc]ons|chapitres?)$/i.test(t) || !/[A-Za-zÀ-ÿ]{3}/.test(t)) return "";
+    /* « LA VIE QUOTIDIENNE : produire… » : intitulé de module en capitales, ramené en minuscules */
+    t = t.replace(/^([A-ZÉÈÀÂÊÎÔÛÇ’' -]{10,})(\s*:)/, function (_, a, b) { return a.charAt(0) + a.slice(1).toLowerCase() + b; });
     t = t.replace(/^0(?=[a-zé])/i, "O").replace(/^n\s+(?=[A-ZÉ])/, "").replace(/^\d+\s*:\s*(?=[A-ZÉ])/, "");
     if (/^-\s*\S/.test(t)) t = t.replace(/^-\s*/, "").replace(/\s+-\s*(?=[A-ZÉÈÀ])/g, " · ");
     return t.charAt(0).toUpperCase() + t.slice(1);

@@ -108,7 +108,7 @@ const CL = { "6ème":["6e"], "5ème":["5e"], "4ème":["4e"], "3ème":["3e"], "1�
 while ((m = RE_EP.exec(ep))) {
   const cls = CL[m[4]], ms = CARTE.matEpreuve[m[3]];
   if (!cls || !ms) { exclus.push(m[1]); continue; }
-  items[m[1]] = { t: "epreuve", ti: m[2], d: "", u: "/app.html#epreuves?classe=" + encodeURIComponent(m[4]) + "&matiere=" + encodeURIComponent(m[3]), ab: m[5] === "true" ? 0 : 1 };
+  items[m[1]] = { t: "epreuve", ti: m[2], d: "", u: "/app.html#epreuves?classe=" + encodeURIComponent(m[4]) + "&matiere=" + encodeURIComponent(m[3]) + "&id=" + encodeURIComponent(m[1]), ab: m[5] === "true" ? 0 : 1 };
   cls.forEach(c => ms.forEach(x => { if (leconsDe(c, x).length) ajoute(mat, c + "|" + x, m[1]); }));
 }
 
