@@ -8,8 +8,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261110e">
-<link rel="stylesheet" href="jeu.css?v=20261110e">
+<link rel="stylesheet" href="apprendre.css?v=20261110f">
+<link rel="stylesheet" href="jeu.css?v=20261110f">
 </head>
 <body class="eleve">
 <header class="top">
@@ -20,11 +20,11 @@
 <nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
 <main class="page"><div class="lim res-page" id="zone"></div></main>
 
-<script src="progressions.js?v=20261110e"></script>
-<script src="lecons.js?v=20261110e"></script>
-<script src="ressources.js?v=20261110e"></script>
-<script src="commun.js?v=20261110e"></script>
-<script src="jeu.js?v=20261110e"></script>
+<script src="progressions.js?v=20261110f"></script>
+<script src="lecons.js?v=20261110f"></script>
+<script src="ressources.js?v=20261110f"></script>
+<script src="commun.js?v=20261110f"></script>
+<script src="jeu.js?v=20261110f"></script>
 <script>
 (function(){
   "use strict";
@@ -52,7 +52,7 @@
   $("#zone").innerHTML='<p class="ariane"><a href="index.html">Apprendre</a><span>›</span><a href="ressources.html?c='+encodeURIComponent(c)+'">Tout pour progresser</a><span>›</span>Mes notes</p>'+
     '<h1 class="res-h1">Mes notes et mes coefficients <span>· '+esc(c)+'</span></h1>'+
     '<p class="res-chapo">Note de séquence, moyenne du trimestre, moyenne générale, moyenne annuelle : le calcul se fait pendant que tu tapes. Tes notes restent sur cet appareil.</p>'+
-    '<div class="classes res-classes" role="group" aria-label="Ma classe">'+A.CLASSES.map(function(x){return '<a href="?c='+encodeURIComponent(x)+'"'+(x===c?' aria-current="page"':'')+'>'+esc(x)+'</a>'}).join("")+'</div>'+
+    '<label class="res-cl">Ma classe <select id="choixCl">'+A.CLASSES.map(function(x){return '<option'+(x===c?' selected':'')+'>'+esc(x)+'</option>'}).join("")+'</select></label>'+
     '<p class="nt-src">'+(officiel?'Coefficients de l\'arrêté n° 92/22/MINESEC du 17 mars 2022, série '+SERIE[c][0]+'. Modifie-les si ton bulletin diffère.':'L\'arrêté de 2022 ne fixe pas les coefficients du collège : chaque matière part à 1. Reporte ceux de ton bulletin.')+'</p>'+
     '<div class="filtres" id="trim" role="tablist" aria-label="Trimestre">'+TRI.map(function(t,i){return '<button type="button" aria-pressed="'+(i===0)+'" data-t="'+i+'">'+t+'</button>'}).join("")+'</div>'+
     '<div class="nt-grille"><div class="nt-table" role="table" aria-label="Notes par matière"><div class="nt-l nt-e" role="row"><span>Matière</span><span id="s1">Séq. 1</span><span id="s2">Séq. 2</span><span>Coef.</span><span>Moy.</span></div><div id="lignes"></div></div>'+
@@ -61,6 +61,7 @@
     '<section class="res-fam" id="series"><h2>'+A.pic("boussole",22)+'Et selon la série ?</h2><div id="cmp"></div></section>'+
     '<section class="res-fam"><h2>'+A.pic("fleche",22)+'Pour aller plus loin</h2><div class="res-g">'+["o_cible","o_planning","o_parcours","o_orient"].map(A.carteRes).join("")+'</div></section>';
 
+  var sel=document.getElementById("choixCl"); if(sel) sel.onchange=function(){location.search="?c="+encodeURIComponent(sel.value)};
   function ligne(m){var d=D[m[0]],s=d.s;return '<div class="nt-l" role="row" data-m="'+esc(m[0])+'"><span class="nt-m">'+esc(m[0])+'</span><input inputmode="decimal" data-i="'+(tri*2)+'" value="'+esc(s[tri*2])+'" aria-label="'+esc(m[0])+', séquence '+(tri*2+1)+'"><input inputmode="decimal" data-i="'+(tri*2+1)+'" value="'+esc(s[tri*2+1])+'" aria-label="'+esc(m[0])+', séquence '+(tri*2+2)+'"><input class="nt-c" inputmode="numeric" data-c="1" value="'+esc(d.c)+'" aria-label="Coefficient de '+esc(m[0])+'"><b class="nt-mo">—</b></div>'}
   function tableau(){
     $("#s1").textContent="Séq. "+(tri*2+1); $("#s2").textContent="Séq. "+(tri*2+2);

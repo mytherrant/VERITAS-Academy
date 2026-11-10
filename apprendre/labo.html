@@ -8,8 +8,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261110e">
-<link rel="stylesheet" href="jeu.css?v=20261110e">
+<link rel="stylesheet" href="apprendre.css?v=20261110f">
+<link rel="stylesheet" href="jeu.css?v=20261110f">
 </head>
 <body class="eleve">
 <header class="top">
@@ -20,11 +20,11 @@
 <nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
 <main class="page"><div class="lim res-page" id="zone"></div></main>
 
-<script src="progressions.js?v=20261110e"></script>
-<script src="lecons.js?v=20261110e"></script>
-<script src="ressources.js?v=20261110e"></script>
-<script src="commun.js?v=20261110e"></script>
-<script src="jeu.js?v=20261110e"></script>
+<script src="progressions.js?v=20261110f"></script>
+<script src="lecons.js?v=20261110f"></script>
+<script src="ressources.js?v=20261110f"></script>
+<script src="commun.js?v=20261110f"></script>
+<script src="jeu.js?v=20261110f"></script>
 <script>
 /* Moteur de simulation : les quatre fonctions qu'attend chunks/labo.js (mêmes qu'app.js). */
 window._sim={running:true,raf:0,t:0,params:{}};
@@ -36,7 +36,7 @@ function _simLoop(){if(!window._sim.running)return;window._sim.t+=0.016;if(windo
 function _simUpdateControls(){var cw=document.getElementById('simControls');if(!cw||!window._sim.controlsDef)return;var a=document.activeElement;if(a&&cw.contains(a))return;var h=window._sim.controlsDef();if(window._sim._lastCtrlHtml===h)return;window._sim._lastCtrlHtml=h;cw.innerHTML=h;}
 if(typeof CanvasRenderingContext2D!=='undefined'&&!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){r=typeof r==='number'?r:5;this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.quadraticCurveTo(x+w,y,x+w,y+r);this.lineTo(x+w,y+h-r);this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);this.lineTo(x+r,y+h);this.quadraticCurveTo(x,y+h,x,y+h-r);this.lineTo(x,y+r);this.quadraticCurveTo(x,y,x+r,y);return this;};}
 </script>
-<script src="../chunks/labo.js?v=20261110e"></script>
+<script src="../chunks/labo.js?v=20261110f"></script>
 <script>
 (function(){
   "use strict";
@@ -51,7 +51,7 @@ if(typeof CanvasRenderingContext2D!=='undefined'&&!CanvasRenderingContext2D.prot
   /* Apprendre n'affiche aucun émoji : on les retire du texte d'origine, sans toucher au reste. */
   function net(s){return String(s).replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{20E3}]/gu,"").replace(/^[ \t]+/gm,"").trim()}
   var liens=A.leconsDeRes(id), ici=liens.filter(function(x){return x.c===classe}), autres=liens.filter(function(x){return x.c!==classe});
-  function ligneProg(x){return '<li><a href="matiere.html?c='+encodeURIComponent(x.c)+'&m='+x.m+'#l'+x.n+'">'+esc(x.c)+' · '+esc(A.PAR_ID[x.m].nom)+' : '+esc(x.t)+'</a></li>'}
+  function ligneProg(x){return '<li><a href="matiere.html?c='+encodeURIComponent(x.c)+'&m='+x.m+'#l'+x.n+'">'+esc(x.c)+' · '+esc(A.PAR_ID[x.m].nom)+' : '+esc(A.titreL(x.t))+'</a></li>'}
   var classes={}; liens.forEach(function(x){classes[x.c]=1});
   zone.innerHTML='<p class="ariane"><a href="index.html">Apprendre</a><span>›</span><a href="ressources.html?c='+encodeURIComponent(classe)+'&f=labo">Laboratoires</a><span>›</span>'+esc(lv.titre)+'</p>'+
     '<h1 class="res-h1">'+esc(lv.titre)+'</h1><p class="res-chapo">'+esc(net(lv.desc))+'</p>'+

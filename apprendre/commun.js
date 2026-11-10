@@ -3,7 +3,7 @@
    rien n'est envoyé. Toute lecture/écriture est protégée (navigation privée, stockage bloqué). */
 (function (W) {
   "use strict";
-  var ICO = "../assets/veritas-matieres.svg?v=20261110e"; /* versionné : un ancien sprite en cache n'a pas les nouvelles icônes */
+  var ICO = "../assets/veritas-matieres.svg?v=20261110f"; /* versionné : un ancien sprite en cache n'a pas les nouvelles icônes */
 
   // id, nom affiché, icône, teinte (m, pale, moyen, foncé), noms MINESEC, préfixes de scènes vivantes
   var MATIERES = [
@@ -323,6 +323,15 @@
   function leconsExiste(c, m) { var p = (W.VRT_PROG || {})[c] || {}; return PAR_ID[m] && PAR_ID[m].minesec.some(function (s) { return p[s]; }); }
   /* icônes du site : même sprite et même trait que la vitrine et les pages publiques */
   function si(nom, taille) { taille = taille || 20; return '<svg class="si" width="' + taille + '" height="' + taille + '" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#' + nom + '"/></svg>'; }
+  /* « -Mouvement… - Mouvement… », « n Langue… », « 39 : Langue… », « 0rthographe », « Titres des leçons » :
+     scories de la fiche source. Les rangs ne changent pas ; une ligne d'en-tête renvoie "" et n'est pas affichée. */
+  function titreL(t) {
+    t = String(t || "").trim();
+    if (/^(titres? des le[çc]ons|chapitres?)$/i.test(t)) return "";
+    t = t.replace(/^0(?=[a-zé])/i, "O").replace(/^n\s+(?=[A-ZÉ])/, "").replace(/^\d+\s*:\s*(?=[A-ZÉ])/, "");
+    if (/^-\s*\S/.test(t)) t = t.replace(/^-\s*/, "").replace(/\s+-\s*(?=[A-ZÉÈÀ])/g, " · ");
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
   function marque(it) { return it.ab ? '<span class="res-tag ab">' + si("i-lock", 12) + 'Abonnement</span>' : it.compte ? '<span class="res-tag">Compte gratuit</span>' : ''; }
   function carteRes(id) {
     var it = RES().items[id]; if (!it) return "";
@@ -338,7 +347,7 @@
   var COURT = { labo: "Labo", jeu: "Jeu", cours: "Cours", methode: "Méthode", oeuvre: "Œuvre", epreuve: "Épreuve", direct: "En direct" };
 
   W.VRT = W.VRT || {};
-  W.VRT.app = { si: si, net: net, ton: ton, GROUPES: GROUPES, chargerCatalogue: chargerCatalogue, FAMILLES: FAMILLES, resLecon: resLecon, resDeMatiere: resDeMatiere, resClasse: resClasse, leconsDeRes: leconsDeRes, carteRes: carteRes, pastilles: pastilles, MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
+  W.VRT.app = { titreL: titreL, si: si, net: net, ton: ton, GROUPES: GROUPES, chargerCatalogue: chargerCatalogue, FAMILLES: FAMILLES, resLecon: resLecon, resDeMatiere: resDeMatiere, resClasse: resClasse, leconsDeRes: leconsDeRes, carteRes: carteRes, pastilles: pastilles, MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
     marquerLu: marquerLu, noterQuiz: noterQuiz, teinter: teinter, ico: ico, icoM: icoM, pic: pic, etoiles: etoiles, esc: esc, slug: slug, rail: rail, chiffreSerie: chiffreSerie, scenesPour: scenesPour, jour: jour,
     exporterImage: exporterImage, offre: offre, cahierPour: cahierPour, melanger: melanger, boutonsImage: boutonsImage, filigraneCanvas: filigraneCanvas };
 })(window);

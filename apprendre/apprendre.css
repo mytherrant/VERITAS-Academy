@@ -726,3 +726,10 @@ h2 .num .pic{vertical-align:middle}
 .labo-t{color:var(--k,#1E499B);font-weight:600;letter-spacing:.01em}
 .labo-ol li::marker{color:var(--k,#1E499B);font-weight:600}
 .labo-ol li{padding-left:4px}
+
+/* ── Audit de production du 10/11/2026 : contrastes et tailles ── */
+.etiq{color:#fff!important}
+.appel span{color:#4D5163}
+.res-pa a{background:#fff;border:1px solid var(--kp,#EDF2FB);font-size:13px}
+.res-pa a:hover{background:var(--kp,#EDF2FB);text-decoration:none}
+.lg .et{font-size:12px}
