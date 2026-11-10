@@ -68,7 +68,9 @@ titre('① Le jeton traverse la chaîne sans jamais s’afficher');
        pre.indexOf('{PRIX:') >= 0 ? 'jeton visible !' : '');
   dire(data.indexOf('{PRIX:') >= 0, 'mais les DONNÉES le gardent, pour le re-rendu des régions');
   const liees = (pre.match(/data-vrt-prix=/g) || []).length;
-  dire(liees >= 9, `${liees} mentions de prix liées dans la page (6 avant le 17/09)`, `lu : ${liees}`);
+  /* Plancher abaissé de 9 à 4 le 10/11/2026 : l'accueil épuré a perdu les
+     blocs « Pourquoi » et « Services » qui portaient quatre de ces prix. */
+  dire(liees >= 4,`${liees} mentions de prix liées dans la page (6 avant le 17/09)`, `lu : ${liees}`);
   /* On exige la CONVERSION elle-même, pas la simple présence du mot « {PRIX: » :
      une première version de ce contrôle se satisfaisait du commentaire qui la
      décrit, et la mutation qui retirait la conversion ne le faisait pas rougir.
