@@ -8,8 +8,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261109b">
-<link rel="stylesheet" href="jeu.css?v=20261109b">
+<link rel="stylesheet" href="apprendre.css?v=20261110d">
+<link rel="stylesheet" href="jeu.css?v=20261110d">
 </head>
 <body class="eleve">
 <header class="top">
@@ -20,25 +20,32 @@
 <nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
 <main class="page"><div class="lim res-page" id="zone"></div></main>
 
-<script src="scenes.js?v=20261109b"></script>
-<script src="progressions.js?v=20261109b"></script>
-<script src="lecons.js?v=20261109b"></script>
-<script src="ressources.js?v=20261109b"></script>
-<script src="commun.js?v=20261109b"></script>
-<script src="jeu.js?v=20261109b"></script>
+<script src="scenes.js?v=20261110d"></script>
+<script src="progressions.js?v=20261110d"></script>
+<script src="lecons.js?v=20261110d"></script>
+<script src="ressources.js?v=20261110d"></script>
+<script src="commun.js?v=20261110d"></script>
+<script src="jeu.js?v=20261110d"></script>
 <script>
 (function(){
   "use strict";
   var A=VRT.app,$=function(s,c){return (c||document).querySelector(s)},$$=function(s,c){return [].slice.call((c||document).querySelectorAll(s))},esc=A.esc;
   var u=new URLSearchParams(location.search), c=u.get("c")||A.lire("classe","3e");
   if(A.CLASSES.indexOf(c)<0) c="3e";
-  var filtre=u.get("f")||"", mat=u.get("m")||"";
+  var filtre=u.get("f")||"", groupe=u.get("g")||"", mat=u.get("m")||"";
   A.ecrire("classe",c); A.rail($("#rail"),c,mat||null); A.chiffreSerie($("#serie"));
   document.title="Tout pour progresser · "+c+" | VÉRITAS";
 
   /* scènes vivantes et cahier : déjà connus du socle commun */
   A.MATIERES.forEach(function(m){if(mat&&m.id!==mat)return;A.scenesPour({m:m.id,c:c}).forEach(function(s){var id="sc_"+s;VRT_RES.items[id]={t:"scene",ti:(window.VRT_SCENES_TITRES||{})[s]||s.replace(/-/g," "),d:m.nom,u:"/scenes/"+s+".html",ab:0};(VRT_RES.mat[c+"|"+m.id]=VRT_RES.mat[c+"|"+m.id]||[]).push(id)})});
   ["francais","philo"].forEach(function(m){var o=A.cahierPour(c,m);if(!o)return;var id="ca_"+m;VRT_RES.items[id]={t:"cahier",ti:o.t,d:o.d,u:o.h,ab:0};(VRT_RES.mat[c+"|"+m]=VRT_RES.mat[c+"|"+m]||[]).push(id)});
+  var IDX={}; A.MATIERES.forEach(function(m,i){IDX[m.id]=i});
+  function rangM(m){return IDX[m]==null?999:IDX[m]}
+  function matiereDe(id){
+    var R=VRT_RES, p=c+"|", best="";
+    [R.mat,R.lec].forEach(function(T){Object.keys(T).forEach(function(k){if(k.indexOf(p)===0&&T[k].indexOf(id)>=0){var m=k.split("|")[1];if(!best||rangM(m)<rangM(best))best=m}})});
+    return best;
+  }
   function ids(){
     var t=A.resClasse(c);
     if(mat) t=t.filter(function(i){return A.resDeMatiere(c,mat).indexOf(i)>=0});
@@ -48,19 +55,39 @@
     var liste=ids(), parT={};
     liste.forEach(function(i){var it=VRT_RES.items[i]; (parT[it.t]=parT[it.t]||[]).push(i)});
     var fams=A.FAMILLES.filter(function(f){return parT[f[0]]});
-    $("#filtres").innerHTML='<button type="button" aria-pressed="'+(!filtre)+'" data-f="">Tout<span class="cpt">'+liste.length+'</span></button>'+
-      fams.map(function(f){return '<button type="button" aria-pressed="'+(filtre===f[0])+'" data-f="'+f[0]+'">'+esc(f[1])+'<span class="cpt">'+parT[f[0]].length+'</span></button>'}).join("");
-    $$("#filtres button").forEach(function(b){b.onclick=function(){filtre=b.getAttribute("data-f");var q="?c="+encodeURIComponent(c)+(mat?"&m="+mat:"")+(filtre?"&f="+filtre:"");history.replaceState(null,"",q);rendu()}});
-    $("#blocs").innerHTML=fams.filter(function(f){return !filtre||f[0]===filtre}).map(function(f){
-      return '<section class="res-fam"><h2>'+A.pic(f[2],22)+esc(f[1])+'</h2><p class="res-int">'+esc(f[3])+'</p><div class="res-g">'+parT[f[0]].map(A.carteRes).join("")+'</div></section>';
-    }).join("")||'<p class="vide">Rien à afficher ici pour l\'instant.</p>';
+    /* 4 portes (les usages), puis, dans la porte ouverte seulement, ses familles */
+    var FG={}; fams.forEach(function(f){FG[f[0]]=f[4]});
+    if(filtre&&!groupe) groupe=FG[filtre]||"";
+    function adresse(){history.replaceState(null,"","?c="+encodeURIComponent(c)+(mat?"&m="+mat:"")+(groupe?"&g="+groupe:"")+(filtre?"&f="+filtre:""))}
+    $("#portes").innerHTML=A.GROUPES.map(function(g,i){
+      var d=fams.filter(function(f){return f[4]===g[0]}), n=d.reduce(function(x,f){return x+parT[f[0]].length},0);
+      return n?'<button type="button" class="porte" style="'+A.ton(i*2)+'" aria-pressed="'+(groupe===g[0])+'" data-g="'+g[0]+'"><span class="res-p">'+A.si(g[2],24)+'</span><span><b>'+esc(g[1])+'</b><small>'+esc(g[3])+'</small></span><em>'+n+'</em></button>':"";
+    }).join("");
+    var dansG=fams.filter(function(f){return f[4]===groupe});
+    $("#filtres").hidden=!groupe||dansG.length<2;
+    $("#filtres").innerHTML=groupe?'<button type="button" aria-pressed="'+(!filtre)+'" data-f="">Tout</button>'+dansG.map(function(f){return '<button type="button" style="'+f[5]+'" aria-pressed="'+(filtre===f[0])+'" data-f="'+f[0]+'">'+esc(f[1])+' <span class="cpt">'+parT[f[0]].length+'</span></button>'}).join(""):"";
+    $$("#portes .porte").forEach(function(b){b.onclick=function(){var g=b.getAttribute("data-g");groupe=groupe===g?"":g;filtre="";adresse();rendu()}});
+    $$("#filtres button").forEach(function(b){b.onclick=function(){filtre=b.getAttribute("data-f");adresse();rendu()}});
+    function famille(f){
+      var ids=parT[f[0]], corps;
+      /* longue liste : rangée par matière */
+      var parM={}, ordre=[];
+      ids.forEach(function(i){var m=matiereDe(i); if(!parM[m]){parM[m]=[];ordre.push(m)} parM[m].push(i)});
+      ordre.sort(function(x,y){return rangM(x)-rangM(y)});
+      if(ids.length>6&&ordre.length>1&&!mat) corps=ordre.map(function(m,i){var P=A.PAR_ID[m];return '<div class="res-sm" style="'+A.ton(i).replace(/--k/g,"--sk")+'"><h3>'+esc(P?P.nom:"Toutes matières")+'</h3><div class="res-g">'+parM[m].map(A.carteRes).join("")+'</div></div>'}).join("");
+      else corps='<div class="res-g">'+ids.map(A.carteRes).join("")+'</div>';
+      return '<section class="res-fam" id="'+f[0]+'" style="'+f[5]+'"><h2><span class="res-p">'+A.si(f[2],22)+'</span>'+esc(f[1])+'</h2><p class="res-int">'+esc(f[3])+'</p>'+corps+'</section>';
+    }
+    var sortie=filtre?fams.filter(function(f){return f[0]===filtre}).map(famille).join(""):A.GROUPES.map(function(g,i){var d=fams.filter(function(f){return f[4]===g[0]&&(!groupe||groupe===g[0])});return d.length?'<div class="res-gr" style="'+A.ton(i*2)+'"><h2 class="res-gt">'+esc(g[1])+'</h2>'+d.map(famille).join("")+'</div>':""}).join("");
+    $("#blocs").innerHTML=sortie||'<p class="vide">Rien à afficher ici pour l\'instant.</p>';
   }
   var M=mat&&A.PAR_ID[mat];
   $("#zone").innerHTML='<p class="ariane"><a href="index.html">Apprendre</a><span>›</span><a href="index.html?c='+encodeURIComponent(c)+'">'+esc(c)+'</a>'+(M?'<span>›</span><a href="matiere.html?c='+encodeURIComponent(c)+'&m='+mat+'">'+esc(M.nom)+'</a>':'')+'<span>›</span>Tout pour progresser</p>'+
     '<h1 class="res-h1">Tout pour progresser <span>· '+esc(c)+(M?' · '+esc(M.nom):'')+'</span></h1>'+
     '<p class="res-chapo">Tout ce que VÉRITAS propose pour ta classe, rangé par usage et relié à la progression MINESEC 2026-2027.</p>'+
-    (M?'':'<div class="classes res-classes" role="group" aria-label="Ma classe">'+A.CLASSES.map(function(x){return '<a href="?c='+encodeURIComponent(x)+'"'+(x===c?' aria-current="page"':'')+'>'+esc(x)+'</a>'}).join("")+'</div>')+
-    '<nav class="filtres" id="filtres" aria-label="Filtrer les ressources"></nav><div id="blocs"></div>';
+    (M?'':'<label class="res-cl">Ma classe <select id="choixCl">'+A.CLASSES.map(function(x){return '<option'+(x===c?' selected':'')+'>'+esc(x)+'</option>'}).join("")+'</select></label>')+
+    '<nav class="res-portes" id="portes" aria-label="Choisir un usage"></nav><nav class="filtres res-sous" id="filtres" aria-label="Préciser" hidden></nav><div id="blocs"></div>';
+  var sel=$("#choixCl"); if(sel) sel.onchange=function(){location.search="?c="+encodeURIComponent(sel.value)};
   rendu();
   A.chargerCatalogue(rendu);
 })();

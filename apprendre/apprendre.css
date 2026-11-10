@@ -659,3 +659,65 @@ h2 .num .pic{vertical-align:middle}
 .nt-cmp b{font:600 15px var(--sans);color:#001136}
 .nt-cmp small{display:block;font:400 12.5px/1.45 var(--sans);color:#6B7287}
 @media (max-width:760px){.nt-grille{grid-template-columns:1fr}.nt-bilan{order:-1}.nt-l{grid-template-columns:minmax(0,1fr) 46px 46px 40px 44px;padding:7px 8px}.res-pa{padding:0 14px 10px 58px}.nt-p{grid-template-columns:minmax(0,120px) minmax(0,1fr) 40px}}
+
+/* ── Harmonisation vitrine / LWS (09/11/2026) : cartes blanches, ombre douce, teintes alternées ── */
+.res-gr{margin:0 0 14px}
+.res-gt{font:600 clamp(22px,3vw,27px)/1.3 var(--sans);color:var(--k);margin:30px 0 16px;padding-top:22px;border-top:1px solid #E6EAF2}
+.res-gr:first-child .res-gt{margin-top:6px;padding-top:0;border-top:0}
+.res-fam{margin:0 0 30px}
+.res-fam>h2{display:flex;align-items:center;gap:12px;font:600 19px/1.3 var(--sans);color:#001136;margin:0 0 4px}
+.res-fam>h2 .res-p{flex:0 0 36px;height:36px}
+.res-fam>h2 svg,.res-p svg{color:var(--k,#1E499B)}
+.res-fam .res-int{margin:0 0 14px 48px}
+.res-sm{margin:0 0 18px}
+.res-sm h3{font:600 15px/1.3 var(--sans);color:var(--sk);margin:0 0 10px}
+/* dans une matière, les cartes prennent la teinte de la matière : une couleur par bloc */
+.res-sm .res-c .res-p{background:var(--skp);color:var(--sk)}
+.res-sm .res-c .res-p svg{color:var(--sk)}
+.res-p{background:var(--kp,#EDF2FB);color:var(--k,#1E499B);border-radius:12px}
+.res-c{border:0;border-radius:14px;padding:16px;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:transform .18s ease,box-shadow .18s ease}
+.res-c:hover{border:0;transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,17,54,.09)}
+.res-x strong{font:600 16px/1.35 var(--sans)}
+.res-x small{font:400 14px/1.5 var(--sans)}
+.res-pa a{color:var(--k,#1E499B);background:var(--kp,#EDF2FB)}
+.res-pa a:hover{background:var(--kp,#EDF2FB);text-decoration:underline}
+.res-page .filtres button{border-color:var(--kp,#EDF2FB);color:var(--k,#0C2A6A)}
+.res-page .filtres button[aria-pressed="true"]{background:var(--k,#1E499B);border-color:var(--k,#1E499B)}
+.res-page .filtres .cpt{background:var(--kp,#EDF2FB);color:var(--k,#0C2A6A)}
+.tp-c{border:0;border-radius:14px;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:transform .18s ease,box-shadow .18s ease}
+.tp-c:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,17,54,.09)}
+.tp-c b{color:var(--k,#001136)}
+.etiq{font-weight:600}
+@media (max-width:640px){.res-fam .res-int{margin-left:0}}
+
+/* ── « Tout pour progresser » : quatre portes, une liste de classes (10/11/2026) ── */
+.res-cl{display:inline-flex;align-items:center;gap:10px;margin:0 0 18px;font:500 14px var(--sans);color:#4D5163}
+.res-cl select{font:600 15px var(--sans);color:#001136;background:#fff;border:1px solid #DCE5F5;border-radius:999px;padding:7px 34px 7px 14px;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231E499B' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;cursor:pointer}
+.res-portes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:12px;margin:0 0 14px}
+.porte{display:flex;align-items:center;gap:12px;text-align:left;background:#fff;border:2px solid transparent;border-radius:14px;padding:14px;box-shadow:0 6px 16px rgba(0,17,54,.06);cursor:pointer;font-family:var(--sans);transition:transform .18s ease,box-shadow .18s ease}
+.porte:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,17,54,.09)}
+.porte[aria-pressed="true"]{border-color:var(--k);background:var(--kp)}
+.porte .res-p{flex:0 0 40px;height:40px;display:grid;place-items:center}
+.porte b{display:block;font:600 15px/1.3 var(--sans);color:#001136}
+.porte small{display:block;font:400 12.5px/1.4 var(--sans);color:#6B7287;margin-top:2px}
+.porte em{margin-left:auto;font:600 13px var(--sans);font-style:normal;color:var(--k);background:var(--kp);border-radius:999px;padding:2px 9px}
+.porte[aria-pressed="true"] em{background:#fff}
+.res-page .res-sous{gap:6px;margin:0 0 22px}
+.res-page .res-sous button{padding:6px 12px;font-size:13.5px}
+@media (max-width:640px){.res-portes{grid-template-columns:1fr 1fr}.porte{flex-direction:column;align-items:flex-start;gap:8px;padding:12px}.porte small{display:none}.porte em{position:absolute;top:10px;right:10px}.porte{position:relative}}
+
+/* ── Icônes du site, sans pastille ni rond (10/11/2026) ── */
+.si{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.res-p,.res-sm .res-c .res-p{background:none!important;width:auto;height:auto;flex:0 0 auto;border-radius:0;color:var(--k,#1E499B);display:inline-flex}
+.res-sm .res-c .res-p{color:var(--sk)}
+.res-c{gap:12px}
+.res-c .res-p{padding-top:2px}
+.res-fam>h2 .res-p{flex:0 0 auto;height:auto}
+.res-fam .res-int{margin-left:34px}
+.porte .res-p{flex:0 0 auto;height:auto}
+.porte em,.porte[aria-pressed="true"] em{background:none;padding:0;font:600 18px var(--sans);color:var(--k)}
+.res-page .filtres .cpt,.res-page .filtres button[aria-pressed="true"] .cpt{background:none;padding:0;color:inherit;opacity:.75}
+.res-tag{background:none;padding:0}
+.res-tag.ab{background:none}
+.tp-c .res-p{width:auto;height:auto}

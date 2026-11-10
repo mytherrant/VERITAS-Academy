@@ -37,6 +37,12 @@ ICONES = {
  "m-esf": ("rose", '<path d="M5 10v10.5h14V10" fill="{L}" {T}/><path d="M3 11 12 3.5 21 11" fill="none" {T}/><path d="M12 18.2s-4-2.4-4-5.1a2.1 2.1 0 0 1 4-1 2.1 2.1 0 0 1 4 1c0 2.7-4 5.1-4 5.1z" fill="{B}" {T} stroke-width="1.3"/>'),
 }
 
+# Mêmes dessins, autre teinte : deux matières voisines dans le rail ne se confondent plus.
+VARIANTES = {"m-pct-violet": ("m-pct", "violet"), "m-pct-orange": ("m-pct", "orange"),
+             "m-langues-bleu": ("m-langues", "bleu"), "m-langues-orange": ("m-langues", "orange"), "m-langues-vert": ("m-langues", "vert"), "m-langues-teal": ("m-langues", "teal"),
+             "m-lcn-violet": ("m-lcn", "violet"), "m-antique-teal": ("m-antique", "teal")}
+for _nom, (_base, _pal) in VARIANTES.items(): ICONES[_nom] = (_pal, ICONES[_base][1])
+
 def rendu(cle, pal, corps):
     L, M, B, S = P[pal]
     # 08/11/2026 : style « trait » (aspect naturel, sans aplats pastel) — les deux tons d'aplat

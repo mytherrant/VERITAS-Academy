@@ -3,31 +3,31 @@
    rien n'est envoyé. Toute lecture/écriture est protégée (navigation privée, stockage bloqué). */
 (function (W) {
   "use strict";
-  var ICO = "../assets/veritas-matieres.svg?v=20261109b"; /* versionné : un ancien sprite en cache n'a pas les nouvelles icônes */
+  var ICO = "../assets/veritas-matieres.svg?v=20261110d"; /* versionné : un ancien sprite en cache n'a pas les nouvelles icônes */
 
   // id, nom affiché, icône, teinte (m, pale, moyen, foncé), noms MINESEC, préfixes de scènes vivantes
   var MATIERES = [
     ["francais", "Français", "m-francais", ["#1E499B", "#DBE8FE", "#8FB0EE", "#142554"], ["Français"], []],
     ["anglais", "Anglais", "m-anglais", ["#B03A6E", "#FBE4EE", "#E79BBE", "#6E1F43"], ["Anglais"], ["anglais"]],
     ["maths", "Mathématiques", "m-maths", ["#0E7C86", "#DDF2F4", "#7CCCD3", "#0A4F55"], ["Mathématiques"], []],
-    ["pct", "Physique-chimie-techno", "m-pct", ["#007E11", "#E0F5E5", "#7FCB8C", "#00520B"], ["PCT"], []],
-    ["physique", "Physique", "m-pct", ["#007E11", "#E0F5E5", "#7FCB8C", "#00520B"], ["Physique"], []],
-    ["chimie", "Chimie", "m-pct", ["#0E7C86", "#DDF2F4", "#7CCCD3", "#0A4F55"], ["Chimie"], []],
+    ["pct", "Physique-chimie-techno", "m-pct-violet", ["#5B4FA8", "#EAE7F7", "#ADA4DE", "#352C72"], ["PCT"], []],
+    ["physique", "Physique", "m-pct-violet", ["#5B4FA8", "#EAE7F7", "#ADA4DE", "#352C72"], ["Physique"], []],
+    ["chimie", "Chimie", "m-pct-orange", ["#C24E00", "#FDEBDD", "#F5B57A", "#6B2A00"], ["Chimie"], []],
     ["svt", "SVT", "m-svt", ["#007E11", "#E0F5E5", "#7FCB8C", "#00520B"], ["SVTEEHB", "SVT"], []],
     ["histoire", "Histoire", "m-histoire", ["#A84200", "#FFF3E4", "#F5B57A", "#6B2A00"], ["Histoire"], ["histoire"]],
     ["geo", "Géographie", "m-geo", ["#1E499B", "#DBE8FE", "#8FB0EE", "#142554"], ["Géographie"], ["geo"]],
     ["ecm", "ECM", "m-ecm", ["#9A6F00", "#FFF6DA", "#FFC93C", "#6B4E00"], ["ECM"], ["ecm"]],
     ["philo", "Philosophie", "m-philo", ["#5B4FA8", "#EAE7F7", "#ADA4DE", "#352C72"], ["Philosophie"], ["philo"]],
     ["info", "Informatique", "m-info", ["#0C2A6A", "#E4E9F2", "#8C9BC0", "#071A45"], ["Informatique", "Informatique TIC", "Informatique Fondamentale"], []],
-    ["allemand", "Allemand", "m-langues", ["#B03A6E", "#FBE4EE", "#E79BBE", "#6E1F43"], ["Allemand"], ["allemand"]],
-    ["espagnol", "Espagnol", "m-langues", ["#B03A6E", "#FBE4EE", "#E79BBE", "#6E1F43"], ["Espagnol"], ["espagnol"]],
-    ["italien", "Italien", "m-langues", ["#B03A6E", "#FBE4EE", "#E79BBE", "#6E1F43"], ["Italien"], ["italien"]],
+    ["allemand", "Allemand", "m-langues-bleu", ["#1E499B", "#DBE8FE", "#8FB0EE", "#142554"], ["Allemand"], ["allemand"]],
+    ["espagnol", "Espagnol", "m-langues-orange", ["#C24E00", "#FDEBDD", "#F5B57A", "#6B2A00"], ["Espagnol"], ["espagnol"]],
+    ["italien", "Italien", "m-langues-vert", ["#007E11", "#E0F5E5", "#7FCB8C", "#00520B"], ["Italien"], ["italien"]],
     ["chinois", "Chinois", "m-langues", ["#B03A6E", "#FBE4EE", "#E79BBE", "#6E1F43"], ["Chinois"], ["chinois"]],
-    ["arabe", "Arabe", "m-langues", ["#B03A6E", "#FBE4EE", "#E79BBE", "#6E1F43"], ["Arabe"], ["arabe"]],
+    ["arabe", "Arabe", "m-langues-teal", ["#0E7C86", "#DDF2F4", "#7CCCD3", "#0A4F55"], ["Arabe"], ["arabe"]],
     ["ln", "Langues nationales", "m-lcn", ["#A84200", "#FFF3E4", "#F5B57A", "#6B2A00"], ["Langues nationales"], ["langues-nationales"]],
-    ["cultures", "Cultures nationales", "m-lcn", ["#A84200", "#FFF3E4", "#F5B57A", "#6B2A00"], ["Cultures nationales"], ["cultures"]],
+    ["cultures", "Cultures nationales", "m-lcn-violet", ["#5B4FA8", "#EAE7F7", "#ADA4DE", "#352C72"], ["Cultures nationales"], ["cultures"]],
     ["latin", "Latin", "m-antique", ["#0C2A6A", "#E4E9F2", "#8C9BC0", "#071A45"], ["Latin"], []],
-    ["grec", "Grec", "m-antique", ["#0C2A6A", "#E4E9F2", "#8C9BC0", "#071A45"], ["Grec"], []],
+    ["grec", "Grec", "m-antique-teal", ["#0E7C86", "#DDF2F4", "#7CCCD3", "#0A4F55"], ["Grec"], []],
     ["sciences", "Sciences", "m-svt", ["#007E11", "#E0F5E5", "#7FCB8C", "#00520B"], ["Sciences"], []],
     ["eps", "EPS", "m-eps", ["#A84200", "#FFF3E4", "#F5B57A", "#6B2A00"], ["Education physique et Sportive"], []],
     ["arts", "Arts", "m-arts", ["#5B4FA8", "#EAE7F7", "#ADA4DE", "#352C72"], ["Arts"], []],
@@ -256,24 +256,31 @@
   }
 
   /* ---------- ressources du site reliées à la progression (ressources.js) ---------- */
+  var GROUPES = [["suivi", "Où j'en suis", "i-gauge", "Notes, coefficients, orientation"], ["apprendre", "Comprendre et apprendre", "i-book-open", "Cours, œuvres, méthodes, corrigés"],
+                 ["entrainer", "M'entraîner", "i-target", "Labos, épreuves, compositions, jeux"], ["aide", "Besoin d'aide", "i-message", "Questions, repères, calendrier"]];
   var FAMILLES = [
-    ["notes", "Notes et coefficients", "calcul", "Savoir où tu en es et ce qui compte vraiment."],
-    ["orientation", "Orientation", "boussole", "Choisir sa série, sa filière, son école."],
-    ["direct", "Compositions en direct", "chrono", "Chronométrées, corrigées dès la remise."],
-    ["defis", "Battles et défis", "epees", "Se mesurer aux élèves de son cycle, travailler à plusieurs."],
-    ["jeu", "Jeux", "manette", "Réviser en jouant, sur les notions de ta classe."],
-    ["labo", "Laboratoires", "fiole", "Manipuler, observer, conclure : l'expérience reliée à ta leçon."],
-    ["cours", "Cours rédigés", "livre", "Les leçons complètes déjà disponibles pour ta classe."],
-    ["methode", "Méthodes et examens", "plume", "Les méthodes attendues le jour de l'épreuve."],
-    ["oeuvre", "Œuvres au programme", "livre", "Analyse, résumé et fiche de lecture."],
-    ["corrige", "Corrigés du cahier", "coche2", "Séquence par séquence, exercice par exercice."],
-    ["epreuve", "Épreuves et annales", "doc", "BEPC, Probatoire, BAC : t'entraîner sur de vrais sujets."],
-    ["fichier", "Cours et fiches du catalogue", "doc", "Les documents réellement déposés par le centre, pour ta classe."],
-    ["scene", "Scènes vivantes", "masques", "Une situation courte où tu choisis la bonne réponse."],
-    ["cahier", "Mon cahier", "livre", "Le cahier interactif de l'année."],
-    ["aide", "Aide et repères", "aide", "Pour poser une question ou situer ce que tu apprends."]
+    ["notes", "Notes et coefficients", "i-calculator", "Savoir où tu en es et ce qui compte vraiment.", "suivi"],
+    ["orientation", "Orientation", "i-compass", "Choisir sa série, sa filière, son école.", "suivi"],
+    ["cours", "Cours rédigés", "i-book-open", "Les leçons complètes déjà disponibles pour ta classe.", "apprendre"],
+    ["methode", "Méthodes et examens", "i-feather", "Les méthodes attendues le jour de l'épreuve.", "apprendre"],
+    ["oeuvre", "Œuvres au programme", "i-book", "Analyse, résumé, carte mentale et QCM.", "apprendre"],
+    ["scene", "Scènes vivantes", "i-play", "Une situation courte où tu choisis la bonne réponse.", "apprendre"],
+    ["cahier", "Mon cahier", "i-notebook", "Le cahier interactif de l'année.", "apprendre"],
+    ["corrige", "Corrigés du cahier", "i-clipboard-check", "Séquence par séquence, exercice par exercice.", "apprendre"],
+    ["fichier", "Documents du catalogue", "i-file-text", "Les documents déposés par le centre pour ta classe.", "apprendre"],
+    ["labo", "Laboratoires", "i-flask", "Manipuler, observer, conclure : l'expérience reliée à ta leçon.", "entrainer"],
+    ["direct", "Compositions en direct", "i-clock", "Chronométrées, corrigées dès la remise.", "entrainer"],
+    ["epreuve", "Épreuves et annales", "i-pen", "T'entraîner sur des sujets complets.", "entrainer"],
+    ["jeu", "Jeux", "i-gamepad", "Réviser en jouant, sur les notions de ta classe.", "entrainer"],
+    ["defis", "Battles et défis", "i-award", "Se mesurer aux élèves de son cycle, travailler à plusieurs.", "entrainer"],
+    ["aide", "Aide et repères", "i-message", "Pour poser une question ou situer ce que tu apprends.", "aide"]
   ];
-  var LIB_F = {}; FAMILLES.forEach(function (f) { LIB_F[f[0]] = f; });
+  var TONS = [["#1E499B", "#EDF2FB"], ["#0E7C86", "#E9F5F6"], ["#5B4FA8", "#F0EDF9"], ["#B03A6E", "#FBEFF4"], ["#007E11", "#EAF6EC"], ["#C24E00", "#FDF1E8"]];
+  function ton(i) { var t = TONS[i % TONS.length]; return "--k:" + t[0] + ";--kp:" + t[1]; }
+  /* Les titres saisis dans l'administration peuvent contenir des émojis : jamais affichés ici. */
+  var RE_EMO = /[\u{1F000}-\u{1FAFF}\u{2190}-\u{21FF}\u{2300}-\u{23FF}\u{2460}-\u{24FF}\u{25A0}-\u{27BF}\u{2900}-\u{297F}\u{2B00}-\u{2BFF}\u{3030}\u{303D}\u{FE0F}\u{20E3}\u{200D}]/gu;
+  function net(s) { return String(s == null ? "" : s).replace(RE_EMO, "").replace(/\s{2,}/g, " ").trim(); }
+  var LIB_F = {}; FAMILLES.forEach(function (f, i) { f[5] = ton(i); LIB_F[f[0]] = f; });
   function RES() { return W.VRT_RES || { items: {}, lec: {}, mat: {}, cl: {} }; }
   function resLecon(c, m, n) { return RES().lec[c + "|" + m + "|" + n] || []; }
   function resDeMatiere(c, m) {
@@ -304,32 +311,34 @@
     if (!W.fetch) return;
     W.fetch("/api/public_data.php", { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       var R0 = RES(), n = 0; ((j && j.elearning_contenus) || []).forEach(function (x) {
-        if (x.dispo !== true) return;
+        if (x.dispo !== true || x.externalUrl || x.resPedago) return;   /* déjà proposée dans Épreuves ou Cours */
         var id = "cat_" + x.id, cs = CL_CAT[x.classe] || [], ms = MAT_CAT[x.matiere] || [];
         if (!cs.length || !ms.length) return;
-        R0.items[id] = { t: "fichier", ti: x.titre, d: x.apercu || x.desc || "", u: "/app.html#fiche?id=" + encodeURIComponent(x.id), ab: x.gratuit ? 0 : 1 };
+        R0.items[id] = { t: "fichier", ti: net(x.titre), d: net(x.apercu || x.desc || ""), u: "/app.html#fiche?id=" + encodeURIComponent(x.id), ab: x.gratuit ? 0 : 1 };
         cs.forEach(function (c) { ms.forEach(function (m) { var k = c + "|" + m; if (leconsExiste(c, m)) { (R0.mat[k] = R0.mat[k] || []); if (R0.mat[k].indexOf(id) < 0) R0.mat[k].push(id); n++; } }); });
       });
       if (n && fin) fin();
     }).catch(function () { });
   }
   function leconsExiste(c, m) { var p = (W.VRT_PROG || {})[c] || {}; return PAR_ID[m] && PAR_ID[m].minesec.some(function (s) { return p[s]; }); }
-  function marque(it) { return it.ab ? '<span class="res-tag ab">' + pic("cadenas", 12) + 'Abonnement</span>' : it.compte ? '<span class="res-tag">Compte gratuit</span>' : ''; }
+  /* icônes du site : même sprite et même trait que la vitrine et les pages publiques */
+  function si(nom, taille) { taille = taille || 20; return '<svg class="si" width="' + taille + '" height="' + taille + '" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#' + nom + '"/></svg>'; }
+  function marque(it) { return it.ab ? '<span class="res-tag ab">' + si("i-lock", 12) + 'Abonnement</span>' : it.compte ? '<span class="res-tag">Compte gratuit</span>' : ''; }
   function carteRes(id) {
     var it = RES().items[id]; if (!it) return "";
     var f = LIB_F[it.t] || LIB_F.aide;
-    return '<a class="res-c" href="' + esc(it.u) + '"><span class="res-p">' + pic(f[2], 20) + '</span><span class="res-x"><strong>' + esc(it.ti) + '</strong>' + (it.d ? '<small>' + esc(it.d) + '</small>' : '') + marque(it) + '</span></a>';
+    return '<a class="res-c" href="' + esc(it.u) + '" style="' + f[5] + '"><span class="res-p">' + si(f[2], 22) + '</span><span class="res-x"><strong>' + esc(net(it.ti)) + '</strong>' + (it.d ? '<small>' + esc(net(it.d)) + '</small>' : '') + marque(it) + '</span></a>';
   }
   function pastilles(ids) {
     return ids.length ? '<div class="res-pa">' + ids.map(function (id) {
       var it = RES().items[id]; if (!it) return ""; var f = LIB_F[it.t] || LIB_F.aide;
-      return '<a href="' + esc(it.u) + '" title="' + esc(it.ti) + '">' + pic(f[2], 14) + '<span>' + esc(COURT[it.t] || f[1]) + '</span>' + (it.ab ? pic("cadenas", 11) : '') + '</a>';
+      return '<a href="' + esc(it.u) + '" title="' + esc(net(it.ti)) + '" style="' + f[5] + '">' + si(f[2], 14) + '<span>' + esc(COURT[it.t] || f[1]) + '</span>' + (it.ab ? si("i-lock", 11) : '') + '</a>';
     }).join("") + '</div>' : "";
   }
   var COURT = { labo: "Labo", jeu: "Jeu", cours: "Cours", methode: "Méthode", oeuvre: "Œuvre", epreuve: "Épreuve", direct: "En direct" };
 
   W.VRT = W.VRT || {};
-  W.VRT.app = { chargerCatalogue: chargerCatalogue, FAMILLES: FAMILLES, resLecon: resLecon, resDeMatiere: resDeMatiere, resClasse: resClasse, leconsDeRes: leconsDeRes, carteRes: carteRes, pastilles: pastilles, MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
+  W.VRT.app = { si: si, net: net, ton: ton, GROUPES: GROUPES, chargerCatalogue: chargerCatalogue, FAMILLES: FAMILLES, resLecon: resLecon, resDeMatiere: resDeMatiere, resClasse: resClasse, leconsDeRes: leconsDeRes, carteRes: carteRes, pastilles: pastilles, MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
     marquerLu: marquerLu, noterQuiz: noterQuiz, teinter: teinter, ico: ico, icoM: icoM, pic: pic, etoiles: etoiles, esc: esc, slug: slug, rail: rail, chiffreSerie: chiffreSerie, scenesPour: scenesPour, jour: jour,
     exporterImage: exporterImage, offre: offre, cahierPour: cahierPour, melanger: melanger, boutonsImage: boutonsImage, filigraneCanvas: filigraneCanvas };
 })(window);
