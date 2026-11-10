@@ -789,18 +789,29 @@ function g_verrou_centre(PDO $pdo, string $centre): void {
 function g_completer_paiement(PDO $pdo, array $champs, array $ctx): array {
     g_verrou_centre($pdo, (string) $champs['centre_id']);
     $propose = (string) ($champs['numero'] ?? '');
+    unset($champs['numero']);
     if ($propose !== '') {
         // Numéro pris par le téléphone dans SA tranche : il doit lui appartenir et n'avoir jamais servi.
-        if (!preg_match('/^(\d{4})-(\d{4})$/', $propose, $m)) { throw new DomainException('Numéro de reçu invalide.'); }
-        $st = $pdo->prepare('SELECT COUNT(*) FROM g_tranches WHERE centre_id = ? AND utilisateur_id = ? AND prefixe = ? AND debut <= ? AND fin >= ?');
-        $st->execute([(string) $champs['centre_id'], $ctx['uid'], $m[1], (int) $m[2], (int) $m[2]]);
-        if (!(int) $st->fetchColumn()) { throw new DomainException('Ce numéro de reçu n\'appartient pas à vos tranches.'); }
-        $st = $pdo->prepare('SELECT COUNT(*) FROM g_paiements WHERE centre_id = ? AND numero = ?');
-        $st->execute([(string) $champs['centre_id'], $propose]);
-        if ((int) $st->fetchColumn()) { throw new DomainException('Numéro de reçu déjà utilisé.'); }
-        $champs['encaisse_par'] = $ctx['uid'];
-        $champs['annule'] = 0;
-        return $champs;
+        // Sinon (même compte sur deux appareils, tranche d'un autre compte restée sur le téléphone…),
+        // l'argent a bel et bien été reçu : on NE refuse PAS le versement, on lui donne le numéro suivant.
+        $valable = (bool) preg_match('/^(\d{4})-(\d{4})$/', $propose, $m);
+        if ($valable) {
+            $st = $pdo->prepare('SELECT COUNT(*) FROM g_tranches WHERE centre_id = ? AND utilisateur_id = ? AND prefixe = ? AND debut <= ? AND fin >= ?');
+            $st->execute([(string) $champs['centre_id'], $ctx['uid'], $m[1], (int) $m[2], (int) $m[2]]);
+            $valable = (bool) (int) $st->fetchColumn();
+        }
+        if ($valable) {
+            $st = $pdo->prepare('SELECT COUNT(*) FROM g_paiements WHERE centre_id = ? AND numero = ?');
+            $st->execute([(string) $champs['centre_id'], $propose]);
+            $valable = !(int) $st->fetchColumn();
+        }
+        if ($valable) {
+            $champs['numero'] = $propose;
+            $champs['encaisse_par'] = $ctx['uid'];
+            $champs['annule'] = 0;
+            return $champs;
+        }
+        $champs['note'] = mb_substr(trim((string) ($champs['note'] ?? '') . ' (reçu renuméroté : n° ' . mb_substr($propose, 0, 20) . ' déjà pris)'), 0, 200);
     }
     $prefixe = g_prefixe_annee($pdo);
     $st = $pdo->prepare('SELECT numero FROM g_paiements WHERE centre_id = ? AND numero LIKE ?');
