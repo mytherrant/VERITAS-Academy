@@ -52,6 +52,7 @@ Sitemap: https://veritas-school.com/outils/sitemap-outils.xml
 Sitemap: https://veritas-school.com/corriges/sitemap-corriges.xml
 Sitemap: https://veritas-school.com/livrets/sitemap-livrets.xml
 Sitemap: https://veritas-school.com/scenes/sitemap-scenes.xml
+Sitemap: https://veritas-school.com/apprendre/sitemap-apprendre.xml
 
 # Résumé du site destiné aux assistants IA (standard llms.txt)
 # https://veritas-school.com/llms.txt

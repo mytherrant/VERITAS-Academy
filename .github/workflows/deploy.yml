@@ -1041,6 +1041,10 @@ jobs:
         run: |
           node tools/oeuvres_statiques.js --controle
           node tools/scenes_statiques.js --controle
+          # Apprendre : RÉGÉNÉRÉ ici plutôt que contrôlé. lecons.js change souvent
+          # (autres sessions) ; un --controle rougirait le déploiement de tous.
+          # Les pages produites sont copiées plus bas puis habillées dans deploy/.
+          node tools/apprendre_statique.js
           node tools/pages_decouverte.js --controle
           python tools/build_llms.py --controle
           python tools/geo_vitrine.py --controle
@@ -1509,6 +1513,14 @@ jobs:
             fi
             mkdir -p deploy/apprendre
             find apprendre -maxdepth 1 -type f ! -name '_*' -exec cp {} deploy/apprendre/ \;
+            # Pages statiques du référencement (10/11/2026, tools/apprendre_statique.js)
+            for d in programme cours; do
+              if [ ! -d "apprendre/$d" ]; then
+                echo "::error title=Apprendre : pages statiques absentes::apprendre/$d manque (node tools/apprendre_statique.js). Déploiement ANNULÉ."
+                exit 1
+              fi
+              cp -r "apprendre/$d" deploy/apprendre/
+            done
             echo "  ✓ apprendre/ ($(ls deploy/apprendre | wc -l) fichiers)"
           fi
 
