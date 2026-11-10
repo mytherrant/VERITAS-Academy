@@ -49,6 +49,16 @@ a.lg:hover{background:var(--kp)}
 .scenes-m{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin:0 0 22px}
 .scenes-m .scene{margin:0}
 @media (max-width:640px){.mtete{padding:18px;gap:14px}.mtete .pas{flex-basis:64px;height:64px}.mtete .pas svg{width:40px!important;height:40px!important}.chap-t .nb{display:none}.lg{padding:11px 14px}.lg .et.av{display:none}}
+/* ── Lien vers l'Atelier de français (10/11/2026) : professeurs de français ── */
+.prof-fr{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:0 0 18px;padding:16px 20px;border:1px solid #DCE5F5;border-radius:14px;background:#fff}
+.prof-fr .pic{flex:none;color:#1E499B}
+.prof-fr div{flex:1 1 260px;min-width:0}
+.prof-fr b{display:block;font-family:var(--sans);font-weight:600;font-size:15px;color:#001136}
+.prof-fr span{display:block;font-size:13.5px;color:#4D5163;line-height:1.5;margin-top:2px}
+.prof-fr a{flex:none;display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border-radius:10px;background:#FFC93C;color:#001136;font-weight:600;font-size:13.5px;text-decoration:none}
+.atelier-l{flex:none;display:inline-flex;align-items:center;gap:5px;margin-left:8px;padding:5px 10px;border:1px solid #DCE5F5;border-radius:999px;font-size:12px;font-weight:600;color:#1E499B;text-decoration:none;white-space:nowrap;background:#fff}
+.atelier-l:hover{border-color:#1E499B}
+.chap.cible{box-shadow:0 0 0 3px #FFC93C}
 </style>
 </head>
 <body class="eleve">
@@ -65,6 +75,7 @@ a.lg:hover{background:var(--kp)}
 <script src="progressions.js?v=20261110g"></script>
 <script src="lecons.js?v=20261110g"></script>
 <script src="ressources.js?v=20261110g"></script>
+<script src="atelier.js?v=20261110a"></script>
 <script src="charge.js?v=4de3211a"></script>
 <script src="commun.js?v=20261110h"></script>
 <script src="jeu.js?v=20261110g"></script>
@@ -85,6 +96,12 @@ a.lg:hover{background:var(--kp)}
   var trims=[], tot=0, nred=Object.keys(red).length;
   chaps.forEach(function(ch){tot+=ch[1].length; if(ch[2]&&trims.indexOf(ch[2])<0) trims.push(ch[2])});
   var sc=A.scenesPour({m:M.id,c:c});
+  /* Français : chaque chapitre ouvre l'évaluation de SA séquence dans l'Atelier
+     (table générée par tools/build_apprendre_atelier.cjs : les deux progressions
+     ne sont pas découpées pareil, on ne suppose pas « chapitre N = séquence N »). */
+  var AT=(M.id==="francais"&&window.VRT_ATELIER)?VRT_ATELIER[c]:null;
+  function seqDe(i){return AT&&AT.seq[i]?AT.seq[i]:0}
+  function lienAtelier(s,quoi){return '/plateforme/#'+quoi+'?prog='+encodeURIComponent(AT.prog)+(s?'&seq='+s:'')}
   /* teintes de la charte, en alternance d'un chapitre à l'autre ; une teinte fixe par trimestre */
   var PAL=[["#1E499B","#EDF2FB"],["#0E7C86","#E9F5F6"],["#5B4FA8","#F0EDF9"],["#B03A6E","#FBEFF4"],["#007E11","#EAF6EC"],["#C24E00","#FDF1E8"]];
   var TRIM={"Premier trimestre":PAL[0],"Deuxième trimestre":PAL[1],"Troisième trimestre":PAL[2]};
@@ -101,7 +118,8 @@ a.lg:hover{background:var(--kp)}
       if(filtre==="red"&&!ch[1].some(function(l){return red[l[0]]})) return "";
       if(filtre&&filtre!=="red"&&ch[2]!==filtre) return "";
       var ls=filtre==="red"?ch[1].filter(function(l){return red[l[0]]}):ch[1], hr=hors.length&&i===0, num=i+1-(hors.length?1:0);
-      return '<section class="chap" style="'+teinte(PAL[(n++)%PAL.length])+'"><div class="chap-t"><span class="chap-n">'+(hr?A.pic("etoile",20):num)+'</span><div><small>'+(ch[2]?esc(ch[2])+' · ':'')+(hr?'Leçons rédigées':'Chapitre '+num)+'</small><h3>'+esc(ch[0]||"Leçons")+'</h3></div><span class="nb">'+ls.length+' leçon'+(ls.length>1?'s':'')+'</span></div><div class="lst">'+ls.map(ligne).join("")+'</div></section>'}).join("")||'<p class="vide">Rien à afficher ici pour l\'instant.</p>';
+      var ix=i-(hors.length?1:0), sq=hr?0:seqDe(ix), prem=sq&&(ix===0||seqDe(ix-1)!==sq);
+      return '<section class="chap"'+(prem?' id="seq-'+sq+'"':'')+' style="'+teinte(PAL[(n++)%PAL.length])+'"><div class="chap-t"><span class="chap-n">'+(hr?A.pic("etoile",20):num)+'</span><div><small>'+(ch[2]?esc(ch[2])+' · ':'')+(hr?'Leçons rédigées':'Chapitre '+num)+'</small><h3>'+esc(ch[0]||"Leçons")+'</h3></div><span class="nb">'+ls.length+' leçon'+(ls.length>1?'s':'')+'</span>'+(sq?'<a class="atelier-l" href="'+lienAtelier(sq,'composer')+'" title="Professeurs : composer l’évaluation de la séquence '+sq+' dans l’Atelier de français">'+A.pic("plume",14)+'Évaluer · séquence '+sq+'</a>':'')+'</div><div class="lst">'+ls.map(ligne).join("")+'</div></section>'}).join("")||'<p class="vide">Rien à afficher ici pour l\'instant.</p>';
   }
   $("#zone").innerHTML='<div class="mpage"><p class="ariane"><a href="index.html">Apprendre</a><span>›</span><a href="index.html?c='+encodeURIComponent(c)+'">'+esc(c)+'</a><span>›</span>'+esc(M.nom)+'</p>'+
     '<header class="mtete"><span class="pas">'+A.icoM(M,58)+'</span><div><h1>'+esc(M.nom)+' <span>· '+esc(c)+'</span></h1><div class="chiffres">'+
@@ -110,6 +128,7 @@ a.lg:hover{background:var(--kp)}
       (nred?'<span style="--k:#C24E00"><b>'+nred+'</b> cours rédigé'+(nred>1?'s':'')+'</span>':'')+
       '<span style="--k:#5B4FA8">MINESEC 2026-2027</span></div></div></header>'+
     (tot&&nred<tot?A.offre(c,M.id,'matiere'):'')+
+    (AT?'<section class="prof-fr" aria-label="Professeurs de français">'+A.pic("plume",30)+'<div><b>Vous enseignez le français en '+esc(c)+' ?</b><span>Chaque chapitre ouvre l’évaluation de sa séquence dans l’Atelier de français : texte du corpus, questions, barème et corrigé conformes au MINESEC, relecture par vos collègues.</span></div><a href="'+lienAtelier(0,'progressions')+'">Ouvrir l’Atelier</a></section>':'')+
     '<nav class="filtres" aria-label="Filtrer le programme">'+
       '<button type="button" aria-pressed="true" data-f="">Tout le programme<span class="cpt">'+tot+'</span></button>'+
       (nred?'<button type="button" aria-pressed="false" data-f="red" style="--k:#9A6F00;--kp:#FFF3CC">Cours rédigés<span class="cpt">'+nred+'</span></button>':'')+
@@ -119,6 +138,8 @@ a.lg:hover{background:var(--kp)}
     (sc.length?'<div class="scenes-m">'+sc.map(function(s){return '<a class="scene" href="/scenes/'+s+'.html"><span class="pl">'+A.pic("masques",30)+'</span><span><small>Scène vivante</small><strong>'+esc((window.VRT_SCENES_TITRES||{})[s]||s)+'</strong></span><span class="jouer">'+A.pic("lecture",30)+'</span></a>'}).join("")+'</div>':'')+
     '<div id="liste"></div></div>';
   rendu("");
+  /* arrivée depuis l'Atelier (?seq=N) : on montre la séquence demandée */
+  var sv=+(u.get("seq")||0); if(sv){var cs=document.getElementById("seq-"+sv); if(cs){cs.classList.add("cible");cs.scrollIntoView({block:"start"})}}
   /* arrivée sur une leçon précise : le filtre a pu masquer l'ancre, on attend le rendu */
   if(/^#l\d+$/.test(location.hash)){var cib=document.querySelector(location.hash);if(cib){cib.classList.add("lgw-v");cib.scrollIntoView({block:"center"})}}
   $$(".filtres button").forEach(function(b){b.addEventListener("click",function(){$$(".filtres button").forEach(function(x){x.setAttribute("aria-pressed",x===b)});rendu(b.getAttribute("data-f"))})});

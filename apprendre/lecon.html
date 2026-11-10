@@ -11,6 +11,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="apprendre.css?v=20261110h">
 <link rel="stylesheet" href="jeu.css?v=20261110g">
+<style>
+/* ── Vue Enseignant, français : évaluer la leçon dans l'Atelier (10/11/2026) ── */
+.atelier-prof{display:none}
+.prof .atelier-prof{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:0 0 18px;padding:14px 18px;border:1px solid #DCE5F5;border-radius:14px;background:#fff}
+.atelier-prof .pic{flex:none;color:#1E499B}
+.atelier-prof div{flex:1 1 240px;min-width:0;font-size:13.5px;color:#4D5163;line-height:1.5}
+.atelier-prof b{display:block;font-weight:600;color:#001136;font-size:14.5px}
+.atelier-prof a{flex:none;padding:8px 14px;border-radius:10px;background:#FFC93C;color:#001136;font-weight:600;font-size:13.5px;text-decoration:none}
+</style>
 </head>
 <body class="eleve">
 <a class="saut" href="#contenu">Aller au contenu</a>
@@ -42,6 +51,7 @@
 <script src="progressions.js?v=20261110g"></script>
 <script src="lecons.js?v=20261110g"></script>
 <script src="ressources.js?v=20261110g"></script>
+<script src="atelier.js?v=20261110a"></script>
 <script src="charge.js?v=4de3211a"></script>
 <script src="commun.js?v=20261110h"></script>
 <script src="jeu.js?v=20261110g"></script>
@@ -173,6 +183,18 @@
     var v=b.getAttribute("data-vue"); $$(".vue button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false")}); document.body.className=v;
     if(v==="prof"&&!A.lire("visite_prof",0)){ouvrir();A.ecrire("visite_prof",1)}
   })});
+
+  /* Français, vue Enseignant : évaluer la leçon dans l'Atelier — la séquence
+     vient du chapitre qui contient la leçon (table générée, cf. matiere.html). */
+  (function(){var AT=(L.m==="francais"&&window.VRT_ATELIER)?VRT_ATELIER[L.c]:null; if(!AT) return;
+    var ch=((window.VRT_PROG||{})[L.c]||{})["Français"]||[], ix=-1;
+    ch.forEach(function(c,k){if(ix<0&&(c[1]||[]).some(function(l){return l[0]===L.n}))ix=k});
+    var sq=ix>=0?AT.seq[ix]:0;
+    var href='/plateforme/#composer?prog='+encodeURIComponent(AT.prog)+(sq?'&seq='+sq:'')+'&lecon='+encodeURIComponent(L.titre);
+    var d=document.createElement("div"); d.className="atelier-prof";
+    d.innerHTML=A.pic("plume",26)+'<div><b>Évaluer cette leçon</b>'+(sq?'L’Atelier de français ouvre l’évaluation de la séquence '+sq+' ('+esc(AT.libelle)+'), avec cette leçon dans son titre.':'L’Atelier de français ouvre une évaluation pour cette classe.')+'</div><a href="'+href+'">Composer dans l’Atelier</a>';
+    var pan=$('[data-panneau=cours]'); if(pan) pan.parentNode.insertBefore(d,pan); else boite.insertBefore(d,boite.firstChild);
+  })();
 
   /* accueil en étapes */
   var ET=[{t:"Choisissez la leçon",s:"Classe, matière, chapitre",i:"p-eleve",l:["Le rail de gauche range les matières de la classe","Chaque leçon suit la progression harmonisée du MINESEC"]},

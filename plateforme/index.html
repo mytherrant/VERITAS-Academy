@@ -1575,6 +1575,7 @@
     </div>
     <div style="padding:12px 18px;border-top:1px solid var(--ceef2f7,#eef2f7);display:flex;gap:8px;flex-wrap:wrap">
       <button onClick="{{ pvRelier }}" style="{{ pvRelierStyle }}">{{ pvRelierLabel }}</button>
+      <button onClick="{{ pvApprendre }}" style="{{ pvApprendreStyle }}" title="Les leçons de cette séquence dans Apprendre">Leçons dans Apprendre</button>
       <button onClick="{{ goProgressions }}" style="background:none;border:none;color:var(--c1a72bb,#1a72bb);font-size:12.5px;font-weight:700;font-family:Poppins;cursor:pointer">Toutes les progressions</button>
     </div>
   </aside>
@@ -3514,6 +3515,7 @@
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap">
               <button onClick="{{ sq.toggle }}" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">{{ sq.toggleLabel }}</button>
+              <button onClick="{{ sq.apprendre }}" style="{{ sq.apprendreStyle }}" title="Les leçons de cette séquence dans Apprendre, à faire lire aux élèves">Leçons dans Apprendre</button>
               <button onClick="{{ sq.composer }}" style="{{ sq.composerStyle }}">Composer l’évaluation</button>
             </div>
           </div>
@@ -4806,6 +4808,7 @@ class Component extends DCLogic {
     sur(()=>this._sondeOffres(),'sonde offres');
     sur(()=>this._reconcilierPaiements(),'paiements en attente');
     sur(()=>this._installerProtection(),'protection du corpus');
+    sur(()=>this._lienApprendre(),'lien Apprendre');
     sur(()=>this._installerRetour(),'touche retour');
     sur(()=>this._installerFermetureCreer(),'menu Créer');
     sur(()=>{document.addEventListener('input',(e)=>{
@@ -6477,6 +6480,10 @@ class Component extends DCLogic {
          sur la sentinelle — renvoi à l'accueil et « Appuyez de nouveau pour
          quitter ». On ouvre la section demandée (28/10/2026, A2). */
       if(!(ev&&ev.state)){
+        /* Lien d'Apprendre suivi alors que l'Atelier est déjà ouvert : pas de
+           rechargement, donc pas de lecture au démarrage — on le lit ici. */
+        if(/^#(composer|progressions)\?/i.test(String(location.hash||''))){
+          this._histRemplacer=true;this._lienApprendre();return;}
         const vise=this._ecranDeLAdresse();
         if(vise&&vise!=='accueil'){
           /* L'entrée vient d'être créée par le navigateur : la synchro de
@@ -9213,6 +9220,48 @@ class Component extends DCLogic {
   _contenusSeq(sq,jusqua){const out=[];(sq&&sq.semaines||[]).filter(w=>w.n<=(jusqua||3)).forEach(w=>(w.contenus||[]).forEach(c=>{if(c&&out.indexOf(c)<0)out.push(c);}));return out;}
   /* Évaluation d'une séquence : épreuve NEUVE, datée de la semaine
      d'évaluation (S5), classe et assistant déjà réglés. */
+  /* ── Lien depuis Apprendre (10/11/2026) ─────────────────────────────
+     Apprendre envoie les professeurs de français ici :
+       #composer?prog=esg-3&seq=2[&lecon=…]  → l'évaluation de la séquence
+       #progressions?prog=esg-3[&seq=2]       → la progression de la classe
+     La séquence vient d'une table générée (tools/build_apprendre_atelier.cjs) :
+     les deux progressions ne sont pas découpées pareil. On attend le
+     répertoire et les progressions ; un brouillon déjà ouvert pour la même
+     séquence est rouvert plutôt que doublé (rechargement, double clic). */
+  _lienApprendre(){
+    const m=/^#(composer|progressions)\?(.*)$/i.exec(String(location.hash||''));
+    if(!m)return;
+    const q=new URLSearchParams(m[2]);
+    const lien={quoi:m[1].toLowerCase(),prog:q.get('prog')||'',seq:parseInt(q.get('seq')||'0',10)||0,lecon:String(q.get('lecon')||'').replace(/\s+/g,' ').trim().slice(0,140)};
+    if(!/^[a-z0-9-]{3,60}$/.test(lien.prog))return;
+    let essais=0;
+    const t=setInterval(()=>{essais++;
+      if(!(this._progs()&&this.state.ready)){if(essais>150)clearInterval(t);return;}
+      clearInterval(t);try{this._suivreLienApprendre(lien);}catch(e){}},200);
+  }
+  _suivreLienApprendre(l){
+    const cls=this._progClasse(l.prog);if(!cls)return;
+    const sq=l.seq?(cls.sequences.find(x=>x.num===l.seq)||null):null;
+    const me=this._me();
+    if(l.quoi==='composer'&&sq&&this._perm(me.role).creer){
+      const deja=(this.state.epreuves||[]).find(e=>e&&e.status==='brouillon'&&e.ownerId===me.id&&e.assistant
+        &&e.assistant.progId===cls.id&&String(e.assistant.progSeq)===String(sq.num));
+      if(deja){this.setState({activeId:deja.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);});return;}
+      this._composerSequence(cls,sq);
+      if(l.lecon)setTimeout(()=>{const a=this._active();
+        if(a&&a.assistant&&a.assistant.progId===cls.id)this._updateActive({title:(a.title||'')+' · '+l.lecon},'a repris la leçon « '+l.lecon+' » d’Apprendre');},60);
+      return;
+    }
+    this.setState({screen:'progressions',progId:cls.id,progOuverts:sq?{[sq.num]:true}:{}},()=>window.scrollTo(0,0));
+  }
+  /* Le chemin inverse : la page de français d'Apprendre pour une classe ESG
+     (séries A → littéraire, C → scientifique ; pas d'Apprendre pour l'EST). */
+  _apprendreUrl(progId,seq){
+    const C={'esg-6':'6e','esg-5':'5e','esg-4':'4e','esg-3':'3e','esg-seconde-litteraire':'2nde A','esg-seconde-scientifique':'2nde C',
+      'esg-premiere-litteraire':'1re A','esg-premiere-scientifique':'1re C','esg-terminale-litteraire':'Tle A','esg-terminale-scientifique':'Tle C'};
+    const c=C[progId];return c?'/apprendre/matiere.html?c='+encodeURIComponent(c)+'&m=francais'+(seq?'&seq='+seq:''):'';
+  }
+  _ouvrirApprendre(progId,seq){const u=this._apprendreUrl(progId,seq);if(u)try{window.open(u,'_blank','noopener');}catch(e){}}
   _composerSequence(cls,sq){
     const w5=(sq.semaines||[]).find(w=>w.n===5)||(sq.semaines||[]).slice(-1)[0]||{};
     const w4=(sq.semaines||[]).find(w=>w.n===4)||{};
@@ -12506,7 +12555,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           pvIcone:this._icon('calendar','var(--c1a72bb,#1a72bb)',15),
           pvBoutonStyle:enCompo?'display:inline-flex;align-items:center;gap:6px;background:var(--cffffff,#fff);border:1px solid var(--cbcd9f2,#bcd9f2);color:var(--c1a72bb,#1a72bb);padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer':hidden,
           pvOuvert:ouvert};
-        const vide={pvSous:'',pvClasses:[],pvClasse:'',setPvClasse:()=>{},pvSeqs:[],pvAbsentStyle:hidden,pvTitre:'',pvDates:'',pvCompetence:'',pvLien:'',pvLienStyle:hidden,pvSemaines:[],pvTache:'',pvTacheStyle:hidden,pvCopier:()=>{},pvCopierLabel:'',pvInserer:()=>{},pvInsererStyle:hidden,pvEval:'',pvEvalStyle:hidden,pvRelier:()=>{},pvRelierLabel:'',pvRelierStyle:hidden};
+        const vide={pvSous:'',pvClasses:[],pvClasse:'',setPvClasse:()=>{},pvSeqs:[],pvAbsentStyle:hidden,pvTitre:'',pvDates:'',pvCompetence:'',pvLien:'',pvLienStyle:hidden,pvSemaines:[],pvTache:'',pvTacheStyle:hidden,pvCopier:()=>{},pvCopierLabel:'',pvInserer:()=>{},pvInsererStyle:hidden,pvApprendre:()=>{},pvApprendreStyle:hidden,pvEval:'',pvEvalStyle:hidden,pvRelier:()=>{},pvRelierLabel:'',pvRelierStyle:hidden};
         if(!ouvert)return Object.assign(base,vide);
         const P=this._progs();
         if(!P){this._attendreProgs();return Object.assign(base,vide,{pvAbsentStyle:'font-size:12.5px;color:var(--c8b97a8,#8b97a8)'});}
@@ -12547,6 +12596,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
             this._updateActive({sujets:l},'a inséré la tâche d’intégration officielle de la séquence '+sq.num+' ('+cls.libelle+')');this._avis('Tâche insérée comme sujet : vous pouvez l’adapter.','ok');},
           pvInsererStyle:perm.edit?'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:6px 11px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
           pvEval:sq.evaluation||'',pvEvalStyle:sq.evaluation?'font-size:12px;color:var(--c5a6678,#5a6678);margin-top:10px;line-height:1.5':hidden,
+          pvApprendre:()=>this._ouvrirApprendre(cls.id,sq.num),pvApprendreStyle:this._apprendreUrl(cls.id)?'background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:8px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
           pvRelier:()=>{if(!perm.edit)return;const w4=(sq.semaines||[]).find(w=>w.n===4)||{};
             this._updateActive({assistant:{...this._assDe(this._active()),progId:relie?'':cls.id,progSeq:relie?'':String(sq.num),borne:relie?this._assDe(this._active()).borne:(w4.fin||this._assDe(this._active()).borne)}},
               relie?'a détaché l’épreuve de la progression':'a relié l’épreuve à la séquence '+sq.num+' ('+cls.libelle+')');},
@@ -12803,6 +12853,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
               num:'display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;font-family:Poppins;font-weight:700;font-size:14px;flex:none;'+(cour?'background:var(--cf39200,#f39200);color:var(--cffffff,#fff)':'background:var(--ce7f1fb,#e7f1fb);color:var(--c1a72bb,#1a72bb)'),
               toggle:()=>this.setState({progOuverts:{...ouverts,[sq.num]:!on}}),toggleLabel:on?'Replier':'Voir les semaines',
               composer:()=>this._composerSequence(cls,sq),
+              apprendre:()=>this._ouvrirApprendre(cls.id,sq.num),apprendreStyle:this._apprendreUrl(cls.id)?'background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:7px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
               composerStyle:perm.creer?'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:8px 13px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
               detail:on?'margin-top:12px;border-top:1px solid var(--ceef2f7,#eef2f7);padding-top:10px':hidden,
               semaines:(sq.semaines||[]).map(w=>{const c=coul[w.type]||coul.ressources;const ceW=!!(ici&&!ici.prochaine&&ici.w===w);
