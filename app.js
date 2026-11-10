@@ -24537,9 +24537,32 @@ function _cvDefaultClassrooms(){
   return base;
 }
 
+/* 10/11/2026 — Apprendre envoie vers /app.html#classes?c=<classe> : on ouvre la
+   classe virtuelle DE CETTE CLASSE. « 3e » ↔ « 3ème », « 1re A » ↔ « 1ère A » ;
+   « 2nde A » retombe sur « 2nde » si le centre n'a qu'une 2nde, jamais sur une
+   classe sœur (Tle C n'ouvre pas Tle A). */
+function _cvCle(n){
+  return String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'')
+    .replace(/^(\d)e$/,'$1eme').replace(/^(\d)eme(?=[a-z])/,'$1eme').replace(/^1re/,'1ere').replace(/^terminale/,'tle');
+}
+function _cvParClasse(c){
+  var k=_cvCle(c); if(!k)return null;
+  var cs=DB.classrooms||[], ex=null, pre=null;
+  cs.forEach(function(x){ if(x.seg)return; var kx=_cvCle(x.nom); if(kx===k)ex=x; else if(!pre&&kx&&k.indexOf(kx)===0&&/^[a-z]$/.test(k.slice(kx.length)))pre=x; });
+  return ex||pre;
+}
+function _cvClasseDuHash(){
+  try{ var h=(location.hash||'').split('?'); if(h[0]!=='#classes'||!h[1])return ''; return new URLSearchParams(h[1]).get('c')||''; }catch(e){ return ''; }
+}
 function showClasseVirtuelle(cid,chid){
   if(!DB.classrooms||!DB.classrooms.length){DB.classrooms=_cvDefaultClassrooms();save();}
   if(!DB.forumPosts)DB.forumPosts=[];
+  if(!cid){
+    var _cq=_cvClasseDuHash(), _cc=_cq&&_cvParClasse(_cq);
+    if(_cc&&_cc.channels&&_cc.channels.length){ cid=_cc.id; chid=_cc.channels[0].id; }
+    // Paramètre consommé une fois : le retour à l'accueil des classes ne doit pas y renvoyer.
+    if(_cq){ try{ history.replaceState(null,'',location.pathname+location.search+'#classes'); }catch(e){} }
+  }
   if(cid&&chid){_CV.classroomId=cid;_CV.channelId=chid;_cvRenderChannel();}
   else if(_CV.classroomId&&_CV.channelId){_cvRenderChannel();}
   else _cvRenderHome();

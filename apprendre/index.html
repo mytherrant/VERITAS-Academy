@@ -50,6 +50,51 @@
 .scenes{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-bottom:38px}
 .scenes .scene{margin:0}
 .profils-z{text-align:center;margin:10px 0 0}
+/* ── Mon année scolaire (10/11/2026) : calendrier, actualités MINESEC, classe virtuelle ── */
+.annee{margin-bottom:34px}
+.annee-g{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px}
+.carte-a{background:#fff;border-radius:20px;padding:20px;box-shadow:0 4px 0 var(--sable)}
+.carte-a h3{font:700 17px var(--serif);color:var(--titre);margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.carte-a h3 .si{color:#1E499B}
+.cal-g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:18px}
+.cal-cpt{background:linear-gradient(140deg,#142554,#1E3A8A);color:#fff;border-radius:16px;padding:18px}
+.cal-sur{margin:0 0 12px;font:600 13px var(--sans);letter-spacing:.04em;text-transform:uppercase;color:#FFE7A3;display:flex;align-items:center;gap:6px}
+.cal-chiffres{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.cal-chiffres span{background:rgba(255,255,255,.1);border-radius:12px;padding:10px 4px;text-align:center}
+.cal-chiffres b{display:block;font:700 clamp(22px,3.2vw,30px)/1.1 var(--sans);color:var(--or);font-variant-numeric:tabular-nums}
+.cal-chiffres small{font-size:11.5px;color:rgba(255,255,255,.82)}
+.cal-quand{margin:12px 0 0;font-size:14px;font-weight:600}
+.cal-note{margin:8px 0 0;font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.82)}
+.cal-sit{display:flex;justify-content:space-between;gap:8px;margin:0 0 6px;font-size:14px;color:var(--titre)}
+.cal-sit span{color:var(--gris);font-size:13px}
+.cal-barre{position:relative;height:8px;border-radius:99px;background:#EDF2FB;margin-bottom:12px}
+.cal-barre i{position:absolute;inset:0 auto 0 0;border-radius:99px;background:#1E499B}
+.cal-barre em{position:absolute;top:-3px;width:2px;height:14px;background:#9FBEEA}
+.cal-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.cal-l li{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:12px;background:#F7F9FE}
+.cal-l li.vac{background:#EAF6EC}.cal-l li.exa{background:#FFF8E6}
+.cal-i{flex:0 0 32px;height:32px;border-radius:10px;display:grid;place-items:center;background:#fff;color:#1E499B}
+.cal-l li.vac .cal-i{color:#007E11}.cal-l li.exa .cal-i{color:#C24E00}
+.cal-t{flex:1;min-width:0}.cal-t b{display:block;font-size:13.5px;color:var(--titre);line-height:1.3}.cal-t small{font-size:12px;color:var(--gris)}
+.cal-j{font:700 12.5px var(--sans);color:#1E499B;white-space:nowrap}
+.cal-src,.act-src{margin:10px 0 0;font-size:12px;color:var(--gris)}
+.act-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.act-l a{display:block;padding:9px 10px;border-radius:12px;text-decoration:none;color:inherit}
+.act-l a:hover{background:#F7F9FE}
+.act-l b{display:block;font-size:14px;line-height:1.35;color:var(--titre);font-weight:600}
+.act-l small{font-size:12px;color:var(--gris)}
+.act-tag{display:inline-block;font:700 11px var(--sans);letter-spacing:.04em;text-transform:uppercase;color:#C24E00;background:#FDF1E8;border-radius:999px;padding:2px 8px;margin-bottom:4px}
+.act-att,.act-vide{color:var(--gris);font-size:14px;margin:0}
+.cv{margin-top:16px}
+.cv-t{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.cv-i{flex:0 0 48px;height:48px;border-radius:14px;display:grid;place-items:center;background:#F0EDF9;color:#5B4FA8}
+.cv-t b{display:block;font:700 17px var(--serif);color:var(--titre)}.cv-t small{color:var(--gris);font-size:13px}
+.cv-s{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.cv-s li{font-size:12.5px;font-weight:600;color:#5B4FA8;background:#F0EDF9;border-radius:999px;padding:4px 10px}
+.cv-p{margin:0 0 14px;color:var(--gris);font-size:14px}
+.cv-go{display:inline-flex;font-weight:700;color:var(--ink);background:var(--or);border-radius:999px;padding:9px 18px;text-decoration:none}
+.cv-sec{display:block;margin-top:10px;font-size:13px}
+@media (max-width:900px){.annee-g,.cal-g{grid-template-columns:1fr}}
 .profils-z h2{font:700 24px var(--serif);color:var(--titre);margin:0 0 16px}
 /* ── Bandeau d'accueil (07/11) : deux colonnes, mosaïque d'icônes colorées, classes par cycle ── */
 .hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:28px;align-items:center;background:linear-gradient(120deg,#EDF2FB 0%,#F7F9FE 45%,#FFF8E6 100%);border:1px solid #DCE5F5;border-radius:16px}
@@ -97,6 +142,17 @@
   <div class="objectif-z"><div class="objectif" id="objectifJour"></div><div class="kalao-accueil" id="kalaoAccueil"></div></div>
   <div class="blocs" id="blocs"></div>
 
+  <section class="annee" aria-labelledby="anneeT">
+    <div class="sec-t"><h2 id="anneeT">Mon année</h2><span class="lu">Calendrier officiel 2026-2027</span></div>
+    <div class="annee-g">
+      <div class="carte-a"><h3><svg class="si" width="20" height="20" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-calendar"/></svg>Calendrier scolaire</h3><div id="anCal"></div></div>
+      <div>
+        <div class="carte-a"><h3><svg class="si" width="20" height="20" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-megaphone"/></svg>Actualités MINESEC</h3><div id="anAct" aria-live="polite"></div></div>
+        <div class="carte-a cv" id="anCv"></div>
+      </div>
+    </div>
+  </section>
+
   <div class="sec-t"><h2 id="matsT">Mes matières</h2><a href="#defi">Défi express ›</a></div>
   <div class="mats" id="mats"></div>
 
@@ -141,6 +197,7 @@
 <script src="charge.js?v=4de3211a"></script>
 <script src="commun.js?v=20261110h"></script>
 <script src="jeu.js?v=20261110g"></script>
+<script src="calendrier.js?v=20261110a"></script>
 <script>
 (function(){
   "use strict";
@@ -174,6 +231,10 @@
     if(der&&LE[der]){var D=LE[der];b.push('<a class="bloc" href="lecon.html?id='+der+'"><small>Reprendre</small><h2>'+esc(D.titre)+'</h2><p>'+esc(A.PAR_ID[D.m].nom)+' · '+esc(D.c)+(qz[der]?' · quiz : '+qz[der][0]+'/'+qz[der][1]:' · quiz pas encore fait')+'</p><span class="go">'+(qz[der]?'Revoir':'Faire le quiz')+' ›</span></a>')}
     else b.push('<a class="bloc" href="/scenes/"><small>Pour commencer en douceur</small><h2>Les scènes vivantes</h2><p>Des scènes courtes, tirées des œuvres et des programmes, où tu choisis la bonne réplique.</p><span class="go">Découvrir ›</span></a>');
     $("#blocs").innerHTML=b.join("");
+
+    /* mon année : compte à rebours, actualités et classe virtuelle de la classe choisie */
+    $("#anneeT").textContent="Mon année en "+classe;
+    if(VRT.annee) VRT.annee.rendre(classe,{cal:"anCal",act:"anAct",cv:"anCv"});
 
     /* matières de la classe */
     $("#matsT").textContent="Mes matières en "+classe;
