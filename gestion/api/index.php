@@ -764,8 +764,16 @@ function g_valider_finances(PDO $pdo, string $table, string $id, ?array $existan
     }
     if ($statut !== 'en_attente' && $statut !== $avant) {
         $auteur = $existant ? (string) $existant['saisie_par'] : (string) ($ctx['uid'] ?? '');
-        if ($role !== 'admin' && !(g_ctx_peut('depenses.valider', $centre) && $auteur !== ($ctx['uid'] ?? ''))) {
-            throw new DomainException('La validation revient à un responsable (pas l\'auteur de la dépense) ou à l\'administrateur.');
+        // Demande de Jacques (10/11/2026) : les dépenses sont validées par le trésorier du centre ou l'administrateur.
+        // Le trésorier ne valide pas ce qu'il a saisi lui-même : l'administrateur le fait.
+        $st = $pdo->prepare('SELECT tresorier_id FROM g_centres WHERE id = ?');
+        $st->execute([$centre]);
+        $tresorier = (string) ($st->fetchColumn() ?: '');
+        $uidV = (string) ($ctx['uid'] ?? '');
+        if ($role !== 'admin' && !($tresorier !== '' && $uidV === $tresorier && $auteur !== $uidV && g_ctx_peut('depenses.voir', $centre))) {
+            throw new DomainException($tresorier !== '' && $uidV === $tresorier
+                ? 'Vous avez saisi cette dépense : l\'administrateur la valide.'
+                : 'La validation des dépenses revient au trésorier du centre ou à l\'administrateur.');
         }
         if ($statut === 'refusee' && trim((string) $val('motif_refus')) === '') { throw new DomainException('Indiquez le motif du refus.'); }
         // L'administrateur, qui a le contrôle sur tout, peut valider sans photo (après confirmation sur le téléphone).
