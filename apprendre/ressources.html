@@ -8,8 +8,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261110c">
-<link rel="stylesheet" href="jeu.css?v=20261110c">
+<link rel="stylesheet" href="apprendre.css?v=20261110d">
+<link rel="stylesheet" href="jeu.css?v=20261110d">
 </head>
 <body class="eleve">
 <header class="top">
@@ -20,12 +20,12 @@
 <nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
 <main class="page"><div class="lim res-page" id="zone"></div></main>
 
-<script src="scenes.js?v=20261110c"></script>
-<script src="progressions.js?v=20261110c"></script>
-<script src="lecons.js?v=20261110c"></script>
-<script src="ressources.js?v=20261110c"></script>
-<script src="commun.js?v=20261110c"></script>
-<script src="jeu.js?v=20261110c"></script>
+<script src="scenes.js?v=20261110d"></script>
+<script src="progressions.js?v=20261110d"></script>
+<script src="lecons.js?v=20261110d"></script>
+<script src="ressources.js?v=20261110d"></script>
+<script src="commun.js?v=20261110d"></script>
+<script src="jeu.js?v=20261110d"></script>
 <script>
 (function(){
   "use strict";
@@ -61,7 +61,7 @@
     function adresse(){history.replaceState(null,"","?c="+encodeURIComponent(c)+(mat?"&m="+mat:"")+(groupe?"&g="+groupe:"")+(filtre?"&f="+filtre:""))}
     $("#portes").innerHTML=A.GROUPES.map(function(g,i){
       var d=fams.filter(function(f){return f[4]===g[0]}), n=d.reduce(function(x,f){return x+parT[f[0]].length},0);
-      return n?'<button type="button" class="porte" style="'+A.ton(i*2)+'" aria-pressed="'+(groupe===g[0])+'" data-g="'+g[0]+'"><span class="res-p">'+A.pic(g[2],20)+'</span><span><b>'+esc(g[1])+'</b><small>'+esc(g[3])+'</small></span><em>'+n+'</em></button>':"";
+      return n?'<button type="button" class="porte" style="'+A.ton(i*2)+'" aria-pressed="'+(groupe===g[0])+'" data-g="'+g[0]+'"><span class="res-p">'+A.si(g[2],24)+'</span><span><b>'+esc(g[1])+'</b><small>'+esc(g[3])+'</small></span><em>'+n+'</em></button>':"";
     }).join("");
     var dansG=fams.filter(function(f){return f[4]===groupe});
     $("#filtres").hidden=!groupe||dansG.length<2;
@@ -76,7 +76,7 @@
       ordre.sort(function(x,y){return rangM(x)-rangM(y)});
       if(ids.length>6&&ordre.length>1&&!mat) corps=ordre.map(function(m,i){var P=A.PAR_ID[m];return '<div class="res-sm" style="'+A.ton(i).replace(/--k/g,"--sk")+'"><h3>'+esc(P?P.nom:"Toutes matières")+'</h3><div class="res-g">'+parM[m].map(A.carteRes).join("")+'</div></div>'}).join("");
       else corps='<div class="res-g">'+ids.map(A.carteRes).join("")+'</div>';
-      return '<section class="res-fam" id="'+f[0]+'" style="'+f[5]+'"><h2><span class="res-p">'+A.pic(f[2],20)+'</span>'+esc(f[1])+'</h2><p class="res-int">'+esc(f[3])+'</p>'+corps+'</section>';
+      return '<section class="res-fam" id="'+f[0]+'" style="'+f[5]+'"><h2><span class="res-p">'+A.si(f[2],22)+'</span>'+esc(f[1])+'</h2><p class="res-int">'+esc(f[3])+'</p>'+corps+'</section>';
     }
     var sortie=filtre?fams.filter(function(f){return f[0]===filtre}).map(famille).join(""):A.GROUPES.map(function(g,i){var d=fams.filter(function(f){return f[4]===g[0]&&(!groupe||groupe===g[0])});return d.length?'<div class="res-gr" style="'+A.ton(i*2)+'"><h2 class="res-gt">'+esc(g[1])+'</h2>'+d.map(famille).join("")+'</div>':""}).join("");
     $("#blocs").innerHTML=sortie||'<p class="vide">Rien à afficher ici pour l\'instant.</p>';

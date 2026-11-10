@@ -706,3 +706,18 @@ h2 .num .pic{vertical-align:middle}
 .res-page .res-sous{gap:6px;margin:0 0 22px}
 .res-page .res-sous button{padding:6px 12px;font-size:13.5px}
 @media (max-width:640px){.res-portes{grid-template-columns:1fr 1fr}.porte{flex-direction:column;align-items:flex-start;gap:8px;padding:12px}.porte small{display:none}.porte em{position:absolute;top:10px;right:10px}.porte{position:relative}}
+
+/* ── Icônes du site, sans pastille ni rond (10/11/2026) ── */
+.si{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.res-p,.res-sm .res-c .res-p{background:none!important;width:auto;height:auto;flex:0 0 auto;border-radius:0;color:var(--k,#1E499B);display:inline-flex}
+.res-sm .res-c .res-p{color:var(--sk)}
+.res-c{gap:12px}
+.res-c .res-p{padding-top:2px}
+.res-fam>h2 .res-p{flex:0 0 auto;height:auto}
+.res-fam .res-int{margin-left:34px}
+.porte .res-p{flex:0 0 auto;height:auto}
+.porte em,.porte[aria-pressed="true"] em{background:none;padding:0;font:600 18px var(--sans);color:var(--k)}
+.res-page .filtres .cpt,.res-page .filtres button[aria-pressed="true"] .cpt{background:none;padding:0;color:inherit;opacity:.75}
+.res-tag{background:none;padding:0}
+.res-tag.ab{background:none}
+.tp-c .res-p{width:auto;height:auto}
