@@ -1422,6 +1422,10 @@ if (($action === 'corpus' || $action === 'citations') && $method === 'GET') {
         foreach ($items as $t) {
             if ((int) ($t['n'] ?? 0) !== $num) continue;
             if (!$estLibre($num)) {
+                /* Le nombre vient du répertoire servi (10/11/2026) : écrit en dur,
+                   il annonçait « 1040 textes » quand le répertoire en compte
+                   près de 4 000 — la promesse du mur restait celle de l'été. */
+                $nbRep = number_format(count($items), 0, ',', "\u{202F}");
                 jsonResponse([
                     'ok'       => false,
                     'error'    => 'Abonnement requis',
@@ -1429,8 +1433,8 @@ if (($action === 'corpus' || $action === 'citations') && $method === 'GET') {
                     'palier'   => $palier,
                     'message'  => $offres['message'] !== '' ? $offres['message']
                         : ($estCitation
-                            ? 'Cette citation fait partie du répertoire complet. Abonnez-vous pour lire les 137 citations et leurs sources vérifiées.'
-                            : 'Ce texte fait partie du répertoire complet. Abonnez-vous pour ouvrir les 1040 textes, leurs questions et leurs faits de langue.'),
+                            ? 'Cette citation fait partie du répertoire complet. Abonnez-vous pour lire les ' . $nbRep . ' citations et leurs sources vérifiées.'
+                            : 'Ce texte fait partie du répertoire complet. Abonnez-vous pour ouvrir les ' . $nbRep . ' textes, leurs questions et leurs faits de langue.'),
                 ], 402);
             }
             /* C'EST ICI que l'essai peut commencer — mais SEULEMENT si c'est
