@@ -508,7 +508,7 @@ html{scroll-behavior:smooth}
 .vate-ph{margin:0;border-radius:20px;overflow:hidden;box-shadow:0 22px 44px rgba(0,17,54,.14);background:#EEF1F7}
 .vate-ph img{display:block;width:100%;height:auto}
 .vphotos-1 .vphotos-in{grid-template-columns:1fr}
-.vphotos-1 .vphoto{aspect-ratio:21/9}
+.vphotos-1 .vphoto{aspect-ratio:16/10;max-width:760px;margin:0 auto;width:100%}
 @media (max-width:899px){
   .vphotos-1 .vphoto{aspect-ratio:16/10}
   .vrow{padding-top:40px}
@@ -1780,7 +1780,7 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
         <div style="position:relative">
           <div data-parallax="0.06" style="position:relative;border-radius:14px;overflow:hidden;background:linear-gradient(160deg,#E9F0FC,#F6F8FD);aspect-ratio:4/3;box-shadow:0 18px 40px rgba(0,17,54,.12);will-change:transform">
             <span aria-hidden="true" style="position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(180deg,rgba(30,73,155,0),rgba(30,73,155,.10))"></span>
-            <img fetchpriority="high" decoding="async" width="1080" height="810" src="assets/hero-maison.webp" srcset="assets/hero-maison-800.webp 800w, assets/hero-maison.webp 1080w" sizes="(max-width: 999px) 100vw, 640px" alt="Une mère accompagne son fils qui révise, l’ordinateur ouvert sur VÉRITAS" class="vhero-img" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;animation:vzoomSlow 24s ease-in-out infinite alternate;display:block"><span class="vhero-cap"><b>À la maison, on progresse aussi.</b>Le cours du jour, repris le soir, avec un vrai suivi.</span>
+            <img fetchpriority="high" decoding="async" width="1080" height="810" src="assets/hero-maison.webp" srcset="assets/hero-maison-600.webp 600w, assets/hero-maison-800.webp 800w, assets/hero-maison.webp 1080w" sizes="(max-width: 999px) calc(100vw - 32px), 520px" alt="Une mère accompagne son fils qui révise, l’ordinateur ouvert sur VÉRITAS" class="vhero-img" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;animation:vzoomSlow 24s ease-in-out infinite alternate;display:block"><span class="vhero-cap"><b>À la maison, on progresse aussi.</b>Le cours du jour, repris le soir, avec un vrai suivi.</span>
           </div>
           <div data-parallax="0.1" style="position:absolute;right:-14px;top:-18px;background:linear-gradient(135deg,#5B4FA8,#0C2A6A);color:#fff;border-radius:100px;padding:11px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 26px rgba(12,42,106,.34);will-change:transform;animation:vfloatSlow 8s ease-in-out infinite">
             <span style="width:9px;height:9px;border-radius:50%;background:#7BD99C;animation:vpulse 2.4s ease-out infinite"></span>
@@ -1818,9 +1818,9 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
             </div>
           </div>
           <div class="vapp-m">
-            <figure class="vapp-ph vapp-ph1"><img width="1080" height="775" src="assets/apprendre-en-ligne.webp" srcset="assets/apprendre-en-ligne-640.webp 640w, assets/apprendre-en-ligne.webp 1080w" sizes="(max-width: 899px) 100vw, 560px" alt="Élève qui suit un cours en ligne, casque sur les oreilles" loading="lazy" decoding="async"><figcaption><small>En ligne</small>On reste concentré.</figcaption></figure>
-            <figure class="vapp-ph"><img width="1080" height="870" src="assets/apprendre-classe.webp" srcset="assets/apprendre-classe-640.webp 640w, assets/apprendre-classe.webp 1080w" sizes="(max-width: 899px) 50vw, 280px" alt="Enseignante qui accompagne deux élèves au tableau" loading="lazy" decoding="async"><figcaption><small>Au centre</small>Des enseignants qui croient en vous.</figcaption></figure>
-            <figure class="vapp-ph"><img width="1080" height="900" src="assets/apprendre-labo.webp" srcset="assets/apprendre-labo-640.webp 640w, assets/apprendre-labo.webp 1080w" sizes="(max-width: 899px) 50vw, 280px" alt="Élèves en blouse lors d'une séance de laboratoire" loading="lazy" decoding="async"><figcaption><small>Au labo</small>Apprendre en pratiquant.</figcaption></figure>
+            <figure class="vapp-ph vapp-ph1"><img width="1080" height="775" src="assets/apprendre-en-ligne.webp" srcset="assets/apprendre-en-ligne-640.webp 640w, assets/apprendre-en-ligne.webp 1080w" sizes="(max-width: 899px) calc(100vw - 66px), 545px" alt="Élève qui suit un cours en ligne, casque sur les oreilles" loading="lazy" decoding="async"><figcaption><small>En ligne</small>On reste concentré.</figcaption></figure>
+            <figure class="vapp-ph"><img width="1080" height="870" src="assets/apprendre-classe.webp" srcset="assets/apprendre-classe-400.webp 400w, assets/apprendre-classe-640.webp 640w, assets/apprendre-classe.webp 1080w" sizes="(max-width: 899px) calc(50vw - 37px), 270px" alt="Enseignante qui accompagne deux élèves au tableau" loading="lazy" decoding="async"><figcaption><small>Au centre</small>Des enseignants qui croient en vous.</figcaption></figure>
+            <figure class="vapp-ph"><img width="1080" height="900" src="assets/apprendre-labo.webp" srcset="assets/apprendre-labo-400.webp 400w, assets/apprendre-labo-640.webp 640w, assets/apprendre-labo.webp 1080w" sizes="(max-width: 899px) calc(50vw - 37px), 270px" alt="Élèves en blouse lors d'une séance de laboratoire" loading="lazy" decoding="async"><figcaption><small>Au labo</small>Apprendre en pratiquant.</figcaption></figure>
           </div>
         </div>
       </div>
@@ -1941,9 +1941,9 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
           </div>
         </div>
         <div class="vbou-v" role="img" aria-label="Couvertures des cahiers VÉRITAS : analyse des œuvres 6ᵉ et 3ᵉ, philosophie Première et Terminale, français 3ᵉ">
-          <img class="vc vc1" src="assets/couv-oeuvres-6e.webp" width="360" height="540" alt="" loading="lazy" decoding="async">
+          <img class="vc vc1" src="assets/couv-oeuvres-6e.webp" width="420" height="630" alt="" loading="lazy" decoding="async">
           <img class="vc vc2" src="uploads/oeuvres/livret_oeuvres-3e_v.webp" width="360" height="480" alt="" loading="lazy" decoding="async">
-          <img class="vc vc3" src="assets/couv-philo-1ere.webp" width="360" height="540" alt="" loading="lazy" decoding="async">
+          <img class="vc vc3" src="assets/couv-philo-1ere.webp" width="420" height="630" alt="" loading="lazy" decoding="async">
           <img class="vc vc4" src="uploads/oeuvres/livret_philo-tle_v.webp" width="341" height="480" alt="" loading="lazy" decoding="async">
           <img class="vc vc5" src="uploads/oeuvres/livret_3e_v.webp" width="360" height="480" alt="" loading="lazy" decoding="async">
         </div>
@@ -1955,7 +1955,7 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
          note de build_vitrine.js sur l'entrée « Abonnements »). -->
     <section class="vrow" aria-labelledby="vateT">
       <div class="vrow-in vrow-ate">
-        <figure class="vate-ph"><img width="1280" height="853" src="assets/atelier-collaboratif.webp" srcset="assets/atelier-collaboratif-640.webp 640w, assets/atelier-collaboratif.webp 1280w" sizes="(max-width: 899px) 100vw, 560px" alt="Enseignants qui préparent ensemble cours, épreuves et corrigés sur la plateforme collaborative VÉRITAS" loading="lazy" decoding="async"></figure>
+        <figure class="vate-ph"><img width="1280" height="853" src="assets/atelier-collaboratif.webp" srcset="assets/atelier-collaboratif-640.webp 640w, assets/atelier-collaboratif-960.webp 960w, assets/atelier-collaboratif.webp 1280w" sizes="(max-width: 899px) calc(100vw - 48px), 540px" alt="Enseignants qui préparent ensemble cours, épreuves et corrigés sur la plateforme collaborative VÉRITAS" loading="lazy" decoding="async"></figure>
         <div class="vrow-t">
           <span class="vrow-eb" style="background:#FBE4EE;color:#B03A6E"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-presentation"></use></svg>Pour les enseignants · Atelier de Français</span>
           <h2 id="vateT">Votre prochaine épreuve, composée en une soirée</h2>
@@ -1991,7 +1991,7 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
             <a href="adopter/" class="vrow-b2" style="color:#0C2A6A;border-color:#0C2A6A">Adopter les cahiers</a>
           </div>
         </div>
-        <figure class="vate-ph"><img width="1280" height="853" src="assets/partenaires-aventure.webp" srcset="assets/partenaires-aventure-640.webp 640w, assets/partenaires-aventure.webp 1280w" sizes="(max-width: 899px) 100vw, 560px" alt="Poignée de main entre une responsable VÉRITAS et un partenaire, devant les cahiers de français" loading="lazy" decoding="async"></figure>
+        <figure class="vate-ph"><img width="1280" height="853" src="assets/partenaires-aventure.webp" srcset="assets/partenaires-aventure-640.webp 640w, assets/partenaires-aventure-960.webp 960w, assets/partenaires-aventure.webp 1280w" sizes="(max-width: 899px) calc(100vw - 48px), 540px" alt="Poignée de main entre une responsable VÉRITAS et un partenaire, devant les cahiers de français" loading="lazy" decoding="async"></figure>
       </div>
     </section>
 
@@ -3048,7 +3048,7 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
     <!-- Photo de la page Parents (10/11/2026) -->
     <section style="padding:40px 0 0">
       <div style="max-width:1170px;margin:0 auto;padding:0 24px">
-        <figure class="vpar-ph"><img width="1080" height="915" src="assets/parents-reussite.webp" srcset="assets/parents-reussite-640.webp 640w, assets/parents-reussite.webp 1080w" sizes="(max-width: 899px) 100vw, 1120px" alt="Des parents serrent dans leurs bras leur fille diplômée" loading="lazy" decoding="async"><figcaption><small>Parents</small>Le bonheur d’un parent, c’est la réussite de son enfant.</figcaption></figure>
+        <figure class="vpar-ph"><img width="1080" height="915" src="assets/parents-reussite.webp" srcset="assets/parents-reussite-640.webp 640w, assets/parents-reussite.webp 1080w" sizes="(max-width: 1169px) 100vw, 1122px" alt="Des parents serrent dans leurs bras leur fille diplômée" loading="lazy" decoding="async"><figcaption><small>Parents</small>Le bonheur d’un parent, c’est la réussite de son enfant.</figcaption></figure>
       </div>
     </section>
 
