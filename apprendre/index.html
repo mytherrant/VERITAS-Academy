@@ -116,6 +116,18 @@
 .hero:hover .mosaique span{transform:translateY(0)}
 @media (max-width:760px){.blocs{grid-template-columns:1fr}.hero{padding:24px 20px;grid-template-columns:1fr}.mosaique{grid-template-columns:repeat(6,1fr);transform:none;gap:8px}.mosaique span{border-radius:12px}.mosaique span:nth-child(n+7){display:none}.mosaique span:nth-child(odd){transform:none}.classes button.sep{margin-left:0}}
 @media (prefers-reduced-motion:reduce){.mosaique span{transition:none}}
+/* Faisons connaissance : les quatre cartes de public de la vitrine (10/11/2026) */
+.pcartes{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:left}
+.pcarte{display:flex;flex-direction:column;border-radius:14px;overflow:hidden;text-decoration:none;color:#fff;box-shadow:0 10px 24px rgba(0,17,54,.10);transition:transform .18s,box-shadow .18s}
+.pcarte:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(0,17,54,.16)}
+.pc-ph{display:block;height:150px;background-size:cover;background-repeat:no-repeat;background-color:#E9EEF7}
+.pc-c{flex:1;display:flex;flex-direction:column;align-items:flex-start;padding:20px 20px 18px;color:#fff}
+.pc-i{width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.pc-c b{font:600 21px/1.25 var(--sans);color:#fff;margin-bottom:6px}
+.pc-t{font-size:14.5px;line-height:1.55;color:rgba(255,255,255,.9);margin-bottom:16px}
+.pc-b{margin-top:auto;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);border-radius:100px;padding:8px 14px;font:600 13.5px var(--sans);color:#fff}
+@media (max-width:900px){.pcartes{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.pcartes{grid-template-columns:1fr}.pc-ph{height:140px}}
 </style>
 </head>
 <body class="eleve">
@@ -181,10 +193,11 @@
 
   <section class="profils-z">
     <h2>Faisons connaissance</h2>
-    <div class="profils">
-      <a class="profil" href="/eleve/">${p-eleve}Je suis<b>Élève</b></a>
-      <a class="profil" href="/parent/">${p-parent}Je suis<b>Parent</b></a>
-      <a class="profil" href="/enseignant/">${p-enseignant}Je suis<b>Enseignant</b></a>
+    <div class="pcartes">
+      <a class="pcarte" href="/eleve/"><span class="pc-ph" style="background-image:url(/assets/photo-examen-600.webp);background-position:50% 45%" aria-hidden="true"></span><span class="pc-c" style="background:linear-gradient(135deg,#1E499B,#0C2A6A)"><span class="pc-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span><b>Élèves</b><span class="pc-t">Le programme de sa classe, les corrigés et un tuteur qui répond à 20 h un dimanche.</span><span class="pc-b">Ta moyenne se joue ce soir<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></span></a>
+      <a class="pcarte" href="/#parents"><span class="pc-ph" style="background-image:url(/assets/photo-parents.webp);background-position:50% 30%" aria-hidden="true"></span><span class="pc-c" style="background:linear-gradient(135deg,#0E7C86,#0A4E58)"><span class="pc-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg></span><b>Parents</b><span class="pc-t">Les notes, les absences et les tranches réglées, depuis votre téléphone.</span><span class="pc-b">Le suivi, sans quitter la maison<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></span></a>
+      <a class="pcarte" href="/enseignant/"><span class="pc-ph" style="background-image:url(/assets/photo-enseignant.webp);background-position:50% 30%" aria-hidden="true"></span><span class="pc-c" style="background:linear-gradient(135deg,#C9508B,#8E2B57)"><span class="pc-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></svg></span><b>Enseignants</b><span class="pc-t">Publiez vos corrigés sous votre nom et encadrez les candidats aux examens.</span><span class="pc-b">Votre savoir, signé et payé<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></span></a>
+      <a class="pcarte" href="/app.html#partenariat"><span class="pc-ph" style="background-image:url(/assets/photo-groupe-600.webp);background-position:50% 40%" aria-hidden="true"></span><span class="pc-c" style="background:linear-gradient(135deg,#A84200,#8A3700)"><span class="pc-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></svg></span><b>Partenaires</b><span class="pc-t">Libraires, inspecteurs, influenceurs, établissements : neuf façons de porter VÉRITAS et d’en vivre.</span><span class="pc-b">Votre réseau, votre revenu<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></span></a>
     </div>
     <p style="margin-top:16px;color:var(--gris)">Déjà un compte ? <a href="/app.html#connexion">Je me connecte</a></p>
   </section>
