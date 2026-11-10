@@ -689,3 +689,20 @@ h2 .num .pic{vertical-align:middle}
 .tp-c b{color:var(--k,#001136)}
 .etiq{font-weight:600}
 @media (max-width:640px){.res-fam .res-int{margin-left:0}}
+
+/* ── « Tout pour progresser » : quatre portes, une liste de classes (10/11/2026) ── */
+.res-cl{display:inline-flex;align-items:center;gap:10px;margin:0 0 18px;font:500 14px var(--sans);color:#4D5163}
+.res-cl select{font:600 15px var(--sans);color:#001136;background:#fff;border:1px solid #DCE5F5;border-radius:999px;padding:7px 34px 7px 14px;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231E499B' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;cursor:pointer}
+.res-portes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:12px;margin:0 0 14px}
+.porte{display:flex;align-items:center;gap:12px;text-align:left;background:#fff;border:2px solid transparent;border-radius:14px;padding:14px;box-shadow:0 6px 16px rgba(0,17,54,.06);cursor:pointer;font-family:var(--sans);transition:transform .18s ease,box-shadow .18s ease}
+.porte:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,17,54,.09)}
+.porte[aria-pressed="true"]{border-color:var(--k);background:var(--kp)}
+.porte .res-p{flex:0 0 40px;height:40px;display:grid;place-items:center}
+.porte b{display:block;font:600 15px/1.3 var(--sans);color:#001136}
+.porte small{display:block;font:400 12.5px/1.4 var(--sans);color:#6B7287;margin-top:2px}
+.porte em{margin-left:auto;font:600 13px var(--sans);font-style:normal;color:var(--k);background:var(--kp);border-radius:999px;padding:2px 9px}
+.porte[aria-pressed="true"] em{background:#fff}
+.res-page .res-sous{gap:6px;margin:0 0 22px}
+.res-page .res-sous button{padding:6px 12px;font-size:13.5px}
+@media (max-width:640px){.res-portes{grid-template-columns:1fr 1fr}.porte{flex-direction:column;align-items:flex-start;gap:8px;padding:12px}.porte small{display:none}.porte em{position:absolute;top:10px;right:10px}.porte{position:relative}}

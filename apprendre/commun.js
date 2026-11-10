@@ -3,7 +3,7 @@
    rien n'est envoyé. Toute lecture/écriture est protégée (navigation privée, stockage bloqué). */
 (function (W) {
   "use strict";
-  var ICO = "../assets/veritas-matieres.svg?v=20261110b"; /* versionné : un ancien sprite en cache n'a pas les nouvelles icônes */
+  var ICO = "../assets/veritas-matieres.svg?v=20261110c"; /* versionné : un ancien sprite en cache n'a pas les nouvelles icônes */
 
   // id, nom affiché, icône, teinte (m, pale, moyen, foncé), noms MINESEC, préfixes de scènes vivantes
   var MATIERES = [
@@ -256,7 +256,8 @@
   }
 
   /* ---------- ressources du site reliées à la progression (ressources.js) ---------- */
-  var GROUPES = [["suivi", "Où j'en suis"], ["apprendre", "Comprendre et apprendre"], ["entrainer", "M'entraîner"], ["aide", "Besoin d'aide"]];
+  var GROUPES = [["suivi", "Où j'en suis", "cible", "Notes, coefficients, orientation"], ["apprendre", "Comprendre et apprendre", "livre", "Cours, œuvres, méthodes, corrigés"],
+                 ["entrainer", "M'entraîner", "chrono", "Labos, épreuves, compositions, jeux"], ["aide", "Besoin d'aide", "aide", "Questions, repères, calendrier"]];
   var FAMILLES = [
     ["notes", "Notes et coefficients", "calcul", "Savoir où tu en es et ce qui compte vraiment.", "suivi"],
     ["orientation", "Orientation", "boussole", "Choisir sa série, sa filière, son école.", "suivi"],
