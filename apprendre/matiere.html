@@ -9,7 +9,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261110g">
+<link rel="stylesheet" href="apprendre.css?v=20261110h">
 <link rel="stylesheet" href="jeu.css?v=20261110g">
 <style>
 /* ── Page matière (refonte 07/11) : en-tête teinté, filtres en pastilles, chapitres en cartes colorées ── */
@@ -65,7 +65,8 @@ a.lg:hover{background:var(--kp)}
 <script src="progressions.js?v=20261110g"></script>
 <script src="lecons.js?v=20261110g"></script>
 <script src="ressources.js?v=20261110g"></script>
-<script src="commun.js?v=20261110g"></script>
+<script src="charge.js?v=4dd556b7"></script>
+<script src="commun.js?v=20261110h"></script>
 <script src="jeu.js?v=20261110g"></script>
 <script>
 (function(){
@@ -89,7 +90,7 @@ a.lg:hover{background:var(--kp)}
   var TRIM={"Premier trimestre":PAL[0],"Deuxième trimestre":PAL[1],"Troisième trimestre":PAL[2]};
   function teinte(p){return '--k:'+p[0]+';--kp:'+p[1]}
   var chev='<span class="chev" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>';
-  function ligne(l){var k=red[l[0]]; var et=k?(lus[k]?'<span class="et lu">'+(qz[k]?'Quiz '+qz[k][0]+'/'+qz[k][1]:'Lue')+'</span>':'<span class="et red">Cours rédigé</span>'):'<span class="et av">Bientôt</span>';
+  function ligne(l){var k=red[l[0]]; var et=k?(lus[k]?'<span class="et lu">'+(qz[k]?'Quiz '+qz[k][0]+'/'+qz[k][1]:'Lue')+'</span>':'<span class="et red">'+(LE[k].verrou?'Début offert':LE[k].gratuit?'Gratuit':'Cours rédigé')+'</span>'):'<span class="et av">Bientôt</span>';
     var rs=A.resLecon(c,M.id,l[0]); if(!k&&rs.length) et='';
     var tl=A.titreL(l[1]); if(!tl) return '';
     var corps='<span class="n">'+(l[0]||"")+'</span><span class="t">'+esc(tl)+'</span>'+et;

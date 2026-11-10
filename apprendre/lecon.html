@@ -9,7 +9,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261110g">
+<link rel="stylesheet" href="apprendre.css?v=20261110h">
 <link rel="stylesheet" href="jeu.css?v=20261110g">
 </head>
 <body class="eleve">
@@ -42,8 +42,11 @@
 <script src="progressions.js?v=20261110g"></script>
 <script src="lecons.js?v=20261110g"></script>
 <script src="ressources.js?v=20261110g"></script>
-<script src="commun.js?v=20261110g"></script>
+<script src="charge.js?v=4dd556b7"></script>
+<script src="commun.js?v=20261110h"></script>
 <script src="jeu.js?v=20261110g"></script>
+<script src="labo.js?v=20261111c"></script>
+<script src="verrou.js?v=20261110b"></script>
 <script>
 (function(){
   "use strict";
@@ -51,6 +54,7 @@
   var id=new URLSearchParams(location.search).get("id")||"";
   var L=(window.VRT_LECONS||{})[id], boite=$("#lecon");
   if(!L){ boite.innerHTML='<p class="vide">Cette leçon n\'existe pas encore. <a href="index.html">Retour aux cours</a>.</p>'; return; }
+  function demarrer(mur){
   var M=A.PAR_ID[L.m]||A.MATIERES[0];
   A.teinter(M); A.rail($("#rail"),L.c,L.m); A.chiffreSerie($("#serie"));
   document.title=L.titre+" · "+L.c+" · "+M.nom+" | VÉRITAS";
@@ -61,10 +65,10 @@
   var i=soeurs.indexOf(id), prec=soeurs[i-1], suiv=soeurs[i+1];
   var sc=A.scenesPour(L), nomScene=function(s){return (window.VRT_SCENES_TITRES||{})[s]||s.replace(/^(3e|1re|tle)-[a-z\-]+?-/,"").replace(/-/g," ")};
 
-  var parties=L.parties.map(function(p,k){
+  var parties=L.parties.filter(function(p){return !p.verrou}).map(function(p,k){
     return '<div class="partie" id="p'+(k+1)+'"><h2><span class="num">'+(k+1)+'</span><span class="txt">'+esc(p.t)+'</span></h2>'+p.html+
       (p.illus?'<figure class="illus">'+p.illus.svg+'<figcaption>'+esc(p.illus.legende||"")+'</figcaption></figure>':'')+
-      (p.anim?'<div class="anim"><div class="anim-t"><span class="anim-p" aria-hidden="true">'+A.pic("lecture",14)+'</span>'+esc(p.animT||"À toi de manipuler")+'</div><div class="anim-c" data-anim="'+k+'"></div></div>':'')+
+      (p.labo?'<div class="anim"><div class="anim-t"><span class="anim-p" aria-hidden="true">'+A.pic("lecture",14)+'</span>Activité d\'apprentissage : à toi de manipuler</div><div class="anim-c" data-labo="'+k+'"></div></div>':'')+(p.anim?'<div class="anim"><div class="anim-t"><span class="anim-p" aria-hidden="true">'+A.pic("lecture",14)+'</span>'+esc(p.animT||"À toi de manipuler")+'</div><div class="anim-c" data-anim="'+k+'"></div></div>':'')+
       (p.retenir?'<p class="retenir">'+p.retenir+'</p>':'')+'</div>';
   }).join("");
   var scenesHtml=sc.map(function(s){return '<a class="scene" href="/scenes/'+s+'.html"><span class="pl">'+A.pic("masques",30)+'</span><span><small>Scène vivante</small><strong>'+esc(nomScene(s))+'</strong></span><span class="jouer">'+A.pic("lecture",30)+'</span></a>'}).join("");
@@ -76,30 +80,32 @@
    '<p class="ariane"><a href="index.html">Apprendre</a><span>›</span><a href="index.html?c='+encodeURIComponent(L.c)+'">'+esc(L.c)+'</a><span>›</span><a href="matiere.html?c='+encodeURIComponent(L.c)+'&m='+L.m+'">'+esc(M.nom)+'</a><span>›</span>'+esc(L.titre)+'</p>'+
    '<header class="bandeau"><span class="medaille" style="background:'+M.t[1]+'">'+A.icoM(M,62)+'</span><div><div class="sur" id="sur">Cours</div><h1>'+esc(L.titre)+'</h1><div class="meta"><span><b>'+esc(M.nom)+'</b> · '+esc(L.c)+'</span>'+(L.chap?'<span>'+esc(L.chap)+'</span>':'')+(L.n<900?'<span>Leçon '+L.n+' de la progression MINESEC</span>':'')+'</div>'+
      (L.accroche?'<p class="accroche">'+esc(L.accroche)+'</p>':'')+
-     '<div class="puces"><span>'+A.pic("horloge",14)+' '+(L.duree||15)+' min</span><span>'+L.parties.length+' parties</span>'+(L.parties.some(function(p){return p.anim})?'<span>'+A.pic("lecture",14)+' schéma animé</span>':'')+'<span>'+A.pic("coche",14)+' quiz de '+L.quiz.length+' questions</span>'+(A.scenesPour(L).length?'<span>'+A.pic("masques",16)+' scène vivante</span>':'')+'</div></div></header>'+
+     '<div class="puces"><span>'+A.pic("horloge",14)+' '+(L.duree||15)+' min</span><span>'+L.parties.length+' parties</span>'+(L.labo||L.parties.some(function(p){return p.anim||p.labo})?'<span>'+A.pic("lecture",14)+' labo interactif</span>':'')+'<span>'+A.pic("coche",14)+' quiz de '+(L.quiz.length||L.nq||0)+' questions</span>'+(A.scenesPour(L).length?'<span>'+A.pic("masques",16)+' scène vivante</span>':'')+'</div></div></header>'+
    '<div class="formats" role="tablist" aria-label="Formats de la leçon">'+
      '<button type="button" role="tab" aria-selected="true" data-f="cours"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>Cours</button>'+
      '<button type="button" role="tab" aria-selected="false" data-f="revision"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Révision</button>'+
      '<button type="button" role="tab" aria-selected="false" data-f="quiz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5h.01"/></svg>Quiz</button>'+
    '</div>'+
-   '<section class="grille" data-panneau="cours"><aside class="sommaire" aria-label="Sommaire"><p>Sommaire</p><ol>'+L.parties.map(function(p,k){return '<li><a href="#p'+(k+1)+'">'+(k+1)+'. '+esc(p.t)+'</a></li>'}).join("")+'</ol><div class="lu"><span id="luTxt">Lecture : 0 %</span><div class="barre-p"><i id="luBar" style="width:0"></i></div></div></aside>'+
+   '<section class="grille" data-panneau="cours"><aside class="sommaire" aria-label="Sommaire"><p>Sommaire</p><ol>'+L.parties.map(function(p,k){return p.verrou?'<li class="ferme">'+VRT.verrou.CADENAS+esc(p.t)+'</li>':'<li><a href="#p'+(k+1)+'">'+(k+1)+'. '+esc(p.t)+'</a></li>'}).join("")+'</ol><div class="lu"><span id="luTxt">Lecture : 0 %</span><div class="barre-p"><i id="luBar" style="width:0"></i></div></div></aside>'+
      '<article class="carte"><div class="outils-pdf"><button type="button" class="btn-l" onclick="print()">⤓ PDF</button></div>'+
      '<div id="kalaoCours"></div>'+
      (L.intro?'<p class="info">'+L.intro+'</p>':'')+
+     (L.apc?'<aside class="apc"><h2>Situation de vie</h2><p>'+esc(L.apc.situation)+'</p><p class="apc-t"><b>Ta tâche :</b> '+esc(L.apc.tache)+'</p></aside>':'')+
      (L.objectifs?'<div class="objectifs"><b>À la fin de la leçon, tu sauras :</b><ul>'+L.objectifs.map(function(o){return '<li>'+o+'</li>'}).join("")+'</ul></div>':'')+
-     parties+plus+scenesHtml+appel+A.offre(L.c,L.m,'lecon')+nav+'</article></section>'+
+     parties+plus+(mur?VRT.verrou.mur(L,mur,A):scenesHtml+appel+A.offre(L.c,L.m,'lecon'))+nav+'</article></section>'+
    '<section class="grille" data-panneau="revision" hidden><aside class="sommaire"><p>L\'essentiel</p></aside><article class="carte">'+
-     '<div class="partie"><h2><span class="num">'+A.pic("coche",20)+'</span><span class="txt">Ce que tu dois retenir</span></h2><ul>'+L.revision.map(function(r){return '<li>'+r+'</li>'}).join("")+'</ul></div>'+
+     ''+(mur?'<p class="vide">La fiche de révision de cette leçon est réservée aux abonnés. <a href="#" data-retour-cours>Voir comment la débloquer</a>.</p>':'<div class="partie"><h2><span class="num">'+A.pic("coche",20)+'</span><span class="txt">Ce que tu dois retenir</span></h2><ul>'+L.revision.map(function(r){return '<li>'+r+'</li>'}).join("")+'</ul></div>')+
      (L.exo?'<div class="partie"><h2><span class="num">'+A.pic("crayon",18)+'</span><span class="txt">À toi de jouer</span></h2>'+L.exo+'</div>':'')+
      scenesHtml+'</article></section>'+
-   '<section class="grille" data-panneau="quiz" hidden><aside class="sommaire"><p>'+L.quiz.length+' questions</p><p id="score" class="lu"></p></aside><article class="carte" id="quiz"><div class="quiz-barre" id="quizBarre" aria-hidden="true"><i></i></div>'+
+   '<section class="grille" data-panneau="quiz" hidden><aside class="sommaire"><p>'+(L.quiz.length||L.nq||0)+' questions</p><p id="score" class="lu"></p></aside><article class="carte" id="quiz"><div class="quiz-barre" id="quizBarre" aria-hidden="true"><i></i></div>'+
      L.quiz.map(function(q0,k){var q=A.melanger(q0);q.q=q0.q;q.e=q0.e;return '<div class="q" data-bonne="'+q.b+'"><p>'+(k+1)+'. '+q.q+'</p>'+q.r.map(function(r){return '<button type="button">'+r+'</button>'}).join("")+'<div class="expl" hidden>'+(q.e||"")+'</div></div>'}).join("")+
-     '<div class="bilan" id="bilan" hidden></div></article></section>';
+     (mur?'<p class="vide">Le quiz de cette leçon est réservé aux abonnés. <a href="#" data-retour-cours>Voir comment le débloquer</a>.</p>':'')+'<div class="bilan" id="bilan" hidden></div></article></section>';
+  if(mur){ VRT.verrou.brancher(boite,L); $$("[data-retour-cours]").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();$('[data-f=cours]').click();var m=$(".mur");if(m)m.scrollIntoView({block:"center"})})}); }
 
   A.noterJour(); A.chiffreSerie($("#serie"));
 
   /* Kalao, la mascotte : un mot d'accueil adapté (déjà lue ? quiz déjà réussi ?) */
-  if(VRT.jeu){ var dejaLu=A.lire("lus",{})[id], qq=A.lire("quiz",{})[id];
+  if(VRT.jeu&&!mur){ var dejaLu=A.lire("lus",{})[id], qq=A.lire("quiz",{})[id];
     VRT.jeu.bulle($("#kalaoCours"), qq&&qq[0]===qq[1] ? "Te revoilà ! Tu as déjà réussi ce quiz sans faute. Une petite révision pour graver tout ça ?"
       : dejaLu ? "Content de te revoir. Après la lecture, tente le quiz : chaque étoile vaut 10 points."
       : "Salut, moi c'est Kalao ! Lis la leçon jusqu'au bout pour gagner <b>20 points</b>, puis décroche les 3 étoiles du quiz.", "salut"); }
@@ -114,6 +120,7 @@
 
   /* schémas animés : chacun isolé, une erreur n'empêche pas la leçon de s'afficher */
   $$("[data-anim]").forEach(function(el){ var p=L.parties[+el.getAttribute("data-anim")]; try{ p.anim(el) }catch(e){ el.closest(".anim").hidden=true; if(window.console) console.warn("Animation", id, e) } });
+  $$("[data-labo]").forEach(function(el){ var p=L.parties[+el.getAttribute("data-labo")]; try{ VRT.labo.monter(el,p.labo) }catch(e){ el.closest(".anim").hidden=true; if(window.console) console.warn("Labo", id, e) } });
   A.boutonsImage(document.getElementById("lecon"));   /* « Enregistrer l'image » : PNG avec filigrane VÉRITAS */
 
   /* onglets */
@@ -133,7 +140,7 @@
   }
   var art=$('[data-panneau=cours] .carte');
   function lecture(){ var r=art.getBoundingClientRect(), h=r.height-innerHeight*.6; var p=Math.max(0,Math.min(100,Math.round((-r.top+innerHeight*.2)/Math.max(h,1)*100)));
-    $("#luBar").style.width=p+"%"; $("#luTxt").textContent=p>=95?"Leçon lue":"Lecture : "+p+" %"; if(p>=95&&!fait){fait=true;A.marquerLu(id);if(VRT.jeu)VRT.jeu.leconLue(id)} }
+    $("#luBar").style.width=p+"%"; $("#luTxt").textContent=p>=95?"Leçon lue":"Lecture : "+p+" %"; if(p>=95&&!fait&&!mur){fait=true;A.marquerLu(id);if(VRT.jeu)VRT.jeu.leconLue(id)} }
   addEventListener("scroll",lecture,{passive:true}); lecture();
 
   /* quiz */
@@ -178,6 +185,8 @@
   $$(".etapes li").forEach(function(li){li.addEventListener("click",function(){cur=+li.getAttribute("data-i");rendre()})});
   $("#visiteS").addEventListener("click",function(){if(cur<ET.length-1){cur++;rendre()}else dlg.close()});
   $(".fermer").addEventListener("click",function(){dlg.close()});
+  }
+  if(L.verrou&&window.VRT&&VRT.verrou){ boite.innerHTML='<p class="vide">Chargement de la leçon…</p>'; VRT.verrou.ouvrir(L,demarrer); } else demarrer(null);
 })();
 </script>
 </body>
