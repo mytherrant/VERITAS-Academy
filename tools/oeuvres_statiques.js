@@ -40,7 +40,7 @@ const OEUVRES = global.window.LITT_OEUVRES;
 const esc = s => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
-const net = s => String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+const net = s => String(s == null ? '' : s).replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{2712}\u{2718}-\u{27BF}\u{FE0F}]/gu, '').replace(/\s+/g, ' ').trim();
 
 // Même icône que les h2 existants de la page : le sprite #lc-* est déjà là.
 const ico = id => '<svg class="vi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
@@ -60,7 +60,7 @@ function analyseHtml(contenu) {
   // un pictogramme ou en capitales (« 📖 SCÈNE — Le contrôle du cacao ») est
   // un intertitre ; le reste, des paragraphes.
   return String(contenu || '').split(/\n\s*\n/).map(bloc => {
-    const lignes = bloc.split('\n').map(l => l.trim()).filter(Boolean);
+    const lignes = bloc.split('\n').map(l => net(l)).filter(Boolean);
     if (!lignes.length) return '';
     let html = '';
     if (lignes.length > 1 && lignes[0].length <= 90

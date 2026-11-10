@@ -64,6 +64,39 @@ const apiDe = (page) => (route, corps) => page.evaluate(async ([route, corps]) =
   r = await api('sync/pousser', { ops: [{ op: hex(), t: 'depenses', id: d2, champs: { montant: 1 } }] });
   ok('admin : une dépense validée ne change pas de montant', r.resultats[0].ok === false, JSON.stringify(r).slice(0, 200));
 
+  // Dépense de 10 000 F ou plus sans photo : le serveur la refuse à un partenaire ; l'admin la valide après confirmation.
+  const d3 = 'de' + hex();
+  await apiDe(pa)('sync/pousser', { ops: [{ op: hex(), t: 'depenses', id: d3, champs: { centre_id: cid, libelle: 'Loyer ' + SUF, montant: 15000, date: auj, categorie: 'loyer', mode: 'especes' } }] });
+  await adm.click('#puce-sync'); await aJour(adm);
+  await adm.goto(B + '#/accueil'); await adm.goto(B + '#/bilan'); await adm.waitForSelector(`[data-a="voir-depense"][data-id="${d3}"]`);
+  await adm.click(`[data-a="voir-depense"][data-id="${d3}"]`); await adm.waitForSelector('#feuille [data-a="valider-depense"]');
+  await adm.waitForSelector('#feuille .note:has-text("validez quand même")');
+  await adm.click('#feuille [data-a="valider-depense"]'); await adm.waitForSelector('#feuille button.btn:has-text("Valider sans justificatif")');
+  await adm.click('#feuille button.btn:has-text("Valider sans justificatif")'); await aJour(adm); await adm.waitForTimeout(600);
+  const D3 = ((await api('sync/tirer&depuis=0')).lignes.depenses.find((x) => x.id === d3) || {});
+  ok('admin : dépense de 15 000 F sans photo validée après confirmation', D3.statut === 'validee', JSON.stringify(D3).slice(0, 160));
+  const d4 = 'de' + hex();
+  await apiDe(pa)('sync/pousser', { ops: [{ op: hex(), t: 'depenses', id: d4, champs: { centre_id: cid, libelle: 'Loyer bis ' + SUF, montant: 12000, date: auj, categorie: 'loyer', mode: 'especes' } }] });
+  const resp = comptes.find((u) => !u.admin_global && u.actif && u.acces[cid] === 'responsable');
+  if (resp) {
+    const pr = await login(nav, resp.identifiant, (await api('comptes/mdp', { id: resp.id })).mdp);
+    r = await apiDe(pr)('sync/pousser', { ops: [{ op: hex(), t: 'depenses', id: d4, champs: { statut: 'validee' } }] });
+    ok('responsable non trésorier : ne valide pas', r.resultats[0].ok === false && /trésorier/.test(r.resultats[0].erreur || ''), JSON.stringify(r).slice(0, 200));
+    // Trésorier du centre : il valide, mais sans photo une dépense de 10 000 F ou plus reste refusée.
+    const tresAvant = ((await api('sync/tirer&depuis=0')).lignes.centres.find((c) => c.id === cid) || {}).tresorier_id || '';
+    await api('sync/pousser', { ops: [{ op: hex(), t: 'centres', id: cid, champs: { tresorier_id: resp.id } }] });
+    r = await apiDe(pr)('sync/pousser', { ops: [{ op: hex(), t: 'depenses', id: d4, champs: { statut: 'validee' } }] });
+    ok('trésorier : sans photo, une dépense de 10 000 F ou plus reste refusée', r.resultats[0].ok === false && /Justificatif/.test(r.resultats[0].erreur || ''), JSON.stringify(r).slice(0, 200));
+    // Sa propre dépense : pas de bouton « Valider », mais on lui dit pourquoi (et qu'elle ne compte pas encore).
+    const d5 = 'de' + hex();
+    await apiDe(pr)('sync/pousser', { ops: [{ op: hex(), t: 'depenses', id: d5, champs: { centre_id: cid, libelle: 'Craie resp ' + SUF, montant: 200, date: auj, categorie: 'fournitures', mode: 'especes' } }] });
+    await pr.click('#puce-sync'); await aJour(pr);
+    await pr.goto(B + '#/caisse'); await pr.click('[data-a="caisse-onglet"][data-v="depenses"]'); await pr.waitForSelector(`[data-a="voir-depense"][data-id="${d5}"]`);
+    await pr.click(`[data-a="voir-depense"][data-id="${d5}"]`); await pr.waitForSelector('#feuille .note.qui-valide');
+    ok('trésorier : sa propre dépense, pas de « Valider » mais l\'explication', await pr.locator('#feuille [data-a="valider-depense"]').count() === 0 &&
+      /vous ne pouvez pas la valider vous-même/.test(await pr.textContent('#feuille .note.qui-valide')), await pr.textContent('#feuille .note.qui-valide').catch(() => 'absent'));
+    await api('sync/pousser', { ops: [{ op: hex(), t: 'centres', id: cid, champs: { tresorier_id: tresAvant } }] });
+  }
   for (const [n, p] of [['admin', adm], ['actionnaire', pa]]) ok(n + ' : aucune erreur JavaScript', p.err.length === 0, p.err.join(' / '));
   await nav.close();
   console.log(echecs.length ? `\n${echecs.length} échec(s)` : '\nTout est vert.');

@@ -7,7 +7,7 @@ require_once __DIR__ . '/_json_boot.php'; // display_errors=0 + purge des parasi
 // Reproduction interdite sans accord écrit. Contrefaçon : 5-10 ans prison +
 // 500 000 à 10 000 000 FCFA d'amende. contact@veritas-school.com
 //
-// GET /api/news_proxy.php?cat=education|minesec|grandes_ecoles|bourses
+// GET /api/news_proxy.php?cat=education|minesec|grandes_ecoles|bourses|bepc|probatoire|bac
 // ── Public (pas d'auth), cache 30 min ──
 // ============================================================
 // v1.2.2 : allowlist au lieu de '*'
@@ -38,6 +38,10 @@ $feeds = [
     'minesec'       => 'https://news.google.com/rss/search?q=MINESEC+cameroun+enseignement+secondaire&hl=fr&gl=CM&ceid=CM:fr',
     'grandes_ecoles'=> 'https://news.google.com/rss/search?q=grandes+%C3%A9coles+concours+universit%C3%A9+cameroun&hl=fr&gl=CM&ceid=CM:fr',
     'bourses'       => 'https://news.google.com/rss/search?q=bourses+%C3%A9tudes+cameroun+2026+candidature&hl=fr&gl=CM&ceid=CM:fr',
+    // Apprendre (10/11/2026) : l'actualité de l'examen de la classe choisie.
+    'bepc'          => 'https://news.google.com/rss/search?q=BEPC+cameroun+OBC&hl=fr&gl=CM&ceid=CM:fr',
+    'probatoire'    => 'https://news.google.com/rss/search?q=probatoire+cameroun+OBC&hl=fr&gl=CM&ceid=CM:fr',
+    'bac'           => 'https://news.google.com/rss/search?q=baccalaur%C3%A9at+cameroun+OBC&hl=fr&gl=CM&ceid=CM:fr',
 ];
 
 $cat = isset($_GET['cat']) ? $_GET['cat'] : 'education';

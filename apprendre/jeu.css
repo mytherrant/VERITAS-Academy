@@ -122,3 +122,8 @@ figure.illus:hover .btn-img,.anim:hover .btn-img,.btn-img:focus-visible{opacity:
 @media (prefers-reduced-motion:reduce){
   .jeu-toast,.jeu-fete,.jeu-fete-c,.kalao,.kalao .kalao-aile,.secoue,.q button.ok,.badge-c,.quiz-barre i{animation:none!important;transition:none!important}
 }
+
+/* badges encore à gagner : grisés mais lisibles (contraste ≥ 4,5:1) */
+.badge-c b{color:#5F6B80}
+.badge-c small{color:#6B7287;font-size:12px}
+.prog-t .cpt{color:#7A5800}

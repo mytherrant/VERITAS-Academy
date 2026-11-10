@@ -812,8 +812,12 @@ function blocCalendrier() {
     throw new Error('Retrait NIVEAUX : marqueurs introuvables — la maquette a changé, vérifier AVANT de déployer.');
   }
   const avantN = corps.length;
-  corps = corps.slice(0, dN) + blocCalendrier() + '\n    ' + corps.slice(fN);
-  console.log('niveaux     : section retirée (' + (fN - dN) + ' octets) → calendrier + actualités');
+  /* 10/11/2026 — Calendrier et actualités quittent l'accueil : ils vivent
+     désormais dans Apprendre, réglés sur la classe de l'élève (compte à
+     rebours, actualités de son examen, classe virtuelle). blocCalendrier()
+     reste disponible mais n'est plus inséré. */
+  corps = corps.slice(0, dN) + corps.slice(fN);
+  console.log('niveaux     : section retirée (' + (fN - dN) + ' octets)');
 
   // ── Retrait 2 : la grille comparative des plans
   const ancre = corps.indexOf('Ce que chaque plan');
@@ -894,30 +898,19 @@ function blocCalendrier() {
      « Photos » menait en plus à une page VIDE : DB.photos compte 0 élément.
      Ne les rétablir que si la vitrine cesse de porter ces informations. */
 const MENU = [
+  /* 10/11/2026 — « maintenant que tout ceci est classé et visible dans
+     apprendre, supprime du menu pour épurer » (Jacques). Les quatorze entrées
+     (e-learning, corrigés, annales, évaluations, œuvres, programmes, outils,
+     test de niveau, progression, jeux, examen blanc, espace élève, cahier en
+     ligne, Flash) sont TOUTES reliées depuis apprendre/ (ressources.js, rail,
+     progressions). Une seule porte, donc. */
   { titre: 'Élève', sous: 'Apprendre et réviser', entrees: [
-    { t: 'Catalogue e-learning', d: 'Matières, œuvres, séquences', i: 'lc-book',        c: '#1E499B', f: '#DBE8FE', vp: 'elearning', g: 1 },
-    { t: 'Corrigés des cahiers', d: 'Accès libre, par séquence',   i: 'lc-checkcircle', c: '#007E11', f: '#E0F5E5', h: 'corriges/' },
-    { t: 'Annales corrigées',    d: 'BEPC, Probatoire, BAC, GCE',  i: 'lc-doc',         c: '#5B4FA8', f: '#EAE7F7', h: APP + '#epreuves', g: 1 },
-    { t: 'Évaluations en ligne', d: 'Entraînement chronométré',    i: 'lc-clock',       c: '#A84200', f: '#FFF3E4', h: APP + '#evaluations', g: 1 },
-    { t: 'Œuvres au programme',  d: 'Analyses et fiches',          i: 'lc-bookopen',    c: '#1E499B', f: '#DBE8FE', h: 'oeuvres/' },
-    { t: 'Programmes par classe',d: 'De la 6ᵉ à la Terminale',     i: 'lc-graduation',  c: '#0E7C86', f: '#DDF2F4', h: 'niveaux/' },
-    { t: 'Outils gratuits',      d: 'Calculateurs de moyenne',     i: 'lc-calculator',  c: '#007E11', f: '#E0F5E5', h: 'outils/' },
-    /* 25/10/2026 — des MODULES de l'application sans aucune porte publique
-       (« tester le niveau, badges de progression… les usagers ne savent pas
-       qu'ils existent », Jacques). Le test de positionnement n'était même plus
-       atteignable depuis l'application (retiré d'un panneau en v1.9.1). */
-    { t: 'Tester mon niveau',    d: '10 questions, forces et lacunes', i: 'lc-target',  c: '#B03A6E', f: '#FBE4EE', h: APP + '#positionnement' },
-    { t: 'Ma progression',       d: 'XP, série, badges à débloquer', i: 'lc-award',     c: '#007E11', f: '#E0F5E5', h: APP + '#progression', g: 1 },
-    { t: 'Jeux et battles',      d: 'Réviser en jouant, défis hebdo', i: 'lc-game',     c: '#5B4FA8', f: '#EAE7F7', h: APP + '#jeux' },
-    { t: 'Examen blanc',         d: 'Sujet officiel + chronomètre', i: 'lc-clock',      c: '#A84200', f: '#FFF3E4', h: APP + '#simulateur' },
-    /* ⚠️ TROIS SERVICES QUI EXISTAIENT SANS ÊTRE ANNONÇÉS (31/08/2026).
-       Chacun a sa page publiée, indexée, alimentée — et aucune entrée de menu.
-       Un visiteur ne pouvait les atteindre qu'en connaissant leur URL. */
-    { t: 'Espace élève',         d: 'Corrigés, quiz et méthodes',  i: 'lc-user',        c: '#1E499B', f: '#DBE8FE', h: 'eleve/' },
-    { t: 'Mon cahier en ligne',  d: 'Interactif, 6ᵉ → Terminale',  i: 'lc-bookopen',    c: '#A84200', f: '#FFF3E4', h: 'livrets/' },
-    { t: 'VÉRITAS Flash',        d: 'Scanner le QR de sa séquence',i: 'lc-qr',          c: '#5B4FA8', f: '#EAE7F7', h: 'flash/' }
+    { t: 'Apprendre',            d: 'Leçons, quiz, corrigés, annales', i: 'lc-graduation', c: '#1E499B', f: '#DBE8FE', h: 'apprendre/' }
   ]},
   { titre: 'Parent', sous: 'Suivre et soutenir', entrees: [
+    /* 10/11/2026 — le bloc « Quelqu'un suit votre enfant » a quitté l'accueil
+       pour la page Parents ; cette entrée y mène. */
+    { t: 'Suivi au centre ou à domicile', d: 'Répétitions, classes virtuelles', i: 'lc-home', c: '#0E7C86', f: '#DDF2F4', vp: 'parents' },
     { t: 'Orientation',          d: 'Choisir sa série',            i: 'lc-compass',     c: '#0E7C86', f: '#DDF2F4', h: APP + '#orientation' },
     { t: 'Tester son niveau',    d: 'Le point avant de commencer', i: 'lc-target',      c: '#B03A6E', f: '#FBE4EE', h: APP + '#positionnement' },
     { t: 'Matières et coefficients', d: 'Poids réels, orientation',i: 'lc-scale',       c: '#5B4FA8', f: '#EAE7F7', h: 'parcours/' },

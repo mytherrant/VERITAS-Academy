@@ -173,7 +173,8 @@ async function session(nav, ident, mdp) {
   ok('15 000 F sans photo : « justificatif manquant »', /justificatif manquant/.test(lSans), lSans);
   ok('1 000 F sans photo et dépense avec photo : pas d\'alerte', !/justificatif manquant/.test(lPetite) && !/justificatif manquant/.test(lAvec), lPetite + ' / ' + lAvec);
   const refus = await api('sync/pousser', { ops: [{ op: id('op'), t: 'depenses', id: grosse, champs: { statut: 'validee' } }] });
-  ok('serveur : validation refusée sans photo dès 10 000 F', /Justificatif obligatoire/.test(JSON.stringify(refus)), JSON.stringify(refus).slice(0, 200));
+  // L'administrateur a le contrôle sur tout : il peut valider sans photo (le refus pour un responsable est dans banc_gestion_detail_sorties).
+  ok('serveur : l\'administrateur valide sans photo dès 10 000 F', refus.resultats[0].ok === true, JSON.stringify(refus).slice(0, 200));
   await page.click(`.ligne:has-text("Sans photo ${SUF}")`);
   await page.waitForSelector('#zone-justificatif p', { timeout: 5000 }).catch(() => {});
   const note = await page.textContent('#zone-justificatif');

@@ -22,7 +22,7 @@ function g_capacites(): array {
         'responsable' => ['centre.voir', 'eleves.gerer', 'appel.faire', 'paiements.encaisser', 'paiements.voir', 'finances.voir',
                           'depenses.saisir', 'depenses.voir', 'enseignants.gerer', 'comptes.gerer', 'journal.voir', 'stats.voir', 'emploi.gerer',
                           // Pouvoirs de correction : nommés pour que l'admin puisse les retirer un par un.
-                          'appel.corriger', 'caisse.corriger', 'depenses.valider', 'tarifs.fixer', 'remises.accorder', 'agenda.gerer'],
+                          'appel.corriger', 'caisse.corriger', 'tarifs.fixer', 'remises.accorder', 'agenda.gerer'],
         // Demande de Jacques (02/11/2026) : les actionnaires tiennent l'emploi du temps de leur centre.
         // Demande de Jacques (03/11/2026) : chaque partenaire, selon ses jours au centre et sa
         // proximité avec les parents, peut encaisser et envoyer le reçu, puis remettre l'argent au trésorier.

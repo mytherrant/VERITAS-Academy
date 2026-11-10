@@ -764,11 +764,20 @@ function g_valider_finances(PDO $pdo, string $table, string $id, ?array $existan
     }
     if ($statut !== 'en_attente' && $statut !== $avant) {
         $auteur = $existant ? (string) $existant['saisie_par'] : (string) ($ctx['uid'] ?? '');
-        if ($role !== 'admin' && !(g_ctx_peut('depenses.valider', $centre) && $auteur !== ($ctx['uid'] ?? ''))) {
-            throw new DomainException('La validation revient à un responsable (pas l\'auteur de la dépense) ou à l\'administrateur.');
+        // Demande de Jacques (10/11/2026) : les dépenses sont validées par le trésorier du centre ou l'administrateur.
+        // Le trésorier ne valide pas ce qu'il a saisi lui-même : l'administrateur le fait.
+        $st = $pdo->prepare('SELECT tresorier_id FROM g_centres WHERE id = ?');
+        $st->execute([$centre]);
+        $tresorier = (string) ($st->fetchColumn() ?: '');
+        $uidV = (string) ($ctx['uid'] ?? '');
+        if ($role !== 'admin' && !($tresorier !== '' && $uidV === $tresorier && $auteur !== $uidV && g_ctx_peut('depenses.voir', $centre))) {
+            throw new DomainException($tresorier !== '' && $uidV === $tresorier
+                ? 'Vous avez saisi cette dépense : l\'administrateur la valide.'
+                : 'La validation des dépenses revient au trésorier du centre ou à l\'administrateur.');
         }
         if ($statut === 'refusee' && trim((string) $val('motif_refus')) === '') { throw new DomainException('Indiquez le motif du refus.'); }
-        if ($statut === 'validee' && $montant >= G_SEUIL_JUSTIFICATIF && empty($existant['justificatif'])) {
+        // L'administrateur, qui a le contrôle sur tout, peut valider sans photo (après confirmation sur le téléphone).
+        if ($statut === 'validee' && $montant >= G_SEUIL_JUSTIFICATIF && empty($existant['justificatif']) && $role !== 'admin') {
             throw new DomainException('Justificatif obligatoire à partir de ' . number_format(G_SEUIL_JUSTIFICATIF, 0, ',', ' ') . ' F : ajoutez la photo avant de valider.');
         }
         $champs['valide_par'] = $ctx['uid'] ?? null;
@@ -788,18 +797,29 @@ function g_verrou_centre(PDO $pdo, string $centre): void {
 function g_completer_paiement(PDO $pdo, array $champs, array $ctx): array {
     g_verrou_centre($pdo, (string) $champs['centre_id']);
     $propose = (string) ($champs['numero'] ?? '');
+    unset($champs['numero']);
     if ($propose !== '') {
         // Numéro pris par le téléphone dans SA tranche : il doit lui appartenir et n'avoir jamais servi.
-        if (!preg_match('/^(\d{4})-(\d{4})$/', $propose, $m)) { throw new DomainException('Numéro de reçu invalide.'); }
-        $st = $pdo->prepare('SELECT COUNT(*) FROM g_tranches WHERE centre_id = ? AND utilisateur_id = ? AND prefixe = ? AND debut <= ? AND fin >= ?');
-        $st->execute([(string) $champs['centre_id'], $ctx['uid'], $m[1], (int) $m[2], (int) $m[2]]);
-        if (!(int) $st->fetchColumn()) { throw new DomainException('Ce numéro de reçu n\'appartient pas à vos tranches.'); }
-        $st = $pdo->prepare('SELECT COUNT(*) FROM g_paiements WHERE centre_id = ? AND numero = ?');
-        $st->execute([(string) $champs['centre_id'], $propose]);
-        if ((int) $st->fetchColumn()) { throw new DomainException('Numéro de reçu déjà utilisé.'); }
-        $champs['encaisse_par'] = $ctx['uid'];
-        $champs['annule'] = 0;
-        return $champs;
+        // Sinon (même compte sur deux appareils, tranche d'un autre compte restée sur le téléphone…),
+        // l'argent a bel et bien été reçu : on NE refuse PAS le versement, on lui donne le numéro suivant.
+        $valable = (bool) preg_match('/^(\d{4})-(\d{4})$/', $propose, $m);
+        if ($valable) {
+            $st = $pdo->prepare('SELECT COUNT(*) FROM g_tranches WHERE centre_id = ? AND utilisateur_id = ? AND prefixe = ? AND debut <= ? AND fin >= ?');
+            $st->execute([(string) $champs['centre_id'], $ctx['uid'], $m[1], (int) $m[2], (int) $m[2]]);
+            $valable = (bool) (int) $st->fetchColumn();
+        }
+        if ($valable) {
+            $st = $pdo->prepare('SELECT COUNT(*) FROM g_paiements WHERE centre_id = ? AND numero = ?');
+            $st->execute([(string) $champs['centre_id'], $propose]);
+            $valable = !(int) $st->fetchColumn();
+        }
+        if ($valable) {
+            $champs['numero'] = $propose;
+            $champs['encaisse_par'] = $ctx['uid'];
+            $champs['annule'] = 0;
+            return $champs;
+        }
+        $champs['note'] = mb_substr(trim((string) ($champs['note'] ?? '') . ' (reçu renuméroté : n° ' . mb_substr($propose, 0, 20) . ' déjà pris)'), 0, 200);
     }
     $prefixe = g_prefixe_annee($pdo);
     $st = $pdo->prepare('SELECT numero FROM g_paiements WHERE centre_id = ? AND numero LIKE ?');

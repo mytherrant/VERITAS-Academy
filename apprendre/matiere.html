@@ -9,8 +9,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261109b">
-<link rel="stylesheet" href="jeu.css?v=20261109b">
+<link rel="stylesheet" href="apprendre.css?v=20261110h">
+<link rel="stylesheet" href="jeu.css?v=20261110g">
 <style>
 /* ── Page matière (refonte 07/11) : en-tête teinté, filtres en pastilles, chapitres en cartes colorées ── */
 .mpage{max-width:900px;margin:0 auto}
@@ -44,7 +44,7 @@ a.lg:hover{background:var(--kp)}
 .lg .t{flex:1;line-height:1.45}
 .lg.r .t{color:#001136;font-weight:500}
 .lg .et{font:600 11px var(--sans);padding:4px 10px;border-radius:999px;white-space:nowrap}
-.et.red{background:#FFC93C;color:#001136}.et.lu{background:#EAF6EC;color:#007E11}.et.av{background:#F5F7FB;color:#9AA3B5}
+.et.red{background:#FFC93C;color:#001136}.et.lu{background:#EAF6EC;color:#007E11}.et.av{background:#F5F7FB;color:#5F6B80}
 .lg .chev{color:var(--k);display:grid;place-items:center}
 .scenes-m{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin:0 0 22px}
 .scenes-m .scene{margin:0}
@@ -52,20 +52,22 @@ a.lg:hover{background:var(--kp)}
 </style>
 </head>
 <body class="eleve">
+<a class="saut" href="#contenu">Aller au contenu</a>
 <header class="top">
   <a class="logo" href="/">VÉRI<b>TAS</b></a>
   <nav class="top-nav" aria-label="Apprendre"><a href="index.html">Apprendre</a><a href="ressources.html">Tout pour progresser</a><a href="notes.html">Mes notes</a><a href="/scenes/">Scènes vivantes</a><a href="/corriges/">Corrigés</a></nav>
   <div class="top-d"><a class="niveau-chip" data-niveau href="index.html#progression" aria-label="Mon niveau et mes badges"></a><span class="serie" id="serie" hidden></span></div>
 </header>
 <nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
-<main class="page"><div class="lim" id="zone"></div></main>
+<main class="page" id="contenu"><div class="lim" id="zone"></div></main>
 
-<script src="scenes.js?v=20261109b"></script>
-<script src="progressions.js?v=20261109b"></script>
-<script src="lecons.js?v=20261109b"></script>
-<script src="ressources.js?v=20261109b"></script>
-<script src="commun.js?v=20261109b"></script>
-<script src="jeu.js?v=20261109b"></script>
+<script src="scenes.js?v=20261110g"></script>
+<script src="progressions.js?v=20261110g"></script>
+<script src="lecons.js?v=20261110g"></script>
+<script src="ressources.js?v=20261110g"></script>
+<script src="charge.js?v=4de3211a"></script>
+<script src="commun.js?v=20261110h"></script>
+<script src="jeu.js?v=20261110g"></script>
 <script>
 (function(){
   "use strict";
@@ -88,9 +90,10 @@ a.lg:hover{background:var(--kp)}
   var TRIM={"Premier trimestre":PAL[0],"Deuxième trimestre":PAL[1],"Troisième trimestre":PAL[2]};
   function teinte(p){return '--k:'+p[0]+';--kp:'+p[1]}
   var chev='<span class="chev" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>';
-  function ligne(l){var k=red[l[0]]; var et=k?(lus[k]?'<span class="et lu">'+(qz[k]?'Quiz '+qz[k][0]+'/'+qz[k][1]:'Lue')+'</span>':'<span class="et red">Cours rédigé</span>'):'<span class="et av">Bientôt</span>';
+  function ligne(l){var k=red[l[0]]; var et=k?(lus[k]?'<span class="et lu">'+(qz[k]?'Quiz '+qz[k][0]+'/'+qz[k][1]:'Lue')+'</span>':'<span class="et red">'+(LE[k].verrou?'Début offert':LE[k].gratuit?'Gratuit':'Cours rédigé')+'</span>'):'<span class="et av">Bientôt</span>';
     var rs=A.resLecon(c,M.id,l[0]); if(!k&&rs.length) et='';
-    var corps='<span class="n">'+(l[0]||"")+'</span><span class="t">'+esc(l[1])+'</span>'+et;
+    var tl=A.titreL(l[1]); if(!tl) return '';
+    var corps='<span class="n">'+(l[0]||"")+'</span><span class="t">'+esc(tl)+'</span>'+et;
     return '<div class="lgw" id="l'+l[0]+'">'+(k?'<a class="lg r" href="lecon.html?id='+k+'">'+corps+chev+'</a>':'<div class="lg">'+corps+'</div>')+A.pastilles(rs)+'</div>'}
   function rendu(filtre){
     var n=0;

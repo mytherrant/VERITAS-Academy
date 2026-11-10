@@ -9,8 +9,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261109b">
-<link rel="stylesheet" href="jeu.css?v=20261109b">
+<link rel="stylesheet" href="apprendre.css?v=20261110h">
+<link rel="stylesheet" href="jeu.css?v=20261110g">
 <style>
 .hero{background:linear-gradient(90deg,#EDF2FB,#F7F9FE 70%);color:#001136;border:1px solid #DCE5F5;border-radius:10px;padding:34px 34px 28px;position:relative;overflow:hidden;margin-bottom:26px}
 .hero::before{display:none}
@@ -42,7 +42,7 @@
 .mat b{color:var(--c,#001136);font-size:16px;line-height:1.25}
 .mat span{font-size:13px;color:var(--gris)}
 .mat .barre-p{margin-top:auto}
-.badge{display:inline-block;font:700 11px var(--sans);letter-spacing:.04em;padding:3px 8px;border-radius:999px;background:var(--m-pale);color:var(--m)}
+.badge{display:inline-block;font:700 12px var(--sans);letter-spacing:.04em;padding:3px 8px;border-radius:999px;background:var(--m-pale);color:var(--m)}
 .defi{background:#fff;border-radius:20px;padding:22px;box-shadow:0 4px 0 var(--sable);margin-bottom:34px}
 .defi .q{margin:0}
 .defi .q button{max-width:none}
@@ -50,6 +50,51 @@
 .scenes{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-bottom:38px}
 .scenes .scene{margin:0}
 .profils-z{text-align:center;margin:10px 0 0}
+/* ── Mon année scolaire (10/11/2026) : calendrier, actualités MINESEC, classe virtuelle ── */
+.annee{margin-bottom:34px}
+.annee-g{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px}
+.carte-a{background:#fff;border-radius:20px;padding:20px;box-shadow:0 4px 0 var(--sable)}
+.carte-a h3{font:700 17px var(--serif);color:var(--titre);margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.carte-a h3 .si{color:#1E499B}
+.cal-g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:18px}
+.cal-cpt{background:linear-gradient(140deg,#142554,#1E3A8A);color:#fff;border-radius:16px;padding:18px}
+.cal-sur{margin:0 0 12px;font:600 13px var(--sans);letter-spacing:.04em;text-transform:uppercase;color:#FFE7A3;display:flex;align-items:center;gap:6px}
+.cal-chiffres{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.cal-chiffres span{background:rgba(255,255,255,.1);border-radius:12px;padding:10px 4px;text-align:center}
+.cal-chiffres b{display:block;font:700 clamp(22px,3.2vw,30px)/1.1 var(--sans);color:var(--or);font-variant-numeric:tabular-nums}
+.cal-chiffres small{font-size:11.5px;color:rgba(255,255,255,.82)}
+.cal-quand{margin:12px 0 0;font-size:14px;font-weight:600}
+.cal-note{margin:8px 0 0;font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.82)}
+.cal-sit{display:flex;justify-content:space-between;gap:8px;margin:0 0 6px;font-size:14px;color:var(--titre)}
+.cal-sit span{color:var(--gris);font-size:13px}
+.cal-barre{position:relative;height:8px;border-radius:99px;background:#EDF2FB;margin-bottom:12px}
+.cal-barre i{position:absolute;inset:0 auto 0 0;border-radius:99px;background:#1E499B}
+.cal-barre em{position:absolute;top:-3px;width:2px;height:14px;background:#9FBEEA}
+.cal-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.cal-l li{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:12px;background:#F7F9FE}
+.cal-l li.vac{background:#EAF6EC}.cal-l li.exa{background:#FFF8E6}
+.cal-i{flex:0 0 32px;height:32px;border-radius:10px;display:grid;place-items:center;background:#fff;color:#1E499B}
+.cal-l li.vac .cal-i{color:#007E11}.cal-l li.exa .cal-i{color:#C24E00}
+.cal-t{flex:1;min-width:0}.cal-t b{display:block;font-size:13.5px;color:var(--titre);line-height:1.3}.cal-t small{font-size:12px;color:var(--gris)}
+.cal-j{font:700 12.5px var(--sans);color:#1E499B;white-space:nowrap}
+.cal-src,.act-src{margin:10px 0 0;font-size:12px;color:var(--gris)}
+.act-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.act-l a{display:block;padding:9px 10px;border-radius:12px;text-decoration:none;color:inherit}
+.act-l a:hover{background:#F7F9FE}
+.act-l b{display:block;font-size:14px;line-height:1.35;color:var(--titre);font-weight:600}
+.act-l small{font-size:12px;color:var(--gris)}
+.act-tag{display:inline-block;font:700 11px var(--sans);letter-spacing:.04em;text-transform:uppercase;color:#C24E00;background:#FDF1E8;border-radius:999px;padding:2px 8px;margin-bottom:4px}
+.act-att,.act-vide{color:var(--gris);font-size:14px;margin:0}
+.cv{margin-top:16px}
+.cv-t{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.cv-i{flex:0 0 48px;height:48px;border-radius:14px;display:grid;place-items:center;background:#F0EDF9;color:#5B4FA8}
+.cv-t b{display:block;font:700 17px var(--serif);color:var(--titre)}.cv-t small{color:var(--gris);font-size:13px}
+.cv-s{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.cv-s li{font-size:12.5px;font-weight:600;color:#5B4FA8;background:#F0EDF9;border-radius:999px;padding:4px 10px}
+.cv-p{margin:0 0 14px;color:var(--gris);font-size:14px}
+.cv-go{display:inline-flex;font-weight:700;color:var(--ink);background:var(--or);border-radius:999px;padding:9px 18px;text-decoration:none}
+.cv-sec{display:block;margin-top:10px;font-size:13px}
+@media (max-width:900px){.annee-g,.cal-g{grid-template-columns:1fr}}
 .profils-z h2{font:700 24px var(--serif);color:var(--titre);margin:0 0 16px}
 /* ── Bandeau d'accueil (07/11) : deux colonnes, mosaïque d'icônes colorées, classes par cycle ── */
 .hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:28px;align-items:center;background:linear-gradient(120deg,#EDF2FB 0%,#F7F9FE 45%,#FFF8E6 100%);border:1px solid #DCE5F5;border-radius:16px}
@@ -71,17 +116,34 @@
 .hero:hover .mosaique span{transform:translateY(0)}
 @media (max-width:760px){.blocs{grid-template-columns:1fr}.hero{padding:24px 20px;grid-template-columns:1fr}.mosaique{grid-template-columns:repeat(6,1fr);transform:none;gap:8px}.mosaique span{border-radius:12px}.mosaique span:nth-child(n+7){display:none}.mosaique span:nth-child(odd){transform:none}.classes button.sep{margin-left:0}}
 @media (prefers-reduced-motion:reduce){.mosaique span{transition:none}}
+/* Faisons connaissance : les quatre cartes de public de la vitrine (10/11/2026) */
+.pcartes{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:left}
+.pcarte{display:flex;flex-direction:column;border-radius:14px;overflow:hidden;text-decoration:none;color:#fff;box-shadow:0 10px 24px rgba(0,17,54,.10);transition:transform .18s,box-shadow .18s}
+.pcarte:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(0,17,54,.16)}
+.pc-ph{display:block;height:150px;background-size:cover;background-repeat:no-repeat;background-color:#E9EEF7}
+.pc-c{flex:1;display:flex;flex-direction:column;align-items:flex-start;padding:20px 20px 18px;color:#fff}
+.pc-i{width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.pc-c b{font:600 21px/1.25 var(--sans);color:#fff;margin-bottom:6px}
+.pc-t{font-size:14.5px;line-height:1.55;color:rgba(255,255,255,.9);margin-bottom:16px}
+.pc-b{margin-top:auto;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);border-radius:100px;padding:8px 14px;font:600 13.5px var(--sans);color:#fff}
+.pc-el{background-image:url(/assets/photo-examen-600.webp);background-image:image-set(url(/assets/photo-examen-600.webp) 1x,url(/assets/photo-examen.webp) 2x)}
+.pc-pa{background-image:url(/assets/parents-reussite-640.webp);background-image:image-set(url(/assets/parents-reussite-640.webp) 1x,url(/assets/parents-reussite.webp) 2x)}
+.pc-en{background-image:url(/assets/apprendre-classe-640.webp);background-image:image-set(url(/assets/apprendre-classe-640.webp) 1x,url(/assets/apprendre-classe.webp) 2x)}
+.pc-pt{background-image:url(/assets/photo-groupe-600.webp);background-image:image-set(url(/assets/photo-groupe-600.webp) 1x,url(/assets/photo-groupe.webp) 2x)}
+@media (max-width:900px){.pcartes{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.pcartes{grid-template-columns:1fr}.pc-ph{height:140px}}
 </style>
 </head>
 <body class="eleve">
+<a class="saut" href="#contenu">Aller au contenu</a>
 <header class="top">
   <a class="logo" href="/">VÉRI<b>TAS</b></a>
-  <nav class="top-nav" aria-label="Apprendre"><a href="index.html" aria-current="page">Apprendre</a><a href="/scenes/">Scènes vivantes</a><a href="/corriges/">Corrigés</a></nav>
+  <nav class="top-nav" aria-label="Apprendre"><a href="index.html" aria-current="page">Apprendre</a><a href="ressources.html">Tout pour progresser</a><a href="notes.html">Mes notes</a><a href="/scenes/">Scènes vivantes</a><a href="/corriges/">Corrigés</a></nav>
   <div class="top-d"><a class="niveau-chip" data-niveau href="#progression" aria-label="Mon niveau et mes badges"></a><span class="serie" id="serie" hidden></span></div>
 </header>
 <nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
 
-<main class="page"><div class="lim">
+<main class="page" id="contenu"><div class="lim">
   <section class="hero">
     <div class="hero-g">
       <h1>Que veux-tu apprendre <span>aujourd'hui</span>&nbsp;?</h1>
@@ -95,6 +157,17 @@
 
   <div class="objectif-z"><div class="objectif" id="objectifJour"></div><div class="kalao-accueil" id="kalaoAccueil"></div></div>
   <div class="blocs" id="blocs"></div>
+
+  <section class="annee" aria-labelledby="anneeT">
+    <div class="sec-t"><h2 id="anneeT">Mon année</h2><span class="lu">Calendrier officiel 2026-2027</span></div>
+    <div class="annee-g">
+      <div class="carte-a"><h3><svg class="si" width="20" height="20" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-calendar"/></svg>Calendrier scolaire</h3><div id="anCal"></div></div>
+      <div>
+        <div class="carte-a"><h3><svg class="si" width="20" height="20" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-megaphone"/></svg>Actualités MINESEC</h3><div id="anAct" aria-live="polite"></div></div>
+        <div class="carte-a cv" id="anCv"></div>
+      </div>
+    </div>
+  </section>
 
   <div class="sec-t"><h2 id="matsT">Mes matières</h2><a href="#defi">Défi express ›</a></div>
   <div class="mats" id="mats"></div>
@@ -124,21 +197,24 @@
 
   <section class="profils-z">
     <h2>Faisons connaissance</h2>
-    <div class="profils">
-      <a class="profil" href="/eleve/">${p-eleve}Je suis<b>Élève</b></a>
-      <a class="profil" href="/parent/">${p-parent}Je suis<b>Parent</b></a>
-      <a class="profil" href="/enseignant/">${p-enseignant}Je suis<b>Enseignant</b></a>
+    <div class="pcartes">
+      <a class="pcarte" href="/eleve/"><span class="pc-ph pc-el" style="background-position:50% 45%" aria-hidden="true"></span><span class="pc-c" style="background:linear-gradient(135deg,#1E499B,#0C2A6A)"><span class="pc-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span><b>Élèves</b><span class="pc-t">Le programme de sa classe, les corrigés et un tuteur qui répond à 20 h un dimanche.</span><span class="pc-b">Ta moyenne se joue ce soir<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></span></a>
+      <a class="pcarte" href="/#parents"><span class="pc-ph pc-pa" style="background-position:50% 30%" aria-hidden="true"></span><span class="pc-c" style="background:linear-gradient(135deg,#0E7C86,#0A4E58)"><span class="pc-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg></span><b>Parents</b><span class="pc-t">Les notes, les absences et les tranches réglées, depuis votre téléphone.</span><span class="pc-b">Le suivi, sans quitter la maison<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></span></a>
+      <a class="pcarte" href="/enseignant/"><span class="pc-ph pc-en" style="background-position:50% 25%" aria-hidden="true"></span><span class="pc-c" style="background:linear-gradient(135deg,#C9508B,#8E2B57)"><span class="pc-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></svg></span><b>Enseignants</b><span class="pc-t">Publiez vos corrigés sous votre nom et encadrez les candidats aux examens.</span><span class="pc-b">Votre savoir, signé et payé<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></span></a>
+      <a class="pcarte" href="/app.html#partenariat"><span class="pc-ph pc-pt" style="background-position:50% 40%" aria-hidden="true"></span><span class="pc-c" style="background:linear-gradient(135deg,#A84200,#8A3700)"><span class="pc-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></svg></span><b>Partenaires</b><span class="pc-t">Libraires, inspecteurs, influenceurs, établissements : neuf façons de porter VÉRITAS et d’en vivre.</span><span class="pc-b">Votre réseau, votre revenu<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></span></a>
     </div>
     <p style="margin-top:16px;color:var(--gris)">Déjà un compte ? <a href="/app.html#connexion">Je me connecte</a></p>
   </section>
 </div></main>
 
-<script src="scenes.js?v=20261109b"></script>
-<script src="progressions.js?v=20261109b"></script>
-<script src="lecons.js?v=20261109b"></script>
-<script src="ressources.js?v=20261109b"></script>
-<script src="commun.js?v=20261109b"></script>
-<script src="jeu.js?v=20261109b"></script>
+<script src="scenes.js?v=20261110g"></script>
+<script src="progressions.js?v=20261110g"></script>
+<script src="lecons.js?v=20261110g"></script>
+<script src="ressources.js?v=20261110g"></script>
+<script src="charge.js?v=4de3211a"></script>
+<script src="commun.js?v=20261110h"></script>
+<script src="jeu.js?v=20261110g"></script>
+<script src="calendrier.js?v=20261110a"></script>
 <script>
 (function(){
   "use strict";
@@ -173,6 +249,10 @@
     else b.push('<a class="bloc" href="/scenes/"><small>Pour commencer en douceur</small><h2>Les scènes vivantes</h2><p>Des scènes courtes, tirées des œuvres et des programmes, où tu choisis la bonne réplique.</p><span class="go">Découvrir ›</span></a>');
     $("#blocs").innerHTML=b.join("");
 
+    /* mon année : compte à rebours, actualités et classe virtuelle de la classe choisie */
+    $("#anneeT").textContent="Mon année en "+classe;
+    if(VRT.annee) VRT.annee.rendre(classe,{cal:"anCal",act:"anAct",cv:"anCv"});
+
     /* matières de la classe */
     $("#matsT").textContent="Mes matières en "+classe;
     var mats=A.MATIERES.filter(function(m){return nbLecons(m,classe)||lecs(classe).some(function(k){return LE[k].m===m.id})});
@@ -185,7 +265,7 @@
     /* tout ce que le site offre à cette classe, par usage */
     var tous=A.resClasse(classe), parT={}; tous.forEach(function(i){var t=VRT_RES.items[i].t;parT[t]=(parT[t]||0)+1});
     $("#tpT").textContent="Tout pour progresser en "+classe; $("#tpL").href="ressources.html?c="+encodeURIComponent(classe);
-    $("#tp").innerHTML=A.FAMILLES.filter(function(f){return parT[f[0]]}).map(function(f){return '<a class="tp-c" href="ressources.html?c='+encodeURIComponent(classe)+'&f='+f[0]+'"><span class="res-p">'+A.pic(f[2],22)+'</span><b>'+esc(f[1])+'</b><small>'+parT[f[0]]+' ressource'+(parT[f[0]]>1?'s':'')+'</small></a>'}).join("");
+    $("#tp").innerHTML=A.FAMILLES.filter(function(f){return parT[f[0]]}).map(function(f){return '<a class="tp-c" style="'+f[5]+'" href="ressources.html?c='+encodeURIComponent(classe)+'&f='+f[0]+'"><span class="res-p">'+A.si(f[2],24)+'</span><b>'+esc(f[1])+'</b><small>'+parT[f[0]]+' ressource'+(parT[f[0]]>1?'s':'')+'</small></a>'}).join("");
 
     /* défi express */
     var pool=[]; lecs(classe).concat(lecs(classe).length?[]:lecs()).forEach(function(k){LE[k].quiz.forEach(function(x){pool.push([k,x])})});
