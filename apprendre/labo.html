@@ -8,8 +8,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261109b">
-<link rel="stylesheet" href="jeu.css?v=20261109b">
+<link rel="stylesheet" href="apprendre.css?v=20261110b">
+<link rel="stylesheet" href="jeu.css?v=20261110b">
 </head>
 <body class="eleve">
 <header class="top">
@@ -20,11 +20,11 @@
 <nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
 <main class="page"><div class="lim res-page" id="zone"></div></main>
 
-<script src="progressions.js?v=20261109b"></script>
-<script src="lecons.js?v=20261109b"></script>
-<script src="ressources.js?v=20261109b"></script>
-<script src="commun.js?v=20261109b"></script>
-<script src="jeu.js?v=20261109b"></script>
+<script src="progressions.js?v=20261110b"></script>
+<script src="lecons.js?v=20261110b"></script>
+<script src="ressources.js?v=20261110b"></script>
+<script src="commun.js?v=20261110b"></script>
+<script src="jeu.js?v=20261110b"></script>
 <script>
 /* Moteur de simulation : les quatre fonctions qu'attend chunks/labo.js (mêmes qu'app.js). */
 window._sim={running:true,raf:0,t:0,params:{}};
@@ -36,7 +36,7 @@ function _simLoop(){if(!window._sim.running)return;window._sim.t+=0.016;if(windo
 function _simUpdateControls(){var cw=document.getElementById('simControls');if(!cw||!window._sim.controlsDef)return;var a=document.activeElement;if(a&&cw.contains(a))return;var h=window._sim.controlsDef();if(window._sim._lastCtrlHtml===h)return;window._sim._lastCtrlHtml=h;cw.innerHTML=h;}
 if(typeof CanvasRenderingContext2D!=='undefined'&&!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){r=typeof r==='number'?r:5;this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.quadraticCurveTo(x+w,y,x+w,y+r);this.lineTo(x+w,y+h-r);this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);this.lineTo(x+r,y+h);this.quadraticCurveTo(x,y+h,x,y+h-r);this.lineTo(x,y+r);this.quadraticCurveTo(x,y,x+r,y);return this;};}
 </script>
-<script src="../chunks/labo.js?v=20261109b"></script>
+<script src="../chunks/labo.js?v=20261110b"></script>
 <script>
 (function(){
   "use strict";
