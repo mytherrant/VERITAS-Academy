@@ -8,8 +8,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261110d">
-<link rel="stylesheet" href="jeu.css?v=20261110d">
+<link rel="stylesheet" href="apprendre.css?v=20261110e">
+<link rel="stylesheet" href="jeu.css?v=20261110e">
 </head>
 <body class="eleve">
 <header class="top">
@@ -20,11 +20,11 @@
 <nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
 <main class="page"><div class="lim res-page" id="zone"></div></main>
 
-<script src="progressions.js?v=20261110d"></script>
-<script src="lecons.js?v=20261110d"></script>
-<script src="ressources.js?v=20261110d"></script>
-<script src="commun.js?v=20261110d"></script>
-<script src="jeu.js?v=20261110d"></script>
+<script src="progressions.js?v=20261110e"></script>
+<script src="lecons.js?v=20261110e"></script>
+<script src="ressources.js?v=20261110e"></script>
+<script src="commun.js?v=20261110e"></script>
+<script src="jeu.js?v=20261110e"></script>
 <script>
 /* Moteur de simulation : les quatre fonctions qu'attend chunks/labo.js (mêmes qu'app.js). */
 window._sim={running:true,raf:0,t:0,params:{}};
@@ -36,7 +36,7 @@ function _simLoop(){if(!window._sim.running)return;window._sim.t+=0.016;if(windo
 function _simUpdateControls(){var cw=document.getElementById('simControls');if(!cw||!window._sim.controlsDef)return;var a=document.activeElement;if(a&&cw.contains(a))return;var h=window._sim.controlsDef();if(window._sim._lastCtrlHtml===h)return;window._sim._lastCtrlHtml=h;cw.innerHTML=h;}
 if(typeof CanvasRenderingContext2D!=='undefined'&&!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){r=typeof r==='number'?r:5;this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.quadraticCurveTo(x+w,y,x+w,y+r);this.lineTo(x+w,y+h-r);this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);this.lineTo(x+r,y+h);this.quadraticCurveTo(x,y+h,x,y+h-r);this.lineTo(x,y+r);this.quadraticCurveTo(x,y,x+r,y);return this;};}
 </script>
-<script src="../chunks/labo.js?v=20261110d"></script>
+<script src="../chunks/labo.js?v=20261110e"></script>
 <script>
 (function(){
   "use strict";
@@ -62,11 +62,14 @@ if(typeof CanvasRenderingContext2D!=='undefined'&&!CanvasRenderingContext2D.prot
       (autres.length?'<details class="labo-d"><summary>Autres classes ('+autres.length+')</summary><ul class="labo-prog">'+autres.map(ligneProg).join("")+'</ul></details>':'')+'</section>':'');
   var P=$("#panneau");
   function stop(){window._sim.running=false;if(window._sim.raf)cancelAnimationFrame(window._sim.raf)}
-  function para(s){return net(s).split(/\n{2,}/).map(function(b){return '<p>'+esc(b).replace(/\n/g,'<br>')+'</p>'}).join("")}
+  /* « TITRE : texte » → titre en couleur ; une teinte de la charte par bloc, en alternance */
+  var nTon=0;
+  function titre(t){var m=/^([^:\n]{2,60}?)\s*:\s+([\s\S]*)$/.exec(t);return m?'<b class="labo-t">'+esc(m[1])+'</b> '+esc(m[2]):esc(t)}
+  function para(s){nTon=0;return net(s).split(/\n{2,}/).map(function(b){return '<p style="'+A.ton(nTon++)+'">'+b.split("\n").map(titre).join("<br>")+'</p>'}).join("")}
   function theorie(){stop();P.innerHTML=para(lv.theorie)}
   function experience(){
     P.innerHTML='<div class="labo-sim"><div class="labo-sim-b"><span>Simulation</span><span><button type="button" id="simPlayBtn">Pause</button> <button type="button" id="simRaz">Recommencer</button></span></div><canvas id="laboCnv" width="680" height="340"></canvas><div id="simValues"></div></div><div id="simControls"></div>'+
-      '<h2 class="labo-h2">Protocole</h2><ol class="labo-ol">'+lv.experience.map(function(e){return '<li>'+esc(net(e).replace(/^\d+[.)]?\s*/,""))+'</li>'}).join("")+'</ol>';
+      '<h2 class="labo-h2">Protocole</h2><ol class="labo-ol">'+lv.experience.map(function(e,i){return '<li style="'+A.ton(i)+'">'+titre(net(e).replace(/^\d+[.)]?\s*/,""))+'</li>'}).join("")+'</ol>';
     $("#simPlayBtn").onclick=_simToggle; $("#simRaz").onclick=_simReset;
     window._sim.running=true; window._sim._lastCtrlHtml=null;
     if(window._initLaboSim) window._initLaboSim(lv);

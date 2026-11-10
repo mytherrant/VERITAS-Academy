@@ -721,3 +721,8 @@ h2 .num .pic{vertical-align:middle}
 .res-tag{background:none;padding:0}
 .res-tag.ab{background:none}
 .tp-c .res-p{width:auto;height:auto}
+
+/* ── Labo : titres d'étape et de notion en couleur (10/11/2026) ── */
+.labo-t{color:var(--k,#1E499B);font-weight:600;letter-spacing:.01em}
+.labo-ol li::marker{color:var(--k,#1E499B);font-weight:600}
+.labo-ol li{padding-left:4px}

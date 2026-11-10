@@ -3,7 +3,7 @@
    rien n'est envoyé. Toute lecture/écriture est protégée (navigation privée, stockage bloqué). */
 (function (W) {
   "use strict";
-  var ICO = "../assets/veritas-matieres.svg?v=20261110d"; /* versionné : un ancien sprite en cache n'a pas les nouvelles icônes */
+  var ICO = "../assets/veritas-matieres.svg?v=20261110e"; /* versionné : un ancien sprite en cache n'a pas les nouvelles icônes */
 
   // id, nom affiché, icône, teinte (m, pale, moyen, foncé), noms MINESEC, préfixes de scènes vivantes
   var MATIERES = [
