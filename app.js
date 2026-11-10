@@ -29549,7 +29549,12 @@ window._track=function(ev,meta){
     // ses conversions. Noms d'événements standard de gtag.
     try{
       var _gEv={signup:'sign_up',pay_init:'begin_checkout'}[ev];
-      if(_gEv&&typeof window.gtag==='function') window.gtag('event',_gEv);
+      if(_gEv&&typeof window.gtag==='function'){
+        window.gtag('event',_gEv);
+        // Action de conversion « Inscription VÉRITAS » (créée le 10/11/2026,
+        // une conversion par clic, 1 €) : c'est elle que la campagne optimise.
+        if(ev==='signup') window.gtag('event','conversion',{send_to:'AW-18559032612/649iCITRqLUdEKS60ZFF'});
+      }
     }catch(_eG){}
     var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
     var data=JSON.stringify(meta?{ev:ev,meta:meta}:{ev:ev});
