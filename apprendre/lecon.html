@@ -42,7 +42,7 @@
 <script src="progressions.js?v=20261110g"></script>
 <script src="lecons.js?v=20261110g"></script>
 <script src="ressources.js?v=20261110g"></script>
-<script src="charge.js?v=edd58624"></script>
+<script src="charge.js?v=1b26f05f"></script>
 <script src="commun.js?v=20261110h"></script>
 <script src="jeu.js?v=20261110g"></script>
 <script src="labo.js?v=20261111c"></script>
@@ -69,7 +69,7 @@
     return '<div class="partie" id="p'+(k+1)+'"><h2><span class="num">'+(k+1)+'</span><span class="txt">'+esc(p.t)+'</span></h2>'+p.html+
       (p.illus?'<figure class="illus">'+p.illus.svg+'<figcaption>'+esc(p.illus.legende||"")+'</figcaption></figure>':'')+
       (p.labo?'<div class="anim"><div class="anim-t"><span class="anim-p" aria-hidden="true">'+A.pic("lecture",14)+'</span>Activité d\'apprentissage : à toi de manipuler</div><div class="anim-c" data-labo="'+k+'"></div></div>':'')+(p.anim?'<div class="anim"><div class="anim-t"><span class="anim-p" aria-hidden="true">'+A.pic("lecture",14)+'</span>'+esc(p.animT||"À toi de manipuler")+'</div><div class="anim-c" data-anim="'+k+'"></div></div>':'')+
-      (p.retenir?'<p class="retenir">'+p.retenir+'</p>':'')+'</div>';
+      (p.retenir?'<p class="retenir"><span>'+p.retenir+'</span></p>':'')+'</div>';
   }).join("");
   var scenesHtml=sc.map(function(s){return '<a class="scene" href="/scenes/'+s+'.html"><span class="pl">'+A.pic("masques",30)+'</span><span><small>Scène vivante</small><strong>'+esc(nomScene(s))+'</strong></span><span class="jouer">'+A.pic("lecture",30)+'</span></a>'}).join("");
   var resL=A.resLecon(L.c,L.m,L.n), plus=resL.length?'<section class="res-fam res-lecon"><h2>'+A.pic("fleche",20)+'Pour aller plus loin</h2><div class="res-g">'+resL.map(A.carteRes).join("")+'</div></section>':'';

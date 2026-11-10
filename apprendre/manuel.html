@@ -220,7 +220,7 @@ dialog .dlg h3{margin:0 0 10px;font:600 19px var(--sans);color:#001136}
   function partieHtml(ref){
     var p=ref.split("#"), L=Object.prototype.hasOwnProperty.call(VRT_LECONS,p[0])?VRT_LECONS[p[0]]:null, k=+p[1]; if(!L||!L.parties||!L.parties[k]) return '<p class="vide">Partie de leçon introuvable.</p>';
     var x=L.parties[k];
-    return '<div class="partie-ref"><div class="src">Leçon VÉRITAS · <a href="lecon.html?id='+p[0]+'">'+esc(L.titre)+'</a></div><div class="partie"><h2><span class="num">'+(k+1)+'</span><span class="txt">'+esc(x.t)+'</span></h2>'+x.html+(x.illus?'<figure class="illus">'+x.illus.svg+'<figcaption>'+esc(x.illus.legende||"")+'</figcaption></figure>':'')+(x.anim?'<div class="anim"><div class="anim-t"><span class="anim-p" aria-hidden="true">'+A.pic("lecture",14)+'</span>'+esc(x.animT||"")+'</div><div class="anim-c" data-anim="'+esc(ref)+'"></div></div>':'')+(x.retenir?'<p class="retenir">'+x.retenir+'</p>':'')+'</div></div>';
+    return '<div class="partie-ref"><div class="src">Leçon VÉRITAS · <a href="lecon.html?id='+p[0]+'">'+esc(L.titre)+'</a></div><div class="partie"><h2><span class="num">'+(k+1)+'</span><span class="txt">'+esc(x.t)+'</span></h2>'+x.html+(x.illus?'<figure class="illus">'+x.illus.svg+'<figcaption>'+esc(x.illus.legende||"")+'</figcaption></figure>':'')+(x.anim?'<div class="anim"><div class="anim-t"><span class="anim-p" aria-hidden="true">'+A.pic("lecture",14)+'</span>'+esc(x.animT||"")+'</div><div class="anim-c" data-anim="'+esc(ref)+'"></div></div>':'')+(x.retenir?'<p class="retenir"><span>'+x.retenir+'</span></p>':'')+'</div></div>';
   }
   function bloc(b,i,editable){
     var cls={def:"def",ex:"ex",astuce:"astuce",attention:"attention",savais:"savais"}[b.type];
