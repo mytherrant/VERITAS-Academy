@@ -29,8 +29,18 @@ global.VRT_MODULES = (k, v) => { MODULES[k] = v; };
 /* Exercice d'examen propre à chaque leçon (partie B) : situation chiffrée, consignes, réponse. */
 const EXAM = {};
 global.VRT_EXAM = (ids, o) => { for (const id of [].concat(ids)) { if (EXAM[id]) err.push(`${id} : exercice d'examen en double`); EXAM[id] = o; } };
+/* Situation de vie réécrite (situation, tâche, résolution) : remplace celle de la fiche APC,
+   quel que soit l'ordre de lecture des fichiers. Une situation doit donner à l'élève des données
+   à exploiter : jamais « un document montre… » sans le document. */
+const SIT = {};
+global.VRT_SIT = (ids, o) => { for (const id of [].concat(ids)) { if (SIT[id]) err.push(`${id} : situation réécrite en double`); SIT[id] = o; } };
 for (const f of fs.readdirSync(src).filter(x => x.endsWith(".js")).sort()) {
   try { eval(fs.readFileSync(path.join(src, f), "utf8")); } catch (e) { err.push(`${f} : ${e.message}`); }
+}
+for (const [id, o] of Object.entries(SIT)) {
+  if (!APC[id]) { err.push(`${id} : situation réécrite pour une leçon sans fiche APC`); continue; }
+  for (const k of ["situation", "tache", "resolution"]) if (!o[k]) err.push(`${id} : situation réécrite sans ${k}`);
+  Object.assign(APC[id], o);
 }
 
 /* Types de labos réellement codés dans apprendre/labo.js */
