@@ -82,6 +82,8 @@ svg.ico.g { width: 24px; height: 24px; }
 
 /* ── Contenu ── */
 main.page { padding: 20px 16px calc(var(--nav-h) + 28px + env(safe-area-inset-bottom)); max-width: 760px; margin: 0 auto; }
+/* Avec un bouton flottant (« + Dépense »…) : la dernière ligne et ses badges restent visibles au-dessus. */
+main.page:has(.fab) { padding-bottom: calc(var(--nav-h) + 96px + env(safe-area-inset-bottom)); }
 h1 { font-size: 22px; font-weight: 600; color: var(--titre); margin: 0 0 4px; line-height: 1.3; }
 h2 { font-size: 16px; font-weight: 600; color: var(--titre); margin: 28px 0 12px; }
 h3 { font-size: 15px; font-weight: 600; color: var(--titre); margin: 0 0 4px; }

@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.13.4';
+  var VERSION = '0.13.5';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -1795,12 +1795,12 @@
       var deps = lignes('depenses').filter(function (d) { return d.centre_id === cid; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
       if (!E.cache.photosEnAttente) idbTout('fichiers').then(function (f) { E.cache.photosEnAttente = {}; f.forEach(function (x) { E.cache.photosEnAttente[x.id] = 1; }); if (f.length) rendre(); });
       var att = deps.filter(function (d) { return d.statut === 'en_attente'; });
-      h += '<p class="sous-titre">' + (att.length ? '<b>' + att.length + '</b> en attente de validation · ' : '') + 'Une dépense validée ne se modifie plus.</p>';
+      h += '<p class="sous-titre">' + (att.length ? '<b>' + att.length + '</b> en attente de validation (badge orange « en attente » : touchez-la pour la valider) · ' : '<b>Aucune dépense en attente : rien à valider.</b> ') + 'Une dépense validée ne se modifie plus.</p>';
       var paiesC = peut('paiements.voir', cid) ? lignes('paies').filter(function (x) { return x.centre_id === cid; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; }) : [];
       if (paiesC.length) {
         var moisCourant = isoLocal(new Date()).slice(0, 7);
         var totP = paiesC.filter(function (x) { return !Number(x.annule) && String(x.date).slice(0, 7) === moisCourant; }).reduce(function (s, x) { return s + Number(x.montant); }, 0);
-        h += '<h2>Paies des enseignants</h2><p class="sous-titre">' + fcfa(totP) + ' ce mois · 1 500 F de l\'heure sauf contrat particulier.</p><div class="liste">' + paiesC.slice(0, 40).map(function (x) {
+        h += '<h2>Paies des enseignants</h2><p class="sous-titre">' + fcfa(totP) + ' ce mois · 1 500 F de l\'heure sauf contrat particulier. Une paie compte dans le bilan dès qu\'elle est versée : pas de validation.</p><div class="liste">' + paiesC.slice(0, 40).map(function (x) {
           return lignePaie(x);
         }).join('') + '</div><h2>Autres dépenses</h2>';
       }
@@ -1814,13 +1814,13 @@
   /** Une dépense (Caisse, Bilan) : touchée, elle s'ouvre (voir, valider, refuser, annuler). */
   function ligneDepense(d) {
     var st = d.statut === 'validee' ? '<span class="badge ok">validée</span>' : d.statut === 'refusee' ? '<span class="badge danger">refusée</span>' : '<span class="badge alerte">en attente</span>';
-    var sansJ = justificatifExige(d) && !d.justificatif && !(E.cache.photosEnAttente || {})[d.id] ? ' <span class="badge alerte">justificatif manquant</span>' : '';
-    return '<button class="ligne" type="button" data-a="voir-depense" data-id="' + esc(d.id) + '"><span class="corps"><b>' + esc(d.libelle) + sansJ + '</b><small>' + esc(dateLisible(d.date, true) + ' · ' + (CATEGORIES[d.categorie] || d.categorie) + (d.beneficiaire ? ' · ' + d.beneficiaire : '') + ' · saisie par ' + (nomPersonne(d.saisie_par) || (d.saisie_par === E.profil.utilisateur.id ? 'vous' : '—'))) + '</small></span><span class="fin"><b>' + fcfa(d.montant) + '</b>' + st + '</span></button>';
+    var sansJ = (d.statut || 'en_attente') === 'en_attente' && justificatifExige(d) && !d.justificatif && !(E.cache.photosEnAttente || {})[d.id] ? ' <span class="badge alerte">justificatif manquant</span>' : '';
+    return '<button class="ligne" type="button" data-a="voir-depense" data-id="' + esc(d.id) + '"><span class="corps"><b>' + esc(d.libelle) + '</b> ' + st + sansJ + '<small>' + esc(dateLisible(d.date, true) + ' · ' + (CATEGORIES[d.categorie] || d.categorie) + (d.beneficiaire ? ' · ' + d.beneficiaire : '') + ' · saisie par ' + (nomPersonne(d.saisie_par) || (d.saisie_par === E.profil.utilisateur.id ? 'vous' : '—'))) + '</small></span><span class="fin"><b>' + fcfa(d.montant) + '</b></span></button>';
   }
   /** Une paie d'enseignant ; « Annuler » pour qui gère les enseignants. */
   function lignePaie(x) {
     var gere = peut('enseignants.gerer', x.centre_id) && !Number(x.annule);
-    return '<div class="ligne"><span class="pastille">' + ico('presentation') + '</span><span class="corps"><b' + (Number(x.annule) ? ' class="barre-txt"' : '') + '>' + esc(nomPersonne(x.enseignant_id) || 'Enseignant') + '</b><small>' +
+    return '<div class="ligne"><span class="pastille">' + ico('presentation') + '</span><span class="corps"><b' + (Number(x.annule) ? ' class="barre-txt"' : '') + '>' + esc(nomPersonne(x.enseignant_id) || 'Enseignant') + '</b>' + (Number(x.annule) ? '' : ' <span class="badge ok">comptée</span>') + '<small>' +
       esc(dateLisible(x.date, true) + ' · ' + (x.note || 'Paie du mois') + ' · payé par ' + nomCompte(x.paye_par) + (Number(x.annule) ? ' · annulée' : '')) + '</small>' +
       '<span class="boutons"><button class="btn clair petit" type="button" data-a="voir-bon" data-t="paie" data-id="' + esc(x.id) + '">' + ico('doc', 'p') + 'Reçu</button>' +
       (gere ? '<button class="btn clair petit" type="button" data-a="annuler-paie" data-id="' + esc(x.id) + '">Annuler cette paie</button>' : '') + '</span>' +
