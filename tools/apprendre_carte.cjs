@@ -160,7 +160,6 @@ exports.outils = [
   { id:"o_correction", t:"aide", ti:"Faire corriger ma copie", d:"Une correction détaillée par l'IA.", u:"/app.html#correction-ia", compte:1 },
   { id:"o_programme", t:"aide", ti:"Le programme de français MINESEC", d:"Ce qui est attendu, de la 6e à la Terminale.", u:"/ressources/programme-francais-minesec.html" },
   { id:"o_ambassa", t:"aide", ti:"Poser une question au Professeur Ambassa", d:"Une explication sur le programme.", u:"/app.html#ambassa" },
-  { id:"o_frise", t:"aide", ti:"Les courants littéraires", d:"La frise, de l'humanisme aux lettres africaines d'aujourd'hui.", u:"/eleve/frise-litteraire.html", c:"3e,2nde A,2nde C,1re A,1re C,1re D,Tle A,Tle C,Tle D" },
   { id:"o_oeuvres", t:"aide", ti:"Analyse interactive des œuvres", d:"Fiche, carte mentale, QCM et citations.", u:"/app.html#oeuvres-interactives" },
   { id:"o_calendrier", t:"aide", ti:"Calendrier scolaire", d:"Examens, vacances, conseils de classe.", u:"/app.html#calendrier" },
   { id:"o_constellation", t:"aide", ti:"La Constellation VÉRITAS", d:"La carte de tout ce qui accompagne ton cahier.", u:"/constellation.html" },

@@ -48391,6 +48391,9 @@ function _cagCreer(eleveId){
           if(_qp.matiere) window._epMat = _qp.matiere;
         }
         try{ window[fn](); }catch(e){}
+        if(sec === 'epreuves' && /^[A-Za-z0-9_-]+$/.test(_qp.id || '') && typeof showEpreuveDetail === 'function'){
+          try{ showEpreuveDetail(_qp.id); }catch(e){}
+        }
         if(sec === 'evaluations' && /^[A-Za-z0-9_-]+$/.test(_qp.id || '')){
           try{ if(typeof SES !== 'undefined' && SES) lancerEvaluation(_qp.id); else apercuEvaluation(_qp.id); }catch(e){}
         }

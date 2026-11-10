@@ -392,7 +392,7 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
 </style>
 <!--vrt-habillage:tete-->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.65.34" data-vrt-epreuve>
+<link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.66.34" data-vrt-epreuve>
 <script>window.VRT_DATA=window.VRT_DATA||{"citations":[{"t":"Le génie, c’est un pour cent d’inspiration et quatre-vingt-dix-neuf pour cent de transpiration.","a":"Thomas Edison"},{"t":"Ce n’est pas parce que les choses sont difficiles que nous n’osons pas ; c’est parce que nous n’osons pas qu’elles sont difficiles.","a":"Sénèque"},{"t":"L’éducation est l’arme la plus puissante pour changer le monde.","a":"Nelson Mandela"},{"t":"Un peu chaque jour vaut mieux que beaucoup un seul jour.","a":"Proverbe"},{"t":"La chance sourit à l’esprit préparé.","a":"Louis Pasteur"},{"t":"Tomber sept fois, se relever huit.","a":"Proverbe japonais"}],"themeSombre":"\n      body{background:#0A1428!important}\n      [style*=\"background:#fff\"],[style*=\"background:#FAFBFE\"],[style*=\"background:#FCFDFE\"],[style*=\"background:#F7F9FD\"]{background:#132241!important}\n      [style*=\"background:#F4F5F8\"],[style*=\"background:#F4F6FB\"],[style*=\"background:#EFF2F7\"],[style*=\"background:#F5F9FF\"]{background:#0F1B33!important}\n      [style*=\"background:rgba(255,255,255,.96)\"]{background:rgba(13,25,48,.96)!important}\n      [style*=\"radial-gradient(1100px\"],[style*=\"radial-gradient(900px\"]{background:#0C1730!important}\n      [style*=\"linear-gradient(180deg,#FBF8F1\"]{background:#0C1730!important}\n      [style*=\"color:#001136\"]{color:#EEF3FC!important}\n      [style*=\"color:#0C2A6A\"]{color:#DCE6F8!important}\n      [style*=\"color:#4D5163\"],[style*=\"color:#6B5A42\"]{color:#B6C2D8!important}\n      [style*=\"color:#6E7385\"],[style*=\"color:#9BA6BE\"]{color:#8D9AB4!important}\n      [style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"]{border-color:#24334F!important}\n      [style*=\"\"],[style*=\"\"]{border-bottom-color:#24334F!important}\n      [style*=\"\"]{border-top-color:#24334F!important}\n      [style*=\"border-left:4px solid\"]{border-left-color:#FFC93C!important}\n      input,input::placeholder{color:#C7D2E6!important}\n    "};</script>
 <!--/vrt-habillage:tete-->
 </head>
@@ -487,7 +487,7 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
 <!-- HEADER -->
 <header>
   <div class="header-top">
-    <div class="header-meta">🇨🇲 MINESEC – OBC</div>
+    <div class="header-meta">MINESEC – OBC</div>
     <div class="header-meta">Coefficient : 3</div>
   </div>
   <h1>Épreuve de Littérature &amp; Culture Générale</h1>
@@ -497,7 +497,7 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
 <!-- CHRONO -->
 <div id="chrono-bar">
   <div style="display:flex;flex-direction:column;align-items:center">
-    <div class="chrono-label">⏱ Temps restant</div>
+    <div class="chrono-label">Temps restant</div>
     <div id="chrono-display">4:00:00</div>
   </div>
   <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
@@ -507,8 +507,8 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
     </div>
   </div>
   <div style="display:flex;flex-direction:column;gap:6px">
-    <button class="btn-chrono" id="btn-pause" onclick="toggleChrono()">⏸ Pause</button>
-    <button class="btn-chrono danger-btn" onclick="endExam()">⏹ Terminer</button>
+    <button class="btn-chrono" id="btn-pause" onclick="toggleChrono()">Pause</button>
+    <button class="btn-chrono danger-btn" onclick="endExam()">Terminer</button>
   </div>
 </div>
 
@@ -517,14 +517,14 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
 
   <!-- INTRO -->
   <div class="intro-card">
-    <h2>📋 Consignes générales</h2>
+    <h2>Consignes générales</h2>
     <p>Le candidat traitera <strong>l'un des trois sujets au choix</strong>. Lisez attentivement chaque sujet avant de choisir. Soignez la présentation, l'orthographe et la cohérence de votre développement. Indiquez le numéro du sujet choisi en tête de votre copie.</p>
     <div class="info-row">
-      <span class="info-pill">📝 3 sujets au choix</span>
-      <span class="info-pill">⏱ 4 heures</span>
-      <span class="info-pill">📊 Coeff. 3</span>
-      <span class="info-pill">🏆 20 points</span>
-      <span class="info-pill">🎯 Présentation : 2 pts</span>
+      <span class="info-pill">3 sujets au choix</span>
+      <span class="info-pill">4 heures</span>
+      <span class="info-pill">Coeff. 3</span>
+      <span class="info-pill">20 points</span>
+      <span class="info-pill">Présentation : 2 pts</span>
     </div>
   </div>
 
@@ -550,10 +550,10 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
   <!-- ════════ SUJET 1 ════════ -->
   <div class="subject-panel active" id="panel-1">
     <nav class="sec-nav">
-      <button class="active" onclick="showSecTab('s1-texte',this,'s1')">📄 Texte</button>
-      <button onclick="showSecTab('s1-resume',this,'s1')">✍️ Résumé (9 pts)</button>
-      <button onclick="showSecTab('s1-discussion',this,'s1')">💬 Discussion (9 pts)</button>
-      <button onclick="showSecTab('s1-corrige',this,'s1')">📗 Corrigé complet</button>
+      <button class="active" onclick="showSecTab('s1-texte',this,'s1')">Texte</button>
+      <button onclick="showSecTab('s1-resume',this,'s1')">Résumé (9 pts)</button>
+      <button onclick="showSecTab('s1-discussion',this,'s1')">Discussion (9 pts)</button>
+      <button onclick="showSecTab('s1-corrige',this,'s1')">Corrigé complet</button>
     </nav>
 
     <!-- Texte -->
@@ -578,25 +578,25 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
     <!-- Résumé -->
     <div id="s1-resume" class="subject-panel">
       <div class="question-block">
-        <h3>✍️ Question 1 – Résumé <span class="q-pts">9 pts</span></h3>
+        <h3>Question 1 – Résumé <span class="q-pts">9 pts</span></h3>
         <div class="consigne">Le texte ci-dessus comporte <strong>588 mots</strong>. Vous le résumerez en <strong>147 mots</strong>. Une marge de 15 mots en plus ou en moins sera tolérée (soit entre 132 et 162 mots). Vous indiquerez le nombre de mots utilisés à la fin de votre résumé.</div>
-        <div class="tip-box"><strong>💡 Méthode :</strong> Identifiez les idées essentielles de chaque paragraphe → reformulez sans citations directes → respectez l'ordre du texte → comptez vos mots. Le résumé doit représenter ¼ du texte original.</div>
+        <div class="tip-box"><strong>Méthode :</strong> Identifiez les idées essentielles de chaque paragraphe reformulez sans citations directes respectez l'ordre du texte comptez vos mots. Le résumé doit représenter ¼ du texte original.</div>
         <textarea id="res-textarea" placeholder="Rédigez votre résumé ici..." oninput="countWords(this,'res-count')"></textarea>
         <div class="word-counter" id="res-count">0 mot(s)</div>
         <div class="btn-row">
-          <button class="btn-primary" onclick="toggleCorrige('corrige-resume')">📗 Voir le corrigé</button>
+          <button class="btn-primary" onclick="toggleCorrige('corrige-resume')">Voir le corrigé</button>
         </div>
         <div class="corrige" id="corrige-resume">
-          <h4>📗 Corrigé – Résumé modèle (147 mots)</h4>
+          <h4>Corrigé – Résumé modèle (147 mots)</h4>
           <div class="highlight">
             Le Salon africain de la femme rurale, tenu à Yaoundé, a mis en lumière le rôle central des femmes dans la production agricole africaine et leur potentiel à accroître leur rendement par la maîtrise des techniques de transformation. Cependant, de nombreux obstacles freinent leur essor. L'enclavement des zones rurales complique l'accès aux exploitations et l'écoulement des produits. Le manque d'électricité engendre des pertes post-récoltes considérables et bloque la transformation. L'absence d'une banque agricole prive les femmes d'un financement adéquat. Dans les sociétés patriarcales, elles subissent une discrimination foncière, surtout au veuvage. La pénurie d'intrants rend le travail pénible et décourage les jeunes, qui fuient vers les villes, accentuant l'exode rural. Ainsi, les femmes demeurent le pilier d'un monde agricole en souffrance, attendant un accompagnement structurel.
             <br><em style="color:var(--muted);font-size:.8rem">(147 mots)</em>
           </div>
           <div class="grid-crit">
-            <div class="crit-item"><div class="crit-label">📌 Idées essentielles (5 pts)</div>Toutes les idées du texte sont présentes et reformulées.</div>
-            <div class="crit-item"><div class="crit-label">📌 Reformulation (2 pts)</div>Pas de citations directes ni de copier-coller du texte.</div>
-            <div class="crit-item"><div class="crit-label">📌 Nombre de mots (1 pt)</div>Entre 132 et 162 mots, comptage indiqué.</div>
-            <div class="crit-item"><div class="crit-label">📌 Langue (1 pt)</div>Expression correcte, syntaxe claire, pas de fautes.</div>
+            <div class="crit-item"><div class="crit-label">Idées essentielles (5 pts)</div>Toutes les idées du texte sont présentes et reformulées.</div>
+            <div class="crit-item"><div class="crit-label">Reformulation (2 pts)</div>Pas de citations directes ni de copier-coller du texte.</div>
+            <div class="crit-item"><div class="crit-label">Nombre de mots (1 pt)</div>Entre 132 et 162 mots, comptage indiqué.</div>
+            <div class="crit-item"><div class="crit-label">Langue (1 pt)</div>Expression correcte, syntaxe claire, pas de fautes.</div>
           </div>
         </div>
       </div>
@@ -605,18 +605,18 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
     <!-- Discussion -->
     <div id="s1-discussion" class="subject-panel">
       <div class="question-block">
-        <h3>💬 Question 2 – Discussion <span class="q-pts">9 pts</span></h3>
+        <h3>Question 2 – Discussion <span class="q-pts">9 pts</span></h3>
         <div class="consigne">S'intéressant au développement de l'agriculture, Rousseau-Joël FOUTE écrit : <em>« Le travail agricole [...] n'intéresse pas beaucoup les jeunes qui sont nombreux à s'exiler vers les villes »</em>.<br><br>Pensez-vous que les activités agricoles sont toujours dépourvues de tout intérêt chez tous les jeunes ? Vous répondrez à cette question dans une argumentation bien structurée et illustrée par des exemples tirés de vos observations de la vie quotidienne.</div>
-        <div class="tip-box"><strong>💡 Forme attendue :</strong> Introduction (contextualisation + thèse) → Développement (2 à 3 parties avec arguments + exemples) → Conclusion (synthèse + ouverture). La réponse attendue est <strong>nuancée</strong> : non, tous les jeunes ne rejettent pas l'agriculture.</div>
+        <div class="tip-box"><strong>Forme attendue :</strong> Introduction (contextualisation + thèse) Développement (2 à 3 parties avec arguments + exemples) Conclusion (synthèse + ouverture). La réponse attendue est <strong>nuancée</strong> : non, tous les jeunes ne rejettent pas l'agriculture.</div>
         <textarea id="disc-textarea" placeholder="Rédigez votre argumentation ici..." style="min-height:220px" oninput="countWords(this,'disc-count')"></textarea>
         <div class="word-counter" id="disc-count">0 mot(s)</div>
         <div class="btn-row">
-          <button class="btn-primary" onclick="toggleCorrige('corrige-disc')">📗 Voir le corrigé</button>
+          <button class="btn-primary" onclick="toggleCorrige('corrige-disc')">Voir le corrigé</button>
         </div>
         <div class="corrige" id="corrige-disc">
-          <h4>📗 Corrigé – Plan détaillé de la discussion</h4>
+          <h4>Corrigé – Plan détaillé de la discussion</h4>
           <div class="plan-block">
-            <div class="plan-title">📌 Introduction</div>
+            <div class="plan-title">Introduction</div>
             <p>Contextualisation : l'agriculture, pilier de l'économie camerounaise et africaine, souffre d'une désaffection des jeunes génération selon FOUTE. Problématique : cette désaffection est-elle universelle et définitive ? Annonce de thèse : Non — un nombre croissant de jeunes s'engage aujourd'hui avec passion et innovation dans l'agriculture.</p>
           </div>
           <div class="plan-block">
@@ -645,7 +645,7 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
             </ul>
           </div>
           <div class="plan-block">
-            <div class="plan-title">📌 Conclusion</div>
+            <div class="plan-title">Conclusion</div>
             <p>Si le texte reflète une réalité préoccupante, elle n'est ni absolue ni irrémédiable. L'agriculture peut redevenir attractive pour la jeunesse si l'État et les partenaires accompagnent sa modernisation. <em>Ouverture :</em> La souveraineté alimentaire de l'Afrique dépendra des choix que font aujourd'hui ses jeunes.</p>
           </div>
           <div class="grid-crit" style="margin-top:14px">
@@ -661,19 +661,19 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
     <!-- Corrigé complet S1 -->
     <div id="s1-corrige" class="subject-panel">
       <div class="question-block">
-        <h3>📗 Corrigé complet – Sujet 1</h3>
+        <h3>Corrigé complet – Sujet 1</h3>
         <p style="font-size:.9rem;line-height:1.8;margin-bottom:14px">Ce sujet évalue deux compétences distinctes :</p>
         <div class="tip-box"><strong>Résumé (9 pts) :</strong> Comprendre, sélectionner et reformuler l'essentiel d'un texte. Exige fidélité aux idées du texte, reformulation personnelle, et respect du nombre de mots (132–162).</div>
         <div class="tip-box" style="background:#edf7f0;border-color:#1a5c2e"><strong>Discussion (9 pts) :</strong> Argumenter de manière organisée en prenant position par rapport à une thèse. La réponse doit être nuancée — ni entièrement en accord, ni en désaccord total avec l'auteur.</div>
         <div class="tip-box" style="background:#f0f4ff;border-color:#0d2f5c"><strong>Présentation (2 pts) :</strong> Écriture lisible, mise en page soignée, absence de ratures excessives, titre du sujet clairement indiqué.</div>
         <div class="corrige active" style="margin-top:0">
-          <h4>⚠️ Erreurs fréquentes à éviter</h4>
+          <h4>Erreurs fréquentes à éviter</h4>
           <ul>
-            <li>Résumé : citer mot pour mot des passages du texte → <em>pénalité</em></li>
-            <li>Résumé : dépasser la fourchette de mots autorisée sans comptage → <em>points perdus</em></li>
-            <li>Discussion : ne développer qu'un seul point de vue → <em>manque de nuance</em></li>
-            <li>Discussion : absence d'exemples concrets → <em>argumentation peu convaincante</em></li>
-            <li>Général : fautes d'accord, barbarismes, phrases incomplètes → <em>perte sur la langue</em></li>
+            <li>Résumé : citer mot pour mot des passages du texte <em>pénalité</em></li>
+            <li>Résumé : dépasser la fourchette de mots autorisée sans comptage <em>points perdus</em></li>
+            <li>Discussion : ne développer qu'un seul point de vue <em>manque de nuance</em></li>
+            <li>Discussion : absence d'exemples concrets <em>argumentation peu convaincante</em></li>
+            <li>Général : fautes d'accord, barbarismes, phrases incomplètes <em>perte sur la langue</em></li>
           </ul>
         </div>
       </div>
@@ -683,9 +683,9 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
   <!-- ════════ SUJET 2 ════════ -->
   <div class="subject-panel" id="panel-2">
     <nav class="sec-nav">
-      <button class="active" onclick="showSecTab('s2-texte',this,'s2')">🎭 Texte</button>
-      <button onclick="showSecTab('s2-travail',this,'s2')">✍️ Mon commentaire</button>
-      <button onclick="showSecTab('s2-corrige',this,'s2')">📗 Corrigé complet</button>
+      <button class="active" onclick="showSecTab('s2-texte',this,'s2')">Texte</button>
+      <button onclick="showSecTab('s2-travail',this,'s2')">Mon commentaire</button>
+      <button onclick="showSecTab('s2-corrige',this,'s2')">Corrigé complet</button>
     </nav>
 
     <!-- Texte S2 -->
@@ -712,44 +712,44 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
         </div>
         <div class="text-source">David MBANGA EYOMBWAN, <em>Ngum a Jemea</em>, IV, 1, PUCAC, 2017.</div>
       </div>
-      <div class="tip-box"><strong>📌 Consigne :</strong> Sans dissocier le fond de la forme, vous ferez de ce texte un commentaire composé. En faisant attention aux didascalies, aux types de phrase, aux répliques des personnages, aux champs lexicaux, aux figures de style, etc., vous pourrez montrer comment l'incitation du peuple à la révolte par Dualla Manga débouche sur son sentiment de satisfaction de la mission accomplie.</div>
+      <div class="tip-box"><strong>Consigne :</strong> Sans dissocier le fond de la forme, vous ferez de ce texte un commentaire composé. En faisant attention aux didascalies, aux types de phrase, aux répliques des personnages, aux champs lexicaux, aux figures de style, etc., vous pourrez montrer comment l'incitation du peuple à la révolte par Dualla Manga débouche sur son sentiment de satisfaction de la mission accomplie.</div>
     </div>
 
     <!-- Travail S2 -->
     <div id="s2-travail" class="subject-panel">
       <div class="question-block">
-        <h3>✍️ Rédaction – Commentaire composé <span class="q-pts">18 pts + 2 pts présentation</span></h3>
-        <div class="tip-box"><strong>💡 Structure attendue :</strong> Introduction (présentation de l'œuvre + problématique + annonce du plan) → I. L'incitation patriotique (comment Dualla Manga a éveillé les consciences) → II. La satisfaction du héros (sa sérénité face au verdict) → Conclusion (portée du texte).</div>
+        <h3>Rédaction – Commentaire composé <span class="q-pts">18 pts + 2 pts présentation</span></h3>
+        <div class="tip-box"><strong>Structure attendue :</strong> Introduction (présentation de l'œuvre + problématique + annonce du plan) I. L'incitation patriotique (comment Dualla Manga a éveillé les consciences) II. La satisfaction du héros (sa sérénité face au verdict) Conclusion (portée du texte).</div>
         <textarea id="cc-textarea" placeholder="Rédigez votre commentaire composé ici..." style="min-height:280px" oninput="countWords(this,'cc-count')"></textarea>
         <div class="word-counter" id="cc-count">0 mot(s)</div>
         <div class="btn-row">
-          <button class="btn-primary" onclick="toggleCorrige('corrige-cc')">📗 Voir le corrigé</button>
+          <button class="btn-primary" onclick="toggleCorrige('corrige-cc')">Voir le corrigé</button>
         </div>
         <div class="corrige" id="corrige-cc">
-          <h4>📗 Plan détaillé du commentaire composé</h4>
+          <h4>Plan détaillé du commentaire composé</h4>
           <div class="plan-block">
-            <div class="plan-title">📌 Introduction</div>
+            <div class="plan-title">Introduction</div>
             <p><em>Ngum a Jemea</em> (2017) de David Mbanga Eyombwan est une pièce de théâtre historique retraçant la résistance de Dualla Manga face à la colonisation allemande au Cameroun. Dans l'extrait proposé, tiré de l'Acte IV, Manga comparaît devant l'officier colonial Niedermeyer. Ce face-à-face judiciaire révèle comment l'action patriotique de Manga se mue en triomphe moral. Comment le dramaturge montre-t-il que l'incitation du peuple à la révolte débouche sur la satisfaction d'une mission accomplie ?<br><strong>Plan :</strong> I. Un militant convaincu qui assume son engagement. II. La fierté inébranlable d'un héros face à la répression coloniale.</p>
           </div>
           <div class="plan-block">
             <div class="plan-title"><span class="plan-roman">I.</span> Dualla Manga : un militant qui assume pleinement son engagement patriotique</div>
             <ul style="padding-left:18px;margin-top:8px;font-size:.86rem;line-height:1.85">
-              <li><strong>A. Un lexique de la résistance et de l'éveil :</strong> « ouvert les yeux », « esprit patriotique », « sens de la Nation » → champ lexical de la conscience et de l'émancipation. Il refuse le terme « révolte » (connotation violente) et lui substitue « ouvrir les yeux » (éducation, éveil).</li>
-              <li><strong>B. Le renversement rhétorique :</strong> Manga retourne la question de Niedermeyer par une contre-question percutante (« Le peuple allemand peut-il accepter qu'un autre peuple vienne chez lui... »). Figure de l'antiphrase et de la comparaison implicite → il légitime sa résistance par le principe universel de souveraineté.</li>
-              <li><strong>C. Les didascalies révélatrices :</strong> Niedermeyer frappe le poing sur la table → violence de la domination coloniale. Il interrompt Manga → l'oppresseur ne peut entendre la vérité. Contraste avec le calme de Manga.</li>
+              <li><strong>A. Un lexique de la résistance et de l'éveil :</strong> « ouvert les yeux », « esprit patriotique », « sens de la Nation » champ lexical de la conscience et de l'émancipation. Il refuse le terme « révolte » (connotation violente) et lui substitue « ouvrir les yeux » (éducation, éveil).</li>
+              <li><strong>B. Le renversement rhétorique :</strong> Manga retourne la question de Niedermeyer par une contre-question percutante (« Le peuple allemand peut-il accepter qu'un autre peuple vienne chez lui... »). Figure de l'antiphrase et de la comparaison implicite il légitime sa résistance par le principe universel de souveraineté.</li>
+              <li><strong>C. Les didascalies révélatrices :</strong> Niedermeyer frappe le poing sur la table violence de la domination coloniale. Il interrompt Manga l'oppresseur ne peut entendre la vérité. Contraste avec le calme de Manga.</li>
             </ul>
           </div>
           <div class="plan-block">
             <div class="plan-title"><span class="plan-roman">II.</span> La sérénité d'un héros comblé par son sacrifice</div>
             <ul style="padding-left:18px;margin-top:8px;font-size:.86rem;line-height:1.85">
-              <li><strong>A. L'énumération comme trophée :</strong> « Ma destitution, mon arrestation, mon incarcération, mon procès, et le verdict... » → accumulation rythmée, anaphore du possessif « mon » → Manga réapproprie sa souffrance comme preuve de son engagement.</li>
-              <li><strong>B. La gradation ascendante de la satisfaction :</strong> « Plus que satisfait, je suis comblé » → hyperbole de la plénitude. Son bonheur n'est pas personnel mais collectif : il a fait « germer l'esprit patriotique ».</li>
-              <li><strong>C. La métaphore nautique et la référence biblique :</strong> « J'ai conduit ma barque à bon port » → métaphore du capitaine accompli. « Quiconque se transforme en Judas aura le sort de Judas » → référence intertextuelle biblique qui condamne la trahison et sacralise sa cause.</li>
-              <li><strong>D. Le démontage de l'idéologie coloniale :</strong> La réplique finale constitue un réquisitoire implacable — Manga expose la logique du pillage (liste des domestiques, violence des châtiments) → ironie cinglante sur l'« amour » colonial. Le mot « pillez » conclut avec une force accusatrice.</li>
+              <li><strong>A. L'énumération comme trophée :</strong> « Ma destitution, mon arrestation, mon incarcération, mon procès, et le verdict... » accumulation rythmée, anaphore du possessif « mon » Manga réapproprie sa souffrance comme preuve de son engagement.</li>
+              <li><strong>B. La gradation ascendante de la satisfaction :</strong> « Plus que satisfait, je suis comblé » hyperbole de la plénitude. Son bonheur n'est pas personnel mais collectif : il a fait « germer l'esprit patriotique ».</li>
+              <li><strong>C. La métaphore nautique et la référence biblique :</strong> « J'ai conduit ma barque à bon port » métaphore du capitaine accompli. « Quiconque se transforme en Judas aura le sort de Judas » référence intertextuelle biblique qui condamne la trahison et sacralise sa cause.</li>
+              <li><strong>D. Le démontage de l'idéologie coloniale :</strong> La réplique finale constitue un réquisitoire implacable — Manga expose la logique du pillage (liste des domestiques, violence des châtiments) ironie cinglante sur l'« amour » colonial. Le mot « pillez » conclut avec une force accusatrice.</li>
             </ul>
           </div>
           <div class="plan-block">
-            <div class="plan-title">📌 Conclusion</div>
+            <div class="plan-title">Conclusion</div>
             <p>Cet extrait est à la fois un acte de résistance et un testament moral. Par sa maîtrise rhétorique et sa sérénité face à la condamnation, Dualla Manga incarne le héros tragique dont la défaite apparente se révèle victoire spirituelle. Mbanga Eyombwan rappelle que la mémoire de la résistance est une force vive pour les générations actuelles.</p>
           </div>
           <div class="grid-crit" style="margin-top:14px">
@@ -765,18 +765,18 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
     <!-- Corrigé complet S2 -->
     <div id="s2-corrige" class="subject-panel">
       <div class="question-block">
-        <h3>📗 Méthode du commentaire composé</h3>
+        <h3>Méthode du commentaire composé</h3>
         <div class="corrige active" style="margin-top:0">
-          <h4>✅ Les étapes clés</h4>
+          <h4>Les étapes clés</h4>
           <ul>
             <li><strong>Lire le texte 2 à 3 fois</strong> en soulignant les faits de langue (figures de style, types de phrases, champ lexicaux, didascalies).</li>
             <li><strong>Formuler une problématique</strong> qui répond à la question posée en consigne.</li>
             <li><strong>Bâtir un plan en 2 axes</strong> (non pas résumé chronologique, mais regroupement thématique des procédés).</li>
-            <li><strong>Analyser</strong> : citer un extrait → nommer le procédé → interpréter son effet de sens.</li>
+            <li><strong>Analyser</strong> : citer un extrait nommer le procédé interpréter son effet de sens.</li>
             <li><strong>Ne pas dissocier fond et forme</strong> : chaque procédé formel doit être relié à une idée du texte.</li>
           </ul>
         </div>
-        <div class="tip-box"><strong>⚠️ Erreurs à éviter :</strong> Résumer le texte au lieu de l'analyser · Citer sans analyser · Oublier les didascalies (elles sont essentielles au théâtre) · Négliger la problématique.</div>
+        <div class="tip-box"><strong>Erreurs à éviter :</strong> Résumer le texte au lieu de l'analyser · Citer sans analyser · Oublier les didascalies (elles sont essentielles au théâtre) · Négliger la problématique.</div>
       </div>
     </div>
   </div>
@@ -784,9 +784,9 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
   <!-- ════════ SUJET 3 ════════ -->
   <div class="subject-panel" id="panel-3">
     <nav class="sec-nav">
-      <button class="active" onclick="showSecTab('s3-sujet',this,'s3')">📜 Sujet</button>
-      <button onclick="showSecTab('s3-travail',this,'s3')">✍️ Ma dissertation</button>
-      <button onclick="showSecTab('s3-corrige',this,'s3')">📗 Corrigé complet</button>
+      <button class="active" onclick="showSecTab('s3-sujet',this,'s3')">Sujet</button>
+      <button onclick="showSecTab('s3-travail',this,'s3')">Ma dissertation</button>
+      <button onclick="showSecTab('s3-corrige',this,'s3')">Corrigé complet</button>
     </nav>
 
     <!-- Sujet S3 -->
@@ -801,23 +801,23 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
         <p style="font-style:italic;font-size:1rem;padding-left:14px;margin:14px 0">« Une œuvre littéraire est à la fois l'expression de l'angoisse existentielle et de l'espoir : angoisse devant des réalités inacceptables et paralysantes ; espoir devant un futur qu'on imagine moins horrible. »</p>
         <p>En vous référant aux œuvres lues ou étudiées, vous commenterez ces propos du critique relatifs à l'épanouissement des hommes dans leur milieu de vie.</p>
       </div>
-      <div class="tip-box"><strong>💡 Mots-clés à analyser :</strong> <em>angoisse existentielle</em> (souffrance face aux injustices, à la mort, à l'oppression) · <em>espoir</em> (désir d'un monde meilleur, résistance, utopie) · <em>réalités inacceptables et paralysantes</em> · <em>futur moins horrible</em> (amélioration possible). La thèse est à la fois valider ET nuancer.</div>
+      <div class="tip-box"><strong>Mots-clés à analyser :</strong> <em>angoisse existentielle</em> (souffrance face aux injustices, à la mort, à l'oppression) · <em>espoir</em> (désir d'un monde meilleur, résistance, utopie) · <em>réalités inacceptables et paralysantes</em> · <em>futur moins horrible</em> (amélioration possible). La thèse est à la fois valider ET nuancer.</div>
     </div>
 
     <!-- Travail S3 -->
     <div id="s3-travail" class="subject-panel">
       <div class="question-block">
-        <h3>✍️ Rédaction – Dissertation <span class="q-pts">18 pts + 2 pts présentation</span></h3>
-        <div class="tip-box"><strong>💡 Œuvres mobilisables :</strong> <em>Une vie de boy</em> (Ferdinand Oyono) · <em>Le vieux nègre et la médaille</em> (F. Oyono) · <em>Mission terminée</em> (Mongo Beti) · <em>Le pauvre Christ de Bomba</em> (Mongo Beti) · <em>L'Enfant noir</em> (Camara Laye) · <em>Les bouts de bois de Dieu</em> (Sembène Ousmane) · <em>La nuit de noces</em> · autres œuvres au programme.</div>
+        <h3>Rédaction – Dissertation <span class="q-pts">18 pts + 2 pts présentation</span></h3>
+        <div class="tip-box"><strong>Œuvres mobilisables :</strong> <em>Une vie de boy</em> (Ferdinand Oyono) · <em>Le vieux nègre et la médaille</em> (F. Oyono) · <em>Mission terminée</em> (Mongo Beti) · <em>Le pauvre Christ de Bomba</em> (Mongo Beti) · <em>L'Enfant noir</em> (Camara Laye) · <em>Les bouts de bois de Dieu</em> (Sembène Ousmane) · <em>La nuit de noces</em> · autres œuvres au programme.</div>
         <textarea id="diss-textarea" placeholder="Rédigez votre dissertation ici..." style="min-height:300px" oninput="countWords(this,'diss-count')"></textarea>
         <div class="word-counter" id="diss-count">0 mot(s)</div>
         <div class="btn-row">
-          <button class="btn-primary" onclick="toggleCorrige('corrige-diss')">📗 Voir le corrigé</button>
+          <button class="btn-primary" onclick="toggleCorrige('corrige-diss')">Voir le corrigé</button>
         </div>
         <div class="corrige" id="corrige-diss">
-          <h4>📗 Plan détaillé de la dissertation</h4>
+          <h4>Plan détaillé de la dissertation</h4>
           <div class="plan-block">
-            <div class="plan-title">📌 Introduction</div>
+            <div class="plan-title">Introduction</div>
             <p>Accroche : La littérature africaine, née souvent dans la douleur de la colonisation et de l'injustice sociale, interroge la condition humaine. Présentation du sujet : Le critique affirme que l'œuvre littéraire porte simultanément angoisse et espoir. Problématique : Dans quelle mesure la littérature africaine est-elle à la fois le miroir de souffrances insupportables et le vecteur d'un espoir en un avenir meilleur ? Annonce du plan en 3 parties.</p>
           </div>
           <div class="plan-block">
@@ -845,7 +845,7 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
             </ul>
           </div>
           <div class="plan-block">
-            <div class="plan-title">📌 Conclusion</div>
+            <div class="plan-title">Conclusion</div>
             <p>La vision du critique est juste et éclairante : la grande littérature africaine naît précisément de cette tension entre le cri de douleur face aux injustices et le murmure d'un avenir possible. Elle n'est ni résignation ni naïveté, mais regard lucide sur le monde et pari sur l'humanité. <em>Ouverture :</em> Cette double dimension explique peut-être pourquoi la littérature africaine demeure si vivante et nécessaire aujourd'hui.</p>
           </div>
           <div class="grid-crit" style="margin-top:14px">
@@ -861,18 +861,18 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
     <!-- Corrigé complet S3 -->
     <div id="s3-corrige" class="subject-panel">
       <div class="question-block">
-        <h3>📗 Méthode de la dissertation littéraire</h3>
+        <h3>Méthode de la dissertation littéraire</h3>
         <div class="corrige active" style="margin-top:0">
-          <h4>✅ Les étapes clés</h4>
+          <h4>Les étapes clés</h4>
           <ul>
             <li><strong>Analyser le sujet</strong> : identifier les mots-clés, comprendre la thèse du critique, repérer ce qui est à commenter.</li>
             <li><strong>Dégager une problématique</strong> : reformuler en question ouverte (ex. : « Dans quelle mesure... ? »).</li>
-            <li><strong>Construire un plan dialectique</strong> (thèse → antithèse → synthèse) ou thématique (si la question n'est pas binaire).</li>
-            <li><strong>Mobiliser des œuvres précises</strong> : auteur, titre, personnage, passage précis → illustration convaincante.</li>
+            <li><strong>Construire un plan dialectique</strong> (thèse antithèse synthèse) ou thématique (si la question n'est pas binaire).</li>
+            <li><strong>Mobiliser des œuvres précises</strong> : auteur, titre, personnage, passage précis illustration convaincante.</li>
             <li><strong>Rédiger des transitions</strong> entre chaque partie pour assurer la cohérence.</li>
           </ul>
         </div>
-        <div class="tip-box"><strong>⚠️ Erreurs à éviter :</strong> Raconter l'histoire des œuvres au lieu d'en tirer des arguments · Plan déséquilibré (parties de longueurs très inégales) · Absence de problématique · Citer des œuvres hors programme ou mal connues.</div>
+        <div class="tip-box"><strong>Erreurs à éviter :</strong> Raconter l'histoire des œuvres au lieu d'en tirer des arguments · Plan déséquilibré (parties de longueurs très inégales) · Absence de problématique · Citer des œuvres hors programme ou mal connues.</div>
       </div>
     </div>
   </div>
@@ -881,7 +881,7 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
 
 <!-- SCORE PANEL -->
 <div id="score-panel">
-  <div class="score-label">📊 Sujet choisi</div>
+  <div class="score-label">Sujet choisi</div>
   <div class="score-num" id="score-display">—</div>
   <div class="score-sub" id="score-sub">Choisissez un sujet</div>
 </div>
@@ -889,12 +889,12 @@ nav.sec-nav button:hover:not(.active) { color: var(--ink); }
 <!-- MODAL FIN -->
 <div id="modal-end">
   <div class="modal-inner">
-    <div style="font-size:3rem">⏱</div>
+    <div style="font-size:3rem"></div>
     <h2>Temps écoulé !</h2>
     <p>L'épreuve est terminée. Consultez les corrigés pour évaluer votre travail.</p>
     <div class="final-score" id="modal-score">BAC</div>
     <p style="font-size:.82rem">Courage ! Le travail régulier est la clé du succès.</p>
-    <button class="btn-primary" style="margin:10px auto 0;display:block" onclick="closeModal()">Consulter les corrigés →</button>
+    <button class="btn-primary" style="margin:10px auto 0;display:block" onclick="closeModal()">Consulter les corrigés </button>
   </div>
 </div>
 
@@ -907,7 +907,7 @@ let timerInterval = null;
 
 function startChrono() {
   running = true;
-  document.getElementById('btn-pause').textContent = '⏸ Pause';
+  document.getElementById('btn-pause').textContent = 'Pause';
   timerInterval = setInterval(() => {
     if (remaining <= 0) { clearInterval(timerInterval); endExam(); return; }
     remaining--;
@@ -981,7 +981,7 @@ function toggleCorrige(id) {
   const el = document.getElementById(id);
   el.classList.toggle('active');
   const isOpen = el.classList.contains('active');
-  event.target.textContent = isOpen ? '🔒 Masquer le corrigé' : '📗 Voir le corrigé';
+  event.target.textContent = isOpen ? 'Masquer le corrigé' : 'Voir le corrigé';
 }
 
 // ─── WORD COUNT ───
@@ -992,9 +992,9 @@ function countWords(ta, countId) {
   el.textContent = `${n} mot(s)`;
   if (countId === 'res-count') {
     el.style.color = (n >= 132 && n <= 162) ? '#1a5c2e' : (n === 0 ? '' : '#8b1a1a');
-    if (n >= 132 && n <= 162) el.textContent += ' ✅ Dans la fourchette';
-    else if (n > 162) el.textContent += ' ⚠️ Trop long';
-    else if (n > 0) el.textContent += ' ⚠️ Insuffisant';
+    if (n >= 132 && n <= 162) el.textContent += ' Dans la fourchette';
+    else if (n > 162) el.textContent += ' Trop long';
+    else if (n > 0) el.textContent += ' Insuffisant';
   }
 }
 </script>
@@ -1066,7 +1066,7 @@ function countWords(ta, countId) {
     if(fini)return;
     clearInterval(tic);running=true;
     fin=Date.now()+remaining*1000;ecrire({fin:fin});
-    btn('⏸ Pause');
+    btn('Pause');
     tic=setInterval(battre,1000);
   };
   window.toggleChrono=function(){
@@ -1219,9 +1219,9 @@ function countWords(ta, countId) {
         <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-brain"></use></svg></button>
     </div>
   </div>
-<script src="/assets/veritas-medaillons.js?v=1.20.65" defer></script>
-<script src="/assets/veritas-harmonie.js?v=1.20.65.34" defer></script>
-<script src="/assets/vitrine.js?v=1.20.65.34" defer></script>
+<script src="/assets/veritas-medaillons.js?v=1.20.66" defer></script>
+<script src="/assets/veritas-harmonie.js?v=1.20.66.34" defer></script>
+<script src="/assets/vitrine.js?v=1.20.66.34" defer></script>
 <!--/vrt-habillage:pied-->
 </body>
 </html>
