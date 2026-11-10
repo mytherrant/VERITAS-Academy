@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.13.2';
+  var VERSION = '0.13.3';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -246,7 +246,12 @@
               // Une création refusée n'existe pas côté serveur : on la retire de l'écran.
               var l = ligne(o.t, o.id);
               var autres = E.sortie.some(function (x) { return x.op !== o.op && x.t === o.t && x.id === o.id; });
-              if (l && l._nouveau && !autres) { delete E.donnees[o.t][o.id]; idbSuppr('lignes', o.t + '/' + o.id); }
+              if (l && l._nouveau && !autres) {
+                delete E.donnees[o.t][o.id]; idbSuppr('lignes', o.t + '/' + o.id);
+                // Sa fiche est peut-être encore ouverte (reçu affiché aussitôt après « Encaisser ») : on la ferme.
+                var fe = $('#feuille');
+                if (fe && !fe.hidden && fe.querySelector('[data-id="' + o.id + '"]')) fermerFeuille();
+              }
               change = true;
             }
           });
@@ -410,7 +415,7 @@
   function deconnexion() {
     var n = E.sortie.length;
     var fin = function () {
-      E.jeton = null; E.profil = null; E.donnees = {}; E.sortie = []; E.rejets = []; E.rev = 0; E.cache = {};
+      E.jeton = null; E.profil = null; E.donnees = {}; E.sortie = []; E.rejets = []; E.rev = 0; E.cache = {}; E.tranches = {};
       Promise.all([idbVider('lignes'), idbVider('sortie'), idbVider('meta'), idbVider('fichiers')]).then(function () { rendre(); });
     };
     var sortir = function () { api('auth/deconnexion', {}).then(fin, fin); };
@@ -4806,6 +4811,7 @@
     },
     'partager-recu': function (el) {
       var p = ligne('paiements', el.dataset.id);
+      if (!p) { fermerFeuille(); toast('Ce versement n\'existe plus sur ce téléphone (refusé par le serveur) : voyez Mon compte › Synchronisation.', true); return; }
       fichierRecu(p, el.dataset.v).then(function (f) {
         E.cache.dernierExport = f;
         return partagerFichiers([f], 'Reçu n° ' + p.numero).then(function () { return muter('paiements', p.id, { envoye_le: maintenantSql() + ' partage' }); });
@@ -4817,6 +4823,7 @@
     },
     'annuler-versement': function (el) {
       var p = ligne('paiements', el.dataset.id);
+      if (!p) { fermerFeuille(); toast('Ce versement n\'existe plus sur ce téléphone (refusé par le serveur) : voyez Mon compte › Synchronisation.', true); return; }
       ouvrirFeuille('<h2>Annuler le versement</h2><p>' + fcfa(p.montant) + ' · reçu n° ' + esc(p.numero || '') + '</p><p class="doux">Le versement reste visible, barré, avec le motif et votre nom.</p>' +
         '<form data-f="annulation" data-id="' + esc(p.id) + '"><label class="champ"><span>Motif</span><input type="text" name="motif" required minlength="5" placeholder="ex. : erreur de montant, doublon"></label>' +
         '<div class="actions"><button class="btn danger" type="submit">Annuler le versement</button><button class="btn clair" type="button" data-a="fermer">Retour</button></div></form>');

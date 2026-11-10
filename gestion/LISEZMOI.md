@@ -39,6 +39,9 @@ tarifs des classes fixés par le responsable, dépense validée par un autre que
 **Reçus hors ligne :** chaque téléphone réserve en ligne des tranches de 20 numéros (`recus/tranche`) ;
 hors ligne, le reçu prend le suivant de sa tranche, définitif. Le serveur vérifie la propriété et
 l'unicité ; sa propre numérotation saute les tranches réservées.
+Un numéro en conflit (même compte sur deux appareils, tranche d'un autre compte restée sur le
+téléphone) ne fait **jamais** refuser le versement : le serveur lui donne le numéro suivant et le note
+(« reçu renuméroté ») — l'argent a été reçu, il ne doit pas disparaître (0.13.3).
 
 **Justificatifs :** photo compressée sur le téléphone (JPEG ≤ 1 280 px), gardée en IndexedDB jusqu'à
 l'envoi (`justificatif/deposer`), stockée dans `api/data/justificatifs/` (verrouillé, gitignoré),

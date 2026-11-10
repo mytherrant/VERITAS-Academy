@@ -440,18 +440,27 @@ t2 = {"fin": max(max(x["fin"] for x in r2["tranches"]), max(x["fin"] for x in ra
 c, r = req("recus/tranche", {"centre": A}, secB)
 verifier("pas de tranche dans un centre où l'on n'encaisse pas", c == 403, r)
 num = lambda t, k: t["prefixe"] + "-" + str(t["debut"] + k).zfill(4)
-pt = pay()
+pt, pd, ph, pa = pay(), pay(), pay(), pay()
 _, r = req("sync/pousser", {"ops": [
     {"op": op(), "t": "paiements", "id": pt, "champs": {"centre_id": Bc, "eleve_id": el1, "numero": num(t1, 0), "montant": 1000, "date": jj(auj), "mode": "especes"}},
-    {"op": op(), "t": "paiements", "id": pay(), "champs": {"centre_id": Bc, "eleve_id": el1, "numero": num(t1, 0), "montant": 1000, "date": jj(auj), "mode": "especes"}},
-    {"op": op(), "t": "paiements", "id": pay(), "champs": {"centre_id": Bc, "eleve_id": el1, "numero": "2627-9999", "montant": 1000, "date": jj(auj), "mode": "especes"}},
+    {"op": op(), "t": "paiements", "id": pd, "champs": {"centre_id": Bc, "eleve_id": el1, "numero": num(t1, 0), "montant": 1000, "date": jj(auj), "mode": "especes"}},
+    {"op": op(), "t": "paiements", "id": ph, "champs": {"centre_id": Bc, "eleve_id": el1, "numero": "2627-9999", "montant": 1000, "date": jj(auj), "mode": "especes"}},
 ]}, secB)
 res = r["resultats"]
 verifier("reçu numéroté hors ligne depuis sa tranche : accepté", res[0]["ok"] is True, res[0])
-verifier("numéro de tranche déjà utilisé : refusé", res[1]["ok"] is False and "déjà utilisé" in res[1].get("erreur", ""), res[1])
-verifier("numéro hors de ses tranches : refusé", res[2]["ok"] is False, res[2])
-_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "paiements", "id": pay(), "champs": {"centre_id": Bc, "eleve_id": el1, "numero": libres_secB[1], "montant": 1000, "date": jj(auj), "mode": "especes"}}]}, adm)
-verifier("la tranche d'un autre compte : refusée", r["resultats"][0]["ok"] is False, r)
+# L'argent a été reçu : un numéro en conflit (même compte sur deux appareils…) ne fait JAMAIS perdre le versement.
+verifier("numéro de tranche déjà utilisé : versement gardé, renuméroté", res[1]["ok"] is True, res[1])
+verifier("numéro hors de ses tranches : versement gardé, renuméroté", res[2]["ok"] is True, res[2])
+_, r = req("sync/pousser", {"ops": [{"op": op(), "t": "paiements", "id": pa, "champs": {"centre_id": Bc, "eleve_id": el1, "numero": libres_secB[1], "montant": 1000, "date": jj(auj), "mode": "especes"}}]}, adm)
+verifier("la tranche d'un autre compte : versement gardé, renuméroté", r["resultats"][0]["ok"] is True, r)
+_, t = req("sync/tirer", jeton=adm)
+pp = {p["id"]: p for p in t["lignes"]["paiements"]}
+nums = [pp[x]["numero"] for x in (pt, pd, ph, pa)]
+verifier("renumérotés : numéros tous différents", len(set(nums)) == 4, nums)
+verifier("renuméroté : pas le numéro d'une autre tranche", pp[pa]["numero"] != libres_secB[1] and pp[ph]["numero"] != "2627-9999", nums)
+verifier("renuméroté : la note garde la trace du numéro proposé", "renuméroté" in (pp[pd].get("note") or ""), pp[pd].get("note"))
+# Ces trois versements de test sont annulés : ils ne faussent pas les comptes vérifiés plus loin.
+req("sync/pousser", {"ops": [{"op": op(), "t": "paiements", "id": x, "champs": {"annule": 1, "motif_annulation": "versement de test"}} for x in (pd, ph, pa)]}, adm)
 c, r = req("recus/tranche", {"centre": "cl-inexistant-centre"}, adm)
 verifier("tranche pour un centre inexistant : refusée", c == 404, (c, r))
 # Lot avec une opération malformée : elle seule est refusée, les autres passent.
