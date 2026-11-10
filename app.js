@@ -29544,6 +29544,13 @@ window._track=function(ev,meta){
     var k='_trk_'+ev+(meta?('_'+JSON.stringify(meta)):'')+'_'+new Date().toDateString();
     if(localStorage.getItem(k))return;
     localStorage.setItem(k,'1');
+    // 07/11/2026 — Google Ads (AW-18559032612) : l'inscription et le paiement
+    // engagé sont aussi remis à la balise Google, pour que la campagne mesure
+    // ses conversions. Noms d'événements standard de gtag.
+    try{
+      var _gEv={signup:'sign_up',pay_init:'begin_checkout'}[ev];
+      if(_gEv&&typeof window.gtag==='function') window.gtag('event',_gEv);
+    }catch(_eG){}
     var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
     var data=JSON.stringify(meta?{ev:ev,meta:meta}:{ev:ev});
     if(navigator.sendBeacon){ navigator.sendBeacon(base+'/stats.php', new Blob([data],{type:'application/json'})); }
