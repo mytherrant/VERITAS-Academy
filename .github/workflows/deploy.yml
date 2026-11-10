@@ -1497,7 +1497,7 @@ jobs:
           #    depuis apprendre/_src/ : les sources restent dans le dépôt, hors ligne.
           #    ÉCHEC BRUYANT si un fichier manque : les quatre pages les chargent tous.
           if [ -d apprendre ]; then
-            for f in index.html matiere.html lecon.html manuel.html ressources.html labo.html notes.html ressources.js apprendre.css jeu.css commun.js jeu.js lecons.js progressions.js scenes.js; do
+            for f in index.html matiere.html lecon.html manuel.html ressources.html labo.html notes.html ressources.js verrou.js labo.js charge.js apprendre.css jeu.css commun.js jeu.js lecons.js progressions.js scenes.js; do
               if [ ! -f "apprendre/$f" ]; then
                 echo "::error title=Apprendre incomplet::apprendre/$f manque (régénérez avec 'python tools/build_apprendre.py'). Déploiement ANNULÉ."
                 exit 1
@@ -1614,6 +1614,7 @@ jobs:
             api/challenge.php \
             api/demandes.php \
             api/manuels.php \
+            api/apprendre.php \
             api/plateforme.php \
             api/compte.php; do
             # ⚠️ ÉCHEC BRUYANT, et pas un « [ -f ] && cp » silencieux.

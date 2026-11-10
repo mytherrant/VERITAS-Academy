@@ -745,3 +745,52 @@ h2 .num .pic{vertical-align:middle}
   .top-d{gap:6px;min-width:0}
   .top-d .vue button{padding:6px 9px}
 }
+/* Suite réservée aux abonnés (09/11/2026) */
+.mur{margin:30px 0 8px;padding:26px 0 0;border-top:1px solid #E4E8F0;position:relative}
+.mur:before{content:"";position:absolute;left:0;right:0;top:-96px;height:96px;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff);pointer-events:none}
+.mur-t{display:flex;gap:10px;align-items:center;font:600 21px/1.35 var(--sans);color:#001136;margin:0 0 8px}
+.mur-t svg{flex:0 0 auto;color:#C24E00}
+.mur-m,.mur-p{font:400 16px/1.6 var(--sans);color:#4D5163;margin:0 0 14px}
+.mur-l{list-style:none;margin:0 0 14px;padding:0}
+.mur-l li{display:flex;gap:10px;align-items:center;font:500 16px/1.4 var(--sans);color:#001136;padding:9px 0;border-bottom:1px solid #EEF1F6}
+.mur-l svg{flex:0 0 auto;color:#6B7280}
+.mur-f{display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) auto;gap:12px;align-items:end;margin:0 0 20px}
+.mur-f label{font:500 14px var(--sans);color:#001136}
+.mur-f input{display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:11px 12px;font:400 16px var(--sans);border:1px solid #CBD3E1;border-radius:8px;background:#fff;color:#001136}
+.mur-f button:disabled{opacity:.55;cursor:wait}
+.sommaire li.ferme{display:flex;gap:7px;align-items:center;color:#6B7280;font-size:14px;padding:4px 0}
+.sommaire li.ferme svg{flex:0 0 auto;width:14px;height:14px}
+@media(max-width:640px){.mur-f{grid-template-columns:minmax(0,1fr)}.mur-t{font-size:19px}}
+@media print{.mur{display:none!important}}
+
+/* Cadre APC et labos (09/11/2026) */
+.apc{margin:0 0 22px;padding:0 0 18px;border-bottom:1px solid #E4E8F0}
+.apc-m{font:400 14.5px/1.55 var(--sans);color:#4D5163;margin:0 0 3px}
+.apc-m b{font-weight:600;color:#001136}
+.apc h2{font:600 20px/1.35 var(--sans);color:#C24E00;margin:16px 0 6px}
+.apc p{font-size:16.5px;line-height:1.65}
+.apc-t{background:#FFF8E5;border-radius:10px;padding:12px 14px;margin:10px 0 0}
+.integ{background:#F4F8FF;border-radius:12px;padding:16px 18px}
+.integ b:first-child{font:600 15px var(--sans);color:#1E499B}
+.labo-cs{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:flex-end;margin:0 0 12px}
+.labo-cs .labo-c{margin:0;line-height:1.4;flex:1 1 180px;min-width:0;font:500 14px var(--sans);color:#001136}
+.labo-cs .labo-c input{display:block;width:100%;accent-color:#1E499B;margin-top:7px}
+.labo-z{overflow-x:auto;text-align:center}
+.labo-s{width:100%;max-width:520px;height:auto;font-family:var(--sans)}
+.labo-r{font:400 16px/1.6 var(--sans);color:#001136;margin:12px 0 0;text-align:left}
+.labo-z .labo-l{display:block;color:#001136;text-align:left;margin:0;padding-left:22px;font:400 16px/1.8 var(--sans)}
+.labo-en{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.labo-en span{padding:9px 16px;border-radius:999px;background:#EEF1F6;color:#6B7280;font:600 17px var(--sans)}
+.labo-en span.oui{background:#1E499B;color:#fff}
+
+/* Formule d'abonnement : fond or léger pour attirer l'œil (09/11/2026) */
+.offre-l.or{background:#FFF6DC!important}
+.offre-l.or:hover{background:#FFEFC2!important}
+
+.labo-sel{display:block;width:100%;margin-top:7px;padding:9px 10px;font:400 16px var(--sans);border:1px solid #CBD3E1;border-radius:8px;background:#fff;color:#001136}
+
+.integ h3{font:600 17px/1.4 var(--sans);color:#001136;margin:14px 0 8px}
+.integ h3:first-child{margin-top:0}
+.integ ol{margin:6px 0 8px}
+.integ details{margin:6px 0 12px}
+.integ summary{cursor:pointer;font:600 15px var(--sans);color:#1E499B}

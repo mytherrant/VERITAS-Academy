@@ -129,12 +129,12 @@
     var LE = W.VRT_LECONS || {}, PR = W.VRT_PROG || {};
     function norm(s) { return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[’']/g, "'").replace(/\s+/g, " ").trim(); }
     Object.keys(LE).forEach(function (k) {
-      var L = LE[k], m = PAR_ID[L.m]; L.id = k; if (!m || !L.cle) return;
+      var L = LE[k], m = PAR_ID[L.m]; L.id = k; if (!m || !(L.cle || L.rang)) return;
       var p = PR[L.c] || {};
       m.minesec.forEach(function (s) {
         (p[s] || []).forEach(function (ch) {
           ch[1].forEach(function (l) {
-            if (!L.chap && norm(l[1]).indexOf(norm(L.cle)) >= 0) { L.n = l[0]; L.chap = ch[0]; L.officiel = l[1]; }
+            if (!L.chap && (L.rang ? l[0] === L.rang : norm(l[1]).indexOf(norm(L.cle)) >= 0)) { L.n = l[0]; L.chap = ch[0]; L.officiel = l[1]; }
           });
         });
       });
