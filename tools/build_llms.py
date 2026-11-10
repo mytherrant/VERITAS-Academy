@@ -69,7 +69,7 @@ SECTIONS = [
     ('niveaux/sitemap-niveaux.xml', 'Programmes de français par classe', 40),
     ('ressources/sitemap-ressources.xml', 'Méthodes et examens', 40),
     ('oeuvres/sitemap-oeuvres.xml', 'Œuvres au programme', 40),
-    ('apprendre/sitemap-apprendre.xml', 'Apprendre : le programme de chaque classe et matière, cours en libre accès', 120),
+    ('apprendre/sitemap-apprendre.xml#programme', 'Apprendre : le programme de chaque classe et matière', 120),
     ('scenes/sitemap-scenes.xml', 'Scènes vivantes (simulations animées, gratuites)', 120),
     ('outils/sitemap-outils.xml', 'Outils gratuits', 40),
     ('livrets/sitemap-livrets.xml', 'Cahiers en ligne', 15),
