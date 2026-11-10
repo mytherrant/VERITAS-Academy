@@ -34,7 +34,7 @@ marche hors ligne. Partage natif du téléphone (navigator.share), sinon téléc
 facturé dès le mois d'inscription, échue le N du mois ; versements imputés du plus ancien au plus
 récent). Le serveur garde les règles d'argent : numéro de reçu séquentiel par centre, versement
 jamais modifié ni supprimé (annulation motivée par un responsable), remise réservée au responsable,
-tarifs des classes fixés par le responsable, dépense validée par un autre que son auteur.
+tarifs des classes fixés par le responsable, dépense validée par le **trésorier du centre** ou l'administrateur, jamais par son auteur (0.13.4).
 
 **Reçus hors ligne :** chaque téléphone réserve en ligne des tranches de 20 numéros (`recus/tranche`) ;
 hors ligne, le reçu prend le suivant de sa tranche, définitif. Le serveur vérifie la propriété et
@@ -111,6 +111,8 @@ L'enseignant voit « Mes paies » et leurs reçus dans « Mes heures ». La cat�
 
 **Justificatif et validation :** à partir de 10 000 F, une dépense ne se valide qu'avec la photo du justificatif,
 sauf par l'**administrateur**, après confirmation (« Valider sans justificatif »), son nom restant comme valideur.
+Qui valide : le trésorier du centre (Centres › trésorier) ou l'administrateur ; le trésorier ne valide pas ce
+qu'il a saisi lui-même. Sans bouton « Valider », la fiche de la dépense dit pourquoi et qui la valide.
 Si la photo n'arrive pas au serveur (erreur réseau ou serveur), la fiche de la dépense le dit sur le téléphone qui l'a prise.
 
 **Centres indépendants :** un compte (hors administrateur) n'a accès qu'à **un seul centre** ; le serveur

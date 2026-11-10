@@ -81,7 +81,21 @@ const apiDe = (page) => (route, corps) => page.evaluate(async ([route, corps]) =
   if (resp) {
     const pr = await login(nav, resp.identifiant, (await api('comptes/mdp', { id: resp.id })).mdp);
     r = await apiDe(pr)('sync/pousser', { ops: [{ op: hex(), t: 'depenses', id: d4, champs: { statut: 'validee' } }] });
-    ok('responsable : sans photo, une dépense de 10 000 F ou plus reste refusée', r.resultats[0].ok === false && /Justificatif/.test(r.resultats[0].erreur || ''), JSON.stringify(r).slice(0, 200));
+    ok('responsable non trésorier : ne valide pas', r.resultats[0].ok === false && /trésorier/.test(r.resultats[0].erreur || ''), JSON.stringify(r).slice(0, 200));
+    // Trésorier du centre : il valide, mais sans photo une dépense de 10 000 F ou plus reste refusée.
+    const tresAvant = ((await api('sync/tirer&depuis=0')).lignes.centres.find((c) => c.id === cid) || {}).tresorier_id || '';
+    await api('sync/pousser', { ops: [{ op: hex(), t: 'centres', id: cid, champs: { tresorier_id: resp.id } }] });
+    r = await apiDe(pr)('sync/pousser', { ops: [{ op: hex(), t: 'depenses', id: d4, champs: { statut: 'validee' } }] });
+    ok('trésorier : sans photo, une dépense de 10 000 F ou plus reste refusée', r.resultats[0].ok === false && /Justificatif/.test(r.resultats[0].erreur || ''), JSON.stringify(r).slice(0, 200));
+    // Sa propre dépense : pas de bouton « Valider », mais on lui dit pourquoi (et qu'elle ne compte pas encore).
+    const d5 = 'de' + hex();
+    await apiDe(pr)('sync/pousser', { ops: [{ op: hex(), t: 'depenses', id: d5, champs: { centre_id: cid, libelle: 'Craie resp ' + SUF, montant: 200, date: auj, categorie: 'fournitures', mode: 'especes' } }] });
+    await pr.click('#puce-sync'); await aJour(pr);
+    await pr.goto(B + '#/caisse'); await pr.click('[data-a="caisse-onglet"][data-v="depenses"]'); await pr.waitForSelector(`[data-a="voir-depense"][data-id="${d5}"]`);
+    await pr.click(`[data-a="voir-depense"][data-id="${d5}"]`); await pr.waitForSelector('#feuille .note.qui-valide');
+    ok('trésorier : sa propre dépense, pas de « Valider » mais l\'explication', await pr.locator('#feuille [data-a="valider-depense"]').count() === 0 &&
+      /vous ne pouvez pas la valider vous-même/.test(await pr.textContent('#feuille .note.qui-valide')), await pr.textContent('#feuille .note.qui-valide').catch(() => 'absent'));
+    await api('sync/pousser', { ops: [{ op: hex(), t: 'centres', id: cid, champs: { tresorier_id: tresAvant } }] });
   }
   for (const [n, p] of [['admin', adm], ['actionnaire', pa]]) ok(n + ' : aucune erreur JavaScript', p.err.length === 0, p.err.join(' / '));
   await nav.close();

@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.13.3';
+  var VERSION = '0.13.4';
   var BASE = window.VERITAS_GESTION_BASE || '';
   var API = BASE + 'api/index.php';
   /** Dans l'application Android (Capacitor) : partage et fichiers passent par les modules natifs. */
@@ -2084,7 +2084,7 @@
     var d = id ? ligne('depenses', id) : { date: isoLocal(new Date()), categorie: 'fournitures', mode: 'especes', statut: 'en_attente' };
     var modifiable = d.statut === 'en_attente' && peut('depenses.saisir', cid);
     var moi = E.profil.utilisateur.id;
-    var valideur = d.statut === 'en_attente' && id && (estAdmin() || (peut('depenses.valider', cid) && d.saisie_par !== moi));
+    var valideur = d.statut === 'en_attente' && id && (estAdmin() || (estTresorier(cid) && d.saisie_par !== moi));
     var dis = modifiable ? '' : ' disabled';
     ouvrirFeuille('<h2>' + (id ? 'Dépense' : 'Nouvelle dépense') + '</h2>' + (id ? '<p class="doux">Saisie par ' + esc(nomPersonne(d.saisie_par) || (d.saisie_par === moi ? 'vous' : '—')) + (d.valide_par ? ' · ' + (d.statut === 'validee' ? 'validée' : 'refusée') + ' par ' + esc(nomPersonne(d.valide_par) || (d.valide_par === moi ? 'vous' : '—')) + ' le ' + esc(dateLisible(d.valide_le)) : '') + '</p>' : '') +
       (d.statut === 'refusee' ? '<p class="note">Refusée : ' + esc(d.motif_refus || '') + '</p>' : '') +
@@ -2100,6 +2100,10 @@
       '<div id="zone-justificatif" class="justificatif"></div>' +
       (modifiable ? '<label class="champ"><span>' + (d.justificatif ? 'Remplacer la photo du justificatif' : 'Photo du justificatif (facture, reçu)') + '</span><small>Obligatoire à partir de ' + fcfa(SEUIL_JUSTIFICATIF) + ', facultative en dessous.</small><input type="file" name="photo" accept="image/*" capture="environment"></label>' : '') +
       (modifiable ? '<div class="actions"><button class="btn" type="submit">Enregistrer</button></div>' : '') + '</form>' +
+      // Pas de bouton « Valider » : on dit pourquoi (deux personnes par dépense) et qu'elle ne compte pas encore.
+      (id && d.statut === 'en_attente' && !valideur ? '<p class="note qui-valide">' + ico('info', 'p') + ' ' + (d.saisie_par === moi && estTresorier(cid)
+        ? 'Vous avez saisi cette dépense : vous ne pouvez pas la valider vous-même. L\'administrateur la valide.'
+        : 'En attente de validation par le trésorier du centre' + (tresorierDe(cid) && nomPersonne(tresorierDe(cid)) ? ' (' + esc(nomPersonne(tresorierDe(cid))) + ')' : '') + ' ou l\'administrateur.') + ' Elle n\'entre dans le bilan et le solde qu\'une fois validée.</p>' : '') +
       (valideur ? '<div class="actions"><button class="btn or" type="button" data-a="valider-depense" data-id="' + esc(id) + '">' + ico('check', 'p') + 'Valider</button><button class="btn danger" type="button" data-a="refuser-depense" data-id="' + esc(id) + '">Refuser</button></div>' : '') +
       (id ? '<div class="actions"><button class="btn clair" type="button" data-a="voir-bon" data-t="depense" data-id="' + esc(id) + '">' + ico('doc', 'p') + 'Bon de sortie (image, PDF, WhatsApp)</button></div>' : '') +
       (id && estAdmin() && d.statut === 'validee' ? '<div class="actions"><button class="btn danger" type="button" data-a="refuser-depense" data-v="annuler" data-id="' + esc(id) + '">Annuler cette dépense</button></div>' +
@@ -3895,7 +3899,7 @@
     var moi = E.profil.utilisateur.id;
     centresChoisis().forEach(function (c) {
       var nom = c.nom_court || c.nom;
-      if (estAdmin() || peut('depenses.valider', c.id)) {
+      if (estAdmin() || estTresorier(c.id)) {
         var dv = lignes('depenses').filter(function (d) { return d.centre_id === c.id && d.statut === 'en_attente' && (estAdmin() || d.saisie_par !== moi); }).length;
         if (dv) out.push({ ico: 'clipboard', niveau: 'alerte', titre: dv + ' dépense' + (dv > 1 ? 's' : '') + ' à valider · ' + nom, detail: 'Caisse › Dépenses', lien: '#/caisse', onglet: 'depenses' });
       }
@@ -4011,15 +4015,15 @@
       pas: [] },
     { cle: 'responsable', espace: 'partenaire', nom: 'Responsable', famille: 'Partenaire',
       resume: 'Dirige un centre au quotidien, avec presque tous les pouvoirs sur ce centre.',
-      peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Remettre les fonds au trésorier', 'Fixer les tarifs, valider les dépenses', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants', 'Tenir l\'agenda : rendez-vous, rencontres, réunions', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
-      pas: ['Les réglages des centres et de l\'année', 'Les comptes responsables, actionnaires et admin', 'Annuler une dépense déjà validée, changer la date d\'un versement (administrateur seul)'] },
+      peut: ['Inscrire les élèves, faire et corriger l\'appel', 'Encaisser, annuler un versement, accorder une remise', 'Remettre les fonds au trésorier', 'Fixer les tarifs', 'Gérer les contrats et paies des enseignants', 'Créer des comptes secrétaires et enseignants', 'Tenir l\'agenda : rendez-vous, rencontres, réunions', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
+      pas: ['Les réglages des centres et de l\'année', 'Les comptes responsables, actionnaires et admin', 'Valider les dépenses (trésorier ou administrateur), annuler une dépense déjà validée, changer la date d\'un versement (administrateur seul)'] },
     { cle: 'actionnaire', espace: 'partenaire', nom: 'Actionnaire', famille: 'Partenaire',
       resume: 'Associé du centre : quand il est présent, il fait l\'appel, relance, inscrit, encaisse, gère et paie les enseignants ; il suit les chiffres.',
       peut: ['Faire l\'appel des classes, prévenir les parents des absences et retards', 'Rappeler les échéances et relancer les impayés (parents ou élèves)',
         'Inscrire les élèves et modifier leurs fiches', 'Encaisser inscriptions et mensualités, envoyer le reçu', 'Créer les comptes des enseignants, fixer leur contrat',
         'Payer l\'enseignant après son cours, verser la paie du mois, lui envoyer son reçu', 'Saisir les dépenses, éditer le bon de sortie', 'Remettre les fonds au trésorier', 'Voir le bilan, les statistiques et les parts',
         'Modifier l\'emploi du temps, tenir l\'agenda', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
-      pas: ['Fixer les tarifs, accorder une remise', 'Valider ou annuler une dépense', 'Clôturer le mois'] },
+      pas: ['Fixer les tarifs, accorder une remise', 'Valider ou annuler une dépense (trésorier ou administrateur)', 'Clôturer le mois'] },
     { cle: 'secretaire', espace: 'secretariat', nom: 'Secrétaire / surveillant', famille: 'Équipe',
       resume: 'Tient l\'accueil et la caisse du centre.',
       peut: ['Inscrire et modifier les élèves', 'Faire l\'appel de toutes les classes', 'Encaisser et remettre les reçus', 'Payer l\'enseignant juste après son cours (1 500 F/h) et lui envoyer son reçu', 'Remettre les fonds au trésorier', 'Saisir les dépenses (avec photo du justificatif)', 'Noter les rendez-vous dans l\'agenda', 'Échanger dans l\'espace Équipe : messages, commentaires, réunions, tâches'],
@@ -4220,12 +4224,12 @@
   var LIB_CAP = {
     'eleves.gerer': 'Inscrire et modifier les élèves', 'appel.faire': 'Faire l\'appel', 'appel.corriger': 'Corriger un appel de plus de 2 jours',
     'paiements.encaisser': 'Encaisser', 'paiements.voir': 'Voir les versements', 'caisse.corriger': 'Corriger la caisse (annuler, antidater)',
-    'finances.voir': 'Voir le bilan', 'depenses.saisir': 'Saisir des dépenses', 'depenses.voir': 'Voir les dépenses', 'depenses.valider': 'Valider les dépenses',
+    'finances.voir': 'Voir le bilan', 'depenses.saisir': 'Saisir des dépenses', 'depenses.voir': 'Voir les dépenses',
     'enseignants.gerer': 'Contrats et paies des enseignants', 'comptes.gerer': 'Créer des comptes (secrétaires, enseignants)', 'journal.voir': 'Lire le journal',
     'stats.voir': 'Voir les statistiques', 'emploi.gerer': 'Modifier l\'emploi du temps', 'tarifs.fixer': 'Fixer les tarifs', 'remises.accorder': 'Accorder des remises',
     'agenda.gerer': 'Gérer l\'agenda (rendez-vous, rencontres)'
   };
-  var CAP_ECRITURE = ['eleves.gerer', 'appel.faire', 'appel.corriger', 'paiements.encaisser', 'caisse.corriger', 'depenses.saisir', 'depenses.valider',
+  var CAP_ECRITURE = ['eleves.gerer', 'appel.faire', 'appel.corriger', 'paiements.encaisser', 'caisse.corriger', 'depenses.saisir',
     'enseignants.gerer', 'comptes.gerer', 'emploi.gerer', 'tarifs.fixer', 'remises.accorder', 'agenda.gerer'];
   function capsDuCompte(u) {
     var caps = {};
