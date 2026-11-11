@@ -1,3 +1,17 @@
+## Premières leçons : chaque classe a au moins 5 leçons (11/11/2026)
+
+Demande de Jacques : « Prépare les premières leçons avec la même rigueur, situations ancrées dans le contexte camerounais, QCM… » et « chaque classe doit avoir au moins 5 leçons disponibles ».
+
+- **Relevé avant** (leçons publiques de lecons.js + aperçus payants) : 5e 1, 4e 4, 2nde A 0, 2nde C 0 ; toutes les autres classes ≥ 6 (6e 11, 3e 160, 1re A 55, 1re C 221, 1re D 185, Tle A 92, Tle C 170, Tle D 193).
+- **15 leçons** dans `apprendre/_src/06-premieres-lecons.js`, premières leçons de l'année de la progression MINESEC 2026-2027 :
+  - 2nde C : ℝ et ses sous-ensembles ; mesure et erreurs ; l'expérience de Rutherford ; le texte théâtral ; la production.
+  - 2nde A : ℝ et ses sous-ensembles ; l'énonciation ; les disciplines affinitaires de l'histoire ; qu'est-ce que la philosophie ? ; lire une carte.
+  - 5e : division euclidienne ; subordonnée relative ; Pygmées et Sao ; croissance de la population mondiale.
+  - 4e : décomposition en facteurs premiers.
+- Format des leçons d'examen : trois parties de cours (définitions, méthode, exemples, « Le savais-tu ? »), entraînement au format de l'épreuve (Partie A ressources, Partie B compétences avec situation camerounaise et réponse attendue), fiche de révision, exercice, 10 QCM à 4 choix corrigés, rattachement APC. Toutes rattachées à leur ligne de progression (n° 1 sauf Français : n° 2 en 2nde C, n° 3 en 5e).
+- Publiques en entier (comme les leçons de lecons.js) : la suite payante n'existe que pour les aperçus construits par `build_apprendre_payant.cjs` à partir des sources privées.
+- `lecons.js` reconstruit (`tools/build_apprendre.py`, 72 leçons) ; 15 pages `apprendre/cours/*.html` et pages programme régénérées (`apprendre_statique.js`), habillées (591 pages).
+
 ## Cours lisibles, le gratuit d'abord dans Apprendre, jeux branchés (11/11/2026)
 
 Demande de Jacques : « Trop sombre et illisible. Vérifie que Apprendre est bien organisé, intuitif, facile à lire, que tout est branché selon les classes, les paiements des abonnements automatiques et bien branchés, la frontière entre payant et non payant ; mettre les ressources gratuites au début ou en évidence : il goûte, l'envie est suscitée et l'abonnement peut suivre. » Puis : « Enlève les traits foncés de gauche. »
