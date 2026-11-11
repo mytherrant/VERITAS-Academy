@@ -9,7 +9,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261110h">
+<link rel="stylesheet" href="apprendre.css?v=20261111b">
 <link rel="stylesheet" href="jeu.css?v=20261110g">
 <style>
 .hero{background:linear-gradient(90deg,#EDF2FB,#F7F9FE 70%);color:#001136;border:1px solid #DCE5F5;border-radius:10px;padding:34px 34px 28px;position:relative;overflow:hidden;margin-bottom:26px}
@@ -296,7 +296,16 @@
     /* tout ce que le site offre à cette classe, par usage */
     var tous=A.resClasse(classe), parT={}; tous.forEach(function(i){var t=VRT_RES.items[i].t;parT[t]=(parT[t]||0)+1});
     $("#tpT").textContent="Tout pour progresser en "+classe; $("#tpL").href="ressources.html?c="+encodeURIComponent(classe);
-    $("#tp").innerHTML=A.FAMILLES.filter(function(f){return parT[f[0]]}).map(function(f){return '<a class="tp-c" style="'+f[5]+'" href="ressources.html?c='+encodeURIComponent(classe)+'&f='+f[0]+'"><span class="res-p">'+A.si(f[2],24)+'</span><b>'+esc(f[1])+'</b><small>'+parT[f[0]]+' ressource'+(parT[f[0]]>1?'s':'')+'</small></a>'}).join("");
+    /* 11/11/2026 — « Structure et dispose bien les icônes » (Jacques) : les
+       familles sont rangées sous leurs quatre rubriques (A.GROUPES), et chaque
+       carte pose son icône dans un rond de sa couleur, à la même place. */
+    $("#tp").innerHTML=A.GROUPES.map(function(g){
+      var fs=A.FAMILLES.filter(function(f){return f[4]===g[0]&&parT[f[0]]}); if(!fs.length)return "";
+      return '<div class="tp-gr"><p class="tp-gt">'+A.si(g[2],16)+'<span>'+esc(g[1])+'</span></p><div class="tp-gl">'+fs.map(function(f){
+        var n=parT[f[0]];
+        return '<a class="tp-c" style="'+f[5]+'" href="ressources.html?c='+encodeURIComponent(classe)+'&f='+f[0]+'"><span class="tp-i">'+A.si(f[2],24)+'</span><span class="tp-t"><b>'+esc(f[1])+'</b><small>'+n+' ressource'+(n>1?'s':'')+'</small></span></a>';
+      }).join("")+'</div></div>';
+    }).join("");
 
     /* défi express */
     var pool=[]; lecs(classe).concat(lecs(classe).length?[]:lecs()).forEach(function(k){LE[k].quiz.forEach(function(x){pool.push([k,x])})});

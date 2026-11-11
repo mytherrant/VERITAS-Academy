@@ -794,3 +794,53 @@ h2 .num .pic{vertical-align:middle}
 .integ ol{margin:6px 0 8px}
 .integ details{margin:6px 0 12px}
 .integ summary{cursor:pointer;font:600 15px var(--sans);color:#1E499B}
+
+/* ════════ « Tout pour progresser » : rubriques et icônes alignées (11/11/2026) ════════
+   Quatre rubriques (Où j'en suis, Comprendre et apprendre, M'entraîner, Besoin
+   d'aide), puis des cartes de même hauteur : icône dans un rond teinté de la
+   couleur de la famille, titre, compteur en pastille. */
+.tp-g{display:flex!important;flex-direction:column;gap:22px}
+.tp-gt{display:flex;align-items:center;gap:8px;margin:0 0 10px;font:700 12.5px var(--sans);letter-spacing:.07em;text-transform:uppercase;color:#6B7287}
+.tp-gt svg{color:#1E499B}
+.tp-gl{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr));gap:12px}
+.tp-gl .tp-c{display:flex;flex-direction:row;align-items:center;gap:14px;padding:16px;min-height:84px;border:1px solid #E6EAF2;border-radius:16px;background:#fff;box-shadow:0 4px 12px rgba(0,17,54,.05)}
+.tp-gl .tp-c:hover{border-color:var(--k,#1E499B)}
+.tp-i{flex:0 0 52px;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:#fff;border:3px solid var(--k,#1E499B);color:#001136}
+.tp-i svg{color:#001136}
+.tp-t{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.tp-gl .tp-c .tp-t b{position:static;display:block;font:600 15.5px/1.3 var(--sans);color:#001136}
+.tp-gl .tp-c .tp-t small{position:static;display:inline-block;font:700 12.5px var(--sans);color:var(--k,#1E499B);background:var(--kp,#EDF2FB);border-radius:999px;padding:4px 10px;white-space:nowrap}
+/* Téléphone : deux colonnes, contenu centré — l'icône en haut, toujours à la même place */
+@media (max-width:640px){
+  .tp-gl{grid-template-columns:1fr 1fr;gap:10px}
+  .tp-gl .tp-c{flex-direction:column;justify-content:flex-start;text-align:center;gap:10px;padding:16px 10px 14px;min-height:0}
+  .tp-t{flex:1 1 auto;align-items:center;width:100%}
+  .tp-gl .tp-c .tp-t b{font-size:14.5px}
+  .tp-gl .tp-c .tp-t small{margin-top:auto}
+}
+
+/* ════════ Un seul système d'icônes dans Apprendre (11/11/2026) ════════
+   « Audite et corrige tous les cas similaires » (Jacques). Les icônes AU TRAIT
+   (familles, rubriques, ressources) prennent l'anneau du site (règle du
+   25/10 : rond blanc, filet de 3 px teinté, icône bleu nuit, centrée), à la
+   même place dans chaque carte : grille « Tout pour progresser », portes et
+   cartes de ressources.html, ressources des pages matière et notes, titres
+   de famille. Les icônes DE MATIÈRE (illustrations en couleur) restent nues,
+   comme demandé le 08/11 ; seul leur alignement est repris. */
+.res-c .res-p,.res-sm .res-c .res-p,.porte .res-p,.res-fam>h2 .res-p{
+  display:grid!important;place-items:center;flex:0 0 44px!important;width:44px!important;height:44px!important;
+  border-radius:50%!important;background:#fff!important;border:3px solid var(--k,#1E499B);padding:0!important;color:#001136!important}
+.res-sm .res-c .res-p{border-color:var(--sk,#1E499B)}
+.res-c .res-p svg,.porte .res-p svg,.res-fam>h2 .res-p svg,.res-sm .res-c .res-p svg{color:#001136!important;width:20px;height:20px}
+.res-c{align-items:flex-start}
+.res-c .res-x{padding-top:2px}
+.res-fam>h2{display:flex;align-items:center;gap:12px}
+.res-fam .res-int{margin-left:56px}
+.porte{align-items:center}
+@media (max-width:640px){.porte{align-items:flex-start}.porte .res-p{flex-basis:40px!important;width:40px!important;height:40px!important}}
+/* Cartes de matière : la ligne « rédigées » et la barre s'alignent sous le nom, pas sous l'icône */
+.mat .h{align-items:center}
+.mat>.barre-p{margin-left:58px}
+.mat>span{margin-left:50px}
+.mat>.barre-p{margin-top:2px}
+@media (max-width:640px){.res-fam .res-int{margin-left:0}}

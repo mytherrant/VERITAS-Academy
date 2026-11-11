@@ -1,3 +1,30 @@
+## Vérification des branchements : classes du lycée et forum (11/11/2026)
+
+Demande de Jacques : « Vérifie que tout est bien branché. »
+
+- **Contrôle** : 216 liens internes de la vitrine, d'Apprendre et du forum (un seul en erreur, `/app.html`, qui n'existe qu'après déploiement) ; aucun `onclick` vers une fonction absente ; aucune erreur JS ; parcours testés de bout en bout (classes → Apprendre, carrousel, récapitulatif, « Tout pour progresser », portes, forum).
+- **Commit perdu repris** : « 2nde, 1ère, Tle par série » (37ac201) avait été poussé 46 s APRÈS la fusion de la PR 247 ; il n'était jamais arrivé en ligne. Repris ici.
+- **Forum — défaut réel en production** : l'inscription range « Terminale »/« 1ère » + filière ; les classes s'appellent « Tle A »/« 1ère A ». La comparaison exacte des noms laissait tout élève de 1ère et de Terminale sans classe, côté client (« rattaché à aucune classe ») ET côté serveur (403 à chaque message). Et les séries C et D n'avaient aucune classe.
+  - `_cvClassePour(cls, serie)` (app.js) : niveau + filière → classe (A1/A4 → A ; jamais une classe sœur). Utilisée par `_resolveClassroom` et l'écran Classes & Forum.
+  - `_cvCompleterClasses()` : ajoute 1ère C, 1ère D, Tle C, Tle D (salons + Physique-Chimie et SVT), sans toucher aux classes ni aux messages existants.
+  - `api/student_data.php` : même règle (`$classeDe`), et la classe de l'élève absente de la base publiée reste utilisable, avec les mêmes identifiants que le client.
+  - « Je m'inscris dans cette classe » règle le niveau ET la filière (C, D) ; une filière ambiguë (A → A1 ou A4) reste à choisir.
+  - Nouveau `tests/banc_forum_classes.cjs` (deploy.yml + test.yml) : 12/12 ; sur l'ancienne version, 6 au rouge.
+- **Interconnexion de tout le site** (« vitrine, Atelier, liens vers app… vérifie que tout est interconnecté ») : dossier `deploy/` reconstruit comme la CI (1 223 fichiers), 110 082 liens de 822 pages vérifiés contre ce qui PART en production ; 29 adresses `app.html#…` ouvertes une à une ; Atelier et 13 pages d'entrée parcourues (296 liens, 0 cassé) ; bancs Atelier, espaces par rôle, plan, menu : au vert.
+  - `VERITAS_favicon_512.png`, icône d'onglet déclarée par ~700 pages (Apprendre, scènes, programmes), n'était pas déployée → ajoutée à deploy.yml (copie + déclencheur ; échec bruyant si absente).
+  - `#labos`, lien des 31 pages Découvrir des laboratoires, n'ouvrait rien → routé vers `showLabosVirtuels`.
+- Version des assets : 1.20.72.
+- **Boutique de la vitrine** (« l'image des cahiers doit venir avant ») : sur téléphone, l'éventail de couvertures précède le texte (`.vrow-bou .vbou-v{order:-1}`) ; ordinateur inchangé. Empreinte d'index.php : 2026-11-11c.
+
+## « Tout pour progresser » : rubriques et icônes alignées (11/11/2026)
+
+Demande de Jacques : « Structure et dispose bien les icônes » (grille des ressources de la classe, apprendre/index.html).
+
+- Les familles sont rangées sous les quatre rubriques de `A.GROUPES` : Où j'en suis, Comprendre et apprendre, M'entraîner, Besoin d'aide (une rubrique vide n'apparaît pas).
+- Chaque carte : icône dans un rond de 52 px teinté de la couleur de sa famille, titre, compteur en pastille. Téléphone : deux colonnes, icône en haut et contenu centré ; ordinateur : icône à gauche, titre et compteur empilés.
+- Styles en fin d'apprendre.css (`.tp-gr`, `.tp-gt`, `.tp-gl`, `.tp-i`, `.tp-t`).
+- **Audit des cas similaires** (« Audite et corrige tous les cas similaires ») : toutes les icônes AU TRAIT d'Apprendre prennent l'anneau du site (règle du 25/10 : rond blanc, filet de 3 px teinté, icône bleu nuit, centrée) — grille « Tout pour progresser », portes et cartes de ressources.html, ressources des pages matière et notes (`carteRes`), titres de famille. La règle « sans pastille ni rond » du 10/11 est ainsi remplacée pour ces icônes. Les icônes DE MATIÈRE (illustrations en couleur) restent nues, comme demandé le 08/11 ; dans les cartes « Mes matières », la ligne « rédigées » et la barre s'alignent désormais sous le nom. `apprendre.css?v=20261111b` sur les sept pages.
+
 ## Actualités MINESEC : seulement le pertinent et le récent (11/11/2026)
 
 Demande de Jacques : « Juste les informations pertinentes et plus récentes » (Apprendre, Tle C, affichait en novembre les résultats du bac de juillet).
@@ -14,6 +41,7 @@ Demande de Jacques : « Créer une animation qui permet aux images ci de défile
 - Pause : doigt posé ou défilement manuel (reprise après 8 s), carrousel hors écran, onglet caché. Coupé si `prefers-reduced-motion`. Rien ne change sur ordinateur (mosaïque).
 - **Bandeau « Réussir son année avec les vrais programmes camerounais » retiré** (« Supprime ceci ») : recherche, trois arguments, prix « dès … FCFA/mois », boutons « Commencer maintenant » / « Voir les abonnements », photo hero-maison et badge « Prof. Ambassa · en ligne ». Le h1 de la page reste, masqué (`.vrt-sr`), en dernier enfant de `.vapp-in` : vitrine.js ne lui trouve pas de frère et ne pose donc plus la barre de recherche. Les prix restent affichés ailleurs (cartes, abonnements) ; banc_prix_vitrine au vert.
 - **« Tout ce dont l'élève a besoin » déplacé en fin d'accueil** (« Apprendre donne déjà beaucoup de ces éléments ; à la fin ce sera une synthèse, un récapitulatif ») : juste avant l'appel final, avec une pastille « En résumé ». Les onglets (régions dynamiques de vitrine.js) fonctionnent à la nouvelle place.
+- **Choix de la classe** (« enlève les effets entourés autour des classes et mets 2nde, 1ère, Tle… ») : plus de pastille ni de contour, texte seul souligné au survol (collège en bleu, lycée en violet). « Lycée · A, C, D » remplacé par les huit classes d'Apprendre : 2nde A, 2nde C, 1ère A, 1ère C, 1ère D, Tle A, Tle C, Tle D, chacune liée à `apprendre/?c=<classe>` (valeurs exactes de `A.CLASSES`). Grille de 4 colonnes sur téléphone. Soulignement parasite retiré de « Commencer à réviser ».
 - Empreinte d'index.php : 2026-11-11b.
 
 ## Classes & Forum au style de la vitrine, connexion et inscription par classe (11/11/2026)
