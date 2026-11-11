@@ -5,10 +5,9 @@
    3. l'entrée dans la classe virtuelle de la classe.
    Source des dates : arrêté conjoint MINEDUB/MINESEC fixant le calendrier de
    l'année scolaire 2026/2027 (mêmes données que CALENDRIER_SCOLAIRE d'app.js).
-   Les dates précises du BEPC, du Probatoire et du Baccalauréat relèvent d'une
-   décision particulière du MINESEC : on n'affiche que la période officielle
-   (à partir du 13 mai 2027) tant qu'elle n'est pas publiée. Pour la renseigner,
-   remplir DATE_EXAMEN ci-dessous. */
+   Dates du BEPC, du Probatoire et du Baccalauréat : décision n° 966/26/MINESEC
+   du 1er octobre 2026 fixant le calendrier des examens et concours de la
+   session 2027 (séries A, ABI, AC, C, D, E, SH, TI ; EPS : article 3). */
 (function (W) {
   "use strict";
   var A = W.VRT && W.VRT.app, esc = A ? A.esc : function (s) { return String(s); };
@@ -16,8 +15,16 @@
   /* Heure du Cameroun (UTC+1, sans heure d'été). */
   function d(iso, h) { return new Date(iso + "T" + (h || "00:00") + ":00+01:00"); }
 
-  /* Date d'ouverture de chaque examen, dès que le MINESEC la publie (ex. "2027-06-01"). */
-  var DATE_EXAMEN = { BEPC: "", Probatoire: "", "Baccalauréat": "" };
+  /* Session 2027 (décision n° 966/26/MINESEC). ecrit : épreuves écrites ;
+     fac : épreuves facultatives ou oral ; fin : résultats ou délibérations. */
+  var SESSION = {
+    BEPC: { ecrit: ["2027-05-31", "2027-06-03"], fac: ["2027-06-04", "Oral du BEPC bilingue"],
+            fin: ["2027-07-09", null, "Publication des résultats du BEPC (à confirmer par la DECC)"] },
+    "Baccalauréat": { ecrit: ["2027-05-24", "2027-05-28"], fac: ["2027-05-28", "Épreuves facultatives du Baccalauréat"],
+            fin: ["2027-07-08", "2027-07-10", "Délibérations du Baccalauréat"] },
+    Probatoire: { ecrit: ["2027-06-07", "2027-06-11"], fac: ["2027-06-11", "Épreuves facultatives du Probatoire"],
+            fin: ["2027-07-22", "2027-07-24", "Délibérations du Probatoire"] }
+  };
 
   function examen(c) {
     if (c === "3e") return { nom: "BEPC", cat: "bepc", mots: /\bBEPC\b/i };
@@ -46,17 +53,17 @@
       { t: "Fin de la séquence 4 et du 2ᵉ trimestre", de: d("2027-03-05", "15:30"), ico: "i-clipboard-check", q: "tous" },
       { t: "Vacances de Pâques", de: d("2027-03-25", "15:30"), a: d("2027-04-12", "07:30"), ico: "i-star", q: "tous", vac: 1 },
       { t: "Épreuves zéro (examen blanc national)", de: d("2027-04-15", "07:30"), a: d("2027-04-16", "15:30"), ico: "i-pen", q: "examen" },
-      { t: "Épreuves pratiques d'EPS", de: d("2027-04-19", "07:30"), a: d("2027-05-07", "15:30"), ico: "i-award", q: "examen" },
+      { t: "Épreuves pratiques d'EPS (dates fixées par ta région)", de: d("2027-04-26", "07:30"), a: d("2027-05-07", "15:30"), ico: "i-award", q: "examen" },
       { t: "Fin de la séquence 5", de: d("2027-04-30", "15:30"), ico: "i-clipboard-check", q: "tous" },
       { t: ex ? "Compositions de fin d'année, au format de l'examen" : "Compositions de fin d'année", de: d("2027-05-03", "07:30"), a: d("2027-05-21", "15:30"), ico: "i-pen", q: "tous" },
       { t: "Grandes vacances", de: d("2027-06-11", "15:30"), a: d("2027-09-06", "07:30"), ico: "i-star", q: "inter", vac: 1 },
       { t: "Rentrée 2027-2028", de: d("2027-09-06", "07:30"), ico: "i-school", q: "tous" }
     ];
     if (ex) {
-      var date = DATE_EXAMEN[ex.nom];
-      L.push(date
-        ? { t: ex.nom + (ex.serie ? " série " + ex.serie : ""), de: d(date, "07:30"), ico: "i-graduation", q: "examen", cle: 1 }
-        : { t: "Ouverture des examens officiels (" + ex.nom + ")", de: d("2027-05-13", "07:30"), a: d("2027-07-30", "15:30"), ico: "i-graduation", q: "examen", cle: 1, approx: 1 });
+      var S = SESSION[ex.nom];
+      L.push({ t: "Épreuves écrites du " + ex.nom + (ex.serie ? " série " + ex.serie : ""), de: d(S.ecrit[0], "07:30"), a: d(S.ecrit[1], "18:00"), ico: "i-graduation", q: "examen", cle: 1 });
+      L.push({ t: S.fac[1], de: d(S.fac[0], "07:30"), ico: "i-pen", q: "examen" });
+      L.push({ t: S.fin[2], de: d(S.fin[0], "08:00"), a: S.fin[1] ? d(S.fin[1], "18:00") : null, ico: "i-award", q: "examen" });
     }
     if (/^(1re|Tle)/.test(c)) L.push({ t: "Journée mondiale de la philosophie", de: d("2026-11-26", "07:30"), ico: "i-brain", q: "tous" });
     L.push({ t: "Semaine nationale du bilinguisme", de: d("2027-01-25", "07:30"), a: d("2027-01-29", "15:30"), ico: "i-globe", q: "tous" });
@@ -99,10 +106,10 @@
     /* Le grand compteur : l'examen pour une classe d'examen, sinon les prochaines vacances. */
     var cible = ex ? venir.filter(function (e) { return e.cle; })[0] : venir.filter(function (e) { return e.vac && e.de > now; })[0];
     cible = cible || venir[0];
-    var titre = !cible ? "Bonne fin d'année" : ex && cible.cle ? (cible.approx ? "Avant la période des examens officiels" : "Avant le " + ex.nom) : "Avant les " + cible.t.charAt(0).toLowerCase() + cible.t.slice(1);
-    var note = ex && cible && cible.approx
-      ? "Les examens officiels s'ouvrent à partir du 13 mai 2027. La date exacte du " + ex.nom + " sera fixée par une décision du MINESEC : le compteur se calera dessus dès sa publication."
-      : ex ? "" : "Classe de " + c + " : pas d'examen officiel cette année, mais six séquences et des compositions qui comptent pour le passage.";
+    var titre = !cible ? "Bonne fin d'année" : ex && cible.cle ? "Avant le " + ex.nom : ex ? "Prochaine étape : " + cible.t.charAt(0).toLowerCase() + cible.t.slice(1) : "Avant les " + cible.t.charAt(0).toLowerCase() + cible.t.slice(1);
+    var note = ex
+      ? "Décision n° 966/26/MINESEC du 1ᵉʳ oct. 2026, session 2027."
+      : "Classe de " + c + " : pas d'examen officiel cette année, mais six séquences et des compositions qui comptent pour le passage.";
     var proch = venir.filter(function (e) { return e !== cible; }).slice(0, 5);
     el.innerHTML =
       '<div class="cal-g">' +
@@ -120,7 +127,7 @@
           var n = jours(e.de - now), en = e.de <= now;
           return '<li class="' + (e.vac ? "vac" : e.q === "examen" ? "exa" : "") + '"><span class="cal-i">' + si(e.ico, 18) + '</span><span class="cal-t"><b>' + esc(e.t) + '</b><small>' + periode(e) + '</small></span><span class="cal-j">' + (en ? "en cours" : n === 0 ? "aujourd'hui" : "J-" + n) + '</span></li>';
         }).join("") + '</ul>' +
-        '<p class="cal-src">Arrêté conjoint MINEDUB/MINESEC, année scolaire 2026-2027.</p>' +
+        '<p class="cal-src">Arrêté conjoint MINEDUB/MINESEC, année scolaire 2026-2027' + (ex ? ' ; décision n° 966/26/MINESEC, examens 2027' : '') + '.</p>' +
       '</div></div>';
     tic(el);
   }
