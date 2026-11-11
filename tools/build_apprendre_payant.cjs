@@ -34,9 +34,30 @@ global.VRT_EXAM = (ids, o) => { for (const id of [].concat(ids)) { if (EXAM[id])
    à exploiter : jamais « un document montre… » sans le document. */
 const SIT = {};
 global.VRT_SIT = (ids, o) => { for (const id of [].concat(ids)) { if (SIT[id]) err.push(`${id} : situation réécrite en double`); SIT[id] = o; } };
+/* Banque de QCM au format des examens : 10 questions à 4 choix, chacune [énoncé, bonne réponse,
+   leurre, leurre, leurre, explication]. La bonne réponse est rédigée en premier ; sa place tourne
+   (a, b, c, d) d'une question à l'autre, pour une répartition équilibrée des lettres. */
+const QCM = {};
+global.VRT_QCM = (ids, liste) => { for (const id of [].concat(ids)) { if (QCM[id]) err.push(`${id} : QCM en double`); QCM[id] = liste; } };
+const crc = s => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
+function poserQcm(id, liste) {
+  if (!Array.isArray(liste) || liste.length !== 10) { err.push(`${id} : il faut exactement 10 QCM (${liste && liste.length})`); return null; }
+  const vus = new Set(), dep = crc(id) % 4;
+  return liste.map((x, i) => {
+    const [q, bonne, f1, f2, f3, e] = x || [];
+    const opts = [bonne, f1, f2, f3];
+    if (!q || opts.some(o => !String(o || "").trim())) err.push(`${id} : QCM ${i + 1} incomplet`);
+    if (new Set(opts.map(o => String(o).trim().toLowerCase())).size !== 4) err.push(`${id} : QCM ${i + 1} a deux choix identiques`);
+    if (!e || String(e).length < 15) err.push(`${id} : QCM ${i + 1} sans explication suffisante`);
+    if (vus.has(q)) err.push(`${id} : QCM ${i + 1} en double`); vus.add(q);
+    const b = (dep + i) % 4, r = [f1, f2, f3]; r.splice(b, 0, bonne);
+    return { q, r, b, e };
+  });
+}
 for (const f of fs.readdirSync(src).filter(x => x.endsWith(".js")).sort()) {
   try { eval(fs.readFileSync(path.join(src, f), "utf8")); } catch (e) { err.push(`${f} : ${e.message}`); }
 }
+for (const [id, liste] of Object.entries(QCM)) { if (!L[id]) { err.push(`${id} : QCM pour une leçon inconnue`); continue; } const q = poserQcm(id, liste); if (q) L[id].quiz = q; }
 for (const [id, o] of Object.entries(SIT)) {
   if (!APC[id]) { err.push(`${id} : situation réécrite pour une leçon sans fiche APC`); continue; }
   for (const k of ["situation", "tache", "resolution"]) if (!o[k]) err.push(`${id} : situation réécrite sans ${k}`);
@@ -70,7 +91,7 @@ for (const [id, l] of Object.entries(L)) {
   if (!m) { err.push(`${id} : rang ${l.rang} sans module APC`); continue; }
   l.apc = { module: m.module, famille: m.famille, agir: m.agir, situation: a.situation, tache: a.tache };
   const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const sci = ["pct", "physique", "chimie"].includes(l.m), svt = l.m === "svt", q0 = (l.quiz || [])[0] || { q: "", r: [], b: 0, e: "" };
+  const sci = ["pct", "physique", "chimie"].includes(l.m), svt = l.m === "svt" || l.m === "sciences", q0 = (l.quiz || [])[0] || { q: "", r: [], b: 0, e: "" };
   const ex = EXAM[id];
   const lib1 = svt ? "Évaluation des savoirs (QCM)" : sci ? "Vérification des savoirs" : "Question de cours";
   const lib2 = svt ? "Évaluation des savoir-faire" : sci ? "Application directe des savoirs" : "Exercice";
