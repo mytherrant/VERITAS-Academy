@@ -12255,6 +12255,7 @@ const ANAV=[
   ]},
   {s:"📚 Pédagogie",i:[
     {k:"grades",i:"▦",l:"Notes & bulletins"},
+    {k:"suivi_epreuves",i:"📈",l:"Suivi scolaire — notes des épreuves"},
     {k:"classstats",i:"📊",l:"Statistiques de classe"},
     {k:"honneur",i:"🏆",l:"Tableau d'honneur"},
     {k:"devoirs_admin",i:"📋",l:"Devoirs"},
@@ -12393,6 +12394,7 @@ const PT={
   absences_admin:"Gestion des absences",
   // Pédagogie
   grades:"Notes & Bulletins",
+  suivi_epreuves:"Suivi scolaire",
   classstats:"Statistiques de classe",
   honneur:"Tableau d'honneur",
   devoirs_admin:"Gestion des devoirs",
@@ -12580,7 +12582,7 @@ function render(p){
   // (journalisée dans _veritasErrors). On ne rend rien plutôt que de planter.
   if(typeof SES==='undefined'||!SES) return '';
   const P={
-    dashboard:pgDash,students:pgStudents,payments:pgPayments,grades:pgGrades,
+    dashboard:pgDash,students:pgStudents,payments:pgPayments,grades:pgGrades,suivi_epreuves:pgSuiviEpreuves,
     schedule:pgSched,announce:pgAnn,books2:pgBooks2,send:pgSend,
     teachers:pgTeachers,accounts:pgAccounts,booksale:pgBooksale,boutiquemgmt:pgBoutiqueMgmt,elearningmgmt:pgElearningMgmt,datareset:pgDataReset,visitororders:pgVisitorOrders,classstats:pgClassStats,honneur:pgHonneur,finance:pgFinance,
     settings:pgSettings,mybooks:pgMyBooks,releve_template:pgReleveTemplate,submit_resource:pgSubmitResource,soumissions:pgSoumissions,visitor_accounts:pgVisitorAccounts,authorsmgmt:pgAuthorsMgmt,certscol:pgCertScol,listeclasse:pgListeClasse,presence:pgPresence,
@@ -14730,6 +14732,251 @@ function saveGr(){
   else DB.grades.push({id:gid(),eid:s.id,enom:`${s.pre} ${s.nom}`,mat:s.mat,cls,sub,n1,n2,coef,tri,ens});
   save();cm();re();toast('✓ Notes enregistrées');
 }
+// ─── SUIVI SCOLAIRE — notes des épreuves (02/11/2026) ─────────────────────
+/* D'après « Notes des épreuves » de Tchouskou : une FEUILLE par épreuve, sur
+   les élèves inscrits de la classe ; note globale ou correction PAR QUESTION
+   sur un barème ; présence (absent, copie non rendue) ; appréciation portée
+   sur la copie ; moyenne, médiane, écart-type, répartition, réussite par
+   question, élèves en alerte (sous 8) ; export Excel, procès-verbal à signer,
+   et report dans « Notes & bulletins » (Devoir 1 ou 2 du trimestre).
+   Données : DB.evalSheets = [{id,titre,type,cls,sub,tri,date,bareme:[{lib,max}],
+   parQ,notes:{eid:{etat:'p'|'abs'|'nr',note,pts:{i:v},comm}},created,auteur}]. */
+var EV_TYPES=['Devoir surveillé','Composition','Interrogation écrite','Devoir maison','Examen blanc'];
+function _evs(){DB.evalSheets=DB.evalSheets||[];return DB.evalSheets;}
+function _evGet(id){return _evs().find(function(e){return e.id===id;})||null;}
+function _evNum(v){if(v===''||v===null||v===undefined)return null;var x=parseFloat(String(v).replace(',','.'));return isFinite(x)?x:null;}
+function _evFr(x){return (x===null||x===undefined)?'—':String(Math.round(x*100)/100).replace('.',',');}
+function _evBareme(e){return Math.round((e.bareme||[]).reduce(function(s,q){return s+(+q.max||0);},0)*100)/100;}
+function _evParQ(e){return !!e.parQ&&_evBareme(e)>0;}
+function _evEleves(e){return DB.students.filter(function(s){return s.cls===e.cls;}).sort(function(a,b){return (a.nom+' '+a.pre).localeCompare(b.nom+' '+b.pre,'fr');});}
+/* Note d'un élève. Par question : somme des points saisis, chacun borné à son
+   barème, ramenée sur 20. Absent ou copie non rendue : pas de note. */
+function _evNote(e,n){
+  var vide={total:null,sur20:null};
+  if(!n||n.etat==='abs'||n.etat==='nr')return vide;
+  if(_evParQ(e)){var t=0,k=0;(e.bareme||[]).forEach(function(q,i){var v=_evNum((n.pts||{})[i]);if(v!==null){t+=Math.min(Math.max(v,0),+q.max||v);k++;}});
+    if(!k)return vide;t=Math.round(t*100)/100;return{total:t,sur20:Math.round(t/_evBareme(e)*2000)/100};}
+  var v=_evNum(n.note);if(v===null)return vide;v=Math.min(Math.max(v,0),20);return{total:v,sur20:v};
+}
+function _evStats(a){var n=a.length;if(!n)return{n:0,moy:null,med:null,min:null,max:null,et:null,reussite:0};
+  var s=a.slice().sort(function(x,y){return x-y;});var moy=s.reduce(function(t,x){return t+x;},0)/n;
+  var med=n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2;
+  var et=Math.sqrt(s.reduce(function(t,x){return t+(x-moy)*(x-moy);},0)/n);
+  return{n:n,moy:moy,med:med,min:s[0],max:s[n-1],et:et,reussite:s.filter(function(x){return x>=10;}).length/n};}
+function _evLignes(e){var N=e.notes||{};return _evEleves(e).map(function(s){var n=N[s.id]||{};return{s:s,n:n,etat:n.etat||'p',r:_evNote(e,n)};});}
+/* Barème saisi « une ligne par question : libellé ; points » (ou « Q1 2 »). */
+function _evParseBareme(txt){var out=[];String(txt||'').split(/\r?\n/).forEach(function(l){l=l.trim();if(!l)return;
+  var m=l.match(/^(.*?)[\s;:=\t]+(\d+(?:[.,]\d+)?)\s*(?:pts?|points?)?\s*$/i);
+  if(m){var lib=m[1].replace(/[;:\-–]+$/,'').trim();out.push({lib:lib||('Q'+(out.length+1)),max:parseFloat(m[2].replace(',','.'))});}});
+  return out;}
+function _evBaremeTexte(e){return (e.bareme||[]).map(function(q){return q.lib+' ; '+String(q.max).replace('.',',');}).join('\n');}
+
+function pgSuiviEpreuves(){
+  if(!iA()&&!isEnseignant())return na();
+  var t=isEnseignant()?T(SES.tid):null;
+  var ouverte=window._evOpen?_evGet(window._evOpen):null;
+  if(ouverte)return _evFeuilleHtml(ouverte);
+  var fC=window._evCls||'',fT=window._evTri||'';
+  var L=_evs().filter(function(e){return (!fC||e.cls===fC)&&(!fT||e.tri===fT)&&(!t||e.sub===t.mat2);})
+    .sort(function(a,b){return (b.date||'').localeCompare(a.date||'')||(b.created||0)-(a.created||0);});
+  var classes=[...new Set(_evs().map(function(e){return e.cls;}))];
+  var toutes=L.map(function(e){var l=_evLignes(e);var notes=l.filter(function(x){return x.r.sur20!==null;}).map(function(x){return x.r.sur20;});return{e:e,l:l,S:_evStats(notes)};});
+  var nAlerte=toutes.reduce(function(a,x){return a+x.l.filter(function(y){return y.etat==='nr'||(y.r.sur20!==null&&y.r.sur20<8);}).length;},0);
+  var aSaisir=toutes.filter(function(x){var pres=x.l.filter(function(y){return y.etat==='p';}).length;return pres&&x.S.n<pres;}).length;
+  return`
+  <div class="ib" style="margin-bottom:14px">📈 <b>Suivi scolaire</b> — une feuille de notes par épreuve, sur les élèves de la classe : note globale ou correction question par question, statistiques, élèves en alerte, procès-verbal et report dans les bulletins.</div>
+  <div class="sg">
+    <div class="sc scg"><div class="sci">📝</div><div class="scl">Épreuves suivies</div><div class="scv vg">${L.length}</div><div class="scs">${fC||'toutes classes'}${fT?' · '+_esc(fT):''}</div></div>
+    <div class="sc scgr"><div class="sci">⏳</div><div class="scl">Saisies incomplètes</div><div class="scv vgr">${aSaisir}</div><div class="scs">feuilles à terminer</div></div>
+    <div class="sc"><div class="sci">⚠️</div><div class="scl">Élèves en alerte</div><div class="scv" style="color:var(--re)">${nAlerte}</div><div class="scs">sous 8/20 ou copie non rendue</div></div>
+  </div>
+  <div class="fl2 fic fsb mb16 fw g8">
+    <div class="fl2 fic g8 fw">
+      <select class="fi" style="max-width:190px" onchange="window._evCls=this.value;re()"><option value="">Toutes les classes</option>${CLS.map(function(c){return '<option'+(c===fC?' selected':'')+(classes.indexOf(c)<0?' style="color:#9aa3b2"':'')+'>'+_esc(c)+'</option>';}).join('')}</select>
+      <select class="fi" style="max-width:190px" onchange="window._evTri=this.value;re()"><option value="">Tous les trimestres</option>${TRS.map(function(x){return '<option'+(x===fT?' selected':'')+'>'+_esc(x)+'</option>';}).join('')}</select>
+    </div>
+    <button class="btn bi" onclick="mEvNew()">＋ Nouvelle épreuve</button>
+  </div>
+  <div class="card">
+    <div class="ct">Épreuves</div>
+    ${!toutes.length?'<div class="empty">Aucune épreuve. Créez-en une : la feuille s’ouvre sur les élèves de la classe.</div>':
+    `<div class="tw"><table><thead><tr><th>Épreuve</th><th>Classe</th><th>Matière</th><th>Trimestre</th><th style="text-align:center">Saisies</th><th style="text-align:center">Moyenne</th><th style="text-align:center">Alertes</th><th></th></tr></thead><tbody>
+    ${toutes.map(function(x){var e=x.e;var pres=x.l.filter(function(y){return y.etat==='p';}).length;var al=x.l.filter(function(y){return y.etat==='nr'||(y.r.sur20!==null&&y.r.sur20<8);}).length;
+      return `<tr><td><div class="bold s">${_esc(e.titre)}</div><div class="xs2 mut">${_esc(e.type||'')}${e.date?' · '+_esc(e.date.split('-').reverse().join('/')):''}${_evBareme(e)?' · barème '+_evFr(_evBareme(e))+' pts':''}</div></td>
+      <td>${_esc(e.cls)}</td><td>${_esc(e.sub)}</td><td class="xs2">${_esc(e.tri)}</td>
+      <td style="text-align:center"><span class="mono xs2" style="color:${x.S.n<pres?'var(--or,#c26a12)':'var(--gr)'}">${x.S.n}/${pres}</span></td>
+      <td style="text-align:center">${x.S.n?`<span class="mono bold s" style="color:${getAppr(x.S.moy).col}">${_evFr(x.S.moy)}</span>`:'<span style="color:var(--ink4)">—</span>'}</td>
+      <td style="text-align:center">${al?`<span class="mono bold xs2" style="color:var(--re)">${al}</span>`:'<span style="color:var(--ink4)">0</span>'}</td>
+      <td style="white-space:nowrap"><button class="btn bi" style="padding:5px 11px;font-size:12px" onclick="window._evOpen='${_esc(e.id)}';re();window.scrollTo(0,0)">Ouvrir</button> <button class="btn bo" style="padding:5px 9px;font-size:12px" onclick="mEvDel('${_esc(e.id)}')" title="Supprimer">🗑</button></td></tr>`;}).join('')}
+    </tbody></table></div>`}
+  </div>`;
+}
+
+function _evFeuilleHtml(e){
+  var parQ=_evParQ(e),bar=_evBareme(e);var l=_evLignes(e);
+  var ong=function(on){return 'padding:6px 12px;border-radius:7px;border:none;font-size:12px;font-weight:700;cursor:pointer;'+(on?'background:#fff;color:var(--bl);box-shadow:0 1px 4px rgba(20,55,95,.14)':'background:transparent;color:var(--ink3)');};
+  var head=parQ?(e.bareme||[]).map(function(q){return `<th style="text-align:center;min-width:58px" title="${_esc(q.lib)}">${_esc(q.lib.length>9?q.lib.slice(0,8)+'…':q.lib)}<div class="xs2 mut" style="font-weight:600">/${_evFr(+q.max)}</div></th>`;}).join(''):'';
+  var inp='width:62px;padding:5px 4px;text-align:center;font-weight:700';
+  return`
+  <div class="fl2 fic g8 mb16 fw"><button class="btn bo" onclick="window._evOpen=null;re()">‹ Toutes les épreuves</button></div>
+  <div class="card mb16">
+    <div class="fl2 fic fsb fw g8">
+      <div><div class="ct" style="margin-bottom:2px">${_esc(e.titre)}</div>
+        <div class="xs2 mut">${_esc([e.type,e.cls,e.sub,e.tri,e.date?e.date.split('-').reverse().join('/'):''].filter(Boolean).join(' · '))}${bar?' · barème '+_evFr(bar)+' pts sur '+(e.bareme||[]).length+' question(s)':' · barème non réglé'}</div></div>
+      <div class="fl2 fic g6 fw">
+        <div style="display:inline-flex;gap:3px;background:var(--sur,#f3f5fa);border-radius:9px;padding:3px">
+          <button style="${ong(!parQ)}" onclick="_evMode('${_esc(e.id)}',false)">Note globale</button>
+          <button style="${ong(parQ)}${bar?'':';opacity:.45;cursor:not-allowed'}" onclick="_evMode('${_esc(e.id)}',true)" title="${bar?'Corriger question par question':'Réglez d’abord le barème'}">Par question</button>
+        </div>
+        <button class="btn bo" onclick="mEvEdit('${_esc(e.id)}')">✎ Épreuve & barème</button>
+        <button class="excel-btn" onclick="_evExcel('${_esc(e.id)}')">📊 Excel</button>
+        <button class="btn bg2" onclick="_evPV('${_esc(e.id)}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Procès-verbal</button>
+        <button class="btn bi" onclick="mEvReport('${_esc(e.id)}')">↪ Reporter dans les bulletins</button>
+      </div>
+    </div>
+  </div>
+  <div id="evStats">${_evStatsHtml(e)}</div>
+  <div class="card mb16">
+    <div class="ct">Feuille de notes — ${l.length} élève${l.length>1?'s':''}</div>
+    ${!l.length?`<div class="empty">Aucun élève inscrit en ${_esc(e.cls)}. Inscrivez-les dans « Inscriptions » : la feuille se remplit seule.</div>`:
+    `<div class="tw"><table><thead><tr><th style="width:30px">N°</th><th>Élève</th><th>Présence</th>${head}${parQ?'<th style="text-align:center">Total<div class="xs2 mut" style="font-weight:600">/'+_evFr(bar)+'</div></th><th style="text-align:center">/20</th>':'<th style="text-align:center">Note /20</th>'}<th>Appréciation (portée sur la copie)</th></tr></thead><tbody>
+    ${l.map(function(x,i){var s=x.s,n=x.n,off=x.etat!=='p',sid=_esc(s.id),eid=_esc(e.id);var dis=off?' disabled':'';
+      var cases=parQ?(e.bareme||[]).map(function(q,k){var v=(n.pts||{})[k];var bv=_evNum(v);var hors=bv!==null&&(bv<0||bv>+q.max);return `<td style="text-align:center"><input class="fi" type="number" step="0.25" min="0" max="${+q.max}" value="${v===undefined||v===null?'':_esc(String(v))}" style="${inp}${hors?';border-color:#c0392b!important;background:#fdecea!important':''}"${dis} aria-label="${_esc(s.nom+' '+s.pre+' — '+q.lib)}" onchange="_evSetPt('${eid}','${sid}',${k},this)"></td>`;}).join(''):'';
+      var noteC=parQ?`<td style="text-align:center" class="mono bold s" id="evT_${sid}">${off?(x.etat==='abs'?'abs.':'n.r.'):_evFr(x.r.total)}</td><td class="mono bold s" id="evS_${sid}" style="text-align:center;color:${x.r.sur20===null?'var(--ink4)':getAppr(x.r.sur20).col}">${off?'':_evFr(x.r.sur20)}</td>`
+        :`<td style="text-align:center"><input class="fi" type="number" step="0.25" min="0" max="20" value="${n.note===undefined||n.note===null?'':_esc(String(n.note))}" style="${inp}"${dis} aria-label="${_esc(s.nom+' '+s.pre)} — note sur 20" onchange="_evSetNote('${eid}','${sid}',this)"></td>`;
+      return `<tr><td class="xs2 mut">${i+1}</td><td class="semi s" style="white-space:nowrap">${_esc(s.nom)} ${_esc(s.pre)}</td>
+      <td><select class="fi" style="padding:5px 6px;font-size:12px;${off?'color:var(--re)':''}" onchange="_evSetEtat('${eid}','${sid}',this.value)"><option value="p"${x.etat==='p'?' selected':''}>Présent</option><option value="abs"${x.etat==='abs'?' selected':''}>Absent</option><option value="nr"${x.etat==='nr'?' selected':''}>Copie non rendue</option></select></td>
+      ${cases}${noteC}
+      <td><input class="fi" style="min-width:180px;padding:5px 8px;font-size:12px" value="${_esc(n.comm||'')}" placeholder="Appréciation"${dis} onchange="_evSetComm('${eid}','${sid}',this.value)"></td></tr>`;}).join('')}
+    </tbody></table></div>`}
+  </div>
+  <div id="evAna">${_evAnaHtml(e)}</div>`;
+}
+function _evStatsHtml(e){
+  var l=_evLignes(e);var pres=l.filter(function(x){return x.etat==='p';}).length;
+  var S=_evStats(l.filter(function(x){return x.r.sur20!==null;}).map(function(x){return x.r.sur20;}));
+  /* data-counted / data-v-counted : les deux compteurs animés des tuiles
+     (runCounters, scan) ne lisent que le PREMIER nombre — « 5,5 – 18,5 »
+     devenait « 5.5 », « 50 % » devenait « 50 ». Ces valeurs se recalculent à
+     chaque frappe : on les écarte de l'animation. */
+  var tile=function(ico,lab,val,sous,col){return `<div class="sc"><div class="sci">${ico}</div><div class="scl">${lab}</div><div class="scv" data-counted="1" data-v-counted="1" style="font-size:19px;color:${col||'var(--bl)'}">${val}</div><div class="scs">${sous||''}</div></div>`;};
+  /* Un seul nombre par tuile : « 0/5 » s'affichait « 5/ » (le compteur animé
+     des tuiles ne lit que le premier nombre). Le détail va dessous. */
+  var nAbs=l.filter(function(x){return x.etat==='abs';}).length,nNr=l.filter(function(x){return x.etat==='nr';}).length;
+  return `<div class="sg">${tile('✍️','Notes saisies',S.n,'sur '+pres+' présent'+(pres>1?'s':''),S.n<pres?'var(--or,#c26a12)':'var(--gr)')}
+    ${tile('🚫','Absents ou sans copie',nAbs+nNr,nAbs+' absent'+(nAbs>1?'s':'')+' · '+nNr+' copie'+(nNr>1?'s':'')+' non rendue'+(nNr>1?'s':''))}
+    ${tile('📊','Moyenne /20',_evFr(S.moy),'médiane '+_evFr(S.med),S.moy===null?'var(--ink4)':getAppr(S.moy).col)}
+    ${tile('↕️','Min – max',S.n?_evFr(S.min)+' – '+_evFr(S.max):'—','écart-type '+_evFr(S.et))}
+    ${tile('✅','Au moins 10/20',S.n?Math.round(S.reussite*100)+' %':'—','taux de réussite',S.n&&S.reussite>=.5?'var(--gr)':'var(--re)')}</div>`;
+}
+function _evAnaHtml(e){
+  var l=_evLignes(e);var notes=l.filter(function(x){return x.r.sur20!==null;}).map(function(x){return x.r.sur20;});
+  if(!notes.length&&!l.some(function(x){return x.etat==='nr';}))return '';
+  var T=[[0,5,'0–5'],[5,8,'5–8'],[8,10,'8–10'],[10,12,'10–12'],[12,14,'12–14'],[14,16,'14–16'],[16,20.01,'16–20']];
+  var c=T.map(function(t){return notes.filter(function(x){return x>=t[0]&&x<t[1];}).length;});var mx=Math.max.apply(null,[1].concat(c));
+  var rep=`<div class="card"><div class="ct">Répartition des notes</div><div style="display:flex;align-items:flex-end;gap:8px;height:130px">${T.map(function(t,k){return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%"><span class="xs2 bold">${c[k]||''}</span><span style="display:block;width:100%;max-width:44px;border-radius:6px 6px 0 0;margin-top:3px;height:${Math.max(c[k]?6:2,Math.round(c[k]/mx*88))}px;background:${t[0]<8?'#c0392b':t[0]<10?'#c26a12':'#188047'};${c[k]?'':'opacity:.25'}"></span><span class="xs2 mut" style="margin-top:4px;font-size:10px">${t[2]}</span></div>`;}).join('')}</div></div>`;
+  var parQ=_evParQ(e),qs='';
+  if(parQ){var it=(e.bareme||[]).map(function(q,k){var v=l.filter(function(x){return x.etat==='p';}).map(function(x){return _evNum((x.n.pts||{})[k]);}).filter(function(x){return x!==null;});
+      return{q:q,t:v.length&&+q.max?v.reduce(function(s,x){return s+Math.min(Math.max(x,0),+q.max);},0)/v.length/q.max:null};}).filter(function(x){return x.t!==null;}).sort(function(a,b){return a.t-b.t;});
+    if(it.length)qs=`<div class="card"><div class="ct">Réussite par question</div><div class="xs2 mut" style="margin:-4px 0 8px">Des moins réussies aux mieux réussies : les premières sont à reprendre en remédiation.</div>${it.map(function(x){var p=Math.round(x.t*100),col=x.t<.5?'#c0392b':x.t<.7?'#c26a12':'#188047';
+      return `<div class="fl2 fic g8" style="padding:4px 0"><span class="s semi" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${_esc(x.q.lib)}">${_esc(x.q.lib)}</span><span style="width:110px;height:8px;border-radius:99px;background:var(--bg2,#eef2f7);overflow:hidden"><span style="display:block;height:100%;width:${p}%;background:${col}"></span></span><span class="mono bold xs2" style="width:40px;text-align:right;color:${col}">${p} %</span></div>`;}).join('')}</div>`;}
+  var al=l.filter(function(x){return x.etat==='nr'||(x.r.sur20!==null&&x.r.sur20<8);}).sort(function(a,b){return (a.r.sur20===null?-1:a.r.sur20)-(b.r.sur20===null?-1:b.r.sur20);});
+  var ale=al.length?`<div class="card" style="border:1px solid #ecc4bf"><div class="ct" style="color:var(--re)">Élèves en alerte</div><div class="xs2 mut" style="margin:-4px 0 8px">Note sous 8/20, ou copie non rendue.</div>${al.map(function(x){return `<div class="fl2 fic fsb" style="padding:6px 0;border-top:1px solid var(--bg2,#eef2f7)"><span class="s semi">${_esc(x.s.nom)} ${_esc(x.s.pre)}</span><span class="mono bold xs2" style="color:var(--re)">${x.etat==='nr'?'copie non rendue':_evFr(x.r.sur20)+'/20'}</span></div>`;}).join('')}</div>`:'';
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">${rep}${qs}${ale}</div>`;
+}
+/* Saisie : on enregistre et on rafraîchit les cases calculées SANS re(),
+   pour ne pas perdre le champ suivant que l'utilisateur vient d'atteindre. */
+function _evNoteDe(e,sid){e.notes=e.notes||{};e.notes[sid]=e.notes[sid]||{etat:'p'};return e.notes[sid];}
+function _evApres(e,sid){
+  save();
+  var n=(e.notes||{})[sid]||{};var r=_evNote(e,n);
+  var tE=_ge('evT_'+sid),sE=_ge('evS_'+sid);
+  if(tE)tE.textContent=_evFr(r.total);
+  if(sE){sE.textContent=_evFr(r.sur20);sE.style.color=r.sur20===null?'var(--ink4)':getAppr(r.sur20).col;}
+  _si('evStats',_evStatsHtml(e));_si('evAna',_evAnaHtml(e));
+}
+function _evBorne(inp,max){var v=_evNum(inp.value);var bad=v!==null&&(v<0||v>max);inp.style.setProperty('border-color',bad?'#c0392b':'',bad?'important':'');inp.style.setProperty('background',bad?'#fdecea':'',bad?'important':'');inp.title=bad?'Hors barème : comptée '+_evFr(Math.min(Math.max(v,0),max)):'';if(bad)toast('Note hors barème (0 – '+_evFr(max)+') : elle sera ramenée dans les bornes','warn');}
+function _evSetPt(id,sid,k,inp){var e=_evGet(id);if(!e)return;var n=_evNoteDe(e,sid);n.pts=n.pts||{};
+  if(inp.value==='')delete n.pts[k];else n.pts[k]=inp.value;_evBorne(inp,+((e.bareme||[])[k]||{}).max||0);_evApres(e,sid);}
+function _evSetNote(id,sid,inp){var e=_evGet(id);if(!e)return;_evNoteDe(e,sid).note=inp.value;_evBorne(inp,20);_evApres(e,sid);}
+function _evSetComm(id,sid,v){var e=_evGet(id);if(!e)return;_evNoteDe(e,sid).comm=String(v||'').slice(0,300);save();}
+function _evSetEtat(id,sid,v){var e=_evGet(id);if(!e)return;_evNoteDe(e,sid).etat=v;save();re();}
+function _evMode(id,parQ){var e=_evGet(id);if(!e)return;if(parQ&&!_evBareme(e)){toast('Réglez d’abord le barème de l’épreuve','warn');mEvEdit(id);return;}e.parQ=!!parQ;save();re();}
+
+function _evFormHtml(e){
+  var t=isEnseignant()?T(SES.tid):null;e=e||{};
+  return `<div class="fg2">
+  <div class="fg" style="grid-column:1/-1"><span class="fl">Intitulé *</span><input class="fi" id="evTitre" value="${_esc(e.titre||'')}" placeholder="Devoir surveillé n°2 — séquence 3"></div>
+  <div class="fg"><span class="fl">Type</span><select class="fi" id="evType">${EV_TYPES.map(function(x){return '<option'+(x===(e.type||EV_TYPES[0])?' selected':'')+'>'+x+'</option>';}).join('')}</select></div>
+  <div class="fg"><span class="fl">Date</span><input class="fi" id="evDate" type="date" value="${_esc(e.date||new Date().toISOString().slice(0,10))}"></div>
+  <div class="fg"><span class="fl">Classe *</span><select class="fi" id="evCls">${CLS.map(function(c){return '<option'+(c===(e.cls||window._evCls||'')?' selected':'')+'>'+_esc(c)+'</option>';}).join('')}</select></div>
+  <div class="fg"><span class="fl">Matière *</span><select class="fi" id="evSub">${(t?[t.mat2]:SUBS).map(function(s){return '<option'+(s===e.sub?' selected':'')+'>'+_esc(s)+'</option>';}).join('')}</select></div>
+  <div class="fg"><span class="fl">Trimestre</span><select class="fi" id="evTri">${TRS.map(function(x){return '<option'+(x===(e.tri||window._evTri||TRS[0])?' selected':'')+'>'+_esc(x)+'</option>';}).join('')}</select></div>
+  <div class="fg" style="grid-column:1/-1"><span class="fl">Barème (facultatif) — une ligne par question : libellé ; points</span>
+    <textarea class="fi" id="evBar" rows="6" placeholder="Compréhension Q1 ; 2&#10;Compréhension Q2 ; 3&#10;Langue Q3 ; 5&#10;Production écrite ; 10">${_esc(_evBaremeTexte(e))}</textarea>
+    <div class="xs2 mut" style="margin-top:4px">Avec un barème, la feuille se corrige question par question et ramène le total sur 20.</div></div>
+  </div>`;
+}
+function _evLireForm(){return{titre:(_ge('evTitre')?.value||'').trim(),type:_ge('evType')?.value||EV_TYPES[0],date:_ge('evDate')?.value||'',
+  cls:_ge('evCls')?.value||'',sub:_ge('evSub')?.value||'',tri:_ge('evTri')?.value||TRS[0],bareme:_evParseBareme(_ge('evBar')?.value||'')};}
+function mEvNew(){M('Nouvelle épreuve','La feuille s’ouvre sur les élèves de la classe',_evFormHtml(null),
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEvNew()">✓ Créer la feuille</button>');}
+function saveEvNew(){var f=_evLireForm();if(!f.titre||!f.cls||!f.sub){toast('Intitulé, classe et matière sont requis','warn');return;}
+  var e=Object.assign({id:'ev'+gid(),parQ:f.bareme.length>0,notes:{},created:Date.now(),auteur:SES?.nom||''},f);
+  _evs().push(e);save();cm();window._evOpen=e.id;re();toast('✓ Feuille créée — '+_evEleves(e).length+' élève(s)');}
+function mEvEdit(id){var e=_evGet(id);if(!e)return;M('Épreuve & barème',_esc(e.titre),_evFormHtml(e),
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEvEdit(\''+_esc(id)+'\')">✓ Enregistrer</button>');}
+function saveEvEdit(id){var e=_evGet(id);if(!e)return;var f=_evLireForm();if(!f.titre){toast('Intitulé requis','warn');return;}
+  /* Les points déjà saisis sont rangés par NUMÉRO de question : changer le
+     nombre de questions les décalerait. On prévient au lieu de remapper. */
+  var avant=(e.bareme||[]).length,apres=f.bareme.length;
+  var saisis=Object.keys(e.notes||{}).some(function(k){return Object.keys((e.notes[k]||{}).pts||{}).length;});
+  Object.assign(e,f);if(!apres)e.parQ=false;else if(!avant)e.parQ=true;save();cm();re();
+  toast(saisis&&avant!==apres?'Barème modifié : vérifiez les points déjà saisis, ils restent rangés par numéro de question':'✓ Épreuve mise à jour',saisis&&avant!==apres?'warn':'ok');}
+function mEvDel(id){var e=_evGet(id);if(!e)return;M('Supprimer la feuille ?',_esc(e.titre),'<p class="s">Les notes saisies sur cette feuille seront effacées. Celles déjà reportées dans les bulletins y restent.</p>',
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn" style="background:var(--re);color:#fff" onclick="DB.evalSheets=_evs().filter(function(x){return x.id!==\''+_esc(id)+'\';});save();cm();re();toast(\'Feuille supprimée\')">Supprimer</button>');}
+
+function _evExcel(id){var e=_evGet(id);if(!e)return;var parQ=_evParQ(e);var etat={p:'présent',abs:'absent',nr:'copie non rendue'};
+  var data=_evLignes(e).map(function(x,i){var o={'N°':i+1,'Nom':x.s.nom,'Prénom':x.s.pre,'Matricule':x.s.mat||'','Présence':etat[x.etat]};
+    if(parQ)(e.bareme||[]).forEach(function(q,k){var v=_evNum((x.n.pts||{})[k]);o[q.lib+' (/'+q.max+')']=v===null?'':v;});
+    if(parQ)o['Total (/'+_evBareme(e)+')']=x.r.total===null?'':x.r.total;
+    o['Note /20']=x.r.sur20===null?'':x.r.sur20;o['Appréciation']=x.n.comm||'';return o;});
+  exportToExcel(data,('Notes_'+e.cls+'_'+e.sub+'_'+e.titre).replace(/[^\wÀ-ÿ-]+/g,'_').slice(0,80),e.sub.slice(0,28));}
+/* Procès-verbal à signer, comme « Établir le procès-verbal » de Tchouskou. */
+function _evPV(id){var e=_evGet(id);if(!e)return;var parQ=_evParQ(e);var l=_evLignes(e);
+  var S=_evStats(l.filter(function(x){return x.r.sur20!==null;}).map(function(x){return x.r.sur20;}));
+  var etat={abs:'absent',nr:'copie non rendue'};var td='padding:5px 8px;border:1px solid #d9dee8;font-size:11.5px';
+  var html=docHeader('Procès-verbal de notes')+`<div style="padding:18px 26px;font-family:Arial,sans-serif;color:#14243a">
+    <div style="font-size:17px;font-weight:700;color:#142554">${_esc(e.titre)}</div>
+    <div style="font-size:12px;color:#5a6678;margin:3px 0 12px">${_esc([e.type,e.cls,e.sub,e.tri,e.date?e.date.split('-').reverse().join('/'):''].filter(Boolean).join(' · '))}${parQ?' · barème '+_evFr(_evBareme(e))+' pts':''}</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:12px"><tr>${[['Effectif',l.length],['Notés',S.n],['Absents',l.filter(function(x){return x.etat==='abs';}).length],['Copies non rendues',l.filter(function(x){return x.etat==='nr';}).length],['Moyenne',_evFr(S.moy)+'/20'],['Min – max',S.n?_evFr(S.min)+' – '+_evFr(S.max):'—'],['Écart-type',_evFr(S.et)],['≥ 10/20',S.n?Math.round(S.reussite*100)+' %':'—']].map(function(c){return `<td style="${td};text-align:center"><div style="font-size:9.5px;text-transform:uppercase;color:#7a8598">${c[0]}</div><b style="font-size:13px">${c[1]}</b></td>`;}).join('')}</tr></table>
+    <table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f2f6fb"><th style="${td};width:30px">N°</th><th style="${td};text-align:left">Élève</th><th style="${td}">Matricule</th>${parQ?`<th style="${td}">Total /${_evFr(_evBareme(e))}</th>`:''}<th style="${td}">Note /20</th><th style="${td};text-align:left">Appréciation</th></tr></thead><tbody>
+    ${l.map(function(x,i){return `<tr><td style="${td};text-align:center">${i+1}</td><td style="${td}">${_esc(x.s.nom)} ${_esc(x.s.pre)}</td><td style="${td};text-align:center">${_esc(x.s.mat||'')}</td>${parQ?`<td style="${td};text-align:center">${etat[x.etat]?'':_evFr(x.r.total)}</td>`:''}<td style="${td};text-align:center;font-weight:700">${etat[x.etat]||_evFr(x.r.sur20)}</td><td style="${td}">${_esc(x.n.comm||'')}</td></tr>`;}).join('')}
+    </tbody></table>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:34px;font-size:12px"><div style="border-top:1px solid #14243a;padding-top:6px;min-height:60px">Le correcteur${e.auteur?' : '+_esc(e.auteur):''}<br><span style="color:#7a8598">Date et signature</span></div><div style="border-top:1px solid #14243a;padding-top:6px">Visa du directeur des études</div></div>
+    <div style="margin-top:20px;font-size:10px;color:#7a8598;text-align:center">Établi le ${today()}</div></div>`;
+  printDoc(html,'PV — '+_esc(e.titre));}
+/* Report dans « Notes & bulletins » : la note /20 devient le Devoir 1 ou 2 de
+   la matière au trimestre. Une ligne NEUVE n'a pas encore l'autre devoir : il
+   reprend provisoirement la même note (le bulletin moyenne les deux), et on
+   le dit. */
+function mEvReport(id){var e=_evGet(id);if(!e)return;var n=_evLignes(e).filter(function(x){return x.r.sur20!==null;}).length;
+  if(!n){toast('Aucune note à reporter','warn');return;}
+  M('Reporter dans les bulletins',_esc(e.cls+' · '+e.sub+' · '+e.tri),
+    `<p class="s" style="margin-bottom:10px">${n} note(s) sur 20 seront inscrites dans « Notes & bulletins ». Les élèves absents ou sans copie ne sont pas touchés.</p>
+    <div class="fg"><span class="fl">Inscrire comme</span><select class="fi" id="evSlot"><option value="n1">Devoir 1</option><option value="n2">Devoir 2</option></select></div>
+    <div class="xs2 mut" style="margin-top:6px">Si l’élève n’a encore aucune note dans cette matière ce trimestre, l’autre devoir reprend provisoirement la même note.</div>`,
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEvReport(\''+_esc(id)+'\')">✓ Reporter</button>');}
+function saveEvReport(id){var e=_evGet(id);if(!e)return;var slot=_ge('evSlot')?.value==='n2'?'n2':'n1',autre=slot==='n1'?'n2':'n1';
+  var coef=COEFS[e.sub]||1,ens=SES?.nom||'Admin',k=0,neuves=0;
+  _evLignes(e).forEach(function(x){if(x.r.sur20===null)return;var s=x.s;
+    var g=DB.grades.find(function(g){return g.eid===s.id&&g.sub===e.sub&&g.tri===e.tri;});
+    if(g){g[slot]=x.r.sur20;g.ens=g.ens||ens;}
+    else{var ng={id:gid(),eid:s.id,enom:s.pre+' '+s.nom,mat:s.mat,cls:e.cls,sub:e.sub,coef:coef,tri:e.tri,ens:ens};ng[slot]=x.r.sur20;ng[autre]=x.r.sur20;DB.grades.push(ng);neuves++;}
+    k++;});
+  e.reporte={slot:slot,date:today(),n:k};save();cm();re();
+  toast('✓ '+k+' note(s) reportée(s)'+(neuves?' · '+neuves+' ligne(s) neuve(s) : l’autre devoir reprend la même note':''));}
+
 function printBulletins(cls,tri){
   const sts=DB.students.filter(s=>s.cls===cls);
   if(!sts.length){toast('Aucun élève','warn');return;}

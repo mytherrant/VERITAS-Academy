@@ -1501,12 +1501,19 @@ jobs:
           #    depuis apprendre/_src/ : les sources restent dans le dépôt, hors ligne.
           #    ÉCHEC BRUYANT si un fichier manque : les quatre pages les chargent tous.
           if [ -d apprendre ]; then
-            for f in index.html matiere.html lecon.html manuel.html ressources.html labo.html notes.html ressources.js verrou.js labo.js charge.js apprendre.css jeu.css commun.js jeu.js calendrier.js lecons.js progressions.js scenes.js; do
+            for f in index.html matiere.html lecon.html manuel.html ressources.html labo.html notes.html ressources.js verrou.js labo.js charge.js apprendre.css jeu.css commun.js jeu.js calendrier.js lecons.js progressions.js scenes.js atelier.js; do
               if [ ! -f "apprendre/$f" ]; then
                 echo "::error title=Apprendre incomplet::apprendre/$f manque (régénérez avec 'python tools/build_apprendre.py'). Déploiement ANNULÉ."
                 exit 1
               fi
             done
+            # Table français d'Apprendre → séquences de l'Atelier (10/11/2026) :
+            # générée depuis les DEUX progressions ; si l'une change sans qu'on
+            # la régénère, les professeurs seraient envoyés sur une autre séquence.
+            if ! node tools/build_apprendre_atelier.cjs --verifie; then
+              echo "::error title=Lien Apprendre → Atelier périmé::apprendre/atelier.js ne suit plus les progressions. Relancez 'node tools/build_apprendre_atelier.cjs'. Déploiement ANNULÉ."
+              exit 1
+            fi
             if [ ! -f assets/veritas-matieres.svg ]; then
               echo "::error title=Icônes des matières absentes::assets/veritas-matieres.svg manque : toutes les cartes de matières seraient vides. Déploiement ANNULÉ."
               exit 1

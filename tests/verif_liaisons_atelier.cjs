@@ -160,7 +160,7 @@ const app = new C({});
 /* On visite les ecrans : certaines cles ne sont produites que sur l'un
    d'eux, et une seule visite laisserait croire a des liaisons mortes. */
 const ECRANS = ['accueil', 'liste', 'fiche', 'composeur', 'epreuves', 'cours',
-  'collab', 'activite', 'profil', 'admin', 'abo', 'login'];
+  'collab', 'activite', 'profil', 'admin', 'abo', 'login', 'suivi'];
 const fournies = new Set();
 const typeDe = new Map();
 let plantages = 0;
