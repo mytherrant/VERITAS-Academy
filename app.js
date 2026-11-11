@@ -21338,6 +21338,10 @@ function vLaunchJeu(id){
   // v1.16 — jeu premium : essais offerts (réglables en admin) puis abonnement.
   // Un essai ouvre CE jeu, rejouable ensuite sans en reconsommer.
   if(!j.gratuit && typeof _pwGate==='function' && !_pwGate('jeux', j.titre||'Ce jeu', j.id)) return;
+  // 11/11/2026 : les jeux intégrés (Calcul mental, Devinettes…) portent leur
+  // lanceur dans `action`. Le lien direct (#jeu?id=j1, cartes « Gratuit » d'Apprendre)
+  // l'ignorait et cherchait des questions : « Aucune question disponible ».
+  if(j.action && typeof window[j.action]==='function'){ window[j.action](); return; }
   // Jeu HTML → ouvrir le contenu dans un nouvel onglet avec filigrane
   if(j.type==='html'||j.type==='html_interactif'){
     if(j.externalUrl){window.open(j.externalUrl,'_blank');return;}

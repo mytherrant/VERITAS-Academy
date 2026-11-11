@@ -1,3 +1,14 @@
+## Cours lisibles, le gratuit d'abord dans Apprendre, jeux branchés (11/11/2026)
+
+Demande de Jacques : « Trop sombre et illisible. Vérifie que Apprendre est bien organisé, intuitif, facile à lire, que tout est branché selon les classes, les paiements des abonnements automatiques et bien branchés, la frontière entre payant et non payant ; mettre les ressources gratuites au début ou en évidence : il goûte, l'envie est suscitée et l'abonnement peut suivre. » Puis : « Enlève les traits foncés de gauche. »
+
+- **Cours illisibles** (`cours/commentaire_compose_analyse`, `module_1_tle_A`, `registres_de_langue_5e`) : blocs en dégradé foncé (`.hi-card`, `.reg-card`, `.lesson-header`, `.obj-box`, `.corpus-box`, `.retenir-box`, `.bac-box`, `.epreuve-header`, `.annot-popup`, encadré de fin) dont l'habillage repeignait titres et gras en bleu nuit : contraste 1,0 à 2,8. Bloc `<style id="vrt-cours-clair">` : fond pâle de la teinte, fin contour, titre dans la teinte foncée, texte encre ; sans trait épais à gauche.
+- **Bandeau des pages statiques** : le gras du chapeau (« soutien scolaire », « 3ème »…) passe en blanc (`tools/habiller_pages.py`, 19 pages, contraste 2,5 → lisible). Relevé : 0 texte illisible sur 95 pages statiques et 37 pages d'Apprendre.
+- **Le gratuit d'abord** : bloc « Gratuit pour commencer en <classe> » en tête de l'accueil d'Apprendre (une ressource gratuite par famille, `A.selectionGratuite`) ; « Commence gratuitement » en tête de chaque page matière, l'offre payante déplacée juste avant le programme ; pastille verte « Gratuit » sur chaque ressource gratuite (`marque`) ; gratuit classé avant le payant partout (`A.gratuitDabord`) ; matières ayant des cours rédigés en premier.
+- **Jeux** : `vLaunchJeu` ignorait le champ `action` des jeux intégrés (Calcul mental…) : `#jeu?id=j1` et les cartes « Gratuit » d'Apprendre n'ouvraient rien. Corrigé. Les 206 ressources gratuites ont été ouvertes une à une : 0 à revoir.
+- **Contrôlé sans défaut** : 12 classes (6e → Tle D), aucun lien vers une autre classe, aucune erreur JS ; paiement → droit → ouverture (`paiements_entitlements` 95/95, `banc_octroi_bloque` 26/26, `banc_tunnel_abonnement` 57/57, `banc_apprendre_verrou` 17/17 ; `api/apprendre.php` lit les mêmes droits). Reste : beaucoup de matières n'ont encore aucun cours rédigé (2nde A et C : aucune) — contenu à écrire, pas un branchement.
+- `commun.js?v=20261111a`, `apprendre.css?v=20261111c`, version des assets 1.20.73.
+
 ## Vérification des branchements : classes du lycée et forum (11/11/2026)
 
 Demande de Jacques : « Vérifie que tout est bien branché. »

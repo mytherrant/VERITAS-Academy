@@ -92,6 +92,7 @@
     corbeille: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12.5A1.5 1.5 0 0 0 8.5 21h7a1.5 1.5 0 0 0 1.5-1.5L18 7M9 7V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V7"/>',
     importer: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
     lecture: '<circle cx="12" cy="12" r="9.5" fill="currentColor" stroke="none"/><path d="M10 8.2v7.6l6-3.8z" fill="#fff" stroke="none"/>',
+    cadeau: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/>',
     etoile: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
     livre: '<path d="M3 5.5c2.7-.9 5.6-.6 8.2 1v13c-2.6-1.6-5.5-1.9-8.2-1zM21 5.5c-2.7-.9-5.6-.6-8.2 1v13c2.6-1.6 5.5-1.9 8.2-1z"/>'
   };
@@ -334,7 +335,17 @@
     if (/^-\s*\S/.test(t)) t = t.replace(/^-\s*/, "").replace(/\s+-\s*(?=[A-ZÉÈÀ])/g, " · ");
     return t.charAt(0).toUpperCase() + t.slice(1);
   }
-  function marque(it) { return it.ab ? '<span class="res-tag ab">' + si("i-lock", 12) + 'Abonnement</span>' : it.compte ? '<span class="res-tag">Compte gratuit</span>' : ''; }
+  /* 11/11/2026 : le gratuit se voit (pastille verte), le payant garde son cadenas. */
+  function marque(it) { return it.ab ? '<span class="res-tag ab">' + si("i-lock", 12) + 'Abonnement</span>' : it.compte ? '<span class="res-tag gr">Gratuit · avec un compte</span>' : '<span class="res-tag gr">Gratuit</span>'; }
+  /* Le gratuit d'abord : l'élève goûte, l'envie vient, l'abonnement suit. Ordre stable sinon. */
+  function gratuitDabord(ids) { var R0 = RES(); return ids.map(function (id, k) { return [id, k]; }).sort(function (a, b) { var x = (R0.items[a[0]] || {}).ab ? 1 : 0, y = (R0.items[b[0]] || {}).ab ? 1 : 0; return x - y || a[1] - b[1]; }).map(function (a) { return a[0]; }); }
+  /* Une ressource gratuite par famille, dans l'ordre où elle donne envie. */
+  var ORDRE_GOUT = ["corrige", "oeuvre", "methode", "direct", "jeu", "labo", "epreuve", "scene", "defis", "cours", "orientation", "notes"];
+  function selectionGratuite(ids, n) {
+    var R0 = RES(), vu = {}, o = [];
+    ORDRE_GOUT.forEach(function (f) { if (o.length >= n) return; var id = ids.find(function (i) { var it = R0.items[i]; return it && !it.ab && it.t === f && !vu[i]; }); if (id) { vu[id] = 1; o.push(id); } });
+    return o;
+  }
   function carteRes(id) {
     var it = RES().items[id]; if (!it) return "";
     var f = LIB_F[it.t] || LIB_F.aide;
@@ -349,7 +360,7 @@
   var COURT = { labo: "Labo", jeu: "Jeu", cours: "Cours", methode: "Méthode", oeuvre: "Œuvre", epreuve: "Épreuve", direct: "En direct" };
 
   W.VRT = W.VRT || {};
-  W.VRT.app = { titreL: titreL, si: si, net: net, ton: ton, GROUPES: GROUPES, chargerCatalogue: chargerCatalogue, FAMILLES: FAMILLES, resLecon: resLecon, resDeMatiere: resDeMatiere, resClasse: resClasse, leconsDeRes: leconsDeRes, carteRes: carteRes, pastilles: pastilles, MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
+  W.VRT.app = { titreL: titreL, si: si, net: net, ton: ton, GROUPES: GROUPES, chargerCatalogue: chargerCatalogue, FAMILLES: FAMILLES, resLecon: resLecon, resDeMatiere: resDeMatiere, resClasse: resClasse, gratuitDabord: gratuitDabord, selectionGratuite: selectionGratuite, leconsDeRes: leconsDeRes, carteRes: carteRes, pastilles: pastilles, MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
     marquerLu: marquerLu, noterQuiz: noterQuiz, teinter: teinter, ico: ico, icoM: icoM, pic: pic, etoiles: etoiles, esc: esc, slug: slug, rail: rail, chiffreSerie: chiffreSerie, scenesPour: scenesPour, jour: jour,
     exporterImage: exporterImage, offre: offre, cahierPour: cahierPour, melanger: melanger, boutonsImage: boutonsImage, filigraneCanvas: filigraneCanvas };
 })(window);

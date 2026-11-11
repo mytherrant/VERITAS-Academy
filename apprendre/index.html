@@ -9,7 +9,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261111b">
+<link rel="stylesheet" href="apprendre.css?v=20261111c">
 <link rel="stylesheet" href="jeu.css?v=20261110g">
 <style>
 .hero{background:linear-gradient(90deg,#EDF2FB,#F7F9FE 70%);color:#001136;border:1px solid #DCE5F5;border-radius:10px;padding:34px 34px 28px;position:relative;overflow:hidden;margin-bottom:26px}
@@ -188,6 +188,7 @@
 
   <div class="objectif-z"><div class="objectif" id="objectifJour"></div><div class="kalao-accueil" id="kalaoAccueil"></div></div>
   <div class="blocs" id="blocs"></div>
+  <section class="gout" id="goutA" aria-labelledby="goutAT" hidden></section>
 
   <section class="annee" aria-labelledby="anneeT">
     <div class="sec-t"><h2 id="anneeT">Mon année</h2><span class="lu">Calendrier officiel 2026-2027</span></div>
@@ -243,7 +244,7 @@
 <script src="lecons.js?v=20261110g"></script>
 <script src="ressources.js?v=20261110g"></script>
 <script src="charge.js?v=13b48c1e"></script>
-<script src="commun.js?v=20261110h"></script>
+<script src="commun.js?v=20261111a"></script>
 <script src="jeu.js?v=20261110g"></script>
 <script src="calendrier.js?v=20261111e"></script>
 <script>
@@ -287,6 +288,10 @@
     /* matières de la classe */
     $("#matsT").textContent="Mes matières en "+classe;
     var mats=A.MATIERES.filter(function(m){return nbLecons(m,classe)||lecs(classe).some(function(k){return LE[k].m===m.id})});
+    /* 11/11/2026 : les matières qui ont déjà des cours rédigés d'abord — l'élève
+       tombe sur quelque chose à lire ; l'ordre du programme est gardé sinon. */
+    var nRed=function(m){return lecs(classe).filter(function(k){return LE[k].m===m.id}).length};
+    mats=mats.map(function(m,i){return [m,i]}).sort(function(a,b){return (nRed(b[0])?1:0)-(nRed(a[0])?1:0)||a[1]-b[1]}).map(function(x){return x[0]});
     $("#mats").innerHTML=mats.map(function(m){
       var red=lecs(classe).filter(function(k){return LE[k].m===m.id}), lu=red.filter(function(k){return lus[k]}).length, tot=nbLecons(m,classe);
       return '<a class="mat" style="--c:'+m.t[0]+';--cp:'+m.t[1]+';--cm:'+m.t[2]+'" href="matiere.html?c='+encodeURIComponent(classe)+'&m='+m.id+'"><div class="h"><span class="pas">'+A.icoM(m,30)+'</span><div><b>'+esc(m.nom)+'</b><br><span>'+(tot?tot+' leçons au programme':'Programme à venir')+'</span></div></div>'+
@@ -294,7 +299,16 @@
     }).join("") || '<p class="vide">La progression de cette classe arrive bientôt.</p>';
 
     /* tout ce que le site offre à cette classe, par usage */
-    var tous=A.resClasse(classe), parT={}; tous.forEach(function(i){var t=VRT_RES.items[i].t;parT[t]=(parT[t]||0)+1});
+    var tous=A.gratuitDabord(A.resClasse(classe)), parT={};
+    /* « Gratuit pour commencer » (11/11/2026) : une ressource gratuite par famille,
+       avant tout le reste — il goûte, l'envie vient, l'abonnement suit. */
+    (function(){var g=$("#goutA"),gr=tous.filter(function(i){return !VRT_RES.items[i].ab}),sel=A.selectionGratuite(tous,6),nr=lecs(classe).length;
+      if(!g)return; if(!sel.length){g.hidden=true;return;}
+      g.innerHTML='<div class="gout-t"><span class="gout-eb">'+A.pic("cadeau",16)+'Gratuit · sans abonnement</span><h2 id="goutAT">Gratuit pour commencer en '+esc(classe)+'</h2>'+
+        '<p><b>'+gr.length+' ressource'+(gr.length>1?'s':'')+' gratuite'+(gr.length>1?'s':'')+'</b> pour ta classe'+(nr?', et le début de chacun des <b>'+nr+' cours rédigés</b>':'')+'. Essaie, et passe à la formule quand tu en veux plus.</p></div>'+
+        '<div class="res-g">'+sel.map(A.carteRes).join("")+'</div>'+
+        '<a class="gout-l" href="ressources.html?c='+encodeURIComponent(classe)+'">Voir les '+gr.length+' ressources gratuites ›</a>';
+      g.hidden=false;})(); tous.forEach(function(i){var t=VRT_RES.items[i].t;parT[t]=(parT[t]||0)+1});
     $("#tpT").textContent="Tout pour progresser en "+classe; $("#tpL").href="ressources.html?c="+encodeURIComponent(classe);
     /* 11/11/2026 — « Structure et dispose bien les icônes » (Jacques) : les
        familles sont rangées sous leurs quatre rubriques (A.GROUPES), et chaque
