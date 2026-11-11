@@ -10,7 +10,10 @@ Demande de Jacques : « Vérifie que tout est bien branché. »
   - `api/student_data.php` : même règle (`$classeDe`), et la classe de l'élève absente de la base publiée reste utilisable, avec les mêmes identifiants que le client.
   - « Je m'inscris dans cette classe » règle le niveau ET la filière (C, D) ; une filière ambiguë (A → A1 ou A4) reste à choisir.
   - Nouveau `tests/banc_forum_classes.cjs` (deploy.yml + test.yml) : 12/12 ; sur l'ancienne version, 6 au rouge.
-- Version des assets : 1.20.71.
+- **Interconnexion de tout le site** (« vitrine, Atelier, liens vers app… vérifie que tout est interconnecté ») : dossier `deploy/` reconstruit comme la CI (1 223 fichiers), 110 082 liens de 822 pages vérifiés contre ce qui PART en production ; 29 adresses `app.html#…` ouvertes une à une ; Atelier et 13 pages d'entrée parcourues (296 liens, 0 cassé) ; bancs Atelier, espaces par rôle, plan, menu : au vert.
+  - `VERITAS_favicon_512.png`, icône d'onglet déclarée par ~700 pages (Apprendre, scènes, programmes), n'était pas déployée → ajoutée à deploy.yml (copie + déclencheur ; échec bruyant si absente).
+  - `#labos`, lien des 31 pages Découvrir des laboratoires, n'ouvrait rien → routé vers `showLabosVirtuels`.
+- Version des assets : 1.20.72.
 - **Boutique de la vitrine** (« l'image des cahiers doit venir avant ») : sur téléphone, l'éventail de couvertures précède le texte (`.vrow-bou .vbou-v{order:-1}`) ; ordinateur inchangé. Empreinte d'index.php : 2026-11-11c.
 
 ## « Tout pour progresser » : rubriques et icônes alignées (11/11/2026)

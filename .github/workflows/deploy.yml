@@ -66,6 +66,7 @@ on:
       - 'og-image.jpg'
       - 'ambassa-avatar.jpg'
       - 'ambassa-avatar.png'
+      - 'VERITAS_favicon_512.png'
       - 'sitemap.xml'
       - 'sitemap-index.xml'
       - 'robots.txt'
@@ -1226,6 +1227,10 @@ jobs:
           # Avatar IA Ambassa (portrait — .png ou .jpg selon disponibilité)
           if [ -f "ambassa-avatar.png" ]; then cp "ambassa-avatar.png" deploy/; echo "  ✓ ambassa-avatar.png"; fi
           if [ -f "ambassa-avatar.jpg" ]; then cp "ambassa-avatar.jpg" deploy/; echo "  ✓ ambassa-avatar.jpg"; fi
+          # Icône d'onglet (11/11/2026) : ~700 pages (Apprendre, scènes, programmes)
+          # déclarent <link rel="icon" href="/VERITAS_favicon_512.png"> ; le
+          # fichier n'était pas copié → 404 à chaque page ouverte.
+          if [ -f "VERITAS_favicon_512.png" ]; then cp "VERITAS_favicon_512.png" deploy/; echo "  ✓ VERITAS_favicon_512.png (icône d'onglet)"; else echo "::error title=Icône absente::VERITAS_favicon_512.png est déclarée par les pages mais absente du dépôt."; exit 1; fi
 
           # .htaccess (sécurité + cache + MIME)
           if [ -f .htaccess ]; then cp .htaccess deploy/; fi

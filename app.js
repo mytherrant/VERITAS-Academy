@@ -48562,7 +48562,10 @@ function _cagCreer(eleveId){
                     ambassa:'mAgentAmbassa',
                     simulateur:'mChoisirSimulation', 'oeuvres-interactives':'mChoisirOeuvre',
                     /* 09/11/2026 : modules sans adresse, reliés depuis Apprendre. */
-                    classes:'showClasseVirtuelle', coaching:'mCoaching', 'sujet-du-jour':'mSujetDuJour',
+                    classes:'showClasseVirtuelle', coaching:'mCoaching',
+                    /* 11/11/2026 : « #labos » était le lien de 31 pages Découvrir (laboratoires
+                       virtuels) et n'ouvrait rien — l'accueil s'affichait. */
+                    labos:'showLabosVirtuels', 'sujet-du-jour':'mSujetDuJour',
                     erreurs:'mErreursARevoir', 'mes-evaluations':'showMesEvaluations', 'correction-ia':'mAICorrection' };
 
   function sectionDuHash(){
