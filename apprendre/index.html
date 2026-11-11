@@ -193,10 +193,15 @@
   <section class="annee" aria-labelledby="anneeT">
     <div class="sec-t"><h2 id="anneeT">Mon année</h2><span class="lu">Calendrier officiel 2026-2027</span></div>
     <div class="annee-g">
-      <div class="carte-a"><h3><svg class="si" width="20" height="20" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-calendar"/></svg>Calendrier scolaire</h3><div id="anCal"></div></div>
+      <div>
+        <div class="carte-a"><h3><svg class="si" width="20" height="20" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-calendar"/></svg>Calendrier scolaire</h3><div id="anCal"></div></div>
+        <!-- 11/11/2026 : la classe virtuelle vit sous le calendrier ; à droite,
+             les actualités seules. Avant, la carte du calendrier était étirée
+             à la hauteur des deux cartes de droite : ~740 px de vide. -->
+        <div class="carte-a cv" id="anCv"></div>
+      </div>
       <div>
         <div class="carte-a"><h3><svg class="si" width="20" height="20" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-megaphone"/></svg>Actualités MINESEC</h3><div id="anAct" aria-live="polite"></div></div>
-        <div class="carte-a cv" id="anCv"></div>
       </div>
     </div>
   </section>
@@ -273,7 +278,10 @@
     $("#stats").innerHTML=st.join(""); $("#stats").hidden=!st.length; $("#offreAccueil").innerHTML=A.offre(classe,"","accueil");
 
     /* reprendre + leçon du jour */
-    var b=[], der=A.lire("derniere",""), ids=lecs(classe); if(!ids.length) ids=lecs();
+    /* « Reprendre » = la dernière leçon lue DANS LA CLASSE CHOISIE (11/11/2026) :
+       la clé globale « derniere » affichait une leçon de philo de Tle A alors
+       que la 3e était cochée. lus[id] porte la date de lecture. */
+    var b=[], ids=lecs(classe), der=Object.keys(lus).filter(function(k){return LE[k]&&LE[k].c===classe}).sort(function(x,y){return lus[y]-lus[x]})[0]||""; if(!ids.length) ids=lecs();
     var jourId=ids.length?ids[(function(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h})(A.jour()+classe)%ids.length]:null;
     if(jourId){var L=LE[jourId],M=A.PAR_ID[L.m];
       b.push('<a class="bloc" href="lecon.html?id='+jourId+'"><small>Leçon du jour</small><div class="jour"><span class="med" style="background:'+M.t[1]+'">'+A.ico(M.ico,38)+'</span><div><h2>'+esc(L.titre)+'</h2><p>'+esc(M.nom)+' · '+esc(L.c)+' · '+(L.duree||15)+' min. '+esc((L.accroche||"").slice(0,120))+'</p></div></div><span class="go">Commencer ›</span></a>');}
