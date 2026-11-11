@@ -11,6 +11,7 @@ Demande de Jacques : « Vérifie que tout est bien branché. »
   - « Je m'inscris dans cette classe » règle le niveau ET la filière (C, D) ; une filière ambiguë (A → A1 ou A4) reste à choisir.
   - Nouveau `tests/banc_forum_classes.cjs` (deploy.yml + test.yml) : 12/12 ; sur l'ancienne version, 6 au rouge.
 - Version des assets : 1.20.71.
+- **Boutique de la vitrine** (« l'image des cahiers doit venir avant ») : sur téléphone, l'éventail de couvertures précède le texte (`.vrow-bou .vbou-v{order:-1}`) ; ordinateur inchangé. Empreinte d'index.php : 2026-11-11c.
 
 ## « Tout pour progresser » : rubriques et icônes alignées (11/11/2026)
 

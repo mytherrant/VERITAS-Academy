@@ -621,6 +621,8 @@ html{scroll-behavior:smooth}
 .vbou-v:hover .vc3{transform:translateX(-50%) translateY(-50px) scale(1.03)}
 @media (max-width:899px){
   .vrow-bou{grid-template-columns:1fr}
+  /* 11/11/2026 : « l'image des cahiers doit venir avant » — sur téléphone, l'éventail précède le texte. */
+  .vrow-bou .vbou-v{order:-1}
   .vbou-v{height:400px}
   .vbou-v .vc{width:126px;bottom:30px}
   .vbou-v .vc3{width:156px}
