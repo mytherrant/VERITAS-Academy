@@ -545,11 +545,13 @@ html{scroll-behavior:smooth}
 .vapp-pas{margin-bottom:22px}
 .vapp-n{display:flex;align-items:center;gap:10px;margin:0 0 11px;font:600 12.5px Poppins,sans-serif;letter-spacing:.7px;text-transform:uppercase;color:#6E7385}
 .vapp-n span{flex:0 0 26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#1E499B,#5B4FA8);color:#fff;display:grid;place-items:center;font:700 12.5px Poppins,sans-serif;letter-spacing:0;box-shadow:0 4px 10px rgba(30,73,155,.28)}
-.vapp-cl{gap:8px;margin:0}
-.vapp-cl a{display:inline-flex;align-items:center;justify-content:center;min-width:58px;padding:11px 16px;border-radius:100px;background:#EEF3FC;border:1.5px solid #DBE8FE;color:#1E499B;font:600 15px Poppins,sans-serif;transition:background .18s,color .18s,border-color .18s,transform .18s}
-.vapp-cl a:hover,.vapp-cl a:focus-visible{background:#1E499B;border-color:#1E499B;color:#fff;transform:translateY(-1px)}
-.vapp-cl a.vapp-ly{background:#F0EDF9;border-color:#E2DCF4;color:#5B4FA8}
-.vapp-cl a.vapp-ly:hover,.vapp-cl a.vapp-ly:focus-visible{background:#5B4FA8;border-color:#5B4FA8;color:#fff}
+.vapp-cl{gap:4px 22px;margin:0}
+.vapp-b1,.vapp-b2,.vapp-b1:hover,.vapp-b2:hover{text-decoration:none!important}
+/* 11/11/2026 : « enlève les effets entourés autour des classes » — texte seul,
+   souligné au survol ; collège en bleu, lycée en violet. */
+.vapp-cl a{display:inline-block;padding:6px 0;border:0!important;background:none!important;color:#1E499B;font:600 16px Poppins,sans-serif;text-decoration:none;border-bottom:2px solid transparent!important;transition:border-color .18s,color .18s}
+.vapp-cl a:hover,.vapp-cl a:focus-visible{border-bottom-color:currentColor!important}
+.vapp-cl a.vapp-ly{color:#5B4FA8}
 .vapp-f{grid-template-columns:1fr;gap:10px;margin:0}
 .vapp-f li{display:block}
 .vapp-f a{height:100%;display:flex;align-items:center;gap:12px;padding:13px 12px 13px 13px;border-radius:14px;background:#F8FAFE;border:1px solid #E4E9F2;color:#4D5163;font:400 13px/1.5 Poppins,sans-serif;transition:border-color .18s,transform .18s,box-shadow .18s}
@@ -572,9 +574,8 @@ html{scroll-behavior:smooth}
   .vapp-ph figcaption,.vapp-ph1 figcaption{font-size:24px;line-height:1.2;left:16px;right:16px;bottom:16px}
   .vapp-ph figcaption small{font-size:11px;padding:3px 10px;margin-bottom:8px}
   .vapp-t{padding:22px 18px 24px}
-  .vapp-cl{display:grid;grid-template-columns:repeat(4,1fr)}
-  .vapp-cl a{min-width:0;padding:12px 6px;font-size:16px}
-  .vapp-cl a.vapp-ly{grid-column:1 / -1}
+  .vapp-cl{display:grid;grid-template-columns:repeat(4,auto);justify-content:space-between;gap:6px 10px}
+  .vapp-cl a{padding:8px 0;font-size:16px;white-space:nowrap}
   .vapp-cta a{flex:1 1 100%;justify-content:center}
   .vapp-f{grid-template-columns:1fr}
 }
@@ -587,8 +588,8 @@ html{scroll-behavior:smooth}
 [data-vrt-theme="sombre"] .vapp-f a{background:#14244A;border-color:#1E3566}
 [data-vrt-theme="sombre"] .vapp-f .vapp-i{background:#101E3C!important}
 [data-vrt-theme="sombre"] .vapp-f .vapp-i svg{color:#E8EEFA}
-[data-vrt-theme="sombre"] .vapp-cl a{background:#14244A;border-color:#24406F;color:#9FC0F5}
-[data-vrt-theme="sombre"] .vapp-cl a.vapp-ly{color:#C2B8F0;border-color:#3A3470}
+[data-vrt-theme="sombre"] .vapp-cl a{color:#9FC0F5}
+[data-vrt-theme="sombre"] .vapp-cl a.vapp-ly{color:#C2B8F0}
 [data-vrt-theme="sombre"] .vapp-b2{color:#9FC0F5;border-color:#3B6FD4}
 [data-vrt-theme="sombre"] .vapp-go{filter:brightness(1.6)}
 .vrt-sr{position:absolute!important;width:1px!important;height:1px!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;border:0!important}
@@ -1834,7 +1835,7 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
             <div class="vapp-pas">
               <p class="vapp-n"><span>1</span>Je choisis ma classe</p>
               <div class="vapp-cl" aria-label="Choisir sa classe">
-                <a href="apprendre/?c=6e">6<sup>e</sup></a><a href="apprendre/?c=5e">5<sup>e</sup></a><a href="apprendre/?c=4e">4<sup>e</sup></a><a href="apprendre/?c=3e">3<sup>e</sup></a><a class="vapp-ly" href="apprendre/">Lycée · A, C, D</a>
+                <a href="apprendre/?c=6e">6<sup>e</sup></a><a href="apprendre/?c=5e">5<sup>e</sup></a><a href="apprendre/?c=4e">4<sup>e</sup></a><a href="apprendre/?c=3e">3<sup>e</sup></a><a class="vapp-ly" href="apprendre/?c=2nde%20A">2nde A</a><a class="vapp-ly" href="apprendre/?c=2nde%20C">2nde C</a><a class="vapp-ly" href="apprendre/?c=1re%20A">1<sup>ère</sup> A</a><a class="vapp-ly" href="apprendre/?c=1re%20C">1<sup>ère</sup> C</a><a class="vapp-ly" href="apprendre/?c=1re%20D">1<sup>ère</sup> D</a><a class="vapp-ly" href="apprendre/?c=Tle%20A">Tle A</a><a class="vapp-ly" href="apprendre/?c=Tle%20C">Tle C</a><a class="vapp-ly" href="apprendre/?c=Tle%20D">Tle D</a>
               </div>
             </div>
             <div class="vapp-pas">
