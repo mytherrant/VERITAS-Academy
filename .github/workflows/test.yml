@@ -237,8 +237,28 @@ jobs:
 
       - name: 👤 Le compte remonte-t-il du serveur ?
         run: node tests/banc_compte_serveur.cjs
+      # 🌐 CHROMIUM SANS DÉPENDRE DU MIROIR UBUNTU (11/11/2026). « --with-deps »
+      #    passe par apt : le 11/11, azure.archive.ubuntu.com ne se résolvait plus
+      #    (« Temporary failure resolving ») et le job tombait AVANT le moindre
+      #    test, trois fois de suite, sans rien dire du site. Le navigateur vient
+      #    du CDN de Playwright ; l'image ubuntu-24.04 porte déjà les bibliothèques
+      #    de Chrome. On ne passe par apt que si le navigateur refuse de démarrer,
+      #    avec trois essais espacés.
       - name: 🌐 Installer Chromium
-        run: npx playwright install --with-deps chromium
+        run: |
+          npx playwright install chromium
+          demarre() { node -e "require('@playwright/test').chromium.launch().then(b=>b.close()).catch(e=>{console.error(e.message);process.exit(1)})"; }
+          if demarre; then
+            echo "✓ Chromium démarre sans dépendances supplémentaires"
+          else
+            for essai in 1 2 3; do
+              echo "Dépendances système, essai $essai/3"
+              if sudo npx playwright install-deps chromium && demarre; then exit 0; fi
+              sleep $((essai * 30))
+            done
+            echo "::error title=Chromium indisponible::Le navigateur ne démarre pas et les dépendances n'ont pas pu être installées (miroir Ubuntu injoignable ?)."
+            exit 1
+          fi
 
       # ⚠️ CE BANC OUVRE UN NAVIGATEUR — il doit donc venir APRÈS l'installation
       # de Chromium. Placé plus haut, il passait en local (le navigateur y était

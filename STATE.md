@@ -1,3 +1,10 @@
+## CI : Chromium sans dépendre du miroir Ubuntu (11/11/2026)
+
+Accord de Jacques (« Oui ») pour fiabiliser le contrôle « Boot du portail ».
+
+- Le job tombait à l'étape « Installer Chromium » : `npx playwright install --with-deps` passe par apt, et `azure.archive.ubuntu.com` ne se résolvait plus (trois échecs le 11/11, aucun test exécuté, site non en cause).
+- `.github/workflows/test.yml` : le navigateur est téléchargé seul (CDN de Playwright), puis on vérifie qu'il démarre ; apt (`playwright install-deps`) n'est appelé qu'en cas d'échec, avec trois essais espacés, et l'erreur finale dit clairement « miroir Ubuntu injoignable ? ».
+
 ## Premières leçons : chaque classe a au moins 5 leçons (11/11/2026)
 
 Demande de Jacques : « Prépare les premières leçons avec la même rigueur, situations ancrées dans le contexte camerounais, QCM… » et « chaque classe doit avoir au moins 5 leçons disponibles ».
