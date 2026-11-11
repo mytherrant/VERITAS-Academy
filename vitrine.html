@@ -537,6 +537,60 @@ html{scroll-behavior:smooth}
   .vpar-ph figcaption{font-size:20px;left:16px;bottom:16px}
   .vhero-cap b{font-size:19px}
 }
+/* ── Apprendre, premier panneau (11/11/2026) ──
+   Trois temps lisibles (ma classe → je révise → ce que je trouve), quatre
+   portes cliquables, et sur téléphone des photos en grand, en carrousel. */
+.vapp{padding-top:36px}
+.vapp-t{display:flex;flex-direction:column}
+.vapp-pas{margin-bottom:22px}
+.vapp-n{display:flex;align-items:center;gap:10px;margin:0 0 11px;font:600 12.5px Poppins,sans-serif;letter-spacing:.7px;text-transform:uppercase;color:#6E7385}
+.vapp-n span{flex:0 0 26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#1E499B,#5B4FA8);color:#fff;display:grid;place-items:center;font:700 12.5px Poppins,sans-serif;letter-spacing:0;box-shadow:0 4px 10px rgba(30,73,155,.28)}
+.vapp-cl{gap:8px;margin:0}
+.vapp-cl a{display:inline-flex;align-items:center;justify-content:center;min-width:58px;padding:11px 16px;border-radius:100px;background:#EEF3FC;border:1.5px solid #DBE8FE;color:#1E499B;font:600 15px Poppins,sans-serif;transition:background .18s,color .18s,border-color .18s,transform .18s}
+.vapp-cl a:hover,.vapp-cl a:focus-visible{background:#1E499B;border-color:#1E499B;color:#fff;transform:translateY(-1px)}
+.vapp-cl a.vapp-ly{background:#F0EDF9;border-color:#E2DCF4;color:#5B4FA8}
+.vapp-cl a.vapp-ly:hover,.vapp-cl a.vapp-ly:focus-visible{background:#5B4FA8;border-color:#5B4FA8;color:#fff}
+.vapp-f{grid-template-columns:1fr;gap:10px;margin:0}
+.vapp-f li{display:block}
+.vapp-f a{height:100%;display:flex;align-items:center;gap:12px;padding:13px 12px 13px 13px;border-radius:14px;background:#F8FAFE;border:1px solid #E4E9F2;color:#4D5163;font:400 13px/1.5 Poppins,sans-serif;transition:border-color .18s,transform .18s,box-shadow .18s}
+.vapp-f a:hover,.vapp-f a:focus-visible{border-color:var(--k);transform:translateY(-2px);box-shadow:0 10px 22px rgba(0,17,54,.08)}
+.vapp-f .vapp-i{flex:0 0 42px;height:42px;border-color:var(--k)}
+.vapp-ft{flex:1;min-width:0}
+.vapp-f b{font:600 15px/21px Poppins,sans-serif}
+.vapp-go{flex:0 0 auto;color:var(--k);display:flex;transition:transform .18s}
+.vapp-f a:hover .vapp-go{transform:translateX(3px)}
+@media (max-width:899px){
+  .vapp{padding-top:16px}
+  .vapp-in{padding:0 12px}
+  .vapp-g{border-radius:20px}
+  /* Les photos d'abord, en grand : une par écran, la suivante qui dépasse
+     invite à glisser. */
+  .vapp-m{order:-1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;padding:10px;min-height:0;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+  .vapp-m::-webkit-scrollbar{display:none}
+  .vapp-ph,.vapp-ph1{flex:0 0 86%;aspect-ratio:4/5;scroll-snap-align:center;border-radius:16px}
+  .vapp-ph img{object-position:50% 30%}
+  .vapp-ph figcaption,.vapp-ph1 figcaption{font-size:24px;line-height:1.2;left:16px;right:16px;bottom:16px}
+  .vapp-ph figcaption small{font-size:11px;padding:3px 10px;margin-bottom:8px}
+  .vapp-t{padding:22px 18px 24px}
+  .vapp-cl{display:grid;grid-template-columns:repeat(4,1fr)}
+  .vapp-cl a{min-width:0;padding:12px 6px;font-size:16px}
+  .vapp-cl a.vapp-ly{grid-column:1 / -1}
+  .vapp-cta a{flex:1 1 100%;justify-content:center}
+  .vapp-f{grid-template-columns:1fr}
+}
+[data-vrt-theme="sombre"] .vapp-g{background:#101E3C;border-color:#1E3566;box-shadow:none}
+[data-vrt-theme="sombre"] .vapp-m{background:#0B1630}
+[data-vrt-theme="sombre"] .vapp-t h2,[data-vrt-theme="sombre"] .vapp-f b{color:#E8EEFA}
+[data-vrt-theme="sombre"] :is(.vapp-p,.vapp-f a){color:#B9C7E2}
+[data-vrt-theme="sombre"] .vapp-n{color:#9FB0CE}
+[data-vrt-theme="sombre"] .vapp-eb{background:#14244A;color:#9FC0F5}
+[data-vrt-theme="sombre"] .vapp-f a{background:#14244A;border-color:#1E3566}
+[data-vrt-theme="sombre"] .vapp-f .vapp-i{background:#101E3C!important}
+[data-vrt-theme="sombre"] .vapp-f .vapp-i svg{color:#E8EEFA}
+[data-vrt-theme="sombre"] .vapp-cl a{background:#14244A;border-color:#24406F;color:#9FC0F5}
+[data-vrt-theme="sombre"] .vapp-cl a.vapp-ly{color:#C2B8F0;border-color:#3A3470}
+[data-vrt-theme="sombre"] .vapp-b2{color:#9FC0F5;border-color:#3B6FD4}
+[data-vrt-theme="sombre"] .vapp-go{filter:brightness(1.6)}
 /* Éventail de couvertures, agrandi (10/11/2026) */
 .vrow-bou{grid-template-columns:.9fr 1.1fr}
 .vbou-v{position:relative;height:540px;border-radius:20px;background:radial-gradient(480px 340px at 50% 62%,#FFE2BC,#FFF6EA 72%);overflow:hidden}
@@ -1746,6 +1800,51 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
   <section data-vp="accueil">
   <div data-screen-label="Accueil">
 
+    <!-- ══ APPRENDRE — LE PREMIER PANNEAU (11/11/2026) ═══════════════════
+         « Apprendre doit être le premier panneau » (Jacques) : la section
+         ouvre désormais l'accueil, avant le bandeau d'abonnement. Sur
+         téléphone, les photos passent en tête, en grand, dans un carrousel
+         qu'on fait glisser ; le texte suit en trois temps : ma classe,
+         commencer, ce que je trouve dedans (quatre portes cliquables).
+         Aucun chiffre inventé. -->
+    <section id="apprendre" class="vapp" aria-labelledby="vappT">
+      <div class="vapp-in">
+        <div class="vapp-g">
+          <div class="vapp-t">
+            <span class="vapp-eb"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"></use></svg> Apprendre · de la 6ᵉ à la Terminale</span>
+            <h2 id="vappT">Chaque leçon de l’année, expliquée, illustrée, testée</h2>
+            <p class="vapp-p">Un cours illustré, une fiche de révision, un quiz et, souvent, une scène vivante&nbsp;: chaque leçon suit la progression officielle du MINESEC. Ce soir, l’élève sait exactement quoi réviser, et ses parents voient qu’il avance.</p>
+            <div class="vapp-pas">
+              <p class="vapp-n"><span>1</span>Je choisis ma classe</p>
+              <div class="vapp-cl" aria-label="Choisir sa classe">
+                <a href="apprendre/?c=6e">6<sup>e</sup></a><a href="apprendre/?c=5e">5<sup>e</sup></a><a href="apprendre/?c=4e">4<sup>e</sup></a><a href="apprendre/?c=3e">3<sup>e</sup></a><a class="vapp-ly" href="apprendre/">Lycée · A, C, D</a>
+              </div>
+            </div>
+            <div class="vapp-pas">
+              <p class="vapp-n"><span>2</span>Je révise</p>
+              <div class="vapp-cta">
+                <a href="apprendre/" class="vapp-b1">Commencer à réviser<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></a>
+                <a href="corriges/" class="vapp-b2">Corrigés gratuits</a>
+              </div>
+            </div>
+            <p class="vapp-n vapp-n3"><span>3</span>Ce que je trouve dedans</p>
+            <ul class="vapp-f">
+              <li><a href="apprendre/" style="--k:#1E499B"><span class="vapp-i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"></use></svg></span><span class="vapp-ft"><b>Cours et fiches</b>Rédigés pour ta classe, dans l'ordre du programme.</span><span class="vapp-go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></span></a></li>
+              <li><a href="apprendre/#defi" style="--k:#B03A6E"><span class="vapp-i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-target"></use></svg></span><span class="vapp-ft"><b>Quiz, défis et badges</b>Tester son niveau, suivre sa progression, garder sa série.</span><span class="vapp-go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></span></a></li>
+              <li><a href="decouvrir/laboratoires-virtuels.html" style="--k:#007E11"><span class="vapp-i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flask"></use></svg></span><span class="vapp-ft"><b>Labos et schémas animés</b>Les sciences en pratique, pas seulement en texte.</span><span class="vapp-go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></span></a></li>
+              <li><a href="corriges/" style="--k:#A84200"><span class="vapp-i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"></use></svg></span><span class="vapp-ft"><b>Corrigés, annales, examens blancs</b>Les cahiers du centre corrigés, les sujets officiels, le chronomètre.</span><span class="vapp-go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></span></a></li>
+            </ul>
+          </div>
+          <div class="vapp-m">
+            <figure class="vapp-ph vapp-ph1"><img fetchpriority="high" width="1080" height="775" src="assets/apprendre-en-ligne.webp" srcset="assets/apprendre-en-ligne-640.webp 640w, assets/apprendre-en-ligne.webp 1080w" sizes="(max-width: 899px) 88vw, 545px" alt="Élève qui suit un cours en ligne, casque sur les oreilles" loading="eager" decoding="async"><figcaption><small>En ligne</small>On reste concentré.</figcaption></figure>
+            <figure class="vapp-ph"><img width="1080" height="870" src="assets/apprendre-classe.webp" srcset="assets/apprendre-classe-400.webp 400w, assets/apprendre-classe-640.webp 640w, assets/apprendre-classe.webp 1080w" sizes="(max-width: 899px) 88vw, 270px" alt="Enseignante qui accompagne deux élèves au tableau" loading="lazy" decoding="async"><figcaption><small>Au centre</small>Des enseignants qui croient en vous.</figcaption></figure>
+            <figure class="vapp-ph"><img width="1080" height="900" src="assets/apprendre-labo.webp" srcset="assets/apprendre-labo-400.webp 400w, assets/apprendre-labo-640.webp 640w, assets/apprendre-labo.webp 1080w" sizes="(max-width: 899px) 88vw, 270px" alt="Élèves en blouse lors d'une séance de laboratoire" loading="lazy" decoding="async"><figcaption><small>Au labo</small>Apprendre en pratiquant.</figcaption></figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
     <section style="position:relative;background:radial-gradient(1100px 460px at 12% 0%,#EAF1FF 0%,#F4F5F8 55%,#F8F9FC 100%);overflow:hidden">
       <span aria-hidden="true" style="position:absolute;left:-90px;top:-70px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(30,73,155,.16),rgba(30,73,155,0) 68%);animation:vorb 17s ease-in-out infinite;pointer-events:none"></span>
       <span aria-hidden="true" style="position:absolute;right:8%;bottom:-110px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(14,124,134,.15),rgba(14,124,134,0) 68%);animation:vorb 21s ease-in-out infinite reverse;pointer-events:none"></span>
@@ -1781,47 +1880,11 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
         <div style="position:relative">
           <div data-parallax="0.06" style="position:relative;border-radius:14px;overflow:hidden;background:linear-gradient(160deg,#E9F0FC,#F6F8FD);aspect-ratio:4/3;box-shadow:0 18px 40px rgba(0,17,54,.12);will-change:transform">
             <span aria-hidden="true" style="position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(180deg,rgba(30,73,155,0),rgba(30,73,155,.10))"></span>
-            <img fetchpriority="high" decoding="async" width="1080" height="810" src="assets/hero-maison.webp" srcset="assets/hero-maison-600.webp 600w, assets/hero-maison-800.webp 800w, assets/hero-maison.webp 1080w" sizes="(max-width: 999px) calc(100vw - 32px), 520px" alt="Une mère accompagne son fils qui révise, l’ordinateur ouvert sur VÉRITAS" class="vhero-img" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;animation:vzoomSlow 24s ease-in-out infinite alternate;display:block"><span class="vhero-cap"><b>À la maison, on progresse aussi.</b>Le cours du jour, repris le soir, avec un vrai suivi.</span>
+            <img loading="lazy" decoding="async" width="1080" height="810" src="assets/hero-maison.webp" srcset="assets/hero-maison-600.webp 600w, assets/hero-maison-800.webp 800w, assets/hero-maison.webp 1080w" sizes="(max-width: 999px) calc(100vw - 32px), 520px" alt="Une mère accompagne son fils qui révise, l’ordinateur ouvert sur VÉRITAS" class="vhero-img" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;animation:vzoomSlow 24s ease-in-out infinite alternate;display:block"><span class="vhero-cap"><b>À la maison, on progresse aussi.</b>Le cours du jour, repris le soir, avec un vrai suivi.</span>
           </div>
           <div data-parallax="0.1" style="position:absolute;right:-14px;top:-18px;background:linear-gradient(135deg,#5B4FA8,#0C2A6A);color:#fff;border-radius:100px;padding:11px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 26px rgba(12,42,106,.34);will-change:transform;animation:vfloatSlow 8s ease-in-out infinite">
             <span style="width:9px;height:9px;border-radius:50%;background:#7BD99C;animation:vpulse 2.4s ease-out infinite"></span>
             <small style="font:500 13px Poppins,sans-serif">Prof. Ambassa · en ligne</small>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ══ APPRENDRE — LE GRAND ESPACE (10/11/2026) ══════════════════════
-         « Fais un grand espace ici pour présenter apprendre » (Jacques).
-         L'accueil est épuré autour de trois portes : Apprendre, la Boutique,
-         l'Atelier. Tout ce que l'élève trouvait dans le menu (corrigés,
-         annales, évaluations, œuvres, test de niveau, jeux, examen blanc…)
-         est rangé dans apprendre/ ; ce bloc l'annonce sans chiffre inventé. -->
-    <section id="apprendre" class="vapp" aria-labelledby="vappT">
-      <div class="vapp-in">
-        <div class="vapp-g">
-          <div class="vapp-t">
-            <span class="vapp-eb"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"></use></svg>Apprendre · de la 6ᵉ à la Terminale</span>
-            <h2 id="vappT">Chaque leçon de l’année, expliquée, illustrée, testée</h2>
-            <p class="vapp-p">Un cours illustré, une fiche de révision, un quiz et, souvent, une scène vivante&nbsp;: chaque leçon suit la progression officielle du MINESEC. Ce soir, l’élève sait exactement quoi réviser, et ses parents voient qu’il avance.</p>
-            <ul class="vapp-f">
-              <li><span class="vapp-i" style="background:#DBE8FE;color:#1E499B"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"></use></svg></span><span><b>Cours et fiches</b>Rédigés pour ta classe, dans l'ordre du programme.</span></li>
-              <li><span class="vapp-i" style="background:#FBE4EE;color:#B03A6E"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-target"></use></svg></span><span><b>Quiz, défis et badges</b>Tester son niveau, suivre sa progression, garder sa série.</span></li>
-              <li><span class="vapp-i" style="background:#E0F5E5;color:#007E11"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flask"></use></svg></span><span><b>Labos et schémas animés</b>Les sciences en pratique, pas seulement en texte.</span></li>
-              <li><span class="vapp-i" style="background:#FFF3E4;color:#A84200"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"></use></svg></span><span><b>Corrigés, annales, examens blancs</b>Les cahiers du centre corrigés, les sujets officiels, le chronomètre.</span></li>
-            </ul>
-            <div class="vapp-cl" aria-label="Choisir sa classe">
-              <a href="apprendre/?c=6e">6<sup>e</sup></a><a href="apprendre/?c=5e">5<sup>e</sup></a><a href="apprendre/?c=4e">4<sup>e</sup></a><a href="apprendre/?c=3e">3<sup>e</sup></a><a href="apprendre/">Lycée · A, C, D</a>
-            </div>
-            <div class="vapp-cta">
-              <a href="apprendre/" class="vapp-b1">Commencer à réviser<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></a>
-              <a href="corriges/" class="vapp-b2">Corrigés gratuits</a>
-            </div>
-          </div>
-          <div class="vapp-m">
-            <figure class="vapp-ph vapp-ph1"><img width="1080" height="775" src="assets/apprendre-en-ligne.webp" srcset="assets/apprendre-en-ligne-640.webp 640w, assets/apprendre-en-ligne.webp 1080w" sizes="(max-width: 899px) calc(100vw - 66px), 545px" alt="Élève qui suit un cours en ligne, casque sur les oreilles" loading="lazy" decoding="async"><figcaption><small>En ligne</small>On reste concentré.</figcaption></figure>
-            <figure class="vapp-ph"><img width="1080" height="870" src="assets/apprendre-classe.webp" srcset="assets/apprendre-classe-400.webp 400w, assets/apprendre-classe-640.webp 640w, assets/apprendre-classe.webp 1080w" sizes="(max-width: 899px) calc(50vw - 37px), 270px" alt="Enseignante qui accompagne deux élèves au tableau" loading="lazy" decoding="async"><figcaption><small>Au centre</small>Des enseignants qui croient en vous.</figcaption></figure>
-            <figure class="vapp-ph"><img width="1080" height="900" src="assets/apprendre-labo.webp" srcset="assets/apprendre-labo-400.webp 400w, assets/apprendre-labo-640.webp 640w, assets/apprendre-labo.webp 1080w" sizes="(max-width: 899px) calc(50vw - 37px), 270px" alt="Élèves en blouse lors d'une séance de laboratoire" loading="lazy" decoding="async"><figcaption><small>Au labo</small>Apprendre en pratiquant.</figcaption></figure>
           </div>
         </div>
       </div>

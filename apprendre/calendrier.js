@@ -125,8 +125,9 @@
       '<div class="cal-g">' +
       '<div class="cal-cpt"' + (cible ? ' data-cible="' + (enCours ? cible.a : cible.de).getTime() + '"' : "") + '>' +
         '<p class="cal-sur">' + si("i-clock", 16) + ' ' + esc(titre) + '</p>' +
-        (cible ? '<div class="cal-chiffres" role="timer" aria-live="off"><span><b data-u="j">–</b><small>jours</small></span><span><b data-u="h">–</b><small>heures</small></span><span><b data-u="m">–</b><small>min</small></span><span><b data-u="s">–</b><small>s</small></span></div>' +
-          '<p class="cal-quand">' + esc(cible.t) + ' · ' + periode(cible) + '</p>' : '<p class="cal-quand">Rentrée 2027-2028 le 6 sept. 2027.</p>') +
+        (cible ? '<div class="cal-chiffres" role="timer" aria-live="off"><span class="cal-u-j"><b data-u="j">–</b><small>jours</small></span><span><b data-u="h">–</b><small>heures</small></span><span><b data-u="m">–</b><small>min</small></span><span><b data-u="s">–</b><small>s</small></span></div>' +
+          trajet(now, enCours ? cible.de : RENTREE, enCours ? cible.a : cible.de, enCours) +
+          '<p class="cal-quand">' + si(cible.vac ? "i-star" : "i-calendar", 16) + '<span>' + esc(cible.t) + ' · ' + periode(cible) + '</span></p>' : '<p class="cal-quand">Rentrée 2027-2028 le 6 sept. 2027.</p>') +
         (note ? '<p class="cal-note">' + esc(note) + '</p>' : "") +
       '</div>' +
       '<div class="cal-an">' +
@@ -141,6 +142,14 @@
       '</div></div>';
     tic(el);
   }
+  /* Le chemin parcouru vers l'échéance (11/11/2026) : de la rentrée à la
+     cible, ou du début à la fin d'une échéance déjà ouverte. */
+  function trajet(now, de, a, enCours) {
+    if (!(a > de)) return "";
+    var p = Math.max(0, Math.min(100, Math.round((now - de) / (a - de) * 100)));
+    return '<div class="cal-trajet"><div class="cal-trajet-b" role="progressbar" aria-valuenow="' + p + '" aria-valuemin="0" aria-valuemax="100" aria-label="Chemin parcouru"><i style="width:' + p + '%"></i></div>' +
+      '<small>' + (enCours ? p + ' % écoulé' : p + ' % du chemin depuis la rentrée') + '</small></div>';
+  }
   function tic(el) {
     if (minuteur) clearInterval(minuteur);
     var box = el.querySelector("[data-cible]"); if (!box) return;
@@ -150,6 +159,7 @@
       var r = Math.max(0, cible - Date.now()), s = Math.floor(r / 1000);
       u.j.textContent = Math.floor(s / 86400); u.h.textContent = ("0" + Math.floor(s % 86400 / 3600)).slice(-2);
       u.m.textContent = ("0" + Math.floor(s % 3600 / 60)).slice(-2); u.s.textContent = ("0" + s % 60).slice(-2);
+      u.s.classList.remove("tic"); void u.s.offsetWidth; u.s.classList.add("tic");
       if (!r) clearInterval(minuteur);
     }
     maj(); minuteur = setInterval(maj, 1000);

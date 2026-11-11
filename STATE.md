@@ -1,3 +1,12 @@
+## Apprendre en premier panneau, photos agrandies, compte à rebours embelli (11/11/2026)
+
+Demande de Jacques : « Apprendre doit être le premier panneau. Agrandir les images sur téléphone. Structure aussi bien les éléments dans apprendre pour captiver et faciliter l'utilisation par les apprenants. Embellis le panneau du compte à rebours. »
+
+- **vitrine.html** : la section `#apprendre` ouvre l'accueil (avant le bandeau « Réussir son année »). Elle se lit en trois temps numérotés : 1 · Je choisis ma classe (pastilles, grille 4 + Lycée sur téléphone), 2 · Je révise (deux boutons pleine largeur sur téléphone), 3 · Ce que je trouve dedans (quatre cartes cliquables : apprendre/, apprendre/#defi, decouvrir/laboratoires-virtuels.html, corriges/). Thème sombre couvert.
+- **Photos sur téléphone** : passent en tête de la section, en carrousel à défilement magnétique, une photo par écran (86 % de large, format 4/5), légendes en 24 px. La première photo prend `fetchpriority="high"`, l'image du bandeau passe en `loading="lazy"` (elle n'est plus au-dessus de la ligne de flottaison).
+- **Compte à rebours** (`apprendre/index.html` + `calendrier.js`) : dégradé lumineux bleu → violet avec halo doré, tuiles « verre », tuile des jours dorée et plus large, secondes animées (coupées si `prefers-reduced-motion`), barre « % du chemin depuis la rentrée ». Version `calendrier.js?v=20261111d`.
+- Empreinte d'index.php : 2026-11-11a.
+
 ## Visibilité maximale : site ouvert aux IA, œuvres, Atelier et simulations en HTML statique (05/11/2026, 2e passe)
 
 Demande de Jacques : « Oui ouvre tout, il faut que le site soit le plus visible possible, surtout sur les œuvres littéraires, l'Atelier de français, les simulations… »
