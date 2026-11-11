@@ -69,24 +69,49 @@ if (!$noCache && file_exists($cacheFile) && $cacheAge < 600) {
 // Si nocache=1, supprimer le fichier cache pour forcer un fetch propre
 if ($noCache && file_exists($cacheFile)) @unlink($cacheFile);
 
-// Récupérer le flux RSS
-$ctx = stream_context_create([
-    'http' => [
-        'timeout' => 12,
-        'header'  => "User-Agent: Mozilla/5.0 (compatible; VERITAS-News/1.0)\r\n",
-    ],
-    // Certificat VÉRIFIÉ (audit 16/10/2026) : sans contrôle, un intermédiaire
-    // pouvait injecter le flux affiché sur le site.
-    'ssl' => [
-        'verify_peer'      => true,
-        'verify_peer_name' => true,
-    ],
-]);
-
-$xml = @file_get_contents($feeds[$cat], false, $ctx);
+// Récupérer le flux RSS — durée TOTALE bornée (11/11/2026).
+// L'ancien file_get_contents ne bornait que chaque lecture : le flux « bac »
+// pouvait pendre indéfiniment (requête jamais close, encart « Chargement… »
+// sans fin dans Apprendre). cURL borne la connexion ET le total, et suit la
+// redirection de Google News (gl=CM → gl=FR).
+$xml = false;
+if (function_exists('curl_init')) {
+    $ch = curl_init($feeds[$cat]);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS      => 3,
+        // Redirections en HTTPS seulement : le flux est affiché sur le site.
+        CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS,
+        CURLOPT_REDIR_PROTOCOLS=> CURLPROTO_HTTPS,
+        CURLOPT_CONNECTTIMEOUT => 4,
+        CURLOPT_TIMEOUT        => 8,
+        CURLOPT_USERAGENT      => 'Mozilla/5.0 (compatible; VERITAS-News/1.0)',
+        // Certificat VÉRIFIÉ (audit 16/10/2026) : sans contrôle, un intermédiaire
+        // pouvait injecter le flux affiché sur le site.
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_SSL_VERIFYHOST => 2,
+    ]);
+    $xml = curl_exec($ch);
+    if (curl_getinfo($ch, CURLINFO_HTTP_CODE) !== 200) $xml = false;
+    curl_close($ch);
+} else {
+    $ctx = stream_context_create([
+        'http' => ['timeout' => 8, 'header' => "User-Agent: Mozilla/5.0 (compatible; VERITAS-News/1.0)\r\n"],
+        'ssl'  => ['verify_peer' => true, 'verify_peer_name' => true],
+    ]);
+    $xml = @file_get_contents($feeds[$cat], false, $ctx);
+}
 if (!$xml) {
-    // Retourner un résultat vide plutôt qu'une erreur dure
-    echo json_encode(['items' => [], 'error' => 'Flux temporairement indisponible']);
+    // Résultat vide plutôt qu'une erreur dure, mis en cache 2 min : un flux en
+    // panne ne doit pas faire attendre 8 s chaque visiteur.
+    // La dernière liste valide, même périmée, vaut mieux qu'une liste vide.
+    $ancien = file_exists($cacheFile) ? json_decode((string)@file_get_contents($cacheFile), true) : null;
+    $vide = (is_array($ancien) && !empty($ancien['items'])) ? $ancien
+          : ['items' => [], 'error' => 'Flux temporairement indisponible', 'cat' => $cat];
+    @file_put_contents($cacheFile, json_encode($vide));
+    @touch($cacheFile, time() - 480);
+    echo json_encode($vide);
     exit;
 }
 
