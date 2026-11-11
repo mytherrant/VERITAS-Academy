@@ -1,3 +1,11 @@
+## « Tout pour progresser » : rubriques et icônes alignées (11/11/2026)
+
+Demande de Jacques : « Structure et dispose bien les icônes » (grille des ressources de la classe, apprendre/index.html).
+
+- Les familles sont rangées sous les quatre rubriques de `A.GROUPES` : Où j'en suis, Comprendre et apprendre, M'entraîner, Besoin d'aide (une rubrique vide n'apparaît pas).
+- Chaque carte : icône dans un rond de 52 px teinté de la couleur de sa famille, titre, compteur en pastille. Téléphone : deux colonnes, icône en haut et contenu centré ; ordinateur : icône à gauche, titre et compteur empilés.
+- Styles en fin d'apprendre.css (`.tp-gr`, `.tp-gt`, `.tp-gl`, `.tp-i`, `.tp-t`) ; `apprendre.css?v=20261111a` sur les sept pages d'Apprendre.
+
 ## Carrousel Apprendre qui défile tout seul (11/11/2026)
 
 Demande de Jacques : « Créer une animation qui permet aux images ci de défiler lentement. »
