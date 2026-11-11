@@ -1494,7 +1494,7 @@
 
     <div style="margin-left:auto;display:flex;align-items:center;gap:9px">
       <div data-vrt-creer="1" style="position:relative;flex:none">
-        <button onClick="{{ toggleCreate }}" style="{{ topCreateStyle }}" style-hover="background:var(--c135a96,#135a96)">{{ topIcPlus }}<span class="vrt-hide-sm">Créer</span></button>
+        <button onClick="{{ toggleCreate }}" aria-label="Créer" style="{{ topCreateStyle }}" style-hover="background:var(--c135a96,#135a96)">{{ topIcPlus }}<span class="vrt-hide-sm">Créer</span></button>
         <sc-if value="{{ createOpen }}" hint-placeholder-val="{{ false }}">
           <div style="{{ createBoite }}">
             <sc-for list="{{ createMenu }}" as="c" hint-placeholder-count="3">
