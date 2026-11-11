@@ -18112,12 +18112,13 @@ window._svDelExam=function(i){if(!confirm('Supprimer cet examen ?'))return;DB.st
 // Le widget affiche le prochain examen pertinent + active une promo automatique
 // dans la fenêtre des 60 jours avant l'épreuve. Éditable via DB.examCountdown.
 // ════════════════════════════════════════════════════════════════════
+// Session 2027 : décision n° 966/26/MINESEC du 1er octobre 2026 (début des épreuves écrites).
 window.EXAM_COUNTDOWN_DEFAULT = [
-  {ex:'Concours 6ème', date:'2026-05-13', cycles:['I']},
-  {ex:'Baccalauréat',  date:'2026-05-25', cycles:['III']},
-  {ex:'BEPC',          date:'2026-06-01', cycles:['II']},
-  {ex:'GCE O/A Level', date:'2026-06-02', cycles:['II','III']},
-  {ex:'Probatoire',    date:'2026-06-08', cycles:['III']}
+  {ex:'Concours 6ème', date:'2027-05-11', cycles:['I']},
+  {ex:'Baccalauréat',  date:'2027-05-24', cycles:['III']},
+  {ex:'BEPC',          date:'2027-05-31', cycles:['II']},
+  {ex:'GCE O/A Level', date:'2027-06-01', cycles:['II','III']},
+  {ex:'Probatoire',    date:'2027-06-07', cycles:['III']}
 ];
 window._examList = function(){
   return (typeof DB!=='undefined' && DB.examCountdown && DB.examCountdown.length) ? DB.examCountdown : EXAM_COUNTDOWN_DEFAULT;
@@ -19348,23 +19349,28 @@ var CALENDRIER_SCOLAIRE={
        {num:6,debut:'03 Mai',fin:'11 Juin',examens:'Compositions de fin d\'année : 03 au 21 mai 2027'},
      ]},
   ],
-  // ── Périodes OFFICIELLES fixées par l'arrêté conjoint 2026/2027 ──
-  // Les dates détaillées par examen (BEPC, Probatoire, BAC, GCE…) relèvent d'une
-  // décision particulière du MINESEC : ne rien afficher tant qu'elle n'est pas publiée.
+  // ── Périodes de l'arrêté conjoint 2026/2027 + dates de la décision
+  //    n° 966/26/MINESEC du 1er octobre 2026 (calendrier des examens et
+  //    concours de la session 2027). Les EPS suivent l'article 3 de la décision.
   examens_nationaux:[
     {nom:'Épreuves zéro (secondaire) · CEP blanc & MOCK (primaire)',date:'Jeu. 15 et Ven. 16 Avr. 2027',niveaux:'Classes d\'examen',matières:'Simulation nationale des épreuves officielles'},
-    {nom:'Épreuves pratiques d\'EPS',date:'Lun. 19 Avr. au Ven. 07 Mai 2027',niveaux:'Classes d\'examen',matières:'EPS — examens officiels, sur toute l\'étendue du territoire'},
+    {nom:'Épreuves pratiques d\'EPS',date:'Lun. 26 Avr. au Ven. 07 Mai 2027',niveaux:'Classes d\'examen',matières:'EPS — calendrier fixé par chaque délégation régionale dans cette période'},
     {nom:'Compositions de fin d\'année (établissements)',date:'Lun. 03 au Ven. 21 Mai 2027',niveaux:'Toutes classes',matières:'Format examen officiel pour les classes d\'examen · programme annuel pour les classes intermédiaires'},
     {nom:'Examens & concours officiels — Éducation de Base',date:'Lun. 10 Mai au Ven. 30 Juil. 2027',niveaux:'Primaire (CEP, Concours 6ème…)',matières:'Dates détaillées fixées par texte particulier du MINEDUB'},
-    {nom:'Examens & concours officiels — Enseignements Secondaires',date:'Jeu. 13 Mai au Ven. 30 Juil. 2027',niveaux:'BEPC · Probatoire · BAC · CAP · GCE · TVEE',matières:'Dates détaillées fixées par texte particulier du MINESEC'},
+    {nom:'Concours d\'entrée en 6ème et en 1ʳᵉ année',date:'Mar. 11 Mai 2027',niveaux:'Entrée au secondaire',matières:'Résultats le Ven. 14 Mai 2027 · interview Form 1 les 10 et 11 juin'},
+    {nom:'Baccalauréat A, ABI, AC, C, D, E, SH, TI',date:'Lun. 24 au Ven. 28 Mai 2027',niveaux:'Terminale',matières:'Épreuves écrites · facultatives le Ven. 28 Mai · délibérations du 8 au 10 juil.'},
+    {nom:'BEPC et BEPC bilingue',date:'Lun. 31 Mai au Jeu. 03 Juin 2027',niveaux:'3ème',matières:'Épreuves écrites · oral bilingue le Ven. 4 Juin · résultats le Ven. 9 Juil. (à confirmer par la DECC)'},
+    {nom:'GCE O Level et A Level',date:'Mar. 01 au Jeu. 17 Juin 2027',niveaux:'Form 5 · Upper Sixth',matières:'Written · pratiques du 4 au 26 mai · résultats le Ven. 30 Juil.'},
+    {nom:'Probatoire A, ABI, AC, C, D, E, SH, TI',date:'Lun. 07 au Ven. 11 Juin 2027',niveaux:'Première',matières:'Épreuves écrites · facultatives le Ven. 11 Juin · délibérations du 22 au 24 juil.'},
+    {nom:'Examens de l\'enseignement secondaire technique (CAP, BT, séries AF et F)',date:'Lun. 24 Mai au Ven. 11 Juin 2027',niveaux:'Enseignement technique',matières:'Bac AF/F/BT écrits 24-28 mai · CAP et Probatoire AF/F écrits 31 mai-4 juin · Probatoire BT/STT 7-11 juin'},
   ],
-  note:'Les dates précises de chaque examen (BEPC, Probatoire, Baccalauréat, GCE, CAP…) seront fixées par une décision particulière du MINESEC. Cette page sera mise à jour dès sa publication.',
+  note:'Dates des examens : décision n° 966/26/MINESEC du 1er octobre 2026 fixant le calendrier des examens et concours de la session 2027. Les dates de publication des résultats restent à confirmer par la DECC.',
   vacances:[
     {label:'1ʳᵉ interruption (Noël / Nouvel An)',debut:'18 Déc 2026 (15h30)',fin:'04 Jan 2027 (7h30)'},
     {label:'2ᵉ interruption (Pâques)',debut:'25 Mars 2027 (15h30)',fin:'12 Avr 2027 (7h30)'},
     {label:'Grandes vacances (élèves non candidats)',debut:'11 Juin 2027 (15h30)',fin:'Rentrée : 06 Sept 2027'},
   ],
-  epsPratiques:'Épreuves pratiques d\'EPS : Lun. 19 Avr. au Ven. 07 Mai 2027 (toute l\'étendue du territoire)',
+  epsPratiques:'Épreuves pratiques d\'EPS : Lun. 26 Avr. au Ven. 07 Mai 2027 (calendrier fixé par chaque délégation régionale)',
   // ── Journées et semaines officielles (article 28 de l'arrêté) + activités du calendrier ──
   journees:[
     {date:'Mar. 08 Sept. 2026',nom:'Journée internationale de l\'alphabétisation',ico:'book'},
