@@ -591,6 +591,23 @@ html{scroll-behavior:smooth}
 [data-vrt-theme="sombre"] .vapp-cl a.vapp-ly{color:#C2B8F0;border-color:#3A3470}
 [data-vrt-theme="sombre"] .vapp-b2{color:#9FC0F5;border-color:#3B6FD4}
 [data-vrt-theme="sombre"] .vapp-go{filter:brightness(1.6)}
+.vrt-sr{position:absolute!important;width:1px!important;height:1px!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;border:0!important}
+/* ── Carrousel Apprendre qui défile tout seul (11/11/2026) ──
+   Sur téléphone, les photos glissent lentement l'une après l'autre ; la photo
+   en vue zoome doucement. Un doigt posé arrête tout pendant 8 s. */
+.vapp-dots{display:none}
+@media (max-width:899px){
+  .vapp-m{position:relative}
+  .vapp-dots{order:-1;display:flex;justify-content:center;gap:7px;padding:0 0 4px;background:#F4F6FB}
+  .vapp-dots button{width:8px;height:8px;padding:0;border:0;border-radius:100px;background:#C9D3E6;cursor:pointer;transition:width .4s,background .4s}
+  .vapp-dots button[aria-current="true"]{width:24px;background:#1E499B}
+  .vapp-ph img{transition:transform 7s ease-out}
+  .vapp-ph.is-on img{transform:scale(1.07)}
+}
+@media (prefers-reduced-motion:reduce){.vapp-ph img{transition:none}.vapp-ph.is-on img{transform:none}}
+[data-vrt-theme="sombre"] .vapp-dots{background:#0B1630}
+[data-vrt-theme="sombre"] .vapp-dots button{background:#2A4176}
+[data-vrt-theme="sombre"] .vapp-dots button[aria-current="true"]{background:#9FC0F5}
 /* Éventail de couvertures, agrandi (10/11/2026) */
 .vrow-bou{grid-template-columns:.9fr 1.1fr}
 .vbou-v{position:relative;height:540px;border-radius:20px;background:radial-gradient(480px 340px at 50% 62%,#FFE2BC,#FFF6EA 72%);overflow:hidden}
@@ -1841,147 +1858,53 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
             <figure class="vapp-ph"><img width="1080" height="900" src="assets/apprendre-labo.webp" srcset="assets/apprendre-labo-400.webp 400w, assets/apprendre-labo-640.webp 640w, assets/apprendre-labo.webp 1080w" sizes="(max-width: 899px) 88vw, 270px" alt="Élèves en blouse lors d'une séance de laboratoire" loading="lazy" decoding="async"><figcaption><small>Au labo</small>Apprendre en pratiquant.</figcaption></figure>
           </div>
         </div>
+        <h1 class="vrt-sr">VÉRITAS, centre d’excellence scolaire : réussir son année avec les vrais programmes camerounais, de la 6ᵉ à la Terminale</h1>
       </div>
     </section>
 
+    <!-- BANDEAU « Réussir son année avec les vrais programmes camerounais »
+         RETIRÉ le 11/11/2026 (« Supprime ceci », Jacques) : recherche, trois
+         arguments, prix « dès … FCFA/mois », boutons et photo hero-maison.
+         La section Apprendre ouvre désormais seule l'accueil. Le h1 de la
+         page est porté, masqué, à la fin de #apprendre (voir .vrt-sr). -->
 
-    <section style="position:relative;background:radial-gradient(1100px 460px at 12% 0%,#EAF1FF 0%,#F4F5F8 55%,#F8F9FC 100%);overflow:hidden">
-      <span aria-hidden="true" style="position:absolute;left:-90px;top:-70px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(30,73,155,.16),rgba(30,73,155,0) 68%);animation:vorb 17s ease-in-out infinite;pointer-events:none"></span>
-      <span aria-hidden="true" style="position:absolute;right:8%;bottom:-110px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(14,124,134,.15),rgba(14,124,134,0) 68%);animation:vorb 21s ease-in-out infinite reverse;pointer-events:none"></span>
-      <span aria-hidden="true" style="position:absolute;right:34%;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(255,201,60,.20),rgba(255,201,60,0) 68%);animation:vorb 25s ease-in-out infinite;pointer-events:none"></span>
-      <div style="position:relative;max-width:1170px;margin:0 auto;padding:56px 24px 62px;display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center">
-        <div>
-          <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #DBE8FE;color:#1E499B;border-radius:100px;padding:7px 15px;font:500 13px Poppins,sans-serif;margin-bottom:18px;box-shadow:0 3px 10px rgba(30,73,155,.08)">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-shield"></use></svg>
-            Programme MINESEC · général, technique &amp; GCE
-          </span>
-          <h1 style="font:600 42px/52px Poppins,sans-serif;color:#001136;margin:0 0 16px;text-wrap:pretty">Réussir son année avec les <span style="background:linear-gradient(180deg,transparent 62%,#FFE08A 62%)">vrais programmes</span> camerounais</h1>
-          <p style="font:400 17px/1.65 Poppins,sans-serif;color:#4D5163;margin:0 0 24px;max-width:520px;text-wrap:pretty">Cours, quiz, corrigés et Prof. Ambassa, de la 6<sup>e</sup> à la Terminale&nbsp;: la plateforme est ouverte à toute heure pour <span data-vrt-prix="abo_starter_m">1 200</span> F par mois. Et quand votre enfant a besoin de quelqu’un à ses côtés, nos enseignants le suivent au centre ou à domicile.</p>
-          <ul style="list-style:none;margin:0 0 26px;padding:0;display:flex;flex-direction:column;gap:12px">
-            <li style="display:flex;align-items:flex-start;gap:11px;font-size:16px;color:#4D5163"><span style="flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#7BD99C,#007E11);color:#fff;display:flex;align-items:center;justify-content:center;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><use href="#lc-check"></use></svg></span><span><b style="font-weight:600;color:#001136">14 049 exercices corrigés</b> — les cahiers du centre, en ligne</span></li>
-            <li style="display:flex;align-items:flex-start;gap:11px;font-size:16px;color:#4D5163"><span style="flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#7C6BD6,#5B4FA8);color:#fff;display:flex;align-items:center;justify-content:center;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><use href="#lc-check"></use></svg></span><span><b style="font-weight:600;color:#001136">Professeur Ambassa</b>, le tuteur IA formé sur le programme</span></li>
-            <li style="display:flex;align-items:flex-start;gap:11px;font-size:16px;color:#4D5163"><span style="flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#A84200,#A84200);color:#fff;display:flex;align-items:center;justify-content:center;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><use href="#lc-check"></use></svg></span><span>Paiement <b style="font-weight:600;color:#001136">MTN MoMo &amp; Orange Money</b>, reçu automatique</span></li>
-          </ul>
-          <div style="display:flex;align-items:flex-end;gap:22px;flex-wrap:wrap;margin-bottom:24px">
-            <div>
-              <div style="font:500 12px Poppins,sans-serif;color:#6E7385;text-transform:uppercase;letter-spacing:.7px;margin-bottom:3px">Abonnement élève, dès</div>
-              <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-                <span style="font:600 48px/1 Poppins,sans-serif;white-space:nowrap;flex:0 0 auto;background:linear-gradient(135deg,#1E499B,#0E7C86);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent" data-vrt-prix="abo_starter_m">1 200</span>
-                <span style="font:500 18px Poppins,sans-serif;color:#4D5163;white-space:nowrap">FCFA<span style="font-weight:400;color:#6E7385">/mois</span></span>
-              </div>
-            </div>
-            <span style="display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:100px;background:#E0F5E5;color:#007E11;font:600 13px Poppins,sans-serif"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-gift"></use></svg>Essai offert · aucune carte demandée</span>
-          </div>
-          <div style="display:flex;gap:12px;flex-wrap:wrap">
-            <a href="app.html#inscription" style="display:inline-flex;align-items:center;gap:9px;padding:14px 28px;border-radius:100px;background:#FFC93C;color:#001136;font:600 16px Poppins,sans-serif;box-shadow:0 2px 4px rgba(0,17,54,.08),0 8px 20px rgba(0,17,54,.10);transition:transform .18s,box-shadow .18s" class="vh13">Commencer maintenant<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></a>
-            <button type="button" onclick="VRT.act('goTarifs',this,event)" data-go="tarifs" style="display:inline-flex;align-items:center;gap:8px;padding:14px 26px;border-radius:14px;background:#fff;color:#1E499B;border:2px solid #1E499B;font:600 16px Poppins,sans-serif;cursor:pointer;transition:background .18s,color .18s" class="vh14">Voir les abonnements</button>
-          </div>
-        </div>
-        <div style="position:relative">
-          <div data-parallax="0.06" style="position:relative;border-radius:14px;overflow:hidden;background:linear-gradient(160deg,#E9F0FC,#F6F8FD);aspect-ratio:4/3;box-shadow:0 18px 40px rgba(0,17,54,.12);will-change:transform">
-            <span aria-hidden="true" style="position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(180deg,rgba(30,73,155,0),rgba(30,73,155,.10))"></span>
-            <img loading="lazy" decoding="async" width="1080" height="810" src="assets/hero-maison.webp" srcset="assets/hero-maison-600.webp 600w, assets/hero-maison-800.webp 800w, assets/hero-maison.webp 1080w" sizes="(max-width: 999px) calc(100vw - 32px), 520px" alt="Une mère accompagne son fils qui révise, l’ordinateur ouvert sur VÉRITAS" class="vhero-img" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;animation:vzoomSlow 24s ease-in-out infinite alternate;display:block"><span class="vhero-cap"><b>À la maison, on progresse aussi.</b>Le cours du jour, repris le soir, avec un vrai suivi.</span>
-          </div>
-          <div data-parallax="0.1" style="position:absolute;right:-14px;top:-18px;background:linear-gradient(135deg,#5B4FA8,#0C2A6A);color:#fff;border-radius:100px;padding:11px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 26px rgba(12,42,106,.34);will-change:transform;animation:vfloatSlow 8s ease-in-out infinite">
-            <span style="width:9px;height:9px;border-radius:50%;background:#7BD99C;animation:vpulse 2.4s ease-out infinite"></span>
-            <small style="font:500 13px Poppins,sans-serif">Prof. Ambassa · en ligne</small>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SERVICES À ONGLETS -->
-    <section style="background:#F4F5F8;margin-top:56px;padding:50px 0">
-      <div style="max-width:1170px;margin:0 auto;padding:0 24px">
-        <div style="max-width:660px;margin:0 auto 26px;text-align:center">
-          <h2 style="font:600 30px/40px Poppins,sans-serif;color:#001136;margin:0 0 10px">Tout ce dont l'élève a besoin</h2>
-          <p style="margin:0;font-size:16px;color:#4D5163;text-wrap:pretty">Ce qui est gratuit le reste. Ce qui est payant affiche son prix, sans surprise.</p>
-        </div>
-        <div style="display:flex;justify-content:center;margin-bottom:30px">
-          <div role="tablist" style="display:inline-flex;gap:4px;background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:6px;box-shadow:0 6px 16px rgba(0,17,54,.06);flex-wrap:wrap;justify-content:center">
-            
-              <button data-vrt-item="onglets" type="button" role="tab" onclick="VRT.act('o__aller',this,event)" style="position:relative;display:inline-flex;align-items:center;gap:9px;padding:12px 20px 14px;border-radius:14px;border:0;background:#F4F6FB;color:#0C2A6A;font:600 14px Poppins,sans-serif;cursor:pointer;transition:background .18s,color .18s" class="vh21">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto" aria-hidden="true"><use href="#lc-book"></use></svg>Apprendre
-                <span aria-hidden="true" style="position:absolute;left:16px;right:16px;bottom:6px;height:3px;border-radius:3px;background:#1E499B;transition:background .18s"></span></button>
-            
-              <button data-vrt-item="onglets" type="button" role="tab" onclick="VRT.act('o__aller',this,event)" style="position:relative;display:inline-flex;align-items:center;gap:9px;padding:12px 20px 14px;border-radius:14px;border:0;background:transparent;color:#6E7385;font:500 14px Poppins,sans-serif;cursor:pointer;transition:background .18s,color .18s" class="vh21">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9BA6BE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto" aria-hidden="true"><use href="#lc-clipboard"></use></svg>S’entraîner
-                <span aria-hidden="true" style="position:absolute;left:16px;right:16px;bottom:6px;height:3px;border-radius:3px;background:transparent;transition:background .18s"></span></button>
-            
-              <button data-vrt-item="onglets" type="button" role="tab" onclick="VRT.act('o__aller',this,event)" style="position:relative;display:inline-flex;align-items:center;gap:9px;padding:12px 20px 14px;border-radius:14px;border:0;background:transparent;color:#6E7385;font:500 14px Poppins,sans-serif;cursor:pointer;transition:background .18s,color .18s" class="vh21">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9BA6BE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto" aria-hidden="true"><use href="#lc-brain"></use></svg>Se faire aider
-                <span aria-hidden="true" style="position:absolute;left:16px;right:16px;bottom:6px;height:3px;border-radius:3px;background:transparent;transition:background .18s"></span></button>
-            
-              <button data-vrt-item="onglets" type="button" role="tab" onclick="VRT.act('o__aller',this,event)" style="position:relative;display:inline-flex;align-items:center;gap:9px;padding:12px 20px 14px;border-radius:14px;border:0;background:transparent;color:#6E7385;font:500 14px Poppins,sans-serif;cursor:pointer;transition:background .18s,color .18s" class="vh21">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9BA6BE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto" aria-hidden="true"><use href="#lc-building"></use></svg>Vie scolaire
-                <span aria-hidden="true" style="position:absolute;left:16px;right:16px;bottom:6px;height:3px;border-radius:3px;background:transparent;transition:background .18s"></span></button>
-            
-              <button data-vrt-item="onglets" type="button" role="tab" onclick="VRT.act('o__aller',this,event)" style="position:relative;display:inline-flex;align-items:center;gap:9px;padding:12px 20px 14px;border-radius:14px;border:0;background:transparent;color:#6E7385;font:500 14px Poppins,sans-serif;cursor:pointer;transition:background .18s,color .18s" class="vh21">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9BA6BE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto" aria-hidden="true"><use href="#lc-presentation"></use></svg>Répétitions
-                <span aria-hidden="true" style="position:absolute;left:16px;right:16px;bottom:6px;height:3px;border-radius:3px;background:transparent;transition:background .18s"></span></button>
-            
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;animation:vfade .3s ease">
-          
-            <div data-vrt-item="services" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh22">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;align-self:center;margin-bottom:15px">
-                <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"></use></svg></span>
-              <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px;text-align:center">Cours leçon par leçon</h3>
-              <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty;text-align:center">Toutes les matières, de la 6ᵉ à la Terminale : cours illustré, fiche de révision et quiz pour chaque leçon.</p>
-              <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px">
-                <span style="font:600 14px Poppins,sans-serif;color:#1E499B">Inclus dès <span data-vrt-prix="abo_starter_m">1 200</span> F</span>
-                <a href="apprendre/" style="display:inline-flex;align-items:center;gap:4px;font:600 13px Poppins,sans-serif;color:#1E499B">Découvrir<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
-              </div>
-            </div>
-          
-            <div data-vrt-item="services" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh22">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #5B4FA8;color:#001136;display:flex;align-items:center;justify-content:center;align-self:center;margin-bottom:15px">
-                <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"></use></svg></span>
-              <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px;text-align:center">Œuvres au programme</h3>
-              <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty;text-align:center">Étude intégrale : résumé par chapitre, personnages, axes de lecture, sujets de dissertation.</p>
-              <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px">
-                <span style="font:600 14px Poppins,sans-serif;color:#5B4FA8">Inclus dès <span data-vrt-prix="abo_starter_m">1 200</span> F</span>
-                <a href="oeuvres/" style="display:inline-flex;align-items:center;gap:4px;font:600 13px Poppins,sans-serif;color:#5B4FA8">Découvrir<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
-              </div>
-            </div>
-          
-            <div data-vrt-item="services" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh22">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #0E7C86;color:#001136;display:flex;align-items:center;justify-content:center;align-self:center;margin-bottom:15px">
-                <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-atom"></use></svg></span>
-              <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px;text-align:center">Labos virtuels</h3>
-              <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty;text-align:center">Expériences de PCT et SVT simulées, pour les établissements sans laboratoire équipé.</p>
-              <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px">
-                <span style="font:600 14px Poppins,sans-serif;color:#0E7C86">Plan Pro</span>
-                <a href="apprendre/labo.html" style="display:inline-flex;align-items:center;gap:4px;font:600 13px Poppins,sans-serif;color:#0E7C86">Découvrir<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
-              </div>
-            </div>
-          
-            <div data-vrt-item="services" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh22">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #B03A6E;color:#001136;display:flex;align-items:center;justify-content:center;align-self:center;margin-bottom:15px">
-                <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"></use></svg></span>
-              <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px;text-align:center">Mon cahier en ligne</h3>
-              <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty;text-align:center">Le cahier de papier, rempli à l’écran : on écrit dedans, le travail se garde, et la correction s’ouvre dès qu’on a cherché.</p>
-              <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px">
-                <span style="font:600 14px Poppins,sans-serif;color:#B03A6E">1 500 F</span>
-                <a href="livrets/" style="display:inline-flex;align-items:center;gap:4px;font:600 13px Poppins,sans-serif;color:#B03A6E">Découvrir<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
-              </div>
-            </div>
-          
-            <div data-vrt-item="services" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh22">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;align-self:center;margin-bottom:15px">
-                <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-game"></use></svg></span>
-              <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px;text-align:center">Jeux pédagogiques</h3>
-              <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty;text-align:center">Révisions actives : quiz chronométrés, associations, cartes mémoire par matière.</p>
-              <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px">
-                <span style="font:600 14px Poppins,sans-serif;color:#007E11">Gratuit</span>
-                <a href="app.html#jeux" style="display:inline-flex;align-items:center;gap:4px;font:600 13px Poppins,sans-serif;color:#007E11">Découvrir<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
-              </div>
-            </div>
-          
-        </div>
-      </div>
-    </section>
+    <script>
+    /* Carrousel Apprendre (11/11/2026) : « une animation qui permet aux images
+       de défiler lentement » (Jacques). Téléphone seulement (le bureau montre
+       les trois photos en mosaïque), coupé si l'utilisateur demande moins
+       d'animations, en pause hors écran, onglet caché ou doigt posé. */
+    (function(){
+      var m=document.querySelector('#apprendre .vapp-m'); if(!m||!window.matchMedia)return;
+      var mq=matchMedia('(max-width: 899px)'), calme=matchMedia('(prefers-reduced-motion: reduce)');
+      var ph=[].slice.call(m.querySelectorAll('.vapp-ph')); if(ph.length<2)return;
+      var PAUSE=4800, DUREE=1600, REPRISE=8000, tic=null, anim=null, vu=true, main=0, idx=0;
+      var dots=document.createElement('div'); dots.className='vapp-dots'; dots.setAttribute('aria-label','Choisir une photo');
+      ph.forEach(function(f,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Photo '+(i+1));
+        b.addEventListener('click',function(){main=Date.now();aller(i);});dots.appendChild(b);});
+      m.parentNode.insertBefore(dots,m.nextSibling);
+      function cible(i){var f=ph[i];return f.offsetLeft-(m.clientWidth-f.offsetWidth)/2;}
+      function marquer(i){idx=i;ph.forEach(function(f,j){f.classList.toggle('is-on',j===i);});
+        [].forEach.call(dots.children,function(b,j){b.setAttribute('aria-current',j===i?'true':'false');});}
+      function aller(i){
+        if(anim)cancelAnimationFrame(anim);
+        var de=m.scrollLeft, a=Math.max(0,Math.min(cible(i),m.scrollWidth-m.clientWidth)), t0=null;
+        marquer(i);
+        if(calme.matches){m.scrollLeft=a;return;}
+        m.style.scrollSnapType='none';
+        (function pas(t){ if(t0===null)t0=t; var k=Math.min(1,(t-t0)/DUREE), e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+          m.scrollLeft=de+(a-de)*e; if(k<1)anim=requestAnimationFrame(pas); else{anim=null;m.style.scrollSnapType='';} })(performance.now());
+      }
+      function suivant(){
+        if(!mq.matches||calme.matches||!vu||document.hidden||Date.now()-main<REPRISE)return;
+        aller((idx+1)%ph.length);
+      }
+      ['pointerdown','touchstart','wheel'].forEach(function(ev){m.addEventListener(ev,function(){main=Date.now();if(anim){cancelAnimationFrame(anim);anim=null;m.style.scrollSnapType='';}},{passive:true});});
+      var fin=null; m.addEventListener('scroll',function(){ if(anim)return; clearTimeout(fin); fin=setTimeout(function(){
+        var c=m.scrollLeft+m.clientWidth/2, best=0, d=1e9; ph.forEach(function(f,i){var x=Math.abs(f.offsetLeft+f.offsetWidth/2-c);if(x<d){d=x;best=i;}}); marquer(best);},120);},{passive:true});
+      if('IntersectionObserver' in window) new IntersectionObserver(function(e){vu=e[0].isIntersecting;},{threshold:.4}).observe(m);
+      marquer(0); tic=setInterval(suivant,PAUSE);
+    })();
+    </script>
 
     <!-- ══ BOUTIQUE — les vraies couvertures des cahiers (10/11/2026) ══
          Couvertures MAISON (uploads/oeuvres/livret_*_v.webp), celles que le
@@ -2245,6 +2168,103 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
               <button type="button" onclick="VRT.act('ouvrirIA',this,event)" style="margin-left:auto;display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:14px;background:linear-gradient(135deg,#7C6BD6,#5B4FA8);color:#fff;border:0;font:600 13px Poppins,sans-serif;cursor:pointer;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:transform .18s,box-shadow .18s" class="vh20"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"></use></svg>Poser une question</button>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES À ONGLETS — RÉCAPITULATIF (11/11/2026)
+         « Mets ceci à la fin parce qu'Apprendre donne déjà beaucoup de ces
+         éléments. À la fin ça sera comme une synthèse, un récapitulatif »
+         (Jacques). Déplacé juste avant l'appel final ; pastille « En résumé ». -->
+    <section style="background:#F4F5F8;margin-top:56px;padding:50px 0">
+      <div style="max-width:1170px;margin:0 auto;padding:0 24px">
+        <div style="max-width:660px;margin:0 auto 26px;text-align:center">
+          <span class="vapp-eb" style="margin-bottom:14px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"></use></svg>En résumé</span>
+          <h2 style="font:600 30px/40px Poppins,sans-serif;color:#001136;margin:0 0 10px">Tout ce dont l'élève a besoin</h2>
+          <p style="margin:0;font-size:16px;color:#4D5163;text-wrap:pretty">Ce qui est gratuit le reste. Ce qui est payant affiche son prix, sans surprise.</p>
+        </div>
+        <div style="display:flex;justify-content:center;margin-bottom:30px">
+          <div role="tablist" style="display:inline-flex;gap:4px;background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:6px;box-shadow:0 6px 16px rgba(0,17,54,.06);flex-wrap:wrap;justify-content:center">
+            
+              <button data-vrt-item="onglets" type="button" role="tab" onclick="VRT.act('o__aller',this,event)" style="position:relative;display:inline-flex;align-items:center;gap:9px;padding:12px 20px 14px;border-radius:14px;border:0;background:#F4F6FB;color:#0C2A6A;font:600 14px Poppins,sans-serif;cursor:pointer;transition:background .18s,color .18s" class="vh21">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto" aria-hidden="true"><use href="#lc-book"></use></svg>Apprendre
+                <span aria-hidden="true" style="position:absolute;left:16px;right:16px;bottom:6px;height:3px;border-radius:3px;background:#1E499B;transition:background .18s"></span></button>
+            
+              <button data-vrt-item="onglets" type="button" role="tab" onclick="VRT.act('o__aller',this,event)" style="position:relative;display:inline-flex;align-items:center;gap:9px;padding:12px 20px 14px;border-radius:14px;border:0;background:transparent;color:#6E7385;font:500 14px Poppins,sans-serif;cursor:pointer;transition:background .18s,color .18s" class="vh21">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9BA6BE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto" aria-hidden="true"><use href="#lc-clipboard"></use></svg>S’entraîner
+                <span aria-hidden="true" style="position:absolute;left:16px;right:16px;bottom:6px;height:3px;border-radius:3px;background:transparent;transition:background .18s"></span></button>
+            
+              <button data-vrt-item="onglets" type="button" role="tab" onclick="VRT.act('o__aller',this,event)" style="position:relative;display:inline-flex;align-items:center;gap:9px;padding:12px 20px 14px;border-radius:14px;border:0;background:transparent;color:#6E7385;font:500 14px Poppins,sans-serif;cursor:pointer;transition:background .18s,color .18s" class="vh21">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9BA6BE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto" aria-hidden="true"><use href="#lc-brain"></use></svg>Se faire aider
+                <span aria-hidden="true" style="position:absolute;left:16px;right:16px;bottom:6px;height:3px;border-radius:3px;background:transparent;transition:background .18s"></span></button>
+            
+              <button data-vrt-item="onglets" type="button" role="tab" onclick="VRT.act('o__aller',this,event)" style="position:relative;display:inline-flex;align-items:center;gap:9px;padding:12px 20px 14px;border-radius:14px;border:0;background:transparent;color:#6E7385;font:500 14px Poppins,sans-serif;cursor:pointer;transition:background .18s,color .18s" class="vh21">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9BA6BE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto" aria-hidden="true"><use href="#lc-building"></use></svg>Vie scolaire
+                <span aria-hidden="true" style="position:absolute;left:16px;right:16px;bottom:6px;height:3px;border-radius:3px;background:transparent;transition:background .18s"></span></button>
+            
+              <button data-vrt-item="onglets" type="button" role="tab" onclick="VRT.act('o__aller',this,event)" style="position:relative;display:inline-flex;align-items:center;gap:9px;padding:12px 20px 14px;border-radius:14px;border:0;background:transparent;color:#6E7385;font:500 14px Poppins,sans-serif;cursor:pointer;transition:background .18s,color .18s" class="vh21">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9BA6BE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto" aria-hidden="true"><use href="#lc-presentation"></use></svg>Répétitions
+                <span aria-hidden="true" style="position:absolute;left:16px;right:16px;bottom:6px;height:3px;border-radius:3px;background:transparent;transition:background .18s"></span></button>
+            
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;animation:vfade .3s ease">
+          
+            <div data-vrt-item="services" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh22">
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;align-self:center;margin-bottom:15px">
+                <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"></use></svg></span>
+              <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px;text-align:center">Cours leçon par leçon</h3>
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty;text-align:center">Toutes les matières, de la 6ᵉ à la Terminale : cours illustré, fiche de révision et quiz pour chaque leçon.</p>
+              <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px">
+                <span style="font:600 14px Poppins,sans-serif;color:#1E499B">Inclus dès <span data-vrt-prix="abo_starter_m">1 200</span> F</span>
+                <a href="apprendre/" style="display:inline-flex;align-items:center;gap:4px;font:600 13px Poppins,sans-serif;color:#1E499B">Découvrir<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
+              </div>
+            </div>
+          
+            <div data-vrt-item="services" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh22">
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #5B4FA8;color:#001136;display:flex;align-items:center;justify-content:center;align-self:center;margin-bottom:15px">
+                <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"></use></svg></span>
+              <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px;text-align:center">Œuvres au programme</h3>
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty;text-align:center">Étude intégrale : résumé par chapitre, personnages, axes de lecture, sujets de dissertation.</p>
+              <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px">
+                <span style="font:600 14px Poppins,sans-serif;color:#5B4FA8">Inclus dès <span data-vrt-prix="abo_starter_m">1 200</span> F</span>
+                <a href="oeuvres/" style="display:inline-flex;align-items:center;gap:4px;font:600 13px Poppins,sans-serif;color:#5B4FA8">Découvrir<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
+              </div>
+            </div>
+          
+            <div data-vrt-item="services" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh22">
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #0E7C86;color:#001136;display:flex;align-items:center;justify-content:center;align-self:center;margin-bottom:15px">
+                <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-atom"></use></svg></span>
+              <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px;text-align:center">Labos virtuels</h3>
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty;text-align:center">Expériences de PCT et SVT simulées, pour les établissements sans laboratoire équipé.</p>
+              <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px">
+                <span style="font:600 14px Poppins,sans-serif;color:#0E7C86">Plan Pro</span>
+                <a href="apprendre/labo.html" style="display:inline-flex;align-items:center;gap:4px;font:600 13px Poppins,sans-serif;color:#0E7C86">Découvrir<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
+              </div>
+            </div>
+          
+            <div data-vrt-item="services" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh22">
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #B03A6E;color:#001136;display:flex;align-items:center;justify-content:center;align-self:center;margin-bottom:15px">
+                <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"></use></svg></span>
+              <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px;text-align:center">Mon cahier en ligne</h3>
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty;text-align:center">Le cahier de papier, rempli à l’écran : on écrit dedans, le travail se garde, et la correction s’ouvre dès qu’on a cherché.</p>
+              <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px">
+                <span style="font:600 14px Poppins,sans-serif;color:#B03A6E">1 500 F</span>
+                <a href="livrets/" style="display:inline-flex;align-items:center;gap:4px;font:600 13px Poppins,sans-serif;color:#B03A6E">Découvrir<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
+              </div>
+            </div>
+          
+            <div data-vrt-item="services" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh22">
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;align-self:center;margin-bottom:15px">
+                <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-game"></use></svg></span>
+              <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px;text-align:center">Jeux pédagogiques</h3>
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty;text-align:center">Révisions actives : quiz chronométrés, associations, cartes mémoire par matière.</p>
+              <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px">
+                <span style="font:600 14px Poppins,sans-serif;color:#007E11">Gratuit</span>
+                <a href="app.html#jeux" style="display:inline-flex;align-items:center;gap:4px;font:600 13px Poppins,sans-serif;color:#007E11">Découvrir<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
+              </div>
+            </div>
+          
         </div>
       </div>
     </section>

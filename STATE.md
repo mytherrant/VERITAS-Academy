@@ -1,3 +1,13 @@
+## Carrousel Apprendre qui défile tout seul (11/11/2026)
+
+Demande de Jacques : « Créer une animation qui permet aux images ci de défiler lentement. »
+
+- **vitrine.html** : petit script en ligne après la section `#apprendre`. Sur téléphone (≤ 899 px), les trois photos glissent seules toutes les 4,8 s (glissement adouci de 1,6 s, retour à la première après la dernière) ; la photo en vue zoome lentement (7 s). Points indicateurs cliquables sous le carrousel.
+- Pause : doigt posé ou défilement manuel (reprise après 8 s), carrousel hors écran, onglet caché. Coupé si `prefers-reduced-motion`. Rien ne change sur ordinateur (mosaïque).
+- **Bandeau « Réussir son année avec les vrais programmes camerounais » retiré** (« Supprime ceci ») : recherche, trois arguments, prix « dès … FCFA/mois », boutons « Commencer maintenant » / « Voir les abonnements », photo hero-maison et badge « Prof. Ambassa · en ligne ». Le h1 de la page reste, masqué (`.vrt-sr`), en dernier enfant de `.vapp-in` : vitrine.js ne lui trouve pas de frère et ne pose donc plus la barre de recherche. Les prix restent affichés ailleurs (cartes, abonnements) ; banc_prix_vitrine au vert.
+- **« Tout ce dont l'élève a besoin » déplacé en fin d'accueil** (« Apprendre donne déjà beaucoup de ces éléments ; à la fin ce sera une synthèse, un récapitulatif ») : juste avant l'appel final, avec une pastille « En résumé ». Les onglets (régions dynamiques de vitrine.js) fonctionnent à la nouvelle place.
+- Empreinte d'index.php : 2026-11-11b.
+
 ## Classes & Forum au style de la vitrine, connexion et inscription par classe (11/11/2026)
 
 Demande de Jacques : « Harmoniser la mise en forme style vitrine, le mode de connexion et inscription relier à chaque classe. »
