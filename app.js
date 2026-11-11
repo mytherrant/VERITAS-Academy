@@ -24957,7 +24957,14 @@ function _cvRenderHome(){
   if(!SES){
     // Comment entrer, en trois temps — la connexion se fait DANS la classe choisie.
     h+="<div class='cvx-acces'><span class='cvx-acces-i'>"+_cvIco('lock',22)+"</span><div class='cvx-acces-t'>";
-    h+="<b>Les salons sont réservés aux élèves et enseignants inscrits</b>";
+    h+="<b>Ta classe t'attend : ne révise plus seul·e</b>";
+    h+="<p class='cvx-acces-p'>Chaque classe a son salon, réservé à ses élèves et à leurs enseignants. Ici, on s'entraide pour comprendre, préparer les séquences et réussir l'examen.</p>";
+    h+="<div class='cvx-plus'>"+[
+      ['help','#1E499B','Une question, même tard le soir ?','Pose-la dans le salon : camarades et enseignants peuvent y répondre.'],
+      ['megaphone','#A84200','Rien ne t\u2019échappe','Devoirs, dates des séquences, corrigés : les annonces de tes enseignants arrivent ici.'],
+      ['users','#5B4FA8','Réviser à plusieurs','Partager ses méthodes, s\u2019expliquer un exercice, se motiver avant les compositions.'],
+      ['gift','#007E11','Gratuit, en deux minutes','Un nom, un numéro WhatsApp, ta classe : c\u2019est tout.']
+    ].map(function(a){return "<div class='cvx-plus-c' style='--k:"+a[1]+"'><span class='cvx-rond'>"+_cvIco(a[0],19)+"</span><span class='cvx-plus-t'><b>"+a[2]+"</b>"+a[3]+"</span></div>";}).join("")+"</div>";
     h+="<div class='cvx-pas'>"+["Je choisis ma classe ci-dessous","Je crée mon compte gratuit ou je me connecte","J'arrive directement dans le salon de ma classe"].map(function(t,i){return "<div class='cvx-pas-l'><span class='cvx-pas-n'>"+(i+1)+"</span><p class='cvx-pas-x'>"+t+"</p></div>";}).join("")+"</div>";
     h+="<div class='cvx-acces-b'><button class='cvx-b1' onclick=\"showRegisterForm('')\">"+_cvIco('user',17)+"Créer mon compte gratuit</button><button class='cvx-b2' onclick=\"showLogin('eleve')\">J'ai déjà un compte</button></div>";
     h+="</div></div>";
@@ -24975,6 +24982,7 @@ function _cvRenderHome(){
   });
   h+="</div>";
   h+="<h2 class='cvx-h2'>"+(SES?'Mes classes':'Choisissez votre classe')+"</h2>";
+  if(!SES) h+="<p class='cvx-sous'>Trouve ta classe, inscris-toi en un geste : tu arriveras directement dans son salon.</p>";
   h+="<div class='cvx-grille'>";
   accessible.forEach(function(c){
     var cp=posts.filter(function(p){return p.classroomId===c.id;});
@@ -24986,7 +24994,10 @@ function _cvRenderHome(){
     h+="<span class='cvx-rond'>"+_cvIco(c.seg?'graduation':'bookopen',22)+"</span>";
     h+="<span class='cvx-carte-t'><b>"+_esc(c.nom)+"</b><small>"+(c.channels||[]).length+" salons · "+cp.length+" message"+(cp.length>1?'s':'')+"</small></span>";
     h+="<span class='cvx-go'>"+_cvIco('chevron-right',18)+"</span></div>";
-    h+="<p class='cvx-der'>"+(lastP?(_cvIco('message',14)+" "+_cvNom((_cvTxt(lastP.auteurNom)||'').split(' ')[0])+" · "+_cvRelTime(lastP.dateISO)):"Aucun message pour l'instant")+"</p>";
+    var kc=_cvCle(c.nom), exam=!!c.seg||/^(3eme|1ere|tle)/.test(kc);
+    if(exam) h+="<span class='cvx-exam'>"+_cvIco('award',14)+"Année d'examen · on révise ensemble</span>";
+    h+="<p class='cvx-der'>"+(lastP?(_cvIco('message',14)+" "+_cvNom((_cvTxt(lastP.auteurNom)||'').split(' ')[0])+" · "+_cvRelTime(lastP.dateISO)+(SES?"":" — rejoins la conversation"))
+      :(_cvIco('sparkles',14)+" "+(SES?"Lance la première discussion de ta classe !":"Le salon est ouvert : sois parmi les premiers à y écrire.")))+"</p>";
     h+="<div class='cvx-salons'>";
     (c.channels||[]).slice(0,5).forEach(function(ch){h+="<span>"+_cvIco(_cvIcoCanal(ch),13)+_esc(ch.nom)+"</span>";});
     h+="</div>";
@@ -25013,6 +25024,10 @@ function _cvRenderHome(){
         "<span>"+_esc((p.contenu||p.titre||'').slice(0,80))+"</span></span></div>";
     });
     h+="</div>";
+  }
+  if(!SES&&accessible.length){
+    h+="<div class='cvx-final'><div><b>Prêt·e à rejoindre ta classe ?</b><p>Crée ton compte gratuit : ta classe, ses salons et tes enseignants t'attendent.</p></div>"
+      +"<div class='cvx-acces-b'><button class='cvx-b1' onclick=\"showRegisterForm('')\">"+_cvIco('rocket',17)+"Je rejoins ma classe</button><button class='cvx-b2 cvx-b2-cl' onclick=\"showLogin('eleve')\">Je me connecte</button></div></div>";
   }
   if(!accessible.length){
     h+="<div class='cvx-vide'><span class='cvx-rond'>"+_cvIco('university',26)+"</span><b>Aucune classe disponible</b>"+(iA()?"<button class='cvx-b1' onclick='_cvAdminPanel()'>Créer une classe</button>":"<p>Contactez l'administration</p>")+"</div>";

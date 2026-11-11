@@ -8593,6 +8593,30 @@ body.vmenu-lock{overflow:hidden}
   #VISITOR #vContent #cvHome .cvx-grille{grid-template-columns:1fr}
   #VISITOR #vContent #cvHome .cvx-carte-b .cvx-b1{flex:1 1 auto}
 }
+/* Messages incitatifs (11/11/2026) */
+#VISITOR #vContent #cvHome .cvx-acces-t>b{font-size:20px;line-height:28px;margin-bottom:6px}
+#VISITOR #vContent #cvHome .cvx-acces-p{margin:0 0 16px;font:400 15px/1.65 Poppins,sans-serif;color:#4D5163}
+#VISITOR #vContent #cvHome .cvx-plus{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 18px}
+#VISITOR #vContent #cvHome .cvx-plus-c{display:flex;gap:12px;align-items:flex-start;background:#F8FAFE;border:1px solid #E4E9F2!important;border-radius:14px;padding:13px}
+#VISITOR #vContent #cvHome .cvx-plus-c .cvx-rond{flex-basis:40px;width:40px;height:40px}
+#VISITOR #vContent #cvHome .cvx-plus-t{flex:1;min-width:0;font:400 13px/1.5 Poppins,sans-serif;color:#4D5163}
+#VISITOR #vContent #cvHome .cvx-plus-t b{display:block;font:600 14.5px/20px Poppins,sans-serif;color:#001136;margin-bottom:2px}
+#VISITOR #vContent #cvHome .cvx-sous{margin:-6px 0 16px;font:400 15px/1.6 Poppins,sans-serif;color:#4D5163}
+#VISITOR #vContent #cvHome .cvx-exam{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;background:#FFF3D6;color:#8A5A00;border-radius:100px;padding:4px 11px;font:600 12px Poppins,sans-serif}
+#VISITOR #vContent #cvHome .cvx-final{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin:0 0 28px;padding:24px;border-radius:18px;background:linear-gradient(135deg,#1E499B,#5B4FA8)!important;color:#fff}
+#VISITOR #vContent #cvHome .cvx-final b{display:block;font:600 20px/28px Poppins,sans-serif;color:#fff!important;margin-bottom:4px}
+#VISITOR #vContent #cvHome .cvx-final p{margin:0;font:400 14.5px/1.6 Poppins,sans-serif;color:rgba(255,255,255,.88)!important}
+#VISITOR #vContent #cvHome .cvx-final .cvx-b2-cl{background:transparent;color:#fff;border-color:rgba(255,255,255,.7)!important}
+#VISITOR #vContent #cvHome .cvx-final .cvx-b2-cl:hover{background:#fff;color:#1E499B}
+@media (max-width:640px){
+  #VISITOR #vContent #cvHome .cvx-plus{grid-template-columns:1fr}
+  #VISITOR #vContent #cvHome .cvx-final{padding:20px 18px}
+  #VISITOR #vContent #cvHome .cvx-final .cvx-acces-b>*{flex:1 1 100%}
+}
+:root[data-theme="dark"] #VISITOR #vContent #cvHome .cvx-plus-c{background:#14244A;border-color:#1E3566!important}
+:root[data-theme="dark"] #VISITOR #vContent #cvHome .cvx-plus-t b{color:#E8EEFA}
+:root[data-theme="dark"] #VISITOR #vContent #cvHome :is(.cvx-plus-t,.cvx-acces-p,.cvx-sous){color:#B9C7E2}
+:root[data-theme="dark"] #VISITOR #vContent #cvHome .cvx-exam{background:#3A2C0A;color:#FFD98A}
 /* Thème sombre */
 :root[data-theme="dark"] #VISITOR #vContent #cvHome :is(.cvx-acces,.cvx-stat,.cvx-carte,.cvx-recent){background:#101E3C;border-color:#1E3566!important;box-shadow:none!important}
 :root[data-theme="dark"] #VISITOR #vContent #cvHome :is(.cvx-h1,.cvx-h2,.cvx-acces-t>b,.cvx-stat b,.cvx-carte-t b,.cvx-msg-t b,.cvx-vide b){color:#E8EEFA!important}
