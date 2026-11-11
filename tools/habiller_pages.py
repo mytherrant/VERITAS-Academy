@@ -609,11 +609,16 @@ html:not([data-theme="sombre"]):has(#dc-root){
    · .eh        : espace élève (veritas-eleve.css) ;
    · .vh-hero   : pages de veritas-refonte.css, dont vitrine.js réunit le
                   premier <h1> et son chapeau dans un en-tête.
-   Le maillage est FIXE (dégradés superposés) : aucune animation ajoutée. */
-:root{--vrt-maille:radial-gradient(55% 90% at 0% 0%,rgba(255,201,60,.34),transparent 62%),
-  radial-gradient(50% 85% at 100% 100%,rgba(110,70,192,.55),transparent 64%),
+   Le maillage est FIXE (dégradés superposés) : aucune animation ajoutée.
+   11/11/2026 : « éclaircis un peu les en-têtes » (Jacques) — bleu nuit
+   #0d1a3d→#3a2a7a remplacé par #1E499B→#5B4FA8 ; blanc lisible (≥ 5:1).
+   background-color reste #1d3168 (invisible sous le dégradé) : c'est lui que
+   veritas-harmonie.js lit pour choisir l'encre — plus clair, il passait le
+   chapeau en bleu nuit. */
+:root{--vrt-maille:radial-gradient(55% 90% at 0% 0%,rgba(255,201,60,.26),transparent 62%),
+  radial-gradient(50% 85% at 100% 100%,rgba(150,120,230,.38),transparent 64%),
   radial-gradient(35% 60% at 80% 30%,rgba(15,155,142,.30),transparent 66%),
-  linear-gradient(135deg,#0d1a3d 0%,#1d3168 48%,#3a2a7a 100%)}
+  linear-gradient(135deg,#1E499B 0%,#2D5DB5 50%,#5B4FA8 100%)}
 /* background-color écrit À PART : veritas-harmonie.js lit la couleur de fond
    calculée pour choisir l'encre du titre. Sous un dégradé seul elle vaut
    « transparent », et le script repeignait le titre en bleu nuit sur fond
@@ -633,7 +638,7 @@ header.top .badge,.eh .kicker,.vh-hero .badge{display:inline-flex;align-items:ce
 header.top h1,.eh h1,.vh-hero h1{font-size:clamp(28px,18px + 2.6vw,44px)!important;
   line-height:1.1!important;font-weight:800!important;letter-spacing:-.02em;color:#fff!important;
   margin:.9rem auto .5rem!important;max-width:900px;text-wrap:balance}
-header.top p,.eh p.sub,.vh-hero p,.vh-hero>div:not(.badge){color:#cdd8f2!important;max-width:64ch;margin:.2rem auto 0!important;
+header.top p,.eh p.sub,.vh-hero p,.vh-hero>div:not(.badge){color:#EEF3FC!important;max-width:64ch;margin:.2rem auto 0!important;
   font-size:clamp(1rem,.95rem + .3vw,1.1rem)!important;line-height:1.6;text-align:center!important}
 header.top p a,.vh-hero p a{color:#FFC93C}
 /* 11/11/2026 : le gras du chapeau (« soutien scolaire », « 3ème »…) prenait le
@@ -730,7 +735,7 @@ html body .cl .go *{color:#fff!important}
 #VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app .pgt-ico,#VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app .vsec-title > :is(span,svg):first-child{width:52px!important;height:52px!important;
   border-radius:50%!important;background:#fff!important;border:3px solid #FFC93C!important;color:#001136!important;
   box-shadow:none!important;box-sizing:border-box}
-#VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app > :not(:first-child){color:#cdd8f2!important;font-style:normal!important;
+#VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app > :not(:first-child){color:#EEF3FC!important;font-style:normal!important;
   font-size:clamp(1rem,.95rem + .3vw,1.1rem)!important;text-align:center!important;max-width:64ch;
   margin:.3rem auto 0!important;background:none!important;border:0!important;padding:0!important}
 /* Une seule police sur les écrans publics : Poppins, comme la vitrine
@@ -740,10 +745,10 @@ html body .cl .go *{color:#fff!important}
    (#VISITOR#VISITOR *{background-image:none!important}). L'en-tête maillé est
    la seule exception voulue : trois identifiants pour passer devant. */
 #VISITOR#VISITOR#VISITOR .vh-hero{background-color:#1d3168!important;background-image:
-  radial-gradient(55% 90% at 0% 0%,rgba(255,201,60,.34),transparent 62%),
-  radial-gradient(50% 85% at 100% 100%,rgba(110,70,192,.55),transparent 64%),
+  radial-gradient(55% 90% at 0% 0%,rgba(255,201,60,.26),transparent 62%),
+  radial-gradient(50% 85% at 100% 100%,rgba(150,120,230,.38),transparent 64%),
   radial-gradient(35% 60% at 80% 30%,rgba(15,155,142,.30),transparent 66%),
-  linear-gradient(135deg,#0d1a3d 0%,#1d3168 48%,#3a2a7a 100%)!important}
+  linear-gradient(135deg,#1E499B 0%,#2D5DB5 50%,#5B4FA8 100%)!important}
 #VISITOR#VISITOR#VISITOR .vh-hero::after{background-image:linear-gradient(90deg,transparent,#FFC93C,transparent)!important}
 
 /* ── Titres de section et boutons : une seule échelle (points 5 et 8) ────── */
