@@ -459,6 +459,14 @@ jobs:
       - name: 👪 Le parent voit-il son enfant, et seulement lui ?
         run: node tests/banc_parent_enfant.cjs
 
+      # ── 🏫 CHAQUE ÉLÈVE ÉCRIT-IL DANS SA CLASSE ? (11/11/2026) L'inscription
+      #    range « Terminale » + filière « C », la classe s'appelle « Tle C » :
+      #    la comparaison exacte refusait (403) tout élève de 1ère et de
+      #    Terminale, et les séries C/D n'avaient pas de classe. Éprouvé sur
+      #    l'ancienne version : 6 contrôles au rouge sur 12.
+      - name: 🏫 Chaque élève écrit-il dans sa classe virtuelle ?
+        run: node tests/banc_forum_classes.cjs
+
       # ── 🔑 LA CLÉ D'UN EXERCICE survit-elle à une correction du cahier ?
       #    Si elle bouge, l'élève retrouve ses réponses sous les mauvaises
       #    questions et l'annotation du professeur désigne un autre exercice.

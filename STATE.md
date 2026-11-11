@@ -1,3 +1,17 @@
+## Vérification des branchements : classes du lycée et forum (11/11/2026)
+
+Demande de Jacques : « Vérifie que tout est bien branché. »
+
+- **Contrôle** : 216 liens internes de la vitrine, d'Apprendre et du forum (un seul en erreur, `/app.html`, qui n'existe qu'après déploiement) ; aucun `onclick` vers une fonction absente ; aucune erreur JS ; parcours testés de bout en bout (classes → Apprendre, carrousel, récapitulatif, « Tout pour progresser », portes, forum).
+- **Commit perdu repris** : « 2nde, 1ère, Tle par série » (37ac201) avait été poussé 46 s APRÈS la fusion de la PR 247 ; il n'était jamais arrivé en ligne. Repris ici.
+- **Forum — défaut réel en production** : l'inscription range « Terminale »/« 1ère » + filière ; les classes s'appellent « Tle A »/« 1ère A ». La comparaison exacte des noms laissait tout élève de 1ère et de Terminale sans classe, côté client (« rattaché à aucune classe ») ET côté serveur (403 à chaque message). Et les séries C et D n'avaient aucune classe.
+  - `_cvClassePour(cls, serie)` (app.js) : niveau + filière → classe (A1/A4 → A ; jamais une classe sœur). Utilisée par `_resolveClassroom` et l'écran Classes & Forum.
+  - `_cvCompleterClasses()` : ajoute 1ère C, 1ère D, Tle C, Tle D (salons + Physique-Chimie et SVT), sans toucher aux classes ni aux messages existants.
+  - `api/student_data.php` : même règle (`$classeDe`), et la classe de l'élève absente de la base publiée reste utilisable, avec les mêmes identifiants que le client.
+  - « Je m'inscris dans cette classe » règle le niveau ET la filière (C, D) ; une filière ambiguë (A → A1 ou A4) reste à choisir.
+  - Nouveau `tests/banc_forum_classes.cjs` (deploy.yml + test.yml) : 12/12 ; sur l'ancienne version, 6 au rouge.
+- Version des assets : 1.20.71.
+
 ## « Tout pour progresser » : rubriques et icônes alignées (11/11/2026)
 
 Demande de Jacques : « Structure et dispose bien les icônes » (grille des ressources de la classe, apprendre/index.html).

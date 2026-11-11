@@ -713,6 +713,10 @@ window._resolveClassroom=function(acc){
   var seg=_segKey(acc.profil);
   var cs=DB.classrooms||[];
   if(seg){ var bySeg=cs.find(function(c){return c.seg===seg;}); if(bySeg) return bySeg; }
+  // 11/11/2026 : l'inscription range « Terminale » + filière « C » ; la classe
+  // virtuelle s'appelle « Tle C ». La comparaison exacte des noms laissait tout
+  // élève de 1ère et de Terminale sans classe.
+  if(typeof _cvClassePour==='function') return _cvClassePour(acc.cls||(acc.profil&&acc.profil.cls), acc.serie||(acc.profil&&acc.profil.serie));
   return cs.find(function(c){return c.nom===(acc.cls||(acc.profil&&acc.profil.cls));})||null;
 };
 const EVT={exam:{l:'Examen',c:'bgr'},reunion:{l:'Réunion',c:'bgb'},event:{l:'Événement',c:'bgg'},holiday:{l:'Congé',c:'bgd'},info:{l:'Info',c:'bgt'}};
@@ -24807,11 +24811,53 @@ function _cvParClasse(c){
   cs.forEach(function(x){ if(x.seg)return; var kx=_cvCle(x.nom); if(kx===k)ex=x; else if(!pre&&kx&&k.indexOf(kx)===0&&/^[a-z]$/.test(k.slice(kx.length)))pre=x; });
   return ex||pre;
 }
+/* Classe virtuelle d'un élève d'après son niveau et sa filière (11/11/2026).
+   « Terminale » + « C » → Tle C ; « 1ère » + « A1 » → 1ère A ; « 3ème » → 3ème.
+   Jamais une classe sœur : une Tle D ne tombe pas dans la Tle A. */
+function _cvClassePour(cls,serie){
+  var cs=(DB.classrooms||[]).filter(function(x){return !x.seg;}); if(!cls)return null;
+  var cle=function(x){return _cvCle(x);}, ser=String(serie||'').trim();
+  var essais=[]; if(ser){ essais.push(cls+' '+ser); if(ser.length>1) essais.push(cls+' '+ser.charAt(0)); }
+  essais.push(cls);
+  for(var i=0;i<essais.length;i++){ var k=cle(essais[i]); var t=cs.find(function(x){return cle(x.nom)===k;}); if(t)return t; }
+  return null;
+}
+/* Le forum ne portait que 7 classes francophones (6ème → Tle A) alors
+   qu'Apprendre propose aussi les séries scientifiques : un élève de C ou de D
+   n'avait pas de salon. On AJOUTE les classes manquantes, sans toucher aux
+   classes existantes ni à leurs messages (11/11/2026). */
+function _cvCompleterClasses(){
+  var cs=DB.classrooms=DB.classrooms||[], ajout=0;
+  var palette=['#3C8DFF','#6C56A6','#059669','#AE5353','#F59E0B','#0891B2','#4F46E5','#BE185D'];
+  ['1ère C','1ère D','Tle C','Tle D'].forEach(function(nom,i){
+    var k=_cvCle(nom); if(cs.some(function(x){return !x.seg&&_cvCle(x.nom)===k;}))return;
+    var key=nom.replace(/[^a-z0-9]/gi,'').toLowerCase();
+    var sci=/[CD]$/.test(nom);
+    cs.push({id:'cls_'+key,nom:nom,couleur:palette[(i+3)%palette.length],ico:'📚',
+      channels:[
+        {id:'ch_gen_'+key,nom:'Général',ico:'💬',ordre:0},
+        {id:'ch_ann_'+key,nom:'Annonces',ico:'📢',ordre:1,teacherOnly:true},
+        {id:'ch_fr_'+key,nom:'Français',ico:'📝',ordre:2},
+        {id:'ch_math_'+key,nom:'Mathématiques',ico:'📐',ordre:3},
+        {id:'ch_sc_'+key,nom:sci?'Physique-Chimie':'Sciences',ico:'🔬',ordre:4},
+        sci?{id:'ch_svt_'+key,nom:'SVT',ico:'🧬',ordre:5}:null
+      ].filter(Boolean),
+      membres:[],enseignants:(DB.teachers||[]).map(function(t){return t.id;})});
+    ajout++;
+  });
+  // Ordre de lecture : collège, lycée par niveau puis série, puis GCE/technique.
+  if(ajout){
+    var rang=function(x){ if(x.seg)return 900; var k=_cvCle(x.nom), m=k.match(/^(\d)eme/); if(m)return 10*(7-(+m[1])); if(/^2nde/.test(k))return 50; if(/^1ere/.test(k))return 60; if(/^tle/.test(k))return 70; return 800; };
+    cs.sort(function(a,b){ return rang(a)-rang(b) || String(a.nom).localeCompare(String(b.nom)); });
+    save();
+  }
+}
 function _cvClasseDuHash(){
   try{ var h=(location.hash||'').split('?'); if(h[0]!=='#classes'||!h[1])return ''; return new URLSearchParams(h[1]).get('c')||''; }catch(e){ return ''; }
 }
 function showClasseVirtuelle(cid,chid){
   if(!DB.classrooms||!DB.classrooms.length){DB.classrooms=_cvDefaultClassrooms();save();}
+  _cvCompleterClasses();
   if(!DB.forumPosts)DB.forumPosts=[];
   if(!cid){
     var _cq=_cvClasseDuHash(), _cc=_cq&&_cvParClasse(_cq);
@@ -24915,10 +24961,23 @@ function _cvRejoindre(cid,mode){
   if(mode==='connexion'){ showLogin('eleve'); return; }
   showRegisterForm('');
   // Pré-régler la classe du formulaire sur celle qu'on vient de choisir.
+  // Le formulaire sépare le NIVEAU (« 1ère », « Terminale ») de la FILIÈRE
+  // (A1, A4, C, D…) : « 1ère C » → niveau 1ère + filière C. Une filière
+  // ambiguë (« A » = A1 ou A4) reste à choisir par l'élève (11/11/2026).
   setTimeout(function(){
-    var sel=document.getElementById('rCls'); if(!sel||!c)return;
-    var k=_cvCle(c.nom), opt=[].slice.call(sel.options).find(function(o){return _cvCle(o.value||o.text)===k;});
-    if(opt){ sel.value=opt.value||opt.text; try{ sel.dispatchEvent(new Event('change',{bubbles:true})); }catch(e){} }
+    var sel=document.getElementById('rCls'); if(!sel||!c||c.seg)return;
+    var nom=String(c.nom||''), opts=[].slice.call(sel.options), val=function(o){return o.value||o.text;};
+    var niveau=/^2nde/i.test(nom)?'2nde':/^1[èe]re/i.test(nom)?'1ère':/^(tle|terminale)/i.test(nom)?'terminale':_cvCle(nom);
+    var opt=opts.find(function(o){return _cvCle(val(o))===_cvCle(niveau);})||opts.find(function(o){return _cvCle(val(o))===_cvCle(nom);});
+    if(!opt)return;
+    sel.value=val(opt);
+    try{ sel.dispatchEvent(new Event('change',{bubbles:true})); }catch(e){}
+    if(typeof window._regSysChange==='function'){ try{ window._regSysChange(); }catch(e){} }
+    var m=nom.match(/\s([A-Z]{1,2}\d?)$/), ser=document.getElementById('rSerie');
+    if(m&&ser){
+      var so=[].slice.call(ser.options).filter(function(o){return o.value===m[1];});
+      if(so.length===1) ser.value=so[0].value;
+    }
   },60);
 }
 /* Appelée après initVisitor() : la classe choisie avant la connexion s'ouvre. */
@@ -24939,7 +24998,9 @@ function _cvRenderHome(){
   var accessible=cls, horsClasse=false;
   if(SES&&!iA()&&SES.type!=='enseignant'){
     var uid=_cvUid(), srv=window._cvMesClasses||[];
-    var mine=cls.filter(function(c){return (c.membres||[]).indexOf(uid)>-1||c.nom===SES.cls||srv.indexOf(c.id)>-1;});
+    var acc0=(DB.visitorAccounts||[]).find(function(a){return a.id===(SES.accountId||SES.id);})||{};
+    var miene=_cvClassePour(SES.cls, SES.serie||acc0.serie);
+    var mine=cls.filter(function(c){return (c.membres||[]).indexOf(uid)>-1||c.nom===SES.cls||(miene&&c.id===miene.id)||srv.indexOf(c.id)>-1;});
     horsClasse=!mine.length;
     accessible=mine.length?mine:cls;
   }
