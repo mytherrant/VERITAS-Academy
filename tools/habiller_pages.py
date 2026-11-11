@@ -636,6 +636,9 @@ header.top h1,.eh h1,.vh-hero h1{font-size:clamp(28px,18px + 2.6vw,44px)!importa
 header.top p,.eh p.sub,.vh-hero p,.vh-hero>div:not(.badge){color:#cdd8f2!important;max-width:64ch;margin:.2rem auto 0!important;
   font-size:clamp(1rem,.95rem + .3vw,1.1rem)!important;line-height:1.6;text-align:center!important}
 header.top p a,.vh-hero p a{color:#FFC93C}
+/* 11/11/2026 : le gras du chapeau (« soutien scolaire », « 3ème »…) prenait le
+   bleu nuit des titres de carte : 2,5 de contraste sur le bandeau. */
+header.top :is(p,div) :is(strong,b),.eh :is(strong,b),.vh-hero :is(strong,b){color:#fff!important}
 .eh .chip .i,.eh .chip b{color:#FFC93C!important}
 .eh h1 .or{color:#FFC93C!important}
 /* Bandeau « contact » commun (.vrtc) : son titre suit l'échelle des titres de section. */

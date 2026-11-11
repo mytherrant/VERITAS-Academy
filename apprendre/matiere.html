@@ -9,7 +9,7 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261111b">
+<link rel="stylesheet" href="apprendre.css?v=20261111c">
 <link rel="stylesheet" href="jeu.css?v=20261110g">
 <style>
 /* ── Page matière (refonte 07/11) : en-tête teinté, filtres en pastilles, chapitres en cartes colorées ── */
@@ -77,7 +77,7 @@ a.lg:hover{background:var(--kp)}
 <script src="ressources.js?v=20261110g"></script>
 <script src="atelier.js?v=20261110a"></script>
 <script src="charge.js?v=13b48c1e"></script>
-<script src="commun.js?v=20261110h"></script>
+<script src="commun.js?v=20261111a"></script>
 <script src="jeu.js?v=20261110g"></script>
 <script>
 (function(){
@@ -127,15 +127,24 @@ a.lg:hover{background:var(--kp)}
       '<span style="--k:#0E7C86"><b>'+chaps.length+'</b> chapitre'+(chaps.length>1?'s':'')+'</span>'+
       (nred?'<span style="--k:#C24E00"><b>'+nred+'</b> cours rédigé'+(nred>1?'s':'')+'</span>':'')+
       '<span style="--k:#5B4FA8">MINESEC 2026-2027</span></div></div></header>'+
-    (tot&&nred<tot?A.offre(c,M.id,'matiere'):'')+
+    /* 11/11/2026 — « mettre les ressources gratuites au début ou en évidence :
+       il goûte, l'envie est suscitée et l'abonnement peut suivre » (Jacques).
+       Le gratuit de la matière d'abord ; l'offre payante vient après. */
+    (function(){var ids=A.gratuitDabord(A.resDeMatiere(c,M.id)),gr=ids.filter(function(i){return !VRT_RES.items[i].ab}),sel=A.selectionGratuite(ids,4);
+      if(!gr.length&&!nred)return "";
+      return '<section class="gout" aria-labelledby="goutT"><div class="gout-t"><span class="gout-eb">'+A.pic("cadeau",16)+'Gratuit · sans abonnement</span><h2 id="goutT">Commence gratuitement</h2>'+
+        '<p>'+(nred?'Le début de chacun des <b>'+nred+' cours rédigés</b> est en libre accès. ':'')+(gr.length?'<b>'+gr.length+' ressource'+(gr.length>1?'s':'')+' gratuite'+(gr.length>1?'s':'')+'</b> en '+esc(M.nom)+' : corrigés, méthodes, entraînements.':'')+'</p></div>'+
+        (sel.length?'<div class="res-g">'+sel.map(A.carteRes).join("")+'</div>':'')+
+        (gr.length>sel.length?'<a class="gout-l" href="ressources.html?c='+encodeURIComponent(c)+'&m='+M.id+'">Voir les '+gr.length+' ressources gratuites ›</a>':'')+'</section>';})()+
     (AT?'<section class="prof-fr" aria-label="Professeurs de français">'+A.pic("plume",30)+'<div><b>Vous enseignez le français en '+esc(c)+' ?</b><span>Chaque chapitre ouvre l’évaluation de sa séquence dans l’Atelier de français : texte du corpus, questions, barème et corrigé conformes au MINESEC, relecture par vos collègues.</span></div><a href="'+lienAtelier(0,'progressions')+'">Ouvrir l’Atelier</a></section>':'')+
     '<nav class="filtres" aria-label="Filtrer le programme">'+
       '<button type="button" aria-pressed="true" data-f="">Tout le programme<span class="cpt">'+tot+'</span></button>'+
       (nred?'<button type="button" aria-pressed="false" data-f="red" style="--k:#9A6F00;--kp:#FFF3CC">Cours rédigés<span class="cpt">'+nred+'</span></button>':'')+
       trims.map(function(t){return '<button type="button" aria-pressed="false" data-f="'+esc(t)+'" style="'+teinte(TRIM[t]||PAL[3])+'">'+esc(t)+'</button>'}).join("")+
     '</nav>'+
-    (function(){var ids=A.resDeMatiere(c,M.id);if(!ids.length)return "";var n=ids.length,dir=ids.filter(function(i){return VRT_RES.items[i].t==="direct"||VRT_RES.items[i].t==="labo"}).slice(0,3);return '<section class="res-mat"><div class="sec-t" style="margin-top:0"><h2>Pour cette matière</h2><a href="ressources.html?c='+encodeURIComponent(c)+'&m='+M.id+'">Voir les '+n+' ressources ›</a></div>'+(dir.length?'<div class="res-g">'+dir.map(A.carteRes).join("")+'</div>':'')+'</section>'})()+
+    (function(){var ids=A.resDeMatiere(c,M.id);if(!ids.length)return "";var n=ids.length;return '<section class="res-mat"><div class="sec-t" style="margin-top:0"><h2>Pour cette matière</h2><a href="ressources.html?c='+encodeURIComponent(c)+'&m='+M.id+'">Voir les '+n+' ressources ›</a></div></section>'})()+
     (sc.length?'<div class="scenes-m">'+sc.map(function(s){return '<a class="scene" href="/scenes/'+s+'.html"><span class="pl">'+A.pic("masques",30)+'</span><span><small>Scène vivante</small><strong>'+esc((window.VRT_SCENES_TITRES||{})[s]||s)+'</strong></span><span class="jouer">'+A.pic("lecture",30)+'</span></a>'}).join("")+'</div>':'')+
+    (tot&&nred<tot?A.offre(c,M.id,'matiere'):'')+
     '<div id="liste"></div></div>';
   rendu("");
   /* arrivée depuis l'Atelier (?seq=N) : on montre la séquence demandée */
