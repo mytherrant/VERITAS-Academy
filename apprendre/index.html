@@ -132,6 +132,14 @@
 .pc-pt{background-image:url(/assets/photo-groupe-600.webp);background-image:image-set(url(/assets/photo-groupe-600.webp) 1x,url(/assets/photo-groupe.webp) 2x)}
 @media (max-width:900px){.pcartes{grid-template-columns:1fr 1fr}}
 @media (max-width:520px){.pcartes{grid-template-columns:1fr}.pc-ph{height:140px}}
+/* 10/11/2026 — « enlève les ronds autour des classes » (Jacques) : texte
+   simple, la classe choisie soulignée. Par identifiant : passe devant
+   .classes button d'apprendre.css et des règles ci-dessus. */
+#classes{gap:4px 20px;align-items:baseline}
+#classes button{border:0;border-radius:0;background:none;padding:6px 0 5px;border-bottom:2px solid transparent;color:var(--k,#1E499B);font:600 15px var(--sans);transform:none}
+#classes button:hover{border-bottom-color:var(--k,#1E499B);background:none;transform:none}
+#classes button[aria-pressed="true"]{background:none;color:var(--k,#1E499B);border-bottom-color:var(--k,#1E499B);font-weight:700}
+#classes button.sep{margin-left:14px}
 </style>
 </head>
 <body class="eleve">
