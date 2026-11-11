@@ -1,3 +1,12 @@
+## Ancien bandeau retiré, en-têtes éclaircis (11/11/2026)
+
+Demande de Jacques : « L'ancienne entête continue de s'afficher dans les pages intérieures, enlève et éclaircis un peu les entêtes. »
+
+- **constellation.html** portait encore une copie figée du « bandeau d'annonce » de l'ancienne vitrine (« VÉRITAS accompagne et suit les apprenants… », Corrigés gratuits / Boutique / Atelier) : retiré. C'était la seule page ; les 576 autres utilisent la barre commune.
+- **En-têtes** (`header.top`, `.eh`, `.vh-hero`, écrans de l'application `.vh-app`) : dégradé #0d1a3d→#1d3168→#3a2a7a remplacé par #1E499B→#2D5DB5→#5B4FA8, halos adoucis (`tools/habiller_pages.py` → `assets/veritas-habillage.css`) ; même éclaircissement dans `assets/veritas-eleve.css` (en-tête et bande d'appel de l'espace élève).
+- Chapeau en #EEF3FC (était #cdd8f2) : 5,6 à 7,6 de contraste sur le nouveau bleu ; titre blanc 6,3 à 8,5.
+- ⚠️ `background-color` reste #1d3168 sous le dégradé : `veritas-harmonie.js` le lit pour choisir l'encre ; plus clair, il passait le chapeau en bleu nuit.
+
 ## Prix du plan Starter : 1 200 F (11/11/2026)
 
 Décision de Jacques : « 1200 frs ».
