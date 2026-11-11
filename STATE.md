@@ -1,3 +1,35 @@
+## Premières leçons : chaque classe a au moins 5 leçons (11/11/2026)
+
+Demande de Jacques : « Prépare les premières leçons avec la même rigueur, situations ancrées dans le contexte camerounais, QCM… » et « chaque classe doit avoir au moins 5 leçons disponibles ».
+
+- **Relevé avant** (leçons publiques de lecons.js + aperçus payants) : 5e 1, 4e 4, 2nde A 0, 2nde C 0 ; toutes les autres classes ≥ 6 (6e 11, 3e 160, 1re A 55, 1re C 221, 1re D 185, Tle A 92, Tle C 170, Tle D 193).
+- **15 leçons** dans `apprendre/_src/06-premieres-lecons.js`, premières leçons de l'année de la progression MINESEC 2026-2027 :
+  - 2nde C : ℝ et ses sous-ensembles ; mesure et erreurs ; l'expérience de Rutherford ; le texte théâtral ; la production.
+  - 2nde A : ℝ et ses sous-ensembles ; l'énonciation ; les disciplines affinitaires de l'histoire ; qu'est-ce que la philosophie ? ; lire une carte.
+  - 5e : division euclidienne ; subordonnée relative ; Pygmées et Sao ; croissance de la population mondiale.
+  - 4e : décomposition en facteurs premiers.
+- Format des leçons d'examen : trois parties de cours (définitions, méthode, exemples, « Le savais-tu ? »), entraînement au format de l'épreuve (Partie A ressources, Partie B compétences avec situation camerounaise et réponse attendue), fiche de révision, exercice, 10 QCM à 4 choix corrigés, rattachement APC. Toutes rattachées à leur ligne de progression (n° 1 sauf Français : n° 2 en 2nde C, n° 3 en 5e).
+- Publiques en entier (comme les leçons de lecons.js) : la suite payante n'existe que pour les aperçus construits par `build_apprendre_payant.cjs` à partir des sources privées.
+- `lecons.js` reconstruit (`tools/build_apprendre.py`, 72 leçons) ; 15 pages `apprendre/cours/*.html` et pages programme régénérées (`apprendre_statique.js`), habillées (591 pages).
+
+## Ancien bandeau retiré, en-têtes éclaircis (11/11/2026)
+
+Demande de Jacques : « L'ancienne entête continue de s'afficher dans les pages intérieures, enlève et éclaircis un peu les entêtes. »
+
+- **constellation.html** portait encore une copie figée du « bandeau d'annonce » de l'ancienne vitrine (« VÉRITAS accompagne et suit les apprenants… », Corrigés gratuits / Boutique / Atelier) : retiré. C'était la seule page ; les 576 autres utilisent la barre commune.
+- **En-têtes** (`header.top`, `.eh`, `.vh-hero`, écrans de l'application `.vh-app`) : dégradé #0d1a3d→#1d3168→#3a2a7a remplacé par #1E499B→#2D5DB5→#5B4FA8, halos adoucis (`tools/habiller_pages.py` → `assets/veritas-habillage.css`) ; même éclaircissement dans `assets/veritas-eleve.css` (en-tête et bande d'appel de l'espace élève).
+- Chapeau en #EEF3FC (était #cdd8f2) : 5,6 à 7,6 de contraste sur le nouveau bleu ; titre blanc 6,3 à 8,5.
+- ⚠️ `background-color` reste #1d3168 sous le dégradé : `veritas-harmonie.js` le lit pour choisir l'encre ; plus clair, il passait le chapeau en bleu nuit.
+
+## Prix du plan Starter : 1 200 F (11/11/2026)
+
+Décision de Jacques : « 1200 frs ».
+
+- **Source unique** : le tarif se règle dans le tableau de bord (« Prix & calculs ») ; `api/public_data.php` le publie (`elearning_plans`) et l'octroi l'EXIGE. Le catalogue serveur (`api/_auth_lib.php`) dit déjà Starter 1 200 F, Pro 2 400 F.
+- **En production, le tableau de bord annonçait encore 1 000 F** (vitrine en ligne : « dès 1 000 F »). À corriger par l'administration dans « Prix & calculs » : la base de production n'est pas dans le dépôt.
+- **apprendre/commun.js** (`offre`) : « dès 1 000 F » et « 2 000 F » (Pro) étaient écrits en dur. Ils suivent maintenant le tarif publié (même lecture que la vitrine), repli sur le catalogue 1 200 / 2 400. `commun.js?v=20261111b`.
+- La vitrine pré-rendue porte déjà 1 200 en repli (5 mentions `data-vrt-prix="abo_starter_m"`).
+
 ## Cours lisibles, le gratuit d'abord dans Apprendre, jeux branchés (11/11/2026)
 
 Demande de Jacques : « Trop sombre et illisible. Vérifie que Apprendre est bien organisé, intuitif, facile à lire, que tout est branché selon les classes, les paiements des abonnements automatiques et bien branchés, la frontière entre payant et non payant ; mettre les ressources gratuites au début ou en évidence : il goûte, l'envie est suscitée et l'abonnement peut suivre. » Puis : « Enlève les traits foncés de gauche. »
