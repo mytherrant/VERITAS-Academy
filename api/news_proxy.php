@@ -33,15 +33,21 @@ require_once __DIR__ . '/_sentinel.php';
 vrt_sentinelle('lecture');
 
 
+// 11/11/2026 — « Juste les informations pertinentes et plus récentes »
+// (Jacques). Apprendre affichait en novembre les résultats du bac de JUILLET :
+// Google News classe par pertinence, et on gardait les 12 premiers. Désormais
+// `when:60d` restreint la recherche, puis on trie par date (plus récent
+// d'abord) et on écarte tout article de plus de 60 jours. `ts` est renvoyé
+// pour que le client trie sans relire la date affichée.
 $feeds = [
-    'education'     => 'https://news.google.com/rss/search?q=education+cameroun+scolaire&hl=fr&gl=CM&ceid=CM:fr',
-    'minesec'       => 'https://news.google.com/rss/search?q=MINESEC+cameroun+enseignement+secondaire&hl=fr&gl=CM&ceid=CM:fr',
-    'grandes_ecoles'=> 'https://news.google.com/rss/search?q=grandes+%C3%A9coles+concours+universit%C3%A9+cameroun&hl=fr&gl=CM&ceid=CM:fr',
-    'bourses'       => 'https://news.google.com/rss/search?q=bourses+%C3%A9tudes+cameroun+2026+candidature&hl=fr&gl=CM&ceid=CM:fr',
+    'education'     => 'https://news.google.com/rss/search?q=education+cameroun+scolaire+when:60d&hl=fr&gl=CM&ceid=CM:fr',
+    'minesec'       => 'https://news.google.com/rss/search?q=MINESEC+cameroun+enseignement+secondaire+when:60d&hl=fr&gl=CM&ceid=CM:fr',
+    'grandes_ecoles'=> 'https://news.google.com/rss/search?q=grandes+%C3%A9coles+concours+universit%C3%A9+cameroun+when:60d&hl=fr&gl=CM&ceid=CM:fr',
+    'bourses'       => 'https://news.google.com/rss/search?q=bourses+%C3%A9tudes+cameroun+2026+candidature+when:60d&hl=fr&gl=CM&ceid=CM:fr',
     // Apprendre (10/11/2026) : l'actualité de l'examen de la classe choisie.
-    'bepc'          => 'https://news.google.com/rss/search?q=BEPC+cameroun+OBC&hl=fr&gl=CM&ceid=CM:fr',
-    'probatoire'    => 'https://news.google.com/rss/search?q=probatoire+cameroun+OBC&hl=fr&gl=CM&ceid=CM:fr',
-    'bac'           => 'https://news.google.com/rss/search?q=baccalaur%C3%A9at+cameroun+OBC&hl=fr&gl=CM&ceid=CM:fr',
+    'bepc'          => 'https://news.google.com/rss/search?q=BEPC+cameroun+OBC+when:60d&hl=fr&gl=CM&ceid=CM:fr',
+    'probatoire'    => 'https://news.google.com/rss/search?q=probatoire+cameroun+OBC+when:60d&hl=fr&gl=CM&ceid=CM:fr',
+    'bac'           => 'https://news.google.com/rss/search?q=baccalaur%C3%A9at+cameroun+OBC+when:60d&hl=fr&gl=CM&ceid=CM:fr',
 ];
 
 $cat = isset($_GET['cat']) ? $_GET['cat'] : 'education';
@@ -53,7 +59,7 @@ if (!array_key_exists($cat, $feeds)) {
 // Cache fichier — 10 minutes (raccourci pour fraicheur)
 // ?nocache=1 bypasse complètement le cache (bouton "Actualiser")
 $cacheDir  = sys_get_temp_dir() . '/';
-$cacheFile = $cacheDir . 'veritas_news_' . $cat . '.json';
+$cacheFile = $cacheDir . 'veritas_news2_' . $cat . '.json';   // « 2 » : format trié par date (11/11/2026)
 $noCache   = isset($_GET['nocache']) && $_GET['nocache']==='1';
 $cacheAge  = file_exists($cacheFile) ? (time() - filemtime($cacheFile)) : 999999;
 // « Actualiser » est public : sans plancher, chaque appel déclenchait une
@@ -122,6 +128,7 @@ if (!$rss || !isset($rss->channel->item)) {
 }
 
 $items = [];
+$__np_limite = time() - 60 * 86400;
 foreach ($rss->channel->item as $item) {
     $title  = html_entity_decode((string)$item->title, ENT_QUOTES, 'UTF-8');
     $link   = (string)$item->link;
@@ -139,17 +146,19 @@ foreach ($rss->channel->item as $item) {
 
     // Formater la date
     $ts        = strtotime($date);
-    $dateStr   = $ts ? date('d/m/Y', $ts) : $date;
+    // Sans date lisible ou trop ancien : pas une actualité.
+    if (!$ts || $ts < $__np_limite) continue;
 
     $items[] = [
         'title'  => $title,
         'link'   => $link,
-        'date'   => $dateStr,
+        'date'   => date('d/m/Y', $ts),
         'source' => $source,
+        'ts'     => $ts,
     ];
-
-    if (count($items) >= 12) break;
 }
+usort($items, function ($a, $b) { return $b['ts'] - $a['ts']; });
+$items = array_slice($items, 0, 12);
 
 $result = ['items' => $items, 'from_cache' => false, 'cat' => $cat, 'fetched_at' => date('c')];
 @file_put_contents($cacheFile, json_encode($result));

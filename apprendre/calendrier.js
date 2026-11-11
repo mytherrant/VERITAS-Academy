@@ -177,22 +177,38 @@
       .then(function (j) { return (j && j.items) || []; })
       .catch(function () { return []; })]));
   }
+  /* Date d'un article : `ts` (secondes, serveur depuis le 11/11/2026), sinon « jj/mm/aaaa ». */
+  function quand(x) {
+    if (x.ts) return +x.ts * 1000;
+    var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(x.date || "");
+    return m ? new Date(+m[3], +m[2] - 1, +m[1], 12).getTime() : 0;
+  }
   function lien(u) { return /^https?:\/\//i.test(u || "") ? u : ""; }
   function actus(el, c) {
     var ex = examen(c), demande = c;
     el.innerHTML = '<p class="act-att">Chargement des actualités…</p>';
     Promise.all([flux("minesec"), ex ? flux(ex.cat) : Promise.resolve([])]).then(function (r) {
       if (demande !== el.getAttribute("data-classe")) return;   // classe changée entre-temps
-      var vus = {}, tout = [];
-      r[1].concat(r[0]).forEach(function (x) {
-        var k = (x.title || "").toLowerCase().slice(0, 70); if (!x.title || !lien(x.link) || vus[k]) return; vus[k] = 1;
-        var mien = ex && ex.mots.test(x.title), autre = !mien && AUTRES.test(x.title);
-        tout.push({ x: x, rang: mien ? 0 : autre ? 2 : 1, mien: mien });
-      });
-      tout.sort(function (a, b) { return a.rang - b.rang; });
+      /* 11/11/2026 — « Juste les informations pertinentes et plus récentes »
+         (Jacques) : en novembre, l'encart montrait les résultats du bac de
+         juillet. On ne garde que les 45 derniers jours, on écarte l'actualité
+         des AUTRES examens, on fusionne les doublons (même sujet, autre
+         journal) et on classe du plus récent au plus ancien. */
+      var LIMITE = Date.now() - 45 * 864e5, vus = {}, tout = [];
+      var cle = function (t) { return String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(function (w) { return w.length > 3; }).slice(0, 6).sort().join(" "); };
+      r[1].concat(r[0]).map(function (x) { return { x: x, t: x ? quand(x) : 0 }; })
+        .sort(function (a, b) { return b.t - a.t; })                // le plus récent d'abord : c'est lui qui reste d'un doublon
+        .forEach(function (o) {
+          var x = o.x;
+          if (!x || !x.title || !lien(x.link) || !o.t || o.t < LIMITE) return;   // trop ancien, ou sans date
+          var mien = ex && ex.mots.test(x.title), autre = !mien && AUTRES.test(x.title);
+          if (autre) return;                                       // l'examen d'une autre classe
+          var k = cle(x.title); if (vus[k]) return; vus[k] = 1;
+          tout.push({ x: x, t: o.t, mien: mien });
+        });
       var L = tout.slice(0, 6);
       if (!L.length) {
-        el.innerHTML = '<p class="act-vide">Les actualités ne répondent pas pour l\'instant. Les communiqués officiels restent sur <a href="https://www.minesec.gov.cm" target="_blank" rel="noopener">minesec.gov.cm</a>.</p>';
+        el.innerHTML = '<p class="act-vide">Pas d\'actualité récente' + (ex ? ' sur le ' + esc(ex.nom) + ' ni' : '') + ' sur le ministère ces dernières semaines. Les communiqués officiels restent sur <a href="https://www.minesec.gov.cm" target="_blank" rel="noopener">minesec.gov.cm</a>.</p>';
         return;
       }
       el.innerHTML = '<ul class="act-l">' + L.map(function (o) {
@@ -201,7 +217,7 @@
           (o.mien ? '<span class="act-tag">' + esc(ex.nom) + '</span>' : "") +
           '<b>' + esc(x.title) + '</b><small>' + esc([x.source, x.date].filter(Boolean).join(" · ")) + '</small></a></li>';
       }).join("") + '</ul>' +
-      '<p class="act-src">' + (ex ? "Le " + esc(ex.nom) + " d'abord, puis l'actualité du ministère. " : "") + 'Sources de presse ; le texte officiel fait foi sur <a href="https://www.minesec.gov.cm" target="_blank" rel="noopener">minesec.gov.cm</a>.</p>';
+      '<p class="act-src">' + "Les 45 derniers jours, du plus récent au plus ancien" + (ex ? ", " + esc(ex.nom) + " et ministère" : "") + ". " + 'Sources de presse ; le texte officiel fait foi sur <a href="https://www.minesec.gov.cm" target="_blank" rel="noopener">minesec.gov.cm</a>.</p>';
     });
   }
 

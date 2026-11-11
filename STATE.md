@@ -21,6 +21,14 @@ Demande de Jacques : « Structure et dispose bien les icônes » (grille des res
 - Styles en fin d'apprendre.css (`.tp-gr`, `.tp-gt`, `.tp-gl`, `.tp-i`, `.tp-t`).
 - **Audit des cas similaires** (« Audite et corrige tous les cas similaires ») : toutes les icônes AU TRAIT d'Apprendre prennent l'anneau du site (règle du 25/10 : rond blanc, filet de 3 px teinté, icône bleu nuit, centrée) — grille « Tout pour progresser », portes et cartes de ressources.html, ressources des pages matière et notes (`carteRes`), titres de famille. La règle « sans pastille ni rond » du 10/11 est ainsi remplacée pour ces icônes. Les icônes DE MATIÈRE (illustrations en couleur) restent nues, comme demandé le 08/11 ; dans les cartes « Mes matières », la ligne « rédigées » et la barre s'alignent désormais sous le nom. `apprendre.css?v=20261111b` sur les sept pages.
 
+## Actualités MINESEC : seulement le pertinent et le récent (11/11/2026)
+
+Demande de Jacques : « Juste les informations pertinentes et plus récentes » (Apprendre, Tle C, affichait en novembre les résultats du bac de juillet).
+
+- **api/news_proxy.php** : `when:60d` ajouté aux sept recherches Google News ; articles sans date ou de plus de 60 jours écartés ; tri du plus récent au plus ancien AVANT de garder les 12 premiers (avant : les 12 premiers dans l'ordre de pertinence de Google) ; champ `ts` renvoyé. Nouveau nom de cache (`veritas_news2_*`) pour ne pas resservir l'ancienne liste.
+- **apprendre/calendrier.js** (`actus`) : 45 derniers jours seulement ; l'actualité des AUTRES examens est écartée (un élève de Tle ne voit plus le BEPC) ; doublons fusionnés (même sujet, autre journal : on garde le plus récent) ; tri par date ; message clair s'il n'y a rien de récent. `calendrier.js?v=20261111e`.
+- La vitrine et l'application lisent le même flux : elles reçoivent elles aussi une liste récente triée par date.
+
 ## Carrousel Apprendre qui défile tout seul (11/11/2026)
 
 Demande de Jacques : « Créer une animation qui permet aux images ci de défiler lentement. »
