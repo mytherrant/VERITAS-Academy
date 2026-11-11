@@ -159,10 +159,13 @@
   var cache = {};
   function flux(cat) {
     if (cache[cat]) return cache[cat];
-    return (cache[cat] = fetch("/api/news_proxy.php?cat=" + cat, { credentials: "omit" })
+    /* 10 s au plus par flux : un flux qui pend ne doit pas laisser l'encart
+       sur « Chargement… » ni retenir les actualités du ministère. */
+    var lent = new Promise(function (ok) { setTimeout(function () { ok([]); }, 10000); });
+    return (cache[cat] = Promise.race([lent, fetch("/api/news_proxy.php?cat=" + cat, { credentials: "omit" })
       .then(function (r) { return r.ok ? r.json() : { items: [] }; })
       .then(function (j) { return (j && j.items) || []; })
-      .catch(function () { return []; }));
+      .catch(function () { return []; })]));
   }
   function lien(u) { return /^https?:\/\//i.test(u || "") ? u : ""; }
   function actus(el, c) {
