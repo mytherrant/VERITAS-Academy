@@ -93,6 +93,9 @@
         }
       }
     }
+    if (now > d("2027-06-11", "15:30")) return { t: "Cours terminés · examens officiels et grandes vacances", p: 100 };
+    for (var j = 0; j < TRIMESTRES.length; j++) if (now >= TRIMESTRES[j].de && now <= TRIMESTRES[j].a)
+      return { t: TRIMESTRES[j].n + (TRIMESTRES[j].n === 1 ? "ᵉʳ" : "ᵉ") + " trimestre · entre deux séquences", p: Math.min(p, 100) };
     return { t: "Entre deux trimestres", p: Math.min(p, 100) };
   }
 
@@ -104,16 +107,23 @@
     var now = new Date(), ex = examen(c), L = echeances(c), sit = situation(now);
     var venir = L.filter(function (e) { return (e.a || e.de) > now; });
     /* Le grand compteur : l'examen pour une classe d'examen, sinon les prochaines vacances. */
-    var cible = ex ? venir.filter(function (e) { return e.cle; })[0] : venir.filter(function (e) { return e.vac && e.de > now; })[0];
+    var cible = ex ? venir.filter(function (e) { return e.cle; })[0] : venir.filter(function (e) { return e.vac; })[0];
     cible = cible || venir[0];
-    var titre = !cible ? "Bonne fin d'année" : ex && cible.cle ? "Avant le " + ex.nom : ex ? "Prochaine étape : " + cible.t.charAt(0).toLowerCase() + cible.t.slice(1) : "Avant les " + cible.t.charAt(0).toLowerCase() + cible.t.slice(1);
+    /* Une échéance déjà ouverte (épreuves, vacances) : on compte jusqu'à sa fin. */
+    var enCours = cible && cible.de <= now && cible.a && cible.a > now;
+    var min = function (t) { return t.charAt(0).toLowerCase() + t.slice(1); };
+    var titre = !cible ? "Bonne fin d'année"
+      : enCours ? (cible.vac ? "Bonnes " + min(cible.t) + " · reprise dans" : "En cours · fin dans")
+      : ex && cible.cle ? "Avant le " + ex.nom
+      : cible.vac ? "Avant les " + min(cible.t)
+      : "Prochaine étape : " + min(cible.t);
     var note = ex
       ? "Décision n° 966/26/MINESEC du 1ᵉʳ oct. 2026, session 2027."
       : "Classe de " + c + " : pas d'examen officiel cette année, mais six séquences et des compositions qui comptent pour le passage.";
     var proch = venir.filter(function (e) { return e !== cible; }).slice(0, 5);
     el.innerHTML =
       '<div class="cal-g">' +
-      '<div class="cal-cpt"' + (cible ? ' data-cible="' + cible.de.getTime() + '"' : "") + '>' +
+      '<div class="cal-cpt"' + (cible ? ' data-cible="' + (enCours ? cible.a : cible.de).getTime() + '"' : "") + '>' +
         '<p class="cal-sur">' + si("i-clock", 16) + ' ' + esc(titre) + '</p>' +
         (cible ? '<div class="cal-chiffres" role="timer" aria-live="off"><span><b data-u="j">–</b><small>jours</small></span><span><b data-u="h">–</b><small>heures</small></span><span><b data-u="m">–</b><small>min</small></span><span><b data-u="s">–</b><small>s</small></span></div>' +
           '<p class="cal-quand">' + esc(cible.t) + ' · ' + periode(cible) + '</p>' : '<p class="cal-quand">Rentrée 2027-2028 le 6 sept. 2027.</p>') +
