@@ -4,7 +4,8 @@ Demande de Jacques : « Structure et dispose bien les icônes » (grille des res
 
 - Les familles sont rangées sous les quatre rubriques de `A.GROUPES` : Où j'en suis, Comprendre et apprendre, M'entraîner, Besoin d'aide (une rubrique vide n'apparaît pas).
 - Chaque carte : icône dans un rond de 52 px teinté de la couleur de sa famille, titre, compteur en pastille. Téléphone : deux colonnes, icône en haut et contenu centré ; ordinateur : icône à gauche, titre et compteur empilés.
-- Styles en fin d'apprendre.css (`.tp-gr`, `.tp-gt`, `.tp-gl`, `.tp-i`, `.tp-t`) ; `apprendre.css?v=20261111a` sur les sept pages d'Apprendre.
+- Styles en fin d'apprendre.css (`.tp-gr`, `.tp-gt`, `.tp-gl`, `.tp-i`, `.tp-t`).
+- **Audit des cas similaires** (« Audite et corrige tous les cas similaires ») : toutes les icônes AU TRAIT d'Apprendre prennent l'anneau du site (règle du 25/10 : rond blanc, filet de 3 px teinté, icône bleu nuit, centrée) — grille « Tout pour progresser », portes et cartes de ressources.html, ressources des pages matière et notes (`carteRes`), titres de famille. La règle « sans pastille ni rond » du 10/11 est ainsi remplacée pour ces icônes. Les icônes DE MATIÈRE (illustrations en couleur) restent nues, comme demandé le 08/11 ; dans les cartes « Mes matières », la ligne « rédigées » et la barre s'alignent désormais sous le nom. `apprendre.css?v=20261111b` sur les sept pages.
 
 ## Carrousel Apprendre qui défile tout seul (11/11/2026)
 
