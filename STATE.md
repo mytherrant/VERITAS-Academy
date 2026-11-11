@@ -1,3 +1,13 @@
+## Classes & Forum au style de la vitrine, connexion et inscription par classe (11/11/2026)
+
+Demande de Jacques : « Harmoniser la mise en forme style vitrine, le mode de connexion et inscription relier à chaque classe. »
+
+- **`_cvRenderHome` (app.js)** réécrit avec des classes `.cvx-*` (app.css, préfixe `#VISITOR #vContent #cvHome` pour passer devant theme-lws) : cartes blanches à filet, anneau de couleur autour des icônes, pastilles de salons, boutons en pilule jaune / contour bleu, Poppins. Plus d'emoji : icônes du sprite `#lc-*` (`_cvIcoCanal` choisit l'icône d'après le nom du salon). Thème sombre couvert.
+- **Visiteur non connecté** : bloc « 1 · je choisis ma classe, 2 · je crée mon compte ou je me connecte, 3 · j'arrive dans le salon », boutons « Créer mon compte gratuit » / « J'ai déjà un compte ». Chaque carte porte « Je m'inscris dans cette classe » et « J'ai un compte ».
+- **`_cvRejoindre(cid, mode)`** retient la classe (`sessionStorage._cvApres`) et ouvre la connexion ou l'inscription, avec le menu « Classe » du formulaire pré-réglé sur cette classe. **`_cvReprendre()`**, appelée par `initVisitor()` (900 ms, après `_vEspaceSiFondVide`), ouvre ensuite le premier salon de cette classe. Les élèves du centre (`go2SES`, espace #APP) ne sont pas concernés.
+- **Messages incitatifs** (« pousser les élèves à adhérer ») : titre « Ta classe t'attend : ne révise plus seul·e », quatre avantages (question le soir, annonces des enseignants, réviser à plusieurs, gratuit en deux minutes), accroche sur chaque carte vide, badge « Année d'examen · on révise ensemble » (3ème, 1ère, Tle, GCE, techniques), bandeau final « Prêt·e à rejoindre ta classe ? ». Aucun chiffre inventé.
+- Version des assets : 1.20.70 (coquille, sw.js et pages qui la portaient).
+
 ## Apprendre en premier panneau, photos agrandies, compte à rebours embelli (11/11/2026)
 
 Demande de Jacques : « Apprendre doit être le premier panneau. Agrandir les images sur téléphone. Structure aussi bien les éléments dans apprendre pour captiver et faciliter l'utilisation par les apprenants. Embellis le panneau du compte à rebours. »
