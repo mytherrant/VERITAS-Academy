@@ -4866,6 +4866,9 @@ window._endOnboarding=function(skipped){
 
 
 function initVisitor(){
+  // 11/11/2026 : la classe choisie avant la connexion / l'inscription s'ouvre
+  // une fois l'espace visiteur rendu (après _vEspaceSiFondVide, posé à 650 ms).
+  setTimeout(function(){ try{ if(typeof _cvReprendre==='function') _cvReprendre(); }catch(e){} },900);
   const img=$("vLogo");if(img)img.src=getLogo();
   const nm=$("vName");if(nm)nm.textContent=DB.school?.nom||"VÉRITAS Academy";
   const sl=$("vSlogan");if(sl)sl.textContent=DB.school?.slogan||"Centre d'Excellence Scolaire";
@@ -24886,6 +24889,50 @@ function _cvTxt(s){
 }
 function _cvNom(s){ return _esc(_cvTxt(s)); }
 
+/* 11/11/2026 — « Harmoniser la mise en forme style vitrine, le mode de
+   connexion et inscription relier à chaque classe » (Jacques).
+   Cartes blanches, anneau de couleur, pastilles et boutons en pilule de la
+   vitrine (styles .cvx-* dans app.css). Un visiteur choisit SA classe :
+   chaque carte porte « Je m'inscris » (formulaire pré-réglé sur la classe) et
+   « J'ai un compte » ; après connexion ou inscription, _cvReprendre() le
+   ramène dans cette classe. */
+function _cvIco(n,z){ z=z||18; return "<svg width='"+z+"' height='"+z+"' class='cvx-svg' aria-hidden='true'><use href='#lc-"+n+"'/></svg>"; }
+function _cvIcoCanal(ch){
+  var k=_cvCle(ch&&ch.nom);
+  if(/^(general|general)/.test(k))return 'message';
+  if(/annonce|announcement/.test(k))return 'megaphone';
+  if(/francais|english|literature|litterature/.test(k))return 'pencil';
+  if(/math/.test(k))return 'ruler';
+  if(/science|physi|chimi|chemistry|biolog|svt/.test(k))return 'flask';
+  if(/histo|geo|philo/.test(k))return 'globe';
+  if(/compta|eco|droit|commerc/.test(k))return 'coins';
+  if(/electro|meca|dessin|techn/.test(k))return 'tool';
+  return 'book';
+}
+function _cvRejoindre(cid,mode){
+  var c=(DB.classrooms||[]).find(function(x){return x.id===cid;});
+  try{ sessionStorage.setItem('_cvApres',cid); }catch(e){}
+  if(mode==='connexion'){ showLogin('eleve'); return; }
+  showRegisterForm('');
+  // Pré-régler la classe du formulaire sur celle qu'on vient de choisir.
+  setTimeout(function(){
+    var sel=document.getElementById('rCls'); if(!sel||!c)return;
+    var k=_cvCle(c.nom), opt=[].slice.call(sel.options).find(function(o){return _cvCle(o.value||o.text)===k;});
+    if(opt){ sel.value=opt.value||opt.text; try{ sel.dispatchEvent(new Event('change',{bubbles:true})); }catch(e){} }
+  },60);
+}
+/* Appelée après initVisitor() : la classe choisie avant la connexion s'ouvre. */
+function _cvReprendre(){
+  var cid=''; try{ cid=sessionStorage.getItem('_cvApres')||''; }catch(e){}
+  if(!cid||!SES)return;
+  try{ sessionStorage.removeItem('_cvApres'); }catch(e){}
+  if(!document.getElementById('vContent'))return;
+  var c=(DB.classrooms||[]).find(function(x){return x.id===cid;});
+  if(c&&c.channels&&c.channels.length) showClasseVirtuelle(c.id,c.channels[0].id);
+  else showClasseVirtuelle();
+}
+window._cvRejoindre=_cvRejoindre; window._cvReprendre=_cvReprendre;
+
 function _cvRenderHome(){
   _cvStopTimer();
   var cls=DB.classrooms||[];
@@ -24898,69 +24945,92 @@ function _cvRenderHome(){
   }
   var posts=(DB.forumPosts||[]).filter(function(p){return p&&p.classroomId;});
   var today2=new Date().toISOString().slice(0,10);
-  var todayPosts=posts.filter(function(p){return (p.dateISO||'').startsWith(today2);}).length;
-  var h="<div class='vsec' id='cvHome' style='max-width:980px;margin:0 auto'>";
-  h+="<div style='display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px'>";
-  h+="<div><div class='vsec-title vsec-title-hero' style='margin-bottom:4px'>🏫 Classes &amp; Forum</div><div style='font-size:13px;color:var(--ink4)'>Échangez avec vos enseignants et vos camarades de classe</div></div>";
-  h+="<div style='display:flex;gap:8px;flex-wrap:wrap'>";
-  h+="<button class='btn bo sm' onclick='showForum()'>💬 Forum public</button>";
-  if(iA()){h+="<button class='btn bi sm' onclick='_cvAdminPanel()'><svg class='vico bico' aria-hidden='true'><use href='#lc-sliders'/></svg>Gérer les classes</button>";}
+  var h="<div class='vsec cvx' id='cvHome'>";
+  // En-tête façon vitrine : pastille, titre, chapeau, actions en pilule
+  h+="<div class='cvx-tete'><div>";
+  h+="<span class='cvx-eb'>"+_cvIco('university',15)+"Classes virtuelles · de la 6<sup>e</sup> à la Terminale</span>";
+  h+="<div class='vsec-title vsec-title-hero cvx-h1'>Classes &amp; Forum</div>";
+  h+="<p class='cvx-chapo'>Échangez avec vos enseignants et vos camarades, dans le salon de votre classe.</p></div>";
+  h+="<div class='cvx-actions'><button class='cvx-b2' onclick='showForum()'>"+_cvIco('forum',17)+"Forum public</button>";
+  if(iA()){h+="<button class='cvx-b2' onclick='_cvAdminPanel()'>"+_cvIco('sliders',17)+"Gérer les classes</button>";}
   h+="</div></div>";
   if(!SES){
-    h+="<div class='ib ibi mb14'><span>🔐</span><span>Les forums de classe sont réservés aux élèves et enseignants inscrits. <button class='btn bi xs' onclick=\"showLogin('eleve')\">Se connecter</button></span></div>";
+    // Comment entrer, en trois temps — la connexion se fait DANS la classe choisie.
+    h+="<div class='cvx-acces'><span class='cvx-acces-i'>"+_cvIco('lock',22)+"</span><div class='cvx-acces-t'>";
+    h+="<b>Ta classe t'attend : ne révise plus seul·e</b>";
+    h+="<p class='cvx-acces-p'>Chaque classe a son salon, réservé à ses élèves et à leurs enseignants. Ici, on s'entraide pour comprendre, préparer les séquences et réussir l'examen.</p>";
+    h+="<div class='cvx-plus'>"+[
+      ['help','#1E499B','Une question, même tard le soir ?','Pose-la dans le salon : camarades et enseignants peuvent y répondre.'],
+      ['megaphone','#A84200','Rien ne t\u2019échappe','Devoirs, dates des séquences, corrigés : les annonces de tes enseignants arrivent ici.'],
+      ['users','#5B4FA8','Réviser à plusieurs','Partager ses méthodes, s\u2019expliquer un exercice, se motiver avant les compositions.'],
+      ['gift','#007E11','Gratuit, en deux minutes','Un nom, un numéro WhatsApp, ta classe : c\u2019est tout.']
+    ].map(function(a){return "<div class='cvx-plus-c' style='--k:"+a[1]+"'><span class='cvx-rond'>"+_cvIco(a[0],19)+"</span><span class='cvx-plus-t'><b>"+a[2]+"</b>"+a[3]+"</span></div>";}).join("")+"</div>";
+    h+="<div class='cvx-pas'>"+["Je choisis ma classe ci-dessous","Je crée mon compte gratuit ou je me connecte","J'arrive directement dans le salon de ma classe"].map(function(t,i){return "<div class='cvx-pas-l'><span class='cvx-pas-n'>"+(i+1)+"</span><p class='cvx-pas-x'>"+t+"</p></div>";}).join("")+"</div>";
+    h+="<div class='cvx-acces-b'><button class='cvx-b1' onclick=\"showRegisterForm('')\">"+_cvIco('user',17)+"Créer mon compte gratuit</button><button class='cvx-b2' onclick=\"showLogin('eleve')\">J'ai déjà un compte</button></div>";
+    h+="</div></div>";
   } else if(horsClasse){
-    h+="<div class='ib ibi mb14'><span>ℹ️</span><span>Votre compte n'est rattaché à aucune classe pour l'instant : vous pouvez lire les classes ouvertes, mais pas y écrire. Renseignez votre classe dans votre profil ou demandez au centre de vous inscrire.</span></div>";
+    h+="<div class='cvx-acces cvx-acces-info'><span class='cvx-acces-i'>"+_cvIco('info',22)+"</span><div class='cvx-acces-t'><b>Votre compte n'est rattaché à aucune classe</b><p>Vous pouvez lire les classes ouvertes, mais pas y écrire. Renseignez votre classe dans votre profil ou demandez au centre de vous inscrire.</p></div></div>";
   }
-  // Stats — des nombres qui concernent CES classes, pas tout le site
-  h+="<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:24px'>";
+  // Chiffres — ceux de CES classes, pas de tout le site
   var ids={};accessible.forEach(function(c){ids[c.id]=1;});
   var mesPosts=posts.filter(function(p){return ids[p.classroomId];});
-  [{n:accessible.length,l:accessible.length>1?'Classes':'Classe',i:'🏫'},{n:mesPosts.length,l:'Messages',i:'💬'},{n:mesPosts.filter(function(p){return (p.dateISO||'').startsWith(today2);}).length,l:"Aujourd'hui",i:'🔔'}].forEach(function(s){
-    h+="<div style='background:#fff;border:1px solid #E4E7EF;border-radius:14px;padding:14px;text-align:center'><div style='font-size:20px;margin-bottom:4px'>"+s.i+"</div><div style='font-size:20px;font-weight:800;color:#142554'>"+s.n+"</div><div style='font-size:11px;color:var(--ink4)'>"+s.l+"</div></div>";
+  h+="<div class='cvx-stats'>";
+  [{n:accessible.length,l:accessible.length>1?'Classes':'Classe',i:'building',k:'#1E499B'},
+   {n:mesPosts.length,l:'Messages',i:'message',k:'#5B4FA8'},
+   {n:mesPosts.filter(function(p){return (p.dateISO||'').startsWith(today2);}).length,l:"Aujourd'hui",i:'activity',k:'#007E11'}].forEach(function(s){
+    h+="<div class='cvx-stat' style='--k:"+s.k+"'><span class='cvx-rond'>"+_cvIco(s.i,20)+"</span><span><b>"+s.n+"</b><small>"+s.l+"</small></span></div>";
   });
-  void todayPosts;
   h+="</div>";
-  // Grille classes. Bandeau navy UNI : la charte (theme-lws) aplatit les
-  // dégradés et neutralise les teintes hors palette — 3 cartes sur 5
-  // perdaient leur bandeau et affichaient un texte blanc sur blanc. La
-  // couleur de la classe reste en liseré.
-  h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:28px'>";
+  h+="<h2 class='cvx-h2'>"+(SES?'Mes classes':'Choisissez votre classe')+"</h2>";
+  if(!SES) h+="<p class='cvx-sous'>Trouve ta classe, inscris-toi en un geste : tu arriveras directement dans son salon.</p>";
+  h+="<div class='cvx-grille'>";
   accessible.forEach(function(c){
     var cp=posts.filter(function(p){return p.classroomId===c.id;});
     var lastP=cp.slice().sort(function(a,b){return (b.dateISO||'').localeCompare(a.dateISO||'');})[0]||null;
     var firstCh=(c.channels||[{id:''}])[0];
-    h+="<div role='button' tabindex='0' onclick=\"showClasseVirtuelle('"+_esc(c.id)+"','"+_esc(firstCh.id)+"')\" onkeydown=\"if(event.key==='Enter')this.click()\" style='background:#fff;border:1px solid #E4E7EF;border-radius:16px;overflow:hidden;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.04)'>";
-    h+="<div style='background-color:#142554;border-bottom:4px solid "+_esc(c.couleur||'#FFC93C')+";padding:16px 18px;color:#fff'>";
-    h+="<div style='font-size:28px;margin-bottom:6px'>"+_esc(c.ico||'📚')+"</div>";
-    h+="<div style='font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:#fff'>"+_esc(c.nom)+"</div>";
-    h+="<div style='font-size:11.5px;color:rgba(255,255,255,.8);margin-top:3px'>"+(c.channels||[]).length+" canaux · "+cp.length+" message"+(cp.length>1?'s':'')+"</div>";
-    h+="</div><div style='padding:12px 14px'>";
-    h+="<div style='font-size:12px;color:var(--ink3);margin-bottom:8px'>"+(lastP?("💬 "+_cvNom((_cvTxt(lastP.auteurNom)||'').split(' ')[0])+" · "+_cvRelTime(lastP.dateISO)):"Aucun message pour l'instant")+"</div>";
-    h+="<div style='display:flex;gap:5px;flex-wrap:wrap'>";
-    (c.channels||[]).slice(0,4).forEach(function(ch){h+="<span style='font-size:11px;background:#EEF3FC;color:#1E499B;border-radius:8px;padding:2px 7px;font-weight:600'>"+_esc(ch.ico)+" "+_esc(ch.nom)+"</span>";});
-    h+="</div></div></div>";
+    var ouvrir="showClasseVirtuelle('"+_esc(c.id)+"','"+_esc(firstCh.id)+"')";
+    h+="<div class='cvx-carte' style='--k:"+_esc(c.couleur||'#1E499B')+"'>";
+    h+="<div role='button' tabindex='0' class='cvx-carte-h' onclick=\""+ouvrir+"\" onkeydown=\"if(event.key==='Enter')this.click()\">";
+    h+="<span class='cvx-rond'>"+_cvIco(c.seg?'graduation':'bookopen',22)+"</span>";
+    h+="<span class='cvx-carte-t'><b>"+_esc(c.nom)+"</b><small>"+(c.channels||[]).length+" salons · "+cp.length+" message"+(cp.length>1?'s':'')+"</small></span>";
+    h+="<span class='cvx-go'>"+_cvIco('chevron-right',18)+"</span></div>";
+    var kc=_cvCle(c.nom), exam=!!c.seg||/^(3eme|1ere|tle)/.test(kc);
+    if(exam) h+="<span class='cvx-exam'>"+_cvIco('award',14)+"Année d'examen · on révise ensemble</span>";
+    h+="<p class='cvx-der'>"+(lastP?(_cvIco('message',14)+" "+_cvNom((_cvTxt(lastP.auteurNom)||'').split(' ')[0])+" · "+_cvRelTime(lastP.dateISO)+(SES?"":" — rejoins la conversation"))
+      :(_cvIco('sparkles',14)+" "+(SES?"Lance la première discussion de ta classe !":"Le salon est ouvert : sois parmi les premiers à y écrire.")))+"</p>";
+    h+="<div class='cvx-salons'>";
+    (c.channels||[]).slice(0,5).forEach(function(ch){h+="<span>"+_cvIco(_cvIcoCanal(ch),13)+_esc(ch.nom)+"</span>";});
+    h+="</div>";
+    if(!SES){
+      h+="<div class='cvx-carte-b'><button class='cvx-b1 cvx-xs' onclick=\"_cvRejoindre('"+_esc(c.id)+"','inscription')\">Je m'inscris dans cette classe</button><button class='cvx-lien' onclick=\"_cvRejoindre('"+_esc(c.id)+"','connexion')\">J'ai un compte</button></div>";
+    } else {
+      h+="<div class='cvx-carte-b'><button class='cvx-b1 cvx-xs' onclick=\""+ouvrir+"\">Entrer dans la classe"+_cvIco('arrow-right',16)+"</button></div>";
+    }
+    h+="</div>";
   });
   h+="</div>";
   // Activité récente — seulement dans les classes affichées
   var recent=mesPosts.slice().sort(function(a,b){return (b.dateISO||'').localeCompare(a.dateISO||'');}).slice(0,6);
   if(recent.length){
-    h+="<div class='vcard'><div class='ct mb10'><span class='ct-ico'><svg class='vico' aria-hidden='true'><use href='#lc-zap'/></svg></span>Activité récente</div>";
+    h+="<div class='cvx-recent'><h2 class='cvx-h2'>"+_cvIco('zap',20)+"Activité récente</h2>";
     recent.forEach(function(p){
       var cls2=(DB.classrooms||[]).find(function(c){return c.id===p.classroomId;});
       var ch2=cls2&&(cls2.channels||[]).find(function(c){return c.id===p.channelId;});
       if(!cls2)return;
-      h+="<div role='button' tabindex='0' onclick=\"showClasseVirtuelle('"+_esc(p.classroomId)+"','"+_esc(p.channelId)+"')\" style='display:flex;align-items:flex-start;gap:10px;padding:9px;border-radius:10px;cursor:pointer;margin-bottom:4px'>"+
-        "<div style='width:34px;height:34px;border-radius:50%;background-color:#1E499B;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0'>"+_esc(_cvInitials(_cvTxt(p.auteurNom)))+"</div>"+
-        "<div style='flex:1;min-width:0'>"+
-        "<div style='font-size:12.5px;font-weight:700;color:var(--bl)'>"+_cvNom(p.auteurNom)+"<span style='font-weight:400;color:var(--ink4);margin-left:6px;font-size:11px'>"+_cvRelTime(p.dateISO)+"</span></div>"+
-        "<div style='font-size:11.5px;color:var(--ink4)'>"+_esc(cls2.nom)+(ch2?(" · "+_esc(ch2.nom)):"")+"</div>"+
-        "<div style='font-size:12.5px;color:var(--ink2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+_esc((p.contenu||p.titre||'').slice(0,80))+"</div>"+
-        "</div></div>";
+      h+="<div role='button' tabindex='0' class='cvx-msg' onclick=\"showClasseVirtuelle('"+_esc(p.classroomId)+"','"+_esc(p.channelId)+"')\" onkeydown=\"if(event.key==='Enter')this.click()\">"+
+        "<span class='cvx-av'>"+_esc(_cvInitials(_cvTxt(p.auteurNom)))+"</span>"+
+        "<span class='cvx-msg-t'><b>"+_cvNom(p.auteurNom)+"<small>"+_cvRelTime(p.dateISO)+"</small></b>"+
+        "<em>"+_esc(cls2.nom)+(ch2?(" · "+_esc(ch2.nom)):"")+"</em>"+
+        "<span>"+_esc((p.contenu||p.titre||'').slice(0,80))+"</span></span></div>";
     });
     h+="</div>";
   }
+  if(!SES&&accessible.length){
+    h+="<div class='cvx-final'><div><b>Prêt·e à rejoindre ta classe ?</b><p>Crée ton compte gratuit : ta classe, ses salons et tes enseignants t'attendent.</p></div>"
+      +"<div class='cvx-acces-b'><button class='cvx-b1' onclick=\"showRegisterForm('')\">"+_cvIco('rocket',17)+"Je rejoins ma classe</button><button class='cvx-b2 cvx-b2-cl' onclick=\"showLogin('eleve')\">Je me connecte</button></div></div>";
+  }
   if(!accessible.length){
-    h+="<div style='text-align:center;padding:60px 20px;color:var(--ink4)'><div style='font-size:56px;margin-bottom:14px'>🏫</div><div style='font-size:15px;font-weight:700;color:var(--bl);margin-bottom:6px'>Aucune classe disponible</div>"+(iA()?"<button class='btn bi sm mt8' onclick='_cvAdminPanel()'>Créer une classe</button>":"<div style='font-size:13px'>Contactez l'administration</div>")+"</div>";
+    h+="<div class='cvx-vide'><span class='cvx-rond'>"+_cvIco('university',26)+"</span><b>Aucune classe disponible</b>"+(iA()?"<button class='cvx-b1' onclick='_cvAdminPanel()'>Créer une classe</button>":"<p>Contactez l'administration</p>")+"</div>";
   }
   h+="</div>";
   _vc(h);
