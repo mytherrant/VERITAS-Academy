@@ -591,6 +591,22 @@ html{scroll-behavior:smooth}
 [data-vrt-theme="sombre"] .vapp-cl a.vapp-ly{color:#C2B8F0;border-color:#3A3470}
 [data-vrt-theme="sombre"] .vapp-b2{color:#9FC0F5;border-color:#3B6FD4}
 [data-vrt-theme="sombre"] .vapp-go{filter:brightness(1.6)}
+/* ── Carrousel Apprendre qui défile tout seul (11/11/2026) ──
+   Sur téléphone, les photos glissent lentement l'une après l'autre ; la photo
+   en vue zoome doucement. Un doigt posé arrête tout pendant 8 s. */
+.vapp-dots{display:none}
+@media (max-width:899px){
+  .vapp-m{position:relative}
+  .vapp-dots{order:-1;display:flex;justify-content:center;gap:7px;padding:0 0 4px;background:#F4F6FB}
+  .vapp-dots button{width:8px;height:8px;padding:0;border:0;border-radius:100px;background:#C9D3E6;cursor:pointer;transition:width .4s,background .4s}
+  .vapp-dots button[aria-current="true"]{width:24px;background:#1E499B}
+  .vapp-ph img{transition:transform 7s ease-out}
+  .vapp-ph.is-on img{transform:scale(1.07)}
+}
+@media (prefers-reduced-motion:reduce){.vapp-ph img{transition:none}.vapp-ph.is-on img{transform:none}}
+[data-vrt-theme="sombre"] .vapp-dots{background:#0B1630}
+[data-vrt-theme="sombre"] .vapp-dots button{background:#2A4176}
+[data-vrt-theme="sombre"] .vapp-dots button[aria-current="true"]{background:#9FC0F5}
 /* Éventail de couvertures, agrandi (10/11/2026) */
 .vrow-bou{grid-template-columns:.9fr 1.1fr}
 .vbou-v{position:relative;height:540px;border-radius:20px;background:radial-gradient(480px 340px at 50% 62%,#FFE2BC,#FFF6EA 72%);overflow:hidden}
@@ -1889,6 +1905,44 @@ html[data-vrt-theme="sombre"] body [data-vp] .vcle-q,html[data-vrt-theme="sombre
         </div>
       </div>
     </section>
+
+    <script>
+    /* Carrousel Apprendre (11/11/2026) : « une animation qui permet aux images
+       de défiler lentement » (Jacques). Téléphone seulement (le bureau montre
+       les trois photos en mosaïque), coupé si l'utilisateur demande moins
+       d'animations, en pause hors écran, onglet caché ou doigt posé. */
+    (function(){
+      var m=document.querySelector('#apprendre .vapp-m'); if(!m||!window.matchMedia)return;
+      var mq=matchMedia('(max-width: 899px)'), calme=matchMedia('(prefers-reduced-motion: reduce)');
+      var ph=[].slice.call(m.querySelectorAll('.vapp-ph')); if(ph.length<2)return;
+      var PAUSE=4800, DUREE=1600, REPRISE=8000, tic=null, anim=null, vu=true, main=0, idx=0;
+      var dots=document.createElement('div'); dots.className='vapp-dots'; dots.setAttribute('aria-label','Choisir une photo');
+      ph.forEach(function(f,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Photo '+(i+1));
+        b.addEventListener('click',function(){main=Date.now();aller(i);});dots.appendChild(b);});
+      m.parentNode.insertBefore(dots,m.nextSibling);
+      function cible(i){var f=ph[i];return f.offsetLeft-(m.clientWidth-f.offsetWidth)/2;}
+      function marquer(i){idx=i;ph.forEach(function(f,j){f.classList.toggle('is-on',j===i);});
+        [].forEach.call(dots.children,function(b,j){b.setAttribute('aria-current',j===i?'true':'false');});}
+      function aller(i){
+        if(anim)cancelAnimationFrame(anim);
+        var de=m.scrollLeft, a=Math.max(0,Math.min(cible(i),m.scrollWidth-m.clientWidth)), t0=null;
+        marquer(i);
+        if(calme.matches){m.scrollLeft=a;return;}
+        m.style.scrollSnapType='none';
+        (function pas(t){ if(t0===null)t0=t; var k=Math.min(1,(t-t0)/DUREE), e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+          m.scrollLeft=de+(a-de)*e; if(k<1)anim=requestAnimationFrame(pas); else{anim=null;m.style.scrollSnapType='';} })(performance.now());
+      }
+      function suivant(){
+        if(!mq.matches||calme.matches||!vu||document.hidden||Date.now()-main<REPRISE)return;
+        aller((idx+1)%ph.length);
+      }
+      ['pointerdown','touchstart','wheel'].forEach(function(ev){m.addEventListener(ev,function(){main=Date.now();if(anim){cancelAnimationFrame(anim);anim=null;m.style.scrollSnapType='';}},{passive:true});});
+      var fin=null; m.addEventListener('scroll',function(){ if(anim)return; clearTimeout(fin); fin=setTimeout(function(){
+        var c=m.scrollLeft+m.clientWidth/2, best=0, d=1e9; ph.forEach(function(f,i){var x=Math.abs(f.offsetLeft+f.offsetWidth/2-c);if(x<d){d=x;best=i;}}); marquer(best);},120);},{passive:true});
+      if('IntersectionObserver' in window) new IntersectionObserver(function(e){vu=e[0].isIntersecting;},{threshold:.4}).observe(m);
+      marquer(0); tic=setInterval(suivant,PAUSE);
+    })();
+    </script>
 
     <!-- SERVICES À ONGLETS -->
     <section style="background:#F4F5F8;margin-top:56px;padding:50px 0">

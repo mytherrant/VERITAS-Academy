@@ -1,3 +1,11 @@
+## Carrousel Apprendre qui défile tout seul (11/11/2026)
+
+Demande de Jacques : « Créer une animation qui permet aux images ci de défiler lentement. »
+
+- **vitrine.html** : petit script en ligne après la section `#apprendre`. Sur téléphone (≤ 899 px), les trois photos glissent seules toutes les 4,8 s (glissement adouci de 1,6 s, retour à la première après la dernière) ; la photo en vue zoome lentement (7 s). Points indicateurs cliquables sous le carrousel.
+- Pause : doigt posé ou défilement manuel (reprise après 8 s), carrousel hors écran, onglet caché. Coupé si `prefers-reduced-motion`. Rien ne change sur ordinateur (mosaïque).
+- Empreinte d'index.php : 2026-11-11b.
+
 ## Apprendre en premier panneau, photos agrandies, compte à rebours embelli (11/11/2026)
 
 Demande de Jacques : « Apprendre doit être le premier panneau. Agrandir les images sur téléphone. Structure aussi bien les éléments dans apprendre pour captiver et faciliter l'utilisation par les apprenants. Embellis le panneau du compte à rebours. »
