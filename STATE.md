@@ -1,3 +1,12 @@
+## Prix du plan Starter : 1 200 F (11/11/2026)
+
+Décision de Jacques : « 1200 frs ».
+
+- **Source unique** : le tarif se règle dans le tableau de bord (« Prix & calculs ») ; `api/public_data.php` le publie (`elearning_plans`) et l'octroi l'EXIGE. Le catalogue serveur (`api/_auth_lib.php`) dit déjà Starter 1 200 F, Pro 2 400 F.
+- **En production, le tableau de bord annonçait encore 1 000 F** (vitrine en ligne : « dès 1 000 F »). À corriger par l'administration dans « Prix & calculs » : la base de production n'est pas dans le dépôt.
+- **apprendre/commun.js** (`offre`) : « dès 1 000 F » et « 2 000 F » (Pro) étaient écrits en dur. Ils suivent maintenant le tarif publié (même lecture que la vitrine), repli sur le catalogue 1 200 / 2 400. `commun.js?v=20261111b`.
+- La vitrine pré-rendue porte déjà 1 200 en repli (5 mentions `data-vrt-prix="abo_starter_m"`).
+
 ## Cours lisibles, le gratuit d'abord dans Apprendre, jeux branchés (11/11/2026)
 
 Demande de Jacques : « Trop sombre et illisible. Vérifie que Apprendre est bien organisé, intuitif, facile à lire, que tout est branché selon les classes, les paiements des abonnements automatiques et bien branchés, la frontière entre payant et non payant ; mettre les ressources gratuites au début ou en évidence : il goûte, l'envie est suscitée et l'abonnement peut suivre. » Puis : « Enlève les traits foncés de gauche. »

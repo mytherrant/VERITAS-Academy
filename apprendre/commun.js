@@ -234,6 +234,21 @@
   }
   var PICTO_LIVRE = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>';
   var PICTO_CLE = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l3 6.5 7 .8-5.2 4.7 1.5 6.9L12 17.4 5.7 20.9l1.5-6.9L2 9.3l7-.8z"/></svg>';
+  /* Tarifs publiés par api/public_data.php (ceux que le serveur exigera au paiement). */
+  var TARIFS = null;
+  function fmtF(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+  function prixConnu(id, repli) { var p = TARIFS && TARIFS[id]; return p ? fmtF(p) : repli; }
+  function poserTarifs() {
+    if (!TARIFS) return;
+    [].forEach.call(document.querySelectorAll("[data-vrt-prix]"), function (el) { var p = TARIFS[el.getAttribute("data-vrt-prix")]; if (p) el.textContent = fmtF(p); });
+  }
+  try {
+    fetch("/api/public_data.php", { credentials: "omit" }).then(function (r) { return r.json(); }).then(function (j) {
+      var pl = (j && j.elearning_plans) || [], t = {};   // même source que la vitrine (assets/vitrine.js, poserFormules)
+      pl.forEach(function (p) { if (p && p.id && +p.prix > 0 && p.actif !== false) t[p.id] = +p.prix; });
+      if (Object.keys(t).length) { TARIFS = t; poserTarifs(); }
+    }).catch(function () {});
+  } catch (e) { }
   function lienOffre(h, t, d, picto, cl) {
     return '<a class="offre-l' + (cl ? " " + cl : "") + '" href="' + h + '">' + picto + '<span><b>' + esc(t) + '</b><small>' + esc(d) + '</small></span><span class="chev" aria-hidden="true">›</span></a>';
   }
@@ -241,8 +256,13 @@
   function offre(c, m, ctx) {
     var cah = cahierPour(c, m), ex = examen(c);
     var abo = ex
-      ? lienOffre("/#tarifs", "Formule Pro : l'année d'examen", "2 000 F par mois : tous les cours de la classe, épreuves et annales corrigées, labos virtuels, bulletins blancs, 30 questions par jour au tuteur.", PICTO_CLE, "or")
-      : lienOffre("/#tarifs", "Formule Starter : dès 1 000 F par mois", "Tous les cours de la classe, les œuvres au programme, épreuves et annales corrigées, 5 questions par jour au tuteur.", PICTO_CLE, "or");
+      ? lienOffre("/#tarifs", "Formule Pro : l'année d'examen", "§PRO§ F par mois : tous les cours de la classe, épreuves et annales corrigées, labos virtuels, bulletins blancs, 30 questions par jour au tuteur.", PICTO_CLE, "or")
+      : lienOffre("/#tarifs", "Formule Starter : dès §STARTER§ F par mois", "Tous les cours de la classe, les œuvres au programme, épreuves et annales corrigées, 5 questions par jour au tuteur.", PICTO_CLE, "or");
+    /* 11/11/2026 : prix écrits en dur (1 000 F, 2 000 F) quand le catalogue dit
+       1 200 F et 2 400 F. Ils suivent désormais le tarif publié par le serveur —
+       celui que l'octroi exige — et retombent sur le catalogue sinon. */
+    abo = abo.replace("§STARTER§", '<span data-vrt-prix="abo_starter_m">' + prixConnu("abo_starter_m", "1 200") + '</span>')
+             .replace("§PRO§", '<span data-vrt-prix="abo_pro_m">' + prixConnu("abo_pro_m", "2 400") + '</span>');
     var titre = { lecon: "Pour aller plus loin", quiz: "Continue sur ta lancée", matiere: "En attendant les prochaines leçons", accueil: "Aller plus loin avec VÉRITAS" }[ctx] || "Pour aller plus loin";
     return '<aside class="offre offre-' + ctx + '" aria-label="' + titre + '"><p class="offre-t">' + titre + '</p>' +
       (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE) : "") + abo +
