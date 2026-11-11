@@ -1,3 +1,11 @@
+## Actualités MINESEC : seulement le pertinent et le récent (11/11/2026)
+
+Demande de Jacques : « Juste les informations pertinentes et plus récentes » (Apprendre, Tle C, affichait en novembre les résultats du bac de juillet).
+
+- **api/news_proxy.php** : `when:60d` ajouté aux sept recherches Google News ; articles sans date ou de plus de 60 jours écartés ; tri du plus récent au plus ancien AVANT de garder les 12 premiers (avant : les 12 premiers dans l'ordre de pertinence de Google) ; champ `ts` renvoyé. Nouveau nom de cache (`veritas_news2_*`) pour ne pas resservir l'ancienne liste.
+- **apprendre/calendrier.js** (`actus`) : 45 derniers jours seulement ; l'actualité des AUTRES examens est écartée (un élève de Tle ne voit plus le BEPC) ; doublons fusionnés (même sujet, autre journal : on garde le plus récent) ; tri par date ; message clair s'il n'y a rien de récent. `calendrier.js?v=20261111e`.
+- La vitrine et l'application lisent le même flux : elles reçoivent elles aussi une liste récente triée par date.
+
 ## Carrousel Apprendre qui défile tout seul (11/11/2026)
 
 Demande de Jacques : « Créer une animation qui permet aux images ci de défiler lentement. »
