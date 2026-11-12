@@ -418,7 +418,30 @@
   var COURT = { labo: "Labo", jeu: "Jeu", cours: "Cours", methode: "Méthode", oeuvre: "Œuvre", epreuve: "Épreuve", direct: "En direct" };
 
   W.VRT = W.VRT || {};
-  W.VRT.app = { titreL: titreL, si: si, net: net, ton: ton, GROUPES: GROUPES, chargerCatalogue: chargerCatalogue, FAMILLES: FAMILLES, resLecon: resLecon, resDeMatiere: resDeMatiere, resClasse: resClasse, gratuitDabord: gratuitDabord, selectionGratuite: selectionGratuite, leconsDeRes: leconsDeRes, carteRes: carteRes, pastilles: pastilles, MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
+  /* « Met seulement 2 éléments les plus actuels ou pertinents, puis le bouton
+     voir plus pour éviter de surcharger » (Jacques, 12/11/2026).
+     replier(liste, n) : n premiers enfants visibles, les autres derrière un
+     bouton « Voir plus (k) » qui les déplie (et « Voir moins » les replie).
+     Idempotent : rappelé après un nouveau rendu, il remplace son bouton. */
+  function replier(liste, n, nom) {
+    if (!liste) return;
+    var enf = [].slice.call(liste.children), reste = enf.length - n;
+    if (liste._vpBtn && liste._vpBtn.parentNode) liste._vpBtn.parentNode.removeChild(liste._vpBtn);
+    enf.forEach(function (e, i) { e.hidden = i >= n; });
+    if (reste <= 0) return;
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "voir-plus"; b.setAttribute("aria-expanded", "false");
+    var lib = function (ouvert) { return ouvert ? "Voir moins" : "Voir plus" + (nom ? " de " + nom : "") + " (" + reste + ")"; };
+    b.textContent = lib(false);
+    b.onclick = function () {
+      var ouvert = b.getAttribute("aria-expanded") !== "true";
+      enf.forEach(function (e, i) { if (i >= n) e.hidden = !ouvert; });
+      b.setAttribute("aria-expanded", String(ouvert)); b.textContent = lib(ouvert);
+    };
+    liste.parentNode.insertBefore(b, liste.nextSibling);
+    liste._vpBtn = b;
+  }
+  W.VRT.app = { replier: replier, titreL: titreL, si: si, net: net, ton: ton, GROUPES: GROUPES, chargerCatalogue: chargerCatalogue, FAMILLES: FAMILLES, resLecon: resLecon, resDeMatiere: resDeMatiere, resClasse: resClasse, gratuitDabord: gratuitDabord, selectionGratuite: selectionGratuite, leconsDeRes: leconsDeRes, carteRes: carteRes, pastilles: pastilles, MATIERES: MATIERES, PAR_ID: PAR_ID, CLASSES: CLASSES, lire: lire, ecrire: ecrire, noterJour: noterJour, serie: serie,
     marquerLu: marquerLu, noterQuiz: noterQuiz, teinter: teinter, ico: ico, icoM: icoM, pic: pic, etoiles: etoiles, esc: esc, slug: slug, rail: rail, chiffreSerie: chiffreSerie, scenesPour: scenesPour, jour: jour,
     exporterImage: exporterImage, offre: offre, cahierPour: cahierPour, melanger: melanger, boutonsImage: boutonsImage, filigraneCanvas: filigraneCanvas };
 })(window);
