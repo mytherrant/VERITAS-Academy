@@ -1,3 +1,34 @@
+## Leçons des classes d'examen, deuxième série (12/11/2026)
+
+Demande de Jacques : « Continue les leçons » (classes d'examen en priorité).
+
+- **11 leçons rédigées et une adaptée, enregistrées sur 22 identifiants** dans `apprendre/_src/08-lecons-examen-2.js`, leçons suivantes de la progression :
+  - Tle C et D : philosophie africaine, le vivre-ensemble et la gouvernance (Philo n° 2) ; le référent et ses substituts (Français n° 2) ; le subjonctif (Français n° 4).
+  - Tle A, C et D : les grands groupes humains du Cameroun (Géographie n° 3).
+  - Tle A : conséquences de la Deuxième Guerre mondiale et naissance de l'ONU (Histoire n° 2) ; période patristique et médiévale (Philo n° 1). Tle A et 1re A : le texte poétique, éléments de métrique (Français n° 3).
+  - 1re C et D : origine et objet de la philosophie (Philo n° 2) ; la ponctuation (Français n° 4).
+  - 1re A, C et D : l'industrialisation de l'Europe (Histoire n° 2).
+  - 1re A : les problèmes démographiques (Géographie n° 3) ; les tendances de la philosophie africaine (Philo n° 2, reprise de la leçon de Tle C et D, même contenu).
+- Les 22 rattachements vérifiés ; 12 leçons ouvertes dans Chromium, 0 erreur JS ; bancs au vert (54/54, 17/17).
+- ⚠️ **`habiller_pages.py` ne traite que les fichiers suivis par git** (`git ls-files`) : une page `apprendre/cours/*.html` NOUVELLE reste sans barre ni pied tant qu'on ne l'a pas ajoutée (`git add`) AVANT de lancer le script. Les 21 pages de la première série étaient parties ainsi ; corrigé ici (114 pages de cours habillées). Ordre : `build_apprendre.py` → `apprendre_statique.js` → `git add apprendre` → `habiller_pages.py`.
+- `lecons.js` : 114 leçons.
+
+## Leçons des classes d'examen : Français, Philosophie, Histoire, Géographie en 1re et Tle (12/11/2026)
+
+Demande de Jacques : « Continue la préparation des autres leçons avec le même workflow que les autres », puis « Classe d'examen en priorité ».
+
+- **Relevé avant** (leçons gratuites + aperçus payants) : en 1re et en Tle, maths, sciences et ECM ont des dizaines de leçons, mais **Français, Philosophie, Histoire et Géographie n'en avaient aucune** (sauf 2 de philosophie en Tle A). La 3e en a déjà 2 dans chacune de ces matières.
+- **11 leçons rédigées, enregistrées sur 21 identifiants** dans `apprendre/_src/07-lecons-examen.js` (une leçon au même intitulé officiel dans plusieurs séries est enregistrée pour chacune : `VRT_L(id, Object.assign({ c }, LECON))`) :
+  - Tle C et D : philosophie africaine, histoire et tendances (Philo n° 1) ; la dissertation philosophique, principes et méthode (Philo n° 3) ; dissertation littéraire, analyse du sujet et problématique (Français n° 3).
+  - Tle A, C et D : la diversité physique du Cameroun (Géographie n° 1).
+  - Tle A : la Deuxième Guerre mondiale (Histoire n° 1). Tle A et 1re A : commentaire composé, analyser la consigne (Français n° 4).
+  - 1re C et D : définir la philosophie (Philo n° 1) ; les conditions de la communication (Français n° 2).
+  - 1re A : les thèses ethnocentristes occidentales (Philo n° 1) ; la croissance démographique (Géographie n° 1).
+  - 1re A, C et D : l'Europe de la Renaissance (Histoire n° 1).
+- Même format que les premières leçons : trois parties de cours, entraînement au format de l'épreuve (Partie A ressources, Partie B compétences, situation camerounaise et réponse attendue), fiche de révision, exercice, 10 QCM corrigés (bonne réponse qui tourne a→d), fiche APC. Les 21 rattachements à la progression vérifiés.
+- Publiques en entier, comme toutes les leçons de lecons.js. La suite payante des classes d'examen (aperçus `apercus-*.js`) se construit avec `build_apprendre_payant.cjs` depuis les sources privées du PC : non touchée ici (le relancer sans ces sources effacerait les aperçus).
+- `lecons.js` reconstruit (92 leçons) ; 21 pages `apprendre/cours/*.html`, 20 pages programme et le sitemap régénérés (`apprendre_statique.js`), habillés. Contrôlé dans Chromium : 11 leçons ouvertes, pages matière (« Cours rédigé » à sa place), 0 erreur JS ; bancs `banc_gabarits_lecons` 54/54, `banc_apprendre_verrou` 17/17.
+
 ## CI : Chromium sans dépendre du miroir Ubuntu (11/11/2026)
 
 Accord de Jacques (« Oui ») pour fiabiliser le contrôle « Boot du portail ».
