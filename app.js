@@ -1200,11 +1200,11 @@ function _formulesDefaut(){
     {g:'starter', nom:'STARTER', pub:'eleve',  mois:1200, an:10000,  cible:'Élève · 6ᵉ → Tˡᵉ', tags:eleve,
      av:['Toutes les leçons de 1 classe','Épreuves, annales et examens blancs chronométrés','5 questions par jour au tuteur IA','10 fiches PDF par semaine','2 labos premium à l’essai par semaine']},
     {g:'pro',     nom:'PRO',     pub:'eleve',  mois:1600, an:13500,  cible:'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', tags:eleve, pop:true,
-     av:['Tout Starter','30 questions par jour au tuteur IA','20 fiches PDF par semaine','Tous les labos virtuels premium','Corrections de copies photographiées : 15 par jour']},
+     av:['Tout Starter','30 questions par jour au tuteur IA','20 fiches PDF par semaine','Tous les labos virtuels premium','Bulletins blancs : copies notées sur 20 par le tuteur','Corrections de copies photographiées : 15 par jour']},
     {g:'elite',   nom:'ÉLITE',   pub:'eleve',  mois:2000, an:16500,  cible:'Accompagnement complet', tags:complet,
-     av:['Tout Pro','2 classes : la sienne + celle d’avant pour revoir les bases','100 questions par jour au tuteur IA','40 fiches PDF par semaine','Corrections de copies photographiées : 50 par jour','Entretien d’orientation sur rendez-vous']},
+     av:['Tout Pro','2 classes : la sienne + celle d’avant pour revoir les bases','100 questions par jour au tuteur IA','40 fiches PDF par semaine','Classes virtuelles en direct avec un enseignant','Entretien d’orientation sur rendez-vous']},
     {g:'famille', nom:'FAMILLE', pub:'parent', mois:6000, an:50000, cible:'Jusqu’à 4 enfants', tags:complet, enfants:4,
-     av:['Jusqu’à 4 enfants sur un seul paiement','Chaque enfant au niveau Élite, dans sa classe','40 fiches PDF par semaine et par enfant','Suivi parent : notes, absences, progression']},
+     av:['Jusqu’à 4 enfants sur un seul paiement','Chaque enfant au niveau Élite, dans sa classe','Classes virtuelles en direct et bulletins blancs','40 fiches PDF par semaine et par enfant','Suivi parent : notes, absences, progression']},
     // Formules ENSEIGNANT multi-classes (12/11/2026) — miroir de vrt_plans_formules().
     {g:'prof3',   nom:'PROF 3 CLASSES', pub:'enseignant', mois:2500, an:21000, cible:'Enseignant · 3 classes', tags:complet,
      av:['Toutes les leçons de 3 classes au choix','40 fiches PDF par semaine','40 questions par jour au tuteur IA','Tous les labos virtuels premium','Épreuves, annales et examens blancs à projeter']},
@@ -9887,6 +9887,7 @@ function pgElearningMgmt(){
   h+='<button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManagePacksAdmin()"><svg class="vico bico" aria-hidden="true"><use href="#lc-package"/></svg>Packs personnalisés</button>';
   h+='<button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageJeux()"><svg class="vico bico" aria-hidden="true"><use href="#lc-game"/></svg>Jeux éducatifs</button>';
   h+='<button class="btn sm" style="background:#6C56A6;color:#fff;border-radius:10px" onclick="mManageLabos()"><svg class="vico bico" aria-hidden="true"><use href="#lc-flask"/></svg>Laboratoires virtuels</button>';
+  h+='<button class="btn sm" style="background:#1E499B;color:#fff;border-radius:10px" onclick="mSeancesDirectAdmin()"><svg class="vico bico" aria-hidden="true"><use href="#lc-presentation"/></svg>Séances en direct</button>';
   h+='<button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mManageCoaching()"><svg class="vico bico" aria-hidden="true"><use href="#lc-target"/></svg>Coaching</button>';
   h+='<button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mManageEpreuves()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Épreuves</button>';
   var _nInact=(typeof _nbInactifs==='function')?_nbInactifs():0;
@@ -18804,20 +18805,21 @@ window._aiTier = function(){
 // Le quota IA Ambassa, lui, est géré par AI_QUOTAS + _aiTier (déjà branché).
 //   features : 'labos' (expériences premium), 'classes' (classes virtuelles live)
 window.PLAN_FEATURES = {
-  // tier -> { labos (premium), classes (virtuelles : élèves du CENTRE, pas les abonnés en ligne) }.
-  // Miroir de vrt_droits_formules() (12/11/2026). Le serveur a le dernier mot pour les labos
-  // (protocole et quiz servis par api/apprendre.php) ; Starter garde 2 labos à l'essai par semaine.
-  anon:     { labos:false, classes:false },
-  free:     { labos:false, classes:false },
-  starter:  { labos:false, classes:false },
-  pro:      { labos:true,  classes:false },
-  elite:    { labos:true,  classes:false },
-  famille:  { labos:true,  classes:false },
-  prof3:    { labos:true,  classes:false },
-  prof6:    { labos:true,  classes:false },
-  proftout: { labos:true,  classes:false },
-  teach:    { labos:true,  classes:true  },
-  admin:    { labos:true,  classes:true  }
+  // Miroir de vrt_droits_formules() (12/11/2026). labos : labos premium (servis par api/apprendre.php) ;
+  // bulletins : copies d'examen blanc notées + bulletin (api/examens.php) ;
+  // direct : classes virtuelles des abonnés en ligne (api/direct.php) ;
+  // classes : classes virtuelles des élèves du CENTRE (équipe).
+  anon:     { labos:false, bulletins:false, direct:false, classes:false },
+  free:     { labos:false, bulletins:false, direct:false, classes:false },
+  starter:  { labos:false, bulletins:false, direct:false, classes:false },
+  pro:      { labos:true,  bulletins:true,  direct:false, classes:false },
+  elite:    { labos:true,  bulletins:true,  direct:true,  classes:false },
+  famille:  { labos:true,  bulletins:true,  direct:true,  classes:false },
+  prof3:    { labos:true,  bulletins:false, direct:false, classes:false },
+  prof6:    { labos:true,  bulletins:false, direct:false, classes:false },
+  proftout: { labos:true,  bulletins:false, direct:false, classes:false },
+  teach:    { labos:true,  bulletins:true,  direct:true,  classes:true  },
+  admin:    { labos:true,  bulletins:true,  direct:true,  classes:true  }
 };
 window._planAccess = function(feature){
   var tier = (typeof _aiTier==='function') ? _aiTier() : 'anon';
@@ -24611,12 +24613,15 @@ function _simulerExamen(epId){
     +"<div id='simFin'></div>"
     +(ep.apercu?"<div class='card mb16'><div class='ct mb12'>Le sujet</div><div style='white-space:pre-line;line-height:1.75'>"+_esc(ep.apercu)+"</div></div>":"")
     +"<div class='card'>"
-    +"<div class='ct mb12'>Mon brouillon</div>"
-    +"<div class='ib ibt mb10'><span>💡</span><span>Composez sur papier comme le jour de l'examen ; notez ici votre plan, vos formules, vos idées.</span></div>"
-    +"<textarea id='simNotes' class='fi' rows='9' placeholder='Plan, formules, brouillon…' style='font-family:Georgia,serif'></textarea>"
+    +"<div class='ct mb12'>Ma copie</div>"
+    +"<div class='ib ibt mb10'><span>💡</span><span>Rédigez vos réponses ici, exercice par exercice (« Exercice 1 : … »). À la fin, rendez votre copie : le tuteur la note sur 20 avec le barème du sujet, et la note rejoint votre bulletin blanc.</span></div>"
+    +"<textarea id='simNotes' class='fi' rows='14' placeholder='Exercice 1 : …&#10;Exercice 2 : …' style='font-family:Georgia,serif'></textarea>"
+    +"<div style='text-align:center;margin-top:14px'><button type='button' class='btn bi' id='simRendre' onclick='_rendreCopie()'>Rendre ma copie et la faire noter</button></div>"
+    +"<div id='simNote'></div>"
     +"</div>"
-    +"<div style='text-align:center;margin:18px 0'><button class='btn bo' onclick='mChoisirSimulation()'>Choisir une autre épreuve</button></div>"
+    +"<div style='text-align:center;margin:18px 0'><button class='btn bo' onclick='mChoisirSimulation()'>Choisir une autre épreuve</button> <button class='btn bo' onclick='mBulletinBlanc()'>Mon bulletin blanc</button></div>"
     +"</div>");
+  window._simCourant = { ep: ep, debut: Date.now() };
   function tic(){
     var reste=Math.max(0,totalSec-elapsed), mn=Math.floor(reste/60), sc=reste%60;
     var pct=Math.round((elapsed/totalSec)*100);
@@ -24628,8 +24633,8 @@ function _simulerExamen(epId){
     if(reste<=0){
       clearInterval(timer);
       _si('simFin',"<div class='vcard' style='text-align:center;padding:24px;margin-bottom:16px'><div style='font-family:Montserrat,sans-serif;font-size:20px;font-weight:800;color:#AE5353;margin-bottom:6px'>Temps écoulé</div>"
-        +"<div style='color:#6B7A99;margin-bottom:12px'>Posez le stylo. Votre brouillon reste ci-dessous.</div>"
-        +"<button class='btn bi' onclick='mChoisirSimulation()'>Nouvelle épreuve</button></div>");
+        +"<div style='color:#6B7A99;margin-bottom:12px'>Posez le stylo. Votre copie reste ci-dessous : rendez-la pour la faire noter.</div>"
+        +"<button class='btn bi' onclick='_rendreCopie()'>Rendre ma copie</button> <button class='btn bo' onclick='mChoisirSimulation()'>Nouvelle épreuve</button></div>");
     }
   }
   window._stopTimer=function(){ clearInterval(timer); if(typeof _espacePerso==='function' && SES && SES.type==='visiteur_inscrit') _espacePerso(SES.role||'eleve'); else showEpreuves(); };
@@ -24637,6 +24642,165 @@ function _simulerExamen(epId){
   window._simTimer=timer;
   tic();
 }
+
+/* ══════════ BULLETINS BLANCS (12/11/2026) ══════════
+   La copie rendue est notée par le tuteur IA (callAmbassaIA → ia_proxy.php,
+   dans le quota de la formule) avec le barème lu dans le sujet, puis gardée
+   par api/examens.php, qui tient le bulletin blanc (moyenne par matière,
+   moyenne générale, mention). Droit « bulletins » : Pro, Élite, Famille.
+   La note est INDICATIVE : elle aide à se situer, elle ne remplace pas un
+   correcteur. */
+function _apiVrt(fichier, corps){
+  var base=(DB&&DB.cloudConfig&&DB.cloudConfig.url|| ((location.origin.indexOf('veritas-school.com')>=0)?location.origin+'/api':'https://veritas-school.com/api')).replace(/\/+$/,'');
+  var tok=''; try{ tok=(typeof _contentToken==='function')?_contentToken():''; }catch(e){}
+  corps.token=tok;
+  return fetch(base+'/'+fichier,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(corps)}).then(function(r){ return r.json(); });
+}
+window._apiVrt=_apiVrt;
+function _noteCouleur(n){ return n>=14?'#047857':n>=10?'#1E499B':'#B42318'; }
+
+window._rendreCopie = async function(){
+  var cur=window._simCourant, ep=cur&&cur.ep;
+  var copie=((_ge('simNotes')||{}).value||'').trim();
+  var zone=_ge('simNote'), btn=_ge('simRendre');
+  if(!ep||!zone) return;
+  if(copie.length<40){ toast('Votre copie est trop courte pour être notée : rédigez vos réponses.','warn'); return; }
+  if(typeof _planAccess==='function' && !_planAccess('bulletins') && !(typeof iA==='function'&&iA())){
+    zone.innerHTML="<div class='ib ibt' style='margin-top:14px'><span>🔒</span><span>La note sur 20 et le bulletin blanc sont inclus dès la formule <b>Pro</b> (1 600 F par mois). Votre copie reste ici.</span></div>"
+      +"<div style='text-align:center;margin-top:10px'><button class='btn bi' onclick=\"(typeof vShowSec==='function')&&vShowSec('elearning',null)\">Voir les formules</button></div>";
+    return;
+  }
+  if(btn){ btn.disabled=true; btn.textContent='Le tuteur corrige votre copie…'; }
+  var sys="Tu es correcteur aux examens officiels camerounais (BEPC, Probatoire, BAC, MINESEC). Tu notes une copie d'examen blanc avec le barème indiqué dans le sujet (points entre parenthèses) ; sans barème, répartis 20 points entre les exercices. Sois juste et exigeant, comme un vrai correcteur : une réponse absente vaut 0. Réponds UNIQUEMENT en JSON.";
+  var prompt="ÉPREUVE : "+(ep.titre||'')+" ("+(ep.matiere||'')+", "+(ep.classe||'')+")\n\nSUJET :\n"+String(ep.apercu||ep.desc||'').slice(0,3500)
+    +"\n\nCOPIE DE L'ÉLÈVE :\n"+copie.slice(0,7000)
+    +"\n\nRéponds en JSON strict : {\"exercices\":[{\"lib\":\"Exercice 1\",\"note\":3,\"sur\":4,\"commentaire\":\"…\"}],\"note20\":12.5,\"appreciation\":\"une phrase\",\"conseils\":\"deux ou trois conseils précis\"}";
+  try{
+    var txt=await callAmbassaIA(prompt, sys);
+    var j=(typeof _evalParseJSON==='function')?_evalParseJSON(txt):null;
+    if(!j || !isFinite(+j.note20)) throw new Error(/^⚠️/.test(String(txt||''))?String(txt).replace(/^⚠️\s*/,''):'Le tuteur n’a pas rendu de note lisible. Réessayez.');
+    var note=Math.max(0,Math.min(20,Math.round(+j.note20*4)/4));
+    var detail=(j.exercices||[]).slice(0,12).map(function(x){ return {lib:String(x.lib||''),note:+x.note||0,sur:+x.sur||0,commentaire:String(x.commentaire||'')}; });
+    var r=await _apiVrt('examens.php',{action:'enregistrer',copie:{epreuveId:ep.id,titre:ep.titre,matiere:ep.matiere,classe:ep.classe,note:note,detail:detail,
+      appreciation:j.appreciation||'',conseils:j.conseils||'',dureeMin:Math.round((Date.now()-(cur.debut||Date.now()))/60000)}});
+    var garde = r&&r.ok;
+    zone.innerHTML="<div style='margin-top:16px;border:1px solid #E4E9F2;border-radius:14px;padding:18px'>"
+      +"<div style='text-align:center'><div style='font:800 44px Montserrat,sans-serif;color:"+_noteCouleur(note)+"'>"+String(note).replace('.',',')+" / 20</div>"
+      +"<div style='color:#4D5163;margin-top:4px'>"+_esc(j.appreciation||'')+"</div>"
+      +"<div style='font-size:12px;color:#8B93A6;margin-top:4px'>Note indicative donnée par le tuteur IA avec le barème du sujet.</div></div>"
+      +(detail.length?"<table style='width:100%;border-collapse:collapse;margin-top:14px;font-size:13.5px'>"+detail.map(function(d){
+          return "<tr style='border-top:1px solid #EEF1F6'><td style='padding:8px 6px;font-weight:700;color:#001136;white-space:nowrap'>"+_esc(d.lib)+"</td><td style='padding:8px 6px;white-space:nowrap'><b>"+d.note+"</b> / "+d.sur+"</td><td style='padding:8px 6px;color:#4D5163'>"+_esc(d.commentaire)+"</td></tr>"; }).join('')+"</table>":"")
+      +(j.conseils?"<div class='ib ibt' style='margin-top:12px'><span>🎯</span><span>"+_esc(j.conseils)+"</span></div>":"")
+      +"<div style='text-align:center;margin-top:12px;color:"+(garde?'#047857':'#B42318')+";font-size:13px'>"
+      +(garde?'Note ajoutée à votre bulletin blanc.':'La note n’a pas pu être enregistrée'+(r&&r.raison==='connexion'?' : reconnectez-vous.':' pour le moment.'))+"</div></div>";
+    if(btn){ btn.textContent='Copie notée'; }
+  }catch(e){
+    zone.innerHTML="<div class='ib ibt' style='margin-top:14px'><span>⚠️</span><span>"+_esc(e.message||'Correction indisponible')+"</span></div>";
+    if(btn){ btn.disabled=false; btn.textContent='Rendre ma copie et la faire noter'; }
+  }
+};
+
+window.mBulletinBlanc = function(){
+  M('Mon bulletin blanc','Vos examens blancs notés par le tuteur',"<div id='bbZone' style='padding:10px;color:#5B6170'>Chargement…</div>",
+    "<button class='btn bo' onclick='cm()'>Fermer</button><button class='btn bi' onclick='_imprimerBulletinBlanc()'>Imprimer</button>", true);
+  _apiVrt('examens.php',{action:'bulletin'}).then(function(r){
+    var z=_ge('bbZone'); if(!z) return;
+    if(!r||!r.ok){ z.innerHTML=r&&r.raison==='connexion'?'Connectez-vous pour voir votre bulletin blanc.':'Bulletin indisponible pour le moment.'; return; }
+    if(!r.notes.length){
+      z.innerHTML="<div style='text-align:center;padding:16px'>Aucune copie notée pour l’instant.<br><br>"+(r.droit?"<button class='btn bi' onclick='cm();mChoisirSimulation()'>Passer un examen blanc</button>":"Les bulletins blancs sont inclus dès la formule <b>Pro</b>.")+"</div>";
+      return;
+    }
+    var fmt2=function(n){ return n==null?'—':String(n).replace('.',','); };
+    z.innerHTML="<div id='bbImp'><div style='display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px'>"
+      +"<div><div style='font:800 15px Montserrat,sans-serif;color:#001136'>BULLETIN BLANC — VÉRITAS</div><div style='font-size:12.5px;color:#5B6170'>"+_esc(((SES&&((SES.pre||'')+' '+(SES.nom||'')))||'').trim())+" · "+r.notes.length+" copie"+(r.notes.length>1?'s':'')+"</div></div>"
+      +"<div style='text-align:right'><div style='font:800 30px Montserrat,sans-serif;color:"+_noteCouleur(r.moyenne)+"'>"+fmt2(r.moyenne)+" / 20</div><div style='font-size:12.5px;color:#4D5163'>Moyenne générale · "+_esc(r.mention)+"</div></div></div>"
+      +"<table style='width:100%;border-collapse:collapse;font-size:13.5px'><thead><tr style='background:#F3F5FA;text-align:left'><th style='padding:8px'>Matière</th><th style='padding:8px'>Copies</th><th style='padding:8px'>Meilleure</th><th style='padding:8px'>Moyenne</th><th style='padding:8px'>Mention</th></tr></thead><tbody>"
+      +r.matieres.map(function(m){ return "<tr style='border-top:1px solid #EEF1F6'><td style='padding:8px;font-weight:700'>"+_esc(m.matiere)+"</td><td style='padding:8px'>"+m.copies+"</td><td style='padding:8px'>"+fmt2(m.meilleure)+"</td><td style='padding:8px;font-weight:700;color:"+_noteCouleur(m.moyenne)+"'>"+fmt2(m.moyenne)+"</td><td style='padding:8px'>"+_esc(m.mention)+"</td></tr>"; }).join('')
+      +"</tbody></table>"
+      +"<div style='font:700 13px Montserrat,sans-serif;color:#001136;margin:16px 0 6px'>Dernières copies</div>"
+      +r.notes.slice(0,15).map(function(n){ return "<div style='display:flex;justify-content:space-between;gap:10px;border-top:1px solid #EEF1F6;padding:7px 0;font-size:13px'><span>"+_esc(n.titre)+" <span style='color:#8B93A6'>· "+new Date(n.date*1000).toLocaleDateString('fr-FR')+"</span></span><b style='color:"+_noteCouleur(n.note)+"'>"+fmt2(n.note)+"/20</b></div>"; }).join('')
+      +"<div style='font-size:11.5px;color:#8B93A6;margin-top:10px'>Notes indicatives données par le tuteur IA avec le barème de chaque sujet.</div></div>";
+  }).catch(function(){ var z=_ge('bbZone'); if(z) z.textContent='Bulletin indisponible : vérifiez votre connexion.'; });
+};
+window._imprimerBulletinBlanc = function(){
+  var el=_ge('bbImp'); if(!el){ toast('Rien à imprimer pour le moment','warn'); return; }
+  if(typeof printDoc==='function'){ printDoc('<div style="max-width:760px;margin:0 auto;font-family:Inter,sans-serif;padding:16px">'+el.innerHTML+'</div>','Bulletin blanc'); return; }
+  window.print();
+};
+
+/* ══════════ CLASSES VIRTUELLES EN DIRECT (12/11/2026) ══════════
+   Planning publié par le centre (DB.seancesDirect, géré dans E-Learning →
+   « Séances en direct ») ; inscription et lien de visio par api/direct.php :
+   le lien n'est remis qu'aux inscrits Élite / Famille, 15 minutes avant. */
+var _DIRECT_MSG = { formule:'Les classes virtuelles en direct sont incluses dans les formules Élite et Famille.', complet:'Cette séance est complète.',
+  classe:'Cette séance est dans une classe que votre formule ne couvre pas.', trop_tot:'Le lien s’ouvre 15 minutes avant le début.',
+  terminee:'Cette séance est terminée.', non_inscrit:'Inscrivez-vous d’abord à cette séance.', connexion:'Connectez-vous pour voir les séances.',
+  introuvable:'Séance introuvable.' };
+window.mClassesDirect = function(){
+  M('Classes virtuelles en direct','Séances en visio avec un enseignant du centre',"<div id='cdZone' style='padding:10px;color:#5B6170'>Chargement…</div>",
+    "<button class='btn bo' onclick='cm()'>Fermer</button>", true);
+  _cdCharger();
+};
+function _cdCharger(){
+  _apiVrt('direct.php',{action:'liste'}).then(function(r){
+    var z=_ge('cdZone'); if(!z) return;
+    if(!r||!r.ok){ z.textContent=_DIRECT_MSG[r&&r.raison]||'Planning indisponible pour le moment.'; return; }
+    var h=r.droit?'':"<div class='ib ibt mb10'><span>🔒</span><span>"+_DIRECT_MSG.formule+" Le planning reste visible.</span></div>";
+    if(!r.seances.length){ z.innerHTML=h+"<div style='text-align:center;padding:16px'>Aucune séance programmée pour le moment. Revenez bientôt.</div>"; return; }
+    z.innerHTML=h+r.seances.map(function(se){
+      var d=new Date(se.debut*1000);
+      var quand=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})+' à '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      var act = !r.droit ? '' : se.inscrit
+        ? "<button class='btn bi' onclick=\"_cdAction('rejoindre','"+_esc(se.id)+"')\""+(se.ouverte?'':' title="Le lien s’ouvre 15 minutes avant"')+">Rejoindre</button> <button class='btn bo' onclick=\"_cdAction('desinscrire','"+_esc(se.id)+"')\">Me désinscrire</button>"
+        : (se.restantes>0?"<button class='btn bi' onclick=\"_cdAction('inscrire','"+_esc(se.id)+"')\">M’inscrire</button>":"<span style='color:#B42318;font-weight:700'>Complet</span>");
+      return "<div style='border:1px solid #E4E9F2;border-radius:12px;padding:12px 14px;margin-bottom:10px'>"
+        +"<div style='font-weight:800;color:#001136'>"+_esc(se.titre)+"</div>"
+        +"<div style='color:#4D5163;font-size:13px;margin:3px 0 8px'>"+_esc([se.matiere,se.classe,se.enseignant].filter(Boolean).join(' · '))+"<br>"+_esc(quand)+" · "+se.duree+" min · "+se.restantes+" place"+(se.restantes>1?'s':'')+" restante"+(se.restantes>1?'s':'')+"</div>"
+        +act+"</div>";
+    }).join('');
+  }).catch(function(){ var z=_ge('cdZone'); if(z) z.textContent='Planning indisponible : vérifiez votre connexion.'; });
+}
+window._cdAction = function(action, id){
+  _apiVrt('direct.php',{action:action,id:id}).then(function(r){
+    if(r&&r.ok&&r.lien){ window.open(r.lien,'_blank','noopener'); return; }
+    if(r&&r.ok){ toast(action==='inscrire'?'Inscription enregistrée':'Désinscription enregistrée','ok'); _cdCharger(); return; }
+    toast(_DIRECT_MSG[r&&r.raison]||'Action impossible pour le moment','warn');
+  }).catch(function(){ toast('Connexion impossible','err'); });
+};
+
+/* Administration : publier les séances (synchronisées avec la base, lues par api/direct.php). */
+window.mSeancesDirectAdmin = function(){
+  if(!(typeof iA==='function'&&iA())) return;
+  DB.seancesDirect=DB.seancesDirect||[];
+  var lignes=DB.seancesDirect.slice().sort(function(a,b){ return String(a.debut).localeCompare(String(b.debut)); }).map(function(se){
+    return "<tr style='border-top:1px solid #EEF1F6'><td style='padding:6px'>"+_esc(se.titre)+"</td><td style='padding:6px'>"+_esc(se.classe||'')+"</td><td style='padding:6px'>"+_esc(String(se.debut||'').replace('T',' '))+"</td><td style='padding:6px'>"+(se.places||30)+"</td><td style='padding:6px'><button class='btn bo' onclick=\"_seanceSuppr('"+_esc(se.id)+"')\">Supprimer</button></td></tr>";
+  }).join('');
+  M('Séances en direct','Classes virtuelles des abonnés Élite et Famille',
+    (lignes?"<table style='width:100%;border-collapse:collapse;font-size:13px;margin-bottom:14px'><tr style='text-align:left;background:#F3F5FA'><th style='padding:6px'>Séance</th><th style='padding:6px'>Classe</th><th style='padding:6px'>Début</th><th style='padding:6px'>Places</th><th></th></tr>"+lignes+"</table>":"<div style='color:#5B6170;margin-bottom:12px'>Aucune séance publiée.</div>")
+    +"<div class='fg'><span class='fl'>Titre</span><input class='fi' id='sdTitre' placeholder='Révision BAC D : fonctions exponentielles'></div>"
+    +"<div class='fg'><span class='fl'>Classe (ex. Tle D, 3ème)</span><input class='fi' id='sdClasse'></div>"
+    +"<div class='fg'><span class='fl'>Matière</span><input class='fi' id='sdMatiere'></div>"
+    +"<div class='fg'><span class='fl'>Enseignant</span><input class='fi' id='sdProf'></div>"
+    +"<div class='fg'><span class='fl'>Début</span><input class='fi' id='sdDebut' type='datetime-local'></div>"
+    +"<div class='fg'><span class='fl'>Durée (minutes)</span><input class='fi' id='sdDuree' type='number' value='60' min='15' max='300'></div>"
+    +"<div class='fg'><span class='fl'>Places</span><input class='fi' id='sdPlaces' type='number' value='30' min='1' max='300'></div>"
+    +"<div class='fg full'><span class='fl'>Lien de visio (https://…, Google Meet, Zoom, Jitsi)</span><input class='fi' id='sdLien' placeholder='https://meet.jit.si/veritas-…'></div>",
+    "<button class='btn bo' onclick='cm()'>Fermer</button><button class='btn bi' onclick='_seanceAjouter()'>Publier la séance</button>", true);
+};
+window._seanceAjouter = function(){
+  var v=function(id){ return ((_ge(id)||{}).value||'').trim(); };
+  var lien=v('sdLien'), debut=v('sdDebut');
+  if(!v('sdTitre')||!debut){ toast('Titre et début requis','warn'); return; }
+  if(!/^https:\/\//i.test(lien)){ toast('Le lien de visio doit commencer par https://','warn'); return; }
+  DB.seancesDirect=DB.seancesDirect||[];
+  DB.seancesDirect.push({ id:'sd_'+gid(), titre:v('sdTitre'), classe:v('sdClasse'), matiere:v('sdMatiere'), enseignant:v('sdProf'),
+    debut: new Date(debut).toISOString(), duree:Math.max(15,Math.min(300,+v('sdDuree')||60)), places:Math.max(1,Math.min(300,+v('sdPlaces')||30)), lien:lien, actif:true });
+  save(); toast('Séance publiée','ok'); mSeancesDirectAdmin();
+};
+window._seanceSuppr = function(id){
+  DB.seancesDirect=(DB.seancesDirect||[]).filter(function(x){ return x.id!==id; });
+  save(); mSeancesDirectAdmin();
+};
 
 /* Choisir l'épreuve à simuler : la classe de l'élève d'abord. */
 window.mChoisirSimulation = function(filtre){
@@ -24652,8 +24816,8 @@ window.mChoisirSimulation = function(filtre){
         +'<div style="font-weight:700;color:#001136">'+_esc(e.titre||'Épreuve')+'</div>'
         +'<div style="color:#5B6170;margin-top:2px">'+_esc([e.matiere,e.classe,(Math.floor(_dureeEpreuve(e)/60)+' h')].filter(Boolean).join(' · '))+'</div></button>';
     }).join(''):'<div style="color:#5B6170">Aucune épreuve pour cette classe pour l’instant.</div>';
-  M('Examen blanc chronométré','Choisissez une épreuve : le chronomètre suit la durée officielle', puces+liste,
-    '<button class="btn bo" onclick="cm()">Fermer</button>', true);
+  M('Examen blanc chronométré','Choisissez une épreuve : le chronomètre suit la durée officielle ; votre copie est notée sur 20', puces+liste,
+    '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();mBulletinBlanc()">Mon bulletin blanc</button>', true);
 };
 
 /* Choisir une œuvre : fiche, carte mentale, QCM, citations, contrôle. */
@@ -50541,6 +50705,8 @@ window._espacePerso = function(role){
       ['lc-compass','Mon orientation','vShowSec(\'orientation\',null)'],
       ['lc-game','Jeux éducatifs &amp; battles','if(typeof showJeuxEdu===\'function\')showJeuxEdu()'],
       ['lc-clock','Examen blanc chronométré','mChoisirSimulation()'],
+      ['lc-chart','Mon bulletin blanc','mBulletinBlanc()'],
+      ['lc-presentation','Classes virtuelles en direct','mClassesDirect()'],
       ['lc-bookopen','Œuvres au programme, en interactif','mChoisirOeuvre()']
     ] : role==='parent' ? [
       ['lc-chart','Notes &amp; bulletin de mon enfant','_espaceParentEnfant()'],
@@ -51146,19 +51312,19 @@ var _PALIERS = {
   starter:{ rang:'N1', pour:'Un élève, toute l’année', metrique:'1 classe · 5 questions / jour',
     fort:'Toute sa classe, en ligne', suite:' — leçons complètes, épreuves corrigées et examens blancs chronométrés, pour réviser à son rythme.',
     specs:[['Classes','1'],['Tuteur IA','5 / jour'],['Fiches PDF','10 / semaine'],['Labos premium','2 à l’essai / semaine']],
-    cmp:{ 'Copies corrigées':'3 / jour', 'Orientation':'—', 'Enfants':'1' } },
+    cmp:{ 'Copies corrigées':'3 / jour', 'Bulletins blancs':'—', 'Direct':'—', 'Orientation':'—', 'Enfants':'1' } },
   pro:{ rang:'N2', pour:'Année d’examen', metrique:'1 classe · 30 questions / jour',
-    fort:'Préparer l’examen sans deviner', suite:' — tous les labos virtuels et la correction de copies photographiées pour le BEPC, le Probatoire et le BAC.',
+    fort:'Préparer l’examen sans deviner', suite:' — examens blancs notés sur 20 et réunis en bulletin blanc, tous les labos virtuels, copies photographiées corrigées.',
     specs:[['Classes','1'],['Tuteur IA','30 / jour'],['Fiches PDF','20 / semaine'],['Labos premium','Tous']],
-    cmp:{ 'Copies corrigées':'15 / jour', 'Orientation':'—', 'Enfants':'1' } },
+    cmp:{ 'Copies corrigées':'15 / jour', 'Bulletins blancs':'Oui', 'Direct':'—', 'Orientation':'—', 'Enfants':'1' } },
   elite:{ rang:'N3', pour:'Accompagnement complet', metrique:'2 classes · 100 questions / jour',
-    fort:'Les bases revues, l’orientation préparée', suite:' — sa classe et celle d’avant, le tuteur presque sans compter et un entretien d’orientation sur rendez-vous.',
-    specs:[['Classes','2'],['Tuteur IA','100 / jour'],['Fiches PDF','40 / semaine'],['Orientation','Entretien']],
-    cmp:{ 'Labos premium':'Tous', 'Copies corrigées':'50 / jour', 'Enfants':'1' } },
+    fort:'Un enseignant en direct, les bases revues', suite:' — classes virtuelles en visio, sa classe et celle d’avant, et un entretien d’orientation sur rendez-vous.',
+    specs:[['Classes','2'],['Tuteur IA','100 / jour'],['Fiches PDF','40 / semaine'],['Direct','Classes virtuelles']],
+    cmp:{ 'Labos premium':'Tous', 'Copies corrigées':'50 / jour', 'Bulletins blancs':'Oui', 'Orientation':'Entretien', 'Enfants':'1' } },
   famille:{ rang:'N4', pour:'Toute la famille', metrique:'Jusqu’à {n} enfants',
     fort:'Tous vos enfants au niveau Élite', suite:' — un seul paiement, chaque enfant dans sa classe, et un suivi parent des notes, absences et progrès.',
     specs:[['Enfants','{n}'],['Classes','1 par enfant'],['Tuteur IA','100 / jour / enfant'],['Fiches PDF','40 / sem. / enfant']],
-    cmp:{ 'Labos premium':'Tous', 'Copies corrigées':'50 / jour', 'Orientation':'Entretien' } },
+    cmp:{ 'Labos premium':'Tous', 'Copies corrigées':'50 / jour', 'Bulletins blancs':'Oui', 'Direct':'Classes virtuelles', 'Orientation':'Entretien' } },
   prof3:{ rang:'E1', pour:'Un enseignant, quelques classes', metrique:'3 classes au choix',
     fort:'Vos trois classes, prêtes à projeter', suite:' — leçons complètes, fiches à distribuer, épreuves et examens blancs corrigés.',
     specs:[['Classes','3'],['Tuteur IA','40 / jour'],['Fiches PDF','40 / semaine'],['Labos premium','Tous']],
@@ -51294,7 +51460,7 @@ function _formulesComparatif(groupes){
   if(!gs.length) return '';
   var fiches = gs.map(function(f){ return _palierFiche(f.groupe, f.mois); });
   var lignes = groupes === _GROUPES_PROF ? ['Classes','Tuteur IA','Fiches PDF','Labos premium']
-                                         : ['Classes','Tuteur IA','Fiches PDF','Labos premium','Copies corrigées','Orientation','Enfants'];
+                                         : ['Classes','Tuteur IA','Fiches PDF','Labos premium','Copies corrigées','Bulletins blancs','Direct','Orientation','Enfants'];
   var val = function(fi, l){ return fi.cmp[l] || '—'; };
   var h = '<div class="vfo-cmp-wrap"><table class="vfo-cmp"><thead><tr><th scope="col"></th>'
     + gs.map(function(f, i){ return '<th scope="col" class="vfo-g-' + _esc(f.groupe) + '"><span class="vfo-rang">' + _esc(fiches[i].rang) + '</span>' + _esc(_palierNomCourt(f.mois)) + '</th>'; }).join('')

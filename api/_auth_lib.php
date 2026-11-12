@@ -708,11 +708,11 @@ if (!defined('VRT_AUTH_LIB')) {
             'starter' => ['nom' => 'STARTER', 'public' => 'eleve', 'mois' => 1200, 'an' => 10000, 'cible' => 'Élève · 6ᵉ → Tˡᵉ', 'tags' => $eleve,
                           'avantages' => ['Toutes les leçons de 1 classe', 'Épreuves, annales et examens blancs chronométrés', '5 questions par jour au tuteur IA', '10 fiches PDF par semaine', '2 labos premium à l’essai par semaine']],
             'pro'     => ['nom' => 'PRO', 'public' => 'eleve', 'mois' => 1600, 'an' => 13500, 'cible' => 'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', 'tags' => $eleve, 'populaire' => true,
-                          'avantages' => ['Tout Starter', '30 questions par jour au tuteur IA', '20 fiches PDF par semaine', 'Tous les labos virtuels premium', 'Corrections de copies photographiées : 15 par jour']],
+                          'avantages' => ['Tout Starter', '30 questions par jour au tuteur IA', '20 fiches PDF par semaine', 'Tous les labos virtuels premium', 'Bulletins blancs : copies notées sur 20 par le tuteur', 'Corrections de copies photographiées : 15 par jour']],
             'elite'   => ['nom' => 'ÉLITE', 'public' => 'eleve', 'mois' => 2000, 'an' => 16500, 'cible' => 'Accompagnement complet', 'tags' => $complet,
-                          'avantages' => ['Tout Pro', '2 classes : la sienne + celle d’avant pour revoir les bases', '100 questions par jour au tuteur IA', '40 fiches PDF par semaine', 'Corrections de copies photographiées : 50 par jour', 'Entretien d’orientation sur rendez-vous']],
+                          'avantages' => ['Tout Pro', '2 classes : la sienne + celle d’avant pour revoir les bases', '100 questions par jour au tuteur IA', '40 fiches PDF par semaine', 'Classes virtuelles en direct avec un enseignant', 'Entretien d’orientation sur rendez-vous']],
             'famille' => ['nom' => 'FAMILLE', 'public' => 'parent', 'mois' => 6000, 'an' => 50000, 'cible' => 'Jusqu’à 4 enfants', 'tags' => $complet, 'enfantsMax' => 4,
-                          'avantages' => ['Jusqu’à 4 enfants sur un seul paiement', 'Chaque enfant au niveau Élite, dans sa classe', '40 fiches PDF par semaine et par enfant', 'Suivi parent : notes, absences, progression']],
+                          'avantages' => ['Jusqu’à 4 enfants sur un seul paiement', 'Chaque enfant au niveau Élite, dans sa classe', 'Classes virtuelles en direct et bulletins blancs', '40 fiches PDF par semaine et par enfant', 'Suivi parent : notes, absences, progression']],
             /* FORMULES ENSEIGNANT MULTI-CLASSES (12/11/2026). Le contenu de
                plusieurs classes pour préparer, projeter et distribuer. Les
                classes se fixent à la première ouverture d'une leçon (voir
@@ -761,23 +761,24 @@ if (!defined('VRT_AUTH_LIB')) {
          fichesJour / fichesSemaine : documents DISTINCTS ouverts (content.php)
          labos      : labos premium ouverts (protocole + quiz servis par apprendre.php)
          labosEssai : labos premium DISTINCTS ouverts à l'essai sur 7 jours, sans labos
+         bulletins  : copies d'examen blanc notées par le tuteur, bulletin blanc (api/examens.php)
+         direct     : classes virtuelles en direct pour abonnés en ligne (api/direct.php)
          orientation: entretien d'orientation (rendez-vous pris par le centre)
-       Ne figure ici que ce qui EXISTE pour un abonné en ligne : les « bulletins
-       blancs », « concours blancs » et « classes virtuelles » annoncés jusqu'au
-       12/11/2026 n'existaient pas (ou seulement pour les élèves du centre).
+       Ne figure ici que ce qui EXISTE : bulletins blancs et classes virtuelles
+       des abonnés en ligne existent depuis le 12/11/2026 (examens.php, direct.php).
        Réglable sans redéployer : DB.elearning.droitsFormules.<groupe>.<clé>.
        ══════════════════════════════════════════════════════════════════════ */
     function vrt_droits_formules(array $db = []): array {
         $d = [
-            'decouverte' => ['classes' => 0,  'iaJour' => 5,   'fichesJour' => 0,  'fichesSemaine' => 0,   'labos' => false, 'labosEssai' => 1, 'orientation' => false],
-            'starter'    => ['classes' => 1,  'iaJour' => 5,   'fichesJour' => 3,  'fichesSemaine' => 10,  'labos' => false, 'labosEssai' => 2, 'orientation' => false],
-            'pro'        => ['classes' => 1,  'iaJour' => 30,  'fichesJour' => 5,  'fichesSemaine' => 20,  'labos' => true,  'labosEssai' => 0, 'orientation' => false],
-            'elite'      => ['classes' => 2,  'iaJour' => 100, 'fichesJour' => 10, 'fichesSemaine' => 40,  'labos' => true,  'labosEssai' => 0, 'orientation' => true],
+            'decouverte' => ['classes' => 0,  'iaJour' => 5,   'fichesJour' => 0,  'fichesSemaine' => 0,   'labos' => false, 'labosEssai' => 1, 'bulletins' => false, 'direct' => false, 'orientation' => false],
+            'starter'    => ['classes' => 1,  'iaJour' => 5,   'fichesJour' => 3,  'fichesSemaine' => 10,  'labos' => false, 'labosEssai' => 2, 'bulletins' => false, 'direct' => false, 'orientation' => false],
+            'pro'        => ['classes' => 1,  'iaJour' => 30,  'fichesJour' => 5,  'fichesSemaine' => 20,  'labos' => true,  'labosEssai' => 0, 'bulletins' => true, 'direct' => false, 'orientation' => false],
+            'elite'      => ['classes' => 2,  'iaJour' => 100, 'fichesJour' => 10, 'fichesSemaine' => 40,  'labos' => true,  'labosEssai' => 0, 'bulletins' => true, 'direct' => true, 'orientation' => true],
             // Famille : PAR ENFANT. Le payeur garde les places que ses enfants rattachés n'occupent pas (vrt_droits_compte).
-            'famille'    => ['classes' => 4,  'iaJour' => 100, 'fichesJour' => 10, 'fichesSemaine' => 40,  'labos' => true,  'labosEssai' => 0, 'orientation' => true],
-            'prof3'      => ['classes' => 3,  'iaJour' => 40,  'fichesJour' => 10, 'fichesSemaine' => 40,  'labos' => true,  'labosEssai' => 0, 'orientation' => false],
-            'prof6'      => ['classes' => 6,  'iaJour' => 80,  'fichesJour' => 15, 'fichesSemaine' => 60,  'labos' => true,  'labosEssai' => 0, 'orientation' => false],
-            'proftout'   => ['classes' => -1, 'iaJour' => 150, 'fichesJour' => 25, 'fichesSemaine' => 120, 'labos' => true,  'labosEssai' => 0, 'orientation' => false],
+            'famille'    => ['classes' => 4,  'iaJour' => 100, 'fichesJour' => 10, 'fichesSemaine' => 40,  'labos' => true,  'labosEssai' => 0, 'bulletins' => true, 'direct' => true, 'orientation' => true],
+            'prof3'      => ['classes' => 3,  'iaJour' => 40,  'fichesJour' => 10, 'fichesSemaine' => 40,  'labos' => true,  'labosEssai' => 0, 'bulletins' => false, 'direct' => false, 'orientation' => false],
+            'prof6'      => ['classes' => 6,  'iaJour' => 80,  'fichesJour' => 15, 'fichesSemaine' => 60,  'labos' => true,  'labosEssai' => 0, 'bulletins' => false, 'direct' => false, 'orientation' => false],
+            'proftout'   => ['classes' => -1, 'iaJour' => 150, 'fichesJour' => 25, 'fichesSemaine' => 120, 'labos' => true,  'labosEssai' => 0, 'bulletins' => false, 'direct' => false, 'orientation' => false],
         ];
         $sur = $db['elearning']['droitsFormules'] ?? null;
         if (is_array($sur)) {

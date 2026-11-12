@@ -285,6 +285,10 @@ jobs:
       - name: 🎟️ Formules — chaque abonnement ouvre-t-il ce qu'il annonce, et pas plus ?
         run: php tests/droits_formules.php
 
+      # Bulletins blancs, classes virtuelles et labos premium, par HTTP sur une base jetable.
+      - name: 📝 Bulletins blancs, direct, labos — servis à qui y a droit, et à lui seul ?
+        run: php tests/bulletins_direct.php
+
       # ── 🤖 RAPPROCHEMENT SMS (25/09/2026). Un SMS de réception conforme sert
       #    le livret/manuel sans humain ; un faux SMS (solde incohérent, txid
       #    rejoué, expéditeur inconnu) ne sert JAMAIS rien.
@@ -1653,6 +1657,8 @@ jobs:
             api/manuels.php \
             api/apprendre.php \
             api/_labos_premium.php \
+            api/examens.php \
+            api/direct.php \
             api/plateforme.php \
             api/compte.php; do
             # ⚠️ ÉCHEC BRUYANT, et pas un « [ -f ] && cp » silencieux.

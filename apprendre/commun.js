@@ -262,12 +262,12 @@
   var FORMULES = [
     { g: "starter", nom: "Starter", pour: "Pour suivre l'année", mois: "1 200", an: "10 000",
       av: ["Toutes les leçons de 1 classe", "Épreuves, annales et examens blancs", "5 questions par jour au tuteur", "10 fiches PDF par semaine", "2 labos premium à l'essai par semaine"],
-      non: ["Correction de copies photographiées"] },
+      non: ["Labos premium (2 à l'essai)", "Bulletins blancs notés"] },
     { g: "pro", nom: "Pro", pour: "Pour l'année d'examen", mois: "1 600", an: "13 500",
-      av: ["Toutes les leçons de 1 classe", "30 questions par jour au tuteur", "20 fiches PDF par semaine", "Tous les labos virtuels premium", "15 copies corrigées par jour (photo)"],
-      non: ["Entretien d'orientation"] },
+      av: ["Toutes les leçons de 1 classe", "30 questions par jour au tuteur", "20 fiches PDF par semaine", "Tous les labos virtuels premium", "Bulletins blancs : copies notées sur 20"],
+      non: ["Classes virtuelles en direct"] },
     { g: "elite", nom: "Élite", pour: "Pour viser la mention", mois: "2 000", an: "16 500",
-      av: ["2 classes : la tienne + celle d'avant", "100 questions par jour au tuteur", "40 fiches PDF par semaine", "50 copies corrigées par jour (photo)", "Entretien d'orientation sur rendez-vous"],
+      av: ["2 classes : la tienne + celle d'avant", "100 questions par jour au tuteur", "40 fiches PDF par semaine", "Classes virtuelles en direct", "Entretien d'orientation sur rendez-vous"],
       non: [] }
   ];
   var WA_VERITAS = "237697637739";
