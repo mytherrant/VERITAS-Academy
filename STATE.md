@@ -1,3 +1,11 @@
+## Leçons d'examen, séries 1 à 8 : aperçus payants en ligne (12/11/2026)
+
+Demande de Jacques : « Met déjà ceci en ligne et continue les autres leçons ».
+
+- **Aperçus fusionnés** dans `apprendre/apercus-*.js` : 200 leçons du paquet privé `60-lettres-examen.js` (3e, 1re, Tle ; Français, Philosophie, Histoire, Géographie, Anglais), ajoutées aux aperçus existants SANS les reconstruire (le script `build_apprendre_payant.cjs` lancé sans toutes les sources du PC effacerait les autres leçons payantes). 17 gratuites en entier (premier de trimestre), 183 à verrou. `charge.js` et ses `?v=` recalculés comme le fait le script.
+- `apprendre/_src/07-09` retirés (devenus payants) ; `lecons.js` et pages statiques régénérés (73 pages `cours/` orphelines retirées), habillage refait.
+- **Reste chez Jacques** : déposer par FTP les 183 fichiers `uploads/protected/apprendre/<id>.json` (zip fourni à part, jamais dans ce dépôt public). Tant qu'un JSON manque, l'abonné voit le message « non_depose » de `verrou.js`. Copier aussi `60-lettres-examen.js` dans `apprendre_prive\sources` pour que la prochaine reconstruction depuis le PC garde ces leçons.
+
 ## Anglais : scène vivante de 1re ; leçons d'examen passées au payant (12/11/2026)
 
 Demandes de Jacques : « Ne fais pas trop de leçons gratuites sinon ils ne vont pas s'abonner », puis « Utilise aussi les situations de vie en anglais (dialogue, petite scène…), n'oublie pas les laboratoires et simulations comme ailleurs. Compare aux annales et à mes livrets d'anglais. »
