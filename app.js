@@ -23626,10 +23626,10 @@ function showJeuxEdu(){
     if(_deleted.indexOf(j.id)>=0)return false;
     if(_purged.indexOf(j.id)>=0)return false;
     var mOk=filtreMat==="Tous"||(j.matiere||"").toLowerCase().indexOf(filtreMat.toLowerCase())>=0;
-    var nOk=filtreNiv==="Tous"||(j.niveau||"").toLowerCase().indexOf(filtreNiv.toLowerCase())>=0;
+    var nOk=filtreNiv==="Tous"||!!j.tousNiveaux||(j.niveau||"").toLowerCase().indexOf(filtreNiv.toLowerCase())>=0;   // jeux de réflexion : tous niveaux
     return mOk&&nOk;
   });
-  var MATS=["Tous","Maths","Francais","Litterature","Histoire-Geo","Physique-Chimie","SVT","Anglais","Philosophie","Geographie"];
+  var MATS=["Tous","Réflexion","Maths","Francais","Litterature","Histoire-Geo","Physique-Chimie","SVT","Anglais","Philosophie","Geographie"];
   var NIVEAUX=["Tous","3eme","1ere","Terminale","6eme-3eme","2nde-Tle"];
   var h="<div class='vsec'>";
   h+="<div class='vsec-title vsec-title-hero'>🎮 Jeux Éducatifs & Cartes Mentales</div><div class='vsec-sub'>Apprenez en vous amusant — verbes, capitales, formules, œuvres au programme</div>";
@@ -23782,6 +23782,7 @@ function showJeuxEdu(){
   // v2.2 : pictos SVG par type/matière (au lieu d'emojis monochromes sur Android)
   function _jeuIcon(j){
     var t=(j.type||'').toLowerCase(), m=(j.matiere||'').toLowerCase();
+    if(j.ico) return j.ico;   // jeux de réflexion : chacun son icône (12/11/2026)
     if(t==='qcm') return 'pencil';
     if(t==='vf') return 'check';
     if(t==='pendu') return 'edit';
@@ -23797,6 +23798,7 @@ function showJeuxEdu(){
   }
   function _jeuColor(j){
     var m=(j.matiere||'').toLowerCase();
+    if(m.indexOf('réflexion')>=0) return '#0E7C86';
     if(m.indexOf('math')>=0) return '#3C8DFF';
     if(m.indexOf('phys')>=0||m.indexOf('chim')>=0) return '#6C56A6';
     if(m.indexOf('svt')>=0) return '#3A8F73';
@@ -23827,7 +23829,7 @@ function showJeuxEdu(){
       if(_pwb) h+="<span style='position:absolute;top:6px;left:6px;z-index:2'>"+_pwb+"</span>";
     }
     else h+="<span class='jeu-free'>GRATUIT</span>";
-    var typeLabel={qcm:"QCM",vf:"Vrai/Faux",pendu:"Pendu",trous:"Texte trous",html:"HTML"}[j.type]||j.type||'';
+    var typeLabel=j.genre||{qcm:"QCM",vf:"Vrai/Faux",pendu:"Pendu",trous:"Texte trous",html:"HTML"}[j.type]||j.type||'';
     if(typeLabel)h+="<span style='position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:rgba(0,0,0,.4)'>"+typeLabel+"</span>";
     h+="</div><div class='jeu-body'>";
     h+="<div class='jeu-title'>"+j.titre+"</div>";
