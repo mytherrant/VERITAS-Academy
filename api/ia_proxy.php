@@ -581,6 +581,9 @@ $geminiModeles = array_values(array_unique(array_filter(array_map('trim',
 // banc — jamais dans le payment_config.php du serveur. Exige en plus le serveur
 // de développement (`php -S`) : un payment_config.php de banc copié par erreur
 // en production servirait sinon la réponse simulée à tous, sans erreur.
+// Vrai dès qu'un moteur a refusé la DEMANDE elle-même (requête rejetée,
+// contenu bloqué) : un tel échec ne rend pas le crédit (section 6).
+$echecClient = false;
 if (PHP_SAPI === 'cli-server' && defined('IA_BANC_REPONSE') && (string) IA_BANC_REPONSE !== '') {
     $ok = true; $text = (string) IA_BANC_REPONSE; $source = 'banc';
 }
@@ -594,6 +597,7 @@ if (!$ok) foreach ($geminiKeys as $gIdx => $gk) {
             break 2;
         }
         if ($error === null) $error = $errG;
+        if (ia_echec_du_client($errG)) $echecClient = true;
     }
 }
 
@@ -605,6 +609,7 @@ if (!$ok) {
                                                      $mai['label'], $mai['max'], min(45, $iaReste()));
             if ($okX) { $ok = true; $text = $textX; $error = null; $source = 'fallback_' . $mai['id']; break 2; }
             if ($error === null) $error = $errX;
+            if (ia_echec_du_client($errX)) $echecClient = true;
         }
     }
     // Dernier recours : la même question a déjà reçu une réponse (pas encore
@@ -630,11 +635,23 @@ if (!$ok) {
     // formule, crédit Atelier, plafond global). Sans cela, un élève dont les
     // deux essais tombaient pendant une panne perdait sa journée sans rien
     // recevoir. Le compteur par IP (anti-abus) reste, lui, décompté.
-    ia_rendre_credit($uFile ?? '');
-    if ($atelierDecompte && $fichierAtelier !== '') ia_rendre_credit($fichierAtelier);
-    if ($inviteDecompte && $fichierInvite !== '') ia_rendre_credit($fichierInvite);
-    ia_rendre_credit($gFile);
-    if ($isShared) ia_rendre_credit($sGenFile ?? '');
+    // Deux bornes (27/10/2026), sans quoi un échec PROVOQUÉ rendait l'appel
+    // gratuit et rejouable à l'infini, plafond global compris :
+    //   · seule une panne du fournisseur rend le crédit — pas une demande que
+    //     le moteur a refusée (requête rejetée, contenu bloqué) ;
+    //   · au plus IA_RENDUS_JOUR crédits rendus par identité et par jour.
+    // L'identité du plafond est celle que le SERVEUR a vérifiée (compte, puis
+    // invité signé), jamais le `userId` envoyé par le client : en le changeant
+    // à chaque requête, on aurait obtenu trois rendus neufs à chaque fois.
+    $identiteRendu = $utilisateurVerifie !== '' ? $utilisateurVerifie
+                   : ($idInvite !== '' ? $idInvite : 'ip:' . $ip);
+    if (!$echecClient && ia_rendu_autorise($rateDir, $identiteRendu)) {
+        ia_rendre_credit($uFile ?? '');
+        if ($atelierDecompte && $fichierAtelier !== '') ia_rendre_credit($fichierAtelier);
+        if ($inviteDecompte && $fichierInvite !== '') ia_rendre_credit($fichierInvite);
+        ia_rendre_credit($gFile);
+        if ($isShared) ia_rendre_credit($sGenFile ?? '');
+    }
     http_response_code(502);
     echo json_encode(['error' => 'Le Professeur Ambassa est momentanément indisponible — réessayez dans quelques instants.', 'source' => $source]);
     log_request($userId, $userPlan, 'fail', 0);
@@ -944,6 +961,37 @@ function log_request(string $userId, string $plan, string $action, int $bytes): 
                  . (isset($u['think']) ? ' tok_think=' . (int) $u['think'] : '')) : '';
     $line = date('Y-m-d H:i:s') . " | " . $plan . " | " . $userId . " | " . $action . " | " . $bytes . " bytes" . $tok . "\n";
     @file_put_contents(__DIR__ . '/data/ia_proxy.log', $line, FILE_APPEND | LOCK_EX);
+}
+
+// L'échec vise-t-il la DEMANDE plutôt que le fournisseur ? HTTP 400 = requête
+// rejetée ; réponse vide pour un motif de CONTENU (« SAFETY »…) = demande
+// bloquée. Tout le reste est une panne, donc rendu : réseau, 401/403, 429,
+// 5xx, moteur indisponible — et aussi les 400 qui trahissent NOTRE
+// configuration (clé invalide, région, modèle retiré, facturation), ou une
+// réponse coupée faute de budget (MAX_TOKENS). En cas de doute : on rend.
+function ia_echec_du_client(?string $err): bool {
+    $err = (string) $err;
+    if (preg_match('/API.?KEY|location|FAILED_PRECONDITION|decommission|model_not|not found|billing|quota|permission/iu', $err)) return false;
+    return (bool) preg_match('/ HTTP 400:|Réponse vide de Gemini \((?:SAFETY|PROHIBITED_CONTENT|BLOCKLIST|SPII|IMAGE_SAFETY|RECITATION)\)/u', $err);
+}
+
+// Plafond des crédits rendus : IA_RENDUS_JOUR par identité et par jour (3 par
+// défaut). Compte le rendu accordé ; refuse au-delà.
+function ia_rendu_autorise(string $rateDir, string $identite): bool {
+    $max = defined('IA_RENDUS_JOUR') ? (int) IA_RENDUS_JOUR : 3;
+    if ($max <= 0) return false;
+    if (!is_dir($rateDir)) @mkdir($rateDir, 0755, true);
+    $f = $rateDir . 'iarendu_' . substr(md5($identite), 0, 16) . '_' . date('Ymd') . '.txt';
+    $h = @fopen($f, 'c+');
+    if (!$h) return false;
+    $ok = false;
+    if (flock($h, LOCK_EX)) {
+        $n = (int) stream_get_contents($h);
+        if ($n < $max) { ftruncate($h, 0); rewind($h); fwrite($h, (string) ($n + 1)); fflush($h); $ok = true; }
+        flock($h, LOCK_UN);
+    }
+    fclose($h);
+    return $ok;
 }
 
 // Décrémente un compteur de quota (fichier « n ») sans jamais passer sous zéro.
