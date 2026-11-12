@@ -1,3 +1,16 @@
+## Leçons des classes d'examen, troisième série, et contrôle de conformité (12/11/2026)
+
+Demandes de Jacques : « Continue les leçons », puis « Vérifier toujours la conformité avec les annales et progressions ».
+
+- **RÈGLE pour toute nouvelle leçon d'Apprendre** : (1) rattachement à la ligne officielle de la progression (`cle` → `VRT_PROG`) ; (2) **aucun doublon** (deux leçons sur la même ligne) ; (3) entraînement conforme au format des annales de l'examen visé. Formats relevés dans le dépôt :
+  - **Philosophie, Bac A4** (livrets/extrait-philo-tle.js, annales 2022-2025) : Partie A commentaire d'un texte de Towa ou Njoh-Mouelle, 15-25 lignes (problème 1,5 ; étude analytique 2 ; réfutation 2 ; réinterprétation 2 ; conclusion 1,5) ; Partie B dissertation en trois tâches (introduction 3 ; analyse dialectique 3 ; conclusion avec solution personnelle et contextualisée 3) ; présentation 2. Tle C et D : la progression prévoit dissertation + exercice sur texte avec questions.
+  - **Philosophie, Probatoire** (livrets/extrait-philo-1ere.js) : Partie 1 définir deux concepts + une citation avec son auteur pour chacun (4) ; compléter, relier, classer, vrai/faux (5) ; Partie 2 commentaire ou dissertation (introduction 3, développement 3, conclusion 3) ; présentation 2.
+  - **Français** (livrets/extrait-1ere.js, corrigés harmonisés OBC) : épreuve de langue sur texte support en phrases complètes ; au Probatoire A, trois sujets au choix (commentaire composé, dissertation, contraction) ; le jury sanctionne paraphrase, outils non interprétés, absence de plan.
+  - **Histoire-Géographie** : AUCUNE annale dans le dépôt ; les sujets sont dans les sources privées du PC. Conformité à vérifier là-bas.
+- **Corrections apportées aux leçons en ligne** : dissertation philosophique (conclusion avec solution personnelle et contextualisée, barème du bac) ; leçons de philosophie de 1re (exercice « définir deux concepts + citation et auteur ») ; exercice sur texte (réfutation, réinterprétation). Une pseudo-citation de Cheikh Anta Diop remplacée par une citation réelle (Antériorité des civilisations nègres, 1967).
+- **Série 3** (`apprendre/_src/09-lecons-examen-3.js`, 30 identifiants) : exercice sur texte philosophique (Tle C, D) ; la conscience (Tle C, D, 1re A) ; période moderne (Tle A) ; méthode de la philosophie (1re C, D) ; texte narratif et recherche des idées (1re et Tle C, D) ; lecture méthodique (Tle A, 1re A) ; villes du Cameroun (Tle A, C, D) ; Europe des deux supergrands (Tle A) ; fondements de l'impérialisme (1re A, C, D) ; migrations (1re A) ; reprises : dissertation littéraire (1re C, D), réorientation du débat africain et dissertation philosophique (1re A). `VRT_LX` partage une leçon entre classes dont l'intitulé officiel diffère.
+- Contrôles : 30 rattachements, 0 doublon sur tout `lecons.js` ; 17 leçons ouvertes dans Chromium, 0 erreur JS ; bancs 54/54, 17/17 ; 144 pages de cours habillées. `lecons.js` : 144 leçons.
+
 ## Leçons des classes d'examen, deuxième série (12/11/2026)
 
 Demande de Jacques : « Continue les leçons » (classes d'examen en priorité).
