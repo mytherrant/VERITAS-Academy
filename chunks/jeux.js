@@ -2,6 +2,9 @@
    47 Ko, ouvert uniquement depuis la page Jeux & Œuvres. Le module REMPLIT
    le tableau déjà déclaré dans app.js (push) au lieu de le remplacer : les
    44 points de lecture du code restent inchangés. */
+/* 12/11/2026 : TOUS les jeux intégrés sont gratuits (« pour mieux captiver et
+   attirer les apprenants », Jacques) : Conjugaison, Figures de rhétorique et les
+   quiz Physique, Géographie, Maths, SVT ne l'étaient pas. */
 Array.prototype.push.apply(window.JEUX_CATALOGUE, [
   {id:"j1",titre:"Calcul Mental",emoji:"🔢",matiere:"Maths",niveau:"6eme-3eme",
    desc:"Additions, soustractions, multiplications et divisions chronometrees",gratuit:true,
@@ -16,10 +19,10 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
    desc:"Situez les regions, villes et fleuves du Cameroun sur la carte",gratuit:true,
    action:"lancerCarteGeo"},
   {id:"j5",titre:"Conjugaison Express",emoji:"📝",matiere:"Francais",niveau:"6eme-Tle",
-   desc:"Conjuguez rapidement les verbes irreguliers et les temps composes",gratuit:false,plan:"Premium",
+   desc:"Conjuguez rapidement les verbes irreguliers et les temps composes",gratuit:true,
    action:"lancerConjugaison"},
   {id:"j6",titre:"Figures de Rhetorique",emoji:"📖",matiere:"Litterature",niveau:"3eme-1ere",
-   desc:"Identifiez metaphores, allegories et autres figures de style",gratuit:false,plan:"Premium",
+   desc:"Identifiez metaphores, allegories et autres figures de style",gratuit:true,
    action:"lancerFigures"},
   {id:"j7",titre:"Tableau Periodique",emoji:"⚗️",matiere:"Physique-Chimie",niveau:"3eme-2nde",
    desc:"Retrouvez les elements chimiques par leur symbole et numero atomique",gratuit:true,
@@ -282,7 +285,7 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
     {q:"Que sont les enzymes ?",opts:["Des hormones","Des protéines catalyseurs","Des vitamines","Des sucres"],ans:1,exp:"Protéines qui accélèrent les réactions chimiques sans être consommées. Ex : amylase (digestion amidon)."},
     {q:"Les neurones communiquent par...",opts:["Les synapses","Les muscles","Les os","Le sang"],ans:0,exp:"Synapses : zones de contact entre neurones où sont libérés les neurotransmetteurs (dopamine, sérotonine...)."},
    ]},
-  {id:'j_lois_physique',titre:'Lois de Physique-Chimie',emoji:'⚡',matiere:'Physique-Chimie',niveau:'2nde-Tle',type:'qcm',acces:1,
+  {id:'j_lois_physique',titre:'Lois de Physique-Chimie',emoji:'⚡',matiere:'Physique-Chimie',niveau:'2nde-Tle',type:'qcm',acces:1,gratuit:true,
     questions:[
       {q:'Quelle est la loi d\'Ohm ?',opts:['U = R × I','U = I / R','I = U × R','R = U × I²'],ans:0,exp:'La loi d\'Ohm : U = R × I, où U est la tension (V), R la résistance (Ω) et I l\'intensité (A).'},
       {q:'Quelle est la 2ème loi de Newton ?',opts:['F = m × a','F = m / a','a = F / m²','F = m + a'],ans:0,exp:'La 2ème loi de Newton : F = m × a. La force (N) = masse (kg) × accélération (m/s²).'},
@@ -293,7 +296,7 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
       {q:'Formule de la chaleur reçue (calorimétrie)',opts:['Q = m × c × ΔT','Q = m / c × ΔT','Q = m × c / ΔT','Q = c × ΔT²'],ans:0,exp:'Q = m × c × ΔT. m : masse (kg), c : capacité thermique massique, ΔT : variation de température.'},
       {q:'Qu\'est-ce que la période T d\'un phénomène périodique ?',opts:['La durée d\'un cycle','La fréquence en Hz','L\'amplitude','La longueur d\'onde'],ans:0,exp:'La période T est la durée d\'un cycle complet, exprimée en secondes.'}
     ]},
-  {id:'j_regions_cmr',titre:'Régions du Cameroun',emoji:'🗺️',matiere:'Géographie',niveau:'3ème-Tle',type:'qcm',acces:1,
+  {id:'j_regions_cmr',titre:'Régions du Cameroun',emoji:'🗺️',matiere:'Géographie',niveau:'3ème-Tle',type:'qcm',acces:1,gratuit:true,
     questions:[
       {q:'Combien de régions compte le Cameroun ?',opts:['10','8','12','9'],ans:0,exp:'Le Cameroun est divisé en 10 régions depuis la réforme administrative.'},
       {q:'Quelle est la capitale de la région du Centre ?',opts:['Yaoundé','Bertoua','Bafoussam','Ngaoundéré'],ans:0,exp:'Yaoundé est la capitale politique du Cameroun et le chef-lieu de la région du Centre.'},
@@ -304,7 +307,7 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
       {q:'Le mont Cameroun se trouve dans quelle région ?',opts:['Sud-Ouest','Littoral','Nord-Ouest','Centre'],ans:0,exp:'Le mont Cameroun (4 095 m), plus haut sommet d\'Afrique centrale, est situé dans la région du Sud-Ouest.'},
       {q:'Quelle région est la plus grande du Cameroun ?',opts:['Est','Nord','Adamaoua','Centre'],ans:0,exp:'La région de l\'Est est la plus grande région du Cameroun avec environ 109 000 km².'}
     ]},
-  {id:'j_maths_fonctions',titre:'Fonctions & Dérivées — Maths Tle',emoji:'📐',matiere:'Mathématiques',niveau:'Tle',type:'qcm',acces:1,
+  {id:'j_maths_fonctions',titre:'Fonctions & Dérivées — Maths Tle',emoji:'📐',matiere:'Mathématiques',niveau:'Tle',type:'qcm',acces:1,gratuit:true,
     questions:[
       {q:'La dérivée de f(x) = x² est',opts:['f\'(x) = 2x','f\'(x) = x','f\'(x) = 2','f\'(x) = x²'],ans:0,exp:'Règle de dérivation : si f(x) = xⁿ alors f\'(x) = n·xⁿ⁻¹. Donc (x²)\' = 2x.'},
       {q:'La dérivée de f(x) = sin(x) est',opts:['f\'(x) = cos(x)','f\'(x) = -cos(x)','f\'(x) = -sin(x)','f\'(x) = tan(x)'],ans:0,exp:'(sin x)\' = cos x. Règle fondamentale à mémoriser.'},
@@ -315,7 +318,7 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
       {q:'La dérivée de f(x) = cos(x) est',opts:['f\'(x) = -sin(x)','f\'(x) = sin(x)','f\'(x) = -cos(x)','f\'(x) = tan(x)'],ans:0,exp:'(cos x)\' = -sin x. Attention au signe !'},
       {q:'Le nombre dérivé f\'(a) représente',opts:['La pente de la tangente en a','La valeur de f en a','L\'ordonnée à l\'origine','La limite de f en +∞'],ans:0,exp:'f\'(a) est la pente (coefficient directeur) de la tangente à la courbe de f au point d\'abscisse a.'}
     ]},
-  {id:'j_svt_genetique',titre:'Génétique & Hérédité — SVT',emoji:'🧬',matiere:'SVT',niveau:'1ère-Tle',type:'qcm',acces:1,
+  {id:'j_svt_genetique',titre:'Génétique & Hérédité — SVT',emoji:'🧬',matiere:'SVT',niveau:'1ère-Tle',type:'qcm',acces:1,gratuit:true,
     questions:[
       {q:'Quel scientifique est le fondateur de la génétique ?',opts:['Gregor Mendel','Charles Darwin','Louis Pasteur','Robert Koch'],ans:0,exp:'Gregor Mendel (1822-1884), moine botaniste autrichien, a établi les lois de l\'hérédité après ses expériences sur les petits pois.'},
       {q:'Combien de chromosomes contient une cellule somatique humaine ?',opts:['46','23','48','44'],ans:0,exp:'Les cellules somatiques humaines contiennent 46 chromosomes (23 paires), dont 22 paires d\'autosomes et 1 paire de chromosomes sexuels.'},

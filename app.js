@@ -21369,9 +21369,16 @@ function vLaunchJeu(id){
       .catch(function(){ toast('Jeu momentanément indisponible','err'); });
     return;
   }
-  var _delJ=DB.deletedJeux||[];
-  if(_delJ.indexOf(id)>=0){toast('Ce jeu n\'est plus disponible.','warn');return;}
   var j=(typeof JEUX_CATALOGUE!=='undefined')&&JEUX_CATALOGUE.find(function(x){return x.id===id;});
+  /* 12/11/2026 — « Ce jeu n'est plus disponible » sur Calcul mental, ouvert
+     depuis Apprendre. La liste des jeux masqués (DB.deletedJeux) est gardée
+     par l'appareil et réunie, synchro après synchro, à celle de la base : un
+     jeu intégré masqué un jour n'ouvrait plus JAMAIS, même par un lien direct
+     publié ailleurs sur le site. Le masquage reste valable pour la LISTE ;
+     il ne bloque plus que les jeux importés (custom), seuls à pouvoir
+     réellement disparaître. */
+  var _delJ=DB.deletedJeux||[];
+  if(_delJ.indexOf(id)>=0 && (!j || j.custom)){toast('Ce jeu n\'est plus disponible.','warn');return;}
   if(!j){
     // Fallback : chercher dans DB.customJeux (peut arriver si JEUX_CATALOGUE pas encore peuplé)
     j=DB.customJeux&&DB.customJeux.find(function(x){return x.id===id;});
