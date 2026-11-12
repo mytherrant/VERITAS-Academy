@@ -141,14 +141,14 @@ titre('3. Les formules Starter · Pro · Élite · Famille');
 $db = base();
 $db['elearning']['plans'] = [];   // la grille PAR DÉFAUT, sans aucun réglage en base
 // Grille du 16/10/2026 : Starter à 12 000 F l'année (prix de référence de la note), +20 %.
-$attendus = ['abo_starter_m' => 1200, 'abo_pro_m' => 1600, 'abo_elite_m' => 2000, 'abo_famille_m' => 12000,
-             'abo_starter_a' => 10000, 'abo_pro_a' => 13500, 'abo_elite_a' => 16500, 'abo_famille_a' => 120000];
+$attendus = ['abo_starter_m' => 1200, 'abo_pro_m' => 1600, 'abo_elite_m' => 2000, 'abo_famille_m' => 6000,
+             'abo_starter_a' => 10000, 'abo_pro_a' => 13500, 'abo_elite_a' => 16500, 'abo_famille_a' => 50000];
 $prixOk = true; $detail = '';
 foreach ($attendus as $id => $p) {
     $v = vrt_prix_catalogue($db, 'subscription', $id);
     if ($v !== $p) { $prixOk = false; $detail .= $id . '=' . var_export($v, true) . ' au lieu de ' . $p . ' '; }
 }
-ok('tarifs connus du serveur SANS ligne en base (1 200/1 600/2 000/12 000 F par mois, Starter 10 000 F l’année)', $prixOk, $detail);
+ok('tarifs connus du serveur SANS ligne en base (1 200/1 600/2 000/6 000 F par mois, Starter 10 000 F l’année)', $prixOk, $detail);
 $f = vrt_plans_formules();
 ok('le prix barré de l’année est celui de 12 mois (14 400 F pour Starter)', (int) $f['abo_starter_a']['ancien'] === 14400);
 $db2 = $db; $db2['elearning']['plans'][] = ['id' => 'abo_pro_m', 'nom' => 'PRO', 'prix' => 2500, 'duree' => 'mensuel'];

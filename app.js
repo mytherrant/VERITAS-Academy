@@ -1203,7 +1203,7 @@ function _formulesDefaut(){
      av:['Tout Starter','30 questions par jour au tuteur','Labos virtuels PCT & SVT','Bulletins blancs notés','Fiches de révision imprimables']},
     {g:'elite',   nom:'ÉLITE',   pub:'eleve',  mois:2000, an:16500,  cible:'Accompagnement complet', tags:complet,
      av:['Tout Pro','Tuteur IA sans limite','Classes virtuelles en direct','Concours blancs corrigés','Entretien d’orientation']},
-    {g:'famille', nom:'FAMILLE', pub:'parent', mois:12000, cible:'Jusqu’à 4 enfants', tags:complet, enfants:4,
+    {g:'famille', nom:'FAMILLE', pub:'parent', mois:6000, an:50000, cible:'Jusqu’à 4 enfants', tags:complet, enfants:4,
      av:['Jusqu’à 4 enfants sur un seul paiement','Chaque enfant au niveau Élite','Suivi parent : notes, absences, progression','Tuteur IA sans limite pour chacun']}
   ];
   var out = [];
@@ -19014,9 +19014,9 @@ window._showQuotaExceeded = function(action, tier, used, limit){
       +'<div style="font-size:13px;color:#475569;line-height:1.6;margin-bottom:16px">Vous avez utilisé <b>'+used+'/'+limit+' essais</b> de '+label+' '+periodTxt+'.<br>Le quota se réinitialise lundi prochain.</div>'
       +'<div style="background:#FEF3C7;border:1px solid #FCD34D;padding:14px;border-radius:12px;text-align:left;margin-bottom:14px">'
         +'<div style="font-weight:800;color:#92400E;font-size:13px;margin-bottom:8px">🚀 Passez à un plan pour utiliser Ambassa sans limite :</div>'
-        +'<table style="width:100%;font-size:12px;color:#78350F"><tr><td><b>Starter</b></td><td>5 essais/jour</td><td><b>3 000 FCFA/mois</b></td></tr>'
-        +'<tr><td><b>Pro</b></td><td>30 essais/jour</td><td><b>8 000 FCFA/mois</b></td></tr>'
-        +'<tr><td><b>Elite</b></td><td>Illimité</td><td><b>15 000 FCFA/mois</b></td></tr></table>'
+        +'<table style="width:100%;font-size:12px;color:#78350F"><tr><td><b>Starter</b></td><td>5 essais/jour</td><td><b>1 200 FCFA/mois</b></td></tr>'
+        +'<tr><td><b>Pro</b></td><td>30 essais/jour</td><td><b>1 600 FCFA/mois</b></td></tr>'
+        +'<tr><td><b>Elite</b></td><td>Illimité</td><td><b>2 000 FCFA/mois</b></td></tr></table>'
       +'</div>'
       // v1.2.2 (#6) : UPGRADE CONTEXTUEL — si un examen approche, créer l'urgence ici (le bon moment)
       +((function(){ try{ var n=(typeof _examPromoActive==='function')?_examPromoActive():null;

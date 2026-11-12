@@ -273,9 +273,9 @@
       (conseillee ? '<span class="fo-badge">Conseillée pour toi</span>' : "") +
       '<p class="fo-nom">' + esc(f.nom) + '</p><p class="fo-pour">' + esc(f.pour) + '</p>' +
       '<p class="fo-prix"><b data-vrt-prix="' + idM + '">' + prixConnu(idM, f.mois) + '</b> F<small> / mois</small></p>' +
-      '<p class="fo-an">ou <b><span data-vrt-prix="' + idA + '">' + prixConnu(idA, f.an) + '</span> F l\'année</b>, payée en une fois</p>' +
+      '<p class="fo-an">ou <a href="/app.html#abonnement?plan=' + idA + '"><b><span data-vrt-prix="' + idA + '">' + prixConnu(idA, f.an) + '</span> F l\'année</b></a>, payée en une fois</p>' +
       '<ul class="fo-av">' + f.av.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + '</ul>' +
-      '<a class="fo-btn" href="/#tarifs" data-formule="' + f.g + '">Choisir ' + esc(f.nom) + '</a></div>';
+      '<a class="fo-btn" href="/app.html#abonnement?plan=' + idM + '">Choisir ' + esc(f.nom) + '</a></div>';
   }
   function carteHumain(c, m) {
     var txt = "Bonjour VÉRITAS, je souhaite un devis pour un accompagnement" + (c ? " en " + c : "") + (m ? " (" + m + ")" : "") + " : suivi particulier en ligne / répétitions à domicile. Ville et quartier : ";
@@ -296,7 +296,7 @@
       '<div class="offre-grille"><div class="offre-plans">' +
       FORMULES.map(function (f) { return carteFormule(f, ex ? f.g === "pro" : f.g === "starter"); }).join("") +
       '</div>' + carteHumain(c, m) + '</div>' +
-      '<p class="offre-n">Payer l\'année en une fois revient à un peu plus de huit mois : Starter à 10 000 F au lieu de 14 400 F. Paiement Orange Money ou MTN MoMo, sans engagement.</p>' +
+      '<p class="offre-n">Payer l\'année en une fois revient à un peu plus de huit mois (Starter : 10 000 F au lieu de 14 400 F). Plusieurs enfants ? La <a href="/app.html#abonnement?plan=abo_famille_m">formule Famille</a> couvre jusqu\'à 4 enfants au niveau Élite pour <span data-vrt-prix="abo_famille_m">' + prixConnu("abo_famille_m", "6 000") + '</span> F par mois. Paiement Orange Money ou MTN MoMo, sans engagement.</p>' +
       (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE) : "") +
       '</aside>';
   }

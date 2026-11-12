@@ -677,9 +677,9 @@ if (!defined('VRT_AUTH_LIB')) {
     /* ══════════════════════════════════════════════════════════════════════
        FORMULES ÉLÈVE & FAMILLE — grille arrêtée par Jacques le 13/09/2026.
 
-       Au mois : Starter 1 200 · Pro 1 600 · Élite 2 000 · Famille 12 000 F
+       Au mois : Starter 1 200 · Pro 1 600 · Élite 2 000 · Famille 6 000 F
        (grille du 12/11/2026 : trois paliers plus serrés, l'ancien Pro à 2 400 F
-       faisait fuir). À l'année : Starter 10 000 · Pro 13 500 · Élite 16 500 F,
+       faisait fuir). À l'année : Starter 10 000 · Pro 13 500 · Élite 16 500 · Famille 50 000 F,
        soit un peu plus de huit mois pour douze (clé `an`) ; sans `an`, l'année
        vaut dix mois. Le prix « ancien », barré sur les cartes, est celui de douze mois payés un à un.
 
@@ -711,7 +711,7 @@ if (!defined('VRT_AUTH_LIB')) {
                           'avantages' => ['Tout Starter', '30 questions par jour au tuteur', 'Labos virtuels PCT & SVT', 'Bulletins blancs notés', 'Fiches de révision imprimables']],
             'elite'   => ['nom' => 'ÉLITE', 'public' => 'eleve', 'mois' => 2000, 'an' => 16500, 'cible' => 'Accompagnement complet', 'tags' => $complet,
                           'avantages' => ['Tout Pro', 'Tuteur IA sans limite', 'Classes virtuelles en direct', 'Concours blancs corrigés', 'Entretien d’orientation']],
-            'famille' => ['nom' => 'FAMILLE', 'public' => 'parent', 'mois' => 12000, 'cible' => 'Jusqu’à 4 enfants', 'tags' => $complet, 'enfantsMax' => 4,
+            'famille' => ['nom' => 'FAMILLE', 'public' => 'parent', 'mois' => 6000, 'an' => 50000, 'cible' => 'Jusqu’à 4 enfants', 'tags' => $complet, 'enfantsMax' => 4,
                           'avantages' => ['Jusqu’à 4 enfants sur un seul paiement', 'Chaque enfant au niveau Élite', 'Suivi parent : notes, absences, progression', 'Tuteur IA sans limite pour chacun']],
         ];
         $out = [];
