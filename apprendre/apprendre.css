@@ -859,3 +859,8 @@ h2 .num .pic{vertical-align:middle}
 .gout-l:hover{text-decoration:underline}
 .res-tag.gr,.res-c .res-tag.gr{display:inline-flex;margin-top:6px;padding:2px 9px!important;border-radius:999px;background:#E3F4E7!important;color:#007E11!important;font:700 11.5px var(--sans)}
 .res-tag.ab,.res-c .res-tag.ab{display:inline-flex;margin-top:6px;padding:2px 9px!important;border-radius:999px;background:#FFF4D6!important;color:#8A5A00!important;font:700 11.5px var(--sans)}
+
+/* « Voir plus » (12/11/2026) : 2 éléments affichés, le reste à la demande. */
+.voir-plus{display:block;margin:10px auto 0;padding:9px 18px;border-radius:999px;border:1.5px solid #1E499B;background:#fff;color:#1E499B;font:600 14px var(--sans);cursor:pointer}
+.voir-plus:hover{background:#EEF2FA}
+.act-l + .voir-plus{margin:6px 0 4px}
