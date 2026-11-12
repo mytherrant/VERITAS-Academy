@@ -141,14 +141,14 @@ titre('3. Les formules Starter · Pro · Élite · Famille');
 $db = base();
 $db['elearning']['plans'] = [];   // la grille PAR DÉFAUT, sans aucun réglage en base
 // Grille du 16/10/2026 : Starter à 12 000 F l'année (prix de référence de la note), +20 %.
-$attendus = ['abo_starter_m' => 1200, 'abo_pro_m' => 1200, 'abo_elite_m' => 3600, 'abo_famille_m' => 12000,
-             'abo_starter_a' => 12000, 'abo_pro_a' => 12000, 'abo_elite_a' => 36000, 'abo_famille_a' => 120000];
+$attendus = ['abo_starter_m' => 1200, 'abo_pro_m' => 1600, 'abo_elite_m' => 2000, 'abo_famille_m' => 12000,
+             'abo_starter_a' => 10000, 'abo_pro_a' => 13500, 'abo_elite_a' => 16500, 'abo_famille_a' => 120000];
 $prixOk = true; $detail = '';
 foreach ($attendus as $id => $p) {
     $v = vrt_prix_catalogue($db, 'subscription', $id);
     if ($v !== $p) { $prixOk = false; $detail .= $id . '=' . var_export($v, true) . ' au lieu de ' . $p . ' '; }
 }
-ok('tarifs connus du serveur SANS ligne en base (1 200/1 200/3 600/12 000 F par mois, l’année = 10 mois)', $prixOk, $detail);
+ok('tarifs connus du serveur SANS ligne en base (1 200/1 600/2 000/12 000 F par mois, Starter 10 000 F l’année)', $prixOk, $detail);
 $f = vrt_plans_formules();
 ok('le prix barré de l’année est celui de 12 mois (14 400 F pour Starter)', (int) $f['abo_starter_a']['ancien'] === 14400);
 $db2 = $db; $db2['elearning']['plans'][] = ['id' => 'abo_pro_m', 'nom' => 'PRO', 'prix' => 2500, 'duree' => 'mensuel'];
@@ -158,14 +158,14 @@ $g = vrt_grant_entitlement($db, ['intent' => 'subscription', 'targetId' => 'abo_
 ok('Pro mensuel payé 100 F : refusé, aucun plan écrit', empty($g['changed']) && !empty($g['underpaid']) && !in_array('abo_pro_m', $db['visitorAccounts'][1]['plans'], true), $g['msg'] ?? '');
 
 $avant = (int) round(microtime(true) * 1000);
-$g = vrt_grant_entitlement($db, ['intent' => 'subscription', 'targetId' => 'abo_pro_m', 'montant' => 1200, 'ref' => 'F-M1', 'accountId' => 'va_filleul']);
+$g = vrt_grant_entitlement($db, ['intent' => 'subscription', 'targetId' => 'abo_pro_m', 'montant' => 1600, 'ref' => 'F-M1', 'accountId' => 'va_filleul']);
 $abo = end($db['elearning']['abonnements']);
 $jours = (int) round(((int) $abo['dateFinTs'] - $avant) / 86400000);
-ok('Pro mensuel payé 1 200 F : activé pour 30 jours (et non 365)', !empty($g['changed']) && $jours === 30, "jours=$jours " . ($g['msg'] ?? ''));
+ok('Pro mensuel payé 1 600 F : activé pour 30 jours (et non 365)', !empty($g['changed']) && $jours === 30, "jours=$jours " . ($g['msg'] ?? ''));
 $acc = vrt_parr_trouver_compte($db, 'va_filleul');
 $tags = vrt_effective_plantags($acc, $db);
 ok('le Pro ouvre les contenus existants (étiquettes plan1, plan2, plan5, plan6)', !array_diff(['plan1', 'plan2', 'plan5', 'plan6'], $tags), json_encode($tags));
-$g = vrt_grant_entitlement($db, ['intent' => 'subscription', 'targetId' => 'abo_pro_m', 'montant' => 1200, 'ref' => 'F-M2', 'accountId' => 'va_filleul']);
+$g = vrt_grant_entitlement($db, ['intent' => 'subscription', 'targetId' => 'abo_pro_m', 'montant' => 1600, 'ref' => 'F-M2', 'accountId' => 'va_filleul']);
 $abo2 = end($db['elearning']['abonnements']);
 $jours2 = (int) round(((int) $abo2['dateFinTs'] - $avant) / 86400000);
 ok('réabonnement avant l’échéance : la nouvelle période part de la fin de l’ancienne (60 jours)', $jours2 === 60, "jours=$jours2");

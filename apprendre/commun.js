@@ -252,21 +252,53 @@
   function lienOffre(h, t, d, picto, cl) {
     return '<a class="offre-l' + (cl ? " " + cl : "") + '" href="' + h + '">' + picto + '<span><b>' + esc(t) + '</b><small>' + esc(d) + '</small></span><span class="chev" aria-hidden="true">›</span></a>';
   }
-  /* ctx : "lecon" (fin du cours), "quiz" (sous le bilan), "matiere", "accueil" */
+  /* ════════ OFFRES (grille du 12/11/2026) ════════
+     Trois formules côte à côte, chacune avec ce qu'elle apporte, pour que
+     l'élève compare et choisisse ; à côté, l'accompagnement humain (suivi
+     particulier en ligne, répétitions à domicile) sur devis.
+     Prix : ceux publiés par le serveur (data-vrt-prix), repli sur le catalogue.
+     ctx : "lecon" (fin du cours), "quiz" (sous le bilan), "matiere", "accueil" */
+  var FORMULES = [
+    { g: "starter", nom: "Starter", pour: "Pour suivre l'année", mois: "1 200", an: "10 000",
+      av: ["Tous les cours de ta classe", "Œuvres au programme", "Épreuves et annales corrigées", "5 questions par jour au tuteur", "Suivi de tes résultats"] },
+    { g: "pro", nom: "Pro", pour: "Pour l'année d'examen", mois: "1 600", an: "13 500",
+      av: ["Tout Starter", "30 questions par jour au tuteur", "Labos virtuels PCT et SVT", "Bulletins blancs notés", "Fiches de révision imprimables"] },
+    { g: "elite", nom: "Élite", pour: "Pour viser la mention", mois: "2 000", an: "16 500",
+      av: ["Tout Pro", "Tuteur IA sans limite", "Classes virtuelles en direct", "Concours blancs corrigés", "Entretien d'orientation"] }
+  ];
+  var WA_VERITAS = "237697637739";
+  function carteFormule(f, conseillee) {
+    var idM = "abo_" + f.g + "_m", idA = "abo_" + f.g + "_a";
+    return '<div class="fo' + (conseillee ? " fo-c" : "") + '">' +
+      (conseillee ? '<span class="fo-badge">Conseillée pour toi</span>' : "") +
+      '<p class="fo-nom">' + esc(f.nom) + '</p><p class="fo-pour">' + esc(f.pour) + '</p>' +
+      '<p class="fo-prix"><b data-vrt-prix="' + idM + '">' + prixConnu(idM, f.mois) + '</b> F<small> / mois</small></p>' +
+      '<p class="fo-an">ou <b><span data-vrt-prix="' + idA + '">' + prixConnu(idA, f.an) + '</span> F l\'année</b>, payée en une fois</p>' +
+      '<ul class="fo-av">' + f.av.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + '</ul>' +
+      '<a class="fo-btn" href="/#tarifs" data-formule="' + f.g + '">Choisir ' + esc(f.nom) + '</a></div>';
+  }
+  function carteHumain(c, m) {
+    var txt = "Bonjour VÉRITAS, je souhaite un devis pour un accompagnement" + (c ? " en " + c : "") + (m ? " (" + m + ")" : "") + " : suivi particulier en ligne / répétitions à domicile. Ville et quartier : ";
+    return '<div class="fo fo-h"><p class="fo-nom">Avec un professeur</p><p class="fo-pour">Quand il faut quelqu\'un à côté</p>' +
+      '<ul class="fo-av fo-av-h">' +
+      '<li><b>Suivi particulier en ligne</b> : un professeur attitré, des séances en visio, des devoirs corrigés</li>' +
+      '<li><b>Répétitions à domicile</b> : un enseignant chez toi, à Douala et environs</li>' +
+      '<li>Fréquence, matières et durée selon tes besoins</li></ul>' +
+      '<p class="fo-an">Tarif sur devis, réponse sous 24 h.</p>' +
+      '<a class="fo-btn fo-btn-h" href="https://wa.me/' + WA_VERITAS + '?text=' + encodeURIComponent(txt) + '" target="_blank" rel="noopener">Demander un devis</a>' +
+      '<a class="fo-lien" href="/decouvrir/repetitions-domicile-douala.html">En savoir plus</a></div>';
+  }
   function offre(c, m, ctx) {
     var cah = cahierPour(c, m), ex = examen(c);
-    var abo = ex
-      ? lienOffre("/#tarifs", "Formule Pro : l'année d'examen", "§PRO§ F par mois : tous les cours de la classe, épreuves et annales corrigées, labos virtuels, bulletins blancs, 30 questions par jour au tuteur.", PICTO_CLE, "or")
-      : lienOffre("/#tarifs", "Formule Starter : dès §STARTER§ F par mois", "Tous les cours de la classe, les œuvres au programme, épreuves et annales corrigées, 5 questions par jour au tuteur.", PICTO_CLE, "or");
-    /* 11/11/2026 : prix écrits en dur (1 000 F, 2 000 F) quand le catalogue dit
-       1 200 F et 2 400 F. Ils suivent désormais le tarif publié par le serveur —
-       celui que l'octroi exige — et retombent sur le catalogue sinon. */
-    abo = abo.replace("§STARTER§", '<span data-vrt-prix="abo_starter_m">' + prixConnu("abo_starter_m", "1 200") + '</span>')
-             .replace("§PRO§", '<span data-vrt-prix="abo_pro_m">' + prixConnu("abo_pro_m", "1 200") + '</span>');
     var titre = { lecon: "Pour aller plus loin", quiz: "Continue sur ta lancée", matiere: "En attendant les prochaines leçons", accueil: "Aller plus loin avec VÉRITAS" }[ctx] || "Pour aller plus loin";
     return '<aside class="offre offre-' + ctx + '" aria-label="' + titre + '"><p class="offre-t">' + titre + '</p>' +
-      (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE) : "") + abo +
-      '<p class="offre-n">Payée d\'un coup, l\'année revient à dix mois : deux mois offerts.</p></aside>';
+      '<h2 class="offre-h">Choisis ta formule</h2>' +
+      '<div class="offre-grille"><div class="offre-plans">' +
+      FORMULES.map(function (f) { return carteFormule(f, ex ? f.g === "pro" : f.g === "starter"); }).join("") +
+      '</div>' + carteHumain(c, m) + '</div>' +
+      '<p class="offre-n">Payer l\'année en une fois revient à un peu plus de huit mois : Starter à 10 000 F au lieu de 14 400 F. Paiement Orange Money ou MTN MoMo, sans engagement.</p>' +
+      (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE) : "") +
+      '</aside>';
   }
   /* Les bonnes réponses étaient rangées en 1ʳᵉ ou 2ᵉ position (3ᵉ : 5 fois sur 177) :
      on mélange l'ordre à l'affichage, l'indice de la bonne réponse suit. */
