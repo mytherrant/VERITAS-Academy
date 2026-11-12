@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The goat and the maize field — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’anglais (Première) : settling a community dispute, conditionals (types 1, 2 and 3), modals and the vocabulary of mediation.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/1re-anglais-community-dispute.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The goat and the maize field — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’anglais (Première) : settling a community dispute, conditionals (types 1, 2 and 3), modals and the vocabulary of mediation.">
+<meta property="og:url" content="https://veritas-school.com/scenes/1re-anglais-community-dispute.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"The goat and the maize field","description":"Scène animée d’anglais (Première) : settling a community dispute, conditionals (types 1, 2 and 3), modals and the vocabulary of mediation.","url":"https://veritas-school.com/scenes/1re-anglais-community-dispute.html","inLanguage":"en-GB","learningResourceType":"Simulation interactive","educationalLevel":"Première","about":"Anglais","teaches":"Understand and use the language of settling a community dispute; use conditionals (types 1, 2 and 3), unless / provided that and modals of advice and obligation in context.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '1re-anglais-community-dispute',
+  discipline: 'Anglais', niveau: 'Première', langue: 'en-GB', langueConsignes: 'en-GB',
+  titre: 'The goat and the maize field',
+  decor: 'chefferie', lieu: 'A quarter in Dschang', moment: 'Saturday, 10 a.m.',
+  objectif: 'Understand and use the language of settling a community dispute; use conditionals (types 1, 2 and 3), unless / provided that and modals of advice and obligation in context.',
+  programme: 'Progression harmonisée 1re · Family and social life, lesson 2 (modals), lessons 7 and 9 (settling community disputes), lesson 10 (conditionals 1, 2, 3)',
+  jauges: [
+    { id: 'paix', nom: 'Peace in the quarter', val: 30, couleur: '#1F9D5B' },
+    { id: 'english', nom: 'Fluency', val: 30, couleur: '#1E499B' }
+  ],
+  personnages: {
+    head:   { nom: 'Pa Nkwain, quarter head', court: 'Quarter head', couleur: '#5A2E5A', look: { tenue: 'boubou', peau: 'fonce', cheveux: 'ras', habit: '#5A2E5A' } },
+    tamfu:  { nom: 'Mr Tamfu, farmer', couleur: '#7A4A12', look: { tenue: 'costume', peau: 'fonce', cheveux: 'court', habit: '#7A4A12', objet: 'houe' } },
+    bih:    { nom: 'Mrs Bih, goat owner', couleur: '#1F6F78', look: { tenue: 'robe', peau: 'brun', cheveux: 'tresses', habit: '#1F6F78' } },
+    nfor:   { nom: 'Nfor, Première student', court: 'Nfor', couleur: '#2B3A55', look: { tenue: 'costume', peau: 'fonce', cheveux: 'ras', habit: '#2B3A55', objet: 'livre' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['head', 'nfor'], txt: 'Every Saturday, Pa Nkwain, the quarter head, settles small disputes. Today, his nephew Nfor, a Première student, helps him write the report in English.', trad: 'Chaque samedi, Pa Nkwain, le chef de quartier, règle les petits conflits. Aujourd’hui, son neveu Nfor, élève de Première, l’aide à rédiger le compte rendu en anglais.', objet: { i: 'document', lib: 'Dispute report' } },
+    { t: 'recit', entre: ['tamfu', 'bih'], txt: 'Mr Tamfu arrives, angry. Mrs Bih follows him. Her goat has eaten half of his maize field.', trad: 'M. Tamfu arrive, en colère. Mme Bih le suit. Sa chèvre a mangé la moitié de son champ de maïs.' },
+    { t: 'dit', qui: 'tamfu', emo: 'colere', txt: 'Pa, if her goat comes into my field again, I will kill it!', trad: 'Pa, si sa chèvre revient dans mon champ, je la tue !', jauges: { paix: 15 } },
+    { t: 'dit', qui: 'head', txt: 'Calm down, my son. If you killed the goat, you would create a bigger problem. Sit down, both of you.', trad: 'Calme-toi, mon fils. Si tu tuais la chèvre, tu créerais un problème plus grave. Asseyez-vous tous les deux.' },
+    { t: 'question', q: '“If her goat comes again, I will kill it.” Which conditional is it?',
+      options: [
+        { txt: 'Type 1: if + present, will + infinitive. A real, possible situation.', ok: true, retour: 'Yes. Tamfu thinks it can really happen again.' },
+        { txt: 'Type 2: an imaginary situation.', retour: 'No: type 2 uses if + past and would: “If you killed it, you would…”.' }
+      ], jauges: { english: 45 } },
+    { t: 'dit', qui: 'bih', emo: 'triste', txt: 'I am sorry. If I had known, I would have tied it. The rope broke during the night.', trad: 'Je suis désolée. Si j’avais su, je l’aurais attachée. La corde s’est cassée pendant la nuit.' },
+    { t: 'remarque', titre: 'The three conditionals', txt: 'Type 1 (possible): If it comes again, I will kill it. Type 2 (imaginary now): If you killed it, you would create a problem. Type 3 (past, did not happen): If I had known, I would have tied it. Never “will” in the if-clause.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Workshop · build the sentence', consigne: 'Put the words in order: « Si j’avais une clôture, ma chèvre ne sortirait pas. »',
+      items: ['If', 'I', 'had', 'a', 'fence,', 'my', 'goat', 'would', 'not', 'go', 'out.'],
+      bravo: 'If I had a fence, my goat would not go out. Type 2: if + past, would + infinitive.', jauges: { english: 60 } },
+    { t: 'dit', qui: 'head', txt: 'Mr Tamfu, how much maize have you lost?', trad: 'Monsieur Tamfu, combien de maïs avez-vous perdu ?' },
+    { t: 'dit', qui: 'tamfu', txt: 'About two bags. That is my children’s school fees!', trad: 'Environ deux sacs. Ce sont les frais de scolarité de mes enfants !' },
+    { t: 'choix', qui: 'nfor', q: 'Pa Nkwain asks Nfor: “What would you propose?” You are Nfor. What do you say?',
+      options: [
+        { txt: '“Mrs Bih should pay for one bag now, and she must build a fence before the rainy season.”', consequence: 'A fair proposal: the damage is repaired and the problem is prevented. Both neighbours listen.', jauges: { paix: 30, english: 15 } },
+        { txt: '“Mr Tamfu can kill the goat; then they are equal.”', consequence: 'Violence answers violence. The quarter head shakes his head.', jauges: { paix: -20 } },
+        { txt: '“They should go to the police in town.”', consequence: 'Possible, but long and costly for a small dispute that the quarter can settle.', jauges: { paix: -5 } }
+      ],
+      oeuvre: 'A good mediator repairs the damage, prevents a new conflict and keeps the neighbours together.' },
+    { t: 'dit', qui: 'bih', txt: 'I will pay for one bag, provided that Mr Tamfu helps me build the fence.', trad: 'Je paierai un sac, à condition que M. Tamfu m’aide à construire la clôture.' },
+    { t: 'dit', qui: 'tamfu', emo: 'doute', txt: 'Unless she ties the goat every night, the fence will not be enough.', trad: 'À moins qu’elle n’attache la chèvre chaque nuit, la clôture ne suffira pas.' },
+    { t: 'question', q: '“Unless she ties the goat…” means:',
+      options: [
+        { txt: 'If she does not tie the goat…', ok: true, retour: 'Unless = if … not.' },
+        { txt: 'If she ties the goat…', retour: 'No: unless has a negative meaning.' }
+      ] },
+    { t: 'atelier', mode: 'tri', titre: 'Workshop · which conditional?', consigne: 'Put each sentence in the right box.',
+      cats: ['Type 1 (possible)', 'Type 2 (imaginary)', 'Type 3 (past regret)'],
+      items: [
+        { txt: 'If it rains, the maize will grow.', cat: 0 },
+        { txt: 'If I were the chief, I would plant more trees.', cat: 1 },
+        { txt: 'If you had come earlier, you would have seen the goat.', cat: 2 },
+        { txt: 'If the fence breaks, we will repair it.', cat: 0 }
+      ],
+      bravo: 'Type 1: present / will. Type 2: past / would. Type 3: past perfect / would have.', jauges: { english: 75 } },
+    { t: 'dit', qui: 'head', emo: 'joie', txt: 'Then it is settled. Nfor, write it down: Mrs Bih pays one bag of maize; both build the fence on Saturday. If anyone breaks this agreement, he will answer before the quarter council.', trad: 'Alors c’est réglé. Nfor, écris : Mme Bih paie un sac de maïs ; tous deux construisent la clôture samedi. Si quelqu’un rompt cet accord, il en répondra devant le conseil du quartier.', jauges: { paix: 85 } },
+    { t: 'recit', txt: 'Mr Tamfu and Mrs Bih shake hands. Nfor reads the report aloud in English, then in French, for the whole quarter.', trad: 'M. Tamfu et Mme Bih se serrent la main. Nfor lit le compte rendu à voix haute en anglais, puis en français, pour tout le quartier.', jauges: { english: 85 } }
+  ],
+  labo: {
+    titre: 'Laboratory · the mediation',
+    intro: 'Adjust the anger, the fairness of the proposal and the quality of listening: does the quarter find peace?',
+    persos: ['tamfu', 'bih', 'head'],
+    curseurs: [
+      { id: 'anger', nom: 'Anger', val: 40, bas: 'calm', haut: 'furious' },
+      { id: 'fairness', nom: 'Fairness of the proposal', val: 70, bas: 'unfair', haut: 'fair' },
+      { id: 'listening', nom: 'Listening', val: 70, bas: 'nobody listens', haut: 'everybody listens' }
+    ],
+    scenarios: [
+      { nom: 'Pa Nkwain’s mediation', icone: 'personne', valeurs: { anger: 40, fairness: 70, listening: 70 } },
+      { nom: 'Furious neighbours', icone: 'colere', valeurs: { anger: 95 } },
+      { nom: 'Unfair proposal', icone: 'nuage', valeurs: { fairness: 15 } }
+    ],
+    liens: [
+      { a: 'tamfu', b: 'bih', type: 'conflit', lib: 'quarrel', base: .5, poids: { anger: .5 } },
+      { a: 'head', b: 'tamfu', type: 'confiance', lib: 'calms down', base: .3, poids: { listening: .4, fairness: .3 } }
+    ],
+    issue: function(v){
+      if(v.anger > 80){ return { niveau: 'ko', badge: 'No agreement', recit: 'Mr Tamfu shouts and leaves. If they had stayed calm, they would have found a solution.', apres: 'Anger closes the ears: first calm the parties down.', themes: ['anger', 'type 3 conditional'] }; }
+      if(v.fairness < 35){ return { niveau: 'ko', badge: 'Agreement refused', recit: 'Mrs Bih refuses to pay everything alone. An unfair deal does not last.', apres: 'A good solution must be acceptable to both sides.', themes: ['fairness'] }; }
+      if(v.listening < 40){ return { niveau: 'moyen', badge: 'Fragile peace', recit: 'They sign, but nobody really listened: the conflict may come back.', apres: 'Listening is the first step of mediation.', themes: ['listening'] }; }
+      return { niveau: 'ok', badge: 'Peace restored', recit: 'Calm, fair and listened to, the neighbours agree and build the fence together.', apres: 'If disputes are settled like this, the quarter will stay united.', themes: ['mediation', 'conditionals'] };
+    }
+  },
+  quiz: [
+    { q: 'Complete: “If it rains tomorrow, the maize … grow.”', options: [
+      { txt: 'will', ok: true, retour: 'Type 1: if + present, will + infinitive.' },
+      { txt: 'would', retour: 'Would is for types 2 and 3.' } ] },
+    { q: 'Complete: “If I … a fence, my goat would not go out.”', options: [
+      { txt: 'had', ok: true, retour: 'Type 2: if + simple past.' },
+      { txt: 'have', retour: 'With “would”, the if-clause is in the past.' } ] },
+    { q: '“If I had known, I … it.”', options: [
+      { txt: 'would have tied', ok: true, retour: 'Type 3: would have + past participle.' },
+      { txt: 'will tie', retour: 'Type 3 is about the past.' } ] },
+    { q: '“Unless” means:', options: [
+      { txt: 'if … not', ok: true, retour: 'Unless she ties it = if she does not tie it.' },
+      { txt: 'because', retour: 'No.' } ] },
+    { q: 'A person who helps two sides to agree is a…', options: [
+      { txt: 'mediator', ok: true, retour: 'To mediate, mediation, a mediator.' },
+      { txt: 'witness', retour: 'A witness saw what happened.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Type 1: if + present → will + infinitive (possible).',
+      'Type 2: if + past → would + infinitive (imaginary); “if I were”.',
+      'Type 3: if + past perfect → would have + past participle (past regret).',
+      'Unless = if … not; provided (that) = only if.',
+      'Mediation vocabulary: dispute, to settle, to compensate, an agreement, a mediator, to shake hands.'
+    ],
+    ecrire: 'Write the report of the meeting (about 150 words) that Nfor reads to the quarter. Use at least one conditional of each type and “unless” or “provided that”.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>The goat and the maize field</h1>
+<p><b>Anglais · Première</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Understand and use the language of settling a community dispute; use conditionals (types 1, 2 and 3), unless / provided that and modals of advice and obligation in context.</p>
+<p>Programme : Progression harmonisée 1re · Family and social life, lesson 2 (modals), lessons 7 and 9 (settling community disputes), lesson 10 (conditionals 1, 2, 3)</p>
+<p>Lieu : A quarter in Dschang · Saturday, 10 a.m.</p>
+<h3>Personnages</h3><ul><li>Pa Nkwain, quarter head</li><li>Mr Tamfu, farmer</li><li>Mrs Bih, goat owner</li><li>Nfor, Première student</li></ul>
+<h3>La scène</h3>
+<p>Every Saturday, Pa Nkwain, the quarter head, settles small disputes. Today, his nephew Nfor, a Première student, helps him write the report in English. — <i>Chaque samedi, Pa Nkwain, le chef de quartier, règle les petits conflits. Aujourd’hui, son neveu Nfor, élève de Première, l’aide à rédiger le compte rendu en anglais.</i></p>
+<p>Mr Tamfu arrives, angry. Mrs Bih follows him. Her goat has eaten half of his maize field. — <i>M. Tamfu arrive, en colère. Mme Bih le suit. Sa chèvre a mangé la moitié de son champ de maïs.</i></p>
+<p><b>Mr Tamfu, farmer</b> : Pa, if her goat comes into my field again, I will kill it! — <i>Pa, si sa chèvre revient dans mon champ, je la tue !</i></p>
+<p><b>Pa Nkwain, quarter head</b> : Calm down, my son. If you killed the goat, you would create a bigger problem. Sit down, both of you. — <i>Calme-toi, mon fils. Si tu tuais la chèvre, tu créerais un problème plus grave. Asseyez-vous tous les deux.</i></p>
+<p><b>Question :</b> “If her goat comes again, I will kill it.” Which conditional is it?</p><ul><li>Type 1: if + present, will + infinitive. A real, possible situation. <b>(bonne réponse)</b></li><li>Type 2: an imaginary situation.</li></ul><p>Yes. Tamfu thinks it can really happen again.</p>
+<p><b>Mrs Bih, goat owner</b> : I am sorry. If I had known, I would have tied it. The rope broke during the night. — <i>Je suis désolée. Si j’avais su, je l’aurais attachée. La corde s’est cassée pendant la nuit.</i></p>
+<h4>The three conditionals</h4><p>Type 1 (possible): If it comes again, I will kill it. Type 2 (imaginary now): If you killed it, you would create a problem. Type 3 (past, did not happen): If I had known, I would have tied it. Never “will” in the if-clause.</p>
+<h4>Workshop · build the sentence</h4><p>Put the words in order: « Si j’avais une clôture, ma chèvre ne sortirait pas. »</p>
+<ol><li>If</li><li>I</li><li>had</li><li>a</li><li>fence,</li><li>my</li><li>goat</li><li>would</li><li>not</li><li>go</li><li>out.</li></ol>
+<p>If I had a fence, my goat would not go out. Type 2: if + past, would + infinitive.</p>
+<p><b>Pa Nkwain, quarter head</b> : Mr Tamfu, how much maize have you lost? — <i>Monsieur Tamfu, combien de maïs avez-vous perdu ?</i></p>
+<p><b>Mr Tamfu, farmer</b> : About two bags. That is my children’s school fees! — <i>Environ deux sacs. Ce sont les frais de scolarité de mes enfants !</i></p>
+<p><b>À toi de décider :</b> Pa Nkwain asks Nfor: “What would you propose?” You are Nfor. What do you say?</p><ul><li>“Mrs Bih should pay for one bag now, and she must build a fence before the rainy season.” — A fair proposal: the damage is repaired and the problem is prevented. Both neighbours listen.</li><li>“Mr Tamfu can kill the goat; then they are equal.” — Violence answers violence. The quarter head shakes his head.</li><li>“They should go to the police in town.” — Possible, but long and costly for a small dispute that the quarter can settle.</li></ul>
+<p><b>Mrs Bih, goat owner</b> : I will pay for one bag, provided that Mr Tamfu helps me build the fence. — <i>Je paierai un sac, à condition que M. Tamfu m’aide à construire la clôture.</i></p>
+<p><b>Mr Tamfu, farmer</b> : Unless she ties the goat every night, the fence will not be enough. — <i>À moins qu’elle n’attache la chèvre chaque nuit, la clôture ne suffira pas.</i></p>
+<p><b>Question :</b> “Unless she ties the goat…” means:</p><ul><li>If she does not tie the goat… <b>(bonne réponse)</b></li><li>If she ties the goat…</li></ul><p>Unless = if … not.</p>
+<h4>Workshop · which conditional?</h4><p>Put each sentence in the right box.</p>
+<ul><li><b>Type 1 (possible)</b> : If it rains, the maize will grow. ; If the fence breaks, we will repair it.</li><li><b>Type 2 (imaginary)</b> : If I were the chief, I would plant more trees.</li><li><b>Type 3 (past regret)</b> : If you had come earlier, you would have seen the goat.</li></ul>
+<p>Type 1: present / will. Type 2: past / would. Type 3: past perfect / would have.</p>
+<p><b>Pa Nkwain, quarter head</b> : Then it is settled. Nfor, write it down: Mrs Bih pays one bag of maize; both build the fence on Saturday. If anyone breaks this agreement, he will answer before the quarter council. — <i>Alors c’est réglé. Nfor, écris : Mme Bih paie un sac de maïs ; tous deux construisent la clôture samedi. Si quelqu’un rompt cet accord, il en répondra devant le conseil du quartier.</i></p>
+<p>Mr Tamfu and Mrs Bih shake hands. Nfor reads the report aloud in English, then in French, for the whole quarter. — <i>M. Tamfu et Mme Bih se serrent la main. Nfor lit le compte rendu à voix haute en anglais, puis en français, pour tout le quartier.</i></p>
+<h3>Quiz</h3><ol><li>Complete: “If it rains tomorrow, the maize … grow.” — <b>will</b> Type 1: if + present, will + infinitive.</li><li>Complete: “If I … a fence, my goat would not go out.” — <b>had</b> Type 2: if + simple past.</li><li>“If I had known, I … it.” — <b>would have tied</b> Type 3: would have + past participle.</li><li>“Unless” means: — <b>if … not</b> Unless she ties it = if she does not tie it.</li><li>A person who helps two sides to agree is a… — <b>mediator</b> To mediate, mediation, a mediator.</li></ol>
+<h3>À retenir</h3><ul><li>Type 1: if + present → will + infinitive (possible).</li><li>Type 2: if + past → would + infinitive (imaginary); “if I were”.</li><li>Type 3: if + past perfect → would have + past participle (past regret).</li><li>Unless = if … not; provided (that) = only if.</li><li>Mediation vocabulary: dispute, to settle, to compensate, an agreement, a mediator, to shake hands.</li></ul>
+<h3>À écrire</h3><p>Write the report of the meeting (about 150 words) that Nfor reads to the quarter. Use at least one conditional of each type and “unless” or “provided that”.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="1re-anglais-community-dispute.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>
