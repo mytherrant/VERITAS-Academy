@@ -878,6 +878,28 @@ if (!defined('VRT_AUTH_LIB')) {
         return true;
     }
 
+    /**
+     * Ce qu'ouvre une formule, en une ligne de SMS (ASCII, sans accents à
+     * risque) : « 1 classe, tuteur IA 30/jour, 20 fiches/semaine, labos ».
+     * Lu dans la table des droits : le SMS dit ce que le serveur appliquera.
+     */
+    function vrt_droits_resume(string $planId, array $db = []): string {
+        $g = vrt_groupe_droits($planId);
+        if ($g === null) return '';
+        $d = vrt_droits_formules($db)[$g] ?? null;
+        if (!$d) return '';
+        $cl = (int) $d['classes'];
+        $l = [];
+        $l[] = $g === 'famille' ? '1 classe par enfant' : ($cl === -1 ? 'toutes les classes' : $cl . ' classe' . ($cl > 1 ? 's' : ''));
+        $l[] = 'tuteur IA ' . (int) $d['iaJour'] . '/jour';
+        $l[] = (int) $d['fichesSemaine'] . ' fiches/semaine';
+        $l[] = !empty($d['labos']) ? 'labos premium' : ((int) $d['labosEssai'] > 0 ? (int) $d['labosEssai'] . ' labos a l essai/semaine' : '');
+        if (!empty($d['bulletins'])) $l[] = 'bulletins blancs';
+        if (!empty($d['direct'])) $l[] = 'classes virtuelles';
+        if (!empty($d['orientation'])) $l[] = 'entretien d orientation';
+        return implode(', ', array_filter($l));
+    }
+
     /** Classe d'une leçon d'après son identifiant (« 1re-c-maths-… » → « 1re-c », « tle-orient-bac » → « tle »). */
     function vrt_classe_de_lecon(string $id): string {
         if (preg_match('/^(6e|5e|4e|3e|2nde-[a-z]|1re-[a-z]|tle-[a-z])-/', $id, $m)) return $m[1];
@@ -1881,6 +1903,8 @@ if (!defined('VRT_AUTH_LIB')) {
                         'ref' => $ref, 'type' => 'abonnement', 'kind' => 'abonnement',
                         'tel' => $telSms, 'mail' => (string) ($state['clientEmail'] ?? ''),
                         'titre' => (string) ($plan['nom'] ?? ($label !== '' ? $label : $targetId)),
+                        // Ce que la formule ouvre (table des droits) : l'abonné sait d'emblée à quoi il a droit.
+                        'droits' => function_exists('vrt_droits_resume') ? vrt_droits_resume($targetId, $db) : '',
                         'exp' => (int) floor($finTs / 1000),
                         'lien' => vrt_notify_site() . ($atelierPlan ? '/plateforme/' : '/app.html#abonnements'),
                     ]);

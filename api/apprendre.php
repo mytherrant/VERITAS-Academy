@@ -160,4 +160,7 @@ if (!is_array($suite)) {
 
 $r = ['ok' => true, 'suite' => $suite];
 if ($nouveau !== '') $r['token'] = $nouveau;
+/* Battement des SMS automatiques (file SkySMS + rappels d'échéance), après la
+   réponse : register_shutdown_function court après le exit d'appr_rep. */
+register_shutdown_function(function () { try { if (function_exists('vrt_notify_battement')) vrt_notify_battement(); } catch (\Throwable $e) {} });
 appr_rep($r);
