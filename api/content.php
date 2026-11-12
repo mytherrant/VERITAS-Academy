@@ -189,6 +189,28 @@ $__flux = in_array($__ext0, ['mp4', 'webm', 'ogg', 'mov', 'mp3', 'wav', 'm4a'], 
 $__role = strtolower((string) ($acc['role'] ?? ''));
 if (!$__flux && empty($contenu['gratuit']) && empty($contenu['free']) && !in_array($__role, ['admin', 'superadmin', 'enseignant'], true)) {
     $__dr = vrt_droits_compte($acc, $db);
+    /* CLASSE DU DOCUMENT (12/11/2026) : une épreuve de 1ʳᵉ C n'est servie qu'à
+       une formule qui couvre la 1ʳᵉ C. Ouvrir un document est un geste voulu :
+       une place libre est prise sans confirmation (libérable après 30 jours,
+       depuis le verrou d'une leçon). Document multi-classes ou sans classe :
+       seul le quota de fiches s'applique. */
+    $__cl = vrt_classe_normaliser((string) ($contenu['classe'] ?? ''));
+    if ($__cl !== '' && vrt_classe_couverte($acc, $__dr, $__cl, true) === 'complet') {
+        $__msg = 'Ce document est en ' . (string) ($contenu['classe'] ?? '') . ', une classe que ta formule ne couvre pas (déjà retenue'
+               . (count(vrt_classes_compte($acc)) > 1 ? 's' : '') . ' : ' . implode(', ', array_keys(vrt_classes_compte($acc)))
+               . '). Passe à une formule qui couvre plus de classes, ou libère une classe retenue depuis plus de 30 jours.';
+        if (stripos((string) ($_SERVER['HTTP_ACCEPT'] ?? ''), 'text/html') !== false) {
+            while (ob_get_level() > 0) { ob_end_clean(); }
+            http_response_code(403);
+            header('Content-Type: text/html; charset=utf-8');
+            echo '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Classe hors formule</title>'
+               . '<body style="font-family:system-ui,sans-serif;max-width:520px;margin:15vh auto;padding:0 16px;color:#142554">'
+               . '<h1 style="font-size:1.3rem">Classe hors de ta formule</h1><p>' . htmlspecialchars($__msg, ENT_QUOTES, 'UTF-8') . '</p>'
+               . '<p><a href="/app.html#tarifs" style="color:#142554;font-weight:600">Voir les formules</a></p></body>';
+            exit;
+        }
+        content_err(403, $__msg);
+    }
     [$__qj, $__qs] = [(int) $__dr['fichesJour'], (int) $__dr['fichesSemaine']];
     $__refus = content_quota('a:' . (string) ($acc['id'] ?? $acc['user'] ?? ''), $id, $__qj, $__qs);
     if ($__refus !== null) {

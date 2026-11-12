@@ -280,6 +280,11 @@ jobs:
       - name: 🧮 Atelier — la synchro admin préserve-t-elle les compteurs de quotas ?
         run: php tests/banc_db_quotas.php
 
+      # Chaque formule n'ouvre que ce qu'elle annonce : classes, fiches, tuteur,
+      # labos premium (servis par le serveur), règle Famille (12/11/2026).
+      - name: 🎟️ Formules — chaque abonnement ouvre-t-il ce qu'il annonce, et pas plus ?
+        run: php tests/droits_formules.php
+
       # ── 🤖 RAPPROCHEMENT SMS (25/09/2026). Un SMS de réception conforme sert
       #    le livret/manuel sans humain ; un faux SMS (solde incohérent, txid
       #    rejoué, expéditeur inconnu) ne sert JAMAIS rien.
@@ -1647,6 +1652,7 @@ jobs:
             api/demandes.php \
             api/manuels.php \
             api/apprendre.php \
+            api/_labos_premium.php \
             api/plateforme.php \
             api/compte.php; do
             # ⚠️ ÉCHEC BRUYANT, et pas un « [ -f ] && cp » silencieux.

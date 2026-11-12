@@ -17,6 +17,7 @@
  *   classe_hors_formule (toutes les classes de la formule sont prises)
  * POST {action:"droits", token} → ce que la formule du compte ouvre (droits + classes).
  * POST {action:"liberer", classe, token} → libère une classe retenue depuis plus de 30 jours.
+ * POST {action:"labo", id, token} → protocole et quiz d'un labo premium (droit « labos » ou essai).
  *   L'hébergeur bannit une IP à 6 réponses 401/403/429 par minute, et une classe
  *   entière partage une IP : un élève sans formule n'est pas une attaque.
  */
@@ -107,6 +108,21 @@ if (in_array($role, ['admin', 'superadmin', 'enseignant'], true)) $droits['class
 /* Ce que la formule ouvre : lu par les pages pour afficher les bons verrous. */
 if (($in['action'] ?? '') === 'droits') {
     $r = ['ok' => true, 'droits' => $droits, 'classes' => array_keys(vrt_classes_compte($acc))];
+    if ($nouveau !== '') $r['token'] = $nouveau;
+    appr_rep($r);
+}
+
+/* LABO PREMIUM : protocole et quiz, sortis du module public le 12/11/2026.
+   Ouverts avec le droit « labos » (Pro et au-dessus), sinon à l'essai
+   (labosEssai labos distincts par 7 jours : 2 en Starter, 1 sans formule). */
+if (($in['action'] ?? '') === 'labo') {
+    $labos = require __DIR__ . '/_labos_premium.php';
+    if (!is_array($labos) || !isset($labos[$id])) appr_rep(['ok' => false, 'raison' => 'introuvable']);
+    $admin = in_array($role, ['admin', 'superadmin', 'enseignant'], true);
+    if (!$admin && empty($droits['labos']) && !vrt_labo_essai($acc, $id, (int) ($droits['labosEssai'] ?? 0))) {
+        appr_refus((int) ($droits['labosEssai'] ?? 0) > 0 ? 'essais' : 'abonnement', $nouveau);
+    }
+    $r = ['ok' => true, 'labo' => $labos[$id]];
     if ($nouveau !== '') $r['token'] = $nouveau;
     appr_rep($r);
 }

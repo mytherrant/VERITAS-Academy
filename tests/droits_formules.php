@@ -66,20 +66,54 @@ $db = ['elearning' => ['abonnements' => [
 $d = vrt_droits_compte(compte('rien', []), $db);
 ok('sans formule : aucune classe, aucune fiche, pas de labos', $d['classes'] === 0 && $d['fichesSemaine'] === 0 && !$d['labos']);
 $d = vrt_droits_compte(compte('a_starter', ['abo_starter_m']), $db);
-ok('Starter : 1 classe, 5 questions/jour, 10 fiches/semaine, ni labos ni bulletins',
-   $d['classes'] === 1 && $d['iaJour'] === 5 && $d['fichesSemaine'] === 10 && !$d['labos'] && !$d['bulletins'], json_encode($d));
+ok('Starter : 1 classe, 5 questions/jour, 10 fiches/semaine, labos premium à l’essai seulement (2)',
+   $d['classes'] === 1 && $d['iaJour'] === 5 && $d['fichesSemaine'] === 10 && !$d['labos'] && $d['labosEssai'] === 2, json_encode($d));
 $d = vrt_droits_compte(compte('a_pro', ['abo_pro_m']), $db);
-ok('Pro : 1 classe, 30 questions/jour, labos et bulletins, pas de direct',
-   $d['classes'] === 1 && $d['iaJour'] === 30 && $d['labos'] && $d['bulletins'] && !$d['direct'], json_encode($d));
+ok('Pro : 1 classe, 30 questions/jour, tous les labos, pas d’orientation',
+   $d['classes'] === 1 && $d['iaJour'] === 30 && $d['labos'] && !$d['orientation'], json_encode($d));
 $d = vrt_droits_compte(compte('a_expire', ['abo_elite_m']), $db);
-ok('Élite expiré : n’ouvre plus rien', $d['classes'] === 0 && !$d['direct'], json_encode($d));
+ok('Élite expiré : n’ouvre plus rien', $d['classes'] === 0 && !$d['labos'] && !$d['orientation'], json_encode($d));
 $d = vrt_droits_compte(compte('a_cumul', ['abo_starter_m', 'abo_elite_a']), $db);
 ok('Starter + Élite : le meilleur de chaque droit, les classes s’additionnent (1 + 2)',
-   $d['classes'] === 3 && $d['iaJour'] === 100 && $d['direct'], json_encode($d));
+   $d['classes'] === 3 && $d['iaJour'] === 100 && $d['orientation'], json_encode($d));
 $d = vrt_droits_compte(compte('a_prof', ['abo_prof6_m']), $db);
 ok('Prof 6 classes : 6 classes, 80 questions/jour, 60 fiches/semaine', $d['classes'] === 6 && $d['iaJour'] === 80 && $d['fichesSemaine'] === 60, json_encode($d));
 $d = vrt_droits_compte(compte('a_tout', ['abo_proftout_a']), $db);
 ok('Prof toutes classes : classes sans limite', $d['classes'] === -1, json_encode($d));
+
+titre('2 bis. Formule Famille : une classe par enfant');
+$dbF = ['elearning' => ['abonnements' => [
+    abo('parent', 'abo_famille_m', $futur),
+    abo('enf1', 'abo_famille_m', $futur) + ['payeParCompte' => 'parent'],
+    abo('enf2', 'abo_famille_m', $futur) + ['payeParCompte' => 'parent'],
+    abo('parentSeul', 'abo_famille_a', $futur),
+]]];
+$d = vrt_droits_compte(compte('enf1', ['abo_famille_m']), $dbF);
+ok('un enfant rattaché a 1 classe, au niveau Élite', $d['classes'] === 1 && $d['iaJour'] === 100 && $d['labos'], json_encode($d));
+$d = vrt_droits_compte(compte('parent', ['abo_famille_m']), $dbF);
+ok('le payeur garde les places non occupées (4 − 2 enfants = 2)', $d['classes'] === 2, json_encode($d));
+$d = vrt_droits_compte(compte('parentSeul', ['abo_famille_a']), $dbF);
+ok('sans enfant rattaché, le compte familial a les 4 places', $d['classes'] === 4, json_encode($d));
+
+titre('2 ter. Classe d’un document du catalogue');
+$cas = ['1ère C' => '1re-c', '3ème' => '3e', 'Tle D' => 'tle-d', 'Terminale' => 'tle', '2nde' => '2nde',
+        '6ème-3ème' => '', '2nde-Tle C' => '', 'Form 5' => 'form-5', 'Tle F3' => 'tle-f3', '' => ''];
+$mal = [];
+foreach ($cas as $c => $v) if (vrt_classe_normaliser($c) !== $v) $mal[] = "« $c »→" . vrt_classe_normaliser($c);
+ok('libellés reconnus ; un document multi-classes n’est rattaché à aucune', !$mal, implode(', ', $mal));
+
+titre('2 quater. Labos premium');
+$accL = compte('essai1', []);
+ok('Starter : 2 labos premium distincts à l’essai sur 7 jours', vrt_labo_essai($accL, 'lv10', 2) && vrt_labo_essai($accL, 'lv11', 2));
+ok('… le même labo se rouvre', vrt_labo_essai($accL, 'lv10', 2));
+ok('… un 3ᵉ est refusé', !vrt_labo_essai($accL, 'lv14', 2));
+ok('sans essai prévu, refusé', !vrt_labo_essai(compte('essai2', []), 'lv10', 0));
+$prem = require __DIR__ . '/../api/_labos_premium.php';
+ok('protocole et quiz des 9 labos payants servis par le serveur', is_array($prem) && count($prem) === 9 && !empty($prem['lv10']['quiz']));
+$chunk = (string) file_get_contents(__DIR__ . '/../chunks/labo.js');
+$fuite = [];
+foreach ($prem as $id => $l) { foreach ($l['quiz'] as $q) if (strpos($chunk, (string) $q['q']) !== false) { $fuite[] = $id; break; } }
+ok('aucun quiz payant ne reste dans le module public', !$fuite, implode(', ', $fuite));
 
 titre('3. Classe d’une leçon');
 $cas = ['1re-c-maths-r20' => '1re-c', '3e-maths-thales' => '3e', 'tle-a-sciences-r39' => 'tle-a',
