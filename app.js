@@ -24850,33 +24850,6 @@ window.mChoisirOeuvre = function(){
     .catch(function(){ toast('Connexion lente : réessayez dans un instant','warn'); });
 };
 
-// ── LABORATOIRES VIRTUELS ─────────────────────────────────────────
-var LABO_EXPERIENCES=[
-  {id:"lv1",titre:"Circuit Électrique",matiere:"Physique",classe:"4ème-3ème",
-   desc:"Construisez et testez des circuits série et parallèle. Mesurez tension et intensité.",
-   ico:"⚡",color:"#0891B2",gratuit:true,
-   composants:["générateur","résistance","ampoule","voltmètre","ampèremètre"]},
-  {id:"lv2",titre:"Dissection Virtuelle",matiere:"SVT",classe:"3ème-2nde",
-   desc:"Observez l'anatomie d'une grenouille et identifiez les organes internes.",
-   ico:"🔬",color:"#059669",gratuit:true,
-   composants:["scalpel","loupe","étiquettes","schéma anatomique"]},
-  {id:"lv3",titre:"Réactions Chimiques",matiere:"Physique-Chimie",classe:"2nde-Tle C",
-   desc:"Simulez des réactions acide-base et d'oxydoréduction en toute sécurité.",
-   ico:"⚗️",color:"#6C56A6",gratuit:false,
-   composants:["acides","bases","indicateurs","pH-mètre","béchers"]},
-  {id:"lv4",titre:"Génétique & ADN",matiere:"SVT",classe:"1ère D-Tle D",
-   desc:"Visualisez la mitose, la méiose et l'expression des gènes en 3D interactif.",
-   ico:"🧬",color:"#AE5353",gratuit:false,
-   composants:["chromosomes","ADN","enzymes","microscope électronique"]},
-  {id:"lv5",titre:"Géométrie 3D",matiere:"Maths",classe:"2nde-Tle",
-   desc:"Construisez et faites pivoter des solides géométriques. Calculez volumes et surfaces.",
-   ico:"📐",color:"#1E3A8A",gratuit:true,
-   composants:["cube","sphère","pyramide","cylindre","règle","rapporteur"]},
-  {id:"lv6",titre:"Carte du Cameroun interactive",matiere:"Géographie",classe:"6ème-3ème",
-   desc:"Explorez les 10 régions, reliefs, fleuves et villes du Cameroun sur une carte interactive.",
-   ico:"🗺️",color:"#D97706",gratuit:true,
-   composants:["carte","légende","calques","zoom"]},
-];
 
 // (fonctions showLabosVirtuels/lancerLabo/saveLaboNote v1 supprimées — remplacées par versions enrichies ci-dessous)
 // ── SECTION ELEARNING AMÉLIORÉE — ONGLET ÉPREUVES + LABOS ────────

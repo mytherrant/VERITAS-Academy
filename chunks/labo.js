@@ -423,6 +423,27 @@ window.LABO_DB=[
    ],
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
+  {id:"lv7",titre:"Carte du Cameroun : les 10 régions",matiere:"Géographie",cat:"geo",
+   classe:"6ème-3ème",ico:"🗺️",color:"#D97706",gratuit:true,
+   desc:"Situe les 10 régions et leurs chefs-lieux sur la vraie carte du Cameroun, avec les pays voisins et le Golfe de Guinée.",
+   theorie:"🗺️ Le Cameroun (475 442 km²) s'étire du Golfe de Guinée (≈2° N) au lac Tchad (≈13° N), entre ≈8,5° E et ≈16° E.\n\n🧭 Voisins (6) : Nigeria (ouest), Tchad (nord-est), République centrafricaine (est), Congo, Gabon et Guinée équatoriale (sud).\n\n🏛 10 régions (appelées « provinces » jusqu'en 2008) et leurs chefs-lieux :\n• Adamaoua — Ngaoundéré\n• Centre — Yaoundé (capitale politique)\n• Est — Bertoua\n• Extrême-Nord — Maroua\n• Littoral — Douala (capitale économique, port)\n• Nord — Garoua\n• Nord-Ouest — Bamenda\n• Ouest — Bafoussam\n• Sud — Ebolowa\n• Sud-Ouest — Buea\n\n🏔 Point culminant : le mont Cameroun (≈4 095 m), volcan actif près de Buea.\n\n🗣 Le Nord-Ouest et le Sud-Ouest sont les deux régions anglophones.",
+   experience:[
+     "1️⃣ OBSERVE la carte : repère le Golfe de Guinée et les 6 pays voisins. Dans quelle direction se trouve le lac Tchad ?",
+     "2️⃣ CLIQUE sur chaque chef-lieu (ou sur la légende) et note sa région et ses coordonnées (latitude N, longitude E).",
+     "3️⃣ COMPARE les latitudes : quel chef-lieu est le plus au nord ? le plus au sud ? Range-les du nord au sud.",
+     "4️⃣ REPÈRE le mont Cameroun : près de quel chef-lieu se trouve-t-il ? Pourquoi Douala et Buea sont-ils si proches ?",
+     "5️⃣ SANS LA CARTE : sur une feuille, dessine le contour du Cameroun et place de mémoire les 10 chefs-lieux. Vérifie ensuite avec le labo.",
+   ],
+   quiz:[
+     {q:"Combien de régions compte le Cameroun ?",opts:["8","10","12","58"],ans:1,exp:"10 régions (anciennes provinces, renommées en 2008). 58 est le nombre de départements."},
+     {q:"Quel est le chef-lieu de la région de l'Est ?",opts:["Ebolowa","Ngaoundéré","Bertoua","Garoua"],ans:2,exp:"Bertoua est le chef-lieu de l'Est, la plus vaste région du pays."},
+     {q:"Buea est le chef-lieu de la région :",opts:["du Littoral","du Sud-Ouest","du Nord-Ouest","de l'Ouest"],ans:1,exp:"Buea, au pied du mont Cameroun, est le chef-lieu du Sud-Ouest. Douala est celui du Littoral."},
+     {q:"Quel chef-lieu est situé le plus au nord ?",opts:["Garoua","Ngaoundéré","Maroua","Bamenda"],ans:2,exp:"Maroua (≈10,6° N), chef-lieu de l'Extrême-Nord, est plus au nord que Garoua (≈9,3° N)."},
+     {q:"Lequel de ces pays n'est PAS voisin du Cameroun ?",opts:["Tchad","Gabon","Ghana","Congo"],ans:2,exp:"Le Ghana est en Afrique de l'Ouest. Les voisins : Nigeria, Tchad, RCA, Congo, Gabon, Guinée équatoriale."},
+     {q:"Les deux régions anglophones sont :",opts:["Nord et Extrême-Nord","Nord-Ouest et Sud-Ouest","Littoral et Ouest","Centre et Sud"],ans:1,exp:"Le Nord-Ouest (Bamenda) et le Sud-Ouest (Buea) sont les régions anglophones."},
+   ],
+   ressource:"https://minesec-distancelearning.cm",pack:null},
+
   {id:"lv32",titre:"Climat Mondial & Changement Climatique",matiere:"Géographie",cat:"geo",
    classe:"6ème-2nde A",ico:"🌍",color:"#0EA5E9",gratuit:true,
    desc:"Climats, biomes, effet de serre, réchauffement, conséquences.",
@@ -1075,76 +1096,107 @@ function _initLaboSim(lv){
     };
 
   // ── GÉO : Carte du Cameroun (lv7) ──
+  // Contour réel : Natural Earth 1:50m (domaine public, via world-atlas),
+  // projection équirectangulaire x=X0+(lon-LON0)·cos(7°)·K, y=Y0+(LAT0-lat)·K.
+  // Les chefs-lieux sont placés par leurs vraies coordonnées avec la même projection.
   } else if(lv.id==="lv7"){
     window._sim.params={highlight:-1};
     window._sim.defaults={highlight:-1};
+    var CM_K=27,CM_COS=Math.cos(7*Math.PI/180),CM_LON0=8.4,CM_LAT0=13.2,CM_X0=200,CM_Y0=12;
+    var cmXY=function(lat,lon){return [CM_X0+(lon-CM_LON0)*CM_COS*CM_K, CM_Y0+(CM_LAT0-lat)*CM_K];};
+    var cmPath=(typeof Path2D==='function')?new Path2D("M204.2 240.0L204.9 237.9L206.5 235.4L208.4 232.1L210.7 228.0L212.3 220.9L213.3 216.4L214.3 212.3L216.0 208.6L217.7 206.2L222.5 201.4L226.1 197.8L227.9 196.3L229.3 195.1L231.5 193.7L233.8 192.1L235.5 188.9L237.0 185.9L238.0 185.3L239.5 184.7L243.9 181.5L246.7 179.5L247.4 180.5L247.9 181.7L248.4 182.3L250.8 182.7L253.9 182.7L255.8 182.3L256.7 181.3L257.8 178.4L258.4 177.8L259.2 177.7L262.6 179.7L265.5 182.6L268.4 185.4L269.9 186.4L270.5 187.6L271.8 192.8L272.6 194.0L273.8 194.6L276.0 194.3L278.4 193.3L280.5 192.0L282.5 190.3L283.9 188.7L284.4 187.6L284.7 183.3L285.2 182.4L287.3 180.7L290.8 177.9L292.7 176.3L292.5 175.7L291.4 174.0L290.2 172.0L291.4 170.1L292.5 168.6L296.9 163.5L296.9 161.8L297.2 159.8L300.6 153.9L302.7 146.3L302.8 144.8L304.8 141.1L307.3 136.3L312.1 135.6L314.0 134.4L316.1 132.3L317.4 130.3L318.1 128.4L318.6 124.9L319.5 120.8L319.9 117.2L321.4 113.9L323.8 112.2L327.9 110.8L328.6 110.2L329.2 108.0L329.7 103.4L329.8 100.6L330.0 99.5L330.6 97.4L334.4 93.8L336.1 88.0L337.6 82.0L342.0 74.8L347.1 67.6L349.6 65.7L351.6 64.8L353.9 64.7L355.5 64.1L361.0 60.6L363.4 59.4L365.1 58.1L365.5 57.0L365.7 55.4L365.1 51.7L366.1 49.0L366.6 44.8L366.9 41.5L366.6 40.3L365.8 38.7L365.7 38.4L364.0 36.3L361.2 35.1L357.4 34.8L355.3 34.0L355.1 32.3L354.9 31.3L354.7 30.2L354.4 27.9L351.8 15.3L356.6 15.3L362.5 16.8L363.9 18.0L364.7 22.2L366.7 24.7L370.5 26.7L372.8 30.9L373.7 37.1L375.7 40.9L376.2 41.5L378.5 46.9L379.1 48.6L379.2 51.9L379.0 54.1L380.1 56.8L378.4 61.5L377.8 64.3L377.6 68.3L378.7 75.4L380.4 80.9L382.3 85.3L384.3 88.7L387.6 92.5L391.1 96.0L394.4 98.2L391.3 99.5L385.4 99.6L382.1 98.9L380.4 98.9L378.8 99.3L372.5 100.0L366.1 99.7L360.2 98.8L356.6 99.0L353.8 101.1L351.6 104.2L349.5 106.7L350.2 109.5L351.8 111.1L354.9 114.4L357.6 117.7L359.0 119.9L364.4 124.7L369.7 129.0L370.8 129.8L372.2 130.5L373.1 130.8L376.0 133.3L379.9 137.4L383.6 143.7L386.2 150.1L388.7 156.4L389.9 157.5L391.6 158.1L391.8 159.5L391.7 161.4L391.1 163.1L389.7 165.2L387.0 169.7L383.4 172.3L382.5 173.8L381.9 175.7L381.1 177.7L379.2 181.8L377.8 185.2L376.4 186.3L373.2 191.4L371.0 196.5L370.6 197.9L369.9 198.8L368.9 199.6L365.1 201.2L363.8 202.0L362.8 203.0L361.9 204.0L361.6 205.4L362.5 207.2L363.5 208.6L364.6 208.7L365.6 208.7L366.2 209.5L366.6 210.0L366.6 220.0L365.7 221.5L365.8 222.2L365.3 223.9L365.2 225.8L365.5 226.6L366.2 227.2L367.2 228.6L367.8 231.6L369.0 242.4L369.6 244.1L370.7 245.3L374.1 247.6L377.4 250.7L378.6 252.7L379.2 256.0L380.5 258.5L380.5 259.4L379.9 259.7L378.7 259.8L377.8 260.0L378.5 261.8L380.3 265.1L383.3 268.5L386.5 272.1L389.1 275.1L392.4 278.5L395.0 281.2L397.6 284.0L399.6 284.6L401.1 284.8L401.8 285.4L402.5 286.6L403.9 288.0L405.4 289.9L405.9 291.7L405.2 293.5L405.9 296.1L405.9 296.3L406.4 297.3L406.2 298.2L406.6 301.6L407.3 304.6L408.6 307.1L408.6 307.3L408.4 308.9L406.8 309.9L405.8 311.5L405.5 313.8L406.0 316.6L407.2 319.9L407.3 321.8L406.9 322.1L406.1 322.7L405.2 323.2L403.0 320.9L400.5 319.4L396.7 316.7L393.0 315.7L388.1 315.6L385.9 315.9L384.5 314.9L382.4 313.7L381.2 313.4L379.6 314.3L378.4 314.4L377.1 314.0L374.3 314.1L374.0 312.5L373.5 312.2L370.5 312.4L369.6 311.1L369.1 311.2L368.0 310.8L365.6 309.0L363.1 310.2L357.8 310.1L351.0 310.1L344.0 310.2L337.6 310.1L331.1 310.0L330.6 308.3L329.2 307.5L326.8 307.4L319.7 307.7L314.3 307.4L312.6 307.3L310.7 306.8L306.1 306.4L300.5 306.7L299.3 306.7L294.9 306.7L284.6 306.2L279.0 306.3L279.1 307.4L278.7 308.1L278.5 309.9L272.3 309.9L264.1 309.9L256.4 309.9L251.2 309.9L242.4 309.9L239.4 308.6L238.5 307.9L238.3 307.0L238.2 306.4L237.5 306.2L238.1 299.9L239.3 294.6L239.8 289.6L241.5 285.3L240.6 280.9L239.6 279.0L234.1 272.9L236.6 270.6L233.3 270.9L232.6 268.6L231.0 265.9L232.0 265.4L232.9 263.9L235.9 264.4L235.8 263.6L233.2 261.3L233.5 260.2L234.6 258.9L234.0 258.3L232.1 259.7L230.8 259.6L229.8 258.7L229.1 258.6L229.5 260.4L228.5 261.9L227.5 262.5L225.8 262.4L224.4 262.0L224.0 261.1L222.8 260.4L219.1 259.3L216.1 257.9L215.5 254.2L214.3 252.6L213.7 250.7L213.4 248.7L213.9 245.4L213.1 244.9L212.3 244.8L210.9 244.9L209.7 244.7L208.2 243.0L207.0 242.3L207.7 245.5L206.9 246.5L204.6 246.2L203.8 245.0L203.6 244.0L204.6 240.1L204.2 240.0Z"):null;
+    // lx/ly/la : décalage et alignement de l'étiquette (évite les chevauchements au sud-ouest)
     var regions=[
-      {nom:"Adamaoua",cx:380,cy:130,chef:"Ngaoundéré",col:"#D97706"},
-      {nom:"Centre",cx:330,cy:200,chef:"Yaoundé",col:"#059669"},
-      {nom:"Est",cx:440,cy:210,chef:"Bertoua",col:"#6C56A6"},
-      {nom:"Extrême-Nord",cx:370,cy:40,chef:"Maroua",col:"#AE5353"},
-      {nom:"Littoral",cx:260,cy:220,chef:"Douala",col:"#0891B2"},
-      {nom:"Nord",cx:370,cy:85,chef:"Garoua",col:"#1E3A8A"},
-      {nom:"Nord-Ouest",cx:270,cy:160,chef:"Bamenda",col:"#BE185D"},
-      {nom:"Ouest",cx:290,cy:185,chef:"Bafoussam",col:"#D97706"},
-      {nom:"Sud",cx:330,cy:260,chef:"Ebolowa",col:"#059669"},
-      {nom:"Sud-Ouest",cx:230,cy:190,chef:"Buea",col:"#6C56A6"},
+      {nom:"Adamaoua",chef:"Ngaoundéré",lat:7.32,lon:13.58,col:"#D97706",lx:9,ly:4,la:"left"},
+      {nom:"Centre",chef:"Yaoundé",lat:3.87,lon:11.52,col:"#059669",lx:9,ly:4,la:"left",capitale:true},
+      {nom:"Est",chef:"Bertoua",lat:4.58,lon:13.68,col:"#7C3AED",lx:9,ly:4,la:"left"},
+      {nom:"Extrême-Nord",chef:"Maroua",lat:10.59,lon:14.32,col:"#DC2626",lx:9,ly:4,la:"left"},
+      {nom:"Littoral",chef:"Douala",lat:4.05,lon:9.70,col:"#0891B2",lx:4,ly:15,la:"left"},
+      {nom:"Nord",chef:"Garoua",lat:9.30,lon:13.40,col:"#2563EB",lx:9,ly:4,la:"left"},
+      {nom:"Nord-Ouest",chef:"Bamenda",lat:5.96,lon:10.16,col:"#DB2777",lx:-9,ly:0,la:"right"},
+      {nom:"Ouest",chef:"Bafoussam",lat:5.48,lon:10.42,col:"#CA8A04",lx:9,ly:4,la:"left"},
+      {nom:"Sud",chef:"Ebolowa",lat:2.90,lon:11.15,col:"#16A34A",lx:9,ly:4,la:"left"},
+      {nom:"Sud-Ouest",chef:"Buea",lat:4.16,lon:9.24,col:"#0D9488",lx:-9,ly:12,la:"right"},
     ];
+    regions.forEach(function(rg){var xy=cmXY(rg.lat,rg.lon);rg.x=xy[0];rg.y=xy[1];});
+    var mtCam=cmXY(4.20,9.17);
+    var LG_X=468,LG_Y=58,LG_H=24;
+    var fmtDeg=function(v,pos,neg){return Math.abs(v).toFixed(2).replace('.',',')+'° '+(v>=0?pos:neg);};
     window._sim.controlsDef=function(){
-      return "<span style='font-size:11px;font-weight:700;color:#142554'>Clique sur une région pour l'explorer</span>"
+      return "<span style='font-size:11px;font-weight:700;color:#142554'>Clique sur un chef-lieu (carte ou légende)</span>"
         +"<button onclick='window._sim.params.highlight=-1' style='background:#F0F4FF;color:#142554;border:none;border-radius:10px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>Tout afficher</button>";
     };
     _simUpdateControls();
-    // Click on canvas to select region
     var cnvEl=document.getElementById('laboCnv');
     if(cnvEl)cnvEl.onclick=function(ev){
       var rect=cnvEl.getBoundingClientRect();
       var mx=(ev.clientX-rect.left)*(W/rect.width);
       var my=(ev.clientY-rect.top)*(H/rect.height);
+      // Légende à droite
+      if(mx>=LG_X-8&&my>=LG_Y-14){
+        var row=Math.floor((my-(LG_Y-14))/LG_H);
+        if(row>=0&&row<regions.length){window._sim.params.highlight=row;return;}
+      }
       var closest=-1,minD=999;
       regions.forEach(function(rg,i){
-        var d=Math.hypot(mx-rg.cx,my-rg.cy);
+        var d=Math.hypot(mx-rg.x,my-rg.y);
         if(d<minD){minD=d;closest=i;}
       });
-      if(minD<50)window._sim.params.highlight=closest;
+      if(minD<16)window._sim.params.highlight=closest;
     };
     window._sim._draw=function(){
       var p=window._sim.params;var t=window._sim.t;
-      ctx.clearRect(0,0,W,H);
-      // Title
-      ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='bold 13px Montserrat';ctx.textAlign='left';
-      ctx.fillText('🗺️ CAMEROUN — 10 Régions',20,25);
-      // Country outline (simplified polygon)
-      ctx.beginPath();ctx.moveTo(350,15);ctx.lineTo(400,30);ctx.lineTo(420,70);ctx.lineTo(410,100);
-      ctx.lineTo(460,160);ctx.lineTo(490,230);ctx.lineTo(420,290);ctx.lineTo(340,310);
-      ctx.lineTo(280,290);ctx.lineTo(240,260);ctx.lineTo(210,230);ctx.lineTo(220,180);
-      ctx.lineTo(240,140);ctx.lineTo(280,120);ctx.lineTo(320,80);ctx.lineTo(340,40);ctx.closePath();
-      ctx.fillStyle='rgba(255,255,255,.05)';ctx.fill();
-      ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=2;ctx.stroke();
-      // Regions
+      // Fond peint sur le canevas : le dégradé du conteneur est écrasé par le thème clair
+      var bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#142554');bg.addColorStop(1,'#0F172A');
+      ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='rgba(255,255,255,.75)';ctx.font='bold 13px Montserrat';ctx.textAlign='left';
+      ctx.fillText('🗺️ CAMEROUN — 10 régions',20,25);
+      // Pays voisins & océan (repères)
+      ctx.fillStyle='rgba(255,255,255,.28)';ctx.font='italic 10px Montserrat';
+      ctx.fillText('NIGERIA',110,150);ctx.fillText('TCHAD',410,118);ctx.fillText('RCA',405,215);
+      ctx.fillText('CONGO',372,334);ctx.fillText('GABON',272,334);ctx.fillText('GUINÉE ÉQ.',176,334);
+      ctx.fillStyle='rgba(125,211,252,.45)';ctx.fillText('Golfe de Guinée',60,295);
+      // Contour réel
+      if(cmPath){
+        ctx.fillStyle='rgba(255,201,60,.08)';ctx.fill(cmPath);
+        ctx.strokeStyle='rgba(255,201,60,.75)';ctx.lineWidth=1.6;ctx.lineJoin='round';ctx.stroke(cmPath);
+      }
+      // Mont Cameroun
+      ctx.fillStyle='#FFC93C';ctx.beginPath();
+      ctx.moveTo(mtCam[0]-3,mtCam[1]-4);ctx.lineTo(mtCam[0]+3,mtCam[1]-4);ctx.lineTo(mtCam[0],mtCam[1]-10);ctx.closePath();ctx.fill();
+      ctx.font='9px Montserrat';ctx.textAlign='right';ctx.fillText('▲ Mt Cameroun 4 095 m',mtCam[0]-14,mtCam[1]-14);
+      // Chefs-lieux
       regions.forEach(function(rg,i){
-        var active=p.highlight===i||p.highlight===-1;
-        var pulse=active?Math.sin(t*2+i)*3:0;
-        var r=18+pulse;
-        ctx.beginPath();ctx.arc(rg.cx,rg.cy,r,0,Math.PI*2);
-        ctx.fillStyle=active?rg.col+'cc':'rgba(100,100,100,.3)';ctx.fill();
-        ctx.strokeStyle=active?'#fff':'rgba(255,255,255,.1)';ctx.lineWidth=active?2:1;ctx.stroke();
-        ctx.fillStyle=active?'#fff':'rgba(255,255,255,.3)';ctx.font=(p.highlight===i?'bold ':'')+' 9px Montserrat';ctx.textAlign='center';
-        ctx.fillText(rg.nom,rg.cx,rg.cy+r+14);
-        if(p.highlight===i){
-          ctx.fillStyle='#FFC93C';ctx.font='bold 10px Fira Code';
-          ctx.fillText('Chef-lieu: '+rg.chef,rg.cx,rg.cy+r+28);
+        var sel=p.highlight===i, active=sel||p.highlight===-1;
+        if(sel){
+          var pr=9+Math.sin(t*3)*3;
+          ctx.beginPath();ctx.arc(rg.x,rg.y,pr,0,Math.PI*2);
+          ctx.strokeStyle=rg.col;ctx.lineWidth=2;ctx.stroke();
         }
+        ctx.beginPath();ctx.arc(rg.x,rg.y,rg.capitale?5.5:4.5,0,Math.PI*2);
+        ctx.fillStyle=active?rg.col:'rgba(140,140,140,.45)';ctx.fill();
+        ctx.strokeStyle=active?'#fff':'rgba(255,255,255,.2)';ctx.lineWidth=rg.capitale?2:1.2;ctx.stroke();
+        ctx.fillStyle=active?'#fff':'rgba(255,255,255,.35)';
+        ctx.font=(sel?'bold ':'')+'10px Montserrat';ctx.textAlign=rg.la;
+        ctx.fillText(rg.chef+(rg.capitale?' ★':''),rg.x+rg.lx,rg.y+rg.ly);
       });
-      // Mt Cameroun
-      ctx.fillStyle='#FFC93C';ctx.font='8px Montserrat';ctx.textAlign='left';
-      ctx.fillText('▲ Mt Cameroun 4095m',200,205);
-      // Info panel
+      // Légende cliquable
+      ctx.fillStyle='rgba(255,255,255,.55)';ctx.font='bold 10px Montserrat';ctx.textAlign='left';
+      ctx.fillText('RÉGION · CHEF-LIEU',LG_X,LG_Y-22);
+      regions.forEach(function(rg,i){
+        var y=LG_Y+i*LG_H, sel=p.highlight===i, active=sel||p.highlight===-1;
+        if(sel){ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(LG_X-8,y-14,W-LG_X,LG_H-2);}
+        ctx.beginPath();ctx.arc(LG_X,y-4,5,0,Math.PI*2);ctx.fillStyle=active?rg.col:'rgba(140,140,140,.45)';ctx.fill();
+        ctx.fillStyle=active?'#fff':'rgba(255,255,255,.4)';ctx.font=(sel?'bold ':'')+'11px Montserrat';
+        ctx.fillText(rg.nom,LG_X+12,y);
+        ctx.fillStyle=active?'rgba(255,201,60,.9)':'rgba(255,255,255,.3)';ctx.font='10px Montserrat';
+        ctx.fillText('· '+rg.chef,LG_X+100,y);
+      });
       if(p.highlight>=0){
-        var sel=regions[p.highlight];
-        setVal("<span style='color:"+sel.col+"'>📍 "+sel.nom+"</span><span>🏛 Chef-lieu: "+sel.chef+"</span>");
+        var s=regions[p.highlight];
+        setVal("<span style='color:"+s.col+"'>📍 Région "+s.nom+"</span><span>🏛 Chef-lieu : "+s.chef+(s.capitale?" (capitale politique)":"")+"</span><span>🧭 "+fmtDeg(s.lat,'N','S')+" · "+fmtDeg(s.lon,'E','O')+"</span>");
       } else {
-        setVal("<span>🗺️ 10 régions</span><span>🏔 Point culminant: Mt Cameroun 4095m</span><span>👆 Clique pour explorer</span>");
+        setVal("<span>🗺️ 10 régions</span><span>📐 475 442 km²</span><span>🏔 Mt Cameroun 4 095 m</span><span>👆 Clique pour explorer</span>");
       }
     };
 
