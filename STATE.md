@@ -1,3 +1,18 @@
+## Leçons des classes d'examen, deuxième série (12/11/2026)
+
+Demande de Jacques : « Continue les leçons » (classes d'examen en priorité).
+
+- **11 leçons rédigées et une adaptée, enregistrées sur 22 identifiants** dans `apprendre/_src/08-lecons-examen-2.js`, leçons suivantes de la progression :
+  - Tle C et D : philosophie africaine, le vivre-ensemble et la gouvernance (Philo n° 2) ; le référent et ses substituts (Français n° 2) ; le subjonctif (Français n° 4).
+  - Tle A, C et D : les grands groupes humains du Cameroun (Géographie n° 3).
+  - Tle A : conséquences de la Deuxième Guerre mondiale et naissance de l'ONU (Histoire n° 2) ; période patristique et médiévale (Philo n° 1). Tle A et 1re A : le texte poétique, éléments de métrique (Français n° 3).
+  - 1re C et D : origine et objet de la philosophie (Philo n° 2) ; la ponctuation (Français n° 4).
+  - 1re A, C et D : l'industrialisation de l'Europe (Histoire n° 2).
+  - 1re A : les problèmes démographiques (Géographie n° 3) ; les tendances de la philosophie africaine (Philo n° 2, reprise de la leçon de Tle C et D, même contenu).
+- Les 22 rattachements vérifiés ; 12 leçons ouvertes dans Chromium, 0 erreur JS ; bancs au vert (54/54, 17/17).
+- ⚠️ **`habiller_pages.py` ne traite que les fichiers suivis par git** (`git ls-files`) : une page `apprendre/cours/*.html` NOUVELLE reste sans barre ni pied tant qu'on ne l'a pas ajoutée (`git add`) AVANT de lancer le script. Les 21 pages de la première série étaient parties ainsi ; corrigé ici (114 pages de cours habillées). Ordre : `build_apprendre.py` → `apprendre_statique.js` → `git add apprendre` → `habiller_pages.py`.
+- `lecons.js` : 114 leçons.
+
 ## Leçons des classes d'examen : Français, Philosophie, Histoire, Géographie en 1re et Tle (12/11/2026)
 
 Demande de Jacques : « Continue la préparation des autres leçons avec le même workflow que les autres », puis « Classe d'examen en priorité ».
