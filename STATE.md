@@ -1,3 +1,13 @@
+## Anglais : scène vivante de 1re ; leçons d'examen passées au payant (12/11/2026)
+
+Demandes de Jacques : « Ne fais pas trop de leçons gratuites sinon ils ne vont pas s'abonner », puis « Utilise aussi les situations de vie en anglais (dialogue, petite scène…), n'oublie pas les laboratoires et simulations comme ailleurs. Compare aux annales et à mes livrets d'anglais. »
+
+- **Scène vivante** `scenes/1re-anglais-community-dispute.html`, « The goat and the maize field » (chefferie de Dschang, médiation d'un conflit de voisinage) : conditionnels 1, 2, 3, unless / provided that, modaux ; 17 étapes, 2 ateliers (ordre, tri), choix du rôle de médiateur, labo à curseurs (colère, équité, écoute), quiz, bilan. C'était la première scène d'anglais de 1re (la Tle en a deux). Banc `_banc_scenes.js` : 17 étapes jusqu'au bilan, 100 %, labo 3 issues, quiz 5/5, 0 erreur. Catalogue, index, sitemap, `llms.txt` régénérés.
+- `apprendre/scenes.js` n'avait pas de générateur : régénéré depuis `scenes/*.html` (la nouvelle scène, et 6 titres qui avaient changé depuis) ; `scenes.js?v=20261112a` sur les 5 pages d'Apprendre.
+- **Leçons d'examen (1re, Tle) : payantes**. Les 73 leçons publiques de `apprendre/_src/07-09` et les séries 4 (lettres) et 5 (anglais) sont livrées à Jacques au format des sources PRIVÉES (`build_apprendre_payant.cjs`) : 120 leçons, 14 gratuites (premier de trimestre), 106 à verrou. Les fichiers 07-09 doivent être retirés du dépôt LORS du dépôt FTP fait depuis le PC (pas avant : les leçons disparaîtraient).
+- **Anglais aligné sur l'épreuve du dépôt** (`evaluations/evaluation_bac_anglais.html`, A4, /40 : A Grammar — dialogue à compléter avec les expressions entre parenthèses, phrases « as started » ; B Vocabulary ; C Reading ; D Composition, grille contenu / langue / structure) ; chaque leçon a une scène dialoguée jouée réplique par réplique (labo `etapes`). Les livrets d'anglais de Jacques ne sont PAS dans le dépôt : comparaison à faire sur le PC.
+- ⚠️ `build_apprendre_payant.cjs` prend le PREMIER `<em>` de l'exercice pour la réponse : tout italique de l'énoncé (choix entre parenthèses, titres d'œuvres) doit être en `<i>`.
+
 ## Leçons des classes d'examen, troisième série, et contrôle de conformité (12/11/2026)
 
 Demandes de Jacques : « Continue les leçons », puis « Vérifier toujours la conformité avec les annales et progressions ».
