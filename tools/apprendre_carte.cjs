@@ -45,6 +45,7 @@ exports.labos = {
   lv29: [["Tle C","maths",[42],/conditionnelles/i], ["Tle D","maths",[27],/conditionnelles/i]],
   lv30: [["Tle C","physique",[35,36,37],/nucléaire|radioact/i], ["Tle D","physique",[26,27,28],/nucléaire|radioact/i]],
   lv31: [[TS,"chimie",[4,7],/estérif/i]],
+  lv7:  [["6e","geo",[3],/localiser/i], ["3e","geo",[1],/cameroun/i]],
   lv32: [["6e","geo",[18],/climat/i], ["2nde A","geo",[16],/climat/i]]
 };
 
