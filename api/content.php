@@ -136,6 +136,86 @@ if (!vrt_account_can_access($acc, $contenu, $db)) {
     content_err(403, 'Accès réservé aux abonnés du plan correspondant');
 }
 
+/* ── QUOTA DE FICHES (12/11/2026) ─────────────────────────────────────────
+   Empêche de payer un seul mois, aspirer toutes les fiches en PDF puis ne
+   plus se réabonner. On compte les DOCUMENTS DISTINCTS ouverts par compte,
+   sur deux fenêtres glissantes : 24 h et 7 jours. Rouvrir une fiche déjà
+   ouverte dans la fenêtre ne coûte rien (et les requêtes Range d'un même
+   document non plus). Vidéos et audios ne sont pas comptés : ils se lisent
+   en streaming, ils ne s'archivent pas comme une fiche.
+   Réglable sans redéployer : DB.elearning.quotaFiches = {jour: N, semaine: N}
+   (0 ou négatif = sans limite). */
+define('CONTENT_QUOTA_JOUR_DEF', 5);
+define('CONTENT_QUOTA_SEMAINE_DEF', 20);
+
+function content_quota_limites(array $db): array {
+    $q = $db['elearning']['quotaFiches'] ?? null;
+    $j = is_array($q) && isset($q['jour']) ? (int) $q['jour'] : CONTENT_QUOTA_JOUR_DEF;
+    $s = is_array($q) && isset($q['semaine']) ? (int) $q['semaine'] : CONTENT_QUOTA_SEMAINE_DEF;
+    return [$j, $s];
+}
+/** Retourne null si autorisé (et enregistre l'ouverture), sinon le message de refus. */
+function content_quota(string $who, string $docId, int $maxJour, int $maxSemaine): ?string {
+    if ($maxJour <= 0 && $maxSemaine <= 0) return null;
+    $dir = __DIR__ . '/data/_rate/';
+    if (!is_dir($dir)) @mkdir($dir, 0750, true);
+    $f = $dir . 'fiches_' . substr(hash('sha256', $who), 0, 24) . '.json';
+    $now = time();
+    $fh = @fopen($f, 'c+');
+    if ($fh === false) return null;             // stockage indisponible : on ne bloque pas un abonné
+    @flock($fh, LOCK_EX);
+    $raw = stream_get_contents($fh);
+    $vus = json_decode((string) $raw, true);
+    if (!is_array($vus)) $vus = [];
+    // On garde, par document, la date de sa PREMIÈRE ouverture encore dans les 7 jours.
+    foreach ($vus as $k => $ts) { if (!is_int($ts) || ($now - $ts) >= 7 * 86400) unset($vus[$k]); }
+    $msg = null;
+    if (!isset($vus[$docId])) {
+        $jour = 0;
+        foreach ($vus as $ts) { if (($now - $ts) < 86400) $jour++; }
+        if ($maxJour > 0 && $jour >= $maxJour) {
+            $msg = 'Tu as déjà ouvert ' . $maxJour . ' fiches différentes aujourd’hui. Les fiches déjà ouvertes restent disponibles ; les nouvelles se débloquent dans les prochaines 24 h.';
+        } elseif ($maxSemaine > 0 && count($vus) >= $maxSemaine) {
+            $plusAncien = min($vus);
+            $h = (int) ceil((7 * 86400 - ($now - $plusAncien)) / 3600);
+            $msg = 'Tu as atteint ' . $maxSemaine . ' fiches différentes cette semaine. Les fiches déjà ouvertes restent disponibles ; une nouvelle se débloque dans environ ' . max(1, $h) . ' h.';
+        } else {
+            $vus[$docId] = $now;
+        }
+    }
+    if ($msg === null) {
+        ftruncate($fh, 0); rewind($fh);
+        fwrite($fh, json_encode($vus));
+    }
+    @flock($fh, LOCK_UN); fclose($fh);
+    return $msg;
+}
+
+$__ext0 = strtolower(pathinfo((string) ($contenu['fichierProtege'] ?? $contenu['fichierUrl'] ?? $contenu['fichier'] ?? ''), PATHINFO_EXTENSION));
+$__flux = in_array($__ext0, ['mp4', 'webm', 'ogg', 'mov', 'mp3', 'wav', 'm4a'], true);
+$__role = strtolower((string) ($acc['role'] ?? ''));
+if (!$__flux && !in_array($__role, ['admin', 'superadmin', 'enseignant'], true)) {
+    [$__qj, $__qs] = content_quota_limites($db);
+    $__refus = content_quota('a:' . (string) ($acc['id'] ?? $acc['user'] ?? ''), $id, $__qj, $__qs);
+    if ($__refus !== null) {
+        @file_put_contents(__DIR__ . '/data/_security_log.txt',
+            date('c') . ' [CONTENT_QUOTA] user=' . substr((string) ($acc['user'] ?? ''), 0, 40) . ' id=' . $id . "\n", FILE_APPEND);
+        // Ouverte dans un onglet, la fiche refusée doit afficher une phrase, pas du JSON.
+        if (stripos((string) ($_SERVER['HTTP_ACCEPT'] ?? ''), 'text/html') !== false) {
+            while (ob_get_level() > 0) { ob_end_clean(); }
+            http_response_code(429);
+            header('Content-Type: text/html; charset=utf-8');
+            header('Retry-After: 3600');
+            echo '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Limite de fiches</title>'
+               . '<body style="font-family:system-ui,sans-serif;max-width:520px;margin:15vh auto;padding:0 16px;color:#142554">'
+               . '<h1 style="font-size:1.3rem">Limite de fiches atteinte</h1><p>' . htmlspecialchars($__refus, ENT_QUOTES, 'UTF-8') . '</p>'
+               . '<p><a href="/" style="color:#142554;font-weight:600">Revenir à VÉRITAS</a></p></body>';
+            exit;
+        }
+        content_err(429, $__refus);
+    }
+}
+
 // ── Résoudre le chemin du fichier (confiné à uploads/) ──
 $uploadsBase = realpath(dirname(__DIR__) . '/uploads');
 if ($uploadsBase === false) content_err(503, 'Stockage indisponible');

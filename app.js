@@ -1199,7 +1199,7 @@ function _formulesDefaut(){
   var F = [
     {g:'starter', nom:'STARTER', pub:'eleve',  mois:1200,  cible:'Élève · 6ᵉ → Tˡᵉ', tags:eleve,
      av:['Tous les cours de sa classe, par séquence','Œuvres au programme','Épreuves et annales corrigées','5 questions par jour au Professeur Ambassa','Suivi des résultats']},
-    {g:'pro',     nom:'PRO',     pub:'eleve',  mois:2400,  cible:'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', tags:eleve, pop:true,
+    {g:'pro',     nom:'PRO',     pub:'eleve',  mois:1200,  cible:'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', tags:eleve, pop:true,
      av:['Tout Starter','30 questions par jour au tuteur','Labos virtuels PCT & SVT','Bulletins blancs notés','Fiches de révision imprimables']},
     {g:'elite',   nom:'ÉLITE',   pub:'eleve',  mois:3600,  cible:'Accompagnement complet', tags:complet,
      av:['Tout Pro','Tuteur IA sans limite','Classes virtuelles en direct','Concours blancs corrigés','Entretien d’orientation']},

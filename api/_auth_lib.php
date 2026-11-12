@@ -677,7 +677,7 @@ if (!defined('VRT_AUTH_LIB')) {
     /* ══════════════════════════════════════════════════════════════════════
        FORMULES ÉLÈVE & FAMILLE — grille arrêtée par Jacques le 13/09/2026.
 
-       Au mois : Starter 1 200 · Pro 2 400 · Élite 3 600 · Famille 12 000 F (grille du
+       Au mois : Starter 1 200 · Pro 1 200 (12/11/2026, était 2 400) · Élite 3 600 · Famille 12 000 F (grille du
        16/10/2026 : Starter à 12 000 F l'année, prix de référence de la note de
        répartition 20 % partenaire / 30 % co-gérants / pool).
        À l'année : douze mois pour le prix de dix (deux mois offerts). Le prix
@@ -707,7 +707,7 @@ if (!defined('VRT_AUTH_LIB')) {
         $f = [
             'starter' => ['nom' => 'STARTER', 'public' => 'eleve', 'mois' => 1200, 'cible' => 'Élève · 6ᵉ → Tˡᵉ', 'tags' => $eleve,
                           'avantages' => ['Tous les cours de sa classe, par séquence', 'Œuvres au programme', 'Épreuves et annales corrigées', '5 questions par jour au Professeur Ambassa', 'Suivi des résultats']],
-            'pro'     => ['nom' => 'PRO', 'public' => 'eleve', 'mois' => 2400, 'cible' => 'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', 'tags' => $eleve, 'populaire' => true,
+            'pro'     => ['nom' => 'PRO', 'public' => 'eleve', 'mois' => 1200, 'cible' => 'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', 'tags' => $eleve, 'populaire' => true,
                           'avantages' => ['Tout Starter', '30 questions par jour au tuteur', 'Labos virtuels PCT & SVT', 'Bulletins blancs notés', 'Fiches de révision imprimables']],
             'elite'   => ['nom' => 'ÉLITE', 'public' => 'eleve', 'mois' => 3600, 'cible' => 'Accompagnement complet', 'tags' => $complet,
                           'avantages' => ['Tout Pro', 'Tuteur IA sans limite', 'Classes virtuelles en direct', 'Concours blancs corrigés', 'Entretien d’orientation']],

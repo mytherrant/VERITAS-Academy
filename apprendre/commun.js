@@ -262,7 +262,7 @@
        1 200 F et 2 400 F. Ils suivent désormais le tarif publié par le serveur —
        celui que l'octroi exige — et retombent sur le catalogue sinon. */
     abo = abo.replace("§STARTER§", '<span data-vrt-prix="abo_starter_m">' + prixConnu("abo_starter_m", "1 200") + '</span>')
-             .replace("§PRO§", '<span data-vrt-prix="abo_pro_m">' + prixConnu("abo_pro_m", "2 400") + '</span>');
+             .replace("§PRO§", '<span data-vrt-prix="abo_pro_m">' + prixConnu("abo_pro_m", "1 200") + '</span>');
     var titre = { lecon: "Pour aller plus loin", quiz: "Continue sur ta lancée", matiere: "En attendant les prochaines leçons", accueil: "Aller plus loin avec VÉRITAS" }[ctx] || "Pour aller plus loin";
     return '<aside class="offre offre-' + ctx + '" aria-label="' + titre + '"><p class="offre-t">' + titre + '</p>' +
       (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE) : "") + abo +
