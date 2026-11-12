@@ -258,13 +258,17 @@
      particulier en ligne, répétitions à domicile) sur devis.
      Prix : ceux publiés par le serveur (data-vrt-prix), repli sur le catalogue.
      ctx : "lecon" (fin du cours), "quiz" (sous le bilan), "matiere", "accueil" */
+  /* Avantages = table des droits du serveur (vrt_droits_formules, 12/11/2026). */
   var FORMULES = [
     { g: "starter", nom: "Starter", pour: "Pour suivre l'année", mois: "1 200", an: "10 000",
-      av: ["Tous les cours de ta classe", "Œuvres au programme", "Épreuves et annales corrigées", "5 questions par jour au tuteur", "Suivi de tes résultats"] },
+      av: ["Toutes les leçons de 1 classe", "Épreuves, annales et examens blancs", "5 questions par jour au tuteur", "10 fiches PDF par semaine", "2 labos premium à l'essai par semaine"],
+      non: ["Labos premium (2 à l'essai)", "Bulletins blancs notés"] },
     { g: "pro", nom: "Pro", pour: "Pour l'année d'examen", mois: "1 600", an: "13 500",
-      av: ["Tout Starter", "30 questions par jour au tuteur", "Labos virtuels PCT et SVT", "Bulletins blancs notés", "Fiches de révision imprimables"] },
+      av: ["Toutes les leçons de 1 classe", "30 questions par jour au tuteur", "20 fiches PDF par semaine", "Tous les labos virtuels premium", "Bulletins blancs : copies notées sur 20"],
+      non: ["Classes virtuelles en direct"] },
     { g: "elite", nom: "Élite", pour: "Pour viser la mention", mois: "2 000", an: "16 500",
-      av: ["Tout Pro", "Tuteur IA sans limite", "Classes virtuelles en direct", "Concours blancs corrigés", "Entretien d'orientation"] }
+      av: ["2 classes : la tienne + celle d'avant", "100 questions par jour au tuteur", "40 fiches PDF par semaine", "Classes virtuelles en direct", "Entretien d'orientation sur rendez-vous"],
+      non: [] }
   ];
   var WA_VERITAS = "237697637739";
   function carteFormule(f, conseillee) {
@@ -273,9 +277,10 @@
       (conseillee ? '<span class="fo-badge">Conseillée pour toi</span>' : "") +
       '<p class="fo-nom">' + esc(f.nom) + '</p><p class="fo-pour">' + esc(f.pour) + '</p>' +
       '<p class="fo-prix"><b data-vrt-prix="' + idM + '">' + prixConnu(idM, f.mois) + '</b> F<small> / mois</small></p>' +
-      '<p class="fo-an">ou <b><span data-vrt-prix="' + idA + '">' + prixConnu(idA, f.an) + '</span> F l\'année</b>, payée en une fois</p>' +
-      '<ul class="fo-av">' + f.av.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + '</ul>' +
-      '<a class="fo-btn" href="/#tarifs" data-formule="' + f.g + '">Choisir ' + esc(f.nom) + '</a></div>';
+      '<p class="fo-an">ou <a href="/app.html#abonnement?plan=' + idA + '"><b><span data-vrt-prix="' + idA + '">' + prixConnu(idA, f.an) + '</span> F l\'année</b></a>, payée en une fois</p>' +
+      '<ul class="fo-av">' + f.av.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") +
+        f.non.map(function (x) { return '<li class="fo-non">' + esc(x) + "</li>"; }).join("") + '</ul>' +
+      '<a class="fo-btn" href="/app.html#abonnement?plan=' + idM + '">Choisir ' + esc(f.nom) + '</a></div>';
   }
   function carteHumain(c, m) {
     var txt = "Bonjour VÉRITAS, je souhaite un devis pour un accompagnement" + (c ? " en " + c : "") + (m ? " (" + m + ")" : "") + " : suivi particulier en ligne / répétitions à domicile. Ville et quartier : ";
@@ -296,8 +301,9 @@
       '<div class="offre-grille"><div class="offre-plans">' +
       FORMULES.map(function (f) { return carteFormule(f, ex ? f.g === "pro" : f.g === "starter"); }).join("") +
       '</div>' + carteHumain(c, m) + '</div>' +
-      '<p class="offre-n">Payer l\'année en une fois revient à un peu plus de huit mois : Starter à 10 000 F au lieu de 14 400 F. Paiement Orange Money ou MTN MoMo, sans engagement.</p>' +
+      '<p class="offre-n">Payer l\'année en une fois revient à un peu plus de huit mois (Starter : 10 000 F au lieu de 14 400 F). Plusieurs enfants ? La <a href="/app.html#abonnement?plan=abo_famille_m">formule Famille</a> couvre jusqu\'à 4 enfants au niveau Élite pour <span data-vrt-prix="abo_famille_m">' + prixConnu("abo_famille_m", "6 000") + '</span> F par mois. Paiement Orange Money ou MTN MoMo, sans engagement.</p>' +
       (cah ? lienOffre(cah.h, cah.t, cah.d, PICTO_LIVRE) : "") +
+      lienOffre("/app.html#tarifs", "Enseignant ? Les formules multi-classes", "3 classes, 6 classes ou toutes, dès 2 500 F par mois : leçons à projeter, fiches à distribuer, épreuves corrigées.", PICTO_CLE) +
       '</aside>';
   }
   /* Les bonnes réponses étaient rangées en 1ʳᵉ ou 2ᵉ position (3ᵉ : 5 fois sur 177) :

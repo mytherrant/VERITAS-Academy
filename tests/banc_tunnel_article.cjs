@@ -174,7 +174,8 @@ console.log(`\n${G}⑤ La page servie ne vante plus un produit inexistant${R}`);
   const vivant = html.replace(/<!--[\s\S]*?-->/g, '');   // hors commentaires
   dire(vivant.indexOf('Le plus vendu du catalogue') < 0,
     'plus de pastille « le plus vendu » — le centre ne publie aucun chiffre de vente');
-  dire(vivant.indexOf('6 500 F') < 0,
+  // Nombre ENTIER : « 16 500 F » (Élite à l'année, grille du 12/11/2026) n'est pas ce faux prix barré.
+  dire(!/(?<!\d[\s\u00a0\u202f]?)6[\s\u00a0\u202f]500 F/.test(vivant),
     'plus de prix barré à 6 500 F, qui n’a jamais été pratiqué');
   dire(vivant.indexOf('−23 %') < 0 && vivant.indexOf('-23 %') < 0,
     'plus de remise de 23 % calculée sur ce prix');

@@ -44,7 +44,7 @@ function dit(bool $b, string $m, string $det = ''): void {
 }
 function titre(string $t): void { global $G, $R; echo "\n{$G}{$t}{$R}\n"; }
 
-function jours(int $j): int { return (int) round(microtime(true) * 1000) + $j * 86400000; }
+function jours(float $j): int { return (int) round(microtime(true) * 1000 + $j * 86400000); }
 function videFile(): void {
     foreach (glob(vrt_notify_dir() . '/*.json') ?: [] as $f) @unlink($f);
 }
@@ -127,6 +127,29 @@ videFile();
 $db = baseAvec([abo(['tel' => '', 'email' => '', 'accountId' => 'inconnu'])]);
 $db['visitorAccounts'][0]['tel'] = ''; $db['visitorAccounts'][0]['email'] = '';
 dit(vrt_abo_relances($db, 7) === 0, 'sans aucun contact, on ne met rien en file');
+
+titre('⑤ bis La veille et le jour de la fin (12/11/2026)');
+videFile();
+$db = baseAvec([abo(['dateFinTs' => jours(3)])]);
+vrt_abo_relances($db, 7);
+$db['elearning']['abonnements'][0]['dateFinTs'] = jours(0.5);   // le temps passe : veille
+dit(vrt_abo_relances($db, 7) === 1 && !empty($db['elearning']['abonnements'][0]['relanceVeille']), 'la veille, un second rappel part (une fois)');
+dit(vrt_abo_relances($db, 7) === 0, 'et pas deux');
+$db['elearning']['abonnements'][0]['dateFinTs'] = jours(-0.2);  // le terme est passé depuis quelques heures
+videFile();
+dit(vrt_abo_relances($db, 7) === 1, 'le jour de la fin, un dernier message part');
+$fs = glob(vrt_notify_dir() . '/*.json'); $m = json_decode((string) file_get_contents($fs[0]), true);
+dit(stripos((string) $m['texte'], 'termine') !== false && stripos((string) $m['texte'], 'enouvel') !== false, 'il dit que c\'est terminé et comment revenir');
+dit(vrt_abo_relances($db, 7) === 0, 'une seule fois');
+videFile();
+$db = baseAvec([abo(['dateFinTs' => jours(3)]), abo(['dateFinTs' => jours(33)])]);
+dit(vrt_abo_relances($db, 7) === 0, 'déjà renouvelé (nouvelle échéance dans 33 jours) : aucun rappel sur l\'ancienne');
+
+titre('⑤ ter Le SMS d\'activation dit ce que la formule ouvre');
+$t = vrt_notify_texte(['type' => 'abonnement', 'titre' => 'PRO', 'droits' => vrt_droits_resume('abo_pro_m'), 'exp' => time() + 86400 * 30], false);
+dit(strpos($t, 'Inclus : 1 classe, tuteur IA 30/jour, 20 fiches/semaine, labos premium, bulletins blancs') !== false, 'Pro : classes, tuteur, fiches, labos, bulletins', str_replace("\n", ' | ', $t));
+dit(strpos(vrt_droits_resume('abo_elite_a'), 'classes virtuelles') !== false, 'Élite : classes virtuelles annoncées');
+dit(vrt_droits_resume('ens') === '', 'plan de l\'Atelier : rien d\'inventé');
 
 titre('⑥ Le battement est bon marché quand il n\'y a rien à faire');
 videFile();

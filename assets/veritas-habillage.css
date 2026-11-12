@@ -253,6 +253,9 @@ html:has(#vrtBurger:not([hidden])) body > div:has([aria-label="Professeur Ambass
   div:has(> #vrtCit){right:12px!important;bottom:12px!important;gap:8px!important}
   #vrtCit{max-width:calc(100vw - 24px)!important;padding:12px 14px!important;font-size:14px}
 }
+/* 12/11/2026 : dans l'application, une règle de thème effaçait le fond de la
+   citation — texte blanc flottant sur la page. Fond imposé partout. */
+#vrtCit{background:linear-gradient(135deg,#0C2A6A,#5B4FA8)!important;color:#fff!important}
 /* TIROIR ☰ AU TÉLÉPHONE (30/10/2026, captures de Jacques) : les rubriques
    « Plus » flottaient sans fond par-dessus la page, centrées et en désordre.
    1. Les réglages du panneau d'ordinateur ci-dessus (max-height 780 px,

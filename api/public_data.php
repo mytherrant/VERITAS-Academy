@@ -764,7 +764,7 @@ function vrt_pd_plans_en_vente(array $db): array {
         if (in_array($id, $retires, true) && empty($p['enVente'])) continue;
         if (isset($p['enVente']) && $p['enVente'] === false) continue;
         if (isset($formules[$id]) && isset($p['actif']) && $p['actif'] === false) continue;
-        if (isset($formules[$id])) $p = array_merge($formules[$id], $p);
+        if (isset($formules[$id])) $p = array_merge($formules[$id], function_exists('vrt_formule_ligne_base') ? vrt_formule_ligne_base($p) : $p);
         $out[] = $p; $vus[$id] = true;
     }
     foreach ($formules as $id => $f) {
@@ -937,4 +937,12 @@ foreach ($public['partenaires'] as &$p) {
 unset($p);
 
 echo json_encode($public, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+/* SMS AUTOMATIQUES (12/11/2026) : la file de SMS (SkySMS) et la ronde des
+   échéances ne battaient qu'aux visites des cahiers. Chaque visite de la
+   vitrine les fait battre désormais — APRÈS la réponse, et pour presque rien
+   quand il n'y a rien à faire (deux lectures de date de fichier). */
+try {
+    if (!function_exists('vrt_notify_battement')) @require_once __DIR__ . '/_auth_lib.php';
+    if (function_exists('vrt_notify_battement')) vrt_notify_battement();
+} catch (\Throwable $e) { /* jamais bloquant */ }
 exit;

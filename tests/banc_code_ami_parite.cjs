@@ -46,7 +46,8 @@ function php(code) {
   if (srcF) {
     const js = new Function(srcF + '\nreturn _formulesDefaut();')();
     const serveur = JSON.parse(php('require "api/_auth_lib.php"; echo json_encode(array_values(vrt_plans_formules()), JSON_UNESCAPED_UNICODE);'));
-    ok('8 formules de chaque côté', js.length === 8 && serveur.length === 8, 'js=' + js.length + ' serveur=' + serveur.length);
+    // 7 formules (Starter, Pro, Élite, Famille, Prof 3 / 6 / toutes classes) × mois et année.
+    ok('14 formules de chaque côté', js.length === 14 && serveur.length === 14, 'js=' + js.length + ' serveur=' + serveur.length);
     const champs = ['id', 'groupe', 'variante', 'nom', 'public', 'cible', 'prix', 'ancien', 'duree', 'planTags', 'avantages', 'populaire', 'enfantsMax'];
     const ecarts = [];
     serveur.forEach(s => {
@@ -58,7 +59,7 @@ function php(code) {
     });
     ok('chaque champ affiché est celui que le serveur encaisse', ecarts.length === 0, ecarts.slice(0, 6).join(' | '));
     const pro = js.find(x => x.id === 'abo_pro_a');
-    ok('Pro à l’année : 24 000 F, barré 28 800 F (deux mois offerts — grille du 16/10/2026)', pro && pro.prix === 24000 && pro.ancien === 28800);
+    ok('Pro à l’année : 13 500 F, barré 19 200 F (grille du 12/11/2026)', pro && pro.prix === 13500 && pro.ancien === 19200);
   }
 
   // ─────────────────────────────────────────────────────────────────────────

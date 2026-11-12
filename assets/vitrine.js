@@ -2978,6 +2978,8 @@
       // retour de paiement peut donc arriver ici plutôt qu'au démarrage.
       if (lireRetourPaiement()) return;
       var n = (location.hash || '').replace('#', '');
+      // Changer de page referme la citation : elle ne suit pas l'élève dans un jeu ou une leçon.
+      if (n && n !== 'accueil') { try { panneau('vrtCit', false); } catch (e) {} }
       if (!n) { if (S.page !== 'accueil') aller('accueil'); return; }
       if (n === S.page) return;                                   // déjà là : ne pas re-rendre
       if (document.querySelector('[data-vp="' + n + '"]')) aller(n);
@@ -3003,6 +3005,11 @@
     if (S.citOn && (D.citations || []).length) {
       setTimeout(function () {
         if (!S.citOn) return;                       // fermée entre-temps
+        /* 12/11/2026 : sur l'ACCUEIL seulement. Ouverte au-dessus d'un jeu,
+           d'une leçon ou de l'application, elle recouvrait ce que l'élève
+           faisait (capture de Jacques, Calcul mental sur téléphone). */
+        var ici = (location.hash || '').replace('#', '');
+        if ((ici && ici !== 'accueil') || /app\.html|VERITAS_v/i.test(location.pathname)) return;
         var c = (D.citations && D.citations[S.cit]) || {};
         poser('citationTexte', c.t || ''); poser('citationAuteur', '— ' + (c.a || ''));
         panneau('vrtCit', true);

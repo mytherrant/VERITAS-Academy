@@ -4504,6 +4504,11 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
 #VISITOR#VISITOR#VISITOR .vfo-g-pro    { --vfo-c1:#1E3A7B; --vfo-c2:#142554; --vfo-tx:#fff; --vfo-soft:#EDF0F7; --vfo-ac:#142554; }
 #VISITOR#VISITOR#VISITOR .vfo-g-elite  { --vfo-c1:#FFD464; --vfo-c2:#F2A520; --vfo-tx:#001136; --vfo-soft:#FFF6DB; --vfo-ac:#9A5B00; }
 #VISITOR#VISITOR#VISITOR .vfo-g-famille{ --vfo-c1:#E86A1C; --vfo-c2:#C2410C; --vfo-tx:#fff; --vfo-soft:#FFF0E6; --vfo-ac:#B23C0A; }
+/* Formules enseignant multi-classes (12/11/2026) : teintes sarcelle, distinctes des paliers élève. */
+#VISITOR#VISITOR#VISITOR .vfo-g-prof3   { --vfo-c1:#14A3AE; --vfo-c2:#0E7C86; --vfo-tx:#fff; --vfo-soft:#E3F4F5; --vfo-ac:#0B636B; }
+#VISITOR#VISITOR#VISITOR .vfo-g-prof6   { --vfo-c1:#0E7C86; --vfo-c2:#085A61; --vfo-tx:#fff; --vfo-soft:#DDF0F1; --vfo-ac:#085A61; }
+#VISITOR#VISITOR#VISITOR .vfo-g-proftout{ --vfo-c1:#5B4FA8; --vfo-c2:#433A86; --vfo-tx:#fff; --vfo-soft:#EEE9F8; --vfo-ac:#433A86; }
+#VISITOR#VISITOR#VISITOR .vfo-profs-int{ max-width:720px; margin:0 auto 22px !important; text-align:center; font:400 15px/1.6 Poppins,sans-serif; color:#4D5163; }
 #VISITOR#VISITOR#VISITOR .vfo-band-l{ min-width:0; }
 #VISITOR#VISITOR#VISITOR .vfo-rang{
   display:inline-block; font:700 11px/1 Poppins,sans-serif !important; letter-spacing:.8px;
@@ -5194,3 +5199,5 @@ body > [id^="_"]:not(script), body > [id^="_"]:not(script) *:not([class*="materi
 #VISITOR#VISITOR#VISITOR .lvx-f{ box-shadow:inset 0 0 0 1px #DDE3EE !important; }
 #VISITOR#VISITOR#VISITOR .lvx-f:hover{ box-shadow:inset 0 0 0 1px #1E499B !important; }
 #VISITOR#VISITOR#VISITOR .lvx-f.on{ box-shadow:none !important; }
+/* Grille enseignant : trois formules, trois colonnes (12/11/2026). */
+@media (min-width:1181px){ #VISITOR#VISITOR#VISITOR .vfo-grille:has(.vfo-g-prof3){ grid-template-columns:repeat(3, minmax(0, 1fr)) !important; } }

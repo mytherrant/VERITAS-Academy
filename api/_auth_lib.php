@@ -677,9 +677,9 @@ if (!defined('VRT_AUTH_LIB')) {
     /* ══════════════════════════════════════════════════════════════════════
        FORMULES ÉLÈVE & FAMILLE — grille arrêtée par Jacques le 13/09/2026.
 
-       Au mois : Starter 1 200 · Pro 1 600 · Élite 2 000 · Famille 12 000 F
+       Au mois : Starter 1 200 · Pro 1 600 · Élite 2 000 · Famille 6 000 F
        (grille du 12/11/2026 : trois paliers plus serrés, l'ancien Pro à 2 400 F
-       faisait fuir). À l'année : Starter 10 000 · Pro 13 500 · Élite 16 500 F,
+       faisait fuir). À l'année : Starter 10 000 · Pro 13 500 · Élite 16 500 · Famille 50 000 F,
        soit un peu plus de huit mois pour douze (clé `an`) ; sans `an`, l'année
        vaut dix mois. Le prix « ancien », barré sur les cartes, est celui de douze mois payés un à un.
 
@@ -706,13 +706,24 @@ if (!defined('VRT_AUTH_LIB')) {
         $complet = ['plan1', 'plan2', 'plan4', 'plan5', 'plan6'];
         $f = [
             'starter' => ['nom' => 'STARTER', 'public' => 'eleve', 'mois' => 1200, 'an' => 10000, 'cible' => 'Élève · 6ᵉ → Tˡᵉ', 'tags' => $eleve,
-                          'avantages' => ['Tous les cours de sa classe, par séquence', 'Œuvres au programme', 'Épreuves et annales corrigées', '5 questions par jour au Professeur Ambassa', 'Suivi des résultats']],
+                          'avantages' => ['Toutes les leçons de 1 classe', 'Épreuves, annales et examens blancs chronométrés', '5 questions par jour au tuteur IA', '10 fiches PDF par semaine', '2 labos premium à l’essai par semaine']],
             'pro'     => ['nom' => 'PRO', 'public' => 'eleve', 'mois' => 1600, 'an' => 13500, 'cible' => 'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', 'tags' => $eleve, 'populaire' => true,
-                          'avantages' => ['Tout Starter', '30 questions par jour au tuteur', 'Labos virtuels PCT & SVT', 'Bulletins blancs notés', 'Fiches de révision imprimables']],
+                          'avantages' => ['Tout Starter', '30 questions par jour au tuteur IA', '20 fiches PDF par semaine', 'Tous les labos virtuels premium', 'Bulletins blancs : copies notées sur 20 par le tuteur', 'Corrections de copies photographiées : 15 par jour']],
             'elite'   => ['nom' => 'ÉLITE', 'public' => 'eleve', 'mois' => 2000, 'an' => 16500, 'cible' => 'Accompagnement complet', 'tags' => $complet,
-                          'avantages' => ['Tout Pro', 'Tuteur IA sans limite', 'Classes virtuelles en direct', 'Concours blancs corrigés', 'Entretien d’orientation']],
-            'famille' => ['nom' => 'FAMILLE', 'public' => 'parent', 'mois' => 12000, 'cible' => 'Jusqu’à 4 enfants', 'tags' => $complet, 'enfantsMax' => 4,
-                          'avantages' => ['Jusqu’à 4 enfants sur un seul paiement', 'Chaque enfant au niveau Élite', 'Suivi parent : notes, absences, progression', 'Tuteur IA sans limite pour chacun']],
+                          'avantages' => ['Tout Pro', '2 classes : la sienne + celle d’avant pour revoir les bases', '100 questions par jour au tuteur IA', '40 fiches PDF par semaine', 'Classes virtuelles en direct avec un enseignant', 'Entretien d’orientation sur rendez-vous']],
+            'famille' => ['nom' => 'FAMILLE', 'public' => 'parent', 'mois' => 6000, 'an' => 50000, 'cible' => 'Jusqu’à 4 enfants', 'tags' => $complet, 'enfantsMax' => 4,
+                          'avantages' => ['Jusqu’à 4 enfants sur un seul paiement', 'Chaque enfant au niveau Élite, dans sa classe', 'Classes virtuelles en direct et bulletins blancs', '40 fiches PDF par semaine et par enfant', 'Suivi parent : notes, absences, progression']],
+            /* FORMULES ENSEIGNANT MULTI-CLASSES (12/11/2026). Le contenu de
+               plusieurs classes pour préparer, projeter et distribuer. Les
+               classes se fixent à la première ouverture d'une leçon (voir
+               vrt_classes_compte) : 3, 6 ou toutes. Distinctes des plans de
+               l'Atelier de français (ens_mois, ens, etab, pro). */
+            'prof3'   => ['nom' => 'PROF 3 CLASSES', 'public' => 'enseignant', 'mois' => 2500, 'an' => 21000, 'cible' => 'Enseignant · 3 classes', 'tags' => $complet,
+                          'avantages' => ['Toutes les leçons de 3 classes au choix', '40 fiches PDF par semaine', '40 questions par jour au tuteur IA', 'Tous les labos virtuels premium', 'Épreuves, annales et examens blancs à projeter']],
+            'prof6'   => ['nom' => 'PROF 6 CLASSES', 'public' => 'enseignant', 'mois' => 4000, 'an' => 33500, 'cible' => 'Enseignant · 6 classes', 'tags' => $complet, 'populaire' => true,
+                          'avantages' => ['Toutes les leçons de 6 classes au choix', '60 fiches PDF par semaine', '80 questions par jour au tuteur IA', 'Tous les labos virtuels premium', 'Épreuves, annales et examens blancs à projeter']],
+            'proftout'=> ['nom' => 'PROF TOUTES CLASSES', 'public' => 'enseignant', 'mois' => 6000, 'an' => 50000, 'cible' => 'Enseignant · de la 6ᵉ à la Tˡᵉ', 'tags' => $complet,
+                          'avantages' => ['Toutes les classes, de la 6ᵉ à la Tˡᵉ', '120 fiches PDF par semaine', '150 questions par jour au tuteur IA', 'Tous les labos virtuels premium', 'Épreuves, annales et examens blancs à projeter']],
         ];
         $out = [];
         foreach ($f as $g => $d) {
@@ -734,10 +745,223 @@ if (!defined('VRT_AUTH_LIB')) {
                     'populaire' => !empty($d['populaire']),
                     'enfantsMax'=> (int) ($d['enfantsMax'] ?? 0),
                     'formule'   => true,
+                    'grille'    => VRT_GRILLE_FORMULES,
                 ];
             }
         }
         return $out;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       DROITS PAR FORMULE (12/11/2026) — LA source unique de ce que chaque
+       formule ouvre. Les cartes de prix, le tuteur IA (ia_proxy.php), les
+       fiches (content.php) et les leçons (apprendre.php) lisent CETTE table ;
+       app.js en garde un miroir (_DROITS_FORMULES), à modifier ensemble.
+         classes   : classes dont les leçons sont ouvertes (-1 = toutes)
+         iaJour    : questions par jour au tuteur IA
+         fichesJour / fichesSemaine : documents DISTINCTS ouverts (content.php)
+         labos      : labos premium ouverts (protocole + quiz servis par apprendre.php)
+         labosEssai : labos premium DISTINCTS ouverts à l'essai sur 7 jours, sans labos
+         bulletins  : copies d'examen blanc notées par le tuteur, bulletin blanc (api/examens.php)
+         direct     : classes virtuelles en direct pour abonnés en ligne (api/direct.php)
+         orientation: entretien d'orientation (rendez-vous pris par le centre)
+       Ne figure ici que ce qui EXISTE : bulletins blancs et classes virtuelles
+       des abonnés en ligne existent depuis le 12/11/2026 (examens.php, direct.php).
+       Réglable sans redéployer : DB.elearning.droitsFormules.<groupe>.<clé>.
+       ══════════════════════════════════════════════════════════════════════ */
+    function vrt_droits_formules(array $db = []): array {
+        $d = [
+            'decouverte' => ['classes' => 0,  'iaJour' => 5,   'fichesJour' => 0,  'fichesSemaine' => 0,   'labos' => false, 'labosEssai' => 1, 'bulletins' => false, 'direct' => false, 'orientation' => false],
+            'starter'    => ['classes' => 1,  'iaJour' => 5,   'fichesJour' => 3,  'fichesSemaine' => 10,  'labos' => false, 'labosEssai' => 2, 'bulletins' => false, 'direct' => false, 'orientation' => false],
+            'pro'        => ['classes' => 1,  'iaJour' => 30,  'fichesJour' => 5,  'fichesSemaine' => 20,  'labos' => true,  'labosEssai' => 0, 'bulletins' => true, 'direct' => false, 'orientation' => false],
+            'elite'      => ['classes' => 2,  'iaJour' => 100, 'fichesJour' => 10, 'fichesSemaine' => 40,  'labos' => true,  'labosEssai' => 0, 'bulletins' => true, 'direct' => true, 'orientation' => true],
+            // Famille : PAR ENFANT. Le payeur garde les places que ses enfants rattachés n'occupent pas (vrt_droits_compte).
+            'famille'    => ['classes' => 4,  'iaJour' => 100, 'fichesJour' => 10, 'fichesSemaine' => 40,  'labos' => true,  'labosEssai' => 0, 'bulletins' => true, 'direct' => true, 'orientation' => true],
+            'prof3'      => ['classes' => 3,  'iaJour' => 40,  'fichesJour' => 10, 'fichesSemaine' => 40,  'labos' => true,  'labosEssai' => 0, 'bulletins' => false, 'direct' => false, 'orientation' => false],
+            'prof6'      => ['classes' => 6,  'iaJour' => 80,  'fichesJour' => 15, 'fichesSemaine' => 60,  'labos' => true,  'labosEssai' => 0, 'bulletins' => false, 'direct' => false, 'orientation' => false],
+            'proftout'   => ['classes' => -1, 'iaJour' => 150, 'fichesJour' => 25, 'fichesSemaine' => 120, 'labos' => true,  'labosEssai' => 0, 'bulletins' => false, 'direct' => false, 'orientation' => false],
+        ];
+        $sur = $db['elearning']['droitsFormules'] ?? null;
+        if (is_array($sur)) {
+            foreach ($d as $g => $v) {
+                if (!isset($sur[$g]) || !is_array($sur[$g])) continue;
+                foreach ($v as $k => $x) {
+                    if (!array_key_exists($k, $sur[$g])) continue;
+                    $d[$g][$k] = is_bool($x) ? (bool) $sur[$g][$k] : (int) $sur[$g][$k];
+                }
+            }
+        }
+        return $d;
+    }
+
+    /** Groupe de droits d'un identifiant de plan (abo_pro_m → pro). Anciens plans payants → pro. */
+    function vrt_groupe_droits(string $planId): ?string {
+        if (preg_match('/^abo_(starter|pro|elite|famille|prof3|prof6|proftout)_[ma]$/', $planId, $m)) return $m[1];
+        if ($planId === 'plan4') return 'famille';
+        if ($planId === 'plan2') return 'starter';
+        if (in_array($planId, ['plan1', 'plan3', 'plan5', 'plan6'], true)) return 'pro';
+        return null;   // plans de l'Atelier, packs : aucun droit e-learning propre
+    }
+
+    /** Droits effectifs d'un compte : le MEILLEUR de chaque droit parmi ses formules actives. */
+    function vrt_droits_compte(array $acc, array $db): array {
+        $table = vrt_droits_formules($db);
+        $out = $table['decouverte']; $out['groupes'] = [];
+        $accId = (string) ($acc['id'] ?? '');
+        foreach (vrt_account_active_plans($acc, $db) as $pid) {
+            $g = vrt_groupe_droits((string) $pid);
+            if ($g === null || !isset($table[$g])) continue;
+            $out['groupes'][] = $g;
+            $ligne = $table[$g];
+            if ($g === 'famille') $ligne['classes'] = vrt_famille_places($accId, (string) $pid, $db, (int) $ligne['classes']);
+            foreach ($ligne as $k => $v) {
+                if (is_bool($v)) { $out[$k] = $out[$k] || $v; continue; }
+                if ($out[$k] === -1 || $v === -1) { $out[$k] = -1; continue; }
+                $out[$k] = ($k === 'classes') ? $out[$k] + $v : max($out[$k], $v);   // deux formules = deux lots de classes
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * FAMILLE : places de classe d'un compte. L'enfant rattaché (ligne
+     * d'abonnement payée par un autre compte, `payeParCompte`) a SA classe ;
+     * le payeur garde les places que ses enfants n'occupent pas. Sans cette
+     * règle, chaque compte de la fratrie recevait les quatre places.
+     */
+    function vrt_famille_places(string $accId, string $planId, array $db, int $max): int {
+        $now = (int) round(microtime(true) * 1000);
+        $enfants = [];
+        foreach (($db['elearning']['abonnements'] ?? []) as $a) {
+            if (!is_array($a) || (string) ($a['plan'] ?? $a['planId'] ?? '') !== $planId) continue;
+            $st = strtolower((string) ($a['statut'] ?? ''));
+            if (in_array($st, ['expiré', 'expire', 'annulé', 'annule', 'en attente', 'suspendu'], true)) continue;
+            $fin = (int) ($a['dateFinTs'] ?? 0);
+            if ($fin && $fin < $now) continue;
+            $payeur = (string) ($a['payeParCompte'] ?? '');
+            if ((string) ($a['accountId'] ?? '') === $accId && $payeur !== '' && $payeur !== $accId) return 1;   // enfant
+            if ($payeur === $accId && (string) ($a['accountId'] ?? '') !== $accId) $enfants[(string) ($a['accountId'] ?? '')] = 1;
+        }
+        return max(0, $max - count($enfants));
+    }
+
+    /** Classe d'un document du catalogue (« 1ère C » → « 1re-c », « 3ème » → « 3e ») ; '' si plusieurs classes ou inconnue. */
+    function vrt_classe_normaliser(string $c): string {
+        $c = trim(mb_strtolower($c, 'UTF-8'));
+        if ($c === '' || preg_match('/[-–\/,]|\bà\b|toutes|liste/u', $c)) return '';   // « 6ème-3ème », « 2nde-Tle » : plusieurs classes
+        $c = str_replace(['ème', 'eme', 'ère', 'ere', 'terminale', 'première', 'seconde'], ['e', 'e', 're', 're', 'tle', '1re', '2nde'], $c);
+        $c = preg_replace('/\s+/', ' ', $c);
+        if (preg_match('/^(6e|5e|4e|3e)$/', $c)) return $c;
+        if (preg_match('/^(2nde|1re|tle)(?: ([a-z0-9]{1,4}))?$/', $c, $m)) return $m[1] . (isset($m[2]) ? '-' . $m[2] : '');
+        return preg_replace('/[^a-z0-9]+/', '-', $c);   // Form 5, Upper Sixth : une classe à part entière
+    }
+
+    /**
+     * LABOS PREMIUM À L'ESSAI : labos payants DISTINCTS ouverts sur 7 jours
+     * glissants par un compte sans le droit « labos ». Renvoie true si
+     * l'ouverture est permise (et l'enregistre).
+     */
+    function vrt_labo_essai(array $acc, string $laboId, int $max): bool {
+        if ($max <= 0) return false;
+        $dir = (defined('VRT_RATE_DIR') ? (string) VRT_RATE_DIR : __DIR__ . '/data/_rate') . '/';
+        if (!is_dir($dir)) @mkdir($dir, 0750, true);
+        $f = $dir . 'laboessai_' . substr(hash('sha256', (string) ($acc['id'] ?? $acc['user'] ?? '')), 0, 24) . '.json';
+        $vus = is_file($f) ? json_decode((string) @file_get_contents($f), true) : [];
+        if (!is_array($vus)) $vus = [];
+        $now = time();
+        foreach ($vus as $k => $t) if (!is_int($t) || $now - $t >= 7 * 86400) unset($vus[$k]);
+        if (!isset($vus[$laboId])) {
+            if (count($vus) >= $max) return false;
+            $vus[$laboId] = $now;
+            @file_put_contents($f, json_encode($vus), LOCK_EX);
+        }
+        return true;
+    }
+
+    /**
+     * Ce qu'ouvre une formule, en une ligne de SMS (ASCII, sans accents à
+     * risque) : « 1 classe, tuteur IA 30/jour, 20 fiches/semaine, labos ».
+     * Lu dans la table des droits : le SMS dit ce que le serveur appliquera.
+     */
+    function vrt_droits_resume(string $planId, array $db = []): string {
+        $g = vrt_groupe_droits($planId);
+        if ($g === null) return '';
+        $d = vrt_droits_formules($db)[$g] ?? null;
+        if (!$d) return '';
+        $cl = (int) $d['classes'];
+        $l = [];
+        $l[] = $g === 'famille' ? '1 classe par enfant' : ($cl === -1 ? 'toutes les classes' : $cl . ' classe' . ($cl > 1 ? 's' : ''));
+        $l[] = 'tuteur IA ' . (int) $d['iaJour'] . '/jour';
+        $l[] = (int) $d['fichesSemaine'] . ' fiches/semaine';
+        $l[] = !empty($d['labos']) ? 'labos premium' : ((int) $d['labosEssai'] > 0 ? (int) $d['labosEssai'] . ' labos a l essai/semaine' : '');
+        if (!empty($d['bulletins'])) $l[] = 'bulletins blancs';
+        if (!empty($d['direct'])) $l[] = 'classes virtuelles';
+        if (!empty($d['orientation'])) $l[] = 'entretien d orientation';
+        return implode(', ', array_filter($l));
+    }
+
+    /** Classe d'une leçon d'après son identifiant (« 1re-c-maths-… » → « 1re-c », « tle-orient-bac » → « tle »). */
+    function vrt_classe_de_lecon(string $id): string {
+        if (preg_match('/^(6e|5e|4e|3e|2nde-[a-z]|1re-[a-z]|tle-[a-z])-/', $id, $m)) return $m[1];
+        if (preg_match('/^(2nde|1re|tle)-/', $id, $m)) return $m[1];
+        return '';
+    }
+
+    /* CLASSES RETENUES PAR UN COMPTE. Fichier plat par compte (data/_classes/),
+       hors de la base synchronisée : une synchro de l'administration ne doit
+       pas pouvoir les effacer. Une classe retenue ne se libère qu'après 30
+       jours, pour qu'une formule « 1 classe » ne fasse pas le tour du lycée. */
+    function vrt_classes_fichier(array $acc): string {
+        $dir = (defined('VRT_CLASSES_DIR') ? (string) VRT_CLASSES_DIR : __DIR__ . '/data/_classes') . '/';
+        if (!is_dir($dir)) @mkdir($dir, 0750, true);
+        return $dir . substr(hash('sha256', 'cl|' . (string) ($acc['id'] ?? $acc['user'] ?? '')), 0, 32) . '.json';
+    }
+    function vrt_classes_compte(array $acc): array {
+        $f = vrt_classes_fichier($acc);
+        $v = is_file($f) ? json_decode((string) @file_get_contents($f), true) : null;
+        return is_array($v) ? $v : [];   // [classe => horodatage]
+    }
+    /**
+     * La leçon de cette classe est-elle couverte ? Renvoie 'ok', 'a_choisir'
+     * (place libre : il faut confirmer) ou 'complet'. Avec $retenir, une place
+     * libre est prise. Une classe générique (« tle ») est couverte par toute
+     * classe retenue du même niveau (« tle-c »), et inversement.
+     */
+    function vrt_classe_couverte(array $acc, array $droits, string $classe, bool $retenir = false): string {
+        if ((int) $droits['classes'] === -1 || $classe === '') return 'ok';
+        $deja = vrt_classes_compte($acc);
+        foreach (array_keys($deja) as $c) {
+            if ($c === $classe || strpos($c, $classe . '-') === 0 || strpos($classe, $c . '-') === 0) return 'ok';
+        }
+        if (count($deja) >= (int) $droits['classes']) return 'complet';
+        if (!$retenir) return 'a_choisir';
+        $deja[$classe] = time();
+        @file_put_contents(vrt_classes_fichier($acc), json_encode($deja), LOCK_EX);
+        return 'ok';
+    }
+    /** Libère une classe retenue depuis plus de 30 jours (changement d'année, de série). */
+    function vrt_classe_liberer(array $acc, string $classe): bool {
+        $deja = vrt_classes_compte($acc);
+        if (!isset($deja[$classe]) || (time() - (int) $deja[$classe]) < 30 * 86400) return false;
+        unset($deja[$classe]);
+        @file_put_contents(vrt_classes_fichier($acc), json_encode($deja), LOCK_EX);
+        return true;
+    }
+
+    /* GRILLE EN VIGUEUR. Une ligne de formule enregistrée en base AVANT cette
+       grille (sans `grille`, ou plus ancienne) ne fixe plus ni le prix ni les
+       avantages : c'est le code qui s'applique, dès le déploiement. Sans cette
+       règle, la base — prioritaire — gardait l'ancien Pro à 2 000 F et l'Élite
+       à 3 000 F tant qu'un administrateur n'avait pas rouvert l'application
+       (constaté en ligne le 12/11/2026). Un tarif réglé ENSUITE par
+       l'administration porte la grille (migration de app.js) et l'emporte. */
+    if (!defined('VRT_GRILLE_FORMULES')) define('VRT_GRILLE_FORMULES', '20261112');
+    function vrt_formule_ligne_base(array $o): array {
+        $id = (string) ($o['id'] ?? '');
+        if (!isset(vrt_plans_formules()[$id])) return $o;
+        if (strcmp((string) ($o['grille'] ?? ''), VRT_GRILLE_FORMULES) >= 0) return $o;
+        foreach (['prix', 'ancien', 'avantages', 'cible', 'nom', 'duree', 'planTags'] as $k) unset($o[$k]);
+        return $o;
     }
 
     /** La définition d'une formule : la ligne de la base si elle existe, sinon le repli du code. */
@@ -745,7 +969,7 @@ if (!defined('VRT_AUTH_LIB')) {
         foreach (($db['elearning']['plans'] ?? []) as $p) {
             if (is_array($p) && (string) ($p['id'] ?? '') === $id) {
                 $def = vrt_plans_formules()[$id] ?? [];
-                return array_merge($def, $p);   // la base gagne champ par champ
+                return array_merge($def, vrt_formule_ligne_base($p));   // la base gagne champ par champ, si elle suit la grille
             }
         }
         $f = vrt_plans_formules();
@@ -905,6 +1129,10 @@ if (!defined('VRT_AUTH_LIB')) {
 
         foreach ($liste as $o) {
             if (!is_array($o) || (string) ($o['id'] ?? '') !== $targetId) continue;
+            // Ligne de formule antérieure à la grille : son prix ne compte plus (repli du code plus bas).
+            if ($intent === 'subscription' && !isset(vrt_formule_ligne_base($o)['prix'])
+                && isset(vrt_plans_formules()[$targetId])
+                && !((isset($o['actif']) && $o['actif'] === false) || (isset($o['enVente']) && $o['enVente'] === false))) break;
             /* Une FORMULE retirée de la vente dans « Prix & calculs » ne se vend
                plus, même par une requête forgée — et surtout pas au tarif du
                repli codé plus bas, qui l'aurait remise en vente en silence. */
@@ -1675,6 +1903,8 @@ if (!defined('VRT_AUTH_LIB')) {
                         'ref' => $ref, 'type' => 'abonnement', 'kind' => 'abonnement',
                         'tel' => $telSms, 'mail' => (string) ($state['clientEmail'] ?? ''),
                         'titre' => (string) ($plan['nom'] ?? ($label !== '' ? $label : $targetId)),
+                        // Ce que la formule ouvre (table des droits) : l'abonné sait d'emblée à quoi il a droit.
+                        'droits' => function_exists('vrt_droits_resume') ? vrt_droits_resume($targetId, $db) : '',
                         'exp' => (int) floor($finTs / 1000),
                         'lien' => vrt_notify_site() . ($atelierPlan ? '/plateforme/' : '/app.html#abonnements'),
                     ]);

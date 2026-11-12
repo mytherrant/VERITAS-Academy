@@ -179,6 +179,17 @@ if (!defined('VRT_NOTIFY_LIB')) {
            revenir. Le transport, lui, était déjà construit et éprouvé — c'est
            celui qui livre les codes de cahier. Il ne manquait que de s'en
            servir. */
+        /* FIN D'ABONNEMENT (12/11/2026) : le jour où l'accès se referme, on le
+           dit — et ce qui reste (le compte, les notes) — avec le lien pour revenir. */
+        if ((string) ($v['type'] ?? 'code') === 'expire') {
+            $t = 'VERITAS — votre abonnement est termine' . "\n"
+               . ($titre !== '' ? $titre . "\n" : '')
+               . 'Les contenus premium sont refermes ; votre compte, vos notes et vos bulletins restent.' . "\n"
+               . 'Renouveler : ' . ($lien !== '' ? $lien : vrt_notify_site()) . "\n"
+               . 'Aide : ' . $aide;
+            return $accents ? $t : vrt_notify_sans_accents($t);
+        }
+
         if ((string) ($v['type'] ?? 'code') === 'echeance') {
             $jours = max(0, (int) ($v['jours'] ?? 0));
             $t = 'VERITAS — votre abonnement arrive a echeance' . "\n"
@@ -197,8 +208,10 @@ if (!defined('VRT_NOTIFY_LIB')) {
            valider sur son téléphone ; ce SMS lui dit que c'est ouvert, quelle
            formule, et jusqu'à quand. */
         if ((string) ($v['type'] ?? 'code') === 'abonnement') {
+            $droits = trim((string) ($v['droits'] ?? ''));
             $t = 'VERITAS — paiement recu, abonnement active' . "\n"
                . ($titre !== '' ? $titre . "\n" : '')
+               . ($droits !== '' ? 'Inclus : ' . $droits . "\n" : '')
                . ($exp > 0 ? 'Valable jusqu’au ' . date('d/m/Y', $exp) . "\n" : '')
                . 'Acceder : ' . ($lien !== '' ? $lien : vrt_notify_site()) . "\n"
                . 'Aide : ' . $aide;
@@ -365,18 +378,47 @@ if (!defined('VRT_NOTIFY_LIB')) {
         $seuil = $now + ($joursAvant * 86400000);
         $mis   = 0;
 
+        /* Terme le plus lointain de chaque compte : un abonné qui a DÉJÀ
+           renouvelé (nouvelle ligne, échéance plus tardive) ne reçoit aucun
+           rappel au sujet de l'ancienne. */
+        $termeCompte = [];
+        foreach ($db['elearning']['abonnements'] as $a) {
+            if (!is_array($a) || (string) ($a['accountId'] ?? '') === '') continue;
+            $st = strtolower((string) ($a['statut'] ?? ''));
+            if (in_array($st, ['expiré', 'expire', 'annulé', 'annule', 'suspendu', 'en attente'], true)) continue;
+            $f = (int) ($a['dateFinTs'] ?? 0);
+            $k = (string) $a['accountId'];
+            if ($f === 0) $termeCompte[$k] = PHP_INT_MAX;   // octroi sans terme : rien n'expire
+            elseif (!isset($termeCompte[$k]) || $f > $termeCompte[$k]) $termeCompte[$k] = $f;
+        }
+
         foreach ($db['elearning']['abonnements'] as $i => $a) {
             if (!is_array($a)) continue;
-            if (!empty($a['relance'])) continue;                       // déjà prévenu
             $fin = (int) ($a['dateFinTs'] ?? 0);
-            if ($fin <= 0 || $fin <= $now || $fin > $seuil) continue;  // sans terme, déjà fini, ou trop tôt
+            if ($fin <= 0) continue;                                   // sans terme
             $st = strtolower((string) ($a['statut'] ?? ''));
             if (in_array($st, ['expiré', 'expire', 'annulé', 'annule', 'suspendu'], true)) continue;
+            $accId = (string) ($a['accountId'] ?? '');
+            if ($accId !== '' && ($termeCompte[$accId] ?? 0) > $fin + 86400000) continue;   // déjà renouvelé
+
+            /* TROIS RAPPELS, chacun une seule fois (12/11/2026) :
+               J-7 « relance », la veille « relanceVeille », le jour de la fin
+               « relanceFin » (dans les 24 h qui suivent le terme). Un abonné
+               découvert à la veille reçoit le rappel de la veille seulement. */
+            if ($fin > $now) {
+                if ($fin > $seuil) continue;                           // trop tôt
+                $veille = ($fin - $now) <= 86400000;
+                $drapeau = $veille ? 'relanceVeille' : 'relance';
+                if (!empty($a[$drapeau])) continue;
+                $type = 'echeance'; $refPre = $veille ? 'RELANCE1-' : 'RELANCE-';
+            } else {
+                if ($now - $fin >= 86400000 || !empty($a['relanceFin'])) continue;   // fini depuis plus d'un jour : trop tard
+                $drapeau = 'relanceFin'; $type = 'expire'; $refPre = 'FIN-';
+            }
 
             // Le contact : celui de la ligne, complété par celui du compte.
             $tel = (string) ($a['tel'] ?? '');
             $mail = (string) ($a['email'] ?? $a['mail'] ?? '');
-            $accId = (string) ($a['accountId'] ?? '');
             if ($accId !== '' && function_exists('vrt_resoudre_compte')) {
                 $r = vrt_resoudre_compte($db, $accId);
                 if ($r) {
@@ -389,12 +431,11 @@ if (!defined('VRT_NOTIFY_LIB')) {
 
             /* Arrondi SUPÉRIEUR, comme _livret_lib : un terme à 3 jours moins
                quelques millisecondes (le temps d'exécuter la ronde) s'annonçait
-               « dans 2 jours ». `$fin > $now` est garanti plus haut : le
-               minimum est donc 1. */
+               « dans 2 jours ». */
             $jours = (int) max(1, ceil(($fin - $now) / 86400000));
             $msg = vrt_notify_enfiler([
-                'ref'   => 'RELANCE-' . (string) ($a['id'] ?? ('abo' . $i)),
-                'type'  => 'echeance',
+                'ref'   => $refPre . (string) ($a['id'] ?? ('abo' . $i)),
+                'type'  => $type,
                 'tel'   => $tel,
                 'mail'  => $mail,
                 'titre' => (string) ($a['planNom'] ?? $a['plan'] ?? 'Votre abonnement'),
@@ -404,7 +445,8 @@ if (!defined('VRT_NOTIFY_LIB')) {
             ]);
             // « déjà en file » compte comme fait : ne pas retenter à chaque battement.
             if ($msg === '' || $msg === 'deja en file' || $msg === 'acheteur injoignable') {
-                $db['elearning']['abonnements'][$i]['relance'] = date('c');
+                $db['elearning']['abonnements'][$i][$drapeau] = date('c');
+                if ($drapeau === 'relanceVeille') $db['elearning']['abonnements'][$i]['relance'] = $db['elearning']['abonnements'][$i]['relance'] ?? date('c');
                 $mis++;
             }
         }
@@ -421,7 +463,9 @@ if (!defined('VRT_NOTIFY_LIB')) {
            terme — c'est-à-dire presque toujours. Verrou non bloquant : aucun
            visiteur n'attend derrière cette tâche. */
         $marqueAbo = dirname($dir) . '/_relance_tick.txt';
-        if (time() - (@filemtime($marqueAbo) ?: 0) >= 43200) {
+        // Toutes les 2 h (12/11/2026) : le rappel de la veille et celui du jour de
+        // la fin ont une fenêtre de 24 h ; deux rondes par jour pouvaient la manquer.
+        if (time() - (@filemtime($marqueAbo) ?: 0) >= 7200) {
             @file_put_contents($marqueAbo, (string) time());
             if (function_exists('vrt_abo_relances_fichier')) {
                 try {

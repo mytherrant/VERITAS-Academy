@@ -51,8 +51,11 @@ const poste = async (c) => { const r = await fetch(BASE + '/api/apprendre.php', 
     r = await poste({ id, login: 'expire', password: 'secret123' });
     dire(r.j.raison === 'abonnement' && !r.j.suite, 'formule expirée : rien ne sort', JSON.stringify(r));
     r = await poste({ id, login: 'abonne', password: 'secret123' });
-    dire(r.j.ok && r.j.suite && r.j.suite.parties[0].html.includes('SECRET'), 'abonné : la suite arrive', JSON.stringify(r));
+    // 12/11/2026 : la formule ouvre 1 classe, retenue à la première leçon APRÈS confirmation.
+    dire(r.j.raison === 'classe_a_choisir' && r.j.classe === '3e' && !r.j.suite && !!r.j.token, 'abonné : la 1ʳᵉ leçon demande de confirmer sa classe, rien ne sort avant', JSON.stringify(r));
     const tok = r.j.token;
+    r = await poste({ id, token: tok, retenir: true });
+    dire(r.j.ok && r.j.suite && r.j.suite.parties[0].html.includes('SECRET'), 'abonné : classe confirmée, la suite arrive', JSON.stringify(r));
     r = await poste({ id, token: tok });
     dire(r.j.ok && r.j.suite.quiz.length === 1, 'abonné : le jeton sert à la leçon suivante', JSON.stringify(r));
     r = await poste({ id: '3e-maths-absente', token: tok });
