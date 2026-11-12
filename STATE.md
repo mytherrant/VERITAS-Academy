@@ -1,3 +1,19 @@
+## Leçons des classes d'examen : Français, Philosophie, Histoire, Géographie en 1re et Tle (12/11/2026)
+
+Demande de Jacques : « Continue la préparation des autres leçons avec le même workflow que les autres », puis « Classe d'examen en priorité ».
+
+- **Relevé avant** (leçons gratuites + aperçus payants) : en 1re et en Tle, maths, sciences et ECM ont des dizaines de leçons, mais **Français, Philosophie, Histoire et Géographie n'en avaient aucune** (sauf 2 de philosophie en Tle A). La 3e en a déjà 2 dans chacune de ces matières.
+- **11 leçons rédigées, enregistrées sur 21 identifiants** dans `apprendre/_src/07-lecons-examen.js` (une leçon au même intitulé officiel dans plusieurs séries est enregistrée pour chacune : `VRT_L(id, Object.assign({ c }, LECON))`) :
+  - Tle C et D : philosophie africaine, histoire et tendances (Philo n° 1) ; la dissertation philosophique, principes et méthode (Philo n° 3) ; dissertation littéraire, analyse du sujet et problématique (Français n° 3).
+  - Tle A, C et D : la diversité physique du Cameroun (Géographie n° 1).
+  - Tle A : la Deuxième Guerre mondiale (Histoire n° 1). Tle A et 1re A : commentaire composé, analyser la consigne (Français n° 4).
+  - 1re C et D : définir la philosophie (Philo n° 1) ; les conditions de la communication (Français n° 2).
+  - 1re A : les thèses ethnocentristes occidentales (Philo n° 1) ; la croissance démographique (Géographie n° 1).
+  - 1re A, C et D : l'Europe de la Renaissance (Histoire n° 1).
+- Même format que les premières leçons : trois parties de cours, entraînement au format de l'épreuve (Partie A ressources, Partie B compétences, situation camerounaise et réponse attendue), fiche de révision, exercice, 10 QCM corrigés (bonne réponse qui tourne a→d), fiche APC. Les 21 rattachements à la progression vérifiés.
+- Publiques en entier, comme toutes les leçons de lecons.js. La suite payante des classes d'examen (aperçus `apercus-*.js`) se construit avec `build_apprendre_payant.cjs` depuis les sources privées du PC : non touchée ici (le relancer sans ces sources effacerait les aperçus).
+- `lecons.js` reconstruit (92 leçons) ; 21 pages `apprendre/cours/*.html`, 20 pages programme et le sitemap régénérés (`apprendre_statique.js`), habillés. Contrôlé dans Chromium : 11 leçons ouvertes, pages matière (« Cours rédigé » à sa place), 0 erreur JS ; bancs `banc_gabarits_lecons` 54/54, `banc_apprendre_verrou` 17/17.
+
 ## CI : Chromium sans dépendre du miroir Ubuntu (11/11/2026)
 
 Accord de Jacques (« Oui ») pour fiabiliser le contrôle « Boot du portail ».
