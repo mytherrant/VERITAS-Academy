@@ -1197,11 +1197,11 @@ function _fixHtdocsUrls(){
 function _formulesDefaut(){
   var eleve = ['plan1','plan2','plan5','plan6'], complet = ['plan1','plan2','plan4','plan5','plan6'];
   var F = [
-    {g:'starter', nom:'STARTER', pub:'eleve',  mois:1200,  cible:'Élève · 6ᵉ → Tˡᵉ', tags:eleve,
+    {g:'starter', nom:'STARTER', pub:'eleve',  mois:1200, an:10000,  cible:'Élève · 6ᵉ → Tˡᵉ', tags:eleve,
      av:['Tous les cours de sa classe, par séquence','Œuvres au programme','Épreuves et annales corrigées','5 questions par jour au Professeur Ambassa','Suivi des résultats']},
-    {g:'pro',     nom:'PRO',     pub:'eleve',  mois:2400,  cible:'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', tags:eleve, pop:true,
+    {g:'pro',     nom:'PRO',     pub:'eleve',  mois:1600, an:13500,  cible:'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', tags:eleve, pop:true,
      av:['Tout Starter','30 questions par jour au tuteur','Labos virtuels PCT & SVT','Bulletins blancs notés','Fiches de révision imprimables']},
-    {g:'elite',   nom:'ÉLITE',   pub:'eleve',  mois:3600,  cible:'Accompagnement complet', tags:complet,
+    {g:'elite',   nom:'ÉLITE',   pub:'eleve',  mois:2000, an:16500,  cible:'Accompagnement complet', tags:complet,
      av:['Tout Pro','Tuteur IA sans limite','Classes virtuelles en direct','Concours blancs corrigés','Entretien d’orientation']},
     {g:'famille', nom:'FAMILLE', pub:'parent', mois:12000, cible:'Jusqu’à 4 enfants', tags:complet, enfants:4,
      av:['Jusqu’à 4 enfants sur un seul paiement','Chaque enfant au niveau Élite','Suivi parent : notes, absences, progression','Tuteur IA sans limite pour chacun']}
@@ -1211,7 +1211,7 @@ function _formulesDefaut(){
     [['m','mensuel'],['a','annuel']].forEach(function(v){
       var an = v[0] === 'a';
       out.push({ id:'abo_'+d.g+'_'+v[0], groupe:d.g, variante: an?'an':'mois', nom: d.nom + (an?' — ANNÉE':''),
-        public:d.pub, cible:d.cible, prix: an ? d.mois*10 : d.mois, ancien: an ? d.mois*12 : 0, duree:v[1],
+        public:d.pub, cible:d.cible, prix: an ? (d.an || d.mois*10) : d.mois, ancien: an ? d.mois*12 : 0, duree:v[1],
         planTags:d.tags.slice(), avantages:d.av.slice(), populaire:!!d.pop, enfantsMax:d.enfants||0, formule:true });
     });
   });
@@ -51433,7 +51433,7 @@ function pgTarifs(){
     ['Et si ça ne me sert pas ?','L\'essentiel est déjà gratuit et sans compte : corrigés, Professeur Ambassa, jeux, labos, outils. Servez-vous d\'abord. On ne s\'abonne que si le gratuit a déjà rendu service.'],
     ['Je n\'ai pas de carte bancaire.','Aucune n\'est demandée. MTN Mobile Money et Orange Money suffisent, depuis un téléphone camerounais.'],
     ['Je suis à l\'étranger, je paie pour un enfant au pays.','C\'est prévu : la cagnotte de scolarité permet de payer depuis l\'étranger, et le plan Famille couvre plusieurs enfants.'],
-    ['Suis-je engagé pour longtemps ?','Non. Au mois, vous payez un mois à la fois ; à l\'année, vous payez dix mois pour douze. Rien ne se reconduit dans votre dos : l\'accès s\'arrête à l\'échéance, et vous êtes prévenu avant.'],
+    ['Suis-je engagé pour longtemps ?','Non. Au mois, vous payez un mois à la fois ; à l\'année, vous payez un peu plus de huit mois pour douze (Starter : 10 000 F au lieu de 14 400 F). Rien ne se reconduit dans votre dos : l\'accès s\'arrête à l\'échéance, et vous êtes prévenu avant.'],
     ['Un ami m\'a donné un code.','Saisissez-le au moment de payer (ou à l\'inscription) : vous payez 10 % de moins sur vos abonnements et achats dans l\'application, sans limite de durée. Et vous recevez à votre tour votre propre code à partager.']
   ].map(function(f){
     return '<details class="vfaq"><summary>'+_esc(f[0])+'</summary><p>'+_esc(f[1])+'</p></details>';

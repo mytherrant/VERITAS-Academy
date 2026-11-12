@@ -677,11 +677,11 @@ if (!defined('VRT_AUTH_LIB')) {
     /* ══════════════════════════════════════════════════════════════════════
        FORMULES ÉLÈVE & FAMILLE — grille arrêtée par Jacques le 13/09/2026.
 
-       Au mois : Starter 1 200 · Pro 2 400 · Élite 3 600 · Famille 12 000 F (grille du
-       16/10/2026 : Starter à 12 000 F l'année, prix de référence de la note de
-       répartition 20 % partenaire / 30 % co-gérants / pool).
-       À l'année : douze mois pour le prix de dix (deux mois offerts). Le prix
-       « ancien », barré sur les cartes, est celui de douze mois payés un à un.
+       Au mois : Starter 1 200 · Pro 1 600 · Élite 2 000 · Famille 12 000 F
+       (grille du 12/11/2026 : trois paliers plus serrés, l'ancien Pro à 2 400 F
+       faisait fuir). À l'année : Starter 10 000 · Pro 13 500 · Élite 16 500 F,
+       soit un peu plus de huit mois pour douze (clé `an`) ; sans `an`, l'année
+       vaut dix mois. Le prix « ancien », barré sur les cartes, est celui de douze mois payés un à un.
 
        Pourquoi ce catalogue vit dans le CODE et pas seulement dans la base :
        l'accueil annonçait Starter / Pro / Élite depuis la refonte d'août, et
@@ -705,11 +705,11 @@ if (!defined('VRT_AUTH_LIB')) {
         $eleve   = ['plan1', 'plan2', 'plan5', 'plan6'];
         $complet = ['plan1', 'plan2', 'plan4', 'plan5', 'plan6'];
         $f = [
-            'starter' => ['nom' => 'STARTER', 'public' => 'eleve', 'mois' => 1200, 'cible' => 'Élève · 6ᵉ → Tˡᵉ', 'tags' => $eleve,
+            'starter' => ['nom' => 'STARTER', 'public' => 'eleve', 'mois' => 1200, 'an' => 10000, 'cible' => 'Élève · 6ᵉ → Tˡᵉ', 'tags' => $eleve,
                           'avantages' => ['Tous les cours de sa classe, par séquence', 'Œuvres au programme', 'Épreuves et annales corrigées', '5 questions par jour au Professeur Ambassa', 'Suivi des résultats']],
-            'pro'     => ['nom' => 'PRO', 'public' => 'eleve', 'mois' => 2400, 'cible' => 'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', 'tags' => $eleve, 'populaire' => true,
+            'pro'     => ['nom' => 'PRO', 'public' => 'eleve', 'mois' => 1600, 'an' => 13500, 'cible' => 'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', 'tags' => $eleve, 'populaire' => true,
                           'avantages' => ['Tout Starter', '30 questions par jour au tuteur', 'Labos virtuels PCT & SVT', 'Bulletins blancs notés', 'Fiches de révision imprimables']],
-            'elite'   => ['nom' => 'ÉLITE', 'public' => 'eleve', 'mois' => 3600, 'cible' => 'Accompagnement complet', 'tags' => $complet,
+            'elite'   => ['nom' => 'ÉLITE', 'public' => 'eleve', 'mois' => 2000, 'an' => 16500, 'cible' => 'Accompagnement complet', 'tags' => $complet,
                           'avantages' => ['Tout Pro', 'Tuteur IA sans limite', 'Classes virtuelles en direct', 'Concours blancs corrigés', 'Entretien d’orientation']],
             'famille' => ['nom' => 'FAMILLE', 'public' => 'parent', 'mois' => 12000, 'cible' => 'Jusqu’à 4 enfants', 'tags' => $complet, 'enfantsMax' => 4,
                           'avantages' => ['Jusqu’à 4 enfants sur un seul paiement', 'Chaque enfant au niveau Élite', 'Suivi parent : notes, absences, progression', 'Tuteur IA sans limite pour chacun']],
@@ -726,7 +726,7 @@ if (!defined('VRT_AUTH_LIB')) {
                     'nom'       => $d['nom'] . ($annuel ? ' — ANNÉE' : ''),
                     'public'    => $d['public'],
                     'cible'     => $d['cible'],
-                    'prix'      => $annuel ? $d['mois'] * 10 : $d['mois'],
+                    'prix'      => $annuel ? (int) ($d['an'] ?? $d['mois'] * 10) : $d['mois'],
                     'ancien'    => $annuel ? $d['mois'] * 12 : 0,
                     'duree'     => $duree,
                     'planTags'  => $d['tags'],

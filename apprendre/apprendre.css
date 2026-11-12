@@ -574,7 +574,34 @@ h2 .num .pic{vertical-align:middle}
 .offre-l .chev{margin-left:auto;font:600 22px var(--sans);color:#1E499B}
 .offre-l.or .chev{color:#C24E00}
 .offre-n{font:400 13.5px var(--sans);color:#6B7280;margin:4px 0 0}
-.offre-accueil,.offre-matiere{max-width:760px}
+.offre-accueil,.offre-matiere{max-width:1080px}
+/* Grille des formules (12/11/2026) : 3 paliers côte à côte + accompagnement humain à côté */
+.offre-h{font:700 22px/1.25 var(--sans);color:#001136;margin:0 0 16px}
+.offre-grille{display:grid;grid-template-columns:3fr 1fr;gap:14px;align-items:stretch;margin:0 0 12px}
+.offre-plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.fo{position:relative;display:flex;flex-direction:column;padding:20px 18px 18px;border-radius:14px;background:#fff;border:1px solid #E6EAF2;box-shadow:0 1px 3px rgba(0,17,54,.06),0 6px 18px rgba(0,17,54,.05);color:#001136}
+.fo-c{border:2px solid #1E499B;box-shadow:0 10px 28px rgba(30,73,155,.16)}
+.fo-badge{position:absolute;top:-11px;left:18px;background:#1E499B;color:#fff;font:600 11.5px var(--sans);letter-spacing:.3px;padding:3px 10px;border-radius:999px}
+.fo-nom{font:700 19px var(--sans);margin:0}
+.fo-pour{font:400 13.5px var(--sans);color:#4D5163;margin:2px 0 12px}
+.fo-prix{margin:0;font:400 14px var(--sans);color:#4D5163}
+.fo-prix b{font:700 30px/1 var(--sans);color:#001136;letter-spacing:-.5px}
+.fo-an{font:400 13px/1.45 var(--sans);color:#4D5163;margin:6px 0 12px}
+.fo-an b{color:#007E11;font-weight:600}
+.fo-av{list-style:none;padding:12px 0 0;margin:0 0 16px;border-top:1px solid #EEF1F6;flex:1}
+.fo-av li{position:relative;padding:0 0 0 22px;margin:0 0 7px;font:400 14px/1.45 var(--sans);color:#273049}
+.fo-av li::before{content:"";position:absolute;left:2px;top:6px;width:10px;height:5px;border-left:2px solid #007E11;border-bottom:2px solid #007E11;transform:rotate(-45deg)}
+.fo-btn{display:block;text-align:center;padding:11px 14px;border-radius:10px;background:#EEF2FA;color:#1E499B;font:600 15px var(--sans);text-decoration:none}
+.fo-btn:hover{background:#DCE4F5}
+.fo-c .fo-btn{background:#1E499B;color:#fff}
+.fo-c .fo-btn:hover{background:#163A7E}
+.fo-h{background:#FFF6DC;border-color:#F3DFA6}
+.fo-av-h li::before{border-color:#C24E00}
+.fo-btn-h{background:#C24E00;color:#fff}
+.fo-btn-h:hover{background:#A34100}
+.fo-lien{display:block;text-align:center;margin-top:8px;font:600 13.5px var(--sans);color:#C24E00}
+@media (max-width:980px){.offre-grille{grid-template-columns:1fr}}
+@media (max-width:720px){.offre-plans{grid-template-columns:1fr;gap:18px}.fo-c{order:-1}}
 .bilan .offre{text-align:left}
 @media print{.offre{display:none!important}}
 
