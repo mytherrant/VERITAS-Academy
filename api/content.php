@@ -143,20 +143,13 @@ if (!vrt_account_can_access($acc, $contenu, $db)) {
    ouverte dans la fenêtre ne coûte rien (et les requêtes Range d'un même
    document non plus). Vidéos et audios ne sont pas comptés : ils se lisent
    en streaming, ils ne s'archivent pas comme une fiche.
-   Réglable sans redéployer : DB.elearning.quotaFiches = {jour: N, semaine: N}
-   (0 ou négatif = sans limite). */
-define('CONTENT_QUOTA_JOUR_DEF', 5);
-define('CONTENT_QUOTA_SEMAINE_DEF', 20);
-
-function content_quota_limites(array $db): array {
-    $q = $db['elearning']['quotaFiches'] ?? null;
-    $j = is_array($q) && isset($q['jour']) ? (int) $q['jour'] : CONTENT_QUOTA_JOUR_DEF;
-    $s = is_array($q) && isset($q['semaine']) ? (int) $q['semaine'] : CONTENT_QUOTA_SEMAINE_DEF;
-    return [$j, $s];
-}
+   Les plafonds sont ceux de la FORMULE (vrt_droits_compte : Starter 3/10,
+   Pro 5/20, Élite 10/40, Famille 15/60, enseignant 10/40 → 25/120), réglables
+   dans DB.elearning.droitsFormules. -1 = sans limite. */
 /** Retourne null si autorisé (et enregistre l'ouverture), sinon le message de refus. */
 function content_quota(string $who, string $docId, int $maxJour, int $maxSemaine): ?string {
-    if ($maxJour <= 0 && $maxSemaine <= 0) return null;
+    if ($maxJour === -1 && $maxSemaine === -1) return null;
+    if ($maxJour === 0 || $maxSemaine === 0) return 'Ta formule ne comprend pas le téléchargement de fiches. Elles sont incluses dès la formule Starter.';
     $dir = __DIR__ . '/data/_rate/';
     if (!is_dir($dir)) @mkdir($dir, 0750, true);
     $f = $dir . 'fiches_' . substr(hash('sha256', $who), 0, 24) . '.json';
@@ -194,8 +187,9 @@ function content_quota(string $who, string $docId, int $maxJour, int $maxSemaine
 $__ext0 = strtolower(pathinfo((string) ($contenu['fichierProtege'] ?? $contenu['fichierUrl'] ?? $contenu['fichier'] ?? ''), PATHINFO_EXTENSION));
 $__flux = in_array($__ext0, ['mp4', 'webm', 'ogg', 'mov', 'mp3', 'wav', 'm4a'], true);
 $__role = strtolower((string) ($acc['role'] ?? ''));
-if (!$__flux && !in_array($__role, ['admin', 'superadmin', 'enseignant'], true)) {
-    [$__qj, $__qs] = content_quota_limites($db);
+if (!$__flux && empty($contenu['gratuit']) && empty($contenu['free']) && !in_array($__role, ['admin', 'superadmin', 'enseignant'], true)) {
+    $__dr = vrt_droits_compte($acc, $db);
+    [$__qj, $__qs] = [(int) $__dr['fichesJour'], (int) $__dr['fichesSemaine']];
     $__refus = content_quota('a:' . (string) ($acc['id'] ?? $acc['user'] ?? ''), $id, $__qj, $__qs);
     if ($__refus !== null) {
         @file_put_contents(__DIR__ . '/data/_security_log.txt',

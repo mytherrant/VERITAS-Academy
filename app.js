@@ -1198,13 +1198,20 @@ function _formulesDefaut(){
   var eleve = ['plan1','plan2','plan5','plan6'], complet = ['plan1','plan2','plan4','plan5','plan6'];
   var F = [
     {g:'starter', nom:'STARTER', pub:'eleve',  mois:1200, an:10000,  cible:'Élève · 6ᵉ → Tˡᵉ', tags:eleve,
-     av:['Tous les cours de sa classe, par séquence','Œuvres au programme','Épreuves et annales corrigées','5 questions par jour au Professeur Ambassa','Suivi des résultats']},
+     av:['Toutes les leçons de 1 classe','Œuvres au programme','Épreuves et annales corrigées','5 questions par jour au tuteur IA','10 fiches PDF par semaine']},
     {g:'pro',     nom:'PRO',     pub:'eleve',  mois:1600, an:13500,  cible:'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', tags:eleve, pop:true,
-     av:['Tout Starter','30 questions par jour au tuteur','Labos virtuels PCT & SVT','Bulletins blancs notés','Fiches de révision imprimables']},
+     av:['Tout Starter','30 questions par jour au tuteur IA','20 fiches PDF par semaine','Tous les labos virtuels PCT & SVT','Bulletins blancs notés']},
     {g:'elite',   nom:'ÉLITE',   pub:'eleve',  mois:2000, an:16500,  cible:'Accompagnement complet', tags:complet,
-     av:['Tout Pro','Tuteur IA sans limite','Classes virtuelles en direct','Concours blancs corrigés','Entretien d’orientation']},
+     av:['Tout Pro','2 classes : la sienne + celle d’avant pour revoir les bases','100 questions par jour au tuteur IA','40 fiches PDF par semaine','Classes virtuelles en direct et concours blancs corrigés','Entretien d’orientation']},
     {g:'famille', nom:'FAMILLE', pub:'parent', mois:6000, an:50000, cible:'Jusqu’à 4 enfants', tags:complet, enfants:4,
-     av:['Jusqu’à 4 enfants sur un seul paiement','Chaque enfant au niveau Élite','Suivi parent : notes, absences, progression','Tuteur IA sans limite pour chacun']}
+     av:['Jusqu’à 4 enfants sur un seul paiement','Chaque enfant au niveau Élite, dans sa classe','Suivi parent : notes, absences, progression','60 fiches PDF par semaine pour la famille']},
+    // Formules ENSEIGNANT multi-classes (12/11/2026) — miroir de vrt_plans_formules().
+    {g:'prof3',   nom:'PROF 3 CLASSES', pub:'enseignant', mois:2500, an:21000, cible:'Enseignant · 3 classes', tags:complet,
+     av:['Toutes les leçons de 3 classes au choix','40 fiches PDF par semaine','40 questions par jour au tuteur IA','Tous les labos virtuels','Épreuves et annales corrigées']},
+    {g:'prof6',   nom:'PROF 6 CLASSES', pub:'enseignant', mois:4000, an:33500, cible:'Enseignant · 6 classes', tags:complet, pop:true,
+     av:['Toutes les leçons de 6 classes au choix','60 fiches PDF par semaine','80 questions par jour au tuteur IA','Tous les labos virtuels','Bulletins et concours blancs']},
+    {g:'proftout',nom:'PROF TOUTES CLASSES', pub:'enseignant', mois:6000, an:50000, cible:'Enseignant · de la 6ᵉ à la Tˡᵉ', tags:complet,
+     av:['Toutes les classes, de la 6ᵉ à la Tˡᵉ','120 fiches PDF par semaine','150 questions par jour au tuteur IA','Tous les labos virtuels','Classes virtuelles en direct']}
   ];
   var out = [];
   F.forEach(function(d){
@@ -1533,6 +1540,20 @@ function _migrateDB(){
     if(!DB._formulesV2){
       _formulesDefaut().forEach(function(f){ if(!_aDejaPlan(f.id)) _pl.push(f); });
       DB._formulesV2 = 1;
+    }
+    /* GRILLE DU 12/11/2026 — appliquée UNE fois aux formules déjà en base :
+       Starter 1 200 · Pro 1 600 · Élite 2 000 · Famille 6 000 F/mois (année
+       10 000 · 13 500 · 16 500 · 50 000), avantages alignés sur la table des
+       droits, et ajout des formules enseignant multi-classes. Sans elle, la
+       base (prioritaire sur le code) gardait l'ancien Pro à 2 000 F. Après ce
+       passage, un prix réglé par l'administration n'est plus jamais écrasé. */
+    if(!DB._grille20261112){
+      _formulesDefaut().forEach(function(f){
+        var ex = _pl.find(function(p){ return p && p.id === f.id; });
+        if(!ex){ _pl.push(f); return; }
+        ex.prix = f.prix; ex.ancien = f.ancien; ex.avantages = f.avantages.slice(); ex.cible = f.cible;
+      });
+      DB._grille20261112 = 1;
     }
   }catch(e){ console.warn('[migration grille tarifaire]', e); }
   /* PRODUIT DE TEST À 100 FCFA — pour éprouver l'encaissement en conditions
@@ -6457,6 +6478,11 @@ function vShowSec(sec,btn,_boot){
     // Les formules (Starter / Pro / Élite / Famille) : la grille partagée,
     // Code ami compris — même rendu que l'accueil et la page Tarifs.
     h+=(typeof _formulesGrille==='function') ? _formulesGrille() : '';
+    // Formules enseignant multi-classes (12/11/2026), sous celles des élèves.
+    if(typeof _formulesProfs==='function'){
+      var _fp=_formulesProfs();
+      if(_fp) h+='<div style="text-align:center;margin:34px 0 18px"><div style="font-family:Montserrat,sans-serif;font-size:22px;font-weight:800;color:#142554">Pour les <span style="color:#3C8DFF">enseignants</span></div></div>'+_fp;
+    }
 
     // ── Les AUTRES offres (enseignants, prestations parents, établissements) ──
     var _picBaseP='https://em-content.zobj.net/source/microsoft-3D-fluent/406/';
@@ -18717,14 +18743,17 @@ function _vheroToggleSound(ev){
 // - Enseignant : 50 / jour
 // - Admin / Super-admin : illimité
 
+/* Quotas alignés sur la table des droits (vrt_droits_formules, api/_auth_lib.php)
+   le 12/11/2026 : Élite = 100 / jour (plus « illimité » : le serveur bornait à 100),
+   et les formules Famille et enseignant ont leur colonne. */
 window.AI_QUOTAS = {
-  // [type d'action] : { anonyme, gratuit_sem, plan_starter_j, plan_pro_j, plan_elite, enseignant_j, admin }
-  default:    { anon:2,  free:3,  starter:5,  pro:30,  elite:-1, teach:50,  admin:-1 },
-  ambassa:     { anon:2,  free:3,  starter:5,  pro:30,  elite:-1, teach:50,  admin:-1 },
-  devoir:     { anon:2,  free:3,  starter:5,  pro:30,  elite:-1, teach:50,  admin:-1 },
-  photo_ia:   { anon:1,  free:2,  starter:3,  pro:15,  elite:-1, teach:20,  admin:-1 },
-  orient:     { anon:1,  free:2,  starter:3,  pro:10,  elite:-1, teach:20,  admin:-1 },
-  correct:    { anon:2,  free:3,  starter:5,  pro:30,  elite:-1, teach:50,  admin:-1 }
+  // [type d'action] : { anonyme, gratuit_sem, starter_j, pro_j, élite_j, famille_j, prof3_j, prof6_j, proftout_j, enseignant_j, admin }
+  default:  { anon:2, free:3, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:50, admin:-1 },
+  ambassa:  { anon:2, free:3, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:50, admin:-1 },
+  devoir:   { anon:2, free:3, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:50, admin:-1 },
+  photo_ia: { anon:1, free:2, starter:3, pro:15, elite:50,  famille:50,  prof3:20, prof6:40, proftout:75,  teach:20, admin:-1 },
+  orient:   { anon:1, free:2, starter:3, pro:10, elite:30,  famille:30,  prof3:10, prof6:20, proftout:30,  teach:20, admin:-1 },
+  correct:  { anon:2, free:3, starter:5, pro:30, elite:100, famille:100, prof3:40, prof6:80, proftout:150, teach:50, admin:-1 }
 };
 
 // Helper : déterminer le tier de l'utilisateur courant
@@ -18747,7 +18776,7 @@ window._aiTier = function(){
   // retombait en 'free'. Désormais : tout abonnement actif vaut au moins 'pro',
   // et on retient le tier le plus élevé si l'utilisateur cumule plusieurs plans.
   var abos = (DB.elearning && DB.elearning.abonnements) || [];
-  var _rank = {free:0, starter:1, pro:2, elite:3};
+  var _rank = {free:0, starter:1, pro:2, prof3:3, prof6:4, elite:5, famille:5, proftout:6};
   var _best = 'free', _bestR = -1;
   abos.forEach(function(x){
     if(!_statutActif(x.statut)) return;
@@ -18759,8 +18788,10 @@ window._aiTier = function(){
     if(!match) return;
     var p = (x.plan||x.planId||'').toLowerCase();
     var t;
-    if(p.indexOf('elite')>=0 || p.indexOf('famille')>=0 || p==='plan4') t='elite';        // FAMILLE / Élite (formules du 13/09/2026 comprises)
-    else if(p==='plan2' || p.indexOf('starter')>=0) t='starter'; // INTERMÉDIAIRE
+    var mg = /^abo_(starter|pro|elite|famille|prof3|prof6|proftout)_[ma]$/.exec(p);   // groupe de droits (même règle que vrt_groupe_droits)
+    if(mg) t=mg[1];
+    else if(p==='plan4') t='famille';
+    else if(p==='plan2') t='starter';                            // INTERMÉDIAIRE
     else t='pro';                                                // EXAMEN(plan1)/ENSEIGNANT(plan3)/TECHNIQUE(plan5)/GCE(plan6)/inconnu payant
     if(_rank[t] > _bestR){ _bestR = _rank[t]; _best = t; }
   });
@@ -18773,14 +18804,19 @@ window._aiTier = function(){
 // Le quota IA Ambassa, lui, est géré par AI_QUOTAS + _aiTier (déjà branché).
 //   features : 'labos' (expériences premium), 'classes' (classes virtuelles live)
 window.PLAN_FEATURES = {
-  // tier -> { labos:bool, classes:bool }  (anon/free = découverte limitée)
-  anon:    { labos:false, classes:false },
-  free:    { labos:false, classes:false },
-  starter: { labos:true,  classes:false },  // plan2 INTERMÉDIAIRE
-  pro:     { labos:true,  classes:true  },  // plan1 EXAMEN / plan3 ENSEIGNANT
-  elite:   { labos:true,  classes:true  },  // plan4 FAMILLE/ÉCOLE (tout inclus)
-  teach:   { labos:true,  classes:true  },
-  admin:   { labos:true,  classes:true  }
+  // tier -> { labos, classes (virtuelles), bulletins }. Miroir de vrt_droits_formules() (12/11/2026) :
+  // Starter n'a plus les labos premium, Pro n'a plus les classes virtuelles (réservées à Élite, Famille, Prof toutes classes).
+  anon:     { labos:false, classes:false, bulletins:false },
+  free:     { labos:false, classes:false, bulletins:false },
+  starter:  { labos:false, classes:false, bulletins:false },
+  pro:      { labos:true,  classes:false, bulletins:true  },
+  elite:    { labos:true,  classes:true,  bulletins:true  },
+  famille:  { labos:true,  classes:true,  bulletins:true  },
+  prof3:    { labos:true,  classes:false, bulletins:false },
+  prof6:    { labos:true,  classes:false, bulletins:true  },
+  proftout: { labos:true,  classes:true,  bulletins:true  },
+  teach:    { labos:true,  classes:true,  bulletins:true  },
+  admin:    { labos:true,  classes:true,  bulletins:true  }
 };
 window._planAccess = function(feature){
   var tier = (typeof _aiTier==='function') ? _aiTier() : 'anon';
@@ -19016,7 +19052,8 @@ window._showQuotaExceeded = function(action, tier, used, limit){
         +'<div style="font-weight:800;color:#92400E;font-size:13px;margin-bottom:8px">🚀 Passez à un plan pour utiliser Ambassa sans limite :</div>'
         +'<table style="width:100%;font-size:12px;color:#78350F"><tr><td><b>Starter</b></td><td>5 essais/jour</td><td><b>1 200 FCFA/mois</b></td></tr>'
         +'<tr><td><b>Pro</b></td><td>30 essais/jour</td><td><b>1 600 FCFA/mois</b></td></tr>'
-        +'<tr><td><b>Elite</b></td><td>Illimité</td><td><b>2 000 FCFA/mois</b></td></tr></table>'
+        +'<tr><td><b>Élite</b></td><td>100 essais/jour</td><td><b>2 000 FCFA/mois</b></td></tr>'
+        +'<tr><td><b>Enseignant</b></td><td>40 à 150/jour</td><td><b>dès 2 500 FCFA/mois</b></td></tr></table>'
       +'</div>'
       // v1.2.2 (#6) : UPGRADE CONTEXTUEL — si un examen approche, créer l'urgence ici (le bon moment)
       +((function(){ try{ var n=(typeof _examPromoActive==='function')?_examPromoActive():null;
@@ -19031,7 +19068,7 @@ window._showQuotaExceeded = function(action, tier, used, limit){
       +'</div>';
   } else {
     // Plans payants : message simple + upgrade vers plan supérieur
-    var upgradeMap = { starter: 'Pro', pro: 'Elite', teach: 'illimité' };
+    var upgradeMap = { starter: 'Pro', pro: 'Élite', prof3: 'Prof 6 classes', prof6: 'Prof toutes classes', teach: 'illimité' };
     var upgrade = upgradeMap[tier] || 'supérieur';
     body = '<div style="text-align:center;padding:10px">'
       +'<div style="font-size:56px;margin-bottom:14px">📊</div>'
@@ -51013,7 +51050,8 @@ window._accOffre = _accOffre;
    Chaque carte dit le prix au mois ET l'offre à l'année avec son ancien prix
    barré (demande de Jacques, 13/09/2026) — pas de bascule à manipuler pour
    découvrir la remise. */
-function _formulesPlans(){
+var _GROUPES_ELEVE = ['starter','pro','elite','famille'], _GROUPES_PROF = ['prof3','prof6','proftout'];
+function _formulesPlans(groupes){
   var plans = (typeof DB!=='undefined' && DB.elearning && DB.elearning.plans) || [];
   var g = {};
   var poser = function(p){
@@ -51025,7 +51063,11 @@ function _formulesPlans(){
   // Base d'avant la mise à jour (ou visiteur dont la sonde publique n'a pas
   // encore répondu) : le catalogue du code, miroir exact du serveur.
   if(!Object.keys(g).length && typeof _formulesDefaut === 'function') _formulesDefaut().forEach(poser);
-  return ['starter','pro','elite','famille']
+  // Base qui ne connaît pas encore une formule (enseignant, ajoutée le 12/11/2026) : repli du code pour CELLE-LÀ.
+  var manquants = (groupes || _GROUPES_ELEVE).filter(function(k){ return !(g[k] && g[k].mois); });
+  if(manquants.length && typeof _formulesDefaut === 'function')
+    _formulesDefaut().forEach(function(p){ if(manquants.indexOf(p.groupe) >= 0) poser(p); });
+  return (groupes || _GROUPES_ELEVE)
     .filter(function(k){ return g[k] && g[k].mois; })
     .map(function(k){ return { groupe:k, mois:g[k].mois, an:g[k].an || null }; });
 }
@@ -51070,24 +51112,37 @@ window._formulesAccroche = _formulesAccroche;
    L'accroche et le chiffre sous le nom se règlent par formule dans l'admin
    (Packs d'abonnement : champs `accrocheFort`, `accrocheSuite`, `metrique`) ;
    à défaut, le texte ci-dessous. */
+/* Chiffres clés = table des droits (vrt_droits_formules, api/_auth_lib.php,
+   12/11/2026) : ce qui est annoncé ici est ce que le serveur applique. */
 var _PALIERS = {
-  starter:{ rang:'N1', pour:'Un élève, toute l’année', metrique:'5 questions / jour au tuteur',
-    fort:'Toute sa classe, en ligne', suite:' — cours par séquence, œuvres au programme et épreuves corrigées, pour réviser à son rythme.',
-    specs:[['Tuteur IA','5 / jour'],['Cours','Sa classe'],['Labos','—'],['Direct','—']],
-    cmp:{ 'Enfants':'1', 'Suivi':'Résultats' } },
-  pro:{ rang:'N2', pour:'Année d’examen', metrique:'30 questions / jour au tuteur',
-    fort:'Préparer l’examen sans deviner', suite:' — labos virtuels, bulletins blancs notés et fiches imprimables pour le BEPC, le Probatoire et le BAC.',
-    specs:[['Tuteur IA','30 / jour'],['Cours','Sa classe'],['Labos','PCT & SVT'],['Direct','—']],
-    cmp:{ 'Enfants':'1', 'Suivi':'Résultats + bulletins blancs' } },
-  elite:{ rang:'N3', pour:'Accompagnement complet', metrique:'Tuteur IA sans limite',
-    fort:'Un enseignant en direct, un tuteur sans limite', suite:' — classes virtuelles, concours blancs corrigés et entretien d’orientation.',
-    specs:[['Tuteur IA','Illimité'],['Cours','Tout inclus'],['Labos','PCT & SVT'],['Direct','Classes virtuelles']],
-    cmp:{ 'Enfants':'1', 'Suivi':'+ entretien d’orientation' } },
+  starter:{ rang:'N1', pour:'Un élève, toute l’année', metrique:'1 classe · 5 questions / jour',
+    fort:'Toute sa classe, en ligne', suite:' — leçons complètes, œuvres au programme et épreuves corrigées, pour réviser à son rythme.',
+    specs:[['Classes','1'],['Tuteur IA','5 / jour'],['Fiches PDF','10 / semaine'],['Labos','Labos d’essai']],
+    cmp:{ 'Bulletins blancs':'—', 'Direct':'—', 'Enfants':'1', 'Suivi':'Résultats' } },
+  pro:{ rang:'N2', pour:'Année d’examen', metrique:'1 classe · 30 questions / jour',
+    fort:'Préparer l’examen sans deviner', suite:' — tous les labos virtuels et des bulletins blancs notés pour le BEPC, le Probatoire et le BAC.',
+    specs:[['Classes','1'],['Tuteur IA','30 / jour'],['Fiches PDF','20 / semaine'],['Labos','PCT & SVT']],
+    cmp:{ 'Bulletins blancs':'Oui', 'Direct':'—', 'Enfants':'1', 'Suivi':'Résultats + bulletins blancs' } },
+  elite:{ rang:'N3', pour:'Accompagnement complet', metrique:'2 classes · 100 questions / jour',
+    fort:'Un enseignant en direct, et les bases revues', suite:' — sa classe et celle d’avant, classes virtuelles, concours blancs corrigés et entretien d’orientation.',
+    specs:[['Classes','2'],['Tuteur IA','100 / jour'],['Fiches PDF','40 / semaine'],['Direct','Classes virtuelles']],
+    cmp:{ 'Labos':'PCT & SVT', 'Bulletins blancs':'Oui + concours blancs', 'Enfants':'1', 'Suivi':'+ entretien d’orientation' } },
   famille:{ rang:'N4', pour:'Toute la famille', metrique:'Jusqu’à {n} enfants',
-    fort:'Tous vos enfants au niveau Élite', suite:' — un seul paiement, et un suivi parent des notes, absences et progrès de chacun.',
-    specs:[['Enfants','{n}'],['Niveau','Élite'],['Tuteur IA','Illimité'],['Suivi parent','Inclus']],
-    // Le comparatif aligne les MÊMES lignes pour les quatre paliers.
-    cmp:{ 'Cours':'Tout inclus', 'Labos':'PCT & SVT', 'Direct':'Classes virtuelles', 'Enfants':'{n}', 'Suivi':'Parent : notes, absences' } }
+    fort:'Tous vos enfants au niveau Élite', suite:' — un seul paiement, chaque enfant dans sa classe, et un suivi parent des notes, absences et progrès.',
+    specs:[['Enfants','{n}'],['Classes','1 par enfant'],['Tuteur IA','100 / jour'],['Fiches PDF','60 / semaine']],
+    cmp:{ 'Labos':'PCT & SVT', 'Bulletins blancs':'Oui + concours blancs', 'Direct':'Classes virtuelles', 'Suivi':'Parent : notes, absences' } },
+  prof3:{ rang:'E1', pour:'Un enseignant, quelques classes', metrique:'3 classes au choix',
+    fort:'Vos trois classes, prêtes à projeter', suite:' — leçons complètes, fiches à distribuer et épreuves corrigées pour préparer vos cours.',
+    specs:[['Classes','3'],['Tuteur IA','40 / jour'],['Fiches PDF','40 / semaine'],['Labos','Tous']],
+    cmp:{ 'Bulletins blancs':'—', 'Direct':'—' } },
+  prof6:{ rang:'E2', pour:'Plusieurs niveaux', metrique:'6 classes au choix',
+    fort:'Du premier au second cycle', suite:' — six classes, bulletins et concours blancs pour évaluer vos élèves au format de l’examen.',
+    specs:[['Classes','6'],['Tuteur IA','80 / jour'],['Fiches PDF','60 / semaine'],['Labos','Tous']],
+    cmp:{ 'Bulletins blancs':'Oui + concours blancs', 'Direct':'—' } },
+  proftout:{ rang:'E3', pour:'Toutes les classes', metrique:'De la 6ᵉ à la Tˡᵉ',
+    fort:'Tout le programme, sans compter', suite:' — toutes les classes et séries, classes virtuelles comprises, pour le professeur principal ou le répétiteur polyvalent.',
+    specs:[['Classes','Toutes'],['Tuteur IA','150 / jour'],['Fiches PDF','120 / semaine'],['Direct','Classes virtuelles']],
+    cmp:{ 'Labos':'Tous', 'Bulletins blancs':'Oui + concours blancs' } }
 };
 var _PALIERS_ORDRE = ['starter','pro','elite','famille'];
 // Les engagements que le tunnel de paiement tient réellement (voir la FAQ de
@@ -51118,7 +51173,7 @@ function _palierFiche(g, m){
 
 function _formulesGrille(opts){
   opts = opts || {};
-  var gs = _formulesPlans();
+  var gs = _formulesPlans(opts.groupes);
   if(!gs.length) return '';
   var rg = window._CODE_AMI_REGLE || {};
   var remise = (rg.remisePct != null ? rg.remisePct : 10), comm = (rg.commissionPct != null ? rg.commissionPct : 10);
@@ -51206,11 +51261,12 @@ function _palierWhatsApp(g){
 window._palierWhatsApp = _palierWhatsApp;
 
 /* ── Comparatif : les paliers en colonnes, les chiffres clés en lignes ── */
-function _formulesComparatif(){
-  var gs = _formulesPlans();
+function _formulesComparatif(groupes){
+  var gs = _formulesPlans(groupes);
   if(!gs.length) return '';
   var fiches = gs.map(function(f){ return _palierFiche(f.groupe, f.mois); });
-  var lignes = ['Tuteur IA','Cours','Labos','Direct','Enfants','Suivi'];
+  var lignes = groupes === _GROUPES_PROF ? ['Classes','Tuteur IA','Fiches PDF','Labos','Bulletins blancs','Direct']
+                                         : ['Classes','Tuteur IA','Fiches PDF','Labos','Bulletins blancs','Direct','Enfants','Suivi'];
   var val = function(fi, l){ return fi.cmp[l] || '—'; };
   var h = '<div class="vfo-cmp-wrap"><table class="vfo-cmp"><thead><tr><th scope="col"></th>'
     + gs.map(function(f, i){ return '<th scope="col" class="vfo-g-' + _esc(f.groupe) + '"><span class="vfo-rang">' + _esc(fiches[i].rang) + '</span>' + _esc(_palierNomCourt(f.mois)) + '</th>'; }).join('')
@@ -51310,9 +51366,10 @@ window._formulesGaranties = _formulesGaranties;
 /* ── Onglets de la page Tarifs : Détails · Trouver ma formule · Comparatif ── */
 var _pfOnglet = 'details';
 function _formulesOnglets(){
-  var t = [['details','Détails des formules'],['trouver','Trouver ma formule'],['comparer','Comparatif']];
+  var t = [['details','Détails des formules'],['trouver','Trouver ma formule'],['comparer','Comparatif'],['enseignants','Enseignants']];
   var corps = _pfOnglet === 'trouver' ? _formulesTrouver()
             : _pfOnglet === 'comparer' ? _formulesComparatif()
+            : _pfOnglet === 'enseignants' ? _formulesProfs()
             : _formulesGrille();
   return '<div class="vfo-onglets" id="vfoOnglets"><div class="vfo-tabs" role="tablist">'
     + t.map(function(x){
@@ -51322,6 +51379,16 @@ function _formulesOnglets(){
     + '</div><div class="vfo-tab-corps">' + corps + '</div></div>';
 }
 window._formulesOnglets = _formulesOnglets;
+
+/* Formules ENSEIGNANT multi-classes (12/11/2026) : même grille, même comparatif. */
+function _formulesProfs(){
+  var grille = _formulesGrille({ groupes:_GROUPES_PROF, codeAmi:false });
+  if(!grille) return '';
+  return '<p class="vfo-profs-int">Le contenu de plusieurs classes pour préparer, projeter et distribuer. '
+    + 'Vos classes se fixent à la première leçon que vous ouvrez dans chacune ; une classe peut être changée après 30 jours.</p>'
+    + grille + _formulesComparatif(_GROUPES_PROF);
+}
+window._formulesProfs = _formulesProfs;
 function _formulesOnglet(id, ancre){
   _pfOnglet = id;
   var el = document.getElementById('vfoOnglets');

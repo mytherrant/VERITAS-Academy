@@ -706,13 +706,24 @@ if (!defined('VRT_AUTH_LIB')) {
         $complet = ['plan1', 'plan2', 'plan4', 'plan5', 'plan6'];
         $f = [
             'starter' => ['nom' => 'STARTER', 'public' => 'eleve', 'mois' => 1200, 'an' => 10000, 'cible' => 'Élève · 6ᵉ → Tˡᵉ', 'tags' => $eleve,
-                          'avantages' => ['Tous les cours de sa classe, par séquence', 'Œuvres au programme', 'Épreuves et annales corrigées', '5 questions par jour au Professeur Ambassa', 'Suivi des résultats']],
+                          'avantages' => ['Toutes les leçons de 1 classe', 'Œuvres au programme', 'Épreuves et annales corrigées', '5 questions par jour au tuteur IA', '10 fiches PDF par semaine']],
             'pro'     => ['nom' => 'PRO', 'public' => 'eleve', 'mois' => 1600, 'an' => 13500, 'cible' => 'Année d’examen · 3ᵉ, 1ʳᵉ, Tˡᵉ', 'tags' => $eleve, 'populaire' => true,
-                          'avantages' => ['Tout Starter', '30 questions par jour au tuteur', 'Labos virtuels PCT & SVT', 'Bulletins blancs notés', 'Fiches de révision imprimables']],
+                          'avantages' => ['Tout Starter', '30 questions par jour au tuteur IA', '20 fiches PDF par semaine', 'Tous les labos virtuels PCT & SVT', 'Bulletins blancs notés']],
             'elite'   => ['nom' => 'ÉLITE', 'public' => 'eleve', 'mois' => 2000, 'an' => 16500, 'cible' => 'Accompagnement complet', 'tags' => $complet,
-                          'avantages' => ['Tout Pro', 'Tuteur IA sans limite', 'Classes virtuelles en direct', 'Concours blancs corrigés', 'Entretien d’orientation']],
+                          'avantages' => ['Tout Pro', '2 classes : la sienne + celle d’avant pour revoir les bases', '100 questions par jour au tuteur IA', '40 fiches PDF par semaine', 'Classes virtuelles en direct et concours blancs corrigés', 'Entretien d’orientation']],
             'famille' => ['nom' => 'FAMILLE', 'public' => 'parent', 'mois' => 6000, 'an' => 50000, 'cible' => 'Jusqu’à 4 enfants', 'tags' => $complet, 'enfantsMax' => 4,
-                          'avantages' => ['Jusqu’à 4 enfants sur un seul paiement', 'Chaque enfant au niveau Élite', 'Suivi parent : notes, absences, progression', 'Tuteur IA sans limite pour chacun']],
+                          'avantages' => ['Jusqu’à 4 enfants sur un seul paiement', 'Chaque enfant au niveau Élite, dans sa classe', 'Suivi parent : notes, absences, progression', '60 fiches PDF par semaine pour la famille']],
+            /* FORMULES ENSEIGNANT MULTI-CLASSES (12/11/2026). Le contenu de
+               plusieurs classes pour préparer, projeter et distribuer. Les
+               classes se fixent à la première ouverture d'une leçon (voir
+               vrt_classes_compte) : 3, 6 ou toutes. Distinctes des plans de
+               l'Atelier de français (ens_mois, ens, etab, pro). */
+            'prof3'   => ['nom' => 'PROF 3 CLASSES', 'public' => 'enseignant', 'mois' => 2500, 'an' => 21000, 'cible' => 'Enseignant · 3 classes', 'tags' => $complet,
+                          'avantages' => ['Toutes les leçons de 3 classes au choix', '40 fiches PDF par semaine', '40 questions par jour au tuteur IA', 'Tous les labos virtuels', 'Épreuves et annales corrigées']],
+            'prof6'   => ['nom' => 'PROF 6 CLASSES', 'public' => 'enseignant', 'mois' => 4000, 'an' => 33500, 'cible' => 'Enseignant · 6 classes', 'tags' => $complet, 'populaire' => true,
+                          'avantages' => ['Toutes les leçons de 6 classes au choix', '60 fiches PDF par semaine', '80 questions par jour au tuteur IA', 'Tous les labos virtuels', 'Bulletins et concours blancs']],
+            'proftout'=> ['nom' => 'PROF TOUTES CLASSES', 'public' => 'enseignant', 'mois' => 6000, 'an' => 50000, 'cible' => 'Enseignant · de la 6ᵉ à la Tˡᵉ', 'tags' => $complet,
+                          'avantages' => ['Toutes les classes, de la 6ᵉ à la Tˡᵉ', '120 fiches PDF par semaine', '150 questions par jour au tuteur IA', 'Tous les labos virtuels', 'Classes virtuelles en direct']],
         ];
         $out = [];
         foreach ($f as $g => $d) {
@@ -738,6 +749,115 @@ if (!defined('VRT_AUTH_LIB')) {
             }
         }
         return $out;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       DROITS PAR FORMULE (12/11/2026) — LA source unique de ce que chaque
+       formule ouvre. Les cartes de prix, le tuteur IA (ia_proxy.php), les
+       fiches (content.php) et les leçons (apprendre.php) lisent CETTE table ;
+       app.js en garde un miroir (_DROITS_FORMULES), à modifier ensemble.
+         classes   : classes dont les leçons sont ouvertes (-1 = toutes)
+         iaJour    : questions par jour au tuteur IA
+         fichesJour / fichesSemaine : documents DISTINCTS ouverts (content.php)
+         labos, bulletins, direct (classes virtuelles + concours blancs), orientation
+       Réglable sans redéployer : DB.elearning.droitsFormules.<groupe>.<clé>.
+       ══════════════════════════════════════════════════════════════════════ */
+    function vrt_droits_formules(array $db = []): array {
+        $d = [
+            'decouverte' => ['classes' => 0,  'iaJour' => 5,   'fichesJour' => 0,  'fichesSemaine' => 0,   'labos' => false, 'bulletins' => false, 'direct' => false, 'orientation' => false],
+            'starter'    => ['classes' => 1,  'iaJour' => 5,   'fichesJour' => 3,  'fichesSemaine' => 10,  'labos' => false, 'bulletins' => false, 'direct' => false, 'orientation' => false],
+            'pro'        => ['classes' => 1,  'iaJour' => 30,  'fichesJour' => 5,  'fichesSemaine' => 20,  'labos' => true,  'bulletins' => true,  'direct' => false, 'orientation' => false],
+            'elite'      => ['classes' => 2,  'iaJour' => 100, 'fichesJour' => 10, 'fichesSemaine' => 40,  'labos' => true,  'bulletins' => true,  'direct' => true,  'orientation' => true],
+            'famille'    => ['classes' => 4,  'iaJour' => 100, 'fichesJour' => 15, 'fichesSemaine' => 60,  'labos' => true,  'bulletins' => true,  'direct' => true,  'orientation' => true],
+            'prof3'      => ['classes' => 3,  'iaJour' => 40,  'fichesJour' => 10, 'fichesSemaine' => 40,  'labos' => true,  'bulletins' => false, 'direct' => false, 'orientation' => false],
+            'prof6'      => ['classes' => 6,  'iaJour' => 80,  'fichesJour' => 15, 'fichesSemaine' => 60,  'labos' => true,  'bulletins' => true,  'direct' => false, 'orientation' => false],
+            'proftout'   => ['classes' => -1, 'iaJour' => 150, 'fichesJour' => 25, 'fichesSemaine' => 120, 'labos' => true,  'bulletins' => true,  'direct' => true,  'orientation' => false],
+        ];
+        $sur = $db['elearning']['droitsFormules'] ?? null;
+        if (is_array($sur)) {
+            foreach ($d as $g => $v) {
+                if (!isset($sur[$g]) || !is_array($sur[$g])) continue;
+                foreach ($v as $k => $x) {
+                    if (!array_key_exists($k, $sur[$g])) continue;
+                    $d[$g][$k] = is_bool($x) ? (bool) $sur[$g][$k] : (int) $sur[$g][$k];
+                }
+            }
+        }
+        return $d;
+    }
+
+    /** Groupe de droits d'un identifiant de plan (abo_pro_m → pro). Anciens plans payants → pro. */
+    function vrt_groupe_droits(string $planId): ?string {
+        if (preg_match('/^abo_(starter|pro|elite|famille|prof3|prof6|proftout)_[ma]$/', $planId, $m)) return $m[1];
+        if ($planId === 'plan4') return 'famille';
+        if ($planId === 'plan2') return 'starter';
+        if (in_array($planId, ['plan1', 'plan3', 'plan5', 'plan6'], true)) return 'pro';
+        return null;   // plans de l'Atelier, packs : aucun droit e-learning propre
+    }
+
+    /** Droits effectifs d'un compte : le MEILLEUR de chaque droit parmi ses formules actives. */
+    function vrt_droits_compte(array $acc, array $db): array {
+        $table = vrt_droits_formules($db);
+        $out = $table['decouverte']; $out['groupes'] = [];
+        foreach (vrt_account_active_plans($acc, $db) as $pid) {
+            $g = vrt_groupe_droits((string) $pid);
+            if ($g === null || !isset($table[$g])) continue;
+            $out['groupes'][] = $g;
+            foreach ($table[$g] as $k => $v) {
+                if (is_bool($v)) { $out[$k] = $out[$k] || $v; continue; }
+                if ($out[$k] === -1 || $v === -1) { $out[$k] = -1; continue; }
+                $out[$k] = ($k === 'classes') ? $out[$k] + $v : max($out[$k], $v);   // deux formules = deux lots de classes
+            }
+        }
+        return $out;
+    }
+
+    /** Classe d'une leçon d'après son identifiant (« 1re-c-maths-… » → « 1re-c », « tle-orient-bac » → « tle »). */
+    function vrt_classe_de_lecon(string $id): string {
+        if (preg_match('/^(6e|5e|4e|3e|2nde-[a-z]|1re-[a-z]|tle-[a-z])-/', $id, $m)) return $m[1];
+        if (preg_match('/^(2nde|1re|tle)-/', $id, $m)) return $m[1];
+        return '';
+    }
+
+    /* CLASSES RETENUES PAR UN COMPTE. Fichier plat par compte (data/_classes/),
+       hors de la base synchronisée : une synchro de l'administration ne doit
+       pas pouvoir les effacer. Une classe retenue ne se libère qu'après 30
+       jours, pour qu'une formule « 1 classe » ne fasse pas le tour du lycée. */
+    function vrt_classes_fichier(array $acc): string {
+        $dir = (defined('VRT_CLASSES_DIR') ? (string) VRT_CLASSES_DIR : __DIR__ . '/data/_classes') . '/';
+        if (!is_dir($dir)) @mkdir($dir, 0750, true);
+        return $dir . substr(hash('sha256', 'cl|' . (string) ($acc['id'] ?? $acc['user'] ?? '')), 0, 32) . '.json';
+    }
+    function vrt_classes_compte(array $acc): array {
+        $f = vrt_classes_fichier($acc);
+        $v = is_file($f) ? json_decode((string) @file_get_contents($f), true) : null;
+        return is_array($v) ? $v : [];   // [classe => horodatage]
+    }
+    /**
+     * La leçon de cette classe est-elle couverte ? Renvoie 'ok', 'a_choisir'
+     * (place libre : il faut confirmer) ou 'complet'. Avec $retenir, une place
+     * libre est prise. Une classe générique (« tle ») est couverte par toute
+     * classe retenue du même niveau (« tle-c »), et inversement.
+     */
+    function vrt_classe_couverte(array $acc, array $droits, string $classe, bool $retenir = false): string {
+        if ((int) $droits['classes'] === -1 || $classe === '') return 'ok';
+        $deja = vrt_classes_compte($acc);
+        foreach (array_keys($deja) as $c) {
+            if ($c === $classe || strpos($c, $classe . '-') === 0 || strpos($classe, $c . '-') === 0) return 'ok';
+        }
+        if (count($deja) >= (int) $droits['classes']) return 'complet';
+        if (!$retenir) return 'a_choisir';
+        $deja[$classe] = time();
+        @file_put_contents(vrt_classes_fichier($acc), json_encode($deja), LOCK_EX);
+        return 'ok';
+    }
+    /** Libère une classe retenue depuis plus de 30 jours (changement d'année, de série). */
+    function vrt_classe_liberer(array $acc, string $classe): bool {
+        $deja = vrt_classes_compte($acc);
+        if (!isset($deja[$classe]) || (time() - (int) $deja[$classe]) < 30 * 86400) return false;
+        unset($deja[$classe]);
+        @file_put_contents(vrt_classes_fichier($acc), json_encode($deja), LOCK_EX);
+        return true;
     }
 
     /** La définition d'une formule : la ligne de la base si elle existe, sinon le repli du code. */

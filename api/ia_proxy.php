@@ -436,7 +436,7 @@ if ($utilisateurVerifie === '') {
             date('c') . ' [IA_TIER_UNPROVEN] palier ' . $userTier . ' réclamé sans jeton — ramené à free. ip=' . $ip
             . ' userId=' . substr((string) $userId, 0, 40) . "\n", FILE_APPEND);
         $userTier = 'free';
-    } elseif ($userTier === 'elite') {
+    } elseif (in_array($userTier, ['elite', 'famille', 'prof6', 'proftout'], true)) {
         $userTier = 'pro';   // abonné non prouvé : quota confortable, jamais le maximum
     }
 } else {
@@ -454,14 +454,26 @@ if ($utilisateurVerifie === '' && $idInvite !== '') {
     }
 }
 if ($utilisateurVerifie !== '') {
-    if ($abonneAtelier && in_array($userTier, ['anon', 'free', 'starter', 'pro', 'elite'], true)) {
+    if ($abonneAtelier && in_array($userTier, ['anon', 'free', 'starter', 'pro', 'prof3', 'elite', 'famille', 'prof6'], true)) {
         $userTier = 'teach';
         if (!is_dir($rateDir)) @mkdir($rateDir, 0755, true);
         @file_put_contents($fichierAtelier, ($compteAtelier + 1) . '', LOCK_EX);
         $atelierDecompte = true;
     }
 }
-$tierDaily = ['anon' => 2, 'free' => 5, 'starter' => 15, 'pro' => 50, 'teach' => 120, 'elite' => 100, 'admin' => -1];
+/* Quotas des formules : ceux de la table des droits (vrt_droits_formules),
+   la même que les cartes de prix annoncent — 5 / 30 / 100 pour l'élève,
+   40 / 80 / 150 pour l'enseignant (12/11/2026). Ils valaient 15 / 50 / 100
+   quand les cartes disaient 5 / 30 / « sans limite ». */
+$tierDaily = ['anon' => 2, 'free' => 5, 'starter' => 5, 'pro' => 30, 'elite' => 100, 'famille' => 100,
+              'prof3' => 40, 'prof6' => 80, 'proftout' => 150, 'teach' => 120, 'admin' => -1];
+if (function_exists('vrt_droits_formules')) {
+    try {
+        foreach (vrt_droits_formules(function_exists('vrt_load_db') ? (vrt_load_db() ?: []) : []) as $gD => $vD) {
+            if ($gD !== 'decouverte' && isset($vD['iaJour'])) $tierDaily[$gD] = (int) $vD['iaJour'];
+        }
+    } catch (Throwable $e) { /* table illisible : on garde les valeurs ci-dessus */ }
+}
 if (defined('IA_TIER_DAILY_JSON')) { $cfg = json_decode(IA_TIER_DAILY_JSON, true); if (is_array($cfg)) $tierDaily = array_merge($tierDaily, $cfg); }
 $uDailyMax = $tierDaily[$userTier] ?? 5;
 // Une publication éditoriale n'est facturée à personne : elle a son propre
@@ -1110,7 +1122,7 @@ function server_user_tier(string $userId): string {
                 if (($acc['id'] ?? null) === $userId || ($acc['user'] ?? null) === $userId) { $known = true; break 2; }
             }
         }
-        $rank = ['free' => 0, 'starter' => 1, 'pro' => 2, 'elite' => 3];
+        $rank = ['free' => 0, 'starter' => 1, 'pro' => 2, 'prof3' => 3, 'prof6' => 4, 'elite' => 5, 'famille' => 5, 'proftout' => 6];
         $best = -1; $bestT = 'free';
         $now = (int) round(microtime(true) * 1000);
         foreach (($db['elearning']['abonnements'] ?? []) as $abo) {
@@ -1122,8 +1134,11 @@ function server_user_tier(string $userId): string {
             if ($end && $end < $now) continue;
             $p = strtolower((string) ($abo['plan'] ?? $abo['planId'] ?? ''));
             // « famille » : chaque enfant couvert est au niveau Élite (formule du 13/09/2026).
-            if (strpos($p, 'elite') !== false || strpos($p, 'famille') !== false || $p === 'plan4') $t = 'elite';
-            elseif ($p === 'plan2' || strpos($p, 'starter') !== false) $t = 'starter';
+            /* Le palier suit le GROUPE de droits de la formule (vrt_groupe_droits,
+               api/_auth_lib.php) : formules enseignant comprises (12/11/2026). */
+            if (preg_match('/^abo_(starter|pro|elite|famille|prof3|prof6|proftout)_[ma]$/', $p, $mg)) $t = $mg[1];
+            elseif ($p === 'plan4') $t = 'famille';
+            elseif ($p === 'plan2') $t = 'starter';
             else $t = 'pro';
             if ($rank[$t] > $best) { $best = $rank[$t]; $bestT = $t; }
         }
