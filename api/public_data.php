@@ -764,7 +764,7 @@ function vrt_pd_plans_en_vente(array $db): array {
         if (in_array($id, $retires, true) && empty($p['enVente'])) continue;
         if (isset($p['enVente']) && $p['enVente'] === false) continue;
         if (isset($formules[$id]) && isset($p['actif']) && $p['actif'] === false) continue;
-        if (isset($formules[$id])) $p = array_merge($formules[$id], $p);
+        if (isset($formules[$id])) $p = array_merge($formules[$id], function_exists('vrt_formule_ligne_base') ? vrt_formule_ligne_base($p) : $p);
         $out[] = $p; $vus[$id] = true;
     }
     foreach ($formules as $id => $f) {

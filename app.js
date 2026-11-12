@@ -1219,7 +1219,7 @@ function _formulesDefaut(){
       var an = v[0] === 'a';
       out.push({ id:'abo_'+d.g+'_'+v[0], groupe:d.g, variante: an?'an':'mois', nom: d.nom + (an?' — ANNÉE':''),
         public:d.pub, cible:d.cible, prix: an ? (d.an || d.mois*10) : d.mois, ancien: an ? d.mois*12 : 0, duree:v[1],
-        planTags:d.tags.slice(), avantages:d.av.slice(), populaire:!!d.pop, enfantsMax:d.enfants||0, formule:true });
+        planTags:d.tags.slice(), avantages:d.av.slice(), populaire:!!d.pop, enfantsMax:d.enfants||0, formule:true, grille:'20261112' });
     });
   });
   return out;
@@ -1551,7 +1551,7 @@ function _migrateDB(){
       _formulesDefaut().forEach(function(f){
         var ex = _pl.find(function(p){ return p && p.id === f.id; });
         if(!ex){ _pl.push(f); return; }
-        ex.prix = f.prix; ex.ancien = f.ancien; ex.avantages = f.avantages.slice(); ex.cible = f.cible;
+        ex.prix = f.prix; ex.ancien = f.ancien; ex.avantages = f.avantages.slice(); ex.cible = f.cible; ex.grille = f.grille;
       });
       DB._grille20261112 = 1;
     }
@@ -57291,7 +57291,7 @@ window._platSonder      = _platSonder;
 function pgPrixCalculs(){
   if(!iA()) return na();
   var T = DB.tarifs || {};
-  var nomsG = { starter:'Starter', pro:'Pro', elite:'Élite', famille:'Famille' };
+  var nomsG = { starter:'Starter', pro:'Pro', elite:'Élite', famille:'Famille', prof3:'Prof 3 classes', prof6:'Prof 6 classes', proftout:'Prof toutes classes' };
   var moisOff = (T.formules && T.formules.moisOfferts != null) ? T.formules.moisOfferts : 2;
   var defs = (typeof _formulesDefaut === 'function') ? _formulesDefaut() : [];
   var ligne = function(id){
@@ -57314,20 +57314,21 @@ function pgPrixCalculs(){
     + (synchro ? '' : '<div class="ib ibr mt8"><span>⚠️</span><span><b>Cet appareil n’est pas relié au serveur</b> (Paramètres → Cloud) : vos réglages resteront sur cet appareil et le serveur continuera d’exiger les anciens prix.</span></div>');
 
   // ── 1. Formules d'abonnement ────────────────────────────────────────────
-  var lignesF = ['starter','pro','elite','famille'].map(function(g){
+  var lignesF = _GROUPES_ELEVE.concat(_GROUPES_PROF).map(function(g){
     var m = ligne('abo_' + g + '_m') || {}, a = ligne('abo_' + g + '_a') || {};
     var enVente = m.actif !== false && m.enVente !== false;
     return '<tr>'
       + '<td><b>' + nomsG[g] + '</b><div class="xs2 mut">' + _esc(m.cible || '') + '</div></td>'
       + '<td style="min-width:120px">' + num('pc_f_' + g, m.prix || '', 100, 1000000, 100) + '</td>'
-      + '<td><span id="pc_fa_' + g + '" class="semi"></span><div class="xs2 mut" id="pc_fb_' + g + '"></div></td>'
+      // 12/11/2026 : prix de l'année SAISI (10 000 F pour 1 200 F par mois n'est pas un nombre entier de mois) ; vide = calculé.
+      + '<td style="min-width:120px">' + num('pc_fa_' + g, a.prix || '', 0, 10000000, 500) + '<div class="xs2 mut" id="pc_fb_' + g + '"></div></td>'
       + '<td style="text-align:center"><input type="radio" name="pc_pop" value="' + g + '"' + (m.populaire ? ' checked' : '') + '></td>'
       + '<td style="text-align:center"><input type="checkbox" id="pc_fv_' + g + '"' + (enVente ? ' checked' : '') + '></td>'
       + '</tr>';
   }).join('');
   var famM = ligne('abo_famille_m') || {};
   h += carte('Formules d’abonnement (élèves et familles)', 'sparkles',
-      '<div class="tw"><table><thead><tr><th>Formule</th><th>Prix par mois (FCFA)</th><th>À l’année (calculé)</th><th>Mise en avant</th><th>En vente</th></tr></thead><tbody>' + lignesF + '</tbody></table></div>'
+      '<div class="tw"><table><thead><tr><th>Formule</th><th>Prix par mois (FCFA)</th><th>À l’année (FCFA, vide = calculé)</th><th>Mise en avant</th><th>En vente</th></tr></thead><tbody>' + lignesF + '</tbody></table></div>'
       + '<div class="fg2 mt12">'
       +   '<div class="fg"><span class="fl">Mois offerts si l’on paie l’année en une fois</span>' + num('pc_moisoff', moisOff, 0, 6) + '<div class="xs2 mut">Prix de l’année = prix du mois × (12 − mois offerts). Le prix barré affiché = 12 mois.</div></div>'
       +   '<div class="fg"><span class="fl">Formule Famille : enfants couverts au plus</span>' + num('pc_enfants', famM.enfantsMax || 4, 1, 8) + '</div>'
@@ -57433,12 +57434,13 @@ function _pcVal(id, def){
 // Les calculs, sous les yeux de l'administrateur, pendant qu'il tape.
 function _pcApercu(){
   var mo = Math.max(0, Math.min(6, Math.round(_pcVal('pc_moisoff', 2))));
-  ['starter','pro','elite','famille'].forEach(function(g){
-    var p = Math.round(_pcVal('pc_f_' + g, 0));
-    var a = document.getElementById('pc_fa_' + g), b = document.getElementById('pc_fb_' + g);
-    if(!a || !b) return;
-    a.textContent = p > 0 ? fmt(p * (12 - mo)) : '—';
-    b.textContent = (p > 0 && mo > 0) ? ('au lieu de ' + fmt(p * 12) + ' · ' + mo + ' mois offert' + (mo > 1 ? 's' : '')) : '';
+  _GROUPES_ELEVE.concat(_GROUPES_PROF).forEach(function(g){
+    var p = Math.round(_pcVal('pc_f_' + g, 0)), an = Math.round(_pcVal('pc_fa_' + g, 0));
+    var b = document.getElementById('pc_fb_' + g);
+    if(!b) return;
+    var annee = an > 0 ? an : p * (12 - mo);
+    b.textContent = p > 0 ? ((an > 0 ? '' : 'calculé : ' + fmt(annee) + ' · ') + 'au lieu de ' + fmt(p * 12)
+      + (annee < p * 12 ? ' (−' + Math.round((p * 12 - annee) * 100 / (p * 12)) + ' %)' : '')) : '';
   });
   var pro = Math.round(_pcVal('pc_f_pro', 2000)) || 2000;
   var r = Math.max(0, Math.min(50, _pcVal('caRemise', 10))), c = Math.max(0, Math.min(50, _pcVal('caComm', 10)));
@@ -57465,10 +57467,11 @@ function _pcFormulesSave(){
   if(!DB.elearning) DB.elearning = {plans:[],categories:[],contenus:[],abonnements:[],commandes:[]};
   if(!Array.isArray(DB.elearning.plans)) DB.elearning.plans = [];
   var defs = _formulesDefaut(), erreurs = [];
-  var groupes = ['starter','pro','elite','famille'];
+  var groupes = _GROUPES_ELEVE.concat(_GROUPES_PROF);
   groupes.forEach(function(g){
-    var p = Math.round(_pcVal('pc_f_' + g, 0));
+    var p = Math.round(_pcVal('pc_f_' + g, 0)), an = Math.round(_pcVal('pc_fa_' + g, 0));
     if(!(p >= 100 && p <= 1000000)) erreurs.push(g);
+    else if(an > 0 && (an < p || an > p * 12)) erreurs.push(g + ' (année entre 1 et 12 mois)');
   });
   if(erreurs.length){ toast('Prix par mois invalide (100 à 1 000 000 F) : ' + erreurs.join(', '), 'warn'); return; }
   groupes.forEach(function(g){
@@ -57484,8 +57487,10 @@ function _pcFormulesSave(){
       }
       l.formule = true; l.groupe = g; l.variante = (v === 'a') ? 'an' : 'mois';
       l.duree = (v === 'a') ? 'annuel' : 'mensuel';
-      l.prix = (v === 'a') ? p * (12 - mo) : p;
-      l.ancien = (v === 'a' && mo > 0) ? p * 12 : 0;
+      var an = Math.round(_pcVal('pc_fa_' + g, 0));
+      l.prix = (v === 'a') ? (an > 0 ? an : p * (12 - mo)) : p;
+      l.ancien = (v === 'a' && l.prix < p * 12) ? p * 12 : 0;
+      l.grille = '20261112';   // réglé APRÈS la grille du 12/11/2026 : ce prix l'emporte sur le code (vrt_formule_ligne_base)
       l.populaire = (v === 'm' && g === pop);
       l.actif = vend; l.enVente = vend;
       if(g === 'famille') l.enfantsMax = enfants;

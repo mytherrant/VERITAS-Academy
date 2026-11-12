@@ -745,6 +745,7 @@ if (!defined('VRT_AUTH_LIB')) {
                     'populaire' => !empty($d['populaire']),
                     'enfantsMax'=> (int) ($d['enfantsMax'] ?? 0),
                     'formule'   => true,
+                    'grille'    => VRT_GRILLE_FORMULES,
                 ];
             }
         }
@@ -925,12 +926,28 @@ if (!defined('VRT_AUTH_LIB')) {
         return true;
     }
 
+    /* GRILLE EN VIGUEUR. Une ligne de formule enregistrée en base AVANT cette
+       grille (sans `grille`, ou plus ancienne) ne fixe plus ni le prix ni les
+       avantages : c'est le code qui s'applique, dès le déploiement. Sans cette
+       règle, la base — prioritaire — gardait l'ancien Pro à 2 000 F et l'Élite
+       à 3 000 F tant qu'un administrateur n'avait pas rouvert l'application
+       (constaté en ligne le 12/11/2026). Un tarif réglé ENSUITE par
+       l'administration porte la grille (migration de app.js) et l'emporte. */
+    if (!defined('VRT_GRILLE_FORMULES')) define('VRT_GRILLE_FORMULES', '20261112');
+    function vrt_formule_ligne_base(array $o): array {
+        $id = (string) ($o['id'] ?? '');
+        if (!isset(vrt_plans_formules()[$id])) return $o;
+        if (strcmp((string) ($o['grille'] ?? ''), VRT_GRILLE_FORMULES) >= 0) return $o;
+        foreach (['prix', 'ancien', 'avantages', 'cible', 'nom', 'duree', 'planTags'] as $k) unset($o[$k]);
+        return $o;
+    }
+
     /** La définition d'une formule : la ligne de la base si elle existe, sinon le repli du code. */
     function vrt_plan_formule(array $db, string $id): ?array {
         foreach (($db['elearning']['plans'] ?? []) as $p) {
             if (is_array($p) && (string) ($p['id'] ?? '') === $id) {
                 $def = vrt_plans_formules()[$id] ?? [];
-                return array_merge($def, $p);   // la base gagne champ par champ
+                return array_merge($def, vrt_formule_ligne_base($p));   // la base gagne champ par champ, si elle suit la grille
             }
         }
         $f = vrt_plans_formules();
@@ -1090,6 +1107,10 @@ if (!defined('VRT_AUTH_LIB')) {
 
         foreach ($liste as $o) {
             if (!is_array($o) || (string) ($o['id'] ?? '') !== $targetId) continue;
+            // Ligne de formule antérieure à la grille : son prix ne compte plus (repli du code plus bas).
+            if ($intent === 'subscription' && !isset(vrt_formule_ligne_base($o)['prix'])
+                && isset(vrt_plans_formules()[$targetId])
+                && !((isset($o['actif']) && $o['actif'] === false) || (isset($o['enVente']) && $o['enVente'] === false))) break;
             /* Une FORMULE retirée de la vente dans « Prix & calculs » ne se vend
                plus, même par une requête forgée — et surtout pas au tarif du
                repli codé plus bas, qui l'aurait remise en vente en silence. */

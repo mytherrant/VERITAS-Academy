@@ -153,6 +153,19 @@ ok('durée mensuelle / annuelle', ($cat['abo_prof6_m']['duree'] ?? '') === 'mens
 ok('public enseignant', ($cat['abo_prof3_m']['public'] ?? '') === 'enseignant');
 ok('prix de catalogue exigé au paiement', vrt_prix_catalogue([], 'subscription', 'abo_prof3_m') === 2500);
 
+titre('5 bis. Grille du 12/11/2026 face aux prix déjà en base');
+$dbAncien = ['elearning' => ['plans' => [
+    ['id' => 'abo_elite_m', 'prix' => 3000, 'ancien' => 0, 'formule' => true, 'avantages' => ['Tuteur IA sans limite']],
+    ['id' => 'abo_pro_a', 'prix' => 20000, 'ancien' => 24000, 'formule' => true],
+    ['id' => 'abo_starter_m', 'prix' => 1100, 'formule' => true, 'grille' => '20261112'],
+]]];
+ok('ligne antérieure à la grille : Élite exigé à 2 000 F, pas 3 000', vrt_prix_catalogue($dbAncien, 'subscription', 'abo_elite_m') === 2000);
+ok('… Pro à l’année exigé à 13 500 F, pas 20 000', vrt_prix_catalogue($dbAncien, 'subscription', 'abo_pro_a') === 13500);
+ok('… et ses avantages sont ceux du code', !in_array('Tuteur IA sans limite', vrt_plan_formule($dbAncien, 'abo_elite_m')['avantages'] ?? [], true));
+ok('prix réglé par l’administration APRÈS la grille : il l’emporte (1 100 F)', vrt_prix_catalogue($dbAncien, 'subscription', 'abo_starter_m') === 1100);
+$dbRetire = ['elearning' => ['plans' => [['id' => 'abo_elite_m', 'prix' => 3000, 'formule' => true, 'actif' => false]]]];
+ok('une formule retirée de la vente le reste, même ancienne', vrt_prix_catalogue($dbRetire, 'subscription', 'abo_elite_m') === null);
+
 titre('6. Réglage par la base');
 $dbR = $db; $dbR['elearning']['droitsFormules'] = ['starter' => ['fichesSemaine' => 15, 'labos' => true]];
 $d = vrt_droits_compte(compte('a_starter', ['abo_starter_m']), $dbR);
