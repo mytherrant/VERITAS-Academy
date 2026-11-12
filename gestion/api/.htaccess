@@ -1,0 +1,6 @@
+# VÉRITAS Gestion — API (gestion/api/)
+# Fichiers internes (_*.php), base SQLite de développement et données : jamais servis.
+<FilesMatch "^(_.*\.php|.*\.sqlite.*)$">
+    Require all denied
+</FilesMatch>
+Options -Indexes

@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La tontine des mamans — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’ECM (3e) : les associations à caractère économique, la tontine et la coopérative ; fonctionnement, avantages, règles.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/3e-ecm-tontine-et-cooperative.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="La tontine des mamans — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’ECM (3e) : les associations à caractère économique, la tontine et la coopérative ; fonctionnement, avantages, règles.">
+<meta property="og:url" content="https://veritas-school.com/scenes/3e-ecm-tontine-et-cooperative.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"La tontine des mamans","description":"Scène animée d’ECM (3e) : les associations à caractère économique, la tontine et la coopérative ; fonctionnement, avantages, règles.","url":"https://veritas-school.com/scenes/3e-ecm-tontine-et-cooperative.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"3ᵉ","about":"Éducation à la citoyenneté et à la morale","teaches":"Comprendre le fonctionnement d’une tontine (cotisations, tour de bénéficiaire, règles, sanctions) et d’une coopérative (mise en commun pour produire et vendre) ; mesurer leur rôle dans la vie économique et sociale.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '3e-ecm-tontine',
+  discipline: 'Éducation à la citoyenneté et à la morale', niveau: '3e',
+  titre: 'La tontine des mamans',
+  decor: 'case_nuit', lieu: 'Un quartier de Bafoussam', moment: 'Le dimanche de la réunion',
+  objectif: 'Comprendre le fonctionnement d’une tontine (cotisations, tour de bénéficiaire, règles, sanctions) et d’une coopérative (mise en commun pour produire et vendre) ; mesurer leur rôle dans la vie économique et sociale.',
+  programme: 'Progression harmonisée 3e · Chapitre 3 (associations à caractère économique), leçon 7 (les tontines), leçon 8 (les coopératives), TD 3 (étude d’une coopérative : l’UCCAO)',
+  jauges: [
+    { id: 'confiance', nom: 'Confiance entre membres', val: 70, couleur: '#1F9D5B' },
+    { id: 'caisse', nom: 'Caisse de la tontine', val: 0, couleur: '#D98E04' }
+  ],
+  personnages: {
+    presidente: { nom: 'Mama Kamga, présidente', couleur: '#5A2E5A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#5A2E5A', habit: '#5A2E5A', objet: 'dossier' } },
+    tresoriere: { nom: 'Mama Fotso, trésorière', couleur: '#2E6B5A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#2E6B5A', habit: '#2E6B5A', objet: 'sac' } },
+    beneficiaire:{ nom: 'Mama Tchoumi, bénéficiaire du jour', couleur: '#C2551F', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#C2551F', habit: '#C2551F' } },
+    retardataire:{ nom: 'Mama Djeumo, en retard de cotisation', couleur: '#8A5A2B', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#8A5A2B', habit: '#B4793F' } },
+    fille:      { nom: 'Ornella, élève de 3e, secrétaire de séance', couleur: '#1F6F78', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses', objet: 'livre' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['presidente', 'tresoriere', 'fille'], txt: 'Chaque dimanche, dix femmes du quartier se réunissent. Chacune verse 10 000 francs. Chaque semaine, une membre différente reçoit toute la somme. Ornella tient le cahier de séance.', objet: { i: 'bourse', lib: 'La caisse' } },
+    { t: 'dit', qui: 'presidente', txt: 'Ouverture de la séance. Trésorière, les cotisations !' },
+    { t: 'question', q: 'Dix membres versent chacune 10 000 francs. Combien reçoit la bénéficiaire du jour ?',
+      options: [
+        { txt: '100 000 francs.', ok: true, retour: '10 × 10 000 = 100 000. En dix semaines, chacune aura reçu une fois la grosse somme.' },
+        { txt: '10 000 francs.', retour: 'C’est ce que verse chaque membre ; la bénéficiaire reçoit toutes les cotisations.' }
+      ] },
+    { t: 'atelier', mode: 'monnaie', titre: 'Atelier · la cotisation', consigne: 'Tu verses ta cotisation de la semaine. Paie exactement 10 000 FCFA.', cible: 10000, pieces: [5000, 2000, 1000, 500], devise: 'FCFA',
+      bravo: 'Cotisation versée. Ornella note ton nom dans le cahier.', jauges: { caisse: 50 } },
+    { t: 'recit', entre: ['beneficiaire'], txt: 'C’est le tour de Mama Tchoumi.' },
+    { t: 'dit', qui: 'beneficiaire', emo: 'joie', txt: 'Avec ces 100 000 francs, j’achète un congélateur pour vendre des jus et de l’eau fraîche devant chez moi. Seule, je n’aurais jamais pu épargner autant d’un coup.', jauges: { caisse: 100 } },
+    { t: 'remarque', titre: 'La tontine', txt: 'Une tontine est une association d’épargne et de crédit fondée sur la confiance : les membres cotisent régulièrement et chacune bénéficie à tour de rôle de la somme totale. Elle permet de financer un projet, une rentrée scolaire, un événement, sans banque ni intérêts élevés. Elle a souvent aussi une caisse de secours et un rôle de solidarité.' },
+    { t: 'recit', entre: ['retardataire'], txt: 'Mama Djeumo arrive en retard, les mains vides.', jauges: { confiance: 55 } },
+    { t: 'dit', qui: 'retardataire', emo: 'triste', txt: 'Je n’ai pas pu cotiser : mon fils était malade, j’ai tout dépensé à l’hôpital.' },
+    { t: 'choix', qui: 'presidente', q: 'Tu es la présidente. Que décides-tu ?',
+      options: [
+        { txt: 'Je l’exclus immédiatement : la règle, c’est la règle.', consequence: 'La règle est appliquée, mais la tontine perd une membre fidèle et l’esprit de solidarité en souffre.', jauges: { confiance: -10 } },
+        { txt: 'J’applique le règlement : la caisse de secours avance sa cotisation, qu’elle remboursera dans un mois, avec une petite pénalité.', consequence: 'La règle est respectée et la solidarité aussi : la confiance se renforce.', jauges: { confiance: 20 } },
+        { txt: 'Je fais comme si de rien n’était.', consequence: 'D’autres membres se demandent pourquoi elles cotisent, elles : la confiance s’effrite.', jauges: { confiance: -20 } }
+      ],
+      oeuvre: 'Une tontine tient grâce à un règlement écrit, connu de tous : montant, calendrier, ordre des bénéficiaires, sanctions, caisse de secours.' },
+    { t: 'dit', qui: 'fille', txt: 'Maman, au collège, on étudie aussi les coopératives. C’est pareil ?' },
+    { t: 'dit', qui: 'tresoriere', txt: 'Presque. Dans une coopérative, des producteurs mettent en commun pour acheter des engrais, transformer et vendre ensemble, à meilleur prix. Ici, à l’Ouest, l’UCCAO réunit des coopératives de producteurs de café depuis la fin des années 1950.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · tontine ou coopérative ?', consigne: 'Classe chaque caractéristique.',
+      cats: ['Tontine', 'Coopérative'],
+      items: [
+        { txt: 'Chaque membre reçoit à tour de rôle la somme des cotisations.', cat: 0 },
+        { txt: 'Des producteurs vendent ensemble leur récolte.', cat: 1 },
+        { txt: 'On achète en commun les engrais et le matériel.', cat: 1 },
+        { txt: 'On épargne sans passer par une banque.', cat: 0 },
+        { txt: 'On transforme ensemble le produit (décorticage du café).', cat: 1 }
+      ],
+      bravo: 'Tontine : épargne et crédit entre membres. Coopérative : production et vente en commun.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · une séance de tontine', consigne: 'Remets dans l’ordre le déroulement d’une séance.',
+      items: [
+        'La présidente ouvre la séance.',
+        'Chaque membre verse sa cotisation.',
+        'La trésorière compte et la secrétaire note.',
+        'La bénéficiaire du jour reçoit la somme.',
+        'On traite les retards selon le règlement.'
+      ],
+      bravo: 'Un cahier bien tenu, c’est la mémoire et la garantie de la tontine.', jauges: { confiance: 85 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · une tontine solide',
+    intro: 'Règle la régularité des cotisations, la clarté du règlement et la solidarité : la tontine traverse-t-elle l’année ?',
+    persos: ['presidente', 'tresoriere', 'beneficiaire', 'retardataire', 'fille'],
+    curseurs: [
+      { id: 'regularite', nom: 'Régularité des cotisations', val: 80, bas: 'irrégulières', haut: 'ponctuelles' },
+      { id: 'reglement', nom: 'Clarté du règlement', val: 70, bas: 'oral, flou', haut: 'écrit, connu' },
+      { id: 'solidarite', nom: 'Solidarité (caisse de secours)', val: 60, bas: 'aucune', haut: 'forte' }
+    ],
+    scenarios: [
+      { nom: 'La tontine des mamans', icone: 'bourse', valeurs: { regularite: 80, reglement: 70, solidarite: 60 } },
+      { nom: 'Sans règlement', icone: 'nuage', valeurs: { reglement: 10, regularite: 40 } },
+      { nom: 'Sans solidarité', icone: 'balance', valeurs: { solidarite: 5 } }
+    ],
+    liens: [
+      { a: 'presidente', b: 'tresoriere', type: 'confiance', lib: 'bureau', base: .6, poids: { reglement: .3 } },
+      { a: 'beneficiaire', b: 'presidente', type: 'confiance', lib: 'reçoit', base: .5, poids: { regularite: .3 } },
+      { a: 'retardataire', b: 'presidente', type: 'conflit', lib: 'retard', base: .3, poids: { solidarite: -.4 } },
+      { a: 'fille', b: 'tresoriere', type: 'alliance', lib: 'cahier', base: .5 }
+    ],
+    issue: function(v){
+      if(v.reglement < 30){ return { niveau: 'ko', badge: 'La tontine éclate', recit: 'Sans règlement écrit, on se dispute l’ordre des tours et les retards : la dernière bénéficiaire ne reçoit rien.', apres: 'La confiance a besoin de règles claires.', themes: ['règlement', 'confiance'] }; }
+      if(v.solidarite < 25){ return { niveau: 'moyen', badge: 'Une tontine sans cœur', recit: 'Les règles sont appliquées strictement : au premier coup dur, une membre est exclue, d’autres s’en vont.', apres: 'La tontine est aussi une institution de solidarité.', themes: ['solidarité'] }; }
+      if(v.regularite > 65 && v.reglement > 55){ return { niveau: 'ok', badge: 'Une année réussie', recit: 'Chacune a reçu son tour : un congélateur, des frais de scolarité, un petit commerce.', apres: 'Épargner ensemble, c’est se donner les moyens d’investir.', themes: ['épargne', 'tontine'] }; }
+      return { niveau: 'moyen', badge: 'Une année difficile', recit: 'Retards et rattrapages : la tontine tient, mais de justesse.', apres: 'La ponctualité de chacune garantit le tour de toutes.', themes: ['ponctualité'] };
+    }
+  },
+  quiz: [
+    { q: 'Qu’est-ce qu’une tontine ?', options: [
+      { txt: 'Une association où les membres cotisent et reçoivent la somme à tour de rôle.', ok: true, retour: 'Épargne et crédit fondés sur la confiance.' },
+      { txt: 'Une banque d’État.', retour: 'Non.' } ] },
+    { q: 'Douze membres cotisent 5 000 francs. Combien reçoit la bénéficiaire ?', options: [
+      { txt: '60 000 francs.', ok: true, retour: '12 × 5 000.' },
+      { txt: '5 000 francs.', retour: 'Non.' } ] },
+    { q: 'Qu’est-ce qu’une coopérative ?', options: [
+      { txt: 'Une association de producteurs qui produisent, transforment ou vendent ensemble.', ok: true, retour: 'Comme les coopératives de café de l’UCCAO.' },
+      { txt: 'Une tontine de jeunes.', retour: 'Non.' } ] },
+    { q: 'Que signifie UCCAO ?', options: [
+      { txt: 'Union centrale des coopératives agricoles de l’Ouest.', ok: true, retour: 'Café arabica de l’Ouest.' },
+      { txt: 'Union camerounaise des commerçants.', retour: 'Non.' } ] },
+    { q: 'Pourquoi un règlement écrit est-il important ?', options: [
+      { txt: 'Il fixe pour tous les montants, l’ordre des tours et les sanctions.', ok: true, retour: 'Il protège la confiance.' },
+      { txt: 'Il n’est pas utile.', retour: 'Sans lui, les disputes éclatent.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Tontine : cotisations régulières, bénéficiaire à tour de rôle, règlement, caisse de secours ; épargne et solidarité.',
+      'Coopérative : des producteurs s’unissent pour acheter, transformer et vendre en commun (exemple : l’UCCAO à l’Ouest).',
+      'Ces associations financent des projets là où l’accès aux banques est difficile.',
+      'Elles reposent sur la confiance, garantie par des règles claires.'
+    ],
+    ecrire: 'Rédigez le règlement intérieur (huit articles) d’une tontine de votre classe : montant, fréquence, ordre des bénéficiaires, retards, caisse de secours.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>La tontine des mamans</h1>
+<p><b>Éducation à la citoyenneté et à la morale · 3ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Comprendre le fonctionnement d’une tontine (cotisations, tour de bénéficiaire, règles, sanctions) et d’une coopérative (mise en commun pour produire et vendre) ; mesurer leur rôle dans la vie économique et sociale.</p>
+<p>Programme : Progression harmonisée 3e · Chapitre 3 (associations à caractère économique), leçon 7 (les tontines), leçon 8 (les coopératives), TD 3 (étude d’une coopérative : l’UCCAO)</p>
+<p>Lieu : Un quartier de Bafoussam · Le dimanche de la réunion</p>
+<h3>Personnages</h3><ul><li>Mama Kamga, présidente</li><li>Mama Fotso, trésorière</li><li>Mama Tchoumi, bénéficiaire du jour</li><li>Mama Djeumo, en retard de cotisation</li><li>Ornella, élève de 3e, secrétaire de séance</li></ul>
+<h3>La scène</h3>
+<p>Chaque dimanche, dix femmes du quartier se réunissent. Chacune verse 10 000 francs. Chaque semaine, une membre différente reçoit toute la somme. Ornella tient le cahier de séance.</p>
+<p><b>Mama Kamga, présidente</b> : Ouverture de la séance. Trésorière, les cotisations !</p>
+<p><b>Question :</b> Dix membres versent chacune 10 000 francs. Combien reçoit la bénéficiaire du jour ?</p><ul><li>100 000 francs. <b>(bonne réponse)</b></li><li>10 000 francs.</li></ul><p>10 × 10 000 = 100 000. En dix semaines, chacune aura reçu une fois la grosse somme.</p>
+<h4>Atelier · la cotisation</h4><p>Tu verses ta cotisation de la semaine. Paie exactement 10 000 FCFA.</p>
+<p>Cotisation versée. Ornella note ton nom dans le cahier.</p>
+<p>C’est le tour de Mama Tchoumi.</p>
+<p><b>Mama Tchoumi, bénéficiaire du jour</b> : Avec ces 100 000 francs, j’achète un congélateur pour vendre des jus et de l’eau fraîche devant chez moi. Seule, je n’aurais jamais pu épargner autant d’un coup.</p>
+<h4>La tontine</h4><p>Une tontine est une association d’épargne et de crédit fondée sur la confiance : les membres cotisent régulièrement et chacune bénéficie à tour de rôle de la somme totale. Elle permet de financer un projet, une rentrée scolaire, un événement, sans banque ni intérêts élevés. Elle a souvent aussi une caisse de secours et un rôle de solidarité.</p>
+<p>Mama Djeumo arrive en retard, les mains vides.</p>
+<p><b>Mama Djeumo, en retard de cotisation</b> : Je n’ai pas pu cotiser : mon fils était malade, j’ai tout dépensé à l’hôpital.</p>
+<p><b>À toi de décider :</b> Tu es la présidente. Que décides-tu ?</p><ul><li>Je l’exclus immédiatement : la règle, c’est la règle. — La règle est appliquée, mais la tontine perd une membre fidèle et l’esprit de solidarité en souffre.</li><li>J’applique le règlement : la caisse de secours avance sa cotisation, qu’elle remboursera dans un mois, avec une petite pénalité. — La règle est respectée et la solidarité aussi : la confiance se renforce.</li><li>Je fais comme si de rien n’était. — D’autres membres se demandent pourquoi elles cotisent, elles : la confiance s’effrite.</li></ul>
+<p><b>Ornella, élève de 3e, secrétaire de séance</b> : Maman, au collège, on étudie aussi les coopératives. C’est pareil ?</p>
+<p><b>Mama Fotso, trésorière</b> : Presque. Dans une coopérative, des producteurs mettent en commun pour acheter des engrais, transformer et vendre ensemble, à meilleur prix. Ici, à l’Ouest, l’UCCAO réunit des coopératives de producteurs de café depuis la fin des années 1950.</p>
+<h4>Atelier · tontine ou coopérative ?</h4><p>Classe chaque caractéristique.</p>
+<ul><li><b>Tontine</b> : Chaque membre reçoit à tour de rôle la somme des cotisations. ; On épargne sans passer par une banque.</li><li><b>Coopérative</b> : Des producteurs vendent ensemble leur récolte. ; On achète en commun les engrais et le matériel. ; On transforme ensemble le produit (décorticage du café).</li></ul>
+<p>Tontine : épargne et crédit entre membres. Coopérative : production et vente en commun.</p>
+<h4>Atelier · une séance de tontine</h4><p>Remets dans l’ordre le déroulement d’une séance.</p>
+<ol><li>La présidente ouvre la séance.</li><li>Chaque membre verse sa cotisation.</li><li>La trésorière compte et la secrétaire note.</li><li>La bénéficiaire du jour reçoit la somme.</li><li>On traite les retards selon le règlement.</li></ol>
+<p>Un cahier bien tenu, c’est la mémoire et la garantie de la tontine.</p>
+<h3>Quiz</h3><ol><li>Qu’est-ce qu’une tontine ? — <b>Une association où les membres cotisent et reçoivent la somme à tour de rôle.</b> Épargne et crédit fondés sur la confiance.</li><li>Douze membres cotisent 5 000 francs. Combien reçoit la bénéficiaire ? — <b>60 000 francs.</b> 12 × 5 000.</li><li>Qu’est-ce qu’une coopérative ? — <b>Une association de producteurs qui produisent, transforment ou vendent ensemble.</b> Comme les coopératives de café de l’UCCAO.</li><li>Que signifie UCCAO ? — <b>Union centrale des coopératives agricoles de l’Ouest.</b> Café arabica de l’Ouest.</li><li>Pourquoi un règlement écrit est-il important ? — <b>Il fixe pour tous les montants, l’ordre des tours et les sanctions.</b> Il protège la confiance.</li></ol>
+<h3>À retenir</h3><ul><li>Tontine : cotisations régulières, bénéficiaire à tour de rôle, règlement, caisse de secours ; épargne et solidarité.</li><li>Coopérative : des producteurs s’unissent pour acheter, transformer et vendre en commun (exemple : l’UCCAO à l’Ouest).</li><li>Ces associations financent des projets là où l’accès aux banques est difficile.</li><li>Elles reposent sur la confiance, garantie par des règles claires.</li></ul>
+<h3>À écrire</h3><p>Rédigez le règlement intérieur (huit articles) d’une tontine de votre classe : montant, fréquence, ordre des bénéficiaires, retards, caisse de secours.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="3e-ecm-tontine-et-cooperative.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La nuit en cellule — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Le Vieux Nègre et la Médaille de Ferdinand Oyono : le jour même de sa décoration, Meka est jeté en cellule. Seul, pour la première fois face à lui-même.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/vieux-negre-la-nuit-en-cellule.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="La nuit en cellule — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’après Le Vieux Nègre et la Médaille de Ferdinand Oyono : le jour même de sa décoration, Meka est jeté en cellule. Seul, pour la première fois face à lui-même.">
+<meta property="og:url" content="https://veritas-school.com/scenes/vieux-negre-la-nuit-en-cellule.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"La nuit en cellule","description":"Scène animée d’après Le Vieux Nègre et la Médaille de Ferdinand Oyono : le jour même de sa décoration, Meka est jeté en cellule. Seul, pour la première fois face à lui-même.","url":"https://veritas-school.com/scenes/vieux-negre-la-nuit-en-cellule.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"Terminale","about":"Français","teaches":"Étudier le seul moment où Meka est seul : la solitude libère la mémoire des ancêtres et une révolte verbale, que le texte fait entendre sans la rendre efficace.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"},"isBasedOn":{"@type":"Book","name":"Le Vieux Nègre et la Médaille","author":{"@type":"Person","name":"Ferdinand Oyono (1956)"}}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'vieux-negre-cellule',
+  discipline: 'Français', niveau: 'Terminale',
+  oeuvre: 'Le Vieux Nègre et la Médaille', auteur: 'Ferdinand Oyono (1956)',
+  titre: 'La nuit en cellule',
+  decor: 'case_nuit', ambiance: 'nuit', lieu: 'Doum, le poste de police', moment: 'Troisième partie, chapitre I',
+  avertissement: 'Les passages suivis de la référence du livre sont ceux du roman, recopiés tels quels ; les coupes sont signalées par […].',
+  objectif: 'Étudier le seul moment où Meka est seul : la solitude libère la mémoire des ancêtres et une révolte verbale, que le texte fait entendre sans la rendre efficace.',
+  jauges: [
+    { id: 'honte', nom: 'Honte', val: 60, couleur: '#7B5CD6' },
+    { id: 'revolte', nom: 'Révolte', val: 10, couleur: '#C0392B' }
+  ],
+  personnages: {
+    meka:      { nom: 'Meka', couleur: '#8A5A2B', look: { tenue: 'costume', col: '#2B3A55', peau: 'fonce', vieux: true, cheveux: 'ras', habit: '#6B4A2B', moustache: true } },
+    garde:     { nom: 'Le garde', couleur: '#14254A', look: { metier: 'policier', peau: 'fonce', cheveux: 'ras' } },
+    brigadier: { nom: 'Le brigadier', couleur: '#3A4A6B', look: { metier: 'policier', peau: 'fonce', cheveux: 'ras', moustache: true } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['meka', 'garde', 'brigadier'], txt: 'Le jour même de sa décoration, Meka s’est perdu sous l’orage au retour du Foyer Africain. Le commissaire Gosier d’Oiseau l’a arrêté pour avoir circulé la nuit. La médaille qu’il porte encore n’a servi à rien.' },
+    { t: 'recit', txt: 'Ils contournèrent la véranda puis arrivèrent devant une petite porte faite du bois d’une caisse à vin. Le second éclaira le brigadier qui se pencha sur le cadenas. Il ouvrit la porte toute grande.', cite: 'Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I', objet: { i: 'porte', lib: 'La porte de la cellule' } },
+    { t: 'question', q: 'Une porte « faite du bois d’une caisse à vin » : que suggère ce détail ?',
+      options: [
+        { txt: 'Le mépris : on enferme les détenus derrière une caisse de récupération.', ok: true, retour: 'Un détail matériel qui dit la considération accordée aux prisonniers.' },
+        { txt: 'Que le poste de police est riche.', retour: 'C’est le contraire : tout est bricolé.' }
+      ] },
+    { t: 'dit', qui: 'meka', emo: 'fier', jeu: 'il se retourne sur le seuil', txt: 'Dieu vous voit !', cite: 'Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I' },
+    { t: 'recit', sort: ['garde', 'brigadier'], txt: 'Le garde lui décocha un coup de pied qui lui fit perdre l’équilibre et le précipita à l’intérieur. La porte se ferma violemment sur ses talons. Meka se retrouva dans les ténèbres de la création.', cite: 'Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I', jauges: { honte: 80 } },
+    { t: 'recit', txt: 'Jamais il ne s’était ainsi trouvé face à face avec lui-même. Il ne savait comment capter les pensées et les images qui bondissaient dans sa tête.', cite: 'Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I' },
+    { t: 'dit', qui: 'meka', emo: 'triste', jeu: 'tout haut, allongé sur le sol', txt: 'Quelle honte ! Quelle honte !', cite: 'Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I', jauges: { honte: 95 } },
+    { t: 'recit', txt: 'Dehors, un oiseau de nuit cria. Meka se sentit très malheureux. Ce cri lugubre lui rappela son lit de bambou et le grand feu que faisait Kelara pendant les nuits pluvieuses.', cite: 'Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I' },
+    { t: 'recit', txt: 'Il aimait alors entendre le crissement de la pluie sur le raphia du toit pendant que ses paupières s’appesantissaient de sommeil. Il glissait son bras sous la nuque de Kelara qui lovait alors ses cheveux tressés dans le creux de son épaule. Des larmes lui vinrent aux yeux.', cite: 'Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I' },
+    { t: 'question', q: 'Pourquoi ce souvenir de Kelara arrive-t-il juste maintenant ?',
+      options: [
+        { txt: 'La cellule froide appelle par contraste le feu, la pluie sur le toit, la tendresse du foyer.', ok: true, retour: 'Seul, Meka retrouve ce qu’il possède vraiment : sa maison, sa femme.' },
+        { txt: 'Kelara est dans la cellule voisine.', retour: 'Non : c’est un souvenir.' }
+      ] },
+    { t: 'pense', qui: 'meka', emo: 'colere', txt: 'Comment lui, le descendant des grands Meka, « les Souches-immuables-sous-l’orage », les « Rivières-qui-n’ont-pas-peur-de-la-forêt », les « Serpents-pythons », les « Rocs », les « Fromagers », les « Éléphants », les « Lions », le fils de ceux-là mêmes qui n’avaient jamais ployé sous la force d’un autre homme, lui qui avait le culte de l’amitié, comment pouvait-on le traiter ainsi', cite: 'Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I', jauges: { revolte: 50 } },
+    { t: 'question', q: 'Les noms de la lignée de Meka viennent tous du même domaine. Lequel ?',
+      options: [
+        { txt: 'La nature : arbres, rochers, rivières, animaux puissants.', ok: true, retour: 'Souches, Rivières, Serpents-pythons, Rocs, Fromagers, Éléphants, Lions : la force qui ne plie pas.' },
+        { txt: 'La guerre.', retour: 'Ce sont des forces naturelles, pas des armes.' }
+      ] },
+    { t: 'pense', qui: 'meka', emo: 'doute', txt: 'Mais bon Dieu ! à quoi servait-il d’être innocent et humble dans ce monde où la vertu et l’honnêteté ne payaient plus ? et où l’homme était devenu impersonnel comme un grain de sable dans le désert !', cite: 'Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I' },
+    { t: 'choix', qui: 'meka', q: 'Tu es Meka. La porte est fermée, la nuit est longue. Que fais-tu ?',
+      options: [
+        { txt: 'Attendre le matin en silence, comme toujours.', consequence: 'Tu restes l’homme humble qu’on a décoré. Mais la honte reste.', jauges: { revolte: 20 } },
+        { txt: 'Crier ma colère contre les gardes.', consequence: 'C’est ce que fait Meka : la révolte sort enfin, mais derrière une porte fermée.', jauges: { revolte: 100 } },
+        { txt: 'Prier.', consequence: '« Mon Dieu ! » : Meka l’a déjà crié. Personne n’a répondu.', jauges: { honte: 90 } }
+      ],
+      oeuvre: 'Meka ébranle la porte à coups de pied et défie les gardes, comme lorsqu’il défiait les hommes à la lutte dans son jeune temps.' },
+    { t: 'dit', qui: 'meka', emo: 'colere', jeu: 'il ébranle la porte', txt: 'Esclaves des incirconcis ! […] Ouvrez ! ouvrez ! pour voir le vrai Meka !… […] Oserez-vous me regarder ? Jamais mes omoplates n’ont touché la poussière sous la force d’un autre homme !', cite: 'Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I', jauges: { revolte: 100 } },
+    { t: 'recit', txt: 'Il mettait un genou en terre, tendait le bras droit à l’invisible adversaire, comme lorsqu’il défiait les hommes à la lutte dans son jeune temps. Il remuait ses épaules et criait à faire sauter le toit de tôle.', cite: 'Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I' },
+    { t: 'remarque', titre: 'Une révolte sans témoin', txt: 'Meka défie un « invisible adversaire » : les gardes ne l’entendent pas, la porte ne s’ouvre pas. Le roman fait entendre la révolte sans jamais la rendre efficace. C’est sa force, et sa tristesse.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · la nuit de Meka', consigne: 'Remets les étapes de la nuit dans l’ordre.',
+      items: ['« Dieu vous voit ! » puis le coup de pied.', 'Seul « face à face avec lui-même ».', '« Quelle honte ! »', 'Le souvenir de Kelara et du feu.', 'La lignée des grands Meka.', 'La révolte contre la porte fermée.'],
+      bravo: 'De la honte à la révolte, en passant par la mémoire : toute une vie remonte en une nuit.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · la cellule de Doum',
+    intro: 'Règle la honte de Meka, la force de sa mémoire et la peur des gardes : que reste-t-il de Meka au matin ?',
+    persos: ['meka', 'garde', 'brigadier'],
+    curseurs: [
+      { id: 'honte', nom: 'Honte', val: 90, bas: 'aucune', haut: 'écrasante', lecture: { haut: '« Quelle honte ! »', bas: 'Il sait qu’il est innocent.' } },
+      { id: 'memoire', nom: 'Mémoire des ancêtres', val: 85, bas: 'oubliée', haut: 'vivante', lecture: { haut: 'Les Souches-immuables-sous-l’orage…', bas: 'Meka ne se souvient de rien qui le tienne debout.' } },
+      { id: 'temoin', nom: 'Quelqu’un l’entend', val: 5, bas: 'personne', haut: 'tout le poste', lecture: { haut: 'Les gardes entendraient « le vrai Meka ».', bas: 'Il défie un « invisible adversaire ».' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans le roman', icone: 'livre', valeurs: { honte: 90, memoire: 85, temoin: 5 } },
+      { nom: 'Et sans la mémoire ?', icone: 'triste', valeurs: { memoire: 10 } },
+      { nom: 'Et si tout le poste l’entendait ?', icone: 'groupe', valeurs: { temoin: 90 } }
+    ],
+    liens: [
+      { a: 'garde', b: 'meka', type: 'domination', lib: 'le coup de pied', base: .8 },
+      { a: 'meka', b: 'garde', type: 'conflit', lib: 'la révolte', base: .2, poids: { memoire: .6 } },
+      { a: 'brigadier', b: 'garde', type: 'alliance', lib: 'le poste', base: .6 }
+    ],
+    issue: function(v){
+      if(v.memoire < 30){ return { niveau: 'ko', badge: 'Meka écrasé', recit: 'Sans la mémoire de sa lignée, Meka reste couché sur le sol froid, à répéter « quelle honte ».', apres: 'C’est la mémoire des ancêtres qui le relève dans le roman.', themes: ['humiliation', 'oubli'] }; }
+      if(v.temoin >= 60){ return { niveau: 'ok', badge: 'Le vrai Meka entendu', recit: 'Les gardes accourent, et ils voient enfin un homme debout, pas un « vieux nègre ».', apres: 'Le roman ne lui accorde pas ce témoin : sa révolte reste enfermée.', themes: ['dignité', 'révolte'] }; }
+      return { niveau: 'moyen', badge: 'Une révolte enfermée', recit: 'Meka crie, défie, éclate de rire contre une porte qui ne s’ouvre pas.', apres: 'C’est le chapitre : la révolte est enfin dite, mais elle ne change rien. Pas encore.', themes: ['révolte', 'mémoire', 'colonisation'] };
+    }
+  },
+  fiche: {"accroche": "Meka a donné ses terres à la mission et ses deux fils à la guerre pour la France. On va le décorer. Que vaut une médaille quand on attend debout, sous le soleil, dans un cercle de chaux ?", "resume": "Dans le Cameroun sous administration française, le vieux Meka apprend qu’il recevra une médaille. Tout le village se prépare, on part pour Doum, on attend la cérémonie. Un roman en trois parties de longueur décroissante — la préparation, la célébration, puis la chute — où l’humour fait apparaître le décalage entre l’honneur proclamé et la vie réelle des colonisés.", "personnages": [{"nom": "Meka", "role": "vieux paysan converti, décoré par l’administration.", "cle": "meka"}, {"nom": "Kelara", "role": "son épouse, mère de deux fils morts à la guerre.", "cle": "kelara"}, {"nom": "Engamba", "role": "le frère de Kelara, beau-frère de Meka.", "cle": "engamba"}, {"nom": "M. Fouconi", "role": "administrateur en chef de Doum, organisateur de la cérémonie.", "cle": "fouconi"}, {"nom": "Gosier d’Oiseau", "role": "le commissaire de police de Doum."}, {"nom": "Le père Vandermayer", "role": "le prêtre de la mission."}], "aLire": [{"ou": "La première partie", "pourquoi": "L’annonce de la décoration et les préparatifs : le village tout entier s’agite."}, {"ou": "La deuxième partie", "pourquoi": "La cérémonie, ses discours, son soleil."}, {"ou": "La troisième partie", "pourquoi": "Une nuit qui va tout changer pour Meka."}], "siTuAimes": "rire et réfléchir en même temps, Oyono manie une ironie que tu reconnaîtras à chaque page.", "reperes": ["Auteur : Ferdinand Oyono (1929-2010), écrivain et diplomate camerounais", "Publié en 1956, comme Une vie de boy", "Trois parties de 5, 3 et 3 chapitres", "Fiction : Doum et ses personnages sont inventés"], "themes": ["la colonisation", "l’illusion", "l’humiliation", "l’ironie"], "cahier": {"lib": "Le cahier VÉRITAS de cette œuvre", "href": "../livrets/oeuvre-vieuxnegre.html"}},
+  quiz: [
+    { q: 'Pourquoi Meka est-il arrêté ?', options: [ { txt: 'Pour avoir circulé la nuit, après s’être perdu sous l’orage.', ok: true, retour: 'Le jour même de sa décoration.' }, { txt: 'Pour avoir volé.', retour: 'Non : il est innocent.' } ] },
+    { q: 'Que crie Meka sur le seuil de la cellule ?', options: [ { txt: '« Dieu vous voit ! »', ok: true, retour: 'Réponse : un coup de pied.' }, { txt: '« Au secours ! »', retour: 'Non : « Dieu vous voit ! »' } ] },
+    { q: 'Quel souvenir le cri de l’oiseau de nuit lui rappelle-t-il ?', options: [ { txt: 'Son lit de bambou et le grand feu que faisait Kelara.', ok: true, retour: 'La pluie sur le raphia, la tendresse.' }, { txt: 'La cérémonie de la médaille.', retour: 'Non : sa maison et sa femme.' } ] },
+    { q: 'Quelle phrase dit que Meka n’a jamais été seul avec lui-même ?', options: [ { txt: '« Jamais il ne s’était ainsi trouvé face à face avec lui-même. »', ok: true, retour: 'Le seul moment du roman où il est vraiment seul.' }, { txt: '« Quelle honte ! »', retour: 'C’est son cri, pas ce constat.' } ] },
+    { q: 'Que signifie « ployer » ?', options: [ { txt: 'Plier, céder sous une force.', ok: true, retour: 'Ses ancêtres n’avaient « jamais ployé ».' }, { txt: 'Pleurer.', retour: 'Non : plier.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'La cellule est le seul lieu où Meka se trouve « face à face avec lui-même ».',
+      'La porte « faite du bois d’une caisse à vin » dit le mépris pour les détenus.',
+      'La mémoire de Kelara et des ancêtres relève Meka : sa lignée porte des noms de forces naturelles.',
+      'La révolte éclate, mais contre une porte fermée : le texte la fait entendre sans la rendre efficace.'
+    ],
+    ecrire: 'Écris le monologue intérieur de Meka au lever du jour (vingt lignes) : que pense-t-il de la médaille qu’il porte encore ?'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>La nuit en cellule</h1>
+<p><b>Français · Terminale · Le Vieux Nègre et la Médaille · Ferdinand Oyono (1956)</b></p>
+<p><i>Les passages suivis de la référence du livre sont ceux du roman, recopiés tels quels ; les coupes sont signalées par […].</i></p>
+<h3>Objectif</h3><p>Étudier le seul moment où Meka est seul : la solitude libère la mémoire des ancêtres et une révolte verbale, que le texte fait entendre sans la rendre efficace.</p>
+<p>Lieu : Doum, le poste de police · Troisième partie, chapitre I</p>
+<h3>Personnages</h3><ul><li>Meka</li><li>Le garde</li><li>Le brigadier</li></ul>
+<h3>L’œuvre</h3>
+<p>Meka a donné ses terres à la mission et ses deux fils à la guerre pour la France. On va le décorer. Que vaut une médaille quand on attend debout, sous le soleil, dans un cercle de chaux ?</p>
+<p>Dans le Cameroun sous administration française, le vieux Meka apprend qu’il recevra une médaille. Tout le village se prépare, on part pour Doum, on attend la cérémonie. Un roman en trois parties de longueur décroissante — la préparation, la célébration, puis la chute — où l’humour fait apparaître le décalage entre l’honneur proclamé et la vie réelle des colonisés.</p>
+<ul><li><b>Meka</b> — vieux paysan converti, décoré par l’administration.</li><li><b>Kelara</b> — son épouse, mère de deux fils morts à la guerre.</li><li><b>Engamba</b> — le frère de Kelara, beau-frère de Meka.</li><li><b>M. Fouconi</b> — administrateur en chef de Doum, organisateur de la cérémonie.</li><li><b>Gosier d’Oiseau</b> — le commissaire de police de Doum.</li><li><b>Le père Vandermayer</b> — le prêtre de la mission.</li></ul>
+<p>Thèmes : la colonisation, l’illusion, l’humiliation, l’ironie</p>
+<h3>La scène</h3>
+<p>Le jour même de sa décoration, Meka s’est perdu sous l’orage au retour du Foyer Africain. Le commissaire Gosier d’Oiseau l’a arrêté pour avoir circulé la nuit. La médaille qu’il porte encore n’a servi à rien.</p>
+<blockquote><p>Ils contournèrent la véranda puis arrivèrent devant une petite porte faite du bois d’une caisse à vin. Le second éclaira le brigadier qui se pencha sur le cadenas. Il ouvrit la porte toute grande.<br><small>Extrait de l’œuvre — Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I</small></p></blockquote>
+<p><b>Question :</b> Une porte « faite du bois d’une caisse à vin » : que suggère ce détail ?</p><ul><li>Le mépris : on enferme les détenus derrière une caisse de récupération. <b>(bonne réponse)</b></li><li>Que le poste de police est riche.</li></ul><p>Un détail matériel qui dit la considération accordée aux prisonniers.</p>
+<blockquote><p><b>Meka</b> <i>(il se retourne sur le seuil)</i> :<br>Dieu vous voit !<br><small>Extrait de l’œuvre — Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I</small></p></blockquote>
+<blockquote><p>Le garde lui décocha un coup de pied qui lui fit perdre l’équilibre et le précipita à l’intérieur. La porte se ferma violemment sur ses talons. Meka se retrouva dans les ténèbres de la création.<br><small>Extrait de l’œuvre — Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I</small></p></blockquote>
+<blockquote><p>Jamais il ne s’était ainsi trouvé face à face avec lui-même. Il ne savait comment capter les pensées et les images qui bondissaient dans sa tête.<br><small>Extrait de l’œuvre — Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I</small></p></blockquote>
+<blockquote><p><b>Meka</b> <i>(tout haut, allongé sur le sol)</i> :<br>Quelle honte ! Quelle honte !<br><small>Extrait de l’œuvre — Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I</small></p></blockquote>
+<blockquote><p>Dehors, un oiseau de nuit cria. Meka se sentit très malheureux. Ce cri lugubre lui rappela son lit de bambou et le grand feu que faisait Kelara pendant les nuits pluvieuses.<br><small>Extrait de l’œuvre — Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I</small></p></blockquote>
+<blockquote><p>Il aimait alors entendre le crissement de la pluie sur le raphia du toit pendant que ses paupières s’appesantissaient de sommeil. Il glissait son bras sous la nuque de Kelara qui lovait alors ses cheveux tressés dans le creux de son épaule. Des larmes lui vinrent aux yeux.<br><small>Extrait de l’œuvre — Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I</small></p></blockquote>
+<p><b>Question :</b> Pourquoi ce souvenir de Kelara arrive-t-il juste maintenant ?</p><ul><li>La cellule froide appelle par contraste le feu, la pluie sur le toit, la tendresse du foyer. <b>(bonne réponse)</b></li><li>Kelara est dans la cellule voisine.</li></ul><p>Seul, Meka retrouve ce qu’il possède vraiment : sa maison, sa femme.</p>
+<blockquote><p><b>Meka</b> (en pensée) :<br>Comment lui, le descendant des grands Meka, « les Souches-immuables-sous-l’orage », les « Rivières-qui-n’ont-pas-peur-de-la-forêt », les « Serpents-pythons », les « Rocs », les « Fromagers », les « Éléphants », les « Lions », le fils de ceux-là mêmes qui n’avaient jamais ployé sous la force d’un autre homme, lui qui avait le culte de l’amitié, comment pouvait-on le traiter ainsi<br><small>Extrait de l’œuvre — Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I</small></p></blockquote>
+<p><b>Question :</b> Les noms de la lignée de Meka viennent tous du même domaine. Lequel ?</p><ul><li>La nature : arbres, rochers, rivières, animaux puissants. <b>(bonne réponse)</b></li><li>La guerre.</li></ul><p>Souches, Rivières, Serpents-pythons, Rocs, Fromagers, Éléphants, Lions : la force qui ne plie pas.</p>
+<blockquote><p><b>Meka</b> (en pensée) :<br>Mais bon Dieu ! à quoi servait-il d’être innocent et humble dans ce monde où la vertu et l’honnêteté ne payaient plus ? et où l’homme était devenu impersonnel comme un grain de sable dans le désert !<br><small>Extrait de l’œuvre — Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I</small></p></blockquote>
+<p><b>À toi de décider :</b> Tu es Meka. La porte est fermée, la nuit est longue. Que fais-tu ?</p><ul><li>Attendre le matin en silence, comme toujours. — Tu restes l’homme humble qu’on a décoré. Mais la honte reste.</li><li>Crier ma colère contre les gardes. — C’est ce que fait Meka : la révolte sort enfin, mais derrière une porte fermée.</li><li>Prier. — « Mon Dieu ! » : Meka l’a déjà crié. Personne n’a répondu.</li></ul>
+<blockquote><p><b>Meka</b> <i>(il ébranle la porte)</i> :<br>Esclaves des incirconcis ! […] Ouvrez ! ouvrez ! pour voir le vrai Meka !… […] Oserez-vous me regarder ? Jamais mes omoplates n’ont touché la poussière sous la force d’un autre homme !<br><small>Extrait de l’œuvre — Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I</small></p></blockquote>
+<blockquote><p>Il mettait un genou en terre, tendait le bras droit à l’invisible adversaire, comme lorsqu’il défiait les hommes à la lutte dans son jeune temps. Il remuait ses épaules et criait à faire sauter le toit de tôle.<br><small>Extrait de l’œuvre — Ferdinand Oyono, Le vieux nègre et la médaille, troisième partie, chap. I</small></p></blockquote>
+<h4>Une révolte sans témoin</h4><p>Meka défie un « invisible adversaire » : les gardes ne l’entendent pas, la porte ne s’ouvre pas. Le roman fait entendre la révolte sans jamais la rendre efficace. C’est sa force, et sa tristesse.</p>
+<h4>Atelier · la nuit de Meka</h4><p>Remets les étapes de la nuit dans l’ordre.</p>
+<ol><li>« Dieu vous voit ! » puis le coup de pied.</li><li>Seul « face à face avec lui-même ».</li><li>« Quelle honte ! »</li><li>Le souvenir de Kelara et du feu.</li><li>La lignée des grands Meka.</li><li>La révolte contre la porte fermée.</li></ol>
+<p>De la honte à la révolte, en passant par la mémoire : toute une vie remonte en une nuit.</p>
+<h3>Quiz</h3><ol><li>Pourquoi Meka est-il arrêté ? — <b>Pour avoir circulé la nuit, après s’être perdu sous l’orage.</b> Le jour même de sa décoration.</li><li>Que crie Meka sur le seuil de la cellule ? — <b>« Dieu vous voit ! »</b> Réponse : un coup de pied.</li><li>Quel souvenir le cri de l’oiseau de nuit lui rappelle-t-il ? — <b>Son lit de bambou et le grand feu que faisait Kelara.</b> La pluie sur le raphia, la tendresse.</li><li>Quelle phrase dit que Meka n’a jamais été seul avec lui-même ? — <b>« Jamais il ne s’était ainsi trouvé face à face avec lui-même. »</b> Le seul moment du roman où il est vraiment seul.</li><li>Que signifie « ployer » ? — <b>Plier, céder sous une force.</b> Ses ancêtres n’avaient « jamais ployé ».</li></ol>
+<h3>À retenir</h3><ul><li>La cellule est le seul lieu où Meka se trouve « face à face avec lui-même ».</li><li>La porte « faite du bois d’une caisse à vin » dit le mépris pour les détenus.</li><li>La mémoire de Kelara et des ancêtres relève Meka : sa lignée porte des noms de forces naturelles.</li><li>La révolte éclate, mais contre une porte fermée : le texte la fait entendre sans la rendre efficace.</li></ul>
+<h3>À écrire</h3><p>Écris le monologue intérieur de Meka au lever du jour (vingt lignes) : que pense-t-il de la médaille qu’il porte encore ?</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="vieux-negre-la-nuit-en-cellule.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

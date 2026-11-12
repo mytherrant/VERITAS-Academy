@@ -22,13 +22,17 @@
 'use strict';
 
 // Taille d'origine → taille relevée.
-const TAILLES = { '10': 12, '10.5': 12.5, '11': 13, '11.5': 13.5, '12': 14, '12.5': 14.5,
-  '13': 15, '13.5': 15.5, '14': 16, '14.5': 16.5, '15': 16.5, '15.5': 17 };
+// 29/10/2026 — chantier design, point 5 : « une seule échelle ». Le relèvement
+// de 2 px reste la règle, mais il tombe sur l'échelle du site (13 · 15 · 17 px)
+// au lieu de créer douze tailles voisines (12,5 · 13,5 · 14,5 · 16,5…), que
+// l'œil ne distingue pas et qui ne hiérarchisent rien.
+const TAILLES = { '10': 13, '10.5': 13, '11': 13, '11.5': 13, '12': 15, '12.5': 15,
+  '13': 15, '13.5': 15, '14': 17, '14.5': 17, '15': 17, '15.5': 17 };
 const GRAISSES = ['300', '400', '500', '600', '700', '800', 'italic 400', 'italic 500'];
-const CLASSES = { 'vbq-cat': 13, 'vbq-type': 15, 'vbq-prix-lbl': 12.5, 'vbq-mention': 13.5,
-  'vbq-fmt-papier': 13, 'vbq-fmt-ebook': 13, 'vbq-cta': 15, 'vbq-niv': 13, 'vbq-exos': 14,
-  'vbq-lire': 15, 'vcle-q': 16.5, 'vcle-d': 15.5, 'vnews-tab': 14.5, 'vnews-src': 13,
-  'vcal-note': 14.5, 'vcal-lien': 16 };
+const CLASSES = { 'vbq-cat': 13, 'vbq-type': 15, 'vbq-prix-lbl': 13, 'vbq-mention': 13,
+  'vbq-fmt-papier': 13, 'vbq-fmt-ebook': 13, 'vbq-cta': 15, 'vbq-niv': 13, 'vbq-exos': 15,
+  'vbq-lire': 15, 'vcle-q': 17, 'vcle-d': 15, 'vnews-tab': 15, 'vnews-src': 13,
+  'vcal-note': 15, 'vcal-lien': 17 };
 
 function cssSecondaires() {
   let css = '<style id="vrt-secondaires">\n/* Généré par tools/vitrine_lisibilite.cjs — ne pas éditer à la main. */\n';

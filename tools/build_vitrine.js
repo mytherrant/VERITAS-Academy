@@ -334,7 +334,12 @@ const ANCRES = {
      mais de câblage : 25 liens sur 44 n'avaient aucune raison de sortir. */
   '#souscrire': '#tarifs',
   '#compte-parent': '#parents',
-  '#matiere': '#elearning',
+  /* 30/10/2026 — PAS '#elearning' : les cartes de matières SONT sur l'écran
+     #elearning, elles y renvoyaient donc le visiteur — un clic, rien. Chaque
+     carte ouvre le catalogue de l'application filtré sur SA matière (passe
+     MATIERES ci-dessous) ; une carte de matière inconnue de la table ouvre
+     le catalogue entier plutôt que de tourner en rond. */
+  '#matiere': APP + '#matiere',
   /* ── Ce qui sort LÉGITIMEMENT vers l'application ────────────────────────
      Aucun équivalent dans la vitrine : ces parcours vivent dans l'app. */
   '#partenariat': APP + '#partenariat',
@@ -403,6 +408,9 @@ for (const cible of Object.values(ANCRES)) {
    prévenir, et une carte inconnue arrête la construction plutôt que de partir
    avec un lien mort.
    ══════════════════════════════════════════════════════════════════════════ */
+/* 30/10/2026 — Jeux, Concours blancs et Professeur Ambassa ont chacun une
+   adresse dans l'application (#jeux, #simulateur, #ambassa) : ils ne
+   renvoient plus à l'écran e-learning général. */
 const DEST_SERVICES = {
   /* Apprendre */
   'Cours par séquence':      '#elearning',
@@ -411,14 +419,14 @@ const DEST_SERVICES = {
   'Mon cahier en ligne':     'livrets/',
   'Œuvres au programme':     'oeuvres/',
   'Labos virtuels':          '#elearning',
-  'Jeux pédagogiques':       '#elearning',
+  'Jeux pédagogiques':       APP + '#jeux',
   /* S'entraîner */
   'Épreuves & annales':      APP + '#epreuves',
   'Corrigés des cahiers':    'corriges/',
   'Bulletins blancs':        '#elearning',
-  'Concours blancs':         '#elearning',
+  'Concours blancs':         APP + '#simulateur',
   /* Se faire aider */
-  'Professeur Ambassa':      '#elearning',
+  'Professeur Ambassa':      APP + '#ambassa',
   'Classes virtuelles':      '#elearning',
   'Orientation':             'parcours/',
   'Support WhatsApp':        'https://wa.me/237' + TEL.slice(4),
@@ -434,10 +442,12 @@ const DEST_SERVICES = {
   'Certificats vérifiables': APP + '#verifier-certificat',
   /* Répétitions — la carte EST la description (prix compris) ; « Découvrir »
      ne peut mener qu'à quelqu'un à qui parler, pas à une page de plus. */
-  'Répétitions au centre':   APP + '#contact',
-  'Répétitions à domicile':  APP + '#contact',
-  'Cours de rattrapage':     APP + '#contact',
-  'Préparation examens':     APP + '#contact'
+  /* 29/10/2026 — pas APP + '#contact' : charger l'application (~6 s) pour
+     un contact. La page de devis est légère et poste au serveur. */
+  'Répétitions au centre':   'decouvrir/devis.html?f=centre',
+  'Répétitions à domicile':  'decouvrir/devis.html?f=domicile',
+  'Cours de rattrapage':     'decouvrir/devis.html?f=rattrapage',
+  'Préparation examens':     'decouvrir/devis.html?f=examens'
 };
 
 /* Mêmes règles de vérification que pour ANCRES : une destination sur disque
@@ -468,6 +478,24 @@ for (const cible of Object.values(DEST_SERVICES)) {
       return '<h3' + attrs + '>' + titre + '</h3>' + milieu + 'href="' + cible + '"';
     });
   console.log('découvrir   : ' + posees + ' carte(s) rendue(s) branchée(s) sur leur destination');
+}
+
+/* Cartes de matières → catalogue de l'application filtré (#matiere?m=…).
+   Clés lues par _EL_MATIERES dans app.js : les deux tables vont ensemble. */
+const MATIERES = {
+  'Français': 'francais', 'Mathématiques': 'mathematiques', 'PCT': 'pct', 'SVT': 'svt',
+  'Histoire-Géo': 'histoire-geo', 'Anglais': 'anglais', 'Philosophie': 'philosophie',
+  'ECM & Informatique': 'ecm-informatique', 'ECM &amp; Informatique': 'ecm-informatique'
+};
+{
+  let posees = 0;
+  corps = corps.replace(/href="#matiere"([^>]*>[\s\S]*?<h3[^>]*>)([^<]+)<\/h3>/g, function (tout, milieu, titre) {
+    const cle = MATIERES[titre.trim()];
+    if (!cle) return tout;
+    posees++;
+    return 'href="' + APP + '#matiere?m=' + cle + '"' + milieu + titre + '</h3>';
+  });
+  console.log('matières    : ' + posees + ' carte(s) branchée(s) sur le catalogue filtré');
 }
 
 for (const [ancre, cible] of Object.entries(ANCRES)) {
@@ -784,8 +812,12 @@ function blocCalendrier() {
     throw new Error('Retrait NIVEAUX : marqueurs introuvables — la maquette a changé, vérifier AVANT de déployer.');
   }
   const avantN = corps.length;
-  corps = corps.slice(0, dN) + blocCalendrier() + '\n    ' + corps.slice(fN);
-  console.log('niveaux     : section retirée (' + (fN - dN) + ' octets) → calendrier + actualités');
+  /* 10/11/2026 — Calendrier et actualités quittent l'accueil : ils vivent
+     désormais dans Apprendre, réglés sur la classe de l'élève (compte à
+     rebours, actualités de son examen, classe virtuelle). blocCalendrier()
+     reste disponible mais n'est plus inséré. */
+  corps = corps.slice(0, dN) + corps.slice(fN);
+  console.log('niveaux     : section retirée (' + (fN - dN) + ' octets)');
 
   // ── Retrait 2 : la grille comparative des plans
   const ancre = corps.indexOf('Ce que chaque plan');
@@ -866,30 +898,19 @@ function blocCalendrier() {
      « Photos » menait en plus à une page VIDE : DB.photos compte 0 élément.
      Ne les rétablir que si la vitrine cesse de porter ces informations. */
 const MENU = [
+  /* 10/11/2026 — « maintenant que tout ceci est classé et visible dans
+     apprendre, supprime du menu pour épurer » (Jacques). Les quatorze entrées
+     (e-learning, corrigés, annales, évaluations, œuvres, programmes, outils,
+     test de niveau, progression, jeux, examen blanc, espace élève, cahier en
+     ligne, Flash) sont TOUTES reliées depuis apprendre/ (ressources.js, rail,
+     progressions). Une seule porte, donc. */
   { titre: 'Élève', sous: 'Apprendre et réviser', entrees: [
-    { t: 'Catalogue e-learning', d: 'Matières, œuvres, séquences', i: 'lc-book',        c: '#1E499B', f: '#DBE8FE', vp: 'elearning', g: 1 },
-    { t: 'Corrigés des cahiers', d: 'Accès libre, par séquence',   i: 'lc-checkcircle', c: '#007E11', f: '#E0F5E5', h: 'corriges/' },
-    { t: 'Annales corrigées',    d: 'BEPC, Probatoire, BAC, GCE',  i: 'lc-doc',         c: '#5B4FA8', f: '#EAE7F7', h: APP + '#epreuves', g: 1 },
-    { t: 'Évaluations en ligne', d: 'Entraînement chronométré',    i: 'lc-clock',       c: '#A84200', f: '#FFF3E4', h: APP + '#evaluations', g: 1 },
-    { t: 'Œuvres au programme',  d: 'Analyses et fiches',          i: 'lc-bookopen',    c: '#1E499B', f: '#DBE8FE', h: 'oeuvres/' },
-    { t: 'Programmes par classe',d: 'De la 6ᵉ à la Terminale',     i: 'lc-graduation',  c: '#0E7C86', f: '#DDF2F4', h: 'niveaux/' },
-    { t: 'Outils gratuits',      d: 'Calculateurs de moyenne',     i: 'lc-calculator',  c: '#007E11', f: '#E0F5E5', h: 'outils/' },
-    /* 25/10/2026 — des MODULES de l'application sans aucune porte publique
-       (« tester le niveau, badges de progression… les usagers ne savent pas
-       qu'ils existent », Jacques). Le test de positionnement n'était même plus
-       atteignable depuis l'application (retiré d'un panneau en v1.9.1). */
-    { t: 'Tester mon niveau',    d: '10 questions, forces et lacunes', i: 'lc-target',  c: '#B03A6E', f: '#FBE4EE', h: APP + '#positionnement' },
-    { t: 'Ma progression',       d: 'XP, série, badges à débloquer', i: 'lc-award',     c: '#007E11', f: '#E0F5E5', h: APP + '#progression', g: 1 },
-    { t: 'Jeux et battles',      d: 'Réviser en jouant, défis hebdo', i: 'lc-game',     c: '#5B4FA8', f: '#EAE7F7', h: APP + '#jeux' },
-    { t: 'Examen blanc',         d: 'Sujet officiel + chronomètre', i: 'lc-clock',      c: '#A84200', f: '#FFF3E4', h: APP + '#simulateur' },
-    /* ⚠️ TROIS SERVICES QUI EXISTAIENT SANS ÊTRE ANNONÇÉS (31/08/2026).
-       Chacun a sa page publiée, indexée, alimentée — et aucune entrée de menu.
-       Un visiteur ne pouvait les atteindre qu'en connaissant leur URL. */
-    { t: 'Espace élève',         d: 'Corrigés, quiz et méthodes',  i: 'lc-user',        c: '#1E499B', f: '#DBE8FE', h: 'eleve/' },
-    { t: 'Mon cahier en ligne',  d: 'Interactif, 6ᵉ → Terminale',  i: 'lc-bookopen',    c: '#A84200', f: '#FFF3E4', h: 'livrets/' },
-    { t: 'VÉRITAS Flash',        d: 'Scanner le QR de sa séquence',i: 'lc-qr',          c: '#5B4FA8', f: '#EAE7F7', h: 'flash/' }
+    { t: 'Apprendre',            d: 'Leçons, quiz, corrigés, annales', i: 'lc-graduation', c: '#1E499B', f: '#DBE8FE', h: 'apprendre/' }
   ]},
   { titre: 'Parent', sous: 'Suivre et soutenir', entrees: [
+    /* 10/11/2026 — le bloc « Quelqu'un suit votre enfant » a quitté l'accueil
+       pour la page Parents ; cette entrée y mène. */
+    { t: 'Suivi au centre ou à domicile', d: 'Répétitions, classes virtuelles', i: 'lc-home', c: '#0E7C86', f: '#DDF2F4', vp: 'parents' },
     { t: 'Orientation',          d: 'Choisir sa série',            i: 'lc-compass',     c: '#0E7C86', f: '#DDF2F4', h: APP + '#orientation' },
     { t: 'Tester son niveau',    d: 'Le point avant de commencer', i: 'lc-target',      c: '#B03A6E', f: '#FBE4EE', h: APP + '#positionnement' },
     { t: 'Matières et coefficients', d: 'Poids réels, orientation',i: 'lc-scale',       c: '#5B4FA8', f: '#EAE7F7', h: 'parcours/' },
@@ -2239,6 +2260,29 @@ for (const bal of ['ul', 'ol', 'li']) {
     rebranches++;
   }
 
+  /* ── « LANCER UN QUIZ », CINQUIÈME ENDROIT (08/11/2026) ────────────────
+     La section « Apprendre en jouant » promet quiz, séries et badges ; son
+     bouton sortait de la maquette avec `{{ goElearning }}` et menait au
+     catalogue d'abonnements. Les quiz, séries et badges vivent dans
+     /apprendre/ : on le rebranche sur `goApprendre`. */
+  const lancerQuiz = /<button type="button" onclick="VRT\.act\('goElearning',this,event\)"([^>]*)>Lancer un quiz</;
+  if (lancerQuiz.test(corps)) {
+    corps = corps.replace(lancerQuiz,
+      '<button type="button" onclick="VRT.act(\'goApprendre\',this,event)"$1>Lancer un quiz<');
+    rebranches++;
+  }
+
+  /* ── « ÉTUDE INTÉGRALE », SIXIÈME ENDROIT (08/11/2026) ─────────────────
+     Bouton pleine largeur du panneau bleu de l'œuvre du jour : il menait au
+     catalogue d'abonnements. goEtudeOeuvre ouvre la fiche de l'œuvre du jour
+     (oeuvres/), ou la liste des œuvres quand VÉRITAS n'en publie pas. */
+  const etudeIntegrale = /<button type="button" onclick="VRT\.act\('goElearning',this,event\)"(?: data-go="elearning")?( style="position:relative;width:100%;flex:0 0 auto[^"]*")/;
+  if (etudeIntegrale.test(corps)) {
+    corps = corps.replace(etudeIntegrale,
+      '<button type="button" onclick="VRT.act(\'goEtudeOeuvre\',this,event)"$1');
+    rebranches++;
+  }
+
   /* ── LE MENU DU TÉLÉPHONE, QUATRIÈME ENDROIT ───────────────────────────
      Sous 1 000 px, la barre disparaît au profit du menu burger. Ses trois
      entrées de public sortent du gabarit avec `mm__aller`, qui lit
@@ -2607,7 +2651,11 @@ ${metaBrut}
   // L'adresse publique du centre est contact@veritas-school.com (index.php,
   // pages statiques). La maquette exposait le Gmail personnel de Jacques dans
   // les données structurées, donc dans les résultats de recherche.
-  .replace(/"jacquesmytheerrant@gmail\.com"/, '"contact@veritas-school.com"')}</script>
+  .replace(/"jacquesmytheerrant@gmail\.com"/, '"contact@veritas-school.com"')
+  // highPrice 7 500 ne correspond à AUCUNE grille (Famille : 10 000 puis
+  // 12 000 F/mois). Un prix faux dans le JSON-LD est repris tel quel par les
+  // moteurs de réponse IA : on le retire plutôt que d'en deviner un (05/11).
+  .replace(/,"highPrice":"[^"]*"/, '')}</script>
 <style>
 ${styleBlock}
 ${cssBascule}

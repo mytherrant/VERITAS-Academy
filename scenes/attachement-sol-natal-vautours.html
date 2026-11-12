@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le retour des vautours — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après L’attachement au sol natal d’Ernest Alima : l’amour du pays et la satire des profiteurs, en vers.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/attachement-sol-natal-vautours.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Le retour des vautours — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’après L’attachement au sol natal d’Ernest Alima : l’amour du pays et la satire des profiteurs, en vers.">
+<meta property="og:url" content="https://veritas-school.com/scenes/attachement-sol-natal-vautours.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Le retour des vautours","description":"Scène animée d’après L’attachement au sol natal d’Ernest Alima : l’amour du pays et la satire des profiteurs, en vers.","url":"https://veritas-school.com/scenes/attachement-sol-natal-vautours.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"4ᵉ","about":"Français","teaches":"Reconnaître les voix d’un recueil — le « je » qui aime, le « nous » du citoyen, la voix qui accuse — et les familles d’images qui reviennent d’un poème à l’autre.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"},"isBasedOn":{"@type":"Book","name":"L’attachement au sol natal","author":{"@type":"Person","name":"Ernest Alima (2024)"}}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'attachement-sol-natal',
+  discipline: 'Français', niveau: '4e',
+  oeuvre: 'L’attachement au sol natal', auteur: 'Ernest Alima (2024)',
+  titre: 'Le retour des vautours',
+  decor: 'village', ambiance: 'aube', lieu: 'Yaoundé, une rencontre avec le poète', moment: 'Vingt-six poèmes, six sections',
+  avertissement: 'Rencontre imaginée pour la leçon : les échanges avec le poète ne sont pas de l’auteur. Les vers marqués « Extrait de l’œuvre » sont cités mot pour mot.',
+  objectif: 'Reconnaître les voix d’un recueil — le « je » qui aime, le « nous » du citoyen, la voix qui accuse — et les familles d’images qui reviennent d’un poème à l’autre.',
+  jauges: [
+    { id: 'amour', nom: 'Lyrisme (amour du pays)', val: 60, couleur: '#1F9D5B' },
+    { id: 'satire', nom: 'Satire (colère contre les profiteurs)', val: 10, couleur: '#D43F2E' }
+  ],
+  personnages: {
+    poete:  { nom: 'Le poète', couleur: '#1E499B', look: { peau: 'fonce', vieux: true, cheveux: 'ras', lunettes: true, tenue: 'costume', habit: '#2B3A55', col: '#1F9D5B', objet: 'livre' } },
+    eleve:  { nom: 'Nadège, élève de 4e', couleur: '#C0397C', look: { metier: 'eleve', peau: 'fonce', cheveux: 'afro', tenue: 'jupe' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['poete', 'eleve'], txt: 'Imaginons : une élève rend visite au « vieux poète qui a depuis longtemps pris sa retraite et qui vit à Yaoundé », comme le présente le Dossier pédagogique de son recueil.' },
+    { t: 'dit', qui: 'eleve', txt: 'Monsieur, dans votre livre, qui parle ? Il n’y a pas de personnages.' },
+    { t: 'dit', qui: 'poete', emo: 'joie', txt: 'Un roman a des personnages ; une pièce a des rôles. Un recueil de poèmes, lui, a une voix. Écoute d’abord celle qui aime.' },
+    { t: 'vers', qui: 'poete', jeu: 'il lit', txt: 'Cameroun, ma patrie,\nJe suis né en ton sein', cite: 'Ernest Alima, L’attachement au sol natal, « Cameroun, ma patrie »', jauges: { amour: 90 } },
+    { t: 'question', q: 'Quelle figure le poète emploie-t-il en s’adressant directement au Cameroun ?',
+      options: [
+        { txt: 'L’apostrophe : on parle à quelqu’un ou à quelque chose.', ok: true, retour: 'Le « je » s’adresse au pays comme à une personne : une mère, une aimée.' },
+        { txt: 'La comparaison.', retour: 'Il n’y a pas d’outil de comparaison : le poète parle directement au pays.' }
+      ] },
+    { t: 'dit', qui: 'eleve', emo: 'surpris', txt: 'Et ce poème très court, avec des oiseaux ? On dirait que vous êtes en colère.' },
+    { t: 'vers', qui: 'poete', jeu: 'vite, à voix haute', txt: 'Ils sont de retour\nDans nos murs,\nLes vautours\nQu’on a cru\nDisparus\nPour toujours\nDe notre azur.', cite: 'Ernest Alima, L’attachement au sol natal, « Le retour des vautours »', jauges: { satire: 85 } },
+    { t: 'vers', qui: 'poete', jeu: 'plus fort', txt: 'Ils sont de retour,\nCes prédateurs\nDe haut vol,\nAlléchés\nPar la puanteur\nDes corps\nMorts\nGisant épars sur le sol,\nVictimes des feux\nPar eux\nAllumés.', cite: 'Ernest Alima, L’attachement au sol natal, « Le retour des vautours »' },
+    { t: 'vers', qui: 'poete', jeu: 'il martèle', txt: 'Voraces\nRapaces\nDe pire race,\nIls planent à ras des cours\nÀ l’affut des cocoricos cacophoniques\nEt folkloriques\nDes basses-cours,\nPrêts à plonger,\nToutes serres dehors,\nSur les poules aux œufs d’or !', cite: 'Ernest Alima, L’attachement au sol natal, « Le retour des vautours »' },
+    { t: 'remarque', titre: 'La voix qui accuse', txt: 'Vingt-cinq vers très courts, un seul mouvement, pas un seul nom propre : les profiteurs deviennent des oiseaux de proie qui plongent « toutes serres dehors, / Sur les poules aux œufs d’or ! ». Le rythme rapide fait la moitié du travail.' },
+    { t: 'choix', qui: 'eleve', q: 'Le vautour est un charognard utile : il empêche les maladies. Le poète a-t-il le droit d’en faire le symbole du mal ?',
+      options: [
+        { txt: 'Oui : en poésie, l’animal est une image, pas une fiche de sciences.', consequence: 'Tu défends la liberté du poète : le vautour symbolise le profiteur qui attend la mort des autres.', jauges: { satire: 5 } },
+        { txt: 'Non : c’est injuste pour un oiseau utile.', consequence: 'Tu poses une vraie question de débat : une image peut-elle trahir la réalité ?', jauges: { satire: -10 } }
+      ],
+      oeuvre: 'Le cahier propose justement ce débat : peut-on faire d’un animal utile le symbole du mal ?' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · les familles d’images', consigne: 'Le recueil revient sans cesse à quatre familles d’images. Classe ces expressions.',
+      cats: ['Le pays-mère', 'Les profiteurs'],
+      items: [
+        { txt: '« Je suis né en ton sein »', cat: 0 },
+        { txt: '« Voraces / Rapaces »', cat: 1 },
+        { txt: '« nourri au sein »', cat: 0 },
+        { txt: '« toutes serres dehors »', cat: 1 }
+      ],
+      bravo: 'Le pays est une mère, une aimée, un corps ; les profiteurs sont des oiseaux de proie.' },
+    { t: 'recit', txt: 'Pour finir, le poème qui donne son titre au recueil : celui qui est parti.' },
+    { t: 'vers', qui: 'poete', emo: 'triste', txt: 'Sol natal\nÔ sol ancestral !\nUn jour, au seuil du soir,\nÀ l’heure accoutumée où le soleil,\nL’œil vermeil de sommeil,\nRegagne à l’ouest son dortoir,\nLe visage baigné de pleurs\nCoulant goutte à goutte de mon cœur,\nJe t’ai quitté par devoir\nPour aller te servir dans de hautes sphères\nAu-delà de tes frontières.', cite: 'Ernest Alima, L’attachement au sol natal, « L’attachement au sol natal »' },
+    { t: 'dit', qui: 'poete', txt: 'Tu vois : on peut aimer son pays et accuser ceux qui le pillent. C’est le même amour.', jauges: { amour: 95 } },
+    {"t": "remarque", "titre": "Une prière en tête du livre", "txt": "Avant le premier poème, Alima recopie une prière de Charles Baudelaire : il demande seulement « la grâce de produire quelques beaux vers ». Ni la gloire ni les prix : une humilité qui autorise chacun à écrire, même sans être sûr que ce soit bon."},
+    {"t": "question", "q": "Dans quelle section le poète chante-t-il son pays depuis l’étranger ?", "options": [{"txt": "Les « Chants d’Exil ».", "ok": true, "retour": "« Pèlerinage aux sources », « L’attachement au sol natal », « Soif du bercail » : le pays aimé de loin."}, {"txt": "Les « Couronnes de lauriers ».", "retour": "Celle-là contient « Appel au travail » et « Bon anniversaire, République Unie »."}]}
+  ],
+  labo: {
+    titre: 'Laboratoire · la voix du poème',
+    intro: 'Règle l’amour du pays, la colère contre les profiteurs et le « nous » civique : quel poème écris-tu ?',
+    persos: ['poete', 'eleve'],
+    curseurs: [
+      { id: 'amour', nom: 'Amour du pays', val: 80, bas: 'distant', haut: 'passionné' },
+      { id: 'colere', nom: 'Colère contre les profiteurs', val: 70, bas: 'apaisée', haut: 'féroce' },
+      { id: 'nous', nom: 'Voix du « nous » citoyen', val: 50, bas: 'je', haut: 'nous' }
+    ],
+    scenarios: [
+      { nom: '« Cameroun, ma patrie »', icone: 'amour', valeurs: { amour: 95, colere: 10, nous: 20 } },
+      { nom: '« Le retour des vautours »', icone: 'colere', valeurs: { amour: 40, colere: 95, nous: 60 } },
+      { nom: '« Patriotisme et démocratie »', icone: 'groupe', valeurs: { amour: 75, colere: 40, nous: 90 } }
+    ],
+    liens: [
+      { a: 'poete', b: 'eleve', type: 'confiance', lib: 'transmet', base: .3, poids: { nous: .5 } }
+    ],
+    issue: function(v){
+      if(v.colere >= 70){ return { niveau: 'ko', badge: 'Registre satirique', recit: 'Vers courts, rimes en rafale, images d’oiseaux de proie : la voix accuse.', apres: 'Comme « Le retour des vautours », le poème le plus féroce du recueil.', themes: ['satire', 'vautours', 'rythme'] }; }
+      if(v.nous >= 70){ return { niveau: 'ok', badge: 'Registre civique', recit: 'Le « nous » du citoyen parle de démocratie et de devoir.', apres: 'Le recueil annonce ce programme dès son liminaire, « Patriotisme et démocratie ».', themes: ['citoyenneté', 'nous'] }; }
+      return { niveau: 'moyen', badge: 'Registre lyrique', recit: 'Le « je » dit son amour pour le pays, comme un amant pour sa belle : apostrophes, images de la mère et du corps.', apres: 'Le Dossier le dit : « son lyrisme est similaire à celui d’un amant qui voue un véritable culte à sa belle ».', themes: ['lyrisme', 'apostrophe', 'pays-mère'] };
+    }
+  },
+  fiche: {"accroche": "On peut aimer son pays comme une mère, comme une bien-aimée… et accuser en même temps ceux qui le pillent. Qui sont les « vautours » d’Ernest Alima ?", "resume": "Vingt-six poèmes d’Ernest Alima, en six sections, pour dire l’amour du Cameroun et accuser les profiteurs qui le dévorent. Des vers libres où la rime reste pour sa musique, et où la répétition martèle les idées.", "personnages": [{"nom": "Le poète", "cle": "poete", "role": "la voix du recueil : il aime, il s’adresse au pays, il accuse."}, {"nom": "Le pays", "role": "tour à tour une mère, une bien-aimée et un corps."}, {"nom": "Les vautours", "role": "les profiteurs, oiseaux de proie qui plongent sur « les poules aux œufs d’or »."}, {"nom": "Le citoyen", "role": "le « nous » qui vit « une époque tourmentée »."}], "aLire": [{"ou": "« Patriotisme et démocratie » (liminaire)", "pourquoi": "Le programme du livre en trente vers."}, {"ou": "« Le retour des vautours » (Tripe républicaine)", "pourquoi": "La satire la plus mordante du recueil, en vers très courts."}, {"ou": "Les « Chants d’Exil »", "pourquoi": "Le poète loin de chez lui : « Pèlerinage aux sources », « Soif du bercail »."}], "siTuAimes": "dire les choses fort, lis deux poèmes par jour à voix haute et garde un vers de chacun : à la fin, tu auras ton propre recueil.", "reperes": ["Auteur : Ernest Alima, poète camerounais à la retraite, à Yaoundé", "Éditions Ifrikiya, 2024", "26 poèmes en 6 sections (1, 9, 8, 4, 2 et 2 textes)", "Épigraphe empruntée à Baudelaire"], "themes": ["le patriotisme", "la démocratie", "l’exil", "la satire des profiteurs"], "cahier": {"lib": "Le cahier VÉRITAS des œuvres de 4e", "href": "../livrets/oeuvres-4e.html"}},
+  quiz: [
+    { q: 'Qu’est-ce qu’une anaphore ?', options: [ { txt: 'La répétition du même mot au début de plusieurs vers.', ok: true, retour: 'La figure préférée d’Alima.' }, { txt: 'Une rime en fin de vers.', retour: 'Non : c’est au début des vers.' } ] },
+    { q: 'Que symbolisent les vautours dans le recueil ?', options: [ { txt: 'Les profiteurs.', ok: true, retour: 'Ils plongent « sur les poules aux œufs d’or ».' }, { txt: 'Les ancêtres.', retour: 'Non.' } ] },
+    { q: 'Qu’est-ce qu’un vers libre ?', options: [ { txt: 'Un vers qui ne compte pas ses syllabes et n’est pas obligé de rimer.', ok: true, retour: 'Comme beaucoup de vers du recueil.' }, { txt: 'Un vers sans majuscule.', retour: 'Non.' } ] },
+    { q: 'Combien de poèmes compte le recueil ?', options: [ { txt: 'Vingt-six.', ok: true, retour: 'En six sections.' }, { txt: 'Vingt-deux.', retour: 'Vingt-deux, c’est le recueil de Philombe.' } ] },
+    {"q": "Quelle est la figure préférée d’Ernest Alima ?", "options": [{"txt": "La répétition, et surtout l’anaphore.", "ok": true, "retour": "Elle « déclenche le poème » et lui donne sa cohérence."}, {"txt": "La métaphore filée sur cent vers.", "retour": "Non : ses poèmes avancent par répétitions."}]}
+  ],
+  bilan: {
+    retenir: [
+      'Un recueil a une voix : le « je » qui aime, le « nous » du citoyen, la voix qui accuse.',
+      'Le pays est une mère, une aimée, un corps ; les profiteurs sont des vautours.',
+      'L’apostrophe : parler directement au pays (« Cameroun, ma patrie »).',
+      'La satire passe par le rythme rapide et les images animales.'
+    ],
+    ecrire: 'Écris un poème en vers libres (dix vers) sur ton village ou ta ville : commence par une apostrophe et répète un même mot au début de trois vers.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Le retour des vautours</h1>
+<p><b>Français · 4ᵉ · L’attachement au sol natal · Ernest Alima (2024)</b></p>
+<p><i>Rencontre imaginée pour la leçon : les échanges avec le poète ne sont pas de l’auteur. Les vers marqués « Extrait de l’œuvre » sont cités mot pour mot.</i></p>
+<h3>Objectif</h3><p>Reconnaître les voix d’un recueil — le « je » qui aime, le « nous » du citoyen, la voix qui accuse — et les familles d’images qui reviennent d’un poème à l’autre.</p>
+<p>Lieu : Yaoundé, une rencontre avec le poète · Vingt-six poèmes, six sections</p>
+<h3>Personnages</h3><ul><li>Le poète</li><li>Nadège, élève de 4e</li></ul>
+<h3>L’œuvre</h3>
+<p>On peut aimer son pays comme une mère, comme une bien-aimée… et accuser en même temps ceux qui le pillent. Qui sont les « vautours » d’Ernest Alima ?</p>
+<p>Vingt-six poèmes d’Ernest Alima, en six sections, pour dire l’amour du Cameroun et accuser les profiteurs qui le dévorent. Des vers libres où la rime reste pour sa musique, et où la répétition martèle les idées.</p>
+<ul><li><b>Le poète</b> — la voix du recueil : il aime, il s’adresse au pays, il accuse.</li><li><b>Le pays</b> — tour à tour une mère, une bien-aimée et un corps.</li><li><b>Les vautours</b> — les profiteurs, oiseaux de proie qui plongent sur « les poules aux œufs d’or ».</li><li><b>Le citoyen</b> — le « nous » qui vit « une époque tourmentée ».</li></ul>
+<p>Thèmes : le patriotisme, la démocratie, l’exil, la satire des profiteurs</p>
+<h3>La scène</h3>
+<p>Imaginons : une élève rend visite au « vieux poète qui a depuis longtemps pris sa retraite et qui vit à Yaoundé », comme le présente le Dossier pédagogique de son recueil.</p>
+<p><b>Nadège, élève de 4e</b> : Monsieur, dans votre livre, qui parle ? Il n’y a pas de personnages.</p>
+<p><b>Le poète</b> : Un roman a des personnages ; une pièce a des rôles. Un recueil de poèmes, lui, a une voix. Écoute d’abord celle qui aime.</p>
+<blockquote><p><b>Le poète</b> <i>(il lit)</i> :<br>Cameroun, ma patrie,<br>Je suis né en ton sein<br><small>Extrait de l’œuvre — Ernest Alima, L’attachement au sol natal, « Cameroun, ma patrie »</small></p></blockquote>
+<p><b>Question :</b> Quelle figure le poète emploie-t-il en s’adressant directement au Cameroun ?</p><ul><li>L’apostrophe : on parle à quelqu’un ou à quelque chose. <b>(bonne réponse)</b></li><li>La comparaison.</li></ul><p>Le « je » s’adresse au pays comme à une personne : une mère, une aimée.</p>
+<p><b>Nadège, élève de 4e</b> : Et ce poème très court, avec des oiseaux ? On dirait que vous êtes en colère.</p>
+<blockquote><p><b>Le poète</b> <i>(vite, à voix haute)</i> :<br>Ils sont de retour<br>Dans nos murs,<br>Les vautours<br>Qu’on a cru<br>Disparus<br>Pour toujours<br>De notre azur.<br><small>Extrait de l’œuvre — Ernest Alima, L’attachement au sol natal, « Le retour des vautours »</small></p></blockquote>
+<blockquote><p><b>Le poète</b> <i>(plus fort)</i> :<br>Ils sont de retour,<br>Ces prédateurs<br>De haut vol,<br>Alléchés<br>Par la puanteur<br>Des corps<br>Morts<br>Gisant épars sur le sol,<br>Victimes des feux<br>Par eux<br>Allumés.<br><small>Extrait de l’œuvre — Ernest Alima, L’attachement au sol natal, « Le retour des vautours »</small></p></blockquote>
+<blockquote><p><b>Le poète</b> <i>(il martèle)</i> :<br>Voraces<br>Rapaces<br>De pire race,<br>Ils planent à ras des cours<br>À l’affut des cocoricos cacophoniques<br>Et folkloriques<br>Des basses-cours,<br>Prêts à plonger,<br>Toutes serres dehors,<br>Sur les poules aux œufs d’or !<br><small>Extrait de l’œuvre — Ernest Alima, L’attachement au sol natal, « Le retour des vautours »</small></p></blockquote>
+<h4>La voix qui accuse</h4><p>Vingt-cinq vers très courts, un seul mouvement, pas un seul nom propre : les profiteurs deviennent des oiseaux de proie qui plongent « toutes serres dehors, / Sur les poules aux œufs d’or ! ». Le rythme rapide fait la moitié du travail.</p>
+<p><b>À toi de décider :</b> Le vautour est un charognard utile : il empêche les maladies. Le poète a-t-il le droit d’en faire le symbole du mal ?</p><ul><li>Oui : en poésie, l’animal est une image, pas une fiche de sciences. — Tu défends la liberté du poète : le vautour symbolise le profiteur qui attend la mort des autres.</li><li>Non : c’est injuste pour un oiseau utile. — Tu poses une vraie question de débat : une image peut-elle trahir la réalité ?</li></ul>
+<h4>Atelier · les familles d’images</h4><p>Le recueil revient sans cesse à quatre familles d’images. Classe ces expressions.</p>
+<ul><li><b>Le pays-mère</b> : « Je suis né en ton sein » ; « nourri au sein »</li><li><b>Les profiteurs</b> : « Voraces / Rapaces » ; « toutes serres dehors »</li></ul>
+<p>Le pays est une mère, une aimée, un corps ; les profiteurs sont des oiseaux de proie.</p>
+<p>Pour finir, le poème qui donne son titre au recueil : celui qui est parti.</p>
+<blockquote><p><b>Le poète</b> :<br>Sol natal<br>Ô sol ancestral !<br>Un jour, au seuil du soir,<br>À l’heure accoutumée où le soleil,<br>L’œil vermeil de sommeil,<br>Regagne à l’ouest son dortoir,<br>Le visage baigné de pleurs<br>Coulant goutte à goutte de mon cœur,<br>Je t’ai quitté par devoir<br>Pour aller te servir dans de hautes sphères<br>Au-delà de tes frontières.<br><small>Extrait de l’œuvre — Ernest Alima, L’attachement au sol natal, « L’attachement au sol natal »</small></p></blockquote>
+<p><b>Le poète</b> : Tu vois : on peut aimer son pays et accuser ceux qui le pillent. C’est le même amour.</p>
+<h4>Une prière en tête du livre</h4><p>Avant le premier poème, Alima recopie une prière de Charles Baudelaire : il demande seulement « la grâce de produire quelques beaux vers ». Ni la gloire ni les prix : une humilité qui autorise chacun à écrire, même sans être sûr que ce soit bon.</p>
+<p><b>Question :</b> Dans quelle section le poète chante-t-il son pays depuis l’étranger ?</p><ul><li>Les « Chants d’Exil ». <b>(bonne réponse)</b></li><li>Les « Couronnes de lauriers ».</li></ul><p>« Pèlerinage aux sources », « L’attachement au sol natal », « Soif du bercail » : le pays aimé de loin.</p>
+<h3>Quiz</h3><ol><li>Qu’est-ce qu’une anaphore ? — <b>La répétition du même mot au début de plusieurs vers.</b> La figure préférée d’Alima.</li><li>Que symbolisent les vautours dans le recueil ? — <b>Les profiteurs.</b> Ils plongent « sur les poules aux œufs d’or ».</li><li>Qu’est-ce qu’un vers libre ? — <b>Un vers qui ne compte pas ses syllabes et n’est pas obligé de rimer.</b> Comme beaucoup de vers du recueil.</li><li>Combien de poèmes compte le recueil ? — <b>Vingt-six.</b> En six sections.</li><li>Quelle est la figure préférée d’Ernest Alima ? — <b>La répétition, et surtout l’anaphore.</b> Elle « déclenche le poème » et lui donne sa cohérence.</li></ol>
+<h3>À retenir</h3><ul><li>Un recueil a une voix : le « je » qui aime, le « nous » du citoyen, la voix qui accuse.</li><li>Le pays est une mère, une aimée, un corps ; les profiteurs sont des vautours.</li><li>L’apostrophe : parler directement au pays (« Cameroun, ma patrie »).</li><li>La satire passe par le rythme rapide et les images animales.</li></ul>
+<h3>À écrire</h3><p>Écris un poème en vers libres (dix vers) sur ton village ou ta ville : commence par une apostrophe et répète un même mot au début de trois vers.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="attachement-sol-natal-vautours.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Un biglietto per Firenze — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’italien (Première) : acheter un billet de transport, demander des informations sur la destination ; futur, impératif et passé composé.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/1re-italien-alla-stazione.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Un biglietto per Firenze — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’italien (Première) : acheter un billet de transport, demander des informations sur la destination ; futur, impératif et passé composé.">
+<meta property="og:url" content="https://veritas-school.com/scenes/1re-italien-alla-stazione.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Un biglietto per Firenze","description":"Scène animée d’italien (Première) : acheter un billet de transport, demander des informations sur la destination ; futur, impératif et passé composé.","url":"https://veritas-school.com/scenes/1re-italien-alla-stazione.html","inLanguage":"it-IT","learningResourceType":"Simulation interactive","educationalLevel":"Première","about":"Italien","teaches":"Acheter un billet de train et demander des informations sur un trajet ; employer le futur (partirò, arriverà), l’impératif (prendi, andate) et le passé composé pour raconter le voyage.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '1re-italien-stazione',
+  discipline: 'Italien', niveau: '1re', langue: 'it-IT',
+  titre: 'Un biglietto per Firenze',
+  decor: 'port', lieu: 'La stazione di Roma Termini', moment: 'Viaggio di studio',
+  objectif: 'Acheter un billet de train et demander des informations sur un trajet ; employer le futur (partirò, arriverà), l’impératif (prendi, andate) et le passé composé pour raconter le voyage.',
+  programme: 'Progression harmonisée 1re · Leçon 15 (comprare un biglietto di trasporto, chiedere informazioni), leçon 16 (futur), leçon 17 (passé composé), leçon 18 (impératif)',
+  jauges: [
+    { id: 'viaggio', nom: 'Viaggio organizzato', val: 15, couleur: '#1F9D5B' },
+    { id: 'italiano', nom: 'Italiano', val: 25, couleur: '#1E499B' }
+  ],
+  personnages: {
+    junior:    { nom: 'Junior', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court', objet: 'sac' } },
+    stella:    { nom: 'Stella', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    impiegato: { nom: 'L’impiegato della biglietteria', couleur: '#14254A', look: { tenue: 'costume', peau: 'clair', cheveux: 'court', couleurCheveux: '#3A2A1A', habit: '#14254A', col: '#FFFFFF', moustache: true } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['junior', 'stella'], txt: 'Junior e Stella hanno vinto una borsa per un viaggio di studio in Italia. Sono alla stazione di Roma Termini. Domani visiteranno Firenze.', trad: 'Junior et Stella ont gagné une bourse pour un voyage d’étude en Italie. Ils sont à la gare de Roma Termini. Demain, ils visiteront Florence.', objet: { i: 'document', lib: 'Il biglietto' } },
+    { t: 'dit', qui: 'stella', txt: 'Junior, chiedi tu le informazioni: il tuo italiano è migliore del mio!', trad: 'Junior, demande toi les informations : ton italien est meilleur que le mien !' },
+    { t: 'recit', entre: ['impiegato'], txt: 'Alla biglietteria.', trad: 'Au guichet.' },
+    { t: 'dit', qui: 'junior', txt: 'Buongiorno. Vorrei due biglietti per Firenze, per domani mattina, per favore.', trad: 'Bonjour. Je voudrais deux billets pour Florence, pour demain matin, s’il vous plaît.' },
+    { t: 'dit', qui: 'impiegato', txt: 'Solo andata o andata e ritorno?', trad: 'Aller simple ou aller-retour ?' },
+    { t: 'dit', qui: 'junior', txt: 'Andata e ritorno. A che ora parte il primo treno?', trad: 'Aller-retour. À quelle heure part le premier train ?' },
+    { t: 'dit', qui: 'impiegato', txt: 'Il treno partirà alle otto e arriverà a Firenze alle nove e mezza. Sono trentacinque euro a persona, andata e ritorno.', trad: 'Le train partira à huit heures et arrivera à Florence à neuf heures et demie. C’est trente-cinq euros par personne, aller-retour.', jauges: { italiano: 45 } },
+    { t: 'question', q: 'Combien coûtent les deux billets aller-retour ?',
+      options: [
+        { txt: 'Settanta euro (70 €) : 2 × 35.', ok: true, retour: 'Trentacinque euro a persona, due persone : settanta euro.' },
+        { txt: 'Trentacinque euro (35 €).', retour: 'C’est le prix pour une personne.' }
+      ] },
+    { t: 'atelier', mode: 'monnaie', titre: 'Laboratorio · pagare i biglietti', consigne: 'Paie exactement 70 € au guichet.', cible: 70, pieces: [50, 20, 10, 5, 2, 1], devise: '€',
+      bravo: 'Cinquanta più venti fa settanta. Ecco a Lei!', jauges: { viaggio: 50 } },
+    { t: 'remarque', titre: 'Le futur', txt: 'On remplace la terminaison de l’infinitif : partire → partirò, partirai, partirà ; arrivare → arriverò, arriverà (le a de -are devient e). Irréguliers fréquents : essere → sarò, avere → avrò, andare → andrò, venire → verrò.' },
+    { t: 'dit', qui: 'impiegato', jeu: 'indica con la mano', txt: 'Il treno parte dal binario dodici. Prendete il sottopassaggio, andate a destra e convalidate il biglietto prima di salire!', trad: 'Le train part du quai douze. Prenez le passage souterrain, allez à droite et compostez le billet avant de monter !' },
+    { t: 'atelier', mode: 'tri', titre: 'Laboratorio · futuro o imperativo?', consigne: 'Classe chaque forme verbale.',
+      cats: ['Futuro', 'Imperativo'],
+      items: [
+        { txt: 'partirà', cat: 0 },
+        { txt: 'prendete', cat: 1 },
+        { txt: 'arriverà', cat: 0 },
+        { txt: 'andate', cat: 1 },
+        { txt: 'visiteremo', cat: 0 },
+        { txt: 'chiedi', cat: 1 }
+      ],
+      bravo: 'Futur : terminaisons -ò, -ai, -à, -emo, -ete, -anno. Impératif : l’ordre ou le conseil.', jauges: { italiano: 65 } },
+    { t: 'choix', qui: 'stella', q: 'Le lendemain, le train a vingt minutes de retard. Que fait Stella ?',
+      options: [
+        { txt: 'Sale su un altro treno senza chiedere. (Elle monte dans un autre train sans demander.)', consequence: 'Le train va à Naples ! Le contrôleur lui fait payer une amende.', jauges: { viaggio: -25 } },
+        { txt: 'Chiede: « Scusi, il treno per Firenze è in ritardo? » (Elle demande : excusez-moi, le train pour Florence est-il en retard ?)', consequence: 'On lui confirme : même quai, vingt minutes d’attente. Elle en profite pour prendre un café.', jauges: { viaggio: 25, italiano: 10 } }
+      ],
+      oeuvre: 'Chiedere informazioni : « Scusi, … ? » est la formule polie pour aborder un inconnu (Lei).' },
+    { t: 'dit', qui: 'junior', emo: 'joie', jeu: 'la sera, al telefono con la mamma', txt: 'Mamma, siamo arrivati a Firenze! Abbiamo visto il Duomo e abbiamo mangiato un gelato.', trad: 'Maman, nous sommes arrivés à Florence ! Nous avons vu le Dôme et nous avons mangé une glace.', jauges: { viaggio: 90, italiano: 85 } }
+  ],
+  labo: {
+    titre: 'Laboratorio · il viaggio perfetto',
+    intro: 'Règle la préparation du voyage, la politesse et la maîtrise de l’italien : comment se passe le voyage à Florence ?',
+    persos: ['junior', 'stella', 'impiegato'],
+    curseurs: [
+      { id: 'preparazione', nom: 'Préparation (orari, binario)', val: 55, bas: 'aucune', haut: 'soignée' },
+      { id: 'cortesia', nom: 'Politesse (cortesia)', val: 70, bas: 'impolis', haut: 'courtois' },
+      { id: 'lingua', nom: 'Maîtrise de l’italien', val: 50, bas: 'faible', haut: 'bonne' }
+    ],
+    scenarios: [
+      { nom: 'Junior e Stella', icone: 'document', valeurs: { preparazione: 55, cortesia: 70, lingua: 50 } },
+      { nom: 'Senza preparazione', icone: 'nuage', valeurs: { preparazione: 5, lingua: 20 } },
+      { nom: 'Viaggiatori esperti', icone: 'fier', valeurs: { preparazione: 90, cortesia: 90, lingua: 85 } }
+    ],
+    liens: [
+      { a: 'junior', b: 'impiegato', type: 'confiance', lib: 'chiede', base: .3, poids: { cortesia: .4, lingua: .3 } },
+      { a: 'stella', b: 'junior', type: 'alliance', lib: 'amici', base: .7 }
+    ],
+    issue: function(v){
+      if(v.preparazione < 25){ return { niveau: 'ko', badge: 'Treno perso', recit: 'Pas d’horaires, pas de quai, pas de compostage : ils ratent le train et paient une amende.', apres: 'Un voyage se prépare.', themes: ['préparation'] }; }
+      if(v.lingua < 30){ return { niveau: 'moyen', badge: 'Viaggio difficile', recit: 'Ils arrivent, mais après beaucoup de malentendus et de gestes.', apres: 'Quelques phrases bien choisies changent tout.', themes: ['communication'] }; }
+      if(v.preparazione > 70 && v.lingua > 65){ return { niveau: 'ok', badge: 'Benvenuti a Firenze!', recit: 'Billets, quai, horaires : tout est prévu ; ils visitent Florence sans stress.', apres: 'Buon viaggio!', themes: ['voyage', 'futur'] }; }
+      return { niveau: 'moyen', badge: 'Viaggio riuscito', recit: 'Un retard, une hésitation, mais ils arrivent à Florence.', apres: 'Chaque voyage améliore l’italien.', themes: ['expérience'] };
+    }
+  },
+  quiz: [
+    { q: 'Comment dit-on « aller-retour » ?', options: [
+      { txt: 'andata e ritorno', ok: true, retour: 'Aller simple : solo andata.' },
+      { txt: 'binario e treno', retour: 'Non.' } ] },
+    { q: 'Futur de « partire » (lui) :', options: [
+      { txt: 'partirà', ok: true, retour: 'Il treno partirà alle otto.' },
+      { txt: 'parte', retour: 'C’est le présent.' } ] },
+    { q: 'Que signifie « il binario » ?', options: [
+      { txt: 'Le quai, la voie.', ok: true, retour: 'Il treno parte dal binario dodici.' },
+      { txt: 'Le billet.', retour: 'Le billet = il biglietto.' } ] },
+    { q: '« Prendete il sottopassaggio » est…', options: [
+      { txt: 'un impératif (voi).', ok: true, retour: 'Un ordre ou une indication.' },
+      { txt: 'un futur.', retour: 'Non.' } ] },
+    { q: 'Passé composé de « arrivare » (noi) :', options: [
+      { txt: 'siamo arrivati', ok: true, retour: 'Avec essere : verbe de mouvement.' },
+      { txt: 'abbiamo arrivato', retour: 'Arrivare se conjugue avec essere.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Vocabulaire : la stazione, la biglietteria, il biglietto, solo andata, andata e ritorno, il binario, il ritardo, convalidare.',
+      'Futur : partirò, arriverà, visiteremo ; irréguliers : sarò, avrò, andrò, verrò.',
+      'Impératif : prendi, prendete, andate, chiedi.',
+      'Passé composé : avere ou essere + participe passé (siamo arrivati, abbiamo visto).'
+    ],
+    ecrire: 'Scrivi un dialogo di sei battute alla biglietteria per un viaggio Roma–Venezia. Utilise le futur et l’impératif.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Un biglietto per Firenze</h1>
+<p><b>Italien · Première</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Acheter un billet de train et demander des informations sur un trajet ; employer le futur (partirò, arriverà), l’impératif (prendi, andate) et le passé composé pour raconter le voyage.</p>
+<p>Programme : Progression harmonisée 1re · Leçon 15 (comprare un biglietto di trasporto, chiedere informazioni), leçon 16 (futur), leçon 17 (passé composé), leçon 18 (impératif)</p>
+<p>Lieu : La stazione di Roma Termini · Viaggio di studio</p>
+<h3>Personnages</h3><ul><li>Junior</li><li>Stella</li><li>L’impiegato della biglietteria</li></ul>
+<h3>La scène</h3>
+<p>Junior e Stella hanno vinto una borsa per un viaggio di studio in Italia. Sono alla stazione di Roma Termini. Domani visiteranno Firenze. — <i>Junior et Stella ont gagné une bourse pour un voyage d’étude en Italie. Ils sont à la gare de Roma Termini. Demain, ils visiteront Florence.</i></p>
+<p><b>Stella</b> : Junior, chiedi tu le informazioni: il tuo italiano è migliore del mio! — <i>Junior, demande toi les informations : ton italien est meilleur que le mien !</i></p>
+<p>Alla biglietteria. — <i>Au guichet.</i></p>
+<p><b>Junior</b> : Buongiorno. Vorrei due biglietti per Firenze, per domani mattina, per favore. — <i>Bonjour. Je voudrais deux billets pour Florence, pour demain matin, s’il vous plaît.</i></p>
+<p><b>L’impiegato della biglietteria</b> : Solo andata o andata e ritorno? — <i>Aller simple ou aller-retour ?</i></p>
+<p><b>Junior</b> : Andata e ritorno. A che ora parte il primo treno? — <i>Aller-retour. À quelle heure part le premier train ?</i></p>
+<p><b>L’impiegato della biglietteria</b> : Il treno partirà alle otto e arriverà a Firenze alle nove e mezza. Sono trentacinque euro a persona, andata e ritorno. — <i>Le train partira à huit heures et arrivera à Florence à neuf heures et demie. C’est trente-cinq euros par personne, aller-retour.</i></p>
+<p><b>Question :</b> Combien coûtent les deux billets aller-retour ?</p><ul><li>Settanta euro (70 €) : 2 × 35. <b>(bonne réponse)</b></li><li>Trentacinque euro (35 €).</li></ul><p>Trentacinque euro a persona, due persone : settanta euro.</p>
+<h4>Laboratorio · pagare i biglietti</h4><p>Paie exactement 70 € au guichet.</p>
+<p>Cinquanta più venti fa settanta. Ecco a Lei!</p>
+<h4>Le futur</h4><p>On remplace la terminaison de l’infinitif : partire → partirò, partirai, partirà ; arrivare → arriverò, arriverà (le a de -are devient e). Irréguliers fréquents : essere → sarò, avere → avrò, andare → andrò, venire → verrò.</p>
+<p><b>L’impiegato della biglietteria</b> <i>(indica con la mano)</i> : Il treno parte dal binario dodici. Prendete il sottopassaggio, andate a destra e convalidate il biglietto prima di salire! — <i>Le train part du quai douze. Prenez le passage souterrain, allez à droite et compostez le billet avant de monter !</i></p>
+<h4>Laboratorio · futuro o imperativo?</h4><p>Classe chaque forme verbale.</p>
+<ul><li><b>Futuro</b> : partirà ; arriverà ; visiteremo</li><li><b>Imperativo</b> : prendete ; andate ; chiedi</li></ul>
+<p>Futur : terminaisons -ò, -ai, -à, -emo, -ete, -anno. Impératif : l’ordre ou le conseil.</p>
+<p><b>À toi de décider :</b> Le lendemain, le train a vingt minutes de retard. Que fait Stella ?</p><ul><li>Sale su un altro treno senza chiedere. (Elle monte dans un autre train sans demander.) — Le train va à Naples ! Le contrôleur lui fait payer une amende.</li><li>Chiede: « Scusi, il treno per Firenze è in ritardo? » (Elle demande : excusez-moi, le train pour Florence est-il en retard ?) — On lui confirme : même quai, vingt minutes d’attente. Elle en profite pour prendre un café.</li></ul>
+<p><b>Junior</b> <i>(la sera, al telefono con la mamma)</i> : Mamma, siamo arrivati a Firenze! Abbiamo visto il Duomo e abbiamo mangiato un gelato. — <i>Maman, nous sommes arrivés à Florence ! Nous avons vu le Dôme et nous avons mangé une glace.</i></p>
+<h3>Quiz</h3><ol><li>Comment dit-on « aller-retour » ? — <b>andata e ritorno</b> Aller simple : solo andata.</li><li>Futur de « partire » (lui) : — <b>partirà</b> Il treno partirà alle otto.</li><li>Que signifie « il binario » ? — <b>Le quai, la voie.</b> Il treno parte dal binario dodici.</li><li>« Prendete il sottopassaggio » est… — <b>un impératif (voi).</b> Un ordre ou une indication.</li><li>Passé composé de « arrivare » (noi) : — <b>siamo arrivati</b> Avec essere : verbe de mouvement.</li></ol>
+<h3>À retenir</h3><ul><li>Vocabulaire : la stazione, la biglietteria, il biglietto, solo andata, andata e ritorno, il binario, il ritardo, convalidare.</li><li>Futur : partirò, arriverà, visiteremo ; irréguliers : sarò, avrò, andrò, verrò.</li><li>Impératif : prendi, prendete, andate, chiedi.</li><li>Passé composé : avere ou essere + participe passé (siamo arrivati, abbiamo visto).</li></ul>
+<h3>À écrire</h3><p>Scrivi un dialogo di sei battute alla biglietteria per un viaggio Roma–Venezia. Utilise le futur et l’impératif.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="1re-italien-alla-stazione.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

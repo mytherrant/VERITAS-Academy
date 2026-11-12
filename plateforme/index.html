@@ -28,20 +28,99 @@
      relatif). Ce fichier est bien déposé à la racine par la CI — vérifié. -->
 <meta property="og:image" content="https://veritas-school.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<script src="./support.js?v=9c859a28"></script>
-<script src="./minesec.js?v=5109f163"></script>
-<script src="./conformite.js?v=582339b2"></script>
-<script src="./exercices.js?v=4cde4eaa"></script>
-<script src="./generateur.js?v=355c6046"></script>
-<script src="./texte.js?v=43fa1e84"></script>
-<script src="./docx.js?v=221641f0"></script>
-<script src="./lecteur-textes.js?v=4153b09f"></script>
+<!-- TOUT EN defer, ET LE MOTEUR EN DERNIER (audit 3G du 28/10/2026).
+     Huit scripts (~400 Ko) bloquaient l'affichage dans l'en-tête. En `defer`
+     ils se téléchargent en parallèle et s'exécutent DANS CET ORDRE, page lue.
+     support.js passe en dernier, et c'est la condition : il démarre l'Atelier
+     dès que React est chargé (document déjà lu), et le composant lit alors
+     MINESEC_CORPUS, VRT_TEXTE, VRT_PROGRESSIONS… Placé avant eux, un React
+     déjà en cache pourrait monter l'Atelier avant leur arrivée.
+     Les deux preload lancent React tout de suite au lieu d'attendre support.js
+     (même intégrité, même crossorigin que son chargeur : sinon double appel). -->
+<link rel="preload" as="script" href="/assets/vendor/react-18.3.1.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous">
+<link rel="preload" as="script" href="/assets/vendor/react-dom-18.3.1.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous">
+<script defer src="./minesec.js?v=5109f163"></script>
+<script defer src="./conformite.js?v=582339b2"></script>
+<script defer src="./exercices.js?v=4cde4eaa"></script>
+<script defer src="./generateur.js?v=355c6046"></script>
+<script defer src="./texte.js?v=43fa1e84"></script>
+<script defer src="./docx.js?v=857dffca"></script>
+<script defer src="./lecteur-textes.js?v=4153b09f"></script>
 <script defer src="./progressions.js?v=6fedeb24"></script>
+<script defer src="./support.js?v=9c859a28"></script>
 <!-- seo-tete -->
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CollectionPage","name":"Atelier de Français","description":"Composez des épreuves de français conformes au programme MINESEC : l’IA Ambassa rédige l’épreuve complète (texte, questions, barème, corrigé), vous relisez. Corpus indexé par classe et par module, contrôle de conformité, export Word.","url":"https://veritas-school.com/plateforme/","inLanguage":"fr","publisher":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://veritas-school.com/"},{"@type":"ListItem","position":2,"name":"Atelier de Français","item":"https://veritas-school.com/plateforme/"}]}]}</script>
 <!-- /seo-tete -->
+<style id="vrt-sujet">
+/* En-tête du sujet et visionneuse PDF (11/2026) — voir le gabarit APERCU. */
+.vrt-sj{position:relative;background:#fff;border-bottom:1px solid #e2eaf3;padding:12px 16px 0;display:grid;grid-template-columns:1fr auto;gap:10px 12px;align-items:center}
+.vrt-sj-l1{display:flex;align-items:center;gap:10px;min-width:0;grid-column:1/2}
+.vrt-sj-retour{background:#fff;border:1px solid #e2eaf3;color:#14375f;padding:7px 12px;font:700 12.5px Poppins,sans-serif;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;flex:none}
+.vrt-sj-titre{font:700 17px/1.3 Poppins,sans-serif;color:#14375f;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vrt-sj-export{grid-column:2/3;grid-row:1/2;position:relative;justify-self:end}
+.vrt-sj-btn{background:#fff;border:1px solid #d5e0ec;color:#14375f;padding:9px 16px;font:700 14px Poppins,sans-serif;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.vrt-sj-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:40;background:#fff;border:1px solid #e2eaf3;border-radius:12px;box-shadow:0 12px 30px rgba(20,55,95,.18);padding:6px;min-width:230px}
+.vrt-sj-menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 12px;border-radius:8px;font:600 13.5px Poppins,sans-serif;color:#14375f;cursor:pointer}
+.vrt-sj-menu button:hover{background:#f2f6fb}
+.vrt-sj-chips{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.vrt-sj-frise{grid-column:1/-1;display:flex;align-items:center;border:1px solid #e2eaf3;border-radius:16px;padding:12px 16px;overflow-x:auto;max-width:640px;box-sizing:border-box}
+.vrt-sj-l2{grid-column:1/-1;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.vrt-sj-seg{display:inline-flex;gap:3px;background:#eef2f7;border-radius:12px;padding:4px}
+.vrt-sj-seg button{border:0!important;padding:8px 18px!important;font-size:14px!important;border-radius:9px!important}
+.vrt-sj-onglets{grid-column:1/-1;display:flex;overflow-x:auto;border-bottom:1px solid #e2eaf3;margin:0 -16px;padding:0 16px}
+.vrt-pdfv{max-width:900px;margin:16px auto 40px;border-radius:14px;overflow:hidden;background:#525659;box-shadow:0 6px 24px rgba(20,37,84,.18)}
+.vrt-pdfv-bar{display:flex;align-items:center;gap:6px;background:#2b2f33;color:#fff;padding:10px 14px;font:500 14px Poppins,sans-serif;position:sticky;top:0;z-index:2}
+.vrt-pdfv-bar button{background:none;border:0;color:#fff;font-size:20px;line-height:1;width:36px;height:34px;border-radius:8px;cursor:pointer}
+.vrt-pdfv-bar button:hover{background:rgba(255,255,255,.12)}
+.vrt-pdfv-zoom{min-width:52px;text-align:center;font-variant-numeric:tabular-nums}
+.vrt-pdfv-pages{max-height:calc(100vh - 150px);overflow:auto;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:14px;-webkit-overflow-scrolling:touch}
+.vrt-pdfv-pages canvas{background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.35);max-width:none}
+/* Fiches « libellé — valeur » (épreuves, échéances), calendrier annuel et
+   menu à deux lignes (11/2026) — sur le modèle de Tchouskou. */
+.vrt-kv-carte{background:#fff;border:1px solid #e2eaf3;border-radius:16px;padding:16px 18px;box-shadow:0 2px 10px rgba(20,55,95,.05);display:flex;flex-direction:column}
+.vrt-kv-titre{font:700 16px/1.3 Poppins,sans-serif;color:#1d3b2a;flex:1;word-break:break-word}
+.vrt-kv{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid #eef2f7;font-size:13.5px;color:#22303f}
+.vrt-kv:last-of-type{border-bottom:0}
+.vrt-kv>span:first-child{color:#7a8598;font-size:13px}
+.vrt-kv-cadre{display:inline-block;border:1.5px solid #1d3b2a;border-radius:999px;padding:3px 12px;font:600 12.5px Poppins,sans-serif;color:#1d3b2a;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vrt-kv-fort{font:700 15px Poppins,sans-serif;color:#1d3b2a}
+.vrt-kv-pastille{display:inline-block;background:#e8f1f4;color:#1a4f6b;border-radius:999px;padding:3px 11px;font:700 12px Poppins,sans-serif}
+.vrt-kv-barre{display:inline-block;width:80px;height:7px;border-radius:99px;background:#e6ece8;overflow:hidden;flex:none}
+.vrt-kv>span:last-child{white-space:normal;min-width:0}
+.vrt-kv-lien{background:none;border:0;padding:0;color:#1a72bb;font:600 12px Poppins,sans-serif;cursor:pointer}
+.vrt-kv-carte button{white-space:nowrap}
+.vrt-ech-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:8px}
+.vrt-an-legende{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:#33404f;margin:2px 0 14px}
+.vrt-an-legende span{display:inline-flex;align-items:center;gap:7px}
+.vrt-an-legende i{display:inline-block;width:12px;height:12px;border-radius:50%}
+.vrt-an-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.vrt-an-mois{background:#fff;border:1px solid #e2eaf3;border-radius:16px;padding:14px}
+.vrt-an-tete{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 8px;width:100%;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.vrt-an-tete:hover b{text-decoration:underline}
+.vrt-an-tete b{font:700 16px Poppins,sans-serif;color:#1d3b2a}
+.vrt-an-tete span{font:600 12.5px Poppins,sans-serif;color:#5a6678}
+.vrt-an-jours{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.vrt-an-sem{text-align:center;font:600 11px Poppins,sans-serif;color:#8b97a8;padding:2px 0}
+.vrt-an-pts{display:flex;gap:2px;align-items:center;flex-wrap:wrap;min-height:7px}
+.vrt-an-pts i{display:inline-block;width:6px;height:6px;border-radius:50%}
+.vrt-an-pts small{font-size:9px;color:#5a6678}
+.vrt-sbgrp{font:700 10.5px Poppins,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--sb-fg-dim);padding:14px 12px 4px}
+.vrt-sbnav .vrt-sbgrp:first-child{padding-top:0}
+.vrt-sbl2{line-height:1.2;text-align:left;min-width:0}
+.vrt-sbl2 b{display:block;font-weight:600}
+.vrt-sbl2 small{display:block;font-size:11px;font-weight:400;color:var(--sb-fg-dim);margin-top:2px;white-space:normal}
+@media(max-width:640px){
+  .vrt-kv{grid-template-columns:104px 1fr}
+  .vrt-ech-grille,.vrt-an-grille{grid-template-columns:1fr}
+  .vrt-sj{padding:10px 12px 0}
+  .vrt-sj-titre{font-size:15px;white-space:normal}
+  .vrt-sj-onglets{margin:0 -12px;padding:0 12px}
+  .vrt-pdfv{margin:12px 8px 30px;border-radius:12px}
+  .vrt-pdfv-pages{max-height:calc(100vh - 120px)}
+}
+</style>
 <!--vrt-habillage:tete-->
-<link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.49">
+<link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.20.73.34">
 <script>window.VRT_DATA=window.VRT_DATA||{"citations":[{"t":"Le génie, c’est un pour cent d’inspiration et quatre-vingt-dix-neuf pour cent de transpiration.","a":"Thomas Edison"},{"t":"Ce n’est pas parce que les choses sont difficiles que nous n’osons pas ; c’est parce que nous n’osons pas qu’elles sont difficiles.","a":"Sénèque"},{"t":"L’éducation est l’arme la plus puissante pour changer le monde.","a":"Nelson Mandela"},{"t":"Un peu chaque jour vaut mieux que beaucoup un seul jour.","a":"Proverbe"},{"t":"La chance sourit à l’esprit préparé.","a":"Louis Pasteur"},{"t":"Tomber sept fois, se relever huit.","a":"Proverbe japonais"}],"themeSombre":"\n      body{background:#0A1428!important}\n      [style*=\"background:#fff\"],[style*=\"background:#FAFBFE\"],[style*=\"background:#FCFDFE\"],[style*=\"background:#F7F9FD\"]{background:#132241!important}\n      [style*=\"background:#F4F5F8\"],[style*=\"background:#F4F6FB\"],[style*=\"background:#EFF2F7\"],[style*=\"background:#F5F9FF\"]{background:#0F1B33!important}\n      [style*=\"background:rgba(255,255,255,.96)\"]{background:rgba(13,25,48,.96)!important}\n      [style*=\"radial-gradient(1100px\"],[style*=\"radial-gradient(900px\"]{background:#0C1730!important}\n      [style*=\"linear-gradient(180deg,#FBF8F1\"]{background:#0C1730!important}\n      [style*=\"color:#001136\"]{color:#EEF3FC!important}\n      [style*=\"color:#0C2A6A\"]{color:#DCE6F8!important}\n      [style*=\"color:#4D5163\"],[style*=\"color:#6B5A42\"]{color:#B6C2D8!important}\n      [style*=\"color:#6E7385\"],[style*=\"color:#9BA6BE\"]{color:#8D9AB4!important}\n      [style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"]{border-color:#24334F!important}\n      [style*=\"\"],[style*=\"\"]{border-bottom-color:#24334F!important}\n      [style*=\"\"]{border-top-color:#24334F!important}\n      [style*=\"border-left:4px solid\"]{border-left-color:#FFC93C!important}\n      input,input::placeholder{color:#C7D2E6!important}\n    "};</script>
 <style>footer[data-noprint="1"]:not(.vrt-hab){display:none!important}.sc-host,div:has(>.sc-host){height:auto!important;min-height:100vh}</style>
 <!--/vrt-habillage:tete-->
@@ -59,7 +138,7 @@
           <button type="button" onclick="VRT.act('goEnseignants',this,event)" data-go="enseignants" style="display:inline-flex;align-items:center;height:100%;padding:0 14px;border:0;border-bottom:3px solid transparent;background:none;cursor:pointer;font:500 15px Poppins,sans-serif;color:#001136;white-space:nowrap;transition:color .18s,border-color .18s" class="vh4">Enseignants</button><a href="/app.html#partenariat" style="display:inline-flex;align-items:center;height:100%;padding:0 14px;border:0;border-bottom:3px solid transparent;background:none;cursor:pointer;font:500 15px Poppins,sans-serif;color:#001136;white-space:nowrap;text-decoration:none;transition:color .18s,border-color .18s" class="vh4">Partenaires</a>
           <div style="position:relative;height:100%;display:flex;align-items:center">
             <button type="button" onclick="VRT.act('basculerPlus',this,event)" aria-expanded="false" style="display:inline-flex;align-items:center;gap:6px;height:100%;padding:0 14px;border:0;border-bottom:3px solid transparent;background:none;cursor:pointer;font:500 15px Poppins,sans-serif;color:#001136;white-space:nowrap;transition:color .18s,border-color .18s" class="vh5">Plus<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(90deg)" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-chevron-right"></use></svg></button>
-            <div id="vrtPlus" class="vmn" hidden role="menu" aria-label="Toutes les rubriques"><div class="vmn-col"><p class="vmn-t">Élève<small>Apprendre et réviser</small></p><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="elearning"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-book"/></svg></span><span class="vmn-x">Catalogue e-learning<small>Matières, œuvres, séquences</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></button><a class="vmn-i" href="/corriges/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-checkcircle"/></svg></span><span class="vmn-x">Corrigés des cahiers<small>Accès libre, par séquence</small></span></a><a class="vmn-i" href="/app.html#epreuves"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-doc"/></svg></span><span class="vmn-x">Annales corrigées<small>BEPC, Probatoire, BAC, GCE</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></a><a class="vmn-i" href="/app.html#evaluations"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-clock"/></svg></span><span class="vmn-x">Évaluations en ligne<small>Entraînement chronométré</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></a><a class="vmn-i" href="/oeuvres/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-bookopen"/></svg></span><span class="vmn-x">Œuvres au programme<small>Analyses et fiches</small></span></a><a class="vmn-i" href="/niveaux/"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-graduation"/></svg></span><span class="vmn-x">Programmes par classe<small>De la 6ᵉ à la Terminale</small></span></a><a class="vmn-i" href="/outils/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-calculator"/></svg></span><span class="vmn-x">Outils gratuits<small>Calculateurs de moyenne</small></span></a><a class="vmn-i" href="/app.html#positionnement"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-target"/></svg></span><span class="vmn-x">Tester mon niveau<small>10 questions, forces et lacunes</small></span></a><a class="vmn-i" href="/app.html#progression"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-award"/></svg></span><span class="vmn-x">Ma progression<small>XP, série, badges à débloquer</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></a><a class="vmn-i" href="/app.html#jeux"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-game"/></svg></span><span class="vmn-x">Jeux et battles<small>Réviser en jouant, défis hebdo</small></span></a><a class="vmn-i" href="/app.html#simulateur"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-clock"/></svg></span><span class="vmn-x">Examen blanc<small>Sujet officiel + chronomètre</small></span></a><a class="vmn-i" href="/eleve/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-user"/></svg></span><span class="vmn-x">Espace élève<small>Corrigés, quiz et méthodes</small></span></a><a class="vmn-i" href="/livrets/"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-bookopen"/></svg></span><span class="vmn-x">Mon cahier en ligne<small>Interactif, 6ᵉ → Terminale</small></span></a><a class="vmn-i" href="/flash/"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-qr"/></svg></span><span class="vmn-x">VÉRITAS Flash<small>Scanner le QR de sa séquence</small></span></a></div><div class="vmn-col"><p class="vmn-t">Parent<small>Suivre et soutenir</small></p><a class="vmn-i" href="/app.html#orientation"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Orientation<small>Choisir sa série</small></span></a><a class="vmn-i" href="/app.html#positionnement"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-target"/></svg></span><span class="vmn-x">Tester son niveau<small>Le point avant de commencer</small></span></a><a class="vmn-i" href="/parcours/"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-scale"/></svg></span><span class="vmn-x">Matières et coefficients<small>Poids réels, orientation</small></span></a><a class="vmn-i" href="/app.html#cagnotte"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-gift"/></svg></span><span class="vmn-x">Cagnotte de scolarité<small>Faire financer son année</small></span></a><a class="vmn-i" href="/app.html#trophees"><span class="vmn-p" style="background:#FFF6DA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-trophy"/></svg></span><span class="vmn-x">Trophées VÉRITAS<small>Vote gratuit et unique</small></span></a><a class="vmn-i" href="/app.html#leaderboard-junior"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-award"/></svg></span><span class="vmn-x">Classement junior<small>Le tableau d’honneur</small></span></a></div><div class="vmn-col"><p class="vmn-t">Enseignant<small>Enseigner et publier</small></p><a class="vmn-i" href="/ressources/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Ressources et cours<small>Leçons interactives</small></span></a><a class="vmn-i" href="/manuels.html"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-qr"/></svg></span><span class="vmn-x">Corrigés du cahier papier<small>La page des QR codes</small></span></a><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="boutique"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shop"/></svg></span><span class="vmn-x">Boutique de manuels<small>Cahiers et études d’œuvres</small></span></button><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="tarifs"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-wallet"/></svg></span><span class="vmn-x">Abonnements<small>Élève, enseignant, établissement</small></span></button><a class="vmn-i" href="/app.html#verifier-certificat"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shield"/></svg></span><span class="vmn-x">Vérifier un certificat<small>Authentifier une distinction</small></span></a><a class="vmn-i" href="/plateforme/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Atelier de Français<small>Composer une épreuve MINESEC</small></span></a><a class="vmn-i" href="/enseignant/"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-doc"/></svg></span><span class="vmn-x">Espace enseignant<small>Guide, grilles, progressions</small></span></a><a class="vmn-i" href="/adopter/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-checkcircle"/></svg></span><span class="vmn-x">Adopter les cahiers<small>Pour une classe, un établissement</small></span></a></div><div class="vmn-col"><p class="vmn-t">Partenaire<small>Diffuser et représenter</small></p><a class="vmn-i" href="/app.html#partenariat"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-users"/></svg></span><span class="vmn-x">Devenir partenaire<small>9 formules, marges revendeur</small></span></a><a class="vmn-i" href="/app.html#nos-partenaires"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-handshake"/></svg></span><span class="vmn-x">Nos partenaires<small>Ceux qui nous accompagnent</small></span></a><a class="vmn-i" href="/campus/"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-university"/></svg></span><span class="vmn-x">VÉRITAS Campus<small>Pour les établissements</small></span></a><a class="vmn-i" href="/constellation.html"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-sparkles"/></svg></span><span class="vmn-x">Constellation VÉRITAS<small>Tout l’écosystème</small></span></a><a class="vmn-i" href="/plan.html#partenaire"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-map"/></svg></span><span class="vmn-x">Espace partenaire<small>Toutes ses pages, réunies</small></span></a></div><div class="vmn-col"><p class="vmn-t">Le centre<small>Nous connaître</small></p><a class="vmn-i" href="/decouvrir/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-building"/></svg></span><span class="vmn-x">Présentation<small>Qui nous sommes</small></span></a><a class="vmn-i" href="/app.html#actualites"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-megaphone"/></svg></span><span class="vmn-x">Actualités<small>Ce qui se passe au centre</small></span></a><a class="vmn-i" href="/app.html#inscription"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-user"/></svg></span><span class="vmn-x">S’inscrire<small>Créer un compte gratuit</small></span></a><a class="vmn-i" href="/plan.html"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Plan du site<small>Tout VÉRITAS, par profil</small></span></a></div></div>
+            <div id="vrtPlus" class="vmn" hidden role="menu" aria-label="Toutes les rubriques"><div class="vmn-col"><p class="vmn-t">Élève<small>Apprendre et réviser</small></p><a class="vmn-i" href="/apprendre/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-graduation"/></svg></span><span class="vmn-x">Apprendre<small>Leçons, quiz, corrigés, annales</small></span></a></div><div class="vmn-col"><p class="vmn-t">Parent<small>Suivre et soutenir</small></p><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="parents"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-home"/></svg></span><span class="vmn-x">Suivi au centre ou à domicile<small>Répétitions, classes virtuelles</small></span></button><a class="vmn-i" href="/app.html#orientation"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Orientation<small>Choisir sa série</small></span></a><a class="vmn-i" href="/app.html#positionnement"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-target"/></svg></span><span class="vmn-x">Tester son niveau<small>Le point avant de commencer</small></span></a><a class="vmn-i" href="/parcours/"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-scale"/></svg></span><span class="vmn-x">Matières et coefficients<small>Poids réels, orientation</small></span></a><a class="vmn-i" href="/app.html#cagnotte"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-gift"/></svg></span><span class="vmn-x">Cagnotte de scolarité<small>Faire financer son année</small></span></a><a class="vmn-i" href="/app.html#trophees"><span class="vmn-p" style="background:#FFF6DA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-trophy"/></svg></span><span class="vmn-x">Trophées VÉRITAS<small>Vote gratuit et unique</small></span></a><a class="vmn-i" href="/app.html#leaderboard-junior"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-award"/></svg></span><span class="vmn-x">Classement junior<small>Le tableau d’honneur</small></span></a></div><div class="vmn-col"><p class="vmn-t">Enseignant<small>Enseigner et publier</small></p><a class="vmn-i" href="/ressources/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Ressources et cours<small>Leçons interactives</small></span></a><a class="vmn-i" href="/manuels.html"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-qr"/></svg></span><span class="vmn-x">Corrigés du cahier papier<small>La page des QR codes</small></span></a><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="boutique"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shop"/></svg></span><span class="vmn-x">Boutique de manuels<small>Cahiers et études d’œuvres</small></span></button><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="tarifs"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-wallet"/></svg></span><span class="vmn-x">Abonnements<small>Élève, enseignant, établissement</small></span></button><a class="vmn-i" href="/app.html#verifier-certificat"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shield"/></svg></span><span class="vmn-x">Vérifier un certificat<small>Authentifier une distinction</small></span></a><a class="vmn-i" href="/plateforme/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Atelier de Français<small>Composer une épreuve MINESEC</small></span></a><a class="vmn-i" href="/enseignant/"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-doc"/></svg></span><span class="vmn-x">Espace enseignant<small>Guide, grilles, progressions</small></span></a><a class="vmn-i" href="/adopter/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-checkcircle"/></svg></span><span class="vmn-x">Adopter les cahiers<small>Pour une classe, un établissement</small></span></a></div><div class="vmn-col"><p class="vmn-t">Partenaire<small>Diffuser et représenter</small></p><a class="vmn-i" href="/app.html#partenariat"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-users"/></svg></span><span class="vmn-x">Devenir partenaire<small>9 formules, marges revendeur</small></span></a><a class="vmn-i" href="/app.html#nos-partenaires"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-handshake"/></svg></span><span class="vmn-x">Nos partenaires<small>Ceux qui nous accompagnent</small></span></a><a class="vmn-i" href="/campus/"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-university"/></svg></span><span class="vmn-x">VÉRITAS Campus<small>Pour les établissements</small></span></a><a class="vmn-i" href="/constellation.html"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-sparkles"/></svg></span><span class="vmn-x">Constellation VÉRITAS<small>Tout l’écosystème</small></span></a><a class="vmn-i" href="/plan.html#partenaire"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-map"/></svg></span><span class="vmn-x">Espace partenaire<small>Toutes ses pages, réunies</small></span></a></div><div class="vmn-col"><p class="vmn-t">Le centre<small>Nous connaître</small></p><a class="vmn-i" href="/decouvrir/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-building"/></svg></span><span class="vmn-x">Présentation<small>Qui nous sommes</small></span></a><a class="vmn-i" href="/app.html#actualites"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-megaphone"/></svg></span><span class="vmn-x">Actualités<small>Ce qui se passe au centre</small></span></a><a class="vmn-i" href="/app.html#inscription"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-user"/></svg></span><span class="vmn-x">S’inscrire<small>Créer un compte gratuit</small></span></a><a class="vmn-i" href="/plan.html"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Plan du site<small>Tout VÉRITAS, par profil</small></span></a></div></div>
           </div>
         </div>
 
@@ -111,7 +190,7 @@
                 </button>
               
               <a href="/app.html#connexion" style="margin-top:6px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:10px;background:#FFC93C;color:#001136;font:600 15px Poppins,sans-serif;box-shadow:0 8px 18px rgba(242,165,32,.3)" class="vh8"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-user"></use></svg>Connexion</a>
-            <div class="vmn vmn-mob"><div class="vmn-col"><p class="vmn-t">Élève<small>Apprendre et réviser</small></p><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="elearning"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-book"/></svg></span><span class="vmn-x">Catalogue e-learning<small>Matières, œuvres, séquences</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></button><a class="vmn-i" href="/corriges/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-checkcircle"/></svg></span><span class="vmn-x">Corrigés des cahiers<small>Accès libre, par séquence</small></span></a><a class="vmn-i" href="/app.html#epreuves"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-doc"/></svg></span><span class="vmn-x">Annales corrigées<small>BEPC, Probatoire, BAC, GCE</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></a><a class="vmn-i" href="/app.html#evaluations"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-clock"/></svg></span><span class="vmn-x">Évaluations en ligne<small>Entraînement chronométré</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></a><a class="vmn-i" href="/oeuvres/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-bookopen"/></svg></span><span class="vmn-x">Œuvres au programme<small>Analyses et fiches</small></span></a><a class="vmn-i" href="/niveaux/"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-graduation"/></svg></span><span class="vmn-x">Programmes par classe<small>De la 6ᵉ à la Terminale</small></span></a><a class="vmn-i" href="/outils/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-calculator"/></svg></span><span class="vmn-x">Outils gratuits<small>Calculateurs de moyenne</small></span></a><a class="vmn-i" href="/app.html#positionnement"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-target"/></svg></span><span class="vmn-x">Tester mon niveau<small>10 questions, forces et lacunes</small></span></a><a class="vmn-i" href="/app.html#progression"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-award"/></svg></span><span class="vmn-x">Ma progression<small>XP, série, badges à débloquer</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></a><a class="vmn-i" href="/app.html#jeux"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-game"/></svg></span><span class="vmn-x">Jeux et battles<small>Réviser en jouant, défis hebdo</small></span></a><a class="vmn-i" href="/app.html#simulateur"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-clock"/></svg></span><span class="vmn-x">Examen blanc<small>Sujet officiel + chronomètre</small></span></a><a class="vmn-i" href="/eleve/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-user"/></svg></span><span class="vmn-x">Espace élève<small>Corrigés, quiz et méthodes</small></span></a><a class="vmn-i" href="/livrets/"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-bookopen"/></svg></span><span class="vmn-x">Mon cahier en ligne<small>Interactif, 6ᵉ → Terminale</small></span></a><a class="vmn-i" href="/flash/"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-qr"/></svg></span><span class="vmn-x">VÉRITAS Flash<small>Scanner le QR de sa séquence</small></span></a></div><div class="vmn-col"><p class="vmn-t">Parent<small>Suivre et soutenir</small></p><a class="vmn-i" href="/app.html#orientation"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Orientation<small>Choisir sa série</small></span></a><a class="vmn-i" href="/app.html#positionnement"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-target"/></svg></span><span class="vmn-x">Tester son niveau<small>Le point avant de commencer</small></span></a><a class="vmn-i" href="/parcours/"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-scale"/></svg></span><span class="vmn-x">Matières et coefficients<small>Poids réels, orientation</small></span></a><a class="vmn-i" href="/app.html#cagnotte"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-gift"/></svg></span><span class="vmn-x">Cagnotte de scolarité<small>Faire financer son année</small></span></a><a class="vmn-i" href="/app.html#trophees"><span class="vmn-p" style="background:#FFF6DA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-trophy"/></svg></span><span class="vmn-x">Trophées VÉRITAS<small>Vote gratuit et unique</small></span></a><a class="vmn-i" href="/app.html#leaderboard-junior"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-award"/></svg></span><span class="vmn-x">Classement junior<small>Le tableau d’honneur</small></span></a></div><div class="vmn-col"><p class="vmn-t">Enseignant<small>Enseigner et publier</small></p><a class="vmn-i" href="/ressources/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Ressources et cours<small>Leçons interactives</small></span></a><a class="vmn-i" href="/manuels.html"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-qr"/></svg></span><span class="vmn-x">Corrigés du cahier papier<small>La page des QR codes</small></span></a><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="boutique"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shop"/></svg></span><span class="vmn-x">Boutique de manuels<small>Cahiers et études d’œuvres</small></span></button><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="tarifs"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-wallet"/></svg></span><span class="vmn-x">Abonnements<small>Élève, enseignant, établissement</small></span></button><a class="vmn-i" href="/app.html#verifier-certificat"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shield"/></svg></span><span class="vmn-x">Vérifier un certificat<small>Authentifier une distinction</small></span></a><a class="vmn-i" href="/plateforme/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Atelier de Français<small>Composer une épreuve MINESEC</small></span></a><a class="vmn-i" href="/enseignant/"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-doc"/></svg></span><span class="vmn-x">Espace enseignant<small>Guide, grilles, progressions</small></span></a><a class="vmn-i" href="/adopter/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-checkcircle"/></svg></span><span class="vmn-x">Adopter les cahiers<small>Pour une classe, un établissement</small></span></a></div><div class="vmn-col"><p class="vmn-t">Partenaire<small>Diffuser et représenter</small></p><a class="vmn-i" href="/app.html#partenariat"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-users"/></svg></span><span class="vmn-x">Devenir partenaire<small>9 formules, marges revendeur</small></span></a><a class="vmn-i" href="/app.html#nos-partenaires"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-handshake"/></svg></span><span class="vmn-x">Nos partenaires<small>Ceux qui nous accompagnent</small></span></a><a class="vmn-i" href="/campus/"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-university"/></svg></span><span class="vmn-x">VÉRITAS Campus<small>Pour les établissements</small></span></a><a class="vmn-i" href="/constellation.html"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-sparkles"/></svg></span><span class="vmn-x">Constellation VÉRITAS<small>Tout l’écosystème</small></span></a><a class="vmn-i" href="/plan.html#partenaire"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-map"/></svg></span><span class="vmn-x">Espace partenaire<small>Toutes ses pages, réunies</small></span></a></div><div class="vmn-col"><p class="vmn-t">Le centre<small>Nous connaître</small></p><a class="vmn-i" href="/decouvrir/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-building"/></svg></span><span class="vmn-x">Présentation<small>Qui nous sommes</small></span></a><a class="vmn-i" href="/app.html#actualites"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-megaphone"/></svg></span><span class="vmn-x">Actualités<small>Ce qui se passe au centre</small></span></a><a class="vmn-i" href="/app.html#inscription"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-user"/></svg></span><span class="vmn-x">S’inscrire<small>Créer un compte gratuit</small></span></a><a class="vmn-i" href="/plan.html"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Plan du site<small>Tout VÉRITAS, par profil</small></span></a></div></div></div>
+            <div class="vmn vmn-mob"><div class="vmn-col"><p class="vmn-t">Élève<small>Apprendre et réviser</small></p><a class="vmn-i" href="/apprendre/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-graduation"/></svg></span><span class="vmn-x">Apprendre<small>Leçons, quiz, corrigés, annales</small></span></a></div><div class="vmn-col"><p class="vmn-t">Parent<small>Suivre et soutenir</small></p><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="parents"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-home"/></svg></span><span class="vmn-x">Suivi au centre ou à domicile<small>Répétitions, classes virtuelles</small></span></button><a class="vmn-i" href="/app.html#orientation"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Orientation<small>Choisir sa série</small></span></a><a class="vmn-i" href="/app.html#positionnement"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-target"/></svg></span><span class="vmn-x">Tester son niveau<small>Le point avant de commencer</small></span></a><a class="vmn-i" href="/parcours/"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-scale"/></svg></span><span class="vmn-x">Matières et coefficients<small>Poids réels, orientation</small></span></a><a class="vmn-i" href="/app.html#cagnotte"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-gift"/></svg></span><span class="vmn-x">Cagnotte de scolarité<small>Faire financer son année</small></span></a><a class="vmn-i" href="/app.html#trophees"><span class="vmn-p" style="background:#FFF6DA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-trophy"/></svg></span><span class="vmn-x">Trophées VÉRITAS<small>Vote gratuit et unique</small></span></a><a class="vmn-i" href="/app.html#leaderboard-junior"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-award"/></svg></span><span class="vmn-x">Classement junior<small>Le tableau d’honneur</small></span></a></div><div class="vmn-col"><p class="vmn-t">Enseignant<small>Enseigner et publier</small></p><a class="vmn-i" href="/ressources/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Ressources et cours<small>Leçons interactives</small></span></a><a class="vmn-i" href="/manuels.html"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-qr"/></svg></span><span class="vmn-x">Corrigés du cahier papier<small>La page des QR codes</small></span></a><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="boutique"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shop"/></svg></span><span class="vmn-x">Boutique de manuels<small>Cahiers et études d’œuvres</small></span></button><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="tarifs"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-wallet"/></svg></span><span class="vmn-x">Abonnements<small>Élève, enseignant, établissement</small></span></button><a class="vmn-i" href="/app.html#verifier-certificat"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shield"/></svg></span><span class="vmn-x">Vérifier un certificat<small>Authentifier une distinction</small></span></a><a class="vmn-i" href="/plateforme/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Atelier de Français<small>Composer une épreuve MINESEC</small></span></a><a class="vmn-i" href="/enseignant/"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-doc"/></svg></span><span class="vmn-x">Espace enseignant<small>Guide, grilles, progressions</small></span></a><a class="vmn-i" href="/adopter/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-checkcircle"/></svg></span><span class="vmn-x">Adopter les cahiers<small>Pour une classe, un établissement</small></span></a></div><div class="vmn-col"><p class="vmn-t">Partenaire<small>Diffuser et représenter</small></p><a class="vmn-i" href="/app.html#partenariat"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-users"/></svg></span><span class="vmn-x">Devenir partenaire<small>9 formules, marges revendeur</small></span></a><a class="vmn-i" href="/app.html#nos-partenaires"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-handshake"/></svg></span><span class="vmn-x">Nos partenaires<small>Ceux qui nous accompagnent</small></span></a><a class="vmn-i" href="/campus/"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-university"/></svg></span><span class="vmn-x">VÉRITAS Campus<small>Pour les établissements</small></span></a><a class="vmn-i" href="/constellation.html"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-sparkles"/></svg></span><span class="vmn-x">Constellation VÉRITAS<small>Tout l’écosystème</small></span></a><a class="vmn-i" href="/plan.html#partenaire"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-map"/></svg></span><span class="vmn-x">Espace partenaire<small>Toutes ses pages, réunies</small></span></a></div><div class="vmn-col"><p class="vmn-t">Le centre<small>Nous connaître</small></p><a class="vmn-i" href="/decouvrir/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-building"/></svg></span><span class="vmn-x">Présentation<small>Qui nous sommes</small></span></a><a class="vmn-i" href="/app.html#actualites"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-megaphone"/></svg></span><span class="vmn-x">Actualités<small>Ce qui se passe au centre</small></span></a><a class="vmn-i" href="/app.html#inscription"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-user"/></svg></span><span class="vmn-x">S’inscrire<small>Créer un compte gratuit</small></span></a><a class="vmn-i" href="/plan.html"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Plan du site<small>Tout VÉRITAS, par profil</small></span></a></div></div></div>
         </div>
 
       <div class="vrt-large" style="display:flex;align-items:center;gap:10px;flex-shrink:0;margin-left:auto">
@@ -1366,22 +1445,24 @@
       </span>
     </button>
 
-    <nav style="display:flex;flex-direction:column;gap:3px">
-      <button title="Accueil" aria-label="Accueil" onClick="{{ goAccueil }}" style="{{ sbAccueil }}" style-hover="background:var(--sb-hover)">{{ sbIcAccueil }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Accueil</span></button>
-      <button title="Corpus" aria-label="Corpus" onClick="{{ goListe }}" style="{{ sbRessources }}" style-hover="background:var(--sb-hover)">{{ sbIcRessources }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Corpus</span></button>
-      <button title="Épreuves" aria-label="Épreuves" onClick="{{ goEpreuves }}" style="{{ sbEpreuves }}" style-hover="background:var(--sb-hover)">{{ sbIcEpreuves }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Épreuves</span></button>
-      <button title="Cours" aria-label="Cours" onClick="{{ goCours }}" style="{{ sbCours }}" style-hover="background:var(--sb-hover)">{{ sbIcCours }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Cours</span></button>
-      <button title="Progressions" aria-label="Progressions" onClick="{{ goProgressions }}" style="{{ sbProgressions }}" style-hover="background:var(--sb-hover)">{{ sbIcProg }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Progressions</span></button>
-      <button title="Suivi" aria-label="Suivi" onClick="{{ goSuivi }}" style="{{ sbSuivi }}" style-hover="background:var(--sb-hover)">{{ sbIcSuivi }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Suivi</span><span style="{{ sbSuiviBadge }}">{{ suiviRetardsN }}</span></button>
-      <button title="Équipe" aria-label="Équipe" onClick="{{ goCollab }}" style="{{ sbCollab }}" style-hover="background:var(--sb-hover)">{{ sbIcCollab }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Équipe</span><span style="{{ sbMsgBadge }}">{{ msgCount }}</span></button>
-    </nav>
-
-    <div style="height:1px;background:var(--sb-border);margin:20px 0"></div>
-
-    <nav style="display:flex;flex-direction:column;gap:3px">
-      <button title="Notifications" aria-label="Notifications" onClick="{{ goActivite }}" style="{{ sbNotifs }}" style-hover="background:var(--sb-hover)">{{ sbIcBell }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Notifications</span><span style="{{ sbNotifBadge }}">{{ notifCount }}</span></button>
-      <button title="Profil" aria-label="Profil" onClick="{{ goProfil }}" style="{{ sbProfil }}" style-hover="background:var(--sb-hover)">{{ sbIcUser }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Profil</span></button>
-      <button title="Administration" aria-label="Administration" onClick="{{ goAdmin }}" style="{{ sbAdmin }}" style-hover="background:var(--sb-hover)">{{ sbIcAdmin }}<span class="vrt-sblabel" style="{{ sbLabelShow }}">Administration</span></button>
+    <!-- MENU GROUPÉ (11/2026), sur le modèle de Tchouskou : des rubriques
+         titrées, et sous chaque entrée une ligne qui dit à quoi elle sert.
+         Replié, le menu ne garde que les icônes (vrt-sblabel). -->
+    <nav class="vrt-sbnav" style="display:flex;flex-direction:column;gap:2px">
+      <div class="vrt-sblabel vrt-sbgrp" style="{{ sbLabelShow }}">Pilotage</div>
+      <button title="Accueil" aria-label="Accueil" onClick="{{ goAccueil }}" style="{{ sbAccueil }}" style-hover="background:var(--sb-hover)">{{ sbIcAccueil }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Accueil</b><small>vue d’ensemble</small></span></button>
+      <button title="Suivi" aria-label="Suivi" onClick="{{ goSuivi }}" style="{{ sbSuivi }}" style-hover="background:var(--sb-hover)">{{ sbIcSuivi }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Suivi</b><small>échéances, retards, calendrier</small></span><span style="{{ sbSuiviBadge }}">{{ suiviRetardsN }}</span></button>
+      <button title="Progressions" aria-label="Progressions" onClick="{{ goProgressions }}" style="{{ sbProgressions }}" style-hover="background:var(--sb-hover)">{{ sbIcProg }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Progressions</b><small>séquences de l’année</small></span></button>
+      <div class="vrt-sblabel vrt-sbgrp" style="{{ sbLabelShow }}">Contenus</div>
+      <button title="Épreuves" aria-label="Épreuves" onClick="{{ goEpreuves }}" style="{{ sbEpreuves }}" style-hover="background:var(--sb-hover)">{{ sbIcEpreuves }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Épreuves</b><small>composer, relire, valider</small></span></button>
+      <button title="Cours" aria-label="Cours" onClick="{{ goCours }}" style="{{ sbCours }}" style-hover="background:var(--sb-hover)">{{ sbIcCours }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Cours</b><small>leçons et fiches</small></span></button>
+      <button title="Corpus" aria-label="Corpus" onClick="{{ goListe }}" style="{{ sbRessources }}" style-hover="background:var(--sb-hover)">{{ sbIcRessources }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Corpus</b><small>textes MINESEC</small></span></button>
+      <div class="vrt-sblabel vrt-sbgrp" style="{{ sbLabelShow }}">Équipe</div>
+      <button title="Équipe" aria-label="Équipe" onClick="{{ goCollab }}" style="{{ sbCollab }}" style-hover="background:var(--sb-hover)">{{ sbIcCollab }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Équipe</b><small>discussion, rôles, invitations</small></span><span style="{{ sbMsgBadge }}">{{ msgCount }}</span></button>
+      <button title="Notifications" aria-label="Notifications" onClick="{{ goActivite }}" style="{{ sbNotifs }}" style-hover="background:var(--sb-hover)">{{ sbIcBell }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Notifications</b><small>activité récente</small></span><span style="{{ sbNotifBadge }}">{{ notifCount }}</span></button>
+      <div class="vrt-sblabel vrt-sbgrp" style="{{ sbLabelShow }}">Compte</div>
+      <button title="Profil" aria-label="Profil" onClick="{{ goProfil }}" style="{{ sbProfil }}" style-hover="background:var(--sb-hover)">{{ sbIcUser }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Profil</b><small>mes classes, préférences</small></span></button>
+      <button title="Administration" aria-label="Administration" onClick="{{ goAdmin }}" style="{{ sbAdmin }}" style-hover="background:var(--sb-hover)">{{ sbIcAdmin }}<span class="vrt-sblabel vrt-sbl2" style="{{ sbLabelShow }}"><b>Administration</b><small>établissement, membres</small></span></button>
     </nav>
 
     <div class="vrt-sblabel" style="margin-top:auto;padding-top:24px;{{ sbLabelShow }}">
@@ -1413,7 +1494,7 @@
 
     <div style="margin-left:auto;display:flex;align-items:center;gap:9px">
       <div data-vrt-creer="1" style="position:relative;flex:none">
-        <button onClick="{{ toggleCreate }}" style="{{ topCreateStyle }}" style-hover="background:var(--c135a96,#135a96)">{{ topIcPlus }}<span class="vrt-hide-sm">Créer</span></button>
+        <button onClick="{{ toggleCreate }}" aria-label="Créer" style="{{ topCreateStyle }}" style-hover="background:var(--c135a96,#135a96)">{{ topIcPlus }}<span class="vrt-hide-sm">Créer</span></button>
         <sc-if value="{{ createOpen }}" hint-placeholder-val="{{ false }}">
           <div style="{{ createBoite }}">
             <sc-for list="{{ createMenu }}" as="c" hint-placeholder-count="3">
@@ -1494,6 +1575,7 @@
     </div>
     <div style="padding:12px 18px;border-top:1px solid var(--ceef2f7,#eef2f7);display:flex;gap:8px;flex-wrap:wrap">
       <button onClick="{{ pvRelier }}" style="{{ pvRelierStyle }}">{{ pvRelierLabel }}</button>
+      <button onClick="{{ pvApprendre }}" style="{{ pvApprendreStyle }}" title="Les leçons de cette séquence dans Apprendre">Leçons dans Apprendre</button>
       <button onClick="{{ goProgressions }}" style="background:none;border:none;color:var(--c1a72bb,#1a72bb);font-size:12.5px;font-weight:700;font-family:Poppins;cursor:pointer">Toutes les progressions</button>
     </div>
   </aside>
@@ -1536,7 +1618,6 @@
         <div style="font-size:13.5px;color:var(--c5a6678,#5a6678);line-height:1.65">{{ corpusMsg }}</div>
         <!-- Cachet de version : une capture de cet ecran doit dire quel code
              tourne, sans avoir a ouvrir une console. -->
-        <div style="margin-top:10px;font-size:10.5px;letter-spacing:.04em;color:var(--cc3ccd8,#c3ccd8);font-family:Open Sans">{{ corpusBuild }}</div>
         <button onClick="{{ corpusAction }}" style="{{ corpusActionStyle }}">{{ corpusActionLabel }}</button>
         <!-- SORTIE DE SECOURS. Tant que le chargement n'a pas echoue, cet ecran
              n'offrait AUCUN bouton : si la reponse tardait, on y restait
@@ -1974,16 +2055,26 @@
     <sc-if value="{{ hasEpreuves }}" hint-placeholder-val="{{ true }}">
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px">
         <sc-for list="{{ epreuvesView }}" as="e" hint-placeholder-count="4">
-          <article style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:13px;padding:18px 19px;box-shadow:0 2px 10px rgba(20,55,95,.05);display:flex;flex-direction:column">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:11px"><span style="{{ e.statusChip }}">{{ e.statusLabel }}</span><span style="{{ e.libChip }}">{{ icEtoile }} Bibliothèque</span><span style="margin-left:auto;font-size:11px;color:var(--c9aa5b5,#9aa5b5)">{{ e.ago }}</span></div>
-            <div style="font-family:'Poppins';font-size:16px;font-weight:600;color:var(--c22303f,#22303f);line-height:1.3;margin-bottom:6px">{{ e.title }}</div>
-            <div style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin-bottom:14px">{{ e.count }} texte(s) · {{ e.classe }} · {{ e.words }} mots</div>
-            <div style="display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:13px;border-top:1px solid var(--ceef2f7,#eef2f7)">
+          <!-- FICHE D'ÉPREUVE (11/2026) — sur le modèle des fiches de sujet de
+               Tchouskou : titre, puis des lignes « libellé — valeur » qui
+               disent tout de l'épreuve sans l'ouvrir (statut, situation par
+               rapport à l'échéance, progression de la validation). -->
+          <article class="vrt-kv-carte">
+            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:6px"><div class="vrt-kv-titre">{{ e.title }}</div><span style="{{ e.libChip }}">{{ icEtoile }} Bibliothèque</span></div>
+            <div class="vrt-kv"><span>Classe</span><span>{{ e.classe }}</span></div>
+            <div class="vrt-kv"><span>Type</span><span><span class="vrt-kv-cadre">{{ e.type }}</span></span></div>
+            <div class="vrt-kv"><span>Statut</span><span><span style="{{ e.statusChip }}">● {{ e.statusLabel }}</span></span></div>
+            <div class="vrt-kv"><span>Situation</span><span><span style="{{ e.situationStyle }}">{{ e.situation }}</span></span></div>
+            <div class="vrt-kv" style="{{ e.echeanceLigne }}"><span>Échéance</span><span>{{ e.echeance }}</span></div>
+            <div class="vrt-kv" style="{{ e.seqLigne }}"><span>Séquence</span><span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="vrt-kv-pastille">{{ e.seqCourt }}</span>{{ e.seqLib }}<button onClick="{{ e.voirSuivi }}" class="vrt-kv-lien">voir le suivi ›</button></span></div>
+            <div class="vrt-kv"><span>Contenu</span><span>{{ e.count }} texte(s) · {{ e.words }} mots</span></div>
+            <div class="vrt-kv"><span>Validation</span><span style="display:flex;align-items:center;gap:8px;white-space:nowrap"><span class="vrt-kv-barre"><i style="{{ e.validBarre }}"></i></span>{{ e.validLabel }}</span></div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:12px;border-top:1px solid var(--ceef2f7,#eef2f7)">
               <span style="display:flex">{{ e.avatars }}</span>
-              <span style="font-size:11.5px;color:var(--c8b97a8,#8b97a8)">{{ e.ownerLine }}</span>
+              <span style="font-size:11.5px;color:var(--c8b97a8,#8b97a8)">{{ e.ownerLine }} · {{ e.ago }}</span>
               <div style="margin-left:auto;display:flex;gap:7px">
                 <button onClick="{{ e.duplicate }}" title="Dupliquer" style="{{ e.dupStyle }}">⧉</button>
-                <button onClick="{{ e.open }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:8px 16px;font-size:12.5px;cursor:pointer;border-radius:8px;font-weight:700;font-family:Poppins" style-hover="background:var(--c135a96,#135a96)">{{ e.openLabel }}</button>
+                <button onClick="{{ e.open }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:8px 16px;font-size:12.5px;cursor:pointer;border-radius:8px;font-weight:700;font-family:Poppins" style-hover="background:var(--c135a96,#135a96)">{{ e.openLabel }} ›</button>
               </div>
             </div>
           </article>
@@ -2022,6 +2113,26 @@
            colonne Collaboration. -->
       <div style="{{ friseStyle }}">
         <sc-for list="{{ frise }}" as="fz" hint-placeholder-count="4"><span style="{{ fz.trait }}"></span><span style="{{ fz.dot }}"></span><span style="{{ fz.lab }}">{{ fz.label }}</span></sc-for>
+      </div>
+      <!-- CALENDRIER DE L'ÉPREUVE (lot M, 02/11/2026) — les cinq échéances du
+           workflow de Tchouskou ; une fois appliquées, chacune devient un
+           rappel dans la cloche et dans « À faire ». -->
+      <div style="{{ jlBlocStyle }}">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+          <span style="font-family:Poppins;font-size:13.5px;font-weight:700;color:var(--c14375f,#14375f)">Calendrier de l’épreuve</span>
+          <span style="font-size:11.5px;color:var(--c8b97a8,#8b97a8)">{{ jlSous }}</span>
+          <span style="{{ jlDemande }}">{{ jlDemandeTexte }}</span>
+          <button onClick="{{ jlAppliquer }}" style="{{ jlAppliquerStyle }}">{{ jlAppliquerLabel }}</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
+          <sc-for list="{{ jalons }}" as="jl" hint-placeholder-count="5">
+            <div style="{{ jl.carte }}">
+              <div style="font-size:11.5px;font-weight:700;font-family:Poppins;color:var(--c22303f,#22303f)">{{ jl.lib }} <span style="font-weight:400;color:var(--c8b97a8,#8b97a8)">· {{ jl.aide }}</span></div>
+              <input type="date" value="{{ jl.date }}" onChange="{{ jl.set }}" disabled="{{ jl.fige }}" aria-label="{{ jl.lib }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:7px;padding:5px 7px;font-size:12px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);width:100%;box-sizing:border-box;margin:6px 0">
+              <div style="display:flex;align-items:center;gap:6px;justify-content:space-between;flex-wrap:wrap"><span style="{{ jl.chip }}">{{ jl.etat }}</span><button onClick="{{ jl.basculer }}" style="{{ jl.basculerStyle }}">{{ jl.basculerLabel }}</button></div>
+            </div>
+          </sc-for>
+        </div>
       </div>
       <!-- Ce rappel dit comment démarrer une épreuve. Il sert la première
            fois, sur une épreuve encore vide ; il ne sert plus du tout quand
@@ -2502,6 +2613,10 @@
               </div>
             </section>
             </sc-if>
+            <!-- Ajouter un sujet SANS passer par Ambassa (02/11/2026) : le seul bouton
+                 vivait dans le panneau replié « Composer avec Ambassa » — qui composait
+                 à la main ne trouvait aucun moyen d'ajouter sa production écrite. -->
+            <button onClick="{{ ajouterSujet }}" style="{{ sujetAjoutStyle }}" title="Production écrite, situation d’intégration, dissertation, texte fautif…">{{ sujetAjoutLabel }}</button>
             <!-- Panneau de génération (20/10/2026) : carte de la vitrine — fond
                  blanc, la couleur dans l'anneau et le bouton (« la couleur
                  qualifie, elle n'inonde pas »). Un quota inconnu ne s'affiche
@@ -3117,32 +3232,59 @@
         page et zoom, et les quatre documents en onglets — comme les livrables
         d'un sujet de concours. -->
    <main class="vrt-doc-main" style="flex:1;background:var(--ce9eef4,#e9eef4);padding:0;min-height:100vh">
-     <div data-noprint="1" style="position:sticky;top:0;z-index:20;background:var(--cffffff,#fff);border-bottom:1px solid var(--ce2eaf3,#e2eaf3);display:flex;align-items:center;gap:8px;padding:8px 16px;flex-wrap:wrap">
-       <button onClick="{{ goComposeur }}" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px">{{ icRetour }} Modifier</button>
-       <span style="{{ activeStatusChip }}">{{ activeStatusLabel }}</span>
-       <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-left:6px;flex-wrap:wrap">
+     <!-- EN-TÊTE DU SUJET (11/2026) — sur le modèle de la fiche de sujet de
+          Tchouskou montrée par Jacques : pastilles d'identité, « Exporter »,
+          frise d'état, bascule Aperçu/PDF, onglets soulignés. Une seule barre
+          d'outils remplace les six boutons qui se disputaient la largeur. -->
+     <div data-noprint="1" class="vrt-sj">
+       <div class="vrt-sj-l1">
+         <button onClick="{{ goComposeur }}" class="vrt-sj-retour">{{ icRetour }} Modifier</button>
+         <div class="vrt-sj-titre">{{ docTitre }}</div>
+       </div>
+       <div class="vrt-sj-chips">
+         <sc-for list="{{ docChips }}" as="c" hint-placeholder-count="4"><span style="{{ c.style }}">{{ c.label }}</span></sc-for>
+       </div>
+       <div class="vrt-sj-export">
+         <button onClick="{{ exportMenuBasculer }}" class="vrt-sj-btn">{{ exportIcon }}<span>Exporter</span><span style="font-size:10px;opacity:.6">▾</span></button>
+         <div style="{{ exportMenuStyle }}" class="vrt-sj-menu" onClick="{{ exportMenuFermer }}">
+           <button onClick="{{ pdfTelecharger }}">⬇️ Télécharger le PDF</button>
+           <button onClick="{{ exportWord }}">📝 Word modifiable (.docx)</button>
+           <button onClick="{{ doPrint }}">🖨️ Imprimer</button>
+         </div>
+       </div>
+       <div class="vrt-sj-frise">
+         <sc-for list="{{ docEtapes }}" as="e" hint-placeholder-count="3"><span class="vrt-sj-etape" style="{{ e.style }}"><i style="{{ e.point }}"></i>{{ e.label }}</span><span style="{{ e.trait }}"></span></sc-for>
+       </div>
+       <div class="vrt-sj-l2">
+         <div class="vrt-sj-seg">
+           <button onClick="{{ docModeApercu }}" style="{{ docModeApercuStyle }}">Aperçu</button>
+           <button onClick="{{ docModePdf }}" style="{{ docModePdfStyle }}">PDF</button>
+         </div>
+         <button onClick="{{ docZoomBasculer }}" style="{{ docZoomStyle }}" title="Ajuster à la fenêtre ou taille réelle">{{ docZoomLabel }}</button>
+       </div>
+       <div class="vrt-sj-onglets">
          <sc-for list="{{ docOnglets }}" as="o" hint-placeholder-count="5"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
        </div>
-       <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px">
-         <button onClick="{{ docModeApercu }}" style="{{ docModeApercuStyle }}">Aperçu</button>
-         <button onClick="{{ docModePdf }}" style="{{ docModePdfStyle }}">PDF</button>
-       </div>
-       <span style="margin-left:auto;font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ docPagesLabel }}</span>
-       <button onClick="{{ docZoomBasculer }}" title="Ajuster à la fenêtre ou taille réelle" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px">{{ docZoomLabel }}</button>
-       <button onClick="{{ exportWord }}" style="{{ exportWordStyle }}" title="Télécharger un .docx modifiable">{{ exportIcon }}<span>Word</span></button>
-       <button onClick="{{ doPrint }}" style="background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;border-radius:999px;font-family:'Poppins'" style-hover="background:var(--ce07f00,#e07f00)">Imprimer / PDF</button>
      </div>
-     <!-- VISIONNEUSE PDF (20/10/2026) : le PDF réel de la vue choisie,
-          fabriqué dans le navigateur et montré par sa visionneuse (pages,
-          zoom, téléchargement) — « comme ici », capture de Tchouskou. Sur
-          téléphone, Chrome n'affiche pas un PDF intégré : on l'ouvre. -->
+     <!-- VISIONNEUSE PDF (11/2026) : les pages du PDF réel, dessinées par
+          pdf.js dans la page — sur ordinateur COMME SUR TÉLÉPHONE. L'iframe
+          d'avant n'affichait rien sous Chrome Android, qui ne sait pas
+          intégrer un PDF : on n'y proposait que « Ouvrir » et « Télécharger ».
+          Barre : page courante, zoom, ouvrir, télécharger (voir VRT_PDFV). -->
      <div data-noprint="1" style="{{ pdfZoneStyle }}">
        <div style="{{ pdfMsgStyle }}">{{ pdfMsg }}</div>
        <button onClick="{{ pdfRefaire }}" style="{{ pdfRefaireStyle }}">Réessayer</button>
-       <sc-if value="{{ pdfIframe }}" hint-placeholder-val="{{ false }}"><iframe src="{{ pdfUrl }}" loading="lazy" title="Aperçu PDF de l’épreuve" style="width:100%;height:calc(100vh - 58px);border:0;display:block;background:#525659"></iframe></sc-if>
-       <div style="{{ pdfMobileStyle }}">
-         <button onClick="{{ pdfOuvrir }}" style="background:var(--c14375f,#14375f);color:var(--cffffff,#fff);border:none;padding:10px 16px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:10px;cursor:pointer">Ouvrir le PDF</button>
-         <button onClick="{{ pdfTelecharger }}" style="background:var(--cffffff,#fff);color:var(--c14375f,#14375f);border:1px solid var(--ce2eaf3,#e2eaf3);padding:10px 16px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:10px;cursor:pointer">Télécharger</button>
+       <div class="vrt-pdfv" style="{{ pdfVueStyle }}">
+         <div class="vrt-pdfv-bar">
+           <span class="vrt-pdfv-num">Page <b id="vrtPdfPage">1</b> / {{ pdfPagesNb }}</span>
+           <span style="flex:1"></span>
+           <button onClick="{{ pdfZoomMoins }}" aria-label="Réduire">−</button>
+           <span id="vrtPdfZoom" class="vrt-pdfv-zoom">100 %</span>
+           <button onClick="{{ pdfZoomPlus }}" aria-label="Agrandir">+</button>
+           <button onClick="{{ pdfOuvrir }}" aria-label="Ouvrir dans un onglet" title="Ouvrir dans un onglet">↗</button>
+           <button onClick="{{ pdfTelecharger }}" aria-label="Télécharger" title="Télécharger">⬇</button>
+         </div>
+         <div id="vrtPdfPages" class="vrt-pdfv-pages"></div>
        </div>
      </div>
      <div data-print-sheet="1" class="vrt-docfeuille" style="{{ docFeuilleStyle }}">
@@ -3214,9 +3356,12 @@
         </div>
         <select value="{{ suiviClasse }}" onChange="{{ setSuiviClasse }}" style="border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;padding:7px 10px;font-size:12.5px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)"><option value="">Toutes mes classes</option><sc-for list="{{ suiviClasses }}" as="c" hint-placeholder-count="2"><option value="{{ c.id }}">{{ c.label }}</option></sc-for></select>
         <button onClick="{{ suiviRetardsBasculer }}" style="{{ suiviRetardsStyle }}">Retards seulement</button>
-        <div style="display:flex;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-left:auto">
+        <div style="display:flex;flex-wrap:wrap;max-width:100%;gap:3px;background:var(--cf2f6fb,#f2f6fb);border-radius:9px;padding:3px;margin-left:auto">
           <button onClick="{{ suiviVueListe }}" style="{{ suiviVueListeStyle }}">Échéances</button>
-          <button onClick="{{ suiviVueMois }}" style="{{ suiviVueMoisStyle }}">Calendrier</button>
+          <button onClick="{{ suiviVueMois }}" style="{{ suiviVueMoisStyle }}">Mois</button>
+          <button onClick="{{ suiviVueAnnee }}" style="{{ suiviVueAnneeStyle }}">Calendrier annuel</button>
+          <button onClick="{{ suiviVueCouv }}" style="{{ suiviVueCouvStyle }}" title="Séquences évaluées, sujets validés, ou restées sans évaluation">Couverture</button>
+          <button onClick="{{ suiviVueDem }}" style="{{ suiviVueDemStyle }}" title="Sujets demandés à un collègue, ou reçus">Demandes<span style="{{ demBadge }}">{{ demRecuesN }}</span></button>
         </div>
       </div>
 
@@ -3225,16 +3370,43 @@
         <sc-for list="{{ suiviGroupes }}" as="gr" hint-placeholder-count="2">
           <section style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:12px 16px;margin-bottom:12px">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ gr.titre }}</span><span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ gr.sous }}</span></div>
+            <!-- Une FICHE par échéance (11/2026), comme le Suivi de Tchouskou :
+                 date et délai, nature de l'échéance, séquence, épreuve liée,
+                 état — teintée en rose quand elle est en retard. -->
+            <div class="vrt-ech-grille">
             <sc-for list="{{ gr.lignes }}" as="l" hint-placeholder-count="4">
-              <div style="display:flex;align-items:center;gap:12px;padding:9px 2px;border-top:1px solid var(--ceef2f7,#eef2f7);flex-wrap:wrap">
-                <div style="min-width:104px"><div style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--c22303f,#22303f)">{{ l.date }}</div><div style="{{ l.relStyle }}">{{ l.rel }}</div></div>
-                <div style="flex:1;min-width:200px"><div style="font-size:13px;font-weight:700;color:var(--c22303f,#22303f)">{{ l.titre }}</div><div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin-top:2px">{{ l.sous }}</div></div>
-                <span style="{{ l.chip }}">{{ l.etat }}</span>
-                <button onClick="{{ l.agir }}" style="{{ l.agirStyle }}">{{ l.agirLabel }}</button>
+              <div class="vrt-kv-carte" style="{{ l.carteStyle }}">
+                <div class="vrt-kv"><span>Date</span><span><b>{{ l.date }}</b> <span style="{{ l.relStyle }}">{{ l.rel }}</span></span></div>
+                <div class="vrt-kv"><span>Échéance</span><span class="vrt-kv-fort">{{ l.lib }}</span></div>
+                <div class="vrt-kv"><span>Séquence</span><span><span class="vrt-kv-pastille">{{ l.seq }}</span> {{ l.module }}</span></div>
+                <div class="vrt-kv"><span>Épreuve</span><span>{{ l.sous }}</span></div>
+                <div class="vrt-kv"><span>État</span><span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="{{ l.chip }}">{{ l.etat }}</span><button onClick="{{ l.agir }}" style="{{ l.agirStyle }}">{{ l.agirLabel }}</button></span></div>
               </div>
             </sc-for>
+            </div>
           </section>
         </sc-for>
+      </sc-if>
+
+      <!-- CALENDRIER ANNUEL (11/2026), comme celui de Tchouskou : l'année
+           scolaire mois par mois, un point de couleur par échéance, les
+           vacances et les jours fériés teintés, le compte d'échéances du mois. -->
+      <sc-if value="{{ suiviEnAnnee }}" hint-placeholder-val="{{ false }}">
+        <div class="vrt-an-legende">
+          <span><i style="background:#1d3b2a"></i>Sujet prêt</span><span><i style="background:#8fbc9a"></i>Épreuve</span><span><i style="background:#c0532b"></i>Corrigé et compte rendu</span>
+          <span><i style="background:#f3e3b9;border:1px solid #e3cf95"></i>vacances</span><span><i style="background:#fbd9d3;border:1px solid #f0b8ad"></i>jour férié</span><span><i style="background:#fff;border:2px solid #f39200"></i>aujourd’hui</span>
+        </div>
+        <div class="vrt-an-grille">
+          <sc-for list="{{ anMois }}" as="am" hint-placeholder-count="10">
+            <section class="vrt-an-mois">
+              <button class="vrt-an-tete" onClick="{{ am.ouvrir }}" title="Voir ce mois en détail"><b>{{ am.titre }}</b><span>{{ am.compte }} ›</span></button>
+              <div class="vrt-an-jours">
+                <sc-for list="{{ moisEntetesCourts }}" as="me3" hint-placeholder-count="7"><span class="vrt-an-sem">{{ me3 }}</span></sc-for>
+                <sc-for list="{{ am.jours }}" as="aj" hint-placeholder-count="35"><div style="{{ aj.style }}" title="{{ aj.titre }}"><span>{{ aj.num }}</span><span class="vrt-an-pts"><sc-for list="{{ aj.pts }}" as="pt" hint-placeholder-count="0"><i style="{{ pt.s }}"></i></sc-for><small>{{ aj.plus }}</small></span></div></sc-for>
+              </div>
+            </section>
+          </sc-for>
+        </div>
       </sc-if>
 
       <sc-if value="{{ suiviEnMois }}" hint-placeholder-val="{{ false }}">
@@ -3255,6 +3427,59 @@
             </sc-for>
           </div>
         </div>
+      </sc-if>
+      <!-- Couverture du programme (lot L, 02/11/2026) — d'après « Couverture
+           du programme » et « Contenus non évalués » de Tchouskou : pour
+           chaque séquence de mes classes, son sujet est-il prêt, validé, ou
+           son évaluation est-elle passée sans épreuve ? -->
+      <sc-if value="{{ suiviEnCouv }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ couvGroupes }}" as="cg" hint-placeholder-count="1">
+          <section style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:12px 16px;margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap"><span style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ cg.titre }}</span><span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ cg.sous }}</span><span style="{{ cg.jaugeStyle }}"><span style="{{ cg.jaugeBarre }}"></span></span></div>
+            <sc-for list="{{ cg.lignes }}" as="cl" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;padding:9px 2px;border-top:1px solid var(--ceef2f7,#eef2f7);flex-wrap:wrap">
+                <div style="min-width:104px"><div style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--c22303f,#22303f)">Séquence {{ cl.num }}</div><div style="font-size:11px;color:var(--c8b97a8,#8b97a8);margin-top:1px">{{ cl.date }}</div></div>
+                <div style="flex:1;min-width:200px"><div style="font-size:13px;font-weight:700;color:var(--c22303f,#22303f)">{{ cl.titre }}</div><div style="{{ cl.sousStyle }}">{{ cl.sous }}</div></div>
+                <span style="{{ cl.chip }}">{{ cl.etat }}</span>
+                <button onClick="{{ cl.agir }}" style="{{ cl.agirStyle }}">{{ cl.agirLabel }}</button>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+      </sc-if>
+      <!-- DEMANDES DE SUJET (lot N, 02/11/2026) — d'après Tchouskou : demander
+           un sujet à un collègue, avec ses dates ; suivre celles reçues et
+           envoyées. -->
+      <sc-if value="{{ suiviEnDem }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ demOkStyle }}">{{ demOk }}</div>
+        <section style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:12px 16px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c14375f,#14375f)">Demander un sujet à un collègue</span><span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">Il le retrouve dans ses épreuves et dans « À faire », avec ses rappels.</span><button onClick="{{ demBasculer }}" style="{{ demBasculerStyle }}">{{ demBasculerLabel }}</button></div>
+          <div style="{{ demSansCollegueStyle }}">Personne d’autre dans l’équipe pour l’instant : invitez un collègue depuis « Équipe ».</div>
+          <div style="{{ demFormStyle }}">
+            <label style="{{ fieldLbl }}">Collègue<select value="{{ demA }}" onChange="{{ setDemA }}" style="{{ fieldIn }}"><option value="">— Choisir —</option><sc-for list="{{ demCollegues }}" as="u" hint-placeholder-count="3"><option value="{{ u.id }}">{{ u.label }}</option></sc-for></select></label>
+            <label style="{{ fieldLbl }}">Classe<select value="{{ demClasse }}" onChange="{{ setDemClasse }}" style="{{ fieldIn }}"><option value="">— Choisir —</option><sc-for list="{{ demClasses }}" as="c" hint-placeholder-count="8"><option value="{{ c }}">{{ c }}</option></sc-for></select></label>
+            <label style="{{ fieldLbl }}">Évaluation<input value="{{ demType }}" onChange="{{ setDemType }}" placeholder="Devoir surveillé n°2" style="{{ fieldIn }}"></label>
+            <label style="{{ fieldLbl }}">Date de l’épreuve<input type="date" value="{{ demDate }}" onChange="{{ setDemDate }}" style="{{ fieldIn }}"></label>
+            <label style="{{ fieldLbl }}">Sujet attendu le<input type="date" value="{{ demAttendu }}" onChange="{{ setDemAttendu }}" style="{{ fieldIn }}"></label>
+            <label style="{{ fieldLbl }};grid-column:1/-1">Consignes<textarea value="{{ demConsignes }}" onChange="{{ setDemConsignes }}" rows="3" placeholder="Séquence, notions à évaluer, nature de l’épreuve, texte imposé…" style="{{ fieldIn }};resize:vertical"></textarea></label>
+            <div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button onClick="{{ demEnvoyer }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:8px 14px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">Envoyer la demande</button><span style="{{ demMsgStyle }}">{{ demMsg }}</span></div>
+          </div>
+        </section>
+        <sc-for list="{{ demListes }}" as="dl2" hint-placeholder-count="2">
+          <section style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:12px;padding:12px 16px;margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span style="font-family:Poppins;font-size:14.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ dl2.titre }}</span><span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ dl2.sous }}</span></div>
+            <div style="{{ dl2.videStyle }}">{{ dl2.vide }}</div>
+            <sc-for list="{{ dl2.lignes }}" as="dm" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:12px;padding:9px 2px;border-top:1px solid var(--ceef2f7,#eef2f7);flex-wrap:wrap">
+                <div style="min-width:118px"><div style="font-family:Poppins;font-size:12.5px;font-weight:700;color:var(--c22303f,#22303f)">{{ dm.date }}</div><div style="{{ dm.relStyle }}">{{ dm.rel }}</div></div>
+                <div style="flex:1;min-width:200px"><div style="font-size:13px;font-weight:700;color:var(--c22303f,#22303f)">{{ dm.titre }}</div><div style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin-top:2px;line-height:1.45">{{ dm.sous }}</div></div>
+                <span style="{{ dm.chip }}">{{ dm.etat }}</span>
+                <button onClick="{{ dm.refuser }}" style="{{ dm.refuserStyle }}">{{ dm.refuserLabel }}</button>
+                <button onClick="{{ dm.ouvrir }}" style="background:var(--cffffff,#fff);color:var(--c14375f,#14375f);border:1px solid var(--ce2eaf3,#e2eaf3);padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">{{ dm.ouvrirLabel }}</button>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
       </sc-if>
     </div>
   </main>
@@ -3290,6 +3515,7 @@
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap">
               <button onClick="{{ sq.toggle }}" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer">{{ sq.toggleLabel }}</button>
+              <button onClick="{{ sq.apprendre }}" style="{{ sq.apprendreStyle }}" title="Les leçons de cette séquence dans Apprendre, à faire lire aux élèves">Leçons dans Apprendre</button>
               <button onClick="{{ sq.composer }}" style="{{ sq.composerStyle }}">Composer l’évaluation</button>
             </div>
           </div>
@@ -4223,6 +4449,7 @@
     <div onClick="{{ stop }}" style="background:var(--cffffff,#fff);border-radius:16px;box-shadow:0 24px 70px rgba(14,46,77,.4);width:100%;max-width:460px;overflow:hidden;animation:popIn .28s ease both">
       <sc-if value="{{ payFormShown }}" hint-placeholder-val="{{ true }}">
         <div style="padding:22px 26px;border-bottom:1px solid var(--ceef2f7,#eef2f7)"><h2 style="font-family:Poppins;font-size:18px;font-weight:700;color:var(--c14375f,#14375f);margin:0">Paiement — plan {{ payPlanName }}</h2><p style="font-size:12.5px;color:var(--c8b97a8,#8b97a8);margin:5px 0 0"><sc-if value="{{ payRemiseShown }}" hint-placeholder-val="{{ false }}"><span style="text-decoration:line-through;margin-right:7px">{{ payPrixAvant }}</span></sc-if>{{ payPlanPrice }} · renouvellement mensuel</p></div>
+        <div role="status" style="{{ payMotifStyle }}">{{ payMotif }}</div>
         <div style="padding:22px 26px">
           <div style="{{ payBannerStyle }}">{{ payBanner }}</div>
           <div style="display:flex;gap:8px;margin:14px 0 18px">
@@ -4581,6 +4808,7 @@ class Component extends DCLogic {
     sur(()=>this._sondeOffres(),'sonde offres');
     sur(()=>this._reconcilierPaiements(),'paiements en attente');
     sur(()=>this._installerProtection(),'protection du corpus');
+    sur(()=>this._lienApprendre(),'lien Apprendre');
     sur(()=>this._installerRetour(),'touche retour');
     sur(()=>this._installerFermetureCreer(),'menu Créer');
     sur(()=>{document.addEventListener('input',(e)=>{
@@ -6252,6 +6480,10 @@ class Component extends DCLogic {
          sur la sentinelle — renvoi à l'accueil et « Appuyez de nouveau pour
          quitter ». On ouvre la section demandée (28/10/2026, A2). */
       if(!(ev&&ev.state)){
+        /* Lien d'Apprendre suivi alors que l'Atelier est déjà ouvert : pas de
+           rechargement, donc pas de lecture au démarrage — on le lit ici. */
+        if(/^#(composer|progressions)\?/i.test(String(location.hash||''))){
+          this._histRemplacer=true;this._lienApprendre();return;}
         const vise=this._ecranDeLAdresse();
         if(vise&&vise!=='accueil'){
           /* L'entrée vient d'être créée par le navigateur : la synchro de
@@ -6300,11 +6532,18 @@ class Component extends DCLogic {
      donnait « a cote » pour s'en debarrasser tombait sur une carte de gabarit
      -- qui cree un brouillon. Le clic exterieur ferme donc le menu ET s'arrete
      la : il n'atteint pas ce qu'il y a dessous. */
+  /* Ferme la fenêtre de paiement — bouton Annuler, clic au-dehors, Échap.
+     Pas pendant une demande en cours : la réponse de l'opérateur doit
+     trouver la fenêtre où l'afficher. */
+  _fermerPaiement(){if(this.state.payBusy)return;
+    this.setState({payOpen:false,payDone:false,payCode:'',payCodeMsg:'',payMotif:'',
+      payCodeOk:false,payRemise:0,payMontant:0,payBase:0});}
   _installerFermetureCreer(){
     if(this._fermCreerInstalle)return;
     this._fermCreerInstalle=true;
     window.addEventListener('keydown',(e)=>{
       if(e.key==='Escape'&&this.state.createOpen)this.setState({createOpen:false});
+      else if(e.key==='Escape'&&this.state.payOpen)this._fermerPaiement();
     });
     document.addEventListener('click',(e)=>{
       if(!this.state.createOpen)return;
@@ -7629,12 +7868,12 @@ class Component extends DCLogic {
         blocs.push({titre:choix?('Sujet 1 — '+this._titreSujet(stru.parties&&stru.parties[0]&&stru.parties[0].titre||'Contraction de texte et discussion'))
                               :('Texte '+(ti+1)+' — '+t),
           lignes:qs.map((q,i)=>(choix?R[k2++]+'. ':(i+1)+'. ')+q
-          +(pp[i]!=null&&pp[i]!==''?' ('+pp[i]+' point'+((parseFloat(pp[i])||0)>1?'s':'')+')':'')
+          +(pp[i]!=null&&pp[i]!==''?' ('+this._ptFr(pp[i])+' point'+((parseFloat(pp[i])||0)>1?'s':'')+')':'')
           +'\n   → '+this._sansMarkdown(c[i]||'à compléter'))});});});
     (a.sujets||[]).forEach(s=>{if(!s||!s.corrige)return;
       if(choix&&s.genre==='presentation')return;
       const t=choix?('Sujet '+(++nSujet)+' — '+this._titreSujet(s.titre)):(s.titre||'Sujet');
-      blocs.push({titre:t+(s.pts?' ('+s.pts+' points)':''),lignes:[this._sansMarkdown(s.corrige)]});});
+      blocs.push({titre:t+(s.pts?' ('+this._ptFr(s.pts)+' points)':''),lignes:[this._sansMarkdown(s.corrige)]});});
     if((a.grilleIA||[]).length)blocs.push({titre:'Grille de correction',
       lignes:a.grilleIA.map(g=>'• '+this._sansMarkdown(g.critere)+(g.points!=null?' — '+g.points+' pts':'')+(g.indicateurs?' : '+this._sansMarkdown(g.indicateurs):''))});
     if(stru&&stru.formulesCorrige&&stru.formulesCorrige.length)blocs.push({titre:'À rappeler aux correcteurs',lignes:stru.formulesCorrige});
@@ -8032,11 +8271,14 @@ class Component extends DCLogic {
        minute. Le message du serveur (retenu au premier 402 reel) reste
        prioritaire quand on l'a. */
     var n=(this.all||[]).filter(function(x){return x&&x.src!=='libre';}).length;
-    this._avis(this._msgAbo
+    /* Le motif s'affiche DANS la fenêtre de paiement (02/11/2026) : en
+       bandeau flottant (_avis), il se posait sur le titre de la fenêtre et
+       les deux devenaient illisibles. */
+    const motif=this._msgAbo
       || ('Ce texte fait partie du répertoire complet. Abonnez-vous pour ouvrir '
          +(n>0?('les '+n.toLocaleString('fr-FR')+' textes'):'tout le répertoire')
-         +', leurs questions et leurs faits de langue.'),'attention');
-    this.setState({payOpen:true,paySelected:'ens',payDone:false,
+         +', leurs questions et leurs faits de langue.');
+    this.setState({payOpen:true,paySelected:'ens',payDone:false,payMotif:motif,
       payCode:this._codeAmiRetenu(),payCodeMsg:'',payCodeOk:false,
       payRemise:0,payMontant:0,payBase:0},()=>{if(this.state.payCode)this._verifierCodeAmi();});
   }
@@ -8543,7 +8785,7 @@ class Component extends DCLogic {
      `revue` vit sur l'épreuve : {tour, requis, echeance, decisions:[{uid,
      nom, verdict, portee, motif, ts, tour}]}. Les décisions des tours
      précédents restent : c'est l'historique de ce qui a été demandé. */
-  _delais(){const d=((this.state.admin||{}).delais)||{};return{validation:+d.validation||5,remplacement:+d.remplacement||3};}
+  _delais(){const d=((this.state.admin||{}).delais)||{};return{validation:+d.validation||5,remplacement:+d.remplacement||3,sujet:+d.sujet||10,copies:+d.copies||7,corrige:+d.corrige||10};}
   _revueDe(e){const r=(e&&e.revue)||{};return{tour:r.tour||1,requis:Math.max(1,+r.requis||1),echeance:r.echeance||0,decisions:Array.isArray(r.decisions)?r.decisions:[]};}
   _statutRevue(r){
     const cur=r.decisions.filter(d=>d.tour===r.tour);
@@ -8741,10 +8983,35 @@ class Component extends DCLogic {
     const items=[];(a.textIds||[]).forEach(n=>{const f=this.all.find(x=>x.n===n);if(!f)return;
       ['comp','expl'].forEach(k=>{this._qList(f,k).forEach((q,i)=>items.push([n,k,i]));});});
     if(!items.length){return;}
-    const part=Math.floor((cible/items.length)*10)/10;
-    const pts={};items.forEach(([n,k,i],idx)=>{pts[n]=pts[n]||{};pts[n][k]=pts[n][k]||[];
-      pts[n][k][i]=(idx===items.length-1)?Math.round((cible-part*(items.length-1))*100)/100:part;});
-    this._updateActive({pts},'a appliqué le barème type ('+cible+' points)');}
+    /* PAR PARTIE (02/11/2026). Le barème était étalé à parts égales sur
+       toutes les questions : une Étude de texte « I. Compréhension /10 ·
+       II. Langue /10 » à deux questions de compréhension et une de langue
+       donnait 13,2 / 6,8 — démenti par le garde-fou affiché juste à côté.
+       Chaque partie de la structure va désormais à SES questions
+       (compréhension → comp, langue/exploitation → expl) ; une partie de
+       production va aux sujets. Sans correspondance, on garde l'étalement. */
+    const genreDe=t=>/compr[ée]hension/i.test(t)?'comp':/langue|exploitation|vocabul|grammaire|maniement/i.test(t)?'expl':'sujet';
+    const parts=((st&&st.parties)||[]).map(p=>({g:genreDe(p.titre||''),pts:parseFloat(p.points)||0})).filter(p=>p.pts>0);
+    const parGenre={comp:0,expl:0,sujet:0};parts.forEach(p=>{parGenre[p.g]+=p.pts;});
+    const repartir=(liste,total,poser)=>{if(!liste.length||!(total>0))return;const part=Math.floor((total/liste.length)*10)/10;
+      liste.forEach((x,idx)=>poser(x,(idx===liste.length-1)?Math.round((total-part*(liste.length-1))*100)/100:part));};
+    const pts={};const poserQ=([n,k,i],v)=>{pts[n]=pts[n]||{};pts[n][k]=pts[n][k]||[];pts[n][k][i]=v;};
+    const comp=items.filter(x=>x[1]==='comp'),expl=items.filter(x=>x[1]==='expl');
+    const parPartie=(parGenre.comp>0||parGenre.expl>0)&&(!comp.length||parGenre.comp>0)&&(!expl.length||parGenre.expl>0);
+    const patch={};
+    if(parPartie){
+      repartir(comp,parGenre.comp,poserQ);repartir(expl,parGenre.expl,poserQ);
+      /* Partie de production : aux sujets imposés (répartie), et chaque sujet
+         au choix la vaut entière — l'élève n'en traite qu'un. */
+      const sj=(a.sujets||[]).filter(s=>s&&s.genre!=='presentation');
+      if(parGenre.sujet>0&&sj.length){const imposes=sj.filter(s=>!s.auChoix);const vals={};
+        repartir(imposes,parGenre.sujet,(s,v)=>{vals[s.id]=v;});
+        patch.sujets=(a.sujets||[]).map(s=>!s||s.genre==='presentation'?s:{...s,pts:s.auChoix?parGenre.sujet:(vals[s.id]!=null?vals[s.id]:s.pts)});}
+    }else repartir(items,cible,poserQ);
+    patch.pts=pts;
+    this._updateActive(patch,'a appliqué le barème type ('+cible+' points'+(parPartie?', par partie':'')+')');}
+  /* Les points s'impriment à la française : « 6,5 pts », pas « 6.5 pts ». */
+  _ptFr(v){return String(v).replace('.',',');}
   /* _qList lisait TOUJOURS l'épreuve active : calculer l'avancement d'une
      autre épreuve lui prêtait les questions de celle qui est ouverte. */
   /* QUESTIONS DU CORPUS PAR DÉFAUT (20/10/2026, signalé par Jacques :
@@ -8898,9 +9165,103 @@ class Component extends DCLogic {
     }));
     return out.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
   }
+  /* ── Calendrier de l'épreuve (lot M, 02/11/2026) ─────────────────────
+     D'après le workflow d'échéances de Tchouskou : sujet remis → sujet
+     validé → épreuve → copies corrigées → corrigé aux élèves. Les dates se
+     PROPOSENT depuis la date de l'épreuve et les délais du Pilotage ; elles
+     ne deviennent des rappels qu'une fois appliquées (`ep.jalons`) : rien ne
+     surgit en retard sur les épreuves d'avant. */
+  _jalonsDe(e){
+    if(!e)return[];
+    const D=this._delais(),J=e.jalons||{},F=e.jalonsFaits||{},ep=e.echeance||'',auj=this._isoAuj();
+    const plus=n=>ep?this._isoPlus(ep,n):'';
+    const rv=e.revue&&e.revue.echeance?this._isoDe(new Date(e.revue.echeance)):'';
+    const st=e.status||'brouillon',valide=st==='valide';
+    return[
+      {k:'sujet',lib:'Sujet remis',aide:'envoi en relecture',date:J.sujet||plus(-D.sujet),fait:st!=='brouillon'},
+      {k:'validation',lib:'Sujet validé',aide:'relecture close',date:J.validation||rv||plus(-Math.max(1,D.sujet-D.validation)),fait:valide},
+      {k:'epreuve',lib:'Épreuve',aide:'passation',date:ep,fait:!!(valide&&ep&&ep<=auj)},
+      {k:'copies',lib:'Copies corrigées',aide:'remises aux élèves',date:J.copies||plus(D.copies),fait:!!F.copies,manuel:true},
+      {k:'corrige',lib:'Corrigé aux élèves',aide:'diffusé en classe',date:J.corrige||plus(D.corrige),fait:!!F.corrige,manuel:true}];
+  }
+  _majJalon(k,iso){const a=this._active();if(!a)return;
+    if(k==='epreuve'){this._updateActive({echeance:iso||''},iso?'a daté l’épreuve du '+this._fmtIso(iso,{day:'numeric',month:'long'}):'a retiré la date de l’épreuve');return;}
+    const lib={sujet:'la remise du sujet',validation:'la validation',copies:'la remise des copies',corrige:'le corrigé aux élèves'}[k]||k;
+    this._updateActive({jalons:{...(a.jalons||{}),[k]:iso||''}},'a fixé '+lib+(iso?' au '+this._fmtIso(iso,{day:'numeric',month:'long'}):' (date retirée)'));}
+  _appliquerJalons(){const a=this._active();if(!a)return;const J={};
+    this._jalonsDe(a).forEach(j=>{if(j.k!=='epreuve'&&j.date)J[j.k]=j.date;});
+    this._updateActive({jalons:{...J,...Object.fromEntries(Object.entries(a.jalons||{}).filter(([,v])=>v))}},'a appliqué le calendrier de l’épreuve');}
+  _basculerJalon(k){const a=this._active();if(!a)return;const F={...(a.jalonsFaits||{})};
+    if(F[k])delete F[k];else F[k]=Date.now();
+    this._updateActive({jalonsFaits:F},(F[k]?'a marqué fait : ':'a rouvert : ')+({copies:'copies corrigées remises',corrige:'corrigé remis aux élèves'}[k]||k));}
+  /* ── Demandes de sujet (lot N, 02/11/2026) ───────────────────────────
+     Comme « Demandes de sujet » de Tchouskou : on demande un sujet à un
+     collègue, avec la date de l'épreuve et la date où le sujet est attendu.
+     La demande EST une épreuve (brouillon au nom du collègue) : elle voyage
+     avec les épreuves de l'équipe, et ses dates deviennent ses rappels. */
+  _envoyerDemande(){const st=this.state,me=this._me();
+    const a=st.users.find(u=>u.id===st.demA);
+    if(!a){this.setState({demMsg:'Choisissez le collègue à qui demander le sujet.'});return;}
+    if(!st.demAttendu){this.setState({demMsg:'Indiquez la date où le sujet est attendu.'});return;}
+    if(st.demDate&&st.demAttendu>st.demDate){this.setState({demMsg:'Le sujet doit être attendu AVANT la date de l’épreuve.'});return;}
+    const id='e'+Date.now(),type=(st.demType||'').trim()||'Évaluation',now=Date.now();
+    const ep={id,groupeId:this._groupeActif(),title:type+(st.demClasse?' — '+st.demClasse:''),etab:'',classe:st.demClasse||'',duree:'2 h',coeff:'',date:'',
+      consigne:'Lis attentivement le(s) texte(s) puis réponds aux questions.',textIds:[],status:'brouillon',ownerId:a.id,editorIds:[],inLibrary:false,updatedAt:now,comments:[],
+      echeance:st.demDate||'',jalons:{sujet:st.demAttendu},
+      demande:{par:me.id,le:now,consignes:(st.demConsignes||'').trim().slice(0,1200),etat:'attente'},
+      activity:[{userId:me.id,text:'a demandé ce sujet à '+a.name+', attendu le '+this._fmtIso(st.demAttendu,{day:'numeric',month:'long'}),ts:now}]};
+    if(ep.demande.consignes)ep.comments=[{id:'c'+now,userId:me.id,text:'Consignes de la demande : '+ep.demande.consignes,ts:now,reactions:{}}];
+    this.setState(s2=>({epreuves:[ep,...s2.epreuves],demA:'',demType:'',demClasse:'',demDate:'',demAttendu:'',demConsignes:'',demMsg:'',demOuvert:false,
+      demOk:'Demande envoyée à '+a.name+'.'}),()=>this._persist());}
+  _repondreDemande(id,etat){const me=this._me();
+    this.setState(s2=>({epreuves:s2.epreuves.map(e=>{if(!e||e.id!==id||!e.demande)return e;
+      return{...e,demande:{...e.demande,etat,repLe:Date.now()},updatedAt:Date.now(),
+        activity:[...(e.activity||[]),{userId:me.id,text:etat==='refusee'?'a décliné la demande de sujet':'a accepté la demande de sujet',ts:Date.now()}]};}),demRefus:''}),()=>this._persist());}
   _contenusSeq(sq,jusqua){const out=[];(sq&&sq.semaines||[]).filter(w=>w.n<=(jusqua||3)).forEach(w=>(w.contenus||[]).forEach(c=>{if(c&&out.indexOf(c)<0)out.push(c);}));return out;}
   /* Évaluation d'une séquence : épreuve NEUVE, datée de la semaine
      d'évaluation (S5), classe et assistant déjà réglés. */
+  /* ── Lien depuis Apprendre (10/11/2026) ─────────────────────────────
+     Apprendre envoie les professeurs de français ici :
+       #composer?prog=esg-3&seq=2[&lecon=…]  → l'évaluation de la séquence
+       #progressions?prog=esg-3[&seq=2]       → la progression de la classe
+     La séquence vient d'une table générée (tools/build_apprendre_atelier.cjs) :
+     les deux progressions ne sont pas découpées pareil. On attend le
+     répertoire et les progressions ; un brouillon déjà ouvert pour la même
+     séquence est rouvert plutôt que doublé (rechargement, double clic). */
+  _lienApprendre(){
+    const m=/^#(composer|progressions)\?(.*)$/i.exec(String(location.hash||''));
+    if(!m)return;
+    const q=new URLSearchParams(m[2]);
+    const lien={quoi:m[1].toLowerCase(),prog:q.get('prog')||'',seq:parseInt(q.get('seq')||'0',10)||0,lecon:String(q.get('lecon')||'').replace(/\s+/g,' ').trim().slice(0,140)};
+    if(!/^[a-z0-9-]{3,60}$/.test(lien.prog))return;
+    let essais=0;
+    const t=setInterval(()=>{essais++;
+      if(!(this._progs()&&this.state.ready)){if(essais>150)clearInterval(t);return;}
+      clearInterval(t);try{this._suivreLienApprendre(lien);}catch(e){}},200);
+  }
+  _suivreLienApprendre(l){
+    const cls=this._progClasse(l.prog);if(!cls)return;
+    const sq=l.seq?(cls.sequences.find(x=>x.num===l.seq)||null):null;
+    const me=this._me();
+    if(l.quoi==='composer'&&sq&&this._perm(me.role).creer){
+      const deja=(this.state.epreuves||[]).find(e=>e&&e.status==='brouillon'&&e.ownerId===me.id&&e.assistant
+        &&e.assistant.progId===cls.id&&String(e.assistant.progSeq)===String(sq.num));
+      if(deja){this.setState({activeId:deja.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);});return;}
+      this._composerSequence(cls,sq);
+      if(l.lecon)setTimeout(()=>{const a=this._active();
+        if(a&&a.assistant&&a.assistant.progId===cls.id)this._updateActive({title:(a.title||'')+' · '+l.lecon},'a repris la leçon « '+l.lecon+' » d’Apprendre');},60);
+      return;
+    }
+    this.setState({screen:'progressions',progId:cls.id,progOuverts:sq?{[sq.num]:true}:{}},()=>window.scrollTo(0,0));
+  }
+  /* Le chemin inverse : la page de français d'Apprendre pour une classe ESG
+     (séries A → littéraire, C → scientifique ; pas d'Apprendre pour l'EST). */
+  _apprendreUrl(progId,seq){
+    const C={'esg-6':'6e','esg-5':'5e','esg-4':'4e','esg-3':'3e','esg-seconde-litteraire':'2nde A','esg-seconde-scientifique':'2nde C',
+      'esg-premiere-litteraire':'1re A','esg-premiere-scientifique':'1re C','esg-terminale-litteraire':'Tle A','esg-terminale-scientifique':'Tle C'};
+    const c=C[progId];return c?'/apprendre/matiere.html?c='+encodeURIComponent(c)+'&m=francais'+(seq?'&seq='+seq:''):'';
+  }
+  _ouvrirApprendre(progId,seq){const u=this._apprendreUrl(progId,seq);if(u)try{window.open(u,'_blank','noopener');}catch(e){}}
   _composerSequence(cls,sq){
     const w5=(sq.semaines||[]).find(w=>w.n===5)||(sq.semaines||[]).slice(-1)[0]||{};
     const w4=(sq.semaines||[]).find(w=>w.n===4)||{};
@@ -9016,8 +9377,23 @@ class Component extends DCLogic {
         genre:genre, date:d, jours:j, urgence:u,
         fini:(o.status === 'valide')});
     };
-    (st.epreuves||[]).forEach(e => ajouter(e, 'epreuve'));
+    /* Une demande de sujet DÉCLINÉE n'a plus d'échéance pour personne. */
+    (st.epreuves||[]).forEach(e => { if (!(e && e.demande && e.demande.etat==='refusee')) ajouter(e, 'epreuve'); });
     (st.cours||[]).forEach(c => ajouter(c, 'cours'));
+    /* Jalons du calendrier de l'épreuve (lot M) : seulement ceux APPLIQUÉS,
+       et pour qui y travaille (auteur, co-auteurs). L'épreuve elle-même a
+       déjà sa ligne ci-dessus (`echeance`). */
+    const moi = st.currentUserId;
+    (st.epreuves||[]).forEach(e => {
+      if (!e || !e.jalons || !(e.ownerId===moi || (e.editorIds||[]).indexOf(moi)>=0)) return;
+      if (e.demande && e.demande.etat==='refusee') return;
+      this._jalonsDe(e).forEach(j => {
+        if (j.k==='epreuve' || j.fait || !e.jalons[j.k]) return;
+        const d = this._parseDate(j.date); if (!d) return;
+        const jr = this._joursAvant(d);
+        out.push({id:e.id, jalon:j.k, titre:j.lib+' — '+(e.title||'Épreuve'), genre:'epreuve', date:d, jours:jr, urgence:this._urgence(jr), fini:false});
+      });
+    });
     /* Ce qui est VALIDE n'a plus d'echeance : le signaler « en retard »
        reprocherait a l'enseignant un travail qu'il a fini. */
     return out.filter(x => !x.fini)
@@ -9376,7 +9752,26 @@ class Component extends DCLogic {
     const cycleCards=(this.meta||[]).map(c=>({short:this.cShort[c.cycle]||c.cycle,sub:this.cSub[c.cycle]||(c.count+' textes'),count:c.count,open:()=>this.setState({filters:{q:'',cycle:c.cycle,group:'',type:'',subkind:'',length:'',source:''},screen:'liste'},()=>window.scrollTo(0,0))}));
 
     const wordsOf=e=>e.textIds.reduce((a,n)=>{const f=all.find(x=>x.n===n);return a+(f?f.words:0);},0);
-    const epCard=e=>{const owner=st.users.find(u=>u.id===e.ownerId);const sm=this._statusMeta(e.status);return{id:e.id,title:e.title,classe:e.classe||'—',count:e.textIds.length,words:wordsOf(e),statusLabel:sm.label,statusChip:this._statusChip(e.status),libChip:e.inLibrary?'font-size:10px;font-weight:700;color:var(--cc26a12,#c26a12);background:var(--cfdefdb,#fdefdb);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,ago:'MàJ '+this._ago(e.updatedAt),avatars:avStack([e.ownerId,...e.editorIds]),ownerLine:owner?owner.name.replace(/^(M\.|Mme|Mlle)\s+/,''):'',open:()=>this.setState({activeId:e.id,screen:'composeur'},()=>{this._persist();window.scrollTo(0,0);}),openLabel:perm.readOnly?'Consulter':'Ouvrir',dupStyle:perm.readOnly?hidden:'background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:13px',duplicate:()=>{const id='e'+Date.now();const copy={...e,id,title:e.title+' (copie)',status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),comments:[],activity:[{userId:me.id,text:'a dupliqué l\u2019épreuve',ts:Date.now()}]};this.setState(s=>({epreuves:[copy,...s.epreuves],activeId:id,screen:'composeur'}),()=>this._persist());}};};
+    const epCard=e=>{const owner=st.users.find(u=>u.id===e.ownerId);const sm=this._statusMeta(e.status);
+      /* Ce que la fiche dit sans ouvrir l'épreuve : sa situation par rapport
+         à l'échéance (champ « borne » de l'assistant) et où en est le circuit
+         de validation (brouillon → relecture → validé). */
+      const ass=this._assDe(e),s0=e.status||'brouillon';
+      const jr=ass.borne?Math.round((new Date(ass.borne+'T00:00:00')-new Date(this._isoAuj()+'T00:00:00'))/86400000):null;
+      const fini=s0==='valide';
+      const sit=fini?(e.inLibrary?'diffusé':'validé'):jr===null?'sans échéance':jr<0?'en retard de '+(-jr)+' j':jr===0?'aujourd’hui':'sous '+jr+' j';
+      const sitC=fini?['var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)']:jr!==null&&jr<0?['var(--cc0392b,#c0392b)','var(--cfdecea,#fdecea)']:jr!==null&&jr<=3?['var(--c8a5a00,#8a5a00)','var(--cfdf1d6,#fdf1d6)']:['var(--c5a6678,#5a6678)','var(--ceef2f7,#eef2f7)'];
+      const pas=s0==='valide'?3:(s0==='relecture'||s0==='ajustement')?2:1;
+      return{id:e.id,title:e.title,type:ass.type+(ass.numero?' n°'+ass.numero:''),
+        situation:sit,situationStyle:'font-size:12px;font-weight:700;font-family:Poppins;padding:3px 10px;border-radius:999px;color:'+sitC[0]+';background:'+sitC[1],
+        echeance:ass.borne?new Date(ass.borne+'T00:00:00').toLocaleDateString('fr-FR'):'',echeanceLigne:ass.borne?'':'display:none',
+        validLabel:pas+'/3 · '+Math.round(pas/3*100)+' %',
+        /* L'épreuve reliée à une séquence (bouton « Relier » des
+           Progressions, ou « Composer » depuis le Suivi) le dit, et mène à
+           son suivi filtré sur sa classe. */
+        ...(()=>{const c=ass.progId?this._progClasse(ass.progId):null;
+          return{seqLigne:c&&ass.progSeq?'':'display:none',seqCourt:'S'+(ass.progSeq||''),seqLib:c?c.libelle:'',
+            voirSuivi:()=>{this.setState({suiviClasse:c?c.id:'',suiviVue:'liste'});this._go('suivi');}};})(),validBarre:'display:block;height:100%;border-radius:99px;background:'+(s0==='rejete'?'#c0392b':'#7fb08f')+';width:'+Math.round(pas/3*100)+'%',classe:e.classe||'—',count:e.textIds.length,words:wordsOf(e),statusLabel:sm.label,statusChip:this._statusChip(e.status),libChip:e.inLibrary?'font-size:10px;font-weight:700;color:var(--cc26a12,#c26a12);background:var(--cfdefdb,#fdefdb);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,ago:'MàJ '+this._ago(e.updatedAt),avatars:avStack([e.ownerId,...e.editorIds]),ownerLine:owner?owner.name.replace(/^(M\.|Mme|Mlle)\s+/,''):'',open:()=>this.setState({activeId:e.id,screen:'composeur'},()=>{this._persist();window.scrollTo(0,0);}),openLabel:perm.readOnly?'Consulter':'Ouvrir',dupStyle:perm.readOnly?hidden:'background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:13px',duplicate:()=>{const id='e'+Date.now();const copy={...e,id,title:e.title+' (copie)',status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),comments:[],activity:[{userId:me.id,text:'a dupliqué l\u2019épreuve',ts:Date.now()}]};this.setState(s=>({epreuves:[copy,...s.epreuves],activeId:id,screen:'composeur'}),()=>this._persist());}};};
     /* Visibilite : une epreuve appartient a un groupe. Un groupe ferme la
        garde pour ses membres ; un groupe ouvert la montre aux autres
        membres de la plateforme ; publiee dans la bibliotheque, elle est
@@ -9623,7 +10018,7 @@ class Component extends DCLogic {
        visite guidee, avant toute connexion. */
     const accountSwitch=(st.compteId?[]:st.users).map(u=>({name:u.name,initials:this._initials(u.name),avatar:this._av(u,36),role:u.role,current:u.id===me.id,currentChip:u.id===me.id?'font-size:11px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:3px 10px;border-radius:999px':hidden,rowStyle:'display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid '+(u.id===me.id?'var(--cbcd9f2,#bcd9f2)':'var(--ceef2f7,#eef2f7)')+';border-radius:11px;background:'+(u.id===me.id?'var(--cf5faff,#f5faff)':'var(--cffffff,#fff)')+';cursor:pointer;text-align:left',select:()=>this.setState({currentUserId:u.id,screen:'accueil'},()=>{this._persist();window.scrollTo(0,0);})}));
 
-    const mkPrintQ=(f,kind)=>this._qList(f,kind).map((t,qi)=>{const p=this._qPts(f.n,kind,qi);return{text:t,pts:(p===null?'':'('+p+' pt'+((parseFloat(p)||0)>1?'s':'')+')'),ptsStyle:(p===null?'display:none':'font-weight:700;color:var(--c14375f,#14375f);white-space:nowrap;margin-left:6px')};});
+    const mkPrintQ=(f,kind)=>this._qList(f,kind).map((t,qi)=>{const p=this._qPts(f.n,kind,qi);return{text:t,pts:(p===null?'':'('+this._ptFr(p)+' pt'+((parseFloat(p)||0)>1?'s':'')+')'),ptsStyle:(p===null?'display:none':'font-weight:700;color:var(--c14375f,#14375f);white-space:nowrap;margin-left:6px')};});
     const printFiches=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean).map((f,i)=>({pos:i+1,
       qBlocStyle:(this._qList(f,'comp').length||this._qList(f,'expl').length)?'font-size:13px;color:var(--c22303f,#22303f)':'display:none',type:f.type,words:f.words,text:f.text||'',reference:f.reference||'',compList:this._qList(f,'comp'),explList:this._qList(f,'expl'),compQ:mkPrintQ(f,'comp'),explQ:mkPrintQ(f,'expl'),
       compBloc:this._qList(f,'comp').length?'':'display:none',explBloc:this._qList(f,'expl').length?'':'display:none',
@@ -10120,7 +10515,7 @@ class Component extends DCLogic {
       pilFiltreLabel:pilF?('Filtre : '+((pilDefs.find(x=>x[0]===pilF)||[])[1]||'')+' \u00b7 '+pilFiltrees.length):(pilEps.length+' \u00e9preuve(s)'),
       pilToutes:()=>this.setState({pilFiltre:''}),
       pilToutesStyle:pilF?'margin-left:auto;background:none;border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
-      pilDelais:[['validation','Relecture','D\u00e9lai laiss\u00e9 aux relecteurs apr\u00e8s la soumission.'],['remplacement','Version corrig\u00e9e','D\u00e9lai laiss\u00e9 \u00e0 l\u2019auteur apr\u00e8s un ajustement ou un rejet.']]
+      pilDelais:[['validation','Relecture','D\u00e9lai laiss\u00e9 aux relecteurs apr\u00e8s la soumission.'],['remplacement','Version corrig\u00e9e','D\u00e9lai laiss\u00e9 \u00e0 l\u2019auteur apr\u00e8s un ajustement ou un rejet.'],['sujet','Sujet \u00e0 remettre','Jours AVANT l\u2019\u00e9preuve o\u00f9 le sujet doit partir en relecture.'],['copies','Copies corrig\u00e9es','Jours APR\u00c8S l\u2019\u00e9preuve pour rendre les copies.'],['corrige','Corrig\u00e9 aux \u00e9l\u00e8ves','Jours APR\u00c8S l\u2019\u00e9preuve pour remettre le corrig\u00e9.']]
         .map(([k,l,a2])=>({label:l,aide:a2,valeur:String(pilDel[k]),
           set:e=>{const v=Math.max(1,Math.min(60,parseInt(val(e),10)||0));if(!v)return;majAdmin({delais:{...(ADM.delais||{}),[k]:v}});}})),
       pilMois:pilMoisL};
@@ -10295,6 +10690,14 @@ class Component extends DCLogic {
       chipLabel:'\u00c9ch\u00e9ance',
       open:()=>this.setState(x.genre==='cours'?{activeCoursId:x.id,screen:'cours'}:{activeId:x.id,screen:'composeur'},
         ()=>{this._persist();window.scrollTo(0,0);})}));
+    st.epreuves.filter(e=>e&&e.demande&&e.demande.etat==='attente'&&e.ownerId===me.id&&e.status==='brouillon').forEach(e=>{
+      const u=st.users.find(x=>x.id===e.demande.par)||{name:'Un collègue'};const att=(e.jalons||{}).sujet;
+      gTraiter.push({avatar:this._av(u,32),initials:this._initials(u.name),
+        textEl:this._mentionEl(u.name+' vous demande un sujet : « '+(e.title||'Épreuve')+' »'+(att?', attendu le '+this._fmtIso(att,{day:'numeric',month:'long'}):'')),
+        ago:this._ago(e.demande.le||0),
+        chip:'font-size:10.5px;font-weight:700;font-family:Poppins;color:var(--cffffff,#fff);background:var(--c7c3aed,#7c3aed);padding:3px 10px;border-radius:999px;flex:none',
+        chipLabel:'Demande',
+        open:()=>this.setState({activeId:e.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);})});});
     st.epreuves.filter(e=>e.status==='relecture').forEach(e=>gTraiter.push({
       avatar:this._av(st.users.find(u=>u.id===e.ownerId)||{name:'?'},32),
       initials:this._initials((st.users.find(u=>u.id===e.ownerId)||{name:'?'}).name),
@@ -10375,7 +10778,7 @@ class Component extends DCLogic {
        de l'écran Activité, et les échéances urgentes pas encore vues (une
        échéance qui passe de « demain » à « en retard » revient). */
     const notifVu=st.notifVu||{ts:0,ech:[]};
-    const cleEch=x=>x.genre+':'+x.id+':'+x.urgence.cle;
+    const cleEch=x=>x.genre+':'+x.id+(x.jalon?'#'+x.jalon:'')+':'+x.urgence.cle;
     const nbNotif=acts.filter(a=>a.userId!==me.id&&(a.ts||0)>(notifVu.ts||0)).length
       +echeancesUrgentes.filter(x=>(notifVu.ech||[]).indexOf(cleEch(x))<0).length;
     /* LA CARTE JUMELLE DE L'ACCUEIL (contre-expertise du 27/10/2026). Le
@@ -10561,7 +10964,7 @@ class Component extends DCLogic {
       {a:'var(--c7b52c7,#7b52c7)',t:'var(--cefe8fa,#efe8fa)'}];
     const plansView=this.plans.map((p,ip)=>{const isCur=p.name===curPlanName;const th=THEMES_PLAN[ip%THEMES_PLAN.length];return{name:p.name,price:p.price,period:p.period,seats:p.seats,
       carte:'background:linear-gradient(180deg,'+th.t+' 0,var(--cffffff,#fff) 170px);border:2px solid '+(isCur?th.a:'var(--ce2eaf3,#e2eaf3)')+';border-top:5px solid '+th.a+';border-radius:16px;padding:24px 22px;display:flex;flex-direction:column;box-shadow:0 3px 12px rgba(20,55,95,.06);animation:popIn .34s ease both',
-      titleColor:th.a,currentChip:isCur?'font-size:10px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,features:p.features.map(f=>({label:f,icon:this._icon('check','var(--cffffff,#fff)',12),check:'display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:'+th.a+';flex:none;margin-top:1px'})),cta:isCur?'Plan actuel':'Choisir ce plan',btn:isCur?'background:var(--ceef2f7,#eef2f7);color:var(--c8b97a8,#8b97a8);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:default;font-family:Poppins':'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;font-family:Poppins',btnHover:isCur?'':'background:var(--c135a96,#135a96)',choose:()=>{if(!isCur)this.setState({payOpen:true,paySelected:p.id,payDone:false,payCode:this._codeAmiRetenu(),payCodeMsg:'',payCodeOk:false,payRemise:0,payMontant:0,payBase:0},()=>{if(this.state.payCode)this._verifierCodeAmi();});}};});
+      titleColor:th.a,currentChip:isCur?'font-size:10px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,features:p.features.map(f=>({label:f,icon:this._icon('check','var(--cffffff,#fff)',12),check:'display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:'+th.a+';flex:none;margin-top:1px'})),cta:isCur?'Plan actuel':'Choisir ce plan',btn:isCur?'background:var(--ceef2f7,#eef2f7);color:var(--c8b97a8,#8b97a8);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:default;font-family:Poppins':'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:11px;font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;font-family:Poppins',btnHover:isCur?'':'background:var(--c135a96,#135a96)',choose:()=>{if(!isCur)this.setState({payOpen:true,paySelected:p.id,payDone:false,payMotif:'',payCode:this._codeAmiRetenu(),payCodeMsg:'',payCodeOk:false,payRemise:0,payMontant:0,payBase:0},()=>{if(this.state.payCode)this._verifierCodeAmi();});}};});
     const payPlan=this.plans.find(p=>p.id===st.paySelected)||this.plans[1];
     /* CODE AMI — la remise ne vaut que pour le plan sur lequel le serveur l'a
        accordee. Changer de plan dans la meme fenetre la rend caduque : sans ce
@@ -10889,8 +11292,9 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       payCheckIcon:this._icon('check','var(--c1f9d55,#1f9d55)',30),
       /* On referme AVEC la remise : la garder ferait rouvrir la fenetre sur un
          prix remise que plus rien n'a valide cote serveur. */
-      closePay:()=>this.setState({payOpen:false,payDone:false,payCode:'',payCodeMsg:'',
-        payCodeOk:false,payRemise:0,payMontant:0,payBase:0}),
+      closePay:()=>this._fermerPaiement(),
+      payMotif:st.payMotif||'',
+      payMotifStyle:st.payMotif?'margin:0;padding:12px 26px;font-size:12.5px;line-height:1.5;font-weight:600;color:var(--c8a5a00,#8a5a00);background:var(--cfff7e6,#fff7e6);border-bottom:1px solid var(--cf0d9b0,#f0d9b0)':'display:none',
       confirmPay:()=>this._payerCamerpay(),
       epreuveSeries:this.epreuveSeries.map(s=>({code:s.code,cycle:s.cycle,name:s.name,structure:s.structure,duree:s.duree,coeff:s.coeff,create:()=>{const me=this._me();const id='e'+Date.now();const ep={id,groupeId:grpActif.id,title:s.name,etab:'',classe:(s.classes&&s.classes[0])||'',duree:s.duree,coeff:s.coeff==='—'?'':s.coeff,date:'',epreuveCode:s.code,consigne:'Lis attentivement le(s) texte(s) puis réponds aux questions.',textIds:[],status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),comments:[],activity:[{userId:me.id,text:'a créé une épreuve à partir du gabarit '+s.code,ts:Date.now()}]};this.setState(st2=>({epreuves:[ep,...st2.epreuves],activeId:id,screen:'composeur'}),()=>{this._persist();window.scrollTo(0,0);});}})),
       setCoTitle:e=>{if(cActive&&!cLocked)this._updateCours({title:val(e)});},
@@ -10900,7 +11304,13 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       coUnlock:()=>this._updateCours({status:'brouillon',inLibrary:false},'a déverrouillé le cours'),
       stats:this.stats||{total:0,authors:0,corpus:0,evalC:0},cycleCards,recentEpreuves,libraryCount:st.epreuves.filter(e=>e.inLibrary).length,
       liveStrip:(()=>{const other=st.users.find(u=>u.id!==me.id&&u.role!=='Élève (lecture seule)');const rel=st.epreuves.find(e=>e.status==='relecture');return (other?other.name.replace(/^(M\.|Mme|Mlle)\s+/,''):'Un collègue')+(rel?' travaille sur « '+rel.title+' »':' est en ligne')+' · '+st.users.filter(u=>u.id!==me.id).length+' collègues actifs';})(),
-      todos:(()=>{const t=[];st.epreuves.filter(e=>(e.status==='ajustement'||e.status==='rejete')&&e.ownerId===me.id).forEach(e=>{const d=this._revueDe(e).decisions.filter(x=>x.verdict!=='valide').slice(-1)[0];t.push({dot:e.status==='rejete'?'var(--cc0392b,#c0392b)':'var(--cc26a12,#c26a12)',textEl:this._mentionEl((e.status==='rejete'?'Rejetée':'Ajustement demandé')+' : « '+e.title+' »'+(d&&d.motif?' \u2014 '+d.motif.slice(0,90):'')),ago:this._ago(e.updatedAt)});});st.epreuves.filter(e=>e.status==='relecture').forEach(e=>t.push({dot:'var(--cf39200,#f39200)',textEl:this._mentionEl('À relire : « '+e.title+' » attend une validation'),ago:this._ago(e.updatedAt)}));st.cours.filter(c=>c.status==='relecture').forEach(c=>t.push({dot:'var(--c7b52c7,#7b52c7)',textEl:this._mentionEl('Cours en relecture : « '+(c.title||'sans titre')+' »'),ago:this._ago(c.updatedAt)}));if(!t.length)t.push({dot:'var(--c1f9d55,#1f9d55)',textEl:this._mentionEl('Rien à traiter pour le moment. Tout est à jour.'),ago:''});return t.slice(0,4);})(),
+      todos:(()=>{const t=[];
+        /* Demandes de sujet reçues (lot N) et jalons du calendrier en retard
+           ou imminents (lot M) : c'est ce qu'il faut faire d'abord. */
+        st.epreuves.filter(e=>e&&e.demande&&e.demande.etat==='attente'&&e.ownerId===me.id&&e.status==='brouillon').forEach(e=>{const u=st.users.find(x=>x.id===e.demande.par)||{name:'Un collègue'};const att=(e.jalons||{}).sujet;
+          t.push({dot:'var(--c7c3aed,#7c3aed)',textEl:this._mentionEl(u.name+' vous demande un sujet : « '+(e.title||'Épreuve')+' »'+(att?', attendu le '+this._fmtIso(att,{day:'numeric',month:'long'}):'')),ago:this._ago(e.demande.le||0)});});
+        this._echeances().filter(x=>x.jalon&&x.urgence&&x.urgence.poids<=2).slice(0,3).forEach(x=>t.push({dot:x.urgence.couleur,textEl:this._mentionEl(x.titre+' — '+x.urgence.libelle),ago:''}));
+        st.epreuves.filter(e=>(e.status==='ajustement'||e.status==='rejete')&&e.ownerId===me.id).forEach(e=>{const d=this._revueDe(e).decisions.filter(x=>x.verdict!=='valide').slice(-1)[0];t.push({dot:e.status==='rejete'?'var(--cc0392b,#c0392b)':'var(--cc26a12,#c26a12)',textEl:this._mentionEl((e.status==='rejete'?'Rejetée':'Ajustement demandé')+' : « '+e.title+' »'+(d&&d.motif?' \u2014 '+d.motif.slice(0,90):'')),ago:this._ago(e.updatedAt)});});st.epreuves.filter(e=>e.status==='relecture').forEach(e=>t.push({dot:'var(--cf39200,#f39200)',textEl:this._mentionEl('À relire : « '+e.title+' » attend une validation'),ago:this._ago(e.updatedAt)}));st.cours.filter(c=>c.status==='relecture').forEach(c=>t.push({dot:'var(--c7b52c7,#7b52c7)',textEl:this._mentionEl('Cours en relecture : « '+(c.title||'sans titre')+' »'),ago:this._ago(c.updatedAt)}));if(!t.length)t.push({dot:'var(--c1f9d55,#1f9d55)',textEl:this._mentionEl('Rien à traiter pour le moment. Tout est à jour.'),ago:''});return t.slice(0,4);})(),
       dashActivity:notifications.slice(0,4),
       newDraft:()=>{this._creerEpreuve(id=>this.setState({activeId:id,screen:'composeur'},()=>window.scrollTo(0,0)));},
       /* Base vide et filtres trop etroits sont deux pannes differentes : le
@@ -11419,6 +11829,8 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       genBtnSec:'background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c14375f,#14375f);padding:8px 13px;font-size:12px;font-weight:600;font-family:Poppins;border-radius:999px;cursor:pointer',
       genBtnSecEdit:perm.edit?'background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);color:var(--c5a6678,#5a6678);padding:8px 13px;font-size:12px;font-weight:600;font-family:Poppins;border-radius:999px;cursor:pointer':hidden,
       ajouterSujet:()=>{if(perm.edit)this._ensureDraft(()=>this._ajouterSujet());},
+      sujetAjoutLabel:(active&&(active.sujets||[]).some(x=>x&&x.genre!=='presentation'))?'＋ Ajouter un autre sujet':'＋ Ajouter un sujet (production écrite, dissertation…)',
+      sujetAjoutStyle:(perm.edit&&active)?'display:block;width:100%;margin:0 0 22px;background:var(--cffffff,#fff);border:1.5px dashed var(--ccdd9e6,#cdd9e6);color:var(--c1f9d55,#1f9d55);padding:11px 14px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:12px;cursor:pointer;text-align:center':'display:none',
       genToggleCorrige:()=>this.setState({genCorrigeVisible:!st.genCorrigeVisible}),
       genCorrigeLabel:st.genCorrigeVisible?'Masquer le corrigé':'Afficher le corrigé',
       genToggleWord:()=>this.setState({genCorrigeWord:st.genCorrigeWord===false}),
@@ -12143,7 +12555,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           pvIcone:this._icon('calendar','var(--c1a72bb,#1a72bb)',15),
           pvBoutonStyle:enCompo?'display:inline-flex;align-items:center;gap:6px;background:var(--cffffff,#fff);border:1px solid var(--cbcd9f2,#bcd9f2);color:var(--c1a72bb,#1a72bb);padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer':hidden,
           pvOuvert:ouvert};
-        const vide={pvSous:'',pvClasses:[],pvClasse:'',setPvClasse:()=>{},pvSeqs:[],pvAbsentStyle:hidden,pvTitre:'',pvDates:'',pvCompetence:'',pvLien:'',pvLienStyle:hidden,pvSemaines:[],pvTache:'',pvTacheStyle:hidden,pvCopier:()=>{},pvCopierLabel:'',pvInserer:()=>{},pvInsererStyle:hidden,pvEval:'',pvEvalStyle:hidden,pvRelier:()=>{},pvRelierLabel:'',pvRelierStyle:hidden};
+        const vide={pvSous:'',pvClasses:[],pvClasse:'',setPvClasse:()=>{},pvSeqs:[],pvAbsentStyle:hidden,pvTitre:'',pvDates:'',pvCompetence:'',pvLien:'',pvLienStyle:hidden,pvSemaines:[],pvTache:'',pvTacheStyle:hidden,pvCopier:()=>{},pvCopierLabel:'',pvInserer:()=>{},pvInsererStyle:hidden,pvApprendre:()=>{},pvApprendreStyle:hidden,pvEval:'',pvEvalStyle:hidden,pvRelier:()=>{},pvRelierLabel:'',pvRelierStyle:hidden};
         if(!ouvert)return Object.assign(base,vide);
         const P=this._progs();
         if(!P){this._attendreProgs();return Object.assign(base,vide,{pvAbsentStyle:'font-size:12.5px;color:var(--c8b97a8,#8b97a8)'});}
@@ -12184,6 +12596,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
             this._updateActive({sujets:l},'a inséré la tâche d’intégration officielle de la séquence '+sq.num+' ('+cls.libelle+')');this._avis('Tâche insérée comme sujet : vous pouvez l’adapter.','ok');},
           pvInsererStyle:perm.edit?'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:6px 11px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
           pvEval:sq.evaluation||'',pvEvalStyle:sq.evaluation?'font-size:12px;color:var(--c5a6678,#5a6678);margin-top:10px;line-height:1.5':hidden,
+          pvApprendre:()=>this._ouvrirApprendre(cls.id,sq.num),pvApprendreStyle:this._apprendreUrl(cls.id)?'background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:8px 13px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
           pvRelier:()=>{if(!perm.edit)return;const w4=(sq.semaines||[]).find(w=>w.n===4)||{};
             this._updateActive({assistant:{...this._assDe(this._active()),progId:relie?'':cls.id,progSeq:relie?'':String(sq.num),borne:relie?this._assDe(this._active()).borne:(w4.fin||this._assDe(this._active()).borne)}},
               relie?'a détaché l’épreuve de la progression':'a relié l’épreuve à la séquence '+sq.num+' ('+cls.libelle+')');},
@@ -12218,7 +12631,8 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           accSemaineBouton:cls0?'Voir le suivi':'Choisir mes classes',
           accSemaineAller:()=>this._go(cls0?'suivi':'progressions')});
         if(!(ready&&st.screen==='suivi'))return Object.assign(vals,{suiviVideStyle:hidden,suiviCorpsStyle:hidden,suiviTuiles:[],suiviHorizons:[],suiviClasses:[],suiviClasse:'',setSuiviClasse:()=>{},suiviRetardsBasculer:()=>{},suiviRetardsStyle:hidden,
-          suiviVueListe:()=>{},suiviVueMois:()=>{},suiviVueListeStyle:hidden,suiviVueMoisStyle:hidden,suiviEnListe:false,suiviEnMois:false,suiviAucuneStyle:hidden,suiviGroupes:[],moisPrec:()=>{},moisSuiv:()=>{},moisTitre:'',moisEntetes:[],moisJours:[]});
+          suiviVueListe:()=>{},suiviVueMois:()=>{},suiviVueListeStyle:hidden,suiviVueMoisStyle:hidden,suiviEnListe:false,suiviEnMois:false,suiviVueCouv:()=>{},suiviVueCouvStyle:hidden,suiviEnCouv:false,couvGroupes:[],suiviVueDem:()=>{},suiviVueDemStyle:hidden,suiviEnDem:false,suiviAucuneStyle:hidden,suiviGroupes:[],moisPrec:()=>{},moisSuiv:()=>{},moisTitre:'',moisEntetes:[],moisJours:[],
+          suiviVueAnnee:()=>{},suiviVueAnneeStyle:hidden,suiviEnAnnee:false,anMois:[],moisEntetesCourts:[]});
         const hz=+(st.suiviHorizon||60);
         const fin=this._isoPlus(auj,hz>=365?400:hz);
         const filtreC=st.suiviClasse||'';
@@ -12251,9 +12665,30 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
             style:'min-height:64px;border-radius:8px;padding:4px 5px;overflow:hidden;border:1px solid '+(iso===auj?'var(--cf39200,#f39200)':'var(--ceef2f7,#eef2f7)')+';background:'+(!dans?'transparent':vac?'var(--cf2f6fb,#f2f6fb)':we?'var(--cfbfcfe,#fbfcfe)':'var(--cffffff,#fff)')+(dans?'':';opacity:.45'),
             numStyle:'font-size:11.5px;font-weight:700;font-family:Poppins;color:'+(fer.length?'var(--cc0392b,#c0392b)':iso===auj?'var(--cf39200,#f39200)':'var(--c22303f,#22303f)')});}
         const decaler=n=>()=>{const d=new Date(moisIso+'-01T00:00:00');d.setMonth(d.getMonth()+n);this.setState({suiviMois:this._isoDe(d).slice(0,7)});};
+        /* Couverture (lot L) : une ligne par séquence de mes classes. */
+        const couvGroupes=vue!=='couv'?[]:mes.map(id=>this._progClasse(id)).filter(c=>c&&(!filtreC||c.id===filtreC)).map(cls=>{
+          let passees=0,evaluees=0;
+          const lignes=cls.sequences.map(sq=>{
+            const w5=(sq.semaines||[]).find(w=>w.n===5)||{};
+            const ep=(st.epreuves||[]).find(e=>e&&e.assistant&&e.assistant.progId===cls.id&&String(e.assistant.progSeq)===String(sq.num))||null;
+            const passee=!!(w5.debut&&w5.debut<=auj);
+            if(passee){passees++;if(ep)evaluees++;}
+            const valide=!!(ep&&ep.status==='valide');const c=valide?['var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)',ep.inLibrary?'sujet diffusé':'sujet validé']:ep?['var(--cc26a12,#c26a12)','var(--cfdefdb,#fdefdb)',passee?'évaluée · sujet non validé':({brouillon:'en préparation',relecture:'en relecture',ajustement:'ajustement demandé',rejete:'rejeté'}[ep.status]||'en préparation')]:passee?['var(--cc0392b,#c0392b)','var(--cfdecea,#fdecea)','non évaluée']:['var(--c5a6678,#5a6678)','var(--cf2f6fb,#f2f6fb)','à venir'];
+            const contenus=(!ep&&passee)?this._contenusSeq(sq,3).slice(0,4):[];
+            const agirLabel=ep?'Ouvrir':(passee?'Évaluer':'Préparer');
+            return{num:sq.num,date:w5.debut?'évaluation '+fmtL(w5.debut):'',titre:sq.module||('Séquence '+sq.num),
+              sous:ep?('« '+(ep.title||'Épreuve')+' »'):contenus.length?'Contenus non évalués : '+contenus.join(' · '):'Aucune épreuve pour cette séquence',
+              sousStyle:'font-size:11.5px;margin-top:2px;line-height:1.45;color:'+(contenus.length?'var(--cc0392b,#c0392b)':'var(--c8b97a8,#8b97a8)'),
+              etat:c[2],chip:'font-size:11px;font-weight:700;font-family:Poppins;padding:3px 10px;border-radius:999px;white-space:nowrap;color:'+c[0]+';background:'+c[1],
+              agir:()=>{if(ep)this.setState({activeId:ep.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);});else this._composerSequence(cls,sq);},
+              agirLabel,agirStyle:(ep||perm.creer)?'background:'+(ep?'var(--cffffff,#fff)':'var(--c1a72bb,#1a72bb)')+';color:'+(ep?'var(--c14375f,#14375f)':'var(--cffffff,#fff)')+';border:1px solid '+(ep?'var(--ce2eaf3,#e2eaf3)':'var(--c1a72bb,#1a72bb)')+';padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden};});
+          const pc=passees?Math.round(evaluees/passees*100):0;
+          return{titre:cls.libelle,sous:passees?(evaluees+' séquence(s) évaluée(s) sur '+passees+' passée(s) · '+pc+' %'):'Aucune évaluation encore passée',
+            jaugeStyle:passees?'margin-left:auto;width:120px;height:8px;border-radius:999px;background:var(--ceef2f7,#eef2f7);overflow:hidden;display:inline-block':hidden,
+            jaugeBarre:'display:block;height:100%;width:'+pc+'%;background:'+(pc>=80?'var(--c188047,#188047)':pc>=50?'var(--cc26a12,#c26a12)':'var(--cc0392b,#c0392b)'),lignes};});
         return Object.assign(vals,{
-          suiviVideStyle:(P&&!mes.length)?'background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);border-radius:12px;padding:18px 20px;margin-bottom:12px':hidden,
-          suiviCorpsStyle:(P&&mes.length)?'':hidden,
+          suiviVideStyle:(P&&!mes.length&&vue!=='dem')?'background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);border-radius:12px;padding:18px 20px;margin-bottom:12px':hidden,
+          suiviCorpsStyle:(P&&(mes.length||vue==='dem'))?'':hidden,
           suiviTuiles:[tuile(parC.filter(x=>x.retard).length,'en retard','var(--cc0392b,#c0392b)'),
             tuile(parC.filter(x=>!x.fait&&x.date>=auj&&x.date<=this._isoPlus(auj,7)).length,'dans les 7 jours','var(--cc26a12,#c26a12)'),
             tuile(parC.filter(x=>!x.fait&&x.date>auj&&x.date<=fin).length,'à venir ('+(hz>=365?'année':hz+' j')+')','var(--c1a72bb,#1a72bb)'),
@@ -12266,10 +12701,47 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           suiviVueListe:()=>this.setState({suiviVue:'liste'}),suiviVueMois:()=>this.setState({suiviVue:'mois'}),
           suiviVueListeStyle:ong(vue==='liste'),suiviVueMoisStyle:ong(vue==='mois'),
           suiviEnListe:vue==='liste',suiviEnMois:vue==='mois',
+          suiviVueCouv:()=>this.setState({suiviVue:'couv'}),suiviVueCouvStyle:ong(vue==='couv'),suiviEnCouv:vue==='couv',couvGroupes,
+          suiviVueDem:()=>this.setState({suiviVue:'dem',demOk:''}),suiviVueDemStyle:ong(vue==='dem'),suiviEnDem:vue==='dem',
+          suiviVueAnnee:()=>this.setState({suiviVue:'annee'}),suiviVueAnneeStyle:ong(vue==='annee'),suiviEnAnnee:vue==='annee',
+          moisEntetesCourts:['L','M','M','J','V','S','D'],
+          anMois:vue!=='annee'?[]:(()=>{
+            /* L'année scolaire de septembre à juillet, celle qui contient
+               aujourd'hui (à partir d'août, la suivante se prépare). */
+            const a0=+auj.slice(0,4)-(+auj.slice(5,7)<8?1:0);
+            const coulE={sujet:'#1d3b2a',epreuve:'#8fbc9a',corrige:'#c0532b'};
+            const out=[];
+            for(let m=0;m<11;m++){
+              const d1=new Date(a0,8+m,1),mo=d1.getMonth();
+              const deb=new Date(d1);deb.setDate(1-((d1.getDay()+6)%7));
+              const jours=[];let n=0;
+              for(let k=0;k<42;k++){const d=new Date(deb);d.setDate(deb.getDate()+k);
+                if(k>=35&&d.getMonth()!==mo)break;
+                const iso=this._isoDe(d),dans=d.getMonth()===mo;
+                if(!dans){jours.push({num:'',pts:[],plus:'',titre:'',style:'min-height:34px'});continue;}
+                const vac=cal.vacances.find(v=>v.debut<=iso&&iso<v.fin);
+                const fer=cal.feries.filter(f=>f.date===iso);
+                const ec=parC.filter(x=>x.date===iso);n+=ec.length;
+                const we=d.getDay()===0||d.getDay()===6;
+                // Un point par échéance, à la couleur de sa nature ; cerclé de rouge si en retard.
+                const pts=ec.slice(0,4).map(x=>({s:'background:'+(coulE[x.genre]||'#8fbc9a')+(x.retard&&!x.fait?';box-shadow:0 0 0 2px #e05a4f':'')}));
+                jours.push({num:d.getDate(),pts,plus:ec.length>4?'+'+(ec.length-4):'',
+                  titre:[].concat(fer.map(f=>f.nom),vac?[vac.label]:[],ec.map(x=>x.lib+' — '+x.cls.libelle+', séq. '+x.sq.num+' ('+(x.fait?'fait':x.retard?'en retard':x.etat)+')')).join(' · '),
+                  style:'min-height:34px;border-radius:7px;padding:3px 4px;font:600 12px Poppins,sans-serif;display:flex;flex-direction:column;justify-content:space-between;'
+                    +'background:'+(fer.length?'#fbd9d3':vac?'#f3e3b9':we?'#f2f4f6':ec.length?'#fff':'transparent')+';'
+                    +'border:'+(iso===auj?'2px solid #f39200':ec.length?'1px solid #cfd8d3':'1px solid transparent')+';color:'+(fer.length?'#a3352a':'#22303f')});}
+              // Le titre du mois mène à sa vue détaillée (libellés des échéances).
+              const mIso=this._isoDe(d1).slice(0,7);
+              out.push({ouvrir:()=>this.setState({suiviVue:'mois',suiviMois:mIso}),
+                titre:d1.toLocaleDateString('fr-FR',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase()),
+                compte:n?n+' échéance'+(n>1?'s':''):'',jours});}
+            return out;})(),
           suiviAucuneStyle:visibles.length?hidden:'font-size:12.5px;color:var(--c8b97a8,#8b97a8);padding:10px 2px',
           suiviGroupes:Object.keys(groupes).map(k=>{const g=groupes[k];const nr=g.l.filter(x=>x.retard).length;
             return{titre:g.cls.libelle,sous:g.l.length+' échéance(s)'+(nr?' · '+nr+' en retard':''),
-              lignes:g.l.map(x=>({date:fmtL(x.date),rel:rel(x.date),relStyle:'font-size:11px;margin-top:1px;color:'+(x.retard?'var(--cc0392b,#c0392b)':'var(--c8b97a8,#8b97a8)')+';font-weight:'+(x.retard?'700':'400'),
+              lignes:g.l.map(x=>({lib:x.lib,seq:'S'+x.sq.num,module:x.sq.module||'',
+                carteStyle:x.retard&&!x.fait?'background:#fdf0ee;border-color:#f3c9c1':'',
+                date:fmtL(x.date),rel:rel(x.date),relStyle:'font-size:11px;margin-top:1px;color:'+(x.retard?'var(--cc0392b,#c0392b)':'var(--c8b97a8,#8b97a8)')+';font-weight:'+(x.retard?'700':'400'),
                 titre:x.lib+' — séquence '+x.sq.num+(x.sq.module?' · '+x.sq.module:''),
                 sous:x.ep?('« '+(x.ep.title||'Épreuve')+' »'):'Aucune épreuve ouverte pour cette séquence',
                 etat:x.fait?'fait':(x.retard?'en retard · ':'')+x.etat,chip:chipE(x),
@@ -12279,6 +12751,74 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           moisTitre:d0.toLocaleDateString('fr-FR',{month:'long',year:'numeric'}),
           moisEntetes:['lun','mar','mer','jeu','ven','sam','dim'],
           moisJours:jours});
+      })(),
+      ...(()=>{
+        /* ── Calendrier de l'épreuve (lot M) et demandes de sujet (lot N) ── */
+        const auj=this._isoAuj();
+        const joursDe=iso=>Math.round((new Date(iso+'T00:00:00')-new Date(auj+'T00:00:00'))/86400000);
+        const rel=iso=>{const j=joursDe(iso);return j===0?'aujourd’hui':j===1?'demain':j===-1?'hier':j>0?'dans '+j+' j':'il y a '+(-j)+' j';};
+        const chip=(c,f)=>'font-size:10.5px;font-weight:700;font-family:Poppins;padding:2px 9px;border-radius:999px;white-space:nowrap;color:'+c+';background:'+f;
+        const recues=(st.epreuves||[]).filter(e=>e&&e.demande&&e.ownerId===me.id);
+        const envoyees=(st.epreuves||[]).filter(e=>e&&e.demande&&e.demande.par===me.id&&e.ownerId!==me.id);
+        const nAtt=recues.filter(e=>e.demande.etat==='attente'&&e.status==='brouillon').length;
+        const out={demRecuesN:nAtt||'',demBadge:nAtt?'margin-left:6px;display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 5px;border-radius:999px;background:var(--c7c3aed,#7c3aed);color:var(--cffffff,#fff);font-size:10px;font-weight:700':hidden};
+        /* Calendrier de l'épreuve active */
+        const a=active;
+        if(a&&st.screen==='composeur'){
+          const J=this._jalonsDe(a),applique=!!a.jalons,edit=perm.edit;
+          const dem=a.demande,parU=dem?(st.users.find(u=>u.id===dem.par)||{name:'un collègue'}):null;
+          Object.assign(out,{
+            jlBlocStyle:'background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:14px;padding:12px 16px;margin:0 0 14px',
+            jlSous:applique?'chaque date est un rappel (cloche et « À faire »)':(a.echeance?'dates proposées d’après la date de l’épreuve et les délais de l’établissement':'datez l’épreuve : les autres échéances se proposent seules'),
+            jlDemande:dem?chip(dem.etat==='refusee'?'var(--cc0392b,#c0392b)':'var(--c7c3aed,#7c3aed)',dem.etat==='refusee'?'var(--cfdecea,#fdecea)':'var(--cf1ebfe,#f1ebfe)'):hidden,
+            jlDemandeTexte:dem?(dem.etat==='refusee'?'Demande déclinée':'Demandé par '+parU.name):'',
+            jlAppliquer:()=>{if(edit)this._appliquerJalons();},
+            jlAppliquerLabel:applique?'Recalculer les dates vides':'Appliquer ces dates',
+            jlAppliquerStyle:(edit&&J.some(j=>j.k!=='epreuve'&&j.date&&!(a.jalons||{})[j.k]))?'margin-left:auto;background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
+            jalons:J.map(j=>{const propose=j.k!=='epreuve'&&!(a.jalons||{})[j.k]&&!!j.date;const jr=j.date?joursDe(j.date):null;
+              const c=j.fait?['var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)','fait']:!j.date?['var(--c8b97a8,#8b97a8)','var(--cf2f6fb,#f2f6fb)','sans date']
+                :jr<0?['var(--cc0392b,#c0392b)','var(--cfdecea,#fdecea)','en retard · '+rel(j.date)]:jr<=3?['var(--cc26a12,#c26a12)','var(--cfdefdb,#fdefdb)',rel(j.date)]:['var(--c1a72bb,#1a72bb)','var(--ce7f1fb,#e7f1fb)',rel(j.date)];
+              return{lib:j.lib,aide:j.aide,date:j.date||'',fige:!edit,set:e=>this._majJalon(j.k,val(e)),
+                carte:'border:1px '+(propose?'dashed':'solid')+' '+(j.fait?'var(--cbfe3cc,#bfe3cc)':'var(--ce6ecf3,#e6ecf3)')+';border-radius:10px;padding:8px 10px;background:'+(j.fait?'var(--cf4fbf6,#f4fbf6)':'var(--cfbfcfe,#fbfcfe)'),
+                etat:propose?'proposé · '+c[2]:c[2],chip:chip(c[0],c[1]),
+                basculer:()=>{if(edit&&j.manuel)this._basculerJalon(j.k);},
+                basculerLabel:j.fait?'Rouvrir':'Fait',
+                basculerStyle:(edit&&j.manuel&&j.date)?'background:none;border:1px solid var(--ce2eaf3,#e2eaf3);color:'+(j.fait?'var(--c5a6678,#5a6678)':'var(--c188047,#188047)')+';padding:2px 8px;font-size:11px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer':hidden};})});
+        }else Object.assign(out,{jlBlocStyle:hidden,jlSous:'',jlDemande:hidden,jlDemandeTexte:'',jlAppliquer:()=>{},jlAppliquerLabel:'',jlAppliquerStyle:hidden,jalons:[]});
+        /* Demandes (onglet du Suivi) */
+        const enDem=ready&&st.screen==='suivi'&&st.suiviVue==='dem';
+        const coll=(st.users||[]).filter(u=>u&&u.id!==me.id);
+        const etatDe=e=>{const d=e.demande;if(d.etat==='refusee')return['déclinée','var(--cc0392b,#c0392b)','var(--cfdecea,#fdecea)'];
+          if(e.status==='valide')return[e.inLibrary?'sujet diffusé':'sujet validé','var(--c188047,#188047)','var(--ce6f5ec,#e6f5ec)'];
+          if(e.status==='relecture'||e.status==='ajustement')return[e.status==='ajustement'?'ajustement demandé':'en relecture','var(--cc26a12,#c26a12)','var(--cfdefdb,#fdefdb)'];
+          return[(e.textIds||[]).length?'en préparation':'en attente','var(--c7c3aed,#7c3aed)','var(--cf1ebfe,#f1ebfe)'];};
+        const ligne=(e,recue)=>{const d=e.demande,att=(e.jalons||{}).sujet||'',x=etatDe(e);const autre=st.users.find(u=>u.id===(recue?d.par:e.ownerId))||{name:'?'};
+          const enRetard=att&&att<auj&&e.status==='brouillon'&&d.etat!=='refusee';const conf=st.demRefus===e.id;
+          return{date:att?'attendu '+this._fmtIso(att,{day:'numeric',month:'short'}):'sans date',rel:att?rel(att):'',
+            relStyle:'font-size:11px;margin-top:1px;color:'+(enRetard?'var(--cc0392b,#c0392b)':'var(--c8b97a8,#8b97a8)')+';font-weight:'+(enRetard?'700':'400'),
+            titre:e.title||'Épreuve',sous:(recue?'demandé par ':'demandé à ')+autre.name+(e.echeance?' · épreuve le '+this._fmtIso(e.echeance,{day:'numeric',month:'long'}):'')+(d.consignes?' · « '+d.consignes.slice(0,120)+(d.consignes.length>120?'…':'')+' »':''),
+            etat:(enRetard?'en retard · ':'')+x[0],chip:chip(enRetard?'var(--cc0392b,#c0392b)':x[1],enRetard?'var(--cfdecea,#fdecea)':x[2]),
+            ouvrir:()=>this.setState({activeId:e.id,screen:'composeur',epTab:'edition'},()=>{this._persist();window.scrollTo(0,0);}),
+            ouvrirLabel:recue&&d.etat!=='refusee'&&e.status==='brouillon'?'Composer':'Ouvrir',
+            refuser:()=>{if(!conf){this.setState({demRefus:e.id});return;}this._repondreDemande(e.id,'refusee');},
+            refuserLabel:conf?'Confirmer : décliner':'Décliner',
+            refuserStyle:(recue&&d.etat==='attente'&&e.status==='brouillon')?'background:'+(conf?'var(--cc0392b,#c0392b)':'var(--cffffff,#fff)')+';color:'+(conf?'var(--cffffff,#fff)':'var(--cc0392b,#c0392b)')+';border:1px solid var(--cecc4bf,#ecc4bf);padding:6px 11px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden};};
+        const tri=(x,y)=>(((x.jalons||{}).sujet||'9')<((y.jalons||{}).sujet||'9')?-1:1);
+        const sel=f=>e=>this.setState({[f]:val(e),demMsg:''});
+        return Object.assign(out,{
+          demOk:st.demOk||'',demOkStyle:enDem&&st.demOk?'font-size:12.5px;font-weight:700;color:var(--c188047,#188047);background:var(--ce6f5ec,#e6f5ec);border-radius:9px;padding:8px 12px;margin-bottom:10px':hidden,
+          demBasculer:()=>this.setState({demOuvert:!st.demOuvert,demOk:''}),demBasculerLabel:st.demOuvert?'Fermer':'Nouvelle demande',
+          demBasculerStyle:coll.length&&perm.edit?'margin-left:auto;background:'+(st.demOuvert?'var(--cffffff,#fff)':'var(--c1a72bb,#1a72bb)')+';color:'+(st.demOuvert?'var(--c14375f,#14375f)':'var(--cffffff,#fff)')+';border:1px solid '+(st.demOuvert?'var(--ce2eaf3,#e2eaf3)':'var(--c1a72bb,#1a72bb)')+';padding:6px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
+          demSansCollegueStyle:coll.length?hidden:'font-size:12.5px;color:var(--c5a6678,#5a6678);margin-top:8px',
+          demFormStyle:enDem&&st.demOuvert&&coll.length?'display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px':hidden,
+          demCollegues:coll.map(u=>({id:u.id,label:u.name+(u.role?' — '+u.role:'')})),demClasses:classeOptions,
+          demA:st.demA||'',setDemA:sel('demA'),demClasse:st.demClasse||'',setDemClasse:sel('demClasse'),
+          demType:st.demType||'',setDemType:sel('demType'),demDate:st.demDate||'',setDemDate:sel('demDate'),
+          demAttendu:st.demAttendu||'',setDemAttendu:sel('demAttendu'),demConsignes:st.demConsignes||'',setDemConsignes:sel('demConsignes'),
+          demEnvoyer:()=>this._envoyerDemande(),demMsg:st.demMsg||'',demMsgStyle:st.demMsg?'font-size:12px;font-weight:700;color:var(--cc0392b,#c0392b)':hidden,
+          demListes:!enDem?[]:[
+            {titre:'Reçues',sous:recues.length?recues.length+' demande(s)'+(nAtt?' · '+nAtt+' à traiter':''):'',vide:'Aucune demande reçue.',videStyle:recues.length?hidden:'font-size:12.5px;color:var(--c8b97a8,#8b97a8);padding:6px 2px',lignes:recues.slice().sort(tri).map(e=>ligne(e,true))},
+            {titre:'Envoyées',sous:envoyees.length?envoyees.length+' demande(s)':'',vide:'Aucune demande envoyée.',videStyle:envoyees.length?hidden:'font-size:12.5px;color:var(--c8b97a8,#8b97a8);padding:6px 2px',lignes:envoyees.slice().sort(tri).map(e=>ligne(e,false))}]});
       })(),
       ...(()=>{
         const P=this._progs();
@@ -12313,6 +12853,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
               num:'display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;font-family:Poppins;font-weight:700;font-size:14px;flex:none;'+(cour?'background:var(--cf39200,#f39200);color:var(--cffffff,#fff)':'background:var(--ce7f1fb,#e7f1fb);color:var(--c1a72bb,#1a72bb)'),
               toggle:()=>this.setState({progOuverts:{...ouverts,[sq.num]:!on}}),toggleLabel:on?'Replier':'Voir les semaines',
               composer:()=>this._composerSequence(cls,sq),
+              apprendre:()=>this._ouvrirApprendre(cls.id,sq.num),apprendreStyle:this._apprendreUrl(cls.id)?'background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c1a72bb,#1a72bb);padding:7px 12px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
               composerStyle:perm.creer?'background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:8px 13px;font-size:12px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
               detail:on?'margin-top:12px;border-top:1px solid var(--ceef2f7,#eef2f7);padding-top:10px':hidden,
               semaines:(sq.semaines||[]).map(w=>{const c=coul[w.type]||coul.ressources;const ceW=!!(ici&&!ici.prochaine&&ici.w===w);
@@ -12342,7 +12883,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       })(),
       ...(()=>{
         if(typeof document!=='undefined'){try{document.documentElement.classList.toggle('vrt-doc',ready&&st.screen==='apercu');document.documentElement.classList.toggle('vrt-app',ready&&st.screen!=='login');}catch(e){}}
-        if(!(ready&&st.screen==='apercu')||!active)return{docModeApercu:()=>{},docModePdf:()=>{},docModeApercuStyle:hidden,docModePdfStyle:hidden,pdfZoneStyle:hidden,pdfIframe:false,pdfUrl:'',pdfMsg:'',pdfMsgStyle:hidden,pdfRefaire:()=>{},pdfRefaireStyle:hidden,pdfMobileStyle:hidden,pdfOuvrir:()=>{},pdfTelecharger:()=>{},docOnglets:[],docVues:[],docVoitEnonce:true,docFeuilleStyle:'',docPagesLabel:'',docZoomLabel:'',docZoomBasculer:()=>{}};
+        if(!(ready&&st.screen==='apercu')||!active)return{docModeApercu:()=>{},docModePdf:()=>{},docModeApercuStyle:hidden,docModePdfStyle:hidden,pdfZoneStyle:hidden,pdfIframe:false,pdfUrl:'',pdfMsg:'',pdfMsgStyle:hidden,pdfRefaire:()=>{},pdfRefaireStyle:hidden,pdfMobileStyle:hidden,pdfOuvrir:()=>{},pdfTelecharger:()=>{},pdfVueStyle:hidden,pdfPagesNb:'',exportMenuFermer:()=>{},pdfZoomMoins:()=>{},pdfZoomPlus:()=>{},docTitre:'',docChips:[],docEtapes:[],exportMenuBasculer:()=>{},exportMenuStyle:hidden,docZoomStyle:hidden,docOnglets:[],docVues:[],docVoitEnonce:true,docFeuilleStyle:'',docPagesLabel:'',docZoomLabel:'',docZoomBasculer:()=>{}};
         const cor=this._corrigePourExport(active)||[];
         const ann=this._annexesPourExport(active,true);
         const guide=ann.find(x=>/^GUIDE/.test(x.titre)),note=ann.find(x=>/^NOTE/.test(x.titre));
@@ -12366,34 +12907,61 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
           const n=Math.max(1,Math.ceil((f.scrollHeight)/1122.5));if(n!==this.state.docPages)this.setState({docPages:n});}catch(e){}},60);
         return{
           docOnglets:ong.map(k=>({label:lib[k],go:()=>this.setState({docVue:k}),
-            style:'border:none;padding:6px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer;'+(k===v?'background:var(--cffffff,#fff);color:var(--c14375f,#14375f);box-shadow:0 1px 4px rgba(20,55,95,.12)':'background:none;color:var(--c7a8598,#7a8598)')})),
+            style:'border:none;background:none;padding:10px 4px 9px;margin-right:18px;font-size:14px;font-weight:700;font-family:Poppins;cursor:pointer;white-space:nowrap;border-bottom:3px solid '+(k===v?'var(--c14375f,#14375f);color:var(--c14375f,#14375f)':'transparent;color:var(--c8b97a8,#8b97a8)')})),
+          /* Identité du sujet, en pastilles — classe, durée, coefficient,
+             échéance, dernière modification — et sa frise d'état. */
+          docTitre:active.title||'Épreuve sans titre',
+          docChips:(()=>{const pil=(t,c,bg)=>({label:t,style:'display:inline-block;font-size:12px;font-weight:600;font-family:Poppins;padding:5px 12px;border-radius:999px;border:1px solid '+(bg?'transparent':'var(--cd5e0ec,#d5e0ec)')+';color:'+(c||'var(--c33404f,#33404f)')+';background:'+(bg||'var(--cffffff,#fff)')});
+            const l=[];if(active.classe)l.push(pil(active.classe));if(active.duree)l.push(pil('Durée '+active.duree,'var(--c1a72bb,#1a72bb)','var(--ce8f1fb,#e8f1fb)'));
+            if(active.coeff)l.push(pil('Coef. '+active.coeff));
+            if(active.echeance){try{l.push(pil('À rendre le '+new Date(active.echeance).toLocaleDateString('fr-FR'),'var(--c8a5a00,#8a5a00)','var(--cfdf1d6,#fdf1d6)'));}catch(e){}}
+            if(active.updatedAt)l.push(pil('Modifié le '+new Date(active.updatedAt).toLocaleDateString('fr-FR'),'var(--c5a6678,#5a6678)','var(--ceef2f7,#eef2f7)'));
+            return l;})(),
+          docEtapes:(()=>{const s0=active.status||'brouillon';
+            const pos=s0==='valide'?2:(s0==='relecture'||s0==='ajustement'||s0==='rejete')?1:0;
+            const lab=['Brouillon',s0==='ajustement'?'Ajustement demandé':s0==='rejete'?'Rejeté':'En relecture','Validé'];
+            // Étapes passées en vert, étape en cours en or (rouge/orange si rejet/ajustement).
+            const coul=s0==='rejete'?'#c0392b':s0==='ajustement'?'#c26a12':'#d4a017';
+            return lab.map((t,i)=>({label:t,
+              style:'display:inline-flex;align-items:center;gap:7px;font-family:Poppins;font-size:13px;white-space:nowrap;font-weight:'+(i===pos?'700':'500')+';color:'+(i<=pos?'var(--c14375f,#14375f)':'var(--c8b97a8,#8b97a8)'),
+              point:'display:inline-block;width:12px;height:12px;border-radius:50%;background:'+(i<pos?'#1f9d55':i===pos?coul:'var(--cd5e0ec,#d5e0ec)')+(i===pos?';box-shadow:0 0 0 4px '+coul+'33':''),
+              trait:i<2?'flex:1;min-width:16px;height:2px;margin:0 8px;background:'+(i<pos?'#1f9d55':'var(--cd5e0ec,#d5e0ec)'):'display:none'}));})(),
+          exportMenuBasculer:()=>this.setState({exportMenu:!st.exportMenu}),
+          exportMenuStyle:st.exportMenu?'':'display:none',
+          exportMenuFermer:()=>{if(this.state.exportMenu)this.setState({exportMenu:false});},
           docVoitEnonce:v==='enonce'||v==='tout',
           docVues:montrer.map((k,i)=>({titre:vues[k].titre,sous:sousT,blocs:vues[k].blocs.map(b=>({titre:b.titre||'',lignes:(b.lignes||[]).map(l=>String(l))})),
             style:(v==='tout'||i>0)?'':'border-top:none;margin-top:0;padding-top:0'})),
           docFeuilleStyle:'width:210mm;min-height:297mm;box-sizing:border-box;margin:22px auto 60px;background-color:var(--cffffff,#fff);padding:16mm 15mm 18mm;box-shadow:0 2px 14px rgba(20,55,95,.12);zoom:'+z.toFixed(3)+';'
-            +'background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) 297mm)'+(st.docMode==='pdf'||(!st.docMode&&!(typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(max-width:820px)').matches))?';position:absolute;left:-30000px;top:0':''),
+            +'background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) calc(297mm - 1px),var(--cc9d6e4,#c9d6e4) 297mm)'+((st.docMode||'pdf')==='pdf'?';position:absolute;left:-30000px;top:0':''),
           ...(()=>{
             const mobile=typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(max-width:820px)').matches;
-            const mode=st.docMode||(mobile?'apercu':'pdf');
+            const mode=st.docMode||'pdf';
             const cle=(active.updatedAt||0)+'|'+v;
             if(mode==='pdf'&&cle!==st.pdfCle&&this._pdfEnCours!==cle){clearTimeout(this._pdfT);this._pdfT=setTimeout(()=>this._fabriquerPdf(cle),300);}
             const seg=on=>'border:none;padding:6px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:7px;cursor:pointer;'+(on?'background:var(--cffffff,#fff);color:var(--c14375f,#14375f);box-shadow:0 1px 4px rgba(20,55,95,.12)':'background:none;color:var(--c7a8598,#7a8598)');
             const pret=st.pdfEtat==='pret'&&!!st.pdfUrl;
             const nomPdf=(typeof VRT_DOCX!=='undefined'?VRT_DOCX.nomFichier(active.title||'epreuve'):'epreuve.docx').replace(/\.docx$/,'.pdf');
             return{
-              docModeApercu:()=>this.setState({docMode:'apercu'}),docModePdf:()=>this.setState({docMode:'pdf'}),
+              docModeApercu:()=>this.setState({docMode:'apercu',exportMenu:false}),docModePdf:()=>this.setState({docMode:'pdf',exportMenu:false}),
+              pdfVueStyle:mode==='pdf'&&pret?'':'display:none',
+              pdfPagesNb:pret?String(st.pdfPages||''):'',
+              pdfZoomMoins:()=>{if(window.VRT_PDFV)VRT_PDFV.zoom(-1);},pdfZoomPlus:()=>{if(window.VRT_PDFV)VRT_PDFV.zoom(1);},
+              ...(()=>{if(mode==='pdf'&&pret&&st.pdfCle===cle)setTimeout(()=>{if(window.VRT_PDFV)VRT_PDFV.assurer(st.pdfUrl);},0);return{};})(),
               docModeApercuStyle:seg(mode==='apercu'),docModePdfStyle:seg(mode==='pdf'),
               pdfZoneStyle:mode==='pdf'?'':hidden,
-              pdfIframe:mode==='pdf'&&pret&&!mobile,pdfUrl:st.pdfUrl||'',
-              pdfMsg:st.pdfEtat==='erreur'?('Le PDF n’a pas pu être fabriqué ('+(st.pdfErr||'erreur inconnue')+'). L’aperçu et l’impression restent disponibles.'):(st.pdfEtat==='pret'&&st.pdfCle===cle?(mobile?'PDF prêt — '+st.pdfPages+' page(s).':''):'Fabrication du PDF…'),
-              pdfMsgStyle:(st.pdfEtat==='pret'&&st.pdfCle===cle&&!mobile)?hidden:'font-size:13px;color:'+(st.pdfEtat==='erreur'?'var(--cc0392b,#c0392b)':'var(--c5a6678,#5a6678)')+';padding:18px 20px 8px;text-align:center',
+              pdfIframe:false,pdfUrl:st.pdfUrl||'',
+              pdfMsg:st.pdfEtat==='erreur'?('Le PDF n’a pas pu être fabriqué ('+(st.pdfErr||'erreur inconnue')+'). L’aperçu et l’impression restent disponibles.'):(st.pdfEtat==='pret'&&st.pdfCle===cle?'':'Fabrication du PDF…'),
+              pdfMsgStyle:(st.pdfEtat==='pret'&&st.pdfCle===cle)?hidden:'font-size:13px;color:'+(st.pdfEtat==='erreur'?'var(--cc0392b,#c0392b)':'var(--c5a6678,#5a6678)')+';padding:18px 20px 8px;text-align:center',
               pdfRefaire:()=>this.setState({pdfCle:''}),
               pdfRefaireStyle:st.pdfEtat==='erreur'?'display:block;margin:0 auto 14px;background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 14px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':hidden,
-              pdfMobileStyle:mode==='pdf'&&pret&&mobile?'display:flex;gap:10px;justify-content:center;padding:6px 16px 18px;flex-wrap:wrap':hidden,
+              pdfMobileStyle:hidden,
               pdfOuvrir:()=>{if(st.pdfUrl)window.open(st.pdfUrl,'_blank');},
-              pdfTelecharger:()=>{if(!st.pdfUrl)return;const a=document.createElement('a');a.href=st.pdfUrl;a.download=nomPdf;document.body.appendChild(a);a.click();a.remove();},
+              pdfTelecharger:()=>{if(st.exportMenu)this.setState({exportMenu:false});if(!st.pdfUrl){this._avis&&this._avis('Le PDF est en cours de fabrication — réessayez dans un instant.','ko');return;}const a=document.createElement('a');a.href=st.pdfUrl;a.download=nomPdf;document.body.appendChild(a);a.click();a.remove();},
               docPagesLabel:mode==='pdf'?(pret?(st.pdfPages+' page'+(st.pdfPages>1?'s':'')+' A4'):''):(st.docPages?('≈ '+st.docPages+' page'+(st.docPages>1?'s':'')+' A4'):'')};})(),
           docZoomLabel:reel?'Ajuster':'Taille réelle',
+          // Le zoom de la feuille ne sert qu'à l'aperçu : le PDF a le sien.
+          docZoomStyle:(st.docMode==='apercu')?'background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);color:var(--c14375f,#14375f);padding:7px 12px;font-size:12.5px;font-weight:700;font-family:Poppins;border-radius:8px;cursor:pointer':'display:none',
           docZoomBasculer:()=>this.setState({docZoom:reel?'':'100'}),
         };
       })(),
@@ -12405,6 +12973,81 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
     };
   }
 }
+</script>
+<script>
+/* VISIONNEUSE PDF DE L'APERÇU (11/2026) — VRT_PDFV.
+   Dessine les pages du PDF fabriqué dans le navigateur (adresse blob:) avec
+   pdf.js, servi par le site lui-même (assets/vendor, comme lecteur-textes.js).
+   Indépendante du moteur de gabarit : celui-ci n'appelle qu'assurer(url) après
+   chaque rendu ; si le conteneur a été recréé ou vidé, on redessine, sinon
+   rien. Zoom par pas de 20 %, « ajusté à la largeur » au départ ; la page
+   courante suit le défilement. */
+window.VRT_PDFV = (function () {
+  var BASE = '/assets/vendor/pdfjs-4.10.38/';
+  var lib = null, doc = null, url = '', zoom = 0, l1 = 595, tour = 0;
+  function hote() { return document.getElementById('vrtPdfPages'); }
+  function charger() {
+    if (lib) return Promise.resolve(lib);
+    return import(BASE + 'pdf.min.js').then(function (m) {
+      lib = m; m.GlobalWorkerOptions.workerSrc = BASE + 'pdf.worker.min.js'; return m;
+    });
+  }
+  function echelle() {
+    var h = hote(); if (zoom) return zoom;
+    var w = h ? h.clientWidth - 20 : 600;
+    // Ajusté à la largeur, sans dépasser 115 % : au-delà, sur grand écran,
+    // une page A4 devient une affiche qu'on lit en défilant.
+    return Math.max(0.3, Math.min(1.15, w / l1));
+  }
+  function majZoom() { var z = document.getElementById('vrtPdfZoom'); if (z) z.textContent = Math.round(echelle() * 100) + ' %'; }
+  function suivre() {
+    var h = hote(); if (!h) return;
+    var haut = h.getBoundingClientRect().top, n = 1;
+    h.querySelectorAll('canvas').forEach(function (c) { if (c.getBoundingClientRect().top - haut < h.clientHeight * 0.45) n = +c.getAttribute('data-p'); });
+    var e = document.getElementById('vrtPdfPage'); if (e) e.textContent = n;
+  }
+  function dessiner() {
+    var h = hote(); if (!h || !doc) return;
+    var t = ++tour, e = echelle(), dpr = Math.min(2, window.devicePixelRatio || 1);
+    h.innerHTML = ''; majZoom();
+    var i = 0;
+    (function suivante() {
+      if (t !== tour || ++i > doc.numPages) { suivre(); return; }
+      doc.getPage(i).then(function (p) {
+        if (t !== tour) return;
+        var vp = p.getViewport({ scale: e * dpr }), c = document.createElement('canvas');
+        c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
+        c.style.width = Math.floor(vp.width / dpr) + 'px'; c.style.height = Math.floor(vp.height / dpr) + 'px';
+        c.setAttribute('data-p', i); h.appendChild(c);
+        return p.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+      }).then(suivante, suivante);
+    })();
+  }
+  return {
+    assurer: function (u) {
+      var h = hote(); if (!h || !u) return;
+      if (h.getAttribute('data-u') === u && h.querySelector('canvas')) return;
+      h.setAttribute('data-u', u);
+      if (!h._vrtEcoute) { h._vrtEcoute = true; h.addEventListener('scroll', suivre, { passive: true }); }
+      if (u === url && doc) { dessiner(); return; }
+      url = u; zoom = 0;
+      charger().then(function (m) { return m.getDocument({ url: u, isEvalSupported: false }).promise; })
+        .then(function (d) {
+          if (url !== u) return;
+          doc = d;
+          return d.getPage(1).then(function (p) { l1 = p.getViewport({ scale: 1 }).width || 595; dessiner(); });
+        })
+        .catch(function (e) {
+          var x = hote(); if (x) x.innerHTML = '<div style="color:#fff;padding:24px;text-align:center;font:14px Poppins,sans-serif">Affichage du PDF impossible ici (' + String((e && e.message) || e).replace(/[<>&]/g, '') + '). Utilisez ↗ pour l’ouvrir ou ⬇ pour le télécharger.</div>';
+        });
+    },
+    zoom: function (sens) {
+      if (!doc) return;
+      zoom = Math.max(0.3, Math.min(3, echelle() * (sens > 0 ? 1.2 : 1 / 1.2)));
+      dessiner();
+    }
+  };
+})();
 </script>
 <script>
 /* Barre d'outils repliable au téléphone (voir « LA PLANCHE D'ABORD »).
@@ -12481,8 +13124,8 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       </div>
     </div>
   </footer>
-<script src="/assets/veritas-harmonie.js?v=1.20.49" defer></script>
-<script src="/assets/vitrine.js?v=1.20.49" defer></script>
+<script src="/assets/veritas-harmonie.js?v=1.20.73.34" defer></script>
+<script src="/assets/vitrine.js?v=1.20.73.34" defer></script>
 <!--/vrt-habillage:pied-->
 </body>
 </html>

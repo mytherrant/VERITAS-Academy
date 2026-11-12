@@ -1,3 +1,211 @@
+## Leçons des classes d'examen, troisième série, et contrôle de conformité (12/11/2026)
+
+Demandes de Jacques : « Continue les leçons », puis « Vérifier toujours la conformité avec les annales et progressions ».
+
+- **RÈGLE pour toute nouvelle leçon d'Apprendre** : (1) rattachement à la ligne officielle de la progression (`cle` → `VRT_PROG`) ; (2) **aucun doublon** (deux leçons sur la même ligne) ; (3) entraînement conforme au format des annales de l'examen visé. Formats relevés dans le dépôt :
+  - **Philosophie, Bac A4** (livrets/extrait-philo-tle.js, annales 2022-2025) : Partie A commentaire d'un texte de Towa ou Njoh-Mouelle, 15-25 lignes (problème 1,5 ; étude analytique 2 ; réfutation 2 ; réinterprétation 2 ; conclusion 1,5) ; Partie B dissertation en trois tâches (introduction 3 ; analyse dialectique 3 ; conclusion avec solution personnelle et contextualisée 3) ; présentation 2. Tle C et D : la progression prévoit dissertation + exercice sur texte avec questions.
+  - **Philosophie, Probatoire** (livrets/extrait-philo-1ere.js) : Partie 1 définir deux concepts + une citation avec son auteur pour chacun (4) ; compléter, relier, classer, vrai/faux (5) ; Partie 2 commentaire ou dissertation (introduction 3, développement 3, conclusion 3) ; présentation 2.
+  - **Français** (livrets/extrait-1ere.js, corrigés harmonisés OBC) : épreuve de langue sur texte support en phrases complètes ; au Probatoire A, trois sujets au choix (commentaire composé, dissertation, contraction) ; le jury sanctionne paraphrase, outils non interprétés, absence de plan.
+  - **Histoire-Géographie** : AUCUNE annale dans le dépôt ; les sujets sont dans les sources privées du PC. Conformité à vérifier là-bas.
+- **Corrections apportées aux leçons en ligne** : dissertation philosophique (conclusion avec solution personnelle et contextualisée, barème du bac) ; leçons de philosophie de 1re (exercice « définir deux concepts + citation et auteur ») ; exercice sur texte (réfutation, réinterprétation). Une pseudo-citation de Cheikh Anta Diop remplacée par une citation réelle (Antériorité des civilisations nègres, 1967).
+- **Série 3** (`apprendre/_src/09-lecons-examen-3.js`, 30 identifiants) : exercice sur texte philosophique (Tle C, D) ; la conscience (Tle C, D, 1re A) ; période moderne (Tle A) ; méthode de la philosophie (1re C, D) ; texte narratif et recherche des idées (1re et Tle C, D) ; lecture méthodique (Tle A, 1re A) ; villes du Cameroun (Tle A, C, D) ; Europe des deux supergrands (Tle A) ; fondements de l'impérialisme (1re A, C, D) ; migrations (1re A) ; reprises : dissertation littéraire (1re C, D), réorientation du débat africain et dissertation philosophique (1re A). `VRT_LX` partage une leçon entre classes dont l'intitulé officiel diffère.
+- Contrôles : 30 rattachements, 0 doublon sur tout `lecons.js` ; 17 leçons ouvertes dans Chromium, 0 erreur JS ; bancs 54/54, 17/17 ; 144 pages de cours habillées. `lecons.js` : 144 leçons.
+
+## Leçons des classes d'examen, deuxième série (12/11/2026)
+
+Demande de Jacques : « Continue les leçons » (classes d'examen en priorité).
+
+- **11 leçons rédigées et une adaptée, enregistrées sur 22 identifiants** dans `apprendre/_src/08-lecons-examen-2.js`, leçons suivantes de la progression :
+  - Tle C et D : philosophie africaine, le vivre-ensemble et la gouvernance (Philo n° 2) ; le référent et ses substituts (Français n° 2) ; le subjonctif (Français n° 4).
+  - Tle A, C et D : les grands groupes humains du Cameroun (Géographie n° 3).
+  - Tle A : conséquences de la Deuxième Guerre mondiale et naissance de l'ONU (Histoire n° 2) ; période patristique et médiévale (Philo n° 1). Tle A et 1re A : le texte poétique, éléments de métrique (Français n° 3).
+  - 1re C et D : origine et objet de la philosophie (Philo n° 2) ; la ponctuation (Français n° 4).
+  - 1re A, C et D : l'industrialisation de l'Europe (Histoire n° 2).
+  - 1re A : les problèmes démographiques (Géographie n° 3) ; les tendances de la philosophie africaine (Philo n° 2, reprise de la leçon de Tle C et D, même contenu).
+- Les 22 rattachements vérifiés ; 12 leçons ouvertes dans Chromium, 0 erreur JS ; bancs au vert (54/54, 17/17).
+- ⚠️ **`habiller_pages.py` ne traite que les fichiers suivis par git** (`git ls-files`) : une page `apprendre/cours/*.html` NOUVELLE reste sans barre ni pied tant qu'on ne l'a pas ajoutée (`git add`) AVANT de lancer le script. Les 21 pages de la première série étaient parties ainsi ; corrigé ici (114 pages de cours habillées). Ordre : `build_apprendre.py` → `apprendre_statique.js` → `git add apprendre` → `habiller_pages.py`.
+- `lecons.js` : 114 leçons.
+
+## Leçons des classes d'examen : Français, Philosophie, Histoire, Géographie en 1re et Tle (12/11/2026)
+
+Demande de Jacques : « Continue la préparation des autres leçons avec le même workflow que les autres », puis « Classe d'examen en priorité ».
+
+- **Relevé avant** (leçons gratuites + aperçus payants) : en 1re et en Tle, maths, sciences et ECM ont des dizaines de leçons, mais **Français, Philosophie, Histoire et Géographie n'en avaient aucune** (sauf 2 de philosophie en Tle A). La 3e en a déjà 2 dans chacune de ces matières.
+- **11 leçons rédigées, enregistrées sur 21 identifiants** dans `apprendre/_src/07-lecons-examen.js` (une leçon au même intitulé officiel dans plusieurs séries est enregistrée pour chacune : `VRT_L(id, Object.assign({ c }, LECON))`) :
+  - Tle C et D : philosophie africaine, histoire et tendances (Philo n° 1) ; la dissertation philosophique, principes et méthode (Philo n° 3) ; dissertation littéraire, analyse du sujet et problématique (Français n° 3).
+  - Tle A, C et D : la diversité physique du Cameroun (Géographie n° 1).
+  - Tle A : la Deuxième Guerre mondiale (Histoire n° 1). Tle A et 1re A : commentaire composé, analyser la consigne (Français n° 4).
+  - 1re C et D : définir la philosophie (Philo n° 1) ; les conditions de la communication (Français n° 2).
+  - 1re A : les thèses ethnocentristes occidentales (Philo n° 1) ; la croissance démographique (Géographie n° 1).
+  - 1re A, C et D : l'Europe de la Renaissance (Histoire n° 1).
+- Même format que les premières leçons : trois parties de cours, entraînement au format de l'épreuve (Partie A ressources, Partie B compétences, situation camerounaise et réponse attendue), fiche de révision, exercice, 10 QCM corrigés (bonne réponse qui tourne a→d), fiche APC. Les 21 rattachements à la progression vérifiés.
+- Publiques en entier, comme toutes les leçons de lecons.js. La suite payante des classes d'examen (aperçus `apercus-*.js`) se construit avec `build_apprendre_payant.cjs` depuis les sources privées du PC : non touchée ici (le relancer sans ces sources effacerait les aperçus).
+- `lecons.js` reconstruit (92 leçons) ; 21 pages `apprendre/cours/*.html`, 20 pages programme et le sitemap régénérés (`apprendre_statique.js`), habillés. Contrôlé dans Chromium : 11 leçons ouvertes, pages matière (« Cours rédigé » à sa place), 0 erreur JS ; bancs `banc_gabarits_lecons` 54/54, `banc_apprendre_verrou` 17/17.
+
+## CI : Chromium sans dépendre du miroir Ubuntu (11/11/2026)
+
+Accord de Jacques (« Oui ») pour fiabiliser le contrôle « Boot du portail ».
+
+- Le job tombait à l'étape « Installer Chromium » : `npx playwright install --with-deps` passe par apt, et `azure.archive.ubuntu.com` ne se résolvait plus (trois échecs le 11/11, aucun test exécuté, site non en cause).
+- `.github/workflows/test.yml` : le navigateur est téléchargé seul (CDN de Playwright), puis on vérifie qu'il démarre ; apt (`playwright install-deps`) n'est appelé qu'en cas d'échec, avec trois essais espacés, et l'erreur finale dit clairement « miroir Ubuntu injoignable ? ».
+
+## Premières leçons : chaque classe a au moins 5 leçons (11/11/2026)
+
+Demande de Jacques : « Prépare les premières leçons avec la même rigueur, situations ancrées dans le contexte camerounais, QCM… » et « chaque classe doit avoir au moins 5 leçons disponibles ».
+
+- **Relevé avant** (leçons publiques de lecons.js + aperçus payants) : 5e 1, 4e 4, 2nde A 0, 2nde C 0 ; toutes les autres classes ≥ 6 (6e 11, 3e 160, 1re A 55, 1re C 221, 1re D 185, Tle A 92, Tle C 170, Tle D 193).
+- **15 leçons** dans `apprendre/_src/06-premieres-lecons.js`, premières leçons de l'année de la progression MINESEC 2026-2027 :
+  - 2nde C : ℝ et ses sous-ensembles ; mesure et erreurs ; l'expérience de Rutherford ; le texte théâtral ; la production.
+  - 2nde A : ℝ et ses sous-ensembles ; l'énonciation ; les disciplines affinitaires de l'histoire ; qu'est-ce que la philosophie ? ; lire une carte.
+  - 5e : division euclidienne ; subordonnée relative ; Pygmées et Sao ; croissance de la population mondiale.
+  - 4e : décomposition en facteurs premiers.
+- Format des leçons d'examen : trois parties de cours (définitions, méthode, exemples, « Le savais-tu ? »), entraînement au format de l'épreuve (Partie A ressources, Partie B compétences avec situation camerounaise et réponse attendue), fiche de révision, exercice, 10 QCM à 4 choix corrigés, rattachement APC. Toutes rattachées à leur ligne de progression (n° 1 sauf Français : n° 2 en 2nde C, n° 3 en 5e).
+- Publiques en entier (comme les leçons de lecons.js) : la suite payante n'existe que pour les aperçus construits par `build_apprendre_payant.cjs` à partir des sources privées.
+- `lecons.js` reconstruit (`tools/build_apprendre.py`, 72 leçons) ; 15 pages `apprendre/cours/*.html` et pages programme régénérées (`apprendre_statique.js`), habillées (591 pages).
+
+## Ancien bandeau retiré, en-têtes éclaircis (11/11/2026)
+
+Demande de Jacques : « L'ancienne entête continue de s'afficher dans les pages intérieures, enlève et éclaircis un peu les entêtes. »
+
+- **constellation.html** portait encore une copie figée du « bandeau d'annonce » de l'ancienne vitrine (« VÉRITAS accompagne et suit les apprenants… », Corrigés gratuits / Boutique / Atelier) : retiré. C'était la seule page ; les 576 autres utilisent la barre commune.
+- **En-têtes** (`header.top`, `.eh`, `.vh-hero`, écrans de l'application `.vh-app`) : dégradé #0d1a3d→#1d3168→#3a2a7a remplacé par #1E499B→#2D5DB5→#5B4FA8, halos adoucis (`tools/habiller_pages.py` → `assets/veritas-habillage.css`) ; même éclaircissement dans `assets/veritas-eleve.css` (en-tête et bande d'appel de l'espace élève).
+- Chapeau en #EEF3FC (était #cdd8f2) : 5,6 à 7,6 de contraste sur le nouveau bleu ; titre blanc 6,3 à 8,5.
+- ⚠️ `background-color` reste #1d3168 sous le dégradé : `veritas-harmonie.js` le lit pour choisir l'encre ; plus clair, il passait le chapeau en bleu nuit.
+
+## Prix du plan Starter : 1 200 F (11/11/2026)
+
+Décision de Jacques : « 1200 frs ».
+
+- **Source unique** : le tarif se règle dans le tableau de bord (« Prix & calculs ») ; `api/public_data.php` le publie (`elearning_plans`) et l'octroi l'EXIGE. Le catalogue serveur (`api/_auth_lib.php`) dit déjà Starter 1 200 F, Pro 2 400 F.
+- **En production, le tableau de bord annonçait encore 1 000 F** (vitrine en ligne : « dès 1 000 F »). À corriger par l'administration dans « Prix & calculs » : la base de production n'est pas dans le dépôt.
+- **apprendre/commun.js** (`offre`) : « dès 1 000 F » et « 2 000 F » (Pro) étaient écrits en dur. Ils suivent maintenant le tarif publié (même lecture que la vitrine), repli sur le catalogue 1 200 / 2 400. `commun.js?v=20261111b`.
+- La vitrine pré-rendue porte déjà 1 200 en repli (5 mentions `data-vrt-prix="abo_starter_m"`).
+
+## Cours lisibles, le gratuit d'abord dans Apprendre, jeux branchés (11/11/2026)
+
+Demande de Jacques : « Trop sombre et illisible. Vérifie que Apprendre est bien organisé, intuitif, facile à lire, que tout est branché selon les classes, les paiements des abonnements automatiques et bien branchés, la frontière entre payant et non payant ; mettre les ressources gratuites au début ou en évidence : il goûte, l'envie est suscitée et l'abonnement peut suivre. » Puis : « Enlève les traits foncés de gauche. »
+
+- **Cours illisibles** (`cours/commentaire_compose_analyse`, `module_1_tle_A`, `registres_de_langue_5e`) : blocs en dégradé foncé (`.hi-card`, `.reg-card`, `.lesson-header`, `.obj-box`, `.corpus-box`, `.retenir-box`, `.bac-box`, `.epreuve-header`, `.annot-popup`, encadré de fin) dont l'habillage repeignait titres et gras en bleu nuit : contraste 1,0 à 2,8. Bloc `<style id="vrt-cours-clair">` : fond pâle de la teinte, fin contour, titre dans la teinte foncée, texte encre ; sans trait épais à gauche.
+- **Bandeau des pages statiques** : le gras du chapeau (« soutien scolaire », « 3ème »…) passe en blanc (`tools/habiller_pages.py`, 19 pages, contraste 2,5 → lisible). Relevé : 0 texte illisible sur 95 pages statiques et 37 pages d'Apprendre.
+- **Le gratuit d'abord** : bloc « Gratuit pour commencer en <classe> » en tête de l'accueil d'Apprendre (une ressource gratuite par famille, `A.selectionGratuite`) ; « Commence gratuitement » en tête de chaque page matière, l'offre payante déplacée juste avant le programme ; pastille verte « Gratuit » sur chaque ressource gratuite (`marque`) ; gratuit classé avant le payant partout (`A.gratuitDabord`) ; matières ayant des cours rédigés en premier.
+- **Jeux** : `vLaunchJeu` ignorait le champ `action` des jeux intégrés (Calcul mental…) : `#jeu?id=j1` et les cartes « Gratuit » d'Apprendre n'ouvraient rien. Corrigé. Les 206 ressources gratuites ont été ouvertes une à une : 0 à revoir.
+- **Contrôlé sans défaut** : 12 classes (6e → Tle D), aucun lien vers une autre classe, aucune erreur JS ; paiement → droit → ouverture (`paiements_entitlements` 95/95, `banc_octroi_bloque` 26/26, `banc_tunnel_abonnement` 57/57, `banc_apprendre_verrou` 17/17 ; `api/apprendre.php` lit les mêmes droits). Reste : beaucoup de matières n'ont encore aucun cours rédigé (2nde A et C : aucune) — contenu à écrire, pas un branchement.
+- `commun.js?v=20261111a`, `apprendre.css?v=20261111c`, version des assets 1.20.73.
+
+## Vérification des branchements : classes du lycée et forum (11/11/2026)
+
+Demande de Jacques : « Vérifie que tout est bien branché. »
+
+- **Contrôle** : 216 liens internes de la vitrine, d'Apprendre et du forum (un seul en erreur, `/app.html`, qui n'existe qu'après déploiement) ; aucun `onclick` vers une fonction absente ; aucune erreur JS ; parcours testés de bout en bout (classes → Apprendre, carrousel, récapitulatif, « Tout pour progresser », portes, forum).
+- **Commit perdu repris** : « 2nde, 1ère, Tle par série » (37ac201) avait été poussé 46 s APRÈS la fusion de la PR 247 ; il n'était jamais arrivé en ligne. Repris ici.
+- **Forum — défaut réel en production** : l'inscription range « Terminale »/« 1ère » + filière ; les classes s'appellent « Tle A »/« 1ère A ». La comparaison exacte des noms laissait tout élève de 1ère et de Terminale sans classe, côté client (« rattaché à aucune classe ») ET côté serveur (403 à chaque message). Et les séries C et D n'avaient aucune classe.
+  - `_cvClassePour(cls, serie)` (app.js) : niveau + filière → classe (A1/A4 → A ; jamais une classe sœur). Utilisée par `_resolveClassroom` et l'écran Classes & Forum.
+  - `_cvCompleterClasses()` : ajoute 1ère C, 1ère D, Tle C, Tle D (salons + Physique-Chimie et SVT), sans toucher aux classes ni aux messages existants.
+  - `api/student_data.php` : même règle (`$classeDe`), et la classe de l'élève absente de la base publiée reste utilisable, avec les mêmes identifiants que le client.
+  - « Je m'inscris dans cette classe » règle le niveau ET la filière (C, D) ; une filière ambiguë (A → A1 ou A4) reste à choisir.
+  - Nouveau `tests/banc_forum_classes.cjs` (deploy.yml + test.yml) : 12/12 ; sur l'ancienne version, 6 au rouge.
+- **Interconnexion de tout le site** (« vitrine, Atelier, liens vers app… vérifie que tout est interconnecté ») : dossier `deploy/` reconstruit comme la CI (1 223 fichiers), 110 082 liens de 822 pages vérifiés contre ce qui PART en production ; 29 adresses `app.html#…` ouvertes une à une ; Atelier et 13 pages d'entrée parcourues (296 liens, 0 cassé) ; bancs Atelier, espaces par rôle, plan, menu : au vert.
+  - `VERITAS_favicon_512.png`, icône d'onglet déclarée par ~700 pages (Apprendre, scènes, programmes), n'était pas déployée → ajoutée à deploy.yml (copie + déclencheur ; échec bruyant si absente).
+  - `#labos`, lien des 31 pages Découvrir des laboratoires, n'ouvrait rien → routé vers `showLabosVirtuels`.
+- Version des assets : 1.20.72.
+- **Boutique de la vitrine** (« l'image des cahiers doit venir avant ») : sur téléphone, l'éventail de couvertures précède le texte (`.vrow-bou .vbou-v{order:-1}`) ; ordinateur inchangé. Empreinte d'index.php : 2026-11-11c.
+
+## « Tout pour progresser » : rubriques et icônes alignées (11/11/2026)
+
+Demande de Jacques : « Structure et dispose bien les icônes » (grille des ressources de la classe, apprendre/index.html).
+
+- Les familles sont rangées sous les quatre rubriques de `A.GROUPES` : Où j'en suis, Comprendre et apprendre, M'entraîner, Besoin d'aide (une rubrique vide n'apparaît pas).
+- Chaque carte : icône dans un rond de 52 px teinté de la couleur de sa famille, titre, compteur en pastille. Téléphone : deux colonnes, icône en haut et contenu centré ; ordinateur : icône à gauche, titre et compteur empilés.
+- Styles en fin d'apprendre.css (`.tp-gr`, `.tp-gt`, `.tp-gl`, `.tp-i`, `.tp-t`).
+- **Audit des cas similaires** (« Audite et corrige tous les cas similaires ») : toutes les icônes AU TRAIT d'Apprendre prennent l'anneau du site (règle du 25/10 : rond blanc, filet de 3 px teinté, icône bleu nuit, centrée) — grille « Tout pour progresser », portes et cartes de ressources.html, ressources des pages matière et notes (`carteRes`), titres de famille. La règle « sans pastille ni rond » du 10/11 est ainsi remplacée pour ces icônes. Les icônes DE MATIÈRE (illustrations en couleur) restent nues, comme demandé le 08/11 ; dans les cartes « Mes matières », la ligne « rédigées » et la barre s'alignent désormais sous le nom. `apprendre.css?v=20261111b` sur les sept pages.
+
+## Actualités MINESEC : seulement le pertinent et le récent (11/11/2026)
+
+Demande de Jacques : « Juste les informations pertinentes et plus récentes » (Apprendre, Tle C, affichait en novembre les résultats du bac de juillet).
+
+- **api/news_proxy.php** : `when:60d` ajouté aux sept recherches Google News ; articles sans date ou de plus de 60 jours écartés ; tri du plus récent au plus ancien AVANT de garder les 12 premiers (avant : les 12 premiers dans l'ordre de pertinence de Google) ; champ `ts` renvoyé. Nouveau nom de cache (`veritas_news2_*`) pour ne pas resservir l'ancienne liste.
+- **apprendre/calendrier.js** (`actus`) : 45 derniers jours seulement ; l'actualité des AUTRES examens est écartée (un élève de Tle ne voit plus le BEPC) ; doublons fusionnés (même sujet, autre journal : on garde le plus récent) ; tri par date ; message clair s'il n'y a rien de récent. `calendrier.js?v=20261111e`.
+- La vitrine et l'application lisent le même flux : elles reçoivent elles aussi une liste récente triée par date.
+
+## Carrousel Apprendre qui défile tout seul (11/11/2026)
+
+Demande de Jacques : « Créer une animation qui permet aux images ci de défiler lentement. »
+
+- **vitrine.html** : petit script en ligne après la section `#apprendre`. Sur téléphone (≤ 899 px), les trois photos glissent seules toutes les 4,8 s (glissement adouci de 1,6 s, retour à la première après la dernière) ; la photo en vue zoome lentement (7 s). Points indicateurs cliquables sous le carrousel.
+- Pause : doigt posé ou défilement manuel (reprise après 8 s), carrousel hors écran, onglet caché. Coupé si `prefers-reduced-motion`. Rien ne change sur ordinateur (mosaïque).
+- **Bandeau « Réussir son année avec les vrais programmes camerounais » retiré** (« Supprime ceci ») : recherche, trois arguments, prix « dès … FCFA/mois », boutons « Commencer maintenant » / « Voir les abonnements », photo hero-maison et badge « Prof. Ambassa · en ligne ». Le h1 de la page reste, masqué (`.vrt-sr`), en dernier enfant de `.vapp-in` : vitrine.js ne lui trouve pas de frère et ne pose donc plus la barre de recherche. Les prix restent affichés ailleurs (cartes, abonnements) ; banc_prix_vitrine au vert.
+- **« Tout ce dont l'élève a besoin » déplacé en fin d'accueil** (« Apprendre donne déjà beaucoup de ces éléments ; à la fin ce sera une synthèse, un récapitulatif ») : juste avant l'appel final, avec une pastille « En résumé ». Les onglets (régions dynamiques de vitrine.js) fonctionnent à la nouvelle place.
+- **Choix de la classe** (« enlève les effets entourés autour des classes et mets 2nde, 1ère, Tle… ») : plus de pastille ni de contour, texte seul souligné au survol (collège en bleu, lycée en violet). « Lycée · A, C, D » remplacé par les huit classes d'Apprendre : 2nde A, 2nde C, 1ère A, 1ère C, 1ère D, Tle A, Tle C, Tle D, chacune liée à `apprendre/?c=<classe>` (valeurs exactes de `A.CLASSES`). Grille de 4 colonnes sur téléphone. Soulignement parasite retiré de « Commencer à réviser ».
+- Empreinte d'index.php : 2026-11-11b.
+
+## Classes & Forum au style de la vitrine, connexion et inscription par classe (11/11/2026)
+
+Demande de Jacques : « Harmoniser la mise en forme style vitrine, le mode de connexion et inscription relier à chaque classe. »
+
+- **`_cvRenderHome` (app.js)** réécrit avec des classes `.cvx-*` (app.css, préfixe `#VISITOR #vContent #cvHome` pour passer devant theme-lws) : cartes blanches à filet, anneau de couleur autour des icônes, pastilles de salons, boutons en pilule jaune / contour bleu, Poppins. Plus d'emoji : icônes du sprite `#lc-*` (`_cvIcoCanal` choisit l'icône d'après le nom du salon). Thème sombre couvert.
+- **Visiteur non connecté** : bloc « 1 · je choisis ma classe, 2 · je crée mon compte ou je me connecte, 3 · j'arrive dans le salon », boutons « Créer mon compte gratuit » / « J'ai déjà un compte ». Chaque carte porte « Je m'inscris dans cette classe » et « J'ai un compte ».
+- **`_cvRejoindre(cid, mode)`** retient la classe (`sessionStorage._cvApres`) et ouvre la connexion ou l'inscription, avec le menu « Classe » du formulaire pré-réglé sur cette classe. **`_cvReprendre()`**, appelée par `initVisitor()` (900 ms, après `_vEspaceSiFondVide`), ouvre ensuite le premier salon de cette classe. Les élèves du centre (`go2SES`, espace #APP) ne sont pas concernés.
+- **Messages incitatifs** (« pousser les élèves à adhérer ») : titre « Ta classe t'attend : ne révise plus seul·e », quatre avantages (question le soir, annonces des enseignants, réviser à plusieurs, gratuit en deux minutes), accroche sur chaque carte vide, badge « Année d'examen · on révise ensemble » (3ème, 1ère, Tle, GCE, techniques), bandeau final « Prêt·e à rejoindre ta classe ? ». Aucun chiffre inventé.
+- Version des assets : 1.20.70 (coquille, sw.js et pages qui la portaient).
+
+## Apprendre en premier panneau, photos agrandies, compte à rebours embelli (11/11/2026)
+
+Demande de Jacques : « Apprendre doit être le premier panneau. Agrandir les images sur téléphone. Structure aussi bien les éléments dans apprendre pour captiver et faciliter l'utilisation par les apprenants. Embellis le panneau du compte à rebours. »
+
+- **vitrine.html** : la section `#apprendre` ouvre l'accueil (avant le bandeau « Réussir son année »). Elle se lit en trois temps numérotés : 1 · Je choisis ma classe (pastilles, grille 4 + Lycée sur téléphone), 2 · Je révise (deux boutons pleine largeur sur téléphone), 3 · Ce que je trouve dedans (quatre cartes cliquables : apprendre/, apprendre/#defi, decouvrir/laboratoires-virtuels.html, corriges/). Thème sombre couvert.
+- **Photos sur téléphone** : passent en tête de la section, en carrousel à défilement magnétique, une photo par écran (86 % de large, format 4/5), légendes en 24 px. La première photo prend `fetchpriority="high"`, l'image du bandeau passe en `loading="lazy"` (elle n'est plus au-dessus de la ligne de flottaison).
+- **Compte à rebours** (`apprendre/index.html` + `calendrier.js`) : dégradé lumineux bleu → violet avec halo doré, tuiles « verre », tuile des jours dorée et plus large, secondes animées (coupées si `prefers-reduced-motion`), barre « % du chemin depuis la rentrée ». Version `calendrier.js?v=20261111d`.
+- Empreinte d'index.php : 2026-11-11a.
+
+## Visibilité maximale : site ouvert aux IA, œuvres, Atelier et simulations en HTML statique (05/11/2026, 2e passe)
+
+Demande de Jacques : « Oui ouvre tout, il faut que le site soit le plus visible possible, surtout sur les œuvres littéraires, l'Atelier de français, les simulations… »
+
+- **Tous les robots d'IA admis** sur les pages publiques (robots.txt réécrit, `User-agent: *` seul ; .htaccess ne bloque plus que les aspirateurs SEO Ahrefs/Semrush/…; X-Robots-Tag « all » sans noai ; balises noindex par robot retirées de VERITAS_v1.2.html ; ai.txt réécrit). Restent fermés à tous : /api/, /data/, /uploads/private/, /uploads/protected/. `api/_sentinel.php` inchangé : l'API reste interdite aux moissonneuses (ce n'est pas une page).
+- **Œuvres** (`tools/oeuvres_statiques.js`) : les 21 pages d'œuvres portaient ~1 000 caractères lisibles ; elles portent désormais, en HTML, l'analyse de `chunks/litt-oeuvres.js` (fiche d'identité, axes, personnages, style, contexte, analyse, citations expliquées, procédés, questions corrigées) + JSON-LD LearningResource et FAQPage. Ville cruelle : 1 980 → 11 709 caractères. Bloc `<!-- oeuvre-statique -->`. Le quiz et la carte mentale restent dans l'application. `5e_nkum_wam` n'a pas de page (même œuvre que 2nde-nkoumwam).
+- **Atelier, examen blanc, laboratoires** (`tools/pages_decouverte.js`, gabarit des pages Découvrir) :
+  - `decouvrir/atelier-de-francais.html` : présentation + les 23 structures d'épreuves de `plateforme/minesec.js` (durée, coefficient, parties, barème, texte support, source) ;
+  - `decouvrir/examen-blanc-en-ligne.html` : les 43 sujets du simulateur (filtre de `_simEpreuves`, durées de `_dureeEpreuve`) ;
+  - `decouvrir/laboratoires-virtuels.html` + 30 pages `decouvrir/labos/*.html` (`chunks/labo.js`) : labos gratuits publiés en entier, labos payants limités à la présentation et à la théorie.
+  - Sitemap Découvrir : bloc `<!-- pages-decouverte -->`. Tuiles ajoutées sur `decouvrir/`. Lien mort `/seo/` corrigé.
+- llms.txt : 146 liens, rubrique Laboratoires. CI : `oeuvres_statiques.js --controle` et `pages_decouverte.js --controle`. Empreinte d'index.php : 2026-11-05b.
+- ⚠️ Ordre de génération : `oeuvres_statiques.js` puis `habiller_pages.py` (l'habillage replace son bloc de tête en dernier ; les deux restent ensuite stables).
+
+## GEO : visibilité dans les moteurs de réponse IA (05/11/2026)
+
+Demande de Jacques : « il faut non seulement du SEO mais aussi du GEO, vérifie et applique ».
+
+- **robots.txt / .htaccess** : même ligne de partage que la décision du 28/10. Les robots qui lisent une page pour RÉPONDRE et CITER sont admis sur les pages publiques : ChatGPT-User, OAI-SearchBot, **Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, MistralAI-User**. Les robots d'ENTRAÎNEMENT restent refusés (GPTBot, ClaudeBot, CCBot, Google-Extended, Applebot-Extended, Meta, Bytespider…). L'API reste fermée à tous (`api/_sentinel.php` inchangé).
+- **llms.txt** (nouveau, `tools/build_llms.py`) : résumé du centre + 113 liens tirés des sitemaps et des balises description. Sans prix (grille en transition).
+- **vitrine.html** : bloc `<!-- geo-ld -->` (`tools/geo_vitrine.py`) : WebSite, centre en EducationalOrganization + LocalBusiness (adresse complète, WhatsApp, MTN MoMo / Orange Money), FAQPage tirée mot pour mot des 7 questions affichées. À relancer après `build_vitrine.js`.
+- `highPrice: 7500` retiré du JSON-LD (ne correspondait à aucune grille) ; `seo/sitemap.xml`, inexistant, retiré de robots.txt et sitemap-index.xml ; ai.txt précise que la citation est admise.
+- CI : `build_llms.py --controle` et `geo_vitrine.py --controle` ; llms.txt déployé. Empreinte d'index.php : 2026-11-05a.
+
+**Reste à faire (Jacques)** : la vitrine affiche encore 1 000 F (cartes) ET 1 200 F (textes, balises description) pour le même plan Starter — voir l'entrée du 29/10. Tant que la grille n'est pas enregistrée, les IA liront deux prix.
+
+## Harmonisation du design : vitrine, pages statiques et application (29/10/2026)
+
+Demande de Jacques : audit design en prod, puis « corrige 4, 5, 6, 8, 9 (dégradé maillé), 10, 11, 12 », « toutes les icônes doivent apparaître dans Plus, dans le cercle coloré, inspire-toi de lws.fr », « vérifie que toutes les pages sont harmonisées, corrige le conflit entre vitrine et app, surtout au niveau du design ».
+
+- **Menu « Plus »** (vitrine.html + CSS_CHROME de build_plan.py) : les 37 rubriques restent ; anneau du site (rond blanc, filet 3 px) teinté par public ; survoler Élèves, Parents, Enseignants ou Partenaires ouvre le panneau et éclaire la colonne ; la colonne Élève prend deux pistes pour que tout tienne sur 1366 × 768 ; fermeture au défilement (.vrt-defile, vitrine.js).
+- **En-tête unique** : le dégradé maillé de l'espace élève sur header.top, .eh et .vh-hero (CSS_CARTES). vitrine.js crée le .vh-hero des pages sans en-tête (œuvres, niveaux, méthodes, outils, légal, Découvrir) et celui des écrans publics de l'application (.vh-app, premier .pgt / .vsec-title + chapeau, MutationObserver). Exceptions voulues : Campus (marque blanche), Atelier, épreuves imprimables.
+- **Conflit vitrine / application** : theme-lws.css éteint tous les dégradés de #VISITOR et app.css imposait Montserrat aux titres. Exception à cinq identifiants pour l'en-tête ; Poppins sur les titres des écrans publics.
+- **Échelle** : titres de page 44 px, de section 30 px partout ; tailles relevées par tools/vitrine_lisibilite.cjs ramenées sur 13 · 15 · 17 px ; demi-pixels en ligne arrondis.
+- **Texte fer à gauche**, sans césure (justification retirée : vitrine, pages, espace visiteur).
+- **Formes** : rayons 8 / 14 / pilule sur la vitrine, plus de lueur jaune, boutons d'action en pilule.
+- **Défauts** : carte du podium vide masquée ; chiffres de /eleve recomptés (14 049 et le total par classe) ; mention « Atelier 28/10 · audit » retirée de l'écran de chargement de l'Atelier.
+- **Prix et grille** : montants insécables ; grille de services en auto-fit (plus d'orpheline).
+- **Réassurance** : une seule bande, sous « Ce que 1 200 F par mois changent ».
+- **Cache** : REV_HABILLAGE = '.29' suffixe veritas-habillage.css, veritas-harmonie.js et vitrine.js sur toutes les pages ; plan.html et constellation.html chargent désormais veritas-habillage.css ; empreinte d'index.php 2026-10-29a.
+
+**2e passe (même jour)** — « trop pâle et monotone, fais comme les cartes Partenariat ; enlève les traits foncés partout ; double police » :
+- Cartes : titres 700 bleu nuit, action en bouton plein à la teinte du médaillon (plan « Ouvrir », corrigés « Voir les corrigés », Constellation « Ouvrir les corrigés »). veritas-pages.css ramène tout à 400 hors .vrt-hab : règles en « html body » ; la barre et le pied de plan.html et constellation.html portent désormais la classe vrt-hab.
+- Traits retirés : barre jaune des encadrés .intro, liseré haut des tuiles .ft, barre basse des tuiles de classe .cl, barre verticale de l'interruption du calendrier (vitrine), carré bleu nuit des numéros de partie de l'espace élève (devenu anneau).
+- Citation du jour entièrement en Poppins (le second paragraphe et l'auteur étaient en Georgia).
+- REV_HABILLAGE passe à '.30'.
+
+**Reste à faire (Jacques)** : enregistrer la grille du 16/10 dans l'admin « Prix & calculs automatiques » (Starter 1 200 / 12 000, Pro 2 400 / 24 000, Élite 3 600 / 36 000, Famille 12 000 / 120 000) : la base de production facture encore 1 000 / 2 000 / 3 000 / 10 000 F et la vitrine se repeint sur ces prix.
+
 ## Élèves : examen blanc et œuvres interactives ; Atelier : import Word/PDF ; 3G ; titres (25/10/2026, v1.20.48)
 
 Demandes de Jacques :
@@ -3305,3 +3513,12 @@ séquence 6, 1 citation hors cahier, 3 « axe ».
   sw.js), puis build_corriges, build_plan, build_vitrine, habiller_pages.
 - Laissés HORS du commit (autre chantier) : `api/payment_monetbil.php`,
   `api/payment_config.php.exemple`, sondes `tests/_*`, brouillons `tools/_*` et `_*.txt`.
+
+## 29/10/2026 (soir) — cartes « sombres et bizarres » reprises
+- Manuels : les tuiles de niveau portaient tout leur descriptif DANS le bouton plein (gros pavé foncé sur 3 lignes). Descriptif en note, bouton « Voir les corrigés » + compteur (build_corriges.py et manuels.html).
+- Boutons de carte à pastille (corrigés, manuels…) : la pastille devient un surtitre en capitales au-dessus du libellé ; carte en colonne, bouton au pied, aligné d'une carte à l'autre.
+- veritas-medaillons.js ne « corrige » plus l'encre des boutons pleins de carte (noircissait « Module 1 », « 830 exos »).
+- Livrets : libellé du bouton orange en 600 et sur une ligne, boutons alignés au pied, clé et œil retirés faute de place.
+- Partenariat : pastille « Parchemin » sur une ligne, au pied de la carte.
+- Tuiles « Continuer » (.cta) : icône dans l'anneau du site (blanc, filet teinté 3 px, encre bleu nuit) au lieu du disque pâle.
+- Versions : app 1.20.53, REV_HABILLAGE .32.

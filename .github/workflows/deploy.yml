@@ -52,7 +52,10 @@ on:
       - 'adopter/**'
       - 'cours/**'
       - 'campus/**'
+      - 'gestion/**'
       - 'plateforme/**'
+      - 'scenes/**'
+      - 'apprendre/**'
       # NOTE : les corpus (corpus_minesec.json, citations_minesec.json) ne
       # figurent PAS ici. Ils sont gitignores — 1040 textes et 137 citations,
       # c'est la marchandise, et ce depot est PUBLIC. Ils n'arrivent donc
@@ -63,6 +66,7 @@ on:
       - 'og-image.jpg'
       - 'ambassa-avatar.jpg'
       - 'ambassa-avatar.png'
+      - 'VERITAS_favicon_512.png'
       - 'sitemap.xml'
       - 'sitemap-index.xml'
       - 'robots.txt'
@@ -80,6 +84,7 @@ on:
       - 'manifest.webmanifest'
       - 'sw.js'
       - 'ai.txt'
+      - 'llms.txt'
       - 'indexnow.txt'
 
   # Lancement manuel depuis GitHub → Actions → Run workflow
@@ -136,7 +141,7 @@ jobs:
           php_fail=0
           echo "→ Lint PHP (php -l) sur api/*.php et api/campus/*.php"
           if command -v php >/dev/null 2>&1; then
-            for f in api/*.php api/campus/*.php; do
+            for f in api/*.php api/campus/*.php gestion/api/*.php; do
               [ -f "$f" ] || continue
               if ! php -l "$f"; then php_fail=1; fi
             done
@@ -145,7 +150,7 @@ jobs:
           fi
           js_fail=0
           echo "→ Lint JS (node --check) sur app.js, sw.js, assets/*.js et chunks/*.js"
-          for j in app.js sw.js $(ls assets/*.js 2>/dev/null) $(ls chunks/*.js 2>/dev/null); do
+          for j in app.js sw.js gestion/app.js gestion/sw.js $(ls assets/*.js 2>/dev/null) $(ls chunks/*.js 2>/dev/null) $(ls scenes/*.js 2>/dev/null) $(ls apprendre/*.js 2>/dev/null); do
             [ -f "$j" ] || continue
             if ! node --check "$j"; then js_fail=1; fi
           done
@@ -154,6 +159,9 @@ jobs:
             exit 1
           fi
           echo "✅ Syntaxe PHP + JS valide — déploiement autorisé."
+          # VÉRITAS Gestion : CSS/JS servis « immutable » un an → le ?v= doit
+          # changer partout à la fois, sinon les téléphones gardent l'ancienne version.
+          node tests/banc_gestion_versions.cjs
 
           # ── Cohérence de version des assets (coquille ⇄ service worker) ──
           # La coquille demande /app.js?v=X ; sw.js précharge /app.js?v=ASSET_VER
@@ -218,11 +226,11 @@ jobs:
           manquants=0
           SUIVIS=$(git ls-files)
           connu() { printf '%s' "$SUIVIS" | grep -qxF "$1"; }
-          for f in $(git ls-files 'api/*.php' 'api/campus/*.php'); do
+          for f in $(git ls-files 'api/*.php' 'api/campus/*.php' 'gestion/api/*.php'); do
             d=$(dirname "$f")
             for rel in $(grep -ohE "(require|include)(_once)?[ (]*__DIR__ *[.] *'[^']+'" "$f" 2>/dev/null | sed -E "s/.*'([^']+)'.*/\1/"); do
               cible=$(echo "$d$rel" | sed 's#/[.]/#/#g')
-              case "$cible" in api/config.php|api/payment_config.php|api/campus/_config.php) continue ;; esac
+              case "$cible" in api/config.php|api/payment_config.php|api/campus/_config.php|gestion/api/_config.php) continue ;; esac
               if [ ! -f "$cible" ]; then
                 echo "::error title=Dependance absente::$f requiert $rel - fichier introuvable."; manquants=1
               elif ! connu "$cible"; then
@@ -451,6 +459,14 @@ jobs:
       #    n'ouvre rien ; aucun autre élève ne fuit ; le rôle redescend.
       - name: 👪 Le parent voit-il son enfant, et seulement lui ?
         run: node tests/banc_parent_enfant.cjs
+
+      # ── 🏫 CHAQUE ÉLÈVE ÉCRIT-IL DANS SA CLASSE ? (11/11/2026) L'inscription
+      #    range « Terminale » + filière « C », la classe s'appelle « Tle C » :
+      #    la comparaison exacte refusait (403) tout élève de 1ère et de
+      #    Terminale, et les séries C/D n'avaient pas de classe. Éprouvé sur
+      #    l'ancienne version : 6 contrôles au rouge sur 12.
+      - name: 🏫 Chaque élève écrit-il dans sa classe virtuelle ?
+        run: node tests/banc_forum_classes.cjs
 
       # ── 🔑 LA CLÉ D'UN EXERCICE survit-elle à une correction du cahier ?
       #    Si elle bouge, l'élève retrouve ses réponses sous les mauvaises
@@ -1015,10 +1031,33 @@ jobs:
             exit 1
           fi
 
+      # ── La page « Livrets » de l'administration : fiches ajoutées, retrait
+      #    de la vente, promotions. Le serveur applique ces réglages au prix
+      #    EXIGÉ : une promo mal bornée vendrait au rabais sans que rien ne le dise.
+      - name: 📗 Fiches, retraits et promotions des livrets sont-ils appliqués ?
+        run: php tests/banc_livrets_admin.php
+
       # ── 🛡️ Le bouclier anti-robots garde MAINTENANT toutes les surfaces
       #    publiques, y compris les payantes. Une régression y est invisible
       #    dans les deux sens : soit les portes s'ouvrent, soit les élèves
       #    restent dehors — et personne ne s'en aperçoit avant les plaintes.
+      # ── 🔎 GEO (05/11/2026) — ce que lisent ChatGPT, Claude, Perplexity.
+      #    llms.txt est tiré des sitemaps et des balises des pages ; le bloc
+      #    geo-ld de la vitrine reprend sa FAQ mot pour mot. Une page ajoutée
+      #    ou une FAQ réécrite sans relancer les deux scripts laisserait aux
+      #    IA un résumé périmé, sans que rien ne le dise.
+      - name: 🔎 GEO — œuvres, Atelier, simulations, llms.txt et vitrine sont-ils à jour ?
+        run: |
+          node tools/oeuvres_statiques.js --controle
+          node tools/scenes_statiques.js --controle
+          # Apprendre : RÉGÉNÉRÉ ici plutôt que contrôlé. lecons.js change souvent
+          # (autres sessions) ; un --controle rougirait le déploiement de tous.
+          # Les pages produites sont copiées plus bas puis habillées dans deploy/.
+          node tools/apprendre_statique.js
+          node tools/pages_decouverte.js --controle
+          python tools/build_llms.py --controle
+          python tools/geo_vitrine.py --controle
+
       - name: 🛡️ Le bouclier tient-il (robots, IA, débit, laissez-passer) ?
         run: |
           if command -v php >/dev/null 2>&1; then
@@ -1188,6 +1227,10 @@ jobs:
           # Avatar IA Ambassa (portrait — .png ou .jpg selon disponibilité)
           if [ -f "ambassa-avatar.png" ]; then cp "ambassa-avatar.png" deploy/; echo "  ✓ ambassa-avatar.png"; fi
           if [ -f "ambassa-avatar.jpg" ]; then cp "ambassa-avatar.jpg" deploy/; echo "  ✓ ambassa-avatar.jpg"; fi
+          # Icône d'onglet (11/11/2026) : ~700 pages (Apprendre, scènes, programmes)
+          # déclarent <link rel="icon" href="/VERITAS_favicon_512.png"> ; le
+          # fichier n'était pas copié → 404 à chaque page ouverte.
+          if [ -f "VERITAS_favicon_512.png" ]; then cp "VERITAS_favicon_512.png" deploy/; echo "  ✓ VERITAS_favicon_512.png (icône d'onglet)"; else echo "::error title=Icône absente::VERITAS_favicon_512.png est déclarée par les pages mais absente du dépôt."; exit 1; fi
 
           # .htaccess (sécurité + cache + MIME)
           if [ -f .htaccess ]; then cp .htaccess deploy/; fi
@@ -1206,7 +1249,7 @@ jobs:
           fi
 
           # ── SEO + PWA (sitemap, robots, manifest) ───────────────
-          for f in sitemap.xml sitemap-index.xml robots.txt manifest.webmanifest sw.js ai.txt indexnow.txt; do
+          for f in sitemap.xml sitemap-index.xml robots.txt manifest.webmanifest sw.js ai.txt llms.txt indexnow.txt; do
             [ -f "$f" ] && cp "$f" deploy/ && echo "  ✓ $f"
           done
 
@@ -1288,7 +1331,9 @@ jobs:
               #    passee sans un mot — le produit vendu, en clair, dans un
               #    depot GitHub public. La garde ne vaut que ce que vaut sa
               #    liste ; celle-ci vient de s'allonger.
-              if grep -qE 'window[.](BOOKLET|GUIDE|OI_DOC)[A-Z0-9_]* *=' "$f"; then
+              #    QUATRE depuis le 28/10/2026 : les livrets de philosophie
+              #    posent `window.PHILO_DOC` (livrets/philo.js).
+              if grep -qE 'window[.](BOOKLET|GUIDE|OI_DOC|PHILO_DOC)[A-Z0-9_]* *=' "$f"; then
                 echo "::error title=Contenu dans la coquille::$f embarque les donnees du livret — le produit partirait en clair. Deploiement ANNULE."
                 exit 1
               fi
@@ -1342,6 +1387,19 @@ jobs:
               fi
               if [ "$c" -gt 2 ]; then
                 echo "::error title=Apercu trop long::$f contient $c oeuvres ouvertes (2 au plus). Deploiement ANNULE."
+                exit 1
+              fi
+              # Format des livrets de philosophie (window.PHILO_DOC) : chaque
+              # section ouverte porte "libre":true — l'avant-propos et deux
+              # lecons, trois au plus. Les corriges (section "corrige") n'y
+              # ont jamais de HTML.
+              p=$(grep -o '"libre":true' "$f" | wc -l)
+              if [ "$p" -gt 3 ]; then
+                echo "::error title=Apercu trop long::$f ouvre $p sections (avant-propos + 2 lecons au plus). Deploiement ANNULE."
+                exit 1
+              fi
+              if grep -qE '"kind":"corrige"[^}]*"html":"[^"]' "$f"; then
+                echo "::error title=Corrige dans un apercu gratuit::$f ouvre la section des corriges. Regenerer avec: python tools/philo_livrets.py. Deploiement ANNULE."
                 exit 1
               fi
             done
@@ -1432,6 +1490,59 @@ jobs:
           for d in eleve enseignant flash parcours adopter; do
             if [ -d "$d" ]; then cp -r "$d" deploy/; echo "  ✓ $d/"; fi
           done
+          # ── Scènes vivantes (scenes/, 03/11/2026) ─────────────────────────
+          #    Pages statiques autonomes (moteur scene.js + decors.js +
+          #    catalogue.js, généré par scenes/_catalogue.js). Les fichiers en
+          #    « _ » sont les bancs et le générateur : ils restent dans le dépôt.
+          #    ÉCHEC BRUYANT si le moteur manque : 80 pages le chargent.
+          if [ -d scenes ]; then
+            for f in scene.js decors.js scene.css catalogue.js index.html; do
+              if [ ! -f "scenes/$f" ]; then
+                echo "::error title=Scènes vivantes incomplètes::scenes/$f manque. Déploiement ANNULÉ."
+                exit 1
+              fi
+            done
+            mkdir -p deploy/scenes
+            find scenes -maxdepth 1 -type f ! -name '_*' -exec cp {} deploy/scenes/ \;
+            echo "  ✓ scenes/ ($(ls deploy/scenes | wc -l) fichiers)"
+          fi
+
+          # ── Apprendre (apprendre/, 07/11/2026) ────────────────────────────
+          #    Cours par classe et matière (progressions MINESEC 2026-27), leçons
+          #    rédigées, schémas animés, manuels collaboratifs (api/manuels.php).
+          #    lecons.js et progressions.js sont GÉNÉRÉS par tools/build_apprendre.py
+          #    depuis apprendre/_src/ : les sources restent dans le dépôt, hors ligne.
+          #    ÉCHEC BRUYANT si un fichier manque : les quatre pages les chargent tous.
+          if [ -d apprendre ]; then
+            for f in index.html matiere.html lecon.html manuel.html ressources.html labo.html notes.html ressources.js verrou.js labo.js charge.js apprendre.css jeu.css commun.js jeu.js calendrier.js lecons.js progressions.js scenes.js atelier.js; do
+              if [ ! -f "apprendre/$f" ]; then
+                echo "::error title=Apprendre incomplet::apprendre/$f manque (régénérez avec 'python tools/build_apprendre.py'). Déploiement ANNULÉ."
+                exit 1
+              fi
+            done
+            # Table français d'Apprendre → séquences de l'Atelier (10/11/2026) :
+            # générée depuis les DEUX progressions ; si l'une change sans qu'on
+            # la régénère, les professeurs seraient envoyés sur une autre séquence.
+            if ! node tools/build_apprendre_atelier.cjs --verifie; then
+              echo "::error title=Lien Apprendre → Atelier périmé::apprendre/atelier.js ne suit plus les progressions. Relancez 'node tools/build_apprendre_atelier.cjs'. Déploiement ANNULÉ."
+              exit 1
+            fi
+            if [ ! -f assets/veritas-matieres.svg ]; then
+              echo "::error title=Icônes des matières absentes::assets/veritas-matieres.svg manque : toutes les cartes de matières seraient vides. Déploiement ANNULÉ."
+              exit 1
+            fi
+            mkdir -p deploy/apprendre
+            find apprendre -maxdepth 1 -type f ! -name '_*' -exec cp {} deploy/apprendre/ \;
+            # Pages statiques du référencement (10/11/2026, tools/apprendre_statique.js)
+            for d in programme cours; do
+              if [ ! -d "apprendre/$d" ]; then
+                echo "::error title=Apprendre : pages statiques absentes::apprendre/$d manque (node tools/apprendre_statique.js). Déploiement ANNULÉ."
+                exit 1
+              fi
+              cp -r "apprendre/$d" deploy/apprendre/
+            done
+            echo "  ✓ apprendre/ ($(ls deploy/apprendre | wc -l) fichiers)"
+          fi
 
           # ── VÉRITAS Campus (SaaS multi-établissement) ───────────
           # Front : campus/*.html + campus.js + config.js.
@@ -1534,6 +1645,8 @@ jobs:
             api/_sentinel.php \
             api/challenge.php \
             api/demandes.php \
+            api/manuels.php \
+            api/apprendre.php \
             api/plateforme.php \
             api/compte.php; do
             # ⚠️ ÉCHEC BRUYANT, et pas un « [ -f ] && cp » silencieux.
@@ -1595,6 +1708,35 @@ jobs:
             cp api/campus/schema.sql deploy/api/campus/
             cp api/campus/.htaccess deploy/api/campus/
             echo "  ✓ api/campus/ ($(ls deploy/api/campus/*.php | wc -l) fichiers PHP + schema.sql + verrou)"
+          fi
+
+          # ── VÉRITAS Gestion (gestion/ → dossier gestion.veritas-school.com/) ──
+          # Application des centres : coquille + API. Le sous-domaine pointe
+          # sur ce dossier (panneau LWS). _config.php (surcharges locales) et
+          # la base SQLite de développement ne partent JAMAIS ; sans les deux
+          # verrous .htaccess, les _*.php seraient appelables : on annule.
+          if [ -d gestion ]; then
+            if [ ! -f gestion/api/.htaccess ] || [ ! -f gestion/api/data/.htaccess ]; then
+              echo "::error title=Gestion sans verrou::gestion/api/.htaccess ou gestion/api/data/.htaccess manquant. Déploiement ANNULÉ."
+              exit 1
+            fi
+            # LWS fait pointer le sous-domaine sur un dossier du MÊME NOM que lui,
+            # à la racine (à côté de api/ : _boot.php y lit api/payment_config.php).
+            GD=deploy/gestion.veritas-school.com
+            mkdir -p "$GD"/api/data "$GD"/polices
+            for f in index.html app.css app.js sw.js manifest.webmanifest icone-512.png logo.png .htaccess; do
+              cp "gestion/$f" "$GD"/
+            done
+            cp gestion/polices/*.woff2 "$GD"/polices/
+            for f in gestion/api/*.php; do
+              case "$(basename "$f")" in
+                _config.php) echo "  ↷ gestion/api/_config.php ignoré (poste de développement)" ;;
+                *) cp "$f" "$GD"/api/ ;;
+              esac
+            done
+            cp gestion/api/.htaccess "$GD"/api/
+            cp gestion/api/data/.htaccess "$GD"/api/data/
+            echo "  ✓ gestion/ ($(ls "$GD"/api/*.php | wc -l) fichiers PHP, coquille, polices, verrous)"
           fi
 
           # ── Atelier de Francais (plateforme/) ────────────────────
@@ -1802,6 +1944,16 @@ jobs:
       - name: 🔤 Poppins servie par le site, plus par Google
         run: python tools/polices_locales.py deploy
 
+      # ── 🪶 LE LOGO EN 7 Ko, SOUS UNE URL NEUVE (audit 3G du 28/10/2026).
+      #    Affiché en 46 px partout, le logo vient de assets/veritas-logo.png,
+      #    servi « immutable » SANS ?v= : allégé le 21/10, il reste à 91 Ko
+      #    pour tout visiteur venu avant. Les <img> passent à
+      #    assets/veritas-logo-96.webp ; favicon, JSON-LD et og:image gardent
+      #    le PNG. Sur deploy/ seulement, pour la même raison que la passe
+      #    Poppins ci-dessus : l'habillage du dépôt se compare à son modèle.
+      - name: 🪶 Le logo des pages en WebP 96 px
+        run: python tools/logo_leger.py deploy
+
       - name: 🔗 Aligner les cache-busters de tous les assets
         run: |
           # Les ?v= de /assets/*.css|js étaient maintenus À LA MAIN, page par page,
@@ -1884,7 +2036,11 @@ jobs:
               sed -i -E "s/\.(css|js)\?v=[0-9.]+/.\1?v=$VER/g" "$f"
               n=$((n+1))
             fi
-          done < <(find deploy -type f \( -name '*.html' -o -name '*.php' \) -not -path 'deploy/plateforme/*')
+          # deploy/gestion.veritas-school.com/ est EXCLU aussi : VÉRITAS Gestion a sa propre
+          # version (0.9.0…) que son sw.js pré-copie. Renuméroter sa page en 1.20.x faisait
+          # demander app.js?v=1.20.x à une page dont le service worker gardait app.js?v=0.9.0 :
+          # au premier lancement sans réseau, la coquille manquait (constaté le 03/11/2026).
+          done < <(find deploy -type f \( -name '*.html' -o -name '*.php' \) -not -path 'deploy/plateforme/*' -not -path 'deploy/gestion.veritas-school.com/*')
           # L'Atelier porte AUSSI l'habillage de la vitrine (barre, pied :
           # /assets/veritas-habillage.css, /assets/vitrine.js). Ces liens-là
           # suivent la version du site — sinon un visiteur qui a déjà chargé
@@ -1964,12 +2120,23 @@ jobs:
           # contenu, pas la version du site. Les compter comme « residuels »
           # ferait crier l'etape a chaque deploiement, et une alerte qui crie
           # toujours ne se lit plus.
-          reste=$(grep -rhoE '\.(css|js)\?v=[0-9.]+' deploy --include='*.html' --include='*.php' --exclude-dir=plateforme | grep -v "v=$VER" | sort -u | tr '\n' ' ')
+          reste=$(grep -rhoE '\.(css|js)\?v=[0-9.]+' deploy --include='*.html' --include='*.php' --exclude-dir=plateforme --exclude-dir=gestion.veritas-school.com | grep -v "v=$VER" | sort -u | tr '\n' ' ')
           if [ -n "$reste" ]; then
             echo "::warning title=Versions résiduelles::$reste"
           else
             echo "   Aucune version résiduelle — tous les assets partagent $VER."
           fi
+
+      # ── 🗜️ LES COMMENTAIRES RESTENT DANS LE DÉPÔT (audit 3G du 28/10/2026).
+      #    L'Atelier, l'accueil et app.html livraient leurs commentaires de
+      #    développement à chaque visiteur (197, 47 et 45 Ko) — dont le récit
+      #    des failles corrigées. Retirés ici, sur deploy/ seulement, avec le
+      #    CSS et le JS en ligne minifiés (sans renommage). Les marqueurs d'un
+      #    mot (`<!--vrt-habillage:barre-->`) restent : 🔭 les cherche en
+      #    production. APRÈS les cache-busters et les gardes de jetons, qui
+      #    lisent les pages telles qu'écrites. Tout bloc douteux part tel quel.
+      - name: 🗜️ Alléger les pages les plus lourdes (commentaires, CSS et JS en ligne)
+        run: npx --yes -p esbuild@0.28.2 -c "node tools/alleger_html.cjs deploy"
 
       # ═══════════════════════════════════════════════════════════════════════
       # UN DÉPLOIEMENT PEUT EFFACER LE SITE. LE 30/08, IL L'A FAIT.
@@ -2275,6 +2442,20 @@ jobs:
           if n == 0:
               print("::warning title=Boutique vide::l'API répond, mais aucun ouvrage n'est publiable — la vitrine masquera la boutique.")
           PY
+
+      # ── 📣 IndexNow (06/11/2026) — Bing (donc la recherche de ChatGPT,
+      #    Copilot, DuckDuckGo), Yandex et Seznam apprennent en quelques
+      #    minutes qu'une page est neuve ou modifiée, au lieu d'attendre le
+      #    passage de leur robot. Seules les pages touchées par ce push sont
+      #    signalées (lues dans l'événement GitHub, recoupées avec les sitemaps
+      #    servis). Un moteur indisponible ne doit JAMAIS faire échouer un
+      #    déploiement déjà en ligne : d'où continue-on-error.
+      - name: 📣 Signaler les pages neuves aux moteurs (IndexNow)
+        if: success()
+        continue-on-error: true
+        run: python tools/indexnow.py --evenement "$GITHUB_EVENT_PATH"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: 🔁 Rappel — version du Service Worker
         if: always()

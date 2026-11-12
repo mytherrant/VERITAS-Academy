@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Casques bleus à la frontière — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’ECM (Terminale) : la participation du Cameroun aux missions de paix des Nations unies et les principes de l’assistance humanitaire.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/tle-ecm-casques-bleus-humanitaire.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Casques bleus et humanitaires — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’ECM (Terminale) : la participation du Cameroun aux missions de paix des Nations unies et les principes de l’assistance humanitaire.">
+<meta property="og:url" content="https://veritas-school.com/scenes/tle-ecm-casques-bleus-humanitaire.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Casques bleus et humanitaires","description":"Scène animée d’ECM (Terminale) : la participation du Cameroun aux missions de paix des Nations unies et les principes de l’assistance humanitaire.","url":"https://veritas-school.com/scenes/tle-ecm-casques-bleus-humanitaire.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"Terminale","about":"Éducation à la citoyenneté et à la morale","teaches":"Comprendre comment le Cameroun participe à la paix dans le monde (missions de l’ONU), et ce que sont les principes de l’assistance humanitaire : humanité, neutralité, impartialité, indépendance.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-ecm-casques-bleus',
+  discipline: 'Éducation à la citoyenneté et à la morale', niveau: 'Terminale',
+  titre: 'Casques bleus et humanitaires',
+  decor: 'village', lieu: 'Un village de Centrafrique', moment: 'Pendant une mission de paix de l’ONU',
+  objectif: 'Comprendre comment le Cameroun participe à la paix dans le monde (missions de l’ONU), et ce que sont les principes de l’assistance humanitaire : humanité, neutralité, impartialité, indépendance.',
+  programme: 'Progression harmonisée Tle · Dossier 1 (l’assistance humanitaire), leçon 4 et dossier 2 (le Cameroun à l’ONU et dans ses missions), TD 2 (gestion des conflits en Afrique)',
+  jauges: [
+    { id: 'securite', nom: 'Sécurité des habitants', val: 25, couleur: '#1E499B' },
+    { id: 'confiance', nom: 'Confiance de la population', val: 30, couleur: '#1F9D5B' }
+  ],
+  personnages: {
+    capitaine: { nom: 'Capitaine Nana, casque bleu camerounais', couleur: '#3A4A28', look: { metier: 'soldat', tenue: 'jupe', peau: 'fonce', cheveux: 'chignon', coiffe: 'casque', couleurCoiffe: '#4A90D9' } },
+    infirmier: { nom: 'Moussa, infirmier humanitaire', couleur: '#5AA9C9', look: { metier: 'infirmier', peau: 'brun', cheveux: 'court' } },
+    chef:      { nom: 'Le chef du village', couleur: '#7A2E2E', look: { tenue: 'boubou', peau: 'tresfonce', vieux: true, cheveux: 'aucun', habit: '#E9E3CF', barbe: true } },
+    mere:      { nom: 'Yasmine, mère de famille', couleur: '#C0397C', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#C0397C', habit: '#B4793F' } },
+    arme:      { nom: 'Un homme armé', couleur: '#3A3A44', look: { peau: 'fonce', cheveux: 'ras', habit: '#3A3A44', coiffe: 'bonnet', couleurCoiffe: '#1A1A1A' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['capitaine'], txt: 'Le Cameroun envoie régulièrement des militaires et des policiers dans les missions de paix des Nations unies, notamment en République centrafricaine voisine, au sein de la MINUSCA. Les casques bleus ont un mandat : protéger les civils et accompagner le retour de la paix.', objet: { i: 'groupe', lib: 'Contingent camerounais' } },
+    { t: 'question', q: 'Pourquoi un pays comme le Cameroun participe-t-il à ces missions ?',
+      options: [
+        { txt: 'Par solidarité, parce que l’insécurité d’un voisin le menace aussi (réfugiés, trafics), et pour peser au sein de l’ONU.', ok: true, retour: 'La paix chez le voisin est aussi une sécurité chez soi : le Cameroun accueille de nombreux réfugiés centrafricains.' },
+        { txt: 'Pour conquérir des territoires.', retour: 'Un casque bleu n’a aucun but de conquête : il agit sous mandat du Conseil de sécurité.' },
+        { txt: 'Parce que c’est obligatoire pour tous les pays.', retour: 'Non : chaque État décide de fournir ou non des contingents.' }
+      ] },
+    { t: 'recit', entre: ['chef', 'mere'], txt: 'Le contingent arrive dans un village où des groupes armés ont pillé les greniers. Les habitants observent, méfiants.', jauges: { securite: 40 } },
+    { t: 'dit', qui: 'chef', emo: 'doute', txt: 'Des hommes en armes, nous en avons trop vu. Pourquoi serait-ce différent avec vous ?' },
+    { t: 'dit', qui: 'capitaine', txt: 'Nous ne prenons parti pour aucun groupe. Notre mission est de protéger tout le monde, sans distinction de religion ou d’ethnie.', jauges: { confiance: 45 } },
+    { t: 'recit', entre: ['infirmier'], txt: 'Un infirmier d’une organisation humanitaire installe un poste de soins sous un manguier.' },
+    { t: 'dit', qui: 'infirmier', txt: 'Je soigne quiconque est blessé ou malade. Je ne demande à personne de quel camp il est.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · les principes humanitaires', consigne: 'Associe chaque comportement au principe humanitaire qu’il illustre.',
+      cats: ['Humanité', 'Neutralité', 'Impartialité', 'Indépendance'],
+      items: [
+        { txt: 'Soulager la souffrance partout où elle se trouve.', cat: 0 },
+        { txt: 'Ne prendre parti dans aucun conflit.', cat: 1 },
+        { txt: 'Soigner d’abord les plus gravement atteints, sans discrimination.', cat: 2 },
+        { txt: 'Décider de son action sans obéir à un gouvernement ou à un groupe armé.', cat: 3 }
+      ],
+      bravo: 'Ces quatre principes protègent les humanitaires : c’est parce qu’ils ne prennent pas parti qu’on les laisse passer.' },
+    { t: 'recit', entre: ['arme'], txt: 'Un homme armé surgit au poste de soins. Un de ses compagnons est blessé.', jauges: { securite: 25 } },
+    { t: 'dit', qui: 'arme', emo: 'colere', txt: 'Soignez-le, tout de suite. Et ne dites rien aux soldats.' },
+    { t: 'dit', qui: 'mere', emo: 'peur', jeu: 'tout bas, à l’infirmier', txt: 'Ce sont eux qui ont brûlé nos greniers. Vous n’allez pas le soigner ?' },
+    { t: 'choix', qui: 'infirmier', q: 'Tu es Moussa. Que fais-tu ?',
+      options: [
+        { txt: 'Je refuse de soigner un combattant ennemi des villageois.', consequence: 'Tu prends parti : demain, les groupes armés t’interdiront l’accès aux zones qu’ils contrôlent, et d’autres blessés mourront.', jauges: { confiance: -10 } },
+        { txt: 'Je le soigne, comme n’importe quel blessé, et j’exige que les armes restent hors du poste de soins.', consequence: 'Tu appliques l’impartialité et la neutralité. Le poste de soins reste un lieu protégé pour tous.', jauges: { confiance: 20, securite: 10 } },
+        { txt: 'Je le soigne et je préviens discrètement les soldats.', consequence: 'Tu trahis ta neutralité : si cela se sait, plus aucun humanitaire ne sera en sécurité.', jauges: { confiance: -15 } }
+      ],
+      oeuvre: 'Le droit international humanitaire impose de soigner tous les blessés, combattants compris. La neutralité des soignants est leur protection.' },
+    { t: 'dit', qui: 'capitaine', jeu: 'elle arrive avec sa patrouille', txt: 'Monsieur, ce poste de soins est protégé. Déposez votre arme : votre camarade sera soigné, vous serez en sécurité ici.', jauges: { securite: 70 } },
+    { t: 'question', q: 'Pourquoi la capitaine ne tire-t-elle pas sur l’homme armé ?',
+      options: [
+        { txt: 'Les casques bleus n’emploient la force qu’en dernier recours, pour se défendre ou protéger des civils : ici, la désescalade suffit.', ok: true, retour: 'Une mission de paix cherche à faire baisser la violence, pas à l’ajouter.' },
+        { txt: 'Parce qu’elle a peur.', retour: 'C’est une règle d’engagement, pas une question de peur.' }
+      ] },
+    { t: 'dit', qui: 'chef', emo: 'joie', txt: 'Ce soir, pour la première fois depuis longtemps, les enfants dormiront au village.', jauges: { confiance: 80 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · le retour de la paix', consigne: 'Remets dans l’ordre les étapes d’une mission de paix.',
+      items: [
+        'Le Conseil de sécurité de l’ONU vote un mandat.',
+        'Des États volontaires, dont le Cameroun, fournissent des contingents.',
+        'Les casques bleus protègent les civils et sécurisent les routes.',
+        'Les humanitaires soignent et nourrissent la population.',
+        'Les communautés dialoguent ; l’État reconstruit ses services.'
+      ],
+      bravo: 'La sécurité d’abord, puis l’aide, puis la réconciliation : la paix se construit par étapes.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · protéger sans prendre parti',
+    intro: 'Règle la neutralité des acteurs, l’usage de la force et le dialogue avec la population : le village retrouve-t-il la paix ?',
+    persos: ['capitaine', 'infirmier', 'chef', 'mere', 'arme'],
+    curseurs: [
+      { id: 'neutralite', nom: 'Neutralité des casques bleus et humanitaires', val: 80, bas: 'partiaux', haut: 'neutres' },
+      { id: 'force', nom: 'Usage de la force', val: 25, bas: 'dernier recours', haut: 'systématique', lecture: { haut: 'On tire d’abord : la violence monte.', bas: 'On dissuade et on désamorce.' } },
+      { id: 'dialogue', nom: 'Dialogue avec la population', val: 65, bas: 'absent', haut: 'constant' }
+    ],
+    scenarios: [
+      { nom: 'Comme dans la scène', icone: 'groupe', valeurs: { neutralite: 80, force: 25, dialogue: 65 } },
+      { nom: 'Des casques bleus partiaux', icone: 'balance', valeurs: { neutralite: 15 } },
+      { nom: 'La force d’abord', icone: 'poing', valeurs: { force: 90, dialogue: 20 } }
+    ],
+    liens: [
+      { a: 'capitaine', b: 'chef', type: 'confiance', lib: 'protection', base: .2, poids: { dialogue: .6 } },
+      { a: 'infirmier', b: 'mere', type: 'alliance', lib: 'soins', base: .5, poids: { neutralite: .3 } },
+      { a: 'arme', b: 'mere', type: 'domination', lib: 'menace', base: .8, poids: { force: .2, neutralite: -.4 } },
+      { a: 'capitaine', b: 'arme', type: 'conflit', lib: 'face-à-face', base: .3, poids: { force: .7 } }
+    ],
+    issue: function(v){
+      if(v.force > 65){ return { niveau: 'ko', badge: 'L’engrenage', recit: 'Les tirs appellent les représailles ; les habitants se retrouvent pris entre deux feux.', apres: 'Une force de paix qui fait la guerre perd sa raison d’être.', themes: ['escalade'] }; }
+      if(v.neutralite < 35){ return { niveau: 'ko', badge: 'Une mission discréditée', recit: 'On accuse les casques bleus de protéger un camp : l’autre les attaque, la population ne leur fait plus confiance.', apres: 'La neutralité n’est pas de l’indifférence : c’est la condition de l’action.', themes: ['neutralité'] }; }
+      if(v.dialogue < 35){ return { niveau: 'moyen', badge: 'Une paix armée', recit: 'Le calme revient, mais les habitants ne comprennent pas la mission et ne s’y associent pas.', apres: 'Sans la confiance des populations, la paix dure le temps de la présence militaire.', themes: ['dialogue'] }; }
+      return { niveau: 'ok', badge: 'La paix revient', recit: 'Protection, soins pour tous, dialogue : la confiance renaît, les familles rentrent.', apres: 'C’est l’objectif des missions auxquelles participe le Cameroun.', themes: ['maintien de la paix', 'principes humanitaires'] };
+    }
+  },
+  quiz: [
+    { q: 'Qui décide d’une mission de paix de l’ONU ?', options: [
+      { txt: 'Le Conseil de sécurité.', ok: true, retour: 'Il vote le mandat.' },
+      { txt: 'Le pays qui envoie les soldats.', retour: 'Il fournit des contingents, mais le mandat vient de l’ONU.' } ] },
+    { q: 'Comment s’appelle la mission de l’ONU en Centrafrique ?', options: [
+      { txt: 'La MINUSCA.', ok: true, retour: 'Le Cameroun y fournit militaires et policiers.' },
+      { txt: 'La CEMAC.', retour: 'C’est la communauté économique d’Afrique centrale.' } ] },
+    { q: 'Que signifie l’impartialité humanitaire ?', options: [
+      { txt: 'Aider selon les besoins, sans discrimination.', ok: true, retour: 'Les plus urgents d’abord.' },
+      { txt: 'Aider seulement ses compatriotes.', retour: 'C’est l’inverse.' } ] },
+    { q: 'Faut-il soigner un combattant blessé ?', options: [
+      { txt: 'Oui : tous les blessés doivent être soignés.', ok: true, retour: 'C’est une règle du droit international humanitaire.' },
+      { txt: 'Non, s’il est du camp adverse.', retour: 'La neutralité des soins protège tout le monde.' } ] },
+    { q: 'Quand un casque bleu peut-il employer la force ?', options: [
+      { txt: 'En dernier recours, pour se défendre ou protéger des civils.', ok: true, retour: 'Selon son mandat.' },
+      { txt: 'Chaque fois qu’il le souhaite.', retour: 'Non : ses règles d’engagement sont strictes.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Le Cameroun participe aux missions de paix de l’ONU, notamment en Centrafrique (MINUSCA).',
+      'Les casques bleus agissent sous mandat du Conseil de sécurité ; ils protègent les civils et n’emploient la force qu’en dernier recours.',
+      'Principes humanitaires : humanité, neutralité, impartialité, indépendance.',
+      'La paix se construit par étapes : sécurité, aide, dialogue, reconstruction.'
+    ],
+    ecrire: 'Le club ECM de votre lycée organise une collecte pour des réfugiés. Rédigez l’appel (dix à quinze lignes) en expliquant pourquoi l’aide doit être donnée à tous, sans distinction.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Casques bleus et humanitaires</h1>
+<p><b>Éducation à la citoyenneté et à la morale · Terminale</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Comprendre comment le Cameroun participe à la paix dans le monde (missions de l’ONU), et ce que sont les principes de l’assistance humanitaire : humanité, neutralité, impartialité, indépendance.</p>
+<p>Programme : Progression harmonisée Tle · Dossier 1 (l’assistance humanitaire), leçon 4 et dossier 2 (le Cameroun à l’ONU et dans ses missions), TD 2 (gestion des conflits en Afrique)</p>
+<p>Lieu : Un village de Centrafrique · Pendant une mission de paix de l’ONU</p>
+<h3>Personnages</h3><ul><li>Capitaine Nana, casque bleu camerounais</li><li>Moussa, infirmier humanitaire</li><li>Le chef du village</li><li>Yasmine, mère de famille</li><li>Un homme armé</li></ul>
+<h3>La scène</h3>
+<p>Le Cameroun envoie régulièrement des militaires et des policiers dans les missions de paix des Nations unies, notamment en République centrafricaine voisine, au sein de la MINUSCA. Les casques bleus ont un mandat : protéger les civils et accompagner le retour de la paix.</p>
+<p><b>Question :</b> Pourquoi un pays comme le Cameroun participe-t-il à ces missions ?</p><ul><li>Par solidarité, parce que l’insécurité d’un voisin le menace aussi (réfugiés, trafics), et pour peser au sein de l’ONU. <b>(bonne réponse)</b></li><li>Pour conquérir des territoires.</li><li>Parce que c’est obligatoire pour tous les pays.</li></ul><p>La paix chez le voisin est aussi une sécurité chez soi : le Cameroun accueille de nombreux réfugiés centrafricains.</p>
+<p>Le contingent arrive dans un village où des groupes armés ont pillé les greniers. Les habitants observent, méfiants.</p>
+<p><b>Le chef du village</b> : Des hommes en armes, nous en avons trop vu. Pourquoi serait-ce différent avec vous ?</p>
+<p><b>Capitaine Nana, casque bleu camerounais</b> : Nous ne prenons parti pour aucun groupe. Notre mission est de protéger tout le monde, sans distinction de religion ou d’ethnie.</p>
+<p>Un infirmier d’une organisation humanitaire installe un poste de soins sous un manguier.</p>
+<p><b>Moussa, infirmier humanitaire</b> : Je soigne quiconque est blessé ou malade. Je ne demande à personne de quel camp il est.</p>
+<h4>Atelier · les principes humanitaires</h4><p>Associe chaque comportement au principe humanitaire qu’il illustre.</p>
+<ul><li><b>Humanité</b> : Soulager la souffrance partout où elle se trouve.</li><li><b>Neutralité</b> : Ne prendre parti dans aucun conflit.</li><li><b>Impartialité</b> : Soigner d’abord les plus gravement atteints, sans discrimination.</li><li><b>Indépendance</b> : Décider de son action sans obéir à un gouvernement ou à un groupe armé.</li></ul>
+<p>Ces quatre principes protègent les humanitaires : c’est parce qu’ils ne prennent pas parti qu’on les laisse passer.</p>
+<p>Un homme armé surgit au poste de soins. Un de ses compagnons est blessé.</p>
+<p><b>Un homme armé</b> : Soignez-le, tout de suite. Et ne dites rien aux soldats.</p>
+<p><b>Yasmine, mère de famille</b> <i>(tout bas, à l’infirmier)</i> : Ce sont eux qui ont brûlé nos greniers. Vous n’allez pas le soigner ?</p>
+<p><b>À toi de décider :</b> Tu es Moussa. Que fais-tu ?</p><ul><li>Je refuse de soigner un combattant ennemi des villageois. — Tu prends parti : demain, les groupes armés t’interdiront l’accès aux zones qu’ils contrôlent, et d’autres blessés mourront.</li><li>Je le soigne, comme n’importe quel blessé, et j’exige que les armes restent hors du poste de soins. — Tu appliques l’impartialité et la neutralité. Le poste de soins reste un lieu protégé pour tous.</li><li>Je le soigne et je préviens discrètement les soldats. — Tu trahis ta neutralité : si cela se sait, plus aucun humanitaire ne sera en sécurité.</li></ul>
+<p><b>Capitaine Nana, casque bleu camerounais</b> <i>(elle arrive avec sa patrouille)</i> : Monsieur, ce poste de soins est protégé. Déposez votre arme : votre camarade sera soigné, vous serez en sécurité ici.</p>
+<p><b>Question :</b> Pourquoi la capitaine ne tire-t-elle pas sur l’homme armé ?</p><ul><li>Les casques bleus n’emploient la force qu’en dernier recours, pour se défendre ou protéger des civils : ici, la désescalade suffit. <b>(bonne réponse)</b></li><li>Parce qu’elle a peur.</li></ul><p>Une mission de paix cherche à faire baisser la violence, pas à l’ajouter.</p>
+<p><b>Le chef du village</b> : Ce soir, pour la première fois depuis longtemps, les enfants dormiront au village.</p>
+<h4>Atelier · le retour de la paix</h4><p>Remets dans l’ordre les étapes d’une mission de paix.</p>
+<ol><li>Le Conseil de sécurité de l’ONU vote un mandat.</li><li>Des États volontaires, dont le Cameroun, fournissent des contingents.</li><li>Les casques bleus protègent les civils et sécurisent les routes.</li><li>Les humanitaires soignent et nourrissent la population.</li><li>Les communautés dialoguent ; l’État reconstruit ses services.</li></ol>
+<p>La sécurité d’abord, puis l’aide, puis la réconciliation : la paix se construit par étapes.</p>
+<h3>Quiz</h3><ol><li>Qui décide d’une mission de paix de l’ONU ? — <b>Le Conseil de sécurité.</b> Il vote le mandat.</li><li>Comment s’appelle la mission de l’ONU en Centrafrique ? — <b>La MINUSCA.</b> Le Cameroun y fournit militaires et policiers.</li><li>Que signifie l’impartialité humanitaire ? — <b>Aider selon les besoins, sans discrimination.</b> Les plus urgents d’abord.</li><li>Faut-il soigner un combattant blessé ? — <b>Oui : tous les blessés doivent être soignés.</b> C’est une règle du droit international humanitaire.</li><li>Quand un casque bleu peut-il employer la force ? — <b>En dernier recours, pour se défendre ou protéger des civils.</b> Selon son mandat.</li></ol>
+<h3>À retenir</h3><ul><li>Le Cameroun participe aux missions de paix de l’ONU, notamment en Centrafrique (MINUSCA).</li><li>Les casques bleus agissent sous mandat du Conseil de sécurité ; ils protègent les civils et n’emploient la force qu’en dernier recours.</li><li>Principes humanitaires : humanité, neutralité, impartialité, indépendance.</li><li>La paix se construit par étapes : sécurité, aide, dialogue, reconstruction.</li></ul>
+<h3>À écrire</h3><p>Le club ECM de votre lycée organise une collecte pour des réfugiés. Rédigez l’appel (dix à quinze lignes) en expliquant pourquoi l’aide doit être donnée à tous, sans distinction.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="tle-ecm-casques-bleus-humanitaire.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

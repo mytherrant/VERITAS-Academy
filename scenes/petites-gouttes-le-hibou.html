@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L’oiseau qu’on brûle — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Petites gouttes de chant pour créer l’Homme de René Philombe : un hibou, une superstition, un souvenir d’enfance, et un sonnet.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/petites-gouttes-le-hibou.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="L’oiseau qu’on brûle — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’après Petites gouttes de chant pour créer l’Homme de René Philombe : un hibou, une superstition, un souvenir d’enfance, et un sonnet.">
+<meta property="og:url" content="https://veritas-school.com/scenes/petites-gouttes-le-hibou.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"L’oiseau qu’on brûle","description":"Scène animée d’après Petites gouttes de chant pour créer l’Homme de René Philombe : un hibou, une superstition, un souvenir d’enfance, et un sonnet.","url":"https://veritas-school.com/scenes/petites-gouttes-le-hibou.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"3ᵉ","about":"Français","teaches":"Suivre un raisonnement complet (croyance, absence de preuve, exemple vécu, savoir) puis lire un sonnet régulier.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"},"isBasedOn":{"@type":"Book","name":"Petites gouttes de chant pour créer l’Homme","author":{"@type":"Person","name":"René Philombe"}}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'petites-gouttes-hibou',
+  discipline: 'Français', niveau: '3e',
+  oeuvre: 'Petites gouttes de chant pour créer l’Homme', auteur: 'René Philombe',
+  titre: 'L’oiseau qu’on brûle',
+  decor: 'village', ambiance: 'nuit', lieu: 'un village du Cameroun, la nuit', moment: 'Poème XIV, « Le hibou »',
+  avertissement: 'La prose et le sonnet sont ceux du poète, recopiés tels quels (poème entier). Les répliques des villageois et du maître sont jouées par nos comédiens.',
+  objectif: 'Suivre un raisonnement complet (croyance, absence de preuve, exemple vécu, savoir) puis lire un sonnet régulier.',
+  jauges: [
+    { id: 'peur', nom: 'Peur du village', val: 80, couleur: '#7B5CD6' },
+    { id: 'savoir', nom: 'Savoir', val: 10, couleur: '#1F9D5B' }
+  ],
+  personnages: {
+    poete:     { nom: 'Le poète', couleur: '#1E499B', look: { peau: 'fonce', vieux: true, cheveux: 'ras', lunettes: true, tenue: 'costume', habit: '#2B3A55', objet: 'livre' } },
+    enfant:    { nom: 'L’enfant qu’il était', court: 'L’enfant', couleur: '#D9822B', look: { metier: 'eleve', peau: 'fonce', cheveux: 'ras' } },
+    villageois:{ nom: 'Les villageois', couleur: '#5A6275', groupe: true, look: { peau: 'fonce', cheveux: 'ras', tenue: 'boubou', habit: '#6E7385' } },
+    maitre:    { nom: 'Le maître d’école', court: 'Le maître', couleur: '#2E6B5A', look: { metier: 'enseignant', peau: 'fonce', cheveux: 'ras' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['poete'], txt: 'Rares sont ceux qui, en Afrique noire, regardent le hibou d’un œil aimable. Tout un village grelotte d’angoisse après une nuit secouée de hululements.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »' },
+    { t: 'dit', qui: 'villageois', entre: ['villageois'], emo: 'peur', txt: 'C’est un oiseau de malheur !', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »' },
+    { t: 'recit', txt: 'Mais personne ne vous expliquerait pourquoi. Tout au plus, se bornerait-on à vous répéter que nos ancêtres n’étaient pas des écervelés en le croyant.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »' },
+    { t: 'question', q: 'Quelle preuve les villageois donnent-ils de leur croyance ?',
+      options: [
+        { txt: 'Aucune : ils répètent seulement ce que croyaient les ancêtres.', ok: true, retour: 'C’est le premier pas du raisonnement : une croyance qui ne s’explique pas.' },
+        { txt: 'Le hibou a déjà attaqué quelqu’un.', retour: 'Le texte ne dit rien de tel : « personne ne vous expliquerait pourquoi ».' }
+      ] },
+    { t: 'recit', entre: ['enfant'], txt: 'Enfant, j’ai assisté un jour à une scène qui marqua mon cœur au fer rouge, et que je n’oublierai jamais.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »' },
+    { t: 'recit', txt: 'Un hibou s’est réfugié dans une case. Le poète raconte : « […] des villageois y accoururent, nombreux, en poussant des cris horrifiés. Tous affirmaient que cet oiseau était un génie malfaisant envoyé par quelque méchant sorcier. Aussi le condamnèrent-ils à être brûlé vif... »', objet: { i: 'flamme', lib: 'Le feu' }, jauges: { peur: 100 } },
+    { t: 'choix', qui: 'enfant', q: 'Tu es l’enfant. Tout le village crie autour de l’oiseau. Que ressens-tu ?',
+      options: [
+        { txt: 'La peur, comme tout le monde.', consequence: 'Tu fais confiance aux grands… mais l’oiseau brûle.', jauges: { peur: 100 } },
+        { txt: 'De la pitié pour l’oiseau.', consequence: 'C’est ce que ressent l’enfant du poème : cette pitié ne le quittera plus.', jauges: { peur: 60 } },
+        { txt: 'De la curiosité : pourquoi serait-il malfaisant ?', consequence: 'La bonne question… à laquelle personne ne répond.', jauges: { savoir: 25 } }
+      ],
+      oeuvre: '« Depuis, j’ai toujours pris en pitié tous les hiboux qui peuplent mon Cameroun natal. »' },
+    { t: 'dit', qui: 'maitre', entre: ['maitre'], jeu: 'au tableau, des années plus tard', txt: 'Le hibou est un rapace nocturne. Il chasse la nuit les rats, les souris, les mulots. Ce sont eux qui ravagent les greniers.' },
+    { t: 'recit', txt: 'Or, quelques années plus tard, je devais apprendre à l’école que le hibou est un oiseau très utile. En effet, il est prouvé que la nuit venue, il tue des rats et des mulots si nuisibles à l’agriculture.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »', jauges: { savoir: 85, peur: 30 } },
+    { t: 'dit', qui: 'poete', emo: 'fier', txt: 'Je pense que la Science mérite seule d’être écoutée au détriment de la superstition.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »' },
+    { t: 'dit', qui: 'poete', txt: 'Chaque poète devant avoir son symbole, j’ai choisi, moi, cet oiseau nocturne. D’abord, parce que j’aime sa tête de vieux sage d’où jaillit un regard d’une profondeur poétique.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »' },
+    { t: 'vers', qui: 'poete', jeu: 'il récite le sonnet', txt: 'Le hibou, cet oiseau des funestes augures,\nEst fait pour apeurer les plus fermes d’esprits.\nSa tête perforée de grands yeux ahuris\nRenferme des pensées et des sciences obscures.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »' },
+    { t: 'vers', qui: 'poete', txt: 'Tant que rit le soleil sur toutes les verdures,\nIl reste dans un coin, ce rêveur incompris ;\nEt là, nonchalamment, sans pousser aucun cri,\nSe cache des vivants dans des voluptés pures.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »' },
+    { t: 'vers', qui: 'poete', txt: 'Mais quand coulent des cieux les ténèbres paisibles,\nIl s’éveille et déploie sa généreuse ardeur\nPour tuer dans nos champs des bestioles nuisibles.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »' },
+    { t: 'vers', qui: 'poete', jeu: 'lentement', txt: 'Le sage a du hibou ce noble caractère :\nEn offrant au prochain le meilleur de son cœur,\nIl couvre son bienfait de nuit et de mystère.', cite: 'René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »' },
+    { t: 'question', q: 'Deux quatrains, deux tercets, des alexandrins rimés : quelle est cette forme ?',
+      options: [
+        { txt: 'Un sonnet.', ok: true, retour: 'Quatorze vers. Tout le recueil est en vers libres : pour sa leçon de sagesse, Philombe choisit la forme la plus rangée.' },
+        { txt: 'Un haïku.', retour: 'Le haïku a trois vers très courts.' }
+      ] },
+    { t: 'question', q: 'Que veut dire le dernier tercet ?',
+      options: [
+        { txt: 'Le sage, comme le hibou, fait le bien sans le faire savoir.', ok: true, retour: '« Il couvre son bienfait de nuit et de mystère. »' },
+        { txt: 'Le sage doit dormir le jour.', retour: 'C’est une image : il agit dans l’ombre, sans se vanter.' }
+      ] },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · le raisonnement du poète', consigne: 'Remets les étapes du texte en prose dans l’ordre.',
+      items: ['Tout le monde dit : « C’est un oiseau de malheur ! »', 'Personne n’explique pourquoi.', 'Le souvenir : un hibou brûlé vif par les villageois.', 'L’école : le hibou est un oiseau utile.', 'La conclusion : la Science mérite seule d’être écoutée.'],
+      bravo: 'Thèse adverse, absence de preuve, exemple vécu, savoir, thèse défendue : le plan d’un vrai texte argumentatif.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · le sort du hibou',
+    intro: 'Règle la peur du village, le savoir de l’école et la pitié de l’enfant : que devient le hibou trouvé dans la case ?',
+    persos: ['villageois', 'enfant', 'maitre', 'poete'],
+    curseurs: [
+      { id: 'peur', nom: 'Peur du village', val: 90, bas: 'calme', haut: 'panique', lecture: { haut: '« des cris horrifiés »', bas: 'On regarde l’oiseau sans trembler.' } },
+      { id: 'savoir', nom: 'Savoir de l’école', val: 10, bas: 'ignoré', haut: 'connu de tous', lecture: { haut: '« il tue des rats et des mulots »', bas: 'Personne ne sait à quoi sert le hibou.' } },
+      { id: 'pitie', nom: 'Pitié de l’enfant', val: 60, bas: 'aucune', haut: 'il ose parler', lecture: { haut: 'Un enfant qui ose dire « arrêtez ».', bas: 'L’enfant se tait.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans le souvenir', icone: 'livre', valeurs: { peur: 90, savoir: 10, pitie: 60 } },
+      { nom: 'Et si le village savait ?', icone: 'ecole', valeurs: { savoir: 90, peur: 30 } },
+      { nom: 'Et si l’enfant osait parler ?', icone: 'aide', valeurs: { pitie: 95 } }
+    ],
+    liens: [
+      { a: 'villageois', b: 'enfant', type: 'domination', lib: 'les grands', base: .4, poids: { peur: .4 } },
+      { a: 'maitre', b: 'enfant', type: 'confiance', lib: 'le savoir', base: .2, poids: { savoir: .6 } },
+      { a: 'poete', b: 'enfant', type: 'amour', lib: 'souvenir', base: .7 }
+    ],
+    issue: function(v){
+      if(v.savoir >= 60){ return { niveau: 'ok', badge: 'Le hibou épargné', recit: 'Les villageois savent que l’oiseau protège leurs greniers. On le laisse repartir dans la nuit.', apres: 'C’est la leçon du poète : la Science contre la superstition.', themes: ['savoir', 'raison'] }; }
+      if(v.pitie >= 85){ return { niveau: 'moyen', badge: 'Une voix d’enfant', recit: 'L’enfant crie « arrêtez ! ». Les grands hésitent… sans savoir pourquoi ils devraient l’écouter.', apres: 'La pitié ouvre la porte ; seul le savoir peut convaincre.', themes: ['courage', 'pitié'] }; }
+      return { niveau: 'ko', badge: 'L’oiseau brûlé vif', recit: 'La peur l’emporte : le hibou est condamné comme « génie malfaisant ».', apres: 'C’est le souvenir qui « marqua au fer rouge » le cœur du poète.', themes: ['superstition', 'violence'] };
+    }
+  },
+  fiche: {"accroche": "Un inconnu frappe à ta porte et te demande de lui ouvrir ton cœur. Ouvrirais-tu ? Le poème ne le dit jamais : à toi de répondre.", "resume": "Vingt-deux poèmes de René Philombe, numérotés de I à XXII, suivis d’un long poème, « Les Blancs partis, les Nègres dansent ». Des vers libres, presque sans ponctuation, portés par la répétition, pour « créer l’Homme » : dénoncer la faim, la guerre et la servitude, et ouvrir la porte à l’autre.", "personnages": [{"nom": "Celui qui frappe", "cle": "voyageur", "role": "l’inconnu, l’autre : « l’homme de tous les temps »."}, {"nom": "Celui qui n’ouvre pas", "cle": "habitant", "role": "derrière la porte, il hésite."}, {"nom": "L’Homme", "role": "l’espèce humaine tout entière, d’où la majuscule du titre."}, {"nom": "Le hibou", "role": "accusé par tout un village, utile à tout un village (poème XIV)."}, {"nom": "Les dormeurs", "role": "ceux qui laissent faire (poème XV)."}, {"nom": "L’esclave", "role": "il plie l’échine, « un œil dangereusement ouvert »."}], "aLire": [{"ou": "« L’homme qui te ressemble » (XVI)", "pourquoi": "Le poème de la porte, à lire et à jouer à deux voix."}, {"ou": "« Le hibou » (XIV)", "pourquoi": "Une histoire d’enfance, puis un sonnet : l’oiseau qu’on accuse sans savoir."}, {"ou": "« Dix amours de poète » (XII)", "pourquoi": "Ce que le poète aime… et le dernier amour n’est pas comme les autres."}], "siTuAimes": "les textes qui se disent plus qu’ils ne se lisent : Philombe écrit pour l’oreille, c’est le souffle qui coupe ses vers.", "reperes": ["Auteur : René Philombe (Cameroun) ; prix Mottart de l’Académie française 1966 pour Lettres de ma cambuse", "Ses livres ont été traduits en anglais, en allemand et en russe", "Éditions CLE et Semences africaines", "22 poèmes numérotés et un long poème final"], "themes": ["la fraternité", "l’accueil de l’autre", "l’injustice", "la faim"], "cahier": {"lib": "Le cahier VÉRITAS des œuvres de 3e", "href": "../livrets/oeuvres-3e.html"}},
+  quiz: [
+    { q: 'Que dit-on du hibou dans le village ?', options: [ { txt: '« C’est un oiseau de malheur ! »', ok: true, retour: 'Sans jamais l’expliquer.' }, { txt: 'Qu’il porte bonheur.', retour: 'C’est le contraire.' } ] },
+    { q: 'Qu’arrive-t-il au hibou trouvé dans la case ?', options: [ { txt: 'Il est condamné à être brûlé vif.', ok: true, retour: 'Une scène que le poète n’a jamais oubliée.' }, { txt: 'On le met en cage.', retour: 'Non : on le brûle vif.' } ] },
+    { q: 'Qu’apprend le poète à l’école ?', options: [ { txt: 'Que le hibou tue les rats et les mulots nuisibles à l’agriculture.', ok: true, retour: 'L’oiseau qu’on brûlait protégeait les récoltes.' }, { txt: 'Que le hibou est dangereux.', retour: 'C’est le contraire : il est utile.' } ] },
+    { q: 'Combien de vers compte un sonnet ?', options: [ { txt: 'Quatorze.', ok: true, retour: 'Deux quatrains et deux tercets.' }, { txt: 'Douze.', retour: 'Douze, c’est le nombre de syllabes d’un alexandrin.' } ] },
+    { q: 'Que signifie « funeste » ?', options: [ { txt: 'Qui annonce ou apporte le malheur.', ok: true, retour: '« cet oiseau des funestes augures ».' }, { txt: 'Qui est très drôle.', retour: 'Non : qui apporte le malheur.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Le texte en prose suit un raisonnement : croyance, absence de preuve, souvenir, savoir, conclusion.',
+      'Le souvenir du hibou brûlé vif a « marqué au fer rouge » le cœur de l’enfant.',
+      'Philombe défend la Science contre la superstition.',
+      'Le sonnet final compare le sage au hibou : il fait le bien dans l’ombre.'
+    ],
+    ecrire: 'Choisis une croyance que tu as entendue autour de toi. Écris un texte argumentatif (vingt lignes) qui suit le même plan que Philombe : ce qu’on dit, l’absence de preuve, un exemple, ce que dit le savoir.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>L’oiseau qu’on brûle</h1>
+<p><b>Français · 3ᵉ · Petites gouttes de chant pour créer l’Homme · René Philombe</b></p>
+<p><i>La prose et le sonnet sont ceux du poète, recopiés tels quels (poème entier). Les répliques des villageois et du maître sont jouées par nos comédiens.</i></p>
+<h3>Objectif</h3><p>Suivre un raisonnement complet (croyance, absence de preuve, exemple vécu, savoir) puis lire un sonnet régulier.</p>
+<p>Lieu : un village du Cameroun, la nuit · Poème XIV, « Le hibou »</p>
+<h3>Personnages</h3><ul><li>Le poète</li><li>L’enfant qu’il était</li><li>Les villageois</li><li>Le maître d’école</li></ul>
+<h3>L’œuvre</h3>
+<p>Un inconnu frappe à ta porte et te demande de lui ouvrir ton cœur. Ouvrirais-tu ? Le poème ne le dit jamais : à toi de répondre.</p>
+<p>Vingt-deux poèmes de René Philombe, numérotés de I à XXII, suivis d’un long poème, « Les Blancs partis, les Nègres dansent ». Des vers libres, presque sans ponctuation, portés par la répétition, pour « créer l’Homme » : dénoncer la faim, la guerre et la servitude, et ouvrir la porte à l’autre.</p>
+<ul><li><b>Celui qui frappe</b> — l’inconnu, l’autre : « l’homme de tous les temps ».</li><li><b>Celui qui n’ouvre pas</b> — derrière la porte, il hésite.</li><li><b>L’Homme</b> — l’espèce humaine tout entière, d’où la majuscule du titre.</li><li><b>Le hibou</b> — accusé par tout un village, utile à tout un village (poème XIV).</li><li><b>Les dormeurs</b> — ceux qui laissent faire (poème XV).</li><li><b>L’esclave</b> — il plie l’échine, « un œil dangereusement ouvert ».</li></ul>
+<p>Thèmes : la fraternité, l’accueil de l’autre, l’injustice, la faim</p>
+<h3>La scène</h3>
+<blockquote><p>Rares sont ceux qui, en Afrique noire, regardent le hibou d’un œil aimable. Tout un village grelotte d’angoisse après une nuit secouée de hululements.<br><small>Extrait de l’œuvre — René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »</small></p></blockquote>
+<blockquote><p><b>Les villageois</b> :<br>C’est un oiseau de malheur !<br><small>Extrait de l’œuvre — René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »</small></p></blockquote>
+<blockquote><p>Mais personne ne vous expliquerait pourquoi. Tout au plus, se bornerait-on à vous répéter que nos ancêtres n’étaient pas des écervelés en le croyant.<br><small>Extrait de l’œuvre — René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »</small></p></blockquote>
+<p><b>Question :</b> Quelle preuve les villageois donnent-ils de leur croyance ?</p><ul><li>Aucune : ils répètent seulement ce que croyaient les ancêtres. <b>(bonne réponse)</b></li><li>Le hibou a déjà attaqué quelqu’un.</li></ul><p>C’est le premier pas du raisonnement : une croyance qui ne s’explique pas.</p>
+<blockquote><p>Enfant, j’ai assisté un jour à une scène qui marqua mon cœur au fer rouge, et que je n’oublierai jamais.<br><small>Extrait de l’œuvre — René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »</small></p></blockquote>
+<p>Un hibou s’est réfugié dans une case. Le poète raconte : « […] des villageois y accoururent, nombreux, en poussant des cris horrifiés. Tous affirmaient que cet oiseau était un génie malfaisant envoyé par quelque méchant sorcier. Aussi le condamnèrent-ils à être brûlé vif... »</p>
+<p><b>À toi de décider :</b> Tu es l’enfant. Tout le village crie autour de l’oiseau. Que ressens-tu ?</p><ul><li>La peur, comme tout le monde. — Tu fais confiance aux grands… mais l’oiseau brûle.</li><li>De la pitié pour l’oiseau. — C’est ce que ressent l’enfant du poème : cette pitié ne le quittera plus.</li><li>De la curiosité : pourquoi serait-il malfaisant ? — La bonne question… à laquelle personne ne répond.</li></ul>
+<p><b>Le maître d’école</b> <i>(au tableau, des années plus tard)</i> : Le hibou est un rapace nocturne. Il chasse la nuit les rats, les souris, les mulots. Ce sont eux qui ravagent les greniers.</p>
+<blockquote><p>Or, quelques années plus tard, je devais apprendre à l’école que le hibou est un oiseau très utile. En effet, il est prouvé que la nuit venue, il tue des rats et des mulots si nuisibles à l’agriculture.<br><small>Extrait de l’œuvre — René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »</small></p></blockquote>
+<blockquote><p><b>Le poète</b> :<br>Je pense que la Science mérite seule d’être écoutée au détriment de la superstition.<br><small>Extrait de l’œuvre — René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »</small></p></blockquote>
+<blockquote><p><b>Le poète</b> :<br>Chaque poète devant avoir son symbole, j’ai choisi, moi, cet oiseau nocturne. D’abord, parce que j’aime sa tête de vieux sage d’où jaillit un regard d’une profondeur poétique.<br><small>Extrait de l’œuvre — René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »</small></p></blockquote>
+<blockquote><p><b>Le poète</b> <i>(il récite le sonnet)</i> :<br>Le hibou, cet oiseau des funestes augures,<br>Est fait pour apeurer les plus fermes d’esprits.<br>Sa tête perforée de grands yeux ahuris<br>Renferme des pensées et des sciences obscures.<br><small>Extrait de l’œuvre — René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »</small></p></blockquote>
+<blockquote><p><b>Le poète</b> :<br>Tant que rit le soleil sur toutes les verdures,<br>Il reste dans un coin, ce rêveur incompris ;<br>Et là, nonchalamment, sans pousser aucun cri,<br>Se cache des vivants dans des voluptés pures.<br><small>Extrait de l’œuvre — René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »</small></p></blockquote>
+<blockquote><p><b>Le poète</b> :<br>Mais quand coulent des cieux les ténèbres paisibles,<br>Il s’éveille et déploie sa généreuse ardeur<br>Pour tuer dans nos champs des bestioles nuisibles.<br><small>Extrait de l’œuvre — René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »</small></p></blockquote>
+<blockquote><p><b>Le poète</b> <i>(lentement)</i> :<br>Le sage a du hibou ce noble caractère :<br>En offrant au prochain le meilleur de son cœur,<br>Il couvre son bienfait de nuit et de mystère.<br><small>Extrait de l’œuvre — René Philombe, Petites gouttes de chant pour créer l’Homme, poème XIV, « Le hibou »</small></p></blockquote>
+<p><b>Question :</b> Deux quatrains, deux tercets, des alexandrins rimés : quelle est cette forme ?</p><ul><li>Un sonnet. <b>(bonne réponse)</b></li><li>Un haïku.</li></ul><p>Quatorze vers. Tout le recueil est en vers libres : pour sa leçon de sagesse, Philombe choisit la forme la plus rangée.</p>
+<p><b>Question :</b> Que veut dire le dernier tercet ?</p><ul><li>Le sage, comme le hibou, fait le bien sans le faire savoir. <b>(bonne réponse)</b></li><li>Le sage doit dormir le jour.</li></ul><p>« Il couvre son bienfait de nuit et de mystère. »</p>
+<h4>Atelier · le raisonnement du poète</h4><p>Remets les étapes du texte en prose dans l’ordre.</p>
+<ol><li>Tout le monde dit : « C’est un oiseau de malheur ! »</li><li>Personne n’explique pourquoi.</li><li>Le souvenir : un hibou brûlé vif par les villageois.</li><li>L’école : le hibou est un oiseau utile.</li><li>La conclusion : la Science mérite seule d’être écoutée.</li></ol>
+<p>Thèse adverse, absence de preuve, exemple vécu, savoir, thèse défendue : le plan d’un vrai texte argumentatif.</p>
+<h3>Quiz</h3><ol><li>Que dit-on du hibou dans le village ? — <b>« C’est un oiseau de malheur ! »</b> Sans jamais l’expliquer.</li><li>Qu’arrive-t-il au hibou trouvé dans la case ? — <b>Il est condamné à être brûlé vif.</b> Une scène que le poète n’a jamais oubliée.</li><li>Qu’apprend le poète à l’école ? — <b>Que le hibou tue les rats et les mulots nuisibles à l’agriculture.</b> L’oiseau qu’on brûlait protégeait les récoltes.</li><li>Combien de vers compte un sonnet ? — <b>Quatorze.</b> Deux quatrains et deux tercets.</li><li>Que signifie « funeste » ? — <b>Qui annonce ou apporte le malheur.</b> « cet oiseau des funestes augures ».</li></ol>
+<h3>À retenir</h3><ul><li>Le texte en prose suit un raisonnement : croyance, absence de preuve, souvenir, savoir, conclusion.</li><li>Le souvenir du hibou brûlé vif a « marqué au fer rouge » le cœur de l’enfant.</li><li>Philombe défend la Science contre la superstition.</li><li>Le sonnet final compare le sage au hibou : il fait le bien dans l’ombre.</li></ul>
+<h3>À écrire</h3><p>Choisis une croyance que tu as entendue autour de toi. Écris un texte argumentatif (vingt lignes) qui suit le même plan que Philombe : ce qu’on dit, l’absence de preuve, un exemple, ce que dit le savoir.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="petites-gouttes-le-hibou.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

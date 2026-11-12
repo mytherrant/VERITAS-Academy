@@ -520,8 +520,8 @@ nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!impor
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:hover{background:#fff!important;transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09)!important}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a small{color:#6E7385!important;font:400 13px/1.5 Poppins,sans-serif!important;margin-top:2px!important}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a > svg{
-  width:42px!important;height:42px!important;padding:11px;box-sizing:border-box;margin:0 0 8px!important;
-  border-radius:50%;background:var(--vm-fond,#DBE8FE);color:var(--vm-trait,#1E499B)!important;
+  width:52px!important;height:52px!important;padding:13px;box-sizing:border-box;margin:0 0 8px!important;
+  border-radius:50%;background:#fff;border:3px solid var(--vm-trait,#1E499B);color:#001136!important;
   stroke:currentColor!important;transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:hover > svg{transform:scale(1.08) rotate(-4deg)}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:nth-child(6n+1){--vm-fond:#DBE8FE;--vm-trait:#1E499B}
@@ -531,6 +531,7 @@ nav.vrt-outil [aria-controls="vrtBurger"]{width:42px!important;height:42px!impor
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:nth-child(6n+5){--vm-fond:#FBE9F1;--vm-trait:#B03A6E}
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a:nth-child(6n+6){--vm-fond:#FFF3E4;--vm-trait:#A84200}
 :root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a{background:#14224A!important;border-color:#24345F!important;color:#F2F5FC!important}
+:root[data-vrt-theme="sombre"]:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) .cta > a > svg{background:#0F1A3A;color:#F2F5FC!important}
 
 /* ════════════════════════════════════════════════════════════════════════
    FAQ NUMÉROTÉE — celle de la vitrine (18/10/2026)
@@ -596,6 +597,176 @@ html:not([data-theme="sombre"]):has(#dc-root){
 /* UNE SEULE POLICE (19/10/2026) — les cours posaient Nunito, Baloo 2 et
    Playfair Display, l'index des cahiers Klee One : la vitrine n'a que Poppins. */
 :root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :not(.vrt-hab):not(.vrt-hab *):not(svg):not(svg *):not(code):not(pre):not(kbd){font-family:Poppins,system-ui,sans-serif!important}
+
+/* ════════════════════════════════════════════════════════════════════════
+   EN-TÊTE DE PAGE UNIQUE — 29/10/2026 (chantier design, point 9)
+   ════════════════════════════════════════════════════════════════════════
+   Cinq gabarits d'en-tête coexistaient : dégradé maillé sur l'espace élève,
+   aplat bleu centré sur les corrigés, les livrets et l'espace enseignant, et
+   AUCUN en-tête sur les œuvres et « Découvrir ». Jacques a choisi le dégradé
+   maillé de l'espace élève : il devient l'en-tête de toutes les pages.
+   · header.top : pages de veritas-pages.css ;
+   · .eh        : espace élève (veritas-eleve.css) ;
+   · .vh-hero   : pages de veritas-refonte.css, dont vitrine.js réunit le
+                  premier <h1> et son chapeau dans un en-tête.
+   Le maillage est FIXE (dégradés superposés) : aucune animation ajoutée.
+   11/11/2026 : « éclaircis un peu les en-têtes » (Jacques) — bleu nuit
+   #0d1a3d→#3a2a7a remplacé par #1E499B→#5B4FA8 ; blanc lisible (≥ 5:1).
+   background-color reste #1d3168 (invisible sous le dégradé) : c'est lui que
+   veritas-harmonie.js lit pour choisir l'encre — plus clair, il passait le
+   chapeau en bleu nuit. */
+:root{--vrt-maille:radial-gradient(55% 90% at 0% 0%,rgba(255,201,60,.26),transparent 62%),
+  radial-gradient(50% 85% at 100% 100%,rgba(150,120,230,.38),transparent 64%),
+  radial-gradient(35% 60% at 80% 30%,rgba(15,155,142,.30),transparent 66%),
+  linear-gradient(135deg,#1E499B 0%,#2D5DB5 50%,#5B4FA8 100%)}
+/* background-color écrit À PART : veritas-harmonie.js lit la couleur de fond
+   calculée pour choisir l'encre du titre. Sous un dégradé seul elle vaut
+   « transparent », et le script repeignait le titre en bleu nuit sur fond
+   bleu nuit. */
+header.top,.eh,.vh-hero{background:var(--vrt-maille)!important;background-color:#1d3168!important;color:#fff;text-align:center;
+  position:relative;overflow:hidden;isolation:isolate}
+header.top,.vh-hero{padding:3.2rem 1rem 3.6rem!important}
+header.top::before{display:none!important}
+header.top::after,.vh-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;
+  z-index:4;background:linear-gradient(90deg,transparent,#FFC93C,transparent)}
+header.top>*,.vh-hero>*{position:relative;z-index:1}
+.vh-hero>*{max-width:920px;margin-left:auto;margin-right:auto}
+header.top .badge,.eh .kicker,.vh-hero .badge{display:inline-flex;align-items:center;gap:.45rem;
+  border:1.5px solid rgba(255,201,60,.55)!important;background:rgba(255,201,60,.10)!important;
+  color:#FFC93C!important;border-radius:999px!important;padding:.25rem .9rem!important;
+  font-size:.76rem!important;font-weight:700!important;letter-spacing:.1em;text-transform:uppercase;margin-bottom:0}
+header.top h1,.eh h1,.vh-hero h1{font-size:clamp(28px,18px + 2.6vw,44px)!important;
+  line-height:1.1!important;font-weight:800!important;letter-spacing:-.02em;color:#fff!important;
+  margin:.9rem auto .5rem!important;max-width:900px;text-wrap:balance}
+header.top p,.eh p.sub,.vh-hero p,.vh-hero>div:not(.badge){color:#EEF3FC!important;max-width:64ch;margin:.2rem auto 0!important;
+  font-size:clamp(1rem,.95rem + .3vw,1.1rem)!important;line-height:1.6;text-align:center!important}
+header.top p a,.vh-hero p a{color:#FFC93C}
+/* 11/11/2026 : le gras du chapeau (« soutien scolaire », « 3ème »…) prenait le
+   bleu nuit des titres de carte : 2,5 de contraste sur le bandeau. */
+header.top :is(p,div) :is(strong,b),.eh :is(strong,b),.vh-hero :is(strong,b){color:#fff!important}
+.eh .chip .i,.eh .chip b{color:#FFC93C!important}
+.eh h1 .or{color:#FFC93C!important}
+/* Bandeau « contact » commun (.vrtc) : son titre suit l'échelle des titres de section. */
+h2.vrtc-t{font-size:clamp(22px,16px + 1.4vw,30px)!important;line-height:1.22!important}
+
+/* ════════════════════════════════════════════════════════════════════════
+   CARTES VIVANTES, PLUS AUCUN TRAIT — 29/10/2026
+   ════════════════════════════════════════════════════════════════════════
+   « La mise en forme n'est pas comme sur la vitrine, c'est trop pâle et
+   monotone. Fais comme ceci [cartes Partenariat : titre gras, bouton plein
+   teinté]. Enlève les traits foncés partout » (Jacques).
+   1. Titres de carte : 700, bleu nuit, 17 à 19 px (ils allaient de 15,5 px
+      maigre sur le plan à 30 px sur les corrigés).
+   2. L'action d'une carte devient un bouton plein, à la teinte de son
+      médaillon : « Ouvrir » (plan), « Voir les corrigés » (corrigés),
+      « Ouvrir les corrigés » (Constellation).
+   3. Les filets d'accent tombent : barre jaune à gauche des encadrés .intro,
+      liseré de couleur en haut des tuiles de l'espace élève. */
+:is(.card,.tile,.loupe) > :is(h3,h4),.pl-t,.ft > :is(h3,h4){font-size:clamp(17px,15px + .4vw,19px)!important;
+  font-weight:700!important;line-height:1.3!important;color:#001136!important}
+:is(.card,.tile,.loupe){--vt:#1E499B}
+:is(.card,.tile,.loupe):has(.ico[data-vm="sarcelle"]){--vt:#0E7C86}
+:is(.card,.tile,.loupe):has(.ico[data-vm="vert"]){--vt:#007E11}
+:is(.card,.tile,.loupe):has(.ico[data-vm="violet"]){--vt:#5B4FA8}
+:is(.card,.tile,.loupe):has(.ico[data-vm="rose"]){--vt:#B03A6E}
+:is(.card,.tile,.loupe):has(.ico[data-vm="brique"]){--vt:#A84200}
+:is(.card,.tile) > a.dl:only-of-type,:is(.card,.tile,.loupe) a.go,.pl-go{
+  display:flex!important;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;
+  margin-top:auto!important;padding:11px 16px!important;border-radius:10px!important;border:0!important;
+  background:var(--vt,var(--trait,#1E499B))!important;color:#fff!important;font-weight:600!important;
+  text-decoration:none!important;box-shadow:none!important;transition:filter .18s,transform .18s}
+.pl-go{background:var(--trait,#1E499B)!important}
+:is(.card,.tile) > a.dl:only-of-type *,:is(.card,.tile,.loupe) a.go *,.pl-go *{color:#fff!important}
+:is(.card,.tile) > a.dl:only-of-type .pill{background:rgba(255,255,255,.18)!important;border:0!important}
+:is(.card,.tile) > a.dl:only-of-type:hover,:is(.card,.tile,.loupe) a.go:hover,a.pl-c:hover .pl-go{filter:brightness(1.08)}
+.intro::before,article.ft::after,.cl::before,header.top::after,.vh-hero::after,.eh::after{display:none!important}  /* y compris le liseré or sous les en-têtes */
+/* veritas-pages.css ramène à 400 tout span, div et lien hors habillage
+   (body span:not(.vrt-hab *) …{font-weight:400!important}) : il faut la même
+   arme, plus spécifique, pour que titres et boutons de carte restent gras. */
+html body :is(.card,.tile,.loupe) > :is(h3,h4),html body .pl-t,html body .ft > :is(h3,h4){font-weight:700!important}
+html body :is(.card,.tile) > a.dl:only-of-type,html body :is(.card,.tile,.loupe) a.go,html body .pl-go,
+html body :is(.card,.tile) > a.dl:only-of-type *,html body :is(.card,.tile,.loupe) a.go *,html body .pl-go *{font-weight:600!important}
+:is(.card,.tile) > a.dl:only-of-type{flex-wrap:wrap;row-gap:6px}
+:is(.card,.tile) > a.dl:only-of-type{text-align:center}
+/* Le compteur « 830 exos » passait en encre foncée sur le bouton violet
+   (veritas-medaillons.js juge le fond de la pastille) : il reste blanc. */
+html body :is(.card,.tile) > a.dl:only-of-type .pill{color:#fff!important;font-weight:700!important}
+html body :is(.card,.tile) > p.note + a.dl:only-of-type{margin-top:auto!important}
+/* Le bouton à pastille (« Voir les corrigés » + « Module 1 ») se cassait
+   en deux lignes bancales, pastille foncée en dessous. La pastille devient
+   un surtitre discret AU-DESSUS du libellé : deux lignes voulues, pas subies.
+   Et la carte passe en colonne pour que le bouton tombe au pied, aligné
+   d'une carte à l'autre (il flottait à mi-hauteur). */
+:is(.card,.tile):has(> a.dl:only-of-type){display:flex!important;flex-direction:column}
+html body :is(.card,.tile) > a.dl:only-of-type:has(.pill){flex-direction:column!important;flex-wrap:nowrap!important;gap:2px!important;padding:10px 14px!important}
+html body :is(.card,.tile) > a.dl:only-of-type .pill{order:-1;background:none!important;padding:0!important;
+  font-size:11.5px!important;letter-spacing:.06em;text-transform:uppercase;opacity:.85;line-height:1.3}
+/* Espace élève : le numéro de chaque partie était un carré bleu nuit plein,
+   son chiffre invisible (var(--gold) n'existe pas sur la page). Il prend
+   l'anneau du site, comme toutes les pastilles. */
+.sh .num{background:#fff!important;border:3px solid #1E499B!important;color:#001136!important;
+  border-radius:50%!important;width:36px!important;height:36px!important;box-sizing:border-box;
+  display:inline-flex!important;align-items:center;justify-content:center;font-weight:700!important}
+/* Espace élève : « 1 685 corrigés » prenait le cadre gris des exercices
+   (.ex de veritas-pages.css) — un nom de classe partagé par hasard. */
+.cl{display:flex!important;flex-direction:column;text-align:center;padding:1.1rem .9rem!important}
+html body .cl .niv{font-size:2rem!important;font-weight:800!important}
+html body .cl .ex{border:0!important;padding:0!important;background:none!important;margin:.35rem 0 .7rem!important;
+  box-shadow:none!important;color:#001136!important;font-weight:600!important;font-size:15px!important}
+/* « Voir » n'apparaissait qu'au survol (invisible au doigt) : bouton plein,
+   à la teinte de la classe, comme les autres cartes. */
+html body .cl .go{opacity:1!important;transform:none!important;margin-top:auto!important;justify-content:center;
+  padding:9px 12px;border-radius:10px;background:var(--ton,#1E499B);color:#fff!important;font-weight:600!important}
+html body .cl .go *{color:#fff!important}
+/* L'application : même police partout sur les écrans publics. */
+#VISITOR :is(.vsec-h,.vsh,.sc-title,.b-title,.h-display,.h-1,.h-2){font-family:Poppins,system-ui,sans-serif!important}  /* var(--gold) n'est pas définie sur cette page : le mot restait blanc */
+/* ── Écrans publics de l'application : le même en-tête que la vitrine ─────
+   assets/vitrine.js place le premier titre de l'écran (.pgt ou .vsec-title)
+   et son chapeau dans un .vh-hero.vh-app. Carte arrondie : l'écran vit dans
+   la colonne de l'application, pas sur toute la largeur. */
+.vh-app{border-radius:20px;margin:4px 0 26px!important;padding:2.6rem 1.2rem 3rem!important}
+.vh-app::after{border-radius:0 0 20px 20px}
+#VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app :is(.pgt,.vsec-title){display:flex!important;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;margin:.4rem auto .5rem!important;padding:0!important;background:none!important;
+  font-family:Poppins,system-ui,sans-serif!important;font-size:clamp(28px,18px + 2.6vw,44px)!important;
+  line-height:1.12!important;font-weight:800!important;color:#fff!important;text-align:center!important;
+  letter-spacing:-.02em;-webkit-text-fill-color:#fff!important;border:0!important}
+#VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app :is(.pgt,.vsec-title)::after,#VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app :is(.pgt,.vsec-title)::before{display:none!important}
+#VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app .pgt-ico,#VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app .vsec-title > :is(span,svg):first-child{width:52px!important;height:52px!important;
+  border-radius:50%!important;background:#fff!important;border:3px solid #FFC93C!important;color:#001136!important;
+  box-shadow:none!important;box-sizing:border-box}
+#VISITOR#VISITOR#VISITOR#VISITOR#VISITOR .vh-app > :not(:first-child){color:#EEF3FC!important;font-style:normal!important;
+  font-size:clamp(1rem,.95rem + .3vw,1.1rem)!important;text-align:center!important;max-width:64ch;
+  margin:.3rem auto 0!important;background:none!important;border:0!important;padding:0!important}
+/* Une seule police sur les écrans publics : Poppins, comme la vitrine
+   (app.css imposait Montserrat aux titres). */
+#VISITOR :is(h1,h2,h3,h4,.ct,.mtt,.pgt,.vsec-title,.vhero-title){font-family:Poppins,system-ui,sans-serif!important}
+/* theme-lws.css éteint tous les dégradés de l'espace visiteur
+   (#VISITOR#VISITOR *{background-image:none!important}). L'en-tête maillé est
+   la seule exception voulue : trois identifiants pour passer devant. */
+#VISITOR#VISITOR#VISITOR .vh-hero{background-color:#1d3168!important;background-image:
+  radial-gradient(55% 90% at 0% 0%,rgba(255,201,60,.26),transparent 62%),
+  radial-gradient(50% 85% at 100% 100%,rgba(150,120,230,.38),transparent 64%),
+  radial-gradient(35% 60% at 80% 30%,rgba(15,155,142,.30),transparent 66%),
+  linear-gradient(135deg,#1E499B 0%,#2D5DB5 50%,#5B4FA8 100%)!important}
+#VISITOR#VISITOR#VISITOR .vh-hero::after{background-image:linear-gradient(90deg,transparent,#FFC93C,transparent)!important}
+
+/* ── Titres de section et boutons : une seule échelle (points 5 et 8) ────── */
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) :is(.wrap,main) h2:not(.vrt-hab h2):not(.card h2):not(.tile h2){
+  font-size:clamp(1.4rem,1.1rem + 1.2vw,1.875rem)!important;line-height:1.22}
+:root:has(link[href*="veritas-pages.css"],link[href*="veritas-refonte.css"]) body:not(:has(nav.vrt-outil)) a.btn{border-radius:999px!important}
+/* ── Texte courant : fer à gauche, sans césure (point 6) ─────────────────
+   Remplace la justification de veritas-pages.css, de veritas-refonte.css et
+   de l'espace visiteur de l'application : en colonne étroite elle creusait
+   des trous et coupait les mots (« in-fluenceurs », « exa-men »).
+   « inherit » et non « left » : un texte posé dans une carte centrée (carte à
+   médaillon, en-tête) reste centré ; ailleurs il revient au fer à gauche.
+   Un alignement écrit EN LIGNE sur l'élément reste prioritaire. */
+:is(.wrap>p,.card .note,.loupe li,.duo .bloc p,details.sol .body p,.ex .q,.step p,.condition li,
+  .wrap p,.wrap li,.wrap dd,.wrap blockquote p,.card p,.card li,.wrap>ul>li,.wrap>ol>li,blockquote p
+):not([style*="text-align"]){text-align:inherit!important;hyphens:manual!important;-webkit-hyphens:manual!important}
+#VISITOR#VISITOR#VISITOR :is(p,.acc-plan-av li,.vbook-desc,.lx-catcard-desc,.lws-path-d,.vsec-tx,.acc-foot-tx,.acc-promesse-tx):not([style*="text-align"]){
+  text-align:inherit!important;hyphens:manual!important;-webkit-hyphens:manual!important}
 """
 
 
@@ -623,6 +794,9 @@ def retirer_blocs(s):
     # Chaque bloc est inséré suivi d'UN saut de ligne, et retiré avec lui :
     # c'est ce qui rend la passe idempotente octet pour octet.
     return re.sub(r'<!--vrt-habillage:([a-z]+)-->[\s\S]*?<!--/vrt-habillage:\1-->\n', '', s)
+
+
+REV_HABILLAGE = '.34'   # 30/10/2026 (sombre par inversion, traducteur, jeton IA) — à changer quand veritas-habillage.css, veritas-harmonie.js ou vitrine.js changent
 
 
 def version(s):
@@ -656,7 +830,7 @@ def habiller(s, donnees, rel=''):
     # <head>
     tete = ('<link rel="stylesheet" href="/assets/veritas-habillage.css?v=%s"%s>\n'
             '<script>window.VRT_DATA=window.VRT_DATA||%s;</script>') % (
-        v, ' data-vrt-epreuve' if epreuve else '', donnees)
+        v + REV_HABILLAGE, ' data-vrt-epreuve' if epreuve else '', donnees)
     # La barre est dessinée en Poppins : une page qui ne la charge pas
     # (évaluations, Campus, Atelier…) la recevrait en police système.
     if not re.search(r'fonts\.googleapis\.com/css2\?family=[^"]*Poppins', s):
@@ -708,8 +882,8 @@ def habiller(s, donnees, rel=''):
         scripts += '<script src="/assets/veritas-medaillons.js?v=%s" defer></script>\n' % v
     # 25/10/2026 — même lecture partout (textes ≥ 15 px, anneaux) : voir
     # l'en-tête de assets/veritas-harmonie.js.
-    scripts += '<script src="/assets/veritas-harmonie.js?v=%s" defer></script>\n' % v
-    scripts += '<script src="/assets/vitrine.js?v=%s" defer></script>' % v
+    scripts += '<script src="/assets/veritas-harmonie.js?v=%s" defer></script>\n' % (v + REV_HABILLAGE)
+    scripts += '<script src="/assets/vitrine.js?v=%s" defer></script>' % (v + REV_HABILLAGE)
     fin = PIED + '\n' + ('' if outil else BULLES + '\n') + scripts
     i = s.rfind('</body>')
     s = s[:i] + bloc('pied', fin) + '\n' + s[i:]
@@ -818,7 +992,7 @@ def habiller_app(s, donnees, vitrine):
     m = re.search(r'app\.js\?v=([0-9.]+)', s)
     v = m.group(1) if m else BP.VER
     tete = ('<link rel="stylesheet" href="/assets/veritas-habillage.css?v=%s">\n'
-            '<script>window.VRT_DATA=window.VRT_DATA||%s;</script>\n%s') % (v, donnees, CSS_APP)
+            '<script>window.VRT_DATA=window.VRT_DATA||%s;</script>\n%s') % (v + REV_HABILLAGE, donnees, CSS_APP)
     s = s.replace('</head>', bloc('tete', tete) + '\n</head>', 1)
 
     mv = re.search(r'<div id="VISITOR"[^>]*>\n', s)
@@ -837,7 +1011,7 @@ def habiller_app(s, donnees, vitrine):
     j = s.rfind('</body>')
     s = s[:j] + bloc('formules', formules_vitrine(vitrine)) + '\n' + s[j:]
     j = s.rfind('</body>')
-    s = s[:j] + bloc('script', '<script src="/assets/veritas-harmonie.js?v=%s" defer></script>\n<script src="/assets/vitrine.js?v=%s" defer></script>' % (v, v)) + '\n' + s[j:]
+    s = s[:j] + bloc('script', '<script src="/assets/veritas-harmonie.js?v=%s" defer></script>\n<script src="/assets/vitrine.js?v=%s" defer></script>' % (v + REV_HABILLAGE, v + REV_HABILLAGE)) + '\n' + s[j:]
     return s
 
 

@@ -225,6 +225,16 @@
   s.src = 'extrait-' + slug + '.js?v=1.20.20';
   s.onload = function () {
     var blocs = window.CAHIER_BLOCS;
+    /* UN OUVRAGE « AUTONOME » A SON PROPRE LECTEUR. Le bouton doré de la
+       fenêtre d'achat (gate.js) mène ici pour TOUS les ouvrages ; or les
+       cahiers d'œuvres du collège (window.OI_DOC) et les livrets de
+       philosophie (window.PHILO_DOC) ne sont pas des blocs que VRTCahier sait
+       dessiner. On l'affichait comme « pas encore en ligne » — sur l'aperçu
+       qu'on vient précisément de promettre. On envoie chez leur lecteur. */
+    if ((!blocs || !blocs.length) && (window.OI_DOC || window.PHILO_DOC)) {
+      location.replace('cahier-' + encodeURIComponent(slug) + '.html?extrait=1');
+      return;
+    }
     if (!blocs || !blocs.length) { echec(); return; }
     $('attente').hidden = true;
     new VRTCahier({ ouvrage: 'apercu-' + slug, token: '', hote: $('hote'), blocs: blocs })

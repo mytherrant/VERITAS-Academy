@@ -713,6 +713,10 @@ window._resolveClassroom=function(acc){
   var seg=_segKey(acc.profil);
   var cs=DB.classrooms||[];
   if(seg){ var bySeg=cs.find(function(c){return c.seg===seg;}); if(bySeg) return bySeg; }
+  // 11/11/2026 : l'inscription range « Terminale » + filière « C » ; la classe
+  // virtuelle s'appelle « Tle C ». La comparaison exacte des noms laissait tout
+  // élève de 1ère et de Terminale sans classe.
+  if(typeof _cvClassePour==='function') return _cvClassePour(acc.cls||(acc.profil&&acc.profil.cls), acc.serie||(acc.profil&&acc.profil.serie));
   return cs.find(function(c){return c.nom===(acc.cls||(acc.profil&&acc.profil.cls));})||null;
 };
 const EVT={exam:{l:'Examen',c:'bgr'},reunion:{l:'Réunion',c:'bgb'},event:{l:'Événement',c:'bgg'},holiday:{l:'Congé',c:'bgd'},info:{l:'Info',c:'bgt'}};
@@ -1608,9 +1612,13 @@ function _migrateDB(){
       ];
     }
   }
-  // Identité école (toujours forcer depuis source embarquée)
+  // Identité école (toujours forcer depuis source embarquée).
+  // Depuis l'audit 3G du 28/10/2026, #_logoData pointe vers un fichier
+  // (/assets/veritas-logo-doc.webp, 26 Ko) au lieu de porter le PNG en base64
+  // (125 Ko, deux fois, dans chaque chargement d'app.html). `.src` rend l'URL
+  // absolue : elle vaut dans les fenêtres d'impression comme sur le canvas.
   var _ldEl=document.getElementById('_logoData');
-  var _ldSrc=(_ldEl&&_ldEl.src&&_ldEl.src.startsWith('data:'))?_ldEl.src:'';
+  var _ldSrc=(_ldEl&&_ldEl.src&&/^(data:|https?:)/.test(_ldEl.src))?_ldEl.src:'';
   if(_ldSrc){DB.school=DB.school||{};DB.school.logo=_ldSrc;}
   if(!DB.school)DB.school={};
   if(!DB.school.nom)DB.school.nom='VERITAS Academy';
@@ -2453,15 +2461,20 @@ function save(){
       function _stripPlainPwd(o){
         if(!o)return;
         if(typeof o.pwd!=='string' || !o.pwd) return;
-        var _estEmpreinte = o.pwd.charAt(0)==='$' || o.pwd.indexOf('S256$')===0;
+        var _estEmpreinte = o.pwd.charAt(0)==='$' || o.pwd.indexOf('S256$')===0 || o.pwd.indexOf('H$')===0;
         if(!_estEmpreinte) delete o.pwd;   // du clair : jamais vers le serveur
       }
-      if(dbLight.superAdmin)_stripPlainPwd(dbLight.superAdmin);
-      (dbLight.admins||[]).forEach(_stripPlainPwd);
-      (dbLight.visitorAccounts||[]).forEach(function(v){
-        _stripPlainPwd(v);
-        // pwdHash : OK à garder (hash bcrypt), permet auth sur autres appareils
-      });
+      /* Le filtre ne visitait que superAdmin, admins et visitorAccounts. Un
+         « pwd » en clair resté ailleurs (studentAccounts, authors,
+         authorAccounts…) partait donc tel quel, et db.php rejetait l'envoi
+         ENTIER en HTTP 400 — synchro bloquée sans que rien ne dise pourquoi.
+         On parcourt désormais toute la copie. */
+      (function _stripPartout(o,prof){
+        if(!o||typeof o!=='object'||prof>8)return;
+        if(Array.isArray(o)){for(var i=0;i<o.length;i++)_stripPartout(o[i],prof+1);return;}
+        _stripPlainPwd(o);
+        for(var k in o){if(Object.prototype.hasOwnProperty.call(o,k)&&o[k]&&typeof o[k]==='object')_stripPartout(o[k],prof+1);}
+      })(dbLight,0);
       if(dbLight.tpwd)dbLight.tpwd={};
       // Stripping binaires lourds (videos, PDFs base64)
       (dbLight.elearning&&dbLight.elearning.contenus||[]).forEach(function(c){delete c.fichierData;});
@@ -2498,7 +2511,12 @@ function save(){
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify(dbLight)
       });
-      if(!res.ok) throw new Error('HTTP '+res.status);
+      if(!res.ok){
+        // db.php explique son refus dans le corps JSON ({error:"…"}) : le garder.
+        var _motif=''; try{ var _jErr=await res.json(); _motif=(_jErr&&_jErr.error)||''; }catch(eJ){}
+        var _eHttp=new Error('HTTP '+res.status+(_motif?' : '+_motif:''));
+        _eHttp.motif=_motif; throw _eHttp;
+      }
       // Mémoriser le lastModified du push pour optimistic-lock du prochain PUT
       window._fbLastSyncedMs=DB.lastModified||Date.now();
       window._fbSaveFails=0; // reset compteur d'échecs
@@ -2531,6 +2549,9 @@ function save(){
         var _sansCle=!(DB&&DB.cloudConfig&&DB.cloudConfig.secret);
         if(_sansCle||_stKo===401||_stKo===403){
           _toastRetrySync('cle',_stKo);
+        } else if(_stKo===400||_stKo===409||_stKo===413){
+          // Le serveur répond : il REFUSE les données. « Injoignable » serait faux.
+          toast('⚠ Synchro refusée par le serveur (HTTP '+_stKo+')'+(e&&e.motif?' : '+e.motif:'')+' — modifications gardées sur cet appareil','warn');
         } else if(typeof _hasLocalBinaries==='function'&&_hasLocalBinaries()){
           _toastRetrySync('reseau',_stKo);
         } else {
@@ -2679,6 +2700,33 @@ async function _pwdIsDefault(stored, plain, salt){
   }catch(e){}
   return false;
 }
+/* ── LES BANDEAUX D'ALERTE RÉSERVENT LEUR PLACE ──────────────────────────────
+   Quatre bandeaux sont posés en `position:fixed` : « mot de passe par défaut »
+   en haut ; « appareil non synchronisé », « clé refusée » et « bouclier » en
+   bas. Ils RECOUVRAIENT la page : en haut le titre et le bouton de menu (sur
+   téléphone, 80 px sur 844), en bas les derniers boutons de chaque écran — et
+   les bandeaux du bas s'empilaient l'un sur l'autre au même endroit.
+   On mesure ce qui est affiché et on réserve exactement cette place à
+   l'application (variables --vrt-haut / --vrt-bas, lues par app.css) ; les
+   bandeaux du bas se rangent les uns au-dessus des autres. */
+function _vrtBandeaux(){
+  try{
+    var s=document.getElementById('_secBanner');
+    var haut=s?s.offsetHeight:0, bas=0;
+    ['_notSyncBanner','_authFailBanner','_shieldBanner'].forEach(function(id){
+      var e=document.getElementById(id); if(!e) return;
+      e.style.bottom=bas+'px'; bas+=e.offsetHeight;
+    });
+    var r=document.documentElement.style;
+    r.setProperty('--vrt-haut',haut+'px'); r.setProperty('--vrt-bas',bas+'px');
+  }catch(e){}
+}
+try{
+  // Un bandeau qui apparaît ou que l'on ferme (« × ») change la place à réserver.
+  new MutationObserver(function(){ _vrtBandeaux(); }).observe(document.body||document.documentElement,{childList:true});
+  window.addEventListener('resize',function(){ _vrtBandeaux(); });
+}catch(e){}
+
 function _showSecurityBanner(msg){
   try{
     if(document.getElementById('_secBanner'))return;
@@ -3832,7 +3880,11 @@ function confirmVisitorOrder(bid){
         code: promoCode
       });
     } else {
-      toast('✓ Commande enregistrée ! Nous vous contacterons au '+tel);
+      /* 29/10/2026 — sans paiement, la commande n'existait que dans
+         DB.visitorOrders, donc dans ce seul navigateur : « nous vous
+         contacterons » ne pouvait arriver. Elle part par WhatsApp. */
+      toast('✓ Commande prête — WhatsApp s\'ouvre pour l\'envoyer au centre');
+      try{ window.open('https://wa.me/237697637739?text='+encodeURIComponent('Bonjour VÉRITAS, je commande : '+b.titre+'\nNom : '+nom+'\nTél : '+tel+'\nLivraison : '+adresse),'_blank','noopener'); }catch(e){}
     }
   }, 100);
 }
@@ -4818,6 +4870,9 @@ window._endOnboarding=function(skipped){
 
 
 function initVisitor(){
+  // 11/11/2026 : la classe choisie avant la connexion / l'inscription s'ouvre
+  // une fois l'espace visiteur rendu (après _vEspaceSiFondVide, posé à 650 ms).
+  setTimeout(function(){ try{ if(typeof _cvReprendre==='function') _cvReprendre(); }catch(e){} },900);
   const img=$("vLogo");if(img)img.src=getLogo();
   const nm=$("vName");if(nm)nm.textContent=DB.school?.nom||"VÉRITAS Academy";
   const sl=$("vSlogan");if(sl)sl.textContent=DB.school?.slogan||"Centre d'Excellence Scolaire";
@@ -5433,6 +5488,8 @@ function _renvoyerVersVitrine(sec, boot){
     if(boot === true) return false;
     if(typeof SES !== 'undefined' && SES) return false;               // connecté : chez lui
     if(!Object.prototype.hasOwnProperty.call(_VITRINE_COUVRE, sec)) return false;
+    // Entré au catalogue par une carte de matière (#matiere) : il y navigue.
+    if(sec === 'elearning' && window._elDansApp === true) return false;
     var p = String(location.pathname || '').toLowerCase().replace(/\/+$/, '');
     if(p !== '/app.html') return false;                               // anti-rebond
     location.replace('/' + _VITRINE_COUVRE[sec]);
@@ -5511,6 +5568,44 @@ function _gateBloque(sec){
   return !_estMembreInscrit();
 }
 
+/* ── Filtre par MATIÈRE du catalogue e-learning (30/10/2026) ──────────────
+   Le catalogue se range par TYPE (épreuves, cours, fiches…), la vitrine par
+   MATIÈRE. #matiere?m=<clé> pose window._elMat ; le catalogue ne garde alors
+   que les ressources de la matière, dans toutes ses vues. Une clé couvre les
+   intitulés des deux sous-systèmes (Mathématiques / Mathematics…). */
+var _EL_MATIERES = {
+  'francais':         { nom:'Français',             m:['Français','Littérature','French'] },
+  'mathematiques':    { nom:'Mathématiques',        m:['Mathématiques','Mathematics','Maths'] },
+  'pct':              { nom:'PCT',                  m:['Physique-Chimie','Physique','Chimie','Physics','Chemistry','Technologie','PCT'] },
+  'svt':              { nom:'SVT',                  m:['SVT','Biology'] },
+  'histoire-geo':     { nom:'Histoire-Géo',         m:['Histoire-Géographie','Histoire','Géographie','History','Geography'] },
+  'anglais':          { nom:'Anglais',              m:['Anglais','English'] },
+  'philosophie':      { nom:'Philosophie',          m:['Philosophie','Philosophy'] },
+  'ecm-informatique': { nom:'ECM & Informatique',   m:['ECM','Éducation civique','Informatique','Computer Science'] }
+};
+function _elMatConcorde(x){
+  var cle = window._elMat;
+  if(!cle || !_EL_MATIERES[cle]) return true;
+  var em = String((x && x.matiere) || '').toLowerCase();
+  return _EL_MATIERES[cle].m.some(function(n){ return em === n.toLowerCase(); });
+}
+function _elMatBandeau(){
+  var cle = window._elMat;
+  if(!cle || !_EL_MATIERES[cle]) return '';
+  /* Une matière sans ressource : on le DIT, et on ouvre le reste du
+     catalogue d'un clic — pas une grille de tuiles « Bientôt » muette. */
+  var _del = DB.deletedDefaults || [];
+  var n = ((DB.elearning && DB.elearning.contenus) || []).filter(function(x){ return x && _del.indexOf(x.id) < 0 && _elMatConcorde(x); }).length;
+  var vide = n ? '' : '<div class="card" style="padding:18px 20px;margin:0 0 16px;text-align:center;color:var(--ink2)">'
+    + 'Les ressources de <b>' + _esc(_EL_MATIERES[cle].nom) + '</b> arrivent bientôt sur la plateforme. '
+    + '<a href="#" onclick="window._elMat=\'\';window._vCurrentSec=\'\';vShowSec(\'elearning\',null,true);return false" style="font-weight:700;color:#1E499B">Voir tout le catalogue</a></div>';
+  return vide + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 16px">'
+    + '<span style="font-size:13px;color:var(--ink3)">Matière :</span>'
+    + '<span style="display:inline-flex;align-items:center;gap:8px;padding:6px 8px 6px 14px;border-radius:20px;background:#EEF3FC;color:#1E499B;font-weight:700;font-size:13px">'
+    + _esc(_EL_MATIERES[cle].nom)
+    + '<button type="button" aria-label="Voir toutes les matières" onclick="window._elMat=\'\';window._vCurrentSec=\'\';vShowSec(\'elearning\',null,true)" style="border:0;background:#fff;color:#1E499B;width:24px;height:24px;border-radius:50%;cursor:pointer;font-weight:700;line-height:1">×</button>'
+    + '</span></div>';
+}
 function vShowSec(sec,btn,_boot){
   /* « presentation » = l'ancien accueil, supprimé comme page publique. Un
      anonyme qui le DEMANDE (lien #presentation, menu « Le centre ») part sur
@@ -5809,7 +5904,7 @@ function vShowSec(sec,btn,_boot){
         <div class="vcard">
           <div class="ct"><span class="ct-ico">${_ico('mappin',17)}</span>Informations pratiques</div>
           ${[['clock','Horaires',pi.horaires],
-             ['phone','Téléphone',_telPublic(pi)],
+             ['phone','Appels',_telPublic(pi)],
              ['whatsapp','WhatsApp',_telPropre(pi.whatsapp)],
              ['mail','Email',_emailPublic(pi)],
              ['mappin','Adresse',pi.adresse||DB.school?.ville],
@@ -6053,7 +6148,7 @@ function vShowSec(sec,btn,_boot){
     // Ce que le visiteur peut réellement ouvrir : les contenus par défaut que
     // l'administration a supprimés (deletedDefaults) ne comptent nulle part.
     var _delDefH=DB.deletedDefaults||[];
-    var _visibles=(el.contenus||[]).filter(function(x){return x&&_delDefH.indexOf(x.id)<0;});
+    var _visibles=(el.contenus||[]).filter(function(x){return x&&_delDefH.indexOf(x.id)<0&&_elMatConcorde(x);});
     var _nbGratuits=_visibles.filter(function(x){return (typeof _pwEstGratuit==='function')?_pwEstGratuit(x):!!x.gratuit;}).length;
     if(!selCat){
       // ── HERO BANNER ──
@@ -6069,22 +6164,22 @@ function vShowSec(sec,btn,_boot){
       h+='<div style="text-align:center"><div style="font-family:Libre Baskerville,Georgia,serif;font-size:28px;font-weight:700;color:#FDE68A;line-height:1">'+_nbGratuits+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Gratuites</div></div>';
       h+='</div>';
       // v1.4.2 : bouton PROFIL — l'apprenant déclare section/enseignement/classe
-      h+='<div style="margin-top:14px"><button onclick="mLearnerProfile()" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,201,60,.45);border-radius:24px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif">🎯 '+(_lpEl&&_lpEl.cls?('Mon parcours : '+_esc(_lpEl.cls)+(_lpEl.sys==='en'?' · Anglophone':'')+(_lpEl.ens==='tech'?' · Technique':'')):'Personnaliser mon parcours')+'</button></div>';
+      h+='<div style="margin-top:14px"><button onclick="mLearnerProfile()" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,201,60,.45);border-radius:24px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif;display:inline-flex;align-items:center;gap:7px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><use href="#lc-target"/></svg>'+(_lpEl&&_lpEl.cls?('Mon parcours : '+_esc(_lpEl.cls)+(_lpEl.sys==='en'?' · Anglophone':'')+(_lpEl.ens==='tech'?' · Technique':'')):'Personnaliser mon parcours')+'</button></div>';
       h+='</div></div>';
       
 
       // ── MINESEC RESSOURCES OFFICIELLES ── (v1.3.1 épure : carte CLAIRE — la page
       // empilait 3 panneaux bleu nuit ; on ne garde qu'UN point focal sombre, le hero)
       h+='<div style="background:#fff;border:1px solid rgba(20,37,84,.08);border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 1px 2px rgba(16,30,69,.04),0 8px 24px rgba(16,30,69,.06)">';
-      h+='<div style="font-size:11px;font-weight:800;color:#B8860B;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px">🎓 Ressources officielles MINESEC</div>';
+      h+='<div style="font:600 12px Poppins,sans-serif;color:#C24E00;letter-spacing:1.6px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><use href="#lc-graduation"/></svg>Ressources officielles MINESEC</div>';
       h+='<div style="font-family:Georgia,serif;font-size:13px;color:#6B7A99;margin-bottom:16px">Épreuves officielles, laboratoires virtuels et cours vidéo du Ministère des Enseignements Secondaires du Cameroun</div>';
       h+='<div style="display:flex;gap:10px;flex-wrap:wrap">';
-      h+='<button onclick="showEpreuves()" style="background:#142554;color:#FFC93C;border:none;border-radius:24px;padding:10px 22px;font-size:12px;font-weight:800;cursor:pointer;font-family:Montserrat,sans-serif;box-shadow:0 4px 12px rgba(20,37,84,.22);transition:transform .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'">📝 Épreuves officielles</button>';
-      h+='<button onclick="showLabosVirtuels()" style="background:#EEF2FF;color:#1E3A8A;border:1px solid #C7D2FE;border-radius:24px;padding:10px 22px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif;transition:transform .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'">🔬 Labos virtuels</button>';
-      h+='<a href="https://minesec-distancelearning.cm" target="_blank" rel="noopener" style="background:#F6F8FC;color:#475882;border:1px solid #E4E8F0;border-radius:24px;padding:10px 22px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px">🌐 Cours MINESEC officiels</a>';
+      h+='<button onclick="showEpreuves()" style="background:#1E499B;color:#fff;border:1px solid #1E499B;display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 20px;font:600 14px Poppins,sans-serif;cursor:pointer;text-decoration:none;transition:transform .18s ease,background-color .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><use href="#lc-doc"/></svg>Épreuves officielles</button>';
+      h+='<button onclick="showLabosVirtuels()" style="background:#fff;color:#1E499B;border:1px solid #CFDBF0;display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 20px;font:600 14px Poppins,sans-serif;cursor:pointer;text-decoration:none;transition:transform .18s ease,background-color .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><use href="#lc-flask"/></svg>Labos virtuels</button>';
+      h+='<a href="https://minesec-distancelearning.cm" target="_blank" rel="noopener" style="background:#fff;color:#001136;border:1px solid #E4E7EF;display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 20px;font:600 14px Poppins,sans-serif;cursor:pointer;text-decoration:none;transition:transform .18s ease,background-color .18s ease"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><use href="#lc-globe"/></svg>Cours MINESEC officiels</a>';
       h+='</div></div>';
       // ── CATEGORIES — TUILES PREMIUM v2 (pictos 3D + couleurs vibrantes + anim) ──
-      h+='<div style="font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:#142554;margin-bottom:14px;display:flex;align-items:center;gap:8px">📂 Choisissez une catégorie<span style="font-size:11px;color:#94A3B8;font-weight:500">Cliquez pour explorer</span></div>';
+      h+='<div class="lx-cattitre" style="font:600 20px/1.3 Poppins,sans-serif;color:#001136;margin:6px 0 16px;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px"><span>Choisissez une catégorie</span><span style="font:400 14px Poppins,sans-serif;color:#6B7280">Cliquez pour explorer</span></div>';
       // Animation d'entrée : déclenche la classe .entering pour stagger
       setTimeout(function(){
         var g=document.querySelector('.velearn-grid');
@@ -6108,11 +6203,12 @@ function vShowSec(sec,btn,_boot){
       // ayants droit (abonnement actif ou groupe acheté). Jusqu'ici la
       // résolution du groupe (_resolveWaGroup) n'était appelée nulle part.
       try{ if(typeof _vBlocGroupeWA==='function') h+=_vBlocGroupeWA(); }catch(e){}
+      h+=_elMatBandeau();
 
       // v1.4.4 (étude vidéo Sharesub) : cartes à BANDEAU — en-tête navy sobre
       // (icône + nom blancs), corps blanc épuré, CTA pilule bleu vif. Entrée en
       // CASCADE au scroll (classe lx-catcard, délais nth-child en CSS).
-      h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px" class="v-reveal lx-catgrid">';
+      h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr));gap:18px" class="v-reveal lx-catgrid">';
       // Les catégories VIDES menaient à « Aucune ressource » : 7 tuiles sur 18
       // étaient des impasses. Elles passent en fin de grille, marquées
       // « Bientôt », et ne s'ouvrent plus pour le visiteur (l'admin, lui,
@@ -6128,7 +6224,7 @@ function vShowSec(sec,btn,_boot){
         var ouvrable=cnt||iA();
         h+='<div class="lx-catcard'+(cnt?'':' lx-catcard-vide')+'"'+(ouvrable
             ?' role="button" tabindex="0" onkeydown="if(event.key===\'Enter\')this.click()" onclick="window._elCat=\''+_esc(cat.id)+'\';vShowSec(\'elearning\',null)"'
-            :' aria-disabled="true" title="Bientôt disponible" style="opacity:.62;cursor:default"')+'>';
+            :' aria-disabled="true" title="Bientôt disponible" style="cursor:default"')+'>';
         // Bandeau navy
         h+='<div class="lx-catcard-head">';
         h+='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-'+theme.ic+'"/></svg>';
@@ -6139,8 +6235,8 @@ function vShowSec(sec,btn,_boot){
         h+='<div class="lx-catcard-body">';
         h+='<div class="lx-catcard-desc">'+_esc((cat.desc||'').slice(0,64))+'</div>';
         h+='<div class="lx-catcard-foot">'+(cnt
-            ?'<span class="lx-catcard-count">'+cnt+' ressource'+(cnt>1?'s':'')+'</span><span class="lx-catcard-cta">Explorer →</span>'
-            :'<span class="lx-catcard-count">Bientôt disponible</span>'+(iA()?'<span class="lx-catcard-cta">Remplir →</span>':''))+'</div>';
+            ?'<span class="lx-catcard-count">'+cnt+' ressource'+(cnt>1?'s':'')+'</span><span class="lx-catcard-cta">Explorer<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"/></svg></span>'
+            :'<span class="lx-catcard-count">Bientôt disponible</span>'+(iA()?'<span class="lx-catcard-cta">Remplir</span>':''))+'</div>';
         h+='</div>';
         h+='</div>';
       });
@@ -6184,6 +6280,7 @@ function vShowSec(sec,btn,_boot){
       var filtered=(el.contenus||[]).filter(function(item){
         if(_delDef.indexOf(item.id)>=0) return false;
         if(item.cat!==selCat) return false;
+        if(!_elMatConcorde(item)) return false;
         if(selCls!=='Toutes'&&item.classe!==selCls) return false;
         // v1.4.3 : filtre RÉEL par section du profil (les classes composites type
         // « 3ème-2nde » passent si l'un des niveaux appartient au groupe)
@@ -6291,7 +6388,9 @@ function vShowSec(sec,btn,_boot){
             }
             h+='<div style="display:flex;align-items:center;gap:6px">';
             if(item.apercu||item.desc) h+='<button class="btn" style="background:'+catColor+'18;color:'+catColor+';font-size:10px;padding:5px 10px;border-radius:10px;border:1px solid '+catColor+'33" onclick="event.stopPropagation();previewElContent(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Aperçu</button>';
-            if(hasPlanAccess||iA()){
+            if(item.dispo===false){
+              h+='<span style="font-size:11px;font-weight:600;color:#6B7287;padding:6px 10px">Bientôt disponible</span>';
+            } else if(hasPlanAccess||iA()){
               h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="consulterGratuit(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Consulter</button>';
             } else {
               h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="commanderContenu(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-card"/></svg>Payer</button>';
@@ -6822,7 +6921,7 @@ function vShowSec(sec,btn,_boot){
              sur la page même où l'on demande au visiteur de nous faire confiance.
              Une ligne sans valeur valable n'est plus affichée du tout : mieux
              vaut un bloc court que « — » en face de « Téléphone ». -->
-        ${[['phone','Téléphone',_telPublic(pi)],
+        ${[['phone','Appels',_telPublic(pi)],
            ['whatsapp','WhatsApp',_telPropre(pi.whatsapp)],
            ['mail','Email',_emailPublic(pi)],
            ['mappin','Adresse',pi.adresse||DB.school?.ville],
@@ -6914,8 +7013,8 @@ function submitOrientation(depuisModale){
   const tel=(document.getElementById('orTel')?.value||'').trim();
   const type=document.getElementById('orType')?.value||'';
   if(!nom||!tel||!type){toast('Nom, téléphone et type de service requis','warn');return;}
-  if(!DB.orientationDemandes)DB.orientationDemandes=[];
-  DB.orientationDemandes.push({
+  if(submitOrientation._enCours) return;
+  var dem={
     id:gid(),
     nom,tel,
     niveau:document.getElementById('orNiveau')?.value||'—',
@@ -6926,9 +7025,31 @@ function submitOrientation(depuisModale){
     matieres:document.getElementById('orMatieres')?.value||'',
     date:today(),
     statut:'En attente'
-  });
+  };
+  if(!DB.orientationDemandes)DB.orientationDemandes=[];
+  DB.orientationDemandes.push(dem);
   save();
-  toast('✓ Demande envoyée ! Nous vous contacterons au '+tel);
+  /* 29/10/2026 — save() n'écrit que dans CE navigateur pour un visiteur
+     (seules les sessions admin/enseignant synchronisent) : « Demande
+     envoyée » s'affichait, le centre ne recevait rien. La demande part donc
+     à api/demandes.php (type « domicile », que le tableau de bord relit).
+     Le serveur exige quartier et matière ; une demande d'orientation n'en a
+     pas toujours : on le dit plutôt que de la faire rejeter. */
+  var corps={
+    nom:nom, tel:tel, niveau:dem.niveau==='—'?'':dem.niveau,
+    quartier:dem.quartier.trim()||'non précisé',
+    matieres:(dem.matieres.split(/[,;]+|\bet\b/).map(function(s){return s.trim();}).filter(Boolean)),
+    creneaux:dem.dispo, objectif:type,
+    message:'Formule : '+type+(dem.msg?'\n'+dem.msg:'')
+  };
+  if(!corps.matieres.length) corps.matieres=['non précisé'];
+  submitOrientation._enCours=true;
+  _demEnvoyer('domicile', corps).then(function(j){
+    toast('✓ Demande reçue (réf. '+(j.ref||'')+') — nous vous rappelons au '+tel,'ok');
+  }).catch(function(e){
+    toast("⚠️ L'envoi n'a pas abouti — WhatsApp s'ouvre avec votre demande",'warn');
+    _demReplWhatsApp('domicile', corps, e && e.message);
+  }).then(function(){ submitOrientation._enCours=false; });
   if(depuisModale && typeof cm==='function'){ cm(); return; }
   ['orNom','orTel','orNiveau','orType','orMsg','orDispo','orQuartier','orMatieres'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
@@ -7370,6 +7491,14 @@ async function _migratePasswords(){
   if(DB.authorAccounts){for(var a=0;a<DB.authorAccounts.length;a++){
     if(DB.authorAccounts[a].pwd&&!isHashed(DB.authorAccounts[a].pwd)){
       DB.authorAccounts[a].pwd=await hashPassword(DB.authorAccounts[a].pwd,DB.authorAccounts[a].user);changed=true;
+    }
+  }}
+  // Auteurs (DB.authors) : créés en clair avant le correctif du 12/09/2026,
+  // jamais repris par cette migration — et db.php refuse la synchro tant qu'il
+  // en reste un.
+  if(DB.authors){for(var au=0;au<DB.authors.length;au++){
+    if(DB.authors[au].pwd&&!isHashed(DB.authors[au].pwd)){
+      DB.authors[au].pwd=await hashPassword(DB.authors[au].pwd,DB.authors[au].user);changed=true;
     }
   }}
   if(changed)save();
@@ -10752,6 +10881,7 @@ function consulterGratuit(itemId){
   var el=DB.elearning||defaultDB().elearning;
   var item=(el.contenus||[]).find(function(c){return c.id===itemId;});
   if(!item){toast('Ressource introuvable','warn');return;}
+  if(item.dispo===false){toast('Ce document n\'est pas encore disponible.','warn');return;}
 
   // Ressources pédagogiques interactives (HTML embarqué)
   if(item.resPedago && typeof window._RESSOURCES_PEDAGO!=='undefined' && window._RESSOURCES_PEDAGO[item.resPedago]){
@@ -11280,6 +11410,8 @@ function commanderContenu(itemId){
   var el=DB.elearning||{contenus:[]};
   var item=el.contenus.find(function(c){return c.id===itemId;});
   if(!item) return;
+  /* 09/11/2026 : le serveur annonce dispo:false quand aucun document n'est déposé. */
+  if(item.dispo===false){ toast('Ce document n\'est pas encore disponible : rien ne vous a été facturé.','warn'); return; }
   var cat=(el.categories||[]).find(function(c){return c.id===item.cat;})||{nom:'Autre'};
   /* Écran intermédiaire court-circuité (v1.15.8) : il ne demandait que nom et
      WhatsApp, soit exactement l'étape ① du modal de paiement. Un contenu
@@ -11344,7 +11476,9 @@ function validerCommandeContenu(itemId){
         customerTel: tel
       });
     } else {
-      toast('✓ Commande envoyée ! Livraison par WhatsApp sous 24h.');
+      // 29/10/2026 — « envoyée » sans rien envoyer : la commande restait locale.
+      toast('✓ Commande prête — WhatsApp s\'ouvre pour l\'envoyer au centre');
+      try{ window.open('https://wa.me/237697637739?text='+encodeURIComponent('Bonjour VÉRITAS, je commande le contenu : '+(item?item.titre:itemId)+'\nNom : '+nom+'\nTél : '+tel),'_blank','noopener'); }catch(e){}
     }
   }, 100);
 }
@@ -12128,6 +12262,7 @@ const ANAV=[
   ]},
   {s:"📚 Pédagogie",i:[
     {k:"grades",i:"▦",l:"Notes & bulletins"},
+    {k:"suivi_epreuves",i:"📈",l:"Suivi scolaire — notes des épreuves"},
     {k:"classstats",i:"📊",l:"Statistiques de classe"},
     {k:"honneur",i:"🏆",l:"Tableau d'honneur"},
     {k:"devoirs_admin",i:"📋",l:"Devoirs"},
@@ -12150,6 +12285,7 @@ const ANAV=[
     {k:"visitororders",i:"📦",l:"Commandes des visiteurs"},
     // Émission d'un code de cahier au comptoir (règlement en espèces) : un
     // ADMIN ordinaire encaisse au centre, la page se garde par iA().
+    {k:"livrets_admin",i:"📗",l:"Livrets : catalogue, prix & promos"},
     {k:"livret_codes",i:"🎟️",l:"Codes d'accès des cahiers"},
     {k:"books2",i:"▤",l:"Bibliothèque"}
   ]},
@@ -12265,6 +12401,7 @@ const PT={
   absences_admin:"Gestion des absences",
   // Pédagogie
   grades:"Notes & Bulletins",
+  suivi_epreuves:"Suivi scolaire",
   classstats:"Statistiques de classe",
   honneur:"Tableau d'honneur",
   devoirs_admin:"Gestion des devoirs",
@@ -12302,6 +12439,16 @@ const PT={
   superoverview:"Vue d'ensemble système",
   sacontrol:"Centre de contrôle Super Admin",
   livret_codes:"Codes d'accès des cahiers",
+  livrets_admin:"Livrets — catalogue, prix & promotions",
+  // Pages ajoutées sans titre : la barre affichait leur identifiant brut.
+  centres_admin:"Centres clients SaaS",
+  calendrier_admin:"Calendrier scolaire",
+  parrainage_admin:"Code ami & enseignants-partenaires",
+  partenaires_admin:"Programme partenariat",
+  marketplace_admin:"Marketplace des auteurs",
+  forum_admin:"Modération du forum",
+  stats_business:"Stats business (ancien calcul)",
+  partenaires_splits:"Partage des revenus (ancien)",
   loginlog:"Journal des connexions",
   allaccounts:"Tous les comptes",
   // Pages enseignant
@@ -12442,7 +12589,7 @@ function render(p){
   // (journalisée dans _veritasErrors). On ne rend rien plutôt que de planter.
   if(typeof SES==='undefined'||!SES) return '';
   const P={
-    dashboard:pgDash,students:pgStudents,payments:pgPayments,grades:pgGrades,
+    dashboard:pgDash,students:pgStudents,payments:pgPayments,grades:pgGrades,suivi_epreuves:pgSuiviEpreuves,
     schedule:pgSched,announce:pgAnn,books2:pgBooks2,send:pgSend,
     teachers:pgTeachers,accounts:pgAccounts,booksale:pgBooksale,boutiquemgmt:pgBoutiqueMgmt,elearningmgmt:pgElearningMgmt,datareset:pgDataReset,visitororders:pgVisitorOrders,classstats:pgClassStats,honneur:pgHonneur,finance:pgFinance,
     settings:pgSettings,mybooks:pgMyBooks,releve_template:pgReleveTemplate,submit_resource:pgSubmitResource,soumissions:pgSoumissions,visitor_accounts:pgVisitorAccounts,authorsmgmt:pgAuthorsMgmt,certscol:pgCertScol,listeclasse:pgListeClasse,presence:pgPresence,
@@ -12490,6 +12637,8 @@ function render(p){
     plateforme:  (typeof pgPlateforme==='function' ? pgPlateforme : null),
     // Émission manuelle des codes de cahier (règlement en espèces au centre).
     livret_codes: (typeof pgLivretCodes==='function' ? pgLivretCodes : null),
+    // Catalogue des livrets : ajout, retrait de la vente, prix, promotions.
+    livrets_admin: (typeof pgLivretsAdmin==='function' ? pgLivretsAdmin : null),
     // Guide d'utilisation (tous rôles)
     guide:pgGuide,
   };
@@ -12536,11 +12685,14 @@ function cm(){
   try { if(window._lastFocusedBeforeModal && document.contains(window._lastFocusedBeforeModal)) window._lastFocusedBeforeModal.focus(); } catch(e){}
   try{ if(typeof _vApresFermetureModale==='function') _vApresFermetureModale(); }catch(e){}
 }
-function toast(msg,t='ok'){const d=document.createElement('div');const c={ok:['var(--gr)','✓'],warn:['var(--or)','⚠'],err:['var(--re)','✕'],info:['#1E499B','ℹ']}[t]||['var(--gr)','✓'];d.style.cssText=`position:fixed;bottom:20px;right:20px;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E6EAF2;color:#142554;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 10px 30px rgba(20,37,84,.16);max-width:360px;animation:su .24s cubic-bezier(.16,1,.3,1);`;d.innerHTML=`<span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${c[0]};color:#fff;font-size:13px;font-weight:800">${c[1]}</span><span>${(''+msg).replace(/</g,'&lt;')}</span>`;document.body.appendChild(d);setTimeout(()=>{d.style.transition='opacity .3s,transform .3s';d.style.opacity='0';d.style.transform='translateY(8px)';setTimeout(()=>d.remove(),300);},3500);}
+function toast(msg,t='ok'){const d=document.createElement('div');const c={ok:['var(--gr)','✓'],warn:['var(--or)','⚠'],err:['var(--re)','✕'],info:['#1E499B','ℹ']}[t]||['var(--gr)','✓'];d.style.cssText=`position:fixed;bottom:calc(20px + var(--vrt-bas,0px));right:20px;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E6EAF2;color:#142554;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 10px 30px rgba(20,37,84,.16);max-width:360px;animation:su .24s cubic-bezier(.16,1,.3,1);`;d.innerHTML=`<span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${c[0]};color:#fff;font-size:13px;font-weight:800">${c[1]}</span><span>${(''+msg).replace(/</g,'&lt;')}</span>`;document.body.appendChild(d);setTimeout(()=>{d.style.transition='opacity .3s,transform .3s';d.style.opacity='0';d.style.transform='translateY(8px)';setTimeout(()=>d.remove(),300);},3500);}
 // Toast enrichi avec bouton d'action — utilisé quand cloud KO et fichiers locaux en attente
 function _toastRetrySync(cause,st){
   var d=document.createElement('div');
-  d.style.cssText='position:fixed;bottom:20px;right:20px;background:var(--orb);border:1px solid var(--ord);color:var(--or);padding:11px 18px;border-radius:var(--r);font-size:13px;font-weight:600;z-index:9999;box-shadow:var(--sh2);max-width:380px;animation:su .22s;display:flex;align-items:center;gap:10px';
+  // La bannière persistante dit déjà « clé absente / refusée » : un second
+  // avertissement flottant, au même moment et au même endroit, ne dit rien de plus.
+  if(cause==='cle' && (document.getElementById('_notSyncBanner')||document.getElementById('_authFailBanner'))) return;
+  d.style.cssText='position:fixed;bottom:calc(20px + var(--vrt-bas,0px));right:20px;background:var(--orb);border:1px solid var(--ord);color:var(--or);padding:11px 18px;border-radius:var(--r);font-size:13px;font-weight:600;z-index:9999;box-shadow:var(--sh2);max-width:380px;animation:su .22s;display:flex;align-items:center;gap:10px';
   var txt=document.createElement('span');
   var _cle=(cause==='cle');
   txt.textContent=_cle
@@ -13992,6 +14144,29 @@ function printStudentHonneur(sid,tri){
 // ═══════════════════════════════════════════════
 // INSCRIPTIONS ÉLÈVES (admin/superadmin)
 // ═══════════════════════════════════════════════
+/* Filtre par classe de la page Inscriptions. Il affichait UN BOUTON PAR
+   CLASSE DU CATALOGUE — près de deux cents (toutes les séries techniques et
+   CAP), un mur qui repoussait la liste des élèves sous l'écran. On ne montre
+   en boutons que les classes qui ont des élèves (avec leur effectif) ; toutes
+   les autres restent accessibles dans une liste déroulante. */
+function _stuFiltreClasses(fc){
+  var eff={};
+  (DB.students||[]).forEach(function(s){ if(s&&s.cls) eff[s.cls]=(eff[s.cls]||0)+1; });
+  var avec=CLS.filter(function(c){ return eff[c]; });
+  var esc=function(c){ return String(c).replace(/[&<>"']/g,function(x){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x];}); };
+  var clic=function(c){ return "window._scls='"+esc(c).replace(/&#39;/g,"\\'")+"';re()"; };
+  var h='<div class="tabs"><button class="tab'+(fc==='Toutes'?' on':'')+'" onclick="'+clic('Toutes')+'">Toutes <span class="mut">'+(DB.students||[]).length+'</span></button>'
+    +avec.map(function(c){ return '<button class="tab'+(fc===c?' on':'')+'" onclick="'+clic(c)+'">'+esc(c)+' <span class="mut">'+eff[c]+'</span></button>'; }).join('')
+    +'</div>';
+  if(avec.length<CLS.length){
+    h+='<select class="fi" style="width:auto;min-width:150px" aria-label="Autre classe" onchange="if(this.value){window._scls=this.value;re()}">'
+      +'<option value="">'+(fc!=='Toutes'&&!eff[fc]?esc(fc):'Autre classe…')+'</option>'
+      +CLS.filter(function(c){ return !eff[c]; }).map(function(c){ return '<option value="'+esc(c)+'"'+(fc===c?' selected':'')+'>'+esc(c)+'</option>'; }).join('')
+      +'</select>';
+  }
+  return h;
+}
+
 function pgStudents(){
   if(!iA())return na();
   const fc=window._scls||'Toutes',q=(window._sq||'').toLowerCase();
@@ -14007,7 +14182,7 @@ function pgStudents(){
     <div class="fl2 fic fsb mb16 fw g8">
       <div class="fl2 fic g8 fw">
         <div class="srch" style="width:220px"><span class="si">🔍</span><input class="fi" style="padding-left:33px" placeholder="Nom, matricule..." value="${window._sq||''}" oninput="window._sq=this.value;re()"></div>
-        <div class="tabs">${['Toutes',...CLS].map(c=>`<button class="tab${fc===c?' on':''}" onclick="window._scls='${c}';re()">${c}</button>`).join('')}</div>
+        ${_stuFiltreClasses(fc)}
       </div>
       <div class="fl2 g8">
         <button class="btn bi" onclick="mAddStu()">＋ Nouvelle inscription</button>
@@ -14054,14 +14229,22 @@ function mAddStudentAccount(){
   },100);
 }
 function autoFillSaPwd(){const sel=document.getElementById('saEtu');if(!sel)return;const sid=sel.value;const st=S(sid);if(st){const u=document.getElementById('saUser');const p=document.getElementById('saPwd2');if(u)u.value=st.mat;if(p)p.value=st.nom+'2024!';}}
-function createStudentAccount(){
+/* Le mot de passe était poussé EN CLAIR dans DB.studentAccounts, et save()
+   l'envoyait aussitôt : db.php refuse tout « pwd » en clair (HTTP 400), si bien
+   que CHAQUE synchro échouait jusqu'au rechargement suivant de la page
+   (_migratePasswords ne tourne qu'au chargement). Bandeau « Serveur injoignable
+   (HTTP 400) » du 31/10/2026. On hache ici, comme _saveStudentPwd(). */
+async function createStudentAccount(){
   const eid=document.getElementById('saEtu')?.value;
   const user=(document.getElementById('saUser')?.value||'').trim();
   const pwd=document.getElementById('saPwd2')?.value||'';
   if(!eid||!user||!pwd){toast('Tous les champs requis','warn');return;}
   if(DB.studentAccounts?.find(sa=>sa.user.toLowerCase()===user.toLowerCase())){toast('Identifiant déjà utilisé','warn');return;}
+  var _pwdStocke;
+  try{ _pwdStocke=await hashPassword(pwd,user); }
+  catch(e){ toast('Chiffrement du mot de passe impossible — compte non créé','err'); return; }
   if(!DB.studentAccounts)DB.studentAccounts=[];
-  DB.studentAccounts.push({id:gid(),eid,user,pwd,lastLogin:null});
+  DB.studentAccounts.push({id:gid(),eid,user,pwd:_pwdStocke,lastLogin:null});
   save();cm();re();toast('✓ Compte élève créé');
 }
 
@@ -14556,6 +14739,251 @@ function saveGr(){
   else DB.grades.push({id:gid(),eid:s.id,enom:`${s.pre} ${s.nom}`,mat:s.mat,cls,sub,n1,n2,coef,tri,ens});
   save();cm();re();toast('✓ Notes enregistrées');
 }
+// ─── SUIVI SCOLAIRE — notes des épreuves (02/11/2026) ─────────────────────
+/* D'après « Notes des épreuves » de Tchouskou : une FEUILLE par épreuve, sur
+   les élèves inscrits de la classe ; note globale ou correction PAR QUESTION
+   sur un barème ; présence (absent, copie non rendue) ; appréciation portée
+   sur la copie ; moyenne, médiane, écart-type, répartition, réussite par
+   question, élèves en alerte (sous 8) ; export Excel, procès-verbal à signer,
+   et report dans « Notes & bulletins » (Devoir 1 ou 2 du trimestre).
+   Données : DB.evalSheets = [{id,titre,type,cls,sub,tri,date,bareme:[{lib,max}],
+   parQ,notes:{eid:{etat:'p'|'abs'|'nr',note,pts:{i:v},comm}},created,auteur}]. */
+var EV_TYPES=['Devoir surveillé','Composition','Interrogation écrite','Devoir maison','Examen blanc'];
+function _evs(){DB.evalSheets=DB.evalSheets||[];return DB.evalSheets;}
+function _evGet(id){return _evs().find(function(e){return e.id===id;})||null;}
+function _evNum(v){if(v===''||v===null||v===undefined)return null;var x=parseFloat(String(v).replace(',','.'));return isFinite(x)?x:null;}
+function _evFr(x){return (x===null||x===undefined)?'—':String(Math.round(x*100)/100).replace('.',',');}
+function _evBareme(e){return Math.round((e.bareme||[]).reduce(function(s,q){return s+(+q.max||0);},0)*100)/100;}
+function _evParQ(e){return !!e.parQ&&_evBareme(e)>0;}
+function _evEleves(e){return DB.students.filter(function(s){return s.cls===e.cls;}).sort(function(a,b){return (a.nom+' '+a.pre).localeCompare(b.nom+' '+b.pre,'fr');});}
+/* Note d'un élève. Par question : somme des points saisis, chacun borné à son
+   barème, ramenée sur 20. Absent ou copie non rendue : pas de note. */
+function _evNote(e,n){
+  var vide={total:null,sur20:null};
+  if(!n||n.etat==='abs'||n.etat==='nr')return vide;
+  if(_evParQ(e)){var t=0,k=0;(e.bareme||[]).forEach(function(q,i){var v=_evNum((n.pts||{})[i]);if(v!==null){t+=Math.min(Math.max(v,0),+q.max||v);k++;}});
+    if(!k)return vide;t=Math.round(t*100)/100;return{total:t,sur20:Math.round(t/_evBareme(e)*2000)/100};}
+  var v=_evNum(n.note);if(v===null)return vide;v=Math.min(Math.max(v,0),20);return{total:v,sur20:v};
+}
+function _evStats(a){var n=a.length;if(!n)return{n:0,moy:null,med:null,min:null,max:null,et:null,reussite:0};
+  var s=a.slice().sort(function(x,y){return x-y;});var moy=s.reduce(function(t,x){return t+x;},0)/n;
+  var med=n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2;
+  var et=Math.sqrt(s.reduce(function(t,x){return t+(x-moy)*(x-moy);},0)/n);
+  return{n:n,moy:moy,med:med,min:s[0],max:s[n-1],et:et,reussite:s.filter(function(x){return x>=10;}).length/n};}
+function _evLignes(e){var N=e.notes||{};return _evEleves(e).map(function(s){var n=N[s.id]||{};return{s:s,n:n,etat:n.etat||'p',r:_evNote(e,n)};});}
+/* Barème saisi « une ligne par question : libellé ; points » (ou « Q1 2 »). */
+function _evParseBareme(txt){var out=[];String(txt||'').split(/\r?\n/).forEach(function(l){l=l.trim();if(!l)return;
+  var m=l.match(/^(.*?)[\s;:=\t]+(\d+(?:[.,]\d+)?)\s*(?:pts?|points?)?\s*$/i);
+  if(m){var lib=m[1].replace(/[;:\-–]+$/,'').trim();out.push({lib:lib||('Q'+(out.length+1)),max:parseFloat(m[2].replace(',','.'))});}});
+  return out;}
+function _evBaremeTexte(e){return (e.bareme||[]).map(function(q){return q.lib+' ; '+String(q.max).replace('.',',');}).join('\n');}
+
+function pgSuiviEpreuves(){
+  if(!iA()&&!isEnseignant())return na();
+  var t=isEnseignant()?T(SES.tid):null;
+  var ouverte=window._evOpen?_evGet(window._evOpen):null;
+  if(ouverte)return _evFeuilleHtml(ouverte);
+  var fC=window._evCls||'',fT=window._evTri||'';
+  var L=_evs().filter(function(e){return (!fC||e.cls===fC)&&(!fT||e.tri===fT)&&(!t||e.sub===t.mat2);})
+    .sort(function(a,b){return (b.date||'').localeCompare(a.date||'')||(b.created||0)-(a.created||0);});
+  var classes=[...new Set(_evs().map(function(e){return e.cls;}))];
+  var toutes=L.map(function(e){var l=_evLignes(e);var notes=l.filter(function(x){return x.r.sur20!==null;}).map(function(x){return x.r.sur20;});return{e:e,l:l,S:_evStats(notes)};});
+  var nAlerte=toutes.reduce(function(a,x){return a+x.l.filter(function(y){return y.etat==='nr'||(y.r.sur20!==null&&y.r.sur20<8);}).length;},0);
+  var aSaisir=toutes.filter(function(x){var pres=x.l.filter(function(y){return y.etat==='p';}).length;return pres&&x.S.n<pres;}).length;
+  return`
+  <div class="ib" style="margin-bottom:14px">📈 <b>Suivi scolaire</b> — une feuille de notes par épreuve, sur les élèves de la classe : note globale ou correction question par question, statistiques, élèves en alerte, procès-verbal et report dans les bulletins.</div>
+  <div class="sg">
+    <div class="sc scg"><div class="sci">📝</div><div class="scl">Épreuves suivies</div><div class="scv vg">${L.length}</div><div class="scs">${fC||'toutes classes'}${fT?' · '+_esc(fT):''}</div></div>
+    <div class="sc scgr"><div class="sci">⏳</div><div class="scl">Saisies incomplètes</div><div class="scv vgr">${aSaisir}</div><div class="scs">feuilles à terminer</div></div>
+    <div class="sc"><div class="sci">⚠️</div><div class="scl">Élèves en alerte</div><div class="scv" style="color:var(--re)">${nAlerte}</div><div class="scs">sous 8/20 ou copie non rendue</div></div>
+  </div>
+  <div class="fl2 fic fsb mb16 fw g8">
+    <div class="fl2 fic g8 fw">
+      <select class="fi" style="max-width:190px" onchange="window._evCls=this.value;re()"><option value="">Toutes les classes</option>${CLS.map(function(c){return '<option'+(c===fC?' selected':'')+(classes.indexOf(c)<0?' style="color:#9aa3b2"':'')+'>'+_esc(c)+'</option>';}).join('')}</select>
+      <select class="fi" style="max-width:190px" onchange="window._evTri=this.value;re()"><option value="">Tous les trimestres</option>${TRS.map(function(x){return '<option'+(x===fT?' selected':'')+'>'+_esc(x)+'</option>';}).join('')}</select>
+    </div>
+    <button class="btn bi" onclick="mEvNew()">＋ Nouvelle épreuve</button>
+  </div>
+  <div class="card">
+    <div class="ct">Épreuves</div>
+    ${!toutes.length?'<div class="empty">Aucune épreuve. Créez-en une : la feuille s’ouvre sur les élèves de la classe.</div>':
+    `<div class="tw"><table><thead><tr><th>Épreuve</th><th>Classe</th><th>Matière</th><th>Trimestre</th><th style="text-align:center">Saisies</th><th style="text-align:center">Moyenne</th><th style="text-align:center">Alertes</th><th></th></tr></thead><tbody>
+    ${toutes.map(function(x){var e=x.e;var pres=x.l.filter(function(y){return y.etat==='p';}).length;var al=x.l.filter(function(y){return y.etat==='nr'||(y.r.sur20!==null&&y.r.sur20<8);}).length;
+      return `<tr><td><div class="bold s">${_esc(e.titre)}</div><div class="xs2 mut">${_esc(e.type||'')}${e.date?' · '+_esc(e.date.split('-').reverse().join('/')):''}${_evBareme(e)?' · barème '+_evFr(_evBareme(e))+' pts':''}</div></td>
+      <td>${_esc(e.cls)}</td><td>${_esc(e.sub)}</td><td class="xs2">${_esc(e.tri)}</td>
+      <td style="text-align:center"><span class="mono xs2" style="color:${x.S.n<pres?'var(--or,#c26a12)':'var(--gr)'}">${x.S.n}/${pres}</span></td>
+      <td style="text-align:center">${x.S.n?`<span class="mono bold s" style="color:${getAppr(x.S.moy).col}">${_evFr(x.S.moy)}</span>`:'<span style="color:var(--ink4)">—</span>'}</td>
+      <td style="text-align:center">${al?`<span class="mono bold xs2" style="color:var(--re)">${al}</span>`:'<span style="color:var(--ink4)">0</span>'}</td>
+      <td style="white-space:nowrap"><button class="btn bi" style="padding:5px 11px;font-size:12px" onclick="window._evOpen='${_esc(e.id)}';re();window.scrollTo(0,0)">Ouvrir</button> <button class="btn bo" style="padding:5px 9px;font-size:12px" onclick="mEvDel('${_esc(e.id)}')" title="Supprimer">🗑</button></td></tr>`;}).join('')}
+    </tbody></table></div>`}
+  </div>`;
+}
+
+function _evFeuilleHtml(e){
+  var parQ=_evParQ(e),bar=_evBareme(e);var l=_evLignes(e);
+  var ong=function(on){return 'padding:6px 12px;border-radius:7px;border:none;font-size:12px;font-weight:700;cursor:pointer;'+(on?'background:#fff;color:var(--bl);box-shadow:0 1px 4px rgba(20,55,95,.14)':'background:transparent;color:var(--ink3)');};
+  var head=parQ?(e.bareme||[]).map(function(q){return `<th style="text-align:center;min-width:58px" title="${_esc(q.lib)}">${_esc(q.lib.length>9?q.lib.slice(0,8)+'…':q.lib)}<div class="xs2 mut" style="font-weight:600">/${_evFr(+q.max)}</div></th>`;}).join(''):'';
+  var inp='width:62px;padding:5px 4px;text-align:center;font-weight:700';
+  return`
+  <div class="fl2 fic g8 mb16 fw"><button class="btn bo" onclick="window._evOpen=null;re()">‹ Toutes les épreuves</button></div>
+  <div class="card mb16">
+    <div class="fl2 fic fsb fw g8">
+      <div><div class="ct" style="margin-bottom:2px">${_esc(e.titre)}</div>
+        <div class="xs2 mut">${_esc([e.type,e.cls,e.sub,e.tri,e.date?e.date.split('-').reverse().join('/'):''].filter(Boolean).join(' · '))}${bar?' · barème '+_evFr(bar)+' pts sur '+(e.bareme||[]).length+' question(s)':' · barème non réglé'}</div></div>
+      <div class="fl2 fic g6 fw">
+        <div style="display:inline-flex;gap:3px;background:var(--sur,#f3f5fa);border-radius:9px;padding:3px">
+          <button style="${ong(!parQ)}" onclick="_evMode('${_esc(e.id)}',false)">Note globale</button>
+          <button style="${ong(parQ)}${bar?'':';opacity:.45;cursor:not-allowed'}" onclick="_evMode('${_esc(e.id)}',true)" title="${bar?'Corriger question par question':'Réglez d’abord le barème'}">Par question</button>
+        </div>
+        <button class="btn bo" onclick="mEvEdit('${_esc(e.id)}')">✎ Épreuve & barème</button>
+        <button class="excel-btn" onclick="_evExcel('${_esc(e.id)}')">📊 Excel</button>
+        <button class="btn bg2" onclick="_evPV('${_esc(e.id)}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Procès-verbal</button>
+        <button class="btn bi" onclick="mEvReport('${_esc(e.id)}')">↪ Reporter dans les bulletins</button>
+      </div>
+    </div>
+  </div>
+  <div id="evStats">${_evStatsHtml(e)}</div>
+  <div class="card mb16">
+    <div class="ct">Feuille de notes — ${l.length} élève${l.length>1?'s':''}</div>
+    ${!l.length?`<div class="empty">Aucun élève inscrit en ${_esc(e.cls)}. Inscrivez-les dans « Inscriptions » : la feuille se remplit seule.</div>`:
+    `<div class="tw"><table><thead><tr><th style="width:30px">N°</th><th>Élève</th><th>Présence</th>${head}${parQ?'<th style="text-align:center">Total<div class="xs2 mut" style="font-weight:600">/'+_evFr(bar)+'</div></th><th style="text-align:center">/20</th>':'<th style="text-align:center">Note /20</th>'}<th>Appréciation (portée sur la copie)</th></tr></thead><tbody>
+    ${l.map(function(x,i){var s=x.s,n=x.n,off=x.etat!=='p',sid=_esc(s.id),eid=_esc(e.id);var dis=off?' disabled':'';
+      var cases=parQ?(e.bareme||[]).map(function(q,k){var v=(n.pts||{})[k];var bv=_evNum(v);var hors=bv!==null&&(bv<0||bv>+q.max);return `<td style="text-align:center"><input class="fi" type="number" step="0.25" min="0" max="${+q.max}" value="${v===undefined||v===null?'':_esc(String(v))}" style="${inp}${hors?';border-color:#c0392b!important;background:#fdecea!important':''}"${dis} aria-label="${_esc(s.nom+' '+s.pre+' — '+q.lib)}" onchange="_evSetPt('${eid}','${sid}',${k},this)"></td>`;}).join(''):'';
+      var noteC=parQ?`<td style="text-align:center" class="mono bold s" id="evT_${sid}">${off?(x.etat==='abs'?'abs.':'n.r.'):_evFr(x.r.total)}</td><td class="mono bold s" id="evS_${sid}" style="text-align:center;color:${x.r.sur20===null?'var(--ink4)':getAppr(x.r.sur20).col}">${off?'':_evFr(x.r.sur20)}</td>`
+        :`<td style="text-align:center"><input class="fi" type="number" step="0.25" min="0" max="20" value="${n.note===undefined||n.note===null?'':_esc(String(n.note))}" style="${inp}"${dis} aria-label="${_esc(s.nom+' '+s.pre)} — note sur 20" onchange="_evSetNote('${eid}','${sid}',this)"></td>`;
+      return `<tr><td class="xs2 mut">${i+1}</td><td class="semi s" style="white-space:nowrap">${_esc(s.nom)} ${_esc(s.pre)}</td>
+      <td><select class="fi" style="padding:5px 6px;font-size:12px;${off?'color:var(--re)':''}" onchange="_evSetEtat('${eid}','${sid}',this.value)"><option value="p"${x.etat==='p'?' selected':''}>Présent</option><option value="abs"${x.etat==='abs'?' selected':''}>Absent</option><option value="nr"${x.etat==='nr'?' selected':''}>Copie non rendue</option></select></td>
+      ${cases}${noteC}
+      <td><input class="fi" style="min-width:180px;padding:5px 8px;font-size:12px" value="${_esc(n.comm||'')}" placeholder="Appréciation"${dis} onchange="_evSetComm('${eid}','${sid}',this.value)"></td></tr>`;}).join('')}
+    </tbody></table></div>`}
+  </div>
+  <div id="evAna">${_evAnaHtml(e)}</div>`;
+}
+function _evStatsHtml(e){
+  var l=_evLignes(e);var pres=l.filter(function(x){return x.etat==='p';}).length;
+  var S=_evStats(l.filter(function(x){return x.r.sur20!==null;}).map(function(x){return x.r.sur20;}));
+  /* data-counted / data-v-counted : les deux compteurs animés des tuiles
+     (runCounters, scan) ne lisent que le PREMIER nombre — « 5,5 – 18,5 »
+     devenait « 5.5 », « 50 % » devenait « 50 ». Ces valeurs se recalculent à
+     chaque frappe : on les écarte de l'animation. */
+  var tile=function(ico,lab,val,sous,col){return `<div class="sc"><div class="sci">${ico}</div><div class="scl">${lab}</div><div class="scv" data-counted="1" data-v-counted="1" style="font-size:19px;color:${col||'var(--bl)'}">${val}</div><div class="scs">${sous||''}</div></div>`;};
+  /* Un seul nombre par tuile : « 0/5 » s'affichait « 5/ » (le compteur animé
+     des tuiles ne lit que le premier nombre). Le détail va dessous. */
+  var nAbs=l.filter(function(x){return x.etat==='abs';}).length,nNr=l.filter(function(x){return x.etat==='nr';}).length;
+  return `<div class="sg">${tile('✍️','Notes saisies',S.n,'sur '+pres+' présent'+(pres>1?'s':''),S.n<pres?'var(--or,#c26a12)':'var(--gr)')}
+    ${tile('🚫','Absents ou sans copie',nAbs+nNr,nAbs+' absent'+(nAbs>1?'s':'')+' · '+nNr+' copie'+(nNr>1?'s':'')+' non rendue'+(nNr>1?'s':''))}
+    ${tile('📊','Moyenne /20',_evFr(S.moy),'médiane '+_evFr(S.med),S.moy===null?'var(--ink4)':getAppr(S.moy).col)}
+    ${tile('↕️','Min – max',S.n?_evFr(S.min)+' – '+_evFr(S.max):'—','écart-type '+_evFr(S.et))}
+    ${tile('✅','Au moins 10/20',S.n?Math.round(S.reussite*100)+' %':'—','taux de réussite',S.n&&S.reussite>=.5?'var(--gr)':'var(--re)')}</div>`;
+}
+function _evAnaHtml(e){
+  var l=_evLignes(e);var notes=l.filter(function(x){return x.r.sur20!==null;}).map(function(x){return x.r.sur20;});
+  if(!notes.length&&!l.some(function(x){return x.etat==='nr';}))return '';
+  var T=[[0,5,'0–5'],[5,8,'5–8'],[8,10,'8–10'],[10,12,'10–12'],[12,14,'12–14'],[14,16,'14–16'],[16,20.01,'16–20']];
+  var c=T.map(function(t){return notes.filter(function(x){return x>=t[0]&&x<t[1];}).length;});var mx=Math.max.apply(null,[1].concat(c));
+  var rep=`<div class="card"><div class="ct">Répartition des notes</div><div style="display:flex;align-items:flex-end;gap:8px;height:130px">${T.map(function(t,k){return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%"><span class="xs2 bold">${c[k]||''}</span><span style="display:block;width:100%;max-width:44px;border-radius:6px 6px 0 0;margin-top:3px;height:${Math.max(c[k]?6:2,Math.round(c[k]/mx*88))}px;background:${t[0]<8?'#c0392b':t[0]<10?'#c26a12':'#188047'};${c[k]?'':'opacity:.25'}"></span><span class="xs2 mut" style="margin-top:4px;font-size:10px">${t[2]}</span></div>`;}).join('')}</div></div>`;
+  var parQ=_evParQ(e),qs='';
+  if(parQ){var it=(e.bareme||[]).map(function(q,k){var v=l.filter(function(x){return x.etat==='p';}).map(function(x){return _evNum((x.n.pts||{})[k]);}).filter(function(x){return x!==null;});
+      return{q:q,t:v.length&&+q.max?v.reduce(function(s,x){return s+Math.min(Math.max(x,0),+q.max);},0)/v.length/q.max:null};}).filter(function(x){return x.t!==null;}).sort(function(a,b){return a.t-b.t;});
+    if(it.length)qs=`<div class="card"><div class="ct">Réussite par question</div><div class="xs2 mut" style="margin:-4px 0 8px">Des moins réussies aux mieux réussies : les premières sont à reprendre en remédiation.</div>${it.map(function(x){var p=Math.round(x.t*100),col=x.t<.5?'#c0392b':x.t<.7?'#c26a12':'#188047';
+      return `<div class="fl2 fic g8" style="padding:4px 0"><span class="s semi" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${_esc(x.q.lib)}">${_esc(x.q.lib)}</span><span style="width:110px;height:8px;border-radius:99px;background:var(--bg2,#eef2f7);overflow:hidden"><span style="display:block;height:100%;width:${p}%;background:${col}"></span></span><span class="mono bold xs2" style="width:40px;text-align:right;color:${col}">${p} %</span></div>`;}).join('')}</div>`;}
+  var al=l.filter(function(x){return x.etat==='nr'||(x.r.sur20!==null&&x.r.sur20<8);}).sort(function(a,b){return (a.r.sur20===null?-1:a.r.sur20)-(b.r.sur20===null?-1:b.r.sur20);});
+  var ale=al.length?`<div class="card" style="border:1px solid #ecc4bf"><div class="ct" style="color:var(--re)">Élèves en alerte</div><div class="xs2 mut" style="margin:-4px 0 8px">Note sous 8/20, ou copie non rendue.</div>${al.map(function(x){return `<div class="fl2 fic fsb" style="padding:6px 0;border-top:1px solid var(--bg2,#eef2f7)"><span class="s semi">${_esc(x.s.nom)} ${_esc(x.s.pre)}</span><span class="mono bold xs2" style="color:var(--re)">${x.etat==='nr'?'copie non rendue':_evFr(x.r.sur20)+'/20'}</span></div>`;}).join('')}</div>`:'';
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">${rep}${qs}${ale}</div>`;
+}
+/* Saisie : on enregistre et on rafraîchit les cases calculées SANS re(),
+   pour ne pas perdre le champ suivant que l'utilisateur vient d'atteindre. */
+function _evNoteDe(e,sid){e.notes=e.notes||{};e.notes[sid]=e.notes[sid]||{etat:'p'};return e.notes[sid];}
+function _evApres(e,sid){
+  save();
+  var n=(e.notes||{})[sid]||{};var r=_evNote(e,n);
+  var tE=_ge('evT_'+sid),sE=_ge('evS_'+sid);
+  if(tE)tE.textContent=_evFr(r.total);
+  if(sE){sE.textContent=_evFr(r.sur20);sE.style.color=r.sur20===null?'var(--ink4)':getAppr(r.sur20).col;}
+  _si('evStats',_evStatsHtml(e));_si('evAna',_evAnaHtml(e));
+}
+function _evBorne(inp,max){var v=_evNum(inp.value);var bad=v!==null&&(v<0||v>max);inp.style.setProperty('border-color',bad?'#c0392b':'',bad?'important':'');inp.style.setProperty('background',bad?'#fdecea':'',bad?'important':'');inp.title=bad?'Hors barème : comptée '+_evFr(Math.min(Math.max(v,0),max)):'';if(bad)toast('Note hors barème (0 – '+_evFr(max)+') : elle sera ramenée dans les bornes','warn');}
+function _evSetPt(id,sid,k,inp){var e=_evGet(id);if(!e)return;var n=_evNoteDe(e,sid);n.pts=n.pts||{};
+  if(inp.value==='')delete n.pts[k];else n.pts[k]=inp.value;_evBorne(inp,+((e.bareme||[])[k]||{}).max||0);_evApres(e,sid);}
+function _evSetNote(id,sid,inp){var e=_evGet(id);if(!e)return;_evNoteDe(e,sid).note=inp.value;_evBorne(inp,20);_evApres(e,sid);}
+function _evSetComm(id,sid,v){var e=_evGet(id);if(!e)return;_evNoteDe(e,sid).comm=String(v||'').slice(0,300);save();}
+function _evSetEtat(id,sid,v){var e=_evGet(id);if(!e)return;_evNoteDe(e,sid).etat=v;save();re();}
+function _evMode(id,parQ){var e=_evGet(id);if(!e)return;if(parQ&&!_evBareme(e)){toast('Réglez d’abord le barème de l’épreuve','warn');mEvEdit(id);return;}e.parQ=!!parQ;save();re();}
+
+function _evFormHtml(e){
+  var t=isEnseignant()?T(SES.tid):null;e=e||{};
+  return `<div class="fg2">
+  <div class="fg" style="grid-column:1/-1"><span class="fl">Intitulé *</span><input class="fi" id="evTitre" value="${_esc(e.titre||'')}" placeholder="Devoir surveillé n°2 — séquence 3"></div>
+  <div class="fg"><span class="fl">Type</span><select class="fi" id="evType">${EV_TYPES.map(function(x){return '<option'+(x===(e.type||EV_TYPES[0])?' selected':'')+'>'+x+'</option>';}).join('')}</select></div>
+  <div class="fg"><span class="fl">Date</span><input class="fi" id="evDate" type="date" value="${_esc(e.date||new Date().toISOString().slice(0,10))}"></div>
+  <div class="fg"><span class="fl">Classe *</span><select class="fi" id="evCls">${CLS.map(function(c){return '<option'+(c===(e.cls||window._evCls||'')?' selected':'')+'>'+_esc(c)+'</option>';}).join('')}</select></div>
+  <div class="fg"><span class="fl">Matière *</span><select class="fi" id="evSub">${(t?[t.mat2]:SUBS).map(function(s){return '<option'+(s===e.sub?' selected':'')+'>'+_esc(s)+'</option>';}).join('')}</select></div>
+  <div class="fg"><span class="fl">Trimestre</span><select class="fi" id="evTri">${TRS.map(function(x){return '<option'+(x===(e.tri||window._evTri||TRS[0])?' selected':'')+'>'+_esc(x)+'</option>';}).join('')}</select></div>
+  <div class="fg" style="grid-column:1/-1"><span class="fl">Barème (facultatif) — une ligne par question : libellé ; points</span>
+    <textarea class="fi" id="evBar" rows="6" placeholder="Compréhension Q1 ; 2&#10;Compréhension Q2 ; 3&#10;Langue Q3 ; 5&#10;Production écrite ; 10">${_esc(_evBaremeTexte(e))}</textarea>
+    <div class="xs2 mut" style="margin-top:4px">Avec un barème, la feuille se corrige question par question et ramène le total sur 20.</div></div>
+  </div>`;
+}
+function _evLireForm(){return{titre:(_ge('evTitre')?.value||'').trim(),type:_ge('evType')?.value||EV_TYPES[0],date:_ge('evDate')?.value||'',
+  cls:_ge('evCls')?.value||'',sub:_ge('evSub')?.value||'',tri:_ge('evTri')?.value||TRS[0],bareme:_evParseBareme(_ge('evBar')?.value||'')};}
+function mEvNew(){M('Nouvelle épreuve','La feuille s’ouvre sur les élèves de la classe',_evFormHtml(null),
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEvNew()">✓ Créer la feuille</button>');}
+function saveEvNew(){var f=_evLireForm();if(!f.titre||!f.cls||!f.sub){toast('Intitulé, classe et matière sont requis','warn');return;}
+  var e=Object.assign({id:'ev'+gid(),parQ:f.bareme.length>0,notes:{},created:Date.now(),auteur:SES?.nom||''},f);
+  _evs().push(e);save();cm();window._evOpen=e.id;re();toast('✓ Feuille créée — '+_evEleves(e).length+' élève(s)');}
+function mEvEdit(id){var e=_evGet(id);if(!e)return;M('Épreuve & barème',_esc(e.titre),_evFormHtml(e),
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEvEdit(\''+_esc(id)+'\')">✓ Enregistrer</button>');}
+function saveEvEdit(id){var e=_evGet(id);if(!e)return;var f=_evLireForm();if(!f.titre){toast('Intitulé requis','warn');return;}
+  /* Les points déjà saisis sont rangés par NUMÉRO de question : changer le
+     nombre de questions les décalerait. On prévient au lieu de remapper. */
+  var avant=(e.bareme||[]).length,apres=f.bareme.length;
+  var saisis=Object.keys(e.notes||{}).some(function(k){return Object.keys((e.notes[k]||{}).pts||{}).length;});
+  Object.assign(e,f);if(!apres)e.parQ=false;else if(!avant)e.parQ=true;save();cm();re();
+  toast(saisis&&avant!==apres?'Barème modifié : vérifiez les points déjà saisis, ils restent rangés par numéro de question':'✓ Épreuve mise à jour',saisis&&avant!==apres?'warn':'ok');}
+function mEvDel(id){var e=_evGet(id);if(!e)return;M('Supprimer la feuille ?',_esc(e.titre),'<p class="s">Les notes saisies sur cette feuille seront effacées. Celles déjà reportées dans les bulletins y restent.</p>',
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn" style="background:var(--re);color:#fff" onclick="DB.evalSheets=_evs().filter(function(x){return x.id!==\''+_esc(id)+'\';});save();cm();re();toast(\'Feuille supprimée\')">Supprimer</button>');}
+
+function _evExcel(id){var e=_evGet(id);if(!e)return;var parQ=_evParQ(e);var etat={p:'présent',abs:'absent',nr:'copie non rendue'};
+  var data=_evLignes(e).map(function(x,i){var o={'N°':i+1,'Nom':x.s.nom,'Prénom':x.s.pre,'Matricule':x.s.mat||'','Présence':etat[x.etat]};
+    if(parQ)(e.bareme||[]).forEach(function(q,k){var v=_evNum((x.n.pts||{})[k]);o[q.lib+' (/'+q.max+')']=v===null?'':v;});
+    if(parQ)o['Total (/'+_evBareme(e)+')']=x.r.total===null?'':x.r.total;
+    o['Note /20']=x.r.sur20===null?'':x.r.sur20;o['Appréciation']=x.n.comm||'';return o;});
+  exportToExcel(data,('Notes_'+e.cls+'_'+e.sub+'_'+e.titre).replace(/[^\wÀ-ÿ-]+/g,'_').slice(0,80),e.sub.slice(0,28));}
+/* Procès-verbal à signer, comme « Établir le procès-verbal » de Tchouskou. */
+function _evPV(id){var e=_evGet(id);if(!e)return;var parQ=_evParQ(e);var l=_evLignes(e);
+  var S=_evStats(l.filter(function(x){return x.r.sur20!==null;}).map(function(x){return x.r.sur20;}));
+  var etat={abs:'absent',nr:'copie non rendue'};var td='padding:5px 8px;border:1px solid #d9dee8;font-size:11.5px';
+  var html=docHeader('Procès-verbal de notes')+`<div style="padding:18px 26px;font-family:Arial,sans-serif;color:#14243a">
+    <div style="font-size:17px;font-weight:700;color:#142554">${_esc(e.titre)}</div>
+    <div style="font-size:12px;color:#5a6678;margin:3px 0 12px">${_esc([e.type,e.cls,e.sub,e.tri,e.date?e.date.split('-').reverse().join('/'):''].filter(Boolean).join(' · '))}${parQ?' · barème '+_evFr(_evBareme(e))+' pts':''}</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:12px"><tr>${[['Effectif',l.length],['Notés',S.n],['Absents',l.filter(function(x){return x.etat==='abs';}).length],['Copies non rendues',l.filter(function(x){return x.etat==='nr';}).length],['Moyenne',_evFr(S.moy)+'/20'],['Min – max',S.n?_evFr(S.min)+' – '+_evFr(S.max):'—'],['Écart-type',_evFr(S.et)],['≥ 10/20',S.n?Math.round(S.reussite*100)+' %':'—']].map(function(c){return `<td style="${td};text-align:center"><div style="font-size:9.5px;text-transform:uppercase;color:#7a8598">${c[0]}</div><b style="font-size:13px">${c[1]}</b></td>`;}).join('')}</tr></table>
+    <table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f2f6fb"><th style="${td};width:30px">N°</th><th style="${td};text-align:left">Élève</th><th style="${td}">Matricule</th>${parQ?`<th style="${td}">Total /${_evFr(_evBareme(e))}</th>`:''}<th style="${td}">Note /20</th><th style="${td};text-align:left">Appréciation</th></tr></thead><tbody>
+    ${l.map(function(x,i){return `<tr><td style="${td};text-align:center">${i+1}</td><td style="${td}">${_esc(x.s.nom)} ${_esc(x.s.pre)}</td><td style="${td};text-align:center">${_esc(x.s.mat||'')}</td>${parQ?`<td style="${td};text-align:center">${etat[x.etat]?'':_evFr(x.r.total)}</td>`:''}<td style="${td};text-align:center;font-weight:700">${etat[x.etat]||_evFr(x.r.sur20)}</td><td style="${td}">${_esc(x.n.comm||'')}</td></tr>`;}).join('')}
+    </tbody></table>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:34px;font-size:12px"><div style="border-top:1px solid #14243a;padding-top:6px;min-height:60px">Le correcteur${e.auteur?' : '+_esc(e.auteur):''}<br><span style="color:#7a8598">Date et signature</span></div><div style="border-top:1px solid #14243a;padding-top:6px">Visa du directeur des études</div></div>
+    <div style="margin-top:20px;font-size:10px;color:#7a8598;text-align:center">Établi le ${today()}</div></div>`;
+  printDoc(html,'PV — '+_esc(e.titre));}
+/* Report dans « Notes & bulletins » : la note /20 devient le Devoir 1 ou 2 de
+   la matière au trimestre. Une ligne NEUVE n'a pas encore l'autre devoir : il
+   reprend provisoirement la même note (le bulletin moyenne les deux), et on
+   le dit. */
+function mEvReport(id){var e=_evGet(id);if(!e)return;var n=_evLignes(e).filter(function(x){return x.r.sur20!==null;}).length;
+  if(!n){toast('Aucune note à reporter','warn');return;}
+  M('Reporter dans les bulletins',_esc(e.cls+' · '+e.sub+' · '+e.tri),
+    `<p class="s" style="margin-bottom:10px">${n} note(s) sur 20 seront inscrites dans « Notes & bulletins ». Les élèves absents ou sans copie ne sont pas touchés.</p>
+    <div class="fg"><span class="fl">Inscrire comme</span><select class="fi" id="evSlot"><option value="n1">Devoir 1</option><option value="n2">Devoir 2</option></select></div>
+    <div class="xs2 mut" style="margin-top:6px">Si l’élève n’a encore aucune note dans cette matière ce trimestre, l’autre devoir reprend provisoirement la même note.</div>`,
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEvReport(\''+_esc(id)+'\')">✓ Reporter</button>');}
+function saveEvReport(id){var e=_evGet(id);if(!e)return;var slot=_ge('evSlot')?.value==='n2'?'n2':'n1',autre=slot==='n1'?'n2':'n1';
+  var coef=COEFS[e.sub]||1,ens=SES?.nom||'Admin',k=0,neuves=0;
+  _evLignes(e).forEach(function(x){if(x.r.sur20===null)return;var s=x.s;
+    var g=DB.grades.find(function(g){return g.eid===s.id&&g.sub===e.sub&&g.tri===e.tri;});
+    if(g){g[slot]=x.r.sur20;g.ens=g.ens||ens;}
+    else{var ng={id:gid(),eid:s.id,enom:s.pre+' '+s.nom,mat:s.mat,cls:e.cls,sub:e.sub,coef:coef,tri:e.tri,ens:ens};ng[slot]=x.r.sur20;ng[autre]=x.r.sur20;DB.grades.push(ng);neuves++;}
+    k++;});
+  e.reporte={slot:slot,date:today(),n:k};save();cm();re();
+  toast('✓ '+k+' note(s) reportée(s)'+(neuves?' · '+neuves+' ligne(s) neuve(s) : l’autre devoir reprend la même note':''));}
+
 function printBulletins(cls,tri){
   const sts=DB.students.filter(s=>s.cls===cls);
   if(!sts.length){toast('Aucun élève','warn');return;}
@@ -17691,12 +18119,13 @@ window._svDelExam=function(i){if(!confirm('Supprimer cet examen ?'))return;DB.st
 // Le widget affiche le prochain examen pertinent + active une promo automatique
 // dans la fenêtre des 60 jours avant l'épreuve. Éditable via DB.examCountdown.
 // ════════════════════════════════════════════════════════════════════
+// Session 2027 : décision n° 966/26/MINESEC du 1er octobre 2026 (début des épreuves écrites).
 window.EXAM_COUNTDOWN_DEFAULT = [
-  {ex:'Concours 6ème', date:'2026-05-13', cycles:['I']},
-  {ex:'Baccalauréat',  date:'2026-05-25', cycles:['III']},
-  {ex:'BEPC',          date:'2026-06-01', cycles:['II']},
-  {ex:'GCE O/A Level', date:'2026-06-02', cycles:['II','III']},
-  {ex:'Probatoire',    date:'2026-06-08', cycles:['III']}
+  {ex:'Concours 6ème', date:'2027-05-11', cycles:['I']},
+  {ex:'Baccalauréat',  date:'2027-05-24', cycles:['III']},
+  {ex:'BEPC',          date:'2027-05-31', cycles:['II']},
+  {ex:'GCE O/A Level', date:'2027-06-01', cycles:['II','III']},
+  {ex:'Probatoire',    date:'2027-06-07', cycles:['III']}
 ];
 window._examList = function(){
   return (typeof DB!=='undefined' && DB.examCountdown && DB.examCountdown.length) ? DB.examCountdown : EXAM_COUNTDOWN_DEFAULT;
@@ -18927,23 +19356,28 @@ var CALENDRIER_SCOLAIRE={
        {num:6,debut:'03 Mai',fin:'11 Juin',examens:'Compositions de fin d\'année : 03 au 21 mai 2027'},
      ]},
   ],
-  // ── Périodes OFFICIELLES fixées par l'arrêté conjoint 2026/2027 ──
-  // Les dates détaillées par examen (BEPC, Probatoire, BAC, GCE…) relèvent d'une
-  // décision particulière du MINESEC : ne rien afficher tant qu'elle n'est pas publiée.
+  // ── Périodes de l'arrêté conjoint 2026/2027 + dates de la décision
+  //    n° 966/26/MINESEC du 1er octobre 2026 (calendrier des examens et
+  //    concours de la session 2027). Les EPS suivent l'article 3 de la décision.
   examens_nationaux:[
     {nom:'Épreuves zéro (secondaire) · CEP blanc & MOCK (primaire)',date:'Jeu. 15 et Ven. 16 Avr. 2027',niveaux:'Classes d\'examen',matières:'Simulation nationale des épreuves officielles'},
-    {nom:'Épreuves pratiques d\'EPS',date:'Lun. 19 Avr. au Ven. 07 Mai 2027',niveaux:'Classes d\'examen',matières:'EPS — examens officiels, sur toute l\'étendue du territoire'},
+    {nom:'Épreuves pratiques d\'EPS',date:'Lun. 26 Avr. au Ven. 07 Mai 2027',niveaux:'Classes d\'examen',matières:'EPS — calendrier fixé par chaque délégation régionale dans cette période'},
     {nom:'Compositions de fin d\'année (établissements)',date:'Lun. 03 au Ven. 21 Mai 2027',niveaux:'Toutes classes',matières:'Format examen officiel pour les classes d\'examen · programme annuel pour les classes intermédiaires'},
     {nom:'Examens & concours officiels — Éducation de Base',date:'Lun. 10 Mai au Ven. 30 Juil. 2027',niveaux:'Primaire (CEP, Concours 6ème…)',matières:'Dates détaillées fixées par texte particulier du MINEDUB'},
-    {nom:'Examens & concours officiels — Enseignements Secondaires',date:'Jeu. 13 Mai au Ven. 30 Juil. 2027',niveaux:'BEPC · Probatoire · BAC · CAP · GCE · TVEE',matières:'Dates détaillées fixées par texte particulier du MINESEC'},
+    {nom:'Concours d\'entrée en 6ème et en 1ʳᵉ année',date:'Mar. 11 Mai 2027',niveaux:'Entrée au secondaire',matières:'Résultats le Ven. 14 Mai 2027 · interview Form 1 les 10 et 11 juin'},
+    {nom:'Baccalauréat A, ABI, AC, C, D, E, SH, TI',date:'Lun. 24 au Ven. 28 Mai 2027',niveaux:'Terminale',matières:'Épreuves écrites · facultatives le Ven. 28 Mai · délibérations du 8 au 10 juil.'},
+    {nom:'BEPC et BEPC bilingue',date:'Lun. 31 Mai au Jeu. 03 Juin 2027',niveaux:'3ème',matières:'Épreuves écrites · oral bilingue le Ven. 4 Juin · résultats le Ven. 9 Juil. (à confirmer par la DECC)'},
+    {nom:'GCE O Level et A Level',date:'Mar. 01 au Jeu. 17 Juin 2027',niveaux:'Form 5 · Upper Sixth',matières:'Written · pratiques du 4 au 26 mai · résultats le Ven. 30 Juil.'},
+    {nom:'Probatoire A, ABI, AC, C, D, E, SH, TI',date:'Lun. 07 au Ven. 11 Juin 2027',niveaux:'Première',matières:'Épreuves écrites · facultatives le Ven. 11 Juin · délibérations du 22 au 24 juil.'},
+    {nom:'Examens de l\'enseignement secondaire technique (CAP, BT, séries AF et F)',date:'Lun. 24 Mai au Ven. 11 Juin 2027',niveaux:'Enseignement technique',matières:'Bac AF/F/BT écrits 24-28 mai · CAP et Probatoire AF/F écrits 31 mai-4 juin · Probatoire BT/STT 7-11 juin'},
   ],
-  note:'Les dates précises de chaque examen (BEPC, Probatoire, Baccalauréat, GCE, CAP…) seront fixées par une décision particulière du MINESEC. Cette page sera mise à jour dès sa publication.',
+  note:'Dates des examens : décision n° 966/26/MINESEC du 1er octobre 2026 fixant le calendrier des examens et concours de la session 2027. Les dates de publication des résultats restent à confirmer par la DECC.',
   vacances:[
     {label:'1ʳᵉ interruption (Noël / Nouvel An)',debut:'18 Déc 2026 (15h30)',fin:'04 Jan 2027 (7h30)'},
     {label:'2ᵉ interruption (Pâques)',debut:'25 Mars 2027 (15h30)',fin:'12 Avr 2027 (7h30)'},
     {label:'Grandes vacances (élèves non candidats)',debut:'11 Juin 2027 (15h30)',fin:'Rentrée : 06 Sept 2027'},
   ],
-  epsPratiques:'Épreuves pratiques d\'EPS : Lun. 19 Avr. au Ven. 07 Mai 2027 (toute l\'étendue du territoire)',
+  epsPratiques:'Épreuves pratiques d\'EPS : Lun. 26 Avr. au Ven. 07 Mai 2027 (calendrier fixé par chaque délégation régionale)',
   // ── Journées et semaines officielles (article 28 de l'arrêté) + activités du calendrier ──
   journees:[
     {date:'Mar. 08 Sept. 2026',nom:'Journée internationale de l\'alphabétisation',ico:'book'},
@@ -19935,7 +20369,16 @@ async function callAmbassaIA(prompt, sysPrompt){
       try{ if(typeof _track==='function') _track('ia_try'); }catch(_eT){}
       if(_j&&_j.text&&!/legacy text API|deprecat|enter\.pollinations/i.test(_j.text)){ console.log('[IA] via ia_proxy ('+(_j.source||'?')+')'); return _j.text; }
       if(_j&&_j.error){ console.warn('[IA] ia_proxy:',_j.error); return "⚠️ "+_j.error; }
-    } else { console.warn('[IA] ia_proxy HTTP '+_r.status); }
+    } else {
+      console.warn('[IA] ia_proxy HTTP '+_r.status);
+      /* 30/10/2026 — Le refus du serveur a une RAISON, rédigée pour le
+         visiteur : « Vos 2 essais gratuits du jour sont épuisés. Créez un
+         compte gratuit… », « Trop de requêtes IA… ». On la jetait, et l'élève
+         lisait « vérifiez votre connexion » — sa connexion n'y était pour
+         rien (dissertation de Jacques sur Le Lion et la Perle). ia_proxy ne
+         met jamais de détail technique dans `error` : on peut l'afficher. */
+      try{ var _je=await _r.json(); if(_je&&_je.error) return "⚠️ "+_je.error; }catch(_eJ){}
+    }
   } catch(_eP){ console.warn('[IA] ia_proxy injoignable:',_eP.message); }
   // v1.3.3 : message VISITEUR neutre — aucun détail technique/serveur exposé.
   // Le diagnostic admin reste dans la console ([IA] …) et les logs serveur.
@@ -20449,11 +20892,18 @@ function _buildOrientationHtml(niveau,serie,maths,fr,sci,interests){
       ecoles.push("ENAM — École Nationale d'Administration et de Magistrature (concours très sélectif)");
       conseils.push("L'ENAM forme les hauts fonctionnaires camerounais");
     }
-  }else if(niveau==="3eme"||niveau==="2nde"){
-    recs.push("📚 Orientation en 2nde / 1ere");
-    if(maths>=13&&sci>=12){recs.push("Série C ou D recommandee");conseils.push("Focus: Maths, Physique-Chimie, SVT");}
-    else if(fr>=13&&maths<12){recs.push("Série A recommandee");conseils.push("Focus: Français, Histoire-Geo, Philosophie");}
-    else{recs.push("Renforcer toutes les matieres");}
+  }else if(niveau==="3eme"){
+    /* 09/11/2026 — la série D commence en 1ère (arrêté 92/22, progressions 2026-27) :
+       en sortie de 3ème, le choix est 2nde A ou 2nde C. */
+    recs.push("📚 Orientation en 2nde");
+    if(maths>=13&&sci>=12){recs.push("2nde C recommandée (C et D se séparent en 1ère)");conseils.push("Priorité : Mathématiques, Physique, Chimie, SVT");}
+    else if(fr>=13&&maths<12){recs.push("2nde A recommandée");conseils.push("Priorité : Français, Anglais, Histoire-Géographie");}
+    else{recs.push("Renforcer toutes les matières avant de choisir");}
+  }else if(niveau==="2nde"){
+    recs.push("📚 Orientation en 1ère");
+    if(maths>=13&&sci>=12){recs.push(maths>=sci?"Série C recommandée (Mathématiques coefficient 6)":"Série D recommandée (SVTEEHB coefficient 6)");conseils.push("Priorité : Mathématiques, Physique, Chimie, SVT");}
+    else if(fr>=13&&maths<12){recs.push("Série A recommandée");conseils.push("Priorité : Littérature, Anglais, Langue vivante II, Philosophie");}
+    else{recs.push("Renforcer toutes les matières avant de choisir");}
   }
   if(!recs.length)recs.push("Remplissez tous les champs pour une orientation precise");
   if(!ecoles.length)ecoles.push("Précisez vos notes et intérêts pour des recommandations d'écoles");
@@ -20888,6 +21338,10 @@ function vLaunchJeu(id){
   // v1.16 — jeu premium : essais offerts (réglables en admin) puis abonnement.
   // Un essai ouvre CE jeu, rejouable ensuite sans en reconsommer.
   if(!j.gratuit && typeof _pwGate==='function' && !_pwGate('jeux', j.titre||'Ce jeu', j.id)) return;
+  // 11/11/2026 : les jeux intégrés (Calcul mental, Devinettes…) portent leur
+  // lanceur dans `action`. Le lien direct (#jeu?id=j1, cartes « Gratuit » d'Apprendre)
+  // l'ignorait et cherchait des questions : « Aucune question disponible ».
+  if(j.action && typeof window[j.action]==='function'){ window[j.action](); return; }
   // Jeu HTML → ouvrir le contenu dans un nouvel onglet avec filigrane
   if(j.type==='html'||j.type==='html_interactif'){
     if(j.externalUrl){window.open(j.externalUrl,'_blank');return;}
@@ -21732,7 +22186,7 @@ function _littCorrigeIA(oeuvreKey, mode){
     +'<div id="littCorrigeBox" class="vcard ai-md" style="margin-top:16px;line-height:1.7">'
       +'<div style="text-align:center;color:var(--ink4);padding:28px"><span style="animation:pulse 1.2s infinite;font-size:30px">🤖</span><br>Le Professeur Ambassa rédige…<br><small>Cela peut prendre 20 à 60 secondes.</small></div>'
     +'</div></div>');
-  callAmbassaIA(base+(prompts[mode]||prompts.complet), (typeof AMBASSA_PERSONA!=='undefined'?AMBASSA_PERSONA:'')).then(function(txt){
+  callAmbassaIA(base+(prompts[mode]||prompts.complet), (typeof _personaAmbassa==='function'?_personaAmbassa('oeuvres'):'')).then(function(txt){
     var box=document.getElementById('littCorrigeBox');
     if(box) box.innerHTML=((typeof _iaBadgeHtml==='function')?_iaBadgeHtml():'')
       +((typeof _aiMarkdown==='function')?_aiMarkdown(txt):('<pre style="white-space:pre-wrap">'+_esc(txt)+'</pre>'));
@@ -23675,6 +24129,10 @@ function showEpreuves(){
   // 2. Librairie e-learning (cat1=épreuves, cat4=corpus, cat6=annales)
   var libEpreuves=(DB.elearningLibrary||[]).filter(function(e){
     return (e.cat==="cat1"||e.cat==="cat4"||e.cat==="cat6")&&_isVisibleEp(e.id);
+  }).map(function(e){
+    /* La copie serveur garde les anciens intitulés : le code fait foi pour le libellé. */
+    var _b=(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB:[]).find(function(x){return x.id===e.id;});
+    return _b?Object.assign({},e,{titre:_b.titre,desc:_b.desc}):e;
   });
   // 3. Épreuves créées par l'admin (filtrées des purgées)
   var customEpreuves=(DB.customEpreuves||[]).filter(function(e){return _isVisibleEp(e.id);});
@@ -24343,9 +24801,74 @@ function _cvDefaultClassrooms(){
   return base;
 }
 
+/* 10/11/2026 — Apprendre envoie vers /app.html#classes?c=<classe> : on ouvre la
+   classe virtuelle DE CETTE CLASSE. « 3e » ↔ « 3ème », « 1re A » ↔ « 1ère A » ;
+   « 2nde A » retombe sur « 2nde » si le centre n'a qu'une 2nde, jamais sur une
+   classe sœur (Tle C n'ouvre pas Tle A). */
+function _cvCle(n){
+  return String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'')
+    .replace(/^(\d)e$/,'$1eme').replace(/^(\d)eme(?=[a-z])/,'$1eme').replace(/^1re/,'1ere').replace(/^terminale/,'tle');
+}
+function _cvParClasse(c){
+  var k=_cvCle(c); if(!k)return null;
+  var cs=DB.classrooms||[], ex=null, pre=null;
+  cs.forEach(function(x){ if(x.seg)return; var kx=_cvCle(x.nom); if(kx===k)ex=x; else if(!pre&&kx&&k.indexOf(kx)===0&&/^[a-z]$/.test(k.slice(kx.length)))pre=x; });
+  return ex||pre;
+}
+/* Classe virtuelle d'un élève d'après son niveau et sa filière (11/11/2026).
+   « Terminale » + « C » → Tle C ; « 1ère » + « A1 » → 1ère A ; « 3ème » → 3ème.
+   Jamais une classe sœur : une Tle D ne tombe pas dans la Tle A. */
+function _cvClassePour(cls,serie){
+  var cs=(DB.classrooms||[]).filter(function(x){return !x.seg;}); if(!cls)return null;
+  var cle=function(x){return _cvCle(x);}, ser=String(serie||'').trim();
+  var essais=[]; if(ser){ essais.push(cls+' '+ser); if(ser.length>1) essais.push(cls+' '+ser.charAt(0)); }
+  essais.push(cls);
+  for(var i=0;i<essais.length;i++){ var k=cle(essais[i]); var t=cs.find(function(x){return cle(x.nom)===k;}); if(t)return t; }
+  return null;
+}
+/* Le forum ne portait que 7 classes francophones (6ème → Tle A) alors
+   qu'Apprendre propose aussi les séries scientifiques : un élève de C ou de D
+   n'avait pas de salon. On AJOUTE les classes manquantes, sans toucher aux
+   classes existantes ni à leurs messages (11/11/2026). */
+function _cvCompleterClasses(){
+  var cs=DB.classrooms=DB.classrooms||[], ajout=0;
+  var palette=['#3C8DFF','#6C56A6','#059669','#AE5353','#F59E0B','#0891B2','#4F46E5','#BE185D'];
+  ['1ère C','1ère D','Tle C','Tle D'].forEach(function(nom,i){
+    var k=_cvCle(nom); if(cs.some(function(x){return !x.seg&&_cvCle(x.nom)===k;}))return;
+    var key=nom.replace(/[^a-z0-9]/gi,'').toLowerCase();
+    var sci=/[CD]$/.test(nom);
+    cs.push({id:'cls_'+key,nom:nom,couleur:palette[(i+3)%palette.length],ico:'📚',
+      channels:[
+        {id:'ch_gen_'+key,nom:'Général',ico:'💬',ordre:0},
+        {id:'ch_ann_'+key,nom:'Annonces',ico:'📢',ordre:1,teacherOnly:true},
+        {id:'ch_fr_'+key,nom:'Français',ico:'📝',ordre:2},
+        {id:'ch_math_'+key,nom:'Mathématiques',ico:'📐',ordre:3},
+        {id:'ch_sc_'+key,nom:sci?'Physique-Chimie':'Sciences',ico:'🔬',ordre:4},
+        sci?{id:'ch_svt_'+key,nom:'SVT',ico:'🧬',ordre:5}:null
+      ].filter(Boolean),
+      membres:[],enseignants:(DB.teachers||[]).map(function(t){return t.id;})});
+    ajout++;
+  });
+  // Ordre de lecture : collège, lycée par niveau puis série, puis GCE/technique.
+  if(ajout){
+    var rang=function(x){ if(x.seg)return 900; var k=_cvCle(x.nom), m=k.match(/^(\d)eme/); if(m)return 10*(7-(+m[1])); if(/^2nde/.test(k))return 50; if(/^1ere/.test(k))return 60; if(/^tle/.test(k))return 70; return 800; };
+    cs.sort(function(a,b){ return rang(a)-rang(b) || String(a.nom).localeCompare(String(b.nom)); });
+    save();
+  }
+}
+function _cvClasseDuHash(){
+  try{ var h=(location.hash||'').split('?'); if(h[0]!=='#classes'||!h[1])return ''; return new URLSearchParams(h[1]).get('c')||''; }catch(e){ return ''; }
+}
 function showClasseVirtuelle(cid,chid){
   if(!DB.classrooms||!DB.classrooms.length){DB.classrooms=_cvDefaultClassrooms();save();}
+  _cvCompleterClasses();
   if(!DB.forumPosts)DB.forumPosts=[];
+  if(!cid){
+    var _cq=_cvClasseDuHash(), _cc=_cq&&_cvParClasse(_cq);
+    if(_cc&&_cc.channels&&_cc.channels.length){ cid=_cc.id; chid=_cc.channels[0].id; }
+    // Paramètre consommé une fois : le retour à l'accueil des classes ne doit pas y renvoyer.
+    if(_cq){ try{ history.replaceState(null,'',location.pathname+location.search+'#classes'); }catch(e){} }
+  }
   if(cid&&chid){_CV.classroomId=cid;_CV.channelId=chid;_cvRenderChannel();}
   else if(_CV.classroomId&&_CV.channelId){_cvRenderChannel();}
   else _cvRenderHome();
@@ -24416,81 +24939,163 @@ function _cvTxt(s){
 }
 function _cvNom(s){ return _esc(_cvTxt(s)); }
 
+/* 11/11/2026 — « Harmoniser la mise en forme style vitrine, le mode de
+   connexion et inscription relier à chaque classe » (Jacques).
+   Cartes blanches, anneau de couleur, pastilles et boutons en pilule de la
+   vitrine (styles .cvx-* dans app.css). Un visiteur choisit SA classe :
+   chaque carte porte « Je m'inscris » (formulaire pré-réglé sur la classe) et
+   « J'ai un compte » ; après connexion ou inscription, _cvReprendre() le
+   ramène dans cette classe. */
+function _cvIco(n,z){ z=z||18; return "<svg width='"+z+"' height='"+z+"' class='cvx-svg' aria-hidden='true'><use href='#lc-"+n+"'/></svg>"; }
+function _cvIcoCanal(ch){
+  var k=_cvCle(ch&&ch.nom);
+  if(/^(general|general)/.test(k))return 'message';
+  if(/annonce|announcement/.test(k))return 'megaphone';
+  if(/francais|english|literature|litterature/.test(k))return 'pencil';
+  if(/math/.test(k))return 'ruler';
+  if(/science|physi|chimi|chemistry|biolog|svt/.test(k))return 'flask';
+  if(/histo|geo|philo/.test(k))return 'globe';
+  if(/compta|eco|droit|commerc/.test(k))return 'coins';
+  if(/electro|meca|dessin|techn/.test(k))return 'tool';
+  return 'book';
+}
+function _cvRejoindre(cid,mode){
+  var c=(DB.classrooms||[]).find(function(x){return x.id===cid;});
+  try{ sessionStorage.setItem('_cvApres',cid); }catch(e){}
+  if(mode==='connexion'){ showLogin('eleve'); return; }
+  showRegisterForm('');
+  // Pré-régler la classe du formulaire sur celle qu'on vient de choisir.
+  // Le formulaire sépare le NIVEAU (« 1ère », « Terminale ») de la FILIÈRE
+  // (A1, A4, C, D…) : « 1ère C » → niveau 1ère + filière C. Une filière
+  // ambiguë (« A » = A1 ou A4) reste à choisir par l'élève (11/11/2026).
+  setTimeout(function(){
+    var sel=document.getElementById('rCls'); if(!sel||!c||c.seg)return;
+    var nom=String(c.nom||''), opts=[].slice.call(sel.options), val=function(o){return o.value||o.text;};
+    var niveau=/^2nde/i.test(nom)?'2nde':/^1[èe]re/i.test(nom)?'1ère':/^(tle|terminale)/i.test(nom)?'terminale':_cvCle(nom);
+    var opt=opts.find(function(o){return _cvCle(val(o))===_cvCle(niveau);})||opts.find(function(o){return _cvCle(val(o))===_cvCle(nom);});
+    if(!opt)return;
+    sel.value=val(opt);
+    try{ sel.dispatchEvent(new Event('change',{bubbles:true})); }catch(e){}
+    if(typeof window._regSysChange==='function'){ try{ window._regSysChange(); }catch(e){} }
+    var m=nom.match(/\s([A-Z]{1,2}\d?)$/), ser=document.getElementById('rSerie');
+    if(m&&ser){
+      var so=[].slice.call(ser.options).filter(function(o){return o.value===m[1];});
+      if(so.length===1) ser.value=so[0].value;
+    }
+  },60);
+}
+/* Appelée après initVisitor() : la classe choisie avant la connexion s'ouvre. */
+function _cvReprendre(){
+  var cid=''; try{ cid=sessionStorage.getItem('_cvApres')||''; }catch(e){}
+  if(!cid||!SES)return;
+  try{ sessionStorage.removeItem('_cvApres'); }catch(e){}
+  if(!document.getElementById('vContent'))return;
+  var c=(DB.classrooms||[]).find(function(x){return x.id===cid;});
+  if(c&&c.channels&&c.channels.length) showClasseVirtuelle(c.id,c.channels[0].id);
+  else showClasseVirtuelle();
+}
+window._cvRejoindre=_cvRejoindre; window._cvReprendre=_cvReprendre;
+
 function _cvRenderHome(){
   _cvStopTimer();
   var cls=DB.classrooms||[];
   var accessible=cls, horsClasse=false;
   if(SES&&!iA()&&SES.type!=='enseignant'){
     var uid=_cvUid(), srv=window._cvMesClasses||[];
-    var mine=cls.filter(function(c){return (c.membres||[]).indexOf(uid)>-1||c.nom===SES.cls||srv.indexOf(c.id)>-1;});
+    var acc0=(DB.visitorAccounts||[]).find(function(a){return a.id===(SES.accountId||SES.id);})||{};
+    var miene=_cvClassePour(SES.cls, SES.serie||acc0.serie);
+    var mine=cls.filter(function(c){return (c.membres||[]).indexOf(uid)>-1||c.nom===SES.cls||(miene&&c.id===miene.id)||srv.indexOf(c.id)>-1;});
     horsClasse=!mine.length;
     accessible=mine.length?mine:cls;
   }
   var posts=(DB.forumPosts||[]).filter(function(p){return p&&p.classroomId;});
   var today2=new Date().toISOString().slice(0,10);
-  var todayPosts=posts.filter(function(p){return (p.dateISO||'').startsWith(today2);}).length;
-  var h="<div class='vsec' id='cvHome' style='max-width:980px;margin:0 auto'>";
-  h+="<div style='display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px'>";
-  h+="<div><div class='vsec-title vsec-title-hero' style='margin-bottom:4px'>🏫 Classes &amp; Forum</div><div style='font-size:13px;color:var(--ink4)'>Échangez avec vos enseignants et vos camarades de classe</div></div>";
-  h+="<div style='display:flex;gap:8px;flex-wrap:wrap'>";
-  h+="<button class='btn bo sm' onclick='showForum()'>💬 Forum public</button>";
-  if(iA()){h+="<button class='btn bi sm' onclick='_cvAdminPanel()'><svg class='vico bico' aria-hidden='true'><use href='#lc-sliders'/></svg>Gérer les classes</button>";}
+  var h="<div class='vsec cvx' id='cvHome'>";
+  // En-tête façon vitrine : pastille, titre, chapeau, actions en pilule
+  h+="<div class='cvx-tete'><div>";
+  h+="<span class='cvx-eb'>"+_cvIco('university',15)+"Classes virtuelles · de la 6<sup>e</sup> à la Terminale</span>";
+  h+="<div class='vsec-title vsec-title-hero cvx-h1'>Classes &amp; Forum</div>";
+  h+="<p class='cvx-chapo'>Échangez avec vos enseignants et vos camarades, dans le salon de votre classe.</p></div>";
+  h+="<div class='cvx-actions'><button class='cvx-b2' onclick='showForum()'>"+_cvIco('forum',17)+"Forum public</button>";
+  if(iA()){h+="<button class='cvx-b2' onclick='_cvAdminPanel()'>"+_cvIco('sliders',17)+"Gérer les classes</button>";}
   h+="</div></div>";
   if(!SES){
-    h+="<div class='ib ibi mb14'><span>🔐</span><span>Les forums de classe sont réservés aux élèves et enseignants inscrits. <button class='btn bi xs' onclick=\"showLogin('eleve')\">Se connecter</button></span></div>";
+    // Comment entrer, en trois temps — la connexion se fait DANS la classe choisie.
+    h+="<div class='cvx-acces'><span class='cvx-acces-i'>"+_cvIco('lock',22)+"</span><div class='cvx-acces-t'>";
+    h+="<b>Ta classe t'attend : ne révise plus seul·e</b>";
+    h+="<p class='cvx-acces-p'>Chaque classe a son salon, réservé à ses élèves et à leurs enseignants. Ici, on s'entraide pour comprendre, préparer les séquences et réussir l'examen.</p>";
+    h+="<div class='cvx-plus'>"+[
+      ['help','#1E499B','Une question, même tard le soir ?','Pose-la dans le salon : camarades et enseignants peuvent y répondre.'],
+      ['megaphone','#A84200','Rien ne t\u2019échappe','Devoirs, dates des séquences, corrigés : les annonces de tes enseignants arrivent ici.'],
+      ['users','#5B4FA8','Réviser à plusieurs','Partager ses méthodes, s\u2019expliquer un exercice, se motiver avant les compositions.'],
+      ['gift','#007E11','Gratuit, en deux minutes','Un nom, un numéro WhatsApp, ta classe : c\u2019est tout.']
+    ].map(function(a){return "<div class='cvx-plus-c' style='--k:"+a[1]+"'><span class='cvx-rond'>"+_cvIco(a[0],19)+"</span><span class='cvx-plus-t'><b>"+a[2]+"</b>"+a[3]+"</span></div>";}).join("")+"</div>";
+    h+="<div class='cvx-pas'>"+["Je choisis ma classe ci-dessous","Je crée mon compte gratuit ou je me connecte","J'arrive directement dans le salon de ma classe"].map(function(t,i){return "<div class='cvx-pas-l'><span class='cvx-pas-n'>"+(i+1)+"</span><p class='cvx-pas-x'>"+t+"</p></div>";}).join("")+"</div>";
+    h+="<div class='cvx-acces-b'><button class='cvx-b1' onclick=\"showRegisterForm('')\">"+_cvIco('user',17)+"Créer mon compte gratuit</button><button class='cvx-b2' onclick=\"showLogin('eleve')\">J'ai déjà un compte</button></div>";
+    h+="</div></div>";
   } else if(horsClasse){
-    h+="<div class='ib ibi mb14'><span>ℹ️</span><span>Votre compte n'est rattaché à aucune classe pour l'instant : vous pouvez lire les classes ouvertes, mais pas y écrire. Renseignez votre classe dans votre profil ou demandez au centre de vous inscrire.</span></div>";
+    h+="<div class='cvx-acces cvx-acces-info'><span class='cvx-acces-i'>"+_cvIco('info',22)+"</span><div class='cvx-acces-t'><b>Votre compte n'est rattaché à aucune classe</b><p>Vous pouvez lire les classes ouvertes, mais pas y écrire. Renseignez votre classe dans votre profil ou demandez au centre de vous inscrire.</p></div></div>";
   }
-  // Stats — des nombres qui concernent CES classes, pas tout le site
-  h+="<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:24px'>";
+  // Chiffres — ceux de CES classes, pas de tout le site
   var ids={};accessible.forEach(function(c){ids[c.id]=1;});
   var mesPosts=posts.filter(function(p){return ids[p.classroomId];});
-  [{n:accessible.length,l:accessible.length>1?'Classes':'Classe',i:'🏫'},{n:mesPosts.length,l:'Messages',i:'💬'},{n:mesPosts.filter(function(p){return (p.dateISO||'').startsWith(today2);}).length,l:"Aujourd'hui",i:'🔔'}].forEach(function(s){
-    h+="<div style='background:#fff;border:1px solid #E4E7EF;border-radius:14px;padding:14px;text-align:center'><div style='font-size:20px;margin-bottom:4px'>"+s.i+"</div><div style='font-size:20px;font-weight:800;color:#142554'>"+s.n+"</div><div style='font-size:11px;color:var(--ink4)'>"+s.l+"</div></div>";
+  h+="<div class='cvx-stats'>";
+  [{n:accessible.length,l:accessible.length>1?'Classes':'Classe',i:'building',k:'#1E499B'},
+   {n:mesPosts.length,l:'Messages',i:'message',k:'#5B4FA8'},
+   {n:mesPosts.filter(function(p){return (p.dateISO||'').startsWith(today2);}).length,l:"Aujourd'hui",i:'activity',k:'#007E11'}].forEach(function(s){
+    h+="<div class='cvx-stat' style='--k:"+s.k+"'><span class='cvx-rond'>"+_cvIco(s.i,20)+"</span><span><b>"+s.n+"</b><small>"+s.l+"</small></span></div>";
   });
-  void todayPosts;
   h+="</div>";
-  // Grille classes. Bandeau navy UNI : la charte (theme-lws) aplatit les
-  // dégradés et neutralise les teintes hors palette — 3 cartes sur 5
-  // perdaient leur bandeau et affichaient un texte blanc sur blanc. La
-  // couleur de la classe reste en liseré.
-  h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:28px'>";
+  h+="<h2 class='cvx-h2'>"+(SES?'Mes classes':'Choisissez votre classe')+"</h2>";
+  if(!SES) h+="<p class='cvx-sous'>Trouve ta classe, inscris-toi en un geste : tu arriveras directement dans son salon.</p>";
+  h+="<div class='cvx-grille'>";
   accessible.forEach(function(c){
     var cp=posts.filter(function(p){return p.classroomId===c.id;});
     var lastP=cp.slice().sort(function(a,b){return (b.dateISO||'').localeCompare(a.dateISO||'');})[0]||null;
     var firstCh=(c.channels||[{id:''}])[0];
-    h+="<div role='button' tabindex='0' onclick=\"showClasseVirtuelle('"+_esc(c.id)+"','"+_esc(firstCh.id)+"')\" onkeydown=\"if(event.key==='Enter')this.click()\" style='background:#fff;border:1px solid #E4E7EF;border-radius:16px;overflow:hidden;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.04)'>";
-    h+="<div style='background-color:#142554;border-bottom:4px solid "+_esc(c.couleur||'#FFC93C')+";padding:16px 18px;color:#fff'>";
-    h+="<div style='font-size:28px;margin-bottom:6px'>"+_esc(c.ico||'📚')+"</div>";
-    h+="<div style='font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:#fff'>"+_esc(c.nom)+"</div>";
-    h+="<div style='font-size:11.5px;color:rgba(255,255,255,.8);margin-top:3px'>"+(c.channels||[]).length+" canaux · "+cp.length+" message"+(cp.length>1?'s':'')+"</div>";
-    h+="</div><div style='padding:12px 14px'>";
-    h+="<div style='font-size:12px;color:var(--ink3);margin-bottom:8px'>"+(lastP?("💬 "+_cvNom((_cvTxt(lastP.auteurNom)||'').split(' ')[0])+" · "+_cvRelTime(lastP.dateISO)):"Aucun message pour l'instant")+"</div>";
-    h+="<div style='display:flex;gap:5px;flex-wrap:wrap'>";
-    (c.channels||[]).slice(0,4).forEach(function(ch){h+="<span style='font-size:11px;background:#EEF3FC;color:#1E499B;border-radius:8px;padding:2px 7px;font-weight:600'>"+_esc(ch.ico)+" "+_esc(ch.nom)+"</span>";});
-    h+="</div></div></div>";
+    var ouvrir="showClasseVirtuelle('"+_esc(c.id)+"','"+_esc(firstCh.id)+"')";
+    h+="<div class='cvx-carte' style='--k:"+_esc(c.couleur||'#1E499B')+"'>";
+    h+="<div role='button' tabindex='0' class='cvx-carte-h' onclick=\""+ouvrir+"\" onkeydown=\"if(event.key==='Enter')this.click()\">";
+    h+="<span class='cvx-rond'>"+_cvIco(c.seg?'graduation':'bookopen',22)+"</span>";
+    h+="<span class='cvx-carte-t'><b>"+_esc(c.nom)+"</b><small>"+(c.channels||[]).length+" salons · "+cp.length+" message"+(cp.length>1?'s':'')+"</small></span>";
+    h+="<span class='cvx-go'>"+_cvIco('chevron-right',18)+"</span></div>";
+    var kc=_cvCle(c.nom), exam=!!c.seg||/^(3eme|1ere|tle)/.test(kc);
+    if(exam) h+="<span class='cvx-exam'>"+_cvIco('award',14)+"Année d'examen · on révise ensemble</span>";
+    h+="<p class='cvx-der'>"+(lastP?(_cvIco('message',14)+" "+_cvNom((_cvTxt(lastP.auteurNom)||'').split(' ')[0])+" · "+_cvRelTime(lastP.dateISO)+(SES?"":" — rejoins la conversation"))
+      :(_cvIco('sparkles',14)+" "+(SES?"Lance la première discussion de ta classe !":"Le salon est ouvert : sois parmi les premiers à y écrire.")))+"</p>";
+    h+="<div class='cvx-salons'>";
+    (c.channels||[]).slice(0,5).forEach(function(ch){h+="<span>"+_cvIco(_cvIcoCanal(ch),13)+_esc(ch.nom)+"</span>";});
+    h+="</div>";
+    if(!SES){
+      h+="<div class='cvx-carte-b'><button class='cvx-b1 cvx-xs' onclick=\"_cvRejoindre('"+_esc(c.id)+"','inscription')\">Je m'inscris dans cette classe</button><button class='cvx-lien' onclick=\"_cvRejoindre('"+_esc(c.id)+"','connexion')\">J'ai un compte</button></div>";
+    } else {
+      h+="<div class='cvx-carte-b'><button class='cvx-b1 cvx-xs' onclick=\""+ouvrir+"\">Entrer dans la classe"+_cvIco('arrow-right',16)+"</button></div>";
+    }
+    h+="</div>";
   });
   h+="</div>";
   // Activité récente — seulement dans les classes affichées
   var recent=mesPosts.slice().sort(function(a,b){return (b.dateISO||'').localeCompare(a.dateISO||'');}).slice(0,6);
   if(recent.length){
-    h+="<div class='vcard'><div class='ct mb10'><span class='ct-ico'><svg class='vico' aria-hidden='true'><use href='#lc-zap'/></svg></span>Activité récente</div>";
+    h+="<div class='cvx-recent'><h2 class='cvx-h2'>"+_cvIco('zap',20)+"Activité récente</h2>";
     recent.forEach(function(p){
       var cls2=(DB.classrooms||[]).find(function(c){return c.id===p.classroomId;});
       var ch2=cls2&&(cls2.channels||[]).find(function(c){return c.id===p.channelId;});
       if(!cls2)return;
-      h+="<div role='button' tabindex='0' onclick=\"showClasseVirtuelle('"+_esc(p.classroomId)+"','"+_esc(p.channelId)+"')\" style='display:flex;align-items:flex-start;gap:10px;padding:9px;border-radius:10px;cursor:pointer;margin-bottom:4px'>"+
-        "<div style='width:34px;height:34px;border-radius:50%;background-color:#1E499B;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0'>"+_esc(_cvInitials(_cvTxt(p.auteurNom)))+"</div>"+
-        "<div style='flex:1;min-width:0'>"+
-        "<div style='font-size:12.5px;font-weight:700;color:var(--bl)'>"+_cvNom(p.auteurNom)+"<span style='font-weight:400;color:var(--ink4);margin-left:6px;font-size:11px'>"+_cvRelTime(p.dateISO)+"</span></div>"+
-        "<div style='font-size:11.5px;color:var(--ink4)'>"+_esc(cls2.nom)+(ch2?(" · "+_esc(ch2.nom)):"")+"</div>"+
-        "<div style='font-size:12.5px;color:var(--ink2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+_esc((p.contenu||p.titre||'').slice(0,80))+"</div>"+
-        "</div></div>";
+      h+="<div role='button' tabindex='0' class='cvx-msg' onclick=\"showClasseVirtuelle('"+_esc(p.classroomId)+"','"+_esc(p.channelId)+"')\" onkeydown=\"if(event.key==='Enter')this.click()\">"+
+        "<span class='cvx-av'>"+_esc(_cvInitials(_cvTxt(p.auteurNom)))+"</span>"+
+        "<span class='cvx-msg-t'><b>"+_cvNom(p.auteurNom)+"<small>"+_cvRelTime(p.dateISO)+"</small></b>"+
+        "<em>"+_esc(cls2.nom)+(ch2?(" · "+_esc(ch2.nom)):"")+"</em>"+
+        "<span>"+_esc((p.contenu||p.titre||'').slice(0,80))+"</span></span></div>";
     });
     h+="</div>";
   }
+  if(!SES&&accessible.length){
+    h+="<div class='cvx-final'><div><b>Prêt·e à rejoindre ta classe ?</b><p>Crée ton compte gratuit : ta classe, ses salons et tes enseignants t'attendent.</p></div>"
+      +"<div class='cvx-acces-b'><button class='cvx-b1' onclick=\"showRegisterForm('')\">"+_cvIco('rocket',17)+"Je rejoins ma classe</button><button class='cvx-b2 cvx-b2-cl' onclick=\"showLogin('eleve')\">Je me connecte</button></div></div>";
+  }
   if(!accessible.length){
-    h+="<div style='text-align:center;padding:60px 20px;color:var(--ink4)'><div style='font-size:56px;margin-bottom:14px'>🏫</div><div style='font-size:15px;font-weight:700;color:var(--bl);margin-bottom:6px'>Aucune classe disponible</div>"+(iA()?"<button class='btn bi sm mt8' onclick='_cvAdminPanel()'>Créer une classe</button>":"<div style='font-size:13px'>Contactez l'administration</div>")+"</div>";
+    h+="<div class='cvx-vide'><span class='cvx-rond'>"+_cvIco('university',26)+"</span><b>Aucune classe disponible</b>"+(iA()?"<button class='cvx-b1' onclick='_cvAdminPanel()'>Créer une classe</button>":"<p>Contactez l'administration</p>")+"</div>";
   }
   h+="</div>";
   _vc(h);
@@ -24944,8 +25549,15 @@ function showLabosVirtuels(){
   if(typeof window.LABO_DB==='undefined'){
     toast('Chargement des laboratoires…','info');
     _lazyChunk('labo')
-      .then(function(){ showLabosVirtuels(); })
-      .catch(function(){ toast('Laboratoires momentanément indisponibles','err'); });
+      .then(function(){
+        /* Deux pannes, deux messages (30/10/2026) : le .catch couvrait aussi
+           une exception d'AFFICHAGE, annoncée comme un module absent. Et un
+           module chargé sans LABO_DB aurait relancé ce chargement sans fin. */
+        if(typeof window.LABO_DB==='undefined') throw new Error('module labo chargé sans LABO_DB');
+        try{ showLabosVirtuels(); }
+        catch(e){ _journalErreur('showLabosVirtuels', e); toast('Les laboratoires n\'ont pas pu s\'afficher — réessayez.','err'); }
+      })
+      .catch(function(e){ _journalErreur('chunk labo', e); toast('Laboratoires momentanément indisponibles — vérifiez votre connexion et réessayez.','err'); });
     return;
   }
   // v1.4.3 : catégorie initiale alignée sur le PARCOURS (anglophone → English,
@@ -24956,81 +25568,76 @@ function showLabosVirtuels(){
   })();
   // v1.4.2 : + catégories Anglophone (GCE) et Enseignement technique
   var cats=["tous","physique","chimie","svt","maths","english","technique","geo","histoire","info","langues"];
-  var catLabels={"tous":"Tous","physique":"⚡ Physique","chimie":"⚗️ Chimie","svt":"🧬 SVT","maths":"📐 Maths","english":"🇬🇧 English (GCE)","technique":"🔧 Technique","geo":"🗺️ Géo","histoire":"🏛️ Histoire","info":"💻 Info","langues":"✍️ Langues"};
-  var _hiddenLV=DB.hiddenLabos||[];
-  var _purgedLV=DB.purgedLabos||[];
+  var catLabels={"tous":"Tous","physique":"Physique","chimie":"Chimie","svt":"SVT","maths":"Maths","english":"English (GCE)","technique":"Technique","geo":"Géo","histoire":"Histoire","info":"Info","langues":"Langues"};
+  // Une base synchronisée peut porter ces listes sous une autre forme :
+  // indexOf sur un objet levait une TypeError et vidait la page des labos.
+  var _hiddenLV=Array.isArray(DB.hiddenLabos)?DB.hiddenLabos:[];
+  var _purgedLV=Array.isArray(DB.purgedLabos)?DB.purgedLabos:[];
   var _visibleLabo=window.LABO_DB.filter(function(l){return _hiddenLV.indexOf(l.id)<0&&_purgedLV.indexOf(l.id)<0;});
   var list=_visibleLabo.filter(function(l){return cat==="tous"||l.cat===cat;});
   var gratuits=list.filter(function(l){return l.gratuit;}).length;
 
-  var h="<div class='vsec'>";
-  h+="<div class='vsec-title vsec-title-hero'>🔬 Laboratoires Virtuels</div>";
-  h+="<div class='vsec-sub'>"+_visibleLabo.length+" expériences interactives basées sur le programme MINESEC — Sans risque, sans matériel</div>";
+  // 08/11/2026 : la page reprend la charte de la vitrine (fond blanc, filet fin,
+  // icônes SVG de couleur tournante, liens légers) — styles .lvx-* dans theme-lws.css.
+  // Les émoji des fiches (lv.ico) ne sont plus affichés : une icône par matière.
+  var _sv=function(id,cl){return "<svg class='"+(cl||"")+"' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#"+id+"'/></svg>";};
+  var _lvIco={physique:"lc-zap",chimie:"lc-flask",svt:"lc-sprout",maths:"lc-ruler",english:"lc-globe",technique:"lc-tool",geo:"lc-map",histoire:"lc-university",info:"lc-laptop",langues:"lc-pencil"};
+  var h="<div class='vsec lvx'>";
+  h+="<div class='vsec-title vsec-title-hero'>Laboratoires virtuels</div>";
+  h+="<div class='vsec-sub'>"+_visibleLabo.length+" expériences interactives basées sur le programme MINESEC — sans risque, sans matériel</div>";
 
-  // Bandeau stats
-  h+="<div style='display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px'>";
-  [{n:_visibleLabo.length,l:"Expériences",c:"#142554",i:"🔬"},{n:gratuits,l:"Gratuites",c:"#059669",i:"✅"},{n:_visibleLabo.filter(function(l){return !l.gratuit;}).length,l:"Premium",c:"#6C56A6",i:"⭐"}].forEach(function(s){
-    h+="<div style='background:"+s.c+"0f;border:0;border-radius:16px;padding:16px 12px;text-align:center;box-shadow:0 8px 22px -15px rgba(20,37,84,.22)'>";
-    h+="<div style='font-size:22px;margin-bottom:4px'>"+s.i+"</div>";
-    h+="<div style='font-family:Montserrat,sans-serif;font-size:24px;font-weight:900;color:"+s.c+";line-height:1'>"+s.n+"</div>";
-    h+="<div style='font-size:11px;color:#6B7A99;margin-top:3px;font-weight:600'>"+s.l+"</div>";
-    h+="</div>";
+  // Chiffres
+  h+="<div class='lvx-stats'>";
+  [{n:_visibleLabo.length,l:"Expériences",i:"lc-flask",c:"c1"},{n:gratuits,l:"Gratuites",i:"lc-checkcircle",c:"c3"},{n:_visibleLabo.filter(function(l){return !l.gratuit;}).length,l:"Premium",i:"lc-star",c:"c4"}].forEach(function(s){
+    h+="<div class='lvx-stat "+s.c+"'>"+_sv(s.i)+"<b>"+s.n+"</b><span>"+s.l+"</span></div>";
   });
   h+="</div>";
 
-  // Filtres catégories
-  h+="<div class='fl2 g6 mb16' style='flex-wrap:wrap'>";
+  // Filtres
+  h+="<div class='lvx-filtres' role='group' aria-label='Filtrer par matière'>";
   cats.forEach(function(c){
-    h+="<button onclick=\"window._laboCat='"+c+"';showLabosVirtuels()\" style='padding:7px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:.2s;background:"+(cat===c?"#142554":"#F0F4FF")+";color:"+(cat===c?"#fff":"#142554")+"'>"+(catLabels[c]||c)+"</button>";
+    h+="<button type='button' class='lvx-f"+(cat===c?" on":"")+"' aria-pressed='"+(cat===c)+"' onclick=\"window._laboCat='"+c+"';showLabosVirtuels()\">"+(catLabels[c]||c)+"</button>";
   });
   h+="</div>";
 
-  // Grille de labos
-  // v2.0 FIX débordement mobile : minmax(min(270px,100%),1fr) → la colonne se réduit
-  // à 100% sous 270px au lieu de forcer 270px (qui poussait la carte + son badge
-  // « GRATUIT » hors écran et créait un défilement horizontal). + overflow-x clos.
-  h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(min(270px,100%),1fr));gap:16px;margin-bottom:28px;max-width:100%'>";
-  list.forEach(function(lv){
+  // Grille des labos
+  h+="<div class='lvx-grid'>";
+  list.forEach(function(lv,k){
     var locked=!lv.gratuit&&!SES;
-    h+="<div onclick='lancerLabo(\""+lv.id+"\")' style='background:#fff;border-radius:18px;border:0;--vcol:"+lv.color+";overflow:hidden;cursor:pointer;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;box-shadow:0 10px 26px -16px rgba(20,37,84,.16)' onmouseover=\"this.style.transform='translateY(-5px)';this.style.boxShadow='0 20px 40px -18px "+lv.color+"55'\" onmouseout=\"this.style.transform='';this.style.boxShadow='0 10px 26px -16px rgba(20,37,84,.16)'\">";
-    h+="<div style='background:linear-gradient(135deg,"+lv.color+"1f,"+lv.color+"08);padding:18px 18px 16px;position:relative'>";
-    h+="<div style='position:absolute;top:10px;right:10px;background:"+(lv.gratuit?"#059669":"#6C56A6")+";color:#fff;font-size:9px;font-weight:800;padding:3px 9px;border-radius:10px'>"+(lv.gratuit?"GRATUIT":lv.plan||"PREMIUM")+"</div>";
-    h+="<div style='width:52px;height:52px;border-radius:14px;background:"+lv.color+"26;display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:10px'>"+lv.ico+"</div>";
-    h+="<div style='font-family:var(--ds-font-display,Montserrat),sans-serif;font-size:14px;font-weight:800;color:#142554'>"+lv.titre+"</div>";
-    h+="<div style='font-size:11px;color:#6B7A99;margin-top:3px;font-weight:600'>"+lv.matiere+" · "+lv.classe+"</div>";
+    h+="<div class='lvx-card c"+(k%5+1)+"' role='button' tabindex='0' onkeydown=\"if(event.key==='Enter')this.click()\" onclick='lancerLabo(\""+lv.id+"\")'>";
+    h+="<span class='lvx-badge"+(lv.gratuit?"":" prem")+"'>"+(lv.gratuit?"Gratuit":_esc(lv.plan||"Premium"))+"</span>";
+    h+=_sv(_lvIco[lv.cat]||"lc-flask","lvx-ico");
+    h+="<div class='lvx-titre'>"+_esc(lv.titre)+"</div>";
+    h+="<div class='lvx-mat'>"+_esc(lv.matiere)+" · "+_esc(lv.classe)+"</div>";
+    h+="<div class='lvx-desc'>"+_esc(lv.desc)+"</div>";
+    h+="<div class='lvx-foot'><span class='lvx-meta'>"+lv.experience.length+" étapes · "+lv.quiz.length+" quiz</span>";
+    h+="<span class='lvx-go"+(locked?" prem":"")+"'>"+(locked?_sv("lc-lock")+"Premium":"Lancer"+_sv("lc-arrow-right"))+"</span></div>";
     h+="</div>";
-    h+="<div style='padding:14px'>";
-    h+="<div style='font-size:12px;color:#6B7A99;line-height:1.6;margin-bottom:10px'>"+lv.desc+"</div>";
-    h+="<div class='fl2 fic fsb'>";
-    h+="<div style='font-size:11px;color:#9CA3AF'>"+lv.experience.length+" étapes · "+lv.quiz.length+" quiz</div>";
-    h+="<button style='background:"+lv.color+";color:#fff;border:none;border-radius:10px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer'>"+(locked?"🔒 Premium":"▶ Lancer")+"</button>";
-    h+="</div></div></div>";
   });
   h+="</div>";
 
-  // Section Packs d'abonnement
-  h+="<div style='background:linear-gradient(135deg,#0F172A,#1E3A8A);border-radius:20px;padding:28px;margin-bottom:20px'>";
-  h+="<div style='font-size:11px;font-weight:800;color:#FFC93C;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px'>⭐ Abonnements Labos</div>";
-  h+="<div style='font-family:Georgia,serif;font-size:15px;color:rgba(255,255,255,.8);margin-bottom:20px'>Accède à tous les labos, quiz et fiches de révision</div>";
-  h+="<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:14px'>";
+  // Abonnements
+  h+="<div class='lvx-packs'>";
+  h+="<div class='lvx-kick'>"+_sv("lc-star")+"Abonnements labos</div>";
+  h+="<div class='lvx-packs-sub'>Accède à tous les labos, quiz et fiches de révision</div>";
+  h+="<div class='lvx-packs-grid'>";
   LABO_PACKS.forEach(function(pk){
-    h+="<div style='background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,."+(pk.populaire?"3":"15")+");border-radius:16px;padding:18px;position:relative'>";
-    if(pk.populaire) h+="<div style='position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#FFC93C;color:#0F172A;font-size:9px;font-weight:800;padding:3px 12px;border-radius:10px;white-space:nowrap'>⭐ PLUS POPULAIRE</div>";
-    h+="<div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#fff;margin-bottom:6px'>"+pk.nom+"</div>";
-    h+="<div style='font-family:Georgia,serif;font-size:20px;font-weight:700;color:#FFC93C;margin-bottom:12px'>"+(pk.prix===0?"Gratuit":pk.badge)+"</div>";
-    h+=pk.avantages.map(function(a){return "<div style='font-size:12px;color:rgba(255,255,255,.7);margin-bottom:5px;display:flex;align-items:center;gap:6px'><span style='color:#FFC93C'>✓</span>"+a+"</div>";}).join("");
-    h+="<button onclick=\"vShowSec('contact',null)\" style='width:100%;margin-top:12px;background:"+(pk.populaire?"#FFC93C":"rgba(255,255,255,.15)")+";color:"+(pk.populaire?"#0F172A":"#fff")+";border:none;border-radius:12px;padding:10px;font-size:12px;font-weight:700;cursor:pointer'>"+(pk.prix===0?"Commencer gratuitement":"S'abonner")+"</button>";
+    h+="<div class='lvx-pack"+(pk.populaire?" pop":"")+"'>";
+    if(pk.populaire) h+="<span class='lvx-pop'>Plus populaire</span>";
+    h+="<div class='lvx-pack-nom'>"+_esc(pk.nom)+"</div>";
+    h+="<div class='lvx-pack-prix'>"+(pk.prix===0?"Gratuit":_esc(pk.badge))+"</div>";
+    h+=pk.avantages.map(function(a){return "<div class='lvx-av'>"+_sv("lc-check")+"<span>"+_esc(a)+"</span></div>";}).join("");
+    h+="<button type='button' class='lvx-pack-btn' onclick=\"vShowSec('contact',null)\">"+(pk.prix===0?"Commencer gratuitement":"S'abonner")+"</button>";
     h+="</div>";
   });
   h+="</div></div>";
 
   // Lien MINESEC
-  h+="<div class='vcard' style='background:linear-gradient(135deg,#EFF6FF,#EDE9FE);border:1px solid #C7D2FE'>";
-  h+="<div class='fl2 fic g12'><span style='font-size:32px'>🌐</span><div>";
-  h+="<div style='font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;color:#142554;margin-bottom:4px'>Cours vidéo officiels MINESEC</div>";
-  h+="<div style='font-size:12px;color:#6B7A99;margin-bottom:10px'>La plateforme officielle propose des vidéos pour toutes les matières de la 6ème à la Terminale.</div>";
-  h+="<a href='https://minesec-distancelearning.cm' target='_blank' rel='noopener' style='background:#142554;color:#fff;border-radius:12px;padding:9px 18px;font-size:12px;font-weight:700;text-decoration:none;display:inline-block'>🎬 Accéder aux cours officiels</a>";
-  h+="</div></div></div>";
+  h+="<div class='lvx-minesec'>"+_sv("lc-globe","lvx-ico")+"<div>";
+  h+="<div class='lvx-titre'>Cours vidéo officiels MINESEC</div>";
+  h+="<div class='lvx-desc'>La plateforme officielle propose des vidéos pour toutes les matières de la 6ème à la Terminale.</div>";
+  h+="<a class='lvx-lien' href='https://minesec-distancelearning.cm' target='_blank' rel='noopener'>Accéder aux cours"+_sv("lc-arrow-right")+"</a>";
+  h+="</div></div>";
   h+="</div>";
   _vc(h);
 }
@@ -25040,8 +25647,8 @@ function lancerLabo(id){
   if(typeof window.LABO_DB==='undefined'){
     toast('Chargement du laboratoire…','info');
     _lazyChunk('labo')
-      .then(function(){ lancerLabo(id); })
-      .catch(function(){ toast('Laboratoire momentanément indisponible','err'); });
+      .then(function(){ if(typeof window.LABO_DB==='undefined') throw new Error('module labo chargé sans LABO_DB'); lancerLabo(id); })
+      .catch(function(err){ _journalErreur('chunk labo', err); toast('Laboratoire momentanément indisponible — vérifiez votre connexion et réessayez.','err'); });
     return;
   }
   var lv=window.LABO_DB.find(function(x){return x.id===id;});
@@ -28037,24 +28644,75 @@ function showEvaluations(){
     var uid=SES&&(SES.accountId||SES.id);
     var myR=uid&&(ev.resultats||[]).find(function(r){return r.uid===uid;});
     var col=myR?(myR.score>=80?"#059669":myR.score>=60?"#D97706":"#AE5353"):"#142554";
-    h+="<div class='vcard' style='--vcol:#142554'>"
-      +"<div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#142554;margin-bottom:6px'>"+ev.titre+"</div>"
-      +"<div style='font-size:11px;color:#6B7A99;margin-bottom:3px'>"+ev.matiere+(ev.classe?" · "+ev.classe:"")+"</div>"
-      +"<div style='font-size:11px;color:#9CA3AF;margin-bottom:14px'>"+ev.questions.length+" questions · "+ev.duree+" min</div>";
+    var th=_evalTheme(ev.matiere);
+    /* 29/10/2026 — « trop monotone » (Jacques) : chaque carte prend la teinte
+       et le médaillon en anneau de sa matière, comme les cartes de la vitrine. */
+    h+="<div class='vcard' style='--vcol:"+th.c+";display:flex;flex-direction:column;text-align:center'>"
+      +"<span style='width:56px;height:56px;margin:0 auto 12px;border-radius:50%;background:#fff;border:3px solid "+th.c+";box-sizing:border-box;display:flex;align-items:center;justify-content:center;color:#001136'><svg class='vico vico-21' aria-hidden='true'><use href='#"+th.i+"'/></svg></span>"
+      +"<div style='font-family:Poppins,sans-serif;font-size:17px;font-weight:700;color:#001136;line-height:1.3;margin-bottom:8px'>"+_evalEsc(ev.titre)+"</div>"
+      +"<div style='margin-bottom:6px'><span style='display:inline-block;font-size:13px;font-weight:600;color:"+th.c+";background:"+th.f+";border-radius:999px;padding:4px 12px'>"+_evalEsc(ev.matiere)+(ev.classe?" · "+_evalEsc(ev.classe):"")+"</span></div>"
+      +"<div style='font-size:14px;color:#4D5163;margin-bottom:14px'>"+ev.questions.length+" questions · "+ev.duree+" min</div>";
     if(myR){
       h+="<div style='background:#F8FAFF;border-radius:10px;padding:10px;text-align:center;margin-bottom:12px'>"
-        +"<div style='font-family:Georgia,serif;font-size:22px;font-weight:700;color:"+col+"'>"+myR.score+"%</div>"
-        +"<div style='font-size:10px;color:#9CA3AF'>Passé le "+myR.date+" · "+myR.correct+"/"+myR.total+"</div></div>";
+        +"<div style='font-family:Poppins,sans-serif;font-size:22px;font-weight:700;color:"+col+"'>"+myR.score+"%</div>"
+        +"<div style='font-size:13px;color:#5F6B80'>Passé le "+myR.date+" · "+myR.correct+"/"+myR.total+"</div></div>";
     }
-    h+="<button class='btn bi' style='width:100%' onclick='lancerEvaluation(\""+ev.id+"\")'>"
-      +(SES?(myR?"🔄 Repasser":"▶ Commencer"):"🔒 Connexion requise")+"</button></div>";
+    /* Le visiteur voyait « Connexion requise » et un clic ne montrait rien
+       d'autre qu'un message : il ouvre maintenant la fiche de l'évaluation
+       (contenu, durée, deux questions d'exemple), et c'est au moment de
+       commencer qu'on lui propose le compte gratuit. */
+    h+="<button class='btn bi' style='width:100%;margin-top:auto;background:"+th.c+";border-color:"+th.c+";color:#fff;justify-content:center' onclick='lancerEvaluation(\""+ev.id+"\")'>"
+      +(SES?(myR?"🔄 Repasser":"▶ Commencer"):"Voir l'évaluation →")+"</button></div>";
   });
   h+="</div></div>";
   _vc(h);
 }
 
+var _EVAL_THEMES={
+  'math':{c:'#1E499B',f:'#E3EBF8',i:'lc-ruler'},'fran':{c:'#B03A6E',f:'#FBEEF3',i:'lc-bookopen'},
+  'litt':{c:'#B03A6E',f:'#FBEEF3',i:'lc-book'},'phys':{c:'#5B4FA8',f:'#F1EEF9',i:'lc-flask'},
+  'chim':{c:'#5B4FA8',f:'#F1EEF9',i:'lc-flask'},'svt':{c:'#007E11',f:'#E7F7EC',i:'lc-sprout'},
+  'bio':{c:'#007E11',f:'#E7F7EC',i:'lc-sprout'},'hist':{c:'#A84200',f:'#FFF3E4',i:'lc-globe'},
+  'géo':{c:'#A84200',f:'#FFF3E4',i:'lc-map'},'angl':{c:'#0E7C86',f:'#E3F1EE',i:'lc-message'},
+  'engl':{c:'#0E7C86',f:'#E3F1EE',i:'lc-message'},'philo':{c:'#5B4FA8',f:'#F1EEF9',i:'lc-lightbulb'},
+  'info':{c:'#0E7C86',f:'#E3F1EE',i:'lc-laptop'},'ecm':{c:'#1E499B',f:'#E3EBF8',i:'lc-flag'}
+};
+function _evalTheme(m){
+  var s=String(m||'').toLowerCase();
+  for(var k in _EVAL_THEMES){ if(s.indexOf(k)>=0) return _EVAL_THEMES[k]; }
+  return {c:'#1E499B',f:'#E3EBF8',i:'lc-clipboard'};
+}
+function _evalEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+/* Fiche d'une évaluation pour le visiteur non connecté : ce qu'il va passer,
+   avant de lui demander un compte. Les réponses ne sont jamais montrées. */
+function apercuEvaluation(evId){
+  var ev=(DB.evaluations||[]).find(function(e){return e.id===evId;});
+  if(!ev||!ev.questions||!ev.questions.length){toast("Évaluation introuvable","warn");return;}
+  var th=_evalTheme(ev.matiere);
+  var ex=ev.questions.slice(0,2).map(function(q,i){
+    var txt=q.q||q.question||q.enonce||q.text||'';
+    return "<li style='margin:0 0 10px;font-size:15px;line-height:1.6;color:#16233F'><b style='color:"+th.c+"'>Question "+(i+1)+".</b> "+_evalEsc(txt)+"</li>";
+  }).join('');
+  var h="<div class='vsec'><div class='vsec-title'>"+_evalEsc(ev.titre)+"</div>"
+    +"<div class='vsec-sub'>"+_evalEsc(ev.matiere)+(ev.classe?" · "+_evalEsc(ev.classe):"")+" · "+ev.questions.length+" questions · "+ev.duree+" min · correction instantanée</div>"
+    +"<div style='max-width:760px;margin:0 auto'>"
+    +"<div class='vcard' style='text-align:left;margin-bottom:18px'>"
+    +"<div style='font-size:17px;font-weight:700;color:#001136;margin-bottom:12px'>Deux questions pour vous faire une idée</div>"
+    +(ex?"<ol style='list-style:none;margin:0;padding:0'>"+ex+"</ol>":"")
+    +"<div style='font-size:14px;color:#4D5163;margin-top:6px'>Le chronomètre démarre quand vous commencez. La note et la correction s'affichent à la fin.</div></div>"
+    +"<div style='display:flex;gap:12px;flex-wrap:wrap;justify-content:center'>"
+    +"<button class='btn' style='background:#FFC93C;color:#001136;border-color:#FFC93C;font-weight:700;padding:12px 22px' onclick='(typeof showRegisterForm===\"function\"?showRegisterForm(\"eleve\"):0)'>Créer mon compte gratuit pour commencer</button>"
+    +"<button class='btn bo' style='padding:12px 22px' onclick='(typeof _ouvrirConnexionAncre===\"function\"?_ouvrirConnexionAncre():(typeof showLogin===\"function\"?showLogin(\"eleve\"):0))'>J'ai déjà un compte</button>"
+    +"</div>"
+    +"<div style='text-align:center;margin-top:18px'><a href='#' onclick='showEvaluations();return false' style='color:#1E499B;font-weight:600'>← Toutes les évaluations</a></div>"
+    +"</div></div>";
+  _vc(h);
+  try{ window.scrollTo({top:0,behavior:'instant'}); }catch(e){ window.scrollTo(0,0); }
+}
+
 function lancerEvaluation(evId){
-  if(!SES){toast("Connectez-vous pour passer une évaluation","warn");return;}
+  if(!SES){apercuEvaluation(evId);return;}
   var ev=(DB.evaluations||[]).find(function(e){return e.id===evId;});
   if(!ev||!ev.questions||!ev.questions.length){toast("Évaluation introuvable","warn");return;}
   var qIdx=0,answers=[],elapsed=0,total=ev.duree*60,timer=null;
@@ -29297,6 +29955,18 @@ window._track=function(ev,meta){
     var k='_trk_'+ev+(meta?('_'+JSON.stringify(meta)):'')+'_'+new Date().toDateString();
     if(localStorage.getItem(k))return;
     localStorage.setItem(k,'1');
+    // 07/11/2026 — Google Ads (AW-18559032612) : l'inscription et le paiement
+    // engagé sont aussi remis à la balise Google, pour que la campagne mesure
+    // ses conversions. Noms d'événements standard de gtag.
+    try{
+      var _gEv={signup:'sign_up',pay_init:'begin_checkout'}[ev];
+      if(_gEv&&typeof window.gtag==='function'){
+        window.gtag('event',_gEv);
+        // Action de conversion « Inscription VÉRITAS » (créée le 10/11/2026,
+        // une conversion par clic, 1 €) : c'est elle que la campagne optimise.
+        if(ev==='signup') window.gtag('event','conversion',{send_to:'AW-18559032612/649iCITRqLUdEKS60ZFF'});
+      }
+    }catch(_eG){}
     var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
     var data=JSON.stringify(meta?{ev:ev,meta:meta}:{ev:ev});
     if(navigator.sendBeacon){ navigator.sendBeacon(base+'/stats.php', new Blob([data],{type:'application/json'})); }
@@ -29471,10 +30141,10 @@ setTimeout(function(){
 if(typeof EPREUVES_DB==='undefined'){
   window.EPREUVES_DB=[
     // ── MATHS ──
-    {id:"ep_m1",titre:"Épreuve Maths BEPC 2024 — Séq. 5",matiere:"Mathématiques",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
-     desc:"Épreuve officielle BEPC 2024, séquence 5. Couvre : Théorème de Pythagore, Thalès, calcul littéral, statistiques.",
+    {id:"ep_m1",titre:"Épreuve Maths 3ème, type BEPC — Séq. 5",matiere:"Mathématiques",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
+     desc:"Épreuve de préparation au BEPC, séquence 5. Couvre : Théorème de Pythagore, Thalès, calcul littéral, statistiques.",
      apercu:"Exercice 1 (4 pts) — Calculer : A = √(49) + 3² − 5  ;  B = (2x−3)(x+4)  développer et réduire.\nExercice 2 (5 pts) — ABC est un triangle rectangle en A tel que AB = 6 cm et AC = 8 cm. 1) Calculer BC. 2) M est le milieu de [BC], montrer que AM = BC/2.\nExercice 3 (5 pts) — Statistiques : 25 élèves ont obtenu les notes suivantes : 08, 10, 12, 14, 09, 11, 13, 15, 07, 10, 12, 11, 14, 16, 08, 09, 13, 10, 11, 12, 15, 07, 14, 10, 13. Calculer la moyenne, la médiane et l'étendue.\nProblème (6 pts) — Dans un repère, A(1;2), B(4;6), C(7;2). Montrer que le triangle ABC est isocèle."},
-    {id:"ep_m2",titre:"Épreuve Maths BEPC 2023 — Séq. 6",matiere:"Mathématiques",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
+    {id:"ep_m2",titre:"Épreuve Maths 3ème, type BEPC — Séq. 6",matiere:"Mathématiques",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
      desc:"Épreuve BEPC 2023, examen blanc. Thèmes : équations, géométrie, proportionnalité.",
      apercu:"Exercice 1 — Résoudre : 3x − 7 = 2(x + 1). Exercice 2 — Deux droites parallèles coupées par deux sécantes. D'après Thalès, calculer les longueurs manquantes. Problème — Un terrain rectangulaire a un périmètre de 120 m. Sa longueur est le double de sa largeur. Déterminer ses dimensions et son aire."},
     {id:"ep_m3",titre:"Épreuve Maths Probatoire C 2024",matiere:"Mathématiques",classe:"1ère C",seq:"Probatoire",cat:"cat1",gratuit:false,prix:1500,
@@ -29485,7 +30155,7 @@ if(typeof EPREUVES_DB==='undefined'){
      apercu:"Partie A — Étude de la fonction f(x) = (x² − 1)eˣ. Dresser le tableau de variation et tracer la courbe. Partie B — Dans une urne, 3 boules rouges et 5 boules blanches. On tire 2 boules sans remise. Calculer P(2 rouges), P(1 rouge et 1 blanche)."},
 
     // ── FRANÇAIS ──
-    {id:"ep_f1",titre:"Épreuve Français BEPC 2024",matiere:"Français",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
+    {id:"ep_f1",titre:"Épreuve Français 3ème, type BEPC — Séq. 6",matiere:"Français",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
      desc:"Épreuve officielle de Français BEPC 2024. Compréhension, grammaire, expression écrite.",
      apercu:"Texte : Extrait de « Une vie de boy » de Ferdinand Oyono.\nCompréhension (8 pts) : 1) Qui est le narrateur ? 2) Quel sentiment domine dans ce passage ? 3) Relevez deux figures de style et expliquez-les.\nGrammaire (6 pts) : 4) Analysez la phrase soulignée (nature et fonction). 5) Conjuguez « prendre » au plus-que-parfait.\nExpression écrite (6 pts) : Sujet au choix : a) Essai argumentatif sur l'éducation ; b) Récit d'une expérience marquante."},
     {id:"ep_f2",titre:"Épreuve Français BAC A 2024",matiere:"Français",classe:"Tle A",seq:"BAC",cat:"cat1",gratuit:false,prix:2000,
@@ -29493,7 +30163,7 @@ if(typeof EPREUVES_DB==='undefined'){
      apercu:"Sujet 1 — Dissertation : « La littérature africaine doit-elle se limiter à dénoncer les injustices sociales ? » Discutez.\nSujet 2 — Commentaire composé d'un extrait de « Les Soleils des Indépendances » d'Ahmadou Kourouma."},
 
     // ── PHYSIQUE-CHIMIE ──
-    {id:"ep_pc1",titre:"Épreuve Physique-Chimie BEPC 2024",matiere:"Physique-Chimie",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
+    {id:"ep_pc1",titre:"Épreuve Physique-Chimie 3ème, type BEPC — Séq. 5",matiere:"Physique-Chimie",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
      desc:"Épreuve officielle Physique-Chimie BEPC 2024. Électricité, mécanique, chimie.",
      apercu:"Chimie (8 pts) : 1) Équilibrer : Fe + O₂ → Fe₂O₃. 2) Calculer la masse molaire de H₂SO₄. 3) Quels sont les produits de la combustion complète du méthane ?\nPhysique (12 pts) : 4) Un mobile parcourt 300 m en 25 s. Calculer sa vitesse en m/s et km/h. 5) Circuit série : U = 12V, R₁ = 100Ω, R₂ = 200Ω. Calculer I et la tension aux bornes de chaque résistance."},
     {id:"ep_pc2",titre:"Épreuve Physique BAC C 2024",matiere:"Physique",classe:"Tle C",seq:"BAC",cat:"cat1",gratuit:false,prix:2000,
@@ -29501,17 +30171,17 @@ if(typeof EPREUVES_DB==='undefined'){
      apercu:"Exercice 1 — Chute libre avec frottements. Un objet de masse 0,5 kg est lâché d'une hauteur de 10 m. 1) Sans frottement : calculer v à l'impact. 2) Avec force de frottement f = 0,2v² : établir l'équation différentielle du mouvement."},
 
     // ── SVT ──
-    {id:"ep_svt1",titre:"Épreuve SVT BEPC 2024",matiere:"SVT",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
+    {id:"ep_svt1",titre:"Épreuve SVT 3ème, type BEPC — Séq. 6",matiere:"SVT",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
      desc:"Épreuve officielle SVT BEPC 2024. Reproduction, écologie, hérédité.",
      apercu:"Partie I — Restitution des connaissances (8 pts) : 1) Schéma annoté de l'appareil reproducteur féminin. 2) Définir : fécondation, nidation, placenta.\nPartie II — Exploitation de documents (12 pts) : Document montrant l'évolution de la température et du CO₂ atmosphérique. 1) Décrire l'évolution. 2) Proposer une explication. 3) Quelles conséquences sur la biodiversité ?"},
 
     // ── HISTOIRE-GÉO ──
-    {id:"ep_hg1",titre:"Épreuve Histoire-Géo BEPC 2024",matiere:"Histoire-Géographie",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
+    {id:"ep_hg1",titre:"Épreuve Histoire-Géo 3ème, type BEPC — Séq. 5",matiere:"Histoire-Géographie",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
      desc:"Épreuve officielle Histoire-Géographie BEPC 2024.",
      apercu:"Histoire (10 pts) : 1) Les causes de la décolonisation en Afrique. 2) Le rôle de l'ONU dans la décolonisation. 3) Citez 3 leaders africains et leur pays.\nGéographie (10 pts) : 4) Les 10 régions du Cameroun et leurs chefs-lieux. 5) Les principaux défis du développement du Cameroun (3 défis argumentés)."},
 
     // ── ANGLAIS ──
-    {id:"ep_en1",titre:"Épreuve Anglais BEPC 2024",matiere:"Anglais",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
+    {id:"ep_en1",titre:"Épreuve Anglais 3ème, type BEPC — Séq. 6",matiere:"Anglais",classe:"3ème",seq:"Séquence 6",cat:"cat1",gratuit:true,
      desc:"Épreuve officielle Anglais BEPC 2024. Reading comprehension, grammar, essay writing.",
      apercu:"Section A — Reading Comprehension (10 marks): Read the passage about education in Cameroon and answer questions.\nSection B — Grammar (5 marks): Fill in the blanks with correct tenses. Rewrite using reported speech.\nSection C — Essay Writing (5 marks): Write a composition on: 'The importance of bilingualism in Cameroon.'"},
 
@@ -29600,7 +30270,7 @@ if(typeof EPREUVES_DB==='undefined'){
      apercu:"Exercice 1 — Analyse de phrase (5 pts)\nAnalysez la phrase suivante (nature et fonction de chaque groupe) : 'Hier, dans le petit village où mes grands-parents vivaient, nous avons assisté à une cérémonie traditionnelle qui m'a profondément ému.'\n\nExercice 2 — Valeurs des temps (4 pts)\nIndiquez la valeur de chaque temps souligné :\n• 'Quand il PLEUVAIT, j'ai fermé les fenêtres.' (imparfait : ?)\n• 'Il SERAIT venu si tu l'avais invité.' (conditionnel : ?)\n• 'Demain, je PRENDRAI le train.' (futur : ?)\n• 'L'eau BOUT à 100°C.' (présent : ?)\n\nExercice 3 — Transformations (5 pts)\n• Passive : 'Le maire a inauguré l'école.' → ?\n• Discours indirect : Il a dit : 'Je viendrai demain.' → ?\n• Négative complète : 'Quelqu'un a apporté quelque chose.' → ?\n\nExercice 4 — Lexique BEPC (6 pts)\nDonnez le sens de : éphémère, perspicace, pugnace, indolent, intrépide, exaspérer."},
 
     // ── BEPC Blanc — Histoire-Géo ──
-    {id:"ep_hg3",titre:"BEPC Blanc — Histoire-Géo 3ème (Cameroun + Mondialisation)",matiere:"Histoire-Géographie",classe:"3ème",seq:"BEPC",cat:"cat1",gratuit:true,
+    {id:"ep_hg3_bepc",titre:"BEPC Blanc — Histoire-Géo 3ème (Cameroun + Mondialisation)",matiere:"Histoire-Géographie",classe:"3ème",seq:"BEPC",cat:"cat1",gratuit:true,
      desc:"Sujet blanc BEPC HG : histoire du Cameroun indépendant + mondialisation économique. 20 points.",
      apercu:"DOSSIER HISTOIRE (10 pts) — Le Cameroun depuis 1960\nDocument 1 : Discours d'Ahidjo au 1er janvier 1960. Document 2 : Carte du Cameroun fédéral (1961-1972). Document 3 : Photo de Paul Biya prêtant serment 1982.\n\n1) Présentez les 3 documents (3 pts).\n2) Quelles sont les 2 grandes étapes politiques entre 1960 et 1972 ? (3 pts)\n3) Comment Paul Biya succède-t-il à Ahidjo ? (2 pts)\n4) Citez 2 défis politiques du Cameroun aujourd'hui (2 pts).\n\nDOSSIER GÉO (10 pts) — La mondialisation\nDocument 4 : Carte des flux commerciaux mondiaux. Document 5 : Photo de Douala (port).\n\n1) Définissez : mondialisation, FTN, IDH (3 pts).\n2) Quels sont les 3 grands pôles mondiaux ? (2 pts)\n3) Quel est le rôle du port de Douala dans l'intégration du Cameroun aux échanges mondiaux ? (3 pts)\n4) Citez 2 conséquences positives et 2 négatives de la mondialisation pour le Cameroun (2 pts)."},
 
@@ -41624,6 +42294,36 @@ window.AMBASSA_PERSONA = [
   "• ANCRAGE AUTONOMIE : propose régulièrement une auto-évaluation (mini-quiz de 2-3 questions, fiche à compléter, application sur un autre exemple) pour que l'élève s'exerce seul."
 ].join("\n");
 
+/* ── LA CONSIGNE D'AMBASSA, COMPOSÉE SELON LA TÂCHE (30/10/2026) ───────────
+   AMBASSA_PERSONA pèse 35 Ko. api/ia_proxy.php coupe toute consigne à
+   20 000 octets (plafond anti-abus) : tout ce qui suivait disparaissait sans
+   bruit — structures du Probatoire et du BAC, en-tête des corrigés, et
+   surtout les RÈGLES ANTI-HALLUCINATION, la posture et l'interaction. Une
+   dissertation de Tle était rédigée sans « n'invente aucune citation ». Le
+   socle MINESEC du serveur s'y ajoutant, la consigne dépassait aussi les
+   8 000 jetons/minute de Groq : ce secours ne pouvait jamais répondre.
+   On envoie donc : le NOYAU (présentation, style, anti-hallucination,
+   posture, interaction) + les sections utiles à la tâche, dans l'ordre
+   d'origine. Les sections sont repérées par leur TITRE : une section
+   renommée tombe simplement hors de la sélection, jamais le noyau. */
+window._personaAmbassa = function(tache){
+  var P = window.AMBASSA_PERSONA || '';
+  var parts = P.split(/\n(?=════════ )/);
+  var NOYAU = ['STYLE & EXIGENCES', 'RÈGLES ANTI-HALLUCINATION', 'POSTURE PÉDAGOGIQUE', 'INTERACTION & AUTONOMIE'];
+  var TACHES = {
+    oeuvres: ['PROGRAMMES MAÎTRISÉS', 'GRILLES OFFICIELLES OBC', 'MÉTHODOLOGIE — COMMENTAIRE COMPOSÉ',
+              'MÉTHODOLOGIE — DISSERTATION LITTÉRAIRE', 'ÉPREUVE BAC/PROBATOIRE FRANÇAIS', 'EN-TÊTE OFFICIEL CORRIGÉ'],
+    devoir:  ['PROGRAMMES MAÎTRISÉS', 'GRILLES OFFICIELLES OBC', 'STRUCTURES OFFICIELLES DES ÉPREUVES',
+              'ÉPREUVE BAC/PROBATOIRE FRANÇAIS', 'EN-TÊTE OFFICIEL CORRIGÉ']
+  };
+  var voulues = NOYAU.concat(TACHES[tache] || TACHES.devoir);
+  return parts.filter(function(sec, i){
+    if(i === 0) return true;                       // « Tu es AMBASSA… »
+    var titre = sec.split('\n')[0];
+    return voulues.some(function(v){ return titre.indexOf(v) >= 0; });
+  }).join('\n');
+};
+
 window.AMBASSA_TACHES = [
   { id:'quiz',       ic:'pencil',    col:'#3C8DFF', t:'Générer un quiz',           d:'QCM / Vrai-Faux / Questions ouvertes — sur n\'importe quel sujet' },
   { id:'corrige',    ic:'check',     col:'#3A8F73', t:'Générer un corrigé',         d:'Pour un sujet d\'épreuve, exercice ou QCM existant' },
@@ -42053,7 +42753,7 @@ window._ambassaGenerate = async function(taskId){
   _ge('mvResult').innerHTML = '<div style="background:#EEF2FF;border:1px solid #C7D2FE;border-radius:12px;padding:14px;text-align:center"><div style="font-size:32px;margin-bottom:6px;animation:pulse 1.2s infinite">🎓</div><div style="font-weight:700;color:#3730A3">Le professeur Ambassa rédige…</div><div style="font-size:11px;color:#6366F1;margin-top:4px;font-style:italic">Cela peut prendre 10-30 secondes pour les contenus longs</div></div>';
 
   try {
-    var resp = await callAmbassaIA(prompt, AMBASSA_PERSONA);
+    var resp = await callAmbassaIA(prompt, _personaAmbassa('devoir'));
 
     // ═══ v2.9.12 : Mode QCM INTERACTIF si c'est un quiz QCM ═══
     // L'apprenant fait l'exercice d'abord, puis voit les corrigés
@@ -42137,7 +42837,7 @@ window._ambassaCorrigerProposition = async function(cls, mat, sujet, taskId){
     + '4) 💡 CONSEIL — 1 à 2 conseils méthodologiques concrets pour progresser.\n'
     + 'Ne réécris pas toute la copie à sa place : guide-le. Valorise l\'effort.';
   try {
-    var resp = await callAmbassaIA(prompt, (typeof AMBASSA_PERSONA!=='undefined'?AMBASSA_PERSONA:''));
+    var resp = await callAmbassaIA(prompt, _personaAmbassa('devoir'));
     if(out) out.innerHTML = '<div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:12px;padding:14px">'
       +'<div style="font-size:11px;font-weight:800;color:#92400E;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🎓 Correction d\'Ambassa</div>'
       +'<div class="ai-md" style="max-height:360px;overflow-y:auto">'+_aiMarkdown(resp)+'</div></div>';
@@ -43992,8 +44692,13 @@ setTimeout(function(){initTickerFixed();},3000);
   }
 
   // Post-process: fix icon colors based on actual background luminosity
+  /* Lecture d'abord, écriture ensuite : poser `color` au fil de la boucle
+     forçait un recalcul de style avant chaque getComputedStyle suivant. Et une
+     icône sur fond clair n'était jamais marquée, donc réexaminée à CHAQUE
+     passe (toutes les mutations du body) : on la marque comme vue. */
   function _fixIconColors(){
-    var icons = document.querySelectorAll('.v-ico, .material-symbols-rounded, .material-icons-round');
+    var icons = document.querySelectorAll('.v-ico:not([data-color-vu]), .material-symbols-rounded:not([data-color-vu]), .material-icons-round:not([data-color-vu])');
+    var aBlanchir = [];
     for(var i=0; i<icons.length; i++){
       var el = icons[i];
       if(el.getAttribute('data-color-fixed')) continue;
@@ -44017,12 +44722,13 @@ setTimeout(function(){initTickerFixed();},3000);
         var r=parseInt(m[1]),g=parseInt(m[2]),b=parseInt(m[3]);
         // Relative luminance (simplified)
         var lum = (0.299*r + 0.587*g + 0.114*b);
-        if(lum < 80){
-          // Dark background → white icon
-          el.style.color = '#fff';
-          el.setAttribute('data-color-fixed','1');
-        }
+        if(lum < 80) aBlanchir.push(el);   // Dark background → white icon
       }
+    }
+    for(var j=0; j<icons.length; j++) icons[j].setAttribute('data-color-vu','1');
+    for(var k=0; k<aBlanchir.length; k++){
+      aBlanchir[k].style.color = '#fff';
+      aBlanchir[k].setAttribute('data-color-fixed','1');
     }
   }
 
@@ -44206,6 +44912,17 @@ function _prtFmt(n){ return (typeof fmt==='function')?fmt(n):(n+' FCFA'); }
 function _prtFmtN(n){ return (typeof fmtN==='function')?fmtN(n):String(n); }
 function _prtToast(m,t){ if(typeof toast==='function') toast(m,t||'ok'); }
 function _prtSave(){ if(typeof save==='function') save(); }
+/* 29/10/2026 — _prtSave() n'écrit que dans le navigateur du candidat (save()
+   ne synchronise que pour admin/enseignant) : « Candidature reçue ! »
+   s'affichait, le centre ne voyait rien. La candidature part donc aussi à
+   api/demandes.php ; si le réseau lâche, WhatsApp prend le relais. */
+function _prtTransmettre(d){
+  if(typeof _demEnvoyer!=='function') return;
+  _demEnvoyer('partenaire', d).catch(function(e){
+    if(typeof toast==='function') toast("⚠️ Candidature non transmise — WhatsApp s'ouvre pour l'envoyer",'warn');
+    if(typeof _demReplWhatsApp==='function') _demReplWhatsApp('partenaire', d, e && e.message);
+  });
+}
 function _prtRe(){ if(typeof re==='function') re(); }
 function _prtCm(){ if(typeof cm==='function') cm(); }
 
@@ -44273,15 +44990,25 @@ function pgPartnerships(){
   h += '<div style="max-width:780px;margin:30px auto;padding:0 14px"><div class="ct" style="text-align:center;margin-bottom:14px">📜 Paliers de reconnaissance Bronze · Argent · Or · Diamant</div>'
     + '<div style="text-align:center;font-size:13px;color:var(--ink3);margin:-6px 0 14px">Une seule commission pour tous : <strong>' + Math.round(_prtTaux()*100) + ' %</strong> de chaque paiement fait avec votre code. Chaque palier atteint vous vaut un parchemin VÉRITAS, vérifiable par QR code.</div>'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">';
+  /* 29/10/2026 — « comme les cartes Partenariat » (Jacques) : les quatre
+     paliers partagent la carte de la vitrine — fond blanc, filet neutre,
+     médaillon en ANNEAU teinté, titre gras bleu nuit, pastille du parchemin
+     pâle. Avant, trois cartes teintées et une blanche : Diamant (#B9F2FF,
+     presque blanc) ne ressemblait pas aux autres. lv.color reste la couleur
+     du palier ailleurs (badges, parchemins) ; ici on prend une encre lisible.
+     La pastille ne dit plus que « Parchemin » (le palier est le titre) : à
+     140 px, « Parchemin Diamant » se cassait en deux, et elle descend au pied
+     de la carte pour s'aligner d'un palier à l'autre. */
+  var ENCRE = { bronze:['#A84200','#FFF3E4'], argent:['#5F6B80','#EEF1F6'], or:['#A67608','#FFF4D6'], diamant:['#0E7C86','#E3F1EE'] };
   ['bronze','argent','or','diamant'].forEach(function(k){
-    var lv = L[k];
-    h += '<div style="position:relative;background:linear-gradient(135deg,'+lv.color+'2e,'+lv.color+'0a);border:2px solid '+lv.color+';border-radius:16px;padding:18px 14px;text-align:center;box-shadow:0 8px 24px '+lv.color+'40;transition:transform .25s,box-shadow .25s;overflow:hidden" '
-      + 'onmouseover="this.style.transform=\'translateY(-6px) scale(1.03)\';this.style.boxShadow=\'0 16px 38px '+lv.color+'66\'" '
-      + 'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 8px 24px '+lv.color+'40\'">'
-      + '<div style="font-size:40px;margin-bottom:6px;line-height:1;filter:drop-shadow(0 4px 10px '+lv.color+'80)">'+lv.badge+'</div>'
-      + '<div style="font-size:15px;font-weight:900;color:#142554;margin-bottom:6px;letter-spacing:.3px">'+lv.label+'</div>'
-      + '<div style="font-size:11px;color:var(--ink3);margin-bottom:8px">À partir de <strong>'+lv.min+'</strong> ventes</div>'
-      + '<div style="display:inline-block;font-size:13px;font-weight:800;color:#142554;background:'+lv.color+'33;border-radius:20px;padding:3px 12px">📜 Parchemin '+lv.label+'</div>'
+    var lv = L[k], e = ENCRE[k];
+    h += '<div style="position:relative;background:#fff;border:1px solid #E4E9F2;border-radius:14px;padding:20px 14px;text-align:center;display:flex;flex-direction:column;align-items:center;box-shadow:0 4px 14px rgba(0,17,54,.05);transition:transform .18s,box-shadow .18s" '
+      + 'onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 12px 26px rgba(0,17,54,.09)\'" '
+      + 'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 4px 14px rgba(0,17,54,.05)\'">'
+      + '<div style="width:60px;height:60px;margin:0 auto 10px;border-radius:50%;background:#fff;border:3px solid '+e[0]+';box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1;color:#001136">'+lv.badge+'</div>'
+      + '<div style="font-size:18px;font-weight:700;color:#001136;margin-bottom:4px">'+lv.label+'</div>'
+      + '<div style="font-size:15px;color:#4D5163;margin-bottom:12px">À partir de <strong style="color:#001136">'+lv.min+'</strong> ventes</div>'
+      + '<div style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:'+e[0]+';background:'+e[1]+';border-radius:999px;padding:6px 14px;margin-top:auto;white-space:nowrap" title="Parchemin '+lv.label+'">📜 Parchemin</div>'
       + '</div>';
   });
   h += '</div></div>';
@@ -44474,6 +45201,12 @@ function submitPartnerApplication(type){
   if(!DB.partnerApplications) DB.partnerApplications=[];
   DB.partnerApplications.push(app);
   _prtSave();
+  _prtTransmettre({
+    nom:nom, email:email, tel:tel, ville:app.ville, etablissement:app.etablissement,
+    formule:(DB.partnerTypes&&DB.partnerTypes[type]?DB.partnerTypes[type].label:type),
+    matieres:app.matieres, social:app.social, followers:app.followers,
+    adresse:app.adresse, secteur:app.secteur, message:app.motivation
+  });
   // Notification admin si dispo
   if(typeof autoNotify==='function'){
     autoNotify('🤝 Nouvelle candidature partenaire',
@@ -45684,6 +46417,10 @@ function _ajSubmit(){
       'admin');
   }
   _prtSave();
+  _prtTransmettre({
+    nom:nom, email:email, tel:tel, ville:app.ville, etablissement:app.etablissement,
+    classe:app.classe, formule:'Ambassadeur Junior', message:app.motivation
+  });
   _prtCm();
   // Si seuil OK → auto-validation en 1,5s pour effet "magie"
   if(seuilOK){
@@ -47842,7 +48579,13 @@ function _cagCreer(eleveId){
                     badges:'mAchievements', jeux:'showJeuxEdu', battles:'mBattles',
                     groupe:'mStudyRoom', 'orientation-ia':'mAIOrientation',
                     ambassa:'mAgentAmbassa',
-                    simulateur:'mChoisirSimulation', 'oeuvres-interactives':'mChoisirOeuvre' };
+                    simulateur:'mChoisirSimulation', 'oeuvres-interactives':'mChoisirOeuvre',
+                    /* 09/11/2026 : modules sans adresse, reliés depuis Apprendre. */
+                    classes:'showClasseVirtuelle', coaching:'mCoaching',
+                    /* 11/11/2026 : « #labos » était le lien de 31 pages Découvrir (laboratoires
+                       virtuels) et n'ouvrait rien — l'accueil s'affichait. */
+                    labos:'showLabosVirtuels', 'sujet-du-jour':'mSujetDuJour',
+                    erreurs:'mErreursARevoir', 'mes-evaluations':'showMesEvaluations', 'correction-ia':'mAICorrection' };
 
   function sectionDuHash(){
     var h = (window.location.hash || '').replace(/^#/, '');
@@ -47852,6 +48595,9 @@ function _cagCreer(eleveId){
     if(FONCTIONS[sec]) return sec;
     if(sec === 'livre') return 'livre';   // lien partagé d'un manuel : #livre?id=…
     if(sec === 'abonnement') return 'abonnement';   // bouton « Choisir » d'une formule : #abonnement?plan=…
+    if(sec === 'matiere') return 'matiere';         // carte de matière de la vitrine : #matiere?m=…
+    if(sec === 'oeuvre') return 'oeuvre';           // bandeau d'une page /oeuvres/ : #oeuvre?k=…
+    if(sec === 'labo' || sec === 'jeu' || sec === 'fiche') return sec; // Apprendre : un labo, un jeu, une fiche précise
     // Programmes de partenariat : « partenariat-parent », « partenariat-sponsor »…
     if(sec.indexOf('partenariat-') === 0) return sec;
     if(sec.indexOf('pour-') === 0) return sec;          // hubs par public (v1.14)
@@ -47893,6 +48639,80 @@ function _cagCreer(eleveId){
         window._vCurrentSec = 'livre:' + id;
         _bookOpenFromHash(id, achat);
       }
+      return;
+    }
+
+    /* Fiche du catalogue : les données publiques arrivent après le chargement. */
+    if(sec === 'fiche'){
+      var qf = (window.location.hash || '').split('?')[1] || '', idF = '';
+      qf.split('&').forEach(function(kv){ var p = kv.split('='); if(decodeURIComponent(p[0] || '') === 'id') idF = decodeURIComponent(p[1] || ''); });
+      if(!/^[A-Za-z0-9_-]+$/.test(idF)) return;
+      window._vCurrentSec = 'fiche:' + idF;
+      try{ if(typeof _vFondNeutre === 'function') _vFondNeutre(); }catch(e){}
+      var essais = 0;
+      (function attend(){
+        var ok = DB && DB.elearning && (DB.elearning.contenus || []).some(function(c){ return c.id === idF; });
+        if(ok){ try{ previewElContenu(idF); }catch(e){} return; }
+        if(++essais < 16) setTimeout(attend, 500); else toast('Fiche introuvable', 'warn');
+      })();
+      return;
+    }
+
+    /* Apprendre (09/11/2026) : ouvrir UN laboratoire (#labo?id=lv10) ou UN jeu
+       (#jeu?id=j5). Les cadenas restent ceux de lancerLabo() et vLaunchJeu() :
+       un contenu payant demande toujours un essai ou un abonnement. */
+    if(sec === 'labo' || sec === 'jeu'){
+      var qr = (window.location.hash || '').split('?')[1] || '', cleRes = '';
+      qr.split('&').forEach(function(kv){
+        var p = kv.split('=');
+        if(decodeURIComponent(p[0] || '') === 'id') cleRes = decodeURIComponent(p[1] || '');
+      });
+      if(!/^[A-Za-z0-9_-]+$/.test(cleRes) || window._vCurrentSec === sec + ':' + cleRes) return;
+      window._vCurrentSec = sec + ':' + cleRes;
+      try{ if(typeof _vFondNeutre === 'function') _vFondNeutre(); }catch(e){}
+      try{ if(sec === 'labo') lancerLabo(cleRes); else vLaunchJeu(cleRes); }catch(e){}
+      return;
+    }
+
+    /* Bandeau « Analyse complète, carte mentale… » des pages /oeuvres/ :
+       #oeuvre?k=tle_stances_poemes (30/10/2026). Il menait à l'accueil du
+       site : le lecteur cherchait l'œuvre, ne la trouvait pas. On ouvre le
+       menu de l'œuvre (fiche, carte mentale, QCM, citations…), celui du
+       sélecteur « Œuvres au programme », une fois ses données chargées. */
+    if(sec === 'oeuvre'){
+      var qo = (window.location.hash || '').split('?')[1] || '', cleOe = '';
+      qo.split('&').forEach(function(kv){
+        var p = kv.split('=');
+        if(decodeURIComponent(p[0] || '') === 'k') cleOe = decodeURIComponent(p[1] || '');
+      });
+      if(cleOe === '2nde_nkoumwam') cleOe = '5e_nkum_wam';     // ancien lien : l'œuvre est au programme de 5e
+      if(!/^[a-z0-9_]+$/.test(cleOe) || window._vCurrentSec === 'oeuvre:' + cleOe) return;
+      window._vCurrentSec = 'oeuvre:' + cleOe;
+      Promise.all([_lazyChunk('litt-oeuvres'), _lazyChunk('jeux')])
+        .then(function(){ _showLittMenu(cleOe, cleOe); })
+        .catch(function(){ toast('Œuvre momentanément indisponible','err'); });
+      return;
+    }
+
+    /* Carte de matière de la vitrine : #matiere?m=mathematiques (30/10/2026).
+       Les huit cartes de /#elearning pointaient sur #elearning, l'écran où le
+       visiteur se trouvait déjà : un clic, rien. Elles ouvrent maintenant le
+       catalogue de l'application filtré sur la matière. `_boot` (3ᵉ argument)
+       évite le renvoi d'un anonyme vers la vitrine (_renvoyerVersVitrine) :
+       c'est la vitrine qui l'envoie ici. Chaque ressource payante garde son
+       propre cadenas (connexion / abonnement). */
+    if(sec === 'matiere'){
+      var qm = (window.location.hash || '').split('?')[1] || '', cleMat = '';
+      qm.split('&').forEach(function(kv){
+        var p = kv.split('=');
+        if(decodeURIComponent(p[0] || '') === 'm') cleMat = decodeURIComponent(p[1] || '');
+      });
+      if(window._vCurrentSec === 'matiere:' + cleMat) return;
+      window._elMat = Object.prototype.hasOwnProperty.call(_EL_MATIERES, cleMat) ? cleMat : '';
+      window._elDansApp = true;
+      window._elCat = '';
+      try{ window.vShowSec('elearning', null, true); }catch(e){}
+      window._vCurrentSec = 'matiere:' + cleMat;
       return;
     }
 
@@ -47955,7 +48775,7 @@ function _cagCreer(eleveId){
          une vraie page, plus jamais un vide. */
       var _MODALE_FN = { recherche:1, calendrier:1, connexion:1, compte:1, inscription:1, partenaire:1,
                          positionnement:1, progression:1, badges:1, battles:1, groupe:1, 'orientation-ia':1, ambassa:1,
-                         simulateur:1, 'oeuvres-interactives':1 };
+                         simulateur:1, 'oeuvres-interactives':1, coaching:1, 'sujet-du-jour':1, erreurs:1, 'correction-ia':1 };
       if(_MODALE_FN[sec]){
         try{
           var _vcBg = document.getElementById('vContent');
@@ -47985,6 +48805,27 @@ function _cagCreer(eleveId){
           });
         }catch(e){}
         try{ window[fn](_q); }catch(e){}
+        return;
+      }
+      /* Apprendre (09/11/2026) : #epreuves?classe=3ème&matiere=Anglais pose les
+         filtres ; #evaluations?id=eval_en1 ouvre l'évaluation demandée. */
+      if(sec === 'epreuves' || sec === 'evaluations'){
+        var _qp = {};
+        ((window.location.hash || '').split('?')[1] || '').split('&').forEach(function(kv){
+          var p = kv.split('=');
+          if(p[0]) _qp[decodeURIComponent(p[0])] = decodeURIComponent((p[1] || '').replace(/\+/g, ' '));
+        });
+        if(sec === 'epreuves'){
+          if(_qp.classe){ window._epClasse = _qp.classe; window._epGrp = ''; }
+          if(_qp.matiere) window._epMat = _qp.matiere;
+        }
+        try{ window[fn](); }catch(e){}
+        if(sec === 'epreuves' && /^[A-Za-z0-9_-]+$/.test(_qp.id || '') && typeof showEpreuveDetail === 'function'){
+          try{ showEpreuveDetail(_qp.id); }catch(e){}
+        }
+        if(sec === 'evaluations' && /^[A-Za-z0-9_-]+$/.test(_qp.id || '')){
+          try{ if(typeof SES !== 'undefined' && SES) lancerEvaluation(_qp.id); else apercuEvaluation(_qp.id); }catch(e){}
+        }
         return;
       }
       try{ window[fn](); }catch(e){}
@@ -48412,40 +49253,60 @@ window._VRT_CHUNKS = window._VRT_CHUNKS || {};
 function _lazyChunk(nom){
   if(window._VRT_CHUNKS[nom]) return window._VRT_CHUNKS[nom];
 
+  /* 30/10/2026 — UNE SECONDE CHANCE. « Laboratoires momentanément
+     indisponibles » au téléphone, alors que le module se charge au banc, y
+     compris minifié comme en production. Un premier échec (réseau mobile
+     coupé, réponse gardée par le service worker ou un cache intermédiaire)
+     emportait tout. La seconde tentative demande une adresse NEUVE (&r=…),
+     qu'aucun cache ne connaît. Délai par tentative porté de 15 à 25 s : le
+     module des labos pèse 187 Ko, et la 3G de province n'est pas le banc. */
   window._VRT_CHUNKS[nom] = new Promise(function(resoudre, rejeter){
-    var fini = false;
-    var s = document.createElement('script');
-    // Chemin RELATIF : le mode file:// et les sous-dossiers doivent continuer
-    // de fonctionner. La version suit celle des assets pour le cache.
-    s.src   = 'chunks/' + nom + '.js?v=' + (window._VRT_ASSET_VER || '1.15.1');
-    s.async = true;
-
-    // Filet : un script qui ne répond jamais laisserait l'appelant sur un
-    // « Chargement… » perpétuel. On tranche au bout de 15 s.
-    var minuteur = setTimeout(function(){
-      if(fini) return;
-      fini = true;
-      delete window._VRT_CHUNKS[nom];
-      rejeter(new Error('délai dépassé : ' + nom));
-    }, 15000);
-
-    s.onload = function(){
-      if(fini) return;
-      fini = true; clearTimeout(minuteur);
-      resoudre(nom);
-    };
-    s.onerror = function(){
-      if(fini) return;
-      fini = true; clearTimeout(minuteur);
-      delete window._VRT_CHUNKS[nom];   // un échec réseau doit rester réessayable
-      rejeter(new Error('module introuvable : ' + nom));
-    };
-    document.head.appendChild(s);
+    function essai(n){
+      var fini = false;
+      var s = document.createElement('script');
+      // Chemin RELATIF : le mode file:// et les sous-dossiers doivent continuer
+      // de fonctionner. La version suit celle des assets pour le cache.
+      s.src   = 'chunks/' + nom + '.js?v=' + (window._VRT_ASSET_VER || '1.15.1') + (n > 1 ? '&r=' + Date.now() : '');
+      s.async = true;
+      function echec(raison){
+        if(fini) return;
+        fini = true; clearTimeout(minuteur);
+        if(s.parentNode) s.parentNode.removeChild(s);
+        if(n < 2){ essai(n + 1); return; }
+        delete window._VRT_CHUNKS[nom];   // un échec réseau doit rester réessayable
+        rejeter(new Error(raison + ' : ' + nom));
+      }
+      // Filet : un script qui ne répond jamais laisserait l'appelant sur un
+      // « Chargement… » perpétuel.
+      var minuteur = setTimeout(function(){ echec('délai dépassé'); }, 25000);
+      s.onload = function(){
+        if(fini) return;
+        fini = true; clearTimeout(minuteur);
+        resoudre(nom);
+      };
+      s.onerror = function(){ echec('module introuvable'); };
+      document.head.appendChild(s);
+    }
+    essai(1);
   });
 
   return window._VRT_CHUNKS[nom];
 }
 window._lazyChunk = _lazyChunk;
+
+/* Inscrit une erreur ATTRAPÉE dans le même journal que window.onerror
+   (localStorage._veritasErrors, lu par showVeritasErrors()) : un .catch qui
+   n'affiche qu'un toast neutre ne laissait aucune trace à diagnostiquer. */
+window._journalErreur = function(ou, e){
+  try{
+    console.error('[' + ou + ']', e);
+    var logs = JSON.parse(localStorage.getItem('_veritasErrors') || '[]');
+    logs.push({ msg: String((e && e.message) || e).substring(0,500), src: ou, line: 0, col: 0,
+                stack: e && e.stack ? String(e.stack).substring(0,1000) : '', when: new Date().toISOString() });
+    if(logs.length > 50) logs = logs.slice(-50);
+    localStorage.setItem('_veritasErrors', JSON.stringify(logs));
+  }catch(x){}
+};
 
 /* Le catalogue des œuvres est chargé à la demande : l'objet existe toujours
    (déclaré vide au démarrage), il faut donc tester son CONTENU et non son
@@ -48583,6 +49444,15 @@ window._chargerCatalogueElearning = _chargerCatalogueElearning;
    et seul le module du résultat CHOISI est téléchargé. Chercher coûte 35 Ko
    au lieu de 1,1 Mo ; ouvrir coûte ce que pèse la ressource ouverte. */
 
+var _RECH_SYNONYMES = {
+  oeuvre:    'oeuvre livre roman lecture litterature analyse',
+  jeu:       'jeu jeux jouer quiz',
+  labo:      'laboratoire labo virtuel experience tp travaux pratiques simulation sciences',
+  ressource: 'ressource document',
+  contenu:   'elearning cours lecon catalogue',
+  corrige:   'corrige correction exercice',
+  page:      ''
+};
 var _RECH_TYPES = {
   oeuvre:    { l:'Œuvre',      ic:'lc-book',      c:'#6C56A6' },
   jeu:       { l:'Jeu',        ic:'lc-game',      c:'#0EA5E9' },
@@ -48654,9 +49524,13 @@ function _rechFiltrer(){
       if(parType[e.t] <= 2) liste.push(e);
     });
   } else {
-    var mots = q.split(' ');
+    /* 30/10/2026 — « Laboratoire » ne trouvait RIEN : on ne cherchait que dans
+       le titre et le sous-titre (« Circuit Électrique Interactif · Physique »).
+       Le type de l'entrée et ses synonymes entrent désormais dans le champ, et
+       le pluriel se réduit (« laboratoires », « jeux » trouvent aussi). */
+    var mots = q.split(' ').filter(Boolean).map(function(m){ return m.length > 3 ? m.replace(/(s|x)$/, '') : m; });
     liste = idx.filter(function(e){
-      var champ = _rechNorm(e.l + ' ' + (e.s||''));
+      var champ = _rechNorm(e.l + ' ' + (e.s||'') + ' ' + ((_RECH_TYPES[e.t]||{}).l||'') + ' ' + (_RECH_SYNONYMES[e.t]||''));
       return mots.every(function(m){ return champ.indexOf(m) >= 0; });
     }).slice(0, 40);
   }
@@ -51304,11 +52178,20 @@ window._vtPictos = function(racine){
 
   while(marcheur.nextNode()) aTraiter.push(marcheur.currentNode);
 
-  aTraiter.forEach(function(nd){
+  /* Tailles lues AVANT toute écriture : _pictoTaille appelle getComputedStyle,
+     et chaque replaceChild ci-dessous invalide les styles. Entrelacées, les
+     deux forçaient un recalcul complet par émoji (1,2 s mesurée sur six
+     changements de page en administration, 31/10/2026). */
+  var tailles = aTraiter.map(function(nd){
+    var p = nd.parentNode;
+    return p ? _pictoTaille(p.nodeType===1 ? p : zone) : 15;
+  });
+
+  aTraiter.forEach(function(nd, idx){
     var txt = (nd.nodeValue||'').replace(_PICTO_TEINTES, '');
     var parent = nd.parentNode;
     if(!parent) return;
-    var taille = _pictoTaille(parent.nodeType===1 ? parent : zone);
+    var taille = tailles[idx];
     var frag = document.createDocumentFragment();
     var tampon = '', converti = false;
 
@@ -51438,6 +52321,14 @@ function _demRecap(type, d){
     if(d.effectif) L.push('Effectif : ' + d.effectif + ' élèves');
     if(d.mode)     L.push('Hébergement souhaité : ' + ({managed:"géré par VÉRITAS", self:"serveur de l'établissement", local:"poste de la direction"}[d.mode] || d.mode));
     if(d.besoins && d.besoins.length) L.push('Besoins : ' + d.besoins.join(', '));
+  } else if(type === 'partenaire'){
+    L.push('Programme : ' + d.formule);
+    if(d.etablissement) L.push('Établissement : ' + d.etablissement);
+    if(d.classe)   L.push('Classe : ' + d.classe);
+    if(d.ville)    L.push('Ville : ' + d.ville);
+    if(d.secteur)  L.push('Secteur : ' + d.secteur);
+    if(d.social)   L.push('Réseaux : ' + d.social + (d.followers ? ' (' + d.followers + ' abonnés)' : ''));
+    if(d.message)  L.push('Motivation : ' + d.message);
   } else {
     if(d.niveau)   L.push('Classe : ' + d.niveau);
     if(d.matieres && d.matieres.length) L.push('Matières : ' + d.matieres.join(', '));
@@ -51481,7 +52372,7 @@ function _demEnvoyer(type, d){
 function _demReplWhatsApp(type, d, raison){
   var titre = (type === 'campus')
     ? "Demande VÉRITAS Campus (gestion d'établissement)"
-    : "Demande d'accompagnement à domicile";
+    : (type === 'partenaire' ? 'Candidature partenaire' : "Demande d'accompagnement à domicile");
   var msg = 'Bonjour VÉRITAS.\n' + titre + '\n\n' + _demRecap(type, d);
   var num = (typeof _vtWaNumber === 'function') ? _vtWaNumber() : '237697637739';
   try{
@@ -51809,6 +52700,7 @@ window.pgDemandes = function(){
     if(f === 'tout')     return true;
     if(f === 'campus')   return d.type === 'campus';
     if(f === 'domicile') return d.type === 'domicile';
+    if(f === 'partenaire') return d.type === 'partenaire';
     return d.statut === f;
   });
   var nb = function(test){ return liste.filter(test).length; };
@@ -51819,6 +52711,7 @@ window.pgDemandes = function(){
     +  _demTuile('À traiter',  nb(function(d){ return d.statut === 'nouveau'; }), '#B45309')
     +  _demTuile('Établissements', nb(function(d){ return d.type === 'campus'; }), '#6C56A6')
     +  _demTuile('À domicile', nb(function(d){ return d.type === 'domicile'; }), '#3A6EA8')
+    +  _demTuile('Partenaires', nb(function(d){ return d.type === 'partenaire'; }), '#B03A6E')
     +  _demTuile('Devis envoyés', nb(function(d){ return d.statut === 'devis_envoye'; }), '#3A8F73')
     + '</div>';
 
@@ -51828,7 +52721,7 @@ window.pgDemandes = function(){
 
   h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">';
   [['tout','Toutes'],['nouveau','À traiter'],['campus','Établissements'],['domicile','À domicile'],
-   ['devis_envoye','Devis envoyés'],['clos','Closes']].forEach(function(o){
+   ['partenaire','Partenaires'],['devis_envoye','Devis envoyés'],['clos','Closes']].forEach(function(o){
     var actif = (f === o[0]);
     h += '<button class="btn ' + (actif ? 'bi' : 'bo') + ' sm" onclick="window._demFiltre=\'' + o[0] + '\';re()">' + o[1] + '</button>';
   });
@@ -51849,10 +52742,19 @@ window.pgDemandes = function(){
 
   vues.forEach(function(d){
     var estCampus = (d.type === 'campus');
+    var estPart = (d.type === 'partenaire');
     var titre = estCampus ? (d.etablissement || '(établissement non précisé)')
-                          : ((d.niveau ? d.niveau + ' · ' : '') + (d.matieres || []).join(', '));
+              : estPart ? ('Partenaire · ' + (d.formule || '—'))
+                        : ((d.niveau ? d.niveau + ' · ' : '') + (d.matieres || []).join(', '));
     var lignes = [];
-    if(estCampus){
+    if(estPart){
+      if(d.etablissement) lignes.push(['Établissement', d.etablissement]);
+      if(d.classe)  lignes.push(['Classe', d.classe]);
+      if(d.secteur) lignes.push(['Secteur', d.secteur]);
+      if(d.social)  lignes.push(['Réseaux', d.social + (d.followers ? ' · ' + d.followers + ' abonnés' : '')]);
+      if(d.adresse) lignes.push(['Adresse', d.adresse]);
+      if((d.matieres || []).length) lignes.push(['Matières', d.matieres.join(', ')]);
+    } else if(estCampus){
       if(d.fonction) lignes.push(['Fonction', d.fonction]);
       if(d.effectif) lignes.push(['Effectif', d.effectif + ' élèves']);
       lignes.push(['Hébergement', ({managed:'Géré par VÉRITAS', self:'Serveur de l\'établissement', local:'Poste de la direction'})[d.mode] || d.mode || '—']);
@@ -54622,6 +55524,805 @@ window._lvcRendreTable  = _lvcRendreTable;
 
 
 /* ══════════════════════════════════════════════════════════════════════════
+   LIVRETS — CATALOGUE, PRIX ET PROMOTIONS (page « livrets_admin »)
+   ──────────────────────────────────────────────────────────────────────────
+   Aucune page ne gérait les livrets eux-mêmes : on émettait des codes
+   (« Codes d'accès des cahiers ») et l'on réglait des prix au fond de
+   « Prix & calculs », mais ajouter un livret, le retirer de la vente ou le
+   mettre en promotion demandait de refaire le JSON du catalogue et de le
+   redéposer par FTP.
+
+   Tout se règle ici, en base, dans DB.tarifs — la tranche que le serveur lit
+   déjà pour ses prix (vrt_tarifs_lire) :
+     · livretFiches      { slug: { titre, niveau, mode, kinds, ajoute, cree } }
+                         ajoute un ouvrage, ou corrige celui du catalogue ;
+     · livretRetires     { slug: true }  — plus en vente, codes vendus intacts ;
+     · livretParOuvrage  { slug: { livret, guide } }  — prix (existait déjà) ;
+     · livretPromos      { slug | "*": { pct, debut, fin, libelle } }.
+   Le SERVEUR applique la promotion (vrt_livret_prix) : le prix affiché par la
+   boutique est celui qu'exige l'octroi. Rien n'est calculé que dans ce
+   navigateur.
+   ══════════════════════════════════════════════════════════════════════════ */
+var _LVA = { cat: null, busy: false, err: '', q: '' };
+
+function _lvaCharger(){
+  _LVA.busy = true; _LVA.err = '';
+  fetch(_VRT_API + '/livret.php', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{"action":"catalogue"}', cache:'no-store' })
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if(!j || !j.ok || !Array.isArray(j.ouvrages)) throw new Error((j && j.error) || 'réponse invalide');
+      _LVA.cat = j.ouvrages;
+    })
+    .catch(function(e){ _LVA.cat = _LVA.cat || []; _LVA.err = 'Catalogue du serveur injoignable (' + (e && e.message || e) + ').'; })
+    .then(function(){ _LVA.busy = false; if(typeof pg !== 'undefined' && pg === 'livrets_admin') re(); });
+}
+
+function _lvaT(){ DB.tarifs = DB.tarifs || {}; return DB.tarifs; }
+function _lvaAuj(){ var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function _lvaDateFr(s){ return /^\d{4}-\d{2}-\d{2}$/.test(s || '') ? s.split('-').reverse().join('/') : ''; }
+
+/** Promotion en cours pour un ouvrage — même règle que vrt_livret_promo(). */
+function _lvaPromo(slug){
+  var P = _lvaT().livretPromos || {}, auj = _lvaAuj();
+  var cles = [slug, '*'];
+  for(var i = 0; i < cles.length; i++){
+    var p = P[cles[i]];
+    if(!p || !(p.pct >= 1 && p.pct <= 90)) continue;
+    if(p.debut && auj < p.debut) continue;
+    if(p.fin && auj > p.fin) continue;
+    return Object.assign({ portee: cles[i] === '*' ? 'tous' : 'ouvrage' }, p);
+  }
+  return null;
+}
+
+/** Les ouvrages vus par l'administration : le catalogue du serveur, plus les
+ *  réglages faits sur ce poste et pas encore synchronisés. */
+function _lvaOuvrages(){
+  var T = _lvaT(), fiches = T.livretFiches || {}, ret = T.livretRetires || {}, par = T.livretParOuvrage || {};
+  var sup = T.livretSupprimes || {};
+  var gen = { livret: T.livret || 1500, guide: T.livretGuide || 5000 };
+  var vus = {}, out = [];
+  (_LVA.cat || []).forEach(function(o){ vus[o.slug] = 1; out.push(Object.assign({}, o)); });
+  Object.keys(fiches).forEach(function(s){
+    if(vus[s]) return;
+    var f = fiches[s] || {};
+    out.push({ slug: s, titre: f.titre || s, niveau: f.niveau || '', mode: f.mode || 'interactif',
+               kinds: f.kinds || ['livret'], disponible: false, nonSynchro: true,
+               prixNormal: gen.livret, prixGuideNormal: gen.guide, ajoute: f.ajoute || '' });
+  });
+  out.forEach(function(o){
+    var f = fiches[o.slug];
+    if(f){
+      if(f.titre) o.titre = f.titre;
+      if(f.niveau != null) o.niveau = f.niveau;
+      if(f.mode) o.mode = f.mode;
+      if(Array.isArray(f.kinds) && f.kinds.length) o.kinds = f.kinds;
+      if(f.pagesLibres != null) o.pagesLibres = f.pagesLibres;
+      o.cree = !!f.cree;
+    }
+    o.supprime = !!sup[o.slug];
+    o.retire = !!ret[o.slug] || o.supprime;
+    // Prix HORS promotion : le réglage de ce poste l'emporte sur ce qu'a lu le serveur.
+    var pp = par[o.slug] || {};
+    o.pLivret = pp.livret > 0 ? pp.livret : (parseInt(o.prixNormal || o.prix, 10) || gen.livret);
+    o.pGuide  = pp.guide  > 0 ? pp.guide  : (parseInt(o.prixGuideNormal || o.prixGuide, 10) || gen.guide);
+    o.promoL = _lvaPromo(o.slug);
+  });
+  out.sort(function(a, b){ return String(a.niveau + a.titre).localeCompare(String(b.niveau + b.titre), 'fr'); });
+  return out;
+}
+
+/* Styles propres à la page — une seule feuille, posée avec la page, plutôt
+   que des attributs `style` répétés sur chaque ligne. Jetons --ds-* (v3). */
+var _LVA_CSS = '<style id="lvaCss">'
+  + '.lva-chips{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 14px}'
+  + '.lva-chip{border:1px solid var(--ds-border,#e2e6ee);background:var(--ds-surface,#fff);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--ds-text-2,#45506a)}'
+  + '.lva-chip b{color:var(--ds-text,#142554);margin-right:4px}'
+  + '.lva-chip.on{background:var(--ds-primary,#142554);border-color:var(--ds-primary,#142554);color:#fff}.lva-chip.on b{color:#FFC93C}'
+  + '.lva-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.lva-bar .sp{flex:1}'
+  + '.lva-grp td{background:var(--ds-surface-2,#f5f7fb);font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ds-text-2,#45506a);padding:6px 10px}'
+  + '.lva-pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700;white-space:nowrap}'
+  + '.lva-ok{background:#e8f6ee;color:#15803d}.lva-attente{background:#fff4e0;color:#9a5b00}.lva-off{background:#fde8e8;color:#b91c1c}.lva-promo{background:#fdecea;color:#c0453f}'
+  + '.lva-meta{font-size:12px;color:var(--ds-text-3,#7a88a6)}'
+  + '.lva-act{display:flex;gap:4px;justify-content:flex-end;flex-wrap:wrap}'
+  + '.lva-prix s{color:var(--ds-text-3,#7a88a6);font-size:12px;margin-right:4px}.lva-prix .g{display:block;font-size:12px;color:var(--ds-text-2,#45506a)}'
+  + '.lva-sec{border:1px solid var(--ds-border,#e2e6ee);border-radius:12px;padding:12px 14px;margin:0 0 12px}'
+  + '.lva-sec h4{margin:0 0 8px;font-size:14px}'
+  + '@media(min-width:900px){#lvaTable .lva-act{flex-wrap:nowrap}}'
+  // Téléphone : chaque livret devient une fiche — un tableau à 4 colonnes y
+  // cachait justement la colonne des actions hors de l'écran.
+  + '@media(max-width:640px){#lvaTable thead{display:none}#lvaTable table,#lvaTable tbody,#lvaTable tr,#lvaTable td{display:block;width:100%;box-sizing:border-box}'
+  + '#lvaTable tr{border-bottom:1px solid var(--ds-border,#e2e6ee);padding:8px 0}#lvaTable td{border:0;padding:3px 4px}'
+  + '#lvaTable .lva-act{justify-content:flex-start;margin-top:4px}#lvaTable .lva-grp td{margin-top:6px}}'
+  + '</style>';
+
+/** Les filtres-pastilles : ce que l'on cherche le plus souvent dans un
+ *  catalogue de 40 livrets, c'est « ce qui ne se vend pas » et pourquoi. */
+var _LVA_FILTRES = [
+  ['tous',    'Tous',            function(o){ return true; }],
+  ['vente',   'En vente',        function(o){ return o.disponible !== false && !o.retire && !o.nonSynchro; }],
+  ['contenu', 'Sans contenu',    function(o){ return (o.disponible === false || o.nonSynchro) && !o.retire; }],
+  ['promo',   'En promotion',    function(o){ return !!o.promoL && !o.retire; }],
+  ['retire',  'Retirés',         function(o){ return o.retire; }]
+];
+
+function pgLivretsAdmin(){
+  if(!iA()) return na();
+  if(_LVA.cat === null && !_LVA.busy) _lvaCharger();
+  var T = _lvaT();
+  var tous = _lvaOuvrages();
+  var liste = tous.filter(function(o){ return !o.supprime; });
+  var corbeille = tous.filter(function(o){ return o.supprime; });
+  var synchro = !!(DB.cloudConfig && DB.cloudConfig.secret);
+  _LVA.f = _LVA.f || 'tous';
+
+  var h = _LVA_CSS + '<div class="pgt">📗 Livrets — catalogue, prix & promotions</div>';
+
+  // ── Ce qui empêche de travailler, en premier
+  if(!synchro) h += '<div class="ib ibr mb12"><span>🔒</span><span><strong>Clé de synchronisation absente sur ce poste</strong> : vos réglages restent locaux et vous ne pouvez pas déposer de fichiers. '
+    + 'Ouvrez <strong>Système → Centre de contrôle SA → Clé de synchronisation Cloud</strong>.</span></div>';
+  if(_LVA.err) h += '<div class="ib ibr mb12"><span>⚠️</span><span>' + _esc(_LVA.err) + '</span></div>';
+
+  // ── Barre d'actions
+  h += '<div class="card mb12"><div class="lva-bar">'
+    + '<button class="btn bi" onclick="_lvaFiche(\'\')">➕ Ajouter un livret</button>'
+    + '<button class="btn bo" onclick="_lvaPromoModal(\'*\')">🏷️ Promotion générale</button>'
+    + '<span class="sp"></span>'
+    + '<button class="btn bo sm" onclick="_lvaTarifsGeneraux()">💰 Tarifs généraux</button>'
+    + '<button class="btn bo sm" onclick="goTo(\'livret_codes\')">🎟️ Codes d’accès</button>'
+    + '<button class="btn bo sm" title="Relire le catalogue du serveur" onclick="_LVA.cat=null;re()">↻</button>'
+    + '</div>';
+
+  var g = (T.livretPromos || {})['*'];
+  if(g && g.pct){
+    var act = _lvaPromo('__aucun__');
+    h += '<div class="ib ' + (act ? 'ibg' : 'ibt') + ' mt12 mb0"><span>🏷️</span><span><strong>Promotion générale −' + g.pct + ' %</strong>'
+      + (g.libelle ? ' « ' + _esc(g.libelle) + ' »' : '')
+      + (g.debut ? ' du ' + _lvaDateFr(g.debut) : '') + (g.fin ? ' au ' + _lvaDateFr(g.fin) : '')
+      + (act ? ' — en cours.' : ' — pas en cours (dates).')
+      + ' <a href="javascript:void(0)" onclick="_lvaPromoModal(\'*\')">Modifier</a> · '
+      + '<a href="javascript:void(0)" onclick="_lvaPromoSuppr(\'*\')">Arrêter</a></span></div>';
+  }
+  h += '<details style="margin-top:14px"><summary class="xs2" style="cursor:pointer;color:var(--ds-text-2,#45506a)">ℹ️ Comment ça marche</summary>'
+    + '<ul class="xs2" style="margin:8px 0 0 18px;line-height:1.6;color:var(--ds-text-2,#45506a)">'
+    + '<li><b>Ajouter</b> crée la fiche ; <b>📁 Fichiers</b> y dépose le PDF (lu page par page) ou les fichiers de cahier interactif, et la couverture.</li>'
+    + '<li>Un livret n’est <b>achetable</b> que si son contenu est sur le serveur : sinon il s’affiche « bientôt en vente ».</li>'
+    + '<li>Les prix et promotions sont appliqués <b>par le serveur</b> : le prix affiché est celui que le paiement exige.</li>'
+    + '<li><b>Retirer</b> arrête la vente ; <b>Supprimer</b> l’envoie aussi à la corbeille (restaurable). Dans les deux cas, les codes déjà vendus continuent d’ouvrir.</li>'
+    + '</ul></details></div>';
+
+  // ── Filtres + recherche + tableau
+  h += '<div class="card"><div class="lva-chips">'
+    + _LVA_FILTRES.map(function(f){
+        var n = liste.filter(f[2]).length;
+        return '<button class="lva-chip' + (_LVA.f === f[0] ? ' on' : '') + '" onclick="_lvaFiltre(\'' + f[0] + '\')"><b>' + n + '</b>' + f[1] + '</button>';
+      }).join('')
+    + '</div>'
+    + '<div class="fg"><input class="fi" id="lvaQ" placeholder="🔎 Rechercher (titre, niveau, identifiant)…" value="' + _esc(_LVA.q) + '" oninput="_LVA.q=this.value;_lvaFiltrer()"></div>'
+    + '<div class="tw" id="lvaTable">' + (_LVA.cat === null ? '<div class="xs2 mut">Chargement du catalogue…</div>' : _lvaTable(liste)) + '</div>'
+    + '</div>';
+
+  if(corbeille.length){
+    h += '<div class="card mt16"><details><summary class="semi" style="cursor:pointer">🗑️ Corbeille — ' + corbeille.length + ' livret(s)</summary>'
+      + '<div class="xs2 mut mt8">Plus vendus ni affichés. Leurs codes vendus continuent d’ouvrir et leurs fichiers restent sur le serveur.</div>'
+      + '<div class="tw mt8"><table><tbody>'
+      + corbeille.map(function(o){
+          var s = _esc(o.slug).replace(/'/g, '');
+          return '<tr><td><b>' + _esc(o.titre || o.slug) + '</b><div class="lva-meta">' + _esc(o.slug) + '</div></td>'
+            + '<td style="text-align:right"><button class="btn bi xs" onclick="_lvaRestaurer(\'' + s + '\')">↩️ Restaurer</button></td></tr>';
+        }).join('')
+      + '</tbody></table></div></details></div>';
+  }
+  return h;
+}
+
+function _lvaFiltre(k){ _LVA.f = k; re(); }
+
+function _lvaFiltrer(){
+  var e = document.getElementById('lvaTable');
+  // La corbeille a sa propre section : la recherche ne doit pas la rouvrir.
+  if(e) e.innerHTML = _lvaTable(_lvaOuvrages().filter(function(o){ return !o.supprime; }));
+}
+
+/** Badge d'état : une couleur par cause, un mot qui dit quoi faire. */
+function _lvaEtat(o){
+  if(o.retire)                return '<span class="lva-pill lva-off">Retiré</span>';
+  if(o.nonSynchro)            return '<span class="lva-pill lva-attente">Synchronisation…</span>';
+  if(o.disponible === false)  return '<span class="lva-pill lva-attente">Sans contenu</span>';
+  return '<span class="lva-pill lva-ok">En vente</span>';
+}
+
+function _lvaTable(liste){
+  var f = _LVA_FILTRES.find(function(x){ return x[0] === (_LVA.f || 'tous'); }) || _LVA_FILTRES[0];
+  liste = liste.filter(f[2]);
+  var q = String(_LVA.q || '').toLowerCase().trim();
+  if(q) liste = liste.filter(function(o){ return (o.titre + ' ' + o.niveau + ' ' + o.slug).toLowerCase().indexOf(q) >= 0; });
+  if(!liste.length) return '<div class="xs2 mut" style="padding:12px 0">Aucun livret ' + (f[0] === 'tous' ? '' : 'dans « ' + f[1] + ' » ') + (q ? 'pour cette recherche' : '') + '.</div>';
+
+  var prix = function(o){
+    var un = function(n){
+      if(!o.promoL) return fmt(n);
+      return '<s>' + fmt(n) + '</s><b style="color:#c0453f">' + fmt(Math.max(1, Math.round(n * (100 - o.promoL.pct) / 100))) + '</b>';
+    };
+    var k = o.kinds || ['livret'];
+    return '<div class="lva-prix">' + (k.indexOf('livret') >= 0 ? un(o.pLivret) : '<span class="mut">—</span>')
+      + (k.indexOf('guide') >= 0 ? '<span class="g">Guide : ' + un(o.pGuide) + '</span>' : '') + '</div>';
+  };
+
+  var h = '<table><thead><tr><th>Livret</th><th>État</th><th>Prix</th><th style="text-align:right">Actions</th></tr></thead><tbody>';
+  var niveau = null;
+  liste.forEach(function(o){
+    // Un intertitre par niveau : 40 lignes à plat ne se parcourent pas.
+    var nv = o.niveau || 'Sans niveau';
+    if(nv !== niveau){ niveau = nv; h += '<tr class="lva-grp"><td colspan="4">' + _esc(nv) + '</td></tr>'; }
+    var s = _esc(o.slug).replace(/'/g, '');
+    var meta = [_esc(o.slug), _esc(_lvaModeLib(o.mode))];
+    if(o.mode === 'lecture' && o.pages) meta.push(o.pages + ' pages');
+    if(o.cree) meta.push('ajouté ici');
+    h += '<tr>'
+      + '<td><b>' + _esc(o.titre || o.slug) + '</b><div class="lva-meta">' + meta.join(' · ') + '</div></td>'
+      + '<td>' + _lvaEtat(o)
+      +   (o.promoL && !o.retire ? ' <span class="lva-pill lva-promo" title="' + (o.promoL.fin ? 'jusqu’au ' + _lvaDateFr(o.promoL.fin) : 'sans date de fin') + '">−' + o.promoL.pct + ' %' + (o.promoL.portee === 'tous' ? ' (générale)' : '') + '</span>' : '')
+      + '</td>'
+      + '<td>' + prix(o) + '</td>'
+      + '<td><div class="lva-act">'
+      +   '<button class="btn ' + (o.disponible === false && !o.retire ? 'bi' : 'bo') + ' xs" onclick="_lvaFichiers(\'' + s + '\')">📁 Fichiers</button>'
+      +   '<button class="btn bo xs" onclick="_lvaFiche(\'' + s + '\')">✏️ Modifier</button>'
+      +   '<button class="btn bo xs" title="Promotion, retrait, suppression…" onclick="_lvaPlus(\'' + s + '\')">⋯ Plus</button>'
+      + '</div></td></tr>';
+  });
+  return h + '</tbody></table>';
+}
+
+/** Les actions moins fréquentes, réunies : la ligne garde trois boutons. */
+function _lvaPlus(slug){
+  var o = _lvaOuvrages().find(function(x){ return x.slug === slug; }) || { slug: slug };
+  var s = _esc(slug).replace(/'/g, '');
+  var b = function(cls, txt, js, aide){
+    return '<button class="btn ' + cls + '" style="width:100%;justify-content:flex-start;margin:0 0 8px" onclick="cm();' + js + '">' + txt
+      + (aide ? '<span class="xs2" style="margin-left:auto;opacity:.75;font-weight:400">' + aide + '</span>' : '') + '</button>';
+  };
+  M(_esc(o.titre || slug), _esc(slug) + ' · ' + _esc(_lvaModeLib(o.mode)),
+    b('bo', '🏷️ Promotion', '_lvaPromoModal(\'' + s + '\')', o.promoL ? 'en cours : −' + o.promoL.pct + ' %' : '')
+    + (o.retire && !o.supprime
+        ? b('bo', '✅ Remettre en vente', '_lvaRetirer(\'' + s + '\',false)', '')
+        : b('bo', '🚫 Retirer de la vente', '_lvaRetirer(\'' + s + '\',true)', 'codes vendus conservés'))
+    + (o.disponible !== false && o.lien ? '<a class="btn bo" style="width:100%;justify-content:flex-start;margin:0 0 8px" href="/livrets/' + _esc(o.lien) + '" target="_blank" rel="noopener">👁️ Voir en boutique ↗</a>' : '')
+    + b('bo', '🗑️ Supprimer', '_lvaSupprimer(\'' + s + '\')', 'restaurable'),
+    '<button class="btn bo" onclick="cm()">Fermer</button>');
+}
+
+function _lvaEnregistrer(msg){
+  save();
+  toast('✓ ' + msg + ((DB.cloudConfig && DB.cloudConfig.secret) ? '' : ' (non synchronisé : appareil sans clé serveur)'));
+  re();
+}
+
+/** Ajouter (slug vide) ou modifier un livret. */
+function _lvaFiche(slug){
+  var o = slug ? (_lvaOuvrages().find(function(x){ return x.slug === slug; }) || {}) : { mode: 'lecture' };
+  var kinds = o.kinds || ['livret'];
+  var opt = function(v, l){ return '<option value="' + v + '"' + ((o.mode || 'interactif') === v ? ' selected' : '') + '>' + l + '</option>'; };
+  M(slug ? 'Modifier un livret' : 'Ajouter un livret', slug ? _esc(o.titre || slug) : 'Nouvelle fiche au catalogue',
+    (slug ? '' : '<div class="fg"><span class="fl">Identifiant <span class="mut">(lettres minuscules, chiffres, tirets — ex. « bord-6e »)</span></span>'
+      + '<input class="fi" id="lvaSlug" maxlength="40" placeholder="ex. cahier-oeuvres-2nde"></div>')
+    + '<div class="fg"><span class="fl">Titre</span><input class="fi" id="lvaTitre" maxlength="120" value="' + _esc(o.titre || '') + '"></div>'
+    + '<div class="fg2">'
+    +   '<div class="fg"><span class="fl">Niveau</span><input class="fi" id="lvaNiveau" maxlength="20" placeholder="6e, 1ère, Tle…" value="' + _esc(o.niveau || '') + '"></div>'
+    +   '<div class="fg"><span class="fl">Format</span><select class="fi" id="lvaMode">'
+    +     opt('lecture', 'Feuilletage (PDF converti en pages)') + opt('interactif', 'Cahier interactif (fichier .js)') + opt('autonome', 'Cahier autonome') + '</select></div>'
+    + '</div>'
+    + '<div class="fg"><span class="fl">Pages offertes en aperçu <span class="mut">(feuilletage : lisibles sans payer)</span></span>'
+    +   '<input class="fi" id="lvaLibres" type="number" min="0" max="50" value="' + (o.pagesLibres != null ? o.pagesLibres : 2) + '"></div>'
+    + '<div class="fg"><span class="fl">Versions vendues</span>'
+    +   '<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="lvaKL"' + (kinds.indexOf('livret') >= 0 ? ' checked' : '') + '> Livret de l’élève</label>'
+    +   '<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="lvaKG"' + (kinds.indexOf('guide') >= 0 ? ' checked' : '') + '> Guide de l’enseignant</label></div>'
+    + '<div class="fg2">'
+    +   '<div class="fg"><span class="fl">Prix livret élève (FCFA)</span><input class="fi" id="lvaPL" type="number" min="100" step="50" value="' + (o.pLivret || _lvaT().livret || 1500) + '"></div>'
+    +   '<div class="fg"><span class="fl">Prix guide enseignant (FCFA)</span><input class="fi" id="lvaPG" type="number" min="100" step="50" value="' + (o.pGuide || _lvaT().livretGuide || 5000) + '"></div>'
+    + '</div>'
+    + (slug ? '' : '<div class="ib ibt mt8"><span>📦</span><span>Après l’enregistrement, la fenêtre <strong>📁 Fichiers</strong> s’ouvre : déposez-y le <strong>PDF</strong> du livret (il sera lu en feuilletage) '
+      + 'ou ses fichiers de cahier interactif, et une couverture. Tant qu’aucun contenu n’est déposé, le livret apparaît « bientôt en vente » et ne peut pas être payé.</span></div>'),
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="_lvaFicheSave(\'' + _esc(slug).replace(/'/g, '') + '\')">✓ Enregistrer</button>');
+}
+
+function _lvaFicheSave(slug){
+  var T = _lvaT();
+  var neuf = !slug;
+  if(neuf){
+    slug = String((_ge('lvaSlug') || {}).value || '').toLowerCase().trim().replace(/\s+/g, '-');
+    if(!/^[a-z0-9][a-z0-9_-]{0,39}$/.test(slug)){ toast('Identifiant : lettres minuscules, chiffres et tirets', 'warn'); return; }
+    if(_lvaOuvrages().some(function(x){ return x.slug === slug; })){ toast('Cet identifiant existe déjà', 'warn'); return; }
+  }
+  var titre = String((_ge('lvaTitre') || {}).value || '').trim();
+  if(!titre){ toast('Titre requis', 'warn'); return; }
+  var kinds = [];
+  if((_ge('lvaKL') || {}).checked) kinds.push('livret');
+  if((_ge('lvaKG') || {}).checked) kinds.push('guide');
+  if(!kinds.length){ toast('Cochez au moins une version', 'warn'); return; }
+  var pl = Math.round(Number((_ge('lvaPL') || {}).value)), pgd = Math.round(Number((_ge('lvaPG') || {}).value));
+  if(!(pl >= 100 && pl <= 1000000) || !(pgd >= 100 && pgd <= 1000000)){ toast('Prix : de 100 à 1 000 000 F', 'warn'); return; }
+
+  /* CHANGER LE FORMAT D'UN LIVRET EN VENTE N'EST PAS UN DÉTAIL DE FICHE.
+     Le format décide de la porte : un cahier interactif passé en
+     « feuilletage » envoie ses acheteurs vers un lecteur de pages — vide s'il
+     n'a pas de pages — et le retire de la vente. On le dit avant. */
+  var modeNouveau = (_ge('lvaMode') || {}).value || 'interactif';
+  var actuel = neuf ? null : (_lvaOuvrages().find(function(x){ return x.slug === slug; }) || {});
+  if(actuel && actuel.mode && actuel.mode !== modeNouveau && actuel.disponible !== false && !actuel.retire){
+    if(!confirm('Changer le format de « ' + titre + ' » de « ' + _lvaModeLib(actuel.mode) + ' » en « ' + _lvaModeLib(modeNouveau) + ' » ?\n\n'
+      + 'Ce livret est EN VENTE. Ses acheteurs seront envoyés vers le nouveau format : s’il n’a pas encore son contenu '
+      + '(PDF ou fichier de cahier), ils ne pourront plus le lire et il sortira de la boutique.\n\nContinuer ?')) return;
+  }
+  var fiches = T.livretFiches = T.livretFiches || {};
+  var f = fiches[slug] || {};
+  f.titre = titre;
+  f.niveau = String((_ge('lvaNiveau') || {}).value || '').trim();
+  f.mode = modeNouveau;
+  f.kinds = kinds;
+  var libres = Math.round(Number((_ge('lvaLibres') || {}).value));
+  if(libres >= 0 && libres <= 50) f.pagesLibres = libres;
+  if(neuf){ f.cree = true; f.ajoute = _lvaAuj(); }
+  fiches[slug] = f;
+  // Le prix n'est inscrit que s'il CHANGE : un ouvrage qui suit le tarif
+  // général doit continuer de le suivre.
+  var avant = slug ? (_lvaOuvrages().find(function(x){ return x.slug === slug; }) || {}) : {};
+  var par = T.livretParOuvrage = T.livretParOuvrage || {};
+  if(neuf || pl !== avant.pLivret){ par[slug] = par[slug] || {}; par[slug].livret = pl; }
+  if(neuf || pgd !== avant.pGuide){ par[slug] = par[slug] || {}; par[slug].guide = pgd; }
+  cm();
+  _lvaEnregistrer(neuf ? 'Livret ajouté au catalogue' : 'Livret modifié');
+  // Un livret ajouté n'a encore rien à vendre : on enchaîne sur ses fichiers.
+  if(neuf) setTimeout(function(){ _lvaFichiers(slug); }, 300);
+}
+
+function _lvaRetirer(slug, oui){
+  var T = _lvaT();
+  var o = _lvaOuvrages().find(function(x){ return x.slug === slug; }) || {};
+  if(oui && !confirm('Retirer « ' + (o.titre || slug) + ' » de la vente ?\n\nIl disparaît de la boutique et ne peut plus être payé. Les codes déjà vendus continuent d’ouvrir.')) return;
+  T.livretRetires = T.livretRetires || {};
+  if(oui) T.livretRetires[slug] = true; else delete T.livretRetires[slug];
+  _lvaEnregistrer(oui ? 'Livret retiré de la vente' : 'Livret remis en vente');
+}
+
+/** Supprimer un livret. On ne DÉTRUIT jamais un ouvrage vendu : il part à la
+ *  corbeille (DB.tarifs.livretSupprimes) — plus vendu, plus affiché, codes
+ *  vendus intacts, fichiers gardés — et se restaure en un clic. Seule une
+ *  fiche ajoutée ici et encore jamais synchronisée s'efface tout à fait. */
+function _lvaSupprimer(slug){
+  var T = _lvaT();
+  var o = _lvaOuvrages().find(function(x){ return x.slug === slug; }) || {};
+  if(o.nonSynchro && T.livretFiches && T.livretFiches[slug]){
+    if(!confirm('Supprimer la fiche « ' + (o.titre || slug) + ' » ?\n\nElle n’a jamais été envoyée au serveur : elle est effacée.')) return;
+    delete T.livretFiches[slug];
+    ['livretRetires', 'livretParOuvrage', 'livretPromos', 'livretSupprimes'].forEach(function(k){ if(T[k]) delete T[k][slug]; });
+    _lvaEnregistrer('Livret supprimé');
+    return;
+  }
+  if(!confirm('Supprimer « ' + (o.titre || slug) + ' » ?\n\nIl disparaît de la boutique et de cette liste, et ne peut plus être acheté. '
+    + 'Les codes déjà vendus continuent d’ouvrir et ses fichiers restent sur le serveur.\n\nVous pourrez le restaurer depuis la corbeille, en bas de la page.')) return;
+  T.livretSupprimes = T.livretSupprimes || {};
+  T.livretSupprimes[slug] = true;
+  _lvaEnregistrer('Livret supprimé (restaurable depuis la corbeille)');
+}
+
+function _lvaRestaurer(slug){
+  var T = _lvaT();
+  if(T.livretSupprimes) delete T.livretSupprimes[slug];
+  _lvaEnregistrer('Livret restauré');
+}
+
+function _lvaModeLib(m){
+  return m === 'lecture' ? 'feuilletage' : (m === 'autonome' ? 'cahier autonome' : 'cahier interactif');
+}
+
+/* ══ FICHIERS D'UN LIVRET ═════════════════════════════════════════════════
+   Déposer, remplacer, retirer — sans FTP. Le serveur contrôle chaque fichier
+   avant de l'accepter (api/livret.php, admin_deposer) et range l'ancien dans
+   une corbeille protégée au lieu de l'effacer.
+   Un PDF ne part JAMAIS tel quel : il est découpé ici, dans le navigateur, en
+   une image par page — c'est ce que le feuilletage sert, page par page, avec
+   le filigrane de l'acheteur. Le PDF d'origine reste sur ce poste. */
+var _LVF = { slug: '', info: null, busy: false };
+
+/** Un envoi interrompu par la fermeture de l'onglet laisse un lot partiel
+ *  (sans danger : il n'est jamais servi), mais l'administrateur croit avoir
+ *  fini. On le prévient. */
+function _lvfGardeFermeture(oui){
+  if(oui){ window.onbeforeunload = function(){ return 'Un envoi de livret est en cours.'; }; }
+  else if(window.onbeforeunload && !_LVF.busy){ window.onbeforeunload = null; }
+}
+
+function _lvaApiFichier(champs, fichier, nom){
+  var sec = (DB.cloudConfig && DB.cloudConfig.secret) ? DB.cloudConfig.secret : '';
+  var fd = new FormData();
+  Object.keys(champs).forEach(function(k){ fd.append(k, champs[k]); });
+  fd.append('fichier', fichier, nom || 'fichier');
+  return fetch(_VRT_API + '/livret.php', { method:'POST', headers: sec ? { 'Authorization':'Bearer ' + sec } : {}, body: fd })
+    .then(function(r){
+      return r.json().catch(function(){ return { ok:false, error:'Réponse illisible du serveur (HTTP ' + r.status + ').' }; })
+        .then(function(j){
+          if(!r.ok || !j || !j.ok){
+            var e = new Error((r.status === 401) ? 'Clé d’administration refusée (Système → Centre de contrôle → Clé de synchronisation Cloud).'
+                              : ((j && j.error) || ('HTTP ' + r.status)));
+            e.code = j && j.code; e.status = r.status;
+            // Clé refusée : on se tait partout (frein partagé, voir _vrtFreiner).
+            if((r.status === 401 || r.status === 403) && typeof _vrtFreiner === 'function') _vrtFreiner('livrets : clé refusée');
+            throw e;
+          }
+          return j;
+        });
+    });
+}
+
+/** Une fiche toute neuve n'est connue du serveur qu'après la synchronisation
+ *  (quelques secondes). On patiente au lieu d'échouer.
+ *  ⚠️ On attend sur le catalogue PUBLIC (réponse 200), pas sur l'action
+ *  d'administration : celle-ci répond 404 tant que la fiche n'est pas arrivée,
+ *  et LWS bannit l'adresse IP — site ENTIER compris — à six « mauvaises »
+ *  réponses par minute. Interroger en boucle une porte qui dit non, c'est
+ *  exactement ce qu'il ne faut pas faire. */
+function _lvaAttendreServeur(slug, essais){
+  essais = essais == null ? 10 : essais;
+  var connu = (_LVA.cat || []).some(function(o){ return o.slug === slug; });
+  if(connu) return _lvcApi('admin_fichiers', { o: slug });
+  return fetch(_VRT_API + '/livret.php', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{"action":"catalogue"}', cache:'no-store' })
+    .then(function(r){ return r.json(); }).catch(function(){ return null; })
+    .then(function(j){
+      if(j && j.ok && Array.isArray(j.ouvrages)){
+        _LVA.cat = j.ouvrages;
+        if(j.ouvrages.some(function(o){ return o.slug === slug; })) return _lvcApi('admin_fichiers', { o: slug });
+      }
+      if(essais <= 0) throw new Error('Le serveur ne connaît pas encore ce livret : la fiche n’a pas été synchronisée. Vérifiez la clé de synchronisation, puis rouvrez cette fenêtre.');
+      _lvfEtat('⏳ Envoi de la fiche au serveur… (synchronisation)');
+      if(typeof save === 'function' && essais % 4 === 0) save();
+      return new Promise(function(ok){ setTimeout(ok, 4000); }).then(function(){ return _lvaAttendreServeur(slug, essais - 1); });
+    });
+}
+
+function _lvfEtat(html, pct){
+  var e = _ge('lvfEtat'); if(!e) return;
+  e.style.display = html ? '' : 'none';
+  e.innerHTML = html + (pct != null ? '<div style="height:6px;background:#e5e7eb;border-radius:4px;margin-top:6px"><div style="height:6px;border-radius:4px;background:#142554;width:' + Math.max(2, Math.min(100, pct)) + '%"></div></div>' : '');
+}
+
+function _lvaFichiers(slug){
+  if(!(DB.cloudConfig && DB.cloudConfig.secret)){
+    toast('Saisissez d’abord la clé de synchronisation (Système → Centre de contrôle SA)', 'warn'); return;
+  }
+  var o = _lvaOuvrages().find(function(x){ return x.slug === slug; }) || { slug: slug, titre: slug };
+  _LVF.slug = slug; _LVF.info = null;
+  M('📁 Fichiers du livret', _esc(o.titre || slug),
+    '<div id="lvfEtat" class="ib ibt mb12" style="display:none"></div>'
+    + '<div id="lvfCorps"><div class="xs2 mut">Lecture de ce qui est déposé sur le serveur…</div></div>'
+    + '<input type="file" id="lvfPdf" accept="application/pdf,.pdf" style="display:none" onchange="_lvfPdfChoisi(this)">'
+    + '<input type="file" id="lvfImgs" accept="image/*" multiple style="display:none" onchange="_lvfImagesChoisies(this)">'
+    + '<input type="file" id="lvfCouv" accept="image/*" style="display:none" onchange="_lvfCouvChoisie(this)">'
+    + '<input type="file" id="lvfJs" accept=".js,application/javascript,text/javascript" style="display:none" onchange="_lvfJsChoisi(this)">',
+    '<button class="btn bo" onclick="cm();_LVA.cat=null;re()">Fermer</button>', true);
+  _lvaAttendreServeur(slug).then(function(j){ _lvfEtat(''); _LVF.info = j; _lvfRendre(); })
+    .catch(function(e){ _lvfEtat(''); _si('lvfCorps', '<div class="ib ibr"><span>⚠️</span><span>' + _esc(e.message || e) + '</span></div>'); });
+}
+
+function _lvfRecharger(){
+  // La liste derrière la fenêtre a changé (état, nombre de pages) : elle se
+  // relira au prochain affichage, même si l'on ferme par la croix.
+  _LVA.cat = null;
+  return _lvcApi('admin_fichiers', { o: _LVF.slug }).then(function(j){ _LVF.info = j; _lvfRendre(); });
+}
+
+function _lvfTaille(n){ return n > 1048576 ? (Math.round(n / 104857.6) / 10) + ' Mo' : Math.max(1, Math.round(n / 1024)) + ' Ko'; }
+
+function _lvfRendre(){
+  var j = _LVF.info; if(!j) return;
+  var o = _lvaOuvrages().find(function(x){ return x.slug === _LVF.slug; }) || {};
+  var mode = o.mode || j.mode;
+  var lecture = mode === 'lecture';
+  var sl = _esc(_LVF.slug).replace(/'/g, '');
+  var nP = (j.pages && j.pages.n) || 0;
+
+  var ligneJs = function(quoi, lib, aide){
+    var f = j[quoi] || {};
+    var etat = !f.depose ? '<span class="lva-pill lva-attente">Pas déposé</span>'
+      : (f.intact === false ? '<span class="lva-pill lva-off">Abîmé — à remplacer</span>'
+                            : '<span class="lva-pill lva-ok">Déposé</span> <span class="lva-meta">' + _lvfTaille(f.octets) + '</span>');
+    return '<tr><td><b>' + lib + '</b><div class="lva-meta">' + aide + '</div></td><td>' + etat + '</td><td><div class="lva-act">'
+      + '<button class="btn ' + (f.depose ? 'bo' : 'bi') + ' xs" onclick="_lvfChoisirJs(\'' + quoi + '\')">' + (f.depose ? '🔁 Remplacer' : '⬆️ Déposer') + '</button>'
+      + (f.depose ? '<button class="btn bo xs" onclick="_lvfRetirer(\'' + quoi + '\')">🗑️</button>' : '')
+      + '</div></td></tr>';
+  };
+
+  var secPages = '<div class="lva-sec"><h4>📄 Pages du livret (PDF)</h4>'
+    + (nP ? '<div><span class="lva-pill lva-ok">' + nP + ' page(s) en ligne</span> <span class="lva-meta">' + _lvfTaille(j.pages.octets)
+          + (o.pagesLibres != null ? ' · ' + o.pagesLibres + ' offerte(s) en aperçu' : '') + '</span></div>'
+          : '<div><span class="lva-pill lva-attente">Aucune page</span></div>')
+    + '<div class="lva-bar mt8">'
+    +   '<button class="btn bi sm" onclick="_ge(\'lvfPdf\').click()">' + (nP ? '🔁 Remplacer par un PDF' : '⬆️ Déposer le PDF') + '</button>'
+    +   '<button class="btn bo sm" onclick="_ge(\'lvfImgs\').click()">🖼️ Images de pages</button>'
+    +   (nP ? '<button class="btn bo sm" onclick="_lvfRetirerPages()">🗑️ Retirer</button>' : '')
+    + '</div>'
+    + '<div class="lva-meta mt6">Le PDF est découpé dans votre navigateur (une image par page) : il ne quitte pas ce poste. '
+    + 'Pendant l’envoi, les lecteurs voient l’ancienne version jusqu’à la dernière page.</div></div>';
+
+  var secCahier = '<div class="lva-sec"><h4>🧩 Fichiers du cahier interactif</h4>'
+    + '<div class="tw"><table><tbody>'
+    + ligneJs('booklet', 'Livret de l’élève', 'booklet-' + _esc(_LVF.slug) + '.js')
+    + ligneJs('guide', 'Guide de l’enseignant', 'guide-' + _esc(_LVF.slug) + '.js')
+    + ligneJs('corrige', 'Corrigés', 'corrige-' + _esc(_LVF.slug) + '.js')
+    + '</tbody></table></div>'
+    + '<div class="lva-meta mt6">Fichiers produits par l’outil de publication. Un fichier illisible est refusé et l’ancien reste en place.</div></div>';
+
+  var secCouv = '<div class="lva-sec"><h4>🖼️ Couverture</h4><div class="lva-bar">'
+    + (j.couverture ? '<img src="' + _esc(j.couverture) + '" alt="" style="height:96px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.15)">' : '<span class="lva-pill lva-attente">Aucune</span>')
+    + '<button class="btn ' + (j.couverture ? 'bo' : 'bi') + ' sm" onclick="_ge(\'lvfCouv\').click()">' + (j.couverture ? '🔁 Remplacer' : '⬆️ Déposer une image') + '</button>'
+    + (j.couverture ? '<button class="btn bo sm" onclick="_lvfRetirer(\'couverture\')">🗑️</button>' : '')
+    + '</div></div>';
+
+  var h = '<div class="ib ' + (j.disponible ? 'ibg' : 'ibw') + ' mb12"><span>' + (j.disponible ? '🛒' : '📦') + '</span><span>'
+    + (j.disponible ? '<strong>Achetable</strong> — le contenu est sur le serveur.'
+                    : '<strong>Pas encore achetable</strong> — ' + (lecture ? 'déposez son PDF.' : 'déposez le fichier « Livret de l’élève ».'))
+    + ' Format : <b>' + _esc(_lvaModeLib(mode)) + '</b> (<a href="javascript:void(0)" onclick="cm();_lvaFiche(\'' + sl + '\')">changer</a>)'
+    + (j.disponible && j.lien ? ' · <a href="/livrets/' + _esc(j.lien) + '" target="_blank" rel="noopener">voir en boutique ↗</a>' : '')
+    + '</span></div>';
+  // Le format du livret d'abord ; l'autre, replié — on ne le cherche que pour changer de format.
+  var autre = lecture ? secCahier : secPages;
+  h += (lecture ? secPages : secCahier) + secCouv
+    + '<details><summary class="xs2" style="cursor:pointer;color:var(--ds-text-2,#45506a)">Autre format : ' + (lecture ? 'cahier interactif' : 'pages (PDF)') + '</summary><div class="mt8">' + autre + '</div></details>'
+    + '<div class="lva-meta mt8">Rien n’est effacé : un fichier remplacé ou retiré est gardé 60 jours dans la corbeille protégée du serveur.</div>';
+  _si('lvfCorps', h);
+}
+
+function _lvfOccupe(){ if(_LVF.busy){ toast('Un envoi est déjà en cours…', 'warn'); return true; } return false; }
+
+function _lvfChoisirJs(quoi){ _LVF.quoiJs = quoi; var i = _ge('lvfJs'); if(i){ i.value = ''; i.click(); } }
+
+function _lvfJsChoisi(inp){
+  var f = inp.files && inp.files[0]; if(!f || _lvfOccupe()) return;
+  _LVF.busy = true; _lvfEtat('⬆️ Envoi de « ' + _esc(f.name) + ' »…');
+  _lvaApiFichier({ action:'admin_deposer', o:_LVF.slug, quoi:_LVF.quoiJs }, f, f.name)
+    .then(function(){ toast('✓ Fichier déposé et vérifié'); _lvfEtat(''); return _lvfRecharger(); })
+    .catch(function(e){ _lvfEtat('<b style="color:#b91c1c">⚠️ ' + _esc(e.message || e) + '</b>'); })
+    .then(function(){ _LVF.busy = false; inp.value = ''; });
+}
+
+function _lvfRetirer(quoi){
+  var lib = { booklet:'le livret de l’élève', guide:'le guide de l’enseignant', corrige:'les corrigés', couverture:'la couverture' }[quoi] || quoi;
+  if(!confirm('Retirer ' + lib + ' du serveur ?\n\nLe fichier est rangé dans la corbeille protégée.' + (quoi === 'booklet' ? ' Le livret ne pourra plus être acheté tant qu’un nouveau fichier n’est pas déposé.' : ''))) return;
+  _lvcApi('admin_retirer_fichier', { o:_LVF.slug, quoi:quoi })
+    .then(function(){ toast('✓ Retiré'); return _lvfRecharger(); })
+    .catch(function(e){ toast(e.message || String(e), 'err'); });
+}
+
+function _lvfRetirerPages(){
+  if(!confirm('Retirer toutes les pages de ce livret ?\n\nElles sont rangées dans la corbeille protégée. Le livret ne pourra plus être lu ni acheté tant que de nouvelles pages ne sont pas déposées.')) return;
+  _lvcApi('admin_retirer_fichier', { o:_LVF.slug, quoi:'pages' })
+    .then(function(){ toast('✓ Pages retirées'); return _lvfRecharger(); })
+    .catch(function(e){ toast(e.message || String(e), 'err'); });
+}
+
+/** Une toile → JPEG. Largeur bornée : assez nette pour lire, assez légère
+ *  pour une connexion mobile. */
+function _lvfToile(src, largeurMax){
+  var w = src.width, hgt = src.height, k = Math.min(1, largeurMax / w);
+  var c = document.createElement('canvas');
+  c.width = Math.round(w * k); c.height = Math.round(hgt * k);
+  var ctx = c.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+  ctx.drawImage(src, 0, 0, c.width, c.height);
+  return new Promise(function(ok, ko){ c.toBlob(function(b){ b ? ok(b) : ko(new Error('Conversion de l’image impossible')); }, 'image/jpeg', 0.85); });
+}
+
+function _lvfImage(fichier){
+  return new Promise(function(ok, ko){
+    var u = URL.createObjectURL(fichier), im = new Image();
+    im.onload = function(){ ok(im); setTimeout(function(){ URL.revokeObjectURL(u); }, 1000); };
+    im.onerror = function(){ ko(new Error('Image illisible : ' + fichier.name)); };
+    im.src = u;
+  });
+}
+
+/** Après une série de pages : le livret devient un feuilletage s'il ne l'était
+ *  pas — sauf s'il se vend déjà sous une autre forme : un cahier interactif en
+ *  vente qui basculerait en feuilletage changerait ce que reçoivent ses
+ *  acheteurs. Là, on demande. */
+function _lvfPasserEnLecture(){
+  var o = _lvaOuvrages().find(function(x){ return x.slug === _LVF.slug; }) || {};
+  if(o.mode === 'lecture') return;
+  var autreFormeEnVente = _LVF.info && _LVF.info.booklet && _LVF.info.booklet.depose && _LVF.info.booklet.intact !== false;
+  if(autreFormeEnVente && !confirm('Les pages sont déposées.\n\nCe livret se vend aujourd’hui comme « ' + _lvaModeLib(o.mode) + ' ». '
+    + 'Le passer en « feuilletage » pour que ses acheteurs lisent ces pages ?\n\n(Annuler : le format ne change pas, les pages restent prêtes.)')) return;
+  var T = _lvaT(), fiches = T.livretFiches = T.livretFiches || {};
+  fiches[_LVF.slug] = Object.assign(fiches[_LVF.slug] || {}, { mode: 'lecture' });
+  if(fiches[_LVF.slug].pagesLibres == null) fiches[_LVF.slug].pagesLibres = 2;
+  save();
+  toast('Format du livret passé en « feuilletage »');
+}
+
+/** Les pages partent dans un lot d'attente du serveur, puis remplacent les
+ *  pages en ligne d'un seul geste (admin_publier_pages). Pendant l'envoi, les
+ *  acheteurs continuent de lire l'ancienne version ; un envoi interrompu ne
+ *  touche à rien.
+ *  Une coupure réseau ou une erreur 5xx se retente (3 fois, avec un délai
+ *  croissant) : sur une connexion mobile, perdre un PDF de 120 pages pour une
+ *  seconde de réseau serait absurde. Un refus du serveur (4xx), lui, ne se
+ *  retente JAMAIS — il ne changerait pas d'avis, et chaque refus rapproche du
+ *  bannissement de l'adresse IP. */
+function _lvfEnvoyerPage(n, blob, essai){
+  essai = essai || 0;
+  return _lvaApiFichier({ action:'admin_deposer', o:_LVF.slug, quoi:'page', n:n }, blob, 'p' + n + '.jpg')
+    .catch(function(e){
+      var transitoire = !e.status || e.status >= 500;
+      if(!transitoire || essai >= 3) throw e;
+      _lvfEtat('⚠️ Réseau instable — nouvelle tentative pour la page ' + n + '…');
+      return new Promise(function(ok){ setTimeout(ok, 3000 * (essai + 1)); })
+        .then(function(){ return _lvfEnvoyerPage(n, blob, essai + 1); });
+    });
+}
+
+function _lvfEnvoyerPages(total, produirePage){
+  _LVF.busy = true;
+  _lvfGardeFermeture(true);
+  var n = 0;
+  var suivante = function(){
+    if(n >= total) return Promise.resolve();
+    n++;
+    _lvfEtat('⬆️ Page ' + n + ' / ' + total + '… <span class="xs2 mut">gardez cette fenêtre ouverte — les lecteurs voient l’ancienne version jusqu’à la fin</span>', (n - 1) / total * 100);
+    return produirePage(n).then(function(blob){ return _lvfEnvoyerPage(n, blob); }).then(suivante);
+  };
+  return suivante().then(function(){
+    _lvfEtat('🔁 Mise en ligne des ' + total + ' pages…', 100);
+    return _lvcApi('admin_publier_pages', { o:_LVF.slug, total:total });
+  }).then(function(){
+    _lvfPasserEnLecture();
+    _lvfEtat('<b style="color:#16a34a">✓ ' + total + ' page(s) en ligne.</b>', 100);
+    toast('✓ ' + total + ' pages en ligne');
+    return _lvfRecharger();
+  }).catch(function(e){
+    _lvfEtat('<b style="color:#b91c1c">⚠️ Arrêt à la page ' + n + ' : ' + _esc(e.message || e) + '</b> — rien n’a changé pour les lecteurs ; relancez le dépôt.');
+  }).then(function(){ _LVF.busy = false; _lvfGardeFermeture(false); });
+}
+
+/** pdf.js : celui de la fiche des livres (CDN), et sinon la copie servie par
+ *  le site lui-même (assets/vendor) — une coupure du CDN ne doit pas empêcher
+ *  de publier un livret. */
+function _lvfPdfLib(){
+  var cdn = (typeof window._bookPdfReady === 'function') ? window._bookPdfReady() : Promise.reject(new Error('indisponible'));
+  return cdn.catch(function(){
+    var base = '/assets/vendor/pdfjs-4.10.38/';
+    return import(base + 'pdf.min.js').then(function(){
+      var L = window.pdfjsLib;
+      if(!L || !L.getDocument) throw new Error('Lecteur PDF indisponible. Rechargez la page et réessayez.');
+      if(!L.GlobalWorkerOptions.workerSrc) L.GlobalWorkerOptions.workerSrc = base + 'pdf.worker.min.js';
+      return L;
+    });
+  });
+}
+
+function _lvfPdfChoisi(inp){
+  var f = inp.files && inp.files[0]; inp.value = '';
+  if(!f || _lvfOccupe()) return;
+  if(_LVF.info && _LVF.info.pages && _LVF.info.pages.n && !confirm('Remplacer les ' + _LVF.info.pages.n + ' pages actuelles par ce PDF ?')) return;
+  _lvfEtat('📖 Ouverture du PDF…');
+  _lvfPdfLib().then(function(L){ return f.arrayBuffer().then(function(buf){ return L.getDocument({ data: buf }).promise; }); })
+    .then(function(pdf){
+      if(pdf.numPages > 2000) throw new Error('PDF trop long (2 000 pages au plus).');
+      return _lvfEnvoyerPages(pdf.numPages, function(n){
+        return pdf.getPage(n).then(function(page){
+          var v1 = page.getViewport({ scale: 1 });
+          var vp = page.getViewport({ scale: Math.min(3, 1400 / v1.width) });
+          var c = document.createElement('canvas');
+          c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+          var ctx = c.getContext('2d');
+          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+          return page.render({ canvasContext: ctx, viewport: vp }).promise.then(function(){ return _lvfToile(c, 1400); });
+        });
+      });
+    })
+    .catch(function(e){ _lvfEtat('<b style="color:#b91c1c">⚠️ ' + _esc(e.message || e) + '</b>'); });
+}
+
+function _lvfImagesChoisies(inp){
+  var fs = Array.prototype.slice.call(inp.files || []); inp.value = '';
+  if(!fs.length || _lvfOccupe()) return;
+  fs.sort(function(a, b){ return a.name.localeCompare(b.name, 'fr', { numeric: true }); });
+  if(_LVF.info && _LVF.info.pages && _LVF.info.pages.n && !confirm('Remplacer les ' + _LVF.info.pages.n + ' pages actuelles par ces ' + fs.length + ' image(s) ?')) return;
+  _lvfEnvoyerPages(fs.length, function(n){ return _lvfImage(fs[n - 1]).then(function(im){ return _lvfToile(im, 1400); }); });
+}
+
+function _lvfCouvChoisie(inp){
+  var f = inp.files && inp.files[0]; inp.value = '';
+  if(!f || _lvfOccupe()) return;
+  _LVF.busy = true; _lvfEtat('⬆️ Envoi de la couverture…');
+  _lvfImage(f).then(function(im){ return _lvfToile(im, 900); })
+    .then(function(b){ return _lvaApiFichier({ action:'admin_deposer', o:_LVF.slug, quoi:'couverture' }, b, 'couverture.jpg'); })
+    .then(function(){ toast('✓ Couverture déposée'); _lvfEtat(''); return _lvfRecharger(); })
+    .catch(function(e){ _lvfEtat('<b style="color:#b91c1c">⚠️ ' + _esc(e.message || e) + '</b>'); })
+    .then(function(){ _LVF.busy = false; });
+}
+
+function _lvaPromoModal(slug){
+  var P = _lvaT().livretPromos || {}, p = P[slug] || {};
+  var tous = slug === '*';
+  var o = tous ? null : _lvaOuvrages().find(function(x){ return x.slug === slug; });
+  M(tous ? 'Promotion sur tous les livrets' : 'Promotion', tous ? 'S’applique à chaque livret sans promotion propre' : _esc((o && o.titre) || slug),
+    '<div class="fg2">'
+    + '<div class="fg"><span class="fl">Remise (%)</span><input class="fi" id="lvaPct" type="number" min="1" max="90" value="' + (p.pct || 20) + '" oninput="_lvaPromoApercu(\'' + _esc(slug).replace(/'/g, '') + '\')"></div>'
+    + '<div class="fg"><span class="fl">Libellé <span class="mut">(facultatif)</span></span><input class="fi" id="lvaLib" maxlength="40" placeholder="ex. Rentrée scolaire" value="' + _esc(p.libelle || '') + '"></div>'
+    + '<div class="fg"><span class="fl">Début <span class="mut">(vide = dès maintenant)</span></span><input class="fi" id="lvaDeb" type="date" value="' + _esc(p.debut || '') + '"></div>'
+    + '<div class="fg"><span class="fl">Fin incluse <span class="mut">(vide = sans fin)</span></span><input class="fi" id="lvaFin" type="date" value="' + _esc(p.fin || '') + '"></div>'
+    + '</div><div class="ib ibt mt8" id="lvaPromoEx"></div>'
+    + '<div class="xs2 mut mt6">Le serveur applique la remise : la boutique affiche l’ancien prix barré, et le paiement exige le prix remisé. '
+    + 'Elle se cumule avec la remise de volume des packs établissement.</div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + (P[slug] ? '<button class="btn bo" onclick="_lvaPromoSuppr(\'' + _esc(slug).replace(/'/g, '') + '\')">Arrêter la promotion</button>' : '')
+    + '<button class="btn bi" onclick="_lvaPromoSave(\'' + _esc(slug).replace(/'/g, '') + '\')">✓ Appliquer</button>');
+  setTimeout(function(){ _lvaPromoApercu(slug); }, 0);
+}
+
+function _lvaPromoApercu(slug){
+  var e = _ge('lvaPromoEx'); if(!e) return;
+  var pct = Math.round(Number((_ge('lvaPct') || {}).value));
+  var o = slug === '*' ? null : _lvaOuvrages().find(function(x){ return x.slug === slug; });
+  var base = (o && o.pLivret) || _lvaT().livret || 1500;
+  e.innerHTML = (pct >= 1 && pct <= 90)
+    ? '<span>🧮</span><span>Livret élève' + (o ? '' : ' au tarif général') + ' : <s>' + fmt(base) + '</s> → <b>' + fmt(Math.max(1, Math.round(base * (100 - pct) / 100))) + '</b></span>'
+    : '<span>⚠️</span><span>Remise de 1 à 90 %</span>';
+}
+
+function _lvaPromoSave(slug){
+  var pct = Math.round(Number((_ge('lvaPct') || {}).value));
+  if(!(pct >= 1 && pct <= 90)){ toast('Remise : de 1 à 90 %', 'warn'); return; }
+  var deb = (_ge('lvaDeb') || {}).value || '', fin = (_ge('lvaFin') || {}).value || '';
+  if(deb && fin && fin < deb){ toast('La fin précède le début', 'warn'); return; }
+  if(fin && fin < _lvaAuj()){ toast('La date de fin est déjà passée', 'warn'); return; }
+  var T = _lvaT();
+  T.livretPromos = T.livretPromos || {};
+  T.livretPromos[slug] = { pct: pct, debut: deb, fin: fin, libelle: String((_ge('lvaLib') || {}).value || '').trim().slice(0, 40) };
+  cm();
+  _lvaEnregistrer('Promotion −' + pct + ' % enregistrée');
+}
+
+function _lvaPromoSuppr(slug){
+  var T = _lvaT();
+  if(T.livretPromos) delete T.livretPromos[slug];
+  cm();
+  _lvaEnregistrer('Promotion arrêtée');
+}
+
+/** Les tarifs généraux (ouvrage sans prix propre) vivent dans « Prix &
+ *  calculs » avec les remises de pack ; on y mène plutôt que les dupliquer. */
+function _lvaTarifsGeneraux(){ goTo('prix_calculs'); }
+
+window.pgLivretsAdmin     = pgLivretsAdmin;
+window._lvaCharger        = _lvaCharger;
+window._lvaFiltrer        = _lvaFiltrer;
+window._lvaFiche          = _lvaFiche;
+window._lvaFicheSave      = _lvaFicheSave;
+window._lvaRetirer        = _lvaRetirer;
+window._lvaSupprimer      = _lvaSupprimer;
+window._lvaPromoModal     = _lvaPromoModal;
+window._lvaPromoApercu    = _lvaPromoApercu;
+window._lvaPromoSave      = _lvaPromoSave;
+window._lvaPromoSuppr     = _lvaPromoSuppr;
+window._lvaTarifsGeneraux = _lvaTarifsGeneraux;
+window._LVA               = _LVA;
+window._LVF               = _LVF;
+window._lvaRestaurer      = _lvaRestaurer;
+window._lvaFichiers       = _lvaFichiers;
+window._lvfChoisirJs      = _lvfChoisirJs;
+window._lvfJsChoisi       = _lvfJsChoisi;
+window._lvfRetirer        = _lvfRetirer;
+window._lvfRetirerPages   = _lvfRetirerPages;
+window._lvfPdfChoisi      = _lvfPdfChoisi;
+window._lvfImagesChoisies = _lvfImagesChoisies;
+window._lvfCouvChoisie    = _lvfCouvChoisie;
+window._lvfPdfLib         = _lvfPdfLib;
+window._lvaFiltre         = _lvaFiltre;
+window._lvaPlus           = _lvaPlus;
+
+
+/* ══════════════════════════════════════════════════════════════════════════
    CONTENU DU SITE — éditeur des textes et des images de la vitrine
    ──────────────────────────────────────────────────────────────────────────
    L'accueil public est une page STATIQUE : elle ne charge ni app.js ni DB.
@@ -55409,7 +57110,7 @@ function pgPrixCalculs(){
       + '<div class="fg"><span class="fl">Livret élève — tarif général (FCFA)</span>' + num('pc_l_livret', T.livret || 1500, 100, 1000000, 100) + '</div>'
       + '<div class="fg"><span class="fl">Guide enseignant — tarif général (FCFA)</span>' + num('pc_l_guide', T.livretGuide || 5000, 100, 1000000, 100) + '</div>'
       + '</div>'
-      + '<div class="xs2 mut">Un cahier dont la fiche porte son propre prix garde ce prix : réglez-le ouvrage par ouvrage ci-dessous.</div>'
+      + '<div class="xs2 mut">Un cahier dont la fiche porte son propre prix garde ce prix : réglez-le ouvrage par ouvrage ci-dessous, ou dans <a href="javascript:void(0)" onclick="goTo(\'livrets_admin\')">Livrets : catalogue, prix &amp; promos</a> (ajout, retrait, promotions).</div>'
       + '<div id="pc_ouvrages" class="mt8"><div class="xs2 mut">Chargement des ouvrages…</div></div>'
       + '<div class="fl mt12">Remise de volume d’un pack établissement</div>'
       + '<div class="tw"><table><thead><tr><th>À partir de (codes)</th><th>Remise (%)</th><th>Exemple : pack au tarif général</th></tr></thead><tbody>'
@@ -55628,7 +57329,8 @@ function _pcOuvragesCharger(){
                 ? '<input class="fi" type="number" min="100" step="100" value="' + (parseInt(v, 10) || '') + '" data-pc-ouvrage="' + _esc(o.slug) + '" data-pc-kind="' + kind + '" data-pc-avant="' + (parseInt(v, 10) || 0) + '">'
                 : '<span class="xs2 mut">non vendu</span>';
             };
-            return '<tr><td>' + _esc(o.titre || o.slug) + (o.disponible ? '' : ' <span class="xs2 mut">(non publié)</span>') + '</td><td>' + cel('livret', o.prix) + '</td><td>' + cel('guide', o.prixGuide) + '</td></tr>';
+            // Prix HORS promotion : c'est lui qu'on règle ici (la promotion se règle dans « Livrets »).
+            return '<tr><td>' + _esc(o.titre || o.slug) + (o.disponible ? '' : ' <span class="xs2 mut">(non publié)</span>') + (o.promo ? ' <span class="xs2 mut">(promo −' + parseInt(o.promo.pct, 10) + ' % en cours)</span>' : '') + '</td><td>' + cel('livret', o.prixNormal || o.prix) + '</td><td>' + cel('guide', o.prixGuideNormal || o.prixGuide) + '</td></tr>';
           }).join('')
         + '</tbody></table></div></details>';
     })

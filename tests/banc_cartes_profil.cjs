@@ -75,7 +75,10 @@ dire(boutons.length >= 6, 'les boutons de public sont repérables — barre, men
   boutons.length + ' bouton(s) trouvé(s)');
 for (const pub of ['eleve', 'parent', 'enseignant']) {
   const n = boutons.filter(b => b.public === pub).length;
-  dire(n >= 3, 'le public « ' + pub + ' » est nommé par ses trois entrées (barre, téléphone, carte)',
+  /* 10/11/2026 — l'accueil épuré autour d'Apprendre, Boutique, Atelier ne
+     porte plus les cartes « Quatre publics » : restent la barre et le menu du
+     téléphone, toujours contrôlés ci-dessous (routeur, panneau, porte). */
+  dire(n >= 2, 'le public « ' + pub + ' » est nommé par ses deux entrées (barre, téléphone)',
     n + ' trouvée(s)');
 }
 

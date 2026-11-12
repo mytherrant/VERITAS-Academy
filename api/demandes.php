@@ -71,7 +71,7 @@ function dem_tel_valide(string $tel): bool {
 
 /** Référence lisible par un humain au téléphone : DEM-260806-4F2A. */
 function dem_reference(string $type): string {
-    $p = $type === 'campus' ? 'ETB' : 'DOM';
+    $p = $type === 'campus' ? 'ETB' : ($type === 'partenaire' ? 'PRT' : 'DOM');
     return $p . '-' . date('ymd') . '-' . strtoupper(bin2hex(random_bytes(2)));
 }
 
@@ -84,7 +84,9 @@ function dem_notifier(array $d): void {
     if (!defined('DEMANDES_NOTIFY_EMAIL') || !DEMANDES_NOTIFY_EMAIL) { return; }
     $titre = $d['type'] === 'campus'
         ? 'Nouvelle demande VÉRITAS Campus — ' . $d['etablissement']
-        : 'Demande d\'accompagnement à domicile — ' . $d['nom'];
+        : ($d['type'] === 'partenaire'
+            ? 'Candidature partenaire (' . $d['formule'] . ') — ' . $d['nom']
+            : 'Demande d\'accompagnement à domicile — ' . $d['nom']);
     /* Le sujet reprend une saisie publique : un saut de ligne y injectait des
        en-têtes de courriel (Bcc:…). dem_txt ne retirait que \r. Encodé en
        MIME, il ne peut plus rien injecter (audit 16/10/2026). */
@@ -182,7 +184,11 @@ $body = json_decode((string) file_get_contents('php://input'), true);
 if (!is_array($body)) { $body = $_POST; }
 
 $type = dem_txt($body['type'] ?? '', 20);
-if ($type !== 'campus' && $type !== 'domicile') {
+// 29/10/2026 — « partenaire » : submitPartnerApplication() et _ajSubmit()
+// (app.js) rangeaient encore les candidatures dans DB.partnerApplications,
+// c'est-à-dire dans le navigateur du candidat — le défaut même qui a fait
+// naître ce fichier. Elles arrivent désormais ici.
+if ($type !== 'campus' && $type !== 'domicile' && $type !== 'partenaire') {
     jsonResponse(['ok' => false, 'error' => 'Type de demande inconnu.'], 422);
 }
 
@@ -221,6 +227,18 @@ if ($type === 'campus') {
     $d['besoins']       = dem_liste_txt($body['besoins'] ?? [], 20, 60);
     if ($d['etablissement'] === '') {
         jsonResponse(['ok' => false, 'error' => 'Le nom de l\'établissement est requis.'], 422);
+    }
+} elseif ($type === 'partenaire') {
+    $d['formule']       = dem_txt($body['formule'] ?? '', 80);   // programme visé (revendeur, ambassadeur…)
+    $d['etablissement'] = dem_txt($body['etablissement'] ?? '', 160);
+    $d['classe']        = dem_txt($body['classe'] ?? '', 40);
+    $d['secteur']       = dem_txt($body['secteur'] ?? '', 120);
+    $d['social']        = dem_txt($body['social'] ?? '', 200);
+    $d['followers']     = max(0, min(100000000, (int) ($body['followers'] ?? 0)));
+    $d['adresse']       = dem_txt($body['adresse'] ?? '', 300);
+    $d['matieres']      = dem_liste_txt($body['matieres'] ?? [], 15, 60);
+    if ($d['formule'] === '') {
+        jsonResponse(['ok' => false, 'error' => 'Programme de partenariat inconnu.'], 422);
     }
 } else {
     $d['adresse']   = dem_txt($body['adresse'] ?? '', 300);

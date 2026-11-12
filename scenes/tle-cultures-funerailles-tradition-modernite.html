@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Les funérailles de grand-père — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de cultures nationales (Terminale) : les pratiques traditionnelles liées à la mort, les chants funèbres et leur lien avec la vie moderne.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/tle-cultures-funerailles-tradition-modernite.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Les funérailles de grand-père — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée de cultures nationales (Terminale) : les pratiques traditionnelles liées à la mort, les chants funèbres et leur lien avec la vie moderne.">
+<meta property="og:url" content="https://veritas-school.com/scenes/tle-cultures-funerailles-tradition-modernite.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Les funérailles de grand-père","description":"Scène animée de cultures nationales (Terminale) : les pratiques traditionnelles liées à la mort, les chants funèbres et leur lien avec la vie moderne.","url":"https://veritas-school.com/scenes/tle-cultures-funerailles-tradition-modernite.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"Terminale","about":"Cultures nationales","teaches":"Établir le lien entre les pratiques traditionnelles liées à la mort (veillée, chants funèbres, funérailles, rôle de la famille élargie) et la vie moderne (coûts, morgue, état civil, diaspora), et distinguer ce qui a du sens de ce qui est devenu ostentatoire.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-cultures-funerailles',
+  discipline: 'Cultures nationales', niveau: 'Terminale',
+  titre: 'Les funérailles de grand-père',
+  decor: 'deuil', lieu: 'La concession familiale, à l’Ouest', moment: 'Réunion de famille avant les funérailles',
+  objectif: 'Établir le lien entre les pratiques traditionnelles liées à la mort (veillée, chants funèbres, funérailles, rôle de la famille élargie) et la vie moderne (coûts, morgue, état civil, diaspora), et distinguer ce qui a du sens de ce qui est devenu ostentatoire.',
+  programme: 'Progression harmonisée Tle · Leçon 3 (pratiques traditionnelles liées à la mort et vie moderne), leçon 4 (croyances), leçon 9 (chansons funèbres)',
+  avertissement: 'Dialogue fictif écrit pour la leçon. Les pratiques décrites varient d’une communauté à l’autre ; chaque élève compare avec la sienne.',
+  jauges: [
+    { id: 'sens', nom: 'Sens du rite préservé', val: 60, couleur: '#1E499B' },
+    { id: 'depenses', nom: 'Dépenses de la famille', val: 30, couleur: '#D43F2E' }
+  ],
+  personnages: {
+    grandmere: { nom: 'Mami Nguefack, la veuve', couleur: '#5A2E5A', look: { tenue: 'robe', peau: 'fonce', vieux: true, coiffe: 'foulard', couleurCoiffe: '#1A1A1A', habit: '#3A2A3A' } },
+    oncle:     { nom: 'Tonton Fotso, l’aîné', couleur: '#7A2E2E', look: { tenue: 'boubou', peau: 'fonce', vieux: true, cheveux: 'ras', habit: '#7A2E2E', moustache: true } },
+    fils:      { nom: 'Arnaud, le fils de la diaspora', couleur: '#2B3A55', look: { tenue: 'costume', peau: 'fonce', cheveux: 'court', habit: '#2B3A55', col: '#FFFFFF', objet: 'dossier' } },
+    tante:     { nom: 'Tata Josiane, chanteuse du deuil', couleur: '#B0503A', look: { tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#B0503A', habit: '#B0503A' } },
+    eleve:     { nom: 'Cédric, élève de Terminale', couleur: '#1F6F78', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['grandmere', 'oncle', 'eleve'], txt: 'Grand-père est mort il y a trois semaines. Il a été inhumé dans la concession, près de ses ancêtres. Chez de nombreux peuples des Grassfields, ce n’est pas la fin : les funérailles, la grande fête du souvenir, auront lieu plus tard.', objet: { i: 'flamme', lib: 'La veillée' } },
+    { t: 'dit', qui: 'eleve', emo: 'doute', txt: 'Pourquoi deux fois ? L’enterrement, puis les funérailles ?' },
+    { t: 'dit', qui: 'oncle', txt: 'L’enterrement rend le corps à la terre. Les funérailles font du défunt un ancêtre, qui veille sur la famille. On danse, on chante, on mange ensemble : la mort ne doit pas disperser la famille, elle doit la rassembler.', jauges: { sens: 75 } },
+    { t: 'dit', qui: 'tante', entre: ['tante'], jeu: 'elle entonne un chant', txt: 'Le chant funèbre dit qui il était, ce qu’il a fait, à qui il manquera. On ne pleure pas seul : on pleure en chœur.' },
+    { t: 'question', q: 'Quelles sont les fonctions des chants funèbres ?',
+      options: [
+        { txt: 'Faire l’éloge du défunt, exprimer la douleur collectivement et consoler les vivants.', ok: true, retour: 'Le chant transforme une douleur individuelle en émotion partagée : c’est une fonction sociale.' },
+        { txt: 'Seulement divertir les invités.', retour: 'Non : ils ont une fonction de mémoire et de consolation.' }
+      ] },
+    { t: 'recit', entre: ['fils'], txt: 'Arnaud arrive d’Europe avec un tableau des dépenses.', jauges: { depenses: 55 } },
+    { t: 'dit', qui: 'fils', jeu: 'il pose ses papiers sur la table', txt: 'Location de chaises et de bâches, sonorisation, tenues assorties pour toute la famille, nourriture pour huit cents personnes, frais de morgue des premiers jours… On parle de plusieurs millions.', jauges: { depenses: 85 } },
+    { t: 'dit', qui: 'grandmere', emo: 'triste', txt: 'Ton père n’aurait pas voulu qu’on s’endette pour lui. Il disait : « Aidez les vivants. »' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · tradition, modernité', consigne: 'Classe chaque pratique : relève-t-elle de la tradition, ou de la vie moderne ?',
+      cats: ['Pratique traditionnelle', 'Pratique moderne'],
+      items: [
+        { txt: 'Inhumer le défunt dans la concession familiale.', cat: 0 },
+        { txt: 'Conserver le corps à la morgue avant l’inhumation.', cat: 1 },
+        { txt: 'Chants et danses du deuil.', cat: 0 },
+        { txt: 'Faire-part diffusé sur les réseaux sociaux.', cat: 1 },
+        { txt: 'Déclarer le décès à l’état civil.', cat: 1 },
+        { txt: 'Faire du défunt un ancêtre honoré par la famille.', cat: 0 }
+      ],
+      bravo: 'Les deux se mêlent aujourd’hui : on enregistre le décès à la mairie, puis on danse à la concession.' },
+    { t: 'choix', qui: 'oncle', q: 'Tu es Tonton Fotso, l’aîné. Comment organises-tu les funérailles ?',
+      options: [
+        { txt: 'La plus grande fête possible : le village doit voir que nous sommes une grande famille.', consequence: 'La fête est mémorable, mais plusieurs membres de la famille s’endettent pour des années.', jauges: { depenses: 15, sens: -15 } },
+        { txt: 'Garder les rites essentiels (chants, danses, repas partagé) et supprimer le superflu ; mettre en commun les cotisations.', consequence: 'Le défunt est honoré, la famille reste unie et personne n’est ruiné.', jauges: { depenses: -40, sens: 20 } },
+        { txt: 'Supprimer les funérailles : c’est de l’argent perdu.', consequence: 'L’argent est économisé, mais une partie de la famille se sent privée de son deuil.', jauges: { depenses: -50, sens: -35 } }
+      ],
+      oeuvre: 'Dans plusieurs communautés, des chefs et des associations ont adopté des règles pour limiter les dépenses des funérailles sans en abandonner le sens.' },
+    { t: 'dit', qui: 'eleve', emo: 'fier', txt: 'Ce qui compte, ce n’est pas le prix des chaises. C’est que tout le monde se souvienne de lui.', jauges: { sens: 85 } },
+    { t: 'atelier', mode: 'balance', titre: 'Atelier · faut-il réformer les funérailles ?', consigne: 'Place chaque argument du côté qu’il défend.',
+      cotes: ['Garder les funérailles telles quelles', 'Les simplifier'],
+      args: [
+        { txt: 'Elles rassemblent la famille dispersée, y compris la diaspora.', cote: 0, poids: 3 },
+        { txt: 'Les dépenses excessives endettent les familles.', cote: 1, poids: 3 },
+        { txt: 'Elles transmettent les chants, les danses et l’histoire de la famille.', cote: 0, poids: 2 },
+        { txt: 'La concurrence entre familles transforme le deuil en spectacle.', cote: 1, poids: 2 }
+      ],
+      bravo: 'Le débat ne porte pas sur le rite lui-même, mais sur ce qui s’y est ajouté.' },
+    { t: 'dit', qui: 'tante', emo: 'joie', txt: 'Alors chantons. Et que chacun apporte ce qu’il peut.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · le juste deuil',
+    intro: 'Règle la pression sociale, la solidarité des cotisations et la place laissée aux rites : quelles funérailles obtiens-tu ?',
+    persos: ['oncle', 'grandmere', 'fils', 'tante', 'eleve'],
+    curseurs: [
+      { id: 'pression', nom: 'Pression du « qu’en-dira-t-on »', val: 70, bas: 'faible', haut: 'forte' },
+      { id: 'solidarite', nom: 'Solidarité des cotisations', val: 50, bas: 'chacun pour soi', haut: 'mise en commun' },
+      { id: 'rites', nom: 'Place des rites essentiels', val: 70, bas: 'oubliés', haut: 'respectés', lecture: { haut: 'Chants, danses, éloge du défunt : le sens est préservé.', bas: 'Il ne reste qu’une fête coûteuse.' } }
+    ],
+    scenarios: [
+      { nom: 'Le grand spectacle', icone: 'pieces', valeurs: { pression: 90, solidarite: 30, rites: 40 } },
+      { nom: 'Le juste deuil', icone: 'groupe', valeurs: { pression: 30, solidarite: 80, rites: 80 } },
+      { nom: 'Sans rites', icone: 'muet', valeurs: { rites: 10, pression: 20 } }
+    ],
+    liens: [
+      { a: 'oncle', b: 'fils', type: 'conflit', lib: 'budget', base: .3, poids: { pression: .5, solidarite: -.3 } },
+      { a: 'grandmere', b: 'eleve', type: 'amour', lib: 'mémoire', base: .7, poids: { rites: .2 } },
+      { a: 'tante', b: 'grandmere', type: 'alliance', lib: 'chant', base: .5, poids: { rites: .4 } },
+      { a: 'fils', b: 'eleve', type: 'confiance', lib: 'cotise', base: .3, poids: { solidarite: .5 } }
+    ],
+    issue: function(v){
+      if(v.rites < 30){ return { niveau: 'ko', badge: 'Un deuil inachevé', recit: 'On économise, mais personne ne chante ni ne danse pour le défunt : la famille se sent privée de son adieu.', apres: 'Le rite a une fonction psychologique et sociale ; le supprimer laisse un vide.', themes: ['fonction du rite'] }; }
+      if(v.pression > 60 && v.solidarite < 50){ return { niveau: 'ko', badge: 'La fête des dettes', recit: 'Huit cents invités, des tenues neuves, des millions dépensés : les enfants du défunt rembourseront pendant des années.', apres: 'Quand le paraître l’emporte, la tradition devient un fardeau.', themes: ['ostentation', 'endettement'] }; }
+      if(v.solidarite > 60 && v.rites > 55){ return { niveau: 'ok', badge: 'Le juste deuil', recit: 'Les rites essentiels sont respectés, les cotisations partagées : le défunt est honoré et personne n’est ruiné.', apres: 'C’est le lien réussi entre tradition et vie moderne.', themes: ['solidarité', 'tradition vivante'] }; }
+      return { niveau: 'moyen', badge: 'Un équilibre fragile', recit: 'Les funérailles ont lieu, honorables, mais certains ont donné au-delà de leurs moyens.', apres: 'La règle commune protège ceux qui n’osent pas dire non.', themes: ['pression sociale'] };
+    }
+  },
+  quiz: [
+    { q: 'Quelle différence entre inhumation et funérailles dans de nombreuses communautés des Grassfields ?', options: [
+      { txt: 'L’inhumation rend le corps à la terre ; les funérailles, plus tard, honorent le défunt devenu ancêtre.', ok: true, retour: 'Deux moments, deux fonctions.' },
+      { txt: 'Ce sont deux mots pour la même chose.', retour: 'Non, dans ces communautés ce sont deux cérémonies distinctes.' } ] },
+    { q: 'À quoi servent les chants funèbres ?', options: [
+      { txt: 'Faire l’éloge du défunt et consoler les vivants.', ok: true, retour: 'Une fonction de mémoire et de cohésion.' },
+      { txt: 'À annoncer le marché.', retour: 'Non.' } ] },
+    { q: 'Citez une pratique moderne liée au décès.', options: [
+      { txt: 'La déclaration de décès à l’état civil.', ok: true, retour: 'Avec la morgue et le faire-part numérique.' },
+      { txt: 'La danse du deuil.', retour: 'C’est une pratique traditionnelle.' } ] },
+    { q: 'Quel est le principal problème posé aujourd’hui par certaines funérailles ?', options: [
+      { txt: 'Des dépenses excessives qui endettent les familles.', ok: true, retour: 'Souvent sous la pression sociale.' },
+      { txt: 'L’absence de chants.', retour: 'Les chants restent très présents.' } ] },
+    { q: 'Que propose la scène ?', options: [
+      { txt: 'Garder le sens du rite et supprimer le superflu.', ok: true, retour: 'Tradition vivante, sans ostentation.' },
+      { txt: 'Supprimer toutes les traditions.', retour: 'Ce n’est pas la conclusion de la scène.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Les rites de la mort ont des fonctions : rendre le corps à la terre, faire du défunt un ancêtre, rassembler et consoler la famille.',
+      'Les chants funèbres font l’éloge du défunt et expriment collectivement la douleur.',
+      'La vie moderne transforme ces rites : morgue, état civil, faire-part numérique, diaspora.',
+      'Le débat actuel porte sur les dépenses ostentatoires ; beaucoup proposent de garder le sens et de supprimer le superflu.'
+    ],
+    ecrire: 'Comparez, en quinze lignes, les rites funéraires de votre communauté avec ceux décrits dans la scène : ressemblances, différences, et ce qui a changé depuis la génération de vos grands-parents.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Les funérailles de grand-père</h1>
+<p><b>Cultures nationales · Terminale</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les pratiques décrites varient d’une communauté à l’autre ; chaque élève compare avec la sienne.</i></p>
+<h3>Objectif</h3><p>Établir le lien entre les pratiques traditionnelles liées à la mort (veillée, chants funèbres, funérailles, rôle de la famille élargie) et la vie moderne (coûts, morgue, état civil, diaspora), et distinguer ce qui a du sens de ce qui est devenu ostentatoire.</p>
+<p>Programme : Progression harmonisée Tle · Leçon 3 (pratiques traditionnelles liées à la mort et vie moderne), leçon 4 (croyances), leçon 9 (chansons funèbres)</p>
+<p>Lieu : La concession familiale, à l’Ouest · Réunion de famille avant les funérailles</p>
+<h3>Personnages</h3><ul><li>Mami Nguefack, la veuve</li><li>Tonton Fotso, l’aîné</li><li>Arnaud, le fils de la diaspora</li><li>Tata Josiane, chanteuse du deuil</li><li>Cédric, élève de Terminale</li></ul>
+<h3>La scène</h3>
+<p>Grand-père est mort il y a trois semaines. Il a été inhumé dans la concession, près de ses ancêtres. Chez de nombreux peuples des Grassfields, ce n’est pas la fin : les funérailles, la grande fête du souvenir, auront lieu plus tard.</p>
+<p><b>Cédric, élève de Terminale</b> : Pourquoi deux fois ? L’enterrement, puis les funérailles ?</p>
+<p><b>Tonton Fotso, l’aîné</b> : L’enterrement rend le corps à la terre. Les funérailles font du défunt un ancêtre, qui veille sur la famille. On danse, on chante, on mange ensemble : la mort ne doit pas disperser la famille, elle doit la rassembler.</p>
+<p><b>Tata Josiane, chanteuse du deuil</b> <i>(elle entonne un chant)</i> : Le chant funèbre dit qui il était, ce qu’il a fait, à qui il manquera. On ne pleure pas seul : on pleure en chœur.</p>
+<p><b>Question :</b> Quelles sont les fonctions des chants funèbres ?</p><ul><li>Faire l’éloge du défunt, exprimer la douleur collectivement et consoler les vivants. <b>(bonne réponse)</b></li><li>Seulement divertir les invités.</li></ul><p>Le chant transforme une douleur individuelle en émotion partagée : c’est une fonction sociale.</p>
+<p>Arnaud arrive d’Europe avec un tableau des dépenses.</p>
+<p><b>Arnaud, le fils de la diaspora</b> <i>(il pose ses papiers sur la table)</i> : Location de chaises et de bâches, sonorisation, tenues assorties pour toute la famille, nourriture pour huit cents personnes, frais de morgue des premiers jours… On parle de plusieurs millions.</p>
+<p><b>Mami Nguefack, la veuve</b> : Ton père n’aurait pas voulu qu’on s’endette pour lui. Il disait : « Aidez les vivants. »</p>
+<h4>Atelier · tradition, modernité</h4><p>Classe chaque pratique : relève-t-elle de la tradition, ou de la vie moderne ?</p>
+<ul><li><b>Pratique traditionnelle</b> : Inhumer le défunt dans la concession familiale. ; Chants et danses du deuil. ; Faire du défunt un ancêtre honoré par la famille.</li><li><b>Pratique moderne</b> : Conserver le corps à la morgue avant l’inhumation. ; Faire-part diffusé sur les réseaux sociaux. ; Déclarer le décès à l’état civil.</li></ul>
+<p>Les deux se mêlent aujourd’hui : on enregistre le décès à la mairie, puis on danse à la concession.</p>
+<p><b>À toi de décider :</b> Tu es Tonton Fotso, l’aîné. Comment organises-tu les funérailles ?</p><ul><li>La plus grande fête possible : le village doit voir que nous sommes une grande famille. — La fête est mémorable, mais plusieurs membres de la famille s’endettent pour des années.</li><li>Garder les rites essentiels (chants, danses, repas partagé) et supprimer le superflu ; mettre en commun les cotisations. — Le défunt est honoré, la famille reste unie et personne n’est ruiné.</li><li>Supprimer les funérailles : c’est de l’argent perdu. — L’argent est économisé, mais une partie de la famille se sent privée de son deuil.</li></ul>
+<p><b>Cédric, élève de Terminale</b> : Ce qui compte, ce n’est pas le prix des chaises. C’est que tout le monde se souvienne de lui.</p>
+<h4>Atelier · faut-il réformer les funérailles ?</h4><p>Place chaque argument du côté qu’il défend.</p>
+<p>Le débat ne porte pas sur le rite lui-même, mais sur ce qui s’y est ajouté.</p>
+<p><b>Tata Josiane, chanteuse du deuil</b> : Alors chantons. Et que chacun apporte ce qu’il peut.</p>
+<h3>Quiz</h3><ol><li>Quelle différence entre inhumation et funérailles dans de nombreuses communautés des Grassfields ? — <b>L’inhumation rend le corps à la terre ; les funérailles, plus tard, honorent le défunt devenu ancêtre.</b> Deux moments, deux fonctions.</li><li>À quoi servent les chants funèbres ? — <b>Faire l’éloge du défunt et consoler les vivants.</b> Une fonction de mémoire et de cohésion.</li><li>Citez une pratique moderne liée au décès. — <b>La déclaration de décès à l’état civil.</b> Avec la morgue et le faire-part numérique.</li><li>Quel est le principal problème posé aujourd’hui par certaines funérailles ? — <b>Des dépenses excessives qui endettent les familles.</b> Souvent sous la pression sociale.</li><li>Que propose la scène ? — <b>Garder le sens du rite et supprimer le superflu.</b> Tradition vivante, sans ostentation.</li></ol>
+<h3>À retenir</h3><ul><li>Les rites de la mort ont des fonctions : rendre le corps à la terre, faire du défunt un ancêtre, rassembler et consoler la famille.</li><li>Les chants funèbres font l’éloge du défunt et expriment collectivement la douleur.</li><li>La vie moderne transforme ces rites : morgue, état civil, faire-part numérique, diaspora.</li><li>Le débat actuel porte sur les dépenses ostentatoires ; beaucoup proposent de garder le sens et de supprimer le superflu.</li></ul>
+<h3>À écrire</h3><p>Comparez, en quinze lignes, les rites funéraires de votre communauté avec ceux décrits dans la scène : ressemblances, différences, et ce qui a changé depuis la génération de vos grands-parents.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="tle-cultures-funerailles-tradition-modernite.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

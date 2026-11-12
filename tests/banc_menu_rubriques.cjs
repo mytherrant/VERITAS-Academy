@@ -62,7 +62,9 @@ let m;
 while ((m = re.exec(bloc))) entrees.push({ h: m[1] || '', vp: m[2] || '', t: m[3], d: m[4] });
 
 console.log(`\n${G}② Chaque entrée mène quelque part de réel${R}`);
-dire(entrees.length >= 30, entrees.length + ' entrées lues dans la page servie');
+/* Plancher contre un motif qui ne lirait plus rien. Abaissé de 30 à 20 le
+   10/11/2026 : la colonne Élève se réduit à « Apprendre » (25 entrées). */
+dire(entrees.length >= 20,entrees.length + ' entrées lues dans la page servie');
 
 const appJs = fs.readFileSync(path.join(RACINE, 'app.js'), 'utf8');
 
@@ -110,8 +112,10 @@ dire(ancresInconnues.length === 0,
 console.log(`\n${G}③ Aucun service publié n'est laissé sans annonce${R}`);
 {
   const suivis = execFileSync('git', ['ls-files'], { cwd: RACINE, encoding: 'utf8' }).split('\n');
-  /* Un « sommaire » = l'index d'un dossier public de premier niveau. */
-  const HORS = new Set(['tests', 'tools', 'legal', 'api', 'chunks', 'assets', 'data', 'uploads', 'd']);
+  /* Un « sommaire » = l'index d'un dossier public de premier niveau.
+     gestion/ n'est pas public : c'est l'application interne des centres
+     (gestion.veritas-school.com, noindex, connexion obligatoire). */
+  const HORS = new Set(['tests', 'tools', 'legal', 'api', 'chunks', 'assets', 'data', 'uploads', 'd', 'gestion']);
   const hubs = [...new Set(suivis
     .filter(p => p.endsWith('/index.html') && p.split('/').length === 2)
     .map(p => p.split('/')[0]))].filter(d => !HORS.has(d));
@@ -120,7 +124,15 @@ console.log(`\n${G}③ Aucun service publié n'est laissé sans annonce${R}`);
   const citeMenu = d => bloc.indexOf('"' + d + '/"') > 0 || bloc.indexOf('/' + d + '/"') > 0;
   const citePlan = d => plan.indexOf('"' + d + '/"') > 0 || plan.indexOf('/' + d + '/"') > 0;
 
-  const orphelins = hubs.filter(d => !citeMenu(d) && !citePlan(d));
+  /* 10/11/2026 — la colonne Élève du menu se réduit à « Apprendre » (« tout
+     ceci est classé et visible dans apprendre, supprime du menu », Jacques).
+     Un service atteint depuis apprendre/ — lui-même dans le menu — garde un
+     chemin réel : on l'accepte, à condition que le lien y soit écrit. */
+  const appr = fs.readdirSync(path.join(RACINE, 'apprendre'))
+    .filter(f => /\.(js|html)$/.test(f))
+    .map(f => fs.readFileSync(path.join(RACINE, 'apprendre', f), 'utf8')).join('\n');
+  const citeApprendre = d => citeMenu('apprendre') && appr.indexOf('"/' + d + '/') >= 0;
+  const orphelins = hubs.filter(d => !citeMenu(d) && !citePlan(d) && !citeApprendre(d));
   dire(orphelins.length === 0,
     'les ' + hubs.length + ' sommaires publics sont annoncés (menu ou plan)',
     'sans aucun chemin : ' + orphelins.join(', '));
@@ -129,7 +141,7 @@ console.log(`\n${G}③ Aucun service publié n'est laissé sans annonce${R}`);
      table ne les laisse pas retomber en silence. */
   for (const d of ['plateforme', 'eleve', 'enseignant', 'livrets', 'flash', 'adopter']) {
     if (hubs.indexOf(d) < 0) continue;
-    dire(citeMenu(d), '« ' + d + '/ » a bien son entrée de menu');
+    dire(citeMenu(d) || citeApprendre(d), '« ' + d + '/ » a bien son entrée de menu (ou passe par Apprendre)');
   }
   dire(bloc.indexOf('plan.html') > 0, 'et le plan du site est atteignable depuis le menu');
 }

@@ -7,7 +7,7 @@ require_once __DIR__ . '/_json_boot.php'; // display_errors=0 + purge des parasi
 // Reproduction interdite sans accord écrit. Contrefaçon : 5-10 ans prison +
 // 500 000 à 10 000 000 FCFA d'amende. contact@veritas-school.com
 //
-// GET /api/news_proxy.php?cat=education|minesec|grandes_ecoles|bourses
+// GET /api/news_proxy.php?cat=education|minesec|grandes_ecoles|bourses|bepc|probatoire|bac
 // ── Public (pas d'auth), cache 30 min ──
 // ============================================================
 // v1.2.2 : allowlist au lieu de '*'
@@ -33,11 +33,21 @@ require_once __DIR__ . '/_sentinel.php';
 vrt_sentinelle('lecture');
 
 
+// 11/11/2026 — « Juste les informations pertinentes et plus récentes »
+// (Jacques). Apprendre affichait en novembre les résultats du bac de JUILLET :
+// Google News classe par pertinence, et on gardait les 12 premiers. Désormais
+// `when:60d` restreint la recherche, puis on trie par date (plus récent
+// d'abord) et on écarte tout article de plus de 60 jours. `ts` est renvoyé
+// pour que le client trie sans relire la date affichée.
 $feeds = [
-    'education'     => 'https://news.google.com/rss/search?q=education+cameroun+scolaire&hl=fr&gl=CM&ceid=CM:fr',
-    'minesec'       => 'https://news.google.com/rss/search?q=MINESEC+cameroun+enseignement+secondaire&hl=fr&gl=CM&ceid=CM:fr',
-    'grandes_ecoles'=> 'https://news.google.com/rss/search?q=grandes+%C3%A9coles+concours+universit%C3%A9+cameroun&hl=fr&gl=CM&ceid=CM:fr',
-    'bourses'       => 'https://news.google.com/rss/search?q=bourses+%C3%A9tudes+cameroun+2026+candidature&hl=fr&gl=CM&ceid=CM:fr',
+    'education'     => 'https://news.google.com/rss/search?q=education+cameroun+scolaire+when:60d&hl=fr&gl=CM&ceid=CM:fr',
+    'minesec'       => 'https://news.google.com/rss/search?q=MINESEC+cameroun+enseignement+secondaire+when:60d&hl=fr&gl=CM&ceid=CM:fr',
+    'grandes_ecoles'=> 'https://news.google.com/rss/search?q=grandes+%C3%A9coles+concours+universit%C3%A9+cameroun+when:60d&hl=fr&gl=CM&ceid=CM:fr',
+    'bourses'       => 'https://news.google.com/rss/search?q=bourses+%C3%A9tudes+cameroun+2026+candidature+when:60d&hl=fr&gl=CM&ceid=CM:fr',
+    // Apprendre (10/11/2026) : l'actualité de l'examen de la classe choisie.
+    'bepc'          => 'https://news.google.com/rss/search?q=BEPC+cameroun+OBC+when:60d&hl=fr&gl=CM&ceid=CM:fr',
+    'probatoire'    => 'https://news.google.com/rss/search?q=probatoire+cameroun+OBC+when:60d&hl=fr&gl=CM&ceid=CM:fr',
+    'bac'           => 'https://news.google.com/rss/search?q=baccalaur%C3%A9at+cameroun+OBC+when:60d&hl=fr&gl=CM&ceid=CM:fr',
 ];
 
 $cat = isset($_GET['cat']) ? $_GET['cat'] : 'education';
@@ -49,7 +59,7 @@ if (!array_key_exists($cat, $feeds)) {
 // Cache fichier — 10 minutes (raccourci pour fraicheur)
 // ?nocache=1 bypasse complètement le cache (bouton "Actualiser")
 $cacheDir  = sys_get_temp_dir() . '/';
-$cacheFile = $cacheDir . 'veritas_news_' . $cat . '.json';
+$cacheFile = $cacheDir . 'veritas_news2_' . $cat . '.json';   // « 2 » : format trié par date (11/11/2026)
 $noCache   = isset($_GET['nocache']) && $_GET['nocache']==='1';
 $cacheAge  = file_exists($cacheFile) ? (time() - filemtime($cacheFile)) : 999999;
 // « Actualiser » est public : sans plancher, chaque appel déclenchait une
@@ -65,24 +75,49 @@ if (!$noCache && file_exists($cacheFile) && $cacheAge < 600) {
 // Si nocache=1, supprimer le fichier cache pour forcer un fetch propre
 if ($noCache && file_exists($cacheFile)) @unlink($cacheFile);
 
-// Récupérer le flux RSS
-$ctx = stream_context_create([
-    'http' => [
-        'timeout' => 12,
-        'header'  => "User-Agent: Mozilla/5.0 (compatible; VERITAS-News/1.0)\r\n",
-    ],
-    // Certificat VÉRIFIÉ (audit 16/10/2026) : sans contrôle, un intermédiaire
-    // pouvait injecter le flux affiché sur le site.
-    'ssl' => [
-        'verify_peer'      => true,
-        'verify_peer_name' => true,
-    ],
-]);
-
-$xml = @file_get_contents($feeds[$cat], false, $ctx);
+// Récupérer le flux RSS — durée TOTALE bornée (11/11/2026).
+// L'ancien file_get_contents ne bornait que chaque lecture : le flux « bac »
+// pouvait pendre indéfiniment (requête jamais close, encart « Chargement… »
+// sans fin dans Apprendre). cURL borne la connexion ET le total, et suit la
+// redirection de Google News (gl=CM → gl=FR).
+$xml = false;
+if (function_exists('curl_init')) {
+    $ch = curl_init($feeds[$cat]);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS      => 3,
+        // Redirections en HTTPS seulement : le flux est affiché sur le site.
+        CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS,
+        CURLOPT_REDIR_PROTOCOLS=> CURLPROTO_HTTPS,
+        CURLOPT_CONNECTTIMEOUT => 4,
+        CURLOPT_TIMEOUT        => 8,
+        CURLOPT_USERAGENT      => 'Mozilla/5.0 (compatible; VERITAS-News/1.0)',
+        // Certificat VÉRIFIÉ (audit 16/10/2026) : sans contrôle, un intermédiaire
+        // pouvait injecter le flux affiché sur le site.
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_SSL_VERIFYHOST => 2,
+    ]);
+    $xml = curl_exec($ch);
+    if (curl_getinfo($ch, CURLINFO_HTTP_CODE) !== 200) $xml = false;
+    curl_close($ch);
+} else {
+    $ctx = stream_context_create([
+        'http' => ['timeout' => 8, 'header' => "User-Agent: Mozilla/5.0 (compatible; VERITAS-News/1.0)\r\n"],
+        'ssl'  => ['verify_peer' => true, 'verify_peer_name' => true],
+    ]);
+    $xml = @file_get_contents($feeds[$cat], false, $ctx);
+}
 if (!$xml) {
-    // Retourner un résultat vide plutôt qu'une erreur dure
-    echo json_encode(['items' => [], 'error' => 'Flux temporairement indisponible']);
+    // Résultat vide plutôt qu'une erreur dure, mis en cache 2 min : un flux en
+    // panne ne doit pas faire attendre 8 s chaque visiteur.
+    // La dernière liste valide, même périmée, vaut mieux qu'une liste vide.
+    $ancien = file_exists($cacheFile) ? json_decode((string)@file_get_contents($cacheFile), true) : null;
+    $vide = (is_array($ancien) && !empty($ancien['items'])) ? $ancien
+          : ['items' => [], 'error' => 'Flux temporairement indisponible', 'cat' => $cat];
+    @file_put_contents($cacheFile, json_encode($vide));
+    @touch($cacheFile, time() - 480);
+    echo json_encode($vide);
     exit;
 }
 
@@ -93,6 +128,7 @@ if (!$rss || !isset($rss->channel->item)) {
 }
 
 $items = [];
+$__np_limite = time() - 60 * 86400;
 foreach ($rss->channel->item as $item) {
     $title  = html_entity_decode((string)$item->title, ENT_QUOTES, 'UTF-8');
     $link   = (string)$item->link;
@@ -110,17 +146,19 @@ foreach ($rss->channel->item as $item) {
 
     // Formater la date
     $ts        = strtotime($date);
-    $dateStr   = $ts ? date('d/m/Y', $ts) : $date;
+    // Sans date lisible ou trop ancien : pas une actualité.
+    if (!$ts || $ts < $__np_limite) continue;
 
     $items[] = [
         'title'  => $title,
         'link'   => $link,
-        'date'   => $dateStr,
+        'date'   => date('d/m/Y', $ts),
         'source' => $source,
+        'ts'     => $ts,
     ];
-
-    if (count($items) >= 12) break;
 }
+usort($items, function ($a, $b) { return $b['ts'] - $a['ts']; });
+$items = array_slice($items, 0, 12);
 
 $result = ['items' => $items, 'from_cache' => false, 'cat' => $cat, 'fetched_at' => date('c')];
 @file_put_contents($cacheFile, json_encode($result));

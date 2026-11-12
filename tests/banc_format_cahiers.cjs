@@ -115,12 +115,21 @@ dit(extraits.length > 0, `${extraits.length} extraits gratuits trouvés`);
    soit, sur la seule page de ces cahiers qui n'exige aucun code. */
 const catalogue = JSON.parse(lire(path.join(RACINE, 'api', 'data',
   'livrets_catalogue.json')) || '{}').ouvrages || {};
-const AUTONOME = 'OI_DOC';
+/* ⚠️ ET « AUTONOME » N'EST PLUS UN SEUL MOTEUR. Depuis le 28/10/2026, les
+   livrets de philosophie apportent le leur (`philo.js`, `PHILO_DOC`). On lit
+   donc dans la page de l'ouvrage (`cahier-<slug>.html`) QUEL moteur elle
+   charge, plutôt que de supposer le premier venu. */
+const MOTEURS = [['philo.js', 'PHILO_DOC'], ['support-oi.js', 'OI_DOC']];
+function globaleAutonome(slug) {
+  const page = lire(path.join(RACINE, 'livrets', `cahier-${slug}.html`));
+  for (const [js, g] of MOTEURS) if (page.includes(`/livrets/${js}`)) return g;
+  return '(page autonome sans moteur connu)';
+}
 
 const malFormes = [];
 for (const f of extraits) {
   const slug = f.replace(/^extrait-/, '').replace(/\.js$/, '');
-  const attendu = ((catalogue[slug] || {}).mode === 'autonome') ? AUTONOME : VIVANT;
+  const attendu = ((catalogue[slug] || {}).mode === 'autonome') ? globaleAutonome(slug) : VIVANT;
   const tete = lire(path.join(RACINE, 'livrets', f)).slice(0, 400);
   const m = /^[\s﻿]*window\.([A-Za-z_$][A-Za-z0-9_$]*)\s*=/.exec(tete);
   const nom = m ? m[1] : '(aucune)';

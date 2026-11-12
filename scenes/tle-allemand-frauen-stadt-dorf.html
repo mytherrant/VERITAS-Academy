@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Frauen in Stadt und Dorf — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’allemand (Terminale) : la situation de la femme en ville et au village ; les noms de métiers au féminin et la subordonnée en weil.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/tle-allemand-frauen-stadt-dorf.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Frauen in Stadt und Dorf — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’allemand (Terminale) : la situation de la femme en ville et au village ; les noms de métiers au féminin et la subordonnée en weil.">
+<meta property="og:url" content="https://veritas-school.com/scenes/tle-allemand-frauen-stadt-dorf.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Frauen in Stadt und Dorf","description":"Scène animée d’allemand (Terminale) : la situation de la femme en ville et au village ; les noms de métiers au féminin et la subordonnée en weil.","url":"https://veritas-school.com/scenes/tle-allemand-frauen-stadt-dorf.html","inLanguage":"de-DE","learningResourceType":"Simulation interactive","educationalLevel":"Terminale","about":"Allemand","teaches":"Comprendre et comparer la situation de la femme en ville et au village ; former les noms de métiers au féminin (-in) ; construire une subordonnée en « weil » (verbe à la fin).","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-allemand-frauen',
+  discipline: 'Allemand', niveau: 'Terminale', langue: 'de-DE',
+  titre: 'Frauen in Stadt und Dorf',
+  decor: 'village', lieu: 'Ein Dorf bei Bafia', moment: 'In den Ferien',
+  objectif: 'Comprendre et comparer la situation de la femme en ville et au village ; former les noms de métiers au féminin (-in) ; construire une subordonnée en « weil » (verbe à la fin).',
+  programme: 'Progression harmonisée Tle · Vie familiale et socioculturelle, leçon 1 (la situation de la femme en ville et au village), leçon 5 (production et traduction)',
+  jauges: [
+    { id: 'chancen', nom: 'Chancen der Mädchen', val: 35, couleur: '#1F9D5B' },
+    { id: 'deutsch', nom: 'Deutsch', val: 25, couleur: '#1E499B' }
+  ],
+  personnages: {
+    amina: { nom: 'Amina', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    oma:   { nom: 'Oma Ngono', couleur: '#5E8A3A', look: { tenue: 'robe', peau: 'fonce', vieux: true, coiffe: 'foulard', couleurCoiffe: '#5E8A3A', habit: '#B4793F', objet: 'houe' } },
+    tante: { nom: 'Tante Brigitte, Ärztin', couleur: '#5AA9C9', look: { metier: 'medecin', tenue: 'jupe', peau: 'fonce', cheveux: 'chignon' } },
+    onkel: { nom: 'Onkel Paul', couleur: '#8A5A2B', look: { metier: 'paysan', peau: 'fonce', cheveux: 'ras', moustache: true } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['amina', 'oma'], txt: 'Amina verbringt die Ferien bei ihrer Großmutter im Dorf. Ihre Tante kommt aus Yaoundé zu Besuch.', trad: 'Amina passe les vacances chez sa grand-mère au village. Sa tante vient de Yaoundé en visite.', objet: { i: 'panier', lib: 'Das Feld' } },
+    { t: 'dit', qui: 'oma', txt: 'Im Dorf stehen die Frauen früh auf. Sie arbeiten auf dem Feld, holen Wasser und kochen für die Familie.', trad: 'Au village, les femmes se lèvent tôt. Elles travaillent aux champs, vont chercher l’eau et cuisinent pour la famille.' },
+    { t: 'dit', qui: 'amina', emo: 'doute', txt: 'Und die Männer, Oma? Helfen sie nicht?', trad: 'Et les hommes, grand-mère ? Ils n’aident pas ?' },
+    { t: 'dit', qui: 'onkel', entre: ['onkel'], jeu: 'er lacht', txt: 'Doch! Ich arbeite auch auf dem Feld. Aber das Kochen ist Frauensache.', trad: 'Mais si ! Moi aussi je travaille aux champs. Mais la cuisine, c’est l’affaire des femmes.' },
+    { t: 'question', q: 'Que pense l’oncle Paul de la répartition des tâches ?',
+      options: [
+        { txt: 'Il aide aux champs, mais considère que la cuisine revient aux femmes.', ok: true, retour: '« Frauensache » : une affaire de femmes. C’est un stéréotype sur les rôles.' },
+        { txt: 'Il fait toute la cuisine.', retour: 'Non : « das Kochen ist Frauensache ».' }
+      ] },
+    { t: 'recit', entre: ['tante'], txt: 'Tante Brigitte kommt an.', trad: 'Tante Brigitte arrive.' },
+    { t: 'dit', qui: 'tante', emo: 'joie', txt: 'Ich bin Ärztin im Krankenhaus von Yaoundé. Ich arbeite viel, aber ich verdiene mein eigenes Geld.', trad: 'Je suis médecin à l’hôpital de Yaoundé. Je travaille beaucoup, mais je gagne mon propre argent.', jauges: { chancen: 55 } },
+    { t: 'dit', qui: 'oma', emo: 'fier', txt: 'Ich konnte nicht zur Schule gehen. Brigitte hatte mehr Glück, weil ihr Vater sie in die Schule geschickt hat.', trad: 'Je n’ai pas pu aller à l’école. Brigitte a eu plus de chance, parce que son père l’a envoyée à l’école.' },
+    { t: 'remarque', titre: 'Le féminin des métiers', txt: 'En allemand, on forme souvent le féminin avec -in : der Lehrer → die Lehrerin, der Ingenieur → die Ingenieurin. Parfois avec un Umlaut : der Arzt → die Ärztin, der Bauer → die Bäuerin.' },
+    { t: 'atelier', mode: 'tri', titre: 'Werkstatt · masculin ou féminin ?', consigne: 'Classe chaque nom de métier.',
+      cats: ['Mann (der)', 'Frau (die)'],
+      items: [
+        { txt: 'Ärztin', cat: 1 },
+        { txt: 'Lehrer', cat: 0 },
+        { txt: 'Ingenieurin', cat: 1 },
+        { txt: 'Bauer', cat: 0 },
+        { txt: 'Verkäuferin', cat: 1 },
+        { txt: 'Polizist', cat: 0 }
+      ],
+      bravo: 'Die Ärztin, der Lehrer, die Ingenieurin, der Bauer, die Verkäuferin, der Polizist.', jauges: { deutsch: 50 } },
+    { t: 'dit', qui: 'amina', txt: 'Ich möchte Ingenieurin werden, weil ich Mathematik liebe.', trad: 'Je voudrais devenir ingénieure, parce que j’aime les mathématiques.' },
+    { t: 'remarque', titre: 'La subordonnée en weil', txt: 'Après « weil » (parce que), le verbe conjugué va à la fin : … weil ich Mathematik liebe. Comparez : Ich liebe Mathematik (principale, verbe en 2e position).' },
+    { t: 'atelier', mode: 'ordre', titre: 'Werkstatt · construis la phrase', consigne: 'Remets les mots dans l’ordre : « Les filles doivent aller à l’école, parce que l’éducation est importante. »',
+      items: ['Die Mädchen', 'müssen', 'zur Schule gehen,', 'weil', 'Bildung', 'wichtig', 'ist.'],
+      bravo: 'Le verbe « ist » est à la fin de la subordonnée en weil.', jauges: { deutsch: 70 } },
+    { t: 'choix', qui: 'onkel', q: 'Tu es l’oncle Paul. Ta fille veut continuer ses études à Yaoundé. Que fais-tu ?',
+      options: [
+        { txt: 'Je refuse : elle doit se marier.', consequence: 'Elle perd une chance, et la famille une future ingénieure ou médecin.', jauges: { chancen: -20 } },
+        { txt: 'Je l’aide, même si cela coûte cher.', consequence: 'Comme le père de Brigitte autrefois, tu ouvres une porte pour toute la famille.', jauges: { chancen: 30 } }
+      ],
+      oeuvre: 'Partout au Cameroun, la scolarisation des filles progresse, mais l’écart reste plus grand dans les campagnes.' },
+    { t: 'dit', qui: 'tante', emo: 'joie', txt: 'Bildung ist der Schlüssel. Für Jungen und für Mädchen.', trad: 'L’éducation est la clé. Pour les garçons et pour les filles.', jauges: { chancen: 85, deutsch: 85 } }
+  ],
+  labo: {
+    titre: 'Labor · die Chancen der Mädchen',
+    intro: 'Règle l’accès à l’école, le partage des tâches et l’accès à un revenu propre : quel avenir pour les filles du village ?',
+    persos: ['amina', 'oma', 'tante', 'onkel'],
+    curseurs: [
+      { id: 'schule', nom: 'Accès à l’école (Schule)', val: 55, bas: 'rare', haut: 'pour toutes' },
+      { id: 'aufgaben', nom: 'Partage des tâches (Hausarbeit)', val: 30, bas: 'femmes seules', haut: 'partagé' },
+      { id: 'geld', nom: 'Revenu propre (eigenes Geld)', val: 35, bas: 'aucun', haut: 'indépendant' }
+    ],
+    scenarios: [
+      { nom: 'Heute im Dorf', icone: 'panier', valeurs: { schule: 55, aufgaben: 30, geld: 35 } },
+      { nom: 'Oma als Kind', icone: 'personne', valeurs: { schule: 10, aufgaben: 10, geld: 10 } },
+      { nom: 'Gleiche Chancen', icone: 'balance', valeurs: { schule: 90, aufgaben: 75, geld: 80 } }
+    ],
+    liens: [
+      { a: 'oma', b: 'amina', type: 'amour', lib: 'Oma', base: .8 },
+      { a: 'tante', b: 'amina', type: 'confiance', lib: 'Vorbild', base: .4, poids: { schule: .4 } },
+      { a: 'onkel', b: 'oma', type: 'domination', lib: 'Frauensache', base: .2, poids: { aufgaben: -.6 } }
+    ],
+    issue: function(v){
+      if(v.schule < 30){ return { niveau: 'ko', badge: 'Keine Schule', recit: 'Les filles quittent l’école très tôt : mariage précoce, travail aux champs, peu de choix.', apres: 'C’est la situation qu’a connue Oma Ngono.', themes: ['scolarisation'] }; }
+      if(v.schule > 70 && v.aufgaben > 55 && v.geld > 55){ return { niveau: 'ok', badge: 'Gleiche Chancen', recit: 'Les filles étudient, les tâches sont partagées, les femmes gagnent leur propre argent.', apres: 'Égalité des chances : l’objectif.', themes: ['égalité', 'Bildung'] }; }
+      return { niveau: 'moyen', badge: 'Auf dem Weg', recit: 'Les filles vont à l’école, mais à la maison, presque tout repose encore sur elles.', apres: 'L’école ne suffit pas : le partage des tâches compte aussi.', themes: ['partage des tâches'] };
+    }
+  },
+  quiz: [
+    { q: 'Comment dit-on « la femme médecin » ?', options: [
+      { txt: 'die Ärztin', ok: true, retour: 'der Arzt → die Ärztin.' },
+      { txt: 'der Ärztin', retour: 'L’article du féminin est « die ».' } ] },
+    { q: 'Où va le verbe après « weil » ?', options: [
+      { txt: 'À la fin de la subordonnée.', ok: true, retour: '… weil ich Mathematik liebe.' },
+      { txt: 'En deuxième position.', retour: 'C’est le cas dans la principale.' } ] },
+    { q: 'Que signifie « Ich verdiene mein eigenes Geld » ?', options: [
+      { txt: 'Je gagne mon propre argent.', ok: true, retour: 'verdienen = gagner (de l’argent).' },
+      { txt: 'Je dépense mon argent.', retour: 'Dépenser = ausgeben.' } ] },
+    { q: 'Que signifie « Bildung ist der Schlüssel » ?', options: [
+      { txt: 'L’éducation est la clé.', ok: true, retour: 'der Schlüssel = la clé.' },
+      { txt: 'L’école est fermée.', retour: 'Non.' } ] },
+    { q: 'Féminin de « der Bauer » ?', options: [
+      { txt: 'die Bäuerin', ok: true, retour: 'Avec Umlaut.' },
+      { txt: 'die Bauerin', retour: 'Il faut l’Umlaut : Bäuerin.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Vocabulaire : die Frau, das Feld, Wasser holen, kochen, verdienen, die Bildung, die Schule, gleiche Chancen.',
+      'Féminin des métiers : -in (Lehrerin, Ingenieurin), parfois avec Umlaut (Ärztin, Bäuerin).',
+      'Après « weil », le verbe conjugué est rejeté à la fin.',
+      'Thème : en ville comme au village, l’éducation des filles ouvre l’accès au travail et à l’indépendance.'
+    ],
+    ecrire: 'Schreib fünf Sätze über eine Frau aus deiner Familie: Wer ist sie? Was macht sie? Utilise au moins deux fois « weil ».'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Frauen in Stadt und Dorf</h1>
+<p><b>Allemand · Terminale</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Comprendre et comparer la situation de la femme en ville et au village ; former les noms de métiers au féminin (-in) ; construire une subordonnée en « weil » (verbe à la fin).</p>
+<p>Programme : Progression harmonisée Tle · Vie familiale et socioculturelle, leçon 1 (la situation de la femme en ville et au village), leçon 5 (production et traduction)</p>
+<p>Lieu : Ein Dorf bei Bafia · In den Ferien</p>
+<h3>Personnages</h3><ul><li>Amina</li><li>Oma Ngono</li><li>Tante Brigitte, Ärztin</li><li>Onkel Paul</li></ul>
+<h3>La scène</h3>
+<p>Amina verbringt die Ferien bei ihrer Großmutter im Dorf. Ihre Tante kommt aus Yaoundé zu Besuch. — <i>Amina passe les vacances chez sa grand-mère au village. Sa tante vient de Yaoundé en visite.</i></p>
+<p><b>Oma Ngono</b> : Im Dorf stehen die Frauen früh auf. Sie arbeiten auf dem Feld, holen Wasser und kochen für die Familie. — <i>Au village, les femmes se lèvent tôt. Elles travaillent aux champs, vont chercher l’eau et cuisinent pour la famille.</i></p>
+<p><b>Amina</b> : Und die Männer, Oma? Helfen sie nicht? — <i>Et les hommes, grand-mère ? Ils n’aident pas ?</i></p>
+<p><b>Onkel Paul</b> <i>(er lacht)</i> : Doch! Ich arbeite auch auf dem Feld. Aber das Kochen ist Frauensache. — <i>Mais si ! Moi aussi je travaille aux champs. Mais la cuisine, c’est l’affaire des femmes.</i></p>
+<p><b>Question :</b> Que pense l’oncle Paul de la répartition des tâches ?</p><ul><li>Il aide aux champs, mais considère que la cuisine revient aux femmes. <b>(bonne réponse)</b></li><li>Il fait toute la cuisine.</li></ul><p>« Frauensache » : une affaire de femmes. C’est un stéréotype sur les rôles.</p>
+<p>Tante Brigitte kommt an. — <i>Tante Brigitte arrive.</i></p>
+<p><b>Tante Brigitte, Ärztin</b> : Ich bin Ärztin im Krankenhaus von Yaoundé. Ich arbeite viel, aber ich verdiene mein eigenes Geld. — <i>Je suis médecin à l’hôpital de Yaoundé. Je travaille beaucoup, mais je gagne mon propre argent.</i></p>
+<p><b>Oma Ngono</b> : Ich konnte nicht zur Schule gehen. Brigitte hatte mehr Glück, weil ihr Vater sie in die Schule geschickt hat. — <i>Je n’ai pas pu aller à l’école. Brigitte a eu plus de chance, parce que son père l’a envoyée à l’école.</i></p>
+<h4>Le féminin des métiers</h4><p>En allemand, on forme souvent le féminin avec -in : der Lehrer → die Lehrerin, der Ingenieur → die Ingenieurin. Parfois avec un Umlaut : der Arzt → die Ärztin, der Bauer → die Bäuerin.</p>
+<h4>Werkstatt · masculin ou féminin ?</h4><p>Classe chaque nom de métier.</p>
+<ul><li><b>Mann (der)</b> : Lehrer ; Bauer ; Polizist</li><li><b>Frau (die)</b> : Ärztin ; Ingenieurin ; Verkäuferin</li></ul>
+<p>Die Ärztin, der Lehrer, die Ingenieurin, der Bauer, die Verkäuferin, der Polizist.</p>
+<p><b>Amina</b> : Ich möchte Ingenieurin werden, weil ich Mathematik liebe. — <i>Je voudrais devenir ingénieure, parce que j’aime les mathématiques.</i></p>
+<h4>La subordonnée en weil</h4><p>Après « weil » (parce que), le verbe conjugué va à la fin : … weil ich Mathematik liebe. Comparez : Ich liebe Mathematik (principale, verbe en 2e position).</p>
+<h4>Werkstatt · construis la phrase</h4><p>Remets les mots dans l’ordre : « Les filles doivent aller à l’école, parce que l’éducation est importante. »</p>
+<ol><li>Die Mädchen</li><li>müssen</li><li>zur Schule gehen,</li><li>weil</li><li>Bildung</li><li>wichtig</li><li>ist.</li></ol>
+<p>Le verbe « ist » est à la fin de la subordonnée en weil.</p>
+<p><b>À toi de décider :</b> Tu es l’oncle Paul. Ta fille veut continuer ses études à Yaoundé. Que fais-tu ?</p><ul><li>Je refuse : elle doit se marier. — Elle perd une chance, et la famille une future ingénieure ou médecin.</li><li>Je l’aide, même si cela coûte cher. — Comme le père de Brigitte autrefois, tu ouvres une porte pour toute la famille.</li></ul>
+<p><b>Tante Brigitte, Ärztin</b> : Bildung ist der Schlüssel. Für Jungen und für Mädchen. — <i>L’éducation est la clé. Pour les garçons et pour les filles.</i></p>
+<h3>Quiz</h3><ol><li>Comment dit-on « la femme médecin » ? — <b>die Ärztin</b> der Arzt → die Ärztin.</li><li>Où va le verbe après « weil » ? — <b>À la fin de la subordonnée.</b> … weil ich Mathematik liebe.</li><li>Que signifie « Ich verdiene mein eigenes Geld » ? — <b>Je gagne mon propre argent.</b> verdienen = gagner (de l’argent).</li><li>Que signifie « Bildung ist der Schlüssel » ? — <b>L’éducation est la clé.</b> der Schlüssel = la clé.</li><li>Féminin de « der Bauer » ? — <b>die Bäuerin</b> Avec Umlaut.</li></ol>
+<h3>À retenir</h3><ul><li>Vocabulaire : die Frau, das Feld, Wasser holen, kochen, verdienen, die Bildung, die Schule, gleiche Chancen.</li><li>Féminin des métiers : -in (Lehrerin, Ingenieurin), parfois avec Umlaut (Ärztin, Bäuerin).</li><li>Après « weil », le verbe conjugué est rejeté à la fin.</li><li>Thème : en ville comme au village, l’éducation des filles ouvre l’accès au travail et à l’indépendance.</li></ul>
+<h3>À écrire</h3><p>Schreib fünf Sätze über eine Frau aus deiner Familie: Wer ist sie? Was macht sie? Utilise au moins deux fois « weil ».</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="tle-allemand-frauen-stadt-dorf.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

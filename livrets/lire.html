@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lire l’ouvrage — Centre VÉRITAS</title>
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self'; base-uri 'self'; object-src 'none'; form-action 'none'">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Baloo+2:wght@700;800&display=swap" media="print" onload="this.media='all'">
+<style>
+  body{margin:0;background:#1f2b38;color:#fff;font-family:"Source Sans 3",system-ui,sans-serif}
+  #lire-msg{max-width:440px;margin:18vh auto 0;padding:0 16px;text-align:center;line-height:1.55}
+  #lire-msg a{color:#FFC93C}
+</style>
+</head>
+<body>
+<!--
+  LECTEUR GÉNÉRIQUE DES OUVRAGES « EN FEUILLETAGE » — lire.html?o=<slug>
+
+  Un ouvrage ajouté depuis le panneau « Livrets » (PDF converti en pages) n'a
+  pas de page dédiée. `cahier.html` ne sait pas afficher des images de pages :
+  le serveur l'envoie donc ici (vrt_livret_etat → lien / porte). Le titre,
+  le nombre de pages et l'aperçu gratuit viennent de la fiche publique
+  (`action: ouvrage`) ; le code et le paiement, de gate.js.
+-->
+<div id="lire-msg">Chargement de l’ouvrage…</div>
+<script src="/livrets/gate.js?v=1.20.54"></script>
+<script src="/livrets/liseur.js?v=1.20.60"></script>
+<script>
+(function () {
+  var m = /[?&]o=([a-z0-9_-]+)/i.exec(location.search);
+  var slug = m ? m[1].toLowerCase() : '';
+  var msg = document.getElementById('lire-msg');
+  function echec(t) {
+    msg.textContent = t + ' ';
+    var a = document.createElement('a');
+    a.href = '/livrets/'; a.textContent = 'Voir tous les livrets';
+    msg.appendChild(a);
+  }
+  if (!slug) { echec('Aucun ouvrage indiqué.'); return; }
+  fetch('/api/livret.php', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    credentials: 'omit', cache: 'no-store',
+    body: JSON.stringify({ action: 'ouvrage', o: slug })
+  }).then(function (r) { return r.json(); }).then(function (j) {
+    if (!j || !j.ok || !j.ouvrage) { echec('Cet ouvrage est introuvable.'); return; }
+    var o = j.ouvrage;
+    document.title = (o.titre || slug) + ' — Centre VÉRITAS';
+    if (!(o.pages > 0)) { echec('Cet ouvrage n’est pas encore disponible en lecture.'); return; }
+    msg.style.display = 'none';
+    window.VRTLiseur.ouvrir(slug, o.titre || slug, o.pagesLibres || 0);
+  }).catch(function () { echec('Connexion impossible. Vérifiez votre réseau.'); });
+})();
+</script>
+</body>
+</html>

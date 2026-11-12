@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L’entretien d’embauche — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’orientation-conseil (Terminale) : l’affirmation de soi (passif, agressif, affirmé), le dossier de recrutement et la réussite d’un entretien d’embauche.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/tle-orientation-entretien-affirmation.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="L’entretien d’embauche — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’orientation-conseil (Terminale) : l’affirmation de soi (passif, agressif, affirmé), le dossier de recrutement et la réussite d’un entretien d’embauche.">
+<meta property="og:url" content="https://veritas-school.com/scenes/tle-orientation-entretien-affirmation.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"L’entretien d’embauche","description":"Scène animée d’orientation-conseil (Terminale) : l’affirmation de soi (passif, agressif, affirmé), le dossier de recrutement et la réussite d’un entretien d’embauche.","url":"https://veritas-school.com/scenes/tle-orientation-entretien-affirmation.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"Terminale","about":"Orientation-conseil","teaches":"Distinguer les comportements passif, agressif et affirmé ; préparer un dossier de recrutement (CV, lettre de motivation) ; réussir un entretien d’embauche.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-orientation-entretien',
+  discipline: 'Orientation-conseil', niveau: 'Terminale',
+  titre: 'L’entretien d’embauche',
+  decor: 'couloir', lieu: 'Le siège d’une entreprise, à Douala', moment: 'Un lundi matin',
+  objectif: 'Distinguer les comportements passif, agressif et affirmé ; préparer un dossier de recrutement (CV, lettre de motivation) ; réussir un entretien d’embauche.',
+  programme: 'Progression harmonisée Tle · SF 722 (affirmation de soi, leçons 10-12), SF 741 (recherche d’emploi, dossier de recrutement, entretien d’embauche, leçons 20-21)',
+  jauges: [
+    { id: 'impression', nom: 'Impression sur le jury', val: 40, couleur: '#1F9D5B' },
+    { id: 'trac', nom: 'Trac', val: 75, couleur: '#D43F2E' }
+  ],
+  personnages: {
+    paul:      { nom: 'Paul, candidat', couleur: '#2B3A55', look: { tenue: 'costume', peau: 'fonce', cheveux: 'ras', habit: '#2B3A55', col: '#FFFFFF', objet: 'dossier' } },
+    recruteuse:{ nom: 'Mme Kouam, responsable des ressources humaines', couleur: '#5A2E5A', look: { tenue: 'jupe', peau: 'fonce', cheveux: 'chignon', lunettes: true, habit: '#5A2E5A' } },
+    candidat2: { nom: 'Brice, autre candidat', couleur: '#8A5A2B', look: { peau: 'brun', cheveux: 'court', habit: '#8A5A2B' } },
+    candidate3:{ nom: 'Laure, autre candidate', couleur: '#1F6F78', look: { tenue: 'robe', peau: 'fonce', cheveux: 'tresses', habit: '#1F6F78' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['paul', 'candidat2', 'candidate3'], txt: 'Une entreprise de distribution recrute un assistant commercial. Dans le couloir, trois candidats attendent leur tour. Chacun a envoyé un CV et une lettre de motivation.', objet: { i: 'document', lib: 'CV et lettre de motivation' } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · le dossier de recrutement', consigne: 'Classe chaque élément : a-t-il sa place dans un CV, ou dans une lettre de motivation ?',
+      cats: ['CV', 'Lettre de motivation'],
+      items: [
+        { txt: 'Diplômes et formations, du plus récent au plus ancien.', cat: 0 },
+        { txt: 'Pourquoi je veux travailler dans cette entreprise.', cat: 1 },
+        { txt: 'Expériences (stages, emplois, bénévolat).', cat: 0 },
+        { txt: 'Ce que je peux apporter au poste proposé.', cat: 1 },
+        { txt: 'Langues parlées et compétences informatiques.', cat: 0 }
+      ],
+      bravo: 'Le CV dit ce que tu as fait ; la lettre dit pourquoi tu es la bonne personne pour ce poste.' },
+    { t: 'dit', qui: 'candidat2', emo: 'peur', jeu: 'à voix basse', txt: 'Moi, je ne vais rien dire. Ils ne prennent que les pistonnés.' },
+    { t: 'dit', qui: 'candidate3', emo: 'colere', txt: 'Moi, je vais leur dire qu’ils ont de la chance que je postule. Il faut écraser les autres.' },
+    { t: 'question', q: 'Comment qualifier l’attitude de Brice, puis celle de Laure ?',
+      options: [
+        { txt: 'Brice est passif (il s’efface, se dévalorise) ; Laure est agressive (elle s’impose aux dépens des autres).', ok: true, retour: 'Entre les deux, il y a l’affirmation de soi : exprimer ses qualités et ses besoins, avec respect pour soi et pour les autres.' },
+        { txt: 'Les deux sont affirmés.', retour: 'Non : l’un fuit, l’autre attaque. Aucun n’est vraiment affirmé.' }
+      ] },
+    { t: 'recit', sort: ['candidat2', 'candidate3'], entre: ['recruteuse'], txt: 'C’est le tour de Paul.', jauges: { trac: 85 } },
+    { t: 'dit', qui: 'recruteuse', txt: 'Bonjour, asseyez-vous. Présentez-vous en deux minutes.' },
+    { t: 'choix', qui: 'paul', q: 'Tu es Paul. Comment commences-tu ?',
+      options: [
+        { txt: '« Euh… je m’appelle Paul… je ne sais pas trop quoi dire… »', consequence: 'Le jury retient ton hésitation, pas tes compétences.', jauges: { impression: -15 } },
+        { txt: '« Je m’appelle Paul Ewane. Titulaire d’un BTS en commerce, j’ai fait un stage de six mois dans une société de distribution, où j’ai aidé à suivre les commandes de quarante clients. »', consequence: 'Clair, précis, chiffré : tu montres ce que tu sais faire.', jauges: { impression: 30, trac: -30 } },
+        { txt: '« Je suis le meilleur candidat que vous verrez aujourd’hui. »', consequence: 'Affirmation sans preuve : le jury se méfie.', jauges: { impression: -10 } }
+      ],
+      oeuvre: 'Une présentation réussie suit un fil : qui je suis, ce que j’ai appris, ce que j’ai fait, ce que je peux apporter.' },
+    { t: 'dit', qui: 'recruteuse', jeu: 'elle note', txt: 'Quel est votre principal défaut ?' },
+    { t: 'dit', qui: 'paul', txt: 'Je suis parfois trop perfectionniste et je prends du retard. Depuis mon stage, je fixe une heure limite à chaque tâche.', jauges: { impression: 60 } },
+    { t: 'question', q: 'Pourquoi cette réponse est-elle efficace ?',
+      options: [
+        { txt: 'Paul reconnaît un vrai défaut, sans se dévaloriser, et montre ce qu’il fait pour le corriger.', ok: true, retour: 'L’honnêteté et la capacité à progresser rassurent un recruteur.' },
+        { txt: 'Parce qu’un défaut ne compte pas.', retour: 'Le recruteur cherche surtout à voir si le candidat se connaît.' }
+      ] },
+    { t: 'dit', qui: 'recruteuse', txt: 'Avez-vous des questions ?' },
+    { t: 'dit', qui: 'paul', emo: 'joie', txt: 'Oui : comment se passe l’intégration d’un nouvel assistant, et quels sont les objectifs du poste pour la première année ?', jauges: { impression: 80, trac: 30 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · le déroulement d’un entretien', consigne: 'Remets dans l’ordre les étapes d’un entretien réussi.',
+      items: [
+        'Se renseigner sur l’entreprise et le poste, la veille.',
+        'Arriver à l’heure, saluer, attendre qu’on vous invite à vous asseoir.',
+        'Se présenter de façon claire et précise.',
+        'Répondre aux questions avec des exemples concrets.',
+        'Poser une ou deux questions sur le poste.',
+        'Remercier et prendre congé.'
+      ],
+      bravo: 'La préparation fait la moitié du succès.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · trois manières de se présenter',
+    intro: 'Règle l’affirmation de soi, la préparation et la gestion du trac : que retient le jury ?',
+    persos: ['paul', 'recruteuse', 'candidat2', 'candidate3'],
+    curseurs: [
+      { id: 'affirmation', nom: 'Attitude', val: 50, bas: 'passive', haut: 'agressive', lecture: { haut: 'Il coupe la parole, se vante, dénigre les autres.', bas: 'Il s’efface, s’excuse, n’ose rien dire.' } },
+      { id: 'preparation', nom: 'Préparation', val: 75, bas: 'aucune', haut: 'sérieuse' },
+      { id: 'trac', nom: 'Gestion du trac', val: 65, bas: 'paralysé', haut: 'maîtrisé' }
+    ],
+    scenarios: [
+      { nom: 'Paul, affirmé', icone: 'personne', valeurs: { affirmation: 50, preparation: 75, trac: 65 } },
+      { nom: 'Brice, passif', icone: 'muet', valeurs: { affirmation: 10, trac: 25 } },
+      { nom: 'Laure, agressive', icone: 'colere', valeurs: { affirmation: 92 } }
+    ],
+    liens: [
+      { a: 'recruteuse', b: 'paul', type: 'confiance', lib: 'évalue', base: .3, poids: { preparation: .5 } },
+      { a: 'candidate3', b: 'candidat2', type: 'domination', lib: 'écrase', base: .3, poids: { affirmation: .5 } },
+      { a: 'paul', b: 'candidat2', type: 'alliance', lib: 'encourage', base: .3 },
+      { a: 'recruteuse', b: 'candidate3', type: 'conflit', lib: 'méfiance', base: .1, poids: { affirmation: .5 } }
+    ],
+    issue: function(v){
+      if(v.affirmation > 75){ return { niveau: 'ko', badge: 'Trop, c’est trop', recit: 'Le candidat se vante et dénigre les autres : le jury imagine déjà les conflits dans l’équipe.', apres: 'S’affirmer, ce n’est pas écraser.', themes: ['agressivité'] }; }
+      if(v.affirmation < 25 || v.trac < 30){ return { niveau: 'ko', badge: 'Une candidature invisible', recit: 'Le candidat ne met pas ses qualités en valeur : le jury ne sait pas ce qu’il sait faire.', apres: 'Se taire par modestie, c’est laisser les autres décider de sa valeur.', themes: ['passivité'] }; }
+      if(v.preparation < 40){ return { niveau: 'moyen', badge: 'De l’aisance, mais rien de précis', recit: 'Le candidat parle bien, mais ne connaît ni l’entreprise ni le poste.', apres: 'La préparation est ce que le jury voit en premier.', themes: ['préparation'] }; }
+      return { niveau: 'ok', badge: 'Candidat retenu', recit: 'Précis, honnête, préparé : le jury retient Paul pour la dernière étape.', apres: 'L’affirmation de soi : dire qui l’on est et ce que l’on vaut, avec respect.', themes: ['affirmation de soi', 'entretien'] };
+    }
+  },
+  quiz: [
+    { q: 'Qu’est-ce qu’un comportement affirmé ?', options: [
+      { txt: 'Exprimer ses idées et ses besoins avec respect pour soi et pour les autres.', ok: true, retour: 'Ni passif, ni agressif.' },
+      { txt: 'Parler plus fort que les autres.', retour: 'C’est de l’agressivité.' } ] },
+    { q: 'Que contient une lettre de motivation ?', options: [
+      { txt: 'Les raisons de sa candidature et ce qu’on peut apporter au poste.', ok: true, retour: 'Le CV, lui, liste formations et expériences.' },
+      { txt: 'La liste complète de ses notes.', retour: 'Non.' } ] },
+    { q: 'Comment répondre à la question du défaut ?', options: [
+      { txt: 'Citer un vrai défaut et montrer comment on le corrige.', ok: true, retour: 'Honnêteté et progrès.' },
+      { txt: 'Dire qu’on n’en a aucun.', retour: 'Le jury n’y croit pas.' } ] },
+    { q: 'Que faire la veille d’un entretien ?', options: [
+      { txt: 'Se renseigner sur l’entreprise et le poste.', ok: true, retour: 'La préparation fait la moitié du succès.' },
+      { txt: 'Rien, pour rester naturel.', retour: 'Non.' } ] },
+    { q: 'Comment qualifier Brice, qui pense ne pas avoir de chance ?', options: [
+      { txt: 'Passif.', ok: true, retour: 'Il s’efface et se dévalorise.' },
+      { txt: 'Agressif.', retour: 'C’est Laure qui l’est.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Trois comportements : passif (s’effacer), agressif (s’imposer aux dépens des autres), affirmé (s’exprimer avec respect).',
+      'Le dossier de recrutement : CV (formations, expériences, compétences) et lettre de motivation (pourquoi ce poste, ce que j’apporte).',
+      'Un entretien se prépare : connaître l’entreprise et le poste, se présenter clairement, répondre par des exemples, poser des questions.',
+      'Le trac se maîtrise par la préparation et la respiration.'
+    ],
+    ecrire: 'Rédigez une lettre de motivation (quinze lignes) pour un stage de vacances dans une entreprise de votre ville : présentez-vous, dites pourquoi cette entreprise et ce que vous pouvez apporter.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>L’entretien d’embauche</h1>
+<p><b>Orientation-conseil · Terminale</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Distinguer les comportements passif, agressif et affirmé ; préparer un dossier de recrutement (CV, lettre de motivation) ; réussir un entretien d’embauche.</p>
+<p>Programme : Progression harmonisée Tle · SF 722 (affirmation de soi, leçons 10-12), SF 741 (recherche d’emploi, dossier de recrutement, entretien d’embauche, leçons 20-21)</p>
+<p>Lieu : Le siège d’une entreprise, à Douala · Un lundi matin</p>
+<h3>Personnages</h3><ul><li>Paul, candidat</li><li>Mme Kouam, responsable des ressources humaines</li><li>Brice, autre candidat</li><li>Laure, autre candidate</li></ul>
+<h3>La scène</h3>
+<p>Une entreprise de distribution recrute un assistant commercial. Dans le couloir, trois candidats attendent leur tour. Chacun a envoyé un CV et une lettre de motivation.</p>
+<h4>Atelier · le dossier de recrutement</h4><p>Classe chaque élément : a-t-il sa place dans un CV, ou dans une lettre de motivation ?</p>
+<ul><li><b>CV</b> : Diplômes et formations, du plus récent au plus ancien. ; Expériences (stages, emplois, bénévolat). ; Langues parlées et compétences informatiques.</li><li><b>Lettre de motivation</b> : Pourquoi je veux travailler dans cette entreprise. ; Ce que je peux apporter au poste proposé.</li></ul>
+<p>Le CV dit ce que tu as fait ; la lettre dit pourquoi tu es la bonne personne pour ce poste.</p>
+<p><b>Brice, autre candidat</b> <i>(à voix basse)</i> : Moi, je ne vais rien dire. Ils ne prennent que les pistonnés.</p>
+<p><b>Laure, autre candidate</b> : Moi, je vais leur dire qu’ils ont de la chance que je postule. Il faut écraser les autres.</p>
+<p><b>Question :</b> Comment qualifier l’attitude de Brice, puis celle de Laure ?</p><ul><li>Brice est passif (il s’efface, se dévalorise) ; Laure est agressive (elle s’impose aux dépens des autres). <b>(bonne réponse)</b></li><li>Les deux sont affirmés.</li></ul><p>Entre les deux, il y a l’affirmation de soi : exprimer ses qualités et ses besoins, avec respect pour soi et pour les autres.</p>
+<p>C’est le tour de Paul.</p>
+<p><b>Mme Kouam, responsable des ressources humaines</b> : Bonjour, asseyez-vous. Présentez-vous en deux minutes.</p>
+<p><b>À toi de décider :</b> Tu es Paul. Comment commences-tu ?</p><ul><li>« Euh… je m’appelle Paul… je ne sais pas trop quoi dire… » — Le jury retient ton hésitation, pas tes compétences.</li><li>« Je m’appelle Paul Ewane. Titulaire d’un BTS en commerce, j’ai fait un stage de six mois dans une société de distribution, où j’ai aidé à suivre les commandes de quarante clients. » — Clair, précis, chiffré : tu montres ce que tu sais faire.</li><li>« Je suis le meilleur candidat que vous verrez aujourd’hui. » — Affirmation sans preuve : le jury se méfie.</li></ul>
+<p><b>Mme Kouam, responsable des ressources humaines</b> <i>(elle note)</i> : Quel est votre principal défaut ?</p>
+<p><b>Paul, candidat</b> : Je suis parfois trop perfectionniste et je prends du retard. Depuis mon stage, je fixe une heure limite à chaque tâche.</p>
+<p><b>Question :</b> Pourquoi cette réponse est-elle efficace ?</p><ul><li>Paul reconnaît un vrai défaut, sans se dévaloriser, et montre ce qu’il fait pour le corriger. <b>(bonne réponse)</b></li><li>Parce qu’un défaut ne compte pas.</li></ul><p>L’honnêteté et la capacité à progresser rassurent un recruteur.</p>
+<p><b>Mme Kouam, responsable des ressources humaines</b> : Avez-vous des questions ?</p>
+<p><b>Paul, candidat</b> : Oui : comment se passe l’intégration d’un nouvel assistant, et quels sont les objectifs du poste pour la première année ?</p>
+<h4>Atelier · le déroulement d’un entretien</h4><p>Remets dans l’ordre les étapes d’un entretien réussi.</p>
+<ol><li>Se renseigner sur l’entreprise et le poste, la veille.</li><li>Arriver à l’heure, saluer, attendre qu’on vous invite à vous asseoir.</li><li>Se présenter de façon claire et précise.</li><li>Répondre aux questions avec des exemples concrets.</li><li>Poser une ou deux questions sur le poste.</li><li>Remercier et prendre congé.</li></ol>
+<p>La préparation fait la moitié du succès.</p>
+<h3>Quiz</h3><ol><li>Qu’est-ce qu’un comportement affirmé ? — <b>Exprimer ses idées et ses besoins avec respect pour soi et pour les autres.</b> Ni passif, ni agressif.</li><li>Que contient une lettre de motivation ? — <b>Les raisons de sa candidature et ce qu’on peut apporter au poste.</b> Le CV, lui, liste formations et expériences.</li><li>Comment répondre à la question du défaut ? — <b>Citer un vrai défaut et montrer comment on le corrige.</b> Honnêteté et progrès.</li><li>Que faire la veille d’un entretien ? — <b>Se renseigner sur l’entreprise et le poste.</b> La préparation fait la moitié du succès.</li><li>Comment qualifier Brice, qui pense ne pas avoir de chance ? — <b>Passif.</b> Il s’efface et se dévalorise.</li></ol>
+<h3>À retenir</h3><ul><li>Trois comportements : passif (s’effacer), agressif (s’imposer aux dépens des autres), affirmé (s’exprimer avec respect).</li><li>Le dossier de recrutement : CV (formations, expériences, compétences) et lettre de motivation (pourquoi ce poste, ce que j’apporte).</li><li>Un entretien se prépare : connaître l’entreprise et le poste, se présenter clairement, répondre par des exemples, poser des questions.</li><li>Le trac se maîtrise par la préparation et la respiration.</li></ul>
+<h3>À écrire</h3><p>Rédigez une lettre de motivation (quinze lignes) pour un stage de vacances dans une entreprise de votre ville : présentez-vous, dites pourquoi cette entreprise et ce que vous pouvez apporter.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="tle-orientation-entretien-affirmation.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

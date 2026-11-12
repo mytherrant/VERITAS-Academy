@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>« Je me croyais poète » — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’après Stances et Poèmes de Sully Prudhomme : le dernier poème du recueil, un aveu d’échec qui finit en vœu. Poème entier.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/stances-je-me-croyais-poete.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="« Je me croyais poète » — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’après Stances et Poèmes de Sully Prudhomme : le dernier poème du recueil, un aveu d’échec qui finit en vœu. Poème entier.">
+<meta property="og:url" content="https://veritas-school.com/scenes/stances-je-me-croyais-poete.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"« Je me croyais poète »","description":"Scène animée d’après Stances et Poèmes de Sully Prudhomme : le dernier poème du recueil, un aveu d’échec qui finit en vœu. Poème entier.","url":"https://veritas-school.com/scenes/stances-je-me-croyais-poete.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"Terminale","about":"Français","teaches":"Étudier le poème qui ferme le recueil : comment un livre peut se conclure sur l’aveu de son insuffisance sans se détruire.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"},"isBasedOn":{"@type":"Book","name":"Stances et Poèmes","author":{"@type":"Person","name":"Sully Prudhomme (1865)"}}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'stances-poete',
+  discipline: 'Français', niveau: 'Terminale',
+  oeuvre: 'Stances et Poèmes', auteur: 'Sully Prudhomme (1865)',
+  titre: '« Je me croyais poète »',
+  decor: 'salon17', ambiance: 'nuit', lieu: 'le cabinet du poète, à la lueur d’une lampe', moment: 'Dernier poème du recueil',
+  avertissement: 'Le poème est donné en entier, strophe par strophe, tel que Sully Prudhomme l’a écrit (domaine public). Les répliques de l’élève sont jouées par nos comédiens.',
+  objectif: 'Étudier le poème qui ferme le recueil : comment un livre peut se conclure sur l’aveu de son insuffisance sans se détruire.',
+  jauges: [
+    { id: 'doute', nom: 'Doute du poète', val: 80, couleur: '#7B5CD6' },
+    { id: 'espoir', nom: 'Espoir', val: 10, couleur: '#E07B39' }
+  ],
+  personnages: {
+    poete: { nom: 'Le poète', couleur: '#6B3E5A', look: { tenue: 'costume', objet: 'livre', peau: 'clair', cheveux: 'court', couleurCheveux: '#4A3A2A', moustache: true, habit: '#3A2E4D', col: '#F2EEE3' } },
+    eleve: { nom: 'Ngono, élève', court: 'Ngono', couleur: '#2E6B5A', look: { tenue: 'jupe', peau: 'fonce', cheveux: 'tresses', habit: '#2F5E9E' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['poete', 'eleve'], txt: 'C’est la dernière pièce du recueil, dédiée à Louis Bertrand : onze strophes de trois alexandrins suivis d’un vers court. Le titre est à l’imparfait.' },
+    { t: 'vers', qui: 'poete', emo: 'triste', txt: 'Je me croyais poète et j’ai pu me méprendre,\nD’autres ont fait la lyre et je subis leur loi ;\nMais si mon âme est juste, impétueuse et tendre,\nQui le sait mieux que moi ?', cite: 'Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »' },
+    { t: 'question', q: '« Je me croyais poète » : que dit l’imparfait ?',
+      options: [
+        { txt: 'Une croyance passée, abandonnée : l’aveu tombe dès le premier hémistiche.', ok: true, retour: 'Mais le vers court relève la tête : « Qui le sait mieux que moi ? »' },
+        { txt: 'Une habitude.', retour: 'Ici, l’imparfait dit une croyance qu’on n’a plus.' }
+      ] },
+    { t: 'vers', qui: 'poete', txt: 'Oui, je suis mal servi par des cordes nouvelles\nQui ne vibrent jamais au rhythme de mon cœur ;\nMon rêve de sa lutte avec les mots rebelles\nNe sort jamais vainqueur !', cite: 'Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »', jauges: { doute: 95 } },
+    { t: 'vers', qui: 'poete', jeu: 'il se redresse', txt: 'Mais quoi ! le statuaire, au moment où l’argile\nRefuse au sentiment le contour désiré,\nParce qu’il trouve alors une fange indocile\nEst-il moins inspiré ?', cite: 'Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »', jauges: { espoir: 30 } },
+    { t: 'question', q: 'À qui le poète se compare-t-il dans la troisième strophe ?',
+      options: [
+        { txt: 'À un sculpteur dont l’argile refuse la forme voulue.', ok: true, retour: 'L’obstacle est dans la matière, pas dans l’inspiration : les mots sont son argile.' },
+        { txt: 'À un musicien.', retour: 'Les « cordes » étaient dans la strophe précédente ; ici, c’est le statuaire.' }
+      ] },
+    { t: 'vers', qui: 'poete', txt: 'Si mon dessein secret demeure obscur aux hommes\nA cause de l’outil qui tremble dans ma main,\nDieu, qui sans interprète aperçoit qui nous sommes,\nJuge l’œuvre en mon sein.', cite: 'Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »' },
+    { t: 'vers', qui: 'poete', txt: 'Quand j’ai changé mon âme en un bruit pour l’oreille,\nLes hommes ont-ils vu ma joie et ma douleur ?\nIls n’ont qu’un mot : l’amour, expression pareille\nDe mon trouble et du leur.', cite: 'Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »' },
+    { t: 'dit', qui: 'eleve', emo: 'doute', txt: 'Il dit que le même mot, « amour », sert à tout le monde. Alors on ne peut jamais dire exactement ce qu’on ressent ?' },
+    { t: 'vers', qui: 'poete', txt: 'Heureux qui de son cœur voit l’image apparaître\nAu flot d’un verbe pur comme en un ruisseau clair,\nEt peut manifester comment frémit son être\nEn faisant frémir l’air !', cite: 'Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »' },
+    { t: 'vers', qui: 'poete', emo: 'triste', txt: 'Hélas ! A mes pensers le signe se dérobe,\nMon âme a plus d’élan que mon cri n’a d’essor,\nJe sens que je suis riche, et ma sordide robe\nCache aux yeux mon trésor.', cite: 'Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »' },
+    { t: 'vers', qui: 'poete', txt: 'L’airain sans l’effigie est un bien illusoire,\nEt j’en porte un lingot qu’il faudrait monnayer ;\nJ’ai de ce fort métal dont s’achète la gloire,\nEt ne la puis payer.', cite: 'Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »' },
+    { t: 'question', q: 'Que possède le poète, et que ne peut-il pas en faire ?',
+      options: [
+        { txt: 'Un lingot de bronze sans effigie : une richesse intérieure qu’il ne peut changer en monnaie, en mots.', ok: true, retour: 'Sans l’image gravée, le métal ne vaut rien : sans la forme, l’émotion ne se partage pas.' },
+        { txt: 'De l’argent qu’il refuse de dépenser.', retour: 'C’est une image : le trésor est dans son âme.' }
+      ] },
+    { t: 'vers', qui: 'poete', jeu: 'l’élan revient', txt: 'La gloire ! oh ! surnager sur cette immense houle\nQui, dans son flux hautain noyant les noms obscurs,\nDes brumes du passé se précipite et roule\nAux horizons futurs !', cite: 'Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »', jauges: { espoir: 60 } },
+    { t: 'vers', qui: 'poete', txt: 'Voir mon œuvre flotter sur cette mer humaine,\nD’un bout du monde à l’autre et par delà ma mort,\nComme un fier pavillon que la vague ramène\nSeul, mais vainqueur, au port !', cite: 'Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »', jauges: { espoir: 80 } },
+    { t: 'choix', qui: 'eleve', q: 'Le poète avoue qu’il n’est peut-être pas poète. Comment finir un tel livre ?',
+      options: [
+        { txt: 'Sur le désespoir : tout était vain.', consequence: 'Le recueil se détruirait lui-même.', jauges: { espoir: 0 } },
+        { txt: 'Sur un vœu : que le poème renaisse dans le cœur d’un autre.', consequence: 'C’est le choix de Sully Prudhomme : passer le relais au lecteur.', jauges: { espoir: 100 } },
+        { txt: 'Sur la gloire assurée.', consequence: 'Ce serait mentir après dix strophes de doute.', jauges: { doute: 100 } }
+      ],
+      oeuvre: 'La dernière strophe transforme l’échec en vœu : « Que dans un autre cœur mon poème renaisse ».' },
+    { t: 'vers', qui: 'poete', jeu: 'lentement', txt: 'Ce rêve ambitieux remplira ma jeunesse,\nMais, si l’air ne s’est point de ma vie animé,\nQue dans un autre cœur mon poème renaisse,\nQu’il vibre et soit aimé !', cite: 'Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »', jauges: { espoir: 100, doute: 40 } },
+    { t: 'dit', qui: 'eleve', emo: 'joie', txt: 'Mais alors… c’est nous, cet « autre cœur ». S’il vibre en nous, il a gagné.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · les images du poème', consigne: 'Classe chaque image selon son domaine.',
+      cats: ['La sculpture', 'La monnaie', 'La mer'],
+      items: [
+        { txt: 'l’argile, une fange indocile', cat: 0 },
+        { txt: 'L’airain sans l’effigie', cat: 1 },
+        { txt: 'un lingot qu’il faudrait monnayer', cat: 1 },
+        { txt: 'cette immense houle', cat: 2 },
+        { txt: 'un fier pavillon que la vague ramène', cat: 2 }
+      ],
+      bravo: 'Trois domaines pour dire une seule chose : la distance entre ce qu’on ressent et ce qu’on parvient à dire.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · le dernier poème',
+    intro: 'Règle le doute du poète, son désir de gloire et la place du lecteur : comment finit le livre ?',
+    persos: ['poete', 'eleve'],
+    curseurs: [
+      { id: 'doute', nom: 'Doute', val: 80, bas: 'assuré', haut: 'écrasant', lecture: { haut: '« Ne sort jamais vainqueur ! »', bas: 'Il se croirait grand poète.' } },
+      { id: 'gloire', nom: 'Désir de gloire', val: 70, bas: 'aucun', haut: 'immense', lecture: { haut: '« surnager sur cette immense houle »', bas: 'Il écrit pour lui seul.' } },
+      { id: 'lecteur', nom: 'Confiance dans le lecteur', val: 90, bas: 'aucune', haut: 'totale', lecture: { haut: '« Que dans un autre cœur mon poème renaisse »', bas: 'Personne ne comprendra.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans le poème', icone: 'livre', valeurs: { doute: 80, gloire: 70, lecteur: 90 } },
+      { nom: 'Et sans confiance dans le lecteur ?', icone: 'triste', valeurs: { lecteur: 10 } },
+      { nom: 'Et si le poète ne doutait pas ?', icone: 'fier', valeurs: { doute: 10, gloire: 95 } }
+    ],
+    liens: [
+      { a: 'poete', b: 'eleve', type: 'confiance', lib: 'le relais', base: .3, poids: { lecteur: .6 } },
+      { a: 'eleve', b: 'poete', type: 'amour', lib: 'elle lit', base: .5 }
+    ],
+    issue: function(v){
+      if(v.lecteur < 35){ return { niveau: 'ko', badge: 'Le livre se referme', recit: 'Le poète avoue son échec et ne croit en personne pour le relever. Le recueil s’éteint sur un soupir.', apres: 'C’est ce que le dernier vers évite, en passant le poème à un autre cœur.', themes: ['échec', 'solitude'] }; }
+      if(v.doute < 30){ return { niveau: 'moyen', badge: 'La gloire proclamée', recit: 'Le poète se dit vainqueur et promet son nom aux horizons futurs.', apres: 'Moins touchant : c’est l’aveu qui rend ce poème si humain.', themes: ['orgueil', 'gloire'] }; }
+      return { niveau: 'ok', badge: 'Le poème passe à un autre cœur', recit: 'Dix strophes de doute, et un vœu : « Qu’il vibre et soit aimé ! »', apres: 'Le livre ne se détruit pas : il se confie à son lecteur.', themes: ['création', 'lecture', 'humilité'] };
+    }
+  },
+  fiche: {"accroche": "En 1865, toute la France récitait un poème sur un vase fêlé par un coup d’éventail. Son auteur, un ingénieur que la maladie avait empêché d’étudier, recevra le tout premier prix Nobel de littérature. Que dit ce poème qui a tant touché ?", "resume": "Le premier recueil de Sully Prudhomme, publié à vingt-six ans. À l’âge de la science et du doute, un poète formé aux sciences interroge le cœur et la raison, le ciel des astronomes et le soleil qui se lève. Des stances régulières, où chaque strophe se tient seule, et des poèmes plus longs, suivis.", "personnages": [{"nom": "Le poète", "role": "un scientifique à qui la science a été retirée.", "cle": "poete"}, {"nom": "L’astronome", "role": "la science qui mesure le ciel.", "cle": "savant"}, {"nom": "Ngono", "role": "l’élève de la scène.", "cle": "eleve"}], "aLire": [{"ou": "« Le Vase brisé »", "pourquoi": "Le poème que tout le monde récitait : chaque quatrain se tient seul."}, {"ou": "« Le Lever du soleil »", "pourquoi": "Dédié au maître de forges Henri Schneider, chez qui le poète a travaillé."}, {"ou": "« Ici-bas ! » et « Les Berceaux »", "pourquoi": "Mis en musique par Gabriel Fauré : écoute-les après les avoir lus."}], "siTuAimes": "les poèmes courts qu’on retient par cœur, ouvre ce recueil au hasard : chaque stance se lit seule.", "reperes": ["Auteur : Sully Prudhomme (1839-1907), né à Paris", "Stances et Poèmes : 1865", "Académie française en 1881, premier prix Nobel de littérature en 1901"], "themes": ["la science et le cœur", "le doute", "la fragilité", "la nature"], "cahier": {"lib": "Le cahier VÉRITAS de cette œuvre", "href": "../livrets/oeuvre-stances.html"}},
+  quiz: [
+    { q: 'Quel aveu le poète fait-il dès le premier vers ?', options: [ { txt: '« Je me croyais poète et j’ai pu me méprendre ».', ok: true, retour: 'Il a pu se tromper sur ce qu’il est.' }, { txt: 'Qu’il est le plus grand poète.', retour: 'C’est le contraire.' } ] },
+    { q: 'Qu’est-ce qu’un « statuaire » ?', options: [ { txt: 'Un sculpteur.', ok: true, retour: 'Son argile refuse parfois la forme voulue.' }, { txt: 'Une statue.', retour: 'Non : celui qui fait les statues.' } ] },
+    { q: 'Que signifie « l’effigie » ?', options: [ { txt: 'L’image gravée sur une monnaie, qui lui donne sa valeur.', ok: true, retour: '« L’airain sans l’effigie est un bien illusoire ».' }, { txt: 'Un métal précieux.', retour: 'Non : l’image gravée.' } ] },
+    { q: 'Quel souhait ferme le recueil ?', options: [ { txt: 'Que le poème renaisse dans un autre cœur, qu’il vibre et soit aimé.', ok: true, retour: 'L’échec devient un relais.' }, { txt: 'Devenir riche.', retour: 'Non : être aimé, à travers un autre.' } ] },
+    { q: 'Comment est construite chaque strophe ?', options: [ { txt: 'Trois alexandrins suivis d’un vers court.', ok: true, retour: 'Onze strophes sur ce modèle.' }, { txt: 'Quatre vers libres.', retour: 'Non : trois alexandrins et un vers court.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Le recueil se ferme sur un aveu : « Je me croyais poète et j’ai pu me méprendre ».',
+      'Le poète se compare au sculpteur dont l’argile résiste : l’obstacle est dans les mots, pas dans l’inspiration.',
+      'Il porte un lingot sans effigie : une richesse intérieure qu’il ne parvient pas à exprimer.',
+      'Le dernier vers transforme l’échec en vœu : que le poème renaisse dans un autre cœur.'
+    ],
+    ecrire: 'Réponds au poète (vingt lignes) : tu es « l’autre cœur » où son poème renaît. Dis-lui ce qui a vibré en toi.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>« Je me croyais poète »</h1>
+<p><b>Français · Terminale · Stances et Poèmes · Sully Prudhomme (1865)</b></p>
+<p><i>Le poème est donné en entier, strophe par strophe, tel que Sully Prudhomme l’a écrit (domaine public). Les répliques de l’élève sont jouées par nos comédiens.</i></p>
+<h3>Objectif</h3><p>Étudier le poème qui ferme le recueil : comment un livre peut se conclure sur l’aveu de son insuffisance sans se détruire.</p>
+<p>Lieu : le cabinet du poète, à la lueur d’une lampe · Dernier poème du recueil</p>
+<h3>Personnages</h3><ul><li>Le poète</li><li>Ngono, élève</li></ul>
+<h3>L’œuvre</h3>
+<p>En 1865, toute la France récitait un poème sur un vase fêlé par un coup d’éventail. Son auteur, un ingénieur que la maladie avait empêché d’étudier, recevra le tout premier prix Nobel de littérature. Que dit ce poème qui a tant touché ?</p>
+<p>Le premier recueil de Sully Prudhomme, publié à vingt-six ans. À l’âge de la science et du doute, un poète formé aux sciences interroge le cœur et la raison, le ciel des astronomes et le soleil qui se lève. Des stances régulières, où chaque strophe se tient seule, et des poèmes plus longs, suivis.</p>
+<ul><li><b>Le poète</b> — un scientifique à qui la science a été retirée.</li><li><b>L’astronome</b> — la science qui mesure le ciel.</li><li><b>Ngono</b> — l’élève de la scène.</li></ul>
+<p>Thèmes : la science et le cœur, le doute, la fragilité, la nature</p>
+<h3>La scène</h3>
+<p>C’est la dernière pièce du recueil, dédiée à Louis Bertrand : onze strophes de trois alexandrins suivis d’un vers court. Le titre est à l’imparfait.</p>
+<blockquote><p><b>Le poète</b> :<br>Je me croyais poète et j’ai pu me méprendre,<br>D’autres ont fait la lyre et je subis leur loi ;<br>Mais si mon âme est juste, impétueuse et tendre,<br>Qui le sait mieux que moi ?<br><small>Extrait de l’œuvre — Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »</small></p></blockquote>
+<p><b>Question :</b> « Je me croyais poète » : que dit l’imparfait ?</p><ul><li>Une croyance passée, abandonnée : l’aveu tombe dès le premier hémistiche. <b>(bonne réponse)</b></li><li>Une habitude.</li></ul><p>Mais le vers court relève la tête : « Qui le sait mieux que moi ? »</p>
+<blockquote><p><b>Le poète</b> :<br>Oui, je suis mal servi par des cordes nouvelles<br>Qui ne vibrent jamais au rhythme de mon cœur ;<br>Mon rêve de sa lutte avec les mots rebelles<br>Ne sort jamais vainqueur !<br><small>Extrait de l’œuvre — Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »</small></p></blockquote>
+<blockquote><p><b>Le poète</b> <i>(il se redresse)</i> :<br>Mais quoi ! le statuaire, au moment où l’argile<br>Refuse au sentiment le contour désiré,<br>Parce qu’il trouve alors une fange indocile<br>Est-il moins inspiré ?<br><small>Extrait de l’œuvre — Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »</small></p></blockquote>
+<p><b>Question :</b> À qui le poète se compare-t-il dans la troisième strophe ?</p><ul><li>À un sculpteur dont l’argile refuse la forme voulue. <b>(bonne réponse)</b></li><li>À un musicien.</li></ul><p>L’obstacle est dans la matière, pas dans l’inspiration : les mots sont son argile.</p>
+<blockquote><p><b>Le poète</b> :<br>Si mon dessein secret demeure obscur aux hommes<br>A cause de l’outil qui tremble dans ma main,<br>Dieu, qui sans interprète aperçoit qui nous sommes,<br>Juge l’œuvre en mon sein.<br><small>Extrait de l’œuvre — Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »</small></p></blockquote>
+<blockquote><p><b>Le poète</b> :<br>Quand j’ai changé mon âme en un bruit pour l’oreille,<br>Les hommes ont-ils vu ma joie et ma douleur ?<br>Ils n’ont qu’un mot : l’amour, expression pareille<br>De mon trouble et du leur.<br><small>Extrait de l’œuvre — Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »</small></p></blockquote>
+<p><b>Ngono, élève</b> : Il dit que le même mot, « amour », sert à tout le monde. Alors on ne peut jamais dire exactement ce qu’on ressent ?</p>
+<blockquote><p><b>Le poète</b> :<br>Heureux qui de son cœur voit l’image apparaître<br>Au flot d’un verbe pur comme en un ruisseau clair,<br>Et peut manifester comment frémit son être<br>En faisant frémir l’air !<br><small>Extrait de l’œuvre — Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »</small></p></blockquote>
+<blockquote><p><b>Le poète</b> :<br>Hélas ! A mes pensers le signe se dérobe,<br>Mon âme a plus d’élan que mon cri n’a d’essor,<br>Je sens que je suis riche, et ma sordide robe<br>Cache aux yeux mon trésor.<br><small>Extrait de l’œuvre — Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »</small></p></blockquote>
+<blockquote><p><b>Le poète</b> :<br>L’airain sans l’effigie est un bien illusoire,<br>Et j’en porte un lingot qu’il faudrait monnayer ;<br>J’ai de ce fort métal dont s’achète la gloire,<br>Et ne la puis payer.<br><small>Extrait de l’œuvre — Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »</small></p></blockquote>
+<p><b>Question :</b> Que possède le poète, et que ne peut-il pas en faire ?</p><ul><li>Un lingot de bronze sans effigie : une richesse intérieure qu’il ne peut changer en monnaie, en mots. <b>(bonne réponse)</b></li><li>De l’argent qu’il refuse de dépenser.</li></ul><p>Sans l’image gravée, le métal ne vaut rien : sans la forme, l’émotion ne se partage pas.</p>
+<blockquote><p><b>Le poète</b> <i>(l’élan revient)</i> :<br>La gloire ! oh ! surnager sur cette immense houle<br>Qui, dans son flux hautain noyant les noms obscurs,<br>Des brumes du passé se précipite et roule<br>Aux horizons futurs !<br><small>Extrait de l’œuvre — Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »</small></p></blockquote>
+<blockquote><p><b>Le poète</b> :<br>Voir mon œuvre flotter sur cette mer humaine,<br>D’un bout du monde à l’autre et par delà ma mort,<br>Comme un fier pavillon que la vague ramène<br>Seul, mais vainqueur, au port !<br><small>Extrait de l’œuvre — Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »</small></p></blockquote>
+<p><b>À toi de décider :</b> Le poète avoue qu’il n’est peut-être pas poète. Comment finir un tel livre ?</p><ul><li>Sur le désespoir : tout était vain. — Le recueil se détruirait lui-même.</li><li>Sur un vœu : que le poème renaisse dans le cœur d’un autre. — C’est le choix de Sully Prudhomme : passer le relais au lecteur.</li><li>Sur la gloire assurée. — Ce serait mentir après dix strophes de doute.</li></ul>
+<blockquote><p><b>Le poète</b> <i>(lentement)</i> :<br>Ce rêve ambitieux remplira ma jeunesse,<br>Mais, si l’air ne s’est point de ma vie animé,<br>Que dans un autre cœur mon poème renaisse,<br>Qu’il vibre et soit aimé !<br><small>Extrait de l’œuvre — Sully Prudhomme, Stances et Poèmes, « Je me croyais poète »</small></p></blockquote>
+<p><b>Ngono, élève</b> : Mais alors… c’est nous, cet « autre cœur ». S’il vibre en nous, il a gagné.</p>
+<h4>Atelier · les images du poème</h4><p>Classe chaque image selon son domaine.</p>
+<ul><li><b>La sculpture</b> : l’argile, une fange indocile</li><li><b>La monnaie</b> : L’airain sans l’effigie ; un lingot qu’il faudrait monnayer</li><li><b>La mer</b> : cette immense houle ; un fier pavillon que la vague ramène</li></ul>
+<p>Trois domaines pour dire une seule chose : la distance entre ce qu’on ressent et ce qu’on parvient à dire.</p>
+<h3>Quiz</h3><ol><li>Quel aveu le poète fait-il dès le premier vers ? — <b>« Je me croyais poète et j’ai pu me méprendre ».</b> Il a pu se tromper sur ce qu’il est.</li><li>Qu’est-ce qu’un « statuaire » ? — <b>Un sculpteur.</b> Son argile refuse parfois la forme voulue.</li><li>Que signifie « l’effigie » ? — <b>L’image gravée sur une monnaie, qui lui donne sa valeur.</b> « L’airain sans l’effigie est un bien illusoire ».</li><li>Quel souhait ferme le recueil ? — <b>Que le poème renaisse dans un autre cœur, qu’il vibre et soit aimé.</b> L’échec devient un relais.</li><li>Comment est construite chaque strophe ? — <b>Trois alexandrins suivis d’un vers court.</b> Onze strophes sur ce modèle.</li></ol>
+<h3>À retenir</h3><ul><li>Le recueil se ferme sur un aveu : « Je me croyais poète et j’ai pu me méprendre ».</li><li>Le poète se compare au sculpteur dont l’argile résiste : l’obstacle est dans les mots, pas dans l’inspiration.</li><li>Il porte un lingot sans effigie : une richesse intérieure qu’il ne parvient pas à exprimer.</li><li>Le dernier vers transforme l’échec en vœu : que le poème renaisse dans un autre cœur.</li></ul>
+<h3>À écrire</h3><p>Réponds au poète (vingt lignes) : tu es « l’autre cœur » où son poème renaît. Dis-lui ce qui a vibré en toi.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="stances-je-me-croyais-poete.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

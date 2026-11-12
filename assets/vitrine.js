@@ -324,34 +324,76 @@
        place, mais un appel direct à VRT.act('mettreEn') réécraserait le texte
        affiché par la traduction du Tube Digestif. */
     if (PDJ) return;
+    /* Les pages du site n'embarquent que `citations` et `themeSombre` dans
+       VRT_DATA : `D.scal[…]` y levait une TypeError, avalée par VRT.act. Le
+       traducteur ne s'ouvrait donc jamais hors de l'accueil (30/10/2026). */
+    if (!D.scal) return;
     var sc = D.scal[S.langue] || {};
     poser('passage1', sc.passage1 || '');
     poser('passage2', sc.passage2 || '');
     poser('decryptage', sc.decryptage || '');
-    rendre('partages', D.partages[S.langue]);
+    rendre('partages', (D.partages || {})[S.langue]);
     /* `rendre` repose les href figés au build : sans ce rappel, changer de
        langue effacerait le lien qu'on vient d'attacher. */
     majPartages();
   }
 
+  /* Page servie par Google Traduction : https://veritas--school-com.translate.goog/… */
+  function pageTraduite() { return /\.translate\.goog$/.test(location.hostname); }
+  function adresseOriginale() { return 'https://veritas-school.com' + location.pathname + location.hash; }
+
   /* ── Thème sombre ──────────────────────────────────────────────────────── */
+  /* ── MODE SOMBRE PAR INVERSION (30/10/2026) ──────────────────────────────
+     Mesuré au navigateur, page par page, après défilement complet : 25 textes
+     illisibles sur /corriges/, 393 sur un corrigé de séquence, 175 sur
+     /parcours/, 25 sur l'accueil — bleu nuit sur bleu nuit, blanc sur blanc.
+     La feuille sombre de la maquette et adapterSurfaces DEVINAIENT les
+     surfaces (styles en ligne, couleur calculée) et éclaircissaient le texte
+     partout : chaque page a ses propres fonds, la devinette ratait toujours
+     quelque part, et les règles [data-vrt-theme="sombre"] des pages s'y
+     ajoutaient en désordre.
+     On ne devine plus : la page reste en CLAIR (data-vrt-theme="clair", donc
+     aucune règle sombre des pages ne s'applique) et on l'inverse en entier.
+     Une inversion conserve le rapport de contraste de chaque texte avec SON
+     fond : ce qui était lisible en clair l'est en sombre, sur toutes les
+     pages, sans une règle par page. Photos et vidéos sont ré-inversées pour
+     garder leurs vraies couleurs.
+     L'APPLICATION (coquille VERITAS_v1.2.html) a son propre thème sombre
+     dessiné (data-theme="dark", ~200 règles dans app.css) : la bulle le pilote
+     au lieu d'inverser. */
+  var NUIT = 'html{filter:invert(.93) hue-rotate(180deg);background:#fff}'
+    + 'img,video,picture,iframe,canvas,embed,object,'
+    + '[style*="background-image:url"],[style*="background-image: url"],'
+    + '[style*="background:url"],[style*="background: url"]'
+    + '{filter:invert(1) hue-rotate(180deg)}'
+    + 'picture img{filter:none}';
   function appliquerTheme(mode) {
+    var sombre = mode === 'sombre';
+    var racine = document.documentElement;
+    if (typeof window.vrtToggleTheme === 'function' && racine.hasAttribute('data-theme')) {
+      /* La clé est écrite dans le vocabulaire de l'application AVANT de la
+         repeindre : écrite « sombre » d'abord, vrtToggleTheme lisait déjà du
+         sombre et rebasculait en clair. */
+      var voulu = sombre ? 'dark' : 'light';
+      try { localStorage.setItem('vrt_theme', voulu); } catch (e) {}
+      if (typeof window.vrtThemeSync === 'function') { try { window.vrtThemeSync(); } catch (e) {} }
+      else if (racine.getAttribute('data-theme') !== voulu) { try { window.vrtToggleTheme(); } catch (e) {} }
+      return;
+    }
+    try { localStorage.setItem('vrt_theme', mode); } catch (e) {}
     var el = document.getElementById('vrt-theme');
     if (!el) { el = document.createElement('style'); el.id = 'vrt-theme'; document.head.appendChild(el); }
-    el.textContent = mode === 'sombre' ? (D.themeSombre || '') : '';
-    /* Repère de thème sur <html>.
-       Le thème sombre de la maquette reconnaît les surfaces en cherchant une
-       CHAÎNE dans les styles en ligne : [style*="background:#fff"], etc. Le
-       procédé tient tant que rien ne bouge, mais il rate toute surface dont
-       le fond vient d'une feuille et non d'un attribut — et il assombrit
-       alors le texte sans assombrir son fond, ce qui donne du gris clair sur
-       du blanc. Mesuré sur l'écran tarifs : 21 textes sous le seuil en mode
-       sombre contre 10 en clair.
-       Cet attribut donne une prise STABLE, indépendante du style en ligne,
-       pour écrire de vraies règles sombres. */
-    try { document.documentElement.setAttribute('data-vrt-theme', mode); } catch (e) {}
-    try { localStorage.setItem('vrt_theme', mode); } catch (e) {}
-    adapterSurfaces(mode === 'sombre');
+    el.textContent = sombre ? NUIT : '';
+    try { racine.setAttribute('data-vrt-theme', 'clair'); racine.setAttribute('data-vrt-nuit', sombre ? '1' : '0'); } catch (e) {}
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (sombre) {
+      if (!m) { m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); }
+      if (!m.hasAttribute('data-vrt-clair')) m.setAttribute('data-vrt-clair', m.getAttribute('content') || '');
+      m.setAttribute('content', '#0A1024');
+    } else if (m && m.hasAttribute('data-vrt-clair')) {
+      m.setAttribute('content', m.getAttribute('data-vrt-clair'));
+    }
+    adapterSurfaces(false);     // rend les fonds qu'une ancienne version aurait assombris
   }
 
   /* ── Le mode sombre effaçait un texte sur trois ───────────────────────────
@@ -518,6 +560,26 @@
     goParents: function () { location.href = '/plan.html#parent'; },
     goEnseignants: function () { location.href = '/plan.html#enseignant'; },
     goPartenaires: function () { location.href = '/plan.html#partenaire'; },
+    /* « Lancer un quiz » (section Apprendre en jouant) : quiz, séries et badges sont dans /apprendre/. */
+    goApprendre: function () { location.href = '/apprendre/'; },
+    /* « Étude intégrale » (panneau bleu de l'œuvre du jour, 08/11/2026) : menait au catalogue
+       d'abonnements. Il ouvre la fiche de l'œuvre du jour quand VÉRITAS en publie une, sinon la
+       liste des œuvres au programme. Clés : fragments du titre, en minuscules et sans accents. */
+    goEtudeOeuvre: function () {
+      var ETUDES = {
+        'balafon': '1ere-balafon', 'coeur des tenebres': '1ere-coeur-tenebres', 'lion et la perle': '1ere-lion-perle',
+        'koum-wam': '5e-nkum-wam', 'koum wam': '5e-nkum-wam', 'poemes sauvages': '2nde-poemes-sauvages', 'tartuffe': '2nde-tartuffe',
+        'tribus de capitoline': '2nde-tribus-capitoline', 'marmite de koka': '3e-marmite-koka', 'petites gouttes': '3e-petites-gouttes',
+        'ville cruelle': '3e-ville-cruelle', 'attachement au sol natal': '4e-attachement-sol', 'coeur du sahel': '4e-coeur-sahel',
+        'trois pretendants': '4e-trois-pretendants', 'arbre fetiche': '5e-arbre-fetiche', 'pere inconnu': '5e-pere-inconnu',
+        'bimanes': '6e-bimanes', 'chants de la foret': '6e-chants-foret', 'korotoumou': '6e-contes-korotoumou',
+        'ngum a jemea': 'tle-ngum-jemea', 'stances et poemes': 'tle-stances-poemes', 'vieux negre': 'tle-vieux-negro'
+      };
+      var t = String((typeof PDJ === 'object' && PDJ && PDJ.titre) || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[’']/g, "'");
+      var page = null;
+      Object.keys(ETUDES).some(function (k) { if (t.indexOf(k) >= 0) { page = ETUDES[k]; return true; } return false; });
+      location.href = page ? '/oeuvres/' + page + '.html' : '/oeuvres/';
+    },
     goTarifs: function () { aller('tarifs'); },
     goBoutique: function () { aller('boutique'); },
     /* `commanderVedette` a été retiré avec le bloc « livre mis en avant » :
@@ -584,11 +646,25 @@
     },
     ajouterArticle: function () { S.qte = Math.min(S.qte + 1, 9); majTotaux(); },
     retirerArticle: function () { S.qte = Math.max(S.qte - 1, 1); majTotaux(); },
-    mettreFr: function () { S.langue = 'fr'; S.trad = false; majLangue(); },
-    mettreEn: function () { S.langue = 'en'; S.trad = false; majLangue(); },
+    /* « Langue du site » (30/10/2026, choix de Jacques) : seul l'encart du
+       passage du jour existait en anglais — « English » ne traduisait rien
+       ailleurs. Il ouvre désormais la page traduite par Google Traduction
+       (*.translate.goog) ; « Français » ramène à l'adresse d'origine. Le
+       panneau ne change plus de langue à sa simple ouverture. */
+    mettreFr: function () {
+      S.trad = false; panneau('vrtTrad', false);
+      if (pageTraduite()) { location.href = adresseOriginale(); return; }
+      S.langue = 'fr'; majLangue();
+    },
+    mettreEn: function () {
+      S.trad = false; panneau('vrtTrad', false);
+      if (pageTraduite()) return;
+      S.langue = 'en'; majLangue();
+      if (!/^https?:$/.test(location.protocol) || /^(localhost|127\.)/.test(location.hostname)) return;
+      location.href = 'https://translate.google.com/translate?sl=fr&tl=en&u=' + encodeURIComponent(location.href);
+    },
     basculerTraducteur: function () {
       S.trad = !S.trad; S.ia = false;
-      if (S.trad) { S.langue = S.langue === 'fr' ? 'en' : 'fr'; majLangue(); }
       panneau('vrtTrad', S.trad); panneau('vrtIA', false);
     },
     basculerTheme: function () {
@@ -815,12 +891,8 @@
      transactions, le second récupère l'URL déjà obtenue. */
   function nouvelleRef() {
     var d = new Date(), p = function (n) { return ('0' + n).slice(-2); };
-    /* 8 caractères tirés par crypto (contre-expertise du 28/10, X3) : avec 4,
-       la référence s'énumérait et ouvrait la page de paiement d'un autre. */
-    var al = '', C = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', buf = new Uint8Array(8);
-    if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(buf);
-    else for (var j = 0; j < 8; j++) buf[j] = Math.random() * 256;
-    for (var i = 0; i < 8; i++) al += C.charAt(buf[i] % C.length);
+    var al = '', C = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    for (var i = 0; i < 4; i++) al += C.charAt(Math.floor(Math.random() * C.length));
     return 'VT' + String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate()) + '-' + al;
   }
 
@@ -1103,10 +1175,7 @@
             lignes: [{ nom: (S.article && S.article.titre) || '', qte: S.qte, pu: prixUnitaire() },
                      { nom: 'Livraison ' + ['(retrait au centre)', 'Douala', 'régions'][S.livr]
                             + (S.livr > 0 ? ' — ' + (S.saisie.vpAdr || '').trim() : ''),
-                       qte: 1, pu: [0, 1000, 2500][S.livr] }],
-            /* Ce que le serveur RECALCULE depuis son catalogue : l'article, la
-               quantité, le mode de livraison. Sans lui, l'init refuse le panier. */
-            article: { id: (S.article && S.article.id) || '', qte: S.qte, livr: S.livr }
+                       qte: 1, pu: [0, 1000, 2500][S.livr] }]
         };
         if (remiseAmi() > 0) {
           corps.code = S.codeAmi.code;
@@ -1498,11 +1567,13 @@
     }
 
     /* ── E-mail ────────────────────────────────────────────────────────── */
-    /* Même règle que _emailPublic() d'app.js (contre-expertise du 28/10, S3) :
-       la base portait « www.…@gmail.com », recopiée telle quelle dans tous les
-       mailto: — adresse invalide, demandes de code enseignant perdues. On
-       retire le « www. », on refuse ce qui n'est pas une adresse, et une boîte
-       gratuite ne remplace pas l'adresse du domaine écrite dans la page. */
+    /* MÊME FILTRE QUE L'APPLICATION (_emailPublic, app.js), 28/10/2026, S3.
+       La base porte « www.<boîte personnelle>@gmail.com » : sans filtre, cette
+       adresse invalide remplaçait le contact@veritas-school.com de TOUTES les
+       pages habillées (/enseignant/, CGV…) — les demandes de code enseignant
+       n'arrivaient pas, et la ligne débordait à 360 px. Une adresse non
+       valide ou en boîte gratuite ne remplace plus rien : la page garde la
+       sienne. */
     var mail = String(pi.email || ec.email || '').trim().replace(/^(www\.)+/i, '');
     if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(mail)
         || /@(gmail|googlemail|yahoo|ymail|hotmail|outlook|live|msn|aol|icloud|gmx|mail\.ru|yandex)\./i.test(mail)) mail = '';
@@ -2661,6 +2732,9 @@
     try { var k = iaSemaineCle(); var n = parseInt(localStorage.getItem(k) || '0', 10) || 0; localStorage.setItem(k, String(n + 1)); }
     catch (e) {}
   }
+  function jetonCompte() {
+    try { return window._vrtContentToken || sessionStorage.getItem('_vrtCT') || ''; } catch (e) { return ''; }
+  }
   function majIAQuota() {
     var el = document.getElementById('vrtIAQuota');
     if (!el) return;
@@ -2725,7 +2799,12 @@
     fetch(base + '/ia_proxy.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: envoi, plan: 'anon', userId: '' })
+      /* Jeton de compte (30/10/2026) : sans lui, un élève CONNECTÉ dans
+         l'application tombait ici au palier anonyme — 2 questions par jour
+         et par IP — puis lisait « essais épuisés ». L'application le range
+         en sessionStorage (_vrtCT, voir _contentToken d'app.js) : même
+         origine, même onglet, la page le lit. ia_proxy.php le vérifie. */
+      body: JSON.stringify({ prompt: envoi, plan: 'anon', userId: '', token: jetonCompte() })
     })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; }, function () { return { ok: r.ok, status: r.status, j: {} }; }); })
       .then(function (res) {
@@ -2932,6 +3011,8 @@
              citation a simplement fini son temps. Mettre citOn à false
              empêcherait le bouton de la rouvrir. */
           panneau('vrtCit', false);
+          // Une fois par session : elle ne revient pas sur chaque page visitée.
+          try { sessionStorage.setItem(CLE_CIT, '1'); } catch (e) {}
         }, DUREE_CIT);
       }, 6000);
     }
@@ -2953,7 +3034,105 @@
       S.plus = S.burger = S.ia = S.trad = false;
       fermerMenus(); panneau('vrtIA', false); panneau('vrtTrad', false);
     });
+    /* 29/10/2026 — Le panneau « Plus » se ferme quand la page défile. Ouvert
+       au survol, il restait posé sur le contenu tant que la souris ne bougeait
+       pas. La classe .vrt-defile, posée le temps du défilement, suspend aussi
+       l'ouverture au survol (règle dans vitrine.html et veritas-habillage.css). */
+    var minuterieDefile = 0;
+    window.addEventListener('scroll', function () {
+      if (S.plus) { S.plus = false; fermerMenus(); }
+      document.documentElement.classList.add('vrt-defile');
+      clearTimeout(minuterieDefile);
+      minuterieDefile = setTimeout(function () {
+        document.documentElement.classList.remove('vrt-defile');
+      }, 400);
+    }, { passive: true });
+    enTetePage();
+    enTeteApp();
   }
+
+  /* 29/10/2026 — En-tête de page unique (chantier design, point 9). Les pages
+     de veritas-refonte.css (œuvres, « Découvrir »…) commençaient par un simple
+     <h1> dans la colonne de texte : aucun en-tête, quand toutes les autres
+     pages en ont un. Ce titre et son chapeau passent dans le même en-tête
+     maillé que le reste du site (style .vh-hero, veritas-habillage.css).
+     Le contenu ne change pas : deux nœuds déplacés, rien d'ajouté sinon la
+     mention « Centre VÉRITAS » que portent les autres en-têtes. */
+  /* 29/10/2026 — « Corrige le conflit entre vitrine et app, surtout au niveau
+     du design » (Jacques). Les écrans publics de l'application (épreuves,
+     partenariat, cagnotte, trophées, certificats…) ouvraient sur un titre posé
+     à plat — pictogramme à gauche, titre à droite, chapeau en italique gris —
+     quand toute la vitrine ouvre sur l'en-tête maillé. Le premier titre de
+     l'écran passe dans ce même en-tête (.vh-hero), avec une ou deux lignes de
+     chapeau. L'application réécrit #vContent à chaque navigation : un
+     MutationObserver refait le geste, une fois par image au plus. Le texte
+     n'est pas touché (les titres servent de clés à la traduction anglaise). */
+  function enTeteApp() {
+    var zone = document.getElementById('vContent');
+    if (!zone || !document.getElementById('VISITOR')) return;
+    var prevu = false;
+    function poser() {
+      prevu = false;
+      if (zone.querySelector('.vh-hero')) return;
+      var t = zone.querySelector('.pgt, .vsec-title');
+      if (!t || !t.offsetWidth) return;
+      // Seulement un titre d'OUVERTURE : pas un intertitre au milieu de l'écran.
+      if (t.getBoundingClientRect().top - zone.getBoundingClientRect().top > 260) return;
+      var tete = document.createElement('header');
+      tete.className = 'vh-hero vh-app';
+      t.parentNode.insertBefore(tete, t);
+      tete.appendChild(t);
+      for (var n = 0; n < 2; n++) {
+        var s = tete.nextElementSibling, txt = s ? s.textContent.trim() : '';
+        if (!s || !/^(P|DIV)$/.test(s.tagName) || !txt || txt.length > 260
+            || s.querySelector('button,a,input,select,img,table,ul,ol,.pgt,.vsec-title')) break;
+        tete.appendChild(s);
+      }
+    }
+    poser();
+    new MutationObserver(function () {
+      if (!prevu) { prevu = true; requestAnimationFrame(poser); }
+    }).observe(zone, { childList: true, subtree: true });
+  }
+
+  function enTetePage() {
+    if (!document.querySelector('link[href*="veritas-refonte.css"],link[href*="veritas-pages.css"]')) return;
+    if (document.querySelector('link[data-vrt-epreuve], nav.vrt-outil')) return;   // épreuve imprimable, outil
+    if (document.querySelector('header.top, .eh, .vh-hero')) return;
+    // 1. Un <header> nu qui porte le titre (corrigés STI) : il devient l'en-tête.
+    var nu = document.querySelector('body > header:not([class]):not(.vrt-hab)');
+    if (nu && nu.querySelector('h1')) { nu.classList.add('vh-hero'); return; }
+    // 2. Le titre dans la colonne de texte : page simple, fiche (carte), page
+    //    juridique (fil d'Ariane avant le titre).
+    var h1 = document.querySelector('.wrap h1');
+    if (!h1) return;
+    var wrap = h1.closest('.wrap'), cadre = h1.parentNode;
+    if (cadre !== wrap && !(cadre.parentNode === wrap && /^(ARTICLE|DIV)$/.test(cadre.tagName))) return;
+    // Seulement un titre d'OUVERTURE : il ne doit avoir devant lui qu'un fil
+    // d'Ariane ou une étiquette.
+    for (var a = h1.previousElementSibling; a; a = a.previousElementSibling)
+      if (!a.matches('.crumb,.badge,.kicker')) return;
+    if (cadre !== wrap)
+      for (var c = cadre.previousElementSibling; c; c = c.previousElementSibling)
+        if (!c.matches('.crumb, .nav')) return;   // fil d'Ariane, onglets de niveau
+    var tete = document.createElement('header');
+    tete.className = 'vh-hero';
+    var etiquette = h1.previousElementSibling;
+    if (etiquette && etiquette.matches('.badge,.kicker')) tete.appendChild(etiquette);
+    else {
+      var marque = document.createElement('span');
+      marque.className = 'badge';
+      marque.textContent = 'Centre VÉRITAS';
+      tete.appendChild(marque);
+    }
+    var chapeau = h1.nextElementSibling;
+    tete.appendChild(h1);
+    if (chapeau && /^(P|DIV)$/.test(chapeau.tagName) && chapeau.textContent.trim().length < 340
+        && !chapeau.querySelector('img,table,ul,ol,form,input,button,iframe,video'))
+      tete.appendChild(chapeau);
+    wrap.parentNode.insertBefore(tete, wrap);
+  }
+
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer);
   else demarrer();
@@ -3009,16 +3188,7 @@
       + '</label>'
       + '<button type="submit">Chercher</button>';
 
-    var sug = document.createElement('div');
-    sug.className = 'vrt-rech-sug';
-    sug.innerHTML = '<span>Souvent cherché :</span>';
-    SUGGESTIONS.forEach(function (s) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = s;
-      b.addEventListener('click', function () { lancer(s); });
-      sug.appendChild(b);
-    });
+    /* « Souvent cherché » retiré le 08/11/2026 (demande de Jacques) : la barre de recherche suffit. */
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -3026,7 +3196,6 @@
       lancer(el ? el.value : '');
     });
 
-    apres.parentNode.insertBefore(sug, apres.nextSibling);
     apres.parentNode.insertBefore(form, apres.nextSibling);
   }
 
@@ -3137,10 +3306,13 @@
     [/ambassa|tuteur/i,                             '!ouvrirIA'],
     [/whatsapp/i,                                   'https://wa.me/237697637739'],
     [/espace parent/i,                              '#parents'],
-    [/domicile/i,                                   '/app.html#devis?f=domicile'],
-    [/rattrapage/i,                                 '/app.html#devis?f=rattrapage'],
-    [/pr[ée]paration.*examen/i,                     '/app.html#devis?f=examens'],
-    [/r[ée]p[ée]tition|soutien/i,                   '/app.html#devis?f=centre'],
+    /* 29/10/2026 — /app.html#devis chargeait toute l'application (~6 s) pour
+       un formulaire qui, de surcroît, ne quittait pas le navigateur du
+       visiteur. La page légère poste à api/demandes.php. */
+    [/domicile/i,                                   '/decouvrir/devis.html?f=domicile'],
+    [/rattrapage/i,                                 '/decouvrir/devis.html?f=rattrapage'],
+    [/pr[ée]paration.*examen/i,                     '/decouvrir/devis.html?f=examens'],
+    [/r[ée]p[ée]tition|soutien/i,                   '/decouvrir/devis.html?f=centre'],
     [/certificat|attestation/i,                    '/app.html#verifier-certificat'],
     [/orientation|s[ée]rie/i,                      '/app.html#orientation'],
     [/cagnotte/i,                                  '/app.html#cagnotte'],
@@ -3173,6 +3345,16 @@
     if (!document.querySelector('[data-vp]')) return;
     var a = ev.target && ev.target.closest ? ev.target.closest('a') : null;
     if (!a || !/^\s*D[ée]couvrir/i.test(a.textContent || '')) return;
+    /* 29/10/2026 — La table ROUTES date du temps où les cartes n'avaient pas
+       de destination. build_vitrine.js leur en écrit une désormais (champ
+       `dest`), et ROUTES la court-circuitait : « Œuvres au programme »
+       (oeuvres/) ouvrait l'e-learning verrouillé, « Mon cahier en ligne »
+       (livrets/) la boutique, « Orientation » (parcours/) chargeait toute
+       l'application, « Espace Parents » (plan.html#parent) la présentation.
+       Un lien vers une vraie page est donc suivi tel quel ; seuls les liens
+       internes (#…) ou vides passent encore par la table. */
+    var hrefCarte = a.getAttribute('href') || '';
+    if (hrefCarte && hrefCarte.charAt(0) !== '#' && !/^(javascript|https?|mailto|tel):/i.test(hrefCarte)) return;
     var carte = carteDe(a);
     var h3 = carte ? carte.querySelector('h3') : null;
     var titre = h3 ? (h3.textContent || '') : (carte ? carte.textContent || '' : '');

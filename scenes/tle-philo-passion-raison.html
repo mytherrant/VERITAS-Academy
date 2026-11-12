@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La passion et la raison — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée de philosophie (Terminale) : les passions, leur définition et leurs manifestations ; faut-il les combattre ou les éduquer ?">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/tle-philo-passion-raison.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="La passion et la raison — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée de philosophie (Terminale) : les passions, leur définition et leurs manifestations ; faut-il les combattre ou les éduquer ?">
+<meta property="og:url" content="https://veritas-school.com/scenes/tle-philo-passion-raison.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"La passion et la raison","description":"Scène animée de philosophie (Terminale) : les passions, leur définition et leurs manifestations ; faut-il les combattre ou les éduquer ?","url":"https://veritas-school.com/scenes/tle-philo-passion-raison.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"Terminale","about":"Philosophie","teaches":"Définir la passion (de pati, subir), en reconnaître les manifestations, et problématiser son rapport à la raison : faut-il supprimer les passions, s’y abandonner, ou les éduquer ?","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-philo-passion',
+  discipline: 'Philosophie', niveau: 'Terminale',
+  titre: 'La passion et la raison',
+  decor: 'classe', lieu: 'Le foyer du lycée', moment: 'Trois mois avant le bac',
+  objectif: 'Définir la passion (de pati, subir), en reconnaître les manifestations, et problématiser son rapport à la raison : faut-il supprimer les passions, s’y abandonner, ou les éduquer ?',
+  programme: 'Progression harmonisée Tle · Chapitre 7 (passion et raison), leçons 15-16 (les passions : définition et manifestations ; éducation des passions)',
+  jauges: [
+    { id: 'passion', nom: 'Force de la passion', val: 60, couleur: '#C0397C' },
+    { id: 'raison', nom: 'Maîtrise par la raison', val: 30, couleur: '#1E499B' }
+  ],
+  personnages: {
+    prof:   { nom: 'Mme Atangana, professeure de philosophie', couleur: '#1E499B', look: { metier: 'enseignant', tenue: 'jupe', peau: 'fonce', cheveux: 'chignon', lunettes: true } },
+    roland: { nom: 'Roland, passionné de football', couleur: '#1F9D5B', look: { metier: 'eleve', peau: 'fonce', cheveux: 'ras', habit: '#1F9D5B' } },
+    nadia:  { nom: 'Nadia, rationnelle', couleur: '#5A2E5A', look: { metier: 'eleve', tenue: 'jupe', peau: 'brun', cheveux: 'queue', objet: 'livre' } },
+    kevin:  { nom: 'Kevin, joueur en ligne', couleur: '#5A6275', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court', objet: 'sac' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['roland', 'nadia', 'kevin'], txt: 'Trois mois avant le bac. Roland ne pense qu’à la finale de la Coupe ; Kevin passe ses nuits à jouer en ligne ; Nadia, elle, révise.', objet: { i: 'flamme', lib: 'La passion' } },
+    { t: 'dit', qui: 'nadia', emo: 'colere', txt: 'Vos passions vous rendent esclaves. Il faudrait les supprimer : seule la raison doit commander.' },
+    { t: 'dit', qui: 'roland', emo: 'fier', txt: 'Sans passion, on ne fait rien de grand ! Les champions, les artistes, les inventeurs sont des passionnés.', jauges: { passion: 70 } },
+    { t: 'recit', entre: ['prof'], txt: 'Mme Atangana a entendu la dispute.' },
+    { t: 'dit', qui: 'prof', txt: 'Commençons par définir. « Passion » vient du latin pati, subir. La passion est une inclination exclusive et durable, qui s’empare de l’esprit au point de le dominer.' },
+    { t: 'question', q: 'Que nous apprend l’étymologie de « passion » ?',
+      options: [
+        { txt: 'Que dans la passion, on subit plus qu’on n’agit : on est « passif » devant une force qui nous emporte.', ok: true, retour: 'D’où le problème : la passion menace la liberté, qui suppose qu’on soit maître de soi.' },
+        { txt: 'Que la passion est toujours une bonne chose.', retour: 'L’étymologie souligne au contraire la passivité.' }
+      ] },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · émotion, passion ou désir ?', consigne: 'Classe chaque état selon sa nature.',
+      cats: ['Émotion (brève, intense)', 'Passion (durable, exclusive)'],
+      items: [
+        { txt: 'La colère soudaine après une injustice.', cat: 0 },
+        { txt: 'La jalousie qui obsède pendant des mois.', cat: 1 },
+        { txt: 'La peur en entendant un bruit dans la nuit.', cat: 0 },
+        { txt: 'Le jeu qui fait oublier le sommeil et les études.', cat: 1 },
+        { txt: 'L’ambition qui organise toute une vie.', cat: 1 }
+      ],
+      bravo: 'L’émotion passe ; la passion s’installe et réorganise toute la vie autour de son objet.' },
+    { t: 'dit', qui: 'kevin', emo: 'triste', txt: 'Moi, je voulais jouer une heure. J’ai joué jusqu’à quatre heures du matin. Je ne contrôle plus rien.', jauges: { passion: 85, raison: 20 } },
+    { t: 'dit', qui: 'prof', txt: 'Voilà le danger : la passion aveugle, elle fait voir le monde à travers son seul objet. Mais Roland n’a pas tort non plus.' },
+    { t: 'dit', qui: 'prof', jeu: 'elle écrit au tableau', txt: 'Rien de grand ne s’est accompli dans le monde sans passion.', cite: 'Hegel, La Raison dans l’histoire (trad. fr.)' },
+    { t: 'remarque', titre: 'Le problème', txt: 'Si la passion asservit, faut-il la détruire, comme le veulent certains moralistes ? Mais si elle est l’énergie des grandes actions, comme le pense Hegel, faut-il s’y abandonner ? Une troisième voie : éduquer les passions, c’est-à-dire les orienter par la raison vers des objets dignes.' },
+    { t: 'choix', qui: 'kevin', q: 'Tu es Kevin. Que fais-tu de ta passion pour le jeu ?',
+      options: [
+        { txt: 'Je supprime le jeu définitivement, par la seule volonté.', consequence: 'Tu tiens trois jours, puis tu rechutes : on ne vainc pas une passion seulement en l’interdisant.', jauges: { raison: 5, passion: 5 } },
+        { txt: 'Je continue sans limite : c’est ma passion, j’ai le droit.', consequence: 'Le bac approche, et ta liberté de choisir ton avenir s’évanouit.', jauges: { passion: 10, raison: -15 } },
+        { txt: 'Je fixe des horaires, je joue après mes révisions, et je mets ma passion au service d’un projet (apprendre à créer des jeux).', consequence: 'Tu n’éteins pas ta passion, tu la diriges : c’est l’éducation des passions.', jauges: { raison: 45, passion: -15 } }
+      ],
+      oeuvre: 'Descartes, dans Les Passions de l’âme, montre qu’on ne commande pas directement aux passions, mais qu’on peut les détourner par l’habitude et en leur opposant d’autres représentations.' },
+    { t: 'atelier', mode: 'balance', titre: 'Atelier · la passion, ennemie ou alliée de la raison ?', consigne: 'Place chaque argument du côté qu’il défend.',
+      cotes: ['La passion asservit', 'La passion est une force'],
+      args: [
+        { txt: 'Elle aveugle et fait perdre la maîtrise de soi.', cote: 0, poids: 3 },
+        { txt: 'Elle donne l’énergie de persévérer dans un grand projet.', cote: 1, poids: 3 },
+        { txt: 'Elle peut conduire à la dépendance (jeu, drogue).', cote: 0, poids: 2 },
+        { txt: 'Sans elle, la raison reste froide et inactive.', cote: 1, poids: 2 }
+      ],
+      bravo: 'Les deux côtés pèsent : c’est pourquoi la solution n’est ni la suppression ni l’abandon, mais l’éducation.' },
+    { t: 'dit', qui: 'roland', emo: 'joie', txt: 'Alors je regarderai la finale… et je réviserai la passion pendant la mi-temps !', jauges: { raison: 75, passion: 55 } }
+  ],
+  labo: {
+    titre: 'Laboratoire · passion et liberté',
+    intro: 'Règle l’intensité de la passion, la maîtrise de soi et la valeur de l’objet visé : la passion libère-t-elle ou asservit-elle ?',
+    persos: ['kevin', 'roland', 'nadia', 'prof'],
+    curseurs: [
+      { id: 'intensite', nom: 'Intensité de la passion', val: 75, bas: 'tiède', haut: 'dévorante' },
+      { id: 'maitrise', nom: 'Maîtrise par la raison', val: 30, bas: 'nulle', haut: 'forte' },
+      { id: 'objet', nom: 'Valeur de l’objet visé', val: 40, bas: 'futile ou nuisible', haut: 'grand projet' }
+    ],
+    scenarios: [
+      { nom: 'Kevin, à 4 h du matin', icone: 'lune', valeurs: { intensite: 85, maitrise: 15, objet: 25 } },
+      { nom: 'Supprimer toute passion', icone: 'muet', valeurs: { intensite: 5, maitrise: 90 } },
+      { nom: 'Une passion éduquée', icone: 'fier', valeurs: { intensite: 75, maitrise: 75, objet: 80 } }
+    ],
+    liens: [
+      { a: 'prof', b: 'kevin', type: 'confiance', lib: 'éduque', base: .3, poids: { maitrise: .5 } },
+      { a: 'nadia', b: 'roland', type: 'conflit', lib: 'raison contre passion', base: .5, poids: { intensite: .3, maitrise: -.3 } },
+      { a: 'roland', b: 'kevin', type: 'alliance', lib: 'passionnés', base: .5 }
+    ],
+    issue: function(v){
+      if(v.intensite < 20){ return { niveau: 'moyen', badge: 'Une raison sans élan', recit: 'Plus aucune passion : tout est raisonnable, mais plus rien ne mobilise vraiment.', apres: 'Hegel : rien de grand sans passion.', themes: ['apathie'] }; }
+      if(v.intensite > 60 && v.maitrise < 40){ return { niveau: 'ko', badge: 'L’esclavage passionnel', recit: 'La passion commande : le sommeil, les études, les amis passent après. La liberté s’efface.', apres: 'La passion, de pati : on subit.', themes: ['aliénation', 'dépendance'] }; }
+      if(v.maitrise > 60 && v.objet > 60){ return { niveau: 'ok', badge: 'Une passion éduquée', recit: 'Une passion forte, dirigée par la raison vers un grand projet : elle devient une force libre.', apres: 'Éduquer les passions plutôt que les détruire.', themes: ['éducation des passions'] }; }
+      return { niveau: 'moyen', badge: 'Un équilibre fragile', recit: 'La passion est tenue, mais l’objet ne la mérite pas tout à fait.', apres: 'Orienter la passion vers un objet digne d’elle.', themes: ['maîtrise de soi'] };
+    }
+  },
+  quiz: [
+    { q: 'D’où vient le mot « passion » ?', options: [
+      { txt: 'Du latin pati, subir.', ok: true, retour: 'La passion est d’abord passivité.' },
+      { txt: 'Du latin passus, le pas.', retour: 'Non.' } ] },
+    { q: 'Qu’est-ce qui distingue la passion de l’émotion ?', options: [
+      { txt: 'Sa durée et son caractère exclusif.', ok: true, retour: 'L’émotion est brève ; la passion s’installe.' },
+      { txt: 'Son intensité seulement.', retour: 'Une émotion peut être très intense.' } ] },
+    { q: 'Qui a écrit que rien de grand ne s’est accompli sans passion ?', options: [
+      { txt: 'Hegel.', ok: true, retour: 'Dans La Raison dans l’histoire.' },
+      { txt: 'Descartes.', retour: 'Descartes a écrit Les Passions de l’âme.' } ] },
+    { q: 'Que signifie « éduquer les passions » ?', options: [
+      { txt: 'Les orienter par la raison vers des objets dignes.', ok: true, retour: 'Ni les supprimer, ni s’y abandonner.' },
+      { txt: 'Les interdire totalement.', retour: 'C’est la thèse de la suppression.' } ] },
+    { q: 'Pourquoi la passion menace-t-elle la liberté ?', options: [
+      { txt: 'Parce qu’elle domine l’esprit et fait perdre la maîtrise de soi.', ok: true, retour: 'Être libre suppose d’être maître de soi.' },
+      { txt: 'Parce qu’elle est interdite par la loi.', retour: 'Non.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Passion : du latin pati (subir) ; inclination exclusive et durable qui domine l’esprit.',
+      'Manifestations : aveuglement, obsession, dépendance ; mais aussi énergie, persévérance.',
+      'Trois attitudes : supprimer les passions, s’y abandonner, ou les éduquer par la raison.',
+      'Repères : Descartes (Les Passions de l’âme), Hegel (« rien de grand… sans passion »).'
+    ],
+    ecrire: 'Sujet : « Faut-il se libérer de ses passions ? » Élaborez un plan détaillé dialectique (thèse, antithèse, synthèse), avec un argument et un exemple par partie.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>La passion et la raison</h1>
+<p><b>Philosophie · Terminale</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Définir la passion (de pati, subir), en reconnaître les manifestations, et problématiser son rapport à la raison : faut-il supprimer les passions, s’y abandonner, ou les éduquer ?</p>
+<p>Programme : Progression harmonisée Tle · Chapitre 7 (passion et raison), leçons 15-16 (les passions : définition et manifestations ; éducation des passions)</p>
+<p>Lieu : Le foyer du lycée · Trois mois avant le bac</p>
+<h3>Personnages</h3><ul><li>Mme Atangana, professeure de philosophie</li><li>Roland, passionné de football</li><li>Nadia, rationnelle</li><li>Kevin, joueur en ligne</li></ul>
+<h3>La scène</h3>
+<p>Trois mois avant le bac. Roland ne pense qu’à la finale de la Coupe ; Kevin passe ses nuits à jouer en ligne ; Nadia, elle, révise.</p>
+<p><b>Nadia, rationnelle</b> : Vos passions vous rendent esclaves. Il faudrait les supprimer : seule la raison doit commander.</p>
+<p><b>Roland, passionné de football</b> : Sans passion, on ne fait rien de grand ! Les champions, les artistes, les inventeurs sont des passionnés.</p>
+<p>Mme Atangana a entendu la dispute.</p>
+<p><b>Mme Atangana, professeure de philosophie</b> : Commençons par définir. « Passion » vient du latin pati, subir. La passion est une inclination exclusive et durable, qui s’empare de l’esprit au point de le dominer.</p>
+<p><b>Question :</b> Que nous apprend l’étymologie de « passion » ?</p><ul><li>Que dans la passion, on subit plus qu’on n’agit : on est « passif » devant une force qui nous emporte. <b>(bonne réponse)</b></li><li>Que la passion est toujours une bonne chose.</li></ul><p>D’où le problème : la passion menace la liberté, qui suppose qu’on soit maître de soi.</p>
+<h4>Atelier · émotion, passion ou désir ?</h4><p>Classe chaque état selon sa nature.</p>
+<ul><li><b>Émotion (brève, intense)</b> : La colère soudaine après une injustice. ; La peur en entendant un bruit dans la nuit.</li><li><b>Passion (durable, exclusive)</b> : La jalousie qui obsède pendant des mois. ; Le jeu qui fait oublier le sommeil et les études. ; L’ambition qui organise toute une vie.</li></ul>
+<p>L’émotion passe ; la passion s’installe et réorganise toute la vie autour de son objet.</p>
+<p><b>Kevin, joueur en ligne</b> : Moi, je voulais jouer une heure. J’ai joué jusqu’à quatre heures du matin. Je ne contrôle plus rien.</p>
+<p><b>Mme Atangana, professeure de philosophie</b> : Voilà le danger : la passion aveugle, elle fait voir le monde à travers son seul objet. Mais Roland n’a pas tort non plus.</p>
+<blockquote><p><b>Mme Atangana, professeure de philosophie</b> <i>(elle écrit au tableau)</i> :<br>Rien de grand ne s’est accompli dans le monde sans passion.<br><small>Extrait de l’œuvre — Hegel, La Raison dans l’histoire (trad. fr.)</small></p></blockquote>
+<h4>Le problème</h4><p>Si la passion asservit, faut-il la détruire, comme le veulent certains moralistes ? Mais si elle est l’énergie des grandes actions, comme le pense Hegel, faut-il s’y abandonner ? Une troisième voie : éduquer les passions, c’est-à-dire les orienter par la raison vers des objets dignes.</p>
+<p><b>À toi de décider :</b> Tu es Kevin. Que fais-tu de ta passion pour le jeu ?</p><ul><li>Je supprime le jeu définitivement, par la seule volonté. — Tu tiens trois jours, puis tu rechutes : on ne vainc pas une passion seulement en l’interdisant.</li><li>Je continue sans limite : c’est ma passion, j’ai le droit. — Le bac approche, et ta liberté de choisir ton avenir s’évanouit.</li><li>Je fixe des horaires, je joue après mes révisions, et je mets ma passion au service d’un projet (apprendre à créer des jeux). — Tu n’éteins pas ta passion, tu la diriges : c’est l’éducation des passions.</li></ul>
+<h4>Atelier · la passion, ennemie ou alliée de la raison ?</h4><p>Place chaque argument du côté qu’il défend.</p>
+<p>Les deux côtés pèsent : c’est pourquoi la solution n’est ni la suppression ni l’abandon, mais l’éducation.</p>
+<p><b>Roland, passionné de football</b> : Alors je regarderai la finale… et je réviserai la passion pendant la mi-temps !</p>
+<h3>Quiz</h3><ol><li>D’où vient le mot « passion » ? — <b>Du latin pati, subir.</b> La passion est d’abord passivité.</li><li>Qu’est-ce qui distingue la passion de l’émotion ? — <b>Sa durée et son caractère exclusif.</b> L’émotion est brève ; la passion s’installe.</li><li>Qui a écrit que rien de grand ne s’est accompli sans passion ? — <b>Hegel.</b> Dans La Raison dans l’histoire.</li><li>Que signifie « éduquer les passions » ? — <b>Les orienter par la raison vers des objets dignes.</b> Ni les supprimer, ni s’y abandonner.</li><li>Pourquoi la passion menace-t-elle la liberté ? — <b>Parce qu’elle domine l’esprit et fait perdre la maîtrise de soi.</b> Être libre suppose d’être maître de soi.</li></ol>
+<h3>À retenir</h3><ul><li>Passion : du latin pati (subir) ; inclination exclusive et durable qui domine l’esprit.</li><li>Manifestations : aveuglement, obsession, dépendance ; mais aussi énergie, persévérance.</li><li>Trois attitudes : supprimer les passions, s’y abandonner, ou les éduquer par la raison.</li><li>Repères : Descartes (Les Passions de l’âme), Hegel (« rien de grand… sans passion »).</li></ul>
+<h3>À écrire</h3><p>Sujet : « Faut-il se libérer de ses passions ? » Élaborez un plan détaillé dialectique (thèse, antithèse, synthèse), avec un argument et un exemple par partie.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="tle-philo-passion-raison.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

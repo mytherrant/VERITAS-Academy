@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le conseil des délégués — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Simulation d’éducation à la citoyenneté : des délégués débattent d’une règle, votent, et apprennent à respecter la minorité.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/ecm-conseil-des-delegues.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Le conseil des délégués — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Simulation d’éducation à la citoyenneté : des délégués débattent d’une règle, votent, et apprennent à respecter la minorité.">
+<meta property="og:url" content="https://veritas-school.com/scenes/ecm-conseil-des-delegues.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Le conseil des délégués","description":"Simulation d’éducation à la citoyenneté : des délégués débattent d’une règle, votent, et apprennent à respecter la minorité.","url":"https://veritas-school.com/scenes/ecm-conseil-des-delegues.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"5e – 4e","about":"Éducation à la citoyenneté et à la morale","teaches":"Vivre un débat démocratique : comprendre à quoi sert une règle, pourquoi tout droit a des limites, voter, et respecter la décision de la majorité tout en garantissant la parole de la minorité. Les jauges mesurent le climat du débat.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'ecm-delegues',
+  discipline: 'Éducation à la citoyenneté et à la morale', niveau: '5e – 4e',
+  titre: 'Le conseil des délégués',
+  decor: 'classe', tableau: ['Conseil des délégués', 'Ordre du jour : le téléphone'], lieu: 'une salle de classe, après les cours', moment: 'Un jeudi, à 15 h',
+  avertissement: 'Scène imaginée pour la leçon : les personnages et l’établissement sont inventés.',
+  objectif: 'Vivre un débat démocratique : comprendre à quoi sert une règle, pourquoi tout droit a des limites, voter, et respecter la décision de la majorité tout en garantissant la parole de la minorité. Les jauges mesurent le climat du débat.',
+  jauges: [
+    { id: 'ecoute', nom: 'Écoute mutuelle', val: 40, couleur: '#4C6FBF' },
+    { id: 'tension', nom: 'Tension', val: 30, couleur: '#E07B39' },
+    { id: 'accord', nom: 'Accord trouvé', val: 0, couleur: '#FFC93C' }
+  ],
+  personnages: {
+    prof:   { nom: 'Mme Ekané, professeure', couleur: '#5A6275', look: { tenue: 'robe', objet: 'dossier', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#1F6F78', habit: '#1F6F78', lunettes: true } },
+    junior: { nom: 'Junior, délégué', couleur: '#2F5E9E', look: { peau: 'fonce', cheveux: 'ras', habit: '#2F5E9E', col: '#FFFFFF' } },
+    aicha:  { nom: 'Aïcha, déléguée', couleur: '#B0503A', look: { tenue: 'jupe', peau: 'brun', coiffe: 'voile', habit: '#2F5E9E' } },
+    ndzie:  { nom: 'Ndzié, délégué', couleur: '#2E6B5A', look: { peau: 'fonce', cheveux: 'court', habit: '#2F5E9E', col: '#FFFFFF', lunettes: true } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['prof', 'junior', 'aicha', 'ndzie'], txt: 'Le directeur a demandé aux délégués de proposer une règle sur l’usage du téléphone portable pendant la récréation. Mme Ekané anime la séance.', objet: { i: '📱', lib: 'Le téléphone' } },
+    { t: 'dit', qui: 'prof', txt: 'Une règle, ce n’est pas une punition. C’est un accord qui permet de vivre ensemble. Qui veut commencer ?' },
+    { t: 'dit', qui: 'junior', emo: 'colere', jeu: 'il se lève d’un bond', txt: 'Moi ! Il faut tout autoriser. Le téléphone, c’est notre droit, point final !', jauges: { tension: 60 } },
+    { t: 'dit', qui: 'aicha', txt: 'Ton droit s’arrête là où commence celui des autres. La semaine dernière, des élèves ont filmé une camarade sans son accord et ont mis la vidéo sur internet.' },
+    { t: 'question', q: 'Que rappelle Aïcha à Junior ?',
+      options: [
+        { txt: 'Qu’un droit a des limites : il ne doit pas porter atteinte aux droits des autres, comme le respect de la vie privée.', ok: true, retour: 'C’est le lien entre droits et devoirs : ma liberté est garantie, mais elle s’arrête où elle blesse autrui.' },
+        { txt: 'Que les élèves n’ont aucun droit à l’école.', retour: 'Les élèves ont des droits : être respectés, s’exprimer, être représentés. C’est d’ailleurs pour cela qu’il y a des délégués.' },
+        { txt: 'Que les téléphones sont dangereux pour la santé.', retour: 'Ce n’est pas son argument : elle parle du respect de la personne.' }
+      ] },
+    { t: 'choix', qui: 'prof', q: 'Tu animes le débat. Junior coupe la parole à tout le monde. Que fais-tu ?',
+      options: [
+        { txt: 'Je le fais taire et je l’exclus du conseil.', consequence: 'Le calme revient, mais la classe de Junior n’est plus représentée. Le débat perd une voix.', jauges: { tension: 10, ecoute: -10 } },
+        { txt: 'Je rappelle la règle du débat : chacun parle à son tour, et j’inscris Junior sur la liste.', consequence: 'Junior grogne, mais il attend son tour. Chacun se sent respecté.', jauges: { tension: -25, ecoute: 30 } },
+        { txt: 'Je laisse faire : le plus fort finira par gagner.', consequence: 'Le débat devient une dispute. Ce n’est plus une décision, c’est un rapport de force.', jauges: { tension: 30, ecoute: -20 } }
+      ],
+      oeuvre: 'Un débat démocratique a des règles : tour de parole, écoute, arguments. Elles protègent chacun, y compris celui qui parle fort.' },
+    { t: 'dit', qui: 'ndzie', emo: 'joie', txt: 'Je propose autre chose : téléphone autorisé à la récréation, mais interdiction absolue de filmer ou photographier quelqu’un sans son accord.', jauges: { accord: 40 } },
+    { t: 'dit', qui: 'junior', emo: 'doute', jeu: 'un peu vexé', txt: 'Et qui va surveiller ça ?' },
+    { t: 'dit', qui: 'aicha', txt: 'Nous tous. Une règle qu’on a choisie ensemble, on la respecte mieux qu’une règle imposée.', jauges: { ecoute: 70 } },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · droit ou devoir ?', consigne: 'Classe chaque phrase : énonce-t-elle un droit de l’élève, ou un devoir ?',
+      cats: ['Droit', 'Devoir'],
+      items: [
+        { txt: 'Être représenté par un délégué élu.', cat: 0 },
+        { txt: 'Respecter l’image et la vie privée de ses camarades.', cat: 1 },
+        { txt: 'Exprimer son opinion pendant le conseil.', cat: 0 },
+        { txt: 'Respecter une règle votée, même si l’on a voté contre.', cat: 1 }
+      ],
+      bravo: 'Droits et devoirs vont ensemble : mes droits sont les devoirs des autres envers moi, et réciproquement.' },
+    { t: 'atelier', mode: 'vote', titre: 'Atelier · à toi de voter', consigne: 'Tu fais partie du conseil. Quelle proposition choisis-tu ? Les voix des autres délégués de l’établissement s’ajoutent à la tienne.',
+      options: ['Tout autoriser (Junior)', 'Autoriser, sans filmer personne (Ndzié)', 'Tout interdire'],
+      classe: [5, 14, 6],
+      bilan: 'La proposition qui recueille le plus de voix est adoptée. Quel qu’ait été ton vote, tu dois maintenant la respecter, et tu gardes le droit de proposer de la changer.', jauges: { accord: 80, tension: 20 } },
+    { t: 'dit', qui: 'junior', emo: 'triste', jeu: 'il soupire', txt: 'J’ai perdu, alors je n’ai plus rien à dire ?' },
+    { t: 'question', q: 'Junior a voté contre. Que doit-il faire maintenant ?',
+      options: [
+        { txt: 'Respecter la règle adoptée, tout en gardant le droit de défendre son opinion et de proposer de la changer plus tard.', ok: true, retour: 'En démocratie, la majorité décide, mais la minorité garde la parole.' },
+        { txt: 'Refuser la règle, puisqu’il n’était pas d’accord.', retour: 'Si chacun n’obéissait qu’aux règles qu’il a votées, aucune vie commune ne serait possible.' },
+        { txt: 'Se taire définitivement.', retour: 'Non : la minorité ne perd pas son droit à la parole. C’est ce qui distingue la démocratie de la loi du plus fort.' }
+      ] },
+    { t: 'dit', qui: 'prof', txt: 'Junior, ton avis compte toujours. Écris-le : nous le relirons au prochain conseil, quand nous ferons le bilan de cette règle.' },
+    { t: 'dit', qui: 'junior', emo: 'joie', jeu: 'il sourit enfin', txt: 'D’accord. Mais je reviendrai avec de meilleurs arguments !', jauges: { tension: 5, accord: 95 } },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · les étapes d’une décision démocratique', consigne: 'Remets dans l’ordre les étapes que le conseil a suivies.',
+      items: [
+        'Poser le problème à résoudre.',
+        'Donner la parole à chacun, à tour de rôle.',
+        'Écouter et discuter les arguments.',
+        'Voter.',
+        'Appliquer la décision et en faire le bilan plus tard.'
+      ],
+      bravo: 'Débattre, voter, appliquer, évaluer : c’est le cycle de toute décision démocratique, de la classe au Parlement.' }
+  ],
+  labo: {
+    titre: 'Laboratoire · la machine démocratique',
+    intro: 'Règle l’écoute, le respect des règles du débat, la participation et la place laissée à la minorité : quel conseil obtiens-tu ?',
+    persos: ['prof', 'junior', 'aicha', 'ndzie'],
+    curseurs: [
+      { id: 'ecoute', nom: 'Écoute mutuelle', val: 75, bas: 'chacun crie', haut: 'on s’écoute',
+        lecture: { haut: 'Chacun parle à son tour et répond aux arguments des autres.', bas: 'Celui qui crie le plus fort l’emporte : ce n’est plus un débat.' } },
+      { id: 'regles', nom: 'Respect des règles du débat', val: 75, bas: 'aucune règle', haut: 'règles claires',
+        lecture: { haut: 'Tour de parole, ordre du jour, vote : les règles protègent chacun.', bas: 'Sans règles, le débat devient un rapport de force.' } },
+      { id: 'minorite', nom: 'Place de la minorité', val: 70, bas: 'écrasée', haut: 'respectée',
+        lecture: { haut: 'Junior a perdu le vote mais garde la parole : on relira son avis au prochain conseil.', bas: 'La majorité fait taire ceux qui ont voté contre : c’est la tyrannie de la majorité.' } },
+      { id: 'participation', nom: 'Participation', val: 70, bas: 'indifférence', haut: 'tous impliqués',
+        lecture: { haut: 'Les délégués portent la parole de leur classe.', bas: 'Si personne ne participe, la règle est décidée par quelques-uns.' } }
+    ],
+    scenarios: [
+      { nom: 'Comme dans la scène', icone: '🏫', valeurs: { ecoute: 75, regles: 75, minorite: 70, participation: 70 } },
+      { nom: 'La loi du plus fort', icone: '📢', valeurs: { ecoute: 15, regles: 10 } },
+      { nom: 'La tyrannie de la majorité', icone: '🔇', valeurs: { minorite: 10 } },
+      { nom: 'L’indifférence', icone: '😴', valeurs: { participation: 10 } }
+    ],
+    liens: [
+      { a: 'prof', b: 'junior', type: 'alliance', lib: 'garde sa parole', base: 0, poids: { minorite: .6, regles: .3 } },
+      { a: 'junior', b: 'aicha', type: 'conflit', lib: 'désaccord', base: .7, poids: { ecoute: -.5 } },
+      { a: 'aicha', b: 'ndzie', type: 'alliance', lib: 'proposition commune', base: .1, poids: { ecoute: .5, participation: .3 } },
+      { a: 'ndzie', b: 'junior', type: 'confiance', lib: 'compromis', base: 0, poids: { ecoute: .5, minorite: .3 } },
+      { a: 'prof', b: 'aicha', type: 'confiance', lib: 'anime', base: .3, poids: { regles: .4 } }
+    ],
+    issue: function(v){
+      if(v.ecoute < 35 || v.regles < 35){ return { niveau: 'ko', badge: 'La loi du plus fort', recit: 'On crie, on se coupe la parole : la règle adoptée est celle du plus bruyant, pas la meilleure.', apres: 'Une règle imposée par la force sera contournée : personne ne s’y reconnaît.', themes: ['rapport de force'] }; }
+      if(v.minorite < 35){ return { niveau: 'ko', badge: 'Tyrannie de la majorité', recit: 'La proposition est votée, puis on interdit à Junior d’en reparler.', apres: 'La démocratie ne se réduit pas au vote : la minorité garde le droit de s’exprimer et de convaincre.', themes: ['droits de la minorité'] }; }
+      if(v.participation < 35){ return { niveau: 'moyen', badge: 'Une règle de quelques-uns', recit: 'Deux délégués décident pour tout l’établissement, les autres s’en désintéressent.', apres: 'Une décision légale, mais fragile : beaucoup ne s’en sentiront pas responsables.', themes: ['participation'] }; }
+      return { niveau: 'ok', badge: 'Démocratie vivante', recit: 'On écoute, on argumente, on vote ; la majorité décide et la minorité garde la parole. La règle est comprise et respectée.', apres: 'Au prochain conseil, on fera le bilan de la règle : une décision démocratique peut toujours être revue.', themes: ['débat', 'vote', 'droits et devoirs', 'respect de la minorité'] };
+    }
+  },
+  quiz: [
+    { q: 'À quoi sert une règle commune ?', options: [
+      { txt: 'À permettre de vivre ensemble en protégeant les droits de chacun.', ok: true, retour: 'Ce n’est pas une punition, c’est un accord.' },
+      { txt: 'À punir les élèves.', retour: 'Une règle n’est pas d’abord une punition.' } ] },
+    { q: 'Jusqu’où va un droit ?', options: [
+      { txt: 'Jusqu’au point où il porte atteinte aux droits des autres.', ok: true, retour: 'Filmer quelqu’un sans son accord viole sa vie privée.' },
+      { txt: 'Il n’a aucune limite.', retour: 'Tout droit a des limites.' } ] },
+    { q: 'Après un vote, que doit faire celui qui a voté contre ?', options: [
+      { txt: 'Respecter la décision, tout en gardant le droit de s’exprimer.', ok: true, retour: 'La majorité décide, la minorité garde la parole.' },
+      { txt: 'Désobéir.', retour: 'Aucune vie commune ne serait possible.' } ] },
+    { q: 'Qui représente la classe au conseil ?', options: [
+      { txt: 'Le délégué élu.', ok: true, retour: 'Il porte la parole de tous, pas seulement la sienne.' },
+      { txt: 'Le meilleur élève.', retour: 'Le délégué est élu, pas désigné par ses notes.' } ] },
+    { q: 'Quel est l’ordre d’une décision démocratique ?', options: [
+      { txt: 'Débattre, voter, appliquer, faire le bilan.', ok: true, retour: 'Le cycle de toute décision, de la classe au Parlement.' },
+      { txt: 'Voter d’abord, débattre ensuite.', retour: 'On débat avant de voter.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Une règle est un accord qui permet de vivre ensemble ; elle protège les droits de chacun.',
+      'Tout droit a des limites : il s’arrête où il porte atteinte aux droits d’autrui (vie privée, dignité).',
+      'Le débat démocratique : écouter, argumenter, puis voter.',
+      'La majorité décide ; la minorité respecte la décision et garde le droit de s’exprimer.',
+      'Le délégué représente sa classe : il porte la parole de tous, pas seulement la sienne.'
+    ],
+    ecrire: 'Rédigez, en cinq articles numérotés, une charte du bon usage du téléphone dans votre établissement. Pour chaque article, indiquez le droit qu’il protège.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Le conseil des délégués</h1>
+<p><b>Éducation à la citoyenneté et à la morale · 5e – 4e</b></p>
+<p><i>Scène imaginée pour la leçon : les personnages et l’établissement sont inventés.</i></p>
+<h3>Objectif</h3><p>Vivre un débat démocratique : comprendre à quoi sert une règle, pourquoi tout droit a des limites, voter, et respecter la décision de la majorité tout en garantissant la parole de la minorité. Les jauges mesurent le climat du débat.</p>
+<p>Lieu : une salle de classe, après les cours · Un jeudi, à 15 h</p>
+<h3>Personnages</h3><ul><li>Mme Ekané, professeure</li><li>Junior, délégué</li><li>Aïcha, déléguée</li><li>Ndzié, délégué</li></ul>
+<h3>La scène</h3>
+<p>Le directeur a demandé aux délégués de proposer une règle sur l’usage du téléphone portable pendant la récréation. Mme Ekané anime la séance.</p>
+<p><b>Mme Ekané, professeure</b> : Une règle, ce n’est pas une punition. C’est un accord qui permet de vivre ensemble. Qui veut commencer ?</p>
+<p><b>Junior, délégué</b> <i>(il se lève d’un bond)</i> : Moi ! Il faut tout autoriser. Le téléphone, c’est notre droit, point final !</p>
+<p><b>Aïcha, déléguée</b> : Ton droit s’arrête là où commence celui des autres. La semaine dernière, des élèves ont filmé une camarade sans son accord et ont mis la vidéo sur internet.</p>
+<p><b>Question :</b> Que rappelle Aïcha à Junior ?</p><ul><li>Qu’un droit a des limites : il ne doit pas porter atteinte aux droits des autres, comme le respect de la vie privée. <b>(bonne réponse)</b></li><li>Que les élèves n’ont aucun droit à l’école.</li><li>Que les téléphones sont dangereux pour la santé.</li></ul><p>C’est le lien entre droits et devoirs : ma liberté est garantie, mais elle s’arrête où elle blesse autrui.</p>
+<p><b>À toi de décider :</b> Tu animes le débat. Junior coupe la parole à tout le monde. Que fais-tu ?</p><ul><li>Je le fais taire et je l’exclus du conseil. — Le calme revient, mais la classe de Junior n’est plus représentée. Le débat perd une voix.</li><li>Je rappelle la règle du débat : chacun parle à son tour, et j’inscris Junior sur la liste. — Junior grogne, mais il attend son tour. Chacun se sent respecté.</li><li>Je laisse faire : le plus fort finira par gagner. — Le débat devient une dispute. Ce n’est plus une décision, c’est un rapport de force.</li></ul>
+<p><b>Ndzié, délégué</b> : Je propose autre chose : téléphone autorisé à la récréation, mais interdiction absolue de filmer ou photographier quelqu’un sans son accord.</p>
+<p><b>Junior, délégué</b> <i>(un peu vexé)</i> : Et qui va surveiller ça ?</p>
+<p><b>Aïcha, déléguée</b> : Nous tous. Une règle qu’on a choisie ensemble, on la respecte mieux qu’une règle imposée.</p>
+<h4>Atelier · droit ou devoir ?</h4><p>Classe chaque phrase : énonce-t-elle un droit de l’élève, ou un devoir ?</p>
+<ul><li><b>Droit</b> : Être représenté par un délégué élu. ; Exprimer son opinion pendant le conseil.</li><li><b>Devoir</b> : Respecter l’image et la vie privée de ses camarades. ; Respecter une règle votée, même si l’on a voté contre.</li></ul>
+<p>Droits et devoirs vont ensemble : mes droits sont les devoirs des autres envers moi, et réciproquement.</p>
+<h4>Atelier · à toi de voter</h4><p>Tu fais partie du conseil. Quelle proposition choisis-tu ? Les voix des autres délégués de l’établissement s’ajoutent à la tienne.</p>
+<p><b>Junior, délégué</b> <i>(il soupire)</i> : J’ai perdu, alors je n’ai plus rien à dire ?</p>
+<p><b>Question :</b> Junior a voté contre. Que doit-il faire maintenant ?</p><ul><li>Respecter la règle adoptée, tout en gardant le droit de défendre son opinion et de proposer de la changer plus tard. <b>(bonne réponse)</b></li><li>Refuser la règle, puisqu’il n’était pas d’accord.</li><li>Se taire définitivement.</li></ul><p>En démocratie, la majorité décide, mais la minorité garde la parole.</p>
+<p><b>Mme Ekané, professeure</b> : Junior, ton avis compte toujours. Écris-le : nous le relirons au prochain conseil, quand nous ferons le bilan de cette règle.</p>
+<p><b>Junior, délégué</b> <i>(il sourit enfin)</i> : D’accord. Mais je reviendrai avec de meilleurs arguments !</p>
+<h4>Atelier · les étapes d’une décision démocratique</h4><p>Remets dans l’ordre les étapes que le conseil a suivies.</p>
+<ol><li>Poser le problème à résoudre.</li><li>Donner la parole à chacun, à tour de rôle.</li><li>Écouter et discuter les arguments.</li><li>Voter.</li><li>Appliquer la décision et en faire le bilan plus tard.</li></ol>
+<p>Débattre, voter, appliquer, évaluer : c’est le cycle de toute décision démocratique, de la classe au Parlement.</p>
+<h3>Quiz</h3><ol><li>À quoi sert une règle commune ? — <b>À permettre de vivre ensemble en protégeant les droits de chacun.</b> Ce n’est pas une punition, c’est un accord.</li><li>Jusqu’où va un droit ? — <b>Jusqu’au point où il porte atteinte aux droits des autres.</b> Filmer quelqu’un sans son accord viole sa vie privée.</li><li>Après un vote, que doit faire celui qui a voté contre ? — <b>Respecter la décision, tout en gardant le droit de s’exprimer.</b> La majorité décide, la minorité garde la parole.</li><li>Qui représente la classe au conseil ? — <b>Le délégué élu.</b> Il porte la parole de tous, pas seulement la sienne.</li><li>Quel est l’ordre d’une décision démocratique ? — <b>Débattre, voter, appliquer, faire le bilan.</b> Le cycle de toute décision, de la classe au Parlement.</li></ol>
+<h3>À retenir</h3><ul><li>Une règle est un accord qui permet de vivre ensemble ; elle protège les droits de chacun.</li><li>Tout droit a des limites : il s’arrête où il porte atteinte aux droits d’autrui (vie privée, dignité).</li><li>Le débat démocratique : écouter, argumenter, puis voter.</li><li>La majorité décide ; la minorité respecte la décision et garde le droit de s’exprimer.</li><li>Le délégué représente sa classe : il porte la parole de tous, pas seulement la sienne.</li></ul>
+<h3>À écrire</h3><p>Rédigez, en cinq articles numérotés, une charte du bon usage du téléphone dans votre établissement. Pour chaque article, indiquez le droit qu’il protège.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="ecm-conseil-des-delegues.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

@@ -1,0 +1,13 @@
+# VÉRITAS Gestion — gestion.veritas-school.com (racine du sous-domaine)
+# AUCUNE directive Rewrite ici : elle couperait l'héritage des règles du site
+# principal, dont la transmission de l'en-tête Authorization à PHP.
+Options -Indexes
+
+# La coquille et le service worker ne sont jamais figés en cache : une nouvelle
+# version doit atteindre les téléphones dès le prochain chargement.
+<IfModule mod_headers.c>
+  <FilesMatch "^(index\.html|sw\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+  Header always set X-Robots-Tag "noindex, nofollow"
+</IfModule>

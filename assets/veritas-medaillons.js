@@ -279,6 +279,10 @@
     for (var i = 0; i < tous.length; i++) {
       var el = tous[i];
       if (!el.offsetWidth || el.closest('.vrt-hab,script,style,svg')) continue;
+      /* Boutons pleins des cartes (habillage) : blanc sur teinte, voulu et
+         vérifié. Le correcteur mesurait la pastille à son ancien fond
+         translucide et noircissait « 830 exos », « Module 1 »… */
+      if (el.closest(':is(.card,.tile) > a.dl:only-of-type, a.go, .pl-go')) continue;
       var texte = false;
       for (var c = 0; c < el.childNodes.length; c++) {
         if (el.childNodes[c].nodeType === 3 && el.childNodes[c].textContent.trim().length > 1) { texte = true; break; }

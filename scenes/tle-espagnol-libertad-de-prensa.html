@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La libertad de prensa — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’espagnol (Terminale) : la liberté d’expression, les délits de presse et le quatrième pouvoir ; le style indirect et la concordance des temps.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/tle-espagnol-libertad-de-prensa.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="La libertad de prensa — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’espagnol (Terminale) : la liberté d’expression, les délits de presse et le quatrième pouvoir ; le style indirect et la concordance des temps.">
+<meta property="og:url" content="https://veritas-school.com/scenes/tle-espagnol-libertad-de-prensa.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"La libertad de prensa","description":"Scène animée d’espagnol (Terminale) : la liberté d’expression, les délits de presse et le quatrième pouvoir ; le style indirect et la concordance des temps.","url":"https://veritas-school.com/scenes/tle-espagnol-libertad-de-prensa.html","inLanguage":"es-ES","learningResourceType":"Simulation interactive","educationalLevel":"Terminale","about":"Espagnol","teaches":"Comprendre un dialogue sur la liberté de la presse et ses limites (diffamation, fausses nouvelles) ; passer du style direct au style indirect en respectant la concordance des temps.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: 'tle-espagnol-prensa',
+  discipline: 'Espagnol', niveau: 'Terminale', langue: 'es-ES',
+  titre: 'La libertad de prensa',
+  decor: 'classe', lieu: 'La redacción del periódico escolar', moment: 'Antes de la publicación',
+  objectif: 'Comprendre un dialogue sur la liberté de la presse et ses limites (diffamation, fausses nouvelles) ; passer du style direct au style indirect en respectant la concordance des temps.',
+  programme: 'Progression harmonisée Tle · Module 5 (mass média et communication), leçons 24 et 26 (quatrième pouvoir, liberté d’expression, délits de presse), leçon 27 (concordance des temps, style direct et indirect)',
+  jauges: [
+    { id: 'verdad', nom: 'Verdad del artículo', val: 30, couleur: '#1F9D5B' },
+    { id: 'riesgo', nom: 'Riesgo de difamación', val: 50, couleur: '#D43F2E' }
+  ],
+  personnages: {
+    carmen:  { nom: 'Carmen, redactora jefa', couleur: '#B0503A', look: { metier: 'eleve', tenue: 'jupe', peau: 'mat', cheveux: 'queue' } },
+    samuel:  { nom: 'Samuel, periodista', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court', objet: 'dossier' } },
+    profe:   { nom: 'El profesor Mbia', couleur: '#2B3A55', look: { metier: 'enseignant', peau: 'fonce', cheveux: 'ras', lunettes: true } },
+    cantinera:{ nom: 'La señora de la cantina', couleur: '#5E8A3A', look: { metier: 'cuisinier', tenue: 'robe', peau: 'fonce', coiffe: 'foulard', couleurCoiffe: '#5E8A3A' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['carmen', 'samuel'], txt: 'El club de periodismo prepara el número de junio del periódico escolar.', trad: 'Le club de journalisme prépare le numéro de juin du journal du lycée.', objet: { i: 'document', lib: 'El periódico escolar' } },
+    { t: 'dit', qui: 'samuel', emo: 'joie', txt: 'Tengo una noticia bomba: dicen que la cantina vende comida caducada.', trad: 'J’ai une nouvelle explosive : on dit que la cantine vend de la nourriture périmée.', jauges: { riesgo: 70 } },
+    { t: 'remarque', titre: 'Traduire le « on » français', txt: '« On dit que… » se traduit souvent par « dicen que… » (3e personne du pluriel) ou « se dice que… ». C’est une rumeur : personne n’est nommé, personne n’est responsable.' },
+    { t: 'dit', qui: 'carmen', emo: 'doute', txt: '¿Quién lo dice? ¿Tienes pruebas?', trad: 'Qui le dit ? Tu as des preuves ?' },
+    { t: 'dit', qui: 'samuel', txt: 'Un compañero me dijo que había visto un paquete viejo.', trad: 'Un camarade m’a dit qu’il avait vu un vieux paquet.' },
+    { t: 'remarque', titre: 'Style indirect et concordance', txt: 'Style direct : « He visto un paquete viejo ». Style indirect au passé : Me dijo que había visto un paquete viejo. Le passé composé devient plus-que-parfait ; le présent devient imparfait : « Vendo » → Dijo que vendía.' },
+    { t: 'question', q: 'Peut-on publier l’article tel quel ?',
+      options: [
+        { txt: 'Non : une seule source, aucune preuve, et l’accusée n’a pas pu répondre. Publier serait risquer la diffamation.', ok: true, retour: 'La liberté de la presse s’accompagne de devoirs : vérifier, recouper, donner la parole à la personne mise en cause.' },
+        { txt: 'Oui : la liberté de la presse permet de tout écrire.', retour: 'La liberté d’expression a des limites fixées par la loi : diffamation, fausses nouvelles, atteinte à la vie privée.' }
+      ] },
+    { t: 'recit', entre: ['profe'], txt: 'El profesor Mbia acompaña el club.', trad: 'M. Mbia encadre le club.' },
+    { t: 'dit', qui: 'profe', txt: 'La prensa es el cuarto poder. Pero un periodista debe verificar, contrastar las fuentes y escuchar a todas las partes.', trad: 'La presse est le quatrième pouvoir. Mais un journaliste doit vérifier, recouper les sources et écouter toutes les parties.', jauges: { verdad: 50 } },
+    { t: 'choix', qui: 'samuel', q: 'Tu es Samuel. Que fais-tu de ton article ?',
+      options: [
+        { txt: 'Je le publie tout de suite : c’est un scoop.', consequence: 'La cantinière est accusée sans preuve. Elle porte plainte pour diffamation, et le journal perd sa crédibilité.', jauges: { riesgo: 30, verdad: -20 } },
+        { txt: 'Je vais à la cantine, je regarde les dates et j’interroge la cantinière.', consequence: 'Tu fais ton métier de journaliste : chercher les faits.', jauges: { riesgo: -40, verdad: 30 } }
+      ],
+      oeuvre: 'Vérifier avant de publier : c’est la règle d’or du journalisme, et la meilleure protection contre les délits de presse.' },
+    { t: 'dit', qui: 'cantinera', entre: ['cantinera'], txt: 'Ese paquete estaba en la basura. Miren las fechas: todos los productos están bien.', trad: 'Ce paquet était à la poubelle. Regardez les dates : tous les produits sont bons.', jauges: { verdad: 80 } },
+    { t: 'atelier', mode: 'tri', titre: 'Taller · directo → indirecto', consigne: 'Associe chaque phrase au style indirect correct (« Dijo que… »).',
+      cats: ['… estaba en la basura.', '… vendía productos frescos.', '… había comprado el pan.'],
+      items: [
+        { txt: '« Está en la basura. »', cat: 0 },
+        { txt: '« Vendo productos frescos. »', cat: 1 },
+        { txt: '« He comprado el pan. »', cat: 2 }
+      ],
+      bravo: 'Présent → imparfait (está → estaba, vendo → vendía) ; passé composé → plus-que-parfait (he comprado → había comprado).' },
+    { t: 'atelier', mode: 'ordre', titre: 'Taller · construye la frase', consigne: 'Remets les mots dans l’ordre : « La cantinière a dit que les produits étaient bons. »',
+      items: ['La cantinera', 'dijo', 'que', 'los productos', 'estaban', 'bien.'],
+      bravo: 'Dijo que… estaban : concordance des temps au passé.' },
+    { t: 'dit', qui: 'carmen', emo: 'fier', txt: 'Nuevo título: « Investigamos: la cantina respeta las fechas ». Eso sí es periodismo.', trad: 'Nouveau titre : « Nous avons enquêté : la cantine respecte les dates ». Ça, c’est du journalisme.', jauges: { riesgo: 5, verdad: 95 } }
+  ],
+  labo: {
+    titre: 'Laboratorio · el cuarto poder',
+    intro: 'Règle la vérification des faits, la liberté laissée au journal et le droit de réponse : quel journal obtiens-tu ?',
+    persos: ['carmen', 'samuel', 'profe', 'cantinera'],
+    curseurs: [
+      { id: 'verificar', nom: 'Vérification (verificar)', val: 70, bas: 'ninguna', haut: 'rigurosa' },
+      { id: 'libertad', nom: 'Liberté du journal (libertad)', val: 70, bas: 'censura', haut: 'libre', lecture: { haut: 'Le journal publie ce qu’il a vérifié, même si cela dérange.', bas: 'Le proviseur relit et coupe tout ce qui dérange.' } },
+      { id: 'respuesta', nom: 'Droit de réponse (derecho de respuesta)', val: 60, bas: 'nunca', haut: 'siempre' }
+    ],
+    scenarios: [
+      { nom: 'Periodismo serio', icone: 'document', valeurs: { verificar: 70, libertad: 70, respuesta: 60 } },
+      { nom: 'Rumores', icone: 'porteVoix', valeurs: { verificar: 10, respuesta: 10 } },
+      { nom: 'Censura', icone: 'muet', valeurs: { libertad: 10 } }
+    ],
+    liens: [
+      { a: 'profe', b: 'samuel', type: 'confiance', lib: 'enseña', base: .4, poids: { verificar: .4 } },
+      { a: 'samuel', b: 'cantinera', type: 'conflit', lib: 'acusa', base: .5, poids: { verificar: -.5, respuesta: -.3 } },
+      { a: 'carmen', b: 'samuel', type: 'alliance', lib: 'redacción', base: .6 }
+    ],
+    issue: function(v){
+      if(v.libertad < 30){ return { niveau: 'ko', badge: 'Censura', recit: 'Le journal ne publie plus que des nouvelles sans intérêt : il ne sert plus à rien.', apres: 'Sans liberté, la presse ne peut pas jouer son rôle de contre-pouvoir.', themes: ['libertad de expresión'] }; }
+      if(v.verificar < 35){ return { niveau: 'ko', badge: 'Difamación', recit: 'Le journal publie des rumeurs : plaintes, excuses publiques, lecteurs perdus.', apres: 'La liberté sans vérification devient un danger.', themes: ['delitos de prensa'] }; }
+      if(v.respuesta < 35){ return { niveau: 'moyen', badge: 'Una sola versión', recit: 'Les faits sont vérifiés, mais la personne mise en cause n’a jamais pu s’exprimer.', apres: 'Écouter toutes les parties fait partie de la déontologie.', themes: ['deontología'] }; }
+      return { niveau: 'ok', badge: 'El cuarto poder', recit: 'Un journal libre, qui vérifie et donne la parole à chacun : les lecteurs lui font confiance.', apres: 'C’est l’idéal du quatrième pouvoir.', themes: ['cuarto poder', 'verificación'] };
+    }
+  },
+  quiz: [
+    { q: 'Comment traduire « On dit que la cantine… » ?', options: [
+      { txt: 'Dicen que la cantina…', ok: true, retour: 'Ou « se dice que… ».' },
+      { txt: 'On dice que la cantina…', retour: 'Le « on » n’existe pas en espagnol.' } ] },
+    { q: '« He visto un paquete » au style indirect passé :', options: [
+      { txt: 'Dijo que había visto un paquete.', ok: true, retour: 'Passé composé → plus-que-parfait.' },
+      { txt: 'Dijo que ha visto un paquete.', retour: 'Après un verbe au passé, il faut la concordance.' } ] },
+    { q: 'Que signifie « el cuarto poder » ?', options: [
+      { txt: 'La presse, le quatrième pouvoir.', ok: true, retour: 'Après l’exécutif, le législatif et le judiciaire.' },
+      { txt: 'La quatrième classe.', retour: 'Non.' } ] },
+    { q: 'Qu’est-ce que la diffamation ?', options: [
+      { txt: 'Accuser publiquement quelqu’un d’un fait qui porte atteinte à son honneur.', ok: true, retour: 'C’est un délit de presse.' },
+      { txt: 'Publier un article vérifié.', retour: 'Non.' } ] },
+    { q: 'Quelle est la règle d’or du journaliste ?', options: [
+      { txt: 'Vérifier et recouper avant de publier.', ok: true, retour: 'Et écouter toutes les parties.' },
+      { txt: 'Publier le plus vite possible.', retour: 'La vitesse ne remplace pas la vérification.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Vocabulaire : la libertad de prensa, el cuarto poder, la fuente, verificar, contrastar, la difamación, el derecho de respuesta.',
+      '« On » : dicen que… / se dice que…',
+      'Style indirect au passé : présent → imparfait, passé composé → plus-que-parfait (dijo que había visto).',
+      'La liberté de la presse a des devoirs : vérifier, recouper, écouter toutes les parties.'
+    ],
+    ecrire: 'Escribe un breve artículo (diez líneas) para el periódico de tu instituto sobre un hecho verificado. Rapporte au style indirect les paroles de deux personnes interrogées.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>La libertad de prensa</h1>
+<p><b>Espagnol · Terminale</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Comprendre un dialogue sur la liberté de la presse et ses limites (diffamation, fausses nouvelles) ; passer du style direct au style indirect en respectant la concordance des temps.</p>
+<p>Programme : Progression harmonisée Tle · Module 5 (mass média et communication), leçons 24 et 26 (quatrième pouvoir, liberté d’expression, délits de presse), leçon 27 (concordance des temps, style direct et indirect)</p>
+<p>Lieu : La redacción del periódico escolar · Antes de la publicación</p>
+<h3>Personnages</h3><ul><li>Carmen, redactora jefa</li><li>Samuel, periodista</li><li>El profesor Mbia</li><li>La señora de la cantina</li></ul>
+<h3>La scène</h3>
+<p>El club de periodismo prepara el número de junio del periódico escolar. — <i>Le club de journalisme prépare le numéro de juin du journal du lycée.</i></p>
+<p><b>Samuel, periodista</b> : Tengo una noticia bomba: dicen que la cantina vende comida caducada. — <i>J’ai une nouvelle explosive : on dit que la cantine vend de la nourriture périmée.</i></p>
+<h4>Traduire le « on » français</h4><p>« On dit que… » se traduit souvent par « dicen que… » (3e personne du pluriel) ou « se dice que… ». C’est une rumeur : personne n’est nommé, personne n’est responsable.</p>
+<p><b>Carmen, redactora jefa</b> : ¿Quién lo dice? ¿Tienes pruebas? — <i>Qui le dit ? Tu as des preuves ?</i></p>
+<p><b>Samuel, periodista</b> : Un compañero me dijo que había visto un paquete viejo. — <i>Un camarade m’a dit qu’il avait vu un vieux paquet.</i></p>
+<h4>Style indirect et concordance</h4><p>Style direct : « He visto un paquete viejo ». Style indirect au passé : Me dijo que había visto un paquete viejo. Le passé composé devient plus-que-parfait ; le présent devient imparfait : « Vendo » → Dijo que vendía.</p>
+<p><b>Question :</b> Peut-on publier l’article tel quel ?</p><ul><li>Non : une seule source, aucune preuve, et l’accusée n’a pas pu répondre. Publier serait risquer la diffamation. <b>(bonne réponse)</b></li><li>Oui : la liberté de la presse permet de tout écrire.</li></ul><p>La liberté de la presse s’accompagne de devoirs : vérifier, recouper, donner la parole à la personne mise en cause.</p>
+<p>El profesor Mbia acompaña el club. — <i>M. Mbia encadre le club.</i></p>
+<p><b>El profesor Mbia</b> : La prensa es el cuarto poder. Pero un periodista debe verificar, contrastar las fuentes y escuchar a todas las partes. — <i>La presse est le quatrième pouvoir. Mais un journaliste doit vérifier, recouper les sources et écouter toutes les parties.</i></p>
+<p><b>À toi de décider :</b> Tu es Samuel. Que fais-tu de ton article ?</p><ul><li>Je le publie tout de suite : c’est un scoop. — La cantinière est accusée sans preuve. Elle porte plainte pour diffamation, et le journal perd sa crédibilité.</li><li>Je vais à la cantine, je regarde les dates et j’interroge la cantinière. — Tu fais ton métier de journaliste : chercher les faits.</li></ul>
+<p><b>La señora de la cantina</b> : Ese paquete estaba en la basura. Miren las fechas: todos los productos están bien. — <i>Ce paquet était à la poubelle. Regardez les dates : tous les produits sont bons.</i></p>
+<h4>Taller · directo → indirecto</h4><p>Associe chaque phrase au style indirect correct (« Dijo que… »).</p>
+<ul><li><b>… estaba en la basura.</b> : « Está en la basura. »</li><li><b>… vendía productos frescos.</b> : « Vendo productos frescos. »</li><li><b>… había comprado el pan.</b> : « He comprado el pan. »</li></ul>
+<p>Présent → imparfait (está → estaba, vendo → vendía) ; passé composé → plus-que-parfait (he comprado → había comprado).</p>
+<h4>Taller · construye la frase</h4><p>Remets les mots dans l’ordre : « La cantinière a dit que les produits étaient bons. »</p>
+<ol><li>La cantinera</li><li>dijo</li><li>que</li><li>los productos</li><li>estaban</li><li>bien.</li></ol>
+<p>Dijo que… estaban : concordance des temps au passé.</p>
+<p><b>Carmen, redactora jefa</b> : Nuevo título: « Investigamos: la cantina respeta las fechas ». Eso sí es periodismo. — <i>Nouveau titre : « Nous avons enquêté : la cantine respecte les dates ». Ça, c’est du journalisme.</i></p>
+<h3>Quiz</h3><ol><li>Comment traduire « On dit que la cantine… » ? — <b>Dicen que la cantina…</b> Ou « se dice que… ».</li><li>« He visto un paquete » au style indirect passé : — <b>Dijo que había visto un paquete.</b> Passé composé → plus-que-parfait.</li><li>Que signifie « el cuarto poder » ? — <b>La presse, le quatrième pouvoir.</b> Après l’exécutif, le législatif et le judiciaire.</li><li>Qu’est-ce que la diffamation ? — <b>Accuser publiquement quelqu’un d’un fait qui porte atteinte à son honneur.</b> C’est un délit de presse.</li><li>Quelle est la règle d’or du journaliste ? — <b>Vérifier et recouper avant de publier.</b> Et écouter toutes les parties.</li></ol>
+<h3>À retenir</h3><ul><li>Vocabulaire : la libertad de prensa, el cuarto poder, la fuente, verificar, contrastar, la difamación, el derecho de respuesta.</li><li>« On » : dicen que… / se dice que…</li><li>Style indirect au passé : présent → imparfait, passé composé → plus-que-parfait (dijo que había visto).</li><li>La liberté de la presse a des devoirs : vérifier, recouper, écouter toutes les parties.</li></ul>
+<h3>À écrire</h3><p>Escribe un breve artículo (diez líneas) para el periódico de tu instituto sobre un hecho verificado. Rapporte au style indirect les paroles de deux personnes interrogées.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="tle-espagnol-libertad-de-prensa.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

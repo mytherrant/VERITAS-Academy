@@ -13,6 +13,7 @@ on:
       - 'app.js'
       - 'app.css'
       - 'api/**'
+      - 'gestion/**'
       - 'tests/**'
       - 'playwright.config.cjs'
       - 'package.json'
@@ -31,6 +32,28 @@ jobs:
   # Il tourne avant le smoke test : il est dix fois plus rapide, et un chemin
   # d'argent cassé est plus grave qu'un écran blanc.
   # ──────────────────────────────────────────────────────────────────────────
+  gestion:
+    name: 🏫 VÉRITAS Gestion (isolement des centres, rôles, synchro)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo_sqlite
+          coverage: none
+      - name: 🔎 Syntaxe et versions
+        run: |
+          for f in gestion/api/*.php; do php -l "$f"; done
+          node --check gestion/app.js && node --check gestion/sw.js
+          node tests/banc_gestion_versions.cjs
+      - name: 🔐 Banc de l'API (SQLite jetable)
+        run: |
+          printf "<?php\ndefine('G_DB_DRIVER', 'sqlite');\ndefine('G_INSTALL_TOKEN', 'jeton-local-de-test-0123456789');\n" > gestion/api/_config.php
+          php -S 127.0.0.1:8000 -t gestion > /tmp/php.log 2>&1 &
+          sleep 1
+          python3 tests/banc_gestion_api.py http://127.0.0.1:8000/api || { cat /tmp/php.log; exit 1; }
+
   paiements:
     name: 💰 Surfaces payantes (octroi, prix, idempotence)
     runs-on: ubuntu-latest
@@ -183,6 +206,7 @@ jobs:
           node tests/banc_remise_sms.cjs
           node tests/banc_skysms_rappel.cjs
           node tests/banc_parent_enfant.cjs
+          node tests/banc_forum_classes.cjs
 
       # ⚠️ `banc_cahiers_reels.cjs` A ÉTÉ RETIRÉ D'ICI, ET SON ABSENCE EST LE
       # CORRECTIF. Son en-tête le dit depuis toujours : « IL N'EST PAS DANS LA
@@ -213,8 +237,28 @@ jobs:
 
       - name: 👤 Le compte remonte-t-il du serveur ?
         run: node tests/banc_compte_serveur.cjs
+      # 🌐 CHROMIUM SANS DÉPENDRE DU MIROIR UBUNTU (11/11/2026). « --with-deps »
+      #    passe par apt : le 11/11, azure.archive.ubuntu.com ne se résolvait plus
+      #    (« Temporary failure resolving ») et le job tombait AVANT le moindre
+      #    test, trois fois de suite, sans rien dire du site. Le navigateur vient
+      #    du CDN de Playwright ; l'image ubuntu-24.04 porte déjà les bibliothèques
+      #    de Chrome. On ne passe par apt que si le navigateur refuse de démarrer,
+      #    avec trois essais espacés.
       - name: 🌐 Installer Chromium
-        run: npx playwright install --with-deps chromium
+        run: |
+          npx playwright install chromium
+          demarre() { node -e "require('@playwright/test').chromium.launch().then(b=>b.close()).catch(e=>{console.error(e.message);process.exit(1)})"; }
+          if demarre; then
+            echo "✓ Chromium démarre sans dépendances supplémentaires"
+          else
+            for essai in 1 2 3; do
+              echo "Dépendances système, essai $essai/3"
+              if sudo npx playwright install-deps chromium && demarre; then exit 0; fi
+              sleep $((essai * 30))
+            done
+            echo "::error title=Chromium indisponible::Le navigateur ne démarre pas et les dépendances n'ont pas pu être installées (miroir Ubuntu injoignable ?)."
+            exit 1
+          fi
 
       # ⚠️ CE BANC OUVRE UN NAVIGATEUR — il doit donc venir APRÈS l'installation
       # de Chromium. Placé plus haut, il passait en local (le navigateur y était

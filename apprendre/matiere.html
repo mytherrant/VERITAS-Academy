@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Programme | VÉRITAS</title>
+<meta name="description" content="Le programme de la matière, chapitre par chapitre, d'après la progression harmonisée du MINESEC.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="apprendre.css?v=20261111c">
+<link rel="stylesheet" href="jeu.css?v=20261110g">
+<style>
+/* ── Page matière (refonte 07/11) : en-tête teinté, filtres en pastilles, chapitres en cartes colorées ── */
+.mpage{max-width:900px;margin:0 auto}
+.mtete{position:relative;overflow:hidden;display:flex;gap:22px;align-items:center;margin:0 0 18px;padding:24px 26px;border-radius:14px;background:linear-gradient(120deg,var(--mt-pale) 0%,#fff 75%);border:1px solid var(--mt-pale)}
+.mtete::after{content:"";position:absolute;right:-50px;top:-60px;width:220px;height:220px;border-radius:50%;background:var(--mt-pale);opacity:.7}
+.mtete>*{position:relative;z-index:1}
+.mtete .pas{flex:0 0 92px;height:92px;border-radius:22px;display:grid;place-items:center;background:#fff!important;border:2px solid var(--mt);box-shadow:0 10px 24px -12px var(--mt)}
+.mtete .pas svg{width:58px!important;height:58px!important}
+.mtete h1{text-align:left;margin:0 0 10px;font-size:clamp(24px,3.4vw,32px);color:#001136}
+.mtete h1 span{color:var(--mt)}
+.chiffres{display:flex;flex-wrap:wrap;gap:8px}
+.chiffres span{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #E6EAF2;border-radius:999px;padding:5px 12px;font:500 13px var(--sans);color:#4D5163}
+.chiffres b{font-weight:600;color:var(--k,#1E499B)}
+.filtres{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+.filtres button{--k:#0C2A6A;--kp:#EDF2FB;display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--kp);background:#fff;color:var(--k);border-radius:999px;padding:8px 16px;font:600 14px var(--sans);cursor:pointer;transition:background .15s,border-color .15s}
+.filtres button:hover{border-color:var(--k)}
+.filtres button[aria-pressed="true"]{background:var(--k);border-color:var(--k);color:#fff}
+.filtres .cpt{font-weight:500;font-size:12px;background:var(--kp);color:var(--k);border-radius:999px;padding:1px 8px}
+.filtres button[aria-pressed="true"] .cpt{background:rgba(255,255,255,.22);color:#fff}
+.chap{--k:#1E499B;--kp:#EDF2FB;margin:0 0 20px;border:1px solid #E6EAF2;border-radius:14px;overflow:hidden;background:#fff}
+.chap-t{display:flex;gap:14px;align-items:center;padding:16px 18px;background:linear-gradient(90deg,var(--kp),#fff 80%)}
+.chap-n{flex:0 0 46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--k);color:#fff;font:600 18px var(--sans)}
+.chap-t small{display:block;font:600 12px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--k)}
+.chap-t h3{margin:2px 0 0;font:600 18px/1.3 var(--sans);color:#001136}
+.chap-t .nb{margin-left:auto;font:500 12px var(--sans);color:#6B7287;white-space:nowrap}
+.lst{background:#fff}
+.lg{display:flex;align-items:center;gap:14px;padding:12px 18px;border-top:1px solid #F0F2F7;text-decoration:none;color:#4D5163}
+a.lg:hover{background:var(--kp)}
+.lg .n{flex:0 0 30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--kp);color:var(--k);font:600 12px var(--sans)}
+.lg.r .n{background:var(--k);color:#fff}
+.lg .t{flex:1;line-height:1.45}
+.lg.r .t{color:#001136;font-weight:500}
+.lg .et{font:600 11px var(--sans);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.et.red{background:#FFC93C;color:#001136}.et.lu{background:#EAF6EC;color:#007E11}.et.av{background:#F5F7FB;color:#5F6B80}
+.lg .chev{color:var(--k);display:grid;place-items:center}
+.scenes-m{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin:0 0 22px}
+.scenes-m .scene{margin:0}
+@media (max-width:640px){.mtete{padding:18px;gap:14px}.mtete .pas{flex-basis:64px;height:64px}.mtete .pas svg{width:40px!important;height:40px!important}.chap-t .nb{display:none}.lg{padding:11px 14px}.lg .et.av{display:none}}
+/* ── Lien vers l'Atelier de français (10/11/2026) : professeurs de français ── */
+.prof-fr{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:0 0 18px;padding:16px 20px;border:1px solid #DCE5F5;border-radius:14px;background:#fff}
+.prof-fr .pic{flex:none;color:#1E499B}
+.prof-fr div{flex:1 1 260px;min-width:0}
+.prof-fr b{display:block;font-family:var(--sans);font-weight:600;font-size:15px;color:#001136}
+.prof-fr span{display:block;font-size:13.5px;color:#4D5163;line-height:1.5;margin-top:2px}
+.prof-fr a{flex:none;display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border-radius:10px;background:#FFC93C;color:#001136;font-weight:600;font-size:13.5px;text-decoration:none}
+.atelier-l{flex:none;display:inline-flex;align-items:center;gap:5px;margin-left:8px;padding:5px 10px;border:1px solid #DCE5F5;border-radius:999px;font-size:12px;font-weight:600;color:#1E499B;text-decoration:none;white-space:nowrap;background:#fff}
+.atelier-l:hover{border-color:#1E499B}
+.chap.cible{box-shadow:0 0 0 3px #FFC93C}
+</style>
+</head>
+<body class="eleve">
+<a class="saut" href="#contenu">Aller au contenu</a>
+<header class="top">
+  <a class="logo" href="/">VÉRI<b>TAS</b></a>
+  <nav class="top-nav" aria-label="Apprendre"><a href="index.html">Apprendre</a><a href="ressources.html">Tout pour progresser</a><a href="notes.html">Mes notes</a><a href="/scenes/">Scènes vivantes</a><a href="/corriges/">Corrigés</a></nav>
+  <div class="top-d"><a class="niveau-chip" data-niveau href="index.html#progression" aria-label="Mon niveau et mes badges"></a><span class="serie" id="serie" hidden></span></div>
+</header>
+<nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
+<main class="page" id="contenu"><div class="lim" id="zone"></div></main>
+
+<script src="scenes.js?v=20261110g"></script>
+<script src="progressions.js?v=20261110g"></script>
+<script src="lecons.js?v=20261110g"></script>
+<script src="ressources.js?v=20261110g"></script>
+<script src="atelier.js?v=20261110a"></script>
+<script src="charge.js?v=9b141ec6"></script>
+<script src="commun.js?v=20261111b"></script>
+<script src="jeu.js?v=20261110g"></script>
+<script>
+(function(){
+  "use strict";
+  var A=VRT.app,$=function(s,c){return (c||document).querySelector(s)},$$=function(s,c){return [].slice.call((c||document).querySelectorAll(s))},esc=A.esc;
+  var u=new URLSearchParams(location.search), c=u.get("c")||A.lire("classe","3e"), M=A.PAR_ID[u.get("m")]||A.MATIERES[0];
+  A.ecrire("classe",c); A.teinter(M); A.rail($("#rail"),c,M.id); A.chiffreSerie($("#serie"));
+  document.title=M.nom+" · "+c+" · programme et cours | VÉRITAS";
+  var LE=window.VRT_LECONS||{}, lus=A.lire("lus",{}), qz=A.lire("quiz",{});
+  var red={}; Object.keys(LE).forEach(function(k){var L=LE[k]; if(L.m===M.id&&L.c===c) red[L.n]=k});
+  var chaps=[]; M.minesec.forEach(function(s){((window.VRT_PROG||{})[c]||{})[s]&&(chaps=chaps.concat(VRT_PROG[c][s]))});
+  /* leçons rédigées absentes de la progression collectée : un chapitre à part */
+  var connus={}; chaps.forEach(function(ch){ch[1].forEach(function(l){connus[l[0]]=1})});
+  var hors=Object.keys(red).filter(function(n){return !connus[n]}).map(function(n){return [+n,LE[red[n]].titre]});
+  if(hors.length) chaps.unshift([LE[red[hors[0][0]]].chap||"Leçons rédigées",hors]);
+  var trims=[], tot=0, nred=Object.keys(red).length;
+  chaps.forEach(function(ch){tot+=ch[1].length; if(ch[2]&&trims.indexOf(ch[2])<0) trims.push(ch[2])});
+  var sc=A.scenesPour({m:M.id,c:c});
+  /* Français : chaque chapitre ouvre l'évaluation de SA séquence dans l'Atelier
+     (table générée par tools/build_apprendre_atelier.cjs : les deux progressions
+     ne sont pas découpées pareil, on ne suppose pas « chapitre N = séquence N »). */
+  var AT=(M.id==="francais"&&window.VRT_ATELIER)?VRT_ATELIER[c]:null;
+  function seqDe(i){return AT&&AT.seq[i]?AT.seq[i]:0}
+  function lienAtelier(s,quoi){return '/plateforme/#'+quoi+'?prog='+encodeURIComponent(AT.prog)+(s?'&seq='+s:'')}
+  /* teintes de la charte, en alternance d'un chapitre à l'autre ; une teinte fixe par trimestre */
+  var PAL=[["#1E499B","#EDF2FB"],["#0E7C86","#E9F5F6"],["#5B4FA8","#F0EDF9"],["#B03A6E","#FBEFF4"],["#007E11","#EAF6EC"],["#C24E00","#FDF1E8"]];
+  var TRIM={"Premier trimestre":PAL[0],"Deuxième trimestre":PAL[1],"Troisième trimestre":PAL[2]};
+  function teinte(p){return '--k:'+p[0]+';--kp:'+p[1]}
+  var chev='<span class="chev" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>';
+  function ligne(l){var k=red[l[0]]; var et=k?(lus[k]?'<span class="et lu">'+(qz[k]?'Quiz '+qz[k][0]+'/'+qz[k][1]:'Lue')+'</span>':'<span class="et red">'+(LE[k].verrou?'Début offert':LE[k].gratuit?'Gratuit':'Cours rédigé')+'</span>'):'<span class="et av">Bientôt</span>';
+    var rs=A.resLecon(c,M.id,l[0]); if(!k&&rs.length) et='';
+    var tl=A.titreL(l[1]); if(!tl) return '';
+    var corps='<span class="n">'+(l[0]||"")+'</span><span class="t">'+esc(tl)+'</span>'+et;
+    return '<div class="lgw" id="l'+l[0]+'">'+(k?'<a class="lg r" href="lecon.html?id='+k+'">'+corps+chev+'</a>':'<div class="lg">'+corps+'</div>')+A.pastilles(rs)+'</div>'}
+  function rendu(filtre){
+    var n=0;
+    $("#liste").innerHTML=chaps.map(function(ch,i){
+      if(filtre==="red"&&!ch[1].some(function(l){return red[l[0]]})) return "";
+      if(filtre&&filtre!=="red"&&ch[2]!==filtre) return "";
+      var ls=filtre==="red"?ch[1].filter(function(l){return red[l[0]]}):ch[1], hr=hors.length&&i===0, num=i+1-(hors.length?1:0);
+      var ix=i-(hors.length?1:0), sq=hr?0:seqDe(ix), prem=sq&&(ix===0||seqDe(ix-1)!==sq);
+      return '<section class="chap"'+(prem?' id="seq-'+sq+'"':'')+' style="'+teinte(PAL[(n++)%PAL.length])+'"><div class="chap-t"><span class="chap-n">'+(hr?A.pic("etoile",20):num)+'</span><div><small>'+(ch[2]?esc(ch[2])+' · ':'')+(hr?'Leçons rédigées':'Chapitre '+num)+'</small><h3>'+esc(ch[0]||"Leçons")+'</h3></div><span class="nb">'+ls.length+' leçon'+(ls.length>1?'s':'')+'</span>'+(sq?'<a class="atelier-l" href="'+lienAtelier(sq,'composer')+'" title="Professeurs : composer l’évaluation de la séquence '+sq+' dans l’Atelier de français">'+A.pic("plume",14)+'Évaluer · séquence '+sq+'</a>':'')+'</div><div class="lst">'+ls.map(ligne).join("")+'</div></section>'}).join("")||'<p class="vide">Rien à afficher ici pour l\'instant.</p>';
+  }
+  $("#zone").innerHTML='<div class="mpage"><p class="ariane"><a href="index.html">Apprendre</a><span>›</span><a href="index.html?c='+encodeURIComponent(c)+'">'+esc(c)+'</a><span>›</span>'+esc(M.nom)+'</p>'+
+    '<header class="mtete"><span class="pas">'+A.icoM(M,58)+'</span><div><h1>'+esc(M.nom)+' <span>· '+esc(c)+'</span></h1><div class="chiffres">'+
+      (tot?'<span style="--k:#1E499B"><b>'+tot+'</b> leçons au programme</span>':'<span>Progression à venir</span>')+
+      '<span style="--k:#0E7C86"><b>'+chaps.length+'</b> chapitre'+(chaps.length>1?'s':'')+'</span>'+
+      (nred?'<span style="--k:#C24E00"><b>'+nred+'</b> cours rédigé'+(nred>1?'s':'')+'</span>':'')+
+      '<span style="--k:#5B4FA8">MINESEC 2026-2027</span></div></div></header>'+
+    /* 11/11/2026 — « mettre les ressources gratuites au début ou en évidence :
+       il goûte, l'envie est suscitée et l'abonnement peut suivre » (Jacques).
+       Le gratuit de la matière d'abord ; l'offre payante vient après. */
+    (function(){var ids=A.gratuitDabord(A.resDeMatiere(c,M.id)),gr=ids.filter(function(i){return !VRT_RES.items[i].ab}),sel=A.selectionGratuite(ids,4);
+      if(!gr.length&&!nred)return "";
+      return '<section class="gout" aria-labelledby="goutT"><div class="gout-t"><span class="gout-eb">'+A.pic("cadeau",16)+'Gratuit · sans abonnement</span><h2 id="goutT">Commence gratuitement</h2>'+
+        '<p>'+(nred?'Le début de chacun des <b>'+nred+' cours rédigés</b> est en libre accès. ':'')+(gr.length?'<b>'+gr.length+' ressource'+(gr.length>1?'s':'')+' gratuite'+(gr.length>1?'s':'')+'</b> en '+esc(M.nom)+' : corrigés, méthodes, entraînements.':'')+'</p></div>'+
+        (sel.length?'<div class="res-g">'+sel.map(A.carteRes).join("")+'</div>':'')+
+        (gr.length>sel.length?'<a class="gout-l" href="ressources.html?c='+encodeURIComponent(c)+'&m='+M.id+'">Voir les '+gr.length+' ressources gratuites ›</a>':'')+'</section>';})()+
+    (AT?'<section class="prof-fr" aria-label="Professeurs de français">'+A.pic("plume",30)+'<div><b>Vous enseignez le français en '+esc(c)+' ?</b><span>Chaque chapitre ouvre l’évaluation de sa séquence dans l’Atelier de français : texte du corpus, questions, barème et corrigé conformes au MINESEC, relecture par vos collègues.</span></div><a href="'+lienAtelier(0,'progressions')+'">Ouvrir l’Atelier</a></section>':'')+
+    '<nav class="filtres" aria-label="Filtrer le programme">'+
+      '<button type="button" aria-pressed="true" data-f="">Tout le programme<span class="cpt">'+tot+'</span></button>'+
+      (nred?'<button type="button" aria-pressed="false" data-f="red" style="--k:#9A6F00;--kp:#FFF3CC">Cours rédigés<span class="cpt">'+nred+'</span></button>':'')+
+      trims.map(function(t){return '<button type="button" aria-pressed="false" data-f="'+esc(t)+'" style="'+teinte(TRIM[t]||PAL[3])+'">'+esc(t)+'</button>'}).join("")+
+    '</nav>'+
+    (function(){var ids=A.resDeMatiere(c,M.id);if(!ids.length)return "";var n=ids.length;return '<section class="res-mat"><div class="sec-t" style="margin-top:0"><h2>Pour cette matière</h2><a href="ressources.html?c='+encodeURIComponent(c)+'&m='+M.id+'">Voir les '+n+' ressources ›</a></div></section>'})()+
+    (sc.length?'<div class="scenes-m">'+sc.map(function(s){return '<a class="scene" href="/scenes/'+s+'.html"><span class="pl">'+A.pic("masques",30)+'</span><span><small>Scène vivante</small><strong>'+esc((window.VRT_SCENES_TITRES||{})[s]||s)+'</strong></span><span class="jouer">'+A.pic("lecture",30)+'</span></a>'}).join("")+'</div>':'')+
+    (tot&&nred<tot?A.offre(c,M.id,'matiere'):'')+
+    '<div id="liste"></div></div>';
+  rendu("");
+  /* arrivée depuis l'Atelier (?seq=N) : on montre la séquence demandée */
+  var sv=+(u.get("seq")||0); if(sv){var cs=document.getElementById("seq-"+sv); if(cs){cs.classList.add("cible");cs.scrollIntoView({block:"start"})}}
+  /* arrivée sur une leçon précise : le filtre a pu masquer l'ancre, on attend le rendu */
+  if(/^#l\d+$/.test(location.hash)){var cib=document.querySelector(location.hash);if(cib){cib.classList.add("lgw-v");cib.scrollIntoView({block:"center"})}}
+  $$(".filtres button").forEach(function(b){b.addEventListener("click",function(){$$(".filtres button").forEach(function(x){x.setAttribute("aria-pressed",x===b)});rendu(b.getAttribute("data-f"))})});
+})();
+</script>
+</body>
+</html>

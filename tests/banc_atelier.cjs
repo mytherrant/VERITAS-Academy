@@ -452,14 +452,16 @@ const serveur = http.createServer((req, res) => {
           /* indexCorpus() rend une CHAINE JSON deja serialisee (elle est mise
              en cache telle quelle) : il faut la relire pour retrouver les
              fiches. */
-          const offerts = JSON.parse(indexCorpus()).textes
-            .filter(t => t.src === 'minesec' && t.libre).map(t => t.n);
+          const fiches = JSON.parse(indexCorpus()).textes;
+          const offerts = fiches.filter(t => t.src === 'minesec' && t.libre).map(t => t.n);
+          /* comme api/plateforme.php : le nombre vient du répertoire servi */
+          const nbRep = fiches.filter(t => t.src === 'minesec').length.toLocaleString('fr-FR');
           if (offerts.indexOf(n) < 0) {
             noter('complet n=' + n + ' -> 402 (hors palier demo)');
             res.writeHead(402, { 'Content-Type': 'application/json; charset=utf-8' });
             return res.end(JSON.stringify({ ok: false, error: 'Abonnement requis',
               motif: 'palier', palier: 'demo',
-              message: 'Ce texte fait partie du répertoire complet. Abonnez-vous pour ouvrir les 1040 textes, leurs questions et leurs faits de langue.' }));
+              message: 'Ce texte fait partie du répertoire complet. Abonnez-vous pour ouvrir les ' + nbRep + ' textes, leurs questions et leurs faits de langue.' }));
           }
         }
 

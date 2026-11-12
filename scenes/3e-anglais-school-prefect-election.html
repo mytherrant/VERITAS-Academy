@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vote for me! — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’anglais (3e) : campaigning and voting for school prefects ; phrasal verbs, word order in questions, question tags.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/3e-anglais-school-prefect-election.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Vote for me! — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’anglais (3e) : campaigning and voting for school prefects ; phrasal verbs, word order in questions, question tags.">
+<meta property="og:url" content="https://veritas-school.com/scenes/3e-anglais-school-prefect-election.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Vote for me!","description":"Scène animée d’anglais (3e) : campaigning and voting for school prefects ; phrasal verbs, word order in questions, question tags.","url":"https://veritas-school.com/scenes/3e-anglais-school-prefect-election.html","inLanguage":"en-GB","learningResourceType":"Simulation interactive","educationalLevel":"3ᵉ","about":"Anglais","teaches":"Comprendre et produire un discours de campagne en anglais ; employer des phrasal verbs (stand for, look after, set up, carry out) ; poser des questions dans le bon ordre (Wh- + auxiliary + subject + verb) et avec des question tags.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '3e-anglais-prefect',
+  discipline: 'Anglais', niveau: '3e', langue: 'en-GB',
+  titre: 'Vote for me!',
+  decor: 'classe', lieu: 'A bilingual college in Yaoundé', moment: 'Election week',
+  objectif: 'Comprendre et produire un discours de campagne en anglais ; employer des phrasal verbs (stand for, look after, set up, carry out) ; poser des questions dans le bon ordre (Wh- + auxiliary + subject + verb) et avec des question tags.',
+  programme: 'Progression harmonisée 3e · Citizenship and human rights, lessons 41 (question tags), 43-45 (polls and surveys, word order in questions), 46-48 (phrasal verbs, campaigning and voting for school prefects)',
+  jauges: [
+    { id: 'votes', nom: 'Votes for Mary', val: 30, couleur: '#1F9D5B' },
+    { id: 'english', nom: 'English', val: 25, couleur: '#1E499B' }
+  ],
+  personnages: {
+    mary:    { nom: 'Mary, candidate', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    tom:     { nom: 'Tom, candidate', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } },
+    student: { nom: 'Fanny, a voter', couleur: '#1F6F78', look: { metier: 'eleve', tenue: 'jupe', peau: 'brun', cheveux: 'queue' } },
+    teacher: { nom: 'Mr Njoh, teacher', couleur: '#2B3A55', look: { metier: 'enseignant', peau: 'fonce', cheveux: 'ras', lunettes: true } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['teacher', 'mary', 'tom'], txt: 'It is election week. Two students are standing for the post of senior prefect. Mr Njoh organises the debate.', trad: 'C’est la semaine des élections. Deux élèves se présentent au poste de préfet principal. M. Njoh organise le débat.', objet: { i: 'porteVoix', lib: 'The debate' } },
+    { t: 'dit', qui: 'teacher', txt: 'Each candidate has two minutes. Mary, you go first.', trad: 'Chaque candidat a deux minutes. Mary, tu commences.' },
+    { t: 'dit', qui: 'mary', txt: 'If you elect me, I will set up a reading club, I will look after the school garden, and I will carry out a survey to listen to every class.', trad: 'Si vous m’élisez, je créerai un club de lecture, je m’occuperai du jardin scolaire et je mènerai une enquête pour écouter chaque classe.', jauges: { votes: 45, english: 40 } },
+    { t: 'remarque', titre: 'Phrasal verbs', txt: 'Un verbe + une particule = un nouveau sens : stand for (se présenter à une élection), set up (créer, mettre en place), look after (s’occuper de), carry out (mener, réaliser), give up (abandonner).' },
+    { t: 'dit', qui: 'tom', jeu: 'confident', txt: 'I will give everyone free snacks and no homework!', trad: 'Je donnerai des goûters gratuits à tout le monde et plus de devoirs !' },
+    { t: 'question', q: 'Quelle promesse est réaliste, et laquelle ne l’est pas ?',
+      options: [
+        { txt: 'Mary’s promises are realistic ; Tom’s are impossible for a prefect.', ok: true, retour: 'A prefect cannot cancel homework or pay for snacks. A good candidate makes promises he or she can keep.' },
+        { txt: 'Tom’s promises are the most realistic.', retour: 'Who will pay for the snacks? Who will cancel homework? Not a prefect!' }
+      ] },
+    { t: 'recit', entre: ['student'], txt: 'Questions from the voters.', trad: 'Les questions des électeurs.' },
+    { t: 'dit', qui: 'student', txt: 'Mary, how will you choose the books for the reading club?', trad: 'Mary, comment choisiras-tu les livres du club de lecture ?' },
+    { t: 'remarque', titre: 'Word order in questions', txt: 'Wh- word + auxiliary + subject + verb : How will you choose…? Where do you live? What did she say? Ne dites pas « How you will choose? » : l’auxiliaire passe devant le sujet.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Workshop · build the question', consigne: 'Remets les mots dans l’ordre : « Quand créeras-tu le club ? »',
+      items: ['When', 'will', 'you', 'set up', 'the club?'],
+      bravo: 'When will you set up the club? Wh- + auxiliary + subject + verb.', jauges: { english: 60 } },
+    { t: 'dit', qui: 'mary', txt: 'Every class will suggest books. We will vote, won’t we?', trad: 'Chaque classe proposera des livres. Nous voterons, n’est-ce pas ?' },
+    { t: 'atelier', mode: 'tri', titre: 'Workshop · the right phrasal verb', consigne: 'Associe chaque phrasal verb à son sens.',
+      cats: ['set up', 'look after', 'carry out', 'stand for'],
+      items: [
+        { txt: 'créer, mettre en place', cat: 0 },
+        { txt: 's’occuper de', cat: 1 },
+        { txt: 'mener, réaliser', cat: 2 },
+        { txt: 'se présenter à une élection', cat: 3 }
+      ],
+      bravo: 'Phrasal verbs are very common in English: learn them in context.' },
+    { t: 'choix', qui: 'student', q: 'Tu es Fanny. Pour qui votes-tu ?',
+      options: [
+        { txt: 'For Tom: free snacks!', consequence: 'Tom wins… and cannot keep a single promise. The students are disappointed.', jauges: { votes: -15 } },
+        { txt: 'For Mary: her promises are realistic.', consequence: 'You vote for a programme, not for a dream. That is a responsible vote.', jauges: { votes: 30, english: 10 } }
+      ],
+      oeuvre: 'A responsible voter compares programmes and asks: can the candidate really do it?' },
+    { t: 'dit', qui: 'teacher', emo: 'joie', jeu: 'after the count', txt: 'Mary is our new senior prefect! Congratulations. Tom, you will help her, won’t you?', trad: 'Mary est notre nouvelle préfète principale ! Félicitations. Tom, tu l’aideras, n’est-ce pas ?', jauges: { votes: 80, english: 85 } }
+  ],
+  labo: {
+    titre: 'Laboratory · the school election',
+    intro: 'Règle le réalisme des promesses, l’information des électeurs et la participation : qui est élu, et pour quel mandat ?',
+    persos: ['mary', 'tom', 'student', 'teacher'],
+    curseurs: [
+      { id: 'realism', nom: 'Realistic promises', val: 70, bas: 'dreams', haut: 'realistic' },
+      { id: 'information', nom: 'Voters’ information', val: 55, bas: 'none', haut: 'debate and questions' },
+      { id: 'turnout', nom: 'Turnout', val: 60, bas: 'low', haut: 'high' }
+    ],
+    scenarios: [
+      { nom: 'Election week', icone: 'porteVoix', valeurs: { realism: 70, information: 55, turnout: 60 } },
+      { nom: 'Empty promises', icone: 'gateau', valeurs: { realism: 10, information: 15 } },
+      { nom: 'Nobody votes', icone: 'muet', valeurs: { turnout: 10 } }
+    ],
+    liens: [
+      { a: 'mary', b: 'student', type: 'confiance', lib: 'programme', base: .3, poids: { realism: .4, information: .3 } },
+      { a: 'tom', b: 'student', type: 'domination', lib: 'promises', base: .3, poids: { information: -.4 } },
+      { a: 'mary', b: 'tom', type: 'conflit', lib: 'rivals', base: .5 },
+      { a: 'teacher', b: 'student', type: 'confiance', lib: 'organises', base: .4 }
+    ],
+    issue: function(v){
+      if(v.turnout < 30){ return { niveau: 'moyen', badge: 'Elected by a few', recit: 'Only a few students vote: the new prefect does not really represent the school.', apres: 'Voting is a right and a duty.', themes: ['turnout'] }; }
+      if(v.realism < 35 && v.information < 40){ return { niveau: 'ko', badge: 'Broken promises', recit: 'The candidate with the biggest promises wins, then does nothing he promised.', apres: 'Ask questions before you vote.', themes: ['responsible vote'] }; }
+      return { niveau: 'ok', badge: 'A good prefect', recit: 'Informed voters choose a realistic programme: the reading club starts next month.', apres: 'Democracy starts at school.', themes: ['school election', 'phrasal verbs'] };
+    }
+  },
+  quiz: [
+    { q: 'Que signifie « to stand for » (élection) ?', options: [
+      { txt: 'Se présenter à une élection.', ok: true, retour: 'She is standing for senior prefect.' },
+      { txt: 'Se lever.', retour: 'Se lever = to stand up.' } ] },
+    { q: 'Quel est l’ordre correct ?', options: [
+      { txt: 'How will you help us?', ok: true, retour: 'Wh- + auxiliary + subject + verb.' },
+      { txt: 'How you will help us?', retour: 'L’auxiliaire passe devant le sujet.' } ] },
+    { q: '« We will vote, … ? »', options: [
+      { txt: 'won’t we', ok: true, retour: 'Phrase affirmative → tag négatif.' },
+      { txt: 'will we', retour: 'Seulement après une phrase négative.' } ] },
+    { q: 'Que signifie « to set up a club » ?', options: [
+      { txt: 'Créer un club.', ok: true, retour: 'set up = mettre en place.' },
+      { txt: 'Fermer un club.', retour: 'Non.' } ] },
+    { q: 'Qu’est-ce qu’un vote responsable ?', options: [
+      { txt: 'Choisir un programme réaliste après s’être informé.', ok: true, retour: 'Comparer, questionner, décider.' },
+      { txt: 'Voter pour celui qui promet le plus.', retour: 'Les promesses doivent pouvoir être tenues.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Election vocabulary: to stand for, a candidate, a campaign, a promise, to vote, a voter, the count.',
+      'Phrasal verbs: set up, look after, carry out, give up.',
+      'Questions: Wh- + auxiliary + subject + verb (How will you…?).',
+      'Question tags: We will vote, won’t we?'
+    ],
+    ecrire: 'Write your own campaign speech (eight lines) for the post of class prefect. Use three phrasal verbs and end with a question tag.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Vote for me!</h1>
+<p><b>Anglais · 3ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Comprendre et produire un discours de campagne en anglais ; employer des phrasal verbs (stand for, look after, set up, carry out) ; poser des questions dans le bon ordre (Wh- + auxiliary + subject + verb) et avec des question tags.</p>
+<p>Programme : Progression harmonisée 3e · Citizenship and human rights, lessons 41 (question tags), 43-45 (polls and surveys, word order in questions), 46-48 (phrasal verbs, campaigning and voting for school prefects)</p>
+<p>Lieu : A bilingual college in Yaoundé · Election week</p>
+<h3>Personnages</h3><ul><li>Mary, candidate</li><li>Tom, candidate</li><li>Fanny, a voter</li><li>Mr Njoh, teacher</li></ul>
+<h3>La scène</h3>
+<p>It is election week. Two students are standing for the post of senior prefect. Mr Njoh organises the debate. — <i>C’est la semaine des élections. Deux élèves se présentent au poste de préfet principal. M. Njoh organise le débat.</i></p>
+<p><b>Mr Njoh, teacher</b> : Each candidate has two minutes. Mary, you go first. — <i>Chaque candidat a deux minutes. Mary, tu commences.</i></p>
+<p><b>Mary, candidate</b> : If you elect me, I will set up a reading club, I will look after the school garden, and I will carry out a survey to listen to every class. — <i>Si vous m’élisez, je créerai un club de lecture, je m’occuperai du jardin scolaire et je mènerai une enquête pour écouter chaque classe.</i></p>
+<h4>Phrasal verbs</h4><p>Un verbe + une particule = un nouveau sens : stand for (se présenter à une élection), set up (créer, mettre en place), look after (s’occuper de), carry out (mener, réaliser), give up (abandonner).</p>
+<p><b>Tom, candidate</b> <i>(confident)</i> : I will give everyone free snacks and no homework! — <i>Je donnerai des goûters gratuits à tout le monde et plus de devoirs !</i></p>
+<p><b>Question :</b> Quelle promesse est réaliste, et laquelle ne l’est pas ?</p><ul><li>Mary’s promises are realistic ; Tom’s are impossible for a prefect. <b>(bonne réponse)</b></li><li>Tom’s promises are the most realistic.</li></ul><p>A prefect cannot cancel homework or pay for snacks. A good candidate makes promises he or she can keep.</p>
+<p>Questions from the voters. — <i>Les questions des électeurs.</i></p>
+<p><b>Fanny, a voter</b> : Mary, how will you choose the books for the reading club? — <i>Mary, comment choisiras-tu les livres du club de lecture ?</i></p>
+<h4>Word order in questions</h4><p>Wh- word + auxiliary + subject + verb : How will you choose…? Where do you live? What did she say? Ne dites pas « How you will choose? » : l’auxiliaire passe devant le sujet.</p>
+<h4>Workshop · build the question</h4><p>Remets les mots dans l’ordre : « Quand créeras-tu le club ? »</p>
+<ol><li>When</li><li>will</li><li>you</li><li>set up</li><li>the club?</li></ol>
+<p>When will you set up the club? Wh- + auxiliary + subject + verb.</p>
+<p><b>Mary, candidate</b> : Every class will suggest books. We will vote, won’t we? — <i>Chaque classe proposera des livres. Nous voterons, n’est-ce pas ?</i></p>
+<h4>Workshop · the right phrasal verb</h4><p>Associe chaque phrasal verb à son sens.</p>
+<ul><li><b>set up</b> : créer, mettre en place</li><li><b>look after</b> : s’occuper de</li><li><b>carry out</b> : mener, réaliser</li><li><b>stand for</b> : se présenter à une élection</li></ul>
+<p>Phrasal verbs are very common in English: learn them in context.</p>
+<p><b>À toi de décider :</b> Tu es Fanny. Pour qui votes-tu ?</p><ul><li>For Tom: free snacks! — Tom wins… and cannot keep a single promise. The students are disappointed.</li><li>For Mary: her promises are realistic. — You vote for a programme, not for a dream. That is a responsible vote.</li></ul>
+<p><b>Mr Njoh, teacher</b> <i>(after the count)</i> : Mary is our new senior prefect! Congratulations. Tom, you will help her, won’t you? — <i>Mary est notre nouvelle préfète principale ! Félicitations. Tom, tu l’aideras, n’est-ce pas ?</i></p>
+<h3>Quiz</h3><ol><li>Que signifie « to stand for » (élection) ? — <b>Se présenter à une élection.</b> She is standing for senior prefect.</li><li>Quel est l’ordre correct ? — <b>How will you help us?</b> Wh- + auxiliary + subject + verb.</li><li>« We will vote, … ? » — <b>won’t we</b> Phrase affirmative → tag négatif.</li><li>Que signifie « to set up a club » ? — <b>Créer un club.</b> set up = mettre en place.</li><li>Qu’est-ce qu’un vote responsable ? — <b>Choisir un programme réaliste après s’être informé.</b> Comparer, questionner, décider.</li></ol>
+<h3>À retenir</h3><ul><li>Election vocabulary: to stand for, a candidate, a campaign, a promise, to vote, a voter, the count.</li><li>Phrasal verbs: set up, look after, carry out, give up.</li><li>Questions: Wh- + auxiliary + subject + verb (How will you…?).</li><li>Question tags: We will vote, won’t we?</li></ul>
+<h3>À écrire</h3><p>Write your own campaign speech (eight lines) for the post of class prefect. Use three phrasal verbs and end with a question tag.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="3e-anglais-school-prefect-election.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

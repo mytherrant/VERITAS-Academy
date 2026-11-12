@@ -57,6 +57,7 @@
      chercher). On le lit, et on garde ces valeurs en repli : si la sonde ne
      répond pas, mieux vaut proposer le prix habituel que bloquer la vente. */
   var PRIX  = { livret: 1500, guide: 5000 };
+  var NORMAL = { livret: 0, guide: 0 }, PROMO = null;
   var tarifsLus = false;
   function resoudreTarifs() {
     if (tarifsLus) return Promise.resolve(PRIX);
@@ -76,6 +77,12 @@
           // Un tarif nul n'est pas un tarif : on ne remplace que ce qui est chiffré.
           if (parseInt(o.prix, 10) > 0)      PRIX.livret = parseInt(o.prix, 10);
           if (parseInt(o.prixGuide, 10) > 0) PRIX.guide  = parseInt(o.prixGuide, 10);
+          // Promotion réglée par l'administration : l'ancien prix, à barrer.
+          if (o.promo && parseInt(o.promo.pct, 10) > 0) {
+            NORMAL.livret = parseInt(o.prixNormal, 10) || 0;
+            NORMAL.guide  = parseInt(o.prixGuideNormal, 10) || 0;
+            PROMO = o.promo;
+          }
           break;
         }
         /* Paliers de remise d'un pack : réglables par l'administration depuis
@@ -109,6 +116,16 @@
     return Math.round(u * n * (100 - r) / 100);
   }
   function fmt(v) { return Number(v).toLocaleString('fr-FR'); }
+  // « au lieu de 1 500 FCFA · −20 % jusqu'au 30/11 » — rien hors promotion.
+  function promoTexte() {
+    var n = NORMAL[cfg.kind] || 0, u = PRIX[cfg.kind] || 0;
+    if (!PROMO || !(n > u)) return '';
+    var fin = /^\d{4}-\d{2}-\d{2}$/.test(PROMO.fin || '') ? PROMO.fin.split('-').reverse().slice(0, 2).join('/') : '';
+    return '<div class="vrt-promo" style="font-size:13px;color:#5c666f;margin:0 0 4px">'
+      + '<s>' + fmt(n) + ' FCFA</s> · <b style="color:#c0453f">−' + parseInt(PROMO.pct, 10) + ' %</b>'
+      + (PROMO.libelle ? ' · ' + String(PROMO.libelle).replace(/[<>&"]/g, '') : '')
+      + (fin ? ' jusqu’au ' + fin : '') + '</div>';
+  }
 
   /* ══ CODE AMI ═══════════════════════════════════════════════════════════════
      Depuis le 14/09/2026 le serveur sait honorer un code ami sur `intent:
@@ -921,6 +938,7 @@
         + '<span>Lire 2 leçons gratuitement, sans payer →</span></a>'
       + '<div style="font-family:\'Baloo 2\',sans-serif;font-weight:800;font-size:30px;color:#c0453f;margin:14px 0 2px" class="vrt-prix">'
       + fmt(prix(cfg.kind, qte)) + ' FCFA</div>'
+      + promoTexte()
       /* 15/10/2026 — le bandeau rouge « Paiement par code marchand… » est
          retiré à la demande de Jacques : l'écran suivant donne déjà les codes
          marchands et la marche à suivre, au moment où l'on en a besoin. */

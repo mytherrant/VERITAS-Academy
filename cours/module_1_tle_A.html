@@ -275,8 +275,39 @@ td:first-child{font-weight:700;color:var(--muted)}
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","name":"Cahier de Français — Terminale A · Stances et Poèmes","description":"Cahier de français de Terminale A sur Stances et Poèmes de Sully Prudhomme : toutes les séquences et semaines, évaluation diagnostique comprise.","url":"https://veritas-school.com/cours/module_1_tle_A.html","inLanguage":"fr","learningResourceType":"Cahier de cours","educationalLevel":"Terminale A","isAccessibleForFree":true,"provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"publisher":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://veritas-school.com/"},{"@type":"ListItem","position":2,"name":"Cours","item":"https://veritas-school.com/cours/"},{"@type":"ListItem","position":3,"name":"Cahier de Français — Terminale A · Stances et Poèmes","item":"https://veritas-school.com/cours/module_1_tle_A.html"}]}]}</script>
 <!-- /seo-tete -->
+<style id="vrt-cours-clair">
+/* 11/11/2026 — « Trop sombre et illisible » (Jacques). Les blocs de couleur
+   foncée (dégradés bleu nuit, violet, vert sombre, brun) portaient un texte
+   que l'habillage du site repeint en bleu nuit : titre bleu sur bleu,
+   contraste 1,0 à 2,8. Ils passent au style clair du site : fond pâle de leur
+   teinte, fin contour de la même teinte (pas de trait foncé à gauche,
+   demande du 11/11), titre dans la teinte foncée, texte encre. */
+:root{--cl-bleu:#1E499B;--cl-bleu-p:#EAF1FC;--cl-violet:#5B4FA8;--cl-violet-p:#F2EEFA;--cl-vert:#007E11;--cl-vert-p:#E7F5EA;
+  --cl-orange:#A84200;--cl-orange-p:#FFF2E3;--cl-rose:#B03A6E;--cl-rose-p:#FBEAF1;--cl-teal:#0E7C86;--cl-teal-p:#E5F4F5;--cl-or:#8A5A00;--cl-or-p:#FFF6DD}
+body .hi-card,body .reg-card,body .lesson-header,body .obj-box,body .corpus-box,body .retenir-box,body .bac-box,body .epreuve-header,body .annot-popup{
+  --k:var(--cl-bleu);--kp:var(--cl-bleu-p);
+  background:var(--kp)!important;background-image:none!important;color:#1F2937!important;
+  border:1px solid color-mix(in srgb,var(--k) 22%,transparent)!important;box-shadow:none!important}
+body :is(.hi-card,.reg-card,.lesson-header,.obj-box,.corpus-box,.retenir-box,.bac-box,.epreuve-header,.annot-popup)::before,
+body :is(.hi-card,.reg-card,.lesson-header,.obj-box,.corpus-box,.retenir-box,.bac-box,.epreuve-header,.annot-popup)::after{display:none!important}
+body :is(.hi-card,.reg-card,.lesson-header,.obj-box,.corpus-box,.retenir-box,.bac-box,.epreuve-header,.annot-popup) :is(p,li,em,span,small,div,blockquote,td){color:#1F2937!important;opacity:1!important}
+body :is(.hi-card,.reg-card,.lesson-header,.obj-box,.corpus-box,.retenir-box,.bac-box,.epreuve-header,.annot-popup) :is(h1,h2,h3,h4,h5,strong,b,.tag){color:var(--k)!important}
+body :is(.hi-card,.reg-card,.lesson-header,.obj-box,.corpus-box,.retenir-box,.bac-box,.epreuve-header,.annot-popup) .tag{background:#fff!important;border:1px solid var(--k)!important}
+body :is(.hi-card,.reg-card,.lesson-header,.obj-box,.corpus-box,.retenir-box,.bac-box,.epreuve-header,.annot-popup) a{color:var(--k)!important;text-decoration:underline}
+.hi-card.forme,.lesson-header.violet{--k:var(--cl-violet);--kp:var(--cl-violet-p)}
+.hi-card.axe1,.reg-card.sout,.lesson-header.vert,.retenir-box{--k:var(--cl-vert);--kp:var(--cl-vert-p)}
+.hi-card.axe2,.reg-card.fam,.bac-box{--k:var(--cl-orange);--kp:var(--cl-orange-p)}
+.lesson-header.rouge{--k:var(--cl-rose);--kp:var(--cl-rose-p)}
+.lesson-header.teal,.lesson-header.marine{--k:var(--cl-teal);--kp:var(--cl-teal-p)}
+.obj-box{--k:var(--cl-or);--kp:var(--cl-or-p)}
+body .annot-popup{box-shadow:0 10px 26px rgba(0,17,54,.16)!important}
+/* encadré de fin de leçon (styles en ligne : dégradé orange, texte blanc) */
+body div[style*="linear-gradient"][style*="color:#fff"]{background:var(--cl-or-p)!important;background-image:none!important;color:#1F2937!important;border:1px solid #F1DDA8!important}
+body div[style*="linear-gradient"][style*="color:#fff"] :is(div,p,span){color:#1F2937!important;opacity:1!important}
+body div[style*="linear-gradient"][style*="color:#fff"] > div:first-child{color:var(--cl-or)!important}
+</style>
 <!--vrt-habillage:tete-->
-<link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.19.25">
+<link rel="stylesheet" href="/assets/veritas-habillage.css?v=1.19.25.34">
 <script>window.VRT_DATA=window.VRT_DATA||{"citations":[{"t":"Le génie, c’est un pour cent d’inspiration et quatre-vingt-dix-neuf pour cent de transpiration.","a":"Thomas Edison"},{"t":"Ce n’est pas parce que les choses sont difficiles que nous n’osons pas ; c’est parce que nous n’osons pas qu’elles sont difficiles.","a":"Sénèque"},{"t":"L’éducation est l’arme la plus puissante pour changer le monde.","a":"Nelson Mandela"},{"t":"Un peu chaque jour vaut mieux que beaucoup un seul jour.","a":"Proverbe"},{"t":"La chance sourit à l’esprit préparé.","a":"Louis Pasteur"},{"t":"Tomber sept fois, se relever huit.","a":"Proverbe japonais"}],"themeSombre":"\n      body{background:#0A1428!important}\n      [style*=\"background:#fff\"],[style*=\"background:#FAFBFE\"],[style*=\"background:#FCFDFE\"],[style*=\"background:#F7F9FD\"]{background:#132241!important}\n      [style*=\"background:#F4F5F8\"],[style*=\"background:#F4F6FB\"],[style*=\"background:#EFF2F7\"],[style*=\"background:#F5F9FF\"]{background:#0F1B33!important}\n      [style*=\"background:rgba(255,255,255,.96)\"]{background:rgba(13,25,48,.96)!important}\n      [style*=\"radial-gradient(1100px\"],[style*=\"radial-gradient(900px\"]{background:#0C1730!important}\n      [style*=\"linear-gradient(180deg,#FBF8F1\"]{background:#0C1730!important}\n      [style*=\"color:#001136\"]{color:#EEF3FC!important}\n      [style*=\"color:#0C2A6A\"]{color:#DCE6F8!important}\n      [style*=\"color:#4D5163\"],[style*=\"color:#6B5A42\"]{color:#B6C2D8!important}\n      [style*=\"color:#6E7385\"],[style*=\"color:#9BA6BE\"]{color:#8D9AB4!important}\n      [style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"],[style*=\"border:1px solid transparent\"]{border-color:#24334F!important}\n      [style*=\"\"],[style*=\"\"]{border-bottom-color:#24334F!important}\n      [style*=\"\"]{border-top-color:#24334F!important}\n      [style*=\"border-left:4px solid\"]{border-left-color:#FFC93C!important}\n      input,input::placeholder{color:#C7D2E6!important}\n    "};</script>
 <!--/vrt-habillage:tete-->
 </head>
@@ -293,7 +324,7 @@ td:first-child{font-weight:700;color:var(--muted)}
           <button type="button" onclick="VRT.act('goEnseignants',this,event)" data-go="enseignants" style="display:inline-flex;align-items:center;height:100%;padding:0 14px;border:0;border-bottom:3px solid transparent;background:none;cursor:pointer;font:500 15px Poppins,sans-serif;color:#001136;white-space:nowrap;transition:color .18s,border-color .18s" class="vh4">Enseignants</button><a href="/app.html#partenariat" style="display:inline-flex;align-items:center;height:100%;padding:0 14px;border:0;border-bottom:3px solid transparent;background:none;cursor:pointer;font:500 15px Poppins,sans-serif;color:#001136;white-space:nowrap;text-decoration:none;transition:color .18s,border-color .18s" class="vh4">Partenaires</a>
           <div style="position:relative;height:100%;display:flex;align-items:center">
             <button type="button" onclick="VRT.act('basculerPlus',this,event)" aria-expanded="false" style="display:inline-flex;align-items:center;gap:6px;height:100%;padding:0 14px;border:0;border-bottom:3px solid transparent;background:none;cursor:pointer;font:500 15px Poppins,sans-serif;color:#001136;white-space:nowrap;transition:color .18s,border-color .18s" class="vh5">Plus<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(90deg)" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-chevron-right"></use></svg></button>
-            <div id="vrtPlus" class="vmn" hidden role="menu" aria-label="Toutes les rubriques"><div class="vmn-col"><p class="vmn-t">Élève<small>Apprendre et réviser</small></p><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="elearning"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-book"/></svg></span><span class="vmn-x">Catalogue e-learning<small>Matières, œuvres, séquences</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></button><a class="vmn-i" href="/corriges/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-checkcircle"/></svg></span><span class="vmn-x">Corrigés des cahiers<small>Accès libre, par séquence</small></span></a><a class="vmn-i" href="/app.html#epreuves"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-doc"/></svg></span><span class="vmn-x">Annales corrigées<small>BEPC, Probatoire, BAC, GCE</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></a><a class="vmn-i" href="/app.html#evaluations"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-clock"/></svg></span><span class="vmn-x">Évaluations en ligne<small>Entraînement chronométré</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></a><a class="vmn-i" href="/oeuvres/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-bookopen"/></svg></span><span class="vmn-x">Œuvres au programme<small>Analyses et fiches</small></span></a><a class="vmn-i" href="/niveaux/"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-graduation"/></svg></span><span class="vmn-x">Programmes par classe<small>De la 6ᵉ à la Terminale</small></span></a><a class="vmn-i" href="/outils/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-calculator"/></svg></span><span class="vmn-x">Outils gratuits<small>Calculateurs de moyenne</small></span></a><a class="vmn-i" href="/app.html#positionnement"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-target"/></svg></span><span class="vmn-x">Tester mon niveau<small>10 questions, forces et lacunes</small></span></a><a class="vmn-i" href="/app.html#progression"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-award"/></svg></span><span class="vmn-x">Ma progression<small>XP, série, badges à débloquer</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></a><a class="vmn-i" href="/app.html#jeux"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-game"/></svg></span><span class="vmn-x">Jeux et battles<small>Réviser en jouant, défis hebdo</small></span></a><a class="vmn-i" href="/app.html#simulateur"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-clock"/></svg></span><span class="vmn-x">Examen blanc<small>Sujet officiel + chronomètre</small></span></a><a class="vmn-i" href="/eleve/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-user"/></svg></span><span class="vmn-x">Espace élève<small>Corrigés, quiz et méthodes</small></span></a><a class="vmn-i" href="/livrets/"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-bookopen"/></svg></span><span class="vmn-x">Mon cahier en ligne<small>Interactif, 6ᵉ → Terminale</small></span></a><a class="vmn-i" href="/flash/"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-qr"/></svg></span><span class="vmn-x">VÉRITAS Flash<small>Scanner le QR de sa séquence</small></span></a></div><div class="vmn-col"><p class="vmn-t">Parent<small>Suivre et soutenir</small></p><a class="vmn-i" href="/app.html#orientation"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Orientation<small>Choisir sa série</small></span></a><a class="vmn-i" href="/app.html#positionnement"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-target"/></svg></span><span class="vmn-x">Tester son niveau<small>Le point avant de commencer</small></span></a><a class="vmn-i" href="/parcours/"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-scale"/></svg></span><span class="vmn-x">Matières et coefficients<small>Poids réels, orientation</small></span></a><a class="vmn-i" href="/app.html#cagnotte"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-gift"/></svg></span><span class="vmn-x">Cagnotte de scolarité<small>Faire financer son année</small></span></a><a class="vmn-i" href="/app.html#trophees"><span class="vmn-p" style="background:#FFF6DA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-trophy"/></svg></span><span class="vmn-x">Trophées VÉRITAS<small>Vote gratuit et unique</small></span></a><a class="vmn-i" href="/app.html#leaderboard-junior"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-award"/></svg></span><span class="vmn-x">Classement junior<small>Le tableau d’honneur</small></span></a></div><div class="vmn-col"><p class="vmn-t">Enseignant<small>Enseigner et publier</small></p><a class="vmn-i" href="/ressources/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Ressources et cours<small>Leçons interactives</small></span></a><a class="vmn-i" href="/manuels.html"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-qr"/></svg></span><span class="vmn-x">Corrigés du cahier papier<small>La page des QR codes</small></span></a><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="boutique"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shop"/></svg></span><span class="vmn-x">Boutique de manuels<small>Cahiers et études d’œuvres</small></span></button><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="tarifs"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-wallet"/></svg></span><span class="vmn-x">Abonnements<small>Élève, enseignant, établissement</small></span></button><a class="vmn-i" href="/app.html#verifier-certificat"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shield"/></svg></span><span class="vmn-x">Vérifier un certificat<small>Authentifier une distinction</small></span></a><a class="vmn-i" href="/plateforme/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Atelier de Français<small>Composer une épreuve MINESEC</small></span></a><a class="vmn-i" href="/enseignant/"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-doc"/></svg></span><span class="vmn-x">Espace enseignant<small>Guide, grilles, progressions</small></span></a><a class="vmn-i" href="/adopter/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-checkcircle"/></svg></span><span class="vmn-x">Adopter les cahiers<small>Pour une classe, un établissement</small></span></a></div><div class="vmn-col"><p class="vmn-t">Partenaire<small>Diffuser et représenter</small></p><a class="vmn-i" href="/app.html#partenariat"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-users"/></svg></span><span class="vmn-x">Devenir partenaire<small>9 formules, marges revendeur</small></span></a><a class="vmn-i" href="/app.html#nos-partenaires"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-handshake"/></svg></span><span class="vmn-x">Nos partenaires<small>Ceux qui nous accompagnent</small></span></a><a class="vmn-i" href="/campus/"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-university"/></svg></span><span class="vmn-x">VÉRITAS Campus<small>Pour les établissements</small></span></a><a class="vmn-i" href="/constellation.html"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-sparkles"/></svg></span><span class="vmn-x">Constellation VÉRITAS<small>Tout l’écosystème</small></span></a><a class="vmn-i" href="/plan.html#partenaire"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-map"/></svg></span><span class="vmn-x">Espace partenaire<small>Toutes ses pages, réunies</small></span></a></div><div class="vmn-col"><p class="vmn-t">Le centre<small>Nous connaître</small></p><a class="vmn-i" href="/decouvrir/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-building"/></svg></span><span class="vmn-x">Présentation<small>Qui nous sommes</small></span></a><a class="vmn-i" href="/app.html#actualites"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-megaphone"/></svg></span><span class="vmn-x">Actualités<small>Ce qui se passe au centre</small></span></a><a class="vmn-i" href="/app.html#inscription"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-user"/></svg></span><span class="vmn-x">S’inscrire<small>Créer un compte gratuit</small></span></a><a class="vmn-i" href="/plan.html"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Plan du site<small>Tout VÉRITAS, par profil</small></span></a></div></div>
+            <div id="vrtPlus" class="vmn" hidden role="menu" aria-label="Toutes les rubriques"><div class="vmn-col"><p class="vmn-t">Élève<small>Apprendre et réviser</small></p><a class="vmn-i" href="/apprendre/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-graduation"/></svg></span><span class="vmn-x">Apprendre<small>Leçons, quiz, corrigés, annales</small></span></a></div><div class="vmn-col"><p class="vmn-t">Parent<small>Suivre et soutenir</small></p><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="parents"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-home"/></svg></span><span class="vmn-x">Suivi au centre ou à domicile<small>Répétitions, classes virtuelles</small></span></button><a class="vmn-i" href="/app.html#orientation"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Orientation<small>Choisir sa série</small></span></a><a class="vmn-i" href="/app.html#positionnement"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-target"/></svg></span><span class="vmn-x">Tester son niveau<small>Le point avant de commencer</small></span></a><a class="vmn-i" href="/parcours/"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-scale"/></svg></span><span class="vmn-x">Matières et coefficients<small>Poids réels, orientation</small></span></a><a class="vmn-i" href="/app.html#cagnotte"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-gift"/></svg></span><span class="vmn-x">Cagnotte de scolarité<small>Faire financer son année</small></span></a><a class="vmn-i" href="/app.html#trophees"><span class="vmn-p" style="background:#FFF6DA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-trophy"/></svg></span><span class="vmn-x">Trophées VÉRITAS<small>Vote gratuit et unique</small></span></a><a class="vmn-i" href="/app.html#leaderboard-junior"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-award"/></svg></span><span class="vmn-x">Classement junior<small>Le tableau d’honneur</small></span></a></div><div class="vmn-col"><p class="vmn-t">Enseignant<small>Enseigner et publier</small></p><a class="vmn-i" href="/ressources/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Ressources et cours<small>Leçons interactives</small></span></a><a class="vmn-i" href="/manuels.html"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-qr"/></svg></span><span class="vmn-x">Corrigés du cahier papier<small>La page des QR codes</small></span></a><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="boutique"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shop"/></svg></span><span class="vmn-x">Boutique de manuels<small>Cahiers et études d’œuvres</small></span></button><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="tarifs"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-wallet"/></svg></span><span class="vmn-x">Abonnements<small>Élève, enseignant, établissement</small></span></button><a class="vmn-i" href="/app.html#verifier-certificat"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shield"/></svg></span><span class="vmn-x">Vérifier un certificat<small>Authentifier une distinction</small></span></a><a class="vmn-i" href="/plateforme/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Atelier de Français<small>Composer une épreuve MINESEC</small></span></a><a class="vmn-i" href="/enseignant/"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-doc"/></svg></span><span class="vmn-x">Espace enseignant<small>Guide, grilles, progressions</small></span></a><a class="vmn-i" href="/adopter/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-checkcircle"/></svg></span><span class="vmn-x">Adopter les cahiers<small>Pour une classe, un établissement</small></span></a></div><div class="vmn-col"><p class="vmn-t">Partenaire<small>Diffuser et représenter</small></p><a class="vmn-i" href="/app.html#partenariat"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-users"/></svg></span><span class="vmn-x">Devenir partenaire<small>9 formules, marges revendeur</small></span></a><a class="vmn-i" href="/app.html#nos-partenaires"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-handshake"/></svg></span><span class="vmn-x">Nos partenaires<small>Ceux qui nous accompagnent</small></span></a><a class="vmn-i" href="/campus/"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-university"/></svg></span><span class="vmn-x">VÉRITAS Campus<small>Pour les établissements</small></span></a><a class="vmn-i" href="/constellation.html"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-sparkles"/></svg></span><span class="vmn-x">Constellation VÉRITAS<small>Tout l’écosystème</small></span></a><a class="vmn-i" href="/plan.html#partenaire"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-map"/></svg></span><span class="vmn-x">Espace partenaire<small>Toutes ses pages, réunies</small></span></a></div><div class="vmn-col"><p class="vmn-t">Le centre<small>Nous connaître</small></p><a class="vmn-i" href="/decouvrir/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-building"/></svg></span><span class="vmn-x">Présentation<small>Qui nous sommes</small></span></a><a class="vmn-i" href="/app.html#actualites"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-megaphone"/></svg></span><span class="vmn-x">Actualités<small>Ce qui se passe au centre</small></span></a><a class="vmn-i" href="/app.html#inscription"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-user"/></svg></span><span class="vmn-x">S’inscrire<small>Créer un compte gratuit</small></span></a><a class="vmn-i" href="/plan.html"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Plan du site<small>Tout VÉRITAS, par profil</small></span></a></div></div>
           </div>
         </div>
 
@@ -345,7 +376,7 @@ td:first-child{font-weight:700;color:var(--muted)}
                 </button>
               
               <a href="/app.html#connexion" style="margin-top:6px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:10px;background:#FFC93C;color:#001136;font:600 15px Poppins,sans-serif;box-shadow:0 8px 18px rgba(242,165,32,.3)" class="vh8"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-user"></use></svg>Connexion</a>
-            <div class="vmn vmn-mob"><div class="vmn-col"><p class="vmn-t">Élève<small>Apprendre et réviser</small></p><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="elearning"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-book"/></svg></span><span class="vmn-x">Catalogue e-learning<small>Matières, œuvres, séquences</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></button><a class="vmn-i" href="/corriges/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-checkcircle"/></svg></span><span class="vmn-x">Corrigés des cahiers<small>Accès libre, par séquence</small></span></a><a class="vmn-i" href="/app.html#epreuves"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-doc"/></svg></span><span class="vmn-x">Annales corrigées<small>BEPC, Probatoire, BAC, GCE</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></a><a class="vmn-i" href="/app.html#evaluations"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-clock"/></svg></span><span class="vmn-x">Évaluations en ligne<small>Entraînement chronométré</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></a><a class="vmn-i" href="/oeuvres/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-bookopen"/></svg></span><span class="vmn-x">Œuvres au programme<small>Analyses et fiches</small></span></a><a class="vmn-i" href="/niveaux/"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-graduation"/></svg></span><span class="vmn-x">Programmes par classe<small>De la 6ᵉ à la Terminale</small></span></a><a class="vmn-i" href="/outils/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-calculator"/></svg></span><span class="vmn-x">Outils gratuits<small>Calculateurs de moyenne</small></span></a><a class="vmn-i" href="/app.html#positionnement"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-target"/></svg></span><span class="vmn-x">Tester mon niveau<small>10 questions, forces et lacunes</small></span></a><a class="vmn-i" href="/app.html#progression"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-award"/></svg></span><span class="vmn-x">Ma progression<small>XP, série, badges à débloquer</small></span><span class="vmn-l" title="Réservé aux membres inscrits"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="vsr">Réservé aux membres inscrits</span></span></a><a class="vmn-i" href="/app.html#jeux"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-game"/></svg></span><span class="vmn-x">Jeux et battles<small>Réviser en jouant, défis hebdo</small></span></a><a class="vmn-i" href="/app.html#simulateur"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-clock"/></svg></span><span class="vmn-x">Examen blanc<small>Sujet officiel + chronomètre</small></span></a><a class="vmn-i" href="/eleve/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-user"/></svg></span><span class="vmn-x">Espace élève<small>Corrigés, quiz et méthodes</small></span></a><a class="vmn-i" href="/livrets/"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-bookopen"/></svg></span><span class="vmn-x">Mon cahier en ligne<small>Interactif, 6ᵉ → Terminale</small></span></a><a class="vmn-i" href="/flash/"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-qr"/></svg></span><span class="vmn-x">VÉRITAS Flash<small>Scanner le QR de sa séquence</small></span></a></div><div class="vmn-col"><p class="vmn-t">Parent<small>Suivre et soutenir</small></p><a class="vmn-i" href="/app.html#orientation"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Orientation<small>Choisir sa série</small></span></a><a class="vmn-i" href="/app.html#positionnement"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-target"/></svg></span><span class="vmn-x">Tester son niveau<small>Le point avant de commencer</small></span></a><a class="vmn-i" href="/parcours/"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-scale"/></svg></span><span class="vmn-x">Matières et coefficients<small>Poids réels, orientation</small></span></a><a class="vmn-i" href="/app.html#cagnotte"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-gift"/></svg></span><span class="vmn-x">Cagnotte de scolarité<small>Faire financer son année</small></span></a><a class="vmn-i" href="/app.html#trophees"><span class="vmn-p" style="background:#FFF6DA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-trophy"/></svg></span><span class="vmn-x">Trophées VÉRITAS<small>Vote gratuit et unique</small></span></a><a class="vmn-i" href="/app.html#leaderboard-junior"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-award"/></svg></span><span class="vmn-x">Classement junior<small>Le tableau d’honneur</small></span></a></div><div class="vmn-col"><p class="vmn-t">Enseignant<small>Enseigner et publier</small></p><a class="vmn-i" href="/ressources/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Ressources et cours<small>Leçons interactives</small></span></a><a class="vmn-i" href="/manuels.html"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-qr"/></svg></span><span class="vmn-x">Corrigés du cahier papier<small>La page des QR codes</small></span></a><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="boutique"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shop"/></svg></span><span class="vmn-x">Boutique de manuels<small>Cahiers et études d’œuvres</small></span></button><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="tarifs"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-wallet"/></svg></span><span class="vmn-x">Abonnements<small>Élève, enseignant, établissement</small></span></button><a class="vmn-i" href="/app.html#verifier-certificat"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shield"/></svg></span><span class="vmn-x">Vérifier un certificat<small>Authentifier une distinction</small></span></a><a class="vmn-i" href="/plateforme/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Atelier de Français<small>Composer une épreuve MINESEC</small></span></a><a class="vmn-i" href="/enseignant/"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-doc"/></svg></span><span class="vmn-x">Espace enseignant<small>Guide, grilles, progressions</small></span></a><a class="vmn-i" href="/adopter/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-checkcircle"/></svg></span><span class="vmn-x">Adopter les cahiers<small>Pour une classe, un établissement</small></span></a></div><div class="vmn-col"><p class="vmn-t">Partenaire<small>Diffuser et représenter</small></p><a class="vmn-i" href="/app.html#partenariat"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-users"/></svg></span><span class="vmn-x">Devenir partenaire<small>9 formules, marges revendeur</small></span></a><a class="vmn-i" href="/app.html#nos-partenaires"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-handshake"/></svg></span><span class="vmn-x">Nos partenaires<small>Ceux qui nous accompagnent</small></span></a><a class="vmn-i" href="/campus/"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-university"/></svg></span><span class="vmn-x">VÉRITAS Campus<small>Pour les établissements</small></span></a><a class="vmn-i" href="/constellation.html"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-sparkles"/></svg></span><span class="vmn-x">Constellation VÉRITAS<small>Tout l’écosystème</small></span></a><a class="vmn-i" href="/plan.html#partenaire"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-map"/></svg></span><span class="vmn-x">Espace partenaire<small>Toutes ses pages, réunies</small></span></a></div><div class="vmn-col"><p class="vmn-t">Le centre<small>Nous connaître</small></p><a class="vmn-i" href="/decouvrir/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-building"/></svg></span><span class="vmn-x">Présentation<small>Qui nous sommes</small></span></a><a class="vmn-i" href="/app.html#actualites"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-megaphone"/></svg></span><span class="vmn-x">Actualités<small>Ce qui se passe au centre</small></span></a><a class="vmn-i" href="/app.html#inscription"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-user"/></svg></span><span class="vmn-x">S’inscrire<small>Créer un compte gratuit</small></span></a><a class="vmn-i" href="/plan.html"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Plan du site<small>Tout VÉRITAS, par profil</small></span></a></div></div></div>
+            <div class="vmn vmn-mob"><div class="vmn-col"><p class="vmn-t">Élève<small>Apprendre et réviser</small></p><a class="vmn-i" href="/apprendre/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-graduation"/></svg></span><span class="vmn-x">Apprendre<small>Leçons, quiz, corrigés, annales</small></span></a></div><div class="vmn-col"><p class="vmn-t">Parent<small>Suivre et soutenir</small></p><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="parents"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-home"/></svg></span><span class="vmn-x">Suivi au centre ou à domicile<small>Répétitions, classes virtuelles</small></span></button><a class="vmn-i" href="/app.html#orientation"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Orientation<small>Choisir sa série</small></span></a><a class="vmn-i" href="/app.html#positionnement"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-target"/></svg></span><span class="vmn-x">Tester son niveau<small>Le point avant de commencer</small></span></a><a class="vmn-i" href="/parcours/"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-scale"/></svg></span><span class="vmn-x">Matières et coefficients<small>Poids réels, orientation</small></span></a><a class="vmn-i" href="/app.html#cagnotte"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-gift"/></svg></span><span class="vmn-x">Cagnotte de scolarité<small>Faire financer son année</small></span></a><a class="vmn-i" href="/app.html#trophees"><span class="vmn-p" style="background:#FFF6DA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-trophy"/></svg></span><span class="vmn-x">Trophées VÉRITAS<small>Vote gratuit et unique</small></span></a><a class="vmn-i" href="/app.html#leaderboard-junior"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-award"/></svg></span><span class="vmn-x">Classement junior<small>Le tableau d’honneur</small></span></a></div><div class="vmn-col"><p class="vmn-t">Enseignant<small>Enseigner et publier</small></p><a class="vmn-i" href="/ressources/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Ressources et cours<small>Leçons interactives</small></span></a><a class="vmn-i" href="/manuels.html"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-qr"/></svg></span><span class="vmn-x">Corrigés du cahier papier<small>La page des QR codes</small></span></a><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="boutique"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shop"/></svg></span><span class="vmn-x">Boutique de manuels<small>Cahiers et études d’œuvres</small></span></button><button type="button" class="vmn-i" onclick="VRT.act('pl__aller',this,event)" data-go="tarifs"><span class="vmn-p" style="background:#EAE7F7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-wallet"/></svg></span><span class="vmn-x">Abonnements<small>Élève, enseignant, établissement</small></span></button><a class="vmn-i" href="/app.html#verifier-certificat"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shield"/></svg></span><span class="vmn-x">Vérifier un certificat<small>Authentifier une distinction</small></span></a><a class="vmn-i" href="/plateforme/"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"/></svg></span><span class="vmn-x">Atelier de Français<small>Composer une épreuve MINESEC</small></span></a><a class="vmn-i" href="/enseignant/"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-doc"/></svg></span><span class="vmn-x">Espace enseignant<small>Guide, grilles, progressions</small></span></a><a class="vmn-i" href="/adopter/"><span class="vmn-p" style="background:#E0F5E5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-checkcircle"/></svg></span><span class="vmn-x">Adopter les cahiers<small>Pour une classe, un établissement</small></span></a></div><div class="vmn-col"><p class="vmn-t">Partenaire<small>Diffuser et représenter</small></p><a class="vmn-i" href="/app.html#partenariat"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-users"/></svg></span><span class="vmn-x">Devenir partenaire<small>9 formules, marges revendeur</small></span></a><a class="vmn-i" href="/app.html#nos-partenaires"><span class="vmn-p" style="background:#DDF2F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-handshake"/></svg></span><span class="vmn-x">Nos partenaires<small>Ceux qui nous accompagnent</small></span></a><a class="vmn-i" href="/campus/"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-university"/></svg></span><span class="vmn-x">VÉRITAS Campus<small>Pour les établissements</small></span></a><a class="vmn-i" href="/constellation.html"><span class="vmn-p" style="background:#FBE4EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B03A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-sparkles"/></svg></span><span class="vmn-x">Constellation VÉRITAS<small>Tout l’écosystème</small></span></a><a class="vmn-i" href="/plan.html#partenaire"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-map"/></svg></span><span class="vmn-x">Espace partenaire<small>Toutes ses pages, réunies</small></span></a></div><div class="vmn-col"><p class="vmn-t">Le centre<small>Nous connaître</small></p><a class="vmn-i" href="/decouvrir/"><span class="vmn-p" style="background:#DBE8FE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-building"/></svg></span><span class="vmn-x">Présentation<small>Qui nous sommes</small></span></a><a class="vmn-i" href="/app.html#actualites"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-megaphone"/></svg></span><span class="vmn-x">Actualités<small>Ce qui se passe au centre</small></span></a><a class="vmn-i" href="/app.html#inscription"><span class="vmn-p" style="background:#FFF3E4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-user"/></svg></span><span class="vmn-x">S’inscrire<small>Créer un compte gratuit</small></span></a><a class="vmn-i" href="/plan.html"><span class="vmn-p" style="background:#E4E9F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C2A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-compass"/></svg></span><span class="vmn-x">Plan du site<small>Tout VÉRITAS, par profil</small></span></a></div></div></div>
         </div>
 
       <div class="vrt-large" style="display:flex;align-items:center;gap:10px;flex-shrink:0;margin-left:auto">
@@ -354,23 +385,14 @@ td:first-child{font-weight:700;color:var(--muted)}
       </div>
     </div>
   </nav>
-  <!-- BANDEAU D'ANNONCE -->
-  <div style="background:linear-gradient(90deg,#0C2A6A,#1E499B 45%,#0E7C86);color:#fff" class="vrt-hab">
-    <div style="max-width:1170px;margin:0 auto;padding:13px 24px;display:flex;align-items:center;justify-content:center;gap:10px 18px;flex-wrap:wrap;text-align:center;font-size:15px">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-sparkles"></use></svg>
-      <span>VÉRITAS accompagne et suit les apprenants <b style="font-weight:600;color:#FFC93C">au centre, en ligne et à domicile</b>. Pour les enseignants : de quoi préparer tous ses cours et ses épreuves.</span>
-      <a href="/corriges/" style="display:inline-flex;align-items:center;gap:6px;padding:6px 18px;border-radius:100px;border:1px solid rgba(255,255,255,.55);color:#fff;font:600 13px Poppins,sans-serif;letter-spacing:.4px;text-transform:uppercase;transition:background .18s,color .18s" class="vh11">Corrigés gratuits</a>
-      <a href="/#boutique" style="display:inline-flex;align-items:center;gap:7px;padding:6px 18px;border-radius:100px;background:#FFC93C;color:#001136;font:600 13px Poppins,sans-serif;letter-spacing:.4px;text-transform:uppercase;transition:background .18s,box-shadow .18s" class="vh12"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-shop"></use></svg>Boutique</a>
-      <a href="/plateforme/" style="display:inline-flex;align-items:center;gap:7px;padding:6px 18px;border-radius:100px;border:1px solid rgba(255,255,255,.55);color:#fff;font:600 13px Poppins,sans-serif;letter-spacing:.4px;text-transform:uppercase;transition:background .18s,color .18s" class="vh11"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/veritas-icons.svg#lc-presentation"></use></svg>Atelier de français</a>
-    </div>
-  </div>
+
 <!--/vrt-habillage:barre-->
 
 
 <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
 
 <div class="main-header">
-  <div class="badge">🇨🇲 Terminale A · Français · Année scolaire 2024–2025</div>
+  <div class="badge">Terminale A · Français · Année scolaire 2024–2025</div>
   <h1><svg class="vi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#lc-book"></use></svg> Cahier de Français<br><em>Stances et Poèmes</em> — Sully Prudhomme</h1>
   <p>Jacques Miterand Takou · Dominique Ambassa · Toutes séquences & semaines</p>
 </div>
@@ -426,7 +448,7 @@ td:first-child{font-weight:700;color:var(--muted)}
 </div>
 
 <div class="sidebar-section">
-  <div class="sidebar-title">⚖️ SEMAINE 5 — ÉPREUVES</div>
+  <div class="sidebar-title">SEMAINE 5 — ÉPREUVES</div>
   <button class="nav-btn" onclick="show('ep1-langue',this)">Épreuve 1 : Langue française</button>
   <button class="nav-btn" onclick="show('ep2-langue',this)">Épreuve 2 : L'Enfant des poubelles</button>
   <button class="nav-btn" onclick="show('ep3-cc',this)">Épreuve 3 : CC « Rencontre »</button>
@@ -470,7 +492,7 @@ td:first-child{font-weight:700;color:var(--muted)}
     <li><strong>6.</strong> À partir de 4 indices, donne le type de ce texte. Précise sa fonction.</li>
   </ul>
 
-  <div class="sec-title vert"><span>✂️</span> II. Contraction de texte</div>
+  <div class="sec-title vert"><span></span> II. Contraction de texte</div>
   <ul class="q-list">
     <li><strong>1.</strong> De quoi parle le texte ?</li>
     <li><strong>2.</strong> Quel est le point de vue de l'auteur ?</li>
@@ -597,7 +619,7 @@ td:first-child{font-weight:700;color:var(--muted)}
         <div id="zm-genie" class="drag-zone" ondragover="allowDrop(event)" ondrop="dropM(event,'zm-genie')"></div></div>
       <div><div class="zone-label" style="color:var(--bleu)"><svg class="vi vi-astuce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#lc-star"></use></svg> Idéal / Âme</div>
         <div id="zm-ideal" class="drag-zone" ondragover="allowDrop(event)" ondrop="dropM(event,'zm-ideal')"></div></div>
-      <div><div class="zone-label" style="color:var(--or)">🌹 Beauté / Amour</div>
+      <div><div class="zone-label" style="color:var(--or)">Beauté / Amour</div>
         <div id="zm-beaute" class="drag-zone" ondragover="allowDrop(event)" ondrop="dropM(event,'zm-beaute')"></div></div>
       <div><div class="zone-label" style="color:var(--vert)"><svg class="vi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#lc-sun"></use></svg> Poésie</div>
         <div id="zm-poesie" class="drag-zone" ondragover="allowDrop(event)" ondrop="dropM(event,'zm-poesie')"></div></div>
@@ -660,7 +682,7 @@ td:first-child{font-weight:700;color:var(--muted)}
   <div class="card or">
     <h3>L'alexandrin et la césure</h3>
     <p>L'<strong>alexandrin</strong> (12 syllabes) se divise en deux <strong>hémistiches</strong> de 6 syllabes séparés par la <strong>césure</strong> (pause obligatoire).<br><br>
-    Exemple : « Je | l'ai | trop | ai | mé | e // pour | ne | point | la | haïr » → 12 syllabes, césure à la 6ᵉ</p>
+    Exemple : « Je | l'ai | trop | ai | mé | e // pour | ne | point | la | haïr » 12 syllabes, césure à la 6ᵉ</p>
     <p style="margin-top:10px"><strong>Enjambement :</strong> le sens déborde sur le vers suivant sans pause syntaxique.<br>
     <strong>Rejet :</strong> un élément court est rejeté au début du vers suivant.<br>
     <strong>Contre-rejet :</strong> un élément est anticipé à la fin du vers précédent.</p>
@@ -670,9 +692,9 @@ td:first-child{font-weight:700;color:var(--muted)}
   <div class="card">
     <h3>Qualité des rimes</h3>
     <ul>
-      <li><strong>Rime pauvre :</strong> 1 son commun (ex. : ami / parti → [i])</li>
-      <li><strong>Rime suffisante :</strong> 2 sons communs (ex. : aimer / rêver → [é]+[r])</li>
-      <li><strong>Rime riche :</strong> 3 sons ou plus (ex. : lumière / poussière → [ièr]+consonnes)</li>
+      <li><strong>Rime pauvre :</strong> 1 son commun (ex. : ami / parti [i])</li>
+      <li><strong>Rime suffisante :</strong> 2 sons communs (ex. : aimer / rêver [é]+[r])</li>
+      <li><strong>Rime riche :</strong> 3 sons ou plus (ex. : lumière / poussière [ièr]+consonnes)</li>
     </ul>
   </div>
   <div class="card violet">
@@ -724,7 +746,7 @@ td:first-child{font-weight:700;color:var(--muted)}
     </div>
   </div>
   <ul class="q-list">
-    <li><strong>1. Mètre :</strong> Compte les syllabes du vers 1 : « Dans le ca-li-ce ou-vert d'u-ne ro-se en-trou-ver-te » → Combien ? Quel est le mètre ?</li>
+    <li><strong>1. Mètre :</strong> Compte les syllabes du vers 1 : « Dans le ca-li-ce ou-vert d'u-ne ro-se en-trou-ver-te » Combien ? Quel est le mètre ?</li>
     <li><strong>2. Rimes :</strong> Identifie les rimes des deux strophes et détermine leur disposition (plates, croisées ou embrassées).</li>
     <li><strong>3. Qualité :</strong> Classe les rimes en pauvres, suffisantes ou riches.</li>
     <li><strong>4. Alternance :</strong> L'alternance masculin/féminin est-elle respectée ?</li>
@@ -837,14 +859,14 @@ td:first-child{font-weight:700;color:var(--muted)}
       <li>La souffrance n'est pas voulue mais assumée (v.5-6)</li>
       <li>Formule centrale v.8 : « La douleur est un bien dont l'art est l'intérêt »</li>
       <li>Métaphore financière : douleur = capital ; art = bénéfice</li>
-      <li>Paradoxe v.10 : « c'est gaiement que j'ai pleuré » → la poésie transcende</li>
+      <li>Paradoxe v.10 : « c'est gaiement que j'ai pleuré » la poésie transcende</li>
     </ul>
   </div>
   <div class="card vert">
     <h3>Axe III — Un art poétique entre romantisme et symbolisme</h3>
     <ul>
       <li>Héritage romantique : le poète souffrant comme figure centrale</li>
-      <li>Dimension symboliste : lyre, deuil, larmes → symboles voilant le réel</li>
+      <li>Dimension symboliste : lyre, deuil, larmes symboles voilant le réel</li>
       <li>Universalité : le poème particulier devient miroir de l'âme humaine (v.14)</li>
     </ul>
   </div>
@@ -858,22 +880,22 @@ td:first-child{font-weight:700;color:var(--muted)}
   </div>
   <div class="plan-box"><div class="plan-header">I. Un poème-confession : le moi lyrique en quête de complicité</div>
     <div class="plan-body">
-      <p><strong>I.1 :</strong> L'affirmation d'une identité poétique personnelle → citations v.1, v.12</p>
-      <p><strong>I.2 :</strong> L'aveu de vulnérabilité comme invitation à l'empathie → citations v.3-4</p>
-      <p><strong>I.3 :</strong> La solidarité universelle dans la souffrance → citation v.14</p>
+      <p><strong>I.1 :</strong> L'affirmation d'une identité poétique personnelle citations v.1, v.12</p>
+      <p><strong>I.2 :</strong> L'aveu de vulnérabilité comme invitation à l'empathie citations v.3-4</p>
+      <p><strong>I.3 :</strong> La solidarité universelle dans la souffrance citation v.14</p>
     </div>
   </div>
   <div class="plan-box"><div class="plan-header">II. L'art comme transformation de la souffrance</div>
     <div class="plan-body">
-      <p><strong>II.1 :</strong> La souffrance, matière involontaire mais précieuse → citation v.5-6</p>
-      <p><strong>II.2 :</strong> Formule centrale : la douleur comme capital artistique → citation + analyse v.8</p>
-      <p><strong>II.3 :</strong> Le paradoxe de la joie dans les larmes → citation v.10-11</p>
+      <p><strong>II.1 :</strong> La souffrance, matière involontaire mais précieuse citation v.5-6</p>
+      <p><strong>II.2 :</strong> Formule centrale : la douleur comme capital artistique citation + analyse v.8</p>
+      <p><strong>II.3 :</strong> Le paradoxe de la joie dans les larmes citation v.10-11</p>
     </div>
   </div>
   <div class="plan-box"><div class="plan-header">III. Un art poétique entre romantisme et symbolisme</div>
     <div class="plan-body">
       <p><strong>III.1 :</strong> L'héritage romantique : le poète souffrant comme figure centrale</p>
-      <p><strong>III.2 :</strong> La dimension symboliste : symboles (lyre, larmes, deuil) → v.9</p>
+      <p><strong>III.2 :</strong> La dimension symboliste : symboles (lyre, larmes, deuil) v.9</p>
       <p><strong>III.3 :</strong> Le liminaire comme seuil annonçant les thèmes du recueil</p>
     </div>
   </div>
@@ -982,23 +1004,23 @@ td:first-child{font-weight:700;color:var(--muted)}
   </div>
   <div class="plan-box"><div class="plan-header">I. La souffrance comme révélation de la sensibilité universelle</div>
     <div class="plan-body">
-      <p><strong>I.1 :</strong> Anaphore « Depuis qu'elle a souffert » (v.1 et v.9) → la souffrance comme seuil transformateur</p>
-      <p><strong>I.2 :</strong> « Elle a mieux entendu » → comparatif de progression, éducation des sens</p>
-      <p><strong>I.3 :</strong> « Deviné la blessure de la rosée » → la fragilité naturelle rejoint la fragilité humaine</p>
+      <p><strong>I.1 :</strong> Anaphore « Depuis qu'elle a souffert » (v.1 et v.9) la souffrance comme seuil transformateur</p>
+      <p><strong>I.2 :</strong> « Elle a mieux entendu » comparatif de progression, éducation des sens</p>
+      <p><strong>I.3 :</strong> « Deviné la blessure de la rosée » la fragilité naturelle rejoint la fragilité humaine</p>
     </div>
   </div>
   <div class="plan-box"><div class="plan-header">II. La nature comme miroir de l'âme — Correspondances symbolistes</div>
     <div class="plan-body">
-      <p><strong>II.1 :</strong> Personnification : « la plainte de sa sœur la brise » → nature fraternelle</p>
-      <p><strong>II.2 :</strong> Antithèse « cri de la mer / silence des bois » → complexité de l'âme</p>
-      <p><strong>II.3 :</strong> Comparaison : « frissons pareils à ses propres émois » → monde intérieur/extérieur unis</p>
+      <p><strong>II.1 :</strong> Personnification : « la plainte de sa sœur la brise » nature fraternelle</p>
+      <p><strong>II.2 :</strong> Antithèse « cri de la mer / silence des bois » complexité de l'âme</p>
+      <p><strong>II.3 :</strong> Comparaison : « frissons pareils à ses propres émois » monde intérieur/extérieur unis</p>
     </div>
   </div>
   <div class="plan-box"><div class="plan-header">III. La renaissance : guérison par l'empathie et réconciliation avec la vie</div>
     <div class="plan-body">
-      <p><strong>III.1 :</strong> « La pitié l'a saisie et ne la quitte plus » → compassion durable</p>
+      <p><strong>III.1 :</strong> « La pitié l'a saisie et ne la quitte plus » compassion durable</p>
       <p><strong>III.2 :</strong> Paradoxe : « Elle entend dans la mort même un appel vers la vie »</p>
-      <p><strong>III.3 :</strong> « La mort lui sourit parce qu'elle est guérie » → réconciliation totale</p>
+      <p><strong>III.3 :</strong> « La mort lui sourit parce qu'elle est guérie » réconciliation totale</p>
     </div>
   </div>
   <div class="plan-box"><div class="plan-header">Conclusion — Ouverture</div>
@@ -1031,7 +1053,7 @@ td:first-child{font-weight:700;color:var(--muted)}
     <li><strong>6.</strong> Identifie les couleurs, puis analyse et interprète-les selon le contexte.</li>
   </ul>
 
-  <div class="sec-title vert"><span>🧐</span> Hypothèses de lecture</div>
+  <div class="sec-title vert"><span></span> Hypothèses de lecture</div>
   <div class="card">
     <h3>À partir de tes réponses, formule quatre hypothèses :</h3>
     <ul>
@@ -1045,10 +1067,10 @@ td:first-child{font-weight:700;color:var(--muted)}
   <div class="retenir-box">
     <h4><svg class="vi vi-ia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#lc-brain"></use></svg> Je retiens</h4>
     <ul>
-      <li>🌺 Sully Prudhomme (1839–1907) — poète français, Prix Nobel de Littérature 1901</li>
-      <li>🌺 <strong>Stance</strong> : poème court, généralement de 4 à 8 vers, exprimant une idée ou un sentiment</li>
-      <li>🌺 <strong>Poème</strong> : texte écrit en vers ou en prose exprimant la beauté et les sentiments personnels</li>
-      <li>🌺 La couverture épurée (noir sur blanc, homme nu labourant) laisse augurer une écriture mélancolique et sobre</li>
+      <li>Sully Prudhomme (1839–1907) — poète français, Prix Nobel de Littérature 1901</li>
+      <li><strong>Stance</strong> : poème court, généralement de 4 à 8 vers, exprimant une idée ou un sentiment</li>
+      <li><strong>Poème</strong> : texte écrit en vers ou en prose exprimant la beauté et les sentiments personnels</li>
+      <li>La couverture épurée (noir sur blanc, homme nu labourant) laisse augurer une écriture mélancolique et sobre</li>
     </ul>
   </div>
 
@@ -1080,11 +1102,11 @@ td:first-child{font-weight:700;color:var(--muted)}
   <div class="card">
     <h3><svg class="vi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#lc-mappin"></use></svg> Corpus du groupement</h3>
     <ul>
-      <li>🌺 <strong>Texte 1 :</strong> Sully Prudhomme, « Rosées » (<em>Stances et Poèmes</em>)</li>
-      <li>🌺 <strong>Texte 2 :</strong> Charles Baudelaire, « L'Homme et la mer » (<em>Les Fleurs du mal</em>)</li>
-      <li>🌺 <strong>Texte 3 :</strong> Arthur Rimbaud, « Le Dormeur du Val » (<em>Poésies</em>)</li>
-      <li>🌺 <strong>Texte 4 :</strong> Victor Hugo, « Tristesse d'Olympio » (<em>Les Rayons et les Ombres</em>)</li>
-      <li>🌺 <strong>Texte 5 :</strong> Leconte de Lisle, « Midi » (<em>Poèmes antiques</em>)</li>
+      <li><strong>Texte 1 :</strong> Sully Prudhomme, « Rosées » (<em>Stances et Poèmes</em>)</li>
+      <li><strong>Texte 2 :</strong> Charles Baudelaire, « L'Homme et la mer » (<em>Les Fleurs du mal</em>)</li>
+      <li><strong>Texte 3 :</strong> Arthur Rimbaud, « Le Dormeur du Val » (<em>Poésies</em>)</li>
+      <li><strong>Texte 4 :</strong> Victor Hugo, « Tristesse d'Olympio » (<em>Les Rayons et les Ombres</em>)</li>
+      <li><strong>Texte 5 :</strong> Leconte de Lisle, « Midi » (<em>Poèmes antiques</em>)</li>
     </ul>
   </div>
 
@@ -1125,7 +1147,7 @@ td:first-child{font-weight:700;color:var(--muted)}
 <div class="lesson-section" id="s2-image">
   <div class="lesson-header teal">
     <div class="lesson-tag">Semaine 1 · CB2 — Outils de la langue</div>
-    <h2>🖼️ Analyse d'image</h2>
+    <h2>Analyse d'image</h2>
     <p>Nature, composantes et messages de l'image</p>
   </div>
 
@@ -1232,7 +1254,7 @@ td:first-child{font-weight:700;color:var(--muted)}
 <div class="lesson-section" id="s2-metrique2">
   <div class="lesson-header violet">
     <div class="lesson-tag">Semaine 1 · CB2 — Outils de la langue</div>
-    <h2>🦉 Éléments de métrique — Le Hibou</h2>
+    <h2>Éléments de métrique — Le Hibou</h2>
     <p>Vers · Rimes · Strophes — Réné Philombe</p>
   </div>
 
@@ -1360,16 +1382,16 @@ td:first-child{font-weight:700;color:var(--muted)}
   <div class="retenir-box">
     <h4><svg class="vi vi-ia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#lc-brain"></use></svg> Je retiens</h4>
     <ul>
-      <li>🌺 <strong>Le fond :</strong> contenu informatif et thématique du texte — l'ensemble des idées développées</li>
-      <li>🌺 <strong>La forme :</strong> ensemble d'outils linguistiques et procédés d'écriture (temps verbaux, ponctuation, focalisation, structures de phrases, figures de style…)</li>
-      <li>🌺 La consigne peut fournir : l'idée générale du texte / les deux centres d'intérêt / un seul CI (et le candidat doit trouver l'autre)</li>
+      <li><strong>Le fond :</strong> contenu informatif et thématique du texte — l'ensemble des idées développées</li>
+      <li><strong>La forme :</strong> ensemble d'outils linguistiques et procédés d'écriture (temps verbaux, ponctuation, focalisation, structures de phrases, figures de style…)</li>
+      <li>La consigne peut fournir : l'idée générale du texte / les deux centres d'intérêt / un seul CI (et le candidat doit trouver l'autre)</li>
     </ul>
   </div>
 
   <div class="bac-box">
     <div class="bac-label"><svg class="vi vi-ia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#lc-award"></use></svg> VERS LE BAC — Analyse de consignes</div>
     <ol>
-      <li style="margin-bottom:14px"><strong>(BAC A 2024)</strong> : « Vous ferez de ce texte un commentaire composé sans dissocier le fond de la forme. À l'aide des champs lexicaux, des types de phrase, des temps verbaux, des figures de style, etc., vous pourrez montrer comment la conception intéressée du mariage chez Diddi brise les rêves de sa fille Ramla. »<br>→ Identifie les parties de la consigne et analyse-les.</li>
+      <li style="margin-bottom:14px"><strong>(BAC A 2024)</strong> : « Vous ferez de ce texte un commentaire composé sans dissocier le fond de la forme. À l'aide des champs lexicaux, des types de phrase, des temps verbaux, des figures de style, etc., vous pourrez montrer comment la conception intéressée du mariage chez Diddi brise les rêves de sa fille Ramla. »<br>Identifie les parties de la consigne et analyse-les.</li>
       <li><strong>(BAC A 2025)</strong> : « Sans dissocier le fond de la forme, vous ferez de ce texte un commentaire composé. En faisant attention aux didascalies, aux types de phrase, aux répliques des personnages, aux champs lexicaux, aux figures de style, etc., vous pourrez montrer comment l'incitation du peuple à la révolte par Dualla Manga débouche sur son sentiment de satisfaction de la mission accomplie. »</li>
     </ol>
   </div>
@@ -1438,15 +1460,15 @@ td:first-child{font-weight:700;color:var(--muted)}
   </div>
   <div class="plan-box"><div class="plan-header">Axe 1 : La formation de la rosée (strophes 1 et 2)</div>
     <div class="plan-body">
-      <p><strong>Idée 1 :</strong> La rosée, phénomène nocturne et silencieux → « perle sans bruit », « main fraîche de la nuit »</p>
-      <p><strong>Idée 2 :</strong> Origine mystérieuse de la rosée → « D'où viennent ces tremblantes gouttes ? » — question rhétorique</p>
-      <p><strong>Interprétation :</strong> La rosée préexiste dans l'air → elle n'est pas créée mais révélée</p>
+      <p><strong>Idée 1 :</strong> La rosée, phénomène nocturne et silencieux « perle sans bruit », « main fraîche de la nuit »</p>
+      <p><strong>Idée 2 :</strong> Origine mystérieuse de la rosée « D'où viennent ces tremblantes gouttes ? » — question rhétorique</p>
+      <p><strong>Interprétation :</strong> La rosée préexiste dans l'air elle n'est pas créée mais révélée</p>
     </div>
   </div>
   <div class="plan-box"><div class="plan-header">Axe 2 : Source / Origine des pleurs et des peines (strophes 3 et 4)</div>
     <div class="plan-body">
-      <p><strong>Idée 1 :</strong> Parallèle entre rosée et larmes → « D'où viennent mes pleurs ? » — même structure interrogative</p>
-      <p><strong>Idée 2 :</strong> Les larmes préexistent dans l'âme → « je les avais dans l'âme / Avant de les sentir aux yeux »</p>
+      <p><strong>Idée 1 :</strong> Parallèle entre rosée et larmes « D'où viennent mes pleurs ? » — même structure interrogative</p>
+      <p><strong>Idée 2 :</strong> Les larmes préexistent dans l'âme « je les avais dans l'âme / Avant de les sentir aux yeux »</p>
       <p><strong>Interprétation :</strong> La douleur est constitutive de l'âme humaine — elle cherche à s'extérioriser</p>
     </div>
   </div>
@@ -1461,7 +1483,7 @@ td:first-child{font-weight:700;color:var(--muted)}
 <div class="lesson-section" id="s3-homme-mer">
   <div class="lesson-header bleu">
     <div class="lesson-tag">Semaine 2 · CB1 — Groupement de textes</div>
-    <h2>🌊 GT : « L'Homme et la mer » — Baudelaire</h2>
+    <h2>GT : « L'Homme et la mer » — Baudelaire</h2>
     <p>Les ressemblances entre la mer et l'homme</p>
   </div>
 
@@ -1562,11 +1584,11 @@ td:first-child{font-weight:700;color:var(--muted)}
   <div class="retenir-box">
     <h4><svg class="vi vi-ia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#lc-brain"></use></svg> Je retiens</h4>
     <ul>
-      <li>🌺 Les <strong>substituts du référent</strong> sont des mots et expressions qui permettent de le remplacer</li>
-      <li>🌺 La référence peut être <strong>anaphorique</strong> (les substituts suivent le référent) ou <strong>cataphorique</strong> (le référent suit les substituts)</li>
-      <li>🌺 <strong>Substituts grammaticaux :</strong> pronoms (il, elle, lui, le, la, leur, qui, lequel…) et déterminants (adj. possessifs, démonstratifs, articles)</li>
-      <li>🌺 <strong>Substituts lexicaux :</strong> nom, adjectif, expansion du nom, périphrase, synecdoque, métaphore</li>
-      <li>🌺 Les substituts lexicaux, par leur dimension méliorative ou péjorative, sont plus riches pour l'interprétation</li>
+      <li>Les <strong>substituts du référent</strong> sont des mots et expressions qui permettent de le remplacer</li>
+      <li>La référence peut être <strong>anaphorique</strong> (les substituts suivent le référent) ou <strong>cataphorique</strong> (le référent suit les substituts)</li>
+      <li><strong>Substituts grammaticaux :</strong> pronoms (il, elle, lui, le, la, leur, qui, lequel…) et déterminants (adj. possessifs, démonstratifs, articles)</li>
+      <li><strong>Substituts lexicaux :</strong> nom, adjectif, expansion du nom, périphrase, synecdoque, métaphore</li>
+      <li>Les substituts lexicaux, par leur dimension méliorative ou péjorative, sont plus riches pour l'interprétation</li>
     </ul>
   </div>
 
@@ -1611,12 +1633,12 @@ td:first-child{font-weight:700;color:var(--muted)}
   <div class="retenir-box">
     <h4><svg class="vi vi-ia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#lc-brain"></use></svg> Je retiens — Types de phrasèmes</h4>
     <ul>
-      <li>🌺 <strong>Collocation :</strong> deux éléments liés (base + collocatif) — ex. « bouffée d'oxygène »</li>
-      <li>🌺 <strong>Locution :</strong> groupe de mots figés ayant une valeur grammaticale</li>
-      <li>🌺 <strong>Parémie :</strong> énoncé stable et bref, généralement didactique</li>
-      <li>🌺 <strong>Slogan :</strong> formule employée dans les campagnes de propagande</li>
-      <li>🌺 <strong>Calque linguistique / emprunt :</strong> traduction mot à mot (recto verso, manu militaris)</li>
-      <li>🌺 <strong>Dicton, proverbe, maxime :</strong> propos sentencieux venant du peuple</li>
+      <li><strong>Collocation :</strong> deux éléments liés (base + collocatif) — ex. « bouffée d'oxygène »</li>
+      <li><strong>Locution :</strong> groupe de mots figés ayant une valeur grammaticale</li>
+      <li><strong>Parémie :</strong> énoncé stable et bref, généralement didactique</li>
+      <li><strong>Slogan :</strong> formule employée dans les campagnes de propagande</li>
+      <li><strong>Calque linguistique / emprunt :</strong> traduction mot à mot (recto verso, manu militaris)</li>
+      <li><strong>Dicton, proverbe, maxime :</strong> propos sentencieux venant du peuple</li>
     </ul>
   </div>
 
@@ -1654,7 +1676,7 @@ td:first-child{font-weight:700;color:var(--muted)}
   <div class="card bleu">
     <h3>Axe 1 : Un amant délaissé mais encore attaché à l'aimée</h3>
     <ul>
-      <li><strong>Énonciation :</strong> usage du « je » et du conditionnel « Si je pouvais » → impuissance et distance</li>
+      <li><strong>Énonciation :</strong> usage du « je » et du conditionnel « Si je pouvais » impuissance et distance</li>
       <li><strong>Vocabulaire de la tristesse :</strong> « ingrate », « chagrin », « pâle, délicate »</li>
       <li><strong>Champ lexical de la douleur :</strong> « triste et lente à sourire », « main repousse »</li>
     </ul>
@@ -1664,7 +1686,7 @@ td:first-child{font-weight:700;color:var(--muted)}
     <ul>
       <li><strong>Impératifs bienveillants :</strong> « Ayez soin d'elle », « Ne la faites jamais pleurer », « Donnez-lui »</li>
       <li><strong>Métaphores :</strong> Symbolisme des fleurs (« bluets plutôt que des roses »)</li>
-      <li><strong>Ponctuation :</strong> usage des guillemets → discours rapporté, détachement</li>
+      <li><strong>Ponctuation :</strong> usage des guillemets discours rapporté, détachement</li>
     </ul>
   </div>
 
@@ -1765,10 +1787,10 @@ td:first-child{font-weight:700;color:var(--muted)}
   <div class="retenir-box">
     <h4><svg class="vi vi-ia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#lc-brain"></use></svg> Je retiens</h4>
     <ul>
-      <li>🌺 Le <strong>contenu manifeste</strong> est l'information claire, le posé (ce qui est dit explicitement)</li>
-      <li>🌺 Le <strong>contenu latent / implicite</strong> désigne les sens cachés dans un énoncé. On distingue :</li>
-      <li>🌺 <strong>Présupposé :</strong> situation antérieure à un énoncé, cachée dans l'énoncé (à travers : négation, adverbes, imparfait, verbes d'état, préfixes, antonymes, intonation) — ex. « Ne plus, avant, aujourd'hui »</li>
-      <li>🌺 <strong>Sous-entendu :</strong> ce qu'implique un énoncé selon le contexte — plusieurs sous-entendus possibles (culturels, religieux, historiques…)</li>
+      <li>Le <strong>contenu manifeste</strong> est l'information claire, le posé (ce qui est dit explicitement)</li>
+      <li>Le <strong>contenu latent / implicite</strong> désigne les sens cachés dans un énoncé. On distingue :</li>
+      <li><strong>Présupposé :</strong> situation antérieure à un énoncé, cachée dans l'énoncé (à travers : négation, adverbes, imparfait, verbes d'état, préfixes, antonymes, intonation) — ex. « Ne plus, avant, aujourd'hui »</li>
+      <li><strong>Sous-entendu :</strong> ce qu'implique un énoncé selon le contexte — plusieurs sous-entendus possibles (culturels, religieux, historiques…)</li>
     </ul>
   </div>
   <div class="bac-box">
@@ -1825,10 +1847,10 @@ td:first-child{font-weight:700;color:var(--muted)}
   <div class="retenir-box">
     <h4><svg class="vi vi-ia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#lc-brain"></use></svg> Je retiens</h4>
     <ul>
-      <li>🌺 <strong>Le rythme :</strong> créé par le nombre de syllabes (souvent alexandrin = 12) et la césure</li>
-      <li>🌺 <strong>L'allitération :</strong> répétition d'un son <em>consonantique</em> — effet d'harmonie imitative ou d'insistance</li>
-      <li>🌺 <strong>L'assonance :</strong> répétition d'un son <em>vocalique</em> — échos sonores et musicalité</li>
-      <li>🌺 Ces procédés renforcent le sens du poème et participent à son pouvoir évocateur</li>
+      <li><strong>Le rythme :</strong> créé par le nombre de syllabes (souvent alexandrin = 12) et la césure</li>
+      <li><strong>L'allitération :</strong> répétition d'un son <em>consonantique</em> — effet d'harmonie imitative ou d'insistance</li>
+      <li><strong>L'assonance :</strong> répétition d'un son <em>vocalique</em> — échos sonores et musicalité</li>
+      <li>Ces procédés renforcent le sens du poème et participent à son pouvoir évocateur</li>
     </ul>
   </div>
   <div class="ex-box">
@@ -1911,11 +1933,11 @@ td:first-child{font-weight:700;color:var(--muted)}
   <div class="plan-box"><div class="plan-header">Centre d'Intérêt I : La Douleur et le Renoncement de l'Amant</div>
     <div class="plan-body">
       <p><strong>Sous-Centre 1.1 — L'Amant Résigné mais Dévoué</strong></p>
-      <p>Outil 1 : La négation « ne m'inspire plus rien » → rupture consommée<br>
-      Outil 2 : Adverbe de condition « Si je pouvais » → impuissance, distance</p>
+      <p>Outil 1 : La négation « ne m'inspire plus rien » rupture consommée<br>
+      Outil 2 : Adverbe de condition « Si je pouvais » impuissance, distance</p>
       <p style="margin-top:8px"><strong>Sous-Centre 1.2 — L'Expression de l'Amertume</strong></p>
-      <p>Outil 1 : Champ lexical de la douleur → « ingrate », « chagrin »<br>
-      Outil 2 : Tonalité lyrique → « pâle, délicate » (v.5), « triste et lente à sourire » (v.16)</p>
+      <p>Outil 1 : Champ lexical de la douleur « ingrate », « chagrin »<br>
+      Outil 2 : Tonalité lyrique « pâle, délicate » (v.5), « triste et lente à sourire » (v.16)</p>
     </div>
   </div>
   <div class="plan-box"><div class="plan-header">Centre d'Intérêt II : Le Portrait de l'Aimée et la Sollicitude du Poète</div>
@@ -1924,8 +1946,8 @@ td:first-child{font-weight:700;color:var(--muted)}
       <p>Outil 1 : Adjectifs qualifiants « pâle, délicate, triste, lente à sourire »<br>
       Outil 2 : Contraste entre « repousse » et « douce »</p>
       <p style="margin-top:8px"><strong>Sous-Centre 2.2 — Le Désir de Bonheur pour l'Autre</strong></p>
-      <p>Outil 1 : Impératifs bienveillants → « Ayez soin », « Ne la faites jamais pleurer », « Donnez-lui »<br>
-      Outil 2 : Symbolisme des fleurs → « Des bluets plutôt que des roses » (v.18)</p>
+      <p>Outil 1 : Impératifs bienveillants « Ayez soin », « Ne la faites jamais pleurer », « Donnez-lui »<br>
+      Outil 2 : Symbolisme des fleurs « Des bluets plutôt que des roses » (v.18)</p>
     </div>
   </div>
   <div class="retenir-box">
@@ -1936,7 +1958,7 @@ td:first-child{font-weight:700;color:var(--muted)}
     <div class="bac-label"><svg class="vi vi-ia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#lc-award"></use></svg> VERS LE BAC — Marizibill (Apollinaire)</div>
     <p style="margin-bottom:10px">Consigne : Sans dissocier le fond de la forme, vous ferez de ce texte un commentaire composé. Vous pourrez, si vous le voulez, en vous aidant des indicateurs spatio-temporels, des champs lexicaux et des figures de style, montrer comment le poète dévoile la prostitution et le proxénétisme. (BAC ABI 2016)</p>
     <p style="font-style:italic">Dans la Haute-Rue à Cologne / Elle allait et venait le soir / Offerte à tous en tout mignonne / Puis buvait lasse des trottoirs / Très tard dans les brasseries borgnes…</p>
-    <p style="margin-top:10px">→ Analyse la consigne et élabore le plan détaillé.</p>
+    <p style="margin-top:10px">Analyse la consigne et élabore le plan détaillé.</p>
   </div>
 </div>
 
@@ -1983,7 +2005,7 @@ td:first-child{font-weight:700;color:var(--muted)}
     <li><strong>1.</strong> Construis à partir du texte les champs lexicaux de la nature et de l'insensibilité/indifférence. Que traduit leur emploi commun ?</li>
     <li><strong>2.</strong> De quelles connotations sont chargés les mots « Lorsque nous dormirons » / « De nous savoir couchés » ? Quelles intentions de communication ?</li>
   </ul>
-  <div class="sec-title bleu"><span>🎭</span> Rhétorique</div>
+  <div class="sec-title bleu"><span></span> Rhétorique</div>
   <ul class="q-list">
     <li><strong>1.</strong> À partir de 4 indices précis, détermine le type de ce texte. Donne son type ou forme et sa fonction.</li>
     <li><strong>2.</strong> Étudie la rime (type, disposition, richesse) puis relève l'allitération dominante dans la 1ère strophe. Quelle fonction du langage ces procédés mettent-ils en évidence ?</li>
@@ -2143,21 +2165,21 @@ td:first-child{font-weight:700;color:var(--muted)}
   <div class="plan-box"><div class="plan-header">Axe I : La nostalgie de la jeunesse</div>
     <div class="plan-body">
       <p><strong>SCI 1.1 — La beauté de la jeunesse</strong><br>
-      Figure de style : la comparaison (« Votre tête est de marbre pur ») → idéalisation de la beauté<br>
-      Lexique mélioratif : « pur », « azur », « blancheur » → association beauté/idéal grec</p>
+      Figure de style : la comparaison (« Votre tête est de marbre pur ») idéalisation de la beauté<br>
+      Lexique mélioratif : « pur », « azur », « blancheur » association beauté/idéal grec</p>
       <p style="margin-top:8px"><strong>SCI 1.2 — Les émotions liées à la jeunesse</strong><br>
-      L'espérance et la tristesse (v.6) → dualité constitutive de la jeunesse<br>
-      L'anaphore « Vous ressemblez à ma jeunesse » (× 4) → insistance nostalgique, refrain obsessionnel</p>
+      L'espérance et la tristesse (v.6) dualité constitutive de la jeunesse<br>
+      L'anaphore « Vous ressemblez à ma jeunesse » (× 4) insistance nostalgique, refrain obsessionnel</p>
     </div>
   </div>
   <div class="plan-box"><div class="plan-header">Axe II : L'amour non réciproque</div>
     <div class="plan-body">
       <p><strong>SCI 2.1 — La tendresse non partagée</strong><br>
-      Hyperbole : « Je vous aime » → aveu direct, sans détour<br>
-      Métaphore : « l'amour qui m'oppresse » → poids de l'amour non rendu</p>
+      Hyperbole : « Je vous aime » aveu direct, sans détour<br>
+      Métaphore : « l'amour qui m'oppresse » poids de l'amour non rendu</p>
       <p style="margin-top:8px"><strong>SCI 2.2 — La distance émotionnelle</strong><br>
-      La négation et la ponctuation : « Mais vous passez votre chemin... » → rejet, indifférence<br>
-      Structure de phrase : les points de suspension → mélancolie, résignation</p>
+      La négation et la ponctuation : « Mais vous passez votre chemin... » rejet, indifférence<br>
+      Structure de phrase : les points de suspension mélancolie, résignation</p>
     </div>
   </div>
   <div class="plan-box"><div class="plan-header">Intérêts du texte</div>
@@ -2176,7 +2198,7 @@ td:first-child{font-weight:700;color:var(--muted)}
 <div class="lesson-section" id="s5-ressem3">
   <div class="lesson-header teal">
     <div class="lesson-tag">Semaine 4 · 3ᵉ Séance — Évaluation</div>
-    <h2>⚖️ Confrontation et auto-évaluation — « Ressemblance »</h2>
+    <h2>Confrontation et auto-évaluation — « Ressemblance »</h2>
     <p>Grille d'observation et meilleure production</p>
   </div>
   <div class="obj-box">
@@ -2202,14 +2224,14 @@ td:first-child{font-weight:700;color:var(--muted)}
     <p><strong>IG :</strong> La nostalgie de la jeunesse qui débouche sur un amour non réciproque</p>
     <br>
     <p><strong>Axe 1 : La nostalgie de la jeunesse</strong><br>
-    SCI1 : La beauté de la jeunesse → figures de style (comparaison, métaphore) + lexique mélioratif<br>
-    SCI2 : Les émotions liées à la jeunesse → espérance et tristesse, anaphore obsessionnelle</p>
+    SCI1 : La beauté de la jeunesse figures de style (comparaison, métaphore) + lexique mélioratif<br>
+    SCI2 : Les émotions liées à la jeunesse espérance et tristesse, anaphore obsessionnelle</p>
     <br>
     <p><strong>Transition :</strong> Mais cette célébration nostalgique cache une blessure profonde…</p>
     <br>
     <p><strong>Axe 2 : L'amour non réciproque</strong><br>
-    SCI : La tendresse non partagée → aveu direct, hyperbole<br>
-    SCI : La distance émotionnelle → négation, ponctuation, résignation</p>
+    SCI : La tendresse non partagée aveu direct, hyperbole<br>
+    SCI : La distance émotionnelle négation, ponctuation, résignation</p>
     <br>
     <p><strong>Intérêts :</strong> psychologique (portrait de l'amour mélancolique) + stylistique (maîtrise de la versification)</p>
   </div>
@@ -2220,7 +2242,7 @@ td:first-child{font-weight:700;color:var(--muted)}
 ══════════════════════════════════ -->
 <div class="lesson-section" id="ep1-langue">
   <div class="epreuve-header">
-    <div class="ep-label">⚖️ Semaine 5 · Épreuve 1</div>
+    <div class="ep-label">Semaine 5 · Épreuve 1</div>
     <h3>Langue française — Sully Prudhomme, Stances et Poèmes, 1865</h3>
   </div>
   <div class="corpus-box">
@@ -2263,7 +2285,7 @@ td:first-child{font-weight:700;color:var(--muted)}
     <li><strong>2a.</strong> Relève un élément de phraséologie dans la 4ᵉ strophe et donne sa signification.</li>
     <li><strong>2b.</strong> Que traduit son emploi sur l'état d'esprit du poète ?</li>
   </ul>
-  <div class="sec-title marine"><span>🎭</span> IV. Rhétorique</div>
+  <div class="sec-title marine"><span></span> IV. Rhétorique</div>
   <ul class="q-list">
     <li><strong>1a.</strong> Étudie la rime de tous les points de vue (nature, disposition, qualité).</li>
     <li><strong>1b.</strong> Déduis à quelle forme classique ce poème s'apparente avec au moins deux indices.</li>
@@ -2277,7 +2299,7 @@ td:first-child{font-weight:700;color:var(--muted)}
 <!-- ══ ÉPREUVE 2 ══ -->
 <div class="lesson-section" id="ep2-langue">
   <div class="epreuve-header">
-    <div class="ep-label">⚖️ Semaine 5 · Épreuve 2</div>
+    <div class="ep-label">Semaine 5 · Épreuve 2</div>
     <h3>Langue française — « L'Enfant des poubelles » — René Philombe</h3>
   </div>
   <div class="corpus-box">
@@ -2319,7 +2341,7 @@ td:first-child{font-weight:700;color:var(--muted)}
     <li><strong>3a.</strong> Quels sont les contenus latents du vers « Bientôt, il eut les mains chargées par le destin ! » ?</li>
     <li><strong>3b.</strong> Quel effet de sens se dégage de ces implicites ?</li>
   </ul>
-  <div class="sec-title marine"><span>🎭</span> IV. Stylistique / Rhétorique</div>
+  <div class="sec-title marine"><span></span> IV. Stylistique / Rhétorique</div>
   <ul class="q-list">
     <li><strong>1a.</strong> À quelle figure de style appartient « il arborait un deuil solennel » ? Que met-elle en évidence ?</li>
     <li><strong>2a.</strong> Détermine avec au moins deux indices la tonalité dominante dans les trois premières strophes.</li>
@@ -2330,7 +2352,7 @@ td:first-child{font-weight:700;color:var(--muted)}
 <!-- ══ ÉPREUVE 3 ══ -->
 <div class="lesson-section" id="ep3-cc">
   <div class="epreuve-header">
-    <div class="ep-label">⚖️ Semaine 5 · Épreuve 3</div>
+    <div class="ep-label">Semaine 5 · Épreuve 3</div>
     <h3>Commentaire composé — « Rencontre » — Sully Prudhomme</h3>
   </div>
   <div class="corpus-box">
@@ -2360,14 +2382,14 @@ td:first-child{font-weight:700;color:var(--muted)}
   </div>
   <div class="plan-box"><div class="plan-header">Axe I : La condition parallèle de deux exclus de la société</div>
     <div class="plan-body">
-      <p><strong>SCI 1.1 :</strong> La prostituée : rejet social mais dignité maintenue → « immuable rire », « plus fort que l'affront »</p>
-      <p><strong>SCI 1.2 :</strong> Le poète : exclusion affective, mendiant de regards → « l'âme d'amour dénuée », « Mendier des regards »</p>
+      <p><strong>SCI 1.1 :</strong> La prostituée : rejet social mais dignité maintenue « immuable rire », « plus fort que l'affront »</p>
+      <p><strong>SCI 1.2 :</strong> Le poète : exclusion affective, mendiant de regards « l'âme d'amour dénuée », « Mendier des regards »</p>
     </div>
   </div>
   <div class="plan-box"><div class="plan-header">Axe II : La fraternité dans le désespoir — deux solitudes face au monde</div>
     <div class="plan-body">
-      <p><strong>SCI 2.1 :</strong> La symétrie structurelle → questions rhétoriques parallèles (v.11-12), adverbe « Également »</p>
-      <p><strong>SCI 2.2 :</strong> La conclusion nihiliste → « glacial délire / Du Désespoir pâmé sur la Faim » — personnifications</p>
+      <p><strong>SCI 2.1 :</strong> La symétrie structurelle questions rhétoriques parallèles (v.11-12), adverbe « Également »</p>
+      <p><strong>SCI 2.2 :</strong> La conclusion nihiliste « glacial délire / Du Désespoir pâmé sur la Faim » — personnifications</p>
     </div>
   </div>
 </div>
@@ -2375,7 +2397,7 @@ td:first-child{font-weight:700;color:var(--muted)}
 <!-- ══ ÉPREUVE 4 ══ -->
 <div class="lesson-section" id="ep4-cc">
   <div class="epreuve-header">
-    <div class="ep-label">⚖️ Semaine 5 · Épreuve 4</div>
+    <div class="ep-label">Semaine 5 · Épreuve 4</div>
     <h3>Commentaire composé — « La Poésie (1-4) » — Sully Prudhomme</h3>
   </div>
   <div class="corpus-box">
@@ -2412,14 +2434,14 @@ td:first-child{font-weight:700;color:var(--muted)}
   <div class="sec-title or"><span><svg class="vi vi-astuce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#lc-bulb"></use></svg></span> Proposition de plan</div>
   <div class="plan-box"><div class="plan-header">Axe I : Les vaines querelles religieuses — critique de la foi aveugle</div>
     <div class="plan-body">
-      <p><strong>SCI 1.1 :</strong> L'inutilité des débats religieux → « où nous en sommes : Hélas, toujours au même point »</p>
-      <p><strong>SCI 1.2 :</strong> Critique du discours vide → « les mots ressemblent aux vases, les plus beaux sont les moins remplis »</p>
+      <p><strong>SCI 1.1 :</strong> L'inutilité des débats religieux « où nous en sommes : Hélas, toujours au même point »</p>
+      <p><strong>SCI 1.2 :</strong> Critique du discours vide « les mots ressemblent aux vases, les plus beaux sont les moins remplis »</p>
     </div>
   </div>
   <div class="plan-box"><div class="plan-header">Axe II : La clarté scientifique comme seule certitude</div>
     <div class="plan-body">
-      <p><strong>SCI 2.1 :</strong> La science comme refuge → « J'ouvre un Euclide avec amour », opposition émotionnelle/rationnelle</p>
-      <p><strong>SCI 2.2 :</strong> L'extase de la certitude → « inondé de jour », « certitude / Mon seul vrai bonheur » — vocabulaire de la lumière</p>
+      <p><strong>SCI 2.1 :</strong> La science comme refuge « J'ouvre un Euclide avec amour », opposition émotionnelle/rationnelle</p>
+      <p><strong>SCI 2.2 :</strong> L'extase de la certitude « inondé de jour », « certitude / Mon seul vrai bonheur » — vocabulaire de la lumière</p>
     </div>
   </div>
 </div>
@@ -2427,7 +2449,7 @@ td:first-child{font-weight:700;color:var(--muted)}
 <!-- ══ ÉPREUVE 5 ══ -->
 <div class="lesson-section" id="ep5-controle">
   <div class="epreuve-header">
-    <div class="ep-label">⚖️ Semaine 5 · Épreuve 5</div>
+    <div class="ep-label">Semaine 5 · Épreuve 5</div>
     <h3>Contrôle de lecture — Stances et Poèmes</h3>
   </div>
   <div class="obj-box">
@@ -2442,18 +2464,18 @@ td:first-child{font-weight:700;color:var(--muted)}
     <li><strong>4.</strong> Combien de sections compte le livre ? Combien de poèmes pour chaque section ?</li>
     <li><strong>5.</strong> Réponds par Vrai ou Faux et justifie :
       <ul>
-        <li>Prudhomme utilise la poésie moderne. → ……</li>
-        <li>La première section compte plus de poèmes. → ……</li>
-        <li>« Le meilleur moment des amours » se trouve dans la dernière section. → ……</li>
-        <li>« Un songe » évoque une discussion du poète avec sa mère. → ……</li>
-        <li>Il existe quatre poèmes intitulés « sonnet » dans le livre. → ……</li>
-        <li>« Je me croyais poète » est le dernier poème du recueil. → ……</li>
-        <li>Le premier poème du livre est « Le vase brisé ». → ……</li>
-        <li>Les poèmes sont écrits dans une seule forme classique. → ……</li>
+        <li>Prudhomme utilise la poésie moderne. ……</li>
+        <li>La première section compte plus de poèmes. ……</li>
+        <li>« Le meilleur moment des amours » se trouve dans la dernière section. ……</li>
+        <li>« Un songe » évoque une discussion du poète avec sa mère. ……</li>
+        <li>Il existe quatre poèmes intitulés « sonnet » dans le livre. ……</li>
+        <li>« Je me croyais poète » est le dernier poème du recueil. ……</li>
+        <li>Le premier poème du livre est « Le vase brisé ». ……</li>
+        <li>Les poèmes sont écrits dans une seule forme classique. ……</li>
       </ul>
     </li>
   </ul>
-  <div class="sec-title marine"><span>🎨</span> II. Analyse thématique</div>
+  <div class="sec-title marine"><span></span> II. Analyse thématique</div>
   <ul class="q-list">
     <li><strong>1.</strong> Propose quatre poèmes à caractère lyrique.</li>
     <li><strong>2.</strong> Donne deux poèmes pour les thèmes suivants : temps · liberté · religion.</li>
@@ -2495,7 +2517,7 @@ function toggleSidebar() {
 function toggleRep(btn) {
   const rep = btn.nextElementSibling;
   rep.classList.toggle('open');
-  btn.textContent = rep.classList.contains('open') ? '🙈 Masquer' : '👁 Voir la réponse';
+  btn.textContent = rep.classList.contains('open') ? 'Masquer' : 'Voir la réponse';
 }
 
 // ── ANNOTATIONS ──
@@ -2549,8 +2571,8 @@ function checkMythDrop() {
     });
   }
   const res = document.getElementById('res-myth');
-  if (correct === total) { res.className = 'act-result ok'; res.innerHTML = '🏆 Parfait ! Tous les personnages sont bien classés !'; }
-  else { res.className = 'act-result nok'; res.innerHTML = `⚠️ ${correct}/${total} corrects. Les éléments en rouge sont mal placés.`; }
+  if (correct === total) { res.className = 'act-result ok'; res.innerHTML = 'Parfait ! Tous les personnages sont bien classés !'; }
+  else { res.className = 'act-result nok'; res.innerHTML = `${correct}/${total} corrects. Les éléments en rouge sont mal placés.`; }
 }
 
 function resetMythDrop() {
@@ -2692,8 +2714,8 @@ function resetMythDrop() {
     </div>
   </div>
 <script src="/assets/veritas-medaillons.js?v=1.19.25" defer></script>
-<script src="/assets/veritas-harmonie.js?v=1.19.25" defer></script>
-<script src="/assets/vitrine.js?v=1.19.25" defer></script>
+<script src="/assets/veritas-harmonie.js?v=1.19.25.34" defer></script>
+<script src="/assets/vitrine.js?v=1.19.25.34" defer></script>
 <!--/vrt-habillage:pied-->
 </body>
 </html>

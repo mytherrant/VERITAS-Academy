@@ -64,14 +64,18 @@ if (!defined('VRT_LIVRET_LIB')) {
         $f = defined('VRT_LIVRET_CATALOGUE')
            ? (string) VRT_LIVRET_CATALOGUE
            : __DIR__ . '/data/livrets_catalogue.json';
-        if (!is_file($f)) { $cache = $repli; return $cache; }
-        $d = json_decode((string) @file_get_contents($f), true);
-        if (!is_array($d) || !isset($d['ouvrages']) || !is_array($d['ouvrages']) || !$d['ouvrages']) {
-            $cache = $repli; return $cache;
+        // Les entrées de repli ont la même forme que les autres : les fiches et
+        // le calcul des prix lisent `prix`, `prixGuide`, `pages`… sans garde.
+        foreach ($repli as $k => $o) {
+            $repli[$k] = $o + ['prix' => 0, 'prixGuide' => 0, 'pages' => 0, 'pagesLibres' => 0, 'ajoute' => ''];
         }
+        $d = is_file($f) ? json_decode((string) @file_get_contents($f), true) : null;
+        // Fichier absent ou illisible : les cinq classes d'origine — et les
+        // réglages de l'administration s'y appliquent quand même (plus bas).
+        $ouvrages = (is_array($d) && isset($d['ouvrages']) && is_array($d['ouvrages'])) ? $d['ouvrages'] : [];
 
         $out = [];
-        foreach ($d['ouvrages'] as $slug => $o) {
+        foreach ($ouvrages as $slug => $o) {
             $slug = (string) preg_replace('/[^a-z0-9_-]/', '', strtolower((string) $slug));
             if ($slug === '' || !is_array($o)) continue;
             $kinds = [];
@@ -111,8 +115,133 @@ if (!defined('VRT_LIVRET_LIB')) {
         // Les cinq d'origine restent servis même si le catalogue les oublie :
         // des codes sont déjà vendus dessus.
         foreach ($repli as $slug => $o) { if (!isset($out[$slug])) $out[$slug] = $o; }
+
+        /* ── LES FICHES RÉGLÉES DEPUIS L'ADMINISTRATION (page « Livrets ») ──
+           Ajouter un livret demandait de refaire le JSON et de le redéposer
+           par FTP. Les fiches écrites dans le panneau vivent en base
+           (DB.tarifs.livretFiches) et se superposent au fichier : elles
+           AJOUTENT un ouvrage, ou corrigent le titre, le niveau, le mode ou
+           les versions vendues d'un ouvrage existant. Une fiche ne fabrique
+           pas de contenu : un ouvrage ajouté reste « non disponible » tant que
+           ses données ne sont pas déposées (vrt_livret_etat le constate). */
+        $reg = vrt_livret_reglages();
+        foreach ((array) ($reg['livretFiches'] ?? []) as $slug => $f) {
+            $slug = (string) preg_replace('/[^a-z0-9_-]/', '', strtolower((string) $slug));
+            if ($slug === '' || !is_array($f)) continue;
+            $o = $out[$slug] ?? ['titre' => $slug, 'niveau' => '', 'mode' => 'interactif',
+                                 'kinds' => ['livret'], 'prix' => 0, 'prixGuide' => 0,
+                                 'pages' => 0, 'pagesLibres' => 0, 'ajoute' => ''];
+            if (trim((string) ($f['titre'] ?? '')) !== '')  $o['titre']  = trim((string) $f['titre']);
+            if (isset($f['niveau']))                        $o['niveau'] = trim((string) $f['niveau']);
+            if (in_array((string) ($f['mode'] ?? ''), ['interactif', 'lecture', 'autonome'], true)) $o['mode'] = (string) $f['mode'];
+            if (isset($f['kinds']) && is_array($f['kinds'])) {
+                $k = array_values(array_intersect(['livret', 'guide'], $f['kinds']));
+                if ($k) $o['kinds'] = $k;
+            }
+            if (isset($f['pages']))       $o['pages'] = max(0, (int) $f['pages']);
+            if (isset($f['pagesLibres'])) $o['pagesLibres'] = max(0, (int) $f['pagesLibres']);
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($f['ajoute'] ?? ''))) $o['ajoute'] = (string) $f['ajoute'];
+            $out[$slug] = $o;
+        }
+        // Retiré de la vente : l'ouvrage RESTE au catalogue — les codes déjà
+        // vendus continuent d'ouvrir — mais vrt_livret_etat() le ferme à la vente.
+        // « Supprimé » depuis l'administration vaut retrait, en plus caché de la
+        // liste de travail (corbeille) : on ne détruit jamais un ouvrage vendu.
+        $retires = (array) ($reg['livretRetires'] ?? []);
+        $supprimes = (array) ($reg['livretSupprimes'] ?? []);
+        foreach ($out as $slug => $o) {
+            $out[$slug]['supprime'] = !empty($supprimes[$slug]);
+            $out[$slug]['retire'] = !empty($retires[$slug]) || $out[$slug]['supprime'];
+            /* Un feuilletage dont la fiche ne dit pas combien il a de pages :
+               on les COMPTE sur le disque. Une fiche ajoutée depuis le panneau,
+               avec un PDF converti en pages, n'a personne pour écrire ce nombre
+               à la main — et à 0 le liseur ne sait pas où s'arrêter. */
+            /* Et quand il y a des pages sur le disque, c'est leur nombre qui
+               fait foi : un PDF remplacé depuis le panneau peut compter plus
+               ou moins de pages que la fiche d'origine, et le liseur s'arrête
+               au nombre annoncé — trop court, il cache la fin du livre payé. */
+            if (($o['mode'] ?? '') === 'lecture') {
+                $surDisque = vrt_livret_pages_deposees((string) $slug);
+                if ($surDisque > 0 || (int) ($o['pages'] ?? 0) <= 0) $out[$slug]['pages'] = $surDisque;
+            }
+        }
         $cache = $out;
         return $cache;
+    }
+
+    /** Le dossier protégé des données vendues (même chemin que lv_dir()). */
+    function vrt_livret_dossier_donnees(): string {
+        return function_exists('lv_dir')
+             ? lv_dir()
+             : (defined('VRT_LIVRET_DONNEES')
+                ? (string) VRT_LIVRET_DONNEES
+                : dirname(__DIR__) . '/uploads/protected/livrets');
+    }
+
+    /** Pages d'un feuilletage RÉELLEMENT déposées : p001.jpg, p002.jpg… sans
+     *  trou. On s'arrête au premier manquant : une page absente au milieu
+     *  ferait un livre qu'on ne peut pas tourner au-delà. */
+    function vrt_livret_pages_deposees(string $slug): int {
+        $slug = (string) preg_replace('/[^a-z0-9_-]/', '', strtolower($slug));
+        if ($slug === '') return 0;
+        $d = vrt_livret_dossier_donnees() . '/' . $slug;
+        if (!is_dir($d)) return 0;
+        $n = 0;
+        while ($n < 2000 && is_file($d . '/p' . str_pad((string) ($n + 1), 3, '0', STR_PAD_LEFT) . '.jpg')) $n++;
+        return $n;
+    }
+
+    /** Les réglages commerciaux des livrets, tels qu'en base (DB.tarifs).
+     *  Par vrt_tarifs_lire() quand _auth_lib.php est chargée ; sinon on lit
+     *  le MÊME fichier, sans charger cette lib (elle fixe API_SECRET : la
+     *  charger ici, avant la configuration de l'appelant, la figerait). */
+    function vrt_livret_reglages(): array {
+        if (function_exists('vrt_tarifs_lire')) {
+            $t = vrt_tarifs_lire();
+            return (isset($t['tarifs']) && is_array($t['tarifs'])) ? $t['tarifs'] : [];
+        }
+        static $cache = null;
+        if ($cache !== null) return $cache;
+        $cache = [];
+        $f = (defined('VRT_DB_FICHIER') && (string) VRT_DB_FICHIER !== '')
+           ? (string) VRT_DB_FICHIER : dirname(__DIR__) . '/data/veritas_db.json';
+        if (is_file($f)) {
+            $d = json_decode((string) @file_get_contents($f), true);
+            if (is_array($d) && isset($d['tarifs']) && is_array($d['tarifs'])) $cache = $d['tarifs'];
+        }
+        return $cache;
+    }
+
+    /**
+     * PROMOTION EN COURS sur un ouvrage — ou null.
+     * DB.tarifs.livretPromos = { "<slug>" | "*" : { pct, debut, fin, libelle } }
+     * La promotion propre à l'ouvrage l'emporte sur la promotion générale « * ».
+     * Dates AAAA-MM-JJ incluses, vides = sans borne. `$grace` (secondes)
+     * prolonge la fin : un client qui a lancé son paiement la dernière minute
+     * de la promotion ne doit pas être refusé pour « sous-paiement » à la
+     * confirmation (voir vrt_verifier_prix).
+     */
+    function vrt_livret_promo(array $db, string $slug, int $grace = 0): ?array {
+        $promos = $db['tarifs']['livretPromos'] ?? null;
+        if (!is_array($promos)) return null;
+        /* L'heure du CAMEROUN, pas celle de l'hébergeur (en France) : une
+           promotion « jusqu'au 30/11 » doit finir à minuit à Douala, comme le
+           compte le navigateur de l'administration. */
+        $tz   = new \DateTimeZone('Africa/Douala');
+        $auj  = (new \DateTime('now', $tz))->format('Y-m-d');
+        $finT = (new \DateTime('@' . (time() - max(0, $grace))))->setTimezone($tz)->format('Y-m-d');
+        foreach ([$slug, '*'] as $cle) {
+            $p = $promos[$cle] ?? null;
+            if (!is_array($p)) continue;
+            $pct = (int) ($p['pct'] ?? 0);
+            if ($pct < 1 || $pct > 90) continue;
+            $deb = (string) ($p['debut'] ?? ''); $fin = (string) ($p['fin'] ?? '');
+            if ($deb !== '' && $auj < $deb) continue;
+            if ($fin !== '' && $finT > $fin) continue;
+            return ['pct' => $pct, 'debut' => $deb, 'fin' => $fin,
+                    'libelle' => (string) ($p['libelle'] ?? ''), 'portee' => ($cle === '*') ? 'tous' : 'ouvrage'];
+        }
+        return null;
     }
 
     /** Ouvrages ouverts à la vente — `slug => libellé`. Le nom historique est
@@ -346,7 +475,9 @@ if (!defined('VRT_LIVRET_LIB')) {
                LIVRER ? Pour un cahier interactif, `booklet-<slug>.js` ;
                pour un feuilletage, le dossier de pages. Une page de vente
                n'est pas une livraison, et ne compte plus. */
-            'disponible' => $livrable,
+            // Retiré depuis l'administration : plus en vente, même livrable.
+            'disponible' => $livrable && empty($cat[$slug]['retire']),
+            'retire' => !empty($cat[$slug]['retire']),
             // Le serveur le dit, parce que lui seul sait laquelle des deux
             // formes existe. Une page dédiée présente mieux qu'un lecteur nu.
             'lien' => $coquille
@@ -358,7 +489,9 @@ if (!defined('VRT_LIVRET_LIB')) {
                        lire ses blocs. */
                     : (($mode === 'autonome')
                        ? ('cahier-' . $slug . '.html')
-                       : ('cahier.html?o=' . rawurlencode($slug))),
+                       : (($mode === 'lecture')
+                          ? ('lire.html?o=' . rawurlencode($slug))
+                          : ('cahier.html?o=' . rawurlencode($slug)))),
             /* ── LA VITRINE ET LA PORTE NE SONT PAS LE MÊME LIEN ─────────────
                `lien` ci-dessus mène où l'on PRÉSENTE l'ouvrage : depuis les
                pages d'atterrissage du 31/08/2026, `<slug>.html` est une page
@@ -377,10 +510,13 @@ if (!defined('VRT_LIVRET_LIB')) {
                autre : le moteur générique pour un cahier qu'on remplit, la
                coquille du liseur pour un ouvrage qu'on feuillette, et sa page
                propre pour un cahier qui porte son moteur avec lui. */
+            /* Un feuilletage SANS page dédiée (ajouté depuis le panneau, PDF
+               converti en pages) s'ouvre dans le lecteur générique
+               `lire.html` : `cahier.html` ne sait pas afficher des images. */
             'porte' => ($mode === 'autonome')
                     ? ('cahier-' . $slug . '.html')
-                    : (($mode === 'lecture' && $coquille)
-                       ? ($slug . '.html')
+                    : (($mode === 'lecture')
+                       ? ($coquille ? ($slug . '.html') : ('lire.html?o=' . rawurlencode($slug)))
                        : ('cahier.html?o=' . rawurlencode($slug))),
             'couverture' => vrt_livret_couverture($slug),
         ];
@@ -411,7 +547,18 @@ if (!defined('VRT_LIVRET_LIB')) {
        vendre au même prix bradait le second — et incitait à acheter un code
        enseignant pour avoir les corrigés du livret à moindre coût.
        Réglables en base sans redéploiement : DB.tarifs.livret / livretGuide. */
-    function vrt_livret_prix(array $db, string $kind = 'livret', string $slug = ''): int {
+    function vrt_livret_prix(array $db, string $kind = 'livret', string $slug = '', int $grace = 0): int {
+        $base = vrt_livret_prix_normal($db, $kind, $slug);
+        /* ④ LA PROMOTION, en dernier : elle porte sur le tarif effectif. C'est
+           ce prix-ci que publie le catalogue ET qu'exige l'octroi — une seule
+           fonction, donc jamais un prix affiché différent du prix réclamé. */
+        $promo = ($slug !== '') ? vrt_livret_promo($db, $slug, $grace) : null;
+        if ($promo) return max(1, (int) round($base * (100 - $promo['pct']) / 100));
+        return $base;
+    }
+
+    /** Le tarif HORS promotion — celui qu'on barre à côté du prix promo. */
+    function vrt_livret_prix_normal(array $db, string $kind = 'livret', string $slug = ''): int {
         /* ① LE RÉGLAGE PAR OUVRAGE, EN BASE — le seul cran vraiment réglable.
            Les tarifs sont annoncés « réglables sans redéploiement »
            (DB.tarifs.livret / livretGuide), mais le catalogue déposé porte
@@ -484,9 +631,9 @@ if (!defined('VRT_LIVRET_LIB')) {
 
     /** Prix d'un pack de N codes. C'est la RÉFÉRENCE serveur : le navigateur
      *  peut afficher ce qu'il veut, c'est ce montant-ci qui autorise. */
-    function vrt_livret_prix_pack(array $db, string $kind, int $n, string $slug = ''): int {
+    function vrt_livret_prix_pack(array $db, string $kind, int $n, string $slug = '', int $grace = 0): int {
         $n = max(1, min(500, $n));
-        $unite = vrt_livret_prix($db, $kind, $slug);
+        $unite = vrt_livret_prix($db, $kind, $slug, $grace);
         $brut  = $unite * $n;
         return (int) round($brut * (100 - vrt_livret_remise_pack($n, $db)) / 100);
     }

@@ -433,14 +433,30 @@ if (in_array($action, ['forum_fetch', 'forum_post', 'forum_like', 'forum_delete'
     // caractère hors [a-z0-9] (les accents tombent des deux côtés : « 6ème » → 6me).
     $cleCls = function (string $nom): string { return strtolower((string) preg_replace('/[^a-z0-9]/i', '', $nom)); };
 
+    // 11/11/2026 — L'inscription range « Terminale » (ou « 1ère ») et, à part,
+    // la filière « C » ; la classe virtuelle s'appelle « Tle C ». La comparaison
+    // exacte des noms laissait tout élève de 1ère et de Terminale hors de sa
+    // classe (403 à chaque message). Même règle que _cvClassePour() côté client.
+    $classeDe = function (string $cls, string $serie): string {
+        $cls = trim($cls); $serie = trim($serie);
+        if ($cls === '') return '';
+        if (preg_match('/^(terminale|tle)/iu', $cls)) $niv = 'Tle';
+        elseif (preg_match('/^1(è|e)?re/iu', $cls)) $niv = '1ère';
+        elseif (preg_match('/^2nde/iu', $cls)) $niv = '2nde';
+        else return $cls;                                   // collège : le nom suffit
+        if ($niv === '2nde' || $serie === '') return $niv . (preg_match('/\s([A-Z])$/u', $cls, $m) ? ' ' . $m[1] : '');
+        return $niv . ' ' . strtoupper(substr($serie, 0, 1));   // A1, A4 → A
+    };
+    $classeEleve = $classeDe($clsNom, (string) ($acc['serie'] ?? (($acc['profil']['serie'] ?? '') ?: '')));
     $classes = (isset($db['classrooms']) && is_array($db['classrooms'])) ? $db['classrooms'] : [];
-    $accede = function (array $cv) use ($eid, $accId, $clsNom, $isProf, $cleCls, $acc): bool {
+    $accede = function (array $cv) use ($eid, $accId, $clsNom, $isProf, $cleCls, $acc, $classeEleve): bool {
         if ($isProf) return true;
         if (in_array($eid, (array) ($cv['membres'] ?? []), true) || in_array($accId, (array) ($cv['membres'] ?? []), true)) return true;
         foreach ((array) ($cv['students'] ?? []) as $st) {
             if (is_array($st) && (string) ($st['accountId'] ?? '') === $accId) return true;
         }
         if ($clsNom !== '' && (string) ($cv['nom'] ?? '') === $clsNom) return true;
+        if ($classeEleve !== '' && empty($cv['seg']) && $cleCls((string) ($cv['nom'] ?? '')) === $cleCls($classeEleve)) return true;
         if (!empty($cv['seg']) && (string) ($acc['seg'] ?? '') === (string) $cv['seg']) return true;
         return false;
     };
@@ -448,14 +464,23 @@ if (in_array($action, ['forum_fetch', 'forum_post', 'forum_like', 'forum_delete'
     foreach ($classes as $cv) {
         if (is_array($cv) && isset($cv['id']) && $accede($cv)) $mesClasses[(string) $cv['id']] = $cv;
     }
-    // Base où l'administration n'a pas encore publié les classes : la classe
-    // par défaut de l'élève (celle que le client affiche) reste utilisable.
-    if ($clsNom !== '' && !$classes) {
-        $k = $cleCls($clsNom);
-        $mesClasses['cls_' . $k] = ['id' => 'cls_' . $k, 'nom' => $clsNom, 'channels' => [
-            ['id' => 'ch_gen_' . $k], ['id' => 'ch_ann_' . $k, 'teacherOnly' => true],
-            ['id' => 'ch_fr_' . $k], ['id' => 'ch_math_' . $k], ['id' => 'ch_sc_' . $k],
-        ]];
+    // Classe de l'élève absente de la base publiée (base vide, ou série
+    // scientifique 1ère C/D, Tle C/D ajoutée côté client le 11/11/2026 et pas
+    // encore synchronisée par l'administration) : elle reste utilisable, avec
+    // les MÊMES identifiants que le client (_cvDefaultClassrooms, _cvCompleterClasses).
+    $nomDefaut = $classeEleve !== '' ? $classeEleve : $clsNom;
+    if ($nomDefaut !== '') {
+        $k = $cleCls($nomDefaut);
+        $connue = false;
+        foreach ($classes as $cv) { if (is_array($cv) && empty($cv['seg']) && $cleCls((string) ($cv['nom'] ?? '')) === $k) { $connue = true; break; } }
+        if (!$connue && !isset($mesClasses['cls_' . $k])) {
+            $canaux = [
+                ['id' => 'ch_gen_' . $k], ['id' => 'ch_ann_' . $k, 'teacherOnly' => true],
+                ['id' => 'ch_fr_' . $k], ['id' => 'ch_math_' . $k], ['id' => 'ch_sc_' . $k],
+            ];
+            if (preg_match('/^(1re|tle)[cd]$/', $k)) $canaux[] = ['id' => 'ch_svt_' . $k];
+            $mesClasses['cls_' . $k] = ['id' => 'cls_' . $k, 'nom' => $nomDefaut, 'channels' => $canaux];
+        }
     }
 
     if ($action === 'forum_fetch') {

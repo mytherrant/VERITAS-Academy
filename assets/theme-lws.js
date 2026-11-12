@@ -113,7 +113,7 @@
       c = clair ? c.map(function (x) { return x * 0.9; })
                 : c.map(function (x) { return x + (255 - x) * 0.15; });
     }
-    el.style.setProperty('color', 'rgb(' + c.map(Math.round).join(',') + ')', 'important');
+    ecrire(el, 'color', 'rgb(' + c.map(Math.round).join(',') + ')');
   }
 
   /* « #1E499B », « #fff » ou « rgb(…) » → [r, g, b] ; null sinon. */
@@ -130,7 +130,45 @@
     return m && m.length >= 3 ? [+m[0], +m[1], +m[2]] : null;
   }
 
+  /* 31/10/2026 — LENTEUR DE L'ADMINISTRATION. Mesure au profileur, six
+     changements de page en super-admin : 9,1 s sur 13 s passées DANS
+     fondEffectif. Deux raisons, cumulées :
+       · chaque élément remontait tous ses ancêtres (deux getComputedStyle
+         par niveau) — les mêmes ancêtres, relus pour chacun de leurs
+         descendants ;
+       · corrigerCouleur ÉCRIVAIT un style entre deux lectures : le
+         navigateur devait recalculer toute la feuille avant la lecture
+         suivante, des centaines de fois par passe.
+     Pendant un lot : les fonds calculés sont mémorisés (aucune passe
+     n'écrit de fond, seulement color/fill/stroke : le cache reste juste),
+     et les écritures sont empilées puis appliquées d'un bloc à la fin.
+     Le résultat à l'écran est le même ; il est obtenu en une seule
+     invalidation de style au lieu d'une par élément corrigé. */
+  var _fonds = null, _ecritures = null;
+  function ecrire(el, p, v) {
+    if (_ecritures) _ecritures.push([el, p, v]);
+    else el.style.setProperty(p, v, 'important');
+  }
+  function enLot(fn) {
+    if (_ecritures) { fn(); return; }        /* déjà dans un lot : rejoindre */
+    _fonds = new Map(); _ecritures = [];
+    try { fn(); }
+    finally {
+      var e = _ecritures; _ecritures = null; _fonds = null;
+      for (var i = 0; i < e.length; i++) e[i][0].style.setProperty(e[i][1], e[i][2], 'important');
+    }
+  }
+
   function fondEffectif(el) {
+    if (_fonds) {
+      var connu = _fonds.get(el);
+      if (connu === undefined) { connu = fondEffectifCalcule(el); _fonds.set(el, connu); }
+      return connu;
+    }
+    return fondEffectifCalcule(el);
+  }
+
+  function fondEffectifCalcule(el) {
     var couches = [], n = el;
     while (n && n.nodeType === 1) {
       /* 17/10/2026 — un fond peut être un DÉGRADÉ venu d'une feuille (pas
@@ -205,7 +243,7 @@
 
     var remplacement = lFond < 0.5 ? '#FFFFFF' : BLEU;
     aCorriger.forEach(function (p) {
-      el.style.setProperty(p, remplacement, 'important');
+      ecrire(el, p, remplacement);
     });
   }
 
@@ -582,14 +620,16 @@
     if (app && getComputedStyle(app).display !== 'none') return;
     vitriner(mc);
     var nn = mc.querySelectorAll('*');
-    for (var k = 0; k < nn.length; k++) {
-      var el = nn[k];
-      if (!horsHabillage(el)) continue;
-      for (var c = 0; c < el.childNodes.length; c++) {
-        var n = el.childNodes[c];
-        if (n.nodeType === 3 && n.textContent.trim().length > 1) { corrigerCouleur(el); break; }
+    enLot(function () {
+      for (var k = 0; k < nn.length; k++) {
+        var el = nn[k];
+        if (!horsHabillage(el)) continue;
+        for (var c = 0; c < el.childNodes.length; c++) {
+          var n = el.childNodes[c];
+          if (n.nodeType === 3 && n.textContent.trim().length > 1) { corrigerCouleur(el); break; }
+        }
       }
-    }
+    });
   }
 
   /* 19/10/2026 — L'ESPACE CONNECTÉ AUSSI (« tout doit être aligné sur la
@@ -609,21 +649,31 @@
     try { if (typeof window.vtIconize === 'function') window.vtIconize(document.body); } catch (e) {}
     var zones = [document.getElementById('cnt'), document.getElementById('sb'),
                  document.getElementById('MC')];
-    for (var z = 0; z < zones.length; z++) {
-      if (!zones[z]) continue;
-      var nn = zones[z].querySelectorAll('*');
-      for (var k = 0; k < nn.length; k++) {
-        var el = nn[k];
-        for (var c = 0; c < el.childNodes.length; c++) {
-          var n = el.childNodes[c];
-          if (n.nodeType === 3 && n.textContent.trim().length > 1) {
-            if (horsHabillage(el)) corrigerCouleur(el);
-            break;
+    /* Un élément déjà examiné ne l'est plus : la passe se rejoue à CHAQUE
+       mutation de #cnt (une horloge, un compteur animé, un fetch qui
+       complète la page) et ré-auditait des centaines de nœuds inchangés.
+       goTo() et buildNav() remplacent les nœuds : les nouveaux sont vus.
+       La bascule de thème vide la liste (voir observer()). */
+    enLot(function () {
+      for (var z = 0; z < zones.length; z++) {
+        if (!zones[z]) continue;
+        var nn = zones[z].querySelectorAll('*');
+        for (var k = 0; k < nn.length; k++) {
+          var el = nn[k];
+          if (_vusApp.has(el)) continue;
+          _vusApp.add(el);
+          for (var c = 0; c < el.childNodes.length; c++) {
+            var n = el.childNodes[c];
+            if (n.nodeType === 3 && n.textContent.trim().length > 1) {
+              if (horsHabillage(el)) corrigerCouleur(el);
+              break;
+            }
           }
         }
       }
-    }
+    });
   }
+  var _vusApp = new WeakSet();
   window._vtPasseApp = function () { try { passeApp(); } catch (e) {} };
 
   function passe(racine) {
@@ -642,6 +692,7 @@
     /* 2. Puis les couleurs en ligne, texte et tracés SVG. On ne balaie que
           les éléments qui EN DÉCLARENT une : inutile d'auditer les 868
           nœuds de la page à chaque re-rendu. */
+    enLot(function () {
     var teintes = portail.querySelectorAll(
       '[style*="color"],[style*="fill"],[style*="stroke"]');
     for (var j = 0; j < teintes.length; j++) if (horsHabillage(teintes[j])) corrigerCouleur(teintes[j]);
@@ -682,6 +733,7 @@
       }
       if (porteDuTexte && horsHabillage(el)) corrigerCouleur(el);
     }
+    });
   }
 
   /* La vitrine se re-rend à chaque changement de section (vShowSec) : sans
@@ -723,6 +775,7 @@
        donc l'attribut, sur la racine — pas sur le portail, où il n'est
        pas posé. */
     new MutationObserver(function () {
+      _vusApp = new WeakSet();
       requestAnimationFrame(function () { passe(); });
     }).observe(document.documentElement, {
       attributes: true, attributeFilter: ['data-theme']

@@ -100,8 +100,13 @@ if ($backupFile === '' || !file_exists($backupFile)) {
     if (!function_exists('vrt_livret_catalogue')) @require_once __DIR__ . '/_livret_lib.php';
     if (function_exists('vrt_livret_catalogue')) {
         $__dc = dirname(__DIR__) . '/uploads/oeuvres/';
+        $__tl = function_exists('vrt_livret_reglages') ? ['tarifs' => vrt_livret_reglages()] : [];
         foreach (vrt_livret_catalogue() as $__s => $__x) {
-            if (!is_array($__x) || (int)($__x['prix'] ?? 0) <= 0) continue;
+            if (!is_array($__x)) continue;
+            // Le tarif EFFECTIF (réglage par ouvrage, promotion) — celui qu'exigera l'octroi.
+            $__px = function_exists('vrt_livret_prix') ? vrt_livret_prix($__tl, 'livret', (string)$__s) : (int)($__x['prix'] ?? 0);
+            $__pn = function_exists('vrt_livret_prix_normal') ? vrt_livret_prix_normal($__tl, 'livret', (string)$__s) : $__px;
+            if ($__px <= 0) continue;
             /* Meme regle que plus bas : on ne met en devanture que ce que
                le serveur peut livrer. Sans cette garde, le repli publiait
                plus large que le chemin normal — exactement l'inverse de ce
@@ -120,7 +125,7 @@ if ($backupFile === '' || !file_exists($backupFile)) {
                           ? 'Cahier à remplir en ligne, avec correction immédiate.'
                           : 'Cahier à remplir en ligne, réponses enregistrées.',
                 'ajoute' => (string)($__x['ajoute'] ?? ''),
-                'prix' => (int)$__x['prix'], 'ancienPrix' => 0,
+                'prix' => $__px, 'ancienPrix' => ($__pn > $__px ? $__pn : 0),
                 'pages' => (int)($__x['pages'] ?? 0), 'chaps' => 0,
                 'ico' => '', 'couleur' => '',
                 'couv' => function_exists('vrt_livret_couverture')
@@ -273,6 +278,24 @@ $__pd_supprimes = (isset($db['deletedDefaults']) && is_array($db['deletedDefault
 $__pd_paywall   = (isset($db['paywall']) && is_array($db['paywall'])) ? $db['paywall'] : null;
 $__pd_offertes  = vrt_pd_offertes($__pd_contenus_src, $__pd_paywall);
 
+// Fiches dont le contenu vit dans le code ou sur une page du site, et non dans un fichier déposé.
+$__pd_en_code = [
+    'res_bac_ang' => ['resPedago' => 'ang'],
+    'res_bac_fra' => ['resPedago' => 'fra'],
+    'res_bac_lit' => ['resPedago' => 'lit'],
+    'res_cours_cc' => ['resPedago' => 'cc'],
+    'res_cours_mod1' => ['resPedago' => 'mod1'],
+    'bac_eval_anglais' => ['externalUrl' => 'https://veritas-school.com/evaluations/evaluation_bac_anglais.html'],
+    'bac_eval_francais' => ['externalUrl' => 'https://veritas-school.com/evaluations/evaluation_bac_langue_francaise.html'],
+    'bac_eval_litterature' => ['externalUrl' => 'https://veritas-school.com/evaluations/evaluation_bac_litterature.html'],
+    'demo_maths3' => [],
+    'demo_pc2nde' => [],
+    'demo_bac_tle_c' => [],
+    'cours_commentaire_compose' => ['externalUrl' => 'https://veritas-school.com/cours/commentaire_compose_analyse.html'],
+    'cours_module1_tleA' => ['externalUrl' => 'https://veritas-school.com/cours/module_1_tle_A.html'],
+    'cours_registres_langue_5e' => ['externalUrl' => 'https://veritas-school.com/cours/registres_de_langue_5e.html'],
+];
+
 $__pd_contenus = [];
 foreach ($__pd_contenus_src as $c) {
     if (!is_array($c) || !isset($c['id'])) continue;
@@ -294,7 +317,12 @@ foreach ($__pd_contenus_src as $c) {
         // Accroches : volontairement tronquées, la carte n'en montre pas plus
         'apercu'  => isset($c['apercu']) ? vrt_pd_coupe($c['apercu'], 240) : '',
         'desc'    => isset($c['desc'])   ? vrt_pd_coupe($c['desc'], 240) : '',
+        // Un document est-il réellement déposé ? Booléen seul : l'adresse du fichier reste privée.
+        'dispo'   => !empty($c['fichierUrl']) || !empty($c['fichierProtege']) || !empty($c['fichierData']) || !empty($c['resPedago'])
+                     || !empty($c['externalUrl']) || !empty($c['htmlContent']) || isset($__pd_en_code[$id]),
     ];
+    if (!empty($c['resPedago'])) $row['resPedago'] = (string)$c['resPedago'];
+    if (isset($__pd_en_code[$id])) $row = array_merge($row, $__pd_en_code[$id]);
     if (!empty($c['ico'])) $row['ico'] = vrt_pd_coupe($c['ico'], 8);
     $ft = vrt_pd_filetype($c);
     if ($ft !== '') $row['fileType'] = $ft;
@@ -516,7 +544,7 @@ if (function_exists('vrt_catalogue_livres')) {
             'etiquette'  => '',
             'desc'       => vrt_pd_coupe((string)($__f['desc'] ?? ''), 180),
             'prix'       => $__prix,
-            'ancienPrix' => 0,
+            'ancienPrix' => ($__prixN > $__prix ? $__prixN : 0),
             'pages'      => (int)($__f['pages'] ?? 0),
             'chaps'      => (isset($__f['chaps']) && is_array($__f['chaps'])) ? count($__f['chaps']) : 0,
             'ico'        => vrt_pd_coupe((string)($__f['ico'] ?? ''), 8),
@@ -563,10 +591,13 @@ if (!function_exists('vrt_livret_catalogue')) {
 }
 if (function_exists('vrt_livret_catalogue')) {
     $__pd_dirCouv = dirname(__DIR__) . '/uploads/oeuvres/';
+    $__pd_tl = function_exists('vrt_livret_reglages') ? ['tarifs' => vrt_livret_reglages()] : [];
     foreach (vrt_livret_catalogue() as $__slug => $__o) {
         if (!is_array($__o)) continue;
         if (count($__pd_livres) >= 120) break;
-        $__prix = (int)($__o['prix'] ?? 0);
+        // Tarif EFFECTIF (réglage par ouvrage, promotion), comme api/livret.php.
+        $__prix = function_exists('vrt_livret_prix') ? vrt_livret_prix($__pd_tl, 'livret', (string)$__slug) : (int)($__o['prix'] ?? 0);
+        $__prixN = function_exists('vrt_livret_prix_normal') ? vrt_livret_prix_normal($__pd_tl, 'livret', (string)$__slug) : $__prix;
         if ($__prix <= 0) continue;          // pas de prix : pas en devanture
         /* ⚠️ DÉCLARÉ N'EST PAS PUBLIÉ. Ce bloc ne regardait que le prix : il
            mettait donc en devanture tout ouvrage tarifé, sans vérifier qu'il

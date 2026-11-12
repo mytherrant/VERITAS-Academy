@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>At the restaurant — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’anglais (3e) : going to the restaurant, ordering a meal, paying the bill ; comparatives and superlatives.">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/3e-anglais-at-the-restaurant.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="At the restaurant — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’anglais (3e) : going to the restaurant, ordering a meal, paying the bill ; comparatives and superlatives.">
+<meta property="og:url" content="https://veritas-school.com/scenes/3e-anglais-at-the-restaurant.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"At the restaurant","description":"Scène animée d’anglais (3e) : going to the restaurant, ordering a meal, paying the bill ; comparatives and superlatives.","url":"https://veritas-school.com/scenes/3e-anglais-at-the-restaurant.html","inLanguage":"en-GB","learningResourceType":"Simulation interactive","educationalLevel":"3ᵉ","about":"Anglais","teaches":"Échanger au restaurant en anglais (commander, demander l’addition) ; comparer des plats et des prix avec les comparatifs (cheaper than, more expensive than) et le superlatif (the cheapest, the most delicious).","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '3e-anglais-restaurant',
+  discipline: 'Anglais', niveau: '3e', langue: 'en-GB',
+  titre: 'At the restaurant',
+  decor: 'bar', lieu: 'A restaurant in Buea', moment: 'Saturday lunch',
+  objectif: 'Échanger au restaurant en anglais (commander, demander l’addition) ; comparer des plats et des prix avec les comparatifs (cheaper than, more expensive than) et le superlatif (the cheapest, the most delicious).',
+  programme: 'Progression harmonisée 3e · Economic life and occupations, lesson 13 (going to the restaurant), lesson 14 (comparatives), lesson 15 (restaurant vocabulary)',
+  jauges: [
+    { id: 'faim', nom: 'Hunger satisfied', val: 10, couleur: '#1F9D5B' },
+    { id: 'english', nom: 'English', val: 25, couleur: '#1E499B' }
+  ],
+  personnages: {
+    waiter: { nom: 'The waiter', couleur: '#2B2B2B', look: { peau: 'fonce', cheveux: 'ras', habit: '#F4F4F4', bas: '#2B2B2B', extra: ['tablier'] } },
+    abel:   { nom: 'Abel', couleur: '#2F5E9E', look: { metier: 'eleve', peau: 'fonce', cheveux: 'court' } },
+    nina:   { nom: 'Nina', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['abel', 'nina'], txt: 'Abel and Nina are on a school trip to Buea. At lunchtime, they go to a small restaurant.', trad: 'Abel et Nina sont en voyage scolaire à Buea. À midi, ils vont dans un petit restaurant.', objet: { i: 'document', lib: 'The menu' } },
+    { t: 'dit', qui: 'waiter', entre: ['waiter'], txt: 'Good afternoon! A table for two? Here is the menu.', trad: 'Bonjour ! Une table pour deux ? Voici la carte.' },
+    { t: 'dit', qui: 'nina', txt: 'Thank you. Look, Abel: eru and fufu is 1,500 francs, rice and chicken is 2,000, and achu is 1,500.', trad: 'Merci. Regarde, Abel : l’eru avec du fufu coûte 1 500 francs, le riz au poulet 2 000, et l’achu 1 500.' },
+    { t: 'dit', qui: 'abel', txt: 'Rice and chicken is more expensive than eru. Eru is cheaper.', trad: 'Le riz au poulet est plus cher que l’eru. L’eru est moins cher.', jauges: { english: 40 } },
+    { t: 'remarque', titre: 'Comparatives and superlatives', txt: 'Adjectif court : cheap → cheaper than (moins cher que), the cheapest (le moins cher). Adjectif long : expensive → more expensive than, the most expensive ; delicious → more delicious, the most delicious. Irréguliers : good → better → the best ; bad → worse → the worst.' },
+    { t: 'question', q: 'Quel plat est « the most expensive » ?',
+      options: [
+        { txt: 'Rice and chicken (2,000 francs).', ok: true, retour: 'It is the most expensive dish on the menu.' },
+        { txt: 'Eru and fufu (1,500 francs).', retour: 'Eru costs 1,500 : it is cheaper.' }
+      ] },
+    { t: 'dit', qui: 'waiter', txt: 'Are you ready to order?', trad: 'Vous êtes prêts à commander ?' },
+    { t: 'dit', qui: 'nina', txt: 'Yes. I’d like eru and fufu, please, and a bottle of water.', trad: 'Oui. Je voudrais de l’eru avec du fufu, s’il vous plaît, et une bouteille d’eau.' },
+    { t: 'choix', qui: 'abel', q: 'Tu es Abel. Comment commandes-tu ?',
+      options: [
+        { txt: '“Give me rice!”', consequence: 'The waiter brings it, but he does not smile: it sounds rude.', jauges: { faim: 30 } },
+        { txt: '“I’d like rice and chicken, please. Could I have a juice too?”', consequence: 'Polite and clear: the waiter smiles and brings your order quickly.', jauges: { faim: 40, english: 15 } }
+      ],
+      oeuvre: 'I’d like… / Could I have…, please ? : les formules polies pour commander.' },
+    { t: 'dit', qui: 'abel', emo: 'joie', jeu: 'after lunch', txt: 'This is the best chicken I have ever eaten!', trad: 'C’est le meilleur poulet que j’aie jamais mangé !', jauges: { faim: 90 } },
+    { t: 'atelier', mode: 'tri', titre: 'Workshop · comparative or superlative?', consigne: 'Classe chaque forme.',
+      cats: ['Comparative', 'Superlative'],
+      items: [
+        { txt: 'cheaper than', cat: 0 },
+        { txt: 'the best', cat: 1 },
+        { txt: 'more expensive than', cat: 0 },
+        { txt: 'the most delicious', cat: 1 },
+        { txt: 'better than', cat: 0 }
+      ],
+      bravo: 'Comparative: …er than / more … than. Superlative: the …est / the most….', jauges: { english: 60 } },
+    { t: 'dit', qui: 'nina', txt: 'Excuse me, can we have the bill, please?', trad: 'Excusez-moi, pouvons-nous avoir l’addition, s’il vous plaît ?' },
+    { t: 'dit', qui: 'waiter', txt: 'Of course. Eru 1,500, rice and chicken 2,000, water 500 and juice 500. That’s 4,500 francs.', trad: 'Bien sûr. Eru 1 500, riz au poulet 2 000, eau 500 et jus 500. Cela fait 4 500 francs.' },
+    { t: 'atelier', mode: 'monnaie', titre: 'Workshop · pay the bill', consigne: 'Paie exactement 4 500 FCFA.', cible: 4500, pieces: [2000, 1000, 500], devise: 'FCFA',
+      bravo: 'Here you are! Thank you very much.', jauges: { english: 80 } }
+  ],
+  labo: {
+    titre: 'Laboratory · a good meal out',
+    intro: 'Règle la politesse, le budget et la maîtrise de l’anglais : comment se passe le déjeuner ?',
+    persos: ['abel', 'nina', 'waiter'],
+    curseurs: [
+      { id: 'politeness', nom: 'Politeness', val: 70, bas: 'rude', haut: 'polite' },
+      { id: 'budget', nom: 'Budget', val: 60, bas: 'too small', haut: 'enough' },
+      { id: 'english', nom: 'English', val: 50, bas: 'weak', haut: 'fluent' }
+    ],
+    scenarios: [
+      { nom: 'Abel and Nina', icone: 'document', valeurs: { politeness: 70, budget: 60, english: 50 } },
+      { nom: 'Rude customers', icone: 'colere', valeurs: { politeness: 10 } },
+      { nom: 'Not enough money', icone: 'pieces', valeurs: { budget: 10 } }
+    ],
+    liens: [
+      { a: 'waiter', b: 'abel', type: 'confiance', lib: 'serves', base: .3, poids: { politeness: .5 } },
+      { a: 'nina', b: 'abel', type: 'alliance', lib: 'friends', base: .7 }
+    ],
+    issue: function(v){
+      if(v.budget < 30){ return { niveau: 'ko', badge: 'Not enough money', recit: 'The bill is bigger than their budget: they must call the teacher for help.', apres: 'Compare the prices before you order.', themes: ['comparatives', 'budget'] }; }
+      if(v.politeness < 30){ return { niveau: 'moyen', badge: 'Bad service', recit: 'Rude customers, unhappy waiter: the meal is slow and cold.', apres: 'Please and thank you open many doors.', themes: ['politeness'] }; }
+      return { niveau: 'ok', badge: 'A great lunch!', recit: 'Polite, within budget, in good English: a perfect meal.', apres: 'The best restaurant in Buea!', themes: ['restaurant'] };
+    }
+  },
+  quiz: [
+    { q: 'Comparatif de « cheap » :', options: [
+      { txt: 'cheaper than', ok: true, retour: 'Adjectif court : -er.' },
+      { txt: 'more cheap than', retour: 'Avec un adjectif court, on ajoute -er.' } ] },
+    { q: 'Superlatif de « good » :', options: [
+      { txt: 'the best', ok: true, retour: 'good → better → the best.' },
+      { txt: 'the goodest', retour: 'Good est irrégulier.' } ] },
+    { q: 'Comment demander l’addition ?', options: [
+      { txt: 'Can we have the bill, please?', ok: true, retour: 'Bill = addition.' },
+      { txt: 'Give us the menu.', retour: 'Le menu, c’est la carte.' } ] },
+    { q: 'Que signifie « I’d like… » ?', options: [
+      { txt: 'Je voudrais…', ok: true, retour: 'I would like.' },
+      { txt: 'J’aime…', retour: 'J’aime = I like.' } ] },
+    { q: '« Rice is … expensive … eru. »', options: [
+      { txt: 'more / than', ok: true, retour: 'more expensive than.' },
+      { txt: 'most / than', retour: 'most = superlatif.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Restaurant vocabulary: menu, dish, to order, waiter, bill, I’d like…, Could I have…?',
+      'Comparatives: cheaper than, more expensive than, better than.',
+      'Superlatives: the cheapest, the most expensive, the best.',
+      'Politeness: please, thank you, excuse me.'
+    ],
+    ecrire: 'Write a dialogue (eight lines) in a restaurant in your town: order two dishes, compare their prices with a comparative and a superlative, and ask for the bill.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>At the restaurant</h1>
+<p><b>Anglais · 3ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Échanger au restaurant en anglais (commander, demander l’addition) ; comparer des plats et des prix avec les comparatifs (cheaper than, more expensive than) et le superlatif (the cheapest, the most delicious).</p>
+<p>Programme : Progression harmonisée 3e · Economic life and occupations, lesson 13 (going to the restaurant), lesson 14 (comparatives), lesson 15 (restaurant vocabulary)</p>
+<p>Lieu : A restaurant in Buea · Saturday lunch</p>
+<h3>Personnages</h3><ul><li>The waiter</li><li>Abel</li><li>Nina</li></ul>
+<h3>La scène</h3>
+<p>Abel and Nina are on a school trip to Buea. At lunchtime, they go to a small restaurant. — <i>Abel et Nina sont en voyage scolaire à Buea. À midi, ils vont dans un petit restaurant.</i></p>
+<p><b>The waiter</b> : Good afternoon! A table for two? Here is the menu. — <i>Bonjour ! Une table pour deux ? Voici la carte.</i></p>
+<p><b>Nina</b> : Thank you. Look, Abel: eru and fufu is 1,500 francs, rice and chicken is 2,000, and achu is 1,500. — <i>Merci. Regarde, Abel : l’eru avec du fufu coûte 1 500 francs, le riz au poulet 2 000, et l’achu 1 500.</i></p>
+<p><b>Abel</b> : Rice and chicken is more expensive than eru. Eru is cheaper. — <i>Le riz au poulet est plus cher que l’eru. L’eru est moins cher.</i></p>
+<h4>Comparatives and superlatives</h4><p>Adjectif court : cheap → cheaper than (moins cher que), the cheapest (le moins cher). Adjectif long : expensive → more expensive than, the most expensive ; delicious → more delicious, the most delicious. Irréguliers : good → better → the best ; bad → worse → the worst.</p>
+<p><b>Question :</b> Quel plat est « the most expensive » ?</p><ul><li>Rice and chicken (2,000 francs). <b>(bonne réponse)</b></li><li>Eru and fufu (1,500 francs).</li></ul><p>It is the most expensive dish on the menu.</p>
+<p><b>The waiter</b> : Are you ready to order? — <i>Vous êtes prêts à commander ?</i></p>
+<p><b>Nina</b> : Yes. I’d like eru and fufu, please, and a bottle of water. — <i>Oui. Je voudrais de l’eru avec du fufu, s’il vous plaît, et une bouteille d’eau.</i></p>
+<p><b>À toi de décider :</b> Tu es Abel. Comment commandes-tu ?</p><ul><li>“Give me rice!” — The waiter brings it, but he does not smile: it sounds rude.</li><li>“I’d like rice and chicken, please. Could I have a juice too?” — Polite and clear: the waiter smiles and brings your order quickly.</li></ul>
+<p><b>Abel</b> <i>(after lunch)</i> : This is the best chicken I have ever eaten! — <i>C’est le meilleur poulet que j’aie jamais mangé !</i></p>
+<h4>Workshop · comparative or superlative?</h4><p>Classe chaque forme.</p>
+<ul><li><b>Comparative</b> : cheaper than ; more expensive than ; better than</li><li><b>Superlative</b> : the best ; the most delicious</li></ul>
+<p>Comparative: …er than / more … than. Superlative: the …est / the most….</p>
+<p><b>Nina</b> : Excuse me, can we have the bill, please? — <i>Excusez-moi, pouvons-nous avoir l’addition, s’il vous plaît ?</i></p>
+<p><b>The waiter</b> : Of course. Eru 1,500, rice and chicken 2,000, water 500 and juice 500. That’s 4,500 francs. — <i>Bien sûr. Eru 1 500, riz au poulet 2 000, eau 500 et jus 500. Cela fait 4 500 francs.</i></p>
+<h4>Workshop · pay the bill</h4><p>Paie exactement 4 500 FCFA.</p>
+<p>Here you are! Thank you very much.</p>
+<h3>Quiz</h3><ol><li>Comparatif de « cheap » : — <b>cheaper than</b> Adjectif court : -er.</li><li>Superlatif de « good » : — <b>the best</b> good → better → the best.</li><li>Comment demander l’addition ? — <b>Can we have the bill, please?</b> Bill = addition.</li><li>Que signifie « I’d like… » ? — <b>Je voudrais…</b> I would like.</li><li>« Rice is … expensive … eru. » — <b>more / than</b> more expensive than.</li></ol>
+<h3>À retenir</h3><ul><li>Restaurant vocabulary: menu, dish, to order, waiter, bill, I’d like…, Could I have…?</li><li>Comparatives: cheaper than, more expensive than, better than.</li><li>Superlatives: the cheapest, the most expensive, the best.</li><li>Politeness: please, thank you, excuse me.</li></ul>
+<h3>À écrire</h3><p>Write a dialogue (eight lines) in a restaurant in your town: order two dishes, compare their prices with a comparative and a superlative, and ask for the bill.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="3e-anglais-at-the-restaurant.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

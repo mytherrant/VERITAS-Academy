@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dix sièges à partager — Scènes vivantes | VÉRITAS</title>
+<meta name="description" content="Scène animée d’ECM (3e) : les élections au Cameroun, le processus électoral et le calcul des sièges à l’issue d’un scrutin proportionnel (quotient et plus fort reste).">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="scene.css?v=20261105b">
+<!-- scene-tete -->
+<link rel="canonical" href="https://veritas-school.com/scenes/3e-ecm-election-proportionnelle.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dix sièges à partager — Scènes vivantes | VÉRITAS">
+<meta property="og:description" content="Scène animée d’ECM (3e) : les élections au Cameroun, le processus électoral et le calcul des sièges à l’issue d’un scrutin proportionnel (quotient et plus fort reste).">
+<meta property="og:url" content="https://veritas-school.com/scenes/3e-ecm-election-proportionnelle.html">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Dix sièges à partager","description":"Scène animée d’ECM (3e) : les élections au Cameroun, le processus électoral et le calcul des sièges à l’issue d’un scrutin proportionnel (quotient et plus fort reste).","url":"https://veritas-school.com/scenes/3e-ecm-election-proportionnelle.html","inLanguage":"fr","learningResourceType":"Simulation interactive","educationalLevel":"3ᵉ","about":"Éducation à la citoyenneté et à la morale","teaches":"Connaître les étapes du processus électoral (inscription, campagne, vote secret, dépouillement, proclamation) ; calculer la répartition des sièges dans un scrutin de liste proportionnel, par le quotient électoral et la règle du plus fort reste.","isAccessibleForFree":true,"interactivityType":"active","provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS","url":"https://veritas-school.com/"},"isPartOf":{"@type":"CollectionPage","name":"Scènes vivantes","url":"https://veritas-school.com/scenes/"}}</script>
+<!-- /scene-tete -->
+</head>
+<body>
+<noscript>Cette scène a besoin de JavaScript pour se jouer.</noscript>
+<script>
+window.SCENE = {
+  id: '3e-ecm-election',
+  discipline: 'Éducation à la citoyenneté et à la morale', niveau: '3e',
+  titre: 'Dix sièges à partager',
+  decor: 'classe', lieu: 'Le collège, élection simulée', moment: 'Semaine de la citoyenneté',
+  objectif: 'Connaître les étapes du processus électoral (inscription, campagne, vote secret, dépouillement, proclamation) ; calculer la répartition des sièges dans un scrutin de liste proportionnel, par le quotient électoral et la règle du plus fort reste.',
+  programme: 'Progression harmonisée 3e · Leçon 3 (les élections au Cameroun), TP 1 (calcul des sièges à l’issue d’un scrutin proportionnel), leçon 4 (le processus électoral), TD 2 (simulation des phases de l’élection municipale)',
+  jauges: [
+    { id: 'participation', nom: 'Participation', val: 50, couleur: '#1E499B' },
+    { id: 'transparence', nom: 'Transparence du scrutin', val: 60, couleur: '#1F9D5B' }
+  ],
+  personnages: {
+    prof:   { nom: 'M. Tamba, professeur d’ECM', couleur: '#1E499B', look: { metier: 'enseignant', peau: 'fonce', cheveux: 'ras', lunettes: true } },
+    listeA: { nom: 'Grâce, tête de liste A', couleur: '#C0397C', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'tresses' } },
+    listeB: { nom: 'Ibrahim, tête de liste B', couleur: '#1F9D5B', look: { metier: 'eleve', peau: 'brun', cheveux: 'court' } },
+    listeC: { nom: 'Laure, tête de liste C', couleur: '#D98E04', look: { metier: 'eleve', tenue: 'jupe', peau: 'fonce', cheveux: 'queue' } },
+    listeD: { nom: 'Ken, tête de liste D', couleur: '#5A6275', look: { metier: 'eleve', peau: 'fonce', cheveux: 'ras' } }
+  },
+  etapes: [
+    { t: 'recit', entre: ['prof'], txt: 'Pour la semaine de la citoyenneté, le collège élit un « conseil municipal des jeunes » de dix membres. M. Tamba organise l’élection comme une vraie élection municipale.', objet: { i: 'document', lib: 'Bulletins et urne' } },
+    { t: 'dit', qui: 'prof', txt: 'Au Cameroun, c’est Elections Cameroon, ELECAM, qui organise les élections. Ici, ce sera le club ECM. Première étape : la liste électorale.' },
+    { t: 'atelier', mode: 'ordre', titre: 'Atelier · le processus électoral', consigne: 'Remets dans l’ordre les étapes d’une élection.',
+      items: [
+        'Inscription des électeurs sur la liste électorale.',
+        'Dépôt des listes de candidats.',
+        'Campagne électorale.',
+        'Vote : bulletin choisi seul dans l’isoloir, enveloppe dans l’urne.',
+        'Dépouillement public des bulletins.',
+        'Proclamation des résultats.'
+      ],
+      bravo: 'Chaque étape a ses règles : elles garantissent que le résultat exprime vraiment la volonté des électeurs.', jauges: { transparence: 70 } },
+    { t: 'recit', entre: ['listeA', 'listeB', 'listeC', 'listeD'], txt: 'Quatre listes se présentent. Après la campagne, 10 000 voix sont exprimées (en comptant tous les élèves des établissements voisins invités).', jauges: { participation: 70 } },
+    { t: 'dit', qui: 'prof', jeu: 'il écrit au tableau', txt: 'Résultats : liste A, 4 650 voix. Liste B, 3 100. Liste C, 1 700. Liste D, 550. Il y a dix sièges à répartir à la proportionnelle.' },
+    { t: 'remarque', titre: 'Étape 1 : le quotient électoral', txt: 'Quotient électoral = nombre de suffrages exprimés ÷ nombre de sièges = 10 000 ÷ 10 = 1 000. Chaque liste obtient autant de sièges que de fois le quotient dans ses voix.' },
+    { t: 'question', q: 'Avec un quotient de 1 000, combien de sièges la liste A (4 650 voix) obtient-elle d’abord ?',
+      options: [
+        { txt: '4 sièges, et il lui reste 650 voix.', ok: true, retour: '4 650 = 4 × 1 000 + 650. On garde le reste pour l’étape suivante.' },
+        { txt: '5 sièges.', retour: 'Pas encore : 4 650 ne contient que 4 fois 1 000. Le reste comptera ensuite.' },
+        { txt: '46 sièges.', retour: 'Il n’y a que dix sièges !' }
+      ] },
+    { t: 'dit', qui: 'prof', txt: 'Au quotient : A obtient 4 sièges (reste 650), B 3 sièges (reste 100), C 1 siège (reste 700), D aucun (reste 550). Cela fait 8 sièges. Il en reste 2.' },
+    { t: 'remarque', titre: 'Étape 2 : le plus fort reste', txt: 'Les sièges restants sont attribués, un par un, aux listes qui ont les plus grands restes. Restes : C 700, A 650, D 550, B 100. Le 9e siège va à C, le 10e à A.' },
+    { t: 'atelier', mode: 'tri', titre: 'Atelier · la répartition finale', consigne: 'Indique combien de sièges obtient chaque liste au total.',
+      cats: ['5 sièges', '3 sièges', '2 sièges', '0 siège'],
+      items: [
+        { txt: 'Liste A (4 650 voix)', cat: 0 },
+        { txt: 'Liste B (3 100 voix)', cat: 1 },
+        { txt: 'Liste C (1 700 voix)', cat: 2 },
+        { txt: 'Liste D (550 voix)', cat: 3 }
+      ],
+      bravo: 'A 5, B 3, C 2, D 0 : total 10 sièges.', jauges: { transparence: 85 } },
+    { t: 'dit', qui: 'listeD', emo: 'triste', txt: 'Et nous, avec 550 voix, on n’a rien ?' },
+    { t: 'choix', qui: 'listeD', q: 'Tu es Ken, de la liste D. Tu n’as aucun élu. Que fais-tu ?',
+      options: [
+        { txt: 'Je conteste en criant que l’élection est truquée.', consequence: 'Sans preuve, tu affaiblis la confiance de tous dans le vote. Une contestation se fait par un recours, avec des faits.', jauges: { transparence: -15 } },
+        { txt: 'J’accepte le résultat et je propose au conseil de travailler avec nous sur notre projet de jardin scolaire.', consequence: 'Tu restes un acteur de la vie du collège, même sans siège.', jauges: { participation: 10 } },
+        { txt: 'Je m’allie avec la liste C pour la prochaine élection.', consequence: 'Une stratégie démocratique : se regrouper pour peser davantage.', jauges: { participation: 5 } }
+      ],
+      oeuvre: 'La proportionnelle donne des sièges aux listes selon leurs voix, mais une petite liste peut n’en obtenir aucun. C’est pourquoi on forme des alliances. Au Cameroun, certaines élections combinent proportionnelle et prime majoritaire.' },
+    { t: 'dit', qui: 'listeA', emo: 'joie', txt: 'Avec 46 % des voix, nous avons 5 sièges sur 10 : nous ne pouvons pas décider seuls. Il faudra convaincre au moins une autre liste.' },
+    { t: 'question', q: 'Quel est l’avantage principal du scrutin proportionnel ?',
+      options: [
+        { txt: 'Le nombre de sièges reflète la diversité des voix : plusieurs courants sont représentés.', ok: true, retour: 'Son inconvénient : il donne rarement une majorité nette.' },
+        { txt: 'La liste arrivée en tête prend tous les sièges.', retour: 'Ça, c’est un scrutin majoritaire de liste.' }
+      ] }
+  ],
+  labo: {
+    titre: 'Laboratoire · un vote qui compte',
+    intro: 'Règle la participation, la transparence du dépouillement et le respect des résultats : l’élection est-elle légitime ?',
+    persos: ['prof', 'listeA', 'listeB', 'listeC', 'listeD'],
+    curseurs: [
+      { id: 'participation', nom: 'Participation', val: 70, bas: 'abstention', haut: 'forte' },
+      { id: 'transparence', nom: 'Transparence (dépouillement public)', val: 75, bas: 'opaque', haut: 'publique' },
+      { id: 'respect', nom: 'Respect des résultats', val: 70, bas: 'contestés', haut: 'acceptés' }
+    ],
+    scenarios: [
+      { nom: 'L’élection du collège', icone: 'document', valeurs: { participation: 70, transparence: 75, respect: 70 } },
+      { nom: 'Forte abstention', icone: 'muet', valeurs: { participation: 15 } },
+      { nom: 'Dépouillement opaque', icone: 'oeil', valeurs: { transparence: 10, respect: 30 } }
+    ],
+    liens: [
+      { a: 'prof', b: 'listeA', type: 'confiance', lib: 'organise', base: .4, poids: { transparence: .4 } },
+      { a: 'listeA', b: 'listeB', type: 'conflit', lib: 'campagne', base: .4 },
+      { a: 'listeC', b: 'listeD', type: 'alliance', lib: 'future alliance', base: .2, poids: { respect: .3 } },
+      { a: 'listeD', b: 'prof', type: 'conflit', lib: 'contestation', base: .1, poids: { respect: -.6 } }
+    ],
+    issue: function(v){
+      if(v.transparence < 30){ return { niveau: 'ko', badge: 'Une élection contestée', recit: 'Le dépouillement se fait à huis clos : les perdants crient à la fraude, personne ne peut prouver le contraire.', apres: 'La transparence est ce qui permet aux perdants d’accepter leur défaite.', themes: ['transparence', 'légitimité'] }; }
+      if(v.participation < 30){ return { niveau: 'moyen', badge: 'Des élus mal élus', recit: 'Peu d’électeurs ont voté : le conseil est légal, mais il représente peu d’élèves.', apres: 'Voter est un droit, et un devoir civique.', themes: ['abstention'] }; }
+      return { niveau: 'ok', badge: 'Un conseil légitime', recit: 'Forte participation, dépouillement public, résultats acceptés : le conseil peut travailler.', apres: 'La démocratie, c’est aussi accepter de perdre.', themes: ['processus électoral', 'proportionnelle'] };
+    }
+  },
+  quiz: [
+    { q: 'Quel organisme organise les élections au Cameroun ?', options: [
+      { txt: 'Elections Cameroon (ELECAM).', ok: true, retour: 'Créé en 2006.' },
+      { txt: 'Le CNC.', retour: 'Le CNC régule les médias.' } ] },
+    { q: 'Comment calcule-t-on le quotient électoral ?', options: [
+      { txt: 'Suffrages exprimés ÷ nombre de sièges.', ok: true, retour: '10 000 ÷ 10 = 1 000.' },
+      { txt: 'Nombre de listes × nombre de sièges.', retour: 'Non.' } ] },
+    { q: 'À quoi sert la règle du plus fort reste ?', options: [
+      { txt: 'À attribuer les sièges qui restent après le quotient.', ok: true, retour: 'Aux listes qui ont les plus grands restes.' },
+      { txt: 'À annuler l’élection.', retour: 'Non.' } ] },
+    { q: 'Pourquoi le vote se fait-il dans un isoloir ?', options: [
+      { txt: 'Pour garantir le secret du vote.', ok: true, retour: 'Personne ne doit savoir ni influencer le choix.' },
+      { txt: 'Pour aller plus vite.', retour: 'Non.' } ] },
+    { q: 'Avec 20 sièges et 40 000 voix, quel est le quotient ?', options: [
+      { txt: '2 000.', ok: true, retour: '40 000 ÷ 20.' },
+      { txt: '800 000.', retour: 'On divise, on ne multiplie pas.' } ] }
+  ],
+  bilan: {
+    retenir: [
+      'Processus électoral : inscription, dépôt des listes, campagne, vote secret, dépouillement public, proclamation ; organisé au Cameroun par ELECAM.',
+      'Scrutin proportionnel : quotient électoral = suffrages exprimés ÷ sièges ; puis plus fort reste.',
+      'Exemple : 10 sièges, 10 000 voix → A 5, B 3, C 2, D 0.',
+      'La proportionnelle représente la diversité des voix, mais donne rarement une majorité nette.'
+    ],
+    ecrire: 'Calculez la répartition de 12 sièges entre trois listes ayant obtenu 5 500, 4 200 et 2 300 voix (quotient, puis plus fort reste). Présentez votre calcul étape par étape.'
+  }
+};
+</script>
+<script src="decors.js?v=20261105b"></script>
+<script src="scene.js?v=20261105b"></script>
+<!-- scene-texte -->
+<details id="scene-texte" style="max-width:860px;margin:28px auto 40px;padding:0 16px;font:15px/1.6 Poppins,system-ui,sans-serif;color:#0C2A6A">
+<summary style="cursor:pointer;font-weight:600;padding:12px 0">Lire la scène en texte</summary>
+<article lang="fr">
+<h1>Dix sièges à partager</h1>
+<p><b>Éducation à la citoyenneté et à la morale · 3ᵉ</b></p>
+<p><i>Dialogue fictif écrit pour la leçon. Les faits et les dates cités sont exacts.</i></p>
+<h3>Objectif</h3><p>Connaître les étapes du processus électoral (inscription, campagne, vote secret, dépouillement, proclamation) ; calculer la répartition des sièges dans un scrutin de liste proportionnel, par le quotient électoral et la règle du plus fort reste.</p>
+<p>Programme : Progression harmonisée 3e · Leçon 3 (les élections au Cameroun), TP 1 (calcul des sièges à l’issue d’un scrutin proportionnel), leçon 4 (le processus électoral), TD 2 (simulation des phases de l’élection municipale)</p>
+<p>Lieu : Le collège, élection simulée · Semaine de la citoyenneté</p>
+<h3>Personnages</h3><ul><li>M. Tamba, professeur d’ECM</li><li>Grâce, tête de liste A</li><li>Ibrahim, tête de liste B</li><li>Laure, tête de liste C</li><li>Ken, tête de liste D</li></ul>
+<h3>La scène</h3>
+<p>Pour la semaine de la citoyenneté, le collège élit un « conseil municipal des jeunes » de dix membres. M. Tamba organise l’élection comme une vraie élection municipale.</p>
+<p><b>M. Tamba, professeur d’ECM</b> : Au Cameroun, c’est Elections Cameroon, ELECAM, qui organise les élections. Ici, ce sera le club ECM. Première étape : la liste électorale.</p>
+<h4>Atelier · le processus électoral</h4><p>Remets dans l’ordre les étapes d’une élection.</p>
+<ol><li>Inscription des électeurs sur la liste électorale.</li><li>Dépôt des listes de candidats.</li><li>Campagne électorale.</li><li>Vote : bulletin choisi seul dans l’isoloir, enveloppe dans l’urne.</li><li>Dépouillement public des bulletins.</li><li>Proclamation des résultats.</li></ol>
+<p>Chaque étape a ses règles : elles garantissent que le résultat exprime vraiment la volonté des électeurs.</p>
+<p>Quatre listes se présentent. Après la campagne, 10 000 voix sont exprimées (en comptant tous les élèves des établissements voisins invités).</p>
+<p><b>M. Tamba, professeur d’ECM</b> <i>(il écrit au tableau)</i> : Résultats : liste A, 4 650 voix. Liste B, 3 100. Liste C, 1 700. Liste D, 550. Il y a dix sièges à répartir à la proportionnelle.</p>
+<h4>Étape 1 : le quotient électoral</h4><p>Quotient électoral = nombre de suffrages exprimés ÷ nombre de sièges = 10 000 ÷ 10 = 1 000. Chaque liste obtient autant de sièges que de fois le quotient dans ses voix.</p>
+<p><b>Question :</b> Avec un quotient de 1 000, combien de sièges la liste A (4 650 voix) obtient-elle d’abord ?</p><ul><li>4 sièges, et il lui reste 650 voix. <b>(bonne réponse)</b></li><li>5 sièges.</li><li>46 sièges.</li></ul><p>4 650 = 4 × 1 000 + 650. On garde le reste pour l’étape suivante.</p>
+<p><b>M. Tamba, professeur d’ECM</b> : Au quotient : A obtient 4 sièges (reste 650), B 3 sièges (reste 100), C 1 siège (reste 700), D aucun (reste 550). Cela fait 8 sièges. Il en reste 2.</p>
+<h4>Étape 2 : le plus fort reste</h4><p>Les sièges restants sont attribués, un par un, aux listes qui ont les plus grands restes. Restes : C 700, A 650, D 550, B 100. Le 9e siège va à C, le 10e à A.</p>
+<h4>Atelier · la répartition finale</h4><p>Indique combien de sièges obtient chaque liste au total.</p>
+<ul><li><b>5 sièges</b> : Liste A (4 650 voix)</li><li><b>3 sièges</b> : Liste B (3 100 voix)</li><li><b>2 sièges</b> : Liste C (1 700 voix)</li><li><b>0 siège</b> : Liste D (550 voix)</li></ul>
+<p>A 5, B 3, C 2, D 0 : total 10 sièges.</p>
+<p><b>Ken, tête de liste D</b> : Et nous, avec 550 voix, on n’a rien ?</p>
+<p><b>À toi de décider :</b> Tu es Ken, de la liste D. Tu n’as aucun élu. Que fais-tu ?</p><ul><li>Je conteste en criant que l’élection est truquée. — Sans preuve, tu affaiblis la confiance de tous dans le vote. Une contestation se fait par un recours, avec des faits.</li><li>J’accepte le résultat et je propose au conseil de travailler avec nous sur notre projet de jardin scolaire. — Tu restes un acteur de la vie du collège, même sans siège.</li><li>Je m’allie avec la liste C pour la prochaine élection. — Une stratégie démocratique : se regrouper pour peser davantage.</li></ul>
+<p><b>Grâce, tête de liste A</b> : Avec 46 % des voix, nous avons 5 sièges sur 10 : nous ne pouvons pas décider seuls. Il faudra convaincre au moins une autre liste.</p>
+<p><b>Question :</b> Quel est l’avantage principal du scrutin proportionnel ?</p><ul><li>Le nombre de sièges reflète la diversité des voix : plusieurs courants sont représentés. <b>(bonne réponse)</b></li><li>La liste arrivée en tête prend tous les sièges.</li></ul><p>Son inconvénient : il donne rarement une majorité nette.</p>
+<h3>Quiz</h3><ol><li>Quel organisme organise les élections au Cameroun ? — <b>Elections Cameroon (ELECAM).</b> Créé en 2006.</li><li>Comment calcule-t-on le quotient électoral ? — <b>Suffrages exprimés ÷ nombre de sièges.</b> 10 000 ÷ 10 = 1 000.</li><li>À quoi sert la règle du plus fort reste ? — <b>À attribuer les sièges qui restent après le quotient.</b> Aux listes qui ont les plus grands restes.</li><li>Pourquoi le vote se fait-il dans un isoloir ? — <b>Pour garantir le secret du vote.</b> Personne ne doit savoir ni influencer le choix.</li><li>Avec 20 sièges et 40 000 voix, quel est le quotient ? — <b>2 000.</b> 40 000 ÷ 20.</li></ol>
+<h3>À retenir</h3><ul><li>Processus électoral : inscription, dépôt des listes, campagne, vote secret, dépouillement public, proclamation ; organisé au Cameroun par ELECAM.</li><li>Scrutin proportionnel : quotient électoral = suffrages exprimés ÷ sièges ; puis plus fort reste.</li><li>Exemple : 10 sièges, 10 000 voix → A 5, B 3, C 2, D 0.</li><li>La proportionnelle représente la diversité des voix, mais donne rarement une majorité nette.</li></ul>
+<h3>À écrire</h3><p>Calculez la répartition de 12 sièges entre trois listes ayant obtenu 5 500, 4 200 et 2 300 voix (quotient, puis plus fort reste). Présentez votre calcul étape par étape.</p>
+<p><a href="index.html">Toutes les Scènes vivantes</a> · <a href="3e-ecm-election-proportionnelle.html">Jouer la scène</a></p>
+</article>
+<!-- /scene-texte -->
+</body>
+</html>

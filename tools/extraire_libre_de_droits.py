@@ -64,6 +64,23 @@ RE_COMP = re.compile(r'^Compréhension\s*:\s*(.*)$')
 RE_EXPL = re.compile(r'^Exploitation\s*:\s*(.*)$')
 
 
+
+# ── Scènes de théâtre mal typées (02/11/2026) ──────────────────────────────
+# Le .docx source classe des scènes de Molière « argumentatif », « explicatif »
+# ou « injonctif » (celui de leur module). Une scène — répliques précédées du
+# nom du personnage — est un DIALOGUE : c'est ce type qui la range dans la
+# séquence « texte théâtral et dialogue » et qui cadre ses questions.
+RE_THEATRE_TETE = re.compile(r"^[A-ZÉÈ][a-zéèêïë]+(?: [A-Z][a-zé]+)? [A-ZÀ-Ü«\"'(]")
+RE_THEATRE_REPLIQUE = re.compile(r"(?:^|[.!?…]\s)([A-ZÉ][a-zéèêë]{2,}) (?=[A-ZÀ-Ü«])")
+
+
+def type_corrige(texte, typ):
+    if typ in ('DIALOGUE', 'POÉTIQUE'):
+        return typ
+    if RE_THEATRE_TETE.match(texte) and len(RE_THEATRE_REPLIQUE.findall(texte)) >= 3:
+        return 'DIALOGUE'
+    return typ
+
 def paragraphes(chemin):
     z = zipfile.ZipFile(chemin)
     xml = z.read('word/document.xml').decode('utf-8')
@@ -170,6 +187,7 @@ def main():
                 break
             i += 1
 
+        typ = type_corrige(texte, typ)
         auteur, titre = (reference.split(',', 1) + [''])[:2]
         fiches.append({
             'n': num, 'type': typ, 'words': mots, 'level': niveau,

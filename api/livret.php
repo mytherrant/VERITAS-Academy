@@ -341,6 +341,9 @@ if ($lv_origin !== '' && !in_array($lv_origin, $lv_allowed, true)) {
 }
 
 $in = json_decode((string) file_get_contents('php://input'), true);
+/* Un envoi de FICHIER arrive en multipart (FormData) : le corps n'est pas du
+   JSON, les champs sont dans $_POST. Seule l'action de dépôt l'utilise. */
+if (!is_array($in) && !empty($_POST['action'])) $in = $_POST;
 if (!is_array($in)) $in = [];
 $action = (string) ($in['action'] ?? '');
 
@@ -449,6 +452,179 @@ if (strpos($action, 'admin_') === 0) {
             ] + $fiches;
         }
         lv_out(200, ['ok' => true, 'dossier' => basename($dir), 'ouvrages' => $out]);
+    }
+
+    /* ── LES FICHIERS D'UN LIVRET, DEPUIS LE PANNEAU ─────────────────────────
+       Déposer un cahier demandait un client FTP. L'administration le fait
+       désormais depuis la page « Livrets » : données du cahier (`booklet-`,
+       `guide-`, `corrige-<slug>.js`), pages d'un feuilletage (`<slug>/pNNN.jpg`,
+       produites dans le navigateur à partir d'un PDF) et couverture.
+
+       Trois règles, celles qui ont coûté des ventes quand on les oubliait :
+         ① on CONTRÔLE avant d'écrire — un `.js` qui ne se lit pas, une image
+           qui n'est pas un JPEG, n'entrent pas (le 01/09/2026, un cahier
+           tronqué s'est vendu et livré vide) ;
+         ② on écrit de façon ATOMIQUE (temp + rename) : jamais de fichier à
+           moitié écrit servi à un acheteur ;
+         ③ on ne DÉTRUIT rien : un fichier remplacé ou retiré part dans
+           `_corbeille/` (dossier protégé), d'où il se récupère par FTP. */
+    $lvSlugAdmin = static function () use ($in): string {
+        $slug = (string) preg_replace('/[^a-z0-9_-]/', '', strtolower((string) ($in['o'] ?? '')));
+        if ($slug === '' || !isset(vrt_livret_catalogue()[$slug])) {
+            lv_err(404, 'Livret inconnu du serveur. Enregistrez la fiche et attendez la synchronisation, puis réessayez.', 'unknown');
+        }
+        return $slug;
+    };
+    /* Corbeille : une COPIE de l'ancien fichier, faite AVANT le remplacement.
+       Le déplacer d'abord laissait un instant — et, si le `rename` suivant
+       échouait, pour de bon — un livret vendu sans son fichier. Copier puis
+       renommer par-dessus garde l'ancien en place jusqu'à la dernière seconde.
+       Purge des entrées de plus de 60 jours : l'hébergement n'a pas un disque
+       infini, et deux mois laissent le temps de s'apercevoir d'une erreur. */
+    $lvCorbeille = static function (string $chemin, string $nom, bool $deplacer = false): bool {
+        if (!file_exists($chemin)) return true;
+        $c = lv_dir() . '/_corbeille';
+        if (!is_dir($c)) @mkdir($c, 0750, true);
+        $dest = $c . '/' . date('Ymd-His') . '_' . $nom;
+        $ok = $deplacer ? @rename($chemin, $dest) : @copy($chemin, $dest);
+        $limite = time() - 60 * 86400;
+        foreach (glob($c . '/*') ?: [] as $v) {
+            if ((int) @filemtime($v) >= $limite) continue;
+            if (is_dir($v)) { foreach (glob($v . '/*') ?: [] as $x) @unlink($x); @rmdir($v); }
+            else @unlink($v);
+        }
+        return $ok;
+    };
+    $lvCibles = static function (string $slug, string $quoi, int $n = 0): ?string {
+        switch ($quoi) {
+            case 'booklet': case 'guide': case 'corrige':
+                return lv_dir() . '/' . $quoi . '-' . $slug . '.js';
+            case 'page':
+                /* Les pages arrivent dans un LOT D'ATTENTE (`<slug>~lot/`),
+                   jamais servi. Elles ne remplacent les pages en ligne qu'en
+                   bloc, une fois toutes reçues (admin_publier_pages). Écrire
+                   directement dans `<slug>/` mettait en vente un livre à
+                   moitié déposé pendant tout l'envoi — et pour de bon si
+                   l'envoi s'interrompait. */
+                if ($n < 1 || $n > 2000) return null;
+                return lv_dir() . '/' . $slug . '~lot/p' . str_pad((string) $n, 3, '0', STR_PAD_LEFT) . '.jpg';
+            case 'couverture':
+                return dirname(__DIR__) . '/uploads/oeuvres/livret_' . $slug . '.jpg';
+        }
+        return null;
+    };
+
+    if ($action === 'admin_fichiers') {
+        $slug = $lvSlugAdmin();
+        $info = static function (string $p, bool $js) {
+            if (!is_file($p)) return ['depose' => false];
+            $r = ['depose' => true, 'octets' => (int) @filesize($p), 'modifie' => (int) @filemtime($p)];
+            if ($js) $r['intact'] = vrt_livret_donnees_bornes($p);
+            return $r;
+        };
+        $nPages = vrt_livret_pages_deposees($slug);
+        $poids = 0;
+        foreach (glob(lv_dir() . '/' . $slug . '/p*.jpg') ?: [] as $f) $poids += (int) @filesize($f);
+        $etat = vrt_livret_etat($slug);
+        lv_out(200, ['ok' => true, 'slug' => $slug,
+            'mode' => (string) $etat['mode'], 'disponible' => (bool) $etat['disponible'],
+            'booklet' => $info($lvCibles($slug, 'booklet'), true),
+            'guide'   => $info($lvCibles($slug, 'guide'), true),
+            'corrige' => $info($lvCibles($slug, 'corrige'), true),
+            'pages'   => ['n' => $nPages, 'octets' => $poids],
+            'couverture' => vrt_livret_couverture($slug),
+            'lien' => (string) $etat['lien']]);
+    }
+
+    if ($action === 'admin_deposer') {
+        $slug = $lvSlugAdmin();
+        $quoi = (string) ($in['quoi'] ?? '');
+        $n    = (int) ($in['n'] ?? 0);
+        $cible = $lvCibles($slug, $quoi, $n);
+        if ($cible === null) lv_err(400, 'Type de fichier inconnu.', 'quoi');
+        $f = $_FILES['fichier'] ?? null;
+        if (!is_array($f) || (int) ($f['error'] ?? 1) !== UPLOAD_ERR_OK || !is_uploaded_file((string) $f['tmp_name'])) {
+            $e = is_array($f) ? (int) ($f['error'] ?? 0) : -1;
+            lv_err(400, ($e === UPLOAD_ERR_INI_SIZE || $e === UPLOAD_ERR_FORM_SIZE)
+                ? 'Fichier trop lourd pour le serveur.' : 'Aucun fichier reçu.', 'fichier');
+        }
+        $tmp = (string) $f['tmp_name'];
+        $taille = (int) @filesize($tmp);
+        $estJs = in_array($quoi, ['booklet', 'guide', 'corrige'], true);
+        if ($taille <= 0 || $taille > ($estJs ? 30 : 8) * 1024 * 1024) {
+            lv_err(400, 'Fichier vide ou trop lourd (' . ($estJs ? '30' : '8') . ' Mo au plus).', 'taille');
+        }
+        if ($estJs) {
+            /* La même preuve que celle qu'exige la livraison : une affectation
+               `window.X = {…}` complète ET qui se lit en JSON. Un fichier qui
+               échouerait ici ferait un cahier vendu et vide. */
+            if (vrt_livret_donnees_identifiant((string) @file_get_contents($tmp)) === null) {
+                lv_err(422, 'Ce fichier n’est pas un cahier lisible (attendu : window.NOM = {…}). Rien n’a été remplacé.', 'illisible');
+            }
+        } else {
+            $im = @getimagesize($tmp);
+            if (!is_array($im) || (int) ($im[2] ?? 0) !== IMAGETYPE_JPEG) {
+                lv_err(422, 'Image JPEG attendue. Rien n’a été remplacé.', 'image');
+            }
+        }
+        $dir = dirname($cible);
+        // La page 1 ouvre un nouveau lot : les restes d'un envoi interrompu
+        // ne doivent pas se mêler au suivant.
+        if ($quoi === 'page' && $n === 1 && is_dir($dir)) {
+            foreach (glob($dir . '/*') ?: [] as $x) @unlink($x);
+        }
+        if (!is_dir($dir) && !@mkdir($dir, 0750, true)) lv_err(500, 'Dossier du livret impossible à créer.', 'io');
+        $part = $cible . '.part';
+        if (!@move_uploaded_file($tmp, $part)) lv_err(500, 'Écriture impossible sur le serveur.', 'io');
+        @chmod($part, $quoi === 'couverture' ? 0644 : 0640);
+        if ($quoi !== 'page') $lvCorbeille($cible, $slug . '_' . basename($cible));
+        if (!@rename($part, $cible)) { @unlink($part); lv_err(500, 'Écriture impossible sur le serveur.', 'io'); }
+        lv_log('[ADMIN-DEPOT] o=' . $slug . ' quoi=' . $quoi . ($quoi === 'page' ? ' n=' . $n : '') . ' octets=' . $taille);
+        lv_out(200, ['ok' => true, 'slug' => $slug, 'quoi' => $quoi, 'n' => $n, 'octets' => $taille,
+                     'pages' => vrt_livret_pages_deposees($slug)]);
+    }
+
+    /* Le lot d'attente est complet : il REMPLACE les pages en ligne d'un seul
+       geste. On vérifie d'abord qu'il contient exactement p001…pN, sans trou —
+       ce que le client annonce n'est pas une preuve. */
+    if ($action === 'admin_publier_pages') {
+        $slug  = $lvSlugAdmin();
+        $total = (int) ($in['total'] ?? 0);
+        $lot   = lv_dir() . '/' . $slug . '~lot';
+        $vu = 0;
+        while ($vu < 2000 && is_file($lot . '/p' . str_pad((string) ($vu + 1), 3, '0', STR_PAD_LEFT) . '.jpg')) $vu++;
+        if ($total < 1 || $vu !== $total) {
+            lv_err(409, 'Envoi incomplet : ' . $vu . ' page(s) reçue(s) sur ' . $total . '. Les pages en ligne n’ont pas été touchées ; relancez le dépôt.', 'incomplet');
+        }
+        $live = lv_dir() . '/' . $slug;
+        if (is_dir($live) && !$lvCorbeille($live, $slug . '_pages', true)) lv_err(500, 'Remplacement impossible.', 'io');
+        if (!@rename($lot, $live)) lv_err(500, 'Publication des pages impossible.', 'io');
+        lv_log('[ADMIN-PAGES] o=' . $slug . ' pages=' . $total);
+        lv_out(200, ['ok' => true, 'pages' => vrt_livret_pages_deposees($slug)]);
+    }
+
+    if ($action === 'admin_retirer_fichier') {
+        $slug = $lvSlugAdmin();
+        $quoi = (string) ($in['quoi'] ?? '');
+        if ($quoi === 'pages') {
+            /* Toutes les pages d'un feuilletage — avant d'en déposer une
+               nouvelle version, sinon les pages de l'ancienne en trop
+               resteraient à la suite. Le dossier entier part à la corbeille. */
+            $d = lv_dir() . '/' . $slug;
+            $n = 0;
+            if (is_dir($d)) {
+                $n = count(glob($d . '/p*.jpg') ?: []);
+                if (!$lvCorbeille($d, $slug . '_pages', true)) lv_err(500, 'Retrait impossible.', 'io');
+            }
+            lv_log('[ADMIN-RETRAIT] o=' . $slug . ' pages=' . $n);
+            lv_out(200, ['ok' => true, 'retirees' => $n]);
+        }
+        $cible = $lvCibles($slug, $quoi, (int) ($in['n'] ?? 0));
+        if ($cible === null || $quoi === 'page') lv_err(400, 'Type de fichier inconnu.', 'quoi');
+        if (!is_file($cible)) lv_err(404, 'Ce fichier n’est pas sur le serveur.', 'absent');
+        if (!$lvCorbeille($cible, $slug . '_' . basename($cible), true)) lv_err(500, 'Retrait impossible.', 'io');
+        lv_log('[ADMIN-RETRAIT] o=' . $slug . ' quoi=' . $quoi);
+        lv_out(200, ['ok' => true]);
     }
 
     if ($action === 'admin_revoke') {
@@ -785,6 +961,18 @@ if ($action === 'catalogue') {
                ira chercher au moment de l'octroi. */
             'prix'  => vrt_livret_prix($__tarifs, 'livret', (string) $slug),
             'prixGuide' => vrt_livret_prix($__tarifs, 'guide', (string) $slug),
+            // Le tarif hors promotion, à barrer à côté du prix promo — et la
+            // promotion elle-même (null hors promotion).
+            'prixNormal' => vrt_livret_prix_normal($__tarifs, 'livret', (string) $slug),
+            'prixGuideNormal' => vrt_livret_prix_normal($__tarifs, 'guide', (string) $slug),
+            'promo' => vrt_livret_promo($__tarifs, (string) $slug),
+            // Retiré de la vente depuis l'administration : la boutique le
+            // masque, l'administration le montre (pour pouvoir le remettre).
+            'retire' => !empty($etat['retire']),
+            'supprime' => !empty($o['supprime']),
+            // Feuilletage : nombre de pages et aperçu gratuit (page Livrets).
+            'pages' => (int) ($o['pages'] ?? 0),
+            'pagesLibres' => (int) ($o['pagesLibres'] ?? 0),
             'disponible' => (bool) $etat['disponible'],
             // Où mène la carte de la boutique. Le serveur le dit, parce que
             // lui seul sait laquelle des deux formes existe.

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apprendre · cours de la 6ᵉ à la Terminale | VÉRITAS</title>
+<meta name="description" content="Toutes les matières du programme camerounais, leçon par leçon, d'après la progression harmonisée du MINESEC : cours illustrés, fiches de révision, quiz et scènes vivantes.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="../VERITAS_favicon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="apprendre.css?v=20261111c">
+<link rel="stylesheet" href="jeu.css?v=20261110g">
+<style>
+.hero{background:linear-gradient(90deg,#EDF2FB,#F7F9FE 70%);color:#001136;border:1px solid #DCE5F5;border-radius:10px;padding:34px 34px 28px;position:relative;overflow:hidden;margin-bottom:26px}
+.hero::before{display:none}
+.hero>*{position:relative}
+.hero h1{color:#001136;margin:0 0 6px;text-align:left;max-width:none}
+.hero p{margin:0 0 18px;color:#4D5163;max-width:620px}
+.classes{display:flex;flex-wrap:wrap;gap:8px}
+.classes button{border:1px solid #DCE5F5;background:#fff;color:#0C2A6A;border-radius:999px;padding:8px 14px;font:600 14px var(--sans);cursor:pointer}
+.classes button:hover{border-color:#9FBEEA}
+.classes button[aria-pressed="true"]{background:#1E499B;color:#fff;border-color:#1E499B}
+.stats{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;font-size:14px;color:#4D5163}
+.stats b{color:#C24E00;font-size:16px}
+.blocs{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:28px}
+.bloc{background:#fff;border-radius:20px;padding:22px 22px 20px;box-shadow:0 4px 0 var(--sable);text-decoration:none;color:inherit;display:block}
+.bloc small{font:700 12px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--m)}
+.bloc h2{font:700 21px/1.3 var(--serif);color:var(--titre);margin:6px 0 6px}
+.bloc p{margin:0;color:var(--gris);font-size:15px}
+.bloc .go{display:inline-flex;margin-top:14px;font-weight:700;color:var(--ink);background:var(--or);border-radius:999px;padding:9px 18px}
+.jour{display:flex;gap:16px;align-items:flex-start}
+.jour .med{flex:0 0 64px;height:64px;border-radius:18px;display:grid;place-items:center}
+.sec-t{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:8px 0 14px}
+.sec-t h2{font:700 22px var(--serif);color:var(--titre);margin:0}
+.sec-t a{font-size:14px;font-weight:600;text-decoration:none}
+.mats{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:14px;margin-bottom:34px}
+.mat{background:#fff;border-radius:18px;padding:16px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 0 var(--sable);transition:transform .2s}
+.mat:hover{transform:translateY(-3px)}
+.mat .h{display:flex;align-items:center;gap:12px}
+.mat .pas{flex:0 0 46px;height:46px;border-radius:14px;display:grid;place-items:center}
+.mat b{color:var(--c,#001136);font-size:16px;line-height:1.25}
+.mat span{font-size:13px;color:var(--gris)}
+.mat .barre-p{margin-top:auto}
+.badge{display:inline-block;font:700 12px var(--sans);letter-spacing:.04em;padding:3px 8px;border-radius:999px;background:var(--m-pale);color:var(--m)}
+.defi{background:#fff;border-radius:20px;padding:22px;box-shadow:0 4px 0 var(--sable);margin-bottom:34px}
+.defi .q{margin:0}
+.defi .q button{max-width:none}
+.defi-pied{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:14px;color:var(--gris);gap:10px;flex-wrap:wrap}
+.scenes{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-bottom:38px}
+.scenes .scene{margin:0}
+.profils-z{text-align:center;margin:10px 0 0}
+/* ── Mon année scolaire (10/11/2026) : calendrier, actualités MINESEC, classe virtuelle ── */
+.annee{margin-bottom:34px}
+.annee-g{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px}
+.carte-a{background:#fff;border-radius:20px;padding:20px;box-shadow:0 4px 0 var(--sable)}
+.carte-a h3{font:700 17px var(--serif);color:var(--titre);margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.carte-a h3 .si{color:#1E499B}
+.cal-g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:18px}
+/* Compte à rebours embelli (11/11/2026) : dégradé lumineux plutôt qu'un aplat
+   nuit, halos décoratifs, tuiles « verre », chiffres dorés, secondes qui
+   battent, et le chemin parcouru depuis la rentrée. */
+.cal-cpt{position:relative;isolation:isolate;overflow:hidden;color:#fff;border-radius:20px;padding:22px 20px 20px;
+  background:radial-gradient(120% 90% at 100% 0%,rgba(255,201,60,.22) 0%,rgba(255,201,60,0) 46%),radial-gradient(90% 80% at 0% 100%,rgba(91,79,168,.55) 0%,rgba(91,79,168,0) 60%),linear-gradient(145deg,#142E78 0%,#1E499B 55%,#3D4FB8 100%);
+  box-shadow:0 18px 36px -18px rgba(20,46,120,.7),inset 0 1px 0 rgba(255,255,255,.14)}
+.cal-cpt::before{content:"";position:absolute;z-index:-1;right:-46px;top:-46px;width:150px;height:150px;border-radius:50%;border:22px solid rgba(255,255,255,.06)}
+.cal-cpt::after{content:"";position:absolute;z-index:-1;inset:0;opacity:.5;pointer-events:none;
+  background-image:radial-gradient(rgba(255,255,255,.55) 1px,transparent 1.4px);background-size:22px 22px;
+  -webkit-mask-image:linear-gradient(200deg,#000 0%,transparent 55%);mask-image:linear-gradient(200deg,#000 0%,transparent 55%)}
+.cal-sur{margin:0 0 14px;display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;background:rgba(255,201,60,.16);border:1px solid rgba(255,201,60,.35);font:700 12px var(--sans);letter-spacing:.07em;text-transform:uppercase;color:#FFE08A}
+.cal-chiffres{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:8px}
+.cal-chiffres span{position:relative;border-radius:14px;padding:12px 4px 9px;text-align:center;
+  background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.06));border:1px solid rgba(255,255,255,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 8px 16px -10px rgba(0,0,0,.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.cal-chiffres span::after{content:"";position:absolute;left:8px;right:8px;top:50%;height:1px;background:rgba(0,0,0,.14);box-shadow:0 1px 0 rgba(255,255,255,.08)}
+.cal-chiffres b{display:block;font:800 clamp(26px,3.4vw,34px)/1.05 var(--sans);color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-.02em;text-shadow:0 2px 10px rgba(0,0,0,.2)}
+.cal-chiffres .cal-u-j{background:linear-gradient(180deg,rgba(255,201,60,.30),rgba(255,201,60,.10));border-color:rgba(255,201,60,.45)}
+.cal-chiffres .cal-u-j b{font-size:clamp(30px,4vw,40px);background:linear-gradient(180deg,#FFF1C2,#FFC93C 70%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none}
+.cal-chiffres small{display:block;margin-top:3px;font:600 11px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.78)}
+.cal-chiffres b.tic{animation:calTic .5s ease-out}
+@keyframes calTic{0%{transform:translateY(-3px);opacity:.55}100%{transform:none;opacity:1}}
+.cal-trajet{margin:14px 0 0}
+.cal-trajet-b{position:relative;height:7px;border-radius:99px;background:rgba(255,255,255,.16);overflow:hidden}
+.cal-trajet-b i{position:absolute;inset:0 auto 0 0;border-radius:99px;background:linear-gradient(90deg,#FFE08A,#FFC93C);box-shadow:0 0 12px rgba(255,201,60,.6)}
+.cal-trajet small{display:block;margin-top:6px;font-size:12px;color:rgba(255,255,255,.8)}
+.cal-quand{margin:14px 0 0;display:flex;align-items:flex-start;gap:8px;font:700 15px/1.4 var(--sans);color:#fff}
+.cal-quand .si,.cal-quand svg{flex:0 0 auto;margin-top:2px;color:#FFC93C}
+.cal-note{margin:12px 0 0;padding-top:10px;border-top:1px solid rgba(255,255,255,.14);font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.78)}
+@media (max-width:520px){.cal-cpt{padding:20px 16px 18px}.cal-chiffres{gap:6px}.cal-chiffres small{font-size:10px}}
+@media (prefers-reduced-motion:reduce){.cal-chiffres b.tic{animation:none}}
+.cal-sit{display:flex;justify-content:space-between;gap:8px;margin:0 0 6px;font-size:14px;color:var(--titre)}
+.cal-sit span{color:var(--gris);font-size:13px}
+.cal-barre{position:relative;height:8px;border-radius:99px;background:#EDF2FB;margin-bottom:12px}
+.cal-barre i{position:absolute;inset:0 auto 0 0;border-radius:99px;background:#1E499B}
+.cal-barre em{position:absolute;top:-3px;width:2px;height:14px;background:#9FBEEA}
+.cal-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.cal-l li{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:12px;background:#F7F9FE}
+.cal-l li.vac{background:#EAF6EC}.cal-l li.exa{background:#FFF8E6}
+.cal-i{flex:0 0 32px;height:32px;border-radius:10px;display:grid;place-items:center;background:#fff;color:#1E499B}
+.cal-l li.vac .cal-i{color:#007E11}.cal-l li.exa .cal-i{color:#C24E00}
+.cal-t{flex:1;min-width:0}.cal-t b{display:block;font-size:13.5px;color:var(--titre);line-height:1.3}.cal-t small{font-size:12px;color:var(--gris)}
+.cal-j{font:700 12.5px var(--sans);color:#1E499B;white-space:nowrap}
+.cal-src,.act-src{margin:10px 0 0;font-size:12px;color:var(--gris)}
+.act-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.act-l a{display:block;padding:9px 10px;border-radius:12px;text-decoration:none;color:inherit}
+.act-l a:hover{background:#F7F9FE}
+.act-l b{display:block;font-size:14px;line-height:1.35;color:var(--titre);font-weight:600}
+.act-l small{font-size:12px;color:var(--gris)}
+.act-tag{display:inline-block;font:700 11px var(--sans);letter-spacing:.04em;text-transform:uppercase;color:#C24E00;background:#FDF1E8;border-radius:999px;padding:2px 8px;margin-bottom:4px}
+.act-att,.act-vide{color:var(--gris);font-size:14px;margin:0}
+.cv{margin-top:16px}
+.cv-t{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.cv-i{flex:0 0 48px;height:48px;border-radius:14px;display:grid;place-items:center;background:#F0EDF9;color:#5B4FA8}
+.cv-t b{display:block;font:700 17px var(--serif);color:var(--titre)}.cv-t small{color:var(--gris);font-size:13px}
+.cv-s{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.cv-s li{font-size:12.5px;font-weight:600;color:#5B4FA8;background:#F0EDF9;border-radius:999px;padding:4px 10px}
+.cv-p{margin:0 0 14px;color:var(--gris);font-size:14px}
+.cv-go{display:inline-flex;font-weight:700;color:var(--ink);background:var(--or);border-radius:999px;padding:9px 18px;text-decoration:none}
+.cv-sec{display:block;margin-top:10px;font-size:13px}
+@media (max-width:900px){.annee-g,.cal-g{grid-template-columns:1fr}}
+.profils-z h2{font:700 24px var(--serif);color:var(--titre);margin:0 0 16px}
+/* ── Bandeau d'accueil (07/11) : deux colonnes, mosaïque d'icônes colorées, classes par cycle ── */
+.hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:28px;align-items:center;background:linear-gradient(120deg,#EDF2FB 0%,#F7F9FE 45%,#FFF8E6 100%);border:1px solid #DCE5F5;border-radius:16px}
+.hero h1{font-size:clamp(26px,3.6vw,38px);line-height:1.15;margin-bottom:10px}
+.hero h1 span{color:#1E499B;background:linear-gradient(transparent 62%,#FFE7A3 62%)}
+.cycle-t{margin:6px 0 8px!important;font:600 12px var(--sans);letter-spacing:.07em;text-transform:uppercase;color:#6B7287}
+.classes button{--k:#1E499B;--kp:#EDF2FB;border:1.5px solid var(--kp);color:var(--k);transition:background .15s,border-color .15s,transform .15s}
+.classes button.lycee{--k:#5B4FA8;--kp:#F0EDF9}
+.classes button.sep{margin-left:10px}
+.classes button:hover{border-color:var(--k);transform:translateY(-1px)}
+.classes button[aria-pressed="true"]{background:var(--k);color:#fff;border-color:var(--k)}
+.stats{gap:8px}
+.stats span{background:#fff;border:1px solid #E6EAF2;border-radius:999px;padding:5px 12px;font-size:13px}
+.stats span:nth-child(2) b{color:#0E7C86}.stats span:nth-child(3) b{color:#007E11}
+.mosaique{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;transform:rotate(-3deg)}
+.mosaique span{aspect-ratio:1;border-radius:18px;display:grid;place-items:center;background:var(--cp);border:2px solid #fff;box-shadow:0 10px 22px -14px var(--c);transition:transform .25s}
+.mosaique span:nth-child(odd){transform:translateY(10px)}
+.mosaique span svg{width:58%;height:58%}
+.hero:hover .mosaique span{transform:translateY(0)}
+@media (max-width:760px){.blocs{grid-template-columns:1fr}.hero{padding:24px 20px;grid-template-columns:1fr}.mosaique{grid-template-columns:repeat(6,1fr);transform:none;gap:8px}.mosaique span{border-radius:12px}.mosaique span:nth-child(n+7){display:none}.mosaique span:nth-child(odd){transform:none}.classes button.sep{margin-left:0}}
+@media (prefers-reduced-motion:reduce){.mosaique span{transition:none}}
+/* Faisons connaissance : les quatre cartes de public de la vitrine (10/11/2026) */
+.pcartes{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:left}
+.pcarte{display:flex;flex-direction:column;border-radius:14px;overflow:hidden;text-decoration:none;color:#fff;box-shadow:0 10px 24px rgba(0,17,54,.10);transition:transform .18s,box-shadow .18s}
+.pcarte:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(0,17,54,.16)}
+.pc-ph{display:block;height:150px;background-size:cover;background-repeat:no-repeat;background-color:#E9EEF7}
+.pc-c{flex:1;display:flex;flex-direction:column;align-items:flex-start;padding:20px 20px 18px;color:#fff}
+.pc-i{width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.pc-c b{font:600 21px/1.25 var(--sans);color:#fff;margin-bottom:6px}
+.pc-t{font-size:14.5px;line-height:1.55;color:rgba(255,255,255,.9);margin-bottom:16px}
+.pc-b{margin-top:auto;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);border-radius:100px;padding:8px 14px;font:600 13.5px var(--sans);color:#fff}
+.pc-el{background-image:url(/assets/photo-examen-600.webp);background-image:image-set(url(/assets/photo-examen-600.webp) 1x,url(/assets/photo-examen.webp) 2x)}
+.pc-pa{background-image:url(/assets/parents-reussite-640.webp);background-image:image-set(url(/assets/parents-reussite-640.webp) 1x,url(/assets/parents-reussite.webp) 2x)}
+.pc-en{background-image:url(/assets/apprendre-classe-640.webp);background-image:image-set(url(/assets/apprendre-classe-640.webp) 1x,url(/assets/apprendre-classe.webp) 2x)}
+.pc-pt{background-image:url(/assets/photo-groupe-600.webp);background-image:image-set(url(/assets/photo-groupe-600.webp) 1x,url(/assets/photo-groupe.webp) 2x)}
+@media (max-width:900px){.pcartes{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.pcartes{grid-template-columns:1fr}.pc-ph{height:140px}}
+/* 10/11/2026 — « enlève les ronds autour des classes » (Jacques) : texte
+   simple, la classe choisie soulignée. Par identifiant : passe devant
+   .classes button d'apprendre.css et des règles ci-dessus. */
+#classes{gap:4px 20px;align-items:baseline}
+#classes button{border:0;border-radius:0;background:none;padding:6px 0 5px;border-bottom:2px solid transparent;color:var(--k,#1E499B);font:600 15px var(--sans);transform:none}
+#classes button:hover{border-bottom-color:var(--k,#1E499B);background:none;transform:none}
+#classes button[aria-pressed="true"]{background:none;color:var(--k,#1E499B);border-bottom-color:var(--k,#1E499B);font-weight:700}
+#classes button.sep{margin-left:14px}
+</style>
+</head>
+<body class="eleve">
+<a class="saut" href="#contenu">Aller au contenu</a>
+<header class="top">
+  <a class="logo" href="/">VÉRI<b>TAS</b></a>
+  <nav class="top-nav" aria-label="Apprendre"><a href="index.html" aria-current="page">Apprendre</a><a href="ressources.html">Tout pour progresser</a><a href="notes.html">Mes notes</a><a href="/scenes/">Scènes vivantes</a><a href="/corriges/">Corrigés</a></nav>
+  <div class="top-d"><a class="niveau-chip" data-niveau href="#progression" aria-label="Mon niveau et mes badges"></a><span class="serie" id="serie" hidden></span></div>
+</header>
+<nav class="rail" id="rail" aria-label="Matières de la classe"></nav>
+
+<main class="page" id="contenu"><div class="lim">
+  <section class="hero">
+    <div class="hero-g">
+      <h1>Que veux-tu apprendre <span>aujourd'hui</span>&nbsp;?</h1>
+      <p>Toutes les matières, leçon par leçon, dans l'ordre de la progression officielle du MINESEC. Un cours illustré, une fiche de révision, un quiz et, souvent, une scène vivante.</p>
+      <p class="cycle-t">Ma classe</p>
+      <div class="classes" id="classes" role="group" aria-label="Ma classe"></div>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="mosaique" aria-hidden="true" id="mosaique"></div>
+  </section>
+
+  <div class="objectif-z"><div class="objectif" id="objectifJour"></div><div class="kalao-accueil" id="kalaoAccueil"></div></div>
+  <div class="blocs" id="blocs"></div>
+  <section class="gout" id="goutA" aria-labelledby="goutAT" hidden></section>
+
+  <section class="annee" aria-labelledby="anneeT">
+    <div class="sec-t"><h2 id="anneeT">Mon année</h2><span class="lu">Calendrier officiel 2026-2027</span></div>
+    <div class="annee-g">
+      <div>
+        <div class="carte-a"><h3><svg class="si" width="20" height="20" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-calendar"/></svg>Calendrier scolaire</h3><div id="anCal"></div></div>
+        <!-- 11/11/2026 : la classe virtuelle vit sous le calendrier ; à droite,
+             les actualités seules. Avant, la carte du calendrier était étirée
+             à la hauteur des deux cartes de droite : ~740 px de vide. -->
+        <div class="carte-a cv" id="anCv"></div>
+      </div>
+      <div>
+        <div class="carte-a"><h3><svg class="si" width="20" height="20" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-megaphone"/></svg>Actualités MINESEC</h3><div id="anAct" aria-live="polite"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sec-t"><h2 id="matsT">Mes matières</h2><a href="#defi">Défi express ›</a></div>
+  <div class="mats" id="mats"></div>
+
+  <section class="tp"><div class="sec-t"><h2 id="tpT">Tout pour progresser</h2><a id="tpL" href="ressources.html">Tout voir ›</a></div><div class="tp-g" id="tp"></div></section>
+
+  <section id="defi" class="defi" hidden>
+    <div class="sec-t" style="margin-top:0"><h2>Défi express</h2><span class="badge">3 questions</span></div>
+    <div id="defiQ"></div>
+    <div class="defi-pied"><span id="defiS">Une question tirée d'une leçon de ta classe.</span><button type="button" class="btn-l" id="defiN">Autre question ›</button></div>
+  </section>
+
+  <section id="scZone" hidden>
+    <div class="sec-t"><h2>Scènes vivantes de ta classe</h2><a href="/scenes/">Toutes les scènes ›</a></div>
+    <div class="scenes" id="scenes"></div>
+  </section>
+
+  <section class="progression" id="progression">
+    <div class="sec-t"><h2>Ma progression</h2><span class="lu">Gardée dans ce navigateur</span></div>
+    <div class="prog-g">
+      <div class="prog-niv" id="progNiv"></div>
+      <div class="prog-badges"><p class="prog-t" id="progBadgesT">Mes badges</p><div class="badges" id="progBadges"></div></div>
+    </div>
+  </section>
+
+  <div id="offreAccueil"></div>
+
+  <section class="profils-z">
+    <h2>Faisons connaissance</h2>
+    <div class="pcartes">
+      <a class="pcarte" href="/eleve/"><span class="pc-ph pc-el" style="background-position:50% 45%" aria-hidden="true"></span><span class="pc-c" style="background:linear-gradient(135deg,#1E499B,#0C2A6A)"><span class="pc-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span><b>Élèves</b><span class="pc-t">Le programme de sa classe, les corrigés et un tuteur qui répond à 20 h un dimanche.</span><span class="pc-b">Ta moyenne se joue ce soir<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></span></a>
+      <a class="pcarte" href="/#parents"><span class="pc-ph pc-pa" style="background-position:50% 30%" aria-hidden="true"></span><span class="pc-c" style="background:linear-gradient(135deg,#0E7C86,#0A4E58)"><span class="pc-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg></span><b>Parents</b><span class="pc-t">Les notes, les absences et les tranches réglées, depuis votre téléphone.</span><span class="pc-b">Le suivi, sans quitter la maison<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></span></a>
+      <a class="pcarte" href="/enseignant/"><span class="pc-ph pc-en" style="background-position:50% 25%" aria-hidden="true"></span><span class="pc-c" style="background:linear-gradient(135deg,#C9508B,#8E2B57)"><span class="pc-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></svg></span><b>Enseignants</b><span class="pc-t">Publiez vos corrigés sous votre nom et encadrez les candidats aux examens.</span><span class="pc-b">Votre savoir, signé et payé<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></span></a>
+      <a class="pcarte" href="/app.html#partenariat"><span class="pc-ph pc-pt" style="background-position:50% 40%" aria-hidden="true"></span><span class="pc-c" style="background:linear-gradient(135deg,#A84200,#8A3700)"><span class="pc-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></svg></span><b>Partenaires</b><span class="pc-t">Libraires, inspecteurs, influenceurs, établissements : neuf façons de porter VÉRITAS et d’en vivre.</span><span class="pc-b">Votre réseau, votre revenu<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></span></a>
+    </div>
+    <p style="margin-top:16px;color:var(--gris)">Déjà un compte ? <a href="/app.html#connexion">Je me connecte</a></p>
+  </section>
+</div></main>
+
+<script src="scenes.js?v=20261110g"></script>
+<script src="progressions.js?v=20261110g"></script>
+<script src="lecons.js?v=20261110g"></script>
+<script src="ressources.js?v=20261110g"></script>
+<script src="charge.js?v=9b141ec6"></script>
+<script src="commun.js?v=20261111b"></script>
+<script src="jeu.js?v=20261110g"></script>
+<script src="calendrier.js?v=20261111e"></script>
+<script>
+(function(){
+  "use strict";
+  var A=VRT.app, $=function(s,c){return (c||document).querySelector(s)}, $$=function(s,c){return [].slice.call((c||document).querySelectorAll(s))}, esc=A.esc;
+  var LE=window.VRT_LECONS||{}, PR=window.VRT_PROG||{};
+  /* icônes des profils */
+  $$(".profil").forEach(function(a){a.innerHTML=a.innerHTML.replace(/\$\{(p-[a-z]+)\}/,function(_,i){return '<svg viewBox="0 0 48 48" aria-hidden="true"><use href="../assets/veritas-matieres.svg#'+i+'"/></svg>'})});
+
+  var q=new URLSearchParams(location.search).get("c");
+  var classe=(q&&A.CLASSES.indexOf(q)>=0)?q:A.lire("classe","3e");
+  /* collège en bleu, lycée en violet ; un écart sépare les deux cycles */
+  $("#classes").innerHTML=A.CLASSES.map(function(c){var ly=!/^[3-6]e$/.test(c);return '<button type="button" class="'+(ly?'lycee':'')+(c==="2nde A"?' sep':'')+'" aria-pressed="'+(c===classe)+'">'+c+'</button>'}).join("");
+  /* mosaïque décorative : 12 matières, chacune sur sa teinte */
+  $("#mosaique").innerHTML=["francais","maths","svt","histoire","anglais","pct","geo","philo","info","ecm","arts","eps"].map(function(id){var m=A.PAR_ID[id];return m?'<span style="--c:'+m.t[0]+';--cp:'+m.t[1]+'">'+A.ico(m.ico,40)+'</span>':''}).join("");
+  $$("#classes button").forEach(function(b){b.addEventListener("click",function(){classe=b.textContent;A.ecrire("classe",classe);history.replaceState(null,"","?c="+encodeURIComponent(classe));$$("#classes button").forEach(function(x){x.setAttribute("aria-pressed",x===b)});tout()})});
+
+  function lecs(c){return Object.keys(LE).filter(function(k){return !c||LE[k].c===c})}
+  function nbLecons(m,c){var p=PR[c]||{},n=0;m.minesec.forEach(function(s){(p[s]||[]).forEach(function(ch){n+=ch[1].length})});return n}
+
+  function tout(){
+    A.rail($("#rail"),classe,null); A.chiffreSerie($("#serie"));
+    var lus=A.lire("lus",{}), qz=A.lire("quiz",{}), nl=Object.keys(lus).length, nq=Object.keys(qz).filter(function(k){return qz[k][0]>=Math.ceil(qz[k][1]*.6)}).length, s=A.serie();
+    var st=[]; if(s) st.push('<span>'+A.pic("flamme",18)+' <b>'+s+'</b> jour'+(s>1?'s':'')+' de suite</span>'); if(nl) st.push('<span><b>'+nl+'</b> leçon'+(nl>1?'s':'')+' lue'+(nl>1?'s':'')+'</span>'); if(nq) st.push('<span><b>'+nq+'</b> quiz réussi'+(nq>1?'s':'')+'</span>');
+    $("#stats").innerHTML=st.join(""); $("#stats").hidden=!st.length; $("#offreAccueil").innerHTML=A.offre(classe,"","accueil");
+
+    /* reprendre + leçon du jour */
+    /* « Reprendre » = la dernière leçon lue DANS LA CLASSE CHOISIE (11/11/2026) :
+       la clé globale « derniere » affichait une leçon de philo de Tle A alors
+       que la 3e était cochée. lus[id] porte la date de lecture. */
+    var b=[], ids=lecs(classe), der=Object.keys(lus).filter(function(k){return LE[k]&&LE[k].c===classe}).sort(function(x,y){return lus[y]-lus[x]})[0]||""; if(!ids.length) ids=lecs();
+    var jourId=ids.length?ids[(function(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h})(A.jour()+classe)%ids.length]:null;
+    if(jourId){var L=LE[jourId],M=A.PAR_ID[L.m];
+      b.push('<a class="bloc" href="lecon.html?id='+jourId+'"><small>Leçon du jour</small><div class="jour"><span class="med" style="background:'+M.t[1]+'">'+A.ico(M.ico,38)+'</span><div><h2>'+esc(L.titre)+'</h2><p>'+esc(M.nom)+' · '+esc(L.c)+' · '+(L.duree||15)+' min. '+esc((L.accroche||"").slice(0,120))+'</p></div></div><span class="go">Commencer ›</span></a>');}
+    if(der&&LE[der]){var D=LE[der];b.push('<a class="bloc" href="lecon.html?id='+der+'"><small>Reprendre</small><h2>'+esc(D.titre)+'</h2><p>'+esc(A.PAR_ID[D.m].nom)+' · '+esc(D.c)+(qz[der]?' · quiz : '+qz[der][0]+'/'+qz[der][1]:' · quiz pas encore fait')+'</p><span class="go">'+(qz[der]?'Revoir':'Faire le quiz')+' ›</span></a>')}
+    else b.push('<a class="bloc" href="/scenes/"><small>Pour commencer en douceur</small><h2>Les scènes vivantes</h2><p>Des scènes courtes, tirées des œuvres et des programmes, où tu choisis la bonne réplique.</p><span class="go">Découvrir ›</span></a>');
+    $("#blocs").innerHTML=b.join("");
+
+    /* mon année : compte à rebours, actualités et classe virtuelle de la classe choisie */
+    $("#anneeT").textContent="Mon année en "+classe;
+    if(VRT.annee) VRT.annee.rendre(classe,{cal:"anCal",act:"anAct",cv:"anCv"});
+
+    /* matières de la classe */
+    $("#matsT").textContent="Mes matières en "+classe;
+    var mats=A.MATIERES.filter(function(m){return nbLecons(m,classe)||lecs(classe).some(function(k){return LE[k].m===m.id})});
+    /* 11/11/2026 : les matières qui ont déjà des cours rédigés d'abord — l'élève
+       tombe sur quelque chose à lire ; l'ordre du programme est gardé sinon. */
+    var nRed=function(m){return lecs(classe).filter(function(k){return LE[k].m===m.id}).length};
+    mats=mats.map(function(m,i){return [m,i]}).sort(function(a,b){return (nRed(b[0])?1:0)-(nRed(a[0])?1:0)||a[1]-b[1]}).map(function(x){return x[0]});
+    $("#mats").innerHTML=mats.map(function(m){
+      var red=lecs(classe).filter(function(k){return LE[k].m===m.id}), lu=red.filter(function(k){return lus[k]}).length, tot=nbLecons(m,classe);
+      return '<a class="mat" style="--c:'+m.t[0]+';--cp:'+m.t[1]+';--cm:'+m.t[2]+'" href="matiere.html?c='+encodeURIComponent(classe)+'&m='+m.id+'"><div class="h"><span class="pas">'+A.icoM(m,30)+'</span><div><b>'+esc(m.nom)+'</b><br><span>'+(tot?tot+' leçons au programme':'Programme à venir')+'</span></div></div>'+
+        (red.length?'<span><span class="badge">'+red.length+' rédigée'+(red.length>1?'s':'')+'</span>'+(lu?' · '+lu+' lue'+(lu>1?'s':''):'')+'</span><div class="barre-p" aria-hidden="true"><i style="width:'+Math.round(lu/red.length*100)+'%"></i></div>':'')+'</a>';
+    }).join("") || '<p class="vide">La progression de cette classe arrive bientôt.</p>';
+
+    /* tout ce que le site offre à cette classe, par usage */
+    var tous=A.gratuitDabord(A.resClasse(classe)), parT={};
+    /* « Gratuit pour commencer » (11/11/2026) : une ressource gratuite par famille,
+       avant tout le reste — il goûte, l'envie vient, l'abonnement suit. */
+    (function(){var g=$("#goutA"),gr=tous.filter(function(i){return !VRT_RES.items[i].ab}),sel=A.selectionGratuite(tous,6),nr=lecs(classe).length;
+      if(!g)return; if(!sel.length){g.hidden=true;return;}
+      g.innerHTML='<div class="gout-t"><span class="gout-eb">'+A.pic("cadeau",16)+'Gratuit · sans abonnement</span><h2 id="goutAT">Gratuit pour commencer en '+esc(classe)+'</h2>'+
+        '<p><b>'+gr.length+' ressource'+(gr.length>1?'s':'')+' gratuite'+(gr.length>1?'s':'')+'</b> pour ta classe'+(nr?', et le début de chacun des <b>'+nr+' cours rédigés</b>':'')+'. Essaie, et passe à la formule quand tu en veux plus.</p></div>'+
+        '<div class="res-g">'+sel.map(A.carteRes).join("")+'</div>'+
+        '<a class="gout-l" href="ressources.html?c='+encodeURIComponent(classe)+'">Voir les '+gr.length+' ressources gratuites ›</a>';
+      g.hidden=false;})(); tous.forEach(function(i){var t=VRT_RES.items[i].t;parT[t]=(parT[t]||0)+1});
+    $("#tpT").textContent="Tout pour progresser en "+classe; $("#tpL").href="ressources.html?c="+encodeURIComponent(classe);
+    /* 11/11/2026 — « Structure et dispose bien les icônes » (Jacques) : les
+       familles sont rangées sous leurs quatre rubriques (A.GROUPES), et chaque
+       carte pose son icône dans un rond de sa couleur, à la même place. */
+    $("#tp").innerHTML=A.GROUPES.map(function(g){
+      var fs=A.FAMILLES.filter(function(f){return f[4]===g[0]&&parT[f[0]]}); if(!fs.length)return "";
+      return '<div class="tp-gr"><p class="tp-gt">'+A.si(g[2],16)+'<span>'+esc(g[1])+'</span></p><div class="tp-gl">'+fs.map(function(f){
+        var n=parT[f[0]];
+        return '<a class="tp-c" style="'+f[5]+'" href="ressources.html?c='+encodeURIComponent(classe)+'&f='+f[0]+'"><span class="tp-i">'+A.si(f[2],24)+'</span><span class="tp-t"><b>'+esc(f[1])+'</b><small>'+n+' ressource'+(n>1?'s':'')+'</small></span></a>';
+      }).join("")+'</div></div>';
+    }).join("");
+
+    /* défi express */
+    var pool=[]; lecs(classe).concat(lecs(classe).length?[]:lecs()).forEach(function(k){LE[k].quiz.forEach(function(x){pool.push([k,x])})});
+    $("#defi").hidden=!pool.length; var faits=0,bons=0;
+    function question(){ if(!pool.length) return; var t=pool[Math.floor(Math.random()*pool.length)],x=t[1],L=LE[t[0]];
+      var xm=A.melanger(x); $("#defiQ").innerHTML='<div class="q" data-bonne="'+xm.b+'"><p>'+x.q+'</p>'+xm.r.map(function(r){return '<button type="button">'+r+'</button>'}).join("")+'<div class="expl" hidden>'+(x.e||"")+' <a href="lecon.html?id='+t[0]+'">Revoir la leçon « '+esc(L.titre)+' »</a></div></div>';
+      $$("#defiQ button").forEach(function(btn,k){btn.addEventListener("click",function(){var qq=$("#defiQ .q");if(qq.dataset.fait)return;qq.dataset.fait=1;faits++;if(k===x.b){btn.classList.add("ok");bons++;if(VRT.jeu)VRT.jeu.defiReussi()}else{btn.classList.add("ko");$$("#defiQ button")[x.b].classList.add("ok");qq.classList.add("secoue")}$("#defiQ .expl").hidden=false;$("#defiS").textContent=bons+" bonne"+(bons>1?"s":"")+" réponse"+(bons>1?"s":"")+" sur "+faits+(faits>=3?(bons===faits?" · Sans faute !":" · Continue !"):"");if(faits===3&&bons===3)A.noterJour()})});
+      $("#defiS").textContent=faits?$("#defiS").textContent:"D'après « "+L.titre+" » ("+A.PAR_ID[L.m].nom+")."; }
+    $("#defiN").onclick=question; question();
+
+    /* scènes */
+    var pre={"3e":"3e","1re A":"1re","1re C":"1re","1re D":"1re","Tle A":"tle","Tle C":"tle","Tle D":"tle"}[classe];
+    var sc=(window.VRT_SCENES||[]).filter(function(s){return pre?s.indexOf(pre+"-")===0:!/^(3e|1re|tle)-/.test(s)}).slice(0,6);
+    $("#scZone").hidden=!sc.length;
+    $("#scenes").innerHTML=sc.map(function(s){return '<a class="scene" href="/scenes/'+s+'.html"><span class="pl">'+A.pic("masques",30)+'</span><span><small>Scène vivante</small><strong>'+esc(VRT_SCENES_TITRES[s]||s)+'</strong></span></a>'}).join("");
+    progression();
+  }
+
+  /* ── couche ludique : niveau, badges, objectif du jour, mot de Kalao ── */
+  function progression(){
+    var J=VRT.jeu; if(!J) return;
+    var n=J.niveau(A.lire("xp",0)), b=A.lire("badges",{}), nb=Object.keys(b).length, o=J.objectif();
+    $("#progNiv").innerHTML='<div class="prog-anneau">'+J.anneau(n.pct,132,"#1E499B")+'<div><b>'+n.rang+'</b><small>niveau</small></div></div>'+
+      '<h3>'+esc(n.nom)+'</h3><p><b>'+n.xp+'</b> points'+(n.suivant?' · encore <b>'+(n.haut-n.xp)+'</b> pour « '+esc(n.suivant)+' »':' · niveau maximal')+'</p>'+
+      '<ul class="bareme"><li><span>'+A.pic("livre",16)+'</span>Leçon lue jusqu\'au bout <b>+20</b></li><li><span>'+A.pic("etoile",16)+'</span>Chaque étoile au quiz <b>+10</b></li><li><span>'+A.pic("coche",16)+'</span>Bonne réponse au défi <b>+5</b></li><li><span>'+A.pic("flamme",16)+'</span>Jour de suite <b>+5</b></li></ul>';
+    $("#progBadgesT").innerHTML='Mes badges <span class="cpt">'+nb+' / '+J.BADGES.length+'</span>';
+    $("#progBadges").innerHTML=J.BADGES.map(function(x){var ok=!!b[x[0]];return '<div class="badge-c'+(ok?' acquis':'')+'" title="'+esc(x[2])+'">'+J.medaille(x,ok,56)+'<b>'+esc(x[1])+'</b><small>'+esc(x[2])+'</small></div>'}).join("");
+    var s=A.serie(), msg = o.fait ? "Objectif du jour rempli. Bravo ! Une leçon de plus pour prendre de l'avance ?"
+      : o.lecon ? "Belle lecture ! Il te reste un quiz pour remplir l'objectif du jour."
+      : s>1 ? "Déjà <b>"+s+" jours de suite</b> ! Ne casse pas ta série : une leçon aujourd'hui."
+      : "Salut ! Une leçon et un quiz par jour, et tu verras tes notes grimper.";
+    J.bulle($("#kalaoAccueil"), msg, o.fait?"bravo":"salut");
+    J.majChips();
+  }
+  tout();
+})();
+</script>
+</body>
+</html>
