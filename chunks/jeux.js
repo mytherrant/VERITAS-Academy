@@ -2,6 +2,9 @@
    47 Ko, ouvert uniquement depuis la page Jeux & Œuvres. Le module REMPLIT
    le tableau déjà déclaré dans app.js (push) au lieu de le remplacer : les
    44 points de lecture du code restent inchangés. */
+/* 12/11/2026 : TOUS les jeux intégrés sont gratuits (« pour mieux captiver et
+   attirer les apprenants », Jacques) : Conjugaison, Figures de rhétorique et les
+   quiz Physique, Géographie, Maths, SVT ne l'étaient pas. */
 Array.prototype.push.apply(window.JEUX_CATALOGUE, [
   {id:"j1",titre:"Calcul Mental",emoji:"🔢",matiere:"Maths",niveau:"6eme-3eme",
    desc:"Additions, soustractions, multiplications et divisions chronometrees",gratuit:true,
@@ -16,10 +19,10 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
    desc:"Situez les regions, villes et fleuves du Cameroun sur la carte",gratuit:true,
    action:"lancerCarteGeo"},
   {id:"j5",titre:"Conjugaison Express",emoji:"📝",matiere:"Francais",niveau:"6eme-Tle",
-   desc:"Conjuguez rapidement les verbes irreguliers et les temps composes",gratuit:false,plan:"Premium",
+   desc:"Conjuguez rapidement les verbes irreguliers et les temps composes",gratuit:true,
    action:"lancerConjugaison"},
   {id:"j6",titre:"Figures de Rhetorique",emoji:"📖",matiere:"Litterature",niveau:"3eme-1ere",
-   desc:"Identifiez metaphores, allegories et autres figures de style",gratuit:false,plan:"Premium",
+   desc:"Identifiez metaphores, allegories et autres figures de style",gratuit:true,
    action:"lancerFigures"},
   {id:"j7",titre:"Tableau Periodique",emoji:"⚗️",matiere:"Physique-Chimie",niveau:"3eme-2nde",
    desc:"Retrouvez les elements chimiques par leur symbole et numero atomique",gratuit:true,
@@ -282,7 +285,7 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
     {q:"Que sont les enzymes ?",opts:["Des hormones","Des protéines catalyseurs","Des vitamines","Des sucres"],ans:1,exp:"Protéines qui accélèrent les réactions chimiques sans être consommées. Ex : amylase (digestion amidon)."},
     {q:"Les neurones communiquent par...",opts:["Les synapses","Les muscles","Les os","Le sang"],ans:0,exp:"Synapses : zones de contact entre neurones où sont libérés les neurotransmetteurs (dopamine, sérotonine...)."},
    ]},
-  {id:'j_lois_physique',titre:'Lois de Physique-Chimie',emoji:'⚡',matiere:'Physique-Chimie',niveau:'2nde-Tle',type:'qcm',acces:1,
+  {id:'j_lois_physique',titre:'Lois de Physique-Chimie',emoji:'⚡',matiere:'Physique-Chimie',niveau:'2nde-Tle',type:'qcm',acces:1,gratuit:true,
     questions:[
       {q:'Quelle est la loi d\'Ohm ?',opts:['U = R × I','U = I / R','I = U × R','R = U × I²'],ans:0,exp:'La loi d\'Ohm : U = R × I, où U est la tension (V), R la résistance (Ω) et I l\'intensité (A).'},
       {q:'Quelle est la 2ème loi de Newton ?',opts:['F = m × a','F = m / a','a = F / m²','F = m + a'],ans:0,exp:'La 2ème loi de Newton : F = m × a. La force (N) = masse (kg) × accélération (m/s²).'},
@@ -293,7 +296,7 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
       {q:'Formule de la chaleur reçue (calorimétrie)',opts:['Q = m × c × ΔT','Q = m / c × ΔT','Q = m × c / ΔT','Q = c × ΔT²'],ans:0,exp:'Q = m × c × ΔT. m : masse (kg), c : capacité thermique massique, ΔT : variation de température.'},
       {q:'Qu\'est-ce que la période T d\'un phénomène périodique ?',opts:['La durée d\'un cycle','La fréquence en Hz','L\'amplitude','La longueur d\'onde'],ans:0,exp:'La période T est la durée d\'un cycle complet, exprimée en secondes.'}
     ]},
-  {id:'j_regions_cmr',titre:'Régions du Cameroun',emoji:'🗺️',matiere:'Géographie',niveau:'3ème-Tle',type:'qcm',acces:1,
+  {id:'j_regions_cmr',titre:'Régions du Cameroun',emoji:'🗺️',matiere:'Géographie',niveau:'3ème-Tle',type:'qcm',acces:1,gratuit:true,
     questions:[
       {q:'Combien de régions compte le Cameroun ?',opts:['10','8','12','9'],ans:0,exp:'Le Cameroun est divisé en 10 régions depuis la réforme administrative.'},
       {q:'Quelle est la capitale de la région du Centre ?',opts:['Yaoundé','Bertoua','Bafoussam','Ngaoundéré'],ans:0,exp:'Yaoundé est la capitale politique du Cameroun et le chef-lieu de la région du Centre.'},
@@ -304,7 +307,7 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
       {q:'Le mont Cameroun se trouve dans quelle région ?',opts:['Sud-Ouest','Littoral','Nord-Ouest','Centre'],ans:0,exp:'Le mont Cameroun (4 095 m), plus haut sommet d\'Afrique centrale, est situé dans la région du Sud-Ouest.'},
       {q:'Quelle région est la plus grande du Cameroun ?',opts:['Est','Nord','Adamaoua','Centre'],ans:0,exp:'La région de l\'Est est la plus grande région du Cameroun avec environ 109 000 km².'}
     ]},
-  {id:'j_maths_fonctions',titre:'Fonctions & Dérivées — Maths Tle',emoji:'📐',matiere:'Mathématiques',niveau:'Tle',type:'qcm',acces:1,
+  {id:'j_maths_fonctions',titre:'Fonctions & Dérivées — Maths Tle',emoji:'📐',matiere:'Mathématiques',niveau:'Tle',type:'qcm',acces:1,gratuit:true,
     questions:[
       {q:'La dérivée de f(x) = x² est',opts:['f\'(x) = 2x','f\'(x) = x','f\'(x) = 2','f\'(x) = x²'],ans:0,exp:'Règle de dérivation : si f(x) = xⁿ alors f\'(x) = n·xⁿ⁻¹. Donc (x²)\' = 2x.'},
       {q:'La dérivée de f(x) = sin(x) est',opts:['f\'(x) = cos(x)','f\'(x) = -cos(x)','f\'(x) = -sin(x)','f\'(x) = tan(x)'],ans:0,exp:'(sin x)\' = cos x. Règle fondamentale à mémoriser.'},
@@ -315,7 +318,7 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
       {q:'La dérivée de f(x) = cos(x) est',opts:['f\'(x) = -sin(x)','f\'(x) = sin(x)','f\'(x) = -cos(x)','f\'(x) = tan(x)'],ans:0,exp:'(cos x)\' = -sin x. Attention au signe !'},
       {q:'Le nombre dérivé f\'(a) représente',opts:['La pente de la tangente en a','La valeur de f en a','L\'ordonnée à l\'origine','La limite de f en +∞'],ans:0,exp:'f\'(a) est la pente (coefficient directeur) de la tangente à la courbe de f au point d\'abscisse a.'}
     ]},
-  {id:'j_svt_genetique',titre:'Génétique & Hérédité — SVT',emoji:'🧬',matiere:'SVT',niveau:'1ère-Tle',type:'qcm',acces:1,
+  {id:'j_svt_genetique',titre:'Génétique & Hérédité — SVT',emoji:'🧬',matiere:'SVT',niveau:'1ère-Tle',type:'qcm',acces:1,gratuit:true,
     questions:[
       {q:'Quel scientifique est le fondateur de la génétique ?',opts:['Gregor Mendel','Charles Darwin','Louis Pasteur','Robert Koch'],ans:0,exp:'Gregor Mendel (1822-1884), moine botaniste autrichien, a établi les lois de l\'hérédité après ses expériences sur les petits pois.'},
       {q:'Combien de chromosomes contient une cellule somatique humaine ?',opts:['46','23','48','44'],ans:0,exp:'Les cellules somatiques humaines contiennent 46 chromosomes (23 paires), dont 22 paires d\'autosomes et 1 paire de chromosomes sexuels.'},
@@ -328,3 +331,814 @@ Array.prototype.push.apply(window.JEUX_CATALOGUE, [
     ]}
 ]);
 window._VRT_JEUX_OK = true;
+
+/* ════════════════════════════════════════════════════════════════════════
+   JEUX DE RÉFLEXION, DE STRATÉGIE ET D'ÉVEIL (12/11/2026) — tous gratuits.
+   « Varie les petits jeux captivants gratuits pour tous les niveaux
+   (intelligence, stratégie, réflexion, éveil, stimulation) pour rendre plus
+   captivant et pousser à l'abonnement » (Jacques).
+
+   Neuf jeux, chacun en trois niveaux (Facile 6ᵉ-5ᵉ, Moyen 4ᵉ-2nde,
+   Difficile 1ʳᵉ-Tˡᵉ), générés à chaque partie : on ne les épuise pas.
+   Record par jeu et par niveau (localStorage, facultatif). En fin de partie,
+   un visiteur non abonné voit une invitation discrète vers les formules.
+   Ajouté à la fin de chunks/jeux.js (même chargement à la demande).
+   ════════════════════════════════════════════════════════════════════════ */
+(function (W) {
+  "use strict";
+  var NIV = [["facile", "Facile", "6ᵉ – 5ᵉ"], ["moyen", "Moyen", "4ᵉ – 2nde"], ["difficile", "Difficile", "1ʳᵉ – Tˡᵉ"]];
+  function esc(s) { return (typeof _esc === "function") ? _esc(s) : String(s).replace(/[&<>"']/g, function (c) { return "&#" + c.charCodeAt(0) + ";"; }); }
+  function alea(n) { return Math.floor(Math.random() * n); }
+  function melange(t) { t = t.slice(); for (var i = t.length - 1; i > 0; i--) { var j = alea(i + 1), x = t[i]; t[i] = t[j]; t[j] = x; } return t; }
+  function lire(k) { try { return JSON.parse(localStorage.getItem("vrt_jr_" + k) || "null"); } catch (e) { return null; } }
+  function ecrire(k, v) { try { localStorage.setItem("vrt_jr_" + k, JSON.stringify(v)); } catch (e) { } }
+  /* Record : `mieux` dit si une valeur plus grande (score) ou plus petite (coups, secondes) est meilleure. */
+  function record(cle, val, mieux) {
+    var r = lire(cle), neuf = r === null || (mieux === "haut" ? val > r : val < r);
+    if (neuf) ecrire(cle, val);
+    return { neuf: neuf, ancien: r };
+  }
+  function abonne() {
+    try { var t = typeof _aiTier === "function" ? _aiTier() : "anon"; return t !== "anon" && t !== "free"; } catch (e) { return false; }
+  }
+  function invitation() {
+    if (abonne()) return "";
+    return "<div style='margin-top:18px;padding:14px 16px;border-radius:14px;background:#FFF6DC;border:1px solid #F3DFA6;text-align:left;font-size:14px;color:#4D3B00'>"
+      + "<b>Tu aimes réfléchir ?</b> Avec une formule VÉRITAS, tu as aussi les leçons complètes de ta classe, le tuteur IA, les labos et les examens blancs notés — dès 1 200 F par mois."
+      + "<div style='margin-top:10px'><button class='btn bi' onclick=\"(typeof vShowSec==='function')&&vShowSec('elearning',null)\">Voir les formules</button></div></div>";
+  }
+  /* L'écran commun : titre, consigne, choix du niveau, zone de jeu. */
+  function ecran(id, titre, ico, consigne, niv, corps) {
+    W._jrPartie = (W._jrPartie || 0) + 1;   // toute nouvelle partie invalide les chronomètres de la précédente
+    _vc("<div class='vsec'>"
+      + "<button class='back-btn' onclick='showJeuxEdu()'>← Jeux</button>"
+      + "<div class='vsec-title'><span class='vsec-ico' aria-hidden='true' style='font-size:20px'>" + ico + "</span>" + esc(titre) + "</div>"
+      + "<div class='vcard' style='max-width:620px;margin:0 auto;text-align:center'>"
+      + "<div style='font-size:14px;color:#4D5163;margin-bottom:12px'>" + consigne + "</div>"
+      + "<div style='display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:14px'>"
+      + NIV.map(function (n) {
+          return "<button type='button' class='tab" + (n[0] === niv ? " on" : "") + "' onclick=\"" + id + "('" + n[0] + "')\" title='" + n[2] + "'>" + n[1] + "</button>";
+        }).join("")
+      + "</div><div id='jrZone'>" + corps + "</div></div></div>");
+  }
+  function zone(h) { var z = document.getElementById("jrZone"); if (z) z.innerHTML = h; }
+  function fin(titre, detail, rec, rejouer) {
+    return "<div style='padding:10px 0'><div style='font:800 22px Montserrat,sans-serif;color:#142554'>" + titre + "</div>"
+      + "<div style='color:#4D5163;margin-top:6px'>" + detail + "</div>"
+      + (rec ? "<div style='margin-top:6px;font-weight:700;color:" + (rec.neuf ? "#047857'>Nouveau record !" : "#5B6170'>Record : " + rec.ancien) + "</div>" : "")
+      + "<div style='margin-top:14px'><button class='btn bi' onclick=\"" + rejouer + "\">Rejouer</button></div>"
+      + invitation() + "</div>";
+  }
+  var CASE = "display:inline-flex;align-items:center;justify-content:center;border-radius:10px;font-weight:800;cursor:pointer;user-select:none;";
+
+  /* ── 1. SUITES LOGIQUES (intelligence) ─────────────────────────────────── */
+  function suite(niv) {
+    var a = 1 + alea(9), r = 2 + alea(4), t = [], k, choix = niv === "facile" ? alea(2) : niv === "moyen" ? alea(4) : alea(6), regle;
+    if (choix === 0) { regle = "on ajoute " + r; for (k = 0; k < 6; k++) t.push(a + k * r); }
+    else if (choix === 1) { regle = "on retire " + r; a += 40; for (k = 0; k < 6; k++) t.push(a - k * r); }
+    else if (choix === 2) { regle = "on multiplie par " + (r > 3 ? 2 : r); var m = r > 3 ? 2 : r; for (k = 0; k < 6; k++) t.push(a * Math.pow(m, k)); }
+    else if (choix === 3) { regle = "les carrés"; var d = 1 + alea(4); for (k = 0; k < 6; k++) t.push((d + k) * (d + k)); }
+    else if (choix === 4) { regle = "chaque terme est la somme des deux précédents"; t = [a, a + r]; for (k = 2; k < 6; k++) t.push(t[k - 1] + t[k - 2]); }
+    else { regle = "on ajoute 1, puis 2, puis 3…"; t = [a]; for (k = 1; k < 6; k++) t.push(t[k - 1] + k); }
+    return { montre: t.slice(0, 5), rep: t[5], regle: regle };
+  }
+  W.lancerJrSuites = function (niv) {
+    niv = niv || "facile";
+    var n = 0, bons = 0, q = suite(niv), t0 = Date.now();
+    function pose() {
+      zone("<div style='font-size:13px;color:#8B93A6'>Question " + (n + 1) + " sur 8 · " + bons + " juste" + (bons > 1 ? "s" : "") + "</div>"
+        + "<div style='font:800 28px Georgia,serif;color:#142554;margin:18px 0;letter-spacing:1px'>" + q.montre.join(" ; ") + " ; <span style='color:#C24E00'>?</span></div>"
+        + "<input id='jrRep' type='number' inputmode='numeric' class='fi' style='max-width:180px;margin:0 auto 12px;text-align:center;font-size:20px'>"
+        + "<div><button class='btn bi' id='jrOk'>Valider</button></div><div id='jrFb' style='min-height:22px;margin-top:10px'></div>");
+      var i = document.getElementById("jrRep"); if (i) { i.focus(); i.onkeydown = function (e) { if (e.key === "Enter") valider(); }; }
+      document.getElementById("jrOk").onclick = valider;
+    }
+    function valider() {
+      var v = parseInt((document.getElementById("jrRep") || {}).value, 10), fb = document.getElementById("jrFb");
+      if (isNaN(v)) return;
+      var ok = v === q.rep; if (ok) bons++;
+      fb.innerHTML = ok ? "<b style='color:#047857'>Juste !</b> " + esc(q.regle) : "<b style='color:#B42318'>C'était " + q.rep + "</b> : " + esc(q.regle);
+      document.getElementById("jrOk").disabled = true;
+      setTimeout(function () {
+        n++;
+        if (n >= 8) { var s = Math.round((Date.now() - t0) / 1000); zone(fin(bons + " / 8", "en " + s + " secondes", record("suites_" + niv, bons, "haut"), "lancerJrSuites('" + niv + "')")); return; }
+        q = suite(niv); pose();
+      }, 1400);
+    }
+    ecran("lancerJrSuites", "Suites logiques", "🧠", "Trouve le nombre suivant. Chaque suite cache une règle.", niv, "");
+    pose();
+  };
+
+  /* ── 2. MÉMOIRE DES PAIRES (éveil, mémoire) ────────────────────────────── */
+  var SYMB = ["📐", "🧪", "🌍", "📚", "🔭", "🧬", "⚡", "🎨", "🎵", "🧮", "🌱", "🦁", "🚀", "⚽", "🥭", "🌋", "🐘", "✏️"];
+  W.lancerJrMemoire = function (niv) {
+    niv = niv || "facile";
+    var paires = niv === "facile" ? 6 : niv === "moyen" ? 8 : 12, cols = niv === "difficile" ? 6 : 4;
+    var cartes = melange(melange(SYMB).slice(0, paires).reduce(function (t, s) { return t.concat([s, s]); }, []));
+    var vues = [], trouvees = {}, coups = 0, bloque = false;
+    function dessine() {
+      zone("<div style='font-size:13px;color:#8B93A6;margin-bottom:10px'>" + coups + " coup" + (coups > 1 ? "s" : "") + " · " + Object.keys(trouvees).length / 2 + " / " + paires + " paires</div>"
+        + "<div style='display:grid;grid-template-columns:repeat(" + cols + ",1fr);gap:8px;max-width:" + (cols * 78) + "px;margin:0 auto'>"
+        + cartes.map(function (s, i) {
+            var ouverte = trouvees[i] || vues.indexOf(i) >= 0;
+            return "<button type='button' data-i='" + i + "' aria-label='Carte " + (i + 1) + "' style='" + CASE + "height:66px;font-size:28px;border:0;background:" + (trouvees[i] ? "#DCFCE7" : ouverte ? "#fff" : "#1E499B") + ";box-shadow:0 1px 3px rgba(0,17,54,.15)'>" + (ouverte ? s : "") + "</button>";
+          }).join("") + "</div>");
+      [].forEach.call(document.querySelectorAll("#jrZone [data-i]"), function (b) { b.onclick = function () { tourne(+b.getAttribute("data-i")); }; });
+    }
+    function tourne(i) {
+      if (bloque || trouvees[i] || vues.indexOf(i) >= 0) return;
+      vues.push(i); dessine();
+      if (vues.length < 2) return;
+      coups++;
+      if (cartes[vues[0]] === cartes[vues[1]]) { trouvees[vues[0]] = trouvees[vues[1]] = 1; vues = []; dessine(); }
+      else { bloque = true; setTimeout(function () { vues = []; bloque = false; dessine(); }, 800); }
+      if (Object.keys(trouvees).length === cartes.length)
+        setTimeout(function () { zone(fin("Bravo !", paires + " paires en " + coups + " coups", record("memoire_" + niv, coups, "bas"), "lancerJrMemoire('" + niv + "')")); }, 400);
+    }
+    ecran("lancerJrMemoire", "Mémoire des paires", "🃏", "Retourne deux cartes à la fois et retrouve toutes les paires, en un minimum de coups.", niv, "");
+    dessine();
+  };
+
+  /* ── 3. TAQUIN (réflexion) ─────────────────────────────────────────────── */
+  W.lancerJrTaquin = function (niv) {
+    niv = niv || "facile";
+    var n = niv === "difficile" ? 4 : 3, t = [], k, coups = 0, vide;
+    for (k = 1; k < n * n; k++) t.push(k); t.push(0);
+    function voisins(p) { var v = [], r = Math.floor(p / n), c = p % n; if (r > 0) v.push(p - n); if (r < n - 1) v.push(p + n); if (c > 0) v.push(p - 1); if (c < n - 1) v.push(p + 1); return v; }
+    // Mélange par coups légaux : la grille est toujours soluble.
+    vide = t.indexOf(0);
+    for (k = 0; k < (niv === "facile" ? 40 : 160); k++) { var v = voisins(vide), p = v[alea(v.length)]; t[vide] = t[p]; t[p] = 0; vide = p; }
+    function gagne() { for (var i = 0; i < n * n - 1; i++) if (t[i] !== i + 1) return false; return true; }
+    function dessine() {
+      zone("<div style='font-size:13px;color:#8B93A6;margin-bottom:10px'>" + coups + " coup" + (coups > 1 ? "s" : "") + "</div>"
+        + "<div style='display:grid;grid-template-columns:repeat(" + n + ",1fr);gap:6px;max-width:" + (n * 76) + "px;margin:0 auto'>"
+        + t.map(function (x, i) {
+            return x === 0 ? "<span style='height:68px'></span>"
+              : "<button type='button' data-i='" + i + "' style='" + CASE + "height:68px;font-size:24px;border:0;background:#1E499B;color:#fff'>" + x + "</button>";
+          }).join("") + "</div>");
+      [].forEach.call(document.querySelectorAll("#jrZone [data-i]"), function (b) { b.onclick = function () { bouge(+b.getAttribute("data-i")); }; });
+    }
+    function bouge(p) {
+      vide = t.indexOf(0);
+      if (voisins(vide).indexOf(p) < 0) return;
+      t[vide] = t[p]; t[p] = 0; coups++; dessine();
+      if (gagne()) zone(fin("Grille remise en ordre !", "en " + coups + " coups", record("taquin_" + niv, coups, "bas"), "lancerJrTaquin('" + niv + "')"));
+    }
+    ecran("lancerJrTaquin", "Taquin", "🧩", "Fais glisser les cases vers la case vide pour les remettre dans l'ordre, de 1 à " + (n * n - 1) + ".", niv, "");
+    dessine();
+  };
+
+  /* ── 4. TOURS DE HANOÏ (stratégie) ─────────────────────────────────────── */
+  W.lancerJrHanoi = function (niv) {
+    niv = niv || "facile";
+    var d = niv === "facile" ? 3 : niv === "moyen" ? 4 : 5, tours = [[], [], []], k, sel = -1, coups = 0, min = Math.pow(2, d) - 1;
+    for (k = d; k >= 1; k--) tours[0].push(k);
+    var COUL = ["#C24E00", "#1E499B", "#047857", "#7C3AED", "#B42318"];
+    function dessine() {
+      zone("<div style='font-size:13px;color:#8B93A6;margin-bottom:10px'>" + coups + " coup" + (coups > 1 ? "s" : "") + " · minimum possible : " + min + "</div>"
+        + "<div style='display:flex;gap:8px;justify-content:center;align-items:flex-end'>"
+        + tours.map(function (t, i) {
+            return "<button type='button' data-t='" + i + "' aria-label='Tour " + (i + 1) + "' style='flex:1;max-width:180px;height:" + (d * 26 + 40) + "px;border:2px solid " + (sel === i ? "#C24E00" : "#E4E9F2") + ";border-radius:12px;background:#F8FAFD;display:flex;flex-direction:column-reverse;align-items:center;padding:8px 4px;gap:4px;cursor:pointer'>"
+              + t.map(function (x) { return "<span style='display:block;height:20px;border-radius:6px;width:" + (20 + x * 16) + "%;background:" + COUL[x - 1] + "'></span>"; }).join("") + "</button>";
+          }).join("") + "</div><div id='jrFb' style='min-height:22px;margin-top:10px;color:#B42318'></div>");
+      [].forEach.call(document.querySelectorAll("#jrZone [data-t]"), function (b) { b.onclick = function () { clic(+b.getAttribute("data-t")); }; });
+    }
+    function clic(i) {
+      if (sel < 0) { if (tours[i].length) { sel = i; dessine(); } return; }
+      if (i === sel) { sel = -1; dessine(); return; }
+      var x = tours[sel][tours[sel].length - 1], dessus = tours[i][tours[i].length - 1];
+      if (dessus && dessus < x) { sel = -1; dessine(); document.getElementById("jrFb").textContent = "Un disque ne se pose jamais sur un plus petit."; return; }
+      tours[i].push(tours[sel].pop()); sel = -1; coups++; dessine();
+      if (tours[2].length === d) zone(fin(coups === min ? "Parfait !" : "Réussi !", coups + " coups (le minimum est " + min + ")", record("hanoi_" + niv, coups, "bas"), "lancerJrHanoi('" + niv + "')"));
+    }
+    ecran("lancerJrHanoi", "Tours de Hanoï", "🗼", "Déplace toute la pile sur la tour de droite. Un disque à la fois, jamais sur un plus petit. Touche une tour pour prendre, une autre pour poser.", niv, "");
+    dessine();
+  };
+
+  /* ── 5. CODE SECRET (logique déductive) ────────────────────────────────── */
+  W.lancerJrCode = function (niv) {
+    niv = niv || "facile";
+    var lg = niv === "facile" ? 3 : niv === "moyen" ? 4 : 5, essaisMax = 10, chiffres = melange([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    var secret = chiffres.slice(0, lg), essais = [];
+    function note(g) {
+      var bien = 0, mal = 0;
+      g.forEach(function (c, i) { if (c === secret[i]) bien++; else if (secret.indexOf(c) >= 0) mal++; });
+      return [bien, mal];
+    }
+    function dessine(msg) {
+      zone("<div style='font-size:13px;color:#8B93A6;margin-bottom:8px'>Code de " + lg + " chiffres tous différents · essai " + (essais.length + 1) + " sur " + essaisMax + "</div>"
+        + "<input id='jrRep' inputmode='numeric' maxlength='" + lg + "' class='fi' style='max-width:200px;margin:0 auto 10px;text-align:center;font-size:22px;letter-spacing:6px'>"
+        + "<div><button class='btn bi' id='jrOk'>Essayer</button></div><div style='min-height:20px;margin-top:8px;color:#B42318'>" + (msg || "") + "</div>"
+        + "<table style='margin:10px auto;border-collapse:collapse;font-size:15px'>" + essais.slice().reverse().map(function (e) {
+            return "<tr><td style='padding:4px 12px;font:700 18px monospace;letter-spacing:4px'>" + e.g.join("") + "</td><td style='padding:4px 8px;color:#047857'>● " + e.n[0] + " bien placé" + (e.n[0] > 1 ? "s" : "") + "</td><td style='padding:4px 8px;color:#C24E00'>○ " + e.n[1] + " mal placé" + (e.n[1] > 1 ? "s" : "") + "</td></tr>";
+          }).join("") + "</table>");
+      var i = document.getElementById("jrRep"); if (i) { i.focus(); i.onkeydown = function (e) { if (e.key === "Enter") essai(); }; }
+      document.getElementById("jrOk").onclick = essai;
+    }
+    function essai() {
+      var v = String((document.getElementById("jrRep") || {}).value || "").replace(/\D/g, "");
+      var g = v.split("").map(Number);
+      if (g.length !== lg) { dessine("Entre exactement " + lg + " chiffres."); return; }
+      if (g.some(function (c, i) { return g.indexOf(c) !== i; })) { dessine("Les chiffres du code sont tous différents."); return; }
+      var r = note(g); essais.push({ g: g, n: r });
+      if (r[0] === lg) { zone(fin("Code trouvé : " + secret.join(""), "en " + essais.length + " essai" + (essais.length > 1 ? "s" : ""), record("code_" + niv, essais.length, "bas"), "lancerJrCode('" + niv + "')")); return; }
+      if (essais.length >= essaisMax) { zone(fin("Perdu !", "Le code était " + secret.join(""), null, "lancerJrCode('" + niv + "')")); return; }
+      dessine();
+    }
+    ecran("lancerJrCode", "Code secret", "🔐", "Devine le code. Après chaque essai : ● chiffres bien placés, ○ chiffres présents mais mal placés.", niv, "");
+    dessine();
+  };
+
+  /* ── 6. ALLUMETTES (stratégie contre l'ordinateur) ─────────────────────── */
+  W.lancerJrAllumettes = function (niv) {
+    niv = niv || "facile";
+    var reste = niv === "facile" ? 15 : niv === "moyen" ? 21 : 25, maxPrise = niv === "difficile" ? 4 : 3, tour = "toi", journal = [];
+    // Celui qui prend la DERNIÈRE allumette perd. Stratégie gagnante : laisser (maxPrise+1)·k + 1.
+    function coupOrdi() {
+      var cible = (reste - 1) % (maxPrise + 1);
+      var parfait = niv === "difficile" || (niv === "moyen" && Math.random() < 0.6);
+      var p = (parfait && cible > 0) ? cible : 1 + alea(Math.min(maxPrise, reste));
+      return Math.min(p, reste);
+    }
+    function dessine() {
+      zone("<div style='font-size:15px;margin-bottom:10px'><b>" + reste + "</b> allumette" + (reste > 1 ? "s" : "") + " · tu peux en prendre de 1 à " + maxPrise + "</div>"
+        + "<div style='font-size:28px;letter-spacing:2px;line-height:1.6;max-width:420px;margin:0 auto 12px;word-break:break-all'>" + new Array(reste + 1).join("🧨") + "</div>"
+        + "<div style='display:flex;gap:8px;justify-content:center'>" + [1, 2, 3, 4].slice(0, maxPrise).map(function (k) {
+            return "<button class='btn bi' data-k='" + k + "'" + (k > reste ? " disabled" : "") + ">Prendre " + k + "</button>";
+          }).join("") + "</div>"
+        + "<div style='margin-top:12px;color:#4D5163;font-size:14px'>" + journal.slice(-3).join("<br>") + "</div>");
+      [].forEach.call(document.querySelectorAll("#jrZone [data-k]"), function (b) { b.onclick = function () { prendre(+b.getAttribute("data-k")); }; });
+    }
+    function prendre(k) {
+      if (tour !== "toi" || k > reste) return;
+      reste -= k; journal.push("Tu prends " + k + ".");
+      if (reste === 0) { zone(fin("Perdu…", "Tu as pris la dernière allumette. Astuce : laisse toujours un multiple de " + (maxPrise + 1) + ", plus un.", null, "lancerJrAllumettes('" + niv + "')")); return; }
+      tour = "ordi"; dessine();
+      setTimeout(function () {
+        var p = coupOrdi(); reste -= p; journal.push("L'ordinateur prend " + p + ".");
+        if (reste === 0) {
+          var v = (lire("allum_" + niv) || 0) + 1; ecrire("allum_" + niv, v);
+          zone(fin("Gagné !", "L'ordinateur a dû prendre la dernière allumette.", { neuf: false, ancien: v + " victoire" + (v > 1 ? "s" : "") }, "lancerJrAllumettes('" + niv + "')")); return;
+        }
+        tour = "toi"; dessine();
+      }, 700);
+    }
+    ecran("lancerJrAllumettes", "Allumettes", "🧨", "Chacun son tour, on prend de 1 à " + maxPrise + " allumettes. Celui qui prend la dernière a perdu. Tu commences.", niv, "");
+    dessine();
+  };
+
+  /* ── 7. RÉFLEXE COULEURS (stimulation, attention) ──────────────────────── */
+  var COUL = [["ROUGE", "#DC2626"], ["BLEU", "#2563EB"], ["VERT", "#16A34A"], ["JAUNE", "#CA8A04"], ["VIOLET", "#7C3AED"], ["ORANGE", "#EA580C"]];
+  W.lancerJrCouleurs = function (niv) {
+    niv = niv || "facile";
+    var nb = niv === "facile" ? 3 : niv === "moyen" ? 4 : 6, duree = 30, pts = 0, erreurs = 0, fini = false, debut = Date.now(), q, chrono;
+    var jeu = COUL.slice(0, nb);
+    function nouvelle() { var m = alea(nb), c = alea(nb); if (niv !== "facile" && m === c) c = (c + 1) % nb; q = { mot: jeu[m][0], encre: c }; }
+    function dessine() {
+      var r = Math.max(0, duree - Math.floor((Date.now() - debut) / 1000));
+      zone("<div style='font-size:13px;color:#8B93A6'>" + r + " s · " + pts + " point" + (pts > 1 ? "s" : "") + " · " + erreurs + " erreur" + (erreurs > 1 ? "s" : "") + "</div>"
+        + "<div style='font:900 44px Montserrat,sans-serif;margin:22px 0;color:" + jeu[q.encre][1] + "'>" + q.mot + "</div>"
+        + "<div style='font-size:13px;color:#4D5163;margin-bottom:10px'>Touche la couleur de l'ENCRE, pas le mot.</div>"
+        + "<div style='display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:360px;margin:0 auto'>" + jeu.map(function (c, i) {
+            return "<button type='button' data-c='" + i + "' aria-label='" + c[0] + "' style='" + CASE + "height:52px;border:0;background:" + c[1] + "'></button>";
+          }).join("") + "</div>");
+      [].forEach.call(document.querySelectorAll("#jrZone [data-c]"), function (b) { b.onclick = function () { repond(+b.getAttribute("data-c")); }; });
+    }
+    function repond(c) { if (fini) return; if (c === q.encre) pts++; else erreurs++; nouvelle(); dessine(); }
+    function arret() {
+      fini = true; clearInterval(chrono);
+      var s = Math.max(0, pts - erreurs);
+      zone(fin(s + " points", pts + " bonnes réponses, " + erreurs + " erreur" + (erreurs > 1 ? "s" : "") + " en " + duree + " secondes", record("couleurs_" + niv, s, "haut"), "lancerJrCouleurs('" + niv + "')"));
+    }
+    ecran("lancerJrCouleurs", "Réflexe couleurs", "🎨", "30 secondes : touche la couleur dans laquelle le mot est ÉCRIT. Le cerveau veut lire le mot : résiste !", niv, "");
+    nouvelle(); dessine();
+    if (W._jrChrono) clearInterval(W._jrChrono);
+    var partie = W._jrPartie;
+    chrono = W._jrChrono = setInterval(function () {
+      // L'élève a quitté le jeu, ou en a lancé un autre : ce chronomètre s'arrête.
+      if (!document.getElementById("jrZone") || W._jrPartie !== partie) { clearInterval(chrono); return; }
+      if (Date.now() - debut >= duree * 1000) arret(); else if (!fini) { var e = document.querySelector("#jrZone div"); if (e) e.textContent = Math.max(0, duree - Math.floor((Date.now() - debut) / 1000)) + " s · " + pts + " point" + (pts > 1 ? "s" : "") + " · " + erreurs + " erreur" + (erreurs > 1 ? "s" : ""); }
+    }, 250);
+  };
+
+  /* ── 8. GRILLE LOGIQUE (carré latin à régions : 4×4, 6×6, 9×9) ─────────── */
+  function grilleSolution(n) {
+    var br = n === 4 ? 2 : n === 6 ? 2 : 3, bc = n / br, g = [], r, c;
+    for (r = 0; r < n; r++) { g.push([]); for (c = 0; c < n; c++) g[r].push(((r % br) * bc + Math.floor(r / br) + c) % n + 1); }
+    // Mélanges qui gardent la grille valide : symboles, lignes dans une bande, bandes, colonnes dans une pile.
+    var perm = melange(Array.apply(null, Array(n)).map(function (_, i) { return i + 1; }));
+    g = g.map(function (l) { return l.map(function (x) { return perm[x - 1]; }); });
+    var lignes = [], bandes = melange(Array.apply(null, Array(n / br)).map(function (_, i) { return i; }));
+    bandes.forEach(function (b) { melange(Array.apply(null, Array(br)).map(function (_, i) { return i; })).forEach(function (i) { lignes.push(g[b * br + i]); }); });
+    g = lignes;
+    var cols = []; melange(Array.apply(null, Array(n / bc)).map(function (_, i) { return i; })).forEach(function (p) {
+      melange(Array.apply(null, Array(bc)).map(function (_, i) { return i; })).forEach(function (i) { cols.push(p * bc + i); });
+    });
+    return { g: g.map(function (l) { return cols.map(function (c) { return l[c]; }); }), br: br, bc: bc };
+  }
+  W.lancerJrGrille = function (niv) {
+    niv = niv || "facile";
+    var n = niv === "facile" ? 4 : niv === "moyen" ? 6 : 9, S = grilleSolution(n), vides = Math.round(n * n * (niv === "facile" ? 0.45 : niv === "moyen" ? 0.5 : 0.55));
+    var fixe = S.g.map(function (l) { return l.map(function () { return true; }); }), joue = S.g.map(function (l) { return l.slice(); }), t0 = Date.now();
+    melange(Array.apply(null, Array(n * n)).map(function (_, i) { return i; })).slice(0, vides).forEach(function (p) { fixe[Math.floor(p / n)][p % n] = false; joue[Math.floor(p / n)][p % n] = 0; });
+    function valide() {
+      var r, c, k, vu;
+      for (r = 0; r < n; r++) { vu = {}; for (c = 0; c < n; c++) { k = joue[r][c]; if (!k || vu[k]) return false; vu[k] = 1; } }
+      for (c = 0; c < n; c++) { vu = {}; for (r = 0; r < n; r++) { k = joue[r][c]; if (vu[k]) return false; vu[k] = 1; } }
+      for (var b = 0; b < n; b++) { vu = {}; var r0 = Math.floor(b / (n / S.bc)) * S.br, c0 = (b % (n / S.bc)) * S.bc;
+        for (r = r0; r < r0 + S.br; r++) for (c = c0; c < c0 + S.bc; c++) { k = joue[r][c]; if (vu[k]) return false; vu[k] = 1; } }
+      return true;
+    }
+    function dessine(msg) {
+      var taille = n === 9 ? 34 : 46;
+      zone("<div style='font-size:13px;color:#8B93A6;margin-bottom:8px'>Chiffres de 1 à " + n + " · zones de " + S.br + "×" + S.bc + "</div>"
+        + "<div style='display:inline-grid;grid-template-columns:repeat(" + n + "," + taille + "px);border:2px solid #142554;border-radius:6px;overflow:hidden'>"
+        + joue.map(function (l, r) { return l.map(function (x, c) {
+            var bord = "border-right:" + ((c + 1) % S.bc === 0 && c < n - 1 ? "2px solid #142554" : "1px solid #CBD5E1") + ";border-bottom:" + ((r + 1) % S.br === 0 && r < n - 1 ? "2px solid #142554" : "1px solid #CBD5E1") + ";";
+            return fixe[r][c] ? "<span style='" + bord + "height:" + taille + "px;display:flex;align-items:center;justify-content:center;font-weight:800;background:#EEF2FA;color:#142554'>" + x + "</span>"
+              : "<input data-r='" + r + "' data-c='" + c + "' inputmode='numeric' maxlength='1' value='" + (x || "") + "' style='" + bord + "width:" + taille + "px;height:" + taille + "px;box-sizing:border-box;border-top:0;border-left:0;text-align:center;font-size:18px;color:#C24E00;font-weight:700;outline:none'>";
+          }).join(""); }).join("") + "</div>"
+        + "<div style='margin-top:12px'><button class='btn bi' id='jrOk'>Vérifier</button></div><div style='min-height:20px;margin-top:8px;color:#B42318'>" + (msg || "") + "</div>");
+      [].forEach.call(document.querySelectorAll("#jrZone input[data-r]"), function (i) {
+        i.oninput = function () { var v = parseInt(i.value, 10); if (!(v >= 1 && v <= n)) { i.value = ""; v = 0; } joue[+i.getAttribute("data-r")][+i.getAttribute("data-c")] = v; };
+      });
+      document.getElementById("jrOk").onclick = function () {
+        if (valide()) { var s = Math.round((Date.now() - t0) / 1000); zone(fin("Grille résolue !", "en " + Math.floor(s / 60) + " min " + (s % 60) + " s", record("grille_" + niv, s, "bas"), "lancerJrGrille('" + niv + "')")); }
+        else dessine("Pas encore : chaque ligne, chaque colonne et chaque zone doit contenir 1 à " + n + " une seule fois.");
+      };
+    }
+    ecran("lancerJrGrille", "Grille logique", "🔢", "Complète la grille : chaque chiffre une seule fois par ligne, par colonne et par zone encadrée.", niv, "");
+    dessine();
+  };
+
+  /* ── 9. ANAGRAMMES (vocabulaire, programme) ────────────────────────────── */
+  var MOTS = {
+    facile: ["CARTE", "LIVRE", "CALCUL", "FLEUVE", "PLANTE", "NOMBRE", "PHRASE", "VERBE", "SAVANE", "ECOLE", "CAHIER", "REGLE", "ANGLE", "SOLEIL"],
+    moyen: ["TRIANGLE", "FRACTION", "VOLCAN", "CELLULE", "ENERGIE", "RECIT", "ADJECTIF", "PROVINCE", "EQUATION", "MOLECULE", "COLONIE", "CLIMAT"],
+    difficile: ["DERIVEE", "PROBABILITE", "PHOTOSYNTHESE", "DISSERTATION", "METAPHORE", "ELECTRON", "LOGARITHME", "INDEPENDANCE", "CHROMOSOME", "ARGUMENT"]
+  };
+  W.lancerJrAnagrammes = function (niv) {
+    niv = niv || "facile";
+    var liste = melange(MOTS[niv]).slice(0, 8), n = 0, bons = 0, mot, brouille;
+    function prepare() { mot = liste[n]; do { brouille = melange(mot.split("")).join(""); } while (brouille === mot && mot.length > 1); }
+    function pose() {
+      zone("<div style='font-size:13px;color:#8B93A6'>Mot " + (n + 1) + " sur 8 · " + bons + " trouvé" + (bons > 1 ? "s" : "") + "</div>"
+        + "<div style='font:800 30px monospace;letter-spacing:8px;color:#142554;margin:18px 0'>" + brouille + "</div>"
+        + "<div style='font-size:13px;color:#4D5163;margin-bottom:8px'>" + mot.length + " lettres · commence par « " + mot[0] + " »</div>"
+        + "<input id='jrRep' class='fi' autocomplete='off' style='max-width:260px;margin:0 auto 10px;text-align:center;font-size:20px;text-transform:uppercase'>"
+        + "<div><button class='btn bi' id='jrOk'>Valider</button> <button class='btn bo' id='jrPasse'>Passer</button></div><div id='jrFb' style='min-height:22px;margin-top:10px'></div>");
+      var i = document.getElementById("jrRep"); if (i) { i.focus(); i.onkeydown = function (e) { if (e.key === "Enter") valider(false); }; }
+      document.getElementById("jrOk").onclick = function () { valider(false); };
+      document.getElementById("jrPasse").onclick = function () { valider(true); };
+    }
+    function valider(passe) {
+      var v = String((document.getElementById("jrRep") || {}).value || "").toUpperCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^A-Z]/g, "");
+      if (!passe && !v) return;
+      var ok = !passe && v === mot; if (ok) bons++;
+      document.getElementById("jrFb").innerHTML = ok ? "<b style='color:#047857'>Bravo !</b>" : "<b style='color:#B42318'>C'était " + mot + "</b>";
+      document.getElementById("jrOk").disabled = document.getElementById("jrPasse").disabled = true;
+      setTimeout(function () {
+        n++;
+        if (n >= liste.length) { zone(fin(bons + " / " + liste.length, "mots retrouvés", record("anagr_" + niv, bons, "haut"), "lancerJrAnagrammes('" + niv + "')")); return; }
+        prepare(); pose();
+      }, 1200);
+    }
+    ecran("lancerJrAnagrammes", "Anagrammes du programme", "🔤", "Remets les lettres dans l'ordre pour retrouver un mot de tes cours.", niv, "");
+    prepare(); pose();
+  };
+
+  /* ════════ DEUXIÈME SÉRIE (12/11/2026) : « corrige, enrichis, diversifie » ════════ */
+
+  /* ── 10. MOTS CROISÉS (vocabulaire des cours) ──────────────────────────
+     Grille construite à chaque partie : les mots se croisent sur une lettre
+     commune, sans jamais se toucher autrement. */
+  var CROISES = {
+    facile: [["FLEUVE", "Grand cours d'eau qui se jette dans la mer"], ["SAVANE", "Prairie des régions chaudes, avec des arbres épars"], ["VERBE", "Mot qui exprime une action ou un état"],
+      ["ANGLE", "Figure formée par deux demi-droites de même origine"], ["SOLEIL", "Étoile au centre de notre système"], ["NOMBRE", "Il s'écrit avec des chiffres"],
+      ["CARTE", "Représentation d'un territoire"], ["PLANTE", "Être vivant qui fabrique sa nourriture grâce à la lumière"], ["PHRASE", "Elle commence par une majuscule et finit par un point"],
+      ["REGLE", "Instrument pour tracer des traits droits"], ["LUNE", "Satellite naturel de la Terre"], ["CERCLE", "Ensemble des points à égale distance d'un centre"],
+      ["ADDITION", "Opération dont le résultat est une somme"], ["YAOUNDE", "Capitale politique du Cameroun"], ["PLUIE", "Eau qui tombe des nuages"]],
+    moyen: [["CELLULE", "Unité de base du vivant"], ["VOLCAN", "Le mont Cameroun en est un"], ["FRACTION", "Elle s'écrit avec un numérateur et un dénominateur"],
+      ["ENERGIE", "Elle se mesure en joules"], ["ADJECTIF", "Mot qui qualifie un nom"], ["EQUATION", "Égalité qui contient une inconnue"],
+      ["ATOME", "Plus petite partie d'un élément chimique"], ["CLIMAT", "Ensemble des conditions météorologiques d'une région"], ["RECIT", "Texte qui raconte une histoire"],
+      ["TRIANGLE", "Polygone à trois côtés"], ["DOUALA", "Capitale économique du Cameroun"], ["SYNONYME", "Mot de même sens qu'un autre"],
+      ["MOLECULE", "Assemblage d'atomes"], ["COLONIE", "Territoire dominé par une puissance étrangère"], ["VECTEUR", "Il a une direction, un sens et une norme"]],
+    difficile: [["DERIVEE", "Elle donne le coefficient directeur de la tangente"], ["METAPHORE", "Comparaison sans outil de comparaison"], ["CHROMOSOME", "Il porte les gènes"],
+      ["LOGARITHME", "Fonction réciproque de l'exponentielle"], ["ELECTRON", "Particule de charge négative"], ["DISSERTATION", "Exercice d'argumentation du BAC"],
+      ["PHOTOSYNTHESE", "Fabrication de matière organique grâce à la lumière"], ["SUITE", "Elle peut être arithmétique ou géométrique"], ["IRONIE", "Dire le contraire de ce qu'on pense pour se moquer"],
+      ["MITOSE", "Division cellulaire qui donne deux cellules identiques"], ["INTEGRALE", "Elle mesure une aire sous une courbe"], ["ENZYME", "Protéine qui accélère une réaction"],
+      ["REUNIFICATION", "Événement camerounais de 1961"], ["PROBABILITE", "Nombre compris entre 0 et 1"], ["OXYDATION", "Perte d'électrons"]]
+  };
+  function croisesConstruire(liste, lim) {
+    var G = {}, places = [], B = { r0: 0, r1: 0, c0: 0, c1: 0 };
+    lim = lim || 13;
+    function tient(m, r, c, h) {   // la grille reste dans lim × lim
+      var r1 = r + (h ? 0 : m.length - 1), c1 = c + (h ? m.length - 1 : 0);
+      return Math.max(B.r1, r1) - Math.min(B.r0, r) < lim && Math.max(B.c1, c1) - Math.min(B.c0, c) < lim;
+    }
+    function lettre(r, c) { return G[r + "," + c]; }
+    function peut(m, r, c, h) {
+      var dr = h ? 0 : 1, dc = h ? 1 : 0, croise = 0;
+      if (lettre(r - dr, c - dc) || lettre(r + dr * m.length, c + dc * m.length)) return -1;
+      for (var i = 0; i < m.length; i++) {
+        var rr = r + dr * i, cc = c + dc * i, x = lettre(rr, cc);
+        if (x) { if (x !== m[i]) return -1; croise++; }
+        else if (lettre(rr + dc, cc + dr) || lettre(rr - dc, cc - dr)) return -1;   // pas de voisin parallèle
+      }
+      return croise;
+    }
+    function pose(m, r, c, h, def) {
+      for (var i = 0; i < m.length; i++) G[(r + (h ? 0 : i)) + "," + (c + (h ? i : 0))] = m[i];
+      B.r0 = Math.min(B.r0, r); B.c0 = Math.min(B.c0, c); B.r1 = Math.max(B.r1, r + (h ? 0 : m.length - 1)); B.c1 = Math.max(B.c1, c + (h ? m.length - 1 : 0));
+      places.push({ m: m, r: r, c: c, h: h, def: def });
+    }
+    var mots = melange(liste).filter(function (x) { return x[0].length <= lim; });
+    var depart = mots.splice(alea(Math.min(4, mots.length)), 1)[0];   // pas toujours le plus long : des grilles variées
+    mots.sort(function (a, b) { return b[0].length - a[0].length; });
+    mots.unshift(depart);
+    pose(mots[0][0], 0, 0, true, mots[0][1]);
+    for (var k = 1; k < mots.length && places.length < 7; k++) {
+      var m = mots[k][0], best = null;
+      places.forEach(function (p) {
+        for (var i = 0; i < p.m.length; i++) for (var j = 0; j < m.length; j++) {
+          if (p.m[i] !== m[j]) continue;
+          var h = !p.h, r = p.h ? p.r - j : p.r + i, c = p.h ? p.c + i : p.c - j, s = peut(m, r, c, h);
+          if (s > 0 && tient(m, r, c, h) && (!best || s > best.s)) best = { r: r, c: c, h: h, s: s };
+        }
+      });
+      if (best) pose(m, best.r, best.c, best.h, mots[k][1]);
+    }
+    var rs = [], cs = [];
+    Object.keys(G).forEach(function (k2) { var p = k2.split(","); rs.push(+p[0]); cs.push(+p[1]); });
+    var r0 = Math.min.apply(null, rs), c0 = Math.min.apply(null, cs);
+    var H = Math.max.apply(null, rs) - r0 + 1, L = Math.max.apply(null, cs) - c0 + 1;
+    places.forEach(function (p) { p.r -= r0; p.c -= c0; });
+    places.sort(function (a, b) { return a.r - b.r || a.c - b.c; });
+    var num = {}, n = 0;
+    places.forEach(function (p) { var k3 = p.r + "," + p.c; if (!num[k3]) num[k3] = ++n; p.n = num[k3]; });
+    var sol = {}; Object.keys(G).forEach(function (k4) { var p = k4.split(","); sol[(+p[0] - r0) + "," + (+p[1] - c0)] = G[k4]; });
+    return { places: places, sol: sol, H: H, L: L, num: num };
+  }
+  W.lancerJrCroises = function (niv) {
+    niv = niv || "facile";
+    var X, essai = 0;
+    var lim = niv === "difficile" ? 14 : 12;
+    do { X = croisesConstruire(CROISES[niv], lim); essai++; } while (X.places.length < 5 && essai < 30);
+    var t0 = Date.now();
+    function dessine(msg) {
+      // Taille des cases d'après la largeur réellement disponible (téléphone compris).
+      var dispo = ((document.getElementById("jrZone") || {}).clientWidth || 320) - 4;
+      var taille = Math.max(20, Math.min(36, Math.floor(dispo / X.L))), h = "";
+      for (var r = 0; r < X.H; r++) for (var c = 0; c < X.L; c++) {
+        var k = r + "," + c;
+        h += X.sol[k]
+          ? "<span class='jrc-case' style='position:relative;width:" + taille + "px;height:" + taille + "px'>"
+            + (X.num[k] ? "<b style='position:absolute;top:1px;left:2px;font-size:9px;color:#5B6170'>" + X.num[k] + "</b>" : "")
+            + "<input data-k='" + k + "' maxlength='1' autocomplete='off' style='font-size:" + Math.round(taille * 0.5) + "px'></span>"
+          : "<span style='width:" + taille + "px;height:" + taille + "px'></span>";
+      }
+      // Des lignes simples, pas une liste : le thème du site coche chaque <li>, comme si le mot était trouvé.
+      var defs = function (hz) { return X.places.filter(function (p) { return p.h === hz; }).map(function (p) { return "<div style='margin:3px 0'><b>" + p.n + ".</b> " + esc(p.def) + " <span style='color:#8B93A6'>(" + p.m.length + ")</span></div>"; }).join(""); };
+      /* Règles locales prioritaires : le thème du site retire bordures et fonds des champs. */
+      // Quatre identifiants : il faut passer devant les règles du thème (« #VISITOR#VISITOR#VISITOR … !important »).
+      var P = "#jrZone#jrZone#jrZone#jrZone ";
+      zone("<style>" + P + ".jrc-case{background:#fff!important;box-shadow:inset 0 0 0 1px #64748B!important;box-sizing:border-box}"
+        + P + ".jrc-case input{width:100%!important;height:100%!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;margin:0!important;"
+        + "text-align:center!important;text-transform:uppercase;font-family:Poppins,sans-serif!important;font-weight:700!important;color:#142554;outline:none}"
+        + P + ".jrc-case input:focus{background:#FFF6DC!important}</style>"
+        + "<div style='overflow-x:auto'><div style='display:inline-grid;grid-template-columns:repeat(" + X.L + "," + taille + "px)'>" + h + "</div></div>"
+        + "<div style='text-align:left;font-size:14px;line-height:1.55;margin-top:12px'><b>Horizontalement</b><div style='margin:4px 0 10px 4px'>" + defs(true) + "</div>"
+        + "<b>Verticalement</b><div style='margin:4px 0 0 4px'>" + defs(false) + "</div></div>"
+        + "<div style='margin-top:10px'><button class='btn bi' id='jrOk'>Vérifier</button> <button class='btn bo' id='jrIndice'>Une lettre</button></div><div id='jrFb' style='min-height:20px;margin-top:8px;color:#B42318'>" + (msg || "") + "</div>");
+      var champs = [].slice.call(document.querySelectorAll("#jrZone input[data-k]"));
+      champs.forEach(function (i, n) { i.oninput = function () { i.value = i.value.toUpperCase().replace(/[^A-Z]/g, ""); i.style.color = "#142554"; if (i.value && champs[n + 1]) champs[n + 1].focus(); }; });
+      document.getElementById("jrOk").onclick = function () {
+        var faux = 0, vides = 0;
+        champs.forEach(function (i) { var v = i.value; if (!v) vides++; else if (v !== X.sol[i.getAttribute("data-k")]) { faux++; i.style.color = "#B42318"; } else i.style.color = "#047857"; });
+        if (!faux && !vides) { var s = Math.round((Date.now() - t0) / 1000); zone(fin("Grille complète !", X.places.length + " mots en " + Math.floor(s / 60) + " min " + (s % 60) + " s", record("croises_" + niv, s, "bas"), "lancerJrCroises('" + niv + "')")); return; }
+        document.getElementById("jrFb").textContent = (faux ? faux + " lettre" + (faux > 1 ? "s" : "") + " fausse" + (faux > 1 ? "s" : "") + " (en rouge)" : "") + (faux && vides ? " · " : "") + (vides ? vides + " case" + (vides > 1 ? "s" : "") + " vide" + (vides > 1 ? "s" : "") : "");
+      };
+      document.getElementById("jrIndice").onclick = function () {
+        var libre = champs.filter(function (i) { return i.value !== X.sol[i.getAttribute("data-k")]; });
+        if (!libre.length) return;
+        var i = libre[alea(libre.length)]; i.value = X.sol[i.getAttribute("data-k")]; i.style.color = "#C24E00"; t0 -= 20000;   // une lettre donnée coûte 20 s
+      };
+    }
+    ecran("lancerJrCroises", "Mots croisés", "✏️", "Remplis la grille avec les mots des définitions. « Une lettre » t'en donne une (+20 s).", niv, "");
+    dessine();
+  };
+
+  /* ── 11. MORPION (stratégie contre l'ordinateur) ───────────────────────── */
+  var LIGNES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+  function gagnant(t) { for (var i = 0; i < 8; i++) { var l = LIGNES[i]; if (t[l[0]] && t[l[0]] === t[l[1]] && t[l[1]] === t[l[2]]) return t[l[0]]; } return t.indexOf("") < 0 ? "nul" : ""; }
+  function minimax(t, joueur) {
+    var g = gagnant(t);
+    if (g === "O") return { s: 1 }; if (g === "X") return { s: -1 }; if (g === "nul") return { s: 0 };
+    var best = { s: joueur === "O" ? -2 : 2 };
+    for (var i = 0; i < 9; i++) if (!t[i]) {
+      t[i] = joueur; var r = minimax(t, joueur === "O" ? "X" : "O").s; t[i] = "";
+      if ((joueur === "O" && r > best.s) || (joueur === "X" && r < best.s)) best = { s: r, i: i };
+    }
+    return best;
+  }
+  W.lancerJrMorpion = function (niv) {
+    niv = niv || "facile";
+    var t = ["", "", "", "", "", "", "", "", ""], fini = false;
+    function coupOrdi() {
+      var libres = []; t.forEach(function (x, i) { if (!x) libres.push(i); });
+      if (niv === "difficile" || (niv === "moyen" && Math.random() < 0.7)) {
+        if (niv === "moyen") {   // gagner, sinon bloquer, sinon le centre
+          for (var j = 0; j < 2; j++) { var qui = j ? "X" : "O"; for (var k = 0; k < libres.length; k++) { t[libres[k]] = qui; var g = gagnant(t) === qui; t[libres[k]] = ""; if (g) return libres[k]; } }
+          if (!t[4]) return 4;
+        } else return minimax(t, "O").i;
+      }
+      return libres[alea(libres.length)];
+    }
+    function dessine(msg) {
+      zone("<div style='display:grid;grid-template-columns:repeat(3,84px);gap:6px;justify-content:center'>" + t.map(function (x, i) {
+          return "<button type='button' data-i='" + i + "' style='" + CASE + "height:84px;border:2px solid #E4E9F2;background:#fff;font-size:40px;color:" + (x === "X" ? "#1E499B" : "#C24E00") + "'>" + (x === "X" ? "✕" : x === "O" ? "◯" : "") + "</button>";
+        }).join("") + "</div><div style='min-height:22px;margin-top:10px;color:#4D5163'>" + (msg || "Tu joues ✕, tu commences.") + "</div>");
+      [].forEach.call(document.querySelectorAll("#jrZone [data-i]"), function (b) { b.onclick = function () { joue(+b.getAttribute("data-i")); }; });
+    }
+    function termine() {
+      var g = gagnant(t); if (!g) return false; fini = true;
+      var v = lire("morpion_" + niv) || { v: 0, n: 0, d: 0 };
+      if (g === "X") v.v++; else if (g === "nul") v.n++; else v.d++;
+      ecrire("morpion_" + niv, v);
+      setTimeout(function () {
+        zone(fin(g === "X" ? "Gagné !" : g === "nul" ? "Match nul" : "L'ordinateur gagne",
+          (niv === "difficile" && g === "nul" ? "Au niveau difficile, l'ordinateur ne perd jamais : un nul est une belle partie. " : "") + "Bilan : " + v.v + " victoire(s), " + v.n + " nul(s), " + v.d + " défaite(s)", null, "lancerJrMorpion('" + niv + "')"));
+      }, 700);
+      return true;
+    }
+    function joue(i) {
+      if (fini || t[i]) return;
+      t[i] = "X"; dessine("L'ordinateur réfléchit…");
+      if (termine()) return;
+      setTimeout(function () { t[coupOrdi()] = "O"; dessine(); termine(); }, 450);
+    }
+    ecran("lancerJrMorpion", "Morpion", "⭕", "Aligne trois ✕ avant l'ordinateur, en ligne, en colonne ou en diagonale.", niv, "");
+    dessine();
+  };
+
+  /* ── 12. TERRAIN MINÉ (logique) ────────────────────────────────────────── */
+  W.lancerJrMines = function (niv) {
+    niv = niv || "facile";
+    var n = niv === "facile" ? 6 : niv === "moyen" ? 8 : 10, nbM = niv === "facile" ? 5 : niv === "moyen" ? 10 : 18;
+    var mine = [], vu = [], drapeau = [], pose = false, fini = false, modeDrapeau = false, t0 = 0;
+    for (var i = 0; i < n * n; i++) { mine.push(false); vu.push(false); drapeau.push(false); }
+    function voisins(p) { var v = [], r = Math.floor(p / n), c = p % n; for (var dr = -1; dr <= 1; dr++) for (var dc = -1; dc <= 1; dc++) { var rr = r + dr, cc = c + dc; if ((dr || dc) && rr >= 0 && rr < n && cc >= 0 && cc < n) v.push(rr * n + cc); } return v; }
+    function compte(p) { return voisins(p).filter(function (q) { return mine[q]; }).length; }
+    function placer(sauf) {   // le premier coup n'est jamais une mine, ni ses voisins
+      var interdit = voisins(sauf).concat([sauf]), libres = [];
+      for (var k = 0; k < n * n; k++) if (interdit.indexOf(k) < 0) libres.push(k);
+      melange(libres).slice(0, nbM).forEach(function (k) { mine[k] = true; });
+      pose = true; t0 = Date.now();
+    }
+    function ouvrir(p) {
+      if (vu[p] || drapeau[p]) return; vu[p] = true;
+      if (!mine[p] && compte(p) === 0) voisins(p).forEach(ouvrir);
+    }
+    var COUL = ["", "#1E499B", "#047857", "#B42318", "#5B21B6", "#92400E", "#0E7C86", "#111", "#666"];
+    function dessine() {
+      var taille = Math.min(40, Math.floor(320 / n)), drap = drapeau.filter(Boolean).length;
+      zone("<div style='font-size:13px;color:#8B93A6;margin-bottom:8px'>" + nbM + " mines · " + drap + " drapeau" + (drap > 1 ? "x" : "") + "</div>"
+        + "<div style='display:inline-grid;grid-template-columns:repeat(" + n + "," + taille + "px);gap:2px'>" + mine.map(function (m, p) {
+            var bg = vu[p] ? (m ? "#FCA5A5" : "#F1F5F9") : "#1E499B", ct = "";
+            if (vu[p]) ct = m ? "💣" : (compte(p) || "");
+            else if (drapeau[p]) ct = "🚩";
+            return "<button type='button' data-p='" + p + "' style='" + CASE + "width:" + taille + "px;height:" + taille + "px;border:0;border-radius:6px;background:" + bg + ";font-size:" + Math.round(taille * 0.5) + "px;color:" + (COUL[compte(p)] || "#111") + "'>" + ct + "</button>";
+          }).join("") + "</div>"
+        + "<div style='margin-top:12px'><button class='btn " + (modeDrapeau ? "bi" : "bo") + "' id='jrMode'>" + (modeDrapeau ? "🚩 Mode drapeau (actif)" : "🚩 Poser un drapeau") + "</button></div>");
+      [].forEach.call(document.querySelectorAll("#jrZone [data-p]"), function (b) { b.onclick = function () { clic(+b.getAttribute("data-p")); }; });
+      document.getElementById("jrMode").onclick = function () { modeDrapeau = !modeDrapeau; dessine(); };
+    }
+    function clic(p) {
+      if (fini || vu[p]) return;
+      if (modeDrapeau) { drapeau[p] = !drapeau[p]; dessine(); return; }
+      if (drapeau[p]) return;
+      if (!pose) placer(p);
+      if (mine[p]) { fini = true; mine.forEach(function (m, q) { if (m) vu[q] = true; }); dessine(); setTimeout(function () { zone(fin("Boum !", "Une mine a sauté. Les chiffres disent combien de mines touchent chaque case : sers-t'en pour déduire.", null, "lancerJrMines('" + niv + "')")); }, 1200); return; }
+      ouvrir(p); dessine();
+      var restant = vu.filter(function (v, q) { return !v && !mine[q]; }).length;
+      if (!restant) { fini = true; var s = Math.round((Date.now() - t0) / 1000); zone(fin("Terrain déminé !", "en " + s + " secondes", record("mines_" + niv, s, "bas"), "lancerJrMines('" + niv + "')")); }
+    }
+    ecran("lancerJrMines", "Terrain miné", "🚩", "Ouvre toutes les cases sans mine. Chaque chiffre indique combien de mines touchent la case. Le premier coup est toujours sûr.", niv, "");
+    dessine();
+  };
+
+  /* ── 13. SÉQUENCE DE COULEURS (mémoire, attention) ─────────────────────── */
+  W.lancerJrSequence = function (niv) {
+    niv = niv || "facile";
+    var nb = niv === "difficile" ? 6 : 4, vitesse = niv === "facile" ? 750 : niv === "moyen" ? 550 : 420;
+    var PADS = [["#DC2626", "#FCA5A5"], ["#2563EB", "#93C5FD"], ["#16A34A", "#86EFAC"], ["#CA8A04", "#FDE68A"], ["#7C3AED", "#C4B5FD"], ["#EA580C", "#FDBA74"]].slice(0, nb);
+    var seq = [], pos = 0, ecoute = false, partie;
+    function dessine(msg) {
+      zone("<div style='font-size:14px;color:#4D5163;margin-bottom:10px'>" + (msg || "") + "</div>"
+        + "<div style='display:grid;grid-template-columns:repeat(" + (nb === 6 ? 3 : 2) + ",96px);gap:10px;justify-content:center'>" + PADS.map(function (c, i) {
+            return "<button type='button' data-c='" + i + "' aria-label='Couleur " + (i + 1) + "' style='height:96px;border:0;border-radius:18px;background:" + c[0] + ";cursor:pointer;transition:background .1s'></button>";
+          }).join("") + "</div><div style='margin-top:10px;font-weight:700;color:#142554'>Longueur : " + seq.length + "</div>");
+      [].forEach.call(document.querySelectorAll("#jrZone [data-c]"), function (b) { b.onclick = function () { touche(+b.getAttribute("data-c")); }; });
+    }
+    function allume(i, d) {
+      var b = document.querySelector("#jrZone [data-c='" + i + "']"); if (!b) return;
+      b.style.background = PADS[i][1]; setTimeout(function () { b.style.background = PADS[i][0]; }, d);
+    }
+    function rejoue() {
+      ecoute = false; seq.push(alea(nb)); dessine("Regarde bien…");
+      var k = 0, maPartie = W._jrPartie;
+      (function suivant() {
+        if (W._jrPartie !== maPartie) return;   // l'élève est parti
+        if (k >= seq.length) { ecoute = true; pos = 0; var m = document.querySelector("#jrZone div"); if (m) m.textContent = "À toi : reproduis la séquence."; return; }
+        allume(seq[k++], vitesse * 0.7); setTimeout(suivant, vitesse);
+      })();
+    }
+    function touche(i) {
+      if (!ecoute) return;
+      allume(i, 180);
+      if (i !== seq[pos]) {
+        ecoute = false; var lg = seq.length - 1;
+        setTimeout(function () {
+          zone(lg > 0 ? fin("Séquence de " + lg + " couleur" + (lg > 1 ? "s" : ""), "retenue sans erreur", record("sequence_" + niv, lg, "haut"), "lancerJrSequence('" + niv + "')")
+                      : fin("Raté dès la première", "Regarde bien la couleur qui s'allume, puis touche la même.", null, "lancerJrSequence('" + niv + "')"));
+        }, 400);
+        return;
+      }
+      if (++pos === seq.length) { ecoute = false; setTimeout(rejoue, 650); }
+    }
+    ecran("lancerJrSequence", "Séquence de couleurs", "🔴", "Les couleurs s'allument dans un ordre : reproduis-le. À chaque tour, la séquence s'allonge d'une couleur.", niv, "");
+    partie = W._jrPartie; setTimeout(function () { if (W._jrPartie === partie) rejoue(); }, 600);
+    dessine("Prépare-toi…");
+  };
+
+  /* ── 14. CIBLE NUMÉRIQUE (calcul, stratégie) ───────────────────────────── */
+  W.lancerJrCible = function (niv) {
+    niv = niv || "facile";
+    var nbN = niv === "facile" ? 4 : niv === "moyen" ? 5 : 6, tirage = [], cible, k;
+    // On fabrique la cible À PARTIR des nombres : elle est toujours atteignable.
+    do {
+      tirage = []; for (k = 0; k < nbN; k++) tirage.push(niv === "difficile" && k === 0 ? [25, 50, 75, 100][alea(4)] : 1 + alea(niv === "facile" ? 9 : 12));
+      var pile = melange(tirage).slice(0, niv === "facile" ? 3 : 4), v = pile[0];
+      for (k = 1; k < pile.length; k++) { var o = alea(niv === "facile" ? 2 : 3); v = o === 0 ? v + pile[k] : o === 1 ? (v > pile[k] ? v - pile[k] : v + pile[k]) : v * pile[k]; }
+      cible = v;
+    } while (cible < 10 || cible > (niv === "facile" ? 60 : niv === "moyen" ? 300 : 999) || tirage.indexOf(cible) >= 0);
+    var nombres = tirage.map(function (x, i) { return { v: x, id: i }; }), sel = null, op = null, etapes = [], t0 = Date.now(), prochain = nbN;
+    function dessine(msg) {
+      zone("<div style='font-size:13px;color:#8B93A6'>Atteins la cible</div><div style='font:900 44px Montserrat,sans-serif;color:#C24E00;margin:4px 0 14px'>" + cible + "</div>"
+        + "<div style='display:flex;gap:8px;justify-content:center;flex-wrap:wrap'>" + nombres.map(function (x) {
+            return "<button type='button' data-n='" + x.id + "' style='" + CASE + "min-width:58px;height:52px;border:2px solid " + (sel === x.id ? "#C24E00" : "#E4E9F2") + ";background:#fff;font-size:20px;color:#142554'>" + x.v + "</button>";
+          }).join("") + "</div>"
+        + "<div style='display:flex;gap:8px;justify-content:center;margin:12px 0'>" + ["+", "−", "×", "÷"].map(function (o) {
+            return "<button type='button' data-o='" + o + "' style='" + CASE + "width:52px;height:46px;border:0;background:" + (op === o ? "#C24E00" : "#1E499B") + ";color:#fff;font-size:22px'>" + o + "</button>";
+          }).join("") + "</div>"
+        + "<div style='font-size:14px;color:#4D5163;min-height:20px'>" + (msg || (sel === null ? "Choisis un nombre." : op === null ? "Choisis une opération." : "Choisis le second nombre.")) + "</div>"
+        + "<div style='font-size:13px;color:#5B6170;margin-top:6px'>" + etapes.join("<br>") + "</div>"
+        + "<div style='margin-top:10px'><button class='btn bo' id='jrRaz'>Recommencer le calcul</button></div>");
+      [].forEach.call(document.querySelectorAll("#jrZone [data-n]"), function (b) { b.onclick = function () { choisitN(+b.getAttribute("data-n")); }; });
+      [].forEach.call(document.querySelectorAll("#jrZone [data-o]"), function (b) { b.onclick = function () { if (sel !== null) { op = b.getAttribute("data-o"); dessine(); } }; });
+      document.getElementById("jrRaz").onclick = function () { nombres = tirage.map(function (x, i) { return { v: x, id: i }; }); sel = op = null; etapes = []; dessine(); };
+    }
+    function choisitN(id) {
+      if (sel === null || op === null) { sel = id; op = null; dessine(); return; }
+      if (id === sel) return;
+      var a = nombres.filter(function (x) { return x.id === sel; })[0].v, b = nombres.filter(function (x) { return x.id === id; })[0].v, r;
+      if (op === "+") r = a + b; else if (op === "×") r = a * b;
+      else if (op === "−") { if (a - b <= 0) { dessine("Le résultat doit rester positif."); return; } r = a - b; }
+      else { if (a % b) { dessine("La division doit tomber juste."); return; } r = a / b; }
+      nombres = nombres.filter(function (x) { return x.id !== sel && x.id !== id; }); nombres.push({ v: r, id: prochain++ });
+      etapes.push(a + " " + op + " " + b + " = " + r); sel = op = null;
+      if (r === cible) { var s = Math.round((Date.now() - t0) / 1000); zone(fin("Cible atteinte : " + cible, etapes.join(" · ") + " — en " + s + " s", record("cible_" + niv, s, "bas"), "lancerJrCible('" + niv + "')")); return; }
+      dessine();
+    }
+    ecran("lancerJrCible", "Cible numérique", "🎯", "Combine les nombres avec + − × ÷ pour obtenir exactement la cible. Chaque nombre sert une seule fois.", niv, "");
+    dessine();
+  };
+
+  /* ── 15. BATAILLE NAVALE (stratégie, repérage dans un quadrillage) ─────── */
+  W.lancerJrNavale = function (niv) {
+    niv = niv || "facile";
+    var n = niv === "facile" ? 6 : 8, flotte = niv === "facile" ? [3, 2, 2] : niv === "moyen" ? [4, 3, 2, 2] : [5, 4, 3, 3, 2];
+    var tirsMax = niv === "facile" ? 22 : niv === "moyen" ? 38 : 42, navire = [], tir = [], tirs = 0, k;
+    for (k = 0; k < n * n; k++) { navire.push(-1); tir.push(false); }
+    flotte.forEach(function (lg, id) {
+      for (var e = 0; e < 500; e++) {
+        var h = Math.random() < 0.5, r = alea(h ? n : n - lg + 1), c = alea(h ? n - lg + 1 : n), ok = true, cases = [];
+        for (var i = 0; i < lg; i++) { var p = (r + (h ? 0 : i)) * n + c + (h ? i : 0); if (navire[p] >= 0) ok = false; cases.push(p); }
+        if (ok) { cases.forEach(function (p) { navire[p] = id; }); return; }
+      }
+    });
+    var LET = "ABCDEFGH";
+    function coule(id) { for (var p = 0; p < n * n; p++) if (navire[p] === id && !tir[p]) return false; return true; }
+    function dessine(msg) {
+      var taille = Math.min(40, Math.floor(300 / n)), restants = flotte.filter(function (_, id) { return !coule(id); }).length;
+      var h = "<span></span>"; for (var c = 0; c < n; c++) h += "<span style='font-size:11px;color:#8B93A6;text-align:center'>" + (c + 1) + "</span>";
+      for (var r = 0; r < n; r++) {
+        h += "<span style='font-size:11px;color:#8B93A6;display:flex;align-items:center'>" + LET[r] + "</span>";
+        for (c = 0; c < n; c++) {
+          var p = r * n + c, bg = !tir[p] ? "#DBEAFE" : navire[p] < 0 ? "#F1F5F9" : coule(navire[p]) ? "#1F2937" : "#DC2626";
+          h += "<button type='button' data-p='" + p + "' aria-label='" + LET[r] + (c + 1) + "' style='" + CASE + "width:" + taille + "px;height:" + taille + "px;border:0;border-radius:5px;background:" + bg + ";font-size:" + Math.round(taille * 0.45) + "px;color:#fff'>" + (tir[p] ? (navire[p] < 0 ? "<span style='color:#94A3B8'>•</span>" : "✕") : "") + "</button>";
+        }
+      }
+      zone("<div style='font-size:13px;color:#8B93A6;margin-bottom:8px'>" + (tirsMax - tirs) + " tirs restants · " + restants + " navire" + (restants > 1 ? "s" : "") + " à couler (" + flotte.join(", ") + " cases)</div>"
+        + "<div style='display:inline-grid;grid-template-columns:16px repeat(" + n + "," + taille + "px);gap:2px'>" + h + "</div>"
+        + "<div style='min-height:22px;margin-top:10px;font-weight:700;color:#142554'>" + (msg || "") + "</div>");
+      [].forEach.call(document.querySelectorAll("#jrZone [data-p]"), function (b) { b.onclick = function () { feu(+b.getAttribute("data-p")); }; });
+    }
+    function feu(p) {
+      if (tir[p]) return;
+      tir[p] = true; tirs++;
+      var msg = navire[p] < 0 ? "À l'eau." : coule(navire[p]) ? "Touché, coulé !" : "Touché !";
+      if (flotte.every(function (_, id) { return coule(id); })) { zone(fin("Flotte coulée !", "en " + tirs + " tirs", record("navale_" + niv, tirs, "bas"), "lancerJrNavale('" + niv + "')")); return; }
+      if (tirs >= tirsMax) { tir = tir.map(function (_, q) { return true; }); dessine("Plus de munitions : voici la flotte."); setTimeout(function () { zone(fin("Munitions épuisées", "Astuce : après un « touché », vise les cases voisines dans la même direction.", null, "lancerJrNavale('" + niv + "')")); }, 1600); return; }
+      dessine(msg);
+    }
+    ecran("lancerJrNavale", "Bataille navale", "🚢", "Une flotte est cachée dans la grille. Repère-la et coule tous les navires avant d'épuiser tes tirs.", niv, "");
+    dessine();
+  };
+
+  /* ── 16. DEVINE LE NOMBRE (éveil : chercher par moitiés) ───────────────── */
+  W.lancerJrDevine = function (niv) {
+    niv = niv || "facile";
+    var max = niv === "facile" ? 100 : niv === "moyen" ? 1000 : 10000, secret = 1 + alea(max), essais = [], ideal = Math.ceil(Math.log(max) / Math.LN2);
+    function dessine(msg) {
+      zone("<div style='font-size:14px;color:#4D5163'>Un nombre entre 1 et " + max.toLocaleString("fr-FR") + " est caché. Tu as " + (ideal + 2) + " essais.</div>"
+        + "<input id='jrRep' type='number' inputmode='numeric' class='fi' style='max-width:200px;margin:14px auto 10px;text-align:center;font-size:22px'>"
+        + "<div><button class='btn bi' id='jrOk'>Proposer</button></div><div style='min-height:24px;margin-top:10px;font-weight:700;color:#142554'>" + (msg || "") + "</div>"
+        + "<div style='font-size:13px;color:#5B6170'>" + essais.map(function (e) { return e.v + (e.v < secret ? " ↑" : " ↓"); }).join(" · ") + "</div>");
+      var i = document.getElementById("jrRep"); if (i) { i.focus(); i.onkeydown = function (e) { if (e.key === "Enter") propose(); }; }
+      document.getElementById("jrOk").onclick = propose;
+    }
+    function propose() {
+      var v = parseInt((document.getElementById("jrRep") || {}).value, 10);
+      if (!(v >= 1 && v <= max)) { dessine("Entre un nombre de 1 à " + max.toLocaleString("fr-FR") + "."); return; }
+      if (v === secret) { var n = essais.length + 1; zone(fin("Trouvé : " + secret, "en " + n + " essai" + (n > 1 ? "s" : "") + " (la méthode des moitiés en garantit " + ideal + " au plus)", record("devine_" + niv, n, "bas"), "lancerJrDevine('" + niv + "')")); return; }
+      essais.push({ v: v });
+      if (essais.length >= ideal + 2) { zone(fin("C'était " + secret, "Astuce : propose toujours le milieu de l'intervalle qui reste ; tu élimines la moitié des nombres à chaque essai.", null, "lancerJrDevine('" + niv + "')")); return; }
+      dessine(v < secret ? "C'est plus grand ↑" : "C'est plus petit ↓");
+    }
+    ecran("lancerJrDevine", "Devine le nombre", "🔍", "Trouve le nombre caché. Après chaque essai, on te dit s'il est plus grand ou plus petit.", niv, "");
+    dessine();
+  };
+
+  /* ── 17. VRAI OU FAUX ÉCLAIR (calcul rapide, 45 s) ─────────────────────── */
+  function affirmation(niv) {
+    var a, b, juste, txt, vrai = Math.random() < 0.5, ecart = (1 + alea(3)) * (Math.random() < 0.5 ? -1 : 1), t = alea(niv === "facile" ? 3 : niv === "moyen" ? 5 : 7);
+    if (t === 0) { a = 2 + alea(30); b = 2 + alea(30); juste = a + b; txt = a + " + " + b; }
+    else if (t === 1) { a = 2 + alea(10); b = 2 + alea(10); juste = a * b; txt = a + " × " + b; }
+    else if (t === 2) { a = 10 + alea(60); b = 1 + alea(a - 1); juste = a - b; txt = a + " − " + b; }
+    else if (t === 3) { a = 2 + alea(15); juste = a * a; txt = a + "²"; }
+    else if (t === 4) { a = 2 + alea(9); b = 2 + alea(9); juste = a; txt = (a * b) + " ÷ " + b; }
+    else if (t === 5) { a = 2 + alea(4); b = 2 + alea(4); juste = Math.pow(a, b); txt = a + "<sup>" + b + "</sup>"; }
+    else { a = (1 + alea(9)) * 10; b = [10, 20, 25, 50][alea(4)]; juste = a * b / 100; txt = b + " % de " + a; }
+    var montre = vrai ? juste : juste + ecart;
+    if (montre === juste) vrai = true;
+    return { txt: txt + " = " + montre, vrai: vrai };
+  }
+  W.lancerJrVraiFaux = function (niv) {
+    niv = niv || "facile";
+    var duree = 45, pts = 0, err = 0, q = affirmation(niv), debut = Date.now(), fini = false, partie = W._jrPartie;
+    function dessine() {
+      zone("<div id='jrInfo' style='font-size:13px;color:#8B93A6'>" + duree + " s · " + pts + " point" + (pts > 1 ? "s" : "") + "</div>"
+        + "<div style='font:800 34px Georgia,serif;color:#142554;margin:22px 0'>" + q.txt + "</div>"
+        + "<div style='display:flex;gap:12px;justify-content:center'><button class='btn' id='jrV' style='background:#047857;color:#fff;min-width:110px;font-size:18px'>Vrai</button><button class='btn' id='jrF' style='background:#B42318;color:#fff;min-width:110px;font-size:18px'>Faux</button></div>");
+      document.getElementById("jrV").onclick = function () { rep(true); };
+      document.getElementById("jrF").onclick = function () { rep(false); };
+    }
+    function rep(v) { if (fini) return; if (v === q.vrai) pts++; else { err++; pts = Math.max(0, pts - 1); } q = affirmation(niv); dessine(); }
+    ecran("lancerJrVraiFaux", "Vrai ou faux éclair", "⚡", "45 secondes : l'égalité est-elle juste ? Une erreur retire un point.", niv, "");
+    partie = W._jrPartie; dessine();
+    var ch = setInterval(function () {
+      if (!document.getElementById("jrZone") || W._jrPartie !== partie) { clearInterval(ch); return; }
+      var r = duree - Math.floor((Date.now() - debut) / 1000);
+      if (r <= 0) { clearInterval(ch); fini = true; zone(fin(pts + " points", "en " + duree + " secondes, " + err + " erreur" + (err > 1 ? "s" : ""), record("vraifaux_" + niv, pts, "haut"), "lancerJrVraiFaux('" + niv + "')")); return; }
+      var e = document.getElementById("jrInfo"); if (e) e.textContent = r + " s · " + pts + " point" + (pts > 1 ? "s" : "");
+    }, 250);
+  };
+
+  /* Au catalogue : gratuits, tous niveaux, rangés sous « Réflexion ». */
+  // [id, titre, emoji, description, lanceur, icône du site, genre affiché sur la carte]
+  var JR = [
+    ["jr_suites", "Suites logiques", "🧠", "Intelligence : trouve la règle cachée et le nombre suivant", "lancerJrSuites", "brain", "Intelligence"],
+    ["jr_memoire", "Mémoire des paires", "🃏", "Éveil et mémoire : retrouve toutes les paires en un minimum de coups", "lancerJrMemoire", "eye", "Mémoire"],
+    ["jr_taquin", "Taquin", "🧩", "Réflexion : fais glisser les cases pour les remettre dans l'ordre", "lancerJrTaquin", "target", "Réflexion"],
+    ["jr_hanoi", "Tours de Hanoï", "🗼", "Stratégie : déplace la pile en un minimum de coups", "lancerJrHanoi", "award", "Stratégie"],
+    ["jr_code", "Code secret", "🔐", "Logique : déduis le code grâce aux indices", "lancerJrCode", "lock", "Logique"],
+    ["jr_allumettes", "Allumettes", "🧨", "Stratégie : bats l'ordinateur en anticipant ses coups", "lancerJrAllumettes", "flame", "Stratégie"],
+    ["jr_couleurs", "Réflexe couleurs", "🎨", "Stimulation : 30 secondes d'attention et de rapidité", "lancerJrCouleurs", "zap", "Réflexes"],
+    ["jr_grille", "Grille logique", "🔢", "Réflexion : complète la grille de 4×4 à 9×9", "lancerJrGrille", "pencil", "Réflexion"],
+    ["jr_anagrammes", "Anagrammes du programme", "🔤", "Vocabulaire : retrouve les mots de tes cours", "lancerJrAnagrammes", "book", "Vocabulaire"],
+    ["jr_croises", "Mots croisés", "✏️", "Vocabulaire : une grille nouvelle à chaque partie, avec les mots de tes cours", "lancerJrCroises", "pencil", "Vocabulaire"],
+    ["jr_morpion", "Morpion", "⭕", "Stratégie : aligne trois signes avant l'ordinateur", "lancerJrMorpion", "target", "Stratégie"],
+    ["jr_mines", "Terrain miné", "🚩", "Logique : déduis où se cachent les mines grâce aux chiffres", "lancerJrMines", "flame", "Logique"],
+    ["jr_sequence", "Séquence de couleurs", "🔴", "Mémoire : reproduis une séquence qui s'allonge à chaque tour", "lancerJrSequence", "eye", "Mémoire"],
+    ["jr_cible", "Cible numérique", "🎯", "Calcul : combine les nombres pour atteindre la cible", "lancerJrCible", "target", "Calcul"],
+    ["jr_navale", "Bataille navale", "🚢", "Stratégie : repère et coule la flotte cachée dans la grille", "lancerJrNavale", "compass", "Stratégie"],
+    ["jr_devine", "Devine le nombre", "🔍", "Éveil : trouve le nombre caché en cherchant par moitiés", "lancerJrDevine", "brain", "Éveil"],
+    ["jr_vraifaux", "Vrai ou faux éclair", "⚡", "Rapidité : 45 secondes pour juger un maximum d'égalités", "lancerJrVraiFaux", "zap", "Réflexes"]
+  ];
+  if (W.JEUX_CATALOGUE) JR.forEach(function (x) {
+    if (W.JEUX_CATALOGUE.some(function (j) { return j.id === x[0]; })) return;
+    W.JEUX_CATALOGUE.push({ id: x[0], titre: x[1], emoji: x[2], matiere: "Réflexion", niveau: "Tous niveaux (6eme-Tle)", tousNiveaux: true,
+      desc: x[3], gratuit: true, action: x[4], type: "reflexion", ico: x[5], genre: x[6] });
+  });
+})(window);

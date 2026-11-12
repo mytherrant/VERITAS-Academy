@@ -218,6 +218,8 @@
           '<b>' + esc(x.title) + '</b><small>' + esc([x.source, x.date].filter(Boolean).join(" · ")) + '</small></a></li>';
       }).join("") + '</ul>' +
       '<p class="act-src">' + "Les 45 derniers jours, du plus récent au plus ancien" + (ex ? ", " + esc(ex.nom) + " et ministère" : "") + ". " + 'Sources de presse ; le texte officiel fait foi sur <a href="https://www.minesec.gov.cm" target="_blank" rel="noopener">minesec.gov.cm</a>.</p>';
+      // Les 2 plus récentes, le reste derrière « Voir plus » (12/11/2026).
+      if (W.VRT && W.VRT.app && W.VRT.app.replier) W.VRT.app.replier(el.querySelector(".act-l"), 2, "actualités");
     });
   }
 

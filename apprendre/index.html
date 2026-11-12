@@ -9,8 +9,8 @@
 <link rel="icon" href="../VERITAS_favicon_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apprendre.css?v=20261112a">
-<link rel="stylesheet" href="jeu.css?v=20261110g">
+<link rel="stylesheet" href="apprendre.css?v=20261112v">
+<link rel="stylesheet" href="jeu.css?v=20261112v">
 <style>
 .hero{background:linear-gradient(90deg,#EDF2FB,#F7F9FE 70%);color:#001136;border:1px solid #DCE5F5;border-radius:10px;padding:34px 34px 28px;position:relative;overflow:hidden;margin-bottom:26px}
 .hero::before{display:none}
@@ -247,11 +247,11 @@
 <script src="scenes.js?v=20261112a"></script>
 <script src="progressions.js?v=20261110g"></script>
 <script src="lecons.js?v=20261110g"></script>
-<script src="ressources.js?v=20261110g"></script>
+<script src="ressources.js?v=20261112a"></script>
 <script src="charge.js?v=442fe38c"></script>
-<script src="commun.js?v=20261112a"></script>
+<script src="commun.js?v=20261112v"></script>
 <script src="jeu.js?v=20261110g"></script>
-<script src="calendrier.js?v=20261111e"></script>
+<script src="calendrier.js?v=20261112v"></script>
 <script>
 (function(){
   "use strict";
@@ -316,7 +316,7 @@
         '<p><b>'+gr.length+' ressource'+(gr.length>1?'s':'')+' gratuite'+(gr.length>1?'s':'')+'</b> pour ta classe'+(nr?', et le début de chacun des <b>'+nr+' cours rédigés</b>':'')+'. Essaie, et passe à la formule quand tu en veux plus.</p></div>'+
         '<div class="res-g">'+sel.map(A.carteRes).join("")+'</div>'+
         '<a class="gout-l" href="ressources.html?c='+encodeURIComponent(classe)+'">Voir les '+gr.length+' ressources gratuites ›</a>';
-      g.hidden=false;})(); tous.forEach(function(i){var t=VRT_RES.items[i].t;parT[t]=(parT[t]||0)+1});
+      g.hidden=false; A.replier(g.querySelector(".res-g"),2,"ressources");})(); tous.forEach(function(i){var t=VRT_RES.items[i].t;parT[t]=(parT[t]||0)+1});
     $("#tpT").textContent="Tout pour progresser en "+classe; $("#tpL").href="ressources.html?c="+encodeURIComponent(classe);
     /* 11/11/2026 — « Structure et dispose bien les icônes » (Jacques) : les
        familles sont rangées sous leurs quatre rubriques (A.GROUPES), et chaque
@@ -343,6 +343,7 @@
     var sc=(window.VRT_SCENES||[]).filter(function(s){return pre?s.indexOf(pre+"-")===0:!/^(3e|1re|tle)-/.test(s)}).slice(0,6);
     $("#scZone").hidden=!sc.length;
     $("#scenes").innerHTML=sc.map(function(s){return '<a class="scene" href="/scenes/'+s+'.html"><span class="pl">'+A.pic("masques",30)+'</span><span><small>Scène vivante</small><strong>'+esc(VRT_SCENES_TITRES[s]||s)+'</strong></span></a>'}).join("");
+    A.replier($("#scenes"),2,"scènes");
     progression();
   }
 
@@ -350,11 +351,16 @@
   function progression(){
     var J=VRT.jeu; if(!J) return;
     var n=J.niveau(A.lire("xp",0)), b=A.lire("badges",{}), nb=Object.keys(b).length, o=J.objectif();
-    $("#progNiv").innerHTML='<div class="prog-anneau">'+J.anneau(n.pct,132,"#1E499B")+'<div><b>'+n.rang+'</b><small>niveau</small></div></div>'+
+    $("#progNiv").innerHTML='<div class="prog-anneau">'+J.anneau(n.pct,88,"#1E499B")+'<div><b>'+n.rang+'</b><small>niveau</small></div></div>'+
       '<h3>'+esc(n.nom)+'</h3><p><b>'+n.xp+'</b> points'+(n.suivant?' · encore <b>'+(n.haut-n.xp)+'</b> pour « '+esc(n.suivant)+' »':' · niveau maximal')+'</p>'+
-      '<ul class="bareme"><li><span>'+A.pic("livre",16)+'</span>Leçon lue jusqu\'au bout <b>+20</b></li><li><span>'+A.pic("etoile",16)+'</span>Chaque étoile au quiz <b>+10</b></li><li><span>'+A.pic("coche",16)+'</span>Bonne réponse au défi <b>+5</b></li><li><span>'+A.pic("flamme",16)+'</span>Jour de suite <b>+5</b></li></ul>';
+      '<details class="bareme-d"><summary>Comment gagner des points ?</summary><ul class="bareme"><li><span>'+A.pic("livre",16)+'</span>Leçon lue jusqu\'au bout <b>+20</b></li><li><span>'+A.pic("etoile",16)+'</span>Chaque étoile au quiz <b>+10</b></li><li><span>'+A.pic("coche",16)+'</span>Bonne réponse au défi <b>+5</b></li><li><span>'+A.pic("flamme",16)+'</span>Jour de suite <b>+5</b></li></ul></details>';
     $("#progBadgesT").innerHTML='Mes badges <span class="cpt">'+nb+' / '+J.BADGES.length+'</span>';
-    $("#progBadges").innerHTML=J.BADGES.map(function(x){var ok=!!b[x[0]];return '<div class="badge-c'+(ok?' acquis':'')+'" title="'+esc(x[2])+'">'+J.medaille(x,ok,56)+'<b>'+esc(x[1])+'</b><small>'+esc(x[2])+'</small></div>'}).join("");
+    /* Badges compacts (12/11/2026, « les badges occupent trop d'espace ») :
+       les badges gagnés d'abord, puis le prochain à décrocher ; petites
+       médailles, consigne en infobulle ; le reste derrière « Voir plus ». */
+    var ordre=J.BADGES.slice().sort(function(x,y){return (b[y[0]]?1:0)-(b[x[0]]?1:0)});
+    $("#progBadges").innerHTML=ordre.map(function(x){var ok=!!b[x[0]];return '<div class="badge-c'+(ok?' acquis':'')+'" title="'+esc(x[1]+' : '+x[2])+'">'+J.medaille(x,ok,40)+'<b>'+esc(x[1])+'</b><small>'+esc(x[2])+'</small></div>'}).join("");
+    A.replier($("#progBadges"),Math.min(J.BADGES.length,Math.max(4,nb+1)),"badges");
     var s=A.serie(), msg = o.fait ? "Objectif du jour rempli. Bravo ! Une leçon de plus pour prendre de l'avance ?"
       : o.lecon ? "Belle lecture ! Il te reste un quiz pour remplir l'objectif du jour."
       : s>1 ? "Déjà <b>"+s+" jours de suite</b> ! Ne casse pas ta série : une leçon aujourd'hui."

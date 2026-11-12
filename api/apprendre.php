@@ -13,6 +13,11 @@
  * USAGE — POST {id, token} ou POST {id, login, password}
  * RÉPONSES — toujours 200 pour un refus ORDINAIRE, avec {ok:false, raison} :
  *   connexion | identifiants | abonnement | non_depose | debit
+ *   classe_a_choisir (place libre : renvoyer {retenir:true} pour la prendre)
+ *   classe_hors_formule (toutes les classes de la formule sont prises)
+ * POST {action:"droits", token} → ce que la formule du compte ouvre (droits + classes).
+ * POST {action:"liberer", classe, token} → libère une classe retenue depuis plus de 30 jours.
+ * POST {action:"labo", id, token} → protocole et quiz d'un labo premium (droit « labos » ou essai).
  *   L'hébergeur bannit une IP à 6 réponses 401/403/429 par minute, et une classe
  *   entière partage une IP : un élève sans formule n'est pas une attaque.
  */
@@ -95,7 +100,54 @@ if ($acc === null && $login !== '' && $pass !== '') {
     }
 }
 if ($acc === null) appr_refus('connexion');
+
+$droits = vrt_droits_compte($acc, $db);
+$role = strtolower((string) ($acc['role'] ?? ''));
+if (in_array($role, ['admin', 'superadmin', 'enseignant'], true)) $droits['classes'] = -1;
+
+/* Ce que la formule ouvre : lu par les pages pour afficher les bons verrous. */
+if (($in['action'] ?? '') === 'droits') {
+    $r = ['ok' => true, 'droits' => $droits, 'classes' => array_keys(vrt_classes_compte($acc))];
+    if ($nouveau !== '') $r['token'] = $nouveau;
+    appr_rep($r);
+}
+
+/* LABO PREMIUM : protocole et quiz, sortis du module public le 12/11/2026.
+   Ouverts avec le droit « labos » (Pro et au-dessus), sinon à l'essai
+   (labosEssai labos distincts par 7 jours : 2 en Starter, 1 sans formule). */
+if (($in['action'] ?? '') === 'labo') {
+    $labos = require __DIR__ . '/_labos_premium.php';
+    if (!is_array($labos) || !isset($labos[$id])) appr_rep(['ok' => false, 'raison' => 'introuvable']);
+    $admin = in_array($role, ['admin', 'superadmin', 'enseignant'], true);
+    if (!$admin && empty($droits['labos']) && !vrt_labo_essai($acc, $id, (int) ($droits['labosEssai'] ?? 0))) {
+        appr_refus((int) ($droits['labosEssai'] ?? 0) > 0 ? 'essais' : 'abonnement', $nouveau);
+    }
+    $r = ['ok' => true, 'labo' => $labos[$id]];
+    if ($nouveau !== '') $r['token'] = $nouveau;
+    appr_rep($r);
+}
+
+/* Changer de classe : une classe retenue depuis plus de 30 jours se libère. */
+if (($in['action'] ?? '') === 'liberer') {
+    $c = (string) ($in['classe'] ?? '');
+    $okL = preg_match('/^[a-z0-9-]{2,12}$/', $c) && vrt_classe_liberer($acc, $c);
+    appr_rep(['ok' => (bool) $okL, 'classes' => array_keys(vrt_classes_compte($acc))]);
+}
+
 if (!appr_a_une_formule($acc, $db)) appr_refus('abonnement', $nouveau);
+
+/* CLASSES DE LA FORMULE (12/11/2026). Starter et Pro ouvrent 1 classe,
+   Élite 2, Famille 4, les formules enseignant 3, 6 ou toutes. La classe se
+   retient à la première leçon ouverte, APRÈS confirmation : un clic égaré
+   ne doit pas consommer la place. */
+$classe = vrt_classe_de_lecon($id);
+$etat = vrt_classe_couverte($acc, $droits, $classe, !empty($in['retenir']));
+if ($etat !== 'ok') {
+    $r = ['ok' => false, 'raison' => $etat === 'complet' ? 'classe_hors_formule' : 'classe_a_choisir',
+          'classe' => $classe, 'classes' => array_keys(vrt_classes_compte($acc)), 'max' => (int) $droits['classes']];
+    if ($nouveau !== '') $r['token'] = $nouveau;
+    appr_rep($r);
+}
 
 $fichier = dirname(__DIR__) . '/uploads/protected/apprendre/' . $id . '.json';
 $suite = is_file($fichier) ? json_decode((string) file_get_contents($fichier), true) : null;
@@ -108,4 +160,7 @@ if (!is_array($suite)) {
 
 $r = ['ok' => true, 'suite' => $suite];
 if ($nouveau !== '') $r['token'] = $nouveau;
+/* Battement des SMS automatiques (file SkySMS + rappels d'échéance), après la
+   réponse : register_shutdown_function court après le exit d'appr_rep. */
+register_shutdown_function(function () { try { if (function_exists('vrt_notify_battement')) vrt_notify_battement(); } catch (\Throwable $e) {} });
 appr_rep($r);

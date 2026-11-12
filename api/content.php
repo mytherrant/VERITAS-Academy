@@ -143,20 +143,13 @@ if (!vrt_account_can_access($acc, $contenu, $db)) {
    ouverte dans la fenêtre ne coûte rien (et les requêtes Range d'un même
    document non plus). Vidéos et audios ne sont pas comptés : ils se lisent
    en streaming, ils ne s'archivent pas comme une fiche.
-   Réglable sans redéployer : DB.elearning.quotaFiches = {jour: N, semaine: N}
-   (0 ou négatif = sans limite). */
-define('CONTENT_QUOTA_JOUR_DEF', 5);
-define('CONTENT_QUOTA_SEMAINE_DEF', 20);
-
-function content_quota_limites(array $db): array {
-    $q = $db['elearning']['quotaFiches'] ?? null;
-    $j = is_array($q) && isset($q['jour']) ? (int) $q['jour'] : CONTENT_QUOTA_JOUR_DEF;
-    $s = is_array($q) && isset($q['semaine']) ? (int) $q['semaine'] : CONTENT_QUOTA_SEMAINE_DEF;
-    return [$j, $s];
-}
+   Les plafonds sont ceux de la FORMULE (vrt_droits_compte : Starter 3/10,
+   Pro 5/20, Élite 10/40, Famille 15/60, enseignant 10/40 → 25/120), réglables
+   dans DB.elearning.droitsFormules. -1 = sans limite. */
 /** Retourne null si autorisé (et enregistre l'ouverture), sinon le message de refus. */
 function content_quota(string $who, string $docId, int $maxJour, int $maxSemaine): ?string {
-    if ($maxJour <= 0 && $maxSemaine <= 0) return null;
+    if ($maxJour === -1 && $maxSemaine === -1) return null;
+    if ($maxJour === 0 || $maxSemaine === 0) return 'Ta formule ne comprend pas le téléchargement de fiches. Elles sont incluses dès la formule Starter.';
     $dir = __DIR__ . '/data/_rate/';
     if (!is_dir($dir)) @mkdir($dir, 0750, true);
     $f = $dir . 'fiches_' . substr(hash('sha256', $who), 0, 24) . '.json';
@@ -194,8 +187,31 @@ function content_quota(string $who, string $docId, int $maxJour, int $maxSemaine
 $__ext0 = strtolower(pathinfo((string) ($contenu['fichierProtege'] ?? $contenu['fichierUrl'] ?? $contenu['fichier'] ?? ''), PATHINFO_EXTENSION));
 $__flux = in_array($__ext0, ['mp4', 'webm', 'ogg', 'mov', 'mp3', 'wav', 'm4a'], true);
 $__role = strtolower((string) ($acc['role'] ?? ''));
-if (!$__flux && !in_array($__role, ['admin', 'superadmin', 'enseignant'], true)) {
-    [$__qj, $__qs] = content_quota_limites($db);
+if (!$__flux && empty($contenu['gratuit']) && empty($contenu['free']) && !in_array($__role, ['admin', 'superadmin', 'enseignant'], true)) {
+    $__dr = vrt_droits_compte($acc, $db);
+    /* CLASSE DU DOCUMENT (12/11/2026) : une épreuve de 1ʳᵉ C n'est servie qu'à
+       une formule qui couvre la 1ʳᵉ C. Ouvrir un document est un geste voulu :
+       une place libre est prise sans confirmation (libérable après 30 jours,
+       depuis le verrou d'une leçon). Document multi-classes ou sans classe :
+       seul le quota de fiches s'applique. */
+    $__cl = vrt_classe_normaliser((string) ($contenu['classe'] ?? ''));
+    if ($__cl !== '' && vrt_classe_couverte($acc, $__dr, $__cl, true) === 'complet') {
+        $__msg = 'Ce document est en ' . (string) ($contenu['classe'] ?? '') . ', une classe que ta formule ne couvre pas (déjà retenue'
+               . (count(vrt_classes_compte($acc)) > 1 ? 's' : '') . ' : ' . implode(', ', array_keys(vrt_classes_compte($acc)))
+               . '). Passe à une formule qui couvre plus de classes, ou libère une classe retenue depuis plus de 30 jours.';
+        if (stripos((string) ($_SERVER['HTTP_ACCEPT'] ?? ''), 'text/html') !== false) {
+            while (ob_get_level() > 0) { ob_end_clean(); }
+            http_response_code(403);
+            header('Content-Type: text/html; charset=utf-8');
+            echo '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Classe hors formule</title>'
+               . '<body style="font-family:system-ui,sans-serif;max-width:520px;margin:15vh auto;padding:0 16px;color:#142554">'
+               . '<h1 style="font-size:1.3rem">Classe hors de ta formule</h1><p>' . htmlspecialchars($__msg, ENT_QUOTES, 'UTF-8') . '</p>'
+               . '<p><a href="/app.html#tarifs" style="color:#142554;font-weight:600">Voir les formules</a></p></body>';
+            exit;
+        }
+        content_err(403, $__msg);
+    }
+    [$__qj, $__qs] = [(int) $__dr['fichesJour'], (int) $__dr['fichesSemaine']];
     $__refus = content_quota('a:' . (string) ($acc['id'] ?? $acc['user'] ?? ''), $id, $__qj, $__qs);
     if ($__refus !== null) {
         @file_put_contents(__DIR__ . '/data/_security_log.txt',

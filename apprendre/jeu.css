@@ -127,3 +127,20 @@ figure.illus:hover .btn-img,.anim:hover .btn-img,.btn-img:focus-visible{opacity:
 .badge-c b{color:#5F6B80}
 .badge-c small{color:#6B7287;font-size:12px}
 .prog-t .cpt{color:#7A5800}
+
+/* Badges compacts (12/11/2026) : médailles de 40 px, 4 par ligne au téléphone. */
+.badges{grid-template-columns:repeat(auto-fill,minmax(78px,1fr))!important;gap:6px!important}
+.badge-c{padding:6px 2px!important}
+.badge-c svg{margin-bottom:3px!important}
+.badge-c b{font-size:11.5px!important}
+.badge-c small{display:none!important}
+.prog-badges{padding:14px 14px!important}
+
+/* Progression compacte (12/11/2026) : anneau de 88 px, barème replié. */
+.prog-niv{padding:14px!important}
+.prog-anneau{width:88px!important;height:88px!important}
+.prog-anneau b{font-size:28px!important}
+.bareme-d{margin-top:8px;text-align:left}
+.bareme-d summary{cursor:pointer;font:600 14px var(--sans);color:#1E499B;list-style:none;text-align:center}
+.bareme-d summary::-webkit-details-marker{display:none}
+.bareme-d summary::after{content:' ›'}
