@@ -25943,7 +25943,7 @@ function _lancerLaboComplet(lv){
       h+="<div class='ib ibt mb14'><span>🥽</span><span>Observe la simulation animée puis suis le protocole étape par étape.</span></div>";
 
       // ── SIMULATION ANIMÉE ──
-      h+="<div id='laboSimWrap' style='background:linear-gradient(135deg,#0F172A,#1E293B);border-radius:16px;overflow:hidden;margin-bottom:18px;position:relative'>";
+      h+="<div id='laboSimWrap' style='background:linear-gradient(135deg,#0F172A,#1E293B);background-color:#0F172A;border-radius:16px;overflow:hidden;margin-bottom:18px;position:relative'>";
       h+="<div style='padding:10px 16px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.06)'>";
       h+="<div style='font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:rgba(255,255,255,.7)'>"+lv.ico+" Simulation — "+_esc(lv.titre)+"</div>";
       h+="<div style='display:flex;gap:6px'>";

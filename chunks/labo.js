@@ -577,11 +577,60 @@ window.LABO_DB=[
 /* ── Moteur de simulation (déplacé depuis app.js) ────────────────────────
    Le catalogue et le simulateur voyagent ensemble : qui ouvre un labo a
    besoin des deux, qui ne l'ouvre pas ne paie ni l'un ni l'autre. */
+/* ── Thème des simulations : sombre ou clair, au choix (12/11/2026) ─────────
+   Toutes les simulations dessinent pour un fond SOMBRE (encre blanche, or).
+   Deux pièges corrigés ici, pour les deux hôtes du moteur (app.js et
+   apprendre/labo.html) :
+   · le fond : theme-lws.css éteint tous les dégradés de la vitrine
+     (#VISITOR#VISITOR * { background-image:none }) et theme-lws.js repeint
+     les grands blocs sombres en gris clair. Les simulations qui ne peignent
+     pas leur propre fond (lv1, lv2, lv3, lv4, lv6, lv11) devenaient du blanc
+     sur gris. On pose donc un aplat EXPLICITE sur l'hôte et le canevas :
+     theme-lws.js respecte un fond explicite, et la règle CSS ne touche que
+     les dégradés.
+   · le choix : le thème CLAIR inverse l'hôte entier (invert + hue-rotate
+     180°) — le fond devient clair, l'encre foncée, et les teintes restent
+     reconnaissables. Une seule règle, valable pour les 31 simulations, sans
+     réécrire leurs dessins.
+   Par défaut : le thème du site (clair, sauf <html data-theme="dark">) ; le
+   choix de l'élève est mémorisé dans ce navigateur. */
+var _LABO_THEME_CLE='vrt_labo_theme';
+function _laboTheme(){
+  try{var v=localStorage.getItem(_LABO_THEME_CLE);if(v==='clair'||v==='sombre')return v;}catch(e){}
+  return document.documentElement.getAttribute('data-theme')==='dark'?'sombre':'clair';
+}
+function _laboAppliquerTheme(cnv){
+  if(!cnv)return;
+  var hote=cnv.parentElement||cnv, clair=_laboTheme()==='clair';
+  cnv.style.backgroundColor='#0F172A';
+  hote.style.backgroundColor='#0F172A';
+  hote.style.filter=clair?'invert(1) hue-rotate(180deg)':'';
+  hote.setAttribute('data-labo-theme',clair?'clair':'sombre');
+  // Bouton à côté de Pause / Recommencer, au style de l'hôte
+  var play=document.getElementById('simPlayBtn'), b=document.getElementById('simThemeBtn');
+  if(play&&play.parentElement&&!b){
+    b=document.createElement('button');b.type='button';b.id='simThemeBtn';
+    b.className=play.className;b.style.cssText=play.style.cssText;
+    b.onclick=function(){
+      try{localStorage.setItem(_LABO_THEME_CLE,_laboTheme()==='clair'?'sombre':'clair');}catch(e){}
+      _laboAppliquerTheme(document.getElementById('laboCnv'));
+    };
+    play.parentElement.appendChild(b);
+  }
+  if(b){
+    b.textContent=clair?'Thème sombre':'Thème clair';
+    b.setAttribute('aria-label',clair?'Passer la simulation en thème sombre':'Passer la simulation en thème clair');
+    b.title=b.getAttribute('aria-label');
+  }
+}
+window._laboTheme=_laboTheme;window._laboAppliquerTheme=_laboAppliquerTheme;
+
 function _initLaboSim(lv){
   cancelAnimationFrame(window._sim.raf);
   window._sim={running:true,raf:0,t:0,params:{},defaults:{}};
   var cnv=document.getElementById('laboCnv');
   if(!cnv) return;
+  _laboAppliquerTheme(cnv);
   var ctx=cnv.getContext('2d');
   if(!ctx){console.warn('[VÉRITAS labo] Canvas 2D unavailable for '+lv.id);window._sim.running=false;return;}
   var W=cnv.width, H=cnv.height;
