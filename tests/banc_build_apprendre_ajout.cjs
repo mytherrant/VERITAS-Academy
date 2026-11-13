@@ -51,6 +51,9 @@ verifie(/"4e-maths-zz02"/.test(a4) && /"4e-maths-zz03"/.test(a4), "les deux lots
 verifie(fs.existsSync(path.join(FTP, "uploads/protected/apprendre/4e-maths-zz02.json")), "le JSON du premier lot n'est pas supprimé");
 build(lecon("4e-maths-zz03", 3, "Leçon B corrigée"), "4e");
 verifie((lire("apercus-4e.js").match(/"4e-maths-zz03"/g) || []).length === 1 && /Leçon B corrigée/.test(lire("apercus-4e.js")), "une leçon re-livrée est mise à jour, sans doublon");
+build(lecon("4e-maths-zz02", 2, "Leçon A corrigée"), "4e");
+const ids = (lire("apercus-4e.js").match(/^VRT_L\("[a-z0-9-]+"/gm) || []).join(" ");
+verifie(/Leçon A corrigée/.test(lire("apercus-4e.js")) && ids.indexOf("zz02") < ids.indexOf("zz03"), "une leçon re-livrée garde sa place dans le fichier", ids);
 
 console.log("\n\x1b[1m③ Garde-fous\x1b[0m");
 let refus = "";

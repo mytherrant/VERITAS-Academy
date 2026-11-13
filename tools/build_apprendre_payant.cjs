@@ -194,17 +194,17 @@ if (!AJOUT) {
 }
 
 const parClasse = {}; let libres = 0, payantes = 0;
-/* Mode ajout : les leçons déjà publiées de la classe, absentes du lot, sont reprises telles quelles. */
-const dejaPubliees = {};
+/* Mode ajout : les leçons déjà publiées de la classe sont reprises telles quelles, À LEUR PLACE ;
+   une leçon re-livrée remplace sa ligne au même endroit, une leçon neuve s'ajoute à la fin. */
+const ordreExistant = {};
 if (AJOUT) for (const c of AJOUT) {
   const f = path.join(APP, `apercus-${slug(c)}.js`);
   if (!fs.existsSync(f)) continue;
   for (const ligne of fs.readFileSync(f, "utf8").split("\n")) {
     const m = /^VRT_L\(("[a-z0-9-]+"),/.exec(ligne);
-    if (m && !L[JSON.parse(m[1])]) (dejaPubliees[c] = dejaPubliees[c] || []).push(ligne);
+    if (m) (ordreExistant[c] = ordreExistant[c] || []).push({ id: JSON.parse(m[1]), ligne });
   }
 }
-for (const c in dejaPubliees) parClasse[c] = dejaPubliees[c].slice();
 for (const [id, l] of Object.entries(L)) {
   const gratuit = !!l.gratuit || premierDuTrimestre(l);
   let pub;
@@ -216,6 +216,13 @@ for (const [id, l] of Object.entries(L)) {
     payantes++;
   }
   (parClasse[l.c] = parClasse[l.c] || []).push(`VRT_L(${JSON.stringify(id)},${JSON.stringify(pub)});`);
+}
+if (AJOUT) for (const c of Object.keys(ordreExistant)) {
+  const neuves = new Map((parClasse[c] || []).map(x => [JSON.parse(/^VRT_L\(("[a-z0-9-]+"),/.exec(x)[1]), x]));
+  const fusion = ordreExistant[c].map(e => neuves.has(e.id) ? neuves.get(e.id) : e.ligne);
+  const vues = new Set(ordreExistant[c].map(e => e.id));
+  for (const [id, x] of neuves) if (!vues.has(id)) fusion.push(x);
+  parClasse[c] = fusion;
 }
 
 const empreintes = {};
