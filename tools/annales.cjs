@@ -177,8 +177,11 @@ for (const s of sources) {
     return [ex, EXAMENS[ex].nom + " (" + EXAMENS[ex].classe + ")", '<table class="ax-tbl"><thead><tr><th>Matière</th><th>Sessions corrigées</th></tr></thead><tbody>' + lignes + "</tbody></table>"];
   }).filter(Boolean);
   parties.push(["methode", "Comment s'en servir", "<p>Traite chaque sujet en temps limité, sans regarder le corrigé. Corrige-toi ensuite avec le barème, puis relis la fiche de méthode de la matière pour comprendre les points perdus.</p><p>Les corrigés marqués « corrigé harmonisé national » reproduisent la grille officielle ; les autres sont des propositions rédigées par VÉRITAS, signalées comme telles.</p>"]);
-  const titre = "Annales corrigées du BEPC, du Probatoire et du BAC";
-  const description = "Les derniers sujets officiels du BEPC, du Probatoire et du BAC (Cameroun), par matière et par session, avec leurs corrigés : mathématiques, PCT, SVTEEHB, français, histoire-géographie, ECM, langues, informatique.";
+  // Le titre ne promet que les examens réellement couverts.
+  const noms = Object.keys(EXAMENS).filter(ex => sources.some(s => s.meta.examen === ex)).map(ex => EXAMENS[ex].nom);
+  const liste = noms.length > 1 ? noms.slice(0, -1).join(", ") + " et " + noms[noms.length - 1] : noms[0];
+  const titre = "Annales corrigées : " + liste;
+  const description = "Les derniers sujets officiels (" + liste + ", Cameroun), par matière et par session, avec leurs corrigés : mathématiques, PCT, SVTEEHB, français, histoire-géographie, ECM, langues, informatique.";
   let html = GAB.replace(RE_ART, () => article("Annales", titre, "Les derniers sujets officiels, par examen, par matière et par session, chacun avec son corrigé.", parties, '<a class="cta" href="/ressources/">Méthodes et examens<small>Le format de chaque épreuve et la méthode pas à pas</small></a>'));
   html = habiller(html, page, titre + " | VÉRITAS", description, { "@type": "CollectionPage", name: titre, description });
   ecrire(page, html);
