@@ -138,5 +138,26 @@
   "matiere": "Éducation à la citoyenneté et à la morale",
   "annee": 2024,
   "u": "/ressources/annales/bepc-ecm-2024.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-informatique-bepc.html",
+  "matiere": "Informatique",
+  "annee": 2026,
+  "u": "/ressources/annales/bepc-informatique-2026.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-informatique-bepc.html",
+  "matiere": "Informatique",
+  "annee": 2025,
+  "u": "/ressources/annales/bepc-informatique-2025.html"
+ },
+ {
+  "examen": "bepc",
+  "fiche": "ressources/examen-informatique-bepc.html",
+  "matiere": "Informatique",
+  "annee": 2024,
+  "u": "/ressources/annales/bepc-informatique-2024.html"
  }
 ]
