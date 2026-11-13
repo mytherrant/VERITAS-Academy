@@ -1,7 +1,9 @@
 /* VÉRITAS — Apprendre : le tuteur IA (Prof. Ambassa) au pied de chaque leçon.
    L'élève pose une question sur la leçon qu'il lit ; la question part vers
    api/ia_proxy.php avec le texte de la leçon (ce que l'élève voit, rien de plus)
-   et le jeton du compte. Le SERVEUR fixe le quota du jour d'après la formule
+   et le jeton du compte, sa place dans la progression MINESEC (déjà vu / à venir),
+   ses objectifs et sa compétence APC. Le serveur ajoute le calibrage de la classe
+   et de la matière (ia_calibrage_tuteur). Le SERVEUR fixe aussi le quota du jour d'après la formule
    (table des droits, vrt_droits_formules) : 2 questions par jour sans compte,
    5 avec un compte gratuit ou Starter, 30 en Pro, 100 en Élite et Famille,
    40 / 80 / 150 pour les formules enseignant. Rien n'est compté ici : un
@@ -41,15 +43,59 @@
     return s.length > MAXCTX ? s.slice(0, MAXCTX) + "…" : s;
   }
 
+  /* PLACE DE LA LEÇON DANS LA PROGRESSION HARMONISÉE (VRT_PROG, MINESEC) :
+     les leçons déjà vues (ce que l'élève est censé savoir) et celles qui
+     suivent (à ne pas supposer acquises). Les séances d'intégration,
+     d'évaluation et de remédiation ne sont pas des notions : on les saute. */
+  var PAS_NOTION = /int[ée]gration|[ée]valuation|r[ée]m[ée]diation|revision|révision/i;
+  function progression(L, M) {
+    var out = { avant: [], apres: [], chap: L.chap || "", officiel: L.officiel || "", rang: L.n && L.n < 900 ? L.n : 0 };
+    if (!out.rang || !M || !M.minesec) return out;
+    var P = (W.VRT_PROG || {})[L.c] || {}, liste = [];
+    M.minesec.some(function (cle) {
+      var t = [];
+      (P[cle] || []).forEach(function (ch) { (ch[1] || []).forEach(function (l) { t.push({ n: l[0], t: String(l[1] || ""), ch: ch[0] }); }); });
+      if (t.some(function (x) { return x.n === out.rang; })) { liste = t; return true; }
+      return false;
+    });
+    var i = -1;
+    liste.forEach(function (x, k) { if (i < 0 && x.n === out.rang) i = k; });
+    if (i < 0) return out;
+    function court(x) { return x.t.length > 110 ? x.t.slice(0, 110) + "…" : x.t; }
+    out.avant = liste.slice(0, i).filter(function (x) { return !PAS_NOTION.test(x.t); }).slice(-6).map(court);
+    out.apres = liste.slice(i + 1).filter(function (x) { return !PAS_NOTION.test(x.t); }).slice(0, 3).map(court);
+    return out;
+  }
+
+  /* Consignes PROPRES À LA LEÇON. Le niveau de la classe, l'examen visé et les
+     critères de la matière sont ajoutés par le serveur (ia_calibrage_tuteur). */
   function consignes(L, M) {
-    return "TUTEUR DE LEÇON — espace Apprendre de VÉRITAS.\n" +
-      "Tu réponds à un élève de " + L.c + " qui lit la leçon « " + L.titre + " » (" + (M && M.nom || L.m) + ").\n" +
-      "• Appuie-toi d'abord sur le texte de la leçon fourni en contexte ; reste au niveau de la classe.\n" +
-      "• Réponds en 200 mots au plus, phrases courtes, tutoiement bienveillant.\n" +
-      "• Si l'élève demande un exercice, donne l'énoncé puis le corrigé détaillé.\n" +
-      "• Si la question sort de la leçon ou de l'école, réponds brièvement puis ramène-le à la leçon.\n" +
-      "• N'invente rien : si tu n'es pas sûr, dis-le.\n" +
-      "• Mise en forme simple : paragraphes, listes « - », **gras** pour les mots-clés. Pas de tableau, pas de LaTeX.";
+    var pg = progression(L, M), t = [];
+    t.push("TUTEUR DE LEÇON — espace Apprendre de VÉRITAS.");
+    t.push("Tu réponds à un élève de " + L.c + " qui lit la leçon « " + L.titre + " » (" + (M && M.nom || L.m) + ").");
+    t.push("PROGRAMME (progression harmonisée MINESEC) :");
+    if (pg.chap) t.push("• Module / chapitre : " + pg.chap);
+    if (pg.officiel) t.push("• Leçon " + pg.rang + " de la progression : " + pg.officiel);
+    if (L.objectifs && L.objectifs.length) t.push("• Objectifs : à la fin, l'élève sait " + L.objectifs.map(texte).join(" ; ") + ".");
+    if (L.apc) t.push("• Compétence visée (APC) — situation de vie : " + texte(L.apc.situation) + " Tâche : " + texte(L.apc.tache));
+    t.push("PROGRESSION :");
+    t.push(pg.avant.length ? "• Déjà vu cette année (prérequis utilisables) : " + pg.avant.join(" | ") : "• Début de la progression de la matière : ne suppose aucun acquis de cette année.");
+    if (pg.apres.length) t.push("• À venir (ne pas supposer acquis) : " + pg.apres.join(" | "));
+    t.push("RÈGLES :");
+    t.push("• Appuie-toi d'abord sur le texte de la leçon fourni en contexte : mêmes définitions, mêmes notations, même vocabulaire.");
+    t.push("• Tutoiement bienveillant ; termine par une courte question ou un mini-défi pour vérifier que l'élève a compris.");
+    t.push("• Si la question sort de la leçon ou de l'école, réponds brièvement puis ramène l'élève à la leçon.");
+    t.push("• Mise en forme simple : paragraphes, listes « - », **gras** pour les mots-clés. Pas de tableau, pas de LaTeX : écris les formules en clair (x², √, ≤).");
+    return t.join("\n");
+  }
+
+  /* L'échange précédent accompagne la question suivante (« explique encore »,
+     « et pour la question 2 ? ») : sans lui, le tuteur repart de zéro. */
+  function avecSuite(question, dernier) {
+    if (!dernier) return question;
+    var r = String(dernier.r || "");
+    return "ÉCHANGE PRÉCÉDENT — l'élève : « " + dernier.q.slice(0, 300) + " » ; toi : « " + (r.length > 700 ? r.slice(0, 700) + "…" : r) + " »\n\n" +
+      "NOUVELLE QUESTION DE L'ÉLÈVE : " + question;
   }
 
   /* Rendu SÛR de la réponse : tout est échappé, puis seuls **gras**, listes et paragraphes sont rétablis. */
@@ -92,7 +138,7 @@
     racine.appendChild(sec);
 
     var f = sec.querySelector("form"), q = sec.querySelector("textarea"), go = sec.querySelector(".tuteur-go"),
-        rep = sec.querySelector(".tuteur-r"), note = sec.querySelector(".tuteur-n"), bloque = false;
+        rep = sec.querySelector(".tuteur-r"), note = sec.querySelector(".tuteur-n"), bloque = false, dernier = null;
 
     [].forEach.call(sec.querySelectorAll("[data-idee]"), function (b) {
       b.addEventListener("click", function () { q.value = b.textContent; q.focus(); });
@@ -107,8 +153,8 @@
       if (question.length < 3) { q.focus(); return; }
       go.disabled = true; go.textContent = "Ambassa réfléchit…";
       afficher('<p class="tuteur-att">Le Prof. Ambassa prépare sa réponse…</p>');
-      var corps = { prompt: question.slice(0, MAXQ), sysPrompt: consignes(L, M), ragContext: contexte(L, M),
-        action: "apprendre_tuteur", userId: "", plan: connecte ? "compte" : "anon" };
+      var corps = { prompt: avecSuite(question.slice(0, MAXQ), dernier), sysPrompt: consignes(L, M), ragContext: contexte(L, M),
+        action: "apprendre_tuteur", classe: L.c, matiere: L.m, userId: "", plan: connecte ? "compte" : "anon" };
       var t = jeton(); if (t) corps.token = t;
       fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corps) })
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { code: r.status, j: j || {} }; }); })
@@ -118,7 +164,8 @@
             afficher('<p class="tuteur-qui">Ta question : ' + esc(question) + '</p>' + rendu(j.text, esc) +
               '<p class="tuteur-pied">Réponse générée par une IA : vérifie-la avec ton cours.</p>');
             note.textContent = j.cached ? "Réponse déjà validée par un enseignant : elle ne compte pas dans ton quota." : libQuota(j.quota);
-            q.value = "";
+            q.value = ""; dernier = { q: question, r: j.text };
+            q.placeholder = "Une autre question ? Le tuteur se souvient de sa dernière réponse.";
             return;
           }
           if (o.code === 429) {
@@ -137,5 +184,5 @@
   }
 
   W.VRT = W.VRT || {};
-  W.VRT.tuteur = { monter: monter, contexte: contexte, rendu: rendu, libQuota: libQuota };
+  W.VRT.tuteur = { monter: monter, contexte: contexte, consignes: consignes, progression: progression, avecSuite: avecSuite, rendu: rendu, libQuota: libQuota };
 })(window);

@@ -142,6 +142,16 @@ MISSION : faire RÉUSSIR l'élève au BEPC, au CAP, au Probatoire, au BACCALAUR�
 MINESEC;
 $sysPrompt = $MINESEC_BASE . ($sysPrompt !== '' ? ("\n\n" . $sysPrompt) : '');
 
+/* TUTEUR DE L'ESPACE APPRENDRE (13/11/2026) : calibrage par CLASSE et par
+   MATIÈRE, rédigé ICI et non par le navigateur. Le client ne transmet que
+   deux identifiants vérifiés sur liste blanche ; le niveau attendu, l'examen
+   visé, la longueur et les critères de la discipline sont ceux du serveur —
+   identiques pour tous, et impossibles à « assouplir » depuis la console. */
+if ((string) ($body['action'] ?? '') === 'apprendre_tuteur') {
+    $calTuteur = ia_calibrage_tuteur((string) ($body['classe'] ?? ''), (string) ($body['matiere'] ?? ''));
+    if ($calTuteur !== '') $sysPrompt .= "\n\n" . $calTuteur;
+}
+
 /* La composition d'une épreuve de l'Atelier porte le TEXTE SUPPORT entier
    (contraction : 550 à 650 mots) et l'extrait du commentaire composé, en plus
    du barème bloc par bloc et du programme de la séquence : sa partie fixe
@@ -587,6 +597,11 @@ $ok = false; $text = ''; $error = null; $source = 'none';
 // température (un sujet d'examen n'a pas besoin de fantaisie). Aucune autre
 // action n'est touchée.
 $geminiReglages = [];
+/* Tuteur de leçon : une explication de cours veut de l'exactitude, pas de la
+   fantaisie — température basse, réflexion bornée pour garder la réponse. */
+if ((string) ($body['action'] ?? '') === 'apprendre_tuteur') {
+    $geminiReglages = ['temperature' => 0.4, 'thinkingConfig' => ['thinkingBudget' => 1024]];
+}
 if ((string) ($body['action'] ?? '') === 'epreuve_minesec') {
     $geminiReglages = [
         'temperature'      => 0.3,
@@ -1123,6 +1138,76 @@ function server_user_is_elite(string $userId): bool {
         return false;
     }
     return false;
+}
+
+/**
+ * CALIBRAGE DU TUTEUR D'APPRENDRE : niveau de la classe, série, examen visé,
+ * longueur et critères de la matière. Rend '' si la classe est inconnue
+ * (le socle MINESEC s'applique alors seul).
+ */
+function ia_calibrage_tuteur(string $classe, string $matiere): string {
+    if (!preg_match('/^(6e|5e|4e|3e|(2nde|1re|Tle)(?: ([A-Z]{1,2}[0-9]?))?)$/', $classe, $mc)) return '';
+    $niv = $mc[2] ?? '' ?: $mc[1];
+    $serie = $mc[3] ?? '';
+    $NIV = [
+        '6e'   => ['1er cycle, sous-cycle d\'observation (11-12 ans)', '', 150,
+                   'Phrases très courtes, mots du quotidien ; une seule idée à la fois ; chaque mot technique est défini la première fois qu\'il apparaît.'],
+        '5e'   => ['1er cycle, sous-cycle d\'observation (12-13 ans)', '', 150,
+                   'Phrases courtes, vocabulaire simple ; chaque mot technique est défini ; exemples concrets et manipulables.'],
+        '4e'   => ['1er cycle, sous-cycle d\'orientation (13-14 ans)', '', 200,
+                   'Vocabulaire de la discipline introduit progressivement ; exemples concrets, puis une généralisation.'],
+        '3e'   => ['1er cycle, classe d\'examen (14-15 ans)', 'BEPC', 200,
+                   'Vocabulaire de la discipline exigé ; rappelle comment la notion est évaluée au BEPC.'],
+        '2nde' => ['2nd cycle, classe de détermination (15-16 ans)', '', 220,
+                   'Rigueur du vocabulaire et des notations ; on justifie chaque étape ; on prépare les exigences de la 1re.'],
+        '1re'  => ['2nd cycle, classe d\'examen (16-17 ans)', 'Probatoire', 250,
+                   'Rédaction rigoureuse et justifiée, comme à l\'examen ; rappelle comment la notion tombe au Probatoire.'],
+        'Tle'  => ['2nd cycle, classe d\'examen (17-18 ans)', 'Baccalauréat', 280,
+                   'Exigence du Baccalauréat : définitions exactes, raisonnement complet, méthode de l\'épreuve ; rappelle comment la notion tombe au BAC.'],
+    ];
+    if (!isset($NIV[$niv])) return '';
+    [$cycle, $examen, $mots, $registre] = $NIV[$niv];
+    $SERIE = [
+        'A' => 'série A (littéraire) : en mathématiques et en sciences, privilégie le sens et les exemples au formalisme ; en lettres et en philosophie, exigence maximale.',
+        'C' => 'série C (mathématiques et sciences physiques) : formalisme et démonstrations complètes attendus en mathématiques et en physique-chimie.',
+        'D' => 'série D (mathématiques et sciences de la vie et de la Terre) : rigueur en mathématiques, applications à la biologie et à la santé bienvenues.',
+        'E' => 'série E (mathématiques et techniques) : rigueur mathématique, applications techniques et industrielles.',
+    ];
+    $FAM = [
+        'calcul'  => ['maths', 'info'],
+        'expsc'   => ['pct', 'physique', 'chimie', 'sciences'],
+        'vivant'  => ['svt'],
+        'lettres' => ['francais', 'latin', 'grec'],
+        'philo'   => ['philo'],
+        'sh'      => ['histoire', 'geo', 'ecm', 'cultures'],
+        'langues' => ['anglais', 'allemand', 'espagnol', 'italien', 'chinois', 'arabe', 'ln'],
+        'pratique'=> ['eps', 'arts', 'tm', 'esf', 'orientation'],
+    ];
+    $CRIT = [
+        'calcul'  => "Énonce exactement la définition ou la propriété utilisée, puis résous par étapes numérotées en justifiant chacune (« d'après… »). Garde les notations du cours. Termine par une vérification du résultat (ordre de grandeur, cas particulier). N'utilise aucun outil absent des notions déjà vues.",
+        'expsc'   => "Formule littérale d'abord, puis application numérique ; grandeurs et unités SI à chaque ligne ; résultat avec un nombre raisonnable de chiffres significatifs. Décris les schémas en mots (éléments, sens, légende). Rappelle les règles de sécurité quand une manipulation est évoquée. Relie la notion à un phénomène du quotidien camerounais.",
+        'vivant'  => "Vocabulaire scientifique exact ; suis la démarche observation → problème → hypothèse → vérification → conclusion. Décris les schémas avec leur titre et leurs légendes. Exemples tirés de la faune, de la flore, de la santé et de l'environnement du Cameroun.",
+        'lettres' => "Méthode : repérer, nommer le procédé ou la notion, puis interpréter son effet. Appuie chaque explication sur une courte citation ou un exemple (auteurs au programme de préférence). Ne rédige jamais le devoir à la place de l'élève : donne la méthode, un plan ou une amorce, et un exemple partiel.",
+        'philo'   => "Pars d'une définition précise, dégage le problème, puis argumente : thèse, argument, exemple, objection. Cite les auteurs exactement, sans inventer de citation. Pour une dissertation, guide (problématique, plan) sans rédiger le devoir.",
+        'sh'      => "Dates, lieux, acteurs et chiffres exacts, ou rien. Distingue les faits de leur interprétation. Ancre les exemples au Cameroun et en Afrique. En ECM, relie la notion aux valeurs citoyennes et aux institutions, sans inventer d'article de loi.",
+        'langues' => "Donne les exemples DANS la langue étudiée, avec leur traduction et, si utile, la prononciation. Au 1er cycle, explique en français avec des phrases modèles très simples ; au 2nd cycle, de préférence dans la langue étudiée, avec une aide en français. Corrige les erreurs de l'élève en montrant la forme juste.",
+        'pratique'=> "Reste concret et praticable : étapes, matériel, consignes de sécurité. Exemples tirés de la vie quotidienne de l'élève.",
+    ];
+    $fam = '';
+    foreach ($FAM as $f => $ids) if (in_array($matiere, $ids, true)) { $fam = $f; break; }
+
+    $l = [];
+    $l[] = 'CALIBRAGE DU TUTEUR — classe de ' . $classe . ' : ' . $cycle . ($examen !== '' ? ', examen visé : ' . $examen : '') . '.';
+    if ($serie !== '' && isset($SERIE[$serie[0]])) $l[] = '• Série : ' . $SERIE[$serie[0]];
+    $l[] = '• Niveau de langue : ' . $registre;
+    $l[] = '• Longueur : ' . $mots . ' mots au plus, sauf si l\'élève demande un exercice corrigé (alors l\'énoncé, puis « Corrigé : » détaillé).';
+    if ($fam !== '') $l[] = '• Critères de la discipline : ' . $CRIT[$fam];
+    $l[] = '• Selon la demande : explication → reformule autrement qu\'au cours, avec une analogie et un exemple ; exemple → situation de vie camerounaise ; exercice → '
+         . ($examen !== '' ? 'au format de l\'épreuve du ' . $examen . ', avec un barème indicatif sur le corrigé' : 'au niveau d\'une évaluation de classe, corrigé pas à pas')
+         . ' ; erreur de l\'élève → nomme la confusion avec bienveillance, puis montre la bonne démarche.';
+    $l[] = '• Programme : ne suppose acquises QUE les notions déjà vues dans la progression ; une notion à venir peut être annoncée, jamais utilisée pour démontrer.';
+    $l[] = '• Avant d\'envoyer, vérifie : niveau adapté à la classe ? conforme à la leçon et au programme ? chaque fait et chaque calcul exacts ? longueur respectée ? Si un doute persiste sur un fait, dis-le.';
+    return implode("\n", $l);
 }
 
 // Tier serveur (anon|free|starter|pro|elite|teach|admin) calculé depuis l'abonnement

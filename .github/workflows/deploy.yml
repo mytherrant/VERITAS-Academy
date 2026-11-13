@@ -284,6 +284,9 @@ jobs:
       - name: 🎓 Tuteur IA — le quota du jour suit-il la formule de l'abonné ?
         run: php tests/banc_ia_paliers.php
 
+      - name: 🎓 Tuteur IA — le calibrage suit-il la classe, la série et la matière ?
+        run: php tests/banc_tuteur_calibrage.php
+
       # Chaque formule n'ouvre que ce qu'elle annonce : classes, fiches, tuteur,
       # labos premium (servis par le serveur), règle Famille (12/11/2026).
       - name: 🎟️ Formules — chaque abonnement ouvre-t-il ce qu'il annonce, et pas plus ?
