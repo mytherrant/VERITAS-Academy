@@ -355,6 +355,29 @@
       + arbre(400, 192, 1.05, ['#2A5226', '#376E31', '#4E8A3A', '#7FB458'], 61)
       + [300, 360, 440, 500].map(tabouret).join('')); },
     // Ville de Tanga / quartier colonial : rues, maisons à étage, poussière
+    // Étang de pisciculture : digues de terre, eau verte, arrivée d'eau grillagée, moine de vidange
+    etang: function(){
+      var ronds = [[220, 168], [410, 160], [560, 172], [330, 176], [640, 164]].map(function(p, k){ return '<ellipse class="an-etoile" style="animation-delay:-' + (k * 0.7) + 's;animation-duration:' + (2.4 + k * .3) + 's" cx="' + p[0] + '" cy="' + p[1] + '" rx="' + (9 + k % 2 * 5) + '" ry="2.4" fill="none" stroke="#E8F4E0" stroke-width="1.2"/>'; }).join('');
+      var vagues = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function(k){ return '<path d="M' + (k * 80) + ' ' + (156 + (k % 3) * 9) + ' q20 -3 40 0 t40 0" stroke="#D8EAD0" stroke-width="1.4" fill="none"/>'; }).join('');
+      var roseaux = ''; [[70, 186], [96, 184], [118, 187], [690, 184], [712, 186], [736, 183]].forEach(function(p){ roseaux += '<path d="M' + p[0] + ' ' + p[1] + ' q-3 -18 -8 -30 M' + p[0] + ' ' + p[1] + ' q1 -20 2 -34 M' + p[0] + ' ' + p[1] + ' q5 -16 10 -26" stroke="#4E7A34" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="' + (p[0] + 2) + '" cy="' + (p[1] - 34) + '" rx="2" ry="6" fill="#6B4425"/>'; });
+      return svg(ciel3('cN', '#74BCE6', '#C4E3EE', '#EEF2DC') + '<linearGradient id="cNe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6E9A6A"/><stop offset=".55" stop-color="#5A8A5E"/><stop offset="1" stop-color="#3E6E4E"/></linearGradient><clipPath id="cNc"><path d="M70 146 Q400 136 730 146 L748 186 Q400 196 52 186 Z"/></clipPath>',
+      '<rect width="800" height="260" fill="url(#cN)"/>' + soleil(690, 42) + nuages(.7) + oiseaux('#2A3A55')
+      + collines(128, 24, '#9DB9B0', 211, .9) + collines(140, 18, '#7FA08A', 213) + lisiere(146, '#4E7E48', 215, 32)
+      + palmier2(40, 150, .62) + bananier(150, 146, .55) + arbre(612, 148, .5, null, 217)
+      + maison(470, 146, 70, 30, { mur:'#B8773E', brique:true, porte:26, toit:'paille', rh:30, ov:8 })
+      + sol('sN', 140, '#B98450', '#A06A38', 219, '#6E8A3A')
+      + '<path d="M58 144 Q400 130 742 144 L760 190 Q400 202 40 190 Z" fill="#8A5E34"/><path d="M58 144 Q400 130 742 144" stroke="#C99A62" stroke-width="3" fill="none" opacity=".7"/>'
+      + '<path d="M70 146 Q400 136 730 146 L748 186 Q400 196 52 186 Z" fill="url(#cNe)"/>'
+      + '<g clip-path="url(#cNc)"><g class="an-eau" opacity=".35">' + vagues + '</g>' + ronds
+      + '<ellipse cx="560" cy="150" rx="70" ry="5" fill="#B8D4B0" opacity=".35"/><path d="M470 146 L540 146 L536 152 L474 152 Z" fill="#6B4E2A" opacity=".35"/>'
+      + '<ellipse cx="180" cy="178" rx="16" ry="3.4" fill="#3E7A2E"/><ellipse cx="200" cy="182" rx="11" ry="2.6" fill="#4C8C36"/><circle cx="184" cy="176" r="2.4" fill="#F2E6F0"/></g>'
+      + '<path d="M52 186 Q400 196 748 186" stroke="#3A5A3A" stroke-width="2" fill="none" opacity=".5"/>'
+      + '<rect x="726" y="128" width="40" height="7" fill="#9A9890"/><rect x="726" y="128" width="40" height="7" fill="url(#vgTole)"/><path d="M732 135 L736 150" stroke="#7E7C74" stroke-width="5"/><path d="M736 150 L740 160" stroke="#C9E4F2" stroke-width="3" opacity=".8"/>'
+      + '<rect x="728" y="137" width="10" height="12" fill="none" stroke="#5A5A5A" stroke-width="1"/><path d="M730 137 V149 M733 137 V149 M736 137 V149" stroke="#5A5A5A" stroke-width=".8"/>'
+      + '<rect x="96" y="150" width="20" height="38" fill="#B0A898"/><rect x="96" y="150" width="20" height="5" fill="#C8C0B0"/><path d="M99 156 H113 M99 162 H113 M99 168 H113" stroke="#7E7668" stroke-width="1.5"/>'
+      + roseaux
+      + '<g transform="translate(330 214)">' + ombre(6, 2, 22, 3, .8) + '<path d="M-14 0 L-11 -12 L11 -12 L14 0 Z" fill="#3E7AB8"/><ellipse cx="0" cy="-12" rx="11" ry="3" fill="#5A9AD0"/><ellipse cx="0" cy="-13" rx="7" ry="2" fill="#C9A15A"/></g>'
+      + '<g transform="translate(560 216)">' + ombre(4, 2, 18, 3, .8) + '<path d="M-16 0 Q0 -10 16 0 Z" fill="#8A6A3A"/><path d="M-16 0 Q0 -10 16 0" stroke="#5A3A1A" stroke-width="1.2" fill="none"/><path d="M-12 -4 L12 -4" stroke="#5A3A1A" stroke-width="1"/></g>'); },
     ville: function(){
       function immeuble(x, w, et, mur, volet){ var base = 190, eh = 44, top = base - et * eh, s = '<path d="M' + x + ' ' + base + ' L' + (x + w) + ' ' + base + ' L' + (x + w + 30) + ' ' + (base + 8) + ' L' + (x + 20) + ' ' + (base + 8) + ' Z" fill="#1A1208" opacity=".16"/>', e, k;
         s += '<rect x="' + x + '" y="' + top + '" width="' + w + '" height="' + (base - top) + '" fill="' + mur + '"/><rect x="' + x + '" y="' + top + '" width="' + w + '" height="' + (base - top) + '" fill="url(#vgMur)"/>';
