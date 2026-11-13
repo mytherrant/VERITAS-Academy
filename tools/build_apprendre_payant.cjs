@@ -5,11 +5,21 @@
      apprendre/apercus-<classe>.js          début public des leçons, leçons gratuites entières
      apprendre/charge.js                    charge le bon fichier selon la classe
      <ftp>/uploads/protected/apprendre/*.json   suite payante, à déposer par FTP
-   Usage : node tools/build_apprendre_payant.cjs <dossier_sources> <dossier_ftp>
+   Usage : node tools/build_apprendre_payant.cjs <dossier_sources> <dossier_ftp> [--ajout=4e,5e]
+   --ajout (13/11/2026) : AJOUTE ou met à jour les leçons des classes citées, sans rien effacer.
+     Sans lui, le build repart de zéro : il supprime TOUS les apercus-*.js et tous les JSON
+     protégés, puis réécrit ceux de ses sources. Avec un lot de sources partiel (une classe
+     neuve, un module), il aurait effacé les autres classes. En mode ajout :
+       - seules les classes citées sont écrites ; une leçon déjà publiée dans apercus-<classe>.js
+         et absente des sources est CONSERVÉE (les lots s'ajoutent les uns aux autres) ;
+       - le dossier FTP ne reçoit que les JSON du lot, rien n'y est supprimé ;
+       - charge.js garde les empreintes des autres classes.
    Une erreur de contenu arrête tout : mieux vaut pas de build qu'une leçon cassée. */
 const fs = require("fs"), path = require("path"), crypto = require("crypto");
-const [src, ftp] = process.argv.slice(2);
-if (!src || !ftp) { console.error("Usage : node tools/build_apprendre_payant.cjs <sources> <ftp>"); process.exit(2); }
+const ARGS = process.argv.slice(2), OPT_AJOUT = (ARGS.find(a => a.startsWith("--ajout=")) || "").slice(8);
+const [src, ftp] = ARGS.filter(a => !a.startsWith("--"));
+const AJOUT = OPT_AJOUT ? new Set(OPT_AJOUT.split(",").map(x => x.trim()).filter(Boolean)) : null;
+if (!src || !ftp) { console.error("Usage : node tools/build_apprendre_payant.cjs <sources> <ftp> [--ajout=4e]"); process.exit(2); }
 const RAC = path.dirname(__dirname), APP = path.join(RAC, "apprendre");
 
 global.window = {};
@@ -160,6 +170,7 @@ function balise(id, html) {
   if (pile.length) err.push(`${id} : balise non fermée <${pile.pop()}>`);
 }
 
+if (AJOUT) for (const [id, l] of Object.entries(L)) if (!AJOUT.has(l.c)) err.push(`${id} : classe ${l.c} hors du lot --ajout=${OPT_AJOUT}`);
 for (const [id, l] of Object.entries(L)) {
   if (!/^[a-z0-9][a-z0-9-]{2,80}$/.test(id)) err.push(`${id} : identifiant invalide`);
   for (const k of ["c", "m", "rang", "titre", "accroche", "intro", "objectifs", "parties", "revision", "exo", "quiz"]) if (!l[k]) err.push(`${id} : ${k} manquant`);
@@ -177,10 +188,23 @@ if (err.length) { console.error(err.join("\n")); console.error(`\n${err.length} 
 
 const dest = path.join(ftp, "uploads", "protected", "apprendre");
 fs.mkdirSync(dest, { recursive: true });
-for (const f of fs.readdirSync(dest)) if (f.endsWith(".json")) fs.unlinkSync(path.join(dest, f));
-for (const f of fs.readdirSync(APP)) if (/^apercus-.*\.js$/.test(f)) fs.unlinkSync(path.join(APP, f));
+if (!AJOUT) {
+  for (const f of fs.readdirSync(dest)) if (f.endsWith(".json")) fs.unlinkSync(path.join(dest, f));
+  for (const f of fs.readdirSync(APP)) if (/^apercus-.*\.js$/.test(f)) fs.unlinkSync(path.join(APP, f));
+}
 
 const parClasse = {}; let libres = 0, payantes = 0;
+/* Mode ajout : les leçons déjà publiées de la classe, absentes du lot, sont reprises telles quelles. */
+const dejaPubliees = {};
+if (AJOUT) for (const c of AJOUT) {
+  const f = path.join(APP, `apercus-${slug(c)}.js`);
+  if (!fs.existsSync(f)) continue;
+  for (const ligne of fs.readFileSync(f, "utf8").split("\n")) {
+    const m = /^VRT_L\(("[a-z0-9-]+"),/.exec(ligne);
+    if (m && !L[JSON.parse(m[1])]) (dejaPubliees[c] = dejaPubliees[c] || []).push(ligne);
+  }
+}
+for (const c in dejaPubliees) parClasse[c] = dejaPubliees[c].slice();
 for (const [id, l] of Object.entries(L)) {
   const gratuit = !!l.gratuit || premierDuTrimestre(l);
   let pub;
@@ -195,14 +219,18 @@ for (const [id, l] of Object.entries(L)) {
 }
 
 const empreintes = {};
+if (AJOUT) {   // les empreintes des autres classes restent celles de charge.js
+  const m = /var D=(\{[^}]*\})/.exec(fs.existsSync(path.join(APP, "charge.js")) ? fs.readFileSync(path.join(APP, "charge.js"), "utf8") : "");
+  if (m) Object.assign(empreintes, JSON.parse(m[1]));
+}
 for (const [c, lignes] of Object.entries(parClasse)) {
   const corps = "/* Fichier GÉNÉRÉ par tools/build_apprendre_payant.cjs : début public des leçons. */\n" + lignes.join("\n") + "\n";
   fs.writeFileSync(path.join(APP, `apercus-${slug(c)}.js`), corps);
   empreintes[c] = crypto.createHash("sha1").update(corps).digest("hex").slice(0, 8);
 }
 const charge = `/* Fichier GÉNÉRÉ par tools/build_apprendre_payant.cjs. Charge les leçons de la classe affichée. */
-(function(){var D=${JSON.stringify(empreintes)},q=new URLSearchParams(location.search),c=q.get("c"),i=q.get("id")||"",m=/^(3e|1re-[acd]|tle-[acd])-/.exec(i);
-if(m&&!c){c=m[1].replace(/^(1re|tle)-(.)/,function(x,a,b){return (a==="tle"?"Tle":"1re")+" "+b.toUpperCase()})}
+(function(){var D=${JSON.stringify(empreintes)},q=new URLSearchParams(location.search),c=q.get("c"),i=q.get("id")||"",m=/^(6e|5e|4e|3e|2nde-[ac]|1re-[acd]|tle-[acd])-/.exec(i);
+if(m&&!c){c=m[1].replace(/^(2nde|1re|tle)-(.)/,function(x,a,b){return (a==="tle"?"Tle":a)+" "+b.toUpperCase()})}
 if(!c){try{c=JSON.parse(localStorage.getItem("vrt_app_classe")||"null")}catch(e){}}
 if(!c&&!i)c="3e";
 if(c&&D[c])document.write('<script src="apercus-'+c.toLowerCase().replace(/\\s+/g,"-")+'.js?v='+D[c]+'"><\\/script>');})();
@@ -214,6 +242,6 @@ for (const p of ["index.html", "matiere.html", "lecon.html"]) {
   if (!/charge\.js\?v=/.test(t)) { console.error(`${p} ne charge pas charge.js`); process.exit(1); }
   fs.writeFileSync(f, n);
 }
-console.log(`${Object.keys(L).length} leçons : ${libres} gratuites, ${payantes} à verrou.`);
+console.log(`${Object.keys(L).length} leçons${AJOUT ? " ajoutées ou mises à jour (mode --ajout)" : ""} : ${libres} gratuites, ${payantes} à verrou.`);
 for (const c of Object.keys(parClasse)) console.log(`  ${c} : ${parClasse[c].length}`);
 console.log(`Dépôt FTP : ${dest}`);

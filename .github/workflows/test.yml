@@ -127,6 +127,10 @@ jobs:
       - name: 🎓 Tuteur IA — le calibrage suit-il la classe, la série et la matière ?
         run: php tests/banc_tuteur_calibrage.php
 
+      # Le build des leçons en mode --ajout ne doit effacer aucune autre classe.
+      - name: 📚 Apprendre — un lot de leçons s'ajoute-t-il sans rien effacer ?
+        run: node tests/banc_build_apprendre_ajout.cjs
+
       - name: ✍️ Les écrans lisent-ils l'argent reçu ?
         run: node tests/banc_recettes_parts_auteur.cjs
 
