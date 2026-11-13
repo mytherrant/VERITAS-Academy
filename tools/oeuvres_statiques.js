@@ -47,6 +47,55 @@ const ico = id => '<svg class="vi" viewBox="0 0 24 24" fill="none" stroke="curre
   + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#lc-' + id + '"></use></svg>';
 const h2 = (id, icone, titre) => '<h2 id="' + id + '">' + ico(icone) + ' ' + esc(titre) + '</h2>';
 
+/* 13/11/2026 — « Trop compliqué pour la classe de 6e (kafkaïen, procédés du
+   comique, figures de style...). Adapte au niveau des classes, langage simple,
+   comique, captivant, didactique, avec beaucoup de leçons de morale » (Jacques).
+   Au premier cycle d'entrée (6e, 5e), les intitulés parlent comme l'élève. */
+const jeune = o => /^(6|5)/.test(String(o.classe || ''));
+const LIB = {
+  resume: ['Résumé & présentation', 'L’histoire en bref'],
+  themes: ['Thèmes principaux', 'Ce que le livre nous apprend'],
+  axes: ['Axes de lecture', 'Les grandes idées du livre'],
+  citations: ['Citations expliquées', 'Les phrases à retenir'],
+  procedes: ['Procédés d’écriture à connaître', 'Les astuces de l’écrivain'],
+  questions: ['Questions de compréhension corrigées', 'Vérifie que tu as compris'],
+  figures: ['Procédés :', 'Les astuces :'],
+  effet: ['Effet sur le lecteur :', 'Ce que ça fait au lecteur :'],
+};
+const lib = (o, k) => LIB[k][jeune(o) ? 1 : 0];
+
+/* Deux pictogrammes de plus dans le sprite de la page : cœur (leçons de vie)
+   et boussole (envie de lire la suite). */
+const SYMBOLES = {
+  'lc-heart': '<symbol id="lc-heart" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></symbol>',
+  'lc-compass': '<symbol id="lc-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></symbol>',
+};
+
+/* Hiérarchie (13/11/2026, « hiérarchise la taille des icônes, titres, sous-titres :
+   tout prête à confusion ») : mesuré sur 6e-bimanes.html, les sous-titres (h3,
+   19 px) avaient la taille du texte (19 px) et l'anneau des titres (60 px)
+   écrasait tout. Trois paliers nets : titre de section 24 px + anneau 46 px ;
+   sous-titre 20 px bleu avec pastille ; texte 18 px. #vrtNav (la barre
+   d'habillage, présente sur chaque page d'œuvre) donne la spécificité d'un id :
+   les règles de veritas-habillage.css (0,5,4 + !important) cèdent. */
+const STYLE = '<!-- oeuvre-style -->\n<style>'
+  + 'body:has(#vrtNav) .wrap article h2{font-size:24px!important;font-weight:700!important;line-height:1.3!important}'
+  + 'body:has(#vrtNav) .wrap article h2>svg.vi{width:46px!important;height:46px!important;padding:10px!important;border-width:2.5px!important}'
+  + 'body:has(#vrtNav) .wrap article h3{font-size:20px!important;font-weight:700!important;color:#1E499B!important;margin:28px 0 8px!important;display:flex;align-items:baseline;gap:10px;text-align:left!important}'
+  + 'body:has(#vrtNav) .wrap article h3::before{content:"";flex:0 0 10px;height:10px;border-radius:50%;background:#FFC93C;transform:translateY(-2px)}'
+  + 'body:has(#vrtNav) .wrap article p,body:has(#vrtNav) .wrap article li{font-size:18px!important;line-height:1.75!important}'
+  + '@media (max-width:600px){body:has(#vrtNav) .wrap article p{text-align:left!important}body:has(#vrtNav) .wrap article h2{font-size:22px!important}body:has(#vrtNav) .wrap article h2>svg.vi{width:42px!important;height:42px!important;padding:9px!important}body:has(#vrtNav) .wrap article h3{font-size:19px!important}}'
+  + '.lecons{display:grid;gap:12px;margin:8px 0 6px}'
+  + '.lecon{background:#FFF8E5;border-radius:14px;padding:14px 16px}'
+  + '.lecon strong{display:block;font-size:18.5px;color:#001136;margin-bottom:4px}'
+  + 'body:has(#vrtNav) .wrap article .lecon p{margin:0;text-align:left!important;font-size:17px!important}'
+  + '.envie{background:#EEF3FC;border-radius:16px;padding:18px 18px 8px;margin:10px 0 4px}'
+  + 'body:has(#vrtNav) .wrap article .envie p{text-align:left!important}'
+  + '.envie .defi{background:#fff;border-radius:12px;padding:12px 14px}'
+  + ':root[data-vrt-theme="sombre"] .lecon,:root[data-vrt-theme="sombre"] .envie,:root[data-vrt-theme="sombre"] .envie .defi{background:#132241}'
+  + ':root[data-vrt-theme="sombre"] .lecon strong{color:#F2F5FC}'
+  + '</style>\n<!-- /oeuvre-style -->';
+
 function examen(classe) {
   const c = String(classe || '').toLowerCase();
   if (/3/.test(c)) return 'BEPC';
@@ -83,7 +132,7 @@ function bloc(o) {
   }
 
   if ((f.axes || []).length) {
-    out.push(h2('axes', 'target', 'Axes de lecture'));
+    out.push(h2('axes', 'target', lib(o, 'axes')));
     out.push('<ol>' + f.axes.map(a => '<li>' + esc(a) + '</li>').join('') + '</ol>');
   }
 
@@ -100,32 +149,46 @@ function bloc(o) {
     out.push(analyseHtml(an.contenu));
   }
 
+  if ((o.morales || []).length) {
+    out.push(h2('lecons', 'heart', 'Les leçons de vie'));
+    out.push('<div class="lecons">' + o.morales.map(m => '<div class="lecon"><strong>' + esc(m.t) + '</strong><p>' + esc(m.d) + '</p></div>').join('') + '</div>');
+  }
+
   if ((o.citations || []).length) {
-    out.push(h2('citations', 'pencil', 'Citations expliquées'));
+    out.push(h2('citations', 'pencil', lib(o, 'citations')));
     o.citations.forEach(c => {
       out.push('<figure class="cit"><blockquote>« ' + esc(net(c.texte)) + ' »</blockquote>'
         + (c.source ? '<figcaption>' + esc(c.source) + '</figcaption>' : '') + '</figure>');
-      if ((c.figures || []).length) out.push('<p><strong>Procédés :</strong> ' + esc(c.figures.join(' ; ')) + '.</p>');
+      if ((c.figures || []).length) out.push('<p><strong>' + lib(o, 'figures') + '</strong> ' + esc(c.figures.join(' ; ')) + '.</p>');
       if (c.analyse) out.push('<p>' + esc(c.analyse) + '</p>');
-      if (c.effet) out.push('<p><strong>Effet sur le lecteur :</strong> ' + esc(c.effet) + '</p>');
+      if (c.effet) out.push('<p><strong>' + lib(o, 'effet') + '</strong> ' + esc(c.effet) + '</p>');
     });
   }
 
   if ((o.techniques || []).length) {
-    out.push(h2('procedes', 'pencil', 'Procédés d’écriture à connaître'));
+    out.push(h2('procedes', 'pencil', lib(o, 'procedes')));
     o.techniques.forEach(t => {
       out.push('<h3>' + esc(t.nom) + '</h3>');
       if (t.def) out.push('<p>' + esc(t.def) + '</p>');
-      if (t.exemple) out.push('<p><strong>Exemple :</strong> « ' + esc(net(t.exemple)) + ' »</p>');
+      // Un exemple qui contient déjà ses guillemets (ou qui décrit au lieu de citer) n'en reçoit pas d'autres.
+      if (t.exemple) { const ex = net(t.exemple); out.push('<p><strong>Exemple :</strong> ' + (/[«»]/.test(ex) ? esc(ex) : '« ' + esc(ex) + ' »') + '</p>'); }
       if (t.effet) out.push('<p><strong>Effet :</strong> ' + esc(t.effet) + '</p>');
     });
   }
 
   if ((o.controle || []).length) {
-    out.push(h2('questions', 'graduation', 'Questions de compréhension corrigées'));
+    out.push(h2('questions', 'graduation', lib(o, 'questions')));
     o.controle.forEach(q => {
       out.push('<h3>' + esc(q.q) + '</h3><p>' + esc(q.r) + '</p>');
     });
+  }
+
+  const ev = o.envie;
+  if (ev && ev.accroche) {
+    out.push(h2('envie', 'compass', 'Envie de lire la suite ?'));
+    out.push('<div class="envie"><p>' + esc(ev.accroche) + '</p>'
+      + ((ev.questions || []).length ? '<p><strong>Les questions que tu vas te poser :</strong></p><ul>' + ev.questions.map(q => '<li>' + esc(q) + '</li>').join('') + '</ul>' : '')
+      + (ev.defi ? '<p class="defi">' + esc(ev.defi) + '</p>' : '') + '</div>');
   }
 
   out.push('</section>', '<!-- /oeuvre-statique -->');
@@ -170,6 +233,25 @@ function remplacer(page, debut, fin, neuf, avant) {
   return page.slice(0, i) + neuf + '\n' + page.slice(i);
 }
 
+/* Le haut de la page (résumé, thèmes) avait été écrit une fois pour toutes :
+   il suit désormais la fiche, comme le reste. Les pictogrammes manquants
+   rejoignent le sprite de la page. */
+function haut(page, o) {
+  const f = o.fiche || {};
+  const titre = '(?:' + LIB.resume.map(t => t.replace(/[.*+?^${}()|[\]\\&’]/g, '.')).join('|') + '|Résumé &amp; présentation)';
+  const reR = new RegExp('(<h2>' + '<svg class="vi"[^>]*><use href="#lc-bookopen"></use></svg> )' + titre + '</h2>\\s*<p>[\\s\\S]*?</p>');
+  if (f.resume && reR.test(page)) page = page.replace(reR, (_, d) => d + esc(lib(o, 'resume')) + '</h2>\n<p>' + esc(net(f.resume)) + '</p>');
+  const titreT = '(?:' + LIB.themes.map(t => t.replace(/[.*+?^${}()|[\]\\&’]/g, '.')).join('|') + ')';
+  const reT = new RegExp('(<h2><svg class="vi"[^>]*><use href="#lc-target"></use></svg> )' + titreT + '</h2><ul>[\\s\\S]*?</ul>');
+  if ((f.themes || []).length && reT.test(page)) page = page.replace(reT, (_, d) => d + esc(lib(o, 'themes')) + '</h2><ul>' + f.themes.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>');
+  Object.keys(SYMBOLES).forEach(id => {
+    if (page.includes('id="' + id + '"')) return;
+    const i = page.indexOf('</symbol></svg>');
+    if (i >= 0) page = page.slice(0, i + 9) + SYMBOLES[id] + page.slice(i + 9);
+  });
+  return page;
+}
+
 let changees = 0, vues = 0;
 const manquantes = [];
 for (const nom of fs.readdirSync(DOSSIER).filter(n => n.endsWith('.html') && n !== 'index.html')) {
@@ -182,6 +264,8 @@ for (const nom of fs.readdirSync(DOSSIER).filter(n => n.endsWith('.html') && n !
   const url = BASE + 'oeuvres/' + nom;
   let neuf = remplacer(page, '<!-- oeuvre-statique -->', '<!-- /oeuvre-statique -->', bloc(o), '<a class="cta"');
   if (neuf) neuf = remplacer(neuf, '<!-- oeuvre-ld -->', '<!-- /oeuvre-ld -->', ld(o, url), '</head>');
+  if (neuf) neuf = remplacer(neuf, '<!-- oeuvre-style -->', '<!-- /oeuvre-style -->', STYLE, '</head>');
+  if (neuf) neuf = haut(neuf, o);
   if (!neuf) { manquantes.push(nom + ' (gabarit)'); continue; }
   if (neuf !== page) {
     changees++;

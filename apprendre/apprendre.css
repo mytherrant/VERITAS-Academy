@@ -863,6 +863,18 @@ h2 .num .pic{vertical-align:middle}
 .res-c .res-x{padding-top:2px}
 .res-fam>h2{display:flex;align-items:center;gap:12px}
 .res-fam .res-int{margin-left:56px}
+/* 13/11/2026 — « Hiérarchise la taille des icônes (titres, sous-titres) : tout
+   prête à confusion » (Jacques, capture de « Cours rédigés »). Mesuré : l'icône
+   du titre de famille et celle de chaque carte faisaient toutes deux 44 px, même
+   anneau. Trois paliers désormais : titre de famille = pastille PLEINE 52 px,
+   icône blanche, titre 22 px ; carte = anneau fin 36 px ; pastilles = 14 px. */
+.res-fam>h2{font-size:22px;gap:14px}
+.res-fam>h2 .res-p{flex:0 0 52px!important;width:52px!important;height:52px!important;border:0!important;background:var(--k,#1E499B)!important;box-shadow:0 6px 16px rgba(0,17,54,.14)}
+.res-fam>h2 .res-p svg{color:#fff!important;width:24px;height:24px}
+.res-fam .res-int{margin-left:66px}
+.res-c .res-p,.res-sm .res-c .res-p{flex:0 0 36px!important;width:36px!important;height:36px!important;border-width:2px!important}
+.res-c .res-p svg,.res-sm .res-c .res-p svg{width:17px;height:17px}
+@media (max-width:640px){.res-fam>h2{font-size:20px}.res-fam>h2 .res-p{flex-basis:46px!important;width:46px!important;height:46px!important}.res-fam .res-int{margin-left:0}}
 .porte{align-items:center}
 @media (max-width:640px){.porte{align-items:flex-start}.porte .res-p{flex-basis:40px!important;width:40px!important;height:40px!important}}
 /* Cartes de matière : la ligne « rédigées » et la barre s'alignent sous le nom, pas sous l'icône */
