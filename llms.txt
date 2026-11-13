@@ -153,6 +153,7 @@
 - [Contraction de texte : résumé, analyse et discussion, méthode et exemples](https://veritas-school.com/ressources/methode-resume-contraction.html): Contraction de texte (2nde, Probatoire, BAC) : résumé au quart (séries A), analyse au tiers (séries C, D), calcul du nombre de mots, reformulation, distanciation, discussion. Barèmes officiels 9/9/2 et 8/10/2, exemples de réduction et erreurs fréquentes.
 - [Le Probatoire de français : épreuves, barèmes officiels et méthode](https://veritas-school.com/ressources/probatoire-francais.html): Probatoire ESG, français (1re A, C, D) : littérature (contraction, commentaire composé, dissertation) et langue française. Durées, coefficients, grilles de l'Office du Baccalauréat, conseils par série et check-list du jour J.
 - [Programme de français MINESEC (6ᵉ à Terminale) : cours…](https://veritas-school.com/ressources/programme-francais-minesec.html): Le programme de français du secondaire camerounais (MINESEC), de la 6ème à la Terminale : œuvres au programme, méthodes…
+- [Annales corrigées : BEPC](https://veritas-school.com/ressources/annales/): Les derniers sujets officiels (BEPC, Cameroun), par matière et par session, avec leurs corrigés : mathématiques, PCT, SVTEEHB, français, histoire-géographie, ECM, langues, informatique.
 
 ## Œuvres au programme
 
