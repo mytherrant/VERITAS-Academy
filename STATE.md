@@ -1,3 +1,15 @@
+## Apprendre réglable depuis le tableau de bord admin (13/11/2026)
+
+Demande : « Configure apprendre dans le dashboard admin avec tout éditable ».
+
+- **Nouvel écran admin** « 📘 Apprendre (cours en ligne) » (section Abonnements & plateformes, route `apprendre_admin`, `pgApprendreAdmin` dans app.js). Huit onglets : Général (fermeture temporaire, bandeau d'annonce, WhatsApp, export/import JSON), Classes & matières (classes ouvertes ; nom, couleur, visibilité des matières), Rubriques (4 rubriques, familles de ressources), Formules & offres (formules, conseillée, carte « Avec un professeur », note, lien enseignants, cahiers), Leçons (modifier, masquer, ajouter : parties, quiz, révision, exercice, lien examen), Ressources (modifier, masquer, ajouter et rattacher), Calendrier (dates BEPC/Probatoire/Bac, échéances ajoutées/masquées, salons), Textes (remplacer n'importe quel texte affiché).
+- Valeurs d'origine lues dans les fichiers d'Apprendre eux-mêmes (cadre invisible, sans réglage) et affichées en grisé : un champ vide rend la valeur d'origine. Bouton **👁 Aperçu** : la page s'ouvre avec le brouillon (`?apercu=1`, localStorage `vrt_app_cfg_apercu`, gardé pour l'onglet).
+- **Chemin** : `DB.apprendreCfg` → synchro habituelle → **`api/apprendre_config.php`** (nouveau, ajouté à deploy.yml ; JavaScript `window.VRT_APP_CFG`, liste blanche, cache `data/_apprendre_cfg.cache.json`, `max-age=60`) → chargé en premier script par les 7 pages d'Apprendre → appliqué par `commun.js` (`?v=20261113n`) et `calendrier.js` (`?v=20261113a`). Sans réglage ou sans serveur : Apprendre est inchangé.
+- **Leçon payante** : seuls titre, accroche, durée et visibilité se règlent (la suite vit sur le serveur, `api/apprendre.php`). Leçon gratuite : tout. Une partie garde son schéma/animation d'origine (`src`).
+- Leçon ajoutée hors progression : rang 900+ (corrige « Cannot read 'chap' » de matiere.html quand une leçon n'a ni `cle` ni `rang`).
+- Non couvert : les pages statiques de référencement `apprendre/cours/*.html` et `apprendre/programme/` (générées, sans commun.js) gardent le contenu d'origine.
+- Bancs : nouveau `tests/banc_apprendre_reglages.cjs` 29/29 ; `banc_apprendre_verrou` 18/18, `banc_gabarits_lecons` 54/54, `banc_calendrier` 51/51, `banc_empreintes` 22/22. Parcours admin contrôlé dans Chromium (modifier, enregistrer, aperçu), 0 erreur JS.
+
 ## Leçons payantes : fin de leçon par discipline, démarche du français (12/11/2026)
 
 Demande de Jacques : « Démarche du français non respectée. Lis bien les skills, les annales et mes documents pour adapter les sujets et contenus » ; « pas de partie A partie B ; vérifie également dans toutes les disciplines ».

@@ -11,6 +11,10 @@
 (function (W) {
   "use strict";
   var A = W.VRT && W.VRT.app, esc = A ? A.esc : function (s) { return String(s); };
+  /* Réglages de l'écran admin « Apprendre » (13/11/2026) : dates d'examen,
+     échéances ajoutées ou masquées, salons de la classe virtuelle. */
+  var CC = (A && A.cfg && A.cfg.calendrier && typeof A.cfg.calendrier === "object") ? A.cfg.calendrier : {};
+  var ISO = /^\d{4}-\d{2}-\d{2}$/;
 
   /* Heure du Cameroun (UTC+1, sans heure d'été). */
   function d(iso, h) { return new Date(iso + "T" + (h || "00:00") + ":00+01:00"); }
@@ -25,6 +29,17 @@
     Probatoire: { ecrit: ["2027-06-07", "2027-06-11"], fac: ["2027-06-11", "Épreuves facultatives du Probatoire"],
             fin: ["2027-07-22", "2027-07-24", "Délibérations du Probatoire"] }
   };
+  Object.keys(SESSION).forEach(function (nom) {
+    var o = (CC.session || {})[nom]; if (!o || typeof o !== "object") return;
+    var S = SESSION[nom];
+    if (ISO.test(o.ecritDe || "")) S.ecrit[0] = o.ecritDe;
+    if (ISO.test(o.ecritA || "")) S.ecrit[1] = o.ecritA;
+    if (ISO.test(o.facDe || "")) S.fac[0] = o.facDe;
+    if (o.facT) S.fac[1] = String(o.facT);
+    if (ISO.test(o.finDe || "")) S.fin[0] = o.finDe;
+    if (ISO.test(o.finA || "")) S.fin[1] = o.finA;
+    if (o.finT) S.fin[2] = String(o.finT);
+  });
 
   function examen(c) {
     if (c === "3e") return { nom: "BEPC", cat: "bepc", mots: /\bBEPC\b/i };
@@ -68,6 +83,14 @@
     if (/^(1re|Tle)/.test(c)) L.push({ t: "Journée mondiale de la philosophie", de: d("2026-11-26", "07:30"), ico: "i-brain", q: "tous" });
     L.push({ t: "Semaine nationale du bilinguisme", de: d("2027-01-25", "07:30"), a: d("2027-01-29", "15:30"), ico: "i-globe", q: "tous" });
     L.push({ t: "Semaine de la jeunesse", de: d("2027-02-03", "07:30"), a: d("2027-02-11", "15:30"), ico: "i-users", q: "tous" });
+    (Array.isArray(CC.ajout) ? CC.ajout : []).forEach(function (e) {
+      if (!e || !e.t || !ISO.test(e.de || "")) return;
+      if (Array.isArray(e.classes) && e.classes.length && e.classes.indexOf(c) < 0) return;
+      L.push({ t: String(e.t), de: d(e.de, e.h || "07:30"), a: ISO.test(e.a || "") ? d(e.a, "15:30") : null,
+               ico: e.vac ? "i-star" : (e.ico || "i-calendar"), q: e.q === "examen" || e.q === "inter" ? e.q : "tous", vac: e.vac ? 1 : 0 });
+    });
+    var masq = Array.isArray(CC.masquer) ? CC.masquer : [];
+    if (masq.length) L = L.filter(function (e) { return masq.indexOf(e.t) < 0; });
     return L.filter(function (e) { return e.q === "tous" || (e.q === "examen") === !!ex; })
       .sort(function (x, y) { return x.de - y.de; });
   }
@@ -225,7 +248,8 @@
 
   /* ---------- 3. classe virtuelle ---------- */
   function classeVirtuelle(el, c) {
-    var ex = examen(c), salons = ["Général", "Annonces", "Français", "Mathématiques", "Sciences"];
+    var ex = examen(c), salons = (Array.isArray(CC.salons) && CC.salons.length) ? CC.salons.map(String) : ["Général", "Annonces", "Français", "Mathématiques", "Sciences"];
+    if (CC.cvMasquer) { el.innerHTML = ""; el.hidden = true; return; }
     el.innerHTML =
       '<div class="cv-t"><span class="cv-i">' + si("i-users", 26) + '</span><div><b>Classe virtuelle de ' + esc(c) + '</b>' +
       '<small>Tes enseignants et les élèves de ta classe, au même endroit.</small></div></div>' +
@@ -243,5 +267,5 @@
   }
 
   W.VRT = W.VRT || {};
-  W.VRT.annee = { rendre: rendre, echeances: echeances, examen: examen, situation: situation };
+  W.VRT.annee = { SESSION: SESSION, rendre: rendre, echeances: echeances, examen: examen, situation: situation };
 })(window);
