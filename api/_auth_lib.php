@@ -799,8 +799,30 @@ if (!defined('VRT_AUTH_LIB')) {
         if (preg_match('/^abo_(starter|pro|elite|famille|prof3|prof6|proftout)_[ma]$/', $planId, $m)) return $m[1];
         if ($planId === 'plan4') return 'famille';
         if ($planId === 'plan2') return 'starter';
-        if (in_array($planId, ['plan1', 'plan3', 'plan5', 'plan6'], true)) return 'pro';
-        return null;   // plans de l'Atelier, packs : aucun droit e-learning propre
+        /* plan7 (e-learning enseignant au mois, étiquette plan3) et plan10
+           (suivi en ligne personnalisé, étiquettes plan1/plan2) sont des
+           abonnements e-learning : sans groupe, leurs abonnés recevaient les
+           droits « découverte » (0 classe, tuteur IA 5/jour) — 13/11/2026. */
+        if (in_array($planId, ['plan1', 'plan3', 'plan5', 'plan6', 'plan7', 'plan10'], true)) return 'pro';
+        return null;   // plans de l'Atelier, prestations, packs : aucun droit e-learning propre
+    }
+
+    /**
+     * PALIER DU TUTEUR IA d'un compte (13/11/2026). Le groupe de droits le plus
+     * élevé parmi ses formules actives (vrt_droits_compte : acc.plans filtré
+     * par l'expiration), et ses questions par jour lues dans la table des
+     * droits. ia_proxy.php l'applique à tout compte PROUVÉ par son jeton : il
+     * ne lisait que elearning.abonnements, si bien qu'une formule accordée par
+     * l'administration (acc.plans) restait au palier gratuit, et qu'un plan
+     * de l'Atelier ou une prestation valait « pro ».
+     * Rend ['palier' => free|starter|pro|…, 'iaJour' => int, 'groupes' => [...]].
+     */
+    function vrt_palier_ia(array $acc, array $db): array {
+        $d = vrt_droits_compte($acc, $db);
+        $rang = ['free' => 0, 'starter' => 1, 'pro' => 2, 'prof3' => 3, 'prof6' => 4, 'elite' => 5, 'famille' => 5, 'proftout' => 6];
+        $p = 'free';
+        foreach ($d['groupes'] as $g) if (($rang[$g] ?? -1) > $rang[$p]) $p = $g;
+        return ['palier' => $p, 'iaJour' => (int) $d['iaJour'], 'groupes' => $d['groupes']];
     }
 
     /** Droits effectifs d'un compte : le MEILLEUR de chaque droit parmi ses formules actives. */
